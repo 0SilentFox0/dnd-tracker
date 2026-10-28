@@ -3,12 +3,14 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import { z } from "zod";
 
 vi.mock("server-only", () => ({}));
+vi.mock("@/lib/ai/api-tokens", async (orig) => ({ ...(await orig<typeof import("@/lib/ai/api-tokens")>()), verifyApiToken: vi.fn() }));
 vi.mock("@/lib/cache/tags", () => ({ invalidateReference: vi.fn() }));
 vi.mock("@/lib/utils/api/api-auth", () => ({
   requireDM: vi.fn(async () => ({ userId: "dm" })),
   requireCampaignAccess: vi.fn(async () => ({ userId: "p", isDM: false })),
 }));
 
+import { verifyApiToken } from "@/lib/ai/api-tokens";
 import { defineResource } from "@/lib/server/content/define-resource";
 import { ContentError } from "@/lib/server/content/errors";
 import * as apiAuth from "@/lib/utils/api/api-auth";
@@ -44,6 +46,10 @@ const ctx = { params: Promise.resolve({ id: "c1" }) };
 const ctxOne = (thingId: string) => ({ params: Promise.resolve({ id: "c1", thingId }) });
 
 const req = (method: string, body?: string) => new Request("http://x/api/campaigns/c1/things", { method, ...(body !== undefined && { body }) });
+
+const bearer = (method: string, body?: string) => new Request("http://x/api/campaigns/c1/things", { method, headers: { authorization: "Bearer dndt_x" }, ...(body !== undefined && { body }) });
+
+const scopes = (s: string[]) => vi.mocked(verifyApiToken).mockResolvedValue({ campaignId: "c1", userId: "dm", scopes: s } as never);
 
 const json = async (res: Response) => ({ status: res.status, body: await res.json() });
 
@@ -99,5 +105,24 @@ describe("content routes", () => {
 
   it("DELETE колекції без removeAll → 405", async () => {
     expect((await col.DELETE(req("DELETE"), ctx)).status).toBe(405);
+  });
+
+  it("токен content:read читає список і запис, але не пише", async () => {
+    scopes(["content:read"]);
+    expect((await col.GET(bearer("GET"), ctx)).status).toBe(200);
+    expect((await one.GET(bearer("GET"), ctxOne("a"))).status).toBe(200);
+    expect((await col.POST(bearer("POST", '{"name":"А"}'), ctx)).status).toBe(403);
+    expect((await one.PATCH(bearer("PATCH", '{"name":"Б"}'), ctxOne("a"))).status).toBe(403);
+    expect(created).not.toHaveBeenCalled();
+  });
+
+  it("токен content:write створює", async () => {
+    scopes(["content:write"]);
+    expect((await col.POST(bearer("POST", '{"name":"А"}'), ctx)).status).toBe(201);
+  });
+
+  it("видалити всі через токен — 403 навіть із content:write", async () => {
+    scopes(["content:write"]);
+    expect((await col.DELETE(bearer("DELETE"), ctx)).status).toBe(403);
   });
 });

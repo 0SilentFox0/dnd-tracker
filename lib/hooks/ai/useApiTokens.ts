@@ -6,7 +6,7 @@ import { aiKeys } from "./keys";
 
 import { createApiToken, getApiTokens, revokeApiToken } from "@/lib/api/ai";
 import { useOptionalNotify } from "@/lib/hooks/common";
-import type { CreatedApiToken } from "@/types/ai";
+import type { CreateApiTokenInput, CreatedApiToken } from "@/types/ai";
 
 export function useApiTokens(campaignId: string) {
   const queryClient = useQueryClient();
@@ -19,14 +19,14 @@ export function useApiTokens(campaignId: string) {
 
   const options = { onError: (e: Error) => notify(e.message), onSettled: () => queryClient.invalidateQueries({ queryKey: key }) };
 
-  const createMutation = useMutation({ mutationFn: (name: string) => createApiToken(campaignId, name), ...options });
+  const createMutation = useMutation({ mutationFn: (input: CreateApiTokenInput) => createApiToken(campaignId, input), ...options });
 
   const revokeMutation = useMutation({ mutationFn: (id: string) => revokeApiToken(campaignId, id), ...options });
 
   return {
     query,
     tokens: query.data ?? [],
-    create: (name: string): Promise<CreatedApiToken | null> => createMutation.mutateAsync(name).catch(() => null),
+    create: (input: CreateApiTokenInput): Promise<CreatedApiToken | null> => createMutation.mutateAsync(input).catch(() => null),
     revoke: (id: string) => revokeMutation.mutateAsync(id).then(() => true, () => false),
   };
 }

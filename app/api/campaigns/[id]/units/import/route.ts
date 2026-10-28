@@ -3,36 +3,22 @@ import { NextResponse } from "next/server";
 import { invalidateReference, ReferenceKind } from "@/lib/cache/tags";
 import { prisma } from "@/lib/db";
 import { importUnitsSchema } from "@/lib/schemas/units";
-import { requireDM } from "@/lib/utils/api/api-auth";
-import { handleApiError } from "@/lib/utils/api/error-handler";
+import { assertCampaignRefs } from "@/lib/server/campaigns/campaign-refs";
+import { NEED, type RouteCtx, runContent } from "@/lib/utils/api/content-routes";
 import { parseBody } from "@/lib/utils/api/parse-body";
 import { importUnitsIntoCampaign } from "@/lib/utils/units/import-units";
 
-export async function POST(
-  request: Request,
-  { params }: { params: Promise<{ id: string }> }
-) {
-  try {
-    const { id } = await params;
-
-    const accessResult = await requireDM(id);
-
-    if (accessResult instanceof NextResponse) {
-      return accessResult;
-    }
-
-    const parsed = await parseBody(importUnitsSchema, request);
+export const POST = (req: Request, ctx: RouteCtx) =>
+  runContent({ req, ctx, need: NEED.write, action: "import units" }, async (actor) => {
+    const parsed = await parseBody(importUnitsSchema, req);
 
     if (parsed instanceof NextResponse) return parsed;
 
-    const { units } = parsed;
+    await assertCampaignRefs(actor.campaignId, { spell: parsed.units.flatMap((u) => u.knownSpells) });
 
-    const report = await importUnitsIntoCampaign(prisma, id, units);
+    const report = await importUnitsIntoCampaign(prisma, actor.campaignId, parsed.units);
 
-    invalidateReference(ReferenceKind.UNITS, id);
+    invalidateReference(ReferenceKind.UNITS, actor.campaignId);
 
     return NextResponse.json(report);
-  } catch (error) {
-    return handleApiError(error, { action: "import units" });
-  }
-}
+  });

@@ -13,6 +13,7 @@ function makeRequest(opts: {
   pathname: string;
   origin?: string | null;
   host?: string;
+  authorization?: string;
 }): NextRequest {
   const url = new URL(`http://${opts.host ?? "example.com"}${opts.pathname}`);
 
@@ -23,6 +24,8 @@ function makeRequest(opts: {
   if (opts.origin !== undefined && opts.origin !== null) {
     headers.set("origin", opts.origin);
   }
+
+  if (opts.authorization) headers.set("authorization", opts.authorization);
 
   return {
     method: opts.method,
@@ -140,5 +143,17 @@ describe("rejectCrossOriginMutation", () => {
     const r = rejectCrossOriginMutation(makeRequest({ method: "POST", pathname: "/api/campaigns/x/ai/threads", origin: "https://evil.example" }));
 
     expect(r?.status).toBe(403);
+  });
+
+  it("Bearer з чужим Origin проходить (токен, не cookie)", () => {
+    expect(rejectCrossOriginMutation(makeRequest({ method: "POST", pathname: "/api/campaigns/c1/units", origin: "https://evil.example", authorization: "Bearer dndt_x" }))).toBeNull();
+  });
+
+  it("cookie-запит з чужим Origin — 403", () => {
+    expect(rejectCrossOriginMutation(makeRequest({ method: "POST", pathname: "/api/campaigns/c1/units", origin: "https://evil.example" }))?.status).toBe(403);
+  });
+
+  it("Basic з чужим Origin — 403", () => {
+    expect(rejectCrossOriginMutation(makeRequest({ method: "POST", pathname: "/api/campaigns/c1/units", origin: "https://evil.example", authorization: "Basic abc" }))?.status).toBe(403);
   });
 });

@@ -1,4 +1,4 @@
-import type { AiProvider, AiThreadMode } from "@/lib/constants/ai";
+import type { AiProvider, AiThreadMode, ApiTokenScope } from "@/lib/constants/ai";
 import type { RichDoc, ScenarioRow, ScenarioSection } from "@/types/scenario";
 import type { Slide } from "@/types/show";
 
@@ -84,8 +84,14 @@ export interface ApiTokenSummary {
   id: string;
   name: string;
   prefix: string;
+  scopes: ApiTokenScope[];
   lastUsedAt: string | null;
   createdAt: string;
+}
+
+export interface CreateApiTokenInput {
+  name: string;
+  scopes: ApiTokenScope[];
 }
 
 export interface CreatedApiToken extends ApiTokenSummary {

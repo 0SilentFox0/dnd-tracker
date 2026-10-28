@@ -7,6 +7,7 @@ import { isLibraryFull, listTracks } from "@/lib/server/audio/track-store";
 import { createTrackUploadTicket } from "@/lib/supabase/battle-music-storage";
 import { requireDM } from "@/lib/utils/api/api-auth";
 import { errorResponse } from "@/lib/utils/api/api-response";
+import { NEED, type RouteCtx, runContent } from "@/lib/utils/api/content-routes";
 import { handleApiError } from "@/lib/utils/api/error-handler";
 import { parseBody } from "@/lib/utils/api/parse-body";
 import { validateTrackFile } from "@/lib/utils/audio/track-file";
@@ -36,17 +37,13 @@ export async function issueUploadTicketHandler(req: Request, campaignId: string)
   }
 }
 
-export async function reorderTracksHandler(req: Request, campaignId: string) {
-  try {
-    const access = await requireDM(campaignId);
-
-    if (access instanceof NextResponse) return access;
-
+export const reorderTracksHandler = (req: Request, ctx: RouteCtx) =>
+  runContent({ req, ctx, need: NEED.write, action: "reorder tracks" }, async (actor) => {
     const body = await parseBody(reorderTracksSchema, req);
 
     if (body instanceof NextResponse) return body;
 
-    const known = new Set((await prisma.campaignTrack.findMany({ where: { campaignId }, select: { id: true } })).map((r) => r.id));
+    const known = new Set((await prisma.campaignTrack.findMany({ where: { campaignId: actor.campaignId }, select: { id: true } })).map((r) => r.id));
 
     const exact = body.ids.length === known.size && new Set(body.ids).size === body.ids.length && body.ids.every((id) => known.has(id));
 
@@ -54,8 +51,5 @@ export async function reorderTracksHandler(req: Request, campaignId: string) {
 
     await prisma.$transaction(body.ids.map((id, sortOrder) => prisma.campaignTrack.update({ where: { id }, data: { sortOrder } })));
 
-    return NextResponse.json(await listTracks(campaignId));
-  } catch (error) {
-    return handleApiError(error, { action: "reorder tracks" });
-  }
-}
+    return NextResponse.json(await listTracks(actor.campaignId));
+  });

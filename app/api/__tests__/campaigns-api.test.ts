@@ -186,6 +186,7 @@ describe("PATCH /api/campaigns/[id]", () => {
       userId: "dm-1",
       isDM: false,
       campaign: {
+        kind: "campaign",
         rules: DEFAULT_RULES,
         id: campaignId,
         maxLevel: 20,

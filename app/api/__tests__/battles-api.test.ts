@@ -56,6 +56,7 @@ describe("GET /api/campaigns/[id]/battles", () => {
       userId: "user-1",
       isDM: false,
       campaign: {
+        kind: "campaign",
         rules: DEFAULT_RULES,
         id: "c1",
         maxLevel: 20,
@@ -141,6 +142,7 @@ describe("POST /api/campaigns/[id]/battles", () => {
       userId: "dm-1",
       isDM: false,
       campaign: {
+        kind: "campaign",
         rules: DEFAULT_RULES,
         id: "c1",
         maxLevel: 20,
@@ -170,6 +172,7 @@ describe("POST /api/campaigns/[id]/battles", () => {
       userId: "dm-1",
       isDM: false,
       campaign: {
+        kind: "campaign",
         rules: DEFAULT_RULES,
         id: "c1",
         maxLevel: 20,

@@ -1,6 +1,8 @@
 import { type NextRequest,NextResponse } from 'next/server'
 import { createServerClient } from '@supabase/ssr'
 
+import { bearerToken } from '@/lib/utils/api/bearer'
+
 /**
  * CSRF defense for mutating /api/* requests: Origin (або Sec-Fetch-Site) POST/PATCH/PUT/DELETE має бути same-origin.
  * Без Origin (server-side fetch, сторонні клієнти) запит пропускається — auth cookie все одно потрібна.
@@ -19,7 +21,9 @@ export function rejectCrossOriginMutation(request: NextRequest): NextResponse | 
 
   if (!pathname.startsWith("/api/") && pathname !== SIGN_OUT_PATH) return null;
 
-  // bearer-only, never reads cookies — browser MCP clients send a foreign Origin
+  // bearer requests never read cookies, so CSRF does not apply
+  if (bearerToken(request)) return null;
+
   if (pathname === "/api/mcp" || pathname.startsWith("/api/mcp/")) return null;
 
   const origin = request.headers.get("origin");

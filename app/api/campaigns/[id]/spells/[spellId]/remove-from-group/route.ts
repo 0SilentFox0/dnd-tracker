@@ -2,46 +2,18 @@ import { NextResponse } from "next/server";
 
 import { invalidateReference, ReferenceKind } from "@/lib/cache/tags";
 import { prisma } from "@/lib/db";
-import { requireDM } from "@/lib/utils/api/api-auth";
-import { handleApiError } from "@/lib/utils/api/error-handler";
+import { NEED, type RouteCtx, runContent } from "@/lib/utils/api/content-routes";
 import { loadOwned } from "@/lib/utils/api/load-owned";
 
-export async function POST(
-  request: Request,
-  { params }: { params: Promise<{ id: string; spellId: string }> }
-) {
-  try {
-    const { id, spellId } = await params;
-    
-    const accessResult = await requireDM(id);
-
-    if (accessResult instanceof NextResponse) {
-      return accessResult;
-    }
-
-    const spell = await loadOwned(
-      prisma.spell.findUnique({
-        where: { id: spellId },
-      }),
-      id,
-    );
+export const POST = (req: Request, ctx: RouteCtx) =>
+  runContent({ req, ctx, need: NEED.write, action: "remove spell from group" }, async (actor, p) => {
+    const spell = await loadOwned(prisma.spell.findUnique({ where: { id: p.spellId } }), actor.campaignId);
 
     if (spell instanceof NextResponse) return spell;
 
-    const updatedSpell = await prisma.spell.update({
-      where: { id: spellId },
-      data: {
-        groupId: null,
-      },
-      include: {
-        spellGroup: true,
-      },
-    });
+    const updatedSpell = await prisma.spell.update({ where: { id: p.spellId }, data: { groupId: null }, include: { spellGroup: true } });
 
-    invalidateReference(ReferenceKind.SPELLS, id);
+    invalidateReference(ReferenceKind.SPELLS, actor.campaignId);
 
     return NextResponse.json(updatedSpell);
-  } catch (error) {
-    return handleApiError(error, { action: "remove spell from group" });
-  }
-}
+  });

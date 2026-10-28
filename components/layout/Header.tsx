@@ -149,7 +149,7 @@ export function Header({ email }: { email: string | null }) {
                     {isDmLinkVisible("ai", isTemplate) && (
                       <DropdownMenuItem asChild>
                         <Link href={`/campaigns/${campaignId}/dm/ai`}>
-                          AI і API
+                          {isTemplate ? "API" : "AI і API"}
                         </Link>
                       </DropdownMenuItem>
                     )}

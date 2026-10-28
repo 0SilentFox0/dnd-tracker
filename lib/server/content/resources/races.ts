@@ -8,6 +8,7 @@ import { API_ERRORS, raceNameTakenMessage } from "@/lib/constants/api-errors";
 import { raceColorAt } from "@/lib/constants/race-colors";
 import { prisma } from "@/lib/db";
 import { createRaceSchema, updateRaceSchema } from "@/lib/schemas";
+import { addedIds, assertCampaignRefs } from "@/lib/server/campaigns/campaign-refs";
 import { defineResource } from "@/lib/server/content/define-resource";
 import { ContentError } from "@/lib/server/content/errors";
 import { raceNameTaken } from "@/lib/server/races/race-name";
@@ -33,6 +34,7 @@ export const racesResource = defineResource<RaceRow, z.infer<typeof createRaceSc
   toItem: (row) => withAbilityIssues("race", row),
   async create(actor, data) {
     await assertNameFree(actor.campaignId, data.name);
+    await assertCampaignRefs(actor.campaignId, { mainSkill: data.availableSkills, skill: data.disabledSkills });
 
     const color = data.color ?? raceColorAt(await prisma.race.count({ where: { campaignId: actor.campaignId } }));
 
@@ -52,6 +54,11 @@ export const racesResource = defineResource<RaceRow, z.infer<typeof createRaceSc
   },
   async update(actor, existing, data) {
     if (data.name !== undefined) await assertNameFree(actor.campaignId, data.name, existing.id);
+
+    await assertCampaignRefs(actor.campaignId, {
+      mainSkill: addedIds(data.availableSkills, existing.availableSkills),
+      skill: addedIds(data.disabledSkills, existing.disabledSkills),
+    });
 
     return updateRaceCascade(actor.campaignId, existing, data);
   },

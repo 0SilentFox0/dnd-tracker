@@ -5,7 +5,7 @@ import { ContentError } from "@/lib/server/content/errors";
 
 type RefId = string | null | undefined;
 
-export type CampaignRefKind = "spell" | "spellGroup" | "mainSkill" | "artifactSet" | "race";
+export type CampaignRefKind = "spell" | "spellGroup" | "mainSkill" | "skill" | "artifactSet" | "race";
 
 export type CampaignRefs = Partial<Record<CampaignRefKind, RefId | RefId[]>>;
 
@@ -24,6 +24,10 @@ const REF_KINDS: Record<CampaignRefKind, { count: Counter; message: string }> = 
     count: (campaignId, ids) => prisma.mainSkill.count({ where: { campaignId, id: { in: ids } } }),
     message: API_ERRORS.FOREIGN_MAIN_SKILL,
   },
+  skill: {
+    count: (campaignId, ids) => prisma.skill.count({ where: { campaignId, id: { in: ids } } }),
+    message: API_ERRORS.FOREIGN_SKILL,
+  },
   artifactSet: {
     count: (campaignId, ids) => prisma.artifactSet.count({ where: { campaignId, id: { in: ids } } }),
     message: API_ERRORS.FOREIGN_ARTIFACT_SET,
@@ -33,6 +37,15 @@ const REF_KINDS: Record<CampaignRefKind, { count: Counter; message: string }> = 
     message: API_ERRORS.FOREIGN_RACE,
   },
 };
+
+/** Ids of `next` not yet stored in `prev` (a JSON column value), so stale stored ids never block a save. */
+export function addedIds(next: string[] | undefined, prev: unknown): string[] | undefined {
+  if (next === undefined) return undefined;
+
+  const known = new Set(Array.isArray(prev) ? prev : []);
+
+  return next.filter((id) => !known.has(id));
+}
 
 /** First foreign ref's message, or null. FK guarantees a referenced row exists, not that it belongs to this campaign. */
 export async function foreignCampaignRef(campaignId: string, refs: CampaignRefs): Promise<string | null> {

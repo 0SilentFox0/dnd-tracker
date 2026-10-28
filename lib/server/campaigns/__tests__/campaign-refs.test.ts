@@ -4,6 +4,7 @@ const db = vi.hoisted(() => ({
   spell: { count: vi.fn() },
   spellGroup: { count: vi.fn() },
   mainSkill: { count: vi.fn() },
+  skill: { count: vi.fn() },
   artifactSet: { count: vi.fn() },
   race: { count: vi.fn() },
 }));
@@ -11,7 +12,7 @@ const db = vi.hoisted(() => ({
 vi.mock("@/lib/db", () => ({ prisma: db }));
 
 import { API_ERRORS } from "@/lib/constants/api-errors";
-import { assertCampaignRefs, foreignCampaignRef } from "@/lib/server/campaigns/campaign-refs";
+import { addedIds, assertCampaignRefs, foreignCampaignRef } from "@/lib/server/campaigns/campaign-refs";
 
 describe("campaign refs", () => {
   beforeEach(() => {
@@ -47,5 +48,19 @@ describe("campaign refs", () => {
     db.race.count.mockResolvedValue(0);
 
     await expect(assertCampaignRefs("c1", { race: "r-x" })).rejects.toMatchObject({ message: API_ERRORS.FOREIGN_RACE, status: 400 });
+  });
+});
+
+describe("addedIds", () => {
+  it("лише нові id", () => {
+    expect(addedIds(["a", "b", "c"], ["a", "gone"])).toEqual(["b", "c"]);
+  });
+
+  it("undefined — поле не змінюється", () => {
+    expect(addedIds(undefined, ["a"])).toBeUndefined();
+  });
+
+  it("prev не масив — усі нові", () => {
+    expect(addedIds(["a"], null)).toEqual(["a"]);
   });
 });

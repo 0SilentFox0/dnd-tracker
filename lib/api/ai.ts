@@ -5,7 +5,7 @@ import { campaignDelete, campaignGet, campaignPatch, campaignPost, campaignPut, 
 
 import type { AiImageAspect, AiProvider } from "@/lib/constants/ai";
 import type {
-  AiChatMessage, AiCredentialSummary, AiFocus, AiProposal, AiProposalStatus, AiSettings, AiThread, AiThreadMode, ApiTokenSummary, CreatedApiToken,
+  AiChatMessage, AiCredentialSummary, AiFocus, AiProposal, AiProposalStatus, AiSettings, AiThread, AiThreadMode, ApiTokenSummary, CreateApiTokenInput, CreatedApiToken,
 } from "@/types/ai";
 import type { ScenarioPage } from "@/types/scenario";
 import type { SlideDeck } from "@/types/show";
@@ -55,7 +55,7 @@ export const saveAiSettings = (campaignId: string, body: { instructions: string 
 
 export const getApiTokens = (campaignId: string) => campaignGet<ApiTokenSummary[]>(campaignId, "/api-tokens", { cache: "no-store" });
 
-export const createApiToken = (campaignId: string, name: string) => campaignPost<CreatedApiToken>(campaignId, "/api-tokens", { name });
+export const createApiToken = (campaignId: string, input: CreateApiTokenInput) => campaignPost<CreatedApiToken>(campaignId, "/api-tokens", input);
 
 export const revokeApiToken = (campaignId: string, tokenId: string) => campaignDelete<{ ok: true }>(campaignId, `/api-tokens/${tokenId}`);
 

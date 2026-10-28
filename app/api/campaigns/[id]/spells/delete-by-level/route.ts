@@ -3,43 +3,18 @@ import { NextResponse } from "next/server";
 import { invalidateReference, ReferenceKind } from "@/lib/cache/tags";
 import { prisma } from "@/lib/db";
 import { deleteSpellsByLevelSchema } from "@/lib/schemas";
-import { requireDM } from "@/lib/utils/api/api-auth";
-import { handleApiError } from "@/lib/utils/api/error-handler";
+import { NEED, type RouteCtx, runContent } from "@/lib/utils/api/content-routes";
 import { parseBody } from "@/lib/utils/api/parse-body";
 
-export async function DELETE(
-  request: Request,
-  { params }: { params: Promise<{ id: string }> }
-) {
-  try {
-    const { id } = await params;
-    
-    const accessResult = await requireDM(id);
+export const DELETE = (req: Request, ctx: RouteCtx) =>
+  runContent({ req, ctx, need: NEED.writeAll, action: "delete spells by level" }, async (actor) => {
+    const parsed = await parseBody(deleteSpellsByLevelSchema, req);
 
-    if (accessResult instanceof NextResponse) {
-      return accessResult;
-    }
+    if (parsed instanceof NextResponse) return parsed;
 
-    const parsedBody = await parseBody(deleteSpellsByLevelSchema, request);
+    const result = await prisma.spell.deleteMany({ where: { campaignId: actor.campaignId, level: parsed.level } });
 
-    if (parsedBody instanceof NextResponse) return parsedBody;
+    invalidateReference(ReferenceKind.SPELLS, actor.campaignId);
 
-    const { level } = parsedBody;
-
-    const result = await prisma.spell.deleteMany({
-      where: {
-        campaignId: id,
-        level,
-      },
-    });
-
-    invalidateReference(ReferenceKind.SPELLS, id);
-
-    return NextResponse.json({
-      ok: true,
-      deleted: result.count,
-    });
-  } catch (error) {
-    return handleApiError(error, { action: "delete spells by level" });
-  }
-}
+    return NextResponse.json({ ok: true, deleted: result.count });
+  });

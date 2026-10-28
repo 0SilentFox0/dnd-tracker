@@ -8,12 +8,14 @@ import { DEFAULT_RULES } from "@/lib/utils/rules";
 import { parseRules } from "@/lib/utils/rules/schema";
 
 vi.mock("@/lib/utils/api/api-auth", () => ({ requireDM: vi.fn(), requireCampaignAccess: vi.fn() }));
-vi.mock("@/lib/db", () => ({ prisma: { campaign: { update: vi.fn(async () => ({})) } } }));
+vi.mock("@/lib/db", () => ({ prisma: { campaign: { update: vi.fn(async () => ({})), findUnique: vi.fn() } } }));
 
 const params = { params: Promise.resolve({ id: "c1" }) };
 
 const access = (isDM: boolean, rules: unknown = {}) =>
   ({ userId: "u", isDM, campaign: { id: "c1", maxLevel: 20, members: [], rules: parseRules(rules) } }) as never;
+
+const stored = (rules: unknown) => vi.mocked(prisma.campaign.findUnique).mockResolvedValue({ rules } as never);
 
 const patch = (body: unknown) => PATCH(new Request("http://x", { method: "PATCH", body: JSON.stringify(body) }), params);
 
@@ -22,6 +24,7 @@ describe("campaign rules API", () => {
     vi.clearAllMocks();
     vi.mocked(apiAuth.requireCampaignAccess).mockResolvedValue(access(false));
     vi.mocked(apiAuth.requireDM).mockResolvedValue(access(true));
+    stored({});
   });
 
   it("GET від гравця: 200 і типові правила для {}", async () => {
@@ -29,6 +32,12 @@ describe("campaign rules API", () => {
 
     expect(res.status).toBe(200);
     expect(await res.json()).toEqual(DEFAULT_RULES);
+  });
+
+  it("GET: кампанії немає — 404", async () => {
+    vi.mocked(prisma.campaign.findUnique).mockResolvedValue(null);
+
+    expect((await GET(new Request("http://x"), params)).status).toBe(404);
   });
 
   it("PATCH від гравця: 403 без запису", async () => {
@@ -50,7 +59,7 @@ describe("campaign rules API", () => {
   });
 
   it("PATCH {morale:{cap}} не вмикає вимкнену мораль", async () => {
-    vi.mocked(apiAuth.requireDM).mockResolvedValue(access(true, { morale: { enabled: false, cap: 3 } }));
+    stored({ morale: { enabled: false, cap: 3 } });
 
     const res = await patch({ morale: { cap: 5 } });
 
@@ -67,7 +76,7 @@ describe("campaign rules API", () => {
   });
 
   it("PATCH heroMin 20 при збереженому heroMax 16: 400 (refine на злитому значенні)", async () => {
-    vi.mocked(apiAuth.requireDM).mockResolvedValue(access(true, { initiative: { heroMin: 10, heroMax: 16 } }));
+    stored({ initiative: { heroMin: 10, heroMax: 16 } });
 
     const res = await patch({ initiative: { heroMin: 20 } });
 

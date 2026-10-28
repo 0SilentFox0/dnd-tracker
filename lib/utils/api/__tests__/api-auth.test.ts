@@ -78,7 +78,7 @@ describe("api-auth", () => {
 
       expect(findCampaign).toHaveBeenCalledWith({
         where: { id: "c1" },
-        select: { id: true, maxLevel: true, rules: true, allowPlayerEdit: true, members: { where: { userId: "u1" }, select: { userId: true, role: true } } },
+        select: { id: true, kind: true, maxLevel: true, rules: true, allowPlayerEdit: true, members: { where: { userId: "u1" }, select: { userId: true, role: true } } },
       });
     });
 

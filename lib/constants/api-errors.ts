@@ -35,6 +35,7 @@ export const API_ERRORS = {
   FOREIGN_ARTIFACT_SET: "Сет артефактів не належить цій кампанії",
   METHOD_NOT_ALLOWED: "Операція недоступна для цього виду контенту",
   FOREIGN_RACE: "Раса не належить цій кампанії",
+  FOREIGN_SKILL: "Скіл не належить цій кампанії",
   CAMPAIGN_NOT_ACTIVE: "Кампанія не активна",
   ALREADY_MEMBER: "Ви вже є учасником цієї кампанії",
   CANNOT_REMOVE_DM: "DM не можна видалити з кампанії",
@@ -52,6 +53,7 @@ export const API_ERRORS = {
   TRACK_DUPLICATE: "Цей файл уже є в бібліотеці",
   TRACK_ORDER_MISMATCH: "Порядок має містити всі треки кампанії",
   TRACK_URL_LOCKED: "Посилання можна змінити лише в треку з YouTube",
+  TRACK_FILE_SESSION_ONLY: "Через API можна додати лише трек з YouTube",
   YOUTUBE_URL_INVALID: "Не вдалося розпізнати посилання YouTube",
   BATTLE_AUDIO_NO_TRACK: "Немає обраного треку",
   BATTLE_AUDIO_EMPTY_LIBRARY: "Бібліотека музики порожня",
@@ -98,6 +100,10 @@ export const API_ERRORS = {
   AI_IMAGE_NOT_OWNED: "Це зображення не належить кампанії",
   AI_PROPOSAL_DONE: "Пропозицію вже застосовано або відхилено",
   API_TOKEN_NOT_FOUND: "Токен не знайдено",
+  API_TOKEN_SCOPE_MISSING: "У токена немає потрібного права",
+  API_TOKEN_WRONG_CAMPAIGN: "Токен належить іншій кампанії",
+  API_TOKEN_SESSION_ONLY: "Ця дія доступна лише з інтерфейсу",
+  API_TOKEN_AI_ON_TEMPLATE: "На шаблоні немає AI-асистента — оберіть лише права на контент",
 } as const;
 
 export const raceNameTakenMessage = (name: string) => `Раса «${name}» уже є в кампанії`;

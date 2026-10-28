@@ -56,6 +56,7 @@ describe("GET /api/campaigns/[id]/skills", () => {
       userId: "user-1",
       isDM: false,
       campaign: {
+        kind: "campaign",
         rules: DEFAULT_RULES,
         id: "c1",
         maxLevel: 20,
@@ -120,6 +121,7 @@ describe("GET /api/campaigns/[id]/skills", () => {
       userId: "user-1",
       isDM: false,
       campaign: {
+        kind: "campaign",
         rules: DEFAULT_RULES,
         id: "c1",
         maxLevel: 20,
@@ -149,7 +151,7 @@ describe("GET /api/campaigns/[id]/skills", () => {
     vi.mocked(apiAuth.requireCampaignAccess).mockResolvedValue({
       userId: "user-1",
       isDM: false,
-      campaign: { id: "c1", maxLevel: 20, rules: DEFAULT_RULES, allowPlayerEdit: true, members: [{ userId: "user-1", role: "player" }] },
+      campaign: { kind: "campaign", id: "c1", maxLevel: 20, rules: DEFAULT_RULES, allowPlayerEdit: true, members: [{ userId: "user-1", role: "player" }] },
     });
     vi.mocked(prisma.skill.findMany).mockResolvedValue([{ id: "s1", name: "Поклик", icon: null, description: null }] as never);
 
@@ -203,6 +205,7 @@ describe("POST /api/campaigns/[id]/skills", () => {
       userId: "dm-1",
       isDM: false,
       campaign: {
+        kind: "campaign",
         rules: DEFAULT_RULES,
         id: "c1",
         maxLevel: 20,
@@ -232,6 +235,7 @@ describe("POST /api/campaigns/[id]/skills", () => {
       userId: "dm-1",
       isDM: false,
       campaign: {
+        kind: "campaign",
         rules: DEFAULT_RULES,
         id: "c1",
         maxLevel: 20,
@@ -347,6 +351,7 @@ describe("DELETE /api/campaigns/[id]/skills (delete all)", () => {
       userId: "dm-1",
       isDM: false,
       campaign: {
+        kind: "campaign",
         rules: DEFAULT_RULES,
         id: "c1",
         maxLevel: 20,
@@ -400,6 +405,7 @@ describe("GET /api/campaigns/[id]/skills/[skillId]", () => {
       userId: "user-1",
       isDM: false,
       campaign: {
+        kind: "campaign",
         rules: DEFAULT_RULES,
         id: "c1",
         maxLevel: 20,
@@ -429,6 +435,7 @@ describe("GET /api/campaigns/[id]/skills/[skillId]", () => {
       userId: "user-1",
       isDM: false,
       campaign: {
+        kind: "campaign",
         rules: DEFAULT_RULES,
         id: "c1",
         maxLevel: 20,
@@ -454,6 +461,7 @@ describe("GET /api/campaigns/[id]/skills/[skillId]", () => {
       userId: "user-1",
       isDM: false,
       campaign: {
+        kind: "campaign",
         rules: DEFAULT_RULES,
         id: "c1",
         maxLevel: 20,
@@ -541,6 +549,7 @@ describe("PATCH /api/campaigns/[id]/skills/[skillId]", () => {
       userId: "dm-1",
       isDM: false,
       campaign: {
+        kind: "campaign",
         rules: DEFAULT_RULES,
         id: "c1",
         maxLevel: 20,
@@ -570,6 +579,7 @@ describe("PATCH /api/campaigns/[id]/skills/[skillId]", () => {
       userId: "dm-1",
       isDM: false,
       campaign: {
+        kind: "campaign",
         rules: DEFAULT_RULES,
         id: "c1",
         maxLevel: 20,
@@ -670,6 +680,7 @@ describe("DELETE /api/campaigns/[id]/skills/[skillId]", () => {
       userId: "dm-1",
       isDM: false,
       campaign: {
+        kind: "campaign",
         rules: DEFAULT_RULES,
         id: "c1",
         maxLevel: 20,
@@ -697,6 +708,7 @@ describe("DELETE /api/campaigns/[id]/skills/[skillId]", () => {
       userId: "dm-1",
       isDM: false,
       campaign: {
+        kind: "campaign",
         rules: DEFAULT_RULES,
         id: "c1",
         maxLevel: 20,

@@ -30,6 +30,7 @@ export interface CampaignAccessResult extends AuthResult {
   isDM: boolean;
   campaign: {
     id: string;
+    kind: string;
     maxLevel: number;
     rules: Ruleset;
     allowPlayerEdit: boolean;
@@ -82,6 +83,7 @@ export async function requireCampaignAccess(
     where: { id: campaignId },
     select: {
       id: true,
+      kind: true,
       maxLevel: true,
       rules: true,
       allowPlayerEdit: true,
@@ -111,6 +113,7 @@ export async function requireCampaignAccess(
     isDM,
     campaign: {
       id: campaign.id,
+      kind: campaign.kind,
       maxLevel: campaign.maxLevel,
       rules: parseRules(campaign.rules),
       allowPlayerEdit: campaign.allowPlayerEdit,

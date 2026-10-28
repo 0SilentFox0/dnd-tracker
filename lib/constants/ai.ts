@@ -76,4 +76,20 @@ export const AI_LIMITS = {
 } as const;
 
 export const API_TOKEN_PREFIX = "dndt_";
-export const API_TOKEN_SCOPES = ["ai"] as const;
+export const API_TOKEN_SCOPES = ["ai", "content:read", "content:write"] as const;
+
+export type ApiTokenScope = (typeof API_TOKEN_SCOPES)[number];
+
+export type ContentScope = Exclude<ApiTokenScope, "ai">;
+
+export const CONTENT_SCOPES = ["content:read", "content:write"] as const satisfies readonly ContentScope[];
+
+export const isApiTokenScope = (s: string): s is ApiTokenScope => (API_TOKEN_SCOPES as readonly string[]).includes(s);
+
+export const API_TOKEN_SCOPE_LABELS: Record<ApiTokenScope, string> = {
+  ai: "AI-асистент (MCP)",
+  "content:read": "Читання контенту",
+  "content:write": "Запис контенту",
+};
+
+export const hasScope = (scopes: readonly string[], need: ApiTokenScope) => scopes.includes(need) || (need === "content:read" && scopes.includes("content:write"));

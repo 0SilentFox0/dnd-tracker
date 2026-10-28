@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-import { AI_IMAGE_ASPECTS, AI_IMAGE_PROMPT_MAX, AI_LIMITS, AI_PROVIDERS, AI_THREAD_MODES } from "@/lib/constants/ai";
+import { AI_IMAGE_ASPECTS, AI_IMAGE_PROMPT_MAX, AI_LIMITS, AI_PROVIDERS, AI_THREAD_MODES, API_TOKEN_SCOPES } from "@/lib/constants/ai";
 
 const id = z.string().min(1).max(40);
 
@@ -33,7 +33,13 @@ export const proposeScenarioEditSchema = z.object({ pageId: id, summary: z.strin
 
 export const aiSettingsSchema = z.object({ instructions: z.string().max(AI_LIMITS.instructionsChars) });
 
-export const createApiTokenSchema = z.object({ name: z.string().trim().min(1).max(60) });
+export const createApiTokenSchema = z.object({
+  name: z.string().trim().min(1).max(60),
+  scopes: z
+    .array(z.enum(API_TOKEN_SCOPES))
+    .min(1)
+    .transform((s) => [...new Set(s)]),
+});
 
 export const generateSlideImageSchema = z.object({
   prompt: z.string().trim().min(1).max(AI_IMAGE_PROMPT_MAX),

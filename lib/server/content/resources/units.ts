@@ -7,7 +7,7 @@ import { ReferenceKind } from "@/lib/cache/tags";
 import { API_ERRORS } from "@/lib/constants/api-errors";
 import { prisma } from "@/lib/db";
 import { createUnitSchema, updateUnitSchema } from "@/lib/schemas";
-import { assertCampaignRefs } from "@/lib/server/campaigns/campaign-refs";
+import { addedIds, assertCampaignRefs } from "@/lib/server/campaigns/campaign-refs";
 import { defineResource } from "@/lib/server/content/define-resource";
 import { toJsonInput } from "@/lib/server/content/errors";
 import { abilitiesJson, withAbilityIssues } from "@/lib/utils/abilities/read";
@@ -28,7 +28,7 @@ export const unitsResource = defineResource<UnitRow, z.infer<typeof createUnitSc
   find: (actor, id) => prisma.unit.findFirst({ where: { id, campaignId: actor.campaignId } }),
   toItem: (row) => withAbilityIssues("unit", row, toUnit(row)),
   async create(actor, data) {
-    await assertCampaignRefs(actor.campaignId, { race: data.raceId });
+    await assertCampaignRefs(actor.campaignId, { race: data.raceId, spell: data.knownSpells });
 
     const unit = await prisma.unit.create({
       data: {
@@ -62,7 +62,7 @@ export const unitsResource = defineResource<UnitRow, z.infer<typeof createUnitSc
     return toUnit(unit);
   },
   async update(actor, existing, data) {
-    await assertCampaignRefs(actor.campaignId, { race: data.raceId });
+    await assertCampaignRefs(actor.campaignId, { race: data.raceId, spell: addedIds(data.knownSpells, existing.knownSpells) });
 
     const unit = await prisma.unit.update({
       where: { id: existing.id },

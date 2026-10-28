@@ -2,27 +2,25 @@ import { NextResponse } from "next/server";
 
 import { prisma } from "@/lib/db";
 import { exportCampaign } from "@/lib/server/templates/export-campaign";
-import { requireDM } from "@/lib/utils/api/api-auth";
 import { bundleErrorResponse } from "@/lib/utils/api/bundle-error";
 import { PRIVATE_NO_STORE_HEADERS } from "@/lib/utils/api/cache-headers";
-import { handleApiError } from "@/lib/utils/api/error-handler";
+import { NEED, type RouteCtx, runContent } from "@/lib/utils/api/content-routes";
 
-export async function GET(_request: Request, { params }: { params: Promise<{ id: string }> }) {
-  try {
-    const { id } = await params;
+export const GET = (req: Request, ctx: RouteCtx) =>
+  runContent({ req, ctx, need: NEED.read("dm"), action: "export campaign" }, async (actor) => {
+    try {
+      const bundle = await exportCampaign(prisma, actor.campaignId);
 
-    const accessResult = await requireDM(id);
+      const date = new Date().toISOString().slice(0, 10);
 
-    if (accessResult instanceof NextResponse) return accessResult;
+      return NextResponse.json(bundle, {
+        headers: { ...PRIVATE_NO_STORE_HEADERS, "Content-Disposition": `attachment; filename="campaign-${actor.campaignId}-${date}.json"` },
+      });
+    } catch (error) {
+      const response = bundleErrorResponse(error);
 
-    const bundle = await exportCampaign(prisma, id);
+      if (response) return response;
 
-    const date = new Date().toISOString().slice(0, 10);
-
-    return NextResponse.json(bundle, {
-      headers: { ...PRIVATE_NO_STORE_HEADERS, "Content-Disposition": `attachment; filename="campaign-${id}-${date}.json"` },
-    });
-  } catch (error) {
-    return bundleErrorResponse(error) ?? handleApiError(error, { action: "export campaign" });
-  }
-}
+      throw error;
+    }
+  });

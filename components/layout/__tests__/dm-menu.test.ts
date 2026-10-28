@@ -8,7 +8,7 @@ describe("isDmLinkVisible", () => {
     expect(isDmLinkVisible(path, false)).toBe(true);
   });
 
-  it.each(["spells", "units", "rules", "music", "artifacts"])("%s видимий на шаблоні", (path) => {
+  it.each(["spells", "units", "rules", "music", "artifacts", "ai"])("%s видимий на шаблоні", (path) => {
     expect(isDmLinkVisible(path, true)).toBe(true);
   });
 });

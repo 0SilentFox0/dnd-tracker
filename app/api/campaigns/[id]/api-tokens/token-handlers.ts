@@ -3,6 +3,7 @@ import { NextResponse } from "next/server";
 import { createApiToken, listApiTokens, revokeApiToken } from "@/lib/ai/api-tokens";
 import { guarded } from "@/lib/ai/guarded";
 import { API_ERRORS } from "@/lib/constants/api-errors";
+import { CampaignKind } from "@/lib/constants/campaigns";
 import { createApiTokenSchema } from "@/lib/schemas/ai";
 import { requireDM } from "@/lib/utils/api/api-auth";
 import { errorResponse } from "@/lib/utils/api/api-response";
@@ -17,7 +18,9 @@ export const createApiTokenHandler = (req: Request, campaignId: string) =>
 
     if (body instanceof NextResponse) return body;
 
-    return NextResponse.json(await createApiToken(campaignId, access.userId, body.name), { status: 201 });
+    if (access.campaign.kind === CampaignKind.TEMPLATE && body.scopes.includes("ai")) return errorResponse(API_ERRORS.API_TOKEN_AI_ON_TEMPLATE, 400);
+
+    return NextResponse.json(await createApiToken(campaignId, access.userId, body), { status: 201 });
   });
 
 export const revokeApiTokenHandler = (campaignId: string, tokenId: string) =>

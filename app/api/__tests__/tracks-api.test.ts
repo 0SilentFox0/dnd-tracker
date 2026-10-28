@@ -1,11 +1,13 @@
 import { NextResponse } from "next/server";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
+import * as apiTokens from "@/lib/ai/api-tokens";
 import { prisma } from "@/lib/db";
 import * as storage from "@/lib/supabase/battle-music-storage";
 import * as apiAuth from "@/lib/utils/api/api-auth";
 import * as oembed from "@/lib/utils/audio/youtube-oembed";
 
+vi.mock("@/lib/ai/api-tokens", async (orig) => ({ ...(await orig<typeof apiTokens>()), verifyApiToken: vi.fn() }));
 vi.mock("@/lib/utils/api/api-auth", () => ({ requireDM: vi.fn() }));
 vi.mock("@/lib/supabase/battle-music-storage", async (orig) => ({
   ...(await orig<typeof storage>()),
@@ -57,6 +59,19 @@ describe("tracks API", () => {
 
     expect((await POST(req("POST", { kind: "youtube", url: "https://youtu.be/dQw4w9WgXcQ" }), params())).status).toBe(403);
     expect(prisma.campaignTrack.create).not.toHaveBeenCalled();
+  });
+
+  it("токен: файл — 403 без запису, YouTube — 201", async () => {
+    vi.mocked(apiTokens.verifyApiToken).mockResolvedValue({ campaignId: "camp1", userId: "dm", scopes: ["content:write"] });
+
+    const { POST } = await tracksRoute();
+
+    const viaToken = (body: unknown) => new Request("http://x", { method: "POST", headers: { authorization: "Bearer dnd_tok" }, body: JSON.stringify(body) });
+
+    expect((await POST(viaToken({ kind: "file", path: PATH, title: "x" }), params())).status).toBe(403);
+    expect(prisma.campaignTrack.create).not.toHaveBeenCalled();
+
+    expect((await POST(viaToken({ kind: "youtube", url: "https://youtu.be/dQw4w9WgXcQ", title: "Y" }), params())).status).toBe(201);
   });
 
   it("файл: перевірений шлях кампанії → 201, url зі Storage, sortOrder у кінець", async () => {
