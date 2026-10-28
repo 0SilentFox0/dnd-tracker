@@ -108,6 +108,7 @@ export const ASSISTANT_ROUTE_COVERAGE: readonly RouteCoverage[] = [
   { route: 'campaigns/[id]/world/markers/[markerId]', methods: ['DELETE', 'PATCH'], task: 0, adapter: 'world-map, backlog W1 in premerge-findings', state: "planned" },
   { route: 'campaigns/[id]/world/notes', methods: ['POST'], task: 0, adapter: 'world-map, backlog W1 in premerge-findings', state: "planned" },
   { route: 'campaigns/[id]/world/notes/[noteId]', methods: ['DELETE', 'PATCH'], task: 0, adapter: 'world-map, backlog W1 in premerge-findings', state: "planned" },
+  { route: 'campaigns/[id]/world/rest', methods: ['POST'], task: 0, adapter: 'world-map, backlog W1 in premerge-findings', state: "planned" },
   { route: 'campaigns/[id]/world/travel', methods: ['POST'], task: 0, adapter: 'world-map, backlog W1 in premerge-findings', state: "planned" },
   { route: 'campaigns/[id]/world/upload-url', methods: ['POST'], task: 0, adapter: 'world-map, backlog W1 in premerge-findings', state: "planned" },
   { route: 'campaigns/[id]/world/view', methods: ['GET'], task: 0, adapter: 'world-map, backlog W1 in premerge-findings', state: "planned" },
