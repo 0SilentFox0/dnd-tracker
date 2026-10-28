@@ -1,21 +1,37 @@
 "use client";
 
+import { useState } from "react";
+import dynamic from "next/dynamic";
+
 import { ChargesList } from "./rest/ChargesList";
 import { FeatsBlock } from "./FeatsBlock";
 import { useProfile } from "./ProfileContext";
 import { RacePassive } from "./RacePassive";
 
+import { ClassProgressionMap } from "@/components/classes/progression";
 import { EntityIcon } from "@/components/common/EntityIcon";
 import { ProgressionPanel } from "@/components/skill-tree/progression";
+
+const ChoicesDialog = dynamic(() => import("./ChoicesDialog"), { ssr: false });
 
 export function SkillsTab({ manage = false }: { manage?: boolean }) {
   const { campaignId, characterId, sheet } = useProfile();
 
   const personal = sheet.personalSkill;
 
+  const [choicesOpen, setChoicesOpen] = useState(false);
+
+  const actions = sheet.choices?.canEdit ? { onPick: () => setChoicesOpen(true) } : undefined;
+
   return (
     <>
-      {sheet.classFeatureDescriptions?.length ? <section className="mb-3 space-y-3"><h3>Вміння класу та підкласу</h3>{sheet.classFeatureDescriptions.map((feature, index) => <details key={index}><summary>{feature.source} · рівень {feature.level}</summary><p className="whitespace-pre-wrap">{feature.description}</p></details>)}</section> : null}
+      {sheet.classProgression?.map((progression) => (
+        <section key={progression.classId} className="mb-3 space-y-2">
+          <h3>{progression.className}</h3>
+          <ClassProgressionMap progression={progression} mode="sheet" actions={actions} />
+        </section>
+      ))}
+      {choicesOpen ? <ChoicesDialog open={choicesOpen} onOpenChange={setChoicesOpen} campaignId={campaignId} characterId={characterId} /> : null}
       <FeatsBlock />
       <RacePassive />
       <ChargesList />

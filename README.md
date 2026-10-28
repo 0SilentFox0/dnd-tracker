@@ -1,415 +1,135 @@
 # D&D Combat Tracker
 
-Веб-додаток для відстеження боїв у настільній ролійній грі Dungeons & Dragons 5e з real-time синхронізацією та мобільною оптимізацією.
+Веб-додаток для ведення кампаній і боїв у Dungeons & Dragons 5e: конструктор кампаній, бойова мапа з real-time синхронізацією, «Показ» для гравців, AI-асистент ДМ. Працює на телефоні й десктопі.
 
-- **[ARCHITECTURE.md](ARCHITECTURE.md)** — детальна архітектура: структура папок (`app/`, `components/`, `lib/`, `types/`), призначення директорій, API routes,
+Документація: [ARCHITECTURE.md](ARCHITECTURE.md) (огляд папок), [docs/architecture/](docs/architecture/README.md) (по підсистемах), [docs/STATUS.md](docs/STATUS.md) (що зараз у роботі), [CLAUDE.md](CLAUDE.md) (правила й пастки для розробки).
 
-# D&D Combat Tracker
+## Можливості
 
-Веб-додаток для відстеження боїв у настільній ролійній грі Dungeons & Dragons 5e з підтримкою реального часу та мобільною оптимізацією.
+### Для Dungeon Master
 
-## 🎯 Основні можливості
+- **Конструктор кампаній**: шаблони (SRD 5.2, Heroes, «Без шаблону»), правила кампанії, класи, раси, риси, передісторії, дерева скілів, заклинання, артефакти й набори, юніти. Оновлення з джерела шаблону (source sync), імпорт/експорт CSV/TSV/JSON.
+- **Відкрите API**: токени зі scopes, REST + публічний `/api/openapi.json`, MCP-сервер `/api/mcp`.
+- **Бої**: ініціатива й черга ходів, атаки, заклинання, стани 5e, рятівні кидки, кидки смерті, концентрація, легендарні дії, мораль, резерв, баланс за `computeFairScaling`. Режими мапи (звичайна, лабіринт), погода, музика, 2D-ефекти й 3D-кубики.
+- **Сценарій і «Показ»**: рукопис сценарію, слайди з музикою, синхронізований перегляд для гравців, пазл, карта світу з туманом і подорожами.
+- **AI-асистент** (власні ключі Claude/OpenAI/Gemini): чат зі сценою, пропозиції правок сценарію, генерація зображень, постійні інструкції кампанії.
+- **Кампанія**: інвайт-коди, дашборд «Що далі», онбординг-чеклісти, довідка `/help`.
 
-### Для Dungeon Master (DM)
+### Для гравців
 
-- **Управління кампаніями**: Створення та налаштування кампаній з унікальними кодами запрошення
-- **Управління персонажами**: Створення та редагування персонажів гравців та NPC героїв з повною формою (7 етапів)
-- **Управління інвентарем**: Повне управління інвентарем персонажів (валюта, екіпіровані артефакти, рюкзак)
-- **Управління юнітами**: Створення груп NPC юнітів для боїв
-- **База заклинань**: Створення та управління заклинаннями кампанії
-- **Артефакти та сети**: Створення артефактів та наборів артефактів
-- **Дерева прокачки**: Налаштування дерев прокачки для рас
-- **Сцени боїв**: Створення та управління боями з реальним часом синхронізацією
-- **Ініціатива та черга**: Автоматичне відстеження черги ходів
-- **Атаки та ушкодження**: Обробка атак з врахуванням модифікаторів з артефактів та дерева скілів
+- Лист героя, інвентар («Підсумок», гаманець, слоти), рівні й вибори (риси, ASI), чернетки героя.
+- Участь у боях у реальному часі, заклинання, відпочинки поза боєм.
+- «Показ» і карта світу, що відкриває ДМ.
 
-### Для Гравців
+## Стек
 
-- **Перегляд персонажа**: Перегляд та редагування власного персонажа
-- **Участь у боях**: Реальний час синхронізація під час боїв
-- **Відстеження HP**: Моніторинг здоров'я та тимчасових HP
-- **Заклинання**: Перегляд та використання відомих заклинань
+- **Next.js 16** (App Router) + **React 19** + **TypeScript** (strict), Tailwind CSS 4, shadcn/ui + Radix, TanStack Query 5
+- **Prisma 6** + **PostgreSQL** (Supabase), **Zod 4**
+- **Supabase Auth** (Google OAuth + email/пароль, сесія перевіряється локально через `getClaims`)
+- **Pusher** (real-time, кластер `eu`), опційно Upstash/Redis (rate limit, кеш)
+- **Vitest** для тестів, **pnpm** як пакетний менеджер
+- Хостинг: **Vercel** (функції `fra1`), шрифти self-hosted
 
-## 🛠 Технологічний стек
+## Швидкий старт
 
-### Frontend
-
-- **Next.js 16.1.1** (App Router) - React фреймворк
-- **React 19.2.3** - UI бібліотека
-- **TypeScript** - Строга типізація без `any`
-- **Tailwind CSS 4** - Стилізація
-- **shadcn/ui** - UI компоненти
-- **Radix UI** - Доступні UI примітиви
-
-### Backend
-
-- **Next.js API Routes** - Serverless API
-- **Prisma 5.20.0** - ORM для роботи з базою даних
-- **PostgreSQL (Supabase)** - База даних
-- **Zod 4.3.5** - Валідація даних
-
-### Authentication & Real-time
-
-- **Supabase Auth** - Аутентифікація (OAuth підтримка)
-- **Pusher** - Real-time синхронізація через WebSockets
-
-### Deployment
-
-- **Vercel** - Хостинг та CI/CD
-
-## 📋 Вимоги
-
-- Node.js 20+
-- npm або yarn
-- Supabase проект з PostgreSQL базою даних
-- Pusher аккаунт (для real-time функціоналу)
-
-## 🚀 Швидкий старт
-
-### 1. Клонування репозиторію
+Потрібні: Node.js 20+ (рекомендовано 22+), **pnpm 9** (`corepack enable`), Docker (локальна БД), проєкт Supabase (Auth/Storage), опційно акаунт Pusher.
 
 ```bash
-git clone <repository-url>
-cd dnd-combat-tracker
+git clone <repository-url> && cd dnd-tracker
+pnpm install
+cp .env.example .env.local   # заповніть значення
+pnpm db:local                # Docker Postgres на :54322 + міграції
+pnpm dev                     # http://localhost:3000
 ```
 
-### 2. Встановлення залежностей
+Локальна БД — Docker (`postgres:17`, порт 54322), щоб `pnpm dev` не витрачав ліміт Supabase. Для неї в `.env.local`:
+`DATABASE_URL=DIRECT_URL=postgresql://postgres:postgres@localhost:54322/postgres`. Supabase Auth/Storage і Pusher лишаються хмарними.
+
+### Змінні середовища
+
+Повний список із коментарями — у [`.env.example`](.env.example).
+
+| Змінна | Призначення |
+|---|---|
+| `DATABASE_URL` | Додаток: Transaction pooler (порт 6543, `?pgbouncer=true&sslmode=require`) |
+| `DIRECT_URL` | Міграції: Direct/Session (порт 5432). Обов'язкова в Vercel Production |
+| `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`, `SUPABASE_SERVICE_ROLE_KEY` | Supabase Auth і Storage |
+| `PUSHER_APP_ID`, `PUSHER_SECRET`, `NEXT_PUBLIC_PUSHER_KEY`, `NEXT_PUBLIC_PUSHER_CLUSTER` | Real-time. Без них бій працює на поллінгу; у production `PUSHER_APP_ID`/`PUSHER_SECRET` обов'язкові |
+| `AI_KEYS_SECRET` (`AI_KEYS_SECRET_PREV`) | Ключ шифрування провайдерних ключів AI (`openssl rand -base64 32`) |
+| `COMPENDIUM_PREVIEW_SECRET` | Підпис попереднього перегляду JSON-імпорту (≥ 32 символи) |
+| `CRON_SECRET` | Захист щоденного cron-роуту очищення даних асистента |
+| `PLATFORM_ADMIN_USER_IDS` | Адміни платформи (керування офіційними шаблонами) |
+| `UPSTASH_REDIS_REST_*`, `REDIS_URL` | Опційно: rate limit і кеш |
+| `SITE_INDEXING=1` | Дозволити індексацію (лише після публічного запуску) |
+
+## Команди
 
 ```bash
-npm install
+pnpm dev                 # next dev
+pnpm build               # prisma generate && next build
+pnpm lint                # eslint
+pnpm knip                # невикористаний код і залежності
+
+pnpm test:run            # vitest, один прогін (CI)
+pnpm test:changed        # лише тести, зачеплені незакоміченими змінами
+pnpm test:related a.ts   # лише тести, що імпортують файли
+pnpm test:integration    # інтеграційні тести з реальною PostgreSQL
+
+pnpm db:local            # Docker Postgres + міграції
+pnpm exec prisma migrate dev --name X   # нова міграція (локально)
+pnpm migrate:deploy      # застосувати міграції (DIRECT_URL з .env.local)
+pnpm exec prisma studio
 ```
 
-### 3. Налаштування змінних середовища
+Одноразові операції лежать у `scripts/` і запускаються через `tsx` (імпорт юнітів і сценаріїв, сід бібліотеки, шаблон SRD, симуляції балансу, `battle-sweep` тощо) — повний перелік у `package.json`.
 
-Створіть файл `.env.local` в корені проекту:
-
-```env
-# База даних Supabase — Transaction pooler (порт 6543, рекомендовано для serverless і локально)
-# Замініть [PROJECT_REF] та [PASSWORD] на значення з Supabase → Connect → Transaction pooler
-DATABASE_URL="postgresql://postgres.[PROJECT_REF]:[PASSWORD]@aws-1-eu-central-1.pooler.supabase.com:6543/postgres?sslmode=require&pgbouncer=true"
-
-# Supabase Authentication
-NEXT_PUBLIC_SUPABASE_URL="https://[PROJECT_REF].supabase.co"
-NEXT_PUBLIC_SUPABASE_ANON_KEY="your-anon-key"
-SUPABASE_SERVICE_ROLE_KEY="your-service-role-key"
-
-# Pusher (для real-time)
-PUSHER_APP_ID="your-app-id"
-PUSHER_SECRET="your-secret"
-NEXT_PUBLIC_PUSHER_KEY="your-key"
-NEXT_PUBLIC_PUSHER_CLUSTER="your-cluster"
-```
-
-### 4. Налаштування бази даних
-
-```bash
-# Генерація Prisma Client
-npx prisma generate
-
-# Застосування міграцій (якщо потрібно)
-npx prisma migrate deploy
-```
-
-### 5. Запуск проекту
-
-```bash
-# Development режим
-npm run dev
-
-# Production build
-npm run build
-npm start
-```
-
-Відкрийте [http://localhost:3000](http://localhost:3000) у браузері.
-
-## 📁 Структура проекту
+## Структура
 
 ```
-dnd-combat-tracker/
-├── app/                          # Next.js App Router
-│   ├── (auth)/                   # Авторизація
-│   │   ├── sign-in/              # Сторінка входу
-│   │   └── sign-up/              # Сторінка реєстрації
-│   ├── api/                      # API Routes
-│   │   └── campaigns/            # API для кампаній
-│   │       └── [id]/
-│   │           ├── characters/   # API для персонажів
-│   │           │   └── [characterId]/
-│   │           │       └── inventory/  # API для інвентаря
-│   │           ├── battles/      # API для боїв
-│   │           ├── spells/       # API для заклинань
-│   │           ├── units/        # API для юнітів
-│   │           └── artifacts/    # API для артефактів
-│   ├── campaigns/                # Сторінки кампаній
-│   │   └── [id]/
-│   │       ├── dm/               # DM панель
-│   │       │   ├── characters/   # Управління персонажами
-│   │       │   │   ├── new/      # Створення персонажа
-│   │       │   │   └── [characterId]/  # Редагування персонажа
-│   │       │   │       └── inventory/  # Управління інвентарем
-│   │       │   ├── battles/      # Управління боями
-│   │       │   ├── spells/       # Управління заклинаннями
-│   │       │   ├── units/        # Управління юнітами
-│   │       │   ├── artifacts/    # Управління артефактами
-│   │       │   └── npc-heroes/   # Редирект на characters?type=npc_hero
-│   │       ├── battles/          # Сторінка бою
-│   │       │   └── [battleId]/
-│   │       └── character/        # Сторінка персонажа гравця
-│   └── auth/                     # OAuth callback
-├── components/                   # React компоненти
-│   ├── ui/                      # UI компоненти (shadcn/ui)
-│   ├── characters/              # Компоненти форми персонажа
-│   │   ├── CharacterBasicInfo.tsx
-│   │   ├── CharacterAbilityScores.tsx
-│   │   ├── CharacterCombatParams.tsx
-│   │   ├── CharacterSkillsSection.tsx
-│   │   ├── CharacterSpellsSection.tsx
-│   │   ├── CharacterLanguagesSection.tsx
-│   │   └── CharacterRoleplaySection.tsx
-│   └── inventory/               # Компоненти інвентаря
-│       ├── CurrencySection.tsx
-│       ├── EquippedItemsSection.tsx
-│       └── ItemListSection.tsx
-├── lib/                         # Утиліти та хелпери
-│   ├── api/                     # API сервіси
-│   │   ├── campaigns.ts         # API для кампаній
-│   │   ├── characters.ts        # API для персонажів
-│   │   └── inventory.ts         # API для інвентаря
-│   ├── hooks/                   # Кастомні React хуки
-│   │   ├── useCharacterForm.ts  # Хук для форми персонажа
-│   │   └── useCampaignMembers.ts # Хук для учасників кампанії
-│   ├── constants/               # Константи D&D 5e
-│   │   ├── skills.ts            # Навички та збереження
-│   │   ├── alignment.ts         # Світогляди
-│   │   ├── abilities.ts        # Характеристики
-│   │   └── index.ts            # Центральний експорт
-│   ├── types/                   # TypeScript типи
-│   │   ├── inventory.ts        # Типи для інвентаря
-│   │   ├── artifacts.ts        # Типи для артефактів
-│   │   └── skills.ts           # Типи для дерева скілів
-│   ├── auth.ts                  # Аутентифікація
-│   ├── db.ts                    # Prisma Client
-│   ├── pusher.ts                # Pusher конфігурація
-│   ├── supabase/                # Supabase клієнти
-│   │   ├── client.ts            # Клієнтський клієнт
-│   │   ├── server.ts            # Серверний клієнт
-│   │   └── middleware.ts       # Middleware для сесій
-│   └── utils/                   # Допоміжні функції
-│       └── calculations.ts      # D&D розрахунки
-├── prisma/                      # Prisma схема та міграції
-│   ├── schema.prisma            # Схема бази даних
-│   └── migrations/              # Міграції
-├── docs/                        # Документація
-│   └── TECHNICAL_SPECIFICATION.md # Технічне завдання
-└── public/                      # Статичні файли
-    └── tavern.png               # Фонове зображення
+app/                  # App Router: сторінки, API routes
+  (auth)/             # sign-in, sign-up, forgot/reset-password
+  api/                # campaigns/[id]/…, ai, mcp, templates, openapi.json, pusher, cron
+  campaigns/[id]/     # сторінки кампанії: dm/…, battles, character, show, world, info
+  help/  settings/  uk/   # довідка, налаштування, українська версія лендінгу
+components/           # UI за доменами (battle, hud, show, world, ai, …) + ui/ (shadcn)
+lib/
+  api/                # клієнтські обгортки запитів
+  hooks/<domain>/     # TanStack Query і форм-хуки
+  server/             # серверна логіка (battles, content, templates, …)
+  utils/<domain>/     # чиста доменна логіка (battle, abilities, spells, …)
+  ai/  pusher/  supabase/  schemas/  constants/  onboarding/
+types/                # типи за доменами
+prisma/               # schema.prisma, міграції
+scripts/              # CLI-скрипти (assets, constructor, db, import, seed, sim, srd)
+data/                 # бібліотеки й шаблони (templates/srd-5.2)
+docs/                 # architecture/, guides/, product/, superpowers/ (специфікації й плани)
 ```
 
-## 🏗️ Архітектура
+Потік запиту: сторінка (server component) → `*-client.tsx` → хук `lib/hooks/<domain>` → `lib/api/<domain>` → route handler (Zod + сесія) → `lib/server/…` / `lib/utils/…` → Prisma. Компоненти не імпортують `@/lib/api/*` напряму (ESLint). Деталі шарів і правила — у [CLAUDE.md](CLAUDE.md).
 
-### Компонентна структура
+## Деплой
 
-Проект використовує модульну архітектуру з чітким розділенням відповідальностей:
+Vercel запускає `node scripts/vercel-build.mjs`: `prisma generate` (з placeholder-URL) → `prisma migrate deploy` (лише production-збірка з `main`, через `DIRECT_URL`) → `next build`. Production-збірка з іншої гілки падає навмисно (override: `ALLOW_PROD_MIGRATE=1`). Міграції мають бути expand-only, кожна `CREATE TABLE` вмикає RLS.
 
-- **API сервіси** (`lib/api/`) - Інкапсулюють всі HTTP запити до API
-- **Хуки** (`lib/hooks/`) - Переіспользувана логіка управління станом
-- **Компоненти** (`components/`) - Переіспользувані UI компоненти
-- **Типи** (`lib/types/`) - TypeScript типи для типобезпеки
-- **Константи** (`lib/constants/`) - Константи D&D 5e розділені за категоріями
+Регіони не змінювати окремо: Supabase `eu-central-1`, Vercel `fra1`, Pusher `eu`. Деталі — [docs/VERCEL.md](docs/VERCEL.md).
 
-### Приклад використання
+У Supabase → Authentication → URL Configuration мають бути Redirect URLs і для `http://localhost:3000/auth/callback`, і для production-домену, інакше після OAuth буде редірект на localhost.
 
-```typescript
-// Замість прямого fetch
-const character = await getCharacter(campaignId, characterId);
+## Troubleshooting
 
-// Замість ручного управління станом
-const { formData, updateField, handleSubmit } = useCharacterForm({
-  onSubmit: async (data) => {
-    await createCharacter(campaignId, data);
-  },
-});
+- **Помилка підключення до БД** — `DATABASE_URL` має вказувати на Transaction pooler (6543, `pgbouncer=true`); спецсимволи в паролі — URL-encoded.
+- **Різні дані локально й на проді** — перевірте, який `DATABASE_URL` активний ([docs/DATABASE-SYNC.md](docs/DATABASE-SYNC.md)).
+- **Prisma** — `pnpm exec prisma generate`; `prisma migrate reset` видаляє всі дані.
+- **Свіжа копія проду для перевірок** — `./scripts/db/prodcopy-db.sh`, потім `pnpm battle-sweep` проти БД `prodcopy`.
 
-// Використання компонентів
-<CharacterBasicInfo
-  formData={formData}
-  onUpdate={updateField}
-  campaignMembers={members}
-/>;
-```
+## Додаткова документація
 
-## 🗄️ Модель даних
+- [docs/DATABASE-SYNC.md](docs/DATABASE-SYNC.md) — синхронізація локальної й прод-БД
+- [docs/DB-SECURITY-RLS.md](docs/DB-SECURITY-RLS.md) — RLS у Supabase
+- [docs/SWITCH-SUPABASE-ACCOUNT.md](docs/SWITCH-SUPABASE-ACCOUNT.md) — бекап і перехід на інший акаунт Supabase (`./scripts/db/backup-database.sh`)
+- [docs/guides/](docs/guides) — AI-асистент кампанії, імпорт JSON-компендіуму
+- [docs/product/](docs/product) — готовність до публічного продукту, план інфраструктури
 
-### Основні сутності
+## Ліцензія
 
-- **User** - Користувач системи
-- **Campaign** - Кампанія D&D
-- **CampaignMember** - Учасник кампанії (DM або Player)
-- **Character** - Персонаж (гравець або NPC герой)
-- **CharacterInventory** - Інвентар персонажа
-- **Unit** - NPC юніт для боїв
-- **Spell** - Заклинання
-- **SpellGroup** - Група заклинань
-- **Artifact** - Артефакт
-- **ArtifactSet** - Набір артефактів
-- **BattleScene** - Сцена бою
-- **SkillTree** - Дерево прокачки для раси
-- **CharacterSkills** - Прогрес персонажа по дереву скілів
-
-## 🔐 Аутентифікація
-
-Проект використовує **Supabase Auth** для аутентифікації з підтримкою OAuth провайдерів (Google, GitHub тощо).
-
-### Налаштування OAuth
-
-1. Перейдіть в [Supabase Dashboard](https://app.supabase.com)
-2. Виберіть ваш проект
-3. Перейдіть в **Authentication** → **Providers**
-4. Увімкніть потрібні провайдери
-5. Налаштуйте Redirect URLs:
-   - `http://localhost:3000/auth/callback` (development)
-   - `https://your-domain.vercel.app/auth/callback` (production)
-
-## 🔄 Real-time синхронізація
-
-Проект використовує **Pusher** для real-time синхронізації під час боїв. Всі зміни в бою автоматично синхронізуються між усіма учасниками.
-
-### Налаштування Pusher
-
-1. Створіть аккаунт на [Pusher](https://pusher.com)
-2. Створіть новий канал (Channel)
-3. Отримайте credentials (App ID, Key, Secret, Cluster)
-4. Додайте їх до `.env.local`
-
-## 📦 Скрипти
-
-```bash
-# Development
-npm run dev              # Запуск dev сервера
-
-# Build
-npm run build            # Build з Prisma generate (на Vercel — scripts/vercel-build.mjs)
-npm run build:local      # Local build з Prisma generate
-
-# Deployment
-npm run deploy           # Deploy на Vercel (production)
-npm run deploy:preview   # Deploy preview
-npm run deploy:dev       # Deploy development
-
-# Database
-npx prisma generate      # Генерація Prisma Client
-npx prisma migrate dev   # Створення нової міграції (тільки локально)
-pnpm migrate:deploy      # Застосування міграцій вручну (DIRECT_URL з .env.local); production-збірка з main робить це сама
-npx prisma studio        # Відкриття Prisma Studio
-```
-
-**Примітка**: Vercel запускає `node scripts/vercel-build.mjs`: `prisma migrate deploy` виконується лише в production-збірці з `main` (через `DIRECT_URL`). Деталі: `docs/VERCEL.md`.
-
-## 🎨 UI/UX
-
-- **Mobile-first дизайн** - Оптимізовано для мобільних пристроїв
-- **Темна тема** - Темна тема за замовчуванням з D&D атмосферою
-- **Responsive** - Адаптивний дизайн для всіх розмірів екранів
-- **Accessibility** - Підтримка доступності через Radix UI
-- **D&D атмосфера** - Фонове зображення та затемнення для створення атмосфери
-- **Accordion форми** - Форми розділені на етапи з використанням accordion компонентів
-
-## 🧮 D&D 5e Розрахунки
-
-Проект включає автоматичні розрахунки для D&D 5e:
-
-- **Proficiency Bonus** - Бонус майстерності залежно від рівня
-- **Ability Modifiers** - Модифікатори характеристик
-- **Passive Scores** - Пасивні значення (Perception, Investigation, Insight)
-- **Spell Save DC** - Складність збереження від заклинань
-- **Spell Attack Bonus** - Бонус атаки заклинань
-- **Attack Damage Modifiers** - Модифікатори урону з характеристик (STR для ближньої, DEX для дальньої)
-- **Artifact Bonuses** - Бонуси з артефактів (damage, attack)
-- **Skill Tree Bonuses** - Бонуси з дерева скілів
-
-## 🚢 Deployment
-
-### Vercel
-
-Проект налаштований для автоматичного деплою на Vercel:
-
-1. Підключіть репозиторій до Vercel
-2. Додайте змінні середовища в Vercel Dashboard
-3. Push до `main` гілки автоматично запускає деплой
-
-### Environment Variables на Vercel
-
-У Vercel Dashboard (**Settings** → **Environment Variables**) додайте для **Production**, **Preview** та **Development**:
-
-| Змінна                          | Опис                                                                                                                                                                                 |
-| ------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `DATABASE_URL`                  | **Обов'язково** — Transaction pooler (порт 6543). Формат: `postgresql://postgres.[PROJECT_REF]:[PASSWORD]@[REGION].pooler.supabase.com:6543/postgres?sslmode=require&pgbouncer=true` |
-| `NEXT_PUBLIC_SUPABASE_URL`      | URL проекту Supabase                                                                                                                                                                 |
-| `NEXT_PUBLIC_SUPABASE_ANON_KEY` | Anon key з Supabase                                                                                                                                                                  |
-| `SUPABASE_SERVICE_ROLE_KEY`     | Service role key (серверні API)                                                                                                                                                      |
-| `SUPABASE_JWT_SECRET`           | JWT secret (для перевірки сесій)                                                                                                                                                     |
-| `PUSHER_APP_ID`                 | Pusher App ID (real-time)                                                                                                                                                            |
-| `PUSHER_SECRET`                 | Pusher secret                                                                                                                                                                        |
-| `NEXT_PUBLIC_PUSHER_KEY`        | Pusher key (публічний)                                                                                                                                                               |
-| `NEXT_PUBLIC_PUSHER_CLUSTER`    | Pusher cluster (наприклад `eu`)                                                                                                                                                      |
-
-**Важливо**: для Vercel завжди використовуйте **Transaction pooler** (порт **6543**, `?pgbouncer=true`) у `DATABASE_URL` — це потрібно для serverless і стабільної продуктивності.
-
-### Міграції та збірка на Vercel
-
-У `vercel.json` збірка — `node scripts/vercel-build.mjs`: `prisma generate` → `prisma migrate deploy` (лише production з `main`) → `next build`. Production-збірка з іншої гілки падає, якщо не задано `ALLOW_PROD_MIGRATE=1`.
-
-Однакові персонажі на локалці й на проді бувають лише якщо **той самий** `DATABASE_URL` (той самий хост/проєкт Postgres). Порівняй рядок з Vercel (Production) і з `.env.local` / `.env`.
-
-## 🐛 Troubleshooting
-
-### Помилка підключення до бази даних
-
-Переконайтеся що:
-
-- `DATABASE_URL` використовує Transaction pooler (порт 6543, `pgbouncer=true`)
-- Пароль не містить спецсимволів які потребують URL encoding
-- Supabase проект активний
-
-### Помилка авторизації / редірект на localhost після логіну з продакшену
-
-- **Supabase → Authentication → URL Configuration**: додайте production URL у **Redirect URLs**, наприклад `https://your-app.vercel.app/auth/callback`. Якщо там лише `http://localhost:3000/auth/callback`, після OAuth браузер перенаправить на localhost. Додайте обидва (localhost для розробки та production URL для проду).
-- Перевірте чи OAuth провайдер увімкнений в Supabase.
-- Перевірте логи в Supabase Dashboard → Logs.
-
-### Prisma помилки
-
-```bash
-# Очистка та регенерація
-npx prisma generate
-npx prisma migrate reset  # УВАГА: видаляє всі дані
-```
-
-### TypeScript помилки
-
-Проект використовує строгу типізацію без `any`. Якщо виникають помилки типізації:
-
-- Перевірте чи всі типи правильно імпортовані з `lib/types/`
-- Використовуйте generic типи для форм: `<K extends keyof FormData>`
-
-## 💾 Backup і перехід на інший акаунт Supabase
-
-- **Бекап бази:** `./scripts/db/backup-database.sh` — зберігає дамп у `.migration-backup/`. Для Supabase використовуй **Direct connection** (порт 5432) у `BACKUP_DATABASE_URL` або в `.env.backup`.
-- **Повний чеклист переходу:** [docs/SWITCH-SUPABASE-ACCOUNT.md](./docs/SWITCH-SUPABASE-ACCOUNT.md) — бекап, новий проєкт, оновлення env, міграції, відновлення даних, Auth, Vercel.
-
-## 📚 Додаткова документація
-
-- [Технічне завдання](./docs/TECHNICAL_SPECIFICATION.md) - Детальна технічна специфікація
-
-## 📝 Ліцензія
-
-Приватний проект.
-
-## 👥 Автори
-
-Розроблено для управління D&D кампаніями та боями.
-
----
-
-**Примітка**: Цей проект знаходиться в активній розробці. Функціонал може змінюватися.
+Приватний проєкт. Функціонал активно розвивається.

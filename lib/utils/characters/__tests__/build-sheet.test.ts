@@ -167,4 +167,14 @@ describe("buildCharacterSheet", () => {
     expect(saves.find((x) => x.key === "strength")).toMatchObject({ proficient: true, bonus: 0 + 9 });
     expect(saves.find((x) => x.key === "dexterity")?.proficient).toBe(false);
   });
+
+  it("classProgression: по запису на клас із class, без класів поля немає", () => {
+    const cls = { id: "f", name: "Fighter", color: null, features: [], subclassLevel: null, subclasses: [] };
+
+    const withClasses = buildCharacterSheet({ ...lira(), classes: [{ classId: "f", level: 3, class: cls, subclass: null }, { classId: "gone", level: 1, class: null, subclass: null }] as never });
+
+    expect(withClasses.classProgression).toHaveLength(1);
+    expect(withClasses.classProgression?.[0].className).toBe("Fighter");
+    expect(buildCharacterSheet(lira())).not.toHaveProperty("classProgression");
+  });
 });
