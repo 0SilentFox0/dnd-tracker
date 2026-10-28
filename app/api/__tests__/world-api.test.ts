@@ -19,7 +19,8 @@ vi.mock("@/lib/db", () => ({
   prisma: {
     worldMap: { findMany: vi.fn(async () => []), findUnique: vi.fn(), findFirst: vi.fn(), count: vi.fn(async () => 0), create: vi.fn(), update: vi.fn(), delete: vi.fn() },
     worldPosition: { findMany: vi.fn(async () => []) },
-    worldMarker: { findUnique: vi.fn(), aggregate: vi.fn(async () => ({ _count: 0, _max: { sortOrder: null } })), create: vi.fn(), update: vi.fn(), delete: vi.fn() },
+    campaignShow: { findUnique: vi.fn(async () => null), updateMany: vi.fn(async () => ({ count: 1 })) },
+    worldMarker: { findUnique: vi.fn(), findMany: vi.fn(async () => []), aggregate: vi.fn(async () => ({ _count: 0, _max: { sortOrder: null } })), create: vi.fn(), update: vi.fn(), delete: vi.fn() },
   },
 }));
 
@@ -85,6 +86,9 @@ describe("world API", () => {
     vi.mocked(prisma.worldMap.findMany).mockResolvedValue([]);
     vi.mocked(prisma.worldMap.count).mockResolvedValue(0);
     vi.mocked(prisma.worldPosition.findMany).mockResolvedValue([]);
+    vi.mocked(prisma.worldMarker.findMany).mockResolvedValue([]);
+    vi.mocked(prisma.campaignShow.findUnique).mockResolvedValue(null);
+    vi.mocked(prisma.campaignShow.updateMany).mockResolvedValue({ count: 1 });
     vi.mocked(prisma.worldMarker.aggregate).mockResolvedValue({ _count: 0, _max: { sortOrder: null } } as never);
   });
 
@@ -381,6 +385,43 @@ describe("world API", () => {
       await runAfter();
 
       expect(storage.removeWorldMapFiles).toHaveBeenCalledWith("c1", [img("deep")]);
+    });
+
+    const shown = (world: unknown) => ({ deckId: null, deckTitle: null, slide: null, nextImageUrl: null, audio: null, battle: null, cover: null, curtain: false, world, seq: 3 });
+
+    it("карта: показана карта з піддерева знімає world", async () => {
+      vi.mocked(prisma.worldMap.findUnique).mockResolvedValue(mapRow({ id: "m2" }) as never);
+      vi.mocked(prisma.worldMap.findMany).mockResolvedValue(tree as never);
+      vi.mocked(prisma.worldMap.delete).mockResolvedValue(mapRow() as never);
+      vi.mocked(prisma.campaignShow.findUnique).mockResolvedValue(shown({ mapId: "m3" }) as never);
+
+      await (await mapById()).DELETE(json("DELETE"), ctx({ mapId: "m2" }));
+      await runAfter();
+
+      expect(vi.mocked(prisma.campaignShow.updateMany).mock.calls[0][0]).toMatchObject({ where: { campaignId: "c1", seq: 3 }, data: { seq: 4 } });
+      expect(vi.mocked(prisma.campaignShow.updateMany).mock.calls[0][0].data).toHaveProperty("world");
+    });
+
+    it("маркер: фокус-маркер знімає лише focusMarkerId", async () => {
+      vi.mocked(prisma.worldMarker.findUnique).mockResolvedValue(markerRow() as never);
+      vi.mocked(prisma.worldMarker.delete).mockResolvedValue(markerRow() as never);
+      vi.mocked(prisma.campaignShow.findUnique).mockResolvedValue(shown({ mapId: "m1", focusMarkerId: "k1" }) as never);
+
+      await (await markerById()).DELETE(json("DELETE"), ctx({ markerId: "k1" }));
+      await runAfter();
+
+      expect(vi.mocked(prisma.campaignShow.updateMany).mock.calls[0][0]).toMatchObject({ data: { world: { mapId: "m1" }, seq: 4 } });
+    });
+
+    it("інша показана карта — показ не чіпаємо", async () => {
+      vi.mocked(prisma.worldMarker.findUnique).mockResolvedValue(markerRow() as never);
+      vi.mocked(prisma.worldMarker.delete).mockResolvedValue(markerRow() as never);
+      vi.mocked(prisma.campaignShow.findUnique).mockResolvedValue(shown({ mapId: "m9", focusMarkerId: "k9" }) as never);
+
+      await (await markerById()).DELETE(json("DELETE"), ctx({ markerId: "k1" }));
+      await runAfter();
+
+      expect(prisma.campaignShow.updateMany).not.toHaveBeenCalled();
     });
 
     it("збій видалення рядка — файли не чіпаємо", async () => {

@@ -17,6 +17,7 @@ vi.mock("@/lib/db", () => ({
     worldReveal: { findMany: vi.fn(), createMany: vi.fn(async (a: unknown) => a) },
     worldTravelLog: { create: vi.fn(async (a: unknown) => a), findMany: vi.fn() },
     worldNote: { findMany: vi.fn() },
+    campaignShow: { findUnique: vi.fn() },
   },
 }));
 
@@ -242,6 +243,48 @@ describe("world travel API", () => {
       vi.mocked(prisma.character.findMany).mockResolvedValue([hero("h1")] as never);
 
       expect((await (await route("view")).GET(get("?mapId=foreign"), ctx())).status).toBe(404);
+    });
+
+    describe("показана карта", () => {
+      const m2 = () => mapRow({ id: "m2", name: "Підземелля", parentMarkerId: "k1", parentMarker: { mapId: "m1" } });
+
+      beforeEach(() => {
+        vi.mocked(prisma.character.findMany).mockResolvedValue([]);
+        vi.mocked(prisma.worldMap.findMany).mockResolvedValue([mapRow(), m2()] as never);
+        vi.mocked(prisma.worldMap.findUnique).mockResolvedValue({ ...m2(), markers: [markerRow({ id: "k5", mapId: "m2", alwaysVisible: true })] } as never);
+        vi.mocked(prisma.worldNote.findMany).mockResolvedValue([]);
+      });
+
+      it("невідома карта без показу — 404", async () => {
+        vi.mocked(prisma.campaignShow.findUnique).mockResolvedValue(null);
+
+        expect((await (await route("view")).GET(get("?mapId=m2"), ctx())).status).toBe(404);
+      });
+
+      it("показана карта — 200 з туманом, без героїв і dmNote", async () => {
+        vi.mocked(prisma.campaignShow.findUnique).mockResolvedValue({ world: { mapId: "m2" } } as never);
+
+        const res = await (await route("view")).GET(get("?mapId=m2"), ctx());
+
+        const body = await res.json();
+
+        expect(res.status).toBe(200);
+        expect(body.heroes).toEqual([]);
+        expect(body.reveals).toEqual([]);
+        expect(body.markers.every((m: { dmNote: unknown }) => m.dmNote === null)).toBe(true);
+      });
+
+      it("після worldOff (world: null) — знову 404", async () => {
+        vi.mocked(prisma.campaignShow.findUnique).mockResolvedValue({ world: null } as never);
+
+        expect((await (await route("view")).GET(get("?mapId=m2"), ctx())).status).toBe(404);
+      });
+
+      it("asHeroId гравцю — все одно 403", async () => {
+        vi.mocked(prisma.campaignShow.findUnique).mockResolvedValue({ world: { mapId: "m2" } } as never);
+
+        expect((await (await route("view")).GET(get("?mapId=m2&asHeroId=h1"), ctx())).status).toBe(403);
+      });
     });
 
     it("гравець без героїв — порожній туман на корені, без dmNote", async () => {

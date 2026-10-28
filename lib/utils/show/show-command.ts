@@ -109,6 +109,19 @@ function showWorld(prev: ShowState | null, mapId: string, focusMarkerId?: string
   return done({ ...next, world: focusMarkerId ? { mapId, focusMarkerId } : { mapId } });
 }
 
+/** null, якщо показана карта/фокус-маркер не серед видалених. */
+export function withoutWorldTargets(prev: ShowState | null, gone: { mapIds: string[]; markerIds: string[] }): ShowState | null {
+  const world = prev?.world;
+
+  if (!prev || !world) return null;
+
+  if (gone.mapIds.includes(world.mapId)) return without(prev, "world");
+
+  if (world.focusMarkerId && gone.markerIds.includes(world.focusMarkerId)) return { ...prev, world: { mapId: world.mapId }, seq: prev.seq + 1 };
+
+  return null;
+}
+
 function moveTo(prev: ShowState | null, cmd: SlideCommand, ctx: Ctx): Outcome {
   if (cmd.action !== "open" && !prev?.deckId) return fail(API_ERRORS.SHOW_NOT_RUNNING);
 
