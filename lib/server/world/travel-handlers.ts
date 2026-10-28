@@ -148,13 +148,13 @@ export function exitHandler(req: Request, campaignId: string) {
 
     if (body.characterIds.some((id) => positions.get(id)?.mapId !== map.id)) return errorResponse(API_ERRORS.WORLD_HERO_INVALID, 400);
 
-    await applyWorldRest(access, body.rest, body.characterIds);
-
     const dest = await prisma.worldMap.findUnique({ where: { id: parentMarker.mapId } });
 
     if (!dest) return errorResponse(API_ERRORS.WORLD_MAP_NOT_FOUND, 404);
 
     const plan = planExit({ map: { id: map.id, parentMarker }, characterIds: body.characterIds });
+
+    await applyWorldRest(access, body.rest, body.characterIds);
 
     await commitTravel({ campaignId, userId: access.userId, dest, plan, positions, rest: body.rest, toMarkerId: parentMarker.id, kind: "exit" });
 

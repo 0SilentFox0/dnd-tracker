@@ -69,7 +69,7 @@ export function useTravelPanel({ campaignId, mapId, heroes, onMapIds, target, se
 
   const restEnabled = !!rules?.outOfCombat.persistResources;
 
-  const canRest = ready && restEnabled && rest !== "none";
+  const canRest = ready && restEnabled && rest !== "none" && selected.every((id) => onMapIds.includes(id));
 
   const childMapId = selectedMarker?.childMapId ?? null;
 
@@ -87,9 +87,10 @@ export function useTravelPanel({ campaignId, mapId, heroes, onMapIds, target, se
     canExit,
     canAct: ready,
     restEnabled,
+    restOff: !!rules && !restEnabled,
     canRest,
     restNow: () => {
-      if (canRest) run(() => restMutation.mutateAsync({ mapId, characterIds: selected, kind: rest }));
+      if (canRest) run(() => restMutation.mutateOk({ mapId, characterIds: selected, kind: rest }));
     },
     move: () => {
       if (ready && target) run(() => moved("travel", travel.mutateAsync({ mapId, characterIds: selected, to: target, toMarkerId: selectedMarker?.id, rest })));

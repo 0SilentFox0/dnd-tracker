@@ -201,6 +201,24 @@ describe("TravelPanel", () => {
     await waitFor(() => expect(api.restHeroes).toHaveBeenCalledWith("c1", { mapId: "m1", characterIds: ["h1"], kind: "long" }));
   });
 
+  it("disables Rest when a selected hero is not on this map", async () => {
+    vi.mocked(rulesApi.getCampaignRules).mockResolvedValue(persistRules);
+    renderPanel({ onMapIds: ["h1"] });
+    fireEvent.click(screen.getByRole("button", { name: "Усі" }));
+    fireEvent.click(screen.getByRole("button", { name: "Довгий" }));
+    await waitFor(() => expect(screen.queryByText(/Ресурси між боями вимкнені/)).toBeNull());
+
+    expect(restBtn().disabled).toBe(true);
+  });
+
+  it("does not show the resources hint before rules load", () => {
+    vi.mocked(rulesApi.getCampaignRules).mockReturnValue(new Promise(() => {}));
+    renderPanel();
+
+    expect(screen.queryByText(/Ресурси між боями вимкнені/)).toBeNull();
+    expect(restBtn().disabled).toBe(true);
+  });
+
   it("disables Rest when no rest is chosen", async () => {
     vi.mocked(rulesApi.getCampaignRules).mockResolvedValue(persistRules);
     renderPanel();

@@ -3,11 +3,16 @@
 import { worldKeys } from "./keys";
 
 import { enterMarker, exitMap, restHeroes, travelHeroes } from "@/lib/api/world";
+import { characterKeys } from "@/lib/hooks/characters/keys";
 import { useCrudMutation } from "@/lib/hooks/common";
-import type { RestRequest } from "@/types/world";
+import type { RestRequest, TravelRest } from "@/types/world";
 
 export function useWorldTravel(campaignId: string) {
-  const invalidateKeys = () => [worldKeys.viewAll(campaignId), worldKeys.mapAll(campaignId), worldKeys.log(campaignId)];
+  const worldKeysFor = () => [worldKeys.viewAll(campaignId), worldKeys.mapAll(campaignId), worldKeys.log(campaignId)];
+
+  const characterKeysFor = () => [characterKeys.sheet(campaignId), characterKeys.lists(campaignId), characterKeys.logs(campaignId)];
+
+  const invalidateKeys = (_data: unknown, { rest }: { rest: TravelRest }) => (rest === "none" ? worldKeysFor() : [...worldKeysFor(), ...characterKeysFor()]);
 
   const travel = useCrudMutation({
     mutationFn: (data: Parameters<typeof travelHeroes>[1]) => travelHeroes(campaignId, data),
@@ -29,7 +34,7 @@ export function useWorldTravel(campaignId: string) {
 
   const rest = useCrudMutation({
     mutationFn: (data: RestRequest) => restHeroes(campaignId, data),
-    invalidateKeys,
+    invalidateKeys: () => [...worldKeysFor(), ...characterKeysFor()],
     errorText: "Не вдалося провести відпочинок",
   });
 

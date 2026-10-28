@@ -79,7 +79,7 @@ export function TravelPanel({ campaignId, mapId, heroes, onMapIds, target, selec
         ) : null}
       </div>
 
-      {panel.restEnabled ? null : <p className="text-xs text-hud-muted">Ресурси між боями вимкнені в правилах кампанії.</p>}
+      {panel.restOff ? <p className="text-xs text-hud-muted">Ресурси між боями вимкнені в правилах кампанії.</p> : null}
 
       <div>
         <h2 className="mb-1 text-sm font-medium text-hud-ink">Журнал</h2>

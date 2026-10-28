@@ -11,14 +11,17 @@ const m = vi.hoisted(() => ({
   publishWorldChanged: vi.fn(),
   ownedMap: vi.fn(),
   findMarker: vi.fn(),
+  ownedMarker: vi.fn(),
+  findMap: vi.fn(),
+  findParent: vi.fn(),
 }));
 
 vi.mock("server-only", () => ({}));
-vi.mock("@/lib/db", () => ({ prisma: { worldMarker: { findFirst: m.findMarker } } }));
+vi.mock("@/lib/db", () => ({ prisma: { worldMarker: { findFirst: m.findMarker, findUnique: m.findParent }, worldMap: { findUnique: m.findMap } } }));
 vi.mock("@/lib/utils/api/api-auth", () => ({ requireDM: vi.fn(async () => ({ userId: "u1", campaign: { id: "c1" } })), requireCampaignAccess: vi.fn() }));
 vi.mock("@/lib/server/world/rest", () => ({ applyWorldRest: m.applyWorldRest }));
 vi.mock("@/lib/server/world/world-events", () => ({ publishWorldChanged: m.publishWorldChanged }));
-vi.mock("@/lib/server/world/map-handlers", () => ({ ownedMap: m.ownedMap, ownedMarker: vi.fn() }));
+vi.mock("@/lib/server/world/map-handlers", () => ({ ownedMap: m.ownedMap, ownedMarker: m.ownedMarker }));
 vi.mock("@/lib/server/world/travel-store", () => ({
   activePlayerHeroes: m.activePlayerHeroes,
   commitTravel: m.commitTravel,
@@ -28,7 +31,7 @@ vi.mock("@/lib/server/world/travel-store", () => ({
   writeRestLog: m.writeRestLog,
 }));
 
-import { restHandler, travelHandler } from "../travel-handlers";
+import { enterHandler, exitHandler, restHandler, travelHandler } from "../travel-handlers";
 
 const req = (body: unknown) => new Request("http://x", { method: "POST", body: JSON.stringify(body), headers: { "content-type": "application/json" } });
 
@@ -41,6 +44,9 @@ beforeEach(() => {
   m.readPositions.mockResolvedValue(new Map([["h1", { characterId: "h1", mapId: "m1", x: 0.3, y: 0.4 }]]));
   m.applyWorldRest.mockResolvedValue({ applied: true });
   m.findMarker.mockResolvedValue(null);
+  m.ownedMarker.mockResolvedValue({ id: "k1", mapId: "m1", x: 0.2, y: 0.2, childMap: { id: "m2" } });
+  m.findMap.mockResolvedValue({ id: "m2", revealRadius: 0.1, width: 100, height: 100, entryX: 0.5, entryY: 0.5 });
+  m.findParent.mockResolvedValue({ id: "k0", mapId: "m0", x: 0.2, y: 0.2 });
 });
 
 describe("restHandler", () => {
@@ -95,6 +101,59 @@ describe("travelHandler rest", () => {
     m.applyWorldRest.mockRejectedValue(new ContentError("busy", 409));
 
     const res = await travelHandler(travel("short"), "c1");
+
+    expect(res.status).toBe(409);
+    expect(m.commitTravel).not.toHaveBeenCalled();
+  });
+});
+
+describe("enterHandler rest", () => {
+  const enter = (rest: string) => req({ markerId: "k1", characterIds: ["h1"], rest });
+
+  it("відпочиває до commitTravel", async () => {
+    await enterHandler(enter("short"), "c1");
+
+    expect(m.applyWorldRest).toHaveBeenCalledWith(expect.anything(), "short", ["h1"]);
+    expect(m.applyWorldRest.mock.invocationCallOrder[0]).toBeLessThan(m.commitTravel.mock.invocationCallOrder[0]);
+  });
+
+  it("409 від відпочинку скасовує вхід", async () => {
+    m.applyWorldRest.mockRejectedValue(new ContentError("busy", 409));
+
+    const res = await enterHandler(enter("short"), "c1");
+
+    expect(res.status).toBe(409);
+    expect(m.commitTravel).not.toHaveBeenCalled();
+  });
+});
+
+describe("exitHandler rest", () => {
+  const exit = (rest: string) => req({ mapId: "m1", characterIds: ["h1"], rest });
+
+  beforeEach(() => {
+    m.ownedMap.mockResolvedValue({ ...map, parentMarkerId: "k0" });
+  });
+
+  it("відпочиває до commitTravel", async () => {
+    await exitHandler(exit("long"), "c1");
+
+    expect(m.applyWorldRest).toHaveBeenCalledWith(expect.anything(), "long", ["h1"]);
+    expect(m.applyWorldRest.mock.invocationCallOrder[0]).toBeLessThan(m.commitTravel.mock.invocationCallOrder[0]);
+  });
+
+  it("не відпочиває, коли батьківської мапи немає", async () => {
+    m.findMap.mockResolvedValue(null);
+
+    const res = await exitHandler(exit("long"), "c1");
+
+    expect(res.status).toBe(404);
+    expect(m.applyWorldRest).not.toHaveBeenCalled();
+  });
+
+  it("409 від відпочинку скасовує вихід", async () => {
+    m.applyWorldRest.mockRejectedValue(new ContentError("busy", 409));
+
+    const res = await exitHandler(exit("short"), "c1");
 
     expect(res.status).toBe(409);
     expect(m.commitTravel).not.toHaveBeenCalled();

@@ -34,18 +34,20 @@ function TravelEntry({ e }: { e: WorldTravelEntry }) {
         <HudPill tone={badge.tone} icon={badge.icon}>
           {badge.label}
         </HudPill>
-        {e.rest !== "none" && e.kind !== "rest" ? (
+        {e.rest !== "none" ? (
           <HudPill tone="muted" icon={<Moon className="size-3" aria-hidden />}>
             {REST_LABEL[e.rest]}
           </HudPill>
         ) : null}
         {when ? <time dateTime={e.createdAt} className="ml-auto text-[11px] text-hud-muted">{when}</time> : null}
       </div>
-      <p className="flex min-w-0 items-center gap-1.5 text-sm text-hud-ink">
-        <span className="shrink-0 text-hud-muted">{e.mapName}</span>
-        <ArrowRight className="size-3.5 shrink-0 text-hud-muted" aria-hidden />
-        <span className="min-w-0 truncate font-medium">{e.toMarkerName ?? "Обрана точка"}</span>
-      </p>
+      {e.kind === "rest" ? null : (
+        <p className="flex min-w-0 items-center gap-1.5 text-sm text-hud-ink">
+          <span className="shrink-0 text-hud-muted">{e.mapName}</span>
+          <ArrowRight className="size-3.5 shrink-0 text-hud-muted" aria-hidden />
+          <span className="min-w-0 truncate font-medium">{e.toMarkerName ?? "Обрана точка"}</span>
+        </p>
+      )}
       <p className="flex items-start gap-1.5 text-xs text-hud-muted">
         <Users className="mt-0.5 size-3 shrink-0" aria-hidden />
         <span className="min-w-0">{e.heroes.map((h) => <span key={h.id} className="mr-1.5 inline-block text-hud-ink">{h.name}</span>)}</span>

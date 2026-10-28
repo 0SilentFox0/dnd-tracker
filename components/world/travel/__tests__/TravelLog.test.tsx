@@ -32,7 +32,7 @@ describe("TravelLog", () => {
   });
 
   it("shows the rest badge", async () => {
-    vi.mocked(api.getTravelLog).mockResolvedValue([entry("r", "rest")]);
+    vi.mocked(api.getTravelLog).mockResolvedValue([{ ...entry("r", "rest"), rest: "long", toMarkerName: "Town" }]);
 
     render(
       <QueryClientProvider client={new QueryClient({ defaultOptions: { queries: { retry: false } } })}>
@@ -41,5 +41,9 @@ describe("TravelLog", () => {
     );
 
     expect(await screen.findByText("Відпочинок")).toBeTruthy();
+    expect(screen.getByText("Довгий відпочинок")).toBeTruthy();
+    expect(screen.getByText("Aria")).toBeTruthy();
+    expect(screen.queryByText("Town")).toBeNull();
+    expect(screen.queryByText("Map")).toBeNull();
   });
 });
