@@ -5,6 +5,7 @@ import { intentSummary, requestDigest } from "./intent-store";
 import type { ActionPreview, ActionResult,AssistantCaller } from "./types";
 
 import "server-only";
+import { API_ERRORS } from "@/lib/constants/api-errors";
 import { prisma } from "@/lib/db";
 import { ContentError } from "@/lib/server/content/errors";
 import { withCampaignContentWrite } from "@/lib/server/content/write";
@@ -15,9 +16,9 @@ const need = { access: "dm" as const, scope: "scenario:write" as const, sessionO
 export async function legacyPreview(caller: AssistantCaller, proposalId: string): Promise<ActionPreview> {
   const proposal = await prisma.aiProposal.findFirst({ where: { id: proposalId, campaignId: caller.actor.campaignId }, select: { id: true, pageId: true, summary: true, ops: true, status: true } });
 
-  if (!proposal) throw new ContentError("Пропозицію не знайдено", 404);
+  if (!proposal) throw new ContentError(API_ERRORS.AI_PROPOSAL_NOT_FOUND, 404);
 
-  if (proposal.status !== "pending") throw new ContentError("Пропозиція вже завершена", 409);
+  if (proposal.status !== "pending") throw new ContentError(API_ERRORS.ASSISTANT_PROPOSAL_ALREADY_DONE, 409);
 
   const state = await scenarioState(caller.actor, proposal.pageId);
 
@@ -27,7 +28,7 @@ export async function legacyPreview(caller: AssistantCaller, proposalId: string)
 }
 export async function linkLegacyProposal(caller: AssistantCaller, proposalId: string) {
   // Old proposals have no trusted originating token identity. Only a real DM session may claim them.
-  if (caller.actor.via !== "session") throw new ContentError("Потрібна сесія ДМ", 403);
+  if (caller.actor.via !== "session") throw new ContentError(API_ERRORS.ASSISTANT_DM_SESSION_REQUIRED, 403);
 
   return withCampaignContentWrite(caller.actor.campaignId, async tx => {
     await authorizeAssistant(caller, need, "execute", tx);
@@ -35,7 +36,7 @@ export async function linkLegacyProposal(caller: AssistantCaller, proposalId: st
     const existing = await tx.assistantIntent.findUnique({ where: { legacyProposalId: proposalId } });
 
     if (existing) {
-      if (existing.campaignId !== caller.actor.campaignId || existing.userId !== caller.actor.userId) throw new ContentError("Дія недоступна", 403);
+      if (existing.campaignId !== caller.actor.campaignId || existing.userId !== caller.actor.userId) throw new ContentError(API_ERRORS.ASSISTANT_ACTION_FORBIDDEN, 403);
 
       return intentSummary(existing);
     }

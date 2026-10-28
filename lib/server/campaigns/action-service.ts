@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-import { createCampaignFromBundle, loadTemplateForUser } from "./create-campaign";
+import { CAMPAIGN_INCLUDE, CAMPAIGN_OMIT, createCampaignForUser, createCampaignFromBundle, loadTemplateForUser } from "./create-campaign";
 
 import "server-only";
 import { saveAiSettings } from "@/lib/ai/settings";
@@ -20,9 +20,9 @@ import { ContentError, parseInput } from "@/lib/server/content/errors";
 import { withCampaignContentWrite } from "@/lib/server/content/write";
 import { afterContentCommit } from "@/lib/server/content/write-context";
 import { readOnboardingSnapshot } from "@/lib/server/onboarding/facts";
+import { type Bundle,BUNDLE_FORMAT_VERSION } from "@/lib/server/templates/bundle";
 import { exportCampaign } from "@/lib/server/templates/export-campaign";
 import { listTemplates } from "@/lib/server/templates/list-templates";
-import { PUBLIC_USER_SELECT } from "@/lib/server/users/db-user";
 import type { Actor } from "@/lib/utils/api/actor";
 import { isPlatformAdmin } from "@/lib/utils/api/platform-admin";
 
@@ -37,7 +37,6 @@ function windowItems(items: unknown[], raw: unknown) {
 export async function loadCampaignMembers(campaignId: string) {
   return prisma.campaignMember.findMany({ where: { campaignId }, select: { id: true, userId: true, role: true, user: { select: { id: true, displayName: true, email: true } } }, orderBy: { joinedAt: "asc" } });
 }
-export const CAMPAIGN_INCLUDE = { members: { include: { user: { select: PUBLIC_USER_SELECT } } }, dm: { select: PUBLIC_USER_SELECT } } as const;
 export const CAMPAIGN_SETTINGS_SELECT = { id: true, name: true, description: true, kind: true, visibility: true, maxLevel: true, allowPlayerEdit: true, status: true, friendlyFire: true, xpMultiplier: true, credits: true, updatedAt: true } as const;
 export const campaignResult = (data: unknown, id: string): ActionResult => ({ data: JSON.parse(JSON.stringify(data)), affected: [{ domain: "campaign", id, name: "Кампанія" }], warnings: [] });
 
@@ -75,7 +74,9 @@ const DELETE_DEPENDENCIES = {
   characterLog: { select: { id: true }, orderBy: { id: "asc" } },
 } as const;
 
-export async function campaignState(actor: Actor, operation: string, input: Record<string, unknown>) {
+type PreparedSource = { bundle: Bundle; id: string };
+
+async function loadCampaignState(actor: Actor, operation: string, input: Record<string, unknown>) {
   const row = await prisma.campaign.findUnique({ where: { id: actor.campaignId }, select: { ...CAMPAIGN_SETTINGS_SELECT, aiInstructions: true, rules: true, ...(operation === "delete" && DELETE_DEPENDENCIES) } });
 
   if (!row) throw new ContentError(API_ERRORS.CAMPAIGN_NOT_FOUND, 404);
@@ -84,22 +85,32 @@ export async function campaignState(actor: Actor, operation: string, input: Reco
 
   let sourceHash: string | null = null;
 
-  if (["clone", "template.save"].includes(operation)) sourceHash = requestDigest(await exportCampaign(prisma, actor.campaignId));
+  let source: PreparedSource | null = null;
+
+  if (["clone", "template.save"].includes(operation)) source = { bundle: await exportCampaign(prisma, actor.campaignId), id: actor.campaignId };
 
   if (operation === "create" && input.templateId) {
     if (String(input.templateId) !== actor.campaignId) {
       try { await prisma.$queryRaw`SELECT id FROM campaigns WHERE id = ${String(input.templateId)} FOR SHARE NOWAIT`; }
-      catch { throw new ContentError("Шаблон зараз змінюється; повторіть перегляд", 409); }
+      catch { throw new ContentError(API_ERRORS.ASSISTANT_TEMPLATE_CHANGING, 409); }
     }
 
     const template = await loadTemplateForUser(actor.userId, String(input.templateId));
 
-    if (!template.ok) throw new ContentError("Шаблон недоступний", template.status);
+    if (!template.ok) throw new ContentError(API_ERRORS.ASSISTANT_TEMPLATE_UNAVAILABLE, template.status);
 
-    sourceHash = requestDigest(await exportCampaign(prisma, template.template.id));
+    source = { bundle: await exportCampaign(prisma, template.template.id), id: template.template.id };
   }
 
-  return { settings: safeSettings(row), instructions: row.aiInstructions, rulesHash: requestDigest(row.rules ?? null), members, sourceHash, dependencies: operation === "delete" ? Object.fromEntries(Object.keys(DELETE_DEPENDENCIES).map(key => [key, (row as unknown as Record<string, unknown>)[key] ?? []])) : null };
+  if (source) sourceHash = requestDigest(source.bundle);
+
+  const state = { settings: safeSettings(row), instructions: row.aiInstructions, rulesHash: requestDigest(row.rules ?? null), members, sourceHash, dependencies: operation === "delete" ? Object.fromEntries(Object.keys(DELETE_DEPENDENCIES).map(key => [key, (row as unknown as Record<string, unknown>)[key] ?? []])) : null };
+
+  return { state, source };
+}
+
+export async function campaignState(actor: Actor, operation: string, input: Record<string, unknown>) {
+  return (await loadCampaignState(actor, operation, input)).state;
 }
 
 export async function updateCampaignSettings(actor: Actor, raw: unknown) {
@@ -114,7 +125,7 @@ export async function updateCampaignSettings(actor: Actor, raw: unknown) {
       if (actor.via !== "session" || row?.kind !== CampaignKind.TEMPLATE || !isPlatformAdmin(actor.userId)) throw new ContentError(API_ERRORS.FORBIDDEN, 403);
     }
 
-    const updated = await prisma.campaign.update({ where: { id: actor.campaignId }, data: { ...data, ...(data.description !== undefined && { description: data.description || null }) }, include: CAMPAIGN_INCLUDE, omit: { aiInstructions: true } });
+    const updated = await prisma.campaign.update({ where: { id: actor.campaignId }, data: { ...data, ...(data.description !== undefined && { description: data.description || null }) }, include: CAMPAIGN_INCLUDE, omit: CAMPAIGN_OMIT });
 
     afterContentCommit(() => invalidateCampaignLists(updated.members.map(m => m.userId)));
 
@@ -157,13 +168,13 @@ export async function deleteCampaign(actor: Actor) {
     return { success: true };
   });
 }
-export async function saveCampaignAsTemplate(actor: Actor, raw: unknown) {
+export async function saveCampaignAsTemplate(actor: Actor, raw: unknown, prepared?: Bundle) {
   assertCan(actor, need(true, true));
 
   const data = parseInput(saveAsTemplateSchema, raw);
 
   return withCampaignContentWrite(actor.campaignId, async () => {
-    const bundle = await exportCampaign(prisma, actor.campaignId);
+    const bundle = prepared ?? await exportCampaign(prisma, actor.campaignId);
 
     const created = await createCampaignFromBundle({ userId: actor.userId, name: data.name, description: data.description, bundle, kind: CampaignKind.TEMPLATE, visibility: CampaignVisibility.PRIVATE, createdFromId: actor.campaignId });
 
@@ -194,9 +205,9 @@ export async function runCampaignOperation(actor: Actor, operation: string, inpu
   }
 
   return withCampaignContentWrite(actor.campaignId, async () => {
-    const state = await campaignState(actor, operation, input);
+    const { state, source } = await loadCampaignState(actor, operation, input);
 
-    if (expected && requestDigest(state) !== expected) throw new ContentError("Налаштування або залежності кампанії змінилися", 409);
+    if (expected && requestDigest(state) !== expected) throw new ContentError(API_ERRORS.ASSISTANT_CAMPAIGN_SETTINGS_CHANGED, 409);
 
     if (operation === "status") return campaignResult(state.settings, actor.campaignId);
 
@@ -205,9 +216,7 @@ export async function runCampaignOperation(actor: Actor, operation: string, inpu
     if (operation === "members") return campaignResult(windowItems((await loadCampaignMembers(actor.campaignId)).map(row => ({ id: row.id, userId: row.userId, role: row.role, displayName: row.user.displayName })), input), actor.campaignId);
 
     if (operation === "export") {
-      const bundle = await exportCampaign(prisma, actor.campaignId);
-
-      return campaignResult({ href: `/api/campaigns/${actor.campaignId}/export`, formatVersion: bundle.formatVersion, description: "Завантаження поточної кампанії у застосунку" }, actor.campaignId);
+      return campaignResult({ href: `/api/campaigns/${actor.campaignId}/export`, formatVersion: BUNDLE_FORMAT_VERSION, description: "Завантаження поточної кампанії у застосунку" }, actor.campaignId);
     }
 
     if (operation === "settings" || operation === "template.update") {
@@ -227,7 +236,7 @@ export async function runCampaignOperation(actor: Actor, operation: string, inpu
     if (operation === "delete") return campaignResult(await deleteCampaign(actor), actor.campaignId);
 
     if (operation === "template.save") {
-      const created = await saveCampaignAsTemplate(actor, input);
+      const created = await saveCampaignAsTemplate(actor, input, source?.bundle);
 
       return { ...campaignResult({ id: created.campaign.id, name: created.campaign.name, href: `/campaigns/${created.campaign.id}/dm` }, created.campaign.id), warnings: created.warnings };
     }
@@ -237,26 +246,13 @@ export async function runCampaignOperation(actor: Actor, operation: string, inpu
 
       const data = creation ?? parseInput(saveAsTemplateSchema, input);
 
-      let bundle = operation === "create" ? null : await exportCampaign(prisma, actor.campaignId);
+      const created = await createCampaignForUser(actor.userId, { ...data, ...(creation && { maxLevel: creation.maxLevel, allowPlayerEdit: creation.allowPlayerEdit }) }, { source: source ?? undefined, defer: afterContentCommit });
 
-      let sourceId: string | null = operation === "create" ? null : actor.campaignId;
-
-      if (creation?.templateId) {
-        const template = await loadTemplateForUser(actor.userId, creation.templateId);
-
-        if (!template.ok) throw new ContentError("Шаблон недоступний", template.status);
-
-        bundle = await exportCampaign(prisma, template.template.id);
-        sourceId = template.template.id;
-      }
-
-      const created = await createCampaignFromBundle({ userId: actor.userId, name: data.name, description: data.description, bundle, kind: CampaignKind.CAMPAIGN, visibility: CampaignVisibility.PRIVATE, createdFromId: sourceId, settings: creation ? { maxLevel: creation.maxLevel, allowPlayerEdit: creation.allowPlayerEdit } : undefined });
-
-      afterContentCommit(() => invalidateCampaignLists([actor.userId]));
+      if (!created.ok) throw new ContentError(API_ERRORS.ASSISTANT_TEMPLATE_UNAVAILABLE, created.status);
 
       return { ...campaignResult({ id: created.campaign.id, name: created.campaign.name, href: `/campaigns/${created.campaign.id}/dm` }, created.campaign.id), warnings: created.warnings };
     }
 
-    throw new ContentError("Невідома дія кампанії", 400);
+    throw new ContentError(API_ERRORS.ASSISTANT_UNKNOWN_CAMPAIGN_ACTION, 400);
   });
 }

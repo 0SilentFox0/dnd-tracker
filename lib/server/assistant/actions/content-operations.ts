@@ -2,10 +2,12 @@ import type { ActionPreview, AssistantActionDef, EffectDescription, TargetRef } 
 import { withContentEffects } from "./content-effects";
 import { contentMediaHandoff } from "./content-media";
 import { operationPreview } from "./content-operation-preview";
+import { contentOperationState } from "./content-preview";
 import { contentSnapshot, jsonContent, snapshotHash } from "./content-snapshot";
 
 import "server-only";
 import { ReferenceKind } from "@/lib/cache/tags";
+import { API_ERRORS } from "@/lib/constants/api-errors";
 import { prisma } from "@/lib/db";
 import { ContentError } from "@/lib/server/content/errors";
 import { type ContentOperationId, contentOperationSchema, runContentOperation } from "@/lib/server/content/operation-service";
@@ -19,6 +21,7 @@ import type { SourceDiff } from "@/types/campaigns";
 type Selection = { sourceId: string; items: Array<{ scope: string; key: string; name: string; status: string; before: unknown; after: unknown }>; autoAdded: unknown[]; credits: { before: string | null; after: string | null } };
 type Deps = {
   snapshot?: (actor: Actor) => Promise<unknown>;
+  operationState?: (actor: Actor, state: unknown, operation: string, input: Record<string, unknown>) => Promise<unknown>;
   guard?: <T>(id: string, fn: () => Promise<T>) => Promise<T>;
   invoke?: (id: ContentOperationId, actor: Actor, input: unknown) => Promise<unknown>;
   sourcePreview?: (actor: Actor, input: unknown) => Promise<Selection>;
@@ -30,6 +33,8 @@ export function createContentOperationActions(deps: Deps = {}): AssistantActionD
   const guard = deps.guard ?? ((id, fn) => withCampaignContentWrite(id, fn));
 
   const snapshot = deps.snapshot ?? contentSnapshot;
+
+  const loadState = deps.operationState ?? (deps.snapshot ? async (_actor: Actor, state: unknown) => state : (actor: Actor, _state: unknown, operation: string, input: Record<string, unknown>) => contentOperationState(actor, operation, input));
 
   const sourcePreview = deps.sourcePreview ?? (async (actor, input) => {
     const campaign = await prisma.campaign.findUnique({ where: { id: actor.campaignId }, select: { createdFromId: true } });
@@ -82,7 +87,7 @@ export function createContentOperationActions(deps: Deps = {}): AssistantActionD
 
         let targets = [target];
 
-        const projected = operationPreview(operation.id, input, state);
+        const projected = operationPreview(operation.id, input, await loadState(caller.actor, state, operation.id, input));
 
         if (projected?.targets.length) targets = projected.targets;
 
@@ -105,7 +110,7 @@ export function createContentOperationActions(deps: Deps = {}): AssistantActionD
         } else if (operation.id === "content.import") {
           const parsed = CONTENT_OPERATIONS["content.import"].body.parse(body);
 
-          if (parsed.dryRun) throw new ContentError("Для dryRun використайте content.import-preview", 400);
+          if (parsed.dryRun) throw new ContentError(API_ERRORS.ASSISTANT_DRY_RUN_USE_PREVIEW, 400);
 
           for (const row of parsed.rows) {
             const handoff = contentMediaHandoff(String(input.kind), row);

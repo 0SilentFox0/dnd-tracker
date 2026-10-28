@@ -3,6 +3,7 @@ import { z } from "zod";
 import type { ActionResult } from "../types";
 
 import "server-only";
+import { API_ERRORS } from "@/lib/constants/api-errors";
 import { prisma } from "@/lib/db";
 import { handoffId } from "@/lib/schemas/assistant-handoff";
 import { jsonContent } from "@/lib/server/assistant/json";
@@ -87,7 +88,7 @@ export async function readCompendiumSummary(
 
   const members = await prisma.campaignMember.findMany({ where: { campaignId: actor.campaignId, userId: actor.userId }, select: { role: true } });
 
-  if (!isDmMember(members)) throw new ContentError("Доступ має лише ДМ кампанії", 403);
+  if (!isDmMember(members)) throw new ContentError(API_ERRORS.ASSISTANT_CAMPAIGN_DM_ONLY, 403);
 
   await prismaImportRepository.authorize(actor);
 
@@ -122,7 +123,7 @@ export async function readCompendiumSummary(
       rows.length !== selectedKeys.length ||
       rows.some((r) => !selectedKeys.includes(r.canonicalKey))
     )
-      throw new ContentError("Примітки не знайдено у кампанії", 404);
+      throw new ContentError(API_ERRORS.ASSISTANT_NOTE_NOT_FOUND, 404);
 
     return result({
       entries: rows.map((r) => ({
@@ -206,7 +207,7 @@ export async function readCompendiumSummary(
 
   const table = BUNDLE_TABLES.find((t) => t.key === kindTable[value.kind]);
 
-  if (!table) throw new ContentError("Недоступний вид контенту", 400);
+  if (!table) throw new ContentError(API_ERRORS.ASSISTANT_CONTENT_KIND_UNAVAILABLE, 400);
 
   const rows = await delegateOf(prisma, table).findMany({
     where: { campaignId: actor.campaignId },

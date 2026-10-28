@@ -1,5 +1,6 @@
 import { z } from "zod";
 
+import { API_ERRORS } from "@/lib/constants/api-errors";
 import { ParticipantSide, ParticipantSourceType } from "@/lib/constants/battle";
 import { UNIT_QUANTITY } from "@/lib/constants/battle-units";
 import { prisma } from "@/lib/db";
@@ -68,13 +69,13 @@ function matchScaling(fresh: BattleParticipant, twin: BattleParticipant): Battle
 function placeFirst(ctx: BattleMutationContext, first: BattleParticipant, to: GridPoint): BattleParticipant {
   const map = ctx.meta.map;
 
-  if (!map) throw new BattleRuleError("action_rejected", "У цьому бою немає карти");
+  if (!map) throw new BattleRuleError("action_rejected", API_ERRORS.BATTLE_NO_MAP);
 
   const own = modePlaceOne(map, { participants: ctx.participants, mover: first, to });
 
   if (own) return own;
 
-  if (!canStand(map, ctx.participants, first, to)) throw new BattleRuleError("action_rejected", "Клітинка зайнята, неігрова або поза картою");
+  if (!canStand(map, ctx.participants, first, to)) throw new BattleRuleError("action_rejected", API_ERRORS.BATTLE_CELL_BLOCKED);
 
   return { ...first, battleData: { ...first.battleData, position: to } };
 }
@@ -99,7 +100,7 @@ export function createAddParticipantMutation(deps: AddParticipantDeps = defaultD
       const character = await deps.loadCharacter(data.sourceId);
 
       if (!character || character.campaignId !== ctx.scene.campaignId) {
-        throw new BattleAccessError(404, "Персонажа не знайдено");
+        throw new BattleAccessError(404, API_ERRORS.CHARACTER_NOT_FOUND);
       }
 
       added.push(await deps.fromCharacter(character, battleId, side, undefined, undefined, { rules: ctx.meta.rules }));
@@ -107,7 +108,7 @@ export function createAddParticipantMutation(deps: AddParticipantDeps = defaultD
       const unit = await deps.loadUnit(data.sourceId);
 
       if (!unit || unit.campaignId !== ctx.scene.campaignId) {
-        throw new BattleAccessError(404, "Юніта не знайдено");
+        throw new BattleAccessError(404, API_ERRORS.BATTLE_UNIT_NOT_FOUND);
       }
 
       const twin = side === ParticipantSide.ENEMY ? [...ctx.participants, ...reserveOf(ctx.pending)].find((p) => p.basicInfo.sourceId === unit.id && p.basicInfo.side === ParticipantSide.ENEMY) : undefined;

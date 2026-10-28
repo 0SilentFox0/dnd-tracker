@@ -4,6 +4,7 @@ import type { ActionExecutionContext, AssistantActionDef } from "../types";
 
 import "server-only";
 import { generateSlideImage } from "@/lib/ai/images";
+import { API_ERRORS } from "@/lib/constants/api-errors";
 import { prisma } from "@/lib/db";
 import { discardGeneratedImageSchema, generateSlideImageSchema } from "@/lib/schemas/ai";
 import { readSlides } from "@/lib/schemas/show";
@@ -53,13 +54,13 @@ export const SHOW_ACTIONS: readonly AssistantActionDef[] = Object.entries(SHOW_I
 
       const previous = await prisma.slideDeck.findFirst({ where: { id: value.deckId, campaignId: caller.actor.campaignId }, select: { slides: true } });
 
-      if (!previous) throw new ContentError("Набір не знайдено", 404);
+      if (!previous) throw new ContentError(API_ERRORS.SHOW_SET_NOT_FOUND, 404);
 
       const result = await persistSlideImages(caller.actor.campaignId, saved.slides, readSlides(previous.slides));
 
       signal?.throwIfAborted();
 
-      if (!result.ok) throw new ContentError("Не вдалося підготувати медіа", 400);
+      if (!result.ok) throw new ContentError(API_ERRORS.ASSISTANT_MEDIA_PREPARE_FAILED, 400);
 
       return jsonContent({ slides: result.value });
     } }),

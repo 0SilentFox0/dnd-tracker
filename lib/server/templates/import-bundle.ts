@@ -4,6 +4,7 @@ import { type Bundle, BUNDLE_TABLES, BundleInvalidError, BundleSchema, delegateO
 import { CONTENT_ID_RE, newContentId } from "./ids";
 import { collectKeysAndStrings, remapIds } from "./remap-ids";
 
+import { API_ERRORS, bundleDuplicateIdMessage } from "@/lib/constants/api-errors";
 import { type CompendiumBundleDb,importCompendiumSection } from "@/lib/server/compendium-import/bundle";
 import { rowHash } from "@/lib/server/templates/sync/hash";
 import { backgroundReferenceError } from "@/lib/utils/backgrounds/integrity";
@@ -13,7 +14,7 @@ const idCandidates = (bundle: Bundle) => new Set([...collectKeysAndStrings(bundl
 export async function importBundle(tx: TemplateDb, raw: Bundle, targetCampaignId: string) {
   const parsed = BundleSchema.safeParse(raw);
 
-  if (!parsed.success) throw new BundleInvalidError("Бандл має неправильний формат", parsed.error.issues);
+  if (!parsed.success) throw new BundleInvalidError(API_ERRORS.IMPORT_BUNDLE_BAD_FORMAT, parsed.error.issues);
 
   const bundle = parsed.data;
 
@@ -31,7 +32,7 @@ export async function importBundle(tx: TemplateDb, raw: Bundle, targetCampaignId
     const seen = new Set<string>();
 
     for (const row of bundle[t.key]) {
-      if (seen.has(row.id)) throw new BundleInvalidError(`Дубльований id у ${t.key}: ${row.id}`);
+      if (seen.has(row.id)) throw new BundleInvalidError(bundleDuplicateIdMessage(t.key, row.id));
 
       seen.add(row.id);
       idMap.set(row.id, newContentId());
@@ -39,17 +40,17 @@ export async function importBundle(tx: TemplateDb, raw: Bundle, targetCampaignId
   }
 
   if (bundle.compendium) {
-    if (!tx.compendiumEntry || !tx.compendiumSource || !tx.scenarioPage) throw new BundleInvalidError("Сховище не підтримує provenance компедіуму");
+    if (!tx.compendiumEntry || !tx.compendiumSource || !tx.scenarioPage) throw new BundleInvalidError(API_ERRORS.IMPORT_BUNDLE_NO_PROVENANCE);
 
     for (const page of bundle.compendium.pages) {
-      if (idMap.has(page.id)) throw new BundleInvalidError("Дубльований id сторінки матеріалів");
+      if (idMap.has(page.id)) throw new BundleInvalidError(API_ERRORS.IMPORT_BUNDLE_DUPLICATE_PAGE_ID);
 
       idMap.set(page.id, newContentId());
     }
     for (const entry of bundle.compendium.entries) {
       const target = entry.kind === "scenarioPages" ? bundle.compendium.pages : bundle[entry.kind === "spell-groups" ? "spellGroups" : entry.kind];
 
-      if (!target?.some((row) => row.id === entry.localId)) throw new BundleInvalidError("Provenance посилається на запис неправильного виду");
+      if (!target?.some((row) => row.id === entry.localId)) throw new BundleInvalidError(API_ERRORS.IMPORT_BUNDLE_PROVENANCE_KIND);
     }
   }
 

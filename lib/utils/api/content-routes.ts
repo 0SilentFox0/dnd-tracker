@@ -7,7 +7,6 @@ import { ContentError } from "@/lib/server/content/errors";
 import type { ContentOperation } from "@/lib/server/content/operations";
 import { createContent, getContent, listContent, removeAllContent, removeContent, updateContent } from "@/lib/server/content/service";
 import { type Actor, type ActorNeed, resolveActor } from "@/lib/utils/api/actor";
-import { errorResponse } from "@/lib/utils/api/api-response";
 import { PRIVATE_NO_STORE_HEADERS } from "@/lib/utils/api/cache-headers";
 import { handleApiError } from "@/lib/utils/api/error-handler";
 import { NEED } from "@/lib/utils/api/need";
@@ -37,8 +36,6 @@ export async function runContent(
 
     return await fn(actor, params);
   } catch (error) {
-    if (error instanceof ContentError) return errorResponse(error.message, error.status, error.issues);
-
     return handleApiError(error, { action });
   }
 }

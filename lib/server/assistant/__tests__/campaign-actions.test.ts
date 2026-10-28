@@ -19,7 +19,7 @@ const h = vi.hoisted(() => ({
 vi.mock("@/lib/db", () => ({ prisma: { ...h, $transaction: (fn: (db: typeof h) => unknown) => fn(h) } }));
 vi.mock("@/lib/cache/campaign-list", () => ({ invalidateCampaignLists: vi.fn() }));
 vi.mock("@/lib/cache/tags", () => ({ invalidateReference: vi.fn(), ReferenceKind: { RACES: "races" } }));
-vi.mock("@/lib/server/campaigns/create-campaign", () => ({ createCampaignFromBundle: h.create, loadTemplateForUser: h.template }));
+vi.mock("@/lib/server/campaigns/create-campaign", async (importOriginal) => ({ ...await importOriginal<typeof import("@/lib/server/campaigns/create-campaign")>(), createCampaignFromBundle: h.create, loadTemplateForUser: h.template, createCampaignForUser: async (userId: string, data: object, options: { source?: { bundle: unknown; id: string } } = {}) => ({ ok: true, ...await h.create({ userId, ...data, bundle: options.source?.bundle ?? null, createdFromId: options.source?.id ?? null }) }) }));
 vi.mock("@/lib/server/templates/export-campaign", () => ({ exportCampaign: h.export }));
 vi.mock("@/lib/server/templates/list-templates", () => ({ listTemplates: vi.fn(async () => ({ official: [], mine: [] })) }));
 
@@ -94,5 +94,31 @@ describe("campaign action guards", () => {
   });
   it("deleteCampaignReceiptSurvivesCascade policy", () => {
     expect(CAMPAIGN_ACTIONS.find(a => a.id === "campaign.delete")).toMatchObject({ confirmation: "always", need: { sessionOnly: true } });
+  });
+});
+
+describe("campaign export reads", () => {
+  beforeEach(() => { vi.clearAllMocks(); h.campaign.findUnique.mockResolvedValue(row); h.create.mockResolvedValue({ campaign: { id: "new", name: "Нова" }, warnings: [] }); });
+  it("clone exports once and reuses the hashed bundle for the write", async () => {
+    await runCampaignOperation(actor, "clone", { name: "Нова" });
+    expect(h.export).toHaveBeenCalledTimes(1);
+    expect(h.create).toHaveBeenCalledWith(expect.objectContaining({ bundle: { settings: {}, formatVersion: 1 }, createdFromId: "c" }));
+  });
+  it("template.save exports once", async () => {
+    await runCampaignOperation(actor, "template.save", { name: "Шаблон" });
+    expect(h.export).toHaveBeenCalledTimes(1);
+  });
+  it("export op does not read the campaign bundle", async () => {
+    const result = await runCampaignOperation(actor, "export", {});
+
+    expect(h.export).not.toHaveBeenCalled();
+    expect(result.data).toMatchObject({ formatVersion: 1 });
+  });
+  it("clone precondition is stale when the campaign changed after preview", async () => {
+    const expected = requestDigest(await campaignState(actor, "clone", { name: "Нова" }));
+
+    h.export.mockResolvedValueOnce({ settings: { changed: true }, formatVersion: 1 } as never);
+    await expect(runCampaignOperation(actor, "clone", { name: "Нова" }, expected)).rejects.toMatchObject({ status: 409 });
+    expect(h.create).not.toHaveBeenCalled();
   });
 });

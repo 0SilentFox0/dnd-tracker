@@ -33,18 +33,39 @@ const isCommand = (op: string) => (BATTLE_COMMANDS as readonly string[]).include
 
 const isRead = (op: string) => (BATTLE_READS as readonly string[]).includes(op);
 
-async function liveAccess(actor: Actor, write: boolean) {
+function assertScope(actor: Actor, write: boolean) {
   const failure = needFailure(actor, { access: "dm", scope: write ? "battles:write" : "battles:read" });
 
   if (failure) throw new ContentError(failure, 403);
+}
 
+async function liveAccess(actor: Actor, write: boolean) {
+  assertScope(actor, write);
   await requireDmMember(prisma, actor);
 }
 
-async function state(actor: Actor, operation: string, value: BattleActionInput) {
-  await liveAccess(actor, !isRead(operation));
+/** loadBattle already derives membership and role, so the separate member query only runs when the battle is missing. */
+async function loadDmBattle(actor: Actor, battleId: string, denied: string = API_ERRORS.DM_ONLY) {
+  const loaded = await defaultPipelineDeps.loadBattle({ campaignId: actor.campaignId, battleId, userId: actor.userId });
 
-  if (!isCommand(operation) && !(operation in recordSchemas) && !isRead(operation)) throw new ContentError("Невідома бойова операція", 404);
+  if (!loaded) {
+    await requireDmMember(prisma, actor);
+    throw new ContentError(API_ERRORS.BATTLE_NOT_FOUND, 404);
+  }
+
+  if (!loaded.isMember || !loaded.isDM) throw new ContentError(denied, 403);
+
+  return loaded;
+}
+
+async function state(actor: Actor, operation: string, value: BattleActionInput) {
+  assertScope(actor, !isRead(operation));
+
+  const known = isCommand(operation) || operation in recordSchemas || isRead(operation);
+
+  if (!known || operation === "create" || operation === "clear-history" || !value.battleId) await requireDmMember(prisma, actor);
+
+  if (!known) throw new ContentError(API_ERRORS.BATTLE_UNKNOWN_OPERATION, 404);
 
   if (operation === "create") {
     return { version: 0, row: null, loaded: null, fingerprint: requestDigest(await contentSnapshot(actor)), rows: [] };
@@ -56,24 +77,14 @@ async function state(actor: Actor, operation: string, value: BattleActionInput) 
     return { version: 0, row: null, loaded: null, fingerprint: requestDigest(rows), rows };
   }
 
-  if (!value.battleId) throw new ContentError("Потрібен battleId", 400);
+  if (!value.battleId) throw new ContentError(API_ERRORS.BATTLE_ID_REQUIRED, 400);
+
+  const loaded = await loadDmBattle(actor, value.battleId);
 
   const row = await battleRecord(actor.campaignId, value.battleId);
 
-  const loaded = await defaultPipelineDeps.loadBattle({ campaignId: actor.campaignId, battleId: value.battleId, userId: actor.userId });
-
-  if (!loaded) throw new ContentError("Бій не знайдено", 404);
-
-  if (!loaded.isMember || !loaded.isDM) throw new ContentError(API_ERRORS.DM_ONLY, 403);
-
-  // Source changes can alter start/refresh/attack/spell outcomes without changing battle.version.
-  const sources = await Promise.all([
-    prisma.character.findMany({ where: { campaignId: actor.campaignId }, orderBy: { id: "asc" } }),
-    prisma.unit.findMany({ where: { campaignId: actor.campaignId }, orderBy: { id: "asc" } }),
-    prisma.spell.findMany({ where: { campaignId: actor.campaignId }, orderBy: { id: "asc" } }),
-  ]);
-
-  return { version: loaded.scene.version, row, loaded, rows: [row], fingerprint: requestDigest({ row, loaded, sources, references: await contentSnapshot(actor), audioLibrary: operation === "audio" ? await loadAudioLibrary(actor.campaignId) : null }) };
+  // Character/unit/spell changes can alter start/refresh/attack outcomes without changing battle.version; contentSnapshot stamps/digests cover them once.
+  return { version: loaded.scene.version, row, loaded, rows: [row], fingerprint: requestDigest({ row, loaded, references: await contentSnapshot(actor), audioLibrary: operation === "audio" ? await loadAudioLibrary(actor.campaignId) : null }) };
 }
 
 async function prepared(caller: AssistantCaller, operation: string, raw: unknown): Promise<ActionPreview> {
@@ -84,7 +95,7 @@ async function prepared(caller: AssistantCaller, operation: string, raw: unknown
   const current = await state(caller.actor, operation, value);
 
   if (isCommand(operation)) {
-    if (!current.loaded) throw new ContentError("Бій не знайдено", 404);
+    if (!current.loaded) throw new ContentError(API_ERRORS.BATTLE_NOT_FOUND, 404);
 
     const params = { id: caller.actor.campaignId, battleId: requireBattleId(value.battleId), ...(typeof value.body.participantId === "string" && { participantId: value.body.participantId }) };
 
@@ -99,27 +110,34 @@ async function prepared(caller: AssistantCaller, operation: string, raw: unknown
 
     const ids = [parsed.attackerId, parsed.casterId, parsed.participantId, parsed.targetId, parsed.targetParticipantId, ...(Array.isArray(parsed.targetParticipantIds) ? parsed.targetParticipantIds : []), ...(Array.isArray(parsed.targetIds) ? parsed.targetIds : [])].filter((id): id is string => typeof id === "string");
 
-    for (const id of ids) if (![...ctx.participants, ...ctx.pending].some(p => p.basicInfo.id === id)) throw new ContentError("Учасника немає в бою", 404);
+    for (const id of ids) if (![...ctx.participants, ...ctx.pending].some(p => p.basicInfo.id === id)) throw new ContentError(API_ERRORS.BATTLE_PARTICIPANT_NOT_IN_BATTLE, 404);
 
     if (operation === "attack") validateAttackPreview(ctx, parsed);
 
     if (operation === "spell") {
       const spell = await prisma.spell.findUnique({ where: { id: String(parsed.spellId) } });
 
-      if (!spell || spell.campaignId !== caller.actor.campaignId) throw new ContentError("Заклинання не знайдено", 404);
+      if (!spell || spell.campaignId !== caller.actor.campaignId) throw new ContentError(API_ERRORS.BATTLE_SPELL_NOT_FOUND, 404);
 
-      if (spell.executionMode === "manual" && !parsed.cancelCasting) throw new ContentError("Налаштуйте механіку заклинання або застосуйте його вручну", 422);
+      if (spell.executionMode === "manual" && !parsed.cancelCasting) throw new ContentError(API_ERRORS.BATTLE_SPELL_CONFIGURE_OR_MANUAL, 422);
     }
   } else if (operation in recordSchemas) parseInput(recordSchemas[operation as RecordOperation] as z.ZodType, value.body);
 
   if (["create", "patch", "add-participant"].includes(operation)) {
     const refs = operation === "add-participant" ? [{ id: value.body.sourceId, type: value.body.type }] : (value.body.participants ?? []) as Array<{ id: string; type: string }>;
 
-    for (const ref of refs) {
-      const rows = ref.type === "character" ? await prisma.character.findMany({ where: { id: String(ref.id), campaignId: caller.actor.campaignId }, select: { id: true } }) : await prisma.unit.findMany({ where: { id: String(ref.id), campaignId: caller.actor.campaignId }, select: { id: true } });
+    const byType = { character: new Set<string>(), unit: new Set<string>() };
 
-      if (!rows.some(row => row.id === ref.id)) throw new ContentError("Джерела учасника немає в кампанії", 404);
-    }
+    for (const ref of refs) (ref.type === "character" ? byType.character : byType.unit).add(String(ref.id));
+
+    const [characters, units] = await Promise.all([
+      byType.character.size ? prisma.character.findMany({ where: { id: { in: [...byType.character] }, campaignId: caller.actor.campaignId }, select: { id: true } }) : [],
+      byType.unit.size ? prisma.unit.findMany({ where: { id: { in: [...byType.unit] }, campaignId: caller.actor.campaignId }, select: { id: true } }) : [],
+    ]);
+
+    const found = { character: new Set(characters.map(row => row.id)), unit: new Set(units.map(row => row.id)) };
+
+    for (const ref of refs) if (!(ref.type === "character" ? found.character : found.unit).has(ref.id as string)) throw new ContentError(API_ERRORS.BATTLE_PARTICIPANT_SOURCE_MISSING, 404);
   }
 
   const map = value.body.map as { background?: string | null } | undefined;
@@ -128,7 +146,7 @@ async function prepared(caller: AssistantCaller, operation: string, raw: unknown
 
   const stored = current.row?.map as { background?: string } | null;
 
-  if (background && background !== stored?.background && !/^\/battle-maps\/[\w.-]+\.(webp|jpg|png)$/.test(background) && !isHostedOnProjectStorage(background)) throw new ContentError("Завантажте фон у чинному редакторі карти; асистент приймає збережені зображення", 400);
+  if (background && background !== stored?.background && !/^\/battle-maps\/[\w.-]+\.(webp|jpg|png)$/.test(background) && !isHostedOnProjectStorage(background)) throw new ContentError(API_ERRORS.BATTLE_BACKGROUND_UPLOAD_IN_EDITOR, 400);
 
   const targets = current.rows.map(row => ({ domain: "battles", id: row.id, name: row.name }));
 
@@ -171,7 +189,7 @@ export async function runBattleAction(actor: Actor, operation: string, raw: unkn
   const run = () => withCampaignContentWrite(actor.campaignId, async () => {
     const fresh = await prepareBattleAction({ actor, channel: execution?.caller.channel ?? "chat", threadId: null, tokenId: null }, operation, value);
 
-    if (requestDigest(fresh.preconditions) !== requestDigest(expected)) throw new ContentError("Бій змінився; підготуйте новий перегляд", 409);
+    if (requestDigest(fresh.preconditions) !== requestDigest(expected)) throw new ContentError(API_ERRORS.BATTLE_CHANGED_PREVIEW_AGAIN, 409);
 
     return executeBattleOperation(actor, { operation, battleId: value.battleId ?? "", input: value.body, expectedVersion: (fresh.preconditions as { version: number }).version, serverDice: value.dice === "server" }, execution);
   });
@@ -182,7 +200,10 @@ export async function runBattleAction(actor: Actor, operation: string, raw: unkn
 }
 
 export async function readBattleAction(actor: Actor, operation: string, raw: unknown): Promise<ActionResult> {
-  await liveAccess(actor, false);
+  const dmLoaded = operation === "summary" || operation === "get";
+
+  if (dmLoaded) assertScope(actor, false);
+  else await liveAccess(actor, false);
 
   const value = parseInput(battleActionInput, raw);
 
@@ -199,18 +220,34 @@ export async function readBattleAction(actor: Actor, operation: string, raw: unk
   if (operation === "balance.get" || operation === "balance") {
     const campaign = await prisma.campaign.findUnique({ where: { id: campaignId }, select: { rules: true } });
 
-    if (!campaign) throw new ContentError("Кампанію не знайдено", 404);
+    if (!campaign) throw new ContentError(API_ERRORS.CAMPAIGN_NOT_FOUND, 404);
 
     return result(await battleBalance(campaignId, operation === "balance" ? value.body : undefined, parseRules(campaign.rules)), campaignId);
   }
 
-  if (!value.battleId) throw new ContentError("Потрібен battleId", 400);
+  if (!value.battleId) throw new ContentError(API_ERRORS.BATTLE_ID_REQUIRED, 400);
 
-  const row = await battleRecord(campaignId, value.battleId);
+  if (dmLoaded) {
+    const loaded = await loadDmBattle(actor, value.battleId, "Доступ заборонено");
 
-  if (operation === "version") return result({ version: row.version }, row.id);
+    if (operation === "summary") return result(summarizeBattle(await loadAllEvents(prisma, loaded.scene.id), loaded.participants), loaded.scene.id);
 
-  if (operation === "audio.get") return result({ audio: row.audio }, row.id);
+    return result(toBattleResponse(loaded, loaded.scene, loaded.participants, loaded.pending, { mode: "full", entries: await loadRecentEvents(prisma, loaded.scene.id, 30) }, { isDM: loaded.isDM }), loaded.scene.id);
+  }
+
+  if (operation === "version") {
+    const row = await battleRecord(campaignId, value.battleId, { id: true, version: true });
+
+    return result({ version: row.version }, row.id);
+  }
+
+  if (operation === "audio.get") {
+    const row = await battleRecord(campaignId, value.battleId, { id: true, audio: true });
+
+    return result({ audio: row.audio }, row.id);
+  }
+
+  const row = await battleRecord(campaignId, value.battleId, { id: true });
 
   if (operation === "events") {
     const page = parseInput(z.object({ before: z.number().int().min(1), limit: z.number().int().min(1).max(100).default(30) }).strict(), value.body);
@@ -218,15 +255,7 @@ export async function readBattleAction(actor: Actor, operation: string, raw: unk
     return result(await loadEventsBefore(prisma, row.id, page), row.id);
   }
 
-  const loaded = await defaultPipelineDeps.loadBattle({ campaignId, battleId: row.id, userId: actor.userId });
-
-  if (!loaded?.isMember || !loaded.isDM) throw new ContentError("Доступ заборонено", 403);
-
-  if (operation === "summary") return result(summarizeBattle(await loadAllEvents(prisma, row.id), loaded.participants), row.id);
-
-  if (operation !== "get") throw new ContentError("Невідома бойова операція", 404);
-
-  return result(toBattleResponse(loaded, loaded.scene, loaded.participants, loaded.pending, { mode: "full", entries: await loadRecentEvents(prisma, row.id, 30) }, { isDM: loaded.isDM }), row.id);
+  throw new ContentError(API_ERRORS.BATTLE_UNKNOWN_OPERATION, 404);
 }
 
 export async function battleBalance(campaignId: string, input: unknown | undefined, rules: import("@/lib/utils/rules").Ruleset) {

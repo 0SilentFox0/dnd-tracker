@@ -4,7 +4,7 @@ import type { z } from "zod";
 import "server-only";
 import { getCachedBackgrounds } from "@/lib/cache/reference-data";
 import { ReferenceKind } from "@/lib/cache/tags";
-import { API_ERRORS } from "@/lib/constants/api-errors";
+import { API_ERRORS, backgroundNameTakenMessage } from "@/lib/constants/api-errors";
 import { prisma } from "@/lib/db";
 import { createBackgroundSchema, updateBackgroundSchema } from "@/lib/schemas/backgrounds";
 import { backgroundInUse } from "@/lib/server/backgrounds/usage";
@@ -31,7 +31,7 @@ async function validateRefs(campaignId: string, originFeatId: string | null | un
 }
 
 async function assertName(campaignId: string, name: string, exceptId?: string) {
-  if (await nameTaken((where) => prisma.background.findFirst({ where, select: { id: true } }), campaignId, name, exceptId)) throw new ContentError(`Передісторія «${name}» вже існує`, 409);
+  if (await nameTaken((where) => prisma.background.findFirst({ where, select: { id: true } }), campaignId, name, exceptId)) throw new ContentError(backgroundNameTakenMessage(name), 409);
 }
 
 export const backgroundsResource = defineResource<Background, z.infer<typeof createBackgroundSchema>, z.infer<typeof updateBackgroundSchema>>({

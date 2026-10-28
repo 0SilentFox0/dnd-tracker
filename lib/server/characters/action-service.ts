@@ -7,6 +7,7 @@ import { actorDmAccess, runCharacterOperation as runOperationCore } from "./oper
 import { characterReferenceHash } from "./reference-state";
 
 import "server-only";
+import { API_ERRORS } from "@/lib/constants/api-errors";
 import { prisma } from "@/lib/db";
 import { putGoalsSchema } from "@/lib/schemas/character-goals";
 import { putNotesSchema } from "@/lib/schemas/character-notes";
@@ -60,7 +61,7 @@ export async function runCharacterOperation(actor: Actor, operation: string, raw
 
   const core = CHARACTER_OPERATIONS[operation];
 
-  if (!schema || !core) throw new ContentError("Невідома операція", 400);
+  if (!schema || !core) throw new ContentError(API_ERRORS.ASSISTANT_UNKNOWN_OPERATION, 400);
 
   assertCan(actor, { access: "dm", scope: characterReads.has(operation) ? "characters:read" : "characters:write" });
 
@@ -68,7 +69,7 @@ export async function runCharacterOperation(actor: Actor, operation: string, raw
 
   const parsed = schema.safeParse(raw);
 
-  if (!parsed.success) throw new ContentError("Некоректні дані персонажа", 400);
+  if (!parsed.success) throw new ContentError(API_ERRORS.CHARACTER_DATA_INVALID, 400);
 
   const input = parsed.data as Record<string, unknown>;
 
@@ -77,7 +78,7 @@ export async function runCharacterOperation(actor: Actor, operation: string, raw
 
     const characterId = String(input.characterId ?? "");
 
-    if (expected && requestDigest(await characterFingerprint(actor, input)) !== expected) throw new ContentError("Персонажі або доступ змінилися", 409);
+    if (expected && requestDigest(await characterFingerprint(actor, input)) !== expected) throw new ContentError(API_ERRORS.ASSISTANT_CHARACTERS_CHANGED, 409);
 
     const data = (await runOperationCore(core, { campaignId: actor.campaignId, characterId, actor, access }, parseInput(core.schema, input))) as { id?: string; name?: string; campaign?: Record<string, unknown> };
 

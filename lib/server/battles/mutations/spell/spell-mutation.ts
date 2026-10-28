@@ -3,7 +3,7 @@ import type { Spell } from "@prisma/client";
 import type { SpellRequestData } from "./cast-spell-schema";
 
 import { getCachedSummonPool } from "@/lib/cache/reference-data";
-import { API_ERRORS } from "@/lib/constants/api-errors";
+import { abilityCooldownMessage,API_ERRORS } from "@/lib/constants/api-errors";
 import { prisma } from "@/lib/db";
 import { findParticipant, updateParticipant } from "@/lib/utils/abilities/engine/core/participants";
 import { replaceParticipant } from "@/lib/utils/abilities/engine/core/participants";
@@ -55,17 +55,17 @@ export function createSpellMutation(deps: SpellMutationDeps = defaultDeps, optio
 
     const spellRow = await deps.loadSpell(data.spellId);
 
-    if (!spellRow || spellRow.campaignId !== ctx.scene.campaignId) throw new BattleAccessError(404, "Заклинання не знайдено");
+    if (!spellRow || spellRow.campaignId !== ctx.scene.campaignId) throw new BattleAccessError(404, API_ERRORS.BATTLE_SPELL_NOT_FOUND);
 
     const spell = toCastableSpell(spellRow);
 
     const { definition } = spell;
 
-    if (definition.executionMode === "manual" && !data.cancelCasting) throw new BattleRuleError("action_rejected", "Налаштуйте механіку заклинання або застосуйте його вручну");
+    if (definition.executionMode === "manual" && !data.cancelCasting) throw new BattleRuleError("action_rejected", API_ERRORS.BATTLE_SPELL_CONFIGURE_OR_MANUAL);
 
-    if (data.legendaryKey && !ctx.isDM) throw new BattleAccessError(403, "Легендарні дії — лише для ДМ");
+    if (data.legendaryKey && !ctx.isDM) throw new BattleAccessError(403, API_ERRORS.BATTLE_LEGENDARY_DM_ONLY);
 
-    if (data.legendaryKey && (data.free || data.slotKey)) throw new BattleRuleError("action_rejected", "Легендарний каст не потребує вільного режиму чи слота");
+    if (data.legendaryKey && (data.free || data.slotKey)) throw new BattleRuleError("action_rejected", API_ERRORS.BATTLE_LEGENDARY_CAST_NO_SLOT);
 
     let caster = requireActor(ctx, data.casterId, {
       anyTurn: definition.cost === "reaction",
@@ -83,17 +83,17 @@ export function createSpellMutation(deps: SpellMutationDeps = defaultDeps, optio
     const legendaryAbility = data.legendaryKey ? [...legendaryAbilities(caster), ...lairAbilities(caster)].find((a) => a.key === data.legendaryKey && a.perform?.kind === "spell" && a.perform.spellId === data.spellId) : undefined;
 
     if (data.legendaryKey) {
-      if (!legendaryAbility) throw new BattleRuleError("action_rejected", "У учасника немає такої легендарної дії заклинання");
+      if (!legendaryAbility) throw new BattleRuleError("action_rejected", API_ERRORS.BATTLE_NO_SUCH_LEGENDARY_SPELL);
 
       const blocker = legendaryAbility.limits?.lair ? lairBlocker(caster, ctx.scene.round, legendaryAbility.key) : legendaryBlocker(caster, order[ctx.scene.turnIndex], legendaryCostOf(legendaryAbility));
 
       if (blocker) throw new BattleRuleError("action_rejected", blocker);
 
-      if (!withinCountLimits(caster, legendaryAbility)) throw new BattleRuleError("ability_limit", "Ліміт використань вичерпано");
+      if (!withinCountLimits(caster, legendaryAbility)) throw new BattleRuleError("ability_limit", API_ERRORS.BATTLE_USES_EXHAUSTED);
 
       const wait = cooldownLeft(caster, legendaryAbility, ctx.scene.round);
 
-      if (wait > 0) throw new BattleRuleError("ability_limit", `Перезарядка: ще ${wait} р.`);
+      if (wait > 0) throw new BattleRuleError("ability_limit", abilityCooldownMessage(wait));
     }
 
     // вільний каст DM (швидкі дії): будь-яке закляття без слота; хід героя під керуванням DM — за правилами героя
@@ -104,24 +104,24 @@ export function createSpellMutation(deps: SpellMutationDeps = defaultDeps, optio
 
     let grant = data.grantKey ? spellGrants.find((g) => g.key === data.grantKey) : undefined;
 
-    if (data.grantKey && !grant) throw new BattleRuleError("action_rejected", "Джерело заклинання більше недоступне");
+    if (data.grantKey && !grant) throw new BattleRuleError("action_rejected", API_ERRORS.BATTLE_SPELL_SOURCE_UNAVAILABLE);
 
     if (!data.grantKey && data.slotKey) {
       if (!caster.spellcasting.slotSpells?.includes(data.spellId) && !spellGrants.some((g) => g.via === "slotOrGrant") && spellGrants.length > 0) throw new BattleRuleError("action_rejected", API_ERRORS.GRANT_NO_SLOT);
     } else if (!data.grantKey && spellGrants.length > 1) {
-      throw new BattleRuleError("action_rejected", "Оберіть джерело заклинання");
+      throw new BattleRuleError("action_rejected", API_ERRORS.BATTLE_SPELL_SOURCE_REQUIRED);
     } else if (!data.grantKey && spellGrants.length === 1) {
       grant = spellGrants[0];
     }
 
-    if (data.grantKey && data.slotKey) throw new BattleRuleError("action_rejected", "Оберіть слот або джерело заклинання");
+    if (data.grantKey && data.slotKey) throw new BattleRuleError("action_rejected", API_ERRORS.BATTLE_SPELL_SLOT_OR_SOURCE);
 
-    if (data.castLevel !== undefined && (!grant?.upcast || data.castLevel < (grant.castLevel ?? 0) || data.castLevel > grant.upcast.maxLevel)) throw new BattleRuleError("action_rejected", "Недозволений рівень підсилення заклинання предмета");
+    if (data.castLevel !== undefined && (!grant?.upcast || data.castLevel < (grant.castLevel ?? 0) || data.castLevel > grant.upcast.maxLevel)) throw new BattleRuleError("action_rejected", API_ERRORS.BATTLE_ITEM_UPCAST_LEVEL_INVALID);
 
     if (data.castLevel !== undefined && grant?.upcast) grant = { ...grant, cost: (grant.cost ?? 1) + (data.castLevel - (grant.castLevel ?? 0)) * grant.upcast.extraCost };
 
     if (!free && !legendaryAbility && !grant && !caster.spellcasting.knownSpells.includes(data.spellId)) {
-      throw new BattleRuleError("action_rejected", "Кастер не знає цього заклинання");
+      throw new BattleRuleError("action_rejected", API_ERRORS.BATTLE_CASTER_UNKNOWN_SPELL);
     }
 
     if (grant && data.slotKey) throw new BattleRuleError("action_rejected", API_ERRORS.GRANT_NO_SLOT);
@@ -132,7 +132,7 @@ export function createSpellMutation(deps: SpellMutationDeps = defaultDeps, optio
       throw new BattleRuleError("action_rejected", API_ERRORS.SPELL_USES_EMPTY);
     }
 
-    if (grant?.castLevel !== undefined && grant.castLevel < spell.level) throw new BattleRuleError("action_rejected", "Рівень джерела нижчий за рівень заклинання");
+    if (grant?.castLevel !== undefined && grant.castLevel < spell.level) throw new BattleRuleError("action_rejected", API_ERRORS.BATTLE_SOURCE_LEVEL_TOO_LOW);
 
     if (!data.preview && !legendaryAbility) {
       if (definition.cost === "reaction" && !free) {
@@ -151,7 +151,7 @@ export function createSpellMutation(deps: SpellMutationDeps = defaultDeps, optio
     }
 
     if (hasEffectMarker(caster, "disable_spell_casting")) {
-      throw new BattleRuleError("action_rejected", "Кастер не може чаклувати");
+      throw new BattleRuleError("action_rejected", API_ERRORS.BATTLE_CASTER_CANNOT_CAST);
     }
 
     const chosen = !free && !legendaryAbility && !grant && data.slotKey && isFiveE(caster) && spellNeedsSlot(spell.level) ? resolveChosenSlot(caster, spell.level, data.slotKey) : null;
@@ -161,7 +161,7 @@ export function createSpellMutation(deps: SpellMutationDeps = defaultDeps, optio
     const castLevel = data.castLevel ?? grant?.castLevel ?? (chosen?.ok ? chosen.castLevel : undefined);
 
     if (definition.cost === "long" && !free && !data.preview) {
-      if (!grant && spellNeedsSlot(spell.level) && (caster.spellcasting.spellSlots[data.slotKey ?? spellSlotKey(caster, spell.level)]?.current ?? 0) <= 0) throw new BattleRuleError("action_rejected", "Немає вільного слота для накладання");
+      if (!grant && spellNeedsSlot(spell.level) && (caster.spellcasting.spellSlots[data.slotKey ?? spellSlotKey(caster, spell.level)]?.current ?? 0) <= 0) throw new BattleRuleError("action_rejected", API_ERRORS.BATTLE_NO_FREE_SLOT_TO_CAST);
 
       const prepared = prepareLongCast({ ...ctx, participants: order }, caster, spell, { grantKey: grant?.key, slotKey: data.slotKey, castLevel }, data.castingRounds);
 
@@ -169,7 +169,7 @@ export function createSpellMutation(deps: SpellMutationDeps = defaultDeps, optio
 
       caster = prepared.caster;
       order = replaceParticipant(prepared.participants, caster);
-    } else if (data.castingRounds !== undefined) throw new BattleRuleError("action_rejected", "Час можна зарахувати лише для тривалого накладання");
+    } else if (data.castingRounds !== undefined) throw new BattleRuleError("action_rejected", API_ERRORS.BATTLE_TIME_ONLY_DURATION_CAST);
 
     const resolution = resolveSpellTargets(order, caster, spell, definition.targeting, data.targetIds, {
       map: ctx.meta.map,
@@ -180,7 +180,7 @@ export function createSpellMutation(deps: SpellMutationDeps = defaultDeps, optio
 
     if (!resolution.ok) throw new BattleRuleError("invalid_target", resolution.error);
 
-    if (legendaryAbility?.condition && !evaluateCondition(legendaryAbility.condition, { owner: caster, event: { type: "action", actorId: caster.basicInfo.id, abilityKey: legendaryAbility.key, targetIds: resolution.targetIds }, participants: order, sourceId: legendaryAbility.source.id })) throw new BattleRuleError("action_rejected", "Умова вміння не виконується");
+    if (legendaryAbility?.condition && !evaluateCondition(legendaryAbility.condition, { owner: caster, event: { type: "action", actorId: caster.basicInfo.id, abilityKey: legendaryAbility.key, targetIds: resolution.targetIds }, participants: order, sourceId: legendaryAbility.source.id })) throw new BattleRuleError("action_rejected", API_ERRORS.BATTLE_ABILITY_CONDITION_UNMET);
 
     const rng = ctx.rng ?? Math.random;
 
@@ -215,7 +215,7 @@ export function createSpellMutation(deps: SpellMutationDeps = defaultDeps, optio
       rules: ctx.meta.rules,
     });
 
-    if (!result.success) throw new BattleRuleError("action_rejected", "Немає вільного слота для цього заклинання");
+    if (!result.success) throw new BattleRuleError("action_rejected", API_ERRORS.BATTLE_NO_FREE_SLOT);
 
     const groups = spellDiceRolls({
       casterId: caster.basicInfo.id,

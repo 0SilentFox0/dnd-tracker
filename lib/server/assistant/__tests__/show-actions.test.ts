@@ -16,7 +16,7 @@ import { prepareShowAction, runShowOperation } from "@/lib/server/show/action-se
 const f = vi.hoisted(() => ({ deck: {} as Record<string, unknown>, show: null as Record<string, unknown> | null, writes: 0, deleted: [] as string[], dm: true }));
 
 vi.mock("@/lib/db", () => ({ prisma: {
-  aiProposal: { findMany: async () => [] }, assistantReceipt: { findMany: async () => [] },
+  $queryRaw: async () => [{ digest: "tracks" }], aiProposal: { findMany: async () => [] }, assistantReceipt: { findMany: async () => [] },
   campaignMember: { findMany: async () => f.dm ? [{ role: "dm" }] : [] },
   slideDeck: { findMany: async () => [f.deck], findFirst: async () => f.deck, update: async ({ data }: { data: object }) => { f.writes++; Object.assign(f.deck, data);
 

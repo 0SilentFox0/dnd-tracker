@@ -5,7 +5,7 @@ import type { z } from "zod";
 import { requireCharacterRecord } from "../access";
 import { characterHandler, defineCharacterOperation, errorStatusMessage, gateOptions, orThrow } from "../operation-runner";
 
-import { API_ERRORS } from "@/lib/constants/api-errors";
+import { API_ERRORS, maxLevelMessage } from "@/lib/constants/api-errors";
 import { CharacterStatus } from "@/lib/constants/characters";
 import { prisma } from "@/lib/db";
 import { applyClasses } from "@/lib/server/characters/apply-classes";
@@ -84,7 +84,7 @@ async function patchCore({ access, character }: Gate, parsed: z.infer<typeof upd
   const finalLevel = fromClasses?.level ?? resolveFinalLevel(character, data);
 
   if (finalLevel > character.level && finalLevel > campaign.maxLevel) {
-    throw new ContentError(`Максимальний рівень кампанії — ${campaign.maxLevel}`, 422);
+    throw new ContentError(maxLevelMessage(campaign.maxLevel), 422);
   }
 
   const needsRace = !fromClasses && (finalLevel !== character.level || clearingClasses);

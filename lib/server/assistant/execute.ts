@@ -1,5 +1,6 @@
 import { authorizeAssistant } from "./authorize";
 import { assistantCatalog } from "./catalog";
+import { conflict,forbidden } from "./errors";
 import { completeIntentOutcome, reconcileReceiptEffects } from "./execution-effects";
 import { executeIntentTransaction } from "./execution-transaction";
 import { executionModeFor, type ExecutorDeps } from "./executor-deps";
@@ -10,6 +11,7 @@ import { ASSISTANT_EFFECT_HANDLERS } from "./runtime-effects";
 import type { ActionRequest, AssistantCaller, DispatchResult, ReceiptDto } from "./types";
 
 import "server-only";
+import { API_ERRORS } from "@/lib/constants/api-errors";
 import { prisma } from "@/lib/db";
 import { actionPreviewSchema, actionResultSchema } from "@/lib/schemas/assistant";
 import { ContentError, parseInput } from "@/lib/server/content/errors";
@@ -17,10 +19,6 @@ import { runContentWriteContext } from "@/lib/server/content/write-context";
 import type { Actor } from "@/lib/utils/api/actor";
 
 type Options = Partial<ExecutorDeps>;
-
-const forbidden = () => new ContentError("Дія недоступна", 403);
-
-const conflict = () => new ContentError("Пропозиція вже неактуальна або завершена", 409);
 
 export function createAssistantExecutor(options: Options = {}) {
   const db = options.db ?? prisma;
@@ -58,9 +56,9 @@ export function createAssistantExecutor(options: Options = {}) {
 
     if (action.effect === "handoff") return { kind: "handoff", ...await action.execute(caller, input) };
 
-    if (action.effect === "paid" && !action.external) throw new ContentError("Платний адаптер ще недоступний", 409);
+    if (action.effect === "paid" && !action.external) throw new ContentError(API_ERRORS.ASSISTANT_PAID_ADAPTER_UNAVAILABLE, 409);
 
-    if (action.effect === "paid" && !caller.runId) throw new ContentError("Потрібний ідентифікатор запуску", 409);
+    if (action.effect === "paid" && !caller.runId) throw new ContentError(API_ERRORS.ASSISTANT_RUN_ID_REQUIRED, 409);
 
     const { request, originKey, requestHash } = identifyActionRequest(caller, { ...raw, input });
 
@@ -103,7 +101,7 @@ export function createAssistantExecutor(options: Options = {}) {
     const result = await db.$transaction(async (tx) => {
       const row = await tx.assistantIntent.findFirst({ where: { id, ...intentOwner(caller) } });
 
-      if (!row) throw new ContentError("Пропозицію не знайдено", 404);
+      if (!row) throw new ContentError(API_ERRORS.AI_PROPOSAL_NOT_FOUND, 404);
 
       await authorizeAssistant(caller, catalog.getAction(row.actionId).need, "prepare", tx);
       await tx.$queryRaw`SELECT id FROM campaigns WHERE id = ${caller.actor.campaignId} FOR UPDATE`;

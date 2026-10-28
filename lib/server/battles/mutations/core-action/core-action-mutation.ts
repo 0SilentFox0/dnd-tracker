@@ -1,3 +1,4 @@
+import { API_ERRORS } from "@/lib/constants/api-errors";
 import { runCoreAction } from "@/lib/utils/battle/actions/run";
 import type { CoreActionBody } from "@/lib/utils/battle/actions/schema";
 import { requireActor } from "@/lib/utils/battle/common/control";
@@ -17,13 +18,13 @@ function guard(ctx: BattleMutationContext, body: CoreActionBody): void {
 
   if (offTurn) return;
 
-  if (ctx.participants[ctx.scene.turnIndex]?.basicInfo.id !== actor.basicInfo.id) throw new BattleRuleError("action_rejected", "Зараз не хід цього учасника");
+  if (ctx.participants[ctx.scene.turnIndex]?.basicInfo.id !== actor.basicInfo.id) throw new BattleRuleError("action_rejected", API_ERRORS.BATTLE_NOT_PARTICIPANT_TURN);
 
   assertCanAct(ctx, actor.basicInfo.id);
 }
 
 export function coreActionMutation(ctx: BattleMutationContext, body: CoreActionBody): MutationResult {
-  if (!ctx.meta.rules.actions.enabled) throw new BattleRuleError("action_rejected", "Дії 5e вимкнені в правилах кампанії");
+  if (!ctx.meta.rules.actions.enabled) throw new BattleRuleError("action_rejected", API_ERRORS.BATTLE_CORE_ACTIONS_DISABLED);
 
   guard(ctx, body);
 

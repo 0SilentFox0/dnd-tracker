@@ -3,6 +3,7 @@ import { z } from "zod";
 import type { HandoffResult } from "../types";
 
 import "server-only";
+import { API_ERRORS } from "@/lib/constants/api-errors";
 import { handoffContentKind, handoffId, isAssistantHandoffHref } from "@/lib/schemas/assistant-handoff";
 import { ContentError, parseInput } from "@/lib/server/content/errors";
 import type { Actor } from "@/lib/utils/api/actor";
@@ -57,12 +58,12 @@ export function buildAssistantHandoff(
   target: unknown = {}
 ): HandoffResult {
   if (!actor.isDM || !actor.userId)
-    throw new ContentError("Доступ має лише ДМ", 403);
+    throw new ContentError(API_ERRORS.ASSISTANT_DM_ONLY, 403);
 
   const campaignId = parseInput(handoffId, actor.campaignId);
 
   if (!Object.hasOwn(HANDOFF_INPUTS, kind))
-    throw new ContentError("Невідомий перехід", 400);
+    throw new ContentError(API_ERRORS.ASSISTANT_UNKNOWN_HANDOFF, 400);
 
   const key = kind as HandoffKind;
 
@@ -97,7 +98,7 @@ export function buildAssistantHandoff(
       : `${base}/dm/compendium`;
 
   if (!isAssistantHandoffHref(href))
-    throw new ContentError("Недоступний перехід", 400);
+    throw new ContentError(API_ERRORS.ASSISTANT_HANDOFF_UNAVAILABLE, 400);
 
   return { href, reason: HANDOFF_REASONS[key] };
 }

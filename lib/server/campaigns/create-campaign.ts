@@ -1,15 +1,21 @@
 import type { Campaign, Prisma } from "@prisma/client";
 
+import { invalidateCampaignLists } from "@/lib/cache/campaign-list";
 import { CampaignKind, CampaignRole, CampaignVisibility } from "@/lib/constants/campaigns";
 import { prisma } from "@/lib/db";
 import { type Bundle, TemplateLeakError } from "@/lib/server/templates/bundle";
+import { exportCampaign } from "@/lib/server/templates/export-campaign";
 import { importBundle } from "@/lib/server/templates/import-bundle";
 import { baselineFromBundle } from "@/lib/server/templates/sync/hash";
+import { PUBLIC_USER_SELECT } from "@/lib/server/users/db-user";
 import { canReadSource } from "@/lib/utils/api/is-dm";
 import { generateInviteCode, INVITE_CODE_ATTEMPTS, isInviteCodeClash } from "@/lib/utils/campaigns/invite-code";
 import { parseRules } from "@/lib/utils/rules/schema";
 
 export { TemplateLeakError };
+
+export const CAMPAIGN_INCLUDE = { members: { include: { user: { select: PUBLIC_USER_SELECT } } }, dm: { select: PUBLIC_USER_SELECT } } as const;
+export const CAMPAIGN_OMIT = { aiInstructions: true } as const;
 
 interface CreateFromBundleInput {
   userId: string;
@@ -94,4 +100,36 @@ export async function loadTemplateForUser(
   if (!template || template.kind !== CampaignKind.TEMPLATE) return { ok: false, status: 404 };
 
   return canReadSource(template.visibility, template.members) ? { ok: true, template } : { ok: false, status: 403 };
+}
+
+type CreateCampaignData = { name: string; description?: string | null; templateId?: string; maxLevel?: number; allowPlayerEdit?: boolean };
+
+type CampaignSource = { bundle: Bundle; id: string };
+
+export async function createCampaignForUser(userId: string, data: CreateCampaignData, options: { source?: CampaignSource; defer?: (effect: () => Promise<void>) => void } = {}) {
+  let source = options.source ?? null;
+
+  if (!source && data.templateId) {
+    const loaded = await loadTemplateForUser(userId, data.templateId);
+
+    if (!loaded.ok) return loaded;
+
+    source = { bundle: await exportCampaign(prisma, loaded.template.id), id: loaded.template.id };
+  }
+
+  const created = await createCampaignFromBundle({
+    userId,
+    name: data.name,
+    description: data.description,
+    bundle: source?.bundle ?? null,
+    createdFromId: source?.id ?? null,
+    settings: { maxLevel: data.maxLevel, allowPlayerEdit: data.allowPlayerEdit },
+  });
+
+  const invalidate = () => invalidateCampaignLists([userId]);
+
+  if (options.defer) options.defer(invalidate);
+  else await invalidate();
+
+  return { ok: true as const, ...created };
 }

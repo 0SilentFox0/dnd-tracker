@@ -1,14 +1,12 @@
 import { NextResponse } from "next/server";
 
-import { campaignListKey, invalidateCampaignLists } from "@/lib/cache/campaign-list";
+import { campaignListKey } from "@/lib/cache/campaign-list";
 import { kvGet, kvSet } from "@/lib/cache/kv";
 import { API_ERRORS } from "@/lib/constants/api-errors";
 import { CampaignKind } from "@/lib/constants/campaigns";
 import { prisma } from "@/lib/db";
 import { createCampaignSchema } from "@/lib/schemas";
-import { createCampaignFromBundle, loadTemplateForUser } from "@/lib/server/campaigns/create-campaign";
-import type { Bundle } from "@/lib/server/templates/bundle";
-import { exportCampaign } from "@/lib/server/templates/export-campaign";
+import { CAMPAIGN_OMIT, createCampaignForUser } from "@/lib/server/campaigns/create-campaign";
 import { ensureDbUser, PUBLIC_USER_SELECT } from "@/lib/server/users/db-user";
 import { requireAuth, requireAuthUser } from "@/lib/utils/api/api-auth";
 import { errorResponse } from "@/lib/utils/api/api-response";
@@ -33,30 +31,15 @@ export async function POST(request: Request) {
 
     await ensureDbUser(authUser);
 
-    let bundle: Bundle | null = null;
+    const created = await createCampaignForUser(userId, data);
 
-    if (data.templateId) {
-      const loaded = await loadTemplateForUser(userId, data.templateId);
-
-      if (!loaded.ok) {
-        return loaded.status === 404
-          ? errorResponse(API_ERRORS.TEMPLATE_NOT_FOUND, 404)
-          : errorResponse(API_ERRORS.TEMPLATE_FORBIDDEN, 403);
-      }
-
-      bundle = await exportCampaign(prisma, loaded.template.id);
+    if (!created.ok) {
+      return created.status === 404
+        ? errorResponse(API_ERRORS.TEMPLATE_NOT_FOUND, 404)
+        : errorResponse(API_ERRORS.TEMPLATE_FORBIDDEN, 403);
     }
 
-    const { campaign, warnings } = await createCampaignFromBundle({
-      userId,
-      name: data.name,
-      description: data.description,
-      bundle,
-      createdFromId: data.templateId ?? null,
-      settings: { maxLevel: data.maxLevel, allowPlayerEdit: data.allowPlayerEdit },
-    });
-
-    await invalidateCampaignLists([userId]);
+    const { campaign, warnings } = created;
 
     return NextResponse.json(warnings.length > 0 ? { ...campaign, warnings } : campaign);
   } catch (error) {
@@ -85,7 +68,7 @@ export async function GET() {
     const campaigns = await prisma.campaign.findMany({
       where: { kind: CampaignKind.CAMPAIGN, members: { some: { userId } } },
       include: { members: { include: { user: { select: PUBLIC_USER_SELECT } } } },
-      omit: { aiInstructions: true },
+      omit: CAMPAIGN_OMIT,
       orderBy: { updatedAt: "desc" },
     });
 

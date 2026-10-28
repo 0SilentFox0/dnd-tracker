@@ -54,6 +54,7 @@ vi.mock("@/lib/server/content/resources", async () => {
   return { CONTENT_RESOURCES: { units: unit } };
 });
 
+vi.mock("@/lib/server/assistant/actions/content-preview", () => ({ contentPreviewState: async () => ({ tables: {}, characters: [] }), contentOperationState: async () => null }));
 vi.mock("@/lib/server/assistant/actions/content-snapshot", async importOriginal => ({
   ...await importOriginal<typeof import("@/lib/server/assistant/actions/content-snapshot")>(),
   contentSnapshot: async () => ({ tables: {}, characters: [] }),

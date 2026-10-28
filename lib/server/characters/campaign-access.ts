@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 
 import "server-only";
+import { API_ERRORS } from "@/lib/constants/api-errors";
 import { prisma } from "@/lib/db";
 import type { Actor } from "@/lib/utils/api/actor";
 import { type CampaignAccessResult, requireCampaignAccess, requireDM } from "@/lib/utils/api/api-auth";
@@ -10,15 +11,15 @@ import { parseRules } from "@/lib/utils/rules/schema";
 export async function operationAccess(campaignId: string, dmOnly: boolean, actor?: Actor): Promise<CampaignAccessResult | NextResponse> {
   if (!actor) return requireCampaignAccess(campaignId, dmOnly);
 
-  if (actor.campaignId !== campaignId) return errorResponse("Доступ заборонено", 403);
+  if (actor.campaignId !== campaignId) return errorResponse(API_ERRORS.CHARACTER_ACCESS_DENIED, 403);
 
   const campaign = await prisma.campaign.findUnique({ where: { id: campaignId }, select: { id: true, kind: true, maxLevel: true, rules: true, allowPlayerEdit: true, members: { where: { userId: actor.userId }, select: { userId: true, role: true } } } });
 
-  if (!campaign) return errorResponse("Кампанію не знайдено", 404);
+  if (!campaign) return errorResponse(API_ERRORS.CAMPAIGN_NOT_FOUND, 404);
 
   const isDM = campaign.members.some(m => m.userId === actor.userId && m.role === "dm");
 
-  if (!campaign.members.some(m => m.userId === actor.userId) || (dmOnly && !isDM)) return errorResponse("Доступ заборонено", 403);
+  if (!campaign.members.some(m => m.userId === actor.userId) || (dmOnly && !isDM)) return errorResponse(API_ERRORS.CHARACTER_ACCESS_DENIED, 403);
 
   return { userId: actor.userId, isDM, campaign: { ...campaign, rules: parseRules(campaign.rules) } };
 }

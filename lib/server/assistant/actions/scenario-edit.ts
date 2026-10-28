@@ -1,6 +1,7 @@
 import type { AssistantWriteAction } from "../types";
 
 import { applyProposal,createProposal } from "@/lib/ai/proposals";
+import { API_ERRORS } from "@/lib/constants/api-errors";
 import { proposeScenarioEditSchema } from "@/lib/schemas/ai";
 import { ContentError } from "@/lib/server/content/errors";
 import { withCampaignContentWrite } from "@/lib/server/content/write";
@@ -19,7 +20,7 @@ export const SCENARIO_EDIT_ACTION: AssistantWriteAction = {
 
     const page = state.page;
 
-    if (!page) throw new ContentError("Сторінку не знайдено", 404);
+    if (!page) throw new ContentError(API_ERRORS.SCENARIO_PAGE_NOT_FOUND, 404);
 
     const resolved = resolveAiOps(readContentStrict(page.content), input.ops);
 
@@ -36,7 +37,7 @@ export const SCENARIO_EDIT_ACTION: AssistantWriteAction = {
 
     const page = state.page;
 
-    if (!page) throw new ContentError("Сторінку не знайдено", 404);
+    if (!page) throw new ContentError(API_ERRORS.SCENARIO_PAGE_NOT_FOUND, 404);
 
     const resolved = resolveAiOps(readContentStrict(page.content), input.ops);
 

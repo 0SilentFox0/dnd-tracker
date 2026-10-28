@@ -25,17 +25,17 @@ export function auraZoneMutation(ctx: BattleMutationContext, data: AuraZoneBody)
 
   const aura = areaAuras(owner).find((a) => a.id === data.auraId);
 
-  if (!aura) throw new BattleRuleError("action_rejected", "У учасника немає такої аури");
+  if (!aura) throw new BattleRuleError("action_rejected", API_ERRORS.BATTLE_NO_SUCH_AURA);
 
   assertCanAct(ctx, owner.basicInfo.id);
 
-  if (!ctx.isDM && owner.battleData.auraZones?.[aura.id] === ctx.scene.round) throw new BattleRuleError("action_used", "Зону цієї аури вже обрано в цьому раунді");
+  if (!ctx.isDM && owner.battleData.auraZones?.[aura.id] === ctx.scene.round) throw new BattleRuleError("action_used", API_ERRORS.BATTLE_AURA_ZONE_CHOSEN);
 
   const targetIds = [...new Set(data.targetIds)];
 
   const allowed = new Set(zoneCandidates(ctx.participants, owner, aura.target).map((p) => p.basicInfo.id));
 
-  if (targetIds.some((id) => !allowed.has(id))) throw new BattleRuleError("action_rejected", "Ціль поза доступною стороною");
+  if (targetIds.some((id) => !allowed.has(id))) throw new BattleRuleError("action_rejected", API_ERRORS.BATTLE_TARGET_OUT_OF_SIDE);
 
   const participants = applyAuraZone(ctx.participants, owner, aura, targetIds, ctx.scene.round);
 

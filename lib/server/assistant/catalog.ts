@@ -2,6 +2,7 @@ import { ASSISTANT_ACTIONS } from "./action-definitions";
 import type { AssistantActionDef } from "./types";
 
 import "server-only";
+import { API_ERRORS } from "@/lib/constants/api-errors";
 import { ContentError } from "@/lib/server/content/errors";
 import type { Actor } from "@/lib/utils/api/actor";
 import { needFailure } from "@/lib/utils/api/need";
@@ -10,7 +11,7 @@ export function createActionCatalog(definitions: readonly AssistantActionDef[]) 
   const actions = new Map<string, AssistantActionDef>();
 
   for (const def of definitions) {
-    if (!/^[a-z][a-z-]*(?:\.[a-z][a-z-]*)+$/.test(def.id) || actions.has(def.id)) throw new ContentError("Некоректний або повторний id дії", 500);
+    if (!/^[a-z][a-z-]*(?:\.[a-z][a-z-]*)+$/.test(def.id) || actions.has(def.id)) throw new ContentError(API_ERRORS.ASSISTANT_ACTION_ID_INVALID, 500);
 
     actions.set(def.id, def);
   }
@@ -19,7 +20,7 @@ export function createActionCatalog(definitions: readonly AssistantActionDef[]) 
     getAction(id: string): AssistantActionDef {
       const action = actions.get(id);
 
-      if (!action) throw new ContentError("Дія асистента недоступна", 404);
+      if (!action) throw new ContentError(API_ERRORS.ASSISTANT_ACTION_UNAVAILABLE, 404);
 
       return action;
     },

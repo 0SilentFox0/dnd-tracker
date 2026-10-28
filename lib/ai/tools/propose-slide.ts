@@ -5,6 +5,7 @@ import { defineTool } from "./define";
 
 import "server-only";
 import { AI_IMAGE_ASPECTS, AI_IMAGE_PROMPT_MAX } from "@/lib/constants/ai";
+import { API_ERRORS } from "@/lib/constants/api-errors";
 import { SLIDE_TITLE_MAX } from "@/lib/constants/show";
 import { ContentError } from "@/lib/server/content/errors";
 
@@ -28,6 +29,6 @@ export const proposeSceneSlideTool = defineTool({
   handler: async (ctx) => {
     callerOf(ctx);
     // Legacy payload has no explicitRequest or trusted run claim. Never infer consent.
-    throw new ContentError("Генерація потребує явного запиту, підтвердження та довіреного запуску. Відкрийте редактор показу.", 409);
+    throw new ContentError(API_ERRORS.ASSISTANT_GENERATION_NEEDS_TRUSTED_RUN, 409);
   },
 });

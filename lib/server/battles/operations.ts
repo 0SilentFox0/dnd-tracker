@@ -1,3 +1,4 @@
+import { API_ERRORS } from "@/lib/constants/api-errors";
 import { BattleStatus } from "@/lib/constants/battle";
 import { ContentError } from "@/lib/server/content/errors";
 import type { RunBattleMutationOptions } from "@/lib/utils/battle/pipeline/run-battle-mutation";
@@ -283,13 +284,13 @@ export async function getBattleOperation(operation: string, params: BattleOperat
 
       const { patchParticipantSchema } = await import("@/lib/server/battles/mutations/participants/patch-participant-schema");
 
-      if (!params.participantId) throw new ContentError("Потрібен participantId", 400);
+      if (!params.participantId) throw new ContentError(API_ERRORS.BATTLE_PARTICIPANT_ID_REQUIRED, 400);
 
       const participantId = params.participantId;
 
       return define({
         access: "dm", requireStatus: BattleStatus.ACTIVE, allowWhileAwaitingDm: true, rateLimitScope: "participantPatch", schema: patchParticipantSchema, mutate: (ctx, body) => patchParticipantMutation(ctx, participantId, body) });
     }
-    default: throw new BattleAccessError(404, "Невідома бойова операція");
+    default: throw new BattleAccessError(404, API_ERRORS.BATTLE_UNKNOWN_OPERATION);
   }
 }

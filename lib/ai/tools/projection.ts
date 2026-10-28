@@ -1,4 +1,5 @@
 import { AI_LIMITS } from "@/lib/constants/ai";
+import { API_ERRORS } from "@/lib/constants/api-errors";
 import { ContentError } from "@/lib/server/content/errors";
 
 /** Defense at both transports, including historical rows read by legacy tools. */
@@ -41,7 +42,7 @@ export function project(value: unknown, { path = [], offset = 0, limit = 20, for
   let selected: unknown = value;
 
   for (const key of path) {
-    if (!selected || typeof selected !== "object" || !Object.hasOwn(selected, key)) throw new ContentError("Шлях даних не знайдено", 404);
+    if (!selected || typeof selected !== "object" || !Object.hasOwn(selected, key)) throw new ContentError(API_ERRORS.ASSISTANT_DATA_PATH_NOT_FOUND, 404);
 
     selected = (selected as Record<string, unknown>)[key];
   }
@@ -71,7 +72,7 @@ export function project(value: unknown, { path = [], offset = 0, limit = 20, for
     const entry = { key, path: [...path, key], value: summary(data) };
 
     if (JSON.stringify({ path, items: [...items, entry] }).length > budget) {
-      if (!items.length) throw new ContentError("Завеликий ключ даних", 413);
+      if (!items.length) throw new ContentError(API_ERRORS.ASSISTANT_DATA_KEY_TOO_LARGE, 413);
 
       break;
     }

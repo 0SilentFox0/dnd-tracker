@@ -51,7 +51,7 @@ export async function runProgressionActionUnlocked(campaignId: string, character
     nextProgress = {};
     unlocked = [];
   } else {
-    if (!treeRow) return NextResponse.json({ error: "Дерева для раси немає" }, { status: 404 });
+    if (!treeRow) return NextResponse.json({ error: API_ERRORS.CHARACTER_RACE_TREE_MISSING }, { status: 404 });
 
     const tree = normalizeTree(treeRow);
 
@@ -70,7 +70,7 @@ export async function runProgressionActionUnlocked(campaignId: string, character
     data: { skillTreeProgress: nextProgress },
   });
 
-  if (count === 0) return NextResponse.json({ error: "Прогрес змінився" }, { status: 409 });
+  if (count === 0) return NextResponse.json({ error: API_ERRORS.CHARACTER_PROGRESS_CHANGED }, { status: 409 });
 
   return NextResponse.json({ unlocked });
 }

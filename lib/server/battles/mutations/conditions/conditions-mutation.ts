@@ -1,6 +1,7 @@
 import { z } from "zod";
 
 import { ABILITY_KEYS } from "@/lib/constants/abilities";
+import { API_ERRORS, conditionAbsentMessage, conditionImmuneMessage } from "@/lib/constants/api-errors";
 import { findParticipant } from "@/lib/utils/abilities/engine/core/participants";
 import { applyCondition5e, CONDITION_5E_KEYS, PERMANENT_ROUNDS, removeCondition5e } from "@/lib/utils/battle/conditions";
 import type { BattleMutationContext, MutationResult } from "@/lib/utils/battle/pipeline/run-battle-mutation";
@@ -23,7 +24,7 @@ export type BattleConditionsBody = z.infer<typeof battleConditionsSchema>;
 export function battleConditionsMutation(ctx: BattleMutationContext, body: BattleConditionsBody): MutationResult {
   const target = findParticipant(ctx.participants, body.participantId);
 
-  if (!target) throw new BattleRuleError("invalid_target", "Учасника не знайдено");
+  if (!target) throw new BattleRuleError("invalid_target", API_ERRORS.MEMBER_NOT_FOUND);
 
   const round = ctx.scene.round;
 
@@ -43,14 +44,14 @@ export function battleConditionsMutation(ctx: BattleMutationContext, body: Battl
       rules: ctx.meta.rules,
     });
 
-    if (result.blocked) throw new BattleRuleError("invalid_target", `${target.basicInfo.name}: імунітет до цього стану`);
+    if (result.blocked) throw new BattleRuleError("invalid_target", conditionImmuneMessage(target.basicInfo.name));
 
     return { participants: result.participants, pending: ctx.pending, events: [dmEvent(round, result.messages.join("; "), targets)] };
   }
 
   const { participants, removed } = removeCondition5e(ctx.participants, body.participantId, body.condition);
 
-  if (removed.length === 0) throw new BattleRuleError("invalid_target", `${target.basicInfo.name}: такого стану немає`);
+  if (removed.length === 0) throw new BattleRuleError("invalid_target", conditionAbsentMessage(target.basicInfo.name));
 
   return { participants, pending: ctx.pending, events: [dmEvent(round, `ДМ: ${target.basicInfo.name} — стан знято: ${removed[0].name}`, targets)] };
 }

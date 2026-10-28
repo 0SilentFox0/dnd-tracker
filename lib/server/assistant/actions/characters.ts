@@ -2,6 +2,7 @@ import { requestDigest } from "../intent-store";
 import type { AssistantActionDef } from "../types";
 
 import "server-only";
+import { API_ERRORS } from "@/lib/constants/api-errors";
 import { CharacterType } from "@/lib/constants/characters";
 import { CHARACTER_INPUTS, characterReads, characterResult, characterState, runCharacterOperation } from "@/lib/server/characters/action-service";
 import { assertSafeCharacterAvatar } from "@/lib/server/characters/avatar-input";
@@ -35,7 +36,7 @@ export const CHARACTER_ACTIONS: readonly AssistantActionDef[] = Object.entries(C
 
         const rows = operation === "create" ? [] : operation === "delete-all" ? state.characters.filter(row => row.type === CharacterType.PLAYER) : state.characters;
 
-        if (value.characterId && !rows.length) throw new ContentError("Персонажа не знайдено", 404);
+        if (value.characterId && !rows.length) throw new ContentError(API_ERRORS.CHARACTER_NOT_FOUND, 404);
 
         const targets = rows.map(row => ({ domain: "characters", id: row.id, name: row.name }));
 

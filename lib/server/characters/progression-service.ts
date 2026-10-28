@@ -10,6 +10,7 @@ import { actorDmAccess, runCharacterOperation as runOperationCore } from "./oper
 import { characterReferenceHash } from "./reference-state";
 
 import "server-only";
+import { API_ERRORS } from "@/lib/constants/api-errors";
 import { prisma } from "@/lib/db";
 import { ChoicesBodySchema } from "@/lib/schemas/choices";
 import { experienceSchema, hitDieSchema, inspirationSchema, resourcesEditSchema, restSchema, sheetRollSchema } from "@/lib/schemas/out-of-combat";
@@ -57,7 +58,7 @@ async function progressionFingerprint(actor: Actor, input: Record<string, unknow
     ? await prisma.character.findMany({ where, include: { inventory: true }, orderBy: { id: "asc" } })
     : await prisma.character.findMany({ where, select: { id: true, name: true, updatedAt: true }, orderBy: { id: "asc" } });
 
-  if (ids.length && characters.length !== ids.length) throw new ContentError("Персонажа не знайдено", 404);
+  if (ids.length && characters.length !== ids.length) throw new ContentError(API_ERRORS.CHARACTER_NOT_FOUND, 404);
 
   const campaign = await prisma.campaign.findUnique({ where: { id: actor.campaignId }, select: { rules: true, maxLevel: true, allowPlayerEdit: true, members: { select: { userId: true, role: true }, orderBy: { userId: "asc" } } } });
 
@@ -69,15 +70,15 @@ async function progressionFingerprint(actor: Actor, input: Record<string, unknow
 export async function runCharacterProgression(actor: Actor, operation: string, raw: Record<string, unknown>, expected?: string): Promise<ActionResult> {
   const schema = PROGRESSION_INPUTS[operation as keyof typeof PROGRESSION_INPUTS];
 
-  if (!schema) throw new ContentError("Невідома операція", 400);
+  if (!schema) throw new ContentError(API_ERRORS.ASSISTANT_UNKNOWN_OPERATION, 400);
 
   assertCan(actor, { access: "dm", scope: progressionReads.has(operation) ? "characters:read" : "characters:write" });
 
-  if ("additionalSpells" in raw) throw new ContentError("UNSUPPORTED_FIELD: additionalSpells — вручну", 422);
+  if ("additionalSpells" in raw) throw new ContentError(API_ERRORS.CHARACTER_UNSUPPORTED_ADDITIONAL_SPELLS, 422);
 
   const parsed = schema.safeParse(raw);
 
-  if (!parsed.success) throw new ContentError("Некоректні дані прогресу", 400);
+  if (!parsed.success) throw new ContentError(API_ERRORS.CHARACTER_PROGRESS_DATA_INVALID, 400);
 
   const input = parsed.data as Record<string, unknown>;
 
@@ -86,7 +87,7 @@ export async function runCharacterProgression(actor: Actor, operation: string, r
 
     await validateCharacterInputRefs(actor, operation, input);
 
-    if (expected && requestDigest(await progressionFingerprint(actor, input)) !== expected) throw new ContentError("Прогрес або залежності змінилися", 409);
+    if (expected && requestDigest(await progressionFingerprint(actor, input)) !== expected) throw new ContentError(API_ERRORS.CHARACTER_PROGRESS_DEPS_CHANGED, 409);
 
     const characterId = String(input.characterId ?? "");
 
@@ -96,7 +97,7 @@ export async function runCharacterProgression(actor: Actor, operation: string, r
 
     const core = CHARACTER_OPERATIONS[operation];
 
-    if (!core) throw new ContentError("Невідома операція", 400);
+    if (!core) throw new ContentError(API_ERRORS.ASSISTANT_UNKNOWN_OPERATION, 400);
 
     return finishProgression(await runOperationCore(core, { campaignId: actor.campaignId, characterId, actor, access }, parseInput(core.schema, body)), actor, input, characterId);
   });
@@ -123,7 +124,7 @@ export async function validateCharacterInputRefs(actor: Actor, operation: string
 
   const supplied = refs.filter((ref): ref is string => typeof ref === "string" && ref.length > 0);
 
-  if (supplied.some(ref => !parseItemRef(ref))) throw new ContentError("Некоректне посилання предмета", 422);
+  if (supplied.some(ref => !parseItemRef(ref))) throw new ContentError(API_ERRORS.CHARACTER_ITEM_REF_INVALID, 422);
 
   const ids = [...new Set(supplied.flatMap(refArtifactIds))];
 
@@ -131,5 +132,5 @@ export async function validateCharacterInputRefs(actor: Actor, operation: string
 
   const rows = await prisma.artifact.findMany({ where: { campaignId: actor.campaignId, id: { in: ids } }, select: { id: true } });
 
-  if (rows.length !== ids.length) throw new ContentError("Предмет не знайдено в цій кампанії", 404);
+  if (rows.length !== ids.length) throw new ContentError(API_ERRORS.CHARACTER_ITEM_NOT_IN_CAMPAIGN, 404);
 }

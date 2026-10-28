@@ -16,6 +16,8 @@ export type Actor = { campaignId: string; userId: string; isDM: boolean; via: "s
 
 export const tokenActorOf = (t: { campaignId: string; userId: string; scopes: readonly ApiTokenScope[] }): Actor => ({ campaignId: t.campaignId, userId: t.userId, scopes: t.scopes, isDM: true, via: "token" });
 
+export const sessionDmActor = (campaignId: string, userId: string): Actor => ({ campaignId, userId, isDM: true, via: "session", scopes: null });
+
 export async function verifyBearer(raw: string | null, campaignId: string | null): Promise<{ tokenId: string; campaignId: string; userId: string; scopes: ApiTokenScope[] } | NextResponse> {
   const token = raw ? await verifyApiToken(raw) : null;
 

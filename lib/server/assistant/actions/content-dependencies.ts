@@ -6,7 +6,7 @@ import { jsonContent } from "./content-snapshot";
 import { BUNDLE_TABLES } from "@/lib/server/templates/bundle";
 import { collectKeysAndStrings } from "@/lib/server/templates/remap-ids";
 
-const tableKey = (kind: string) => ({ "spell-groups": "spellGroups", "main-skills": "mainSkills", "artifact-sets": "artifactSets" }[kind] ?? kind);
+export const tableKey = (kind: string) => ({ "spell-groups": "spellGroups", "main-skills": "mainSkills", "artifact-sets": "artifactSets" }[kind] ?? kind);
 
 type Row = Record<string, unknown>;
 
@@ -26,6 +26,8 @@ for (const table of BUNDLE_TABLES) {
     cascadeRelations.set(relation.type, entries);
   }
 }
+
+export const cascadeRelationsOf = (model: string) => cascadeRelations.get(model) ?? [];
 
 const object = (value: unknown): Row => value && typeof value === "object" && !Array.isArray(value) ? value as Row : {};
 
@@ -78,7 +80,7 @@ export function contentDeleteCascades(state: unknown, kind: string, ids: readonl
 
   const selected = new Set(ids);
 
-  for (const relation of targetModel ? cascadeRelations.get(targetModel) ?? [] : []) {
+  for (const relation of targetModel ? cascadeRelationsOf(targetModel) : []) {
     const { column } = relation;
 
     const rows = Array.isArray(tables[relation.table]) ? tables[relation.table] as Row[] : [];

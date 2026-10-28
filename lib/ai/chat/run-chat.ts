@@ -10,8 +10,8 @@ import { toAiSdkTools } from "@/lib/ai/tools";
 import { publicToolData } from "@/lib/ai/tools/projection";
 import { AI_LIMITS, API_TOKEN_SCOPES } from "@/lib/constants/ai";
 import { API_ERRORS } from "@/lib/constants/api-errors";
+import { chatCaller } from "@/lib/server/assistant/caller";
 import { beginAssistantRun, createRunSignal, finishAssistantRun, isAssistantRunCancelled, readAssistantRuns, recordAssistantRunUsage, RUN_GRACE_MS } from "@/lib/server/assistant/runs";
-import type { AssistantCaller } from "@/lib/server/assistant/types";
 import { ContentError } from "@/lib/server/content/errors";
 import { errorResponse } from "@/lib/utils/api/api-response";
 import { PRIVATE_NO_STORE_HEADERS } from "@/lib/utils/api/cache-headers";
@@ -34,7 +34,7 @@ export async function runChat({ campaignId, userId, threadId, requestId, text, f
 
   if (!thread) return errorResponse(API_ERRORS.AI_THREAD_NOT_FOUND, 404);
 
-  const caller: AssistantCaller = { actor: { campaignId, userId, isDM: true, via: "session", scopes: null }, channel: "chat", threadId, tokenId: null };
+  const caller = chatCaller(campaignId, userId, threadId);
 
   let claim;
 

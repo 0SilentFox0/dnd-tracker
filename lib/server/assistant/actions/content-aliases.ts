@@ -2,6 +2,7 @@ import type { ActionRequest, AssistantCaller, DispatchResult } from "../types";
 import { contentMediaHandoff } from "./content-media";
 
 import "server-only";
+import { API_ERRORS } from "@/lib/constants/api-errors";
 import { ContentError } from "@/lib/server/content/errors";
 
 /** Trusted transport supplies caller and stable requestId; never model fields. */
@@ -39,7 +40,7 @@ export async function dispatchContentAlias(
     case "update_rules": actionId = "rules.update"; payload = { body: input.patch }; break;
     case "save_skill_tree": actionId = "skill-trees.save"; payload = { treeId: input.treeId, body: { race: input.race, skills: input.skills } }; break;
     case "source_apply": actionId = "source.apply"; payload = { body: input }; break;
-    default: throw new ContentError("Невідомий alias запису контенту", 404);
+    default: throw new ContentError(API_ERRORS.ASSISTANT_UNKNOWN_CONTENT_ALIAS, 404);
   }
 
   return dispatch(caller, { actionId, input: payload, requestId });

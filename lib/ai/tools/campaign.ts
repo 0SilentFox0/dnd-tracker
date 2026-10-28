@@ -3,6 +3,7 @@ import { z } from "zod";
 import { AiToolError, defineTool } from "./define";
 
 import "server-only";
+import { API_ERRORS } from "@/lib/constants/api-errors";
 import { prisma } from "@/lib/db";
 
 export const getCampaignBriefTool = defineTool({
@@ -14,7 +15,7 @@ export const getCampaignBriefTool = defineTool({
   handler: async (ctx) => {
     const campaign = await prisma.campaign.findUnique({ where: { id: ctx.campaignId }, select: { name: true, description: true, aiInstructions: true } });
 
-    if (!campaign) throw new AiToolError("Кампанію не знайдено");
+    if (!campaign) throw new AiToolError(API_ERRORS.CAMPAIGN_NOT_FOUND);
 
     return { name: campaign.name, description: campaign.description, instructions: campaign.aiInstructions };
   },

@@ -1,5 +1,5 @@
 import { after } from "next/server";
-import { Prisma } from "@prisma/client";
+import { type BattleScene, Prisma } from "@prisma/client";
 import { z } from "zod";
 
 import { API_ERRORS } from "@/lib/constants/api-errors";
@@ -28,15 +28,17 @@ export const recordSchemas = { create: createBattleSchema, patch: patchBattleSch
 export type RecordOperation = keyof typeof recordSchemas;
 
 export function requireBattleId(id: string | undefined): string {
-  if (!id) throw new ContentError("Потрібен battleId", 400);
+  if (!id) throw new ContentError(API_ERRORS.BATTLE_ID_REQUIRED, 400);
 
   return id;
 }
 
-export async function battleRecord(campaignId: string, battleId: string) {
-  const row = await prisma.battleScene.findUnique({ where: { id: battleId } });
+export async function battleRecord(campaignId: string, battleId: string): Promise<BattleScene>;
+export async function battleRecord<S extends Prisma.BattleSceneSelect>(campaignId: string, battleId: string, select: S): Promise<Prisma.BattleSceneGetPayload<{ select: S }>>;
+export async function battleRecord(campaignId: string, battleId: string, select?: Prisma.BattleSceneSelect): Promise<unknown> {
+  const row = await prisma.battleScene.findUnique({ where: { id: battleId }, ...(select && { select: { ...select, campaignId: true } }) });
 
-  if (!row || row.campaignId !== campaignId) throw new ContentError("Бій не знайдено", 404);
+  if (!row || row.campaignId !== campaignId) throw new ContentError(API_ERRORS.BATTLE_NOT_FOUND, 404);
 
   return row;
 }

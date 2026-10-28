@@ -4,7 +4,7 @@ import type { Prisma } from "@prisma/client";
 import { requireCharacterRecord } from "../access";
 import { characterRoute, defineCharacterOperation, dmCharacterGate, orThrow } from "../operation-runner";
 
-import { API_ERRORS } from "@/lib/constants/api-errors";
+import { API_ERRORS, characterMaxLevelReachedMessage } from "@/lib/constants/api-errors";
 import { CharacterLogKind } from "@/lib/constants/character-log";
 import { prisma } from "@/lib/db";
 import { rejectIfInActiveBattle } from "@/lib/server/characters/battle-lock";
@@ -93,7 +93,7 @@ async function levelUpCore({ access, character }: Gate, pick: LevelUpPick) {
 
   const newLevel = character.level + 1;
 
-  if (newLevel > campaign.maxLevel) throw new ContentError(`Персонаж досяг максимального рівня ${campaign.maxLevel}`, 422);
+  if (newLevel > campaign.maxLevel) throw new ContentError(characterMaxLevelReachedMessage(campaign.maxLevel), 422);
 
   const race = await loadRaceProgression(id, character.race);
 

@@ -4,6 +4,7 @@ import { isKnownImageModel } from "@/lib/constants/ai";
 import { API_ERRORS } from "@/lib/constants/api-errors";
 import { prisma } from "@/lib/db";
 import { readSlides } from "@/lib/schemas/show";
+import { fullRowDigest, stampDigest } from "@/lib/server/assistant/digest";
 import { requestDigest } from "@/lib/server/assistant/intent-store";
 import type { ActionExecutionContext, ActionPreview, ActionResult, AssistantCaller, JsonValue } from "@/lib/server/assistant/types";
 import { assertCan } from "@/lib/server/content/access";
@@ -53,18 +54,19 @@ async function access(actor: Actor, read = false) {
 async function state(actor: Actor, input: ShowInput) {
   const campaignId = actor.campaignId;
 
-  const [decks, show, scenes, tracks, battles] = await Promise.all([
-    prisma.slideDeck.findMany({ where: { campaignId }, orderBy: [{ sortOrder: "asc" }, { id: "asc" }] }), readShowState(campaignId),
+  const [decks, deck, show, scenes, tracks, tracksDigest, battles] = await Promise.all([
+    stampDigest(prisma, "SlideDeck", { campaignId }),
+    input.deckId ? prisma.slideDeck.findFirst({ where: { id: input.deckId, campaignId } }).then(row => row ?? undefined) : undefined,
+    readShowState(campaignId),
     prisma.scenarioPage.findMany({ where: { campaignId }, select: { id: true, kind: true }, orderBy: { id: "asc" } }),
-    prisma.campaignTrack.findMany({ where: { campaignId }, orderBy: { id: "asc" } }),
+    prisma.campaignTrack.findMany({ where: { campaignId }, select: { id: true }, orderBy: { id: "asc" } }),
+    fullRowDigest(prisma, "campaign_tracks", campaignId),
     prisma.battleScene.findMany({ where: { campaignId }, select: { id: true, name: true, status: true }, orderBy: { id: "asc" } }),
   ]);
 
-  const deck = input.deckId ? decks.find(d => d.id === input.deckId) : undefined;
-
   if (input.deckId && !deck) throw new ContentError(API_ERRORS.DECK_NOT_FOUND, 404);
 
-  return { decks, deck, show, scenes, tracks, battles };
+  return { decks, deck, show, scenes, tracks, tracksDigest, battles };
 }
 
 export async function prepareShowAction(caller: AssistantCaller, operation: string, input: ShowInput): Promise<ActionPreview> {
@@ -79,10 +81,10 @@ export async function prepareShowAction(caller: AssistantCaller, operation: stri
 
     if (operation === "decks.scene" && body.scenarioPageId && !snapshot.scenes.some(p => p.id === body.scenarioPageId && p.kind === "scene")) throw new ContentError(API_ERRORS.DECK_SCENE_INVALID, 400);
 
-    if (operation === "generate" && (!input.explicitRequest || !isKnownImageModel(body.provider as Parameters<typeof isKnownImageModel>[0], String(body.model)))) throw new ContentError("Потрібний явний запит і чинна модель зображень", 400);
+    if (operation === "generate" && (!input.explicitRequest || !isKnownImageModel(body.provider as Parameters<typeof isKnownImageModel>[0], String(body.model)))) throw new ContentError(API_ERRORS.ASSISTANT_IMAGE_EXPLICIT_REQUEST, 400);
 
     if (operation === "decks.save") for (const slide of body.slides as Slide[]) {
-      if (slide.trackId && !snapshot.tracks.some(t => t.id === slide.trackId)) throw new ContentError("Трек не знайдено", 404);
+      if (slide.trackId && !snapshot.tracks.some(t => t.id === slide.trackId)) throw new ContentError(API_ERRORS.TRACK_NOT_FOUND, 404);
     }
 
     const target = { domain: "show", id: input.deckId ?? caller.actor.campaignId, name: snapshot.deck?.title ?? "Показ" };
@@ -130,7 +132,7 @@ export async function runShowOperation(actor: Actor, operation: string, input: S
     if (operation === "decks.get") return result(toSlideDeck(requiredDeck(snapshot.deck)));
 
     if (operation === "generate") {
-      if (!ctx?.externalResult) throw new ContentError("Немає збереженого результату генерації", 409);
+      if (!ctx?.externalResult) throw new ContentError(API_ERRORS.ASSISTANT_NO_GENERATION_RESULT, 409);
 
       return result(ctx.externalResult);
     }
@@ -147,7 +149,7 @@ export async function runShowOperation(actor: Actor, operation: string, input: S
     if (operation === "command") {
       const rate = await checkRateLimit({ userId: actor.userId, scope: "show", battleId: campaignId, ...BATTLE_RATE_LIMITS.show });
 
-      if (!rate.allowed) throw new ContentError("Забагато запитів", 429);
+      if (!rate.allowed) throw new ContentError(API_ERRORS.ASSISTANT_TOO_MANY_REQUESTS, 429);
 
       const next = await applyAndWriteShowCommand(campaignId, snapshot.show, body as ShowCommand);
 
@@ -183,9 +185,9 @@ export async function runShowOperation(actor: Actor, operation: string, input: S
       remaining = ctx?.externalResult ? (ctx.externalResult as unknown as { slides: Slide[] }).slides : body.slides as Slide[];
 
       // No copying or provider call under the DB guard.
-      if (remaining.some(s => !before.some(p => p.imageUrl === s.imageUrl) && !isHostedOnProjectStorage(s.imageUrl))) throw new ContentError("Потрібна підготовка медіа", 409);
+      if (remaining.some(s => !before.some(p => p.imageUrl === s.imageUrl) && !isHostedOnProjectStorage(s.imageUrl))) throw new ContentError(API_ERRORS.ASSISTANT_MEDIA_PREPARE_REQUIRED, 409);
 
-      for (const s of remaining) if (s.trackId && !snapshot.tracks.some(t => t.id === s.trackId)) throw new ContentError("Трек не знайдено", 404);
+      for (const s of remaining) if (s.trackId && !snapshot.tracks.some(t => t.id === s.trackId)) throw new ContentError(API_ERRORS.TRACK_NOT_FOUND, 404);
 
       const savedRow = await saveDeckRecord(campaignId, deck.id, deck.updatedAt, String(body.title), remaining);
 
@@ -202,7 +204,7 @@ export async function runShowOperation(actor: Actor, operation: string, input: S
       return result(saved);
     }
 
-    if (operation !== "decks.delete") throw new ContentError("Невідома дія показу", 400);
+    if (operation !== "decks.delete") throw new ContentError(API_ERRORS.ASSISTANT_UNKNOWN_SHOW_ACTION, 400);
 
     await deleteDeckRecord(campaignId, deck.id);
 

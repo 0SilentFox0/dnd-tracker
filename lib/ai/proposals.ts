@@ -10,6 +10,7 @@ import { DECK_TITLE_MAX, MAX_DECKS_PER_CAMPAIGN, MAX_SLIDES_PER_DECK } from "@/l
 import { prisma } from "@/lib/db";
 import { scenarioContentSchema } from "@/lib/schemas/scenario";
 import { slidesSchema } from "@/lib/schemas/show";
+import { chatCaller } from "@/lib/server/assistant/caller";
 import { requestDigest } from "@/lib/server/assistant/intent-store";
 import { legacyPreview, reconcileLegacyProposal } from "@/lib/server/assistant/legacy-proposals";
 import { withCampaignContentWrite } from "@/lib/server/content/write";
@@ -60,7 +61,7 @@ export async function applyProposal(campaignId: string, userId: string, proposal
     if (linked && !executingIntentId) {
       if (linked.userId !== userId || linked.status !== "pending" || linked.expiresAt <= new Date()) return { ok: false, status: 409, error: API_ERRORS.AI_PROPOSAL_DONE };
 
-      const fresh = await legacyPreview({ actor: { campaignId, userId, via: "session", scopes: null, isDM: true }, channel: "chat", threadId: null, tokenId: null }, proposalId);
+      const fresh = await legacyPreview(chatCaller(campaignId, userId, null), proposalId);
 
       if (requestDigest(fresh.preconditions) !== requestDigest(linked.expected)) {
         await tx.aiProposal.update({ where: { id: proposalId }, data: { status: "stale" } });

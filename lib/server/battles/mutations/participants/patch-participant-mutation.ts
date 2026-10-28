@@ -1,5 +1,6 @@
 import type { PatchParticipantData } from "./patch-participant-schema";
 
+import { API_ERRORS } from "@/lib/constants/api-errors";
 import { CombatStatus } from "@/lib/constants/battle";
 import { findParticipant } from "@/lib/utils/abilities/engine/core/participants";
 import { resolveDowned } from "@/lib/utils/abilities/engine/core/run-abilities";
@@ -18,11 +19,11 @@ export function patchParticipantMutation(
   data: PatchParticipantData,
 ): MutationResult {
   if (data.lairActive !== undefined) {
-    if (!ctx.isDM) throw new BattleAccessError(403, "Лігво перемикає лише ДМ");
+    if (!ctx.isDM) throw new BattleAccessError(403, API_ERRORS.BATTLE_LAIR_DM_ONLY);
 
     const actor = findParticipant(ctx.participants, participantId);
 
-    if (!actor) throw new BattleAccessError(404, "Учасника не знайдено");
+    if (!actor) throw new BattleAccessError(404, API_ERRORS.MEMBER_NOT_FOUND);
 
     const updated = toggleLair(actor, data.lairActive);
 
@@ -37,7 +38,7 @@ export function patchParticipantMutation(
 
   if (data.currentHp !== undefined) return updateHp(ctx, participantId, data.currentHp);
 
-  throw new BattleRuleError("action_rejected", "Вкажіть currentHp, kill, revive або removeFromBattle");
+  throw new BattleRuleError("action_rejected", API_ERRORS.BATTLE_PATCH_PARTICIPANT_EMPTY);
 }
 
 function removeParticipant(ctx: BattleMutationContext, participantId: string): MutationResult {
@@ -86,7 +87,7 @@ function removeParticipant(ctx: BattleMutationContext, participantId: string): M
 function removeFromReserve(ctx: BattleMutationContext, participantId: string): MutationResult {
   const removed = findParticipant(reserveOf(ctx.pending), participantId);
 
-  if (!removed) throw new BattleAccessError(404, "Учасника не знайдено");
+  if (!removed) throw new BattleAccessError(404, API_ERRORS.MEMBER_NOT_FOUND);
 
   return {
     participants: ctx.participants,
@@ -98,7 +99,7 @@ function removeFromReserve(ctx: BattleMutationContext, participantId: string): M
 function updateHp(ctx: BattleMutationContext, participantId: string, requestedHp: number, kill = false): MutationResult {
   const idx = ctx.participants.findIndex((p) => p.basicInfo.id === participantId);
 
-  if (idx === -1) throw new BattleAccessError(404, "Учасника не знайдено");
+  if (idx === -1) throw new BattleAccessError(404, API_ERRORS.MEMBER_NOT_FOUND);
 
   const participant = ctx.participants[idx];
 
@@ -146,11 +147,11 @@ function updateHp(ctx: BattleMutationContext, participantId: string, requestedHp
 function revive(ctx: BattleMutationContext, participantId: string): MutationResult {
   const idx = ctx.participants.findIndex((p) => p.basicInfo.id === participantId);
 
-  if (idx === -1) throw new BattleAccessError(404, "Учасника не знайдено");
+  if (idx === -1) throw new BattleAccessError(404, API_ERRORS.MEMBER_NOT_FOUND);
 
   const participant = ctx.participants[idx];
 
-  if (isUp(participant)) throw new BattleRuleError("action_rejected", "Учасник і так живий");
+  if (isUp(participant)) throw new BattleRuleError("action_rejected", API_ERRORS.BATTLE_PARTICIPANT_ALREADY_ALIVE);
 
   const oldHp = participant.combatStats.currentHp;
 

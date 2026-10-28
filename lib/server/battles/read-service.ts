@@ -1,6 +1,6 @@
 import "server-only";
 import { AI_LIMITS } from "@/lib/constants/ai";
-import { API_ERRORS } from "@/lib/constants/api-errors";
+import { API_ERRORS, battleNotInCampaignMessage } from "@/lib/constants/api-errors";
 import { BattleStatus } from "@/lib/constants/battle";
 import { prisma } from "@/lib/db";
 import { ContentError } from "@/lib/server/content/errors";
@@ -16,7 +16,7 @@ export async function readLegacyBattleState(ctx: { campaignId: string; userId: s
 
     const battle = await loadBattle(prisma, { battleId: id, campaignId: ctx.campaignId, userId: ctx.userId });
 
-    if (!battle) throw new ContentError(`Бою ${id} немає в цій кампанії`, 404);
+    if (!battle) throw new ContentError(battleNotInCampaignMessage(id), 404);
 
     if (!battle.isMember || !battle.isDM) throw new ContentError(API_ERRORS.DM_ONLY, 403);
 

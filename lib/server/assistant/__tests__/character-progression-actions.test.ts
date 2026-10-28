@@ -68,7 +68,7 @@ it("foreignNestedHeroCannotBePrepared", async () => { h.character.findMany.mockR
 it("artifactSetChangesAlsoMakeProgressStale", async () => {
   const expected = requestDigest(await progressionState(actor, { characterId: "hero" }));
 
-  h.artifactSet.findMany.mockResolvedValue([{ id: "set", abilities: [{ id: "changed" }] }] as never); await expect(runCharacterProgression(actor, "choices", { characterId: "hero", raceChoices: {} }, expected)).rejects.toMatchObject({ status: 409 });
+  h.$queryRaw.mockResolvedValue([{ id: "c", digest: "changed" }] as never); await expect(runCharacterProgression(actor, "choices", { characterId: "hero", raceChoices: {} }, expected)).rejects.toMatchObject({ status: 409 });
 });
 it("inventoryReadDoesNotCreateMissingInventory", async () => {
   h.character.findUnique.mockResolvedValue({ ...hero, inventory: null, campaign: { members: [{ userId: "dm", role: "dm" }] } });

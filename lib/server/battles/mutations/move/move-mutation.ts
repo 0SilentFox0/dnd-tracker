@@ -3,6 +3,7 @@ import { z } from "zod";
 import { mazeMove } from "./maze-move";
 import { resolveMover } from "./resolve-mover";
 
+import { API_ERRORS } from "@/lib/constants/api-errors";
 import { DEFAULT_HAZARD_LABEL } from "@/lib/constants/battle";
 import { mapCellSchema } from "@/lib/schemas/battles";
 import { findParticipant, isActive, replaceParticipant } from "@/lib/utils/abilities/engine/core/participants";
@@ -32,7 +33,7 @@ const MODE_MOVES: Partial<Record<MapModeKey, ModeMove>> = { maze: mazeMove };
 export function moveMutation(ctx: BattleMutationContext, data: MoveBody): MutationResult {
   const map = ctx.meta.map;
 
-  if (!map) throw new BattleRuleError("action_rejected", "У цьому бою немає карти");
+  if (!map) throw new BattleRuleError("action_rejected", API_ERRORS.BATTLE_NO_MAP);
 
   const own = MODE_MOVES[activeMapMode(map).key as MapModeKey];
 
@@ -48,7 +49,7 @@ export function moveMutation(ctx: BattleMutationContext, data: MoveBody): Mutati
 
   // розстановка ДМ (чужий хід або free) — без бюджету й шляху
   if (!ownTurn || (ctx.isDM && data.free === true)) {
-    if (!canStand(map, participants, mover, data.to)) throw new BattleRuleError("action_rejected", "Клітинка зайнята, неігрова або поза картою");
+    if (!canStand(map, participants, mover, data.to)) throw new BattleRuleError("action_rejected", API_ERRORS.BATTLE_CELL_BLOCKED);
 
     const moved = at(mover, data.to, mover.battleData.movementUsed);
 
@@ -67,9 +68,9 @@ export function moveMutation(ctx: BattleMutationContext, data: MoveBody): Mutati
 
   const cost = search.cost.get(cellKey(data.to));
 
-  if (cost === undefined) throw new BattleRuleError("action_rejected", "Туди не дійти: зайнято, закрито ворогами або не вистачає руху");
+  if (cost === undefined) throw new BattleRuleError("action_rejected", API_ERRORS.BATTLE_UNREACHABLE);
 
-  if (frightenedBlocksMove(map, participants, mover, data.to)) throw new BattleRuleError("action_rejected", "Наляканий не може наблизитись до джерела страху");
+  if (frightenedBlocksMove(map, participants, mover, data.to)) throw new BattleRuleError("action_rejected", API_ERRORS.BATTLE_FRIGHTENED_NO_APPROACH);
 
   if (!rules.actions.enabled) {
     const moved = at(mover, data.to, (mover.battleData.movementUsed ?? 0) + cost);
@@ -107,7 +108,7 @@ function finishMove(ctx: BattleMutationContext, { participants, moved, hazard, m
 }
 
 function returnToStart(ctx: BattleMutationContext, participants: BattleParticipant[], mover: BattleParticipant, ownTurn: boolean): MutationResult {
-  const check = ownTurn ? checkReturnToStart(ctx.meta.map, participants, mover) : { ok: false as const, error: "Повернутися можна лише у свій хід" };
+  const check = ownTurn ? checkReturnToStart(ctx.meta.map, participants, mover) : { ok: false as const, error: API_ERRORS.BATTLE_RETURN_OWN_TURN };
 
   if (!check.ok) throw new BattleRuleError("action_rejected", check.error);
 

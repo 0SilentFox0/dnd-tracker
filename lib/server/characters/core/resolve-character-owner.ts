@@ -2,6 +2,7 @@ import { type NextResponse } from "next/server";
 
 import type { CreateCharacterInput } from "./create-character-schema";
 
+import { API_ERRORS } from "@/lib/constants/api-errors";
 import { CharacterType } from "@/lib/constants/characters";
 import { prisma } from "@/lib/db";
 import { errorResponse } from "@/lib/utils/api/api-response";
@@ -13,19 +14,19 @@ export async function resolveCharacterOwner(campaignId: string, dmUserId: string
 
   const ownerId = data.controlledBy.trim();
 
-  if (!ownerId) return { error: errorResponse("Оберіть гравця для персонажа типу «Гравець».", 400) };
+  if (!ownerId) return { error: errorResponse(API_ERRORS.CHARACTER_PLAYER_REQUIRED, 400) };
 
   const owner = await prisma.user.findUnique({ where: { id: ownerId }, select: { id: true } });
 
   if (!owner) {
     return {
-      error: errorResponse("Користувача з обраним ID немає в базі (наприклад, після зміни Supabase або міграції). Оновіть сторінку та оберіть гравця знову.", 400),
+      error: errorResponse(API_ERRORS.CHARACTER_OWNER_NOT_IN_DB, 400),
     };
   }
 
   const membership = await prisma.campaignMember.findFirst({ where: { campaignId, userId: ownerId }, select: { id: true } });
 
-  if (!membership) return { error: errorResponse("Обраний користувач не є учасником цієї кампанії.", 400) };
+  if (!membership) return { error: errorResponse(API_ERRORS.CHARACTER_OWNER_NOT_MEMBER, 400) };
 
   return { controlledBy: ownerId };
 }

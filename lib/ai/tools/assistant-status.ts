@@ -5,6 +5,7 @@ import { defineTool } from "./define";
 import { project } from "./projection";
 
 import { API_TOKEN_SCOPES } from "@/lib/constants/ai";
+import { API_ERRORS } from "@/lib/constants/api-errors";
 import { prisma } from "@/lib/db";
 import { authorizeAssistant } from "@/lib/server/assistant/authorize";
 import { assistantCatalog } from "@/lib/server/assistant/catalog";
@@ -33,7 +34,7 @@ export const assistantStatusTool = defineTool({
       else {
         const ref = await prisma.assistantReceipt.findFirst({ where: { intentId: input.intentId, ...intentOwner(caller) }, select: { actionId: true } });
 
-        if (!ref) throw new ContentError("Результат дії не знайдено", 404);
+        if (!ref) throw new ContentError(API_ERRORS.ASSISTANT_RECEIPT_NOT_FOUND, 404);
 
         await authorizeAssistant(caller, assistantCatalog.getAction(ref.actionId).need, "prepare");
       }

@@ -102,7 +102,7 @@ async function updateInventoryCore({ access, character }: Gate, data: z.infer<ty
         const owner = parsed && rows.get(parsed.propertyId ?? parsed.baseId);
 
         return (!!parsed?.param || !!(owner && itemStatsFromRow(owner)?.parameter)) && !resolveItemRow(ref, rows);
-      })) throw new ContentError("Недозволений або відсутній параметр предмета", 422);
+      })) throw new ContentError(API_ERRORS.CHARACTER_ITEM_PARAM_INVALID, 422);
 
       if (checkIds.length > 0) {
         const others = await tx.characterInventory.findMany({

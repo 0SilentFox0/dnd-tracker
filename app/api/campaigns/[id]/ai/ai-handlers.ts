@@ -12,9 +12,9 @@ import { createThread, deleteThread, listThreads, loadMessages, loadThread, patc
 import { AI_LIMITS, AI_PROPOSAL_STATUSES, isKnownImageModel, isKnownModel } from "@/lib/constants/ai";
 import { API_ERRORS } from "@/lib/constants/api-errors";
 import { prisma } from "@/lib/db";
-import { aiSettingsSchema, chatRequestSchema, createThreadSchema, discardGeneratedImageSchema, generateSlideImageSchema, patchThreadSchema } from "@/lib/schemas/ai";
+import { aiSettingsSchema, assistantRequestIdSchema, chatRequestSchema, createThreadSchema, discardGeneratedImageSchema, generateSlideImageSchema, patchThreadSchema } from "@/lib/schemas/ai";
+import { chatCaller } from "@/lib/server/assistant/caller";
 import { cancelAssistantRun, readAssistantRuns } from "@/lib/server/assistant/runs";
-import type { AssistantCaller } from "@/lib/server/assistant/types";
 import { ContentError } from "@/lib/server/content/errors";
 import { requireDM } from "@/lib/utils/api/api-auth";
 import { errorResponse } from "@/lib/utils/api/api-response";
@@ -165,7 +165,6 @@ export const discardGeneratedImageHandler = (req: Request, campaignId: string) =
     return outcome === "foreign" ? errorResponse(API_ERRORS.AI_IMAGE_NOT_OWNED, 400) : NextResponse.json({ removed: outcome === "removed" });
   });
 
-const chatCaller = (campaignId: string, userId: string, threadId: string): AssistantCaller => ({ actor: { campaignId, userId, isDM: true, via: "session", scopes: null }, channel: "chat", threadId, tokenId: null });
 
 export const recoverChatHandler = (campaignId: string, threadId: string, requestId?: string) =>
   guarded("recover ai chat", () => requireDM(campaignId), async access => runResponse(async () => {
@@ -177,9 +176,9 @@ export const recoverChatHandler = (campaignId: string, threadId: string, request
   }));
 export const cancelChatHandler = (req: Request, campaignId: string, threadId: string) =>
   guarded("cancel ai chat", () => requireDM(campaignId), async access => runResponse(async () => {
-    const id = z.string().regex(/^[a-zA-Z0-9_-]{1,100}$/).safeParse(new URL(req.url).searchParams.get("requestId"));
+    const id = assistantRequestIdSchema.safeParse(new URL(req.url).searchParams.get("requestId"));
 
-    if (!id.success) return errorResponse("Некоректний ідентифікатор запиту", 400);
+    if (!id.success) return errorResponse(API_ERRORS.INVALID_REQUEST_ID, 400);
 
     const state = await cancelAssistantRun(chatCaller(campaignId, access.userId, threadId), id.data);
 

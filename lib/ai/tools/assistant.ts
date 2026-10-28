@@ -7,6 +7,7 @@ import { project } from "./projection";
 import { toolRequestId } from "./request-key";
 
 import { API_TOKEN_SCOPES } from "@/lib/constants/ai";
+import { API_ERRORS } from "@/lib/constants/api-errors";
 import { authorizeAssistant } from "@/lib/server/assistant/authorize";
 import { assistantCatalog } from "@/lib/server/assistant/catalog";
 import { dispatchAction } from "@/lib/server/assistant/execute";
@@ -59,7 +60,7 @@ export const assistantReadTool = defineTool({
 
     const action = assistantCatalog.getAction(input.actionId);
 
-    if (action.effect !== "read" && action.effect !== "handoff") throw new ContentError("Читання не може виконувати запис", 403);
+    if (action.effect !== "read" && action.effect !== "handoff") throw new ContentError(API_ERRORS.ASSISTANT_READ_CANNOT_WRITE, 403);
 
     const result = await dispatchAction(caller, { actionId: input.actionId, input: input.input, requestId: toolRequestId(ctx) }, ctx.abortSignal);
 

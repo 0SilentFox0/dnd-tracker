@@ -1,4 +1,5 @@
 import { publicToolData } from "@/lib/ai/tools/projection";
+import { API_ERRORS } from "@/lib/constants/api-errors";
 import { ContentError } from "@/lib/server/content/errors";
 
 export type ContextBlock = { label: string; required?: boolean; maxChars?: number } & ({ text: string; value?: never } | { value: unknown; text?: never });
@@ -7,11 +8,11 @@ const render = (b: ContextBlock) => `${b.label}:\n${typeof b.text === "string" ?
 
 /** Required blocks are indivisible. Optional blocks are valid JSON pages, never sliced JSON. */
 export function fitContext(blocks: readonly ContextBlock[], budget: number, includedLabels?: string[]): { text: string; truncated: boolean } {
-  if (!Number.isSafeInteger(budget) || budget < 0) throw new ContentError("Некоректний бюджет контексту", 400);
+  if (!Number.isSafeInteger(budget) || budget < 0) throw new ContentError(API_ERRORS.ASSISTANT_CONTEXT_BUDGET_INVALID, 400);
 
   const parts = blocks.filter(b => b.required).map(render);
 
-  if (parts.join("\n\n").length > budget) throw new ContentError("Обов’язкові інструкції не вміщуються в контекст. Скоротіть постійні інструкції кампанії.", 413);
+  if (parts.join("\n\n").length > budget) throw new ContentError(API_ERRORS.ASSISTANT_INSTRUCTIONS_TOO_LONG, 413);
 
   includedLabels?.push(...blocks.filter(b => b.required).map(b => b.label));
 

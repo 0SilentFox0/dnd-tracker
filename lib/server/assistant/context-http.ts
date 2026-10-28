@@ -5,6 +5,7 @@ import { readCompendiumSummary } from "./actions/handoffs";
 import { buildInstructions } from "@/lib/ai/context/prompt";
 import { loadThread } from "@/lib/ai/threads";
 import { AI_LIMITS } from "@/lib/constants/ai";
+import { API_ERRORS } from "@/lib/constants/api-errors";
 import { assistantContextPreviewSchema } from "@/lib/schemas/ai";
 import { ContentError } from "@/lib/server/content/errors";
 import { requireDM } from "@/lib/utils/api/api-auth";
@@ -19,7 +20,7 @@ const json=(body:unknown,status=200)=>NextResponse.json(body,{status,headers:PRI
 export function assistantContextRoute(mode:"preview"|"notes") {
  return async(req:Request,context:{params:Promise<{id:string;threadId?:string}>})=>{
   try {
-   if(req.headers.has("authorization") || (mode==="preview"&&!isSameOriginRequest(req))) return json({error:"Потрібна захищена сесія ДМ"},403);
+   if(req.headers.has("authorization") || (mode==="preview"&&!isSameOriginRequest(req))) return json({error:API_ERRORS.ASSISTANT_PROTECTED_DM_SESSION},403);
 
    const {id:campaignId,threadId}=await context.params;
 
@@ -53,7 +54,7 @@ return response; }
 
    const thread=threadId?await loadThread(campaignId,access.userId,threadId):null;
 
-   if(!thread)return json({error:"Тред недоступний"},404);
+   if(!thread)return json({error:API_ERRORS.ASSISTANT_THREAD_UNAVAILABLE},404);
 
    let disclosure:AssistantContextDisclosure|undefined;
 
@@ -62,6 +63,6 @@ return response; }
    return json({...disclosure,provider:thread.provider,model:thread.model,historyLimit:AI_LIMITS.historyMessages});
   }catch(error){ if(error instanceof ContentError)return json({error:error.message},error.status);
 
-return json({error:"Не вдалося підготувати перегляд контексту"},500); }
+return json({error:API_ERRORS.ASSISTANT_CONTEXT_PREVIEW_FAILED},500); }
  };
 }

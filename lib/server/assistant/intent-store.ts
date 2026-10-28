@@ -4,6 +4,7 @@ import { createHash } from "node:crypto";
 import type { ActionPreview, ActionRequest, AssistantCaller, IntentDetail, IntentStatus,IntentSummary } from "./types";
 
 import "server-only";
+import { API_ERRORS } from "@/lib/constants/api-errors";
 import { ASSISTANT_LIMITS } from "@/lib/constants/assistant";
 import { prisma } from "@/lib/db";
 import { actionPreviewSchema, assistantRequestSchema, assistantTargetSchema, intentPageSchema, intentStatusSchema } from "@/lib/schemas/assistant";
@@ -24,15 +25,15 @@ export const jsonInput = (value: Prisma.JsonValue): Prisma.InputJsonValue | type
 export function intentOwner(caller: AssistantCaller): { campaignId: string; userId: string; originTokenId?: string } {
   const { actor } = caller;
 
-  if (!actor.isDM || !actor.campaignId || !actor.userId) throw new ContentError("Дія недоступна", 403);
+  if (!actor.isDM || !actor.campaignId || !actor.userId) throw new ContentError(API_ERRORS.ASSISTANT_ACTION_FORBIDDEN, 403);
 
   if (actor.via === "token") {
-    if (!caller.tokenId || caller.channel !== "mcp" || !actor.scopes) throw new ContentError("Дія недоступна", 403);
+    if (!caller.tokenId || caller.channel !== "mcp" || !actor.scopes) throw new ContentError(API_ERRORS.ASSISTANT_ACTION_FORBIDDEN, 403);
 
     return { campaignId: actor.campaignId, userId: actor.userId, originTokenId: caller.tokenId };
   }
 
-  if (actor.via !== "session" || caller.channel !== "chat" || caller.tokenId !== null || actor.scopes !== null) throw new ContentError("Дія недоступна", 403);
+  if (actor.via !== "session" || caller.channel !== "chat" || caller.tokenId !== null || actor.scopes !== null) throw new ContentError(API_ERRORS.ASSISTANT_ACTION_FORBIDDEN, 403);
 
   return { campaignId: actor.campaignId, userId: actor.userId };
 }
@@ -49,7 +50,7 @@ export async function createIntent(caller: AssistantCaller, rawRequest: ActionRe
 
   const validatedPreview = parseInput(actionPreviewSchema, preview);
 
-  if (Buffer.byteLength(JSON.stringify({ request, preview: validatedPreview })) > ASSISTANT_LIMITS.maxPayloadBytes) throw new ContentError("Завелика пропозиція змін", 413);
+  if (Buffer.byteLength(JSON.stringify({ request, preview: validatedPreview })) > ASSISTANT_LIMITS.maxPayloadBytes) throw new ContentError(API_ERRORS.ASSISTANT_PROPOSAL_TOO_LARGE, 413);
 
   const originKey = requestDigest({ campaignId: owner.campaignId, channel: caller.channel, threadId: caller.threadId, tokenId: caller.tokenId });
 
@@ -71,7 +72,7 @@ export async function createIntent(caller: AssistantCaller, rawRequest: ActionRe
     select: { ...SUMMARY_SELECT, requestHash: true },
   });
 
-  if (row.requestHash !== requestHash) throw new ContentError("Цей запит уже має інший вміст", 409);
+  if (row.requestHash !== requestHash) throw new ContentError(API_ERRORS.ASSISTANT_INTENT_CONTENT_MISMATCH, 409);
 
   return intentSummary(row);
 }
@@ -79,9 +80,9 @@ export async function createIntent(caller: AssistantCaller, rawRequest: ActionRe
 export async function getIntent(caller: AssistantCaller, id: string, db: IntentDb = prisma): Promise<IntentDetail> {
   const row = await db.assistantIntent.findFirst({ where: { id, ...intentOwner(caller) }, select: { ...SUMMARY_SELECT, preview: true, redactedAt: true } });
 
-  if (!row) throw new ContentError("Пропозицію не знайдено", 404);
+  if (!row) throw new ContentError(API_ERRORS.AI_PROPOSAL_NOT_FOUND, 404);
 
-  if (row.redactedAt || row.preview === null) throw new ContentError("Вміст пропозиції очищено", 410);
+  if (row.redactedAt || row.preview === null) throw new ContentError(API_ERRORS.ASSISTANT_INTENT_PURGED, 410);
 
   return { ...intentSummary(row), preview: parseInput(actionPreviewSchema, row.preview) };
 }
@@ -98,7 +99,7 @@ export async function listIntents(caller: AssistantCaller, input: { cursor?: str
       if (typeof parsed.createdAt !== "string" || !Number.isFinite(Date.parse(parsed.createdAt)) || typeof parsed.id !== "string" || !/^[A-Za-z0-9_-]{1,100}$/.test(parsed.id)) throw new Error();
 
       after = parsed;
-    } catch { throw new ContentError("Некоректний курсор списку", 400); }
+    } catch { throw new ContentError(API_ERRORS.ASSISTANT_CURSOR_INVALID, 400); }
   }
 
   const rows = await db.assistantIntent.findMany({

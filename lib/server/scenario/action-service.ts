@@ -9,6 +9,7 @@ import { API_ERRORS } from "@/lib/constants/api-errors";
 import { DEFAULT_SCENE_LEGEND, SCENARIO_MAX_CONTENT_BYTES, SCENARIO_MAX_VERSIONS } from "@/lib/constants/scenario";
 import { prisma } from "@/lib/db";
 import { createScenarioPageSchema, scenarioContentSchema, scenarioSectionPatchSchema, updateScenarioMetaSchema } from "@/lib/schemas/scenario";
+import { stampDigest } from "@/lib/server/assistant/digest";
 import { requestDigest } from "@/lib/server/assistant/intent-store";
 import type { ActionResult } from "@/lib/server/assistant/types";
 import { assertCan } from "@/lib/server/content/access";
@@ -22,17 +23,18 @@ import type { ScenarioContent } from "@/types/scenario";
 export const scenarioFingerprint = requestDigest;
 export const scenarioResult = (data: unknown, id = "all"): ActionResult => ({ data: JSON.parse(JSON.stringify(data)), affected: [{ domain: "scenario", id, name: "Сценарій" }], warnings: [] });
 export async function scenarioState(actor: Actor, id?: string) {
-  const pages = await prisma.scenarioPage.findMany({ where: { campaignId: actor.campaignId }, select: OWNED_WITH_CONTENT_SELECT, orderBy: { id: "asc" } });
+  const where = { campaignId: actor.campaignId };
 
-  const page = id ? pages.find(p => p.id === id) : undefined;
+  const page = id ? await prisma.scenarioPage.findFirst({ where: { id, ...where }, select: OWNED_WITH_CONTENT_SELECT }) : undefined;
 
   if (id && !page) throw new ContentError(API_ERRORS.SCENARIO_NOT_FOUND, 404);
 
   // Bindings and metadata are dependencies even when page.version did not change.
-  const [decks, battles, characters] = await Promise.all([
-    prisma.slideDeck.findMany({ where: { campaignId: actor.campaignId }, select: { id: true, slides: true, scenarioPageId: true, updatedAt: true }, orderBy: { id: "asc" } }),
-    prisma.battleScene.findMany({ where: { campaignId: actor.campaignId }, select: { id: true }, orderBy: { id: "asc" } }),
-    prisma.character.findMany({ where: { campaignId: actor.campaignId }, select: { id: true }, orderBy: { id: "asc" } }),
+  const [pages, decks, battles, characters] = await Promise.all([
+    stampDigest(prisma, "ScenarioPage", where, { version: true }),
+    stampDigest(prisma, "SlideDeck", where),
+    prisma.battleScene.findMany({ where, select: { id: true }, orderBy: { id: "asc" } }),
+    prisma.character.findMany({ where, select: { id: true }, orderBy: { id: "asc" } }),
   ]);
 
   return { page, pages, decks, battles, characters };
@@ -42,7 +44,7 @@ export function transformScenarioContent(content: ScenarioContent, operation: st
 
   if (!section) throw new ContentError(API_ERRORS.SCENARIO_SECTION_NOT_FOUND, 404);
 
-  if (operation.startsWith("row.") && !section.rows.some(r => r.id === input.rowId)) throw new ContentError("Рядок не знайдено", 404);
+  if (operation.startsWith("row.") && !section.rows.some(r => r.id === input.rowId)) throw new ContentError(API_ERRORS.ASSISTANT_ROW_NOT_FOUND, 404);
 
   if (operation === "section.delete") return removeSection(content, input.sectionId);
 
@@ -58,7 +60,7 @@ export function transformScenarioContent(content: ScenarioContent, operation: st
     return updateSection(content, input.sectionId, { ...(patch.played !== undefined && { played: patch.played }), ...(patch.revealed !== undefined && { revealedAt: patch.revealed ? new Date().toISOString() : null }) });
   }
 
-  throw new ContentError("Невідома дія сценарію", 400);
+  throw new ContentError(API_ERRORS.ASSISTANT_UNKNOWN_SCENARIO_ACTION, 400);
 }
 
 async function validateBindings(actor: Actor, content: ScenarioContent) {
@@ -66,16 +68,16 @@ async function validateBindings(actor: Actor, content: ScenarioContent) {
     if (section.reveal?.mode === "afterSection") {
       const page = await prisma.scenarioPage.findFirst({ where: { campaignId: actor.campaignId, id: section.reveal.pageId }, select: { content: true } });
 
-      if (!page || !readContentStrict(page.content).sections.some(s => s.id === (section.reveal as { sectionId: string }).sectionId)) throw new ContentError("Розділ відкриття недоступний", 422);
+      if (!page || !readContentStrict(page.content).sections.some(s => s.id === (section.reveal as { sectionId: string }).sectionId)) throw new ContentError(API_ERRORS.ASSISTANT_OPEN_SECTION_UNAVAILABLE, 422);
     }
 
     for (const row of section.rows) {
-      if (row.battleId && !await prisma.battleScene.findFirst({ where: { id: row.battleId, campaignId: actor.campaignId }, select: { id: true } })) throw new ContentError("Бій недоступний", 422);
+      if (row.battleId && !await prisma.battleScene.findFirst({ where: { id: row.battleId, campaignId: actor.campaignId }, select: { id: true } })) throw new ContentError(API_ERRORS.BATTLE_UNAVAILABLE, 422);
 
       if (row.slide) {
         const deck = await prisma.slideDeck.findFirst({ where: { id: row.slide.deckId, campaignId: actor.campaignId }, select: { slides: true } });
 
-        if (!deck || !Array.isArray(deck.slides) || !deck.slides.some(s => s && typeof s === "object" && "id" in s && s.id === row.slide!.slideId)) throw new ContentError("Слайд недоступний", 422);
+        if (!deck || !Array.isArray(deck.slides) || !deck.slides.some(s => s && typeof s === "object" && "id" in s && s.id === row.slide!.slideId)) throw new ContentError(API_ERRORS.SCENARIO_SLIDE_UNAVAILABLE, 422);
       }
     }
   }

@@ -3,6 +3,7 @@ import { z } from "zod";
 import { AiToolError, defineTool } from "./define";
 
 import "server-only";
+import { characterNotInCampaignMessage } from "@/lib/constants/api-errors";
 import { ACTIVE_CHARACTER, CharacterType } from "@/lib/constants/characters";
 import { prisma } from "@/lib/db";
 import { readContent } from "@/lib/server/scenario/page-store";
@@ -52,7 +53,7 @@ export const readCharacterTool = defineTool({
       },
     });
 
-    if (!c) throw new AiToolError(`Персонажа ${id} немає в цій кампанії`);
+    if (!c) throw new AiToolError(characterNotInCampaignMessage(id));
 
     const bio = await prisma.scenarioPage.findFirst({ where: { campaignId: ctx.campaignId, characterId: id, kind: "hero" }, select: { content: true } });
 

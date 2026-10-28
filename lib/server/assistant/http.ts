@@ -1,11 +1,12 @@
 import { NextResponse } from "next/server";
 
+import { chatCaller } from "./caller";
 import { confirmIntent, rejectIntent } from "./execute";
 import { getIntent, listIntents } from "./intent-store";
 import { readDeletionReceipt, readReceipt } from "./receipts";
-import type { AssistantCaller } from "./types";
 
 import "server-only";
+import { API_ERRORS } from "@/lib/constants/api-errors";
 import { prisma } from "@/lib/db";
 import { assistantPolicySchema } from "@/lib/schemas/assistant";
 import { ContentError } from "@/lib/server/content/errors";
@@ -58,7 +59,7 @@ export function assistantRoute(mode: RouteMode) {
 
       if (access instanceof NextResponse) return privateResponse(access);
 
-      const caller: AssistantCaller = { actor: { campaignId, userId: access.userId, isDM: true, via: "session", scopes: null }, channel: "chat", threadId: null, tokenId: null };
+      const caller = chatCaller(campaignId, access.userId, null);
 
       if (!receiptRateChecked) {
         const rate = await checkRateLimit({ userId: access.userId, scope: `assistant-${mode}`, battleId: campaignId, limit: mutation ? 20 : 120, windowSeconds: 60, memoryFallback: true });
@@ -105,7 +106,7 @@ export function assistantRoute(mode: RouteMode) {
       if (error instanceof ContentError) return json({ code: error.status === 409 ? "ASSISTANT_CONFLICT" : "ASSISTANT_UNAVAILABLE", error: error.message }, error.status);
 
       // Do not log unknown DB/provider exceptions or return their raw payload.
-      return json({ code: "ASSISTANT_FAILED", error: "Не вдалося виконати запит" }, 500);
+      return json({ code: "ASSISTANT_FAILED", error: API_ERRORS.ASSISTANT_RUN_FAILED }, 500);
     }
   };
 }

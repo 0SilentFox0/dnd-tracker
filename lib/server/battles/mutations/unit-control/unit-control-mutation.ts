@@ -1,5 +1,6 @@
 import { z } from "zod";
 
+import { API_ERRORS } from "@/lib/constants/api-errors";
 import { ownerHeroNames, randomizeUnitControl, setUnitController } from "@/lib/utils/battle/participant/unit-control";
 import type { BattleMutationContext, MutationResult } from "@/lib/utils/battle/pipeline/run-battle-mutation";
 import { BattleRuleError, dmEvent } from "@/lib/utils/battle/store";
@@ -36,7 +37,7 @@ function assign(ctx: BattleMutationContext, body: Extract<UnitControlBody, { mod
 function random(ctx: BattleMutationContext) {
   const { participants, assigned } = randomizeUnitControl(ctx.participants, ctx.userId, ctx.rng ?? Math.random);
 
-  if (assigned.length === 0) throw new BattleRuleError("action_rejected", "Немає вільних юнітів або гравців із героями на цій стороні");
+  if (assigned.length === 0) throw new BattleRuleError("action_rejected", API_ERRORS.BATTLE_NO_CONTROLLABLE_UNITS);
 
   const given = assigned.map(({ unit, owner }) => `${unit.basicInfo.name} → ${ownerHeroNames(participants, owner)}`);
 

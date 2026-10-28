@@ -2,6 +2,7 @@ import type { Prisma } from "@prisma/client";
 
 import { authorizeAssistant } from "./authorize";
 import { runDurableEffects } from "./effects";
+import { conflict } from "./errors";
 import { readExternalState } from "./execution-state";
 import type { IntentTransactionOutcome } from "./execution-transaction";
 import type { ExecutorDeps } from "./executor-deps";
@@ -11,10 +12,9 @@ import type { AssistantCaller, ReceiptDto } from "./types";
 
 import "server-only";
 import { AI_LIMITS } from "@/lib/constants/ai";
+import { API_ERRORS } from "@/lib/constants/api-errors";
 import { receiptEffectsSchema } from "@/lib/schemas/assistant";
 import { ContentError, parseInput } from "@/lib/server/content/errors";
-
-const conflict = () => new ContentError("Пропозиція вже неактуальна або завершена", 409);
 
 /** Continue only after the claim/domain transaction committed. Resume uses the same executor. */
 export async function completeIntentOutcome(deps: ExecutorDeps, caller: AssistantCaller, intentId: string, outcome: IntentTransactionOutcome, callbacks: Array<() => void>, resume: () => Promise<ReceiptDto>, signal?: AbortSignal): Promise<ReceiptDto> {
@@ -68,7 +68,7 @@ export async function reconcileReceiptEffects(deps: ExecutorDeps, caller: Assist
 
   const row = await db.assistantReceipt.findFirst({ where: { intentId, ...intentOwner(caller) } });
 
-  if (!row) throw new ContentError("Результат дії не знайдено", 404);
+  if (!row) throw new ContentError(API_ERRORS.ASSISTANT_RECEIPT_NOT_FOUND, 404);
 
   await authorizeAssistant(caller, catalog.getAction(row.actionId).need, "prepare", db);
 

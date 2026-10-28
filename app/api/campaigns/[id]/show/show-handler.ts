@@ -1,11 +1,9 @@
 import { after, NextResponse } from "next/server";
 
 import { showCommandSchema } from "@/lib/schemas/show";
-import { ContentError } from "@/lib/server/content/errors";
 import { applyAndWriteShowCommand } from "@/lib/server/show/command-service";
 import { publishShow, readShowState } from "@/lib/server/show/show-store";
 import { requireCampaignAccess, requireDM } from "@/lib/utils/api/api-auth";
-import { errorResponse } from "@/lib/utils/api/api-response";
 import { handleApiError } from "@/lib/utils/api/error-handler";
 import { parseBody } from "@/lib/utils/api/parse-body";
 import { BATTLE_RATE_LIMITS, checkRateLimit, rateLimitResponse } from "@/lib/utils/api/rate-limit";
@@ -47,8 +45,6 @@ export async function commandShow(req: Request, campaignId: string): Promise<Nex
 
     return NextResponse.json({ show: next } satisfies ShowResponse);
   } catch (error) {
-    if (error instanceof ContentError) return errorResponse(error.message, error.status);
-
     return handleApiError(error, { action: "show command" });
   }
 }

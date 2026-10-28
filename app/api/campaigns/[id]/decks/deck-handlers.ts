@@ -3,7 +3,6 @@ import { after, NextResponse } from "next/server";
 import { API_ERRORS } from "@/lib/constants/api-errors";
 import { prisma } from "@/lib/db";
 import { createDeckSchema, deckSceneSchema, readSlides, saveDeckSchema, slideUploadRequestSchema } from "@/lib/schemas/show";
-import { ContentError } from "@/lib/server/content/errors";
 import { bindDeckRecord, createDeckRecord, deleteDeckRecord, saveDeckRecord } from "@/lib/server/show/deck-operations";
 import { listDecks, persistSlideImages, toSlideDeck, urlsUsedElsewhere } from "@/lib/server/show/deck-store";
 import { publishShow, readShowState, writeShowState } from "@/lib/server/show/show-store";
@@ -27,8 +26,6 @@ async function asDM(campaignId: string, action: string, run: () => Promise<NextR
 
     return await run();
   } catch (error) {
-    if (error instanceof ContentError) return errorResponse(error.message, error.status);
-
     return handleApiError(error, { action });
   }
 }

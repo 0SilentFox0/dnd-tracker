@@ -4,10 +4,10 @@ import type { ZodType } from "zod";
 import { operationAccess, operationDM, withCharacterOperation } from "./operation-context";
 
 import "server-only";
+import { API_ERRORS } from "@/lib/constants/api-errors";
 import { ContentError } from "@/lib/server/content/errors";
 import type { Actor } from "@/lib/utils/api/actor";
 import type { CampaignAccessResult } from "@/lib/utils/api/api-auth";
-import { errorResponse } from "@/lib/utils/api/api-response";
 import { handleApiError } from "@/lib/utils/api/error-handler";
 import { parseBody } from "@/lib/utils/api/parse-body";
 
@@ -65,7 +65,7 @@ export const memberScope = scoped(memberGate);
 export const errorStatusMessage = async (response: NextResponse): Promise<never> => {
   const data = await response.json().catch(() => null);
 
-  throw new ContentError(typeof data?.error === "string" ? data.error : "Операцію відхилено", response.status, data?.issues);
+  throw new ContentError(typeof data?.error === "string" ? data.error : API_ERRORS.CHARACTER_OPERATION_REJECTED, response.status, data?.issues);
 };
 
 export async function responseBody(response: NextResponse) {
@@ -124,8 +124,6 @@ export async function executeCharacterRoute<I, G>(op: CharacterOperation<I, G>, 
 
     return NextResponse.json(data, init);
   } catch (error) {
-    if (error instanceof ContentError) return errorResponse(error.message, error.status, error.issues);
-
     return handleApiError(error, { action: op.action });
   }
 }

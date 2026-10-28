@@ -5,10 +5,12 @@ import { contentDeleteCascades, contentDependencies, contentIds } from "./conten
 import { withContentEffects } from "./content-effects";
 import { contentMediaHandoff } from "./content-media";
 import { createContentOperationActions } from "./content-operations";
+import { contentPreviewState } from "./content-preview";
 import { createContentReadActions } from "./content-reads";
 import { contentSnapshot, jsonContent, snapshotHash } from "./content-snapshot";
 
 import "server-only";
+import { API_ERRORS } from "@/lib/constants/api-errors";
 import type { AnyContentResource } from "@/lib/server/content/define-resource";
 import { ContentError, parseInput } from "@/lib/server/content/errors";
 import { CONTENT_RESOURCES } from "@/lib/server/content/resources";
@@ -29,6 +31,7 @@ export const contentResult = (data: unknown, affected: TargetRef[] = [], warning
 type Deps = {
   resources?: Partial<Record<string, AnyContentResource>>;
   snapshot?: (actor: Actor) => Promise<unknown>;
+  preview?: (actor: Actor, state: unknown, kind: string, id: string | undefined, body: unknown) => Promise<unknown>;
   guard?: <T>(campaignId: string, callback: () => Promise<T>) => Promise<T>;
 };
 
@@ -49,6 +52,8 @@ export function createContentActions(deps: Deps = {}): AssistantActionDef[] {
   const resources = deps.resources ?? CONTENT_RESOURCES;
 
   const snapshot = deps.snapshot ?? contentSnapshot;
+
+  const preview = deps.preview ?? (deps.snapshot ? async (_actor: Actor, state: unknown) => state : (actor: Actor, _state: unknown, kind: string, id: string | undefined, body: unknown) => contentPreviewState(actor, kind, id, body));
 
   const guard = deps.guard ?? ((campaignId, callback) => withCampaignContentWrite(campaignId, callback));
 
@@ -75,7 +80,7 @@ export function createContentActions(deps: Deps = {}): AssistantActionDef[] {
 
       const rows = await listContent(resource, caller.actor, new URLSearchParams(query));
 
-      if (!Array.isArray(rows)) throw new ContentError("Некоректний список", 500);
+      if (!Array.isArray(rows)) throw new ContentError(API_ERRORS.ASSISTANT_LIST_INVALID, 500);
 
       return contentResult({ total: rows.length, offset, items: rows.slice(offset, offset + limit).map((row) => ({ id: row.id, name: row.name ?? row.title, ...Object.fromEntries(resource.listFields.map((field) => [field, row[field]])) })), nextOffset: offset + limit < rows.length ? offset + limit : null });
     } });
@@ -102,14 +107,16 @@ export function createContentActions(deps: Deps = {}): AssistantActionDef[] {
 
           const changes = body ? Object.entries(body).map(([path, after]) => ({ target: targets[0], path, before: jsonContent(before?.[path]), after: jsonContent(after) })) : [{ target: targets[0], path: "$record", before: jsonContent(before ?? state), after: null }];
 
-          const dependencies = contentDependencies(state, kind, value.id, body);
+          const shown = await preview(caller.actor, state, kind, value.id, body);
+
+          const dependencies = contentDependencies(shown, kind, value.id, body);
 
           changes.push({ target: targets[0], path: "$dependencies", before: jsonContent(dependencies), after: jsonContent(dependencies) });
 
           if (verb.startsWith("delete")) {
-            const ids = value.id ? [value.id] : contentIds(state, kind);
+            const ids = value.id ? [value.id] : contentIds(shown, kind);
 
-            changes.push(...contentDeleteCascades(state, kind, ids));
+            changes.push(...contentDeleteCascades(shown, kind, ids));
           }
 
           return { summary: `${resource.label}: ${verb}`, targets, changes, warnings: verb.startsWith("delete") ? ["Буде застосовано чинні каскади та правила посилань. Зміна залежностей скасує пропозицію."] : [], effects: [{ kind: verb === "create" ? "create" : verb === "update" ? "update" : "delete", targets, description: `${resource.label}: ${verb}` }], preconditions: { snapshot: snapshotHash(state), before: snapshotHash(before), body: jsonContent(body) } };

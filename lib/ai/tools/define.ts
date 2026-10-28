@@ -5,6 +5,7 @@ import { project, publicToolData } from "./projection";
 
 import "server-only";
 import { AI_LIMITS, type ApiTokenScope } from "@/lib/constants/ai";
+import { API_ERRORS } from "@/lib/constants/api-errors";
 import { authorizeLegacyAssistantRead } from "@/lib/server/assistant/authorize";
 import type { AssistantCaller } from "@/lib/server/assistant/types";
 import { ContentError } from "@/lib/server/content/errors";
@@ -63,7 +64,7 @@ export async function runToolResult(def: AiToolDef, ctx: AiToolContext, rawInput
     ctx.abortSignal?.throwIfAborted();
 
     if (ctx.caller && def.scopes.includes("ai")) {
-      if (ctx.caller.actor.campaignId !== ctx.campaignId || ctx.caller.actor.userId !== ctx.userId) throw new ContentError("Дія недоступна", 403);
+      if (ctx.caller.actor.campaignId !== ctx.campaignId || ctx.caller.actor.userId !== ctx.userId) throw new ContentError(API_ERRORS.ASSISTANT_ACTION_FORBIDDEN, 403);
 
       await authorizeLegacyAssistantRead(ctx.caller);
     }

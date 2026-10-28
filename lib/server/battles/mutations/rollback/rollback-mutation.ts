@@ -1,5 +1,6 @@
 import { z } from "zod";
 
+import { API_ERRORS } from "@/lib/constants/api-errors";
 import { BATTLE_SNAPSHOTS_KEPT_AFTER_COMPLETE, BattleStatus } from "@/lib/constants/battle";
 import { prisma } from "@/lib/db";
 import { replaceTerrain } from "@/lib/utils/battle/grid/terrain";
@@ -30,7 +31,7 @@ export function createRollbackMutation(load: LoadSnapshots = defaultLoad, isActi
   return async (ctx: BattleMutationContext, body: z.infer<typeof rollbackSchema>): Promise<MutationResult> => {
     // повторний клік чи друга вкладка DM: скасовану подію не відкочуємо вдруге
     if (!(await isActiveEvent(ctx.scene.id, body.actionIndex))) {
-      throw new BattleRuleError("action_rejected", "Цієї дії вже немає в журналі");
+      throw new BattleRuleError("action_rejected", API_ERRORS.BATTLE_ACTION_NOT_IN_LOG);
     }
 
     const snapshots = await load(ctx.scene.id, body.actionIndex);

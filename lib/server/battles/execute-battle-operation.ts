@@ -7,6 +7,7 @@ import { defaultPipelineDeps, scopedPipelineDeps } from "./pipeline-deps";
 import { runGuardedBattleRecordOperation } from "./record-operation";
 import { battleRecord, type RecordOperation, writeBattleRecord } from "./record-service";
 
+import { API_ERRORS } from "@/lib/constants/api-errors";
 import type { ActionExecutionContext, ActionResult } from "@/lib/server/assistant/types";
 import { ContentError } from "@/lib/server/content/errors";
 import { runContentWriteContext } from "@/lib/server/content/write-context";
@@ -28,7 +29,7 @@ export async function executeBattleOperation(
 
   if (failure) throw new BattleAccessError(403, failure);
 
-  if (!Number.isInteger(command.expectedVersion) || command.expectedVersion < 0) throw new ContentError("Потрібна версія бою", 400);
+  if (!Number.isInteger(command.expectedVersion) || command.expectedVersion < 0) throw new ContentError(API_ERRORS.BATTLE_VERSION_REQUIRED, 400);
 
   assertWriteScope(actor, execution);
 
@@ -39,7 +40,7 @@ export async function executeBattleOperation(
       if (!["create", "clear-history"].includes(command.operation)) {
         const row = await battleRecord(actor.campaignId, command.battleId);
 
-        if (row.version !== command.expectedVersion) throw new ContentError("Бій змінився; підготуйте новий перегляд", 409);
+        if (row.version !== command.expectedVersion) throw new ContentError(API_ERRORS.BATTLE_CHANGED_PREVIEW_AGAIN, 409);
       }
 
       const data = await writeBattleRecord(actor.campaignId, actor.userId, command.operation as RecordOperation, command.battleId, input, execution);

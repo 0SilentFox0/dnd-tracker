@@ -88,6 +88,12 @@ Usage зберігається після завершених model steps і н
 
 User-facing setup, review workflow, MCP result meanings, errors, recovery, disclosure and retention are described in [Асистент кампанії](../guides/campaign-assistant.md). The reviewed route/action/test inventory and review limits are in the [stage 6 coverage ledger](../superpowers/plans/2026-10-25-constructor-stage6-ai-coverage.md).
 
+### Precondition-хеш (B04/B05/B10)
+
+Guard-стан превʼю й виконання не читає повні рядки: `lib/server/assistant/digest.ts`. Таблиці з `updatedAt @updatedAt` (`UPDATED_AT_TABLES`: Campaign, Character, CharacterInventory, CharacterSkills, Race, GameClass, Feat, Background, MainSkill, ScenarioPage, SlideDeck, CampaignShow) хешуються як `stampDigest` = `{ id, updatedAt }` (ScenarioPage ще й `version`, SlideDeck ще й `scenarioPageId`). Таблиці без `updatedAt` (`FULL_ROW_TABLES`: units, spells, spell_groups, artifacts, artifact_sets, skills, skill_trees, campaign_tracks) хешуються повним рядком у Postgres (`fullRowDigest`: `md5(string_agg(md5(t::text) ORDER BY id))`, ~32 байти). `contentSnapshot` = `{ stamps, rowDigests, campaign }`; повні рядки читаються лише для цілі (сторінка сценарію, дека) і для видимого превʼю (`content-preview.ts`: рядки, що згадують цільові id, SQL-префільтр + точний фільтр `contentDependencies`).
+
+Правило: запис у таблицю з `updatedAt` без Prisma-бампу заборонений (raw `UPDATE`, явний `updatedAt` у `data`); `updated-at-audit.test.ts` сканує `lib/`, `app/`, `scripts/` і нові міграції. Єдиний виняток: `bindDeckRecord` свідомо зберігає `updatedAt` (CAS редактора деки) і змінює лише `scenarioPageId`, тому він входить у stamp деки. Обмеження: два записи одного рядка в межах 1 мс дають однаковий `updatedAt`; записи контенту серіалізовані `withCampaignContentWrite`. Довгострокова альтернатива (`campaigns.contentRevision`) винесена в окремий epic.
+
 ### Refactor S1: перевірки й output boundary
 
 Відтворюваний local-only runner — `scripts/constructor/assistant-check.ts`; tracked browser sources, CLI options і prerequisites описано в [README harness](../../scripts/constructor/assistant-check/README.md). `.superpowers` містить тільки ignored outputs, не runtime dependencies. Integration counts читаються з Vitest JSON report; skipped/empty suite не вважається успіхом. Browser залишається synthetic HTTP перевіркою компонентів, SQL authority перевіряється окремо на guarded local constructor з `connection_limit=1` для обох URL.

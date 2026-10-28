@@ -58,7 +58,7 @@ export const spellsResource = defineResource<SpellRow, CreateSpellInput, UpdateS
     });
   },
   update: async (actor, existing, data) => {
-    try { assertManualActivation(existing.executionMode, data); } catch { throw new ContentError("Для автоматичного застосування явно налаштуйте всю механіку заклинання", 422); }
+    try { assertManualActivation(existing.executionMode, data); } catch { throw new ContentError(API_ERRORS.ASSISTANT_SPELL_MECHANICS_REQUIRED, 422); }
     await assertCampaignRefs(actor.campaignId, { spellGroup: data.groupId });
 
     return prisma.spell.update({

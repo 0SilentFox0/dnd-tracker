@@ -1,5 +1,6 @@
 import { z } from "zod";
 
+import { API_ERRORS } from "@/lib/constants/api-errors";
 import { HAZARD_DICE_PATTERN } from "@/lib/constants/battle";
 import { DAMAGE_ELEMENT_OPTIONS } from "@/lib/constants/damage";
 import { applyTerrain, blockedSet, cellKey, inBounds, occupiedBy } from "@/lib/utils/battle/grid";
@@ -36,7 +37,7 @@ function parseKey(key: string) {
 export function mapTerrainMutation(ctx: BattleMutationContext, body: MapTerrainBody): MutationResult {
   const map = ctx.meta.map;
 
-  if (!map) throw new BattleRuleError("action_rejected", "У цьому бою немає карти");
+  if (!map) throw new BattleRuleError("action_rejected", API_ERRORS.BATTLE_NO_MAP);
 
   // "05:6" проходить regex, але рушій і рендер шукають лише канонічні ключі
   const cells = [...new Set(body.cells.map((k) => cellKey(parseKey(k))))];

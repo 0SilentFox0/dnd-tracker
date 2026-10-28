@@ -14,11 +14,11 @@ export function moraleCheckMutation(ctx: BattleMutationContext, data: MoraleChec
   const pending = ctx.scene.pendingMoraleCheck as PendingMoraleCheckPayload | null;
 
   if (pending?.participantId === data.participantId) {
-    throw new BattleRuleError("action_used", "Мораль цього учасника вже перевірено в цьому ході");
+    throw new BattleRuleError("action_used", API_ERRORS.BATTLE_MORALE_ALREADY_CHECKED);
   }
 
   if (participant.battleData.extraTurnActive) {
-    throw new BattleRuleError("action_used", "У додатковому ході мораль не перевіряється");
+    throw new BattleRuleError("action_used", API_ERRORS.BATTLE_MORALE_EXTRA_TURN);
   }
 
   const moraleResult = checkMorale(participant, data.d10Roll, ctx.participants);

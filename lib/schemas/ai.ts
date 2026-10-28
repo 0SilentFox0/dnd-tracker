@@ -6,6 +6,8 @@ const id = z.string().min(1).max(40);
 
 const markdown = z.string().max(20_000);
 
+export const assistantRequestIdSchema = z.string().regex(/^[a-zA-Z0-9_-]{1,100}$/);
+
 export const aiProviderSchema = z.enum(AI_PROVIDERS);
 
 export const saveCredentialSchema = z.object({ apiKey: z.string().trim().min(10).max(500), defaultModel: z.string().max(100).nullish() });
@@ -28,7 +30,7 @@ export const aiFocusSchema = z.union([
 export const assistantSessionContextSchema = z.strictObject({ sourceNoteKeys: z.array(z.string().min(1).max(512)).max(5).refine(keys => new Set(keys).size === keys.length) });
 export const assistantContextPreviewSchema = z.strictObject({ focus: aiFocusSchema.optional(), sessionContext: assistantSessionContextSchema.optional() });
 
-export const chatRequestSchema = z.strictObject({ requestId: z.string().regex(/^[a-zA-Z0-9_-]{1,100}$/), text: z.string().trim().min(1).max(AI_LIMITS.messageChars), focus: aiFocusSchema.optional(), sessionContext: assistantSessionContextSchema.optional() });
+export const chatRequestSchema = z.strictObject({ requestId: assistantRequestIdSchema, text: z.string().trim().min(1).max(AI_LIMITS.messageChars), focus: aiFocusSchema.optional(), sessionContext: assistantSessionContextSchema.optional() });
 
 export const scenarioAiOpInputSchema = z.discriminatedUnion("op", [
   z.object({ op: z.literal("replaceRow"), sectionId: id, rowId: id, story: markdown.optional(), notes: markdown.optional(), allowRemoval: z.boolean().optional() }).refine((o) => o.story !== undefined || o.notes !== undefined, { message: "replaceRow: потрібне story або notes" }),

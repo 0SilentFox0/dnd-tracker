@@ -9,8 +9,10 @@ import "server-only";
 import { appendMessageInTransaction } from "@/lib/ai/threads";
 import { publicToolData } from "@/lib/ai/tools/projection";
 import { AI_LIMITS } from "@/lib/constants/ai";
+import { API_ERRORS } from "@/lib/constants/api-errors";
 import { RUN_GRACE_MS } from "@/lib/constants/assistant";
 import { prisma } from "@/lib/db";
+import { assistantRequestIdSchema } from "@/lib/schemas/ai";
 import { actionResultSchema } from "@/lib/schemas/assistant";
 import { ContentError } from "@/lib/server/content/errors";
 import type { AiFocus, AiUsage } from "@/types/ai";
@@ -45,19 +47,19 @@ export function createAssistantRunStore(options: { db?: PrismaClient; now?: () =
   const now = options.now ?? (() => new Date());
 
   async function own(caller: AssistantCaller, tx: Prisma.TransactionClient = db) {
-    if (!caller.threadId || caller.actor.via !== "session") throw new ContentError("Тред недоступний", 403);
+    if (!caller.threadId || caller.actor.via !== "session") throw new ContentError(API_ERRORS.ASSISTANT_THREAD_UNAVAILABLE, 403);
 
     await revalidateAssistantCaller(caller, tx);
 
     const thread = await tx.aiThread.findFirst({ where: { id: caller.threadId, ...intentOwner(caller) }, select: { id: true } });
 
-    if (!thread) throw new ContentError("Тред не знайдено", 404);
+    if (!thread) throw new ContentError(API_ERRORS.AI_THREAD_NOT_FOUND, 404);
 
     return thread.id;
   }
 
   async function beginAssistantRun(caller: AssistantCaller, requestId: string, input?: RunInput): Promise<RunClaim> {
-    if (!/^[a-zA-Z0-9_-]{1,100}$/.test(requestId)) throw new ContentError("Некоректний ідентифікатор запиту", 400);
+    if (!assistantRequestIdSchema.safeParse(requestId).success) throw new ContentError(API_ERRORS.INVALID_REQUEST_ID, 400);
 
     // Recovery may settle effects, but must never retry a business write or external charge.
     const threadId = await own(caller);
@@ -82,7 +84,7 @@ export function createAssistantRunStore(options: { db?: PrismaClient; now?: () =
       const requestHash = requestDigest(input ?? {});
 
       if (existing) {
-        if (existing.requestHash !== requestHash) throw new ContentError("Запит із цим ідентифікатором уже має інший вміст", 409);
+        if (existing.requestHash !== requestHash) throw new ContentError(API_ERRORS.ASSISTANT_REQUEST_ID_CONTENT_MISMATCH, 409);
 
         return { replayed: true, run: existing };
       }
@@ -90,13 +92,13 @@ export function createAssistantRunStore(options: { db?: PrismaClient; now?: () =
       const claimed = await tx.assistantRun.findFirst({ where: { activeThreadId: caller.threadId } });
 
       if (claimed) {
-        if (claimed.expiresAt > now()) throw new ContentError("У цьому треді вже виконується запит. Відновіть його стан.", 409);
+        if (claimed.expiresAt > now()) throw new ContentError(API_ERRORS.ASSISTANT_THREAD_BUSY, 409);
 
         const unsettled = await tx.assistantIntent.findMany({ where: { ...intentOwner(caller), requestId: { startsWith: `${claimed.id}_` }, status: { in: ["executing", "unknown"] } }, select: { id: true } });
 
         const uncertain = await tx.assistantReceipt.findMany({ where: { ...intentOwner(caller), requestId: { startsWith: `${claimed.id}_` }, OR: [{ status: { in: ["executing", "unknown"] } }, { effectsStatus: "unknown" }] }, select: { id: true } });
 
-        if (unsettled.length || uncertain.length) throw new ContentError("Результат попередньої дії ще перевіряється. Відновіть стан треду.", 409);
+        if (unsettled.length || uncertain.length) throw new ContentError(API_ERRORS.ASSISTANT_PREVIOUS_RESULT_PENDING, 409);
 
         await tx.assistantRun.update({ where: { id: claimed.id }, data: { activeThreadId: null, ...(claimed.status === "running" && { status: terminalStatus(claimed.resultRefs) ?? "failed", errorCode: claimed.errorCode ?? "INTERRUPTED" }) } });
       }
@@ -120,7 +122,7 @@ export function createAssistantRunStore(options: { db?: PrismaClient; now?: () =
   }
 
   async function readAssistantRuns(caller: AssistantCaller, requestId?: string) {
-    if (requestId !== undefined && !/^[a-zA-Z0-9_-]{1,100}$/.test(requestId)) throw new ContentError("Некоректний ідентифікатор запиту", 400);
+    if (requestId !== undefined && !assistantRequestIdSchema.safeParse(requestId).success) throw new ContentError(API_ERRORS.INVALID_REQUEST_ID, 400);
 
     const threadId = await own(caller);
 

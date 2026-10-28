@@ -1,6 +1,7 @@
 import { type AssistantReceipt, Prisma } from "@prisma/client";
 
 import { authorizeAssistant } from "./authorize";
+import { conflict,forbidden } from "./errors";
 import { actionExpected, actionExternalResult, externalRun, readExternalState } from "./execution-state";
 import { executionModeFor, type ExecutorDeps } from "./executor-deps";
 import { intentOwner, requestDigest } from "./intent-store";
@@ -9,6 +10,7 @@ import type { ActionExecutionContext, AssistantCaller, AssistantWriteAction, Dur
 
 import "server-only";
 import { isApiTokenScope } from "@/lib/constants/ai";
+import { API_ERRORS } from "@/lib/constants/api-errors";
 import { ASSISTANT_LIMITS } from "@/lib/constants/assistant";
 import { actionPreviewSchema, actionResultSchema } from "@/lib/schemas/assistant";
 import { ContentError, parseInput } from "@/lib/server/content/errors";
@@ -18,10 +20,6 @@ export type IntentTransactionOutcome =
   | { kind: "receipt"; receipt: AssistantReceipt; effects?: DurableEffect[] }
   | { kind: "external"; receipt: AssistantReceipt; action: AssistantWriteAction; input: unknown }
   | { kind: "conflict"; error: ContentError };
-
-const forbidden = () => new ContentError("Дія недоступна", 403);
-
-const conflict = () => new ContentError("Пропозиція вже неактуальна або завершена", 409);
 
 /** Only atomic database work belongs here; external calls and effects run after commit. */
 export async function executeIntentTransaction(deps: ExecutorDeps, caller: AssistantCaller, intentId: string, human: boolean, callbacks: Array<() => void>, signal?: AbortSignal): Promise<IntentTransactionOutcome> {
@@ -34,7 +32,7 @@ export async function executeIntentTransaction(deps: ExecutorDeps, caller: Assis
 
     const previous = await tx.assistantReceipt.findFirst({ where: { intentId, ...intentOwner(caller) } });
 
-    if (!owned && !previous) throw new ContentError("Пропозицію не знайдено", 404);
+    if (!owned && !previous) throw new ContentError(API_ERRORS.AI_PROPOSAL_NOT_FOUND, 404);
 
     if (!owned && previous) {
       await authorizeAssistant(caller, catalog.getAction(previous.actionId).need, "prepare", tx);
@@ -67,7 +65,7 @@ export async function executeIntentTransaction(deps: ExecutorDeps, caller: Assis
 
     const action = catalog.getAction(row.actionId);
 
-    if (action.effect !== "write" && action.effect !== "paid") throw new ContentError("Ця дія потребує іншого способу виконання", 409);
+    if (action.effect !== "write" && action.effect !== "paid") throw new ContentError(API_ERRORS.ASSISTANT_EXEC_MODE_MISMATCH, 409);
 
     await tx.$queryRaw`SELECT id FROM campaign_members WHERE "campaignId" = ${row.campaignId} AND "userId" = ${caller.actor.userId} FOR SHARE`;
     await authorizeAssistant(caller, action.need, "execute", tx);
@@ -119,7 +117,7 @@ export async function executeIntentTransaction(deps: ExecutorDeps, caller: Assis
         if (action.effect === "paid") {
           const priorImages = await tx.assistantReceipt.findMany({ where: { campaignId: row.campaignId, userId: row.userId, actionId: row.actionId } });
 
-          if (priorImages.some(r => readExternalState(r.effects)?.runId === runId)) throw new ContentError("Лише одне зображення за запуск", 409);
+          if (priorImages.some(r => readExternalState(r.effects)?.runId === runId)) throw new ContentError(API_ERRORS.ASSISTANT_ONE_IMAGE_PER_RUN, 409);
         }
 
         const receipt = await tx.assistantReceipt.create({ data: {

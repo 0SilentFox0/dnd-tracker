@@ -1,5 +1,6 @@
 import { type Bundle, BUNDLE_TABLES, BundleInvalidError, delegateOf, pick, SETTINGS_SELECT, settingsOf, type TemplateDb } from "./bundle";
 
+import { API_ERRORS } from "@/lib/constants/api-errors";
 import { type CompendiumBundleDb,exportCompendiumSection } from "@/lib/server/compendium-import/bundle";
 import { parseRules } from "@/lib/utils/rules/schema";
 
@@ -9,7 +10,7 @@ export async function exportCampaign(db: TemplateDb, campaignId: string): Promis
     select: { ...SETTINGS_SELECT, rules: true, credits: true },
   });
 
-  if (!campaign) throw new BundleInvalidError("Кампанію не знайдено");
+  if (!campaign) throw new BundleInvalidError(API_ERRORS.CAMPAIGN_NOT_FOUND);
 
   const bundle: Record<string, unknown> = {
     formatVersion: 1,

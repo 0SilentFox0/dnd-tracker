@@ -95,8 +95,10 @@ const perTable = <T>(make: () => T) => Object.fromEntries(BUNDLE_TABLES.map((t) 
 
 const rowSchema = z.array(z.looseObject({ id: z.string().regex(CONTENT_ID_RE) })).max(5000);
 
+export const BUNDLE_FORMAT_VERSION = 1 as const;
+
 export const BundleSchema = z.object({
-  formatVersion: z.literal(1),
+  formatVersion: z.literal(BUNDLE_FORMAT_VERSION),
   settings: z.strictObject({
     maxLevel: z.number().min(1).max(30),
     xpMultiplier: z.number().min(0).max(10),

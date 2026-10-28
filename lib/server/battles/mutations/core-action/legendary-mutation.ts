@@ -1,4 +1,5 @@
 import { getCachedSummonPool } from "@/lib/cache/reference-data";
+import { abilityCooldownMessage,API_ERRORS } from "@/lib/constants/api-errors";
 import { prisma } from "@/lib/db";
 import { createSpellMutation, type SpellMutationDeps } from "@/lib/server/battles/mutations/spell/spell-mutation";
 import { findParticipant, updateParticipant } from "@/lib/utils/abilities/engine/core/participants";
@@ -29,11 +30,11 @@ const counter = (p: BattleParticipant) => `${p.battleData.legendary?.actionsLeft
 
 export function createLegendaryMutation(deps: SummonDeps & Partial<Pick<SpellMutationDeps, "loadSpell">> = defaultDeps) {
   return async (ctx: BattleMutationContext, body: LegendaryActionBody): Promise<MutationResult> => {
-    if (!ctx.isDM) throw new BattleAccessError(403, "Легендарні дії — лише для ДМ");
+    if (!ctx.isDM) throw new BattleAccessError(403, API_ERRORS.BATTLE_LEGENDARY_DM_ONLY);
 
     const actor = findParticipant(ctx.participants, body.participantId);
 
-    if (!actor) throw new BattleAccessError(404, "Учасника немає в бою");
+    if (!actor) throw new BattleAccessError(404, API_ERRORS.BATTLE_PARTICIPANT_NOT_IN_BATTLE);
 
     const { id, name } = actor.basicInfo;
 
@@ -57,7 +58,7 @@ export function createLegendaryMutation(deps: SummonDeps & Partial<Pick<SpellMut
 
     const ability = (lair ? lairAbilities(actor) : legendaryAbilities(actor)).find((a) => a.key === option.abilityKey);
 
-    if (!ability) throw new BattleRuleError("action_rejected", "У учасника немає такої легендарної дії");
+    if (!ability) throw new BattleRuleError("action_rejected", API_ERRORS.BATTLE_NO_SUCH_LEGENDARY);
 
     const cost = legendaryCostOf(ability);
 
@@ -69,16 +70,16 @@ export function createLegendaryMutation(deps: SummonDeps & Partial<Pick<SpellMut
 
     const spend = (p: BattleParticipant) => lair ? spendLair(p, round, ability.key) : spendLegendary(p, cost);
 
-    if (!withinCountLimits(actor, ability)) throw new BattleRuleError("ability_limit", "Ліміт використань вичерпано");
+    if (!withinCountLimits(actor, ability)) throw new BattleRuleError("ability_limit", API_ERRORS.BATTLE_USES_EXHAUSTED);
 
     const wait = cooldownLeft(actor, ability, round);
 
-    if (wait > 0) throw new BattleRuleError("ability_limit", `Перезарядка: ще ${wait} р.`);
+    if (wait > 0) throw new BattleRuleError("ability_limit", abilityCooldownMessage(wait));
 
-    if (ability.condition && !evaluateCondition(ability.condition, { owner: actor, event: { type: "action", actorId: id, abilityKey: ability.key, targetIds: option.targetIds ?? [] }, participants: ctx.participants, sourceId: ability.source.id })) throw new BattleRuleError("action_rejected", "Умова вміння не виконується");
+    if (ability.condition && !evaluateCondition(ability.condition, { owner: actor, event: { type: "action", actorId: id, abilityKey: ability.key, targetIds: option.targetIds ?? [] }, participants: ctx.participants, sourceId: ability.source.id })) throw new BattleRuleError("action_rejected", API_ERRORS.BATTLE_ABILITY_CONDITION_UNMET);
 
     if (ability.perform?.kind === "spell") {
-      if (!lair) throw new BattleRuleError("action_rejected", "Цю дію виконують через діалог заклинання");
+      if (!lair) throw new BattleRuleError("action_rejected", API_ERRORS.BATTLE_LEGENDARY_VIA_SPELL_DIALOG);
 
       return createSpellMutation({ ...defaultDeps, ...deps }, { serverRolls: true })(ctx, { casterId: id, spellId: ability.perform.spellId, legendaryKey: ability.key, targetIds: option.targetIds ?? [], diceRolls: [] });
     }
@@ -88,9 +89,9 @@ export function createLegendaryMutation(deps: SummonDeps & Partial<Pick<SpellMut
 
       const attackIndex = actor.battleData.attacks.findIndex((a) => a.name.toLocaleLowerCase() === attackName.toLocaleLowerCase());
 
-      if (attackIndex < 0) throw new BattleRuleError("action_rejected", "Атаку вміння не знайдено");
+      if (attackIndex < 0) throw new BattleRuleError("action_rejected", API_ERRORS.BATTLE_LEGENDARY_ATTACK_NOT_FOUND);
 
-      if (option.targetIds?.length !== 1) throw new BattleRuleError("invalid_target", "Оберіть одну ціль атаки");
+      if (option.targetIds?.length !== 1) throw new BattleRuleError("invalid_target", API_ERRORS.BATTLE_LEGENDARY_ONE_TARGET);
 
       const out = legendaryAttack({ participants: ctx.participants, actorId: id, attackIndex, targetId: option.targetIds[0], map: ctx.meta.map, rules: ctx.meta.rules, round, rng: ctx.rng ?? Math.random, battleId: ctx.scene.id });
 

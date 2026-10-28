@@ -5,6 +5,7 @@ import type { ActionExecutionContext } from "../types";
 
 import "server-only";
 import { invalidateReference, ReferenceKind, type ReferenceKindValue } from "@/lib/cache/tags";
+import { API_ERRORS } from "@/lib/constants/api-errors";
 import { ContentError } from "@/lib/server/content/errors";
 import { currentContentWrite } from "@/lib/server/content/write-context";
 import { removeTrackFile, trackObjectPath, trackPathOwnedBy } from "@/lib/supabase/battle-music-storage";
@@ -20,7 +21,7 @@ export const CONTENT_EFFECT_HANDLERS: EffectHandlers = {
 
     const path = trackObjectPath(url);
 
-    if (!path || !trackPathOwnedBy(path, campaignId)) throw new ContentError("Некоректний об’єкт очищення", 403);
+    if (!path || !trackPathOwnedBy(path, campaignId)) throw new ContentError(API_ERRORS.ASSISTANT_PURGE_TARGET_INVALID, 403);
 
     await removeTrackFile(url, { strict: true });
   },
@@ -29,7 +30,7 @@ export const CONTENT_EFFECT_HANDLERS: EffectHandlers = {
 export async function withContentEffects<T>(ctx: ActionExecutionContext, kinds: readonly ReferenceKindValue[], work: () => Promise<T>): Promise<T> {
   const current = currentContentWrite();
 
-  if (!current || current.campaignId !== ctx.caller.actor.campaignId) throw new ContentError("Відсутній контекст запису", 500);
+  if (!current || current.campaignId !== ctx.caller.actor.campaignId) throw new ContentError(API_ERRORS.ASSISTANT_WRITE_CONTEXT_MISSING, 500);
 
   const previous = current.onTrackFileRemoved;
 
