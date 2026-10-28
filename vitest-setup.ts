@@ -14,5 +14,40 @@ vi.mock("next/font/google", () => ({
 // підказки онбордингу тягнуть TanStack Query й мережу; у тестах екранів вони не потрібні (власний тест робить vi.unmock)
 vi.mock("@/components/onboarding/OnboardingHint", () => ({ OnboardingHint: () => null, PlayerSheetHint: () => null }));
 
+// next-intl у тестах повертає ключ з префіксом namespace; справжні переклади — через renderWithIntl (lib/i18n/test)
+vi.mock("next-intl", async () => {
+  const { makeT } = await import("@/lib/i18n/test/mock-t");
+
+  return {
+    useTranslations: (namespace?: string) => makeT(namespace),
+    useLocale: () => "uk",
+    useFormatter: () => ({
+      number: (value: number) => String(value),
+      dateTime: (value: Date | number) => new Date(value).toISOString(),
+      relativeTime: (value: Date | number) => String(value),
+      list: (values: Iterable<string>) => [...values].join(", "),
+    }),
+    NextIntlClientProvider: ({ children }: { children: unknown }) => children,
+  };
+});
+
+vi.mock("next-intl/server", async () => {
+  const { makeT } = await import("@/lib/i18n/test/mock-t");
+
+  return {
+    getTranslations: async (arg?: string | { namespace?: string }) => makeT(typeof arg === "string" ? arg : arg?.namespace),
+    getLocale: async () => "uk",
+    getFormatter: async () => ({ number: (value: number) => String(value) }),
+  };
+});
+
+vi.mock("@/lib/i18n/translator", async () => {
+  const { makeT } = await import("@/lib/i18n/test/mock-t");
+
+  return { getTranslator: async (_locale: string, namespace?: string) => makeT(namespace) };
+});
+
+vi.mock("@/lib/i18n/request-locale", () => ({ getRequestLocale: async () => "uk" }));
+
 // lib/db створює PrismaClient під час імпорту; без URL падають навіть тести, що не ходять у БД
 process.env.DATABASE_URL ??= "postgresql://test:test@127.0.0.1:1/test";
