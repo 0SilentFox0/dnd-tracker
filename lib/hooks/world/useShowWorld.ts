@@ -10,9 +10,9 @@ import type { ShowWorld } from "@/types/show";
 import type { MapPoint } from "@/types/world";
 
 export function useShowWorld(campaignId: string, world: ShowWorld, isDM: boolean) {
-  const player = useWorldView(campaignId, { mapId: isDM ? null : world.mapId });
+  const player = useWorldView(campaignId, { mapId: isDM ? null : world.mapId, keepPrevious: true });
 
-  const dm = useWorldMap(campaignId, isDM ? world.mapId : null);
+  const dm = useWorldMap(campaignId, isDM ? world.mapId : null, { keepPrevious: true });
 
   const query = isDM ? dm : player;
 

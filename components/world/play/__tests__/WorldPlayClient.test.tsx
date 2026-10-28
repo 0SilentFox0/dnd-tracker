@@ -11,6 +11,10 @@ import type { WorldMarker, WorldView } from "@/types/world";
 
 vi.mock("@/lib/api/world");
 
+const pusherSync = vi.fn();
+
+vi.mock("@/lib/hooks/show", async (orig) => ({ ...(await orig<typeof import("@/lib/hooks/show")>()), usePusherShowSync: (...a: unknown[]) => pusherSync(...a) }));
+
 const push = vi.fn();
 
 vi.mock("next/navigation", () => ({ useRouter: () => ({ push }), usePathname: () => "/campaigns/c1/world" }));
@@ -72,6 +76,12 @@ describe("WorldPlayClient", () => {
     fireEvent.click(screen.getByRole("button", { name: "Cellar" }));
 
     expect(push).toHaveBeenCalledWith("/campaigns/c1/world?map=m2");
+  });
+
+  it("subscribes to the show channel so the page updates live", () => {
+    renderClient("m1");
+
+    expect(pusherSync).toHaveBeenCalledWith("c1", true);
   });
 
   it("opens the notes panel for a clicked marker", async () => {

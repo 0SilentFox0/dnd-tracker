@@ -38,7 +38,7 @@ function OnScreen({ campaignId, show, onLocate }: { campaignId: string; show: Sh
 
   const mapName = show?.world && maps?.find((m) => m.id === show.world?.mapId)?.name;
 
-  const label = show?.battle ? `⚔ До бою: ${show.battle.name}` : show?.world ? `🗺 Карта${mapName ? `: ${mapName}` : ""}` : cover ? (show?.deckId ? "Заглушка" : "Показ не запущено") : (show?.slide?.title ?? show?.deckTitle ?? "Слайд");
+  const label = show?.battle ? `⚔ До бою: ${show.battle.name}` : show?.world && !show.curtain ? `🗺 Карта${mapName ? `: ${mapName}` : ""}` : cover ? (show?.deckId ? "Заглушка" : "Показ не запущено") : (show?.slide?.title ?? show?.deckTitle ?? "Слайд");
 
   return (
     <button type="button" className="sb-show-now" data-curtain={(cover && !!show?.deckId) || undefined} disabled={!onLocate} title={onLocate ? "До рядка зі слайдом" : undefined} onClick={onLocate}>

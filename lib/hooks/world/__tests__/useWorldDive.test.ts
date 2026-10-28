@@ -13,11 +13,11 @@ afterEach(() => {
   vi.useRealTimers();
 });
 
-const root = { map: { id: "m1", parentMarkerId: null, parentMapId: null } as WorldMap, markers: [{ id: "k1", x: 0.3, y: 0.6 } as WorldMarker] };
+const root = { detail: { map: { id: "m1", parentMarkerId: null, parentMapId: null } as WorldMap, markers: [{ id: "k1", x: 0.3, y: 0.6 } as WorldMarker] } };
 
-const child = { map: { id: "m2", parentMarkerId: "k1", parentMapId: "m1" } as WorldMap, markers: [] as WorldMarker[] };
+const child = { detail: { map: { id: "m2", parentMarkerId: "k1", parentMapId: "m1" } as WorldMap, markers: [] as WorldMarker[] }, heroes: [], fog: { shapes: [], radius: 0.1 } };
 
-const sibling = { map: { id: "m3", parentMarkerId: null, parentMapId: null } as WorldMap, markers: [] as WorldMarker[] };
+const sibling = { detail: { map: { id: "m3", parentMarkerId: null, parentMapId: null } as WorldMap, markers: [] as WorldMarker[] } };
 
 describe("useWorldDive", () => {
   it("провал: dive 600 мс зі старою картою, потім reveal 300 мс, потім idle", () => {
@@ -39,6 +39,17 @@ describe("useWorldDive", () => {
     act(() => void vi.advanceTimersByTime(300));
 
     expect(result.current.phase).toBe("idle");
+  });
+
+  it("під час dive shown — вся стара сцена, зі своїми героями й туманом", () => {
+    const old = { ...root, heroes: [{ id: "h1" }], fog: { shapes: [], radius: 0.05 } };
+
+    const { result, rerender } = renderHook(({ v }) => useWorldDive(v, false), { initialProps: { v: old as typeof old | typeof child | undefined } });
+
+    rerender({ v: child });
+
+    expect(result.current.shown).toBe(old);
+    expect(result.current.shown).toHaveProperty("heroes", old.heroes);
   });
 
   it("без точки провалу — лише reveal", () => {

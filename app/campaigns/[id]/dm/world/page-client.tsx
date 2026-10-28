@@ -55,6 +55,14 @@ export function WorldEditorPageClient({ campaignId, campaignName, mapId, initial
 
   const [selectedId, select] = useState<string | null>(initialSelectedId ?? null);
 
+  const [seenInitial, setSeenInitial] = useState(initialSelectedId);
+
+  if (initialSelectedId !== seenInitial) {
+    setSeenInitial(initialSelectedId);
+
+    if (initialSelectedId) select(initialSelectedId);
+  }
+
   const moveTarget = useMoveTarget(detail.data?.markers ?? NO_MARKERS);
 
   const [creating, setCreating] = useState(false);
@@ -93,7 +101,9 @@ export function WorldEditorPageClient({ campaignId, campaignName, mapId, initial
     onEntry: (p: MapPoint) => {
       if (mapId) void editor.map.update.mutateOk({ id: mapId, data: { entryX: p.x, entryY: p.y } });
     },
-    onMove: moveTarget.pickPoint,
+    onMove: (p) => {
+      if (!detail.isPlaceholderData) moveTarget.pickPoint(p);
+    },
   }, !eyes.asHeroId);
 
   const { tool, setTool } = drawing;
@@ -216,7 +226,7 @@ export function WorldEditorPageClient({ campaignId, campaignName, mapId, initial
                                   onMapClick: (p) => (tool === "select" ? select(null) : drawing.handlers.onMapClick(p)),
                                   onMarkerClick: (id) => {
                                     if (tool === "select") select(id);
-                                    else if (tool === "move") moveTarget.pickMarker(id);
+                                    else if (tool === "move" && !detail.isPlaceholderData) moveTarget.pickMarker(id);
                                   },
                                   onMarkerDrag: tool === "select" || tool === "point" ? (id, p) => void editor.marker.update.mutateOk({ id, data: { x: p.x, y: p.y } }) : undefined,
                                 }}

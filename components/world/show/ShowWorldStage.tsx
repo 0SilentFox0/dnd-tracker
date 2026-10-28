@@ -17,11 +17,9 @@ export function ShowWorldStage({ campaignId, world, isDM }: { campaignId: string
 
   const isDesktop = useMediaQuery(DESKTOP_QUERY);
 
-  const detail = scene.props?.detail;
+  const dive = useWorldDive(scene.props, reduced);
 
-  const dive = useWorldDive(detail, reduced);
-
-  const shown = scene.props && dive.shown ? { ...scene.props, detail: dive.shown } : undefined;
+  const shown = dive.shown;
 
   if (!shown || scene.status === "missing") {
     return (

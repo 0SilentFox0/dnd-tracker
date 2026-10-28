@@ -12,6 +12,7 @@ import { WorldCrumbs } from "@/components/world/WorldCrumbs";
 import { WorldMapView } from "@/components/world/WorldMapView";
 import { useMediaQuery } from "@/lib/hooks/common";
 import { DESKTOP_QUERY } from "@/lib/hooks/common/useIsMobile";
+import { usePusherShowSync } from "@/lib/hooks/show";
 import { useWorldPlay } from "@/lib/hooks/world";
 import { viewToMapProps } from "@/lib/utils/world/view-props";
 
@@ -19,6 +20,8 @@ const MAP_HEIGHT = "h-[calc(100dvh-var(--app-header-h,89px)-9rem)] min-h-[20rem]
 
 export function WorldPlayClient({ campaignId, campaignName, mapId }: { campaignId: string; campaignName: string; mapId: string | null }) {
   const play = useWorldPlay(campaignId, mapId);
+
+  usePusherShowSync(campaignId, !!mapId);
 
   const isDesktop = useMediaQuery(DESKTOP_QUERY);
 

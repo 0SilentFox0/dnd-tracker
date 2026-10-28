@@ -6,7 +6,7 @@ import { WORLD_DIVE_MS, WORLD_REVEAL_MS } from "@/lib/constants/world";
 import { diveOrigin } from "@/lib/utils/world/dive";
 import type { MapPoint, WorldView } from "@/types/world";
 
-type Scene = Pick<WorldView, "map" | "markers">;
+type Scene = { detail: Pick<WorldView, "map" | "markers"> };
 
 export type DivePhase = "idle" | "dive" | "reveal";
 
@@ -22,9 +22,9 @@ function advance<T extends Scene>(s: DiveState<T>, view: T, reduced: boolean): D
 
   const phase = s.phase === "reveal" ? "reveal" : "idle";
 
-  if (!s.shown || reduced || view.map.id === s.shown.map.id) return { shown: view, target: view, phase, origin: null };
+  if (!s.shown || reduced || view.detail.map.id === s.shown.detail.map.id) return { shown: view, target: view, phase, origin: null };
 
-  const origin = diveOrigin(s.shown, view);
+  const origin = diveOrigin(s.shown.detail, view.detail);
 
   return origin ? { shown: s.shown, target: view, phase: "dive", origin } : { shown: view, target: view, phase: "reveal", origin: null };
 }

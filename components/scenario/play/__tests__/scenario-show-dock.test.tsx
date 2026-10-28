@@ -52,6 +52,12 @@ describe("ScenarioShowDock", () => {
     expect(screen.getByText("🗺 Карта: Сфера")).toBeTruthy();
   });
 
+  it("карта під заглушкою — підпис не каже «Карта»", () => {
+    render(<ScenarioShowDock campaignId="c" pageId="pg" content={empty} play={play({ deckId: "d", deckTitle: "Д", slide: null, nextImageUrl: null, audio: null, seq: 1, world: { mapId: "m1" }, curtain: true })} />);
+
+    expect(screen.queryByText(/Карта/)).toBeNull();
+  });
+
   it("за замовчуванням згорнуто; перемикач розгортає і згортає панель", () => {
     render(<ScenarioShowDock campaignId="c" pageId="pg" content={bound} play={play(null)} />);
 
