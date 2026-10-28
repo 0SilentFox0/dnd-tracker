@@ -28,15 +28,17 @@ export function useUnitsList(campaignId: string, initialUnits: Unit[]) {
 
   const labelOf = useGroupLabel();
 
-  const allGroups = useMemo(() => groupUnitsByRace(units, races).filter((g) => g.total > 0), [units, races]);
+  const [hideEmpty, setHideEmpty] = useState(false);
 
-  const found = useMemo(() => groupUnitsByRace(units, races, query).filter((g) => g.total > 0), [units, races, query]);
+  const allGroups = useMemo(() => groupUnitsByRace(units, races).filter((g) => !hideEmpty || g.total > 0), [units, races, hideEmpty]);
+
+  const found = useMemo(() => groupUnitsByRace(units, races, query).filter((g) => !hideEmpty || g.total > 0), [units, races, query, hideEmpty]);
 
   const groups = raceFilter.length > 0 ? found.filter((g) => raceFilter.includes(g.key)) : found;
 
   const search = (next: string) => {
     setQuery(next);
-    setOpen(next.trim() ? groupUnitsByRace(units, races, next).filter((g) => g.total > 0).map((g) => g.key) : []);
+    setOpen(next.trim() ? groupUnitsByRace(units, races, next).map((g) => g.key) : []);
   };
 
   const toggleRace = (key: string) =>
@@ -54,7 +56,7 @@ export function useUnitsList(campaignId: string, initialUnits: Unit[]) {
     units,
     isLoading,
     view: { groups, chips: raceChips(allGroups, labelOf), open, setOpen },
-    filter: { query, search, raceFilter, toggleRace },
+    filter: { query, search, raceFilter, toggleRace, hideEmpty, toggleHideEmpty: () => setHideEmpty((v) => !v) },
     actions: {
       deleteUnit,
       removeAll,
