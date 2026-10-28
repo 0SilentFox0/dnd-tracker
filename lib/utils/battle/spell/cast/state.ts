@@ -11,6 +11,8 @@ export interface Outcome {
   skip: boolean;
   factor: number;
   raceMultiplier: number;
+  /** крит рятівного кидка: статуси заклинання на ціль не накладаються */
+  negateEffects?: boolean;
 }
 
 export interface SpellCastState {

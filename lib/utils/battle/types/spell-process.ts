@@ -1,4 +1,5 @@
 import type { SummonRequest } from "@/lib/utils/abilities/engine/core/types";
+import type { CritPicker } from "@/lib/utils/battle/crit-choice/types";
 import type { SpellDefinition } from "@/lib/utils/spells/model/schema";
 import type { BattleAction, BattleMapConfig, BattleParticipant, TerrainDamage } from "@/types/battle";
 
@@ -23,6 +24,7 @@ export interface CastSpellParams {
   /** DM накладає з сайдбару — не витрачати spell slot */
   isDMCast?: boolean;
   rng?: () => number;
+  crit?: CritPicker;
   map?: BattleMapConfig | null;
 }
 
