@@ -18,6 +18,13 @@ export function parseCatalog(csv: string): CatalogEntry[] {
   });
 }
 
+// variants only for property-template families; another template item's own art is never borrowed
+function pickVariant(catalog: CatalogEntry[], slug: string, templateSlugs: ReadonlySet<string>) {
+  const candidates = catalog.filter((e) => e.slug.startsWith(`${slug}-`) && !templateSlugs.has(e.slug));
+
+  return candidates.find((e) => e.slug === `${slug}-plus-1`) ?? candidates[0];
+}
+
 export function mapToTemplate(entries: CatalogEntry[], slugs: Record<TokenKind, readonly string[]>) {
   const picked: Array<CatalogEntry & { via?: string }> = [];
 
@@ -30,10 +37,12 @@ export function mapToTemplate(entries: CatalogEntry[], slugs: Record<TokenKind, 
 
     const bySlug = new Map(catalog.map((e) => [e.slug, e]));
 
+    const templateSlugs = new Set(slugs[kind]);
+
     for (const slug of slugs[kind]) {
       const direct = bySlug.get(slug);
 
-      const variant = direct ?? catalog.find((e) => e.slug.startsWith(`${slug}-`));
+      const variant = direct ?? pickVariant(catalog, slug, templateSlugs);
 
       if (!variant) {
         templateOnly.push({ kind, slug });

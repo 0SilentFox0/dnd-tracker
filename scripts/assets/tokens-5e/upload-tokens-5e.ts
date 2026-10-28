@@ -12,6 +12,7 @@ import { mapToTemplate, parseCatalog, TOKEN_SIZE, type TokenKind } from "./catal
 import { toWebp } from "./convert";
 import { readIcons, writeIcons } from "./icons-file";
 
+import { CampaignKind, SRD_TEMPLATE_NAME } from "@/lib/constants/campaigns";
 import { prisma } from "@/lib/db";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { ensureBucket } from "@/lib/supabase/buckets";
@@ -26,6 +27,8 @@ async function main() {
 
   const dirIdx = args.indexOf("--dir");
 
+  if (dirIdx >= 0 && (!args[dirIdx + 1] || args[dirIdx + 1].startsWith("--"))) throw new Error(`--dir потребує шляху до теки v2. ${USAGE}`);
+
   const dir = dirIdx >= 0 ? args[dirIdx + 1] : path.join(os.homedir(), "Downloads", "fantasy-tokens", "output", "v2");
 
   const templateId = args.find((a, i) => !a.startsWith("--") && args[i - 1] !== "--dir");
@@ -38,7 +41,10 @@ async function main() {
 
   if (!dryRun) {
     assertSeedTarget(process.env.DATABASE_URL, args.includes("--allow-remote"));
-    await prisma.campaign.findUniqueOrThrow({ where: { id: templateId }, select: { id: true } });
+
+    const campaign = await prisma.campaign.findUnique({ where: { id: templateId }, select: { name: true, kind: true } });
+
+    if (campaign?.name !== SRD_TEMPLATE_NAME || campaign.kind !== CampaignKind.TEMPLATE) throw new Error(`Кампанія ${templateId} не є офіційним шаблоном «${SRD_TEMPLATE_NAME}»`);
   }
 
   // власні AI-іконки, не Forgotten Adventures: --allow-official не потрібен
@@ -114,7 +120,9 @@ async function main() {
   if (!dryRun) {
     const old = readIcons();
 
-    writeIcons({ spells: { ...old.spells, ...uploaded.spells }, units: { ...old.units, ...uploaded.units }, artifacts: { ...old.artifacts, ...uploaded.artifacts } });
+    const kept = (kind: TokenKind) => Object.fromEntries(Object.entries(old[kind]).filter(([slug]) => picked.some((p) => p.kind === kind && p.slug === slug)));
+
+    writeIcons({ spells: { ...kept("spells"), ...uploaded.spells }, units: { ...kept("units"), ...uploaded.units }, artifacts: { ...kept("artifacts"), ...uploaded.artifacts } });
   }
 
   if (errors.length > 0) process.exitCode = 1;

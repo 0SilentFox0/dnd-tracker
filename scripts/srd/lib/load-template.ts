@@ -63,8 +63,12 @@ export function withIcons(kind: SrdKind, data: SrdData, rows: Record<string, unk
 
   const urls = icons[kind as TokenKind];
 
+  const source = data[kind] as ReadonlyArray<{ slug: string }>;
+
+  if (source.length !== rows.length) throw new Error(`withIcons(${kind}): ${rows.length} рядків проти ${source.length} записів даних`);
+
   return rows.map((row, i) => {
-    const url = urls[(data[kind] as ReadonlyArray<{ slug: string }>)[i].slug];
+    const url = urls[source[i].slug];
 
     return url ? { ...row, [column]: url } : row;
   });

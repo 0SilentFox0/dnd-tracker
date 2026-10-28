@@ -40,4 +40,29 @@ describe("mapToTemplate", () => {
   });
 });
 
+describe("mapToTemplate variant rules", () => {
+  const art = (slug: string) => ({ kind: "artifacts" as const, slug, imagePath: `${slug}.png` });
+
+  const empty = { spells: [], units: [] };
+
+  it("never takes art of another template item (base weapon vs magic item)", () => {
+    const entries = [art("dagger-of-venom"), art("flame-tongue-dagger")];
+
+    const r = mapToTemplate(entries, { ...empty, artifacts: ["dagger", "dagger-of-venom", "flame-tongue"] });
+
+    expect(r.picked.find((p) => p.slug === "dagger")).toBeUndefined();
+    expect(r.templateOnly).toContainEqual({ kind: "artifacts", slug: "dagger" });
+    expect(r.picked.find((p) => p.slug === "dagger-of-venom")?.via).toBeUndefined();
+    expect(r.picked.find((p) => p.slug === "flame-tongue")?.via).toBe("flame-tongue-dagger");
+  });
+
+  it("prefers -plus-1 over the alphabetically first variant", () => {
+    const entries = [art("armor-a"), art("armor-plus-1"), art("armor-b")];
+
+    const r = mapToTemplate(entries, { ...empty, artifacts: ["armor"] });
+
+    expect(r.picked[0].via).toBe("armor-plus-1");
+  });
+});
+
 it("sizes", () => expect(TOKEN_SIZE).toEqual({ spells: 256, artifacts: 256, units: 384 }));
