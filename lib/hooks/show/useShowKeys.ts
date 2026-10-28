@@ -10,17 +10,21 @@ const TYPING = new Set(["INPUT", "TEXTAREA", "SELECT"]);
 
 const DIALOG = '[role="dialog"]';
 
-const ARROWS: Record<string, ShowCommand> = { ArrowRight: { action: "next" }, ArrowLeft: { action: "prev" } };
+const ARROWS: Partial<Record<string, ShowCommand>> = { ArrowRight: { action: "next" }, ArrowLeft: { action: "prev" } };
 
-export function useShowKeys(control: ShowControl | null): void {
+/** Літери за e.code: на українській розкладці e.key для B — «и». */
+const LETTERS: Partial<Record<string, ShowCommand>> = { KeyB: { action: "curtain" } };
+
+/** extraKeys — додаткові дії за e.code (сценарій: KeyN — наступний рядок). */
+export function useShowKeys(control: ShowControl | null, extraKeys: Record<string, () => void> = {}): void {
   const inFlight = useRef(false);
 
-  const latest = useRef(control);
+  const latest = useRef({ control, extraKeys });
 
   const active = control !== null;
 
   useEffect(() => {
-    latest.current = control;
+    latest.current = { control, extraKeys };
   });
 
   useEffect(() => {
@@ -29,7 +33,9 @@ export function useShowKeys(control: ShowControl | null): void {
     const onKey = (e: KeyboardEvent) => {
       const target = e.target as HTMLElement | null;
 
-      const cmd = ARROWS[e.key];
+      const { control, extraKeys } = latest.current;
+
+      const cmd: ShowCommand | (() => void) | undefined = ARROWS[e.key] ?? LETTERS[e.code] ?? extraKeys[e.code];
 
       if (!cmd || e.altKey || e.ctrlKey || e.metaKey || e.shiftKey) return;
 
@@ -39,9 +45,9 @@ export function useShowKeys(control: ShowControl | null): void {
 
       e.preventDefault();
 
-      const control = latest.current;
-
       if (e.repeat || inFlight.current || !control || control.pending) return;
+
+      if (typeof cmd === "function") return cmd();
 
       inFlight.current = true;
       void control.send(cmd).finally(() => (inFlight.current = false));

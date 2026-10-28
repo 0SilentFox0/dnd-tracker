@@ -16,7 +16,7 @@ export const createSkillSchema = z.object({
     spellGroupId: z.string().nullable().optional(),
     grantedSpellId: z.string().nullable().optional(),
   }),
-  abilities: AbilitiesSchema.optional(),
+  abilities: AbilitiesSchema.describe("Здібності скіла").optional(),
   mainSkillData: z.object({
     mainSkillId: z.string().nullable().optional(),
   }),
@@ -41,7 +41,7 @@ export const updateSkillSchema = z.object({
       grantedSpellId: z.string().nullable().optional(),
     })
     .optional(),
-  abilities: AbilitiesSchema.optional(),
+  abilities: AbilitiesSchema.describe("Здібності скіла").optional(),
   mainSkillData: z
     .object({
       mainSkillId: z.string().nullable().optional(),
@@ -53,3 +53,10 @@ export const updateSkillSchema = z.object({
 
 export type CreateSkillInput = z.infer<typeof createSkillSchema>;
 export type UpdateSkillInput = z.infer<typeof updateSkillSchema>;
+
+export const saveSkillTreeSchema = z.object({
+  race: z.string().min(1).describe("Назва раси, для якої це дерево"),
+  skills: z
+    .object({ mainSkills: z.array(z.object({ id: z.string() }).passthrough()).describe("Гілки дерева: id основного скіла і рівні з id скілів бібліотеки") })
+    .passthrough(),
+});

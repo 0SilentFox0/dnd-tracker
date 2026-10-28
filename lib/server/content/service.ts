@@ -15,6 +15,8 @@ async function found(r: AnyContentResource, actor: Actor, id: string | undefined
   return row;
 }
 
+const item = (r: AnyContentResource, row: unknown) => (r.toItem ? r.toItem(row) : row);
+
 const invalidate = (r: AnyContentResource, actor: Actor) => {
   if (r.invalidates.length > 0) invalidateReference(r.invalidates, actor.campaignId);
 };
@@ -24,7 +26,7 @@ export const listContent = (r: AnyContentResource, actor: Actor, query: URLSearc
 export async function getContent(r: AnyContentResource, actor: Actor, id: string) {
   const row = await found(r, actor, id, "read");
 
-  return r.toItem ? r.toItem(row) : row;
+  return item(r, row);
 }
 
 export async function createContent(r: AnyContentResource, actor: Actor, raw: unknown) {
@@ -32,7 +34,7 @@ export async function createContent(r: AnyContentResource, actor: Actor, raw: un
 
   invalidate(r, actor);
 
-  return created;
+  return item(r, created);
 }
 
 export async function updateContent(r: AnyContentResource, actor: Actor, id: string, raw: unknown) {
@@ -42,7 +44,7 @@ export async function updateContent(r: AnyContentResource, actor: Actor, id: str
 
   invalidate(r, actor);
 
-  return updated;
+  return item(r, updated);
 }
 
 export async function removeContent(r: AnyContentResource, actor: Actor, id: string): Promise<void> {

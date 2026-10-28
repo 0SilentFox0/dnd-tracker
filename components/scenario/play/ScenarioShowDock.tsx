@@ -1,25 +1,48 @@
 "use client";
 
-import { ChevronDown, ChevronLeft, ChevronRight, ChevronUp } from "lucide-react";
+import { ChevronDown, ChevronUp, EyeOff, SkipForward } from "lucide-react";
 
 import { AudioDock } from "@/components/audio/AudioDock";
 import { AudioPlayerProvider } from "@/components/audio/AudioPlayerProvider";
-import { ShowControlPanel } from "@/components/show/stage/ShowControlPanel";
+import { OptimizedImage } from "@/components/common/OptimizedImage";
+import { ShowButton } from "@/components/show/stage/show-ui";
+import { ShowDeckStrip } from "@/components/show/stage/ShowDeckStrip";
+import { ShowTransport } from "@/components/show/stage/ShowTransport";
 import { useNotify } from "@/lib/hooks/common";
 import { type ScenarioPlay, useShowDockExpanded } from "@/lib/hooks/scenario";
-import { useShowAudioHost } from "@/lib/hooks/show";
+import { useShowAudioHost, useShowKeys } from "@/lib/hooks/show";
 import { hasPlayBindings } from "@/lib/utils/scenario/play";
+import { showsCover, visibleSlide } from "@/lib/utils/show/player-view";
 import type { ScenarioContent } from "@/types/scenario";
+import type { ShowState } from "@/types/show";
 
-export function ScenarioShowDock({ campaignId, content, play }: { campaignId: string; content: ScenarioContent; play: ScenarioPlay }) {
+const scrollToRow = (rowId: string) => document.getElementById(`row-${rowId}`)?.scrollIntoView({ behavior: "smooth", block: "center" });
+
+export function ScenarioShowDock({ campaignId, pageId, content, play }: { campaignId: string; pageId: string; content: ScenarioContent; play: ScenarioPlay }) {
   const { show } = play.lookup;
 
   if (!hasPlayBindings(content) && !show?.deckId && !show?.battle) return null;
 
-  return <DockBody campaignId={campaignId} play={play} />;
+  return <DockBody campaignId={campaignId} pageId={pageId} play={play} />;
 }
 
-function DockBody({ campaignId, play }: { campaignId: string; play: ScenarioPlay }) {
+/** Що зараз бачать гравці; клік — до рядка зі слайдом. */
+function OnScreen({ show, onLocate }: { show: ShowState | null; onLocate?: () => void }) {
+  const cover = showsCover(show);
+
+  const image = visibleSlide(show)?.imageUrl;
+
+  const label = show?.battle ? `⚔ До бою: ${show.battle.name}` : cover ? (show?.deckId ? "Заглушка" : "Показ не запущено") : (show?.slide?.title ?? show?.deckTitle ?? "Слайд");
+
+  return (
+    <button type="button" className="sb-show-now" data-curtain={(cover && !!show?.deckId) || undefined} disabled={!onLocate} title={onLocate ? "До рядка зі слайдом" : undefined} onClick={onLocate}>
+      {image ? <OptimizedImage src={image} alt="" width={64} height={36} className="sb-thumb" /> : <span className="sb-thumb sb-show-thumb-empty">{cover && <EyeOff className="size-4" />}</span>}
+      <span className="sb-show-title">{label}</span>
+    </button>
+  );
+}
+
+function DockBody({ campaignId, pageId, play }: { campaignId: string; pageId: string; play: ScenarioPlay }) {
   const notify = useNotify();
 
   const host = useShowAudioHost({ campaignId, isDM: true, onFailure: notify });
@@ -28,31 +51,38 @@ function DockBody({ campaignId, play }: { campaignId: string; play: ScenarioPlay
 
   const { show } = play.lookup;
 
-  const running = !!show?.deckId;
+  const nextRow = () => {
+    if (!play.nextRow) return;
+
+    play.showSlide(play.nextRow);
+    scrollToRow(play.nextRow.id);
+  };
+
+  const current = play.currentRow;
+
+  useShowKeys(play.control, { KeyN: nextRow });
 
   return (
     <AudioPlayerProvider host={host}>
       <div className="sb-show-dock">
         <div className="sb-show-bar sans">
-          <span className="sb-show-title">{running ? (show?.slide?.title ?? show?.deckTitle ?? "Слайд") : show?.battle ? `⚔ ${show.battle.name}` : "Показ не запущено"}</span>
-          <button type="button" className="toggle" aria-label="Попередній слайд" disabled={!running || play.pending} onClick={() => void play.control.send({ action: "prev" })}>
-            <ChevronLeft className="size-4" />
-          </button>
-          <button type="button" className="toggle" aria-label="Наступний слайд" disabled={!running || play.pending} onClick={() => void play.control.send({ action: "next" })}>
-            <ChevronRight className="size-4" />
-          </button>
-          <button type="button" className="toggle" aria-expanded={expanded} aria-label={expanded ? "Згорнути панель показу" : "Розгорнути панель показу"} onClick={() => setExpanded(!expanded)}>
-            {expanded ? <ChevronDown className="size-4" /> : <ChevronUp className="size-4" />}
-          </button>
-        </div>
-        {expanded && (
-          <div className="sb-show-body">
+          <OnScreen show={show} onLocate={current ? () => scrollToRow(current.id) : undefined} />
+          <div className="sb-show-controls">
             <div className="sb-show-audio">
               <AudioDock placement="corner" defaultExpanded={false} />
             </div>
-            <div className="sb-show-controls">
-              <ShowControlPanel campaignId={campaignId} show={show} control={play.control} />
-            </div>
+            <ShowTransport campaignId={campaignId} show={show} control={play.control} />
+            <ShowButton aria-label="Наступний рядок" title={play.nextRow ? "Слайд наступного рядка (N)" : "Далі в сценарії слайдів немає"} disabled={play.pending || !play.nextRow} onClick={nextRow}>
+              <SkipForward className="size-4" />
+            </ShowButton>
+            <ShowButton aria-expanded={expanded} aria-label={expanded ? "Згорнути панель показу" : "Розгорнути панель показу"} title={expanded ? "Сховати слайди" : "Слайди"} onClick={() => setExpanded(!expanded)}>
+              {expanded ? <ChevronDown className="size-4" /> : <ChevronUp className="size-4" />}
+            </ShowButton>
+          </div>
+        </div>
+        {expanded && (
+          <div className="sb-show-body sans">
+            <ShowDeckStrip campaignId={campaignId} show={show} control={play.control} sceneId={pageId} />
           </div>
         )}
       </div>

@@ -22,6 +22,7 @@ export const artifactsResource = defineResource<ArtifactRow, z.infer<typeof crea
   description: "Артефакти: слот, рідкість, сет, зброя, бонуси (здібності).",
   path: "/artifacts",
   schemas: { create: createArtifactSchema, update: patchArtifactSchema },
+  errors: [422],
   access: { list: "member", item: "dm" },
   invalidates: [],
   notFound: API_ERRORS.NOT_FOUND,

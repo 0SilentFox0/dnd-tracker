@@ -74,8 +74,8 @@ export async function updateSpellGroup(
 export async function removeAllSpellsFromGroup(
   campaignId: string,
   groupId: string,
-): Promise<{ success: boolean }> {
-  return campaignPost<{ success: boolean }>(
+): Promise<{ ok: boolean }> {
+  return campaignPost<{ ok: boolean }>(
     campaignId,
     `/spells/groups/${groupId}/remove-all-spells`,
     {},

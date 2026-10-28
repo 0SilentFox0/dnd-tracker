@@ -25,13 +25,13 @@ export function RowBindings({ campaignId, pageId, row, onChange }: Props) {
   const battle = row.battleId && briefs?.find((b) => b.id === row.battleId);
 
   return (
-    <div className="sb-bindings sans">
+    <div className="sb-bindings">
       {row.slide ? (
         <span className="sb-chip">
           {slide ? (
             <>
-              <OptimizedImage src={slide.imageUrl} alt="" width={48} height={27} className="h-[27px] w-12 rounded object-cover" />
-              {slide.title ?? deck?.title}
+              <OptimizedImage src={slide.imageUrl} alt="" width={36} height={20} className="h-5 w-9 shrink-0 rounded-sm object-cover" />
+              <span className="sb-chip-name">{slide.title ?? deck?.title}</span>
             </>
           ) : (
             deck && "Слайд недоступний"
@@ -42,19 +42,26 @@ export function RowBindings({ campaignId, pageId, row, onChange }: Props) {
         </span>
       ) : (
         <button type="button" className="toggle" aria-label="Прив'язати слайд" onClick={() => setPicking("slide")}>
-          <ImageIcon className="size-3" /> Слайд
+          <ImageIcon className="size-3.5" /> Слайд
         </button>
       )}
       {row.battleId ? (
         <span className="sb-chip">
-          {battle ? `⚔ ${battle.name}` : briefs && "Бій недоступний"}
+          {battle ? (
+            <>
+              <Swords className="size-3.5 shrink-0" />
+              <span className="sb-chip-name">{battle.name}</span>
+            </>
+          ) : (
+            briefs && "Бій недоступний"
+          )}
           <button type="button" aria-label="Відв'язати бій" onClick={() => onChange.battle(undefined)}>
             <X className="size-3" />
           </button>
         </span>
       ) : (
         <button type="button" className="toggle" aria-label="Прив'язати бій" onClick={() => setPicking("battle")}>
-          <Swords className="size-3" /> Бій
+          <Swords className="size-3.5" /> Бій
         </button>
       )}
       <SlidePickerDialog campaignId={campaignId} pageId={pageId} open={picking === "slide"} onOpenChange={(v) => setPicking(v ? "slide" : null)} onPick={onChange.slide} />

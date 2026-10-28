@@ -5,7 +5,7 @@ import type { z } from "zod";
 import "server-only";
 import { API_ERRORS } from "@/lib/constants/api-errors";
 import { prisma } from "@/lib/db";
-import { createTrackSchema, updateTrackSchema } from "@/lib/schemas/music";
+import { createTrackSchema, createYoutubeTrackSchema, updateTrackSchema } from "@/lib/schemas/music";
 import { isLibraryFull, listTracks, toCampaignTrack } from "@/lib/server/audio/track-store";
 import { defineResource } from "@/lib/server/content/define-resource";
 import { ContentError } from "@/lib/server/content/errors";
@@ -51,7 +51,7 @@ export const tracksResource = defineResource<TrackRow, z.infer<typeof createTrac
   label: "Музика бою",
   description: "Треки плеєра бою. Через API — лише YouTube за посиланням; файли завантажуються в UI.",
   path: "/tracks",
-  schemas: { create: createTrackSchema, update: updateTrackSchema },
+  schemas: { create: createTrackSchema, update: updateTrackSchema, apiCreate: createYoutubeTrackSchema },
   access: { list: "dm", item: "dm" },
   invalidates: [],
   notFound: API_ERRORS.TRACK_NOT_FOUND,
@@ -67,14 +67,14 @@ export const tracksResource = defineResource<TrackRow, z.infer<typeof createTrac
 
     const last = await prisma.campaignTrack.aggregate({ where: { campaignId: actor.campaignId }, _max: { sortOrder: true } });
 
-    return toCampaignTrack(await prisma.campaignTrack.create({ data: { campaignId: actor.campaignId, ...source, sortOrder: (last._max.sortOrder ?? -1) + 1 } }));
+    return prisma.campaignTrack.create({ data: { campaignId: actor.campaignId, ...source, sortOrder: (last._max.sortOrder ?? -1) + 1 } });
   },
   async update(_actor, existing, body) {
     if (body.url !== undefined && existing.kind !== "youtube") throw new ContentError(API_ERRORS.TRACK_URL_LOCKED, 400);
 
     const data = { title: body.title, durationSec: body.durationSec, youtubeId: body.url === undefined ? undefined : parseYoutubeId(body.url) };
 
-    return toCampaignTrack(await prisma.campaignTrack.update({ where: { id: existing.id }, data }));
+    return prisma.campaignTrack.update({ where: { id: existing.id }, data });
   },
   async remove(actor, existing) {
     await prisma.campaignTrack.deleteMany({ where: { id: existing.id, campaignId: actor.campaignId } });

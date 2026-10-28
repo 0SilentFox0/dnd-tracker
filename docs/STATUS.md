@@ -8,7 +8,7 @@ _Оновлено: 2026-10-21._
 
 | Що | Гілка / worktree | Стан |
 |---|---|---|
-| Конструктор кампаній (епік, етапи 1–6) | `feat/constructor`, `../dnd-tracker-constructor`, локальна БД `constructor` | Етап 1 (1a хардкод→дані, 1b правила, 1c шаблони) готовий і перевірений; етап 2 у роботі: **2a фабрика CRUD і 2b токени готові** (`lib/server/content`, `CONTENT_RESOURCES`, `lib/utils/api/content-routes.ts`; спек `docs/superpowers/specs/2026-10-21-constructor-stage2-open-api-design.md`); 2b: scopes `ai`/`content:read`/`content:write` на `api_tokens`, `resolveActor` з Bearer, перевірка id у `knownSpells`/`availableSkills`/`disabledSkills`, UI прав на `/dm/ai` (на шаблоні — сторінка «API»); далі 2c OpenAPI (+ query-схеми ресурсів, відповіді запису через `toItem`), 2d MCP-інструменти контенту (доступ у сервісі, типізований сервіс). **Злиття в `main` і prod — лише після всього епіку (етапи 1–6)**; хендоф: `docs/superpowers/constructor-handoff.md` |
+| Конструктор кампаній (епік, етапи 1–6) | `feat/constructor`, `../dnd-tracker-constructor`, локальна БД `constructor` | Етап 1 (1a хардкод→дані, 1b правила, 1c шаблони) готовий і перевірений; етап 2 у роботі: **2a фабрика CRUD, 2b токени і 2c OpenAPI готові** (`lib/server/content`, `CONTENT_RESOURCES`, `lib/utils/api/content-routes.ts`; спек `docs/superpowers/specs/2026-10-21-constructor-stage2-open-api-design.md`); 2b: scopes `ai`/`content:read`/`content:write` на `api_tokens`, `resolveActor` з Bearer, перевірка id у `knownSpells`/`availableSkills`/`disabledSkills`, UI прав на `/dm/ai` (на шаблоні — сторінка «API»); 2c: публічний `/api/openapi.json` з `CONTENT_RESOURCES` + `CONTENT_OPERATIONS` (`lib/server/content/openapi.ts`, `json-schema.ts`, `operations.ts`), відповіді запису через `toItem`, abilities з `content:read`, панель «REST API» на `/dm/ai`; далі 2d MCP-інструменти контенту (доступ у сервісі, типізований сервіс). **Злиття в `main` і prod — лише після всього епіку (етапи 1–6)**; хендоф: `docs/superpowers/constructor-handoff.md` |
 
 ## Домовленості
 
@@ -17,6 +17,7 @@ _Оновлено: 2026-10-21._
 - Під час 1b/1c нова логіка CRUD-роутів живе в `lib/schemas`, `lib/server/…`, `lib/utils/api`, а не в тілі `route.ts`.
 - `main` підтягується у `feat/constructor` після фінального рев'ю кожної частини; зворотного злиття до кінця епіку немає.
 - Паралельно — не більше 2–3 активних worktree; злиті worktree й гілки видаляються одразу.
+- **Після епіку «Конструктор»** — наступний епік: розділити код на доменні модулі (`modules/<домен>/{core,server,api,hooks,ui,types}` + `shared/`, імпорт лише через публічний `index.ts`, межі через ESLint, тести по модулях), щоб звузити контекст розробки й обсяг тестів. Почати з карти залежностей між доменами і спеку; до злиття конструктора не починати (масове перенесення файлів конфліктує з `feat/constructor`).
 - Перехід до публічного продукту (конкуренти, чого бракує, пріоритети) — відкладено, бэклог у [product/product-readiness-2026-10-21.md](product/product-readiness-2026-10-21.md).
 
 ## Відкриті хвости

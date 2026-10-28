@@ -1,6 +1,6 @@
 "use client";
 
-import { type ReactNode, useCallback, useEffect, useState } from "react";
+import { type ReactNode, useCallback, useEffect, useRef, useState } from "react";
 import type { Editor } from "@tiptap/core";
 
 import { OrderButtons } from "./OrderButtons";
@@ -13,7 +13,7 @@ import { ScenarioToolbar } from "./ScenarioToolbar";
 import { SectionHeaderEditor } from "./SectionHeaderEditor";
 
 import { ScenarioLegend } from "@/components/scenario/ScenarioLegend";
-import { useConfirm } from "@/lib/hooks/common";
+import { useConfirm, useCssVarHeight } from "@/lib/hooks/common";
 import { useMentionSearch, useScenarioDraft, useScenarioPage } from "@/lib/hooks/scenario";
 import { addRow, addSection, moveRow, moveSection, removeRow, removeSection, setRowBattle, setRowSlide, updateRow, updateSection } from "@/lib/utils/scenario/structure";
 import type { RevealRule, RichDoc, ScenarioPage } from "@/types/scenario";
@@ -43,6 +43,10 @@ export function ScenarioEditor({ campaignId, page, onExit, toolbarActions, onDra
 
   const onReady = useCallback((e: Editor | null) => setEditor(e), []);
 
+  const toolbarRef = useRef<HTMLDivElement>(null);
+
+  useCssVarHeight(toolbarRef, "--sb-toolbar-h");
+
   const removeWithConfirm = async (title: string, apply: () => void) => {
     if (await confirm({ title: `Видалити ${title}?`, description: "Зміну можна відкотити через «Версії».", confirmLabel: "Видалити" })) apply();
   };
@@ -67,7 +71,7 @@ export function ScenarioEditor({ campaignId, page, onExit, toolbarActions, onDra
 
   return (
     <>
-      <div className="sb-toolbar-wrap">
+      <div ref={toolbarRef} className="sb-toolbar-wrap">
         <ScenarioToolbar editor={active ? editor : null} />
         <div className="sb-toolbar" style={{ borderTop: 0 }}>
           <SaveStatus state={draft.state} error={draft.error} onRetry={() => void draft.flush()} onReload={() => void draft.reload()} />
@@ -111,18 +115,20 @@ export function ScenarioEditor({ campaignId, page, onExit, toolbarActions, onDra
                 <div className="story">{renderCell(s.id, r.id, "story", r.story)}</div>
                 <aside className="notes" style={{ display: "block" }}>
                   {renderCell(s.id, r.id, "notes", r.notes)}
-                  <RowBindings
-                    campaignId={campaignId}
-                    pageId={page.id}
-                    row={r}
-                    onChange={{ slide: (v) => draft.setContent((c) => setRowSlide(c, s.id, r.id, v)), battle: (v) => draft.setContent((c) => setRowBattle(c, s.id, r.id, v)) }}
-                  />
-                  <div className="sans" style={{ display: "flex", gap: 4, marginTop: 10, justifyContent: "flex-end" }}>
-                    <OrderButtons
-                      labels={{ up: "Рядок вгору", down: "Рядок вниз", remove: "Видалити рядок" }}
-                      onMove={(dir) => draft.setContent((c) => moveRow(c, s.id, r.id, dir))}
-                      onRemove={() => void removeWithConfirm("рядок", () => draft.setContent((c) => removeRow(c, s.id, r.id)))}
+                  <div className="sb-row-foot sans">
+                    <RowBindings
+                      campaignId={campaignId}
+                      pageId={page.id}
+                      row={r}
+                      onChange={{ slide: (v) => draft.setContent((c) => setRowSlide(c, s.id, r.id, v)), battle: (v) => draft.setContent((c) => setRowBattle(c, s.id, r.id, v)) }}
                     />
+                    <div className="sb-row-order">
+                      <OrderButtons
+                        labels={{ up: "Рядок вгору", down: "Рядок вниз", remove: "Видалити рядок" }}
+                        onMove={(dir) => draft.setContent((c) => moveRow(c, s.id, r.id, dir))}
+                        onRemove={() => void removeWithConfirm("рядок", () => draft.setContent((c) => removeRow(c, s.id, r.id)))}
+                      />
+                    </div>
                   </div>
                 </aside>
               </div>

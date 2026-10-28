@@ -22,7 +22,7 @@ describe("RowBindings", () => {
     render(<RowBindings campaignId="c" pageId="p1" row={{ id: "r", story: doc, notes: doc, slide: { deckId: "d1", slideId: "slide-a" }, battleId: "b1" }} onChange={onChange} />);
 
     expect(screen.getByText("Галявина")).toBeTruthy();
-    expect(screen.getByText("⚔ Засідка")).toBeTruthy();
+    expect(screen.getByText("Засідка")).toBeTruthy();
 
     fireEvent.click(screen.getByRole("button", { name: "Відв'язати слайд" }));
     expect(onChange.slide).toHaveBeenCalledWith(undefined);

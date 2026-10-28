@@ -267,3 +267,71 @@ describe("withoutBattle", () => {
     expect(withoutBattle(showing(0, { battle: called }), "b2")).toBeNull();
   });
 });
+
+describe("заглушка (curtain / cover)", () => {
+  const cover = { deckId: "d1", slide: { id: "slide-0002", imageUrl: img(2), title: "Слайд 2" } };
+
+  it("setCover — знімок слайда без треку, показ не змінюється", () => {
+    const next = ok(applyShowCommand(showing(0), { action: "setCover", deckId: "d1", slideId: "slide-0002" }, ctx));
+
+    expect(next.cover).toEqual(cover);
+    expect(next.slide).toEqual(s(1));
+    expect(next.seq).toBe(5);
+  });
+
+  it("setCover без показу створює стан; невідомий слайд — помилка", () => {
+    expect(ok(applyShowCommand(null, { action: "setCover", deckId: "d1", slideId: "slide-0001" }, ctx))).toMatchObject({ deckId: null, cover: { deckId: "d1" }, seq: 1 });
+    expect(applyShowCommand(null, { action: "setCover", deckId: "d1", slideId: "slide-9999" }, ctx).ok).toBe(false);
+  });
+
+  it("clearCover прибирає заглушку; без неї — той самий стан", () => {
+    const prev = showing(0);
+
+    expect(ok(applyShowCommand(showing(0, { cover }), { action: "clearCover" }, ctx))).not.toHaveProperty("cover");
+    expect(ok(applyShowCommand(prev, { action: "clearCover" }, ctx))).toBe(prev);
+  });
+
+  it("curtain on/off лишає слайд і музику", () => {
+    const playing = audio();
+
+    const on = ok(applyShowCommand(showing(1, { audio: playing }), { action: "curtain", on: true }, ctx));
+
+    expect(on).toMatchObject({ curtain: true, slide: deck.slides[1], seq: 5 });
+    expect(on.audio).toBe(playing);
+
+    const off = ok(applyShowCommand(on, { action: "curtain", on: false }, ctx));
+
+    expect(off).not.toHaveProperty("curtain");
+    expect(off.slide).toEqual(deck.slides[1]);
+  });
+
+  it("без on — перемикання; без показу вмикається з порожнього стану", () => {
+    expect(ok(applyShowCommand(showing(0, { curtain: true }), { action: "curtain" }, ctx))).not.toHaveProperty("curtain");
+    expect(ok(applyShowCommand(null, { action: "curtain" }, ctx))).toMatchObject({ curtain: true, deckId: null, seq: 1 });
+  });
+
+  it("повтор того самого стану нічого не змінює", () => {
+    const prev = showing(0, { curtain: true });
+
+    expect(ok(applyShowCommand(prev, { action: "curtain", on: true }, ctx))).toBe(prev);
+  });
+
+  it("перемикання слайда знімає заглушку, але зберігає cover; на межі набору теж", () => {
+    const next = ok(applyShowCommand(showing(0, { curtain: true, cover }), { action: "next" }, ctx));
+
+    expect(next).not.toHaveProperty("curtain");
+    expect(next.cover).toEqual(cover);
+
+    const edge = ok(applyShowCommand(showing(2, { curtain: true, cover }), { action: "next" }, ctx));
+
+    expect(edge).not.toHaveProperty("curtain");
+    expect(edge.seq).toBe(5);
+  });
+
+  it("end зберігає cover і знімає curtain", () => {
+    const ended = ok(applyShowCommand(showing(0, { curtain: true, cover }), { action: "end" }, ctx));
+
+    expect(ended).toMatchObject({ deckId: null, slide: null, cover });
+    expect(ended).not.toHaveProperty("curtain");
+  });
+});

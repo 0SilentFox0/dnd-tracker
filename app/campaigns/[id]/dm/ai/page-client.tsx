@@ -74,6 +74,26 @@ function McpPanel() {
   );
 }
 
+function RestApiPanel({ campaignId }: { campaignId: string }) {
+  const origin = useSyncExternalStore(subscribeNothing, () => window.location.origin, () => "");
+
+  const curl = `curl -H "Authorization: Bearer <токен>" ${origin}/api/campaigns/${campaignId}/units`;
+
+  return (
+    <HudPanel>
+      <h2 className="mb-3 font-semibold text-hud-ink">REST API</h2>
+      <p className="mb-2 text-sm text-hud-muted">
+        Опис усіх операцій контенту:{" "}
+        <a href="/api/openapi.json" target="_blank" rel="noreferrer" className="underline">
+          openapi.json
+        </a>
+        . Права токена вказано в кожній операції (x-scopes).
+      </p>
+      <pre className="overflow-x-auto rounded-md bg-black/30 p-3 text-xs text-hud-ink">{curl}</pre>
+    </HudPanel>
+  );
+}
+
 export function DmAiPageClient({ campaignId, isTemplate }: { campaignId: string; isTemplate: boolean }) {
   return (
     <HudPage>
@@ -84,6 +104,7 @@ export function DmAiPageClient({ campaignId, isTemplate }: { campaignId: string;
       <div className="space-y-4">
         {!isTemplate && <AssistantPanels campaignId={campaignId} />}
         <TokensPanel campaignId={campaignId} scopes={isTemplate ? CONTENT_SCOPES : API_TOKEN_SCOPES} />
+        <RestApiPanel campaignId={campaignId} />
         {!isTemplate && <McpPanel />}
       </div>
     </HudPage>

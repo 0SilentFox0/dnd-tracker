@@ -1,13 +1,14 @@
 import { NextResponse } from "next/server";
+import type { z } from "zod";
 
 import { API_ERRORS } from "@/lib/constants/api-errors";
 import { prisma } from "@/lib/db";
 import { reorderTracksSchema, trackUploadRequestSchema } from "@/lib/schemas/music";
 import { isLibraryFull, listTracks } from "@/lib/server/audio/track-store";
 import { createTrackUploadTicket } from "@/lib/supabase/battle-music-storage";
+import type { Actor } from "@/lib/utils/api/actor";
 import { requireDM } from "@/lib/utils/api/api-auth";
 import { errorResponse } from "@/lib/utils/api/api-response";
-import { NEED, type RouteCtx, runContent } from "@/lib/utils/api/content-routes";
 import { handleApiError } from "@/lib/utils/api/error-handler";
 import { parseBody } from "@/lib/utils/api/parse-body";
 import { validateTrackFile } from "@/lib/utils/audio/track-file";
@@ -37,19 +38,14 @@ export async function issueUploadTicketHandler(req: Request, campaignId: string)
   }
 }
 
-export const reorderTracksHandler = (req: Request, ctx: RouteCtx) =>
-  runContent({ req, ctx, need: NEED.write, action: "reorder tracks" }, async (actor) => {
-    const body = await parseBody(reorderTracksSchema, req);
+export async function reorderTracks({ actor, body }: { actor: Actor; body: z.infer<typeof reorderTracksSchema> }) {
+  const known = new Set((await prisma.campaignTrack.findMany({ where: { campaignId: actor.campaignId }, select: { id: true } })).map((r) => r.id));
 
-    if (body instanceof NextResponse) return body;
+  const exact = body.ids.length === known.size && new Set(body.ids).size === body.ids.length && body.ids.every((id) => known.has(id));
 
-    const known = new Set((await prisma.campaignTrack.findMany({ where: { campaignId: actor.campaignId }, select: { id: true } })).map((r) => r.id));
+  if (!exact) return errorResponse(API_ERRORS.TRACK_ORDER_MISMATCH, 400);
 
-    const exact = body.ids.length === known.size && new Set(body.ids).size === body.ids.length && body.ids.every((id) => known.has(id));
+  await prisma.$transaction(body.ids.map((id, sortOrder) => prisma.campaignTrack.update({ where: { id }, data: { sortOrder } })));
 
-    if (!exact) return errorResponse(API_ERRORS.TRACK_ORDER_MISMATCH, 400);
-
-    await prisma.$transaction(body.ids.map((id, sortOrder) => prisma.campaignTrack.update({ where: { id }, data: { sortOrder } })));
-
-    return NextResponse.json(await listTracks(actor.campaignId));
-  });
+  return NextResponse.json(await listTracks(actor.campaignId));
+}

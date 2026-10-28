@@ -9,7 +9,7 @@ export const createArtifactSchema = z.object({
   description: z.string().optional(),
   rarity: z.enum(ARTIFACT_RARITY_VALUES).optional(),
   slot: z.enum(ARTIFACT_SLOT_VALUES),
-  abilities: AbilitiesSchema.optional(),
+  abilities: AbilitiesSchema.describe("Здібності артефакту").optional(),
   weapon: WeaponStatsSchema.optional(),
   setId: z.string().optional(),
   icon: z.preprocess(
@@ -23,7 +23,7 @@ export const patchArtifactSchema = z.object({
   description: z.string().nullable().optional(),
   rarity: z.enum(ARTIFACT_RARITY_VALUES).nullable().optional(),
   slot: z.enum(ARTIFACT_SLOT_VALUES).optional(),
-  abilities: AbilitiesSchema.optional(),
+  abilities: AbilitiesSchema.describe("Здібності артефакту").optional(),
   weapon: WeaponStatsSchema.optional(),
   setId: z.string().nullable().optional(),
   icon: z.preprocess(

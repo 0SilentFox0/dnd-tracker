@@ -8,6 +8,12 @@ export interface Slide {
   trackId?: string;
 }
 
+/** Заглушка кампанії: знімок обраного слайда (без треку). */
+export interface ShowCover {
+  deckId: string;
+  slide: Slide;
+}
+
 export interface ShowBattle {
   id: string;
   name: string;
@@ -53,6 +59,9 @@ export interface ShowState {
   audio: BattleAudioState | null;
   /** Бій, до якого кличуть гравців; відсутнє — нікого не кличемо. */
   battle?: ShowBattle;
+  cover?: ShowCover;
+  /** Гравці бачать заглушку замість слайда; позиція в наборі й музика лишаються. */
+  curtain?: true;
   seq: number;
 }
 
@@ -62,7 +71,10 @@ export type ShowCommand =
   | { action: "prev" }
   | { action: "end" }
   | { action: "audio"; command: BattleAudioCommand }
-  | { action: "battle"; battleId: string };
+  | { action: "battle"; battleId: string }
+  | { action: "curtain"; on?: boolean }
+  | { action: "setCover"; deckId: string; slideId: string }
+  | { action: "clearCover" };
 
 export interface ShowResponse {
   show: ShowState | null;

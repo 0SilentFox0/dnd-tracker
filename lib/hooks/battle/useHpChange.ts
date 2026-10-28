@@ -6,6 +6,7 @@ import type { FxImpact } from "@/lib/utils/battle/fx";
 
 export interface HpChange {
   delta: number;
+  hp: number;
   id: number;
   impact: FxImpact | null;
 }
@@ -18,7 +19,7 @@ export function useHpChange(hp: number, impact: FxImpact | null = null): HpChang
 
   if (hp !== prev) {
     setPrev(hp);
-    setChange({ delta: hp - prev, id: (change?.id ?? 0) + 1, impact });
+    setChange({ delta: hp - prev, hp, id: (change?.id ?? 0) + 1, impact });
   }
 
   return change;

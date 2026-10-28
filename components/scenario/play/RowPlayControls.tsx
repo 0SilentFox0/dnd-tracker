@@ -3,7 +3,8 @@
 import Link from "next/link";
 import { Play, Swords } from "lucide-react";
 
-import { BattleStatus } from "@/lib/constants/battle";
+import { OptimizedImage } from "@/components/common/OptimizedImage";
+import { BATTLE_STATUS_LABEL, BattleStatus } from "@/lib/constants/battle";
 import type { ScenarioPlay } from "@/lib/hooks/scenario";
 import { battleAction, rowBattleState, rowSlideState } from "@/lib/utils/scenario/play";
 import type { ScenarioRow } from "@/types/scenario";
@@ -20,26 +21,43 @@ export function RowPlayControls({ campaignId, row, play }: { campaignId: string;
   return (
     <div className="sb-play sans">
       {slide.kind === "ready" && (
-        <button type="button" className="toggle" aria-pressed={slide.active} disabled={play.pending} onClick={() => play.showSlide(row)}>
-          <Play className="size-3" /> Показати слайд
-        </button>
+        <span className="sb-bind" data-on-screen={slide.active || undefined}>
+          <OptimizedImage src={slide.slide.imageUrl} alt="" width={64} height={36} className="sb-thumb" />
+          <span className="sb-bind-name">{slide.slide.title ?? "Слайд"}</span>
+          {slide.active ? (
+            <span className="sb-bind-live">● На екрані</span>
+          ) : (
+            <button type="button" className="toggle" aria-label="Показати слайд" disabled={play.pending} onClick={() => play.showSlide(row)}>
+              <Play className="size-3" /> Показати
+            </button>
+          )}
+        </span>
       )}
-      {slide.kind === "missing" && <span className="sb-missing">Слайд недоступний</span>}
-      {battle.kind === "missing" && <span className="sb-missing">Бій недоступний</span>}
-      {battle.kind === "ready" && action !== "none" && (
-        <button type="button" className="toggle" disabled={play.pending} onClick={() => play.runBattle(row)}>
-          <Swords className="size-3" /> {action === "start" ? `Почати бій «${battle.battle.name}»` : battle.called ? "Покликати ще раз" : "Покликати в бій"}
-        </button>
-      )}
-      {battle.kind === "ready" && battle.battle.status === BattleStatus.ACTIVE && (
-        <Link className="toggle" href={`/campaigns/${campaignId}/battles/${battle.battle.id}`} target="_blank" rel="noopener">
-          Перейти до бою ↗
-        </Link>
-      )}
-      {battle.kind === "ready" && action === "none" && battle.battle.status === BattleStatus.COMPLETED && (
-        <button type="button" className="toggle" disabled>
-          Бій завершено
-        </button>
+      {slide.kind === "loading" && <span className="sb-bind sb-missing">Слайд…</span>}
+      {slide.kind === "missing" && <span className="sb-bind sb-missing">Слайд недоступний</span>}
+      {battle.kind === "missing" && <span className="sb-bind sb-missing">Бій недоступний</span>}
+      {battle.kind === "ready" && (
+        <span className="sb-bind" data-battle={battle.battle.status}>
+          <Swords className="size-4 shrink-0" />
+          <span className="sb-bind-name">
+            {battle.battle.name} <small>· {BATTLE_STATUS_LABEL[battle.battle.status as BattleStatus] ?? battle.battle.status}</small>
+          </span>
+          {action !== "none" && (
+            <button type="button" className="toggle" disabled={play.pending} onClick={() => play.runBattle(row)}>
+              {action === "start" ? "Почати бій" : battle.called ? "Покликати ще раз" : "Покликати в бій"}
+            </button>
+          )}
+          {battle.battle.status === BattleStatus.ACTIVE && (
+            <Link className="toggle" href={`/campaigns/${campaignId}/battles/${battle.battle.id}`} target="_blank" rel="noopener">
+              До бою ↗
+            </Link>
+          )}
+          {action === "none" && battle.battle.status === BattleStatus.COMPLETED && (
+            <button type="button" className="toggle" disabled>
+              Бій завершено
+            </button>
+          )}
+        </span>
       )}
     </div>
   );

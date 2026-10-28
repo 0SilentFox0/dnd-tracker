@@ -19,6 +19,8 @@ const CASES: Array<[string, () => Promise<Record<string, unknown>>, string, Reco
   ["tracks/order", () => import("@/app/api/campaigns/[id]/tracks/order/route"), "PUT", {}, W],
   ["rules GET", () => import("@/app/api/campaigns/[id]/rules/route"), "GET", {}, { access: "member", scope: "content:read" }],
   ["rules PATCH", () => import("@/app/api/campaigns/[id]/rules/route"), "PATCH", {}, W],
+  ["abilities sources", () => import("@/app/api/campaigns/[id]/abilities/sources/route"), "GET", {}, { access: "dm", scope: "content:read" }],
+  ["abilities owner", () => import("@/app/api/campaigns/[id]/abilities/[kind]/[ownerId]/route"), "GET", { kind: "unit", ownerId: "o" }, { access: "dm", scope: "content:read" }],
   ["export", () => import("@/app/api/campaigns/[id]/export/route"), "GET", {}, { access: "dm", scope: "content:read" }],
 ];
 

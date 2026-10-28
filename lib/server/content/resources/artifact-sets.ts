@@ -11,7 +11,6 @@ import {
   insertArtifactSet,
   listArtifactSets,
   reloadArtifactSetDetail,
-  reloadArtifactSetWithArtifacts,
   updateArtifactSetRow,
 } from "@/lib/server/artifacts/artifact-set-queries";
 import { persistIcon } from "@/lib/server/artifacts/persist-icon";
@@ -39,6 +38,7 @@ export const artifactSetsResource = defineResource<SetRow, z.infer<typeof create
   description: "Сети: склад артефактів, бонус сету (текст і здібності), іконка.",
   path: "/artifact-sets",
   schemas: { create: createArtifactSetSchema, update: patchArtifactSetSchema },
+  errors: [422],
   access: { list: "member", item: "member" },
   invalidates: [],
   notFound: API_ERRORS.NOT_FOUND,
@@ -52,7 +52,7 @@ export const artifactSetsResource = defineResource<SetRow, z.infer<typeof create
 
     if (data.artifactIds?.length) await syncMembers(actor.campaignId, created.id, data.artifactIds);
 
-    return reloadArtifactSetWithArtifacts(created.id);
+    return reloadArtifactSetDetail(created.id);
   },
   async update(actor, existing, data) {
     const patch = data.icon !== undefined && data.icon !== existing.icon ? { ...data, icon: await persistIcon(actor.campaignId, data.icon, `${existing.id}-${randomUUID()}`) } : data;

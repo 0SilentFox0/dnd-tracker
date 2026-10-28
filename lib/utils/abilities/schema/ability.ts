@@ -105,7 +105,8 @@ export const AbilitySchema = z
         ctx.addIssue({ code: "custom", path: ["effects", i], message });
       }
     });
-  });
+  })
+  .describe("Здібність: тригер (коли), умова (якщо), ефекти (що), ліміти. Пасивки — лише статичні ефекти без тривалості.");
 
 export const AbilitiesSchema = z.array(AbilitySchema);
 

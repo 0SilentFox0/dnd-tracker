@@ -14,12 +14,12 @@ import { abilityCharges, NO_EFFECTS, turnsUntil } from "@/lib/utils/battle/view"
 import { signed } from "@/lib/utils/common/format";
 import type { BattleParticipant } from "@/types/battle";
 
-export const MyHeroPanel = memo(function MyHeroPanel({ hero, compact = false }: { hero: BattleParticipant; compact?: boolean }) {
+export const MyHeroPanel = memo(function MyHeroPanel({ hero: live, compact = false }: { hero: BattleParticipant; compact?: boolean }) {
   const { battle, turn: { queue, isMyTurn }, effects } = useBattleSceneData();
 
-  const heroEffects = effects.get(hero.basicInfo.id) ?? NO_EFFECTS;
+  const heroEffects = effects.get(live.basicInfo.id) ?? NO_EFFECTS;
 
-  const { change, shakeRef } = useHitFx<HTMLDivElement>(hero.combatStats.currentHp, useFxImpacts()(hero.basicInfo.id));
+  const { change, shown: hero, shakeRef } = useHitFx<HTMLDivElement>(live, useFxImpacts()(live.basicInfo.id));
 
   const until = turnsUntil(queue, [hero.basicInfo.id]);
 

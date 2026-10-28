@@ -1,7 +1,9 @@
 import { NextResponse } from "next/server";
 import type { Prisma } from "@prisma/client";
 
+import { API_ERRORS } from "@/lib/constants/api-errors";
 import { prisma } from "@/lib/db";
+import { errorResponse } from "@/lib/utils/api/api-response";
 import { readTreeJson, validateTree } from "@/lib/utils/skills/progression";
 
 const MOVE_ATTEMPTS = 3;
@@ -18,7 +20,7 @@ export async function saveSkillTree(campaignId: string, treeId: string, race: st
 
   const errors = validateTree(raw, { mainSkillIds: new Set(mainSkills.map((m) => m.id)), skillIds: new Set(librarySkills.map((s) => s.id)) });
 
-  if (errors.length > 0) return NextResponse.json({ errors }, { status: 400 });
+  if (errors.length > 0) return errorResponse(API_ERRORS.INVALID_SKILL_TREE, 400, errors);
 
   const existing =
     (await prisma.skillTree.findFirst({ where: { id: treeId, campaignId } })) ??
@@ -33,7 +35,7 @@ export async function saveSkillTree(campaignId: string, treeId: string, race: st
       await moveProgressKey(campaignId, existing?.race ?? race, oldJsonId, rowId);
     } catch (error) {
       if (error instanceof ProgressMoveConflict) {
-        return NextResponse.json({ error: "Прогрес персонажів змінився під час збереження, спробуйте ще раз" }, { status: 409 });
+        return errorResponse(API_ERRORS.SKILL_TREE_PROGRESS_CHANGED, 409);
       }
 
       throw error;

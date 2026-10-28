@@ -1,13 +1,17 @@
 import { NextResponse } from "next/server";
+import type { z, ZodType } from "zod";
 
 import { API_ERRORS } from "@/lib/constants/api-errors";
 import type { AnyContentResource } from "@/lib/server/content/define-resource";
 import { ContentError } from "@/lib/server/content/errors";
+import type { ContentOperation } from "@/lib/server/content/operations";
 import { createContent, getContent, listContent, removeAllContent, removeContent, updateContent } from "@/lib/server/content/service";
-import { type AccessLevel, type Actor, type ActorNeed, resolveActor } from "@/lib/utils/api/actor";
+import { type Actor, type ActorNeed, resolveActor } from "@/lib/utils/api/actor";
 import { errorResponse } from "@/lib/utils/api/api-response";
 import { PRIVATE_NO_STORE_HEADERS } from "@/lib/utils/api/cache-headers";
 import { handleApiError } from "@/lib/utils/api/error-handler";
+import { NEED } from "@/lib/utils/api/need";
+import { parseBody } from "@/lib/utils/api/parse-body";
 
 export type RouteCtx = { params: Promise<Record<string, string>> };
 
@@ -18,12 +22,6 @@ async function readJson(req: Request): Promise<unknown> {
     throw new ContentError(API_ERRORS.INVALID_JSON, 400);
   }
 }
-
-export const NEED = {
-  read: (access: AccessLevel): ActorNeed => ({ access, scope: "content:read" }),
-  write: { access: "dm", scope: "content:write" } as ActorNeed,
-  writeAll: { access: "dm", scope: "content:write", sessionOnly: true } as ActorNeed,
-};
 
 /** Resolves the actor for the campaign in params, runs fn, maps ContentError  /  anything else to the shared error body. */
 export async function runContent(
@@ -43,6 +41,21 @@ export async function runContent(
 
     return handleApiError(error, { action });
   }
+}
+
+type OperationBody<O extends ContentOperation> = O extends { body: infer B extends ZodType } ? z.output<B> : undefined;
+
+export type OperationArgs<O extends ContentOperation> = { actor: Actor; params: Record<string, string>; req: Request; body: OperationBody<O> };
+
+export function operationRoute<O extends ContentOperation>(op: O, fn: (args: OperationArgs<O>) => Promise<NextResponse>) {
+  return (req: Request, ctx: RouteCtx) =>
+    runContent({ req, ctx, need: op.need, action: op.summary }, async (actor, params) => {
+      const parsed = op.body ? await parseBody(op.body, req, op.invalidBody) : undefined;
+
+      if (parsed instanceof NextResponse) return parsed;
+
+      return fn({ actor, params, req, body: parsed as OperationBody<O> });
+    });
 }
 
 export function collectionRoutes(r: AnyContentResource) {

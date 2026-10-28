@@ -87,7 +87,7 @@ describe("ScenarioPageView — режим гри", () => {
     expect(pl.showSlide).toHaveBeenCalledWith(row);
   });
 
-  it("клік по тілу рядка (не по кнопці) — showSlide; подвійний клік і виділення — ні", () => {
+  it("подвійний клік по тілу рядка — showSlide; одинарний і по кнопці — ні", () => {
     const pl = play();
 
     const row = { id: "r1", story: p("Дзвони б'ють"), notes: p(""), slide: { deckId: "d1", slideId: "slide-a" } };
@@ -95,17 +95,43 @@ describe("ScenarioPageView — режим гри", () => {
     render(<ScenarioPageView page={pageWith([row])} campaignId="c" play={pl} />);
 
     fireEvent.click(screen.getByText("Дзвони б'ють"));
-    expect(pl.showSlide).toHaveBeenCalledTimes(1);
+    expect(pl.showSlide).not.toHaveBeenCalled();
+
+    fireEvent.doubleClick(screen.getByText("Дзвони б'ють"));
     expect(pl.showSlide).toHaveBeenCalledWith(row);
 
-    fireEvent.click(screen.getByText("Дзвони б'ють"), { detail: 2 });
+    fireEvent.doubleClick(screen.getByRole("button", { name: "Показати слайд" }));
     expect(pl.showSlide).toHaveBeenCalledTimes(1);
+  });
 
-    const spy = vi.spyOn(window, "getSelection").mockReturnValue({ toString: () => "Дзвони" } as Selection);
+  it("прив'язки стоять перед текстом рядка: мініатюра і назва слайда, статус бою", () => {
+    const pl = play();
 
-    fireEvent.click(screen.getByText("Дзвони б'ють"));
-    expect(pl.showSlide).toHaveBeenCalledTimes(1);
-    spy.mockRestore();
+    const { container } = render(
+      <ScenarioPageView page={pageWith([{ id: "r1", story: p("Текст рядка"), notes: p(""), slide: { deckId: "d1", slideId: "slide-a" }, battleId: "b1" }])} campaignId="c" play={pl} />,
+    );
+
+    const story = container.querySelector(".story");
+
+    expect(story?.firstElementChild?.classList.contains("sb-play")).toBe(true);
+    expect(screen.getByText("Слайд")).toBeTruthy();
+    expect(screen.getByText(/підготовлений/)).toBeTruthy();
+  });
+
+  it("слайд на екрані — «На екрані» замість кнопки; під заглушкою — знову кнопка", () => {
+    const base = play();
+
+    const shown = { deckId: "d1", deckTitle: "Ліс", slide: { id: "slide-a", imageUrl: "https://x/a.webp" }, nextImageUrl: null, audio: null, seq: 1 };
+
+    const row = { id: "r1", story: p("Текст"), notes: p(""), slide: { deckId: "d1", slideId: "slide-a" } };
+
+    const { unmount } = render(<ScenarioPageView page={pageWith([row])} campaignId="c" play={play({ lookup: { ...base.lookup, show: shown } } as never)} />);
+
+    expect(screen.getByText("● На екрані")).toBeTruthy();
+    unmount();
+
+    render(<ScenarioPageView page={pageWith([row])} campaignId="c" play={play({ lookup: { ...base.lookup, show: { ...shown, curtain: true } } } as never)} />);
+    expect(screen.getByRole("button", { name: "Показати слайд" })).toBeTruthy();
   });
 
   it("активний рядок має is-current", () => {
@@ -123,7 +149,7 @@ describe("ScenarioPageView — режим гри", () => {
 
     render(<ScenarioPageView page={pageWith([{ id: "r1", story: p("А"), notes: p(""), battleId: "b1" }, { id: "r2", story: p("Б"), notes: p(""), battleId: "b3" }])} campaignId="c" play={pl} />);
 
-    fireEvent.click(screen.getByRole("button", { name: "Почати бій «Засідка»" }));
+    fireEvent.click(screen.getByRole("button", { name: "Почати бій" }));
     expect(pl.runBattle).toHaveBeenCalled();
     expect((screen.getByRole("button", { name: "Бій завершено" }) as HTMLButtonElement).disabled).toBe(true);
   });

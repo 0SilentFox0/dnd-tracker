@@ -26,6 +26,7 @@ export const racesResource = defineResource<RaceRow, z.infer<typeof createRaceSc
   description: "Ігрові раси: колір, іконка, доступні скіли, прогресія слотів, расові здібності.",
   path: "/races",
   schemas: { create: createRaceSchema, update: updateRaceSchema },
+  errors: [409],
   access: { list: "member", item: "dm" },
   invalidates: [ReferenceKind.RACES, ReferenceKind.UNITS],
   notFound: API_ERRORS.RACE_NOT_FOUND,

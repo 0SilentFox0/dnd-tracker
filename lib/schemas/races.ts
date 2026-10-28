@@ -48,7 +48,7 @@ export const createRaceSchema = z.object({
   availableSkills: z.array(z.string()).default([]),
   disabledSkills: z.array(z.string()).default([]),
   passiveAbility: passiveAbilitySchema,
-  abilities: AbilitiesSchema.optional(),
+  abilities: AbilitiesSchema.describe("Здібності раси").optional(),
   spellSlotProgression: spellSlotProgressionSchema,
 });
 
@@ -59,7 +59,7 @@ export const updateRaceSchema = z.object({
   availableSkills: z.array(z.string()).optional(),
   disabledSkills: z.array(z.string()).optional(),
   passiveAbility: passiveAbilitySchema,
-  abilities: AbilitiesSchema.optional(),
+  abilities: AbilitiesSchema.describe("Здібності раси").optional(),
   spellSlotProgression: spellSlotProgressionSchema,
 });
 

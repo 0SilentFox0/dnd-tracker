@@ -16,7 +16,7 @@ import { ContentError } from "@/lib/server/content/errors";
 import * as apiAuth from "@/lib/utils/api/api-auth";
 import { collectionRoutes, itemRoutes } from "@/lib/utils/api/content-routes";
 
-const created = vi.fn(async (_a: unknown, input: { name: string }) => ({ id: "n1", ...input }));
+const created = vi.fn(async (_a: unknown, input: { name: string }) => ({ id: "n1", campaignId: "c1", ...input }));
 
 const thing = defineResource<{ id: string; campaignId: string }, { name: string }, { name?: string }>({
   kind: "units",
@@ -76,7 +76,7 @@ describe("content routes", () => {
   });
 
   it("POST → 201 із записом", async () => {
-    expect(await json(await col.POST(req("POST", '{"name":"А"}'), ctx))).toEqual({ status: 201, body: { id: "n1", name: "А" } });
+    expect(await json(await col.POST(req("POST", '{"name":"А"}'), ctx))).toEqual({ status: 201, body: { id: "n1", campaignId: "c1", name: "А" } });
   });
 
   it("некоректний або порожній JSON → 400 INVALID_JSON", async () => {

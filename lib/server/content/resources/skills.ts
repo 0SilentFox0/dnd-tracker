@@ -30,7 +30,7 @@ export const skillsResource = defineResource<SkillRow, CreateSkillInput, UpdateS
   label: "Скіли",
   description: "Бібліотека скілів: опис, іконка, прив'язка до гілки й заклинань, здібності.",
   path: "/skills",
-  schemas: { create: createSkillSchema, update: updateSkillSchema },
+  schemas: { create: createSkillSchema, update: updateSkillSchema, query: listSkillsQuerySchema },
   access: { list: "member", item: "member" },
   invalidates: [ReferenceKind.SKILLS],
   notFound: API_ERRORS.SKILL_NOT_FOUND,
@@ -74,9 +74,7 @@ export const skillsResource = defineResource<SkillRow, CreateSkillInput, UpdateS
   async update(actor, existing, data) {
     await assertRefs(actor.campaignId, data);
 
-    const updated = await prisma.skill.update({ where: { id: existing.id }, data: buildSkillUpdateData(data), include: { ...withRefs, mainSkill: true } });
-
-    return formatSkillResponse(updated);
+    return prisma.skill.update({ where: { id: existing.id }, data: buildSkillUpdateData(data), include: withRefs });
   },
   async remove(actor, existing) {
     await prisma.skill.deleteMany({ where: { id: existing.id, campaignId: actor.campaignId } });

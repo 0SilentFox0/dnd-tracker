@@ -2,10 +2,10 @@ import { NextResponse } from "next/server";
 
 import { API_ERRORS } from "@/lib/constants/api-errors";
 import { prisma } from "@/lib/db";
+import { CONTENT_OPERATIONS } from "@/lib/server/content/operations";
 import { OwnerKind, readAbilities } from "@/lib/utils/abilities/read";
-import { requireDM } from "@/lib/utils/api/api-auth";
 import { errorResponse } from "@/lib/utils/api/api-response";
-import { handleApiError } from "@/lib/utils/api/error-handler";
+import { operationRoute } from "@/lib/utils/api/content-routes";
 
 async function findOwner(kind: OwnerKind, campaignId: string, id: string) {
   const where = { id, campaignId };
@@ -26,22 +26,12 @@ async function findOwner(kind: OwnerKind, campaignId: string, id: string) {
 
 const KINDS = new Set<OwnerKind>(Object.values(OwnerKind));
 
-export async function GET(_req: Request, { params }: { params: Promise<{ id: string; kind: string; ownerId: string }> }) {
-  try {
-    const { id, kind, ownerId } = await params;
+export const GET = operationRoute(CONTENT_OPERATIONS["abilities.get"], async ({ actor, params: { kind, ownerId } }) => {
+  if (!KINDS.has(kind as OwnerKind)) return errorResponse(API_ERRORS.UNKNOWN_OWNER_KIND, 400);
 
-    const auth = await requireDM(id);
+  const row = await findOwner(kind as OwnerKind, actor.campaignId, ownerId);
 
-    if (auth instanceof NextResponse) return auth;
+  if (!row) return errorResponse(API_ERRORS.NOT_FOUND, 404);
 
-    if (!KINDS.has(kind as OwnerKind)) return errorResponse(API_ERRORS.UNKNOWN_OWNER_KIND, 400);
-
-    const row = await findOwner(kind as OwnerKind, id, ownerId);
-
-    if (!row) return errorResponse(API_ERRORS.NOT_FOUND, 404);
-
-    return NextResponse.json({ abilities: readAbilities(kind as OwnerKind, row).abilities });
-  } catch (error) {
-    return handleApiError(error, { action: "get owner abilities" });
-  }
-}
+  return NextResponse.json({ abilities: readAbilities(kind as OwnerKind, row).abilities });
+});

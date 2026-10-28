@@ -59,7 +59,7 @@ export const unitsResource = defineResource<UnitRow, z.infer<typeof createUnitSc
       },
     });
 
-    return toUnit(unit);
+    return unit;
   },
   async update(actor, existing, data) {
     await assertCampaignRefs(actor.campaignId, { race: data.raceId, spell: addedIds(data.knownSpells, existing.knownSpells) });
@@ -93,7 +93,7 @@ export const unitsResource = defineResource<UnitRow, z.infer<typeof createUnitSc
       },
     });
 
-    return toUnit(unit);
+    return unit;
   },
   async remove(actor, existing) {
     await prisma.unit.deleteMany({ where: { id: existing.id, campaignId: actor.campaignId } });

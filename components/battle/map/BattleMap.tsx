@@ -6,6 +6,7 @@ import { Flame } from "lucide-react";
 import { WeatherLayer } from "./weather/WeatherLayer";
 import { ATTACK_CURSOR } from "./attack-cursors";
 import { MapBackground } from "./MapBackground";
+import { MapHitFloat } from "./MapHitFloat";
 import { MapToken } from "./MapToken";
 import { MapTokenHud } from "./MapTokenHud";
 
@@ -451,10 +452,11 @@ export function BattleMap({ map, participants, view, actions, className, editing
 
   const modeView = view?.mode;
 
-  const tokens = useMemo(
+  // полеглі лишаються тут: жетон зникає лише в момент удару анімації, а число смертельного удару — після
+  const placed = useMemo(
     () =>
       participants
-        .filter((p) => !p.battleData.reserved && !isFallen(p))
+        .filter((p) => !p.battleData.reserved)
         .filter((p) => !modeView || (!isEscaped(p) && modeView.visibleIds.has(p.basicInfo.id)))
         .flatMap((p) => {
           const box = tokenBox(p);
@@ -463,6 +465,8 @@ export function BattleMap({ map, participants, view, actions, className, editing
         }),
     [participants, modeView],
   );
+
+  const tokens = useMemo(() => placed.filter(({ p }) => !isFallen(p)), [placed]);
 
   const onTokenClick = useCallback((id: string) => !wasDragged() && actions?.onTokenClick?.(id), [wasDragged, actions]);
 
@@ -562,7 +566,7 @@ export function BattleMap({ map, participants, view, actions, className, editing
         </svg>
         {/* у режимі місцевості токени притушені, щоб під ними було видно штрих і заливку */}
         <div data-map-tokens className={cn(fit.rotated && "*:-rotate-90")} style={painting ? { opacity: 0.35 } : undefined}>
-        {tokens.map(({ p, box }) => (
+        {placed.map(({ p, box }) => (
           <MapToken
             key={p.basicInfo.id}
             participant={p}
@@ -579,7 +583,7 @@ export function BattleMap({ map, participants, view, actions, className, editing
             dormant={!!modeView?.showDormant && isDormant(p)}
           />
         ))}
-        {tokens.map(({ p, box }) => {
+        {placed.map(({ p, box }) => {
           const id = p.basicInfo.id;
 
           const hud = view?.hud?.get(id);
@@ -599,6 +603,9 @@ export function BattleMap({ map, participants, view, actions, className, editing
             />
           );
         })}
+        {placed.map(({ p, box }) => (
+          <MapHitFloat key={`float:${p.basicInfo.id}`} participant={p} box={box} mapSize={size} pxPerUnit={pxPerUnit} impact={view?.impactFor?.(p.basicInfo.id)} />
+        ))}
         </div>
       </div>
       </div>

@@ -16,7 +16,15 @@ export interface ContentResource<Row = unknown, Create = unknown, Update = unkno
   description: string;
   /** path under /api/campaigns/{id} */
   path: string;
-  schemas: { create: ZodType<Create>; update: ZodType<Update> };
+  schemas: {
+    create: ZodType<Create>;
+    update: ZodType<Update>;
+    query?: ZodType;
+    /** narrower create body for API docs (tracks: YouTube only) */
+    apiCreate?: ZodType;
+  };
+  /** extra error statuses beyond 400/401/403/404, for API docs */
+  errors?: readonly (409 | 422)[];
   access: { list: AccessLevel; item: AccessLevel };
   invalidates: readonly ReferenceKindValue[];
   notFound: string;
@@ -24,8 +32,8 @@ export interface ContentResource<Row = unknown, Create = unknown, Update = unkno
   /** scoped to actor.campaignId; null when missing or in another campaign */
   find(actor: Actor, id: string, purpose: FindPurpose): Promise<Row | null>;
   toItem?(row: Row): unknown;
-  create(actor: Actor, input: Create): Promise<unknown>;
-  update(actor: Actor, existing: Row, input: Update): Promise<unknown>;
+  create(actor: Actor, input: Create): Promise<Row>;
+  update(actor: Actor, existing: Row, input: Update): Promise<Row>;
   remove(actor: Actor, existing: Row): Promise<void>;
   /** absent → bulk delete is not offered (405) */
   removeAll?(actor: Actor): Promise<number>;

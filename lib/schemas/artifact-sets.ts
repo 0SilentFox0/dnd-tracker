@@ -11,7 +11,7 @@ export const createArtifactSetSchema = z.object({
   name: z.string().min(1).max(120),
   description: z.string().optional().nullable(),
   setBonus: setBonusTextSchema.optional(),
-  abilities: AbilitiesSchema.optional(),
+  abilities: AbilitiesSchema.describe("Здібності сету").optional(),
   artifactIds: z.array(z.string()).optional(),
   icon: z.preprocess(
     (val) => (val === "" ? null : val),
@@ -23,7 +23,7 @@ export const patchArtifactSetSchema = z.object({
   name: z.string().min(1).max(120).optional(),
   description: z.string().optional().nullable(),
   setBonus: setBonusTextSchema.optional().nullable(),
-  abilities: AbilitiesSchema.optional(),
+  abilities: AbilitiesSchema.describe("Здібності сету").optional(),
   artifactIds: z.array(z.string()).optional(),
   icon: z.preprocess(
     (val) => (val === "" ? null : val),

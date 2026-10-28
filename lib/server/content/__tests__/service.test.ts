@@ -37,6 +37,11 @@ const thing = defineResource<Row, { name: string }, { name?: string }>({
   },
 });
 
+const shaped = defineResource<Row, { name: string }, { name?: string }>({
+  ...thing,
+  toItem: (row) => ({ ...row, shaped: true }),
+});
+
 const actor = { campaignId: "c1", userId: "u1", isDM: true, via: "session" as const };
 
 const rejectsWith = async (p: Promise<unknown>, status: number) => {
@@ -52,6 +57,12 @@ describe("content service", () => {
     rows.clear();
     rows.set("a", { id: "a", campaignId: "c1", name: "А" });
     rows.set("b", { id: "b", campaignId: "c2", name: "Б" });
+  });
+
+  it("create і update віддають ту саму форму, що й get (toItem)", async () => {
+    expect(await createContent(shaped, actor, { name: "Н" })).toEqual({ id: "n1", campaignId: "c1", name: "Н", shaped: true });
+    expect(await updateContent(shaped, actor, "a", { name: "Нове" })).toEqual({ id: "a", campaignId: "c1", name: "Нове", shaped: true });
+    expect(await getContent(shaped, actor, "a")).toEqual({ id: "a", campaignId: "c1", name: "А", shaped: true });
   });
 
   it("create парсить ввід і скидає теги ресурсу", async () => {

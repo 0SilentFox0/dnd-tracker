@@ -17,6 +17,8 @@ export const API_ERRORS = {
   INVALID_QUERY: "Некоректні параметри запиту",
   INITIATIVE_OUT_OF_RANGE: "Ініціатива героя виходить за межі, дозволені правилами кампанії",
   INVALID_RULES: "Некоректні правила кампанії",
+  INVALID_SKILL_TREE: "Невалідне дерево скілів",
+  SKILL_TREE_PROGRESS_CHANGED: "Прогрес персонажів змінився під час збереження, спробуйте ще раз",
   INVALID_JSON: "Некоректний JSON у тілі запиту",
   TOO_MANY_REQUESTS: "Забагато запитів, спробуйте трохи згодом",
   ABILITY_TOO_MANY_TARGETS: "Забагато цілей для цього вміння",

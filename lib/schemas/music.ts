@@ -19,9 +19,11 @@ const youtubeUrlSchema = z
   .max(300)
   .refine((v) => parseYoutubeId(v) !== null, API_ERRORS.YOUTUBE_URL_INVALID);
 
+export const createYoutubeTrackSchema = z.object({ kind: z.literal("youtube"), url: youtubeUrlSchema, title: trackTitleSchema.optional() });
+
 export const createTrackSchema = z.discriminatedUnion("kind", [
   z.object({ kind: z.literal("file"), path: z.string().min(1).max(200), title: trackTitleSchema, durationSec: trackDurationSchema.optional() }),
-  z.object({ kind: z.literal("youtube"), url: youtubeUrlSchema, title: trackTitleSchema.optional() }),
+  createYoutubeTrackSchema,
 ]);
 
 export const updateTrackSchema = z

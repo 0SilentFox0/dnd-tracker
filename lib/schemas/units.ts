@@ -46,10 +46,10 @@ export const createUnitSchema = z.object({
   proficiencyBonus: z.number().min(0).default(2),
   minTargets: z.number().min(1).default(1),
   maxTargets: z.number().min(1).default(1),
-  attacks: z.array(unitAttackSchema).default([]),
-  abilities: AbilitiesSchema.optional(),
+  attacks: z.array(unitAttackSchema).describe("Атаки юніта: назва, бонус, кістки шкоди, тип").default([]),
+  abilities: AbilitiesSchema.describe("Здібності юніта").optional(),
   immunities: z.array(z.string()).default([]),
-  knownSpells: z.array(z.string()).default([]),
+  knownSpells: z.array(z.string()).describe("id заклинань кампанії, які юніт може кастувати").default([]),
   morale: z.number().min(-10).max(10).default(0),
   avatar: unitAvatarSchema,
 });
@@ -70,10 +70,10 @@ export const updateUnitSchema = z.object({
   gridSize: z.number().int().min(1).max(3).optional(),
   maxHp: z.number().min(1).optional(),
   proficiencyBonus: z.number().min(0).optional(),
-  attacks: z.array(unitAttackSchema).optional(),
-  abilities: AbilitiesSchema.optional(),
+  attacks: z.array(unitAttackSchema).describe("Атаки юніта: назва, бонус, кістки шкоди, тип").optional(),
+  abilities: AbilitiesSchema.describe("Здібності юніта").optional(),
   immunities: z.array(z.string()).optional(),
-  knownSpells: z.array(z.string()).optional(),
+  knownSpells: z.array(z.string()).describe("id заклинань кампанії, які юніт може кастувати").optional(),
   minTargets: z.number().min(1).optional(),
   maxTargets: z.number().min(1).optional(),
   morale: z.number().min(-10).max(10).optional(),
@@ -96,7 +96,7 @@ export const importUnitSchema = z.object({
   gridSize: z.number().int().min(1).max(3).default(1),
   maxHp: z.number().min(1).default(10),
   proficiencyBonus: z.number().min(0).default(2),
-  attacks: z.array(unitAttackSchema).default([]),
+  attacks: z.array(unitAttackSchema).describe("Атаки юніта: назва, бонус, кістки шкоди, тип").default([]),
   specialAbilities: z
     .array(
       z.object({
@@ -107,7 +107,7 @@ export const importUnitSchema = z.object({
       }),
     )
     .default([]),
-  knownSpells: z.array(z.string()).default([]),
+  knownSpells: z.array(z.string()).describe("id заклинань кампанії, які юніт може кастувати").default([]),
   avatar: unitAvatarSchema,
 });
 

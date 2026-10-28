@@ -11,7 +11,7 @@ import { battleKeys, useBattleBriefs } from "@/lib/hooks/battles";
 import { useNotify } from "@/lib/hooks/common";
 import { type ShowControl, showKeys, usePusherShowSync, useShowControl, useShowState } from "@/lib/hooks/show";
 import { errorMessage } from "@/lib/utils/common/error-message";
-import { battleAction, boundDeckIds, hasBattleBindings, type PlayLookup, rowBattleState, rowSlideState } from "@/lib/utils/scenario/play";
+import { battleAction, boundDeckIds, currentSlideRow, hasBattleBindings, nextSlideRow, type PlayLookup, rowBattleState, rowSlideState } from "@/lib/utils/scenario/play";
 import type { BattleBrief } from "@/types/battle";
 import type { ScenarioContent, ScenarioRow } from "@/types/scenario";
 import type { Slide } from "@/types/show";
@@ -19,6 +19,10 @@ import type { Slide } from "@/types/show";
 export interface ScenarioPlay {
   lookup: PlayLookup;
   showSlide(row: ScenarioRow): void;
+  /** Рядок, на чиєму слайді стоїть показ. */
+  currentRow: ScenarioRow | null;
+  /** Рядок для «Наступний рядок»; null — далі слайдів немає. */
+  nextRow: ScenarioRow | null;
   runBattle(row: ScenarioRow): void;
   pending: boolean;
   control: ShowControl;
@@ -85,11 +89,14 @@ export function useScenarioPlay(campaignId: string, content: ScenarioContent, en
 
   return {
     lookup,
+    // open на поточному слайді знімає й заглушку
     showSlide: (row) => {
       const state = rowSlideState(row, lookup);
 
       if (row.slide && state.kind === "ready" && !state.active) void control.send({ action: "open", deckId: row.slide.deckId, slideId: row.slide.slideId });
     },
+    currentRow: currentSlideRow(content, lookup),
+    nextRow: nextSlideRow(content, lookup),
     runBattle: (row) => battleRun.mutate(row),
     pending: control.pending || battleRun.isPending,
     control,

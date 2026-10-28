@@ -22,7 +22,7 @@ const spellFields = {
   raceModifiers: z.array(RaceModifierSchema),
   stackable: z.boolean(),
   maxStacks: z.number().int().min(1).max(10).nullable(),
-  fx: SpellFxSchema.nullable().optional(),
+  fx: SpellFxSchema.describe("Візуальний ефект заклинання на мапі бою").nullable().optional(),
 };
 
 export const createSpellSchema = z.object({

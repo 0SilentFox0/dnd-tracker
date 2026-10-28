@@ -21,7 +21,7 @@ export const spellsResource = defineResource<SpellRow, CreateSpellInput, UpdateS
   label: "Заклинання",
   description: "Заклинання кампанії: рівень, школа, ціль, кидок, ефекти, візуальний ефект (fx).",
   path: "/spells",
-  schemas: { create: createSpellSchema, update: updateSpellSchema },
+  schemas: { create: createSpellSchema, update: updateSpellSchema, query: listSpellsQuerySchema },
   access: { list: "member", item: "member" },
   invalidates: [ReferenceKind.SPELLS],
   notFound: API_ERRORS.NOT_FOUND,

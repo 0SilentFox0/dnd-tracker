@@ -122,3 +122,33 @@ describe("useScenarioPlay", () => {
     expect(battlesApi.getBattleBriefs).not.toHaveBeenCalled();
   });
 });
+
+describe("useScenarioPlay — наступний рядок і заглушка", () => {
+  const shown = (over: Partial<ShowState> = {}): ShowState => ({ deckId: "d1", deckTitle: "Д", slide: { id: "sl1", imageUrl: "https://x/a.webp" }, nextImageUrl: null, audio: null, seq: 1, ...over });
+
+  it("showSlide поточного рядка під заглушкою шле open (сервер знімає заглушку)", async () => {
+    show = shown({ curtain: true });
+
+    const { result } = setup();
+
+    await waitFor(() => expect(result.current.lookup.decks.get("d1")).toBeTruthy());
+    act(() => result.current.showSlide(slideRow));
+
+    expect(send).toHaveBeenCalledWith({ action: "open", deckId: "d1", slideId: "sl1" });
+  });
+
+  it("nextRow: без показу — перший рядок; рядок на екрані — далі нічого; під заглушкою — поточний", async () => {
+    const { result, rerender } = setup();
+
+    await waitFor(() => expect(result.current.nextRow).toBe(slideRow));
+
+    show = shown();
+    rerender();
+    expect(result.current.nextRow).toBeNull();
+    expect(result.current.currentRow).toBe(slideRow);
+
+    show = shown({ curtain: true });
+    rerender();
+    expect(result.current.nextRow).toBe(slideRow);
+  });
+});

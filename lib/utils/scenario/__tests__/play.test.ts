@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { battleAction, boundDeckIds, type PlayLookup, rowBattleState, rowSlideState } from "../play";
+import { battleAction, boundDeckIds, currentSlideRow, nextSlideRow, type PlayLookup, rowBattleState, rowSlideState } from "../play";
 
 import type { RichDoc, ScenarioContent, ScenarioRow } from "@/types/scenario";
 import type { ShowState, Slide } from "@/types/show";
@@ -24,7 +24,7 @@ describe("rowSlideState", () => {
   it("без прив'язки — none", () => expect(rowSlideState(row(), lookup())).toEqual({ kind: "none" }));
 
   it("поточний слайд показу — active", () => {
-    expect(rowSlideState(row({ slide: { deckId: "d1", slideId: "slide-a" } }), lookup())).toEqual({ kind: "ready", slide: slide("slide-a"), active: true });
+    expect(rowSlideState(row({ slide: { deckId: "d1", slideId: "slide-a" } }), lookup())).toEqual({ kind: "ready", slide: slide("slide-a"), current: true, active: true });
     expect(rowSlideState(row({ slide: { deckId: "d1", slideId: "slide-b" } }), lookup())).toMatchObject({ kind: "ready", active: false });
   });
 
@@ -60,5 +60,36 @@ describe("boundDeckIds", () => {
     const content: ScenarioContent = { legend: [], sections: [{ id: "s", title: "", played: false, rows: [row({ slide: { deckId: "d1", slideId: "a" } }), row({ id: "r2", slide: { deckId: "d1", slideId: "b" } }), row({ id: "r3", slide: { deckId: "d2", slideId: "c" } }), row({ id: "r4" })] }] };
 
     expect(boundDeckIds(content)).toEqual(["d1", "d2"]);
+  });
+});
+
+describe("currentSlideRow / nextSlideRow", () => {
+  const content = (rows: ScenarioRow[][]): ScenarioContent => ({ legend: [], sections: rows.map((r, i) => ({ id: `s${i}`, title: `Розділ ${i}`, rows: r })) }) as unknown as ScenarioContent;
+
+  const a = row({ id: "ra", slide: { deckId: "d1", slideId: "slide-a" } });
+
+  const b = row({ id: "rb", slide: { deckId: "d1", slideId: "slide-b" } });
+
+  const gone = row({ id: "rg", slide: { deckId: "gone", slideId: "x" } });
+
+  it("поточний рядок — той, чий слайд на екрані", () => {
+    expect(currentSlideRow(content([[row(), a], [b]]), lookup())?.id).toBe("ra");
+    expect(currentSlideRow(content([[b]]), lookup())).toBeNull();
+  });
+
+  it("наступний — через розділи, пропускаючи недоступні", () => {
+    expect(nextSlideRow(content([[a, gone], [row(), b]]), lookup())?.id).toBe("rb");
+  });
+
+  it("без поточного — перший доступний; після останнього — null", () => {
+    expect(nextSlideRow(content([[gone, b, a]]), lookup({ show: null }))?.id).toBe("rb");
+    expect(nextSlideRow(content([[b, a]]), lookup())).toBeNull();
+  });
+
+  it("під заглушкою поточний рядок не active, і nextSlideRow повертає його", () => {
+    const covered = lookup({ show: show({ curtain: true }) });
+
+    expect(rowSlideState(a, covered)).toMatchObject({ current: true, active: false });
+    expect(nextSlideRow(content([[a, b]]), covered)?.id).toBe("ra");
   });
 });

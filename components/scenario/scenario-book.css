@@ -39,7 +39,10 @@
 .scenario-book .legend i { width: 12px; height: 12px; border-radius: 2px; display: inline-block; }
 
 .scenario-book main { max-width: 1180px; margin: 0 auto; padding: 0 24px 120px; }
-.scenario-book section { margin-top: 56px; scroll-margin-top: 72px; }
+.scenario-book section { margin-top: 56px; scroll-margin-top: calc(var(--app-header-h, 89px) + var(--sb-bar-h, 49px) + var(--sb-toolbar-h, 0px) + 16px); }
+@media (prefers-reduced-motion: no-preference) {
+  html:has(.scenario-book) { scroll-behavior: smooth; }
+}
 .scenario-book section > h2 { font-size: 30px; font-weight: 500; margin: 0 0 6px; padding-bottom: 10px; border-bottom: 2px solid var(--ink); display: flex; gap: 12px; align-items: baseline; }
 .scenario-book section > h2 .played { margin-left: auto; font-family: var(--font-scenario-sans), sans-serif; font-size: 14px; font-weight: 700; }
 .scenario-book section.is-played > h2 { color: var(--ink-soft); }
@@ -143,25 +146,50 @@
 .scenario-book .sb-toolbar-wrap { position: sticky; top: calc(var(--app-header-h, 89px) + var(--sb-bar-h, 49px)); z-index: 4; background: var(--page); border-bottom: 1px solid var(--rule); }
 .scenario-book .sb-toolbar-wrap .sb-toolbar { position: static; max-width: 1180px; margin: 0 auto; border-bottom: 0; }
 
-.scenario-book .sb-bindings { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 10px; }
-.scenario-book .sb-chip { display: inline-flex; align-items: center; gap: 6px; padding: 2px 6px; border: 1px solid var(--rule); border-radius: 6px; font-size: 12px; color: var(--ink); }
-.scenario-book .sb-chip button { background: none; border: 0; padding: 0; cursor: pointer; color: var(--ink-soft); }
+.scenario-book .sb-row-foot { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin-top: 12px; }
+.scenario-book .sb-bindings { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; flex: 1 1 auto; min-width: 0; }
+.scenario-book .sb-row-order { display: flex; gap: 4px; margin-left: auto; }
+.scenario-book .sb-bindings .toggle,
+.scenario-book .sb-chip,
+.scenario-book .sb-row-order .toggle { box-sizing: border-box; height: 28px; display: inline-flex; align-items: center; border-radius: 6px; font-size: 12px; line-height: 1; }
+.scenario-book .sb-bindings .toggle { gap: 6px; padding: 0 10px; border-style: dashed; color: var(--ink-soft); }
+.scenario-book .sb-bindings .toggle:hover { border-style: solid; color: var(--ink); }
+.scenario-book .sb-row-order .toggle { justify-content: center; width: 28px; padding: 0; color: var(--ink-soft); }
+.scenario-book .sb-row-order .toggle:hover { color: var(--ink); }
+.scenario-book .sb-chip { gap: 6px; max-width: 100%; padding: 0 6px 0 4px; border: 1px solid var(--rule); color: var(--ink); }
+.scenario-book .sb-chip-name { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 160px; }
+.scenario-book .sb-chip button { display: inline-flex; background: none; border: 0; padding: 2px; cursor: pointer; color: var(--ink-soft); }
+.scenario-book .sb-chip button:hover { color: var(--blood); }
 
-.scenario-book .row.is-slide { cursor: pointer; border-radius: 6px; transition: box-shadow 0.15s; }
+.scenario-book .row.is-slide { border-radius: 6px; transition: box-shadow 0.15s; }
 .scenario-book .row.is-slide:hover { box-shadow: 0 0 0 1px var(--gold); }
 .scenario-book .row.is-current { box-shadow: 0 0 0 2px var(--gold); }
-.scenario-book .sb-play { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 10px; font-size: 14px; }
-.scenario-book .sb-missing { font-size: 13px; color: var(--ink-soft); }
-.scenario-book .sb-show-dock { position: sticky; bottom: 0; z-index: 20; background: var(--page); border-top: 1px solid var(--rule); }
-.scenario-book .sb-show-bar { display: flex; align-items: center; gap: 6px; padding: 6px 10px; }
-.scenario-book .sb-show-body { display: flex; flex-direction: column; max-height: 45vh; overflow-y: auto; overscroll-behavior: contain; }
-.scenario-book .sb-show-audio { padding: 8px; }
-.scenario-book .sb-show-controls { min-width: 0; }
-@media (min-width: 1024px) {
-  .scenario-book .sb-show-body { flex-direction: row; align-items: center; }
-  .scenario-book .sb-show-audio { flex: 0 0 276px; }
-  .scenario-book .sb-show-controls { flex: 1; }
-}
+.scenario-book .sb-play { display: flex; flex-wrap: wrap; gap: 4px 16px; margin: 0 0 8px; font-size: 13px; color: var(--ink-soft); }
+.scenario-book .sb-bind { display: inline-flex; align-items: center; gap: 6px; max-width: 100%; }
+.scenario-book .sb-bind[data-on-screen] .sb-thumb { box-shadow: 0 0 0 2px var(--gold); }
+.scenario-book .sb-thumb { width: 48px; height: 27px; border-radius: 3px; object-fit: cover; flex: none; }
+.scenario-book .sb-bind-name { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.scenario-book .sb-bind-name small { color: var(--ink-soft); font-size: 12px; }
+.scenario-book .sb-bind-live { color: var(--gold); font-weight: 700; white-space: nowrap; }
+.scenario-book .sb-bind .toggle { display: inline-flex; align-items: center; gap: 4px; padding: 1px 6px; border-color: transparent; color: var(--ink-soft); white-space: nowrap; }
+.scenario-book .sb-bind .toggle:hover:not(:disabled) { border-color: var(--rule); color: var(--ink); }
+.scenario-book .sb-missing { font-size: 13px; color: var(--ink-soft); background: none; }
+.scenario-book .sb-show-dock { --show-rule: var(--rule); --show-accent: var(--gold); --show-muted: var(--ink-soft); position: sticky; bottom: 0; z-index: 20; background: color-mix(in srgb, var(--page) 92%, transparent); backdrop-filter: blur(6px); border-top: 1px solid var(--rule); }
+.scenario-book .sb-show-bar { max-width: 1180px; margin: 0 auto; display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 4px 16px; font-size: 13px; }
+.scenario-book .sb-show-controls { display: flex; align-items: center; gap: 2px; }
+.scenario-book .sb-show-now { display: flex; align-items: center; gap: 8px; min-width: 0; flex: 0 1 300px; font: inherit; color: inherit; background: none; border: 0; padding: 0; text-align: left; cursor: pointer; }
+.scenario-book .sb-show-now:disabled { cursor: default; }
+.scenario-book .sb-show-now:hover:not(:disabled) .sb-show-title { color: var(--gold); }
+.scenario-book .sb-show-now[data-curtain] .sb-show-title { color: var(--ink-soft); font-style: italic; }
 .scenario-book .sb-show-title { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 14px; }
+.scenario-book .sb-show-thumb-empty { display: inline-flex; align-items: center; justify-content: center; border: 1px dashed var(--rule); color: var(--ink-soft); }
+.scenario-book .sb-show-body { max-width: 1180px; margin: 0 auto; padding: 4px 16px 10px; max-height: 40vh; overflow-y: auto; overscroll-behavior: contain; }
+.scenario-book .sb-show-audio { margin-right: 8px; font-family: var(--font-scenario-sans), system-ui, sans-serif; font-size: 13px; line-height: 1.4; }
+.scenario-book .sb-show-audio [data-audio-panel="open"] { position: absolute; right: 16px; bottom: calc(100% + 8px); z-index: 1; max-width: calc(100vw - 32px); }
+@media (max-width: 640px) {
+  .scenario-book .sb-show-bar { flex-wrap: wrap; gap: 6px; padding: 6px 12px; overflow: visible; }
+  .scenario-book .sb-show-now { flex: 1 1 100%; }
+  .scenario-book .sb-show-body { padding: 4px 12px 8px; max-height: 32vh; }
+}
 
 @media (min-width: 1024px) { .scenario-book.sb-with-ai { padding-right: var(--ai-panel-w, 420px); } }
