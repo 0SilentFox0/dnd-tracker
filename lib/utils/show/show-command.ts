@@ -1,6 +1,7 @@
 import { API_ERRORS } from "@/lib/constants/api-errors";
 import { BattleStatus } from "@/lib/constants/battle";
 import { applyAudioCommand, type AudioLibraryEntry, commandNeedsLibrary } from "@/lib/utils/audio/audio-command";
+import { initPuzzle } from "@/lib/utils/puzzle/puzzle-command";
 import type { BattleAudioState } from "@/types/audio";
 import type { Result } from "@/types/common";
 import type { ShowBattle, ShowCommand, ShowState, Slide } from "@/types/show";
@@ -62,6 +63,8 @@ function autoTrack(audio: BattleAudioState | null, trackId: string | undefined, 
   return played.ok ? played.value : audio;
 }
 
+const puzzleFor = (slide: Slide) => (slide.kind === "puzzle" && slide.puzzle ? { puzzle: initPuzzle(slide.puzzle) } : {});
+
 const slideAt = (deck: ShowDeck, index: number) => ({ slide: deck.slides[index], nextImageUrl: deck.slides[index + 1]?.imageUrl ?? null });
 
 /** Прибирає поле стану й піднімає seq. */
@@ -91,7 +94,7 @@ function setCover(prev: ShowState | null, slideId: string, deck: ShowDeck | null
 
   if (!found) return fail(API_ERRORS.SLIDE_NOT_FOUND);
 
-  const { trackId: _trackId, ...slide } = found;
+  const { trackId: _trackId, kind: _kind, puzzle: _puzzle, ...slide } = found;
 
   return done({ ...(prev ?? EMPTY), cover: { deckId: deck.id, slide }, seq: (prev?.seq ?? 0) + 1 });
 }
@@ -139,7 +142,7 @@ function moveTo(prev: ShowState | null, cmd: SlideCommand, ctx: Ctx): Outcome {
 
   const at = slideAt(deck, index);
 
-  return done({ deckId: deck.id, deckTitle: deck.title, ...at, audio: autoTrack(prev?.audio ?? null, at.slide.trackId, ctx), ...keepCover(prev), seq: (prev?.seq ?? 0) + 1 });
+  return done({ deckId: deck.id, deckTitle: deck.title, ...at, audio: autoTrack(prev?.audio ?? null, at.slide.trackId, ctx), ...keepCover(prev), ...puzzleFor(at.slide), seq: (prev?.seq ?? 0) + 1 });
 }
 
 function stopAudio(prev: ShowState | null, ctx: Ctx): BattleAudioState | null {
@@ -192,7 +195,7 @@ export function applyShowCommand(prev: ShowState | null, cmd: ShowCommand, ctx: 
   }
 }
 
-const sameSlide = (a: Slide | null, b: Slide) => !!a && a.id === b.id && a.imageUrl === b.imageUrl && a.title === b.title && a.caption === b.caption && a.trackId === b.trackId;
+const sameSlide = (a: Slide | null, b: Slide) => !!a && a.id === b.id && a.imageUrl === b.imageUrl && a.title === b.title && a.caption === b.caption && a.trackId === b.trackId && a.kind === b.kind && JSON.stringify(a.puzzle) === JSON.stringify(b.puzzle);
 
 /** Після збереження набору: знімок поточного слайда без перемикання і без автотреку; видалений слайд замінює сусід, порожній набір завершує показ. */
 export function refreshShowSlide(prev: ShowState, deck: ShowDeck, ctx: { before: Slide[]; now: number }): ShowState | null {
@@ -212,5 +215,9 @@ export function refreshShowSlide(prev: ShowState, deck: ShowDeck, ctx: { before:
 
   if (sameSlide(prev.slide, slide) && nextImageUrl === prev.nextImageUrl && deck.title === prev.deckTitle) return null;
 
-  return { ...prev, deckTitle: deck.title, slide, nextImageUrl, seq: prev.seq + 1 };
+  const { puzzle: _puzzle, ...rest } = prev;
+
+  const keepPuzzle = prev.puzzle && prev.slide?.id === slide.id && JSON.stringify(prev.slide.puzzle) === JSON.stringify(slide.puzzle);
+
+  return { ...rest, deckTitle: deck.title, slide, nextImageUrl, ...(keepPuzzle ? { puzzle: prev.puzzle } : puzzleFor(slide)), seq: prev.seq + 1 };
 }

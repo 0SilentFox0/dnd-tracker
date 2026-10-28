@@ -17,4 +17,12 @@ describe("stageMode", () => {
     expect(stageMode({ ...base, world: { mapId: "m" } })).toBe("world");
     expect(stageMode({ ...base, slide, world: { mapId: "m" }, curtain: true })).toBe("cover");
   });
+
+  it("puzzle slide gives puzzle mode unless curtain or world", () => {
+    const puzzleSlide = { ...slide, kind: "puzzle" as const, puzzle: { cut: "classic" as const, count: 6, seed: 1, imageWidth: 100, imageHeight: 100 } };
+
+    expect(stageMode({ ...base, slide: puzzleSlide })).toBe("puzzle");
+    expect(stageMode({ ...base, slide: puzzleSlide, curtain: true })).toBe("cover");
+    expect(stageMode({ ...base, slide: puzzleSlide, world: { mapId: "m" } })).toBe("world");
+  });
 });

@@ -10,6 +10,34 @@ export interface PuzzleSpec {
   imageHeight: number;
 }
 
+export interface PuzzleHolder {
+  userId: string;
+  name: string;
+  until: number;
+}
+
+export interface PuzzlePieceState {
+  x: number;
+  y: number;
+  rot: number;
+  place: "tray" | "board";
+  correct: boolean;
+  holder?: PuzzleHolder;
+}
+
+export interface PuzzleState {
+  pieces: Record<string, PuzzlePieceState>;
+  solved: boolean;
+}
+
+export type PuzzleCommand =
+  | { action: "puzzleGrab"; pieceId: string }
+  | { action: "puzzleKeepAlive"; pieceId: string }
+  | { action: "puzzleDrop"; pieceId: string; x: number; y: number; rot: number }
+  | { action: "puzzleReturn"; pieceId: string }
+  | { action: "puzzleRelease"; pieceId?: string }
+  | { action: "puzzleReset" };
+
 export interface Slide {
   id: string;
   imageUrl: string;
@@ -81,6 +109,7 @@ export interface ShowState {
   curtain?: true;
   /** Карта світу на екрані гравців: лише id, вигляд кожен клієнт дочитує сам. */
   world?: ShowWorld;
+  puzzle?: PuzzleState;
   seq: number;
 }
 

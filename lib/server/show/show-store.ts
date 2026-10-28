@@ -7,23 +7,37 @@ import { safePusherTrigger } from "@/lib/pusher/safe-trigger";
 import { pusherServer } from "@/lib/pusher/server";
 import { withoutBattle, withoutWorldTargets } from "@/lib/utils/show/show-command";
 import type { BattleAudioState } from "@/types/audio";
-import type { ShowBattle, ShowCover, ShowEvent, ShowState, ShowWorld, Slide } from "@/types/show";
+import type { PuzzleState, ShowBattle, ShowCover, ShowEvent, ShowState, ShowWorld, Slide } from "@/types/show";
 
 const SHOW_SELECT = { deckId: true, deckTitle: true, slide: true, nextImageUrl: true, audio: true, battle: true, cover: true, curtain: true, world: true, seq: true } as const;
 
 type ShowRow = Prisma.CampaignShowGetPayload<{ select: typeof SHOW_SELECT }>;
 
+type StoredSlide = Slide & { puzzleState?: PuzzleState };
+
+/** Стан пазла лежить усередині JSONB слайда під `puzzleState` (`puzzle` слайда — це параметри нарізки). */
+function splitSlide(raw: unknown): { slide: Slide | null; puzzle?: PuzzleState } {
+  if (!raw) return { slide: null };
+
+  const { puzzleState, ...slide } = raw as StoredSlide;
+
+  return { slide, ...(puzzleState ? { puzzle: puzzleState } : {}) };
+}
+
 export function toShowState(row: ShowRow): ShowState {
+  const { slide, puzzle } = splitSlide(row.slide);
+
   return {
     deckId: row.deckId,
     deckTitle: row.deckTitle,
-    slide: (row.slide ?? null) as Slide | null,
+    slide,
     nextImageUrl: row.nextImageUrl,
     audio: (row.audio ?? null) as BattleAudioState | null,
     ...(row.battle ? { battle: row.battle as unknown as ShowBattle } : {}),
     ...(row.cover ? { cover: row.cover as unknown as ShowCover } : {}),
     ...(row.curtain ? { curtain: true as const } : {}),
     ...(row.world ? { world: row.world as unknown as ShowWorld } : {}),
+    ...(puzzle ? { puzzle } : {}),
     seq: row.seq,
   };
 }
@@ -38,7 +52,7 @@ const json = (v: unknown) => (v === null ? Prisma.DbNull : (v as Prisma.InputJso
 
 /** Оптимістичне блокування за seq; рядок створюється лише першим записом і ніколи не видаляється. */
 export async function writeShowState(campaignId: string, prev: ShowState | null, next: ShowState): Promise<boolean> {
-  const data = { deckId: next.deckId, deckTitle: next.deckTitle, slide: json(next.slide), nextImageUrl: next.nextImageUrl, audio: json(next.audio), battle: json(next.battle ?? null), cover: json(next.cover ?? null), curtain: !!next.curtain, world: json(next.world ?? null), seq: next.seq };
+  const data = { deckId: next.deckId, deckTitle: next.deckTitle, slide: json(next.slide && next.puzzle ? { ...next.slide, puzzleState: next.puzzle } : next.slide), nextImageUrl: next.nextImageUrl, audio: json(next.audio), battle: json(next.battle ?? null), cover: json(next.cover ?? null), curtain: !!next.curtain, world: json(next.world ?? null), seq: next.seq };
 
   if (!prev) {
     const { count } = await prisma.campaignShow.createMany({ data: [{ campaignId, ...data }], skipDuplicates: true });
