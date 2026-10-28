@@ -9,6 +9,9 @@ import { acquaintanceKeys, useAcquaintanceActions, useAcquaintanceNote, useAcqua
 import { createAcquaintance, getAcquaintances, saveAcquaintanceNote } from "@/lib/api/acquaintances";
 import type { AcquaintancesResponse, AcquaintanceView } from "@/types/acquaintances";
 
+const notify = vi.hoisted(() => vi.fn());
+
+vi.mock("@/lib/hooks/common", async (orig) => ({ ...(await orig<typeof import("@/lib/hooks/common")>()), useOptionalNotify: () => notify }));
 vi.mock("@/lib/api/acquaintances", () => ({
   getAcquaintances: vi.fn(),
   createAcquaintance: vi.fn(),
@@ -141,5 +144,19 @@ describe("useAcquaintanceNote", () => {
     });
 
     expect(ownNotes(client)?.map((n) => n.text)).toEqual(["стара"]);
+  });
+
+  it("tells the user when saving fails", async () => {
+    vi.mocked(saveAcquaintanceNote).mockRejectedValue(new Error("boom"));
+
+    const { wrapper } = setup(response());
+
+    const { result } = renderHook(() => useAcquaintanceNote("c1", "a1"), { wrapper });
+
+    await act(async () => {
+      await result.current.save("текст");
+    });
+
+    expect(notify).toHaveBeenCalledWith("Не вдалося зберегти нотатку");
   });
 });

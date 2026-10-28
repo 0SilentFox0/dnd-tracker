@@ -5,7 +5,6 @@ import { ACQUAINTANCE_INCLUDE, assertSectionInCampaign, ownedAcquaintance, readA
 import { API_ERRORS } from "@/lib/constants/api-errors";
 import { prisma } from "@/lib/db";
 import { createAcquaintanceSchema, updateAcquaintanceSchema } from "@/lib/schemas/acquaintances";
-import { characterInCampaign } from "@/lib/server/scenario/loaders";
 import { type CampaignAccessResult, requireCampaignAccess, requireDM } from "@/lib/utils/api/api-auth";
 import { errorResponse } from "@/lib/utils/api/api-response";
 import { handleApiError } from "@/lib/utils/api/error-handler";
@@ -58,6 +57,11 @@ export function createAcquaintanceHandler(req: Request, campaignId: string) {
         const character = await ownedCharacter(campaignId, body.characterId);
 
         if (character instanceof NextResponse) return character;
+
+        // the same hero is one acquaintance: re-picking returns it so the caller inserts its chip
+        const existing = await prisma.acquaintance.findFirst({ where: { campaignId, characterId: body.characterId }, include: ACQUAINTANCE_INCLUDE });
+
+        if (existing) return NextResponse.json(await dmView(campaignId, access.userId, existing));
       }
 
       const created = await prisma.acquaintance.create({
@@ -93,9 +97,19 @@ export function updateAcquaintanceHandler(req: Request, campaignId: string, acqu
 
       if (existing instanceof NextResponse) return existing;
 
-      if (body.characterId && !(await characterInCampaign(campaignId, body.characterId))) return errorResponse(API_ERRORS.CHARACTER_NOT_FOUND, 404);
+      if (body.characterId) {
+        const character = await ownedCharacter(campaignId, body.characterId);
 
-      const updated = await prisma.acquaintance.update({ where: { id: acquaintanceId }, data: body, include: ACQUAINTANCE_INCLUDE });
+        if (character instanceof NextResponse) return character;
+      }
+
+      const kind = body.kind ?? existing.kind;
+
+      const characterId = kind === "micro" ? null : body.characterId === undefined ? existing.characterId : body.characterId;
+
+      if (kind === "character" && !characterId) return errorResponse(API_ERRORS.INVALID_BODY, 400, [{ path: ["characterId"] }]);
+
+      const updated = await prisma.acquaintance.update({ where: { id: acquaintanceId }, data: { ...body, ...((body.kind !== undefined || body.characterId !== undefined) && { kind, characterId }) }, include: ACQUAINTANCE_INCLUDE });
 
       return NextResponse.json(await dmView(campaignId, access.userId, updated));
     },

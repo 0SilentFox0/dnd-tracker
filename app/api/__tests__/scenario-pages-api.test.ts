@@ -4,10 +4,12 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import { discardSlideFiles } from "@/lib/ai/proposal-media";
 import { API_ERRORS } from "@/lib/constants/api-errors";
 import { prisma } from "@/lib/db";
+import { notifyRevealForContentChange } from "@/lib/server/acquaintances/reveal";
 import * as apiAuth from "@/lib/utils/api/api-auth";
 
 vi.mock("@/lib/ai/proposal-media", () => ({ pendingSlideUrls: vi.fn(async () => ["https://x/orphan.webp"]), discardSlideFiles: vi.fn() }));
 vi.mock("@/lib/utils/api/api-auth", () => ({ requireDM: vi.fn() }));
+vi.mock("@/lib/server/acquaintances/reveal", () => ({ notifyRevealForContentChange: vi.fn() }));
 vi.mock("@/lib/db", () => ({
   prisma: {
     $transaction: async (callback: (tx: object) => unknown) => callback({ $queryRaw: async () => [{ id: "camp1" }] }),
@@ -109,6 +111,30 @@ describe("scenario pages API", () => {
       where: { id: "p1", campaignId: "camp1", version: 2 },
       data: expect.objectContaining({ content, version: { increment: 1 }, searchText: expect.stringContaining("Дзвони") }),
     });
+  });
+
+  it("PUT, що робить секцію зіграною, передає before/after у розкриття знайомств", async () => {
+    const { PUT } = await pageRoute();
+
+    const played = { ...content, sections: [{ ...content.sections[0], played: true }] };
+
+    expect((await PUT(req("PUT", { expectedVersion: 2, content: played }), params({ pageId: "p1" }))).status).toBe(200);
+
+    const [campaignId, pageId, before, after] = vi.mocked(notifyRevealForContentChange).mock.calls[0];
+
+    expect([campaignId, pageId]).toEqual(["camp1", "p1"]);
+    expect(before.sections[0].played).toBe(false);
+    expect(after.sections[0].played).toBe(true);
+  });
+
+  it("PUT, що програв гонку, не розкриває знайомства", async () => {
+    vi.mocked(prisma.scenarioPage.updateMany).mockResolvedValue({ count: 0 } as never);
+
+    const { PUT } = await pageRoute();
+
+    await PUT(req("PUT", { expectedVersion: 2, content: { ...content, sections: [{ ...content.sections[0], played: true }] } }), params({ pageId: "p1" }));
+
+    expect(notifyRevealForContentChange).not.toHaveBeenCalled();
   });
 
   it("PUT зі старою версією — 409 без запису", async () => {

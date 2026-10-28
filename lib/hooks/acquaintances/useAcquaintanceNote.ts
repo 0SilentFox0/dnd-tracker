@@ -5,6 +5,7 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { acquaintanceKeys } from "./keys";
 
 import { saveAcquaintanceNote } from "@/lib/api/acquaintances";
+import { useOptionalNotify } from "@/lib/hooks/common";
 import type { AcquaintanceNoteView, AcquaintancesResponse } from "@/types/acquaintances";
 
 function withOwnNote(data: AcquaintancesResponse | undefined, acquaintanceId: string, text: string): AcquaintancesResponse | undefined {
@@ -29,6 +30,8 @@ export function useAcquaintanceNote(campaignId: string, acquaintanceId: string) 
 
   const key = acquaintanceKeys.list(campaignId);
 
+  const notify = useOptionalNotify();
+
   const mutation = useMutation({
     mutationFn: (text: string) => saveAcquaintanceNote(campaignId, acquaintanceId, { text }),
     onMutate: async (text) => {
@@ -40,7 +43,10 @@ export function useAcquaintanceNote(campaignId: string, acquaintanceId: string) 
 
       return { previous };
     },
-    onError: (_error, _text, context) => queryClient.setQueryData(key, context?.previous),
+    onError: (_error, _text, context) => {
+      queryClient.setQueryData(key, context?.previous);
+      notify("Не вдалося зберегти нотатку");
+    },
     onSettled: () => void queryClient.invalidateQueries({ queryKey: key }),
   });
 

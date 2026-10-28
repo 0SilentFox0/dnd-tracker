@@ -14,7 +14,7 @@ vi.mock("@/lib/db", () => ({
     scenarioPage: { findUnique: vi.fn() },
     acquaintanceEntry: { findUnique: vi.fn(), aggregate: vi.fn(), create: vi.fn(), update: vi.fn(), delete: vi.fn() },
     acquaintanceNote: { upsert: vi.fn(), deleteMany: vi.fn() },
-    acquaintance: { findMany: vi.fn(), findUnique: vi.fn(), create: vi.fn(), update: vi.fn(), delete: vi.fn() },
+    acquaintance: { findMany: vi.fn(), findFirst: vi.fn(), findUnique: vi.fn(), create: vi.fn(), update: vi.fn(), delete: vi.fn() },
   },
 }));
 
@@ -328,5 +328,71 @@ describe("PUT /acquaintances/[id]/note", () => {
     const body = await (await (await collection()).GET(json("GET"), ctx())).json();
 
     expect(body.items[0].notes).toEqual([]);
+  });
+});
+
+describe("acquaintances: dedup, egress, PATCH consistency", () => {
+  const params = ctx({ acquaintanceId: "a1" });
+
+  const charRow = row({ kind: "character", characterId: "ch1" });
+
+  it("returns the existing acquaintance instead of creating a duplicate for the same character", async () => {
+    vi.mocked(prisma.scenarioPage.findUnique).mockResolvedValue(pageRow as never);
+    vi.mocked(prisma.character.findUnique).mockResolvedValue({ campaignId: "c1", name: "Король" } as never);
+    vi.mocked(prisma.acquaintance.findFirst).mockResolvedValue(row({ id: "a5", kind: "character", characterId: "ch1" }) as never);
+
+    const res = await (await collection()).POST(json("POST", { kind: "character", characterId: "ch1", name: "Король", sourcePageId: "p1", sourceSectionId: "s1" }), ctx());
+
+    expect(res.status).toBe(200);
+    expect((await res.json()).id).toBe("a5");
+    expect(prisma.acquaintance.create).not.toHaveBeenCalled();
+    expect(vi.mocked(prisma.acquaintance.findFirst).mock.calls[0][0]?.where).toEqual({ campaignId: "c1", characterId: "ch1" });
+  });
+
+  it("loads only the viewing player's own notes, and all notes for the DM", async () => {
+    vi.mocked(prisma.acquaintance.findMany).mockResolvedValue([]);
+
+    await (await collection()).GET(json("GET"), ctx());
+
+    expect(vi.mocked(prisma.acquaintance.findMany).mock.calls[0][0]?.include).toMatchObject({ notes: { where: { authorUserId: "u1" } } });
+
+    vi.mocked(apiAuth.requireCampaignAccess).mockResolvedValue(dm);
+    await (await collection()).GET(json("GET"), ctx());
+
+    expect(vi.mocked(prisma.acquaintance.findMany).mock.calls[1][0]?.include?.notes).not.toHaveProperty("where");
+  });
+
+  it("checks ownership with a slim select instead of the full include", async () => {
+    vi.mocked(prisma.acquaintance.findUnique).mockResolvedValue(row() as never);
+
+    await (await single()).DELETE(json("DELETE"), params);
+
+    const args = vi.mocked(prisma.acquaintance.findUnique).mock.calls[0][0];
+
+    expect(args).toHaveProperty("select");
+    expect(args).not.toHaveProperty("include");
+  });
+
+  it("rejects PATCH kind character without a character", async () => {
+    vi.mocked(prisma.acquaintance.findUnique).mockResolvedValue(row() as never);
+
+    expect((await (await single()).PATCH(json("PATCH", { kind: "character" }), params)).status).toBe(400);
+    expect(prisma.acquaintance.update).not.toHaveBeenCalled();
+  });
+
+  it("clears the character when PATCH switches to micro", async () => {
+    vi.mocked(prisma.acquaintance.findUnique).mockResolvedValue(charRow as never);
+    vi.mocked(prisma.acquaintance.update).mockResolvedValue(row() as never);
+
+    await (await single()).PATCH(json("PATCH", { kind: "micro" }), params);
+
+    expect(vi.mocked(prisma.acquaintance.update).mock.calls[0][0].data).toMatchObject({ kind: "micro", characterId: null });
+  });
+
+  it("403s PATCH with a character of another campaign", async () => {
+    vi.mocked(prisma.acquaintance.findUnique).mockResolvedValue(charRow as never);
+    vi.mocked(prisma.character.findUnique).mockResolvedValue({ campaignId: "other", name: "X" } as never);
+
+    expect((await (await single()).PATCH(json("PATCH", { characterId: "foreign" }), params)).status).toBe(403);
   });
 });

@@ -1,6 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import { prisma } from "@/lib/db";
+import { runContentWriteContext } from "@/lib/server/content/write-context";
 import { notifyCampaignPlayers } from "@/lib/server/notifications/notify";
 import { loadPlayedSections } from "@/lib/server/scenario/page-store";
 import { logger } from "@/lib/utils/common/logger";
@@ -95,5 +96,24 @@ describe("notifyRevealForContentChange", () => {
 
     expect(prisma.campaign.findUnique).not.toHaveBeenCalled();
     expect(notifyCampaignPlayers).not.toHaveBeenCalled();
+  });
+});
+
+describe("notifyRevealForContentChange inside a content transaction", () => {
+  it("sends nothing until the transaction commits, so a rollback never notifies", async () => {
+    vi.mocked(prisma.acquaintance.findMany).mockResolvedValue([{ id: "a1", sourcePageId: "p1", sourceSectionId: "s1" }] as never);
+
+    const afterCommit: Array<() => void> = [];
+
+    const { notifyRevealForContentChange } = await loadReveal();
+
+    await runContentWriteContext("c1", {}, () => notifyRevealForContentChange("c1", "p1", content(sec("s1", false)), content(sec("s1", true))), afterCommit);
+
+    expect(afterCommit).toHaveLength(1);
+    expect(notifyCampaignPlayers).not.toHaveBeenCalled();
+
+    await afterCommit[0]();
+
+    expect(notifyCampaignPlayers).toHaveBeenCalledTimes(1);
   });
 });

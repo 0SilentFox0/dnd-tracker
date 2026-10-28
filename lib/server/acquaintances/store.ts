@@ -12,11 +12,17 @@ import { loadOwned } from "@/lib/utils/api/load-owned";
 import { playedLookup } from "@/lib/utils/scenario/reveal";
 import type { AcquaintancesResponse, AcquaintanceView } from "@/types/acquaintances";
 
-export const ACQUAINTANCE_INCLUDE = {
-  character: { select: { name: true, avatar: true } },
-  entries: true,
-  notes: { include: { author: { select: { displayName: true } } } },
-} satisfies Prisma.AcquaintanceInclude;
+// players only ever see their own note, so other authors' texts never leave the DB for them
+export const acquaintanceInclude = (viewer?: { userId: string; isDM: boolean }) =>
+  ({
+    character: { select: { name: true, avatar: true } },
+    entries: true,
+    notes: { ...(viewer && !viewer.isDM && { where: { authorUserId: viewer.userId } }), include: { author: { select: { displayName: true } } } },
+  }) satisfies Prisma.AcquaintanceInclude;
+
+export const ACQUAINTANCE_INCLUDE = acquaintanceInclude();
+
+const OWNED_SELECT = { id: true, campaignId: true, kind: true, characterId: true, sourcePageId: true, sourceSectionId: true } as const;
 
 export interface AcquaintanceViewer {
   userId: string;
@@ -44,7 +50,7 @@ export async function readAcquaintances(campaignId: string, viewer: Acquaintance
 
   if (!viewer.isDM && !enabled) return { isDM: false, enabled, items: [] };
 
-  const rows = await prisma.acquaintance.findMany({ where: { campaignId }, include: ACQUAINTANCE_INCLUDE });
+  const rows = await prisma.acquaintance.findMany({ where: { campaignId }, include: acquaintanceInclude(viewer) });
 
   return { isDM: viewer.isDM, enabled, items: await viewAcquaintanceRows(campaignId, rows, viewer) };
 }
@@ -58,4 +64,4 @@ export async function assertSectionInCampaign(campaignId: string, pageId: string
 }
 
 export const ownedAcquaintance = (campaignId: string, id: string) =>
-  loadOwned(prisma.acquaintance.findUnique({ where: { id }, include: ACQUAINTANCE_INCLUDE }), campaignId, API_ERRORS.ACQUAINTANCE_NOT_FOUND);
+  loadOwned(prisma.acquaintance.findUnique({ where: { id }, select: OWNED_SELECT }), campaignId, API_ERRORS.ACQUAINTANCE_NOT_FOUND);
