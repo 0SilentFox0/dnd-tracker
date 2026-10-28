@@ -20,11 +20,11 @@ import { useMapFields, useMarkerFields } from "@/lib/hooks/world";
 import { cn } from "@/lib/utils";
 import type { WorldMapDetail, WorldMarker } from "@/types/world";
 
-const ROW = "flex min-h-12 flex-wrap items-center gap-x-3 gap-y-2 px-2 py-1.5";
+const ROW = "hud-scroll-x flex min-h-12 items-center gap-x-2 gap-y-2 overflow-x-auto px-2 py-1.5 max-lg:flex-wrap";
 
 const CHIP = "inline-flex h-9 shrink-0 items-center gap-1.5 rounded-md border border-hud-rule bg-black/40 px-2.5 text-sm text-hud-ink hover:border-[var(--gold)] disabled:opacity-40";
 
-const MEDALLION = "metal-gold metal-fill flex size-8 shrink-0 items-center justify-center rounded-full border border-[var(--gold)]";
+const MEDALLION = "metal-gold metal-fill flex size-9 shrink-0 items-center justify-center rounded-full border border-[var(--gold)]";
 
 const POPOVER = "border-hud-rule bg-[rgba(17,14,11,.99)]";
 
@@ -109,11 +109,11 @@ function MarkerStrip({ marker, onClose }: { marker: WorldMarker; onClose(): void
         <span className={MEDALLION}>
           <Icon className="size-4 text-[#2a1d05]" aria-hidden />
         </span>
-        <span className="hud-sc text-xs text-hud-muted">{marker.kind === "zone" ? "Зона" : "Точка"}</span>
+        <span className="hud-sc hidden text-xs text-hud-muted xl:inline">{marker.kind === "zone" ? "Зона" : "Точка"}</span>
       </span>
       <Input
         aria-label="Назва"
-        className="h-9 w-48"
+        className="h-9 w-44 shrink-0"
         maxLength={WORLD_NAME_MAX}
         value={name}
         onChange={(e) => setName(e.target.value)}
@@ -154,16 +154,16 @@ function MarkerStrip({ marker, onClose }: { marker: WorldMarker; onClose(): void
       ) : (
         <>
           <ColorSwatch color={color} label="Колір зони" onChange={pickColor} />
-          <Button type="button" size="sm" variant={redrawing ? "default" : "outline"} onClick={() => redraw(redrawing ? null : marker.id)} className="h-9 gap-1.5">
+          <Button type="button" size="sm" variant={redrawing ? "default" : "outline"} onClick={() => redraw(redrawing ? null : marker.id)} className="h-9 shrink-0 gap-1.5" aria-label={redrawing ? "Малюйте нову зону…" : "Перемалювати контур"}>
             <PenLine className="size-4" />
-            {redrawing ? "Малюйте нову зону…" : "Перемалювати контур"}
+            {redrawing ? "Малюйте…" : "Контур"}
           </Button>
         </>
       )}
       <SwitchField label="Відома локація" title="Гравці бачать її й без відкритого туману" checked={marker.alwaysVisible} onChange={(v) => void save({ alwaysVisible: v })} />
-      <Button type="button" size="sm" variant="outline" onClick={() => (marker.childMapId ? openMap(marker.childMapId) : setCreating(true))} className="h-9 gap-1.5">
+      <Button type="button" size="sm" variant="outline" onClick={() => (marker.childMapId ? openMap(marker.childMapId) : setCreating(true))} className="h-9 shrink-0 gap-1.5" aria-label={marker.childMapId ? "Відкрити вкладену карту" : "Створити вкладену карту"}>
         <MapPinned className="size-4" />
-        {marker.childMapId ? "Відкрити вкладену карту" : "Створити вкладену карту"}
+        {marker.childMapId ? "Вкладена карта" : "Створити карту"}
       </Button>
       <Popover onOpenChange={(o) => !o && commitNote()}>
         <PopoverTrigger asChild>
@@ -203,7 +203,7 @@ function MapStrip({ detail, onClose }: { detail: WorldMapDetail; onClose(): void
       </span>
       <Input
         aria-label="Назва"
-        className="h-9 w-48"
+        className="h-9 w-44 shrink-0"
         maxLength={WORLD_NAME_MAX}
         value={name}
         onChange={(e) => setName(e.target.value)}
