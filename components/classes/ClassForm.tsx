@@ -1,6 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
+import { useTranslations } from "next-intl";
 
 import { ClassBasicsTab } from "./ClassBasicsTab";
 import { ClassColumnsEditor } from "./ClassColumnsEditor";
@@ -19,6 +20,8 @@ import type { GameClassData } from "@/types/classes";
 type ClassFormTabId = "map" | "basics" | "table" | "features" | "subclasses";
 
 export function ClassForm({ campaignId, gameClass }: { campaignId: string; gameClass: GameClassData }) {
+  const t = useTranslations();
+
   const { id, ...initial } = gameClass;
 
   const editor = useClassForm(campaignId, id, initial);
@@ -43,14 +46,14 @@ export function ClassForm({ campaignId, gameClass }: { campaignId: string; gameC
   const tabs: HudTab<ClassFormTabId>[] = [
     {
       id: "map",
-      label: "Карта",
+      label: t("classes.form.tabs.map"),
       content: <ClassProgressionMap progression={progression} mode="dm" actions={{ onOpenLevel: (_, column) => setTab(column === "subclass" ? "subclasses" : "features") }} />,
     },
-    { id: "basics", label: "Основне", content: <ClassBasicsTab form={editor.form} campaignId={campaignId} /> },
-    { id: "table", label: "Таблиця класу", content: <ClassColumnsEditor value={data.columns ?? []} onChange={(columns) => set((prev) => ({ ...prev, columns }))} /> },
+    { id: "basics", label: t("classes.form.tabs.basics"), content: <ClassBasicsTab form={editor.form} campaignId={campaignId} /> },
+    { id: "table", label: t("classes.form.tabs.table"), content: <ClassColumnsEditor value={data.columns ?? []} onChange={(columns) => set((prev) => ({ ...prev, columns }))} /> },
     {
       id: "features",
-      label: "Вміння за рівнями",
+      label: t("classes.form.tabs.features"),
       invalid: invalid.features,
       content: (
         <ClassFeaturesEditor
@@ -64,14 +67,14 @@ export function ClassForm({ campaignId, gameClass }: { campaignId: string; gameC
     },
     {
       id: "subclasses",
-      label: "Підкласи",
+      label: t("classes.form.tabs.subclasses"),
       invalid: invalid.subclasses,
       content: <SubclassesEditor campaignId={campaignId} form={editor.form} onValidityChange={track("subclasses")} />,
     },
   ];
 
   return (
-    <HudFormPage title="Редагувати клас" aside="Основне, вміння за рівнями та підкласи">
+    <HudFormPage title={t("classes.form.title")} aside={t("classes.form.aside")}>
       <HudForm
         id="class-form"
         onSubmit={editor.actions.submit}
@@ -81,10 +84,10 @@ export function ClassForm({ campaignId, gameClass }: { campaignId: string; gameC
         actions={
           <>
             <Button type="button" variant="outline" onClick={editor.actions.cancel}>
-              Скасувати
+              {t("common.actions.cancel")}
             </Button>
             <Button type="submit" disabled={editor.status.isSaving || !editor.abilities.valid}>
-              {editor.status.isSaving ? "Збереження..." : withAbilityErrors("Зберегти", editor.abilities.errors)}
+              {editor.status.isSaving ? t("common.actions.saving") : withAbilityErrors(t("common.actions.save"), editor.abilities.errors)}
             </Button>
           </>
         }

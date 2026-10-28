@@ -39,6 +39,6 @@ describe("ClassForm map tab", () => {
   it("shows the SRD hint in the subclasses editor", () => {
     render(<SubclassesEditor campaignId="c" form={{ data: cls, set: () => {} }} />);
 
-    expect(screen.getByText(/SRD містить лише один підклас/)).toBeInTheDocument();
+    expect(screen.getByText("classes.subclasses.srdNote")).toBeInTheDocument();
   });
 });

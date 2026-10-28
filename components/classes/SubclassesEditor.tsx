@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import { Plus, Trash2 } from "lucide-react";
 
 import { ClassFeaturesEditor } from "./ClassFeaturesEditor";
@@ -20,6 +21,8 @@ interface SubclassesEditorProps {
 }
 
 export function SubclassesEditor({ campaignId, form: { data, set }, onValidityChange }: SubclassesEditorProps) {
+  const t = useTranslations("classes");
+
   const { report, drop } = useErrorTotals(onValidityChange);
 
   const patchSubclass = (id: string, patch: Partial<Subclass>) =>
@@ -40,7 +43,7 @@ export function SubclassesEditor({ campaignId, form: { data, set }, onValidityCh
   return (
     <div className="space-y-4">
       <div className="space-y-2">
-        <Label htmlFor="subclass-level">Рівень вибору підкласу</Label>
+        <Label htmlFor="subclass-level">{t("subclasses.levelLabel")}</Label>
         <Input
           id="subclass-level"
           type="number"
@@ -50,21 +53,21 @@ export function SubclassesEditor({ campaignId, form: { data, set }, onValidityCh
           onChange={(e) => set((prev) => ({ ...prev, subclassLevel: e.target.value === "" ? null : Number(e.target.value) }))}
           className="w-24"
         />
-        <p className="text-xs text-hud-muted">SRD містить лише один підклас на клас; інші додайте самі.</p>
+        <p className="text-xs text-hud-muted">{t("subclasses.srdNote")}</p>
       </div>
 
       {data.subclasses.map((subclass) => (
         <HudSection
           key={subclass.id}
-          title={subclass.name || "Новий підклас"}
+          title={subclass.name || t("subclasses.newSubclass")}
           action={
-            <Button type="button" variant="ghost" size="sm" aria-label={`Видалити підклас ${subclass.name}`} onClick={() => remove(subclass.id)}>
+            <Button type="button" variant="ghost" size="sm" aria-label={t("subclasses.remove", { name: subclass.name })} onClick={() => remove(subclass.id)}>
               <Trash2 className="h-4 w-4" />
             </Button>
           }
         >
           <div className="space-y-3">
-            <Input aria-label="Назва підкласу" value={subclass.name} required onChange={(e) => patchSubclass(subclass.id, { name: e.target.value })} placeholder="Назва підкласу" />
+            <Input aria-label={t("subclasses.nameLabel")} value={subclass.name} required onChange={(e) => patchSubclass(subclass.id, { name: e.target.value })} placeholder={t("subclasses.nameLabel")} />
             <ClassFeaturesEditor
               campaignId={campaignId}
               value={subclass.features}
@@ -78,7 +81,7 @@ export function SubclassesEditor({ campaignId, form: { data, set }, onValidityCh
 
       <Button type="button" variant="outline" size="sm" onClick={add}>
         <Plus className="h-4 w-4" />
-        Додати підклас
+        {t("subclasses.add")}
       </Button>
     </div>
   );
