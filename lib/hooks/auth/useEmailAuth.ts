@@ -3,7 +3,9 @@
 import { useEffect, useMemo, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 
+import { localeApi } from "@/lib/api/locale";
 import { AFTER_SIGN_IN_PATH, RESET_PASSWORD_PATH } from "@/lib/constants/auth";
+import { LOCALE_CHANGE_EVENT } from "@/lib/i18n/client-locale-provider";
 import type { NewPasswordValues, SignInValues, SignUpValues } from "@/lib/schemas/auth";
 import { createClient } from "@/lib/supabase/client";
 import { authErrorMessage, safeNextPath } from "@/lib/utils/auth";
@@ -87,6 +89,8 @@ export function useEmailSignIn() {
 
     if (!ok) return;
 
+    await localeApi.get().catch(() => null);
+    window.dispatchEvent(new Event(LOCALE_CHANGE_EVENT));
     router.replace(safeNextPath(searchParams.get("next")));
     router.refresh();
   };
