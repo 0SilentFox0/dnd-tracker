@@ -45,6 +45,8 @@ export function applyStatic(input: EffectApplyInput<StaticEffect>, describe: (e:
 
   const consumeOn = effect.kind === "flag" && effect.flag === "advantage" ? effect.consumeOn : undefined;
 
+  const until = effect.kind === "flag" && effect.flag === "advantage" ? effect.until : undefined;
+
   const nature = abilityNature(ability.effects);
 
   const blocked = fearBlocked ? targetIds.filter((id) => immuneTo(input.participants, id, "fear")) : [];
@@ -64,6 +66,7 @@ export function applyStatic(input: EffectApplyInput<StaticEffect>, describe: (e:
           maxStacks: ability.maxStacks,
           abilityEffects: [stripped],
           ...(consumeOn && { consumeOn }),
+          ...(until && { until }),
         },
         ctx.round,
       );

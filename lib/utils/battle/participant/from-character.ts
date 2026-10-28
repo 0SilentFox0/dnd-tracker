@@ -200,7 +200,7 @@ export async function createBattleParticipantFromCharacter(
       ? ABILITY_KEYS.filter((k) => (rawSaves as Record<string, unknown>)[k] === true)
       : [];
 
-  const classProficiency = resolvedClasses ? classProficiencies(resolvedClasses.flatMap((e) => (e.class ? [e.class] : []))) : undefined;
+  const classProficiency = resolvedClasses ? classProficiencies(resolvedClasses.map((e) => e.class)) : undefined;
 
   const rawSkills = character.skills;
 

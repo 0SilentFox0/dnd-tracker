@@ -55,6 +55,7 @@ export const FLAG_REGISTRY: { [K in FlagKey]: FlagDefinition<K> } = {
       { name: "attackKind", label: "Атаки", input: "select", options: ATTACK_KIND_ALL },
       { name: "attackAbility", label: "Лише атаки цією характеристикою", input: "select", optional: true, options: ABILITY_OPTIONS },
       { name: "consumeOn", label: "Зникає після першої атаки", input: "select", optional: true, options: [{ value: "ownAttack", label: "так" }] },
+      { name: "until", label: "Зникає в кінці мого ходу", input: "select", optional: true, options: [{ value: "turnEnd", label: "так" }] },
     ],
     defaults: { attackKind: "all" },
     describe: (e) => {

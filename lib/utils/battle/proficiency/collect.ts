@@ -9,8 +9,10 @@ const ARMOR_LINE = { light: "Light armor", medium: "Medium armor", heavy: "Heavy
 const WEAPON_LINE = { simple: "Simple weapons", martial: "Martial weapons" } as const;
 
 /** The first class gives its full list, later ones only their multiclass table; custom classes without lists → no checks. */
-export function classProficiencies(classes: readonly Pick<GameClassData, "proficiencies" | "multiclassProficiencies">[]): Lines | undefined {
-  const [first, ...rest] = classes;
+export function classProficiencies(classes: readonly (Pick<GameClassData, "proficiencies" | "multiclassProficiencies"> | null | undefined)[]): Lines | undefined {
+  const [first, ...others] = classes;
+
+  const rest = others.flatMap((c) => (c ? [c] : []));
 
   if (!first || (first.proficiencies.armor.length === 0 && first.proficiencies.weapons.length === 0)) return undefined;
 

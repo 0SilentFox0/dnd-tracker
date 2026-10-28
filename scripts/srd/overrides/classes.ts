@@ -79,7 +79,7 @@ export const CLASS_FEATURE_OVERRIDES: Record<string, AbilityCore | FeatureOption
   "srd-2024_barbarian_reckless-attack": {
     trigger: { event: "bonusAction" },
     effects: [
-      { kind: "flag", flag: "advantage", attackKind: "melee", attackAbility: "strength", duration: { rounds: 1 }, target: "self" },
+      { kind: "flag", flag: "advantage", attackKind: "all", attackAbility: "strength", duration: { rounds: 1 }, target: "self" },
       { kind: "flag", flag: "advantageForAttackers", duration: { rounds: 1 }, target: "self" },
       { kind: "grantAction", refreshBonusAction: true, target: "self" },
     ],
@@ -88,7 +88,7 @@ export const CLASS_FEATURE_OVERRIDES: Record<string, AbilityCore | FeatureOption
     trigger: { event: "bonusAction" },
     condition: { type: "notMoved" },
     effects: [
-      { kind: "flag", flag: "advantage", attackKind: "all", consumeOn: "ownAttack", duration: { rounds: 1 }, target: "self" },
+      { kind: "flag", flag: "advantage", attackKind: "all", consumeOn: "ownAttack", until: "turnEnd", duration: { rounds: 1 }, target: "self" },
       { kind: "modifyStat", stat: "speed", percent: -100, duration: { rounds: 1 }, target: "self" },
     ],
   },

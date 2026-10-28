@@ -184,7 +184,7 @@
               {
                 "kind": "flag",
                 "flag": "advantage",
-                "attackKind": "melee",
+                "attackKind": "all",
                 "attackAbility": "strength",
                 "duration": {
                   "rounds": 1
@@ -5706,6 +5706,7 @@
                 "flag": "advantage",
                 "attackKind": "all",
                 "consumeOn": "ownAttack",
+                "until": "turnEnd",
                 "duration": {
                   "rounds": 1
                 },

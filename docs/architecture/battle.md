@@ -98,6 +98,7 @@ Wizards (attack, spellbook, player turn) are reducers in `lib/utils/battle/flows
 - **Володіння бронею й зброєю** (`lib/utils/battle/proficiency/`): `abilities.proficiencies { armor, weapons }` — вільні рядки першого класу SRD (є лише в героя 5e з непорожніми списками; без поля — жодних перевірок), розбір за ключовими словами. Мартіал/сімпл береться з опису предмета (`BattleAttack.weaponCategory`; невідомо = володіє): без володіння атака не додає майстерність (`calculateAttackBonus`). Броня/щит без володіння (`armorPenalty`): перешкода на Сил/Спр атаки, перевірки й рятунки (`rollModeReasons`, `rollCheck`, `rollSave`) і заборона каста (`spell-mutation`). Раси й риси (Lightly/Heavily Armored…) поки не враховуються.
 - **Відсіч HOMM** — `rules.actions.retaliation` (default `true`, SRD-пресет `false`): вимкнено — ціль не відповідає й не витрачає реакцію (провокована критом відсіч лишається).
 - **Шкода вмінь при влучанні** (Sneak Attack тощо, `attack/process/hit.ts`): різниця HP цілі навколо події `hit` додається в `damageBreakdown` рядками «Вміння: +N», у `totalDamage`/`hpChanges`/`finalDamage`.
+- **Cunning Strike**: the attacker may forgo Sneak Attack dice for a rider effect; the choice reaches the engine as `cunningDice` on the `hit` event (`attack/process/hit.ts`), and the Sneak Attack effect (`registry/effects/hp.ts`) subtracts those dice from its damage roll.
 - **UI**: лічильник «Атака N/M», «Атака другою рукою» у `BonusActionPicker`, вибір слота в `SpellCastDialog` (лише 5e), d20-поля для атаки заклинанням.
 
 ## 5e: поза боєм

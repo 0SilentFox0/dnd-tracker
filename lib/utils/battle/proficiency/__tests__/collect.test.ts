@@ -38,6 +38,10 @@ describe("classProficiencies", () => {
     expect(parseArmorProficiency(merged.armor).medium).toBe(false);
   });
 
+  it("нерозв'язаний перший клас не робить другий «першим»", () => {
+    expect(classProficiencies([null, srd("Fighter")])).toBeUndefined();
+  });
+
   it("клас без володінь (кастомний/HOMM) — без перевірок", () => {
     expect(classProficiencies([{ ...srd("Fighter"), proficiencies: { armor: [], weapons: [], tools: [] } }])).toBeUndefined();
   });

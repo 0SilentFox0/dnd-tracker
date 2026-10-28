@@ -7,13 +7,14 @@ import { evaluateCondition } from "@/lib/utils/abilities/registry/conditions";
 import { AbilitySchema } from "@/lib/utils/abilities/schema";
 import { rollModeReasons } from "@/lib/utils/battle/attack/bonus";
 import { activeEffectIds, consumeAttackEffects } from "@/lib/utils/battle/attack/consume-effects";
+import { decreaseEffectDurations } from "@/lib/utils/battle/turn/effects";
 import type { BattleAttack, BattleParticipant } from "@/types/battle";
 
 const reckless = resolved({
   id: "reckless",
   name: "Reckless Attack",
   trigger: { event: "bonusAction" },
-  effects: [{ kind: "flag", flag: "advantage", attackKind: "melee", attackAbility: "strength", duration: { rounds: 1 }, target: "self" }],
+  effects: [{ kind: "flag", flag: "advantage", attackKind: "all", attackAbility: "strength", duration: { rounds: 1 }, target: "self" }],
 });
 
 const steady = resolved({
@@ -21,7 +22,7 @@ const steady = resolved({
   name: "Steady Aim",
   trigger: { event: "bonusAction" },
   condition: { type: "notMoved" },
-  effects: [{ kind: "flag", flag: "advantage", attackKind: "all", consumeOn: "ownAttack", duration: { rounds: 1 }, target: "self" }],
+  effects: [{ kind: "flag", flag: "advantage", attackKind: "all", consumeOn: "ownAttack", until: "turnEnd", duration: { rounds: 1 }, target: "self" }],
 });
 
 const hero = (abilities = [reckless, steady], movementUsed?: number): BattleParticipant => {
@@ -44,7 +45,21 @@ describe("Reckless Attack accuracy", () => {
 
     expect(rollModeReasons(p, sword, [p]).advantage).toHaveLength(1);
     expect(rollModeReasons(p, finesse, [p]).advantage).toHaveLength(1);
-    expect(rollModeReasons(p, bow, [p]).advantage).toHaveLength(0);
+  });
+
+  it("a ranged finesse (thrown) attack resolving to Strength gets advantage, a Dexterity ranged attack does not", () => {
+    const base = use(hero(), "skill:s1:reckless");
+
+    const thrown: BattleAttack = { ...bow, traits: ["finesse", "thrown"] };
+
+    const str = { ...base, abilities: { ...base.abilities, dexterity: 10, strength: 18 } };
+
+    expect(rollModeReasons(str, thrown, [str]).advantage).toHaveLength(1);
+    expect(rollModeReasons(str, bow, [str]).advantage).toHaveLength(0);
+
+    const dex = { ...base, abilities: { ...base.abilities, dexterity: 18, strength: 10 } };
+
+    expect(rollModeReasons(dex, thrown, [dex]).advantage).toHaveLength(0);
   });
 
   it("a Dexterity finesse attack gets none", () => {
@@ -70,6 +85,16 @@ describe("Steady Aim accuracy", () => {
     const [after] = consumeAttackEffects([p], { attackerId: "h", targetId: "t", hit: false, existedBefore: activeEffectIds([p]) });
 
     expect(rollModeReasons(after, bow, [after]).advantage).toHaveLength(0);
+  });
+
+  it("expires at the end of the Rogue's turn, so an opportunity attack later has no advantage", () => {
+    const p = use(hero(), "skill:s1:steady");
+
+    const { updatedEffects } = decreaseEffectDurations(p);
+
+    const later = { ...p, battleData: { ...p.battleData, activeEffects: updatedEffects } };
+
+    expect(rollModeReasons(later, bow, [later]).advantage).toHaveLength(0);
   });
 
   it("notMoved holds only while no cells were walked", () => {
