@@ -4,6 +4,7 @@ import { Map as MapIcon } from "lucide-react";
 
 import { EmptyState, QueryState } from "@/components/common/states";
 import { HudChipTabs, HudPage, HudPageHeader, HudPanel } from "@/components/hud/page";
+import { OnboardingHint } from "@/components/onboarding/OnboardingHint";
 import { Button } from "@/components/ui/button";
 import { WorldNotesPanel } from "@/components/world/notes/WorldNotesPanel";
 import { TravelLog } from "@/components/world/travel/TravelLog";
@@ -32,6 +33,7 @@ export function WorldPlayClient({ campaignId, campaignName, mapId }: { campaignI
 
   return (
     <HudPage>
+      <OnboardingHint id="player.world" />
       <QueryState query={play.view}>
         {(view) => {
           const props = viewToMapProps(view);

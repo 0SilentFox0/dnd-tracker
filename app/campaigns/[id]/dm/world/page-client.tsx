@@ -6,6 +6,7 @@ import { Map as MapIcon } from "lucide-react";
 
 import { EmptyState, QueryState } from "@/components/common/states";
 import { HudPage, HudPageHeader } from "@/components/hud/page";
+import { OnboardingHint } from "@/components/onboarding/OnboardingHint";
 import { Button } from "@/components/ui/button";
 import { ResponsiveDialog } from "@/components/ui/responsive-dialog";
 import { HeroEyesSelect } from "@/components/world/editor/HeroEyesSelect";
@@ -153,6 +154,7 @@ export function WorldEditorPageClient({ campaignId, campaignName, mapId, initial
   return (
     <WorldEditorContext.Provider value={ctx}>
       <HudPage>
+        <OnboardingHint id="dm.world" />
         <QueryState query={maps} empty={emptyView}>
           {() =>
             mapId ? (
