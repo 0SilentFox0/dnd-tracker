@@ -1,6 +1,6 @@
 type Issue = { code: string; minimum?: unknown; origin?: string; format?: string };
 
-export function zodIssueKey(issue: Issue): string | undefined {
+function zodIssueKey(issue: Issue): string | undefined {
   switch (issue.code) {
     case "too_small":
       return issue.minimum === 1 && issue.origin !== "number" ? "validation.required" : "validation.minLength";
