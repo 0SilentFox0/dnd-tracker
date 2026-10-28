@@ -69,10 +69,10 @@ describe("generic compendium adapters", () => {
     expect(result.entries[0].notes).toContain("Special");
   });
 
-  it("does not fabricate sources, duplicate identities, or required monster HP", () => {
+  it("does not fabricate sources, duplicate identities, or an error for an unparseable monster HP", () => {
     const result = adaptCompendium({ feat: [{ name: "Missing" }, source, { ...source, name: " synthetic " }], monster: [{ ...source, ac: [12], hp: { special: "Unspecified" } }] });
 
-    expect(result.issues.map((i) => i.code)).toEqual(expect.arrayContaining(["SOURCE_REQUIRED", "DUPLICATE_IDENTITY", "REQUIRED_MONSTER_STATS"]));
+    expect(result.issues.map((i) => i.code)).toEqual(expect.arrayContaining(["SOURCE_REQUIRED", "DUPLICATE_IDENTITY", "MANUAL_MONSTER_HP"]));
   });
 
   it("creates private DM notes only from matching manifest data", () => {
