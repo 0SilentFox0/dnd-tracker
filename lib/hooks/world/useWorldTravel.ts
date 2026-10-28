@@ -2,7 +2,7 @@
 
 import { worldKeys } from "./keys";
 
-import { enterMarker, exitMap, travelHeroes } from "@/lib/api/world";
+import { enterMarker, exitMap, restHeroes, travelHeroes } from "@/lib/api/world";
 import { useCrudMutation } from "@/lib/hooks/common";
 
 export function useWorldTravel(campaignId: string) {
@@ -26,5 +26,11 @@ export function useWorldTravel(campaignId: string) {
     errorText: "Не вдалося вийти з карти",
   });
 
-  return { travel, enter, exit, isPending: travel.isPending || enter.isPending || exit.isPending };
+  const rest = useCrudMutation({
+    mutationFn: (data: Parameters<typeof restHeroes>[1]) => restHeroes(campaignId, data),
+    invalidateKeys,
+    errorText: "Не вдалося провести відпочинок",
+  });
+
+  return { travel, enter, exit, rest, isPending: travel.isPending || enter.isPending || exit.isPending || rest.isPending };
 }

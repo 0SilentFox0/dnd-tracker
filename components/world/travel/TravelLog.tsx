@@ -13,6 +13,7 @@ const REST_LABEL: Record<Exclude<TravelRest, "none">, string> = { short: "Кор
 const KIND_BADGE: Record<TravelKind, { label: string; tone: "accent" | "muted" | "bone"; icon: ReactNode }> = {
   travel: { label: "Подорож", tone: "accent", icon: <Route className="size-3" aria-hidden /> },
   enter: { label: "Зайшли", tone: "bone", icon: <DoorOpen className="size-3" aria-hidden /> },
+  rest: { label: "Відпочинок", tone: "muted", icon: <Moon className="size-3" aria-hidden /> },
   exit: { label: "Вийшли", tone: "muted", icon: <LogOut className="size-3" aria-hidden /> },
 };
 
@@ -33,7 +34,7 @@ function TravelEntry({ e }: { e: WorldTravelEntry }) {
         <HudPill tone={badge.tone} icon={badge.icon}>
           {badge.label}
         </HudPill>
-        {e.rest !== "none" ? (
+        {e.rest !== "none" && e.kind !== "rest" ? (
           <HudPill tone="muted" icon={<Moon className="size-3" aria-hidden />}>
             {REST_LABEL[e.rest]}
           </HudPill>

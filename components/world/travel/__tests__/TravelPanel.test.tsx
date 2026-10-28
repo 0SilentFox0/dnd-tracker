@@ -5,10 +5,17 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import { TravelPanel, type TravelPanelProps } from "../TravelPanel";
 
+import * as rulesApi from "@/lib/api/rules";
 import * as api from "@/lib/api/world";
+import { DEFAULT_RULES } from "@/lib/utils/rules";
 import type { WorldMarker } from "@/types/world";
 
 vi.mock("@/lib/api/world");
+vi.mock("@/lib/api/rules");
+
+const persistRules = { ...DEFAULT_RULES, outOfCombat: { ...DEFAULT_RULES.outOfCombat, persistResources: true } };
+
+const restBtn = () => screen.getByRole("button", { name: /Відпочити/ }) as HTMLButtonElement;
 
 const heroes = [
   { id: "h1", name: "Aria", avatar: null },
@@ -31,6 +38,8 @@ const renderPanel = (over: Partial<TravelPanelProps> = {}) =>
 const move = () => screen.getByRole("button", { name: /Перемістити/ }) as HTMLButtonElement;
 
 beforeEach(() => {
+  vi.mocked(rulesApi.getCampaignRules).mockResolvedValue({ ...DEFAULT_RULES });
+  vi.mocked(api.restHeroes).mockResolvedValue({ ok: true, applied: true });
   vi.mocked(api.getTravelLog).mockResolvedValue([]);
   vi.mocked(api.getWorldMaps).mockResolvedValue([mapSummary("m1", null)]);
   vi.mocked(api.travelHeroes).mockResolvedValue({ ok: true, positions: [] });
@@ -170,5 +179,44 @@ describe("TravelPanel", () => {
     await waitFor(() => expect(move().disabled).toBe(false));
 
     expect(onMoved).not.toHaveBeenCalled();
+  });
+
+  it("disables Rest with a hint when persistent resources are off", async () => {
+    renderPanel();
+    fireEvent.click(screen.getByRole("button", { name: "Aria" }));
+    fireEvent.click(screen.getByRole("button", { name: "Довгий" }));
+
+    expect(await screen.findByText("Ресурси між боями вимкнені в правилах кампанії.")).toBeTruthy();
+    expect(restBtn().disabled).toBe(true);
+  });
+
+  it("rests the selected heroes when persistent resources are on", async () => {
+    vi.mocked(rulesApi.getCampaignRules).mockResolvedValue(persistRules);
+    renderPanel();
+    fireEvent.click(screen.getByRole("button", { name: "Aria" }));
+    fireEvent.click(screen.getByRole("button", { name: "Довгий" }));
+    await waitFor(() => expect(restBtn().disabled).toBe(false));
+    fireEvent.click(restBtn());
+
+    await waitFor(() => expect(api.restHeroes).toHaveBeenCalledWith("c1", { mapId: "m1", characterIds: ["h1"], kind: "long" }));
+  });
+
+  it("disables Rest when no rest is chosen", async () => {
+    vi.mocked(rulesApi.getCampaignRules).mockResolvedValue(persistRules);
+    renderPanel();
+    fireEvent.click(screen.getByRole("button", { name: "Aria" }));
+
+    await waitFor(() => expect(screen.queryByText(/Ресурси між боями вимкнені/)).toBeNull());
+
+    expect(restBtn().disabled).toBe(true);
+  });
+
+  it("keeps Move working when rest is chosen but rules are off", async () => {
+    renderPanel();
+    fireEvent.click(screen.getByRole("button", { name: "Aria" }));
+    fireEvent.click(screen.getByRole("button", { name: "Короткий" }));
+    fireEvent.click(move());
+
+    await waitFor(() => expect(api.travelHeroes).toHaveBeenCalled());
   });
 });

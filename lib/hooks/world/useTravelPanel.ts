@@ -6,6 +6,7 @@ import type { RosterHero } from "./useWorldHeroes";
 import { useWorldMaps } from "./useWorldMaps";
 import { useWorldTravel } from "./useWorldTravel";
 
+import { useCampaignRules } from "@/lib/hooks/campaigns";
 import type { MapPoint, TravelRest, WorldMarker } from "@/types/world";
 
 export interface TravelMoved {
@@ -29,7 +30,9 @@ export function useTravelPanel({ campaignId, mapId, heroes, onMapIds, target, se
 
   const [rest, setRest] = useState<TravelRest>("none");
 
-  const { travel, enter, exit, isPending } = useWorldTravel(campaignId);
+  const { travel, enter, exit, rest: restMutation, isPending } = useWorldTravel(campaignId);
+
+  const { data: rules } = useCampaignRules(campaignId);
 
   const maps = useWorldMaps(campaignId);
 
@@ -64,6 +67,10 @@ export function useTravelPanel({ campaignId, mapId, heroes, onMapIds, target, se
 
   const canExit = ready && nested && selected.every((id) => onMapIds.includes(id));
 
+  const restEnabled = !!rules?.outOfCombat.persistResources;
+
+  const canRest = ready && restEnabled && rest !== "none";
+
   const childMapId = selectedMarker?.childMapId ?? null;
 
   return {
@@ -79,6 +86,11 @@ export function useTravelPanel({ campaignId, mapId, heroes, onMapIds, target, se
     nested,
     canExit,
     canAct: ready,
+    restEnabled,
+    canRest,
+    restNow: () => {
+      if (canRest) run(() => restMutation.mutateAsync({ mapId, characterIds: selected, kind: rest }));
+    },
     move: () => {
       if (ready && target) run(() => moved("travel", travel.mutateAsync({ mapId, characterIds: selected, to: target, toMarkerId: selectedMarker?.id, rest })));
     },
