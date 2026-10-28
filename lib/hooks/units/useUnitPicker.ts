@@ -4,7 +4,6 @@ import { useMemo, useState } from "react";
 
 import { useUnits } from "./useUnits";
 
-import { UNGROUPED_LABELS } from "@/lib/constants/ungrouped";
 import { useRaces } from "@/lib/hooks/races";
 import { groupUnitsByRace } from "@/lib/utils/units/group-units";
 
@@ -22,7 +21,7 @@ export function useUnitPicker(campaignId: string, enabled: boolean) {
   const tiers = groups.find((g) => g.key === raceKey)?.tiers ?? [];
 
   return {
-    raceOptions: groups.map((g) => ({ key: g.key, label: g.race?.name ?? UNGROUPED_LABELS.race, count: g.total })),
+    raceOptions: groups.map((g) => ({ key: g.key, label: g.label, count: g.total })),
     raceKey,
     selectRace: (key: string) => {
       setRaceKey(key);

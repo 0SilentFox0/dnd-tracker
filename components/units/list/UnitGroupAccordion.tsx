@@ -1,13 +1,12 @@
 "use client";
 
-import { useState } from "react";
+import { memo, useState } from "react";
 
 import { EntityIcon } from "@/components/common/EntityIcon";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { UnitCard } from "@/components/units/list/UnitCard";
-import { UNGROUPED_LABELS } from "@/lib/constants/ungrouped";
 import { parseUnitDragPayload, planUnitDrop, UNIT_DRAG_TYPE, type UnitDropTarget } from "@/lib/utils/units/drag";
-import { raceIdOfGroup, type UnitRaceGroup } from "@/lib/utils/units/group-units";
+import { isTypeGroup, raceIdOfGroup, type UnitRaceGroup } from "@/lib/utils/units/group-units";
 import type { Race } from "@/types/races";
 import type { Unit } from "@/types/units";
 
@@ -20,10 +19,12 @@ interface UnitGroupAccordionProps {
 
 const carriesUnit = (e: React.DragEvent) => e.dataTransfer.types.includes(UNIT_DRAG_TYPE);
 
-export function UnitGroupAccordion({ group, campaignId, onDeleteUnit, onDrop }: UnitGroupAccordionProps) {
+export const UnitGroupAccordion = memo(function UnitGroupAccordion({ group, campaignId, onDeleteUnit, onDrop }: UnitGroupAccordionProps) {
   const [over, setOver] = useState<string | null>(null);
 
-  const title = group.race?.name ?? UNGROUPED_LABELS.race;
+  const title = group.label;
+
+  const raceDrop = !isTypeGroup(group.key);
 
   const allowDrop = (e: React.DragEvent) => {
     if (!carriesUnit(e)) return;
@@ -52,10 +53,10 @@ export function UnitGroupAccordion({ group, campaignId, onDeleteUnit, onDrop }: 
       <AccordionTrigger className="px-4 sm:px-6">
         <div
           className={`flex w-full items-center gap-3 rounded-md text-left transition-colors sm:gap-4 ${highlight("race")}`}
-          onDragOver={allowDrop}
-          onDragEnter={(e) => carriesUnit(e) && setOver("race")}
+          onDragOver={raceDrop ? allowDrop : undefined}
+          onDragEnter={(e) => raceDrop && carriesUnit(e) && setOver("race")}
           onDragLeave={() => setOver(null)}
-          onDrop={dropOn({ raceId: raceIdOfGroup(group.key) })}
+          onDrop={raceDrop ? dropOn({ raceId: raceIdOfGroup(group.key) }) : undefined}
         >
           <EntityIcon src={group.race?.icon ?? null} name={title} className="h-9 w-9 shrink-0" />
           <div className="min-w-0 flex-1">
@@ -98,4 +99,4 @@ export function UnitGroupAccordion({ group, campaignId, onDeleteUnit, onDrop }: 
       </AccordionContent>
     </AccordionItem>
   );
-}
+});
