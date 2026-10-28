@@ -32,6 +32,7 @@ import { loadSpellsFromDb } from "@/lib/utils/battle/spell/load-spells-db";
 import { loadBattle, loadRecentEvents, saveBattle } from "@/lib/utils/battle/store";
 import { rollDiceList } from "@/lib/utils/common/dice";
 import { categoryInventory, projectInput } from "@/lib/utils/compendium-import/flow";
+import { itemStatsFromRow } from "@/lib/utils/items/item-row";
 
 const FILE = process.env.COMPENDIUM_REAL_FILE;
 
@@ -100,6 +101,12 @@ describe.skipIf(!FILE)("real file import", () => {
     const report = await confirmImport(actor(), input, p.token, "real-file", secret, prismaImportRepository);
 
     console.info(JSON.stringify(report.counts), "units:", await prisma.unit.count({ where: { campaignId } }));
+
+    const artifacts = await prisma.artifact.findMany({ where: { campaignId } });
+
+    const stats = artifacts.map((a) => itemStatsFromRow(a));
+
+    console.info(JSON.stringify({ artifacts: artifacts.length, consumable: stats.filter((i) => i?.consumable).length, nonUnique: stats.filter((i) => i?.unique === false).length, withAbilities: artifacts.filter((a) => Array.isArray(a.abilities) && a.abilities.length > 0).length, weaponBonus: artifacts.filter((a) => JSON.stringify(a.modifiers).includes("damageBonus")).length }));
   }, 300_000);
 
   it("every monster becomes a participant and fights through the real battle mutations", async () => {
