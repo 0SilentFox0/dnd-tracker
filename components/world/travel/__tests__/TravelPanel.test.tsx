@@ -45,7 +45,7 @@ describe("TravelPanel", () => {
   it("moves the selected heroes to the target with the chosen rest", async () => {
     renderPanel({ selectedMarker: marker() });
     fireEvent.click(screen.getByRole("button", { name: "Aria" }));
-    fireEvent.click(screen.getByLabelText("Довгий"));
+    fireEvent.click(screen.getByRole("button", { name: "Довгий" }));
     fireEvent.click(move());
 
     await waitFor(() => expect(api.travelHeroes).toHaveBeenCalledWith("c1", { mapId: "m1", characterIds: ["h1"], to: { x: 0.3, y: 0.6 }, toMarkerId: "k1", rest: "long" }));
@@ -126,7 +126,15 @@ describe("TravelPanel", () => {
     ]);
     renderPanel();
 
-    expect(await screen.findByText(/Town, короткий відпочинок/)).toBeTruthy();
+    expect(await screen.findByText("Town")).toBeTruthy();
+    expect(screen.getAllByText("Aria")).toHaveLength(2);
+    expect(screen.getByText("Короткий відпочинок")).toBeTruthy();
+  });
+
+  it("shows the empty journal state", async () => {
+    renderPanel();
+
+    expect(await screen.findByText("Подорожей ще не було")).toBeTruthy();
   });
 
   it("reports the destination map after Enter", async () => {

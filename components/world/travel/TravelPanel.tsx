@@ -42,15 +42,10 @@ export function TravelPanel({ campaignId, mapId, heroes, onMapIds, target, selec
         />
       </div>
 
-      <fieldset className="flex flex-wrap gap-x-3 gap-y-1 text-sm text-hud-ink">
-        <legend className="mb-1 text-sm font-medium">Відпочинок</legend>
-        {RESTS.map((r) => (
-          <label key={r.value} className="flex items-center gap-1.5">
-            <input type="radio" name="travel-rest" value={r.value} checked={panel.rest === r.value} onChange={() => panel.setRest(r.value)} />
-            {r.label}
-          </label>
-        ))}
-      </fieldset>
+      <div>
+        <h2 className="mb-1 text-sm font-medium text-hud-ink">Відпочинок</h2>
+        <HudChipTabs ariaLabel="Відпочинок" items={RESTS.map((r) => ({ key: r.value, label: r.label, active: panel.rest === r.value, onSelect: () => panel.setRest(r.value) }))} />
+      </div>
 
       <p className="text-xs text-hud-muted">
         {target ? "Ціль обрано на карті." : "Клікніть по карті, щоб обрати ціль."}
