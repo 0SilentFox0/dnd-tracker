@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { BATTLE_TRACK_GROUP, filterTracks, groupTracks, joinTrackTitle, listGroupPrefixes, listTrackGroups, OTHER_TRACK_GROUP, splitTrackTitle, trackGroupName, trackLabelInGroup } from "@/lib/utils/audio/playlist-groups";
+import { BATTLE_TRACK_GROUP, filterTracks, groupTracks, joinTrackTitle, listGroupPrefixes, listTrackGroups, OTHER_TRACK_GROUP, splitTrackTitle, trackGroupLabelKey, trackGroupName, trackLabelInGroup } from "@/lib/utils/audio/playlist-groups";
 
 const t = (title: string, kind: "file" | "youtube" = "youtube") => ({ title, kind });
 
@@ -77,5 +77,13 @@ describe("splitTrackTitle / joinTrackTitle", () => {
 
   it("підказки груп — унікальні префікси, включно з расами битв", () => {
     expect(listGroupPrefixes(library)).toEqual(["Люди", "Ельфи"]);
+  });
+});
+
+describe("trackGroupLabelKey", () => {
+  it("маркери «Інше» і «Битва» мають ключі, решта груп — ні", () => {
+    expect(trackGroupLabelKey("Інше")).toBe("music.groups.other");
+    expect(trackGroupLabelKey("Битва")).toBe("music.groups.battle");
+    expect(trackGroupLabelKey("Люди")).toBeNull();
   });
 });

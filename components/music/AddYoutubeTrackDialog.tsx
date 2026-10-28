@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useTranslations } from "next-intl";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -16,6 +17,8 @@ export function AddYoutubeTrackDialog({ open, onOpenChange, onSubmit, pending }:
   onSubmit: (data: { url: string; title?: string }) => Promise<boolean>;
   pending: boolean;
 }) {
+  const t = useTranslations();
+
   const [url, setUrl] = useState("");
 
   const [title, setTitle] = useState("");
@@ -27,11 +30,11 @@ export function AddYoutubeTrackDialog({ open, onOpenChange, onSubmit, pending }:
       hud
       open={open}
       onOpenChange={onOpenChange}
-      title="Додати з YouTube"
-      description="Посилання youtu.be, watch?v= або shorts. Назву можна не вводити — візьмемо з YouTube."
+      title={t("music.youtube.title")}
+      description={t("music.youtube.description")}
       footer={
         <Button type="submit" form={FORM_ID} disabled={!valid || pending}>
-          Додати
+          {t("common.actions.add")}
         </Button>
       }
     >
@@ -48,9 +51,9 @@ export function AddYoutubeTrackDialog({ open, onOpenChange, onSubmit, pending }:
           }
         }}
       >
-        <Input aria-label="Посилання YouTube" placeholder="https://youtu.be/…" value={url} onChange={(e) => setUrl(e.target.value)} />
-        {url && !valid && <p className="text-xs text-[var(--enemy)]">Не вдалося розпізнати посилання YouTube</p>}
-        <Input aria-label="Назва (необовʼязково)" placeholder="Назва" maxLength={TRACK_TITLE_MAX} value={title} onChange={(e) => setTitle(e.target.value)} />
+        <Input aria-label={t("music.youtube.urlLabel")} placeholder="https://youtu.be/…" value={url} onChange={(e) => setUrl(e.target.value)} />
+        {url && !valid && <p className="text-xs text-[var(--enemy)]">{t("music.youtube.urlInvalid")}</p>}
+        <Input aria-label={t("music.youtube.titleLabel")} placeholder={t("music.youtube.titlePlaceholder")} maxLength={TRACK_TITLE_MAX} value={title} onChange={(e) => setTitle(e.target.value)} />
       </form>
     </ResponsiveDialog>
   );

@@ -34,16 +34,16 @@ describe("TrackGroups", () => {
   it("на всіх групах одночасно активний лише один трек", () => {
     const { getAllByRole, queryAllByRole } = setup();
 
-    fireEvent.click(getAllByRole("button", { name: "Слухати" })[0]);
-    expect(queryAllByRole("button", { name: "Пауза" })).toHaveLength(1);
-    fireEvent.click(getAllByRole("button", { name: "Слухати" })[2]);
-    expect(queryAllByRole("button", { name: "Пауза" })).toHaveLength(1);
+    fireEvent.click(getAllByRole("button", { name: "music.list.play" })[0]);
+    expect(queryAllByRole("button", { name: "music.list.pause" })).toHaveLength(1);
+    fireEvent.click(getAllByRole("button", { name: "music.list.play" })[2]);
+    expect(queryAllByRole("button", { name: "music.list.pause" })).toHaveLength(1);
   });
 
   it("групи за расами, усі битви — в окремій групі «Битва»", () => {
     const { getByRole } = setup();
 
-    const battle = within(getByRole("region", { name: "Битва" }));
+    const battle = within(getByRole("region", { name: "music.groups.battle" }));
 
     expect(battle.getAllByRole("listitem")).toHaveLength(2);
     expect(battle.getByDisplayValue("Люди - Битва 1")).toBeTruthy();
@@ -55,23 +55,23 @@ describe("TrackGroups", () => {
   it("групу можна згорнути", () => {
     const { getByRole, queryByDisplayValue } = setup();
 
-    fireEvent.click(within(getByRole("region", { name: "Битва" })).getByRole("button", { expanded: true }));
+    fireEvent.click(within(getByRole("region", { name: "music.groups.battle" })).getByRole("button", { expanded: true }));
     expect(queryByDisplayValue("Ельфи - Битва")).toBeNull();
   });
 
   it("«Згорнути всі» ховає всі групи, повторне натискання розгортає", () => {
     const { getByRole, queryAllByRole } = setup();
 
-    fireEvent.click(getByRole("button", { name: "Згорнути всі" }));
+    fireEvent.click(getByRole("button", { name: "music.list.collapseAll" }));
     expect(queryAllByRole("listitem")).toHaveLength(0);
-    fireEvent.click(getByRole("button", { name: "Розгорнути всі" }));
+    fireEvent.click(getByRole("button", { name: "music.list.expandAll" }));
     expect(queryAllByRole("listitem")).toHaveLength(4);
   });
 
   it("пошук звужує список", () => {
     const { getByLabelText, queryByRole } = setup();
 
-    fireEvent.change(getByLabelText("Пошук треку"), { target: { value: "місто" } });
-    expect(queryByRole("region", { name: "Битва" })).toBeNull();
+    fireEvent.change(getByLabelText("music.search.label"), { target: { value: "місто" } });
+    expect(queryByRole("region", { name: "music.groups.battle" })).toBeNull();
   });
 });

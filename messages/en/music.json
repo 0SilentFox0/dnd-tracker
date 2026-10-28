@@ -1,1 +1,108 @@
-{}
+{
+  "groups": {
+    "other": "Other",
+    "battle": "Battle"
+  },
+  "page": {
+    "title": "Music",
+    "subtitle": "{count} of {max} {max, plural, one {track} other {tracks}} · {formats} up to {mb} MB",
+    "loading": "Loading tracks…",
+    "emptyTitle": "No tracks yet",
+    "emptyDescription": "Upload {formats} or add a YouTube link — the DM plays them in battle."
+  },
+  "upload": {
+    "fileLabel": "Track file",
+    "button": "Upload track",
+    "pending": "Uploading…"
+  },
+  "youtube": {
+    "title": "Add from YouTube",
+    "description": "A youtu.be, watch?v= or shorts link. The title is optional — we will take it from YouTube.",
+    "urlLabel": "YouTube link",
+    "urlInvalid": "Could not recognize the YouTube link",
+    "titleLabel": "Title (optional)",
+    "titlePlaceholder": "Title"
+  },
+  "edit": {
+    "title": "Edit track",
+    "group": "Group",
+    "groupHint": "Pick an existing one or type a new one. Empty means “{other}”. All “Race - Battle N” tracks are shown in the “{battle}” group.",
+    "name": "Title",
+    "link": "Link",
+    "duration": "Duration, s"
+  },
+  "search": {
+    "label": "Search tracks",
+    "placeholder": "Search…"
+  },
+  "list": {
+    "expandAll": "Expand all",
+    "collapseAll": "Collapse all",
+    "nothingFound": "Nothing found",
+    "play": "Listen",
+    "pause": "Pause",
+    "playFailed": "Could not play",
+    "progress": "Progress",
+    "earlier": "Earlier",
+    "later": "Later",
+    "fileKind": "File",
+    "titleName": "Track title",
+    "titleNewName": "New track title"
+  },
+  "library": {
+    "deleteTitle": "Delete “{title}”?",
+    "deleteNote": {
+      "file": "The track will disappear from the library and the file from storage. If it is playing in battle right now, the music will stop for everyone.",
+      "youtube": "The track will disappear from the library."
+    },
+    "defaultTitle": "Track",
+    "saveFailed": "Failed to save",
+    "uploadFailed": "Failed to upload the file"
+  },
+  "player": {
+    "label": "Music",
+    "silence": "Silence",
+    "paused": "paused",
+    "video": "Video",
+    "collapse": "Collapse player",
+    "expand": "Expand player: {title}",
+    "muteOn": "Unmute for me",
+    "muteOff": "Mute for me",
+    "volume": "Volume",
+    "trackUnavailable": "Track unavailable",
+    "unlock": "Enable sound",
+    "tapPlayer": "Tap ▶ in the player",
+    "videoUnavailable": "Video cannot be embedded",
+    "failedTitle": "The player crashed",
+    "restart": "Restart",
+    "restartLabel": "Restart player",
+    "controlFailed": "Failed to control the music",
+    "renameFailed": "Failed to rename the track"
+  },
+  "dm": {
+    "prev": "Previous track",
+    "pause": "Pause",
+    "play": "Play",
+    "next": "Next track",
+    "stop": "Stop",
+    "emptyLibrary": "The library is empty — <link>add tracks</link>."
+  },
+  "playlist": {
+    "title": "Playlist",
+    "renameLabel": "Rename: {title}",
+    "rename": "Rename",
+    "allGroups": "All groups",
+    "group": "Group",
+    "kind": "Track type",
+    "allKinds": "All types",
+    "kinds": {
+      "youtube": "YouTube",
+      "file": "Files"
+    },
+    "resetFilters": "Reset filters",
+    "found": "Found {shown} of {total}"
+  },
+  "validation": {
+    "nothingToChange": "Nothing to change"
+  }
+}

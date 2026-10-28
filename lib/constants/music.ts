@@ -21,7 +21,7 @@ export const TRACK_EXTENSIONS = Object.keys(TRACK_FORMATS) as TrackFormat[];
 
 export const TRACK_CONTENT_TYPES: string[] = Object.values(TRACK_FORMATS).map((f) => f.contentType);
 
-export const TRACK_FORMATS_LABEL = TRACK_EXTENSIONS.map((e) => e.toUpperCase()).join(" або ");
+export const TRACK_FORMATS_LABEL = TRACK_EXTENSIONS.map((e) => e.toUpperCase()).join(" / ");
 
 /** accept для <input type="file"> */
 export const TRACK_FILE_ACCEPT = [...TRACK_EXTENSIONS.map((e) => `.${e}`), ...TRACK_CONTENT_TYPES].join(",");

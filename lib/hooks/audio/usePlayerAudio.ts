@@ -9,6 +9,8 @@ import { type AudioPrefs, useAudioPrefs } from "./useAudioPrefs";
 import { useAudioState } from "./useAudioState";
 
 import { useRenameTrack, useTracks } from "@/lib/hooks/music";
+import { translateIssue } from "@/lib/i18n/translate-issue";
+import { useTranslator } from "@/lib/i18n/use-translator";
 import { errorMessage } from "@/lib/utils/common/error-message";
 import type { BattleAudioState, CampaignTrack } from "@/types/audio";
 
@@ -36,6 +38,8 @@ const NO_TRACKS: CampaignTrack[] = [];
 export function usePlayerAudioValue(host: AudioHost): { value: PlayerAudioValue; audioRef: (el: HTMLAudioElement | null) => void } {
   const { campaignId, isDM, onFailure } = host;
 
+  const t = useTranslator();
+
   // браузери пускають звук лише після жесту: один клік на кожне відкриття сторінки
   const [unlocked, setUnlocked] = useState(false);
 
@@ -47,7 +51,7 @@ export function usePlayerAudioValue(host: AudioHost): { value: PlayerAudioValue;
 
   const { data: tracks = NO_TRACKS, isLoading } = useTracks(campaignId, { enabled: isDM });
 
-  const rename = useRenameTrack(campaignId, (e) => onFailure(errorMessage(e, "Не вдалося перейменувати трек")));
+  const rename = useRenameTrack(campaignId, (e) => onFailure(translateIssue(t, { message: errorMessage(e, "music.player.renameFailed") })));
 
   const track = audio?.track ?? null;
 
@@ -86,7 +90,7 @@ export function usePlayerAudioValue(host: AudioHost): { value: PlayerAudioValue;
 export function usePlayerAudio(): PlayerAudioValue {
   const value = useContext(AudioPlayerContext);
 
-  if (!value) throw new Error("usePlayerAudio: немає AudioPlayerContext");
+  if (!value) throw new Error("usePlayerAudio: missing AudioPlayerContext");
 
   return value;
 }

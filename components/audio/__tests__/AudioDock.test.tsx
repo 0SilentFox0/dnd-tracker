@@ -78,23 +78,23 @@ describe("AudioDock — гравець", () => {
     const { getByText, getByRole, queryByRole } = dock({ audio: fileState });
 
     expect(getByText("Бій у таверні")).toBeTruthy();
-    expect(getByRole("button", { name: "Увімкнути звук" })).toBeTruthy();
-    expect(queryByRole("button", { name: "Пауза" })).toBeNull();
+    expect(getByRole("button", { name: "music.player.unlock" })).toBeTruthy();
+    expect(queryByRole("button", { name: "music.dm.pause" })).toBeNull();
     expect(queryByRole("list", { name: "Бібліотека музики" })).toBeNull();
   });
 
   it("клік «Увімкнути звук» — play у жесті, далі гучність і вимкнення звуку (запамʼятовується)", () => {
     const { getByRole, queryByRole } = dock({ audio: fileState });
 
-    fireEvent.click(getByRole("button", { name: "Увімкнути звук" }));
+    fireEvent.click(getByRole("button", { name: "music.player.unlock" }));
 
     expect(HTMLMediaElement.prototype.play).toHaveBeenCalled();
-    expect(queryByRole("button", { name: "Увімкнути звук" })).toBeNull();
+    expect(queryByRole("button", { name: "music.player.unlock" })).toBeNull();
 
-    fireEvent.change(getByRole("slider", { name: "Гучність" }), { target: { value: "0.3" } });
+    fireEvent.change(getByRole("slider", { name: "music.player.volume" }), { target: { value: "0.3" } });
     expect(localStorage.getItem("battle-music-volume")).toBe("0.3");
 
-    fireEvent.click(getByRole("button", { name: "Вимкнути звук у мене" }));
+    fireEvent.click(getByRole("button", { name: "music.player.muteOff" }));
     expect(localStorage.getItem("battle-music-muted")).toBe("on");
   });
 
@@ -103,21 +103,21 @@ describe("AudioDock — гравець", () => {
 
     expect(container.querySelector("[data-youtube-player]")).toBeNull();
 
-    fireEvent.click(getByRole("button", { name: "Увімкнути звук" }));
+    fireEvent.click(getByRole("button", { name: "music.player.unlock" }));
 
     const player = container.querySelector<HTMLElement>("[data-youtube-player]");
 
     expect(player?.style.width).toBe("200px");
     expect(player?.style.height).toBe("200px");
 
-    fireEvent.click(getByRole("button", { name: "Згорнути плеєр" }));
+    fireEvent.click(getByRole("button", { name: "music.player.collapse" }));
     expect(container.querySelector("[data-youtube-player]")).toBe(player);
     expect(container.querySelector("[data-audio-panel]")?.className).toContain("sr-only");
-    expect(queryByRole("region", { name: "Музика" })).toBeNull();
+    expect(queryByRole("region", { name: "music.player.label" })).toBeNull();
 
-    fireEvent.click(getByRole("button", { name: /Розгорнути плеєр/ }));
+    fireEvent.click(getByRole("button", { name: /music.player.expand/ }));
     expect(container.querySelector("[data-youtube-player]")).toBe(player);
-    expect(getByRole("region", { name: "Музика" })).toBeTruthy();
+    expect(getByRole("region", { name: "music.player.label" })).toBeTruthy();
   });
 
   it("телефон: смуга й кут на вузькому екрані стартують згорнутими — чип із назвою треку", () => {
@@ -126,8 +126,8 @@ describe("AudioDock — гравець", () => {
     for (const placement of ["strip", "corner"] as const) {
       const { getByRole, queryByRole, unmount } = dock({ audio: fileState, placement });
 
-      expect(getByRole("button", { name: "Розгорнути плеєр: Бій у таверні" })).toBeTruthy();
-      expect(queryByRole("region", { name: "Музика" })).toBeNull();
+      expect(getByRole("button", { name: 'music.player.expand {"title":"Бій у таверні"}' })).toBeTruthy();
+      expect(queryByRole("region", { name: "music.player.label" })).toBeNull();
       unmount();
     }
   });
@@ -137,14 +137,14 @@ describe("AudioDock — гравець", () => {
 
     const { getByRole, queryByRole, container } = dock({ audio: fileState, placement: "strip" });
 
-    expect(queryByRole("region", { name: "Музика" })).toBeNull();
+    expect(queryByRole("region", { name: "music.player.label" })).toBeNull();
 
-    fireEvent.click(getByRole("button", { name: "Увімкнути звук" }));
+    fireEvent.click(getByRole("button", { name: "music.player.unlock" }));
 
     expect(HTMLMediaElement.prototype.play).toHaveBeenCalled();
     expect(container.querySelector("audio")?.getAttribute("src")).toBe("https://s/1.mp3");
-    expect(queryByRole("button", { name: "Увімкнути звук" })).toBeNull();
-    expect(getByRole("button", { name: "Розгорнути плеєр: Бій у таверні" })).toBeTruthy();
+    expect(queryByRole("button", { name: "music.player.unlock" })).toBeNull();
+    expect(getByRole("button", { name: 'music.player.expand {"title":"Бій у таверні"}' })).toBeTruthy();
   });
 
   it("один <audio> на сторінку: панель зникає й з'являється (Стоп, лобі → бій, 1024 px) — той самий розблокований елемент", () => {
@@ -152,7 +152,7 @@ describe("AudioDock — гравець", () => {
 
     const el = container.querySelector("audio");
 
-    fireEvent.click(getByRole("button", { name: "Увімкнути звук" }));
+    fireEvent.click(getByRole("button", { name: "music.player.unlock" }));
     rerender(<Screen show={false} />);
     expect(container.querySelector("audio")).toBe(el);
 
@@ -168,9 +168,9 @@ describe("AudioDock — гравець", () => {
 
     vi.mocked(HTMLMediaElement.prototype.play).mockResolvedValueOnce(undefined).mockRejectedValue(blocked);
 
-    await act(async () => fireEvent.click(getByRole("button", { name: "Увімкнути звук" })));
+    await act(async () => fireEvent.click(getByRole("button", { name: "music.player.unlock" })));
 
-    expect(await findByRole("button", { name: "Увімкнути звук" })).toBeTruthy();
+    expect(await findByRole("button", { name: "music.player.unlock" })).toBeTruthy();
   });
 });
 
@@ -187,7 +187,7 @@ describe("AudioDock — defaultExpanded", () => {
 
     expect(container.querySelector("[data-audio-panel]")?.getAttribute("data-audio-panel")).toBe("collapsed");
 
-    fireEvent.click(getByLabelText(/Розгорнути плеєр/));
+    fireEvent.click(getByLabelText(/music.player.expand/));
 
     expect(container.querySelector("[data-audio-panel]")?.getAttribute("data-audio-panel")).toBe("open");
   });
@@ -205,7 +205,7 @@ describe("AudioDock — ДМ", () => {
   it("грає — пауза, наступний, попередній, стоп (кнопки вимкнені, поки команда в дорозі)", async () => {
     const { getByRole } = dock({ isDM: true, audio: fileState });
 
-    const steps: Array<[string, string]> = [["Пауза", "pause"], ["Наступний трек", "next"], ["Попередній трек", "prev"], ["Стоп", "stop"]];
+    const steps: Array<[string, string]> = [["music.dm.pause", "pause"], ["music.dm.next", "next"], ["music.dm.prev", "prev"], ["music.dm.stop", "stop"]];
 
     for (const [name, action] of steps) {
       await waitFor(() => expect((getByRole("button", { name }) as HTMLButtonElement).disabled).toBe(false));
@@ -217,7 +217,7 @@ describe("AudioDock — ДМ", () => {
   it("подвійний клік «Пауза» — одна команда", async () => {
     const { getByRole } = dock({ isDM: true, audio: fileState });
 
-    const pause = getByRole("button", { name: "Пауза" });
+    const pause = getByRole("button", { name: "music.dm.pause" });
 
     fireEvent.click(pause);
     fireEvent.click(pause);
@@ -237,7 +237,7 @@ describe("AudioDock — ДМ", () => {
   it("на паузі кнопка — «Грати» → resume", async () => {
     const { getByRole } = dock({ isDM: true, audio: { ...fileState, playing: false } });
 
-    fireEvent.click(getByRole("button", { name: "Грати" }));
+    fireEvent.click(getByRole("button", { name: "music.dm.play" }));
 
     await waitFor(() => expect(sendBattleAudio).toHaveBeenCalledWith("c1", "b1", { action: "resume" }));
   });
@@ -257,7 +257,7 @@ describe("AudioDock — ДМ", () => {
   it("плейлист: усі треки бібліотеки в її порядку, поточний виділений", async () => {
     const { findByRole } = dock({ isDM: true, audio: fileState });
 
-    const list = await findByRole("list", { name: "Плейлист" });
+    const list = await findByRole("list", { name: "music.playlist.title" });
 
     await waitFor(() => expect(list.querySelectorAll("li")).toHaveLength(2));
     expect([...list.querySelectorAll("li")].map((li) => li.textContent)).toEqual(["♪ Бій у таверні", "▶ Епік"]);
@@ -278,19 +278,19 @@ describe("AudioDock — ДМ", () => {
 
     expect([...people.querySelectorAll("li")].map((li) => li.textContent)).toEqual(["▶ Тема", "♪ Місто"]);
     expect(getByRole("list", { name: "Ельфи" })).toBeTruthy();
-    expect([...getByRole("list", { name: "Битва" }).querySelectorAll("li")].map((li) => li.textContent)).toEqual(["▶ Люди - Битва 1"]);
+    expect([...getByRole("list", { name: "music.groups.battle" }).querySelectorAll("li")].map((li) => li.textContent)).toEqual(["▶ Люди - Битва 1"]);
 
-    fireEvent.change(getByRole("searchbox", { name: "Пошук треку" }), { target: { value: "тема ельфи" } });
+    fireEvent.change(getByRole("searchbox", { name: "music.search.label" }), { target: { value: "тема ельфи" } });
     expect(queryByRole("list", { name: "Люди" })).toBeNull();
-    expect(getByText("Знайдено 1 з 4")).toBeTruthy();
+    expect(getByText('music.playlist.found {"shown":1,"total":4}')).toBeTruthy();
 
-    fireEvent.click(getByRole("button", { name: "Скинути фільтри" }));
-    fireEvent.change(getByRole("combobox", { name: "Група" }), { target: { value: "Люди" } });
-    fireEvent.change(getByRole("combobox", { name: "Тип треку" }), { target: { value: "file" } });
+    fireEvent.click(getByRole("button", { name: "music.playlist.resetFilters" }));
+    fireEvent.change(getByRole("combobox", { name: "music.playlist.group" }), { target: { value: "Люди" } });
+    fireEvent.change(getByRole("combobox", { name: "music.playlist.kind" }), { target: { value: "file" } });
     expect([...getByRole("list", { name: "Люди" }).querySelectorAll("li")].map((li) => li.textContent)).toEqual(["♪ Місто"]);
     expect(queryByRole("list", { name: "Ельфи" })).toBeNull();
 
-    fireEvent.click(getByRole("button", { name: "Скинути фільтри" }));
+    fireEvent.click(getByRole("button", { name: "music.playlist.resetFilters" }));
     fireEvent.click(getByRole("button", { name: /^Люди/, expanded: true }));
     expect(queryByRole("list", { name: "Люди" })).toBeNull();
     expect(getByRole("list", { name: "Ельфи" })).toBeTruthy();
@@ -299,50 +299,50 @@ describe("AudioDock — ДМ", () => {
   it("плейлист згортається, і це запамʼятовується на пристрої", async () => {
     const first = dock({ isDM: true, audio: fileState });
 
-    await first.findByRole("list", { name: "Плейлист" });
+    await first.findByRole("list", { name: "music.playlist.title" });
 
-    fireEvent.click(first.getByRole("button", { name: "Плейлист", expanded: true }));
-    expect(first.queryByRole("list", { name: "Плейлист" })).toBeNull();
+    fireEvent.click(first.getByRole("button", { name: "music.playlist.title", expanded: true }));
+    expect(first.queryByRole("list", { name: "music.playlist.title" })).toBeNull();
     expect(localStorage.getItem("battle-music-playlist")).toBe("off");
     first.unmount();
 
     const second = dock({ isDM: true, audio: fileState });
 
-    expect(second.getByRole("button", { name: "Плейлист", expanded: false })).toBeTruthy();
-    expect(second.queryByRole("list", { name: "Плейлист" })).toBeNull();
+    expect(second.getByRole("button", { name: "music.playlist.title", expanded: false })).toBeTruthy();
+    expect(second.queryByRole("list", { name: "music.playlist.title" })).toBeNull();
   });
 
   it("перейменування: олівець → поле, Enter зберігає назву бібліотеки; команд музики немає", async () => {
     const { findByRole, getByRole, queryByRole } = dock({ isDM: true, audio: fileState });
 
-    fireEvent.click(await findByRole("button", { name: "Перейменувати: Епік" }));
+    fireEvent.click(await findByRole("button", { name: 'music.playlist.renameLabel {"title":"Епік"}' }));
 
-    const input = getByRole("textbox", { name: "Нова назва треку" });
+    const input = getByRole("textbox", { name: "music.list.titleNewName" });
 
     fireEvent.change(input, { target: { value: "  Фінальна битва " } });
     fireEvent.keyDown(input, { key: "Enter" });
 
     await waitFor(() => expect(updateTrack).toHaveBeenCalledWith("c1", "t2", { title: "Фінальна битва" }));
     expect(updateTrack).toHaveBeenCalledTimes(1);
-    expect(queryByRole("textbox", { name: "Нова назва треку" })).toBeNull();
+    expect(queryByRole("textbox", { name: "music.list.titleNewName" })).toBeNull();
     expect(sendBattleAudio).not.toHaveBeenCalled();
   });
 
   it("перейменування: Esc скасовує, порожня назва не зберігається, blur зберігає", async () => {
     const { findByRole, getByRole } = dock({ isDM: true, audio: fileState });
 
-    fireEvent.click(await findByRole("button", { name: "Перейменувати: Епік" }));
-    fireEvent.change(getByRole("textbox", { name: "Нова назва треку" }), { target: { value: "Інша" } });
-    fireEvent.keyDown(getByRole("textbox", { name: "Нова назва треку" }), { key: "Escape" });
+    fireEvent.click(await findByRole("button", { name: 'music.playlist.renameLabel {"title":"Епік"}' }));
+    fireEvent.change(getByRole("textbox", { name: "music.list.titleNewName" }), { target: { value: "Інша" } });
+    fireEvent.keyDown(getByRole("textbox", { name: "music.list.titleNewName" }), { key: "Escape" });
 
-    fireEvent.click(getByRole("button", { name: "Перейменувати: Епік" }));
-    fireEvent.change(getByRole("textbox", { name: "Нова назва треку" }), { target: { value: "   " } });
-    fireEvent.keyDown(getByRole("textbox", { name: "Нова назва треку" }), { key: "Enter" });
+    fireEvent.click(getByRole("button", { name: 'music.playlist.renameLabel {"title":"Епік"}' }));
+    fireEvent.change(getByRole("textbox", { name: "music.list.titleNewName" }), { target: { value: "   " } });
+    fireEvent.keyDown(getByRole("textbox", { name: "music.list.titleNewName" }), { key: "Enter" });
     expect(updateTrack).not.toHaveBeenCalled();
 
-    fireEvent.click(getByRole("button", { name: "Перейменувати: Епік" }));
-    fireEvent.change(getByRole("textbox", { name: "Нова назва треку" }), { target: { value: "Буря" } });
-    fireEvent.blur(getByRole("textbox", { name: "Нова назва треку" }));
+    fireEvent.click(getByRole("button", { name: 'music.playlist.renameLabel {"title":"Епік"}' }));
+    fireEvent.change(getByRole("textbox", { name: "music.list.titleNewName" }), { target: { value: "Буря" } });
+    fireEvent.blur(getByRole("textbox", { name: "music.list.titleNewName" }));
 
     await waitFor(() => expect(updateTrack).toHaveBeenCalledWith("c1", "t2", { title: "Буря" }));
     expect(updateTrack).toHaveBeenCalledTimes(1);
@@ -353,9 +353,9 @@ describe("AudioDock — плейлист лише для ДМ", () => {
   it("гравець не бачить плейлиста й олівців", () => {
     const { queryByRole } = dock({ audio: fileState });
 
-    expect(queryByRole("button", { name: "Плейлист" })).toBeNull();
-    expect(queryByRole("list", { name: "Плейлист" })).toBeNull();
-    expect(queryByRole("button", { name: /Перейменувати/ })).toBeNull();
+    expect(queryByRole("button", { name: "music.playlist.title" })).toBeNull();
+    expect(queryByRole("list", { name: "music.playlist.title" })).toBeNull();
+    expect(queryByRole("button", { name: /music.playlist.renameLabel/ })).toBeNull();
     expect(getTracks).not.toHaveBeenCalled();
   });
 });
@@ -364,30 +364,30 @@ describe("AudioDock — перемикач «Відео»", () => {
   it("лише для YouTube-треку", () => {
     const { queryByRole } = dock({ audio: fileState });
 
-    expect(queryByRole("button", { name: "Відео" })).toBeNull();
+    expect(queryByRole("button", { name: "music.player.video" })).toBeNull();
   });
 
   it("ховає лише відео: iframe той самий, панель і звук лишаються; запамʼятовується", () => {
     const { container, getByRole } = dock({ audio: ytState });
 
-    fireEvent.click(getByRole("button", { name: "Увімкнути звук" }));
+    fireEvent.click(getByRole("button", { name: "music.player.unlock" }));
 
     const player = container.querySelector<HTMLElement>("[data-youtube-player]");
 
-    const toggle = getByRole("button", { name: "Відео", pressed: true });
+    const toggle = getByRole("button", { name: "music.player.video", pressed: true });
 
     fireEvent.click(toggle);
 
     expect(container.querySelector("[data-youtube-player]")).toBe(player);
     expect(container.querySelector("[data-youtube-video]")?.className).toContain("sr-only");
-    expect(getByRole("region", { name: "Музика" })).toBeTruthy();
-    expect(getByRole("slider", { name: "Гучність" })).toBeTruthy();
-    expect(getByRole("button", { name: "Відео", pressed: false })).toBeTruthy();
+    expect(getByRole("region", { name: "music.player.label" })).toBeTruthy();
+    expect(getByRole("slider", { name: "music.player.volume" })).toBeTruthy();
+    expect(getByRole("button", { name: "music.player.video", pressed: false })).toBeTruthy();
     expect(localStorage.getItem("battle-music-video")).toBe("off");
     expect(sendBattleAudio).not.toHaveBeenCalled();
     expect(HTMLMediaElement.prototype.pause).not.toHaveBeenCalled();
 
-    fireEvent.click(getByRole("button", { name: "Відео", pressed: false }));
+    fireEvent.click(getByRole("button", { name: "music.player.video", pressed: false }));
     expect(container.querySelector("[data-youtube-video]")?.className).not.toContain("sr-only");
     expect(player?.style.width).toBe("200px");
   });
@@ -398,7 +398,7 @@ describe("AudioDock — перемикач «Відео»", () => {
 
     const { container, getByRole, rerender } = dock({ audio: ytState, placement: "strip" });
 
-    fireEvent.click(getByRole("button", { name: "Увімкнути звук" }));
+    fireEvent.click(getByRole("button", { name: "music.player.unlock" }));
     expect(container.querySelector("[data-audio-panel]")?.getAttribute("data-audio-panel")).toBe("collapsed");
 
     yt.needsTap = true;
@@ -427,9 +427,9 @@ describe("AudioDock — розташування", () => {
 
     const { getByRole, container } = dock({ isDM: true, audio: ytState, placement: "strip" });
 
-    fireEvent.click(getByRole("button", { name: "Розгорнути плеєр: Епік" }));
+    fireEvent.click(getByRole("button", { name: 'music.player.expand {"title":"Епік"}' }));
 
-    const panel = getByRole("region", { name: "Музика" });
+    const panel = getByRole("region", { name: "music.player.label" });
 
     expect(panel.className).toContain("max-h-[50dvh]");
     expect(panel.className).toContain("overflow-y-auto");
@@ -438,14 +438,14 @@ describe("AudioDock — розташування", () => {
     const header = panel.querySelector("[data-audio-header]") as HTMLElement;
 
     expect(header.className).toContain("sticky");
-    expect(header.contains(getByRole("button", { name: "Згорнути плеєр" }))).toBe(true);
-    expect(header.contains(getByRole("button", { name: "Відео" }))).toBe(true);
+    expect(header.contains(getByRole("button", { name: "music.player.collapse" }))).toBe(true);
+    expect(header.contains(getByRole("button", { name: "music.player.video" }))).toBe(true);
   });
 
   it("кут (desktop): висота панелі не обмежена, заголовок звичайний", () => {
     const { getByRole } = dock({ audio: fileState });
 
-    const panel = getByRole("region", { name: "Музика" });
+    const panel = getByRole("region", { name: "music.player.label" });
 
     expect(panel.className).not.toContain("max-h-[50dvh]");
     expect(panel.querySelector("[data-audio-header]")?.className).not.toContain("sticky");
@@ -456,8 +456,8 @@ describe("AudioDock — розташування", () => {
 
     const { container, getByRole, rerender } = render(<Screen placement="strip" />, { wrapper: fakeScene({ audio: ytState }).wrapper });
 
-    fireEvent.click(getByRole("button", { name: "Увімкнути звук" }));
-    fireEvent.click(getByRole("button", { name: "Розгорнути плеєр: Епік" }));
+    fireEvent.click(getByRole("button", { name: "music.player.unlock" }));
+    fireEvent.click(getByRole("button", { name: 'music.player.expand {"title":"Епік"}' }));
     expect(container.querySelector("[data-audio-panel]")?.getAttribute("data-audio-panel")).toBe("open");
 
     const audio = container.querySelector("audio");
@@ -470,7 +470,7 @@ describe("AudioDock — розташування", () => {
     expect(container.querySelector("audio")).toBe(audio);
     expect(container.querySelector("[data-youtube-player]")).toBe(player);
 
-    fireEvent.click(getByRole("button", { name: "Розгорнути плеєр: Епік" }));
+    fireEvent.click(getByRole("button", { name: 'music.player.expand {"title":"Епік"}' }));
     rerender(<Screen placement="strip" collapseOn="h1-1-n" />);
     expect(container.querySelector("[data-audio-panel]")?.getAttribute("data-audio-panel")).toBe("open");
 
@@ -486,8 +486,8 @@ describe("AudioDock — розташування", () => {
 
     const { container, getByRole, rerender } = render(<Screen placement="strip" />, { wrapper: fakeScene({ audio: ytState }).wrapper });
 
-    fireEvent.click(getByRole("button", { name: "Увімкнути звук" }));
-    fireEvent.click(getByRole("button", { name: "Розгорнути плеєр: Епік" }));
+    fireEvent.click(getByRole("button", { name: "music.player.unlock" }));
+    fireEvent.click(getByRole("button", { name: 'music.player.expand {"title":"Епік"}' }));
 
     const audio = container.querySelector("audio");
 
@@ -499,7 +499,7 @@ describe("AudioDock — розташування", () => {
     expect(container.querySelector("audio")).toBe(audio);
     expect(container.querySelector("[data-youtube-player]")).toBe(player);
 
-    fireEvent.click(getByRole("button", { name: "Розгорнути плеєр: Епік" }));
+    fireEvent.click(getByRole("button", { name: 'music.player.expand {"title":"Епік"}' }));
     rerender(<Screen placement="strip" collapseTick={1} />);
     expect(container.querySelector("[data-audio-panel]")?.getAttribute("data-audio-panel")).toBe("open");
   });
@@ -526,14 +526,14 @@ describe("BattleAudioDock — збій YouTube-плеєра", () => {
 
     const { container, getByRole, getByText } = dock({ audio: ytState });
 
-    fireEvent.click(getByRole("button", { name: "Увімкнути звук" }));
+    fireEvent.click(getByRole("button", { name: "music.player.unlock" }));
 
-    expect(getByRole("alert").textContent).toContain("Плеєр збоїв");
+    expect(getByRole("alert").textContent).toContain("music.player.failedTitle");
     expect(getByText(youtubeTrack.title)).toBeTruthy();
     expect(container.querySelector("[data-youtube-player]")).toBeNull();
 
     yt.crash = false;
-    fireEvent.click(getByRole("button", { name: "Перезапустити плеєр" }));
+    fireEvent.click(getByRole("button", { name: "music.player.restartLabel" }));
 
     expect(container.querySelector("[data-youtube-player]")).not.toBeNull();
   });

@@ -1,6 +1,7 @@
 "use client";
 
 import { useRef } from "react";
+import { useTranslations } from "next-intl";
 
 import { Input } from "@/components/ui/input";
 import { TRACK_TITLE_MAX } from "@/lib/constants/music";
@@ -13,6 +14,8 @@ import type { CampaignTrack } from "@/types/audio";
  * з onClose — режим «олівець → поле»: Esc скасовує, і поле закривається після будь-якого завершення.
  */
 export function TrackTitleInput({ track, onRename, onClose, className }: { track: Pick<CampaignTrack, "title">; onRename(title: string): void; onClose?(): void; className?: string }) {
+  const t = useTranslations("music");
+
   // Esc знімає поле з фокусу, і blur не мусить зберегти скасовану назву
   const settled = useRef(false);
 
@@ -33,7 +36,7 @@ export function TrackTitleInput({ track, onRename, onClose, className }: { track
 
   return (
     <Input
-      aria-label={onClose ? "Нова назва треку" : "Назва треку"}
+      aria-label={onClose ? t("list.titleNewName") : t("list.titleName")}
       autoFocus={!!onClose}
       defaultValue={track.title}
       maxLength={TRACK_TITLE_MAX}

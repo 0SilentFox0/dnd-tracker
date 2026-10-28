@@ -54,10 +54,10 @@ describe("useMusicLibrary", () => {
     const { result } = renderHook(() => useMusicLibrary("c1", tracks), { wrapper: wrapper(false) });
 
     await act(() => result.current.remove(tracks[0]));
-    expect(confirm).toHaveBeenLastCalledWith(expect.objectContaining({ description: expect.stringContaining("зупиниться для всіх") }));
+    expect(confirm).toHaveBeenLastCalledWith(expect.objectContaining({ description: "music.library.deleteNote.file" }));
 
     await act(() => result.current.remove({ ...tracks[1], kind: "youtube", youtubeId: "dQw4w9WgXcQ" }));
-    expect(confirm).toHaveBeenLastCalledWith(expect.objectContaining({ description: "Трек зникне з бібліотеки." }));
+    expect(confirm).toHaveBeenLastCalledWith(expect.objectContaining({ description: "music.library.deleteNote.youtube" }));
   });
 
   it("move шле повний новий порядок", async () => {

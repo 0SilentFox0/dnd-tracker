@@ -1,1 +1,108 @@
-{}
+{
+  "groups": {
+    "other": "Інше",
+    "battle": "Битва"
+  },
+  "page": {
+    "title": "Музика",
+    "subtitle": "{count} з {max} {max, plural, one {треку} few {треків} many {треків} other {треків}} · {formats} до {mb} МБ",
+    "loading": "Завантаження треків…",
+    "emptyTitle": "Ще немає треків",
+    "emptyDescription": "Завантажте {formats} або додайте посилання YouTube — ДМ вмикає їх у бою."
+  },
+  "upload": {
+    "fileLabel": "Файл треку",
+    "button": "Завантажити трек",
+    "pending": "Завантаження…"
+  },
+  "youtube": {
+    "title": "Додати з YouTube",
+    "description": "Посилання youtu.be, watch?v= або shorts. Назву можна не вводити — візьмемо з YouTube.",
+    "urlLabel": "Посилання YouTube",
+    "urlInvalid": "Не вдалося розпізнати посилання YouTube",
+    "titleLabel": "Назва (необовʼязково)",
+    "titlePlaceholder": "Назва"
+  },
+  "edit": {
+    "title": "Редагувати трек",
+    "group": "Група",
+    "groupHint": "Оберіть наявну або введіть нову. Порожня — «{other}». Усі «Раса - Битва N» показуються в групі «{battle}».",
+    "name": "Назва",
+    "link": "Посилання",
+    "duration": "Тривалість, с"
+  },
+  "search": {
+    "label": "Пошук треку",
+    "placeholder": "Пошук…"
+  },
+  "list": {
+    "expandAll": "Розгорнути всі",
+    "collapseAll": "Згорнути всі",
+    "nothingFound": "Нічого не знайдено",
+    "play": "Слухати",
+    "pause": "Пауза",
+    "playFailed": "Не вдалося відтворити",
+    "progress": "Прогрес",
+    "earlier": "Раніше",
+    "later": "Пізніше",
+    "fileKind": "Файл",
+    "titleName": "Назва треку",
+    "titleNewName": "Нова назва треку"
+  },
+  "library": {
+    "deleteTitle": "Видалити «{title}»?",
+    "deleteNote": {
+      "file": "Трек зникне з бібліотеки, а файл — зі сховища. Якщо він зараз грає в бою, музика зупиниться для всіх.",
+      "youtube": "Трек зникне з бібліотеки."
+    },
+    "defaultTitle": "Трек",
+    "saveFailed": "Не вдалося зберегти",
+    "uploadFailed": "Не вдалося завантажити файл"
+  },
+  "player": {
+    "label": "Музика",
+    "silence": "Тиша",
+    "paused": "пауза",
+    "video": "Відео",
+    "collapse": "Згорнути плеєр",
+    "expand": "Розгорнути плеєр: {title}",
+    "muteOn": "Увімкнути звук у мене",
+    "muteOff": "Вимкнути звук у мене",
+    "volume": "Гучність",
+    "trackUnavailable": "Трек недоступний",
+    "unlock": "Увімкнути звук",
+    "tapPlayer": "Торкніться ▶ у плеєрі",
+    "videoUnavailable": "Відео недоступне для вбудовування",
+    "failedTitle": "Плеєр збоїв",
+    "restart": "Перезапустити",
+    "restartLabel": "Перезапустити плеєр",
+    "controlFailed": "Не вдалося керувати музикою",
+    "renameFailed": "Не вдалося перейменувати трек"
+  },
+  "dm": {
+    "prev": "Попередній трек",
+    "pause": "Пауза",
+    "play": "Грати",
+    "next": "Наступний трек",
+    "stop": "Стоп",
+    "emptyLibrary": "Бібліотека порожня — <link>додайте треки</link>."
+  },
+  "playlist": {
+    "title": "Плейлист",
+    "renameLabel": "Перейменувати: {title}",
+    "rename": "Перейменувати",
+    "allGroups": "Усі групи",
+    "group": "Група",
+    "kind": "Тип треку",
+    "allKinds": "Усі типи",
+    "kinds": {
+      "youtube": "YouTube",
+      "file": "Файли"
+    },
+    "resetFilters": "Скинути фільтри",
+    "found": "Знайдено {shown} з {total}"
+  },
+  "validation": {
+    "nothingToChange": "Немає що змінювати"
+  }
+}
