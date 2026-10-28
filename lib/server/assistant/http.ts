@@ -6,6 +6,7 @@ import { getIntent, listIntents } from "./intent-store";
 import { readDeletionReceipt, readReceipt } from "./receipts";
 
 import "server-only";
+import { AI_BODY_LIMITS } from "@/lib/constants/ai";
 import { API_ERRORS } from "@/lib/constants/api-errors";
 import { prisma } from "@/lib/db";
 import { assistantPolicySchema } from "@/lib/schemas/assistant";
@@ -78,7 +79,7 @@ export function assistantRoute(mode: RouteMode) {
       }
 
       if (mode === "policy") {
-        const body = await parseBody(assistantPolicySchema, req);
+        const body = await parseBody(assistantPolicySchema, req, undefined, { maxBytes: AI_BODY_LIMITS.small });
 
         if (body instanceof NextResponse) return privateResponse(body);
 

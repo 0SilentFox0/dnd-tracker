@@ -7,12 +7,16 @@ import { performance } from "node:perf_hooks";
 import { BENCHMARK_SCENARIOS, benchmarkFixtures, FIXTURE_CLOCK, FIXTURE_SIZES } from "./assistant-check/benchmark-fixtures";
 import { type BenchmarkSample, summarizeSamples } from "./assistant-check/benchmark-report";
 import { measureTraversal } from "./assistant-check/benchmark-traversal";
+import { findRunManifests, initManifest, MANIFEST_FILE, retireManifest, trackFixture } from "./assistant-check/manifest";
+import { recoverRun } from "./assistant-check/recover";
 
 import { constructorDatabaseTarget } from "@/lib/server/assistant/test-support";
 import { runContentWriteContext } from "@/lib/server/content/write-context";
 
 async function main() {
-  if (process.argv.length !== 5 || process.argv[2] !== "--run" || process.argv[3] !== "--output-dir") throw new Error("ASSISTANT_BENCHMARK_INVALID_OPTIONS");
+  const recover = process.argv[2] === "--recover";
+
+  if (process.argv.length !== 5 || (process.argv[2] !== "--run" && !recover) || process.argv[3] !== "--output-dir") throw new Error("ASSISTANT_BENCHMARK_INVALID_OPTIONS");
 
   const outputRoot = path.resolve(process.argv[4]);
 
@@ -34,9 +38,35 @@ async function main() {
 
   if (!/^s3-bench-[a-z0-9-]{8,32}$/.test(marker)) throw new Error("ASSISTANT_BENCHMARK_INVALID_MARKER");
 
+  const existing = findRunManifests(outputRoot, marker);
+
+  if (recover) {
+    if (existing.length !== 1) throw new Error("ASSISTANT_BENCHMARK_RECOVER_MANIFEST_NOT_UNIQUE");
+
+    const url = new URL(process.env.DATABASE_URL ?? "");
+
+    const recoveryDb = new PrismaClient({ datasources: { db: { url: url.toString() } }, log: [] });
+
+    try {
+      const result = await recoverRun(existing[0], { db: recoveryDb });
+
+      process.stdout.write(`${JSON.stringify(result)}\n`);
+
+      if (!result.ok) process.exitCode = 1;
+    } finally { await recoveryDb.$disconnect(); }
+
+    return;
+  }
+
+  if (existing.length) throw new Error("ASSISTANT_BENCHMARK_REQUIRES_RECOVER");
+
   mkdirSync(outputRoot, { recursive: true });
 
   const dir = mkdtempSync(path.join(outputRoot, `${marker}-`));
+
+  const manifestFile = path.join(dir, MANIFEST_FILE);
+
+  initManifest(manifestFile, marker);
 
   const base = new PrismaClient({ datasources: { db: { url: process.env.DATABASE_URL } }, log: [{ level: "query", emit: "event" }] });
 
@@ -89,7 +119,7 @@ async function main() {
 
     for (const size of ["small", "large"] as const) {
       // Extension preserves Prisma's model API; the narrowed cast is harness-only.
-      const fixture = benchmarkFixtures(db as unknown as PrismaClient, marker, size);
+      const fixture = benchmarkFixtures(db as unknown as PrismaClient, marker, size, (kind, id) => trackFixture(manifestFile, kind, id));
 
       try {
         const inputs = await fixture.seed();
@@ -160,6 +190,7 @@ async function main() {
     };
 
     writeFileSync(path.join(dir, "samples.json"), JSON.stringify(report, null, 2));
+    retireManifest(manifestFile, "completed");
     process.stdout.write(`${JSON.stringify({ output: dir, summaries, cleanupResults })}\n`);
   } finally {
     await base.$disconnect();

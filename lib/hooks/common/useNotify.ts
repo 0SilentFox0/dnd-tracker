@@ -3,7 +3,9 @@ import { type ReactNode, useCallback, useContext } from "react";
 import { ConfirmContext, type ConfirmOptions } from "./confirm-context";
 import { useConfirm } from "./useConfirm";
 
-const notice = (message: ReactNode): ConfirmOptions => ({ title: message, confirmLabel: "Зрозуміло", cancelLabel: null });
+import { NOTICE_TITLE } from "@/lib/constants/ui";
+
+const notice = (message: ReactNode): ConfirmOptions => ({ title: NOTICE_TITLE, description: message, confirmLabel: "Зрозуміло", cancelLabel: null });
 
 /** Replacement for window.alert: a one-button dialog (sheet on phones). */
 export function useNotify(): (message: ReactNode) => Promise<void> {

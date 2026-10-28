@@ -1,5 +1,7 @@
 import type { PrismaClient } from "@prisma/client";
 
+import type { OnCreated } from "./manifest";
+
 import { assertConstructorDatabaseUrls } from "@/lib/server/assistant/test-support";
 import type { AssistantCaller } from "@/lib/server/assistant/types";
 import { classify } from "@/lib/server/templates/sync/classify";
@@ -10,7 +12,7 @@ export const FIXTURE_CLOCK = new Date("2026-10-26T12:00:00.000Z");
 export const BENCHMARK_SCENARIOS = ["rules.update", "content.spells.update", "content.spells.delete", "source.apply"] as const;
 
 /** Only exact owned IDs are ever deleted; partial seed failures share this cleanup. */
-export function benchmarkFixtures(db: PrismaClient, marker: string, size: keyof typeof FIXTURE_SIZES) {
+export function benchmarkFixtures(db: PrismaClient, marker: string, size: keyof typeof FIXTURE_SIZES, onCreated?: OnCreated) {
   const guard = () => assertConstructorDatabaseUrls({ DATABASE_URL: process.env.DATABASE_URL, DIRECT_URL: process.env.DIRECT_URL });
 
   guard();
@@ -61,6 +63,9 @@ export function benchmarkFixtures(db: PrismaClient, marker: string, size: keyof 
 
   async function seed() {
     guard();
+    onCreated?.("user", userId);
+    onCreated?.("campaign", sourceId);
+    onCreated?.("campaign", campaignId);
     await db.user.create({ data: { id: userId, displayName: prefix, email: `${prefix}@example.invalid` } });
     ownsUser = true;
 

@@ -118,7 +118,7 @@ describe("useMazeTools", () => {
     act(() => tools().actions.clickCell({ x: 3, y: 3 }));
 
     expect(mutate).not.toHaveBeenCalled();
-    expect(scene.confirm).toHaveBeenCalledWith(expect.objectContaining({ title: MAZE_TEXTS.exitOnEdge }));
+    expect(scene.confirm).toHaveBeenCalledWith(expect.objectContaining({ description: MAZE_TEXTS.exitOnEdge }));
 
     act(() => tools().actions.clickCell({ x: 0, y: 3 }));
 

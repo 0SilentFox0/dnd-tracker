@@ -1,6 +1,6 @@
 import { spawn } from 'node:child_process';
 import { once } from 'node:events';
-import { readFileSync, writeFileSync } from 'node:fs';
+import { readFileSync, renameSync, writeFileSync } from 'node:fs';
 import { createServer } from 'node:http';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -11,6 +11,16 @@ import * as esbuild from 'esbuild';
 const sourceDir = path.dirname(fileURLToPath(import.meta.url));
 const output = process.argv[2];
 if (!output || !path.isAbsolute(output)) throw Error('Expected an absolute fresh output directory');
+
+const manifestPath = process.argv.find((arg, index) => index > 2 && !arg.startsWith('--') && path.isAbsolute(arg));
+// Crash recovery reads these pids; the parent is the only other writer and is idle while the server builds.
+const recordPids = pids => {
+  if (!manifestPath) return;
+  const manifest = JSON.parse(readFileSync(manifestPath, 'utf8'));
+  manifest.pids = { ...manifest.pids, ...pids };
+  writeFileSync(`${manifestPath}.${process.pid}.tmp`, JSON.stringify(manifest, null, 2));
+  renameSync(`${manifestPath}.${process.pid}.tmp`, manifestPath);
+};
 
 let chrome;
 let server;
@@ -77,6 +87,7 @@ try {
   ], { stdio: 'ignore' });
   chrome.on('error', () => { void stop(1); });
   chrome.on('exit', () => { if (!stopping) void stop(1); });
+  recordPids({ server: process.pid, chrome: chrome.pid });
   const metadata = { pid: process.pid, chrome: chrome.pid, origin };
   writeFileSync(path.join(output, 'process.json'), JSON.stringify(metadata));
   for (let attempt = 0; attempt < 150; attempt += 1) {

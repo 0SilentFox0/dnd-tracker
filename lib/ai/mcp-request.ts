@@ -1,4 +1,5 @@
 import "server-only";
+import { readLimitedBodyBytes } from "@/lib/utils/api/read-limited-body";
 
 // Match the SDK's 4 MiB transport limit. mcp-handler preparses req.clone().json()
 // and supplies parsedBody, which otherwise skips the SDK's bounded body reader.
@@ -12,38 +13,12 @@ const tooLarge = () => Response.json({
 export async function boundMcpRequest(req: Request): Promise<Request | Response> {
   if (req.method !== "POST") return req;
 
-  if (Number(req.headers.get("content-length")) > MAX_MCP_BODY_BYTES) {
-    void req.body?.cancel().catch(() => {});
+  const body = await readLimitedBodyBytes(req, MAX_MCP_BODY_BYTES);
 
-    return tooLarge();
-  }
+  if (!body.ok) return tooLarge();
 
-  const reader = req.body?.getReader();
-
-  if (!reader) return req;
-
-  const chunks: Uint8Array[] = [];
-
-  let bytes = 0;
-
-  try {
-    for (;;) {
-      const { value, done } = await reader.read();
-
-      if (done) break;
-
-      bytes += value.byteLength;
-
-      if (bytes > MAX_MCP_BODY_BYTES) {
-        void reader.cancel().catch(() => {});
-
-        return tooLarge();
-      }
-
-      chunks.push(value);
-    }
-  } finally { reader.releaseLock(); }
+  if (!req.body) return req;
 
   // Preserve headers, signal and raw JSON semantics for the existing MCP handler.
-  return new Request(req, { body: Buffer.concat(chunks, bytes) });
+  return new Request(req, { body: Buffer.from(body.bytes) });
 }

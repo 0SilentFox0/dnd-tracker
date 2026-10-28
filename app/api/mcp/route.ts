@@ -3,11 +3,12 @@ import { createMcpHandler } from "mcp-handler";
 
 import { boundMcpRequest } from "@/lib/ai/mcp-request";
 import { registerMcpTools, toolsFor } from "@/lib/ai/tools";
-import { AI_LIMITS } from "@/lib/constants/ai";
+import { AI_LIMITS, AI_RATE_LIMITS } from "@/lib/constants/ai";
 import { API_ERRORS } from "@/lib/constants/api-errors";
 import { verifyBearer } from "@/lib/utils/api/actor";
 import { errorResponse } from "@/lib/utils/api/api-response";
 import { bearerToken } from "@/lib/utils/api/bearer";
+import { checkRateLimit, rateLimitResponse } from "@/lib/utils/api/rate-limit";
 
 export const maxDuration = 300;
 
@@ -20,6 +21,12 @@ async function handler(req: Request): Promise<Response> {
   const tools = toolsFor(auth.scopes);
 
   if (tools.length === 0) return errorResponse(API_ERRORS.API_TOKEN_SCOPE_MISSING, 403);
+
+  if (req.method === "POST") {
+    const rate = await checkRateLimit({ userId: auth.tokenId, scope: "mcp", ...AI_RATE_LIMITS.mcp, memoryFallback: true });
+
+    if (!rate.allowed) return rateLimitResponse(rate);
+  }
 
   const bounded = await boundMcpRequest(req);
 

@@ -1,13 +1,20 @@
 import type { PrismaClient } from "@prisma/client";
 import { randomUUID } from "node:crypto";
 
-export async function createSyntheticCampaign(db: PrismaClient, runId: string) {
+import type { OnCreated } from "@/scripts/constructor/assistant-check/manifest";
+
+export async function createSyntheticCampaign(db: PrismaClient, runId: string, onCreated?: OnCreated) {
   const marker = `assistant-${runId}-${randomUUID()}`;
+
+  const campaignId = randomUUID();
+
+  onCreated?.("user", marker);
+  onCreated?.("campaign", campaignId);
 
   const user = await db.user.create({ data: { id: marker, email: `${marker}@example.invalid`, displayName: marker } });
 
   try {
-    const campaign = await db.campaign.create({ data: { name: marker, dmUserId: marker, inviteCode: randomUUID(), members: { create: { userId: marker, role: "dm" } } } });
+    const campaign = await db.campaign.create({ data: { id: campaignId, name: marker, dmUserId: marker, inviteCode: randomUUID(), members: { create: { userId: marker, role: "dm" } } } });
 
     const thread = await db.aiThread.create({ data: { campaignId: campaign.id, userId: marker, title: marker, provider: "anthropic", model: "synthetic", mode: "scenario" } });
 

@@ -156,9 +156,6 @@ function finalizeCharacter(participant: BattleParticipant, character: CharacterF
   return applyCharacterResources(ready, storedCharacterState(character, rules), rules);
 }
 
-/**
- * Створює BattleParticipant з Character. Завантажує скіли, артефакти, заклинання.
- */
 export async function createBattleParticipantFromCharacter(
   character: CharacterFromPrisma,
   battleId: string,

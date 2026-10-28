@@ -61,6 +61,23 @@ export function defaultModelFor(provider: AiProvider, mode: AiThreadMode): strin
 
 export const isKnownModel = (provider: AiProvider, id: string) => AI_MODELS[provider].some((m) => m.id === id);
 
+const KIB = 1024;
+
+export const AI_BODY_LIMITS = {
+  chat: 64 * KIB,
+  contextPreview: 16 * KIB,
+  settings: 64 * KIB,
+  credentials: 4 * KIB,
+  small: 4 * KIB,
+  slideImage: 16 * KIB,
+} as const;
+
+export const AI_RATE_LIMITS = {
+  chat: { limit: 20, windowSeconds: 60 },
+  credentials: { limit: 10, windowSeconds: 60 },
+  mcp: { limit: 120, windowSeconds: 60 },
+} as const;
+
 export const AI_LIMITS = {
   messageChars: 8000,
   historyMessages: 30,

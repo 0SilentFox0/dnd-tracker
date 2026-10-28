@@ -64,7 +64,7 @@ export function createContentOperationActions(deps: Deps = {}): AssistantActionD
 
     if (operation.method === "GET") {
       actions.push({ ...base, effect: "read", execute: async (caller, raw) => {
-        const input = schema.parse(raw) as Record<string, unknown>;
+        const input = raw as Record<string, unknown>;
 
         const data = await invoke(operation.id, caller.actor, input);
 
@@ -75,7 +75,7 @@ export function createContentOperationActions(deps: Deps = {}): AssistantActionD
 
     actions.push({ ...base, effect: "write", confirmation: operation.need.sessionOnly || ["spell-groups.remove-all-spells", "skill-trees.save"].includes(operation.id) ? "always" : "standard",
       prepare: async (caller, raw) => guard(caller.actor.campaignId, async (): Promise<ActionPreview> => {
-        const input = schema.parse(raw) as Record<string, unknown>;
+        const input = raw as Record<string, unknown>;
 
         const body = (input as Record<string, unknown>).body;
 

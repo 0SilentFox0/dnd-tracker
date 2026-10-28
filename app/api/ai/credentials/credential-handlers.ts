@@ -4,12 +4,13 @@ import { deleteCredential, listCredentials, saveCredential, setDefaultModel } fr
 import { isAiConfigured } from "@/lib/ai/crypto";
 import { guarded } from "@/lib/ai/guarded";
 import { verifyProviderKey } from "@/lib/ai/providers";
-import { isKnownModel } from "@/lib/constants/ai";
+import { AI_BODY_LIMITS, AI_RATE_LIMITS, isKnownModel } from "@/lib/constants/ai";
 import { API_ERRORS } from "@/lib/constants/api-errors";
 import { aiProviderSchema, patchCredentialSchema, saveCredentialSchema } from "@/lib/schemas/ai";
 import { requireAuth } from "@/lib/utils/api/api-auth";
 import { errorResponse } from "@/lib/utils/api/api-response";
 import { parseBody } from "@/lib/utils/api/parse-body";
+import { checkRateLimit, rateLimitResponse } from "@/lib/utils/api/rate-limit";
 
 async function guardUser() {
   if (!isAiConfigured()) return errorResponse(API_ERRORS.AI_NOT_CONFIGURED, 503);
@@ -32,7 +33,11 @@ export const listCredentialsHandler = () =>
 
 export const saveCredentialHandler = (req: Request, providerParam: string) =>
   guarded("save ai credential", () => guard(providerParam), async (g) => {
-    const body = await parseBody(saveCredentialSchema, req);
+    const rate = await checkRateLimit({ userId: g.userId, scope: "ai-credentials", ...AI_RATE_LIMITS.credentials, memoryFallback: true });
+
+    if (!rate.allowed) return rateLimitResponse(rate);
+
+    const body = await parseBody(saveCredentialSchema, req, undefined, { maxBytes: AI_BODY_LIMITS.credentials });
 
     if (body instanceof NextResponse) return body;
 
@@ -49,7 +54,11 @@ export const saveCredentialHandler = (req: Request, providerParam: string) =>
 
 export const patchCredentialHandler = (req: Request, providerParam: string) =>
   guarded("patch ai credential", () => guard(providerParam), async (g) => {
-    const body = await parseBody(patchCredentialSchema, req);
+    const rate = await checkRateLimit({ userId: g.userId, scope: "ai-credentials", ...AI_RATE_LIMITS.credentials, memoryFallback: true });
+
+    if (!rate.allowed) return rateLimitResponse(rate);
+
+    const body = await parseBody(patchCredentialSchema, req, undefined, { maxBytes: AI_BODY_LIMITS.credentials });
 
     if (body instanceof NextResponse) return body;
 

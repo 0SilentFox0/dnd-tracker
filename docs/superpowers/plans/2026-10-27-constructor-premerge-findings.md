@@ -154,3 +154,7 @@ Scope: production files from `git diff main...HEAD` under lib/hooks, components,
 9. **DM navigation registry** — C13.
 10. **Dialog form hooks** — C15, C14 (level-up and grant-artifact form hooks, character class sync, AiPanel prop grouping and shared focus label).
 11. **Query and egress hygiene** — C11, C12, C25, C26, C27 (lean spell refs, source-sync memoisation, small memo and key fixes).
+
+## F04 disposition (T26)
+
+Removed only identical re-parses: `CONTENT_OPERATIONS[x].body.parse` and `z.enum(...).parse` in `operation-service.ts` (replaced by `bodyOf`/`kindOf` casts after `contentOperationSchema`), and `schema.parse(input)` in assistant `content.ts`/`content-operations.ts` prepare/execute (dispatchAction and execution-transaction already parse). Kept: `parseBody` in `operationRoute`, stored-payload re-parse in `execution-transaction.ts`, `validatedBody`, `source.diff` query default parse, import-preview parse, class-column guard. Measured `rules.update` x1000 via `parse-cost.bench.test.ts`: ~25-29 ms before, ~24-36 ms after (noise; gain < 5%), kept for less code.

@@ -186,14 +186,7 @@ function resetTurnFlags(updated: BattleParticipant, original: BattleParticipant,
   return { participant: setExtraActionPool(flagged, isActive(flagged) ? actionsPerTurnPool(flagged, allParticipants) : 0), skippedBy };
 }
 
-/**
- * Обробляє початок ходу учасника
- * @param participant - учасник бою
- * @param currentRound - поточний раунд
- * @param allParticipants - всі учасники бою (для контексту пасивок)
- * @param map - карта бою: небезпечна клітинка під учасником шкодить після DoT
- * @returns результат обробки
- */
+/** `map`: a hazard cell under the participant damages after DoT. */
 export function processStartOfTurn(
   participant: BattleParticipant,
   currentRound: number,

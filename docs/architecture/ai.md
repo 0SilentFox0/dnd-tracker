@@ -94,6 +94,21 @@ Guard-стан превʼю й виконання не читає повні р�
 
 Правило: запис у таблицю з `updatedAt` без Prisma-бампу заборонений (raw `UPDATE`, явний `updatedAt` у `data`); `updated-at-audit.test.ts` сканує `lib/`, `app/`, `scripts/` і нові міграції. Єдиний виняток: `bindDeckRecord` свідомо зберігає `updatedAt` (CAS редактора деки) і змінює лише `scenarioPageId`, тому він входить у stamp деки. Обмеження: два записи одного рядка в межах 1 мс дають однаковий `updatedAt`; записи контенту серіалізовані `withCampaignContentWrite`. Довгострокова альтернатива (`campaigns.contentRevision`) винесена в окремий epic.
 
+### Refactor S1 Хвіст 1: бюджети AI entrypoint (T25)
+
+Тіло читає `parseBody(schema, req, msg, { maxBytes })` через `readLimitedBody` (`lib/utils/api/read-limited-body.ts`): Content-Length понад ліміт або потік понад ліміт (без Content-Length) -> 413 `BODY_TOO_LARGE` до Zod, reader скасовується. Без `maxBytes` поведінка незмінна. Бюджети: `AI_BODY_LIMITS` у `lib/constants/ai.ts` (chat 64 KiB, context-preview 16 KiB, settings 64 KiB, credentials 4 KiB, threads/patch/policy 4 KiB, slide-image 16 KiB), MCP — 4 MiB у `boundMcpRequest` (та сама `readLimitedBodyBytes`).
+
+| Entrypoint | Тіло | Ліміт | Rate (`AI_RATE_LIMITS`, `memoryFallback`) |
+|---|---|---|---|
+| chat POST | parseBody | chat | 20/60 с, scope `assistant-chat`, на користувача+кампанію |
+| context-preview POST | parseBody | contextPreview | 20/60 с (було) |
+| settings PUT | parseBody | settings | - |
+| threads POST / PATCH | parseBody | small | - |
+| slide-image POST | parseBody | slideImage | AI_PLAYER_RATE_LIMIT/генерація (було) |
+| assistant policy PATCH | parseBody | small | 20/60 с (було) |
+| credentials PUT/PATCH | parseBody | credentials | 10/60 с, scope `ai-credentials` |
+| MCP POST | boundMcpRequest | 4 MiB | 120/60 с на token id, scope `mcp` |
+
 ### Refactor S1: перевірки й output boundary
 
 Відтворюваний local-only runner — `scripts/constructor/assistant-check.ts`; tracked browser sources, CLI options і prerequisites описано в [README harness](../../scripts/constructor/assistant-check/README.md). `.superpowers` містить тільки ignored outputs, не runtime dependencies. Integration counts читаються з Vitest JSON report; skipped/empty suite не вважається успіхом. Browser залишається synthetic HTTP перевіркою компонентів, SQL authority перевіряється окремо на guarded local constructor з `connection_limit=1` для обох URL.

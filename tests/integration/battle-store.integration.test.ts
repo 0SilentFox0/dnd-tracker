@@ -314,8 +314,8 @@ describe.skipIf(!isLocal)("battle store (local DB)", () => {
     expect(first.events.every((e) => e.actionIndex < 3 && !e.isCancelled)).toBe(true);
     expect(first.hasMore).toBe(false);
 
-    expect(await loadBattleAccess(prisma, { battleId: ids.battle, campaignId: ids.campaign, userId: ids.user })).toEqual({ version: before.scene.version, isMember: true });
-    expect(await loadBattleAccess(prisma, { battleId: ids.battle, campaignId: ids.campaign, userId: "stranger" })).toEqual({ version: before.scene.version, isMember: false });
+    expect(await loadBattleAccess(prisma, { battleId: ids.battle, campaignId: ids.campaign, userId: ids.user })).toEqual({ version: before.scene.version, isMember: true, isDM: false });
+    expect(await loadBattleAccess(prisma, { battleId: ids.battle, campaignId: ids.campaign, userId: "stranger" })).toEqual({ version: before.scene.version, isMember: false, isDM: false });
     expect(await loadBattleAccess(prisma, { battleId: ids.battle, campaignId: "other", userId: ids.user })).toBeNull();
   });
 

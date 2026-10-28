@@ -35,7 +35,7 @@ describe("useLibraryList", () => {
 
     await act(() => hook.result.current.remove("a"));
     await vi.waitFor(() => expect(confirm).toHaveBeenCalledTimes(2));
-    expect(confirm).toHaveBeenLastCalledWith(expect.objectContaining({ title: "del-fail" }));
+    expect(confirm).toHaveBeenLastCalledWith(expect.objectContaining({ description: "del-fail" }));
   });
 
   it("closes the create dialog on success", () => {

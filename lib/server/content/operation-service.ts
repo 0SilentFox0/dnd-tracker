@@ -42,6 +42,13 @@ export function contentOperationSchema(operationId: ContentOperationId) {
 }
 export type OperationInput = z.infer<ReturnType<typeof contentOperationSchema>>;
 
+type BodyOf<K extends ContentOperationId> = (typeof CONTENT_OPERATIONS)[K] extends { body: infer B extends z.ZodType } ? z.output<B> : never;
+
+// contentOperationSchema already validated the body; this only narrows the type.
+const bodyOf = <K extends ContentOperationId>(_id: K, body: unknown) => body as BodyOf<K>;
+
+const kindOf = (value: unknown) => value as (typeof IMPORT_KINDS)[number];
+
 async function owned<T extends { campaignId: string }>(row: T | null, actor: Actor, message: string = API_ERRORS.NOT_FOUND): Promise<T> {
   if (!row || row.campaignId !== actor.campaignId) throw new ContentError(message, 404);
 
@@ -83,15 +90,15 @@ export async function runContentOperation(operationId: ContentOperationId, actor
   const work = async () => {
     switch (operationId) {
       case "rules.get": return readCampaignRules(actor);
-      case "rules.update": return updateCampaignRules(actor, CONTENT_OPERATIONS["rules.update"].body.parse(body));
+      case "rules.update": return updateCampaignRules(actor, bodyOf("rules.update", body));
       case "campaign.export": return exportCampaign(prisma, actor.campaignId);
       case "source.diff": return getSourceDiff(actor, CONTENT_OPERATIONS["source.diff"].query.parse(input.query ?? {}).scope);
-      case "source.apply": return applySource(actor, CONTENT_OPERATIONS["source.apply"].body.parse(body));
+      case "source.apply": return applySource(actor, bodyOf("source.apply", body));
       case "skill-trees.list": return listSkillTrees(actor);
-      case "skill-trees.save": return saveSkillTree(actor, { ...CONTENT_OPERATIONS["skill-trees.save"].body.parse(body), ...(input.treeId ? { treeId: String(input.treeId) } : {}) });
-      case "content.import": return importContent(actor, z.enum(IMPORT_KINDS).parse(input.kind), CONTENT_OPERATIONS["content.import"].body.parse(body));
-      case "content.import-example": return exampleCsv(actor, z.enum(IMPORT_KINDS).parse(input.kind));
-      case "content.export": return exportCsv(actor, z.enum(IMPORT_KINDS).parse(input.kind));
+      case "skill-trees.save": return saveSkillTree(actor, { ...bodyOf("skill-trees.save", body), ...(input.treeId ? { treeId: String(input.treeId) } : {}) });
+      case "content.import": return importContent(actor, kindOf(input.kind), bodyOf("content.import", body));
+      case "content.import-example": return exampleCsv(actor, kindOf(input.kind));
+      case "content.export": return exportCsv(actor, kindOf(input.kind));
       case "abilities.sources": {
         const where = { campaignId: actor.campaignId }, select = { id: true, name: true } as const;
 
@@ -102,7 +109,7 @@ export async function runContentOperation(operationId: ContentOperationId, actor
         return { sources: groups.flatMap((rows, i) => rows.map((row) => ({ kind: kinds[i], id: row.id, name: row.name })).sort((a, b) => a.name.localeCompare(b.name, "uk"))) };
       }
       case "abilities.get": {
-        const kind = z.enum(Object.values(OwnerKind)).parse(input.kind);
+        const kind = input.kind as OwnerKind;
 
         const row = await owner(kind, actor, param("ownerId"));
 
@@ -145,7 +152,7 @@ export async function runContentOperation(operationId: ContentOperationId, actor
  return { ok: true };
       }
       case "spells.delete-by-level": {
-        const { level } = CONTENT_OPERATIONS["spells.delete-by-level"].body.parse(body);
+        const { level } = bodyOf("spells.delete-by-level", body);
 
         const result = await prisma.spell.deleteMany({ where: { campaignId: actor.campaignId, level } });
 
@@ -154,7 +161,7 @@ export async function runContentOperation(operationId: ContentOperationId, actor
  return { ok: true, deleted: result.count };
       }
       case "units.import": {
-        const { units } = CONTENT_OPERATIONS["units.import"].body.parse(body);
+        const { units } = bodyOf("units.import", body);
 
         await assertCampaignRefs(actor.campaignId, { spell: units.flatMap((unit) => unit.knownSpells) });
 
@@ -165,7 +172,7 @@ export async function runContentOperation(operationId: ContentOperationId, actor
  return result;
       }
       case "tracks.reorder": {
-        const { ids } = CONTENT_OPERATIONS["tracks.reorder"].body.parse(body);
+        const { ids } = bodyOf("tracks.reorder", body);
 
         const known = new Set((await prisma.campaignTrack.findMany({ where: { campaignId: actor.campaignId }, select: { id: true } })).map((row) => row.id));
 

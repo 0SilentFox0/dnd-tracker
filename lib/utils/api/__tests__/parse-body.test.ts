@@ -40,4 +40,45 @@ describe("parseBody", () => {
 
     expect((await res.json()).error).toBe("Некоректні цілі");
   });
+
+  describe("maxBytes", () => {
+    const chunked = (chunks: string[], onCancel = () => {}) => {
+      const enc = new TextEncoder();
+
+      let i = 0;
+
+      return new Request("http://localhost/api", {
+        method: "POST",
+        body: new ReadableStream({
+          pull(c) {
+            if (i < chunks.length) c.enqueue(enc.encode(chunks[i++]));
+            else c.close();
+          },
+          cancel: onCancel,
+        }),
+        duplex: "half",
+      } as RequestInit);
+    };
+
+    it("Content-Length понад ліміт — 413 до Zod", async () => {
+      const res = (await parseBody(schema, post(JSON.stringify({ name: "x".repeat(200) })), undefined, { maxBytes: 100 })) as NextResponse;
+
+      expect(res.status).toBe(413);
+      expect(await res.json()).toEqual({ error: API_ERRORS.BODY_TOO_LARGE });
+    });
+
+    it("потік без Content-Length понад ліміт — 413, reader скасовано", async () => {
+      let cancelled = false;
+
+      const res = (await parseBody(schema, chunked(["{\"name\":\"", "x".repeat(60), "x".repeat(60), "\"}"], () => { cancelled = true; }), undefined, { maxBytes: 100 })) as NextResponse;
+
+      expect(res.status).toBe(413);
+      expect(cancelled).toBe(true);
+    });
+
+    it("тіло в межах ліміту доходить до Zod", async () => {
+      expect(await parseBody(schema, chunked(["{\"name\":", "\"Ельф\"}"]), undefined, { maxBytes: 100 })).toEqual({ name: "Ельф" });
+      expect(((await parseBody(schema, post("{not"), undefined, { maxBytes: 100 })) as NextResponse).status).toBe(400);
+    });
+  });
 });

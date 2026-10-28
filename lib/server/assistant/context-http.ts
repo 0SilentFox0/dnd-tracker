@@ -4,7 +4,7 @@ import { readCompendiumSummary } from "./actions/handoffs";
 
 import { buildInstructions } from "@/lib/ai/context/prompt";
 import { loadThread } from "@/lib/ai/threads";
-import { AI_LIMITS } from "@/lib/constants/ai";
+import { AI_BODY_LIMITS, AI_LIMITS } from "@/lib/constants/ai";
 import { API_ERRORS } from "@/lib/constants/api-errors";
 import { assistantContextPreviewSchema } from "@/lib/schemas/ai";
 import { ContentError } from "@/lib/server/content/errors";
@@ -48,7 +48,7 @@ return response; }
     return json(result.data);
    }
 
-   const body=await parseBody(assistantContextPreviewSchema,req);
+   const body=await parseBody(assistantContextPreviewSchema,req,undefined,{maxBytes:AI_BODY_LIMITS.contextPreview});
 
    if(body instanceof NextResponse)return body;
 

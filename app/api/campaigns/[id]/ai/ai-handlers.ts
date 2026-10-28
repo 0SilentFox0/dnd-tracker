@@ -11,7 +11,7 @@ import { applyProposal, listProposals, listProposalSummaries, rejectProposal } f
 import { recoveredState } from "@/lib/ai/recovered-state";
 import { getAiSettings, saveAiSettings } from "@/lib/ai/settings";
 import { createThread, deleteThread, listThreads, loadMessages, loadThread, patchThread, resolveDefaultModel } from "@/lib/ai/threads";
-import { AI_LIMITS, AI_PROPOSAL_STATUSES, isKnownImageModel, isKnownModel } from "@/lib/constants/ai";
+import { AI_BODY_LIMITS, AI_LIMITS, AI_PROPOSAL_STATUSES, AI_RATE_LIMITS, isKnownImageModel, isKnownModel } from "@/lib/constants/ai";
 import { API_ERRORS } from "@/lib/constants/api-errors";
 import { prisma } from "@/lib/db";
 import { aiSettingsSchema, assistantRequestIdSchema, chatRequestSchema, createThreadSchema, discardGeneratedImageSchema, generateSlideImageSchema, patchThreadSchema } from "@/lib/schemas/ai";
@@ -22,6 +22,7 @@ import { requireDM } from "@/lib/utils/api/api-auth";
 import { errorResponse } from "@/lib/utils/api/api-response";
 import { PRIVATE_NO_STORE_HEADERS } from "@/lib/utils/api/cache-headers";
 import { parseBody } from "@/lib/utils/api/parse-body";
+import { checkRateLimit, rateLimitResponse } from "@/lib/utils/api/rate-limit";
 
 export async function aiGuard(campaignId: string) {
   if (!isAiConfigured()) return errorResponse(API_ERRORS.AI_NOT_CONFIGURED, 503);
@@ -73,7 +74,7 @@ export const listThreadsHandler = (req: Request, campaignId: string) =>
 
 export const createThreadHandler = (req: Request, campaignId: string) =>
   guarded("create ai thread", () => aiGuard(campaignId), async (access) => {
-    const body = await parseBody(createThreadSchema, req);
+    const body = await parseBody(createThreadSchema, req, undefined, { maxBytes: AI_BODY_LIMITS.small });
 
     if (body instanceof NextResponse) return body;
 
@@ -88,7 +89,7 @@ export const createThreadHandler = (req: Request, campaignId: string) =>
 
 export const patchThreadHandler = (req: Request, campaignId: string, threadId: string) =>
   guarded("patch ai thread", () => aiGuard(campaignId), async (access) => {
-    const body = await parseBody(patchThreadSchema, req);
+    const body = await parseBody(patchThreadSchema, req, undefined, { maxBytes: AI_BODY_LIMITS.small });
 
     if (body instanceof NextResponse) return body;
 
@@ -123,7 +124,7 @@ export const getSettingsHandler = (campaignId: string) =>
 
 export const putSettingsHandler = (req: Request, campaignId: string) =>
   guarded("save ai settings", () => requireDM(campaignId), async () => {
-    const body = await parseBody(aiSettingsSchema, req);
+    const body = await parseBody(aiSettingsSchema, req, undefined, { maxBytes: AI_BODY_LIMITS.settings });
 
     if (body instanceof NextResponse) return body;
 
@@ -132,7 +133,11 @@ export const putSettingsHandler = (req: Request, campaignId: string) =>
 
 export const chatHandler = (req: Request, campaignId: string, threadId: string) =>
   guarded("ai chat", () => aiGuard(campaignId), async (access) => {
-    const body = await parseBody(chatRequestSchema, req);
+    const rate = await checkRateLimit({ userId: access.userId, scope: "assistant-chat", battleId: campaignId, ...AI_RATE_LIMITS.chat, memoryFallback: true });
+
+    if (!rate.allowed) return rateLimitResponse(rate);
+
+    const body = await parseBody(chatRequestSchema, req, undefined, { maxBytes: AI_BODY_LIMITS.chat });
 
     if (body instanceof NextResponse) return body;
 
@@ -141,7 +146,7 @@ export const chatHandler = (req: Request, campaignId: string, threadId: string) 
 
 export const generateSlideImageHandler = (req: Request, campaignId: string) =>
   guarded("generate slide image", () => aiGuard(campaignId), async (access) => {
-    const body = await parseBody(generateSlideImageSchema, req);
+    const body = await parseBody(generateSlideImageSchema, req, undefined, { maxBytes: AI_BODY_LIMITS.slideImage });
 
     if (body instanceof NextResponse) return body;
 

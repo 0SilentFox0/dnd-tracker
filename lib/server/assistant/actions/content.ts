@@ -95,7 +95,7 @@ export function createContentActions(deps: Deps = {}): AssistantActionDef[] {
       const action: AssistantWriteAction = {
         ...base, id: `content.${kind}.${verb}`, need: verb === "delete-all" ? NEED.writeAll : NEED.write, input: schema, effect: "write", confirmation: verb.startsWith("delete") ? "always" : "standard",
         prepare: async (caller, input) => guard(caller.actor.campaignId, async (): Promise<ActionPreview> => {
-          const value = schema.parse(input) as { id?: string; data?: unknown; patch?: unknown };
+          const value = input as { id?: string; data?: unknown; patch?: unknown };
 
           const before = value.id ? await found(caller, value.id) : null;
 
@@ -122,7 +122,7 @@ export function createContentActions(deps: Deps = {}): AssistantActionDef[] {
           return { summary: `${resource.label}: ${verb}`, targets, changes, warnings: verb.startsWith("delete") ? ["Буде застосовано чинні каскади та правила посилань. Зміна залежностей скасує пропозицію."] : [], effects: [{ kind: verb === "create" ? "create" : verb === "update" ? "update" : "delete", targets, description: `${resource.label}: ${verb}` }], preconditions: { snapshot: snapshotHash(state), before: snapshotHash(before), body: jsonContent(body) } };
         }),
         execute: async (ctx, input) => withContentEffects(ctx, resource.invalidates, async () => {
-          const value = schema.parse(input) as { id?: string; data?: unknown; patch?: unknown };
+          const value = input as { id?: string; data?: unknown; patch?: unknown };
 
           if (verb === "create") {
             const created = await createContent(resource, ctx.caller.actor, validatedBody(resource, value.data, false)) as Record<string, unknown>;

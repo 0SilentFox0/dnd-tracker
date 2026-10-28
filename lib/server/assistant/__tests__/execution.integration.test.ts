@@ -14,6 +14,7 @@ import { assertConstructorDatabaseUrls } from "@/lib/server/assistant/test-suppo
 import type { ActionExecutionContext, AssistantCaller, DurableEffect } from "@/lib/server/assistant/types";
 import { ContentError } from "@/lib/server/content/errors";
 import { afterContentCommit, currentContentWrite } from "@/lib/server/content/write-context";
+import { manifestTracker } from "@/scripts/constructor/assistant-check/manifest";
 
 vi.mock("@/lib/pusher/server", () => ({ pusherServer: { trigger: vi.fn(async () => {}) } }));
 vi.mock("@/lib/server/assistant/runtime-effects", () => ({ ASSISTANT_EFFECT_HANDLERS: {} }));
@@ -89,7 +90,7 @@ describe("T19 local constructor execution integration (connection_limit=1)", () 
   });
 
   beforeEach(async () => {
-    fixture = await createSyntheticCampaign(db, runId);
+    fixture = await createSyntheticCampaign(db, runId, manifestTracker());
     fixtures.push(fixture);
     routeAuth.userId = fixture.userId;
   });
