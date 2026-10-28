@@ -1,11 +1,16 @@
 import { randomUUID } from "node:crypto";
 import { afterAll, beforeAll, describe, expect, it, vi } from "vitest";
 
-vi.hoisted(() => {
-  const url = new URL(process.env.DATABASE_URL ?? "");
+const localDb = vi.hoisted(() => {
+  try {
+    const url = new URL(process.env.DATABASE_URL ?? "");
 
-  if (url.hostname !== "localhost" || url.port !== "54322") throw Error("Requires the local docker database");
+    return url.hostname === "localhost" && url.port === "54322";
+  } catch {
+    return false;
+  }
 });
+
 vi.mock("@/lib/cache/tags", async original => ({ ...await original<object>(), invalidateReference: vi.fn() }));
 
 import { canonicalKey } from "../identity";
@@ -21,17 +26,17 @@ let campaignId: string;
 
 const actor = () => ({ campaignId, userId, isDM: true, via: "session" as const, scopes: null });
 
-beforeAll(async () => {
-  await prisma.user.create({ data: { id: userId, email: `${userId}@reimport.example.test`, displayName: "Reimport DM" } });
-  campaignId = (await createCampaignFromBundle({ userId, name, bundle: null })).campaign.id;
-});
-afterAll(async () => {
-  await prisma.campaign.deleteMany({ where: { id: campaignId, dmUserId: userId } });
-  await prisma.user.deleteMany({ where: { id: userId } });
-  await prisma.$disconnect();
-});
+describe.skipIf(!localDb)("nested subclass of an SRD class", () => {
+  beforeAll(async () => {
+    await prisma.user.create({ data: { id: userId, email: `${userId}@reimport.example.test`, displayName: "Reimport DM" } });
+    campaignId = (await createCampaignFromBundle({ userId, name, bundle: null })).campaign.id;
+  });
+  afterAll(async () => {
+    await prisma.campaign.deleteMany({ where: { id: campaignId, dmUserId: userId } });
+    await prisma.user.deleteMany({ where: { id: userId } });
+    await prisma.$disconnect();
+  });
 
-describe("nested subclass of an SRD class", () => {
   it("reimports unchanged without LOCAL_CONFLICT", async () => {
     const template = await prisma.campaign.findFirstOrThrow({ where: { kind: "template", visibility: "official", name: "5e SRD 5.2" } });
 

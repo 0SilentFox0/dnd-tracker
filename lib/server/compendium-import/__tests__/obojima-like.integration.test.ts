@@ -3,11 +3,16 @@ import { afterAll, beforeAll, describe, expect, it, vi } from "vitest";
 
 import fixture from "./fixtures/obojima-like.synthetic.json";
 
-vi.hoisted(() => {
-  const url = new URL(process.env.DATABASE_URL ?? "");
+const localDb = vi.hoisted(() => {
+  try {
+    const url = new URL(process.env.DATABASE_URL ?? "");
 
-  if (url.hostname !== "localhost" || url.port !== "54322") throw Error("Requires the local docker database");
+    return url.hostname === "localhost" && url.port === "54322";
+  } catch {
+    return false;
+  }
 });
+
 vi.mock("next/cache", async (original) => ({ ...(await original<object>()), unstable_cache: <T,>(fn: T) => fn, revalidateTag: vi.fn() }));
 vi.mock("@/lib/cache/tags", async (original) => ({ ...(await original<object>()), invalidateReference: vi.fn() }));
 
@@ -49,17 +54,17 @@ async function buildInput(): Promise<ImportInput> {
   return { ...base, dependencies: [...dependencies.values()] };
 }
 
-beforeAll(async () => {
-  await prisma.user.create({ data: { id: userId, email: `${userId}@obojima-like.example.test`, displayName: "Obojima-like DM" } });
-  campaignId = (await createCampaignFromBundle({ userId, name: `Obojima-like ${userId}`, bundle: null })).campaign.id;
-});
-afterAll(async () => {
-  await prisma.campaign.deleteMany({ where: { id: campaignId, dmUserId: userId } });
-  await prisma.user.deleteMany({ where: { id: userId } });
-  await prisma.$disconnect();
-});
+describe.skipIf(!localDb)("obojima-like synthetic import", () => {
+  beforeAll(async () => {
+    await prisma.user.create({ data: { id: userId, email: `${userId}@obojima-like.example.test`, displayName: "Obojima-like DM" } });
+    campaignId = (await createCampaignFromBundle({ userId, name: `Obojima-like ${userId}`, bundle: null })).campaign.id;
+  });
+  afterAll(async () => {
+    await prisma.campaign.deleteMany({ where: { id: campaignId, dmUserId: userId } });
+    await prisma.user.deleteMany({ where: { id: userId } });
+    await prisma.$disconnect();
+  });
 
-describe("obojima-like synthetic import", () => {
   it("imports every entity kind, is idempotent and leaves no dangling references", async () => {
     const input = await buildInput();
 

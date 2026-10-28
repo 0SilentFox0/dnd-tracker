@@ -197,4 +197,34 @@ describe("source aware atomic import plan", () => {
     expect(plan.errors).toEqual([]);
     expect(plan.warnings.map((w) => w.code)).toContain("MIXED_EDITION_WARNING");
   });
+
+  it("warns when an own-file fallback crosses sources", () => {
+    const refEntry = (spellSource: string) => adaptCompendium({ _meta: { edition: "classic", sources: [{ json: "T" }] }, spell: [{ name: "Fireball", source: "HB", level: 3, school: "V", entries: ["x"] }], background: [{ name: "Past", source: "T", feats: [{ [`Gift|${spellSource}`]: true }] }], feat: [{ name: "Gift", source: "HB", category: "O" }] });
+
+    const crossSource = buildImportPlan(refEntry("PHB"), { campaignId: "c", existing: [] });
+
+    expect(crossSource.errors).toEqual([]);
+    expect(crossSource.warnings.map((w) => w.code)).toContain("SOURCE_MISMATCH_WARNING");
+
+    const sameSource = buildImportPlan(refEntry("HB"), { campaignId: "c", existing: [] });
+
+    expect(sameSource.warnings.map((w) => w.code)).not.toContain("SOURCE_MISMATCH_WARNING");
+  });
+
+  it("writes an existing parent race after the spells its subrace grants", () => {
+    const spell = { name: "Spark", source: "T", level: 1, school: "V", entries: ["Synthetic"] };
+
+    const adapted = adaptCompendium({ _meta: { edition: "one", sources: [{ json: "T" }] }, spell: [spell], subrace: [{ name: "Hill", source: "T", raceName: "People", raceSource: "T", additionalSpells: [{ innate: { _: { daily: { "1e": ["spark|T"] } } } }] }] });
+
+    const parentKey = canonicalKey("race", "People", "T", "one");
+
+    const parent = { key: parentKey, localId: "people", kind: "races" as const, edition: "one" as const, body: { name: "People", choices: [] }, baseline: {} };
+
+    const plan = buildImportPlan(adapted, { campaignId: "c", existing: [], bindings: { [parentKey]: parent } });
+
+    const order = plan.writes.filter((r) => !r.nested).map((r) => r.kind);
+
+    expect(plan.errors).toEqual([]);
+    expect(order.indexOf("spells")).toBeLessThan(order.indexOf("races"));
+  });
 });

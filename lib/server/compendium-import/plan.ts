@@ -1,5 +1,5 @@
 import { domainSchemas } from "./domain-schemas";
-import { canonicalKey, digest, nameKey, stableJson } from "./identity";
+import { canonicalKey, digest, nameKey, sameEdition, sameSource, stableJson } from "./identity";
 import type { JsonRecord } from "./parse";
 import { type AdaptedCompendium, type AdaptedEntry, type CompendiumRef, type Edition, type ImportIssue, issue } from "./types";
 
@@ -130,9 +130,16 @@ function resolveRef(ps: PlanState, ref: CompendiumRef, owner: AdaptedEntry): Res
     return { localId: bound.localId, body: bound.body, key: bound.key };
   }
 
-  const own = ps.entries.find((e) => e.key !== owner.key && e.kind === expectedKind(ref) && nameKey(e.name) === nameKey(ref.name));
+  const candidates = ps.entries.filter((e) => e.key !== owner.key && e.kind === expectedKind(ref) && nameKey(e.name) === nameKey(ref.name));
 
-  if (own) return plannedResolved(ps, own.key);
+  const own = candidates.find((e) => sameSource(e.source, ref.source) && sameEdition(e.edition, ref.edition)) ?? candidates[0];
+
+  if (own) {
+    if (!sameEdition(own.edition, ref.edition)) owner.issues.push(issue("MIXED_EDITION_WARNING", owner.key, "warning", `Посилання «${ref.name}» (${ref.edition}) зіставлено із записом файлу з редакції ${own.edition}: перевірте результат`));
+    else if (!sameSource(own.source, ref.source)) owner.issues.push(issue("SOURCE_MISMATCH_WARNING", owner.key, "warning", `Посилання «${ref.name}|${ref.source}» зіставлено із записом файлу з іншого джерела (${own.source}): перевірте, що це той самий запис`));
+
+    return plannedResolved(ps, own.key);
+  }
 
   const error = issue("UNRESOLVED_REF", `${owner.key}.${ref.path.join(".")}`, "error", `Не знайдено «${ref.name}» (${REF_KIND_LABELS[ref.kind] ?? ref.kind}), потрібне для «${owner.name}». Додайте залежність, виберіть зіставлення або виключіть залежний запис`);
 

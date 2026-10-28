@@ -23,3 +23,7 @@ export function stableJson(value: unknown): string {
 }
 
 export const nameKey = (name: string): string => normalized(name).replace(/[\u2018\u2019\u02bc`]/g, "'").replace(/\s+/g, " ");
+
+export const sameSource = (a: string, b: string) => a.normalize("NFC").trim().toLowerCase() === b.normalize("NFC").trim().toLowerCase();
+
+export const sameEdition = (a: string, b: string) => a === b || a === "unknown" || b === "unknown";

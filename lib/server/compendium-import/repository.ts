@@ -1,4 +1,4 @@
-import { findByName, type NamedRow, pendingRefs } from "./auto-bind";
+import { matchCampaignRows, matchTemplateRows, pendingRefs } from "./auto-bind";
 import { buildDependencyClosure, type TemplateSnapshot } from "./dependencies";
 import { domainSchemas } from "./domain-schemas";
 import { digest } from "./identity";
@@ -173,9 +173,9 @@ export const prismaImportRepository: ImportRepository = {
 
     const pending = pendingRefs(adaptedEntries.filter((e) => !input.excludedKeys?.includes(e.key)), (key) => key in bindings || explicit.has(key) || existing.some((e) => e.key === key));
 
-    const matched = pending.flatMap((p) => { const row = findByName(occupiedNames[p.kind], p.ref.name);
+    const imported = new Set(provenance.map((e) => `${e.kind}:${e.localId}`));
 
- return row ? [{ ...p, row }] : []; });
+    const matched = matchCampaignRows(pending, occupiedNames, (kind, id) => imported.has(`${kind}:${id}`));
 
     const autoRows = await loadRows(actor.campaignId, matched.map((m) => ({ kind: m.kind, id: m.row.id })));
 
@@ -195,12 +195,8 @@ export const prismaImportRepository: ImportRepository = {
       for (const template of official) {
         const names = await loadNames(template.id);
 
-        for (const p of stillPending) {
-          const row = findByName(names[p.kind] as NamedRow[] | undefined, p.ref.name);
-
-          const compatible = p.ref.edition === "one" || input.allowMixedEdition;
-
-          if (row && compatible && !choices.some((c) => c.refKey === p.key)) choices.push({ refKey: p.key, templateId: template.id, kind: p.kind, localId: row.id, edition: "one" });
+        for (const p of matchTemplateRows(stillPending, names, input.allowMixedEdition)) {
+          if (!choices.some((c) => c.refKey === p.key)) choices.push({ refKey: p.key, templateId: template.id, kind: p.kind, localId: p.row.id, edition: "one" });
         }
       }
     }
