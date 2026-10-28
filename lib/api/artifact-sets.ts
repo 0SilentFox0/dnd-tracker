@@ -26,7 +26,7 @@ const artifactSetsApi = createCampaignCrudApi<
   ArtifactSetRow,
   ArtifactSetCreatePayload,
   ArtifactSetUpdatePayload,
-  { success: boolean }
+  { ok: true }
 >("/artifact-sets");
 
 export const getArtifactSets = (campaignId: string): Promise<ArtifactSetRow[]> => artifactSetsApi.list(campaignId);

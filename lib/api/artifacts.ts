@@ -29,7 +29,7 @@ const artifactsApi = createCampaignCrudApi<
   Artifact,
   CreateArtifactData,
   UpdateArtifactData,
-  void
+  { ok: true }
 >("/artifacts");
 
 export const getArtifacts = (campaignId: string): Promise<ArtifactListItem[]> => artifactsApi.list(campaignId);
@@ -40,6 +40,6 @@ export const deleteArtifact = artifactsApi.remove;
 
 export async function deleteAllArtifacts(
   campaignId: string,
-): Promise<{ deleted: number }> {
-  return campaignDelete<{ deleted: number }>(campaignId, "/artifacts");
+): Promise<{ ok: true; deleted: number }> {
+  return campaignDelete<{ ok: true; deleted: number }>(campaignId, "/artifacts");
 }

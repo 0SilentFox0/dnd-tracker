@@ -63,3 +63,9 @@ export function readAbilities(_kind: OwnerKind, row: OwnerRow): { abilities: Abi
 
   return { abilities: [], issues: [] };
 }
+
+export function withAbilityIssues<R extends OwnerRow, B extends object = R>(kind: OwnerKind, row: R, base: B = row as unknown as B) {
+  const { abilities, issues: abilityIssues } = readAbilities(kind, row);
+
+  return { ...base, abilities, abilityIssues };
+}

@@ -7,7 +7,7 @@ vi.mock("@/lib/utils/api/api-auth", () => ({
 
 vi.mock("@/lib/db", () => ({
   prisma: {
-    skill: { findUnique: vi.fn(), findMany: vi.fn(async () => [{ id: "s1", name: "Лють" }]), update: vi.fn(), create: vi.fn() },
+    skill: { findFirst: vi.fn(), findMany: vi.fn(async () => [{ id: "s1", name: "Лють" }]), update: vi.fn(), create: vi.fn() },
     race: { findMany: vi.fn(async () => []), findFirst: vi.fn() },
     artifact: { findMany: vi.fn(async () => []), findFirst: vi.fn() },
     artifactSet: { findMany: vi.fn(async () => []), findFirst: vi.fn() },
@@ -40,7 +40,7 @@ describe("abilities API", () => {
   });
 
   it("GET skill detail з NULL у колонці — порожні abilities без abilityIssues", async () => {
-    vi.mocked(prisma.skill.findUnique).mockResolvedValue({ id: "s1", campaignId: "c1", name: "Лють", abilities: null } as never);
+    vi.mocked(prisma.skill.findFirst).mockResolvedValue({ id: "s1", campaignId: "c1", name: "Лють", abilities: null } as never);
 
     const { GET } = await import("@/app/api/campaigns/[id]/skills/[skillId]/route");
 
@@ -51,7 +51,7 @@ describe("abilities API", () => {
   });
 
   it("PATCH skill з abilities пише колонку; без abilities — не чіпає", async () => {
-    vi.mocked(prisma.skill.findUnique).mockResolvedValue({ id: "s1", campaignId: "c1", name: "Лють" } as never);
+    vi.mocked(prisma.skill.findFirst).mockResolvedValue({ id: "s1", campaignId: "c1", name: "Лють" } as never);
     vi.mocked(prisma.skill.update).mockResolvedValue({ id: "s1", campaignId: "c1", name: "Лють", abilities: [] } as never);
 
     const { PATCH } = await import("@/app/api/campaigns/[id]/skills/[skillId]/route");
@@ -71,7 +71,7 @@ describe("abilities API", () => {
   });
 
   it("PATCH з невалідними abilities → 400 з path", async () => {
-    vi.mocked(prisma.skill.findUnique).mockResolvedValue({ id: "s1", campaignId: "c1", name: "Лють" } as never);
+    vi.mocked(prisma.skill.findFirst).mockResolvedValue({ id: "s1", campaignId: "c1", name: "Лють" } as never);
 
     const { PATCH } = await import("@/app/api/campaigns/[id]/skills/[skillId]/route");
 

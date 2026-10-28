@@ -10,7 +10,7 @@ vi.mock("@/lib/utils/api/api-auth", () => ({
 }));
 
 vi.mock("@/lib/db", () => ({
-  prisma: { artifact: { findUnique: vi.fn(), update: vi.fn() } },
+  prisma: { artifact: { findFirst: vi.fn(), update: vi.fn() } },
 }));
 
 vi.mock("@/lib/supabase/admin", () => ({
@@ -43,7 +43,7 @@ describe("PATCH with an already stored external icon", () => {
     vi.clearAllMocks();
     vi.stubGlobal("fetch", fetchMock);
     lookupMock.mockResolvedValue([{ address: "93.184.216.34", family: 4 }]);
-    vi.mocked(prisma.artifact.findUnique).mockResolvedValue({ id: "a1", campaignId: "c1", icon: SVG_URL } as never);
+    vi.mocked(prisma.artifact.findFirst).mockResolvedValue({ id: "a1", campaignId: "c1", icon: SVG_URL } as never);
     vi.mocked(prisma.artifact.update).mockResolvedValue({ id: "a1" } as never);
   });
 

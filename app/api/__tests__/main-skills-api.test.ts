@@ -2,7 +2,8 @@ import { NextResponse } from "next/server";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 const db = vi.hoisted(() => ({
-  mainSkill: { create: vi.fn(), findUnique: vi.fn(), update: vi.fn(), deleteMany: vi.fn() },
+  spellGroup: { count: vi.fn(async () => 1) },
+  mainSkill: { create: vi.fn(), findFirst: vi.fn(), update: vi.fn(), deleteMany: vi.fn() },
 }));
 
 const revalidateTag = vi.hoisted(() => vi.fn());
@@ -45,7 +46,7 @@ describe("main-skills API", () => {
     auth.requireDM.mockResolvedValue({ userId: "dm" });
     auth.requireCampaignAccess.mockResolvedValue({ userId: "dm" });
     db.mainSkill.create.mockResolvedValue({ id: "m9" });
-    db.mainSkill.findUnique.mockResolvedValue({ id: "m1", campaignId: "c1" });
+    db.mainSkill.findFirst.mockResolvedValue({ id: "m1", campaignId: "c1" });
     db.mainSkill.update.mockResolvedValue({ id: "m1" });
   });
 
@@ -59,7 +60,7 @@ describe("main-skills API", () => {
   it.each(writes)("%s скидає кеш основних навиків і скілів одразу", async (_name, call) => {
     const res = await call();
 
-    expect(res.status).toBe(200);
+    expect(res.status).toBe(_name.startsWith("POST") ? 201 : 200);
     expect(revalidateTag).toHaveBeenCalledWith("main-skills-c1", { expire: 0 });
     expect(revalidateTag).toHaveBeenCalledWith("skills-c1", { expire: 0 });
   });
@@ -78,5 +79,14 @@ describe("main-skills API", () => {
     auth.requireDM.mockResolvedValue(forbidden());
 
     expect((await one.GET(req("GET"), ctxOne)).status).toBe(403);
+  });
+
+  it("школа магії іншої кампанії → 400, нічого не створено", async () => {
+    db.spellGroup.count.mockResolvedValue(0);
+
+    const res = await list.POST(req("POST", { name: "Магія", color: "#fff", spellGroupId: "foreign" }), ctx);
+
+    expect(res.status).toBe(400);
+    expect(db.mainSkill.create).not.toHaveBeenCalled();
   });
 });

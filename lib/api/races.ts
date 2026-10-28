@@ -1,7 +1,7 @@
 import { createCampaignCrudApi } from "@/lib/api/client";
 import type { Race, RaceFormData } from "@/types/races";
 
-const racesApi = createCampaignCrudApi<Race, RaceFormData, Partial<RaceFormData>, Race>(
+const racesApi = createCampaignCrudApi<Race, RaceFormData, Partial<RaceFormData>, { ok: true }>(
   "/races",
 );
 

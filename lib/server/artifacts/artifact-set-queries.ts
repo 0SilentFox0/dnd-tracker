@@ -151,6 +151,6 @@ export async function deleteArtifactSetAndClearArtifacts(
       where: { campaignId, setId },
       data: { setId: null },
     }),
-    prisma.artifactSet.deleteMany({ where: { id: setId } }),
+    prisma.artifactSet.deleteMany({ where: { id: setId, campaignId } }),
   ]);
 }

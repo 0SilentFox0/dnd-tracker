@@ -5,7 +5,7 @@ import { getResponseJson } from "./helpers";
 
 const db = vi.hoisted(() => {
   const m = {
-    race: { findFirst: vi.fn(), findUnique: vi.fn(), count: vi.fn(), create: vi.fn(), update: vi.fn(), deleteMany: vi.fn() },
+    race: { findFirst: vi.fn(), count: vi.fn(), create: vi.fn(), update: vi.fn(), deleteMany: vi.fn() },
     character: { updateMany: vi.fn() },
     skillTree: { updateMany: vi.fn() },
     $transaction: vi.fn(),
@@ -36,13 +36,15 @@ const ctxOne = { params: Promise.resolve({ id: "c1", raceId: "r1" }) };
 const req = (method: string, body?: unknown) =>
   new Request("http://x", { method, ...(body !== undefined && { body: JSON.stringify(body) }) });
 
+let nameClash: { id: string } | null = null;
+
 const elf = { id: "r1", campaignId: "c1", name: "Ельф", color: "#22c55e" };
 
 describe("races API", () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    db.race.findFirst.mockResolvedValue(null);
-    db.race.findUnique.mockResolvedValue(elf);
+    nameClash = null;
+    db.race.findFirst.mockImplementation(async ({ where }: { where: { name?: unknown } }) => (where.name ? nameClash : elf));
     db.race.count.mockResolvedValue(2);
     db.race.create.mockImplementation(async ({ data }: { data: unknown }) => data);
     db.race.update.mockImplementation(async ({ data }: { data: object }) => ({ ...elf, ...data }));
@@ -55,7 +57,7 @@ describe("races API", () => {
   });
 
   it("POST дубля назви без урахування регістру — 409, нічого не створено", async () => {
-    db.race.findFirst.mockResolvedValue({ id: "r1" });
+    nameClash = { id: "r1" };
 
     const res = (await list.POST(req("POST", { name: "  ельф " }), ctx)) as NextResponse;
 
@@ -105,7 +107,7 @@ describe("races API", () => {
   });
 
   it("PATCH на назву іншої раси — 409, без оновлення", async () => {
-    db.race.findFirst.mockResolvedValue({ id: "r2" });
+    nameClash = { id: "r2" };
 
     const res = (await one.PATCH(req("PATCH", { name: "ОРК" }), ctxOne)) as NextResponse;
 
@@ -117,9 +119,28 @@ describe("races API", () => {
     expect(db.race.update).not.toHaveBeenCalled();
   });
 
-  it("DELETE — інвалідує units (юніти раси стають «Без раси»)", async () => {
-    await one.DELETE(req("DELETE"), ctxOne);
+  it("перейменування в назву іншої раси (інший регістр) — 409 з текстом, без транзакції", async () => {
+    nameClash = { id: "r2" };
 
+    const res = (await one.PATCH(req("PATCH", { name: "ЕЛЬФ" }), ctxOne)) as NextResponse;
+
+    expect(res.status).toBe(409);
+    expect(((await getResponseJson(res)) as { error: string }).error).toBe("Раса «ЕЛЬФ» уже є в кампанії");
+    expect(db.$transaction).not.toHaveBeenCalled();
+  });
+
+  it("раса іншої кампанії — 404", async () => {
+    db.race.findFirst.mockResolvedValue(null);
+
+    const res = (await one.PATCH(req("PATCH", { name: "X" }), ctxOne)) as NextResponse;
+
+    expect(res.status).toBe(404);
+  });
+
+  it("DELETE — інвалідує units (юніти раси стають «Без раси»)", async () => {
+    const res = (await one.DELETE(req("DELETE"), ctxOne)) as NextResponse;
+
+    expect(await getResponseJson(res)).toEqual({ ok: true });
     expect(revalidateTag).toHaveBeenCalledWith("units-c1", { expire: 0 });
   });
 });

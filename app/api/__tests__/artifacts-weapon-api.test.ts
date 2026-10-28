@@ -5,8 +5,10 @@ vi.mock("@/lib/utils/api/api-auth", () => ({
   requireCampaignAccess: vi.fn(async () => ({ userId: "u1" })),
 }));
 
+vi.mock("server-only", () => ({}));
+
 vi.mock("@/lib/db", () => ({
-  prisma: { artifact: { findUnique: vi.fn(), update: vi.fn(), create: vi.fn() } },
+  prisma: { artifact: { findFirst: vi.fn(), update: vi.fn(), create: vi.fn() } },
 }));
 
 import { prisma } from "@/lib/db";
@@ -18,7 +20,7 @@ const patch = (body: unknown) => new Request("http://localhost/api/campaigns/c1/
 describe("artifact weapon stats API", () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    vi.mocked(prisma.artifact.findUnique).mockResolvedValue({ id: "a1", campaignId: "c1", slot: "weapon" } as never);
+    vi.mocked(prisma.artifact.findFirst).mockResolvedValue({ id: "a1", campaignId: "c1", slot: "weapon" } as never);
     vi.mocked(prisma.artifact.update).mockResolvedValue({ id: "a1", campaignId: "c1" } as never);
   });
 

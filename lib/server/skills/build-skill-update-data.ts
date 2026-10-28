@@ -1,11 +1,9 @@
 import { Prisma } from "@prisma/client";
-import type { z } from "zod";
 
-import type { updateSkillSchema } from "./update-skill-schema";
-
+import type { UpdateSkillInput } from "@/lib/schemas";
 import { abilitiesJson } from "@/lib/utils/abilities/read";
 
-export type UpdateSkillData = z.infer<typeof updateSkillSchema>;
+export type UpdateSkillData = UpdateSkillInput;
 
 const relation = (id: string | null) => (id === null ? { disconnect: true } : { connect: { id } });
 

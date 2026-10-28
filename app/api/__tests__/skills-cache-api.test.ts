@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 const db = vi.hoisted(() => ({
-  skill: { create: vi.fn(), findUnique: vi.fn(), update: vi.fn(), delete: vi.fn(), deleteMany: vi.fn() },
+  skill: { create: vi.fn(), findUnique: vi.fn(), findFirst: vi.fn(), update: vi.fn(), delete: vi.fn(), deleteMany: vi.fn() },
 }));
 
 const revalidateTag = vi.hoisted(() => vi.fn());
@@ -58,15 +58,16 @@ describe("skills API — кеш", () => {
     vi.clearAllMocks();
     requireDM.mockResolvedValue({ userId: "dm" });
     db.skill.create.mockResolvedValue(row);
+    db.skill.findFirst.mockResolvedValue(row);
     db.skill.findUnique.mockResolvedValue(row);
     db.skill.update.mockResolvedValue(row);
     db.skill.deleteMany.mockResolvedValue({ count: 1 });
   });
 
-  it.each(writes)("%s скидає кеш скілів одразу", async (_name, call) => {
+  it.each(writes)("%s скидає кеш скілів одразу", async (name, call) => {
     const res = await call();
 
-    expect(res.status).toBe(200);
+    expect(res.status).toBe(name === "POST /skills" ? 201 : 200);
     expect(revalidateTag).toHaveBeenCalledWith("skills-c1", { expire: 0 });
   });
 

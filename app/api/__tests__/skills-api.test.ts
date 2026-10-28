@@ -21,6 +21,7 @@ vi.mock("@/lib/db", () => ({
       findMany: vi.fn(),
       create: vi.fn(),
       findUnique: vi.fn(),
+      findFirst: vi.fn(),
       update: vi.fn(),
       delete: vi.fn(),
       deleteMany: vi.fn(),
@@ -226,7 +227,7 @@ describe("POST /api/campaigns/[id]/skills", () => {
     consoleErrorSpy.mockRestore();
   });
 
-  it("повертає 200 та створений скіл при валідному body", async () => {
+  it("повертає 201 та створений скіл при валідному body", async () => {
     vi.mocked(apiAuth.requireDM).mockResolvedValue({
       userId: "dm-1",
       isDM: false,
@@ -289,7 +290,7 @@ describe("POST /api/campaigns/[id]/skills", () => {
       params: Promise.resolve({ id: "c1" }),
     });
 
-    expect(await getResponseStatus(response)).toBe(200);
+    expect(await getResponseStatus(response)).toBe(201);
 
     const data = await getResponseJson(response) as { id: string; name: string };
 
@@ -341,7 +342,7 @@ describe("DELETE /api/campaigns/[id]/skills (delete all)", () => {
     expect(await getResponseStatus(response)).toBe(403);
   });
 
-  it("повертає 200 та deletedCount при успіху", async () => {
+  it("повертає deleted, а не deletedCount", async () => {
     vi.mocked(apiAuth.requireDM).mockResolvedValue({
       userId: "dm-1",
       isDM: false,
@@ -367,10 +368,9 @@ describe("DELETE /api/campaigns/[id]/skills (delete all)", () => {
 
     expect(await getResponseStatus(response)).toBe(200);
 
-    const data = await getResponseJson(response) as { success: boolean; deletedCount: number };
+    const data = await getResponseJson(response) as { ok: boolean; deleted: number };
 
-    expect(data.success).toBe(true);
-    expect(data.deletedCount).toBe(5);
+    expect(data).toEqual({ ok: true, deleted: 5 });
   });
 });
 
@@ -407,7 +407,7 @@ describe("GET /api/campaigns/[id]/skills/[skillId]", () => {
         members: [{ userId: "user-1", role: "player" }],
       },
     });
-    vi.mocked(prisma.skill.findUnique).mockResolvedValue(null);
+    vi.mocked(prisma.skill.findFirst).mockResolvedValue(null);
 
     const { GET } = await import("@/app/api/campaigns/[id]/skills/[skillId]/route");
 
@@ -436,35 +436,7 @@ describe("GET /api/campaigns/[id]/skills/[skillId]", () => {
         members: [{ userId: "user-1", role: "player" }],
       },
     });
-    vi.mocked(prisma.skill.findUnique).mockResolvedValue({
-      id: "skill-1",
-      campaignId: "other-campaign",
-      name: "Skill",
-      description: null,
-      icon: null,
-      basicInfo: {},
-      combatStats: null,
-      bonuses: {},
-      spellData: null,
-      mainSkillData: null,
-      skillTriggers: [],
-      image: null,
-      damage: null,
-      armor: null,
-      speed: null,
-      physicalResistance: null,
-      magicalResistance: null,
-      spellId: null,
-      spellGroupId: null,
-      mainSkillId: null,
-      spellNewSpellId: null,
-      grantedSpellId: null,
-      createdAt: new Date(),
-      updatedAt: new Date(),
-      spell: null,
-      spellGroup: null,
-      grantedSpell: null,
-    } as never);
+    vi.mocked(prisma.skill.findFirst).mockResolvedValue(null);
 
     const { GET } = await import("@/app/api/campaigns/[id]/skills/[skillId]/route");
 
@@ -520,7 +492,7 @@ describe("GET /api/campaigns/[id]/skills/[skillId]", () => {
       grantedSpell: null,
     };
 
-    vi.mocked(prisma.skill.findUnique).mockResolvedValue(mockSkill as never);
+    vi.mocked(prisma.skill.findFirst).mockResolvedValue(mockSkill as never);
 
     const { GET } = await import("@/app/api/campaigns/[id]/skills/[skillId]/route");
 
@@ -576,7 +548,7 @@ describe("PATCH /api/campaigns/[id]/skills/[skillId]", () => {
         members: [{ userId: "dm-1", role: "dm" }],
       },
     });
-    vi.mocked(prisma.skill.findUnique).mockResolvedValue(null);
+    vi.mocked(prisma.skill.findFirst).mockResolvedValue(null);
 
     const { PATCH } = await import("@/app/api/campaigns/[id]/skills/[skillId]/route");
 
@@ -633,7 +605,7 @@ describe("PATCH /api/campaigns/[id]/skills/[skillId]", () => {
       updatedAt: new Date(),
     };
 
-    vi.mocked(prisma.skill.findUnique).mockResolvedValue(existingSkill as never);
+    vi.mocked(prisma.skill.findFirst).mockResolvedValue(existingSkill as never);
 
     const updatedSkill = {
       ...existingSkill,
@@ -705,7 +677,7 @@ describe("DELETE /api/campaigns/[id]/skills/[skillId]", () => {
         members: [{ userId: "dm-1", role: "dm" }],
       },
     });
-    vi.mocked(prisma.skill.findUnique).mockResolvedValue(null);
+    vi.mocked(prisma.skill.findFirst).mockResolvedValue(null);
 
     const { DELETE } = await import("@/app/api/campaigns/[id]/skills/[skillId]/route");
 
@@ -732,7 +704,7 @@ describe("DELETE /api/campaigns/[id]/skills/[skillId]", () => {
         members: [{ userId: "dm-1", role: "dm" }],
       },
     });
-    vi.mocked(prisma.skill.findUnique).mockResolvedValue({
+    vi.mocked(prisma.skill.findFirst).mockResolvedValue({
       id: "skill-1",
       campaignId: "c1",
     } as never);
@@ -750,8 +722,8 @@ describe("DELETE /api/campaigns/[id]/skills/[skillId]", () => {
 
     expect(await getResponseStatus(response)).toBe(200);
 
-    const data = await getResponseJson(response) as { success: boolean };
+    const data = await getResponseJson(response) as { ok: boolean };
 
-    expect(data.success).toBe(true);
+    expect(data.ok).toBe(true);
   });
 });

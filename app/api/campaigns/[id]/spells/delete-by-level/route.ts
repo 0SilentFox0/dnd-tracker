@@ -36,7 +36,7 @@ export async function DELETE(
     invalidateReference(ReferenceKind.SPELLS, id);
 
     return NextResponse.json({
-      success: true,
+      ok: true,
       deleted: result.count,
     });
   } catch (error) {

@@ -33,6 +33,8 @@ export const API_ERRORS = {
   FOREIGN_SPELL_GROUP: "Група заклинань не належить цій кампанії",
   FOREIGN_MAIN_SKILL: "Основний навик не належить цій кампанії",
   FOREIGN_ARTIFACT_SET: "Сет артефактів не належить цій кампанії",
+  METHOD_NOT_ALLOWED: "Операція недоступна для цього виду контенту",
+  FOREIGN_RACE: "Раса не належить цій кампанії",
   CAMPAIGN_NOT_ACTIVE: "Кампанія не активна",
   ALREADY_MEMBER: "Ви вже є учасником цієї кампанії",
   CANNOT_REMOVE_DM: "DM не можна видалити з кампанії",
@@ -97,3 +99,5 @@ export const API_ERRORS = {
   AI_PROPOSAL_DONE: "Пропозицію вже застосовано або відхилено",
   API_TOKEN_NOT_FOUND: "Токен не знайдено",
 } as const;
+
+export const raceNameTakenMessage = (name: string) => `Раса «${name}» уже є в кампанії`;

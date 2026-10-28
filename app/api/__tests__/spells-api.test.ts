@@ -1,10 +1,12 @@
 import { NextResponse } from "next/server";
+import { Prisma } from "@prisma/client";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 const db = vi.hoisted(() => ({
   spell: {
     create: vi.fn(),
     createMany: vi.fn(),
+    findFirst: vi.fn(),
     findUnique: vi.fn(),
     findMany: vi.fn(),
     update: vi.fn(),
@@ -12,7 +14,7 @@ const db = vi.hoisted(() => ({
     delete: vi.fn(),
     deleteMany: vi.fn(),
   },
-  spellGroup: { create: vi.fn(), findFirst: vi.fn(), findUnique: vi.fn(), findMany: vi.fn(), update: vi.fn(), deleteMany: vi.fn() },
+  spellGroup: { count: vi.fn(), create: vi.fn(), findFirst: vi.fn(), findUnique: vi.fn(), findMany: vi.fn(), update: vi.fn(), deleteMany: vi.fn() },
 }));
 
 const revalidateTag = vi.hoisted(() => vi.fn());
@@ -78,13 +80,14 @@ describe("spells API", () => {
     auth.requireCampaignAccess.mockResolvedValue({ userId: "dm" });
     db.spell.create.mockResolvedValue({ id: "s9" });
     db.spell.createMany.mockResolvedValue({ count: 1 });
+    db.spell.findFirst.mockResolvedValue({ id: "s1", campaignId: "c1" });
     db.spell.findUnique.mockResolvedValue({ id: "s1", campaignId: "c1" });
     db.spell.findMany.mockResolvedValue([]);
     db.spell.update.mockResolvedValue({ id: "s1" });
     db.spell.updateMany.mockResolvedValue({ count: 2 });
     db.spell.deleteMany.mockResolvedValue({ count: 2 });
     db.spellGroup.create.mockResolvedValue({ id: "g9" });
-    db.spellGroup.findFirst.mockResolvedValue(null);
+    db.spellGroup.findFirst.mockResolvedValue({ id: "g1", campaignId: "c1" });
     db.spellGroup.findUnique.mockResolvedValue({ id: "g1", campaignId: "c1" });
     db.spellGroup.update.mockResolvedValue({ id: "g1" });
   });
@@ -126,6 +129,15 @@ describe("spells API", () => {
     expect(db.spell.create).not.toHaveBeenCalled();
   });
 
+  it("група іншої кампанії → 400, заклинання не створено і не змінено", async () => {
+    db.spellGroup.count.mockResolvedValue(0);
+
+    expect((await list.POST(req("POST", { ...spellBody, groupId: "foreign" }), ctx)).status).toBe(400);
+    expect((await one.PATCH(req("PATCH", { groupId: "foreign" }), ctxSpell)).status).toBe(400);
+    expect(db.spell.create).not.toHaveBeenCalled();
+    expect(db.spell.update).not.toHaveBeenCalled();
+  });
+
   it("PATCH дозволяє лишити старий 0-й рівень", async () => {
     expect((await one.PATCH(req("PATCH", { level: 0 }), ctxSpell)).status).toBe(200);
   });
@@ -140,10 +152,25 @@ describe("spells API", () => {
     expect(data.name).toBeUndefined();
   });
 
+  it("PATCH лише з name не чіпає fx і spellEffects", async () => {
+    await one.PATCH(req("PATCH", { name: "Нова" }), ctxSpell);
+
+    const data = db.spell.update.mock.calls[0][0].data;
+
+    expect(data.fx).toBeUndefined();
+    expect(data.spellEffects).toBeUndefined();
+  });
+
+  it("PATCH fx: null → Prisma.DbNull", async () => {
+    await one.PATCH(req("PATCH", { fx: null }), ctxSpell);
+
+    expect(db.spell.update.mock.calls[0][0].data.fx).toBe(Prisma.DbNull);
+  });
+
   it.each(writes)("%s скидає кеш заклинань одразу", async (_name, call) => {
     const res = await call();
 
-    expect(res.status).toBe(200);
+    expect(res.ok).toBe(true);
     expect(revalidateTag).toHaveBeenCalledWith("spells-c1", { expire: 0 });
   });
 

@@ -45,7 +45,10 @@ describe("GET /spells?ids=", () => {
   it("понад 200 id — 400", async () => {
     const ids = Array.from({ length: 201 }, (_, i) => `s${i}`).join(",");
 
-    expect((await get(`?ids=${ids}`)).status).toBe(400);
+    const res = await get(`?ids=${ids}`);
+
+    expect(res.status).toBe(400);
+    expect((await res.json()).error).toBe("Некоректні параметри запиту");
     expect(prisma.spell.findMany).not.toHaveBeenCalled();
   });
 

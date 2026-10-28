@@ -8,7 +8,7 @@ _Оновлено: 2026-10-21._
 
 | Що | Гілка / worktree | Стан |
 |---|---|---|
-| Конструктор кампаній (епік, етапи 1–6) | `feat/constructor`, `../dnd-tracker-constructor`, локальна БД `constructor` | Етап 1 (1a хардкод→дані, 1b правила, 1c шаблони) готовий і перевірений; етап 2 у роботі (фабрика CRUD → токени на базі `api_tokens` AI-асистента → OpenAPI → MCP-інструменти контенту в наявному `/api/mcp`). **Злиття в `main` і prod — лише після всього епіку (етапи 1–6)**; хендоф: `docs/superpowers/constructor-handoff.md` |
+| Конструктор кампаній (епік, етапи 1–6) | `feat/constructor`, `../dnd-tracker-constructor`, локальна БД `constructor` | Етап 1 (1a хардкод→дані, 1b правила, 1c шаблони) готовий і перевірений; етап 2 у роботі: **2a фабрика CRUD готова** (`lib/server/content`, `CONTENT_RESOURCES`, `lib/utils/api/content-routes.ts`; спек `docs/superpowers/specs/2026-10-21-constructor-stage2-open-api-design.md`); далі 2b токени (scopes на `api_tokens` AI-асистента, `resolveActor` з Bearer; перевірка id у `knownSpells`/`availableSkills`), 2c OpenAPI (+ query-схеми ресурсів, відповіді запису через `toItem`), 2d MCP-інструменти контенту (доступ у сервісі, типізований сервіс). **Злиття в `main` і prod — лише після всього епіку (етапи 1–6)**; хендоф: `docs/superpowers/constructor-handoff.md` |
 
 ## Домовленості
 
