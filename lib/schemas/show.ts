@@ -1,6 +1,15 @@
 import { z } from "zod";
 
-import { DECK_TITLE_MAX, MAX_SLIDE_BYTES, MAX_SLIDES_PER_DECK, SLIDE_CAPTION_MAX, SLIDE_TITLE_MAX, SLIDE_UPLOAD_TYPES } from "@/lib/constants/show";
+import {
+  DECK_TITLE_MAX,
+  MAX_SLIDE_BYTES,
+  MAX_SLIDES_PER_DECK,
+  PUZZLE_MAX_PIECES,
+  PUZZLE_MIN_PIECES,
+  SLIDE_CAPTION_MAX,
+  SLIDE_TITLE_MAX,
+  SLIDE_UPLOAD_TYPES,
+} from "@/lib/constants/show";
 import { battleAudioCommandSchema } from "@/lib/schemas/music";
 import type { Slide } from "@/types/show";
 
@@ -21,13 +30,25 @@ const imageUrlSchema = z
   .url()
   .refine((v) => v.startsWith("https://") || v.startsWith("http://"), "Потрібне посилання http(s)");
 
-const slideSchema = z.object({
-  id: slideIdSchema,
-  imageUrl: imageUrlSchema,
-  title: optionalText(SLIDE_TITLE_MAX),
-  caption: optionalText(SLIDE_CAPTION_MAX),
-  trackId: z.string().min(1).max(64).optional(),
+const puzzleSpecSchema = z.object({
+  cut: z.enum(["classic", "organic", "straight"]),
+  count: z.number().int().min(PUZZLE_MIN_PIECES).max(PUZZLE_MAX_PIECES),
+  seed: z.number().int().min(0).max(2 ** 31),
+  imageWidth: z.number().int().min(1).max(8192),
+  imageHeight: z.number().int().min(1).max(8192),
 });
+
+const slideSchema = z
+  .object({
+    id: slideIdSchema,
+    imageUrl: imageUrlSchema,
+    title: optionalText(SLIDE_TITLE_MAX),
+    caption: optionalText(SLIDE_CAPTION_MAX),
+    trackId: z.string().min(1).max(64).optional(),
+    kind: z.literal("puzzle").optional(),
+    puzzle: puzzleSpecSchema.optional(),
+  })
+  .refine((s) => (s.kind === "puzzle") === (s.puzzle !== undefined), "Пазл і його параметри йдуть разом");
 
 export const slidesSchema = z
   .array(slideSchema)

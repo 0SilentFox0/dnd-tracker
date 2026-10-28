@@ -54,3 +54,27 @@ describe("showCommandSchema battle / deckSceneSchema", () => {
     expect(deckSceneSchema.safeParse({ scenarioPageId: "" }).success).toBe(false);
   });
 });
+
+describe("слайд-пазл", () => {
+  const puzzle = { cut: "classic", count: 24, seed: 5, imageWidth: 1600, imageHeight: 900 };
+
+  it("readSlides зберігає kind і puzzle", () => {
+    const slides = readSlides([slide("slide-0001", { kind: "puzzle", puzzle })]);
+
+    expect(slides[0]).toMatchObject({ kind: "puzzle", puzzle });
+  });
+
+  it("відхиляє kind без puzzle, puzzle без kind, count і розміри поза межами", () => {
+    const parse = (extra: Record<string, unknown>) => saveDeckSchema.safeParse({ expectedUpdatedAt: T, title: "a", slides: [slide("slide-0001", extra)] }).success;
+
+    expect(parse({ kind: "puzzle", puzzle })).toBe(true);
+    expect(parse({ kind: "puzzle" })).toBe(false);
+    expect(parse({ puzzle })).toBe(false);
+    expect(parse({ kind: "puzzle", puzzle: { ...puzzle, count: 3 } })).toBe(false);
+    expect(parse({ kind: "puzzle", puzzle: { ...puzzle, count: 101 } })).toBe(false);
+    expect(parse({ kind: "puzzle", puzzle: { ...puzzle, cut: "zigzag" } })).toBe(false);
+    expect(parse({ kind: "puzzle", puzzle: { ...puzzle, imageWidth: 9000 } })).toBe(false);
+    expect(parse({ kind: "puzzle", puzzle: { ...puzzle, seed: -1 } })).toBe(false);
+  });
+});
+

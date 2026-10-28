@@ -1,7 +1,7 @@
 "use client";
 
 import type { Dispatch } from "react";
-import { ChevronLeft, ChevronRight, type LucideIcon, Music, Trash2 } from "lucide-react";
+import { ChevronLeft, ChevronRight, type LucideIcon, Music, Puzzle, Trash2 } from "lucide-react";
 
 import { OptimizedImage } from "@/components/common/OptimizedImage";
 import type { DeckDraftAction } from "@/lib/utils/show/deck-draft";
@@ -25,6 +25,11 @@ export function SlideGrid({ slides, actions }: { slides: Slide[]; actions: { dis
           <button type="button" aria-label={`Слайд ${i + 1}`} onClick={() => edit(slide.id)} className="relative block aspect-video w-full bg-black">
             <OptimizedImage src={slide.imageUrl} alt="" width={320} height={180} className="size-full object-contain" />
             <span className="absolute left-1 top-1 rounded bg-black/70 px-1.5 text-xs text-hud-bone">{i + 1}</span>
+            {slide.kind === "puzzle" && (
+              <span aria-label="Пазл" className="absolute bottom-1 left-1 rounded bg-black/70 p-0.5 text-hud-gold">
+                <Puzzle className="size-3.5" />
+              </span>
+            )}
             {slide.trackId && (
               <span aria-label="Є трек" className="absolute right-1 top-1 rounded bg-black/70 p-0.5 text-hud-gold">
                 <Music className="size-3.5" />
