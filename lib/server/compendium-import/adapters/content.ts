@@ -5,6 +5,7 @@ import { type MonsterStats, parseAttack, parseMultiattack, plainName } from "./m
 import { CastingBuilder, defenseAbilities, legendaryAbilities, legendaryResistances, saveProficiencies } from "./monster-traits";
 import { ABILITIES, array, description, num, object, str, unsupported } from "./shared";
 import { spellCast } from "./spell-cast";
+import { BLOCKER_ACTIONS, deriveSpell } from "./spell-derive";
 
 import type { AbilityKey } from "@/lib/constants/abilities";
 import { schoolByCode } from "@/lib/constants/spell-groups";
@@ -14,11 +15,11 @@ import { castingFields, spellHead } from "@/lib/utils/spells/derive/mechanics";
 import { battleSpeed, coreTrait } from "@/lib/utils/units/monster-core-traits";
 import type { ScenarioContent } from "@/types/scenario";
 
-const SPELL_CONSUMED = ["level", "school", "classes", "time", "range", "components", "duration", "meta"];
+const SPELL_CONSUMED = ["level", "school", "classes", "time", "range", "components", "duration", "meta", "damageInflict", "savingThrow", "spellAttack", "scalingLevelDice", "conditionInflict", "damageImmune", "damageResist", "damageVulnerable", "conditionImmune", "abilityCheck", "areaTags", "miscTags"];
+
+const MANUAL_SPELL_BODY = { executionMode: "manual", targeting: { kind: "self" }, resolution: { kind: "auto" }, dice: 0, spellEffects: [] };
 
 export const spell: Adapter = (row, ctx) => {
-  ctx.issues.push(issue("MANUAL_SPELL", ctx.path, "warning", "Налаштуйте механіку заклинання або застосовуйте його вручну"));
-
   const cast = spellCast(row);
 
   const lists = array(object(row.classes).fromClassList).map((r) => str(object(r).name)).filter(Boolean);
@@ -27,7 +28,17 @@ export const spell: Adapter = (row, ctx) => {
 
   const head = spellHead({ level: row.level as number, school, casting: cast.castingText, ritual: cast.ritual, range: cast.rangeText, components: cast.components, duration: cast.durationText, concentration: cast.concentration, classes: lists });
 
-  return { kind: "spells", body: { name: row.name, level: row.level, description: [head, description(row, ctx)].filter(Boolean).join("\n\n"), executionMode: "manual", ...castingFields(cast.castingKey, cast.trigger), targeting: { kind: "self" }, resolution: { kind: "auto" }, dice: 0, spellEffects: [], concentration: cast.concentration, lists }, notes: unsupported(row, SPELL_CONSUMED, ctx) };
+  const text = renderEntries(row.entries, `${ctx.path}.entries`);
+
+  const derived = deriveSpell(row, text.text, renderEntries(row.entriesHigherLevel).text, cast);
+
+  const mechanics = "native" in derived ? { executionMode: "native", ...derived.native.fields } : MANUAL_SPELL_BODY;
+
+  if ("blocker" in derived) ctx.issues.push(issue(`MANUAL_SPELL_${derived.blocker}`, ctx.path, "warning", `${BLOCKER_ACTIONS[derived.blocker]}${derived.detail ? ` (${derived.detail})` : ""}`));
+  else if (derived.native.narrative) ctx.issues.push(issue("SPELL_NARRATIVE_ONLY", ctx.path, "warning", "Заклинання без бойової механіки: каст лише витрачає ресурси, ефект описує ДМ"));
+  else if (derived.native.riders.length > 0) ctx.issues.push(issue("SPELL_RIDER_MANUAL", ctx.path, "warning", `Додаткові ефекти не автоматизовано (${derived.native.riders.join(", ")}): див. опис`));
+
+  return { kind: "spells", body: { name: row.name, level: row.level, description: [head, description(row, ctx)].filter(Boolean).join("\n\n"), ...mechanics, ...castingFields(cast.castingKey, cast.trigger), concentration: cast.concentration, lists }, notes: unsupported(row, SPELL_CONSUMED, ctx) };
 };
 
 const MONSTER_FIELDS = ["trait", "action", "bonus", "reaction", "legendary", "spellcasting"] as const;
