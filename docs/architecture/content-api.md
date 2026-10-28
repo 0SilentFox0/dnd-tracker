@@ -36,7 +36,7 @@
 
 ## OpenAPI
 
-`GET /api/openapi.json` — публічний документ OpenAPI 3.1 (~145 КБ), статичний (`force-static`, `s-maxage`).
+`GET /api/openapi.json` — публічний документ OpenAPI 3.1 (~145 КБ, поріг тесту 160 000 символів), статичний (`force-static`, `s-maxage`).
 - Його будує `lib/server/content/openapi.ts` з обох реєстрів.
 - Тіла запитів — ті самі Zod-схеми через `toJsonSchemas` (`json-schema.ts`, локальний реєстр Zod). Спільні підсхеми підставляються через `$ref`: здібність, тригер, умова, кожен вид ефекту, `SpellFx`, `WeaponStats`, `RulesetPatch`. Спільні схеми 4f-2: `Formula`, `Flat`, `Amount`, `ArmorStats`, `ClassColumn`.
 - Помилки й успішні відповіді винесені в `components.responses`.
