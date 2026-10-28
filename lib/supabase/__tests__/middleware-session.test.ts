@@ -82,7 +82,7 @@ describe("updateSession", () => {
   it("публічні сторінки без сесії — пропускає", async () => {
     signedOut();
 
-    for (const path of ["/", "/sign-in", "/sign-up", "/forgot-password", "/reset-password", "/auth/callback"]) {
+    for (const path of ["/", "/uk", "/sign-in", "/sign-up", "/forgot-password", "/reset-password", "/auth/callback"]) {
       expect((await updateSession(request(path))).headers.get("location")).toBeNull();
     }
   });

@@ -50,7 +50,8 @@ export function Breadcrumbs() {
   if (
     pathname?.startsWith("/sign-in") ||
     pathname?.startsWith("/sign-up") ||
-    pathname === "/"
+    pathname === "/" ||
+    pathname === "/uk"
   ) {
     return null;
   }
