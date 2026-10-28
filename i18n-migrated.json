@@ -21,6 +21,8 @@
   "lib/constants/api-errors.ts",
   "lib/zod/**",
   "lib/onboarding/**",
+  "lib/server/onboarding/**",
+  "lib/schemas/onboarding.ts",
   "components/onboarding/**",
   "app/help/**",
   "lib/hooks/onboarding/**"
