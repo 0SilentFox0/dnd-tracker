@@ -31,6 +31,7 @@ export const SHOWCASE_MEDIA: Record<string, ShowcaseMedia> = {
   ai: { mock: "ai", ratio: "16/10" },
   phone: { ratio: "9/16" },
   hero: { image: "/landing/screen-hero.webp", ratio: "16/10" },
+  mechanics: { ratio: "16/10" },
 };
 
 export const PROBLEM_ICONS: LucideIcon[] = [Map, Swords, ScrollText, MessageSquare, Music, NotebookPen, ImageIcon];
@@ -46,3 +47,11 @@ export const CAPABILITY_ICONS: Record<string, LucideIcon> = {
   import: FileUp,
   api: Braces,
 };
+
+export const FX_SPRITES = [
+  { sprite: "ld-sprite-explosion", glow: "rgba(255,120,40,.35)", scale: "scale-[2]" },
+  { sprite: "ld-sprite-lightning", glow: "rgba(120,170,255,.35)", scale: "scale-100" },
+  { sprite: "ld-sprite-dark-bolt", glow: "rgba(170,90,255,.35)", scale: "scale-[1.4]" },
+  { sprite: "ld-sprite-rings", glow: "rgba(90,220,255,.3)", scale: "scale-[2]" },
+  { sprite: "ld-sprite-spark", glow: "rgba(255,220,120,.3)", scale: "scale-[3]" },
+];

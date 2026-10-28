@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 
-import { FAQ } from "@/components/landing/content";
+import { getCopy } from "@/components/landing/copy";
 import { LandingPage } from "@/components/landing/LandingPage";
 import { SITE_URL } from "@/lib/constants/site";
 
@@ -60,7 +60,7 @@ const JSON_LD = {
     },
     {
       "@type": "FAQPage",
-      mainEntity: FAQ.map(({ q, a }) => ({ "@type": "Question", name: q, acceptedAnswer: { "@type": "Answer", text: a } })),
+      mainEntity: getCopy("en").faq.items.map(({ q, a }) => ({ "@type": "Question", name: q, acceptedAnswer: { "@type": "Answer", text: a } })),
     },
   ],
 };
@@ -69,7 +69,7 @@ export default function HomePage() {
   return (
     <>
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(JSON_LD).replace(/</g, "\\u003c") }} />
-      <LandingPage />
+      <LandingPage copy={getCopy("en")} />
     </>
   );
 }
