@@ -353,7 +353,9 @@ describe.skipIf(!FILE)("real file import", () => {
 
       const kind = (spell.targeting as any)?.kind;
 
-      const body = { casterId: me.basicInfo.id, spellId: spell.id, free: true, targetIds: kind === "self" || kind === "template" ? [] : kind === "ally" ? [friend.basicInfo.id] : [foe.basicInfo.id], ...(kind === "template" && { targetCell: foe.battleData.position }), diceRolls: [] };
+      const ally = kind === "ally" || (spell.targeting as any)?.side === "ally";
+
+      const body = { casterId: me.basicInfo.id, spellId: spell.id, free: true, targetIds: kind === "self" || kind === "template" ? [] : ally ? [friend.basicInfo.id] : [foe.basicInfo.id], ...(kind === "template" && { targetCell: foe.battleData.position }), diceRolls: [] };
 
       const r = await run(battleId, CAST, body);
 
