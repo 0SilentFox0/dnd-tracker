@@ -5,6 +5,7 @@ import {
   getCriticalEffect,
 } from "@/lib/constants/critical-effects";
 import { SAVE_FAIL_EFFECTS, SAVE_SUCCESS_EFFECTS } from "@/lib/constants/save-critical-effects";
+import type { Rng } from "@/lib/utils/common/rng";
 
 export type CritKind = "success" | "fail";
 
@@ -20,7 +21,7 @@ export const critEffectsFor = (source: CritSource, kind: CritKind): readonly Cri
 export const getCritEffect = (source: CritSource, kind: CritKind, id: number): CriticalEffect | undefined =>
   source === "attack" ? getCriticalEffect(id, kind) : TABLES.save[kind].find((e) => e.id === id);
 
-export const randomCritEffect = (source: CritSource, kind: CritKind, rng: () => number): CriticalEffect => {
+export const randomCritEffect = (source: CritSource, kind: CritKind, rng: Rng): CriticalEffect => {
   const table = TABLES[source][kind];
 
   return table[Math.min(Math.floor(rng() * table.length), table.length - 1)];

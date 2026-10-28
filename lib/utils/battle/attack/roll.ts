@@ -6,6 +6,7 @@ import { getRandomCriticalEffect } from "@/lib/constants/critical-effects";
 import { collectModifiers } from "@/lib/utils/abilities/engine/core/collect-modifiers";
 import { withSelf } from "@/lib/utils/abilities/engine/core/participants";
 import type { StaticEffect } from "@/lib/utils/abilities/schema";
+import type { CritPicker } from "@/lib/utils/battle/crit-choice/types";
 import { rollDie } from "@/lib/utils/common/dice";
 import type { BattleAttack, BattleParticipant } from "@/types/battle";
 
@@ -15,7 +16,7 @@ export function calculateAttackRoll(
   d20Roll: number,
   advantageRoll?: number,
   disadvantageRoll?: number,
-  opts: { participants?: BattleParticipant[]; extra?: StaticEffect[]; targetId?: string; targetExtra?: StaticEffect[]; rng?: () => number; manualMode?: RollMode } = {},
+  opts: { participants?: BattleParticipant[]; extra?: StaticEffect[]; targetId?: string; targetExtra?: StaticEffect[]; rng?: () => number; manualMode?: RollMode; crit?: CritPicker } = {},
 ): AttackRollResult {
   const participants = withSelf(opts.participants ?? [], attacker);
 
@@ -62,9 +63,9 @@ export function calculateAttackRoll(
   let criticalEffect: CriticalEffect | undefined;
 
   if (isCritical) {
-    criticalEffect = getRandomCriticalEffect("success", opts.rng);
+    criticalEffect = opts.crit ? opts.crit({ source: "attack", kind: "success", actorId: attacker.basicInfo.id, targetId: opts.targetId ?? "" }) : getRandomCriticalEffect("success", opts.rng);
   } else if (isCriticalFail) {
-    criticalEffect = getRandomCriticalEffect("fail", opts.rng);
+    criticalEffect = opts.crit ? opts.crit({ source: "attack", kind: "fail", actorId: attacker.basicInfo.id, targetId: opts.targetId ?? "" }) : getRandomCriticalEffect("fail", opts.rng);
   }
 
   return {
