@@ -121,7 +121,7 @@ describe("PuzzleStage", () => {
 
     fireEvent.click(screen.getByText("Скинути"));
 
-    fireEvent.click(await within(await screen.findByRole("dialog")).findByRole("button", { name: "Скинути" }));
+    fireEvent.click(await within(await screen.findByRole("alertdialog")).findByRole("button", { name: "Скинути" }));
     await waitFor(() => expect(send).toHaveBeenCalledWith({ action: "puzzleReset" }));
   });
 
