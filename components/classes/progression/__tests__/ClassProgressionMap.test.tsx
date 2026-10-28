@@ -3,22 +3,12 @@ import { cleanup, fireEvent, render, screen } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
 import { ClassProgressionMap } from "@/components/classes/progression";
+import { makeAbility, makeClass } from "@/lib/utils/characters/classes/__tests__/class-fixtures";
 import { buildClassProgression } from "@/lib/utils/characters/classes/progression";
-import type { ClassFeature, GameClassData } from "@/types/classes";
 
-const cls: GameClassData = {
-  id: "f",
-  name: "Fighter",
-  icon: null,
-  color: "#c33",
-  hitDie: 10,
-  savingThrows: [],
-  proficiencies: { armor: [], weapons: [], tools: [] },
-  skillChoices: { count: 0, from: [] },
-  caster: "none",
-  spellcastingAbility: null,
+const cls = makeClass({
   features: [
-    { level: 1, abilities: [{ id: "a1", name: "Second Wind", description: "Heal", trigger: { event: "passive" }, effects: [] } as unknown as ClassFeature["abilities"][number]] },
+    { level: 1, abilities: [makeAbility("a1", "Second Wind", "Heal")] },
     { level: 4, abilities: [], choices: [{ id: "asi4", label: "ASI", level: 4, count: 1, kind: "feat" }] },
   ],
   subclassLevel: 3,
@@ -26,7 +16,7 @@ const cls: GameClassData = {
     { id: "champ", name: "Champion", features: [] },
     { id: "bm", name: "Battle Master", features: [] },
   ],
-};
+});
 
 const sheet = () => buildClassProgression(cls, { classId: "f", level: 4 });
 

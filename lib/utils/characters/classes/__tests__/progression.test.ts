@@ -1,29 +1,14 @@
 import { describe, expect, it } from "vitest";
 
+import { makeAbility as ability, makeClass } from "./class-fixtures";
+
 import { buildClassProgression } from "@/lib/utils/characters/classes/progression";
 import type { Choice } from "@/types/choices";
-import type { ClassFeature, GameClassData } from "@/types/classes";
-
-const ability = (id: string, name: string, description?: string) => ({ id, name, description, trigger: { event: "passive" }, effects: [{ kind: "stat" }] }) as unknown as ClassFeature["abilities"][number];
+import type { GameClassData } from "@/types/classes";
 
 const choice = (over: Partial<Choice> & Pick<Choice, "id" | "level">): Choice => ({ label: over.id, count: 1, kind: "feat", ...over });
 
-const make = (over: Partial<GameClassData> = {}): GameClassData => ({
-  id: "fighter",
-  name: "Fighter",
-  icon: null,
-  color: "#c33",
-  hitDie: 10,
-  savingThrows: [],
-  proficiencies: { armor: [], weapons: [], tools: [] },
-  skillChoices: { count: 0, from: [] },
-  caster: "none",
-  spellcastingAbility: null,
-  features: [],
-  subclassLevel: null,
-  subclasses: [],
-  ...over,
-});
+const make = makeClass;
 
 const rich = (): GameClassData =>
   make({

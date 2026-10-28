@@ -4,7 +4,7 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 
 import { ClassForm } from "@/components/classes/ClassForm";
 import { SubclassesEditor } from "@/components/classes/SubclassesEditor";
-import type { GameClassData } from "@/types/classes";
+import { makeClass } from "@/lib/utils/characters/classes/__tests__/class-fixtures";
 
 vi.mock("@/lib/hooks/classes", async () => {
   const { useState } = await import("react");
@@ -21,7 +21,7 @@ vi.mock("@/lib/hooks/classes", async () => {
 vi.mock("@/components/classes/ClassBasicsTab", () => ({ ClassBasicsTab: () => <div>basics</div> }));
 vi.mock("@/components/classes/ClassFeaturesEditor", () => ({ ClassFeaturesEditor: () => <div>features-editor</div> }));
 
-const cls = { id: "f", name: "Fighter", color: "#c33", features: [{ level: 1, abilities: [], choices: [] }], subclassLevel: 3, subclasses: [], columns: [] } as unknown as GameClassData;
+const cls = makeClass({ id: "f", features: [{ level: 1, abilities: [], choices: [] }], subclassLevel: 3 });
 
 describe("ClassForm map tab", () => {
   afterEach(cleanup);
@@ -37,7 +37,7 @@ describe("ClassForm map tab", () => {
   });
 
   it("shows the SRD hint in the subclasses editor", () => {
-    render(<SubclassesEditor campaignId="c" form={{ data: cls as never, set: () => {} }} />);
+    render(<SubclassesEditor campaignId="c" form={{ data: cls, set: () => {} }} />);
 
     expect(screen.getByText(/SRD містить лише один підклас/)).toBeInTheDocument();
   });
