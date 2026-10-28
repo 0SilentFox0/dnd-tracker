@@ -6,6 +6,8 @@ import { canonicalKey } from "../identity";
 import { type AdaptedEntry, type Adapter, issue } from "../types";
 import { type AdaptState, addEntry, isEnabled } from "./state";
 
+import { schoolByCode } from "@/lib/constants/spell-groups";
+
 const adapters: Record<string, Adapter> = {
   spell,
   monster,
@@ -26,11 +28,15 @@ const adapters: Record<string, Adapter> = {
 
 const nestedKinds = new Set(["subclass", "subclassFeature", "classFeature", "subrace", "optionalfeature", "book", "adventure", "bookData", "adventureData"]);
 
-function addSpellSchool(state: AdaptState, entry: AdaptedEntry, school: string) {
+function addSpellSchool(state: AdaptState, entry: AdaptedEntry, code: string) {
+  const known = schoolByCode(code);
+
+  const school = known?.name ?? code;
+
   const key = canonicalKey("spellSchool", school, "5etools-format", "unknown");
 
   if (!state.entries.some((e) => e.key === key))
-    state.entries.push({ key, inputKind: "spellSchool", name: school, source: "5etools-format", edition: "unknown", kind: "spell-groups", body: { name: school }, refs: [], notes: "", issues: [] });
+    state.entries.push({ key, inputKind: "spellSchool", name: school, source: "5etools-format", edition: "unknown", kind: "spell-groups", body: { name: school, ...(known && { color: known.color, icon: known.icon }) }, refs: [], notes: "", issues: [] });
 
   entry.refs.push({ path: ["groupId"], kind: "spellSchool", name: school, source: "5etools-format", edition: "unknown" });
 }

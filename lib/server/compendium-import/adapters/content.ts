@@ -4,17 +4,30 @@ import { type Adapter, issue } from "../types";
 import { type MonsterStats, parseAttack, parseMultiattack, plainName } from "./monster-attacks";
 import { CastingBuilder, defenseAbilities, legendaryAbilities, legendaryResistances, saveProficiencies } from "./monster-traits";
 import { ABILITIES, array, description, num, object, str, unsupported } from "./shared";
+import { spellCast } from "./spell-cast";
 
 import type { AbilityKey } from "@/lib/constants/abilities";
+import { schoolByCode } from "@/lib/constants/spell-groups";
 import type { Ability } from "@/lib/utils/abilities/schema";
 import { buildSearchText } from "@/lib/utils/scenario/search-text";
+import { castingFields, spellHead } from "@/lib/utils/spells/derive/mechanics";
 import { battleSpeed, coreTrait } from "@/lib/utils/units/monster-core-traits";
 import type { ScenarioContent } from "@/types/scenario";
+
+const SPELL_CONSUMED = ["level", "school", "classes", "time", "range", "components", "duration", "meta"];
 
 export const spell: Adapter = (row, ctx) => {
   ctx.issues.push(issue("MANUAL_SPELL", ctx.path, "warning", "Налаштуйте механіку заклинання або застосовуйте його вручну"));
 
-  return { kind: "spells", body: { name: row.name, level: row.level, description: description(row, ctx), executionMode: "manual", cost: "action", targeting: { kind: "self" }, resolution: { kind: "auto" }, dice: 0, spellEffects: [], concentration: array(row.duration).some((d) => object(d).concentration === true), lists: array(object(row.classes).fromClassList).map((r) => str(object(r).name)).filter(Boolean) }, notes: unsupported(row, ["level", "school", "classes"], ctx) };
+  const cast = spellCast(row);
+
+  const lists = array(object(row.classes).fromClassList).map((r) => str(object(r).name)).filter(Boolean);
+
+  const school = schoolByCode(str(row.school))?.name ?? str(row.school);
+
+  const head = spellHead({ level: row.level as number, school, casting: cast.castingText, ritual: cast.ritual, range: cast.rangeText, components: cast.components, duration: cast.durationText, concentration: cast.concentration, classes: lists });
+
+  return { kind: "spells", body: { name: row.name, level: row.level, description: [head, description(row, ctx)].filter(Boolean).join("\n\n"), executionMode: "manual", ...castingFields(cast.castingKey, cast.trigger), targeting: { kind: "self" }, resolution: { kind: "auto" }, dice: 0, spellEffects: [], concentration: cast.concentration, lists }, notes: unsupported(row, SPELL_CONSUMED, ctx) };
 };
 
 const MONSTER_FIELDS = ["trait", "action", "bonus", "reaction", "legendary", "spellcasting"] as const;
