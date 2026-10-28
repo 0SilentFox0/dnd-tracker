@@ -591,7 +591,7 @@ describe("резерв і рішення ДМ", () => {
 });
 
 describe("runBattleMutation: pending крита", () => {
-  const stored = { action: "attack" as const, actorId: "hero", triggers: [], request: { secret: "req" }, seed: 424242 };
+  const stored = { action: "attack" as const, actorId: "hero", triggers: [], request: { secret: "req" }, seed: 424242, userId: "u", isDM: false };
 
   const pendingLoaded = () => {
     const base = loaded({ isDM: true });

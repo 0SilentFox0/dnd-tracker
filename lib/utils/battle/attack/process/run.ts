@@ -64,7 +64,7 @@ export function processAttack(params: ProcessAttackParams): ProcessAttackResult 
     return {
       success: false,
       summons: flow.summons,
-      attackRoll: calculateAttackRoll(getP(flow, attackerId), attack, d20Roll, advantageRoll, disadvantageRoll, { participants: flow.ps, rng: flow.ctx.rng, manualMode: params.rollMode, crit: flow.ctx.crit }),
+      attackRoll: calculateAttackRoll(getP(flow, attackerId), attack, d20Roll, advantageRoll, disadvantageRoll, { participants: flow.ps, rng: flow.ctx.rng, manualMode: params.rollMode }),
       targetUpdated: getP(flow, targetId),
       attackerUpdated: getP(flow, attackerId),
       allParticipantsUpdated: flow.ps,

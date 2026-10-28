@@ -17,9 +17,12 @@ interface RunWithCritChoiceOptions {
 export async function runWithCritChoice(ctx: BattleMutationContext, opts: RunWithCritChoiceOptions): Promise<MutationResult> {
   const seed = opts.resume?.seed ?? Math.floor(Math.random() * 2 ** 32);
 
-  const gate = createCritGate({ rng: ctx.rng ?? mulberry32(seed), choices: opts.resume?.choices });
+  // скриптовий ctx.rng (тести, sweep) діє напряму; повтор після паузи завжди йде за seed
+  const rng = !opts.resume && ctx.rng ? ctx.rng : mulberry32(seed);
 
-  const result = await opts.run({ rng: gate.rng, crit: gate.pick });
+  const gate = createCritGate({ rng, choices: opts.resume?.choices });
+
+  const result = await opts.run({ rng, crit: gate.pick });
 
   if (opts.resume) return { ...result, scene: { ...result.scene, pendingCritChoice: null } };
 
@@ -29,7 +32,7 @@ export async function runWithCritChoice(ctx: BattleMutationContext, opts: RunWit
     participants: ctx.participants,
     pending: ctx.pending,
     events: [],
-    scene: { pendingCritChoice: { action: opts.action, actorId: opts.actorId, triggers: gate.triggers, request: opts.request, seed } },
+    scene: { pendingCritChoice: { action: opts.action, actorId: opts.actorId, triggers: gate.triggers, request: opts.request, seed, userId: ctx.userId, isDM: ctx.isDM } },
     response: { pendingCritChoice: true },
   };
 }

@@ -2,6 +2,8 @@ import { describe, expect, it } from "vitest";
 
 import { CRITICAL_FAIL_EFFECTS, CRITICAL_SUCCESS_EFFECTS } from "@/lib/constants/critical-effects";
 import { SAVE_FAIL_EFFECTS, SAVE_SUCCESS_EFFECTS } from "@/lib/constants/save-critical-effects";
+import { createMockParticipant } from "@/lib/utils/battle/__tests__/fixtures/mock-participant";
+import { applyCriticalEffect } from "@/lib/utils/battle/attack/critical";
 import { critEffectsFor, getCritEffect, randomCritEffect } from "@/lib/utils/battle/crit-choice/catalog";
 
 const HANDLED_IN_SPELL = ["negate_damage", "negate_effects", "double_damage"];
@@ -22,7 +24,7 @@ describe("таблиці ефектів спасків", () => {
   });
 
   it("містить задуману розкладку типів", () => {
-    expect(SAVE_SUCCESS_EFFECTS.map((e) => e.effect.type)).toEqual(["negate_damage", "advantage_next_attack", "free_attack", "ac_buff", "negate_effects", "extra_action"]);
+    expect(SAVE_SUCCESS_EFFECTS.map((e) => e.effect.type)).toEqual(["negate_damage", "advantage_next_attack", "extra_action", "ac_buff", "negate_effects", "extra_action"]);
     expect(SAVE_FAIL_EFFECTS.map((e) => e.effect.type)).toEqual(["double_damage", "prone", "disadvantage_next_attack", "ac_debuff", "lose_reaction", "block_bonus_action"]);
   });
 });
@@ -61,11 +63,15 @@ describe("catalog", () => {
     expect(randomCritEffect(source, kind, () => 0)).toBe(critEffectsFor(source, kind)[0]);
   });
 
-  it("типи нових таблиць відомі applyCriticalEffect або обробляються в спеллі", () => {
-    for (const e of [...SAVE_SUCCESS_EFFECTS, ...SAVE_FAIL_EFFECTS]) {
-      expect(typeof e.effect.type).toBe("string");
+  it("кожен не-спелівський тип змінює учасника в applyCriticalEffect", () => {
+    const target = createMockParticipant();
 
-      if (HANDLED_IN_SPELL.includes(e.effect.type)) expect(e.effect.type).toMatch(/negate_|double_damage/);
+    for (const e of [...SAVE_SUCCESS_EFFECTS, ...SAVE_FAIL_EFFECTS]) {
+      if (HANDLED_IN_SPELL.includes(e.effect.type)) {
+        expect(applyCriticalEffect(target, e, 1)).toEqual(target);
+      } else {
+        expect(applyCriticalEffect(target, e, 1), e.name).not.toEqual(target);
+      }
     }
   });
 });

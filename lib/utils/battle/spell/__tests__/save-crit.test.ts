@@ -31,8 +31,12 @@ const enemy = (id: string) => makeParticipant({ id, side: ParticipantSide.ENEMY,
 
 const effectByType = (list: typeof SAVE_FAIL_EFFECTS, type: string) => list.find((e) => e.effect.type === type)!;
 
-function cast(spell: CastableSpell, rolls: Record<string, number>, crit?: CritPicker) {
+const withSaveMod = (p: BattleParticipant, mod = 0): BattleParticipant => ({ ...p, abilities: { ...p.abilities, modifiers: { ...p.abilities.modifiers, dexterity: mod } } });
+
+function cast(spell: CastableSpell, rolls: Record<string, number>, crit?: CritPicker, opts: { dc?: number; saveMod?: number } = {}) {
   const c = caster();
+
+  if (opts.dc !== undefined) c.spellcasting = { ...c.spellcasting, spellSaveDC: opts.dc };
 
   const ids = Object.keys(rolls);
 
@@ -40,7 +44,7 @@ function cast(spell: CastableSpell, rolls: Record<string, number>, crit?: CritPi
     caster: c,
     spell,
     targetIds: ids,
-    allParticipants: [c, ...ids.map(enemy)],
+    allParticipants: [c, ...ids.map((id) => withSaveMod(enemy(id), opts.saveMod))],
     currentRound: 1,
     battleId: "b",
     diceRolls: [3, 3],
@@ -98,6 +102,25 @@ describe("криті на рятівних кидках заклинань", () 
 
     expect(get(r, "e1").battleData.activeEffects.some((e) => e.dotDamage)).toBe(false);
     expect(get(r, "e1").combatStats.currentHp).toBe(197);
+  });
+
+  it("нат. 20 проти недосяжної СК — успіх (половина шкоди), picker отримує success", () => {
+    const crit = vi.fn(picking(SAVE_SUCCESS_EFFECTS, "ac_buff"));
+
+    const r = cast(spellOf([fire]), { e1: 20 }, crit, { dc: 30 });
+
+    expect(crit).toHaveBeenCalledWith(expect.objectContaining({ kind: "success" }));
+    expect(r.messages.join("\n")).toContain("успіх, половина");
+    expect(get(r, "e1").combatStats.currentHp).toBe(197);
+    expect(r.battleAction.actionDetails.savingThrows?.[0].result).toBe("success");
+  });
+
+  it("нат. 1 з великим модифікатором проти низької СК — провал, повна шкода", () => {
+    const r = cast(spellOf([fire]), { e1: 1 }, picking(SAVE_FAIL_EFFECTS, "prone"), { dc: 5, saveMod: 10 });
+
+    expect(r.messages.join("\n")).toContain("провал");
+    expect(get(r, "e1").combatStats.currentHp).toBe(194);
+    expect(r.battleAction.actionDetails.savingThrows?.[0].result).toBe("fail");
   });
 
   it("кидок 10 не викликає picker", () => {

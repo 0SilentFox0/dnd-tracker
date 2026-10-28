@@ -8,7 +8,7 @@ describe("prepareSave: pending крита", () => {
   it("результат лише зі scene-патчем піднімає версію і несе pending у delta", () => {
     const c = context();
 
-    const pendingCritChoice = { action: "attack" as const, actorId: "hero", triggers: [], request: {}, seed: 1 };
+    const pendingCritChoice = { action: "attack" as const, actorId: "hero", triggers: [], request: {}, seed: 1, userId: "u", isDM: false };
 
     const { delta } = prepareSave({ ...c, scene: { ...c.scene, pendingCritChoice: null } }, { participants: c.participants, pending: c.pending, events: [], scene: { pendingCritChoice } });
 

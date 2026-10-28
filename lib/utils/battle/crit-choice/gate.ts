@@ -3,7 +3,7 @@ import type { CritPicker, CritTrigger } from "./types";
 
 import type { Rng } from "@/lib/utils/common/rng";
 
-export function createCritGate(opts: { rng: Rng; choices?: Record<string, number> }): { rng: Rng; pick: CritPicker; triggers: CritTrigger[] } {
+export function createCritGate(opts: { rng: Rng; choices?: Record<string, number> }): { pick: CritPicker; triggers: CritTrigger[] } {
   const triggers: CritTrigger[] = [];
 
   const seen = new Map<string, number>();
@@ -27,5 +27,5 @@ export function createCritGate(opts: { rng: Rng; choices?: Record<string, number
     return (chosen !== undefined && getCritEffect(info.source, info.kind, chosen)) || random;
   };
 
-  return { rng: opts.rng, pick, triggers };
+  return { pick, triggers };
 }

@@ -7,7 +7,7 @@ import type { CritChoiceBody } from "@/lib/schemas";
 import { getCritEffect } from "@/lib/utils/battle/crit-choice/catalog";
 import type { CritResume } from "@/lib/utils/battle/crit-choice/types";
 import type { BattleMutationContext, MutationResult } from "@/lib/utils/battle/pipeline/run-battle-mutation";
-import { BattleRuleError } from "@/lib/utils/battle/store";
+import { BattleRuleError, dmEvent } from "@/lib/utils/battle/store";
 
 type Resumable<T> = (ctx: BattleMutationContext, request: T, resume: CritResume) => Promise<MutationResult>;
 
@@ -21,6 +21,10 @@ export function createCritChoiceMutation(deps: CritChoiceDeps) {
     const pending = ctx.scene.pendingCritChoice;
 
     if (!pending) throw new BattleRuleError("action_rejected", "Немає вибору крита");
+
+    if ("cancel" in body) {
+      return { participants: ctx.participants, pending: ctx.pending, events: [dmEvent(ctx.scene.round, "ДМ скасував дію")], scene: { pendingCritChoice: null } };
+    }
 
     const triggers = new Map(pending.triggers.map((t) => [t.key, t]));
 
@@ -44,7 +48,9 @@ export function createCritChoiceMutation(deps: CritChoiceDeps) {
 
     const resume = { seed: pending.seed, choices };
 
-    return pending.action === "attack" ? deps.attack(ctx, pending.request as AttackBody, resume) : deps.spell(ctx, pending.request as SpellRequestData, resume);
+    const requester = { ...ctx, userId: pending.userId, isDM: pending.isDM };
+
+    return pending.action === "attack" ? deps.attack(requester, pending.request as AttackBody, resume) : deps.spell(requester, pending.request as SpellRequestData, resume);
   };
 }
 

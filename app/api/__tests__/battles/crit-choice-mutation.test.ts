@@ -101,6 +101,25 @@ describe("crit-choice mutation", () => {
     expect(out.scene?.pendingCritChoice).toBeNull();
   });
 
+  it("cancel: pending знято, стан без змін, одна подія", async () => {
+    const { ctx } = await pendingCtx();
+
+    const out = await critChoice(ctx, { cancel: true });
+
+    expect(out.scene?.pendingCritChoice).toBeNull();
+    expect(out.participants).toBe(ctx.participants);
+    expect(out.events).toHaveLength(1);
+    expect(out.events[0].resultText).toBe("ДМ скасував дію");
+    await expect(critChoice(on(), { cancel: true })).rejects.toMatchObject({ code: "action_rejected" });
+  });
+
+  it("схема: choices або cancel, не порожнє тіло", () => {
+    expect(critChoiceSchema.safeParse({ cancel: true }).success).toBe(true);
+    expect(critChoiceSchema.safeParse({ choices: {} }).success).toBe(true);
+    expect(critChoiceSchema.safeParse({}).success).toBe(false);
+    expect(critChoiceSchema.safeParse({ cancel: false }).success).toBe(false);
+  });
+
   it("через пайплайн: не-DM — 403, DM — застосовано і версія/delta без request/seed", async () => {
     const { ctx } = await pendingCtx();
 
@@ -128,7 +147,7 @@ describe("crit-choice mutation", () => {
 });
 
 describe("очищення pending", () => {
-  const stored: StoredPendingCritChoice = { action: "attack", actorId: "hero", triggers: [], request: {}, seed: 1 };
+  const stored: StoredPendingCritChoice = { action: "attack", actorId: "hero", triggers: [], request: {}, seed: 1, userId: "u", isDM: false };
 
   const withPending = () => {
     const c = context();

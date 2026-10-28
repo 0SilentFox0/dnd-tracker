@@ -45,6 +45,8 @@ describe("runWithCritChoice", () => {
       actorId: "hero",
       request: { attackerId: "hero" },
       seed: expect.any(Number),
+      userId: "user-1",
+      isDM: false,
       triggers: [{ ...info, key: "attack:hero:gob:0" }],
     });
   });
@@ -86,8 +88,26 @@ describe("runWithCritChoice", () => {
     expect(chosen).toMatchObject({ id: 3 });
   });
 
+  it("скриптовий ctx.rng діє напряму, а повтор за seed від нього не залежить", async () => {
+    const seen: number[] = [];
+
+    const run = ({ rng }: { rng: () => number }) => {
+      seen.push(rng());
+
+      return done();
+    };
+
+    await runWithCritChoice({ ...ctx, rng: () => 0.123 }, opts({ run }));
+    await runWithCritChoice({ ...ctx, rng: () => 0.123 }, opts({ resume: { seed: 5, choices: {} }, run }));
+    await runWithCritChoice(ctx, opts({ resume: { seed: 5, choices: {} }, run }));
+
+    expect(seen[0]).toBe(0.123);
+    expect(seen[1]).toBe(seen[2]);
+    expect(seen[1]).not.toBe(0.123);
+  });
+
   it("toPublicPendingCrit прибирає request і seed", () => {
-    const pub = toPublicPendingCrit({ action: "spell", actorId: "hero", triggers: [], request: { secret: 1 }, seed: 5 });
+    const pub = toPublicPendingCrit({ action: "spell", actorId: "hero", triggers: [], request: { secret: 1 }, seed: 5, userId: "u", isDM: false });
 
     expect(pub).toEqual({ action: "spell", actorId: "hero", triggers: [] });
     expect(toPublicPendingCrit(null)).toBeNull();

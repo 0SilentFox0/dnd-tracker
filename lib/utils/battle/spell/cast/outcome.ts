@@ -32,7 +32,7 @@ function applySaveCrit(state: SpellCastState, id: string, kind: CritKind): Criti
 
   const target = getP(flow, id);
 
-  const flavor = critFlavorFor(effect, caster.basicInfo.name, target.basicInfo.name, { battleId: spell.id, round: flow.ctx.round, attackerId: caster.basicInfo.id, targetId: id });
+  const flavor = critFlavorFor(effect, caster.basicInfo.name, target.basicInfo.name, { battleId: state.battleId, round: flow.ctx.round, attackerId: caster.basicInfo.id, targetId: id });
 
   flow.messages.push(`🎯 ${target.basicInfo.name}: ${effect.name} — ${flavor}`);
 
@@ -71,7 +71,12 @@ export function resolveOutcome(state: SpellCastState, id: string, withSave: bool
 
     const dc = state.saveDc;
 
-    const { roll, mod, total, success } = rollSavingThrow(target, saveAbility, dc, state.rng, state.saveRolls.find((s) => s.participantId === id)?.roll);
+    const rolled = rollSavingThrow(target, saveAbility, dc, state.rng, state.saveRolls.find((s) => s.participantId === id)?.roll);
+
+    const { roll, mod, total } = rolled;
+
+    // нат. 20/1 визначають результат лише там, де діють криті (є picker)
+    const success = flow.ctx.crit && (roll === 20 || roll === 1) ? roll === 20 : rolled.success;
 
     state.saves.push({ participantId: id, ability: saveAbility, roll, result: success ? "success" : "fail" });
 

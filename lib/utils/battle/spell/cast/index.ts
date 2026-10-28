@@ -58,6 +58,7 @@ export function castSpell(params: CastSpellParams): CastSpellResult {
     ability: abilityOf(spell),
     power: computeSpellPower({ caster: readyCaster, groupId: spell.groupId, rolls: diceRolls, participants: flow.ps, extra: actionModifiers[casterId] }),
     saveDc: spellSaveDc(readyCaster),
+    battleId,
     actionModifiers,
     rng,
     saveRolls,

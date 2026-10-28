@@ -4,10 +4,12 @@ import { describe, expect, it, vi } from "vitest";
 import { context, goblin as baseGoblin, participant } from "./fixtures";
 
 import { attackBodySchema, createAttackMutation } from "@/app/api/campaigns/[id]/battles/[battleId]/attack/attack-mutation";
+import { createCritChoiceMutation } from "@/app/api/campaigns/[id]/battles/[battleId]/crit-choice/crit-choice-mutation";
 import { createSpellMutation } from "@/app/api/campaigns/[id]/battles/[battleId]/spell/spell-mutation";
 import { AttackType } from "@/lib/constants/battle";
 import { createMockParticipant } from "@/lib/utils/battle/__tests__/fixtures/mock-participant";
 import type { BattleMutationContext } from "@/lib/utils/battle/pipeline/run-battle-mutation";
+import { mulberry32 } from "@/lib/utils/common/rng";
 
 const base = createMockParticipant();
 
@@ -92,6 +94,31 @@ describe("атака: вибір крита ДМ-ом", () => {
     expect(a.events[0].resultText).toBe(b.events[0].resultText);
   });
 
+  it("пауза → вибір «випадково» дає той самий результат, що й прапор off із тим самим rng", async () => {
+    const critChoice = createCritChoiceMutation({ attack, spell });
+
+    const random = vi.spyOn(Math, "random").mockReturnValue(0.37);
+
+    const seeded = (flag: boolean) => {
+      const c = on();
+
+      return { ...c, meta: { ...c.meta, critChoiceByDm: flag } };
+    };
+
+    const off = await attack(seeded(false), body());
+
+    const paused = seeded(true);
+
+    const pending = (await attack(paused, body())).scene?.pendingCritChoice;
+
+    const resumed = await critChoice({ ...paused, scene: { ...paused.scene, pendingCritChoice: pending! } }, { choices: { "attack:hero:gob:0": "random" } });
+
+    random.mockRestore();
+
+    expect(resumed.events[0].resultText).toBe(off.events[0].resultText);
+    expect(hpOf(resumed)).toBe(hpOf(off));
+  });
+
   it("схема відкидає critChoices/seed з тіла — pending не обійти", async () => {
     const parsed = body({ critChoices: { "attack:hero:gob:0": 1 }, seed: 5 });
 
@@ -112,6 +139,29 @@ describe("заклинання: вибір крита ДМ-ом", () => {
 
     expect(out.events).toEqual([]);
     expect(out.scene?.pendingCritChoice).toMatchObject({ action: "spell", triggers: [expect.objectContaining({ source: "save" })] });
+  });
+
+  it("повтор після вибору йде від імені гравця: free від гравця не робить каст безкоштовним", async () => {
+    const critChoice = createCritChoiceMutation({ attack, spell });
+
+    let player = on();
+
+    let pending;
+
+    for (let seed = 1; !pending && seed < 500; seed++) {
+      player = on({ rng: mulberry32(seed) });
+
+      pending = (await spell(player, data({ free: true, saveRolls: [] }) as never)).scene?.pendingCritChoice;
+    }
+
+    const dmCtx = { ...dm(), scene: { ...player.scene, pendingCritChoice: pending! } };
+
+    const out = await critChoice(dmCtx, { choices: { "save:hero:gob:0": "random" } });
+
+    const caster = out.participants.find((p) => p.basicInfo.id === "hero")!;
+
+    expect(caster.spellcasting.spellSlots["1"].current).toBe(1);
+    expect(caster.actionFlags.hasUsedAction).toBe(true);
   });
 
   it("preview pending не створює", async () => {

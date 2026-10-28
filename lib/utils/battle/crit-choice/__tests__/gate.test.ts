@@ -35,16 +35,20 @@ describe("createCritGate", () => {
   });
 
   it("потік rng не залежить від вибору", () => {
-    const withChoice = createCritGate({ rng: mulberry32(7), choices: { "attack:a:t:0": critEffectsFor("attack", "success")[1].id } });
+    const rngA = mulberry32(7);
 
-    const without = createCritGate({ rng: mulberry32(7) });
+    const rngB = mulberry32(7);
+
+    const withChoice = createCritGate({ rng: rngA, choices: { "attack:a:t:0": critEffectsFor("attack", "success")[1].id } });
+
+    const without = createCritGate({ rng: rngB });
 
     for (let i = 0; i < 3; i++) {
       withChoice.pick(info);
       without.pick(info);
     }
 
-    expect(withChoice.rng()).toBe(without.rng());
+    expect(rngA()).toBe(rngB());
   });
 });
 

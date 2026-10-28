@@ -24,10 +24,12 @@ export interface PendingCritChoice {
 export interface StoredPendingCritChoice extends PendingCritChoice {
   request: unknown;
   seed: number;
+  userId: string;
+  isDM: boolean;
 }
 
-/** key → id ефекту */
 export interface CritResume {
   seed: number;
+  /** key тригера → id ефекту */
   choices: Record<string, number>;
 }

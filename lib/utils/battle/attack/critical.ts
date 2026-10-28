@@ -46,7 +46,7 @@ const SPECS: Record<CriticalEffectType, EffectSpec | ((effect: CriticalEffect) =
   }),
   negate_damage: null,
   negate_effects: null,
-  extra_action: null,
+  extra_action: { idPart: "extra-action", type: "buff", modifiers: [{ kind: "modifyStat", stat: "actionsPerTurn", flat: 1 }], expireAtTurnEnd: true },
   double_damage: null,
   max_damage: null,
   additional_damage: null,
@@ -94,8 +94,6 @@ export function applyCriticalEffect(
       return { ...updated, actionFlags: { ...updated.actionFlags, hasUsedReaction: true } };
     case "free_attack":
       return opts.offTurn ? updated : grantExtraActions(updated, 1);
-    case "extra_action":
-      return grantExtraActions(updated, 1);
   }
 
   const spec = specFor(effect);

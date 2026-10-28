@@ -26,19 +26,19 @@ export const SAVE_SUCCESS_EFFECTS: CriticalEffect[] = [
   },
   {
     id: 3,
-    name: "Вільна атака по кастеру",
-    description: "Ціль одразу атакує кастера (1 раз)",
+    name: "Контратака",
+    description: "Додаткова дія наступного ходу",
     type: "success",
     flavor: [
-      "{target} розвіює чари {attacker} і б'є у відповідь, поки той не опам'ятався!",
-      "Заклинання {attacker} розсипається іскрами — {target} кидається в контратаку.",
+      "{target} розвіює чари {attacker} і вже готує контратаку, поки той не опам'ятався!",
+      "Заклинання {attacker} розсипається іскрами — {target} збирається з силами для контратаки.",
     ],
-    effect: { type: "free_attack", duration: 1, target: "target" },
+    effect: { type: "extra_action", target: "target" },
   },
   {
     id: 4,
     name: "Гарт",
-    description: "+2 КЗ до кінця раунду",
+    description: "+2 КЗ до початку наступного ходу",
     type: "success",
     flavor: [
       "Магія {attacker} загартовує {target}: шкіра твердне, як камінь.",
@@ -60,7 +60,7 @@ export const SAVE_SUCCESS_EFFECTS: CriticalEffect[] = [
   {
     id: 6,
     name: "Другий вдих",
-    description: "Ціль отримує додаткову дію",
+    description: "Додаткова дія наступного ходу",
     type: "success",
     flavor: [
       "{target} пережив чари {attacker} і відчуває несподіваний приплив сил.",

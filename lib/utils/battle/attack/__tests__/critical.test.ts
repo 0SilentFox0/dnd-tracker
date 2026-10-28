@@ -28,14 +28,11 @@ describe("applyCriticalEffect", () => {
     expect(p.battleData.activeEffects[0]).toMatchObject({ type: "buff", duration: 1, appliedAt: { round: 3 } });
   });
 
-  it("extra_action: +1 дія, навіть поза ходом", () => {
-    const base = createMockParticipant();
+  it("extra_action: ефект +1 до actionsPerTurn, пул не чіпає", () => {
+    const p = apply("extra_action");
 
-    const p = applyCriticalEffect({ ...base, actionFlags: { ...base.actionFlags, hasUsedAction: true } }, crit("extra_action"), 3, { offTurn: true });
-
-    expect(p.actionFlags.hasUsedAction).toBe(false);
+    expect(collectModifiers([p], p.basicInfo.id, { stat: "actionsPerTurn" }).flat).toBe(1);
     expect(p.battleData.pendingExtraActions ?? 0).toBe(0);
-    expect(applyCriticalEffect(base, crit("extra_action"), 3, { offTurn: true }).battleData.pendingExtraActions).toBe(1);
   });
 
   it.each(["negate_damage", "negate_effects"] as const)("%s не змінює учасника (обробляється в спеллі)", (type) => {
