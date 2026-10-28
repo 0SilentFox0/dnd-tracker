@@ -73,7 +73,7 @@ describe("SkillGroupAccordionItem", () => {
       campaignId: "c1",
     });
     expect(screen.getByText("Бойові скіли")).toBeInTheDocument();
-    expect(screen.getByText("2 скілів")).toBeInTheDocument();
+    expect(screen.getByText('skills.group.count {"count":2}')).toBeInTheDocument();
   });
 
   it("рендерить скіли всередині групи", () => {

@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { useTranslations } from "next-intl";
 
 import { useUpdateMainSkill } from "./useMainSkills";
 
@@ -11,6 +12,8 @@ import { errorMessage } from "@/lib/utils/common/error-message";
 import type { MainSkill, MainSkillFormData } from "@/types/main-skills";
 
 export function useMainSkillForm(campaignId: string, mainSkill: MainSkill) {
+  const t = useTranslations();
+
   const router = useRouter();
 
   const navigateFresh = useNavigateFresh();
@@ -36,7 +39,7 @@ export function useMainSkillForm(campaignId: string, mainSkill: MainSkill) {
     e.preventDefault();
 
     if (!formData.name.trim()) {
-      setError("Вкажіть назву");
+      setError(t("common.form.nameRequired"));
 
       return;
     }
@@ -47,7 +50,7 @@ export function useMainSkillForm(campaignId: string, mainSkill: MainSkill) {
       await update.mutateAsync({ mainSkillId: mainSkill.id, data: { ...formData, name: formData.name.trim(), icon: formData.icon?.trim() || undefined } });
       navigateFresh(listHref);
     } catch (err) {
-      setError(errorMessage(err, "Помилка при оновленні основного навику"));
+      setError(errorMessage(err, t("skills.mainSkills.list.updateFailed")));
     }
   };
 

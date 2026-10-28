@@ -14,9 +14,9 @@ describe("MainSkillFormFields", () => {
 
     render(<MainSkillFormFields form={form} onChange={onChange} spellGroups={[]} />);
 
-    fireEvent.change(screen.getByLabelText(/Назва/), { target: { value: "Напад" } });
-    fireEvent.change(screen.getByLabelText("Колір сегменту (hex)"), { target: { value: "#ff0000" } });
-    fireEvent.change(screen.getByLabelText("Іконка (URL)"), { target: { value: "https://example.com/i.png" } });
+    fireEvent.change(screen.getByLabelText(/skills.mainSkills.form.name/), { target: { value: "Напад" } });
+    fireEvent.change(screen.getByLabelText("skills.mainSkills.form.color (hex)"), { target: { value: "#ff0000" } });
+    fireEvent.change(screen.getByLabelText("skills.mainSkills.form.icon"), { target: { value: "https://example.com/i.png" } });
 
     expect(onChange.mock.calls).toEqual([[{ name: "Напад" }], [{ color: "#ff0000" }], [{ icon: "https://example.com/i.png" }]]);
     expect(screen.getByText("М")).toBeTruthy();
@@ -25,12 +25,12 @@ describe("MainSkillFormFields", () => {
   it("без груп заклинань — без поля школи", () => {
     render(<MainSkillFormFields form={form} onChange={vi.fn()} spellGroups={[]} />);
 
-    expect(screen.queryByText("Група заклинань (школа магії)")).toBeNull();
+    expect(screen.queryByText("skills.mainSkills.form.spellGroup")).toBeNull();
   });
 
   it("з групами — поле школи", () => {
     render(<MainSkillFormFields form={form} onChange={vi.fn()} spellGroups={[{ id: "g1", name: "Вогонь" }]} />);
 
-    expect(screen.getByText("Група заклинань (школа магії)")).toBeTruthy();
+    expect(screen.getByText("skills.mainSkills.form.spellGroup")).toBeTruthy();
   });
 });

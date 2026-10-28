@@ -1,5 +1,7 @@
 "use client";
 
+import { useTranslations } from "next-intl";
+
 import { MainSkillFormFields } from "./MainSkillFormFields";
 
 import { HudForm, HudFormPage } from "@/components/hud/form";
@@ -13,10 +15,12 @@ interface MainSkillEditFormProps {
 }
 
 export function MainSkillEditForm({ campaignId, mainSkill }: MainSkillEditFormProps) {
+  const t = useTranslations();
+
   const { form, spellGroups, status, actions } = useMainSkillForm(campaignId, mainSkill);
 
   return (
-    <HudFormPage title="Редагувати основний навик" aside="Оновіть інформацію про основний навик">
+    <HudFormPage title={t("skills.mainSkills.edit.title")} aside={t("skills.mainSkills.edit.aside")}>
       <HudForm
         id="main-skill-form"
         onSubmit={actions.submit}
@@ -24,10 +28,10 @@ export function MainSkillEditForm({ campaignId, mainSkill }: MainSkillEditFormPr
         actions={
           <>
             <Button type="button" variant="outline" onClick={actions.cancel}>
-              Скасувати
+              {t("common.actions.cancel")}
             </Button>
             <Button type="submit" disabled={status.isSaving}>
-              {status.isSaving ? "Збереження..." : "Зберегти зміни"}
+              {status.isSaving ? t("common.actions.saving") : t("skills.mainSkills.edit.submit")}
             </Button>
           </>
         }

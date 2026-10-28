@@ -2,6 +2,7 @@
 
 import type { ReactNode } from "react";
 import Link from "next/link";
+import { useTranslations } from "next-intl";
 
 import { SkillCardActionsMenu } from "./SkillCardActionsMenu";
 
@@ -40,6 +41,8 @@ export function SkillCard({
   actions,
   printMode = false,
 }: SkillCardProps) {
+  const t = useTranslations();
+
   const confirm = useConfirm();
 
   const { data: mainSkills = [] } = useMainSkills(campaignId);
@@ -54,9 +57,9 @@ export function SkillCard({
 
   const handleRemove = () =>
     confirm({
-      title: "Видалити скіл?",
-      description: `Скіл "${skillName}" буде видалено. Цю дію неможливо скасувати.`,
-      confirmLabel: "Видалити",
+      title: t("skills.card.deleteTitle"),
+      description: t("skills.card.deleteDescription", { name: skillName }),
+      confirmLabel: t("common.actions.delete"),
       destructive: true,
       onConfirm: async () => {
         await onDelete?.(skillId);
@@ -115,7 +118,7 @@ export function SkillCard({
 
           {skillSpell && (
             <div className="text-xs text-muted-foreground">
-              <span className="font-semibold">Покращення спела:</span>{" "}
+              <span className="font-semibold">{t("skills.card.spellUpgrade")}</span>{" "}
               {skillSpell.name}
             </div>
           )}
@@ -123,7 +126,7 @@ export function SkillCard({
       </div>
       {!printMode && (
         <Button variant="outline" size="sm" className="w-full text-xs sm:text-sm" asChild>
-          <Link href={`/campaigns/${campaignId}/dm/skills/${skillId}`}>Редагувати</Link>
+          <Link href={`/campaigns/${campaignId}/dm/skills/${skillId}`}>{t("common.actions.edit")}</Link>
         </Button>
       )}
     </SkillCardShell>

@@ -1,6 +1,7 @@
 "use client";
 
 import { useMemo } from "react";
+import { useTranslations } from "next-intl";
 import { Printer } from "lucide-react";
 
 import { SkillCard } from "@/components/skills/list/SkillCard";
@@ -33,6 +34,8 @@ export function PrintSkillsPageClient({
   mainSkills,
   skillTrees,
 }: PrintSkillsPageClientProps) {
+  const t = useTranslations("skills.print");
+
   const positions = useMemo(
     () => skillPlacements(skillTrees),
     [skillTrees]
@@ -49,10 +52,10 @@ export function PrintSkillsPageClient({
       <div className="no-print mb-6 flex items-center justify-between gap-4 border-b pb-4">
         <div>
           <h1 className="text-2xl font-bold">
-            Кампанія «{campaignName}» — Скіли
+            {t("title", { campaign: campaignName })}
           </h1>
           <p className="text-sm text-muted-foreground mt-1">
-            Версія для друку. Натисніть Cmd/Ctrl+P щоб зберегти PDF.
+            {t("hint")}
           </p>
         </div>
         <Button
@@ -61,19 +64,19 @@ export function PrintSkillsPageClient({
           className="shrink-0"
         >
           <Printer className="h-4 w-4 mr-2" />
-          Друкувати
+          {t("button")}
         </Button>
       </div>
 
       <header className="mb-6 hidden print:block">
         <h1 className="text-2xl font-bold">
-          Кампанія «{campaignName}» — Скіли
+          {t("title", { campaign: campaignName })}
         </h1>
       </header>
 
       {groupedByMainSkill.length === 0 ? (
         <p className="text-muted-foreground">
-          У кампанії немає скілів для друку.
+          {t("empty")}
         </p>
       ) : (
         groupedByMainSkill.map(([groupName, groupSkills]) => {
@@ -105,7 +108,7 @@ export function PrintSkillsPageClient({
                   <h2 className="text-base font-semibold">{groupDisplayName(groupName, UNGROUPED_LABELS.mainSkill)}</h2>
                   {mainSkill?.spellGroupName && (
                     <p className="text-xs text-muted-foreground">
-                      Школа магії: {mainSkill.spellGroupName}
+                      {t("school", { group: mainSkill.spellGroupName })}
                     </p>
                   )}
                 </div>

@@ -1,3 +1,4 @@
+import { useTranslations } from "next-intl";
 import { useQuery } from "@tanstack/react-query";
 
 import { skillKeys } from "./keys";
@@ -47,10 +48,12 @@ export function useUpdateMainSkill(campaignId: string) {
 }
 
 export function useDeleteMainSkill(campaignId: string) {
+  const t = useTranslations("skills.mainSkills.list");
+
   return useCrudMutation({
     mutationFn: (mainSkillId: string) =>
       deleteMainSkill(campaignId, mainSkillId),
-    errorText: "Помилка при видаленні основного навику",
+    errorText: t("deleteFailed"),
     // скіли посилаються на видалений mainSkill
     invalidateKeys: [
       skillKeys.mainSkills(campaignId),

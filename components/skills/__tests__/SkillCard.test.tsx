@@ -81,7 +81,7 @@ describe("SkillCard", () => {
 
     renderWithConfirm(<SkillCard skill={skill} campaignId="camp-123" />);
 
-    const links = screen.getAllByRole("link", { name: /редагувати/i });
+    const links = screen.getAllByRole("link", { name: "common.actions.edit" });
 
     const link = links.find((el) => el.getAttribute("href") === "/campaigns/camp-123/dm/skills/skill-1");
 
@@ -112,8 +112,8 @@ describe("SkillCard", () => {
   });
 
   const openDelete = async () => {
-    fireEvent.pointerDown(screen.getByLabelText("Меню дій"), { button: 0, ctrlKey: false, pointerType: "mouse" });
-    fireEvent.click(await screen.findByRole("menuitem", { name: /Видалити/ }));
+    fireEvent.pointerDown(screen.getByLabelText("skills.card.menu"), { button: 0, ctrlKey: false, pointerType: "mouse" });
+    fireEvent.click(await screen.findByRole("menuitem", { name: "common.actions.delete" }));
 
     return screen.findByRole("alertdialog");
   };
@@ -122,7 +122,7 @@ describe("SkillCard", () => {
     const onRemove = vi.fn(async () => {});
 
     renderWithConfirm(<SkillCard skill={minimalSkill()} campaignId="c1" actions={{ onDelete: onRemove }} />);
-    fireEvent.click(within(await openDelete()).getByRole("button", { name: "Видалити" }));
+    fireEvent.click(within(await openDelete()).getByRole("button", { name: "common.actions.delete" }));
 
     await vi.waitFor(() => expect(onRemove).toHaveBeenCalledWith("skill-1"));
   });
@@ -136,7 +136,7 @@ describe("SkillCard", () => {
 
     const dialog = await openDelete();
 
-    fireEvent.click(within(dialog).getByRole("button", { name: "Видалити" }));
+    fireEvent.click(within(dialog).getByRole("button", { name: "common.actions.delete" }));
     expect(await within(dialog).findByRole("alert")).toHaveTextContent("Скіл використовується");
   });
 });

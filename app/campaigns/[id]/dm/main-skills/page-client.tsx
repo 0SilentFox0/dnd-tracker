@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import { Network } from "lucide-react";
 
 import { SearchEmptyState } from "@/components/common/SearchEmptyState";
@@ -19,26 +20,28 @@ interface DMMainSkillsPageClientProps {
 }
 
 export function DMMainSkillsPageClient({ campaignId, initialMainSkills }: DMMainSkillsPageClientProps) {
+  const t = useTranslations("skills.mainSkills.page");
+
   const { mainSkills, total, search, createDialog, actions } = useMainSkillsList(campaignId, initialMainSkills);
 
   return (
     <HudPage>
       <HudPageHeader
-        title="Основні Навики"
-        subtitle={`Управління основними навиками для дерев прокачки · Всього: ${total}`}
+        title={t("title")}
+        subtitle={t("subtitle", { total })}
         actions={
           <>
             <ContentTransferButtons campaignId={campaignId} kind="main-skills" />
-            <Button onClick={() => createDialog.setOpen(true)}>Створити основний навик</Button>
+            <Button onClick={() => createDialog.setOpen(true)}>{t("create")}</Button>
           </>
         }
       />
 
       {total === 0 ? (
-        <EmptyState icon={Network} title="Ще немає основних навиків" description="Створіть перший основний навик — він групує скіли в дереві прокачки." />
+        <EmptyState icon={Network} title={t("emptyTitle")} description={t("emptyDescription")} />
       ) : (
         <>
-          <SearchInput value={search.query.value} onChange={search.query.set} label="Пошук основних навиків" />
+          <SearchInput value={search.query.value} onChange={search.query.set} label={t("searchLabel")} />
           {mainSkills.length === 0 ? (
             <SearchEmptyState query={search.query.value} onClear={() => search.query.set("")} />
           ) : (
