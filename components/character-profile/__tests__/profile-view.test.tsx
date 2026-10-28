@@ -6,6 +6,7 @@ import { sheetFixture, withSheet } from "./sheet-fixture";
 
 const h = vi.hoisted(() => ({ replace: vi.fn(), editorMounts: 0, sheetQuery: { data: null as unknown, isPending: false, isError: false, error: null, refetch: () => {} } }));
 
+vi.mock("@/lib/hooks/notifications", () => ({ useSeenOnOpen: () => new Set<string>(), useNotifications: () => ({ data: undefined }) }));
 vi.mock("next/navigation", () => ({ useRouter: () => ({ replace: h.replace, push: vi.fn() }) }));
 vi.mock("@/components/hud/fonts", () => ({ hudFontClassName: "", HUD_SURFACE: "hud-surface" }));
 vi.mock("@/components/skill-tree/progression", () => ({ ProgressionPanel: () => <div>прокачка</div>, LevelUpOverlay: () => null }));

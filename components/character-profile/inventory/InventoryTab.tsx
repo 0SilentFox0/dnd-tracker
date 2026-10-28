@@ -20,12 +20,15 @@ import { HudPanel } from "@/components/hud/page";
 import { Button } from "@/components/ui/button";
 import { ResponsiveDialog } from "@/components/ui/responsive-dialog";
 import { useInventory } from "@/lib/hooks/characters";
+import { useSeenOnOpen } from "@/lib/hooks/notifications";
 import type { SpecialItem } from "@/types/inventory";
 
 export function InventoryTab() {
   const { campaignId, characterId, sheet } = useProfile();
 
   const inv = useInventory(campaignId, characterId, sheet);
+
+  const newIds = useSeenOnOpen(campaignId, { types: ["item"], enabled: sheet.viewer.isOwner && !sheet.viewer.isDM });
 
   const [transfer, setTransfer] = useState<TransferTarget | null>(null);
 
@@ -70,7 +73,7 @@ export function InventoryTab() {
                 {(view) => (
                   <>
                     <PurseBar purse={view.purse} access={inv.access} onMode={setMoney} />
-                    <BackpackGrid inv={inv} onAdd={onAdd} />
+                    <BackpackGrid inv={inv} onAdd={onAdd} newIds={newIds} />
                     <p className="text-xs text-hud-muted">Зміни під час бою діють з наступного бою.</p>
                   </>
                 )}

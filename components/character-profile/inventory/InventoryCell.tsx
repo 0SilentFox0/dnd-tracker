@@ -1,6 +1,7 @@
 import type { DragEvent, ReactNode } from "react";
 
 import { EntityIcon } from "@/components/common/EntityIcon";
+import { NewPill } from "@/components/common/NewPill";
 import { ARTIFACT_RARITY_COLOR, artifactRarityLabel } from "@/lib/constants/artifacts";
 import { cn } from "@/lib/utils";
 
@@ -17,9 +18,10 @@ interface InventoryCellProps {
     onDrop?: (e: DragEvent) => void;
   };
   onClick?: () => void;
+  isNew?: boolean;
 }
 
-export function InventoryCell({ label, thing, placeholder, state, dnd, onClick }: InventoryCellProps) {
+export function InventoryCell({ label, thing, placeholder, state, dnd, onClick, isNew }: InventoryCellProps) {
   const inert = !thing && !onClick;
 
   const title = thing ? (thing.rarity ? `${thing.name} · ${artifactRarityLabel(thing.rarity)}` : thing.name) : undefined;
@@ -52,6 +54,7 @@ export function InventoryCell({ label, thing, placeholder, state, dnd, onClick }
       {thing ? (
         <>
           <EntityIcon src={thing.icon} name={thing.name} size={68} className="hud-sc pointer-events-none size-full rounded-none bg-transparent text-inherit" />
+          {isNew && <NewPill className="absolute top-0.5 left-0.5" />}
           {thing.badge && <span className="absolute right-0.5 bottom-0.5 rounded bg-black/75 px-1 text-[10px] leading-4 text-hud-ink">{thing.badge}</span>}
         </>
       ) : (

@@ -155,3 +155,20 @@ describe("PurseBar", () => {
     expect(onMode).toHaveBeenCalledWith("set");
   });
 });
+
+describe("BackpackGrid new pills", () => {
+  afterEach(cleanup);
+
+  it("marks only the cells whose artifact id is in newIds", () => {
+    const cells: BackpackCell[] = [
+      { kind: "artifact", key: "k1", artifact: { id: "a1", name: "Перстень", icon: null, rarity: "epic", slot: "ring" } } as never,
+      { kind: "artifact", key: "k2", artifact: { id: "a2", name: "Плащ", icon: null, rarity: "rare", slot: "cloak" } } as never,
+    ];
+
+    render(<BackpackGrid inv={makeInv({}, cells)} onAdd={vi.fn()} newIds={new Set(["a1"])} />);
+
+    expect(screen.getAllByText("common.notifications.new")).toHaveLength(1);
+    expect(screen.getByRole("button", { name: "Перстень" }).textContent).toContain("common.notifications.new");
+    expect(screen.getByRole("button", { name: "Плащ" }).textContent).not.toContain("common.notifications.new");
+  });
+});

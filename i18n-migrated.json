@@ -12,6 +12,7 @@
   "components/hud/**",
   "lib/hooks/common/**",
   "lib/hooks/notifications/**",
+  "components/notifications/**",
   "app/error.tsx",
   "app/not-found.tsx",
   "app/campaigns/**/loading.tsx",
