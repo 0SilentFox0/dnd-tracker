@@ -113,6 +113,8 @@ function resolveRef(ps: PlanState, ref: CompendiumRef, owner: AdaptedEntry): Res
       return;
     }
 
+    if (bound.edition && bound.edition !== "unknown" && ref.edition !== "unknown" && bound.edition !== ref.edition) owner.issues.push(issue("MIXED_EDITION_WARNING", owner.key, "warning", `Залежність із редакції ${bound.edition} під контентом ${ref.edition}: правила не конвертуються, перевірте результат`));
+
     if (bound.kind && expectedKind(ref) && bound.kind !== expectedKind(ref)) {
       errors.push(issue("BINDING_WRONG_KIND", owner.key, "error", "Зіставте з записом правильного виду"));
 

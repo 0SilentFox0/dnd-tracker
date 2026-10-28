@@ -130,4 +130,17 @@ describe("source aware atomic import plan", () => {
 
     expect(again.writes.flatMap((w) => w.issues).filter((i) => i.code === "LOCAL_CONFLICT")).toEqual([]);
   });
+
+  it("warns about an allowed mixed-edition binding without blocking", () => {
+    const adapted = adaptCompendium({ _meta: { edition: "classic", sources: [{ json: "T" }] }, background: [{ name: "Past", source: "T", feats: [{ "Gift|Test": true }] }] });
+
+    const key = canonicalKey("feat", "Gift", "Test", "classic");
+
+    const bound = { key, localId: "gift", kind: "feats" as const, edition: "one" as const, body: { name: "Gift", type: "origin" }, baseline: {} };
+
+    const plan = buildImportPlan(adapted, { campaignId: "c", existing: [], bindings: { [key]: bound }, allowMixedEdition: true });
+
+    expect(plan.errors).toEqual([]);
+    expect(plan.warnings.map((w) => w.code)).toContain("MIXED_EDITION_WARNING");
+  });
 });

@@ -27,6 +27,7 @@ import { armorStatsFromRow } from "@/lib/utils/artifacts/armor-stats";
 import { weaponStatsFromRow } from "@/lib/utils/artifacts/weapon-stats";
 import { isRecord } from "@/lib/utils/common/is-record";
 import { itemStatsFromRow } from "@/lib/utils/items/item-row";
+import { parseRules } from "@/lib/utils/rules/schema";
 import type { ScenarioContent } from "@/types/scenario";
 
 export const kindTable = { "spell-groups": "spellGroups", spells: "spells", units: "units", artifacts: "artifacts", races: "races", classes: "classes", feats: "feats", backgrounds: "backgrounds" } as const;
@@ -114,6 +115,8 @@ export const prismaImportRepository: ImportRepository = {
 
     const hasCharacters = (await prisma.character.count({ where: { campaignId: actor.campaignId } })) > 0;
 
+    const hasClasses = (await prisma.gameClass.count({ where: { campaignId: actor.campaignId } })) > 0;
+
     const provenance = await prisma.compendiumEntry.findMany({ where: { campaignId: actor.campaignId }, orderBy: { canonicalKey: "asc" } });
 
     const bindingRefs = (entry: (typeof provenance)[number]) => Object.values(object(entry.bindings)).map(object).filter((b) => typeof b.kind === "string" && typeof b.id === "string").map((b) => ({ kind: b.kind as TargetKind, id: b.id as string }));
@@ -185,7 +188,7 @@ export const prismaImportRepository: ImportRepository = {
 
     const occupiedNames = await loadNames(actor.campaignId);
 
-    return { campaignId: actor.campaignId, existing, bindings, occupiedNames, extraEntries: dependencies.entries, settingsHash: digest(settings), hasCharacters };
+    return { campaignId: actor.campaignId, existing, bindings, occupiedNames, extraEntries: dependencies.entries, settingsHash: digest(settings), hasCharacters, hasClasses, classesEnabled: parseRules(settings.rules).classes.enabled };
   },
   async findRun(actor, key) {
     const run = await prisma.compendiumImportRun.findUnique({ where: { campaignId_idempotencyKey: { campaignId: actor.campaignId, idempotencyKey: key } } });
