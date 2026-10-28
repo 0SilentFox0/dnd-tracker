@@ -38,5 +38,7 @@ export function toUnit(row: Prisma.UnitGetPayload<object>): Unit {
     legendaryActions: row.legendaryActions ?? 0,
     legendaryResistances: row.legendaryResistances ?? 0,
     saveProficiencies: readSaveProficiencies(row.saveProficiencies),
+    statblock: (row.statblock ?? {}) as Unit["statblock"],
+    spellcasting: (row.spellcasting ?? {}) as unknown as Unit["spellcasting"],
   };
 }

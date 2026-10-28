@@ -26,9 +26,10 @@ export interface ModifierEntry {
   icon?: string | null;
   /** назва вміння, раси, артефакту чи ефекту, що дав модифікатор */
   source?: string;
+  condition?: string;
 }
 
-type EntryMeta = Pick<ModifierEntry, "label" | "sourceType" | "icon" | "source">;
+type EntryMeta = Pick<ModifierEntry, "label" | "sourceType" | "icon" | "source" | "condition">;
 
 export interface ModifierResult {
   flat: number;
@@ -183,7 +184,9 @@ export function collectModifiers(
   for (const ae of liveActiveEffects(subject, participants)) {
     const owner = (ae.zone && findParticipant(participants, ae.zone.ownerId)) || subject;
 
-    for (const effect of ae.abilityEffects ?? legacyActiveEffectModifiers(ae)) add(effect, owner, { label: ae.name, sourceType: "effect", icon: ae.icon ?? ae.source?.icon, source: ae.name });
+    const condition = ae.effects.find((m) => m.type === "blinded" || m.type === "invisible")?.type;
+
+    for (const effect of ae.abilityEffects ?? legacyActiveEffectModifiers(ae)) add(effect, owner, { label: ae.name, sourceType: "effect", icon: ae.icon ?? ae.source?.icon, source: ae.name, ...(condition && { condition }) });
   }
 
   for (const effect of extra) add(effect, subject, { label: "Ця дія", sourceType: "action" });

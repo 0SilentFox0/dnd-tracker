@@ -29,6 +29,8 @@ const spellFields = {
   upcastDice: z.number().int().min(0).max(10).nullable(),
   upcastTargets: z.number().int().min(0).max(10).nullable(),
   addAbilityMod: z.boolean().nullable(),
+  fixedDice: z.boolean().nullable(),
+  damageBonus: z.number().int().min(-20).max(40).nullable(),
   fx: SpellFxSchema.describe("Візуальний ефект заклинання на мапі бою").nullable().optional(),
   lists: SpellListsSchema.describe("Теги списків заклинань класів (Wizard, Cleric…)"),
 };
@@ -52,6 +54,8 @@ export const createSpellSchema = z.object({
   upcastDice: spellFields.upcastDice.optional(),
   upcastTargets: spellFields.upcastTargets.optional(),
   addAbilityMod: spellFields.addAbilityMod.optional(),
+  fixedDice: spellFields.fixedDice.optional(),
+  damageBonus: spellFields.damageBonus.optional(),
   lists: spellFields.lists.optional(),
 });
 

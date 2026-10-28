@@ -51,3 +51,13 @@ describe("computeSpellPower addAbilityMod", () => {
     expect(power(wizard(), true).damage).toBe(4);
   });
 });
+
+it("monster spellcasting may use a physical ability from its statblock", () => {
+  const base = createMockParticipant();
+
+  const caster: BattleParticipant = { ...base, abilities: { ...base.abilities, damageModel: "5e", modifiers: { ...base.abilities.modifiers, constitution: 5 } }, spellcasting: { ...base.spellcasting, spellcastingAbility: "constitution" } };
+
+  const power = computeSpellPower({ caster, groupId: null, rolls: [4], participants: [caster], addAbilityMod: true });
+
+  expect(power.breakdown).toContain("+ мод. CON (+5)");
+});

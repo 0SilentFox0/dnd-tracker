@@ -21,6 +21,10 @@ export interface UnitAttack {
   versatileDice?: string;
 }
 
+export type UnitSenseKind = "darkvision" | "blindsight" | "tremorsense" | "truesight";
+export interface UnitStatblock { creatureType?: string; size?: "tiny" | "small" | "medium" | "large" | "huge" | "gargantuan"; alignment?: string; senses?: Partial<Record<UnitSenseKind, number>> & { passivePerception?: number }; movement?: { fly?: number; swim?: number; climb?: number; burrow?: number; hover?: boolean }; languages?: string; telepathy?: number; lairResistances?: number; }
+export interface UnitSpellcasting { ability?: AbilityKey; dc?: number; attackBonus?: number; spells: Array<{ spellId: string; perBattle?: number; recharge?: 4 | 5 | 6; castLevel?: number; dc?: number; attackBonus?: number; legendaryOnly?: boolean }>; }
+
 export interface Unit {
   abilities?: Ability[];
   abilitySummary?: string[];
@@ -54,4 +58,6 @@ export interface Unit {
   legendaryActions?: number;
   legendaryResistances?: number;
   saveProficiencies?: AbilityKey[];
+  statblock?: UnitStatblock;
+  spellcasting?: UnitSpellcasting;
 }

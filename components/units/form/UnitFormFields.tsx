@@ -6,6 +6,8 @@ import { UnitBasicInfo } from "./UnitBasicInfo";
 import { UnitFiveEFields } from "./UnitFiveEFields";
 import { UnitImmunities } from "./UnitImmunities";
 import { UnitKnownSpells } from "./UnitKnownSpells";
+import { UnitSpellcastingFields } from "./UnitSpellcastingFields";
+import { UnitStatblockFields } from "./UnitStatblockFields";
 
 import { AbilityListEditor } from "@/components/abilities";
 import { AbilityScoresGrid } from "@/components/common/AbilityScoresGrid";
@@ -67,6 +69,7 @@ export function unitFormTabs({ campaignId, editor, abilityIssues }: UnitFormFiel
       content: (
         <AbilityListEditor
           campaignId={campaignId}
+          performChoices={{ attacks: formData.attacks ?? [], spells }}
           value={formData.abilities ?? []}
           onChange={(abilities) => change({ abilities })}
           issues={abilityIssues}
@@ -76,8 +79,9 @@ export function unitFormTabs({ campaignId, editor, abilityIssues }: UnitFormFiel
     },
     {
       id: UNIT_FORM_TAB.magic,
-      label: "Магія",
-      content: <UnitKnownSpells formData={formData} spells={spells} onChange={change} />,
+      label: formData.cr != null ? "Заклинання" : "Магія",
+      content: formData.cr != null ? <UnitSpellcastingFields formData={formData} spells={spells} onChange={change} /> : <UnitKnownSpells formData={formData} spells={spells} onChange={change} />,
     },
+    ...(formData.cr != null ? [{ id: UNIT_FORM_TAB.statblock, label: "Статблок", content: <UnitStatblockFields formData={formData} onChange={change} /> }] : []),
   ];
 }

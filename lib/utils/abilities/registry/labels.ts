@@ -89,6 +89,7 @@ export function limitsLabel(l: Limits | undefined): string[] {
     l.perTurn ? `${l.perTurn}/хід` : null,
     l.cooldownRounds ? `перезарядка ${l.cooldownRounds} р.` : null,
     l.chance ? `${l.chance}%` : null,
+    l.lair ? "дія лігва" : null,
     l.legendaryCost ? `легендарна дія (${l.legendaryCost})` : null,
     l.pool ? `пул «${l.pool.key}»: ${l.pool.cost}` : null,
   ].filter((x): x is string => !!x);

@@ -28,6 +28,7 @@ export interface StartOfTurnResult {
   damageMessages: string[];
   expiredEffects: string[];
   abilityMessages: string[];
+  rechargeMessages: string[];
   statusChanged: boolean; // чи змінився статус (unconscious/dead)
   hazard?: StartOfTurnHazard;
 }
@@ -57,6 +58,26 @@ export function processStartOfTurn(
   rules?: Ruleset,
 ): StartOfTurnResult {
   let updatedParticipant = { ...participant };
+
+  const rechargeMessages: string[] = [];
+
+  for (const [key, pool] of Object.entries(participant.battleData.pools ?? {})) {
+    const usage = participant.battleData.abilityUsage?.[key];
+
+    const threshold = pool.recharge;
+
+    if (!usage || usage.battle <= 0 || (threshold !== 4 && threshold !== 5 && threshold !== 6)) continue;
+
+    const roll = Math.floor(rng() * 6) + 1;
+
+    const recharged = roll >= threshold;
+
+    if (recharged) {
+      updatedParticipant = { ...updatedParticipant, battleData: { ...updatedParticipant.battleData, abilityUsage: { ...updatedParticipant.battleData.abilityUsage, [key]: { ...usage, battle: 0 } } } };
+    }
+
+    rechargeMessages.push(`🔄 ${pool.label} ${recharged ? "перезарядилась" : "не перезарядилась"} (${roll})`);
+  }
 
   const hasNoBonusAction = hasEffectMarker(participant, "no_bonus_action");
 
@@ -223,6 +244,7 @@ export function processStartOfTurn(
     damageMessages,
     expiredEffects,
     abilityMessages,
+    rechargeMessages,
     statusChanged,
     ...(hazardResult && { hazard: hazardResult }),
   };
@@ -315,6 +337,7 @@ export function processStartOfRound(
   updatedInitiativeOrder: BattleParticipant[];
   message: string;
   triggerMessages: string[];
+  lairMessages: string[];
 } {
   // 0. Видаляємо тимчасові слоти додаткових ходів з попереднього раунду
   const baseOrder = (initiativeOrder || []).filter((p) => !p.basicInfo?.isExtraTurnSlot);
@@ -352,5 +375,6 @@ export function processStartOfRound(
     updatedInitiativeOrder: sortedOrder.map(countDownRoundEffects),
     message: `🔁 Початок Раунду ${currentRound}`,
     triggerMessages: messages,
+    lairMessages: sortedOrder.filter((p) => p.battleData.lair?.active && isActive(p) && p.battleData.resolvedAbilities.some((a) => a.limits?.lair)).map((p) => `🏰 Ініціатива 20: дія лігва — ${p.basicInfo.name}`),
   };
 }

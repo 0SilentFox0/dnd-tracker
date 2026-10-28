@@ -29,14 +29,14 @@ export const unitsResource = defineResource<UnitRow, z.infer<typeof createUnitSc
   find: (actor, id) => prisma.unit.findFirst({ where: { id, campaignId: actor.campaignId } }),
   toItem: (row) => withAbilityIssues("unit", row, toUnit(row)),
   async create(actor, data) {
-    await assertCampaignRefs(actor.campaignId, { race: data.raceId, spell: data.knownSpells });
+    await assertCampaignRefs(actor.campaignId, { race: data.raceId, spell: [...(data.knownSpells ?? []), ...(data.spellcasting?.spells ?? []).map((s) => s.spellId), ...(data.abilities ?? []).flatMap((a) => a.perform?.kind === "spell" ? [a.perform.spellId] : [])] });
 
     const unit = await prisma.unit.create({ data: unitCreateData(actor.campaignId, data) });
 
     return unit;
   },
   async update(actor, existing, data) {
-    await assertCampaignRefs(actor.campaignId, { race: data.raceId, spell: addedIds(data.knownSpells, existing.knownSpells) });
+    await assertCampaignRefs(actor.campaignId, { race: data.raceId, spell: [...(addedIds(data.knownSpells, existing.knownSpells) ?? []), ...(data.spellcasting?.spells ?? []).map((s) => s.spellId), ...(data.abilities ?? []).flatMap((a) => a.perform?.kind === "spell" ? [a.perform.spellId] : [])] });
 
     const unit = await prisma.unit.update({
       where: { id: existing.id },
@@ -70,6 +70,8 @@ export const unitsResource = defineResource<UnitRow, z.infer<typeof createUnitSc
         legendaryActions: data.legendaryActions,
         legendaryResistances: data.legendaryResistances,
         saveProficiencies: toJsonInput(data.saveProficiencies),
+        statblock: toJsonInput(data.statblock),
+        spellcasting: toJsonInput(data.spellcasting),
       },
     });
 

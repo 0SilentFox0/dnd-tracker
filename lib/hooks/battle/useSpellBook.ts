@@ -6,6 +6,7 @@ import { useModeView } from "./modes/useModeView";
 import { useBattleScene } from "./useBattleScene";
 
 import { usePrefetchSpellsByIds, useSpells, useSpellsByIds } from "@/lib/hooks/spells";
+import { poolLeft } from "@/lib/utils/abilities/engine/core/usage";
 import {
   buildSpellPick,
   casterUsesUniversalSlot,
@@ -61,13 +62,13 @@ function useBattleSpellIds(): string[] {
 
   const source = viewer.isDM ? battle.initiativeOrder : roster.myParticipants;
 
-  const key = useMemo(() => [...new Set(source.flatMap((p) => p.spellcasting?.knownSpells ?? []))].sort().join(","), [source]);
+  const key = useMemo(() => [...new Set(source.flatMap((p) => [...p.spellcasting.knownSpells, ...(p.spellcasting.grants ?? []).map((g) => g.spellId), ...p.battleData.resolvedAbilities.flatMap((a) => a.perform?.kind === "spell" ? [a.perform.spellId] : [])]))].sort().join(","), [source]);
 
   return useMemo(() => (key ? key.split(",") : NO_SPELLS), [key]);
 }
 
 const knownBy = (spells: BookSpell[] | undefined, who: BattleParticipant | null) => {
-  const ids = new Set(who?.spellcasting.knownSpells ?? []);
+  const ids = new Set([...(who?.spellcasting.knownSpells ?? []), ...(who?.spellcasting.grants ?? []).map((g) => g.spellId)]);
 
   return (spells ?? []).filter((s) => ids.has(s.id));
 };
@@ -190,7 +191,7 @@ function useSpellMapTargeting(state: SpellFlowState, dispatch: Dispatch<SpellFlo
   return template ? hover : null;
 }
 
-export function useSpellBook(caster: BattleParticipant | null, options: { allSpells?: boolean; onDone?: () => void } = {}) {
+export function useSpellBook(caster: BattleParticipant | null, options: { allSpells?: boolean; onDone?: () => void; legendary?: { abilityKey: string; spellId: string } } = {}) {
   const scene = useBattleScene();
 
   const [flow, dispatch] = useReducer(spellFlow, initialSpellFlow);
@@ -203,11 +204,17 @@ export function useSpellBook(caster: BattleParticipant | null, options: { allSpe
 
   const known = useSpellsByIds(scene.campaignId, useBattleSpellIds(), { enabled: isOpen && !free });
 
-  const spells = useMemo(() => (free ? ((library.data ?? []) as BookSpell[]) : knownBy(known.data, caster)), [free, library.data, known.data, caster]);
+  const special = options.legendary;
 
-  const byLevel = useMemo(() => groupSpellsByLevel(spells), [spells]);
+  const specialSpellId = special?.spellId;
 
-  const levels = useMemo(() => levelsWithSpells(byLevel), [byLevel]);
+  const bypassCost = free || !!special;
+
+  const spells = free ? ((library.data ?? []) as BookSpell[]) : specialSpellId ? (known.data ?? []).filter((s) => s.id === specialSpellId) : knownBy(known.data, caster);
+
+  const byLevel = groupSpellsByLevel(spells);
+
+  const levels = levelsWithSpells(byLevel);
 
   if (flow.step === "book" && !flow.levelPinned && levels.length > 0 && !levels.includes(flow.level)) {
     dispatch({ type: "SPELLS_LOADED", levels });
@@ -216,6 +223,10 @@ export function useSpellBook(caster: BattleParticipant | null, options: { allSpe
   const selected = spells.find((s) => s.id === flow.pick?.spellId) ?? null;
 
   const order = scene.battle.initiativeOrder;
+
+  if (flow.step === "book" && special && spells[0]) {
+    dispatch({ type: "PICK", pick: buildSpellPick(order, caster, spells[0], scene.battle.map ?? null, { castLevel: caster?.spellcasting.grants?.find((g) => g.spellId === special.spellId)?.castLevel }) });
+  }
 
   const map = scene.battle.map ?? null;
 
@@ -227,11 +238,16 @@ export function useSpellBook(caster: BattleParticipant | null, options: { allSpe
 
   const aimPick = flow.pick?.targetMode === "template" ? flow.pick : undefined;
 
-  const touchedAt = (cell: GridPoint | null | undefined) => (map && caster && aimPick && cell ? spellAimTargets({ map, participants: order, caster }, aimPick, cell) : []);
+  const touchedAt = (cell: GridPoint | null | undefined) => {
+    const aim = aimPick?.template?.shape === "emanation" ? caster?.battleData.position : cell;
+
+    return map && caster && aimPick && aim ? spellAimTargets({ map, participants: order, caster }, aimPick, aim) : [];
+  };
 
   const onMap = !!map && !!caster && isOnMap(caster);
 
   // полеглі зникають з карти — воскресіння обирає ціль зі списку у вікні
+
   const mapTargeting = flow.step === "targets" && onMap && flow.pick?.targetSide !== "dead";
 
   const hover = useSpellMapTargeting(flow, dispatch, {
@@ -247,6 +263,7 @@ export function useSpellBook(caster: BattleParticipant | null, options: { allSpe
   const allSide = flow.pick?.targetMode === "all" && caster && (flow.pick.targetSide === "ally" || flow.pick.targetSide === "enemy") ? modeSightedTargets(map, order, caster, skillAllTargets(order, caster, flow.pick.targetSide)) : [];
 
   // від точки, а не від id на момент кліку: рух до касту змінює, кого зачепить
+
   const state = withAllTargets(withChainTargets(withLiveAimTargets(flow, touchedAt(flow.aim).map((p) => p.basicInfo.id)), chain.map((p) => p.basicInfo.id)), allSide);
 
   const saveTargets = spellSaveTargets(targets, state, scene.viewer);
@@ -256,21 +273,39 @@ export function useSpellBook(caster: BattleParticipant | null, options: { allSpe
   const wideningOf = (s: BookSpell) => spellWidening(order, caster, s, onMap);
 
   const castLevelOf = (s: BookSpell): number | undefined => {
+    const grantLevel = caster?.spellcasting.grants?.find((g) => g.spellId === s.id)?.castLevel;
+
+    if (grantLevel !== undefined) return grantLevel;
+
     if (!caster || !flow.slotKey || flow.pick?.spellId !== s.id) return undefined;
 
     return slotOptions(caster, s.level).find((o) => o.key === flow.slotKey)?.castLevel;
   };
 
   const formulaOf = (s: BookSpell): string =>
-    caster ? spellFormulaLabel(caster, { dice: spellDefinition(s).dice, groupId: s.spellGroup?.id ?? null, level: s.level, dieSides: s.dieSides, upcastDice: s.upcastDice }, castLevelOf(s)) : "";
+    caster ? spellFormulaLabel(caster, { dice: spellDefinition(s).dice, groupId: s.spellGroup?.id ?? null, level: s.level, dieSides: s.dieSides, upcastDice: s.upcastDice, fixedDice: s.fixedDice }, castLevelOf(s)) : "";
 
-  const slotChoices = selected && !free ? slotOptions(caster, selected.level) : [];
+  const grantOf = (s: BookSpell) => caster?.spellcasting.grants?.find((g) => g.spellId === s.id);
+
+  const grantLabel = (s: BookSpell): string | undefined => {
+    const grant = grantOf(s);
+
+    if (!grant || !caster) return undefined;
+
+    const pool = grant.pool && caster.battleData.pools?.[grant.pool];
+
+    const usage = grant.pool && pool ? `${poolLeft(caster, grant.pool) ?? 0}/${pool.max}${pool.recharge ? ` · ⟳ ${pool.recharge}–6` : " за бій"}` : "За бажанням";
+
+    return `${grant.legendaryOnly ? "Лише легендарна / лігво · " : ""}${usage}`;
+  };
+
+  const slotChoices = selected && !bypassCost && !grantOf(selected) ? slotOptions(caster, selected.level) : [];
 
   const send = useEffectEvent(async () => {
     if (!caster) return;
 
     try {
-      const res = await scene.actions.castSpell.mutateAsync({ ...spellPayload(state), ...(free && { free: true }) });
+      const res = await scene.actions.castSpell.mutateAsync({ ...spellPayload(state), ...(free && { free: true }), ...(special && { legendaryKey: special.abilityKey }) });
 
       dispatch({ type: "SUCCESS" });
       scene.result.show({ kind: "spell", spellName: selected?.name ?? "Заклинання", changes: hpTotals(res?.hpChanges ?? []), targetCount: state.targetIds.length });
@@ -290,12 +325,23 @@ export function useSpellBook(caster: BattleParticipant | null, options: { allSpe
     spells, byLevel, selected, targets, saveTargets, aimPreview, mapTargeting, chain: chain.filter(visible), inRange, formulaOf, wideningOf, definitionOf: spellDefinition, slots: caster ? slotLevels(caster) : [],
     universalSlot,
     free,
-    slotLeft: (level: number) => spellSlotsLeft(caster, level, free),
-    slotCostLabel: (s: BookSpell) => spellSlotCostLabel(s, { free, universal: universalSlot, chosen: slotChoices.find((o) => o.key === state.slotKey)?.label }),
+    grantLabel,
+    slotLeft: (level: number) => spellSlotsLeft(caster, level, bypassCost || spells.some((s) => s.level === level && !!grantOf(s))),
+    slotCostLabel: (s: BookSpell) => [special ? "Легендарна дія / дія лігва" : undefined, grantLabel(s)].filter(Boolean).join(" · ") || spellSlotCostLabel(s, { free, universal: universalSlot, chosen: slotChoices.find((o) => o.key === state.slotKey)?.label }),
     slot: { options: slotChoices, value: state.slotKey },
-    noSlot: (s: BookSpell) => spellBlockedBySlots(caster, s.level, free),
+    noSlot: (s: BookSpell) => !grantOf(s) && spellBlockedBySlots(caster, s.level, bypassCost),
     attackTargets: state.pick?.needsAttackRolls ? targets.filter((t) => state.targetIds.includes(t.basicInfo.id)) : [],
-    costUsed: (s: BookSpell) => !!caster && !free && (spellDefinition(s).cost === "bonusAction" ? caster.actionFlags.hasUsedBonusAction : caster.actionFlags.hasUsedAction),
+    costUsed: (s: BookSpell) => {
+      const grant = grantOf(s);
+
+      if (!caster || free) return false;
+
+      if (grant?.legendaryOnly && !special) return true;
+
+      if (grant?.pool && (poolLeft(caster, grant.pool) ?? 0) < (grant.cost ?? 1)) return true;
+
+      return !bypassCost && (spellDefinition(s).cost === "bonusAction" ? caster.actionFlags.hasUsedBonusAction : caster.actionFlags.hasUsedAction);
+    },
   };
 
   const actions = {
@@ -306,9 +352,11 @@ export function useSpellBook(caster: BattleParticipant | null, options: { allSpe
     },
     setLevel: (level: number) => dispatch({ type: "SET_LEVEL", level }),
     pick: (s: BookSpell) => {
-      const first = free ? undefined : slotOptions(caster, s.level)[0];
+      const grant = grantOf(s);
 
-      dispatch({ type: "PICK", pick: buildSpellPick(order, caster, s, map, { castLevel: first?.castLevel }), ...(first && { slotKey: first.key }) });
+      const first = bypassCost || grant ? undefined : slotOptions(caster, s.level)[0];
+
+      dispatch({ type: "PICK", pick: buildSpellPick(order, caster, s, map, { castLevel: grant?.castLevel ?? first?.castLevel }), ...(first && { slotKey: first.key }) });
     },
     setSlot: (key: string) => {
       const option = selected && slotChoices.find((o) => o.key === key);

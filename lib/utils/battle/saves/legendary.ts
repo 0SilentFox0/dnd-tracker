@@ -9,7 +9,7 @@ export function resolveSave<T extends { success: boolean }>(participant: BattleP
 
   return {
     result: { ...result, success: true },
-    participant: { ...participant, battleData: { ...participant.battleData, legendary: { ...legendary, resistLeft } } },
+    participant: { ...participant, battleData: { ...participant.battleData, legendary: { ...legendary, resistLeft }, ...(participant.battleData.lair && { lair: { ...participant.battleData.lair, resistSpent: participant.battleData.lair.resistSpent + 1 } }) } },
     message: `👑 ${participant.basicInfo.name}: Легендарний опір — провал стає успіхом (${resistLeft} залишилось)`,
   };
 }

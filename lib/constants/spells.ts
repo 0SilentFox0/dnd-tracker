@@ -59,6 +59,7 @@ export const TEMPLATE_SHAPE_LABELS = {
   cone: "Конус",
   line: "Лінія",
   cross: "Хрест",
+  emanation: "Еманація",
 } as const;
 
 export const SPELL_SAVE_ON_SUCCESS_LABELS = {

@@ -28,6 +28,7 @@ export interface SpellCastState {
   ability: ResolvedAbility;
   power: SpellPower;
   saveDc: number;
+  attackBonus?: number;
   actionModifiers: Record<string, StaticEffect[]>;
   rng: () => number;
   saveRolls: Array<{ participantId: string; roll: number }>;

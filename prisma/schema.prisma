@@ -189,6 +189,8 @@ model Unit {
   legendaryActions     Int      @default(0)
   legendaryResistances Int      @default(0)
   saveProficiencies    Json     @default("[]")
+  statblock            Json     @default("{}")
+  spellcasting         Json     @default("{}")
   campaign             Campaign @relation(fields: [campaignId], references: [id], onDelete: Cascade)
   race                 Race?    @relation(fields: [raceId], references: [id], onDelete: SetNull)
   spellsSummoning      Spell[]  @relation("SpellSummonUnit")
@@ -241,6 +243,8 @@ model Spell {
   upcastDice            Int?
   upcastTargets         Int?
   addAbilityMod         Boolean?
+  fixedDice             Boolean?
+  damageBonus           Int?
   lists                 Json        @default("[]")
   summonUnitId          String?
   summonUnit            Unit?       @relation("SpellSummonUnit", fields: [summonUnitId], references: [id], onDelete: SetNull)

@@ -82,6 +82,8 @@ export type SpellFlowAction =
 
 export const initialSpellFlow: SpellFlowState = { step: "closed", level: 0, targetIds: [], saves: {}, attacks: {}, damage: [] };
 
+const selfCentered = (p: SpellPick | undefined) => p?.template?.shape === "emanation";
+
 const needsRolls = (p: SpellPick) => p.needsSaves || !!p.needsAttackRolls || p.diceSlots.length > 0;
 
 export function rollsComplete(s: SpellFlowState): boolean {
@@ -100,7 +102,7 @@ function previousStep(s: SpellFlowState): SpellFlowState["step"] | null {
 
   if (BACK_ORDER[i] === "rolls" && s.pick && !needsRolls(s.pick)) i -= 1;
 
-  if (BACK_ORDER[i] === "targets" && (s.pick?.targetMode === "none" || s.pick?.targetMode === "all")) i -= 1;
+  if (BACK_ORDER[i] === "targets" && (s.pick?.targetMode === "none" || s.pick?.targetMode === "all" || selfCentered(s.pick))) i -= 1;
 
   return i >= 0 ? BACK_ORDER[i] : null;
 }
@@ -113,12 +115,16 @@ const firstLevelWithSpells = (current: number, levels: number[]): number =>
 export function spellFlow(s: SpellFlowState, a: SpellFlowAction): SpellFlowState {
   switch (a.type) {
     case "OPEN":
+
       return { ...initialSpellFlow, step: "book", casterId: a.casterId, level: firstLevelWithSpells(a.level, a.levels ?? []) };
     case "SPELLS_LOADED":
+
       return s.step !== "book" || s.levelPinned ? s : { ...s, level: firstLevelWithSpells(s.level, a.levels) };
     case "SET_LEVEL":
+
       return { ...initialSpellFlow, step: "book", casterId: s.casterId, level: a.level, levelPinned: true };
     case "PICK":
+
       return { ...s, step: "spell", pick: a.pick, slotKey: a.slotKey, targetIds: [], aim: undefined, saves: {}, attacks: {}, damage: a.pick.diceSlots.map(() => undefined), error: undefined };
     case "SET_SLOT": {
       const sameDice = s.pick?.diceSlots.length === a.pick.diceSlots.length && s.pick.diceSlots.every((d, i) => d === a.pick.diceSlots[i]);
@@ -146,9 +152,10 @@ export function spellFlow(s: SpellFlowState, a: SpellFlowAction): SpellFlowState
       return { ...s, attacks: a.value === undefined ? rest : { ...rest, [a.id]: a.value } };
     }
     case "TO_TARGETS":
+
       if (!s.pick) return s;
 
-      return s.pick.targetMode === "none" || s.pick.targetMode === "all" ? afterTargets(s) : { ...s, step: "targets" };
+      return s.pick.targetMode === "none" || s.pick.targetMode === "all" || selfCentered(s.pick) ? afterTargets(s) : { ...s, step: "targets" };
     case "TOGGLE_TARGET": {
       if (s.pick?.targetMode === "single") return { ...s, targetIds: [a.id], saves: {} };
 
@@ -177,6 +184,7 @@ export function spellFlow(s: SpellFlowState, a: SpellFlowAction): SpellFlowState
       return { ...s, aim: a.aim, targetIds: a.targetIds, saves };
     }
     case "CONFIRM_TARGETS":
+
       if (s.step !== "targets") return s;
 
       if (s.pick?.targetMode === "template") return s.aim ? afterTargets(s) : s;
@@ -188,8 +196,10 @@ export function spellFlow(s: SpellFlowState, a: SpellFlowAction): SpellFlowState
       return { ...s, saves: a.value === undefined ? rest : { ...rest, [a.id]: a.value } };
     }
     case "SET_DAMAGE":
+
       return { ...s, damage: s.damage.map((v, i) => (i === a.index ? a.value : v)) };
     case "TO_SUMMARY":
+
       return rollsComplete(s) ? { ...s, step: "summary", error: undefined } : s;
     case "BACK": {
       const prev = previousStep(s);
@@ -197,12 +207,16 @@ export function spellFlow(s: SpellFlowState, a: SpellFlowAction): SpellFlowState
       return prev ? { ...s, step: prev, error: undefined } : s;
     }
     case "SUBMIT":
+
       return s.step === "summary" ? { ...s, step: "submitting", error: undefined } : s;
     case "SUCCESS":
+
       return { ...s, step: "result" };
     case "FAIL":
+
       return { ...s, step: "summary", error: a.error };
     case "CLOSE":
+
       return initialSpellFlow;
   }
 }
@@ -215,7 +229,7 @@ function withTargets(s: SpellFlowState, ids: string[]): SpellFlowState {
 
 /** Шаблон: цілі — ті, кого точка зачіпає зараз; рух після наведення змінює список, тож підказки й каст беруть живий. */
 export function withLiveAimTargets(s: SpellFlowState, liveIds: string[]): SpellFlowState {
-  return s.pick?.targetMode === "template" && s.aim ? withTargets(s, liveIds) : s;
+  return s.pick?.targetMode === "template" && (s.aim || selfCentered(s.pick)) ? withTargets(s, liveIds) : s;
 }
 
 /** «all»: цілі не обирають — уся сторона заклинання зараз, тож рятунки й підсумок бачать живий список. */
@@ -237,7 +251,7 @@ export function spellPayload(s: SpellFlowState): SpellCastData {
     casterId: s.casterId as string,
     spellId: s.pick?.spellId as string,
     targetIds: s.pick?.targetMode === "none" ? [] : s.pick?.chain ? s.targetIds.slice(0, 1) : s.targetIds,
-    ...(s.pick?.targetMode === "template" && s.aim && { targetCell: s.aim }),
+    ...(s.pick?.targetMode === "template" && !selfCentered(s.pick) && s.aim && { targetCell: s.aim }),
     diceRolls: s.damage.filter((v): v is number => typeof v === "number"),
     ...(saves.length > 0 && { saveRolls: saves }),
     ...(attacks.length > 0 && { attackRolls: attacks }),
@@ -302,7 +316,7 @@ export function buildSpellPick(order: BattleParticipant[], caster: BattlePartici
 
   const chain: SpellChain | undefined = onMap && targeting.kind === "area" && targeting.chain ? { side: targeting.side, maxTargets: targeting.maxTargets + extra } : undefined;
 
-  const template = targeting.kind === "template" && onMap ? { shape: targeting.shape, size: targeting.size, ...(targeting.hollow && { hollow: true }) } : skillRadius && SKILL_AREA_TEMPLATE;
+  const template = targeting.kind === "template" && onMap ? { shape: targeting.shape, size: targeting.size, ...(targeting.exact !== undefined && { exact: targeting.exact }), ...(targeting.hollow && { hollow: true }) } : skillRadius && SKILL_AREA_TEMPLATE;
 
   const isMulti = !chain && (targeting.kind === "area" || targeting.kind === "template");
 
@@ -314,7 +328,7 @@ export function buildSpellPick(order: BattleParticipant[], caster: BattlePartici
 
   const range = "range" in targeting ? targeting.range : undefined;
 
-  const dice = caster ? casterSpellDice(caster, { dice: def.dice, groupId: s.spellGroup?.id ?? null, level: s.level, dieSides: s.dieSides, upcastDice: s.upcastDice }, opts.castLevel) : { count: def.dice, sides: 6 };
+  const dice = caster ? casterSpellDice(caster, { dice: def.dice, groupId: s.spellGroup?.id ?? null, level: s.level, dieSides: s.dieSides, upcastDice: s.upcastDice, fixedDice: s.fixedDice }, opts.castLevel) : { count: def.dice, sides: 6 };
 
   return {
     spellId: s.id,

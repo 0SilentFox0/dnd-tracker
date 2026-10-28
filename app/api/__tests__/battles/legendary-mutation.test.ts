@@ -34,7 +34,7 @@ const find = (ps: BattleParticipant[], id: string) => ps.find((p) => p.basicInfo
 
 const attack = { action: "legendary" as const, participantId: "dragon", option: { kind: "attack" as const, attackIndex: 0, targetId: "hero" } };
 
-const ability = (abilityKey: string) => ({ action: "legendary" as const, participantId: "dragon", option: { kind: "ability" as const, abilityKey } });
+const ability = (abilityKey: string, targetIds?: string[]) => ({ action: "legendary" as const, participantId: "dragon", option: { kind: "ability" as const, abilityKey, targetIds } });
 
 describe("legendary mutation", () => {
   it("атака поза ходом: −1 дія, подія легендарної дії й атаки; правила дій 5e не потрібні", async () => {
@@ -75,4 +75,49 @@ describe("legendary mutation", () => {
   it("гравець — 403", async () => {
     await expect(legendaryMutation(context({ participants: [hero, dragonOf()] }), attack)).rejects.toBeInstanceOf(BattleAccessError);
   });
+});
+
+describe("linked legendary attacks", () => {
+  const linked = resolved({ id: "pounce", name: "Стрибок", trigger: { event: "action" }, limits: { legendaryCost: 2, perRound: 1 }, perform: { kind: "attack", attack: "хВіСт" }, effects: [{ kind: "note", text: "Рух перед атакою" }] } as never);
+
+  it("resolves the attack by name and spends the ability cost and usage", async () => {
+    const out = await legendaryMutation(dm(dragonOf({ resolvedAbilities: [linked] })), ability(linked.key, ["hero"]));
+
+    expect(find(out.participants, "hero").combatStats.currentHp).toBeLessThan(20);
+    expect(find(out.participants, "dragon").battleData.legendary?.actionsLeft).toBe(1);
+    expect(find(out.participants, "dragon").battleData.abilityUsage?.[linked.key].round).toBe(1);
+    expect(find(out.participants, "dragon").actionFlags.hasUsedAction).toBe(false);
+  });
+
+  it("rejects unresolved references and exhausted limits without spending", async () => {
+    const broken = { ...linked, perform: { kind: "attack" as const, attack: "missing" } };
+
+    const actor = dragonOf({ resolvedAbilities: [broken] });
+
+    await expect(legendaryMutation(dm(actor), ability(linked.key, ["hero"]))).rejects.toMatchObject({ code: "action_rejected" });
+    expect(actor.battleData.legendary?.actionsLeft).toBe(3);
+
+    const used = dragonOf({ resolvedAbilities: [linked], abilityUsage: { [linked.key]: { battle: 1, round: 1, turn: 1, lastRound: 1 } } });
+
+    await expect(legendaryMutation(dm(used), ability(linked.key, ["hero"]))).rejects.toMatchObject({ code: "ability_limit" });
+  });
+
+  it("refuses linked spells on the core-action route", async () => {
+    const spell = { ...linked, perform: { kind: "spell" as const, spellId: "fear" } };
+
+    await expect(legendaryMutation(dm(dragonOf({ resolvedAbilities: [spell] })), ability(spell.key))).rejects.toMatchObject({ code: "action_rejected" });
+  });
+});
+
+it("linked attack respects its condition and cooldown without spending", async () => {
+  const linked = resolved({ id: "pounce", name: "Pounce", trigger: { event: "action" }, limits: { legendaryCost: 1, cooldownRounds: 2 }, condition: { type: "hpBelow", who: "self", percent: 50 }, perform: { kind: "attack", attack: "Хвіст" }, effects: [{ kind: "note", text: "Move" }] });
+
+  const actor = dragonOf({ resolvedAbilities: [linked] });
+
+  await expect(legendaryMutation(dm(actor), ability(linked.key, ["hero"]))).rejects.toMatchObject({ code: "action_rejected" });
+  expect(actor.battleData.legendary?.actionsLeft).toBe(3);
+
+  const cooling = dragonOf({ resolvedAbilities: [{ ...linked, condition: undefined }], abilityUsage: { [linked.key]: { battle: 1, round: 0, turn: 0, lastRound: 1 } } });
+
+  await expect(legendaryMutation(dm(cooling), ability(linked.key, ["hero"]))).rejects.toMatchObject({ code: "ability_limit" });
 });

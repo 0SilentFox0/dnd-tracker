@@ -66,6 +66,8 @@ describe("staleSpellColumns", () => {
       { column: "upcastDice", names: ["Freedom of Movement"] },
       { column: "upcastTargets", names: ["Fireball", "Freedom of Movement"] },
       { column: "addAbilityMod", names: ["Fireball", "Freedom of Movement"] },
+      { column: "fixedDice", names: ["Fireball", "Freedom of Movement"] },
+      { column: "damageBonus", names: ["Fireball", "Freedom of Movement"] },
     ]);
   });
 });

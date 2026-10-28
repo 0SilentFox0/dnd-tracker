@@ -3,6 +3,7 @@ import { z, type ZodType } from "zod";
 import "server-only";
 import { ChoiceSchema } from "@/lib/schemas/choices";
 import { ClassColumnSchema } from "@/lib/schemas/classes";
+import { UnitSpellcastingSchema, UnitSpellGrantSchema, UnitStatblockSchema } from "@/lib/schemas/units";
 import { AbilitySchema, LimitsSchema } from "@/lib/utils/abilities/schema/ability";
 import { AmountSchema, FlatSchema, FormulaSchema, ScaleSchema } from "@/lib/utils/abilities/schema/common";
 import { ConditionSchema } from "@/lib/utils/abilities/schema/conditions";
@@ -43,6 +44,9 @@ export const SHARED_SCHEMAS: ReadonlyArray<Entry> = [
   [ClassColumnSchema, "ClassColumn"],
   [ChoiceSchema, "Choice"],
   [RulesetPatchSchema, "RulesetPatch"],
+  [UnitStatblockSchema, "UnitStatblock"],
+  [UnitSpellcastingSchema, "UnitSpellcasting"],
+  [UnitSpellGrantSchema, "UnitSpellGrant"],
 ];
 
 const stripMeta = (s: object): Record<string, unknown> => {

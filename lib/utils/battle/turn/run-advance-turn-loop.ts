@@ -131,6 +131,7 @@ export function runAdvanceTurnLoop(
       );
 
       updatedInitiativeOrder = roundResult.updatedInitiativeOrder;
+      newLogEntries.push(...roundResult.lairMessages.map((text) => systemEntry(nextRound, text, "lair")));
 
       // індекс обрано за старим порядком; після пересортування раунд починається з початку
       nextTurnIndex = 0;
@@ -190,6 +191,10 @@ export function runAdvanceTurnLoop(
     );
 
     updatedInitiativeOrder = turnResult.participants;
+
+    if (turnResult.rechargeMessages.length > 0) {
+      newLogEntries.push(systemEntry(nextRound, turnResult.rechargeMessages.join("; "), "spell-recharge"));
+    }
 
     // запис DOT закінчується до шкоди небезпеки — вона має власний запис
     const dotHpAfter = turnResult.hazard?.hpBefore ?? turnResult.participant.combatStats.currentHp;

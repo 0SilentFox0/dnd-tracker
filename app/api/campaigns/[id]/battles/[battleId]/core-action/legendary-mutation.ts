@@ -1,7 +1,11 @@
+import { createSpellMutation, type SpellMutationDeps } from "@/app/api/campaigns/[id]/battles/[battleId]/spell/spell-mutation";
 import { getCachedSummonPool } from "@/lib/cache/reference-data";
+import { prisma } from "@/lib/db";
 import { findParticipant, updateParticipant } from "@/lib/utils/abilities/engine/core/participants";
 import { runAbilities } from "@/lib/utils/abilities/engine/core/run-abilities";
-import { cooldownLeft, withinCountLimits } from "@/lib/utils/abilities/engine/core/usage";
+import { cooldownLeft, recordUse, withinCountLimits } from "@/lib/utils/abilities/engine/core/usage";
+import { evaluateCondition } from "@/lib/utils/abilities/registry/conditions";
+import { lairAbilities, lairBlocker, spendLair } from "@/lib/utils/battle/actions/lair";
 import { legendaryAttack } from "@/lib/utils/battle/actions/legendary";
 import { legendaryAbilities, legendaryBlocker, legendaryCostOf, spendLegendary } from "@/lib/utils/battle/actions/legendary-options";
 import type { LegendaryActionBody } from "@/lib/utils/battle/actions/schema";
@@ -13,7 +17,7 @@ import { assertAbilityTargets } from "@/lib/utils/battle/validation/ability-targ
 import { abilityOnMap } from "@/lib/utils/battle/view";
 import type { BattleParticipant } from "@/types/battle";
 
-const defaultDeps: SummonDeps = { loadPool: getCachedSummonPool };
+const defaultDeps: SpellMutationDeps = { loadPool: getCachedSummonPool, loadSpell: (id) => prisma.spell.findUnique({ where: { id } }) };
 
 function assertLegendaryAllowed(ctx: BattleMutationContext, actor: BattleParticipant, cost: number): void {
   const blocker = legendaryBlocker(actor, ctx.participants[ctx.scene.turnIndex], cost);
@@ -23,7 +27,7 @@ function assertLegendaryAllowed(ctx: BattleMutationContext, actor: BattlePartici
 
 const counter = (p: BattleParticipant) => `${p.battleData.legendary?.actionsLeft ?? 0}/${p.battleData.legendary?.actions ?? 0}`;
 
-export function createLegendaryMutation(deps: SummonDeps = defaultDeps) {
+export function createLegendaryMutation(deps: SummonDeps & Partial<Pick<SpellMutationDeps, "loadSpell">> = defaultDeps) {
   return async (ctx: BattleMutationContext, body: LegendaryActionBody): Promise<MutationResult> => {
     if (!ctx.isDM) throw new BattleAccessError(403, "Легендарні дії — лише для ДМ");
 
@@ -49,13 +53,21 @@ export function createLegendaryMutation(deps: SummonDeps = defaultDeps) {
       return { participants, pending: ctx.pending, events: [systemEvent(round, `👑 ${name}: легендарна дія — ${out.attackName} (${counter(after)})`), battleActionToEvent(out.action)] };
     }
 
-    const ability = legendaryAbilities(actor).find((a) => a.key === option.abilityKey);
+    const lair = option.kind === "lair";
+
+    const ability = (lair ? lairAbilities(actor) : legendaryAbilities(actor)).find((a) => a.key === option.abilityKey);
 
     if (!ability) throw new BattleRuleError("action_rejected", "У учасника немає такої легендарної дії");
 
     const cost = legendaryCostOf(ability);
 
-    assertLegendaryAllowed(ctx, actor, cost);
+    if (lair) {
+      const blocker = lairBlocker(actor, round, ability.key);
+
+      if (blocker) throw new BattleRuleError("action_rejected", blocker);
+    } else assertLegendaryAllowed(ctx, actor, cost);
+
+    const spend = (p: BattleParticipant) => lair ? spendLair(p, round, ability.key) : spendLegendary(p, cost);
 
     if (!withinCountLimits(actor, ability)) throw new BattleRuleError("ability_limit", "Ліміт використань вичерпано");
 
@@ -63,13 +75,37 @@ export function createLegendaryMutation(deps: SummonDeps = defaultDeps) {
 
     if (wait > 0) throw new BattleRuleError("ability_limit", `Перезарядка: ще ${wait} р.`);
 
+    if (ability.condition && !evaluateCondition(ability.condition, { owner: actor, event: { type: "action", actorId: id, abilityKey: ability.key, targetIds: option.targetIds ?? [] }, participants: ctx.participants, sourceId: ability.source.id })) throw new BattleRuleError("action_rejected", "Умова вміння не виконується");
+
+    if (ability.perform?.kind === "spell") {
+      if (!lair) throw new BattleRuleError("action_rejected", "Цю дію виконують через діалог заклинання");
+
+      return createSpellMutation({ ...defaultDeps, ...deps }, { serverRolls: true })(ctx, { casterId: id, spellId: ability.perform.spellId, legendaryKey: ability.key, targetIds: option.targetIds ?? [], diceRolls: [] });
+    }
+
+    if (ability.perform?.kind === "attack") {
+      const attackName = ability.perform.attack;
+
+      const attackIndex = actor.battleData.attacks.findIndex((a) => a.name.toLocaleLowerCase() === attackName.toLocaleLowerCase());
+
+      if (attackIndex < 0) throw new BattleRuleError("action_rejected", "Атаку вміння не знайдено");
+
+      if (option.targetIds?.length !== 1) throw new BattleRuleError("invalid_target", "Оберіть одну ціль атаки");
+
+      const out = legendaryAttack({ participants: ctx.participants, actorId: id, attackIndex, targetId: option.targetIds[0], map: ctx.meta.map, rules: ctx.meta.rules, round, rng: ctx.rng ?? Math.random, battleId: ctx.scene.id });
+
+      const participants = updateParticipant(out.participants, id, (p) => spend(recordUse(p, ability.key, round, ability.limits?.pool)));
+
+      return { participants, pending: ctx.pending, events: [systemEvent(round, `${lair ? "🏰" : "👑"} ${name}: ${lair ? "дія лігва" : "легендарна дія"} — ${ability.name} → ${out.attackName}`), battleActionToEvent(out.action)] };
+    }
+
     const targetIds = assertAbilityTargets(ability, ctx.participants, option.targetIds ?? [], { owner: actor, onMap: abilityOnMap(ctx.meta.map, actor) });
 
     const run = runAbilities(ctx.participants, { type: "action", actorId: id, abilityKey: ability.key, targetIds }, abilityRunContext(ctx));
 
     const summoned = await applyAbilitySummons(run.summons, run.participants, { campaignId: ctx.scene.campaignId, battleId: ctx.scene.id, rng: ctx.rng ?? Math.random, rules: ctx.meta.rules, deps });
 
-    const participants = updateParticipant(summoned.order, id, (p) => spendLegendary(p, cost));
+    const participants = updateParticipant(summoned.order, id, spend);
 
     const after = findParticipant(participants, id) ?? actor;
 
@@ -83,7 +119,7 @@ export function createLegendaryMutation(deps: SummonDeps = defaultDeps) {
           type: "ability",
           round,
           actorId: id,
-          resultText: `👑 ${name}: легендарна дія «${ability.name}» (${counter(after)}) — ${text}`,
+          resultText: `${lair ? "🏰" : "👑"} ${name}: ${lair ? "дія лігва" : "легендарна дія"} «${ability.name}» (${counter(after)}) — ${text}`,
           details: { actorName: name, actorSide: actor.basicInfo.side, actionDetails: { abilityKey: ability.key, skillName: ability.name } },
         },
       ],

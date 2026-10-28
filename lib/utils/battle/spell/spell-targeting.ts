@@ -133,6 +133,14 @@ const fail = (error: string): SpellTargetResolution => ({ ok: false, error });
 type TemplateTargeting = Extract<SpellTargetingDef, { kind: "template" }>;
 
 function resolveTemplate(ps: BattleParticipant[], caster: BattleParticipant, targeting: TemplateTargeting, map: BattleMapConfig, aim: GridPoint | undefined): SpellTargetResolution {
+  if (targeting.shape === "emanation") {
+    const centre = cellsOf(caster)[0];
+
+    const { cells, targets } = templateArea(map, ps, caster, targeting, centre);
+
+    return { ok: true, targetIds: targets.map((p) => p.basicInfo.id), cells, centre };
+  }
+
   if (!aim) return fail("Оберіть точку на карті");
 
   if (!inBounds(map, aim)) return fail("Точка поза картою");
@@ -146,9 +154,11 @@ function resolveTemplate(ps: BattleParticipant[], caster: BattleParticipant, tar
   const { cells, targets } = templateArea(map, ps, caster, targeting, aim);
 
   // конус/лінія у власну клітинку не мають напрямку — інакше слот згорів би без зони
+
   if (cells.length === 0) return fail("Оберіть напрямок");
 
   // промах повз усіх — теж каст: слот і дія витрачаються, FX летить у точку
+
   return { ok: true, targetIds: targets.map((p) => p.basicInfo.id), cells, centre: templateCentre(targeting, aim, cells) };
 }
 
@@ -224,12 +234,16 @@ function resolveRaw(
 
   switch (targeting.kind) {
     case "self":
+
       return { ok: true, targetIds: [caster.basicInfo.id] };
     case "allAllies":
+
       return { ok: true, targetIds: ids((p) => isTargetable(p) && p.basicInfo.side === side) };
     case "allEnemies":
+
       return { ok: true, targetIds: sighted((p) => isTargetable(p) && p.basicInfo.side !== side) };
     case "everyone":
+
       return { ok: true, targetIds: sighted(isTargetable) };
     case "allAlliesDead": {
       const fallen = ids((p) => !isActive(p) && p.basicInfo.side === side);

@@ -33,3 +33,12 @@ describe("useDmParticipantActions: легендарна дія", () => {
     expect(result.current.row.onLegendary).toBeUndefined();
   });
 });
+
+it("DM toggles lair through the participant mutation", () => {
+  const { wrapper, value, gob } = fakeScene({ isDM: true });
+
+  const { result } = renderHook(() => useDmParticipantActions({ onChangeHp: noop, onDone: noop }), { wrapper });
+
+  act(() => result.current.row.onToggleLair?.(gob));
+  expect(value.actions.updateParticipant.mutate).toHaveBeenCalledWith({ participantId: "gob", data: { lairActive: true } });
+});

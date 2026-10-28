@@ -218,6 +218,7 @@ export interface AbilityActionData {
 }
 
 export interface SpellCastData {
+  legendaryKey?: string;
   casterId: string;
   spellId: string;
   targetIds: string[];

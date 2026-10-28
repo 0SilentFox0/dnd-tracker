@@ -83,6 +83,8 @@ export interface O5Creature {
   truesight_range: number | null;
   passive_perception: number | null;
   languages_desc: string | null;
+  hover?: boolean;
+  telepathy_range?: number | null;
 }
 
 export interface O5CreatureAction {

@@ -3,7 +3,7 @@ import type { SpellFx } from "@/lib/utils/battle/fx/spells";
 import type { Ruleset } from "@/lib/utils/rules";
 import type { SpellDice } from "@/lib/utils/spells/model/dice";
 import type { SpellDefinition } from "@/lib/utils/spells/model/schema";
-import type { BattleAction, BattleMapConfig, BattleParticipant, TerrainDamage } from "@/types/battle";
+import type { BattleAction, BattleMapConfig, BattleParticipant, SpellGrant, TerrainDamage } from "@/types/battle";
 
 export interface CastableSpell {
   id: string;
@@ -28,8 +28,10 @@ export interface CastSpellParams {
   dice?: SpellDice;
   /** DM накладає з сайдбару — не витрачати spell slot */
   isDMCast?: boolean;
+  isLegendaryCast?: boolean;
   slotKey?: string;
   castLevel?: number;
+  grant?: SpellGrant;
   rng?: () => number;
   map?: BattleMapConfig | null;
   rules?: Ruleset;

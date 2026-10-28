@@ -55,6 +55,34 @@ const aimOf = (out: { events: { details?: unknown }[] }) => (out.events[0].detai
 const hpOf = (out: { participants: BattleParticipant[] }, id: string) => out.participants.find((p) => p.basicInfo.id === id)?.combatStats.currentHp;
 
 describe("spell mutation", () => {
+  it("fixed monster cantrip accepts one d10 at level 17", async () => {
+    const monster = { ...caster, abilities: { ...caster.abilities, level: 17, damageModel: "5e" as const } };
+
+    const row = { ...spellRow, level: 0, dieSides: 10, fixedDice: true } as Spell;
+
+    const out = await mutation(row)(context({ participants: [monster, goblin] }), body({ diceRolls: [7] }) as never);
+
+    expect(hpOf(out, "gob")).toBe(goblin.combatStats.currentHp - 7);
+  });
+
+  it.each([false, true])("flat bonus appears once in preview and cast (heal=%s)", async (heal) => {
+    const target = { ...goblin, combatStats: { ...goblin.combatStats, currentHp: 10, maxHp: 50 } };
+
+    const row = { ...spellRow, dice: 2, damageBonus: 3, ...(heal && { targeting: { kind: "enemy" }, spellEffects: [{ kind: "heal", amount: { spellRoll: 100 } }] }) } as unknown as Spell;
+
+    const ctx = context({ participants: [caster, target] });
+
+    const out = await mutation(row)(ctx, body({ diceRolls: [2, 3] }) as never);
+
+    const preview = await mutation(row)(ctx, body({ preview: true, diceRolls: [2, 3] }) as never);
+
+    const action = preview.response?.battleAction as { hpChanges: unknown[] };
+
+    expect(hpOf(out, "gob")).toBe(heal ? 18 : 2);
+    expect(action.hpChanges).toEqual(out.events[0].hpChanges);
+    expect(preview.participants).toBe(ctx.participants);
+  });
+
   it("каст: сума кубиків, одна подія, слот витрачено", async () => {
     const out = await mutation()(context({ participants: [caster, goblin] }), body() as never);
 
@@ -326,6 +354,25 @@ describe("spell mutation", () => {
     };
 
     const withTargeting = (targeting: unknown, name = spellRow.name) => ({ ...spellRow, name, targeting }) as unknown as Spell;
+
+    it("exact Fireball preview returns the same 49-cell disk used for casting", async () => {
+      const row = withTargeting({ kind: "template", shape: "circle", size: 20, exact: true, side: "enemy", maxTargets: 3, range: 150 });
+
+      const ctx = onMap({ participants: [placed(caster, { x: 2, y: 2 }), placed(goblin, { x: 10, y: 6 }), placed(gob2, { x: 9, y: 9 })] });
+
+      const preview = await mutation(row)(ctx, body({ preview: true, targetCell: { x: 6, y: 6 } }) as never);
+
+      const cast = await mutation(row)(ctx, body({ targetCell: { x: 6, y: 6 } }) as never);
+
+      const cells = preview.response?.cells as string[];
+
+      expect(hpOf(cast, "gob")).toBe(goblin.combatStats.currentHp - 4);
+      expect(hpOf(cast, "gob2")).toBe(gob2.combatStats.currentHp);
+      expect(cells).toHaveLength(49);
+      expect(cells).toContain("10:6");
+      expect(cells).not.toContain("9:9");
+      expect((preview.response?.battleAction as { hpChanges: unknown[] }).hpChanges).toEqual(cast.events[0].hpChanges);
+    });
 
     it("шаблон: цілі визначає сервер за точкою, обрані ігноруються", async () => {
       const row = withTargeting({ kind: "template", shape: "circle", size: 10, side: "enemy", maxTargets: 3, range: 30 });

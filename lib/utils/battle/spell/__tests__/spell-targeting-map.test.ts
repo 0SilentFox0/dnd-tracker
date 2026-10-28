@@ -34,6 +34,19 @@ const fireball: SpellTargeting = { kind: "template", shape: "circle", size: 10, 
 const resolve = (targeting: SpellTargeting, chosen: string[], ctx?: SpellMapContext, list = ps, who = caster) => resolveSpellTargets(list, who, spell, targeting, chosen, ctx);
 
 describe("resolveSpellTargets на карті", () => {
+  it("emanation resolves from every cell of a 2x2 caster without a targetCell", () => {
+    const large = { ...caster, combatStats: { ...caster.combatStats, gridSize: 2 } };
+
+    const edge = at("edge", { x: 4, y: 4 }, ParticipantSide.ENEMY);
+
+    const r = resolve({ kind: "template", shape: "emanation", size: 5, side: "enemy", maxTargets: 10 }, [], { map }, [large, edge, far], large);
+
+    expect(r).toMatchObject({ ok: true, targetIds: ["edge"] });
+    expect(r.ok && r.cells).toHaveLength(12);
+    expect(r.ok && r.cells).not.toContain("2:2");
+    expect(r.ok && r.cells).not.toContain("3:3");
+  });
+
   it("коло зачіпає союзника й ворогів, обраних ігнорує, порядок — від точки", () => {
     const r = resolve(fireball, ["far"], { map, targetCell: { x: 6, y: 3 } });
 

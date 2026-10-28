@@ -16,3 +16,15 @@ describe("migration 20261103000000_choices_feats", () => {
     expect(sql).not.toMatch(/DROP|RENAME|ALTER COLUMN/);
   });
 });
+
+const monsterSql = readFileSync(path.resolve(__dirname, "../migrations/20261104000000_monster_5e_full/migration.sql"), "utf8");
+
+describe("migration 20261104000000_monster_5e_full", () => {
+  it("лише додає колонки 4f-5a без RLS", () => {
+    expect(monsterSql).toContain(`ALTER TABLE "units" ADD COLUMN "statblock" JSONB NOT NULL DEFAULT '{}'`);
+    expect(monsterSql).toContain(`ALTER TABLE "units" ADD COLUMN "spellcasting" JSONB NOT NULL DEFAULT '{}'`);
+    expect(monsterSql).toContain(`ALTER TABLE "spells" ADD COLUMN "fixedDice" BOOLEAN`);
+    expect(monsterSql).toContain(`ALTER TABLE "spells" ADD COLUMN "damageBonus" INTEGER`);
+    expect(monsterSql).not.toMatch(/DROP|RENAME|ALTER COLUMN|ROW LEVEL SECURITY/);
+  });
+});

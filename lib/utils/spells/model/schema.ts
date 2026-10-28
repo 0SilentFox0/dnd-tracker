@@ -7,7 +7,7 @@ export const SPELL_COSTS = ["action", "bonusAction"] as const;
 
 export const SpellCostSchema = z.enum(SPELL_COSTS);
 
-export const TEMPLATE_SHAPES = ["circle", "cube", "cone", "line", "cross"] as const;
+export const TEMPLATE_SHAPES = ["circle", "cube", "cone", "line", "cross", "emanation"] as const;
 
 const rangeField = z.number().int().min(5).max(600).optional();
 
@@ -29,7 +29,8 @@ export const SpellTargetingSchema = z.discriminatedUnion("kind", [
     range: rangeField,
     zone: SpellZoneSchema.optional(),
     hollow: z.boolean().optional(),
-  }),
+    exact: z.boolean().optional(),
+  }).refine((t) => t.exact === undefined || t.shape === "circle", { message: "Точна площа доступна лише для кола", path: ["exact"] }),
   z.object({ kind: z.literal("allAllies") }),
   z.object({ kind: z.literal("allEnemies") }),
   z.object({ kind: z.literal("everyone") }),
@@ -64,6 +65,8 @@ export const SpellDefinitionSchema = z.object({
   upcastDice: z.number().int().min(0).max(10).optional(),
   upcastTargets: z.number().int().min(0).max(10).optional(),
   addAbilityMod: z.boolean().optional(),
+  fixedDice: z.boolean().optional(),
+  damageBonus: z.number().int().min(-20).max(40).optional(),
 }).refine((d) => d.resolution.kind !== "attack" || d.targeting.kind === "enemy" || d.targeting.kind === "area", {
   message: "Атака заклинанням — лише для цілі-ворога або області",
   path: ["resolution"],

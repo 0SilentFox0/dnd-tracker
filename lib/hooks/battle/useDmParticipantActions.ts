@@ -16,6 +16,7 @@ export interface DmParticipantActions {
   onRemove: (p: BattleParticipant) => void;
   onKill?: (p: BattleParticipant) => void;
   onConditions?: (p: BattleParticipant) => void;
+  onToggleLair?: (p: BattleParticipant) => void;
   onLegendary?: (p: BattleParticipant) => void;
   conditionsEnabled?: boolean;
   onDone?: () => void;
@@ -58,6 +59,7 @@ export function useDmParticipantActions({ onChangeHp, onDone }: Options) {
     onTakeControl: (p) => dmControl.set(p?.basicInfo.id ?? null),
     onRemove: (p) => update(p, { removeFromBattle: true }),
     onConditions: isActive ? (p) => setConditionsId(p.basicInfo.id) : undefined,
+    onToggleLair: isActive ? (p) => actions.updateParticipant.mutate({ participantId: p.basicInfo.id, data: { lairActive: !p.battleData.lair?.active } }) : undefined,
     onLegendary: isActive ? (p) => setLegendaryId(p.basicInfo.id) : undefined,
     conditionsEnabled: (battle.rules?.conditions.enabled ?? false) || (battle.initiativeOrder ?? []).some(hasAnyCondition5e),
     onKill: isActive ? (p) => update(p, { kill: true }) : undefined,

@@ -44,7 +44,7 @@ export function castSpell(params: CastSpellParams): CastSpellResult {
 
   const slot = readyCaster.spellcasting.spellSlots[slotKey];
 
-  const usesSlot = !isDMCast && spellNeedsSlot(spell.level);
+  const usesSlot = !isDMCast && !params.isLegendaryCast && !params.grant && spellNeedsSlot(spell.level);
 
   if (usesSlot && (!slot || slot.current <= 0)) {
     return {
@@ -67,8 +67,9 @@ export function castSpell(params: CastSpellParams): CastSpellResult {
     castLevel,
     chosenCastLevel: params.castLevel,
     ability: abilityOf(spell),
-    power: computeSpellPower({ caster: readyCaster, groupId: spell.groupId, rolls: diceRolls, participants: flow.ps, extra: actionModifiers[casterId], addAbilityMod: def.addAbilityMod }),
-    saveDc: spellSaveDc(readyCaster),
+    power: computeSpellPower({ caster: readyCaster, groupId: spell.groupId, rolls: diceRolls, participants: flow.ps, extra: actionModifiers[casterId], addAbilityMod: def.addAbilityMod, damageBonus: def.damageBonus }),
+    saveDc: params.grant?.dc ?? spellSaveDc(readyCaster),
+    attackBonus: params.grant?.attackBonus,
     actionModifiers,
     rng,
     saveRolls,
@@ -117,7 +118,7 @@ export function castSpell(params: CastSpellParams): CastSpellResult {
 
   if (tag) flow.ps = tagConcentration(psBeforeEffects, flow.ps, tag, state.ability.key);
 
-  spendCastCost(state, { slotKey, usesSlot, isDMCast });
+  spendCastCost(state, { slotKey, usesSlot, isDMCast, isLegendaryCast: params.isLegendaryCast, grant: params.grant });
 
   const result = finishSpellAction(state, { before, targetsBefore, allParticipants, battleId, round: currentRound });
 

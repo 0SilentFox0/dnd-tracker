@@ -5,6 +5,7 @@ import { X } from "lucide-react";
 import { ConditionSection } from "./sections/ConditionSection";
 import { EffectsSection } from "./sections/EffectsSection";
 import { LimitsSection } from "./sections/LimitsSection";
+import { PerformSection } from "./sections/PerformSection";
 import { TriggerSection } from "./sections/TriggerSection";
 import { useErrorsUnder } from "./editor-context";
 import { FieldErrors } from "./FieldErrors";
@@ -60,6 +61,7 @@ export function AbilityPanel({ ability, path, actions }: { ability: Ability; pat
       <TriggerSection {...section} />
       <ConditionSection {...section} />
       <LimitsSection {...section} />
+      <PerformSection {...section} />
       <EffectsSection {...section} />
     </div>
   );

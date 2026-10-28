@@ -31,6 +31,8 @@ export function buildUnitFormData(unit: Unit): Partial<Unit> {
     legendaryActions: unit.legendaryActions ?? 0,
     legendaryResistances: unit.legendaryResistances ?? 0,
     saveProficiencies: unit.saveProficiencies ?? [],
+    statblock: unit.statblock ?? {},
+    spellcasting: { ...unit.spellcasting, spells: unit.spellcasting?.spells ?? [] },
   };
 }
 
@@ -64,6 +66,8 @@ export function emptyUnitFormDefaults(): Partial<Unit> {
     legendaryActions: 0,
     legendaryResistances: 0,
     saveProficiencies: [],
+    statblock: {},
+    spellcasting: { spells: [] },
   };
 }
 

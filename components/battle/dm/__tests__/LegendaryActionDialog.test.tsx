@@ -4,8 +4,11 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 
 vi.mock("@/components/hud/fonts", () => ({ hudFontClassName: "", HUD_SURFACE: "hud-surface" }));
 
+vi.mock("@/lib/hooks/spells", async (importOriginal) => ({ ...await importOriginal<typeof import("@/lib/hooks/spells")>(), useSpells: () => ({ data: [] }), useSpellsByIds: () => ({ data: [{ id: "fear", name: "Страх", level: 1, targeting: { kind: "enemy" }, dice: 0, cost: "action" }] }), usePrefetchSpellsByIds: () => undefined }));
+
 import { LegendaryActionDialog } from "@/components/battle/dm/LegendaryActionDialog";
 import { fakeScene } from "@/lib/hooks/battle/__tests__/fake-scene";
+import { resolved } from "@/lib/utils/abilities/__tests__/fixtures";
 import type { BattleParticipant } from "@/types/battle";
 
 function sceneWithDragon(isMyTurn: boolean) {
@@ -56,4 +59,28 @@ describe("LegendaryActionDialog", () => {
 
     expect((screen.getByRole("button", { name: "Виконати" }) as HTMLButtonElement).disabled).toBe(true);
   });
+});
+
+ it("linked attack asks for its target; linked spell opens the regular spell dialog", () => {
+  const { wrapper, dragon } = sceneWithDragon(true);
+
+  dragon.battleData.resolvedAbilities = [resolved({ id: "pounce", name: "Pounce", trigger: { event: "action" }, limits: { legendaryCost: 2 }, perform: { kind: "attack", attack: "Рапіра" }, effects: [{ kind: "note", text: "Move" }] }), resolved({ id: "ray", name: "Ray", trigger: { event: "action" }, limits: { legendaryCost: 1 }, perform: { kind: "spell", spellId: "fear" }, effects: [{ kind: "note", text: "Spell" }] })];
+  render(<LegendaryActionDialog participant={dragon} onClose={vi.fn()} />, { wrapper });
+  fireEvent.click(screen.getByRole("radio", { name: /Pounce → Рапіра/ }));
+  expect(screen.getByRole("radio", { name: "Фрейда" })).toBeTruthy();
+  fireEvent.click(screen.getByRole("radio", { name: /Ray → Страх/ }));
+  fireEvent.click(screen.getByRole("button", { name: "Виконати" }));
+  expect(screen.getByRole("dialog", { name: /Книга заклинань|До списку/ })).toBeTruthy();
+ });
+
+it("offers lair actions independently of legendary budget and sends kind lair", async () => {
+  const { wrapper, dragon, coreAction } = sceneWithDragon(false);
+
+  dragon.battleData.legendary = { actions: 3, actionsLeft: 0, resistLeft: 0 };
+  dragon.battleData.lair = { active: true, baseResistances: 0, resistSpent: 0 };
+  dragon.battleData.resolvedAbilities = [resolved({ id: "fog", name: "Туман лігва", trigger: { event: "action" }, limits: { lair: true }, effects: [{ kind: "changeMorale", delta: 1 }] })];
+  render(<LegendaryActionDialog participant={dragon} onClose={vi.fn()} />, { wrapper });
+  fireEvent.click(screen.getByRole("radio", { name: /Туман лігва/ }));
+  fireEvent.click(screen.getByRole("button", { name: "Виконати" }));
+  await waitFor(() => expect(coreAction).toHaveBeenCalledWith(expect.objectContaining({ option: { kind: "lair", abilityKey: dragon.battleData.resolvedAbilities[0].key } })));
 });

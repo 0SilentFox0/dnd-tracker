@@ -16,6 +16,7 @@ export const LimitsSchema = z.object({
   perRest: z.object({ rest: z.enum(["short", "long"]), uses: z.union([z.number().int().min(1), FormulaSchema, ScaleSchema]) }).optional(),
   cooldownRounds: z.number().int().min(1).optional(),
   chance: z.number().min(1).max(100).optional(),
+  lair: z.literal(true).optional(),
   legendaryCost: z.number().int().min(1).max(3).optional(),
   pool: z.object({ key: z.string().regex(CLASS_COLUMN_KEY_RE).max(40), cost: z.number().int().min(1).max(20) }).optional(),
 });
@@ -84,6 +85,7 @@ export const AbilitySchema = z
     trigger: TriggerSchema,
     condition: ConditionSchema.optional(),
     limits: LimitsSchema.optional(),
+    perform: z.discriminatedUnion("kind", [z.object({ kind: z.literal("attack"), attack: z.string().min(1) }).strict(), z.object({ kind: z.literal("spell"), spellId: z.string().min(1) }).strict()]).optional(),
     effects: z.array(EffectSchema).min(1),
     stackable: z.boolean().optional(),
     maxStacks: z.number().int().min(1).optional(),
@@ -105,6 +107,14 @@ export const AbilitySchema = z
 
     if (a.limits?.legendaryCost !== undefined && (a.trigger.event !== "action" || a.aim)) {
       ctx.addIssue({ code: "custom", path: ["limits", "legendaryCost"], message: "Легендарна дія — лише для вміння-дії без прицілу на клітинку" });
+    }
+
+    if (a.limits?.lair && (a.trigger.event !== "action" || a.limits.legendaryCost !== undefined || a.aim)) {
+      ctx.addIssue({ code: "custom", path: ["limits", "lair"], message: "Дія лігва — лише вміння-дія без легендарної вартості й прицілу" });
+    }
+
+    if (a.perform && (!a.limits?.legendaryCost && !a.limits?.lair || a.effects.some((e) => e.kind !== "note"))) {
+      ctx.addIssue({ code: "custom", path: ["perform"], message: "Виконання атаки чи заклинання — лише легендарна дія або дія лігва з ефектами-нотатками" });
     }
 
     if (a.aim && a.trigger.event !== "bonusAction" && a.trigger.event !== "action") {

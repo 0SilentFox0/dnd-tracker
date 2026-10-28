@@ -19,6 +19,8 @@ const fields: ImportField[] = [
   { key: "upcastDice", label: "Кістки за коло", aliases: ["upcast"], type: "int", examples: ["1", "1"] },
   { key: "upcastTargets", label: "Цілі за коло", aliases: [], type: "int", examples: ["", ""] },
   { key: "addAbilityMod", label: "Додавати модифікатор", aliases: [], type: "bool", examples: ["ні", "так"] },
+  { key: "fixedDice", label: "Фіксовані кубики", aliases: ["fixed dice"], type: "bool", examples: ["ні", "так"] },
+  { key: "damageBonus", label: "Бонус шкоди", aliases: ["damage bonus"], type: "int", examples: ["", "2"] },
   jsonField("targeting", "Ціль (JSON)", ["ціль", "target"], ['{"kind":"template","shape":"circle","size":20,"side":"enemy","maxTargets":6}', '{"kind":"ally","range":5}']),
   jsonField("resolution", "Кидок (JSON)", ["кидок"], ['{"kind":"save","ability":"dexterity","onSuccess":"half"}', '{"kind":"auto"}']),
   jsonField("spellEffects", "Ефекти (JSON)", ["ефекти", "effects"], ["[]", "[]"]),

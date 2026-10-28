@@ -15,7 +15,7 @@ import { getAbilityModifier } from "@/lib/utils/common/calculations";
 import { logger } from "@/lib/utils/common/logger";
 import { getUnitImmunities } from "@/lib/utils/races/race-effects";
 import { DEFAULT_RULES, moraleCapFromRules, type Ruleset } from "@/lib/utils/rules";
-import { bestMentalAbility, isMonster5e, monsterSaveDc, multiattackAbilities, readSaveProficiencies, unitXp } from "@/lib/utils/units/monster";
+import { bestMentalAbility, isMonster5e, monsterSenseAbilities, multiattackAbilities, readSaveProficiencies, unitXp } from "@/lib/utils/units/monster";
 import type { BattleParticipant } from "@/types/battle";
 import type { Unit } from "@/types/units";
 
@@ -105,10 +105,34 @@ export async function createBattleParticipantFromUnit(
 
   const saveProficiencies = monster ? readSaveProficiencies(unit.saveProficiencies) : [];
 
+  const statblock = monster ? ((unit.statblock ?? {}) as NonNullable<Unit["statblock"]>) : {};
+
   const legendary =
-    monster && (unit.legendaryActions > 0 || unit.legendaryResistances > 0)
+    monster && (unit.legendaryActions > 0 || unit.legendaryResistances > 0 || (statblock.lairResistances ?? 0) > 0)
       ? { actions: unit.legendaryActions, actionsLeft: unit.legendaryActions, resistLeft: unit.legendaryResistances }
       : undefined;
+
+  const spellcasting = monster ? ((unit.spellcasting ?? { spells: [] }) as unknown as NonNullable<Unit["spellcasting"]>) : { spells: [] };
+
+  const configuredSpells = Array.isArray(spellcasting.spells) ? spellcasting.spells : [];
+
+  const knownSpells = monster ? [...new Set([...(unit.knownSpells as string[] || []), ...configuredSpells.map((grant) => grant.spellId)])] : (unit.knownSpells as string[]) || [];
+
+  const configured = new Set(configuredSpells.map((grant) => grant.spellId));
+
+  const grants = [
+    ...configuredSpells.map((grant) => ({
+      spellId: grant.spellId,
+      ...(grant.perBattle !== undefined && { pool: `pool:spell:${grant.spellId}`, cost: 1 }),
+      ...(grant.castLevel !== undefined && { castLevel: grant.castLevel }),
+      ...(grant.dc !== undefined && { dc: grant.dc }),
+      ...(grant.attackBonus !== undefined && { attackBonus: grant.attackBonus }),
+      ...(grant.legendaryOnly && { legendaryOnly: true as const }),
+    })),
+    ...knownSpells.filter((id) => !configured.has(id)).map((spellId) => ({ spellId })),
+  ];
+
+  const pools = Object.fromEntries(configuredSpells.flatMap((grant) => grant.perBattle === undefined ? [] : [[`pool:spell:${grant.spellId}`, { label: grant.spellId, max: grant.perBattle, rest: null, ...(grant.recharge !== undefined && { recharge: grant.recharge }) }]]));
 
   const participant: BattleParticipant = {
     basicInfo: {
@@ -140,6 +164,7 @@ export async function createBattleParticipantFromUnit(
       raceId: race?.id,
       moraleCap: moraleCapFromRules(rules),
       ...(monster && { damageModel: "5e" as const }),
+      ...(statblock.creatureType && { creatureType: statblock.creatureType }),
       ...(saveProficiencies.length > 0 && { saveProficiencies }),
     },
     combatStats: {
@@ -155,12 +180,13 @@ export async function createBattleParticipantFromUnit(
       maxTargets: unit.maxTargets ?? 1,
     },
     spellcasting: {
-      spellcastingAbility: monster ? bestMentalAbility(unit) : undefined,
+      spellcastingAbility: monster ? (spellcasting.ability ?? bestMentalAbility(unit)) : undefined,
       // HOMM-юніт без заклинальної характеристики: СК росте з тіром (level = тір)
-      spellSaveDC: monster ? monsterSaveDc(rules.formulas.saveDcBase, unit.proficiencyBonus, unit) : rules.formulas.saveDcBase + unit.proficiencyBonus + unit.level,
-      spellAttackBonus: undefined,
-      spellSlots: { universal: { max: UNIT_SPELL_SLOTS, current: UNIT_SPELL_SLOTS } },
-      knownSpells: (unit.knownSpells as string[]) || [],
+      spellSaveDC: monster ? (spellcasting.dc ?? rules.formulas.saveDcBase + unit.proficiencyBonus + modifiers[spellcasting.ability ?? bestMentalAbility(unit)]) : rules.formulas.saveDcBase + unit.proficiencyBonus + unit.level,
+      spellAttackBonus: monster ? spellcasting.attackBonus : undefined,
+      spellSlots: monster ? {} : { universal: { max: UNIT_SPELL_SLOTS, current: UNIT_SPELL_SLOTS } },
+      knownSpells,
+      ...(monster && grants.length > 0 && { grants }),
     },
     battleData: {
       attacks: battleAttacks,
@@ -169,11 +195,19 @@ export async function createBattleParticipantFromUnit(
       resolvedAbilities: [
         ...collectUnitAbilities(unit, race),
         ...(monster ? multiattackAbilities(unit) : []),
+        ...monsterSenseAbilities(unit, statblock.senses),
         ...immunityAbilities(getUnitImmunities(unit as unknown as Unit), { type: "unit", id: unit.id }),
       ],
       abilityUsage: {},
       pendingExtraActions: 0,
       ...(legendary && { legendary }),
+      ...(monster && { lair: { active: false, baseResistances: unit.legendaryResistances, resistSpent: 0 } }),
+      ...(statblock.lairResistances !== undefined && { lairResistances: statblock.lairResistances }),
+      ...(Object.keys(pools).length > 0 && { pools }),
+      ...(statblock.senses && { senses: statblock.senses }),
+      ...(statblock.movement && { movement: statblock.movement }),
+      ...(statblock.languages && { languages: statblock.languages }),
+      ...(statblock.telepathy !== undefined && { telepathy: statblock.telepathy }),
     },
     actionFlags: {
       hasUsedAction: false,

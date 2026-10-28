@@ -79,6 +79,44 @@ describe("refreshFromSource", () => {
 });
 
 describe("refreshFromSource pools", () => {
+  it("keeps a resolved spell name when a refreshed definition has only its ID", () => {
+    const base = makeParticipant({ id: "p" });
+
+    const live = { ...base, battleData: { ...base.battleData, pools: { "pool:spell:breath": { label: "Вогняний подих", max: 1, rest: null } } } };
+
+    const fresh = { ...base, battleData: { ...base.battleData, pools: { "pool:spell:breath": { label: "breath", max: 2, rest: null, recharge: 5 as const } } } };
+
+    expect(refreshFromSource(live, fresh).battleData.pools?.["pool:spell:breath"]).toEqual({ label: "Вогняний подих", max: 2, rest: null, recharge: 5 });
+  });
+
+  it("refreshes grant overrides and statblock while preserving spent usage", () => {
+    const base = makeParticipant({ id: "p" });
+
+    const live = { ...base, battleData: { ...base.battleData, abilityUsage: { "pool:spell:fireball": { battle: 1, round: 0, turn: 0 } } } };
+
+    const fresh = { ...base, abilities: { ...base.abilities, creatureType: "dragon" }, spellcasting: { ...base.spellcasting, grants: [{ spellId: "fireball", pool: "pool:spell:fireball", cost: 1, dc: 22, attackBonus: 14 }] }, battleData: { ...base.battleData, senses: { blindsight: 60 }, languages: "Draconic", telepathy: 120 } };
+
+    const out = refreshFromSource(live, fresh);
+
+    expect(out.spellcasting.grants).toEqual(fresh.spellcasting.grants);
+    expect(out.abilities.creatureType).toBe("dragon");
+    expect(out.battleData).toMatchObject({ senses: { blindsight: 60 }, languages: "Draconic", telepathy: 120 });
+    expect(out.battleData.abilityUsage).toEqual(live.battleData.abilityUsage);
+  });
+
+  it("keeps spell grant pools spent while refreshing their limits", () => {
+    const base = makeParticipant({ id: "p", hp: 7 });
+
+    const live = { ...base, battleData: { ...base.battleData, pools: { "pool:spell:fireball": { label: "fireball", max: 1, rest: null, recharge: 5 as const } }, abilityUsage: { "pool:spell:fireball": { battle: 1, round: 0, turn: 0 } } } };
+
+    const fresh = { ...base, battleData: { ...base.battleData, pools: { "pool:spell:fireball": { label: "fireball", max: 2, rest: null, recharge: 5 as const } } } };
+
+    const out = refreshFromSource(live, fresh);
+
+    expect(out.battleData.pools?.["pool:spell:fireball"]?.max).toBe(2);
+    expect(out.battleData.abilityUsage).toEqual(live.battleData.abilityUsage);
+  });
+
   it("drops live pools when the fresh build has none", () => {
     const base = makeParticipant({ id: "p", hp: 7 });
 

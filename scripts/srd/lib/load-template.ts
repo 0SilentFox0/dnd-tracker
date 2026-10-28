@@ -35,7 +35,7 @@ export type RunImport = (kind: SrdKind, rows: Record<string, unknown>[]) => Prom
 
 export type SrdImportResult = { kind: SrdKind; report: ImportReport };
 
-export const CLEARABLE_SPELL_COLUMNS = ["dieSides", "upcastDice", "upcastTargets", "addAbilityMod"] as const;
+export const CLEARABLE_SPELL_COLUMNS = ["dieSides", "upcastDice", "upcastTargets", "addAbilityMod", "fixedDice", "damageBonus"] as const;
 
 // the import treats null as an empty cell and keeps the old value, so a rerun clears dropped optional columns itself
 export function staleSpellColumns(spells: SpellRow[]): Array<{ column: (typeof CLEARABLE_SPELL_COLUMNS)[number]; names: string[] }> {

@@ -51,7 +51,7 @@ function resourceSpecs(r: AnyContentResource): OpSpec[] {
   const base = { tag: r.label, response: "item" } as const;
 
   return [
-    { ...base, id: `${r.kind}.list`, method: "GET", path: r.path, summary: `${r.label}: список`, description: r.description, need: NEED.read(r.access.list), query: r.schemas.query, response: "list", notFound: false },
+    { ...base, id: `${r.kind}.list`, method: "GET", path: r.path, summary: `${r.label}: список`, need: NEED.read(r.access.list), query: r.schemas.query, response: "list", notFound: false },
     { ...base, id: `${r.kind}.create`, method: "POST", path: r.path, summary: `${r.label}: створити`, description: r.description, need: NEED.write, body: r.schemas.apiCreate ?? r.schemas.create, errors: r.errors, status: 201, notFound: false },
     { ...base, id: `${r.kind}.get`, method: "GET", path: item, summary: `${r.label}: один запис`, need: NEED.read(r.access.item) },
     { ...base, id: `${r.kind}.update`, method: "PATCH", path: item, summary: `${r.label}: змінити`, need: NEED.write, body: r.schemas.update, errors: r.errors },
@@ -105,7 +105,7 @@ export function buildOpenApi(): OpenApiDocument {
     const operation: OpenApiOperation = {
       operationId: spec.id,
       summary: spec.summary,
-      description: `${spec.description ? `${spec.description}\n\n` : ""}Права токена: ${scope}${spec.need.access === "dm" ? "; з сесії — лише ДМ" : ""}.`,
+      description: `${spec.description ? `${spec.description}\n` : ""}Права: ${scope}${spec.need.access === "dm" ? "; ДМ" : ""}.`,
       tags: [spec.tag],
       "x-scopes": [scope],
       parameters: [...pathParams(p, spec.pathEnums), ...queryParams(spec.query)],

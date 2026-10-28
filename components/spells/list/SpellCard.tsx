@@ -59,6 +59,7 @@ export function SpellCard({ spell, campaignId, spellGroups, onRemoveFromGroup, o
           <h3 className="hud-sc truncate text-[15px] text-hud-ink">{spell.name}</h3>
           <div className="mt-1 flex flex-wrap gap-1">
             <HudPill icon={<Sparkles className="size-3" />}>{spellLevelName(spell.level)}</HudPill>
+            {groupName === "Monster Actions" && <HudPill>Monster Actions</HudPill>}
             {spellMechanicsLabels(spell).map((label) => (
               <HudPill key={label}>{label}</HudPill>
             ))}

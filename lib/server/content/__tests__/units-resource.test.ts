@@ -52,6 +52,15 @@ describe("unitsResource", () => {
     expect(db.unit.update).toHaveBeenCalled();
   });
 
+  it("update with spellcasting but no spell grants does not treat it as an iterable", async () => {
+    db.unit.update.mockResolvedValue({ id: "u1" });
+
+    await unitsResource.update(actor, { id: "u1", knownSpells: [] } as never, { spellcasting: {} } as never);
+
+    expect(db.spell.count).not.toHaveBeenCalled();
+    expect(db.unit.update).toHaveBeenCalled();
+  });
+
   it("update checks only the newly added spell ids", async () => {
     db.spell.count.mockResolvedValue(1);
     db.unit.update.mockResolvedValue({ id: "u1" });

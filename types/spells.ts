@@ -28,6 +28,8 @@ export interface Spell {
   upcastDice?: number | null;
   upcastTargets?: number | null;
   addAbilityMod?: boolean | null;
+  fixedDice?: boolean | null;
+  damageBonus?: number | null;
   spellGroup?: SpellGroupRef | null;
   fx?: unknown;
   lists?: string[];
@@ -60,6 +62,8 @@ export interface SpellFormData {
   upcastDice?: number | null;
   upcastTargets?: number | null;
   addAbilityMod?: boolean;
+  fixedDice?: boolean;
+  damageBonus?: number | null;
   fx: SpellFx;
   lists?: string[];
 }
@@ -78,6 +82,8 @@ export interface SpellRules {
   upcastDice?: number;
   upcastTargets?: number;
   addAbilityMod?: boolean;
+  fixedDice?: boolean;
+  damageBonus?: number;
 }
 
 export type BookSpell = SpellRules & {

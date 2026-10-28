@@ -4,6 +4,7 @@ import { mapCellSchema } from "@/lib/schemas/battles";
 
 export const spellSchema = z.object({
   casterId: z.string(),
+  legendaryKey: z.string().min(1).optional(),
   spellId: z.string(),
   targetIds: z.array(z.string()).default([]),
   targetCell: mapCellSchema.optional(),

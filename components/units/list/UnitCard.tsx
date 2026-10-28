@@ -7,6 +7,7 @@ import { UnitQuickStatsEditor } from "./UnitQuickStatsEditor";
 
 import { AbilitySummary } from "@/components/abilities";
 import { EntityIcon } from "@/components/common/EntityIcon";
+import { MonsterStatblock } from "@/components/common/MonsterStatblock";
 import { HudCard } from "@/components/hud/page";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -97,6 +98,8 @@ export function UnitCard({ unit, campaignId, onDelete }: UnitCardProps) {
         <div className="mt-3 mb-3">
           <UnitQuickStatsEditor unit={unit} campaignId={campaignId} primaryAttackIndex={primaryIdx} primaryAttackName={primaryAttack?.name} />
         </div>
+
+        {unit.cr != null && unit.statblock && <MonsterStatblock block={unit.statblock} />}
 
         {abilitySummary.length > 0 && (
           <div className="space-y-1 mt-4">

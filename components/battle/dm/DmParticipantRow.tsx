@@ -8,6 +8,7 @@ import { CombatStatus, ParticipantSourceType } from "@/lib/constants/battle";
 import type { DmParticipantActions } from "@/lib/hooks/battle";
 import { useConfirm } from "@/lib/hooks/common";
 import { cn } from "@/lib/utils";
+import { lairAbilities } from "@/lib/utils/battle/actions/lair";
 import { hasLegendaryActions, legendaryBadge } from "@/lib/utils/battle/actions/legendary-options";
 import { mult } from "@/lib/utils/common/format";
 import type { BattleParticipant } from "@/types/battle";
@@ -29,7 +30,7 @@ interface DmParticipantRowProps {
 }
 
 export function DmParticipantRow({ participant, controlled, actions }: DmParticipantRowProps) {
-  const { onChangeHp, onTakeControl, onRemove, onKill, onConditions, onLegendary, conditionsEnabled, onDone, unitControl } = actions;
+  const { onChangeHp, onTakeControl, onRemove, onKill, onConditions, onLegendary, onToggleLair, conditionsEnabled, onDone, unitControl } = actions;
 
   const confirm = useConfirm();
 
@@ -40,6 +41,8 @@ export function DmParticipantRow({ participant, controlled, actions }: DmPartici
   const canKill = onKill && participant.basicInfo.sourceType === ParticipantSourceType.UNIT && participant.combatStats.status !== CombatStatus.DEAD;
 
   const legendary = onLegendary && hasLegendaryActions(participant) ? participant.battleData.legendary : undefined;
+
+  const hasLair = !!participant.battleData.lair || lairAbilities(participant).length > 0;
 
   const badge = legendaryBadge(participant);
 
@@ -82,8 +85,9 @@ export function DmParticipantRow({ participant, controlled, actions }: DmPartici
         >
           <LogIn className="size-3.5" />
         </button>
-        {legendary && (
-          <button type="button" className={cn(ICON, "text-[var(--gold)] hover:border-[var(--gold)]/40")} title={`Легендарна дія (${legendary.actionsLeft}/${legendary.actions})`} aria-label={`Легендарна дія (${legendary.actionsLeft}/${legendary.actions})`} onClick={() => onLegendary?.(participant)}>
+        {hasLair && onToggleLair && <button type="button" className={cn(ICON, participant.battleData.lair?.active && "text-hud-gold-bright")} aria-label={participant.battleData.lair?.active ? "Вимкнути лігво" : "Увімкнути лігво"} title={participant.battleData.lair?.active ? "У лігві" : "Поза лігвом"} aria-pressed={!!participant.battleData.lair?.active} onClick={() => onToggleLair(participant)}>🏰</button>}
+        {(legendary || hasLair && onLegendary) && (
+          <button type="button" className={cn(ICON, "text-[var(--gold)] hover:border-[var(--gold)]/40")} title={`Легендарна дія (${legendary?.actionsLeft ?? 0}/${legendary?.actions ?? 0})`} aria-label={`Легендарна дія (${legendary?.actionsLeft ?? 0}/${legendary?.actions ?? 0})`} onClick={() => onLegendary?.(participant)}>
             <Crown className="size-3.5" />
           </button>
         )}

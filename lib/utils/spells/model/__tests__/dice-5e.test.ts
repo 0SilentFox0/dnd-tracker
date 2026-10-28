@@ -42,4 +42,19 @@ describe("casterSpellDice", () => {
 
     expect(casterSpellDice(wizard, { dice: 8, groupId: null, level: 3, upcastDice: 1 }, 4)).toEqual({ count: 9, sides: 6 });
   });
+
+  it("fixed dice ignore upcast in 5e while HOMM keeps its original formula", () => {
+    const monster = { ...homm, abilities: { ...homm.abilities, damageModel: "5e" as const, level: 17 } };
+
+    const spell = { dice: 2, groupId: null, level: 1, dieSides: 8, upcastDice: 2, fixedDice: true };
+
+    expect(casterSpellDice(monster, spell, 5)).toEqual({ count: 2, sides: 8 });
+    expect(casterSpellDice(homm, spell, 5)).toEqual(casterSpellDice(homm, { dice: 2, groupId: null, level: 1 }));
+  });
+
+  it("fixed SRD cantrip dice do not scale for a CR 17 monster", () => {
+    const monster = { ...homm, abilities: { ...homm.abilities, damageModel: "5e" as const, level: 17 } };
+
+    expect(casterSpellDice(monster, { dice: 1, groupId: null, level: 0, dieSides: 10, fixedDice: true })).toEqual({ count: 1, sides: 10 });
+  });
 });

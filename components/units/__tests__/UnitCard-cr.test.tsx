@@ -27,6 +27,14 @@ describe("UnitCard: CR", () => {
     expect(screen.getByText("CR 1/4")).toBeTruthy();
   });
 
+  it("shows creature type, senses, movement and languages for a monster", () => {
+    renderCard({ id: "dragon", name: "Дракон", level: 1, attacks: [], cr: 10, statblock: { creatureType: "dragon", senses: { blindsight: 60, passivePerception: 21 }, movement: { fly: 80, hover: true }, languages: "Draconic", telepathy: 120 } } as unknown as Unit);
+    expect(screen.getByText("dragon")).toBeTruthy();
+    expect(screen.getByText(/Сліпочуття 60 фт/)).toBeTruthy();
+    expect(screen.getByText(/Політ 80 фт/)).toBeTruthy();
+    expect(screen.getByText(/Draconic/)).toBeTruthy();
+  });
+
   it("HOMM-юніт без чипа", () => {
     renderCard({ id: "u2", name: "Гоблін", level: 1, attacks: [], cr: null } as unknown as Unit);
 

@@ -78,6 +78,22 @@ describe("templateCells", () => {
     expect(quake).not.toContain(k(9, 6));
   });
 
+  it("exact Fireball 20 фт — евклідів диск з 49 клітинок, HOMM коло лишається квадратом", () => {
+    const aim = { x: 6, y: 6 };
+
+    expect(templateCells(map, { shape: "circle", size: 20, exact: true }, [{ x: 0, y: 0 }], aim)).toHaveLength(49);
+    expect(templateCells(map, { shape: "circle", size: 20 }, [{ x: 0, y: 0 }], aim)).toHaveLength(25);
+  });
+
+  it("emanation бере Чебишеву область від усіх клітинок footprint, без власних", () => {
+    const cells = templateCells(map, { shape: "emanation", size: 5 }, [{ x: 5, y: 5 }, { x: 6, y: 5 }], { x: 0, y: 0 });
+
+    expect(cells).toHaveLength(10);
+    expect(cells).not.toContain(k(5, 5));
+    expect(cells).toContain(k(4, 4));
+    expect(cells).toContain(k(7, 6));
+  });
+
   it("куб 10 фт: 4 клітинки від aim; 15 фт: 9 з центром aim", () => {
     const even = templateCells(map, { shape: "cube", size: 10 }, [{ x: 0, y: 0 }], { x: 5, y: 5 });
 

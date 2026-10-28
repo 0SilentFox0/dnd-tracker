@@ -5,9 +5,9 @@ import { applyMainActionUsed } from "@/lib/utils/battle/participant";
 import { diffAppliedEffects } from "@/lib/utils/battle/spell/applied-effects";
 import { actionOf, flatEffects, isDamageEffect, type SpellCastState } from "@/lib/utils/battle/spell/cast/state";
 import type { CastSpellResult } from "@/lib/utils/battle/types/spell-process";
-import type { BattleParticipant } from "@/types/battle";
+import type { BattleParticipant, SpellGrant } from "@/types/battle";
 
-export function spendCastCost(state: SpellCastState, cost: { slotKey: string; usesSlot: boolean; isDMCast: boolean }): void {
+export function spendCastCost(state: SpellCastState, cost: { slotKey: string; usesSlot: boolean; isDMCast: boolean; isLegendaryCast?: boolean; grant?: SpellGrant }): void {
   let caster = getP(state.flow, state.caster.basicInfo.id);
 
   const spent = caster.spellcasting.spellSlots[cost.slotKey];
@@ -16,7 +16,26 @@ export function spendCastCost(state: SpellCastState, cost: { slotKey: string; us
     caster = { ...caster, spellcasting: { ...caster.spellcasting, spellSlots: { ...caster.spellcasting.spellSlots, [cost.slotKey]: { ...spent, current: spent.current - 1 } } } };
   }
 
-  if (!cost.isDMCast) {
+  const poolKey = cost.grant?.pool;
+
+  if (!cost.isDMCast && poolKey) {
+    const usage = caster.battleData.abilityUsage?.[poolKey] ?? { battle: 0, round: 0, turn: 0 };
+
+    const amount = cost.grant?.cost ?? 1;
+
+    const pool = caster.battleData.pools?.[poolKey];
+
+    caster = {
+      ...caster,
+      battleData: {
+        ...caster.battleData,
+        abilityUsage: { ...caster.battleData.abilityUsage, [poolKey]: { battle: usage.battle + amount, round: usage.round + amount, turn: usage.turn + amount, lastRound: state.flow.ctx.round } },
+        ...(pool && { pools: { ...caster.battleData.pools, [poolKey]: { ...pool, label: state.spell.name } } }),
+      },
+    };
+  }
+
+  if (!cost.isDMCast && !cost.isLegendaryCast) {
     caster = state.spell.definition.cost === "bonusAction" ? { ...caster, actionFlags: { ...caster.actionFlags, hasUsedBonusAction: true } } : applyMainActionUsed(caster);
   }
 

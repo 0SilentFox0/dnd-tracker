@@ -5,7 +5,11 @@ import type { SpellRequestData } from "./cast-spell-schema";
 import { getCachedSummonPool } from "@/lib/cache/reference-data";
 import { API_ERRORS } from "@/lib/constants/api-errors";
 import { prisma } from "@/lib/db";
-import { findParticipant } from "@/lib/utils/abilities/engine/core/participants";
+import { findParticipant, updateParticipant } from "@/lib/utils/abilities/engine/core/participants";
+import { cooldownLeft, poolLeft, recordUse, withinCountLimits } from "@/lib/utils/abilities/engine/core/usage";
+import { evaluateCondition } from "@/lib/utils/abilities/registry/conditions";
+import { lairAbilities, lairBlocker, spendLair } from "@/lib/utils/battle/actions/lair";
+import { legendaryAbilities, legendaryBlocker, legendaryCostOf, spendLegendary } from "@/lib/utils/battle/actions/legendary-options";
 import { isFiveE } from "@/lib/utils/battle/attack/ability";
 import { requireActor } from "@/lib/utils/battle/common/control";
 import { spellDiceRolls } from "@/lib/utils/battle/dice-record";
@@ -40,9 +44,13 @@ const defaultDeps: SpellMutationDeps = {
   loadPool: getCachedSummonPool,
 };
 
-export function createSpellMutation(deps: SpellMutationDeps = defaultDeps) {
+export function createSpellMutation(deps: SpellMutationDeps = defaultDeps, options: { serverRolls?: boolean } = {}) {
   return async (ctx: BattleMutationContext, data: SpellRequestData): Promise<MutationResult> => {
     const order = ctx.participants;
+
+    if (data.legendaryKey && !ctx.isDM) throw new BattleAccessError(403, "Легендарні дії — лише для ДМ");
+
+    if (data.legendaryKey && (data.free || data.slotKey)) throw new BattleRuleError("action_rejected", "Легендарний каст не потребує вільного режиму чи слота");
 
     const caster = requireActor(ctx, data.casterId, {
       missing: "Кастера немає в бою",
@@ -50,11 +58,38 @@ export function createSpellMutation(deps: SpellMutationDeps = defaultDeps) {
       inactive: { code: "participant_dead", message: "Кастер непритомний або мертвий" },
     });
 
+    const legendaryAbility = data.legendaryKey ? [...legendaryAbilities(caster), ...lairAbilities(caster)].find((a) => a.key === data.legendaryKey && a.perform?.kind === "spell" && a.perform.spellId === data.spellId) : undefined;
+
+    if (data.legendaryKey) {
+      if (!legendaryAbility) throw new BattleRuleError("action_rejected", "У учасника немає такої легендарної дії заклинання");
+
+      const blocker = legendaryAbility.limits?.lair ? lairBlocker(caster, ctx.scene.round, legendaryAbility.key) : legendaryBlocker(caster, order[ctx.scene.turnIndex], legendaryCostOf(legendaryAbility));
+
+      if (blocker) throw new BattleRuleError("action_rejected", blocker);
+
+      if (!withinCountLimits(caster, legendaryAbility)) throw new BattleRuleError("ability_limit", "Ліміт використань вичерпано");
+
+      const wait = cooldownLeft(caster, legendaryAbility, ctx.scene.round);
+
+      if (wait > 0) throw new BattleRuleError("ability_limit", `Перезарядка: ще ${wait} р.`);
+    }
+
     // вільний каст DM (швидкі дії): будь-яке закляття без слота; хід героя під керуванням DM — за правилами героя
+
     const free = ctx.isDM && data.free === true;
 
-    if (!free && !caster.spellcasting.knownSpells.includes(data.spellId)) {
+    const grant = free ? undefined : caster.spellcasting.grants?.find((g) => g.spellId === data.spellId);
+
+    if (!free && !legendaryAbility && !grant && !caster.spellcasting.knownSpells.includes(data.spellId)) {
       throw new BattleRuleError("action_rejected", "Кастер не знає цього заклинання");
+    }
+
+    if (grant && data.slotKey) throw new BattleRuleError("action_rejected", API_ERRORS.GRANT_NO_SLOT);
+
+    if (grant?.legendaryOnly && !legendaryAbility) throw new BattleRuleError("action_rejected", API_ERRORS.SPELL_LEGENDARY_ONLY);
+
+    if (grant?.pool && (poolLeft(caster, grant.pool) ?? -1) < (grant.cost ?? 1)) {
+      throw new BattleRuleError("action_rejected", API_ERRORS.SPELL_USES_EMPTY);
     }
 
     const spellRow = await deps.loadSpell(data.spellId);
@@ -65,12 +100,13 @@ export function createSpellMutation(deps: SpellMutationDeps = defaultDeps) {
 
     const { definition } = spell;
 
-    if (!data.preview) {
+    if (!data.preview && !legendaryAbility) {
       assertCanAct(ctx, caster.basicInfo.id, { skipMorale: free });
 
       const isBonus = definition.cost === "bonusAction";
 
       // атака й закляття за дію ділять одну дію ходу; вільний каст DM її не витрачає
+
       if (!free && (isBonus ? caster.actionFlags.hasUsedBonusAction : caster.actionFlags.hasUsedAction)) {
         throw new BattleRuleError("action_used", isBonus ? API_ERRORS.BONUS_ACTION_USED : API_ERRORS.ACTION_USED);
       }
@@ -80,11 +116,11 @@ export function createSpellMutation(deps: SpellMutationDeps = defaultDeps) {
       throw new BattleRuleError("action_rejected", "Кастер не може чаклувати");
     }
 
-    const chosen = !free && data.slotKey && isFiveE(caster) && spellNeedsSlot(spell.level) ? resolveChosenSlot(caster, spell.level, data.slotKey) : null;
+    const chosen = !free && !legendaryAbility && !grant && data.slotKey && isFiveE(caster) && spellNeedsSlot(spell.level) ? resolveChosenSlot(caster, spell.level, data.slotKey) : null;
 
     if (chosen && !chosen.ok) throw new BattleRuleError("action_rejected", chosen.error);
 
-    const castLevel = chosen?.ok ? chosen.castLevel : undefined;
+    const castLevel = grant?.castLevel ?? (chosen?.ok ? chosen.castLevel : undefined);
 
     const resolution = resolveSpellTargets(order, caster, spell, definition.targeting, data.targetIds, {
       map: ctx.meta.map,
@@ -95,12 +131,15 @@ export function createSpellMutation(deps: SpellMutationDeps = defaultDeps) {
 
     if (!resolution.ok) throw new BattleRuleError("invalid_target", resolution.error);
 
+    if (legendaryAbility?.condition && !evaluateCondition(legendaryAbility.condition, { owner: caster, event: { type: "action", actorId: caster.basicInfo.id, abilityKey: legendaryAbility.key, targetIds: resolution.targetIds }, participants: order, sourceId: legendaryAbility.source.id })) throw new BattleRuleError("action_rejected", "Умова вміння не виконується");
+
     const rng = ctx.rng ?? Math.random;
 
-    const expected = casterSpellDice(caster, { dice: definition.dice, groupId: spell.groupId, level: spell.level, dieSides: definition.dieSides, upcastDice: definition.upcastDice }, castLevel);
+    const expected = casterSpellDice(caster, { dice: definition.dice, groupId: spell.groupId, level: spell.level, dieSides: definition.dieSides, upcastDice: definition.upcastDice, fixedDice: definition.fixedDice }, castLevel);
 
     // прев'ю без кидків: сервер кидає сам, щоб показати орієнтовний результат
-    const diceRolls = data.preview && data.diceRolls.length === 0 ? rollDiceList(`${expected.count}d${expected.sides}`, rng) : data.diceRolls;
+
+    const diceRolls = (data.preview || options.serverRolls) && data.diceRolls.length === 0 ? rollDiceList(`${expected.count}d${expected.sides}`, rng) : data.diceRolls;
 
     assertSpellRolls(expected, diceRolls);
 
@@ -118,7 +157,10 @@ export function createSpellMutation(deps: SpellMutationDeps = defaultDeps) {
       attackRolls: data.attackRolls,
       dice: expected,
       isDMCast: free,
-      ...(chosen?.ok && { slotKey: data.slotKey, castLevel }),
+      isLegendaryCast: !!legendaryAbility,
+      grant,
+      castLevel,
+      ...(chosen?.ok && { slotKey: data.slotKey }),
       rng,
       map: ctx.meta.map,
       rules: ctx.meta.rules,
@@ -153,6 +195,14 @@ export function createSpellMutation(deps: SpellMutationDeps = defaultDeps) {
     }
 
     const summoned = await applyAbilitySummons(result.summons, result.allParticipantsUpdated, { campaignId: ctx.scene.campaignId, battleId: ctx.scene.id, rng, rules: ctx.meta.rules, deps });
+
+    if (legendaryAbility) summoned.order = updateParticipant(summoned.order, caster.basicInfo.id, (p) => {
+      const used = recordUse(p, legendaryAbility.key, ctx.scene.round, legendaryAbility.limits?.pool);
+
+      return legendaryAbility.limits?.lair ? spendLair(used, ctx.scene.round, legendaryAbility.key) : spendLegendary(used, legendaryCostOf(legendaryAbility));
+    });
+
+    if (legendaryAbility) result.battleAction.resultText = `${legendaryAbility.limits?.lair ? "🏰" : "👑"} ${legendaryAbility.name} — ${result.battleAction.resultText}`;
 
     const action = summoned.messages.length > 0 ? { ...result.battleAction, resultText: [result.battleAction.resultText, ...summoned.messages].join(" | ") } : result.battleAction;
 

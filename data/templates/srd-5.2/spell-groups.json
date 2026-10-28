@@ -46,5 +46,11 @@
     "name": "Transmutation",
     "color": "#2ca59a",
     "icon": "vortex"
+  },
+  {
+    "slug": "srd-2024_monster-actions",
+    "name": "Monster Actions",
+    "color": "#a34c38",
+    "icon": "skull"
   }
 ]

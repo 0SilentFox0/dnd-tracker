@@ -60,6 +60,7 @@ export const ParticipantRow = memo(function ParticipantRow({ participant: live, 
         <Portrait key={`portrait:${change?.id ?? ""}`} participant={participant} fx="main" size={48} current={current} className={cn("pointer-events-none", !change?.impact && hitFlashClass(change))} />
       </PortraitFx>
       <div className="min-w-0 flex-1">
+        {exact && participant.abilities.creatureType && <div className="text-[10px] text-[var(--hud-muted)]">{participant.abilities.creatureType}</div>}
         <div className={cn("hud-sc flex h-5 items-center whitespace-nowrap text-base font-bold text-[var(--ink)]", down && "line-through")}>
           <span className="truncate">{participant.basicInfo.name}</span>
           {exact ? <span className={cn("ml-auto pl-2 font-sans text-sm font-medium tracking-normal", hpRatio(participant) <= 0.25 ? "text-[#e04a35]" : "text-[#d6cbb7]")}>{currentHp} / {maxHp}</span> : <HealthLabel participant={participant} />}

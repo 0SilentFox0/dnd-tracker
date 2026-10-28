@@ -853,7 +853,16 @@ async function newMechanics() {
 
   const hpBefore = new Map(allies.map((p) => [p.basicInfo.id, hp(by(p.basicInfo.name))]));
 
-  const cast = await call("spell", SPELL, { casterId: by(u("Жрець")).basicInfo.id, spellId: light.id, targetIds: [by(u("Підопічний")).basicInfo.id], diceRolls: Array.from({ length: casterSpellDice(by(u("Жрець")), light).count }, () => 3) }, SIM_USER.id);
+  const lightDiceCount = casterSpellDice(by(u("Жрець")), {
+    dice: light.dice ?? 0,
+    groupId: light.groupId,
+    level: light.level,
+    dieSides: light.dieSides,
+    upcastDice: light.upcastDice,
+    fixedDice: light.fixedDice === true,
+  }).count;
+
+  const cast = await call("spell", SPELL, { casterId: by(u("Жрець")).basicInfo.id, spellId: light.id, targetIds: [by(u("Підопічний")).basicInfo.id], diceRolls: Array.from({ length: lightDiceCount }, () => 3) }, SIM_USER.id);
 
   quiet = false;
   check(

@@ -7,10 +7,10 @@ export const upcastSteps = (spellLevel: number, castLevel: number): number => Ma
 
 export function casterSpellDice(
   caster: BattleParticipant,
-  spell: { dice: number; groupId: string | null; level?: number; dieSides?: number | null; upcastDice?: number | null },
+  spell: { dice: number; groupId: string | null; level?: number; dieSides?: number | null; upcastDice?: number | null; fixedDice?: boolean },
   castLevel?: number,
 ): SpellDice {
-  if (isFiveE(caster)) return spellDice5e({ dice: spell.dice, level: spell.level ?? 0, dieSides: spell.dieSides ?? undefined, upcastDice: spell.upcastDice ?? undefined }, caster.abilities.level, castLevel ?? spell.level ?? 0);
+  if (isFiveE(caster)) return spellDice5e({ dice: spell.dice, level: spell.level ?? 0, dieSides: spell.dieSides ?? undefined, upcastDice: spell.fixedDice ? 0 : spell.upcastDice ?? undefined }, spell.fixedDice ? 1 : caster.abilities.level, castLevel ?? spell.level ?? 0);
 
   const kind = caster.basicInfo.sourceType === ParticipantSourceType.CHARACTER ? "hero" : "unit";
 

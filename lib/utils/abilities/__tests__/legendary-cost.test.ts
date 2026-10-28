@@ -27,3 +27,23 @@ describe("limits.legendaryCost", () => {
     expect(abilityOptions(p, "action", 1).map((o) => o.ability.id)).toEqual(["hit"]);
   });
 });
+
+ describe("linked legendary and lair actions", () => {
+  const linked = { ...wing, effects: [{ kind: "note", text: "Опис" }], perform: { kind: "attack", attack: "Хвіст" } };
+
+  it("keeps a linked attack or spell only on legendary or lair actions", () => {
+    expect(AbilitySchema.parse(linked)).toMatchObject({ perform: linked.perform });
+    expect(AbilitySchema.parse({ ...linked, perform: { kind: "spell", spellId: "fear" } })).toMatchObject({ perform: { kind: "spell", spellId: "fear" } });
+    expect(AbilitySchema.safeParse({ ...linked, limits: {} }).success).toBe(false);
+    expect(AbilitySchema.safeParse({ ...linked, limits: { lair: true } }).success).toBe(true);
+    expect(AbilitySchema.safeParse({ ...linked, limits: { lair: true, legendaryCost: 1 } }).success).toBe(false);
+    expect(AbilitySchema.safeParse({ ...linked, trigger: { event: "bonusAction" }, limits: { lair: true } }).success).toBe(false);
+    expect(AbilitySchema.safeParse({ ...linked, effects: [{ kind: "heal", amount: 1 }] }).success).toBe(false);
+  });
+
+  it("hides lair actions during an ordinary turn", () => {
+    const p = makeParticipant({ id: "d", abilities: [resolved({ ...wing, limits: { lair: true } } as never)] });
+
+    expect(abilityOptions(p, "action", 1)).toEqual([]);
+  });
+});

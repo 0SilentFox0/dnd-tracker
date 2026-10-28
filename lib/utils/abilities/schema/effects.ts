@@ -68,6 +68,7 @@ const SkillsOrAll = z.union([z.literal("all"), z.array(DndSkillSchema).min(1)]);
 const AbilitiesOrAll = z.union([z.literal("all"), z.array(AbilityKeySchema).min(1)]);
 
 const FlagSchema = z.discriminatedUnion("flag", [
+  z.object({ ...flagBase, flag: z.literal("sense"), sense: z.enum(["darkvision", "blindsight", "tremorsense", "truesight"]), range: z.number().int().min(5).max(1000) }),
   z.object({ ...flagBase, flag: z.literal("advantage"), attackKind: z.enum([...ATTACK_KINDS, "all"]) }),
   z.object({ ...flagBase, flag: z.literal("disadvantage") }),
   z.object({ ...flagBase, flag: z.literal("disadvantageForAttackers") }),

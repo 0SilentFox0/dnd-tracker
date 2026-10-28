@@ -21,6 +21,8 @@ interface BookSpellRow {
   upcastDice?: number | null;
   upcastTargets?: number | null;
   addAbilityMod?: boolean | null;
+  fixedDice?: boolean | null;
+  damageBonus?: number | null;
   fx?: unknown;
 }
 
@@ -37,6 +39,8 @@ export function spellRules(def: SpellDefinition): SpellRules {
     ...(def.upcastDice !== undefined && { upcastDice: def.upcastDice }),
     ...(def.upcastTargets !== undefined && { upcastTargets: def.upcastTargets }),
     ...(def.addAbilityMod && { addAbilityMod: true }),
+    ...(def.fixedDice && { fixedDice: true }),
+    ...(def.damageBonus !== undefined && { damageBonus: def.damageBonus }),
   };
 }
 

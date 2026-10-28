@@ -1,6 +1,5 @@
 import type { AbilityUsageCounter, ResolvedAbility, StaticEffect } from "./abilities";
 
-import { type SpellcastingAbility } from "@/lib/constants/abilities";
 import { AttackType, type BattleStatus, type CombatStatusType, type MAZE_DIFFICULTIES, type MAZE_MARK_SYMBOLS, ParticipantSide, type ParticipantSourceTypeValue } from "@/lib/constants/battle";
 import type { WEATHER_KINDS } from "@/lib/constants/battle-weather";
 import type { CriticalEffect } from "@/lib/constants/critical-effects";
@@ -146,6 +145,7 @@ export interface BattleParticipantBasicInfo {
  * Характеристики учасника бою
  */
 export interface BattleParticipantAbilities {
+  creatureType?: string;
   damageModel?: "5e";
   level: number;
   initiative: number; // поточна ініціатива (з урахуванням бонусів)
@@ -183,6 +183,16 @@ export interface BattleParticipantAbilities {
   heroDice?: { melee?: Record<number, string>; ranged?: Record<number, string> };
 }
 
+export interface SpellGrant {
+  spellId: string;
+  pool?: string;
+  cost?: number;
+  castLevel?: number;
+  dc?: number;
+  attackBonus?: number;
+  legendaryOnly?: true;
+}
+
 export interface GridPoint {
   x: number;
   y: number;
@@ -213,7 +223,7 @@ export interface MazeConfig {
   moved?: boolean;
 }
 
-export type TemplateShape = "circle" | "cube" | "cone" | "line" | "cross";
+export type TemplateShape = "circle" | "cube" | "cone" | "line" | "cross" | "emanation";
 
 /** size у футах: радіус кола, сторона куба, довжина конуса/лінії, промінь хреста */
 export interface SpellTemplate {
@@ -221,6 +231,8 @@ export interface SpellTemplate {
   size: number;
   /** Кільце: клітинка прицілу кола не вражається */
   hollow?: boolean;
+  /** 5e: euclidean disk rather than legacy HOMM square */
+  exact?: boolean;
 }
 
 export type WeatherKind = (typeof WEATHER_KINDS)[number];
@@ -332,11 +344,12 @@ export interface BattleParticipantCombatStats {
  * Дані про заклинання учасника
  */
 export interface BattleParticipantSpellcasting {
-  spellcastingAbility?: SpellcastingAbility;
+  spellcastingAbility?: AbilityKey;
   spellSaveDC?: number;
   spellAttackBonus?: number;
   spellSlots: StoredSpellSlots;
   knownSpells: string[]; // масив ID заклинань
+  grants?: SpellGrant[];
 }
 
 /**
@@ -356,12 +369,13 @@ export interface LegendaryState {
   resistLeft: number;
 }
 
-export type LegendaryOption = { kind: "attack"; attackIndex: number; targetId: string } | { kind: "ability"; abilityKey: string; targetIds?: string[] };
+export type LegendaryOption = { kind: "attack"; attackIndex: number; targetId: string } | { kind: "ability" | "lair"; abilityKey: string; targetIds?: string[] };
 
 export interface AbilityPool {
   label: string;
   max: number;
   rest: "short" | "long" | null;
+  recharge?: 4 | 5 | 6;
 }
 
 export interface BattleParticipantBattleData {
@@ -427,6 +441,12 @@ export interface BattleParticipantBattleData {
   hpMultiplier?: number;
   /** Легендарні дії й опір монстра 5e; actionsLeft відновлюється на початку його ходу */
   legendary?: LegendaryState;
+  lairResistances?: number;
+  lair?: { active: boolean; usedRound?: number; lastKey?: string; baseResistances: number; resistSpent: number };
+  senses?: { darkvision?: number; blindsight?: number; tremorsense?: number; truesight?: number; passivePerception?: number };
+  movement?: { fly?: number; swim?: number; climb?: number; burrow?: number; hover?: boolean };
+  languages?: string;
+  telepathy?: number;
 }
 
 /**

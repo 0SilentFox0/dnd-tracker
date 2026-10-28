@@ -3,6 +3,7 @@ import { CONDITION_LABELS } from "../labels";
 
 import { ABILITY_LABELS, ABILITY_OPTIONS, DEFAULT_AREA_TARGETS } from "@/lib/constants/abilities";
 import { AttackType } from "@/lib/constants/battle";
+import { MONSTER_SENSE_LABELS } from "@/lib/constants/monster";
 import { DND_SKILL_META, DND_SKILLS, type DndSkill } from "@/lib/constants/skills";
 import type { FlagEffect, FlagKey } from "@/lib/utils/abilities/schema";
 import { signed } from "@/lib/utils/common/format";
@@ -37,6 +38,12 @@ const skillsText = (a: readonly string[] | "all") => (a === "all" ? "" : ` (${a.
 const abilitiesText = (a: readonly string[] | "all") => (a === "all" ? "" : ` (${a.map((k) => ABILITY_LABELS[k as keyof typeof ABILITY_LABELS]).join(", ")})`);
 
 export const FLAG_REGISTRY: { [K in FlagKey]: FlagDefinition<K> } = {
+  sense: {
+    label: "Чуття",
+    fields: [{ name: "sense", label: "Чуття", input: "select", options: Object.entries(MONSTER_SENSE_LABELS).map(([value, label]) => ({ value, label })) }, { name: "range", label: "Дальність, фути", input: "number" }],
+    defaults: { sense: "blindsight", range: 30 },
+    describe: (e) => `${MONSTER_SENSE_LABELS[e.sense]} ${e.range} фт`,
+  },
   advantage: {
     label: "Перевага",
     fields: [{ name: "attackKind", label: "Атаки", input: "select", options: ATTACK_KIND_ALL }],

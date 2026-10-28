@@ -1,0 +1,4 @@
+ALTER TABLE "units" ADD COLUMN "statblock" JSONB NOT NULL DEFAULT '{}';
+ALTER TABLE "units" ADD COLUMN "spellcasting" JSONB NOT NULL DEFAULT '{}';
+ALTER TABLE "spells" ADD COLUMN "fixedDice" BOOLEAN;
+ALTER TABLE "spells" ADD COLUMN "damageBonus" INTEGER;

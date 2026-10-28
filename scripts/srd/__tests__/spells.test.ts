@@ -15,12 +15,12 @@ const spell = (slug: string) => {
 };
 
 describe("spell groups", () => {
-  it("8 schools with the SRD icon keys and colours", () => {
+  it("8 schools and a separate Monster Actions group with icon keys and colours", () => {
     const groups = convertSpellGroups();
 
-    expect(groups.map((g) => g.name)).toEqual(["Abjuration", "Conjuration", "Divination", "Enchantment", "Evocation", "Illusion", "Necromancy", "Transmutation"]);
-    expect(groups.map((g) => g.icon)).toEqual(["shield", "portal", "eye", "heart", "flame", "mask", "skull", "vortex"]);
-    expect(groups.every((g) => /^#[0-9a-f]{6}$/.test(g.color) && g.slug.startsWith("srd-2024_school-"))).toBe(true);
+    expect(groups.map((g) => g.name)).toEqual(["Abjuration", "Conjuration", "Divination", "Enchantment", "Evocation", "Illusion", "Necromancy", "Transmutation", "Monster Actions"]);
+    expect(groups.map((g) => g.icon)).toEqual(["shield", "portal", "eye", "heart", "flame", "mask", "skull", "vortex", "skull"]);
+    expect(groups.every((g) => /^#[0-9a-f]{6}$/.test(g.color) && g.slug.startsWith("srd-2024_"))).toBe(true);
   });
 });
 
@@ -63,8 +63,10 @@ describe("convertSpells", () => {
     });
   });
 
-  it("Spirit Guardians: 15-ft emanation from self as a circle next to the caster", () => {
-    expect(spell("spirit-guardians")).toMatchObject({ targeting: { kind: "template", shape: "circle", size: 15, side: "enemy", range: 5 }, resolution: { kind: "save", ability: "wisdom", onSuccess: "half" }, dice: 3, dieSides: 8, upcastDice: 1 });
+  it("Spirit Guardians is a self-centered emanation; all SRD circles are exact", () => {
+    expect(spell("spirit-guardians")).toMatchObject({ targeting: { kind: "template", shape: "emanation", size: 15, side: "enemy" }, resolution: { kind: "save", ability: "wisdom", onSuccess: "half" }, dice: 3, dieSides: 8, upcastDice: 1 });
+    expect(spell("spirit-guardians").targeting).not.toHaveProperty("range");
+    expect(spells.filter((s) => s.targeting.kind === "template" && s.targeting.shape === "circle").every((s) => s.targeting.kind === "template" && s.targeting.exact === true)).toBe(true);
   });
 
   it("Hex deals no damage on cast; Teleport (d100) has no dice; Sacred Flame cantrip has no upcast", () => {

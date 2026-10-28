@@ -29,6 +29,11 @@ describe("unitsResource 5e", () => {
     expect(db.unit.create).toHaveBeenCalledWith({ data: expect.objectContaining({ cr: 5, xp: null, multiattack: 2, legendaryActions: 0, legendaryResistances: 1, saveProficiencies: ["strength"], proficiencyBonus: 3 }) });
   });
 
+  it("create preserves spellcasting overrides without configured grants", async () => {
+    await unitsResource.create(actor, createUnitSchema.parse({ name: "Маг", cr: 5, spellcasting: { ability: "wisdom", dc: 17, attackBonus: 9 } }));
+    expect(db.unit.create).toHaveBeenCalledWith({ data: expect.objectContaining({ spellcasting: { ability: "wisdom", dc: 17, attackBonus: 9, spells: [] } }) });
+  });
+
   it("create без CR — HOMM: cr null, майстерність за рівнем", async () => {
     await unitsResource.create(actor, createUnitSchema.parse({ name: "Гоблін", level: 5, proficiencyBonus: 0 }));
 
@@ -52,4 +57,20 @@ describe("unitsResource 5e", () => {
 
     expect(db.unit.update.mock.calls[1][0].data.cr).toBeUndefined();
   });
+});
+
+const performAbility = { id: "command", name: "Command", trigger: { event: "action" }, limits: { legendaryCost: 1 }, perform: { kind: "spell", spellId: "foreign-spell" }, effects: [{ kind: "note", text: "Cast" }] };
+
+it.each(["create", "PATCH"])("%s rejects foreign campaign perform spell references before writing", async (op) => {
+  db.spell.count.mockResolvedValue(0);
+  db.unit.create.mockClear();
+  db.unit.update.mockClear();
+
+  const write = op === "create"
+    ? unitsResource.create(actor, createUnitSchema.parse({ name: "Dragon", abilities: [performAbility] }))
+    : unitsResource.update(actor, { id: "u1", knownSpells: [] } as never, updateUnitSchema.parse({ abilities: [performAbility] }));
+
+  await expect(write).rejects.toMatchObject({ status: 400 });
+  expect(db.unit.create).not.toHaveBeenCalled();
+  expect(db.unit.update).not.toHaveBeenCalled();
 });

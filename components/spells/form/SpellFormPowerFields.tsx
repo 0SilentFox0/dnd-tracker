@@ -46,7 +46,7 @@ function RangeInput({ value, onCommit }: { value: number | undefined; onCommit: 
   return <Input id="spell-range" type="number" min={5} max={600} step={5} placeholder="без обмеження" value={draft ?? value ?? ""} onChange={(e) => setDraft(e.target.value)} onBlur={commit} className="w-40" />;
 }
 
-function targetingOf(kind: string, previous: SpellTargeting): SpellTargeting {
+function targetingOf(kind: string, previous: SpellTargeting, exactDefault = false): SpellTargeting {
   const range = RANGED_KINDS.includes(kind) && "range" in previous ? { range: previous.range } : {};
 
   const multi = previous.kind === "area" || previous.kind === "template" ? previous : null;
@@ -57,7 +57,7 @@ function targetingOf(kind: string, previous: SpellTargeting): SpellTargeting {
 
   if (kind === "area") return { kind, side, maxTargets, ...range, ...(previous.kind === "area" && previous.chain ? { chain: true } : {}) };
 
-  if (kind === "template") return { kind, shape: previous.kind === "template" ? previous.shape : "circle", size: previous.kind === "template" ? previous.size : 20, side, maxTargets, ...range, ...(previous.kind === "template" && previous.zone ? { zone: previous.zone } : {}), ...(previous.kind === "template" && previous.hollow ? { hollow: true } : {}) };
+  if (kind === "template") return { kind, shape: previous.kind === "template" ? previous.shape : "circle", size: previous.kind === "template" ? previous.size : 20, side, maxTargets, ...range, ...(previous.kind === "template" && previous.zone ? { zone: previous.zone } : {}), ...(previous.kind === "template" && previous.hollow ? { hollow: true } : {}), ...(previous.kind === "template" ? previous.exact !== undefined && { exact: previous.exact } : exactDefault && { exact: true }) };
 
   return { kind, ...range } as SpellTargeting;
 }
@@ -76,19 +76,25 @@ export function SpellFormPowerFields({ formData, setFormData, classesEnabled = f
       </div>
       <div className="col-span-2">
         <Label htmlFor="targeting">Цілі</Label>
-        <SelectField id="targeting" value={targeting.kind} onValueChange={(kind) => setFormData({ ...formData, targeting: targetingOf(kind, targeting) })} placeholder="Цілі" options={TARGETING_KIND_OPTIONS.map((o) => ({ value: o.value, label: o.label }))} />
+        <SelectField id="targeting" value={targeting.kind} onValueChange={(kind) => setFormData({ ...formData, targeting: targetingOf(kind, targeting, classesEnabled) })} placeholder="Цілі" options={TARGETING_KIND_OPTIONS.map((o) => ({ value: o.value, label: o.label }))} />
       </div>
       {targeting.kind === "template" && (
         <>
           <div>
             <Label htmlFor="template-shape">Форма</Label>
-            <SelectField id="template-shape" value={targeting.shape} onValueChange={(shape) => setFormData({ ...formData, targeting: { ...targeting, shape: shape as TemplateShape, hollow: shape === "circle" ? targeting.hollow : undefined } })} placeholder="Форма" options={SHAPE_OPTIONS} />
+            <SelectField id="template-shape" value={targeting.shape} onValueChange={(shape) => setFormData({ ...formData, targeting: { ...targeting, shape: shape as TemplateShape, hollow: shape === "circle" ? targeting.hollow : undefined, exact: shape === "circle" ? targeting.exact ?? (classesEnabled || undefined) : undefined, ...(shape === "emanation" && { range: undefined }) } })} placeholder="Форма" options={SHAPE_OPTIONS} />
           </div>
           <div>
             <Label htmlFor="template-size">Розмір, фути</Label>
             <BoundedNumberInput id="template-size" min={5} max={120} value={targeting.size} onCommit={(v) => setFormData({ ...formData, targeting: { ...targeting, size: v } })} className="w-24" />
           </div>
         </>
+      )}
+      {targeting.kind === "template" && targeting.shape === "circle" && (
+        <div className="col-span-2 flex items-center gap-2">
+          <Switch id="template-exact" checked={!!targeting.exact} onCheckedChange={(on) => setFormData({ ...formData, targeting: { ...targeting, exact: on || undefined } })} />
+          <Label htmlFor="template-exact">Точна площа 5e</Label>
+        </div>
       )}
       {targeting.kind === "template" && targeting.shape === "circle" && (
         <div className="col-span-2 flex items-center gap-2">
@@ -114,7 +120,7 @@ export function SpellFormPowerFields({ formData, setFormData, classesEnabled = f
           <Label htmlFor="targeting-chain">Ланцюг: наступна найближча ціль</Label>
         </div>
       )}
-      {RANGED_KINDS.includes(targeting.kind) && (
+      {RANGED_KINDS.includes(targeting.kind) && !(targeting.kind === "template" && targeting.shape === "emanation") && (
         <div className="col-span-2">
           <Label htmlFor="spell-range">Дальність, фути</Label>
           <RangeInput value={(targeting as { range?: number }).range} onCommit={(range) => setFormData({ ...formData, targeting: { ...targeting, range } as SpellTargeting })} />
@@ -156,10 +162,12 @@ export function SpellFormPowerFields({ formData, setFormData, classesEnabled = f
           </div>
         </>
       )}
-      {classesEnabled && (
+      {(classesEnabled || formData.fixedDice !== undefined || formData.damageBonus != null) && (
         <div className="col-span-2">
           <HudSection title="5e">
             <div className="grid grid-cols-2 gap-4 [&>*]:min-w-0">
+              <label className="col-span-2 flex items-center gap-2"><Checkbox id="fixed-dice" checked={!!formData.fixedDice} onCheckedChange={(v) => setFormData({ ...formData, fixedDice: v === true })} />Фіксовані кубики</label>
+              <div><Label htmlFor="damage-bonus">Добавка до шкоди / лікування</Label><Input id="damage-bonus" type="number" min={-20} max={40} value={formData.damageBonus ?? ""} onChange={(e) => setFormData({ ...formData, damageBonus: e.target.value === "" ? null : Math.max(-20, Math.min(40, Math.trunc(Number(e.target.value)))) })} /></div>
               <div className="col-span-2">
                 <Label htmlFor="spell-lists">Списки</Label>
                 <Input id="spell-lists" placeholder="Wizard, Sorcerer" value={(formData.lists ?? []).join(", ")} onChange={(e) => setFormData({ ...formData, lists: parseCommaList(e.target.value) })} />

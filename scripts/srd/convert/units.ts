@@ -3,6 +3,7 @@ import { type Fixture, type O5Creature, type O5CreatureAction, type O5CreatureAt
 import { bySlug, clamp, numberWord, titleCase } from "../lib/text";
 import type { UnitAttackRow, UnitRow } from "../lib/types";
 import { UNIT_OVERRIDES } from "../overrides/units";
+import { actionGrant, saveAction, spellcastingBlock, spellsInText } from "./monster-actions";
 
 import { ABILITY_KEYS, type AbilityKey } from "@/lib/constants/abilities";
 import { proficiencyForChallenge } from "@/lib/constants/challenge";
@@ -10,6 +11,7 @@ import type { WeaponTrait } from "@/lib/constants/weapon-traits";
 import type { Ability, Effect } from "@/lib/utils/abilities/schema";
 import { getAbilityModifier } from "@/lib/utils/common/calculations";
 import { groupBy } from "@/lib/utils/common/collections";
+import type { UnitSpellcasting, UnitStatblock } from "@/types/units";
 
 const SIZE_CELLS: Record<string, UnitRow["gridSize"]> = { tiny: 1, small: 1, medium: 1, large: 2, huge: 3, gargantuan: 3 };
 
@@ -139,7 +141,7 @@ function usesSuffix(a: O5CreatureAction): string {
 const flagsAbility = (id: string, name: string, list: string[], effect: (t: string) => Effect): Ability | null =>
   list.length > 0 ? coreAbility(id, name, list.map(titleCase).join(", "), { trigger: { event: "passive" }, effects: list.map(effect) }) : null;
 
-function statblock(c: O5Creature): string {
+function statblockText(c: O5Creature): string {
   const speeds = [c.walk && `${c.walk} ft.`, c.climb && `climb ${c.climb} ft.`, c.fly && `fly ${c.fly} ft.`, c.swim && `swim ${c.swim} ft.`, c.burrow && `burrow ${c.burrow} ft.`].filter(Boolean);
 
   const senses = [
@@ -151,6 +153,14 @@ function statblock(c: O5Creature): string {
   ].filter(Boolean);
 
   return [`${titleCase(c.size)} ${titleCase(c.type)}, ${titleCase(c.alignment)}`, `Speed: ${speeds.join(", ") || "—"}`, `Senses: ${senses.join(", ") || "—"}`, `Languages: ${c.languages_desc || "—"}`].join("\n");
+}
+
+function structuredStatblock(c: O5Creature, lairResistances: number | undefined): UnitStatblock {
+  const senses = Object.fromEntries([["darkvision", c.darkvision_range], ["blindsight", c.blindsight_range], ["tremorsense", c.tremorsense_range], ["truesight", c.truesight_range], ["passivePerception", c.passive_perception]].filter(([, value]) => typeof value === "number" && value > 0));
+
+  const movement = Object.fromEntries([["fly", c.fly], ["swim", c.swim], ["climb", c.climb], ["burrow", c.burrow], ["hover", c.hover]].filter(([, value]) => value !== null && value !== undefined && value !== false));
+
+  return { creatureType: c.type, size: c.size as UnitStatblock["size"], alignment: c.alignment, ...(Object.keys(senses).length > 0 && { senses }), ...(Object.keys(movement).length > 0 && { movement }), ...(c.languages_desc && { languages: c.languages_desc }), ...(c.telepathy_range && { telepathy: c.telepathy_range }), ...(lairResistances !== undefined && { lairResistances }) };
 }
 
 export function convertUnits(data: Open5eData): UnitRow[] {
@@ -172,15 +182,44 @@ export function convertUnits(data: Open5eData): UnitRow[] {
 
       const unitAttacks: UnitAttackRow[] = [];
 
-      const abilities: Ability[] = [noteAbility(uniqueId(seen, "statblock"), "Statblock", statblock(c))];
+      const blockTexts = own.filter((a) => /Spellcasting/i.test(a.fields.name)).map((a) => a.fields.desc);
+
+      const abilities: Ability[] = [noteAbility(uniqueId(seen, "statblock"), "Statblock", [statblockText(c), ...blockTexts].join("\n\n"))];
+
+      const spellcasting: UnitSpellcasting = { spells: [] };
+
+      const spellNames = data.spells.map((s) => s.fields.name);
+
+      const addGrant = (grant: UnitSpellcasting["spells"][number]) => {
+        const existing = spellcasting.spells.find((s) => s.spellId === grant.spellId);
+
+        if (existing) {
+          const legendaryOnly = existing.legendaryOnly && grant.legendaryOnly;
+
+          Object.assign(existing, grant);
+
+          if (!legendaryOnly) delete existing.legendaryOnly;
+        } else spellcasting.spells.push(grant);
+      };
+
+      const readCastingDefaults = (description: string) => {
+        const block = spellcastingBlock(description, spellNames);
+
+        spellcasting.ability ??= block.ability;
+        spellcasting.dc ??= block.dc;
+        spellcasting.attackBonus ??= block.attackBonus;
+      };
 
       let legendaryResistances = 0;
+
+      let lairResistances: number | undefined;
 
       for (const t of traits.get(row.pk) ?? []) {
         const res = LEGENDARY_RES.exec(t.fields.name);
 
         if (res) {
           legendaryResistances = Number(res[1]);
+          lairResistances = Number(/or (\d+)\/Day in Lair/i.exec(t.fields.name)?.[1]) || undefined;
           continue;
         }
 
@@ -225,7 +264,23 @@ export function convertUnits(data: Open5eData): UnitRow[] {
 
         if (f.action_type === "LEGENDARY_ACTION") {
           legendary = true;
-          abilities.push(coreAbility(uniqueId(seen, slugTail(a.pk)), f.name, f.desc, { trigger: { event: "action" }, limits: { legendaryCost: clamp(f.legendary_action_cost ?? 1, 1, 3) }, effects: [{ kind: "note", text: f.name }] }));
+          continue;
+        }
+
+        if (/Spellcasting/i.test(f.name) && /At Will|\d\/Day/.test(f.desc)) {
+          const block = spellcastingBlock(f.desc, spellNames);
+
+          if (block.spells.length > 0) {
+            Object.assign(spellcasting, { ...block, spells: spellcasting.spells });
+            block.spells.forEach(addGrant);
+            continue;
+          }
+        }
+
+        const saved = saveAction(a, row);
+
+        if (saved) {
+          addGrant(saved.grant);
           continue;
         }
 
@@ -243,9 +298,49 @@ export function convertUnits(data: Open5eData): UnitRow[] {
           continue;
         }
 
+        if (/\bcasts?\b/i.test(f.desc)) {
+          const refs = spellsInText(f.desc, spellNames);
+
+          if (refs.length > 0) {
+            readCastingDefaults(f.desc);
+            refs.forEach((ref) => addGrant({ ...actionGrant(f, ref.spellId), ...ref }));
+            abilities.push(noteAbility(uniqueId(seen, slugTail(a.pk)), `${f.name}${usesSuffix(f)}`, f.desc));
+            continue;
+          }
+        }
+
         const name = `${f.name}${usesSuffix(f)}`;
 
-        abilities.push(noteAbility(uniqueId(seen, slugTail(a.pk)), name, f.desc));
+        abilities.push(noteAbility(uniqueId(seen, slugTail(a.pk)), name, `${f.desc}${/^\w+ Saving Throw: DC/.test(f.desc) ? "\n\nМеханіку автоматично не розпізнано; дію збережено повним текстом." : ""}`));
+      }
+
+      for (const a of own.filter((action) => action.fields.action_type === "LEGENDARY_ACTION")) {
+        const f = a.fields;
+
+        const saved = saveAction(a, row);
+
+        const casts = /\bcasts?\b/i.test(f.desc) ? spellsInText(f.desc, spellNames) : [];
+
+        const referenced = own.find((other) => other !== a && new RegExp(`\\buses (?:its |the )?${other.fields.name.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}\\b`, "i").test(f.desc));
+
+        const refSave = referenced ? saveAction(referenced, row) : null;
+
+        const refCasts = referenced && /\bcasts?\b/i.test(referenced.fields.desc) ? spellsInText(referenced.fields.desc, spellNames) : [];
+
+        const grant = saved?.grant ?? casts[0] ?? refSave?.grant ?? refCasts[0];
+
+        const attackChoice = /makes (?:one|a) ([^.]+?) attack/i.exec(f.desc)?.[1].toLowerCase();
+
+        const attack = unitAttacks.find((item) => attackChoice?.split(/ or /).some((name) => name.trim() === item.name.toLowerCase()));
+
+        const perform: Ability["perform"] = grant ? { kind: "spell", spellId: grant.spellId } : attack ? { kind: "attack", attack: attack.name } : undefined;
+
+        if (grant) {
+          readCastingDefaults(f.desc);
+          addGrant({ ...actionGrant(f, grant.spellId), ...grant, ...(!spellcasting.spells.some((s) => s.spellId === grant.spellId && !s.legendaryOnly) && { legendaryOnly: true }) });
+        }
+
+        abilities.push(coreAbility(uniqueId(seen, slugTail(a.pk)), f.name, f.desc, { trigger: { event: "action" }, limits: { legendaryCost: clamp(f.legendary_action_cost ?? 1, 1, 3), ...(/can't take this action again until the start of its next turn/i.test(f.desc) && { perRound: 1 }) }, ...(perform && { perform }), effects: [{ kind: "note", text: f.name }] }));
       }
 
       return {
@@ -255,7 +350,7 @@ export function convertUnits(data: Open5eData): UnitRow[] {
         cr,
         armorClass: c.armor_class,
         maxHp: c.hit_points,
-        speed: c.walk ?? c.fly ?? c.swim ?? 30,
+        speed: Math.max(c.walk ?? 0, c.fly ?? 0) || c.swim || 30,
         initiative: c.initiative_bonus,
         strength: clamp(c.ability_score_strength, 1, 30),
         dexterity: clamp(c.ability_score_dexterity, 1, 30),
@@ -274,6 +369,8 @@ export function convertUnits(data: Open5eData): UnitRow[] {
         }),
         attacks: unitAttacks,
         abilities,
+        statblock: structuredStatblock(c, lairResistances),
+        ...(spellcasting.spells.length > 0 && { spellcasting }),
         ...UNIT_OVERRIDES[row.pk],
       };
     })

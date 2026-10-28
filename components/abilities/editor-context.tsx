@@ -9,6 +9,7 @@ export interface AbilityEditorContextValue {
   errorsByPath: Record<string, string[]>;
   classColumns?: readonly ClassColumn[];
   itemCharges?: boolean;
+  performChoices?: { attacks: readonly { name: string }[]; spells: readonly { id: string; name: string }[] };
 }
 
 const Ctx = createContext<AbilityEditorContextValue>({ campaignId: "", errorsByPath: {} });

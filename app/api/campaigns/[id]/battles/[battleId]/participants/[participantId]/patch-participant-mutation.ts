@@ -3,6 +3,7 @@ import type { PatchParticipantData } from "./patch-participant-schema";
 import { CombatStatus } from "@/lib/constants/battle";
 import { findParticipant } from "@/lib/utils/abilities/engine/core/participants";
 import { resolveDowned } from "@/lib/utils/abilities/engine/core/run-abilities";
+import { toggleLair } from "@/lib/utils/battle/actions/lair";
 import { settleStatusChange } from "@/lib/utils/battle/damage/consequences";
 import { reserveOf } from "@/lib/utils/battle/participant/reserve";
 import { isUp, statusForHp } from "@/lib/utils/battle/participant/state";
@@ -16,6 +17,18 @@ export function patchParticipantMutation(
   participantId: string,
   data: PatchParticipantData,
 ): MutationResult {
+  if (data.lairActive !== undefined) {
+    if (!ctx.isDM) throw new BattleAccessError(403, "Лігво перемикає лише ДМ");
+
+    const actor = findParticipant(ctx.participants, participantId);
+
+    if (!actor) throw new BattleAccessError(404, "Учасника не знайдено");
+
+    const updated = toggleLair(actor, data.lairActive);
+
+    return { participants: ctx.participants.map((p) => p.basicInfo.id === participantId ? updated : p), pending: ctx.pending, events: [dmEvent(ctx.scene.round, `🏰 ${actor.basicInfo.name}: ${data.lairActive ? "у лігві" : "поза лігвом"}`)] };
+  }
+
   if (data.removeFromBattle === true) return removeParticipant(ctx, participantId);
 
   if (data.kill === true) return updateHp(ctx, participantId, 0, true);

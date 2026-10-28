@@ -11,7 +11,9 @@ export const SRD_SCHOOLS = [
   { key: "transmutation", name: "Transmutation", color: "#2ca59a", icon: "vortex" },
 ] as const satisfies ReadonlyArray<{ key: string; name: string; color: string; icon: SpellGroupRow["icon"] }>;
 
-export const convertSpellGroups = (): SpellGroupRow[] => SRD_SCHOOLS.map((s) => ({ slug: `srd-2024_school-${s.key}`, name: s.name, color: s.color, icon: s.icon }));
+export const MONSTER_ACTIONS_GROUP = "Monster Actions";
+
+export const convertSpellGroups = (): SpellGroupRow[] => [...SRD_SCHOOLS.map((s) => ({ slug: `srd-2024_school-${s.key}`, name: s.name, color: s.color, icon: s.icon })), { slug: "srd-2024_monster-actions", name: MONSTER_ACTIONS_GROUP, color: "#a34c38", icon: "skull" }];
 
 export function schoolName(school: string): string {
   const found = SRD_SCHOOLS.find((s) => s.key === school);

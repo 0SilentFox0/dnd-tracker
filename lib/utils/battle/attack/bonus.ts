@@ -1,4 +1,4 @@
-import { AttackType } from "@/lib/constants/battle";
+import { AttackType, CELL_FEET } from "@/lib/constants/battle";
 import { collectModifiers, statWithModifiers } from "@/lib/utils/abilities/engine/core/collect-modifiers";
 import { findParticipant, isActive, withSelf } from "@/lib/utils/abilities/engine/core/participants";
 import { runAbilities } from "@/lib/utils/abilities/engine/core/run-abilities";
@@ -8,7 +8,8 @@ import { INSPIRATION_LABEL } from "@/lib/utils/battle/attack/inspiration";
 import { attackSourceOf } from "@/lib/utils/battle/attack/source";
 import { attackKindOf } from "@/lib/utils/battle/common/attack-kind";
 import { rangeDisadvantageReasons } from "@/lib/utils/battle/grid/attack-reach";
-import { isAdjacent, isOnMap } from "@/lib/utils/battle/grid/occupancy";
+import { footprintDistance } from "@/lib/utils/battle/grid/geometry";
+import { cellsOf, isAdjacent, isOnMap } from "@/lib/utils/battle/grid/occupancy";
 import type { BattleAttack, BattleMapConfig, BattleParticipant } from "@/types/battle";
 
 export function calculateAttackBonus(
@@ -50,6 +51,20 @@ export function rollModeReasons(attacker: BattleParticipant, attack: BattleAttac
 
   const target = opts.targetId ? findParticipant(ps, opts.targetId) : undefined;
 
+  const senses = (viewer: BattleParticipant, other: BattleParticipant | undefined, blindOnly = false) => {
+    if (!other || !isOnMap(viewer) || !isOnMap(other)) return false;
+
+    const feet = footprintDistance(cellsOf(viewer), cellsOf(other)) * CELL_FEET;
+
+    return collectModifiers(ps, viewer.basicInfo.id, { flag: "sense" }).flags.some((f) => f.flag === "sense" && (f.sense === "blindsight" || (!blindOnly && f.sense === "truesight")) && f.range >= feet);
+  };
+
+  const attackerSees = senses(attacker, target);
+
+  const attackerBlindSees = senses(attacker, target, true);
+
+  const targetSees = !!target && senses(target, attacker);
+
   const proneDefense = target ? labels(flagEntries(target.basicInfo.id, "proneDefense", opts.targetExtra)) : [];
 
   const adjacent = !!target && proneDefense.length > 0 && isAdjacentAttack(attacker, target, attack);
@@ -59,15 +74,15 @@ export function rollModeReasons(attacker: BattleParticipant, attack: BattleAttac
     .map((e) => e.name);
 
   const advantage = [
-    ...labels(flagEntries(id, "advantage", opts.extra).filter((e) => e.flag?.flag === "advantage" && (e.flag.attackKind === "all" || e.flag.attackKind === kind))),
+    ...labels(flagEntries(id, "advantage", opts.extra).filter((e) => !(targetSees && e.condition === "invisible") && e.flag?.flag === "advantage" && (e.flag.attackKind === "all" || e.flag.attackKind === kind))),
     ...(opts.targetId ? labels(flagEntries(opts.targetId, "advantageForAttackers", opts.targetExtra)) : []),
     ...(adjacent ? proneDefense : []),
     ...(opts.inspiration ? [INSPIRATION_LABEL] : []),
   ];
 
   const disadvantage = [
-    ...labels(flagEntries(id, "disadvantage", opts.extra)),
-    ...(opts.targetId ? labels(flagEntries(opts.targetId, "disadvantageForAttackers", opts.targetExtra)) : []),
+    ...labels(flagEntries(id, "disadvantage", opts.extra).filter((e) => !(attackerBlindSees && e.condition === "blinded"))),
+    ...(opts.targetId ? labels(flagEntries(opts.targetId, "disadvantageForAttackers", opts.targetExtra).filter((e) => !(attackerSees && e.condition === "invisible"))) : []),
     ...(adjacent ? [] : proneDefense),
     ...frightenedLabels,
     ...(target ? rangeDisadvantageReasons(opts.map, ps, attacker, attack, target) : []),

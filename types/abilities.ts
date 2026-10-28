@@ -16,6 +16,11 @@ export interface AbilitySource {
 
 export type ResolvedAbility = Ability & { key: string; source: AbilitySource };
 
+/** 5e legendary/lair action link; schema validation is server-side. */
+export type AbilityPerform = { kind: "attack"; attack: string } | { kind: "spell"; spellId: string };
+
+export type AbilityLimits5e = { lair?: true };
+
 export interface AbilityUsageCounter {
   battle: number;
   round: number;

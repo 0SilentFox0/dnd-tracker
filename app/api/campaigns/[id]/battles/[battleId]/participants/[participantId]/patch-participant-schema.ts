@@ -6,6 +6,7 @@ import { z } from "zod";
  */
 export const patchParticipantSchema = z
   .object({
+    lairActive: z.boolean().optional(),
     currentHp: z.number().int().min(0).optional(),
     removeFromBattle: z.boolean().optional(),
     kill: z.boolean().optional(),

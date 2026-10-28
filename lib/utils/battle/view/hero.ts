@@ -123,7 +123,7 @@ export function abilityOptions(p: BattleParticipant, trigger: "bonusAction" | "a
   const pools = poolViews(p);
 
   return (p.battleData.resolvedAbilities ?? [])
-    .filter((a) => a.trigger.event === trigger && !a.limits?.legendaryCost && withinCountLimits(p, a))
+    .filter((a) => a.trigger.event === trigger && !a.limits?.legendaryCost && !a.limits?.lair && withinCountLimits(p, a))
     .map((ability) => {
       const ref = ability.limits?.pool;
 

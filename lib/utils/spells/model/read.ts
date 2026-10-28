@@ -31,6 +31,8 @@ type SpellRulesRow = {
   upcastDice?: number | null;
   upcastTargets?: number | null;
   addAbilityMod?: boolean | null;
+  fixedDice?: boolean | null;
+  damageBonus?: number | null;
 };
 
 const DEFAULT_TARGETING: SpellTargeting = { kind: "enemy" };
@@ -97,6 +99,8 @@ function readSpell5e(row: SpellRulesRow) {
     ...(upcastDice !== undefined && { upcastDice }),
     ...(upcastTargets !== undefined && { upcastTargets }),
     ...(row.addAbilityMod === true && { addAbilityMod: true }),
+    ...(row.fixedDice === true && { fixedDice: true }),
+    ...(typeof row.damageBonus === "number" && Number.isInteger(row.damageBonus) && row.damageBonus >= -20 && row.damageBonus <= 40 && { damageBonus: row.damageBonus }),
   };
 }
 
@@ -130,5 +134,7 @@ export function spellDefinitionColumns(def: SpellDefinition) {
     upcastDice: def.upcastDice ?? null,
     upcastTargets: def.upcastTargets ?? null,
     addAbilityMod: def.addAbilityMod ?? null,
+    fixedDice: def.fixedDice ?? null,
+    damageBonus: def.damageBonus ?? null,
   };
 }

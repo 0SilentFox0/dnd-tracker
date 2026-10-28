@@ -52,6 +52,17 @@ describe("шаблон, дальність і зона заклинання", ()
     expect(spellFormError({ ...spellToForm(row), targeting: { ...template, size: 0 } })).not.toBeNull();
   });
 
+  it("exact is accepted only for circles", () => {
+    expect(SpellTargetingSchema.safeParse({ ...template, shape: "circle", exact: true }).success).toBe(true);
+    for (const shape of ["cone", "line", "cube", "cross", "emanation"]) {
+      expect(SpellTargetingSchema.safeParse({ ...template, shape, exact: true }).success).toBe(false);
+    }
+  });
+
+  it("emanation has a Ukrainian label", () => {
+    expect(targetingLabel({ ...template, shape: "emanation" })).toBe("Еманація 15 фт");
+  });
+
   it("лейбли", () => {
     expect(targetingLabel(template)).toBe("Конус 15 фт");
     expect(targetingLabel({ ...template, shape: "circle", size: 10 })).toBe("Коло 10 фт");

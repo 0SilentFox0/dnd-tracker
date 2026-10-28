@@ -34,4 +34,19 @@ describe("readSpellDefinition 5e", () => {
   it("HOMM-рядок: колонки null", () => {
     expect(spellDefinitionColumns(readSpellDefinition({ id: "s", dice: 2 }))).toMatchObject({ dieSides: null, upcastDice: null, upcastTargets: null, addAbilityMod: null });
   });
+
+  it("старий рядок без колонок 4f-5a лишається сумісним", () => {
+    const def = readSpellDefinition({ id: "homm", dice: 2 });
+
+    expect(def).not.toHaveProperty("fixedDice");
+    expect(def).not.toHaveProperty("damageBonus");
+    expect(spellDefinitionColumns(def)).toMatchObject({ fixedDice: null, damageBonus: null });
+  });
+
+  it("читає й записує fixedDice та damageBonus", () => {
+    const def = readSpellDefinition({ id: "s", dice: 2, fixedDice: true, damageBonus: 12 });
+
+    expect(def).toMatchObject({ fixedDice: true, damageBonus: 12 });
+    expect(spellDefinitionColumns(def)).toMatchObject({ fixedDice: true, damageBonus: 12 });
+  });
 });

@@ -49,7 +49,7 @@ export const spellsResource = defineResource<SpellRow, CreateSpellInput, UpdateS
         // legacy NOT NULL columns until a later migration; the new model never reads them
         type: "target",
         damageType: "damage",
-        ...spellDefinitionColumns({ dice: data.dice, cost: data.cost, targeting: data.targeting, resolution: data.resolution, effects: data.spellEffects, raceModifiers: data.raceModifiers, stackable: data.stackable, maxStacks: data.maxStacks ?? undefined, concentration: data.concentration, dieSides: data.dieSides ?? undefined, upcastDice: data.upcastDice ?? undefined, upcastTargets: data.upcastTargets ?? undefined, addAbilityMod: data.addAbilityMod ?? undefined }),
+        ...spellDefinitionColumns({ dice: data.dice, cost: data.cost, targeting: data.targeting, resolution: data.resolution, effects: data.spellEffects, raceModifiers: data.raceModifiers, stackable: data.stackable, maxStacks: data.maxStacks ?? undefined, concentration: data.concentration, dieSides: data.dieSides ?? undefined, upcastDice: data.upcastDice ?? undefined, upcastTargets: data.upcastTargets ?? undefined, addAbilityMod: data.addAbilityMod ?? undefined, fixedDice: data.fixedDice ?? undefined, damageBonus: data.damageBonus ?? undefined }),
       },
       include: withGroup,
     });
@@ -79,6 +79,8 @@ export const spellsResource = defineResource<SpellRow, CreateSpellInput, UpdateS
         upcastDice: data.upcastDice,
         upcastTargets: data.upcastTargets,
         addAbilityMod: data.addAbilityMod,
+        fixedDice: data.fixedDice,
+        damageBonus: data.damageBonus,
         fx: data.fx === null ? Prisma.DbNull : toJsonInput(data.fx),
         lists: data.lists,
       },

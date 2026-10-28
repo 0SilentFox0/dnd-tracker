@@ -17,7 +17,7 @@ describe("convertUnits", () => {
       level: 17,
       armorClass: 19,
       maxHp: 256,
-      speed: 40,
+      speed: 80,
       initiative: 12,
       gridSize: 3,
       strength: 27,
@@ -33,14 +33,14 @@ describe("convertUnits", () => {
     expect(unit("Adult Red Dragon").attacks).toEqual([{ name: "Rend", type: "melee", attackBonus: 0, damageDice: "1d10", damageType: "slashing", traits: ["reach"], properties: "plus 2d4 fire damage" }]);
   });
 
-  it("Adult Red Dragon: immunity as resistance 100, legendary actions usable, breath as a note", () => {
+  it("Adult Red Dragon: immunity as resistance 100, legendary actions usable, breath as a grant", () => {
     expect(ability("Adult Red Dragon", "damage-immunities")).toMatchObject({ trigger: { event: "passive" }, effects: [{ kind: "flag", flag: "resistance", damageType: "fire", percent: 100 }] });
 
     const legendary = unit("Adult Red Dragon").abilities.filter((a) => a.limits?.legendaryCost);
 
     expect(legendary.map((a) => a.name).sort()).toEqual(["Commanding Presence", "Fiery Rays", "Pounce"]);
     expect(legendary.every((a) => a.trigger.event === "action" && a.limits?.legendaryCost === 1)).toBe(true);
-    expect(unit("Adult Red Dragon").abilities.find((a) => a.name.startsWith("Fire Breath"))).toMatchObject({ name: "Fire Breath (Recharge 5–6)", effects: [{ kind: "note", text: "Fire Breath (Recharge 5–6)" }] });
+    expect(unit("Adult Red Dragon").spellcasting?.spells).toContainEqual({ spellId: "Fire Breath (Adult Red Dragon)", dc: 21, perBattle: 1, recharge: 5 });
     expect(unit("Adult Red Dragon").abilities.some((a) => a.name.startsWith("Legendary Resistance"))).toBe(false);
     expect(ability("Adult Red Dragon", "statblock")?.description).toContain("Huge Dragon, Chaotic Evil");
   });

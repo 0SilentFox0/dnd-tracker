@@ -4,6 +4,7 @@ import type { ReactNode } from "react";
 
 import { HitFrame } from "@/components/battle/fx/PortraitFx";
 import { EffectIcon, HealthBar, HealthLabel, hitFlashClass, HitFloat, ZoomablePortrait } from "@/components/battle/hud";
+import { MonsterStatblock } from "@/components/common/MonsterStatblock";
 import { useBattleSceneData, useFxImpacts, useHitFx } from "@/lib/hooks/battle";
 import { cn } from "@/lib/utils";
 import { getEffectiveArmorClass } from "@/lib/utils/battle/participant/helpers";
@@ -57,6 +58,7 @@ function ParticipantDetailsBody({ participant: live }: ParticipantDetailsProps) 
         </div>
       </div>
       <HealthBar participant={participant} exact={exact} className="mt-3" />
+      {exact && (participant.abilities.creatureType || participant.battleData.senses || participant.battleData.movement || participant.battleData.languages || participant.battleData.telepathy !== undefined) && <Section title="Статблок"><MonsterStatblock block={{ creatureType: participant.abilities.creatureType, senses: participant.battleData.senses, movement: participant.battleData.movement, languages: participant.battleData.languages, telepathy: participant.battleData.telepathy }} /></Section>}
       <Section title="Броня">
         <div className="flex min-h-10 items-center justify-between border-b border-white/[.08]">
           <span>{exact ? "AC" : "AC між"}</span>

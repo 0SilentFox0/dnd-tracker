@@ -261,7 +261,7 @@ export async function updateBattleParticipant(
   campaignId: string,
   battleId: string,
   participantId: string,
-  data: WithVersion<{ currentHp?: number; removeFromBattle?: boolean; kill?: boolean; revive?: boolean }>,
+  data: WithVersion<{ lairActive?: boolean; currentHp?: number; removeFromBattle?: boolean; kill?: boolean; revive?: boolean }>,
 ): Promise<BattleMutationResponse> {
   return campaignPatch<BattleMutationResponse>(campaignId, `/battles/${battleId}/participants/${participantId}`, data);
 }

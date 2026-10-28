@@ -10,6 +10,7 @@ import type { ItemStats } from "@/lib/utils/items/item-stats";
 import type { SpellResolution, SpellTargeting } from "@/lib/utils/spells/model/schema";
 import type { Choice, FeatPrerequisite, FeatType } from "@/types/choices";
 import type { ClassColumn } from "@/types/classes";
+import type { UnitSpellcasting, UnitStatblock } from "@/types/units";
 
 export const SRD_KINDS = ["spell-groups", "spells", "races", "classes", "feats", "units", "artifacts"] as const;
 
@@ -30,6 +31,8 @@ export interface SpellRow {
   upcastDice?: number;
   upcastTargets?: number;
   addAbilityMod?: boolean;
+  fixedDice?: boolean;
+  damageBonus?: number;
   targeting: SpellTargeting;
   resolution: SpellResolution;
   spellEffects: Effect[];
@@ -89,6 +92,8 @@ export interface UnitRow {
   saveProficiencies: AbilityKey[];
   attacks: UnitAttackRow[];
   abilities: Ability[];
+  statblock?: UnitStatblock;
+  spellcasting?: UnitSpellcasting;
 }
 
 export interface ArtifactRow {

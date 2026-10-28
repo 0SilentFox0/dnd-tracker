@@ -30,7 +30,7 @@ export function defaultSpellForm(): SpellFormData {
 }
 
 export function spellToForm(spell: Spell): SpellFormData {
-  const def = readSpellDefinition({ id: spell.id, dice: spell.dice, cost: spell.cost, targeting: spell.targeting, resolution: spell.resolution, spellEffects: spell.spellEffects, raceModifiers: spell.raceModifiers, stackable: spell.stackable, maxStacks: spell.maxStacks, concentration: spell.concentration, dieSides: spell.dieSides, upcastDice: spell.upcastDice, upcastTargets: spell.upcastTargets, addAbilityMod: spell.addAbilityMod });
+  const def = readSpellDefinition({ id: spell.id, dice: spell.dice, cost: spell.cost, targeting: spell.targeting, resolution: spell.resolution, spellEffects: spell.spellEffects, raceModifiers: spell.raceModifiers, stackable: spell.stackable, maxStacks: spell.maxStacks, concentration: spell.concentration, dieSides: spell.dieSides, upcastDice: spell.upcastDice, upcastTargets: spell.upcastTargets, addAbilityMod: spell.addAbilityMod, fixedDice: spell.fixedDice, damageBonus: spell.damageBonus });
 
   return {
     name: spell.name,
@@ -52,6 +52,8 @@ export function spellToForm(spell: Spell): SpellFormData {
     upcastDice: def.upcastDice ?? null,
     upcastTargets: def.upcastTargets ?? null,
     addAbilityMod: def.addAbilityMod === true,
+    fixedDice: def.fixedDice,
+    damageBonus: def.damageBonus,
     fx: parseSpellFx(spell.fx) ?? {},
     ...(spell.lists?.length && { lists: spell.lists }),
   };

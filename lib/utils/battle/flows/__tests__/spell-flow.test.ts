@@ -211,6 +211,43 @@ describe("шаблон і дальність", () => {
 
   const ball: SpellPick = { spellId: "fb", level: 3, targetMode: "template", template: { shape: "circle", size: 20 }, range: 150, needsSaves: true, diceSlots: [6] };
 
+  it("preview preserves exact circle geometry", () => {
+    const exact = { ...fireball, targeting: { ...fireball.targeting, exact: true } } as BookSpell;
+
+    const wideMap = { ...map, cols: 20, rows: 20 };
+
+    const corner = placed("corner", ParticipantSide.ENEMY, { x: 8, y: 8 });
+
+    const edge = placed("edge", ParticipantSide.ENEMY, { x: 10, y: 6 });
+
+    const outside = placed("outside", ParticipantSide.ENEMY, { x: 9, y: 9 });
+
+    const pick = buildSpellPick([hero, corner, edge, outside], hero, exact, wideMap);
+
+    expect(pick.template).toMatchObject({ exact: true });
+    expect(spellAimTargets({ map: wideMap, participants: [hero, corner, edge, outside], caster: hero }, pick, { x: 6, y: 6 }).map(p => p.basicInfo.id)).toEqual(["corner", "edge"]);
+  });
+
+  it("fixed monster cantrip preview keeps its base dice", () => {
+    const monster = { ...hero, abilities: { ...hero.abilities, level: 17, damageModel: "5e" as const } };
+
+    expect(buildSpellPick(order, monster, { ...fireball, level: 0, dice: 1, dieSides: 10, fixedDice: true }, map).diceSlots).toEqual([10]);
+  });
+
+  it("emanation skips aim and refreshes its live targets without targetCell", () => {
+    const pick: SpellPick = { ...ball, template: { shape: "emanation", size: 5 } };
+
+    const s = run({ type: "OPEN", casterId: "h", level: 3 }, { type: "PICK", pick }, { type: "TO_TARGETS" });
+
+    expect(s.step).toBe("rolls");
+
+    const live = withLiveAimTargets(s, ["f"]);
+
+    expect(live.targetIds).toEqual(["f"]);
+    expect(spellPayload(live)).not.toHaveProperty("targetCell");
+    expect(spellFlow(s, { type: "BACK" }).step).toBe("spell");
+  });
+
   it("buildSpellPick: template на карті з позицією заклинателя; без карти чи позиції — multi", () => {
     expect(buildSpellPick(order, hero, fireball, map)).toMatchObject({ targetMode: "template", template: { shape: "circle", size: 20 }, range: 150 });
     expect(buildSpellPick(order, hero, fireball, null)).toMatchObject({ targetMode: "multi", maxTargets: 4, targetSide: "enemy" });

@@ -23,6 +23,9 @@ const row: Spell = {
 };
 
 describe("форма заклинання", () => {
+  it("preserves fixedDice and damageBonus when editing", () => {
+    expect(formToPayload(spellToForm({ ...row, fixedDice: true, damageBonus: -3 }))).toMatchObject({ fixedDice: true, damageBonus: -3 });
+  });
   it("рядок → форма → payload API зберігає всю модель", () => {
     const payload = formToPayload(spellToForm(row));
 

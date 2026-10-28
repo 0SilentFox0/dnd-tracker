@@ -53,6 +53,10 @@ export function LimitsSection({ ability, path, onChange }: AbilitySectionProps) 
 
     if (v === undefined) delete next[name];
 
+    if (name === "lair" && v) delete next.legendaryCost;
+
+    if (name === "legendaryCost" && v) delete next.lair;
+
     const { limits: _l, ...rest } = ability;
 
     onChange(Object.keys(next).length ? { ...rest, limits: next } : rest);
@@ -107,6 +111,7 @@ export function LimitsSection({ ability, path, onChange }: AbilitySectionProps) 
           </div>
         )}
       </div>
+      {ability.trigger.event === "action" && <label className="flex items-center gap-2 text-xs text-muted-foreground"><input type="checkbox" aria-label="Дія лігва" checked={!!ability.limits?.lair} onChange={(e) => set("lair", e.target.checked ? true : undefined)} />Дія лігва</label>}
       <div className="grid grid-cols-6 items-end gap-2 [&>*]:min-w-0">
         <FieldRenderer meta={{ name: "stackable", label: "Ефекти складаються", input: "toggle", optional: true }} path={`${path}.stackable`} value={ability.stackable} onChange={(v) => setTop("stackable", v)} />
         {ability.stackable && (

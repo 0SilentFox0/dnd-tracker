@@ -86,7 +86,11 @@ export function spellKind(f: O5Spell): Kind {
 
 const sideOf = (f: O5Spell, kind: Kind): Side => (kind === "heal" ? "ally" : kind !== "none" || f.saving_throw_ability || SPELL_ATTACK.test(f.desc) ? "enemy" : "ally");
 
-function templateShape(f: O5Spell): { shape: "circle" | "cube" | "cone" | "line"; size: number } | null {
+function templateShape(f: O5Spell): { shape: "circle" | "cube" | "cone" | "line" | "emanation"; size: number } | null {
+  const area = AREA.exec(f.desc);
+
+  if (area?.[2] === "Emanation") return { shape: "emanation", size: clamp(Number(area[1]), 5, 120) };
+
   const shape = f.shape_type ? SHAPES[f.shape_type] : undefined;
 
   if (shape) {
@@ -94,8 +98,6 @@ function templateShape(f: O5Spell): { shape: "circle" | "cube" | "cone" | "line"
 
     return { shape, size: clamp(Math.round(size), 5, 120) };
   }
-
-  const area = AREA.exec(f.desc);
 
   return area ? { shape: "circle", size: clamp(Number(area[1]), 5, 120) } : null;
 }
@@ -114,9 +116,9 @@ export function spellTargeting(f: O5Spell, side: Side, kind: Kind = "none"): Spe
 
     const centered = template.shape === "circle" || template.shape === "cube";
 
-    const at = range === "self" ? (centered ? 5 : undefined) : range;
+    const at = template.shape === "emanation" ? undefined : range === "self" ? (centered ? 5 : undefined) : range;
 
-    return { kind: "template", shape: template.shape, size: template.size, side, maxTargets, ...(at !== undefined && { range: at }) };
+    return { kind: "template", shape: template.shape, size: template.size, side, maxTargets, ...(template.shape === "circle" && { exact: true }), ...(at !== undefined && { range: at }) };
   }
 
   if (range === "self") {

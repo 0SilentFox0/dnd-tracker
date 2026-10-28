@@ -3,6 +3,7 @@ import { applyClassChoices } from "../convert/class-choices";
 import { convertClasses } from "../convert/classes";
 import { convertFeats } from "../convert/feats";
 import { convertMagicItems } from "../convert/magic-items";
+import { convertMonsterActions } from "../convert/monster-actions";
 import { applyRaceChoices } from "../convert/race-choices";
 import { convertRaces } from "../convert/races";
 import { convertSpellGroups } from "../convert/spell-groups";
@@ -56,7 +57,7 @@ export function buildSrdData(data: Open5eData): SrdData {
 
   const out: SrdData = {
     "spell-groups": convertSpellGroups(),
-    spells: convertSpells(data),
+    spells: [...convertSpells(data), ...convertMonsterActions(data)].sort(bySlug),
     races: applyRaceChoices(convertRaces(data), data),
     classes: applyClassChoices(convertClasses(data)),
     feats: convertFeats(data),
@@ -71,6 +72,12 @@ export function buildSrdData(data: Open5eData): SrdData {
   const spellNames = new Set(out.spells.map((s) => s.name));
 
   assertKnown("race choice spells", out.races.flatMap((r) => (r.choices ?? []).flatMap((c) => (c.options ?? []).flatMap((o) => (o.spells ?? []).map((s) => s.spellId)))), spellNames);
+  assertKnown("unit spell grants", out.units.flatMap((u) => (u.spellcasting?.spells ?? []).map((s) => s.spellId)), spellNames);
+  assertKnown("unit linked spells", out.units.flatMap((u) => u.abilities.flatMap((a) => a.perform?.kind === "spell" ? [a.perform.spellId] : [])), spellNames);
+
+  for (const unit of out.units) {
+    assertKnown(`${unit.name} linked attacks`, unit.abilities.flatMap((a) => a.perform?.kind === "attack" ? [a.perform.attack.toLowerCase()] : []), new Set(unit.attacks.map((a) => a.name.toLowerCase())));
+  }
 
   for (const kind of SRD_KINDS) assertUniqueSlugs(kind, out[kind]);
 

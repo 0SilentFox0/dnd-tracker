@@ -1,4 +1,4 @@
-import { ABILITY_ENUM, nameField } from "./common";
+import { ABILITY_ENUM, jsonField, nameField } from "./common";
 
 import { getProficiencyBonus } from "@/lib/utils/common/calculations";
 import type { ImportField, ImportSpec } from "@/types/content-import";
@@ -21,9 +21,11 @@ const fields: ImportField[] = [
   int("wisdom", "МДР", ["муд", "wis", "мудрість"], ["8", "12"]),
   int("charisma", "ХАР", ["cha", "харизма"], ["8", "6"]),
   { key: "attacks", label: "Атаки", aliases: ["атака"], type: "attacks", examples: ["Короткий лук +4, 1к6+2 колючий", "Укус +4, 2к4+2 колючий"] },
-  { key: "abilities", label: "Навички/Здібності", aliases: ["особливості", "features", "здібності", "traits"], type: "abilitiesText", examples: ["Втеча: бонусною дією відходить або ховається", "Зграя: перевага на атаку, якщо поруч союзник"] },
+  { key: "abilities", label: "Навички/Здібності", aliases: ["особливості", "features", "здібності", "traits"], type: "abilitiesText", nestedRef: { kind: "spells", key: "spellId" }, examples: ["Втеча: бонусною дією відходить або ховається", "Зграя: перевага на атаку, якщо поруч союзник"] },
   { key: "immunities", label: "Імунітети", aliases: ["імунітет"], type: "list", examples: ["", "poison"] },
   { key: "knownSpells", label: "Заклинання", aliases: ["spells", "known spells"], type: "refList", ref: "spells", examples: ["", ""] },
+  jsonField("statblock", "Статблок (JSON)", ["statblock"]),
+  { ...jsonField("spellcasting", "Заклинання монстра (JSON)", ["spellcasting"]), nestedRef: { kind: "spells", key: "spellId" } },
   int("proficiencyBonus", "Майстерність", ["proficiency", "бонус майстерності"], ["", ""]),
   int("gridSize", "Розмір на мапі", ["клітинок"], ["1", "1"]),
   int("morale", "Мораль", [], ["0", "1"]),

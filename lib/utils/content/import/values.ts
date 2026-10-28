@@ -206,13 +206,13 @@ export function formatFieldValue(field: ImportField, value: unknown, nameOf: (ki
       return value ? "так" : "ні";
     case "cr":
       return String(value);
+    case "abilitiesText":
     case "json": {
       const mapped = field.nestedRef ? namesInside(value, field.nestedRef, nameOf) : value;
 
       return Array.isArray(mapped) && mapped.length === 0 ? "" : JSON.stringify(mapped);
     }
     case "attacks":
-    case "abilitiesText":
       return Array.isArray(value) && value.length === 0 ? "" : JSON.stringify(value);
     default:
       return String(value);

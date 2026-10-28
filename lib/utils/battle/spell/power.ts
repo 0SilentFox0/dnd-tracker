@@ -11,7 +11,7 @@ function spellcastingModifier(p: BattleParticipant): { mod: number; label: strin
 
   if (!ability) return { mod: 0, label: "" };
 
-  const labels = { intelligence: "INT", wisdom: "WIS", charisma: "CHA" } as const;
+  const labels = { strength: "STR", dexterity: "DEX", constitution: "CON", intelligence: "INT", wisdom: "WIS", charisma: "CHA" } as const;
 
   return { mod: p.abilities.modifiers[ability], label: labels[ability] };
 }
@@ -37,6 +37,7 @@ export function computeSpellPower(input: {
   participants: BattleParticipant[];
   extra?: StaticEffect[];
   addAbilityMod?: boolean;
+  damageBonus?: number;
 }): SpellPower {
   const { caster, rolls } = input;
 
@@ -46,7 +47,7 @@ export function computeSpellPower(input: {
 
   const breakdown = [`+ сума кубиків (${sum})`];
 
-  const heal = sum;
+  const heal = sum + (input.damageBonus ?? 0);
 
   const mods = collectModifiers(withSelf(input.participants, caster), caster.basicInfo.id, { damage: { kind: "magic", school: input.groupId } }, input.extra);
 
@@ -61,6 +62,8 @@ export function computeSpellPower(input: {
   const abilityMod = isFiveE(caster) && input.addAbilityMod ? spellcastingModifier(caster) : null;
 
   if (abilityMod) breakdown.push(`+ мод. ${abilityMod.label} (${signed(abilityMod.mod)})`);
+
+  if (input.damageBonus) breakdown.push(`+ бонус заклинання (${signed(input.damageBonus)})`);
 
   const raw = heal + mods.flat + percentBonus + (abilityMod?.mod ?? 0);
 
