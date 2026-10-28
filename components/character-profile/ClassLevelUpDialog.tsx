@@ -20,7 +20,7 @@ interface ClassLevelUpDialogProps {
 export function ClassLevelUpDialog({ open, onOpenChange, character, onLeveled }: ClassLevelUpDialogProps) {
   const form = useClassLevelUpForm({ open, character, onLeveled, onClose: () => onOpenChange(false) });
 
-  const { byId, available, selection, cls, stepDefs, raisedEntry, canSubmit, actions } = form;
+  const { byId, available, selection, cls, stepDefs, raisedEntry, nextRow, gained, picksCount, nextLevel, canSubmit, actions } = form;
 
   const { choice } = selection;
 
@@ -88,6 +88,13 @@ export function ClassLevelUpDialog({ open, onOpenChange, character, onLeveled }:
             required
             triggerClassName="w-full"
           />
+        )}
+        {nextRow && (gained.length > 0 || picksCount > 0) && (
+          <section aria-label="Що дає рівень" className="space-y-1 rounded-md border border-hud-rule p-2 text-sm">
+            <h4 className="font-semibold">Що дає рівень {nextLevel}</h4>
+            {gained.length > 0 && <p>{gained.map((item) => item.name).join(", ")}</p>}
+            {picksCount > 0 && <p className="text-hud-muted">Виборів: {picksCount}</p>}
+          </section>
         )}
         {stepDefs.length > 0 && character.hero && raisedEntry && <LevelUpChoicesStep campaignId={character.campaignId} hero={character.hero} entry={raisedEntry} value={selection.picks} onChange={actions.setPicks} />}
         {form.error && <FormAlert>{form.error}</FormAlert>}

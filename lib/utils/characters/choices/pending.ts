@@ -1,12 +1,15 @@
 import type { ChoiceRefs, PickVisit } from "@/lib/utils/characters/choices/walk";
+import type { Choice, ChoicePick, FeatData } from "@/types/choices";
 
-function resolved(v: PickVisit, refs: Pick<ChoiceRefs, "featsById">): number {
-  if (v.choice.kind === "option") return v.picks.filter((p) => v.choice.options?.some((o) => o.id === p.id)).length;
+export function resolvedPickCount(choice: Choice, picks: readonly ChoicePick[], featsById?: Readonly<Record<string, FeatData>>): number {
+  if (choice.kind === "option") return picks.filter((p) => choice.options?.some((o) => o.id === p.id)).length;
 
-  if (v.choice.kind === "feat") return v.picks.filter((p) => refs.featsById[p.id] || v.choice.options?.some((o) => o.id === p.id)).length;
+  if (choice.kind === "feat" && featsById) return picks.filter((p) => featsById[p.id] || choice.options?.some((o) => o.id === p.id)).length;
 
-  return v.picks.length;
+  return picks.length;
 }
+
+const resolved = (v: PickVisit, refs: Pick<ChoiceRefs, "featsById">): number => resolvedPickCount(v.choice, v.picks, refs.featsById);
 
 const unreachable = (v: PickVisit): boolean => {
   const rule = v.choice.spells;
