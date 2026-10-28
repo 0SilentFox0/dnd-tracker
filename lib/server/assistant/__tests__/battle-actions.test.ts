@@ -22,7 +22,7 @@ vi.mock("@/lib/db", () => ({ prisma: {
   spell: { findUnique: async () => ({ id: "s", campaignId: "c", executionMode: "manual" }), findMany: async () => [] },
   character: { findMany: async () => [] }, unit: { findMany: async () => [] },
 } }));
-vi.mock("@/lib/utils/battle/pipeline/default-deps", () => ({ defaultPipelineDeps: {
+vi.mock("@/lib/server/battles/pipeline-deps", () => ({ defaultPipelineDeps: {
   getUserId: async () => "u", loadBattle: async () => fixture.loaded,
   recheckAccess: async () => ({ isMember: true, isDM: true }),
   rateLimit: async () => ({ allowed: true }), loadRecentEvents: async () => [],

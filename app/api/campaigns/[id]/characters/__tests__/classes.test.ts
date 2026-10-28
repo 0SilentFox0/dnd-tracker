@@ -142,7 +142,7 @@ describe("PATCH character classes", () => {
   });
 
   it("class у тілі необов'язковий, якщо є непорожні classes", async () => {
-    const { updateCharacterSchema } = await import("@/app/api/campaigns/[id]/characters/[characterId]/update-character-schema");
+    const { updateCharacterSchema } = await import("@/lib/server/characters/core/update-character-schema");
 
     expect(updateCharacterSchema.safeParse({ class: "", classes: [{ classId: "c1", level: 1 }] }).success).toBe(true);
     expect(updateCharacterSchema.safeParse({ class: "", classes: [] }).success).toBe(false);

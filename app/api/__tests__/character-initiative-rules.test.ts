@@ -8,7 +8,7 @@ import * as apiAuth from "@/lib/utils/api/api-auth";
 import { parseRules } from "@/lib/utils/rules/schema";
 
 vi.mock("@/lib/utils/api/api-auth", () => ({ requireAuth: vi.fn(), requireCampaignAccess: vi.fn(), requireDM: vi.fn() }));
-vi.mock("@/app/api/campaigns/[id]/characters/resolve-character-owner", () => ({ resolveCharacterOwner: vi.fn(async () => ({ controlledBy: "owner" })) }));
+vi.mock("@/lib/server/characters/core/resolve-character-owner", () => ({ resolveCharacterOwner: vi.fn(async () => ({ controlledBy: "owner" })) }));
 vi.mock("@/lib/supabase/avatar-storage", () => ({ resolveAvatarForPersistence: vi.fn(async (a: string | undefined) => ({ ok: true, avatar: a })) }));
 vi.mock("@/lib/db", () => ({
   prisma: {

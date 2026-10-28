@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { stashActionSchema } from "../stash-schema";
+import { stashActionSchema } from "@/lib/server/characters/core/stash-schema";
 
 describe("stash schema 4f-3", () => {
   it("accepts refs, grant with base/quantity, attune/unattune", () => {

@@ -35,7 +35,7 @@ export const CHARACTER_PROGRESSION_ACTIONS: readonly AssistantActionDef[] = Obje
 
         const target = targets[0] ?? { domain: "characters", id: caller.actor.campaignId, name: "Персонажі" };
 
-        const before = state.characters.map(({ notes, ...row }) => ({ ...row, notesHash: requestDigest(notes ?? null) }));
+        const before = state.characters.map(({ notes, ...row }: { notes?: unknown; id: string }) => ({ ...row, notesHash: requestDigest(notes ?? null) }));
 
         const kind: EffectKind = operation === "progression.reset" || operation === "progression.unlearn" || (operation === "resources" && value.reset) ? "erase-progress" : "update";
 

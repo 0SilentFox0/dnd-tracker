@@ -1,12 +1,12 @@
-import { NextResponse } from "next/server";
+import { z } from "zod";
 
-import { guardedCharacterHandler,operationAccess } from "../operation-context";
+import { characterHandler, defineCharacterOperation, memberScope } from "../operation-runner";
 
 import { API_ERRORS } from "@/lib/constants/api-errors";
 import { CharacterStatus, type CharacterStatusValue, CharacterType, type CharacterTypeValue } from "@/lib/constants/characters";
 import { prisma } from "@/lib/db";
+import { ContentError } from "@/lib/server/content/errors";
 import type { Actor } from "@/lib/utils/api/actor";
-import { errorResponse } from "@/lib/utils/api/api-response";
 
 const COMPACT_SELECT = {
   id: true,
@@ -34,35 +34,35 @@ const LIST_SELECT = {
   user: { select: { displayName: true } },
 } as const;
 
-async function listCharactersImpl(request: Request, campaignId: string, actor?: Actor): Promise<NextResponse> {
-  const { searchParams } = new URL(request.url);
+const listSchema = z.object({ type: z.string().nullish(), compact: z.boolean().optional(), status: z.string().nullish() });
 
-  const type = searchParams.get("type");
+export const listOperation = defineCharacterOperation({
+  name: "list",
+  action: "list characters",
+  schema: listSchema,
+  unlocked: true,
+  gate: memberScope,
+  query: ({ searchParams }) => ({ type: searchParams.get("type"), compact: searchParams.get("compact") === "1" || searchParams.get("compact") === "true", status: searchParams.get("status") }),
+  run: async ({ access, campaignId }, { type, compact, status }) => {
+    const pending = status === CharacterStatus.PENDING;
 
-  const compact = searchParams.get("compact") === "1" || searchParams.get("compact") === "true";
+    if (pending && !access.isDM) throw new ContentError(API_ERRORS.FORBIDDEN, 403);
 
-  const accessResult = await operationAccess(campaignId, false, actor);
+    const where: { campaignId: string; status: CharacterStatusValue; type?: CharacterTypeValue } = {
+      campaignId,
+      status: pending ? CharacterStatus.PENDING : CharacterStatus.ACTIVE,
+    };
 
-  if (accessResult instanceof NextResponse) return accessResult;
+    if (type === CharacterType.PLAYER || type === CharacterType.NPC_HERO) where.type = type;
 
-  const pending = searchParams.get("status") === CharacterStatus.PENDING;
+    const orderBy = { createdAt: "desc" } as const;
 
-  if (pending && !accessResult.isDM) return errorResponse(API_ERRORS.FORBIDDEN, 403);
+    return compact
+      ? prisma.character.findMany({ where, select: COMPACT_SELECT, orderBy })
+      : prisma.character.findMany({ where, select: pending ? { ...LIST_SELECT, reviewNote: true } : LIST_SELECT, orderBy });
+  },
+});
 
-  const where: { campaignId: string; status: CharacterStatusValue; type?: CharacterTypeValue } = {
-    campaignId,
-    status: pending ? CharacterStatus.PENDING : CharacterStatus.ACTIVE,
-  };
+const list = characterHandler(listOperation);
 
-  if (type === CharacterType.PLAYER || type === CharacterType.NPC_HERO) where.type = type;
-
-  const orderBy = { createdAt: "desc" } as const;
-
-  const characters = compact
-    ? await prisma.character.findMany({ where, select: COMPACT_SELECT, orderBy })
-    : await prisma.character.findMany({ where, select: pending ? { ...LIST_SELECT, reviewNote: true } : LIST_SELECT, orderBy });
-
-  return NextResponse.json(characters);
-}
-
-export const listCharacters = guardedCharacterHandler(listCharactersImpl, "list");
+export const listCharacters = (request: Request, campaignId: string, actor?: Actor) => list(request, campaignId, undefined, actor);

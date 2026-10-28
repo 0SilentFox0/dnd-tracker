@@ -1,5 +1,4 @@
-import { readFreeArtifacts } from "./read-free-artifacts";
-
+import { readFreeArtifacts } from "@/lib/server/characters/core/read-free-artifacts";
 import { handleApiError } from "@/lib/utils/api/error-handler";
 import type { CharacterRouteContext } from "@/types/api";
 

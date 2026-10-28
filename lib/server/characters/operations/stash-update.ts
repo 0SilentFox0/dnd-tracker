@@ -1,21 +1,20 @@
-import { NextResponse } from "next/server";
 import type { Prisma } from "@prisma/client";
 import { randomUUID } from "node:crypto";
+import type { z } from "zod";
 
-import { guardedCharacterHandler, operationAccess } from "../operation-context";
+import { type CampaignScope, characterHandler, defineCharacterOperation, memberScope, orThrow } from "../operation-runner";
 
-import { buildStashView, STASH_ROW_SELECT } from "@/app/api/campaigns/[id]/characters/[characterId]/stash/read-stash";
-import { stashActionSchema } from "@/app/api/campaigns/[id]/characters/[characterId]/stash/stash-schema";
 import { API_ERRORS } from "@/lib/constants/api-errors";
 import { CharacterStatus } from "@/lib/constants/characters";
 import { prisma } from "@/lib/db";
 import { ensureInventory, lockCampaignArtifacts } from "@/lib/server/artifacts/lock";
 import { rejectIfInActiveBattle } from "@/lib/server/characters/battle-lock";
+import { buildStashView, STASH_ROW_SELECT } from "@/lib/server/characters/core/read-stash";
+import { stashActionSchema } from "@/lib/server/characters/core/stash-schema";
+import { ContentError } from "@/lib/server/content/errors";
 import { writeInventoryLog } from "@/lib/server/inventory/log";
 import type { Actor } from "@/lib/utils/api/actor";
-import { errorResponse } from "@/lib/utils/api/api-response";
 import { loadOwned } from "@/lib/utils/api/load-owned";
-import { parseBody } from "@/lib/utils/api/parse-body";
 import { findHolder } from "@/lib/utils/artifacts/ownership";
 import { normalizeItems, normalizeStash } from "@/lib/utils/inventory/items";
 import { canStashAction } from "@/lib/utils/inventory/permissions";
@@ -63,37 +62,25 @@ const GRANT_ERROR: Record<GrantError, { text: string; status: number }> = {
   ITEM_SPELL_INVALID: { text: "Недозволене заклинання предмета", status: 422 },
 };
 
-async function applyStashImpl(request: Request, campaignId: string, characterId: string, actor?: Actor): Promise<NextResponse> {
-  const access = await operationAccess(campaignId, false, actor);
-
-  if (access instanceof NextResponse) return access;
-
+async function applyStashCore({ access, campaignId, characterId }: CampaignScope, data: z.infer<typeof stashActionSchema>) {
   const { isDM, userId } = access;
 
-  const data = await parseBody(stashActionSchema, request);
-
-  if (data instanceof NextResponse) return data;
-
-  const character = await loadOwned(
+  const character = await orThrow(loadOwned(
     prisma.character.findUnique({ where: { id: characterId }, select: { id: true, campaignId: true, controlledBy: true, status: true, resources: true } }),
     campaignId,
     API_ERRORS.CHARACTER_NOT_FOUND,
-  );
-
-  if (character instanceof NextResponse) return character;
+  ));
 
   const allowed = canStashAction(data.action, { isDM, isOwner: character.controlledBy === userId, pending: character.status === CharacterStatus.PENDING });
 
-  if (!allowed) return errorResponse(API_ERRORS.FORBIDDEN, 403);
+  if (!allowed) throw new ContentError(API_ERRORS.FORBIDDEN, 403);
 
   const rules = parseRules(access.campaign?.rules);
 
   if (data.action === "attune" || data.action === "unattune") {
-    if (!rules.items.enabled) return errorResponse(API_ERRORS.ITEMS_DISABLED, 409);
+    if (!rules.items.enabled) throw new ContentError(API_ERRORS.ITEMS_DISABLED, 409);
 
-    const inBattle = await rejectIfInActiveBattle(campaignId, [characterId]);
-
-    if (inBattle) return inBattle;
+    await orThrow(rejectIfInActiveBattle(campaignId, [characterId]));
   }
 
   return prisma.$transaction(async (tx) => {
@@ -128,17 +115,13 @@ async function applyStashImpl(request: Request, campaignId: string, characterId:
 
       const found = await tx.artifact.findFirst({ where: { id: lookupId, campaignId }, select: STASH_ROW_SELECT });
 
-      if (!found) return errorResponse(API_ERRORS.ARTIFACT_NOT_FOUND, 404);
+      if (!found) throw new ContentError(API_ERRORS.ARTIFACT_NOT_FOUND, 404);
 
       artifact = found;
       grantRow = found;
       artifactSlotType = found.slot;
 
-      if (data.action === "equip" && data.slot) {
-        const campaign = await tx.campaign.findUnique({ where: { id: campaignId }, select: { rules: true } });
-
-        classesEnabled = parseRules(campaign?.rules).classes.enabled;
-      }
+      if (data.action === "equip" && data.slot) classesEnabled = rules.classes.enabled;
     }
 
     if (data.action === "grant" && grantRow) {
@@ -151,7 +134,7 @@ async function applyStashImpl(request: Request, campaignId: string, characterId:
       if (!planned.ok) {
         const { text, status } = GRANT_ERROR[planned.error];
 
-        return errorResponse(text, status);
+        throw new ContentError(text, status);
       }
 
       grant = planned.plan;
@@ -169,7 +152,7 @@ async function applyStashImpl(request: Request, campaignId: string, characterId:
           uniqueChecker(rows),
         );
 
-        if (holder) return errorResponse(`${API_ERRORS.ARTIFACT_HELD_BY_OTHER}: ${all.find((o) => o.characterId === holder)?.character.name ?? ""}`, 409);
+        if (holder) throw new ContentError(`${API_ERRORS.ARTIFACT_HELD_BY_OTHER}: ${all.find((o) => o.characterId === holder)?.character.name ?? ""}`, 409);
       }
     }
 
@@ -187,7 +170,7 @@ async function applyStashImpl(request: Request, campaignId: string, characterId:
 
     const result = applyStashAction(state, data, { newItemId: randomUUID(), artifactSlotType, artifact, classesEnabled, grant, items, name, isDM });
 
-    if (!result.ok) return errorResponse(STASH_ERROR_TEXT[result.error], STASH_ERROR_STATUS[result.error] ?? 400);
+    if (!result.ok) throw new ContentError(STASH_ERROR_TEXT[result.error], STASH_ERROR_STATUS[result.error] ?? 400);
 
     const saved = await tx.characterInventory.update({
       where: { characterId },
@@ -204,8 +187,18 @@ async function applyStashImpl(request: Request, campaignId: string, characterId:
 
     await writeInventoryLog(tx, [{ campaignId, characterId, actorUserId: userId, ...result.log }]);
 
-    return NextResponse.json(await buildStashView(tx, campaignId, saved, { rules, resources: character.resources }));
+    return buildStashView(tx, campaignId, saved, { rules, resources: character.resources });
   });
 }
 
-export const applyStash = guardedCharacterHandler(applyStashImpl, "stash-update");
+export const stashUpdateOperation = defineCharacterOperation({
+  name: "stash-update",
+  action: "apply stash action",
+  schema: stashActionSchema,
+  gate: memberScope,
+  run: applyStashCore,
+});
+
+const stash = characterHandler(stashUpdateOperation);
+
+export const applyStash = (request: Request, campaignId: string, characterId: string, actor?: Actor) => stash(request, campaignId, characterId, actor);

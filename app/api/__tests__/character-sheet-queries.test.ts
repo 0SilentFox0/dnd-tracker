@@ -33,7 +33,7 @@ vi.mock("@/lib/db", () => {
   return { prisma: new Proxy({}, { get: (_t, name: string) => model(name) }) };
 });
 
-import { buildSheetFor, loadSheetCharacter } from "@/app/api/campaigns/[id]/characters/[characterId]/sheet/sheet-handler";
+import { buildSheetFor, loadSheetCharacter } from "@/lib/server/characters/core/sheet-handler";
 
 const rage = { id: "r", name: "Лють", trigger: { event: "passive" }, effects: [{ kind: "damageBonus", filter: { kind: "melee" }, percent: 10 }] };
 

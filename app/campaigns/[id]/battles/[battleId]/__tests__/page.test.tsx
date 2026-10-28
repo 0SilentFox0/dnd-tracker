@@ -9,7 +9,7 @@ const readBattleScene = vi.hoisted(() => vi.fn());
 
 const getSessionUserId = vi.hoisted(() => vi.fn());
 
-vi.mock("@/lib/utils/battle/pipeline/read-battle", () => ({ readBattleScene }));
+vi.mock("@/lib/server/battles/read-battle", () => ({ readBattleScene }));
 vi.mock("@/lib/auth", () => ({ getSessionUserId }));
 vi.mock("../BattlePageClient", () => ({ BattlePageClient: () => null }));
 

@@ -1,6 +1,5 @@
 import { NextResponse } from "next/server";
 
-import { deriveCharacterDefaults } from "../../derive-character-defaults";
 import { draftChoiceFields } from "../../draft/draft-choices";
 import { parseDraftBody } from "../../draft/draft-class";
 import { draftFields } from "../../draft/draft-data";
@@ -9,6 +8,7 @@ import { resolveDraftParts } from "../../draft/draft-resolve";
 import { API_ERRORS } from "@/lib/constants/api-errors";
 import { CharacterStatus } from "@/lib/constants/characters";
 import { prisma } from "@/lib/db";
+import { deriveCharacterDefaults } from "@/lib/server/characters/core/derive-character-defaults";
 import { requireCampaignAccess } from "@/lib/utils/api/api-auth";
 import { errorResponse } from "@/lib/utils/api/api-response";
 import { loadOwned } from "@/lib/utils/api/load-owned";

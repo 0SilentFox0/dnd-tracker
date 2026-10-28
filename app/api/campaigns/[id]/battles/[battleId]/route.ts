@@ -1,6 +1,6 @@
 import { BATTLE_VERSION_ONLY_PARAM } from "@/lib/constants/battle";
 import { battleRecordHttp } from "@/lib/server/battles/http";
-import { readBattleScene, readBattleVersion } from "@/lib/utils/battle/pipeline/read-battle";
+import { readBattleScene, readBattleVersion } from "@/lib/server/battles/read-battle";
 type Params = { params: Promise<{ id: string; battleId: string }> };
 export async function GET(req: Request, { params }: Params) {
   if (new URL(req.url).searchParams.has(BATTLE_VERSION_ONLY_PARAM)) return readBattleVersion(await params);

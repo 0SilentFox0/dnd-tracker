@@ -7,7 +7,7 @@ import { PrefetchedQuery } from "@/lib/providers/prefetched-query";
 
 const readCharacterSheet = vi.hoisted(() => vi.fn());
 
-vi.mock("@/app/api/campaigns/[id]/characters/[characterId]/sheet/read-sheet", () => ({ readCharacterSheet }));
+vi.mock("@/lib/server/characters/core/read-sheet", () => ({ readCharacterSheet }));
 vi.mock("@/components/character-profile", () => ({ CharacterProfile: () => null }));
 
 import DmCharacterPage from "../page";

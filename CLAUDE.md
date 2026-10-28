@@ -68,7 +68,7 @@ Many one-off ops live in `scripts/` and run via `tsx` (e.g. `pnpm import-units`,
 
 Details in `docs/architecture/`; read the file before changing the subsystem.
 
-- **Battle** ([battle.md](docs/architecture/battle.md)): every battle route = Zod schema + `runBattleMutation` (`lib/utils/battle/pipeline/`) + sibling `<action>-mutation.ts` with pure engine code. Anything writing `battle_participants.snapshot` must write `snapshotHash` too. Turn advance only through `lib/utils/battle/turn/advanceTurn`. Damage → `applyDamageConsequences` right after the primitive; effect removal via `removeEffects`. Responses are deltas (`ClientBattleDelta`), not full scenes.
+- **Battle** ([battle.md](docs/architecture/battle.md)): every battle route = Zod schema + `runBattleMutation` (`lib/server/battles/run-mutation.ts`, pure engine in `lib/utils/battle/pipeline/`) + `<action>-mutation.ts` in `lib/server/battles/mutations/<action>/` with pure engine code. Anything writing `battle_participants.snapshot` must write `snapshotHash` too. Turn advance only through `lib/utils/battle/turn/advanceTurn`. Damage → `applyDamageConsequences` right after the primitive; effect removal via `removeEffects`. Responses are deltas (`ClientBattleDelta`), not full scenes.
 - **Balance** ([balance.md](docs/architecture/balance.md)): no difficulty setting; setup UI and battle start call the same `computeFairScaling`.
 - **Map modes** ([map-modes.md](docs/architecture/map-modes.md)): core never imports a mode directly (ESLint); a new mode = folders + registry rows.
 - **Abilities** ([abilities.md](docs/architecture/abilities.md)): engine reads bonuses only via `collectModifiers`/`runAbilities`, the `abilities` column only via `lib/utils/abilities/read.ts`.

@@ -142,6 +142,31 @@ export function parseRules(raw: unknown): Ruleset {
   ) as Ruleset;
 }
 
+const RULES_CACHE_LIMIT = 50;
+
+const rulesCache = new Map<string, Ruleset>();
+
+export function parseRulesCached(raw: unknown): Ruleset {
+  const key = JSON.stringify(raw ?? null);
+
+  const hit = rulesCache.get(key);
+
+  if (hit) {
+    rulesCache.delete(key);
+    rulesCache.set(key, hit);
+
+    return hit;
+  }
+
+  const parsed = parseRules(raw);
+
+  rulesCache.set(key, parsed);
+
+  if (rulesCache.size > RULES_CACHE_LIMIT) rulesCache.delete(rulesCache.keys().next().value as string);
+
+  return parsed;
+}
+
 export const RulesetPatchSchema = z
   .strictObject({
     morale: patchSection("morale").optional(),

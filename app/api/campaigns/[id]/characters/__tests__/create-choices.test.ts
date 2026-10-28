@@ -11,8 +11,8 @@ vi.mock("@/lib/server/characters/choices/load-refs", () => ({ loadChoiceRefs: vi
 vi.mock("@/lib/server/characters/apply-classes", () => ({
   applyClasses: vi.fn(async ({ entries }: { entries: unknown[] }) => ({ ok: true, data: entries.length ? { classes: entries, level: 1, class: "Sorcerer", subclass: null, spellSlots: {} } : null })),
 }));
-vi.mock("@/app/api/campaigns/[id]/characters/resolve-character-owner", () => ({ resolveCharacterOwner: vi.fn(async () => ({ controlledBy: "p1" })) }));
-vi.mock("@/app/api/campaigns/[id]/characters/derive-character-defaults", () => ({ deriveCharacterDefaults: vi.fn(async () => ({ spellSlots: {} })) }));
+vi.mock("@/lib/server/characters/core/resolve-character-owner", () => ({ resolveCharacterOwner: vi.fn(async () => ({ controlledBy: "p1" })) }));
+vi.mock("@/lib/server/characters/core/derive-character-defaults", () => ({ deriveCharacterDefaults: vi.fn(async () => ({ spellSlots: {} })) }));
 vi.mock("@/lib/supabase/avatar-storage", () => ({ resolveAvatarForPersistence: vi.fn(async (a: string | undefined) => ({ ok: true, avatar: a })) }));
 vi.mock("@/lib/db", () => ({ prisma: { character: { create: vi.fn(async ({ data }: { data: object }) => ({ id: "new", ...data })) }, characterInventory: { create: vi.fn() } } }));
 

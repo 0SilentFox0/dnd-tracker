@@ -1,20 +1,16 @@
-import { NextResponse } from "next/server";
 import type { ZodType } from "zod";
 
 import type { PusherMessage } from "./battle-response";
 import { buildPusherMessages, toBattleResponse } from "./battle-response";
 import { buildClientDelta } from "./client-delta";
-import { defaultPipelineDeps } from "./default-deps";
 import { guardTurnOrder } from "./turn-order-guard";
 
 import { API_ERRORS } from "@/lib/constants/api-errors";
 import { BattleStatus } from "@/lib/constants/battle";
-import { ContentError } from "@/lib/server/content/errors";
 import { isActive } from "@/lib/utils/abilities/engine/core/participants";
 import type { Rng } from "@/lib/utils/abilities/engine/core/types";
 import { syncMapAuras } from "@/lib/utils/abilities/engine/effects/map-auras";
 import type { BATTLE_RATE_LIMITS, RateLimitResult } from "@/lib/utils/api/rate-limit";
-import { rateLimitResponse } from "@/lib/utils/api/rate-limit";
 import { releaseInvalidGrapples } from "@/lib/utils/battle/actions/grapple";
 import { controls } from "@/lib/utils/battle/common/control";
 import { placeParticipants } from "@/lib/utils/battle/grid/placement";
@@ -41,7 +37,7 @@ import { checkVictoryConditions, completeBattle } from "@/lib/utils/battle/turn/
 import type { BattleKnowledge } from "@/lib/utils/battle/view/knowledge";
 import { alwaysSeesEnemyStats } from "@/lib/utils/battle/view/visibility";
 import type { Ruleset } from "@/lib/utils/rules";
-import type { BattleScene } from "@/types/api";
+import type { BattleScene, ClientBattleDelta } from "@/types/api";
 import type { BattleAction, BattleMapConfig, BattleParticipant } from "@/types/battle";
 
 export { PUSHER_DELTA_LIMIT_BYTES } from "./limits";
@@ -97,7 +93,7 @@ export interface RunBattleMutationOptions<TBody> {
 export function assertAccess(access: BattleAccess, ctx: BattleMutationContext): void {
   if (access === BattleAccess.MEMBER || ctx.isDM) return;
 
-  if (access === BattleAccess.DM) throw new BattleAccessError(403, "Лише DM");
+  if (access === BattleAccess.DM) throw new BattleAccessError(403, API_ERRORS.DM_ONLY);
 
   const current = ctx.participants[ctx.scene.turnIndex];
 
@@ -157,74 +153,33 @@ function withPlacement(map: BattleMapConfig | null, scene: { status: BattleStatu
   return participants === result.participants ? result : { ...result, participants };
 }
 
-function respondWith(
-  mode: "battle" | "wrapped" | "response" | undefined,
-  battle: BattleScene,
-  response?: Record<string, unknown>,
-): NextResponse {
-  if (mode === "response") return NextResponse.json(response ?? {});
-
-  if (mode === "wrapped") return NextResponse.json({ battle, ...response });
-
-  return NextResponse.json({ ...battle, ...response });
-}
-
-export function battleErrorResponse(err: unknown): NextResponse {
-  if (err instanceof BattleConflictError) {
-    return NextResponse.json({ code: "conflict", error: err.message, version: err.currentVersion }, { status: 409 });
-  }
-
-  if (err instanceof BattleAccessError || err instanceof ContentError) {
-    return NextResponse.json({ error: err.message }, { status: err.status });
-  }
-
-  if (err instanceof BattleRuleError) {
-    return NextResponse.json({ code: err.code, error: err.message }, { status: 422 });
-  }
-
-  console.error("[battle-pipeline] unexpected error", err);
-
-  return NextResponse.json({ error: API_ERRORS.INTERNAL }, { status: 500 });
-}
-
-export type NamedBattleMutationOptions = { params: RunBattleMutationOptions<unknown>["params"]; operation: string };
-
-export async function runBattleMutation<TBody>(
-  req: Request,
-  supplied: RunBattleMutationOptions<TBody> | NamedBattleMutationOptions,
-  deps: PipelineDeps = defaultPipelineDeps,
-): Promise<NextResponse> {
-  try {
-    const userId = await deps.getUserId();
-
-    if (!userId) throw new BattleAccessError(401, API_ERRORS.UNAUTHORIZED);
-
-    const options = "mutate" in supplied ? supplied : {
-      ...await (await import("@/lib/server/battles/operations")).getBattleOperation(supplied.operation, supplied.params),
-      ...supplied,
-    };
-
-    const raw: unknown = await req.json().catch(() => undefined);
-
-    const expectedVersion = raw && typeof raw === "object" && typeof (raw as { expectedVersion?: unknown }).expectedVersion === "number"
-      ? (raw as { expectedVersion: number }).expectedVersion : undefined;
-
-    const run = () => runGuardedBattleOperation(userId, raw, expectedVersion, options as RunBattleMutationOptions<unknown>, deps);
-
-    return await (deps.withWrite ? deps.withWrite(options.params.id, run) : run());
-  } catch (err) {
-    return battleErrorResponse(err);
+export class BattleOperationError extends Error {
+  constructor(
+    readonly status: number,
+    message: string,
+    readonly issues?: unknown,
+    readonly rate?: RateLimitResult,
+  ) {
+    super(message);
+    this.name = "BattleOperationError";
   }
 }
+
+export type BattleOperationOutcome = {
+  delta: ClientBattleDelta | null;
+  version: number;
+  response?: Record<string, unknown>;
+  preview?: BattleScene & { knowledge?: BattleKnowledge };
+};
 
 /** Shared guard/mutation/save pipeline. Errors escape the transaction boundary. */
-export async function runGuardedBattleOperation<TBody>(
+export async function runGuardedBattleOperationCore<TBody>(
   userId: string,
   raw: unknown,
   expectedVersion: number | undefined,
   options: RunBattleMutationOptions<TBody>,
   deps: PipelineDeps,
-): Promise<NextResponse> {
+): Promise<BattleOperationOutcome> {
   const { id: campaignId, battleId } = options.params;
 
   const [rate, loaded] = await Promise.all([
@@ -232,11 +187,11 @@ export async function runGuardedBattleOperation<TBody>(
     deps.loadBattle({ battleId, campaignId, userId }),
   ]);
 
-  if (rate && !rate.allowed) return rateLimitResponse(rate);
+  if (rate && !rate.allowed) throw new BattleOperationError(429, API_ERRORS.TOO_MANY_REQUESTS, undefined, rate);
 
   const parsed = options.schema ? options.schema.safeParse(raw) : { success: true as const, data: undefined as TBody };
 
-  if (!parsed.success) return NextResponse.json({ error: API_ERRORS.INVALID_BODY, issues: parsed.error.issues }, { status: 400 });
+  if (!parsed.success) throw new BattleOperationError(400, API_ERRORS.INVALID_BODY, parsed.error.issues);
 
   const body = parsed.data;
 
@@ -244,13 +199,9 @@ export async function runGuardedBattleOperation<TBody>(
 
   if (!loaded.isMember) throw new BattleAccessError(403, API_ERRORS.FORBIDDEN);
 
-  const ctx = guardBattleContext(userId, loaded, body, expectedVersion, options, deps.rng);
-
-  const awaitedBefore = loaded.scene.status === BattleStatus.ACTIVE && checkVictoryConditions(loaded.participants, reserveOf(loaded.pending)).awaiting !== null;
+  const { ctx, awaiting, isDryRun } = guardBattleContext(userId, loaded, body, expectedVersion, options, deps.rng);
 
   const mutated = guardTurnOrder(loaded.scene, loaded.participants, await options.mutate(ctx, body), options.operation);
-
-  const isDryRun = options.dryRun?.(body) ?? false;
 
   const map = mutated.scene?.map !== undefined ? mutated.scene.map : loaded.meta.map;
 
@@ -275,7 +226,7 @@ export async function runGuardedBattleOperation<TBody>(
       { isDM: loaded.isDM },
     );
 
-    return respondWith(options.respond, knowledge ? { ...battle, knowledge } : battle, result.response);
+    return { delta: null, version: loaded.scene.version, response: result.response, preview: knowledge ? { ...battle, knowledge } : battle };
   }
 
   const access = deps.recheckAccess
@@ -322,13 +273,13 @@ export async function runGuardedBattleOperation<TBody>(
 
   if (loaded.scene.status === BattleStatus.ACTIVE && after.status !== BattleStatus.ACTIVE) deps.onLeftActive?.(campaignId, battleId);
 
-  deps.publish(buildPusherMessages({ before: loaded.scene, after, participants: result.participants, pending: result.pending, wasAwaiting: awaitedBefore, delta: clientDelta }));
+  deps.publish(buildPusherMessages({ before: loaded.scene, after, participants: result.participants, pending: result.pending, wasAwaiting: awaiting !== null, delta: clientDelta }));
 
-  return NextResponse.json({ delta: clientDelta, ...(result.response && { response: result.response }) });
+  return { delta: clientDelta, version: clientDelta.version, ...(result.response && { response: result.response }) };
 }
 
 /** Read-only guards shared by intent preview and execution; never invokes a mutation. */
-export function guardBattleContext<TBody>(userId: string, loaded: LoadedBattle & { isMember: boolean }, body: TBody, expectedVersion: number | undefined, options: RunBattleMutationOptions<TBody>, rng?: Rng): BattleMutationContext {
+export function guardBattleContext<TBody>(userId: string, loaded: LoadedBattle & { isMember: boolean }, body: TBody, expectedVersion: number | undefined, options: RunBattleMutationOptions<TBody>, rng?: Rng): { ctx: BattleMutationContext; awaiting: "victory" | "defeat" | null; isDryRun: boolean } {
   const ctx: BattleMutationContext = {
     scene: loaded.scene,
     meta: loaded.meta,
@@ -341,6 +292,10 @@ export function guardBattleContext<TBody>(userId: string, loaded: LoadedBattle &
 
   assertAccess(options.access, ctx);
 
+  const isDryRun = options.dryRun?.(body) ?? false;
+
+  const awaiting = loaded.scene.status === BattleStatus.ACTIVE ? checkVictoryConditions(loaded.participants, reserveOf(loaded.pending)).awaiting : null;
+
   const allowed = options.requireStatus
     ? ([] as BattleStatus[]).concat(options.requireStatus)
     : null;
@@ -351,16 +306,11 @@ export function guardBattleContext<TBody>(userId: string, loaded: LoadedBattle &
 
   const blocked = options.blockedByMode ? modeBlockedText(loaded.meta.map) : null;
 
-  if (blocked && !options.dryRun?.(body)) {
+  if (blocked && !isDryRun) {
     throw new BattleRuleError("action_rejected", blocked);
   }
 
-  if (
-    loaded.scene.status === BattleStatus.ACTIVE &&
-    !options.allowWhileAwaitingDm &&
-    !options.dryRun?.(body) &&
-    checkVictoryConditions(loaded.participants, reserveOf(loaded.pending)).awaiting
-  ) {
+  if (awaiting && !options.allowWhileAwaitingDm && !isDryRun) {
     throw new BattleRuleError("awaiting_dm", API_ERRORS.BATTLE_AWAITING_DM);
   }
 
@@ -370,40 +320,5 @@ export function guardBattleContext<TBody>(userId: string, loaded: LoadedBattle &
     throw new BattleConflictError(loaded.scene.version);
   }
 
-  return ctx;
-}
-
-/** Record commands (create/delete/audio) share T10's transaction and live access boundary.
- * They cannot use saveBattle: creation has no scene, deletion removes it, audio has its own seq.
- */
-export async function runGuardedBattleRecordOperation<T>(
-  actor: import("@/lib/utils/api/actor").Actor,
-  callback: () => Promise<T>,
-  execution?: import("@/lib/server/assistant/types").ActionExecutionContext,
-): Promise<T> {
-  const { needFailure } = await import("@/lib/utils/api/need");
-
-  const { prisma } = await import("@/lib/db");
-
-  const { withCampaignContentWrite } = await import("@/lib/server/content/write");
-
-  const { currentContentWrite, runContentWriteContext } = await import("@/lib/server/content/write-context");
-
-  const failure = needFailure(actor, { access: "dm", scope: "battles:write" });
-
-  if (failure) throw new ContentError(failure, 403);
-
-  const current = currentContentWrite();
-
-  if ((execution && (execution.caller.actor.userId !== actor.userId || execution.caller.actor.campaignId !== actor.campaignId)) || (current && (current.campaignId !== actor.campaignId || (execution && current.db !== execution.db)))) throw new ContentError("Невідповідна транзакція", 403);
-
-  const run = () => withCampaignContentWrite(actor.campaignId, async () => {
-    const member = await prisma.campaignMember.findUnique({ where: { campaignId_userId: { campaignId: actor.campaignId, userId: actor.userId } } });
-
-    if (member?.role !== "dm") throw new ContentError("Лише DM", 403);
-
-    return callback();
-  });
-
-  return execution ? runContentWriteContext(actor.campaignId, execution.db, run) : run();
+  return { ctx, awaiting, isDryRun };
 }

@@ -12,7 +12,7 @@ const requireCampaignMember = vi.hoisted(() => vi.fn());
 
 const findFirst = vi.hoisted(() => vi.fn());
 
-vi.mock("@/app/api/campaigns/[id]/characters/[characterId]/sheet/read-sheet", () => ({ readCharacterSheet }));
+vi.mock("@/lib/server/characters/core/read-sheet", () => ({ readCharacterSheet }));
 vi.mock("@/lib/server/campaigns/access", () => ({ requireCampaignMember }));
 vi.mock("@/lib/db", () => ({ prisma: { character: { findFirst } } }));
 vi.mock("@/components/character-profile", () => ({ CharacterProfile: () => null }));

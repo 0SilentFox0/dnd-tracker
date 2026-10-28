@@ -14,7 +14,7 @@ vi.mock("@/lib/cache/reference-data", () => ({
     { id: "c2", name: "Маг", hitDie: 6, caster: "full", savingThrows: [], proficiencies: {}, skillChoices: {}, features: [], subclasses: [], subclassLevel: null },
   ]),
 }));
-vi.mock("@/app/api/campaigns/[id]/characters/[characterId]/load-race-progression", () => ({ loadRaceProgression: vi.fn(async () => null) }));
+vi.mock("@/lib/server/characters/core/load-race-progression", () => ({ loadRaceProgression: vi.fn(async () => null) }));
 vi.mock("@/lib/db", () => {
   const prisma: Record<string, unknown> = { $queryRaw: vi.fn(async () => []), character: { findUnique: vi.fn(), update: vi.fn() } };
 

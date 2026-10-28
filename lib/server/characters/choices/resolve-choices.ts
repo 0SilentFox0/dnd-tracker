@@ -4,6 +4,7 @@ import type { Prisma } from "@prisma/client";
 import "server-only";
 import { ABILITY_KEYS, type AbilityKey } from "@/lib/constants/abilities";
 import { type ChoiceDb, loadChoiceRefs } from "@/lib/server/characters/choices/load-refs";
+import { ContentError } from "@/lib/server/content/errors";
 import { errorResponse } from "@/lib/utils/api/api-response";
 import { planChoices } from "@/lib/utils/characters/choices/plan";
 import type { ChoiceRefs } from "@/lib/utils/characters/choices/walk";
@@ -26,7 +27,7 @@ export async function resolveCharacterChoices(input: {
   after: ChoicesState;
   refs?: ChoiceRefs;
   db?: ChoiceDb;
-}): Promise<{ ok: true; fields: ChoiceFields; state: ChoicesState } | { ok: false; response: NextResponse }> {
+}): Promise<{ ok: true; fields: ChoiceFields; state: ChoicesState } | { ok: false; response: NextResponse; error: ContentError }> {
   const classMode = characterClassMode(input.rules, input.after.classes);
 
   const refs = input.refs ?? (await loadChoiceRefs(input.campaignId, input.character.race, { classMode, backgroundIds: [input.before.backgroundId, input.after.backgroundId], db: input.db }));
@@ -35,7 +36,7 @@ export async function resolveCharacterChoices(input: {
 
   const plan = planChoices({ before: input.before, after: input.after, refs, classMode, isDM: input.isDM, level: input.character.level, scores, skills: input.character.skills });
 
-  if (!plan.ok) return { ok: false, response: errorResponse(plan.message, plan.status, plan.issues) };
+  if (!plan.ok) return { ok: false, response: errorResponse(plan.message, plan.status, plan.issues), error: new ContentError(plan.message, plan.status, plan.issues) };
 
   return {
     ok: true,

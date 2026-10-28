@@ -1,37 +1,32 @@
 import { NextResponse } from "next/server";
 
-import { guardedCharacterHandler,operationAccess } from "../operation-context";
+import { requireCharacterSelect } from "../access";
+import { characterRoute, defineCharacterOperation, tokenGate } from "../operation-runner";
 
 import { API_ERRORS } from "@/lib/constants/api-errors";
 import { prisma } from "@/lib/db";
 import { createTokenSchema } from "@/lib/schemas/character-tokens";
-import type { Actor } from "@/lib/utils/api/actor";
-import { errorResponse } from "@/lib/utils/api/api-response";
-import { handleApiError } from "@/lib/utils/api/error-handler";
-import { parseBody } from "@/lib/utils/api/parse-body";
 
-async function POSTImpl(request: Request, { params }: { params: Promise<{ id: string; characterId: string }> }, actor?: Actor) {
-  try {
-    const { id, characterId } = await params;
-
-    const access = await operationAccess(id, true, actor);
+export const tokensCreateOperation = defineCharacterOperation({
+  name: "tokens-create",
+  action: "create character token",
+  schema: createTokenSchema,
+  parseMessage: "Некоректний жетон",
+  status: 201,
+  gate: async ctx => {
+    const access = await tokenGate(ctx);
 
     if (access instanceof NextResponse) return access;
 
-    const character = await prisma.character.findUnique({ where: { id: characterId }, select: { id: true, campaignId: true } });
+    const gate = await requireCharacterSelect(ctx.campaignId, ctx.characterId, { id: true, campaignId: true }, { access, notFound: API_ERRORS.NOT_FOUND, foreign404: true });
 
-    if (!character || character.campaignId !== id) return errorResponse(API_ERRORS.NOT_FOUND, 404);
-
-    const parsed = await parseBody(createTokenSchema, request, "Некоректний жетон");
-
-    if (parsed instanceof NextResponse) return parsed;
-
+    return gate instanceof NextResponse ? gate : { ...gate, characterId: ctx.characterId };
+  },
+  run: async ({ access, characterId }, parsed) => {
     const row = await prisma.characterToken.create({ data: { characterId, color: parsed.color, label: parsed.label, createdBy: access.userId } });
 
-    return NextResponse.json({ token: { id: row.id, color: row.color, label: row.label, createdAt: row.createdAt.toISOString() } }, { status: 201 });
-  } catch (error) {
-    return handleApiError(error, { action: "create character token" });
-  }
-}
+    return { token: { id: row.id, color: row.color, label: row.label, createdAt: row.createdAt.toISOString() } };
+  },
+});
 
-export const POST = guardedCharacterHandler(POSTImpl, "tokens-create");
+export const POST = characterRoute(tokensCreateOperation);

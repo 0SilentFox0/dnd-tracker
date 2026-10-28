@@ -1,5 +1,5 @@
-import { createAttackMutation } from "@/app/api/campaigns/[id]/battles/[battleId]/attack/attack-mutation";
-import { createSpellMutation } from "@/app/api/campaigns/[id]/battles/[battleId]/spell/spell-mutation";
+import { createAttackMutation } from "@/lib/server/battles/mutations/attack/attack-mutation";
+import { createSpellMutation } from "@/lib/server/battles/mutations/spell/spell-mutation";
 import { ContentError } from "@/lib/server/content/errors";
 import { validateAttackRequest } from "@/lib/utils/battle/attack-phase/request";
 import { attackReachError } from "@/lib/utils/battle/grid";

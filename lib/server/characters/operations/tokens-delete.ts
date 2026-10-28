@@ -1,31 +1,28 @@
-import { NextResponse } from "next/server";
+import { z } from "zod";
 
-import { guardedCharacterHandler,operationAccess } from "../operation-context";
+import { characterRoute, defineCharacterOperation, tokenScope } from "../operation-runner";
 
 import { API_ERRORS } from "@/lib/constants/api-errors";
 import { prisma } from "@/lib/db";
-import type { Actor } from "@/lib/utils/api/actor";
-import { errorResponse } from "@/lib/utils/api/api-response";
-import { handleApiError } from "@/lib/utils/api/error-handler";
+import { ContentError } from "@/lib/server/content/errors";
 
-async function DELETEImpl(_request: Request, { params }: { params: Promise<{ id: string; characterId: string; tokenId: string }> }, actor?: Actor) {
-  try {
-    const { id, characterId, tokenId } = await params;
+const tokenDeleteSchema = z.object({ characterId: z.string(), tokenId: z.string() });
 
-    const access = await operationAccess(id, true, actor);
-
-    if (access instanceof NextResponse) return access;
-
+export const tokensDeleteOperation = defineCharacterOperation({
+  name: "tokens-delete",
+  action: "delete character token",
+  schema: tokenDeleteSchema,
+  gate: tokenScope,
+  query: ({ params }) => ({ characterId: params.characterId, tokenId: params.tokenId }),
+  run: async ({ campaignId }, { characterId, tokenId }) => {
     const token = await prisma.characterToken.findUnique({ where: { id: tokenId }, select: { characterId: true, character: { select: { campaignId: true } } } });
 
-    if (!token || token.characterId !== characterId || token.character.campaignId !== id) return errorResponse(API_ERRORS.NOT_FOUND, 404);
+    if (!token || token.characterId !== characterId || token.character.campaignId !== campaignId) throw new ContentError(API_ERRORS.NOT_FOUND, 404);
 
     await prisma.characterToken.delete({ where: { id: tokenId } });
 
-    return NextResponse.json({ ok: true });
-  } catch (error) {
-    return handleApiError(error, { action: "delete character token" });
-  }
-}
+    return { ok: true };
+  },
+});
 
-export const DELETE = guardedCharacterHandler(DELETEImpl, "tokens-delete");
+export const DELETE = characterRoute(tokensDeleteOperation);

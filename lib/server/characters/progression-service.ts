@@ -1,40 +1,23 @@
-import { NextResponse } from "next/server";
 import { z } from "zod";
 
-import { PUT as choices } from "./operations/choices";
-import { POST as experience } from "./operations/experience";
-import { POST as hitDice } from "./operations/hit-dice";
-import { POST as inspiration } from "./operations/inspiration";
-import { updateInventory, updateInventorySchema } from "./operations/inventory-update";
-import { POST as levelUp } from "./operations/level-up";
-import { PATCH as resources } from "./operations/resources";
-import { POST as rest } from "./operations/rest";
-import { POST as roll } from "./operations/roll";
-import { applyStash } from "./operations/stash-update";
-import { transferArtifact, transferSchema } from "./operations/transfer";
-import { characterIdSchema, characterResult, responseData } from "./action-service";
+import { updateInventorySchema } from "./operations/inventory-update";
+import { CHARACTER_OPERATIONS } from "./operations/registry";
+import { transferSchema } from "./operations/transfer";
+import { characterIdSchema, characterResult } from "./action-service";
 import { LevelUpBodySchema } from "./class-level-up";
-import { characterIds, operationAccess, withCharacterOperation } from "./operation-context";
+import { characterIds, withCharacterOperation } from "./operation-context";
+import { actorDmAccess, runCharacterOperation as runOperationCore } from "./operation-runner";
 import { characterReferenceHash } from "./reference-state";
 
 import "server-only";
-import { readInventory } from "@/app/api/campaigns/[id]/characters/[characterId]/inventory/read-inventory";
-import { readCharacterLog } from "@/app/api/campaigns/[id]/characters/[characterId]/log/read-character-log";
-import { buildProgressionDto } from "@/app/api/campaigns/[id]/characters/[characterId]/progression/get-progression-handler";
-import { loadProgressionContext } from "@/app/api/campaigns/[id]/characters/[characterId]/progression/load-progression-context";
-import { markLevelSeen, runProgressionAction } from "@/app/api/campaigns/[id]/characters/[characterId]/progression/progression-action-handler";
-import { readCharacterSheet } from "@/app/api/campaigns/[id]/characters/[characterId]/sheet/read-sheet";
-import { readFreeArtifacts } from "@/app/api/campaigns/[id]/characters/[characterId]/stash/free-artifacts/read-free-artifacts";
-import { readLog } from "@/app/api/campaigns/[id]/characters/[characterId]/stash/log/read-log";
-import { readStash } from "@/app/api/campaigns/[id]/characters/[characterId]/stash/read-stash";
-import { stashActionSchema } from "@/app/api/campaigns/[id]/characters/[characterId]/stash/stash-schema";
 import { prisma } from "@/lib/db";
 import { ChoicesBodySchema } from "@/lib/schemas/choices";
 import { experienceSchema, hitDieSchema, inspirationSchema, resourcesEditSchema, restSchema, sheetRollSchema } from "@/lib/schemas/out-of-combat";
 import { requestDigest } from "@/lib/server/assistant/intent-store";
 import type { ActionResult } from "@/lib/server/assistant/types";
+import { stashActionSchema } from "@/lib/server/characters/core/stash-schema";
 import { assertCan } from "@/lib/server/content/access";
-import { ContentError } from "@/lib/server/content/errors";
+import { ContentError, parseInput } from "@/lib/server/content/errors";
 import type { Actor } from "@/lib/utils/api/actor";
 import { parseItemRef, refArtifactIds } from "@/lib/utils/items/ref";
 
@@ -60,25 +43,27 @@ export const progressionReads = new Set(["inventory", "stash", "sheet", "progres
 export async function progressionState(actor: Actor, input: Record<string, unknown>, operation?: string) {
   if (operation) await validateCharacterInputRefs(actor, operation, input);
 
-  const access = await operationAccess(actor.campaignId, true, actor);
+  await actorDmAccess(actor);
 
-  if (access instanceof NextResponse) await responseData(access);
+  return progressionFingerprint(actor, input);
+}
 
+async function progressionFingerprint(actor: Actor, input: Record<string, unknown>) {
   const ids = characterIds(input);
 
-  const where = { campaignId: actor.campaignId };
+  const where = { campaignId: actor.campaignId, ...(ids.length ? { id: { in: ids } } : {}) };
 
-  const characters = await prisma.character.findMany({ where: { ...where, ...(ids.length ? { id: { in: ids } } : {}) }, include: { inventory: true }, orderBy: { id: "asc" } });
+  const characters = ids.length
+    ? await prisma.character.findMany({ where, include: { inventory: true }, orderBy: { id: "asc" } })
+    : await prisma.character.findMany({ where, select: { id: true, name: true, updatedAt: true }, orderBy: { id: "asc" } });
 
   if (ids.length && characters.length !== ids.length) throw new ContentError("Персонажа не знайдено", 404);
-
-  const inventories = await prisma.characterInventory.findMany({ where: { character: where }, orderBy: { characterId: "asc" } });
 
   const campaign = await prisma.campaign.findUnique({ where: { id: actor.campaignId }, select: { rules: true, maxLevel: true, allowPlayerEdit: true, members: { select: { userId: true, role: true }, orderBy: { userId: "asc" } } } });
 
   const refsHash = await characterReferenceHash(actor.campaignId);
 
-  return { characters, inventories, campaign, refsHash };
+  return { characters, campaign, refsHash };
 }
 
 export async function runCharacterProgression(actor: Actor, operation: string, raw: Record<string, unknown>, expected?: string): Promise<ActionResult> {
@@ -97,13 +82,11 @@ export async function runCharacterProgression(actor: Actor, operation: string, r
   const input = parsed.data as Record<string, unknown>;
 
   return withCharacterOperation(actor.campaignId, operation, input, async () => {
-    const access = await operationAccess(actor.campaignId, true, actor);
-
-    if (access instanceof NextResponse) await responseData(access);
-
-    if (expected && requestDigest(await progressionState(actor, input, operation)) !== expected) throw new ContentError("Прогрес або залежності змінилися", 409);
+    const access = await actorDmAccess(actor);
 
     await validateCharacterInputRefs(actor, operation, input);
+
+    if (expected && requestDigest(await progressionFingerprint(actor, input)) !== expected) throw new ContentError("Прогрес або залежності змінилися", 409);
 
     const characterId = String(input.characterId ?? "");
 
@@ -111,55 +94,25 @@ export async function runCharacterProgression(actor: Actor, operation: string, r
 
     delete body.mode;
 
-    const request = new Request("http://local", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) });
+    const core = CHARACTER_OPERATIONS[operation];
 
-    const ctx = { params: Promise.resolve({ id: actor.campaignId, characterId }) };
+    if (!core) throw new ContentError("Невідома операція", 400);
 
-    let response: NextResponse;
-
-    switch (operation) {
-      case "choices": response = await choices(request, ctx, actor); break;
-      case "resources": response = await resources(request, ctx, actor); break;
-      case "roll": response = await roll(request, ctx, actor); break;
-      case "hit-dice": response = await hitDice(request, ctx, actor); break;
-      case "inspiration": response = await inspiration(request, ctx, actor); break;
-      case "level-up": response = await levelUp(request, ctx, actor); break;
-      case "rest": response = await rest(request, ctx, actor); break;
-      case "experience": response = await experience(request, ctx, actor); break;
-      case "inventory.patch": response = await updateInventory(request, actor.campaignId, characterId, actor); break;
-      case "stash.apply": response = await applyStash(request, actor.campaignId, characterId, actor); break;
-      case "transfer": response = await transferArtifact(request, actor.campaignId, characterId, actor); break;
-      case "inventory": response = await readInventory(actor.campaignId, characterId, actor, true); break;
-      case "stash": response = await readStash(actor.campaignId, characterId, actor); break;
-      case "stash.log": response = await readLog(actor.campaignId, characterId, input.cursor ? String(input.cursor) : null, actor); break;
-      case "log": response = await readCharacterLog(actor.campaignId, characterId, input.cursor ? String(input.cursor) : null, actor); break;
-      case "stash.free-artifacts": response = await readFreeArtifacts(actor.campaignId, actor); break;
-      case "sheet": response = await readCharacterSheet({ id: actor.campaignId, characterId }, actor); break;
-      case "progression": {
-        const context = await loadProgressionContext(actor.campaignId, characterId, actor);
-
-        response = context instanceof NextResponse ? context : NextResponse.json(await buildProgressionDto(actor.campaignId, context)); break;
-      }
-      case "progression.learn": response = await runProgressionAction(actor.campaignId, characterId, { type: "learn", nodeId: String(input.nodeId) }, actor); break;
-      case "progression.unlearn": response = await runProgressionAction(actor.campaignId, characterId, { type: "unlearn", nodeIds: input.nodeIds as string[] }, actor); break;
-      case "progression.reset": response = await runProgressionAction(actor.campaignId, characterId, { type: "reset" }, actor); break;
-      case "progression.seen-level": response = await markLevelSeen(actor.campaignId, characterId, actor); break;
-      default: throw new ContentError("Невідома операція", 400);
-    }
-
-    const data = await responseData(response);
-
-    if (data && typeof data === "object" && "notes" in data && data.controlledBy !== actor.userId) delete data.notes;
-
-    const result = characterResult(data, characterId || actor.campaignId);
-
-    // Multi-character actions report every affected hero for cache invalidation.
-    if (Array.isArray(input.characterIds)) result.affected = (input.characterIds as string[]).map(id => ({ domain: "characters", id, name: "Персонаж" }));
-
-    if (input.toCharacterId) result.affected.push({ domain: "characters", id: String(input.toCharacterId), name: "Персонаж" });
-
-    return result;
+    return finishProgression(await runOperationCore(core, { campaignId: actor.campaignId, characterId, actor, access }, parseInput(core.schema, body)), actor, input, characterId);
   });
+}
+
+function finishProgression(data: unknown, actor: Actor, input: Record<string, unknown>, characterId: string): ActionResult {
+  if (data && typeof data === "object" && "notes" in data && (data as { controlledBy?: unknown }).controlledBy !== actor.userId) delete (data as { notes?: unknown }).notes;
+
+  const result = characterResult(data, characterId || actor.campaignId);
+
+  // Multi-character actions report every affected hero for cache invalidation.
+  if (Array.isArray(input.characterIds)) result.affected = (input.characterIds as string[]).map(id => ({ domain: "characters", id, name: "Персонаж" }));
+
+  if (input.toCharacterId) result.affected.push({ domain: "characters", id: String(input.toCharacterId), name: "Персонаж" });
+
+  return result;
 }
 
 /** Agent-supplied ids must resolve in this campaign, including legacy HOMM inventory refs. */

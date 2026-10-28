@@ -1,27 +1,21 @@
-import { NextResponse } from "next/server";
+import { z } from "zod";
 
-import { guardedCharacterHandler,operationDM } from "../operation-context";
+import { characterRoute, defineCharacterOperation, dmScope } from "../operation-runner";
 
 import { CharacterType } from "@/lib/constants/characters";
 import { prisma } from "@/lib/db";
-import type { Actor } from "@/lib/utils/api/actor";
-import { handleApiError } from "@/lib/utils/api/error-handler";
-import type { CampaignRouteContext } from "@/types/api";
 
-async function DELETEImpl(_request: Request, { params }: CampaignRouteContext, actor?: Actor) {
-  try {
-    const { id } = await params;
+export const deleteAllOperation = defineCharacterOperation({
+  name: "delete-all",
+  action: "delete all characters",
+  schema: z.object({}),
+  gate: dmScope,
+  query: () => ({}),
+  run: async ({ campaignId }) => {
+    const result = await prisma.character.deleteMany({ where: { campaignId, type: CharacterType.PLAYER } });
 
-    const accessResult = await operationDM(id, actor);
+    return { success: true, deleted: result.count };
+  },
+});
 
-    if (accessResult instanceof NextResponse) return accessResult;
-
-    const result = await prisma.character.deleteMany({ where: { campaignId: id, type: CharacterType.PLAYER } });
-
-    return NextResponse.json({ success: true, deleted: result.count });
-  } catch (error) {
-    return handleApiError(error, { action: "delete all characters" });
-  }
-}
-
-export const DELETE = guardedCharacterHandler(DELETEImpl,"delete-all");
+export const DELETE = characterRoute(deleteAllOperation);

@@ -8,7 +8,7 @@ import { DEFAULT_RULES } from "@/lib/utils/rules";
 vi.mock("@/lib/server/scenario/player-story", () => ({ loadStoryChapters: vi.fn(async () => []) }));
 vi.mock("@/lib/utils/api/api-auth", () => ({ requireCampaignAccess: vi.fn() }));
 vi.mock("@/lib/db", () => ({ prisma: { character: { findUnique: vi.fn() } } }));
-vi.mock("@/app/api/campaigns/[id]/characters/[characterId]/sheet/sheet-handler", async (orig) => ({
+vi.mock("@/lib/server/characters/core/sheet-handler", async (orig) => ({
   ...(await orig<object>()),
   buildSheetFor: vi.fn().mockResolvedValue({ identity: { name: "Ліра" } }),
 }));
@@ -49,7 +49,7 @@ describe("GET sheet", () => {
   });
 
   it("відомий доступ сторінки — без повторного запиту членства", async () => {
-    const { readCharacterSheet } = await import("@/app/api/campaigns/[id]/characters/[characterId]/sheet/read-sheet");
+    const { readCharacterSheet } = await import("@/lib/server/characters/core/read-sheet");
 
     const res = await readCharacterSheet({ id: "camp", characterId: "ch", known: { userId: "owner", isDM: false, maxLevel: 20, rules: DEFAULT_RULES } });
 

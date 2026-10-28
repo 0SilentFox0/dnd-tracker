@@ -29,6 +29,11 @@ const API_IMPORT_PATTERN = {
   message: "Компоненти не ходять в API — використайте хук із @/lib/hooks/<domain>.",
 };
 
+const APP_IMPORT_PATTERN = {
+  group: ["@/app", "@/app/*"],
+  message: "lib не залежить від app: винесіть код у lib/server/<domain> і імпортуйте його з роутів.",
+};
+
 const DICE_SCENE_FILE = "components/battle/fx/dice/scene.ts";
 
 const MODE_IMPORT_PATTERN = {
@@ -40,9 +45,9 @@ const MODE_OWNED_FILES = [
   "lib/utils/battle/modes/**",
   "lib/hooks/battle/modes/**",
   "components/battle/modes/**",
-  "app/api/campaigns/[[]id]/battles/[[]battleId]/maze/**",
-  "app/api/campaigns/[[]id]/battles/[[]battleId]/maze-mark/**",
-  "app/api/campaigns/[[]id]/battles/[[]battleId]/move/**",
+  "lib/server/battles/mutations/maze/**",
+  "lib/server/battles/mutations/maze-mark/**",
+  "lib/server/battles/mutations/move/**",
 ];
 
 const eslintConfig = defineConfig([
@@ -204,7 +209,19 @@ const eslintConfig = defineConfig([
     },
   },
   {
-    files: [...MODE_OWNED_FILES.map((glob) => `${glob}/*.{ts,tsx}`), "**/__tests__/**/*.{ts,tsx}"],
+    files: ["lib/**/*.{ts,tsx}"],
+    rules: {
+      "no-restricted-imports": [
+        "error",
+        {
+          paths: RESTRICTED_PATHS,
+          patterns: [APP_IMPORT_PATTERN, MODE_IMPORT_PATTERN, THREE_IMPORT_PATTERN],
+        },
+      ],
+    },
+  },
+  {
+    files: [...MODE_OWNED_FILES.map((glob) => `${glob}/*.{ts,tsx}`), "**/__tests__/**/*.{ts,tsx}", "**/*.test.{ts,tsx}"],
     ignores: ["components/ui/**"],
     rules: {
       "no-restricted-imports": ["error", { paths: RESTRICTED_PATHS, patterns: [THREE_IMPORT_PATTERN] }],

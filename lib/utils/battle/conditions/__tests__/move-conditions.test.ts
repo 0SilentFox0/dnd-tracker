@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 
-import { context, goblin, hero } from "@/app/api/__tests__/battles/fixtures";
-import { moveMutation } from "@/app/api/campaigns/[id]/battles/[battleId]/move/move-mutation";
+import { context, goblin, hero } from "@/lib/server/battles/__tests__/mutations/fixtures";
+import { moveMutation } from "@/lib/server/battles/mutations/move/move-mutation";
 import { applyCondition5e } from "@/lib/utils/battle/conditions";
 import { frightenedBlocksMove } from "@/lib/utils/battle/grid";
 import type { BattleParticipant } from "@/types/battle";

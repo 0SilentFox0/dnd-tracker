@@ -28,7 +28,7 @@ it("backgroundGearGoldUntouched", async () => {
 
   const preview = await action.prepare({ actor, channel: "chat", threadId: null, tokenId: null }, { characterId: "hero", raceChoices: {} });
 
-  expect(h.character.update).not.toHaveBeenCalled(); expect(JSON.stringify(preview)).toContain("Життєпис"); expect(h.characterInventory.findMany).toHaveBeenCalled(); expect(preview.warnings.join(" ")).toMatch(/вручну/);
+  expect(h.character.update).not.toHaveBeenCalled(); expect(JSON.stringify(preview)).toContain("Життєпис"); expect(h.characterInventory.findMany).not.toHaveBeenCalled(); expect(preview.warnings.join(" ")).toMatch(/вручну/);
 });
 it("additionalSpellsStillUnsupported", () => {
   const action = CHARACTER_PROGRESSION_ACTIONS.find(a => a.id === "characters.choices");
@@ -79,3 +79,11 @@ it("inventoryReadDoesNotCreateMissingInventory", async () => {
 });
 
 it("foreignInventoryRefRejectedBeforeWrite",async()=>{ await expect(runCharacterProgression(actor,"inventory.patch",{characterId:"hero",equipped:{weapon:"foreign"}})).rejects.toMatchObject({status:404});expect(h.characterInventory.upsert).not.toHaveBeenCalled(); });
+it("progressionStateReadsOnlyRequestedHeroes", async () => {
+  await progressionState(actor, { characterId: "hero" });
+
+  expect(h.character.findMany).toHaveBeenCalledTimes(1);
+  expect(h.character.findMany).toHaveBeenCalledWith(expect.objectContaining({ where: { campaignId: "c", id: { in: ["hero"] } } }));
+  expect(h.characterInventory.findMany).not.toHaveBeenCalled();
+  expect(h.campaign.findUnique).toHaveBeenCalledTimes(2);
+});

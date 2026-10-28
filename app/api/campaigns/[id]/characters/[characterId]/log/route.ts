@@ -1,5 +1,4 @@
-import { readCharacterLog } from "./read-character-log";
-
+import { readCharacterLog } from "@/lib/server/characters/core/read-character-log";
 import { handleApiError } from "@/lib/utils/api/error-handler";
 import type { CharacterRouteContext } from "@/types/api";
 

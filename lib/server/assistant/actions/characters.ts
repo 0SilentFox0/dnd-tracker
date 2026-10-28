@@ -43,7 +43,7 @@ export const CHARACTER_ACTIONS: readonly AssistantActionDef[] = Object.entries(C
 
         if (operation === "create") targets.push(target);
 
-        const before = rows.map(({ notes, ...row }) => ({ ...row, notesHash: requestDigest(notes ?? null) }));
+        const before = rows.map(({ notes, ...row }: { notes?: unknown; id: string }) => ({ ...row, notesHash: requestDigest(notes ?? null) }));
 
         const kind = ["delete", "delete-all", "tokens.delete"].includes(operation) ? "delete"
           : operation === "patch" && value.controlledBy !== undefined ? "change-access"

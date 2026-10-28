@@ -1,31 +1,15 @@
-import { NextResponse } from "next/server";
+import { requireCharacterRow } from "../access";
+import { characterRoute, defineCharacterOperation, gateOptions } from "../operation-runner";
 
-import { guardedCharacterHandler } from "../operation-context";
-
-import { setInspiration } from "@/app/api/campaigns/[id]/characters/[characterId]/inspiration/set-inspiration";
 import { inspirationSchema } from "@/lib/schemas/out-of-combat";
-import { requireCharacterRow } from "@/lib/server/characters/access";
-import type { Actor } from "@/lib/utils/api/actor";
-import { handleApiError } from "@/lib/utils/api/error-handler";
-import { parseBody } from "@/lib/utils/api/parse-body";
-import type { CharacterRouteContext } from "@/types/api";
+import { setInspiration } from "@/lib/server/characters/core/set-inspiration";
 
-async function POSTImpl(request: Request, { params }: CharacterRouteContext, actor?: Actor) {
-  try {
-    const { id, characterId } = await params;
+export const inspirationOperation = defineCharacterOperation({
+  name: "inspiration",
+  action: "set inspiration",
+  schema: inspirationSchema,
+  gate: ctx => requireCharacterRow(ctx.campaignId, ctx.characterId, gateOptions(ctx, true)),
+  run: (gate, body) => setInspiration(gate, body.value),
+});
 
-    const gate = await requireCharacterRow(id, characterId, { actor, dmOnly: true });
-
-    if (gate instanceof NextResponse) return gate;
-
-    const body = await parseBody(inspirationSchema, request);
-
-    if (body instanceof NextResponse) return body;
-
-    return await setInspiration(gate.access, gate.character, body.value);
-  } catch (error) {
-    return handleApiError(error, { action: "set inspiration" });
-  }
-}
-
-export const POST = guardedCharacterHandler(POSTImpl, "inspiration");
+export const POST = characterRoute(inspirationOperation);

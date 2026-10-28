@@ -1,6 +1,5 @@
 import { NextResponse } from "next/server";
 
-import { deriveCharacterDefaults, EMPTY_INVENTORY } from "../derive-character-defaults";
 import { draftChoiceFields } from "./draft-choices";
 import { parseDraftBody } from "./draft-class";
 import { draftFields } from "./draft-data";
@@ -9,6 +8,7 @@ import { draftRejection } from "./draft-rules";
 
 import { CharacterStatus, CharacterType, HERO_INITIATIVE } from "@/lib/constants/characters";
 import { prisma } from "@/lib/db";
+import { deriveCharacterDefaults, EMPTY_INVENTORY } from "@/lib/server/characters/core/derive-character-defaults";
 import { lockPlayerDrafts } from "@/lib/server/characters/draft-lock";
 import { requireCampaignAccess } from "@/lib/utils/api/api-auth";
 import { errorResponse } from "@/lib/utils/api/api-response";

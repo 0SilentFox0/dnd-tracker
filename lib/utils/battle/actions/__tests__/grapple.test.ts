@@ -3,8 +3,8 @@ import { describe, expect, it } from "vitest";
 import { contest, releaseInvalidGrapples } from "../grapple";
 import { runCoreAction } from "../run";
 
-import { context } from "@/app/api/__tests__/battles/fixtures";
-import { moveMutation } from "@/app/api/campaigns/[id]/battles/[battleId]/move/move-mutation";
+import { context } from "@/lib/server/battles/__tests__/mutations/fixtures";
+import { moveMutation } from "@/lib/server/battles/mutations/move/move-mutation";
 import { createMockParticipant } from "@/lib/utils/battle/__tests__/fixtures/mock-participant";
 import { applyCondition5e, hasCondition } from "@/lib/utils/battle/conditions";
 import { grappledBy, releaseGrapples } from "@/lib/utils/battle/conditions/grapple-links";

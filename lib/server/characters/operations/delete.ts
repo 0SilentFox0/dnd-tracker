@@ -1,31 +1,22 @@
-import { NextResponse } from "next/server";
+import { z } from "zod";
 
-import { guardedCharacterHandler,operationDM } from "../operation-context";
+import { requireCharacterSelect } from "../access";
+import { characterRoute, defineCharacterOperation, dmCharacterGate } from "../operation-runner";
 
+import { API_ERRORS } from "@/lib/constants/api-errors";
 import { prisma } from "@/lib/db";
-import type { Actor } from "@/lib/utils/api/actor";
-import { handleApiError } from "@/lib/utils/api/error-handler";
-import { loadOwned } from "@/lib/utils/api/load-owned";
-import type { CharacterRouteContext } from "@/types/api";
 
-async function DELETEImpl(_request: Request, { params }: CharacterRouteContext, actor?: Actor) {
-  try {
-    const { id, characterId } = await params;
-
-    const accessResult = await operationDM(id, actor);
-
-    if (accessResult instanceof NextResponse) return accessResult;
-
-    const character = await loadOwned(prisma.character.findUnique({ where: { id: characterId }, select: { campaignId: true } }), id);
-
-    if (character instanceof NextResponse) return character;
-
+export const deleteOperation = defineCharacterOperation({
+  name: "delete",
+  action: "delete character",
+  schema: z.object({ characterId: z.string() }),
+  gate: dmCharacterGate((ctx, access) => requireCharacterSelect(ctx.campaignId, ctx.characterId, { campaignId: true }, { access, notFound: API_ERRORS.NOT_FOUND })),
+  query: ({ params }) => ({ characterId: params.characterId }),
+  run: async (_gate, { characterId }) => {
     await prisma.character.deleteMany({ where: { id: characterId } });
 
-    return NextResponse.json({ success: true });
-  } catch (error) {
-    return handleApiError(error, { action: "delete character" });
-  }
-}
+    return { success: true };
+  },
+});
 
-export const DELETE = guardedCharacterHandler(DELETEImpl,"delete");
+export const DELETE = characterRoute(deleteOperation);

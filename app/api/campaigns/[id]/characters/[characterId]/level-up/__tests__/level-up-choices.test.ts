@@ -10,7 +10,7 @@ vi.mock("server-only", () => ({}));
 vi.mock("@/lib/utils/api/api-auth", () => ({ requireDM: vi.fn(async () => ({ userId: "dm", isDM: true, campaign: { id: "camp", maxLevel: 20, rules: { ...DEFAULT_RULES, classes: { enabled: true } } } })) }));
 vi.mock("@/lib/server/characters/class-level-up", async (importOriginal) => ({ ...(await importOriginal<object>()), classLevelUp: vi.fn() }));
 vi.mock("@/lib/server/characters/choices/load-refs", () => ({ loadChoiceRefs: vi.fn(async () => refs) }));
-vi.mock("@/app/api/campaigns/[id]/characters/[characterId]/load-race-progression", () => ({ loadRaceProgression: vi.fn(async () => null) }));
+vi.mock("@/lib/server/characters/core/load-race-progression", () => ({ loadRaceProgression: vi.fn(async () => null) }));
 vi.mock("@/lib/db", () => {
   const prisma: Record<string, unknown> = {
     $queryRaw: vi.fn(async () => []),

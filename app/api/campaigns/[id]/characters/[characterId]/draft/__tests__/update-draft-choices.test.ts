@@ -10,7 +10,7 @@ vi.mock("server-only", () => ({}));
 vi.mock("@/lib/utils/api/api-auth", () => ({ requireCampaignAccess: vi.fn() }));
 vi.mock("@/lib/supabase/avatar-storage", () => ({ resolveAvatarForPersistence: vi.fn(async (a: string | undefined) => ({ ok: true, avatar: a })) }));
 vi.mock("../../../draft/draft-choices", () => ({ draftChoiceFields: vi.fn(async () => null) }));
-vi.mock("../../../derive-character-defaults", () => ({ deriveCharacterDefaults: vi.fn(async () => ({ spellSlots: {} })) }));
+vi.mock("@/lib/server/characters/core/derive-character-defaults", () => ({ deriveCharacterDefaults: vi.fn(async () => ({ spellSlots: {} })) }));
 vi.mock("@/lib/db", () => ({ prisma: { character: { findUnique: vi.fn(), update: vi.fn(async () => ({ id: "a" })) } } }));
 
 const stored = { campaignId: "camp", controlledBy: "u1", status: "pending", race: "Elf", goals: [], skills: {}, raceChoices: { l: [{ id: "drow" }] }, feats: [], classes: [] };

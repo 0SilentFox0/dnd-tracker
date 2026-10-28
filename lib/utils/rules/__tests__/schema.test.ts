@@ -90,3 +90,15 @@ describe("mergeRules", () => {
     expect(parseRules({ criticals: { critOn: 3, fumbleOn: 3 } }).criticals).toEqual(DEFAULT_RULES.criticals);
   });
 });
+
+describe("parseRulesCached", () => {
+  it("той самий JSON дає той самий об'єкт, інший — новий", async () => {
+    const { parseRulesCached } = await import("../schema");
+
+    const a = parseRulesCached({ morale: { enabled: false } });
+
+    expect(parseRulesCached({ morale: { enabled: false } })).toBe(a);
+    expect(parseRulesCached({ morale: { enabled: true } })).not.toBe(a);
+    expect(parseRulesCached(null)).toEqual(parseRulesCached({}));
+  });
+});

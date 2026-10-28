@@ -1,39 +1,32 @@
 import { NextResponse } from "next/server";
 
-import { guardedCharacterHandler,operationAccess } from "../operation-context";
+import { requireCharacterSelect } from "../access";
+import { characterRoute, defineCharacterOperation, gateOptions } from "../operation-runner";
 
 import { API_ERRORS } from "@/lib/constants/api-errors";
 import { prisma } from "@/lib/db";
 import { putNotesSchema } from "@/lib/schemas/character-notes";
-import type { Actor } from "@/lib/utils/api/actor";
 import { errorResponse } from "@/lib/utils/api/api-response";
-import { handleApiError } from "@/lib/utils/api/error-handler";
-import { parseBody } from "@/lib/utils/api/parse-body";
 
-async function PUTImpl(request: Request, { params }: { params: Promise<{ id: string; characterId: string }> }, actor?: Actor) {
-  try {
-    const { id, characterId } = await params;
+export const notesOperation = defineCharacterOperation({
+  name: "notes",
+  action: "update character notes",
+  schema: putNotesSchema,
+  parseMessage: "Некоректні нотатки",
+  gate: async ctx => {
+    const gate = await requireCharacterSelect(ctx.campaignId, ctx.characterId, { campaignId: true, controlledBy: true }, { ...gateOptions(ctx), notFound: API_ERRORS.NOT_FOUND, foreign404: true });
 
-    const access = await operationAccess(id, false, actor);
+    if (gate instanceof NextResponse) return gate;
 
-    if (access instanceof NextResponse) return access;
+    if (gate.character.controlledBy !== gate.access.userId) return errorResponse(API_ERRORS.FORBIDDEN, 403);
 
-    const character = await prisma.character.findUnique({ where: { id: characterId }, select: { campaignId: true, controlledBy: true } });
-
-    if (!character || character.campaignId !== id) return errorResponse(API_ERRORS.NOT_FOUND, 404);
-
-    if (character.controlledBy !== access.userId) return errorResponse(API_ERRORS.FORBIDDEN, 403);
-
-    const parsed = await parseBody(putNotesSchema, request, "Некоректні нотатки");
-
-    if (parsed instanceof NextResponse) return parsed;
-
+    return { ...gate, characterId: ctx.characterId };
+  },
+  run: async ({ characterId }, parsed) => {
     const updated = await prisma.character.update({ where: { id: characterId }, data: { notes: parsed.notes || null }, select: { notes: true } });
 
-    return NextResponse.json({ notes: updated.notes });
-  } catch (error) {
-    return handleApiError(error, { action: "update character notes" });
-  }
-}
+    return { notes: updated.notes };
+  },
+});
 
-export const PUT = guardedCharacterHandler(PUTImpl, "notes");
+export const PUT = characterRoute(notesOperation);

@@ -1,40 +1,30 @@
-import { NextResponse } from "next/server";
 import { Prisma } from "@prisma/client";
 
-import { guardedCharacterHandler,operationDM } from "../operation-context";
+import { type CampaignScope, characterHandler, defineCharacterOperation, dmScope, errorStatusMessage } from "../operation-runner";
 
-import { createCharacterSchema } from "@/app/api/campaigns/[id]/characters/create-character-schema";
-import { deriveCharacterDefaults } from "@/app/api/campaigns/[id]/characters/derive-character-defaults";
-import { resolveCharacterOwner } from "@/app/api/campaigns/[id]/characters/resolve-character-owner";
 import { API_ERRORS } from "@/lib/constants/api-errors";
 import { prisma } from "@/lib/db";
 import { applyClasses } from "@/lib/server/characters/apply-classes";
 import { resolveCharacterChoices } from "@/lib/server/characters/choices/resolve-choices";
+import { type CreateCharacterInput, createCharacterSchema } from "@/lib/server/characters/core/create-character-schema";
+import { deriveCharacterDefaults } from "@/lib/server/characters/core/derive-character-defaults";
+import { resolveCharacterOwner } from "@/lib/server/characters/core/resolve-character-owner";
+import { ContentError } from "@/lib/server/content/errors";
 import { PUBLIC_USER_SELECT } from "@/lib/server/users/db-user";
 import { resolveAvatarForPersistence } from "@/lib/supabase/avatar-storage";
 import type { Actor } from "@/lib/utils/api/actor";
-import { errorResponse } from "@/lib/utils/api/api-response";
-import { parseBody } from "@/lib/utils/api/parse-body";
 import { backgroundFields } from "@/lib/utils/backgrounds/selection";
 import { hasPicks } from "@/lib/utils/characters/choices/read";
 
 const INVALID_OWNER_REFERENCE =
   "Невірне посилання на користувача (controlledBy). Переконайтесь, що обраний гравець існує в users і є учасником кампанії.";
 
-async function createCharacterImpl(request: Request, campaignId: string, actor?: Actor): Promise<NextResponse> {
-  const accessResult = await operationDM(campaignId, actor);
+async function createCharacterCore({ access, campaignId }: CampaignScope, data: CreateCharacterInput) {
+  const { heroMin, heroMax } = access.campaign.rules.initiative;
 
-  if (accessResult instanceof NextResponse) return accessResult;
+  if (data.initiative < heroMin || data.initiative > heroMax) throw new ContentError(`${API_ERRORS.INITIATIVE_OUT_OF_RANGE} (${heroMin}–${heroMax})`, 400);
 
-  const data = await parseBody(createCharacterSchema, request);
-
-  if (data instanceof NextResponse) return data;
-
-  const { heroMin, heroMax } = accessResult.campaign.rules.initiative;
-
-  if (data.initiative < heroMin || data.initiative > heroMax) return errorResponse(`${API_ERRORS.INITIATIVE_OUT_OF_RANGE} (${heroMin}–${heroMax})`, 400);
-
-  const { campaign } = accessResult;
+  const { campaign } = access;
 
   const applied = await applyClasses({
     campaignId,
@@ -44,7 +34,7 @@ async function createCharacterImpl(request: Request, campaignId: string, actor?:
     spellcastingAbility: data.spellcastingAbility ?? null,
   });
 
-  if (!applied.ok) return errorResponse(applied.error, applied.status);
+  if (!applied.ok) throw new ContentError(applied.error, applied.status);
 
   const fromClasses = applied.data;
 
@@ -63,15 +53,15 @@ async function createCharacterImpl(request: Request, campaignId: string, actor?:
       })
     : null;
 
-  if (choices && !choices.ok) return choices.response;
+  if (choices && !choices.ok) throw choices.error;
 
-  const owner = await resolveCharacterOwner(campaignId, accessResult.userId, data);
+  const owner = await resolveCharacterOwner(campaignId, access.userId, data);
 
-  if ("error" in owner) return owner.error;
+  if ("error" in owner) return errorStatusMessage(owner.error);
 
   const avatar = await resolveAvatarForPersistence(data.avatar, { campaignId });
 
-  if (!avatar.ok) return errorResponse(avatar.message, 400);
+  if (!avatar.ok) throw new ContentError(avatar.message, 400);
 
   const spellSlots = fromClasses?.spellSlots ?? (await deriveCharacterDefaults(campaignId, data)).spellSlots;
 
@@ -128,14 +118,33 @@ async function createCharacterImpl(request: Request, campaignId: string, actor?:
       data: { characterId: character.id, equipped: {}, backpack: [], gold: 0, silver: 0, copper: 0, items: [] },
     });
 
-    return NextResponse.json(character);
+    return character;
   } catch (error) {
     if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === "P2003") {
-      return errorResponse(INVALID_OWNER_REFERENCE, 400);
+      throw new ContentError(INVALID_OWNER_REFERENCE, 400);
     }
 
     throw error;
   }
 }
 
-export const createCharacter = guardedCharacterHandler(createCharacterImpl, "create");
+export const createOperation = defineCharacterOperation({
+  name: "create",
+  action: "create character",
+  schema: createCharacterSchema,
+  gate: dmScope,
+  prepare: async ({ campaignId }, data) => {
+    if (data.avatar === undefined) return data;
+
+    const avatar = await resolveAvatarForPersistence(data.avatar, { campaignId });
+
+    if (!avatar.ok) throw new ContentError(avatar.message, 400);
+
+    return { ...data, avatar: avatar.avatar ?? undefined };
+  },
+  run: createCharacterCore,
+});
+
+const create = characterHandler(createOperation);
+
+export const createCharacter = (request: Request, campaignId: string, actor?: Actor) => create(request, campaignId, undefined, actor);

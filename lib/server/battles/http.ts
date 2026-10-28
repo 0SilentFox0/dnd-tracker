@@ -1,14 +1,14 @@
 import { NextResponse } from "next/server";
 
+import { runGuardedBattleRecordOperation } from "./record-operation";
 import { BattleAudioRateLimitError, prepareHttpBattleRecord, type RecordOperation, requireBattleId, writeBattleRecord } from "./record-service";
 
+import { readBattleScene } from "@/lib/server/battles/read-battle";
 import { ContentError } from "@/lib/server/content/errors";
 import { requireDM } from "@/lib/utils/api/api-auth";
 import { errorResponse } from "@/lib/utils/api/api-response";
 import { handleApiError } from "@/lib/utils/api/error-handler";
 import { rateLimitResponse } from "@/lib/utils/api/rate-limit";
-import { readBattleScene } from "@/lib/utils/battle/pipeline/read-battle";
-import { runGuardedBattleRecordOperation } from "@/lib/utils/battle/pipeline/run-battle-mutation";
 
 export async function battleRecordHttp(req: Request, campaignId: string, operation: RecordOperation, battleId?: string): Promise<NextResponse> {
   try {

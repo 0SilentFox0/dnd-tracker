@@ -8,7 +8,7 @@ Page `app/campaigns/[id]/battles/[battleId]/page.tsx` (server: `userId` from `ge
 
 ## Mutation pipeline
 
-Every battle route is a Zod schema + `runBattleMutation` (`lib/utils/battle/pipeline/`) with a sibling `<action>-mutation.ts`. The pipeline:
+Every battle route is a Zod schema + `runBattleMutation` (`lib/server/battles/run-mutation.ts`, pure engine in `lib/utils/battle/pipeline/`) with a `<action>-mutation.ts` in `lib/server/battles/mutations/<action>/`. The pipeline:
 
 - does auth (`getClaims`);
 - loads the battle in one query (`lib/utils/battle/store/loadBattle`). Participant snapshots — ~75 % of the bytes — come from a per-instance content-addressed cache keyed by `snapshotHash`, and only misses are read, so **anything writing `battle_participants.snapshot` must write its `snapshotHash` too**, as `saveBattle` does;

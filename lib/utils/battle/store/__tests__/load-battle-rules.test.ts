@@ -5,7 +5,7 @@ import { type BattleDb, loadBattle } from "../load-battle";
 import { DEFAULT_RULES } from "@/lib/utils/rules";
 
 function fakeDb(row: { status: string; rules: unknown; campaignRules: unknown }) {
-  const findFirst = vi.fn(async () => ({
+  const findFirst = vi.fn(async (args?: { select?: { campaign?: { select?: Record<string, unknown> } } }) => args?.select?.campaign?.select?.rules ? { campaign: { rules: row.campaignRules } } : ({
     id: "b1",
     campaignId: "c1",
     name: "Бій",
@@ -24,10 +24,12 @@ function fakeDb(row: { status: string; rules: unknown; campaignRules: unknown })
     createdAt: new Date(0),
     participants: [],
     battleParticipants: [],
-    campaign: { friendlyFire: false, rules: row.campaignRules, members: [{ role: "dm" }] },
+    campaign: { friendlyFire: false, members: [{ role: "dm" }] },
   }));
 
-  return { battleScene: { findFirst }, battleParticipant: { findMany: vi.fn(async () => []) } } as unknown as BattleDb;
+  return { battleScene: { findFirst }, battleParticipant: { findMany: vi.fn(async () => []) } } as unknown as BattleDb & {
+    battleScene: { findFirst: typeof findFirst };
+  };
 }
 
 const load = (db: BattleDb) => loadBattle(db, { battleId: "b1", campaignId: "c1", userId: "dm" });
@@ -57,5 +59,24 @@ describe("loadBattle: правила бою", () => {
     const loaded = await load(fakeDb({ status: "active", rules: null, campaignRules }));
 
     expect(loaded?.meta.rules).toEqual(DEFAULT_RULES);
+  });
+
+  it("active не читає campaign.rules", async () => {
+    const db = fakeDb({ status: "active", rules: {}, campaignRules }) as ReturnType<typeof fakeDb>;
+
+    await load(db);
+
+    const selects = (db.battleScene.findFirst as unknown as { mock: { calls: Array<[{ select: { campaign?: { select: object } } }]> } }).mock.calls;
+
+    expect(selects).toHaveLength(1);
+    expect(selects[0][0].select.campaign?.select).not.toHaveProperty("rules");
+  });
+
+  it("prepared читає campaign.rules окремим запитом", async () => {
+    const db = fakeDb({ status: "prepared", rules: null, campaignRules });
+
+    await load(db);
+
+    expect(db.battleScene.findFirst).toHaveBeenCalledTimes(2);
   });
 });

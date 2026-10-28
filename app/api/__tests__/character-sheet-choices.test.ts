@@ -9,7 +9,7 @@ vi.mock("@/lib/server/scenario/player-story", () => ({ loadStoryChapters: vi.fn(
 vi.mock("@/lib/utils/battle/participant/extract-artifacts", async (importOriginal) => ({ ...(await importOriginal<object>()), loadEquippedArtifactRows: vi.fn(async () => []) }));
 vi.mock("@/lib/server/characters/participant", () => ({ buildCharacterParticipant: vi.fn() }));
 
-import { buildSheetFor } from "@/app/api/campaigns/[id]/characters/[characterId]/sheet/sheet-handler";
+import { buildSheetFor } from "@/lib/server/characters/core/sheet-handler";
 import { buildCharacterParticipant } from "@/lib/server/characters/participant";
 import { createMockParticipant } from "@/lib/utils/battle/__tests__/fixtures/mock-participant";
 import { elf } from "@/lib/utils/characters/choices/__tests__/fixtures";

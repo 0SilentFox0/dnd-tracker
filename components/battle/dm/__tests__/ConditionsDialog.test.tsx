@@ -4,8 +4,8 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 
 vi.mock("@/components/hud/fonts", () => ({ hudFontClassName: "", HUD_SURFACE: "hud-surface" }));
 
-import { hero } from "@/app/api/__tests__/battles/fixtures";
 import { ConditionsDialog } from "@/components/battle/dm/ConditionsDialog";
+import { hero } from "@/lib/server/battles/__tests__/mutations/fixtures";
 import { applyCondition5e,CONDITION_5E_KEYS } from "@/lib/utils/battle/conditions";
 
 afterEach(cleanup);

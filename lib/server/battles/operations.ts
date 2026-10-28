@@ -12,7 +12,7 @@ function define<T>(definition: Omit<RunBattleMutationOptions<T>, "params">): Def
 export async function getBattleOperation(operation: string, params: BattleOperationParams): Promise<Definition> {
   switch (operation) {
     case "ability-action": {
-      const { abilityActionMutation, abilityActionSchema } = await import("@/app/api/campaigns/[id]/battles/[battleId]/ability-action/ability-action-mutation");
+      const { abilityActionMutation, abilityActionSchema } = await import("@/lib/server/battles/mutations/ability-action/ability-action-mutation");
 
       return define({
         access: "member",
@@ -25,7 +25,7 @@ export async function getBattleOperation(operation: string, params: BattleOperat
       });
     }
     case "add-participant": {
-      const { addParticipantSchema, createAddParticipantMutation } = await import("@/app/api/campaigns/[id]/battles/[battleId]/add-participant/add-participant-mutation");
+      const { addParticipantSchema, createAddParticipantMutation } = await import("@/lib/server/battles/mutations/add-participant/add-participant-mutation");
 
       const mutate = createAddParticipantMutation();
 
@@ -38,7 +38,7 @@ export async function getBattleOperation(operation: string, params: BattleOperat
       });
     }
     case "attack": {
-      const { attackBodySchema, attackMutation } = await import("@/app/api/campaigns/[id]/battles/[battleId]/attack/attack-mutation");
+      const { attackBodySchema, attackMutation } = await import("@/lib/server/battles/mutations/attack/attack-mutation");
 
       return define({
         access: "member",
@@ -50,7 +50,7 @@ export async function getBattleOperation(operation: string, params: BattleOperat
       });
     }
     case "aura-zone": {
-      const { auraZoneMutation, auraZoneSchema } = await import("@/app/api/campaigns/[id]/battles/[battleId]/aura-zone/aura-zone-mutation");
+      const { auraZoneMutation, auraZoneSchema } = await import("@/lib/server/battles/mutations/aura-zone/aura-zone-mutation");
 
       return define({
         access: "member",
@@ -63,7 +63,7 @@ export async function getBattleOperation(operation: string, params: BattleOperat
       });
     }
     case "bonus-action": {
-      const { bonusActionMutation, bonusActionSchema } = await import("@/app/api/campaigns/[id]/battles/[battleId]/bonus-action/bonus-action-mutation");
+      const { bonusActionMutation, bonusActionSchema } = await import("@/lib/server/battles/mutations/bonus-action/bonus-action-mutation");
 
       return define({
         access: "member",
@@ -76,7 +76,7 @@ export async function getBattleOperation(operation: string, params: BattleOperat
       });
     }
     case "complete": {
-      const { completeBattleSchema, completeMutation } = await import("@/app/api/campaigns/[id]/battles/[battleId]/complete/complete-mutation");
+      const { completeBattleSchema, completeMutation } = await import("@/lib/server/battles/mutations/complete/complete-mutation");
 
       return define({
         access: "dm",
@@ -87,7 +87,7 @@ export async function getBattleOperation(operation: string, params: BattleOperat
       });
     }
     case "conditions": {
-      const { battleConditionsMutation, battleConditionsSchema } = await import("@/app/api/campaigns/[id]/battles/[battleId]/conditions/conditions-mutation");
+      const { battleConditionsMutation, battleConditionsSchema } = await import("@/lib/server/battles/mutations/conditions/conditions-mutation");
 
       return define({
         access: "dm",
@@ -97,9 +97,9 @@ export async function getBattleOperation(operation: string, params: BattleOperat
       });
     }
     case "core-action": {
-      const { coreActionMutation } = await import("@/app/api/campaigns/[id]/battles/[battleId]/core-action/core-action-mutation");
+      const { coreActionMutation } = await import("@/lib/server/battles/mutations/core-action/core-action-mutation");
 
-      const { legendaryMutation } = await import("@/app/api/campaigns/[id]/battles/[battleId]/core-action/legendary-mutation");
+      const { legendaryMutation } = await import("@/lib/server/battles/mutations/core-action/legendary-mutation");
 
       const { coreActionRouteSchema } = await import("@/lib/utils/battle/actions/schema");
 
@@ -112,7 +112,7 @@ export async function getBattleOperation(operation: string, params: BattleOperat
       });
     }
     case "map-terrain": {
-      const { mapTerrainMutation, mapTerrainSchema } = await import("@/app/api/campaigns/[id]/battles/[battleId]/map-terrain/map-terrain-mutation");
+      const { mapTerrainMutation, mapTerrainSchema } = await import("@/lib/server/battles/mutations/map-terrain/map-terrain-mutation");
 
       return define({
         access: "dm",
@@ -123,7 +123,7 @@ export async function getBattleOperation(operation: string, params: BattleOperat
       });
     }
     case "map-weather": {
-      const { mapWeatherMutation, mapWeatherSchema } = await import("@/app/api/campaigns/[id]/battles/[battleId]/map-weather/map-weather-mutation");
+      const { mapWeatherMutation, mapWeatherSchema } = await import("@/lib/server/battles/mutations/map-weather/map-weather-mutation");
 
       return define({
         access: "dm",
@@ -134,7 +134,7 @@ export async function getBattleOperation(operation: string, params: BattleOperat
       });
     }
     case "maze": {
-      const { mazeActionSchema,mazeMutation } = await import("@/app/api/campaigns/[id]/battles/[battleId]/maze/maze-mutation");
+      const { mazeActionSchema,mazeMutation } = await import("@/lib/server/battles/mutations/maze/maze-mutation");
 
       return define({
         access: "dm",
@@ -145,7 +145,7 @@ export async function getBattleOperation(operation: string, params: BattleOperat
       });
     }
     case "maze-mark": {
-      const { mazeMarkMutation, mazeMarkSchema } = await import("@/app/api/campaigns/[id]/battles/[battleId]/maze-mark/maze-mark-mutation");
+      const { mazeMarkMutation, mazeMarkSchema } = await import("@/lib/server/battles/mutations/maze-mark/maze-mark-mutation");
 
       return define({
         access: "member",
@@ -157,7 +157,7 @@ export async function getBattleOperation(operation: string, params: BattleOperat
       });
     }
     case "morale-check": {
-      const { moraleCheckMutation } = await import("@/app/api/campaigns/[id]/battles/[battleId]/morale-check/morale-check-mutation");
+      const { moraleCheckMutation } = await import("@/lib/server/battles/mutations/morale-check/morale-check-mutation");
 
       const { moraleCheckSchema } = await import("@/lib/schemas");
 
@@ -172,7 +172,7 @@ export async function getBattleOperation(operation: string, params: BattleOperat
       });
     }
     case "move": {
-      const { moveMutation, moveSchema } = await import("@/app/api/campaigns/[id]/battles/[battleId]/move/move-mutation");
+      const { moveMutation, moveSchema } = await import("@/lib/server/battles/mutations/move/move-mutation");
 
       return define({
         access: "member",
@@ -184,7 +184,7 @@ export async function getBattleOperation(operation: string, params: BattleOperat
       });
     }
     case "next-turn": {
-      const { nextTurnMutation } = await import("@/app/api/campaigns/[id]/battles/[battleId]/next-turn/next-turn-mutation");
+      const { nextTurnMutation } = await import("@/lib/server/battles/mutations/next-turn/next-turn-mutation");
 
       return define({
         access: "currentController",
@@ -194,7 +194,7 @@ export async function getBattleOperation(operation: string, params: BattleOperat
       });
     }
     case "refresh-sources": {
-      const { createRefreshSourcesMutation, refreshSourcesSchema } = await import("@/app/api/campaigns/[id]/battles/[battleId]/refresh-sources/refresh-sources-mutation");
+      const { createRefreshSourcesMutation, refreshSourcesSchema } = await import("@/lib/server/battles/mutations/refresh-sources/refresh-sources-mutation");
 
       const mutate = createRefreshSourcesMutation();
 
@@ -207,13 +207,13 @@ export async function getBattleOperation(operation: string, params: BattleOperat
       });
     }
     case "reset": {
-      const { resetMutation } = await import("@/app/api/campaigns/[id]/battles/[battleId]/reset/reset-mutation");
+      const { resetMutation } = await import("@/lib/server/battles/mutations/reset/reset-mutation");
 
       return define({
         access: "dm", allowWhileAwaitingDm: true, mutate: resetMutation });
     }
     case "reveal-participant": {
-      const { revealParticipantMutation, revealParticipantSchema } = await import("@/app/api/campaigns/[id]/battles/[battleId]/reveal-participant/reveal-participant-mutation");
+      const { revealParticipantMutation, revealParticipantSchema } = await import("@/lib/server/battles/mutations/reveal-participant/reveal-participant-mutation");
 
       return define({
         access: "dm",
@@ -224,7 +224,7 @@ export async function getBattleOperation(operation: string, params: BattleOperat
       });
     }
     case "rollback": {
-      const { createRollbackMutation, rollbackSchema } = await import("@/app/api/campaigns/[id]/battles/[battleId]/rollback/rollback-mutation");
+      const { createRollbackMutation, rollbackSchema } = await import("@/lib/server/battles/mutations/rollback/rollback-mutation");
 
       const mutate = createRollbackMutation();
 
@@ -232,7 +232,7 @@ export async function getBattleOperation(operation: string, params: BattleOperat
         access: "dm", allowWhileAwaitingDm: true, schema: rollbackSchema, mutate });
     }
     case "scale-units": {
-      const { scaleUnitsMutation, scaleUnitsSchema } = await import("@/app/api/campaigns/[id]/battles/[battleId]/scale-units/scale-units-mutation");
+      const { scaleUnitsMutation, scaleUnitsSchema } = await import("@/lib/server/battles/mutations/scale-units/scale-units-mutation");
 
       return define({
         access: "dm",
@@ -243,9 +243,9 @@ export async function getBattleOperation(operation: string, params: BattleOperat
       });
     }
     case "spell": {
-      const { spellSchema } = await import("@/app/api/campaigns/[id]/battles/[battleId]/spell/cast-spell-schema");
+      const { spellSchema } = await import("@/lib/server/battles/mutations/spell/cast-spell-schema");
 
-      const { createSpellMutation } = await import("@/app/api/campaigns/[id]/battles/[battleId]/spell/spell-mutation");
+      const { createSpellMutation } = await import("@/lib/server/battles/mutations/spell/spell-mutation");
 
       const mutate = createSpellMutation();
 
@@ -260,7 +260,7 @@ export async function getBattleOperation(operation: string, params: BattleOperat
       });
     }
     case "start": {
-      const { createStartMutation } = await import("@/app/api/campaigns/[id]/battles/[battleId]/start/start-mutation");
+      const { createStartMutation } = await import("@/lib/server/battles/mutations/start/start-mutation");
 
       const mutate = createStartMutation();
 
@@ -268,7 +268,7 @@ export async function getBattleOperation(operation: string, params: BattleOperat
         access: "dm", requireStatus: BattleStatus.PREPARED, mutate });
     }
     case "unit-control": {
-      const { unitControlMutation, unitControlSchema } = await import("@/app/api/campaigns/[id]/battles/[battleId]/unit-control/unit-control-mutation");
+      const { unitControlMutation, unitControlSchema } = await import("@/lib/server/battles/mutations/unit-control/unit-control-mutation");
 
       return define({
         access: "dm",
@@ -279,9 +279,9 @@ export async function getBattleOperation(operation: string, params: BattleOperat
       });
     }
     case "participants.patch": {
-      const { patchParticipantMutation } = await import("@/app/api/campaigns/[id]/battles/[battleId]/participants/[participantId]/patch-participant-mutation");
+      const { patchParticipantMutation } = await import("@/lib/server/battles/mutations/participants/patch-participant-mutation");
 
-      const { patchParticipantSchema } = await import("@/app/api/campaigns/[id]/battles/[battleId]/participants/[participantId]/patch-participant-schema");
+      const { patchParticipantSchema } = await import("@/lib/server/battles/mutations/participants/patch-participant-schema");
 
       if (!params.participantId) throw new ContentError("Потрібен participantId", 400);
 

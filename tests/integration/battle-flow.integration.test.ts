@@ -3,14 +3,14 @@
  */
 import { afterAll, beforeAll, describe, expect, it, vi } from "vitest";
 
-import { attackBodySchema, attackMutation } from "@/app/api/campaigns/[id]/battles/[battleId]/attack/attack-mutation";
-import { nextTurnMutation } from "@/app/api/campaigns/[id]/battles/[battleId]/next-turn/next-turn-mutation";
-import { createRollbackMutation, rollbackSchema } from "@/app/api/campaigns/[id]/battles/[battleId]/rollback/rollback-mutation";
 import { AttackType, ParticipantSide } from "@/lib/constants/battle";
 import { prisma } from "@/lib/db";
+import { attackBodySchema, attackMutation } from "@/lib/server/battles/mutations/attack/attack-mutation";
+import { nextTurnMutation } from "@/lib/server/battles/mutations/next-turn/next-turn-mutation";
+import { createRollbackMutation, rollbackSchema } from "@/lib/server/battles/mutations/rollback/rollback-mutation";
+import { runBattleMutation } from "@/lib/server/battles/run-mutation";
 import { createMockParticipant } from "@/lib/utils/battle/__tests__/fixtures/mock-participant";
 import type { PipelineDeps } from "@/lib/utils/battle/pipeline/run-battle-mutation";
-import { runBattleMutation } from "@/lib/utils/battle/pipeline/run-battle-mutation";
 import { loadBattle, loadRecentEvents, loadSnapshotsFrom, saveBattle } from "@/lib/utils/battle/store";
 import type { ClientBattleDelta } from "@/types/api";
 

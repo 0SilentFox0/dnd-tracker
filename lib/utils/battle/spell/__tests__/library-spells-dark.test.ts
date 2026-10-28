@@ -1,9 +1,9 @@
 import type { Spell } from "@prisma/client";
 import { describe, expect, it } from "vitest";
 
-import { createSpellMutation } from "@/app/api/campaigns/[id]/battles/[battleId]/spell/spell-mutation";
 import { SPELLS } from "@/data/library/spells";
 import { ParticipantSide, ParticipantSourceType } from "@/lib/constants/battle";
+import { createSpellMutation } from "@/lib/server/battles/mutations/spell/spell-mutation";
 import { makeParticipant, seq } from "@/lib/utils/abilities/__tests__/fixtures";
 import { collectModifiers } from "@/lib/utils/abilities/engine/core/collect-modifiers";
 import { updateParticipant } from "@/lib/utils/abilities/engine/core/participants";

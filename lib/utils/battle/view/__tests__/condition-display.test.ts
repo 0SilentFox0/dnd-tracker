@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { goblin, hero } from "@/app/api/__tests__/battles/fixtures";
+import { goblin, hero } from "@/lib/server/battles/__tests__/mutations/fixtures";
 import { applyCondition5e } from "@/lib/utils/battle/conditions";
 import { displayEffects, effectSummary } from "@/lib/utils/battle/view";
 

@@ -1,19 +1,18 @@
-import { NextResponse } from "next/server";
+import type { NextResponse } from "next/server";
 import type { Prisma } from "@prisma/client";
 import { z } from "zod";
 
-import { guardedCharacterHandler, operationDM } from "../operation-context";
+import { requireCharacterRecord } from "../access";
+import { characterHandler, defineCharacterOperation, dmCharacterGate } from "../operation-runner";
 
 import { API_ERRORS } from "@/lib/constants/api-errors";
 import { ARTIFACT_GRID_9, ArtifactSlot } from "@/lib/constants/artifacts";
 import { InventoryLogKind } from "@/lib/constants/inventory";
 import { prisma } from "@/lib/db";
 import { lockCampaignArtifacts } from "@/lib/server/artifacts/lock";
+import { ContentError } from "@/lib/server/content/errors";
 import { writeInventoryLog } from "@/lib/server/inventory/log";
 import type { Actor } from "@/lib/utils/api/actor";
-import { errorResponse } from "@/lib/utils/api/api-response";
-import { loadOwned } from "@/lib/utils/api/load-owned";
-import { parseBody } from "@/lib/utils/api/parse-body";
 import { buildEquipped } from "@/lib/utils/artifacts/equipment";
 import { canEquipOffHand } from "@/lib/utils/artifacts/off-hand";
 import { findHolder, uniqueConflict } from "@/lib/utils/artifacts/ownership";
@@ -36,21 +35,15 @@ export const updateInventorySchema = z.object({
   items: z.array(inventoryItemSchema).optional(),
 });
 
-async function updateInventoryImpl(request: Request, campaignId: string, characterId: string, actor?: Actor): Promise<NextResponse> {
-  const accessResult = await operationDM(campaignId, actor);
+type Gate = Exclude<Awaited<ReturnType<typeof requireCharacterRecord>>, NextResponse>;
 
-  if (accessResult instanceof NextResponse) return accessResult;
+async function updateInventoryCore({ access, character }: Gate, data: z.infer<typeof updateInventorySchema>) {
+  const campaignId = character.campaignId;
 
-  const character = await loadOwned(prisma.character.findUnique({ where: { id: characterId } }), campaignId);
-
-  if (character instanceof NextResponse) return character;
-
-  const data = await parseBody(updateInventorySchema, request);
-
-  if (data instanceof NextResponse) return data;
+  const characterId = character.id;
 
   if (data.equipSlot && !ARTIFACT_GRID_9.some((cell) => cell.key === data.equipSlot?.slot)) {
-    return errorResponse(API_ERRORS.ARTIFACT_UNKNOWN_SLOT, 400);
+    throw new ContentError(API_ERRORS.ARTIFACT_UNKNOWN_SLOT, 400);
   }
 
   return prisma.$transaction(async (tx) => {
@@ -69,7 +62,7 @@ async function updateInventoryImpl(request: Request, campaignId: string, charact
 
       displaced = occupant && occupant !== data.equipSlot.artifactId ? occupant : undefined;
 
-      if (displaced && normalizeStash(current?.stash).includes(displaced)) return errorResponse(API_ERRORS.ITEM_ALREADY_IN_STASH, 409);
+      if (displaced && normalizeStash(current?.stash).includes(displaced)) throw new ContentError(API_ERRORS.ITEM_ALREADY_IN_STASH, 409);
 
       nextEquipped = buildEquipped(equippedNow, data.equipSlot.slot, data.equipSlot.artifactId);
     }
@@ -82,14 +75,14 @@ async function updateInventoryImpl(request: Request, campaignId: string, charact
       if (shieldArtifact && shieldArtifact.slot !== ArtifactSlot.SHIELD) {
         const campaign = await tx.campaign.findUnique({ where: { id: campaignId }, select: { rules: true } });
 
-        if (!canEquipOffHand(shieldArtifact, parseRules(campaign?.rules).classes.enabled)) return errorResponse(API_ERRORS.OFF_HAND_EQUIP, 422);
+        if (!canEquipOffHand(shieldArtifact, parseRules(campaign?.rules).classes.enabled)) throw new ContentError(API_ERRORS.OFF_HAND_EQUIP, 422);
       }
     }
 
     if (nextEquipped) {
       const ids = Object.values(nextEquipped).filter((v): v is string => !!v);
 
-      const rules = parseRules(accessResult.campaign?.rules);
+      const rules = parseRules(access.campaign?.rules);
 
       // the legacy grid editor knows non-unique gear only for 5e item campaigns or composed refs: HOMM keeps one query-free check
       const rows =
@@ -99,7 +92,7 @@ async function updateInventoryImpl(request: Request, campaignId: string, charact
 
       const isUnique = rows ? uniqueChecker(rows) : undefined;
 
-      if (uniqueConflict(ids, isUnique)) return errorResponse(API_ERRORS.ARTIFACT_ALREADY_EQUIPPED, 409);
+      if (uniqueConflict(ids, isUnique)) throw new ContentError(API_ERRORS.ARTIFACT_ALREADY_EQUIPPED, 409);
 
       const checkIds = data.equipSlot ? (data.equipSlot.artifactId ? [data.equipSlot.artifactId] : []) : ids;
 
@@ -109,7 +102,7 @@ async function updateInventoryImpl(request: Request, campaignId: string, charact
         const owner = parsed && rows.get(parsed.propertyId ?? parsed.baseId);
 
         return (!!parsed?.param || !!(owner && itemStatsFromRow(owner)?.parameter)) && !resolveItemRow(ref, rows);
-      })) return errorResponse("Недозволений або відсутній параметр предмета", 422);
+      })) throw new ContentError("Недозволений або відсутній параметр предмета", 422);
 
       if (checkIds.length > 0) {
         const others = await tx.characterInventory.findMany({
@@ -125,7 +118,7 @@ async function updateInventoryImpl(request: Request, campaignId: string, charact
           if (holderId) {
             const holderName = others.find((o) => o.characterId === holderId)?.character.name ?? "";
 
-            return errorResponse(`${API_ERRORS.ARTIFACT_HELD_BY_OTHER}: ${holderName}`, 409);
+            throw new ContentError(`${API_ERRORS.ARTIFACT_HELD_BY_OTHER}: ${holderName}`, 409);
           }
         }
       }
@@ -152,7 +145,7 @@ async function updateInventoryImpl(request: Request, campaignId: string, charact
         {
           campaignId,
           characterId,
-          actorUserId: accessResult.userId,
+          actorUserId: access.userId,
           kind: data.equipSlot.artifactId ? InventoryLogKind.ARTIFACT_EQUIP : InventoryLogKind.ARTIFACT_UNEQUIP,
           delta: data.equipSlot.artifactId
             ? { artifactId: data.equipSlot.artifactId, slot: data.equipSlot.slot, swappedArtifactId: displaced }
@@ -162,8 +155,18 @@ async function updateInventoryImpl(request: Request, campaignId: string, charact
       ]);
     }
 
-    return NextResponse.json(inventory);
+    return inventory;
   });
 }
 
-export const updateInventory = guardedCharacterHandler(updateInventoryImpl, "inventory-update");
+export const inventoryUpdateOperation = defineCharacterOperation({
+  name: "inventory-update",
+  action: "update inventory",
+  schema: updateInventorySchema,
+  gate: dmCharacterGate((ctx, access) => requireCharacterRecord(ctx.campaignId, ctx.characterId, { access, notFound: API_ERRORS.NOT_FOUND })),
+  run: updateInventoryCore,
+});
+
+const update = characterHandler(inventoryUpdateOperation);
+
+export const updateInventory = (request: Request, campaignId: string, characterId: string, actor?: Actor) => update(request, campaignId, characterId, actor);

@@ -1,9 +1,9 @@
 import { NextResponse } from "next/server";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-import { updateCharacterSchema } from "@/app/api/campaigns/[id]/characters/[characterId]/update-character-schema";
-import { createCharacterSchema } from "@/app/api/campaigns/[id]/characters/create-character-schema";
 import { prisma } from "@/lib/db";
+import { createCharacterSchema } from "@/lib/server/characters/core/create-character-schema";
+import { updateCharacterSchema } from "@/lib/server/characters/core/update-character-schema";
 import { resolveAvatarForPersistence } from "@/lib/supabase/avatar-storage";
 import * as apiAuth from "@/lib/utils/api/api-auth";
 

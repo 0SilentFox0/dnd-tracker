@@ -1,8 +1,7 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
 
-import { runProgressionAction } from "../progression-action-handler";
-
+import { runProgressionAction } from "@/lib/server/characters/core/progression-action-handler";
 import { handleApiError } from "@/lib/utils/api/error-handler";
 import { parseBody } from "@/lib/utils/api/parse-body";
 

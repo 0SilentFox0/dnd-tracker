@@ -1,5 +1,6 @@
 import { z } from "zod";
 
+import { API_ERRORS } from "@/lib/constants/api-errors";
 import { prisma } from "@/lib/db";
 import { BATTLE_COMMANDS, BATTLE_READS, type BattleActionInput,battleActionInput, HUMAN_BATTLE_ACTIONS } from "@/lib/server/assistant/actions/battle-actions";
 import { contentSnapshot } from "@/lib/server/assistant/actions/content-snapshot";
@@ -7,17 +8,18 @@ import { requestDigest } from "@/lib/server/assistant/intent-store";
 import type { ActionExecutionContext, ActionPreview, ActionResult, AssistantCaller, JsonValue } from "@/lib/server/assistant/types";
 import { loadAudioLibrary } from "@/lib/server/audio/track-store";
 import { assertDiceMode, schemaDiceInput, validateAttackPreview } from "@/lib/server/battles/dice";
+import { executeBattleOperation } from "@/lib/server/battles/execute-battle-operation";
+import { assertWriteScope, requireDmMember } from "@/lib/server/battles/guards";
 import { getBattleOperation } from "@/lib/server/battles/operations";
+import { defaultPipelineDeps } from "@/lib/server/battles/pipeline-deps";
 import { battleRecord, type RecordOperation, recordSchemas, requireBattleId } from "@/lib/server/battles/record-service";
 import { ContentError, parseInput } from "@/lib/server/content/errors";
 import { withCampaignContentWrite } from "@/lib/server/content/write";
-import { currentContentWrite, runContentWriteContext } from "@/lib/server/content/write-context";
+import { runContentWriteContext } from "@/lib/server/content/write-context";
 import { isHostedOnProjectStorage } from "@/lib/supabase/image-storage";
 import type { Actor } from "@/lib/utils/api/actor";
 import { needFailure } from "@/lib/utils/api/need";
 import { toBattleResponse } from "@/lib/utils/battle/pipeline/battle-response";
-import { defaultPipelineDeps } from "@/lib/utils/battle/pipeline/default-deps";
-import { executeBattleOperation } from "@/lib/utils/battle/pipeline/execute-battle-operation";
 import { guardBattleContext } from "@/lib/utils/battle/pipeline/run-battle-mutation";
 import { BattleAccessError, BattleRuleError, loadAllEvents, loadEventsBefore, loadRecentEvents } from "@/lib/utils/battle/store";
 import { summarizeBattle } from "@/lib/utils/battle/view/summary";
@@ -36,9 +38,7 @@ async function liveAccess(actor: Actor, write: boolean) {
 
   if (failure) throw new ContentError(failure, 403);
 
-  const member = await prisma.campaignMember.findUnique({ where: { campaignId_userId: { campaignId: actor.campaignId, userId: actor.userId } } });
-
-  if (member?.role !== "dm") throw new ContentError("Лише DM", 403);
+  await requireDmMember(prisma, actor);
 }
 
 async function state(actor: Actor, operation: string, value: BattleActionInput) {
@@ -64,7 +64,7 @@ async function state(actor: Actor, operation: string, value: BattleActionInput) 
 
   if (!loaded) throw new ContentError("Бій не знайдено", 404);
 
-  if (!loaded.isMember || !loaded.isDM) throw new ContentError("Лише DM", 403);
+  if (!loaded.isMember || !loaded.isDM) throw new ContentError(API_ERRORS.DM_ONLY, 403);
 
   // Source changes can alter start/refresh/attack/spell outcomes without changing battle.version.
   const sources = await Promise.all([
@@ -93,7 +93,7 @@ async function prepared(caller: AssistantCaller, operation: string, raw: unknown
     // Access precedes schema errors, just like actual execution access cannot be fabricated by actor.isDM.
     const body = schemaDiceInput(operation, value.body, value.dice === "server");
 
-    const ctx = guardBattleContext(caller.actor.userId, current.loaded, body, current.version, definition);
+    const { ctx } = guardBattleContext(caller.actor.userId, current.loaded, body, current.version, definition);
 
     const parsed = definition.schema ? parseInput(definition.schema, body) as Record<string, unknown> : body;
 
@@ -176,11 +176,7 @@ export async function runBattleAction(actor: Actor, operation: string, raw: unkn
     return executeBattleOperation(actor, { operation, battleId: value.battleId ?? "", input: value.body, expectedVersion: (fresh.preconditions as { version: number }).version, serverDice: value.dice === "server" }, execution);
   });
 
-  const current = currentContentWrite();
-
-  if (current && (current.campaignId !== actor.campaignId || (execution && current.db !== execution.db))) throw new ContentError("Невідповідна транзакція", 403);
-
-  if (execution && (execution.caller.actor.userId !== actor.userId || execution.caller.actor.campaignId !== actor.campaignId)) throw new ContentError("Невідповідний actor", 403);
+  assertWriteScope(actor, execution);
 
   return execution ? runContentWriteContext(actor.campaignId, execution.db, run) : run();
 }
@@ -234,9 +230,9 @@ export async function readBattleAction(actor: Actor, operation: string, raw: unk
 }
 
 export async function battleBalance(campaignId: string, input: unknown | undefined, rules: import("@/lib/utils/rules").Ruleset) {
-  if (input === undefined) return (await import("@/app/api/campaigns/[id]/battles/balance/balance-get")).getBalancePayload(campaignId, rules);
+  if (input === undefined) return (await import("@/lib/server/battles/balance/balance-get")).getBalancePayload(campaignId, rules);
 
-  const { balanceSchema } = await import("@/app/api/campaigns/[id]/battles/balance/balance-schema");
+  const { balanceSchema } = await import("@/lib/server/battles/balance/balance-schema");
 
-  return (await import("@/app/api/campaigns/[id]/battles/balance/balance-post")).postBalanceResponse(campaignId, parseInput(balanceSchema, input), rules);
+  return (await import("@/lib/server/battles/balance/balance-post")).postBalanceResponse(campaignId, parseInput(balanceSchema, input), rules);
 }

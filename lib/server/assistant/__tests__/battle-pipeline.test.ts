@@ -2,12 +2,13 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import { z } from "zod";
 
 import type { ActionExecutionContext } from "@/lib/server/assistant/types";
+import { executeBattleOperation } from "@/lib/server/battles/execute-battle-operation";
+import { runBattleMutation } from "@/lib/server/battles/run-mutation";
 import { ContentError } from "@/lib/server/content/errors";
 import type { Actor } from "@/lib/utils/api/actor";
 import { createMockParticipant } from "@/lib/utils/battle/__tests__/fixtures/mock-participant";
 import { mazeMap } from "@/lib/utils/battle/modes/maze/__tests__/fixtures";
-import { executeBattleOperation } from "@/lib/utils/battle/pipeline/execute-battle-operation";
-import { type PipelineDeps, runBattleMutation, type RunBattleMutationOptions } from "@/lib/utils/battle/pipeline/run-battle-mutation";
+import type { PipelineDeps, RunBattleMutationOptions } from "@/lib/utils/battle/pipeline/run-battle-mutation";
 import type { LoadedBattle } from "@/lib/utils/battle/store";
 import { DEFAULT_RULES } from "@/lib/utils/rules";
 
@@ -74,7 +75,7 @@ describe("shared battle operation pipeline", () => {
 
     const ctx = { caller: { actor: { ...actor, campaignId: "foreign" } }, db: {} } as ActionExecutionContext;
 
-    await expect(executeBattleOperation(actor, command, ctx, d)).rejects.toMatchObject({ status: 403 });
+    await expect(executeBattleOperation(actor, command, ctx, d)).rejects.toMatchObject({ status: 409 });
     expect(d.saveBattle).not.toHaveBeenCalled();
   });
   it("same schema and rate limit reject both entry points before mutation", async () => {

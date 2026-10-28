@@ -7,8 +7,8 @@ import { prisma } from "@/lib/db";
 import { createActionCatalog } from "@/lib/server/assistant/catalog";
 import { createAssistantExecutor } from "@/lib/server/assistant/execute";
 import type { AssistantCaller, AssistantWriteAction } from "@/lib/server/assistant/types";
-import { executeBattleOperation } from "@/lib/utils/battle/pipeline/execute-battle-operation";
-import { runBattleMutation } from "@/lib/utils/battle/pipeline/run-battle-mutation";
+import { executeBattleOperation } from "@/lib/server/battles/execute-battle-operation";
+import { runBattleMutation } from "@/lib/server/battles/run-mutation";
 
 const session = vi.hoisted(() => ({ userId: "" }));
 

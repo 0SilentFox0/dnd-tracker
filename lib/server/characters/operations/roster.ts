@@ -1,6 +1,6 @@
-import { NextResponse } from "next/server";
+import { z } from "zod";
 
-import { guardedCharacterHandler,operationAccess } from "../operation-context";
+import { defineCharacterOperation, executeCharacterRoute, memberScope } from "../operation-runner";
 
 import type { CharacterTypeValue } from "@/lib/constants/characters";
 import { ACTIVE_CHARACTER } from "@/lib/constants/characters";
@@ -13,11 +13,17 @@ import type { RosterHero } from "@/types/characters";
 
 const urlOnly = (avatar: string | null) => (avatar?.startsWith("http") ? avatar : null);
 
-async function readRosterImpl(campaignId: string, actor?: Actor): Promise<NextResponse> {
-  const access = await operationAccess(campaignId, false, actor);
+export const rosterOperation = defineCharacterOperation({
+  name: "roster",
+  action: "fetch roster",
+  schema: z.object({}),
+  unlocked: true,
+  gate: memberScope,
+  query: () => ({}),
+  run: ({ campaignId }) => readRosterHeroes(campaignId),
+});
 
-  if (access instanceof NextResponse) return access;
-
+async function readRosterHeroes(campaignId: string): Promise<RosterHero[]> {
   const heroes = await prisma.character.findMany({
     where: { campaignId, ...ACTIVE_CHARACTER },
     select: { id: true, name: true, avatar: true, type: true, inventory: { select: { equipped: true } } },
@@ -47,7 +53,7 @@ async function readRosterImpl(campaignId: string, actor?: Actor): Promise<NextRe
     ),
   }));
 
-  return NextResponse.json(roster);
+  return roster;
 }
 
-export const readRoster = guardedCharacterHandler(readRosterImpl, "roster");
+export const readRoster = (campaignId: string, actor?: Actor) => executeCharacterRoute(rosterOperation, { campaignId, params: {}, actor });

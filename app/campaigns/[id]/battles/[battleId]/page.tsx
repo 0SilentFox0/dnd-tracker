@@ -3,8 +3,8 @@ import { BattlePageClient } from "./BattlePageClient";
 import { getSessionUserId } from "@/lib/auth";
 import { battleQueryKey } from "@/lib/hooks/battles/keys";
 import { PrefetchedQuery } from "@/lib/providers/prefetched-query";
+import { readBattleScene } from "@/lib/server/battles/read-battle";
 import { readOkJson } from "@/lib/utils/api/read-json";
-import { readBattleScene } from "@/lib/utils/battle/pipeline/read-battle";
 import type { BattleScene } from "@/types/api";
 
 export default async function BattlePage({ params }: { params: Promise<{ id: string; battleId: string }> }) {

@@ -7,8 +7,8 @@ import { BATTLE_ACTIONS } from "@/lib/server/assistant/actions/battles";
 import { createActionCatalog } from "@/lib/server/assistant/catalog";
 import { createAssistantExecutor } from "@/lib/server/assistant/execute";
 import type { AssistantCaller } from "@/lib/server/assistant/types";
+import { executeBattleOperation } from "@/lib/server/battles/execute-battle-operation";
 import { createMockParticipant } from "@/lib/utils/battle/__tests__/fixtures/mock-participant";
-import { executeBattleOperation } from "@/lib/utils/battle/pipeline/execute-battle-operation";
 import { loadBattle, saveBattle } from "@/lib/utils/battle/store";
 
 const session = vi.hoisted(() => ({ userId: "" }));

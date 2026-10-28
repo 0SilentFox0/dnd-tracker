@@ -1,18 +1,16 @@
-import { NextResponse } from "next/server";
 import { z } from "zod";
 
-import { guardedCharacterHandler, operationAccess } from "../operation-context";
+import { type CampaignScope, characterHandler, defineCharacterOperation, memberScope, orThrow } from "../operation-runner";
 
 import { API_ERRORS } from "@/lib/constants/api-errors";
 import { CharacterStatus } from "@/lib/constants/characters";
 import { InventoryLogKind } from "@/lib/constants/inventory";
 import { prisma } from "@/lib/db";
 import { ensureInventory, lockCampaignArtifacts } from "@/lib/server/artifacts/lock";
+import { ContentError } from "@/lib/server/content/errors";
 import { writeInventoryLog } from "@/lib/server/inventory/log";
 import type { Actor } from "@/lib/utils/api/actor";
-import { errorResponse } from "@/lib/utils/api/api-response";
 import { loadOwned } from "@/lib/utils/api/load-owned";
-import { parseBody } from "@/lib/utils/api/parse-body";
 import { planTransfer, TransferError, type TransferErrorCode } from "@/lib/utils/artifacts/ownership";
 import { normalizeStash } from "@/lib/utils/inventory/items";
 import { pruneAttuned } from "@/lib/utils/items/resolve";
@@ -31,26 +29,14 @@ const ERROR_TEXT: Record<TransferErrorCode, string> = {
 
 const characterSelect = { id: true, campaignId: true, controlledBy: true, status: true } as const;
 
-async function transferArtifactImpl(request: Request, campaignId: string, characterId: string, actor?: Actor): Promise<NextResponse> {
-  const access = await operationAccess(campaignId, false, actor);
+async function transferCore({ access, campaignId, characterId }: CampaignScope, data: z.infer<typeof transferSchema>) {
+  const from = await orThrow(loadOwned(prisma.character.findUnique({ where: { id: characterId }, select: characterSelect }), campaignId, API_ERRORS.CHARACTER_NOT_FOUND));
 
-  if (access instanceof NextResponse) return access;
+  if (!access.isDM && (from.controlledBy !== access.userId || from.status === CharacterStatus.PENDING)) throw new ContentError(API_ERRORS.FORBIDDEN, 403);
 
-  const data = await parseBody(transferSchema, request);
+  const to = await orThrow(loadOwned(prisma.character.findUnique({ where: { id: data.toCharacterId }, select: characterSelect }), campaignId, API_ERRORS.CHARACTER_NOT_FOUND));
 
-  if (data instanceof NextResponse) return data;
-
-  const from = await loadOwned(prisma.character.findUnique({ where: { id: characterId }, select: characterSelect }), campaignId, API_ERRORS.CHARACTER_NOT_FOUND);
-
-  if (from instanceof NextResponse) return from;
-
-  if (!access.isDM && (from.controlledBy !== access.userId || from.status === CharacterStatus.PENDING)) return errorResponse(API_ERRORS.FORBIDDEN, 403);
-
-  const to = await loadOwned(prisma.character.findUnique({ where: { id: data.toCharacterId }, select: characterSelect }), campaignId, API_ERRORS.CHARACTER_NOT_FOUND);
-
-  if (to instanceof NextResponse) return to;
-
-  if (to.status === CharacterStatus.PENDING) return errorResponse(API_ERRORS.CHARACTER_NOT_FOUND, 404);
+  if (to.status === CharacterStatus.PENDING) throw new ContentError(API_ERRORS.CHARACTER_NOT_FOUND, 404);
 
   return prisma.$transaction(async (tx) => {
     await lockCampaignArtifacts(tx, campaignId);
@@ -65,9 +51,9 @@ async function transferArtifactImpl(request: Request, campaignId: string, charac
       source: data.slot ? { slot: data.slot } : { artifactId: data.artifactId as string },
     });
 
-    if (!plan.ok) return errorResponse(ERROR_TEXT[plan.error], 400);
+    if (!plan.ok) throw new ContentError(ERROR_TEXT[plan.error], 400);
 
-    if (normalizeStash(toInv.stash).includes(plan.artifactId)) return errorResponse(API_ERRORS.ITEM_ALREADY_IN_STASH, 409);
+    if (normalizeStash(toInv.stash).includes(plan.artifactId)) throw new ContentError(API_ERRORS.ITEM_ALREADY_IN_STASH, 409);
 
     const attunedBefore = normalizeStash(fromInv.attuned);
 
@@ -84,8 +70,18 @@ async function transferArtifactImpl(request: Request, campaignId: string, charac
       { ...base, characterId: to.id, delta: { artifactId: plan.artifactId, fromCharacterId: from.id } },
     ]);
 
-    return NextResponse.json({ from: fromSaved, to: toSaved });
+    return { from: fromSaved, to: toSaved };
   });
 }
 
-export const transferArtifact = guardedCharacterHandler(transferArtifactImpl, "transfer");
+export const transferOperation = defineCharacterOperation({
+  name: "transfer",
+  action: "transfer artifact",
+  schema: transferSchema,
+  gate: memberScope,
+  run: transferCore,
+});
+
+const transfer = characterHandler(transferOperation);
+
+export const transferArtifact = (request: Request, campaignId: string, characterId: string, actor?: Actor) => transfer(request, campaignId, characterId, actor);

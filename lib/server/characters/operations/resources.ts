@@ -1,31 +1,15 @@
-import { NextResponse } from "next/server";
+import { requireCharacterAccess } from "../access";
+import { characterRoute, defineCharacterOperation, gateOptions } from "../operation-runner";
 
-import { guardedCharacterHandler } from "../operation-context";
-
-import { editResourcesFor } from "@/app/api/campaigns/[id]/characters/[characterId]/resources/resources-handler";
 import { resourcesEditSchema } from "@/lib/schemas/out-of-combat";
-import { requireCharacterAccess } from "@/lib/server/characters/access";
-import type { Actor } from "@/lib/utils/api/actor";
-import { handleApiError } from "@/lib/utils/api/error-handler";
-import { parseBody } from "@/lib/utils/api/parse-body";
-import type { CharacterRouteContext } from "@/types/api";
+import { editResourcesFor } from "@/lib/server/characters/core/resources-handler";
 
-async function PATCHImpl(request: Request, { params }: CharacterRouteContext, actor?: Actor) {
-  try {
-    const { id, characterId } = await params;
+export const resourcesOperation = defineCharacterOperation({
+  name: "resources",
+  action: "edit character resources",
+  schema: resourcesEditSchema,
+  gate: ctx => requireCharacterAccess(ctx.campaignId, ctx.characterId, gateOptions(ctx, true)),
+  run: editResourcesFor,
+});
 
-    const gate = await requireCharacterAccess(id, characterId, { actor, dmOnly: true });
-
-    if (gate instanceof NextResponse) return gate;
-
-    const body = await parseBody(resourcesEditSchema, request);
-
-    if (body instanceof NextResponse) return body;
-
-    return await editResourcesFor(gate.access, gate.character, body);
-  } catch (error) {
-    return handleApiError(error, { action: "edit character resources" });
-  }
-}
-
-export const PATCH = guardedCharacterHandler(PATCHImpl, "resources");
+export const PATCH = characterRoute(resourcesOperation);

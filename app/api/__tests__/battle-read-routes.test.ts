@@ -1,13 +1,12 @@
 import { NextResponse } from "next/server";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-import { context, goblin, hero } from "./battles/fixtures";
-
 import { prisma } from "@/lib/db";
+import { context, goblin, hero } from "@/lib/server/battles/__tests__/mutations/fixtures";
+import { defaultPipelineDeps, defaultReadDeps } from "@/lib/server/battles/pipeline-deps";
 import * as apiAuth from "@/lib/utils/api/api-auth";
-import { defaultPipelineDeps, defaultReadDeps } from "@/lib/utils/battle/pipeline/default-deps";
 
-vi.mock("@/lib/utils/battle/pipeline/default-deps", () => ({
+vi.mock("@/lib/server/battles/pipeline-deps", () => ({
   defaultPipelineDeps: {
     getUserId: vi.fn(),
     rateLimit: vi.fn(),
