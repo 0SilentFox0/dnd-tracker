@@ -68,7 +68,7 @@
 ### 3. Стоки повз `errorResponse`
 Кожен переводиться на `apiErrorJson`/`errorResponse` або на `translateErrorBody` з мовою запиту:
 - `run-mutation.ts`, `assistant/{http,context-http}.ts`, `compendium-import/http.ts`, `progression-action-handler.ts`, `draft-class.ts` — `apiErrorJson` з тими ж додатковими полями.
-- `lib/ai/tools/define.ts` — `message`/`issues` результату інструмента перекладаються мовою запиту (MCP без cookie → `Accept-Language` → `uk`).
+- `lib/ai/tools/define.ts` — `message`/`issues` результату інструмента перекладаються мовою запиту (MCP/Bearer без cookie → `Accept-Language` → `en`).
 - `run-chat.ts`: `metadata.error`, що пишеться в БД, перекладається **під час запису** мовою запиту (в БД не потрапляє ключ).
 - Клієнт: `join-error.ts` порівнює `ApiError.errorKey` замість тексту, тексти — `common.joinErrors.*`; `EditTrackDialog` і форма артефакта показують `translateIssue(t, { message })`.
 - `translateIssue` зливає `issue.params` і `API_ERROR_PARAMS[message]` у значення ICU.
@@ -83,7 +83,7 @@
 - Тексти в `common.json` під префіксами за компонентом (`common.confirm.*`, `common.notify.*`, `common.header.*`, `common.breadcrumbs.*`, `common.states.*`, `common.search.*`, `common.import.*`, …). `useConfirm`/`useNotify`/`useUnsavedChangesGuard`/`useLibraryList`/`useFileImport` беруть `useTranslations("common")`; помилки `useFileImport` — ключі, показ через `t`.
 - Повідомлення розробника (`throw new Error("useConfirm потребує ConfirmProvider…")`) → англійською без перекладу.
 - `MonsterStatblock`, `DiceRoller`, `AbbreviationsInfoDialog`, `WeaponTraitsField` лежать у `components/common`, тому входять сюди (лише літерали в самих компонентах); доменні константи з `lib/constants/*`, які вони показують, лишаються українськими до частини свого домену (вони поза храповиком).
-- `app/layout.tsx` `metadata.description` лишається українським (root статичний) — прийнятий компроміс.
+- `app/layout.tsx` `metadata.description` переходить на англійську (root статичний, `/` і x-default — `en`); окремі сторінки з власними `metadata` не змінюються.
 - Root (`ClientLocaleProvider`) вантажить обидві мови для `common` + `validation`; `common` росте (~150 рядків × 2 мови, ~10 KB) — прийнятно.
 
 ### 6. Хвости частини 0
@@ -138,11 +138,11 @@
 - **Опечатка ключа** в `errorResponse` віддається текстом і не ламає `tsc` — страхує тест покриття; нові ключі поза `API_ERRORS` не допускаються (рев'ю).
 - **Якість `en`** ~400 рядків помилок пише модель; ICU-плейсхолдери ловить паритет, стиль — ні.
 - **Змішана мова.** Бойові правила з літералами (32), доменні Zod-повідомлення (20 файлів), лог бою лишаються українськими до своїх частин — прийнято ядром.
-- **MCP і Bearer-запити** без cookie отримують `uk` (якщо клієнт не шле `Accept-Language`).
+- **MCP і Bearer-запити** без cookie й `Accept-Language` отримують `en` (рішення користувача); це окремий fallback для запитів без cookie-сесії, браузерний ланцюжок cookie → `Accept-Language` → `uk` не змінюється.
 
 ## Поза скоупом
 
-Доменні `message:` у `lib/schemas` (20 файлів), інлайн-тексти бойових помилок і лог бою (частина 6), тексти інструментів AI (`"Некоректні параметри"` у `define.ts`, промпти — частина 5), доменні fallback-и `lib/api/{decks,tracks,world}.ts`, клієнтська глобальна конфігурація Zod, `metadata` root layout, onboarding (частина 2), `toLocaleDateString`, переклад наявних рядків у БД.
+Доменні `message:` у `lib/schemas` (20 файлів), інлайн-тексти бойових помилок і лог бою (частина 6), тексти інструментів AI (`"Некоректні параметри"` у `define.ts`, промпти — частина 5), доменні fallback-и `lib/api/{decks,tracks,world}.ts`, клієнтська глобальна конфігурація Zod, onboarding (частина 2), `toLocaleDateString`, переклад наявних рядків у БД.
 
 ## Документація в кінці
 
