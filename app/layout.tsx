@@ -24,7 +24,7 @@ export default async function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  const messages = await loadStaticMessages(["common", "validation"]);
+  const messages = await loadStaticMessages(["common", "validation", "whatsNew"]);
 
   return (
     <html lang="uk" className="dark">

@@ -1,0 +1,80 @@
+{
+  "ui": {
+    "button": "What's new",
+    "title": "What's new",
+    "new": " · new",
+    "open": "Open"
+  },
+  "2026-10-28-class-map": {
+    "title": "Class map",
+    "body": "A class shows what it grants at each level: abilities, subclass, choices and numbers. The DM sees the map in the class editor; the player sees it on the hero sheet (current level, next level, open choices) and in the level-up dialog."
+  },
+  "2026-10-28-official-templates": {
+    "title": "Campaign templates",
+    "body": "In the new campaign wizard you can start from an official template: 5e SRD 5.2 with 5e rules and content, Heroes with factions, units and spells, or an empty campaign (the \"No template\" option). Template updates are pulled in via \"Update from template\"."
+  },
+  "2026-10-28-tokens-5e": {
+    "title": "Icons in the SRD 5.2 template",
+    "body": "Units, spells and artifacts of the SRD template have their own images; campaigns receive them through \"Update from template\"."
+  },
+  "2026-10-28-world-rest": {
+    "title": "Resting on the world map",
+    "body": "The DM rests the party from the travel panel: heroes' resources are restored according to the campaign rules, and the rest is recorded in the journal."
+  },
+  "2026-10-28-puzzle": {
+    "title": "Puzzle in Show",
+    "body": "The DM adds an image as a puzzle and picks the cut style and number of pieces. Players assemble it together on the show screen: a piece can be rotated, and a piece someone else has picked up is marked with their name."
+  },
+  "2026-10-28-world-map": {
+    "title": "World map",
+    "body": "The DM moves heroes across the continent map and shows it to players, each with their own fog. There are notes for locations, and in the scenario rows and chapters can be linked to places on the map."
+  },
+  "2026-10-28-crit-choice": {
+    "title": "DM picks the crit effect",
+    "body": "In campaign settings there is a \"DM picks crit/fumble effects\" option: on a natural 20 or 1 the battle waits until you choose an effect from a list. Crits can now also happen on targets' saving throws against spells; without the option the effect is random."
+  },
+  "2026-10-27-dashboard": {
+    "title": "New campaign dashboard",
+    "body": "Sections are grouped and there is a section search. The DM sees \"What's next\": approvals, recent scenario pages and prepared battles. The player gets their hero card and a \"To battle\" button."
+  },
+  "2026-10-27-inventory": {
+    "title": "Hero inventory",
+    "body": "\"Items\" and \"Summary\" are now a single \"Inventory\" tab: slots with silhouettes, a backpack, a wallet. On desktop you can drag items between the backpack and slots; on a phone, tap and pick an action."
+  },
+  "2026-10-27-search": {
+    "title": "Search in lists",
+    "body": "Spells, races, artifacts, sets, skills, heroes and battles now have a search field by name."
+  },
+  "2026-10-23-monsters-full": {
+    "title": "5e monsters: breaths, spells, lair",
+    "body": "Stat blocks with senses and movement modes, at-will and recharge spells, legendary actions with targeting, and lair actions. Exact circle and emanation are available for 5e areas."
+  },
+  "2026-10-23-feats-choices": {
+    "title": "5e feats and choices",
+    "body": "Race lines (Elf, Gnome, Tiefling, Dragonborn, Goliath), feats (ASI capped at 20, fighting styles, epic boons), metamagic, cantrips, expertise and spells from class lists - in the hero form, on level-up and on the sheet (\"Unchosen choices\")."
+  },
+  "2026-10-23-magic-items": {
+    "title": "5e magic items",
+    "body": "Properties (\"Flame Tongue\", \"Weapon +1\") are granted together with the base item, ordinary gear is non-unique, plus attunement, charges that recharge on rest and consumable potions in battle. The SRD 5.2 template has 32 properties and 248 items."
+  },
+  "2026-10-22-onboarding": {
+    "title": "First steps and help",
+    "body": "The campaign page has a first-steps checklist, screens have hints, and the menu has a help section."
+  },
+  "2026-10-22-player-drafts": {
+    "title": "Hero drafts from players",
+    "body": "A player creates a hero draft themselves with portrait generation, and the DM approves it or sends it back. The new \"Summary\" tab holds the hero's money, items and journal."
+  },
+  "2026-10-21-ranged": {
+    "title": "Ranged combat",
+    "body": "Obstacles on the line of fire give cover automatically; chain shot and melee cleave have been added."
+  },
+  "2026-10-21-manuscript": {
+    "title": "Scenario manuscript",
+    "body": "The scenario is now a manuscript: links to slides and battles above the text, a table of contents for chapters and a placeholder for players."
+  },
+  "2026-10-20-ai": {
+    "title": "AI assistant",
+    "body": "Connect your own Claude, OpenAI or Gemini key - the assistant suggests scenario edits and helps during play."
+  }
+}

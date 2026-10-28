@@ -148,7 +148,7 @@ describe("GET /api/campaigns/[id]/onboarding", () => {
 
     expect(body.role).toBe("player");
     expect(body.steps.map((s: { id: string }) => s.id)).toEqual(["character", "sheet", "battle", "show"]);
-    expect(body.steps[0].description).toContain("схвален");
+    expect(body.steps[0].variant).toEqual({ name: "pending" });
     expect(body.state).toBe("open");
     expect(prisma.userOnboardingFlag.createMany).not.toHaveBeenCalled();
   });

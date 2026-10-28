@@ -24,12 +24,11 @@ describe("DM_STEPS", () => {
     expect(done(DM_STEPS, { ...emptyDm, battlesStarted: 1 })).toEqual(["battle-run"]);
   });
 
-  it("чернетки на схваленні — в описі кроку героя", () => {
+  it("чернетки на схваленні — variant кроку героя", () => {
     const step = DM_STEPS.find((s) => s.id === "characters")!;
 
-    const text = typeof step.description === "function" ? step.description({ ...emptyDm, pendingDrafts: 2 }) : step.description;
-
-    expect(text).toContain("2");
+    expect(step.variant?.({ ...emptyDm, pendingDrafts: 2 })).toEqual({ name: "pending", params: { count: 2 } });
+    expect(step.variant?.(emptyDm)).toBeUndefined();
   });
 
   it("6 обов'язкових кроків, решта optional", () => {
@@ -40,11 +39,11 @@ describe("DM_STEPS", () => {
 describe("PLAYER_STEPS", () => {
   const base: PlayerFacts = { ownCharacter: "none", sheetSeen: false, joinedBattle: false };
 
-  it("чернетка на схваленні — крок героя ще не виконано, опис про очікування", () => {
+  it("чернетка на схваленні — крок героя ще не виконано, variant про очікування", () => {
     const step = PLAYER_STEPS.find((s) => s.id === "character")!;
 
     expect(step.isDone({ ...base, ownCharacter: "pending" })).toBe(false);
-    expect(typeof step.description === "function" && step.description({ ...base, ownCharacter: "pending" })).toContain("схвален");
+    expect(step.variant?.({ ...base, ownCharacter: "pending" })).toEqual({ name: "pending" });
     expect(step.isDone({ ...base, ownCharacter: "active" })).toBe(true);
   });
 

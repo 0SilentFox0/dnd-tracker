@@ -1,6 +1,6 @@
 import { DM_STEPS, PLAYER_STEPS } from "@/lib/onboarding/checklists";
 import { CHECKLIST_HIDDEN, HIDE_ALL_HINTS_KEY, hintKey } from "@/lib/onboarding/flag-keys";
-import type { ChecklistState, OnboardingFacts, OnboardingFlags, OnboardingRole, OnboardingStep, WhatsNewEntry } from "@/lib/onboarding/types";
+import type { ChecklistState, OnboardingFacts, OnboardingFlags, OnboardingRole, OnboardingStep, StepVariant, WhatsNewEntry } from "@/lib/onboarding/types";
 
 const CHECKLIST_COLLAPSED_DAYS = 7;
 
@@ -8,8 +8,7 @@ const DAY_MS = 24 * 60 * 60 * 1000;
 
 export interface StepStatus {
   id: string;
-  title: string;
-  description: string;
+  variant?: StepVariant;
   href?: string;
   helpSlug?: string;
   optional: boolean;
@@ -17,11 +16,16 @@ export interface StepStatus {
   done: boolean;
 }
 
+function variantOf<F>(step: OnboardingStep<F>, facts: F) {
+  const variant = step.variant?.(facts);
+
+  return variant ? { variant } : {};
+}
+
 function statuses<F>(steps: OnboardingStep<F>[], facts: F, campaignId: string): StepStatus[] {
   return steps.map((s) => ({
     id: s.id,
-    title: s.title,
-    description: typeof s.description === "function" ? s.description(facts) : s.description,
+    ...variantOf(s, facts),
     ...(s.href && { href: s.href(campaignId) }),
     ...(s.helpSlug && { helpSlug: s.helpSlug }),
     optional: !!s.optional,
