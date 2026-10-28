@@ -27,11 +27,11 @@ export const SHOWCASE_MEDIA: Record<string, ShowcaseMedia> = {
   combat: { image: "/landing/screen-battle.webp", ratio: "16/10" },
   scenario: { image: "/landing/screen-scenario.webp", ratio: "16/10" },
   show: { image: "/landing/screen-show.webp", ratio: "16/10" },
-  world: { ratio: "16/10" },
+  world: { image: "/landing/screen-world.webp", ratio: "16/10" },
   ai: { mock: "ai", ratio: "16/10" },
-  phone: { ratio: "9/16" },
+  phone: { image: "/landing/screen-player-mobile.webp", ratio: "9/16" },
   hero: { image: "/landing/screen-hero.webp", ratio: "16/10" },
-  mechanics: { ratio: "16/10" },
+  mechanics: { image: "/landing/screen-constructor.webp", ratio: "16/10" },
 };
 
 export const PROBLEM_ICONS: LucideIcon[] = [Map, Swords, ScrollText, MessageSquare, Music, NotebookPen, ImageIcon];
