@@ -1,6 +1,7 @@
 import { ArmorModifierType, ArtifactModifierType, ArtifactSlot, ItemModifierType } from "@/lib/constants/artifacts";
 import { parseWeaponTraits } from "@/lib/constants/weapon-traits";
 import { armorStatsFromRow } from "@/lib/utils/artifacts/armor-row";
+import { weaponCategoryFromText } from "@/lib/utils/artifacts/weapon-stats";
 import { isRecord } from "@/lib/utils/common/is-record";
 import { itemStatsFromRow, itemStatsRecords } from "@/lib/utils/items/item-row";
 import type { ItemKind, ItemStats } from "@/lib/utils/items/item-stats";
@@ -109,6 +110,10 @@ export function composeItemRow<R extends ItemRowLike>(base: R, property: R): R {
     p?.property?.overrides,
   );
 
+  const category = weaponCategoryFromText(base.description);
+
+  const keepCategory = category && !baseMods.some((m) => m.type === ArtifactModifierType.WEAPON_CATEGORY);
+
   const spells = [...(b?.spells ?? []), ...(p?.spells ?? [])];
 
   const charges = p?.charges ?? b?.charges;
@@ -128,7 +133,7 @@ export function composeItemRow<R extends ItemRowLike>(base: R, property: R): R {
     description: property.description ?? base.description ?? null,
     setId: property.setId ?? base.setId ?? null,
     bonuses: sumNumbers(base.bonuses, property.bonuses),
-    modifiers: [...baseMods, ...(damage ? [{ type: ArtifactModifierType.DAMAGE_BONUS, value: String(damage) }] : []), ...itemStatsRecords(stats)],
+    modifiers: [...baseMods, ...(keepCategory ? [{ type: ArtifactModifierType.WEAPON_CATEGORY, value: category }] : []), ...(damage ? [{ type: ArtifactModifierType.DAMAGE_BONUS, value: String(damage) }] : []), ...itemStatsRecords(stats)],
     abilities: [...list(base.abilities), ...prefixed],
   };
 }

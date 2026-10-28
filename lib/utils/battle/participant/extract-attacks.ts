@@ -15,6 +15,7 @@ import {
 import { WEAPON_PROFICIENCY_KINDS } from "@/lib/constants/artifacts";
 import { AttackType } from "@/lib/constants/battle";
 import { parseWeaponTraits } from "@/lib/constants/weapon-traits";
+import { weaponCategoryFromText } from "@/lib/utils/artifacts/weapon-stats";
 import { resolveItemRow } from "@/lib/utils/items/resolve";
 import { DEFAULT_RULES, type Ruleset } from "@/lib/utils/rules";
 
@@ -31,9 +32,7 @@ export const weaponCategoryOf = (modifiers: ArtifactModifier[], description: str
 
   if ((WEAPON_PROFICIENCY_KINDS as readonly string[]).includes(field as string)) return field as "simple" | "martial";
 
-  const m = /^\s*(simple|martial)\b/i.exec(description ?? "");
-
-  return m ? (m[1].toLowerCase() as "simple" | "martial") : undefined;
+  return weaponCategoryFromText(description);
 };
 
 export function extractAttacksFromCharacter(

@@ -6,6 +6,13 @@ import { parseWeaponTraits, WEAPON_TRAITS } from "@/lib/constants/weapon-traits"
 
 export { isWeaponSlot } from "@/lib/utils/artifacts/weapon-slot";
 
+/** Legacy rows carry the category only as the description prefix ("Martial Melee Weapon."). */
+export const weaponCategoryFromText = (text: string | null | undefined): "simple" | "martial" | undefined => {
+  const m = /^\s*(simple|martial)\b/i.exec(text ?? "");
+
+  return m ? (m[1].toLowerCase() as "simple" | "martial") : undefined;
+};
+
 export const WeaponStatsSchema = z.object({
   damageDice: z.string().trim().max(30).optional(),
   damageType: z.string().trim().max(30).optional(),
