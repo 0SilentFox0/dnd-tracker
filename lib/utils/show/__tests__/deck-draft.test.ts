@@ -72,3 +72,25 @@ describe("deckDraftReducer: saved", () => {
     expect(deckDraftReducer(current, { type: "saved", sent, saved: sent })).toBe(current);
   });
 });
+
+describe("puzzle-слайд", () => {
+  const spec = { cut: "classic" as const, count: 24, seed: 1, imageWidth: 800, imageHeight: 600 };
+
+  const pz = { ...s("a"), kind: "puzzle" as const, puzzle: spec };
+
+  it("update з puzzle змінює параметри, sameDraft їх помічає", () => {
+    const base: DeckDraft = { title: "Т", slides: [pz] };
+
+    const next = deckDraftReducer(base, { type: "update", id: "a", patch: { puzzle: { ...spec, seed: 2 } } });
+
+    expect(next.slides[0].puzzle?.seed).toBe(2);
+    expect(next.slides[0].kind).toBe("puzzle");
+    expect(sameDraft(base, next)).toBe(false);
+    expect(sameDraft(base, { title: "Т", slides: [{ ...pz, puzzle: { ...spec } }] })).toBe(true);
+  });
+
+  it("kind розрізняє слайди", () => {
+    expect(sameDraft({ title: "Т", slides: [s("a")] }, { title: "Т", slides: [pz] })).toBe(false);
+  });
+});
+

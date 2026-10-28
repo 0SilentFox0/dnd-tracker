@@ -4,6 +4,8 @@ export { useDeckEditor } from "./useDeckEditor";
 export { useDeck, useDeckMutations, useDecks, useDeckScene } from "./useDecks";
 export { useGenerateSlide } from "./useGenerateSlide";
 export { usePusherShowSync } from "./usePusherShowSync";
+export { type PuzzleControl, usePuzzleControl } from "./usePuzzleControl";
+export { type DragState, usePuzzleDrag } from "./usePuzzleDrag";
 export { useShowAudioHost } from "./useShowAudioHost";
 export { type ShowControl, useShowControl } from "./useShowControl";
 export { useShowKeys } from "./useShowKeys";

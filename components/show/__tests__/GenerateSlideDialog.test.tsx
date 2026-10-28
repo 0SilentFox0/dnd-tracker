@@ -37,7 +37,7 @@ afterEach(() => {
 
 describe("генерація слайда", () => {
   it("кнопка прихована без ключа провайдера з картинками (лише Anthropic)", () => {
-    const upload = { addFiles: vi.fn(), addUrl: vi.fn(), progress: null };
+    const upload = { addFiles: vi.fn(), addUrl: vi.fn(), addPuzzle: vi.fn(), progress: null };
 
     render(<AddSlidesBar campaignId="c1" upload={upload} count={0} />, { wrapper: wrap([{ ...openai[0], provider: "anthropic" }]) });
 
@@ -45,7 +45,7 @@ describe("генерація слайда", () => {
   });
 
   it("кнопка видима з ключем OpenAI", () => {
-    const upload = { addFiles: vi.fn(), addUrl: vi.fn(), progress: null };
+    const upload = { addFiles: vi.fn(), addUrl: vi.fn(), addPuzzle: vi.fn(), progress: null };
 
     render(<AddSlidesBar campaignId="c1" upload={upload} count={0} />, { wrapper: wrap(openai) });
 

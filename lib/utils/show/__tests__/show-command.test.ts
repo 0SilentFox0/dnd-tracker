@@ -385,3 +385,62 @@ describe("applyShowCommand world", () => {
     expect(ok(applyShowCommand(prev, { action: "curtain", on: true }, ctx)).world).toEqual({ mapId: "m1" });
   });
 });
+
+describe("пазл-слайд", () => {
+  const spec = { cut: "classic" as const, count: 6, seed: 2, imageWidth: 600, imageHeight: 400 };
+
+  const pz: Slide = { id: "slide-0009", imageUrl: img(9), kind: "puzzle", puzzle: spec };
+
+  const pdeck: ShowDeck = { id: "d1", title: "Таверна", slides: [s(1), pz, s(3)] };
+
+  const pctx = { ...ctx, deck: pdeck };
+
+  it("open пазл-слайда ініціалізує puzzle, next/prev з нього знімає", () => {
+    const opened = ok(applyShowCommand(null, { action: "open", deckId: "d1", slideId: "slide-0009" }, pctx));
+
+    expect(opened.puzzle?.solved).toBe(false);
+    expect(Object.keys(opened.puzzle!.pieces).length).toBeGreaterThan(0);
+    expect(ok(applyShowCommand(opened, { action: "next" }, pctx)).puzzle).toBeUndefined();
+    expect(ok(applyShowCommand(opened, { action: "end" }, pctx)).puzzle).toBeUndefined();
+  });
+
+  it("curtain і world не гублять puzzle", () => {
+    const opened = ok(applyShowCommand(null, { action: "open", deckId: "d1", slideId: "slide-0009" }, pctx));
+
+    expect(ok(applyShowCommand(opened, { action: "curtain", on: true }, pctx)).puzzle).toBe(opened.puzzle);
+  });
+
+  it("повторний open того ж пазл-слайда зберігає прогрес, але знімає curtain/world/battle", () => {
+    const opened = ok(applyShowCommand(null, { action: "open", deckId: "d1", slideId: "slide-0009" }, pctx));
+
+    const progressed = { ...opened, curtain: true as const, puzzle: { ...opened.puzzle!, solved: true } };
+
+    const again = ok(applyShowCommand(progressed, { action: "open", deckId: "d1", slideId: "slide-0009" }, pctx));
+
+    expect(again.puzzle).toBe(progressed.puzzle);
+    expect(again.curtain).toBeUndefined();
+  });
+
+  it("setCover відкидає kind і puzzle", () => {
+    const next = ok(applyShowCommand(null, { action: "setCover", deckId: "d1", slideId: "slide-0009" }, pctx));
+
+    expect(next.cover?.slide).toEqual({ id: "slide-0009", imageUrl: img(9) });
+  });
+
+  it("refreshShowSlide: зміна параметрів перевидає puzzle, незмінні — зберігають, не-пазл знімає", () => {
+    const opened = ok(applyShowCommand(null, { action: "open", deckId: "d1", slideId: "slide-0009" }, pctx));
+
+    const same = refreshShowSlide({ ...opened, puzzle: { ...opened.puzzle!, solved: true } }, { ...pdeck, title: "Нова" }, { before: pdeck.slides, now: 1 });
+
+    expect(same?.puzzle?.solved).toBe(true);
+
+    const changed = refreshShowSlide(opened, { ...pdeck, slides: [s(1), { ...pz, puzzle: { ...spec, seed: 99 } }, s(3)] }, { before: pdeck.slides, now: 1 });
+
+    expect(changed?.puzzle).toBeDefined();
+    expect(changed?.puzzle).not.toEqual(opened.puzzle);
+
+    const plain = refreshShowSlide(opened, { ...pdeck, slides: [s(1), { id: "slide-0009", imageUrl: img(9) }, s(3)] }, { before: pdeck.slides, now: 1 });
+
+    expect(plain?.puzzle).toBeUndefined();
+  });
+});

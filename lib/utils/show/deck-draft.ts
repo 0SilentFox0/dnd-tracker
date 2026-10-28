@@ -5,7 +5,7 @@ export interface DeckDraft {
   slides: Slide[];
 }
 
-type SlidePatch = Partial<Pick<Slide, "title" | "caption" | "trackId">>;
+type SlidePatch = Partial<Pick<Slide, "title" | "caption" | "trackId" | "puzzle">>;
 
 export type DeckDraftAction =
   | { type: "reset"; draft: DeckDraft }
@@ -18,7 +18,7 @@ export type DeckDraftAction =
 
 export const newSlideId = () => `slide-${crypto.randomUUID()}`;
 
-const sameSlide = (a: Slide, b: Slide) => a.id === b.id && a.imageUrl === b.imageUrl && a.title === b.title && a.caption === b.caption && a.trackId === b.trackId;
+const sameSlide = (a: Slide, b: Slide) => a.id === b.id && a.imageUrl === b.imageUrl && a.title === b.title && a.caption === b.caption && a.trackId === b.trackId && a.kind === b.kind && JSON.stringify(a.puzzle) === JSON.stringify(b.puzzle);
 
 export const sameDraft = (a: DeckDraft, b: DeckDraft) => a === b || (a.title === b.title && a.slides.length === b.slides.length && a.slides.every((s, i) => sameSlide(s, b.slides[i])));
 

@@ -1,7 +1,7 @@
 "use client";
 
 import { useRef, useState } from "react";
-import { ImagePlus, Sparkles } from "lucide-react";
+import { ImagePlus, Puzzle, Sparkles } from "lucide-react";
 
 import { GenerateSlideDialog } from "./GenerateSlideDialog";
 
@@ -20,6 +20,8 @@ export function AddSlidesBar({ campaignId, upload, count }: { campaignId: string
   const [generating, setGenerating] = useState(false);
 
   const fileInput = useRef<HTMLInputElement>(null);
+
+  const puzzleInput = useRef<HTMLInputElement>(null);
 
   const [url, setUrl] = useState("");
 
@@ -48,9 +50,26 @@ export function AddSlidesBar({ campaignId, upload, count }: { campaignId: string
             if (files.length) void upload.addFiles(files);
           }}
         />
+        <input
+          ref={puzzleInput}
+          type="file"
+          hidden
+          accept={SLIDE_FILE_ACCEPT}
+          onChange={(e) => {
+            const file = e.target.files?.[0];
+
+            e.target.value = "";
+
+            if (file) upload.addPuzzle(file).catch(() => void notify(`${file.name}: не вдалося додати пазл`));
+          }}
+        />
         <Button type="button" variant="outline" disabled={disabled} onClick={() => fileInput.current?.click()} className="flex items-center gap-2">
           <ImagePlus className="size-4" />
           Додати картинки
+        </Button>
+        <Button type="button" variant="outline" disabled={disabled} onClick={() => puzzleInput.current?.click()} className="flex items-center gap-2">
+          <Puzzle className="size-4" />
+          Додати пазл
         </Button>
         <Input aria-label="Посилання на картинку" placeholder="Посилання на картинку" value={url} disabled={disabled} onChange={(e) => setUrl(e.target.value)} className="sm:flex-1" />
         <Button

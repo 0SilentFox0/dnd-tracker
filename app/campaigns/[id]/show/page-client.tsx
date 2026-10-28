@@ -10,7 +10,7 @@ import { ShowStage } from "@/components/show/stage/ShowStage";
 import { useNotify } from "@/lib/hooks/common";
 import { usePusherShowSync, useShowAudioHost, useShowControl, useShowKeys, useShowState } from "@/lib/hooks/show";
 
-export function ShowPageClient({ campaignId, isDM }: { campaignId: string; isDM: boolean }) {
+export function ShowPageClient({ campaignId, isDM, userId }: { campaignId: string; isDM: boolean; userId: string }) {
   const notify = useNotify();
 
   usePusherShowSync(campaignId);
@@ -27,7 +27,7 @@ export function ShowPageClient({ campaignId, isDM }: { campaignId: string; isDM:
     <AudioPlayerProvider host={host}>
       <div className="flex min-h-[calc(100dvh-var(--app-header-h))] flex-col">
         <div className="relative min-h-[60dvh] flex-1">
-          <ShowStage show={show} campaignId={campaignId} isDM={isDM} />
+          <ShowStage show={show} campaignId={campaignId} isDM={isDM} userId={userId} />
           {show?.battle && <ShowBattleCall campaignId={campaignId} battle={show.battle} />}
           <div className="absolute right-3 top-3 z-20 flex gap-2">
             {!isDM && <DiceRoller />}

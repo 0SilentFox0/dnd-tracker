@@ -2,6 +2,7 @@
 
 import { type Dispatch, useState } from "react";
 
+import { PuzzlePreview } from "./PuzzlePreview";
 import { TrackPicker } from "./TrackPicker";
 
 import { OptimizedImage } from "@/components/common/OptimizedImage";
@@ -9,15 +10,22 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { ResponsiveDialog } from "@/components/ui/responsive-dialog";
 import { Textarea } from "@/components/ui/textarea";
-import { SLIDE_CAPTION_MAX, SLIDE_TITLE_MAX } from "@/lib/constants/show";
+import { PUZZLE_MAX_PIECES, PUZZLE_MIN_PIECES, SLIDE_CAPTION_MAX, SLIDE_TITLE_MAX } from "@/lib/constants/show";
+import { randomPuzzleSeed } from "@/lib/utils/puzzle/generate";
 import type { DeckDraftAction } from "@/lib/utils/show/deck-draft";
-import type { Slide } from "@/types/show";
+import type { PuzzleCut, Slide } from "@/types/show";
 
 interface SlideDialogProps {
   campaignId: string;
   slide: { slide: Slide; index: number } | null;
   actions: { dispatch: Dispatch<DeckDraftAction>; close(): void };
 }
+
+const CUTS: { cut: PuzzleCut; label: string }[] = [
+  { cut: "classic", label: "Класична" },
+  { cut: "organic", label: "Органічна" },
+  { cut: "straight", label: "Прямі зрізи" },
+];
 
 function SlideForm({ campaignId, slide, actions }: { campaignId: string; slide: Slide; actions: SlideDialogProps["actions"] }) {
   const [title, setTitle] = useState(slide.title ?? "");
@@ -26,16 +34,46 @@ function SlideForm({ campaignId, slide, actions }: { campaignId: string; slide: 
 
   const [trackId, setTrackId] = useState(slide.trackId);
 
+  const [puzzle, setPuzzle] = useState(slide.puzzle);
+
   const done = () => {
-    actions.dispatch({ type: "update", id: slide.id, patch: { title: title.trim(), caption: caption.trim(), trackId } });
+    actions.dispatch({ type: "update", id: slide.id, patch: { title: title.trim(), caption: caption.trim(), trackId, puzzle } });
     actions.close();
   };
 
   return (
     <div className="flex flex-col gap-3">
-      <div className="aspect-video w-full overflow-hidden rounded bg-black">
-        <OptimizedImage src={slide.imageUrl} alt="" width={640} height={360} className="size-full object-contain" />
-      </div>
+      {puzzle ? (
+        <>
+          <PuzzlePreview spec={puzzle} imageUrl={slide.imageUrl} />
+          <div className="flex flex-wrap items-center gap-2">
+            {CUTS.map(({ cut, label }) => (
+              <Button key={cut} type="button" size="sm" variant={puzzle.cut === cut ? "default" : "outline"} aria-pressed={puzzle.cut === cut} onClick={() => setPuzzle({ ...puzzle, cut })}>
+                {label}
+              </Button>
+            ))}
+            <Button type="button" size="sm" variant="outline" onClick={() => setPuzzle({ ...puzzle, seed: randomPuzzleSeed() })}>
+              Перемішати
+            </Button>
+          </div>
+          <label className="flex items-center gap-3 text-sm text-hud-bone">
+            Шматочків: {puzzle.count}
+            <input
+              type="range"
+              aria-label="Кількість шматочків"
+              min={PUZZLE_MIN_PIECES}
+              max={PUZZLE_MAX_PIECES}
+              value={puzzle.count}
+              onChange={(e) => setPuzzle({ ...puzzle, count: Number(e.target.value) })}
+              className="flex-1"
+            />
+          </label>
+        </>
+      ) : (
+        <div className="aspect-video w-full overflow-hidden rounded bg-black">
+          <OptimizedImage src={slide.imageUrl} alt="" width={640} height={360} className="size-full object-contain" />
+        </div>
+      )}
       <Input aria-label="Заголовок" placeholder="Заголовок" maxLength={SLIDE_TITLE_MAX} value={title} onChange={(e) => setTitle(e.target.value)} />
       <div>
         <Textarea aria-label="Підпис" placeholder="Підпис" maxLength={SLIDE_CAPTION_MAX} value={caption} onChange={(e) => setCaption(e.target.value)} />
