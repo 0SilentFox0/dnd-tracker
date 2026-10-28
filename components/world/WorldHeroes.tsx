@@ -1,33 +1,21 @@
-import { EntityIcon } from "@/components/common/EntityIcon";
-import { cn } from "@/lib/utils";
+import { HeroCluster } from "@/components/world/HeroCluster";
+import { clusterHeroes, HERO_CLUSTER_PX } from "@/lib/utils/world/hero-clusters";
 import type { WorldHero } from "@/types/world";
 
 interface WorldHeroesProps {
   heroes: WorldHero[];
   zoom: number;
+  box: { width: number; height: number };
   onHeroClick?(id: string): void;
 }
 
-export function WorldHeroes({ heroes, zoom, onHeroClick }: WorldHeroesProps) {
+export function WorldHeroes({ heroes, zoom, box, onHeroClick }: WorldHeroesProps) {
+  const clusters = clusterHeroes(heroes, (h) => ({ x: h.x * box.width * zoom, y: h.y * box.height * zoom }), HERO_CLUSTER_PX);
+
   return (
     <>
-      {heroes.map((h) => (
-        <button
-          key={h.id}
-          type="button"
-          aria-label={h.name}
-          data-own={h.own}
-          className={cn("atlas-hero absolute", h.own && "atlas-hero-own")}
-          style={{ left: `${h.x * 100}%`, top: `${h.y * 100}%`, transform: `translate(-50%, -50%) scale(${1 / zoom})`, touchAction: "none" }}
-          onPointerDown={(e) => e.stopPropagation()}
-          onPointerUp={(e) => {
-            e.stopPropagation();
-            onHeroClick?.(h.id);
-          }}
-          onDoubleClick={(e) => e.stopPropagation()}
-        >
-          <EntityIcon src={h.avatar} name={h.name} size={30} className="size-full rounded-full bg-transparent text-inherit" />
-        </button>
+      {clusters.map((c) => (
+        <HeroCluster key={c.key} cluster={c} zoom={zoom} onHeroClick={onHeroClick} />
       ))}
     </>
   );

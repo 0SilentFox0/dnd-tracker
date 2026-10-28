@@ -22,13 +22,16 @@ export async function readDmDashboard(campaignId: string): Promise<DmDashboardDa
 }
 
 export async function readPlayerDashboard(campaignId: string, userId: string): Promise<PlayerDashboardData> {
-  const hero = await prisma.character.findFirst({
+  const [hasWorld, hero] = await Promise.all([
+    prisma.worldMap.count({ where: { campaignId, parentMarkerId: null } }).then((n) => n > 0),
+    prisma.character.findFirst({
     where: { campaignId, controlledBy: userId, type: CharacterType.PLAYER },
     orderBy: { createdAt: "desc" },
     select: { id: true, name: true, level: true, race: true, class: true, avatar: true, armorClass: true, speed: true, status: true, reviewNote: true, seenLevel: true },
-  });
+    }),
+  ]);
 
-  if (!hero) return { hero: null, activeBattle: null };
+  if (!hero) return { hero: null, activeBattle: null, hasWorld };
 
   const participant = await prisma.battleParticipant.findFirst({
     where: { sourceId: hero.id, sourceType: ParticipantSourceType.CHARACTER, battle: { campaignId, status: BattleStatus.ACTIVE } },
@@ -38,6 +41,7 @@ export async function readPlayerDashboard(campaignId: string, userId: string): P
 
   return {
     hero,
+    hasWorld,
     activeBattle: participant ? { battleId: participant.battleId, hp: { current: participant.currentHp, max: participant.maxHp, temp: participant.tempHp } } : null,
   };
 }

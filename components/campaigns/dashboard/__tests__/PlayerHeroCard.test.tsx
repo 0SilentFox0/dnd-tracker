@@ -10,11 +10,11 @@ afterEach(cleanup);
 
 const hero: DashboardHero = { id: "h1", name: "Зехір", level: 3, race: "Ельф", class: "Маг", avatar: null, armorClass: 14, speed: 30, status: CharacterStatus.ACTIVE, reviewNote: null, seenLevel: 3 };
 
-const data = (over: Partial<DashboardHero> = {}, activeBattle: PlayerDashboardData["activeBattle"] = null): PlayerDashboardData => ({ hero: { ...hero, ...over }, activeBattle });
+const data = (over: Partial<DashboardHero> = {}, activeBattle: PlayerDashboardData["activeBattle"] = null): PlayerDashboardData => ({ hero: { ...hero, ...over }, activeBattle, hasWorld: false });
 
 describe("PlayerHeroCard", () => {
   it("offers creation when there is no hero", () => {
-    render(<PlayerHeroCard campaignId="c1" data={{ hero: null, activeBattle: null }} />);
+    render(<PlayerHeroCard campaignId="c1" data={{ hero: null, activeBattle: null, hasWorld: false }} />);
 
     expect(screen.getByRole("link", { name: "Створити персонажа" }).getAttribute("href")).toBe("/campaigns/c1/character");
   });

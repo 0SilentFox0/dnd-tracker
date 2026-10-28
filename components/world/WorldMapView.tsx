@@ -139,7 +139,7 @@ export function WorldMapView({ detail, selectedId, draft, tool = "select", handl
                 }}
               />
               </div>
-              {heroes?.length ? <WorldHeroes heroes={heroes} zoom={zoom} onHeroClick={handlers.onHeroClick} /> : null}
+              {heroes?.length ? <WorldHeroes heroes={heroes} zoom={zoom} box={box} onHeroClick={handlers.onHeroClick} /> : null}
               {overlay}
             </div>
             ) : null}

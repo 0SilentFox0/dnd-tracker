@@ -145,6 +145,23 @@
   box-shadow: 0 2px 5px rgba(0, 0, 0, 0.6);
 }
 
+.atlas-hero-cluster { overflow: visible; }
+
+.atlas-hero-badge {
+  position: absolute;
+  right: -6px;
+  bottom: -6px;
+  min-width: 18px;
+  padding: 0 4px;
+  border-radius: 9999px;
+  font-size: 11px;
+  line-height: 18px;
+  text-align: center;
+  color: var(--atlas-paper);
+  background: var(--atlas-ink);
+  border: 1.5px solid var(--atlas-paper);
+}
+
 .atlas-hero-own {
   box-shadow: 0 0 0 2px var(--color-hud-gold-bright, #ffe08a), 0 0 0 4px var(--atlas-ink), 0 0 12px 3px rgba(255, 224, 138, 0.7);
 }
