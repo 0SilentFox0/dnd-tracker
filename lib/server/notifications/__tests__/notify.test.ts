@@ -7,7 +7,7 @@ const db = vi.hoisted(() => ({
   campaignMember: { findMany: vi.fn() },
 }));
 
-const trigger = vi.hoisted(() => vi.fn(async () => undefined));
+const trigger = vi.hoisted(() => vi.fn(async (..._args: unknown[]) => undefined));
 
 const afterCallbacks = vi.hoisted(() => [] as Array<() => unknown>);
 
