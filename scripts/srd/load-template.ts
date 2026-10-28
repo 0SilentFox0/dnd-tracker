@@ -2,10 +2,11 @@
 // pnpm constructor:srd-template [--owner <userId>] [--allow-remote]
 import type { Prisma } from "@prisma/client";
 
+import { readIcons } from "../assets/tokens-5e/icons-file";
 import { assertSeedTarget } from "../seed/seed-library-lib";
 import { SRD_CREDITS } from "./lib/credits";
 import { readSrdData } from "./lib/data-files";
-import { ensureSrdTemplate, formatImportSummary, hasRowErrors, importSrdData, resolveSchoolRefs, SRD_TEMPLATE_DESCRIPTION, SRD_TEMPLATE_NAME, staleSpellColumns, type TemplateStore } from "./lib/load-template";
+import { ensureSrdTemplate, formatImportSummary, hasRowErrors, importSrdData, resolveSchoolRefs, SRD_TEMPLATE_DESCRIPTION, SRD_TEMPLATE_NAME, staleSpellColumns, type TemplateStore, withIcons } from "./lib/load-template";
 import { SRD_RULES } from "./lib/rules-preset";
 
 import { REFERENCE_REVALIDATE_SECONDS } from "@/lib/cache/reference-data";
@@ -46,12 +47,14 @@ async function main() {
 
   const data = readSrdData();
 
+  const icons = readIcons();
+
   const schoolIds = async () => new Map((await prisma.spellGroup.findMany({ where: { campaignId: template.id }, select: { id: true, name: true } })).map((g) => [g.name, g.id]));
 
   const results = await importSrdData(
     data,
     (kind, rows) => importContent(actor, kind, { rows, mode: "update", dryRun: false }, OFFLINE_IMPORT_DEPS),
-    async (kind, rows) => (kind === "spell-groups" ? rows : resolveSchoolRefs(rows, await schoolIds())),
+    async (kind, rows) => (kind === "spell-groups" ? rows : withIcons(kind, data, resolveSchoolRefs(rows, await schoolIds()), icons)),
   );
 
   for (const { column, names } of staleSpellColumns(data.spells)) await prisma.spell.updateMany({ where: { campaignId: template.id, name: { in: names } }, data: { [column]: null } });
