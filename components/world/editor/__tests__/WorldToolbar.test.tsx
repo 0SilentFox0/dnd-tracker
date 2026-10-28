@@ -1,4 +1,5 @@
 // @vitest-environment happy-dom
+import type { ReactNode } from "react";
 import { cleanup, fireEvent, render, screen } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
@@ -20,10 +21,12 @@ const ctx = (parentMapId: string | null) =>
 
 const drawing = (over: Partial<ReturnType<typeof useMapDrawing>> = {}) => ({ tool: "select", setTool: vi.fn(), draft: [], finish: vi.fn(), undoVertex: vi.fn(), ...over }) as unknown as ReturnType<typeof useMapDrawing>;
 
-const renderBar = (d: ReturnType<typeof useMapDrawing>, parentMapId: string | null = null, onSettings?: () => void) =>
+const renderBar = (d: ReturnType<typeof useMapDrawing>, parentMapId: string | null = null, onSettings?: () => void, extra?: ReactNode) =>
   render(
     <WorldEditorContext.Provider value={ctx(parentMapId)}>
-      <WorldToolbar drawing={d} onSettings={onSettings} />
+      <WorldToolbar drawing={d} onSettings={onSettings}>
+        {extra}
+      </WorldToolbar>
     </WorldEditorContext.Provider>,
   );
 
@@ -60,9 +63,15 @@ describe("WorldToolbar", () => {
     const onSettings = vi.fn();
 
     renderBar(drawing(), null, onSettings);
-    fireEvent.click(screen.getByRole("button", { name: "Налаштування" }));
+    fireEvent.click(screen.getByRole("button", { name: "Налаштування карти" }));
 
     expect(onSettings).toHaveBeenCalled();
+  });
+
+  it("renders extra slot content", () => {
+    renderBar(drawing(), null, undefined, <button type="button">Відпочинок</button>);
+
+    expect(screen.getByRole("button", { name: "Відпочинок" })).toBeTruthy();
   });
 });
 

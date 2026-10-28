@@ -1,5 +1,6 @@
 "use client";
 
+import type { ReactNode } from "react";
 import { Check, CornerLeftUp, LogIn, type LucideIcon, MapPin, MousePointer2, Pentagon, Settings2, Undo2 } from "lucide-react";
 
 import { useWorldEditorContext } from "./WorldEditorContext";
@@ -33,7 +34,7 @@ function ToolButton({ label, hotkey, Icon, active, disabled, onClick }: { label:
   );
 }
 
-export function WorldToolbar({ drawing, onSettings }: { drawing: ReturnType<typeof useMapDrawing>; onSettings?(): void }) {
+export function WorldToolbar({ drawing, onSettings, children }: { drawing: ReturnType<typeof useMapDrawing>; onSettings?(): void; children?: ReactNode }) {
   const { detail, maps, openMap } = useWorldEditorContext();
 
   const { tool, setTool, draft, finish, undoVertex } = drawing;
@@ -42,7 +43,7 @@ export function WorldToolbar({ drawing, onSettings }: { drawing: ReturnType<type
 
   return (
     <TooltipProvider delayDuration={300}>
-      <div role="group" aria-label="Інструменти" className="hud-scroll-x flex max-w-full items-center gap-1 overflow-x-auto rounded-md border border-hud-rule bg-black/75 p-1">
+      <div role="group" aria-label="Інструменти" className="hud-scroll-x flex w-full items-center gap-1 overflow-x-auto rounded-md border border-hud-rule bg-black/75 p-1">
         {TOOLS.map(({ key, label, hotkey, Icon }) => (
           <ToolButton key={key} label={label} hotkey={hotkey} Icon={Icon} active={tool === key} onClick={() => setTool(key)} />
         ))}
@@ -62,7 +63,8 @@ export function WorldToolbar({ drawing, onSettings }: { drawing: ReturnType<type
             </button>
           </>
         ) : null}
-        {onSettings ? <ToolButton label="Налаштування" Icon={Settings2} onClick={onSettings} /> : null}
+        {onSettings ? <ToolButton label="Налаштування карти" Icon={Settings2} onClick={onSettings} /> : null}
+        {children ? <div className="ml-auto flex shrink-0 items-center gap-1 pl-2">{children}</div> : null}
       </div>
     </TooltipProvider>
   );

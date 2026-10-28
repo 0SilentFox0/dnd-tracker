@@ -5,7 +5,7 @@ import { usePathname, useRouter } from "next/navigation";
 import { Map as MapIcon } from "lucide-react";
 
 import { EmptyState, QueryState } from "@/components/common/states";
-import { HudPage, HudPageHeader, HudPanel } from "@/components/hud/page";
+import { HudPage, HudPageHeader } from "@/components/hud/page";
 import { Button } from "@/components/ui/button";
 import { ResponsiveDialog } from "@/components/ui/responsive-dialog";
 import { NewWorldMapDialog } from "@/components/world/editor/NewWorldMapDialog";
@@ -13,6 +13,7 @@ import { WorldBreadcrumbs } from "@/components/world/editor/WorldBreadcrumbs";
 import { WorldEditorContext, type WorldEditorCtx } from "@/components/world/editor/WorldEditorContext";
 import { WorldMapSettings } from "@/components/world/editor/WorldMapSettings";
 import { WorldMarkerPanel } from "@/components/world/editor/WorldMarkerPanel";
+import { WorldSidePanel } from "@/components/world/editor/WorldSidePanel";
 import { WorldToolbar, WorldToolHint } from "@/components/world/editor/WorldToolbar";
 import { CompassRose } from "@/components/world/marker-icons";
 import { WorldMapView } from "@/components/world/WorldMapView";
@@ -24,7 +25,7 @@ import type { CreateWorldMarkerData, MapPoint, Polygon } from "@/types/world";
 
 const ENTRY_COMPASS = { width: "3.2%", aspectRatio: "1", transform: "translate(-50%, -50%)" } as const;
 
-const MAP_HEIGHT = "h-[calc(100dvh-var(--app-header-h,89px)-5.5rem)] lg:h-[calc(100dvh-var(--app-header-h,89px)-8.5rem)]";
+const MAP_HEIGHT = "h-[calc(100dvh-var(--app-header-h,89px)-9rem)] lg:h-[calc(100dvh-var(--app-header-h,89px)-12rem)]";
 
 export function WorldEditorPageClient({ campaignId, campaignName, mapId }: { campaignId: string; campaignName: string; mapId: string | null }) {
   const router = useRouter();
@@ -78,6 +79,11 @@ export function WorldEditorPageClient({ campaignId, campaignName, mapId }: { cam
   });
 
   const { tool, setTool } = drawing;
+
+  const closePanel = useCallback(() => {
+    select(null);
+    setSettingsOpen(false);
+  }, []);
 
   const redraw = useCallback(
     (id: string | null) => {
@@ -137,37 +143,38 @@ export function WorldEditorPageClient({ campaignId, campaignName, mapId }: { cam
                         actions={<span className="hidden text-sm text-hud-muted md:inline">{campaignName}</span>}
                         className="max-md:p-2 max-md:[&_h1]:sr-only"
                       />
-                      <div className="grid gap-3 lg:grid-cols-[1fr_20rem]">
-                        <div className={MAP_HEIGHT}>
-                          <WorldMapView
-                            key={d.map.id}
-                            detail={d}
-                            selectedId={selectedId}
-                            draft={drawing.draft}
-                            tool={tool}
-                            compact={!isDesktop}
-                            toolbar={<WorldToolbar drawing={drawing} onSettings={isDesktop ? undefined : () => setSettingsOpen(true)} />}
-                            hint={<WorldToolHint tool={tool} vertices={drawing.draft.length} />}
-                            handlers={{
-                              ...drawing.handlers,
-                              onMapClick: (p) => (tool === "select" ? select(null) : drawing.handlers.onMapClick(p)),
-                              onMarkerClick: (id) => (tool === "select" ? select(id) : undefined),
-                              onMarkerDrag: tool === "select" || tool === "point" ? (id, p) => void editor.marker.update.mutateOk({ id, data: { x: p.x, y: p.y } }) : undefined,
-                            }}
-                            overlay={<CompassRose className="atlas-compass pointer-events-none absolute" style={{ ...ENTRY_COMPASS, left: `${d.map.entryX * 100}%`, top: `${d.map.entryY * 100}%` }} />}
-                          />
-                        </div>
-                        {isDesktop ? <HudPanel className={`${MAP_HEIGHT} overflow-y-auto`}>{panel}</HudPanel> : null}
+                      <div className="mb-2">
+                        <WorldToolbar drawing={drawing} onSettings={() => setSettingsOpen(true)} />
+                      </div>
+                      <div className={`relative ${MAP_HEIGHT}`}>
+                        <WorldMapView
+                          key={d.map.id}
+                          detail={d}
+                          selectedId={selectedId}
+                          draft={drawing.draft}
+                          tool={tool}
+                          compact={!isDesktop}
+                          hint={<WorldToolHint tool={tool} vertices={drawing.draft.length} />}
+                          handlers={{
+                            ...drawing.handlers,
+                            onMapClick: (p) => (tool === "select" ? select(null) : drawing.handlers.onMapClick(p)),
+                            onMarkerClick: (id) => (tool === "select" ? select(id) : undefined),
+                            onMarkerDrag: tool === "select" || tool === "point" ? (id, p) => void editor.marker.update.mutateOk({ id, data: { x: p.x, y: p.y } }) : undefined,
+                          }}
+                          overlay={<CompassRose className="atlas-compass pointer-events-none absolute" style={{ ...ENTRY_COMPASS, left: `${d.map.entryX * 100}%`, top: `${d.map.entryY * 100}%` }} />}
+                        />
+                        {isDesktop ? (
+                          <WorldSidePanel open={tool === "select" && (!!marker || settingsOpen)} onClose={closePanel}>
+                            {panel}
+                          </WorldSidePanel>
+                        ) : null}
                       </div>
                       {isDesktop ? null : (
                         <ResponsiveDialog
                           hud
                           open={sheetOpen}
                           onOpenChange={(open) => {
-                            if (open) return;
-
-                            select(null);
-                            setSettingsOpen(false);
+                            if (!open) closePanel();
                           }}
                           title={marker?.name ?? d.map.name}
                           description={marker ? "Параметри маркера" : "Параметри карти"}
