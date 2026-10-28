@@ -27,7 +27,7 @@ export function ShowPageClient({ campaignId, isDM }: { campaignId: string; isDM:
     <AudioPlayerProvider host={host}>
       <div className="flex min-h-[calc(100dvh-var(--app-header-h))] flex-col">
         <div className="relative min-h-[60dvh] flex-1">
-          <ShowStage show={show} />
+          <ShowStage show={show} campaignId={campaignId} isDM={isDM} />
           {show?.battle && <ShowBattleCall campaignId={campaignId} battle={show.battle} />}
           <div className="absolute right-3 top-3 z-20 flex gap-2">
             {!isDM && <DiceRoller />}

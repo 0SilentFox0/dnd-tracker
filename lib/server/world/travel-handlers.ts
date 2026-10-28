@@ -6,6 +6,7 @@ import { prisma } from "@/lib/db";
 import { enterSchema, exitSchema, travelSchema } from "@/lib/schemas/world";
 import { ownedMap, ownedMarker } from "@/lib/server/world/map-handlers";
 import { activePlayerHeroes, commitTravel, readPositions, readTravelLog, toDmHeroes } from "@/lib/server/world/travel-store";
+import { publishWorldChanged } from "@/lib/server/world/world-events";
 import { requireCampaignAccess } from "@/lib/utils/api/api-auth";
 import { errorResponse } from "@/lib/utils/api/api-response";
 import { withDM } from "@/lib/utils/api/as-dm";
@@ -50,7 +51,9 @@ export function travelHandler(req: Request, campaignId: string) {
 
     const plan = planTravel({ positions, characterIds: body.characterIds, mapId: map.id, to: body.to, radius: map.revealRadius, aspect: map.width / map.height });
 
-    await commitTravel({ campaignId, userId: access.userId, dest: map, plan, positions, rest: body.rest, toMarkerId: marker?.id ?? null });
+    await commitTravel({ campaignId, userId: access.userId, dest: map, plan, positions, rest: body.rest, toMarkerId: marker?.id ?? null, kind: "travel" });
+
+    publishWorldChanged(campaignId, map.id);
 
     return respond(heroes, plan, map.id);
   });
@@ -78,7 +81,9 @@ export function enterHandler(req: Request, campaignId: string) {
 
     const plan = planEnter({ marker, childMap: child, characterIds: body.characterIds });
 
-    await commitTravel({ campaignId, userId: access.userId, dest: child, plan, positions, rest: body.rest, toMarkerId: null });
+    await commitTravel({ campaignId, userId: access.userId, dest: child, plan, positions, rest: body.rest, toMarkerId: null, kind: "enter" });
+
+    publishWorldChanged(campaignId, child.id);
 
     return respond(heroes, plan, child.id);
   });
@@ -112,7 +117,9 @@ export function exitHandler(req: Request, campaignId: string) {
 
     const plan = planExit({ map: { id: map.id, parentMarker }, characterIds: body.characterIds });
 
-    await commitTravel({ campaignId, userId: access.userId, dest, plan, positions, rest: body.rest, toMarkerId: parentMarker.id });
+    await commitTravel({ campaignId, userId: access.userId, dest, plan, positions, rest: body.rest, toMarkerId: parentMarker.id, kind: "exit" });
+
+    publishWorldChanged(campaignId, dest.id);
 
     return respond(heroes, plan, dest.id);
   });

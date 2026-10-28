@@ -1,6 +1,6 @@
 "use client";
 
-import { RowPlayControls } from "./play/RowPlayControls";
+import { MarkerPlay, RowPlayControls } from "./play/RowPlayControls";
 import { ScenarioLegend } from "./ScenarioLegend";
 import { ScenarioRichText } from "./ScenarioRichText";
 import { SectionIcon } from "./SectionIcon";
@@ -58,6 +58,11 @@ export function ScenarioPageView({ page, campaignId, progress, play, collapse }:
                 </div>
                 <h2>{s.title}</h2>
                 {!collapsed && playedButton}
+                {play && s.marker && !collapsed && (
+                  <div className="sb-play sans">
+                    <MarkerPlay campaignId={campaignId} marker={s.marker} play={play} />
+                  </div>
+                )}
               </div>
               <div className="sb-rows" hidden={collapsed}>
                 {s.rows.map((r) => {

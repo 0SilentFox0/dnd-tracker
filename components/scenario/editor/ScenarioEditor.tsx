@@ -17,7 +17,7 @@ import { ScenarioLegend } from "@/components/scenario/ScenarioLegend";
 import { ScenarioToc, type TocControl, tocItems } from "@/components/scenario/ScenarioToc";
 import { useConfirm, useCssVarHeight } from "@/lib/hooks/common";
 import { useMentionSearch, useScenarioDraft, useScenarioPage } from "@/lib/hooks/scenario";
-import { addRow, addSection, moveRow, moveSection, removeRow, removeSection, setRowBattle, setRowSlide, updateRow, updateSection } from "@/lib/utils/scenario/structure";
+import { addRow, addSection, moveRow, moveSection, removeRow, removeSection, setRowBattle, setRowMarker, setRowSlide, setSectionMarker, updateRow, updateSection } from "@/lib/utils/scenario/structure";
 import type { RevealRule, RichDoc, ScenarioPage } from "@/types/scenario";
 
 type ActiveCell = { rowId: string; column: CellColumn } | null;
@@ -96,10 +96,12 @@ export function ScenarioEditor({ campaignId, page, onExit, toolbarActions, onDra
           {draft.content.sections.map((s) => (
             <section key={s.id} id={`sec-${s.id}`}>
               <SectionHeaderEditor
+                campaignId={campaignId}
                 section={s}
                 actions={{
                   onTitle: (title) => draft.setContent((c) => updateSection(c, s.id, { title })),
                   onIcon: (icon) => draft.setContent((c) => updateSection(c, s.id, { icon })),
+                  onMarker: (marker) => draft.setContent((c) => setSectionMarker(c, s.id, marker)),
                   onMove: (dir) => draft.setContent((c) => moveSection(c, s.id, dir)),
                   onRemove: () => void removeWithConfirm(`розділ «${s.title}»`, () => draft.setContent((c) => removeSection(c, s.id))),
                 }}
@@ -124,7 +126,10 @@ export function ScenarioEditor({ campaignId, page, onExit, toolbarActions, onDra
                         campaignId={campaignId}
                         pageId={page.id}
                         row={r}
-                        onChange={{ slide: (v) => draft.setContent((c) => setRowSlide(c, s.id, r.id, v)), battle: (v) => draft.setContent((c) => setRowBattle(c, s.id, r.id, v)) }}
+                        onChange={{
+                          slide: (v) => draft.setContent((c) => setRowSlide(c, s.id, r.id, v)), battle: (v) => draft.setContent((c) => setRowBattle(c, s.id, r.id, v)),
+                          marker: (v) => draft.setContent((c) => setRowMarker(c, s.id, r.id, v)),
+                        }}
                       />
                       <div className="sb-row-order">
                         <OrderButtons

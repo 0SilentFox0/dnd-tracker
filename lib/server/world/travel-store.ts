@@ -2,7 +2,7 @@ import { CharacterStatus, CharacterType } from "@/lib/constants/characters";
 import { prisma } from "@/lib/db";
 import { listWorldMaps } from "@/lib/server/world/map-store";
 import { dedupePoint, type HeroPos, type TravelPlan } from "@/lib/utils/world/travel";
-import type { RevealShape, TravelRest, WorldHero, WorldTravelEntry } from "@/types/world";
+import { type RevealShape, TRAVEL_KINDS, type TravelKind, type TravelRest, type WorldHero, type WorldTravelEntry } from "@/types/world";
 
 type HeroRow = { id: string; name: string; avatar: string | null };
 
@@ -44,6 +44,7 @@ export async function commitTravel(args: {
   positions: Map<string, HeroPos>;
   rest: TravelRest;
   toMarkerId: string | null;
+  kind: TravelKind;
 }): Promise<void> {
   const { campaignId, dest, plan } = args;
 
@@ -77,6 +78,7 @@ export async function commitTravel(args: {
         to: { mapId: dest.id, x: first.to.x, y: first.to.y },
         toMarkerId: args.toMarkerId,
         rest: args.rest,
+        kind: args.kind,
         byUserId: args.userId,
       },
     }),
@@ -119,6 +121,7 @@ export async function readTravelLog(campaignId: string, limit: number, heroIds?:
     to: r.to as WorldTravelEntry["to"],
     toMarkerName: r.toMarkerId ? (markerNames.get(r.toMarkerId) ?? null) : null,
     rest: r.rest as TravelRest,
+    kind: (TRAVEL_KINDS as readonly string[]).includes(r.kind) ? (r.kind as TravelKind) : "travel",
     createdAt: r.createdAt.toISOString(),
   }));
 }

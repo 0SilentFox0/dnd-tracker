@@ -27,24 +27,24 @@ export function useNotesPanel({ campaignId, mapId, markerId, notes, heroes, isDM
 
   const [tab, setTab] = useState<NotesTab>("public");
 
+  const activeTab: NotesTab = isDM ? "public" : tab;
+
   const [text, setText] = useState("");
 
   const [characterId, setCharacterId] = useState("");
 
   const [editing, setEditing] = useState<{ id: string; text: string } | null>(null);
 
-  const visibility: NotesTab = isDM ? "public" : tab;
+    const shown = notes.filter((n) => n.markerId === markerId && n.visibility === activeTab && (activeTab === "public" || n.mine));
 
-  const shown = notes.filter((n) => n.markerId === markerId && n.visibility === visibility && (visibility === "public" || n.mine));
-
-  const canSubmit = !isDM && text.trim().length > 0 && text.length <= WORLD_NOTE_MAX && !create.isPending;
+  const canSubmit = text.trim().length > 0 && text.length <= WORLD_NOTE_MAX && !create.isPending;
 
   const submit = async () => {
     if (!canSubmit) return;
 
-    const author = characterId || heroes[0]?.id;
+    const author = isDM ? undefined : characterId || heroes[0]?.id;
 
-    if (await create.mutateOk({ markerId, text: text.trim(), visibility, ...(author ? { characterId: author } : {}) })) setText("");
+    if (await create.mutateOk({ markerId, text: text.trim(), visibility: activeTab, ...(author ? { characterId: author } : {}) })) setText("");
   };
 
   const saveEdit = async () => {
@@ -58,7 +58,7 @@ export function useNotesPanel({ campaignId, mapId, markerId, notes, heroes, isDM
   };
 
   return {
-    tab,
+    tab: activeTab,
     setTab,
     shown,
     text,

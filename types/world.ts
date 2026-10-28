@@ -40,6 +40,7 @@ export interface WorldMapDetail {
   map: WorldMap;
   markers: WorldMarker[];
   heroes?: WorldHero[];
+  notes?: WorldNote[];
 }
 
 export type CreateWorldMapData = { name: string; imageUrl: string; width: number; height: number; parentMarkerId?: string };
@@ -64,6 +65,9 @@ export type WorldUploadRequest = { size: number; contentType: "image/webp" | "im
 export type RevealShape = { t: "p"; x: number; y: number } | { t: "s"; x1: number; y1: number; x2: number; y2: number };
 export type TravelRest = "none" | "short" | "long";
 
+export const TRAVEL_KINDS = ["travel", "enter", "exit"] as const;
+export type TravelKind = (typeof TRAVEL_KINDS)[number];
+
 export interface WorldHero {
   id: string;
   name: string;
@@ -85,6 +89,13 @@ export interface WorldNote {
   mine: boolean;
   createdAt: string;
   updatedAt: string;
+}
+
+/** Pusher `world-changed`: без назв, координат і нотаток. */
+export interface WorldChangedEvent {
+  campaignId: string;
+  mapId: string | null;
+  seq: number;
 }
 
 export interface WorldView {
@@ -113,6 +124,7 @@ export interface WorldTravelEntry {
   to: { mapId: string; x: number; y: number };
   toMarkerName: string | null;
   rest: TravelRest;
+  kind: TravelKind;
   createdAt: string;
 }
 

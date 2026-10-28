@@ -1100,6 +1100,7 @@ model WorldTravelLog {
   to           Json
   toMarkerId   String?
   rest         String       @default("none")
+  kind         String       @default("travel")
   byUserId     String?
   createdAt    DateTime     @default(now())
   campaign     Campaign     @relation(fields: [campaignId], references: [id], onDelete: Cascade)

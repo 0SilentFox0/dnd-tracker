@@ -5,6 +5,7 @@ const db = vi.hoisted(() => ({
   scenarioPage: { findMany: vi.fn() },
   battleScene: { findMany: vi.fn() },
   battleParticipant: { findFirst: vi.fn() },
+  worldMap: { count: vi.fn() },
 }));
 
 vi.mock("@/lib/db", () => ({ prisma: db }));
@@ -59,10 +60,12 @@ describe("readDmDashboard", () => {
 });
 
 describe("readPlayerDashboard", () => {
+  beforeEach(() => db.worldMap.count.mockResolvedValue(0));
+
   it("без героя — порожній результат без запиту учасника", async () => {
     db.character.findFirst.mockResolvedValue(null);
 
-    expect(await readPlayerDashboard("c1", "u1")).toEqual({ hero: null, activeBattle: null });
+    expect(await readPlayerDashboard("c1", "u1")).toEqual({ hero: null, activeBattle: null, hasWorld: false });
     expect(db.battleParticipant.findFirst).not.toHaveBeenCalled();
   });
 
@@ -70,7 +73,15 @@ describe("readPlayerDashboard", () => {
     db.character.findFirst.mockResolvedValue({ id: "h1" });
     db.battleParticipant.findFirst.mockResolvedValue(null);
 
-    expect(await readPlayerDashboard("c1", "u1")).toEqual({ hero: { id: "h1" }, activeBattle: null });
+    expect(await readPlayerDashboard("c1", "u1")).toEqual({ hero: { id: "h1" }, activeBattle: null, hasWorld: false });
+  });
+
+  it("hasWorld — є коренева карта, також для гравця без героя", async () => {
+    db.worldMap.count.mockResolvedValue(2);
+    db.character.findFirst.mockResolvedValue(null);
+
+    expect((await readPlayerDashboard("c1", "u1")).hasWorld).toBe(true);
+    expect(db.worldMap.count).toHaveBeenCalledWith({ where: { campaignId: "c1", parentMarkerId: null } });
   });
 
   it("герой у бою — hp з tempHp, where з кампанією й active", async () => {

@@ -15,6 +15,7 @@ vi.mock("@/lib/db", () => ({
     character: { findMany: vi.fn(async () => [{ id: "c1", name: "Біара" }]) },
     spell: { findMany: vi.fn(async () => []) },
     battleScene: { findMany: vi.fn(async () => []) },
+    worldMarker: { findMany: vi.fn(async () => [{ id: "m1", name: "Біла вежа" }]) },
   },
 }));
 
@@ -118,7 +119,8 @@ describe("scenario aux API", () => {
 
     const options = await (await GET(req("GET", undefined, "http://x?q=бі"), params())).json();
 
-    expect(options).toEqual([{ type: "unit", id: "u1", label: "Біс" }, { type: "character", id: "c1", label: "Біара" }]);
+    expect(options).toEqual([{ type: "unit", id: "u1", label: "Біс" }, { type: "character", id: "c1", label: "Біара" }, { type: "marker", id: "m1", label: "Біла вежа" }]);
+    expect(vi.mocked(prisma.worldMarker.findMany).mock.calls[0][0]?.where).toEqual({ map: { campaignId: "camp1" }, name: { contains: "бі", mode: "insensitive" } });
     expect(vi.mocked(prisma.unit.findMany).mock.calls[0][0]?.where).toEqual({ campaignId: "camp1", name: { contains: "бі", mode: "insensitive" } });
   });
 });

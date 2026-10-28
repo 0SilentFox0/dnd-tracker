@@ -20,6 +20,14 @@ export async function applyAndWriteShowCommand(campaignId: string, prev: ShowSta
 
   if (cmd.action === "battle" && !battle) throw new ContentError(API_ERRORS.NOT_FOUND, 404);
 
+  if (cmd.action === "world") {
+    const map = await prisma.worldMap.findFirst({ where: { id: cmd.mapId, campaignId }, select: { id: true } });
+
+    if (!map) throw new ContentError(API_ERRORS.WORLD_MAP_NOT_FOUND, 404);
+
+    if (cmd.focusMarkerId && !(await prisma.worldMarker.findFirst({ where: { id: cmd.focusMarkerId, mapId: cmd.mapId }, select: { id: true } }))) throw new ContentError(API_ERRORS.WORLD_MARKER_NOT_FOUND, 404);
+  }
+
   const library = showNeedsLibrary(prev, cmd, deck) ? await loadAudioLibrary(campaignId) : [];
 
   const result = applyShowCommand(prev, cmd, { now: Date.now(), deck, library, battle });

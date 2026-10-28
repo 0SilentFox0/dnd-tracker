@@ -5,31 +5,15 @@ import { prisma } from "@/lib/db";
 import { createWorldNoteSchema, updateWorldNoteSchema } from "@/lib/schemas/world";
 import { ownedMarker } from "@/lib/server/world/map-handlers";
 import { readWorldMapDetail } from "@/lib/server/world/map-store";
+import { noteInclude as include, toNote } from "@/lib/server/world/note-store";
 import { activePlayerHeroes } from "@/lib/server/world/travel-store";
 import { readViewerScope } from "@/lib/server/world/view-handlers";
+import { publishWorldChanged } from "@/lib/server/world/world-events";
 import { type CampaignAccessResult, requireCampaignAccess } from "@/lib/utils/api/api-auth";
 import { errorResponse } from "@/lib/utils/api/api-response";
 import { handleApiError } from "@/lib/utils/api/error-handler";
 import { parseBody } from "@/lib/utils/api/parse-body";
 import { visibleMarkerIds } from "@/lib/utils/world/player-view";
-import type { WorldNote } from "@/types/world";
-
-type NoteWithAuthor = { id: string; markerId: string; authorUserId: string; characterId: string | null; visibility: string; text: string; createdAt: Date; updatedAt: Date; author: { displayName: string } };
-
-const include = { author: { select: { displayName: true } } } as const;
-
-const toNote = (n: NoteWithAuthor, userId: string): WorldNote => ({
-  id: n.id,
-  markerId: n.markerId,
-  authorUserId: n.authorUserId,
-  authorName: n.author.displayName,
-  characterId: n.characterId,
-  visibility: n.visibility === "private" ? "private" : "public",
-  text: n.text,
-  mine: n.authorUserId === userId,
-  createdAt: n.createdAt.toISOString(),
-  updatedAt: n.updatedAt.toISOString(),
-});
 
 async function withAccess(campaignId: string, action: string, run: (access: CampaignAccessResult) => Promise<NextResponse>) {
   try {
@@ -81,12 +65,14 @@ export function createNoteHandler(req: Request, campaignId: string) {
 
     const created = await prisma.worldNote.create({ data: { markerId: marker.id, authorUserId: access.userId, characterId, visibility: body.visibility, text: body.text }, include });
 
+    if (created.visibility === "public") publishWorldChanged(campaignId, marker.mapId);
+
     return NextResponse.json(toNote(created, access.userId), { status: 201 });
   });
 }
 
 async function ownedNote(campaignId: string, noteId: string) {
-  const note = await prisma.worldNote.findUnique({ where: { id: noteId }, include: { ...include, marker: { select: { map: { select: { campaignId: true } } } } } });
+  const note = await prisma.worldNote.findUnique({ where: { id: noteId }, include: { ...include, marker: { select: { mapId: true, map: { select: { campaignId: true } } } } } });
 
   return note && note.marker.map.campaignId === campaignId ? note : errorResponse(API_ERRORS.WORLD_NOTE_NOT_FOUND, 404);
 }
@@ -107,6 +93,8 @@ export function updateNoteHandler(req: Request, campaignId: string, noteId: stri
 
     const updated = await prisma.worldNote.update({ where: { id: noteId }, data: body, include });
 
+    if (note.visibility === "public" || updated.visibility === "public") publishWorldChanged(campaignId, note.marker.mapId);
+
     return NextResponse.json(toNote(updated, access.userId));
   });
 }
@@ -124,6 +112,8 @@ export function deleteNoteHandler(campaignId: string, noteId: string) {
     }
 
     await prisma.worldNote.delete({ where: { id: noteId } });
+
+    if (note.visibility === "public") publishWorldChanged(campaignId, note.marker.mapId);
 
     return NextResponse.json({ ok: true });
   });

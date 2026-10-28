@@ -12,6 +12,7 @@ Details that used to live in `CLAUDE.md`. Read the file of the subsystem you are
 | [content-api.md](content-api.md) | Content API: resource/operation registry, service with access checks, REST factory, tokens, OpenAPI, MCP content tools |
 | [characters.md](characters.md) | Підсумок героя (stash, журнал), чернетки гравця, аватари, AI на ключі DM для гравців |
 | [ai.md](ai.md) | AI assistant: BYOK keys, tool registry (chat + MCP), proposals, context |
+| [world-map.md](world-map.md) | Карта світу: вкладені карти, туман у кожного гравця, подорожі, показ гравцям, прив'язки сценарію |
 | [landing-auth.md](landing-auth.md) | Static landing (`/`), SEO, Google + email/password auth flows |
 | [onboarding.md](onboarding.md) | First-steps checklists, hints, what's new, /help; progress derived from facts |
 

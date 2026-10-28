@@ -145,9 +145,51 @@
   box-shadow: 0 2px 5px rgba(0, 0, 0, 0.6);
 }
 
+.atlas-hero-cluster { overflow: visible; }
+
+.atlas-hero-badge {
+  position: absolute;
+  right: -6px;
+  bottom: -6px;
+  min-width: 18px;
+  padding: 0 4px;
+  border-radius: 9999px;
+  font-size: 11px;
+  line-height: 18px;
+  text-align: center;
+  color: var(--atlas-paper);
+  background: var(--atlas-ink);
+  border: 1.5px solid var(--atlas-paper);
+}
+
 .atlas-hero-own {
   box-shadow: 0 0 0 2px var(--color-hud-gold-bright, #ffe08a), 0 0 0 4px var(--atlas-ink), 0 0 12px 3px rgba(255, 224, 138, 0.7);
 }
 
 .atlas-top-layer { pointer-events: none; }
 .atlas-top-layer .atlas-pin, .atlas-top-layer .atlas-hero { pointer-events: auto; }
+
+.atlas-dive-scene { position: absolute; inset: 0; }
+
+.atlas-dive {
+  transform-origin: var(--dive-x, 50%) var(--dive-y, 50%);
+  transform: scale(4);
+  transition: transform 600ms ease-in;
+}
+.atlas-dive::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: #000;
+  opacity: 1;
+  animation: atlas-dive-dark 600ms ease-in both;
+}
+
+.atlas-reveal { animation: atlas-fade-in 300ms ease-out both; }
+
+@keyframes atlas-dive-dark { from { opacity: 0; } to { opacity: 1; } }
+@keyframes atlas-fade-in { from { opacity: 0; } to { opacity: 1; } }
+
+@media (prefers-reduced-motion: reduce) {
+  .atlas-dive, .atlas-dive::after, .atlas-reveal { animation: none; transition: none; transform: none; }
+}

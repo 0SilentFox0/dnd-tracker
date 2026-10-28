@@ -2,9 +2,11 @@ import { NextResponse } from "next/server";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import { prisma } from "@/lib/db";
+import { publishWorldChanged } from "@/lib/server/world/world-events";
 import * as apiAuth from "@/lib/utils/api/api-auth";
 
 vi.mock("server-only", () => ({}));
+vi.mock("@/lib/server/world/world-events", () => ({ publishWorldChanged: vi.fn() }));
 vi.mock("@/lib/utils/api/api-auth", () => ({ requireDM: vi.fn(), requireCampaignAccess: vi.fn() }));
 vi.mock("@/lib/supabase/world-map-storage", () => ({ ownedWorldMapPath: vi.fn(), removeWorldMapFiles: vi.fn(), createWorldMapUploadTicket: vi.fn() }));
 vi.mock("@/lib/db", () => ({
@@ -17,6 +19,7 @@ vi.mock("@/lib/db", () => ({
     worldReveal: { findMany: vi.fn(), createMany: vi.fn(async (a: unknown) => a) },
     worldTravelLog: { create: vi.fn(async (a: unknown) => a), findMany: vi.fn() },
     worldNote: { findMany: vi.fn() },
+    campaignShow: { findUnique: vi.fn() },
   },
 }));
 
@@ -118,9 +121,10 @@ describe("world travel API", () => {
       const res = await (await route("travel")).POST(post(body()), ctx());
 
       expect(res.status).toBe(200);
+      expect(publishWorldChanged).toHaveBeenCalledExactlyOnceWith("c1", "m1");
       expect((await res.json()).positions).toEqual([{ id: "h1", name: "Hero h1", avatar: null, mapId: "m1", x: 0.5, y: 0.5, own: true }]);
       expect(vi.mocked(prisma.worldReveal.createMany).mock.calls[0][0]?.data).toEqual([{ mapId: "m1", characterId: "h1", shape: { t: "p", x: 0.5, y: 0.5 } }]);
-      expect(vi.mocked(prisma.worldTravelLog.create).mock.calls[0][0]?.data).toMatchObject({ mapId: "m1", from: undefined, to: { mapId: "m1", x: 0.5, y: 0.5 }, byUserId: "dm", rest: "none" });
+      expect(vi.mocked(prisma.worldTravelLog.create).mock.calls[0][0]?.data).toMatchObject({ mapId: "m1", from: undefined, to: { mapId: "m1", x: 0.5, y: 0.5 }, byUserId: "dm", rest: "none", kind: "travel" });
     });
 
     it("другий візит на тій же карті — відрізок s, з поправкою from", async () => {
@@ -193,8 +197,9 @@ describe("world travel API", () => {
       const res = await (await route("enter")).POST(post({ markerId: "k1", characterIds: ["h1"], rest: "none" }), ctx());
 
       expect(res.status).toBe(200);
+      expect(publishWorldChanged).toHaveBeenCalledExactlyOnceWith("c1", "m2");
       expect(vi.mocked(prisma.worldPosition.upsert).mock.calls[0][0]?.update).toEqual({ mapId: "m2", x: 0.3, y: 0.4 });
-      expect(vi.mocked(prisma.worldTravelLog.create).mock.calls[0][0]?.data).toMatchObject({ mapId: "m2", from: { mapId: "m1", x: 0.1, y: 0.1 }, to: { mapId: "m2", x: 0.3, y: 0.4 } });
+      expect(vi.mocked(prisma.worldTravelLog.create).mock.calls[0][0]?.data).toMatchObject({ mapId: "m2", from: { mapId: "m1", x: 0.1, y: 0.1 }, to: { mapId: "m2", x: 0.3, y: 0.4 }, kind: "enter" });
     });
   });
 
@@ -217,7 +222,9 @@ describe("world travel API", () => {
       const res = await (await route("exit")).POST(post(body), ctx());
 
       expect(res.status).toBe(200);
+      expect(publishWorldChanged).toHaveBeenCalledExactlyOnceWith("c1", "m1");
       expect(vi.mocked(prisma.worldPosition.upsert).mock.calls[0][0]?.update).toEqual({ mapId: "m1", x: 0.1, y: 0.1 });
+      expect(vi.mocked(prisma.worldTravelLog.create).mock.calls[0][0]?.data).toMatchObject({ kind: "exit" });
     });
   });
 
@@ -242,6 +249,48 @@ describe("world travel API", () => {
       vi.mocked(prisma.character.findMany).mockResolvedValue([hero("h1")] as never);
 
       expect((await (await route("view")).GET(get("?mapId=foreign"), ctx())).status).toBe(404);
+    });
+
+    describe("показана карта", () => {
+      const m2 = () => mapRow({ id: "m2", name: "Підземелля", parentMarkerId: "k1", parentMarker: { mapId: "m1" } });
+
+      beforeEach(() => {
+        vi.mocked(prisma.character.findMany).mockResolvedValue([]);
+        vi.mocked(prisma.worldMap.findMany).mockResolvedValue([mapRow(), m2()] as never);
+        vi.mocked(prisma.worldMap.findUnique).mockResolvedValue({ ...m2(), markers: [markerRow({ id: "k5", mapId: "m2", alwaysVisible: true })] } as never);
+        vi.mocked(prisma.worldNote.findMany).mockResolvedValue([]);
+      });
+
+      it("невідома карта без показу — 404", async () => {
+        vi.mocked(prisma.campaignShow.findUnique).mockResolvedValue(null);
+
+        expect((await (await route("view")).GET(get("?mapId=m2"), ctx())).status).toBe(404);
+      });
+
+      it("показана карта — 200 з туманом, без героїв і dmNote", async () => {
+        vi.mocked(prisma.campaignShow.findUnique).mockResolvedValue({ world: { mapId: "m2" } } as never);
+
+        const res = await (await route("view")).GET(get("?mapId=m2"), ctx());
+
+        const body = await res.json();
+
+        expect(res.status).toBe(200);
+        expect(body.heroes).toEqual([]);
+        expect(body.reveals).toEqual([]);
+        expect(body.markers.every((m: { dmNote: unknown }) => m.dmNote === null)).toBe(true);
+      });
+
+      it("після worldOff (world: null) — знову 404", async () => {
+        vi.mocked(prisma.campaignShow.findUnique).mockResolvedValue({ world: null } as never);
+
+        expect((await (await route("view")).GET(get("?mapId=m2"), ctx())).status).toBe(404);
+      });
+
+      it("asHeroId гравцю — все одно 403", async () => {
+        vi.mocked(prisma.campaignShow.findUnique).mockResolvedValue({ world: { mapId: "m2" } } as never);
+
+        expect((await (await route("view")).GET(get("?mapId=m2&asHeroId=h1"), ctx())).status).toBe(403);
+      });
     });
 
     it("гравець без героїв — порожній туман на корені, без dmNote", async () => {
@@ -313,6 +362,15 @@ describe("world travel API", () => {
 
       expect(vi.mocked(prisma.worldTravelLog.findMany).mock.calls[0][0]?.where).toMatchObject({ campaignId: "c1", characterIds: { hasSome: ["h1"] } });
       expect((await res.json())[0].heroes).toEqual([{ id: "h1", name: "Hero h1" }]);
+    });
+
+    it("kind віддається в журналі; невідоме значення -> travel", async () => {
+      vi.mocked(apiAuth.requireCampaignAccess).mockResolvedValue(dm);
+      vi.mocked(prisma.character.findMany).mockResolvedValue([hero("h1")] as never);
+      vi.mocked(prisma.worldTravelLog.findMany).mockResolvedValue([{ ...entry, kind: "enter" }, { ...entry, id: "l2", kind: "weird" }] as never);
+      vi.mocked(prisma.worldMarker.findMany).mockResolvedValue([]);
+
+      expect((await (await (await route("log")).GET(get(), ctx())).json()).map((e: { kind: string }) => e.kind)).toEqual(["enter", "travel"]);
     });
 
     it("гравець не бачить координат `from`, ДМ бачить", async () => {

@@ -1,5 +1,6 @@
 "use client";
 
+import { useMemo } from "react";
 import { useRouter } from "next/navigation";
 
 import { SearchEmptyState } from "@/components/common/SearchEmptyState";
@@ -16,10 +17,12 @@ const GRID = "grid grid-cols-1 gap-2 sm:grid-cols-2 xl:grid-cols-3";
 
 const COMPACT_GRID = "grid grid-cols-2 gap-2 sm:grid-cols-3";
 
-export function DashboardGroups({ campaignId, isDM, pendingDrafts, context = DEFAULT_DASHBOARD_CONTEXT }: { campaignId: string; isDM: boolean; pendingDrafts: number; context?: DashboardContext }) {
+export function DashboardGroups({ campaignId, isDM, pendingDrafts, context = DEFAULT_DASHBOARD_CONTEXT, hiddenKeys }: { campaignId: string; isDM: boolean; pendingDrafts: number; context?: DashboardContext; hiddenKeys?: string[] }) {
   const router = useRouter();
 
-  const base = isDM ? dmDashboardSectionsFor(context) : PLAYER_DASHBOARD_SECTIONS;
+  const sections = isDM ? dmDashboardSectionsFor(context) : PLAYER_DASHBOARD_SECTIONS;
+
+  const base = useMemo(() => sections.filter((s) => !hiddenKeys?.includes(s.key)), [sections, hiddenKeys]);
 
   const { query, items, isActive } = useSearch(base, fieldsOf);
 

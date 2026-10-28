@@ -38,10 +38,26 @@ describe("DashboardGroups", () => {
   it("player sees own sections without group headings", () => {
     render(<DashboardGroups campaignId="c1" isDM={false} pendingDrafts={0} />);
 
-    for (const t of ["Мій персонаж", "Показ", "Довідник"]) expect(screen.getByText(t)).toBeTruthy();
+    for (const t of ["Мій персонаж", "Показ", "Карта", "Довідник"]) expect(screen.getByText(t)).toBeTruthy();
 
     expect(screen.queryByText("Юніти")).toBeNull();
     expect(screen.queryByRole("heading")).toBeNull();
+  });
+
+  it("hides the world tile for the keys the page hides", () => {
+    render(<DashboardGroups campaignId="c1" isDM={false} pendingDrafts={0} hiddenKeys={["player-world"]} />);
+
+    expect(screen.queryByText("Карта")).toBeNull();
+    expect(screen.getByText("Показ")).toBeTruthy();
+    expect(tileLinks()).toHaveLength(3);
+  });
+
+  it("the world tile links to the player map and is found by search", async () => {
+    render(<DashboardGroups campaignId="c1" isDM={false} pendingDrafts={0} />);
+
+    type("світ");
+
+    expect((await screen.findByText("Карта")).closest("a")?.getAttribute("href")).toBe("/campaigns/c1/world");
   });
 
   it("query filters to a flat grid without headings", async () => {

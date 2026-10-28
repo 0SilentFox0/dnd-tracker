@@ -14,6 +14,8 @@ vi.mock("@/components/audio/AudioPlayerProvider", () => ({ AudioPlayerProvider: 
 vi.mock("@/components/show/stage/ShowDeckStrip", () => ({ ShowDeckStrip: () => <div>control-panel</div> }));
 vi.mock("@/components/show/stage/ShowTransport", () => ({ ShowTransport: () => <div>transport</div> }));
 vi.mock("@/lib/hooks/common", async (importOriginal) => ({ ...(await importOriginal<typeof import("@/lib/hooks/common")>()), useNotify: () => vi.fn() }));
+vi.mock("@/components/world/show/ShowWorldControls", () => ({ ShowWorldControls: () => <div>world-controls</div> }));
+vi.mock("@/lib/hooks/world", () => ({ useWorldMaps: () => ({ data: [{ id: "m1", name: "Сфера" }] }) }));
 vi.mock("@/lib/hooks/show", () => ({ useShowAudioHost: () => ({}), useShowKeys: () => {} }));
 
 const p = { type: "doc" as const, content: [] };
@@ -42,6 +44,18 @@ describe("ScenarioShowDock", () => {
 
     render(<ScenarioShowDock campaignId="c" pageId="pg" content={empty} play={play({ deckId: "d", deckTitle: "Д", slide: { id: "s1", imageUrl: "https://x/a.webp", title: "Собор" }, nextImageUrl: null, audio: null, seq: 1 })} />);
     expect(screen.getByText("Собор")).toBeTruthy();
+  });
+
+  it("карта в показі без прив'язок — док видно, підпис із назвою карти", () => {
+    render(<ScenarioShowDock campaignId="c" pageId="pg" content={empty} play={play({ deckId: null, deckTitle: null, slide: null, nextImageUrl: null, audio: null, seq: 1, world: { mapId: "m1" } })} />);
+
+    expect(screen.getByText("🗺 Карта: Сфера")).toBeTruthy();
+  });
+
+  it("карта під заглушкою — підпис не каже «Карта»", () => {
+    render(<ScenarioShowDock campaignId="c" pageId="pg" content={empty} play={play({ deckId: "d", deckTitle: "Д", slide: null, nextImageUrl: null, audio: null, seq: 1, world: { mapId: "m1" }, curtain: true })} />);
+
+    expect(screen.queryByText(/Карта/)).toBeNull();
   });
 
   it("за замовчуванням згорнуто; перемикач розгортає і згортає панель", () => {

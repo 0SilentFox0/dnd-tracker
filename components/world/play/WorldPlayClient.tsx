@@ -4,6 +4,7 @@ import { Map as MapIcon } from "lucide-react";
 
 import { EmptyState, QueryState } from "@/components/common/states";
 import { HudChipTabs, HudPage, HudPageHeader, HudPanel } from "@/components/hud/page";
+import { OnboardingHint } from "@/components/onboarding/OnboardingHint";
 import { Button } from "@/components/ui/button";
 import { WorldNotesPanel } from "@/components/world/notes/WorldNotesPanel";
 import { TravelLog } from "@/components/world/travel/TravelLog";
@@ -11,6 +12,7 @@ import { WorldCrumbs } from "@/components/world/WorldCrumbs";
 import { WorldMapView } from "@/components/world/WorldMapView";
 import { useMediaQuery } from "@/lib/hooks/common";
 import { DESKTOP_QUERY } from "@/lib/hooks/common/useIsMobile";
+import { usePusherShowSync } from "@/lib/hooks/show";
 import { useWorldPlay } from "@/lib/hooks/world";
 import { viewToMapProps } from "@/lib/utils/world/view-props";
 
@@ -18,6 +20,8 @@ const MAP_HEIGHT = "h-[calc(100dvh-var(--app-header-h,89px)-9rem)] min-h-[20rem]
 
 export function WorldPlayClient({ campaignId, campaignName, mapId }: { campaignId: string; campaignName: string; mapId: string | null }) {
   const play = useWorldPlay(campaignId, mapId);
+
+  usePusherShowSync(campaignId, !!mapId);
 
   const isDesktop = useMediaQuery(DESKTOP_QUERY);
 
@@ -32,6 +36,7 @@ export function WorldPlayClient({ campaignId, campaignName, mapId }: { campaignI
 
   return (
     <HudPage>
+      <OnboardingHint id="player.world" />
       <QueryState query={play.view}>
         {(view) => {
           const props = viewToMapProps(view);
