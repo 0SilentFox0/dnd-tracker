@@ -15,6 +15,22 @@ describe("checklistProgress", () => {
     expect(p.steps[0].href).toContain("/campaigns/c1/");
   });
 
+  it("чернетки на схваленні — variant pending з count, без них — без variant", () => {
+    const pending = checklistProgress({ role: "dm", dm: { ...dm, pendingDrafts: 2 } }, "c1").steps.find((s) => s.id === "characters");
+
+    const none = checklistProgress({ role: "dm", dm }, "c1").steps.find((s) => s.id === "characters");
+
+    expect(pending?.variant).toEqual({ name: "pending", params: { count: 2 } });
+    expect(none && "variant" in none).toBe(false);
+  });
+
+  it("власна чернетка героя — variant pending", () => {
+    const step = (ownCharacter: "none" | "pending" | "active") => checklistProgress({ role: "player", player: { ownCharacter, sheetSeen: false, joinedBattle: false } }, "c1").steps.find((s) => s.id === "character");
+
+    expect(step("pending")?.variant).toEqual({ name: "pending" });
+    expect(step("none")?.variant).toBeUndefined();
+  });
+
   it("гравцю — лише кроки гравця", () => {
     const p = checklistProgress({ role: "player", player: { ownCharacter: "active", sheetSeen: true, joinedBattle: true } }, "c1");
 
@@ -50,9 +66,9 @@ describe("checklistState", () => {
 
 describe("whats-new", () => {
   const entries: WhatsNewEntry[] = [
-    { id: "n3", date: "2026-10-21", audience: "player", title: "", body: "" },
-    { id: "n2", date: "2026-10-20", audience: "dm", title: "", body: "" },
-    { id: "n1", date: "2026-10-19", audience: "all", title: "", body: "" },
+    { id: "n3", date: "2026-10-21", audience: "player" },
+    { id: "n2", date: "2026-10-20", audience: "dm" },
+    { id: "n1", date: "2026-10-19", audience: "all" },
   ];
 
   it("лише новіші за побачений і за аудиторією", () => {

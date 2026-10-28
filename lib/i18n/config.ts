@@ -10,7 +10,7 @@ export const LOCALE_COOKIE_MAX_AGE = 60 * 60 * 24 * 365;
 
 export const LOCALE_CHANGE_EVENT = "locale-change";
 
-export const NAMESPACES = ["common", "validation", "errors", "auth", "landing"] as const;
+export const NAMESPACES = ["common", "validation", "errors", "auth", "landing", "onboarding", "whatsNew", "help"] as const;
 
 export type Namespace = (typeof NAMESPACES)[number];
 

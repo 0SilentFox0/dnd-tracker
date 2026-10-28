@@ -1,0 +1,272 @@
+{
+  "dm-quickstart": {
+    "title": "DM quick start",
+    "summary": "From an empty campaign to the first battle.",
+    "sections": {
+      "s0": {
+        "heading": "What this app is",
+        "b0": "A DM workspace for your own setting: you describe the world (races, skills, units, spells, artifacts), write the scenario, show scenes and run battles. Players play from their phones, and the server calculates the combat rules."
+      },
+      "s1": {
+        "heading": "The path to the first battle",
+        "b0": {
+          "i0": "Create at least one race.",
+          "i1": "Add enemy units, by hand or by import.",
+          "i2": "Invite players with the invite code.",
+          "i3": "Approve hero drafts or create heroes yourself.",
+          "i4": "Prepare a battle scene.",
+          "i5": "Start the battle."
+        },
+        "b1": "This same list is the \"First steps\" checklist on the campaign page; it ticks off completed items on its own."
+      },
+      "s2": {
+        "heading": "How to invite players",
+        "b0": "The invite code is in the \"Campaign settings\" block on the campaign page. A player enters it on the campaigns page via \"Join a campaign\"."
+      },
+      "s3": {
+        "heading": "Hero drafts",
+        "b0": "A player without a hero creates a draft. It appears in \"Characters\" marked \"pending approval\". You approve it and the hero becomes active, or send it back with a comment.",
+        "b1": "A draft never enters a battle, the balance or the party summary until you approve it."
+      }
+    }
+  },
+  "dm-world": {
+    "title": "Campaign world: races, skills, trees",
+    "summary": "What a hero is made of and how to set up their growth.",
+    "sections": {
+      "s0": {
+        "heading": "Races",
+        "b0": "A race sets the base stats, the passive ability and the list of skills available to its heroes. Portraits for player drafts are taken from the avatars of that race's units."
+      },
+      "s1": {
+        "heading": "Skills and effects",
+        "b0": "A skill is a set of effects: bonuses to stats and damage, resistances, triggers on battle events, reactions. The battle engine applies them itself, so you don't have to calculate anything by hand.",
+        "b1": "Races, artifacts, artifact sets and units have the same effects."
+      },
+      "s2": {
+        "heading": "Progression trees",
+        "b0": "A tree is tied to a race: which skills a hero unlocks with levels and in what order. Fill the skill library first, then build the tree."
+      },
+      "s3": {
+        "heading": "Spells and artifacts",
+        "b0": {
+          "i0": "A hero gets spells through skills and levels; in battle they are cast from the spellbook or from the map.",
+          "i1": "An artifact is unique: it is held by one hero (equipped or in the stash). Artifacts can be passed between heroes.",
+          "i2": "Several artifacts from one set give an extra bonus."
+        }
+      },
+      "s4": {
+        "heading": "Import",
+        "b0": "Lists of units, skills and other reference data can be imported from JSON with the import button on the list page."
+      }
+    }
+  },
+  "dm-units-balance": {
+    "title": "Units and battle balance",
+    "summary": "How units become fair opponents.",
+    "sections": {
+      "s0": {
+        "heading": "Units and tiers",
+        "b0": "A unit is a monster or a squad: stats, attacks, spells, abilities. Level and tier determine how strong it is; stronger units have a higher difficulty class on their effects."
+      },
+      "s1": {
+        "heading": "How balance works",
+        "b0": "There is no separate difficulty setting. During preparation and at battle start the app calculates the strength of the player party and adjusts enemy HP and damage so the battle is fair.",
+        "b1": "Armor class, resistances to damage types and the spells of both sides are taken into account. Summoned creatures are not part of the calculation."
+      },
+      "s2": {
+        "heading": "Reserve",
+        "b0": "Participants can be held in reserve and brought into the battle later: reinforcements, an ambush, a second wave."
+      }
+    }
+  },
+  "dm-battle": {
+    "title": "Running a battle",
+    "summary": "Scene setup, the map, turns and finishing a battle.",
+    "sections": {
+      "s0": {
+        "heading": "Scene setup",
+        "b0": "Create a battle in \"Battle scenes\": sides, heroes, units, the map. A prepared battle waits until you start it; players see the join button in the header only after the start."
+      },
+      "s1": {
+        "heading": "Map and modes",
+        "b0": "The map is a grid with obstacles, walls and weather. Besides the regular mode there is a maze with fog. Obstacles on the line of fire grant cover automatically."
+      },
+      "s2": {
+        "heading": "Turns, morale, finishing",
+        "b0": {
+          "i0": "You take the units' turns; players take theirs from their phones.",
+          "i1": "Morale can grant an extra turn or force a skip; the threshold is visible on the card.",
+          "i2": "When one side wins, the battle waits for your confirmation and shows the result screen."
+        },
+        "b1": "Every action can be rolled back from the battle log.",
+        "b2": "A natural 20 and a natural 1 give a critical effect, also on the saving throws of spell targets. Turn on \"DM picks crit/fumble effects\" in the campaign settings: the player's action pauses and you pick an effect from the list, choose \"Random\" or cancel the action. Without the option the effect is random."
+      },
+      "s3": {
+        "heading": "Battle music",
+        "b0": "The track library is in \"Battle music\"; in battle there is a player with a playlist that all participants hear."
+      }
+    }
+  },
+  "dm-scenario-show": {
+    "title": "Scenario and show",
+    "summary": "The campaign manuscript, slides for players and the curtain.",
+    "sections": {
+      "s0": {
+        "heading": "Manuscript",
+        "b0": "The scenario is pages with sections: scenes, DM notes, hero biographies. The table of contents is on the left; played scenes collapse."
+      },
+      "s1": {
+        "heading": "Links to slides and battles",
+        "b0": "A scenario row can be linked to a show slide or a battle. The link sits above the row text: the slide is shown with a button or a double click, and the battle opens from the same place."
+      },
+      "s2": {
+        "heading": "Show and curtain",
+        "b0": "\"Scene show\" is a set of slides with music. You switch slides and players see them in sync.",
+        "b1": {
+          "i0": "←/→ for the previous/next slide.",
+          "i1": "B for the curtain: players see the chosen curtain slide, and position and music are not reset.",
+          "i2": "N (in the scenario) for the next row."
+        }
+      }
+    }
+  },
+  "dm-ai": {
+    "title": "AI assistant",
+    "summary": "Your own key, edit proposals and MCP.",
+    "sections": {
+      "s0": {
+        "heading": "Your own key",
+        "b0": "The assistant runs on your Claude, OpenAI or Gemini key. The key is stored encrypted and is never returned to the browser.",
+        "b1": "Set up keys"
+      },
+      "s1": {
+        "heading": "Edit proposals",
+        "b0": "The assistant never changes the scenario by itself: it proposes edits, and you apply or reject them. A version of the page is saved before applying."
+      },
+      "s2": {
+        "heading": "Live mode and images",
+        "b0": "During play the assistant sees the current scene and show. It can also generate an image for a slide if the key supports it (OpenAI or Gemini)."
+      },
+      "s3": {
+        "heading": "MCP and API tokens",
+        "b0": "The same tools are available to external AI clients (Claude Desktop, Cursor) through MCP. A token is created on the campaign's \"AI and API\" page and shown only once."
+      }
+    }
+  },
+  "dm-world-map": {
+    "title": "World map",
+    "summary": "The map editor, hero travel, showing to players and scenario links.",
+    "sections": {
+      "s0": {
+        "heading": "Editor",
+        "b0": "\"World map\" in the DM menu: upload a map image, place locations (markers) and draw zones. A marker can lead to a nested map, such as a city inside a continent. Hidden markers and zones are visible only to the DM until you reveal them."
+      },
+      "s1": {
+        "heading": "Hero travel",
+        "b0": "The \"Travel\" tool moves selected heroes to a point or location. \"Enter\" takes the party to a nested map, \"Exit\" brings it back. Every transition is written to the log; you can mark a rest in it, but it doesn't restore resources yet, it is only a record.",
+        "b1": "The \"Through the hero's eyes\" switch shows the map the way the chosen hero sees it, with their own fog."
+      },
+      "s2": {
+        "heading": "Showing to players",
+        "b0": "In \"Show\" or in the scenario dock press \"Show map to players\", pick a map and, if needed, a marker to focus on. Each player sees only their own fog, and a map unknown to them is open only while it is on screen. \"Enter\" in the dock's travel switches the show to the nested map with a falling animation."
+      },
+      "s3": {
+        "heading": "Notes",
+        "b0": "In the marker panel you see players' public notes and can delete them. Players' private notes are not visible to you."
+      },
+      "s4": {
+        "heading": "Scenario links and mentions",
+        "b0": "A row or a chapter of the scenario can be linked to a place on the map: a \"📍\" chip above the text, and the \"Show on map\" button brings up the map focused on the place. An @Place mention in the text leads to the editor with the marker selected. If the marker was deleted, the chip shows \"Place unavailable\"."
+      }
+    }
+  },
+  "player-quickstart": {
+    "title": "Player quick start",
+    "summary": "From the invite code to a ready hero.",
+    "sections": {
+      "s0": {
+        "heading": "How to join",
+        "b0": "The DM gives you an invite code. On the campaigns page press \"Join a campaign\" and enter the code; the campaign appears in your list.",
+        "b1": "To the campaign list"
+      },
+      "s1": {
+        "heading": "Hero draft",
+        "b0": "Open the campaign and go to \"My character\". While you have no hero, you create a draft: race, name, stats, portrait and backstory.",
+        "b1": {
+          "i0": "Any field can be generated, or everything at once.",
+          "i1": "The portrait is taken from the race library; if the DM connected AI, it can be drawn.",
+          "i2": "Stats are the standard array or point-buy; the server checks that everything is fair."
+        },
+        "b2": "The draft goes to the DM for approval. They can accept it or send it back with a comment, then fix it and submit again."
+      },
+      "s2": {
+        "heading": "Hero sheet",
+        "b0": "After approval \"My character\" shows the hero sheet with tabs:",
+        "b1": {
+          "i0": "\"Combat\" for stats, attacks, defense and saving throws.",
+          "i1": "\"Abilities\" for skills and the progression tree.",
+          "i2": "\"Magic\" for the spellbook.",
+          "i3": "\"Inventory\" for equipment, backpack, money and the log.",
+          "i4": "\"History\" for the biography, goals and your personal notes (the DM can't see them)."
+        },
+        "b2": "A new level comes after battles; a level-up marker will appear on the sheet."
+      },
+      "s3": {
+        "heading": "Scene show",
+        "b0": "During play the DM can show slides with music. Open \"Show\" in the campaign or press the show button in the header, and the scene will switch in sync with the DM."
+      }
+    }
+  },
+  "player-battle": {
+    "title": "Battle from your phone",
+    "summary": "How to move, attack and cast in battle.",
+    "sections": {
+      "s0": {
+        "heading": "How to get into a battle",
+        "b0": "When the DM starts a battle, a join-battle button appears in the header. There is nothing to install: the battle works in your phone's browser."
+      },
+      "s1": {
+        "heading": "Your turn",
+        "b0": "The turn order is visible at the top. When your turn comes, actions appear:",
+        "b1": {
+          "i0": "Move: pick a cell on the map.",
+          "i1": "Attack: pick a target; the server won't accept targets out of reach.",
+          "i2": "Spell: from the spellbook or directly from the map.",
+          "i3": "End turn: the button at the bottom; without it the turn won't pass on."
+        }
+      },
+      "s2": {
+        "heading": "Attack and spells",
+        "b0": "The server calculates rolls and damage; you see the result and the animation. For ranged attacks, obstacles on the line of fire give the target cover automatically.",
+        "b1": "For enemies you see their health state, not exact HP; you learn armor class and traits from attacks."
+      },
+      "s3": {
+        "heading": "Morale and conditions",
+        "b0": "High morale can grant an extra turn, low morale can force a skip. Effects on a hero (poison, stun and so on) are visible on their card; they wear off on their own over the rounds."
+      },
+      "s4": {
+        "heading": "When a hero falls",
+        "b0": "A hero at 0 HP leaves the map but not the game: an ally or the DM can bring them back. After the battle the DM sums up and experience is added to the sheet."
+      }
+    }
+  },
+  "player-world-map": {
+    "title": "World map",
+    "summary": "Where your heroes are, what is discovered and how to leave notes.",
+    "sections": {
+      "s0": {
+        "heading": "The \"Map\" tile",
+        "b0": "A \"Map\" tile appears on the campaign dashboard once the DM has prepared a map. It shows your heroes and the places they have already discovered; the rest is covered by fog, separate for each player."
+      },
+      "s1": {
+        "heading": "Notes on places",
+        "b0": "Tap a discovered place: the \"Shared\" tab holds the party's notes, \"Mine\" holds private ones that only you see. A note can be attached to your hero."
+      },
+      "s2": {
+        "heading": "Map on the show screen",
+        "b0": "When the DM puts a map on the \"Show\", it opens for you on its own even if you haven't been there; the fog stays yours. When the DM ends the show, the open map is limited again to what you know."
+      }
+    }
+  }
+}
