@@ -4,5 +4,7 @@
   "maxLength": "At most {maximum, plural, one {# character} other {# characters}}",
   "email": "Invalid email address",
   "invalid": "Invalid value",
-  "passwordMismatch": "Passwords do not match"
+  "passwordMismatch": "Passwords do not match",
+  "min": "At least {minimum}",
+  "max": "At most {maximum}"
 }

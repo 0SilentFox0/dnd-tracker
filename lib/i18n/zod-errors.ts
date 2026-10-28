@@ -1,22 +1,24 @@
 type Issue = { code: string; minimum?: unknown; origin?: string; format?: string };
 
-function zodIssueKey(issue: Issue): string | undefined {
+const MEASURED = new Set(["number", "bigint", "date"]);
+
+function zodIssueKey(issue: Issue): string {
+  const measured = MEASURED.has(issue.origin ?? "");
+
   switch (issue.code) {
     case "too_small":
-      return issue.minimum === 1 && issue.origin !== "number" ? "validation.required" : "validation.minLength";
+      if (measured) return "validation.min";
+
+      return issue.minimum === 1 ? "validation.required" : "validation.minLength";
     case "too_big":
-      return "validation.maxLength";
+      return measured ? "validation.max" : "validation.maxLength";
     case "invalid_format":
       return issue.format === "email" ? "validation.email" : "validation.invalid";
-    case "invalid_type":
-      return "validation.invalid";
     default:
-      return undefined;
+      return "validation.invalid";
   }
 }
 
-export function zodErrorMap(issue: Issue): { message: string } | undefined {
-  const key = zodIssueKey(issue);
-
-  return key ? { message: key } : undefined;
+export function zodErrorMap(issue: Issue): { message: string } {
+  return { message: zodIssueKey(issue) };
 }

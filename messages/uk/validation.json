@@ -4,5 +4,7 @@
   "maxLength": "Щонайбільше {maximum, plural, one {# символ} few {# символи} many {# символів} other {# символу}}",
   "email": "Некоректна адреса електронної пошти",
   "invalid": "Некоректне значення",
-  "passwordMismatch": "Паролі не збігаються"
+  "passwordMismatch": "Паролі не збігаються",
+  "min": "Не менше {minimum}",
+  "max": "Не більше {maximum}"
 }
