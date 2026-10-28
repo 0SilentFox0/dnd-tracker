@@ -130,6 +130,7 @@ describe("ScenarioPageView — режим гри", () => {
       show: null,
     },
     showSlide: vi.fn(),
+    showMarker: vi.fn(),
     runBattle: vi.fn(),
     pending: false,
     control: { send: vi.fn(), pending: false },

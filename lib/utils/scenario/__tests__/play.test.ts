@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { battleAction, boundDeckIds, currentSlideRow, nextSlideRow, type PlayLookup, rowBattleState, rowSlideState } from "../play";
+import { battleAction, boundDeckIds, currentSlideRow, hasPlayBindings, markerOnScreen, nextSlideRow, type PlayLookup, rowBattleState, rowSlideState } from "../play";
 
 import type { RichDoc, ScenarioContent, ScenarioRow } from "@/types/scenario";
 import type { ShowState, Slide } from "@/types/show";
@@ -91,5 +91,24 @@ describe("currentSlideRow / nextSlideRow", () => {
 
     expect(rowSlideState(a, covered)).toMatchObject({ current: true, active: false });
     expect(nextSlideRow(content([[a, b]]), covered)?.id).toBe("ra");
+  });
+});
+
+describe("marker bindings", () => {
+  const ref = { mapId: "w", markerId: "m" };
+
+  it("hasPlayBindings: маркер лише в главі теж прив'язка", () => {
+    const content = (section: object): ScenarioContent => ({ legend: [], sections: [{ id: "s", title: "S", played: false, rows: [row()], ...section }] });
+
+    expect(hasPlayBindings(content({}))).toBe(false);
+    expect(hasPlayBindings(content({ marker: ref }))).toBe(true);
+    expect(hasPlayBindings(content({ rows: [row({ marker: ref })] }))).toBe(true);
+  });
+
+  it("markerOnScreen: збігається карта й маркер, заглушка гасить", () => {
+    expect(markerOnScreen(ref, show({ world: { mapId: "w", focusMarkerId: "m" } }))).toBe(true);
+    expect(markerOnScreen(ref, show({ world: { mapId: "w", focusMarkerId: "other" } }))).toBe(false);
+    expect(markerOnScreen(ref, show({ world: { mapId: "w", focusMarkerId: "m" }, curtain: true }))).toBe(false);
+    expect(markerOnScreen(ref, null)).toBe(false);
   });
 });
