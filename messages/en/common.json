@@ -178,5 +178,15 @@
       "artifacts": "Artifact",
       "sets": "Set"
     }
+  },
+  "notifications": {
+    "new": "new",
+    "newCount": "new: {count}",
+    "open": "Open",
+    "region": "Notifications",
+    "level": "New level",
+    "item": "New item",
+    "spell": "New spell",
+    "acquaintance": "New acquaintance"
   }
 }
