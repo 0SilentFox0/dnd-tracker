@@ -25,7 +25,7 @@ function effectIssues(effect: Effect, trigger: Trigger, hasCondition: boolean): 
   const issues: string[] = [];
 
   if (trigger.event === "passive") {
-    if (effect.kind !== "note" && !isStaticEffect(effect)) {
+    if (effect.kind !== "note" && effect.kind !== "restoreSpellSlotLevels" && !isStaticEffect(effect)) {
       issues.push("Пасивка допускає лише modifyStat, damageBonus, flag, note");
     }
 

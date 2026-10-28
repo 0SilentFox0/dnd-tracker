@@ -190,6 +190,7 @@ export const CLASS_FEATURE_OVERRIDES: Record<string, AbilityCore | FeatureOption
     { name: "Draconic Resilience", slug: "hp", ...passive([{ kind: "modifyStat", stat: "maxHp", flat: { formula: "class_level" } }]) },
     { name: "Draconic Resilience: AC", slug: "ac", ...passive([{ kind: "modifyStat", stat: "armor", flat: { formula: "cha_mod" } }], UNARMORED) },
   ],
+  "srd-2024_wizard_arcane-recovery": passive([{ kind: "restoreSpellSlotLevels", budget: { formula: "ceil(class_level / 2)" }, maxSlotLevel: 5 }]),
   "srd-2024_wizard_evoker_empowered-evocation": passive([{ kind: "damageBonus", filter: { kind: "magic", school: "Evocation" }, flat: { formula: "int_mod" } }]),
 };
 

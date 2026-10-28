@@ -8556,8 +8556,11 @@
             },
             "effects": [
               {
-                "kind": "note",
-                "text": "Arcane Recovery"
+                "kind": "restoreSpellSlotLevels",
+                "budget": {
+                  "formula": "ceil(class_level / 2)"
+                },
+                "maxSlotLevel": 5
               }
             ]
           },

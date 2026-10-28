@@ -27,7 +27,7 @@ const rest: SheetRest = {
     { key: "pool:grant:feat%3Amagic-initiate:sp-guidance", name: "Magic Initiate: Guidance", uses: 1, used: 1, rest: "long" },
     { key: "pool:consumable:scroll-stack", name: "Spell Scroll", uses: 1, used: 0, rest: null },
   ],
-  inspiration: null,
+  arcaneRecovery: null, inspiration: null,
   xp: null,
 };
 

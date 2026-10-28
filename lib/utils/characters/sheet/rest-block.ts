@@ -1,5 +1,6 @@
 import { levelUpAvailable, xpForLevel } from "@/lib/constants/experience";
 import { restUses } from "@/lib/utils/abilities/engine/core/usage";
+import { arcaneRecoveryOffer } from "@/lib/utils/characters/resources/arcane-recovery";
 import { hitDicePool } from "@/lib/utils/characters/resources/hit-dice";
 import { readResources } from "@/lib/utils/characters/resources/schema";
 import { isConsumablePool } from "@/lib/utils/items/pools";
@@ -27,6 +28,8 @@ export function buildRestBlock(input: {
 
   const experience = c.experience ?? 0;
 
+  const offer = persist ? arcaneRecoveryOffer(p, r) : null;
+
   return {
     persist,
     hp: persist ? { current: p.combatStats.currentHp, max: p.combatStats.maxHp, temp: p.combatStats.tempHp } : null,
@@ -42,6 +45,7 @@ export function buildRestBlock(input: {
             .map(([key, pool]) => ({ key, name: pool.label, uses: pool.max, used: p.battleData.abilityUsage?.[key]?.battle ?? 0, rest: pool.rest })),
         ]
       : [],
+    arcaneRecovery: offer && { budget: offer.budget, maxSlotLevel: offer.maxSlotLevel, used: offer.used, slots: offer.slots },
     inspiration: ooc.inspiration ? !!c.inspiration : null,
     xp: ooc.xp ? { value: experience, next: xpForLevel(c.level + 1), levelUp: levelUpAvailable({ level: c.level, experience }, input.maxLevel) } : null,
   };

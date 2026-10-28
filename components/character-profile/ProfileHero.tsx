@@ -2,6 +2,7 @@
 
 import { type ReactNode, type Ref, useState } from "react";
 
+import { ArcaneRecoveryPanel } from "./rest/ArcaneRecoveryPanel";
 import { HitDicePanel } from "./rest/HitDicePanel";
 import { RestBadges } from "./rest/RestBadges";
 import { Breakdown } from "./Breakdown";
@@ -55,6 +56,7 @@ export function ProfileHero({ actions, badge, ref }: { actions?: ReactNode; badg
               ))}
               {sheet.rest && <RestBadges />}
               {sheet.rest && <HitDicePanel />}
+              {sheet.rest && <ArcaneRecoveryPanel />}
             </div>
             {actions && <div className="flex shrink-0 flex-col gap-1.5">{actions}</div>}
           </div>

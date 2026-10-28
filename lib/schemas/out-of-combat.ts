@@ -14,6 +14,10 @@ export type RestInput = z.infer<typeof restSchema>;
 
 export const hitDieSchema = z.object({ classId: z.string().min(1).max(100) });
 
+export const arcaneRecoverySchema = z.object({ picks: z.record(z.string().regex(/^\d$/), z.number().int().min(1).max(9)) });
+
+export type ArcaneRecoveryInput = z.infer<typeof arcaneRecoverySchema>;
+
 export type HitDieInput = z.infer<typeof hitDieSchema>;
 
 export const sheetRollSchema = z.union([

@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-import { AbilityTargetSchema, AmountSchema, DurationSchema, FlatSchema } from "./common";
+import { AbilityTargetSchema, AmountSchema, DurationSchema, FlatSchema, FormulaSchema } from "./common";
 import { ATTACK_KINDS, CONDITION_5E_KEYS, CONDITION_KEYS, DAMAGE_FILTER_KINDS, STAT_KEYS } from "./kinds";
 
 import { ABILITY_KEYS } from "@/lib/constants/abilities";
@@ -203,6 +203,8 @@ const ApplyConditionSchema = z.object({
 
 const RestoreSpellSlotSchema = z.object({ kind: z.literal("restoreSpellSlot"), count: z.number().int().min(1), ...target });
 
+const RestoreSpellSlotLevelsSchema = z.object({ kind: z.literal("restoreSpellSlotLevels"), budget: z.union([z.number().int().min(1), FormulaSchema]), maxSlotLevel: z.number().int().min(1).max(9) });
+
 const DrainSpellSlotSchema = z.object({ kind: z.literal("drainSpellSlot"), count: z.number().int().min(1), ...target });
 
 const ChangeMoraleSchema = z.object({
@@ -251,6 +253,7 @@ const BASE_EFFECTS = [
   CharmSchema,
   ApplyConditionSchema,
   RestoreSpellSlotSchema,
+  RestoreSpellSlotLevelsSchema,
   DrainSpellSlotSchema,
   ChangeMoraleSchema,
   CleanseSchema,
