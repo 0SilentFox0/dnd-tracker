@@ -155,7 +155,7 @@ export const generateSlideImageHandler = (req: Request, campaignId: string) =>
     try {
       return NextResponse.json(await generateSlideImage({ ...body, campaignId, userId: access.userId }));
     } catch (error) {
-      if (error instanceof AiImageError) return errorResponse(error.message, error.status, undefined, error.params);
+      if (error instanceof AiImageError) return errorResponse(error.message, error.status);
 
       throw error;
     }
@@ -198,7 +198,7 @@ async function runResponse(run: () => Promise<Response>): Promise<Response> {
     return response; }
   catch (error) {
     if (error instanceof ContentError) {
-      const response = errorResponse(error.message, error.status);
+      const response = errorResponse(error.message, error.status, undefined, error.params);
 
       response.headers.set("cache-control", PRIVATE_NO_STORE_HEADERS["Cache-Control"]);
 
