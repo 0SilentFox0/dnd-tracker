@@ -1,6 +1,7 @@
 import { array, str } from "./shared";
 import type { SpellCast } from "./spell-cast";
 import { createsPlainObject, isOutOfCombatBuff, type NarrativeReason, withoutObjectConditions, withoutRestOrTravel } from "./spell-narrative";
+import { recognizeSpell } from "./spell-patterns";
 
 import { ABILITY_KEYS, ABILITY_LABELS, type AbilityKey } from "@/lib/constants/abilities";
 import { type AnyConditionKey, CONDITION_5E_KEYS } from "@/lib/utils/abilities/schema/kinds";
@@ -147,6 +148,10 @@ export function deriveSpell(row: Record<string, unknown>, text: string, higher: 
   if (signals && !hasSignals(text, withoutObjectConditions(raw))) return narrative("objectOnly");
 
   if (!signals && createsPlainObject(misc, text, raw)) return narrative("createdObject");
+
+  const recognized = recognizeSpell({ row, raw, text, higher, cast, ability: ability as AbilityKey | null, damageTypes });
+
+  if (recognized) return recognized;
 
   if (misc.includes("SMN")) return { blocker: "SUMMON" };
 

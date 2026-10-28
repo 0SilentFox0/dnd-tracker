@@ -15,7 +15,7 @@ const casterIdOf = (state: SpellCastState) => state.caster.basicInfo.id;
 function runEffect(state: SpellCastState, effect: Effect, effectIndex: number, ids: string[], roll: number): void {
   const { flow } = state;
 
-  const event: AbilityEvent = { type: "spellCast", phase: "after", actorId: casterIdOf(state), targetIds: state.targetIds, ...state.info, roll };
+  const event: AbilityEvent = { type: "spellCast", phase: "after", actorId: casterIdOf(state), targetIds: state.targetIds, ...state.info, roll, damage: state.dealt };
 
   const r = applyEffect({ participants: flow.ps, ability: state.ability, effectIndex, ownerId: casterIdOf(state), effect, targetIds: ids, event, ctx: flow.ctx });
 
@@ -59,6 +59,7 @@ function dealSpellDamage(state: SpellCastState, effect: Extract<Effect, { kind: 
   const resisted = applyResistance(target, planned, effect.damageType ?? "magic", { participants: flow.ps, fromSpell: true, school: spell.groupId, extra: state.actionModifiers[id] });
 
   put(flow, applyRawDamage(target, resisted.finalDamage));
+  state.dealt += resisted.finalDamage;
   applyFlowDamage(flow, target, resisted.finalDamage);
   absorbSpellDamage(state, id, resisted.finalDamage);
   state.damageSteps[id] = [...(state.damageSteps[id] ?? []), ...resisted.steps];

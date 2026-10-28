@@ -35,5 +35,5 @@ export function eventSpellRoll(e: AbilityEvent): number | undefined {
 }
 
 export function eventDamage(e: AbilityEvent): number | undefined {
-  return e.type === "hit" ? e.damage : undefined;
+  return e.type === "hit" || e.type === "spellCast" ? e.damage : undefined;
 }

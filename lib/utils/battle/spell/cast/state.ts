@@ -44,6 +44,8 @@ export interface SpellCastState {
   damageSteps: Record<string, DamageStep[]>;
   outcomes: Map<string, Outcome>;
   summons: SummonRequest[];
+  /** Сума фактичної шкоди (після опору) від усіх dealDamage цього касту. */
+  dealt: number;
 }
 
 function amountOf(e: Effect): Amount | undefined {
@@ -73,6 +75,9 @@ export const NO_TARGET_KINDS = new Set<Effect["kind"]>(["note", "summon"]);
 export const targetOf = (e: Effect) => (NO_TARGET_KINDS.has(e.kind) ? undefined : (e as { target?: string }).target);
 
 export const isPerTarget = (e: Effect) => !NO_TARGET_KINDS.has(e.kind) && (targetOf(e) === undefined || targetOf(e) === "eventTarget");
+
+/** Цільові ефекти, що читають шкоду касту: виконуються після нецільових. */
+export const readsEventDamage = (e: Effect) => (e.kind === "heal" || e.kind === "dealDamage") && typeof e.amount === "object" && "percentOf" in e.amount && e.amount.percentOf === "eventDamage";
 
 export const flatEffects = (effects: Effect[]): Effect[] => effects.flatMap((e) => (e.kind === "randomOf" ? e.options : [e]));
 

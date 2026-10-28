@@ -7,7 +7,7 @@ import { removeEffects } from "@/lib/utils/battle/conditions/query";
 import { applyTo } from "@/lib/utils/battle/spell/cast/effects";
 import { finishSpellAction, spendCastCost } from "@/lib/utils/battle/spell/cast/finish";
 import { resolveOutcome } from "@/lib/utils/battle/spell/cast/outcome";
-import { abilityOf, actionOf, isPerTarget, type SpellCastState, targetOf } from "@/lib/utils/battle/spell/cast/state";
+import { abilityOf, actionOf, isPerTarget, readsEventDamage, type SpellCastState, targetOf } from "@/lib/utils/battle/spell/cast/state";
 import { computeSpellPower, spellSaveDc } from "@/lib/utils/battle/spell/power";
 import { spellNeedsSlot, spellSlotKey } from "@/lib/utils/battle/spell/slot";
 import type { CastSpellParams, CastSpellResult } from "@/lib/utils/battle/types/spell-process";
@@ -90,6 +90,7 @@ export function castSpell(params: CastSpellParams): CastSpellResult {
     damageSteps: {},
     outcomes: new Map(),
     summons: [],
+    dealt: 0,
   };
 
   const concentrates = !!params.rules?.concentration.enabled && def.concentration === true;
@@ -113,7 +114,7 @@ export function castSpell(params: CastSpellParams): CastSpellResult {
 
   for (const [index, id] of targetIds.entries()) {
     def.effects.forEach((effect, effectIndex) => {
-      if (isPerTarget(effect)) applyTo(state, effect, effectIndex, id, index);
+      if (isPerTarget(effect) && !readsEventDamage(effect)) applyTo(state, effect, effectIndex, id, index);
     });
   }
 
@@ -124,6 +125,12 @@ export function castSpell(params: CastSpellParams): CastSpellResult {
 
     resolveTargetIds(targetOf(effect) as Parameters<typeof resolveTargetIds>[0], casterId, event, flow.ps, flow.ctx).forEach((id, index) => applyTo(state, effect, effectIndex, id, index));
   });
+
+  for (const [index, id] of targetIds.entries()) {
+    def.effects.forEach((effect, effectIndex) => {
+      if (isPerTarget(effect) && readsEventDamage(effect)) applyTo(state, effect, effectIndex, id, index);
+    });
+  }
 
   if (tag) flow.ps = tagConcentration(psBeforeEffects, flow.ps, tag, state.ability.key);
 
