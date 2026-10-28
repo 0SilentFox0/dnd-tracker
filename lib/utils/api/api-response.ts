@@ -1,9 +1,9 @@
 import type { NextResponse } from "next/server";
 
-import type { ErrorParams } from "@/lib/constants/api-errors";
-
 import { PRIVATE_NO_STORE_HEADERS } from "./cache-headers";
 import { apiErrorJson } from "./translate-error";
+
+import type { ErrorParams } from "@/lib/constants/api-errors";
 
 export type ApiErrorBody = { error: string; errorKey?: string; issues?: unknown };
 

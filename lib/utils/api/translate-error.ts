@@ -1,14 +1,13 @@
 import { NextResponse } from "next/server";
 
+import type { ApiErrorBody } from "./api-response";
+
+import "server-only";
 import { API_ERROR_PARAMS, type ApiErrorKey, type ErrorParams } from "@/lib/constants/api-errors";
 import { DEFAULT_LOCALE } from "@/lib/i18n/config";
 import { getRequestLocale } from "@/lib/i18n/request-locale";
 import { translateIssue } from "@/lib/i18n/translate-issue";
 import { getTranslator, type Translator } from "@/lib/i18n/translator";
-
-import type { ApiErrorBody } from "./api-response";
-
-import "server-only";
 
 export type ApiErrorInput = { error: string; issues?: unknown; params?: ErrorParams } & Record<string, unknown>;
 

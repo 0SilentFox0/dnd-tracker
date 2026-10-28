@@ -1,6 +1,6 @@
-import { API_ERROR_PARAMS, type ApiErrorKey, type ErrorParams } from "@/lib/constants/api-errors";
-
 import type { Translator } from "./translator";
+
+import { API_ERROR_PARAMS, type ApiErrorKey, type ErrorParams } from "@/lib/constants/api-errors";
 
 interface TranslatableIssue {
   message: string;

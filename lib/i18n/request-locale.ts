@@ -1,11 +1,10 @@
 import { cookies, headers } from "next/headers";
 
-import { bearerToken } from "@/lib/utils/api/bearer";
-
 import { DEFAULT_LOCALE, type Locale, LOCALE_COOKIE } from "./config";
 import { negotiateLocale } from "./resolve-locale";
 
 import "server-only";
+import { bearerToken } from "@/lib/utils/api/bearer";
 
 export async function getRequestLocale(): Promise<Locale> {
   const [cookieStore, headerStore] = await Promise.all([cookies(), headers()]);
