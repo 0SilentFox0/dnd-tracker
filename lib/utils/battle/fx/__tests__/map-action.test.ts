@@ -8,8 +8,14 @@ import { SPELL_FX_BY_NAME } from "@/scripts/constructor/backfill/spell-fx-by-nam
 describe("mapAction", () => {
   it("melee hit with slashing → melee/physical", () => {
     expect(mapAction(action({ actionType: "attack", actionDetails: { attackKind: "melee", isHit: true, damageRolls: [{ dice: "1d8", results: [5], total: 5, damageType: "slashing" }] } }))).toEqual([
-      { key: "b-1:0", archetype: "melee", element: "physical", actorId: "a", actorSide: "ally", targetIds: ["t"], hit: true, critical: false },
+      { key: "b-1:0", actionId: "b-1", archetype: "melee", element: "physical", actorId: "a", actorSide: "ally", targetIds: ["t"], hit: true, critical: false },
     ]);
+  });
+
+  it("кожна FX дії несе actionId", () => {
+    const specs = mapAction(action({ actionType: "attack", actionDetails: { attackKind: "melee", isHit: true, diceRolls: [{ kind: "attack", rollerId: "a", dice: [{ sides: 20, value: 12 }] }] } }));
+
+    expect(specs.every((s) => s.actionId === specs[0].actionId && !!s.actionId)).toBe(true);
   });
 
   it("ranged miss keeps the archetype with hit=false", () => {
@@ -199,5 +205,21 @@ describe("mapAction dice", () => {
     expect(withDice[0].dice).toBeDefined();
     expect(mapAction(action({ actionType: "attack", actionDetails: { attackKind: "melee", isHit: true } })).map((s) => s.archetype)).toEqual(["melee"]);
     expect(mapAction(action({ isCancelled: true, actionDetails: { diceRolls: rolls } }))).toEqual([]);
+  });
+
+  it("влучання і шкода — два окремі кидки перед анімацією удару", () => {
+    const specs = mapAction(action({ actionType: "attack", actionDetails: { attackKind: "melee", isHit: true, diceRolls: [...rolls, { kind: "damage", rollerId: "a", dice: [{ sides: 8, value: 5 }] }] } }));
+
+    expect(specs.map((s) => s.archetype)).toEqual(["dice", "dice", "melee"]);
+    expect(new Set(specs.map((s) => s.key)).size).toBe(3);
+  });
+});
+
+describe("signature 2D strikes", () => {
+  it("«Блискавка» → skystrike, «Крижаний болт» → icefall", () => {
+    const cast = (spellName: string) => mapAction(action({ actionType: "spell", actionDetails: { spellName, spellFx: SPELL_FX_BY_NAME[spellName], totalDamage: 12 } })).find((s) => s.archetype !== "dice");
+
+    expect(cast("Блискавка")).toMatchObject({ archetype: "skystrike", element: "lightning" });
+    expect(cast("Крижаний болт")).toMatchObject({ archetype: "icefall", element: "cold" });
   });
 });

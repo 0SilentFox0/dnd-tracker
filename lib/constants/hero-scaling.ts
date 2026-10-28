@@ -52,27 +52,35 @@ const DEFAULT_DICE_BY_LEVEL: Record<number, string> = {
 function getDiceForLevel(level: number, attackType: AttackType, opts?: HeroScalingOptions | null): string {
   const table = attackType === AttackType.MELEE ? opts?.meleeDiceByLevel : opts?.rangedDiceByLevel;
 
-  const resolved = table ?? DEFAULT_DICE_BY_LEVEL;
-
   const clamped = Math.max(1, Math.min(20, level));
 
-  return resolved[clamped] ?? resolved[20] ?? "1d4";
+  return table?.[clamped] ?? DEFAULT_DICE_BY_LEVEL[clamped] ?? "1d4";
 }
 
-export function getHeroMaxHpBreakdown(level: number, constitution: number, archetype: string | null | undefined): { total: number; breakdown: string[] } {
+export interface HeroHpFormula {
+  baseLevels: number;
+  conCoefficient: number;
+}
+
+export function getHeroMaxHpBreakdown(
+  level: number,
+  constitution: number,
+  archetype: string | null | undefined,
+  hp: HeroHpFormula = { baseLevels: HP_BASE_LEVELS, conCoefficient: HP_CON_COEFFICIENT },
+): { total: number; breakdown: string[] } {
   const a = heroArchetype(archetype);
 
   const conMod = getAbilityModifier(constitution);
 
-  const base = HP_BASE_LEVELS * a.hpPerLevel;
+  const base = hp.baseLevels * a.hpPerLevel;
 
-  const perLevel = a.hpPerLevel + conMod * HP_CON_COEFFICIENT;
+  const perLevel = a.hpPerLevel + conMod * hp.conCoefficient;
 
   const total = Math.max(1, Math.floor(base + level * perLevel));
 
   return {
     total,
-    breakdown: [`${a.name}: ${HP_BASE_LEVELS} × ${a.hpPerLevel} + рівень × (${a.hpPerLevel} + мод. ВИТ ${conMod} × ${HP_CON_COEFFICIENT})`, `= ${base} + ${level} × ${perLevel} = ${total}`],
+    breakdown: [`${a.name}: ${hp.baseLevels} × ${a.hpPerLevel} + рівень × (${a.hpPerLevel} + мод. ВИТ ${conMod} × ${hp.conCoefficient})`, `= ${base} + ${level} × ${perLevel} = ${total}`],
   };
 }
 

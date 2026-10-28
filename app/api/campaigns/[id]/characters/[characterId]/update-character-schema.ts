@@ -1,7 +1,7 @@
 import { z } from "zod";
 
 import { ABILITY_KEYS, SPELLCASTING_ABILITIES } from "@/lib/constants/abilities";
-import { HERO_INITIATIVE } from "@/lib/constants/characters";
+import { HERO_INITIATIVE_BOUNDS } from "@/lib/constants/characters";
 import { HERO_ARCHETYPE_KEYS } from "@/lib/constants/hero-archetypes";
 
 export const updateCharacterSchema = z.object({
@@ -26,7 +26,7 @@ export const updateCharacterSchema = z.object({
   charisma: z.number().min(1).max(30).optional(),
 
   armorClass: z.number().min(0).optional(),
-  initiative: z.number().int().min(HERO_INITIATIVE.MIN).max(HERO_INITIATIVE.MAX).optional(),
+  initiative: z.number().int().min(HERO_INITIATIVE_BOUNDS.MIN).max(HERO_INITIATIVE_BOUNDS.MAX).optional(),
   speed: z.number().min(0).optional(),
 
   savingThrows: z.record(z.string(), z.boolean()).optional(),
@@ -50,7 +50,7 @@ export const updateCharacterSchema = z.object({
   languages: z.array(z.string()).optional(),
   proficiencies: z.record(z.string(), z.array(z.string())).optional(),
   immunities: z.array(z.string()).optional(),
-  morale: z.number().min(-3).max(3).optional(),
+  morale: z.number().min(-10).max(10).optional(),
 
   // Прокачка
   controlledBy: z.string().optional(),

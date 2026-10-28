@@ -1,6 +1,6 @@
 import type { DiceThrowSpec } from "./dice/from-action";
 
-export const FX_ARCHETYPES = ["melee", "ranged", "bolt", "area", "heal", "buff", "debuff", "summon", "death", "swarm", "quake", "teleport", "entangle", "meteor", "eldritch", "slow", "haste", "stoneskin", "cleanse", "regenerate", "might", "deflect", "holyword", "empower", "spellward", "sunbeam", "retribution", "resurrect", "siphon", "rust", "pestilence", "whispers", "thorns", "raincloud", "blindfold", "puppet", "netherhands", "firesummon", "watersummon", "earthsummon", "airsummon", "phoenix", "avatar", "healword", "healwave", "rebirth", "forestspirit", "thornvines", "moonbeam", "vampire", "dice"] as const;
+export const FX_ARCHETYPES = ["melee", "ranged", "bolt", "area", "heal", "buff", "debuff", "summon", "death", "swarm", "quake", "teleport", "entangle", "meteor", "eldritch", "slow", "haste", "stoneskin", "cleanse", "regenerate", "might", "deflect", "holyword", "empower", "spellward", "sunbeam", "retribution", "resurrect", "siphon", "rust", "pestilence", "whispers", "thorns", "raincloud", "blindfold", "puppet", "netherhands", "firesummon", "watersummon", "earthsummon", "airsummon", "phoenix", "avatar", "healword", "healwave", "rebirth", "forestspirit", "thornvines", "moonbeam", "vampire", "skystrike", "icefall", "dice"] as const;
 
 export type FxArchetype = (typeof FX_ARCHETYPES)[number];
 
@@ -10,6 +10,8 @@ export type FxElement = (typeof FX_ELEMENTS)[number];
 
 export interface FxSpec {
   key: string;
+  /** Дія журналу, з якої ця FX; кадр влучання токенів чекає її удару. */
+  actionId?: string;
   archetype: FxArchetype;
   element: FxElement;
   actorId: string;

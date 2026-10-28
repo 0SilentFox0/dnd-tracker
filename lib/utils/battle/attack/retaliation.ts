@@ -17,6 +17,7 @@ import { getEffectiveArmorClass } from "@/lib/utils/battle/participant";
 import { hasEffectMarker } from "@/lib/utils/battle/participant/state";
 import type { AttackRollResult } from "@/lib/utils/battle/types/attack";
 import { parseDiceLenient, rollDie, rollGroups } from "@/lib/utils/common/dice";
+import type { Ruleset } from "@/lib/utils/rules";
 import type { BattleAction, BattleAttack, BattleMapConfig, BattleParticipant } from "@/types/battle";
 
 type Kind = AttackType;
@@ -35,6 +36,7 @@ export interface RetaliationInput {
   battleId: string;
   rng: Rng;
   map?: BattleMapConfig | null;
+  rules?: Ruleset;
 }
 
 export interface RetaliationResult {
@@ -86,7 +88,7 @@ export function resolveRetaliation(input: RetaliationInput): RetaliationResult |
 
   const existedBefore = activeEffectIds(participants);
 
-  const flow: ActionFlow = { ps: participants, messages: [], summons: [], ctx: { round, rng, map: input.map } };
+  const flow: ActionFlow = { ps: participants, messages: [], summons: [], ctx: { round, rng, map: input.map, rules: input.rules } };
 
   if (!provoked && !unlimited) {
     put(flow, {
@@ -100,7 +102,7 @@ export function resolveRetaliation(input: RetaliationInput): RetaliationResult |
 
   const second = rollDie(20, rng);
 
-  const roll = calculateAttackRoll(getP(flow, defenderId), weapon.attack, first, second, second, { participants: flow.ps, targetId: attackerId, rng });
+  const roll = calculateAttackRoll(getP(flow, defenderId), weapon.attack, first, second, second, { participants: flow.ps, targetId: attackerId, rng, rules: flow.ctx.rules });
 
   if (roll.secondRoll) flow.messages.push(`🎲 відсіч, ${roll.secondRoll.mode === "advantage" ? "перевага" : "недолік"}: другий d20 = ${roll.secondRoll.value}`);
 

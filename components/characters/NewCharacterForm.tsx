@@ -56,7 +56,7 @@ export function NewCharacterForm({ campaignId: id, characterType }: { campaignId
             <CharacterAbilityScores abilityScores={abilityScores} />
           </HudSection>
           <HudSection title="Бойові параметри">
-            <CharacterCombatParams combatStats={combatStats} />
+            <CharacterCombatParams campaignId={id} combatStats={combatStats} />
           </HudSection>
         </>
       ),

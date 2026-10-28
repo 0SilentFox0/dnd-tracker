@@ -15,7 +15,7 @@ export async function scaleEnemiesForFairBattle(campaignId: string, slots: Start
 
   if (!slots.some(isEnemyUnit)) return built;
 
-  const library = await loadUnitLibraryStats(campaignId);
+  const library = await loadUnitLibraryStats(campaignId, campaignContext?.rules);
 
   const byId = new Map(library.map((u) => [u.unitId, u]));
 

@@ -1,7 +1,7 @@
 import type { AbilityUsageCounter, ResolvedAbility, StaticEffect } from "./abilities";
 
 import { type SpellcastingAbility } from "@/lib/constants/abilities";
-import { AttackType, type CombatStatusType, type MAZE_DIFFICULTIES, type MAZE_MARK_SYMBOLS, ParticipantSide, type ParticipantSourceTypeValue } from "@/lib/constants/battle";
+import { AttackType, type BattleStatus, type CombatStatusType, type MAZE_DIFFICULTIES, type MAZE_MARK_SYMBOLS, ParticipantSide, type ParticipantSourceTypeValue } from "@/lib/constants/battle";
 import type { WEATHER_KINDS } from "@/lib/constants/battle-weather";
 import type { CriticalEffect } from "@/lib/constants/critical-effects";
 import type { FxAuraKind, FxImpact, SpellFx } from "@/lib/utils/battle/fx";
@@ -147,12 +147,16 @@ export interface BattleParticipantAbilities {
   race: string;
   /** Race.id для расових модифікаторів заклинань */
   raceId?: string;
+  /** Межа моралі кампанії; 0 — мораль вимкнена, відсутнє — 3 */
+  moraleCap?: number;
   primaryAbility?: AbilityKey;
   /** Множник шкоди ближнього бою від архетипу (лише character) */
   meleeMultiplier?: number;
   rangedMultiplier?: number;
   magicMultiplier?: number;
   archetypeName?: string;
+  /** Таблиці кубиків героя з правил кампанії; відсутнє — типова прогресія */
+  heroDice?: { melee?: Record<number, string>; ranged?: Record<number, string> };
 }
 
 export interface GridPoint {
@@ -572,3 +576,9 @@ export type AddParticipantData = {
   reserved?: boolean;
   position?: GridPoint;
 };
+
+export interface BattleBrief {
+  id: string;
+  name: string;
+  status: BattleStatus;
+}

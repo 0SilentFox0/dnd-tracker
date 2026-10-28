@@ -17,7 +17,7 @@ export function heroAttackDamageParts(p: BattleParticipant, attack: BattleAttack
 
   const type = attackKindOf(attack.type);
 
-  const heroDice = getHeroDamageDiceForLevel(p.abilities.level, type);
+  const heroDice = getHeroDamageDiceForLevel(p.abilities.level, type, { meleeDiceByLevel: p.abilities.heroDice?.melee, rangedDiceByLevel: p.abilities.heroDice?.ranged });
 
   return { weaponDice, heroDice, formula: mergeDiceFormulas(weaponDice, heroDice) };
 }

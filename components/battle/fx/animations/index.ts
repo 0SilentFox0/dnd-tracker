@@ -65,6 +65,8 @@ const SIGNATURES: Record<SignatureArchetype, { load: () => Promise<FxAnimation>;
   thornvines: { load: () => import("./thornvines").then((m) => m.thornvines), fallback: "bolt" },
   moonbeam: { load: () => import("./moonbeam").then((m) => m.moonbeam), fallback: "bolt" },
   vampire: { load: () => import("./vampire").then((m) => m.vampire), fallback: "buff" },
+  skystrike: { load: () => import("./skystrike").then((m) => m.skystrike), fallback: "bolt" },
+  icefall: { load: () => import("./icefall").then((m) => m.icefall), fallback: "bolt" },
 };
 
 const isBase = (a: AnimatedArchetype): a is BaseArchetype => a in BASE;

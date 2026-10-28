@@ -15,6 +15,7 @@ import { BattleAccess, runBattleMutation } from "@/lib/utils/battle/pipeline/run
 import type { BattleMeta, BattleSceneState, SnapshotState, StoredBattleEvent, StoredParticipant } from "@/lib/utils/battle/store";
 import { buildSnapshotState, eventToBattleAction, joinParticipant, prepareSave, splitParticipant } from "@/lib/utils/battle/store";
 import { KNOWLEDGE_EVENT_TYPES, summarizeKnowledge } from "@/lib/utils/battle/view/knowledge";
+import { DEFAULT_RULES } from "@/lib/utils/rules";
 import type { BattleMutationResponse, BattleScene } from "@/types/api";
 import type { ActiveEffect, BattleParticipant } from "@/types/battle";
 
@@ -42,7 +43,7 @@ function memoryBattle(init: { participants: BattleParticipant[]; pending?: Battl
     ...init.scene,
   };
 
-  const meta: BattleMeta = { name: "Бій", description: null, setup: [], friendlyFire: false, map: null, createdAt: CREATED_AT };
+  const meta: BattleMeta = { name: "Бій", description: null, setup: [], friendlyFire: false, rules: DEFAULT_RULES, map: null, createdAt: CREATED_AT };
 
   let rows: StoredParticipant[] = wire([
     ...init.participants.map((p, i) => splitParticipant(p, { orderIndex: i, isPending: false })),

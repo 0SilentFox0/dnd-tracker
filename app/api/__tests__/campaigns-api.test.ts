@@ -5,6 +5,7 @@ import { createRequest,getResponseJson, getResponseStatus } from "./helpers";
 
 import { prisma } from "@/lib/db";
 import * as apiAuth from "@/lib/utils/api/api-auth";
+import { DEFAULT_RULES } from "@/lib/utils/rules";
 
 vi.mock("@/lib/utils/api/api-auth", () => ({
   requireAuth: vi.fn(),
@@ -185,6 +186,7 @@ describe("PATCH /api/campaigns/[id]", () => {
       userId: "dm-1",
       isDM: false,
       campaign: {
+        rules: DEFAULT_RULES,
         id: campaignId,
         maxLevel: 20,
         allowPlayerEdit: true,

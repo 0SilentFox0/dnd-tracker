@@ -9,6 +9,7 @@ import { loadEquippedArtifactRows } from "@/lib/utils/battle/participant/extract
 import { loadCharacterContext } from "@/lib/utils/battle/participant/load-character-context";
 import { getCharacterImmunities } from "@/lib/utils/characters/character-race-effects";
 import { buildCharacterSheet } from "@/lib/utils/characters/sheet";
+import type { Ruleset } from "@/lib/utils/rules";
 import { normalizeTree, readUnlocked, skillPoints } from "@/lib/utils/skills/progression";
 import type { CharacterSheet, SheetArtifact } from "@/types/characters";
 
@@ -16,8 +17,8 @@ export const loadSheetCharacter = (characterId: string) => prisma.character.find
 
 export type SheetCharacter = NonNullable<Awaited<ReturnType<typeof loadSheetCharacter>>>;
 
-export async function buildSheetFor(character: SheetCharacter, viewer: CharacterSheet["viewer"], maxLevel: number): Promise<CharacterSheet> {
-  const { context, race, tree } = await loadCharacterContext(character, maxLevel);
+export async function buildSheetFor(character: SheetCharacter, viewer: CharacterSheet["viewer"], campaign: { maxLevel: number; rules: Ruleset }): Promise<CharacterSheet> {
+  const { context, race, tree } = await loadCharacterContext(character, campaign);
 
   const built = await createBattleParticipantFromCharacter(character, "", ParticipantSide.ALLY, undefined, context);
 
@@ -40,7 +41,8 @@ export async function buildSheetFor(character: SheetCharacter, viewer: Character
   return buildCharacterSheet({
     participant,
     viewer,
-    maxLevel,
+    maxLevel: campaign.maxLevel,
+    rules: campaign.rules,
     chapters,
     character,
     raceIcon: race?.icon ?? null,

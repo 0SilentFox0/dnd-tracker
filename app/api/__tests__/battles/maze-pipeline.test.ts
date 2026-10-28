@@ -14,6 +14,7 @@ import type { PipelineDeps, RunBattleMutationOptions } from "@/lib/utils/battle/
 import { BattleAccess, runBattleMutation } from "@/lib/utils/battle/pipeline/run-battle-mutation";
 import type { BattleMeta, BattleSceneState, SnapshotState, StoredBattleEvent, StoredParticipant } from "@/lib/utils/battle/store";
 import { buildSnapshotState, eventToBattleAction, joinParticipant, prepareSave, splitParticipant } from "@/lib/utils/battle/store";
+import { DEFAULT_RULES } from "@/lib/utils/rules";
 import type { BattleMutationResponse, BattleScene } from "@/types/api";
 import type { BattleMapConfig, BattleParticipant, GridPoint, MazeConfig } from "@/types/battle";
 
@@ -34,7 +35,7 @@ const scene0: BattleSceneState = {
 function memoryBattle(participants: BattleParticipant[], map: BattleMapConfig) {
   let scene = { ...scene0 };
 
-  const meta: BattleMeta = { name: "Бій", description: null, setup: [], friendlyFire: false, map, createdAt: new Date() };
+  const meta: BattleMeta = { name: "Бій", description: null, setup: [], friendlyFire: false, rules: DEFAULT_RULES, map, createdAt: new Date() };
 
   let rows: StoredParticipant[] = wire(participants.map((p, i) => splitParticipant(p, { orderIndex: i, isPending: false })));
 
@@ -208,7 +209,7 @@ describe("дельта лабіринту", () => {
   const bigMap: BattleMapConfig = { ...big, rows: 30, maze: { ...(big.maze as MazeConfig), walls: allInteriorEdges({ cols: 40, rows: 30 }) } };
 
   const args = (map: BattleMapConfig) => ({
-    before: { scene: scene0, meta: { name: "Бій", description: null, setup: [], friendlyFire: false, map: bigMap, createdAt: new Date() }, participants: [], pending: [] },
+    before: { scene: scene0, meta: { name: "Бій", description: null, setup: [], friendlyFire: false, rules: DEFAULT_RULES, map: bigMap, createdAt: new Date() }, participants: [], pending: [] },
     after: { ...scene0, version: 2 },
     participants: [],
     pending: [],

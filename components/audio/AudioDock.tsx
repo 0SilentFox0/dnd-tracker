@@ -17,7 +17,7 @@ import { cn } from "@/lib/utils";
  * collapseOn — нове не-null значення згортає панель (у бою — новий хід: вікно ходу забирає ту саму висоту).
  * collapseTick — кожне зростання лічильника теж згортає панель.
  */
-export function AudioDock({ placement, collapseOn = null, collapseTick = 0 }: { placement: "corner" | "strip"; collapseOn?: string | null; collapseTick?: number }) {
+export function AudioDock({ placement, collapseOn = null, collapseTick = 0, defaultExpanded }: { placement: "corner" | "strip"; collapseOn?: string | null; collapseTick?: number; defaultExpanded?: boolean }) {
   const { state, sound, dm, prefs } = usePlayerAudio();
 
   const wide = useMediaQuery(DESKTOP_QUERY);
@@ -36,7 +36,7 @@ export function AudioDock({ placement, collapseOn = null, collapseTick = 0 }: { 
     if ((collapseOn !== null && collapseOn !== seenCollapseOn) || collapseTick > seenTick) setChoice(false);
   }
 
-  const expanded = choice ?? (placement === "corner" && wide);
+  const expanded = choice ?? defaultExpanded ?? (placement === "corner" && wide);
 
   const strip = placement === "strip";
 

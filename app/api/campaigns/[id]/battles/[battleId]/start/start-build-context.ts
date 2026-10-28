@@ -4,6 +4,7 @@ import { prisma } from "@/lib/db";
 import { attachArtifactSetsToSpellContext } from "@/lib/utils/battle/artifact-sets";
 import { referencedSkillIds } from "@/lib/utils/battle/participant/extract-skills";
 import type { CampaignSpellContext } from "@/lib/utils/battle/types/participant";
+import { parseRules } from "@/lib/utils/rules/schema";
 
 type CharacterWithRelations = Prisma.CharacterGetPayload<{
   include: { inventory: true };
@@ -51,7 +52,7 @@ export async function buildCampaignContextForStart(
     raceFilters.length > 0 ? prisma.race.findMany({ where: { campaignId, OR: raceFilters } }) : [],
     prisma.campaign.findUnique({
       where: { id: campaignId },
-      select: { maxLevel: true },
+      select: { maxLevel: true, rules: true },
     }),
     ...(characters.length > 0
       ? [
@@ -145,6 +146,7 @@ export async function buildCampaignContextForStart(
       campaign: {
         maxLevel: (campaign as { maxLevel?: number })?.maxLevel ?? 20,
       },
+      rules: parseRules(campaign?.rules ?? {}),
       skillsById,
       artifactsById:
         Object.keys(artifactsById).length > 0 ? artifactsById : undefined,

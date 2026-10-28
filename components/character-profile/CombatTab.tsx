@@ -10,6 +10,7 @@ import { EmptyState } from "@/components/common/states";
 import { HudSection } from "@/components/hud/form";
 import { ABILITY_SHORT_LABELS } from "@/lib/constants/abilities";
 import { AttackType } from "@/lib/constants/battle";
+import { useCampaignRules } from "@/lib/hooks/campaigns";
 import { cn } from "@/lib/utils";
 import { signed } from "@/lib/utils/common/format";
 import type { SheetLine } from "@/types/characters";
@@ -31,7 +32,9 @@ function Row({ label, value, lines }: { label: string; value: string; lines?: Sh
 }
 
 export function CombatTab() {
-  const { sheet } = useProfile();
+  const { campaignId, sheet } = useProfile();
+
+  const { data: rules } = useCampaignRules(campaignId);
 
   const [openAttack, setOpenAttack] = useState<string | null>(null);
 
@@ -83,7 +86,7 @@ export function CombatTab() {
         <Row label="AC" value={String(sheet.armorClass.total)} lines={sheet.armorClass.lines} />
         <Row label="Ініціатива" value={String(sheet.initiative)} />
         <Row label="Швидкість" value={String(sheet.speed)} />
-        <Row label="Мораль" value={signed(sheet.morale)} />
+        {rules?.morale.enabled !== false && <Row label="Мораль" value={signed(sheet.morale)} />}
         <Row label="Цілей за атаку" value={sheet.targets.min === sheet.targets.max ? String(sheet.targets.max) : `${sheet.targets.min}–${sheet.targets.max}`} />
         {sheet.immunities.length > 0 && <Row label="Імунітети" value={sheet.immunities.join(", ")} />}
       </HudSection>

@@ -380,11 +380,12 @@ export function getCriticalEffect(
 export function getRandomCriticalEffect(
   type: "success" | "fail",
   rng: () => number = Math.random,
-): CriticalEffect {
-  const effects =
+  disabledIds: string[] = [],
+): CriticalEffect | undefined {
+  const all =
     type === "success" ? CRITICAL_SUCCESS_EFFECTS : CRITICAL_FAIL_EFFECTS;
 
-  const randomId = Math.floor(rng() * effects.length) + 1;
+  const effects = all.filter((effect) => !disabledIds.includes(String(effect.id)));
 
-  return getCriticalEffect(randomId, type) || effects[0];
+  return effects[Math.floor(rng() * effects.length)];
 }

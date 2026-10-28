@@ -104,10 +104,11 @@ export function createAttackMutation(deps: AttackMutationDeps = defaultDeps) {
       isDM: ctx.isDM,
       rng: ctx.rng,
       map: ctx.meta.map,
+      rules: ctx.meta.rules,
       hitSpells,
     });
 
-    const summoned = await applyAbilitySummons(phase.summons, phase.finalInitiativeOrder, { campaignId: ctx.scene.campaignId, battleId: ctx.scene.id, rng: ctx.rng ?? Math.random, deps });
+    const summoned = await applyAbilitySummons(phase.summons, phase.finalInitiativeOrder, { campaignId: ctx.scene.campaignId, battleId: ctx.scene.id, rng: ctx.rng ?? Math.random, rules: ctx.meta.rules, deps });
 
     const order = summoned.order;
 
@@ -117,7 +118,7 @@ export function createAttackMutation(deps: AttackMutationDeps = defaultDeps) {
 
     if (!endTurn) return { participants: order, pending: ctx.pending, events };
 
-    const advanced = advanceTurn({ participants: order, pending: ctx.pending, scene: ctx.scene, rng: ctx.rng, map: ctx.meta.map });
+    const advanced = advanceTurn({ participants: order, pending: ctx.pending, scene: ctx.scene, rng: ctx.rng, map: ctx.meta.map, rules: ctx.meta.rules });
 
     return {
       participants: advanced.participants,

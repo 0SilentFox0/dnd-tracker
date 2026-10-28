@@ -5,16 +5,17 @@ import { loadCharacterBalanceStats } from "./character-stats";
 
 import { buildPartyPower, computeFairScaling, heroMember, pickEnemyRoster, unitMember } from "@/lib/utils/battle/balance";
 import { loadUnitLibraryStats } from "@/lib/utils/battle/balance/unit-library";
+import type { Ruleset } from "@/lib/utils/rules";
 import type { AllyStats, SuggestedEnemy } from "@/types/battle-setup";
 
 type BalancePostData = z.infer<typeof balanceSchema>;
 
 const round1 = (n: number) => Math.round(n * 10) / 10;
 
-export async function postBalanceResponse(campaignId: string, data: BalancePostData) {
+export async function postBalanceResponse(campaignId: string, data: BalancePostData, rules?: Ruleset) {
   const { allyParticipants, suggest, raceId } = data;
 
-  const library = await loadUnitLibraryStats(campaignId);
+  const library = await loadUnitLibraryStats(campaignId, rules);
 
   const members: Parameters<typeof buildPartyPower>[0] = [];
 

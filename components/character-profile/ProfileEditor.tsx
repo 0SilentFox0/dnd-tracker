@@ -78,7 +78,7 @@ export function ProfileEditor({ onDone }: { onDone: () => void }) {
             content: (
               <div className="space-y-6">
                 <CharacterAbilityScores abilityScores={abilityScores} withPrimary />
-                <CharacterCombatParams combatStats={combatStats} />
+                <CharacterCombatParams campaignId={campaignId} combatStats={combatStats} />
                 <CharacterSkillsSection skills={skills} />
               </div>
             ),

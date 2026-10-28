@@ -26,10 +26,17 @@ export interface RichDoc {
   content: RichNode[];
 }
 
+export interface ScenarioRowSlide {
+  deckId: string;
+  slideId: string;
+}
+
 export interface ScenarioRow {
   id: string;
   story: RichDoc;
   notes: RichDoc;
+  slide?: ScenarioRowSlide;
+  battleId?: string;
 }
 
 export type RevealRule = { mode: "manual" } | { mode: "afterSection"; pageId: string; sectionId: string };

@@ -2,6 +2,7 @@ import { ParticipantSide } from "@/lib/constants/battle";
 import { collectModifiers } from "@/lib/utils/abilities/engine/core/collect-modifiers";
 import { isAirborne, withSelf } from "@/lib/utils/abilities/engine/core/participants";
 import { cooldownLeft, withinCountLimits } from "@/lib/utils/abilities/engine/core/usage";
+import { HARMFUL_FLAGS } from "@/lib/utils/abilities/engine/effects/harmful-flags";
 import { deadTargetRules, isEligibleDeadTarget } from "@/lib/utils/abilities/target-rules";
 import { calculateAttackBonus } from "@/lib/utils/battle/attack/bonus";
 import { attackKindOf } from "@/lib/utils/battle/common/attack-kind";
@@ -72,9 +73,6 @@ const isManeuver = (a: ResolvedAbility) => a.effects.some((e) => e.kind === "man
 
 const HOSTILE = new Set(["dealDamage", "dot", "applyCondition"]);
 
-// flags read from the holder's side: these help whoever attacks the holder
-const HOSTILE_FLAGS = new Set(["advantageForAttackers", "disadvantage"]);
-
 export function bonusTargetSide(a: ResolvedAbility): ParticipantSide | null {
   if (isManeuver(a)) return ParticipantSide.ENEMY;
 
@@ -84,7 +82,7 @@ export function bonusTargetSide(a: ResolvedAbility): ParticipantSide | null {
 
   const hostile = aimed.some((e) =>
     HOSTILE.has(e.kind) ||
-    (e.kind === "flag" && HOSTILE_FLAGS.has(e.flag)) ||
+    (e.kind === "flag" && HARMFUL_FLAGS.has(e.flag)) ||
     (("flat" in e && typeof e.flat === "number" && e.flat < 0) || ("percent" in e && typeof e.percent === "number" && e.percent < 0)),
   );
 

@@ -4,6 +4,7 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import { characterKeys } from "@/lib/hooks/characters/keys";
 import { PrefetchedQuery } from "@/lib/providers/prefetched-query";
+import { DEFAULT_RULES } from "@/lib/utils/rules";
 
 const readCharacterSheet = vi.hoisted(() => vi.fn());
 
@@ -37,7 +38,7 @@ describe("CharacterPage (server)", () => {
 
     const el = await render();
 
-    expect(readCharacterSheet).toHaveBeenCalledWith({ id: "c1", characterId: "ch1", known: { userId: "u1", isDM: false, maxLevel: 20 } });
+    expect(readCharacterSheet).toHaveBeenCalledWith({ id: "c1", characterId: "ch1", known: { userId: "u1", isDM: false, maxLevel: 20, rules: DEFAULT_RULES } });
     expect(el.type).toBe(PrefetchedQuery);
     expect(el.props.queryKey).toEqual(characterKeys.sheet("c1", "ch1"));
     expect(el.props.data).toEqual(sheet);

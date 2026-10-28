@@ -3,6 +3,7 @@ import type { CastableSpell } from "./spell-process";
 
 import type { CriticalEffect } from "@/lib/constants/critical-effects";
 import type { SummonRequest } from "@/lib/utils/abilities/engine/core/types";
+import type { Ruleset } from "@/lib/utils/rules";
 import type { BattleAction, BattleAttack, BattleMapConfig, BattleParticipant } from "@/types/battle";
 
 export interface ProcessAttackParams {
@@ -31,6 +32,7 @@ export interface ProcessAttackParams {
   /** Що з кубиків докинув сервер: d20 і шкода від цього індексу */
   serverRolled?: { d20?: boolean; damageFrom?: number };
   map?: BattleMapConfig | null;
+  rules?: Ruleset;
   /** Лише текст і зміни учасників: summons і зона закляття на влучання не застосовуються (зараз це Dark 1-3) */
   hitSpells?: ReadonlyMap<string, CastableSpell>;
 }

@@ -87,7 +87,7 @@ describe("advanceFxQueue", () => {
   });
 
   describe("morale dice", () => {
-    const m = (d10: number): MoraleThrow => ({ key: `1:0:p:${d10}`, spec: { seed: 1, groups: [[{ sides: 10, value: d10 }]], caption: "x · мораль", extraSaves: 0 } });
+    const m = (d10: number): MoraleThrow => ({ key: `1:0:p:${d10}`, spec: { seed: 1, groups: [[{ sides: 10, value: d10 }]] } });
 
     const base = adv(INITIAL_FX_QUEUE, [melee(1)], true);
 

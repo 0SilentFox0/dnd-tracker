@@ -10,7 +10,7 @@ export function nextTurnMutation(ctx: BattleMutationContext): MutationResult {
 
   if (ended && !ctx.isDM && !skipText) assertMoraleResolved(ctx, ended.basicInfo.id);
 
-  const out = advanceTurn({ participants: ctx.participants, pending: ctx.pending, scene: ctx.scene, rng: ctx.rng, map: ctx.meta.map });
+  const out = advanceTurn({ participants: ctx.participants, pending: ctx.pending, scene: ctx.scene, rng: ctx.rng, map: ctx.meta.map, rules: ctx.meta.rules });
 
   const events = out.actions.map(battleActionToEvent);
 

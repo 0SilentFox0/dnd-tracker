@@ -5,6 +5,7 @@ import { createRequest,getResponseJson, getResponseStatus } from "./helpers";
 
 import { prisma } from "@/lib/db";
 import * as apiAuth from "@/lib/utils/api/api-auth";
+import { DEFAULT_RULES } from "@/lib/utils/rules";
 
 vi.mock("@/lib/utils/api/api-auth", () => ({
   requireAuth: vi.fn(),
@@ -55,6 +56,7 @@ describe("GET /api/campaigns/[id]/battles", () => {
       userId: "user-1",
       isDM: false,
       campaign: {
+        rules: DEFAULT_RULES,
         id: "c1",
         maxLevel: 20,
         allowPlayerEdit: true,
@@ -139,6 +141,7 @@ describe("POST /api/campaigns/[id]/battles", () => {
       userId: "dm-1",
       isDM: false,
       campaign: {
+        rules: DEFAULT_RULES,
         id: "c1",
         maxLevel: 20,
         allowPlayerEdit: true,
@@ -167,6 +170,7 @@ describe("POST /api/campaigns/[id]/battles", () => {
       userId: "dm-1",
       isDM: false,
       campaign: {
+        rules: DEFAULT_RULES,
         id: "c1",
         maxLevel: 20,
         allowPlayerEdit: true,

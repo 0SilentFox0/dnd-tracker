@@ -29,7 +29,10 @@ export async function readCharacter(campaignId: string, characterId: string): Pr
     return errorResponse(API_ERRORS.FORBIDDEN, 403);
   }
 
-  const knownSpells = Array.isArray(character.knownSpells) ? character.knownSpells : [];
+  const { notes, ...rest } = character;
 
-  return NextResponse.json({ ...character, knownSpells });
+  const knownSpells = Array.isArray(rest.knownSpells) ? rest.knownSpells : [];
+
+  // нотатки — особисті: майстер їх не бачить
+  return NextResponse.json({ ...rest, ...(character.controlledBy === userId && { notes }), knownSpells });
 }

@@ -6,6 +6,7 @@ import type { Editor } from "@tiptap/core";
 import { OrderButtons } from "./OrderButtons";
 import { PagePropertiesDialog } from "./PagePropertiesDialog";
 import { RevealSettings } from "./RevealSettings";
+import { RowBindings } from "./RowBindings";
 import { SaveStatus } from "./SaveStatus";
 import { type CellColumn, ScenarioCell } from "./ScenarioCell";
 import { ScenarioToolbar } from "./ScenarioToolbar";
@@ -14,7 +15,7 @@ import { SectionHeaderEditor } from "./SectionHeaderEditor";
 import { ScenarioLegend } from "@/components/scenario/ScenarioLegend";
 import { useConfirm } from "@/lib/hooks/common";
 import { useMentionSearch, useScenarioDraft, useScenarioPage } from "@/lib/hooks/scenario";
-import { addRow, addSection, moveRow, moveSection, removeRow, removeSection, updateRow, updateSection } from "@/lib/utils/scenario/structure";
+import { addRow, addSection, moveRow, moveSection, removeRow, removeSection, setRowBattle, setRowSlide, updateRow, updateSection } from "@/lib/utils/scenario/structure";
 import type { RevealRule, RichDoc, ScenarioPage } from "@/types/scenario";
 
 type ActiveCell = { rowId: string; column: CellColumn } | null;
@@ -106,6 +107,12 @@ export function ScenarioEditor({ campaignId, page, onExit, toolbarActions }: { c
                 <div className="story">{renderCell(s.id, r.id, "story", r.story)}</div>
                 <aside className="notes" style={{ display: "block" }}>
                   {renderCell(s.id, r.id, "notes", r.notes)}
+                  <RowBindings
+                    campaignId={campaignId}
+                    pageId={page.id}
+                    row={r}
+                    onChange={{ slide: (v) => draft.setContent((c) => setRowSlide(c, s.id, r.id, v)), battle: (v) => draft.setContent((c) => setRowBattle(c, s.id, r.id, v)) }}
+                  />
                   <div className="sans" style={{ display: "flex", gap: 4, marginTop: 10, justifyContent: "flex-end" }}>
                     <OrderButtons
                       labels={{ up: "Рядок вгору", down: "Рядок вниз", remove: "Видалити рядок" }}

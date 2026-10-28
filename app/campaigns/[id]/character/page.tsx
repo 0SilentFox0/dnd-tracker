@@ -8,6 +8,7 @@ import { characterKeys } from "@/lib/hooks/characters/keys";
 import { PrefetchedQuery } from "@/lib/providers/prefetched-query";
 import { requireCampaignMember } from "@/lib/server/campaigns/access";
 import { readOkJson } from "@/lib/utils/api/read-json";
+import { parseRules } from "@/lib/utils/rules/schema";
 import type { CharacterSheet } from "@/types/characters";
 
 export default async function CharacterPage({ params, searchParams }: { params: Promise<{ id: string }>; searchParams: Promise<{ tab?: string }> }) {
@@ -28,7 +29,7 @@ export default async function CharacterPage({ params, searchParams }: { params: 
     );
   }
 
-  const sheet = await readOkJson<CharacterSheet>(await readCharacterSheet({ id, characterId: character.id, known: { userId, isDM, maxLevel: campaign.maxLevel } }));
+  const sheet = await readOkJson<CharacterSheet>(await readCharacterSheet({ id, characterId: character.id, known: { userId, isDM, maxLevel: campaign.maxLevel, rules: parseRules(campaign.rules) } }));
 
   return (
     <PrefetchedQuery queryKey={characterKeys.sheet(id, character.id)} data={sheet}>

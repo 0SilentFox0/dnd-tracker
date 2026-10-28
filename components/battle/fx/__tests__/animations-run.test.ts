@@ -76,8 +76,6 @@ function row(x: number, y: number) {
 }
 
 async function setup() {
-  vi.resetModules();
-
   const { loadAnimation } = await import("@/components/battle/fx/animations");
 
   const { PALETTE } = await import("@/components/battle/fx/runtime/palette");

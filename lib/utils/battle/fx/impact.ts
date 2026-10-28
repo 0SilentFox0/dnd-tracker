@@ -6,6 +6,9 @@ export interface FxImpact {
   kind: "damage" | "heal";
   delayMs: number;
   attack?: "melee" | "ranged";
+  /** Бій: кадр чекає `fireFxImpact(actionId)` замість `delayMs`. */
+  actionId?: string;
+  waitMs?: number;
 }
 
 /** `spec` is the first FX of the last action (`mapAction(action)[0]`), mapped once for all rows. */

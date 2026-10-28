@@ -116,6 +116,60 @@ describe("useBattleFxQueue", () => {
     expect(result.current.current).toBeNull();
   });
 
+  it("сигнал удару: дія поза чергою — одразу, дія в черзі — лише після свого FX або коли черга її відкинула", async () => {
+    const { BattleSceneDataContext, useBattleFxQueue, onFxImpact } = await load();
+
+    let log: BattleAction[] = range(1);
+
+    const wrapper = ({ children }: { children: ReactNode }) => <BattleSceneDataContext.Provider value={{ battle: { battleLog: log } } as never}>{children}</BattleSceneDataContext.Provider>;
+
+    const { result, rerender } = renderHook(({ on }) => useBattleFxQueue(on), { wrapper, initialProps: { on: true } });
+
+    const seen: string[] = [];
+
+    for (const id of ["b-1", "b-2", "b-3"]) onFxImpact(id, 60_000, () => seen.push(id));
+
+    log = range(3);
+    rerender({ on: true });
+    await act(async () => Promise.resolve());
+
+    expect(seen).toEqual(["b-1"]);
+
+    act(() => result.current.done("b-2:0"));
+
+    expect(seen).toEqual(["b-1", "b-2"]);
+
+    rerender({ on: false });
+
+    expect(seen).toEqual(["b-1", "b-2", "b-3"]);
+  });
+
+  it("useFxBusy: зайнято, поки черга не порожня; FX вимкнено — вільно", async () => {
+    const { BattleSceneDataContext, useBattleFxQueue, useFxBusy } = await load();
+
+    let log: BattleAction[] = range(1);
+
+    const wrapper = ({ children }: { children: ReactNode }) => <BattleSceneDataContext.Provider value={{ battle: { battleLog: log } } as never}>{children}</BattleSceneDataContext.Provider>;
+
+    const { result, rerender } = renderHook(({ on }) => ({ queue: useBattleFxQueue(on), busy: useFxBusy() }), { wrapper, initialProps: { on: true } });
+
+    expect(result.current.busy).toBe(false);
+
+    log = range(2);
+    rerender({ on: true });
+
+    expect(result.current.busy).toBe(true);
+
+    act(() => result.current.queue.done("b-2:0"));
+
+    expect(result.current.busy).toBe(false);
+
+    log = range(3);
+    rerender({ on: false });
+
+    expect(result.current.busy).toBe(false);
+  });
+
   it("FX off with a pending queue → current null", async () => {
     const { BattleSceneDataContext, useBattleFxQueue } = await load();
 

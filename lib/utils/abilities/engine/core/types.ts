@@ -1,4 +1,5 @@
 import type { StaticEffect } from "@/lib/utils/abilities/schema";
+import type { Ruleset } from "@/lib/utils/rules";
 import type { BattleMapConfig, BattleParticipant } from "@/types/battle";
 
 export type Rng = () => number;
@@ -8,6 +9,7 @@ export interface AbilityRunContext {
   rng: Rng;
   depth?: number;
   map?: BattleMapConfig | null;
+  rules?: Ruleset;
 }
 
 export interface SummonRequest {

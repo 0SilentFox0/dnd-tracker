@@ -102,7 +102,7 @@ export function createAddParticipantMutation(deps: AddParticipantDeps = defaultD
         throw new BattleAccessError(404, "Персонажа не знайдено");
       }
 
-      added.push(await deps.fromCharacter(character, battleId, side));
+      added.push(await deps.fromCharacter(character, battleId, side, undefined, undefined, { rules: ctx.meta.rules }));
     } else {
       const unit = await deps.loadUnit(data.sourceId);
 
@@ -113,7 +113,7 @@ export function createAddParticipantMutation(deps: AddParticipantDeps = defaultD
       const twin = side === ParticipantSide.ENEMY ? [...ctx.participants, ...reserveOf(ctx.pending)].find((p) => p.basicInfo.sourceId === unit.id && p.basicInfo.side === ParticipantSide.ENEMY) : undefined;
 
       for (let i = 0; i < (data.quantity ?? 1); i++) {
-        const fresh = await deps.fromUnit(unit, battleId, side, i + 1);
+        const fresh = await deps.fromUnit(unit, battleId, side, i + 1, undefined, ctx.meta.rules);
 
         added.push(twin ? matchScaling(fresh, twin) : fresh);
       }

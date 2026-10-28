@@ -32,15 +32,9 @@ export function useDamageShake<T extends HTMLElement>(change: HpChange | null) {
 
   const id = change && change.delta < 0 ? change.id : null;
 
-  const delayMs = change?.impact?.delayMs ?? 0;
-
   useEffect(() => {
-    if (id === null) return;
-
-    const timer = setTimeout(() => ref.current?.animate?.(SHAKE, { duration: 350 }), delayMs);
-
-    return () => clearTimeout(timer);
-  }, [id, delayMs]);
+    if (id !== null) ref.current?.animate?.(SHAKE, { duration: 350 });
+  }, [id]);
 
   return ref;
 }

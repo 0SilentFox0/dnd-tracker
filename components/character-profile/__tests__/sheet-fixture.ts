@@ -46,6 +46,7 @@ export const sheetFixture: CharacterSheet = {
   story: {
     biography: "Мати ==загинула== давно",
     chapters: [],
+    notes: "Купити мотузку",
     goals: [
       { id: "d1", text: "Знайти брата", status: "active", author: "dm" },
       { id: "p1", text: "Повернути лук", status: "active", author: "player" },

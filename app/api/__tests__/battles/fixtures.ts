@@ -1,6 +1,7 @@
 import { ParticipantSide } from "@/lib/constants/battle";
 import { createMockParticipant } from "@/lib/utils/battle/__tests__/fixtures/mock-participant";
 import type { BattleMutationContext } from "@/lib/utils/battle/pipeline/run-battle-mutation";
+import { DEFAULT_RULES } from "@/lib/utils/rules";
 import type { BattleParticipant } from "@/types/battle";
 
 const base = createMockParticipant();
@@ -27,7 +28,7 @@ export function context(over: Partial<BattleMutationContext> = {}): BattleMutati
       startedAt: null,
       completedAt: null,
     },
-    meta: { name: "Бій", description: null, setup: [], friendlyFire: false, map: null, createdAt: new Date() },
+    meta: { name: "Бій", description: null, setup: [], friendlyFire: false, rules: DEFAULT_RULES, map: null, createdAt: new Date() },
     participants: [hero, goblin],
     pending: [],
     userId: "user-1",

@@ -33,7 +33,7 @@ const spend: Record<AbilityUseTrigger, (p: BattleParticipant) => BattleParticipa
   bonusAction: (p) => ({ ...p, actionFlags: { ...p.actionFlags, hasUsedBonusAction: true } }),
 };
 
-export const abilityRunContext = (ctx: BattleMutationContext): AbilityRunContext => ({ round: ctx.scene.round, rng: ctx.rng ?? Math.random, map: ctx.meta.map });
+export const abilityRunContext = (ctx: BattleMutationContext): AbilityRunContext => ({ round: ctx.scene.round, rng: ctx.rng ?? Math.random, map: ctx.meta.map, rules: ctx.meta.rules });
 
 export async function runAbilityUse(ctx: BattleMutationContext, req: AbilityUseRequest, trigger: AbilityUseTrigger, deps: SummonDeps): Promise<MutationResult> {
   const participant = findParticipant(ctx.participants, req.participantId);
@@ -70,7 +70,7 @@ export async function runAbilityUse(ctx: BattleMutationContext, req: AbilityUseR
 
   const run = runAbilities(order, { type: trigger, actorId: id, abilityKey: ability.key, targetIds, ...(targetCell && { targetCell }) }, abilityRunContext(ctx));
 
-  const summoned = await applyAbilitySummons(run.summons, run.participants, { campaignId: ctx.scene.campaignId, battleId: ctx.scene.id, rng: ctx.rng ?? Math.random, deps });
+  const summoned = await applyAbilitySummons(run.summons, run.participants, { campaignId: ctx.scene.campaignId, battleId: ctx.scene.id, rng: ctx.rng ?? Math.random, rules: ctx.meta.rules, deps });
 
   const participants = usage.spendFirst ? summoned.order : updateParticipant(summoned.order, id, spend[trigger]);
 

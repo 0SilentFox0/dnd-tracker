@@ -97,7 +97,7 @@ function resolveHazardHit(
   const messages = [hit.message];
 
   if (!isActive(hit.participant)) {
-    const downed = resolveDowned(next, { victimId: id, actorId: null }, { round: ctx.scene.round, rng: ctx.rng ?? Math.random });
+    const downed = resolveDowned(next, { victimId: id, actorId: null }, { round: ctx.scene.round, rng: ctx.rng ?? Math.random, rules: ctx.meta.rules });
 
     next = downed.participants;
     messages.push(...downed.messages);

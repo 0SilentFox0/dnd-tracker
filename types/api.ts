@@ -5,6 +5,7 @@ import type { GroupedSkillPayload } from "./hooks";
 import { BattleStatus, type CombatStatusType, type ParticipantSourceTypeValue } from "@/lib/constants/battle";
 import { type CampaignRoleValue } from "@/lib/constants/campaigns";
 import type { mazeActionSchema, mazeMarkSchema } from "@/lib/schemas/battles";
+import type { Ruleset } from "@/lib/utils/rules";
 import type { BattleAudioState } from "@/types/audio";
 import type { BattleMapConfig, GridPoint, MazeConfig, TerrainDiff, TerrainKind, WeatherKind } from "@/types/battle";
 
@@ -44,6 +45,7 @@ export interface BattleScene {
   currentRound: number;
   currentTurnIndex: number;
   initiativeOrder: BattleParticipant[];
+  rules: Ruleset;
   /** Призвані істоти (з’являться на початку наступного раунду) */
   pendingSummons?: BattleParticipant[];
   battleLog: BattleAction[];

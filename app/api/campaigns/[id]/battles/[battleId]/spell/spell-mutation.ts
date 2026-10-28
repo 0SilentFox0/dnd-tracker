@@ -105,6 +105,7 @@ export function createSpellMutation(deps: SpellMutationDeps = defaultDeps) {
       isDMCast: free,
       rng,
       map: ctx.meta.map,
+      rules: ctx.meta.rules,
     });
 
     if (!result.success) throw new BattleRuleError("action_rejected", "Немає вільного слота для цього заклинання");
@@ -135,7 +136,7 @@ export function createSpellMutation(deps: SpellMutationDeps = defaultDeps) {
       };
     }
 
-    const summoned = await applyAbilitySummons(result.summons, result.allParticipantsUpdated, { campaignId: ctx.scene.campaignId, battleId: ctx.scene.id, rng, deps });
+    const summoned = await applyAbilitySummons(result.summons, result.allParticipantsUpdated, { campaignId: ctx.scene.campaignId, battleId: ctx.scene.id, rng, rules: ctx.meta.rules, deps });
 
     const action = summoned.messages.length > 0 ? { ...result.battleAction, resultText: [result.battleAction.resultText, ...summoned.messages].join(" | ") } : result.battleAction;
 

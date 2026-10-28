@@ -19,6 +19,7 @@ import {
   calculateInitiative,
   sortByInitiative,
 } from "@/lib/utils/battle/turn/initiative";
+import { DEFAULT_RULES, type Ruleset } from "@/lib/utils/rules";
 import type { BattleAction, BattleMapConfig, BattleParticipant, BattlePreparationParticipant } from "@/types/battle";
 
 export async function buildStartOrder(
@@ -26,6 +27,7 @@ export async function buildStartOrder(
   campaignId: string,
   setup: BattlePreparationParticipant[],
   map: BattleMapConfig | null = null,
+  rules: Ruleset = DEFAULT_RULES,
 ): Promise<{ order: BattleParticipant[]; reserve: BattleParticipant[]; triggerLogEntries: BattleAction[] }> {
   const participantsRaw = setup as Array<{
     id: string;
@@ -122,7 +124,7 @@ export async function buildStartOrder(
             undefined,
             campaignContext,
           )
-        : createBattleParticipantFromUnit(slot.unit, battleId, slot.side, slot.instanceNumber, racesById),
+        : createBattleParticipantFromUnit(slot.unit, battleId, slot.side, slot.instanceNumber, racesById, rules),
     ),
   );
 
@@ -136,6 +138,7 @@ export async function buildStartOrder(
     initiativeOrder,
     battleId,
     map,
+    rules,
   );
 
   return {
@@ -149,8 +152,9 @@ function applyStartOfBattleAndSort(
   initiativeOrder: BattleParticipant[],
   battleId: string,
   map: BattleMapConfig | null,
+  rules: Ruleset,
 ): { order: BattleParticipant[]; triggerLogEntries: BattleAction[] } {
-  const ctx = { round: 1, rng: Math.random, map };
+  const ctx = { round: 1, rng: Math.random, map, rules };
 
   const battleStart = runAbilities(
     // сплячі вороги лабіринту не спрацьовують на старті

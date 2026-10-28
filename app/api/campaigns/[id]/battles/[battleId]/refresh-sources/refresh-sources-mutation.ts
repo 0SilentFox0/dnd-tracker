@@ -68,8 +68,8 @@ export function createRefreshSourcesMutation(deps: RefreshSourcesDeps = defaultD
 
       const fresh =
         sourceType === ParticipantSourceType.CHARACTER
-          ? await deps.fromCharacter(row as CharacterRow, battleId, side, instanceNumber)
-          : await deps.fromUnit(row as UnitRow, battleId, side, instanceNumber ?? 1);
+          ? await deps.fromCharacter(row as CharacterRow, battleId, side, instanceNumber, undefined, { rules: ctx.meta.rules })
+          : await deps.fromUnit(row as UnitRow, battleId, side, instanceNumber ?? 1, undefined, ctx.meta.rules);
 
       refreshed++;
 

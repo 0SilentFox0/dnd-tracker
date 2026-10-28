@@ -1,7 +1,7 @@
 import { z } from "zod";
 
 import { ABILITY_KEYS, SPELLCASTING_ABILITIES } from "@/lib/constants/abilities";
-import { CharacterType, HERO_INITIATIVE } from "@/lib/constants/characters";
+import { CharacterType, HERO_INITIATIVE, HERO_INITIATIVE_BOUNDS } from "@/lib/constants/characters";
 import { HERO_ARCHETYPE_KEYS } from "@/lib/constants/hero-archetypes";
 
 export const createCharacterSchema = z.object({
@@ -26,7 +26,7 @@ export const createCharacterSchema = z.object({
   charisma: z.number().min(1).max(30).default(10),
 
   armorClass: z.number().min(0).default(10),
-  initiative: z.number().int().min(HERO_INITIATIVE.MIN).max(HERO_INITIATIVE.MAX).default(HERO_INITIATIVE.DEFAULT),
+  initiative: z.number().int().min(HERO_INITIATIVE_BOUNDS.MIN).max(HERO_INITIATIVE_BOUNDS.MAX).default(HERO_INITIATIVE.DEFAULT),
   speed: z.number().min(0).default(30),
 
   savingThrows: z.record(z.string(), z.boolean()).default({}),
@@ -50,7 +50,7 @@ export const createCharacterSchema = z.object({
   languages: z.array(z.string()).default([]),
   proficiencies: z.record(z.string(), z.array(z.string())).default({}),
   immunities: z.array(z.string()).default([]),
-  morale: z.number().min(-3).max(3).default(0),
+  morale: z.number().min(-10).max(10).default(0),
 
 
   // Уміння (персональний скіл з групи «Персональні»)

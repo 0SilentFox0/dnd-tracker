@@ -4,6 +4,8 @@ export { type DraftError, type DraftState, useScenarioDraft } from "./useScenari
 export { useScenarioPage } from "./useScenarioPage";
 export { useScenarioPageActions } from "./useScenarioPageActions";
 export { useScenarioPages } from "./useScenarioPages";
+export { type ScenarioPlay, useScenarioPlay } from "./useScenarioPlay";
 export { useScenarioSearch } from "./useScenarioSearch";
 export { useScenarioVersions } from "./useScenarioVersions";
 export { useSectionProgress } from "./useSectionProgress";
+export { useShowDockExpanded } from "./useShowDockExpanded";

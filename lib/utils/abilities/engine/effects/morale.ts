@@ -4,7 +4,9 @@ import { resolvedAbilitiesOf } from "@/lib/utils/abilities/engine/core/participa
 import type { FlagKey } from "@/lib/utils/abilities/schema";
 import type { BattleParticipant } from "@/types/battle";
 
-const clampMorale = (v: number) => Math.max(-3, Math.min(3, v));
+export const moraleCapOf = (p: BattleParticipant) => p.abilities.moraleCap ?? 3;
+
+export const clampMorale = (v: number, cap: number) => Math.max(-cap, Math.min(cap, v));
 
 export function ownTimedMoraleFlat(p: BattleParticipant, ps?: BattleParticipant[]): number {
   let sum = 0;
@@ -37,10 +39,15 @@ function ownHasFlag(p: BattleParticipant, flag: FlagKey): boolean {
   return passive || liveActiveEffects(p).some((ae) => (ae.abilityEffects ?? []).some((e) => e.kind === "flag" && e.flag === flag));
 }
 
-export function combineMorale(base: number, timedFlat: number, flags: { ignored: boolean; noNegative: boolean; min?: number }): { value: number; ignored: boolean } {
-  if (flags.ignored) return { value: 0, ignored: true };
+export function combineMorale(
+  base: number,
+  timedFlat: number,
+  flags: { ignored: boolean; noNegative: boolean; min?: number },
+  cap = 3,
+): { value: number; ignored: boolean } {
+  if (flags.ignored || cap === 0) return { value: 0, ignored: true };
 
-  const raw = clampMorale(base + timedFlat);
+  const raw = clampMorale(base + timedFlat, cap);
 
   const value = raw < 0 && flags.noNegative ? 0 : raw;
 
@@ -48,5 +55,10 @@ export function combineMorale(base: number, timedFlat: number, flags: { ignored:
 }
 
 export function ownMorale(p: BattleParticipant): number {
-  return combineMorale(p.combatStats.morale, ownTimedMoraleFlat(p), { ignored: ownHasFlag(p, "ignoreMorale"), noNegative: ownHasFlag(p, "noNegativeMorale"), min: ownMinMorale(p) }).value;
+  return combineMorale(
+    p.combatStats.morale,
+    ownTimedMoraleFlat(p),
+    { ignored: ownHasFlag(p, "ignoreMorale"), noNegative: ownHasFlag(p, "noNegativeMorale"), min: ownMinMorale(p) },
+    moraleCapOf(p),
+  ).value;
 }

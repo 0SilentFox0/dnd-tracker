@@ -2,6 +2,7 @@
 
 import { ABILITY_LABELS } from "@/lib/constants/abilities";
 import { AttackType } from "@/lib/constants/battle";
+import { DEFAULT_RULES, proficiencyForLevel, type Ruleset } from "@/lib/utils/rules";
 import type { AbilityKey } from "@/types/characters";
 
 /**
@@ -25,9 +26,10 @@ export function getProficiencyBonus(level: number): number {
  */
 export function getSpellSaveDC(
   proficiencyBonus: number,
-  abilityModifier: number
+  abilityModifier: number,
+  base = 8,
 ): number {
-  return 8 + proficiencyBonus + abilityModifier;
+  return base + proficiencyBonus + abilityModifier;
 }
 
 /**
@@ -69,12 +71,13 @@ export function spellcastingDerived(
   level: number,
   ability: string | null | undefined,
   scores: Record<AbilityKey, number>,
+  formulas: Ruleset["formulas"] = DEFAULT_RULES.formulas,
 ): { saveDC: number; attackBonus: number } | null {
   if (!ability || !(ability in scores)) return null;
 
-  const prof = getProficiencyBonus(level);
+  const prof = proficiencyForLevel(level, formulas);
 
   const mod = getAbilityModifier(scores[ability as AbilityKey]);
 
-  return { saveDC: getSpellSaveDC(prof, mod), attackBonus: getSpellAttackBonus(prof, mod) };
+  return { saveDC: getSpellSaveDC(prof, mod, formulas.saveDcBase), attackBonus: getSpellAttackBonus(prof, mod) };
 }

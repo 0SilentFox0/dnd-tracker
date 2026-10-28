@@ -36,7 +36,7 @@ export interface MapTokenProps {
 function MapTokenImpl({ participant, box, mapSize, pxPerUnit, selected, current, passThrough, impact = null, effects = NO_EFFECTS, dormant, onClick, onHover }: MapTokenProps) {
   const { id, name } = participant.basicInfo;
 
-  const { change, shakeRef, delayStyle } = useHitFx<HTMLButtonElement>(participant.combatStats.currentHp, impact);
+  const { change, shakeRef } = useHitFx<HTMLButtonElement>(participant.combatStats.currentHp, impact);
 
   const portraitPx = Math.max(12, Math.round(box.size * pxPerUnit * PORTRAIT_SHARE));
 
@@ -65,7 +65,6 @@ function MapTokenImpl({ participant, box, mapSize, pxPerUnit, selected, current,
         <span
           key={`portrait:${change?.id ?? ""}`}
           data-map-token-flash={change ? (change.delta < 0 ? "damage" : "heal") : undefined}
-          style={delayStyle}
           className={cn("inline-flex rounded-full", hitFlashClass(change))}
         >
           <Portrait participant={participant} size={portraitPx} current={current} />

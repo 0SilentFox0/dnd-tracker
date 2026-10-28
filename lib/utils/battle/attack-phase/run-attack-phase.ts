@@ -11,6 +11,7 @@ import { activeEffectIds } from "@/lib/utils/battle/attack/consume-effects";
 import { resolveRetaliation } from "@/lib/utils/battle/attack/retaliation";
 import { heroAttackDamageParts } from "@/lib/utils/battle/damage/hero-damage";
 import type { CastableSpell } from "@/lib/utils/battle/types/spell-process";
+import type { Ruleset } from "@/lib/utils/rules";
 import type { ActiveEffect, BattleAction, BattleMapConfig, BattleParticipant } from "@/types/battle";
 
 export type AttackPhaseInput = {
@@ -25,6 +26,7 @@ export type AttackPhaseInput = {
   isDM: boolean;
   rng?: Rng;
   map?: BattleMapConfig | null;
+  rules?: Ruleset;
   hitSpells?: ReadonlyMap<string, CastableSpell>;
 };
 
@@ -95,6 +97,7 @@ export function runAttackPhase(input: AttackPhaseInput): AttackPhaseResult {
       damageMultiplier: targets.length > 1 ? fractions[i] : undefined,
       obstacle: data.obstacle,
       map: input.map,
+      rules: input.rules,
       hitSpells: input.hitSpells,
       rng,
       recordDice: true,
@@ -128,6 +131,7 @@ export function runAttackPhase(input: AttackPhaseInput): AttackPhaseResult {
         battleId,
         rng,
         map: input.map,
+        rules: input.rules,
       });
 
       if (retaliation) {

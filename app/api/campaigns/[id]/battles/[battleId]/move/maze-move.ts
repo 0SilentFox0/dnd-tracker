@@ -53,7 +53,7 @@ export function mazeMove(ctx: BattleMutationContext, data: MazeMoveBody, base: B
   const escapedEvent = actorEvent(ctx.scene.round, step.mover, MAZE_TEXTS.escaped(mover.basicInfo.name));
 
   // вихід завершує хід героя тим самим рушієм, що й attack з endTurn
-  const advanced = advanceTurn({ participants: after, pending: ctx.pending, scene: ctx.scene, rng: ctx.rng, map: map ?? base });
+  const advanced = advanceTurn({ participants: after, pending: ctx.pending, scene: ctx.scene, rng: ctx.rng, map: map ?? base, rules: ctx.meta.rules });
 
   return {
     participants: advanced.participants,

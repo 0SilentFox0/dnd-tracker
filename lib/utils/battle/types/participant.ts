@@ -1,6 +1,7 @@
 import type { Prisma } from "@prisma/client";
 
 import type { AttackType } from "@/lib/constants/battle";
+import type { Ruleset } from "@/lib/utils/rules";
 
 export type ArtifactModifier = {
   type: string;
@@ -37,6 +38,7 @@ export interface CampaignSpellContext {
   allSkills: Array<Prisma.SkillGetPayload<object>>;
   racesByName: Record<string, Prisma.RaceGetPayload<object> | null>;
   campaign: { maxLevel: number };
+  rules: Ruleset;
   skillsById?: Record<string, Prisma.SkillGetPayload<object>>;
   artifactsById?: Record<string, Prisma.ArtifactGetPayload<object>>;
   /** Сети артефактів (для бонусу повного комплекту без додаткових запитів). */

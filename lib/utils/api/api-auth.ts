@@ -6,6 +6,8 @@ import { prisma } from "@/lib/db";
 import { createClient } from "@/lib/supabase/server";
 import { errorResponse } from "@/lib/utils/api/api-response";
 import { isDmMember } from "@/lib/utils/api/is-dm";
+import type { Ruleset } from "@/lib/utils/rules";
+import { parseRules } from "@/lib/utils/rules/schema";
 
 export interface AuthResult {
   userId: string;
@@ -29,6 +31,7 @@ export interface CampaignAccessResult extends AuthResult {
   campaign: {
     id: string;
     maxLevel: number;
+    rules: Ruleset;
     allowPlayerEdit: boolean;
     members: Array<{ userId: string; role: string }>;
   };
@@ -104,6 +107,7 @@ export async function requireCampaignAccess(
     campaign: {
       id: campaign.id,
       maxLevel: campaign.maxLevel,
+      rules: parseRules(campaign.rules),
       allowPlayerEdit: campaign.allowPlayerEdit,
       members: campaign.members.map((m) => ({
         userId: m.userId,

@@ -3,10 +3,11 @@ import { describe, expect, it, vi } from "vitest";
 import { createStartMutation } from "@/app/api/campaigns/[id]/battles/[battleId]/start/start-mutation";
 import { createMockParticipant } from "@/lib/utils/battle/__tests__/fixtures/mock-participant";
 import type { BattleMutationContext } from "@/lib/utils/battle/pipeline/run-battle-mutation";
+import { DEFAULT_RULES } from "@/lib/utils/rules";
 
 const ctx = {
   scene: { id: "b1", campaignId: "c1", status: "prepared", round: 1, turnIndex: 0, version: 0, eventSeq: 0, pendingMoraleCheck: null, startedAt: null, completedAt: null },
-  meta: { name: "Бій", description: null, setup: [{ id: "u1", type: "unit", side: "enemy" }], friendlyFire: false, map: null, createdAt: new Date() },
+  meta: { name: "Бій", description: null, setup: [{ id: "u1", type: "unit", side: "enemy" }], friendlyFire: false, rules: DEFAULT_RULES, map: null, createdAt: new Date() },
   participants: [],
   pending: [],
   userId: "dm",
@@ -21,7 +22,7 @@ describe("start mutation", () => {
 
     const out = await createStartMutation(build)(ctx);
 
-    expect(build).toHaveBeenCalledWith("b1", "c1", ctx.meta.setup, ctx.meta.map);
+    expect(build).toHaveBeenCalledWith("b1", "c1", ctx.meta.setup, ctx.meta.map, DEFAULT_RULES);
     expect(out.participants).toEqual([hero]);
     expect(out.scene).toMatchObject({ status: "active", round: 1, turnIndex: 0, pendingMoraleCheck: null, completedAt: null });
     expect(out.scene?.startedAt).toBeInstanceOf(Date);
@@ -58,5 +59,16 @@ describe("start mutation", () => {
     const out = await createStartMutation(vi.fn(async () => ({ order: [hero, unit], reserve: [], triggerLogEntries: [] })))(ctx);
 
     expect(out.participants.find((p) => p.basicInfo.id === "u")?.basicInfo.controlledBy).toBe("dm");
+  });
+
+  it("фіксує правила кампанії в сцені й передає їх у побудову", async () => {
+    const rules = { ...DEFAULT_RULES, morale: { ...DEFAULT_RULES.morale, enabled: false } };
+
+    const build = vi.fn(async () => ({ order: [createMockParticipant()], reserve: [], triggerLogEntries: [] }));
+
+    const out = await createStartMutation(build)({ ...ctx, meta: { ...ctx.meta, rules } } as never);
+
+    expect(out.scene?.rules).toEqual(rules);
+    expect(build).toHaveBeenCalledWith("b1", "c1", ctx.meta.setup, ctx.meta.map, rules);
   });
 });

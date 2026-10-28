@@ -6,6 +6,7 @@ import type { BattleSceneState, LoadedBattle, ParticipantColumns, ParticipantSna
 
 import { BattleStatus } from "@/lib/constants/battle";
 import { CampaignRole } from "@/lib/constants/campaigns";
+import { parseRules } from "@/lib/utils/rules/schema";
 import type { BattleAudioState } from "@/types/audio";
 import type { BattleMapConfig, BattleParticipant, BattlePreparationParticipant } from "@/types/battle";
 
@@ -104,13 +105,14 @@ export async function loadBattle(
       pendingMoraleCheck: true,
       map: true,
       audio: true,
+      rules: true,
       startedAt: true,
       completedAt: true,
       createdAt: true,
       participants: true,
       battleParticipants: { orderBy: { orderIndex: "asc" }, select: PARTICIPANT_ROW_SELECT },
       campaign: {
-        select: { friendlyFire: true, members: { where: { userId: args.userId }, select: { role: true } } },
+        select: { friendlyFire: true, rules: true, members: { where: { userId: args.userId }, select: { role: true } } },
       },
     },
   });
@@ -141,6 +143,7 @@ export async function loadBattle(
       description: row.description,
       setup: (row.participants ?? []) as unknown as BattlePreparationParticipant[],
       friendlyFire: row.campaign.friendlyFire ?? false,
+      rules: parseRules(row.status === BattleStatus.PREPARED ? row.campaign.rules : (row.rules ?? {})),
       map: (row.map ?? null) as BattleMapConfig | null,
       audio: (row.audio ?? null) as BattleAudioState | null,
       createdAt: row.createdAt,

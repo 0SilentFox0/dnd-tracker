@@ -10,6 +10,7 @@ import { ConfirmContext } from "@/lib/hooks/common";
 import { createMockParticipant } from "@/lib/utils/battle/__tests__/fixtures/mock-participant";
 import type { MapAim, MapPick } from "@/lib/utils/battle/grid";
 import { buildDisplayEffects, turnQueue } from "@/lib/utils/battle/view";
+import { DEFAULT_RULES } from "@/lib/utils/rules";
 import type { ResolvedAbility } from "@/types/abilities";
 import type { BattleScene } from "@/types/api";
 import type { BattleAction, BattleParticipant } from "@/types/battle";
@@ -67,7 +68,7 @@ export function fakeScene(opts: FakeSceneOptions = {}) {
 
   const battle = {
     id: "b1", campaignId: "c1", name: "Засідка", status: opts.status ?? "active", participants: [], currentRound: 3, currentTurnIndex: opts.isMyTurn === false ? 1 : 0,
-    initiativeOrder: order, pendingSummons: [], battleLog: [], createdAt: "", version: 5, isDM: opts.isDM ?? false,
+    initiativeOrder: order, pendingSummons: [], rules: DEFAULT_RULES, battleLog: [], createdAt: "", version: 5, isDM: opts.isDM ?? false,
     campaign: { id: "c1", friendlyFire: false }, pendingMoraleCheck: null, map: opts.map ?? null, audio: opts.audio ?? null,
   } as BattleScene;
 

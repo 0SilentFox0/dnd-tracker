@@ -4,6 +4,7 @@ import { Prisma } from "@prisma/client";
 import { createCharacterSchema } from "./create-character-schema";
 import { resolveCharacterOwner } from "./resolve-character-owner";
 
+import { API_ERRORS } from "@/lib/constants/api-errors";
 import { prisma } from "@/lib/db";
 import { PUBLIC_USER_SELECT } from "@/lib/server/users/db-user";
 import { resolveAvatarForPersistence } from "@/lib/supabase/avatar-storage";
@@ -24,6 +25,10 @@ export async function createCharacter(request: Request, campaignId: string): Pro
   const data = await parseBody(createCharacterSchema, request);
 
   if (data instanceof NextResponse) return data;
+
+  const { heroMin, heroMax } = accessResult.campaign.rules.initiative;
+
+  if (data.initiative < heroMin || data.initiative > heroMax) return errorResponse(`${API_ERRORS.INITIATIVE_OUT_OF_RANGE} (${heroMin}–${heroMax})`, 400);
 
   const owner = await resolveCharacterOwner(campaignId, accessResult.userId, data);
 

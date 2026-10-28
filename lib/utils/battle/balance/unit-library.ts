@@ -5,6 +5,7 @@ import { ParticipantSide } from "@/lib/constants/battle";
 import { prisma } from "@/lib/db";
 import { createBattleParticipantFromUnit } from "@/lib/utils/battle/participant/from-unit";
 import type { UnitFromPrisma } from "@/lib/utils/battle/types/participant";
+import { DEFAULT_RULES, type Ruleset } from "@/lib/utils/rules";
 import type { RaceRow } from "@/types/races";
 
 type UnitAttacks = Array<{ damageDice?: string; type?: string; attackBonus?: number; targetType?: string; maxTargets?: number }>;
@@ -28,12 +29,12 @@ export interface UnitStatsRow {
 
 export type UnitSpellRow = UnitSpellInput & { id: string };
 
-export function unitRowStats(u: UnitStatsRow, spellsById: Map<string, UnitSpellRow> = new Map(), resist?: Record<string, number>): UnitStats {
+export function unitRowStats(u: UnitStatsRow, spellsById: Map<string, UnitSpellRow> = new Map(), resist?: Record<string, number>, saveDcBase?: number): UnitStats {
   const known = Array.isArray(u.knownSpells) ? (u.knownSpells as unknown[]).filter((x): x is string => typeof x === "string") : [];
 
   const spells = known.map((id) => spellsById.get(id)).filter((s): s is UnitSpellRow => !!s);
 
-  const stats = getUnitStats({ id: u.id, name: u.name, maxHp: u.maxHp, level: u.level, raceId: u.raceId, strength: u.strength, dexterity: u.dexterity, maxTargets: u.maxTargets, armorClass: u.armorClass, proficiencyBonus: u.proficiencyBonus, attacks: (u.attacks as UnitAttacks) || [], spells });
+  const stats = getUnitStats({ id: u.id, name: u.name, maxHp: u.maxHp, level: u.level, raceId: u.raceId, strength: u.strength, dexterity: u.dexterity, maxTargets: u.maxTargets, armorClass: u.armorClass, proficiencyBonus: u.proficiencyBonus, attacks: (u.attacks as UnitAttacks) || [], spells, saveDcBase });
 
   return resist && Object.keys(resist).length > 0 ? { ...stats, resist } : stats;
 }
@@ -86,7 +87,7 @@ async function loadSummonSources(campaignId: string): Promise<unknown[]> {
   return spells.map((s) => s.spellEffects);
 }
 
-export async function loadUnitLibraryStats(campaignId: string): Promise<UnitStats[]> {
+export async function loadUnitLibraryStats(campaignId: string, rules: Ruleset = DEFAULT_RULES): Promise<UnitStats[]> {
   const [rows, races, summonSources] = await Promise.all([prisma.unit.findMany({ where: { campaignId } }), prisma.race.findMany({ where: { campaignId } }), loadSummonSources(campaignId)]);
 
   const [spellsById, resistById] = await Promise.all([loadSpellsForUnits(campaignId, rows), unitResistancesById(rows, races)]);
@@ -94,7 +95,7 @@ export async function loadUnitLibraryStats(campaignId: string): Promise<UnitStat
   const summoned = summonedUnitIds([...summonSources, ...rows.map((u) => u.abilities), ...races.map((r) => r.abilities)]);
 
   return rows.map((u) => {
-    const stats = unitRowStats(u, spellsById, resistById.get(u.id));
+    const stats = unitRowStats(u, spellsById, resistById.get(u.id), rules.formulas.saveDcBase);
 
     return summoned.has(u.id) ? { ...stats, summon: true } : stats;
   });

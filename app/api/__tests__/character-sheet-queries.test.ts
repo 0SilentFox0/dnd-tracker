@@ -1,5 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
+import { DEFAULT_RULES } from "@/lib/utils/rules";
 import { buildTreeJson } from "@/lib/utils/skills/progression";
 
 const db = vi.hoisted(() => ({
@@ -82,7 +83,7 @@ describe("лист персонажа: запити до БД", () => {
   it("персонаж із деревом, артефактами, особистим скілом і заклинаннями — не більше 5 викликів Prisma", async () => {
     const loaded = await loadSheetCharacter("ch");
 
-    const sheet = await buildSheetFor(loaded as never, { isDM: false, isOwner: true }, 20);
+    const sheet = await buildSheetFor(loaded as never, { isDM: false, isOwner: true }, { maxLevel: 20, rules: DEFAULT_RULES });
 
     expect(total()).toBeLessThanOrEqual(5);
     expect(db.calls["race.findFirst"]).toBeUndefined();
@@ -97,7 +98,7 @@ describe("лист персонажа: запити до БД", () => {
   it("сети приходять разом з артефактами, без окремих запитів", async () => {
     db.results["artifact.findMany"] = [{ ...armor, setId: "s1", artifactSet: huntSet }];
 
-    const sheet = await buildSheetFor(character as never, { isDM: false, isOwner: true }, 20);
+    const sheet = await buildSheetFor(character as never, { isDM: false, isOwner: true }, { maxLevel: 20, rules: DEFAULT_RULES });
 
     expect(sheet.items.sets).toEqual([{ setId: "s1", name: "Мисливець", have: 1, total: 1, complete: true, effects: [expect.stringMatching(/шкода \(ближня\) \+10%/)] }]);
     expect(db.calls["artifactSet.findMany"]).toBeUndefined();
@@ -105,7 +106,7 @@ describe("лист персонажа: запити до БД", () => {
   });
 
   it("прогресія в листі: вільні очки = рівень − вивчені вузли дерева", async () => {
-    const sheet = await buildSheetFor(character as never, { isDM: false, isOwner: true }, 20);
+    const sheet = await buildSheetFor(character as never, { isDM: false, isOwner: true }, { maxLevel: 20, rules: DEFAULT_RULES });
 
     expect(sheet.progression).toEqual({ freePoints: 3, level: 5, seenLevel: 3 });
   });
@@ -113,7 +114,7 @@ describe("лист персонажа: запити до БД", () => {
   it("без дерева раси — 0 вільних очок", async () => {
     db.results["campaign.findUnique"] = { races: [], skillTrees: [], skills: [], mainSkills: [], spells: [] };
 
-    const sheet = await buildSheetFor(character as never, { isDM: false, isOwner: true }, 20);
+    const sheet = await buildSheetFor(character as never, { isDM: false, isOwner: true }, { maxLevel: 20, rules: DEFAULT_RULES });
 
     expect(sheet.progression.freePoints).toBe(0);
   });
@@ -121,7 +122,7 @@ describe("лист персонажа: запити до БД", () => {
   it("без вивчених вузлів і особистого скіла — без скілів, шкіл і заклинань кампанії", async () => {
     const fresh = { ...character, skillTreeProgress: {}, personalSkillId: null };
 
-    await buildSheetFor(fresh as never, { isDM: false, isOwner: true }, 20);
+    await buildSheetFor(fresh as never, { isDM: false, isOwner: true }, { maxLevel: 20, rules: DEFAULT_RULES });
 
     expect(db.calls["campaign.findUnique"]).toBe(1);
     expect(db.args["campaign.findUnique"][0]).not.toHaveProperty("select.spells");
@@ -131,7 +132,7 @@ describe("лист персонажа: запити до БД", () => {
   it("лише особистий скіл — скіл за id, без шкіл і заклинань", async () => {
     const personalOnly = { ...character, skillTreeProgress: {} };
 
-    await buildSheetFor(personalOnly as never, { isDM: false, isOwner: true }, 20);
+    await buildSheetFor(personalOnly as never, { isDM: false, isOwner: true }, { maxLevel: 20, rules: DEFAULT_RULES });
 
     const [, second] = db.args["campaign.findUnique"] as Array<{ select: Record<string, unknown> }>;
 
@@ -141,7 +142,7 @@ describe("лист персонажа: запити до БД", () => {
   });
 
   it("вивчені вузли — школи й заклинання лише для гілок дерева і вивчених скілів", async () => {
-    await buildSheetFor(character as never, { isDM: false, isOwner: true }, 20);
+    await buildSheetFor(character as never, { isDM: false, isOwner: true }, { maxLevel: 20, rules: DEFAULT_RULES });
 
     const [, second] = db.args["campaign.findUnique"] as Array<{ select: Record<string, { where?: unknown }> }>;
 

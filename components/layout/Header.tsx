@@ -105,6 +105,11 @@ export function Header({ email }: { email: string | null }) {
                       </Link>
                     </DropdownMenuItem>
                     <DropdownMenuItem asChild>
+                      <Link href={`/campaigns/${campaignId}/dm/rules`}>
+                        Правила
+                      </Link>
+                    </DropdownMenuItem>
+                    <DropdownMenuItem asChild>
                       <Link href={`/campaigns/${campaignId}/dm/artifacts`}>
                         Артефакти
                       </Link>

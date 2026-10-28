@@ -5,6 +5,7 @@ import { createMockParticipant } from "@/lib/utils/battle/__tests__/fixtures/moc
 import { buildClientDelta } from "@/lib/utils/battle/pipeline/client-delta";
 import { PUSHER_DELTA_LIMIT_BYTES } from "@/lib/utils/battle/pipeline/limits";
 import type { BattleSceneState } from "@/lib/utils/battle/store";
+import { DEFAULT_RULES } from "@/lib/utils/rules";
 import type { BattleParticipant } from "@/types/battle";
 
 const p = (id: string, hp = 10, side = ParticipantSide.ALLY): BattleParticipant => {
@@ -18,7 +19,7 @@ const scene: BattleSceneState = {
   eventSeq: 10, pendingMoraleCheck: null, startedAt: new Date("2026-01-01"), completedAt: null,
 };
 
-const meta = { name: "Бій", description: null, setup: [], friendlyFire: false, map: null, createdAt: new Date() };
+const meta = { name: "Бій", description: null, setup: [], friendlyFire: false, rules: DEFAULT_RULES, map: null, createdAt: new Date() };
 
 describe("buildClientDelta", () => {
   it("зміна HP наявного учасника — лише патч поля, без order, коли порядок той самий", () => {

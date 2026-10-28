@@ -37,6 +37,9 @@ const FONT_PX: Record<DieSides, number> = { 4: 38, 6: 62, 8: 42, 10: 44, 12: 56,
 
 const GOLD = "vec3( 1.0, 0.78, 0.3 )";
 
+// перевага/перешкода: відкинутий d20 гасне після приземлення — плашок над кубиками немає
+const DROPPED_DIM = 0.6;
+
 function atlasGrid(faceCount: number) {
   const cols = Math.ceil(Math.sqrt(faceCount));
 
@@ -121,8 +124,10 @@ function buildMeshData(sides: DieSides, markValue: number) {
 }
 
 // грань-результат світиться у власному тоні з золотом: змішування з білим робило синій d6 сірим
-function dieMaterial(sides: DieSides, map: CanvasTexture) {
+function dieMaterial(sides: DieSides, map: CanvasTexture, dropped: boolean) {
   const settle = { value: 0 };
+
+  const drop = { value: dropped ? 1 : 0 };
 
   const base = { value: new Color(FACE_COLOR[sides]) };
 
@@ -131,13 +136,14 @@ function dieMaterial(sides: DieSides, map: CanvasTexture) {
   material.onBeforeCompile = (shader) => {
     shader.uniforms.uSettle = settle;
     shader.uniforms.uBase = base;
+    shader.uniforms.uDropped = drop;
     shader.vertexShader = shader.vertexShader
       .replace("#include <common>", "#include <common>\nattribute float faceMark;\nvarying float vMark;")
       .replace("#include <begin_vertex>", "#include <begin_vertex>\nvMark = faceMark;");
     shader.fragmentShader = shader.fragmentShader
-      .replace("#include <common>", "#include <common>\nuniform float uSettle;\nuniform vec3 uBase;\nvarying float vMark;")
-      .replace("#include <map_fragment>", `vec4 texel = texture2D( map, vMapUv );\ntexel.rgb = mix( texel.rgb, uBase, uSettle * ${DIM_NUMBERS.toFixed(2)} * ( 1.0 - vMark ) );\ndiffuseColor *= texel;`)
-      .replace("#include <emissivemap_fragment>", `#include <emissivemap_fragment>\ntotalEmissiveRadiance += mix( uBase, ${GOLD}, 0.35 ) * uSettle * vMark * 0.22;`);
+      .replace("#include <common>", "#include <common>\nuniform float uSettle;\nuniform vec3 uBase;\nuniform float uDropped;\nvarying float vMark;")
+      .replace("#include <map_fragment>", `vec4 texel = texture2D( map, vMapUv );\ntexel.rgb = mix( texel.rgb, uBase, uSettle * ${DIM_NUMBERS.toFixed(2)} * ( 1.0 - vMark ) );\ndiffuseColor *= texel;\ndiffuseColor.rgb *= 1.0 - uSettle * uDropped * ${DROPPED_DIM.toFixed(2)};`)
+      .replace("#include <emissivemap_fragment>", `#include <emissivemap_fragment>\ntotalEmissiveRadiance += mix( uBase, ${GOLD}, 0.35 ) * uSettle * vMark * 0.22 * ( 1.0 - uDropped );`);
   };
 
   return { material, settle };
@@ -196,7 +202,7 @@ function createBackend(host: HTMLElement): Backend {
       sun.shadow.camera.bottom = -span;
       sun.shadow.camera.updateProjectionMatrix();
     },
-    createDie(sides, value): DieHandle {
+    createDie({ sides, value, dropped = false }): DieHandle {
       let atlas = atlases.get(sides);
 
       if (!atlas) {
@@ -215,7 +221,7 @@ function createBackend(host: HTMLElement): Backend {
       geometry.setAttribute("uv", new Float32BufferAttribute(data.uv, 2));
       geometry.setAttribute("faceMark", new Float32BufferAttribute(data.mark, 1));
 
-      const { material, settle } = dieMaterial(sides, atlas);
+      const { material, settle } = dieMaterial(sides, atlas, dropped);
 
       const mesh = new Mesh(geometry, material);
 

@@ -33,6 +33,12 @@ export async function patchCharacter(request: Request, campaignId: string, chara
 
   if (parsed instanceof NextResponse) return parsed;
 
+  if (parsed.initiative !== undefined) {
+    const { heroMin, heroMax } = campaign.rules.initiative;
+
+    if (parsed.initiative < heroMin || parsed.initiative > heroMax) return errorResponse(`${API_ERRORS.INITIATIVE_OUT_OF_RANGE} (${heroMin}–${heroMax})`, 400);
+  }
+
   const data = isDM
     ? parsed
     : ({ ...parsed, level: undefined, archetype: undefined, avatar: undefined, controlledBy: character.controlledBy, type: character.type } as typeof parsed);
@@ -67,6 +73,7 @@ export async function patchCharacter(request: Request, campaignId: string, chara
       ...(computed.seenLevel !== undefined && { seenLevel: computed.seenLevel }),
     },
     include: { user: { select: PUBLIC_USER_SELECT }, inventory: true },
+    omit: { notes: true },
   });
 
   return NextResponse.json(updatedCharacter);

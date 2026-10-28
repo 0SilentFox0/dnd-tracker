@@ -15,6 +15,7 @@ import { BattleStatus, ParticipantSide } from "@/lib/constants/battle";
 import { useBattleScene, useFxEnabled, useModeAutoSkip, useSpellBookPrefetch } from "@/lib/hooks/battle";
 import { DESKTOP_QUERY, useMediaQuery } from "@/lib/hooks/common";
 import { cn } from "@/lib/utils";
+import { myTurnKey } from "@/lib/utils/battle/view";
 import type { BattlePreparationParticipant } from "@/types/battle";
 
 type DesktopLayout = ComponentType<{ onComplete: () => void }>;
@@ -63,7 +64,7 @@ const sideCount = (participants: BattlePreparationParticipant[], side: string) =
 const onFieldCount = (participants: BattlePreparationParticipant[]) => participants.reduce((s, p) => s + (p.quantity ?? 1) - Math.min(p.reserved ?? 0, p.quantity ?? 1), 0);
 
 export function BattleScreen() {
-  const { battle, viewer: { isDM }, actions } = useBattleScene();
+  const { battle, viewer: { isDM }, actions, turn: { isMyTurn }, roster: { hero } } = useBattleScene();
 
   // перший HTML — мобільний макет: телефони не бачать підміни після гідратації
   const wide = useMediaQuery(DESKTOP_QUERY);
@@ -71,6 +72,9 @@ export function BattleScreen() {
   const Desktop = useDesktopLayout(wide);
 
   const [completeOpen, setCompleteOpen] = useState(false);
+
+  // як на телефоні: новий хід згортає плеєр, інакше розгорнута панель лежить на кнопках моралі й дій
+  const turnKey = hero && isMyTurn ? myTurnKey(hero, battle.currentRound) : null;
 
   const [notices, setNotices] = useState<HTMLElement | null>(null);
 
@@ -107,7 +111,7 @@ export function BattleScreen() {
           {Desktop && (
             <CornerStack>
               <ActionResultCard />
-              <AudioDock placement="corner" />
+              <AudioDock placement="corner" collapseOn={turnKey} />
             </CornerStack>
           )}
           {isDM && <DmRevivePrompt />}

@@ -5,6 +5,7 @@ import { findParticipant, updateParticipant } from "@/lib/utils/abilities/engine
 import { runAbilities } from "@/lib/utils/abilities/engine/core/run-abilities";
 import { newBattleAction } from "@/lib/utils/battle/common/new-action";
 import { effectiveMorale } from "@/lib/utils/battle/morale/effective-morale";
+import type { Ruleset } from "@/lib/utils/rules";
 import type { BattleAction, BattleParticipant } from "@/types/battle";
 
 export interface ApplyPendingMoraleResult {
@@ -19,6 +20,7 @@ export function applyPendingMoraleCheck(
   battleId: string,
   battleLogLength: number,
   rng: () => number = Math.random,
+  rules?: Ruleset,
 ): ApplyPendingMoraleResult {
   const { participantId, d10Roll, moraleResult } = payload;
 
@@ -68,7 +70,7 @@ export function applyPendingMoraleCheck(
   const run = runAbilities(
     updatedInitiativeOrder,
     { type: "moraleCheck", actorId: participant.basicInfo.id, result: moraleSuccess ? "success" : "fail" },
-    { round: currentRound, rng },
+    { round: currentRound, rng, rules },
   );
 
   updatedInitiativeOrder = run.participants;

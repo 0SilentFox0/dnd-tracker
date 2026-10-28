@@ -45,7 +45,7 @@
 
 ## Корекції відсотків
 
-Рівень шкоди порівнювали за HP × найкраща шкода (L6/L10). Зміни в `lib/constants/hero-archetypes.ts` (і спеці `docs/superpowers/specs/2026-10-09-hero-profile-design.md`):
+Рівень шкоди порівнювали за HP × найкраща шкода (L6/L10). Зміни в `lib/constants/hero-archetypes.ts` (і спеці `docs/archive/superpowers/specs/2026-10-09-hero-profile-design.md`):
 
 | Архетип | Було | Стало | Причина |
 |---|---|---|---|

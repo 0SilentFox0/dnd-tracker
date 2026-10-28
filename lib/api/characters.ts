@@ -24,6 +24,9 @@ export async function getCharacter(
 export const putCharacterGoals = (campaignId: string, characterId: string, goals: GoalInput[], seen?: string[]) =>
   campaignPut<{ goals: CharacterGoal[] }>(campaignId, `/characters/${characterId}/goals`, { goals, seen });
 
+export const putCharacterNotes = (campaignId: string, characterId: string, notes: string) =>
+  campaignPut<{ notes: string | null }>(campaignId, `/characters/${characterId}/notes`, { notes });
+
 export const createCharacterToken = (campaignId: string, characterId: string, body: CreateTokenInput) =>
   campaignPost<{ token: CharacterToken }>(campaignId, `/characters/${characterId}/tokens`, body);
 

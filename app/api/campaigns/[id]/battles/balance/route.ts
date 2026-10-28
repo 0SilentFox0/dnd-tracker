@@ -20,7 +20,7 @@ export async function GET(
 
     if (accessResult instanceof NextResponse) return accessResult;
 
-    const payload = await getBalancePayload(campaignId);
+    const payload = await getBalancePayload(campaignId, accessResult.campaign.rules);
 
     return NextResponse.json(payload);
   } catch (e) {
@@ -44,7 +44,7 @@ export async function POST(
 
     if (data instanceof NextResponse) return data;
 
-    const response = await postBalanceResponse(campaignId, data);
+    const response = await postBalanceResponse(campaignId, data, accessResult.campaign.rules);
 
     return NextResponse.json(response);
   } catch (e) {

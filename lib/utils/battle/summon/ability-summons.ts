@@ -5,6 +5,7 @@ import { createBattleParticipantFromUnit } from "@/lib/utils/battle/participant"
 import { appendToInitiativeEnd, nextInstanceNumber } from "@/lib/utils/battle/summon/append-summoned-unit";
 import type { UnitFromPrisma } from "@/lib/utils/battle/types/participant";
 import { pickOne } from "@/lib/utils/common/dice";
+import type { Ruleset } from "@/lib/utils/rules";
 import { scaleSummon } from "@/lib/utils/units/level-scaling";
 import type { BattleParticipant } from "@/types/battle";
 import type { RaceRow } from "@/types/races";
@@ -45,7 +46,7 @@ function banish(order: BattleParticipant[], summoned: BattleParticipant): { part
 export async function applyAbilitySummons(
   requests: SummonRequest[],
   order: BattleParticipant[],
-  opts: { campaignId: string; battleId: string; rng: () => number; deps: SummonDeps },
+  opts: { campaignId: string; battleId: string; rng: () => number; rules?: Ruleset; deps: SummonDeps },
 ): Promise<{ order: BattleParticipant[]; messages: string[] }> {
   if (requests.length === 0) return { order, messages: [] };
 
@@ -80,7 +81,7 @@ export async function applyAbilitySummons(
     for (let i = 0; i < count; i++) {
       const unit = pickOne(candidates, opts.rng);
 
-      const built = await createBattleParticipantFromUnit(unit as UnitFromPrisma, opts.battleId, owner.basicInfo.side, nextInstanceNumber(next, unit.id), racesById as Record<string, RaceRow>);
+      const built = await createBattleParticipantFromUnit(unit as UnitFromPrisma, opts.battleId, owner.basicInfo.side, nextInstanceNumber(next, unit.id), racesById as Record<string, RaceRow>, opts.rules);
 
       const scaled = scaleSummon(built, unit.levelScaling, req.casterLevel);
 

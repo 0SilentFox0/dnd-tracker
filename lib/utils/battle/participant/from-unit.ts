@@ -12,6 +12,7 @@ import { immunityAbilities } from "@/lib/utils/abilities/build/immunities";
 import { getAbilityModifier } from "@/lib/utils/common/calculations";
 import { logger } from "@/lib/utils/common/logger";
 import { getUnitImmunities } from "@/lib/utils/races/race-effects";
+import { DEFAULT_RULES, moraleCapFromRules, type Ruleset } from "@/lib/utils/rules";
 import type { BattleParticipant } from "@/types/battle";
 import type { Unit } from "@/types/units";
 
@@ -21,6 +22,7 @@ export async function createBattleParticipantFromUnit(
   side: ParticipantSide,
   instanceNumber: number,
   racesById?: Record<string, Prisma.RaceGetPayload<object> | null>,
+  rules: Ruleset = DEFAULT_RULES,
 ): Promise<BattleParticipant> {
   const modifiers = {
     strength: getAbilityModifier(unit.strength),
@@ -30,6 +32,8 @@ export async function createBattleParticipantFromUnit(
     wisdom: getAbilityModifier(unit.wisdom),
     charisma: getAbilityModifier(unit.charisma),
   };
+
+  const hasSpells = Array.isArray(unit.knownSpells) && unit.knownSpells.length > 0;
 
   const attacks =
     (unit.attacks as Array<{
@@ -117,6 +121,7 @@ export async function createBattleParticipantFromUnit(
       proficiencyBonus: unit.proficiencyBonus,
       race: race?.name ?? "",
       raceId: race?.id,
+      moraleCap: moraleCapFromRules(rules),
     },
     combatStats: {
       maxHp: unit.maxHp,
@@ -132,7 +137,7 @@ export async function createBattleParticipantFromUnit(
     },
     spellcasting: {
       spellcastingAbility: undefined,
-      spellSaveDC: undefined,
+      spellSaveDC: hasSpells ? rules.formulas.saveDcBase + unit.proficiencyBonus : undefined,
       spellAttackBonus: undefined,
       spellSlots: { universal: { max: UNIT_SPELL_SLOTS, current: UNIT_SPELL_SLOTS } },
       knownSpells: (unit.knownSpells as string[]) || [],

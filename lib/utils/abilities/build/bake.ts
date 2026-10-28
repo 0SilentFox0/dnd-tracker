@@ -3,6 +3,7 @@ import { resolveFlat } from "@/lib/utils/abilities/engine/core/amount";
 import { auraKey } from "@/lib/utils/abilities/engine/core/collect-modifiers";
 import { staticEffectStrength } from "@/lib/utils/abilities/engine/core/effect-strength";
 import { resolvedAbilitiesOf } from "@/lib/utils/abilities/engine/core/participants";
+import { clampMorale, moraleCapOf } from "@/lib/utils/abilities/engine/effects/morale";
 import type { Effect } from "@/lib/utils/abilities/schema";
 import { isBakedStat } from "@/lib/utils/abilities/schema/kinds";
 import { getAbilityModifier } from "@/lib/utils/common/calculations";
@@ -27,7 +28,7 @@ function bakeOne(p: BattleParticipant, e: ModifyStat, owner: BattleParticipant):
     case "speed":
       return { ...p, combatStats: { ...cs, speed: cs.speed + pct(cs.speed) } };
     case "morale":
-      return { ...p, combatStats: { ...cs, morale: Math.max(-3, Math.min(3, cs.morale + flat)) } };
+      return { ...p, combatStats: { ...cs, morale: clampMorale(cs.morale + flat, moraleCapOf(p)) } };
     case "minTargets":
     case "maxTargets":
       return { ...p, combatStats: { ...cs, [e.stat]: cs[e.stat] + flat } };

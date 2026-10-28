@@ -4,6 +4,7 @@ import type { CampaignSpellContext, CharacterFromPrisma } from "../types/partici
 import { referencedSkillIds } from "./extract-skills";
 
 import { prisma } from "@/lib/db";
+import type { Ruleset } from "@/lib/utils/rules";
 import { normalizeTree, resolveLearned } from "@/lib/utils/skills/progression";
 
 export interface CharacterContext {
@@ -36,8 +37,10 @@ function learnedNeeds(character: CharacterFromPrisma, tree: Prisma.SkillTreeGetP
  * Контекст одного персонажа за 3 виклики Prisma: раса й дерево + артефакти зі сетами → скіли, школи й заклинання.
  * Школи й заклинання — лише коли є вивчені вузли, і лише групи гілок дерева та вивчених скілів.
  */
-export async function loadCharacterContext(character: CharacterFromPrisma, maxLevel: number): Promise<CharacterContext> {
+export async function loadCharacterContext(character: CharacterFromPrisma, settings: { maxLevel: number; rules: Ruleset }): Promise<CharacterContext> {
   const { campaignId, race: raceName } = character;
+
+  const { maxLevel, rules } = settings;
 
   const artifactIds = equippedArtifactIds(character);
 
@@ -113,6 +116,7 @@ export async function loadCharacterContext(character: CharacterFromPrisma, maxLe
       allSkills: skills,
       racesByName: { [raceName]: race },
       campaign: { maxLevel },
+      rules,
       skillsById: Object.fromEntries(skills.map((s) => [s.id, s])),
       artifactsById,
       artifactSetsById,

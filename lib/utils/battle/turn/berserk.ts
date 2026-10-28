@@ -6,6 +6,7 @@ import { getDisabledAttackKinds } from "@/lib/utils/battle/attack/disabled-attac
 import { heroAttackDamageParts } from "@/lib/utils/battle/damage/hero-damage";
 import { endTurnCleanup } from "@/lib/utils/battle/turn/end-turn-cleanup";
 import { pickOne, rollDiceList, rollDie } from "@/lib/utils/common/dice";
+import type { Ruleset } from "@/lib/utils/rules";
 import type { BattleAction, BattleMapConfig, BattleParticipant } from "@/types/battle";
 
 export function berserkBonusOf(p: BattleParticipant): number | undefined {
@@ -23,6 +24,7 @@ interface BerserkTurnParams {
   actionIndex: number;
   rng: () => number;
   map?: BattleMapConfig | null;
+  rules?: Ruleset;
 }
 
 function note(p: BattleParticipant, params: BerserkTurnParams, text: string): BattleAction {
@@ -48,7 +50,7 @@ function note(p: BattleParticipant, params: BerserkTurnParams, text: string): Ba
 function finishTurn(participants: BattleParticipant[], actions: BattleAction[], params: BerserkTurnParams) {
   const id = params.participantId;
 
-  const ended = runAbilities(participants, { type: "turnEnd", actorId: id }, { round: params.round, rng: params.rng, map: params.map });
+  const ended = runAbilities(participants, { type: "turnEnd", actorId: id }, { round: params.round, rng: params.rng, map: params.map, rules: params.rules });
 
   const order = updateParticipant(ended.participants, id, endTurnCleanup);
 
@@ -95,6 +97,7 @@ export function runBerserkTurn(params: BerserkTurnParams): { participants: Battl
     bonusLabel: "Шал",
     rng,
     map: params.map,
+    rules: params.rules,
   });
 
   const updated = new Map((result.allParticipantsUpdated ?? []).map((p) => [p.basicInfo.id, p]));

@@ -8,6 +8,7 @@ import type { BattleMutationContext, PipelineDeps } from "@/lib/utils/battle/pip
 import { runBattleMutation } from "@/lib/utils/battle/pipeline/run-battle-mutation";
 import type { BattleDelta, LoadedBattle } from "@/lib/utils/battle/store";
 import { BattleConflictError, BattleRuleError } from "@/lib/utils/battle/store";
+import { DEFAULT_RULES } from "@/lib/utils/rules";
 import type { BattleParticipant } from "@/types/battle";
 
 const hero = createMockParticipant({ basicInfo: { ...createMockParticipant().basicInfo, id: "hero", controlledBy: "u-player" } });
@@ -30,7 +31,7 @@ function loaded(over: Partial<LoadedBattle> = {}): LoadedBattle & { isMember: bo
       startedAt: null,
       completedAt: null,
     },
-    meta: { name: "Бій", description: null, setup: [], friendlyFire: false, map: null, createdAt: new Date("2026-01-01") },
+    meta: { name: "Бій", description: null, setup: [], friendlyFire: false, rules: DEFAULT_RULES, map: null, createdAt: new Date("2026-01-01") },
     participants: [hero, goblin],
     pending: [],
     isDM: false,
@@ -75,6 +76,34 @@ const req = (body: unknown = {}) =>
   new Request("http://x/api", { method: "POST", body: JSON.stringify(body) });
 
 const noop = vi.fn((ctx) => ({ participants: ctx.participants, pending: ctx.pending, events: [] }));
+
+describe("runBattleMutation: завершення бою", () => {
+  const complete = vi.fn((ctx) => ({ participants: ctx.participants, pending: ctx.pending, scene: { status: "completed" as const, completedAt: new Date() }, events: [] }));
+
+  it("перехід у completed викликає onLeftActive(campaignId, battleId)", async () => {
+    const onLeftActive = vi.fn();
+
+    await runBattleMutation(req(), { params, access: "member", mutate: complete }, deps({ onLeftActive }));
+
+    expect(onLeftActive).toHaveBeenCalledWith("c1", "b1");
+  });
+
+  it("скидання active → prepared також викликає onLeftActive", async () => {
+    const onLeftActive = vi.fn();
+
+    await runBattleMutation(req(), { params, access: "member", mutate: (ctx) => ({ participants: ctx.participants, pending: ctx.pending, scene: { status: "prepared" as const }, events: [] }) }, deps({ onLeftActive }));
+
+    expect(onLeftActive).toHaveBeenCalledWith("c1", "b1");
+  });
+
+  it("звичайна дія onLeftActive не викликає", async () => {
+    const onLeftActive = vi.fn();
+
+    await runBattleMutation(req(), { params, access: "member", mutate: (ctx) => ({ participants: ctx.participants, pending: ctx.pending, events: [] }) }, deps({ onLeftActive }));
+
+    expect(onLeftActive).not.toHaveBeenCalled();
+  });
+});
 
 describe("runBattleMutation", () => {
   it("rng із залежностей потрапляє в контекст мутації", async () => {

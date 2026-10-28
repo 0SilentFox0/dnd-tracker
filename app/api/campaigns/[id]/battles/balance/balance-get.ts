@@ -2,9 +2,10 @@ import { loadCharacterBalanceStats } from "./character-stats";
 
 import { heroMember } from "@/lib/utils/battle/balance";
 import { loadUnitLibraryStats } from "@/lib/utils/battle/balance/unit-library";
+import type { Ruleset } from "@/lib/utils/rules";
 import type { EntityStats, UnitEntityStats } from "@/types/battle-setup";
 
-export async function getBalancePayload(campaignId: string) {
+export async function getBalancePayload(campaignId: string, rules?: Ruleset) {
   const characters = await loadCharacterBalanceStats(campaignId);
 
   const characterStats: Record<string, EntityStats> = {};
@@ -15,7 +16,7 @@ export async function getBalancePayload(campaignId: string) {
 
   const unitStats: Record<string, UnitEntityStats> = {};
 
-  for (const u of await loadUnitLibraryStats(campaignId)) {
+  for (const u of await loadUnitLibraryStats(campaignId, rules)) {
     unitStats[u.unitId] = { dpr: u.dpr, hp: u.hp, kpi: Math.round(u.kpi * 100) / 100, name: u.name, level: u.level, raceId: u.raceId, ac: u.ac, attackBonus: u.attackBonus, damageKey: u.damageKey, resist: u.resist, spell: u.spell, summon: u.summon };
   }
 

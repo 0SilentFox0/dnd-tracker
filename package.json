@@ -39,6 +39,8 @@
     "reset-mock-battle": "tsx scripts/seed/reset-mock-battle-data.ts",
     "test": "vitest",
     "test:run": "vitest run",
+    "test:changed": "vitest run --changed",
+    "test:related": "vitest related --run",
     "test:integration": "vitest run --config vitest.integration.config.mts",
     "migrate:deploy": "bash scripts/db/prisma-migrate-deploy.sh",
     "db:local": "docker compose up -d --wait db && pnpm migrate:deploy"

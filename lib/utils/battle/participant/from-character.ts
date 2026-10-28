@@ -16,7 +16,8 @@ import { immunityAbilities } from "@/lib/utils/abilities/build/immunities";
 import { findCompletedSets } from "@/lib/utils/battle/artifact-sets";
 import { getCharacterImmunities } from "@/lib/utils/characters/character-race-effects";
 import { heroBaseHp } from "@/lib/utils/characters/hero-hp";
-import { getAbilityModifier, getProficiencyBonus, spellcastingDerived } from "@/lib/utils/common/calculations";
+import { getAbilityModifier, spellcastingDerived } from "@/lib/utils/common/calculations";
+import { DEFAULT_RULES, heroDiceTable, heroHpFormula, moraleCapFromRules, proficiencyForLevel, type Ruleset } from "@/lib/utils/rules";
 import type { BattleParticipant } from "@/types/battle";
 
 /**
@@ -28,8 +29,10 @@ export async function createBattleParticipantFromCharacter(
   side: ParticipantSide,
   instanceNumber?: number,
   context?: CampaignSpellContext,
-  preloaded?: { artifactRows?: EquippedArtifactRow[] },
+  preloaded?: { artifactRows?: EquippedArtifactRow[]; rules?: Ruleset },
 ): Promise<BattleParticipant> {
+  const rules = context?.rules ?? preloaded?.rules ?? DEFAULT_RULES;
+
   const modifiers = {
     strength: getAbilityModifier(character.strength),
     dexterity: getAbilityModifier(character.dexterity),
@@ -57,7 +60,7 @@ export async function createBattleParticipantFromCharacter(
 
   const completed = await findCompletedSets(equippedArtifacts, character.campaignId, context);
 
-  const attacks = await extractAttacksFromCharacter(character, artifactsById);
+  const attacks = await extractAttacksFromCharacter(character, artifactsById, rules.defaultAttacks);
 
   const race = await loadRace(character.race, character.campaignId, context ? (context.racesByName[character.race] ?? null) : undefined);
 
@@ -77,11 +80,15 @@ export async function createBattleParticipantFromCharacter(
 
   const archetype = heroArchetype((character as { archetype?: string | null }).archetype);
 
-  const proficiencyBonus = getProficiencyBonus(character.level);
+  const meleeDice = heroDiceTable(rules, "melee");
+
+  const rangedDice = heroDiceTable(rules, "ranged");
+
+  const proficiencyBonus = proficiencyForLevel(character.level, rules.formulas);
 
   const primaryAbility = (ABILITY_KEYS as readonly string[]).includes(character.primaryAbility ?? "") ? (character.primaryAbility as AbilityKey) : undefined;
 
-  const computedMaxHp = heroBaseHp(character).total;
+  const computedMaxHp = heroBaseHp(character, heroHpFormula(rules.heroScaling)).total;
 
   const resolvedAbilities = [
     ...collectCharacterAbilities({
@@ -120,6 +127,8 @@ export async function createBattleParticipantFromCharacter(
       proficiencyBonus,
       race: character.race,
       raceId: (race as { id?: string } | null)?.id,
+      moraleCap: moraleCapFromRules(rules),
+      heroDice: meleeDice || rangedDice ? { melee: meleeDice, ranged: rangedDice } : undefined,
       primaryAbility,
       meleeMultiplier: archetype.melee,
       rangedMultiplier: archetype.ranged,
@@ -167,7 +176,7 @@ export async function createBattleParticipantFromCharacter(
   const baked = bakePassives(participant);
 
   // СК і бонус заклять — від характеристики з расовими/артефактними бонусами, тож після запікання
-  const spell = spellcastingDerived(character.level, character.spellcastingAbility, baked.abilities);
+  const spell = spellcastingDerived(character.level, character.spellcastingAbility, baked.abilities, rules.formulas);
 
   return { ...baked, spellcasting: { ...baked.spellcasting, spellSaveDC: spell?.saveDC, spellAttackBonus: spell?.attackBonus } };
 }

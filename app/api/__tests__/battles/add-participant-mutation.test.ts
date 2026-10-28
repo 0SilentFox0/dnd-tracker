@@ -7,6 +7,7 @@ import { ParticipantSide } from "@/lib/constants/battle";
 import { resolved } from "@/lib/utils/abilities/__tests__/fixtures";
 import { at, mazeMap, withMap } from "@/lib/utils/battle/modes/maze/__tests__/fixtures";
 import { toReserve } from "@/lib/utils/battle/participant/reserve";
+import { parseRules } from "@/lib/utils/rules/schema";
 import type { BattleParticipant } from "@/types/battle";
 
 function deps(over = {}) {
@@ -43,6 +44,16 @@ describe("add-participant mutation", () => {
 
     expect(out.participants.map((p) => p.basicInfo.id)).toEqual(["fast", "hero", "gob"]);
     expect(out.scene?.turnIndex).toBe(2);
+  });
+
+  it("героя будують із зафіксованими правилами бою", async () => {
+    const rules = parseRules({ morale: { enabled: false } });
+
+    const d = deps();
+
+    await createAddParticipantMutation(d)(context({ meta: { ...context().meta, rules } }), { sourceId: "ch1", type: "character", side: "ally", quantity: 1 });
+
+    expect(d.fromCharacter).toHaveBeenCalledWith(expect.anything(), "b1", "ally", undefined, undefined, { rules });
   });
 
   it("reserved — у резерв, черга не змінюється", async () => {

@@ -7,6 +7,7 @@ import { collectModifiers } from "@/lib/utils/abilities/engine/core/collect-modi
 import { withSelf } from "@/lib/utils/abilities/engine/core/participants";
 import type { StaticEffect } from "@/lib/utils/abilities/schema";
 import { rollDie } from "@/lib/utils/common/dice";
+import { DEFAULT_RULES, type Ruleset } from "@/lib/utils/rules";
 import type { BattleAttack, BattleParticipant } from "@/types/battle";
 
 export function calculateAttackRoll(
@@ -15,8 +16,10 @@ export function calculateAttackRoll(
   d20Roll: number,
   advantageRoll?: number,
   disadvantageRoll?: number,
-  opts: { participants?: BattleParticipant[]; extra?: StaticEffect[]; targetId?: string; targetExtra?: StaticEffect[]; rng?: () => number; manualMode?: RollMode } = {},
+  opts: { participants?: BattleParticipant[]; extra?: StaticEffect[]; targetId?: string; targetExtra?: StaticEffect[]; rng?: () => number; manualMode?: RollMode; rules?: Ruleset } = {},
 ): AttackRollResult {
+  const c = (opts.rules ?? DEFAULT_RULES).criticals;
+
   const participants = withSelf(opts.participants ?? [], attacker);
 
   const attackBonus = calculateAttackBonus(attacker, attack, participants, opts.extra);
@@ -28,7 +31,7 @@ export function calculateAttackRoll(
 
   const manual = !forced.forced && mode !== "normal";
 
-  const critThreshold = Math.max(2, 20 + collectModifiers(participants, attacker.basicInfo.id, { stat: "critThreshold" }, opts.extra).flat);
+  const critThreshold = Math.max(2, c.critOn + collectModifiers(participants, attacker.basicInfo.id, { stat: "critThreshold" }, opts.extra).flat);
 
   let finalRoll = d20Roll;
 
@@ -53,18 +56,18 @@ export function calculateAttackRoll(
 
   const totalAttackValue = finalRoll + attackBonus;
 
-  const isCritical = finalRoll >= critThreshold;
+  const isCriticalFail = c.fumbleOn > 0 && finalRoll <= c.fumbleOn;
 
-  const isCriticalFail = finalRoll === 1;
+  const isCritical = !isCriticalFail && finalRoll >= critThreshold;
 
   const isHit = !isCriticalFail;
 
   let criticalEffect: CriticalEffect | undefined;
 
-  if (isCritical) {
-    criticalEffect = getRandomCriticalEffect("success", opts.rng);
-  } else if (isCriticalFail) {
-    criticalEffect = getRandomCriticalEffect("fail", opts.rng);
+  if (c.effects && isCritical) {
+    criticalEffect = getRandomCriticalEffect("success", opts.rng, c.disabledSuccess);
+  } else if (c.effects && isCriticalFail) {
+    criticalEffect = getRandomCriticalEffect("fail", opts.rng, c.disabledFail);
   }
 
   return {

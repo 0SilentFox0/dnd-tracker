@@ -167,6 +167,7 @@ export async function saveBattle(
         ...(patch.startedAt !== undefined && { startedAt: patch.startedAt }),
         ...(patch.completedAt !== undefined && { completedAt: patch.completedAt }),
         ...(patch.map !== undefined && { map: jsonOrNull(patch.map) }),
+        ...(patch.rules !== undefined && { rules: patch.rules as Prisma.InputJsonValue }),
       },
     });
 

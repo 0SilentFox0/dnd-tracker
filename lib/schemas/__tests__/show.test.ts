@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { readSlides, saveDeckSchema, showCommandSchema, slideUploadRequestSchema } from "@/lib/schemas/show";
+import { deckSceneSchema, readSlides, saveDeckSchema, showCommandSchema, slideUploadRequestSchema } from "@/lib/schemas/show";
 
 const slide = (id: string, extra: Record<string, unknown> = {}) => ({ id, imageUrl: "https://x.supabase.co/storage/v1/object/public/scene-slides/c1/a.webp", ...extra });
 
@@ -39,5 +39,18 @@ describe("show schemas", () => {
     expect(readSlides([slide("slide-0001")])).toHaveLength(1);
     expect(readSlides({ nope: true })).toEqual([]);
     expect(readSlides(null)).toEqual([]);
+  });
+});
+
+describe("showCommandSchema battle / deckSceneSchema", () => {
+  it("команда battle з battleId", () => {
+    expect(showCommandSchema.parse({ action: "battle", battleId: "b1" })).toEqual({ action: "battle", battleId: "b1" });
+    expect(showCommandSchema.safeParse({ action: "battle" }).success).toBe(false);
+  });
+
+  it("сцена набору — id або null", () => {
+    expect(deckSceneSchema.parse({ scenarioPageId: null })).toEqual({ scenarioPageId: null });
+    expect(deckSceneSchema.parse({ scenarioPageId: "p1" })).toEqual({ scenarioPageId: "p1" });
+    expect(deckSceneSchema.safeParse({ scenarioPageId: "" }).success).toBe(false);
   });
 });

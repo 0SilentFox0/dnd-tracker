@@ -1,6 +1,8 @@
 import type { SpellFx } from "@/lib/utils/battle/fx/spells";
 
 export const SPELL_FX_BY_NAME: Record<string, SpellFx> = {
+  "Блискавка": { archetype: "skystrike", element: "lightning" },
+  "Крижаний болт": { archetype: "icefall", element: "cold" },
   "Рій ос": { archetype: "swarm", element: "nature", aura: "stings" },
   "Землетрус": { archetype: "quake", element: "earth", aura: "dust" },
   "Корені": { archetype: "entangle", element: "nature", aura: "roots" },

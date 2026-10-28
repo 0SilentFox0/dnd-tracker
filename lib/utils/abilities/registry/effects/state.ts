@@ -5,6 +5,7 @@ import { findFlags } from "@/lib/utils/abilities/engine/core/collect-modifiers";
 import { findParticipant, participantNames, updateParticipant } from "@/lib/utils/abilities/engine/core/participants";
 import { restoreCharm } from "@/lib/utils/abilities/engine/effects/charm";
 import { countMarks, GUARD_KEY, markKey } from "@/lib/utils/abilities/engine/effects/marks";
+import { clampMorale, moraleCapOf } from "@/lib/utils/abilities/engine/effects/morale";
 import { effectSource, upsertTimedEffect } from "@/lib/utils/abilities/engine/effects/timed-effects";
 import type { ConditionImmunityKey, Effect } from "@/lib/utils/abilities/schema";
 import { grantExtraActions } from "@/lib/utils/battle/participant/helpers";
@@ -173,7 +174,7 @@ export function applyChangeMorale(input: EffectApplyInput<Of<"changeMorale">>): 
   return each(
     input,
     (p) => {
-      const morale = Math.max(-3, Math.min(3, p.combatStats.morale + effect.delta));
+      const morale = clampMorale(p.combatStats.morale + effect.delta, moraleCapOf(p));
 
       return morale === p.combatStats.morale ? null : { ...p, combatStats: { ...p.combatStats, morale } };
     },

@@ -50,7 +50,7 @@ export const createUnitSchema = z.object({
   abilities: AbilitiesSchema.optional(),
   immunities: z.array(z.string()).default([]),
   knownSpells: z.array(z.string()).default([]),
-  morale: z.number().min(-3).max(3).default(0),
+  morale: z.number().min(-10).max(10).default(0),
   avatar: unitAvatarSchema,
 });
 
@@ -76,7 +76,7 @@ export const updateUnitSchema = z.object({
   knownSpells: z.array(z.string()).optional(),
   minTargets: z.number().min(1).optional(),
   maxTargets: z.number().min(1).optional(),
-  morale: z.number().min(-3).max(3).optional(),
+  morale: z.number().min(-10).max(10).optional(),
   avatar: unitAvatarSchema,
 });
 

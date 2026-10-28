@@ -65,6 +65,7 @@ export interface UnitStatsInput {
   maxTargets?: number | null;
   armorClass?: number;
   proficiencyBonus?: number;
+  saveDcBase?: number;
   attacks: Array<{
     damageDice?: string;
     damageType?: string;
@@ -93,7 +94,7 @@ function spellTargets(targeting: SpellTargeting): number {
 
 type BestSpell = Pick<UnitSpellPower, "dpr" | "damageType" | "save">;
 
-function bestSpell(spells: UnitSpellInput[], unit: { level: number; proficiencyBonus?: number }): BestSpell | null {
+function bestSpell(spells: UnitSpellInput[], unit: { level: number; proficiencyBonus?: number }, saveDcBase = 8): BestSpell | null {
   let best: BestSpell | null = null;
 
   for (const [index, s] of spells.entries()) {
@@ -116,7 +117,7 @@ function bestSpell(spells: UnitSpellInput[], unit: { level: number; proficiencyB
     const resolution = spellResolution(row);
 
     // юніт без заклинальної характеристики: СК = 8 + майстерність (spellSaveDc рушія)
-    const save = resolution.kind === "save" ? { ability: resolution.ability, dc: 8 + (unit.proficiencyBonus ?? 0), half: resolution.onSuccess === "half" } : undefined;
+    const save = resolution.kind === "save" ? { ability: resolution.ability, dc: saveDcBase + (unit.proficiencyBonus ?? 0), half: resolution.onSuccess === "half" } : undefined;
 
     best = { dpr, damageType: damage.damageType ?? "magic", ...(save && { save }) };
   }
@@ -153,7 +154,7 @@ export function getUnitStats(unit: UnitStatsInput): UnitStats {
     }
   }
 
-  const spell = bestSpell(unit.spells ?? [], unit);
+  const spell = bestSpell(unit.spells ?? [], unit, unit.saveDcBase);
 
   const spellDpr = spell?.dpr ?? 0;
 

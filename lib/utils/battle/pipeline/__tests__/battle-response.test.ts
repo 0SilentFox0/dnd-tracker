@@ -4,13 +4,14 @@ import { ParticipantSide } from "@/lib/constants/battle";
 import { createMockParticipant } from "@/lib/utils/battle/__tests__/fixtures/mock-participant";
 import { buildPusherMessages, toBattleResponse } from "@/lib/utils/battle/pipeline/battle-response";
 import type { BattleSceneState } from "@/lib/utils/battle/store";
+import { DEFAULT_RULES } from "@/lib/utils/rules";
 
 const scene: BattleSceneState = {
   id: "b1", campaignId: "c1", status: "active", round: 1, turnIndex: 0, version: 3,
   eventSeq: 4, pendingMoraleCheck: null, startedAt: null, completedAt: null,
 };
 
-const meta = { name: "Бій", description: null, setup: [{ id: "u1", type: "unit" as const, side: ParticipantSide.ENEMY }], friendlyFire: true, map: null, createdAt: new Date() };
+const meta = { name: "Бій", description: null, setup: [{ id: "u1", type: "unit" as const, side: ParticipantSide.ENEMY }], friendlyFire: true, rules: DEFAULT_RULES, map: null, createdAt: new Date() };
 
 const hero = createMockParticipant({ basicInfo: { ...createMockParticipant().basicInfo, id: "hero", controlledBy: "u-player" } });
 
@@ -24,6 +25,10 @@ describe("toBattleResponse", () => {
     expect(b).not.toHaveProperty("userRole");
     expect(b.battleLogMode).toBe("append");
     expect(b.campaign).toEqual({ id: "c1", friendlyFire: true });
+  });
+
+  it("містить правила бою", () => {
+    expect(toBattleResponse({ meta }, scene, [hero], [], { mode: "full", entries: [] }).rules).toEqual(meta.rules);
   });
 
   it("для того, хто діяв, — з isDM/userRole; лобі видно лише в prepared", () => {

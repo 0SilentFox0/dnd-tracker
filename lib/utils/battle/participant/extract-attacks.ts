@@ -14,20 +14,22 @@ import {
 
 import { AttackType } from "@/lib/constants/battle";
 import { prisma } from "@/lib/db";
+import { DEFAULT_RULES, type Ruleset } from "@/lib/utils/rules";
 
 // Без зброї свого виду герой б'є лише кубиками рівня — так само рахує баланс (bestAttack у balance/stats.ts)
-const DEFAULT_ATTACKS: ExtractedAttack[] = [
-  { id: "default-melee", name: "Звичайний удар", type: AttackType.MELEE as ExtractedAttack["type"], attackBonus: 0, damageDice: "", damageType: "physical" },
-  { id: "default-ranged", name: "Звичайний постріл", type: AttackType.RANGED as ExtractedAttack["type"], attackBonus: 0, damageDice: "", damageType: "physical" },
+const defaultAttacks = (names: Ruleset["defaultAttacks"]): ExtractedAttack[] => [
+  { id: "default-melee", name: names.meleeName, type: AttackType.MELEE as ExtractedAttack["type"], attackBonus: 0, damageDice: "", damageType: "physical" },
+  { id: "default-ranged", name: names.rangedName, type: AttackType.RANGED as ExtractedAttack["type"], attackBonus: 0, damageDice: "", damageType: "physical" },
 ];
 
 export async function extractAttacksFromCharacter(
   character: CharacterFromPrisma,
   preloadedArtifactsById?: Record<string, Prisma.ArtifactGetPayload<object>>,
+  names: Ruleset["defaultAttacks"] = DEFAULT_RULES.defaultAttacks,
 ): Promise<ExtractedAttack[]> {
   const weapons = await extractWeaponAttacks(character, preloadedArtifactsById);
 
-  return [...weapons, ...DEFAULT_ATTACKS.filter((d) => !weapons.some((w) => w.type === d.type))];
+  return [...weapons, ...defaultAttacks(names).filter((d) => !weapons.some((w) => w.type === d.type))];
 }
 
 async function extractWeaponAttacks(

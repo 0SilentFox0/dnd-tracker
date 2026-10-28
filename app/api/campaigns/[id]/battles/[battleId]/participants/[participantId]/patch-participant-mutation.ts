@@ -106,7 +106,7 @@ function updateHp(ctx: BattleMutationContext, participantId: string, requestedHp
   order[idx] = updated;
 
   const downed = oldHp > 0 && newHp <= 0
-    ? resolveDowned(order, { victimId: participantId, actorId: null }, { round: ctx.scene.round, rng: ctx.rng ?? Math.random }, { allowSurvive: false })
+    ? resolveDowned(order, { victimId: participantId, actorId: null }, { round: ctx.scene.round, rng: ctx.rng ?? Math.random, rules: ctx.meta.rules }, { allowSurvive: false })
     : { participants: order, messages: [] as string[] };
 
   const name = updated.basicInfo.name;

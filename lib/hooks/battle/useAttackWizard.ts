@@ -6,7 +6,7 @@ import { useModeView } from "./modes/useModeView";
 import { useBattleScene } from "./useBattleScene";
 
 import { AttackType } from "@/lib/constants/battle";
-import { findFlags } from "@/lib/utils/abilities/engine/core/collect-modifiers";
+import { collectModifiers, findFlags } from "@/lib/utils/abilities/engine/core/collect-modifiers";
 import { isAirborne, withSelf } from "@/lib/utils/abilities/engine/core/participants";
 import { predictAttack } from "@/lib/utils/battle/attack/bonus";
 import { attackKindOf } from "@/lib/utils/battle/common/attack-kind";
@@ -19,6 +19,7 @@ import { enemiesInReach } from "@/lib/utils/battle/grid";
 import { isUp } from "@/lib/utils/battle/participant/state";
 import { canSeeExactStats, critOutcome, formatKnownArmorClass, hiddenTargetSteps, resolveKnownArmorClass, retaliationOutcome, weaponPreview } from "@/lib/utils/battle/view";
 import { cryptoRandom, rollDie } from "@/lib/utils/common/dice";
+import { DEFAULT_RULES } from "@/lib/utils/rules";
 import type { BattleAttack, BattleParticipant, DamageStep } from "@/types/battle";
 
 export function useAttackWizard(attacker: BattleParticipant | null, onDone?: () => void) {
@@ -104,10 +105,13 @@ export function useAttackWizard(attacker: BattleParticipant | null, onDone?: () 
 
     const { totalBonus, targetAC } = predictAttack(attacker, target, attack, order, scene.battle.currentRound);
 
+    const crit = scene.battle.rules?.criticals ?? DEFAULT_RULES.criticals;
+
     const r = resolveAttackRoll(
       { attackRoll: d20, ...(currentMode === "advantage" && second !== undefined && { advantageRoll: second }), ...(currentMode === "disadvantage" && second !== undefined && { disadvantageRoll: second }) },
       targetAC,
       totalBonus,
+      { critOn: Math.max(2, crit.critOn + collectModifiers(order, attacker.basicInfo.id, { stat: "critThreshold" }).flat), fumbleOn: crit.fumbleOn },
     );
 
     return r.crit ? "crit" : r.critFail ? "critFail" : r.hit ? "hit" : "miss";

@@ -11,6 +11,7 @@ import {
   processStartOfTurn,
 } from "@/lib/utils/battle/turn/start-end";
 import { checkVictoryConditions } from "@/lib/utils/battle/turn/victory";
+import type { Ruleset } from "@/lib/utils/rules";
 import type { BattleAction, BattleMapConfig, BattleParticipant } from "@/types/battle";
 
 export interface AdvanceTurnLoopParams {
@@ -22,6 +23,7 @@ export interface AdvanceTurnLoopParams {
   pendingSummons: BattleParticipant[];
   rng?: () => number;
   map?: BattleMapConfig | null;
+  rules?: Ruleset;
 }
 
 export interface AdvanceTurnLoopResult {
@@ -100,7 +102,7 @@ export function runAdvanceTurnLoop(
     nextRound = turnTransition.nextRound;
 
     if (nextRound > previousRound) {
-      const roundEnd = runAbilities(updatedInitiativeOrder, { type: "roundEnd" }, { round: previousRound, rng, map });
+      const roundEnd = runAbilities(updatedInitiativeOrder, { type: "roundEnd" }, { round: previousRound, rng, map, rules: params.rules });
 
       updatedInitiativeOrder = roundEnd.participants;
 
@@ -118,6 +120,7 @@ export function runAdvanceTurnLoop(
         pendingSummons,
         rng,
         map,
+        params.rules,
       );
 
       updatedInitiativeOrder = roundResult.updatedInitiativeOrder;
@@ -165,6 +168,7 @@ export function runAdvanceTurnLoop(
       updatedInitiativeOrder,
       rng,
       map,
+      params.rules,
     );
 
     updatedInitiativeOrder = turnResult.participants;
@@ -315,6 +319,7 @@ export function runAdvanceTurnLoop(
         actionIndex: currentBattleLogLength + newLogEntries.length,
         rng,
         map,
+        rules: params.rules,
       });
 
       updatedInitiativeOrder = berserk.participants;

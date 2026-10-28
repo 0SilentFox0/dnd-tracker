@@ -3,10 +3,12 @@ import type { MoraleCheckInput } from "@/lib/schemas";
 import { requireActor } from "@/lib/utils/battle/common/control";
 import { checkMorale } from "@/lib/utils/battle/morale/check";
 import type { BattleMutationContext, MutationResult } from "@/lib/utils/battle/pipeline/run-battle-mutation";
-import { BattleRuleError } from "@/lib/utils/battle/store";
+import { BattleRuleError, rejectAction } from "@/lib/utils/battle/store";
 import type { PendingMoraleCheckPayload } from "@/lib/utils/battle/turn";
 
 export function moraleCheckMutation(ctx: BattleMutationContext, data: MoraleCheckInput): MutationResult {
+  if (!ctx.meta.rules.morale.enabled) rejectAction(API_ERRORS.BATTLE_MORALE_DISABLED);
+
   const participant = requireActor(ctx, data.participantId, { missing: "Учасника немає в бою", forbidden: API_ERRORS.FORBIDDEN });
 
   const pending = ctx.scene.pendingMoraleCheck as PendingMoraleCheckPayload | null;

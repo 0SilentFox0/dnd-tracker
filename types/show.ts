@@ -8,9 +8,15 @@ export interface Slide {
   trackId?: string;
 }
 
+export interface ShowBattle {
+  id: string;
+  name: string;
+}
+
 export interface SlideDeck {
   id: string;
   title: string;
+  scenarioPageId: string | null;
   slides: Slide[];
   updatedAt: string;
 }
@@ -18,9 +24,14 @@ export interface SlideDeck {
 export interface SlideDeckSummary {
   id: string;
   title: string;
+  scenarioPageId: string | null;
   slideCount: number;
   coverUrl: string | null;
   updatedAt: string;
+}
+
+export interface DeckSceneData {
+  scenarioPageId: string | null;
 }
 
 export interface CreateDeckData {
@@ -40,6 +51,8 @@ export interface ShowState {
   slide: Slide | null;
   nextImageUrl: string | null;
   audio: BattleAudioState | null;
+  /** Бій, до якого кличуть гравців; відсутнє — нікого не кличемо. */
+  battle?: ShowBattle;
   seq: number;
 }
 
@@ -48,7 +61,8 @@ export type ShowCommand =
   | { action: "next" }
   | { action: "prev" }
   | { action: "end" }
-  | { action: "audio"; command: BattleAudioCommand };
+  | { action: "audio"; command: BattleAudioCommand }
+  | { action: "battle"; battleId: string };
 
 export interface ShowResponse {
   show: ShowState | null;

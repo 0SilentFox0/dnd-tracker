@@ -1,5 +1,6 @@
 import type { SummonRequest } from "@/lib/utils/abilities/engine/core/types";
 import type { SpellFx } from "@/lib/utils/battle/fx/spells";
+import type { Ruleset } from "@/lib/utils/rules";
 import type { SpellDefinition } from "@/lib/utils/spells/model/schema";
 import type { BattleAction, BattleMapConfig, BattleParticipant, TerrainDamage } from "@/types/battle";
 
@@ -26,6 +27,7 @@ export interface CastSpellParams {
   isDMCast?: boolean;
   rng?: () => number;
   map?: BattleMapConfig | null;
+  rules?: Ruleset;
 }
 
 export interface CastSpellResult {

@@ -7,7 +7,8 @@ import Link from "next/link";
 import { LoadingState, QueryState } from "@/components/common/states";
 import { ScenarioBar, ScenarioBook, ScenarioPageView } from "@/components/scenario";
 import { VersionsDialog } from "@/components/scenario/editor/VersionsDialog";
-import { useScenarioPage, useSectionProgress } from "@/lib/hooks/scenario";
+import { ScenarioShowDock } from "@/components/scenario/play/ScenarioShowDock";
+import { useScenarioPage, useScenarioPlay, useSectionProgress } from "@/lib/hooks/scenario";
 import { playedLookup } from "@/lib/utils/scenario/reveal";
 import type { ScenarioPage } from "@/types/scenario";
 
@@ -30,6 +31,10 @@ function ScenarioPageBody({ campaignId, page, playedPages }: { campaignId: strin
 
   const [editBase, setEditBase] = useState<ScenarioPage | null>(null);
 
+  const playEnabled = page.kind === "scene" && !editBase;
+
+  const play = useScenarioPlay(campaignId, page.content, playEnabled);
+
   const [versionsOpen, setVersionsOpen] = useState(false);
 
   // edit mode leaves through the editor's own «Готово», which awaits the last save first
@@ -43,6 +48,9 @@ function ScenarioPageBody({ campaignId, page, playedPages }: { campaignId: strin
           <button type="button" className="toggle" onClick={() => setVersionsOpen(true)}>
             Версії
           </button>
+          <Link className="toggle" href={`/campaigns/${campaignId}/show`} target="_blank" rel="noopener">
+            Екран показу ↗
+          </Link>
         </>
       )}
       <Link className="toggle" href={`/campaigns/${campaignId}/dm/scenario`}>
@@ -68,9 +76,11 @@ function ScenarioPageBody({ campaignId, page, playedPages }: { campaignId: strin
         <ScenarioPageView
           page={page}
           campaignId={campaignId}
+          play={playEnabled ? play : undefined}
           progress={{ onPlayed: (id, v) => void progress.setPlayed(id, v).catch(() => {}), onRevealed: (id, v) => void progress.setRevealed(id, v).catch(() => {}), pending: progress.isPending, played: playedLookup(playedPages) }}
         />
       )}
+      {playEnabled && <ScenarioShowDock campaignId={campaignId} content={page.content} play={play} />}
       {versionsOpen && !editBase && <VersionsDialog campaignId={campaignId} pageId={page.id} open onOpenChange={setVersionsOpen} onRestored={() => {}} />}
     </ScenarioBook>
   );
