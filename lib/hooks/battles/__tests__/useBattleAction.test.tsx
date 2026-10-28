@@ -76,7 +76,7 @@ describe("useBattleAction", () => {
     expect(settled).toBe(true);
   });
 
-  it("пропуск версії — інвалідація замість патчу", async () => {
+  it("пропуск версії — одна інвалідація замість патчу", async () => {
     const { qc, wrapper } = setup();
 
     const spy = vi.spyOn(qc, "invalidateQueries");
@@ -88,6 +88,7 @@ describe("useBattleAction", () => {
     });
 
     expect(spy).toHaveBeenCalledWith({ queryKey: key });
+    expect(spy).toHaveBeenCalledTimes(1);
     expect(qc.getQueryData<BattleScene>(key)?.version).toBe(5);
   });
 
@@ -190,5 +191,37 @@ describe("useBattleAction — retryOnConflict", () => {
 
     expect(fn).toHaveBeenCalledTimes(2);
     await waitFor(() => expect(onConflict).toHaveBeenCalledTimes(1));
+  });
+
+  it("завершення бою інвалідує кеш листів героїв", async () => {
+    const { qc, wrapper } = setup();
+
+    const spy = vi.spyOn(qc, "invalidateQueries");
+
+    const done: ClientBattleDelta = { ...delta(6), scene: { status: "completed", round: 1, turnIndex: 0, pendingMoraleCheck: null, pendingCritChoice: null } };
+
+    const { result } = renderHook(() => useBattleAction("c1", "b1", async () => ({ delta: done })), { wrapper });
+
+    await act(async () => {
+      await result.current.mutateAsync({});
+    });
+
+    const keys = spy.mock.calls.map(([f]) => (f as { queryKey: unknown[] }).queryKey[0]);
+
+    expect(keys).toEqual(expect.arrayContaining(["character-sheet", "characters", "character-log"]));
+  });
+
+  it("звичайна дія не чіпає кеш героїв", async () => {
+    const { qc, wrapper } = setup();
+
+    const spy = vi.spyOn(qc, "invalidateQueries");
+
+    const { result } = renderHook(() => useBattleAction("c1", "b1", async () => ({ delta: delta(6) })), { wrapper });
+
+    await act(async () => {
+      await result.current.mutateAsync({});
+    });
+
+    expect(spy).not.toHaveBeenCalled();
   });
 });

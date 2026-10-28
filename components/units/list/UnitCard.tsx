@@ -7,16 +7,17 @@ import { UnitQuickStatsEditor } from "./UnitQuickStatsEditor";
 
 import { AbilitySummary } from "@/components/abilities";
 import { EntityIcon } from "@/components/common/EntityIcon";
+import { MonsterStatblock } from "@/components/common/MonsterStatblock";
 import { HudCard } from "@/components/hud/page";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { AttackType } from "@/lib/constants/battle";
+import { challengeLabel } from "@/lib/constants/challenge";
 import { useConfirm } from "@/lib/hooks/common";
 import { pluralUk } from "@/lib/utils/common/plural";
 import { getUnitImmunities } from "@/lib/utils/races/race-effects";
 import { unitDamageSummary } from "@/lib/utils/units/damage-summary";
 import { UNIT_DRAG_TYPE, unitDragPayload } from "@/lib/utils/units/drag";
-import type { Race } from "@/types/races";
 import type { Unit, UnitAttack } from "@/types/units";
 
 function primaryAttackIndex(attacks: UnitAttack[]): number {
@@ -32,11 +33,10 @@ function primaryAttackIndex(attacks: UnitAttack[]): number {
 interface UnitCardProps {
   unit: Unit;
   campaignId: string;
-  race?: Race | null;
   onDelete: (unitId: string) => void;
 }
 
-export function UnitCard({ unit, campaignId, race, onDelete }: UnitCardProps) {
+export function UnitCard({ unit, campaignId, onDelete }: UnitCardProps) {
   const confirm = useConfirm();
 
   const handleDragStart = (e: React.DragEvent) => {
@@ -51,7 +51,7 @@ export function UnitCard({ unit, campaignId, race, onDelete }: UnitCardProps) {
 
   const abilitySummary = unit.abilitySummary ?? [];
 
-  const allImmunities = getUnitImmunities(unit, race);
+  const allImmunities = getUnitImmunities(unit);
 
   const damage = unitDamageSummary(unit, attacks);
 
@@ -73,7 +73,14 @@ export function UnitCard({ unit, campaignId, race, onDelete }: UnitCardProps) {
         <div className="flex items-start gap-3">
           <EntityIcon src={unit.avatar} name={unit.name} size={80} className="size-16 rounded-lg text-2xl sm:size-20" />
           <div className="flex-1 min-w-0">
-            <h3 className="text-base font-semibold text-hud-ink">{unit.name}</h3>
+            <h3 className="text-base font-semibold text-hud-ink">
+              {unit.name}
+              {unit.cr != null && (
+                <Badge variant="outline" className="ml-2 align-middle text-xs">
+                  {`CR ${challengeLabel(unit.cr)}`}
+                </Badge>
+              )}
+            </h3>
             <div className="text-sm text-muted-foreground space-y-1">
               <div>
                 Рівень {unit.level} • HP {unit.maxHp}
@@ -91,6 +98,8 @@ export function UnitCard({ unit, campaignId, race, onDelete }: UnitCardProps) {
         <div className="mt-3 mb-3">
           <UnitQuickStatsEditor unit={unit} campaignId={campaignId} primaryAttackIndex={primaryIdx} primaryAttackName={primaryAttack?.name} />
         </div>
+
+        {unit.cr != null && unit.statblock && <MonsterStatblock block={unit.statblock} />}
 
         {abilitySummary.length > 0 && (
           <div className="space-y-1 mt-4">

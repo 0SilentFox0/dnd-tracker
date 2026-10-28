@@ -33,7 +33,7 @@ async function main() {
   });
 
   const campaigns = await prisma.campaign.findMany({
-    where: { id: { in: [...new Set(characters.map((c) => c.campaignId))] } },
+    where: { id: { in: [...new Set(characters.map((c) => c.campaignId))] }, kind: "campaign" },
     select: { id: true, maxLevel: true },
   });
 

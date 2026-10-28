@@ -65,8 +65,8 @@ export function damageDiceCursor(sent: number[], formula: string | null, rng: Rn
 
       return { rolls: [...own, ...extra], serverRolled: extra };
     },
-    hit() {
-      cursor += perStrike;
+    hit(doubled = false) {
+      cursor += doubled ? 2 * perStrike : perStrike;
     },
   };
 }

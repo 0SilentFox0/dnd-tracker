@@ -3,7 +3,7 @@ import { findFlags } from "@/lib/utils/abilities/engine/core/collect-modifiers";
 import { applyRawDamage, applyRawHeal } from "@/lib/utils/abilities/engine/effects/hp";
 import { applyEffect } from "@/lib/utils/abilities/registry/effects";
 import type { Effect } from "@/lib/utils/abilities/schema";
-import { getP, put } from "@/lib/utils/battle/common/action-flow";
+import { applyFlowDamage, getP, put } from "@/lib/utils/battle/common/action-flow";
 import { applyBalanceDamageMultiplier } from "@/lib/utils/battle/damage/balance-multiplier";
 import { applyResistance, immunityNote } from "@/lib/utils/battle/resistance";
 import { outcomeFor } from "@/lib/utils/battle/spell/cast/outcome";
@@ -59,6 +59,7 @@ function dealSpellDamage(state: SpellCastState, effect: Extract<Effect, { kind: 
   const resisted = applyResistance(target, planned, effect.damageType ?? "magic", { participants: flow.ps, fromSpell: true, school: spell.groupId, extra: state.actionModifiers[id] });
 
   put(flow, applyRawDamage(target, resisted.finalDamage));
+  applyFlowDamage(flow, target, resisted.finalDamage);
   absorbSpellDamage(state, id, resisted.finalDamage);
   state.damageSteps[id] = [...(state.damageSteps[id] ?? []), ...resisted.steps];
 
@@ -78,7 +79,9 @@ export function applyTo(state: SpellCastState, effect: Effect, effectIndex: numb
 
   if (outcome.skip || (outcome.factor < 1 && !usesRoll(effect))) return;
 
-  const roll = Math.floor(baseFor(state, effect) * outcome.factor * (isDamageEffect(effect) ? outcome.raceMultiplier : 1));
+  const base = baseFor(state, effect) + (isDamageEffect(effect) ? (outcome.critExtra ?? 0) : 0);
+
+  const roll = Math.floor(base * outcome.factor * (isDamageEffect(effect) ? outcome.raceMultiplier : 1));
 
   if (effect.kind === "dealDamage") dealSpellDamage(state, effect, id, roll, index);
   else runEffect(state, effect, effectIndex, [id], roll);

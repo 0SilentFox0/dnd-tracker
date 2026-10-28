@@ -9,6 +9,7 @@ import { DeleteAllArtifactsButton } from "@/components/artifacts/DeleteAllArtifa
 import { SearchEmptyState } from "@/components/common/SearchEmptyState";
 import { SearchInput } from "@/components/common/SearchInput";
 import { EmptyState, LoadingState } from "@/components/common/states";
+import { ContentTransferButtons } from "@/components/content-import/ContentTransferButtons";
 import { HudSection } from "@/components/hud/form";
 import { HudPage, HudPageHeader, HudPanel } from "@/components/hud/page";
 import { OnboardingHint } from "@/components/onboarding/OnboardingHint";
@@ -35,6 +36,7 @@ export function DMArtifactsPageClient({ campaignId }: { campaignId: string }) {
         subtitle="Управління артефактами та сетами"
         actions={
           <>
+            <ContentTransferButtons campaignId={campaignId} kind="artifacts" />
             <DeleteAllArtifactsButton campaignId={campaignId} artifactsCount={catalog.count} />
             <Button variant="outline" className="whitespace-nowrap" asChild>
               <Link href={`/campaigns/${campaignId}/dm/artifact-sets`}>Сети артефактів</Link>

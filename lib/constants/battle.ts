@@ -1,5 +1,7 @@
 import type { BattleMapConfig } from "@/types/battle";
 
+export const CONDITION_LIMITS = { rounds: 99, dc: 40 } as const;
+
 export const AttackType = {
   MELEE: "melee",
   RANGED: "ranged",
@@ -21,6 +23,16 @@ export const CombatStatus = {
 } as const;
 
 export type CombatStatusType = (typeof CombatStatus)[keyof typeof CombatStatus];
+
+export const EffectMarker = {
+  IMMOBILIZED: "immobilized",
+  SKIP_ACTION: "skip_action",
+  NO_REACTION: "no_reaction",
+  NO_BONUS_ACTION: "no_bonus_action",
+  DISENGAGED: "disengaged",
+} as const;
+
+export type EffectMarker = (typeof EffectMarker)[keyof typeof EffectMarker];
 
 export const BattleStatus = {
   PREPARED: "prepared",
@@ -107,6 +119,14 @@ export const BATTLE_LOG_PAGE_MAX = 100;
 // відкат дозволено й для завершеного бою, тож знімки лишаються, але не всі
 export const BATTLE_SNAPSHOTS_KEPT_AFTER_COMPLETE = 20;
 
+export const RECHARGE_THRESHOLDS = [4, 5, 6] as const;
+
+export type RechargeThreshold = (typeof RECHARGE_THRESHOLDS)[number];
+
+export const isRecharge = (value: unknown): value is RechargeThreshold => (RECHARGE_THRESHOLDS as readonly unknown[]).includes(value);
+
+export const MIN_CRIT_ON = 2;
+
 export const CELL_FEET = 5;
 
 export const FIRE_WAVE_NO_MAP_VICTIMS = 2;
@@ -138,3 +158,5 @@ export const MAZE_DIFFICULTIES = ["easy", "medium", "hard"] as const;
 export const MAZE_MARK_SYMBOLS = ["arrow-n", "arrow-e", "arrow-s", "arrow-w", "cross", "skull", "star"] as const;
 
 export const MAZE_LIMITS = { wallEdgesPerOp: 400, fogCellsPerOp: 400, teleportPairs: 10, fogPatches: 20 } as const;
+
+export const BATTLE_SELECT_CLASS = "h-10 min-w-40 border border-white/20 bg-black/30 px-2 text-[var(--ink)]";

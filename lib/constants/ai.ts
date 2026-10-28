@@ -8,7 +8,7 @@ export const AI_PROPOSAL_STATUSES = ["pending", "applied", "rejected", "stale"] 
 
 export const AI_PROVIDER_LABELS: Record<AiProvider, string> = { anthropic: "Claude (Anthropic)", openai: "ChatGPT (OpenAI)", google: "Gemini (Google)" };
 
-export const AI_MODE_LABELS: Record<AiThreadMode, string> = { scenario: "Співавтор", live: "Живий режим" };
+export const AI_MODE_LABELS: Record<AiThreadMode, string> = { scenario: "Помічник кампанії / співавтор", live: "Живий режим" };
 
 export type AiModelOption = { id: string; label: string; tier: "fast" | "smart" };
 
@@ -61,11 +61,30 @@ export function defaultModelFor(provider: AiProvider, mode: AiThreadMode): strin
 
 export const isKnownModel = (provider: AiProvider, id: string) => AI_MODELS[provider].some((m) => m.id === id);
 
+const KIB = 1024;
+
+export const AI_BODY_LIMITS = {
+  chat: 64 * KIB,
+  contextPreview: 16 * KIB,
+  settings: 64 * KIB,
+  credentials: 4 * KIB,
+  small: 4 * KIB,
+  slideImage: 16 * KIB,
+} as const;
+
+export const AI_RATE_LIMITS = {
+  chat: { limit: 20, windowSeconds: 60 },
+  credentials: { limit: 10, windowSeconds: 60 },
+  mcp: { limit: 120, windowSeconds: 60 },
+} as const;
+
 export const AI_LIMITS = {
   messageChars: 8000,
   historyMessages: 30,
   fullToolResultsInLast: 6,
   requestDeadlineMs: 270_000,
+  cancelPollMs: 2500,
+  slimOutputChars: 2000,
   toolResultChars: 24_000,
   contextChars: 40_000,
   maxSteps: 8,
@@ -75,5 +94,40 @@ export const AI_LIMITS = {
   instructionsChars: 8000,
 } as const;
 
+export const AI_TOOL_OUTPUT_COMPACTED = "[результат інструменту стиснуто]";
+
 export const API_TOKEN_PREFIX = "dndt_";
-export const API_TOKEN_SCOPES = ["ai"] as const;
+export const API_TOKEN_SCOPES = ["ai", "content:read", "content:write", "campaign:read", "campaign:write", "scenario:read", "scenario:write", "characters:read", "characters:write", "battles:read", "battles:write", "show:read", "show:write"] as const;
+
+export type ApiTokenScope = (typeof API_TOKEN_SCOPES)[number];
+
+export type ContentScope = "content:read" | "content:write";
+export type ActionScope = Exclude<ApiTokenScope, "ai">;
+
+export const CONTENT_SCOPES = ["content:read", "content:write"] as const satisfies readonly ContentScope[];
+
+export const CHAT_SCOPES: readonly ApiTokenScope[] = ["ai"];
+
+export const isApiTokenScope = (s: string): s is ApiTokenScope => (API_TOKEN_SCOPES as readonly string[]).includes(s);
+
+export const API_TOKEN_SCOPE_LABELS: Record<ApiTokenScope, string> = {
+  ai: "AI-асистент (MCP)",
+  "content:read": "Читання контенту",
+  "content:write": "Запис контенту",
+  "campaign:read": "Читання налаштувань кампанії",
+  "campaign:write": "Керування кампанією",
+  "scenario:read": "Читання сценарію",
+  "scenario:write": "Редагування сценарію",
+  "characters:read": "Читання персонажів",
+  "characters:write": "Керування персонажами",
+  "battles:read": "Читання боїв",
+  "battles:write": "Керування боями",
+  "show:read": "Читання показу",
+  "show:write": "Керування показом",
+};
+
+export const hasScope = (scopes: readonly string[], need: ApiTokenScope) => scopes.includes(need) || (need.endsWith(":read") && scopes.includes(`${need.slice(0, -5)}:write`));
+
+export const ASSISTANT_PAGE_SIZES = { changes: 20, queue: 20, queueMax: 50 } as const;
+
+export const DEFAULT_THREAD_TITLE = "Новий тред";

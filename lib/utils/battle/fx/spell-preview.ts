@@ -4,6 +4,7 @@ import { impactFor } from "./impact";
 import { mapAction } from "./map-action";
 import { previewParticipant } from "./preview-participant";
 import { PREVIEW_UNITS, type PreviewUnitId } from "./preview-units";
+import type { SpellFx } from "./spells";
 import type { FxAuraKind, FxSpec } from "./types";
 
 import type { LibrarySpell } from "@/data/library/types";
@@ -50,6 +51,7 @@ export interface PreviewSpell {
   name: string;
   level: number;
   groupId: string | null;
+  fx?: SpellFx | null;
   rules: SpellRules;
 }
 
@@ -86,12 +88,12 @@ const TARGET_IDS: { [K in SpellTargeting["kind"]]: (t: TargetingOf<K>) => Previe
 
 const targetIdsFor = (t: SpellTargeting) => (TARGET_IDS[t.kind] as (t: SpellTargeting) => PreviewUnitId[])(t);
 
-export function castableOf({ id, name, level, groupId, rules }: PreviewSpell): CastableSpell {
-  return { id, name, level, groupId, definition: readSpellDefinition({ id, ...rules }) };
+export function castableOf({ id, name, level, groupId, fx, rules }: PreviewSpell): CastableSpell {
+  return { id, name, level, groupId, fx, definition: readSpellDefinition({ id, ...rules }) };
 }
 
 /** The library entry as the seeder writes it to the DB, so it previews like a campaign spell. */
-export function libraryPreviewSpell(spell: LibrarySpell): PreviewSpell {
+export function libraryPreviewSpell(spell: LibrarySpell, fx?: SpellFx | null): PreviewSpell {
   const d = spell.definition;
 
   return {
@@ -99,11 +101,12 @@ export function libraryPreviewSpell(spell: LibrarySpell): PreviewSpell {
     name: spell.name,
     level: spell.level,
     groupId: null,
-    rules: { dice: d.dice, cost: d.cost, targeting: d.targeting, resolution: d.resolution, spellEffects: d.effects, stackable: d.stackable ?? false, maxStacks: d.maxStacks ?? null },
+    fx,
+    rules: { dice: d.dice, cost: d.cost, targeting: d.targeting, resolution: d.resolution, spellEffects: d.effects, stackable: d.stackable ?? false, maxStacks: d.maxStacks ?? null, concentration: d.concentration ?? false },
   };
 }
 
-const libraryCastable = (spell: LibrarySpell): CastableSpell => castableOf(libraryPreviewSpell(spell));
+const libraryCastable = (spell: LibrarySpell, fx?: SpellFx | null): CastableSpell => castableOf(libraryPreviewSpell(spell, fx));
 
 /** Casts the spell on a synthetic arena (every save fails, dice roll 4) and reads off what the client would play. */
 export function previewCastFx(castable: CastableSpell): SpellFxResult {
@@ -154,8 +157,8 @@ export function previewCastFx(castable: CastableSpell): SpellFxResult {
   }
 }
 
-export function previewSpellFx(spell: LibrarySpell): SpellFxPreview {
-  const castable = libraryCastable(spell);
+export function previewSpellFx(spell: LibrarySpell, fx?: SpellFx | null): SpellFxPreview {
+  const castable = libraryCastable(spell, fx);
 
   return {
     key: spell.key,

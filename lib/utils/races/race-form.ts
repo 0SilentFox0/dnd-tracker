@@ -1,6 +1,7 @@
 import { DEFAULT_SPELL_SLOT_PROGRESSION } from "@/lib/constants/spells";
 import type { Ability } from "@/lib/utils/abilities/schema";
 import { normalizePassiveAbility } from "@/lib/utils/races/race-summary";
+import type { Choice } from "@/types/choices";
 import type { RaceFormData, SpellSlotProgression } from "@/types/races";
 
 export function getInitialRaceFormData(race: {
@@ -12,6 +13,7 @@ export function getInitialRaceFormData(race: {
   passiveAbility?: unknown;
   spellSlotProgression?: unknown;
   abilities?: Ability[];
+  choices?: Choice[];
 }): RaceFormData {
   const passive = normalizePassiveAbility(race);
 
@@ -29,5 +31,6 @@ export function getInitialRaceFormData(race: {
     spellSlotProgression:
       progression.length > 0 ? progression : DEFAULT_SPELL_SLOT_PROGRESSION,
     abilities: race.abilities ?? [],
+    ...(race.choices?.length && { choices: race.choices }),
   };
 }

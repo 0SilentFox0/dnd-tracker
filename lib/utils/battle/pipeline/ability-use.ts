@@ -2,7 +2,7 @@ import { API_ERRORS } from "@/lib/constants/api-errors";
 import { findParticipant, isActive, updateParticipant } from "@/lib/utils/abilities/engine/core/participants";
 import { runAbilities } from "@/lib/utils/abilities/engine/core/run-abilities";
 import type { AbilityRunContext } from "@/lib/utils/abilities/engine/core/types";
-import { cooldownLeft, withinCountLimits } from "@/lib/utils/abilities/engine/core/usage";
+import { cooldownLeft, poolAffordable, withinCountLimits } from "@/lib/utils/abilities/engine/core/usage";
 import { canActNow } from "@/lib/utils/battle/common/control";
 import { applyMainActionUsed } from "@/lib/utils/battle/participant";
 import type { BattleMutationContext, MutationResult } from "@/lib/utils/battle/pipeline/run-battle-mutation";
@@ -33,7 +33,7 @@ const spend: Record<AbilityUseTrigger, (p: BattleParticipant) => BattleParticipa
   bonusAction: (p) => ({ ...p, actionFlags: { ...p.actionFlags, hasUsedBonusAction: true } }),
 };
 
-export const abilityRunContext = (ctx: BattleMutationContext): AbilityRunContext => ({ round: ctx.scene.round, rng: ctx.rng ?? Math.random, map: ctx.meta.map });
+export const abilityRunContext = (ctx: BattleMutationContext): AbilityRunContext => ({ round: ctx.scene.round, rng: ctx.rng ?? Math.random, map: ctx.meta.map, rules: ctx.meta.rules });
 
 export async function runAbilityUse(ctx: BattleMutationContext, req: AbilityUseRequest, trigger: AbilityUseTrigger, deps: SummonDeps): Promise<MutationResult> {
   const participant = findParticipant(ctx.participants, req.participantId);
@@ -50,9 +50,15 @@ export async function runAbilityUse(ctx: BattleMutationContext, req: AbilityUseR
 
   if (!ability) throw new BattleRuleError("action_rejected", "У учасника немає такого вміння");
 
+  if (ability.limits?.lair) throw new BattleRuleError("action_rejected", "Це вміння — дія лігва");
+
+  if (ability.limits?.legendaryCost) throw new BattleRuleError("action_rejected", "Це вміння — легендарна дія, її використовують поза своїм ходом");
+
   const usage = USAGE[trigger];
 
   if (usage.used(participant)) throw new BattleRuleError(usage.error.code, usage.error.message);
+
+  if (!poolAffordable(participant, ability)) throw new BattleRuleError("ability_limit", API_ERRORS.ABILITY_POOL_EMPTY);
 
   if (!withinCountLimits(participant, ability)) throw new BattleRuleError("ability_limit", "Ліміт використань вичерпано");
 
@@ -70,7 +76,7 @@ export async function runAbilityUse(ctx: BattleMutationContext, req: AbilityUseR
 
   const run = runAbilities(order, { type: trigger, actorId: id, abilityKey: ability.key, targetIds, ...(targetCell && { targetCell }) }, abilityRunContext(ctx));
 
-  const summoned = await applyAbilitySummons(run.summons, run.participants, { campaignId: ctx.scene.campaignId, battleId: ctx.scene.id, rng: ctx.rng ?? Math.random, deps });
+  const summoned = await applyAbilitySummons(run.summons, run.participants, { campaignId: ctx.scene.campaignId, battleId: ctx.scene.id, rng: ctx.rng ?? Math.random, rules: ctx.meta.rules, deps });
 
   const participants = usage.spendFirst ? summoned.order : updateParticipant(summoned.order, id, spend[trigger]);
 

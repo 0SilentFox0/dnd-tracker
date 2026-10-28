@@ -30,15 +30,15 @@ describe("SpellLevelAccordion delete level", () => {
   it("deletes after confirm", async () => {
     renderIt();
     fireEvent.click(screen.getByTitle("Видалити всі заклинання рівня"));
-    fireEvent.click(within(await screen.findByRole("dialog")).getByRole("button", { name: "Видалити" }));
+    fireEvent.click(within(await screen.findByRole("alertdialog")).getByRole("button", { name: "Видалити" }));
     await waitFor(() => expect(mutateAsync).toHaveBeenCalledWith(3));
   });
 
   it("does nothing on cancel", async () => {
     renderIt();
     fireEvent.click(screen.getByTitle("Видалити всі заклинання рівня"));
-    fireEvent.click(within(await screen.findByRole("dialog")).getByRole("button", { name: "Скасувати" }));
-    await waitFor(() => expect(screen.queryByRole("dialog")).toBeNull());
+    fireEvent.click(within(await screen.findByRole("alertdialog")).getByRole("button", { name: "Скасувати" }));
+    await waitFor(() => expect(screen.queryByRole("alertdialog")).toBeNull());
     expect(mutateAsync).not.toHaveBeenCalled();
   });
 });

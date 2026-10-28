@@ -6,13 +6,14 @@ import { restoreParticipantsAt } from "@/lib/utils/battle/store/history";
 import { buildSnapshotState } from "@/lib/utils/battle/store/snapshot-state";
 import { splitParticipant } from "@/lib/utils/battle/store/split-participant";
 import type { BattleSceneState, LoadedBattle } from "@/lib/utils/battle/store/types";
+import { DEFAULT_RULES } from "@/lib/utils/rules";
 
 const scene: BattleSceneState = {
   id: "b1", campaignId: "c1", status: "active", round: 1, turnIndex: 0,
   version: 1, eventSeq: 0, pendingMoraleCheck: null, pendingCritChoice: null, startedAt: null, completedAt: null,
 };
 
-const meta = { name: "Бій", description: null, setup: [], friendlyFire: false, critChoiceByDm: false, map: null, createdAt: new Date() };
+const meta = { name: "Бій", description: null, setup: [], friendlyFire: false, rules: DEFAULT_RULES, critChoiceByDm: false, map: null, createdAt: new Date() };
 
 const hero = createMockParticipant({ basicInfo: { ...createMockParticipant().basicInfo, id: "hero", battleId: "b1" } });
 

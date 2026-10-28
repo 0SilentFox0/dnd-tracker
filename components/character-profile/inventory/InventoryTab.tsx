@@ -60,6 +60,7 @@ export function InventoryTab() {
     <div className="space-y-4">
       <div className="gap-4 lg:grid lg:grid-cols-[auto_1fr]">
         <div className="space-y-3">
+          {sheet.items.attunement && <p className="text-xs text-hud-muted">{`Налаштування ${sheet.items.attunement.used}/${sheet.items.attunement.limit}`}</p>}
           <EquipmentGrid inv={inv} />
           {inv.access.pending ? (
             <EmptyState title="Підсумок з'явиться після схвалення персонажа" />

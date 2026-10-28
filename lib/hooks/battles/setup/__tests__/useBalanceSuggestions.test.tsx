@@ -15,6 +15,8 @@ vi.mock("../../useBattleSetupQueries", () => ({
 
 import { useBalanceSuggestions } from "../useBalanceSuggestions";
 
+import { DEFAULT_RULES } from "@/lib/utils/rules";
+
 describe("useBalanceSuggestions", () => {
   it("прийняття пропозиції зберігає резерв ворогів (обмежений кількістю) і не чіпає союзників", () => {
     const participants: BattlePreparationParticipant[] = [
@@ -25,7 +27,7 @@ describe("useBalanceSuggestions", () => {
 
     const setParticipants = vi.fn();
 
-    const { result } = renderHook(() => useBalanceSuggestions({ campaignId: "c", participants, allies: { value: { characterIds: ["h1"], units: [] }, exists: true }, setParticipants }));
+    const { result } = renderHook(() => useBalanceSuggestions({ campaignId: "c", participants, allies: { value: { characterIds: ["h1"], units: [] }, exists: true }, setParticipants, encounters: DEFAULT_RULES.encounters }));
 
     act(() => result.current.actions.suggest());
     act(() => result.current.actions.apply());

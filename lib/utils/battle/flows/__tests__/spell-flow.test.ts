@@ -1,9 +1,12 @@
 import { describe, expect, it } from "vitest";
 
 import { ParticipantSide } from "@/lib/constants/battle";
-import { makeParticipant, resolved } from "@/lib/utils/abilities/__tests__/fixtures";
+import { makeEffect, makeParticipant, resolved } from "@/lib/utils/abilities/__tests__/fixtures";
 import type { Effect } from "@/lib/utils/abilities/schema";
 import { buildSpellPick, canGoBack, initialSpellFlow, rollsComplete, spellAimTargets, spellFlow, type SpellFlowAction, type SpellFlowState, spellPayload, type SpellPick,spellSaveTargets, spellSlotCostLabel, spellSlotsLeft, spellTargetCandidates, spellTargetInRange, spellTargetSide, withAllTargets, withChainTargets, withLiveAimTargets } from "@/lib/utils/battle/flows";
+import { castSpell } from "@/lib/utils/battle/spell/cast";
+import { resolveSpellTargets } from "@/lib/utils/battle/spell/spell-targeting";
+import type { CastableSpell } from "@/lib/utils/battle/types/spell-process";
 import type { BattleMapConfig, GridPoint } from "@/types/battle";
 import type { BookSpell } from "@/types/spells";
 
@@ -16,6 +19,19 @@ const cloud: SpellPick = { spellId: "cloud", level: 1, targetMode: "multi", need
 const aura: SpellPick = { spellId: "aura", level: 3, targetMode: "none", needsSaves: false, diceSlots: [] };
 
 describe("spellFlow", () => {
+  it("reconciles dice when item cast level or grant changes", () => {
+    const start = run({ type: "OPEN", casterId: "me", level: 2 }, { type: "PICK", pick: ray, grantKey: "wand" });
+
+    const up = spellFlow(start, { type: "SET_CAST_LEVEL", castLevel: 3, pick: { ...ray, diceSlots: [6, 6, 6] } });
+
+    const filled = [0, 1, 2].reduce((s, index) => spellFlow(s, { type: "SET_DAMAGE", index, value: 4 }), up);
+
+    expect(filled.damage).toEqual([4, 4, 4]);
+
+    const down = spellFlow(filled, { type: "SET_GRANT", grantKey: "other", pick: { ...ray, diceSlots: [6] } });
+
+    expect(down.damage).toEqual([undefined]);
+  });
   it("відкривається на сторінці кола; вибір спела → сторінка спела; TO_TARGETS → цілі", () => {
     const s = run({ type: "OPEN", casterId: "me", level: 2 }, { type: "PICK", pick: ray });
 
@@ -211,6 +227,43 @@ describe("шаблон і дальність", () => {
 
   const ball: SpellPick = { spellId: "fb", level: 3, targetMode: "template", template: { shape: "circle", size: 20 }, range: 150, needsSaves: true, diceSlots: [6] };
 
+  it("preview preserves exact circle geometry", () => {
+    const exact = { ...fireball, targeting: { ...fireball.targeting, exact: true } } as BookSpell;
+
+    const wideMap = { ...map, cols: 20, rows: 20 };
+
+    const corner = placed("corner", ParticipantSide.ENEMY, { x: 8, y: 8 });
+
+    const edge = placed("edge", ParticipantSide.ENEMY, { x: 10, y: 6 });
+
+    const outside = placed("outside", ParticipantSide.ENEMY, { x: 9, y: 9 });
+
+    const pick = buildSpellPick([hero, corner, edge, outside], hero, exact, wideMap);
+
+    expect(pick.template).toMatchObject({ exact: true });
+    expect(spellAimTargets({ map: wideMap, participants: [hero, corner, edge, outside], caster: hero }, pick, { x: 6, y: 6 }).map(p => p.basicInfo.id)).toEqual(["corner", "edge"]);
+  });
+
+  it("fixed monster cantrip preview keeps its base dice", () => {
+    const monster = { ...hero, abilities: { ...hero.abilities, level: 17, damageModel: "5e" as const } };
+
+    expect(buildSpellPick(order, monster, { ...fireball, level: 0, dice: 1, dieSides: 10, fixedDice: true }, map).diceSlots).toEqual([10]);
+  });
+
+  it("emanation skips aim and refreshes its live targets without targetCell", () => {
+    const pick: SpellPick = { ...ball, template: { shape: "emanation", size: 5 } };
+
+    const s = run({ type: "OPEN", casterId: "h", level: 3 }, { type: "PICK", pick }, { type: "TO_TARGETS" });
+
+    expect(s.step).toBe("rolls");
+
+    const live = withLiveAimTargets(s, ["f"]);
+
+    expect(live.targetIds).toEqual(["f"]);
+    expect(spellPayload(live)).not.toHaveProperty("targetCell");
+    expect(spellFlow(s, { type: "BACK" }).step).toBe("spell");
+  });
+
   it("buildSpellPick: template на карті з позицією заклинателя; без карти чи позиції — multi", () => {
     expect(buildSpellPick(order, hero, fireball, map)).toMatchObject({ targetMode: "template", template: { shape: "circle", size: 20 }, range: 150 });
     expect(buildSpellPick(order, hero, fireball, null)).toMatchObject({ targetMode: "multi", maxTargets: 4, targetSide: "enemy" });
@@ -399,7 +452,9 @@ describe("шаблон і дальність", () => {
     it("spellAimTargets: радіус бере лише сторону заклинання, найближчих до точки, до ліміту; шаблон — усіх", () => {
       const area = widened("area");
 
-      const participants = [area, foe, near, friend];
+      const invisible = { ...friend, battleData: { ...friend.battleData, activeEffects: [{ id: "inv", name: "Невидимий", type: "condition" as const, duration: 3, appliedAt: { round: 1, timestamp: new Date() }, effects: [{ type: "invisible", value: 1 }] }] } };
+
+      const participants = [area, foe, near, invisible];
 
       const pick = buildSpellPick(participants, area, bolt, map);
 
@@ -471,4 +526,69 @@ describe("шаблон і дальність", () => {
     expect(spellFlow(waiting, { type: "FAIL", error: "x" }).waitingCrit).toBe(false);
     expect(spellFlow(run({ type: "OPEN", casterId: "me", level: 3 }), { type: "WAIT_CRIT" }).waitingCrit).toBeFalsy();
   });
+});
+
+describe("SET_SLOT", () => {
+  it("prunes save and attack rolls of targets that no longer fit", () => {
+    const wide: SpellPick = { spellId: "x", level: 1, targetMode: "multi", needsSaves: true, needsAttackRolls: true, diceSlots: [8], maxTargets: 3 };
+
+    const s = run(
+      { type: "OPEN", casterId: "me", level: 1 },
+      { type: "PICK", pick: wide },
+      { type: "TO_TARGETS" },
+      { type: "TOGGLE_TARGET", id: "a" },
+      { type: "TOGGLE_TARGET", id: "b" },
+      { type: "TOGGLE_TARGET", id: "c" },
+      { type: "SET_SAVE", id: "a", value: 5 },
+      { type: "SET_SAVE", id: "c", value: 7 },
+      { type: "SET_ATTACK", id: "a", value: 11 },
+      { type: "SET_ATTACK", id: "c", value: 13 },
+      { type: "SET_SLOT", slotKey: "1", pick: { ...wide, maxTargets: 1 } },
+    );
+
+    expect(s.targetIds).toEqual(["a"]);
+    expect(s.saves).toEqual({ a: 5 });
+    expect(s.attacks).toEqual({ a: 11 });
+  });
+});
+
+it("AoE preview і server cast вражають невидимого учасника в геометрії шаблону", () => {
+  const map: BattleMapConfig = { cols: 20, rows: 20, background: null, opacity: 0.3 };
+
+  const base = makeParticipant({ id: "caster" });
+
+  const caster = { ...base, spellcasting: { ...base.spellcasting, spellSlots: { "1": { max: 2, current: 2 } } }, battleData: { ...base.battleData, position: { x: 1, y: 1 } } };
+
+  const enemy = makeParticipant({ id: "invisible", side: ParticipantSide.ENEMY });
+
+  const invisible = { ...enemy, battleData: { ...enemy.battleData, position: { x: 5, y: 5 }, activeEffects: [makeEffect("invisible", { effects: [{ type: "invisible", value: 1 }] })] } };
+
+  const participants = [caster, invisible];
+
+  const spell: CastableSpell = {
+    id: "aoe", name: "Вогонь", groupId: null, level: 1,
+    definition: {
+      dice: 1, cost: "action", targeting: { kind: "template", shape: "circle", size: 10, side: "enemy", maxTargets: 10, range: 60 },
+      resolution: { kind: "auto" }, effects: [{ kind: "dealDamage", amount: { spellRoll: 100 }, damageType: "fire" }], raceModifiers: [],
+    },
+  };
+
+  const pick = buildSpellPick(participants, caster, { id: spell.id, name: spell.name, level: spell.level, ...spell.definition } as BookSpell, map);
+
+  const aim = { x: 5, y: 5 };
+
+  const preview = spellAimTargets({ map, participants, caster }, pick, aim).map((p) => p.basicInfo.id);
+
+  const resolution = resolveSpellTargets(participants, caster, spell, spell.definition.targeting, [], { map, targetCell: aim });
+
+  expect(preview).toEqual(["invisible"]);
+  expect(resolution).toMatchObject({ ok: true, targetIds: preview });
+
+  if (!resolution.ok) throw new Error(resolution.error);
+
+  const result = castSpell({ caster, spell, targetIds: resolution.targetIds, allParticipants: participants, currentRound: 1, battleId: "b", diceRolls: [4], map, rng: () => 0.5 });
+
+  expect(result.success).toBe(true);
+  expect(result.allParticipantsUpdated.find((p) => p.basicInfo.id === "invisible")?.combatStats.currentHp).toBe(16);
+  expect(invisible.combatStats.currentHp).toBe(20);
 });

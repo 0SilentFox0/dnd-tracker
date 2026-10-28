@@ -1,0 +1,15 @@
+[
+  {
+    "fields": {
+      "ac_add_dexmod": false,
+      "ac_base": 2,
+      "ac_cap_dexmod": null,
+      "document": "srd-2024",
+      "grants_stealth_disadvantage": false,
+      "name": "Shield",
+      "strength_score_required": null
+    },
+    "model": "api_v2.armor",
+    "pk": "srd-2024_shield"
+  }
+]

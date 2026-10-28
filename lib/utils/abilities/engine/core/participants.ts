@@ -1,6 +1,6 @@
 import { CombatStatus } from "@/lib/constants/battle";
 import type { ResolvedAbility } from "@/types/abilities";
-import type { BattleParticipant } from "@/types/battle";
+import type { ActiveEffect, BattleParticipant } from "@/types/battle";
 
 export function findParticipant(ps: BattleParticipant[], id: string): BattleParticipant | undefined {
   return ps.find((p) => p.basicInfo.id === id);
@@ -16,6 +16,10 @@ export function updateParticipant(
   fn: (p: BattleParticipant) => BattleParticipant,
 ): BattleParticipant[] {
   return ps.map((p) => (p.basicInfo.id === id ? fn(p) : p));
+}
+
+export function withActiveEffects(p: BattleParticipant, fn: (list: ActiveEffect[]) => ActiveEffect[]): BattleParticipant {
+  return { ...p, battleData: { ...p.battleData, activeEffects: fn(p.battleData.activeEffects) } };
 }
 
 export function mergeParticipants(ps: BattleParticipant[], updated: BattleParticipant[]): BattleParticipant[] {
@@ -51,6 +55,11 @@ export function idleTurnIndex(order: BattleParticipant[]): number {
 export function isTargetable(p: BattleParticipant): boolean {
   return isActive(p) && !isAirborne(p) && !isEscaped(p);
 }
+
+export const isDying = (p: BattleParticipant): boolean => p.combatStats.status === CombatStatus.UNCONSCIOUS && !!p.battleData.deathSaves;
+
+/** Ціль атаки: як isTargetable, але героя, що вмирає за 5e, теж можна бити (кожне влучання — провал кидка смерті). */
+export const isAttackable = (p: BattleParticipant): boolean => (isActive(p) || isDying(p)) && !isAirborne(p) && !isEscaped(p);
 
 export function resolvedAbilitiesOf(p: BattleParticipant): ResolvedAbility[] {
   return p.battleData.resolvedAbilities ?? [];

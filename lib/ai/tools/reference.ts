@@ -5,6 +5,7 @@ import { AiToolError, defineTool } from "./define";
 import "server-only";
 import { getCachedRaces, getCachedSpells, getCachedUnits } from "@/lib/cache/reference-data";
 import { AI_LIMITS } from "@/lib/constants/ai";
+import { referenceEntryMissingMessage } from "@/lib/constants/api-errors";
 import { prisma } from "@/lib/db";
 
 const kindSchema = z.enum(["unit", "spell", "race", "skill", "artifact"]);
@@ -36,6 +37,7 @@ async function findEntry(campaignId: string, kind: Kind, id: string): Promise<En
 
 export const searchReferenceTool = defineTool({
   name: "search_reference",
+  scopes: ["ai"],
   title: "Пошук у довіднику",
   description: "Search the campaign reference by name: units, spells, races, skills, artifacts. Returns id and name; use read_reference for details.",
   input: z.object({ kind: kindSchema, query: z.string().trim().min(1).max(60) }),
@@ -51,13 +53,14 @@ export const searchReferenceTool = defineTool({
 
 export const readReferenceTool = defineTool({
   name: "read_reference",
+  scopes: ["ai"],
   title: "Запис довідника",
   description: "Full reference entry (unit stats and abilities, spell effects, race traits, skill or artifact description) by kind and id.",
   input: z.object({ kind: kindSchema, id: z.string().min(1) }),
   handler: async (ctx, { kind, id }) => {
     const entry = await findEntry(ctx.campaignId, kind, id);
 
-    if (!entry) throw new AiToolError(`Запису ${kind} ${id} немає в довіднику кампанії`);
+    if (!entry) throw new AiToolError(referenceEntryMissingMessage(kind, id));
 
     return entry;
   },

@@ -48,7 +48,7 @@ export function imageBucketStorage<T extends string>({ bucket, maxBytes, formats
     return path?.startsWith(`${campaignId}/`) && objectName.test(path.slice(campaignId.length + 1)) ? path : null;
   }
 
-  async function remove(campaignId: string, urls: string[]): Promise<void> {
+  async function remove(campaignId: string, urls: string[], options: { strict?: boolean } = {}): Promise<void> {
     const paths = urls.flatMap((url) => ownedPath(campaignId, url) ?? []);
 
     if (paths.length === 0) return;
@@ -56,8 +56,12 @@ export function imageBucketStorage<T extends string>({ bucket, maxBytes, formats
     try {
       const { error } = await createAdminClient().storage.from(bucket).remove(paths);
 
+      if (error && options.strict) throw new Error("Не вдалося очистити медіа");
+
       if (error) console.warn(`[${logTag}] remove failed`, paths, error.message);
     } catch (e) {
+      if (options.strict) throw new Error("Не вдалося очистити медіа");
+
       console.warn(`[${logTag}] remove failed`, paths, e);
     }
   }

@@ -35,7 +35,10 @@ export const sheetFixture: CharacterSheet = {
   skills: [{ key: "stealth", label: "Скритність", ability: "dexterity", bonus: 13, proficient: true }],
   passives: { perception: 19, investigation: 10, insight: 10 },
   magic: null,
-  slots: [{ level: 1, count: 4 }, { level: 2, count: 2 }],
+  hitDice: null,
+  pact: null,
+  slots: [{ level: 1, count: 4, current: 4 }, { level: 2, count: 2, current: 2 }],
+  rest: null,
   spells: [{ id: "mark", name: "Мітка мисливця", level: 1, dice: 1, targeting: { kind: "enemy" } }],
   items: {
     grid: { armor: { id: "a1", name: "Кольчуга ельфів", icon: null, slot: "armor", rarity: "rare", description: "Легка і тиха.", effects: ["AC +2"] } },

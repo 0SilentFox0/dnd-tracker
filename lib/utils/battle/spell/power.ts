@@ -1,9 +1,9 @@
-import type { AbilityKey } from "@/lib/constants/abilities";
 import { collectModifiers } from "@/lib/utils/abilities/engine/core/collect-modifiers";
 import { withSelf } from "@/lib/utils/abilities/engine/core/participants";
 import type { StaticEffect } from "@/lib/utils/abilities/schema";
+import { isFiveE } from "@/lib/utils/battle/attack/ability";
 import { archetypeLabel, heroMagicMultiplier } from "@/lib/utils/battle/damage/hero-dm-multiplier";
-import { rollDie } from "@/lib/utils/common/dice";
+import { getSpellSaveDC } from "@/lib/utils/common/calculations";
 import { signed } from "@/lib/utils/common/format";
 import type { BattleParticipant } from "@/types/battle";
 
@@ -12,23 +12,21 @@ function spellcastingModifier(p: BattleParticipant): { mod: number; label: strin
 
   if (!ability) return { mod: 0, label: "" };
 
-  const labels = { intelligence: "INT", wisdom: "WIS", charisma: "CHA" } as const;
+  const labels = { strength: "STR", dexterity: "DEX", constitution: "CON", intelligence: "INT", wisdom: "WIS", charisma: "CHA" } as const;
 
   return { mod: p.abilities.modifiers[ability], label: labels[ability] };
 }
 
-export function spellSaveDc(caster: BattleParticipant): number {
-  return caster.spellcasting.spellSaveDC ?? 8 + caster.abilities.proficiencyBonus + spellcastingModifier(caster).mod;
+export function spellSaveDc(caster: BattleParticipant, ability: keyof BattleParticipant["abilities"]["modifiers"] | undefined, saveDcBase: number): number {
+  const modifier = ability ? caster.abilities.modifiers[ability] : spellcastingModifier(caster).mod;
+
+  const computed = getSpellSaveDC(caster.abilities.proficiencyBonus, modifier, saveDcBase);
+
+  return ability ? computed : (caster.spellcasting.spellSaveDC ?? computed);
 }
 
-export function rollSavingThrow(target: BattleParticipant, ability: AbilityKey, dc: number, rng: () => number, presetRoll?: number): { roll: number; mod: number; total: number; success: boolean } {
-  const roll = presetRoll ?? rollDie(20, rng);
-
-  const mod = target.abilities.modifiers[ability];
-
-  const total = roll + mod;
-
-  return { roll, mod, total, success: total >= dc };
+export function spellAttackBonus(caster: BattleParticipant): number {
+  return caster.spellcasting.spellAttackBonus ?? caster.abilities.proficiencyBonus + spellcastingModifier(caster).mod;
 }
 
 export interface SpellPower {
@@ -43,6 +41,8 @@ export function computeSpellPower(input: {
   rolls: number[];
   participants: BattleParticipant[];
   extra?: StaticEffect[];
+  addAbilityMod?: boolean;
+  damageBonus?: number;
 }): SpellPower {
   const { caster, rolls } = input;
 
@@ -52,7 +52,7 @@ export function computeSpellPower(input: {
 
   const breakdown = [`+ сума кубиків (${sum})`];
 
-  const heal = sum;
+  const heal = sum + (input.damageBonus ?? 0);
 
   const mods = collectModifiers(withSelf(input.participants, caster), caster.basicInfo.id, { damage: { kind: "magic", school: input.groupId } }, input.extra);
 
@@ -64,7 +64,13 @@ export function computeSpellPower(input: {
     if (e.percent) breakdown.push(`+ бонус ${e.label}: ${e.percent}% від ${sum} (${signed(Math.floor((sum * e.percent) / 100))})`);
   }
 
-  const raw = heal + mods.flat + percentBonus;
+  const abilityMod = isFiveE(caster) && input.addAbilityMod ? spellcastingModifier(caster) : null;
+
+  if (abilityMod) breakdown.push(`+ мод. ${abilityMod.label} (${signed(abilityMod.mod)})`);
+
+  if (input.damageBonus) breakdown.push(`+ бонус заклинання (${signed(input.damageBonus)})`);
+
+  const raw = heal + mods.flat + percentBonus + (abilityMod?.mod ?? 0);
 
   const mult = heroMagicMultiplier(caster);
 
@@ -72,5 +78,5 @@ export function computeSpellPower(input: {
 
   if (mult !== 1) breakdown.push(`× ${mult} (${archetypeLabel(caster)}) = ${damage}`);
 
-  return { heal, damage, breakdown };
+  return { heal: heal + (abilityMod?.mod ?? 0), damage, breakdown };
 }

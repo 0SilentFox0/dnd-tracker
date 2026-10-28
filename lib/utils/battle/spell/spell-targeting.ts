@@ -4,11 +4,15 @@ import { SKILL_AREA_RADIUS_FEET } from "@/lib/constants/battle";
 import { collectModifiers } from "@/lib/utils/abilities/engine/core/collect-modifiers";
 import { findParticipant, isActive, isAirborne, isTargetable } from "@/lib/utils/abilities/engine/core/participants";
 import type { FlagEffect } from "@/lib/utils/abilities/schema";
+import { isFiveE } from "@/lib/utils/battle/attack/ability";
+import { conditionSourceIds } from "@/lib/utils/battle/conditions/query";
+import { isDying } from "@/lib/utils/battle/death-saves";
 import { footprintDistance, inBounds } from "@/lib/utils/battle/grid/geometry";
 import { cellsOf, isOnMap } from "@/lib/utils/battle/grid/occupancy";
 import { aimInRange, feetToCells, templateAimAllowed, templateArea, templateCentre } from "@/lib/utils/battle/grid/template";
 import { modeAimHiddenText, modeSightedTargets, modeTargetHiddenText } from "@/lib/utils/battle/modes/engine";
 import { isReserved } from "@/lib/utils/battle/participant/reserve";
+import { upcastSteps } from "@/lib/utils/battle/spell/caster-dice";
 import type { SpellTargeting as SpellTargetingDef } from "@/lib/utils/spells/model/schema";
 import type { BattleMapConfig, BattleParticipant, GridPoint, SpellTemplate } from "@/types/battle";
 
@@ -118,6 +122,8 @@ export type SpellTargetResolution = { ok: true; targetIds: string[]; cells?: str
 export interface SpellMapContext {
   map: BattleMapConfig | null;
   targetCell?: GridPoint;
+  castLevel?: number;
+  upcastTargets?: number;
 }
 
 const SIGHTED_KINDS: ReadonlySet<SpellTargetingDef["kind"]> = new Set(["ally", "enemy", "allyDead", "area", "template"]);
@@ -127,6 +133,14 @@ const fail = (error: string): SpellTargetResolution => ({ ok: false, error });
 type TemplateTargeting = Extract<SpellTargetingDef, { kind: "template" }>;
 
 function resolveTemplate(ps: BattleParticipant[], caster: BattleParticipant, targeting: TemplateTargeting, map: BattleMapConfig, aim: GridPoint | undefined): SpellTargetResolution {
+  if (targeting.shape === "emanation") {
+    const centre = cellsOf(caster)[0];
+
+    const { cells, targets } = templateArea(map, ps, caster, targeting, centre);
+
+    return { ok: true, targetIds: targets.map((p) => p.basicInfo.id), cells, centre };
+  }
+
   if (!aim) return fail("Оберіть точку на карті");
 
   if (!inBounds(map, aim)) return fail("Точка поза картою");
@@ -140,9 +154,11 @@ function resolveTemplate(ps: BattleParticipant[], caster: BattleParticipant, tar
   const { cells, targets } = templateArea(map, ps, caster, targeting, aim);
 
   // конус/лінія у власну клітинку не мають напрямку — інакше слот згорів би без зони
+
   if (cells.length === 0) return fail("Оберіть напрямок");
 
   // промах повз усіх — теж каст: слот і дія витрачаються, FX летить у точку
+
   return { ok: true, targetIds: targets.map((p) => p.basicInfo.id), cells, centre: templateCentre(targeting, aim, cells) };
 }
 
@@ -170,7 +186,7 @@ function outOfRange(caster: BattleParticipant, picked: BattleParticipant[], rang
   return picked.some((p) => p.battleData.position !== undefined && footprintDistance(cellsOf(caster), cellsOf(p)) > max);
 }
 
-export function resolveSpellTargets(
+function resolveRaw(
   ps: BattleParticipant[],
   caster: BattleParticipant,
   spell: SpellRef,
@@ -218,12 +234,16 @@ export function resolveSpellTargets(
 
   switch (targeting.kind) {
     case "self":
+
       return { ok: true, targetIds: [caster.basicInfo.id] };
     case "allAllies":
+
       return { ok: true, targetIds: ids((p) => isTargetable(p) && p.basicInfo.side === side) };
     case "allEnemies":
+
       return { ok: true, targetIds: sighted((p) => isTargetable(p) && p.basicInfo.side !== side) };
     case "everyone":
+
       return { ok: true, targetIds: sighted(isTargetable) };
     case "allAlliesDead": {
       const fallen = ids((p) => !isActive(p) && p.basicInfo.side === side);
@@ -245,7 +265,7 @@ export function resolveSpellTargets(
 
       if (picked.length === 0) return fail("Оберіть ціль заклинання");
 
-      if (picked.some((p) => !isActive(p) || (p.basicInfo.side === side) !== (wanted === "ally"))) {
+      if (picked.some((p) => !(isActive(p) || (wanted === "ally" && isDying(p))) || (p.basicInfo.side === side) !== (wanted === "ally"))) {
         return fail(wanted === "ally" ? "Ціль має бути живим союзником" : "Ціль має бути живим ворогом");
       }
 
@@ -255,11 +275,49 @@ export function resolveSpellTargets(
         return { ok: true, targetIds: spellChain({ participants: ps, caster }, targeting, picked[0]).map((p) => p.basicInfo.id) };
       }
 
-      const skill = multi ? { mode: "single" as const, maxTargets: targeting.maxTargets } : spellTargetingFor(ps, caster.basicInfo.id, spell);
+      const base = multi ? { mode: "single" as const, maxTargets: targeting.maxTargets } : spellTargetingFor(ps, caster.basicInfo.id, spell);
+
+      const skill = multi ? base : { ...base, maxTargets: base.maxTargets + upcastExtra(caster, spell, mapCtx) };
 
       if (!validateSpellTargetCount(skill, picked.length)) return fail("Забагато цілей");
 
       return { ok: true, targetIds: picked.map((p) => p.basicInfo.id) };
     }
   }
+}
+
+const upcastExtra = (caster: BattleParticipant, spell: SpellRef, mapCtx?: SpellMapContext): number =>
+  isFiveE(caster) && mapCtx?.castLevel !== undefined && mapCtx.upcastTargets ? mapCtx.upcastTargets * upcastSteps(spell.level, mapCtx.castLevel) : 0;
+
+const HOSTILE_KINDS = new Set(["enemy", "area", "template", "allEnemies"]);
+
+function hostile(targeting: SpellTargetingDef): boolean {
+  if (targeting.kind === "area" || targeting.kind === "template") return targeting.side === "enemy";
+
+  return HOSTILE_KINDS.has(targeting.kind);
+}
+
+export function resolveSpellTargets(
+  ps: BattleParticipant[],
+  caster: BattleParticipant,
+  spell: SpellRef,
+  targeting: SpellTargetingDef,
+  chosenIds: string[],
+  mapCtx?: SpellMapContext,
+): SpellTargetResolution {
+  const extra = upcastExtra(caster, spell, mapCtx);
+
+  const widened = extra > 0 && (targeting.kind === "area" || targeting.kind === "template") ? { ...targeting, maxTargets: targeting.maxTargets + extra } : targeting;
+
+  const res = resolveRaw(ps, caster, spell, widened, chosenIds, mapCtx);
+
+  const charmers = conditionSourceIds(caster, "charmed");
+
+  if (!res.ok || !charmers.length || !hostile(targeting)) return res;
+
+  const targetIds = res.targetIds.filter((id) => !charmers.includes(id));
+
+  if (targetIds.length === res.targetIds.length) return res;
+
+  return targetIds.length > 0 ? { ...res, targetIds } : fail("Не можна накладати ворожі чари на того, хто зачарував");
 }

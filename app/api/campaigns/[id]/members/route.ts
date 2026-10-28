@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 
-import { prisma } from "@/lib/db";
+import { loadCampaignMembers } from "@/lib/server/campaigns/action-service";
 import { requireCampaignAccess } from "@/lib/utils/api/api-auth";
 import { PRIVATE_NO_STORE_HEADERS } from "@/lib/utils/api/cache-headers";
 import { handleApiError } from "@/lib/utils/api/error-handler";
@@ -17,11 +17,7 @@ export async function GET(
 
     if (access instanceof NextResponse) return access;
 
-    const rows = await prisma.campaignMember.findMany({
-      where: { campaignId: id },
-      select: { user: { select: { id: true, displayName: true, email: true } } },
-      orderBy: { joinedAt: "asc" },
-    });
+    const rows = await loadCampaignMembers(id);
 
     const members: CampaignMember[] = rows.map(({ user }) => ({
       id: user.id,

@@ -1,10 +1,10 @@
 import type { Prisma, Spell } from "@prisma/client";
 import { describe, expect, it, vi } from "vitest";
 
-import { context } from "@/app/api/__tests__/battles/fixtures";
-import { createSpellMutation } from "@/app/api/campaigns/[id]/battles/[battleId]/spell/spell-mutation";
 import { SPELLS } from "@/data/library/spells";
 import { ParticipantSide, ParticipantSourceType } from "@/lib/constants/battle";
+import { context } from "@/lib/server/battles/__tests__/mutations/fixtures";
+import { createSpellMutation } from "@/lib/server/battles/mutations/spell/spell-mutation";
 import { makeParticipant, seq } from "@/lib/utils/abilities/__tests__/fixtures";
 import { allowedEffectKinds } from "@/lib/utils/abilities/editor";
 import { findFlags } from "@/lib/utils/abilities/engine/core/collect-modifiers";

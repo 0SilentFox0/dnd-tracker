@@ -8,18 +8,27 @@ import type { BookSpell } from "@/types/spells";
 export const BOOK_SPELL_SELECT = {
   id: true,
   name: true,
+  executionMode: true,
   level: true,
   description: true,
   appearanceDescription: true,
   icon: true,
   dice: true,
   cost: true,
+  casting: true,
   targeting: true,
   resolution: true,
   spellEffects: true,
   stackable: true,
   maxStacks: true,
-  spellGroup: { select: { id: true, name: true } },
+  dieSides: true,
+  upcastDice: true,
+  upcastTargets: true,
+  addAbilityMod: true,
+  fixedDice: true,
+  damageBonus: true,
+  fx: true,
+  spellGroup: { select: { id: true, name: true, color: true, icon: true } },
 } satisfies Prisma.SpellSelect;
 
 export async function loadBookSpellsByIds(campaignId: string, ids: string[]): Promise<BookSpell[]> {

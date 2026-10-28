@@ -4,8 +4,9 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { act, renderHook, waitFor } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-import { getDraftPortraitPools } from "@/lib/api/characters";
+import { createDraft, getDraftPortraitPools } from "@/lib/api/characters";
 import { usePlayerDraftForm } from "@/lib/hooks/characters/usePlayerDraftForm";
+import { refs } from "@/lib/utils/characters/choices/__tests__/fixtures";
 
 vi.mock("next/navigation", () => ({ useRouter: () => ({ push: vi.fn() }) }));
 
@@ -20,6 +21,10 @@ vi.mock("@/lib/api/characters", () => ({
 
 vi.mock("@/lib/hooks/races", () => ({ useRaces: () => ({ data: [{ name: "Люди" }, { name: "Орки" }] }) }));
 
+const classMode = vi.hoisted(() => ({ value: { enabled: false, classes: [] as unknown[], pending: false } }));
+
+vi.mock("@/lib/hooks/classes", () => ({ useClassMode: () => classMode.value }));
+
 const setup = (initial?: "generate") => {
   const client = new QueryClient();
 
@@ -32,6 +37,19 @@ describe("usePlayerDraftForm", () => {
   beforeEach(() => {
     vi.stubGlobal("matchMedia", () => ({ matches: true }));
     vi.mocked(getDraftPortraitPools).mockReset().mockResolvedValue({ pools: {} });
+  });
+
+  it("class mode: generate.all picks a campaign class and needs no archetype select", () => {
+    classMode.value = { enabled: true, classes: [{ id: "k1", name: "Бард-тест", spellcastingAbility: "charisma", savingThrows: ["dexterity", "charisma"] }], pending: false };
+
+    const { result } = setup();
+
+    act(() => result.current.generate.all());
+
+    expect(result.current.form.classes?.list).toHaveLength(1);
+    expect(result.current.form.values).toMatchObject({ classId: "k1", class: "Бард-тест", charisma: 15, dexterity: 14, primaryAbility: "charisma" });
+
+    classMode.value = { enabled: false, classes: [], pending: false };
   });
 
   it("generate.all fills the form with a valid standard array", () => {
@@ -120,5 +138,19 @@ describe("usePlayerDraftForm", () => {
 
       expect(result.current.form.values.avatar).toBe("https://x/own.png");
     });
+  });
+
+  it("submit prunes picks of a previous race before sending", async () => {
+    classMode.value = { enabled: false, classes: [], pending: false };
+    vi.mocked(createDraft).mockResolvedValue({} as never);
+
+    const { result } = setup();
+
+    act(() => result.current.form.set("race", "Люди"));
+    act(() => result.current.choices.set({ raceChoices: { "old-race-choice": [{ id: "x" }], "elven-lineage": [{ id: "drow" }] }, feats: [], classes: [] }));
+    act(() => result.current.submit.run(refs));
+
+    await waitFor(() => expect(createDraft).toHaveBeenCalled());
+    expect(vi.mocked(createDraft).mock.calls[0][1].choices?.raceChoices).toEqual({ "elven-lineage": [{ id: "drow" }] });
   });
 });

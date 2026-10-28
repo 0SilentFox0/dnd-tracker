@@ -1,13 +1,26 @@
 import type { CriticalEffect, CriticalEffectType } from "@/lib/constants/critical-effects";
-import { findParticipant } from "@/lib/utils/abilities/engine/core/participants";
+import { collectModifiers } from "@/lib/utils/abilities/engine/core/collect-modifiers";
+import { findParticipant, replaceParticipant, withSelf } from "@/lib/utils/abilities/engine/core/participants";
+import { forcedRollMode, rollModeReasons } from "@/lib/utils/battle/attack/bonus";
+import { critDoublesDice } from "@/lib/utils/battle/attack/crit-dice";
+import { critThresholdOf } from "@/lib/utils/battle/attack/crit-threshold";
 import { applyCriticalEffect, critFlavorFor } from "@/lib/utils/battle/attack/critical";
 import { getP, put } from "@/lib/utils/battle/common/action-flow";
+import { attackKindOf } from "@/lib/utils/battle/common/attack-kind";
 import type { CritKind } from "@/lib/utils/battle/crit-choice/catalog";
+import { isAdjacent, isOnMap } from "@/lib/utils/battle/grid/occupancy";
+import { getEffectiveArmorClass } from "@/lib/utils/battle/participant/helpers";
+import { evasionFactor, hasEvasion } from "@/lib/utils/battle/saves/evasion";
+import { resolveSave } from "@/lib/utils/battle/saves/legendary";
+import { rollD20WithMode } from "@/lib/utils/battle/saves/roll-d20";
+import { rollSave } from "@/lib/utils/battle/saves/roll-save";
 import type { Outcome, SpellCastState } from "@/lib/utils/battle/spell/cast/state";
-import { rollSavingThrow } from "@/lib/utils/battle/spell/power";
+import { spellAttackBonus } from "@/lib/utils/battle/spell/power";
 import { participantImmuneToSpell } from "@/lib/utils/battle/spell/spell-immunity";
+import { rollGroups } from "@/lib/utils/common/dice";
+import { DEFAULT_RULES } from "@/lib/utils/rules";
 import type { RaceModifier } from "@/lib/utils/spells/model/schema";
-import type { BattleParticipant } from "@/types/battle";
+import type { BattleAttack, BattleParticipant } from "@/types/battle";
 
 const NON_PARTICIPANT_EFFECTS = new Set<CriticalEffectType>(["negate_damage", "negate_effects", "double_damage"]);
 
@@ -23,12 +36,72 @@ function raceEffect(mods: RaceModifier[], target: BattleParticipant): { immune: 
   return { immune: percent <= -100, multiplier: Math.max(0, (100 + percent) / 100) };
 }
 
+function resolveSpellAttack(state: SpellCastState, target: BattleParticipant, raceMultiplier: number): Outcome {
+  const { flow, caster, spell } = state;
+
+  const id = target.basicInfo.id;
+
+  const adjacent = isOnMap(caster) && isOnMap(target) && isAdjacent(caster, target);
+
+  const targeting = spell.definition.targeting;
+
+  const range = "range" in targeting ? targeting.range : undefined;
+
+  const pseudoAttack: BattleAttack = { name: spell.name, type: adjacent ? "melee" : "ranged", attackBonus: 0, damageDice: "", damageType: "magic", ...(range !== undefined && { range: String(range) }) };
+
+  const { mode } = forcedRollMode(rollModeReasons(caster, pseudoAttack, flow.ps, { targetId: id, map: flow.ctx.map }));
+
+  const { roll, rolls } = rollD20WithMode(mode, state.rng, state.attackRolls.find((a) => a.participantId === id)?.roll);
+
+  const mods = withSelf(flow.ps, caster);
+
+  const bonus = (state.attackBonus ?? spellAttackBonus(caster)) + collectModifiers(mods, caster.basicInfo.id, { stat: "attackBonus", attackKind: attackKindOf(pseudoAttack.type) }).flat;
+
+  const total = roll + bonus;
+
+  const ac = getEffectiveArmorClass(target, flow.ps);
+
+  const crit = roll >= critThresholdOf(flow.ctx.rules, mods, caster.basicInfo.id);
+
+  const fumble = roll <= (flow.ctx.rules?.criticals.fumbleOn ?? 1);
+
+  const hit = !fumble && (crit || total >= ac);
+
+  state.attacks.push({ participantId: id, roll, total, ac, hit, crit: hit && crit });
+
+  const note = mode !== "normal" ? ` (${mode === "advantage" ? "перевага" : "недолік"}: ${rolls.join("/")})` : "";
+
+  const name = target.basicInfo.name;
+
+  const line = `🎯 ${name}: атака заклинанням ${roll}+${bonus}=${total} проти КЗ ${ac}${note}`;
+
+  if (!hit) {
+    flow.messages.push(`${line} — промах`);
+
+    return SKIPPED;
+  }
+
+  if (!critDoublesDice(flow.ctx.rules, crit) || state.diceCount === 0) {
+    flow.messages.push(`${line} — ${crit ? "крит" : "влучання"}`);
+
+    return { skip: false, factor: 1, raceMultiplier };
+  }
+
+  const critExtra = rollGroups([{ count: state.diceCount, size: state.diceSides }], state.rng).reduce((a, b) => a + b, 0);
+
+  flow.messages.push(`${line} — крит — кубики подвоєно`);
+
+  return { skip: false, factor: 1, raceMultiplier, critExtra };
+}
+
 function applySaveCrit(state: SpellCastState, id: string, kind: CritKind): CriticalEffect["effect"] | undefined {
-  const { flow, spell, caster } = state;
+  const { flow, caster } = state;
 
   if (!flow.ctx.crit) return undefined;
 
   const effect = flow.ctx.crit({ source: "save", kind, actorId: caster.basicInfo.id, targetId: id });
+
+  if (!effect) return undefined;
 
   const target = getP(flow, id);
 
@@ -71,20 +144,40 @@ export function resolveOutcome(state: SpellCastState, id: string, withSave: bool
 
     const dc = state.saveDc;
 
-    const rolled = rollSavingThrow(target, saveAbility, dc, state.rng, state.saveRolls.find((s) => s.participantId === id)?.roll);
+    const r = rollSave({ target, ability: saveAbility, dc, participants: flow.ps, rules: flow.ctx.rules, rng: state.rng, presetRoll: state.saveRolls.find((s) => s.participantId === id)?.roll, vsSpell: true });
 
-    const { roll, mod, total } = rolled;
+    // союзник кастера сам хоче провалити корисне заклинання — опір не витрачається
+    const { roll, mod, bonus, total } = r;
 
-    // нат. 20/1 визначають результат лише там, де діють криті (є picker)
-    const success = flow.ctx.crit && (roll === 20 || roll === 1) ? roll === 20 : rolled.success;
+    const saveCrit = !!flow.ctx.crit && (flow.ctx.rules ?? DEFAULT_RULES).criticals.effects && !r.autoFail && (roll === 20 || roll === 1);
 
-    state.saves.push({ participantId: id, ability: saveAbility, roll, result: success ? "success" : "fail" });
+    // нат. 20/1 визначають результат лише там, де діють криті; Легендарний опір діє вже на цей результат
+    const base = saveCrit ? { ...r, success: roll === 20 } : r;
 
-    if (success) factor = onSuccess === "half" ? 0.5 : 0;
+    const resisted = target.basicInfo.side !== state.caster.basicInfo.side ? resolveSave(target, base) : { result: base, participant: target, message: null };
 
-    flow.messages.push(`🎲 ${target.basicInfo.name}: рятівний кидок ${roll}${mod < 0 ? "-" : "+"}${Math.abs(mod)}=${total} проти СК ${dc} — ${success ? (factor > 0 ? "успіх, половина шкоди" : "успіх") : "провал"}`);
+    if (resisted.message) flow.ps = replaceParticipant(flow.ps, resisted.participant);
 
-    const crit = roll === 20 || roll === 1 ? applySaveCrit(state, id, roll === 20 ? "success" : "fail") : undefined;
+    const success = resisted.result.success;
+
+    state.saves.push({ participantId: id, ability: saveAbility, roll, result: success ? "success" : "fail", ...(r.mode !== "normal" && { mode: r.mode, rolls: r.rolls }), ...(r.autoFail && { autoFail: true }) });
+
+    const evasive = saveAbility === "dexterity" && onSuccess === "half" && hasEvasion(flow.ps, target);
+
+    if (evasive) factor = evasionFactor(success, true);
+    else if (success) factor = onSuccess === "half" ? 0.5 : 0;
+
+    const extra = (bonus ? `${bonus < 0 ? "-" : "+"}${Math.abs(bonus)}` : "");
+
+    const note = r.autoFail ? " (автопровал)" : r.mode !== "normal" ? ` (${r.mode === "advantage" ? "перевага" : "недолік"}: ${r.rolls.join("/")})` : "";
+
+    flow.messages.push(r.autoFail
+      ? `🎲 ${target.basicInfo.name}: рятівний кидок проти СК ${dc} — автопровал`
+      : `🎲 ${target.basicInfo.name}: рятівний кидок ${roll}${mod < 0 ? "-" : "+"}${Math.abs(mod)}${extra}=${total} проти СК ${dc}${note} — ${success ? (factor > 0 ? "успіх, половина шкоди" : "успіх") : "провал"}${evasive ? " · ухилення" : ""}`);
+
+    if (resisted.message) flow.messages.push(resisted.message);
+
+    const crit = saveCrit && (roll === 20 || !success) ? applySaveCrit(state, id, roll === 20 ? "success" : "fail") : undefined;
 
     if (crit?.type === "negate_damage") factor = 0;
 
@@ -92,6 +185,8 @@ export function resolveOutcome(state: SpellCastState, id: string, withSave: bool
 
     return { skip: false, factor, raceMultiplier: race.multiplier * (crit?.type === "double_damage" ? 2 : 1), ...(crit?.type === "negate_effects" && { negateEffects: true }) };
   }
+
+  if (withSave && def.resolution.kind === "attack" && target.basicInfo.side !== state.caster.basicInfo.side) return resolveSpellAttack(state, target, race.multiplier);
 
   return { skip: false, factor, raceMultiplier: race.multiplier };
 }

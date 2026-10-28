@@ -6,6 +6,7 @@ import { FlatField } from "./FlatField";
 import { MultiSelectField } from "./MultiSelectField";
 import { NumberField } from "./NumberField";
 import { NumberListField } from "./NumberListField";
+import { SaveEndsField } from "./SaveEndsField";
 import { SelectInput } from "./SelectInput";
 import { SpellPickerField } from "./SpellPickerField";
 import { TextField } from "./TextField";
@@ -57,6 +58,8 @@ export function FieldRenderer({ meta, value, onChange, path }: { meta: FieldMeta
         return <NumberListField {...props} />;
       case "spells":
         return <SpellPickerField {...props} />;
+      case "saveEnds":
+        return <SaveEndsField {...props} />;
       case "unit":
         return <UnitPickerField {...props} />;
       default:

@@ -68,3 +68,10 @@ describe("FormulaEvaluator", () => {
     expect(evaluateFormula("invalid_var * 2", {})).toBe(0); // non-replaced text remains? actually invalid_var remains, making valid JS fail
   });
 });
+
+describe("negative variables", () => {
+  it("substitutes negatives in parentheses", () => {
+    expect(evaluateFormula("10-dex_mod", { dex_mod: -1 })).toBe(11);
+    expect(evaluateFormula("2*dex_mod", { dex_mod: -2 })).toBe(-4);
+  });
+});

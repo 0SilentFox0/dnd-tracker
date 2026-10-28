@@ -6,6 +6,7 @@ import Link from "next/link";
 import { BookOpen, ChevronsUpDown, History, Moon, Sun } from "lucide-react";
 
 import { AiPanel, AiProposalBadge, AiProposalCard } from "@/components/ai";
+import { AssistantReview } from "@/components/ai/AssistantReview";
 import type { ActionsMenuItem } from "@/components/common/ActionsMenu";
 import { LoadingState, QueryState } from "@/components/common/states";
 import { ScenarioBar, ScenarioBook, ScenarioLayout, ScenarioPageView, ScenarioToc, type TocControl, tocItems } from "@/components/scenario";
@@ -68,9 +69,9 @@ function ScenarioPageBody({ campaignId, page, playedPages, aiEnabled }: { campai
 
   const [focusCleared, setFocusCleared] = useState(false);
 
-  const draftRef = useRef<{ flush: () => Promise<boolean> } | null>(null);
+  const draftRef = useRef<{ flush: () => Promise<boolean>; hasUnsavedChanges?: () => boolean } | null>(null);
 
-  const onDraftReady = useCallback((d: { flush: () => Promise<boolean> }) => {
+  const onDraftReady = useCallback((d: { flush: () => Promise<boolean>; hasUnsavedChanges?: () => boolean }) => {
     draftRef.current = d;
   }, []);
 
@@ -79,14 +80,14 @@ function ScenarioPageBody({ campaignId, page, playedPages, aiEnabled }: { campai
     full: aiOpen,
     beforeApply: async () => (editBase && draftRef.current ? draftRef.current.flush() : true),
     // remount the editor from the applied page so its draft carries the new version — no 409 on the next autosave
-    onApplied: (next) => setEditBase((cur) => (cur ? next : cur)),
+    onApplied: (next) => { if (!draftRef.current?.hasUnsavedChanges?.()) setEditBase((cur) => (cur ? next : cur)); },
   });
 
   const aiMode: AiThreadMode = playEnabled ? "live" : "scenario";
 
   const currentSection = playEnabled && !focusCleared ? pickLiveSection(page.content) ?? undefined : undefined;
 
-  const focus: AiFocus = { pageId: page.id, sectionId: currentSection?.id };
+  const focus: AiFocus | undefined = focusCleared ? undefined : { pageId: page.id, sectionId: currentSection?.id };
 
   const openAi = (showPending: boolean) => {
     setPendingShown(showPending);
@@ -164,21 +165,23 @@ function ScenarioPageBody({ campaignId, page, playedPages, aiEnabled }: { campai
       {aiEnabled && aiOpen && (
         <AiPanel
           campaignId={campaignId}
-          page={page}
           mode={aiMode}
-          focus={focus}
-          proposals={proposals}
-          showPending={pendingShown}
-          renderProposal={(id, { send }) => {
-            const proposal = proposals.byId(id);
+          focus={{ value: focus, page, onClear: () => setFocusCleared(true) }}
+          proposals={{
+            data: proposals,
+            showPending: pendingShown,
+            review: <AssistantReview campaignId={campaignId} />,
+            render: (id, { send }) => {
+              const proposal = proposals.byId(id);
 
-            if (!proposal) return null;
+              if (!proposal) return null;
 
-            const onRedo = () => send?.(`Пропозиція «${proposal.summary}» застаріла: перечитай сторінку й запропонуй її заново.`);
+              const onRedo = () => send?.(`Пропозиція «${proposal.summary}» застаріла: перечитай сторінку й запропонуй її заново.`);
 
-            return <AiProposalCard campaignId={campaignId} proposal={proposal} busy={proposals.isApplying} actions={{ onApply: () => proposals.apply(id), onReject: () => proposals.reject(id), onRedo }} />;
+              return <AiProposalCard campaignId={campaignId} proposal={proposal} busy={proposals.isApplying} actions={{ onApply: () => proposals.apply(id), onReject: () => proposals.reject(id), onRedo }} />;
+            },
           }}
-          actions={{ onClose: () => setAiOpen(false), onClearFocus: () => setFocusCleared(true) }}
+          actions={{ onClose: () => setAiOpen(false) }}
         />
       )}
       {versionsOpen && !editBase && <VersionsDialog campaignId={campaignId} pageId={page.id} open onOpenChange={setVersionsOpen} onRestored={() => {}} />}

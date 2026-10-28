@@ -1,4 +1,4 @@
-import { commandBattleAudio, readBattleAudio } from "./audio-handler";
+import { commandBattleAudio, readBattleAudio } from "@/lib/server/battles/mutations/audio/audio-handler";
 
 type Params = { params: Promise<{ id: string; battleId: string }> };
 

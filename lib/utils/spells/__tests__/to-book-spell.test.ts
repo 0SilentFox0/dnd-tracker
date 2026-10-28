@@ -5,6 +5,10 @@ import { toBookSpell } from "@/lib/utils/spells/to-book-spell";
 const row = { id: "s", name: "Мітка", level: 1, description: null, icon: null, spellGroup: { id: "g", name: "Віщування" } };
 
 describe("toBookSpell", () => {
+  it("keeps fixed dice and signed flat bonuses in the book preview", () => {
+    expect(toBookSpell({ ...row, dice: 2, fixedDice: true, damageBonus: -3 })).toMatchObject({ dice: 2, fixedDice: true, damageBonus: -3 });
+  });
+
   it("коректний рядок проходить, нова модель зчитується", () => {
     expect(toBookSpell({ ...row, dice: 3, cost: "bonusAction", targeting: { kind: "area", side: "enemy", maxTargets: 2 }, resolution: { kind: "save", ability: "dexterity", onSuccess: "half" } })).toMatchObject({
       id: "s",

@@ -3,6 +3,8 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import { API_ERRORS } from "@/lib/constants/api-errors";
 
 const tx = vi.hoisted(() => ({
+  $queryRaw: vi.fn(async () => [{ id: "camp" }]),
+  assistantIntent: { findUnique: vi.fn(async () => null) },
   aiProposal: { findFirst: vi.fn(), update: vi.fn(), updateMany: vi.fn(async () => ({ count: 1 })) },
   scenarioPage: { findFirst: vi.fn(), updateMany: vi.fn() },
 }));

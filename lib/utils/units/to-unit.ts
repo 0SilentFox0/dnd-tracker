@@ -1,6 +1,7 @@
 import type { Prisma } from "@prisma/client";
 
 import { abilitySummary } from "@/lib/utils/abilities/summary";
+import { readSaveProficiencies } from "@/lib/utils/units/monster";
 import type { Unit, UnitAttack } from "@/types/units";
 
 const list = <T>(value: unknown): T[] => (Array.isArray(value) ? (value as T[]) : []);
@@ -31,5 +32,13 @@ export function toUnit(row: Prisma.UnitGetPayload<object>): Unit {
     knownSpells: list<string>(row.knownSpells),
     avatar: row.avatar,
     abilitySummary: abilitySummary("unit", row),
+    cr: row.cr ?? null,
+    xp: row.xp ?? null,
+    multiattack: row.multiattack ?? 1,
+    legendaryActions: row.legendaryActions ?? 0,
+    legendaryResistances: row.legendaryResistances ?? 0,
+    saveProficiencies: readSaveProficiencies(row.saveProficiencies),
+    statblock: (row.statblock ?? {}) as Unit["statblock"],
+    spellcasting: (row.spellcasting ?? {}) as unknown as Unit["spellcasting"],
   };
 }

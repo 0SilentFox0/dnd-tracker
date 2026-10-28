@@ -2,8 +2,8 @@ import { spellSchoolColor } from "@/lib/constants/spells";
 import { ALL_SCHOOLS } from "@/lib/hooks/spells";
 import { cn } from "@/lib/utils";
 
-export function SchoolTabs({ schools, active, countOf, onPick }: { schools: string[]; active: string; countOf: (name: string) => number; onPick: (name: string) => void }) {
-  const tabs = [{ name: ALL_SCHOOLS, label: "Усі", color: "#2a2018" }, ...schools.map((name) => ({ name, label: name, color: spellSchoolColor(name) }))];
+export function SchoolTabs({ schools, active, countOf, onPick }: { schools: { name: string; color?: string | null }[]; active: string; countOf: (name: string) => number; onPick: (name: string) => void }) {
+  const tabs = [{ name: ALL_SCHOOLS, label: "Усі", color: "#2a2018" }, ...schools.map((school) => ({ name: school.name, label: school.name, color: spellSchoolColor(school) }))];
 
   return (
     <div role="group" aria-label="Школи магії" className="sticky top-0 z-10 -mx-5 -mt-4 mb-2 flex flex-wrap items-start gap-1.5 bg-[#e9dec5] px-5 pb-1">

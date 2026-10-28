@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 
 import { useDeleteAllSpells, useMoveSpellToGroup, useRemoveSpellFromGroup, useSpellGroups, useSpells } from "./useSpells";
 
@@ -21,7 +21,13 @@ export function useSpellsList(campaignId: string) {
 
   const deleteAll = useDeleteAllSpells(campaignId);
 
-  const search = useSearch(spells, spellFields);
+  const [listTag, setListTag] = useState<string | null>(null);
+
+  const tags = useMemo(() => [...new Set(spells.flatMap((s) => s.lists ?? []))].sort((a, b) => a.localeCompare(b)), [spells]);
+
+  const tagged = useMemo(() => (listTag ? spells.filter((s) => s.lists?.includes(listTag)) : spells), [spells, listTag]);
+
+  const search = useSearch(tagged, spellFields);
 
   const groups = useMemo(() => convertGroupedSpellsToArray(groupSpellsByGroupAndLevel(search.items)), [search.items]);
 
@@ -30,6 +36,7 @@ export function useSpellsList(campaignId: string) {
     isLoading,
     search,
     view: { groups, spellGroups },
+    listFilter: { tags, value: listTag, set: setListTag },
     actions: {
       removeFromGroup: (spellId: string) => removeFromGroup.mutate(spellId),
       moveToGroup: (spellId: string, groupId: string | null) => moveToGroup.mutate({ spellId, groupId }),

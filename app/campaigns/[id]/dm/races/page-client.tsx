@@ -5,6 +5,7 @@ import { Dna, Plus } from "lucide-react";
 import { SearchEmptyState } from "@/components/common/SearchEmptyState";
 import { SearchInput } from "@/components/common/SearchInput";
 import { EmptyState, LoadingState } from "@/components/common/states";
+import { ContentTransferButtons } from "@/components/content-import/ContentTransferButtons";
 import { HudPage, HudPageHeader } from "@/components/hud/page";
 import { OnboardingHint } from "@/components/onboarding/OnboardingHint";
 import { CreateRaceDialog } from "@/components/races/CreateRaceDialog";
@@ -26,10 +27,13 @@ export function DMRacesPageClient({ campaignId }: { campaignId: string }) {
         title="Ігрові Раси"
         subtitle={`${total} ${pluralUk(total, ["раса", "раси", "рас"])}`}
         actions={
-          <Button onClick={() => list.createDialog.setOpen(true)} className="flex items-center gap-2">
-            <Plus className="h-4 w-4" />
-            Створити расу
-          </Button>
+          <>
+            <ContentTransferButtons campaignId={campaignId} kind="races" />
+            <Button onClick={() => list.createDialog.setOpen(true)} className="flex items-center gap-2">
+              <Plus className="h-4 w-4" />
+              Створити расу
+            </Button>
+          </>
         }
       />
       <OnboardingHint id="dm.races" />

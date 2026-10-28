@@ -2,9 +2,11 @@ import type { McpServer } from "@modelcontextprotocol/server";
 import { tool, type ToolSet } from "ai";
 import type { z } from "zod";
 
+import { ASSISTANT_TOOLS } from "./assistant";
 import { getBattleStateTool } from "./battle";
 import { getCampaignBriefTool } from "./campaign";
-import { type AiToolContext, type AiToolDef, runTool } from "./define";
+import { CONTENT_TOOLS } from "./content";
+import { type AiToolContext, type AiToolDef, runTool, runToolResult } from "./define";
 import { getPartyTool, readCharacterTool } from "./party";
 import { proposeScenarioEditTool } from "./propose";
 import { proposeSceneSlideTool } from "./propose-slide";
@@ -13,6 +15,7 @@ import { listScenarioPagesTool, readScenarioPageTool, searchScenarioTool } from 
 import { getShowStateTool } from "./show";
 
 import "server-only";
+import { type ApiTokenScope, hasScope } from "@/lib/constants/ai";
 
 export const AI_TOOLS: AiToolDef[] = [getCampaignBriefTool, listScenarioPagesTool, readScenarioPageTool, searchScenarioTool,
   getPartyTool,
@@ -23,20 +26,26 @@ export const AI_TOOLS: AiToolDef[] = [getCampaignBriefTool, listScenarioPagesToo
   readReferenceTool,
   proposeScenarioEditTool,
   proposeSceneSlideTool,
+  ...CONTENT_TOOLS,
+  ...ASSISTANT_TOOLS,
 ];
+
+export const toolsFor = (scopes: readonly ApiTokenScope[]): AiToolDef[] => AI_TOOLS.filter((def) => def.scopes.some((s) => hasScope(scopes, s)));
 
 export function toAiSdkTools(base: AiToolContext): ToolSet {
   const ctx = { ...base, usage: { images: 0 } };
 
-  return Object.fromEntries(AI_TOOLS.map((def) => [def.name, tool({ description: def.description, inputSchema: def.input, execute: (input: unknown) => runTool(def, ctx, input) })]));
+  return Object.fromEntries(toolsFor(base.scopes).map((def) => [def.name, tool({ description: def.description, inputSchema: def.input, execute: (input: unknown, options) => runTool(def, { ...ctx, toolCallId: options.toolCallId }, input) })]));
 }
 
-export function registerMcpTools(server: McpServer, base: AiToolContext): void {
+export function registerMcpTools(server: McpServer, tools: readonly AiToolDef[], base: AiToolContext): void {
   const ctx = { ...base, usage: { images: 0 } };
 
-  for (const def of AI_TOOLS) {
-    server.registerTool(def.name, { title: def.title, description: def.description, inputSchema: def.input as z.ZodObject }, async (input: unknown) => ({
-      content: [{ type: "text" as const, text: await runTool(def, ctx, input) }],
-    }));
+  for (const def of tools) {
+    server.registerTool(def.name, { title: def.title, description: def.description, inputSchema: def.input as z.ZodObject }, async (input: unknown) => {
+      const result = await runToolResult(def, ctx, input);
+
+      return { content: [{ type: "text" as const, text: JSON.stringify(result) }], isError: result.kind === "error" };
+    });
   }
 }

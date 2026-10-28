@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
+import * as preloadedModule0 from "@/app/api/campaigns/[id]/decks/generated-image/route";
 import { API_ERRORS } from "@/lib/constants/api-errors";
 import { prisma } from "@/lib/db";
 import * as apiAuth from "@/lib/utils/api/api-auth";
@@ -17,7 +18,7 @@ vi.mock("@/lib/supabase/admin", () => ({ createAdminClient: vi.fn() }));
 const own = `https://x.supabase.co/storage/v1/object/public/scene-slides/c1/${"a".repeat(32)}.webp`;
 
 const del = async (body: unknown) => {
-  const { DELETE } = await import("@/app/api/campaigns/[id]/decks/generated-image/route");
+  const { DELETE } = preloadedModule0;
 
   return DELETE(new Request("http://x", { method: "DELETE", body: JSON.stringify(body) }), { params: Promise.resolve({ id: "c1" }) });
 };

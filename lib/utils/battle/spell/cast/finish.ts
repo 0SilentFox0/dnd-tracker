@@ -5,9 +5,9 @@ import { applyMainActionUsed } from "@/lib/utils/battle/participant";
 import { diffAppliedEffects } from "@/lib/utils/battle/spell/applied-effects";
 import { actionOf, flatEffects, isDamageEffect, type SpellCastState } from "@/lib/utils/battle/spell/cast/state";
 import type { CastSpellResult } from "@/lib/utils/battle/types/spell-process";
-import type { BattleParticipant } from "@/types/battle";
+import type { BattleParticipant, SpellGrant } from "@/types/battle";
 
-export function spendCastCost(state: SpellCastState, cost: { slotKey: string; usesSlot: boolean; isDMCast: boolean }): void {
+export function spendCastCost(state: SpellCastState, cost: { slotKey: string; usesSlot: boolean; isDMCast: boolean; isLegendaryCast?: boolean; grant?: SpellGrant }): void {
   let caster = getP(state.flow, state.caster.basicInfo.id);
 
   const spent = caster.spellcasting.spellSlots[cost.slotKey];
@@ -16,8 +16,24 @@ export function spendCastCost(state: SpellCastState, cost: { slotKey: string; us
     caster = { ...caster, spellcasting: { ...caster.spellcasting, spellSlots: { ...caster.spellcasting.spellSlots, [cost.slotKey]: { ...spent, current: spent.current - 1 } } } };
   }
 
-  if (!cost.isDMCast) {
-    caster = state.spell.definition.cost === "bonusAction" ? { ...caster, actionFlags: { ...caster.actionFlags, hasUsedBonusAction: true } } : applyMainActionUsed(caster);
+  const poolKey = cost.grant?.pool;
+
+  if (!cost.isDMCast && poolKey && (cost.grant?.cost ?? 1) > 0) {
+    const usage = caster.battleData.abilityUsage?.[poolKey] ?? { battle: 0, round: 0, turn: 0 };
+
+    const amount = cost.grant?.cost ?? 1;
+
+    caster = {
+      ...caster,
+      battleData: {
+        ...caster.battleData,
+        abilityUsage: { ...caster.battleData.abilityUsage, [poolKey]: { battle: usage.battle + amount, round: usage.round + amount, turn: usage.turn + amount, lastRound: state.flow.ctx.round } },
+      },
+    };
+  }
+
+  if (!cost.isDMCast && !cost.isLegendaryCast) {
+    caster = state.spell.definition.cost === "reaction" ? { ...caster, actionFlags: { ...caster.actionFlags, hasUsedReaction: true } } : state.spell.definition.cost === "bonusAction" ? { ...caster, actionFlags: { ...caster.actionFlags, hasUsedBonusAction: true } } : applyMainActionUsed(caster);
   }
 
   put(state.flow, caster);
@@ -95,7 +111,9 @@ export function finishSpellAction(state: SpellCastState, { before, targetsBefore
 
   const meta = fxMeta(def);
 
-  if (meta.spellDamageType) {
+  const stamp = { ...(meta.spellDamageType && { fxElement: meta.spellDamageType }), ...(spell.fx?.aura && { fxAura: spell.fx.aura }) };
+
+  if (Object.keys(stamp).length > 0) {
     // only the spell's own effects: one applied by a trigger during the cast keeps its own look
     for (const { id, name, targetId } of applied) {
       if (name !== spell.name) continue;
@@ -104,18 +122,22 @@ export function finishSpellAction(state: SpellCastState, { before, targetsBefore
 
       if (!target) continue;
 
-      put(flow, { ...target, battleData: { ...target.battleData, activeEffects: target.battleData.activeEffects.map((e) => (e.id === id ? { ...e, fxElement: meta.spellDamageType } : e)) } });
+      put(flow, { ...target, battleData: { ...target.battleData, activeEffects: target.battleData.activeEffects.map((e) => (e.id === id ? { ...e, ...stamp } : e)) } });
     }
   }
 
   Object.assign(action.actionDetails, {
     ...meta,
     ...(applied.length > 0 && { appliedEffects: applied }),
-    spellSlotUsed: spell.level,
+    spellSlotUsed: state.castLevel,
+    ...(state.grant?.key && { spellGrantKey: state.grant.key }),
+    ...(state.grant?.label && { spellGrantLabel: state.grant.label }),
+    ...(state.chosenCastLevel !== undefined && { castLevel: state.chosenCastLevel }),
     ...(dealt > 0 && { totalDamage: dealt }),
     ...(healed > 0 && { totalHealing: healed }),
     ...(state.power.breakdown.length > 0 && { damageBreakdown: state.power.breakdown.join("; ") }),
     ...(state.saves.length > 0 && { savingThrows: state.saves }),
+    ...(state.attacks.length > 0 && { spellAttacks: state.attacks }),
     ...(Object.keys(state.damageSteps).length > 0 && { damageSteps: state.damageSteps }),
   });
   appendHpChanges(action, before, flow.ps);

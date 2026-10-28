@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-import { MAIN_SKILL_NAME_MAX } from "@/lib/constants/main-skills";
+import { MAIN_SKILL_NAME_MAX, MAIN_SKILL_ROLES } from "@/lib/constants/main-skills";
 
 const iconField = z
   .union([z.string().url(), z.literal(""), z.null()])
@@ -14,6 +14,7 @@ export const createMainSkillSchema = z.object({
   icon: iconField,
   isEnableInSkillTree: z.boolean().optional(),
   spellGroupId: z.string().nullable().optional(),
+  role: z.enum(MAIN_SKILL_ROLES).nullable().optional(),
 });
 
 export const updateMainSkillSchema = z.object({
@@ -22,4 +23,5 @@ export const updateMainSkillSchema = z.object({
   icon: iconField,
   isEnableInSkillTree: z.boolean().optional(),
   spellGroupId: z.string().nullable().optional(),
+  role: z.enum(MAIN_SKILL_ROLES).nullable().optional(),
 });

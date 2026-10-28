@@ -8,7 +8,7 @@
 
 **Tech Stack:** Next.js 16 App Router, React 19, TypeScript strict, Prisma 6 / Postgres, Zod 4, TanStack Query, `ai@7`, `@ai-sdk/react@4`, `@ai-sdk/anthropic|openai|google@4`, `mcp-handler@2` + `@modelcontextprotocol/server@2`, Vitest (+ happy-dom).
 
-**Spec:** `docs/superpowers/specs/2026-10-21-ai-assistant-design.md`
+**Spec:** `docs/archive/superpowers/specs/2026-10-21-ai-assistant-design.md`
 
 ## Global Constraints
 

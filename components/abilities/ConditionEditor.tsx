@@ -24,13 +24,21 @@ function defaultFor(type: Condition["type"]): Condition {
       return { type, kind: AttackType.MELEE };
     case "targetHasCondition":
       return { type, condition: "no_reaction" };
+    case "targetCreatureType":
+      return { type, types: ["humanoid"] };
     case "targetRace":
       return { type, races: [""] };
     case "targetDead":
     case "actorIsEnemy":
+    case "allyAdjacent":
+    case "withThisItem":
       return { type };
+    case "attackRollMode":
+      return { type, mode: "advantage" };
     case "hasMark":
       return { type, who: "eventActor", markId: "mark" };
+    case "armorWorn":
+      return { type, categories: ["none"] };
     case "not":
       return { type, condition: DEFAULT_CONDITION };
     case "all":

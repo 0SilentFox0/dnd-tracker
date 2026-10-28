@@ -1,6 +1,7 @@
 import type { CampaignTrack as TrackRow } from "@prisma/client";
 
 import "server-only";
+import { MAX_TRACKS_PER_CAMPAIGN } from "@/lib/constants/music";
 import { prisma } from "@/lib/db";
 import type { AudioLibraryEntry } from "@/lib/utils/audio/audio-command";
 import type { BattleAudioTrack, CampaignTrack, TrackKind } from "@/types/audio";
@@ -32,3 +33,5 @@ export async function loadAudioLibrary(campaignId: string): Promise<AudioLibrary
 
   return rows.map((row) => ({ id: row.id, track: toBattleAudioTrack(row) }));
 }
+
+export const isLibraryFull = async (campaignId: string) => (await prisma.campaignTrack.count({ where: { campaignId } })) >= MAX_TRACKS_PER_CAMPAIGN;

@@ -14,6 +14,8 @@ interface ImportDialogProps {
   title?: string;
   description?: string;
   importHook: UseFileImportReturn;
+  accept?: string;
+  hideTrigger?: boolean;
   onOpenChange?: (open: boolean) => void;
   open?: boolean;
 }
@@ -23,6 +25,8 @@ export function ImportDialog({
   title = "Імпорт",
   description = "Завантажте CSV або JSON файл для масового імпорту",
   importHook,
+  accept = ".csv,.json",
+  hideTrigger = false,
   onOpenChange,
   open,
 }: ImportDialogProps) {
@@ -57,10 +61,12 @@ export function ImportDialog({
 
   return (
     <>
-      <Button onClick={() => handleDialogOpenChange(true)} variant="outline">
+      {!hideTrigger && (
+        <Button onClick={() => handleDialogOpenChange(true)} variant="outline">
           <Upload className="h-4 w-4 mr-2" />
           {triggerLabel}
         </Button>
+      )}
     <ResponsiveDialog
       hud
       open={isOpen}
@@ -75,7 +81,7 @@ export function ImportDialog({
               <Input
                 id="file-upload"
                 type="file"
-                accept=".csv,.json"
+                accept={accept}
                 onChange={handleFileChange}
                 disabled={isLoading}
                 className="w-full"

@@ -5,14 +5,15 @@ import { Settings } from "lucide-react";
 
 import { CampaignSettingsDialog } from "@/components/campaigns/settings/CampaignSettingsDialog";
 import { Button } from "@/components/ui/button";
-import type { CampaignSettings } from "@/types/campaigns";
+import type { CampaignSettings, CampaignSettingsMeta } from "@/types/campaigns";
 
 interface CampaignSettingsButtonProps {
   campaignId: string;
   campaign: CampaignSettings;
+  meta: CampaignSettingsMeta;
 }
 
-export function CampaignSettingsButton({ campaignId, campaign }: CampaignSettingsButtonProps) {
+export function CampaignSettingsButton({ campaignId, campaign, meta }: CampaignSettingsButtonProps) {
   const [open, setOpen] = useState(false);
 
   const [openCount, setOpenCount] = useState(0);
@@ -27,7 +28,7 @@ export function CampaignSettingsButton({ campaignId, campaign }: CampaignSetting
         <span className="sr-only">Редагувати налаштування</span>
       </Button>
       {/* Remount per opening so the form starts from the saved values. */}
-      <CampaignSettingsDialog key={openCount} campaignId={campaignId} campaign={campaign} open={open} onOpenChange={setOpen} />
+      <CampaignSettingsDialog key={openCount} campaignId={campaignId} campaign={campaign} meta={meta} open={open} onOpenChange={setOpen} />
     </>
   );
 }

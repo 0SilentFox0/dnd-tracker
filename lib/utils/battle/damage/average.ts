@@ -1,10 +1,11 @@
-import { heroAttackDamageParts } from "./hero-damage";
+import { heroAttackDamageParts, heroDamageContext } from "./hero-damage";
 import { applyHeroDmDamageMultiplier } from "./hero-dm-multiplier";
 import { calculateDamageWithModifiers } from "./index";
+import { WEAPON_FLAT_LABEL } from "./weapon-flat";
 
 import { ParticipantSourceType } from "@/lib/constants/battle";
+import { attackAbilityLabelFor, attackDamageModifier, isFiveE } from "@/lib/utils/battle/attack/ability";
 import { attackKindOf } from "@/lib/utils/battle/common/attack-kind";
-import { attackAbilityLabel, getAttackAbilityModifier } from "@/lib/utils/common/calculations";
 import { diceAverage } from "@/lib/utils/common/dice";
 import type { BattleAttack, BattleParticipant, DamageStep } from "@/types/battle";
 
@@ -30,18 +31,22 @@ export function averageAttackDamage(p: BattleParticipant, attack: BattleAttack, 
 
   const weaponAvg = diceAverage(weaponDice);
 
-  const statMod = getAttackAbilityModifier(p.abilities, type);
+  const statMod = attackDamageModifier(p, attack, all);
 
   const calc = calculateDamageWithModifiers(p, weaponAvg, statMod, type, {
     allParticipants: all,
-    heroLevelPart: isHero ? p.abilities.level : 0,
+    heroLevelPart: heroDamageContext(p, attack, []).heroLevelPart,
     heroDicePart: heroDiceAvg,
     heroDiceNotation: heroDice,
     weaponDiceNotation: attack.damageDice ?? undefined,
-    statLabel: attackAbilityLabel(p.abilities, type),
+    statLabel: attackAbilityLabelFor(p, attack),
   });
 
-  const dm = applyHeroDmDamageMultiplier(p, type, calc.totalDamage);
+  const bonus = attack.damageBonus ?? 0;
 
-  return { total: dm.damage, statLabel: attackAbilityLabel(p.abilities, type), weaponAvg, heroDice, heroPart: isHero ? p.abilities.level + heroDiceAvg : 0, statMod, steps: calc.steps, multiplier: dm.multiplier };
+  const steps = bonus ? [...calc.steps, { label: WEAPON_FLAT_LABEL, side: "attacker" as const, kind: "flat" as const, value: bonus, after: calc.totalDamage + bonus }] : calc.steps;
+
+  const dm = applyHeroDmDamageMultiplier(p, type, calc.totalDamage + bonus);
+
+  return { total: dm.damage, statLabel: attackAbilityLabelFor(p, attack), weaponAvg, heroDice, heroPart: isHero && !isFiveE(p) ? p.abilities.level + heroDiceAvg : 0, statMod, steps, multiplier: dm.multiplier };
 }

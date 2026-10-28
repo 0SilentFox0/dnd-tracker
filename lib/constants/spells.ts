@@ -1,8 +1,11 @@
+import { SPELL_GROUP_FALLBACK_COLOR } from "@/lib/constants/spell-groups";
 import type { SpellSlotProgression } from "@/types/races";
 
 export const DEFAULT_SPELL_SLOT_PROGRESSION: SpellSlotProgression[] = [1, 2, 3, 4, 5].map((level) => ({ level, slots: 0 }));
 
 export const SPELL_IDS_QUERY_MAX = 200;
+
+export const MAX_SPELL_LEVEL = 9;
 
 const SPELL_CIRCLE_ORDINALS = ["", "Перше", "Друге", "Третє", "Четверте", "П'яте", "Шосте", "Сьоме", "Восьме", "Дев'яте"];
 
@@ -30,20 +33,15 @@ export function spellLevelRoman(level: number): string {
   return ROMAN_NUMERALS[Math.max(0, level)] ?? String(level);
 }
 
-const SPELL_SCHOOL_COLORS: Record<string, string> = {
-  Природа: "#12a52b",
-  Світло: "#f2b300",
-  Темрява: "#7a1fe6",
-  Хаос: "#ec1c0c",
-};
-
-export function spellSchoolColor(name: string | null | undefined): string {
-  return (name && SPELL_SCHOOL_COLORS[name]) || "#6d7177";
+export function spellSchoolColor(group: { color?: string | null } | null | undefined): string {
+  return group?.color || SPELL_GROUP_FALLBACK_COLOR;
 }
 
 export const SPELL_COST_LABELS = {
   action: "Дія",
   bonusAction: "Бонусна дія",
+  reaction: "Реакція",
+  long: "Тривале накладання",
 } as const;
 
 export const SPELL_TARGETING_LABELS = {
@@ -65,6 +63,7 @@ export const TEMPLATE_SHAPE_LABELS = {
   cone: "Конус",
   line: "Лінія",
   cross: "Хрест",
+  emanation: "Еманація",
 } as const;
 
 export const SPELL_SAVE_ON_SUCCESS_LABELS = {

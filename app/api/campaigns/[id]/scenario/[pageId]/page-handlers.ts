@@ -1,19 +1,17 @@
 import { NextResponse } from "next/server";
 
-import { discardSlideFiles, pendingSlideUrls } from "@/lib/ai/proposals";
 import { API_ERRORS } from "@/lib/constants/api-errors";
 import { SCENARIO_MAX_CONTENT_BYTES } from "@/lib/constants/scenario";
-import { prisma } from "@/lib/db";
 import { saveScenarioContentSchema, updateScenarioMetaSchema } from "@/lib/schemas/scenario";
-import { characterInCampaign, loadOwnedPage } from "@/lib/server/scenario/loaders";
-import { contentWrite, InvalidScenarioContentError, OWNED_SELECT, OWNED_WITH_CONTENT_SELECT, readContent, SUMMARY_SELECT, toPage, toSummary } from "@/lib/server/scenario/page-store";
-import { pruneVersions, snapshotIfDue } from "@/lib/server/scenario/versions";
+import { runScenarioOperation,saveScenarioContent } from "@/lib/server/scenario/action-service";
+import { loadOwnedPage } from "@/lib/server/scenario/loaders";
+import { InvalidScenarioContentError, OWNED_WITH_CONTENT_SELECT, toPage } from "@/lib/server/scenario/page-store";
+import { sessionDmActor } from "@/lib/utils/api/actor";
 import { requireDM } from "@/lib/utils/api/api-auth";
 import { errorResponse } from "@/lib/utils/api/api-response";
 import { handleApiError } from "@/lib/utils/api/error-handler";
-import { loadOwned } from "@/lib/utils/api/load-owned";
 import { parseBody } from "@/lib/utils/api/parse-body";
-import { buildSearchText } from "@/lib/utils/scenario/search-text";
+
 
 export async function getScenarioPageHandler(campaignId: string, pageId: string) {
   try {
@@ -43,22 +41,9 @@ export async function saveScenarioContentHandler(req: Request, campaignId: strin
 
     if (Buffer.byteLength(JSON.stringify(body.content)) > SCENARIO_MAX_CONTENT_BYTES) return errorResponse(API_ERRORS.SCENARIO_TOO_LARGE, 413);
 
-    const page = await loadOwnedPage(campaignId, pageId, OWNED_SELECT);
+    const page = await saveScenarioContent(sessionDmActor(campaignId, access.userId), pageId, body.content, body.expectedVersion, false);
 
-    if (page instanceof NextResponse) return page;
-
-    if (page.version !== body.expectedVersion) return errorResponse(API_ERRORS.SCENARIO_CONFLICT, 409);
-
-    if (await snapshotIfDue(prisma, pageId, access.userId)) await pruneVersions(prisma, pageId);
-
-    const { count } = await prisma.scenarioPage.updateMany({
-      where: { id: pageId, version: body.expectedVersion },
-      data: { ...contentWrite(page.title, body.content), version: { increment: 1 } },
-    });
-
-    if (count === 0) return errorResponse(API_ERRORS.SCENARIO_CONFLICT, 409);
-
-    return NextResponse.json({ version: body.expectedVersion + 1 });
+    return NextResponse.json({ version: page.version });
   } catch (error) {
     return handleApiError(error, { action: "save scenario page" });
   }
@@ -74,21 +59,9 @@ export async function updateScenarioMetaHandler(req: Request, campaignId: string
 
     if (body instanceof NextResponse) return body;
 
-    const page = await loadOwnedPage(campaignId, pageId, OWNED_SELECT);
+    const result = await runScenarioOperation(sessionDmActor(campaignId, access.userId), "meta", { id: pageId, patch: body });
 
-    if (page instanceof NextResponse) return page;
-
-    if (!(await characterInCampaign(campaignId, body.characterId))) return errorResponse(API_ERRORS.SCENARIO_CHARACTER_INVALID, 400);
-
-    const titleChanged = body.title !== undefined && body.title !== page.title;
-
-    const current = titleChanged ? await prisma.scenarioPage.findUnique({ where: { id: pageId }, select: { content: true } }) : null;
-
-    const searchText = titleChanged && body.title ? buildSearchText(body.title, readContent(current?.content)) : undefined;
-
-    const row = await prisma.scenarioPage.update({ where: { id: pageId }, data: { ...body, ...(searchText !== undefined && { searchText }) }, select: SUMMARY_SELECT });
-
-    return NextResponse.json(toSummary(row));
+    return NextResponse.json(result.data);
   } catch (error) {
     return handleApiError(error, { action: "update scenario page" });
   }
@@ -100,14 +73,7 @@ export async function deleteScenarioPageHandler(campaignId: string, pageId: stri
 
     if (access instanceof NextResponse) return access;
 
-    const page = await loadOwnedPage(campaignId, pageId, OWNED_SELECT);
-
-    if (page instanceof NextResponse) return page;
-
-    const orphanUrls = await pendingSlideUrls(campaignId, pageId);
-
-    await prisma.scenarioPage.delete({ where: { id: pageId } });
-    await discardSlideFiles(campaignId, orphanUrls);
+    await runScenarioOperation(sessionDmActor(campaignId, access.userId), "delete", { id: pageId });
 
     return NextResponse.json({ ok: true });
   } catch (error) {

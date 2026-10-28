@@ -1,14 +1,13 @@
 "use client";
 
 import type { ReactNode } from "react";
-import { Sparkles } from "lucide-react";
 
-import { OptimizedImage } from "@/components/common/OptimizedImage";
 import { LevelBookmarks } from "@/components/spells/book/LevelBookmarks";
 import { SchoolHeading } from "@/components/spells/book/SchoolHeading";
 import { SchoolTabs } from "@/components/spells/book/SchoolTabs";
 import { SpellRow } from "@/components/spells/book/SpellRow";
 import { SpellBattlePreview } from "@/components/spells/preview/SpellBattlePreview";
+import { SpellIcon } from "@/components/spells/SpellIcon";
 import { spellLevelName, spellSchoolColor } from "@/lib/constants/spells";
 import { useSchoolFilter } from "@/lib/hooks/spells";
 import { cn } from "@/lib/utils";
@@ -49,9 +48,9 @@ export function SpellBookPages({ byLevel, page, pick, layout, detail }: SpellBoo
             {filter.shown.length === 0 && <p className="py-6 text-center italic text-[#7a6650]">{filter.isAll ? "На цьому колі заклинань немає" : "На цьому колі заклинань цієї школи немає"}</p>}
             {filter.shown.map((g) => (
               <section key={g.name} className="mt-3 first:mt-1">
-                {filter.isAll && <SchoolHeading name={g.name} />}
+                {filter.isAll && <SchoolHeading school={g} />}
                 {g.spells.map((s) => (
-                  <SpellRow key={s.id} spell={s} school={g.name} wide={wide} picked={pickedId === s.id} extras={{ formula: formulaOf?.(s), badge: badgeOf?.(s) }} onPick={onPick} />
+                  <SpellRow key={s.id} spell={s} school={g} wide={wide} picked={pickedId === s.id} extras={{ formula: formulaOf?.(s), badge: badgeOf?.(s) }} onPick={onPick} />
                 ))}
               </section>
             ))}
@@ -83,28 +82,29 @@ export function SpellDetail({ spell, formula, children }: { spell: BookSpell; fo
     <>
       <div className="flex items-center gap-4">
         <span className="flex size-16 items-center justify-center border border-[#2a2018] bg-[#7a2a1f]/10 text-[#7a2a1f]">
-          {spell.icon ? <OptimizedImage src={spell.icon} alt="" width={44} height={44} /> : <Sparkles className="size-10" />}
+          <SpellIcon spell={spell} size={44} iconClassName="size-10" />
         </span>
         <div>
           <div className="hud-sc text-[26px] font-bold leading-[30px]">{spell.name}</div>
           <div className="text-sm italic text-[#7a6650]">{spell.spellGroup?.name ?? "Без школи"} · {spellLevelName(spell.level).toLowerCase()}</div>
         </div>
       </div>
+      {spell.executionMode === "manual" && <p role="status">Ручне заклинання: читайте опис і узгодьте застосування з ДМ. Автоматичне застосування недоступне до налаштування механіки.</p>}
       {spell.description && (
-        <p className="mt-4 border-l-4 pl-4 text-[19px] font-medium italic leading-7 text-[#3b2716]" style={{ borderColor: spellSchoolColor(spell.spellGroup?.name) }}>
+        <p className="mt-4 border-l-4 pl-4 text-[19px] font-medium italic leading-7 text-[#3b2716]" style={{ borderColor: spellSchoolColor(spell.spellGroup) }}>
           {spell.description}
         </p>
       )}
-      <div className="mt-4 grid grid-cols-2 border-t border-[#2a2018]/25">
+      {spell.executionMode !== "manual" && <div className="mt-4 grid grid-cols-2 border-t border-[#2a2018]/25">
         {[["Сила", formula ?? (spell.dice ? `${spell.dice} баз. кубиків` : "—")], ["Ціль", spell.targeting ? targetingLabel(spell.targeting) : "—"], ["Перевірка", spell.resolution ? resolutionLabel(spell.resolution) : "автоматично"], ["Вартість", costLabel(spell.cost ?? "action")]].map(([a, b]) => (
           <div key={a} className="flex h-12 flex-col justify-center border-b border-[#2a2018]/15 odd:border-r odd:pr-3 even:pl-3">
             <span className="text-xs italic text-[#7a6650]">{a}</span>
             <span className="text-base">{b}</span>
           </div>
         ))}
-      </div>
+      </div>}
       {spell.appearanceDescription && <p className="mt-5 text-[17px] leading-6 first-letter:float-left first-letter:pr-1.5 first-letter:pt-1 first-letter:font-[family-name:var(--font-hud-sc)] first-letter:text-[52px] first-letter:leading-[44px] first-letter:text-[#7a2a1f]">{spell.appearanceDescription}</p>}
-      <SpellBattlePreview key={spell.id} spell={{ id: spell.id, name: spell.name, level: spell.level, groupId: spell.spellGroup?.id ?? null, rules: spell }} variant="book" className="clear-left mt-4" />
+      {spell.executionMode !== "manual" && <SpellBattlePreview key={spell.id} spell={{ id: spell.id, name: spell.name, level: spell.level, groupId: spell.spellGroup?.id ?? null, fx: spell.fx, rules: spell }} variant="book" className="clear-left mt-4" />}
       {children}
     </>
   );

@@ -3,6 +3,7 @@ import { describe, expect, it } from "vitest";
 import { action } from "./action-fixture";
 
 import { ARCHETYPE_FX, FX_ARCHETYPES, impactFor as impactForSpec, mapAction } from "@/lib/utils/battle/fx";
+import { SPELL_FX_BY_NAME } from "@/scripts/constructor/backfill/spell-fx-by-name";
 import type { BattleAction } from "@/types/battle";
 
 const impactFor = (action: BattleAction | undefined, id: string) => impactForSpec(action ? mapAction(action)[0] : undefined, id);
@@ -57,7 +58,7 @@ describe("impactFor", () => {
   });
 
   it("eldritch borrows the fire frame at its own impact time; slow, haste and stoneskin have none", () => {
-    const cast = (spellName: string, actionDetails: Record<string, unknown>) => impactFor(action({ actionType: "spell", actionDetails: { spellName, ...actionDetails } }), "t");
+    const cast = (spellName: string, actionDetails: Record<string, unknown>) => impactFor(action({ actionType: "spell", actionDetails: { spellName, spellFx: SPELL_FX_BY_NAME[spellName], ...actionDetails } }), "t");
 
     expect(cast("Потойбічна стріла", { spellDamageType: "fire", spellEffectKinds: ["dealDamage"], totalDamage: 9 })).toEqual({ element: "fire", kind: "damage", delayMs: ARCHETYPE_FX.eldritch.impactMs });
     expect(cast("Сповільнення", { spellEffectKinds: ["modifyStat"] })).toBeNull();
@@ -66,7 +67,7 @@ describe("impactFor", () => {
   });
 
   it("Dark: plague and the netherworld curse keep their damage frames, the other curses have none", () => {
-    const cast = (spellName: string, actionDetails: Record<string, unknown>) => impactFor(action({ actionType: "spell", actionDetails: { spellName, ...actionDetails } }), "t");
+    const cast = (spellName: string, actionDetails: Record<string, unknown>) => impactFor(action({ actionType: "spell", actionDetails: { spellName, spellFx: SPELL_FX_BY_NAME[spellName], ...actionDetails } }), "t");
 
     expect(cast("Чума", { spellDamageType: "poison", spellEffectKinds: ["dot"] })).toEqual({ element: "poison", kind: "damage", delayMs: ARCHETYPE_FX.pestilence.impactMs });
     expect(cast("Прокляття Потойбіччя", { spellDamageType: "necrotic", spellEffectKinds: ["dealDamage"], totalDamage: 20 })).toEqual({ element: "necrotic", kind: "damage", delayMs: ARCHETYPE_FX.netherhands.impactMs });
@@ -75,7 +76,7 @@ describe("impactFor", () => {
   });
 
   it("Light: the smites hit with radiant damage, sunbeam and resurrection heal, the wards and blessings have no frame", () => {
-    const cast = (spellName: string, actionDetails: Record<string, unknown>) => impactFor(action({ actionType: "spell", actionDetails: { spellName, ...actionDetails } }), "t");
+    const cast = (spellName: string, actionDetails: Record<string, unknown>) => impactFor(action({ actionType: "spell", actionDetails: { spellName, spellFx: SPELL_FX_BY_NAME[spellName], ...actionDetails } }), "t");
 
     const smite = { spellDamageType: "radiant", spellEffectKinds: ["dealDamage"], totalDamage: 20 };
 
@@ -88,13 +89,13 @@ describe("impactFor", () => {
   });
 
   it("summons never play a hit frame on the caster", () => {
-    const cast = (spellName: string) => impactFor(action({ actionType: "spell", actionDetails: { spellName, spellEffectKinds: ["summon"] } }), "t");
+    const cast = (spellName: string) => impactFor(action({ actionType: "spell", actionDetails: { spellName, spellFx: SPELL_FX_BY_NAME[spellName], spellEffectKinds: ["summon"] } }), "t");
 
     for (const name of ["Прикликання елементаля: Вогонь", "Прикликання елементаля: Вода", "Прикликання елементаля: Земля", "Прикликання елементаля: Повітря", "Призив Фенікса", "Аватар", "Інший призов"]) expect(cast(name)).toBeNull();
   });
 
   it("Nature: the heals keep the heal frame, vines poison, moonbeam radiant; the spirit and vampirism have none", () => {
-    const cast = (spellName: string, actionDetails: Record<string, unknown>) => impactFor(action({ actionType: "spell", actionDetails: { spellName, ...actionDetails } }), "t");
+    const cast = (spellName: string, actionDetails: Record<string, unknown>) => impactFor(action({ actionType: "spell", actionDetails: { spellName, spellFx: SPELL_FX_BY_NAME[spellName], ...actionDetails } }), "t");
 
     const healing = { spellEffectKinds: ["heal"], totalHealing: 9 };
 
@@ -108,8 +109,8 @@ describe("impactFor", () => {
   });
 
   it("teleport, entangle and a death never borrow a damage frame", () => {
-    expect(impactFor(action({ actionType: "spell", actionDetails: { spellName: "Телепортація", spellEffectKinds: ["note"] } }), "t")).toBeNull();
-    expect(impactFor(action({ actionType: "spell", actionDetails: { spellName: "Корені", spellEffectKinds: ["applyCondition"] } }), "t")).toBeNull();
+    expect(impactFor(action({ actionType: "spell", actionDetails: { spellName: "Телепортація", spellFx: SPELL_FX_BY_NAME["Телепортація"], spellEffectKinds: ["note"] } }), "t")).toBeNull();
+    expect(impactFor(action({ actionType: "spell", actionDetails: { spellName: "Корені", spellFx: SPELL_FX_BY_NAME["Корені"], spellEffectKinds: ["applyCondition"] } }), "t")).toBeNull();
     expect(impactForSpec({ key: "k", archetype: "death", element: "necrotic", actorId: "a", actorSide: "ally", targetIds: ["t"], hit: true, critical: false }, "t")).toBeNull();
   });
 

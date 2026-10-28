@@ -1,3 +1,5 @@
+import { useSyncExternalStore } from "react";
+
 import { btn, primaryBtn } from "../attack/shared";
 import { MapAimPanel } from "../MapAimPanel";
 
@@ -25,7 +27,9 @@ function hintOf({ state }: Book): string {
 export function SpellAimPanel({ book, spellName }: { book: Book; spellName: string }) {
   const { state, view, actions } = book;
 
-  const { aimPreview } = view;
+  const hover = useSyncExternalStore(view.hover.subscribe, view.hover.get, () => null);
+
+  const aimPreview = hover ? view.aimPreviewAt(hover) : null;
 
   const template = state.pick?.targetMode === "template";
 

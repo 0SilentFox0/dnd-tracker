@@ -2,20 +2,27 @@ import { NextResponse } from "next/server";
 import { z } from "zod";
 
 import { runChat } from "@/lib/ai/chat/run-chat";
+import { compactToolOutputs } from "@/lib/ai/compact";
 import { isAiConfigured } from "@/lib/ai/crypto";
 import { discardGeneratedImage } from "@/lib/ai/generated-images";
 import { guarded } from "@/lib/ai/guarded";
 import { AiImageError, generateSlideImage } from "@/lib/ai/images";
 import { applyProposal, listProposals, listProposalSummaries, rejectProposal } from "@/lib/ai/proposals";
+import { recoveredState } from "@/lib/ai/recovered-state";
 import { getAiSettings, saveAiSettings } from "@/lib/ai/settings";
-import { createThread, deleteThread, listThreads, loadMessages, loadThread, patchThread, resolveDefaultModel,slimToolOutputs } from "@/lib/ai/threads";
-import { AI_LIMITS, AI_PROPOSAL_STATUSES, isKnownImageModel, isKnownModel } from "@/lib/constants/ai";
+import { createThread, deleteThread, listThreads, loadMessages, loadThread, patchThread, resolveDefaultModel } from "@/lib/ai/threads";
+import { AI_BODY_LIMITS, AI_LIMITS, AI_PROPOSAL_STATUSES, AI_RATE_LIMITS, isKnownImageModel, isKnownModel } from "@/lib/constants/ai";
 import { API_ERRORS } from "@/lib/constants/api-errors";
 import { prisma } from "@/lib/db";
-import { aiSettingsSchema, chatRequestSchema, createThreadSchema, discardGeneratedImageSchema, generateSlideImageSchema, patchThreadSchema } from "@/lib/schemas/ai";
+import { aiSettingsSchema, assistantRequestIdSchema, chatRequestSchema, createThreadSchema, discardGeneratedImageSchema, generateSlideImageSchema, patchThreadSchema } from "@/lib/schemas/ai";
+import { chatCaller } from "@/lib/server/assistant/caller";
+import { cancelAssistantRun } from "@/lib/server/assistant/runs";
+import { ContentError } from "@/lib/server/content/errors";
 import { requireDM } from "@/lib/utils/api/api-auth";
 import { errorResponse } from "@/lib/utils/api/api-response";
+import { PRIVATE_NO_STORE_HEADERS } from "@/lib/utils/api/cache-headers";
 import { parseBody } from "@/lib/utils/api/parse-body";
+import { checkRateLimit, rateLimitResponse } from "@/lib/utils/api/rate-limit";
 
 export async function aiGuard(campaignId: string) {
   if (!isAiConfigured()) return errorResponse(API_ERRORS.AI_NOT_CONFIGURED, 503);
@@ -23,28 +30,36 @@ export async function aiGuard(campaignId: string) {
   return requireDM(campaignId);
 }
 
-const listQuery = z.object({ pageId: z.string().min(1).max(40).optional(), status: z.enum(AI_PROPOSAL_STATUSES).optional(), summary: z.literal("1").optional() });
+const listQuery = z.object({ pageId: z.string().min(1).max(40).optional(), status: z.enum(AI_PROPOSAL_STATUSES).optional(), summary: z.literal("1").optional(), workspace: z.literal("true").optional() });
 
 export const listProposalsHandler = (req: Request, campaignId: string) =>
-  guarded("list ai proposals", () => aiGuard(campaignId), async () => {
+  guarded("list ai proposals", () => requireDM(campaignId), async (access) => {
     const query = listQuery.safeParse(Object.fromEntries(new URL(req.url).searchParams));
 
     if (!query.success) return errorResponse(API_ERRORS.INVALID_QUERY, 400, query.error.issues);
 
-    const { summary, ...filter } = query.data;
+    const { summary, workspace, ...filter } = query.data;
 
-    return NextResponse.json(summary ? await listProposalSummaries(campaignId, filter) : await listProposals(campaignId, filter));
+    if (summary) return NextResponse.json(await listProposalSummaries(campaignId, filter));
+
+    const proposals = await listProposals(campaignId, filter);
+
+    if (!workspace) return NextResponse.json(proposals);
+
+    const links = await prisma.assistantIntent.findMany({ where: { campaignId, userId: access.userId, legacyProposalId: { in: proposals.map(p => p.id) } }, select: { id: true, legacyProposalId: true } });
+
+    return NextResponse.json(proposals.map(p => ({ ...p, assistantIntentId: links.find(link => link.legacyProposalId === p.id)?.id })), { headers: PRIVATE_NO_STORE_HEADERS });
   });
 
 export const applyProposalHandler = (campaignId: string, proposalId: string) =>
-  guarded("apply ai proposal", () => aiGuard(campaignId), async (access) => {
+  guarded("apply ai proposal", () => requireDM(campaignId), async (access) => {
     const result = await applyProposal(campaignId, access.userId, proposalId);
 
     return result.ok ? NextResponse.json("deck" in result ? { deck: result.deck } : result.page) : errorResponse(result.error, result.status);
   });
 
 export const rejectProposalHandler = (campaignId: string, proposalId: string) =>
-  guarded("reject ai proposal", () => aiGuard(campaignId), async () => {
+  guarded("reject ai proposal", () => requireDM(campaignId), async () => {
     const row = await rejectProposal(campaignId, proposalId);
 
     return row ? NextResponse.json(row) : errorResponse(API_ERRORS.AI_PROPOSAL_DONE, 409);
@@ -59,7 +74,7 @@ export const listThreadsHandler = (req: Request, campaignId: string) =>
 
 export const createThreadHandler = (req: Request, campaignId: string) =>
   guarded("create ai thread", () => aiGuard(campaignId), async (access) => {
-    const body = await parseBody(createThreadSchema, req);
+    const body = await parseBody(createThreadSchema, req, undefined, { maxBytes: AI_BODY_LIMITS.small });
 
     if (body instanceof NextResponse) return body;
 
@@ -74,7 +89,7 @@ export const createThreadHandler = (req: Request, campaignId: string) =>
 
 export const patchThreadHandler = (req: Request, campaignId: string, threadId: string) =>
   guarded("patch ai thread", () => aiGuard(campaignId), async (access) => {
-    const body = await parseBody(patchThreadSchema, req);
+    const body = await parseBody(patchThreadSchema, req, undefined, { maxBytes: AI_BODY_LIMITS.small });
 
     if (body instanceof NextResponse) return body;
 
@@ -101,7 +116,7 @@ export const listMessagesHandler = (campaignId: string, threadId: string) =>
 
     if (!thread) return errorResponse(API_ERRORS.AI_THREAD_NOT_FOUND, 404);
 
-    return NextResponse.json({ thread, messages: slimToolOutputs(await loadMessages(threadId, AI_LIMITS.historyMessages * 2)) });
+    return NextResponse.json({ thread, messages: compactToolOutputs(await loadMessages(threadId, AI_LIMITS.historyMessages * 2), { minChars: AI_LIMITS.slimOutputChars }) });
   });
 
 export const getSettingsHandler = (campaignId: string) =>
@@ -109,7 +124,7 @@ export const getSettingsHandler = (campaignId: string) =>
 
 export const putSettingsHandler = (req: Request, campaignId: string) =>
   guarded("save ai settings", () => requireDM(campaignId), async () => {
-    const body = await parseBody(aiSettingsSchema, req);
+    const body = await parseBody(aiSettingsSchema, req, undefined, { maxBytes: AI_BODY_LIMITS.settings });
 
     if (body instanceof NextResponse) return body;
 
@@ -118,16 +133,20 @@ export const putSettingsHandler = (req: Request, campaignId: string) =>
 
 export const chatHandler = (req: Request, campaignId: string, threadId: string) =>
   guarded("ai chat", () => aiGuard(campaignId), async (access) => {
-    const body = await parseBody(chatRequestSchema, req);
+    const rate = await checkRateLimit({ userId: access.userId, scope: "assistant-chat", battleId: campaignId, ...AI_RATE_LIMITS.chat, memoryFallback: true });
+
+    if (!rate.allowed) return rateLimitResponse(rate);
+
+    const body = await parseBody(chatRequestSchema, req, undefined, { maxBytes: AI_BODY_LIMITS.chat });
 
     if (body instanceof NextResponse) return body;
 
-    return runChat({ campaignId, userId: access.userId, threadId, text: body.text, focus: body.focus, abortSignal: req.signal });
+    return runChat({ campaignId, userId: access.userId, threadId, requestId: body.requestId, text: body.text, focus: body.focus, sessionContext: body.sessionContext, abortSignal: req.signal });
   });
 
 export const generateSlideImageHandler = (req: Request, campaignId: string) =>
   guarded("generate slide image", () => aiGuard(campaignId), async (access) => {
-    const body = await parseBody(generateSlideImageSchema, req);
+    const body = await parseBody(generateSlideImageSchema, req, undefined, { maxBytes: AI_BODY_LIMITS.slideImage });
 
     if (body instanceof NextResponse) return body;
 
@@ -152,3 +171,40 @@ export const discardGeneratedImageHandler = (req: Request, campaignId: string) =
 
     return outcome === "foreign" ? errorResponse(API_ERRORS.AI_IMAGE_NOT_OWNED, 400) : NextResponse.json({ removed: outcome === "removed" });
   });
+
+
+export const recoverChatHandler = (campaignId: string, threadId: string, requestId?: string, statusOnly = false) =>
+  guarded("recover ai chat", () => requireDM(campaignId), async access => runResponse(async () => {
+    const caller = chatCaller(campaignId, access.userId, threadId);
+
+    return NextResponse.json(await recoveredState(caller, threadId, requestId, undefined, { statusOnly }));
+  }));
+export const cancelChatHandler = (req: Request, campaignId: string, threadId: string) =>
+  guarded("cancel ai chat", () => requireDM(campaignId), async access => runResponse(async () => {
+    const id = assistantRequestIdSchema.safeParse(new URL(req.url).searchParams.get("requestId"));
+
+    if (!id.success) return errorResponse(API_ERRORS.INVALID_REQUEST_ID, 400);
+
+    const caller = chatCaller(campaignId, access.userId, threadId);
+
+    return NextResponse.json(await recoveredState(caller, threadId, id.data, await cancelAssistantRun(caller, id.data)));
+  }));
+
+async function runResponse(run: () => Promise<Response>): Promise<Response> {
+  try { const response = await run();
+
+    response.headers.set("cache-control", PRIVATE_NO_STORE_HEADERS["Cache-Control"]);
+
+    return response; }
+  catch (error) {
+    if (error instanceof ContentError) {
+      const response = errorResponse(error.message, error.status);
+
+      response.headers.set("cache-control", PRIVATE_NO_STORE_HEADERS["Cache-Control"]);
+
+      return response;
+    }
+
+    throw error;
+  }
+}

@@ -1,6 +1,9 @@
+import { columnRefIssues } from "@/lib/utils/abilities/class-columns";
 import { EFFECT_REGISTRY } from "@/lib/utils/abilities/registry/effects";
-import { AbilitiesSchema, type Ability, type Effect, type EffectKind, isActionScopedTrigger, isStaticEffect, type Trigger, type TriggerEvent } from "@/lib/utils/abilities/schema";
+import { AbilitiesSchema, type Ability, AbilitySchema, type Effect, type EffectKind, isActionScopedTrigger, isStaticEffect, type Trigger, type TriggerEvent } from "@/lib/utils/abilities/schema";
 import { PASSIVE_TARGETS } from "@/lib/utils/abilities/schema/kinds";
+import { ITEM_CHARGES_KEY } from "@/lib/utils/items/pools";
+import type { ClassColumn } from "@/types/classes";
 
 const STATIC_KINDS: EffectKind[] = ["modifyStat", "damageBonus", "flag", "note"];
 
@@ -32,7 +35,7 @@ const EFFECT_DEFAULTS: { [K in EffectKind]: WithoutKind<Extract<Effect, { kind: 
   changeMorale: { delta: 1 },
   cleanse: {},
   copySpellBuffs: {},
-  summon: { group: "Демони", tier: 1 },
+  summon: { tier: 1 },
   raiseDead: { hpPercent: 50, target: "eventTarget" },
   guard: { percent: 50, duration: { rounds: 2 }, target: "eventTarget" },
   mark: { markId: "mark", duration: { rounds: 2 }, target: "eventTarget" },
@@ -132,16 +135,32 @@ export function setAtPath<T>(obj: T, path: string, value: unknown): T {
   return copy as T;
 }
 
-export function validateAbilities(list: unknown[]): { ok: boolean; errorsByPath: Record<string, string[]> } {
-  const r = AbilitiesSchema.safeParse(list);
-
-  if (r.success) return { ok: true, errorsByPath: {} };
-
+export function validateAbilities(list: unknown[], opts: { classColumns?: readonly ClassColumn[]; itemCharges?: boolean; attacks?: readonly { name: string }[]; spellIds?: readonly string[] } = {}): { ok: boolean; errorsByPath: Record<string, string[]> } {
   const errorsByPath: Record<string, string[]> = {};
 
-  for (const issue of r.error.issues) (errorsByPath[issue.path.join(".")] ??= []).push(issue.message);
+  const push = (path: PropertyKey[], message: string) => (errorsByPath[path.map(String).join(".")] ??= []).push(message);
 
-  return { ok: false, errorsByPath };
+  const r = AbilitiesSchema.safeParse(list);
+
+  if (!r.success) for (const issue of r.error.issues) push(issue.path, issue.message);
+
+  list.forEach((raw, i) => {
+    const one = AbilitySchema.safeParse(raw);
+
+    if (!one.success) return;
+
+    const perform = one.data.perform;
+
+    if (perform?.kind === "attack" && opts.attacks && !opts.attacks.some((a) => a.name.toLocaleLowerCase() === perform.attack.toLocaleLowerCase())) push([i, "perform", "attack"], "Атаку не знайдено серед атак юніта");
+
+    if (perform?.kind === "spell" && opts.spellIds && !opts.spellIds.includes(perform.spellId)) push([i, "perform", "spellId"], "Заклинання не знайдено в бібліотеці");
+
+    const checked = opts.itemCharges && one.data.limits?.pool?.key === ITEM_CHARGES_KEY ? { ...one.data, limits: { ...one.data.limits, pool: undefined } } : one.data;
+
+    for (const issue of columnRefIssues([checked], opts.classColumns ?? null)) push([i, ...issue.path.slice(1)], issue.message);
+  });
+
+  return { ok: Object.keys(errorsByPath).length === 0, errorsByPath };
 }
 
 export function withFreshIds(list: Ability[], taken: string[]): Ability[] {

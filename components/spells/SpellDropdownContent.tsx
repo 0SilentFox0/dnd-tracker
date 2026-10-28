@@ -58,7 +58,7 @@ export function SpellDropdownContent({
       {groupedSpells.map(([groupName, groupSpells]) => {
         const displayName = groupDisplayName(groupName, UNGROUPED_LABELS.spellGroup);
 
-        const GroupIcon = getSpellGroupIcon(displayName);
+        const GroupIcon = getSpellGroupIcon(groupSpells[0]?.spellGroup);
 
         return (
           <div key={groupName}>

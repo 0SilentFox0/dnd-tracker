@@ -1,4 +1,4 @@
-import { findParticipant, isTargetable } from "@/lib/utils/abilities/engine/core/participants";
+import { findParticipant, isAttackable } from "@/lib/utils/abilities/engine/core/participants";
 import { canStartAttack, pickAttack } from "@/lib/utils/battle/grid";
 import type { BattleScene } from "@/types/api";
 import type { BattleParticipant } from "@/types/battle";
@@ -24,10 +24,11 @@ export interface TurnAttackStatus {
   phase: string;
   actionUsed: boolean;
   skipped: boolean;
+  attackLeft?: boolean;
 }
 
-export function turnAllowsAttack({ phase, actionUsed, skipped }: TurnAttackStatus): boolean {
-  return phase === "acting" && !actionUsed && !skipped;
+export function turnAllowsAttack({ phase, actionUsed, skipped, attackLeft }: TurnAttackStatus): boolean {
+  return phase === "acting" && (!actionUsed || !!attackLeft) && !skipped;
 }
 
 export function canConsumeIntent(intent: AttackIntent, turn: TurnPoint & TurnAttackStatus & { heroId: string }): boolean {
@@ -50,7 +51,7 @@ export function participantAttackIntent({ battle, turn: { current, isMyTurn }, a
 
   const target = findParticipant(order, targetId);
 
-  if (!target || target.basicInfo.side === current.basicInfo.side || !isTargetable(target)) return null;
+  if (!target || target.basicInfo.side === current.basicInfo.side || !isAttackable(target)) return null;
 
   const { attack } = pickAttack(battle.map ?? null, order, current, current.battleData.attacks, target);
 

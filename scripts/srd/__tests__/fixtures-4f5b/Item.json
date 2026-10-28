@@ -1,0 +1,29 @@
+[
+  {
+    "fields": {
+      "armor": null,
+      "armor_class": 0,
+      "armor_detail": "",
+      "category": "scroll",
+      "cost": "30.00",
+      "damage_immunities": [
+        "poison",
+        "psychic"
+      ],
+      "damage_resistances": [],
+      "damage_vulnerabilities": [],
+      "desc": "A Spell Scroll (Cantrip) or Spell Scroll (Level 1) is a magic item that bears the words of a cantrip or level 1 spell, respectively, determined by the scroll's creator. If the spell is on your class's spell list, you can read the scroll and cast the spell using its normal casting time and without providing any Material components. If the spell requires a saving throw or an attack roll, the spell save DC is 13, and the attack bonus is +5. The scroll disintegrates when the casting is completed.",
+      "document": "srd-2024",
+      "hit_dice": null,
+      "hit_points": 0,
+      "name": "Spell Scroll",
+      "nonmagical_attack_immunity": false,
+      "nonmagical_attack_resistance": false,
+      "size": "tiny",
+      "weapon": null,
+      "weight": "0.000"
+    },
+    "model": "api_v2.item",
+    "pk": "srd-2024_spell-scroll"
+  }
+]

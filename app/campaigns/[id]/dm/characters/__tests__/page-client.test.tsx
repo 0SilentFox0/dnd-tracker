@@ -49,7 +49,7 @@ describe("DMCharactersClient delete all", () => {
     deleteAllCharacters.mockResolvedValue({});
     renderIt();
     fireEvent.click(await screen.findByRole("button", { name: /Видалити всіх/ }));
-    fireEvent.click(within(await screen.findByRole("dialog")).getByRole("button", { name: "Видалити всіх" }));
+    fireEvent.click(within(await screen.findByRole("alertdialog")).getByRole("button", { name: "Видалити всіх" }));
     await vi.waitFor(() => expect(deleteAllCharacters).toHaveBeenCalledWith("c1"));
   });
 
@@ -58,7 +58,7 @@ describe("DMCharactersClient delete all", () => {
     renderIt();
     fireEvent.click(await screen.findByRole("button", { name: /Видалити всіх/ }));
 
-    const dialog = await screen.findByRole("dialog");
+    const dialog = await screen.findByRole("alertdialog");
 
     fireEvent.click(within(dialog).getByRole("button", { name: "Видалити всіх" }));
     expect(await within(dialog).findByRole("alert")).toHaveTextContent("Збій");

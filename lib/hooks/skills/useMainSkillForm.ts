@@ -25,6 +25,7 @@ export function useMainSkillForm(campaignId: string, mainSkill: MainSkill) {
     icon: mainSkill.icon || "",
     isEnableInSkillTree: mainSkill.isEnableInSkillTree ?? false,
     spellGroupId: mainSkill.spellGroupId ?? null,
+    role: (mainSkill.role as MainSkillFormData["role"]) ?? null,
   });
 
   const [error, setError] = useState<string | null>(null);

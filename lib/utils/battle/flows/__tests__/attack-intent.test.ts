@@ -85,3 +85,48 @@ describe("participantAttackIntent", () => {
     expect(participantAttackIntent(clickScene({ battle: { map, initiativeOrder: order, currentRound: 2, currentTurnIndex: 0 } }, order), "e")).toBeNull();
   });
 });
+
+describe("participantAttackIntent: герой, що вмирає", () => {
+  const downed = (deathSaves?: { successes: number; failures: number; stable: boolean }) => {
+    const p = unit("d", ParticipantSide.ALLY, { deathSaves });
+
+    return { ...p, combatStats: { ...p.combatStats, currentHp: 0, status: "unconscious" as const } };
+  };
+
+  const order = (d: BattleParticipant) => [unit("e", ParticipantSide.ENEMY), d];
+
+  const scene = (d: BattleParticipant) => clickScene({ turn: { current: order(d)[0], isMyTurn: true } }, order(d));
+
+  it("ворог може обрати ціллю", () => {
+    expect(participantAttackIntent(scene(downed({ successes: 0, failures: 0, stable: false })), "d")).toMatchObject({ targetId: "d" });
+  });
+
+  it("без кидків смерті (HOMM) — лише вибір", () => {
+    expect(participantAttackIntent(scene(downed()), "d")).toBeNull();
+  });
+});
+
+describe("participantAttackIntent: додаткова атака й друга рука", () => {
+  const dagger = { id: "dagger:off", name: "Кинджал", type: AttackType.MELEE, hand: "off" } as BattleAttack;
+
+  const scene = (current: BattleParticipant) => clickScene({ turn: { current, isMyTurn: true } }, [current, unit("e", ParticipantSide.ENEMY)]);
+
+  const used = (over: Partial<BattleParticipant["battleData"]>) => {
+    const p = unit("h", ParticipantSide.ALLY, over);
+
+    return { ...p, actionFlags: { ...p.actionFlags, hasUsedAction: true } };
+  };
+
+  it("дія витрачена, але лічильник атак не порожній — намір є", () => {
+    expect(participantAttackIntent(scene(used({ attacksLeft: 1 })), "e")).toMatchObject({ targetId: "e", attackId: "sword" });
+  });
+
+  it("дія витрачена й лічильник порожній — лише вибір", () => {
+    expect(participantAttackIntent(scene(used({ attacksLeft: 0 })), "e")).toBeNull();
+  });
+
+  it("атака другою рукою не береться для кліку", () => {
+    expect(participantAttackIntent(scene(unit("h", ParticipantSide.ALLY, { attacks: [dagger, sword] })), "e")).toMatchObject({ attackId: "sword" });
+    expect(participantAttackIntent(scene(unit("h", ParticipantSide.ALLY, { attacks: [dagger] })), "e")).toBeNull();
+  });
+});

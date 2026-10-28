@@ -4,6 +4,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import { prisma } from "@/lib/db";
 import * as apiAuth from "@/lib/utils/api/api-auth";
+import { checkRateLimit } from "@/lib/utils/api/rate-limit";
 import { audioState, fileTrack } from "@/lib/utils/audio/__tests__/fixtures";
 
 const trigger = vi.hoisted(() => vi.fn(async () => undefined));
@@ -16,6 +17,9 @@ vi.mock("@/lib/utils/api/rate-limit", async (orig) => ({ ...(await orig<typeof i
 vi.mock("@/lib/utils/api/api-auth", () => ({ requireDM: vi.fn(), requireCampaignAccess: vi.fn() }));
 vi.mock("@/lib/db", () => ({
   prisma: {
+    $transaction: async (callback: (tx: unknown) => unknown) => callback({ $queryRaw: async () => [{ id: "c1" }] }),
+    campaignMember: { findUnique: async () => ({ role: "dm" }) },
+
     battleScene: { findFirst: vi.fn(), updateMany: vi.fn(async () => ({ count: 1 })) },
     campaignTrack: { findMany: vi.fn() },
   },
@@ -46,7 +50,7 @@ describe("battle audio API", () => {
     vi.mocked(apiAuth.requireDM).mockResolvedValue(access(true));
     vi.mocked(apiAuth.requireCampaignAccess).mockResolvedValue(access(false));
     vi.mocked(prisma.campaignTrack.findMany).mockResolvedValue(rows as never);
-    vi.mocked(prisma.battleScene.findFirst).mockResolvedValue({ audio: null } as never);
+    vi.mocked(prisma.battleScene.findFirst).mockResolvedValue({ id: "b1", campaignId: "c1", audio: null } as never);
   });
 
   afterEach(() => vi.useRealTimers());
@@ -77,7 +81,7 @@ describe("battle audio API", () => {
   });
 
   it("pause: умова за попереднім seq, позиція на момент паузи", async () => {
-    vi.mocked(prisma.battleScene.findFirst).mockResolvedValue({ audio: playing } as never);
+    vi.mocked(prisma.battleScene.findFirst).mockResolvedValue({ id: "b1", campaignId: "c1", audio: playing } as never);
 
     const res = await post({ action: "pause" });
 
@@ -105,8 +109,18 @@ describe("battle audio API", () => {
     expect((await post({ action: "seek" })).status).toBe(400);
   });
 
+  it("audio rate limit keeps retry metadata", async () => {
+    vi.mocked(checkRateLimit).mockResolvedValueOnce({ allowed: false, count: 21, limit: 20, retryAfterSeconds: 17 });
+
+    const response = await post({ action: "stop" });
+
+    expect(response.status).toBe(429);
+    expect(response.headers.get("Retry-After")).toBe("17");
+    expect(prisma.battleScene.updateMany).not.toHaveBeenCalled();
+  });
+
   it("GET для учасника: поточний стан без кешу", async () => {
-    vi.mocked(prisma.battleScene.findFirst).mockResolvedValue({ audio: playing } as never);
+    vi.mocked(prisma.battleScene.findFirst).mockResolvedValue({ id: "b1", campaignId: "c1", audio: playing } as never);
 
     const { GET } = await import("@/app/api/campaigns/[id]/battles/[battleId]/audio/route");
 

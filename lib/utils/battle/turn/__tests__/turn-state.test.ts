@@ -27,3 +27,16 @@ describe("resetTurnState", () => {
     expect("movementUsed" in next && next.movementUsed).toBeFalsy();
   });
 });
+
+describe("resetTurnState legendary", () => {
+  const withLegendary = () => {
+    const p = placed("m", { side: "enemy", at: { x: 0, y: 0 } });
+
+    return { ...p, battleData: { ...p.battleData, legendary: { actions: 3, actionsLeft: 1, resistLeft: 1 } } } as typeof p;
+  };
+
+  it("рефілить легендарні дії на початку ходу, але не при keepLegendary", () => {
+    expect(resetTurnState(withLegendary()).legendary?.actionsLeft).toBe(3);
+    expect(resetTurnState(withLegendary(), { keepLegendary: true }).legendary?.actionsLeft).toBe(1);
+  });
+});

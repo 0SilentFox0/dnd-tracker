@@ -9,14 +9,16 @@ import { findParticipant, isActive, mergeParticipants, withSelf } from "@/lib/ut
 import type { Rng, SummonRequest } from "@/lib/utils/abilities/engine/core/types";
 import { processAttack } from "@/lib/utils/battle/attack";
 import { activeEffectIds } from "@/lib/utils/battle/attack/consume-effects";
+import { critDoublesDice } from "@/lib/utils/battle/attack/crit-dice";
 import { nextChainTarget } from "@/lib/utils/battle/attack/process/chain";
 import { resolveRetaliation } from "@/lib/utils/battle/attack/retaliation";
 import { attackKindOf } from "@/lib/utils/battle/common/attack-kind";
 import type { CritPicker } from "@/lib/utils/battle/crit-choice/types";
-import { heroAttackDamageParts } from "@/lib/utils/battle/damage/hero-damage";
+import { damageDiceSlots, heroAttackDamageParts } from "@/lib/utils/battle/damage/hero-damage";
 import { lineOfFire } from "@/lib/utils/battle/grid";
 import type { CastableSpell } from "@/lib/utils/battle/types/spell-process";
 import { rollDie } from "@/lib/utils/common/dice";
+import type { Ruleset } from "@/lib/utils/rules";
 import type { ActiveEffect, BattleAction, BattleMapConfig, BattleParticipant } from "@/types/battle";
 
 export type AttackPhaseInput = {
@@ -30,8 +32,10 @@ export type AttackPhaseInput = {
   userId: string;
   isDM: boolean;
   rng?: Rng;
+  serverRolls?: boolean;
   crit?: CritPicker;
   map?: BattleMapConfig | null;
+  rules?: Ruleset;
   hitSpells?: ReadonlyMap<string, CastableSpell>;
 };
 
@@ -82,11 +86,13 @@ export function runAttackPhase(input: AttackPhaseInput): AttackPhaseResult {
   const strikeAt = (target: BattleParticipant, i: number, opts: { serverRolled: boolean; multiplier?: number; cover: boolean }) => {
     const chosenAt = expanded ? chosenTargets.findIndex((t) => t.basicInfo.id === target.basicInfo.id) : i;
 
-    const strike = opts.serverRolled ? { value: rollDie(20, rng), serverRolled: true } : strikeD20(data, request, { index: i, chosenAt, expanded }, rng);
+    const strike = (input.serverRolls || opts.serverRolled) ? { value: rollDie(20, rng), serverRolled: true } : strikeD20(data, request, { index: i, chosenAt, expanded }, rng);
 
-    const strikeDice = dice.next();
+    const serverDamage = input.serverRolls ? damageDiceSlots(attacker, attack).map(sides => rollDie(sides, rng)) : null;
 
-    const second = opts.serverRolled ? undefined : (data.secondRolls?.[chosenAt] ?? data.advantageRoll ?? data.disadvantageRoll);
+    const strikeDice = serverDamage ? { rolls: serverDamage, serverRolled: serverDamage } : dice.next();
+
+    const second = (input.serverRolls || opts.serverRolled) ? undefined : (data.secondRolls?.[chosenAt] ?? data.advantageRoll ?? data.disadvantageRoll);
 
     const victim = live(target);
 
@@ -100,7 +106,9 @@ export function runAttackPhase(input: AttackPhaseInput): AttackPhaseResult {
       advantageRoll: second,
       disadvantageRoll: second,
       rollMode: data.rollMode,
+      inspiration: !!data.useInspiration && i === 0,
       actionSpent: i > 0,
+      offHand: data.offHand,
       damageRolls: strikeDice.rolls,
       allParticipants: currentInitiativeOrder,
       currentRound: battle.currentRound,
@@ -108,6 +116,7 @@ export function runAttackPhase(input: AttackPhaseInput): AttackPhaseResult {
       damageMultiplier: opts.multiplier,
       obstacle,
       map: input.map,
+      rules: input.rules,
       hitSpells: input.hitSpells,
       rng,
       crit: input.crit,
@@ -115,7 +124,7 @@ export function runAttackPhase(input: AttackPhaseInput): AttackPhaseResult {
       serverRolled: { d20: strike.serverRolled, ...(strikeDice.serverRolled && { damageFrom: strikeDice.rolls.length - strikeDice.serverRolled.length }) },
     });
 
-    if (attackResult.success) dice.hit();
+    if (attackResult.success) dice.hit(critDoublesDice(input.rules, !!attackResult.attackRoll?.isCritical));
 
     currentInitiativeOrder = mergeParticipants(currentInitiativeOrder, attackResult.allParticipantsUpdated ?? []);
     currentAttacker = attackResult.attackerUpdated;
@@ -143,6 +152,7 @@ export function runAttackPhase(input: AttackPhaseInput): AttackPhaseResult {
         rng,
         crit: input.crit,
         map: input.map,
+        rules: input.rules,
       });
 
       if (retaliation) {

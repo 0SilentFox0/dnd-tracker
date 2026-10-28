@@ -12,3 +12,5 @@ export function groupBy<T, K>(items: readonly T[], keyFn: (item: T) => K): Map<K
 
   return groups;
 }
+
+export const toggleItem = <T>(list: readonly T[] | undefined, item: T): T[] => ((list ?? []).includes(item) ? (list ?? []).filter((x) => x !== item) : [...(list ?? []), item]);

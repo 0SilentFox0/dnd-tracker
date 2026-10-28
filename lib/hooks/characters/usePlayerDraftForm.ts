@@ -10,14 +10,21 @@ import { createDraft, generateBackstory, generateDraftAvatar, getBackstoryAvaila
 import { ABILITY_KEYS, type AbilityKey } from "@/lib/constants/abilities";
 import { ALIGNMENTS } from "@/lib/constants/alignment";
 import { HERO_ARCHETYPE_KEYS, HERO_ARCHETYPE_OPTIONS } from "@/lib/constants/hero-archetypes";
+import { useClassMode } from "@/lib/hooks/classes";
 import { useOptionalNotify } from "@/lib/hooks/common";
 import { useRaces } from "@/lib/hooks/races";
+import { draftChoicesState, stateDraftChoices } from "@/lib/utils/characters/choices/picks";
+import { prunePicks } from "@/lib/utils/characters/choices/prune";
+import type { ChoiceRefs } from "@/lib/utils/characters/choices/walk";
+import { classModeOf } from "@/lib/utils/characters/classes";
 import {
   type AbilityMethod,
   type AbilityScores,
   ARCHETYPE_CLASS,
   ARCHETYPE_PRIMARY,
+  assignByPriority,
   assignStandardArray,
+  classPrimaryAbilities,
   createRng,
   generateBackstory as generateLocalBackstory,
   generateCharacter,
@@ -28,6 +35,7 @@ import {
   validateAbilityScores,
 } from "@/lib/utils/characters/generate";
 import type { DraftInput } from "@/types/characters";
+import type { ChoicesState } from "@/types/choices";
 
 export type RollKey = "race" | "avatar" | "archetype" | "class" | "alignment" | "name" | "background" | AbilityKey;
 
@@ -55,6 +63,10 @@ export function usePlayerDraftForm({ campaignId, characterId, initial }: PlayerD
   const queryClient = useQueryClient();
 
   const { data: raceList } = useRaces(campaignId);
+
+  const classMode = useClassMode(campaignId);
+
+  const classBased = classModeOf(classMode.enabled, classMode.classes.length);
 
   const raceNames = useMemo(() => (raceList ?? []).map((r) => r.name), [raceList]);
 
@@ -97,7 +109,7 @@ export function usePlayerDraftForm({ campaignId, characterId, initial }: PlayerD
   const all = useCallback(() => {
     const seed = seedNow();
 
-    const g = generateCharacter({ races: raceNames, seed });
+    const g = generateCharacter({ races: raceNames, seed, classes: classBased ? classMode.classes : undefined });
 
     const pool = portraitPool(g.race);
 
@@ -120,6 +132,7 @@ export function usePlayerDraftForm({ campaignId, characterId, initial }: PlayerD
       race: g.race,
       archetype: g.archetype,
       class: g.class,
+      classId: g.classId,
       alignment: g.alignment,
       method: g.method,
       ...g.scores,
@@ -132,14 +145,14 @@ export function usePlayerDraftForm({ campaignId, characterId, initial }: PlayerD
     start([
       raceStep(g.race),
       ...(portrait ? [avatarStep(portrait, pool)] : []),
-      { key: "archetype", pool: () => ARCHETYPE_LABEL[pick(Math.random, HERO_ARCHETYPE_KEYS)], final: ARCHETYPE_LABEL[g.archetype] },
-      { key: "class", pool: () => ARCHETYPE_CLASS[pick(Math.random, HERO_ARCHETYPE_KEYS)], final: g.class },
+      ...(classBased ? [] : [{ key: "archetype" as const, pool: () => ARCHETYPE_LABEL[pick(Math.random, HERO_ARCHETYPE_KEYS)], final: ARCHETYPE_LABEL[g.archetype] }]),
+      { key: "class", pool: () => (classBased ? pick(Math.random, classMode.classes).name : ARCHETYPE_CLASS[pick(Math.random, HERO_ARCHETYPE_KEYS)]), final: g.class },
       { key: "alignment", pool: () => pick(Math.random, ALIGNMENTS), final: g.alignment },
       nameStep(g.name, g.race),
       ...scoreSteps(g.scores),
       backgroundStep(g.background),
     ]);
-  }, [raceNames, raceStep, start, portraitPool, queryClient, campaignId]);
+  }, [raceNames, raceStep, start, portraitPool, queryClient, campaignId, classBased, classMode.classes]);
 
   const name = useCallback(() => {
     const next = generateName(values.race, Math.random);
@@ -150,12 +163,26 @@ export function usePlayerDraftForm({ campaignId, characterId, initial }: PlayerD
   }, [start, values.race]);
 
   const scores = useCallback(() => {
-    const next = assignStandardArray(values.archetype, Math.random);
+    const cls = classBased ? classMode.classes.find((c) => c.id === values.classId) : undefined;
 
-    setValues((prev) => ({ ...prev, method: "standard", ...next, primaryAbility: ARCHETYPE_PRIMARY[prev.archetype][0] }));
+    const priority = cls ? classPrimaryAbilities(cls) : ARCHETYPE_PRIMARY[values.archetype];
+
+    const next = cls ? assignByPriority(priority, Math.random) : assignStandardArray(values.archetype, Math.random);
+
+    setValues((prev) => ({ ...prev, method: "standard", ...next, primaryAbility: priority[0] ?? ARCHETYPE_PRIMARY[prev.archetype][0] }));
 
     start(scoreSteps(next));
-  }, [start, values.archetype]);
+  }, [start, values.archetype, values.classId, classBased, classMode.classes]);
+
+  const setClass = useCallback(
+    (classId: string) => setValues((prev) => ({
+        ...prev,
+        classId,
+        class: classMode.classes.find((c) => c.id === classId)?.name ?? prev.class,
+        ...(prev.choices && { choices: { ...prev.choices, classChoices: undefined } }),
+      })),
+    [classMode.classes],
+  );
 
   const backstory = useCallback(() => {
     const next = generateLocalBackstory({ name: values.name || "Герой", raceName: values.race, archetype: values.archetype }, Math.random);
@@ -196,8 +223,10 @@ export function usePlayerDraftForm({ campaignId, characterId, initial }: PlayerD
   });
 
   const submitMutation = useMutation({
-    mutationFn: () => {
-      const body: DraftInput = { ...values, alignment: values.alignment || undefined, background: values.background || undefined, avatar: values.avatar };
+    mutationFn: (refs?: ChoiceRefs) => {
+      const choices = values.choices && refs ? stateDraftChoices(prunePicks(draftChoicesState(values.choices, classBased ? values.classId : undefined), refs).state) : values.choices;
+
+      const body: DraftInput = { ...values, ...(choices && { choices }), alignment: values.alignment || undefined, background: values.background || undefined, avatar: values.avatar };
 
       return characterId ? updateDraft(campaignId, characterId, body) : createDraft(campaignId, body);
     },
@@ -209,7 +238,7 @@ export function usePlayerDraftForm({ campaignId, characterId, initial }: PlayerD
 
   const [validationError, setValidationError] = useState<string | null>(null);
 
-  const run = () => {
+  const run = (refs?: ChoiceRefs) => {
     if (!values.race) {
       setValidationError("Оберіть расу");
 
@@ -217,18 +246,18 @@ export function usePlayerDraftForm({ campaignId, characterId, initial }: PlayerD
     }
 
     setValidationError(null);
-    submitMutation.mutate();
+    submitMutation.mutate(refs);
   };
 
   const autoGenerated = useRef(false);
 
   useEffect(() => {
-    if (initial !== "generate" || autoGenerated.current || raceList === undefined || portraitPools.isPending) return;
+    if (initial !== "generate" || autoGenerated.current || raceList === undefined || portraitPools.isPending || classMode.pending) return;
 
     autoGenerated.current = true;
     // eslint-disable-next-line react-hooks/set-state-in-effect -- one-shot generation once the races have loaded
     all();
-  }, [initial, raceList, portraitPools.isPending, all]);
+  }, [initial, raceList, portraitPools.isPending, classMode.pending, all]);
 
   const scoreStatus = useMemo(() => {
     const scoreValues = scoresOf(values);
@@ -237,7 +266,12 @@ export function usePlayerDraftForm({ campaignId, characterId, initial }: PlayerD
   }, [values]);
 
   return {
-    form: { values, set, setScore, method: values.method, setMethod },
+    form: { values, set, setScore, classes: classBased ? { list: classMode.classes, set: setClass } : null, method: values.method, setMethod },
+    choices: {
+      data: draftChoicesState(values.choices, classBased ? values.classId : undefined),
+      set: (next: ChoicesState) => setValues((prev) => ({ ...prev, choices: stateDraftChoices(next) })),
+      enabled: classBased,
+    },
     generate: { all, name, scores, backstory, portrait, canPortrait: canReroll },
     ai: {
       available: availability.data?.available === true,

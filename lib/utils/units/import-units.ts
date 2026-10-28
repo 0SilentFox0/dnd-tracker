@@ -2,6 +2,8 @@ import type { Prisma, PrismaClient } from "@prisma/client";
 
 import type { ImportUnitRow } from "@/lib/schemas/units";
 import { abilitiesJson } from "@/lib/utils/abilities/read";
+import { nameKey } from "@/lib/utils/content/import/mapping";
+import { resolveUnitProficiency } from "@/lib/utils/units/monster";
 import { specialAbilitiesToAbilities } from "@/lib/utils/units/special-abilities";
 import type { UnitImportResult } from "@/types/import";
 
@@ -9,8 +11,6 @@ export interface ImportDb {
   race: Pick<PrismaClient["race"], "findMany">;
   unit: Pick<PrismaClient["unit"], "findMany" | "createMany">;
 }
-
-const nameKey = (name: string) => name.trim().toLocaleLowerCase("uk");
 
 export function resolveImportRaces(names: Array<string | undefined>, races: Array<{ id: string; name: string }>) {
   const byName = new Map<string, string>();
@@ -48,11 +48,17 @@ export function toUnitCreateData(campaignId: string, unit: ImportUnitRow, raceId
     speed: unit.speed,
     gridSize: unit.gridSize,
     maxHp: unit.maxHp,
-    proficiencyBonus: unit.proficiencyBonus,
+    proficiencyBonus: resolveUnitProficiency(unit),
     attacks: unit.attacks as Prisma.InputJsonValue,
     abilities: abilitiesJson(specialAbilitiesToAbilities(unit.specialAbilities)),
     knownSpells: unit.knownSpells,
     avatar: unit.avatar ?? null,
+    cr: unit.cr ?? null,
+    xp: unit.xp ?? null,
+    multiattack: unit.multiattack,
+    legendaryActions: unit.legendaryActions,
+    legendaryResistances: unit.legendaryResistances,
+    saveProficiencies: unit.saveProficiencies as Prisma.InputJsonValue,
   };
 }
 

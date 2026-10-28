@@ -21,13 +21,15 @@ vi.mock("@/lib/supabase/image-storage", () => ({
   resolveImageForPersistence: vi.fn(async () => ({ ok: true, value: "https://p.supabase.co/storage/v1/object/public/scene-slides/c1/mirrored.png" })),
 }));
 vi.mock("@/lib/supabase/admin", () => ({ createAdminClient: vi.fn(() => ({})) }));
-vi.mock("@/lib/db", () => ({
-  prisma: {
+vi.mock("@/lib/db", async () => {
+  const { contentDatabaseDouble } = await import("@/lib/server/content/__tests__/database-double");
+
+  return { prisma: contentDatabaseDouble({
     slideDeck: { findMany: vi.fn(async () => []), findUnique: vi.fn(), findFirst: vi.fn(), aggregate: vi.fn(async () => ({ _count: 0, _max: { sortOrder: null } })), create: vi.fn(), update: vi.fn(), delete: vi.fn() },
     scenarioPage: { findFirst: vi.fn() },
     campaignShow: { findUnique: vi.fn(async () => null), updateMany: vi.fn(async () => ({ count: 1 })), createMany: vi.fn(async () => ({ count: 1 })) },
-  },
-}));
+  }) };
+});
 
 const dm = { userId: "dm", isDM: true, campaign: { id: "c1", maxLevel: 20, members: [] } } as never;
 
@@ -246,6 +248,27 @@ describe("decks API", () => {
     const res = await POST(new Request("http://x", { method: "POST", body: JSON.stringify({ size: 10, contentType: "image/webp" }) }), p);
 
     expect(await res.json()).toMatchObject({ path: "c1/x.webp", publicUrl: url("x") });
+  });
+
+  it("native scene bindings share the Campaign write guard", async () => {
+    vi.mocked(prisma.slideDeck.findUnique).mockResolvedValue(deckRowWith({}) as never);
+
+    const { currentContentWrite } = await import("@/lib/server/content/write-context");
+
+    let guarded = false;
+
+    vi.mocked(prisma.slideDeck.update).mockImplementation((async () => { guarded = currentContentWrite()?.campaignId === "c1";
+
+ return deckRowWith({}); }) as never);
+    expect((await patch("d1", { scenarioPageId: null })).status).toBe(200);
+    expect(guarded).toBe(true);
+  });
+
+  it("binding never restores an older updatedAt after waiting for the shared lock", async () => {
+    vi.mocked(prisma.slideDeck.findUnique).mockReset().mockResolvedValueOnce(deckRowWith({}) as never).mockResolvedValueOnce(deckRowWith({ updatedAt: new Date(5) }) as never);
+    vi.mocked(prisma.slideDeck.update).mockResolvedValue(deckRowWith({ updatedAt: new Date(5) }) as never);
+    expect((await patch("d1", { scenarioPageId: null })).status).toBe(200);
+    expect(vi.mocked(prisma.slideDeck.update).mock.calls[0][0]).toMatchObject({ data: { updatedAt: new Date(5) } });
   });
 
   it("PATCH сцени: своя сцена — зберігає, updatedAt не змінюється", async () => {

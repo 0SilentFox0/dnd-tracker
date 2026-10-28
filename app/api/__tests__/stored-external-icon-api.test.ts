@@ -9,9 +9,11 @@ vi.mock("@/lib/utils/api/api-auth", () => ({
   requireCampaignAccess: vi.fn(async () => ({ userId: "u1" })),
 }));
 
-vi.mock("@/lib/db", () => ({
-  prisma: { artifact: { findUnique: vi.fn(), update: vi.fn() } },
-}));
+vi.mock("@/lib/db", async () => {
+  const { contentDatabaseDouble } = await import("@/lib/server/content/__tests__/database-double");
+
+  return { prisma: contentDatabaseDouble({ artifact: { findFirst: vi.fn(), update: vi.fn() } }) };
+});
 
 vi.mock("@/lib/supabase/admin", () => ({
   createAdminClient: () => ({
@@ -43,7 +45,7 @@ describe("PATCH with an already stored external icon", () => {
     vi.clearAllMocks();
     vi.stubGlobal("fetch", fetchMock);
     lookupMock.mockResolvedValue([{ address: "93.184.216.34", family: 4 }]);
-    vi.mocked(prisma.artifact.findUnique).mockResolvedValue({ id: "a1", campaignId: "c1", icon: SVG_URL } as never);
+    vi.mocked(prisma.artifact.findFirst).mockResolvedValue({ id: "a1", campaignId: "c1", icon: SVG_URL } as never);
     vi.mocked(prisma.artifact.update).mockResolvedValue({ id: "a1" } as never);
   });
 

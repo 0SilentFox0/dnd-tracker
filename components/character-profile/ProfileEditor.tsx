@@ -19,13 +19,16 @@ import { CharacterArtifactsSection } from "@/components/characters/artifacts/Cha
 import { CharacterSkillsSection } from "@/components/characters/skills/CharacterSkillsSection";
 import { CharacterAbilityScores } from "@/components/characters/stats/CharacterAbilityScores";
 import { CharacterCombatParams } from "@/components/characters/stats/CharacterCombatParams";
+import { CharacterChoicesPanel } from "@/components/choices/CharacterChoicesPanel";
 import { ActionBar } from "@/components/common/ActionBar";
+import { FormAlert } from "@/components/common/states";
 import { LoadingState } from "@/components/common/states";
 import { HudSection } from "@/components/hud/form";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { SelectField } from "@/components/ui/select-field";
 import { SPELL_ABILITY_OPTIONS, toSpellcastingAbility } from "@/lib/constants/abilities";
+import { useCampaignRules } from "@/lib/hooks/campaigns";
 import { useCharacterRoster, useDmCharacterEditor } from "@/lib/hooks/characters";
 
 export function ProfileEditor({ onDone }: { onDone: () => void }) {
@@ -37,6 +40,8 @@ export function ProfileEditor({ onDone }: { onDone: () => void }) {
 
   const [tab, setTab] = useState<ProfileTabId>("basic");
 
+  const classesEnabled = !!useCampaignRules(campaignId).data?.classes.enabled;
+
   const roster = useCharacterRoster(campaignId);
 
   const holders = useMemo(() => {
@@ -45,7 +50,7 @@ export function ProfileEditor({ onDone }: { onDone: () => void }) {
     for (const hero of roster.data ?? []) {
       if (hero.id === characterId) continue;
 
-      for (const item of Object.values(hero.equipped)) map[item.id] = hero.name;
+      for (const item of Object.values(hero.equipped)) if (!item.gear) map[item.id] = hero.name;
     }
 
     return map;
@@ -57,15 +62,30 @@ export function ProfileEditor({ onDone }: { onDone: () => void }) {
 
   const { formData, abilityScores, combatStats, skills, abilities, spellcasting } = form;
 
+  const heroClasses = (formData.basicInfo.classes ?? []).filter((e) => e.classId);
+
+  const heroClassMode = classesEnabled && heroClasses.length > 0;
+
+  const showChoices = heroClassMode || !!sheet.choices;
+
   return (
     <form id="profile-edit" className="hud-form" onSubmit={form.actions.handleSubmit}>
       <ProfileHero
-        actions={<LevelUpAction level={formData.basicInfo.level} maxLevel={sheet.maxLevel} onLevelUp={() => void editor.dmActions.levelUp()} />}
+        actions={
+          <LevelUpAction
+            level={formData.basicInfo.level}
+            maxLevel={sheet.maxLevel}
+            onLevelUp={() => void editor.dmActions.levelUp()}
+            classLevelUp={
+              classesEnabled && (formData.basicInfo.classes ?? []).length > 0
+                ? { character: { campaignId, id: characterId, entries: formData.basicInfo.classes ?? [], hero: { race: formData.basicInfo.race, level: formData.basicInfo.level, scores: abilityScores.data, skills: skills.data.skills } }, onLeveled: editor.dmActions.applyClassLevelUp }
+                : undefined
+            }
+          />
+        }
       />
       {form.status.error && (
-        <p role="alert" className="mx-4 rounded-md border border-hud-danger/50 bg-hud-danger/10 px-3 py-2 text-sm text-[#f0b4a6]">
-          {form.status.error}
-        </p>
+        <FormAlert className="mx-4">{form.status.error}</FormAlert>
       )}
       <ProfileTabs
         value={tab}
@@ -78,7 +98,7 @@ export function ProfileEditor({ onDone }: { onDone: () => void }) {
             content: (
               <div className="space-y-6">
                 <CharacterAbilityScores abilityScores={abilityScores} withPrimary />
-                <CharacterCombatParams combatStats={combatStats} />
+                <CharacterCombatParams campaignId={campaignId} combatStats={combatStats} classArmor={classesEnabled && (formData.basicInfo.classes ?? []).length > 0 ? sheet.armorClass : undefined} />
                 <CharacterSkillsSection skills={skills} />
               </div>
             ),
@@ -93,6 +113,23 @@ export function ProfileEditor({ onDone }: { onDone: () => void }) {
               </div>
             ),
           },
+          ...(showChoices
+            ? [
+                {
+                  id: "choices" as const,
+                  label: "Вибори",
+                  content: (
+                    <CharacterChoicesPanel
+                      campaignId={campaignId}
+                      characterId={characterId}
+                      initial={{ backgroundId: formData.choices?.backgroundId, backgroundChoices: formData.choices?.backgroundChoices, backgroundFeatPicks: formData.choices?.backgroundFeatPicks, raceChoices: formData.choices?.raceChoices ?? {}, feats: formData.choices?.feats ?? [], classes: heroClasses }}
+                      hero={{ race: formData.basicInfo.race, level: formData.basicInfo.level, scores: abilityScores.data, skills: skills.data.skills, classMode: heroClassMode }}
+                      onSaved={editor.dmActions.applyClassLevelUp}
+                    />
+                  ),
+                },
+              ]
+            : []),
           {
             id: "magic",
             label: "Магія",
@@ -123,7 +160,7 @@ export function ProfileEditor({ onDone }: { onDone: () => void }) {
                   campaignId={campaignId}
                   characterId={characterId}
                   equipped={equipped}
-                  artifacts={artifacts.map((a) => ({ id: a.id, name: a.name, slot: a.slot ?? "item", icon: a.icon ?? null }))}
+                  artifacts={artifacts.map((a) => ({ id: a.id, name: a.name, slot: a.slot ?? "item", icon: a.icon ?? null, modifiers: a.modifiers }))}
                   holders={holders}
                   onEquippedChange={setEquipped}
                 />

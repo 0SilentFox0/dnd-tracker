@@ -1,3 +1,4 @@
+import { spellPoolKey } from "@/lib/utils/items/pools";
 import type { BattleParticipant, BattleParticipantSpellcasting } from "@/types/battle";
 
 function mergeSlots(live: BattleParticipantSpellcasting["spellSlots"], fresh: BattleParticipantSpellcasting["spellSlots"]) {
@@ -12,7 +13,9 @@ function mergeSlots(live: BattleParticipantSpellcasting["spellSlots"], fresh: Ba
 
     const spent = old ? old.max - old.current : 0;
 
-    out[key] = { max, current: Math.min(Math.max(max - spent, 0), max) };
+    const level = fresh?.[key]?.level;
+
+    out[key] = { max, current: Math.min(Math.max(max - spent, 0), max), ...(level !== undefined && { level }) };
   }
 
   return out;
@@ -20,17 +23,32 @@ function mergeSlots(live: BattleParticipantSpellcasting["spellSlots"], fresh: Ba
 
 /** Takes only what the library edits (abilities, attacks, spells, slot maxima, grid size, speed); HP, morale, effects, usage and flags stay live. */
 export function refreshFromSource(live: BattleParticipant, fresh: BattleParticipant): BattleParticipant {
+  const pools = fresh.battleData.pools && Object.fromEntries(Object.entries(fresh.battleData.pools).map(([key, pool]) => {
+    const liveLabel = live.battleData.pools?.[key]?.label;
+
+    // Збирач юніта має лише ID заклинань; назву розв'язує успішний каст.
+    return [key, key === spellPoolKey(pool.label) && liveLabel ? { ...pool, label: liveLabel } : pool];
+  }));
+
   return {
     ...live,
+    abilities: { ...live.abilities, creatureType: fresh.abilities.creatureType },
     combatStats: { ...live.combatStats, gridSize: fresh.combatStats.gridSize, speed: fresh.combatStats.speed },
     battleData: {
       ...live.battleData,
       resolvedAbilities: fresh.battleData.resolvedAbilities,
       attacks: fresh.battleData.attacks,
+      pools,
+      senses: fresh.battleData.senses,
+      movement: fresh.battleData.movement,
+      languages: fresh.battleData.languages,
+      telepathy: fresh.battleData.telepathy,
     },
     spellcasting: {
       ...live.spellcasting,
       knownSpells: fresh.spellcasting.knownSpells,
+      grants: fresh.spellcasting.grants,
+      slotSpells: fresh.spellcasting.slotSpells,
       spellSaveDC: fresh.spellcasting.spellSaveDC,
       spellAttackBonus: fresh.spellcasting.spellAttackBonus,
       spellcastingAbility: fresh.spellcasting.spellcastingAbility,

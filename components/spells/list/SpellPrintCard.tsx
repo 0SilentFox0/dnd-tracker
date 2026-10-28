@@ -1,6 +1,6 @@
 import { Sparkles } from "lucide-react";
 
-import { OptimizedImage } from "@/components/common/OptimizedImage";
+import { SpellIcon } from "@/components/spells/SpellIcon";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { spellLevelName, spellLevelRoman } from "@/lib/constants/spells";
@@ -10,31 +10,14 @@ import { getSpellGroupIcon } from "@/lib/utils/spells/spell-icons";
 import type { Spell } from "@/types/spells";
 
 export function SpellPrintCard({ spell }: { spell: Spell }) {
-  const SpellGroupIcon = getSpellGroupIcon(spell.spellGroup?.name || UNGROUPED_LABELS.spellGroup);
+  const SpellGroupIcon = getSpellGroupIcon(spell.spellGroup);
 
   return (
     <Card className="hover:shadow-md transition-shadow h-full flex flex-col">
       <CardHeader className="pb-3">
         <div className="flex items-start gap-3 mb-2">
           <div className="w-12 h-12 sm:w-16 sm:h-16 rounded-lg overflow-hidden flex items-center justify-center shrink-0 relative bg-muted">
-            {spell.icon ? (
-              <OptimizedImage
-                src={spell.icon}
-                alt={spell.name}
-                width={64}
-                height={64}
-                className="w-full h-full object-cover"
-                fallback={
-                  <div className="absolute inset-0 w-full h-full flex items-center justify-center">
-                    <Sparkles className="h-6 w-6 sm:h-8 sm:w-8 text-muted-foreground" />
-                  </div>
-                }
-              />
-            ) : (
-              <div className="absolute inset-0 w-full h-full flex items-center justify-center">
-                <Sparkles className="h-6 w-6 sm:h-8 sm:w-8 text-muted-foreground" />
-              </div>
-            )}
+            <SpellIcon spell={spell} size={64} className="w-full h-full object-cover" iconClassName="h-6 w-6 sm:h-8 sm:w-8" />
           </div>
           <div className="flex-1 min-w-0">
             <div className="flex items-start justify-between gap-2 min-w-0">

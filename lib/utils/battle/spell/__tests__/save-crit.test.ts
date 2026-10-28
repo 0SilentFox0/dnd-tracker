@@ -123,6 +123,24 @@ describe("криті на рятівних кидках заклинань", () 
     expect(r.battleAction.actionDetails.savingThrows?.[0].result).toBe("fail");
   });
 
+  it("нат. 1 проти Легендарного опору: опір спрацьовує, крит провалу не застосовується", () => {
+    const crit = vi.fn(picking(SAVE_FAIL_EFFECTS, "prone"));
+
+    const spell = spellOf([fire]);
+
+    const c = caster();
+
+    const boss = withSaveMod(enemy("e1"));
+
+    const target = { ...boss, battleData: { ...boss.battleData, legendary: { actions: 0, actionsLeft: 0, resistLeft: 1 } } };
+
+    const r = castSpell({ caster: c, spell, targetIds: ["e1"], allParticipants: [c, target], currentRound: 1, battleId: "b", diceRolls: [3, 3], saveRolls: [{ participantId: "e1", roll: 1 }], rng: seq(0.5), crit });
+
+    expect(get(r as ReturnType<typeof cast>, "e1").battleData.legendary?.resistLeft).toBe(0);
+    expect(r.battleAction.actionDetails.savingThrows?.[0].result).toBe("success");
+    expect(get(r as ReturnType<typeof cast>, "e1").battleData.activeEffects.some((e) => e.id.includes("prone"))).toBe(false);
+  });
+
   it("кидок 10 не викликає picker", () => {
     const crit = vi.fn(picking(SAVE_FAIL_EFFECTS, "prone"));
 

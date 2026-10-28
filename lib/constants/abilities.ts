@@ -1,6 +1,10 @@
 export const ABILITY_KEYS = ["strength", "dexterity", "constitution", "intelligence", "wisdom", "charisma"] as const;
 
+export const ABILITY_SCORE_CAP = 20;
+
 export type AbilityKey = (typeof ABILITY_KEYS)[number];
+
+export const isAbilityKey = (v: unknown): v is AbilityKey => (ABILITY_KEYS as readonly unknown[]).includes(v);
 
 export const SPELLCASTING_ABILITIES = ["intelligence", "wisdom", "charisma"] as const;
 
@@ -16,6 +20,8 @@ export const CORE_ABILITY_SCORES = [
 ] as const;
 
 export const ABILITY_LABELS = Object.fromEntries(CORE_ABILITY_SCORES.map((a) => [a.key, a.label])) as Record<AbilityKey, string>;
+
+export const ABILITY_OPTIONS = ABILITY_KEYS.map((key) => ({ value: key, label: ABILITY_LABELS[key] }));
 
 export const SPELL_ABILITY_OPTIONS = SPELLCASTING_ABILITIES.map((key) => ({ value: key, label: ABILITY_LABELS[key] }));
 

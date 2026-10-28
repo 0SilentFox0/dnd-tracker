@@ -6,7 +6,7 @@
 
 - **Ключі**: `ai_credentials` (на користувача й провайдера; `anthropic`/`openai`/`google`). `lib/ai/crypto.ts` (`server-only`) — AES-256-GCM, майстер-ключ `AI_KEYS_SECRET` (32 байти base64), `keyVersion` = 1. `lib/ai/credentials.ts` шифрує/розшифровує, `verifyProviderKey` (`lib/ai/providers.ts`) перевіряє ключ безкоштовним запитом списку моделей. Клієнту повертається лише маска. Без `AI_KEYS_SECRET` AI-маршрути чату, пропозицій і генерації зображень → 503 (`aiGuard`: спершу конфігурація, потім `requireDM`). Маршрути налаштувань (`GET`/`PUT …/ai/settings`) і токенів — лише `requireDM`, без 503: інструкції можна редагувати й без AI.
 - **Провайдери**: `createModel(provider, apiKey, modelId)` — AI SDK 7 (`@ai-sdk/{anthropic,openai,google}`).
-- **Реєстр інструментів**: `lib/ai/tools/*.ts` (один файл — інструмент, `AiToolDef` з `define.ts`) + рядок у `AI_TOOLS` (`tools/index.ts`). Два адаптери над одним реєстром: `toAiSdkTools` (чат) і `registerMcpTools` (MCP). Результат кожного інструмента обрізається до `AI_LIMITS.toolResultChars` у `runTool`.
+- **Реєстр інструментів**: `lib/ai/tools/*.ts` (один файл — інструмент, `AiToolDef` з `define.ts`) + рядок у `AI_TOOLS` (`tools/index.ts`). Кожен інструмент має `scopes`; `toolsFor(scopes)` відбирає доступні. Два адаптери над одним реєстром: `toAiSdkTools` (чат, session DM; доменні grants без token actor) і `registerMcpTools` (MCP, права токена). Інструменти контенту (`content_*`, правила, дерева скілів) — `lib/ai/tools/content.ts`, див. [content-api.md](content-api.md). Tool outputs мають v2 JSON envelope і bounded projections у межах `AI_LIMITS.toolResultChars` (контракт нижче).
 - **Чат-пайплайн** (`lib/ai/chat/run-chat.ts`): `POST …/ai/threads/[threadId]/chat` → `loadThread` → ключ користувача → збереження повідомлення користувача → `buildInstructions` + історія (`compactHistory` стискає старі результати інструментів) → `streamText` (`stopWhen: isStepCount(AI_LIMITS.maxSteps)`) → UI-стрім; відповідь із `usage` дописується в `ai_messages` по завершенню. Помилка провайдера → український текст (`lib/ai/errors.ts`): 401 → `AI_KEY_INVALID`, 403/404 → `AI_MODEL_FORBIDDEN` (немає доступу до моделі з цим ключем). `maxDuration = 300`, у `vercel.json` для цього маршруту `supportsCancellation: true` — інакше обрив клієнта не доходить до `abortSignal` і стрім платно доїдає.
 - **Збирач контексту** (`lib/ai/context/prompt.ts`): блок ролі → **постійні інструкції кампанії** (`campaigns.aiInstructions`, ≤ `AI_LIMITS.instructionsChars`, редагуються на `/dm/ai`, не обрізаються) → правила режиму (`scenario`/`live`) → партія → показ (live) → фокус ДМ → текст сторінки в markdown. Лише сторінка обрізається під `contextChars`. Нотатки героїв потрапляють лише в AI-контекст ДМ. Ті самі інструкції віддає інструмент `get_campaign_brief`, тож зовнішній MCP-клієнт їх теж бачить.
 - **Пропозиції** (`lib/ai/proposals.ts`, `ai_proposals`): AI ніколи не пише у сценарій напряму — `propose_scenario_edit` створює рядок `pending` з операціями (`ScenarioAiOp`, `lib/utils/scenario/ai-ops.ts`). Кожна операція несе `before` (старий текст/заголовок/story+notes). `apply` у транзакції: перевіряє `before` через `applyAiOps` (розбіжність → `stale`, 409), валідує схему й розмір, **примусово знімає версію сторінки** (`snapshotIfDue(…, { force: true })`) перед правкою, пише з оптимістичним `version` (нова `version` у `appliedVersion`). `reject` — лише з `pending`/`stale`.
@@ -16,7 +16,7 @@
 - **Захист від втрати структури** (`lib/utils/scenario/block-inventory.ts`, `resolveAiOps`): `replaceRow` замінює все поле, тож інструмент порівнює кількість блоків за видами (callout/readAloud/say/table/token/mention; секрети — лише наявність) до і після й відхиляє правку, що їх зменшує, з помилкою для моделі; обійти можна лише `allowRemoval: true` (ДМ прямо просив видалити). Картка пропозиції показує те саме попередження `lostBlocks` і для `allowRemoval`.
 - **Редактор**: `useAiProposals({ beforeApply, onApplied })` на сторінці сценарію: `beforeApply` = `flush()` незбережених правок редактора (якщо flush не вдався — apply не йде) → `POST …/apply` → відповідь кладеться в кеш сторінки й редактор перемонтовується з новою `version`, тож наступне автозбереження не дає 409.
 - **Markdown-діалект** (`lib/utils/scenario/markdown.ts`): `**жирний**`, `_курсив_`, `||секрет ДМ||`, `:::read`/`:::say`/`:::callout`, `[@Ім'я](character:id)`, `{{token:red|green}}`; інструменти читають сторінку в ньому, id розділів/рядків видно моделі.
-- **MCP** (`app/api/mcp/route.ts`, `mcp-handler`): stateless, обробник на запит. `Authorization: Bearer dndt_…` → `verifyApiToken` (SHA-256 хеш у `api_tokens`, не відкликаний, власник усе ще ДМ кампанії) → ті самі інструменти з `{ campaignId, userId, threadId: null }`. Токени: `app/api/campaigns/[id]/api-tokens`, значення показується один раз при створенні.
+- **MCP** (`app/api/mcp/route.ts`, `mcp-handler`): stateless, обробник на запит. `Authorization: Bearer dndt_…` → `verifyApiToken` (SHA-256 хеш у `api_tokens`, не відкликаний, власник усе ще ДМ кампанії) → інструменти, дозволені правами токена (`toolsFor(scopes)`), з `{ campaignId, userId, threadId: null, scopes }`; токен без жодного доступного інструмента → 403. Токени: `app/api/campaigns/[id]/api-tokens`, значення показується один раз при створенні.
 - **Обробники**: кожен AI-маршрут — `guarded(action, guard, run)` (`lib/ai/guarded.ts`): guard і `run` в одному `try`, `NextResponse` від guard повертається як є, помилки → `handleApiError`; чат — `chatHandler` у `ai-handlers.ts` (передає `req.signal`).
 - **Клієнт**: `lib/api/ai.ts` → `lib/hooks/ai` (`aiKeys` у `keys.ts`) → `components/ai`; панель AI на сторінці сценарію має змінну ширину (`useAiPanelWidth`, ключ `ai-panel-width` у localStorage, CSS-змінна `--ai-panel-w` ділиться з `ScenarioBook`; перетягування, стрілки, скидання; значення обмежується `clampAiPanelWidth`); відповіді асистента рендеряться через `markdownToDoc` → `ScenarioRichText`; сторінка `/campaigns/[id]/dm/ai` (ключі, токени, постійні інструкції, налаштування MCP-клієнтів — Claude Desktop через `mcp-remote`, Cursor/інші за URL).
 
@@ -25,9 +25,13 @@
 - Ключ провайдера ніколи не залишає сервер: не у відповіді, не в логах, Pusher, тексті помилки; розшифровується лише в `loadApiKey` безпосередньо перед `createModel`.
 - `campaigns.aiInstructions` — лише для ДМ: у всіх читаннях кампанії для членів (`GET /api/campaigns`, `/api/campaigns/[id]`, `join`, `requireCampaign*`, `character.campaign`) стоїть `omit: { aiInstructions: true }`; читають його лише `lib/ai/settings.ts`, `buildInstructions` і `get_campaign_brief` через явний `select`. Нове читання `campaign` з відповіддю клієнту — з `omit`. (Глобальний `omit` у `lib/db.ts` ламає типізацію `BattleDb`.)
 - Зміни сценарію й нові слайди в наборах лише через `ai_proposals` + `apply`; жоден інструмент не пише у `scenario_pages`/`slide_decks` напряму.
-- Новий інструмент = файл у `lib/ai/tools` + рядок у `AI_TOOLS`; він автоматично доступний в обох каналах (чат і MCP). Окремо під канал не реєструвати.
+- Новий інструмент = файл у `lib/ai/tools` + рядок у `AI_TOOLS` з `scopes`; канали відбирають його за правами (`ai` → чат і MCP, `content:*` → лише MCP). Окремо під канал не реєструвати.
 - `/api/mcp` має `maxDuration = 300`; запит несе дедлайн `AI_LIMITS.requestDeadlineMs` (270 с) і `req.signal` у `ctx.abortSignal` — генерація зображення зупиняється до ліміту функції, завантаження — лише після успішної генерації; якщо пропозицію створити не вдалося, файл видаляється. За один запит чату/MCP — одна згенерована картинка (`ctx.usage`).
 - `/api/mcp` звільнений від CSRF-перевірки (`lib/supabase/middleware.ts`: браузерні MCP-клієнти шлють чужий `Origin`) і приймає лише Bearer із `api_tokens`; cookie-сесію не читає.
+- **Права токена** (`API_TOKEN_SCOPES`, `lib/constants/ai.ts`): `ai` (чат/MCP), `content:read`, `content:write`; `content:write` ⊃ `content:read` (`hasScope`). Наявні токени мають `["ai"]`. Права задаються при створенні й не змінюються. `/api/mcp` приймає будь-який дійсний токен і реєструє лише інструменти за його правами; чат усередині застосунку — лише `ai`.
+- **`resolveActor` з Bearer**: заголовок `Authorization: Bearer` → лише токен (401 без відкату до cookie; 403 — інша кампанія, немає права або `sessionOnly`); актор через токен = ДМ. Роути поза контентом Bearer не читають. CSRF-перевірка пропускає запити з `Authorization: Bearer`.
+- **OpenAPI** (2c): `GET /api/openapi.json` — публічний статичний документ OpenAPI 3.1 для всіх операцій контенту (`lib/server/content/openapi.ts` будує його з `CONTENT_RESOURCES` і `CONTENT_OPERATIONS`; тіла — ті самі Zod-схеми через `toJsonSchemas`, спільні підсхеми через `$ref`). Кожна операція має `x-scopes`; масове видалення (`sessionOnly`) у документ не входить. На `/dm/ai` — панель «REST API» з посиланням і прикладом `curl`.
+- **Шаблони**: `ai` на шаблоні не видається (400); сторінка `/dm/ai` на шаблоні — «API», лише токени з правами на контент.
 - Кожен маршрут — лише ДМ і в межах кампанії (`requireDM` через `guarded()`; кожен запит до БД фільтрується за `campaignId`, а треди — ще й за `userId`); маршрути ключів — `requireAuth` (ключ належить користувачеві).
 - `AI_KEYS_SECRET`/`_PREV` не логувати й не комітити.
 
@@ -42,3 +46,84 @@
 ## Підключення зовнішнього MCP-клієнта
 
 Сторінка `/campaigns/[id]/dm/ai`: створити токен, скопіювати готовий JSON для клієнта (URL `/api/mcp`, заголовок `Authorization: Bearer <токен>`).
+
+## Assistant transport v2 — stage6 T14
+
+Чат і MCP підключають `assistant_capabilities`, `assistant_schema`, `assistant_read`, `assistant_action`, `assistant_status`, `assistant_reject` до одного executable catalog (`lib/server/assistant/catalog.ts`, склад доменів у `action-definitions.ts`). Каталог охоплює content/source/templates, scenario, campaign, characters/progression, battles, show та protected UI/compendium handoffs. Це композиція чинних adapters, не новий business registry. HTTP session review використовує той самий default executor.
+
+Тільки transport передає `AssistantCaller`: session chat має справжній session actor, `channel: chat`, `tokenId: null`; MCP бере id з перевіреного запису API token, зберігає token actor і scopes. Модель не задає caller, grants, actor, channel або run identity. Вихідні DTO не включають caller чи службові preconditions. Scopes фільтрують discovery, а executor повторює поточні membership/token/scopes checks перед читанням, prepare та виконанням. Старі вузькі `ai` context reads також повторно перевіряють membership, відкликання та актуальне право `ai`; це право не відкриває нові доменні mutations.
+
+Кожна tool text-відповідь — валідний JSON envelope:
+
+```json
+{"version":2,"kind":"result","data":{"kind":"pending","intent":{"id":"…","status":"pending"},"reviewUrl":"…"}}
+```
+
+`kind: result` зовні означає успіх tool-виклику. Всередині dispatcher повертає `result` (доменний результат), `pending` (ще не виконана пропозиція) або `handoff` (`href/reason`, дія людини в застосунку). Не трактувати `pending/handoff` як успішну мутацію. Реальна помилка має `{version:2,kind:"error",error:{code,status,message,issues?}}`; MCP додатково встановлює `isError: true`. Unknown DB/provider errors не містять raw exception. Status повертає дозволений receipt навіть після очищення preview; ніякого повторного виконання чи повторної генерації в status немає.
+
+Для великих схем/даних використовуються bounded projections: `projection`, `path`, `items[{key,path,value}]`, `total`, `nextOffset`. Великий вкладений вузол має `expandable: true`; продовження читається через `assistant_schema`, `assistant_read` або `assistant_status` з повернутим `path` та `offset`. Рядки мають сторінки `text/total/nextOffset`. Native domain pagination передається всередині `input`; transport projection pagination — зовні. JSON не розрізається по символу. Pending завжди зберігає id/status/reviewUrl; повний preview доступний у session UI. Signed media URLs прибираються також на спільній межі outputs.
+
+Міграція legacy contracts:
+
+- `content_*`, `get_rules/update_rules`, `get_skill_tree/save_skill_tree`, `source_diff/source_apply` зберігають імена/входи, але йдуть через canonical dispatcher; записи замість негайного CRUD повертають review/auto результат. Клієнти мають читати v2 envelope та явний внутрішній `kind`. Для великого legacy read перейти на еквівалентний `assistant_read` з projection pagination.
+- `propose_scenario_edit` вимагає `scenario:write` та готує `scenario.propose-edit`. До підтвердження немає окремого застосовного legacy proposal. Підтвердження створює й застосовує один proposal через єдиний T6 writer у scoped transaction; save, snapshot та receipt атомарні. Старі pending proposals підхоплюються session queue через `scenario.legacy-proposal`, без другого writer.
+- `propose_scene_slide` вимагає `show:write`, але старий payload не доводить явний запит/consent і не має trusted run claim: alias fail closed з поясненням переходу до редактора. Canonical `show.generate` потребує `explicitRequest`, human confirmation та trusted `caller.runId`; поточні T14 transports не створюють runId, тому paid action відмовляє до intent/provider. Run identity/retry/recovery належать T15. Поле `runId` від моделі цього не змінює. Чинна генерація людиною у native UI збережена.
+
+Модельних `confirm/apply/set-auto` tools немає. Небезпечні дії та session-only execution лишаються за session UI. Token compendium reads повертають handoff, source-note текст читається лише через явний session UI selection. Нема raw compendium JSON, credentials чи signed upload URLs; player draft AI лишається окремим.
+
+Default durable effects маршрутизуються за збереженим payload, зі збереженням чинних after-commit callbacks доменів: content invalidate/track cleanup, battle messages/left-active, show `{campaignId,show}` через `publishShow`, show `{campaignId,urls}` через `runShowMediaCleanup`. Strict publication failures лишаються failed для reconciliation. External started/result і фінальна atomicity T12 не змінені; unknown paid external ніколи не повторюється для оплати.
+
+
+### Чат: стабільний запит і відновлення (stage6 T15)
+
+POST `/api/campaigns/:id/ai/threads/:threadId/chat` вимагає `{ requestId, text, focus? }`. Request id стабільний для однієї спроби; інший payload під тим самим id відхиляється409. Повтор повертає JSON `{ recovered:true, runs, messages, intents, receipts }` без нового model/tool call. Явний новий запит отримує новий id. GET того самого route читає recovery state; optional `?requestId=` повертає квитанції конкретного retained run незалежно від останньої сторінки історії. DELETE `?requestId=` запитує cancellation. Session DM та власник треду перевіряються повторно; відповіді private/no-store.
+
+Claim на чинному AssistantRun і user message атомарні. Tool request key походить із trusted runId+toolCallId, а не model payload. Model/tools мають один270s abort signal і maxRetries0; Stop не відкочує commit і recovery показує квитанцію. Claim утримується до270s+30s grace навіть після раннього завершення; через чинний T2 CHECK terminal outcome міститься в resultRefs до безпечного звільнення lease. Unknown/executing не дає звільнити claim або повторити зовнішню оплату. Terminal request mapping зберігається протягом90-day receipt window.
+
+Usage зберігається після завершених model steps і на finish. `inputTokens/outputTokens: null` означає невідоме значення, `partial:true` — неповний підсумок; це не нульова вартість. Thread totals включають crash/interrupted run без assistant message та не рахують його двічі після збереження відповіді. UI «Відновити стан» читає server state, не робить blind resend. Paid generation не отримує додаткових дозволів: explicitRequest+human confirmation і durable one-image/run лишаються обов’язковими.
+
+### Retention cleanup
+
+`GET /api/cron/assistant-cleanup` runs once daily at 03:00 UTC through the production Vercel Cron entry in `vercel.json`. It requires `Authorization: Bearer $CRON_SECRET` and fails closed when the secret is missing or does not match. The response reports expired intents, redacted terminal intent payloads/previews older than7days, and receipts deleted after90days when terminal effects are complete. A failed cleanup returns HTTP500 so the scheduled invocation is observable. `CRON_SECRET` is configured as a sensitive Vercel Production variable for project `dnd-tracker`; Vercel applies environment changes to new deployments only. The cron schedule is not active until this code and environment revision are deployed.
+
+User-facing setup, review workflow, MCP result meanings, errors, recovery, disclosure and retention are described in [Асистент кампанії](../guides/campaign-assistant.md). The reviewed route/action/test inventory and review limits are in the [stage 6 coverage ledger](../archive/superpowers/plans/2026-10-25-constructor-stage6-ai-coverage.md).
+
+### Precondition-хеш (B04/B05/B10)
+
+Guard-стан превʼю й виконання не читає повні рядки: `lib/server/assistant/digest.ts`. Таблиці з `updatedAt @updatedAt` (`UPDATED_AT_TABLES`: Campaign, Character, CharacterInventory, CharacterSkills, Race, GameClass, Feat, Background, MainSkill, ScenarioPage, SlideDeck, CampaignShow) хешуються як `stampDigest` = `{ id, updatedAt }` (ScenarioPage ще й `version`, SlideDeck ще й `scenarioPageId`). Таблиці без `updatedAt` (`FULL_ROW_TABLES`: units, spells, spell_groups, artifacts, artifact_sets, skills, skill_trees, campaign_tracks) хешуються повним рядком у Postgres (`fullRowDigest`: `md5(string_agg(md5(t::text) ORDER BY id))`, ~32 байти). `contentSnapshot` = `{ stamps, rowDigests, campaign }`; повні рядки читаються лише для цілі (сторінка сценарію, дека) і для видимого превʼю (`content-preview.ts`: рядки, що згадують цільові id, SQL-префільтр + точний фільтр `contentDependencies`).
+
+Правило: запис у таблицю з `updatedAt` без Prisma-бампу заборонений (raw `UPDATE`, явний `updatedAt` у `data`); `updated-at-audit.test.ts` сканує `lib/`, `app/`, `scripts/` і нові міграції. Єдиний виняток: `bindDeckRecord` свідомо зберігає `updatedAt` (CAS редактора деки) і змінює лише `scenarioPageId`, тому він входить у stamp деки. Обмеження: два записи одного рядка в межах 1 мс дають однаковий `updatedAt`; записи контенту серіалізовані `withCampaignContentWrite`. Довгострокова альтернатива (`campaigns.contentRevision`) винесена в окремий epic.
+
+### Refactor S1 Хвіст 1: бюджети AI entrypoint (T25)
+
+Тіло читає `parseBody(schema, req, msg, { maxBytes })` через `readLimitedBody` (`lib/utils/api/read-limited-body.ts`): Content-Length понад ліміт або потік понад ліміт (без Content-Length) -> 413 `BODY_TOO_LARGE` до Zod, reader скасовується. Без `maxBytes` поведінка незмінна. Бюджети: `AI_BODY_LIMITS` у `lib/constants/ai.ts` (chat 64 KiB, context-preview 16 KiB, settings 64 KiB, credentials 4 KiB, threads/patch/policy 4 KiB, slide-image 16 KiB), MCP — 4 MiB у `boundMcpRequest` (та сама `readLimitedBodyBytes`).
+
+| Entrypoint | Тіло | Ліміт | Rate (`AI_RATE_LIMITS`, `memoryFallback`) |
+|---|---|---|---|
+| chat POST | parseBody | chat | 20/60 с, scope `assistant-chat`, на користувача+кампанію |
+| context-preview POST | parseBody | contextPreview | 20/60 с (було) |
+| settings PUT | parseBody | settings | - |
+| threads POST / PATCH | parseBody | small | - |
+| slide-image POST | parseBody | slideImage | AI_PLAYER_RATE_LIMIT/генерація (було) |
+| assistant policy PATCH | parseBody | small | 20/60 с (було) |
+| credentials PUT/PATCH | parseBody | credentials | 10/60 с, scope `ai-credentials` |
+| MCP POST | boundMcpRequest | 4 MiB | 120/60 с на token id, scope `mcp` |
+
+### Premerge refactor (part 2): chat, preview, помилки
+
+- `useAiChat`: після нормального стріму виконується один `recover({ statusOnly, afterStream })`: споживаються receipts і вивчається lease, без повного recover і заміни повідомлень; `useSourceSync` лише інвалідує queries (без `router.refresh()`).
+- Превʼю `content.<kind>.*` без `id` (`actions/content-preview.ts`): власна таблиця читається `findMany`, залежності шукаються SQL-regex префільтром по id чанками до 500 з обʼєднанням результатів (більше ~2.5k альтернатив ламало Postgres).
+- `ContentError` обробляє `handleApiError` (з `issues`); тексти - `lib/constants/api-errors.ts` (статичний тест `error-literals.test.ts` забороняє кириличні літерали в `lib/server`, `lib/ai`). Fingerprint пропозицій змінено: пропозиції до деплою стануть stale (прийнято).
+- Операції персонажів - `CHARACTER_OPERATIONS` у спільному ядрі для роутів і асистента; `/spells/refs` лише сесійний, поза OpenAPI/MCP.
+
+### Refactor S1: перевірки й output boundary
+
+Відтворюваний local-only runner — `scripts/constructor/assistant-check.ts`; tracked browser sources, CLI options і prerequisites описано в [README harness](../../scripts/constructor/assistant-check/README.md). `.superpowers` містить тільки ignored outputs, не runtime dependencies. Integration counts читаються з Vitest JSON report; skipped/empty suite не вважається успіхом. Browser залишається synthetic HTTP перевіркою компонентів, SQL authority перевіряється окремо на guarded local constructor з `connection_limit=1` для обох URL.
+
+`publicToolData` прибирає signed/credential URLs незалежно від регістру HTTP scheme; цю межу застосовано також до historical chat messages перед передачею моделі, без переписування persisted JSON. MCP request body обмежено4MiB до wrapper JSON parsing: встановлений `mcp-handler` передає parsedBody і тим самим обходить власний bounded reader SDK. Action ids/payloads, writers/locks/recovery не змінено. Security matrix, регресії та обмеження доказів — у [checkpoint S1](../archive/superpowers/plans/2026-10-26-constructor-refactor-s1-progress.md).
+
+### Refactor S2–S4/S8
+
+`execute.ts` є facade: transaction authority — `execution-transaction.ts`, recovery/effects — `execution-effects.ts`, persisted external JSON boundary — `execution-state.ts`; runtime limits — `lib/constants/assistant.ts` і доменні власники. `actions/handoff-navigation.ts` будує safe app hrefs, `compendium-reads.ts` володіє bounded read projections; `handoffs.ts` зберігає compatibility exports. Recovery run/receipt selects bounded, pending/status mapping і одна оплачувана operation/run збережені.
+
+UI cache identity — `lib/hooks/ai/keys.ts`, polling — `assistant-polling.ts` (intents10s, executing receipt2s). Receipt dedup scoped QueryClient/campaign із retry після invalidation failure; broad campaign invalidation збережено для cascades/unknown domains. Disclosure approval не переживає зміну campaign/thread/focus/notes/configuration; save-before-apply fail closed. Synthetic browser та SQL evidence розділено в [S8 checkpoint](../archive/superpowers/plans/2026-10-26-constructor-refactor-s8-progress.md).

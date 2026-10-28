@@ -12,6 +12,7 @@ import { MapStripRow } from "@/components/battle/scene/MapStrip";
 import { AuraZonePicker } from "@/components/battle/wizards/AuraZonePicker";
 import { useAttackWizard, useAuraZones, useBattleScene, useBonusSpells, usePlayerTurn, useSpellBook } from "@/lib/hooks/battle";
 import { cn } from "@/lib/utils";
+import { canOffHandAttack } from "@/lib/utils/battle/attack/attacks-left";
 import { canConsumeIntent, COUNTDOWN_SECONDS, turnAllowsAttack, type TurnFlowState } from "@/lib/utils/battle/flows";
 import { moraleTriggerRolls } from "@/lib/utils/battle/morale/check";
 import { usableAbilities } from "@/lib/utils/battle/view";
@@ -21,6 +22,8 @@ import type { BattleParticipant } from "@/types/battle";
 const AttackWizard = dynamic(() => import("@/components/battle/wizards/AttackWizard").then((m) => m.AttackWizard), { ssr: false });
 
 const SpellBook = dynamic(() => import("@/components/battle/wizards/SpellBook").then((m) => m.SpellBook), { ssr: false });
+
+const CoreActionsDialog = dynamic(() => import("@/components/battle/turn/CoreActionsDialog").then((m) => m.CoreActionsDialog), { ssr: false });
 
 const BonusActionPicker = dynamic(() => import("@/components/battle/wizards/BonusActionPicker").then((m) => m.BonusActionPicker), { ssr: false });
 
@@ -53,13 +56,15 @@ export function MyTurnControls({ hero, strip }: { hero: BattleParticipant; strip
 
   const [abilityOpen, setAbilityOpen] = useState(false);
 
+  const [coreOpen, setCoreOpen] = useState(false);
+
   const bonusAbilities = usableAbilities(hero, "bonusAction", battle.currentRound);
 
   const actionAbilities = usableAbilities(hero, "action", battle.currentRound);
 
   const hasMagic = Object.values(hero.spellcasting?.spellSlots ?? {}).some((s) => s.current > 0) || (hero.spellcasting?.knownSpells.length ?? 0) > 0;
 
-  const { phase, status: { actionUsed, skipped } } = turn;
+  const { phase, status: { actionUsed, attackLeft, skipped } } = turn;
 
   const { open: openAttack } = attack.actions;
 
@@ -69,7 +74,7 @@ export function MyTurnControls({ hero, strip }: { hero: BattleParticipant; strip
 
   const ui = modeUiOf(battle.map);
 
-  const attackReady = turnAllowsAttack({ phase, actionUsed, skipped });
+  const attackReady = turnAllowsAttack({ phase, actionUsed, skipped, attackLeft });
 
   useEffect(() => {
     setAttackReady(attackReady ? heroId : null);
@@ -80,10 +85,10 @@ export function MyTurnControls({ hero, strip }: { hero: BattleParticipant; strip
   useEffect(() => {
     if (attackIntent === null) return;
 
-    if (canConsumeIntent(attackIntent, { heroId, round, turnIndex, phase, actionUsed, skipped })) openAttack(attackIntent.targetId, attackIntent.attackId);
+    if (canConsumeIntent(attackIntent, { heroId, round, turnIndex, phase, actionUsed, skipped, attackLeft })) openAttack(attackIntent.targetId, attackIntent.attackId);
 
     clearAttackIntent();
-  }, [attackIntent, heroId, round, turnIndex, phase, actionUsed, skipped, openAttack, clearAttackIntent]);
+  }, [attackIntent, heroId, round, turnIndex, phase, actionUsed, attackLeft, skipped, openAttack, clearAttackIntent]);
 
   const full = (
     <>
@@ -104,8 +109,8 @@ export function MyTurnControls({ hero, strip }: { hero: BattleParticipant; strip
         <ActionGrid
           turn={turn}
           pending={anyPending}
-          available={{ magic: hasMagic, bonus: bonusAbilities.length > 0, ability: actionAbilities.length > 0 }}
-          actions={{ attack: () => attack.actions.open(), magic: () => book.actions.open(), bonus: () => setBonusOpen(true), ability: () => setAbilityOpen(true) }}
+          available={{ magic: hasMagic, bonus: bonusAbilities.length > 0 || canOffHandAttack(hero), ability: actionAbilities.length > 0, core: !!battle.rules?.actions.enabled }}
+          actions={{ attack: () => attack.actions.open(), magic: () => book.actions.open(), bonus: () => setBonusOpen(true), ability: () => setAbilityOpen(true), core: () => setCoreOpen(true) }}
         />
       )}
       {turn.phase === "acting" && ui?.TurnControls && <ui.TurnControls hero={hero} />}
@@ -124,7 +129,8 @@ export function MyTurnControls({ hero, strip }: { hero: BattleParticipant; strip
       {turn.phase === "countdown" && <TurnCountdown seconds={COUNTDOWN_SECONDS} onElapsed={() => void turn.actions.endTurn()} onStay={turn.actions.stay} />}
       <AttackWizard wizard={attack} />
       <SpellBook book={book} />
-      <BonusActionPicker participant={hero} open={bonusOpen} onOpenChange={setBonusOpen} onDone={turn.actions.afterAction} />
+      {battle.rules?.actions.enabled && <CoreActionsDialog participant={hero} open={coreOpen} onOpenChange={setCoreOpen} onDone={turn.actions.afterAction} />}
+      <BonusActionPicker participant={hero} open={bonusOpen} onOpenChange={setBonusOpen} onDone={turn.actions.afterAction} onOffHand={() => attack.actions.open(undefined, undefined, { offHand: true })} />
       <BonusActionPicker participant={hero} trigger="action" open={abilityOpen} onOpenChange={setAbilityOpen} onDone={turn.actions.afterAction} />
     </>
   );

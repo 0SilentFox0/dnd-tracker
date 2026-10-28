@@ -5,33 +5,36 @@ import { reachable } from "./path";
 import { DEFAULT_HAZARD_LABEL } from "@/lib/constants/battle";
 import type { Rng } from "@/lib/utils/abilities/engine/core/types";
 import { applyRawDamage } from "@/lib/utils/abilities/engine/effects/hp";
+import { isZoneConcentrationLive } from "@/lib/utils/battle/concentration";
+import { applyDamageConsequences } from "@/lib/utils/battle/damage/consequences";
 import { applyResistance } from "@/lib/utils/battle/resistance";
 import { participantImmuneToSpell } from "@/lib/utils/battle/spell/spell-immunity";
 import { diceAverage, rollDice } from "@/lib/utils/common/dice";
+import type { Ruleset } from "@/lib/utils/rules";
 import type { BattleMapConfig, BattleParticipant, GridPoint, TerrainCell } from "@/types/battle";
 
 const strength = (c: TerrainCell) => (c.damage?.dice ? diceAverage(c.damage.dice) : (c.damage?.amount ?? 0));
 
-function damagingHazards(map: Pick<BattleMapConfig, "terrain">): Map<string, TerrainCell> {
-  return new Map(Object.entries(map.terrain ?? {}).filter(([, c]) => c.kind === "hazard" && c.damage));
+function damagingHazards(map: Pick<BattleMapConfig, "terrain">, participants?: BattleParticipant[]): Map<string, TerrainCell> {
+  return new Map(Object.entries(map.terrain ?? {}).filter(([, c]) => c.kind === "hazard" && c.damage && (!participants || !c.damage.concentrationOf || isZoneConcentrationLive(participants, c.damage.concentrationOf))));
 }
 
 function strongest(cells: (TerrainCell | undefined)[]): TerrainCell | null {
   return cells.reduce<TerrainCell | null>((best, c) => (c && (!best || strength(c) > strength(best)) ? c : best), null);
 }
 
-export function hazardUnder(map: BattleMapConfig, p: BattleParticipant, at?: GridPoint): TerrainCell | null {
+export function hazardUnder(map: BattleMapConfig, p: BattleParticipant, at?: GridPoint, participants?: BattleParticipant[]): TerrainCell | null {
   const anchor = at ?? p.battleData.position;
 
   if (!anchor) return null;
 
-  const hazards = damagingHazards(map);
+  const hazards = damagingHazards(map, participants);
 
   return strongest(footprint(anchor, sizeOf(p)).map((c) => hazards.get(cellKey(c))));
 }
 
 export function hazardOnMove(map: BattleMapConfig, participants: BattleParticipant[], mover: BattleParticipant, to: GridPoint, cost: number): TerrainCell | null {
-  const hazards = damagingHazards(map);
+  const hazards = damagingHazards(map, participants);
 
   const start = new Set(cellsOf(mover).map(cellKey));
 
@@ -55,10 +58,13 @@ export function hazardHit(
   round: number,
   participants: BattleParticipant[],
   rng: Rng,
-): { participant: BattleParticipant; message: string; damage: number } | null {
+  rules?: Ruleset,
+): { participant: BattleParticipant; participants: BattleParticipant[]; message: string; damage: number; consequences: string[] } | null {
   const hazard = cell.damage;
 
   if (!hazard || p.battleData.hazardHitRound === round) return null;
+
+  if (!isZoneConcentrationLive(participants, hazard.concentrationOf)) return null;
 
   if (hazard.spellId && participantImmuneToSpell(p, hazard.spellId, participants)) return null;
 
@@ -68,9 +74,13 @@ export function hazardHit(
 
   const hurt = applyRawDamage(p, damage);
 
+  const c = applyDamageConsequences({ before: p, after: hurt, amount: damage, rules, rng, participants });
+
   return {
-    participant: { ...hurt, battleData: { ...hurt.battleData, hazardHitRound: round } },
+    participant: { ...c.participant, battleData: { ...c.participant.battleData, hazardHitRound: round } },
+    participants: c.participants,
     message: `${p.basicInfo.name}: ${damage} ${hazard.type} шкоди від «${cell.label ?? DEFAULT_HAZARD_LABEL}»`,
     damage,
+    consequences: c.messages,
   };
 }

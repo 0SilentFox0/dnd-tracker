@@ -1,0 +1,58 @@
+import type { ZodType } from "zod";
+
+import "server-only";
+import { API_ERRORS } from "@/lib/constants/api-errors";
+import { contentImportSchema, deleteSpellsByLevelSchema, importUnitsSchema, reorderTracksSchema, saveSkillTreeSchema, sourceSyncApplySchema, sourceSyncQuerySchema } from "@/lib/schemas";
+import { OwnerKind } from "@/lib/utils/abilities/read";
+import type { ActorNeed } from "@/lib/utils/api/actor";
+import { NEED } from "@/lib/utils/api/need";
+import { IMPORT_KINDS } from "@/lib/utils/content/import/kinds";
+import { RulesetPatchSchema } from "@/lib/utils/rules/schema";
+
+export type OperationResponse = "item" | "list" | "ok" | "object" | "csv";
+
+export interface ContentOperation {
+  id: string;
+  method: "GET" | "POST" | "PATCH" | "PUT" | "DELETE";
+  path: string;
+  summary: string;
+  description: string;
+  tag: string;
+  need: ActorNeed;
+  body?: ZodType;
+  invalidBody?: string;
+  query?: ZodType;
+  response: OperationResponse;
+  errors?: readonly (409 | 422)[];
+  pathEnums?: Record<string, readonly string[]>;
+}
+
+type OperationRow = Omit<ContentOperation, "id">;
+
+const defineOperations = <T extends Record<string, OperationRow>>(rows: T) =>
+  Object.fromEntries(Object.entries(rows).map(([id, row]) => [id, { ...row, id }])) as { [K in keyof T & string]: T[K] & { id: K } };
+
+const OPERATION_ROWS = {
+  "rules.get": { method: "GET", path: "/rules", summary: "Правила кампанії", description: "Повний набір правил кампанії (ruleset) з урахуванням значень за замовчуванням.", need: NEED.read("member"), response: "object", tag: "Кампанія" },
+  "rules.update": { method: "PATCH", path: "/rules", summary: "Змінити правила", description: "Частковий патч правил; не вказані поля лишаються як були.", need: NEED.write, body: RulesetPatchSchema, response: "object", invalidBody: API_ERRORS.INVALID_RULES, tag: "Кампанія" },
+  "campaign.export": { method: "GET", path: "/export", summary: "Експорт бандла", description: "Увесь контент і правила кампанії одним JSON — бекап або основа шаблону.", need: NEED.read("dm"), response: "object", tag: "Кампанія" },
+  "source.diff": { method: "GET", path: "/source-sync", summary: "Зміни в джерелі", description: "Різниця між кампанією і шаблоном (або кампанією), з якого її створено: нові, оновлені, конфліктні й видалені записи, правила по механіках, налаштування. query scope — лише одна таблиця.", need: NEED.read("dm"), query: sourceSyncQuerySchema, response: "object", tag: "Кампанія" },
+  "source.apply": { method: "POST", path: "/source-sync", summary: "Застосувати зміни джерела", description: "apply — пункти з diff (scope, key, sourceHash), які взяти з джерела; залежності додаються автоматично. ignore — сховати пункти до наступної зміни джерела. 409 — джерело змінилося, візьміть свіжий diff.", need: NEED.write, body: sourceSyncApplySchema, response: "object", errors: [409], tag: "Кампанія" },
+  "skill-trees.list": { method: "GET", path: "/skill-trees", summary: "Дерева скілів", description: "Дерева скілів усіх рас кампанії.", need: NEED.read("member"), response: "list", tag: "Скіли" },
+  "skill-trees.save": { method: "PATCH", path: "/skill-trees/{treeId}", summary: "Зберегти дерево скілів", description: "Зберігає дерево раси; створює його, якщо ще немає. Прогрес персонажів переноситься. 409 — прогрес змінився паралельно, повторіть.", need: NEED.write, body: saveSkillTreeSchema, response: "object", errors: [409], invalidBody: API_ERRORS.INVALID_SKILL_TREE, tag: "Скіли" },
+  "skills.duplicate": { method: "POST", path: "/skills/{skillId}/duplicate", summary: "Дублювати скіл", description: "Копія скіла з суфіксом «(копія)».", need: NEED.write, response: "item", tag: "Скіли" },
+  "spells.remove-from-group": { method: "POST", path: "/spells/{spellId}/remove-from-group", summary: "Прибрати заклинання з групи", description: "Відв'язує заклинання від школи магії.", need: NEED.write, response: "item", tag: "Заклинання" },
+  "spell-groups.remove-all-spells": { method: "POST", path: "/spells/groups/{groupId}/remove-all-spells", summary: "Очистити школу", description: "Відв'язує всі заклинання від школи магії; самі заклинання лишаються.", need: NEED.write, response: "ok", tag: "Школи магії" },
+  "spells.delete-by-level": { method: "DELETE", path: "/spells/delete-by-level", summary: "Видалити заклинання рівня", description: "Лише з UI.", need: NEED.writeAll, body: deleteSpellsByLevelSchema, response: "ok", tag: "Заклинання" },
+  "units.import": { method: "POST", path: "/units/import", summary: "Імпорт юнітів", description: "Масове додавання/оновлення юнітів за назвою; повертає звіт.", need: NEED.write, body: importUnitsSchema, response: "object", tag: "Юніти" },
+  "content.import": { method: "POST", path: "/content-import/{kind}", summary: "Імпорт контенту", description: "Масовий імпорт до 500 рядків виду kind. mode: create (дубль назви — помилка рядка) | update (оновити за назвою, інакше створити) | skip (наявні пропустити); dryRun — лише перевірка. Посилання — назвою або id цієї кампанії. Відповідь: статус і помилки кожного рядка, counts. Валідні рядки записуються, невалідні — у звіті.", need: NEED.write, body: contentImportSchema, response: "object", pathEnums: { kind: IMPORT_KINDS }, tag: "Імпорт і експорт" },
+  "content.import-example": { method: "GET", path: "/content-import/{kind}/example.csv", summary: "Приклад CSV для імпорту", description: "CSV із заголовками полів виду kind і двома рядками прикладу; посилання заповнені назвою першого наявного запису кампанії.", need: NEED.read("dm"), response: "csv", pathEnums: { kind: IMPORT_KINDS }, tag: "Імпорт і експорт" },
+  "content.export": { method: "GET", path: "/content-export/{kind}", summary: "Експорт CSV", description: "Усі записи виду kind у форматі імпорту: заголовки — підписи полів, посилання — назвами, вкладене — JSON у клітинці. Змінений файл імпортується назад (mode update).", need: NEED.read("dm"), response: "csv", pathEnums: { kind: IMPORT_KINDS }, tag: "Імпорт і експорт" },
+  "tracks.reorder": { method: "PUT", path: "/tracks/order", summary: "Порядок треків", description: "Повний список id треків кампанії в новому порядку.", need: NEED.write, body: reorderTracksSchema, response: "list", tag: "Музика бою" },
+  "abilities.sources": { method: "GET", path: "/abilities/sources", summary: "Власники здібностей", description: "Список скілів, рас, артефактів, сетів, юнітів, класів і рис (kind, id, name) — джерела для копіювання здібностей.", need: NEED.read("dm"), response: "object", tag: "Кампанія" },
+  "abilities.get": { method: "GET", path: "/abilities/{kind}/{ownerId}", summary: "Здібності власника", description: "Здібності одного власника; kind: skill | race | artifact | artifactSet | unit | class | feat.", need: NEED.read("dm"), response: "object", pathEnums: { kind: Object.values(OwnerKind) }, tag: "Кампанія" },
+} satisfies Record<string, OperationRow>;
+
+export const CONTENT_OPERATIONS = defineOperations(OPERATION_ROWS);
+
+export const CONTENT_OPERATION_LIST: ContentOperation[] = Object.values(CONTENT_OPERATIONS);

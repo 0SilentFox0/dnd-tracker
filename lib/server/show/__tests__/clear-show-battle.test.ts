@@ -61,3 +61,14 @@ describe("clearShowBattle", () => {
     expect(err).toHaveBeenCalled();
   });
 });
+it("durable publication failure rejects; retry republishes current cleared state", async () => {
+  const { clearShowBattle, publishShow } = await import("../show-store");
+
+  trigger.mockRejectedValueOnce(new Error("offline"));
+  await expect(publishShow("c", { seq: 1 } as never, { strict: true })).rejects.toThrow("offline");
+  findUnique.mockResolvedValueOnce(row({ battle: null }));
+  trigger.mockRejectedValueOnce(new Error("offline"));
+  await expect(clearShowBattle("c", "b1", { strict: true })).rejects.toThrow("offline");
+  findUnique.mockResolvedValueOnce(row({ battle: null }));
+  await expect(clearShowBattle("c", "b1", { strict: true })).resolves.toBeUndefined();
+});

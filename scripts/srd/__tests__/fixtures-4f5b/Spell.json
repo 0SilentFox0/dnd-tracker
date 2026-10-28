@@ -1,0 +1,249 @@
+[
+  {
+    "model": "api_v2.spell",
+    "pk": "srd-2024_burning-hands",
+    "fields": {
+      "name": "Burning Hands",
+      "desc": "A thin sheet of flames shoots forth from you. Each creature in a 15-foot Cone makes a Dexterity saving throw, taking 3d6 Fire damage on a failed save or half as much damage on a successful one. Flammable objects in the Cone that aren't being worn or carried start burning.",
+      "document": "srd-2024",
+      "level": 1,
+      "school": "evocation",
+      "higher_level": "The damage increases by 1d6 for each spell slot level above 1.",
+      "target_type": "creature",
+      "range_text": "Self",
+      "range": 0,
+      "range_unit": null,
+      "ritual": false,
+      "casting_time": "action",
+      "reaction_condition": null,
+      "verbal": true,
+      "somatic": true,
+      "material": false,
+      "material_specified": "",
+      "material_cost": null,
+      "material_consumed": false,
+      "target_count": 1,
+      "saving_throw_ability": "dexterity",
+      "attack_roll": false,
+      "damage_roll": "3d6",
+      "damage_types": [
+        "fire"
+      ],
+      "duration": "instantaneous",
+      "shape_type": "cone",
+      "shape_size": 15,
+      "shape_size_unit": "feet",
+      "concentration": false,
+      "classes": [
+        "srd-2024_sorcerer",
+        "srd-2024_wizard"
+      ]
+    }
+  },
+  {
+    "model": "api_v2.spell",
+    "pk": "srd-2024_fireball",
+    "fields": {
+      "name": "Fireball",
+      "desc": "A bright streak flashes from you to a point you choose within range and then blossoms with a low roar into a fiery explosion. Each creature in a 20-foot-radius Sphere centered on that point makes a Dexterity saving throw, taking 8d6 Fire damage on a failed save or half as much damage on a successful one. Flammable objects in the area that aren't being worn or carried start burning.",
+      "document": "srd-2024",
+      "level": 3,
+      "school": "evocation",
+      "higher_level": "The damage increases by 1d6 for each spell slot level above 3.",
+      "target_type": "creature",
+      "range_text": "150 feet",
+      "range": 150,
+      "range_unit": "feet",
+      "ritual": false,
+      "casting_time": "action",
+      "reaction_condition": null,
+      "verbal": true,
+      "somatic": true,
+      "material": true,
+      "material_specified": "a ball of bat guano and sulfur",
+      "material_cost": null,
+      "material_consumed": false,
+      "target_count": 1,
+      "saving_throw_ability": "dexterity",
+      "attack_roll": false,
+      "damage_roll": "8d6",
+      "damage_types": [
+        "fire"
+      ],
+      "duration": "instantaneous",
+      "shape_type": "sphere",
+      "shape_size": 20,
+      "shape_size_unit": "feet",
+      "concentration": false,
+      "classes": [
+        "srd-2024_sorcerer",
+        "srd-2024_wizard"
+      ]
+    }
+  },
+  {
+    "model": "api_v2.spell",
+    "pk": "srd-2024_fire-bolt",
+    "fields": {
+      "name": "Fire Bolt",
+      "desc": "You hurl a mote of fire at a creature or an object within range. Make a ranged spell attack against the target. On a hit, the target takes 1d10 Fire damage. A flammable object hit by this spell starts burning if it isn't being worn or carried.",
+      "document": "srd-2024",
+      "level": 0,
+      "school": "evocation",
+      "higher_level": "The damage increases by 1d10 when you reach levels 5 (2d10), 11 (3d10), and 17 (4d10).",
+      "target_type": "creature",
+      "range_text": "120 feet",
+      "range": 120,
+      "range_unit": "feet",
+      "ritual": false,
+      "casting_time": "action",
+      "reaction_condition": null,
+      "verbal": true,
+      "somatic": true,
+      "material": false,
+      "material_specified": "",
+      "material_cost": null,
+      "material_consumed": false,
+      "target_count": 1,
+      "saving_throw_ability": "",
+      "attack_roll": true,
+      "damage_roll": "1d10",
+      "damage_types": [
+        "fire"
+      ],
+      "duration": "instantaneous",
+      "shape_type": null,
+      "shape_size": null,
+      "shape_size_unit": null,
+      "concentration": false,
+      "classes": [
+        "srd-2024_sorcerer",
+        "srd-2024_wizard"
+      ]
+    }
+  },
+  {
+    "model": "api_v2.spell",
+    "pk": "srd-2024_lightning-bolt",
+    "fields": {
+      "name": "Lightning Bolt",
+      "desc": "A stroke of lightning forming a 100-foot-long, 5-foot-wide Line blasts out from you in a direction you choose. Each creature in the Line makes a Dexterity saving throw, taking 8d6 Lightning damage on a failed save or half as much damage on a successful one.",
+      "document": "srd-2024",
+      "level": 3,
+      "school": "evocation",
+      "higher_level": "The damage increases by 1d6 for each spell slot level above 3.",
+      "target_type": "creature",
+      "range_text": "Self",
+      "range": 0,
+      "range_unit": null,
+      "ritual": false,
+      "casting_time": "action",
+      "reaction_condition": null,
+      "verbal": true,
+      "somatic": true,
+      "material": true,
+      "material_specified": "a bit of fur and a crystal rod",
+      "material_cost": null,
+      "material_consumed": false,
+      "target_count": 1,
+      "saving_throw_ability": "dexterity",
+      "attack_roll": false,
+      "damage_roll": "8d6",
+      "damage_types": [
+        "lightning"
+      ],
+      "duration": "instantaneous",
+      "shape_type": "line",
+      "shape_size": 5,
+      "shape_size_unit": "feet",
+      "concentration": false,
+      "classes": [
+        "srd-2024_sorcerer",
+        "srd-2024_wizard"
+      ]
+    }
+  },
+  {
+    "model": "api_v2.spell",
+    "pk": "srd-2024_longstrider",
+    "fields": {
+      "name": "Longstrider",
+      "desc": "You touch a creature. The target's Speed increases by 10 feet until the spell ends.",
+      "document": "srd-2024",
+      "level": 1,
+      "school": "transmutation",
+      "higher_level": "You can target one additional creature for each spell slot level above 1.",
+      "target_type": "creature",
+      "range_text": "Touch",
+      "range": 0,
+      "range_unit": null,
+      "ritual": false,
+      "casting_time": "action",
+      "reaction_condition": null,
+      "verbal": true,
+      "somatic": true,
+      "material": true,
+      "material_specified": "a pinch of dirt",
+      "material_cost": null,
+      "material_consumed": false,
+      "target_count": 1,
+      "saving_throw_ability": "",
+      "attack_roll": false,
+      "damage_roll": "",
+      "damage_types": [],
+      "duration": "1 hour",
+      "shape_type": null,
+      "shape_size": null,
+      "shape_size_unit": null,
+      "concentration": false,
+      "classes": [
+        "srd-2024_bard",
+        "srd-2024_druid",
+        "srd-2024_ranger",
+        "srd-2024_wizard"
+      ]
+    }
+  },
+  {
+    "model": "api_v2.spell",
+    "pk": "srd-2024_wall-of-fire",
+    "fields": {
+      "name": "Wall of Fire",
+      "desc": "You create a wall of fire on a solid surface within range. You can make the wall up to 60 feet long, 20 feet high, and 1 foot thick, or a ringed wall up to 20 feet in diameter, 20 feet high, and 1 foot thick. The wall is opaque and lasts for the duration. When the wall appears, each creature in its area makes a Dexterity saving throw, taking 5d8 Fire damage on a failed save or half as much damage on a successful one. One side of the wall, selected by you when you cast this spell, deals 5d8 Fire damage to each creature that ends its turn within 10 feet of that side or inside the wall. A creature takes the same damage when it enters the wall for the first time on a turn or ends its turn there. The other side of the wall deals no damage.",
+      "document": "srd-2024",
+      "level": 4,
+      "school": "evocation",
+      "higher_level": "The damage increases by 1d8 for each spell slot level above 4.",
+      "target_type": "creature",
+      "range_text": "120 feet",
+      "range": 120,
+      "range_unit": "feet",
+      "ritual": false,
+      "casting_time": "action",
+      "reaction_condition": null,
+      "verbal": true,
+      "somatic": true,
+      "material": true,
+      "material_specified": "a piece of charcoal",
+      "material_cost": null,
+      "material_consumed": false,
+      "target_count": 1,
+      "saving_throw_ability": "dexterity",
+      "attack_roll": false,
+      "damage_roll": "5d8",
+      "damage_types": [
+        "fire"
+      ],
+      "duration": "1 minute",
+      "shape_type": null,
+      "shape_size": null,
+      "shape_size_unit": null,
+      "concentration": true,
+      "classes": [
+        "srd-2024_druid",
+        "srd-2024_sorcerer",
+        "srd-2024_wizard"
+      ]
+    }
+  }
+]

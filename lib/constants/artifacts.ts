@@ -121,7 +121,53 @@ export enum ArtifactModifierType {
   PROPERTIES = "properties",
   MIN_TARGETS = "minTargets",
   MAX_TARGETS = "maxTargets",
+  TRAITS = "traits",
+  VERSATILE_DICE = "versatileDice",
+  DAMAGE_BONUS = "damageBonus",
 }
+
+// окремо від ArtifactModifierType: weaponStatsFromRow бере лише свої типи
+export enum ArmorModifierType {
+  CATEGORY = "armorCategory",
+  BASE = "armorBase",
+  DEX_CAP = "armorDexCap",
+  STRENGTH = "armorStrength",
+  STEALTH = "armorStealth",
+}
+
+export const ARMOR_LIMITS = { base: [1, 30], dexCap: [0, 10], strength: [1, 30] } as const;
+
+// окремо: weaponStatsFromRow/armorStatsFromRow беруть лише свої типи
+export enum ItemModifierType {
+  STATS = "itemStats",
+}
+
+export const ITEM_LIMITS = {
+  charges: [1, 50],
+  bases: 60,
+  grantQuantity: [1, 99],
+  quantity: 9999,
+  specialName: 100,
+  specialDescription: 1000,
+  cost: [0, 50],
+  castLevel: [0, 9],
+  dc: [1, 40],
+  attackBonus: [-10, 30],
+  upcastMaxLevel: [1, 9],
+  upcastExtraCost: [1, 50],
+  options: 50,
+  label: 60,
+  spells: 500,
+  keyPattern: /^[a-z][a-z0-9_-]{0,39}$/,
+} as const;
+
+export const ITEM_KINDS = ["weapon", "armor", "shield"] as const;
+
+export const ARMOR_CATEGORIES = ["light", "medium", "heavy"] as const;
+
+export const CARRIED_SLOTS: ReadonlySet<string> = new Set([ArtifactSlot.ITEM, ArtifactSlot.RING]);
+
+export const PROPERTY_SLOTS: ReadonlySet<string> = new Set([ArtifactSlot.WEAPON, ArtifactSlot.RANGE_WEAPON, ArtifactSlot.ARMOR, ArtifactSlot.SHIELD]);
 
 export const DEFAULT_ARTIFACT_MODIFIERS = {
   DAMAGE_DICE: "1d6",

@@ -1,13 +1,9 @@
 import { NextResponse } from "next/server";
 
-import { invalidateCampaignLists } from "@/lib/cache/campaign-list";
-import { API_ERRORS } from "@/lib/constants/api-errors";
-import { CampaignRole } from "@/lib/constants/campaigns";
-import { prisma } from "@/lib/db";
+import { removeCampaignMember } from "@/lib/server/campaigns/action-service";
+import { sessionDmActor } from "@/lib/utils/api/actor";
 import { requireDM } from "@/lib/utils/api/api-auth";
-import { errorResponse } from "@/lib/utils/api/api-response";
 import { handleApiError } from "@/lib/utils/api/error-handler";
-import { loadOwned } from "@/lib/utils/api/load-owned";
 
 export async function DELETE(
   request: Request,
@@ -22,27 +18,7 @@ export async function DELETE(
       return accessResult;
     }
 
-    const member = await loadOwned(
-      prisma.campaignMember.findUnique({
-        where: { id: memberId },
-        select: { campaignId: true, role: true, userId: true },
-      }),
-      id,
-    );
-
-    if (member instanceof NextResponse) return member;
-
-    if (member.role === CampaignRole.DM) {
-      return errorResponse(API_ERRORS.CANNOT_REMOVE_DM, 400);
-    }
-
-    await prisma.campaignMember.deleteMany({
-      where: { id: memberId },
-    });
-
-    const remaining = await prisma.campaignMember.findMany({ where: { campaignId: id }, select: { userId: true } });
-
-    await invalidateCampaignLists([member.userId, ...remaining.map((m) => m.userId)]);
+    await removeCampaignMember(sessionDmActor(id, accessResult.userId), memberId);
 
     return NextResponse.json({ success: true });
   } catch (error) {

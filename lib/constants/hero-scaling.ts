@@ -6,6 +6,8 @@
 import { AttackType } from "@/lib/constants/battle";
 import { heroArchetype } from "@/lib/constants/hero-archetypes";
 import { getAbilityModifier } from "@/lib/utils/common/calculations";
+import { DEFAULT_RULES } from "@/lib/utils/rules/defaults";
+import { heroHpFormula } from "@/lib/utils/rules/formulas";
 
 /** Коефіцієнти масштабування (можна перевизначити на рівні кампанії) */
 export interface HeroScalingOptions {
@@ -17,10 +19,6 @@ export interface HeroScalingOptions {
   /** Те саме для ranged */
   rangedDiceByLevel?: Record<number, string>;
 }
-
-const HP_CON_COEFFICIENT = 1.5;
-
-const HP_BASE_LEVELS = 3;
 
 /**
  * Рівномірна прогресія кубиків за рівнем (d4, d6, d8).
@@ -52,27 +50,35 @@ const DEFAULT_DICE_BY_LEVEL: Record<number, string> = {
 function getDiceForLevel(level: number, attackType: AttackType, opts?: HeroScalingOptions | null): string {
   const table = attackType === AttackType.MELEE ? opts?.meleeDiceByLevel : opts?.rangedDiceByLevel;
 
-  const resolved = table ?? DEFAULT_DICE_BY_LEVEL;
-
   const clamped = Math.max(1, Math.min(20, level));
 
-  return resolved[clamped] ?? resolved[20] ?? "1d4";
+  return table?.[clamped] ?? DEFAULT_DICE_BY_LEVEL[clamped] ?? "1d4";
 }
 
-export function getHeroMaxHpBreakdown(level: number, constitution: number, archetype: string | null | undefined): { total: number; breakdown: string[] } {
+export interface HeroHpFormula {
+  baseLevels: number;
+  conCoefficient: number;
+}
+
+export function getHeroMaxHpBreakdown(
+  level: number,
+  constitution: number,
+  archetype: string | null | undefined,
+  hp: HeroHpFormula = heroHpFormula(DEFAULT_RULES.heroScaling),
+): { total: number; breakdown: string[] } {
   const a = heroArchetype(archetype);
 
   const conMod = getAbilityModifier(constitution);
 
-  const base = HP_BASE_LEVELS * a.hpPerLevel;
+  const base = hp.baseLevels * a.hpPerLevel;
 
-  const perLevel = a.hpPerLevel + conMod * HP_CON_COEFFICIENT;
+  const perLevel = a.hpPerLevel + conMod * hp.conCoefficient;
 
   const total = Math.max(1, Math.floor(base + level * perLevel));
 
   return {
     total,
-    breakdown: [`${a.name}: ${HP_BASE_LEVELS} × ${a.hpPerLevel} + рівень × (${a.hpPerLevel} + мод. ВИТ ${conMod} × ${HP_CON_COEFFICIENT})`, `= ${base} + ${level} × ${perLevel} = ${total}`],
+    breakdown: [`${a.name}: ${hp.baseLevels} × ${a.hpPerLevel} + рівень × (${a.hpPerLevel} + мод. ВИТ ${conMod} × ${hp.conCoefficient})`, `= ${base} + ${level} × ${perLevel} = ${total}`],
   };
 }
 

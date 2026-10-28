@@ -8,7 +8,7 @@
 
 **Tech Stack:** React 19, TanStack Query, нативний HTML5 drag-and-drop (без нових залежностей), Vitest + happy-dom + Testing Library.
 
-**Spec:** `docs/superpowers/specs/2026-10-27-inventory-design.md`
+**Spec:** `docs/archive/superpowers/specs/2026-10-27-inventory-design.md`
 
 ## Global Constraints
 

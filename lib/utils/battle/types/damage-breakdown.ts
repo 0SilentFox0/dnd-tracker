@@ -1,3 +1,4 @@
+import type { Ruleset } from "@/lib/utils/rules";
 import type { BattleAttack, BattleParticipant, DamageStep } from "@/types/battle";
 
 export interface DamageBreakdownResult {
@@ -15,4 +16,5 @@ export interface ComputeDamageBreakdownParams {
   damageRolls: number[];
   allParticipants: BattleParticipant[];
   isCritical?: boolean;
+  rules?: Ruleset;
 }

@@ -7,7 +7,7 @@
 - Витрата монет із решею — `lib/utils/inventory/money.ts`. `grant`, `revoke`, `setMoney` — лише DM.
 - `inventory_log` лише додається (рядки не змінюються й не видаляються). Види: `money_*`, `item_*`, `artifact_stash|equip|unequip|grant|revoke|transfer`. Підписи — `components/character-profile/stash/describe-log.ts`; журнал читається курсором (`stash/log`).
 - Передача артефакта іншому герою кладе його в підсумок отримувача (`artifacts/transfer`).
-- DM-форма інвентарю (`PATCH …/inventory`, `equipSlot`): артефакт, що був у слоті, не губиться, а йде в кінець підсумку; запис журналу — `artifact_equip` (з `swappedArtifactId`) або `artifact_unequip` («знято в підсумок (DM)»), коли слот очищено.
+- DM-форма інвентарю (`PATCH …/inventory`, `equipSlot`): артефакт, що був у слоті, не губиться, а йде в кінець підсумку; запис журналу — `artifact_equip` (з `swappedArtifactId`) або `artifact_unequip` («знято в підсумок (DM)»), коли слот очищено. Нове розміщення не-щитового артефакта в клітинку «Щит» відхиляється (422, `OFF_HAND_EQUIP`) незалежно від режиму класів (виняток — легка ближня зброя, коли класи ввімкнені); уже збережені значення клітинки приймаються без змін.
 - Клієнт: `useStash` (`lib/hooks/…`) — `staleTime`, `setQueryData` з відповіді POST, інвалідація листа/ростера/довідника лише для дій, що це зачіпають. Вільні артефакти для видачі — окремий DM-ендпоінт `stash/free-artifacts`, що вантажиться лише при відкритому діалозі.
 - Клієнт: вкладка «Інвентар» (`components/character-profile/inventory/`, хук `useInventory`) замінила «Речі» й «Підсумок». Клітинки рюкзака й правила дропу — `buildBackpackCells`/`dropAction` (`lib/utils/inventory/backpack.ts`). Увага: `SheetArtifact.slot` у листі — ключ клітинки (напр. `ring1`), а `StashArtifact.slot` — тип слота (`ring`). Drag-and-drop лише на десктопі; тап-дії (деталі, «Вдягнути»/«Зняти»/передати/використати) працюють усюди, на телефоні деталі — bottom sheet.
 
@@ -16,6 +16,7 @@
 - `characters.status`: `pending` (чернетка) → `active` (схвалено DM). Гравець без активного героя створює чернетку (`POST …/characters/draft`), редагує її (`PATCH …/[characterId]/draft`), DM схвалює або повертає з коментарем (`…/review`).
 - **Кожен запит героїв для бою, балансу, ростера, AI й підсумку партії мусить містити `ACTIVE_CHARACTER`** (`lib/constants/characters.ts`) — чернетка ніколи не потрапляє в бій. Нові запити по `character` без цього фільтра — помилка.
 - Одна чернетка на гравця: перевірка й створення під `pg_advisory_xact_lock` (`lib/server/characters/draft-lock.ts`); ще до завантаження аватара — швидка перевірка, щоб відмова не лишала файлів у сховищі.
+- **Режим класів** (`rules.classes.enabled` і в кампанії ≥1 клас, `draft-class.ts`): чернетка приймає `classId` (обов'язковий, інакше 422 `DRAFT_CLASS_REQUIRED`) замість `class`/`archetype`; сервер пише `classes: [{ classId, level: 1 }]` через `applyClasses` (рівень, текст класу, слоти), `archetype = null`. Генератор бере випадковий клас кампанії; характеристики — за пріоритетом: ability заклинань, рятівні кидки класу, решта. Форма показує вибір класу замість архетипу. Без класів — поведінка HOMM без змін.
 - Характеристики валідуються на сервері (`validateAbilityScores`: стандартний набір або point-buy), а не довіряються клієнту. Загальний `PATCH` героя для власника-чернетки дає 403 (`DRAFT_EDIT_VIA_DRAFT`).
 - Збереження чернетки зберігає `id` незмінених цілей і всі цілі, написані DM (`mergeDraftGoals`); порожній `avatar` очищає аватар, відсутнє поле не чіпає.
 - Генератор (`lib/utils/characters/generate`) і анімація «прокрутки» (`useRollReveal`, `usePlayerDraftForm`) — на клієнті; клавіша Esc пропускає анімацію.
@@ -30,3 +31,9 @@
 - Передісторія й аватар: `guardDraftAi` (DM, або гравець без активного героя) + `limitDraftAi` (10 викликів / 10 хв на користувача й кампанію, окремий `scope` на кожну функцію).
 - Ліміт — Upstash (`lib/utils/api/rate-limit.ts`). Без Upstash (на проді його зараз немає) виклики з `memoryFallback: true` рахуються ковзним вікном у пам'яті інстанса (ключ scope+користувач+кампанія, обмежений розмір мапи); інші ендпоінти лишаються fail-open. Ліміт per-instance, тобто на кількох інстансах ефективно ширший.
 - Доступність AI для форми (`GET …/draft/backstory`) перевіряє лише наявність ключів DM (`readDmAiAvailability`), без розшифрування; клієнт кешує відповідь 5 хв.
+
+## Refactor S6/S8: derivation і lifecycle
+
+Чистий `lib/utils/characters/classes/application.ts` володіє class validation/derivation, server `apply-classes.ts` — loading та compatibility exports. Participant context підтримує scoped preloaded feat/background refs; grants/pools складає `character-spell-grants.ts`. Integrated SQL lifecycle create→choices→level-up→rest→battle→finish→sheet перевіряє збереження derived slots, origin feat, HP і spent resources; це local store/service evidence, не browser auth end-to-end.
+
+`useBackgroundForm` володіє state/patch/validation/submit/cancel; mutation — чинний `useUpdateBackground`/`useCrudMutation`, navigation — `useNavigateFresh`. BackgroundForm рендерить HUD/choices. Class/feat body normalization лишається доменною. Докази — [S6](../archive/superpowers/plans/2026-10-26-constructor-refactor-s6-progress.md) і [S8](../archive/superpowers/plans/2026-10-26-constructor-refactor-s8-progress.md).

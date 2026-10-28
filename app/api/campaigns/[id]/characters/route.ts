@@ -1,11 +1,8 @@
-import { NextResponse } from "next/server";
+
 
 import { createCharacter } from "./create-character";
 import { listCharacters } from "./list-characters";
 
-import { CharacterType } from "@/lib/constants/characters";
-import { prisma } from "@/lib/db";
-import { requireDM } from "@/lib/utils/api/api-auth";
 import { handleApiError } from "@/lib/utils/api/error-handler";
 import type { CampaignRouteContext } from "@/types/api";
 
@@ -29,18 +26,4 @@ export async function GET(request: Request, { params }: CampaignRouteContext) {
   }
 }
 
-export async function DELETE(_request: Request, { params }: CampaignRouteContext) {
-  try {
-    const { id } = await params;
-
-    const accessResult = await requireDM(id);
-
-    if (accessResult instanceof NextResponse) return accessResult;
-
-    const result = await prisma.character.deleteMany({ where: { campaignId: id, type: CharacterType.PLAYER } });
-
-    return NextResponse.json({ success: true, deleted: result.count });
-  } catch (error) {
-    return handleApiError(error, { action: "delete all characters" });
-  }
-}
+export { DELETE } from "@/lib/server/characters/operations/delete-all";

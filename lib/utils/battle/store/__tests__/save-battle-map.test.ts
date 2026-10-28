@@ -5,6 +5,7 @@ import { createMockParticipant } from "@/lib/utils/battle/__tests__/fixtures/moc
 import type { BattleDb } from "@/lib/utils/battle/store/load-battle";
 import { saveBattle } from "@/lib/utils/battle/store/save-battle";
 import type { BattleMutationOutcome, LoadedBattle } from "@/lib/utils/battle/store/types";
+import { DEFAULT_RULES } from "@/lib/utils/rules";
 import type { BattleMapConfig } from "@/types/battle";
 
 const map: BattleMapConfig = { cols: 8, rows: 8, background: null, opacity: 0.3, terrain: { "1:1": { kind: "barrier", untilRound: 2 } } };
@@ -16,7 +17,7 @@ const before: LoadedBattle = {
     id: "b1", campaignId: "c1", status: "active", round: 2, turnIndex: 0, version: 3,
     eventSeq: 4, pendingMoraleCheck: null, pendingCritChoice: null, startedAt: null, completedAt: null,
   },
-  meta: { name: "Бій", description: null, setup: [], friendlyFire: false, critChoiceByDm: false, map, createdAt: new Date() },
+  meta: { name: "Бій", description: null, setup: [], friendlyFire: false, rules: DEFAULT_RULES, critChoiceByDm: false, map, createdAt: new Date() },
   participants: [hero],
   pending: [],
   isDM: true,
@@ -81,5 +82,25 @@ describe("saveBattle: карта", () => {
     await saveBattle(db, { ...before, meta: { ...before.meta, audio: { trackId: "t", track: null, playing: true, offsetSec: 0, startedAt: 0, seq: 1 } } }, { participants: [hero], pending: [], events: [event], scene: { turnIndex: 0 } });
 
     expect((tx.battleScene.updateMany.mock.calls[0] as unknown as [{ data: object }])[0].data).not.toHaveProperty("audio");
+  });
+});
+
+describe("saveBattle: правила", () => {
+  it("пише колонку rules, коли вона в патчі", async () => {
+    const { db, tx } = fakeDb();
+
+    const rules = { ...DEFAULT_RULES, morale: { ...DEFAULT_RULES.morale, enabled: false } };
+
+    await saveBattle(db, before, { participants: [hero], pending: [], events: [], scene: { rules } });
+
+    expect(tx.battleScene.updateMany.mock.calls[0]).toMatchObject([{ data: { rules } }]);
+  });
+
+  it("без rules у патчі колонку не чіпає", async () => {
+    const { db, tx } = fakeDb();
+
+    await saveBattle(db, before, { participants: [hero], pending: [], events: [], scene: { turnIndex: 0 } });
+
+    expect((tx.battleScene.updateMany.mock.calls[0] as unknown as [{ data: object }])[0].data).not.toHaveProperty("rules");
   });
 });

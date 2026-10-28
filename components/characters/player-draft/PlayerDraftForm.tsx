@@ -6,6 +6,7 @@ import Link from "next/link";
 import { AbilityScoresPicker } from "./AbilityScoresPicker";
 import { RollingField } from "./RollingField";
 
+import { ChoicesEditor } from "@/components/choices/ChoicesEditor";
 import { EntityIcon } from "@/components/common/EntityIcon";
 import { HudForm, HudFormPage, HudSection } from "@/components/hud/form";
 import { OnboardingHint } from "@/components/onboarding/OnboardingHint";
@@ -18,7 +19,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { ALIGNMENTS } from "@/lib/constants/alignment";
 import { GOAL_KIND_LABEL } from "@/lib/constants/characters";
 import { HERO_ARCHETYPE_OPTIONS } from "@/lib/constants/hero-archetypes";
-import { type RollKey, usePlayerDraftForm } from "@/lib/hooks/characters";
+import { type RollKey, useChoiceRefs, usePlayerDraftForm } from "@/lib/hooks/characters";
 import { useRaces } from "@/lib/hooks/races";
 import type { DraftInput } from "@/types/characters";
 
@@ -33,9 +34,11 @@ const ARCHETYPES = HERO_ARCHETYPE_OPTIONS.filter((o) => o.value);
 export function PlayerDraftForm({ campaignId, characterId, initial }: PlayerDraftFormProps) {
   const { data: races = [] } = useRaces(campaignId);
 
-  const { form, generate, ai, submit, scoreStatus, reveal } = usePlayerDraftForm({ campaignId, characterId, initial });
+  const { form, choices, generate, ai, submit, scoreStatus, reveal } = usePlayerDraftForm({ campaignId, characterId, initial });
 
   const { values, set } = form;
+
+  const refs = useChoiceRefs(campaignId, values.race);
 
   const spinning = (key: RollKey) => reveal.rolling && !reveal.settled.has(key) && key in reveal.display;
 
@@ -71,11 +74,11 @@ export function PlayerDraftForm({ campaignId, characterId, initial }: PlayerDraf
         error={submit.error ?? disabledReason}
         onSubmit={(e) => {
           e.preventDefault();
-          submit.run();
+          submit.run(refs.ready ? refs : undefined);
         }}
         actions={
           <>
-            <Button type="submit" form="player-draft" disabled={!scoreStatus.valid || submit.isPending || busy}>
+            <Button type="submit" form="player-draft" disabled={!scoreStatus.valid || (!!form.classes && !values.classId) || submit.isPending || busy}>
               {submit.isPending ? "Відправка..." : "Відправити DM"}
             </Button>
             <Button type="button" variant="outline" asChild>
@@ -99,7 +102,7 @@ export function PlayerDraftForm({ campaignId, characterId, initial }: PlayerDraf
                   <DropdownMenuItem onSelect={generate.all}>Усе</DropdownMenuItem>
                   <DropdownMenuItem onSelect={generate.name}>Ім&apos;я</DropdownMenuItem>
                   <DropdownMenuItem onSelect={generate.scores}>Характеристики</DropdownMenuItem>
-                  <DropdownMenuItem onSelect={generate.backstory}>Передісторія</DropdownMenuItem>
+                  <DropdownMenuItem onSelect={generate.backstory}>Біографія</DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>
               {ai.available && (
@@ -120,13 +123,21 @@ export function PlayerDraftForm({ campaignId, characterId, initial }: PlayerDraf
                   {races.length === 0 && <p className="mt-1 text-xs text-hud-muted">У кампанії ще немає рас - попросіть DM створити расу.</p>}
                 </RollingField>
 
-                <RollingField id="draft-archetype" label="Архетип" spinning={spinning("archetype")} settled={settled("archetype")} display={archetypeLabel(shown("archetype"))}>
-                  <SelectField id="draft-archetype" value={values.archetype} onValueChange={(v) => set("archetype", v as DraftInput["archetype"])} options={ARCHETYPES} triggerClassName="w-full" />
-                </RollingField>
+                {form.classes ? (
+                  <RollingField id="draft-class" label="Клас *" spinning={spinning("class")} settled={settled("class")} display={shown("class")}>
+                    <SelectField id="draft-class" value={values.classId ?? ""} onValueChange={form.classes.set} placeholder="Виберіть клас" options={form.classes.list.map((c) => ({ value: c.id, label: c.name }))} required triggerClassName="w-full" />
+                  </RollingField>
+                ) : (
+                  <>
+                    <RollingField id="draft-archetype" label="Архетип" spinning={spinning("archetype")} settled={settled("archetype")} display={archetypeLabel(shown("archetype"))}>
+                      <SelectField id="draft-archetype" value={values.archetype} onValueChange={(v) => set("archetype", v as DraftInput["archetype"])} options={ARCHETYPES} triggerClassName="w-full" />
+                    </RollingField>
 
-                <RollingField id="draft-class" label="Клас *" spinning={spinning("class")} settled={settled("class")} display={shown("class")}>
-                  <Input id="draft-class" value={values.class} onChange={(e) => set("class", e.target.value)} required maxLength={100} placeholder="Наприклад: Паладин" />
-                </RollingField>
+                    <RollingField id="draft-class" label="Клас *" spinning={spinning("class")} settled={settled("class")} display={shown("class")}>
+                      <Input id="draft-class" value={values.class} onChange={(e) => set("class", e.target.value)} required maxLength={100} placeholder="Наприклад: Паладин" />
+                    </RollingField>
+                  </>
+                )}
 
                 <RollingField id="draft-alignment" label="Світогляд" spinning={spinning("alignment")} settled={settled("alignment")} display={shown("alignment")}>
                   <SelectField id="draft-alignment" value={values.alignment ?? ""} onValueChange={(v) => set("alignment", v)} placeholder="Виберіть світогляд" options={ALIGNMENTS.map((a) => ({ value: a, label: a }))} allowNone triggerClassName="w-full" />
@@ -158,9 +169,24 @@ export function PlayerDraftForm({ campaignId, characterId, initial }: PlayerDraf
               <AbilityScoresPicker form={form} scoreStatus={scoreStatus} reveal={reveal} />
             </HudSection>
 
+            {(refs.race || choices.enabled) && refs.ready && (
+              <HudSection title="Вибори">
+                <ChoicesEditor
+                  state={choices}
+                  refs={refs}
+                  hero={{
+                    level: 1,
+                    scores: { strength: values.strength, dexterity: values.dexterity, constitution: values.constitution, intelligence: values.intelligence, wisdom: values.wisdom, charisma: values.charisma },
+                    skills: {},
+                    classMode: choices.enabled && !!values.classId,
+                  }}
+                />
+              </HudSection>
+            )}
+
             <HudSection title="Історія">
               <div data-settled={settled("background")} className="hud-roll-fade flex flex-col gap-3" style={spinning("background") ? { opacity: 0 } : undefined}>
-                <Textarea aria-label="Передісторія" rows={6} maxLength={4000} value={values.background ?? ""} onChange={(e) => set("background", e.target.value)} placeholder="Розкажіть, хто ваш герой" />
+                <Textarea aria-label="Біографія" rows={6} maxLength={4000} value={values.background ?? ""} onChange={(e) => set("background", e.target.value)} placeholder="Розкажіть, хто ваш герой" />
 
                 {goals.length > 0 && (
                   <ul className="flex flex-col gap-2">

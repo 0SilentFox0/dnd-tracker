@@ -61,16 +61,18 @@ export function useUpdateCharacter(campaignId: string, characterId: string) {
   });
 }
 
+export const levelUpInvalidateKeys = (campaignId: string) => [
+  ...characterWriteKeys(campaignId),
+  characterKeys.details(campaignId),
+  characterKeys.sheet(campaignId),
+  skillKeys.progressionOf(campaignId),
+];
+
 export function useLevelUpCharacter(campaignId: string) {
   return useCrudMutation({
     mutationFn: (characterId: string) =>
       levelUpCharacter(campaignId, characterId),
-    invalidateKeys: [
-      ...characterWriteKeys(campaignId),
-      characterKeys.details(campaignId),
-      characterKeys.sheet(campaignId),
-      skillKeys.progressionOf(campaignId),
-    ],
+    invalidateKeys: levelUpInvalidateKeys(campaignId),
   });
 }
 

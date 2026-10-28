@@ -1,12 +1,13 @@
-import { describe, expect, it } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import type { CriticalEffect, CriticalEffectType } from "@/lib/constants/critical-effects";
-import { makeEffect } from "@/lib/utils/abilities/__tests__/fixtures";
+import { makeEffect, resolved } from "@/lib/utils/abilities/__tests__/fixtures";
 import { createMockParticipant, grantPassive } from "@/lib/utils/battle/__tests__/fixtures/mock-participant";
 import { testMap } from "@/lib/utils/battle/__tests__/fixtures/placed";
 import { applyCriticalEffect } from "@/lib/utils/battle/attack";
 import { endTurnCleanup } from "@/lib/utils/battle/turn/end-turn-cleanup";
 import { processStartOfRound, processStartOfTurn } from "@/lib/utils/battle/turn/start-end";
+import { DEFAULT_RULES } from "@/lib/utils/rules/defaults";
 import type { ActiveEffect, BattleMapConfig, BattleParticipant } from "@/types/battle";
 
 const debuff = (type: string, duration: number): ActiveEffect => makeEffect(`e-${type}`, { name: type, type: "debuff", duration, effects: [{ type, value: 0 }] });
@@ -205,5 +206,53 @@ describe("приземлення після піке", () => {
 
     expect(out.battleData.airborne).toBeUndefined();
     expect(out.battleData.position).toEqual({ x: 4, y: 4 });
+  });
+});
+
+describe("детермінований контракт початку ходу", () => {
+  beforeEach(() => { vi.useFakeTimers(); vi.setSystemTime(new Date("2026-10-27T12:00:00Z")); });
+  afterEach(() => { vi.useRealTimers(); });
+
+  it("фіксує повний результат recharge, DOT, hazard, HOT, concentration, expiry та abilities", () => {
+    const base = createMockParticipant();
+
+    const participant = createMockParticipant({
+      combatStats: { ...base.combatStats, currentHp: 25, maxHp: 40 },
+      battleData: {
+        ...base.battleData, position: { x: 1, y: 1 },
+        pools: { breath: { label: "Подих", max: 1, rest: null, recharge: 5 }, roar: { label: "Рик", max: 1, rest: null, recharge: 6 } },
+        abilityUsage: { breath: { battle: 1, round: 0, turn: 0, lastRound: 1 }, roar: { battle: 1, round: 0, turn: 0, lastRound: 1 } },
+        activeEffects: [
+          makeEffect("concentration", { concentration: { castId: "cast", spellName: "Захист" } }),
+          makeEffect("burn", { dotDamage: { damagePerRound: 3, damageType: "fire" } }),
+          makeEffect("regen", { hotHeal: { healPerRound: 2 } }),
+          makeEffect("expired", { duration: 1, countdownAtTurnStart: true }),
+          makeEffect("skip", { effects: [{ type: "skip_action", value: 25 }] }),
+        ],
+        resolvedAbilities: [resolved({ id: "heal", trigger: { event: "turnStart" }, limits: { chance: 50 }, effects: [{ kind: "heal", amount: 2, target: "self" }] })],
+      },
+    });
+
+    const linked = createMockParticipant({ basicInfo: { ...base.basicInfo, id: "linked" }, battleData: { ...base.battleData, activeEffects: [makeEffect("linked", { concentrationOf: { casterId: "p1", castId: "cast" } })] } });
+
+    const map: BattleMapConfig = { cols: 10, rows: 10, background: null, opacity: 0.3, terrain: { "1:1": { kind: "hazard", label: "Вогонь", damage: { dice: "1d6", type: "fire" } } } };
+
+    const values = [0.91, 0.12, 0.74, 0.03, 0.08, 0.87, 0.27];
+
+    let i = 0;
+
+    const rng = vi.fn(() => {
+      if (i >= values.length) throw new Error("Unexpected RNG call");
+
+      return values[i++];
+    });
+
+    const input = structuredClone([participant, linked]);
+
+    const result = processStartOfTurn(participant, 2, [participant, linked], rng, map, { ...DEFAULT_RULES, concentration: { enabled: true, dcCap: null } });
+
+    expect(rng).toHaveBeenCalledTimes(values.length);
+    expect({ result, rngCalls: rng.mock.results.map((r) => r.value) }).toMatchSnapshot();
+    expect([participant, linked]).toEqual(input);
   });
 });

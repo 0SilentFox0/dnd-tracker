@@ -5,6 +5,7 @@ import { createRequest,getResponseJson, getResponseStatus } from "./helpers";
 
 import { prisma } from "@/lib/db";
 import * as apiAuth from "@/lib/utils/api/api-auth";
+import { DEFAULT_RULES } from "@/lib/utils/rules";
 
 vi.mock("@/lib/utils/api/api-auth", () => ({
   requireAuth: vi.fn(),
@@ -14,19 +15,22 @@ vi.mock("@/lib/utils/api/api-auth", () => ({
 
 vi.mock("next/cache", () => ({ revalidateTag: vi.fn() }));
 
-vi.mock("@/lib/db", () => ({
-  prisma: {
+vi.mock("@/lib/db", async () => {
+  const { contentDatabaseDouble } = await import("@/lib/server/content/__tests__/database-double");
+
+  return { prisma: contentDatabaseDouble({
     skill: {
       findMany: vi.fn(),
       create: vi.fn(),
       findUnique: vi.fn(),
+      findFirst: vi.fn(),
       update: vi.fn(),
       delete: vi.fn(),
       deleteMany: vi.fn(),
     },
     spell: { count: vi.fn() },
-  },
-}));
+  }) };
+});
 
 describe("GET /api/campaigns/[id]/skills", () => {
   beforeEach(() => {
@@ -54,6 +58,8 @@ describe("GET /api/campaigns/[id]/skills", () => {
       userId: "user-1",
       isDM: false,
       campaign: {
+        kind: "campaign",
+        rules: DEFAULT_RULES,
         id: "c1",
         maxLevel: 20,
         allowPlayerEdit: true,
@@ -117,6 +123,8 @@ describe("GET /api/campaigns/[id]/skills", () => {
       userId: "user-1",
       isDM: false,
       campaign: {
+        kind: "campaign",
+        rules: DEFAULT_RULES,
         id: "c1",
         maxLevel: 20,
         allowPlayerEdit: true,
@@ -145,7 +153,7 @@ describe("GET /api/campaigns/[id]/skills", () => {
     vi.mocked(apiAuth.requireCampaignAccess).mockResolvedValue({
       userId: "user-1",
       isDM: false,
-      campaign: { id: "c1", maxLevel: 20, allowPlayerEdit: true, members: [{ userId: "user-1", role: "player" }] },
+      campaign: { kind: "campaign", id: "c1", maxLevel: 20, rules: DEFAULT_RULES, allowPlayerEdit: true, members: [{ userId: "user-1", role: "player" }] },
     });
     vi.mocked(prisma.skill.findMany).mockResolvedValue([{ id: "s1", name: "Поклик", icon: null, description: null }] as never);
 
@@ -199,6 +207,8 @@ describe("POST /api/campaigns/[id]/skills", () => {
       userId: "dm-1",
       isDM: false,
       campaign: {
+        kind: "campaign",
+        rules: DEFAULT_RULES,
         id: "c1",
         maxLevel: 20,
         allowPlayerEdit: true,
@@ -222,11 +232,13 @@ describe("POST /api/campaigns/[id]/skills", () => {
     consoleErrorSpy.mockRestore();
   });
 
-  it("повертає 200 та створений скіл при валідному body", async () => {
+  it("повертає 201 та створений скіл при валідному body", async () => {
     vi.mocked(apiAuth.requireDM).mockResolvedValue({
       userId: "dm-1",
       isDM: false,
       campaign: {
+        kind: "campaign",
+        rules: DEFAULT_RULES,
         id: "c1",
         maxLevel: 20,
         allowPlayerEdit: true,
@@ -284,7 +296,7 @@ describe("POST /api/campaigns/[id]/skills", () => {
       params: Promise.resolve({ id: "c1" }),
     });
 
-    expect(await getResponseStatus(response)).toBe(200);
+    expect(await getResponseStatus(response)).toBe(201);
 
     const data = await getResponseJson(response) as { id: string; name: string };
 
@@ -336,11 +348,13 @@ describe("DELETE /api/campaigns/[id]/skills (delete all)", () => {
     expect(await getResponseStatus(response)).toBe(403);
   });
 
-  it("повертає 200 та deletedCount при успіху", async () => {
+  it("повертає deleted, а не deletedCount", async () => {
     vi.mocked(apiAuth.requireDM).mockResolvedValue({
       userId: "dm-1",
       isDM: false,
       campaign: {
+        kind: "campaign",
+        rules: DEFAULT_RULES,
         id: "c1",
         maxLevel: 20,
         allowPlayerEdit: true,
@@ -361,10 +375,9 @@ describe("DELETE /api/campaigns/[id]/skills (delete all)", () => {
 
     expect(await getResponseStatus(response)).toBe(200);
 
-    const data = await getResponseJson(response) as { success: boolean; deletedCount: number };
+    const data = await getResponseJson(response) as { ok: boolean; deleted: number };
 
-    expect(data.success).toBe(true);
-    expect(data.deletedCount).toBe(5);
+    expect(data).toEqual({ ok: true, deleted: 5 });
   });
 });
 
@@ -394,13 +407,15 @@ describe("GET /api/campaigns/[id]/skills/[skillId]", () => {
       userId: "user-1",
       isDM: false,
       campaign: {
+        kind: "campaign",
+        rules: DEFAULT_RULES,
         id: "c1",
         maxLevel: 20,
         allowPlayerEdit: true,
         members: [{ userId: "user-1", role: "player" }],
       },
     });
-    vi.mocked(prisma.skill.findUnique).mockResolvedValue(null);
+    vi.mocked(prisma.skill.findFirst).mockResolvedValue(null);
 
     const { GET } = await import("@/app/api/campaigns/[id]/skills/[skillId]/route");
 
@@ -422,41 +437,15 @@ describe("GET /api/campaigns/[id]/skills/[skillId]", () => {
       userId: "user-1",
       isDM: false,
       campaign: {
+        kind: "campaign",
+        rules: DEFAULT_RULES,
         id: "c1",
         maxLevel: 20,
         allowPlayerEdit: true,
         members: [{ userId: "user-1", role: "player" }],
       },
     });
-    vi.mocked(prisma.skill.findUnique).mockResolvedValue({
-      id: "skill-1",
-      campaignId: "other-campaign",
-      name: "Skill",
-      description: null,
-      icon: null,
-      basicInfo: {},
-      combatStats: null,
-      bonuses: {},
-      spellData: null,
-      mainSkillData: null,
-      skillTriggers: [],
-      image: null,
-      damage: null,
-      armor: null,
-      speed: null,
-      physicalResistance: null,
-      magicalResistance: null,
-      spellId: null,
-      spellGroupId: null,
-      mainSkillId: null,
-      spellNewSpellId: null,
-      grantedSpellId: null,
-      createdAt: new Date(),
-      updatedAt: new Date(),
-      spell: null,
-      spellGroup: null,
-      grantedSpell: null,
-    } as never);
+    vi.mocked(prisma.skill.findFirst).mockResolvedValue(null);
 
     const { GET } = await import("@/app/api/campaigns/[id]/skills/[skillId]/route");
 
@@ -474,6 +463,8 @@ describe("GET /api/campaigns/[id]/skills/[skillId]", () => {
       userId: "user-1",
       isDM: false,
       campaign: {
+        kind: "campaign",
+        rules: DEFAULT_RULES,
         id: "c1",
         maxLevel: 20,
         allowPlayerEdit: true,
@@ -511,7 +502,7 @@ describe("GET /api/campaigns/[id]/skills/[skillId]", () => {
       grantedSpell: null,
     };
 
-    vi.mocked(prisma.skill.findUnique).mockResolvedValue(mockSkill as never);
+    vi.mocked(prisma.skill.findFirst).mockResolvedValue(mockSkill as never);
 
     const { GET } = await import("@/app/api/campaigns/[id]/skills/[skillId]/route");
 
@@ -560,13 +551,15 @@ describe("PATCH /api/campaigns/[id]/skills/[skillId]", () => {
       userId: "dm-1",
       isDM: false,
       campaign: {
+        kind: "campaign",
+        rules: DEFAULT_RULES,
         id: "c1",
         maxLevel: 20,
         allowPlayerEdit: true,
         members: [{ userId: "dm-1", role: "dm" }],
       },
     });
-    vi.mocked(prisma.skill.findUnique).mockResolvedValue(null);
+    vi.mocked(prisma.skill.findFirst).mockResolvedValue(null);
 
     const { PATCH } = await import("@/app/api/campaigns/[id]/skills/[skillId]/route");
 
@@ -588,6 +581,8 @@ describe("PATCH /api/campaigns/[id]/skills/[skillId]", () => {
       userId: "dm-1",
       isDM: false,
       campaign: {
+        kind: "campaign",
+        rules: DEFAULT_RULES,
         id: "c1",
         maxLevel: 20,
         allowPlayerEdit: true,
@@ -622,7 +617,7 @@ describe("PATCH /api/campaigns/[id]/skills/[skillId]", () => {
       updatedAt: new Date(),
     };
 
-    vi.mocked(prisma.skill.findUnique).mockResolvedValue(existingSkill as never);
+    vi.mocked(prisma.skill.findFirst).mockResolvedValue(existingSkill as never);
 
     const updatedSkill = {
       ...existingSkill,
@@ -687,13 +682,15 @@ describe("DELETE /api/campaigns/[id]/skills/[skillId]", () => {
       userId: "dm-1",
       isDM: false,
       campaign: {
+        kind: "campaign",
+        rules: DEFAULT_RULES,
         id: "c1",
         maxLevel: 20,
         allowPlayerEdit: true,
         members: [{ userId: "dm-1", role: "dm" }],
       },
     });
-    vi.mocked(prisma.skill.findUnique).mockResolvedValue(null);
+    vi.mocked(prisma.skill.findFirst).mockResolvedValue(null);
 
     const { DELETE } = await import("@/app/api/campaigns/[id]/skills/[skillId]/route");
 
@@ -713,13 +710,15 @@ describe("DELETE /api/campaigns/[id]/skills/[skillId]", () => {
       userId: "dm-1",
       isDM: false,
       campaign: {
+        kind: "campaign",
+        rules: DEFAULT_RULES,
         id: "c1",
         maxLevel: 20,
         allowPlayerEdit: true,
         members: [{ userId: "dm-1", role: "dm" }],
       },
     });
-    vi.mocked(prisma.skill.findUnique).mockResolvedValue({
+    vi.mocked(prisma.skill.findFirst).mockResolvedValue({
       id: "skill-1",
       campaignId: "c1",
     } as never);
@@ -737,8 +736,8 @@ describe("DELETE /api/campaigns/[id]/skills/[skillId]", () => {
 
     expect(await getResponseStatus(response)).toBe(200);
 
-    const data = await getResponseJson(response) as { success: boolean };
+    const data = await getResponseJson(response) as { ok: boolean };
 
-    expect(data.success).toBe(true);
+    expect(data.ok).toBe(true);
   });
 });

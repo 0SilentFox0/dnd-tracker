@@ -1,20 +1,8 @@
-import { bonusActionMutation, bonusActionSchema } from "./bonus-action-mutation";
-
-import { BattleStatus } from "@/lib/constants/battle";
-import { BattleAccess, runBattleMutation } from "@/lib/utils/battle/pipeline/run-battle-mutation";
+import { runBattleMutation } from "@/lib/server/battles/run-mutation";
 
 export async function POST(
   req: Request,
   { params }: { params: Promise<{ id: string; battleId: string }> },
 ) {
-  return runBattleMutation(req, {
-    params: await params,
-    access: BattleAccess.MEMBER,
-    requireStatus: BattleStatus.ACTIVE,
-    blockedByMode: true,
-    rateLimitScope: "bonusAction",
-    schema: bonusActionSchema,
-    respond: "wrapped",
-    mutate: bonusActionMutation,
-  });
+  return runBattleMutation(req, { params: await params, operation: "bonus-action" });
 }

@@ -6,6 +6,7 @@ import { cacheTags } from "@/lib/cache/tags";
 import { prisma } from "@/lib/db";
 import { describeEffect } from "@/lib/utils/abilities/registry/effects";
 import { abilitySummary } from "@/lib/utils/abilities/summary";
+import { parseSpellFx } from "@/lib/utils/battle/fx/spell-fx-schema";
 import { costLabel, resolutionLabel, targetingLabel } from "@/lib/utils/spells/model/labels";
 import { readSpellDefinition } from "@/lib/utils/spells/model/read";
 import { spellRules } from "@/lib/utils/spells/to-book-spell";
@@ -37,6 +38,7 @@ const SPELL_SELECT = {
   maxStacks: true,
   appearanceDescription: true,
   icon: true,
+  fx: true,
   spellGroup: { select: { name: true } },
 } satisfies Prisma.SpellSelect;
 
@@ -82,6 +84,7 @@ async function loadInfoReference(campaignId: string): Promise<InfoReference> {
         appearanceDescription: s.appearanceDescription ?? null,
         groupName: s.spellGroup?.name ?? null,
         icon: s.icon ?? null,
+        fx: parseSpellFx(s.fx),
         rules: spellRules(def),
       };
     }),
@@ -91,5 +94,5 @@ async function loadInfoReference(campaignId: string): Promise<InfoReference> {
 export function getCachedInfoReference(campaignId: string): Promise<InfoReference> {
   const tags = [cacheTags.skills(campaignId), cacheTags.mainSkills(campaignId), cacheTags.spells(campaignId)];
 
-  return unstable_cache(() => loadInfoReference(campaignId), ["info-reference-v2", campaignId], { tags, revalidate: REFERENCE_REVALIDATE_SECONDS })();
+  return unstable_cache(() => loadInfoReference(campaignId), ["info-reference-v3", campaignId], { tags, revalidate: REFERENCE_REVALIDATE_SECONDS })();
 }

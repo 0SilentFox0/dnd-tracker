@@ -5,12 +5,13 @@ import { newBattleAction } from "@/lib/utils/battle/common/new-action";
 import type { SpellPower } from "@/lib/utils/battle/spell/power";
 import type { CastableSpell } from "@/lib/utils/battle/types/spell-process";
 import type { ResolvedAbility } from "@/types/abilities";
-import type { BattleAction, BattleParticipant, DamageStep } from "@/types/battle";
+import type { BattleAction, BattleParticipant, DamageStep, SpellGrant } from "@/types/battle";
 
 export interface Outcome {
   skip: boolean;
   factor: number;
   raceMultiplier: number;
+  critExtra?: number;
   /** крит рятівного кидка: статуси заклинання на ціль не накладаються */
   negateEffects?: boolean;
 }
@@ -23,14 +24,22 @@ export interface SpellCastState {
   targetIds: string[];
   /** Цілі каста й усі, кого зачепили власні ефекти заклинання — без тих, кого змінили лише тригери. */
   touchedIds: Set<string>;
-  info: { spellId: string; school: string | null; level: number };
+  info: { spellId: string; school: string | null; level: number; castLevel?: number };
+  castLevel: number;
+  chosenCastLevel?: number;
   ability: ResolvedAbility;
+  grant?: SpellGrant;
   power: SpellPower;
   saveDc: number;
+  attackBonus?: number;
   battleId: string;
   actionModifiers: Record<string, StaticEffect[]>;
   rng: () => number;
   saveRolls: Array<{ participantId: string; roll: number }>;
+  attackRolls: Array<{ participantId: string; roll: number }>;
+  diceCount: number;
+  diceSides: number;
+  attacks: NonNullable<BattleAction["actionDetails"]["spellAttacks"]>;
   saves: NonNullable<BattleAction["actionDetails"]["savingThrows"]>;
   damageSteps: Record<string, DamageStep[]>;
   outcomes: Map<string, Outcome>;
@@ -82,7 +91,7 @@ export function abilityOf(spell: CastableSpell): ResolvedAbility {
 
 export function actionOf(caster: BattleParticipant, spell: CastableSpell, targets: BattleParticipant[], battleId: string, round: number, text: string): BattleAction {
   return newBattleAction(caster, "spell", { battleId, round, targets }, {
-    actionDetails: { spellId: spell.id, spellName: spell.name, spellLevel: spell.level },
+    actionDetails: { spellId: spell.id, spellName: spell.name, spellLevel: spell.level, ...(spell.fx && { spellFx: spell.fx }) },
     resultText: text,
   });
 }

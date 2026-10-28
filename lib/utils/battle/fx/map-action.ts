@@ -1,7 +1,6 @@
 import { diceThrowsOf } from "./dice/from-action";
 import { elementOf } from "./element";
 import { splashTargetIds } from "./impact";
-import { spellFx } from "./spells";
 import type { FxArchetype, FxElement, FxSpec } from "./types";
 
 import type { BattleAction } from "@/types/battle";
@@ -37,7 +36,7 @@ function spellRules(action: BattleAction): { archetype: FxArchetype; element: Fx
 function spellArchetype(action: BattleAction): { archetype: FxArchetype; element: FxElement } {
   const computed = spellRules(action);
 
-  const signature = spellFx(action.actionDetails.spellName);
+  const signature = action.actionDetails.spellFx;
 
   return { archetype: signature?.archetype ?? computed.archetype, element: signature?.element ?? computed.element };
 }

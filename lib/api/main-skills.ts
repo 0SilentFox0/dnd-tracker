@@ -5,7 +5,7 @@ const mainSkillsApi = createCampaignCrudApi<
   MainSkill,
   MainSkillFormData,
   Partial<MainSkillFormData>,
-  void
+  { ok: true }
 >("/main-skills");
 
 export const getMainSkills = mainSkillsApi.list;

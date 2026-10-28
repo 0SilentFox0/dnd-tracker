@@ -1,8 +1,6 @@
 import { NextResponse } from "next/server";
 
-import { formatSkillsListResponse } from "./format-skills-response";
-
-import { prisma } from "@/lib/db";
+import { readSkillsList } from "@/lib/server/skills/read-skills-list";
 import { requireCampaignAccess } from "@/lib/utils/api/api-auth";
 import { handleApiError } from "@/lib/utils/api/error-handler";
 
@@ -15,13 +13,7 @@ export async function readSkills({ id, accessChecked = false }: { id: string; ac
       if (access instanceof NextResponse) return access;
     }
 
-    const skills = await prisma.skill.findMany({
-      where: { campaignId: id },
-      include: { spell: true, spellGroup: true, grantedSpell: true },
-      orderBy: { createdAt: "desc" },
-    });
-
-    return NextResponse.json(formatSkillsListResponse(skills));
+    return NextResponse.json(await readSkillsList(id));
   } catch (error) {
     return handleApiError(error, { action: "list skills" });
   }

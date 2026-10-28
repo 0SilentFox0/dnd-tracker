@@ -3,11 +3,12 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import { prisma } from "@/lib/db";
 import * as apiAuth from "@/lib/utils/api/api-auth";
+import { DEFAULT_RULES } from "@/lib/utils/rules";
 
 vi.mock("@/lib/server/scenario/player-story", () => ({ loadStoryChapters: vi.fn(async () => []) }));
 vi.mock("@/lib/utils/api/api-auth", () => ({ requireCampaignAccess: vi.fn() }));
 vi.mock("@/lib/db", () => ({ prisma: { character: { findUnique: vi.fn() } } }));
-vi.mock("@/app/api/campaigns/[id]/characters/[characterId]/sheet/sheet-handler", async (orig) => ({
+vi.mock("@/lib/server/characters/core/sheet-handler", async (orig) => ({
   ...(await orig<object>()),
   buildSheetFor: vi.fn().mockResolvedValue({ identity: { name: "Ліра" } }),
 }));
@@ -48,12 +49,12 @@ describe("GET sheet", () => {
   });
 
   it("відомий доступ сторінки — без повторного запиту членства", async () => {
-    const { readCharacterSheet } = await import("@/app/api/campaigns/[id]/characters/[characterId]/sheet/read-sheet");
+    const { readCharacterSheet } = await import("@/lib/server/characters/core/read-sheet");
 
-    const res = await readCharacterSheet({ id: "camp", characterId: "ch", known: { userId: "owner", isDM: false, maxLevel: 20 } });
+    const res = await readCharacterSheet({ id: "camp", characterId: "ch", known: { userId: "owner", isDM: false, maxLevel: 20, rules: DEFAULT_RULES } });
 
     expect(res.status).toBe(200);
     expect(apiAuth.requireCampaignAccess).not.toHaveBeenCalled();
-    expect((await readCharacterSheet({ id: "camp", characterId: "ch", known: { userId: "other", isDM: false, maxLevel: 20 } })).status).toBe(403);
+    expect((await readCharacterSheet({ id: "camp", characterId: "ch", known: { userId: "other", isDM: false, maxLevel: 20, rules: DEFAULT_RULES } })).status).toBe(403);
   });
 });

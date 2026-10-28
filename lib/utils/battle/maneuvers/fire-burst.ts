@@ -1,9 +1,13 @@
 import { attackShare, isEnemyOf, maneuverResult,pickedEnemies, strikeAll } from "./strike";
 import type { ManeuverInput, ManeuverResult } from "./types";
 
-import { findParticipant } from "@/lib/utils/abilities/engine/core/participants";
+import { findParticipant, replaceParticipant } from "@/lib/utils/abilities/engine/core/participants";
 import { cellsOf, footprintDistance, isOnMap } from "@/lib/utils/battle/grid";
-import { rollSavingThrow, spellSaveDc } from "@/lib/utils/battle/spell/power";
+import { evasionFactor, hasEvasion } from "@/lib/utils/battle/saves/evasion";
+import { resolveSave } from "@/lib/utils/battle/saves/legendary";
+import { rollSave } from "@/lib/utils/battle/saves/roll-save";
+import { spellSaveDc } from "@/lib/utils/battle/spell/power";
+import { DEFAULT_RULES } from "@/lib/utils/rules";
 import type { BattleParticipant } from "@/types/battle";
 
 export function fireBurst(ps: BattleParticipant[], input: ManeuverInput): ManeuverResult {
@@ -19,17 +23,30 @@ export function fireBurst(ps: BattleParticipant[], input: ManeuverInput): Maneuv
 
   const full = attackShare(actor, ps, input.percentOfAttack, input.rng);
 
-  const dc = spellSaveDc(actor);
+  const dc = spellSaveDc(actor, undefined, (input.rules ?? DEFAULT_RULES).formulas.saveDcBase);
 
   const notes = new Map<string, string>();
 
+  let next = ps;
+
+  const resisted: string[] = [];
+
   const hits = targets.map((t) => {
-    const { total, success: saved } = rollSavingThrow(t, "dexterity", dc, input.rng);
+    const rolled = rollSave({ target: t, ability: "dexterity", dc, participants: ps, rules: input.rules, rng: input.rng });
 
-    notes.set(t.basicInfo.id, ` (Спритність ${total} проти СК ${dc}${saved ? " — половина" : ""})`);
+    const { result, participant, message } = resolveSave(t, rolled);
 
-    return { targetId: t.basicInfo.id, amount: saved ? Math.floor(full / 2) : full };
+    if (message) {
+      next = replaceParticipant(next, participant);
+      resisted.push(message);
+    }
+
+    const evasive = hasEvasion(ps, t);
+
+    notes.set(t.basicInfo.id, ` (Спритність ${rolled.total} проти СК ${dc}${evasive ? (result.success ? " — ухилення" : " — ухилення, половина") : result.success ? " — половина" : ""})`);
+
+    return { targetId: t.basicInfo.id, amount: Math.floor(full * evasionFactor(result.success, evasive)) };
   });
 
-  return strikeAll(maneuverResult(ps), hits, { actorId: actor.basicInfo.id, damageType: "fire", name: input.name, note: (id) => notes.get(id) ?? "" });
+  return strikeAll(maneuverResult(next, resisted), hits, { actorId: actor.basicInfo.id, damageType: "fire", name: input.name, rules: input.rules, rng: input.rng, note: (id) => notes.get(id) ?? "" });
 }

@@ -1,3 +1,4 @@
+import { NextResponse } from "next/server";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import { getResponseJson } from "./helpers";
@@ -6,14 +7,15 @@ import { prisma } from "@/lib/db";
 import * as apiAuth from "@/lib/utils/api/api-auth";
 import { buildTreeJson } from "@/lib/utils/skills/progression";
 
-vi.mock("@/lib/utils/api/api-auth", () => ({ requireDM: vi.fn() }));
+vi.mock("@/lib/utils/api/api-auth", () => ({ requireDM: vi.fn(), requireCampaignAccess: vi.fn() }));
 
 vi.mock("@/lib/db", () => ({
   prisma: {
-    skillTree: { findFirst: vi.fn(), create: vi.fn(), update: vi.fn() },
+    skillTree: { findMany: vi.fn(), findFirst: vi.fn(), create: vi.fn(), update: vi.fn() },
     character: { findMany: vi.fn(), updateMany: vi.fn(), findUnique: vi.fn() },
     mainSkill: { findMany: vi.fn() },
     skill: { findMany: vi.fn() },
+    $queryRaw: vi.fn(async () => [{ id: "camp" }]),
     $transaction: vi.fn(),
   },
 }));
@@ -67,7 +69,7 @@ describe("PATCH skill tree", () => {
     const res = await patch("new", raw);
 
     expect(res.status).toBe(400);
-    expect(await getResponseJson(res as never)).toEqual({ error: "Цей скіл уже стоїть в іншому місці дерева" });
+    expect(await getResponseJson(res as never)).toEqual({ error: "Цей скіл уже стоїть в іншому місці дерева", issues: [{ code: "duplicateSkill", ref: "o1" }] });
   });
 
   it("прогрес під старим JSON id дерева переноситься під id рядка при збереженні", async () => {
@@ -119,5 +121,30 @@ describe("PATCH skill tree", () => {
     expect(res.status).toBe(409);
     expect(prisma.character.updateMany).toHaveBeenCalledTimes(3);
     expect(prisma.skillTree.update).not.toHaveBeenCalled();
+  });
+});
+
+describe("GET skill trees", () => {
+  const list = async () => {
+    const { GET } = await import("@/app/api/campaigns/[id]/skill-trees/route");
+
+    return GET(new Request("http://x"), { params: Promise.resolve({ id: "camp" }) });
+  };
+
+  beforeEach(() => vi.clearAllMocks());
+
+  it("учасник — список дерев кампанії", async () => {
+    vi.mocked(apiAuth.requireCampaignAccess).mockResolvedValue({ userId: "u", isDM: false } as never);
+    vi.mocked(prisma.skillTree.findMany).mockResolvedValue([{ id: "t1" }] as never);
+
+    expect(await getResponseJson(await list() as never)).toEqual([{ id: "t1" }]);
+    expect(prisma.skillTree.findMany).toHaveBeenCalledWith({ where: { campaignId: "camp" } });
+  });
+
+  it("не учасник — 403", async () => {
+    vi.mocked(apiAuth.requireCampaignAccess).mockResolvedValue(NextResponse.json({ error: "x" }, { status: 403 }) as never);
+
+    expect((await list()).status).toBe(403);
+    expect(prisma.skillTree.findMany).not.toHaveBeenCalled();
   });
 });

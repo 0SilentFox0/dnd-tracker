@@ -33,15 +33,36 @@ export function MagicTab() {
           <span>{sheet.magic.ability}</span>
         </div>
       )}
+      {sheet.pact && (
+        <HudSection title="ПАКТ">
+          <span aria-label={`Слоти пакту: ${sheet.pact.current} з ${sheet.pact.max}, ${spellLevelRoman(sheet.pact.level)} коло`} className={cn("hud-sc metal-fill inline-block rounded-md px-3 py-1.5 text-sm", spellLevelMetal(sheet.pact.level))}>
+            {spellLevelRoman(sheet.pact.level)} · {sheet.pact.current}/{sheet.pact.max}
+          </span>
+        </HudSection>
+      )}
       {sheet.slots.length > 0 && (
         <HudSection title="СЛОТИ">
           <div className="flex flex-wrap gap-1.5">
             {sheet.slots.map((s) => (
-              <span key={s.level} aria-label={`${spellLevelRoman(s.level)} коло: ${s.count} ${pluralUk(s.count, ["слот", "слоти", "слотів"])}`} className={cn("hud-sc metal-fill rounded-md px-3 py-1.5 text-sm", spellLevelMetal(s.level))}>
-                {spellLevelRoman(s.level)} · {s.count}
+              <span key={s.level} aria-label={sheet.rest?.persist ? `${spellLevelRoman(s.level)} коло: залишилось ${s.current} з ${s.count}` : `${spellLevelRoman(s.level)} коло: ${s.count} ${pluralUk(s.count, ["слот", "слоти", "слотів"])}`} className={cn("hud-sc metal-fill rounded-md px-3 py-1.5 text-sm", spellLevelMetal(s.level))}>
+                {spellLevelRoman(s.level)} · {sheet.rest?.persist ? `${s.current}/${s.count}` : s.count}
               </span>
             ))}
           </div>
+        </HudSection>
+      )}
+      {sheet.choices && sheet.spells.some((s) => sheet.choices?.spellSources[s.id]) && (
+        <HudSection title="ЗАКЛИНАННЯ З ВИБОРІВ">
+          <ul className="space-y-1 text-sm">
+            {sheet.spells
+              .filter((s) => sheet.choices?.spellSources[s.id])
+              .map((s) => (
+                <li key={s.id} className="flex justify-between gap-2">
+                  <span>{s.name}</span>
+                  <span className="text-xs text-hud-muted">{sheet.choices?.spellSources[s.id]}</span>
+                </li>
+              ))}
+          </ul>
         </HudSection>
       )}
       {sheet.spells.length > 0 ? (

@@ -3,8 +3,11 @@ import { resolveFlat } from "@/lib/utils/abilities/engine/core/amount";
 import { auraKey } from "@/lib/utils/abilities/engine/core/collect-modifiers";
 import { staticEffectStrength } from "@/lib/utils/abilities/engine/core/effect-strength";
 import { resolvedAbilitiesOf } from "@/lib/utils/abilities/engine/core/participants";
+import { clampMorale, moraleCapOf } from "@/lib/utils/abilities/engine/effects/morale";
+import { evaluateCondition } from "@/lib/utils/abilities/registry/conditions";
 import type { Effect } from "@/lib/utils/abilities/schema";
 import { isBakedStat } from "@/lib/utils/abilities/schema/kinds";
+import { isStaticCondition } from "@/lib/utils/abilities/schema/static-condition";
 import { getAbilityModifier } from "@/lib/utils/common/calculations";
 import type { ResolvedAbility } from "@/types/abilities";
 import type { BattleParticipant } from "@/types/battle";
@@ -27,7 +30,7 @@ function bakeOne(p: BattleParticipant, e: ModifyStat, owner: BattleParticipant):
     case "speed":
       return { ...p, combatStats: { ...cs, speed: cs.speed + pct(cs.speed) } };
     case "morale":
-      return { ...p, combatStats: { ...cs, morale: Math.max(-3, Math.min(3, cs.morale + flat)) } };
+      return { ...p, combatStats: { ...cs, morale: clampMorale(cs.morale + flat, moraleCapOf(p)) } };
     case "minTargets":
     case "maxTargets":
       return { ...p, combatStats: { ...cs, [e.stat]: cs[e.stat] + flat } };
@@ -49,22 +52,26 @@ function bakeOne(p: BattleParticipant, e: ModifyStat, owner: BattleParticipant):
 
       const stat = e.stat as (typeof ABILITY_KEYS)[number];
 
-      const score = p.abilities[stat] + flat;
+      const score = e.atLeast !== undefined ? Math.max(p.abilities[stat], e.atLeast) : p.abilities[stat] + flat;
 
       return { ...p, abilities: { ...p.abilities, [stat]: score, modifiers: { ...p.abilities.modifiers, [stat]: getAbilityModifier(score) } } };
     }
   }
 }
 
+const bakesNow = (a: ResolvedAbility, p: BattleParticipant) =>
+  a.trigger.event === "passive" && (!a.condition || (isStaticCondition(a.condition) && evaluateCondition(a.condition, { owner: p, event: null, participants: [p] })));
+
 function bakedEffects(p: BattleParticipant): { ability: ResolvedAbility; effect: ModifyStat; target: string }[] {
   return resolvedAbilitiesOf(p)
-    .filter((a) => a.trigger.event === "passive" && !a.condition)
+    .filter((a) => bakesNow(a, p))
     .flatMap((ability) => ability.effects.filter((e): e is ModifyStat => e.kind === "modifyStat" && isBakedStat(e.stat)).map((effect) => ({ ability, effect, target: effect.target ?? "self" })));
 }
 
 export function bakePassives(p: BattleParticipant): BattleParticipant {
   return bakedEffects(p)
     .filter((x) => x.target === "self")
+    .sort((a, b) => Number(a.effect.atLeast !== undefined) - Number(b.effect.atLeast !== undefined))
     .reduce((acc, { effect }) => bakeOne(acc, effect, p), p);
 }
 
@@ -109,7 +116,7 @@ export function applyBakedAuras(ps: BattleParticipant[], newIds: Set<string>): B
 
 export function bakedStatSources(p: BattleParticipant, stat: string): { label: string; value: number; sourceType: ResolvedAbility["source"]["type"] }[] {
   return resolvedAbilitiesOf(p)
-    .filter((a) => a.trigger.event === "passive" && !a.condition)
+    .filter((a) => bakesNow(a, p))
     .flatMap((a) =>
       a.effects
         .filter((e): e is ModifyStat => e.kind === "modifyStat" && e.stat === stat && (e.target ?? "self") === "self")

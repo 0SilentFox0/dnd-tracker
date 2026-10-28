@@ -3,10 +3,12 @@ import type { Prisma } from "@prisma/client";
 import {
   type RaceModifier,
   RaceModifierSchema,
+  SpellCastingTimeSchema,
   type SpellCost,
   SpellCostSchema,
   type SpellDefinition,
   SpellDiceSchema,
+  SpellDieSidesSchema,
   type SpellResolution,
   SpellResolutionSchema,
   type SpellTargeting,
@@ -17,14 +19,23 @@ import { type Effect, EffectSchema } from "@/lib/utils/abilities/schema";
 
 type SpellRulesRow = {
   id: string;
+  executionMode?: string | null;
   dice?: number | null;
   cost?: string | null;
+  casting?: unknown;
   targeting?: unknown;
   resolution?: unknown;
   spellEffects?: unknown;
   raceModifiers?: unknown;
   stackable?: boolean | null;
   maxStacks?: number | null;
+  concentration?: boolean | null;
+  dieSides?: number | null;
+  upcastDice?: number | null;
+  upcastTargets?: number | null;
+  addAbilityMod?: boolean | null;
+  fixedDice?: boolean | null;
+  damageBonus?: number | null;
 };
 
 const DEFAULT_TARGETING: SpellTargeting = { kind: "enemy" };
@@ -77,28 +88,60 @@ export const spellRaceModifiers = (row: SpellRulesRow): RaceModifier[] => readLi
 
 const readMaxStacks = (v: number | null | undefined) => (Number.isInteger(v) && (v as number) >= 1 && (v as number) <= 10 ? (v as number) : undefined);
 
+const readCount = (v: number | null | undefined) => (Number.isInteger(v) && (v as number) >= 0 && (v as number) <= 10 ? (v as number) : undefined);
+
+function readSpell5e(row: SpellRulesRow) {
+  const dieSides = SpellDieSidesSchema.safeParse(row.dieSides);
+
+  const upcastDice = readCount(row.upcastDice);
+
+  const upcastTargets = readCount(row.upcastTargets);
+
+  return {
+    ...(dieSides.success && { dieSides: dieSides.data }),
+    ...(upcastDice !== undefined && { upcastDice }),
+    ...(upcastTargets !== undefined && { upcastTargets }),
+    ...(row.addAbilityMod === true && { addAbilityMod: true }),
+    ...(row.fixedDice === true && { fixedDice: true }),
+    ...(typeof row.damageBonus === "number" && Number.isInteger(row.damageBonus) && row.damageBonus >= -20 && row.damageBonus <= 40 && { damageBonus: row.damageBonus }),
+  };
+}
+
 export function readSpellDefinition(row: SpellRulesRow): SpellDefinition {
   return {
+    ...(row.executionMode === "manual" && { executionMode: "manual" as const }),
     dice: spellDiceCount(row),
     cost: spellCost(row),
+    ...(SpellCastingTimeSchema.safeParse(row.casting).success && { casting: SpellCastingTimeSchema.parse(row.casting) }),
     targeting: spellTargeting(row),
     resolution: spellResolution(row),
     effects: spellEffects(row),
     raceModifiers: spellRaceModifiers(row),
     stackable: row.stackable === true,
     maxStacks: row.stackable === true ? readMaxStacks(row.maxStacks) : undefined,
+    ...(row.concentration === true && { concentration: true }),
+    ...readSpell5e(row),
   };
 }
 
 export function spellDefinitionColumns(def: SpellDefinition) {
   return {
+    ...(def.executionMode && { executionMode: def.executionMode }),
     dice: def.dice,
     cost: def.cost,
+    casting: def.casting as Prisma.InputJsonValue | undefined,
     targeting: def.targeting as unknown as Prisma.InputJsonValue,
     resolution: def.resolution as unknown as Prisma.InputJsonValue,
     spellEffects: def.effects as unknown as Prisma.InputJsonValue,
     raceModifiers: def.raceModifiers as unknown as Prisma.InputJsonValue,
     stackable: def.stackable === true,
     maxStacks: def.stackable ? (def.maxStacks ?? null) : null,
+    concentration: def.concentration === true,
+    dieSides: def.dieSides ?? null,
+    upcastDice: def.upcastDice ?? null,
+    upcastTargets: def.upcastTargets ?? null,
+    addAbilityMod: def.addAbilityMod ?? null,
+    fixedDice: def.fixedDice ?? null,
+    damageBonus: def.damageBonus ?? null,
   };
 }

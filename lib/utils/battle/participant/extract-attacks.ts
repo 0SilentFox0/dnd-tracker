@@ -13,27 +13,34 @@ import {
 } from "./artifact-utils";
 
 import { AttackType } from "@/lib/constants/battle";
-import { prisma } from "@/lib/db";
+import { parseWeaponTraits } from "@/lib/constants/weapon-traits";
+import { resolveItemRow } from "@/lib/utils/items/resolve";
+import { DEFAULT_RULES, type Ruleset } from "@/lib/utils/rules";
 
+// 5e: безоружний удар = 1 + Сил (плоска «1»)
 // Без зброї свого виду герой б'є лише кубиками рівня — так само рахує баланс (bestAttack у balance/stats.ts)
-const DEFAULT_ATTACKS: ExtractedAttack[] = [
-  { id: "default-melee", name: "Звичайний удар", type: AttackType.MELEE as ExtractedAttack["type"], attackBonus: 0, damageDice: "", damageType: "physical" },
-  { id: "default-ranged", name: "Звичайний постріл", type: AttackType.RANGED as ExtractedAttack["type"], attackBonus: 0, damageDice: "", damageType: "physical" },
+const defaultAttacks = (names: Ruleset["defaultAttacks"], fiveE: boolean): ExtractedAttack[] => [
+  { id: "default-melee", name: names.meleeName, type: AttackType.MELEE as ExtractedAttack["type"], attackBonus: 0, damageDice: fiveE ? "1" : "", damageType: "physical" },
+  { id: "default-ranged", name: names.rangedName, type: AttackType.RANGED as ExtractedAttack["type"], attackBonus: 0, damageDice: "", damageType: "physical" },
 ];
 
-export async function extractAttacksFromCharacter(
+export function extractAttacksFromCharacter(
   character: CharacterFromPrisma,
-  preloadedArtifactsById?: Record<string, Prisma.ArtifactGetPayload<object>>,
-): Promise<ExtractedAttack[]> {
-  const weapons = await extractWeaponAttacks(character, preloadedArtifactsById);
+  artifactsById: Record<string, Prisma.ArtifactGetPayload<object>>,
+  names: Ruleset["defaultAttacks"] = DEFAULT_RULES.defaultAttacks,
+  opts: { fiveE?: boolean; items?: { enabled: boolean; attuned: readonly string[] } } = {},
+): ExtractedAttack[] {
+  const weapons = extractWeaponAttacks(character, artifactsById, !!opts.fiveE, opts.items);
 
-  return [...weapons, ...DEFAULT_ATTACKS.filter((d) => !weapons.some((w) => w.type === d.type))];
+  return [...weapons, ...defaultAttacks(names, !!opts.fiveE).filter((d) => !weapons.some((w) => w.type === d.type))];
 }
 
-async function extractWeaponAttacks(
+function extractWeaponAttacks(
   character: CharacterFromPrisma,
-  preloadedArtifactsById?: Record<string, Prisma.ArtifactGetPayload<object>>,
-): Promise<ExtractedAttack[]> {
+  rowsById: Record<string, Prisma.ArtifactGetPayload<object>>,
+  fiveE: boolean,
+  items?: { enabled: boolean; attuned: readonly string[] },
+): ExtractedAttack[] {
   const attacks: ExtractedAttack[] = [];
 
   if (!character.inventory) {
@@ -55,7 +62,7 @@ async function extractWeaponAttacks(
     "range_weapon",
   ] as const;
 
-  const weaponIds: string[] = [];
+  const entries: Array<{ ref: string; offHand: boolean }> = [];
 
   for (const key of slotKeys) {
     const val = equipped[key];
@@ -63,7 +70,7 @@ async function extractWeaponAttacks(
     if (!val) continue;
 
     if (typeof val === "string") {
-      weaponIds.push(val);
+      entries.push({ ref: val, offHand: false });
     } else if (typeof val === "object" && val !== null && "damageDice" in val) {
       const inv = val as {
         id?: string;
@@ -94,23 +101,25 @@ async function extractWeaponAttacks(
     }
   }
 
-  if (weaponIds.length === 0) {
+  const shieldRef = fiveE && typeof equipped.shield === "string" ? equipped.shield : null;
+
+  if (shieldRef) entries.push({ ref: shieldRef, offHand: true });
+
+  if (entries.length === 0) {
     return attacks;
   }
 
-  const potentialWeapons = preloadedArtifactsById
-    ? weaponIds
-        .map((id) => preloadedArtifactsById[id])
-        .filter((w): w is NonNullable<typeof w> => w != null)
-    : await prisma.artifact.findMany({
-        where: {
-          id: { in: weaponIds },
-          campaignId: character.campaignId,
-        },
-      });
+  const shieldCellEmpty = !equipped.shield;
 
-  for (const weapon of potentialWeapons) {
+  for (const { ref, offHand: isOffHand } of entries) {
+    const weapon = resolveItemRow(ref, rowsById, { itemsEnabled: !!items?.enabled, attuned: items?.attuned ?? [] });
+
+    if (!weapon) continue;
+
+    if (isOffHand && weapon.slot !== "weapon") continue;
+
     if (
+      !isOffHand &&
       weapon.slot !== "weapon" &&
       weapon.slot !== "mainHand" &&
       weapon.slot !== "offHand" &&
@@ -155,14 +164,24 @@ async function extractWeaponAttacks(
       attackType = AttackType.RANGED;
     }
 
+    const traits = fiveE ? parseWeaponTraits(getOptionalModifierValue(modifiers, ArtifactModifierType.TRAITS)) : [];
+
+    const versatileDice = fiveE ? getOptionalModifierValue(modifiers, ArtifactModifierType.VERSATILE_DICE) : undefined;
+
+    const thrownMelee = traits.includes("thrown");
+
+    const useVersatile = fiveE && !isOffHand && traits.includes("versatile") && !!versatileDice && shieldCellEmpty;
+
+    const damageBonus = Number(getOptionalModifierValue(modifiers, ArtifactModifierType.DAMAGE_BONUS) ?? 0) || 0;
+
     attacks.push({
-      id: weapon.id,
+      id: isOffHand ? `${ref}:off` : ref,
       name: weapon.name,
-      type: (attackType === AttackType.RANGED
+      type: (attackType === AttackType.RANGED && !thrownMelee
         ? AttackType.RANGED
         : AttackType.MELEE) as ExtractedAttack["type"],
       attackBonus,
-      damageDice,
+      damageDice: useVersatile ? versatileDice : damageDice,
       damageType,
       range: rangeVal,
       properties: getOptionalModifierValue(
@@ -177,6 +196,10 @@ async function extractWeaponAttacks(
         parseInt(
           getModifierValue(modifiers, ArtifactModifierType.MAX_TARGETS, "0"),
         ) || undefined,
+      ...(traits.length > 0 && { traits }),
+      ...(versatileDice && { versatileDice }),
+      ...(isOffHand && { hand: "off" as const }),
+      ...(damageBonus !== 0 && { damageBonus }),
     });
   }
 

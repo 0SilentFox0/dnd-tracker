@@ -1,3 +1,4 @@
+import { proficiencyForChallenge } from "@/lib/constants/challenge";
 import type { Unit } from "@/types/units";
 
 export function buildUnitFormData(unit: Unit): Partial<Unit> {
@@ -24,6 +25,14 @@ export function buildUnitFormData(unit: Unit): Partial<Unit> {
     minTargets: unit.minTargets,
     maxTargets: unit.maxTargets,
     gridSize: unit.gridSize ?? 1,
+    cr: unit.cr ?? null,
+    xp: unit.xp ?? null,
+    multiattack: unit.multiattack ?? 1,
+    legendaryActions: unit.legendaryActions ?? 0,
+    legendaryResistances: unit.legendaryResistances ?? 0,
+    saveProficiencies: unit.saveProficiencies ?? [],
+    statblock: unit.statblock ?? {},
+    spellcasting: { ...unit.spellcasting, spells: unit.spellcasting?.spells ?? [] },
   };
 }
 
@@ -51,7 +60,19 @@ export function emptyUnitFormDefaults(): Partial<Unit> {
     minTargets: 1,
     maxTargets: 1,
     gridSize: 1,
+    cr: null,
+    xp: null,
+    multiattack: 1,
+    legendaryActions: 0,
+    legendaryResistances: 0,
+    saveProficiencies: [],
+    statblock: {},
+    spellcasting: { spells: [] },
   };
+}
+
+export function applyChallenge(cr: number | null): Partial<Unit> {
+  return cr === null ? { cr: null } : { cr, proficiencyBonus: proficiencyForChallenge(cr) };
 }
 
 const cleanAvatar = (avatar: string | null | undefined) => avatar?.trim() || null;

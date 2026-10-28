@@ -1,3 +1,5 @@
+import type { MainSkillRole } from "@/lib/constants/main-skills";
+
 export interface MainSkill {
   id: string;
   campaignId: string;
@@ -8,6 +10,7 @@ export interface MainSkill {
   isEnableInSkillTree?: boolean;
   /** ID групи заклинань, пов'язаної з цією основною навичкою (школа магії) */
   spellGroupId?: string | null;
+  role?: string | null;
   createdAt: string;
   updatedAt: string;
 }
@@ -20,4 +23,5 @@ export interface MainSkillFormData {
   isEnableInSkillTree?: boolean;
   /** ID групи заклинань (школа магії) */
   spellGroupId?: string | null;
+  role?: MainSkillRole | null;
 }

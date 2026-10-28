@@ -11,6 +11,7 @@ import { pruneExpiredTerrain } from "@/lib/utils/battle/grid/terrain";
 import { actionsPerTurnPool, setExtraActionPool } from "@/lib/utils/battle/participant/helpers";
 import { dropBattleFlag, reserveOf } from "@/lib/utils/battle/participant/reserve";
 import type { BattleSceneState, ScenePatch } from "@/lib/utils/battle/store";
+import type { Ruleset } from "@/lib/utils/rules";
 import type { BattleAction, BattleMapConfig, BattleParticipant } from "@/types/battle";
 
 export interface AdvanceTurnInput {
@@ -19,6 +20,7 @@ export interface AdvanceTurnInput {
   pending: BattleParticipant[];
   scene: BattleSceneState;
   map?: BattleMapConfig | null;
+  rules?: Ruleset;
 }
 
 export interface AdvanceTurnOutput {
@@ -42,13 +44,13 @@ export function advanceAfterRemoval({ before, scene, ...input }: AdvanceAfterRem
   return advanceFrom({ ...input, scene: { ...scene, turnIndex: before - 1, pendingMoraleCheck: null } }, true);
 }
 
-function advanceFrom({ participants, pending, scene, rng, map }: AdvanceTurnInput, skipEnding: boolean): AdvanceTurnOutput {
+function advanceFrom({ participants, pending, scene, rng, map, rules }: AdvanceTurnInput, skipEnding: boolean): AdvanceTurnOutput {
   let order = participants;
 
   const actions: BattleAction[] = [];
 
   if (scene.pendingMoraleCheck) {
-    const morale = applyPendingMoraleCheck(order, scene.pendingMoraleCheck as PendingMoraleCheckPayload, scene.round, scene.id, scene.eventSeq);
+    const morale = applyPendingMoraleCheck(order, scene.pendingMoraleCheck as PendingMoraleCheckPayload, scene.round, scene.id, scene.eventSeq, undefined, rules);
 
     order = morale.updatedInitiativeOrder;
 
@@ -61,15 +63,17 @@ function advanceFrom({ participants, pending, scene, rng, map }: AdvanceTurnInpu
   if (ending) order = replaceParticipant(order, setExtraActionPool(ending, 0));
 
   if (ending && takesTurn(ending, scene.round)) {
-    const ended = runAbilities(order, { type: "turnEnd", actorId: ending.basicInfo.id }, { round: scene.round, rng: rng ?? Math.random, map });
+    const ended = runAbilities(order, { type: "turnEnd", actorId: ending.basicInfo.id }, { round: scene.round, rng: rng ?? Math.random, map, rules });
 
     order = ended.participants;
 
     if (ended.messages.length > 0) actions.push(turnEndAction(ending, scene, ended.messages));
 
-    const finished = finishTurnEffects(findParticipant(order, ending.basicInfo.id) ?? ending);
+    const finished = finishTurnEffects(findParticipant(order, ending.basicInfo.id) ?? ending, { participants: order, rules, rng: rng ?? Math.random, round: scene.round });
 
     order = replaceParticipant(order, finished.participant);
+
+    if (finished.messages.length > 0) actions.push(turnEndAction(ending, scene, finished.messages));
 
     if (finished.expired.length > 0) actions.push(turnEndAction(ending, scene, [`ефекти завершилися: ${finished.expired.join(", ")}`]));
   }
@@ -100,7 +104,7 @@ function advanceFrom({ participants, pending, scene, rng, map }: AdvanceTurnInpu
             ...p,
             actionFlags: { hasUsedAction: false, hasUsedBonusAction: false, hasUsedReaction: false, hasExtraTurn: false },
             battleData: {
-              ...resetTurnState(p),
+              ...resetTurnState(p, { keepLegendary: true }),
               extraTurnActive: true,
               pendingExtraActions: actionsPerTurnPool(p, order),
             },
@@ -128,6 +132,7 @@ function advanceFrom({ participants, pending, scene, rng, map }: AdvanceTurnInpu
     pendingSummons: pending,
     rng,
     map,
+    rules,
   });
 
   const newLogEntries = [...loop.newLogEntries];
@@ -140,6 +145,7 @@ function advanceFrom({ participants, pending, scene, rng, map }: AdvanceTurnInpu
     currentBattleLogLength: scene.eventSeq + actions.length,
     newLogEntries,
     reserve,
+    rules,
     getStateBeforeForEntry: () => undefined,
   });
 

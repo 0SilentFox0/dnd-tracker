@@ -13,7 +13,7 @@ export interface CritTrigger extends CritTriggerInfo {
   key: string;
 }
 
-export type CritPicker = (info: CritTriggerInfo) => CriticalEffect;
+export type CritPicker = (info: CritTriggerInfo) => CriticalEffect | undefined;
 
 export interface PendingCritChoice {
   action: "attack" | "spell";
@@ -24,6 +24,7 @@ export interface PendingCritChoice {
 export interface StoredPendingCritChoice extends PendingCritChoice {
   request: unknown;
   seed: number;
+  serverRolls?: boolean;
   userId: string;
   isDM: boolean;
 }

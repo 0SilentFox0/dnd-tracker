@@ -13,6 +13,8 @@ export const characterKeys = {
   draftPortraits: (campaignId: string) => ["draft-portraits", campaignId] as const,
   inventoryLogs: (campaignId: string) => ["inventory-log", campaignId] as const,
   inventoryLog: (campaignId: string, characterId: string) => ["inventory-log", campaignId, characterId] as const,
+  log: (campaignId: string, characterId: string) => ["character-log", campaignId, characterId] as const,
+  logs: (campaignId: string) => ["character-log", campaignId] as const,
   sheet: (campaignId: string, characterId?: string) => (characterId ? (["character-sheet", campaignId, characterId] as const) : (["character-sheet", campaignId] as const)),
 };
 

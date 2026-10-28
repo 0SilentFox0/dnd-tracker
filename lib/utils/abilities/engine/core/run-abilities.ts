@@ -4,7 +4,7 @@ import type { AbilityRunContext, AbilityRunResult, Downed, SummonRequest } from 
 import { recordUse, resetUsage, withinLimits } from "./usage";
 
 import { restoreCharm } from "@/lib/utils/abilities/engine/effects/charm";
-import { evaluateCondition } from "@/lib/utils/abilities/registry/conditions";
+import { conditionEventForTarget, evaluateCondition, hasCreatureTypeCondition } from "@/lib/utils/abilities/registry/conditions";
 import { applyEffect } from "@/lib/utils/abilities/registry/effects";
 import { triggerMatches } from "@/lib/utils/abilities/registry/triggers";
 import type { StaticEffect } from "@/lib/utils/abilities/schema";
@@ -48,7 +48,13 @@ export function runAbilities(participants: BattleParticipant[], event: AbilityEv
 
       if (!triggerMatches(ability.trigger, event, owner, ps)) continue;
 
-      if (ability.condition && !evaluateCondition(ability.condition, { owner, event, participants: ps })) continue;
+      const perTarget = hasCreatureTypeCondition(ability.condition);
+
+      if (ability.condition && !perTarget && !evaluateCondition(ability.condition, { owner, event, participants: ps, sourceId: ability.source.id })) continue;
+
+      const effects = ability.effects.map((effect, effectIndex) => ({ effect, effectIndex, targetIds: resolveTargetIds("target" in effect ? effect.target : undefined, ownerId, event, ps, ctx).filter((id) => !perTarget || !ability.condition || evaluateCondition(ability.condition, { owner, event: conditionEventForTarget(event, id), participants: ps, sourceId: ability.source.id })) }));
+
+      if (perTarget && !effects.some(({ targetIds }) => targetIds.length > 0)) continue;
 
       if (!withinLimits(owner, ability, ctx.round)) continue;
 
@@ -59,11 +65,11 @@ export function runAbilities(participants: BattleParticipant[], event: AbilityEv
         continue;
       }
 
-      ps = updateParticipant(ps, ownerId, (p) => recordUse(p, ability.key, ctx.round));
+      ps = updateParticipant(ps, ownerId, (p) => recordUse(p, ability.key, ctx.round, ability.limits?.pool));
       fired.push(ability.key);
 
-      for (const [effectIndex, effect] of ability.effects.entries()) {
-        const targetIds = resolveTargetIds("target" in effect ? effect.target : undefined, ownerId, event, ps, ctx);
+      for (const { effectIndex, effect, targetIds: filteredIds } of effects) {
+        const targetIds = perTarget ? filteredIds : resolveTargetIds("target" in effect ? effect.target : undefined, ownerId, event, ps, ctx);
 
         const r = applyEffect({ participants: ps, ability, effectIndex, ownerId, effect, targetIds, event, ctx });
 

@@ -3,12 +3,13 @@ import { calculateAttackBonus, forcedRollMode, type RollMode, rollModeReasons } 
 
 import type { CriticalEffect } from "@/lib/constants/critical-effects";
 import { getRandomCriticalEffect } from "@/lib/constants/critical-effects";
-import { collectModifiers } from "@/lib/utils/abilities/engine/core/collect-modifiers";
 import { withSelf } from "@/lib/utils/abilities/engine/core/participants";
 import type { StaticEffect } from "@/lib/utils/abilities/schema";
+import { critThresholdOf } from "@/lib/utils/battle/attack/crit-threshold";
 import type { CritPicker } from "@/lib/utils/battle/crit-choice/types";
 import { rollDie } from "@/lib/utils/common/dice";
-import type { BattleAttack, BattleParticipant } from "@/types/battle";
+import { DEFAULT_RULES, type Ruleset } from "@/lib/utils/rules";
+import type { BattleAttack, BattleMapConfig, BattleParticipant } from "@/types/battle";
 
 export function calculateAttackRoll(
   attacker: BattleParticipant,
@@ -16,8 +17,10 @@ export function calculateAttackRoll(
   d20Roll: number,
   advantageRoll?: number,
   disadvantageRoll?: number,
-  opts: { participants?: BattleParticipant[]; extra?: StaticEffect[]; targetId?: string; targetExtra?: StaticEffect[]; rng?: () => number; manualMode?: RollMode; crit?: CritPicker } = {},
+  opts: { participants?: BattleParticipant[]; extra?: StaticEffect[]; targetId?: string; targetExtra?: StaticEffect[]; rng?: () => number; manualMode?: RollMode; rules?: Ruleset; map?: BattleMapConfig | null; inspiration?: boolean; crit?: CritPicker } = {},
 ): AttackRollResult {
+  const c = (opts.rules ?? DEFAULT_RULES).criticals;
+
   const participants = withSelf(opts.participants ?? [], attacker);
 
   const attackBonus = calculateAttackBonus(attacker, attack, participants, opts.extra);
@@ -29,7 +32,7 @@ export function calculateAttackRoll(
 
   const manual = !forced.forced && mode !== "normal";
 
-  const critThreshold = Math.max(2, 20 + collectModifiers(participants, attacker.basicInfo.id, { stat: "critThreshold" }, opts.extra).flat);
+  const critThreshold = critThresholdOf(opts.rules, participants, attacker.basicInfo.id, opts.extra);
 
   let finalRoll = d20Roll;
 
@@ -54,18 +57,18 @@ export function calculateAttackRoll(
 
   const totalAttackValue = finalRoll + attackBonus;
 
-  const isCritical = finalRoll >= critThreshold;
+  const isCriticalFail = c.fumbleOn > 0 && finalRoll <= c.fumbleOn;
 
-  const isCriticalFail = finalRoll === 1;
+  const isCritical = !isCriticalFail && finalRoll >= critThreshold;
 
   const isHit = !isCriticalFail;
 
   let criticalEffect: CriticalEffect | undefined;
 
-  if (isCritical) {
-    criticalEffect = opts.crit ? opts.crit({ source: "attack", kind: "success", actorId: attacker.basicInfo.id, targetId: opts.targetId ?? "" }) : getRandomCriticalEffect("success", opts.rng);
-  } else if (isCriticalFail) {
-    criticalEffect = opts.crit ? opts.crit({ source: "attack", kind: "fail", actorId: attacker.basicInfo.id, targetId: opts.targetId ?? "" }) : getRandomCriticalEffect("fail", opts.rng);
+  if (c.effects && isCritical) {
+    criticalEffect = opts.crit ? opts.crit({ source: "attack", kind: "success", actorId: attacker.basicInfo.id, targetId: opts.targetId ?? "" }) : getRandomCriticalEffect("success", opts.rng, c.disabledSuccess);
+  } else if (c.effects && isCriticalFail) {
+    criticalEffect = opts.crit ? opts.crit({ source: "attack", kind: "fail", actorId: attacker.basicInfo.id, targetId: opts.targetId ?? "" }) : getRandomCriticalEffect("fail", opts.rng, c.disabledFail);
   }
 
   return {
@@ -79,4 +82,9 @@ export function calculateAttackRoll(
     chosenD20: finalRoll,
     ...(secondRoll && { secondRoll }),
   };
+}
+
+/** Режим кидка для подій hit / attack after: лише перевага чи недолік, звичайний — без поля. */
+export function eventRollMode(roll: AttackRollResult): { rollMode?: "advantage" | "disadvantage" } {
+  return roll.secondRoll ? { rollMode: roll.secondRoll.mode } : {};
 }

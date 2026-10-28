@@ -13,7 +13,7 @@ const skillsApi = createCampaignCrudApi<
   Skill,
   SkillPayload,
   SkillUpdatePayload,
-  void
+  { ok: true }
 >("/skills", { listCache: "no-store", getCache: "no-store" });
 
 export const getSkills = skillsApi.list;
@@ -41,8 +41,8 @@ export async function getSkill(
 export async function deleteSkill(
   campaignId: string,
   skillId: string,
-): Promise<void> {
-  await campaignDelete<void>(campaignId, `/skills/${skillId}`);
+): Promise<{ ok: true }> {
+  return campaignDelete<{ ok: true }>(campaignId, `/skills/${skillId}`);
 }
 
 export async function updateSkillAppearance(
@@ -64,9 +64,6 @@ export async function duplicateSkill(
 
 export async function deleteAllSkills(
   campaignId: string,
-): Promise<{ success?: boolean; deleted?: number }> {
-  return campaignDelete<{ success?: boolean; deleted?: number }>(
-    campaignId,
-    "/skills",
-  );
+): Promise<{ ok: true; deleted: number }> {
+  return campaignDelete<{ ok: true; deleted: number }>(campaignId, "/skills");
 }

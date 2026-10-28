@@ -1,6 +1,6 @@
 # Онбординг: перші кроки, підказки, «Що нового», довідка
 
-Спека: `docs/superpowers/specs/2026-10-22-onboarding-design.md`.
+Спека: `docs/archive/superpowers/specs/2026-10-22-onboarding-design.md`.
 
 ## Реєстр (`lib/onboarding/`, чисті дані й функції)
 

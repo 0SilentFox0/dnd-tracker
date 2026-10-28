@@ -1,21 +1,19 @@
 import { describe, expect, it } from "vitest";
 
-import { RACES } from "@/data/library/races";
 import { getCharacterImmunities } from "@/lib/utils/characters/character-race-effects";
-import { extractRaceImmunities } from "@/lib/utils/races/race-effects";
-import { racePassiveData } from "@/scripts/seed/seed-library-lib";
+import { getUnitImmunities } from "@/lib/utils/races/race-effects";
+import type { Unit } from "@/types/units";
 
 describe("race immunities", () => {
-  it("library races (with abilities) yield no text-parsed immunities", () => {
-    for (const race of RACES) {
-      const row = { ...racePassiveData(race), id: "r", name: race.name };
+  it("only unit.immunities count; race passive text no longer adds immunities", () => {
+    const race = { passiveAbility: "Імунітет до вогню", abilities: [] };
 
-      expect(extractRaceImmunities(row as never), race.key).toEqual([]);
-      expect(getCharacterImmunities({ immunities: [] }, row as never), race.key).toEqual([]);
-    }
+    expect(getUnitImmunities({ immunities: ["страху"], race } as unknown as Unit)).toEqual(["страху"]);
+    expect(getUnitImmunities({ immunities: [] } as unknown as Unit)).toEqual([]);
   });
 
-  it("legacy races without abilities still parse the description", () => {
-    expect(extractRaceImmunities({ passiveAbility: { description: "Імунітет до вогню" }, abilities: [] } as never)).toContain("вогню");
+  it("character immunities come from the character only", () => {
+    expect(getCharacterImmunities({ immunities: ["отруєння"] })).toEqual(["отруєння"]);
+    expect(getCharacterImmunities({ immunities: null })).toEqual([]);
   });
 });

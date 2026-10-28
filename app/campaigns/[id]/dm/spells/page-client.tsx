@@ -7,7 +7,8 @@ import { DeleteAllButton } from "@/components/common/DeleteAllButton";
 import { SearchEmptyState } from "@/components/common/SearchEmptyState";
 import { SearchInput } from "@/components/common/SearchInput";
 import { EmptyState, LoadingState } from "@/components/common/states";
-import { HudPage, HudPageHeader } from "@/components/hud/page";
+import { ContentTransferButtons } from "@/components/content-import/ContentTransferButtons";
+import { HudChipTabs, HudPage, HudPageHeader } from "@/components/hud/page";
 import { OnboardingHint } from "@/components/onboarding/OnboardingHint";
 import { CreateSpellGroupDialog } from "@/components/spells/dialogs/CreateSpellGroupDialog";
 import { SpellGroupAccordion } from "@/components/spells/list/SpellGroupAccordion";
@@ -30,6 +31,7 @@ export function DMSpellsPageClient({ campaignId }: { campaignId: string }) {
         subtitle={`База заклинань кампанії · Всього: ${count}`}
         actions={
           <>
+            <ContentTransferButtons campaignId={campaignId} kind="spells" />
             <CreateSpellGroupDialog campaignId={campaignId} />
             <Button className="whitespace-nowrap text-xs sm:text-sm" asChild>
               <Link href={`/campaigns/${campaignId}/dm/spells/new`}>+ Створити заклинання</Link>
@@ -55,6 +57,15 @@ export function DMSpellsPageClient({ campaignId }: { campaignId: string }) {
         }
       />
       <OnboardingHint id="dm.spells" />
+      {list.listFilter.tags.length > 0 && (
+        <HudChipTabs
+          ariaLabel="Список заклинань"
+          items={[
+            { key: "all", label: "Усі", active: list.listFilter.value === null, onSelect: () => list.listFilter.set(null) },
+            ...list.listFilter.tags.map((tag) => ({ key: tag, label: tag, active: list.listFilter.value === tag, onSelect: () => list.listFilter.set(tag) })),
+          ]}
+        />
+      )}
 
       {list.isLoading && count === 0 ? (
         <LoadingState rows={6} label="Завантаження заклинань…" />

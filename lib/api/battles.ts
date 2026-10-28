@@ -5,7 +5,9 @@ import {
   campaignPost,
 } from "./client";
 
+import type { AbilityKey } from "@/lib/constants/abilities";
 import { BATTLE_LOG_PAGE_SIZE, BATTLE_VERSION_ONLY_PARAM } from "@/lib/constants/battle";
+import type { Condition5eKey } from "@/lib/utils/abilities/schema/kinds";
 import type { MoraleCheckResult } from "@/lib/utils/battle/morale/check";
 import type {
   AbilityActionData,
@@ -27,7 +29,7 @@ import type {
   MoveParticipantData,
   SpellCastData,
 } from "@/types/api";
-import type { BattleBrief } from "@/types/battle";
+import type { BattleBrief, LegendaryOption } from "@/types/battle";
 import type {
   AddParticipantData,
   BattleBalanceBody,
@@ -228,6 +230,24 @@ export async function revealBattleParticipants(campaignId: string, battleId: str
   return campaignPost<BattleMutationResponse>(campaignId, `/battles/${battleId}/reveal-participant`, data);
 }
 
+export type BattleConditionsBody =
+  | { action: "apply"; participantId: string; condition: Condition5eKey; rounds?: number; levels?: number; saveEnds?: { ability: AbilityKey; dc: number } }
+  | { action: "remove"; participantId: string; condition: Condition5eKey };
+
+export async function applyBattleCondition(campaignId: string, battleId: string, data: WithVersion<BattleConditionsBody>): Promise<BattleMutationResponse> {
+  return campaignPost<BattleMutationResponse>(campaignId, `/battles/${battleId}/conditions`, data);
+}
+
+export type CoreActionBody =
+  | { action: "dash" | "disengage" | "dodge" | "hide" | "ready" | "standUp" | "escape"; participantId: string }
+  | { action: "help" | "grapple" | "readiedAttack"; participantId: string; targetId: string }
+  | { action: "shove"; participantId: string; targetId: string; mode: "prone" | "push" }
+  | { action: "legendary"; participantId: string; option: LegendaryOption };
+
+export async function runCoreAction(campaignId: string, battleId: string, data: WithVersion<CoreActionBody>): Promise<BattleMutationResponse> {
+  return campaignPost<BattleMutationResponse>(campaignId, `/battles/${battleId}/core-action`, data);
+}
+
 export async function scaleBattleUnits(campaignId: string, battleId: string, data: WithVersion<{ direction: "buff" | "debuff" }>): Promise<BattleMutationResponse> {
   return campaignPost<BattleMutationResponse>(campaignId, `/battles/${battleId}/scale-units`, data);
 }
@@ -246,7 +266,7 @@ export async function updateBattleParticipant(
   campaignId: string,
   battleId: string,
   participantId: string,
-  data: WithVersion<{ currentHp?: number; removeFromBattle?: boolean; kill?: boolean; revive?: boolean }>,
+  data: WithVersion<{ lairActive?: boolean; currentHp?: number; removeFromBattle?: boolean; kill?: boolean; revive?: boolean }>,
 ): Promise<BattleMutationResponse> {
   return campaignPatch<BattleMutationResponse>(campaignId, `/battles/${battleId}/participants/${participantId}`, data);
 }

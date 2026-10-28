@@ -24,7 +24,7 @@ export function evaluateFormula(
       // Use regex with word boundaries to ensure exact match
       const regex = new RegExp(`\\b${key}\\b`, "g");
 
-      parsedFormula = parsedFormula.replace(regex, value.toString());
+      parsedFormula = parsedFormula.replace(regex, value < 0 ? `(${value})` : value.toString());
     }
 
     // 2. Replace supported functions

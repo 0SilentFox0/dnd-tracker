@@ -12,6 +12,7 @@ import { usePusherBattleSync } from "../usePusherBattleSync";
 
 import { getBattleVersion } from "@/lib/api/battles";
 import { audioState } from "@/lib/utils/audio/__tests__/fixtures";
+import { DEFAULT_RULES } from "@/lib/utils/rules";
 import type { BattleScene } from "@/types/api";
 
 vi.mock("@/lib/api/battles", () => ({ getBattleVersion: vi.fn() }));
@@ -117,6 +118,7 @@ function makeBattlePayload(overrides: Partial<BattleScene> = {}): BattleScene {
       { basicInfo: { id: "p-1", name: "Айвен", side: "ally" } },
       { basicInfo: { id: "p-2", name: "Аграїл", side: "ally" } },
     ] as BattleScene["initiativeOrder"],
+    rules: DEFAULT_RULES,
     battleLog: [],
     createdAt: new Date().toISOString(),
     ...overrides,

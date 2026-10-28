@@ -5,11 +5,11 @@ import { Skull } from "lucide-react";
 
 import { DeleteAllButton } from "@/components/common/DeleteAllButton";
 import { EmptyState, LoadingState } from "@/components/common/states";
+import { ContentTransferButtons } from "@/components/content-import/ContentTransferButtons";
 import { HudPage, HudPageHeader } from "@/components/hud/page";
 import { OnboardingHint } from "@/components/onboarding/OnboardingHint";
 import { Accordion } from "@/components/ui/accordion";
 import { Button } from "@/components/ui/button";
-import { UnitImportDialog } from "@/components/units/dialogs/UnitImportDialog";
 import { UnitGroupAccordion } from "@/components/units/list/UnitGroupAccordion";
 import { UnitsToolbar } from "@/components/units/list/UnitsToolbar";
 import { useUnitsList } from "@/lib/hooks/units";
@@ -30,7 +30,7 @@ export function DMUnitsPageClient({ campaignId, initialUnits }: DMUnitsPageClien
         subtitle={`Управління мобами та юнітами · Всього: ${list.units.length}`}
         actions={
           <>
-            <UnitImportDialog campaignId={campaignId} />
+            <ContentTransferButtons campaignId={campaignId} kind="units" />
             <Button variant="outline" className="whitespace-nowrap text-xs sm:text-sm" asChild>
               <Link href={`/campaigns/${campaignId}/dm/races`}>+ Раса</Link>
             </Button>

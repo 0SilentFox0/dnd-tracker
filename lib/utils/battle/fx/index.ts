@@ -7,6 +7,6 @@ export { mapAction } from "./map-action";
 export { PREVIEW_UNITS, type PreviewUnit, type PreviewUnitId } from "./preview-units";
 export { advanceFxQueue, type FxQueueState, INITIAL_FX_QUEUE, isMoraleFx, MAX_FX_QUEUE, shiftFxQueue, trimFxQueue } from "./queue";
 export type { PreviewSpell, SpellFxPreview, SpellFxTarget } from "./spell-preview";
-export { type SpellFx, spellFx } from "./spells";
+export type { SpellFx } from "./spells";
 export { MAX_FX_BATCH, MAX_FX_MS } from "./timing";
 export type { FxArchetype, FxAuraKind, FxElement, FxSpec } from "./types";

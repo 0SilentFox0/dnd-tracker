@@ -2,9 +2,14 @@
 
 import { createContext, useContext } from "react";
 
+import type { ClassColumn } from "@/types/classes";
+
 export interface AbilityEditorContextValue {
   campaignId: string;
   errorsByPath: Record<string, string[]>;
+  classColumns?: readonly ClassColumn[];
+  itemCharges?: boolean;
+  performChoices?: { attacks: readonly { name: string }[]; spells: readonly { id: string; name: string }[] };
 }
 
 const Ctx = createContext<AbilityEditorContextValue>({ campaignId: "", errorsByPath: {} });

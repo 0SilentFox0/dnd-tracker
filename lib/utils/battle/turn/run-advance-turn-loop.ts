@@ -3,14 +3,14 @@ import { berserkBonusOf, runBerserkTurn } from "./berserk";
 import { SYSTEM_ACTOR } from "@/lib/constants/battle";
 import { idleTurnIndex, isActive, sitsOutTurn, takesTurn } from "@/lib/utils/abilities/engine/core/participants";
 import { runAbilities } from "@/lib/utils/abilities/engine/core/run-abilities";
+import { rollDyingAt } from "@/lib/utils/battle/death-saves";
 import { pruneExpiredTerrain } from "@/lib/utils/battle/grid/terrain";
 import { reserveOf } from "@/lib/utils/battle/participant/reserve";
-import {
-  processEndOfTurn,
-  processStartOfRound,
-  processStartOfTurn,
-} from "@/lib/utils/battle/turn/start-end";
+import { processStartOfRound } from "@/lib/utils/battle/turn/round-start";
+import { processEndOfTurn } from "@/lib/utils/battle/turn/turn-end";
+import { processStartOfTurn, type StartOfTurnResult } from "@/lib/utils/battle/turn/turn-start";
 import { checkVictoryConditions } from "@/lib/utils/battle/turn/victory";
+import type { Ruleset } from "@/lib/utils/rules";
 import type { BattleAction, BattleMapConfig, BattleParticipant } from "@/types/battle";
 
 export interface AdvanceTurnLoopParams {
@@ -22,6 +22,7 @@ export interface AdvanceTurnLoopParams {
   pendingSummons: BattleParticipant[];
   rng?: () => number;
   map?: BattleMapConfig | null;
+  rules?: Ruleset;
 }
 
 export interface AdvanceTurnLoopResult {
@@ -32,48 +33,33 @@ export interface AdvanceTurnLoopResult {
   clearedPendingSummons: boolean;
 }
 
-export function runAdvanceTurnLoop(
-  params: AdvanceTurnLoopParams,
-): AdvanceTurnLoopResult {
-  const {
-    initiativeOrder,
-    currentTurnIndex,
-    currentRound,
-    battleId,
-    currentBattleLogLength,
-    pendingSummons,
-    rng = Math.random,
-  } = params;
 
-  let map = params.map ?? null;
+interface LoopState {
+  order: BattleParticipant[];
+  index: number;
+  round: number;
+  map: BattleMapConfig | null;
+  log: BattleAction[];
+  attempts: number;
+  clearedPendingSummons: boolean;
+}
 
-  const reserve = reserveOf(pendingSummons);
+interface LoopEnv {
+  battleId: string;
+  logBase: number;
+  pendingSummons: BattleParticipant[];
+  rng: () => number;
+  rules?: Ruleset;
+}
 
-  const verdict = (order: BattleParticipant[]) => checkVictoryConditions(order, reserve);
+const stateBeforeForEntry = () => undefined;
 
-  let activeParticipantFound = false;
-
-  let attempts = 0;
-
-  const maxAttempts = initiativeOrder.length * 2;
-
-  let updatedInitiativeOrder = [...initiativeOrder];
-
-  let nextTurnIndex = currentTurnIndex;
-
-  let nextRound = currentRound;
-
-  const newLogEntries: BattleAction[] = [];
-
-  const getStateBeforeForEntry = () => undefined;
-
-  let clearedPendingSummons = false;
-
-  const systemEntry = (round: number, text: string, tag: string): BattleAction => ({
-    id: `${tag}-${round}-${Date.now()}-${attempts}`,
-    battleId,
+function systemEntry(st: LoopState, env: LoopEnv, round: number, text: string, tag: string): BattleAction {
+  return {
+    id: `${tag}-${round}-${Date.now()}-${st.attempts}`,
+    battleId: env.battleId,
     round,
-    actionIndex: currentBattleLogLength + newLogEntries.length,
+    actionIndex: env.logBase + st.log.length,
     timestamp: new Date(),
     ...SYSTEM_ACTOR,
     actionType: "ability",
@@ -82,148 +68,91 @@ export function runAdvanceTurnLoop(
     resultText: text,
     hpChanges: [],
     isCancelled: false,
-    stateBefore: getStateBeforeForEntry(),
+    stateBefore: stateBeforeForEntry(),
+  };
+}
+
+function roundTransition(st: LoopState, env: LoopEnv, previousRound: number): void {
+  const { rng } = env;
+
+  const roundEnd = runAbilities(st.order, { type: "roundEnd" }, { round: previousRound, rng, map: st.map, rules: env.rules });
+
+  st.order = roundEnd.participants;
+
+  if (roundEnd.messages.length > 0) {
+    st.log.push(systemEntry(st, env, previousRound, `Кінець раунду ${previousRound}: ${roundEnd.messages.join("; ")}`, "triggers-round-end"));
+  }
+
+  st.clearedPendingSummons = true;
+
+  if (st.map) st.map = pruneExpiredTerrain(st.map, st.round) ?? st.map;
+
+  const roundResult = processStartOfRound(st.order, st.round, env.pendingSummons, rng, st.map, env.rules);
+
+  st.order = roundResult.updatedInitiativeOrder;
+  st.log.push(...roundResult.lairMessages.map((text) => systemEntry(st, env, st.round, text, "lair")));
+
+  // індекс обрано за старим порядком; після пересортування раунд починається з початку
+  st.index = 0;
+
+  if (roundResult.triggerMessages.length > 0) {
+    st.log.push(systemEntry(st, env, st.round, `Тригери початку раунду ${st.round}: ${roundResult.triggerMessages.join("; ")}`, "triggers-round"));
+  }
+}
+
+function startTurnEntries(st: LoopState, env: LoopEnv, turnResult: StartOfTurnResult, before: BattleParticipant): void {
+  const { participant } = turnResult;
+
+  const actor = { actorId: participant.basicInfo.id, actorName: participant.basicInfo.name, actorSide: participant.basicInfo.side };
+
+  const entry = (tag: string, fields: Pick<BattleAction, "actionType" | "actionDetails" | "resultText" | "hpChanges">): BattleAction => ({
+    id: `${tag}-${st.index}-${Date.now()}-${st.attempts}`,
+    battleId: env.battleId,
+    round: st.round,
+    actionIndex: env.logBase + st.log.length,
+    timestamp: new Date(),
+    ...actor,
+    targets: [],
+    isCancelled: false,
+    stateBefore: stateBeforeForEntry(),
+    ...fields,
   });
 
-  while (!activeParticipantFound && attempts < maxAttempts) {
-    attempts++;
+  if (turnResult.rechargeMessages.length > 0) {
+    st.log.push(systemEntry(st, env, st.round, turnResult.rechargeMessages.join("; "), "spell-recharge"));
+  }
 
-    const turnTransition = processEndOfTurn(
-      nextTurnIndex,
-      updatedInitiativeOrder,
-      nextRound,
-    );
+  // запис DOT закінчується до шкоди небезпеки — вона має власний запис
+  const dotHpAfter = turnResult.hazard?.hpBefore ?? participant.combatStats.currentHp;
 
-    const previousRound = nextRound;
-
-    nextTurnIndex = turnTransition.nextTurnIndex;
-    nextRound = turnTransition.nextRound;
-
-    if (nextRound > previousRound) {
-      const roundEnd = runAbilities(updatedInitiativeOrder, { type: "roundEnd" }, { round: previousRound, rng, map });
-
-      updatedInitiativeOrder = roundEnd.participants;
-
-      if (roundEnd.messages.length > 0) {
-        newLogEntries.push(systemEntry(previousRound, `Кінець раунду ${previousRound}: ${roundEnd.messages.join("; ")}`, "triggers-round-end"));
-      }
-
-      clearedPendingSummons = true;
-
-      if (map) map = pruneExpiredTerrain(map, nextRound) ?? map;
-
-      const roundResult = processStartOfRound(
-        updatedInitiativeOrder,
-        nextRound,
-        pendingSummons,
-        rng,
-        map,
-      );
-
-      updatedInitiativeOrder = roundResult.updatedInitiativeOrder;
-
-      // індекс обрано за старим порядком; після пересортування раунд починається з початку
-      nextTurnIndex = 0;
-
-      if (roundResult.triggerMessages.length > 0) {
-        newLogEntries.push({
-          id: `triggers-round-${nextRound}-${Date.now()}-${attempts}`,
-          battleId,
-          round: nextRound,
-          actionIndex: currentBattleLogLength + newLogEntries.length,
-          timestamp: new Date(),
-          ...SYSTEM_ACTOR,
-          actionType: "ability",
-          targets: [],
-          actionDetails: {},
-          resultText: `Тригери початку раунду ${nextRound}: ${roundResult.triggerMessages.join("; ")}`,
-          hpChanges: [],
-          isCancelled: false,
-          stateBefore: getStateBeforeForEntry(),
-        });
-      }
-    }
-
-    const nextParticipant = updatedInitiativeOrder[nextTurnIndex];
-
-    if (!nextParticipant) break;
-
-    if (sitsOutTurn(nextParticipant, nextRound)) {
-      // ніхто з живих не ходить цього раунду: зупиняємось на його початку, ходи пропустить клієнт/ДМ
-      if (!updatedInitiativeOrder.some((p) => takesTurn(p, nextRound))) {
-        nextTurnIndex = idleTurnIndex(updatedInitiativeOrder);
-
-        break;
-      }
-
-      continue;
-    }
-
-    const turnResult = processStartOfTurn(
-      nextParticipant,
-      nextRound,
-      updatedInitiativeOrder,
-      rng,
-      map,
-    );
-
-    updatedInitiativeOrder = turnResult.participants;
-
-    // запис DOT закінчується до шкоди небезпеки — вона має власний запис
-    const dotHpAfter = turnResult.hazard?.hpBefore ?? turnResult.participant.combatStats.currentHp;
-
-    if (turnResult.damageMessages.length > 0) {
-      newLogEntries.push({
-        id: `turn-${nextTurnIndex}-${Date.now()}-${attempts}`,
-        battleId,
-        round: nextRound,
-        actionIndex: currentBattleLogLength + newLogEntries.length,
-        timestamp: new Date(),
-        actorId: turnResult.participant.basicInfo.id,
-        actorName: turnResult.participant.basicInfo.name,
-        actorSide: turnResult.participant.basicInfo.side,
+  if (turnResult.damageMessages.length > 0) {
+    st.log.push(
+      entry("turn", {
         actionType: "end_turn",
-        targets: [],
-        actionDetails: {
-          damageRolls: turnResult.damageMessages.map(() => ({
-            dice: "DOT",
-            results: [],
-            total: 0,
-            damageType: "dot",
-          })),
-        },
+        actionDetails: { damageRolls: turnResult.damageMessages.map(() => ({ dice: "DOT", results: [], total: 0, damageType: "dot" })) },
         resultText: turnResult.damageMessages.join("; "),
         hpChanges: [
           {
-            participantId: turnResult.participant.basicInfo.id,
-            participantName: turnResult.participant.basicInfo.name,
-            oldHp: nextParticipant.combatStats.currentHp,
+            participantId: participant.basicInfo.id,
+            participantName: participant.basicInfo.name,
+            oldHp: before.combatStats.currentHp,
             newHp: dotHpAfter,
-            change: nextParticipant.combatStats.currentHp - dotHpAfter,
+            change: before.combatStats.currentHp - dotHpAfter,
           },
         ],
-        isCancelled: false,
-        stateBefore: getStateBeforeForEntry(),
-      });
-    }
+      }),
+    );
+  }
 
-    const hazard = turnResult.hazard;
+  const hazard = turnResult.hazard;
 
-    // кінцеве HP: після HoT і вмінь на кшталт lethalDamage → survive
-    const hazardHpAfter = turnResult.participant.combatStats.currentHp;
+  // кінцеве HP: після HoT і вмінь на кшталт lethalDamage → survive
+  const hazardHpAfter = participant.combatStats.currentHp;
 
-    if (hazard) {
-      newLogEntries.push({
-        id: `hazard-${nextTurnIndex}-${Date.now()}-${attempts}`,
-        battleId,
-        round: nextRound,
-        actionIndex: currentBattleLogLength + newLogEntries.length,
-        timestamp: new Date(),
-        actorId: turnResult.participant.basicInfo.id,
-        actorName: turnResult.participant.basicInfo.name,
-        actorSide: turnResult.participant.basicInfo.side,
+  if (hazard) {
+    st.log.push(
+      entry("hazard", {
         actionType: "ability",
-        targets: [],
         actionDetails: {
           hazard: { label: hazard.label, damageType: hazard.damageType, damage: hazard.damage },
           damageRolls: [{ dice: "", results: [], total: hazard.damage, damageType: hazard.damageType }],
@@ -231,71 +160,106 @@ export function runAdvanceTurnLoop(
         resultText: hazard.message,
         hpChanges: [
           {
-            participantId: turnResult.participant.basicInfo.id,
-            participantName: turnResult.participant.basicInfo.name,
+            participantId: participant.basicInfo.id,
+            participantName: participant.basicInfo.name,
             oldHp: hazard.hpBefore,
             newHp: hazardHpAfter,
             change: hazard.hpBefore - hazardHpAfter,
           },
         ],
-        isCancelled: false,
-        stateBefore: getStateBeforeForEntry(),
-      });
-    }
+      }),
+    );
+  }
 
-    if (turnResult.expiredEffects.length > 0) {
-      newLogEntries.push({
-        id: `effects-${nextTurnIndex}-${Date.now()}-${attempts}`,
-        battleId,
-        round: nextRound,
-        actionIndex: currentBattleLogLength + newLogEntries.length,
-        timestamp: new Date(),
-        actorId: turnResult.participant.basicInfo.id,
-        actorName: turnResult.participant.basicInfo.name,
-        actorSide: turnResult.participant.basicInfo.side,
+  if (turnResult.expiredEffects.length > 0) {
+    st.log.push(
+      entry("effects", {
         actionType: "ability",
-        targets: [],
-        actionDetails: {
-          appliedEffects: turnResult.expiredEffects.map((name) => ({
-            id: name,
-            name,
-            duration: 0,
-          })),
-        },
+        actionDetails: { appliedEffects: turnResult.expiredEffects.map((name) => ({ id: name, name, duration: 0 })) },
         resultText: `Ефекти завершилися: ${turnResult.expiredEffects.join(", ")}`,
         hpChanges: [],
-        isCancelled: false,
-        stateBefore: getStateBeforeForEntry(),
-      });
+      }),
+    );
+  }
+
+  if (turnResult.abilityMessages.length > 0) {
+    st.log.push(entry("triggers-turn", { actionType: "ability", actionDetails: {}, resultText: `Початок ходу: ${turnResult.abilityMessages.join("; ")}`, hpChanges: [] }));
+  }
+}
+
+export function runAdvanceTurnLoop(
+  params: AdvanceTurnLoopParams,
+): AdvanceTurnLoopResult {
+  const { initiativeOrder, currentTurnIndex, currentRound, battleId, currentBattleLogLength, pendingSummons, rng = Math.random } = params;
+
+  const st: LoopState = { order: [...initiativeOrder], index: currentTurnIndex, round: currentRound, map: params.map ?? null, log: [], attempts: 0, clearedPendingSummons: false };
+
+  const env: LoopEnv = { battleId, logBase: currentBattleLogLength, pendingSummons, rng, rules: params.rules };
+
+  const reserve = reserveOf(pendingSummons);
+
+  const verdict = (order: BattleParticipant[]) => checkVictoryConditions(order, reserve);
+
+  let activeParticipantFound = false;
+
+  const maxAttempts = initiativeOrder.length * 2;
+
+  while (!activeParticipantFound && st.attempts < maxAttempts) {
+    st.attempts++;
+
+    const turnTransition = processEndOfTurn(st.index, st.order, st.round, { rules: params.rules, rng });
+
+    if (turnTransition.participants) {
+      st.order = turnTransition.participants;
+      st.log.push(systemEntry(st, env, st.round, turnTransition.messages?.join("; ") ?? "", "death-saves"));
     }
 
-    if (turnResult.abilityMessages.length > 0) {
-      newLogEntries.push({
-        id: `triggers-turn-${nextTurnIndex}-${Date.now()}-${attempts}`,
-        battleId,
-        round: nextRound,
-        actionIndex: currentBattleLogLength + newLogEntries.length,
-        timestamp: new Date(),
-        actorId: turnResult.participant.basicInfo.id,
-        actorName: turnResult.participant.basicInfo.name,
-        actorSide: turnResult.participant.basicInfo.side,
-        actionType: "ability",
-        targets: [],
-        actionDetails: {},
-        resultText: `Початок ходу: ${turnResult.abilityMessages.join("; ")}`,
-        hpChanges: [],
-        isCancelled: false,
-        stateBefore: getStateBeforeForEntry(),
-      });
+    const previousRound = st.round;
+
+    st.index = turnTransition.nextTurnIndex;
+    st.round = turnTransition.nextRound;
+
+    if (st.round > previousRound) roundTransition(st, env, previousRound);
+
+    let nextParticipant = st.order[st.index];
+
+    if (!nextParticipant) break;
+
+    const dyingRoll = st.round > previousRound ? rollDyingAt(st.order, st.index, params.rules, rng) : null;
+
+    if (dyingRoll) {
+      st.order = dyingRoll.participants;
+      st.log.push(systemEntry(st, env, st.round, dyingRoll.messages.join("; "), "death-saves"));
+
+      nextParticipant = st.order[st.index];
+
+      if (!isActive(nextParticipant)) continue;
     }
 
-    const beforeAuto = verdict(updatedInitiativeOrder);
+    if (sitsOutTurn(nextParticipant, st.round)) {
+      // ніхто з живих не ходить цього раунду: зупиняємось на його початку, ходи пропустить клієнт/ДМ
+      if (!st.order.some((p) => takesTurn(p, st.round))) {
+        st.index = idleTurnIndex(st.order);
+
+        break;
+      }
+
+      continue;
+    }
+
+    const turnResult = processStartOfTurn(nextParticipant, st.round, st.order, rng, st.map, params.rules);
+
+    st.order = turnResult.participants;
+
+    startTurnEntries(st, env, turnResult, nextParticipant);
+
+    const beforeAuto = verdict(st.order);
 
     if (beforeAuto.result) break;
 
     // у очікуванні рішення ДМ автоматичні дії не виконуються; цикл лише шукає живого поточного
     if (beforeAuto.awaiting) {
-      if (!updatedInitiativeOrder.some(isActive)) break;
+      if (!st.order.some(isActive)) break;
 
       if (isActive(turnResult.participant)) activeParticipantFound = true;
 
@@ -306,35 +270,36 @@ export function runAdvanceTurnLoop(
 
     if (berserkBonus !== undefined && isActive(turnResult.participant)) {
       const berserk = runBerserkTurn({
-        participants: updatedInitiativeOrder,
+        participants: st.order,
         participantId: turnResult.participant.basicInfo.id,
         restrictedBy: nextParticipant,
         bonusPercent: berserkBonus,
-        round: nextRound,
+        round: st.round,
         battleId,
-        actionIndex: currentBattleLogLength + newLogEntries.length,
+        actionIndex: currentBattleLogLength + st.log.length,
         rng,
-        map,
+        map: st.map,
+        rules: params.rules,
       });
 
-      updatedInitiativeOrder = berserk.participants;
-      newLogEntries.push(...berserk.actions.map((a, i) => ({ ...a, actionIndex: currentBattleLogLength + newLogEntries.length + i, stateBefore: getStateBeforeForEntry() })));
+      st.order = berserk.participants;
+      st.log.push(...berserk.actions.map((a, i) => ({ ...a, actionIndex: currentBattleLogLength + st.log.length + i, stateBefore: stateBeforeForEntry() })));
 
-      if (verdict(updatedInitiativeOrder).result) break;
+      if (verdict(st.order).result) break;
 
       continue;
     }
 
     if (isActive(turnResult.participant)) activeParticipantFound = true;
 
-    if (verdict(updatedInitiativeOrder).result) break;
+    if (verdict(st.order).result) break;
   }
 
   return {
-    updatedInitiativeOrder,
-    nextTurnIndex,
-    nextRound,
-    newLogEntries,
-    clearedPendingSummons,
+    updatedInitiativeOrder: st.order,
+    nextTurnIndex: st.index,
+    nextRound: st.round,
+    newLogEntries: st.log,
+    clearedPendingSummons: st.clearedPendingSummons,
   };
 }

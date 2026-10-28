@@ -5,7 +5,7 @@ const VALUE: Record<DamageStep["kind"], (value: number) => string> = {
   dice: String,
   flat: signed,
   percent: (v) => `${signed(v)}%`,
-  multiplier: (v) => `×${v}`,
+  multiplier: (v) => `×${+v.toFixed(2)}`,
   immunity: () => "імунітет",
 };
 

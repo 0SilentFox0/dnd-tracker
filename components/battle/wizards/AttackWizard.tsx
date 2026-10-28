@@ -52,7 +52,7 @@ export function AttackWizard({ wizard }: { wizard: AttackWizardModel }) {
   );
 
   return (
-    <ResponsiveDialog open={open} onOpenChange={(o) => !o && actions.close()} title={attack ? `${attack.name}${target ? ` → ${target.basicInfo.name}` : ""}` : "Атака"} className={cn(HUD_SURFACE, "border-white/25 bg-[#15110e]")}>
+    <ResponsiveDialog open={open} onOpenChange={(o) => !o && actions.close()} title={attack ? `${view.offHand ? "Друга рука · " : view.counter ? `Атака ${view.counter.n}/${view.counter.m} · ` : ""}${attack.name}${target ? ` → ${target.basicInfo.name}` : ""}` : "Атака"} className={cn(HUD_SURFACE, "border-white/25 bg-[#15110e]")}>
       {header}
       {state.picked && view.attackKind && PICKED_STEPS.has(state.step) && (
         <div data-attack-picked={view.attackKind} className="mb-2 flex min-h-8 items-center justify-between gap-2 text-sm text-[#cdb87e]">

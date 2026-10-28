@@ -13,16 +13,18 @@ vi.mock("next/server", async (orig) => ({ ...(await orig<typeof import("next/ser
 vi.mock("@/lib/pusher/server", () => ({ pusherServer: { trigger } }));
 vi.mock("@/lib/utils/api/rate-limit", async (orig) => ({ ...(await orig<typeof import("@/lib/utils/api/rate-limit")>()), checkRateLimit: vi.fn(async () => ({ allowed: true, count: 1, limit: 30, retryAfterSeconds: 10 })) }));
 vi.mock("@/lib/utils/api/api-auth", () => ({ requireDM: vi.fn(), requireCampaignAccess: vi.fn() }));
-vi.mock("@/lib/db", () => ({
-  prisma: {
+vi.mock("@/lib/db", async () => {
+  const { contentDatabaseDouble } = await import("@/lib/server/content/__tests__/database-double");
+
+  return { prisma: contentDatabaseDouble({
     campaignShow: { findUnique: vi.fn(async () => null), updateMany: vi.fn(async () => ({ count: 1 })), createMany: vi.fn(async () => ({ count: 1 })) },
     slideDeck: { findFirst: vi.fn() },
     battleScene: { findFirst: vi.fn() },
     worldMap: { findFirst: vi.fn() },
     worldMarker: { findFirst: vi.fn() },
     campaignTrack: { findMany: vi.fn(async () => []) },
-  },
-}));
+  }) };
+});
 
 const access = (isDM: boolean) => ({ userId: isDM ? "dm" : "p", isDM, campaign: { id: "c1", maxLevel: 20, members: [] } }) as never;
 
@@ -91,6 +93,18 @@ describe("show API", () => {
     expect(await res.json()).toEqual({ show: last });
     expect(prisma.campaignShow.updateMany).not.toHaveBeenCalled();
     expect(afterCallbacks).toHaveLength(0);
+  });
+
+  it("native commands share the Campaign write guard", async () => {
+    const { currentContentWrite } = await import("@/lib/server/content/write-context");
+
+    let guarded = false;
+
+    vi.mocked(prisma.campaignShow.createMany).mockImplementationOnce((async () => { guarded = currentContentWrite()?.campaignId === "c1";
+
+ return { count: 1 }; }) as never);
+    expect((await post({ action: "open", deckId: "d1" })).status).toBe(200);
+    expect(guarded).toBe(true);
   });
 
   it("помилки команд — 422; невідома дія — 400", async () => {

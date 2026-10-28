@@ -23,6 +23,7 @@ export {
   useBattleSceneValue,
 } from "./useBattleScene";
 export { type BattleViewMode, useBattleViewMode } from "./useBattleViewMode";
+export { canReadiedAttack, type CoreActionChoice, useCoreActions, useReadiedAttack } from "./useCoreActions";
 export { type CritChoiceRow, useCritChoiceDialog } from "./useCritChoiceDialog";
 export { useDmCaster } from "./useDmCaster";
 export { type DmParticipantActions, useDmParticipantActions } from "./useDmParticipantActions";
@@ -31,6 +32,7 @@ export { useFxEnabled } from "./useFxEnabled";
 export { useFxImpacts } from "./useFxImpacts";
 export { useHitChange, useHitFx } from "./useHitFx";
 export { type HpChange, useDamageShake, useHpChange } from "./useHpChange";
+export { type LegendaryChoice, useLegendaryAction } from "./useLegendaryAction";
 export { type MapTerrainTool, MAX_BARRIER_ROUNDS, type TerrainBrush, useMapTerrainTool } from "./useMapTerrainTool";
 export { type MapWeatherTool, useMapWeatherTool } from "./useMapWeatherTool";
 export { MAP_TAB, type MobileBattleTab, useMobileBattleTabs } from "./useMobileBattleTabs";
@@ -38,6 +40,6 @@ export { type ParticipantClickInput, useParticipantClick } from "./useParticipan
 export { ParticipantFacesContext, useParticipantFace, useParticipantFacesValue } from "./useParticipantFace";
 export { usePlayerTurn } from "./usePlayerTurn";
 export { useSelectedParticipant } from "./useSelectedParticipant";
-export { useBonusSpells, useSpellBook, useSpellBookPrefetch } from "./useSpellBook";
+export { useBonusSpells, useReactionSpells, useSpellBook, useSpellBookPrefetch } from "./useSpellBook";
 export { type FxRunner, useSpellFxPlayback } from "./useSpellFxPlayback";
 export { type UnitControlRow, useUnitControlPanel } from "./useUnitControlPanel";

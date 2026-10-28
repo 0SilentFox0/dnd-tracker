@@ -7,6 +7,7 @@ vi.mock("@/lib/utils/api/api-auth", () => ({ requireDM: vi.fn() }));
 
 const tx = vi.hoisted(() => ({
   $executeRaw: vi.fn(),
+  artifact: { findMany: vi.fn() },
   inventoryLog: { createMany: vi.fn() },
   characterInventory: { upsert: vi.fn(), findMany: vi.fn(), findUnique: vi.fn() },
 }));
@@ -31,6 +32,15 @@ describe("DM equip via inventory PATCH", () => {
     tx.characterInventory.findUnique.mockResolvedValue({ characterId: "a", equipped: { helmet: "h1" }, stash: ["s1"] });
     tx.characterInventory.findMany.mockResolvedValue([]);
     tx.characterInventory.upsert.mockImplementation(async ({ update }: { update: object }) => ({ characterId: "a", ...update }));
+  });
+
+  it("rejects a forged item parameter without writing inventory", async () => {
+    tx.artifact.findMany.mockResolvedValue([{ id: "ring", name: "Ring", slot: "ring", modifiers: [{ type: "itemStats", value: JSON.stringify({ parameter: { kind: "damageType", options: [{ key: "fire", label: "Fire" }] } }) }] }]);
+
+    const response = await patch({ equipSlot: { slot: "helmet", artifactId: "ring~cold" } });
+
+    expect(response.status).toBe(422);
+    expect(tx.characterInventory.upsert).not.toHaveBeenCalled();
   });
 
   it("moves the displaced artifact to the stash and logs the swap", async () => {
@@ -67,3 +77,6 @@ describe("DM equip via inventory PATCH", () => {
     expect(tx.inventoryLog.createMany).not.toHaveBeenCalled();
   });
 });
+
+// Shared transaction SQL is exercised by character storage integration; retain the existing business DB doubles.
+vi.mock("@/lib/server/content/write", () => ({ withCampaignContentWrite: async (_id: string, fn: (tx: unknown) => unknown) => fn({ $queryRaw: async () => [], $executeRaw: async () => 1 }) }));

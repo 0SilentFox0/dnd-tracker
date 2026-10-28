@@ -7,6 +7,7 @@ import type { BattleSceneState, LoadedBattle, ParticipantColumns, ParticipantSna
 import { BattleStatus } from "@/lib/constants/battle";
 import { CampaignRole } from "@/lib/constants/campaigns";
 import type { StoredPendingCritChoice } from "@/lib/utils/battle/crit-choice/types";
+import { parseRulesCached } from "@/lib/utils/rules/schema";
 import type { BattleAudioState } from "@/types/audio";
 import type { BattleMapConfig, BattleParticipant, BattlePreparationParticipant } from "@/types/battle";
 
@@ -86,6 +87,15 @@ async function withSnapshots(db: BattleDb, rows: Array<Omit<ParticipantRow, "sna
   });
 }
 
+async function loadCampaignRules(db: BattleDb, args: { battleId: string; campaignId: string }): Promise<unknown> {
+  const row = await db.battleScene.findFirst({
+    where: { id: args.battleId, campaignId: args.campaignId },
+    select: { campaign: { select: { rules: true } } },
+  });
+
+  return row?.campaign.rules;
+}
+
 export async function loadBattle(
   db: BattleDb,
   args: { battleId: string; campaignId: string; userId: string },
@@ -106,6 +116,7 @@ export async function loadBattle(
       pendingCritChoice: true,
       map: true,
       audio: true,
+      rules: true,
       startedAt: true,
       completedAt: true,
       createdAt: true,
@@ -135,6 +146,8 @@ export async function loadBattle(
 
   const membership = row.campaign.members[0];
 
+  const rules = parseRulesCached(row.status === BattleStatus.PREPARED ? await loadCampaignRules(db, args) : (row.rules ?? {}));
+
   const all = (await withSnapshots(db, row.battleParticipants)).map((p) => ({ isPending: p.isPending, participant: rowToParticipant(p) }));
 
   return {
@@ -144,6 +157,7 @@ export async function loadBattle(
       description: row.description,
       setup: (row.participants ?? []) as unknown as BattlePreparationParticipant[],
       friendlyFire: row.campaign.friendlyFire ?? false,
+      rules,
       critChoiceByDm: row.campaign.critChoiceByDm,
       map: (row.map ?? null) as BattleMapConfig | null,
       audio: (row.audio ?? null) as BattleAudioState | null,
@@ -159,11 +173,15 @@ export async function loadBattle(
 export async function loadBattleAccess(
   db: BattleDb,
   args: { battleId: string; campaignId: string; userId: string },
-): Promise<{ version: number; isMember: boolean } | null> {
+): Promise<{ version: number; isMember: boolean; isDM: boolean } | null> {
   const row = await db.battleScene.findFirst({
     where: { id: args.battleId, campaignId: args.campaignId },
-    select: { version: true, campaign: { select: { members: { where: { userId: args.userId }, select: { userId: true } } } } },
+    select: { version: true, campaign: { select: { members: { where: { userId: args.userId }, select: { role: true } } } } },
   });
 
-  return row ? { version: row.version, isMember: row.campaign.members.length > 0 } : null;
+  if (!row) return null;
+
+  const membership = row.campaign.members[0];
+
+  return { version: row.version, isMember: Boolean(membership), isDM: membership?.role === CampaignRole.DM };
 }

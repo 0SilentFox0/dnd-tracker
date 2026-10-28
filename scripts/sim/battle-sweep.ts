@@ -16,27 +16,28 @@ import { mkdirSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 
-import { abilityActionSchema, createAbilityActionMutation } from "@/app/api/campaigns/[id]/battles/[battleId]/ability-action/ability-action-mutation";
-import { attackBodySchema, createAttackMutation } from "@/app/api/campaigns/[id]/battles/[battleId]/attack/attack-mutation";
-import { auraZoneMutation, auraZoneSchema } from "@/app/api/campaigns/[id]/battles/[battleId]/aura-zone/aura-zone-mutation";
-import { bonusActionSchema, createBonusActionMutation } from "@/app/api/campaigns/[id]/battles/[battleId]/bonus-action/bonus-action-mutation";
-import { mapTerrainMutation, mapTerrainSchema } from "@/app/api/campaigns/[id]/battles/[battleId]/map-terrain/map-terrain-mutation";
-import { mazeActionSchema, mazeMutation } from "@/app/api/campaigns/[id]/battles/[battleId]/maze/maze-mutation";
-import { mazeMarkMutation, mazeMarkSchema } from "@/app/api/campaigns/[id]/battles/[battleId]/maze-mark/maze-mark-mutation";
-import { moraleCheckMutation } from "@/app/api/campaigns/[id]/battles/[battleId]/morale-check/morale-check-mutation";
-import { moveMutation, moveSchema } from "@/app/api/campaigns/[id]/battles/[battleId]/move/move-mutation";
-import { nextTurnMutation } from "@/app/api/campaigns/[id]/battles/[battleId]/next-turn/next-turn-mutation";
-import { patchParticipantMutation } from "@/app/api/campaigns/[id]/battles/[battleId]/participants/[participantId]/patch-participant-mutation";
-import { patchParticipantSchema } from "@/app/api/campaigns/[id]/battles/[battleId]/participants/[participantId]/patch-participant-schema";
-import { revealParticipantMutation, revealParticipantSchema } from "@/app/api/campaigns/[id]/battles/[battleId]/reveal-participant/reveal-participant-mutation";
-import { spellSchema } from "@/app/api/campaigns/[id]/battles/[battleId]/spell/cast-spell-schema";
-import { createSpellMutation } from "@/app/api/campaigns/[id]/battles/[battleId]/spell/spell-mutation";
-import { createStartMutation } from "@/app/api/campaigns/[id]/battles/[battleId]/start/start-mutation";
-import { unitControlMutation, unitControlSchema } from "@/app/api/campaigns/[id]/battles/[battleId]/unit-control/unit-control-mutation";
 import { BATTLE_LOG_RECENT_EVENTS, ParticipantSourceType } from "@/lib/constants/battle";
 import { CONTROLLED_BY_DM } from "@/lib/constants/characters";
 import { prisma } from "@/lib/db";
 import { moraleCheckSchema } from "@/lib/schemas";
+import { abilityActionSchema, createAbilityActionMutation } from "@/lib/server/battles/mutations/ability-action/ability-action-mutation";
+import { attackBodySchema, createAttackMutation } from "@/lib/server/battles/mutations/attack/attack-mutation";
+import { auraZoneMutation, auraZoneSchema } from "@/lib/server/battles/mutations/aura-zone/aura-zone-mutation";
+import { bonusActionSchema, createBonusActionMutation } from "@/lib/server/battles/mutations/bonus-action/bonus-action-mutation";
+import { mapTerrainMutation, mapTerrainSchema } from "@/lib/server/battles/mutations/map-terrain/map-terrain-mutation";
+import { mazeActionSchema, mazeMutation } from "@/lib/server/battles/mutations/maze/maze-mutation";
+import { mazeMarkMutation, mazeMarkSchema } from "@/lib/server/battles/mutations/maze-mark/maze-mark-mutation";
+import { moraleCheckMutation } from "@/lib/server/battles/mutations/morale-check/morale-check-mutation";
+import { moveMutation, moveSchema } from "@/lib/server/battles/mutations/move/move-mutation";
+import { nextTurnMutation } from "@/lib/server/battles/mutations/next-turn/next-turn-mutation";
+import { patchParticipantMutation } from "@/lib/server/battles/mutations/participants/patch-participant-mutation";
+import { patchParticipantSchema } from "@/lib/server/battles/mutations/participants/patch-participant-schema";
+import { revealParticipantMutation, revealParticipantSchema } from "@/lib/server/battles/mutations/reveal-participant/reveal-participant-mutation";
+import { spellSchema } from "@/lib/server/battles/mutations/spell/cast-spell-schema";
+import { createSpellMutation } from "@/lib/server/battles/mutations/spell/spell-mutation";
+import { createStartMutation } from "@/lib/server/battles/mutations/start/start-mutation";
+import { unitControlMutation, unitControlSchema } from "@/lib/server/battles/mutations/unit-control/unit-control-mutation";
+import { runBattleMutation } from "@/lib/server/battles/run-mutation";
 import { collectModifiers, statWithModifiers } from "@/lib/utils/abilities/engine/core/collect-modifiers";
 import { pendingAreaAuras, zoneCandidates, zoneMembers } from "@/lib/utils/abilities/engine/effects/area-aura";
 import { applyBattleDelta } from "@/lib/utils/battle/client/apply-delta";
@@ -47,7 +48,6 @@ import { allReachExit, canStep, featureKeys, isMazeHero, mazeBudgetLeft, mazeDis
 import { emptyMaze, MAZE_SCATTER_MIN_GAP, MAZE_STEPS_PER_TURN } from "@/lib/utils/battle/modes/maze/constants";
 import { MAZE_TEXTS } from "@/lib/utils/battle/modes/maze/texts";
 import { awaitsMoraleCheck } from "@/lib/utils/battle/morale/awaits-check";
-import { runBattleMutation } from "@/lib/utils/battle/pipeline/run-battle-mutation";
 import { casterSpellDice } from "@/lib/utils/battle/spell/caster-dice";
 import { loadSpellsFromDb } from "@/lib/utils/battle/spell/load-spells-db";
 import { spellTargetingFor } from "@/lib/utils/battle/spell/spell-targeting";
@@ -362,7 +362,7 @@ function learnLegally(tree: any, order: string[], level: number, who: string) {
 }
 
 async function prepare() {
-  campaign = await prisma.campaign.findFirstOrThrow({ where: CAMPAIGN ? { id: CAMPAIGN } : { name: "HOMM5" } });
+  campaign = await prisma.campaign.findFirstOrThrow({ where: CAMPAIGN ? { id: CAMPAIGN } : { name: "HOMM5", kind: "campaign" } });
   ctx.campaignId = campaign.id;
   dmId = campaign.dmUserId;
   for (const row of await prisma.skillTree.findMany({ where: { campaignId: campaign.id } })) trees[row.race] = normalizeTree(row);

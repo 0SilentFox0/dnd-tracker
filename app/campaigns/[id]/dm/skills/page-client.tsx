@@ -7,6 +7,7 @@ import { DeleteAllButton } from "@/components/common/DeleteAllButton";
 import { SearchEmptyState } from "@/components/common/SearchEmptyState";
 import { SearchInput } from "@/components/common/SearchInput";
 import { EmptyState, LoadingState } from "@/components/common/states";
+import { ContentTransferButtons } from "@/components/content-import/ContentTransferButtons";
 import { HudPage, HudPageHeader } from "@/components/hud/page";
 import { OnboardingHint } from "@/components/onboarding/OnboardingHint";
 import { SkillGroupAccordion } from "@/components/skills/list/SkillGroupAccordion";
@@ -31,6 +32,7 @@ export function DMSkillsPageClient({ campaignId }: { campaignId: string }) {
         subtitle="Управління скілами та їх ефектами"
         actions={
           <>
+            <ContentTransferButtons campaignId={campaignId} kind="skills" />
             <Button variant="outline" className="whitespace-nowrap text-xs sm:text-sm" asChild>
               <Link href={`/campaigns/${campaignId}/dm/main-skills`}>+ Основний навик</Link>
             </Button>

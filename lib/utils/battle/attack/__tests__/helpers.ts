@@ -12,8 +12,8 @@ export function swordUnit(id: string, side: ParticipantSide, abilities?: Resolve
   return { ...p, basicInfo: { ...p.basicInfo, sourceType: ParticipantSourceType.UNIT }, battleData: { ...p.battleData, attacks: [SWORD] } };
 }
 
-export function retaliate(ps: BattleParticipant[], map?: BattleMapConfig) {
-  return resolveRetaliation({ participants: ps, attackerId: "a", defenderId: "d", attack: SWORD, attackRoll: { isCriticalFail: false }, round: 1, battleId: "b1", rng: seq(0.85), ...(map && { map }) });
+export function retaliate(ps: BattleParticipant[], map?: BattleMapConfig, rng: () => number = seq(0.85)) {
+  return resolveRetaliation({ participants: ps, attackerId: "a", defenderId: "d", attack: SWORD, attackRoll: { isCriticalFail: false }, round: 1, battleId: "b1", rng, ...(map && { map }) });
 }
 
 export function retaliateTimes(ps: BattleParticipant[], tries: number): boolean[] {

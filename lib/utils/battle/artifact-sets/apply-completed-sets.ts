@@ -3,6 +3,7 @@ import { type ArtifactSetBattleMaps, loadArtifactSetBattleMaps } from "./load-ma
 
 import type { ArtifactSetRowLike } from "@/lib/utils/abilities/build/collect";
 import { abilitySummary } from "@/lib/utils/abilities/summary";
+import { refArtifactIds } from "@/lib/utils/items/ref";
 import type { EquippedArtifact } from "@/types/battle";
 import type { SetProgress } from "@/types/characters";
 
@@ -13,7 +14,7 @@ const hasEffect = (row: { setBonus: unknown; abilities?: unknown }) => row.setBo
 const setIdsOf = (equipped: Pick<EquippedArtifact, "setId">[]) => [...new Set(equipped.map((a) => a.setId).filter((id): id is string => !!id))];
 
 export function findSetProgress(equipped: Pick<EquippedArtifact, "artifactId" | "setId">[], maps: ArtifactSetBattleMaps): SetProgress[] {
-  const equippedIds = new Set(equipped.map((a) => a.artifactId));
+  const equippedIds = new Set(equipped.flatMap((a) => refArtifactIds(a.artifactId)));
 
   return setIdsOf(equipped).flatMap((setId) => {
     const row = maps.artifactSetsById[setId];

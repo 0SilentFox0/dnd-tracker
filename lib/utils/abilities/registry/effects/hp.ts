@@ -9,6 +9,8 @@ import { findParticipant, isActive, replaceParticipant } from "@/lib/utils/abili
 import { applyRawDamage } from "@/lib/utils/abilities/engine/effects/hp";
 import { effectSource, upsertTimedEffect } from "@/lib/utils/abilities/engine/effects/timed-effects";
 import type { Effect } from "@/lib/utils/abilities/schema";
+import { applyDamageConsequences } from "@/lib/utils/battle/damage/consequences";
+import { clearDeathSaves, isDying } from "@/lib/utils/battle/death-saves";
 import { hasImmunity } from "@/lib/utils/battle/resistance";
 
 type Of<K extends Effect["kind"]> = Extract<Effect, { kind: K }>;
@@ -37,10 +39,12 @@ export function applyDealDamage(input: EffectApplyInput<Of<"dealDamage">>): Effe
 
     if (amount <= 0) continue;
 
-    const updated = applyRawDamage(t, amount);
+    const c = applyDamageConsequences({ before: t, after: applyRawDamage(t, amount), amount, rules: ctx.rules, rng: ctx.rng, participants: ps });
 
-    ps = replaceParticipant(ps, updated);
-    messages.push(`💥 ${ability.name}: ${t.basicInfo.name} −${amount} HP`);
+    const updated = c.participant;
+
+    ps = replaceParticipant(c.participants, updated);
+    messages.push(`💥 ${ability.name}: ${t.basicInfo.name} −${amount} HP`, ...c.messages);
 
     if (!isActive(updated)) downed.push({ victimId: id, actorId: input.ownerId });
   }
@@ -64,7 +68,7 @@ export function applyHeal(input: EffectApplyInput<Of<"heal">>): EffectApplyResul
   for (const id of input.targetIds) {
     const t = findParticipant(ps, id);
 
-    if (!t || (!isActive(t) && !effect.revive)) continue;
+    if (!t || (!isActive(t) && !effect.revive && !isDying(t))) continue;
 
     const amount = resolveAmount(effect.amount, { owner, target: t, eventDamage: eventDamage(input.event), spellRoll: eventSpellRoll(input.event), rng: ctx.rng, participants: input.participants });
 
@@ -74,10 +78,12 @@ export function applyHeal(input: EffectApplyInput<Of<"heal">>): EffectApplyResul
 
     if (hp <= before && isActive(t)) continue;
 
-    ps = replaceParticipant(ps, {
+    const healed = {
       ...t,
       combatStats: { ...t.combatStats, currentHp: hp, status: hp > 0 ? CombatStatus.ACTIVE : t.combatStats.status },
-    });
+    };
+
+    ps = replaceParticipant(ps, hp > 0 ? clearDeathSaves(healed) : healed);
     messages.push(
       isActive(t)
         ? `💚 ${label}: ${t.basicInfo.name} +${hp - before} HP`

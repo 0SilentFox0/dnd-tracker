@@ -1,13 +1,10 @@
 import type { Prisma } from "@prisma/client";
 import { randomUUID } from "node:crypto";
-import type { z } from "zod";
 
-import type { draftSchema } from "./draft-schema";
+import type { DraftData } from "./draft-schema";
 
 import { GoalAuthor, GoalStatus } from "@/lib/constants/characters";
 import type { CharacterGoal } from "@/types/characters";
-
-type DraftData = z.infer<typeof draftSchema>;
 
 const buildDraftGoals = (goals: DraftData["goals"]) =>
   (goals ?? []).map((g) => ({ id: randomUUID(), text: g.text, kind: g.kind, status: GoalStatus.ACTIVE, author: GoalAuthor.PLAYER }));
@@ -32,8 +29,8 @@ function mergeDraftGoals(stored: unknown, incoming: DraftData["goals"]): Charact
 export const draftFields = (data: DraftData, storedGoals?: unknown) => ({
   name: data.name,
   race: data.race,
-  class: data.class,
-  archetype: data.archetype,
+  class: "class" in data ? data.class : "",
+  archetype: "archetype" in data ? data.archetype : null,
   alignment: data.alignment ?? null,
   background: data.background ?? null,
   strength: data.strength,

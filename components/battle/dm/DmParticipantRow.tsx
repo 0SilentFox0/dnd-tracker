@@ -1,6 +1,6 @@
 "use client";
 
-import { Heart, LogIn, Skull, Trash2 } from "lucide-react";
+import { Crown, Heart, LogIn, ShieldAlert, Skull, Trash2 } from "lucide-react";
 
 import { SideDot } from "@/components/battle/hud";
 import { SelectField } from "@/components/ui/select-field";
@@ -8,6 +8,8 @@ import { CombatStatus, ParticipantSourceType } from "@/lib/constants/battle";
 import type { DmParticipantActions } from "@/lib/hooks/battle";
 import { useConfirm } from "@/lib/hooks/common";
 import { cn } from "@/lib/utils";
+import { lairAbilities } from "@/lib/utils/battle/actions/lair";
+import { hasLegendaryActions, legendaryBadge } from "@/lib/utils/battle/actions/legendary-options";
 import { mult } from "@/lib/utils/common/format";
 import type { BattleParticipant } from "@/types/battle";
 
@@ -28,7 +30,7 @@ interface DmParticipantRowProps {
 }
 
 export function DmParticipantRow({ participant, controlled, actions }: DmParticipantRowProps) {
-  const { onChangeHp, onTakeControl, onRemove, onKill, onDone, unitControl } = actions;
+  const { onChangeHp, onTakeControl, onRemove, onKill, onConditions, onLegendary, onToggleLair, conditionsEnabled, onDone, unitControl } = actions;
 
   const confirm = useConfirm();
 
@@ -38,12 +40,21 @@ export function DmParticipantRow({ participant, controlled, actions }: DmPartici
 
   const canKill = onKill && participant.basicInfo.sourceType === ParticipantSourceType.UNIT && participant.combatStats.status !== CombatStatus.DEAD;
 
+  const legendary = onLegendary && hasLegendaryActions(participant) ? participant.battleData.legendary : undefined;
+
+  const hasLair = !!participant.battleData.lair || lairAbilities(participant).length > 0;
+
+  const badge = legendaryBadge(participant);
+
+  const canConditions = onConditions && conditionsEnabled;
+
   return (
     <div className={cn("flex min-h-10 items-center gap-2 border-b border-white/[.08] py-1", controlled && "bg-[var(--gold)]/[.08]")}>
       <SideDot side={participant.basicInfo.side} />
       <div className="min-w-0 flex-1">
         <div className="truncate text-sm font-medium text-[var(--ink)]">{participant.basicInfo.name}</div>
         {label && <div className="truncate text-xs text-[var(--hud-muted)]" data-testid="balance-scale">{label}</div>}
+        {badge && <div className="truncate text-xs text-[var(--hud-muted)]" data-testid="legendary-badge">{badge}</div>}
         {unitControl?.isAssignable(participant) && (
           <label className="flex items-center gap-1.5 pt-1 text-xs text-[var(--hud-muted)]">
             Керує:
@@ -74,6 +85,17 @@ export function DmParticipantRow({ participant, controlled, actions }: DmPartici
         >
           <LogIn className="size-3.5" />
         </button>
+        {hasLair && onToggleLair && <button type="button" className={cn(ICON, participant.battleData.lair?.active && "text-hud-gold-bright")} aria-label={participant.battleData.lair?.active ? "Вимкнути лігво" : "Увімкнути лігво"} title={participant.battleData.lair?.active ? "У лігві" : "Поза лігвом"} aria-pressed={!!participant.battleData.lair?.active} onClick={() => onToggleLair(participant)}>🏰</button>}
+        {(legendary || hasLair && onLegendary) && (
+          <button type="button" className={cn(ICON, "text-[var(--gold)] hover:border-[var(--gold)]/40")} title={`Легендарна дія (${legendary?.actionsLeft ?? 0}/${legendary?.actions ?? 0})`} aria-label={`Легендарна дія (${legendary?.actionsLeft ?? 0}/${legendary?.actions ?? 0})`} onClick={() => onLegendary?.(participant)}>
+            <Crown className="size-3.5" />
+          </button>
+        )}
+        {canConditions && (
+          <button type="button" className={cn(ICON, "text-[#8fd0e8] hover:border-[#8fd0e8]/40")} title="Стани" onClick={() => onConditions(participant)}>
+            <ShieldAlert className="size-3.5" />
+          </button>
+        )}
         {canKill && (
           <button
             type="button"

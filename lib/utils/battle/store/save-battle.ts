@@ -4,6 +4,9 @@ import type { ParticipantsDiff, ParticipantUpdate } from "./diff-participants";
 import { diffParticipants } from "./diff-participants";
 import { BattleConflictError } from "./errors";
 import type { BattleDb } from "./load-battle";
+import { persistConsumables } from "./persist-consumables";
+import { persistCharacterResources } from "./persist-resources";
+import { persistBattleXp } from "./persist-xp";
 import { buildSnapshotState } from "./snapshot-state";
 import { joinParticipant, splitParticipant } from "./split-participant";
 import type {
@@ -169,6 +172,7 @@ export async function saveBattle(
         ...(patch.startedAt !== undefined && { startedAt: patch.startedAt }),
         ...(patch.completedAt !== undefined && { completedAt: patch.completedAt }),
         ...(patch.map !== undefined && { map: jsonOrNull(patch.map) }),
+        ...(patch.rules !== undefined && { rules: patch.rules as Prisma.InputJsonValue }),
       },
     });
 
@@ -230,7 +234,12 @@ export async function saveBattle(
       });
     }
 
-    if (completing) await tx.$executeRaw(pruneSnapshotsSql(scene.id));
+    if (completing) {
+      await persistCharacterResources(tx, { campaignId: scene.campaignId, battleId: scene.id, rules: before.meta.rules }, outcome.participants);
+      await persistBattleXp(tx, { campaignId: scene.campaignId, battleId: scene.id, rules: before.meta.rules }, outcome.participants, outcome.events);
+      await persistConsumables(tx, { campaignId: scene.campaignId }, outcome.participants);
+      await tx.$executeRaw(pruneSnapshotsSql(scene.id));
+    }
   });
 
   return delta;

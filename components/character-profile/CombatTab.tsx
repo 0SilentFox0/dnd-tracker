@@ -1,8 +1,9 @@
 "use client";
 
-import { useState } from "react";
+import { type ReactNode, useState } from "react";
 import { Crosshair, Swords } from "lucide-react";
 
+import { SheetRollDialog, type SheetRollRequest } from "./rest/SheetRollDialog";
 import { Breakdown } from "./Breakdown";
 import { useProfile } from "./ProfileContext";
 
@@ -10,6 +11,8 @@ import { EmptyState } from "@/components/common/states";
 import { HudSection } from "@/components/hud/form";
 import { ABILITY_SHORT_LABELS } from "@/lib/constants/abilities";
 import { AttackType } from "@/lib/constants/battle";
+import type { DndSkill } from "@/lib/constants/skills";
+import { useCampaignRules } from "@/lib/hooks/campaigns";
 import { cn } from "@/lib/utils";
 import { signed } from "@/lib/utils/common/format";
 import type { SheetLine } from "@/types/characters";
@@ -31,9 +34,25 @@ function Row({ label, value, lines }: { label: string; value: string; lines?: Sh
 }
 
 export function CombatTab() {
-  const { sheet } = useProfile();
+  const { campaignId, sheet } = useProfile();
+
+  const { data: rules } = useCampaignRules(campaignId);
 
   const [openAttack, setOpenAttack] = useState<string | null>(null);
+
+  const [rollRequest, setRollRequest] = useState<SheetRollRequest | null>(null);
+
+  const canRoll = !!sheet.rest && (sheet.viewer.isOwner || sheet.viewer.isDM);
+
+  const rollable = (request: SheetRollRequest, children: ReactNode) =>
+    canRoll ? (
+      <button type="button" title="Кинути" onClick={() => setRollRequest(request)} className="flex w-full justify-between gap-2 text-left">
+        <span className="sr-only">Кинути: </span>
+        {children}
+      </button>
+    ) : (
+      <div className="flex w-full justify-between gap-2">{children}</div>
+    );
 
   return (
     <>
@@ -83,19 +102,25 @@ export function CombatTab() {
         <Row label="AC" value={String(sheet.armorClass.total)} lines={sheet.armorClass.lines} />
         <Row label="Ініціатива" value={String(sheet.initiative)} />
         <Row label="Швидкість" value={String(sheet.speed)} />
-        <Row label="Мораль" value={signed(sheet.morale)} />
+        {rules?.morale.enabled !== false && <Row label="Мораль" value={signed(sheet.morale)} />}
         <Row label="Цілей за атаку" value={sheet.targets.min === sheet.targets.max ? String(sheet.targets.max) : `${sheet.targets.min}–${sheet.targets.max}`} />
         {sheet.immunities.length > 0 && <Row label="Імунітети" value={sheet.immunities.join(", ")} />}
       </HudSection>
       <HudSection title="РЯТІВНІ КИДКИ">
         <ul className="grid grid-cols-2 gap-x-4 text-sm">
           {sheet.saves.map((s) => (
-            <li key={s.key} className="flex justify-between gap-2 border-b border-[#2a2218] py-1">
-              <span className="min-w-0 truncate">
-                {s.proficient ? "● " : ""}
-                {s.label}
-              </span>
-              <span className="tabular-nums">{signed(s.bonus)}</span>
+            <li key={s.key} className="border-b border-[#2a2218] py-1">
+              {rollable(
+                { label: `Рятівний кидок: ${s.label}`, subject: { kind: "save", ability: s.ability } },
+                <>
+                  <span className="min-w-0 truncate">
+                    {s.proficient ? (s.expertise ? "●● " : "● ") : ""}
+                    {s.label}
+                    {s.expertise && <span className="ml-1 text-xs text-hud-muted">×2</span>}
+                  </span>
+                  <span className="tabular-nums">{signed(s.bonus)}</span>
+                </>,
+              )}
             </li>
           ))}
         </ul>
@@ -103,12 +128,17 @@ export function CombatTab() {
       <HudSection title="НАВИЧКИ">
         <ul className="grid grid-cols-2 gap-x-4 text-sm">
           {sheet.skills.map((s) => (
-            <li key={s.key} className="flex justify-between gap-2 border-b border-[#2a2218] py-1">
-              <span className="min-w-0 truncate">
-                {s.proficient ? "● " : ""}
-                {s.label}
-              </span>
-              <span className="tabular-nums">{signed(s.bonus)}</span>
+            <li key={s.key} className="border-b border-[#2a2218] py-1">
+              {rollable(
+                { label: s.label, subject: { kind: "check", skill: s.key as DndSkill } },
+                <>
+                  <span className="min-w-0 truncate">
+                    {s.proficient ? "● " : ""}
+                    {s.label}
+                  </span>
+                  <span className="tabular-nums">{signed(s.bonus)}</span>
+                </>,
+              )}
             </li>
           ))}
         </ul>
@@ -121,6 +151,7 @@ export function CombatTab() {
           </p>
         )}
       </HudSection>
+      {canRoll && <SheetRollDialog request={rollRequest} onClose={() => setRollRequest(null)} />}
     </>
   );
 }

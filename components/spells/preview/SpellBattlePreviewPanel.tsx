@@ -33,9 +33,9 @@ const BOOK_WASH = "radial-gradient(ellipse at 50% 45%, #3b2a1c 0%, #2a1d14 58%, 
 export default function SpellBattlePreviewPanel({ spell, className, variant = "hud" }: { spell: PreviewSpell; className?: string; variant?: "hud" | "book" }) {
   const book = variant === "book";
 
-  const { id, name, level, groupId, rules } = spell;
+  const { id, name, level, groupId, fx: spellFx, rules } = spell;
 
-  const preview = useMemo(() => previewCastFx(castableOf({ id, name, level, groupId, rules })), [id, name, level, groupId, rules]);
+  const preview = useMemo(() => previewCastFx(castableOf({ id, name, level, groupId, fx: spellFx, rules })), [id, name, level, groupId, spellFx, rules]);
 
   const fx = useFxEnabled();
 

@@ -1,5 +1,7 @@
 import type { LucideIcon } from "lucide-react";
-import { BookOpen, Gem, GitBranch, Images, Map as MapIcon, Music, ScrollText, Shield, Skull, Sparkles, Swords, User, Users } from "lucide-react";
+import { Award, BookOpen, Gem, GitBranch, GraduationCap, Images, Map as MapIcon, Music, Scale, ScrollText, Shield, Skull, Sparkles, Swords, User, Users, Wand2 } from "lucide-react";
+
+import { dmTilesFor } from "@/lib/constants/campaigns";
 
 export type DashboardGroupKey = "game" | "heroes" | "libraries" | "player";
 
@@ -37,7 +39,26 @@ export const DM_DASHBOARD_SECTIONS: DashboardSection[] = [
   { key: "skills", href: dm("skills"), icon: BookOpen, title: "Скіли", subtitle: "Управління скілами та їх ефектами", keywords: ["навички", "здібності"], group: "libraries" },
   { key: "skill-trees", href: dm("skill-trees"), icon: GitBranch, title: "Дерева прокачки", subtitle: "Налаштування дерев прокачки для рас", keywords: ["прокачка", "рівні"], group: "libraries" },
   { key: "races", href: dm("races"), icon: Shield, title: "Раси", subtitle: "Управління расами та їх здібностями", keywords: ["народи"], group: "libraries" },
+  { key: "classes", href: dm("classes"), icon: GraduationCap, title: "Класи", subtitle: "Класи, підкласи і вміння за рівнями", keywords: ["підкласи"], group: "libraries" },
+  { key: "backgrounds", href: dm("backgrounds"), icon: Award, title: "Передісторії", subtitle: "Походження героя, навички й стартові вибори", keywords: ["походження"], group: "libraries" },
+  { key: "feats", href: dm("feats"), icon: Award, title: "Риси", subtitle: "Риси 5e: походження, загальні, стилі бою, епічні дари", keywords: ["фіти"], group: "libraries" },
+  { key: "spell-groups", href: dm("spell-groups"), icon: Wand2, title: "Школи магії", subtitle: "Групи заклинань і школи", keywords: ["групи заклинань"], group: "libraries" },
+  { key: "rules", href: dm("rules"), icon: Scale, title: "Правила", subtitle: "Правила кампанії", keywords: ["налаштування"], group: "libraries" },
 ];
+
+export interface DashboardContext {
+  isTemplate: boolean;
+  classesEnabled: boolean;
+}
+
+export const DEFAULT_DASHBOARD_CONTEXT: DashboardContext = { isTemplate: false, classesEnabled: false };
+
+/** Visibility comes from DM_SECTIONS (templates, classes rules); "info" is the reference page of a playable campaign. */
+export function dmDashboardSectionsFor(ctx: DashboardContext): DashboardSection[] {
+  const visible = new Set(dmTilesFor(ctx).map((s) => s.path));
+
+  return DM_DASHBOARD_SECTIONS.filter((s) => (s.key === "info" ? !ctx.isTemplate : visible.has(s.key)));
+}
 
 export const PLAYER_DASHBOARD_SECTIONS: DashboardSection[] = [
   { key: "my-character", href: (id) => `/campaigns/${id}/character`, icon: User, title: "Мій персонаж", subtitle: "Перегляд та редагування персонажа", keywords: ["герой", "лист"], group: "player" },

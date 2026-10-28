@@ -4,7 +4,6 @@ import { useMemo } from "react";
 
 import { Label } from "@/components/ui/label";
 import { SelectField } from "@/components/ui/select-field";
-import { MAIN_SKILL_BY_CATEGORY } from "@/lib/constants/main-skills";
 import { useMainSkills, usePersonalSkills } from "@/lib/hooks/skills";
 import type { CharacterFormBindings } from "@/lib/utils/characters/form/bindings";
 
@@ -19,7 +18,7 @@ export function CharacterAbilitiesSection({
 }: CharacterAbilitiesSectionProps) {
   const { data: mainSkills = [] } = useMainSkills(campaignId);
 
-  const personalMainSkillId = mainSkills.find((ms) => ms.name === MAIN_SKILL_BY_CATEGORY.Personal)?.id;
+  const personalMainSkillId = mainSkills.find((ms) => ms.role === "personal")?.id;
 
   const { data: personalSkills = [] } = usePersonalSkills(campaignId, personalMainSkillId);
 

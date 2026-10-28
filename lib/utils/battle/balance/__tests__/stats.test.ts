@@ -43,7 +43,7 @@ describe("getCharacterStats з учасника бою", () => {
   it("влучання — рушій для кращої атаки, КД — ефективний, шкода зброєю без гілок шкіл магії", () => {
     const p = hero([sword, bow]);
 
-    const s = getCharacterStats({ participant: p, branchLevels: { attack: SkillLevel.BASIC, chaos: SkillLevel.BASIC }, spellSchoolIds: new Set(["chaos"]) });
+    const s = getCharacterStats({ participant: p, branchLevels: { attack: SkillLevel.BASIC, chaos: SkillLevel.BASIC }, magicMainSkillIds: new Set(["chaos"]) });
 
     const best = s.dprBreakdown.rangedAvg > s.dprBreakdown.meleeAvg ? bow : sword;
 
@@ -74,7 +74,7 @@ describe("getCharacterStats: архетип і раса в оцінці сили
 
     const plain = getCharacterStats({ participant: hero([sword]), branchLevels: levels });
 
-    const school = getCharacterStats({ participant: hero([sword]), branchLevels: levels, spellSchoolIds: new Set(["chaos"]) });
+    const school = getCharacterStats({ participant: hero([sword]), branchLevels: levels, magicMainSkillIds: new Set(["chaos"]) });
 
     expect(plain.spellDpr).toBe(0);
     expect(plain.dprBreakdown.nonMagicDpr).toBe(DPR_BY_LEVEL_NON_MAGIC[SkillLevel.BASIC]);
@@ -94,7 +94,7 @@ describe("getCharacterStats: архетип і раса в оцінці сили
   });
 
   it("spell DPR множиться на magicMultiplier архетипу й на расовий % шкоди магії", () => {
-    const params = { branchLevels: { chaos: SkillLevel.BASIC }, spellSchoolIds: new Set(["chaos"]) };
+    const params = { branchLevels: { chaos: SkillLevel.BASIC }, magicMainSkillIds: new Set(["chaos"]) };
 
     const base = getCharacterStats({ participant: asCharacter(hero([sword]), { magicMultiplier: 1 }), ...params }).spellDpr;
 

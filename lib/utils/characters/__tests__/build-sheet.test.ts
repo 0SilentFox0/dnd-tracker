@@ -156,4 +156,15 @@ describe("buildCharacterSheet", () => {
 
     expect(buildCharacterSheet(input).items.sets).toEqual([set]);
   });
+
+  it("рятівні від класу (участник) показані з майстерністю в режимі класів", () => {
+    const input = lira({ savingThrows: {} });
+
+    input.participant.abilities = { ...input.participant.abilities, saveProficiencies: ["strength", "constitution"] };
+
+    const saves = buildCharacterSheet(input).saves;
+
+    expect(saves.find((x) => x.key === "strength")).toMatchObject({ proficient: true, bonus: 0 + 9 });
+    expect(saves.find((x) => x.key === "dexterity")?.proficient).toBe(false);
+  });
 });

@@ -2,8 +2,8 @@ import { z } from "zod";
 
 import { API_ERRORS } from "@/lib/constants/api-errors";
 import { BATTLE_LOG_PAGE_MAX, BATTLE_LOG_PAGE_SIZE } from "@/lib/constants/battle";
+import { readBattleEvents } from "@/lib/server/battles/read-battle";
 import { errorResponse } from "@/lib/utils/api/api-response";
-import { readBattleEvents } from "@/lib/utils/battle/pipeline/read-battle";
 
 const eventsQuerySchema = z.object({
   before: z.coerce.number().int().min(1),

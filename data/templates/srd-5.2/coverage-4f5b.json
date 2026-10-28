@@ -1,0 +1,732 @@
+{
+  "supported": {
+    "itemSpells": [
+      {
+        "name": "Cube of Force",
+        "spells": 6
+      },
+      {
+        "name": "Dragon Orb",
+        "spells": 3
+      },
+      {
+        "name": "Spell Scroll (Cantrip)",
+        "spells": 27
+      },
+      {
+        "name": "Spell Scroll (Level 1)",
+        "spells": 57
+      },
+      {
+        "name": "Staff of Fire",
+        "spells": 3
+      },
+      {
+        "name": "Staff of Frost",
+        "spells": 4
+      },
+      {
+        "name": "Staff of Healing",
+        "spells": 2
+      },
+      {
+        "name": "Staff of Power",
+        "spells": 7
+      },
+      {
+        "name": "Staff of Swarming Insects",
+        "spells": 2
+      },
+      {
+        "name": "Staff of the Magi",
+        "spells": 17
+      },
+      {
+        "name": "Staff of the Woodlands",
+        "spells": 8
+      },
+      {
+        "name": "Wand of Binding",
+        "spells": 2
+      },
+      {
+        "name": "Wand of Fireballs",
+        "spells": 1
+      },
+      {
+        "name": "Wand of Lightning Bolts",
+        "spells": 1
+      }
+    ],
+    "parameterizedItems": [
+      "Armor of Resistance",
+      "Potion of Resistance",
+      "Ring of Resistance"
+    ],
+    "breathVariants": [
+      "Breath Weapon (Acid, Cone)",
+      "Breath Weapon (Acid, Line)",
+      "Breath Weapon (Cold, Cone)",
+      "Breath Weapon (Cold, Line)",
+      "Breath Weapon (Fire, Cone)",
+      "Breath Weapon (Fire, Line)",
+      "Breath Weapon (Lightning, Cone)",
+      "Breath Weapon (Lightning, Line)",
+      "Breath Weapon (Poison, Cone)",
+      "Breath Weapon (Poison, Line)"
+    ],
+    "heroGrants": [
+      "Elf / Gnome / Tiefling",
+      "Magic Initiate",
+      "Mystic Arcanum 6/7/8/9",
+      "Signature Spells"
+    ]
+  },
+  "unsupported": [
+    {
+      "source": "Amulet of the Planes",
+      "category": "item-spell",
+      "reason": "Немає однозначного підтриманого запису spell/cost/level; каст за описом виконує ДМ."
+    },
+    {
+      "source": "Armor of Vulnerability",
+      "category": "item-spell",
+      "reason": "Немає однозначного підтриманого запису spell/cost/level; каст за описом виконує ДМ."
+    },
+    {
+      "source": "Boots of Levitation",
+      "category": "item-spell",
+      "reason": "Немає однозначного підтриманого запису spell/cost/level; каст за описом виконує ДМ."
+    },
+    {
+      "source": "Candle of Invocation",
+      "category": "item-spell",
+      "reason": "Немає однозначного підтриманого запису spell/cost/level; каст за описом виконує ДМ."
+    },
+    {
+      "source": "Cape of the Mountebank",
+      "category": "item-spell",
+      "reason": "Немає однозначного підтриманого запису spell/cost/level; каст за описом виконує ДМ."
+    },
+    {
+      "source": "Chime of Opening",
+      "category": "item-spell",
+      "reason": "Немає однозначного підтриманого запису spell/cost/level; каст за описом виконує ДМ."
+    },
+    {
+      "source": "Circlet of Blasting",
+      "category": "item-spell",
+      "reason": "Немає однозначного підтриманого запису spell/cost/level; каст за описом виконує ДМ."
+    },
+    {
+      "source": "Cloak of Arachnida",
+      "category": "item-spell",
+      "reason": "Немає однозначного підтриманого запису spell/cost/level; каст за описом виконує ДМ."
+    },
+    {
+      "source": "Cloak of the Bat",
+      "category": "item-spell",
+      "reason": "Немає однозначного підтриманого запису spell/cost/level; каст за описом виконує ДМ."
+    },
+    {
+      "source": "Crystal Ball",
+      "category": "item-spell",
+      "reason": "Немає однозначного підтриманого запису spell/cost/level; каст за описом виконує ДМ."
+    },
+    {
+      "source": "Crystal Ball of Mind Reading",
+      "category": "item-spell",
+      "reason": "Немає однозначного підтриманого запису spell/cost/level; каст за описом виконує ДМ."
+    },
+    {
+      "source": "Crystal Ball of Telepathy",
+      "category": "item-spell",
+      "reason": "Немає однозначного підтриманого запису spell/cost/level; каст за описом виконує ДМ."
+    },
+    {
+      "source": "Crystal Ball of True Seeing",
+      "category": "item-spell",
+      "reason": "Немає однозначного підтриманого запису spell/cost/level; каст за описом виконує ДМ."
+    },
+    {
+      "source": "Cube of Force",
+      "category": "charge-recovery",
+      "reason": "Кидок відновлення зарядів не автоматизовано; чинне відновлення детерміноване, ДМ коригує лічильник."
+    },
+    {
+      "source": "Cubic Gate",
+      "category": "item-spell",
+      "reason": "Немає однозначного підтриманого запису spell/cost/level; каст за описом виконує ДМ."
+    },
+    {
+      "source": "Cubic Gate",
+      "category": "charge-recovery",
+      "reason": "Кидок відновлення зарядів не автоматизовано; чинне відновлення детерміноване, ДМ коригує лічильник."
+    },
+    {
+      "source": "Dragon Orb",
+      "category": "charge-recovery",
+      "reason": "Кидок відновлення зарядів не автоматизовано; чинне відновлення детерміноване, ДМ коригує лічильник."
+    },
+    {
+      "source": "Dragon Scale Mail",
+      "category": "item-spell",
+      "reason": "Немає однозначного підтриманого запису spell/cost/level; каст за описом виконує ДМ."
+    },
+    {
+      "source": "Efreeti Bottle",
+      "category": "item-spell",
+      "reason": "Немає однозначного підтриманого запису spell/cost/level; каст за описом виконує ДМ."
+    },
+    {
+      "source": "Eyes of Charming",
+      "category": "item-spell",
+      "reason": "Немає однозначного підтриманого запису spell/cost/level; каст за описом виконує ДМ."
+    },
+    {
+      "source": "Figurine of Wondrous Power (Silver Raven)",
+      "category": "item-spell",
+      "reason": "Немає однозначного підтриманого запису spell/cost/level; каст за описом виконує ДМ."
+    },
+    {
+      "source": "Gem of Brightness",
+      "category": "item-destruction",
+      "reason": "Випадкове знищення після останнього заряду визначає ДМ."
+    },
+    {
+      "source": "Gem of Seeing",
+      "category": "charge-recovery",
+      "reason": "Кидок відновлення зарядів не автоматизовано; чинне відновлення детерміноване, ДМ коригує лічильник."
+    },
+    {
+      "source": "Giant Slayer",
+      "category": "creature-effect-residual",
+      "reason": "Автоматизовано лише перевірену додаткову шкоду за типом істоти; знищення, повалення та аура з опису лишаються ручними."
+    },
+    {
+      "source": "Hammer of Thunderbolts",
+      "category": "charge-recovery",
+      "reason": "Кидок відновлення зарядів не автоматизовано; чинне відновлення детерміноване, ДМ коригує лічильник."
+    },
+    {
+      "source": "Hat of Disguise",
+      "category": "item-spell",
+      "reason": "Немає однозначного підтриманого запису spell/cost/level; каст за описом виконує ДМ."
+    },
+    {
+      "source": "Helm of Brilliance",
+      "category": "item-spell",
+      "reason": "Немає однозначного підтриманого запису spell/cost/level; каст за описом виконує ДМ."
+    },
+    {
+      "source": "Helm of Comprehending Languages",
+      "category": "item-spell",
+      "reason": "Немає однозначного підтриманого запису spell/cost/level; каст за описом виконує ДМ."
+    },
+    {
+      "source": "Helm of Telepathy",
+      "category": "item-spell",
+      "reason": "Немає однозначного підтриманого запису spell/cost/level; каст за описом виконує ДМ."
+    },
+    {
+      "source": "Helm of Teleportation",
+      "category": "item-spell",
+      "reason": "Немає однозначного підтриманого запису spell/cost/level; каст за описом виконує ДМ."
+    },
+    {
+      "source": "Helm of Teleportation",
+      "category": "charge-recovery",
+      "reason": "Кидок відновлення зарядів не автоматизовано; чинне відновлення детерміноване, ДМ коригує лічильник."
+    },
+    {
+      "source": "Holy Avenger",
+      "category": "creature-effect-residual",
+      "reason": "Автоматизовано лише перевірену додаткову шкоду за типом істоти; знищення, повалення та аура з опису лишаються ручними."
+    },
+    {
+      "source": "Luck Blade",
+      "category": "item-spell",
+      "reason": "Немає однозначного підтриманого запису spell/cost/level; каст за описом виконує ДМ."
+    },
+    {
+      "source": "Mace of Disruption",
+      "category": "creature-effect-residual",
+      "reason": "Автоматизовано лише перевірену додаткову шкоду за типом істоти; знищення, повалення та аура з опису лишаються ручними."
+    },
+    {
+      "source": "Mace of Terror",
+      "category": "charge-recovery",
+      "reason": "Кидок відновлення зарядів не автоматизовано; чинне відновлення детерміноване, ДМ коригує лічильник."
+    },
+    {
+      "source": "Medallion of Thoughts",
+      "category": "item-spell",
+      "reason": "Немає однозначного підтриманого запису spell/cost/level; каст за описом виконує ДМ."
+    },
+    {
+      "source": "Medallion of Thoughts",
+      "category": "charge-recovery",
+      "reason": "Кидок відновлення зарядів не автоматизовано; чинне відновлення детерміноване, ДМ коригує лічильник."
+    },
+    {
+      "source": "Mysterious Deck",
+      "category": "item-spell",
+      "reason": "Немає однозначного підтриманого запису spell/cost/level; каст за описом виконує ДМ."
+    },
+    {
+      "source": "Necklace of Prayer Beads",
+      "category": "item-spell",
+      "reason": "Немає однозначного підтриманого запису spell/cost/level; каст за описом виконує ДМ."
+    },
+    {
+      "source": "Periapt of Health",
+      "category": "charge-recovery",
+      "reason": "Кидок відновлення зарядів не автоматизовано; чинне відновлення детерміноване, ДМ коригує лічильник."
+    },
+    {
+      "source": "Pipes of Haunting",
+      "category": "charge-recovery",
+      "reason": "Кидок відновлення зарядів не автоматизовано; чинне відновлення детерміноване, ДМ коригує лічильник."
+    },
+    {
+      "source": "Pipes of the Sewers",
+      "category": "charge-recovery",
+      "reason": "Кидок відновлення зарядів не автоматизовано; чинне відновлення детерміноване, ДМ коригує лічильник."
+    },
+    {
+      "source": "Potion of Animal Friendship",
+      "category": "item-spell",
+      "reason": "Немає однозначного підтриманого запису spell/cost/level; каст за описом виконує ДМ."
+    },
+    {
+      "source": "Potion of Greater Healing",
+      "category": "charge-recovery",
+      "reason": "Кидок відновлення зарядів не автоматизовано; чинне відновлення детерміноване, ДМ коригує лічильник."
+    },
+    {
+      "source": "Potion of Healing",
+      "category": "charge-recovery",
+      "reason": "Кидок відновлення зарядів не автоматизовано; чинне відновлення детерміноване, ДМ коригує лічильник."
+    },
+    {
+      "source": "Potion of Invisibility",
+      "category": "item-spell",
+      "reason": "Немає однозначного підтриманого запису spell/cost/level; каст за описом виконує ДМ."
+    },
+    {
+      "source": "Potion of Resistance",
+      "category": "effect-duration",
+      "reason": "Параметр збережено в стеку; одногодинний ефект із виходом за межі бою ДМ враховує вручну."
+    },
+    {
+      "source": "Potion of Superior Healing",
+      "category": "charge-recovery",
+      "reason": "Кидок відновлення зарядів не автоматизовано; чинне відновлення детерміноване, ДМ коригує лічильник."
+    },
+    {
+      "source": "Potion of Supreme Healing",
+      "category": "charge-recovery",
+      "reason": "Кидок відновлення зарядів не автоматизовано; чинне відновлення детерміноване, ДМ коригує лічильник."
+    },
+    {
+      "source": "Ring of Animal Influence",
+      "category": "item-spell",
+      "reason": "Немає однозначного підтриманого запису spell/cost/level; каст за описом виконує ДМ."
+    },
+    {
+      "source": "Ring of Animal Influence",
+      "category": "charge-recovery",
+      "reason": "Кидок відновлення зарядів не автоматизовано; чинне відновлення детерміноване, ДМ коригує лічильник."
+    },
+    {
+      "source": "Ring of Elemental Command",
+      "category": "item-spell",
+      "reason": "Немає однозначного підтриманого запису spell/cost/level; каст за описом виконує ДМ."
+    },
+    {
+      "source": "Ring of Elemental Command",
+      "category": "charge-recovery",
+      "reason": "Кидок відновлення зарядів не автоматизовано; чинне відновлення детерміноване, ДМ коригує лічильник."
+    },
+    {
+      "source": "Ring of Evasion",
+      "category": "charge-recovery",
+      "reason": "Кидок відновлення зарядів не автоматизовано; чинне відновлення детерміноване, ДМ коригує лічильник."
+    },
+    {
+      "source": "Ring of Jumping",
+      "category": "item-spell",
+      "reason": "Немає однозначного підтриманого запису spell/cost/level; каст за описом виконує ДМ."
+    },
+    {
+      "source": "Ring of Regeneration",
+      "category": "charge-recovery",
+      "reason": "Кидок відновлення зарядів не автоматизовано; чинне відновлення детерміноване, ДМ коригує лічильник."
+    },
+    {
+      "source": "Ring of Shooting Stars",
+      "category": "item-spell",
+      "reason": "Немає однозначного підтриманого запису spell/cost/level; каст за описом виконує ДМ."
+    },
+    {
+      "source": "Ring of Shooting Stars",
+      "category": "charge-recovery",
+      "reason": "Кидок відновлення зарядів не автоматизовано; чинне відновлення детерміноване, ДМ коригує лічильник."
+    },
+    {
+      "source": "Ring of Spell Storing",
+      "category": "item-spell",
+      "reason": "Немає однозначного підтриманого запису spell/cost/level; каст за описом виконує ДМ."
+    },
+    {
+      "source": "Ring of Telekinesis",
+      "category": "item-spell",
+      "reason": "Немає однозначного підтриманого запису spell/cost/level; каст за описом виконує ДМ."
+    },
+    {
+      "source": "Ring of the Ram",
+      "category": "charge-recovery",
+      "reason": "Кидок відновлення зарядів не автоматизовано; чинне відновлення детерміноване, ДМ коригує лічильник."
+    },
+    {
+      "source": "Ring of Three Wishes",
+      "category": "item-spell",
+      "reason": "Немає однозначного підтриманого запису spell/cost/level; каст за описом виконує ДМ."
+    },
+    {
+      "source": "Ring of Three Wishes",
+      "category": "item-destruction",
+      "reason": "Випадкове знищення після останнього заряду визначає ДМ."
+    },
+    {
+      "source": "Ring of Water Walking",
+      "category": "item-spell",
+      "reason": "Немає однозначного підтриманого запису spell/cost/level; каст за описом виконує ДМ."
+    },
+    {
+      "source": "Robe of Eyes",
+      "category": "item-spell",
+      "reason": "Немає однозначного підтриманого запису spell/cost/level; каст за описом виконує ДМ."
+    },
+    {
+      "source": "Robe of Scintillating Colors",
+      "category": "charge-recovery",
+      "reason": "Кидок відновлення зарядів не автоматизовано; чинне відновлення детерміноване, ДМ коригує лічильник."
+    },
+    {
+      "source": "Robe of Stars",
+      "category": "item-spell",
+      "reason": "Немає однозначного підтриманого запису spell/cost/level; каст за описом виконує ДМ."
+    },
+    {
+      "source": "Rod of Absorption",
+      "category": "item-spell",
+      "reason": "Немає однозначного підтриманого запису spell/cost/level; каст за описом виконує ДМ."
+    },
+    {
+      "source": "Rod of Alertness",
+      "category": "item-spell",
+      "reason": "Немає однозначного підтриманого запису spell/cost/level; каст за описом виконує ДМ."
+    },
+    {
+      "source": "Scarab of Protection",
+      "category": "item-destruction",
+      "reason": "Випадкове знищення після останнього заряду визначає ДМ."
+    },
+    {
+      "source": "Staff of Charming",
+      "category": "item-spell",
+      "reason": "Немає однозначного підтриманого запису spell/cost/level; каст за описом виконує ДМ."
+    },
+    {
+      "source": "Staff of Charming",
+      "category": "charge-recovery",
+      "reason": "Кидок відновлення зарядів не автоматизовано; чинне відновлення детерміноване, ДМ коригує лічильник."
+    },
+    {
+      "source": "Staff of Charming",
+      "category": "item-destruction",
+      "reason": "Випадкове знищення після останнього заряду визначає ДМ."
+    },
+    {
+      "source": "Staff of Fire",
+      "category": "charge-recovery",
+      "reason": "Кидок відновлення зарядів не автоматизовано; чинне відновлення детерміноване, ДМ коригує лічильник."
+    },
+    {
+      "source": "Staff of Fire",
+      "category": "item-destruction",
+      "reason": "Випадкове знищення після останнього заряду визначає ДМ."
+    },
+    {
+      "source": "Staff of Frost",
+      "category": "charge-recovery",
+      "reason": "Кидок відновлення зарядів не автоматизовано; чинне відновлення детерміноване, ДМ коригує лічильник."
+    },
+    {
+      "source": "Staff of Frost",
+      "category": "item-destruction",
+      "reason": "Випадкове знищення після останнього заряду визначає ДМ."
+    },
+    {
+      "source": "Staff of Healing",
+      "category": "charge-recovery",
+      "reason": "Кидок відновлення зарядів не автоматизовано; чинне відновлення детерміноване, ДМ коригує лічильник."
+    },
+    {
+      "source": "Staff of Healing",
+      "category": "item-destruction",
+      "reason": "Випадкове знищення після останнього заряду визначає ДМ."
+    },
+    {
+      "source": "Staff of Power",
+      "category": "charge-recovery",
+      "reason": "Кидок відновлення зарядів не автоматизовано; чинне відновлення детерміноване, ДМ коригує лічильник."
+    },
+    {
+      "source": "Staff of Power",
+      "category": "item-destruction",
+      "reason": "Випадкове знищення після останнього заряду визначає ДМ."
+    },
+    {
+      "source": "Staff of Striking",
+      "category": "charge-recovery",
+      "reason": "Кидок відновлення зарядів не автоматизовано; чинне відновлення детерміноване, ДМ коригує лічильник."
+    },
+    {
+      "source": "Staff of Striking",
+      "category": "item-destruction",
+      "reason": "Випадкове знищення після останнього заряду визначає ДМ."
+    },
+    {
+      "source": "Staff of Swarming Insects",
+      "category": "charge-recovery",
+      "reason": "Кидок відновлення зарядів не автоматизовано; чинне відновлення детерміноване, ДМ коригує лічильник."
+    },
+    {
+      "source": "Staff of Swarming Insects",
+      "category": "item-destruction",
+      "reason": "Випадкове знищення після останнього заряду визначає ДМ."
+    },
+    {
+      "source": "Staff of the Magi",
+      "category": "charge-recovery",
+      "reason": "Кидок відновлення зарядів не автоматизовано; чинне відновлення детерміноване, ДМ коригує лічильник."
+    },
+    {
+      "source": "Staff of the Magi",
+      "category": "item-destruction",
+      "reason": "Випадкове знищення після останнього заряду визначає ДМ."
+    },
+    {
+      "source": "Staff of the Woodlands",
+      "category": "charge-recovery",
+      "reason": "Кидок відновлення зарядів не автоматизовано; чинне відновлення детерміноване, ДМ коригує лічильник."
+    },
+    {
+      "source": "Staff of the Woodlands",
+      "category": "item-destruction",
+      "reason": "Випадкове знищення після останнього заряду визначає ДМ."
+    },
+    {
+      "source": "Staff of Withering",
+      "category": "charge-recovery",
+      "reason": "Кидок відновлення зарядів не автоматизовано; чинне відновлення детерміноване, ДМ коригує лічильник."
+    },
+    {
+      "source": "Talisman of Pure Good",
+      "category": "item-spell",
+      "reason": "Немає однозначного підтриманого запису spell/cost/level; каст за описом виконує ДМ."
+    },
+    {
+      "source": "Talisman of Pure Good",
+      "category": "item-destruction",
+      "reason": "Випадкове знищення після останнього заряду визначає ДМ."
+    },
+    {
+      "source": "Talisman of Ultimate Evil",
+      "category": "item-spell",
+      "reason": "Немає однозначного підтриманого запису spell/cost/level; каст за описом виконує ДМ."
+    },
+    {
+      "source": "Talisman of Ultimate Evil",
+      "category": "item-destruction",
+      "reason": "Випадкове знищення після останнього заряду визначає ДМ."
+    },
+    {
+      "source": "Trident of Fish Command",
+      "category": "item-spell",
+      "reason": "Немає однозначного підтриманого запису spell/cost/level; каст за описом виконує ДМ."
+    },
+    {
+      "source": "Trident of Fish Command",
+      "category": "charge-recovery",
+      "reason": "Кидок відновлення зарядів не автоматизовано; чинне відновлення детерміноване, ДМ коригує лічильник."
+    },
+    {
+      "source": "Wand of Binding",
+      "category": "charge-recovery",
+      "reason": "Кидок відновлення зарядів не автоматизовано; чинне відновлення детерміноване, ДМ коригує лічильник."
+    },
+    {
+      "source": "Wand of Binding",
+      "category": "item-destruction",
+      "reason": "Випадкове знищення після останнього заряду визначає ДМ."
+    },
+    {
+      "source": "Wand of Enemy Detection",
+      "category": "charge-recovery",
+      "reason": "Кидок відновлення зарядів не автоматизовано; чинне відновлення детерміноване, ДМ коригує лічильник."
+    },
+    {
+      "source": "Wand of Enemy Detection",
+      "category": "item-destruction",
+      "reason": "Випадкове знищення після останнього заряду визначає ДМ."
+    },
+    {
+      "source": "Wand of Fear",
+      "category": "item-spell",
+      "reason": "Немає однозначного підтриманого запису spell/cost/level; каст за описом виконує ДМ."
+    },
+    {
+      "source": "Wand of Fear",
+      "category": "charge-recovery",
+      "reason": "Кидок відновлення зарядів не автоматизовано; чинне відновлення детерміноване, ДМ коригує лічильник."
+    },
+    {
+      "source": "Wand of Fear",
+      "category": "item-destruction",
+      "reason": "Випадкове знищення після останнього заряду визначає ДМ."
+    },
+    {
+      "source": "Wand of Fireballs",
+      "category": "charge-recovery",
+      "reason": "Кидок відновлення зарядів не автоматизовано; чинне відновлення детерміноване, ДМ коригує лічильник."
+    },
+    {
+      "source": "Wand of Fireballs",
+      "category": "item-destruction",
+      "reason": "Випадкове знищення після останнього заряду визначає ДМ."
+    },
+    {
+      "source": "Wand of Lightning Bolts",
+      "category": "charge-recovery",
+      "reason": "Кидок відновлення зарядів не автоматизовано; чинне відновлення детерміноване, ДМ коригує лічильник."
+    },
+    {
+      "source": "Wand of Lightning Bolts",
+      "category": "item-destruction",
+      "reason": "Випадкове знищення після останнього заряду визначає ДМ."
+    },
+    {
+      "source": "Wand of Magic Detection",
+      "category": "item-spell",
+      "reason": "Немає однозначного підтриманого запису spell/cost/level; каст за описом виконує ДМ."
+    },
+    {
+      "source": "Wand of Magic Detection",
+      "category": "charge-recovery",
+      "reason": "Кидок відновлення зарядів не автоматизовано; чинне відновлення детерміноване, ДМ коригує лічильник."
+    },
+    {
+      "source": "Wand of Magic Missiles",
+      "category": "item-spell",
+      "reason": "Немає однозначного підтриманого запису spell/cost/level; каст за описом виконує ДМ."
+    },
+    {
+      "source": "Wand of Magic Missiles",
+      "category": "charge-recovery",
+      "reason": "Кидок відновлення зарядів не автоматизовано; чинне відновлення детерміноване, ДМ коригує лічильник."
+    },
+    {
+      "source": "Wand of Magic Missiles",
+      "category": "item-destruction",
+      "reason": "Випадкове знищення після останнього заряду визначає ДМ."
+    },
+    {
+      "source": "Wand of Paralysis",
+      "category": "charge-recovery",
+      "reason": "Кидок відновлення зарядів не автоматизовано; чинне відновлення детерміноване, ДМ коригує лічильник."
+    },
+    {
+      "source": "Wand of Paralysis",
+      "category": "item-destruction",
+      "reason": "Випадкове знищення після останнього заряду визначає ДМ."
+    },
+    {
+      "source": "Wand of Polymorph",
+      "category": "item-spell",
+      "reason": "Немає однозначного підтриманого запису spell/cost/level; каст за описом виконує ДМ."
+    },
+    {
+      "source": "Wand of Polymorph",
+      "category": "charge-recovery",
+      "reason": "Кидок відновлення зарядів не автоматизовано; чинне відновлення детерміноване, ДМ коригує лічильник."
+    },
+    {
+      "source": "Wand of Polymorph",
+      "category": "item-destruction",
+      "reason": "Випадкове знищення після останнього заряду визначає ДМ."
+    },
+    {
+      "source": "Wand of Secrets",
+      "category": "charge-recovery",
+      "reason": "Кидок відновлення зарядів не автоматизовано; чинне відновлення детерміноване, ДМ коригує лічильник."
+    },
+    {
+      "source": "Wand of Web",
+      "category": "item-spell",
+      "reason": "Немає однозначного підтриманого запису spell/cost/level; каст за описом виконує ДМ."
+    },
+    {
+      "source": "Wand of Web",
+      "category": "charge-recovery",
+      "reason": "Кидок відновлення зарядів не автоматизовано; чинне відновлення детерміноване, ДМ коригує лічильник."
+    },
+    {
+      "source": "Wand of Web",
+      "category": "item-destruction",
+      "reason": "Випадкове знищення після останнього заряду визначає ДМ."
+    },
+    {
+      "source": "Wand of Wonder",
+      "category": "item-spell",
+      "reason": "Немає однозначного підтриманого запису spell/cost/level; каст за описом виконує ДМ."
+    },
+    {
+      "source": "Wand of Wonder",
+      "category": "charge-recovery",
+      "reason": "Кидок відновлення зарядів не автоматизовано; чинне відновлення детерміноване, ДМ коригує лічильник."
+    },
+    {
+      "source": "Wand of Wonder",
+      "category": "item-destruction",
+      "reason": "Випадкове знищення після останнього заряду визначає ДМ."
+    },
+    {
+      "source": "Wind Fan",
+      "category": "item-spell",
+      "reason": "Немає однозначного підтриманого запису spell/cost/level; каст за описом виконує ДМ."
+    },
+    {
+      "source": "Winged Boots",
+      "category": "charge-recovery",
+      "reason": "Кидок відновлення зарядів не автоматизовано; чинне відновлення детерміноване, ДМ коригує лічильник."
+    },
+    {
+      "source": "Spell Scroll",
+      "category": "scroll-eligibility",
+      "reason": "ДМ визначає право читання; автоматизовано каст, DC13/attack5 і списання лише для явних у джерелі кіл 0–1."
+    },
+    {
+      "source": "Breath Weapon",
+      "category": "attack-replacement",
+      "reason": "Дві форми ділять пул; рушій витрачає дію, заміну однієї атаки враховує ДМ."
+    },
+    {
+      "source": "Lineage / Magic Initiate",
+      "category": "casting-ability-choice",
+      "reason": "Окремий вибір характеристики героя з тексту фічі не автоматизовано; грант використовує задану dcAbility або основну характеристику героя."
+    }
+  ]
+}

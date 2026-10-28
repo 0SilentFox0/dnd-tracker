@@ -1,0 +1,92 @@
+[
+  {
+    "fields": {
+      "damage_dice": "1d8",
+      "damage_type": "slashing",
+      "distance_unit": null,
+      "document": "srd-2024",
+      "is_improvised": false,
+      "is_simple": false,
+      "long_range": 0,
+      "name": "Battleaxe",
+      "range": 0
+    },
+    "model": "api_v2.weapon",
+    "pk": "srd-2024_battleaxe"
+  },
+  {
+    "fields": {
+      "damage_dice": "1",
+      "damage_type": "piercing",
+      "distance_unit": null,
+      "document": "srd-2024",
+      "is_improvised": false,
+      "is_simple": false,
+      "long_range": 100,
+      "name": "Blowgun",
+      "range": 25
+    },
+    "model": "api_v2.weapon",
+    "pk": "srd-2024_blowgun"
+  },
+  {
+    "fields": {
+      "damage_dice": "1d4",
+      "damage_type": "piercing",
+      "distance_unit": null,
+      "document": "srd-2024",
+      "is_improvised": false,
+      "is_simple": true,
+      "long_range": 60,
+      "name": "Dagger",
+      "range": 20
+    },
+    "model": "api_v2.weapon",
+    "pk": "srd-2024_dagger"
+  },
+  {
+    "fields": {
+      "damage_dice": "2d6",
+      "damage_type": "slashing",
+      "distance_unit": null,
+      "document": "srd-2024",
+      "is_improvised": false,
+      "is_simple": false,
+      "long_range": 0,
+      "name": "Greatsword",
+      "range": 0
+    },
+    "model": "api_v2.weapon",
+    "pk": "srd-2024_greatsword"
+  },
+  {
+    "fields": {
+      "damage_dice": "1d6",
+      "damage_type": "piercing",
+      "distance_unit": null,
+      "document": "srd-2024",
+      "is_improvised": false,
+      "is_simple": true,
+      "long_range": 120,
+      "name": "Javelin",
+      "range": 30
+    },
+    "model": "api_v2.weapon",
+    "pk": "srd-2024_javelin"
+  },
+  {
+    "fields": {
+      "damage_dice": "1d8",
+      "damage_type": "piercing",
+      "distance_unit": null,
+      "document": "srd-2024",
+      "is_improvised": false,
+      "is_simple": false,
+      "long_range": 600,
+      "name": "Longbow",
+      "range": 150
+    },
+    "model": "api_v2.weapon",
+    "pk": "srd-2024_longbow"
+  }
+]

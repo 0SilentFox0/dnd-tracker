@@ -4,7 +4,7 @@ import {
   campaignPatch,
   request,
 } from "@/lib/api/client";
-import type { ActiveSessions, Campaign, CampaignMember, CampaignSettings } from "@/types/campaigns";
+import type { ActiveSessions, Campaign, CampaignMember, CampaignSettings, CampaignWithWarnings } from "@/types/campaigns";
 
 /**
  * Отримує активні бої й покази в кампаніях, де користувач є учасником.
@@ -20,6 +20,10 @@ export async function updateCampaign(
   return campaignPatch<Campaign>(campaignId, "", data);
 }
 
+export async function getCampaign(campaignId: string): Promise<Campaign> {
+  return campaignGet<Campaign>(campaignId, "");
+}
+
 export async function getCampaignMembers(campaignId: string): Promise<CampaignMember[]> {
   return campaignGet<CampaignMember[]>(campaignId, "/members");
 }
@@ -32,9 +36,10 @@ export async function createCampaign(data: {
   description?: string;
   maxLevel?: number;
   allowPlayerEdit?: boolean;
+  templateId?: string;
   critChoiceByDm?: boolean;
-}): Promise<Campaign> {
-  return request<Campaign>("/api/campaigns", {
+}): Promise<CampaignWithWarnings> {
+  return request<CampaignWithWarnings>("/api/campaigns", {
     method: "POST",
     body: JSON.stringify(data),
   });

@@ -153,7 +153,7 @@ export function calculateSpellSlotGain(
 
   const gain: SpellSlots = {};
   
-  for (let level = 1; level <= 5; level++) {
+  for (let level = 1; level <= 9; level++) {
     const levelKey = level.toString();
 
     const increase = (newSlots[levelKey]?.max ?? 0) - (currentSlots[levelKey]?.max ?? 0);

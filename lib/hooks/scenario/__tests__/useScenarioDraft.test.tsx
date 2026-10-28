@@ -158,3 +158,21 @@ describe("useScenarioDraft", () => {
     expect(result.current.error).toEqual({ message: "Сторінка завелика", retryable: false });
   });
 });
+
+it("lateOlderCacheSnapshotCannotRollBackSavedEditor",async()=>{
+ const client=new QueryClient();
+
+ client.setQueryData(["scenario-page","c","p1"],page);
+
+ const wrap=({children}:{children:ReactNode})=><QueryClientProvider client={client}>{children}</QueryClientProvider>;
+
+ vi.mocked(api.saveScenarioContent).mockResolvedValueOnce({version:2});
+
+ const {result}=renderHook(()=>useScenarioDraft("c",page),{wrapper:wrap});
+
+ act(()=>result.current.setContent(rename("Збережений локальний текст")));
+ await act(()=>result.current.flush());
+ act(()=>client.setQueryData(["scenario-page","c","p1"],page));
+ expect(result.current.content.legend[0]?.label).toBe("Збережений локальний текст");
+ expect(result.current.state).toBe("saved");
+});

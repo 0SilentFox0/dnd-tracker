@@ -1,11 +1,12 @@
 import { AttackType } from "@/lib/constants/battle";
+import type { OwnerKind } from "@/lib/utils/abilities/read";
 import type { Ability, StaticEffect } from "@/lib/utils/abilities/schema";
 import type { GridPoint } from "@/types/battle";
 
 export type { Ability, StaticEffect };
 
 export interface AbilitySource {
-  type: "skill" | "race" | "artifact" | "artifactSet" | "unit" | "character";
+  type: "skill" | "race" | "artifact" | "artifactSet" | "unit" | "character" | "class" | "feat";
   id: string;
   name: string;
   icon?: string | null;
@@ -15,6 +16,11 @@ export interface AbilitySource {
 }
 
 export type ResolvedAbility = Ability & { key: string; source: AbilitySource };
+
+/** 5e legendary/lair action link; schema validation is server-side. */
+export type AbilityPerform = { kind: "attack"; attack: string } | { kind: "spell"; spellId: string };
+
+export type AbilityLimits5e = { lair?: true };
 
 export interface AbilityUsageCounter {
   battle: number;
@@ -29,17 +35,17 @@ export type AbilityEvent =
   | { type: "roundEnd" }
   | { type: "turnStart"; actorId: string }
   | { type: "turnEnd"; actorId: string }
-  | { type: "attack"; phase: "before" | "after"; actorId: string; targetId: string; attackKind: AttackType }
-  | { type: "hit"; actorId: string; targetId: string; attackKind: AttackType; damage: number }
+  | { type: "attack"; phase: "before" | "after"; actorId: string; targetId: string; attackKind: AttackType; attackSourceId?: string; rollMode?: "advantage" | "disadvantage" }
+  | { type: "hit"; actorId: string; targetId: string; attackKind: AttackType; attackSourceId?: string; damage: number; rollMode?: "advantage" | "disadvantage" }
   | { type: "kill"; actorId: string | null; targetId: string }
   | { type: "lethalDamage"; actorId: string | null; targetId: string }
-  | { type: "spellCast"; phase: "before" | "after"; actorId: string; targetIds: string[]; spellId?: string; school?: string | null; level?: number; roll?: number }
+  | { type: "spellCast"; phase: "before" | "after"; actorId: string; targetIds: string[]; spellId?: string; school?: string | null; level?: number; castLevel?: number; roll?: number }
   | { type: "moraleCheck"; actorId: string; result: "success" | "fail" }
   | { type: "bonusAction"; actorId: string; abilityKey: string; targetIds?: string[]; targetCell?: GridPoint }
   | { type: "action"; actorId: string; abilityKey: string; targetIds?: string[]; targetCell?: GridPoint };
 
 export interface AbilitySourceRef {
-  kind: "skill" | "race" | "artifact" | "artifactSet" | "unit";
+  kind: OwnerKind;
   id: string;
   name: string;
 }

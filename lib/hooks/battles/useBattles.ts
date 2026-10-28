@@ -5,10 +5,11 @@ import { battleKeys } from "./keys";
 import { battleQueryKey } from "./keys";
 import { useBattleAction } from "./useBattleAction";
 
-import type { AddParticipantData, CreateBattleData, UnitControlData } from "@/lib/api/battles";
+import type { AddParticipantData, BattleConditionsBody, CoreActionBody, CreateBattleData, UnitControlData } from "@/lib/api/battles";
 import {
   abilityAction,
   addBattleParticipant,
+  applyBattleCondition,
   attack,
   bonusAction,
   castSpell,
@@ -27,6 +28,7 @@ import {
   resetBattle,
   revealBattleParticipants,
   rollbackBattleAction,
+  runCoreAction,
   scaleBattleUnits,
   setAuraZone,
   setBattleUnitControl,
@@ -215,11 +217,17 @@ export const useRollbackBattleAction = (c: string, b: string, o: ActionOpts = {}
 export const useRevealBattleParticipants = (c: string, b: string, o: ActionOpts = {}) =>
   useBattleAction<{ participantIds: string[] }>(c, b, (body) => revealBattleParticipants(c, b, body), o);
 
+export const useBattleConditions = (c: string, b: string, o: ActionOpts = {}) =>
+  useBattleAction<BattleConditionsBody>(c, b, (body) => applyBattleCondition(c, b, body), o);
+
+export const useBattleCoreAction = (c: string, b: string, o: ActionOpts = {}) =>
+  useBattleAction<CoreActionBody>(c, b, (body) => runCoreAction(c, b, body), o);
+
 export const useAddBattleParticipant = (c: string, b: string, o: ActionOpts = {}) =>
   useBattleAction<AddParticipantData>(c, b, (data) => addBattleParticipant(c, b, data), o);
 
 export const useUpdateBattleParticipant = (c: string, b: string, o: ActionOpts = {}) =>
-  useBattleAction<{ participantId: string; data: { currentHp?: number; removeFromBattle?: boolean; kill?: boolean; revive?: boolean } }>(
+  useBattleAction<{ participantId: string; data: { lairActive?: boolean; currentHp?: number; removeFromBattle?: boolean; kill?: boolean; revive?: boolean } }>(
     c,
     b,
     ({ participantId, data, expectedVersion }) => updateBattleParticipant(c, b, participantId, { ...data, expectedVersion }),

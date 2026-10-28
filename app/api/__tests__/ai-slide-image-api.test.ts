@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
+import * as preloadedModule0 from "@/app/api/campaigns/[id]/decks/generate-image/route";
 import { API_ERRORS } from "@/lib/constants/api-errors";
 import * as apiAuth from "@/lib/utils/api/api-auth";
 
@@ -14,7 +15,7 @@ vi.mock("@/lib/db", () => ({ prisma: {} }));
 const body = { prompt: "Таверна", provider: "openai", model: "gpt-image-2", aspect: "16:9", useCampaignStyle: false };
 
 const post = async (b: unknown) => {
-  const { POST } = await import("@/app/api/campaigns/[id]/decks/generate-image/route");
+  const { POST } = preloadedModule0;
 
   return POST(new Request("http://x", { method: "POST", body: JSON.stringify(b) }), { params: Promise.resolve({ id: "c1" }) });
 };

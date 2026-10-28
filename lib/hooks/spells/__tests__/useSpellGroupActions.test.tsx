@@ -29,7 +29,7 @@ describe("useSpellGroupActions.confirmRemoveAll", () => {
       done = result.current.handlers.confirmRemoveAll();
     });
 
-    const dialog = await screen.findByRole("dialog");
+    const dialog = await screen.findByRole("alertdialog");
 
     expect(dialog).toHaveTextContent("Вогонь");
     fireEvent.click(within(dialog).getByRole("button", { name: "Видалити всі з групи" }));

@@ -1,26 +1,31 @@
 import { NextResponse } from "next/server";
 
-import { deriveCharacterDefaults, EMPTY_INVENTORY } from "../derive-character-defaults";
+import { draftChoiceFields } from "./draft-choices";
+import { parseDraftBody } from "./draft-class";
 import { draftFields } from "./draft-data";
+import { resolveDraftParts } from "./draft-resolve";
 import { draftRejection } from "./draft-rules";
-import { draftSchema } from "./draft-schema";
 
 import { CharacterStatus, CharacterType, HERO_INITIATIVE } from "@/lib/constants/characters";
 import { prisma } from "@/lib/db";
+import { deriveCharacterDefaults, EMPTY_INVENTORY } from "@/lib/server/characters/core/derive-character-defaults";
 import { lockPlayerDrafts } from "@/lib/server/characters/draft-lock";
-import { resolveAvatarForPersistence } from "@/lib/supabase/avatar-storage";
 import { requireCampaignAccess } from "@/lib/utils/api/api-auth";
 import { errorResponse } from "@/lib/utils/api/api-response";
-import { parseBody } from "@/lib/utils/api/parse-body";
+import type { CharacterClassEntry } from "@/types/classes";
 
 export async function createDraft(request: Request, campaignId: string): Promise<NextResponse> {
   const access = await requireCampaignAccess(campaignId);
 
   if (access instanceof NextResponse) return access;
 
-  const data = await parseBody(draftSchema, request);
+  const { campaign } = access;
 
-  if (data instanceof NextResponse) return data;
+  const parsed = await parseDraftBody(request, campaign);
+
+  if (parsed instanceof NextResponse) return parsed;
+
+  const { data } = parsed;
 
   const role = access.campaign.members.find((m) => m.userId === access.userId)?.role ?? "";
 
@@ -32,11 +37,17 @@ export async function createDraft(request: Request, campaignId: string): Promise
 
   if (early) return errorResponse(early, 400);
 
-  const avatar = await resolveAvatarForPersistence(data.avatar, { campaignId });
+  const { avatar, asClass } = await resolveDraftParts(parsed, campaign);
 
   if (!avatar.ok) return errorResponse(avatar.message, 400);
 
-  const { spellSlots } = await deriveCharacterDefaults(campaignId, { level: 1, race: data.race });
+  if (asClass && !asClass.ok) return errorResponse(asClass.error, asClass.status);
+
+  const choices = await draftChoiceFields({ campaignId, rules: campaign.rules, data, classes: asClass?.ok ? (asClass.fields.classes as unknown as CharacterClassEntry[]) : [], classesById: parsed.asClass?.classesById });
+
+  if (choices && !choices.ok) return choices.response;
+
+  const spellSlots = asClass?.spellSlots ?? (await deriveCharacterDefaults(campaignId, { level: 1, race: data.race })).spellSlots;
 
   const result = await prisma.$transaction(async (tx) => {
     await lockPlayerDrafts(tx, campaignId, access.userId);
@@ -53,6 +64,8 @@ export async function createDraft(request: Request, campaignId: string): Promise
         status: CharacterStatus.PENDING,
         controlledBy: access.userId,
         level: 1,
+        ...asClass?.fields,
+        ...(choices?.ok && choices.fields),
         initiative: HERO_INITIATIVE.DEFAULT,
         avatar: avatar.avatar ?? undefined,
         spellSlots,

@@ -1,21 +1,8 @@
-import { moraleCheckMutation } from "./morale-check-mutation";
-
-import { BattleStatus } from "@/lib/constants/battle";
-import { moraleCheckSchema } from "@/lib/schemas";
-import { BattleAccess, runBattleMutation } from "@/lib/utils/battle/pipeline/run-battle-mutation";
+import { runBattleMutation } from "@/lib/server/battles/run-mutation";
 
 export async function POST(
   req: Request,
   { params }: { params: Promise<{ id: string; battleId: string }> },
 ) {
-  return runBattleMutation(req, {
-    params: await params,
-    access: BattleAccess.MEMBER,
-    requireStatus: BattleStatus.ACTIVE,
-    blockedByMode: true,
-    allowWhileAwaitingDm: true,
-    schema: moraleCheckSchema,
-    respond: "wrapped",
-    mutate: moraleCheckMutation,
-  });
+  return runBattleMutation(req, { params: await params, operation: "morale-check" });
 }

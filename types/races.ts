@@ -1,6 +1,7 @@
 import type { Prisma } from "@prisma/client";
 
 import type { Ability, ConversionIssue } from "@/lib/utils/abilities/schema";
+import type { Choice } from "@/types/choices";
 
 export interface StatModifier {
   bonus?: boolean; // Дає + (бонус)
@@ -14,6 +15,7 @@ export interface SpellSlotProgression {
 }
 
 export interface RacePassiveAbility {
+  creatureType?: string;
   name?: string;
   icon?: string;
   description: string;
@@ -28,6 +30,7 @@ export interface Race {
   icon?: string | null;
   color?: string | null;
   abilityIssues?: ConversionIssue[];
+  choices?: Choice[];
   id: string;
   campaignId: string;
   name: string;
@@ -48,6 +51,7 @@ export interface RaceFormData {
   passiveAbility?: RacePassiveAbility;
   spellSlotProgression?: SpellSlotProgression[];
   abilities: Ability[];
+  choices?: Choice[];
 }
 
 export type RaceRow = Prisma.RaceGetPayload<object>;

@@ -1,0 +1,42 @@
+[
+  {
+    "fields": {
+      "desc": "",
+      "document": "srd-2024",
+      "name": "Dwarf",
+      "subspecies_of": null
+    },
+    "model": "api_v2.species",
+    "pk": "srd-2024_dwarf"
+  },
+  {
+    "fields": {
+      "desc": "",
+      "document": "srd-2024",
+      "name": "Elf",
+      "subspecies_of": null
+    },
+    "model": "api_v2.species",
+    "pk": "srd-2024_elf"
+  },
+  {
+    "fields": {
+      "desc": "",
+      "document": "srd-2024",
+      "name": "Goliath",
+      "subspecies_of": null
+    },
+    "model": "api_v2.species",
+    "pk": "srd-2024_goliath"
+  },
+  {
+    "fields": {
+      "desc": "",
+      "document": "srd-2024",
+      "name": "Orc",
+      "subspecies_of": null
+    },
+    "model": "api_v2.species",
+    "pk": "srd-2024_orc"
+  }
+]

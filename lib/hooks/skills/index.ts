@@ -25,4 +25,5 @@ export {
 export { type SkillListGroup, useSkillsList } from "./useSkillsList";
 export { useSkillTreeEditor } from "./useSkillTreeEditor";
 export { useSaveSkillTree, useSkillTrees } from "./useSkillTrees";
+export { useSkillTreeTransfer } from "./useSkillTreeTransfer";
 export { useUpdateSkillAppearance } from "./useUpdateSkillAppearance";

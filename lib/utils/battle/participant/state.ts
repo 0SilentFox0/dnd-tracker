@@ -1,4 +1,5 @@
-import { CombatStatus, type CombatStatusType } from "@/lib/constants/battle";
+import { CombatStatus, type CombatStatusType, type EffectMarker } from "@/lib/constants/battle";
+import type { AnyConditionKey } from "@/lib/utils/abilities/schema/kinds";
 import type { ActiveEffect, BattleParticipant } from "@/types/battle";
 
 export function isUp(p: BattleParticipant): boolean {
@@ -30,6 +31,6 @@ export function findEffectMarker(p: BattleParticipant, type: string): { effect: 
   return undefined;
 }
 
-export function hasEffectMarker(p: BattleParticipant, type: string): boolean {
+export function hasEffectMarker(p: BattleParticipant, type: EffectMarker | AnyConditionKey): boolean {
   return findEffectMarker(p, type) !== undefined;
 }

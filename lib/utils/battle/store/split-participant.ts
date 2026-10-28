@@ -28,11 +28,11 @@ export function splitParticipant(
 
   const spellSlotsCurrent: Record<string, number> = {};
 
-  const spellSlotsMax: Record<string, { max: number }> = {};
+  const spellSlotsMax: Record<string, { max: number; level?: number }> = {};
 
   for (const [level, slot] of Object.entries(p.spellcasting.spellSlots ?? {})) {
     spellSlotsCurrent[level] = slot.current;
-    spellSlotsMax[level] = { max: slot.max };
+    spellSlotsMax[level] = { max: slot.max, ...(slot.level !== undefined && { level: slot.level }) };
   }
 
   const snapshot: ParticipantSnapshot = {
@@ -96,14 +96,14 @@ export function joinParticipant(stored: StoredParticipant, battleId: string): Ba
     basicInfo: Record<string, unknown>;
     abilities: Record<string, unknown>;
     combatStats: Record<string, unknown>;
-    spellcasting: Record<string, unknown> & { spellSlots?: Record<string, { max: number }> };
+    spellcasting: Record<string, unknown> & { spellSlots?: Record<string, { max: number; level?: number }> };
     battleData: Record<string, unknown>;
   };
 
-  const spellSlots: Record<string, { max: number; current: number }> = {};
+  const spellSlots: Record<string, { max: number; current: number; level?: number }> = {};
 
   for (const [level, slot] of Object.entries(s.spellcasting.spellSlots ?? {})) {
-    spellSlots[level] = { max: slot.max, current: state.spellSlotsCurrent[level] ?? slot.max };
+    spellSlots[level] = { max: slot.max, current: state.spellSlotsCurrent[level] ?? slot.max, ...(slot.level !== undefined && { level: slot.level }) };
   }
 
   return {

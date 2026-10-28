@@ -16,6 +16,7 @@ import type { BranchLevel } from "@/lib/utils/skills/progression";
 import { spellDice } from "@/lib/utils/spells/model/dice";
 import { readSpellDefinition, spellEffects, spellResolution, spellTargeting } from "@/lib/utils/spells/model/read";
 import type { SpellTargeting } from "@/lib/utils/spells/model/schema";
+import { isMonster5e, monsterSaveDc, unitXp } from "@/lib/utils/units/monster";
 import type { BattleAttack, BattleParticipant } from "@/types/battle";
 import type { CharacterDprBreakdown, UnitSpellPower } from "@/types/battle-setup";
 
@@ -38,14 +39,14 @@ export interface UnitStats {
   spell?: UnitSpellPower;
   /** Ціль прикликання (Фенікс, елементалі): ДМ не виставляє його сам, тож він не задає стелю тіру. */
   summon?: boolean;
+  cr?: number;
+  xp?: number;
 }
 
 export interface GetCharacterStatsParams {
   participant: BattleParticipant;
   branchLevels?: Record<string, BranchLevel> | null;
   magicMainSkillIds?: Set<string> | null;
-  /** Branches tied to a spell school: their DPR comes from spells, which ignore AC. */
-  spellSchoolIds?: Set<string> | null;
 }
 
 export interface UnitSpellInput {
@@ -63,9 +64,16 @@ export interface UnitStatsInput {
   raceId?: string | null;
   strength?: number;
   dexterity?: number;
+  intelligence?: number;
+  wisdom?: number;
+  charisma?: number;
   maxTargets?: number | null;
   armorClass?: number;
   proficiencyBonus?: number;
+  saveDcBase?: number;
+  cr?: number | null;
+  xp?: number | null;
+  multiattack?: number | null;
   attacks: Array<{
     damageDice?: string;
     damageType?: string;
@@ -94,7 +102,7 @@ function spellTargets(targeting: SpellTargeting): number {
 
 type BestSpell = Pick<UnitSpellPower, "dpr" | "damageType" | "save">;
 
-function bestSpell(spells: UnitSpellInput[], unit: { level: number; proficiencyBonus?: number }): BestSpell | null {
+function bestSpell(spells: UnitSpellInput[], unit: { level: number }, saveDc: number): BestSpell | null {
   let best: BestSpell | null = null;
 
   for (const [index, s] of spells.entries()) {
@@ -116,8 +124,7 @@ function bestSpell(spells: UnitSpellInput[], unit: { level: number; proficiencyB
 
     const resolution = spellResolution(row);
 
-    // юніт без заклинальної характеристики: СК = 8 + майстерність (spellSaveDc рушія)
-    const save = resolution.kind === "save" ? { ability: resolution.ability, dc: 8 + (unit.proficiencyBonus ?? 0), half: resolution.onSuccess === "half" } : undefined;
+    const save = resolution.kind === "save" ? { ability: resolution.ability, dc: saveDc, half: resolution.onSuccess === "half" } : undefined;
 
     best = { dpr, damageType: damage.damageType ?? "magic", ...(save && { save }) };
   }
@@ -154,7 +161,19 @@ export function getUnitStats(unit: UnitStatsInput): UnitStats {
     }
   }
 
-  const spell = bestSpell(unit.spells ?? [], unit);
+  const monster = isMonster5e(unit);
+
+  if (monster) weaponDpr *= Math.max(1, unit.multiattack ?? 1);
+
+  const mental = { intelligence: unit.intelligence ?? 10, wisdom: unit.wisdom ?? 10, charisma: unit.charisma ?? 10 };
+
+  const saveDcBase = unit.saveDcBase ?? 8;
+
+  const saveDc = monster ? monsterSaveDc(saveDcBase, unit.proficiencyBonus ?? 0, mental) : saveDcBase + (unit.proficiencyBonus ?? 0);
+
+  const xp = unitXp(unit);
+
+  const spell = bestSpell(unit.spells ?? [], unit, saveDc);
 
   const spellDpr = spell?.dpr ?? 0;
 
@@ -178,6 +197,8 @@ export function getUnitStats(unit: UnitStatsInput): UnitStats {
     ...(attackBonus !== undefined && { attackBonus }),
     ...(weaponLeads && weaponKey && { damageKey: weaponKey }),
     ...(spell && !weaponLeads && { spell: { ...spell, weaponDpr: weaponDpr || diceAverage("1d6"), ...(unit.proficiencyBonus !== undefined && weaponToHit !== undefined && { weaponToHit }) } }),
+    ...(monster && { cr: unit.cr }),
+    ...(xp !== null && { xp }),
   };
 }
 
@@ -191,7 +212,7 @@ function bestAttack(p: BattleParticipant, type: AttackType): { avg: number; atta
   return options.map((attack) => ({ avg: averageAttackDamage(p, attack, [p]).total, attack })).reduce((best, o) => (o.avg > best.avg ? o : best));
 }
 
-export function getCharacterStats({ participant, branchLevels, magicMainSkillIds, spellSchoolIds }: GetCharacterStatsParams): {
+export function getCharacterStats({ participant, branchLevels, magicMainSkillIds }: GetCharacterStatsParams): {
   dpr: number;
   hp: number;
   level: number;
@@ -219,21 +240,21 @@ export function getCharacterStats({ participant, branchLevels, magicMainSkillIds
 
   const toHit = calculateAttackBonus(participant, best, [participant]);
 
-  const magicIds = new Set([...(magicMainSkillIds ?? []), ...(spellSchoolIds ?? [])]);
+  const levels = branchLevels ?? {};
+
+  const magicIds = magicMainSkillIds ?? new Set<string>();
 
   const racialMagicPercent = collectModifiers([participant], participant.basicInfo.id, { damage: { kind: "magic" } }).percent;
 
-  const spellDpr = getSpellDprFromBranchLevels(branchLevels ?? {}, magicIds) * heroMagicMultiplier(participant) * (1 + racialMagicPercent / 100);
+  const spellDpr = getSpellDprFromBranchLevels(levels, magicIds) * heroMagicMultiplier(participant) * (1 + racialMagicPercent / 100);
 
   const bestKindMultiplier = applyHeroDmDamageMultiplier(participant, attackKindOf(best.type), 1).multiplier;
 
-  const nonMagicDpr = getNonMagicBranchDpr(branchLevels ?? {}, magicIds) * bestKindMultiplier;
+  const nonMagicDpr = getNonMagicBranchDpr(levels, magicIds) * bestKindMultiplier;
 
   const dpr = physicalDpr + spellDpr + nonMagicDpr;
 
-  const weaponBranches = Object.fromEntries(Object.entries(branchLevels ?? {}).filter(([id]) => !spellSchoolIds?.has(id)));
-
-  const weaponDpr = physicalDpr + getNonMagicBranchDpr(weaponBranches, magicIds) * bestKindMultiplier;
+  const weaponDpr = physicalDpr + nonMagicDpr;
 
   const hp = participant.combatStats.maxHp;
 

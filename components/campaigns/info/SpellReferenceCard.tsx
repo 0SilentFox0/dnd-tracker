@@ -116,7 +116,7 @@ export function SpellReferenceCard({
           </div>
           {spell.rules && (
             <SpellBattlePreview
-              spell={{ id: spell.id, name: spell.name, level: spell.level, groupId: null, rules: spell.rules }}
+              spell={{ id: spell.id, name: spell.name, level: spell.level, groupId: null, fx: spell.fx, rules: spell.rules }}
             />
           )}
         </div>

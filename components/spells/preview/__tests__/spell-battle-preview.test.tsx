@@ -17,13 +17,14 @@ vi.mock("@/components/battle/fx/frames/CanvasFrame", () => ({ CanvasFrame: () =>
 import SpellBattlePreviewPanel from "@/components/spells/preview/SpellBattlePreviewPanel";
 import { SPELLS } from "@/data/library/spells";
 import { libraryPreviewSpell, type PreviewSpell } from "@/lib/utils/battle/fx/spell-preview";
+import { SPELL_FX_BY_NAME } from "@/scripts/constructor/backfill/spell-fx-by-name";
 
 function spellNamed(name: string): PreviewSpell {
   const s = SPELLS.find((x) => x.name === name);
 
   if (!s) throw new Error(name);
 
-  return libraryPreviewSpell(s);
+  return libraryPreviewSpell(s, SPELL_FX_BY_NAME[name]);
 }
 
 const plague = spellNamed("Чума");

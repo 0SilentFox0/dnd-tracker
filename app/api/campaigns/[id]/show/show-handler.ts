@@ -1,24 +1,13 @@
 import { after, NextResponse } from "next/server";
 
-import { API_ERRORS } from "@/lib/constants/api-errors";
-import { prisma } from "@/lib/db";
 import { showCommandSchema } from "@/lib/schemas/show";
-import { loadAudioLibrary } from "@/lib/server/audio/track-store";
-import { loadShowDeck } from "@/lib/server/show/deck-store";
-import { publishShow, readShowState, writeShowState } from "@/lib/server/show/show-store";
+import { applyAndWriteShowCommand } from "@/lib/server/show/command-service";
+import { publishShow, readShowState } from "@/lib/server/show/show-store";
 import { requireCampaignAccess, requireDM } from "@/lib/utils/api/api-auth";
-import { errorResponse } from "@/lib/utils/api/api-response";
 import { handleApiError } from "@/lib/utils/api/error-handler";
 import { parseBody } from "@/lib/utils/api/parse-body";
 import { BATTLE_RATE_LIMITS, checkRateLimit, rateLimitResponse } from "@/lib/utils/api/rate-limit";
-import { applyShowCommand, showNeedsLibrary } from "@/lib/utils/show/show-command";
-import type { ShowCommand, ShowResponse, ShowState } from "@/types/show";
-
-function deckIdFor(cmd: ShowCommand, prev: ShowState | null): string | null {
-  if (cmd.action === "open" || cmd.action === "setCover") return cmd.deckId;
-
-  return cmd.action === "next" || cmd.action === "prev" ? (prev?.deckId ?? null) : null;
-}
+import type { ShowResponse } from "@/types/show";
 
 export async function readShow(campaignId: string): Promise<NextResponse> {
   try {
@@ -48,33 +37,9 @@ export async function commandShow(req: Request, campaignId: string): Promise<Nex
 
     if (cmd instanceof NextResponse) return cmd;
 
-    const deckId = deckIdFor(cmd, prev);
-
-    const deck = deckId ? await loadShowDeck(campaignId, deckId) : null;
-
-    const battle = cmd.action === "battle" ? await prisma.battleScene.findFirst({ where: { id: cmd.battleId, campaignId }, select: { id: true, name: true, status: true } }) : null;
-
-    if (cmd.action === "battle" && !battle) return errorResponse(API_ERRORS.NOT_FOUND, 404);
-
-    if (cmd.action === "world") {
-      const map = await prisma.worldMap.findFirst({ where: { id: cmd.mapId, campaignId }, select: { id: true } });
-
-      if (!map) return errorResponse(API_ERRORS.WORLD_MAP_NOT_FOUND, 404);
-
-      if (cmd.focusMarkerId && !(await prisma.worldMarker.findFirst({ where: { id: cmd.focusMarkerId, mapId: cmd.mapId }, select: { id: true } }))) return errorResponse(API_ERRORS.WORLD_MARKER_NOT_FOUND, 404);
-    }
-
-    const library = showNeedsLibrary(prev, cmd, deck) ? await loadAudioLibrary(campaignId) : [];
-
-    const result = applyShowCommand(prev, cmd, { now: Date.now(), deck, library, battle });
-
-    if (!result.ok) return errorResponse(result.message, 422);
-
-    const next = result.value;
+    const next = await applyAndWriteShowCommand(campaignId, prev, cmd);
 
     if (next === prev) return NextResponse.json({ show: prev } satisfies ShowResponse);
-
-    if (!(await writeShowState(campaignId, prev, next))) return errorResponse(API_ERRORS.SHOW_CONFLICT, 409);
 
     after(() => publishShow(campaignId, next));
 

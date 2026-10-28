@@ -4,8 +4,10 @@ import { toPublicPendingCrit } from "../public";
 import { runWithCritChoice } from "../run-with-crit-choice";
 import type { CritTriggerInfo } from "../types";
 
-import { context } from "@/app/api/__tests__/battles/fixtures";
+import { context } from "@/lib/server/battles/__tests__/mutations/fixtures";
+import { critEffectsFor } from "@/lib/utils/battle/crit-choice/catalog";
 import type { MutationResult } from "@/lib/utils/battle/pipeline/run-battle-mutation";
+import { DEFAULT_RULES } from "@/lib/utils/rules";
 
 const info: CritTriggerInfo = { source: "attack", kind: "success", actorId: "hero", targetId: "gob" };
 
@@ -104,6 +106,20 @@ describe("runWithCritChoice", () => {
     expect(seen[0]).toBe(0.123);
     expect(seen[1]).toBe(seen[2]);
     expect(seen[1]).not.toBe(0.123);
+  });
+
+  it("rules.criticals.disabled* діють у picker", async () => {
+    const all = critEffectsFor("attack", "success");
+
+    const rules = { ...DEFAULT_RULES, criticals: { ...DEFAULT_RULES.criticals, disabledSuccess: all.slice(1).map((e) => String(e.id)) } };
+
+    let chosen: unknown;
+
+    await runWithCritChoice({ ...ctx, meta: { ...ctx.meta, rules } }, opts({ run: ({ crit }) => { chosen = crit(info);
+
+ return done(); } }));
+
+    expect(chosen).toBe(all[0]);
   });
 
   it("toPublicPendingCrit прибирає request і seed", () => {

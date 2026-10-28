@@ -3,13 +3,13 @@ import { InviteCodeDisplay } from "@/components/campaigns/settings/InviteCodeDis
 import { HudSection } from "@/components/hud/form";
 import { HudPanel } from "@/components/hud/page";
 import { CampaignStatus } from "@/lib/constants/campaigns";
-import type { CampaignSettings } from "@/types/campaigns";
+import type { CampaignSettings, CampaignSettingsMeta } from "@/types/campaigns";
 
 const LABEL = "text-sm text-hud-muted";
 
 type CampaignSummary = CampaignSettings & { inviteCode: string };
 
-export function CampaignSummaryPanel({ campaignId, campaign, isDM }: { campaignId: string; campaign: CampaignSummary; isDM: boolean }) {
+export function CampaignSummaryPanel({ campaignId, campaign, isDM, meta }: { campaignId: string; campaign: CampaignSummary; isDM: boolean; meta: CampaignSettingsMeta }) {
   return (
     <HudPanel>
       <HudSection
@@ -26,6 +26,7 @@ export function CampaignSummaryPanel({ campaignId, campaign, isDM }: { campaignI
                 critChoiceByDm: campaign.critChoiceByDm,
                 status: campaign.status,
               }}
+              meta={meta}
             />
           ) : undefined
         }
@@ -35,10 +36,12 @@ export function CampaignSummaryPanel({ campaignId, campaign, isDM }: { campaignI
             <p className={LABEL}>Макс. рівень</p>
             <p className="text-lg font-semibold text-hud-ink">{campaign.maxLevel}</p>
           </div>
-          <div id="invite" className="scroll-mt-20">
-            <p className={`${LABEL} mb-2`}>Код запрошення</p>
-            <InviteCodeDisplay inviteCode={campaign.inviteCode} />
-          </div>
+          {!meta.isTemplate && (
+            <div id="invite" className="scroll-mt-20">
+              <p className={`${LABEL} mb-2`}>Код запрошення</p>
+              <InviteCodeDisplay inviteCode={campaign.inviteCode} />
+            </div>
+          )}
           <div>
             <p className={LABEL}>Статус</p>
             <span className="inline-block rounded-full px-2 text-xs text-hud-bone shadow-[inset_0_0_0_1px_var(--color-hud-line)]">

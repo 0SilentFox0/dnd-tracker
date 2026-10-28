@@ -8,7 +8,7 @@
 
 **Tech Stack:** Next.js 16 App Router, React 19, TypeScript strict, Zod, lucide-react, Radix dropdown (`components/ui/dropdown-menu`), vitest + happy-dom + Testing Library.
 
-**Spec:** `docs/superpowers/specs/2026-10-21-scenario-manuscript-design.md`
+**Spec:** `docs/archive/superpowers/specs/2026-10-21-scenario-manuscript-design.md`
 
 ## Global Constraints
 

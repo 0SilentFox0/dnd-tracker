@@ -8,7 +8,7 @@
 
 **Tech Stack:** Next.js 16, Prisma 6, TanStack Query, Zod, Pusher, Vitest (node / happy-dom), CSS-анімації.
 
-**Spec:** `docs/superpowers/specs/2026-10-27-world-map-design.md` + дельта `docs/superpowers/specs/2026-10-28-world-map-part3-design.md` (рішення тут не повторюються — читати дельту перед кожним пакетом).
+**Spec:** `docs/archive/superpowers/specs/2026-10-27-world-map-design.md` + дельта `docs/archive/superpowers/specs/2026-10-28-world-map-part3-design.md` (рішення тут не повторюються — читати дельту перед кожним пакетом).
 
 ## Global Constraints
 

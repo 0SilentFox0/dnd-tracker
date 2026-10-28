@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { buildCharacterUpdateData } from "@/app/api/campaigns/[id]/characters/[characterId]/build-character-update-data";
+import { buildCharacterUpdateData } from "@/lib/server/characters/core/build-character-update-data";
 
 const character = {
   level: 3,

@@ -21,6 +21,8 @@ export const DND_SKILLS = [
   "survival",
 ] as const;
 
+export const isDndSkill = (id: string): id is (typeof DND_SKILLS)[number] => (DND_SKILLS as readonly string[]).includes(id);
+
 const BASE_ABILITIES = CORE_ABILITY_SCORES;
 
 export const DND_SAVING_THROWS = [

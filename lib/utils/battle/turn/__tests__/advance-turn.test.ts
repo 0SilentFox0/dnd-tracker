@@ -1,4 +1,4 @@
-import { describe, expect, it } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import { ParticipantSide } from "@/lib/constants/battle";
 import { makeEffect, resolved } from "@/lib/utils/abilities/__tests__/fixtures";
@@ -7,6 +7,7 @@ import { testMap } from "@/lib/utils/battle/__tests__/fixtures/placed";
 import { mapAction } from "@/lib/utils/battle/fx/map-action";
 import type { BattleSceneState } from "@/lib/utils/battle/store";
 import { advanceTurn } from "@/lib/utils/battle/turn";
+import { DEFAULT_RULES } from "@/lib/utils/rules/defaults";
 import type { BattleAction, BattleMapConfig } from "@/types/battle";
 
 const scene: BattleSceneState = {
@@ -407,5 +408,43 @@ describe("небезпека на початку ходу в advanceTurn", () =>
 
     expect(out.scene.round).toBe(2);
     expect(out.participants[0].combatStats.currentHp).toBe(20);
+  });
+});
+
+describe("детермінований контракт turn loop", () => {
+  beforeEach(() => { vi.useFakeTimers(); vi.setSystemTime(new Date("2026-10-27T12:00:00Z")); });
+  afterEach(() => { vi.useRealTimers(); });
+
+  it("зберігає повних participants, events, round wrap, summons/reserve та RNG order", () => {
+    const active = { ...hero, battleData: {
+      ...hero.battleData, position: { x: 1, y: 1 },
+      pools: { breath: { label: "Подих", max: 1, rest: null, recharge: 5 as const } },
+      abilityUsage: { breath: { battle: 1, round: 0, turn: 0, lastRound: 1 } },
+      activeEffects: [makeEffect("burn", { dotDamage: { damagePerRound: 2, damageType: "fire" } }), makeEffect("regen", { hotHeal: { healPerRound: 1 } }), makeEffect("expired", { duration: 1, countdownAtTurnStart: true })],
+      resolvedAbilities: [resolved({ id: "heal", trigger: { event: "turnStart" }, limits: { chance: 50 }, effects: [{ kind: "heal", amount: 1, target: "self" }] })],
+    } };
+
+    const enemy = { ...goblin, battleData: { ...goblin.battleData, activeEffects: [makeEffect("end-expiry", { duration: 1, armed: true })], resolvedAbilities: [resolved({ id: "round", trigger: { event: "roundStart" }, limits: { chance: 50 }, effects: [{ kind: "heal", amount: 1, target: "self" }] })] } };
+
+    const summon = createMockParticipant({ basicInfo: { ...base.basicInfo, id: "summon" }, abilities: { ...base.abilities, initiative: 1, baseInitiative: 1 } });
+
+    const reserve = { ...summon, basicInfo: { ...summon.basicInfo, id: "reserve", side: ParticipantSide.ENEMY }, battleData: { ...summon.battleData, reserved: true } };
+
+    const values = [0.31, 0.92, 0.14, 0.27];
+
+    let i = 0;
+
+    const rng = vi.fn(() => {
+      if (i >= values.length) throw new Error("Unexpected RNG call");
+
+      return values[i++];
+    });
+
+    const out = advanceTurn({ participants: [active, enemy], pending: [summon, reserve], scene: { ...scene, turnIndex: 1 }, rng, rules: DEFAULT_RULES, map: { cols: 10, rows: 10, background: null, opacity: 0.3, terrain: { "1:1": { kind: "hazard", label: "Вогонь", damage: { dice: "1d6", type: "fire" } } } } });
+
+    expect(rng).toHaveBeenCalledTimes(values.length);
+    expect({ out, rngCalls: rng.mock.results.map((r) => r.value) }).toMatchSnapshot();
+    expect(out.scene).toMatchObject({ round: 2, turnIndex: 0 });
+    expect(out.pending.map((p) => p.basicInfo.id)).toEqual(["reserve"]);
   });
 });

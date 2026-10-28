@@ -4,7 +4,9 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import { getResponseJson } from "./helpers";
 
 const db = vi.hoisted(() => ({
+  $transaction: async (callback: (tx: object) => unknown) => callback({ $queryRaw: async () => [{ id: "c1" }] }),
   race: { findMany: vi.fn() },
+  spell: { count: vi.fn() },
   unit: { findMany: vi.fn(), createMany: vi.fn() },
 }));
 
@@ -24,6 +26,7 @@ describe("POST units/import", () => {
     vi.clearAllMocks();
     db.race.findMany.mockResolvedValue([{ id: "r1", name: "Гобліни" }]);
     db.unit.findMany.mockResolvedValue([]);
+    db.spell.count.mockResolvedValue(1);
     db.unit.createMany.mockImplementation(async ({ data }: { data: unknown[] }) => ({ count: data.length }));
   });
 
@@ -46,6 +49,15 @@ describe("POST units/import", () => {
 
   it("невалідний avatar — 400, нічого не створено", async () => {
     const res = await post({ units: [{ name: "X", avatar: "data:image/png;base64,AAA" }] });
+
+    expect(res.status).toBe(400);
+    expect(db.unit.createMany).not.toHaveBeenCalled();
+  });
+
+  it("чужі id заклинань у knownSpells — 400, нічого не створено", async () => {
+    db.spell.count.mockResolvedValue(0);
+
+    const res = await post({ units: [{ name: "Маг", knownSpells: ["foreign"] }] });
 
     expect(res.status).toBe(400);
     expect(db.unit.createMany).not.toHaveBeenCalled();

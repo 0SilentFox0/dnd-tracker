@@ -8,6 +8,7 @@ import { useFxEnabled } from "./useFxEnabled";
 
 import { BattleStatus } from "@/lib/constants/battle";
 import { useConfirm, usePageHidden } from "@/lib/hooks/common";
+import { canAttackFromPool } from "@/lib/utils/battle/attack/attacks-left";
 import { initialTurnFlow, MORALE_SKIP_MS, moraleOutcome, turnFlow } from "@/lib/utils/battle/flows";
 import { checkReturnToStart } from "@/lib/utils/battle/grid";
 import { effectiveMorale } from "@/lib/utils/battle/morale/effective-morale";
@@ -96,7 +97,7 @@ export function usePlayerTurn(participant: BattleParticipant, bonusSpells: Bonus
     afterAction: () => {
       if (scene.readBattle()?.status !== BattleStatus.ACTIVE) return;
 
-      if (turnExhausted(fresh(), bonusSpells, canReturnNow())) dispatch({ type: "EXHAUSTED" });
+      if (turnExhausted(fresh(), bonusSpells, { canReturn: canReturnNow(), coreActions: !!scene.battle.rules?.actions.enabled })) dispatch({ type: "EXHAUSTED" });
     },
     rollMorale: async (d10: number) => {
       let res;
@@ -156,6 +157,7 @@ export function usePlayerTurn(participant: BattleParticipant, bonusSpells: Bonus
     moraleResult,
     status: {
       actionUsed: participant.actionFlags.hasUsedAction,
+      attackLeft: canAttackFromPool(participant),
       bonusAvailable: !participant.actionFlags.hasUsedBonusAction,
       bonusSpellReady: canCastBonusSpell(participant, bonusSpells),
       skipped: moraleResult === "skip",

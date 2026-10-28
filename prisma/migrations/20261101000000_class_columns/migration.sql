@@ -1,0 +1,1 @@
+ALTER TABLE "classes" ADD COLUMN "columns" JSONB NOT NULL DEFAULT '[]';

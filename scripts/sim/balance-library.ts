@@ -11,28 +11,29 @@ import { execFileSync } from "node:child_process";
 import { SIM_PLAYER, SIM_USER } from "./simulate-battle-scenario";
 import { FAIR_WEAPONS } from "./simulate-battle-scenario";
 
-import { abilityActionSchema, createAbilityActionMutation } from "@/app/api/campaigns/[id]/battles/[battleId]/ability-action/ability-action-mutation";
-import { attackBodySchema, createAttackMutation } from "@/app/api/campaigns/[id]/battles/[battleId]/attack/attack-mutation";
-import { bonusActionSchema, createBonusActionMutation } from "@/app/api/campaigns/[id]/battles/[battleId]/bonus-action/bonus-action-mutation";
-import { moraleCheckMutation } from "@/app/api/campaigns/[id]/battles/[battleId]/morale-check/morale-check-mutation";
-import { nextTurnMutation } from "@/app/api/campaigns/[id]/battles/[battleId]/next-turn/next-turn-mutation";
-import { spellSchema } from "@/app/api/campaigns/[id]/battles/[battleId]/spell/cast-spell-schema";
-import { createSpellMutation } from "@/app/api/campaigns/[id]/battles/[battleId]/spell/spell-mutation";
-import { createStartMutation } from "@/app/api/campaigns/[id]/battles/[battleId]/start/start-mutation";
-import { loadCharacterBalanceStats } from "@/app/api/campaigns/[id]/battles/balance/character-stats";
 import { LIBRARY_ARTIFACT_SETS } from "@/data/library/artifacts";
 import { RACES } from "@/data/library/races";
 import { BATTLE_LOG_RECENT_EVENTS, ParticipantSourceType } from "@/lib/constants/battle";
 import { CampaignRole } from "@/lib/constants/campaigns";
 import { prisma } from "@/lib/db";
 import { moraleCheckSchema } from "@/lib/schemas";
+import { loadCharacterBalanceStats } from "@/lib/server/battles/balance/character-stats";
+import { abilityActionSchema, createAbilityActionMutation } from "@/lib/server/battles/mutations/ability-action/ability-action-mutation";
+import { attackBodySchema, createAttackMutation } from "@/lib/server/battles/mutations/attack/attack-mutation";
+import { bonusActionSchema, createBonusActionMutation } from "@/lib/server/battles/mutations/bonus-action/bonus-action-mutation";
+import { moraleCheckMutation } from "@/lib/server/battles/mutations/morale-check/morale-check-mutation";
+import { nextTurnMutation } from "@/lib/server/battles/mutations/next-turn/next-turn-mutation";
+import { spellSchema } from "@/lib/server/battles/mutations/spell/cast-spell-schema";
+import { createSpellMutation } from "@/lib/server/battles/mutations/spell/spell-mutation";
+import { createStartMutation } from "@/lib/server/battles/mutations/start/start-mutation";
+import { runBattleMutation } from "@/lib/server/battles/run-mutation";
 import { findCompletedSets } from "@/lib/utils/battle/artifact-sets";
 import { buildPartyPower, computeFairScaling, heroMember, pickEnemyRoster } from "@/lib/utils/battle/balance";
 import { loadUnitLibraryStats } from "@/lib/utils/battle/balance/unit-library";
 import { applyBattleDelta } from "@/lib/utils/battle/client/apply-delta";
 import { heroAttackDamageParts } from "@/lib/utils/battle/damage/hero-damage";
 import { loadEquippedArtifactRows, toEquippedArtifacts } from "@/lib/utils/battle/participant/extract-artifacts";
-import { type PipelineDeps, runBattleMutation, type RunBattleMutationOptions } from "@/lib/utils/battle/pipeline/run-battle-mutation";
+import type { PipelineDeps, RunBattleMutationOptions } from "@/lib/utils/battle/pipeline/run-battle-mutation";
 import { casterSpellDice } from "@/lib/utils/battle/spell/caster-dice";
 import { loadSpellsFromDb } from "@/lib/utils/battle/spell/load-spells-db";
 import { spellTargetingFor } from "@/lib/utils/battle/spell/spell-targeting";
@@ -451,16 +452,16 @@ function plan(tree: TreeNodes, level: number, branchNames: string[]): string[] {
 
 async function setupCampaign() {
   if (REUSE) {
-    const existing = await prisma.campaign.findFirst({ where: { name: CAMPAIGN_NAME, dmUserId: SIM_USER.id } });
+    const existing = await prisma.campaign.findFirst({ where: { name: CAMPAIGN_NAME, dmUserId: SIM_USER.id, kind: "campaign" } });
 
     if (existing) return existing.id;
   }
 
-  await prisma.campaign.deleteMany({ where: { name: CAMPAIGN_NAME, dmUserId: SIM_USER.id } });
+  await prisma.campaign.deleteMany({ where: { name: CAMPAIGN_NAME, dmUserId: SIM_USER.id, kind: "campaign" } });
   await prisma.user.upsert({ where: { id: SIM_USER.id }, update: {}, create: SIM_USER });
   await prisma.user.upsert({ where: { id: SIM_PLAYER.id }, update: {}, create: SIM_PLAYER });
 
-  const campaign = await prisma.campaign.create({ data: { name: CAMPAIGN_NAME, inviteCode: `SIMB-${Date.now()}`, dmUserId: SIM_USER.id } });
+  const campaign = await prisma.campaign.create({ data: { name: CAMPAIGN_NAME, inviteCode: `SIMB-${Date.now()}`, dmUserId: SIM_USER.id, kind: "campaign" } });
 
   await prisma.campaignMember.create({ data: { campaignId: campaign.id, userId: SIM_USER.id, role: CampaignRole.DM } });
   await prisma.campaignMember.create({ data: { campaignId: campaign.id, userId: SIM_PLAYER.id, role: CampaignRole.PLAYER } });
@@ -537,7 +538,9 @@ async function createParty(partyKey: string, level: number, trees: Map<string, T
     await prisma.characterInventory.create({ data: { characterId: row.id, equipped } });
 
     if (withSets && process.argv.includes("--debug") && i === 0) {
-      const eq = toEquippedArtifacts(await loadEquippedArtifactRows({ ...row, inventory: { equipped } } as never));
+      const artifactsById = Object.fromEntries((await prisma.artifact.findMany({ where: { campaignId } })).map((r) => [r.id, r]));
+
+      const eq = toEquippedArtifacts(loadEquippedArtifactRows({ ...row, inventory: { equipped } } as never, artifactsById));
 
       const { progress } = await findCompletedSets(eq, campaignId);
 

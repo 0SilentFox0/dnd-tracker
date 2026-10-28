@@ -30,6 +30,20 @@ export function schoolMasteryFromLearned(learned: LearnedNode[], branchSpellGrou
   return (groupId) => (groupId ? (byGroup.get(groupId) ?? null) : null);
 }
 
+export function spellDice5e(spell: { dice: number; level: number; dieSides?: number; upcastDice?: number }, characterLevel: number, castLevel: number): SpellDice {
+  const sides = spell.dieSides ?? 6;
+
+  if (spell.dice <= 0) return { count: 0, sides };
+
+  if (spell.level === 0) {
+    const tier = 1 + (characterLevel >= 5 ? 1 : 0) + (characterLevel >= 11 ? 1 : 0) + (characterLevel >= 17 ? 1 : 0);
+
+    return { count: spell.dice * tier, sides };
+  }
+
+  return { count: spell.dice + (spell.upcastDice ?? 0) * Math.max(0, castLevel - spell.level), sides };
+}
+
 // юніти не мають майстерності шкіл: грані ростуть з рівнем, а кубики — швидше, ніж у героя
 const unitSides = (level: number) => (level >= 10 ? 10 : level >= 5 ? 8 : 6);
 

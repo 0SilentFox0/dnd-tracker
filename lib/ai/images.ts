@@ -87,6 +87,7 @@ async function renderImage(input: RenderInput): Promise<Buffer> {
       model: createImageModel(input.provider, apiKey, input.model),
       prompt,
       n: 1,
+      maxRetries: 0, // An unknown paid outcome must never cause a second provider request.
       ...(input.provider === "openai" ? { size: OPENAI_SIZES[input.aspect] as `${number}x${number}` } : { aspectRatio: input.aspect }),
       abortSignal: AbortSignal.any([AbortSignal.timeout(110_000), ...(input.abortSignal ? [input.abortSignal] : [])]),
     });

@@ -1,0 +1,56 @@
+[
+  {
+    "slug": "srd-2024_school-abjuration",
+    "name": "Abjuration",
+    "color": "#4a7bd0",
+    "icon": "shield"
+  },
+  {
+    "slug": "srd-2024_school-conjuration",
+    "name": "Conjuration",
+    "color": "#d08a2c",
+    "icon": "portal"
+  },
+  {
+    "slug": "srd-2024_school-divination",
+    "name": "Divination",
+    "color": "#c9b458",
+    "icon": "eye"
+  },
+  {
+    "slug": "srd-2024_school-enchantment",
+    "name": "Enchantment",
+    "color": "#d0569a",
+    "icon": "heart"
+  },
+  {
+    "slug": "srd-2024_school-evocation",
+    "name": "Evocation",
+    "color": "#d0432c",
+    "icon": "flame"
+  },
+  {
+    "slug": "srd-2024_school-illusion",
+    "name": "Illusion",
+    "color": "#8a5cd0",
+    "icon": "mask"
+  },
+  {
+    "slug": "srd-2024_school-necromancy",
+    "name": "Necromancy",
+    "color": "#5f8a3c",
+    "icon": "skull"
+  },
+  {
+    "slug": "srd-2024_school-transmutation",
+    "name": "Transmutation",
+    "color": "#2ca59a",
+    "icon": "vortex"
+  },
+  {
+    "slug": "srd-2024_monster-actions",
+    "name": "Monster Actions",
+    "color": "#a34c38",
+    "icon": "skull"
+  }
+]

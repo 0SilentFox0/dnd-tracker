@@ -1,6 +1,7 @@
 import { buildBattleActionForCriticalFail } from "./actions";
 
 import { applyCriticalEffect } from "@/lib/utils/battle/attack/critical";
+import { attackSourceOf } from "@/lib/utils/battle/attack/source";
 import { type ActionFlow, fire, getP, put } from "@/lib/utils/battle/common/action-flow";
 import { attackKindOf } from "@/lib/utils/battle/common/attack-kind";
 import type { AttackRollResult } from "@/lib/utils/battle/types/attack";
@@ -39,6 +40,7 @@ export function handleCriticalFail(params: HandleCriticalFailParams): Omit<Proce
     actorId: attackerId,
     targetId,
     attackKind: attackKindOf(attack.type),
+    ...attackSourceOf(attack),
   });
 
   const battleAction = buildBattleActionForCriticalFail({

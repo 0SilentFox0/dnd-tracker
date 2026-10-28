@@ -5,34 +5,6 @@
 
 import { SkillLevel } from "@/types/skill-tree";
 
-/** ID (slug) основних навичок, які вважаються школами магії */
-export const MAGIC_MAIN_SKILL_IDS = [
-  "sorcery",
-  "light_magic",
-  "dark_magic",
-  "chaos_magic",
-  "summoning_magic",
-] as const;
-
-export type MagicMainSkillId = (typeof MAGIC_MAIN_SKILL_IDS)[number];
-
-/**
- * Нормалізовані назви шкіл магії (lowercase, пробіли → _).
- * Якщо MainSkill.name після нормалізації збігається з одним із цих рядків — вважаємо школу магією.
- */
-export const MAGIC_MAIN_SKILL_NAME_ALIASES: readonly string[] = [
-  ...MAGIC_MAIN_SKILL_IDS,
-  "магія світла",
-  "магія_світла",
-  "магія призиву",
-  "магія_призиву",
-  "магія темряви",
-  "магія_темряви",
-  "магія хаосу",
-  "магія_хаосу",
-  "сорсерія",
-];
-
 /**
  * DPR за рівень прокачки школи магії (лише одна школа — найвищий рівень).
  * Школа магії - Базова / Просунута / Експертна.

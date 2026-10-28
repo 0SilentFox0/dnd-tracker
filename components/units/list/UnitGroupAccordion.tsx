@@ -86,7 +86,7 @@ export function UnitGroupAccordion({ group, campaignId, onDeleteUnit, onDrop }: 
                   <AccordionContent>
                     <div className="grid gap-4 pt-2 md:grid-cols-2 lg:grid-cols-3">
                       {tier.units.map((unit) => (
-                        <UnitCard key={unit.id} unit={unit} campaignId={campaignId} race={group.race} onDelete={onDeleteUnit} />
+                        <UnitCard key={unit.id} unit={unit} campaignId={campaignId} onDelete={onDeleteUnit} />
                       ))}
                     </div>
                   </AccordionContent>

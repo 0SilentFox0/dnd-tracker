@@ -1,7 +1,8 @@
 import { shuffle } from "./rng";
 
 import { ABILITY_KEYS, type AbilityKey } from "@/lib/constants/abilities";
-import type { HeroArchetypeKey } from "@/lib/constants/hero-archetypes";
+import { HERO_ARCHETYPE_KEYS, heroArchetype,type HeroArchetypeKey } from "@/lib/constants/hero-archetypes";
+import type { GameClassData } from "@/types/classes";
 
 export const STANDARD_ARRAY = [15, 14, 13, 12, 10, 8] as const;
 
@@ -21,7 +22,7 @@ export const ARCHETYPE_PRIMARY: Record<HeroArchetypeKey, AbilityKey[]> = {
   mage: ["intelligence", "wisdom"],
 };
 
-export const ARCHETYPE_CLASS: Record<HeroArchetypeKey, string> = { warrior: "Воїн", paladin: "Паладин", ranger: "Слідопит", rogue: "Розбійник", mage: "Маг" };
+export const ARCHETYPE_CLASS = Object.fromEntries(HERO_ARCHETYPE_KEYS.map((k) => [k, heroArchetype(k).className])) as Record<HeroArchetypeKey, string>;
 
 export const pointBuySpent = (scores: AbilityScores) => ABILITY_KEYS.reduce((sum, k) => sum + (POINT_BUY_COST[scores[k]] ?? Infinity), 0);
 
@@ -35,10 +36,14 @@ export function validateAbilityScores(scores: AbilityScores, method: AbilityMeth
   return values.every((v) => v >= 8 && v <= 15) && pointBuySpent(scores) <= POINT_BUY_BUDGET;
 }
 
-export function assignStandardArray(archetype: HeroArchetypeKey, rng: () => number): AbilityScores {
-  const primary = ARCHETYPE_PRIMARY[archetype];
-
+export function assignByPriority(primary: readonly AbilityKey[], rng: () => number): AbilityScores {
   const order = [...primary, ...shuffle(rng, ABILITY_KEYS.filter((k) => !primary.includes(k)))];
 
   return Object.fromEntries(order.map((k, i) => [k, STANDARD_ARRAY[i]])) as AbilityScores;
 }
+
+export const assignStandardArray = (archetype: HeroArchetypeKey, rng: () => number): AbilityScores => assignByPriority(ARCHETYPE_PRIMARY[archetype], rng);
+
+export const classPrimaryAbilities = (cls: Pick<GameClassData, "spellcastingAbility" | "savingThrows">): AbilityKey[] => [
+  ...new Set([...(cls.spellcastingAbility ? [cls.spellcastingAbility] : []), ...cls.savingThrows]),
+];

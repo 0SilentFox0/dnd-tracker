@@ -14,9 +14,9 @@ describe("get_campaign_brief", () => {
 
     const { runTool } = await import("@/lib/ai/tools/define");
 
-    const out = await runTool(getCampaignBriefTool, { campaignId: "camp1", userId: "dm", threadId: null }, {});
+    const out = await runTool(getCampaignBriefTool, { campaignId: "camp1", userId: "dm", scopes: ["ai"] as const, threadId: null }, {});
 
-    expect(JSON.parse(out)).toEqual({ name: "Асхан", description: "Темне фентезі", instructions: "Говори архаїчно" });
+    expect(JSON.parse(out).data).toEqual({ name: "Асхан", description: "Темне фентезі", instructions: "Говори архаїчно" });
     expect(prisma.campaign.findUnique).toHaveBeenCalledWith(expect.objectContaining({ where: { id: "camp1" } }));
   });
 });

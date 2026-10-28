@@ -3,6 +3,7 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 const prismaMock = vi.hoisted(() => ({
   aiThread: { findMany: vi.fn(), create: vi.fn() },
   aiMessage: { findMany: vi.fn() },
+  assistantRun: { findMany: vi.fn(async () => []) },
   aiCredential: { findUnique: vi.fn() },
 }));
 
@@ -28,9 +29,27 @@ describe("threads", () => {
     expect(prismaMock.aiMessage.findMany).toHaveBeenCalledTimes(1);
     expect(list.map((t) => t.usage)).toEqual([
       { inputTokens: 11, outputTokens: 7 },
-      { inputTokens: 0, outputTokens: 0 },
+      { inputTokens: null, outputTokens: null, partial: true },
       { inputTokens: 0, outputTokens: 0 },
     ]);
+  });
+
+  it("a crashed run without an assistant message is unknown usage, not a free request", async () => {
+    const { listThreads } = await import("@/lib/ai/threads");
+
+    prismaMock.aiThread.findMany.mockResolvedValue([row("a")]);
+    prismaMock.aiMessage.findMany.mockResolvedValue([]);
+    prismaMock.assistantRun.findMany.mockResolvedValueOnce([{ id: "run", threadId: "a", resultRefs: { usage: { inputTokens: 17, outputTokens: null, partial: true } } }] as never);
+    expect((await listThreads("camp", "dm"))[0].usage).toEqual({ inputTokens: 17, outputTokens: null, partial: true });
+  });
+
+  it("a completed run is not counted again beside its saved assistant message", async () => {
+    const { listThreads } = await import("@/lib/ai/threads");
+
+    prismaMock.aiThread.findMany.mockResolvedValue([row("a")]);
+    prismaMock.aiMessage.findMany.mockResolvedValue([{ id: "assistant-run", threadId: "a", metadata: { usage: { inputTokens: 17, outputTokens: 3 } } }]);
+    prismaMock.assistantRun.findMany.mockResolvedValueOnce([{ id: "run", threadId: "a", resultRefs: { usage: { inputTokens: 17, outputTokens: 3, partial: true } } }] as never);
+    expect((await listThreads("camp", "dm"))[0].usage).toEqual({ inputTokens: 17, outputTokens: 3 });
   });
 
   it("createThread без model бере defaultModel ключа", async () => {
@@ -56,21 +75,5 @@ describe("threads", () => {
     prismaMock.aiCredential.findUnique.mockResolvedValue({ defaultModel: "nope" });
 
     expect(await resolveDefaultModel("dm", "anthropic", "scenario")).toBe(defaultModelFor("anthropic", "scenario"));
-  });
-
-  it("slimToolOutputs стискає великі виводи лише у старих повідомленнях", async () => {
-    const { slimToolOutputs } = await import("@/lib/ai/threads");
-
-    const big = "x".repeat(5000);
-
-    const msg = (id: string) => ({ id, role: "assistant" as const, parts: [{ type: "tool-read_scenario_page", output: big }, { type: "tool-propose_scenario_edit", output: '{"proposalId":"ap1"}' }] as unknown[], metadata: {} });
-
-    const messages = Array.from({ length: 10 }, (_, i) => msg(`m${i}`));
-
-    const out = slimToolOutputs(messages as never);
-
-    expect((out[0].parts[0] as { output: string }).output).toContain("стиснуто");
-    expect((out[0].parts[1] as { output: string }).output).toBe('{"proposalId":"ap1"}');
-    expect((out[9].parts[0] as { output: string }).output).toBe(big);
   });
 });

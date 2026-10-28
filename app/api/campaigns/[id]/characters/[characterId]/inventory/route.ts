@@ -1,6 +1,6 @@
-import { readInventory } from "./read-inventory";
 import { updateInventory } from "./update-inventory";
 
+import { readInventory } from "@/lib/server/characters/core/read-inventory";
 import { handleApiError } from "@/lib/utils/api/error-handler";
 import type { CharacterRouteContext } from "@/types/api";
 

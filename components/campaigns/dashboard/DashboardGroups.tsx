@@ -6,7 +6,7 @@ import { useRouter } from "next/navigation";
 import { SearchEmptyState } from "@/components/common/SearchEmptyState";
 import { SearchInput } from "@/components/common/SearchInput";
 import { HudTile } from "@/components/hud/page";
-import { COMPACT_GROUPS, DASHBOARD_GROUP_TITLE, type DashboardGroupKey, type DashboardSection, DM_DASHBOARD_SECTIONS, PLAYER_DASHBOARD_SECTIONS } from "@/lib/constants/campaign-dashboard";
+import { COMPACT_GROUPS, DASHBOARD_GROUP_TITLE, type DashboardContext, type DashboardGroupKey, type DashboardSection, DEFAULT_DASHBOARD_CONTEXT, dmDashboardSectionsFor, PLAYER_DASHBOARD_SECTIONS } from "@/lib/constants/campaign-dashboard";
 import { useSearch } from "@/lib/hooks/common";
 
 const fieldsOf = (s: DashboardSection) => [s.title, ...s.keywords];
@@ -17,10 +17,10 @@ const GRID = "grid grid-cols-1 gap-2 sm:grid-cols-2 xl:grid-cols-3";
 
 const COMPACT_GRID = "grid grid-cols-2 gap-2 sm:grid-cols-3";
 
-export function DashboardGroups({ campaignId, isDM, pendingDrafts, hiddenKeys }: { campaignId: string; isDM: boolean; pendingDrafts: number; hiddenKeys?: string[] }) {
+export function DashboardGroups({ campaignId, isDM, pendingDrafts, context = DEFAULT_DASHBOARD_CONTEXT, hiddenKeys }: { campaignId: string; isDM: boolean; pendingDrafts: number; context?: DashboardContext; hiddenKeys?: string[] }) {
   const router = useRouter();
 
-  const sections = isDM ? DM_DASHBOARD_SECTIONS : PLAYER_DASHBOARD_SECTIONS;
+  const sections = isDM ? dmDashboardSectionsFor(context) : PLAYER_DASHBOARD_SECTIONS;
 
   const base = useMemo(() => sections.filter((s) => !hiddenKeys?.includes(s.key)), [sections, hiddenKeys]);
 

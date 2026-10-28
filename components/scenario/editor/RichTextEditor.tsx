@@ -32,6 +32,12 @@ export function RichTextEditor({
     onUpdate: ({ editor: e }) => onChange(e.getJSON() as RichDoc),
   });
 
+  // The draft hook retains dirty local content on a remote conflict. A changed
+  // doc here is an accepted clean update or an explicit reload by the DM.
+  useEffect(() => {
+    if (editor && JSON.stringify(editor.getJSON()) !== JSON.stringify(doc)) editor.commands.setContent(doc, { emitUpdate: false });
+  }, [editor, doc]);
+
   useEffect(() => {
     if (!editor) return;
 

@@ -3,6 +3,7 @@ import { describe, expect, it } from "vitest";
 import { ParticipantSide } from "@/lib/constants/battle";
 import { createMockParticipant } from "@/lib/utils/battle/__tests__/fixtures/mock-participant";
 import { acceptFullBattle, applyBattleDelta, prependBattleLog } from "@/lib/utils/battle/client/apply-delta";
+import { DEFAULT_RULES } from "@/lib/utils/rules";
 import type { BattleScene, ClientBattleDelta } from "@/types/api";
 import type { BattleAction, BattleParticipant } from "@/types/battle";
 
@@ -18,7 +19,7 @@ const a = p("a"), b = p("b");
 
 const cached: BattleScene = {
   id: "b1", campaignId: "c1", name: "Бій", status: "active", participants: [], currentRound: 1, currentTurnIndex: 0,
-  initiativeOrder: [a, b], pendingSummons: [], battleLog: [entry(1), entry(2)], createdAt: "x", version: 5,
+  initiativeOrder: [a, b], pendingSummons: [], rules: DEFAULT_RULES, battleLog: [entry(1), entry(2)], createdAt: "x", version: 5,
   isDM: true, userRole: "dm", campaign: { id: "c1", friendlyFire: false },
 };
 

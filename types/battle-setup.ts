@@ -1,5 +1,6 @@
 import type { AbilityKey } from "@/lib/constants/abilities";
 import { ParticipantSide,type ParticipantSourceTypeValue } from "@/lib/constants/battle";
+import type { XpDifficulty } from "@/lib/utils/battle/balance/xp-budget";
 import type { BattleMapConfig } from "@/types/battle";
 
 export interface SetupCharacter {
@@ -36,6 +37,7 @@ export interface SuggestedEnemy {
   totalHp: number;
   hpMult?: number;
   dmgMult?: number;
+  xp?: number;
 }
 
 /** Детальний розклад DPR персонажа (з balance API) */
@@ -79,6 +81,8 @@ export interface UnitEntityStats extends EntityStats {
   resist?: Record<string, number>;
   spell?: UnitSpellPower;
   summon?: boolean;
+  cr?: number;
+  xp?: number;
 }
 
 export interface CreateBattleData {
@@ -100,6 +104,7 @@ export interface BattleBalanceBody {
   };
   suggest?: boolean;
   raceId?: string;
+  xpDifficulty?: XpDifficulty;
 }
 
 export interface BattleBalanceResponse {

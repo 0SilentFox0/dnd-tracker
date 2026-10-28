@@ -6,6 +6,7 @@ import type { UseQueryResult } from "@tanstack/react-query";
 import { useStash, useStashAction } from "./useStash";
 
 import { ARTIFACT_GRID_9, type ArtifactGridSlotKey, type ArtifactSlot } from "@/lib/constants/artifacts";
+import { useCampaignRules } from "@/lib/hooks/campaigns";
 import { DESKTOP_QUERY, useConfirm, useMediaQuery, useNotify } from "@/lib/hooks/common";
 import { type BackpackCell, buildBackpackCells, type DragPayload, dropAction, type DropTarget } from "@/lib/utils/inventory/backpack";
 import type { StashAction } from "@/lib/utils/inventory/stash-actions";
@@ -32,10 +33,12 @@ export interface InventoryModel {
   purse: Purse | null;
   access: { canAct: boolean; isDM: boolean; pending: boolean };
   layout: { desktop: boolean };
+  rules: { offHand: boolean };
   selection: { value: InventorySelection | null; set: (key: SelectionKey | null) => void };
   drag: { value: DragPayload | null; set: (p: DragPayload | null) => void };
   actions: {
-    equip: (artifactId: string) => Promise<void>;
+    equip: (artifactId: string, slot?: "shield") => Promise<void>;
+    attune: (ref: string, on: boolean) => Promise<void>;
     unequip: (slot: ArtifactGridSlotKey) => Promise<void>;
     drop: (target: DropTarget) => Promise<void>;
     use: (itemId: string) => Promise<void>;
@@ -77,6 +80,8 @@ export function useInventory(campaignId: string, characterId: string, sheet: Cha
   const desktop = useMediaQuery(DESKTOP_QUERY);
 
   const columns = desktop ? 6 : 5;
+
+  const offHand = !!useCampaignRules(campaignId).data?.classes.enabled;
 
   const query = useStash(campaignId, characterId, { enabled: !pending });
 
@@ -149,10 +154,12 @@ export function useInventory(campaignId: string, characterId: string, sheet: Cha
     purse: view?.purse ?? null,
     access: { canAct, isDM, pending },
     layout: { desktop },
+    rules: { offHand },
     selection: { value: selection, set: setSelectedKey },
     drag: { value: drag, set: setDrag },
     actions: {
-      equip: (artifactId) => run({ action: "equip", artifactId }, true),
+      equip: (artifactId, slot) => run({ action: "equip", artifactId, ...(slot && { slot }) }, true),
+      attune: (ref, on) => run({ action: on ? "attune" : "unattune", ref }, true),
       unequip: (slot) => run({ action: "stash", slot }, true),
       drop,
       use: (itemId) => run({ action: "useItem", itemId }, false),

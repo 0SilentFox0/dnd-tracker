@@ -32,6 +32,8 @@ export function ItemBody({ selection, withTitle = true }: { selection: Inventory
 
   const { artifact } = selection;
 
+  const flags = [artifact.carried && "Носиться", artifact.attunement === "attuned" && "Налаштовано", artifact.attunement === "required" && "Не діє без налаштування", "charges" in artifact && artifact.charges && `Заряди ${artifact.charges.left}/${artifact.charges.max}`].filter(Boolean);
+
   const slot = selection.kind === "equipped" ? selection.label : artifactSlotLabel(artifact.slot);
 
   const effects = selection.kind === "equipped" ? selection.artifact.effects : [];
@@ -40,6 +42,13 @@ export function ItemBody({ selection, withTitle = true }: { selection: Inventory
     <div className="space-y-1.5">
       {withTitle && <h3 className="hud-sc text-lg text-hud-ink">{artifact.name}</h3>}
       <p className="text-xs text-hud-muted">{[artifact.rarity ? artifactRarityLabel(artifact.rarity) : null, slot].filter(Boolean).join(" · ")}</p>
+      {flags.length > 0 && (
+        <p className="flex flex-wrap gap-x-2 text-xs text-hud-muted">
+          {flags.map((f) => (
+            <span key={String(f)}>{f}</span>
+          ))}
+        </p>
+      )}
       {artifact.description && <p className="whitespace-pre-line break-words text-sm text-hud-ink">{artifact.description}</p>}
       {effects.length > 0 && (
         <ul className="list-disc pl-5 text-sm text-hud-ink">
@@ -63,15 +72,26 @@ export function ItemActions({ inv, on }: ItemDetailsProps) {
     </Button>
   );
 
+  const attuneButtons = (a: { id: string; attunement?: "attuned" | "required" }) => [
+    a.attunement === "required" && btn("Налаштувати", () => void inv.actions.attune(a.id, true)),
+    a.attunement === "attuned" && btn("Зняти налаштування", () => void inv.actions.attune(a.id, false)),
+  ];
+
   const buttons =
     value.kind === "backpack"
       ? [
           value.artifact.slot !== ArtifactSlot.ITEM && btn("Вдягнути", () => void inv.actions.equip(value.artifact.id)),
+          inv.rules.offHand && value.artifact.light && btn("У другу руку", () => void inv.actions.equip(value.artifact.id, "shield")),
+          ...attuneButtons(value.artifact),
           btn("Передати", () => on.transfer({ artifact: value.artifact, source: { artifactId: value.artifact.id } })),
           inv.access.isDM && btn("Забрати", () => inv.actions.revoke(value.artifact)),
         ]
       : value.kind === "equipped"
-        ? [btn("Зняти", () => void inv.actions.unequip(value.slot)), btn("Передати", () => on.transfer({ artifact: value.artifact, source: { slot: value.slot } }))]
+        ? [
+            !value.artifact.carried && btn("Зняти", () => void inv.actions.unequip(value.slot)),
+            ...attuneButtons(value.artifact),
+            btn("Передати", () => on.transfer({ artifact: value.artifact, source: value.artifact.carried ? { artifactId: value.artifact.id } : { slot: value.slot } })),
+          ]
         : [
             value.item.consumable && btn("Використати", () => void inv.actions.use(value.item.id)),
             btn("Редагувати", () => on.edit(value.item)),

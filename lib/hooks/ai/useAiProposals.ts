@@ -4,6 +4,7 @@ import { useCallback } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
 import { aiKeys } from "./keys";
+import { flushAssistantBeforeApply, useAssistantEffects } from "./useAssistantEffects";
 
 import { applyAiProposal, getAiProposals, getAiProposalSummaries, rejectAiProposal } from "@/lib/api/ai";
 import { useOptionalNotify } from "@/lib/hooks/common";
@@ -15,6 +16,8 @@ type Options = { enabled?: boolean; full?: boolean; beforeApply?: () => Promise<
 
 export function useAiProposals(campaignId: string, pageId: string, { enabled = true, full = true, beforeApply, onApplied }: Options = {}) {
   const queryClient = useQueryClient();
+
+  const { consumeReceipt } = useAssistantEffects(campaignId);
 
   const notify = useOptionalNotify();
 
@@ -32,14 +35,16 @@ export function useAiProposals(campaignId: string, pageId: string, { enabled = t
 
   const applyMutation = useMutation({
     mutationFn: async (id: string) => {
-      const slideOnly = (query.data ?? []).find((p) => p.id === id)?.ops?.some((o) => o.op === "addSlide");
+      if (beforeApply && !(await beforeApply())) return null;
 
-      if (!slideOnly && beforeApply && !(await beforeApply())) return null;
+      await flushAssistantBeforeApply(campaignId);
 
       return applyAiProposal(campaignId, id);
     },
-    onSuccess: (result) => {
+    onSuccess: (result, id) => {
       if (!result) return;
+
+      void consumeReceipt({ id: `legacy:${id}`, status: "applied", effectsStatus: "complete", result: { data: null, affected: ["deck" in result ? { domain: "show", id: result.deck.id, name: "Показ" } : { domain: "scenario", id: result.id, name: "Сценарій" }], warnings: [] } });
 
       if ("deck" in result) {
         queryClient.invalidateQueries({ queryKey: showKeys.decks(campaignId) });

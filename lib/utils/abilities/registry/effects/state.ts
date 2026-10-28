@@ -1,15 +1,22 @@
 import { CONDITION_LABELS } from "../labels";
 import type { EffectApplyInput, EffectApplyResult } from "./types";
 
+import { EffectMarker } from "@/lib/constants/battle";
 import { findFlags } from "@/lib/utils/abilities/engine/core/collect-modifiers";
 import { findParticipant, participantNames, updateParticipant } from "@/lib/utils/abilities/engine/core/participants";
 import { restoreCharm } from "@/lib/utils/abilities/engine/effects/charm";
 import { countMarks, GUARD_KEY, markKey } from "@/lib/utils/abilities/engine/effects/marks";
+import { clampMorale, moraleCapOf } from "@/lib/utils/abilities/engine/effects/morale";
 import { effectSource, upsertTimedEffect } from "@/lib/utils/abilities/engine/effects/timed-effects";
-import type { ConditionImmunityKey, Effect } from "@/lib/utils/abilities/schema";
+import type { Condition5eKey, ConditionImmunityKey, Effect } from "@/lib/utils/abilities/schema";
+import { isCondition5eKey } from "@/lib/utils/abilities/schema/kinds";
+import { applyCondition5e, saveEndsFor } from "@/lib/utils/battle/conditions/apply";
+import { removeEffects } from "@/lib/utils/battle/conditions/query";
 import { grantExtraActions } from "@/lib/utils/battle/participant/helpers";
 import { signed } from "@/lib/utils/common/format";
 import { pluralUk } from "@/lib/utils/common/plural";
+import { DEFAULT_RULES } from "@/lib/utils/rules";
+import { slotLevel, slotRestoreOrder } from "@/lib/utils/spells/slot-keys";
 import type { BattleParticipant } from "@/types/battle";
 
 type Of<K extends Effect["kind"]> = Extract<Effect, { kind: K }>;
@@ -55,8 +62,43 @@ export function immuneTo(ps: BattleParticipant[], id: string, key: ConditionImmu
 
 export { CONDITION_LABELS };
 
+function applyCondition5eToTargets(input: EffectApplyInput<Of<"applyCondition">>, key: Condition5eKey): EffectApplyResult {
+  const { ability, effect, ctx } = input;
+
+  const owner = findParticipant(input.participants, input.ownerId);
+
+  const source = effectSource(owner, ability);
+
+  let ps = input.participants;
+
+  const messages: string[] = [];
+
+  for (const id of input.targetIds) {
+    const result = applyCondition5e(ps, id, {
+      key,
+      rounds: effect.duration.rounds,
+      levels: effect.levels,
+      saveEnds: effect.saveEnds ? saveEndsFor(owner, effect.saveEnds.ability, (ctx.rules ?? DEFAULT_RULES).formulas.saveDcBase) : undefined,
+      source,
+      sourceName: ability.name,
+      timedKey: `${ability.key}#${input.effectIndex}@${input.ownerId}`,
+      round: ctx.round,
+      rules: ctx.rules,
+    });
+
+    ps = result.participants;
+    messages.push(...result.messages);
+  }
+
+  return { participants: ps, messages };
+}
+
 export function applyCondition(input: EffectApplyInput<Of<"applyCondition">>): EffectApplyResult {
   const { ability, effect, ctx } = input;
+
+  if (isCondition5eKey(effect.condition)) return applyCondition5eToTargets(input, effect.condition);
+
+  const condition = effect.condition;
 
   return each(
     input,
@@ -70,16 +112,16 @@ export function applyCondition(input: EffectApplyInput<Of<"applyCondition">>): E
           type: "condition",
           rounds: effect.duration.rounds,
           stackable: false,
-          effects: [{ type: effect.condition, value: effect.condition === "skip_action" ? (effect.percent ?? 100) : 1 }],
+          effects: [{ type: condition, value: condition === EffectMarker.SKIP_ACTION ? (effect.percent ?? 100) : 1 }],
           breakOnDamage: effect.breakOnDamage,
         },
         ctx.round,
       );
 
-      return effect.condition === "no_reaction" ? { ...next, actionFlags: { ...next.actionFlags, hasUsedReaction: true } } : next;
+      return condition === EffectMarker.NO_REACTION ? { ...next, actionFlags: { ...next.actionFlags, hasUsedReaction: true } } : next;
     },
-    (names) => `⛓ ${ability.name}: ${names} — ${CONDITION_LABELS[effect.condition]} (${effect.duration.rounds} р.)`,
-    (p) => immuneTo(input.participants, p.basicInfo.id, effect.condition),
+    (names) => `⛓ ${ability.name}: ${names} — ${CONDITION_LABELS[condition]} (${effect.duration.rounds} р.)`,
+    (p) => immuneTo(input.participants, p.basicInfo.id, condition),
   );
 }
 
@@ -114,9 +156,7 @@ export function applyRestoreSpellSlot(input: EffectApplyInput<Of<"restoreSpellSl
     (p) => {
       const slots = p.spellcasting.spellSlots;
 
-      const level = Object.keys(slots)
-        .sort((a, b) => Number(a) - Number(b))
-        .find((l) => slots[l].current < slots[l].max);
+      const level = slotRestoreOrder(slots).find((l) => slots[l].current < slots[l].max);
 
       if (!level) return null;
 
@@ -150,7 +190,7 @@ export function applyDrainSpellSlot(input: EffectApplyInput<Of<"drainSpellSlot">
     for (let i = 0; i < effect.count; i++) {
       const level = Object.keys(slots)
         .filter((l) => slots[l].current > 0)
-        .sort((a, b) => (Number(b) || 0) - (Number(a) || 0))[0];
+        .sort((a, b) => slotLevel(slots, b) - slotLevel(slots, a))[0];
 
       if (!level) break;
 
@@ -173,7 +213,7 @@ export function applyChangeMorale(input: EffectApplyInput<Of<"changeMorale">>): 
   return each(
     input,
     (p) => {
-      const morale = Math.max(-3, Math.min(3, p.combatStats.morale + effect.delta));
+      const morale = clampMorale(p.combatStats.morale + effect.delta, moraleCapOf(p));
 
       return morale === p.combatStats.morale ? null : { ...p, combatStats: { ...p.combatStats, morale } };
     },
@@ -188,14 +228,12 @@ export function applyCleanse(input: EffectApplyInput<Of<"cleanse">>): EffectAppl
   return each(
     input,
     (p) => {
-      const kept = p.battleData.activeEffects.filter((e) => e.type !== "debuff" && !(effect.includeConditions && e.type === "condition"));
+      const { participant: cleaned, removed } = removeEffects(p, (e) => e.type === "debuff" || (!!effect.includeConditions && e.type === "condition"));
 
-      if (kept.length === p.battleData.activeEffects.length) return null;
+      if (!removed.length) return null;
 
       // знятий чарм більше не поверне учасника наприкінці ходу — повертаємо одразу
-      const charm = p.battleData.activeEffects.find((e) => e.charmOrigin && !kept.includes(e));
-
-      const cleaned = { ...p, battleData: { ...p.battleData, activeEffects: kept } };
+      const charm = removed.find((e) => e.charmOrigin);
 
       return charm ? restoreCharm({ ...cleaned, battleData: { ...cleaned.battleData, charmReturn: charm.charmOrigin } }) : cleaned;
     },

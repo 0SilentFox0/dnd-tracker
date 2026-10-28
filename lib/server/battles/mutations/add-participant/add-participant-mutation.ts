@@ -1,0 +1,173 @@
+import { z } from "zod";
+
+import { API_ERRORS } from "@/lib/constants/api-errors";
+import { ParticipantSide, ParticipantSourceType } from "@/lib/constants/battle";
+import { UNIT_QUANTITY } from "@/lib/constants/battle-units";
+import { prisma } from "@/lib/db";
+import { mapCellSchema } from "@/lib/schemas/battles";
+import { applyBakedAuras } from "@/lib/utils/abilities/build/bake";
+import { canStand } from "@/lib/utils/battle/grid/occupancy";
+import { modeEnter, modePlaceOne } from "@/lib/utils/battle/modes/server";
+import {
+  createBattleParticipantFromCharacter,
+  createBattleParticipantFromUnit,
+} from "@/lib/utils/battle/participant";
+import { reserveOf, toReserve } from "@/lib/utils/battle/participant/reserve";
+import type { BattleMutationContext, MutationResult } from "@/lib/utils/battle/pipeline/run-battle-mutation";
+import { BattleAccessError, BattleRuleError, dmEvent } from "@/lib/utils/battle/store";
+import { calculateInitiative, compareInitiative } from "@/lib/utils/battle/turn/initiative";
+import type { BattleParticipant, GridPoint } from "@/types/battle";
+
+export const addParticipantSchema = z.object({
+  sourceId: z.string(),
+  type: z.enum([ParticipantSourceType.CHARACTER, ParticipantSourceType.UNIT]),
+  side: z.enum([ParticipantSide.ALLY, ParticipantSide.ENEMY]),
+  quantity: z.number().int().min(UNIT_QUANTITY.min).max(UNIT_QUANTITY.max).optional().default(1),
+  reserved: z.boolean().optional(),
+  position: mapCellSchema.optional(),
+});
+
+export type AddParticipantBody = z.infer<typeof addParticipantSchema>;
+
+type CharacterRow = Parameters<typeof createBattleParticipantFromCharacter>[0] & { campaignId: string };
+
+type UnitRow = Parameters<typeof createBattleParticipantFromUnit>[0] & { campaignId: string };
+
+export interface AddParticipantDeps {
+  loadCharacter(id: string): Promise<CharacterRow | null>;
+  loadUnit(id: string): Promise<UnitRow | null>;
+  fromCharacter: typeof createBattleParticipantFromCharacter;
+  fromUnit: typeof createBattleParticipantFromUnit;
+}
+
+const defaultDeps: AddParticipantDeps = {
+  loadCharacter: (id) =>
+    prisma.character.findUnique({
+      where: { id },
+      include: { inventory: true },
+    }) as Promise<CharacterRow | null>,
+  loadUnit: (id) => prisma.unit.findUnique({ where: { id } }) as Promise<UnitRow | null>,
+  fromCharacter: createBattleParticipantFromCharacter,
+  fromUnit: createBattleParticipantFromUnit,
+};
+
+/** A unit added mid-battle copies the multipliers of a same-source enemy on the field or in the reserve; none there means ×1. */
+function matchScaling(fresh: BattleParticipant, twin: BattleParticipant): BattleParticipant {
+  const { hpMultiplier, damageMultiplier } = twin.battleData;
+
+  if (hpMultiplier === undefined && damageMultiplier === undefined) return fresh;
+
+  const maxHp = Math.max(1, Math.round(fresh.combatStats.maxHp * (hpMultiplier ?? 1)));
+
+  return {
+    ...fresh,
+    combatStats: { ...fresh.combatStats, maxHp, currentHp: maxHp },
+    battleData: { ...fresh.battleData, hpMultiplier, damageMultiplier },
+  };
+}
+
+function placeFirst(ctx: BattleMutationContext, first: BattleParticipant, to: GridPoint): BattleParticipant {
+  const map = ctx.meta.map;
+
+  if (!map) throw new BattleRuleError("action_rejected", API_ERRORS.BATTLE_NO_MAP);
+
+  const own = modePlaceOne(map, { participants: ctx.participants, mover: first, to });
+
+  if (own) return own;
+
+  if (!canStand(map, ctx.participants, first, to)) throw new BattleRuleError("action_rejected", API_ERRORS.BATTLE_CELL_BLOCKED);
+
+  return { ...first, battleData: { ...first.battleData, position: to } };
+}
+
+function enterMap(ctx: BattleMutationContext, added: BattleParticipant[], position: GridPoint | undefined): BattleParticipant[] {
+  return added.map((p, i) => {
+    const asleep = modeEnter(ctx.meta.map, p);
+
+    return i === 0 && position ? placeFirst(ctx, asleep, position) : asleep;
+  });
+}
+
+export function createAddParticipantMutation(deps: AddParticipantDeps = defaultDeps) {
+  return async (ctx: BattleMutationContext, data: AddParticipantBody): Promise<MutationResult> => {
+    const side = data.side;
+
+    const battleId = ctx.scene.id;
+
+    const added: BattleParticipant[] = [];
+
+    if (data.type === ParticipantSourceType.CHARACTER) {
+      const character = await deps.loadCharacter(data.sourceId);
+
+      if (!character || character.campaignId !== ctx.scene.campaignId) {
+        throw new BattleAccessError(404, API_ERRORS.CHARACTER_NOT_FOUND);
+      }
+
+      added.push(await deps.fromCharacter(character, battleId, side, undefined, undefined, { rules: ctx.meta.rules }));
+    } else {
+      const unit = await deps.loadUnit(data.sourceId);
+
+      if (!unit || unit.campaignId !== ctx.scene.campaignId) {
+        throw new BattleAccessError(404, API_ERRORS.BATTLE_UNIT_NOT_FOUND);
+      }
+
+      const twin = side === ParticipantSide.ENEMY ? [...ctx.participants, ...reserveOf(ctx.pending)].find((p) => p.basicInfo.sourceId === unit.id && p.basicInfo.side === ParticipantSide.ENEMY) : undefined;
+
+      for (let i = 0; i < (data.quantity ?? 1); i++) {
+        const fresh = await deps.fromUnit(unit, battleId, side, i + 1, undefined, ctx.meta.rules);
+
+        added.push(twin ? matchScaling(fresh, twin) : fresh);
+      }
+    }
+
+    if (data.reserved) {
+      return {
+        participants: ctx.participants,
+        pending: [...ctx.pending, ...added.map(toReserve)],
+        events: [],
+      };
+    }
+
+    const addedIds = new Set(added.map((p) => p.basicInfo.id));
+
+    const baked = applyBakedAuras([...ctx.participants, ...enterMap(ctx, added, data.position)], addedIds);
+
+    let order = baked.slice(0, ctx.participants.length);
+
+    let turnIndex = ctx.scene.turnIndex;
+
+    for (const newcomer of baked.slice(ctx.participants.length)) {
+      const initiative = calculateInitiative(newcomer, [...order, newcomer]);
+
+      const p = { ...newcomer, abilities: { ...newcomer.abilities, initiative } };
+
+      const current = order[turnIndex];
+
+      let at: number;
+
+      if (current && compareInitiative(p, current) < 0) {
+        // місце в цьому раунді вже минуло: поточний лишається поточним, новачок ходить з наступного раунду
+        at = order.findIndex((other) => compareInitiative(p, other) < 0);
+        turnIndex++;
+      } else {
+        // порядок після розкриттів не монотонний: шукаємо лише серед тих, хто ще має ходити (після щойно введених)
+        let afterRun = turnIndex + 1;
+
+        while (order[afterRun]?.battleData.revealPending) afterRun++;
+
+        const next = order.findIndex((other, i) => i >= afterRun && compareInitiative(p, other) < 0);
+
+        at = next === -1 ? order.length : next;
+      }
+
+      order = [...order.slice(0, at), p, ...order.slice(at)];
+    }
+
+    return {
+      participants: order,
+      pending: ctx.pending,
+      ...(turnIndex !== ctx.scene.turnIndex && { scene: { turnIndex } }),
+      events: [dmEvent(ctx.scene.round, `DM додав на поле: ${added.map((p) => p.basicInfo.name).join(", ")}`, added.map((p) => ({ participantId: p.basicInfo.id, participantName: p.basicInfo.name })))],
+    };
+  };
+}

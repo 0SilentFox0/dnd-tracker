@@ -4,9 +4,10 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import { RACES } from "@/data/library/races";
 import { prisma } from "@/lib/db";
 import * as apiAuth from "@/lib/utils/api/api-auth";
+import { DEFAULT_RULES } from "@/lib/utils/rules";
 
 vi.mock("@/lib/utils/api/api-auth", () => ({ requireAuth: vi.fn(), requireCampaignAccess: vi.fn(), requireDM: vi.fn() }));
-vi.mock("@/app/api/campaigns/[id]/characters/resolve-character-owner", () => ({ resolveCharacterOwner: vi.fn(async () => ({ controlledBy: "owner" })) }));
+vi.mock("@/lib/server/characters/core/resolve-character-owner", () => ({ resolveCharacterOwner: vi.fn(async () => ({ controlledBy: "owner" })) }));
 vi.mock("@/lib/db", () => ({ prisma: { character: { create: vi.fn() }, characterInventory: { create: vi.fn() }, race: { findFirst: vi.fn() } } }));
 
 const create = async (level: number) => {
@@ -22,7 +23,7 @@ const slots = () => (vi.mocked(prisma.character.create).mock.calls[0][0].data as
 describe("створення персонажа: слоти за прогресією раси", () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    vi.mocked(apiAuth.requireDM).mockResolvedValue({ userId: "dm", isDM: true, campaign: { id: "camp" } } as never);
+    vi.mocked(apiAuth.requireDM).mockResolvedValue({ userId: "dm", isDM: true, campaign: { id: "camp", rules: DEFAULT_RULES } } as never);
     vi.mocked(prisma.character.create).mockImplementation((async (args: { data: object }) => ({ id: "c", ...args.data })) as never);
   });
 
@@ -42,3 +43,6 @@ describe("створення персонажа: слоти за прогрес�
     expect(slots()).toEqual({ "1": { max: 2, current: 2 } });
   });
 });
+
+// Domain assertions keep their DB doubles; real shared locking is covered by storage integration.
+vi.mock("@/lib/server/content/write", () => ({ withCampaignContentWrite: async (_id: string, fn: (tx: unknown) => unknown) => fn({ $queryRaw: async () => [], $executeRaw: async () => 1 }) }));

@@ -1,13 +1,14 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
-import { useQueryClient } from "@tanstack/react-query";
+import { hashKey, useQueryClient } from "@tanstack/react-query";
 
 import { scenarioKeys } from "./keys";
 
 import { ApiError } from "@/lib/api/client";
 import { getScenarioPage, saveScenarioContent } from "@/lib/api/scenario";
 import { SCENARIO_AUTOSAVE_MS } from "@/lib/constants/scenario";
+import { registerAssistantBeforeApply } from "@/lib/hooks/ai/useAssistantEffects";
 import { useOptionalNotify } from "@/lib/hooks/common";
 import type { ScenarioContent, ScenarioPage } from "@/types/scenario";
 
@@ -41,6 +42,14 @@ export function useScenarioDraft(campaignId: string, page: ScenarioPage) {
 
     try {
       const { version } = await saveScenarioContent(campaignId, page.id, { expectedVersion: r.version, content: sent });
+
+      const current = queryClient.getQueryData<ScenarioPage>(scenarioKeys.page(campaignId, page.id));
+
+      if (current && current.version > version) {
+        r.conflict = true; r.dirty = true; setState("conflict");
+
+        return;
+      }
 
       r.version = version;
       queryClient.setQueryData<ScenarioPage>(scenarioKeys.page(campaignId, page.id), (old) => old && { ...old, content: sent, version });
@@ -101,13 +110,60 @@ export function useScenarioDraft(campaignId: string, page: ScenarioPage) {
   );
 
   const reload = useCallback(async () => {
-    const fresh = await getScenarioPage(campaignId, page.id);
+    const current = ref.current;
+
+    if (current.timer) clearTimeout(current.timer);
+
+    current.timer = null;
+    while (current.inFlight) await current.inFlight;
+
+    let fresh: ScenarioPage;
+
+    try { fresh = await getScenarioPage(campaignId, page.id); }
+    catch { setError({ message: "Не вдалося завантажити свіжу версію. Локальні правки лишаються у редакторі.", retryable: false });
+
+ return; }
 
     queryClient.setQueryData(scenarioKeys.page(campaignId, page.id), fresh);
     ref.current = { ...ref.current, content: fresh.content, version: fresh.version, dirty: false, conflict: false };
     setLocal(fresh.content);
     setError(null);
     setState("saved");
+  }, [campaignId, page.id, queryClient]);
+
+  const hasUnsavedChanges = useCallback(() => ref.current.dirty || !!ref.current.inFlight || ref.current.conflict, []);
+
+  const retainLocal = useCallback(() => { setError({ message: "Локальна чернетка лишається у відкритому редакторі. Автозбереження зупинено до явного перезавантаження.", retryable: false }); }, []);
+
+  useEffect(() => registerAssistantBeforeApply({ campaignId, domain: "scenario", id: page.id }, flush), [campaignId, page.id, flush]);
+  useEffect(() => {
+    const sync = () => {
+      const fresh = queryClient.getQueryData<ScenarioPage>(scenarioKeys.page(campaignId, page.id));
+
+      const r = ref.current;
+
+      if (!fresh || fresh.version <= r.version) return;
+
+      if (r.dirty || r.inFlight || r.conflict) {
+        r.conflict = true;
+
+        if (r.timer) clearTimeout(r.timer);
+
+        r.timer = null;
+        setState("conflict");
+      } else {
+        r.version = fresh.version; r.content = fresh.content;
+        setLocal(fresh.content); setState("saved");
+      }
+    };
+
+    sync();
+
+    const pageHash = hashKey(scenarioKeys.page(campaignId, page.id));
+
+    return queryClient.getQueryCache().subscribe(event => {
+      if (event.query.queryHash === pageHash) sync();
+    });
   }, [campaignId, page.id, queryClient]);
 
   useEffect(() => {
@@ -123,5 +179,5 @@ export function useScenarioDraft(campaignId: string, page: ScenarioPage) {
     };
   }, [flush]);
 
-  return { content, setContent, state, error, flush, reload };
+  return { content, setContent, state, error, flush, reload, retainLocal, hasUnsavedChanges };
 }

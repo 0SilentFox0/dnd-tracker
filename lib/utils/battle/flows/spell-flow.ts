@@ -1,76 +1,16 @@
-import { spellLevelRoman } from "@/lib/constants/spells";
-import { footprintDistance } from "@/lib/utils/battle/grid/geometry";
-import { cellsOf, isOnMap } from "@/lib/utils/battle/grid/occupancy";
-import { areaRadiusCells, feetToCells, templateArea } from "@/lib/utils/battle/grid/template";
-import { modeTargetHiddenText } from "@/lib/utils/battle/modes/engine";
-import { isUp } from "@/lib/utils/battle/participant/state";
-import { casterSpellDice } from "@/lib/utils/battle/spell/caster-dice";
-import { spellNeedsSlot, spellSlotKey, spellSlotLeft } from "@/lib/utils/battle/spell/slot";
-import { type AimScene, SKILL_AREA_TEMPLATE, type SkillRadius, skillRadiusArea, type SpellChain, spellTargetingFor, spellWideningOf } from "@/lib/utils/battle/spell/spell-targeting";
+import type { SpellFlowAction, SpellFlowState, SpellPick } from "./spell-flow-types";
+
 import type { SpellCastData } from "@/types/api";
-import type { BattleMapConfig, BattleParticipant, GridPoint, SpellTemplate } from "@/types/battle";
-import type { BookSpell } from "@/types/spells";
 
-export type SpellTargetMode = "none" | "single" | "multi" | "all" | "template";
+export * from "./spell-costs";
+export * from "./spell-flow-types";
+export * from "./spell-pick";
 
-export interface SpellPick {
-  spellId: string;
-  level: number;
-  targetMode: SpellTargetMode;
-  /** кого можна обирати: союзник, ворог або полеглий союзник */
-  targetSide?: "ally" | "enemy" | "dead";
-  maxTargets?: number;
-  template?: SpellTemplate;
-  /** дальність у футах */
-  range?: number;
-  /** шаблон лишає зону: його можна поставити й без цілей */
-  zone?: boolean;
-  /** одиночне заклинання, розширене вмінням до кількох цілей: на карті — коло лише по своїй стороні */
-  skillRadius?: SkillRadius;
-  /** ланцюг на карті: гравець обирає першу ціль, решту рахує спільний spellChain */
-  chain?: SpellChain;
-  needsSaves: boolean;
-  diceSlots: number[];
-}
+export const initialSpellFlow: SpellFlowState = { step: "closed", level: 0, targetIds: [], saves: {}, attacks: {}, damage: [] };
 
-export interface SpellFlowState {
-  step: "closed" | "book" | "spell" | "targets" | "rolls" | "summary" | "submitting" | "result";
-  casterId?: string;
-  level: number;
-  levelPinned?: boolean;
-  pick?: SpellPick;
-  targetIds: string[];
-  aim?: GridPoint;
-  saves: Record<string, number>;
-  damage: (number | undefined)[];
-  error?: string;
-  /** сервер зупинив каст: ДМ обирає ефект крита */
-  waitingCrit?: boolean;
-}
+const selfCentered = (p: SpellPick | undefined) => p?.template?.shape === "emanation";
 
-export type SpellFlowAction =
-  | { type: "OPEN"; casterId: string; level: number; levels?: number[] }
-  | { type: "SPELLS_LOADED"; levels: number[] }
-  | { type: "SET_LEVEL"; level: number }
-  | { type: "PICK"; pick: SpellPick }
-  | { type: "TO_TARGETS" }
-  | { type: "TOGGLE_TARGET"; id: string }
-  | { type: "PICK_TARGET"; id: string }
-  | { type: "SET_AIM"; aim: GridPoint; targetIds: string[] }
-  | { type: "CONFIRM_TARGETS" }
-  | { type: "SET_SAVE"; id: string; value: number | undefined }
-  | { type: "SET_DAMAGE"; index: number; value: number | undefined }
-  | { type: "TO_SUMMARY" }
-  | { type: "BACK" }
-  | { type: "SUBMIT" }
-  | { type: "WAIT_CRIT" }
-  | { type: "SUCCESS" }
-  | { type: "FAIL"; error: string }
-  | { type: "CLOSE" };
-
-export const initialSpellFlow: SpellFlowState = { step: "closed", level: 0, targetIds: [], saves: {}, damage: [] };
-
-const needsRolls = (p: SpellPick) => p.needsSaves || p.diceSlots.length > 0;
+const needsRolls = (p: SpellPick) => p.needsSaves || !!p.needsAttackRolls || p.diceSlots.length > 0;
 
 export function rollsComplete(s: SpellFlowState): boolean {
   if (!s.pick) return false;
@@ -88,7 +28,7 @@ function previousStep(s: SpellFlowState): SpellFlowState["step"] | null {
 
   if (BACK_ORDER[i] === "rolls" && s.pick && !needsRolls(s.pick)) i -= 1;
 
-  if (BACK_ORDER[i] === "targets" && (s.pick?.targetMode === "none" || s.pick?.targetMode === "all")) i -= 1;
+  if (BACK_ORDER[i] === "targets" && (s.pick?.targetMode === "none" || s.pick?.targetMode === "all" || selfCentered(s.pick))) i -= 1;
 
   return i >= 0 ? BACK_ORDER[i] : null;
 }
@@ -98,20 +38,48 @@ export const canGoBack = (s: SpellFlowState): boolean => previousStep(s) !== nul
 const firstLevelWithSpells = (current: number, levels: number[]): number =>
   levels.length === 0 || levels.includes(current) ? current : Math.min(...levels);
 
+function reconcileSpellPick(s: SpellFlowState, pick: SpellPick, patch: Partial<SpellFlowState>): SpellFlowState {
+  const sameDice = s.pick?.diceSlots.length === pick.diceSlots.length && s.pick.diceSlots.every((d, i) => d === pick.diceSlots[i]);
+
+  const targetIds = pick.maxTargets === undefined ? s.targetIds : s.targetIds.slice(0, pick.maxTargets);
+
+  const kept = <T,>(rolls: Record<string, T>) => Object.fromEntries(Object.entries(rolls).filter(([id]) => targetIds.includes(id)));
+
+  const next: SpellFlowState = { ...s, ...patch, pick, targetIds, saves: kept(s.saves), attacks: kept(s.attacks), damage: sameDice ? s.damage : pick.diceSlots.map(() => undefined), error: undefined };
+
+  return next.step === "summary" && !rollsComplete(next) ? { ...next, step: "rolls" } : next;
+}
+
 export function spellFlow(s: SpellFlowState, a: SpellFlowAction): SpellFlowState {
   switch (a.type) {
     case "OPEN":
+
       return { ...initialSpellFlow, step: "book", casterId: a.casterId, level: firstLevelWithSpells(a.level, a.levels ?? []) };
     case "SPELLS_LOADED":
+
       return s.step !== "book" || s.levelPinned ? s : { ...s, level: firstLevelWithSpells(s.level, a.levels) };
     case "SET_LEVEL":
+
       return { ...initialSpellFlow, step: "book", casterId: s.casterId, level: a.level, levelPinned: true };
     case "PICK":
-      return { ...s, step: "spell", pick: a.pick, targetIds: [], aim: undefined, saves: {}, damage: a.pick.diceSlots.map(() => undefined), error: undefined };
+
+      return { ...s, step: "spell", pick: a.pick, slotKey: a.slotKey, grantKey: a.grantKey, castLevel: a.castLevel, targetIds: [], aim: undefined, saves: {}, attacks: {}, damage: a.pick.diceSlots.map(() => undefined), error: undefined };
+    case "SET_SLOT":
+      return reconcileSpellPick(s, a.pick, { slotKey: a.slotKey, grantKey: undefined, castLevel: undefined });
+    case "SET_GRANT":
+      return reconcileSpellPick(s, a.pick, { grantKey: a.grantKey, castLevel: a.castLevel, slotKey: undefined });
+    case "SET_CAST_LEVEL":
+      return reconcileSpellPick(s, a.pick, { castLevel: a.castLevel });
+    case "SET_ATTACK": {
+      const { [a.id]: _cleared, ...rest } = s.attacks;
+
+      return { ...s, attacks: a.value === undefined ? rest : { ...rest, [a.id]: a.value } };
+    }
     case "TO_TARGETS":
+
       if (!s.pick) return s;
 
-      return s.pick.targetMode === "none" || s.pick.targetMode === "all" ? afterTargets(s) : { ...s, step: "targets" };
+      return s.pick.targetMode === "none" || s.pick.targetMode === "all" || selfCentered(s.pick) ? afterTargets(s) : { ...s, step: "targets" };
     case "TOGGLE_TARGET": {
       if (s.pick?.targetMode === "single") return { ...s, targetIds: [a.id], saves: {} };
 
@@ -140,6 +108,7 @@ export function spellFlow(s: SpellFlowState, a: SpellFlowAction): SpellFlowState
       return { ...s, aim: a.aim, targetIds: a.targetIds, saves };
     }
     case "CONFIRM_TARGETS":
+
       if (s.step !== "targets") return s;
 
       if (s.pick?.targetMode === "template") return s.aim ? afterTargets(s) : s;
@@ -151,8 +120,10 @@ export function spellFlow(s: SpellFlowState, a: SpellFlowAction): SpellFlowState
       return { ...s, saves: a.value === undefined ? rest : { ...rest, [a.id]: a.value } };
     }
     case "SET_DAMAGE":
+
       return { ...s, damage: s.damage.map((v, i) => (i === a.index ? a.value : v)) };
     case "TO_SUMMARY":
+
       return rollsComplete(s) ? { ...s, step: "summary", error: undefined } : s;
     case "BACK": {
       const prev = previousStep(s);
@@ -160,14 +131,18 @@ export function spellFlow(s: SpellFlowState, a: SpellFlowAction): SpellFlowState
       return prev ? { ...s, step: prev, error: undefined } : s;
     }
     case "SUBMIT":
+
       return s.step === "summary" ? { ...s, step: "submitting", error: undefined } : s;
     case "WAIT_CRIT":
       return s.step === "submitting" ? { ...s, waitingCrit: true } : s;
     case "SUCCESS":
+
       return { ...s, step: "result", waitingCrit: false };
     case "FAIL":
+
       return { ...s, step: "summary", error: a.error, waitingCrit: false };
     case "CLOSE":
+
       return initialSpellFlow;
   }
 }
@@ -180,7 +155,7 @@ function withTargets(s: SpellFlowState, ids: string[]): SpellFlowState {
 
 /** Шаблон: цілі — ті, кого точка зачіпає зараз; рух після наведення змінює список, тож підказки й каст беруть живий. */
 export function withLiveAimTargets(s: SpellFlowState, liveIds: string[]): SpellFlowState {
-  return s.pick?.targetMode === "template" && s.aim ? withTargets(s, liveIds) : s;
+  return s.pick?.targetMode === "template" && (s.aim || selfCentered(s.pick)) ? withTargets(s, liveIds) : s;
 }
 
 /** «all»: цілі не обирають — уся сторона заклинання зараз, тож рятунки й підсумок бачать живий список. */
@@ -196,152 +171,18 @@ export function withChainTargets(s: SpellFlowState, chainIds: string[]): SpellFl
 export function spellPayload(s: SpellFlowState): SpellCastData {
   const saves = Object.entries(s.saves).map(([participantId, roll]) => ({ participantId, roll }));
 
+  const attacks = s.pick?.needsAttackRolls ? Object.entries(s.attacks).filter(([id]) => s.targetIds.includes(id)).map(([participantId, roll]) => ({ participantId, roll })) : [];
+
   return {
     casterId: s.casterId as string,
     spellId: s.pick?.spellId as string,
     targetIds: s.pick?.targetMode === "none" ? [] : s.pick?.chain ? s.targetIds.slice(0, 1) : s.targetIds,
-    ...(s.pick?.targetMode === "template" && s.aim && { targetCell: s.aim }),
+    ...(s.pick?.targetMode === "template" && !selfCentered(s.pick) && s.aim && { targetCell: s.aim }),
     diceRolls: s.damage.filter((v): v is number => typeof v === "number"),
     ...(saves.length > 0 && { saveRolls: saves }),
+    ...(attacks.length > 0 && { attackRolls: attacks }),
+    ...(s.slotKey && { slotKey: s.slotKey }),
+    ...(s.grantKey && { grantKey: s.grantKey }),
+    ...(s.castLevel !== undefined && { castLevel: s.castLevel }),
   };
-}
-
-export const spellDefinition = (s: BookSpell) => ({
-  dice: s.dice ?? 0,
-  cost: s.cost ?? "action",
-  targeting: s.targeting ?? ({ kind: "enemy" } as const),
-  resolution: s.resolution ?? ({ kind: "auto" } as const),
-});
-
-export const spellSpec = (s: BookSpell) => ({ id: s.id, groupId: s.spellGroup?.id ?? null, level: s.level });
-
-export function spellTargetSide(s: BookSpell | null): SpellPick["targetSide"] {
-  const t = s ? spellDefinition(s).targeting : null;
-
-  if (!t) return undefined;
-
-  if (t.kind === "allyDead") return "dead";
-
-  if (t.kind === "ally" || t.kind === "enemy") return t.kind;
-
-  return t.kind === "area" || t.kind === "template" ? t.side : undefined;
-}
-
-const AUTO_TARGETING = ["self", "allAllies", "allAlliesDead", "allEnemies", "everyone"];
-
-export function buildSpellPick(order: BattleParticipant[], caster: BattleParticipant | null, s: BookSpell, map: BattleMapConfig | null = null): SpellPick {
-  const def = spellDefinition(s);
-
-  const { targeting } = def;
-
-  const onMap = !!map && !!caster && isOnMap(caster);
-
-  const skill = caster && (targeting.kind === "ally" || targeting.kind === "enemy") ? spellTargetingFor(order, caster.basicInfo.id, spellSpec(s)) : { mode: "single" as const, maxTargets: 1 };
-
-  const skillRadius: SkillRadius | undefined =
-    onMap && skill.mode === "area" && (targeting.kind === "ally" || targeting.kind === "enemy") ? { side: targeting.kind, maxTargets: skill.maxTargets } : undefined;
-
-  const chain: SpellChain | undefined = onMap && targeting.kind === "area" && targeting.chain ? { side: targeting.side, maxTargets: targeting.maxTargets } : undefined;
-
-  const template = targeting.kind === "template" && onMap ? { shape: targeting.shape, size: targeting.size, ...(targeting.hollow && { hollow: true }) } : skillRadius && SKILL_AREA_TEMPLATE;
-
-  const isMulti = !chain && (targeting.kind === "area" || targeting.kind === "template");
-
-  const auto = AUTO_TARGETING.includes(targeting.kind);
-
-  const targetMode: SpellPick["targetMode"] = template ? "template" : auto ? "none" : isMulti ? "multi" : skill.mode === "all" ? "all" : skill.mode === "area" ? "multi" : "single";
-
-  const maxTargets = template ? undefined : isMulti ? targeting.maxTargets : skill.mode === "area" ? skill.maxTargets : undefined;
-
-  const range = "range" in targeting ? targeting.range : undefined;
-
-  const dice = caster ? casterSpellDice(caster, { dice: def.dice, groupId: s.spellGroup?.id ?? null }) : { count: def.dice, sides: 6 };
-
-  return {
-    spellId: s.id,
-    level: s.level,
-    targetMode,
-    targetSide: spellTargetSide(s),
-    maxTargets,
-    ...(template && { template }),
-    ...(template && targeting.kind === "template" && targeting.zone && { zone: true }),
-    ...(skillRadius && { skillRadius }),
-    ...(chain && { chain }),
-    ...(range !== undefined && { range }),
-    needsSaves: def.resolution.kind === "save" && !auto,
-    diceSlots: Array.from({ length: dice.count }, () => dice.sides),
-  };
-}
-
-/** Кого зачіпає наведення в точці: та сама функція, що й на сервері. */
-export function spellAimTargets(scene: AimScene, pick: SpellPick, aim: GridPoint): BattleParticipant[] {
-  if (pick.skillRadius) return skillRadiusArea(scene, pick.skillRadius, aim).targets;
-
-  return pick.template ? templateArea(scene.map, scene.participants, scene.caster, pick.template, aim).targets : [];
-}
-
-export function spellTargetCandidates(order: BattleParticipant[], caster: BattleParticipant | null, side: SpellPick["targetSide"]): BattleParticipant[] {
-  return order.filter((p) => {
-    if (!side || !caster) return isUp(p);
-
-    const mine = p.basicInfo.side === caster.basicInfo.side;
-
-    return side === "dead" ? mine && !isUp(p) : isUp(p) && (side === "ally" ? mine : !mine);
-  });
-}
-
-/** Дзеркалить серверну перевірку: поза картою чи без дальності обмеження немає. */
-export function spellTargetInRange(map: BattleMapConfig | null, caster: BattleParticipant | null, target: BattleParticipant, range: number | undefined): boolean {
-  if (!map || !caster || !isOnMap(caster) || target.battleData.position === undefined) return true;
-
-  const inRange = range === undefined || footprintDistance(cellsOf(caster), cellsOf(target)) <= feetToCells(range);
-
-  return inRange && !modeTargetHiddenText(map, caster, [target]);
-}
-
-export function spellSaveTargets(targets: BattleParticipant[], s: SpellFlowState, viewer: { isDM: boolean; userId: string | null }): BattleParticipant[] {
-  if (!s.pick?.needsSaves) return [];
-
-  return targets.filter((t) => s.targetIds.includes(t.basicInfo.id) && (viewer.isDM || t.basicInfo.controlledBy === viewer.userId));
-}
-
-/** Скільки разів ще можна кастувати коло; кантрипи та вільний каст DM безлімітні. */
-export function spellSlotsLeft(caster: BattleParticipant | null, level: number, free: boolean): number {
-  return !spellNeedsSlot(level) || !caster || free ? Infinity : spellSlotLeft(caster, level);
-}
-
-export const casterUsesUniversalSlot = (caster: BattleParticipant | null): boolean => !!caster && spellSlotKey(caster, 1) === "universal";
-
-export function spellSlotCostLabel(spell: BookSpell, opts: { free: boolean; universal: boolean }): string | null {
-  if (!spellNeedsSlot(spell.level)) return null;
-
-  if (opts.free) return "Вільний каст DM — слот не витрачається.";
-
-  return opts.universal ? "Витратить універсальний слот." : `Витратить слот ${spellLevelRoman(spell.level)} кола.`;
-}
-
-export interface SpellWidening {
-  /** коротко для рядка списку */
-  badge: string;
-  /** повністю для деталей заклинання */
-  note: string;
-}
-
-const ALL_OF_SIDE = { enemy: "усі вороги", ally: "усі союзники" } as const;
-
-/** Одиночне заклинання, яке вміння заклинателя б'є по кількох цілях, — з назвою вміння. */
-export function spellWidening(order: BattleParticipant[], caster: BattleParticipant | null, s: BookSpell, onMap: boolean): SpellWidening | null {
-  const { targeting } = spellDefinition(s);
-
-  if (!caster || (targeting.kind !== "ally" && targeting.kind !== "enemy")) return null;
-
-  const w = spellWideningOf(order, caster.basicInfo.id, spellSpec(s));
-
-  if (w.mode === "single") return null;
-
-  const badge = w.mode === "all" ? ALL_OF_SIDE[targeting.kind] : `до ${w.maxTargets} цілей`;
-
-  const side = 2 * areaRadiusCells(SKILL_AREA_TEMPLATE.size) + 1;
-
-  return { badge, note: `${w.source ?? "Вміння"}: ${badge}${onMap && w.mode === "area" ? ` (на карті — зона ${side}×${side})` : ""}` };
 }

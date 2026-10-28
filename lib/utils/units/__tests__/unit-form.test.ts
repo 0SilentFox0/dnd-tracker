@@ -6,6 +6,11 @@ import type { Unit } from "@/types/units";
 const unit = { id: "u1", name: "Гоблін", raceId: "r1", knownSpells: ["s1"], attacks: null, avatar: "https://x/a.png" } as unknown as Unit;
 
 describe("unit form", () => {
+  it("preserves monster statblock and grants through editing", () => {
+    const monster = { ...unit, cr: 3, statblock: { creatureType: "dragon", senses: { blindsight: 60 } }, spellcasting: { dc: 17, spells: [{ spellId: "breath", perBattle: 1, recharge: 5 as const }] } };
+
+    expect(buildUnitUpdatePayload(buildUnitFormData(monster), monster)).toMatchObject({ statblock: monster.statblock, spellcasting: monster.spellcasting });
+  });
   it("бере raceId юніта й нормалізує масиви", () => {
     const f = buildUnitFormData(unit);
 

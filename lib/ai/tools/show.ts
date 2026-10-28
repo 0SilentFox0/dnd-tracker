@@ -17,6 +17,7 @@ export async function showSummary(campaignId: string): Promise<string | null> {
 
 export const getShowStateTool = defineTool({
   name: "get_show_state",
+  scopes: ["ai"],
   title: "Поточний показ",
   description: "What the players currently see on the show screen: deck, slide title and caption, battle call.",
   input: z.object({}),

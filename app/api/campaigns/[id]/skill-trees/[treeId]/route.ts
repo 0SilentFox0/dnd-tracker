@@ -1,28 +1,11 @@
 import { NextResponse } from "next/server";
-import { z } from "zod";
 
-import { saveSkillTree } from "./save-skill-tree-handler";
+import { CONTENT_OPERATIONS } from "@/lib/server/content/operations";
+import { saveSkillTree } from "@/lib/server/skills/skill-tree-service";
+import { operationRoute } from "@/lib/utils/api/content-routes";
 
-import { requireDM } from "@/lib/utils/api/api-auth";
-import { handleApiError } from "@/lib/utils/api/error-handler";
-import { parseBody } from "@/lib/utils/api/parse-body";
+export const PATCH = operationRoute(CONTENT_OPERATIONS["skill-trees.save"], async ({ actor, params, body }) => {
+  const saved = await saveSkillTree(actor, { treeId: params.treeId, race: body.race, skills: body.skills });
 
-const bodySchema = z.object({ race: z.string().min(1), skills: z.object({ mainSkills: z.array(z.object({ id: z.string() }).passthrough()) }).passthrough() });
-
-export async function PATCH(request: Request, { params }: { params: Promise<{ id: string; treeId: string }> }) {
-  try {
-    const { id, treeId } = await params;
-
-    const access = await requireDM(id);
-
-    if (access instanceof NextResponse) return access;
-
-    const parsed = await parseBody(bodySchema, request, "Невалідне дерево");
-
-    if (parsed instanceof NextResponse) return parsed;
-
-    return await saveSkillTree(id, treeId, parsed.race, parsed.skills);
-  } catch (error) {
-    return handleApiError(error, { action: "update skill tree" });
-  }
-}
+  return NextResponse.json({ id: saved.id, race: saved.race, skills: saved.skills });
+});

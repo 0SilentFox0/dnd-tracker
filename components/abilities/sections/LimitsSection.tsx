@@ -1,11 +1,18 @@
 "use client";
 
 import type { AbilitySectionProps } from "../AbilityPanel";
+import { useAbilityEditor } from "../editor-context";
 import { FieldRenderer } from "../fields/FieldRenderer";
+import { FlatField } from "../fields/FlatField";
+import { ScaleColumnSelect } from "../fields/ScaleColumnSelect";
 import { SectionTitle } from "./SectionTitle";
 
+import { Checkbox } from "@/components/ui/checkbox";
+import { Input } from "@/components/ui/input";
 import type { FieldMeta } from "@/lib/utils/abilities/registry/fields";
 import type { Limits } from "@/lib/utils/abilities/schema";
+import { patchDefined } from "@/lib/utils/common/patch-defined";
+import { ITEM_CHARGES_KEY } from "@/lib/utils/items/pools";
 
 const LIMIT_FIELDS: readonly FieldMeta[] = [
   { name: "perBattle", label: "Разів за бій", input: "number", optional: true },
@@ -15,7 +22,14 @@ const LIMIT_FIELDS: readonly FieldMeta[] = [
   { name: "chance", label: "Шанс, %", input: "number", optional: true },
 ];
 
+const REST_OPTIONS = [
+  { value: "short", label: "Короткий" },
+  { value: "long", label: "Довгий" },
+];
+
 export function LimitsSection({ ability, path, onChange }: AbilitySectionProps) {
+  const { classColumns: columns, itemCharges } = useAbilityEditor();
+
   if (ability.trigger.event === "passive") {
     return (
       <div className="space-y-1">
@@ -28,9 +42,7 @@ export function LimitsSection({ ability, path, onChange }: AbilitySectionProps) 
   const isButton = ability.trigger.event === "bonusAction" || ability.trigger.event === "action";
 
   const setTop = (name: "stackable" | "maxStacks" | "maxTargets", v: unknown) => {
-    const next = { ...ability, [name]: v } as typeof ability;
-
-    if (v === undefined || v === false) delete next[name];
+    const next = patchDefined(ability, { [name]: v } as Partial<typeof ability>, (x) => x === undefined || x === false);
 
     if (name === "stackable" && v !== true) delete next.maxStacks;
 
@@ -38,13 +50,27 @@ export function LimitsSection({ ability, path, onChange }: AbilitySectionProps) 
   };
 
   const set = (name: keyof Limits, v: unknown) => {
-    const next: Limits = { ...ability.limits, [name]: v };
+    const next: Limits = patchDefined(ability.limits ?? {}, { [name]: v } as Partial<Limits>);
 
-    if (v === undefined) delete next[name];
+    if (name === "lair" && v) delete next.legendaryCost;
+
+    if (name === "legendaryCost" && v) delete next.lair;
 
     const { limits: _l, ...rest } = ability;
 
     onChange(Object.keys(next).length ? { ...rest, limits: next } : rest);
+  };
+
+  const setRest = (patch: { rest?: string; uses?: NonNullable<Limits["perRest"]>["uses"] }) => {
+    const current = ability.limits?.perRest;
+
+    const rest = "rest" in patch ? patch.rest : (current?.rest ?? "long");
+
+    const uses = "uses" in patch ? patch.uses : (current?.uses ?? 1);
+
+    const clearing = "rest" in patch ? !patch.rest : "uses" in patch && patch.uses === undefined;
+
+    set("perRest", clearing ? undefined : { rest, uses });
   };
 
   return (
@@ -54,7 +80,37 @@ export function LimitsSection({ ability, path, onChange }: AbilitySectionProps) 
         {LIMIT_FIELDS.map((f) => (
           <FieldRenderer key={f.name} meta={f} path={`${path}.limits.${f.name}`} value={ability.limits?.[f.name as keyof Limits]} onChange={(v) => set(f.name as keyof Limits, v)} />
         ))}
+        <FieldRenderer meta={{ name: "perRestKind", label: "Відпочинок", input: "select", options: REST_OPTIONS, optional: true }} path={`${path}.limits.perRest.rest`} value={ability.limits?.perRest?.rest} onChange={(v) => setRest({ rest: v as string | undefined })} />
+        {columns ? (
+          <div className="col-span-3 space-y-1">
+            <span className="text-xs text-muted-foreground">Разів за відпочинок</span>
+            <FlatField id={`${path}.limits.perRest.uses`} meta={{ name: "perRestUses", label: "Разів", input: "flat", optional: true }} value={ability.limits?.perRest?.uses as never} onChange={(v) => setRest({ uses: v as never })} />
+          </div>
+        ) : (
+          <FieldRenderer meta={{ name: "perRestUses", label: "Разів", input: "number", optional: true }} path={`${path}.limits.perRest.uses`} value={ability.limits?.perRest?.uses as number | undefined} onChange={(v) => setRest({ uses: v as number | undefined })} />
+        )}
+        {columns && isButton && (
+          <div className="col-span-3 space-y-1">
+            <span className="text-xs text-muted-foreground">Пул (колонка, ціна)</span>
+            <div className="flex gap-1">
+              <ScaleColumnSelect id={`${path}.limits.pool.key`} poolsOnly value={ability.limits?.pool?.key} onChange={(key) => set("pool", { key, cost: ability.limits?.pool?.cost ?? 1 })} />
+              <Input aria-label="Ціна пулу" type="number" min={1} max={20} className="w-16" value={ability.limits?.pool?.cost ?? ""} onChange={(e) => set("pool", e.target.value === "" ? undefined : { key: ability.limits?.pool?.key ?? "", cost: Number(e.target.value) })} />
+            </div>
+          </div>
+        )}
+        {itemCharges && !columns && isButton && (
+          <div className="col-span-3 space-y-1">
+            <label className="flex items-center gap-2 text-xs text-muted-foreground">
+              <Checkbox aria-label="Витрачає заряди предмета" checked={ability.limits?.pool?.key === ITEM_CHARGES_KEY} onCheckedChange={(on) => set("pool", on === true ? { key: ITEM_CHARGES_KEY, cost: ability.limits?.pool?.cost ?? 1 } : undefined)} />
+              Витрачає заряди предмета
+            </label>
+            {ability.limits?.pool?.key === ITEM_CHARGES_KEY && (
+              <Input aria-label="Зарядів за раз" type="number" min={1} max={20} className="w-16" value={ability.limits.pool.cost} onChange={(e) => set("pool", { key: ITEM_CHARGES_KEY, cost: Math.max(1, Number(e.target.value) || 1) })} />
+            )}
+          </div>
+        )}
       </div>
+      {ability.trigger.event === "action" && <label className="flex items-center gap-2 text-xs text-muted-foreground"><Checkbox aria-label="Дія лігва" checked={!!ability.limits?.lair} onCheckedChange={(on) => set("lair", on === true ? true : undefined)} />Дія лігва</label>}
       <div className="grid grid-cols-6 items-end gap-2 [&>*]:min-w-0">
         <FieldRenderer meta={{ name: "stackable", label: "Ефекти складаються", input: "toggle", optional: true }} path={`${path}.stackable`} value={ability.stackable} onChange={(v) => setTop("stackable", v)} />
         {ability.stackable && (
@@ -62,6 +118,9 @@ export function LimitsSection({ ability, path, onChange }: AbilitySectionProps) 
         )}
         {isButton && (
           <FieldRenderer meta={{ name: "maxTargets", label: "Макс. цілей", input: "number", optional: true }} path={`${path}.maxTargets`} value={ability.maxTargets} onChange={(v) => setTop("maxTargets", v)} />
+        )}
+        {ability.trigger.event === "action" && (
+          <FieldRenderer meta={{ name: "legendaryCost", label: "Легендарна дія (вартість 1–3)", input: "number", optional: true }} path={`${path}.limits.legendaryCost`} value={ability.limits?.legendaryCost} onChange={(v) => set("legendaryCost", v)} />
         )}
       </div>
     </div>

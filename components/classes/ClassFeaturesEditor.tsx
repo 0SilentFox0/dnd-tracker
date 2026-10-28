@@ -1,0 +1,98 @@
+"use client";
+
+import { useState } from "react";
+import { Plus, Trash2 } from "lucide-react";
+
+import { AbilityListEditor } from "@/components/abilities";
+import { ChoiceListEditor } from "@/components/choices/ChoiceListEditor";
+import { HUD_SELECT_CLASS, HudSection } from "@/components/hud/form";
+import { Button } from "@/components/ui/button";
+import { MAX_CLASS_LEVEL } from "@/lib/constants/classes";
+import { useErrorTotals } from "@/lib/hooks/common";
+import type { Ability } from "@/types/abilities";
+import type { Choice } from "@/types/choices";
+import type { ClassColumn, ClassFeature } from "@/types/classes";
+
+interface ClassFeaturesEditorProps {
+  campaignId: string;
+  value: ClassFeature[];
+  onChange: (next: ClassFeature[]) => void;
+  onValidityChange?: (ok: boolean, errorCount: number) => void;
+  classColumns?: readonly ClassColumn[];
+}
+
+export function ClassFeaturesEditor({ campaignId, value, onChange, onValidityChange, classColumns }: ClassFeaturesEditorProps) {
+  const { report, drop } = useErrorTotals(onValidityChange);
+
+  const used = new Set(value.map((f) => f.level));
+
+  const free = Array.from({ length: MAX_CLASS_LEVEL }, (_, i) => i + 1).filter((l) => !used.has(l));
+
+  const [picked, setPicked] = useState<number | null>(null);
+
+  const next = picked !== null && free.includes(picked) ? picked : (free[0] ?? null);
+
+  const sorted = [...value].sort((a, b) => a.level - b.level);
+
+  const add = () => {
+    if (next === null) return;
+
+    onChange([...value, { level: next, abilities: [] }].sort((a, b) => a.level - b.level));
+    setPicked(null);
+  };
+
+  const remove = (level: number) => {
+    drop(String(level));
+    drop(`choices-${level}`);
+    onChange(value.filter((f) => f.level !== level));
+  };
+
+  const setAbilities = (level: number, abilities: Ability[]) => onChange(value.map((f) => (f.level === level ? { ...f, abilities } : f)));
+
+  const setChoices = (level: number, choices: Choice[]) =>
+    onChange(value.map((f) => (f.level !== level ? f : choices.length > 0 ? { ...f, choices } : { level: f.level, abilities: f.abilities })));
+
+  return (
+    <div className="space-y-4">
+      {sorted.map((feature) => (
+        <HudSection
+          key={feature.level}
+          title={`Рівень ${feature.level}`}
+          action={
+            <Button type="button" variant="ghost" size="sm" aria-label={`Видалити рівень ${feature.level}`} onClick={() => remove(feature.level)}>
+              <Trash2 className="h-4 w-4" />
+            </Button>
+          }
+        >
+          <AbilityListEditor
+            campaignId={campaignId}
+            value={feature.abilities}
+            onChange={(abilities) => setAbilities(feature.level, abilities)}
+            onValidityChange={(_, n) => report(String(feature.level), n)}
+            classColumns={classColumns}
+          />
+          <div className="mt-3 space-y-2">
+            <p className="hud-sc text-xs text-hud-muted">Вибори</p>
+            <ChoiceListEditor campaignId={campaignId} owner="class" value={feature.choices ?? []} onChange={(choices) => setChoices(feature.level, choices)} classColumns={classColumns} onValidityChange={(_, n) => report(`choices-${feature.level}`, n)} />
+          </div>
+        </HudSection>
+      ))}
+
+      {free.length > 0 && (
+        <div className="flex flex-wrap items-center gap-2">
+          <select aria-label="Рівень для додавання" className={HUD_SELECT_CLASS} value={next ?? ""} onChange={(e) => setPicked(Number(e.target.value))}>
+            {free.map((l) => (
+              <option key={l} value={l}>
+                {l}
+              </option>
+            ))}
+          </select>
+          <Button type="button" variant="outline" size="sm" onClick={add}>
+            <Plus className="h-4 w-4" />
+            Додати рівень
+          </Button>
+        </div>
+      )}
+    </div>
+  );
+}

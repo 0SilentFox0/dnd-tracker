@@ -1,5 +1,6 @@
 import "server-only";
 import { prisma } from "@/lib/db";
+import { withCampaignContentWrite } from "@/lib/server/content/write";
 import type { AiSettings } from "@/types/ai";
 
 export async function getAiSettings(campaignId: string): Promise<AiSettings> {
@@ -9,7 +10,9 @@ export async function getAiSettings(campaignId: string): Promise<AiSettings> {
 }
 
 export async function saveAiSettings(campaignId: string, instructions: string | null): Promise<AiSettings> {
-  const row = await prisma.campaign.update({ where: { id: campaignId }, data: { aiInstructions: instructions }, select: { aiInstructions: true } });
+  return withCampaignContentWrite(campaignId, async () => {
+    const row = await prisma.campaign.update({ where: { id: campaignId }, data: { aiInstructions: instructions }, select: { aiInstructions: true } });
 
-  return { instructions: row.aiInstructions };
+    return { instructions: row.aiInstructions };
+  });
 }

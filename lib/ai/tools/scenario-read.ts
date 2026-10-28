@@ -4,6 +4,7 @@ import { AiToolError, defineTool } from "./define";
 
 import "server-only";
 import { AI_LIMITS } from "@/lib/constants/ai";
+import { scenarioPageNotInCampaignMessage } from "@/lib/constants/api-errors";
 import { prisma } from "@/lib/db";
 import { listPages, readContent } from "@/lib/server/scenario/page-store";
 import { searchScenarioPages } from "@/lib/server/scenario/search";
@@ -27,13 +28,14 @@ export function contentToMarkdown(title: string, content: ScenarioContent, secti
 export async function loadPageForAi(campaignId: string, pageId: string) {
   const page = await prisma.scenarioPage.findFirst({ where: { id: pageId, campaignId }, select: { id: true, title: true, kind: true, content: true } });
 
-  if (!page) throw new AiToolError(`Сторінки ${pageId} немає в цій кампанії`);
+  if (!page) throw new AiToolError(scenarioPageNotInCampaignMessage(pageId));
 
   return { ...page, content: readContent(page.content) };
 }
 
 export const listScenarioPagesTool = defineTool({
   name: "list_scenario_pages",
+  scopes: ["ai"],
   title: "Сторінки сценарію",
   description: "List all scenario pages of the campaign: id, kind (scene|hero), arc, title, status.",
   input: z.object({}),
@@ -42,6 +44,7 @@ export const listScenarioPagesTool = defineTool({
 
 export const readScenarioPageTool = defineTool({
   name: "read_scenario_page",
+  scopes: ["ai"],
   title: "Прочитати сторінку сценарію",
   description:
     "Read a scenario page as the scenario markdown dialect: sections with [sectionId], rows with ids, story and DM notes. ||text|| is a DM-only secret. Pass sectionId to read one section.",
@@ -55,6 +58,7 @@ export const readScenarioPageTool = defineTool({
 
 export const searchScenarioTool = defineTool({
   name: "search_scenario",
+  scopes: ["ai"],
   title: "Пошук у сценарії",
   description: "Full-text search across all scenario pages (titles, stories, notes). Returns page, section and a snippet.",
   input: z.object({ query: z.string().trim().min(2).max(100) }),

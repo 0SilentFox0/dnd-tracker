@@ -1,8 +1,10 @@
 import type { FieldMeta } from "../fields";
 import { CONDITION_LABELS } from "../labels";
 
-import { DEFAULT_AREA_TARGETS } from "@/lib/constants/abilities";
+import { ABILITY_LABELS, ABILITY_OPTIONS, DEFAULT_AREA_TARGETS } from "@/lib/constants/abilities";
 import { AttackType } from "@/lib/constants/battle";
+import { MONSTER_SENSE_LABELS } from "@/lib/constants/monster";
+import { DND_SKILL_META, DND_SKILLS, type DndSkill } from "@/lib/constants/skills";
 import type { FlagEffect, FlagKey } from "@/lib/utils/abilities/schema";
 import { signed } from "@/lib/utils/common/format";
 
@@ -25,7 +27,23 @@ const meleeRanged = (melee: string, ranged: string) => [{ value: AttackType.MELE
 
 const plain = (label: string, text: string) => ({ label, fields: [] as readonly FieldMeta[], defaults: {} as Record<string, unknown>, describe: () => text });
 
+const SAVE_ABILITY_OPTIONS = [{ value: "all", label: "усі" }, ...ABILITY_OPTIONS];
+
+const SKILL_OPTIONS = DND_SKILLS.map((k) => ({ value: k, label: DND_SKILL_META[k].label }));
+
+const SKILL_OR_ALL_OPTIONS = [{ value: "all", label: "усі" }, ...SKILL_OPTIONS];
+
+const skillsText = (a: readonly string[] | "all") => (a === "all" ? "" : ` (${a.map((k) => DND_SKILL_META[k as DndSkill].label).join(", ")})`);
+
+const abilitiesText = (a: readonly string[] | "all") => (a === "all" ? "" : ` (${a.map((k) => ABILITY_LABELS[k as keyof typeof ABILITY_LABELS]).join(", ")})`);
+
 export const FLAG_REGISTRY: { [K in FlagKey]: FlagDefinition<K> } = {
+  sense: {
+    label: "Чуття",
+    fields: [{ name: "sense", label: "Чуття", input: "select", options: Object.entries(MONSTER_SENSE_LABELS).map(([value, label]) => ({ value, label })) }, { name: "range", label: "Дальність, фути", input: "number" }],
+    defaults: { sense: "blindsight", range: 30 },
+    describe: (e) => `${MONSTER_SENSE_LABELS[e.sense]} ${e.range} фт`,
+  },
   advantage: {
     label: "Перевага",
     fields: [{ name: "attackKind", label: "Атаки", input: "select", options: ATTACK_KIND_ALL }],
@@ -168,6 +186,62 @@ export const FLAG_REGISTRY: { [K in FlagKey]: FlagDefinition<K> } = {
     defaults: { percent: 50 },
     describe: (e) => `прикликані ворогом істоти втрачають ${e.percent}% HP`,
   },
+  saveAdvantage: {
+    label: "Перевага на рятівні кидки",
+    fields: [
+      { name: "abilities", label: "Характеристики", input: "multiselect", options: SAVE_ABILITY_OPTIONS },
+      { name: "vsSpells", label: "Лише проти заклинань", input: "toggle", optional: true },
+    ],
+    defaults: { abilities: "all" },
+    describe: (e) => `перевага на рятівні кидки${abilitiesText(e.abilities)}${e.vsSpells ? " проти заклинань" : ""}`,
+  },
+  saveDisadvantage: {
+    label: "Недолік на рятівні кидки",
+    fields: [{ name: "abilities", label: "Характеристики", input: "multiselect", options: SAVE_ABILITY_OPTIONS }],
+    defaults: { abilities: "all" },
+    describe: (e) => `недолік на рятівні кидки${abilitiesText(e.abilities)}`,
+  },
+  autoFailSave: {
+    label: "Автопровал рятівних кидків",
+    fields: [{ name: "abilities", label: "Характеристики", input: "multiselect", options: ABILITY_OPTIONS }],
+    defaults: { abilities: ["strength", "dexterity"] },
+    describe: (e) => `автопровал рятівних кидків${abilitiesText(e.abilities)}`,
+  },
+  saveProficiency: {
+    label: "Майстерність в рятівних кидках",
+    fields: [{ name: "abilities", label: "Характеристики", input: "multiselect", options: ABILITY_OPTIONS }],
+    defaults: { abilities: ["wisdom"] },
+    describe: (e) => `майстерність в рятівних кидках${abilitiesText(e.abilities)}`,
+  },
+  checkAdvantage: {
+    label: "Перевага на перевірки",
+    fields: [{ name: "skills", label: "Навички", input: "multiselect", options: SKILL_OR_ALL_OPTIONS }],
+    defaults: { skills: "all" },
+    describe: (e) => `перевага на перевірки${skillsText(e.skills)}`,
+  },
+  checkDisadvantage: {
+    label: "Недолік на перевірки",
+    fields: [{ name: "skills", label: "Навички", input: "multiselect", options: SKILL_OR_ALL_OPTIONS }],
+    defaults: { skills: "all" },
+    describe: (e) => `недолік на перевірки${skillsText(e.skills)}`,
+  },
+  skillProficiency: {
+    label: "Майстерність у навичках",
+    fields: [{ name: "skills", label: "Навички", input: "multiselect", options: SKILL_OPTIONS }],
+    defaults: { skills: ["perception"] },
+    describe: (e) => `майстерність у навичках${skillsText(e.skills)}`,
+  },
+  skillExpertise: {
+    label: "Експертиза в навичках",
+    fields: [{ name: "skills", label: "Навички", input: "multiselect", options: SKILL_OPTIONS }],
+    defaults: { skills: ["stealth"] },
+    describe: (e) => `експертиза в навичках${skillsText(e.skills)} (подвійна майстерність)`,
+  },
+  autoCritAdjacent: plain("Криті від сусідів", "ближні атаки з 5 фт по цілі — критичні"),
+  twoWeaponFighting: plain("Бій двома зброями", "модифікатор до шкоди другої руки"),
+  critImmunity: plain("Імунітет до критів", "критичне влучання по власнику стає звичайним"),
+  evasion: plain("Ухилення (Evasion)", "рятівний кидок Спритності з половиною шкоди: успіх — 0, провал — половина"),
+  proneDefense: plain("Захист повалених", "ближні атаки по цілі з перевагою, дальні — з недоліком"),
   conditionImmunity: {
     label: "Імунітет до станів",
     fields: [

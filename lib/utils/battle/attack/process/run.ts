@@ -3,16 +3,21 @@ import { handleCriticalFail } from "./critical-fail";
 import { resolveHit } from "./hit";
 import { handleMiss } from "./miss";
 
-import { findFlags } from "@/lib/utils/abilities/engine/core/collect-modifiers";
-import { isActive, withSelf } from "@/lib/utils/abilities/engine/core/participants";
+import { collectModifiers, findFlags } from "@/lib/utils/abilities/engine/core/collect-modifiers";
+import { isActive, isAttackable, withSelf } from "@/lib/utils/abilities/engine/core/participants";
+import { spendAttack } from "@/lib/utils/battle/attack/attacks-left";
+import { isAdjacentAttack } from "@/lib/utils/battle/attack/bonus";
 import { activeEffectIds, consumeAttackEffects } from "@/lib/utils/battle/attack/consume-effects";
+import { critDamageRolls, critDoublesDice } from "@/lib/utils/battle/attack/crit-dice";
+import { cancelCritIfImmune } from "@/lib/utils/battle/attack/crit-immunity";
 import { critFlavorFor } from "@/lib/utils/battle/attack/critical";
-import { calculateAttackRoll } from "@/lib/utils/battle/attack/roll";
+import { calculateAttackRoll, eventRollMode } from "@/lib/utils/battle/attack/roll";
+import { attackSourceOf } from "@/lib/utils/battle/attack/source";
 import { type ActionFlow, appendHpChanges, fire, getP, put } from "@/lib/utils/battle/common/action-flow";
 import { attackKindOf } from "@/lib/utils/battle/common/attack-kind";
-import { damageDiceSlots } from "@/lib/utils/battle/damage/hero-damage";
+import { damageDiceSlots, heroAttackDamageParts } from "@/lib/utils/battle/damage/hero-damage";
 import { attackDiceRolls } from "@/lib/utils/battle/dice-record";
-import { applyMainActionUsed, getEffectiveArmorClass } from "@/lib/utils/battle/participant";
+import { getEffectiveArmorClass } from "@/lib/utils/battle/participant";
 import type { ProcessAttackParams, ProcessAttackResult } from "@/lib/utils/battle/types/attack-process";
 import type { BattleAction } from "@/types/battle";
 
@@ -26,12 +31,15 @@ export function processAttack(params: ProcessAttackParams): ProcessAttackResult 
     d20Roll,
     advantageRoll,
     disadvantageRoll,
-    damageRolls,
     allParticipants,
     currentRound,
     battleId,
     damageMultiplier,
   } = params;
+
+  let { damageRolls } = params;
+
+  let damageFrom = params.serverRolled?.damageFrom;
 
   const attackerId = attacker.basicInfo.id;
 
@@ -41,12 +49,16 @@ export function processAttack(params: ProcessAttackParams): ProcessAttackResult 
 
   const before = withSelf(withSelf(allParticipants, target), attacker);
 
-  const flow: ActionFlow = { ps: before, messages: [], summons: [], ctx: { round: currentRound, rng: params.rng ?? Math.random, map: params.map, crit: params.crit } };
+  const flow: ActionFlow = { ps: before, messages: [], summons: [], ctx: { round: currentRound, rng: params.rng ?? Math.random, map: params.map, rules: params.rules, crit: params.crit } };
 
   const existedBefore = activeEffectIds(flow.ps);
 
   // дія витрачається до подій атаки: «оновлення дії» від вбивства чи «+1 дія» мають пережити цей удар
-  if (!params.actionSpent) put(flow, applyMainActionUsed(getP(flow, attackerId)));
+  if (!params.actionSpent) {
+    const attacker = getP(flow, attackerId);
+
+    put(flow, params.offHand ? { ...attacker, actionFlags: { ...attacker.actionFlags, hasUsedBonusAction: true } } : spendAttack(attacker, flow.ps, attack));
+  }
 
   const consume = (r: Omit<ProcessAttackResult, "summons">, hit: boolean): ProcessAttackResult => {
     flow.ps = consumeAttackEffects(flow.ps, { attackerId, targetId, hit, existedBefore });
@@ -54,9 +66,9 @@ export function processAttack(params: ProcessAttackParams): ProcessAttackResult 
     return { ...r, summons: flow.summons, allParticipantsUpdated: flow.ps, attackerUpdated: getP(flow, attackerId), targetUpdated: getP(flow, targetId) };
   };
 
-  const { actionModifiers } = fire(flow, { type: "attack", phase: "before", actorId: attackerId, targetId, attackKind });
+  const { actionModifiers } = fire(flow, { type: "attack", phase: "before", actorId: attackerId, targetId, attackKind, ...attackSourceOf(attack) });
 
-  if (!isActive(getP(flow, targetId)) || !isActive(getP(flow, attackerId))) {
+  if (!isAttackable(getP(flow, targetId)) || !isActive(getP(flow, attackerId))) {
     const battleAction = buildAbortedAttackAction(getP(flow, attackerId), target, attack, flow.messages, battleId, currentRound);
 
     appendHpChanges(battleAction, before, flow.ps);
@@ -64,7 +76,7 @@ export function processAttack(params: ProcessAttackParams): ProcessAttackResult 
     return {
       success: false,
       summons: flow.summons,
-      attackRoll: calculateAttackRoll(getP(flow, attackerId), attack, d20Roll, advantageRoll, disadvantageRoll, { participants: flow.ps, rng: flow.ctx.rng, manualMode: params.rollMode }),
+      attackRoll: calculateAttackRoll(getP(flow, attackerId), attack, d20Roll, advantageRoll, disadvantageRoll, { participants: flow.ps, rng: flow.ctx.rng, manualMode: params.rollMode, rules: flow.ctx.rules, map: flow.ctx.map, inspiration: params.inspiration }),
       targetUpdated: getP(flow, targetId),
       attackerUpdated: getP(flow, attackerId),
       allParticipantsUpdated: flow.ps,
@@ -72,23 +84,26 @@ export function processAttack(params: ProcessAttackParams): ProcessAttackResult 
     };
   }
 
-  const attackRoll = calculateAttackRoll(getP(flow, attackerId), attack, d20Roll, advantageRoll, disadvantageRoll, {
+  const rolled = calculateAttackRoll(getP(flow, attackerId), attack, d20Roll, advantageRoll, disadvantageRoll, {
     participants: flow.ps,
     extra: actionModifiers[attackerId],
     targetId,
     targetExtra: actionModifiers[targetId],
     rng: flow.ctx.rng,
     manualMode: params.rollMode,
+    rules: flow.ctx.rules,
+    map: flow.ctx.map,
+    inspiration: params.inspiration,
     crit: flow.ctx.crit,
   });
 
-  const second = attackRoll.secondRoll;
+  const second = rolled.secondRoll;
 
   if (second) {
-    flow.messages.push(`🎲 ${second.mode === "advantage" ? "перевага" : "недолік"}${second.manual ? " (вибір гравця)" : ""}: другий d20 = ${second.value}${second.serverRolled ? " (сервер)" : ""}, обрано ${attackRoll.chosenD20}`);
+    flow.messages.push(`🎲 ${second.mode === "advantage" ? "перевага" : "недолік"}${second.manual ? " (вибір гравця)" : ""}: другий d20 = ${second.value}${second.serverRolled ? " (сервер)" : ""}, обрано ${rolled.chosenD20}`);
   }
 
-  const slots = damageDiceSlots(getP(flow, attackerId), attack);
+  let slots = damageDiceSlots(getP(flow, attackerId), attack);
 
   const withRollDetails = <T extends { actionDetails: BattleAction["actionDetails"] }>(action: T): T => {
     if (second) Object.assign(action.actionDetails, { secondRoll: second, chosenD20: attackRoll.chosenD20 });
@@ -105,7 +120,7 @@ export function processAttack(params: ProcessAttackParams): ProcessAttackResult 
       ...(second && { second, chosenD20: attackRoll.chosenD20 }),
       damage,
       slots,
-      damageServerFrom: params.serverRolled?.damageFrom,
+      damageServerFrom: damageFrom,
     });
 
     return action;
@@ -115,7 +130,20 @@ export function processAttack(params: ProcessAttackParams): ProcessAttackResult 
 
   const guaranteedHit = findFlags(flow.ps, attackerId, "guaranteedHit", actionModifiers[attackerId]).length > 0;
 
-  const isHit = !attackRoll.isCriticalFail && (attackRoll.isCritical || guaranteedHit || attackRoll.totalAttackValue >= targetAC);
+  const isHit = !rolled.isCriticalFail && (rolled.isCritical || guaranteedHit || rolled.totalAttackValue >= targetAC);
+
+  const adjacentCrit =
+    isHit && !rolled.isCritical && collectModifiers(flow.ps, targetId, { flag: "autoCritAdjacent" }, actionModifiers[targetId]).entries.length > 0 && isAdjacentAttack(getP(flow, attackerId), getP(flow, targetId), attack);
+
+  const critRoll = adjacentCrit ? { ...rolled, isCritical: true } : rolled;
+
+  if (adjacentCrit) flow.messages.push("💥 влучання впритул — критичне");
+
+  const immune = isHit ? cancelCritIfImmune(critRoll, flow.ps, targetId, actionModifiers[targetId]) : { roll: critRoll, cancelled: false };
+
+  const attackRoll = immune.roll;
+
+  if (immune.cancelled) flow.messages.push("🛡 крит скасовано — звичайне влучання");
 
   const critFlavorText = attackRoll.criticalEffect
     ? critFlavorFor(attackRoll.criticalEffect, getP(flow, attackerId).basicInfo.name, getP(flow, targetId).basicInfo.name, {
@@ -146,6 +174,16 @@ export function processAttack(params: ProcessAttackParams): ProcessAttackResult 
     return consume(r, false);
   }
 
+  if (critDoublesDice(flow.ctx.rules, attackRoll.isCritical)) {
+    const doubled = critDamageRolls({ formula: heroAttackDamageParts(getP(flow, attackerId), attack).formula, rolls: damageRolls, rng: flow.ctx.rng });
+
+    if (doubled.serverRolled.length > 0) damageFrom = Math.min(damageFrom ?? damageRolls.length, damageRolls.length);
+
+    damageRolls = doubled.rolls;
+    slots = [...slots, ...slots];
+    flow.messages.push(`🎲 крит: кубики шкоди подвоєно${doubled.serverRolled.length ? ` (сервер: ${doubled.serverRolled.join(", ")})` : ""}`);
+  }
+
   const { hitDamage, vampirismHeal } = resolveHit({
     flow,
     attackerId,
@@ -165,7 +203,7 @@ export function processAttack(params: ProcessAttackParams): ProcessAttackResult 
 
   if (params.obstacle) flow.messages.unshift(`🧱 перешкода: шкода ×0.5 → ${hitDamage.totalFinalDamage}`);
 
-  fire(flow, { type: "attack", phase: "after", actorId: attackerId, targetId, attackKind });
+  fire(flow, { type: "attack", phase: "after", actorId: attackerId, targetId, attackKind, ...attackSourceOf(attack), ...eventRollMode(attackRoll) });
 
   const battleAction = buildBattleActionForHit({
     attacker: getP(flow, attackerId),

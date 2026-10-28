@@ -123,7 +123,7 @@ describe("ArtifactForm", () => {
 
     fireEvent.click(screen.getByRole("button", { name: "Видалити" }));
 
-    const dialog = await screen.findByRole("dialog");
+    const dialog = await screen.findByRole("alertdialog");
 
     fireEvent.click(within(dialog).getByRole("button", { name: "Видалити" }));
 

@@ -3,11 +3,19 @@ import { z } from "zod";
 import { ABILITY_KEYS } from "@/lib/constants/abilities";
 import { EffectSchema } from "@/lib/utils/abilities/schema";
 
-export const SPELL_COSTS = ["action", "bonusAction"] as const;
+export const SPELL_COSTS = ["action", "bonusAction", "reaction", "long"] as const;
+
+export const SpellCastingTimeSchema = z.object({
+  rounds: z.number().int().min(2).max(144000).optional(),
+  text: z.string().trim().min(1).max(500).optional(),
+  trigger: z.string().trim().min(1).max(1000).optional(),
+});
+
+export type SpellCastingTime = z.infer<typeof SpellCastingTimeSchema>;
 
 export const SpellCostSchema = z.enum(SPELL_COSTS);
 
-export const TEMPLATE_SHAPES = ["circle", "cube", "cone", "line", "cross"] as const;
+export const TEMPLATE_SHAPES = ["circle", "cube", "cone", "line", "cross", "emanation"] as const;
 
 const rangeField = z.number().int().min(5).max(600).optional();
 
@@ -29,7 +37,8 @@ export const SpellTargetingSchema = z.discriminatedUnion("kind", [
     range: rangeField,
     zone: SpellZoneSchema.optional(),
     hollow: z.boolean().optional(),
-  }),
+    exact: z.boolean().optional(),
+  }).refine((t) => t.exact === undefined || t.shape === "circle", { message: "Точна площа доступна лише для кола", path: ["exact"] }),
   z.object({ kind: z.literal("allAllies") }),
   z.object({ kind: z.literal("allEnemies") }),
   z.object({ kind: z.literal("everyone") }),
@@ -38,6 +47,7 @@ export const SpellTargetingSchema = z.discriminatedUnion("kind", [
 export const SpellResolutionSchema = z.discriminatedUnion("kind", [
   z.object({ kind: z.literal("auto") }),
   z.object({ kind: z.literal("save"), ability: z.enum(ABILITY_KEYS), onSuccess: z.enum(["half", "none"]) }),
+  z.object({ kind: z.literal("attack") }),
 ]);
 
 export const RaceModifierSchema = z.object({
@@ -45,17 +55,31 @@ export const RaceModifierSchema = z.object({
   percent: z.number().min(-100).max(200),
 });
 
-export const SpellDiceSchema = z.number().int().min(0).max(20);
+export const SpellDiceSchema = z.number().int().min(0).max(40);
+
+export const SpellDieSidesSchema = z.union([z.literal(4), z.literal(6), z.literal(8), z.literal(10), z.literal(12)]);
 
 export const SpellDefinitionSchema = z.object({
+  executionMode: z.enum(["native", "manual"]).optional(),
   dice: SpellDiceSchema,
   cost: SpellCostSchema,
+  casting: SpellCastingTimeSchema.optional(),
   targeting: SpellTargetingSchema,
   resolution: SpellResolutionSchema,
   effects: z.array(EffectSchema),
   raceModifiers: z.array(RaceModifierSchema),
   stackable: z.boolean().optional(),
   maxStacks: z.number().int().min(1).max(10).optional(),
+  concentration: z.boolean().optional(),
+  dieSides: SpellDieSidesSchema.optional(),
+  upcastDice: z.number().int().min(0).max(10).optional(),
+  upcastTargets: z.number().int().min(0).max(10).optional(),
+  addAbilityMod: z.boolean().optional(),
+  fixedDice: z.boolean().optional(),
+  damageBonus: z.number().int().min(-20).max(40).optional(),
+}).refine((d) => d.resolution.kind !== "attack" || d.targeting.kind === "enemy" || d.targeting.kind === "area", {
+  message: "Атака заклинанням — лише для цілі-ворога або області",
+  path: ["resolution"],
 });
 
 export type SpellCost = z.infer<typeof SpellCostSchema>;

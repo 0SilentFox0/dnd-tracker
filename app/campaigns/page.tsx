@@ -6,7 +6,7 @@ import { EmptyState, ErrorState } from "@/components/common/states";
 import { HudCard, HudPage, HudPageHeader, HudPanel } from "@/components/hud/page";
 import { Button } from "@/components/ui/button";
 import { getAuthUser } from "@/lib/auth";
-import { CampaignRole, CampaignStatus } from "@/lib/constants/campaigns";
+import { CampaignKind, CampaignRole, CampaignStatus } from "@/lib/constants/campaigns";
 import { prisma } from "@/lib/db";
 
 export default async function CampaignsPage() {
@@ -31,7 +31,15 @@ export default async function CampaignsPage() {
 
   let campaigns: CampaignWithMembers = [];
 
+  let templates: { id: string; name: string; description: string | null }[] = [];
+
   try {
+    templates = await prisma.campaign.findMany({
+      where: { kind: CampaignKind.TEMPLATE, members: { some: { userId, role: CampaignRole.DM } } },
+      select: { id: true, name: true, description: true },
+      orderBy: { updatedAt: "desc" },
+    });
+
     campaigns = await prisma.campaign.findMany({
       where: {
         members: {
@@ -40,6 +48,7 @@ export default async function CampaignsPage() {
           },
         },
         status: CampaignStatus.ACTIVE,
+        kind: CampaignKind.CAMPAIGN,
       },
       include: {
         members: {
@@ -126,6 +135,22 @@ export default async function CampaignsPage() {
           );
         })}
       </div>
+
+      {templates.length > 0 && (
+        <section className="mt-8 space-y-3">
+          <h2 className="hud-sc text-xl text-hud-ink">Мої шаблони</h2>
+          <div className="grid gap-3 md:grid-cols-2 lg:grid-cols-3">
+            {templates.map((template) => (
+              <HudCard key={template.id} asChild className="space-y-2">
+                <Link href={`/campaigns/${template.id}`}>
+                  <h3 className="hud-sc text-lg text-hud-ink">{template.name}</h3>
+                  {template.description && <p className="text-sm text-hud-muted">{template.description}</p>}
+                </Link>
+              </HudCard>
+            ))}
+          </div>
+        </section>
+      )}
 
       {campaigns.length === 0 && (
         <EmptyState

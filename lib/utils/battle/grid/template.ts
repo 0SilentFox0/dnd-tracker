@@ -32,6 +32,22 @@ function circleCells(r: number, aim: GridPoint): GridPoint[] {
   return out;
 }
 
+function exactCircleCells(r: number, aim: GridPoint): GridPoint[] {
+  const out: GridPoint[] = [];
+
+  for (let dy = -r; dy <= r; dy++) {
+    for (let dx = -r; dx <= r; dx++) {
+      if (dx * dx + dy * dy <= r * r) out.push({ x: aim.x + dx, y: aim.y + dy });
+    }
+  }
+
+  return out;
+}
+
+function emanationCells(r: number, origin: GridPoint[]): GridPoint[] {
+  return origin.flatMap((o) => circleCells(r, o));
+}
+
 function cubeCells(r: number, aim: GridPoint): GridPoint[] {
   const x0 = aim.x - Math.floor((r - 1) / 2);
 
@@ -105,7 +121,9 @@ export function templateCells(map: BattleMapConfig, template: SpellTemplate, ori
 
   let raw: GridPoint[];
 
-  if (template.shape === "circle") raw = circleCells(areaRadiusCells(template.size), aim).filter((c) => !template.hollow || cellKey(c) !== cellKey(aim));
+  if (template.shape === "circle") raw = (template.exact ? exactCircleCells(Math.round(template.size / CELL_FEET), aim) : circleCells(areaRadiusCells(template.size), aim)).filter((c) => !template.hollow || cellKey(c) !== cellKey(aim));
+
+  else if (template.shape === "emanation") raw = emanationCells(Math.round(template.size / CELL_FEET), origin).filter((c) => !own.has(cellKey(c)));
   else if (template.shape === "cube") raw = cubeCells(r, aim);
   else if (template.shape === "cross") raw = crossCells(r, aim);
   else if (origin.length === 0) raw = [];

@@ -52,3 +52,29 @@ describe("resolveAttackTargets", () => {
     expect(() => resolveAttackTargets({ ...base, attack: ranged, chosen: [e1, e2], targetIds: ["e1", "e2"], flags })).toThrow("Максимум: 1");
   });
 });
+
+describe("resolveAttackTargets: герой, що вмирає", () => {
+  const attacker = placed("e", { side: ParticipantSide.ENEMY, at: { x: 1, y: 5 } });
+
+  const downed = (deathSaves?: { successes: number; failures: number; stable: boolean }) => {
+    const p = placed("h", { side: ParticipantSide.ALLY, at: { x: 2, y: 5 } });
+
+    return { ...p, combatStats: { ...p.combatStats, currentHp: 0, status: "unconscious" as const }, battleData: { ...p.battleData, deathSaves } };
+  };
+
+  const flags = { ...none, attackHitsAllEnemies: [{ kind: "flag" as const, flag: "attackHitsAllEnemies" as const }] };
+
+  it("потрапляє в досяжних ворогів", () => {
+    const h = downed({ successes: 0, failures: 0, stable: false });
+
+    const r = resolveAttackTargets({ order: [attacker, h], attacker, attack: { ...CLAWS, type: AttackType.RANGED }, chosen: [h], targetIds: ["h"], map: testMap(), flags });
+
+    expect(r.targets).toEqual([h]);
+  });
+
+  it("без кидків смерті (HOMM) не вважається ціллю", () => {
+    const h = downed();
+
+    expect(() => resolveAttackTargets({ order: [attacker, h], attacker, attack: { ...CLAWS, type: AttackType.RANGED }, chosen: [], targetIds: [], map: testMap(), flags })).toThrow("Жоден ворог не в досяжності");
+  });
+});

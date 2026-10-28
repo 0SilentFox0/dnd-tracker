@@ -1,6 +1,7 @@
 export { ALL_SCHOOLS, useSchoolFilter } from "./useSchoolFilter";
 export { useSpellFormSync } from "./useSpellFormSync";
 export { useSpellGroupActions } from "./useSpellGroupActions";
+export { useSpellRefs } from "./useSpellRefs";
 export {
   useCreateSpell,
   useCreateSpellGroup,
@@ -13,6 +14,7 @@ export {
   useSpellGroups,
   useSpells,
   useUpdateSpell,
+  useUpdateSpellGroup,
 } from "./useSpells";
 export { usePrefetchSpellsByIds, useSpellsByIds } from "./useSpellsByIds";
 export { useSpellSelection } from "./useSpellSelection";

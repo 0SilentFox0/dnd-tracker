@@ -167,7 +167,7 @@ describe("MobileBattleLayout — вкладка «Карта» на весь е�
 describe("SpellAimPanel", () => {
   const book = {
     state: { aim: null, targetIds: [], pick: { targetMode: "template" } },
-    view: { aimPreview: null, targets: [] },
+    view: { hover: { get: () => null, subscribe: () => () => undefined }, aimPreviewAt: () => ({ targets: [] }), targets: [] },
     actions: { back: vi.fn(), close: vi.fn(), confirmTargets: vi.fn() },
   } as unknown as Parameters<typeof SpellAimPanel>[0]["book"];
 

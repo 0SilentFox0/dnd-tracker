@@ -5,19 +5,26 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 
 import { CampaignSettingsDialog } from "@/components/campaigns/settings/CampaignSettingsDialog";
 import { renderWithConfirm } from "@/components/ui/__tests__/render-with-confirm";
-import { deleteCampaign } from "@/lib/api/campaigns";
+import { deleteCampaign, updateCampaign } from "@/lib/api/campaigns";
+import type { CampaignSettings, CampaignSettingsMeta } from "@/types/campaigns";
 
 vi.mock("next/navigation", () => ({ useRouter: () => ({ push: vi.fn(), refresh: vi.fn() }) }));
-vi.mock("@/lib/api/campaigns", () => ({ deleteCampaign: vi.fn(async () => ({ success: true })), updateCampaign: vi.fn() }));
+vi.mock("@/lib/api/campaigns", () => ({ deleteCampaign: vi.fn(async () => ({ success: true })), updateCampaign: vi.fn(async () => ({})) }));
 
 Object.assign(Element.prototype, { hasPointerCapture: () => false, releasePointerCapture: () => {}, setPointerCapture: () => {}, scrollIntoView: () => {} });
 
-const campaign = { name: "Зоря", description: null, maxLevel: 20, allowPlayerEdit: true, critChoiceByDm: false, status: "active" };
+const campaign: CampaignSettings = { name: "Зоря", description: null, maxLevel: 20, allowPlayerEdit: true, critChoiceByDm: false, status: "active" };
 
-const renderDialog = () =>
+const baseMeta: CampaignSettingsMeta = { createdFromId: null, isTemplate: false };
+
+vi.mock("@/components/campaigns/templates/SourceSyncDialog", () => ({
+  SourceSyncDialog: ({ open }: { open: boolean }) => (open ? <div>sync-dialog-open</div> : null),
+}));
+
+const renderDialog = (meta: Partial<CampaignSettingsMeta> = {}) =>
   renderWithConfirm(
     <QueryClientProvider client={new QueryClient()}>
-      <CampaignSettingsDialog campaignId="c1" campaign={campaign} open onOpenChange={vi.fn()} />
+      <CampaignSettingsDialog campaignId="c1" campaign={campaign} meta={{ ...baseMeta, ...meta }} open onOpenChange={vi.fn()} />
     </QueryClientProvider>,
   );
 
@@ -44,6 +51,51 @@ describe("CampaignSettingsDialog: видалення", () => {
     fireEvent.click(screen.getAllByRole("button", { name: "Скасувати" }).pop() as HTMLElement);
     await waitFor(() => expect(screen.queryByText("Видалити кампанію «Зоря»?")).not.toBeInTheDocument());
     expect(deleteCampaign).not.toHaveBeenCalled();
+  });
+});
+
+describe("CampaignSettingsDialog: оновлення з шаблону", () => {
+  afterEach(cleanup);
+
+  it("без createdFromId кнопки немає", () => {
+    renderDialog();
+    expect(screen.queryByRole("button", { name: "Оновлення з шаблону" })).toBeNull();
+  });
+
+  it("з createdFromId кнопка відкриває діалог синхронізації", () => {
+    renderDialog({ createdFromId: "t1" });
+    expect(screen.queryByText("sync-dialog-open")).toBeNull();
+    fireEvent.click(screen.getByRole("button", { name: "Оновлення з шаблону" }));
+    expect(screen.getByText("sync-dialog-open")).toBeTruthy();
+  });
+
+  it("збереження не шле createdFromId та isTemplate", async () => {
+    renderDialog({ createdFromId: "t1", isTemplate: true });
+    fireEvent.click(screen.getByRole("button", { name: "Зберегти" }));
+    await waitFor(() => expect(updateCampaign).toHaveBeenCalled());
+
+    const body = vi.mocked(updateCampaign).mock.calls[0][1] as Record<string, unknown>;
+
+    expect(body).not.toHaveProperty("createdFromId");
+    expect(body).not.toHaveProperty("isTemplate");
+  });
+});
+
+describe("CampaignSettingsDialog: джерела й ліцензії", () => {
+  afterEach(() => {
+    cleanup();
+    vi.clearAllMocks();
+  });
+
+  it("показує credits лише для читання, коли вони є", () => {
+    renderDialog({ credits: "SRD 5.2 by Wizards of the Coast LLC" });
+    expect(screen.getByText("Джерела й ліцензії")).toBeInTheDocument();
+    expect(screen.getByText("SRD 5.2 by Wizards of the Coast LLC")).toBeInTheDocument();
+  });
+
+  it("без credits розділу немає", () => {
+    renderDialog();
+    expect(screen.queryByText("Джерела й ліцензії")).toBeNull();
   });
 });
 

@@ -28,8 +28,10 @@ import {
 import { applyRaiseDead, applySummon, describeRaiseDead, describeSummon } from "./summon";
 import type { EffectApplyInput, EffectApplyResult } from "./types";
 
+import { ABILITY_LABELS } from "@/lib/constants/abilities";
 import { resolveTargetIds } from "@/lib/utils/abilities/engine/core/targets";
 import type { Ability, Effect, EffectKind } from "@/lib/utils/abilities/schema";
+import { CONDITION_5E_KEYS } from "@/lib/utils/abilities/schema/kinds";
 import { pickOne } from "@/lib/utils/common/dice";
 import { signed } from "@/lib/utils/common/format";
 
@@ -79,14 +81,21 @@ export const EFFECT_REGISTRY: { [K in EffectKind]: EffectDefinition<K> } = {
     label: "Накласти стан",
     static: false,
     fields: [
-      { name: "condition", label: "Стан", input: "select", options: Object.entries(CONDITION_LABELS).map(([value, label]) => ({ value, label })) },
+      {
+        name: "condition",
+        label: "Стан",
+        input: "select",
+        options: Object.entries(CONDITION_LABELS).map(([value, label]) => ({ value, label, group: (CONDITION_5E_KEYS as readonly string[]).includes(value) ? "Стани 5e" : "Механічні стани" })),
+      },
+      { name: "levels", label: "Рівні виснаження (1–6)", input: "number", optional: true, visibleWhen: (v) => v.condition === "exhaustion" },
+      { name: "saveEnds", label: "Рятівний кидок наприкінці ходу", input: "saveEnds", optional: true, visibleWhen: (v) => (CONDITION_5E_KEYS as readonly string[]).includes(String(v.condition)) },
       { name: "percent", label: "Шанс, % (для втрати дії)", input: "number", optional: true, visibleWhen: (v) => v.condition === "skip_action" },
       { name: "breakOnDamage", label: "Знімається при отриманні шкоди", input: "toggle", optional: true },
       TARGET_FIELD,
       REQUIRED_DURATION,
     ],
     describe: (e) =>
-      `${CONDITION_LABELS[e.condition]}${e.condition === "skip_action" && e.percent ? ` ${e.percent}%` : ""} × ${e.duration?.rounds ?? "?"} р.${e.breakOnDamage ? ", до шкоди" : ""}`,
+      `${CONDITION_LABELS[e.condition]}${e.condition === "skip_action" && e.percent ? ` ${e.percent}%` : ""}${e.levels ? ` ×${e.levels}` : ""} × ${e.duration?.rounds ?? "?"} р.${e.breakOnDamage ? ", до шкоди" : ""}${e.saveEnds ? `, рятівний кидок ${ABILITY_LABELS[e.saveEnds.ability]}` : ""}`,
     apply: applyCondition,
   },
   grantAction: { kind: "grantAction", label: "Дати дію", static: false, fields: [

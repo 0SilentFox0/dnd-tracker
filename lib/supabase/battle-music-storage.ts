@@ -59,7 +59,7 @@ export async function verifyUploadedTrack(path: string): Promise<Result<string>>
 
 export const trackObjectPath = (url: string): string | null => bucketObjectPath(url, BATTLE_MUSIC_BUCKET);
 
-export async function removeTrackFile(url: string): Promise<void> {
+export async function removeTrackFile(url: string, options: { strict?: boolean } = {}): Promise<void> {
   const path = trackObjectPath(url);
 
   if (!path) return;
@@ -67,8 +67,14 @@ export async function removeTrackFile(url: string): Promise<void> {
   try {
     const { error } = await createAdminClient().storage.from(BATTLE_MUSIC_BUCKET).remove([path]);
 
-    if (error) console.warn("[battle-music] remove failed", path, error.message);
+    if (error) {
+      if (options.strict) throw new Error("Не вдалося видалити файл музики");
+
+      console.warn("[battle-music] remove failed", path, error.message);
+    }
   } catch (e) {
+    if (options.strict) throw e;
+
     console.warn("[battle-music] remove failed", path, e);
   }
 }

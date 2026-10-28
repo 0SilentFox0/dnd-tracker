@@ -2,6 +2,10 @@
 
 import { useState } from "react";
 
+import { CreditsText } from "@/components/campaigns/templates/CreditsText";
+import { SaveAsTemplateDialog } from "@/components/campaigns/templates/SaveAsTemplateDialog";
+import { SourceSyncDialog } from "@/components/campaigns/templates/SourceSyncDialog";
+import { FormAlert } from "@/components/common/states";
 import { HudSection } from "@/components/hud/form";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -10,20 +14,22 @@ import { LabeledInput } from "@/components/ui/labeled-input";
 import { ResponsiveDialog } from "@/components/ui/responsive-dialog";
 import { Textarea } from "@/components/ui/textarea";
 import { CampaignStatus } from "@/lib/constants/campaigns";
-import { useDeleteCampaign, useUpdateCampaign } from "@/lib/hooks/campaigns";
+import { syncTitle } from "@/lib/constants/source-sync";
+import { useCampaignExportUrl, useDeleteCampaign, useUpdateCampaign } from "@/lib/hooks/campaigns";
 import { useConfirm } from "@/lib/hooks/common";
-import type { CampaignSettings } from "@/types/campaigns";
+import type { CampaignSettings, CampaignSettingsMeta } from "@/types/campaigns";
 
 interface CampaignSettingsDialogProps {
   campaignId: string;
   campaign: CampaignSettings;
+  meta: CampaignSettingsMeta;
   open: boolean;
   onOpenChange: (open: boolean) => void;
 }
 
 const toFields = (c: CampaignSettings) => ({ ...c, description: c.description || "" });
 
-export function CampaignSettingsDialog({ campaignId, campaign, open, onOpenChange }: CampaignSettingsDialogProps) {
+export function CampaignSettingsDialog({ campaignId, campaign, meta, open, onOpenChange }: CampaignSettingsDialogProps) {
   const update = useUpdateCampaign(campaignId);
 
   const remove = useDeleteCampaign(campaignId);
@@ -33,6 +39,12 @@ export function CampaignSettingsDialog({ campaignId, campaign, open, onOpenChang
   const [fields, setFields] = useState(() => toFields(campaign));
 
   const [error, setError] = useState<string | null>(null);
+
+  const [templateOpen, setTemplateOpen] = useState(false);
+
+  const [syncOpen, setSyncOpen] = useState(false);
+
+  const exportUrl = useCampaignExportUrl(campaignId);
 
   const isSaving = update.isPending || remove.isPending;
 
@@ -66,6 +78,7 @@ export function CampaignSettingsDialog({ campaignId, campaign, open, onOpenChang
   };
 
   return (
+    <>
     <ResponsiveDialog
       open={open}
       onOpenChange={onOpenChange}
@@ -124,16 +137,53 @@ export function CampaignSettingsDialog({ campaignId, campaign, open, onOpenChang
           </div>
         </div>
       </HudSection>
+      <HudSection title="Шаблони">
+        <div className="flex flex-wrap gap-2">
+          <Button
+            variant="outline"
+            onClick={() => {
+              onOpenChange(false);
+              setTemplateOpen(true);
+            }}
+            disabled={isSaving}
+          >
+            Зберегти як шаблон
+          </Button>
+          {meta.createdFromId && (
+            <Button
+              variant="outline"
+              onClick={() => {
+                onOpenChange(false);
+                setSyncOpen(true);
+              }}
+              disabled={isSaving}
+            >
+              {syncTitle(meta.isTemplate)}
+            </Button>
+          )}
+          <Button variant="outline" asChild>
+            <a href={exportUrl} download>
+              Експортувати в JSON
+            </a>
+          </Button>
+        </div>
+      </HudSection>
+      {meta.credits && (
+        <HudSection title="Джерела й ліцензії">
+          <CreditsText credits={meta.credits} />
+        </HudSection>
+      )}
       <HudSection title="Небезпечна зона">
         <Button variant="destructive" onClick={handleDelete} disabled={isSaving}>
           {remove.isPending ? "Видалення..." : "Видалити кампанію"}
         </Button>
       </HudSection>
       {error && (
-        <p role="alert" className="mt-4 rounded-md border border-hud-danger/50 bg-hud-danger/10 px-3 py-2 text-sm text-[#f0b4a6]">
-          {error}
-        </p>
+        <FormAlert className="mt-4">{error}</FormAlert>
       )}
     </ResponsiveDialog>
+    <SaveAsTemplateDialog campaignId={campaignId} defaultName={`${campaign.name} (шаблон)`} open={templateOpen} onOpenChange={setTemplateOpen} />
+    <SourceSyncDialog campaignId={campaignId} isTemplate={meta.isTemplate} open={syncOpen} onOpenChange={setSyncOpen} />
+    </>
   );
 }

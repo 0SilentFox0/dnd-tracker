@@ -1,5 +1,6 @@
 import { ABILITY_KEYS } from "@/lib/constants/abilities";
-import { CharacterType, type CharacterTypeValue, clampHeroInitiative } from "@/lib/constants/characters";
+import { CharacterType, type CharacterTypeValue, clampHeroInitiative, HERO_INITIATIVE_BOUNDS } from "@/lib/constants/characters";
+import { backgroundFields } from "@/lib/utils/backgrounds/selection";
 import { fullSpellSlots } from "@/lib/utils/spells/spell-slots";
 import type { Character, CharacterFormData } from "@/types/characters";
 import type { SpellSlotProgression } from "@/types/races";
@@ -26,6 +27,7 @@ export function characterToFormData(
       level: character.level || 1,
       class: character.class || "",
       subclass: character.subclass,
+      ...(character.classes?.length && { classes: character.classes }),
       archetype: character.archetype ?? "",
       race: character.race || "",
       subrace: character.subrace,
@@ -44,7 +46,7 @@ export function characterToFormData(
     },
     combatStats: {
       armorClass: character.armorClass ?? 10,
-      initiative: clampHeroInitiative(character.initiative),
+      initiative: clampHeroInitiative(character.initiative, { heroMin: HERO_INITIATIVE_BOUNDS.MIN, heroMax: HERO_INITIATIVE_BOUNDS.MAX }),
       speed: character.speed ?? 30,
       minTargets: character.minTargets || 1,
       maxTargets: character.maxTargets || 1,
@@ -76,6 +78,9 @@ export function characterToFormData(
     abilities: {
       personalSkillId: (character as { personalSkillId?: string | null }).personalSkillId ?? "",
     },
+    ...((character.backgroundId || character.raceChoices && Object.keys(character.raceChoices).length > 0) || (character.feats?.length ?? 0) > 0
+      ? { choices: { ...backgroundFields(character), raceChoices: character.raceChoices ?? {}, feats: character.feats ?? [] } }
+      : {}),
   };
 }
 
@@ -85,9 +90,13 @@ export function mergeLevelUpIntoForm(prev: CharacterFormData, updated: Partial<C
 
   return {
     ...prev,
-    basicInfo: { ...prev.basicInfo, level: next.basicInfo.level },
+    basicInfo: {
+      ...prev.basicInfo,
+      level: next.basicInfo.level,
+      ...(next.basicInfo.classes && { classes: next.basicInfo.classes, class: next.basicInfo.class, subclass: next.basicInfo.subclass }),
+    },
     abilityScores: { ...prev.abilityScores, ...Object.fromEntries(ABILITY_KEYS.map((k) => [k, next.abilityScores[k]])) },
-    spellcasting: { ...prev.spellcasting, spellSlots: next.spellcasting.spellSlots },
+    spellcasting: { ...prev.spellcasting, spellSlots: next.spellcasting.spellSlots, spellcastingAbility: next.spellcasting.spellcastingAbility ?? prev.spellcasting.spellcastingAbility },
   };
 }
 
@@ -108,6 +117,7 @@ export function formDataToCharacter(
     level: formData.basicInfo.level,
     class: formData.basicInfo.class,
     subclass: formData.basicInfo.subclass,
+    ...(formData.basicInfo.classes && { classes: formData.basicInfo.classes.filter((e) => e.classId) }),
     archetype: formData.basicInfo.archetype || null,
     race: formData.basicInfo.race,
     subrace: formData.basicInfo.subrace,
@@ -136,5 +146,6 @@ export function formDataToCharacter(
     immunities: formData.roleplay.immunities,
     morale: formData.combatStats.morale,
     personalSkillId: formData.abilities.personalSkillId?.trim() || null,
+    ...(formData.choices && { ...backgroundFields(formData.choices), raceChoices: formData.choices.raceChoices, feats: formData.choices.feats }),
   };
 }

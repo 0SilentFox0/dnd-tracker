@@ -3,6 +3,7 @@ import { describe, expect, it } from "vitest";
 import { action } from "./action-fixture";
 
 import { mapAction } from "@/lib/utils/battle/fx";
+import { SPELL_FX_BY_NAME } from "@/scripts/constructor/backfill/spell-fx-by-name";
 
 describe("mapAction", () => {
   it("melee hit with slashing → melee/physical", () => {
@@ -27,6 +28,16 @@ describe("mapAction", () => {
 
   it("retaliation animates like an attack", () => {
     expect(mapAction(action({ actionType: "retaliation", actionDetails: { attackKind: "melee", isHit: true } }))[0].archetype).toBe("melee");
+  });
+
+  it("takes the spell signature from actionDetails.spellFx, not the name", () => {
+    const a = action({ actionType: "spell", actionDetails: { spellName: "Рій ос", spellFx: { archetype: "bolt", element: "cold" } } });
+
+    expect(mapAction(a)[0]).toMatchObject({ archetype: "bolt", element: "cold" });
+  });
+
+  it("an action without spellFx falls back to the generic rules even for a known name", () => {
+    expect(mapAction(action({ actionType: "spell", actionDetails: { spellName: "Рій ос" } }))[0].archetype).not.toBe("swarm");
   });
 
   it("single-target damage spell → bolt with its element", () => {
@@ -78,22 +89,22 @@ describe("mapAction", () => {
   });
 
   it("«Рій ос» → swarm/nature even though it deals damage", () => {
-    expect(mapAction(action({ actionType: "spell", actionDetails: { spellName: "Рій ос", spellDamageType: "piercing", spellTargeting: "area", spellEffectKinds: ["dealDamage"], totalDamage: 8 } }))[0]).toMatchObject({ archetype: "swarm", element: "nature" });
+    expect(mapAction(action({ actionType: "spell", actionDetails: { spellName: "Рій ос", spellFx: SPELL_FX_BY_NAME["Рій ос"], spellDamageType: "piercing", spellTargeting: "area", spellEffectKinds: ["dealDamage"], totalDamage: 8 } }))[0]).toMatchObject({ archetype: "swarm", element: "nature" });
   });
 
   it("«Землетрус» → quake/earth", () => {
-    expect(mapAction(action({ actionType: "spell", actionDetails: { spellName: "Землетрус", spellDamageType: "bludgeoning", spellTargeting: "area", spellEffectKinds: ["dealDamage"], totalDamage: 8 } }))[0]).toMatchObject({ archetype: "quake", element: "earth" });
+    expect(mapAction(action({ actionType: "spell", actionDetails: { spellName: "Землетрус", spellFx: SPELL_FX_BY_NAME["Землетрус"], spellDamageType: "bludgeoning", spellTargeting: "area", spellEffectKinds: ["dealDamage"], totalDamage: 8 } }))[0]).toMatchObject({ archetype: "quake", element: "earth" });
   });
 
   it("«Телепортація» (note only) → teleport/arcane", () => {
-    expect(mapAction(action({ actionType: "spell", actionDetails: { spellName: "Телепортація", spellTargeting: "ally", spellEffectKinds: ["note"] } }))[0]).toMatchObject({ archetype: "teleport", element: "arcane" });
+    expect(mapAction(action({ actionType: "spell", actionDetails: { spellName: "Телепортація", spellFx: SPELL_FX_BY_NAME["Телепортація"], spellTargeting: "ally", spellEffectKinds: ["note"] } }))[0]).toMatchObject({ archetype: "teleport", element: "arcane" });
   });
 
   it("damage + lasting condition on one target stays a bolt with the damage element", () => {
-    expect(mapAction(action({ actionType: "spell", actionDetails: { spellName: "Глибока заморозка", spellDamageType: "cold", spellTargeting: "enemy", spellEffectKinds: ["dealDamage", "applyCondition"], totalDamage: 6 } }))[0]).toMatchObject({ archetype: "bolt", element: "cold" });
+    expect(mapAction(action({ actionType: "spell", actionDetails: { spellName: "Глибока заморозка", spellFx: SPELL_FX_BY_NAME["Глибока заморозка"], spellDamageType: "cold", spellTargeting: "enemy", spellEffectKinds: ["dealDamage", "applyCondition"], totalDamage: 6 } }))[0]).toMatchObject({ archetype: "bolt", element: "cold" });
   });
 
-  const spell = (spellName: string, actionDetails: Record<string, unknown> = {}) => mapAction(action({ actionType: "spell", actionDetails: { spellName, ...actionDetails } }))[0];
+  const spell = (spellName: string, actionDetails: Record<string, unknown> = {}) => mapAction(action({ actionType: "spell", actionDetails: { spellName, spellFx: SPELL_FX_BY_NAME[spellName], ...actionDetails } }))[0];
 
   it("«Корені» → entangle/nature", () => {
     expect(spell("Корені", { spellTargeting: "enemy", spellEffectKinds: ["applyCondition"] })).toMatchObject({ archetype: "entangle", element: "nature" });
@@ -206,7 +217,7 @@ describe("mapAction dice", () => {
 
 describe("signature 2D strikes", () => {
   it("«Блискавка» → skystrike, «Крижаний болт» → icefall", () => {
-    const cast = (spellName: string) => mapAction(action({ actionType: "spell", actionDetails: { spellName, totalDamage: 12 } })).find((s) => s.archetype !== "dice");
+    const cast = (spellName: string) => mapAction(action({ actionType: "spell", actionDetails: { spellName, spellFx: SPELL_FX_BY_NAME[spellName], totalDamage: 12 } })).find((s) => s.archetype !== "dice");
 
     expect(cast("Блискавка")).toMatchObject({ archetype: "skystrike", element: "lightning" });
     expect(cast("Крижаний болт")).toMatchObject({ archetype: "icefall", element: "cold" });

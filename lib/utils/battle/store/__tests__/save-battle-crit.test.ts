@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 
 import { prepareSave } from "../save-battle";
 
-import { context } from "@/app/api/__tests__/battles/fixtures";
+import { context } from "@/lib/server/battles/__tests__/mutations/fixtures";
 
 describe("prepareSave: pending крита", () => {
   it("результат лише зі scene-патчем піднімає версію і несе pending у delta", () => {

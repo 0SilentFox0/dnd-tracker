@@ -1,0 +1,464 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`детермінований контракт початку ходу > фіксує повний результат recharge, DOT, hazard, HOT, concentration, expiry та abilities 1`] = `
+{
+  "result": {
+    "abilityMessages": [
+      "Тест: +2 HP від regen",
+      "💚 Вміння: Тест +2 HP (шанс 50 %)",
+    ],
+    "damageMessages": [
+      "Тест: 3 fire шкоди від burn",
+      "🎲 Тест: концентрація — рятівний кидок ВИТ 15 проти СК 10 — утримує",
+      "🎲 Тест: концентрація — рятівний кидок ВИТ 2 проти СК 10 — втрачає концентрацію на «Захист»",
+    ],
+    "expiredEffects": [
+      "expired",
+    ],
+    "hazard": {
+      "damage": 1,
+      "damageType": "fire",
+      "hpBefore": 22,
+      "label": "Вогонь",
+      "message": "Тест: 1 fire шкоди від «Вогонь»",
+    },
+    "participant": {
+      "abilities": {
+        "baseInitiative": 10,
+        "charisma": 10,
+        "constitution": 10,
+        "dexterity": 12,
+        "initiative": 10,
+        "intelligence": 10,
+        "level": 1,
+        "modifiers": {
+          "charisma": 0,
+          "constitution": 0,
+          "dexterity": 1,
+          "intelligence": 0,
+          "strength": 2,
+          "wisdom": 0,
+        },
+        "proficiencyBonus": 2,
+        "race": "human",
+        "strength": 14,
+        "wisdom": 10,
+      },
+      "actionFlags": {
+        "hasExtraTurn": false,
+        "hasUsedAction": false,
+        "hasUsedBonusAction": false,
+        "hasUsedReaction": false,
+      },
+      "basicInfo": {
+        "battleId": "b1",
+        "controlledBy": "user-1",
+        "id": "p1",
+        "name": "Тест",
+        "side": "ally",
+        "sourceId": "c1",
+        "sourceType": "character",
+      },
+      "battleData": {
+        "abilityUsage": {
+          "breath": {
+            "battle": 0,
+            "lastRound": 1,
+            "round": 0,
+            "turn": 0,
+          },
+          "roar": {
+            "battle": 1,
+            "lastRound": 1,
+            "round": 0,
+            "turn": 0,
+          },
+          "skill:s1:heal": {
+            "battle": 1,
+            "lastRound": 2,
+            "round": 1,
+            "turn": 1,
+          },
+        },
+        "activeEffects": [
+          {
+            "appliedAt": {
+              "round": 1,
+              "timestamp": 1970-01-01T00:00:00.000Z,
+            },
+            "armed": true,
+            "dotDamage": {
+              "damagePerRound": 3,
+              "damageType": "fire",
+            },
+            "duration": 2,
+            "effects": [],
+            "id": "burn",
+            "name": "burn",
+            "type": "buff",
+          },
+          {
+            "appliedAt": {
+              "round": 1,
+              "timestamp": 1970-01-01T00:00:00.000Z,
+            },
+            "armed": true,
+            "duration": 2,
+            "effects": [],
+            "hotHeal": {
+              "healPerRound": 2,
+            },
+            "id": "regen",
+            "name": "regen",
+            "type": "buff",
+          },
+          {
+            "appliedAt": {
+              "round": 1,
+              "timestamp": 1970-01-01T00:00:00.000Z,
+            },
+            "armed": true,
+            "duration": 2,
+            "effects": [
+              {
+                "type": "skip_action",
+                "value": 25,
+              },
+            ],
+            "id": "skip",
+            "name": "skip",
+            "type": "buff",
+          },
+        ],
+        "attackedWithLight": undefined,
+        "attacks": [],
+        "attacksLeft": undefined,
+        "equippedArtifacts": [],
+        "extraMovement": undefined,
+        "hazardHitRound": 2,
+        "pools": {
+          "breath": {
+            "label": "Подих",
+            "max": 1,
+            "recharge": 5,
+            "rest": null,
+          },
+          "roar": {
+            "label": "Рик",
+            "max": 1,
+            "recharge": 6,
+            "rest": null,
+          },
+        },
+        "position": {
+          "x": 1,
+          "y": 1,
+        },
+        "readied": undefined,
+        "resolvedAbilities": [
+          {
+            "effects": [
+              {
+                "amount": 2,
+                "kind": "heal",
+                "target": "self",
+              },
+            ],
+            "id": "heal",
+            "key": "skill:s1:heal",
+            "limits": {
+              "chance": 50,
+            },
+            "name": "Вміння",
+            "source": {
+              "id": "s1",
+              "name": "Вміння",
+              "type": "skill",
+            },
+            "trigger": {
+              "event": "turnStart",
+            },
+          },
+        ],
+        "retaliationsUsed": 0,
+        "returnedThisTurn": undefined,
+        "turnStartPosition": {
+          "x": 1,
+          "y": 1,
+        },
+      },
+      "combatStats": {
+        "armorClass": 14,
+        "currentHp": 25,
+        "maxHp": 40,
+        "maxTargets": 1,
+        "minTargets": 1,
+        "morale": 0,
+        "speed": 30,
+        "status": "active",
+        "tempHp": 0,
+      },
+      "spellcasting": {
+        "knownSpells": [],
+        "spellSlots": {},
+      },
+    },
+    "participants": [
+      {
+        "abilities": {
+          "baseInitiative": 10,
+          "charisma": 10,
+          "constitution": 10,
+          "dexterity": 12,
+          "initiative": 10,
+          "intelligence": 10,
+          "level": 1,
+          "modifiers": {
+            "charisma": 0,
+            "constitution": 0,
+            "dexterity": 1,
+            "intelligence": 0,
+            "strength": 2,
+            "wisdom": 0,
+          },
+          "proficiencyBonus": 2,
+          "race": "human",
+          "strength": 14,
+          "wisdom": 10,
+        },
+        "actionFlags": {
+          "hasExtraTurn": false,
+          "hasUsedAction": false,
+          "hasUsedBonusAction": false,
+          "hasUsedReaction": false,
+        },
+        "basicInfo": {
+          "battleId": "b1",
+          "controlledBy": "user-1",
+          "id": "p1",
+          "name": "Тест",
+          "side": "ally",
+          "sourceId": "c1",
+          "sourceType": "character",
+        },
+        "battleData": {
+          "abilityUsage": {
+            "breath": {
+              "battle": 0,
+              "lastRound": 1,
+              "round": 0,
+              "turn": 0,
+            },
+            "roar": {
+              "battle": 1,
+              "lastRound": 1,
+              "round": 0,
+              "turn": 0,
+            },
+            "skill:s1:heal": {
+              "battle": 1,
+              "lastRound": 2,
+              "round": 1,
+              "turn": 1,
+            },
+          },
+          "activeEffects": [
+            {
+              "appliedAt": {
+                "round": 1,
+                "timestamp": 1970-01-01T00:00:00.000Z,
+              },
+              "armed": true,
+              "dotDamage": {
+                "damagePerRound": 3,
+                "damageType": "fire",
+              },
+              "duration": 2,
+              "effects": [],
+              "id": "burn",
+              "name": "burn",
+              "type": "buff",
+            },
+            {
+              "appliedAt": {
+                "round": 1,
+                "timestamp": 1970-01-01T00:00:00.000Z,
+              },
+              "armed": true,
+              "duration": 2,
+              "effects": [],
+              "hotHeal": {
+                "healPerRound": 2,
+              },
+              "id": "regen",
+              "name": "regen",
+              "type": "buff",
+            },
+            {
+              "appliedAt": {
+                "round": 1,
+                "timestamp": 1970-01-01T00:00:00.000Z,
+              },
+              "armed": true,
+              "duration": 2,
+              "effects": [
+                {
+                  "type": "skip_action",
+                  "value": 25,
+                },
+              ],
+              "id": "skip",
+              "name": "skip",
+              "type": "buff",
+            },
+          ],
+          "attackedWithLight": undefined,
+          "attacks": [],
+          "attacksLeft": undefined,
+          "equippedArtifacts": [],
+          "extraMovement": undefined,
+          "hazardHitRound": 2,
+          "pools": {
+            "breath": {
+              "label": "Подих",
+              "max": 1,
+              "recharge": 5,
+              "rest": null,
+            },
+            "roar": {
+              "label": "Рик",
+              "max": 1,
+              "recharge": 6,
+              "rest": null,
+            },
+          },
+          "position": {
+            "x": 1,
+            "y": 1,
+          },
+          "readied": undefined,
+          "resolvedAbilities": [
+            {
+              "effects": [
+                {
+                  "amount": 2,
+                  "kind": "heal",
+                  "target": "self",
+                },
+              ],
+              "id": "heal",
+              "key": "skill:s1:heal",
+              "limits": {
+                "chance": 50,
+              },
+              "name": "Вміння",
+              "source": {
+                "id": "s1",
+                "name": "Вміння",
+                "type": "skill",
+              },
+              "trigger": {
+                "event": "turnStart",
+              },
+            },
+          ],
+          "retaliationsUsed": 0,
+          "returnedThisTurn": undefined,
+          "turnStartPosition": {
+            "x": 1,
+            "y": 1,
+          },
+        },
+        "combatStats": {
+          "armorClass": 14,
+          "currentHp": 25,
+          "maxHp": 40,
+          "maxTargets": 1,
+          "minTargets": 1,
+          "morale": 0,
+          "speed": 30,
+          "status": "active",
+          "tempHp": 0,
+        },
+        "spellcasting": {
+          "knownSpells": [],
+          "spellSlots": {},
+        },
+      },
+      {
+        "abilities": {
+          "baseInitiative": 10,
+          "charisma": 10,
+          "constitution": 10,
+          "dexterity": 12,
+          "initiative": 10,
+          "intelligence": 10,
+          "level": 1,
+          "modifiers": {
+            "charisma": 0,
+            "constitution": 0,
+            "dexterity": 1,
+            "intelligence": 0,
+            "strength": 2,
+            "wisdom": 0,
+          },
+          "proficiencyBonus": 2,
+          "race": "human",
+          "strength": 14,
+          "wisdom": 10,
+        },
+        "actionFlags": {
+          "hasExtraTurn": false,
+          "hasUsedAction": false,
+          "hasUsedBonusAction": false,
+          "hasUsedReaction": false,
+        },
+        "basicInfo": {
+          "battleId": "b1",
+          "controlledBy": "user-1",
+          "id": "linked",
+          "name": "Тест",
+          "side": "ally",
+          "sourceId": "c1",
+          "sourceType": "character",
+        },
+        "battleData": {
+          "activeEffects": [],
+          "attacks": [],
+          "equippedArtifacts": [],
+          "resolvedAbilities": [],
+        },
+        "combatStats": {
+          "armorClass": 14,
+          "currentHp": 20,
+          "maxHp": 20,
+          "maxTargets": 1,
+          "minTargets": 1,
+          "morale": 0,
+          "speed": 30,
+          "status": "active",
+          "tempHp": 0,
+        },
+        "spellcasting": {
+          "knownSpells": [],
+          "spellSlots": {},
+        },
+      },
+    ],
+    "rechargeMessages": [
+      "🔄 Подих перезарядилась (6)",
+      "🔄 Рик не перезарядилась (1)",
+    ],
+    "statusChanged": false,
+  },
+  "rngCalls": [
+    0.91,
+    0.12,
+    0.74,
+    0.03,
+    0.08,
+    0.87,
+    0.27,
+  ],
+}
+`;

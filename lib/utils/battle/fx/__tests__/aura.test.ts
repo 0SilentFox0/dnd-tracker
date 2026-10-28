@@ -1,10 +1,19 @@
 import { describe, expect, it } from "vitest";
 
 import { auraOf, aurasOf, MAX_AURAS } from "@/lib/utils/battle/fx/aura";
+import { SPELL_FX_BY_NAME } from "@/scripts/constructor/backfill/spell-fx-by-name";
 import type { ActiveEffect } from "@/types/battle";
 import { ParticipantSide } from "@/types/battle";
 
 const fx = (over: Partial<ActiveEffect>): ActiveEffect => ({ id: over.id ?? "e", name: "e", type: "debuff", duration: 2, appliedAt: { round: 1, timestamp: new Date(0) }, effects: [], ...over });
+
+const fxn = (over: Partial<ActiveEffect>): ActiveEffect => {
+  const e = fx(over);
+
+  const aura = SPELL_FX_BY_NAME[e.name]?.aura;
+
+  return aura ? { ...e, fxAura: aura } : e;
+};
 
 describe("auraOf", () => {
   it("dot damage types map to their auras", () => {
@@ -48,7 +57,7 @@ describe("auraOf", () => {
 
 describe("spell-check aura rules", () => {
   it("name map", () => {
-    const named = (name: string) => auraOf(fx({ name, type: "debuff" }));
+    const named = (name: string) => auraOf(fxn({ name, type: "debuff" }));
 
     expect(named("Корені")).toBe("roots");
     expect(named("Сплутування")).toBe("roots");
@@ -58,11 +67,11 @@ describe("spell-check aura rules", () => {
     expect(named("Землетрус")).toBe("dust");
     expect(named("Рій ос")).toBe("stings");
     expect(named("Сповільнення")).toBe("shackles");
-    expect(auraOf(fx({ name: "Кам'яна шкіра", type: "buff", abilityEffects: [{ kind: "modifyStat", stat: "armor", flat: 3 }] as ActiveEffect["abilityEffects"] }))).toBe("stoneskin");
+    expect(auraOf(fxn({ name: "Кам'яна шкіра", type: "buff", abilityEffects: [{ kind: "modifyStat", stat: "armor", flat: 3 }] as ActiveEffect["abilityEffects"] }))).toBe("stoneskin");
   });
 
   it("Light buffs get their own auras by name, ahead of the generic regen/blessing", () => {
-    const buff = (name: string, over: Partial<ActiveEffect> = {}) => auraOf(fx({ name, type: "buff", ...over }));
+    const buff = (name: string, over: Partial<ActiveEffect> = {}) => auraOf(fxn({ name, type: "buff", ...over }));
 
     expect(buff("Регенерація", { hotHeal: { healPerRound: 4 } } as Partial<ActiveEffect>)).toBe("lifedome");
     expect(buff("Вічне світло", { hotHeal: { healPerRound: 4 } } as Partial<ActiveEffect>)).toBe("sunglow");
@@ -70,11 +79,11 @@ describe("spell-check aura rules", () => {
     expect(buff("Ухилення")).toBe("deflect");
     expect(buff("Праведна міць")).toBe("might");
     expect(buff("Божественна сила")).toBe("holyweapon");
-    expect(aurasOf([fx({ id: "a", name: "Божественна сила", type: "buff" }), fx({ id: "b", name: "Магічний імунітет", type: "buff" }), fx({ id: "c", name: "Регенерація", type: "buff" })])).toEqual(["lifedome", "spellward"]);
+    expect(aurasOf([fxn({ id: "a", name: "Божественна сила", type: "buff" }), fxn({ id: "b", name: "Магічний імунітет", type: "buff" }), fxn({ id: "c", name: "Регенерація", type: "buff" })])).toEqual(["lifedome", "spellward"]);
   });
 
   it("Dark curses get their own auras by name instead of the shared curse/charm/stun", () => {
-    const debuff = (name: string, over: Partial<ActiveEffect> = {}) => auraOf(fx({ name, type: "debuff", ...over }));
+    const debuff = (name: string, over: Partial<ActiveEffect> = {}) => auraOf(fxn({ name, type: "debuff", ...over }));
 
     expect(debuff("Ослаблення")).toBe("sapped");
     expect(debuff("Немічність")).toBe("rust");
@@ -82,18 +91,18 @@ describe("spell-check aura rules", () => {
     expect(debuff("Смуток")).toBe("raincloud");
     expect(debuff("Розсіяність", { type: "condition", effects: [{ type: "skip_action", value: 50 }] })).toBe("dizzy");
     expect(debuff("Ляльковод", { charmOrigin: { side: "enemy" } } as Partial<ActiveEffect>)).toBe("strings");
-    expect(aurasOf([fx({ id: "a", name: "Смуток", type: "debuff" }), fx({ id: "b", name: "Ослаблення", type: "debuff" }), fx({ id: "c", name: "Ляльковод", type: "debuff" })])).toEqual(["strings", "raincloud"]);
+    expect(aurasOf([fxn({ id: "a", name: "Смуток", type: "debuff" }), fxn({ id: "b", name: "Ослаблення", type: "debuff" }), fxn({ id: "c", name: "Ляльковод", type: "debuff" })])).toEqual(["strings", "raincloud"]);
   });
 
   it("Nature: thorny vines and the forest spirit get their own auras ahead of plague and regen", () => {
-    expect(auraOf(fx({ name: "Колючі лози", dotDamage: { damagePerRound: 3, damageType: "poison" } }))).toBe("vines");
-    expect(auraOf(fx({ name: "Дух лісу", type: "buff", hotHeal: { healPerRound: 4 } } as Partial<ActiveEffect>))).toBe("stag");
-    expect(aurasOf([fx({ id: "a", name: "Регенерація", type: "buff" }), fx({ id: "b", name: "Дух лісу", type: "buff" })])).toEqual(["lifedome", "stag"]);
-    expect(aurasOf([fx({ id: "a", name: "Колючі лози" }), fx({ id: "b", dotDamage: { damagePerRound: 2, damageType: "slashing" } })])).toEqual(["vines", "bleeding"]);
+    expect(auraOf(fxn({ name: "Колючі лози", dotDamage: { damagePerRound: 3, damageType: "poison" } }))).toBe("vines");
+    expect(auraOf(fxn({ name: "Дух лісу", type: "buff", hotHeal: { healPerRound: 4 } } as Partial<ActiveEffect>))).toBe("stag");
+    expect(aurasOf([fxn({ id: "a", name: "Регенерація", type: "buff" }), fxn({ id: "b", name: "Дух лісу", type: "buff" })])).toEqual(["lifedome", "stag"]);
+    expect(aurasOf([fxn({ id: "a", name: "Колючі лози" }), fxn({ id: "b", dotDamage: { damagePerRound: 2, damageType: "slashing" } })])).toEqual(["vines", "bleeding"]);
   });
 
   it("fxElement maps debuffs and conditions", () => {
-    const el = (fxElement: string, over: Partial<ActiveEffect> = {}) => auraOf(fx({ fxElement, ...over }));
+    const el = (fxElement: string, over: Partial<ActiveEffect> = {}) => auraOf(fxn({ fxElement, ...over }));
 
     expect(el("cold")).toBe("frost");
     expect(el("cold", { type: "condition", effects: [{ type: "skip_action", value: 100 }] })).toBe("frozen");
@@ -106,16 +115,16 @@ describe("spell-check aura rules", () => {
   });
 
   it("charm and berserk beat fxElement; buffs ignore it", () => {
-    expect(auraOf(fx({ fxElement: "cold", charmOrigin: { side: ParticipantSide.ALLY, controlledBy: "u" } }))).toBe("charm");
-    expect(auraOf(fx({ fxElement: "cold", type: "condition", effects: [{ type: "berserk", value: 50 }] }))).toBe("rage");
-    expect(auraOf(fx({ fxElement: "fire", type: "buff" }))).toBe("blessing");
+    expect(auraOf(fxn({ fxElement: "cold", charmOrigin: { side: ParticipantSide.ALLY, controlledBy: "u" } }))).toBe("charm");
+    expect(auraOf(fxn({ fxElement: "cold", type: "condition", effects: [{ type: "berserk", value: 50 }] }))).toBe("rage");
+    expect(auraOf(fxn({ fxElement: "fire", type: "buff" }))).toBe("blessing");
   });
 
   it("priority places new kinds", () => {
-    const kinds = (...names: string[]) => aurasOf(names.map((name, i) => fx({ id: String(i), name })));
+    const kinds = (...names: string[]) => aurasOf(names.map((name, i) => fxn({ id: String(i), name })));
 
     expect(kinds("Корені", "Сліпота")).toEqual(["roots", "blind"]);
-    expect(aurasOf([fx({ id: "a", type: "condition", fxElement: "cold", effects: [{ type: "skip_action", value: 1 }] }), fx({ id: "b", type: "condition", effects: [{ type: "skip_action", value: 1 }] })])).toEqual(["stun", "frozen"]);
+    expect(aurasOf([fxn({ id: "a", type: "condition", fxElement: "cold", effects: [{ type: "skip_action", value: 1 }] }), fxn({ id: "b", type: "condition", effects: [{ type: "skip_action", value: 1 }] })])).toEqual(["stun", "frozen"]);
     expect(kinds("Поспіх", "Корені")).toEqual(["roots", "haste"]);
   });
 });
@@ -129,6 +138,15 @@ describe("aurasOf", () => {
     ];
 
     expect(aurasOf(list)).toEqual(["stun", "plague"]);
+  });
+
+  it("uses effect.fxAura when present", () => {
+    expect(auraOf(fx({ name: "Будь-що", fxAura: "stings", duration: 2 }))).toBe("stings");
+  });
+
+  it("an old effect without fxAura (snapshot before the deploy) gets a generic aura, no throw", () => {
+    expect(() => auraOf(fx({ name: "Рій ос", duration: 2, type: "debuff" }))).not.toThrow();
+    expect(auraOf(fx({ name: "Рій ос", duration: 2, type: "debuff" }))).toBe("curse");
   });
 
   it("rage ranks right after charm", () => {

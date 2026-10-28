@@ -11,12 +11,12 @@ it("рівні гілки з levelNode групуються за гілкою н
   expect(picked.map((p) => p.item).sort()).toEqual(["b", "c"]);
 });
 
-it("старі знімки без levelNode — фолбек на назву", () => {
+it("лінія без levelNode не є лінією рівнів, навіть якщо назва каже «Експерт»", () => {
   const picked = pickHighestPerLine([
     { item: "a", source: { type: "skill" as const, id: "a", name: "Напад — Основи", line: { mainSkillId: "attack", level: "basic" } } },
     { item: "b", source: { type: "skill" as const, id: "b", name: "Напад — Експерт", line: { mainSkillId: "attack", level: "expert" } } },
   ]);
 
-  expect(picked.map((p) => p.item)).toEqual(["b"]);
+  expect(picked.map((p) => p.item).sort()).toEqual(["a", "b"]);
 });
 });

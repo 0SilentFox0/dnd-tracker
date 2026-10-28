@@ -1,6 +1,7 @@
 "use client";
 
 import { SPELL_COST_OPTIONS, type SpellFormData,spellLevelOptions } from "./spell-form-defaults";
+import { SpellFxFields } from "./SpellFxFields";
 
 import { IconUrlField } from "@/components/common/IconUrlField";
 import { Label } from "@/components/ui/label";
@@ -22,16 +23,19 @@ export function SpellFormBasicFields({ formData, setFormData, spellGroups }: Spe
       <LabeledInput containerClassName="col-span-2" id="name" label="Назва заклинання" value={formData.name} onChange={(e) => setFormData({ ...formData, name: e.target.value })} required maxLength={SPELL_NAME_MAX} placeholder="Назва заклинання" />
       <div>
         <Label htmlFor="level">Рівень (слот) *</Label>
-        <SelectField id="level" value={String(formData.level)} onValueChange={(value) => setFormData({ ...formData, level: parseInt(value) })} placeholder="Виберіть рівень" options={spellLevelOptions(formData.level)} />
+        <SelectField id="level" value={String(formData.level)} onValueChange={(value) => setFormData({ ...formData, level: parseInt(value) })} placeholder="Виберіть рівень" options={spellLevelOptions()} />
       </div>
       <div>
         <Label htmlFor="cost">Вартість</Label>
-        <SelectField id="cost" value={formData.cost} onValueChange={(value) => setFormData({ ...formData, cost: value as SpellCost })} placeholder="Вартість" options={SPELL_COST_OPTIONS.map((o) => ({ value: o.value, label: o.label }))} />
+        <SelectField id="cost" value={formData.cost} onValueChange={(value) => setFormData({ ...formData, cost: value as SpellCost, ...(value === "long" && { casting: { ...formData.casting, rounds: formData.casting?.rounds ?? 10 } }) })} placeholder="Вартість" options={SPELL_COST_OPTIONS.map((o) => ({ value: o.value, label: o.label }))} />
       </div>
+      {formData.cost === "long" && <LabeledInput id="casting-rounds" label="Раундів накладання (1 хв = 10 раундів)" type="number" min={2} max={144000} value={formData.casting?.rounds ?? 10} onChange={(e) => setFormData({ ...formData, casting: { ...formData.casting, rounds: Number(e.target.value) } })} />}
+      {formData.cost === "reaction" && <LabeledInput containerClassName="col-span-2" id="reaction-trigger" label="Умова реакції" value={formData.casting?.trigger ?? ""} onChange={(e) => setFormData({ ...formData, casting: { ...formData.casting, trigger: e.target.value || undefined } })} />}
       <div className="col-span-2">
         <Label htmlFor="groupId">Школа</Label>
         <SelectField id="groupId" value={formData.groupId ?? ""} onValueChange={(value) => setFormData({ ...formData, groupId: value || null })} placeholder="Виберіть школу" options={spellGroups.map((g) => ({ value: g.id, label: g.name }))} allowNone noneLabel="Без школи" />
       </div>
+      <SpellFxFields value={formData.fx} onChange={(fx) => setFormData({ ...formData, fx })} />
       <div className="col-span-2">
         <Label htmlFor="description">Що робить (точна механіка)</Label>
         <Textarea id="description" value={formData.description ?? ""} onChange={(e) => setFormData({ ...formData, description: e.target.value || null })} placeholder="Живою мовою, з числами" rows={3} />

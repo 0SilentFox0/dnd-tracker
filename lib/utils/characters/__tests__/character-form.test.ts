@@ -17,6 +17,13 @@ describe("mergeLevelUpIntoForm", () => {
     expect(merged.spellcasting.spellSlots).toEqual({ "1": { max: 3, current: 3 } });
     expect(merged.combatStats.armorClass).toBe(18);
   });
+
+  it("spellcastingAbility з відповіді підхоплюється, а без неї — зберігається", () => {
+    const prev = characterToFormData({ level: 3, spellcastingAbility: "wisdom" } as Partial<Character>);
+
+    expect(mergeLevelUpIntoForm(prev, { level: 4, spellcastingAbility: "intelligence" } as Partial<Character>).spellcasting.spellcastingAbility).toBe("intelligence");
+    expect(mergeLevelUpIntoForm(prev, { level: 4 } as Partial<Character>).spellcasting.spellcastingAbility).toBe("wisdom");
+  });
 });
 
 describe("characterToFormData: слоти за прогресією раси", () => {
@@ -39,5 +46,11 @@ describe("архетип у формі", () => {
     expect(formDataToCharacter(characterToFormData({ archetype: null } as Partial<Character>)).archetype).toBeNull();
 
     for (const key of ["hpMultiplier", "meleeMultiplier", "rangedMultiplier"]) expect(payload[key]).toBeUndefined();
+  });
+
+  it("formDataToCharacter відкидає рядки класів з порожнім classId", () => {
+    const form = characterToFormData({ classes: [{ classId: "a", level: 1 }, { classId: "", level: 1 }] } as Partial<Character>);
+
+    expect(formDataToCharacter(form).classes).toEqual([{ classId: "a", level: 1 }]);
   });
 });

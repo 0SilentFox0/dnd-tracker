@@ -1,11 +1,12 @@
 // @vitest-environment happy-dom
 import { useEffect } from "react";
 import { act, cleanup, fireEvent, render, screen, waitFor } from "@testing-library/react";
-import { afterEach, beforeEach, describe, expect, it } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import { mockMatchMedia } from "./match-media";
 
 import { ConfirmProvider } from "@/components/ui/confirm-dialog";
+import { NOTICE_TITLE } from "@/lib/constants/ui";
 import { type ConfirmFn, useConfirm, useNotify } from "@/lib/hooks/common";
 
 const holder: { confirm?: ConfirmFn } = {};
@@ -58,7 +59,7 @@ describe("useConfirm", () => {
     act(() => {
       p = confirm({ title: "Вийти?" });
     });
-    fireEvent.keyDown(await screen.findByRole("dialog"), { key: "Escape" });
+    fireEvent.keyDown(await screen.findByRole("alertdialog"), { key: "Escape" });
     await expect(p).resolves.toBe(false);
   });
 
@@ -96,7 +97,7 @@ describe("useConfirm", () => {
     expect(await screen.findByRole("alert")).toHaveTextContent("Сервер недоступний");
     fireEvent.click(screen.getByRole("button", { name: "Видалити" }));
     await expect(p).resolves.toBe(true);
-    await waitFor(() => expect(screen.queryByRole("dialog")).toBeNull());
+    await waitFor(() => expect(screen.queryByRole("alertdialog")).toBeNull());
   });
 
   it("розмонтування провайдера з відкритим підтвердженням → false", async () => {
@@ -136,6 +137,12 @@ describe("useConfirm", () => {
       p = notify("Оберіть хоча б одного учасника");
     });
     expect(await screen.findByText("Оберіть хоча б одного учасника")).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: NOTICE_TITLE })).toBeInTheDocument();
+
+    const describedBy = screen.getByRole("alertdialog").getAttribute("aria-describedby");
+
+    expect(describedBy).toBeTruthy();
+    expect(document.getElementById(describedBy ?? "")).toHaveTextContent("Оберіть хоча б одного учасника");
     expect(screen.queryByRole("button", { name: "Скасувати" })).toBeNull();
     fireEvent.click(screen.getByRole("button", { name: "Зрозуміло" }));
     await expect(p).resolves.toBeUndefined();
@@ -158,5 +165,24 @@ describe("useConfirm", () => {
     expect(sheet).toHaveAttribute("data-state", "closed");
     expect(sheet).toHaveTextContent("Видалити юніта?");
     expect(sheet).not.toHaveTextContent("Скасувати");
+  });
+
+  it.each([false, true])("confirm без опису не дає попередження про aria-describedby (mobile=%s)", async (mobile) => {
+    mockMatchMedia(mobile);
+
+    const warn = vi.spyOn(console, "warn").mockImplementation(() => {});
+
+    const error = vi.spyOn(console, "error").mockImplementation(() => {});
+
+    mount();
+    act(() => {
+      void confirm({ title: "Видалити?" });
+    });
+    await screen.findByRole("alertdialog");
+    expect(screen.getByRole("alertdialog")).not.toHaveAttribute("aria-describedby");
+    expect(warn).not.toHaveBeenCalled();
+    expect(error).not.toHaveBeenCalled();
+    warn.mockRestore();
+    error.mockRestore();
   });
 });

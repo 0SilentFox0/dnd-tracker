@@ -1,50 +1,7 @@
 import { NextResponse } from "next/server";
 
-import { API_ERRORS } from "@/lib/constants/api-errors";
-import { prisma } from "@/lib/db";
-import { requireAuth } from "@/lib/utils/api/api-auth";
-import { errorResponse } from "@/lib/utils/api/api-response";
-import { handleApiError } from "@/lib/utils/api/error-handler";
+import { CONTENT_OPERATIONS } from "@/lib/server/content/operations";
+import { listSkillTrees } from "@/lib/server/skills/skill-tree-service";
+import { operationRoute } from "@/lib/utils/api/content-routes";
 
-/**
- * GET /api/campaigns/[id]/skill-trees
- * Повертає список дерев прокачки кампанії (для вибору дерева за расою персонажа).
- */
-export async function GET(
-  _request: Request,
-  { params }: { params: Promise<{ id: string }> }
-) {
-  try {
-    const { id } = await params;
-
-    const authResult = await requireAuth();
-
-    if (authResult instanceof NextResponse) {
-      return authResult;
-    }
-
-    const { userId } = authResult;
-
-    const campaign = await prisma.campaign.findUnique({
-      where: { id },
-      select: {
-        members: {
-          where: { userId },
-          select: { userId: true },
-        },
-      },
-    });
-
-    if (!campaign || campaign.members.length === 0) {
-      return errorResponse(API_ERRORS.NOT_FOUND, 404);
-    }
-
-    const skillTrees = await prisma.skillTree.findMany({
-      where: { campaignId: id },
-    });
-
-    return NextResponse.json(skillTrees);
-  } catch (error) {
-    return handleApiError(error, { action: "list skill trees" });
-  }
-}
+export const GET = operationRoute(CONTENT_OPERATIONS["skill-trees.list"], async ({ actor }) => NextResponse.json(await listSkillTrees(actor)));

@@ -26,6 +26,7 @@ const toCard = (a: ArtifactListItem): ArtifactCardData => ({
   description: a.description ?? null,
   abilitySummary: a.abilitySummary ?? [],
   artifactSet: a.artifactSet ?? null,
+  itemKind: a.itemKind,
 });
 
 const toSetCard = (s: ArtifactSetRow): ArtifactSetCardData => ({

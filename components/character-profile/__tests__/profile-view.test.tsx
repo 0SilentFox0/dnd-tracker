@@ -9,6 +9,7 @@ const h = vi.hoisted(() => ({ replace: vi.fn(), editorMounts: 0, sheetQuery: { d
 vi.mock("next/navigation", () => ({ useRouter: () => ({ replace: h.replace, push: vi.fn() }) }));
 vi.mock("@/components/hud/fonts", () => ({ hudFontClassName: "", HUD_SURFACE: "hud-surface" }));
 vi.mock("@/components/skill-tree/progression", () => ({ ProgressionPanel: () => <div>прокачка</div>, LevelUpOverlay: () => null }));
+vi.mock("@/lib/hooks/campaigns", async (orig) => ({ ...(await orig<object>()), useCampaignRules: () => ({ data: undefined }) }));
 vi.mock("@/lib/hooks/skills", () => ({ useCharacterProgression: () => ({ view: null }) }));
 vi.mock("@/lib/hooks/characters/useStash", async (orig) => ({
   ...(await orig<object>()),

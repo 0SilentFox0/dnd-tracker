@@ -1,5 +1,6 @@
 import { buildPartyPower, computeFairScaling, type FairScaling, type PartyMember, type PartyPower, type Power, unitMember } from "./fair";
 import type { UnitStats } from "./stats";
+import { computeXpBudget, type XpBudgetResult, type XpEdition } from "./xp-budget";
 
 import { ParticipantSide, ParticipantSourceType } from "@/lib/constants/battle";
 
@@ -81,4 +82,20 @@ export function sharedEnemyRace(participants: SetupBalanceParticipant[], stats: 
   const [only] = races;
 
   return races.size === 1 ? (only ?? null) : null;
+}
+
+export function setupXpBudget(participants: SetupBalanceParticipant[], stats: SetupBalanceStats, edition: XpEdition): XpBudgetResult | null {
+  const heroLevels = participants.flatMap((p) => {
+    const c = p.side === ParticipantSide.ALLY && p.type === ParticipantSourceType.CHARACTER ? stats.characterStats[p.id] : undefined;
+
+    return c ? [c.level ?? 1] : [];
+  });
+
+  const enemies = participants
+    .filter((p) => p.side === ParticipantSide.ENEMY && p.type === ParticipantSourceType.UNIT)
+    .map((p) => ({ unitId: p.id, quantity: p.quantity ?? 1, xp: stats.unitStats[p.id]?.xp ?? null }));
+
+  if (heroLevels.length === 0 || enemies.length === 0) return null;
+
+  return computeXpBudget({ edition, heroLevels, enemies });
 }

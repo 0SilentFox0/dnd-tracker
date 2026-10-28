@@ -79,19 +79,6 @@ export async function findArtifactSetInCampaign(
   });
 }
 
-export async function reloadArtifactSetWithArtifacts(setId: string) {
-  const row = await prisma.artifactSet.findUnique({
-    where: { id: setId },
-    include: includeList,
-  });
-
-  if (!row) {
-    throw new Error(`ArtifactSet not found: ${setId}`);
-  }
-
-  return row;
-}
-
 export async function reloadArtifactSetDetail(setId: string) {
   const row = await prisma.artifactSet.findUnique({
     where: { id: setId },
@@ -151,6 +138,6 @@ export async function deleteArtifactSetAndClearArtifacts(
       where: { campaignId, setId },
       data: { setId: null },
     }),
-    prisma.artifactSet.deleteMany({ where: { id: setId } }),
+    prisma.artifactSet.deleteMany({ where: { id: setId, campaignId } }),
   ]);
 }

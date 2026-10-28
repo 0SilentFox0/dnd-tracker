@@ -6,8 +6,12 @@ import Image from "next/image";
 import { EntityIcon } from "@/components/common/EntityIcon";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { ARTIFACT_GRID_9, ArtifactSlot } from "@/lib/constants/artifacts";
+import { useCampaignRules } from "@/lib/hooks/campaigns";
 import { useEquipArtifact } from "@/lib/hooks/characters";
 import { useNotify } from "@/lib/hooks/common";
+import { canEquipOffHand } from "@/lib/utils/artifacts/off-hand";
+import { isPropertyRow, isUniqueRow } from "@/lib/utils/items/item-row";
+import { resolveItemRow } from "@/lib/utils/items/resolve";
 import type { EquippedItems } from "@/types/inventory";
 
 export interface ArtifactOption {
@@ -15,6 +19,7 @@ export interface ArtifactOption {
   name: string;
   slot: string;
   icon?: string | null;
+  modifiers?: unknown;
 }
 
 interface CharacterArtifactsSectionProps {
@@ -26,6 +31,14 @@ interface CharacterArtifactsSectionProps {
   onEquippedChange: (equipped: EquippedItems) => void;
 }
 
+function optionFor(ref: string, artifacts: ArtifactOption[]): ArtifactOption | undefined {
+  const direct = artifacts.find((a) => a.id === ref);
+
+  if (direct) return direct;
+
+  return resolveItemRow(ref, new Map(artifacts.map((a) => [a.id, a]))) ?? undefined;
+}
+
 const CELL =
   "relative flex aspect-square cursor-pointer flex-col items-center justify-center overflow-hidden rounded border-2 border-amber-700/80 bg-stone-900/60 p-1 text-center shadow-inner transition-colors hover:border-amber-600/90 hover:bg-stone-800/80 disabled:opacity-50";
 
@@ -33,6 +46,8 @@ export function CharacterArtifactsSection({ campaignId, characterId, equipped, a
   const notify = useNotify();
 
   const equip = useEquipArtifact(campaignId, characterId);
+
+  const classesEnabled = !!useCampaignRules(campaignId).data?.classes.enabled;
 
   const [updatingSlot, setUpdatingSlot] = useState<string | null>(null);
 
@@ -59,9 +74,15 @@ export function CharacterArtifactsSection({ campaignId, characterId, equipped, a
           {ARTIFACT_GRID_9.map((cell) => {
             const equippedId = equipped[cell.key] as string | undefined;
 
-            const current = equippedId ? artifacts.find((a) => a.id === equippedId) : undefined;
+            const current = equippedId ? optionFor(equippedId, artifacts) : undefined;
 
-            const available = artifacts.filter((a) => a.slot === cell.slotType || (cell.slotType === ArtifactSlot.WEAPON && a.slot === ArtifactSlot.RANGE_WEAPON));
+            const available = artifacts.filter(
+              (a) =>
+                !isPropertyRow(a) &&
+                (a.slot === cell.slotType ||
+                (cell.slotType === ArtifactSlot.WEAPON && a.slot === ArtifactSlot.RANGE_WEAPON) ||
+                (cell.slotType === ArtifactSlot.SHIELD && canEquipOffHand(a, classesEnabled))),
+            );
 
             return (
               <DropdownMenu key={cell.key}>
@@ -88,7 +109,7 @@ export function CharacterArtifactsSection({ campaignId, characterId, equipped, a
                     available.map((a) => {
                       const holder = holders?.[a.id];
 
-                      const wornElsewhere = Object.entries(equipped).some(([key, id]) => id === a.id && key !== cell.key);
+                      const wornElsewhere = isUniqueRow(a) && Object.entries(equipped).some(([key, id]) => id === a.id && key !== cell.key);
 
                       return (
                         <DropdownMenuItem key={a.id} disabled={Boolean(holder) || wornElsewhere} onClick={() => handleSlotChange(cell.key, a.id)} className="flex items-center gap-2">

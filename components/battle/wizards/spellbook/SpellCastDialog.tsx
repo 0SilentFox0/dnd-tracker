@@ -3,6 +3,7 @@ import { Loader2, Sparkles } from "lucide-react";
 import { btn, primaryBtn } from "../attack/shared";
 import { TargetButton } from "../TargetButton";
 import { SaveRolls } from "./SaveRolls";
+import { SlotSelect } from "./SlotSelect";
 import { SpellSummary } from "./SpellSummary";
 
 import { AiRollButton, DamageDice } from "@/components/battle/hud/DiceInput";
@@ -66,6 +67,8 @@ function RollsStep({ book }: { book: Book }) {
   return (
     <>
       <SaveRolls targets={view.saveTargets} saves={state.saves} onChange={actions.setSave} />
+      <SaveRolls targets={view.attackTargets} saves={state.attacks} onChange={actions.setAttack} title="Кидок атаки" />
+      {view.attackTargets.length > 0 && <p className="mt-1 text-xs italic text-[var(--hud-muted)]">Порожній d20 кине сервер.</p>}
       {state.pick && state.pick.diceSlots.length > 0 && (
         <>
           <div className="hud-sc mt-4 text-lg font-bold">Кубики{selected ? ` · ${view.formulaOf(selected)}` : ""}</div>
@@ -109,6 +112,7 @@ export function SpellCastDialog({ book }: { book: Book }) {
 
   return (
     <ResponsiveDialog open={open} onOpenChange={(o) => !o && actions.close()} title={view.selected?.name ?? "Заклинання"} className={cn(HUD_SURFACE, "border-white/25 bg-[#15110e]")}>
+      {step !== "submitting" && <SlotSelect book={book} />}
       {step === "targets" && <TargetsStep book={book} />}
       {step === "rolls" && <RollsStep book={book} />}
       {(step === "summary" || step === "submitting") && <SummaryStep book={book} />}

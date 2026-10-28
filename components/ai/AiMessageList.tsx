@@ -7,9 +7,11 @@ import { ScenarioRichText } from "@/components/scenario/ScenarioRichText";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { markdownToDoc } from "@/lib/utils/scenario/markdown";
+import type { AiMessageMetadata } from "@/types/ai";
 
 interface AiMessageListProps {
   messages: UIMessage[];
+  campaignId?: string;
   error?: string | null;
   renderProposal?: (proposalId: string) => ReactNode;
   onRedo?: () => void;
@@ -67,7 +69,7 @@ function AssistantText({ text }: { text: string }) {
 
 const errorOf = (m: UIMessage) => (m.metadata as { error?: string } | undefined)?.error;
 
-export function AiMessageList({ messages, error, renderProposal, onRedo }: AiMessageListProps) {
+export function AiMessageList({ campaignId, messages, error, renderProposal, onRedo }: AiMessageListProps) {
   return (
     <div className="flex flex-col gap-3" data-slot="ai-message-list">
       {messages.map((m) => (
@@ -85,17 +87,29 @@ export function AiMessageList({ messages, error, renderProposal, onRedo }: AiMes
 
             if (!part.type.startsWith("tool-")) return null;
 
+            let output = part.output;
+
+            if (typeof output === "string") { try { output = JSON.parse(output); } catch { output = null; } }
+
+            const envelope = output && typeof output === "object" ? output as { kind?: string; data?: { kind?: string; intent?: { id?: string } } } : null;
+
+            const pending = envelope?.kind === "result" && envelope.data?.kind === "pending" ? envelope.data.intent?.id : null;
+
+            if (campaignId && pending && /^[A-Za-z0-9_-]{1,100}$/.test(pending)) return <div key={part.toolCallId ?? i}><AiToolChip part={part} /><a className="ml-2 underline" href={`/campaigns/${campaignId}/dm/assistant?intent=${pending}`}>Переглянути дію</a></div>;
+
             const proposalId = PROPOSAL_TOOLS.has(toolName(part.type)) && part.state === "output-available" ? proposalIdOf(part.output) : null;
 
             return proposalId && renderProposal ? <div key={part.toolCallId ?? i} className="w-full">{renderProposal(proposalId)}</div> : <AiToolChip key={part.toolCallId ?? i} part={part} />;
           })}
+          {(m.metadata as AiMessageMetadata | undefined)?.model && <p className="break-words text-xs text-muted-foreground">Модель відповіді: {(m.metadata as AiMessageMetadata).model}</p>}
+          {(m.metadata as AiMessageMetadata | undefined)?.usage && <p className="text-xs text-muted-foreground">↑{(m.metadata as AiMessageMetadata).usage?.inputTokens ?? "невідомо"} ↓{(m.metadata as AiMessageMetadata).usage?.outputTokens ?? "невідомо"}{(m.metadata as AiMessageMetadata).usage?.partial ? " (неповні дані)" : ""}</p>}
           {errorOf(m) ? <p className="text-sm text-destructive">{errorOf(m)}</p> : null}
         </div>
       ))}
       {error ? (
         <div className="flex items-center gap-2 text-sm text-destructive" role="alert">
           <span>{error}</span>
-          {onRedo ? <Button type="button" size="sm" variant="outline" onClick={onRedo}>Повторити</Button> : null}
+          {onRedo ? <Button type="button" size="sm" variant="outline" onClick={onRedo}>Відновити стан</Button> : null}
         </div>
       ) : null}
     </div>

@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef } from "react";
+import { Fragment, useRef } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { CircleHelp, Home, KeyRound, LogOut, Menu, Sparkles, User, UserRoundCog } from "lucide-react";
@@ -20,7 +20,9 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { HudPortalClassProvider } from "@/components/ui/portal-class";
+import { dmSectionsFor } from "@/lib/constants/campaigns";
 import { useSessionEmail, useSwitchGoogleAccount } from "@/lib/hooks/auth";
+import { useCampaignRules, useIsTemplateCampaign } from "@/lib/hooks/campaigns";
 import { cn } from "@/lib/utils";
 
 const BATTLE_PATH = /^\/campaigns\/[^/]+\/battles\/[^/]+$/;
@@ -29,6 +31,8 @@ export function Header() {
   const pathname = usePathname();
 
   const email = useSessionEmail();
+
+  const isTemplate = useIsTemplateCampaign(pathname?.includes("/dm/") ? pathname.match(/^\/campaigns\/([^/]+)/)?.[1] : undefined);
 
   const switchAccount = useSwitchGoogleAccount();
 
@@ -43,6 +47,10 @@ export function Header() {
   const isDMPage = pathname?.includes("/dm/") || false;
 
   const isPlayerPage = !isDMPage && isCampaignPage;
+
+  const classesEnabled = !!useCampaignRules(isDMPage ? campaignId ?? "" : "").data?.classes.enabled;
+
+  const dmSections = dmSectionsFor({ isTemplate, classesEnabled });
 
   const isBattlePage = BATTLE_PATH.test(pathname ?? "");
 
@@ -77,56 +85,18 @@ export function Header() {
                 {isDMPage && (
                   <>
                     <DropdownMenuSeparator />
-                    <DropdownMenuItem asChild>
-                      <Link href={`/campaigns/${campaignId}/dm/characters`}>
-                        Персонажі
-                      </Link>
-                    </DropdownMenuItem>
-                    <DropdownMenuItem asChild>
-                      <Link href={`/campaigns/${campaignId}/dm/characters?type=npc_hero`}>
-                        NPC Герої
-                      </Link>
-                    </DropdownMenuItem>
-                    <DropdownMenuItem asChild>
-                      <Link href={`/campaigns/${campaignId}/dm/units`}>
-                        NPC Юніти
-                      </Link>
-                    </DropdownMenuItem>
-                    <DropdownMenuItem asChild>
-                      <Link href={`/campaigns/${campaignId}/dm/spells`}>
-                        Заклинання
-                      </Link>
-                    </DropdownMenuItem>
-                    <DropdownMenuItem asChild>
-                      <Link href={`/campaigns/${campaignId}/dm/artifacts`}>
-                        Артефакти
-                      </Link>
-                    </DropdownMenuItem>
-                    <DropdownMenuItem asChild>
-                      <Link href={`/campaigns/${campaignId}/dm/artifact-sets`}>
-                        Сети артефактів
-                      </Link>
-                    </DropdownMenuItem>
-                    <DropdownMenuItem asChild>
-                      <Link href={`/campaigns/${campaignId}/dm/battles`}>
-                        Сцени Боїв
-                      </Link>
-                    </DropdownMenuItem>
-                    <DropdownMenuItem asChild>
-                      <Link href={`/campaigns/${campaignId}/dm/music`}>
-                        Музика
-                      </Link>
-                    </DropdownMenuItem>
-                    <DropdownMenuItem asChild>
-                      <Link href={`/campaigns/${campaignId}/dm/scenario`}>
-                        Сценарій
-                      </Link>
-                    </DropdownMenuItem>
-                    <DropdownMenuItem asChild>
-                      <Link href={`/campaigns/${campaignId}/dm/ai`}>
-                        AI і API
-                      </Link>
-                    </DropdownMenuItem>
+                    {dmSections.map(({ path, label, title }) => (
+                      <Fragment key={path}>
+                        <DropdownMenuItem asChild>
+                          <Link href={`/campaigns/${campaignId}/dm/${path}`}>{title ?? label}</Link>
+                        </DropdownMenuItem>
+                        {path === "characters" && (
+                          <DropdownMenuItem asChild>
+                            <Link href={`/campaigns/${campaignId}/dm/characters?type=npc_hero`}>NPC Герої</Link>
+                          </DropdownMenuItem>
+                        )}
+                      </Fragment>
+                    ))}
                   </>
                 )}
                 {isPlayerPage && (

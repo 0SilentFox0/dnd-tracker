@@ -58,6 +58,21 @@ describe("generateSlideImage", () => {
     expect(calls[0].size).toBe("1536x1024");
   });
 
+  it("unknown paid provider outcome is never automatically retried", async () => {
+    let calls = 0;
+
+    generateImageModel.model = new MockImageModelV4({ doGenerate: async () => {
+      calls++;
+
+      if (calls === 1) throw new APICallError({ message: "unknown", url: "https://api", requestBodyValues: {}, statusCode: 503, isRetryable: true });
+
+      return { images: [new Uint8Array(png)], warnings: [], response: { timestamp: new Date(), modelId: "m", headers: {} } } as never;
+    } });
+    await expect(generateSlideImage(input)).rejects.toThrow();
+    expect(calls).toBe(1);
+    expect(upload).not.toHaveBeenCalled();
+  });
+
   it("Google отримує aspectRatio", async () => {
     const calls: { aspectRatio?: string; size?: string }[] = [];
 

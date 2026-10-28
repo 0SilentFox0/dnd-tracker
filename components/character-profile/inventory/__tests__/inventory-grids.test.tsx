@@ -18,9 +18,10 @@ const makeInv = (over: Partial<InventoryModel> = {}, cells: BackpackCell[] = [])
   purse: { gp: 5, sp: 0, cp: 3 },
   access: { canAct: true, isDM: false, pending: false },
   layout: { desktop: true },
+  rules: { offHand: false },
   selection: { value: null, set: vi.fn() },
   drag: { value: null, set: vi.fn() },
-  actions: { equip: vi.fn(), unequip: vi.fn(), drop: vi.fn(), use: vi.fn(), revoke: vi.fn(), remove: vi.fn() },
+  actions: { equip: vi.fn(), attune: vi.fn(), unequip: vi.fn(), drop: vi.fn(), use: vi.fn(), revoke: vi.fn(), remove: vi.fn() },
   isPending: false,
   ...over,
 });

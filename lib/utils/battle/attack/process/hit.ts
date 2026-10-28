@@ -8,7 +8,9 @@ import { castHitSpell } from "./hit-spell";
 import { findFlags } from "@/lib/utils/abilities/engine/core/collect-modifiers";
 import { isActive } from "@/lib/utils/abilities/engine/core/participants";
 import type { StaticEffect } from "@/lib/utils/abilities/schema";
-import { type ActionFlow, fire, getP, put, settleDowned } from "@/lib/utils/battle/common/action-flow";
+import { eventRollMode } from "@/lib/utils/battle/attack/roll";
+import { attackSourceOf } from "@/lib/utils/battle/attack/source";
+import { type ActionFlow, applyFlowDamage, fire, getP, put, settleDowned } from "@/lib/utils/battle/common/action-flow";
 import { attackKindOf } from "@/lib/utils/battle/common/attack-kind";
 import { dealResistedHits } from "@/lib/utils/battle/damage/resisted-ability-damage";
 import type { AttackRollResult } from "@/lib/utils/battle/types/attack";
@@ -58,12 +60,16 @@ export function resolveHit(p: ResolveHitParams): { hitDamage: ComputeHitDamageRe
 
   const guarded = splitGuardedDamage(flow.ps, targetId, hitDamage.totalFinalDamage);
 
-  put(flow, applyDamageToTarget(getP(flow, targetId), guarded.targetDamage).updatedTarget);
+  const targetBefore = getP(flow, targetId);
+
+  put(flow, applyDamageToTarget(targetBefore, guarded.targetDamage).updatedTarget);
+  applyFlowDamage(flow, targetBefore, guarded.targetDamage, p.attackRoll.isCritical);
 
   if (guarded.guardianId) {
     const guardian = getP(flow, guarded.guardianId);
 
     put(flow, applyDamageToTarget(guardian, guarded.guardianDamage).updatedTarget);
+    applyFlowDamage(flow, guardian, guarded.guardianDamage, p.attackRoll.isCritical);
     flow.messages.push(`🛡 ${guardian.basicInfo.name} приймає ${guarded.guardianDamage} шкоди — захищає: ${getP(flow, targetId).basicInfo.name}`);
     settleDowned(flow, guarded.guardianId, attackerId);
   }
@@ -75,7 +81,9 @@ export function resolveHit(p: ResolveHitParams): { hitDamage: ComputeHitDamageRe
     actorId: attackerId,
     targetId,
     attackKind: attackKindOf(attack.type),
+    ...attackSourceOf(attack),
     damage: Math.min(hitDamage.resistanceResult.finalDamage, hitDamage.totalFinalDamage),
+    ...eventRollMode(p.attackRoll),
   });
 
   applyFireWave(flow, attackerId, targetId, hitDamage.totalFinalDamage);
@@ -111,9 +119,10 @@ function applyFireWave(flow: ActionFlow, attackerId: string, targetId: string, h
 
     const victims = fireWaveVictims(flow.ctx.map, flow.ps, getP(flow, attackerId), targetId, f.size);
 
-    const r = dealResistedHits(flow.ps, victims.map((targetId) => ({ targetId, amount })), { actorId: attackerId, damageType: "fire" });
+    const r = dealResistedHits(flow.ps, victims.map((targetId) => ({ targetId, amount })), { actorId: attackerId, damageType: "fire", rules: flow.ctx.rules, rng: flow.ctx.rng });
 
     flow.ps = r.participants;
+    flow.messages.push(...r.messages);
 
     const parts = r.results.map(({ targetId: id, dealt }) => `${getP(flow, id).basicInfo.name} (−${dealt})`);
 

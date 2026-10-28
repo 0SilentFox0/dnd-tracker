@@ -1,11 +1,14 @@
 import type { AbilityUsageCounter, ResolvedAbility, StaticEffect } from "./abilities";
 
-import { type SpellcastingAbility } from "@/lib/constants/abilities";
 import { AttackType, type BattleStatus, type CombatStatusType, type MAZE_DIFFICULTIES, type MAZE_MARK_SYMBOLS, ParticipantSide, type ParticipantSourceTypeValue } from "@/lib/constants/battle";
 import type { WEATHER_KINDS } from "@/lib/constants/battle-weather";
 import type { CriticalEffect } from "@/lib/constants/critical-effects";
-import type { FxImpact } from "@/lib/utils/battle/fx";
+import type { RulesEdition } from "@/lib/constants/rules";
+import type { DndSkill } from "@/lib/constants/skills";
+import type { WeaponTrait } from "@/lib/constants/weapon-traits";
+import type { FxAuraKind, FxImpact, SpellFx } from "@/lib/utils/battle/fx";
 import type { ModeView } from "@/lib/utils/battle/modes/types";
+import type { StoredSpellSlots } from "@/lib/utils/spells/slot-keys";
 import type { AbilityKey, SetProgress } from "@/types/characters";
 import { SkillLevel } from "@/types/skill-tree";
 
@@ -43,6 +46,7 @@ export interface ActiveEffect {
   };
   /** Сирий тип шкоди заклинання, що наклало ефект (для візуалу ауры) */
   fxElement?: string;
+  fxAura?: FxAuraKind;
   breakOnDamage?: boolean;
   consumeOn?: "ownAttack" | "ownHit" | "attackAgainst";
   expireAtTurnEnd?: boolean;
@@ -58,6 +62,16 @@ export interface ActiveEffect {
   permanent?: boolean;
   /** ефект зони аури: діє, поки власник живий; key — спільний для однакових аур різних власників */
   zone?: { ownerId: string; key: string };
+  /** стан закінчується, коли власник проходить рятівний кидок наприкінці свого ходу */
+  saveEnds?: { ability: AbilityKey; dc: number };
+  /** ефект, що тримається поки кастер концентрується на закляттi castId */
+  concentrationOf?: { casterId: string; castId: string };
+  /** маркер концентрації на самому кастері */
+  concentration?: { castId: string; spellName: string };
+  /** скільки HP зняло виснаження з maxHp (повертається при зніманні) */
+  exhaustionHpHalved?: number;
+  /** варіант правил виснаження на момент накладання (для перерахунку за сумарним рівнем) */
+  exhaustionVariant?: RulesEdition;
 }
 
 /**
@@ -98,6 +112,11 @@ export interface BattleAttack {
   damageDistribution?: number[];
   /** Гарантована шкода — застосовується навіть при промаху. */
   guaranteedDamage?: number;
+  traits?: WeaponTrait[];
+  versatileDice?: string;
+  hand?: "off";
+  /** +N до шкоди цією зброєю (магічний предмет) */
+  damageBonus?: number;
 }
 
 /**
@@ -119,12 +138,16 @@ export interface BattleParticipantBasicInfo {
   side: ParticipantSide;
   controlledBy: string; // userId (для players) або CONTROLLED_BY_DM (для NPC/units)
   isExtraTurnSlot?: boolean; // чи є цей слот додатковим ходом
+  /** XP за перемогу над учасником (юніт з CR або ручним XP) */
+  xp?: number;
 }
 
 /**
  * Характеристики учасника бою
  */
 export interface BattleParticipantAbilities {
+  creatureType?: string;
+  damageModel?: "5e";
   level: number;
   initiative: number; // поточна ініціатива (з урахуванням бонусів)
   baseInitiative: number; // базова ініціатива (без тимчасових бонусів)
@@ -146,12 +169,36 @@ export interface BattleParticipantAbilities {
   race: string;
   /** Race.id для расових модифікаторів заклинань */
   raceId?: string;
+  /** Межа моралі кампанії; 0 — мораль вимкнена, відсутнє — 3 */
+  moraleCap?: number;
   primaryAbility?: AbilityKey;
   /** Множник шкоди ближнього бою від архетипу (лише character) */
   meleeMultiplier?: number;
   rangedMultiplier?: number;
   magicMultiplier?: number;
   archetypeName?: string;
+  /** Характеристики з майстерністю рятівних кидків (лише герої, якщо є) */
+  saveProficiencies?: AbilityKey[];
+  skillProficiencies?: DndSkill[];
+  /** Таблиці кубиків героя з правил кампанії; відсутнє — типова прогресія */
+  heroDice?: { melee?: Record<number, string>; ranged?: Record<number, string> };
+}
+
+export interface SpellGrant {
+  spellId: string;
+  /** стабільне джерело каста (відокремлено від spellId) */
+  key?: string;
+  label?: string;
+  via?: "grant" | "slotOrGrant";
+  pool?: string;
+  cost?: number;
+  castLevel?: number;
+  dc?: number;
+  dcAbility?: AbilityKey;
+  rest?: "short" | "long";
+  attackBonus?: number;
+  upcast?: { maxLevel: number; extraCost: number };
+  legendaryOnly?: true;
 }
 
 export interface GridPoint {
@@ -184,7 +231,7 @@ export interface MazeConfig {
   moved?: boolean;
 }
 
-export type TemplateShape = "circle" | "cube" | "cone" | "line" | "cross";
+export type TemplateShape = "circle" | "cube" | "cone" | "line" | "cross" | "emanation";
 
 /** size у футах: радіус кола, сторона куба, довжина конуса/лінії, промінь хреста */
 export interface SpellTemplate {
@@ -192,6 +239,8 @@ export interface SpellTemplate {
   size: number;
   /** Кільце: клітинка прицілу кола не вражається */
   hollow?: boolean;
+  /** 5e: euclidean disk rather than legacy HOMM square */
+  exact?: boolean;
 }
 
 export type WeatherKind = (typeof WEATHER_KINDS)[number];
@@ -225,6 +274,8 @@ export interface TerrainDamage {
   type: string;
   /** Небезпека від заклинання: імунітет і опори до заклинань діють, як при касті */
   spellId?: string;
+  /** Небезпека тримається, поки кастер концентрується на закляттi castId */
+  concentrationOf?: { casterId: string; castId: string };
 }
 
 export interface TerrainCell {
@@ -301,11 +352,13 @@ export interface BattleParticipantCombatStats {
  * Дані про заклинання учасника
  */
 export interface BattleParticipantSpellcasting {
-  spellcastingAbility?: SpellcastingAbility;
+  spellcastingAbility?: AbilityKey;
   spellSaveDC?: number;
   spellAttackBonus?: number;
-  spellSlots: Record<string, { max: number; current: number }>; // "1" до "5"
+  spellSlots: StoredSpellSlots;
   knownSpells: string[]; // масив ID заклинань
+  slotSpells?: string[]; // незалежне право слотного каста, без знання лише з предметів/грантів
+  grants?: SpellGrant[];
 }
 
 /**
@@ -319,13 +372,36 @@ export interface AirborneState {
   name: string;
 }
 
+export interface LegendaryState {
+  actions: number;
+  actionsLeft: number;
+  resistLeft: number;
+}
+
+export type LegendaryOption = { kind: "attack"; attackIndex: number; targetId: string } | { kind: "ability" | "lair"; abilityKey: string; targetIds?: string[] };
+
+export interface AbilityPool {
+  label: string;
+  max: number;
+  rest: "short" | "long" | null;
+  recharge?: 4 | 5 | 6;
+}
+
 export interface BattleParticipantBattleData {
+  pendingCast?: { spellId: string; spellName: string; remainingRounds: number; totalRounds: number; lastRound: number; grantKey?: string; slotKey?: string; castLevel?: number };
   attacks: BattleAttack[];
   activeEffects: ActiveEffect[];
   equippedArtifacts: EquippedArtifact[];
   artifactSets?: SetProgress[];
   /** Пул додаткових дій: поповнюється ефектом grantAction, а на початку власного ходу скидається до суми actionsPerTurn; споживається при використанні основної дії */
   pendingExtraActions?: number;
+  /** Атаки дії «Атака», що лишилися цього ходу */
+  attacksLeft?: number;
+  inspiration?: boolean;
+  /** Натхнення витрачено в цьому бою: після бою знімається з листа (ніколи не виставляється з бою) */
+  inspirationSpent?: boolean;
+  /** Цього ходу була атака дією легкою ближньою зброєю основної руки */
+  attackedWithLight?: boolean;
   /** Хто прикликав або підняв учасника здібністю */
   summonedBy?: string;
   /** Учасник зараз робить додатковий хід від моралі (наприкінці раунду) */
@@ -334,8 +410,12 @@ export interface BattleParticipantBattleData {
   reserved?: boolean;
   /** Щойно введений з резерву: ходить після поточного, у порядку введення */
   revealPending?: boolean;
+  /** 5e: герой на 0 HP кидає смерті; лічильники живуть, поки він непритомний */
+  deathSaves?: { successes: number; failures: number; stable: boolean };
   resolvedAbilities: ResolvedAbility[];
   abilityUsage?: Record<string, AbilityUsageCounter>;
+  /** Спільні пули вмінь класу (ключ pool:<classId>:<колонка>); витрачено — abilityUsage[ключ].battle */
+  pools?: Record<string, AbilityPool>;
   /** Чарм скінчився: сторона й контролер повертаються наприкінці цього ходу */
   charmReturn?: { side: ParticipantSide; controlledBy: string };
   /** Рівень майстерності героя у гілці кожної школи заклинань (groupId → рівень) */
@@ -351,6 +431,10 @@ export interface BattleParticipantBattleData {
   mazeWakeRound?: number;
   /** Клітинок пройдено в поточному ході */
   movementUsed?: number;
+  /** Додаткові клітинки руху цього ходу (Ривок) */
+  extraMovement?: number;
+  /** Підготовлена атака: чекає тригера до початку наступного ходу власника */
+  readied?: { kind: "attack"; round: number };
   /** Якір на початок поточного ходу (для «Удару і повернення») */
   turnStartPosition?: GridPoint;
   /** Вже поверталася на стартову клітинку цього ходу */
@@ -365,6 +449,14 @@ export interface BattleParticipantBattleData {
   damageMultiplier?: number;
   /** Масштаб HP ворога-юніта для рівного бою; лише для показу ДМу */
   hpMultiplier?: number;
+  /** Легендарні дії й опір монстра 5e; actionsLeft відновлюється на початку його ходу */
+  legendary?: LegendaryState;
+  lairResistances?: number;
+  lair?: { active: boolean; usedRound?: number; lastKey?: string; baseResistances: number; resistSpent: number };
+  senses?: { darkvision?: number; blindsight?: number; tremorsense?: number; truesight?: number; passivePerception?: number };
+  movement?: { fly?: number; swim?: number; climb?: number; burrow?: number; hover?: boolean };
+  languages?: string;
+  telepathy?: number;
 }
 
 /**
@@ -486,7 +578,9 @@ export interface BattleAction {
     // Для заклинань:
     spellId?: string;
     spellName?: string;
+    spellFx?: SpellFx;
     spellLevel?: number;
+    castLevel?: number;
     spellSlotUsed?: number;
     /** Приклик юніта після касту */
     summonedUnitTemplateId?: string;
@@ -497,7 +591,11 @@ export interface BattleAction {
       ability: string;
       roll: number;
       result: "success" | "fail";
+      mode?: "advantage" | "disadvantage";
+      rolls?: number[];
+      autoFail?: boolean;
     }>;
+    spellAttacks?: Array<{ participantId: string; roll: number; total: number; ac: number; hit: boolean; crit: boolean }>;
     // Для лікування:
     healingRolls?: Array<{
       dice: string;

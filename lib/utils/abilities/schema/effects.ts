@@ -1,11 +1,17 @@
 import { z } from "zod";
 
 import { AbilityTargetSchema, AmountSchema, DurationSchema, FlatSchema } from "./common";
-import { ATTACK_KINDS, CONDITION_KEYS, DAMAGE_FILTER_KINDS, STAT_KEYS } from "./kinds";
+import { ATTACK_KINDS, CONDITION_5E_KEYS, CONDITION_KEYS, DAMAGE_FILTER_KINDS, STAT_KEYS } from "./kinds";
+
+import { ABILITY_KEYS } from "@/lib/constants/abilities";
+import { DND_SKILLS } from "@/lib/constants/skills";
 
 export {
+  type AnyConditionKey,
   BAKED_STATS,
+  CONDITION_5E_KEYS,
   CONDITION_KEYS,
+  type Condition5eKey,
   type ConditionImmunityKey,
   DYNAMIC_STATS,
   isBakedStat,
@@ -27,11 +33,16 @@ const ModifyStatSchema = z
     stat: z.enum(STAT_KEYS),
     flat: FlatSchema.optional(),
     percent: FlatSchema.optional(),
+    atLeast: z.number().int().min(1).max(30).optional(),
     attackKind: z.enum(ATTACK_KINDS).optional(),
     spellLevels: z.array(z.number().int().min(1).max(9)).min(1).optional(),
     ...timed,
   })
-  .refine(hasValue, { message: "Потрібен flat або percent" });
+  .refine((e) => hasValue(e) || e.atLeast !== undefined, { message: "Потрібен flat, percent або atLeast" })
+  .refine((e) => e.atLeast === undefined || ((ABILITY_KEYS as readonly string[]).includes(e.stat) && e.flat === undefined && e.percent === undefined), {
+    message: "atLeast — лише для характеристик і без flat/percent",
+    path: ["atLeast"],
+  });
 
 const DamageBonusSchema = z
   .object({
@@ -46,7 +57,18 @@ const DamageBonusSchema = z
 
 const flagBase = { kind: z.literal("flag"), ...timed };
 
+export const AbilityKeySchema = z.enum(ABILITY_KEYS);
+
+export const AnyConditionSchema = z.enum([...CONDITION_KEYS, ...CONDITION_5E_KEYS]);
+
+const DndSkillSchema = z.enum(DND_SKILLS);
+
+const SkillsOrAll = z.union([z.literal("all"), z.array(DndSkillSchema).min(1)]);
+
+const AbilitiesOrAll = z.union([z.literal("all"), z.array(AbilityKeySchema).min(1)]);
+
 const FlagSchema = z.discriminatedUnion("flag", [
+  z.object({ ...flagBase, flag: z.literal("sense"), sense: z.enum(["darkvision", "blindsight", "tremorsense", "truesight"]), range: z.number().int().min(5).max(1000) }),
   z.object({ ...flagBase, flag: z.literal("advantage"), attackKind: z.enum([...ATTACK_KINDS, "all"]) }),
   z.object({ ...flagBase, flag: z.literal("disadvantage") }),
   z.object({ ...flagBase, flag: z.literal("disadvantageForAttackers") }),
@@ -96,10 +118,23 @@ const FlagSchema = z.discriminatedUnion("flag", [
   z.object({ ...flagBase, flag: z.literal("piercingShot") }),
   z.object({ ...flagBase, flag: z.literal("fireWave"), percent: z.number().int().min(1).max(100), size: z.number().int().min(5).max(120) }),
   z.object({ ...flagBase, flag: z.literal("banishSummons"), percent: z.number().int().min(1).max(100) }),
+  z.object({ ...flagBase, flag: z.literal("saveAdvantage"), abilities: AbilitiesOrAll, vsSpells: z.boolean().optional() }),
+  z.object({ ...flagBase, flag: z.literal("saveDisadvantage"), abilities: AbilitiesOrAll }),
+  z.object({ ...flagBase, flag: z.literal("autoFailSave"), abilities: z.array(AbilityKeySchema).min(1) }),
+  z.object({ ...flagBase, flag: z.literal("saveProficiency"), abilities: z.array(AbilityKeySchema).min(1) }),
+  z.object({ ...flagBase, flag: z.literal("checkAdvantage"), skills: SkillsOrAll }),
+  z.object({ ...flagBase, flag: z.literal("checkDisadvantage"), skills: SkillsOrAll }),
+  z.object({ ...flagBase, flag: z.literal("skillProficiency"), skills: z.array(DndSkillSchema).min(1) }),
+  z.object({ ...flagBase, flag: z.literal("skillExpertise"), skills: z.array(DndSkillSchema).min(1) }),
+  z.object({ ...flagBase, flag: z.literal("autoCritAdjacent") }),
+  z.object({ ...flagBase, flag: z.literal("proneDefense") }),
+  z.object({ ...flagBase, flag: z.literal("twoWeaponFighting") }),
+  z.object({ ...flagBase, flag: z.literal("evasion") }),
+  z.object({ ...flagBase, flag: z.literal("critImmunity") }),
   z.object({
     ...flagBase,
     flag: z.literal("conditionImmunity"),
-    conditions: z.union([z.literal("all"), z.array(z.enum([...CONDITION_KEYS, "fear", "berserk", "charm"])).min(1)]),
+    conditions: z.union([z.literal("all"), z.array(z.union([AnyConditionSchema, z.enum(["fear", "berserk", "charm"])])).min(1)]),
   }),
 ]);
 
@@ -154,8 +189,10 @@ const CharmSchema = z.object({ kind: z.literal("charm"), duration: DurationSchem
 
 const ApplyConditionSchema = z.object({
   kind: z.literal("applyCondition"),
-  condition: z.enum(CONDITION_KEYS),
+  condition: AnyConditionSchema,
   duration: DurationSchema,
+  levels: z.number().int().min(1).max(6).optional(),
+  saveEnds: z.object({ ability: AbilityKeySchema }).optional(),
   percent: z.number().int().min(1).max(100).optional(),
   breakOnDamage: z.boolean().optional(),
   ...target,

@@ -6,17 +6,38 @@ import { HeroPortrait } from "@/components/character-profile/HeroPortrait";
 import { ActionsMenu } from "@/components/common/ActionsMenu";
 import { HudCard, HudPill, HudStatChip } from "@/components/hud/page";
 import { CharacterType } from "@/lib/constants/characters";
-import { heroBaseHp } from "@/lib/utils/characters/hero-hp";
+import { levelUpAvailable } from "@/lib/constants/experience";
+import { useCampaignRules } from "@/lib/hooks/campaigns";
+import { useClassMode } from "@/lib/hooks/classes";
+import { characterBaseHp } from "@/lib/utils/characters/hero-hp";
+import { currentHp } from "@/lib/utils/characters/resources/hp";
+import { heroHpFormula } from "@/lib/utils/rules";
+import { resolveClassEntries } from "@/lib/utils/spells/class-slots";
 import type { CharacterListItem } from "@/types/characters";
 
 interface DmCharacterCardProps {
   character: CharacterListItem;
   campaignId: string;
   busy: boolean;
+  maxLevel?: number;
   actions: { onLevelUp?: () => void; onDelete: () => void };
 }
 
-export function DmCharacterCard({ character, campaignId, busy, actions }: DmCharacterCardProps) {
+export function DmCharacterCard({ character, campaignId, busy, maxLevel = 20, actions }: DmCharacterCardProps) {
+  const { data: rules } = useCampaignRules(campaignId);
+
+  const classMode = useClassMode(campaignId);
+
+  const entries = classMode.enabled && character.classes?.length ? resolveClassEntries(character.classes, classMode.byId) : null;
+
+  const ooc = rules?.outOfCombat;
+
+  const maxHp = characterBaseHp(character, { entries, formula: rules && heroHpFormula(rules.heroScaling) }).total;
+
+  const hp = ooc?.persistResources && character.resources ? currentHp(character.resources, maxHp) : maxHp;
+
+  const levelReady = !!ooc?.xp && levelUpAvailable({ level: character.level, experience: character.experience ?? 0 }, maxLevel);
+
   const isNpc = character.type === CharacterType.NPC_HERO;
 
   return (
@@ -31,6 +52,8 @@ export function DmCharacterCard({ character, campaignId, busy, actions }: DmChar
           </p>
           <div className="flex min-w-0 items-center gap-1.5">
             <HudPill tone={isNpc ? "silver" : "gold"}>{isNpc ? "NPC герой" : "Гравець"}</HudPill>
+            {ooc?.inspiration && character.inspiration && <span title="Натхнення" className="text-hud-gold">✦</span>}
+            {levelReady && <HudPill tone="gold">Рівень доступний</HudPill>}
             {!isNpc && <span className="truncate text-xs text-hud-muted">{character.user?.displayName || "Не призначено"}</span>}
           </div>
         </div>
@@ -49,7 +72,7 @@ export function DmCharacterCard({ character, campaignId, busy, actions }: DmChar
       </div>
       <div className="flex gap-1.5">
         <HudStatChip short="Рів" value={character.level} />
-        <HudStatChip short="HP" value={heroBaseHp(character).total} />
+        <HudStatChip short="HP" label="HP" value={ooc?.persistResources ? (character.resources?.dead ? "Загинув" : `${hp}/${maxHp}`) : maxHp} />
         <HudStatChip short="AC" value={character.armorClass} />
         <HudStatChip short="Ініц" value={character.initiative} />
       </div>

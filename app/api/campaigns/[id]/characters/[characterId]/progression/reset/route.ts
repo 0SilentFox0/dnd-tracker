@@ -1,5 +1,4 @@
-import { runProgressionAction } from "../progression-action-handler";
-
+import { runProgressionAction } from "@/lib/server/characters/core/progression-action-handler";
 import { handleApiError } from "@/lib/utils/api/error-handler";
 
 export async function POST(_request: Request, { params }: { params: Promise<{ id: string; characterId: string }> }) {

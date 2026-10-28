@@ -5,7 +5,7 @@ import { findParticipant, isActive, isDormant, isEscaped, resolvedAbilitiesOf } 
 import { legacyActiveEffectModifiers } from "@/lib/utils/abilities/engine/effects/legacy-active-effects";
 import { countMarks } from "@/lib/utils/abilities/engine/effects/marks";
 import { liveActiveEffects } from "@/lib/utils/abilities/engine/effects/zone-effects";
-import { evaluateCondition } from "@/lib/utils/abilities/registry/conditions";
+import { evaluateCondition, hasCreatureTypeCondition } from "@/lib/utils/abilities/registry/conditions";
 import type { AttackKind, DamageKind, FlagEffect, FlagKey, StaticEffect, StatKey } from "@/lib/utils/abilities/schema";
 import { isBakedStat, isStaticEffect } from "@/lib/utils/abilities/schema/kinds";
 import type { AbilitySource, ResolvedAbility } from "@/types/abilities";
@@ -26,9 +26,10 @@ export interface ModifierEntry {
   icon?: string | null;
   /** назва вміння, раси, артефакту чи ефекту, що дав модифікатор */
   source?: string;
+  condition?: string;
 }
 
-type EntryMeta = Pick<ModifierEntry, "label" | "sourceType" | "icon" | "source">;
+type EntryMeta = Pick<ModifierEntry, "label" | "sourceType" | "icon" | "source" | "condition">;
 
 export interface ModifierResult {
   flat: number;
@@ -146,7 +147,11 @@ export function collectModifiers(
       for (const ability of resolvedAbilitiesOf(source)) {
         if (ability.trigger.event !== "passive") continue;
 
-        if (ability.condition && !evaluateCondition(ability.condition, { owner: source, event: null, participants })) continue;
+        const targetId = "damage" in query ? query.damage.targetId : undefined;
+
+        const event = hasCreatureTypeCondition(ability.condition) && targetId ? { type: "spellCast" as const, phase: "before" as const, actorId: source.basicInfo.id, targetIds: [targetId] } : null;
+
+        if (ability.condition && !evaluateCondition(ability.condition, { owner: source, event, participants })) continue;
 
         const auraEntries: ModifierEntry[] = [];
 
@@ -183,7 +188,9 @@ export function collectModifiers(
   for (const ae of liveActiveEffects(subject, participants)) {
     const owner = (ae.zone && findParticipant(participants, ae.zone.ownerId)) || subject;
 
-    for (const effect of ae.abilityEffects ?? legacyActiveEffectModifiers(ae)) add(effect, owner, { label: ae.name, sourceType: "effect", icon: ae.icon ?? ae.source?.icon, source: ae.name });
+    const condition = ae.effects.find((m) => m.type === "blinded" || m.type === "invisible")?.type;
+
+    for (const effect of ae.abilityEffects ?? legacyActiveEffectModifiers(ae)) add(effect, owner, { label: ae.name, sourceType: "effect", icon: ae.icon ?? ae.source?.icon, source: ae.name, ...(condition && { condition }) });
   }
 
   for (const effect of extra) add(effect, subject, { label: "Ця дія", sourceType: "action" });

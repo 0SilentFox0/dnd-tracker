@@ -1,6 +1,11 @@
+import { autoXpEnabled, battleXpAward } from "./battle-xp";
+import { originalSide } from "./original-side";
+
 import { CombatStatus, ParticipantSide, SYSTEM_ACTOR } from "@/lib/constants/battle";
 import { isActive, isEscaped } from "@/lib/utils/abilities/engine/core/participants";
 import { restoreCharm } from "@/lib/utils/abilities/engine/effects/charm";
+import { clearDeathSaves } from "@/lib/utils/battle/death-saves";
+import type { Ruleset } from "@/lib/utils/rules";
 import { BattleAction, BattleParticipant } from "@/types/battle";
 
 export interface VictoryCheckResult {
@@ -9,13 +14,6 @@ export interface VictoryCheckResult {
   result: "victory" | "defeat" | null;
   awaiting: "victory" | "defeat" | null;
   message: string;
-}
-
-/** Зачарований юніт у переможних умовах лишається на своєму початковому боці. */
-export function originalSide(p: BattleParticipant): ParticipantSide {
-  const origin = p.battleData.charmReturn ?? p.battleData.activeEffects.find((e) => e.charmOrigin)?.charmOrigin;
-
-  return origin?.side ?? p.basicInfo.side;
 }
 
 /** Перевіряє умови перемоги. */
@@ -89,17 +87,24 @@ export function completeBattle(
   initiativeOrder: BattleParticipant[],
   result: "victory" | "defeat",
   currentRound: number,
+  rules?: Ruleset,
 ): {
   updatedParticipants: BattleParticipant[];
   battleAction: BattleAction;
 } {
+  const reviveHp = (p: BattleParticipant) => (rules?.outOfCombat.persistResources ? 1 : p.combatStats.maxHp);
+
   const restored = initiativeOrder.map(restoreCharm);
 
   const revived = result === "victory" ? restored.filter(revivesOnVictory) : [];
 
   const updatedParticipants = restored.map((p) =>
-    revived.includes(p) ? { ...p, combatStats: { ...p.combatStats, currentHp: p.combatStats.maxHp, status: CombatStatus.ACTIVE } } : p,
+    revived.includes(p) ? { ...clearDeathSaves(p), combatStats: { ...p.combatStats, currentHp: reviveHp(p), status: CombatStatus.ACTIVE } } : p,
   );
+
+  const award = result === "victory" && autoXpEnabled(rules) ? battleXpAward(updatedParticipants) : null;
+
+  const baseText = result === "victory" ? "🎉 Бій завершено! Перемога союзників!" : "💀 Бій завершено! Поразка союзників!";
 
   const battleAction: BattleAction = {
     id: `battle-complete-${Date.now()}`,
@@ -111,13 +116,13 @@ export function completeBattle(
     actionType: "end_turn",
     targets: [],
     actionDetails: { battleResult: result },
-    resultText: result === "victory" ? "🎉 Бій завершено! Перемога союзників!" : "💀 Бій завершено! Поразка союзників!",
+    resultText: award ? `${baseText} · ⭐ Досвід: ${award.share} кожному` : baseText,
     hpChanges: revived.map((p) => ({
       participantId: p.basicInfo.id,
       participantName: p.basicInfo.name,
       oldHp: p.combatStats.currentHp,
-      newHp: p.combatStats.maxHp,
-      change: p.combatStats.currentHp - p.combatStats.maxHp,
+      newHp: reviveHp(p),
+      change: p.combatStats.currentHp - reviveHp(p),
     })),
     isCancelled: false,
   };

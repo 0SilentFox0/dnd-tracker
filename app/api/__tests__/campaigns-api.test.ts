@@ -5,6 +5,7 @@ import { createRequest,getResponseJson, getResponseStatus } from "./helpers";
 
 import { prisma } from "@/lib/db";
 import * as apiAuth from "@/lib/utils/api/api-auth";
+import { DEFAULT_RULES } from "@/lib/utils/rules";
 
 vi.mock("@/lib/utils/api/api-auth", () => ({
   requireAuth: vi.fn(),
@@ -13,6 +14,7 @@ vi.mock("@/lib/utils/api/api-auth", () => ({
 
 vi.mock("@/lib/db", () => ({
   prisma: {
+    $transaction: async (callback: (tx: object) => unknown) => callback({ $queryRaw: async () => [{ id: "c1" }] }),
     campaign: {
       findUnique: vi.fn(),
       update: vi.fn(),
@@ -185,6 +187,8 @@ describe("PATCH /api/campaigns/[id]", () => {
       userId: "dm-1",
       isDM: false,
       campaign: {
+        kind: "campaign",
+        rules: DEFAULT_RULES,
         id: campaignId,
         maxLevel: 20,
         allowPlayerEdit: true,
@@ -237,7 +241,7 @@ describe("PATCH /api/campaigns/[id]", () => {
     vi.mocked(apiAuth.requireDM).mockResolvedValue({
       userId: "dm-1",
       isDM: false,
-      campaign: { id: "c1", maxLevel: 20, allowPlayerEdit: true, members: [{ userId: "dm-1", role: "dm" }] },
+      campaign: { kind: "campaign", rules: DEFAULT_RULES, id: "c1", maxLevel: 20, allowPlayerEdit: true, members: [{ userId: "dm-1", role: "dm" }] },
     });
     vi.mocked(prisma.campaign.update).mockResolvedValue({ id: "c1", critChoiceByDm: true, members: [] } as never);
 

@@ -14,9 +14,12 @@ vi.mock("@/lib/server/show/show-store", () => ({ clearShowBattle }));
 
 vi.mock("@/lib/utils/api/api-auth", () => ({ requireAuth: vi.fn(), requireDM: vi.fn(), requireCampaignAccess: vi.fn() }));
 
-vi.mock("@/lib/db", () => ({ prisma: { battleScene: { findMany: vi.fn(), findUnique: vi.fn(), deleteMany: vi.fn() } } }));
+vi.mock("@/lib/db", () => ({ prisma: {
+    $transaction: async (callback: (tx: unknown) => unknown) => callback({ $queryRaw: async () => [{ id: "c1" }] }),
+    campaignMember: { findUnique: async () => ({ role: "dm" }) },
+ battleScene: { findMany: vi.fn(), findUnique: vi.fn(), deleteMany: vi.fn() } } }));
 
-const dm = { isDM: true } as never;
+const dm = { userId: "dm", isDM: true } as never;
 
 beforeEach(() => {
   vi.clearAllMocks();
@@ -26,7 +29,7 @@ beforeEach(() => {
 
 describe("видалення бою знімає виклик «До бою!»", () => {
   it("DELETE одного бою: clearShowBattle лише для нього, через after()", async () => {
-    vi.mocked(prisma.battleScene.findUnique).mockResolvedValue({ campaignId: "c1" } as never);
+    vi.mocked(prisma.battleScene.findUnique).mockResolvedValue({ id: "b1", version: 0, campaignId: "c1" } as never);
 
     const { DELETE } = await import("@/app/api/campaigns/[id]/battles/[battleId]/route");
 

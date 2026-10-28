@@ -2,32 +2,21 @@ import { HudSection } from "@/components/hud/form";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
-import {
-  extractRaceImmunities,
-  getUnitImmunities,
-} from "@/lib/utils/races/race-effects";
-import type { Race } from "@/types/races";
+import { getUnitImmunities } from "@/lib/utils/races/race-effects";
 import type { Unit } from "@/types/units";
 
 interface UnitImmunitiesProps {
   formData: Partial<Unit>;
-  race?: Race | null;
   onChange: (data: Partial<Unit>) => void;
 }
 
 export function UnitImmunities({
   formData,
-  race,
   onChange,
 }: UnitImmunitiesProps) {
   const unitImmunities = formData.immunities || [];
 
-  const raceImmunities = extractRaceImmunities(race);
-
-  const allImmunities = getUnitImmunities(
-    formData as Unit,
-    race
-  );
+  const allImmunities = getUnitImmunities(formData as Unit);
 
   const handleAdd = () => {
     const newImmunity = prompt("Введіть назву імунітету:");
@@ -55,21 +44,6 @@ export function UnitImmunities({
         </Button>
       }
     >
-      {raceImmunities.length > 0 && (
-        <div className="space-y-2">
-          <Label className="text-sm text-muted-foreground">
-            Імунітети з раси ({race?.name}):
-          </Label>
-          <div className="flex flex-wrap gap-2">
-            {raceImmunities.map((immunity, index) => (
-              <Badge key={`race-${index}`} variant="secondary" className="text-sm">
-                {immunity}
-              </Badge>
-            ))}
-          </div>
-        </div>
-      )}
-
       {unitImmunities.length > 0 && (
         <div className="space-y-2">
           <Label className="text-sm text-muted-foreground">
@@ -100,7 +74,7 @@ export function UnitImmunities({
       {allImmunities.length > 0 && (
         <div className="space-y-2 border-t pt-2">
           <Label className="text-sm font-semibold">
-            Всі імунітети (раса + юніт):
+            Всі імунітети:
           </Label>
           <div className="flex flex-wrap gap-2">
             {allImmunities.map((immunity, index) => (

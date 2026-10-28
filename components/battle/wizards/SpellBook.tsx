@@ -2,6 +2,8 @@
 
 import { Swords } from "lucide-react";
 
+import { CastSourceSelect } from "./spellbook/CastSourceSelect";
+import { SlotSelect } from "./spellbook/SlotSelect";
 import { SpellAimPanel } from "./spellbook/SpellAimPanel";
 import { SpellCastDialog } from "./spellbook/SpellCastDialog";
 
@@ -32,13 +34,24 @@ export function SpellBook({ book }: { book: Book }) {
 
   const widening = selected && view.wideningOf(selected);
 
+  const pending = view.pendingCast?.spellId === selected?.id ? view.pendingCast : undefined;
+
+  const preparing = !view.free && selected?.cost === "long" && (pending?.remainingRounds ?? view.timing?.rounds ?? 0) > 1;
+
   const detailPage = selected && (
     <div className="relative flex h-full flex-1 flex-col px-5 pb-5 pt-6">
       <SpellDetail spell={selected} formula={view.formulaOf(selected)}>
+        {view.timing?.trigger && <p className="mt-3 text-sm">Реакція: {view.timing.trigger}</p>}
+        {selected.cost === "long" && <p className="mt-3 text-sm">{pending?.remainingRounds ?? view.timing?.rounds} раундів накладання · потрібні дія й концентрація кожного ходу</p>}
+        {state.error && <p role="alert" className="text-sm text-red-700">{state.error}</p>}
+        {view.grantLabel(selected) && <p className="mt-3 text-sm font-semibold">{view.grantLabel(selected)}</p>}
         {widening && <p role="note" className="mt-4 border-l-4 border-[#7a2a1f] bg-[#7a2a1f]/10 py-2 pl-3 pr-2 text-base font-semibold text-[#7a2a1f]">{widening.note}</p>}
-        <button type="button" disabled={(selected.level > 0 && view.slotLeft(selected.level) === 0) || view.costUsed(selected)} onClick={actions.toTargets} className={cn(seal, "mt-auto")}>
-          <Swords className="size-5" />{targetsLabel(state.pick?.targetMode)}
+        {state.step === "spell" && <div className="mt-4">{view.sourceOptions.length > 0 ? <CastSourceSelect book={book} /> : <SlotSelect book={book} />}</div>}
+        <button type="button" disabled={selected.executionMode === "manual" || (selected.level > 0 && !view.grantLabel(selected) && (view.noSlot(selected) || (!view.slot.options.length && view.slotLeft(selected.level) === 0))) || view.costUsed(selected)} onClick={preparing ? () => void actions.prepareCast() : actions.toTargets} className={cn(seal, "mt-auto")}>
+          <Swords className="size-5" />{preparing ? pending ? "Продовжити накладання" : "Почати накладання" : targetsLabel(state.pick?.targetMode)}
         </button>
+        {selected.executionMode !== "manual" && pending && view.canFastForward && preparing && <button type="button" className="mt-2 text-sm underline" disabled={view.costUsed(selected)} onClick={actions.completeLong}>ДМ: зарахувати решту часу й завершити</button>}
+        {view.pendingCast && <button type="button" className="mt-2 text-sm underline" onClick={() => void actions.prepareCast(true)}>Перервати накладання</button>}
       </SpellDetail>
     </div>
   );
@@ -50,7 +63,7 @@ export function SpellBook({ book }: { book: Book }) {
       {view.mapTargeting && selected && <SpellAimPanel book={book} spellName={selected.name} />}
       <SpellCastDialog book={book} />
     <ResponsiveDialog open={open} onOpenChange={(o) => !o && actions.close()} title={showDetail && !wide ? "← До списку" : "Книга заклинань"} size="lg" className={cn(HUD_SURFACE, "max-w-[980px] border-none bg-[#3a2016] p-2.5 text-[#2a2018] shadow-[0_30px_80px_rgba(0,0,0,.9),inset_0_0_0_2px_#2a160f]")}>
-      <SpellBookPages byLevel={byLevel} page={{ level: state.level, slotOf: view.slotLeft, onLevel: actions.setLevel }} pick={{ pickedId: state.pick?.spellId ?? null, onPick: actions.pick, formulaOf: view.formulaOf, badgeOf: (s) => view.wideningOf(s)?.badge }} layout={{ wide, showDetail }} detail={detailPage || null} />
+      <SpellBookPages byLevel={byLevel} page={{ level: state.level, slotOf: view.slotLeft, onLevel: actions.setLevel }} pick={{ pickedId: state.pick?.spellId ?? null, onPick: actions.pick, formulaOf: view.formulaOf, badgeOf: (s) => [view.grantLabel(s), view.wideningOf(s)?.badge].filter(Boolean).join(" · ") || undefined }} layout={{ wide, showDetail }} detail={detailPage || null} />
       {showDetail && !wide && canGoBack(state) && <button type="button" onClick={actions.back} className="hud-sc mt-2 h-10 w-full text-sm text-hud-bone">← Назад</button>}
     </ResponsiveDialog>
     </>

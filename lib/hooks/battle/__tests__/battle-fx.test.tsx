@@ -29,10 +29,23 @@ function setHidden(hidden: boolean) {
   document.dispatchEvent(new Event("visibilitychange"));
 }
 
-async function load() {
+async function loadFx() {
   vi.resetModules();
 
-  return import("@/lib/hooks/battle");
+  return import("@/lib/hooks/battle/useFxEnabled");
+}
+
+async function loadQueue() {
+  vi.resetModules();
+
+  const [queue, scene, impact, busy] = await Promise.all([
+    import("@/lib/hooks/battle/useBattleFxQueue"),
+    import("@/lib/hooks/battle/useBattleScene"),
+    import("@/lib/hooks/battle/fx-impact"),
+    import("@/lib/hooks/battle/fx-busy"),
+  ]);
+
+  return { ...queue, ...scene, ...impact, ...busy };
 }
 
 beforeEach(() => window.localStorage.clear());
@@ -43,10 +56,14 @@ afterEach(() => {
 });
 
 describe("useFxEnabled", () => {
+  let fx: Awaited<ReturnType<typeof loadFx>>;
+
+  beforeEach(async () => { fx = await loadFx(); });
+
   it("reduced motion: user toggle stays on, action FX off; reacts to the media change; one MediaQueryList", async () => {
     const motion = stubReducedMotion(true);
 
-    const { useFxEnabled } = await load();
+    const { useFxEnabled } = fx;
 
     const a = renderHook(() => useFxEnabled());
 
@@ -64,7 +81,7 @@ describe("useFxEnabled", () => {
   it("user toggle off disables everything", async () => {
     stubReducedMotion(false);
 
-    const { useFxEnabled } = await load();
+    const { useFxEnabled } = fx;
 
     const { result } = renderHook(() => useFxEnabled());
 
@@ -75,12 +92,16 @@ describe("useFxEnabled", () => {
 });
 
 describe("useBattleFxQueue", () => {
+  let modules: Awaited<ReturnType<typeof loadQueue>>;
+
+  beforeEach(async () => { modules = await loadQueue(); });
+
   const melee = (i: number) => action({ actionIndex: i, id: `b-${i}`, actionType: "attack", actionDetails: { attackKind: "melee", isHit: true } });
 
   const range = (to: number) => Array.from({ length: to }, (_, i) => melee(i + 1));
 
   it("hidden tab queues nothing and drops the pending queue; return plays only new actions", async () => {
-    const { BattleSceneDataContext, useBattleFxQueue } = await load();
+    const { BattleSceneDataContext, useBattleFxQueue } = modules;
 
     let log: BattleAction[] = range(1);
 
@@ -117,7 +138,7 @@ describe("useBattleFxQueue", () => {
   });
 
   it("сигнал удару: дія поза чергою — одразу, дія в черзі — лише після свого FX або коли черга її відкинула", async () => {
-    const { BattleSceneDataContext, useBattleFxQueue, onFxImpact } = await load();
+    const { BattleSceneDataContext, useBattleFxQueue, onFxImpact } = modules;
 
     let log: BattleAction[] = range(1);
 
@@ -145,7 +166,7 @@ describe("useBattleFxQueue", () => {
   });
 
   it("useFxBusy: зайнято, поки черга не порожня; FX вимкнено — вільно", async () => {
-    const { BattleSceneDataContext, useBattleFxQueue, useFxBusy } = await load();
+    const { BattleSceneDataContext, useBattleFxQueue, useFxBusy } = modules;
 
     let log: BattleAction[] = range(1);
 
@@ -171,7 +192,7 @@ describe("useBattleFxQueue", () => {
   });
 
   it("FX off with a pending queue → current null", async () => {
-    const { BattleSceneDataContext, useBattleFxQueue } = await load();
+    const { BattleSceneDataContext, useBattleFxQueue } = modules;
 
     let log: BattleAction[] = range(1);
 

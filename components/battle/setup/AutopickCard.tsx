@@ -1,10 +1,12 @@
 "use client";
 
 import { HudSection } from "@/components/hud/form";
+import { HudChipTabs } from "@/components/hud/page";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { SelectField } from "@/components/ui/select-field";
 import type { BalanceSuggestions } from "@/lib/hooks/battles";
+import { XP_DIFFICULTIES, XP_DIFFICULTY_LABELS } from "@/lib/utils/battle/balance/xp-budget";
 import type { IdName } from "@/types/common";
 
 interface AutopickCardProps {
@@ -14,12 +16,14 @@ interface AutopickCardProps {
 }
 
 export function AutopickCard({ hasAllies, races, balance }: AutopickCardProps) {
-  const { isLoading, race, suggested, done, actions } = balance;
+  const { isLoading, race, suggested, done, actions, xp } = balance;
 
   return (
     <HudSection title="Підбір ворогів" className="space-y-4">
       <p className="text-xs text-muted-foreground">
-        Система підбирає склад і сама масштабує HP та шкоду ворогів під силу героїв, щоб бій тривав ~3–4 раунди.
+        {xp.enabled
+          ? "Система підбирає склад під бюджет XP 5e обраної складності — без масштабування HP і шкоди."
+          : "Система підбирає склад і сама масштабує HP та шкоду ворогів під силу героїв, щоб бій тривав ~3–4 раунди."}
       </p>
       {hasAllies ? (
         <>
@@ -35,6 +39,12 @@ export function AutopickCard({ hasAllies, races, balance }: AutopickCardProps) {
               options={races.map((r) => ({ value: r.id, label: r.name }))}
             />
           </div>
+          {xp.enabled && (
+            <HudChipTabs
+              ariaLabel="Складність"
+              items={XP_DIFFICULTIES[xp.edition].map((d) => ({ key: d, label: XP_DIFFICULTY_LABELS[d], active: xp.difficulty === d, onSelect: () => actions.setDifficulty(d) }))}
+            />
+          )}
           <div className="flex flex-wrap gap-2">
             <Button type="button" onClick={actions.suggest} disabled={isLoading}>
               {isLoading ? "Підбір…" : "Підібрати"}
@@ -57,6 +67,7 @@ export function AutopickCard({ hasAllies, races, balance }: AutopickCardProps) {
                         ×{s.hpMult} HP · ×{s.dmgMult} шкода
                       </span>
                     )}
+                    {s.xp !== undefined && <span className="ml-2 text-xs text-muted-foreground">XP {s.xp}</span>}
                   </li>
                 ))}
               </ul>

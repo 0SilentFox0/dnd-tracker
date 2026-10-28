@@ -27,7 +27,9 @@ export function SpellGroupAccordion({
   spellGroups,
   spellActions,
 }: SpellGroupAccordionProps) {
-  const groupId = spellGroups.find((g) => g.name === groupName)?.id;
+  const group = spellGroups.find((g) => g.name === groupName);
+
+  const groupId = group?.id;
 
   const isUngrouped = isUngroupedKey(groupName);
 
@@ -35,7 +37,7 @@ export function SpellGroupAccordion({
 
   const totalSpells = calculateTotalSpellsInGroup(levels);
 
-  const GroupIcon = getSpellGroupIcon(displayName);
+  const GroupIcon = getSpellGroupIcon(group);
 
   const actions = useSpellGroupActions({
     campaignId,

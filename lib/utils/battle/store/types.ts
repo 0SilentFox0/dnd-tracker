@@ -1,5 +1,6 @@
 import type { BattleStatus } from "@/lib/constants/battle";
 import type { StoredPendingCritChoice } from "@/lib/utils/battle/crit-choice/types";
+import type { Ruleset } from "@/lib/utils/rules";
 import type { AbilityUsageCounter } from "@/types/abilities";
 import type { BattleAudioState } from "@/types/audio";
 import type { AirborneState, BattleMapConfig, BattleParticipant, BattlePreparationParticipant, Direction8, GridPoint } from "@/types/battle";
@@ -86,6 +87,7 @@ export interface BattleMeta {
   description: string | null;
   setup: BattlePreparationParticipant[];
   friendlyFire: boolean;
+  rules: Ruleset;
   critChoiceByDm: boolean;
   map: BattleMapConfig | null;
   audio?: BattleAudioState | null;
@@ -104,7 +106,7 @@ export interface LoadedBattle {
 
 export type ScenePatch = Partial<
   Pick<BattleSceneState, "status" | "round" | "turnIndex" | "pendingMoraleCheck" | "pendingCritChoice" | "startedAt" | "completedAt">
-> & { map?: BattleMapConfig | null };
+> & { map?: BattleMapConfig | null; rules?: Ruleset };
 
 export interface BattleMutationOutcome {
   scene?: ScenePatch;

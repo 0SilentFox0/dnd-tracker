@@ -17,7 +17,7 @@ function Harness({ initial = [] as Ability[], issues = [] as { severity: "loss" 
 
   return (
     <QueryClientProvider client={new QueryClient()}>
-      <AbilityListEditor campaignId="c1" value={value} onChange={setValue} issues={issues} onValidityChange={onValid} />
+      <AbilityListEditor campaignId="c1" value={value} onChange={setValue} issues={issues} onValidityChange={onValid} performChoices={{ attacks: [{ name: "Rend" }], spells: [{ id: "fear", name: "Страх" }] }} />
       <output data-testid="json">{JSON.stringify(value)}</output>
     </QueryClientProvider>
   );
@@ -132,5 +132,19 @@ describe("AbilityListEditor", () => {
     fireEvent.change(screen.getByLabelText("Назва"), { target: { value: "" } });
 
     expect(screen.getByTestId("field-errors-0.name")).toBeInTheDocument();
+  });
+});
+
+ describe("linked action editor", () => {
+  afterEach(cleanup);
+
+  it("chooses an attack reference and lair limit", () => {
+    render(<Harness initial={[{ id: "a", name: "Pounce", trigger: { event: "action" }, limits: { legendaryCost: 1 }, effects: [{ kind: "note", text: "Move" }] }]} />);
+    fireEvent.change(screen.getByLabelText("Виконує"), { target: { value: "attack" } });
+    fireEvent.change(screen.getByLabelText("Атака вміння"), { target: { value: "Rend" } });
+    expect(json()[0].perform).toEqual({ kind: "attack", attack: "Rend" });
+    fireEvent.click(screen.getByLabelText("Дія лігва"));
+    expect(json()[0].limits).toMatchObject({ lair: true });
+    expect(json()[0].limits?.legendaryCost).toBeUndefined();
   });
 });

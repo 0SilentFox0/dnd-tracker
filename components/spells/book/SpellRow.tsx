@@ -1,6 +1,4 @@
-import { Sparkles } from "lucide-react";
-
-import { OptimizedImage } from "@/components/common/OptimizedImage";
+import { SpellIcon } from "@/components/spells/SpellIcon";
 import { spellSchoolColor } from "@/lib/constants/spells";
 import { cn } from "@/lib/utils";
 import { targetingLabel } from "@/lib/utils/spells/model/labels";
@@ -17,7 +15,7 @@ interface SpellRowExtras {
   badge?: string;
 }
 
-export function SpellRow({ spell, school, wide, picked, extras = {}, onPick }: { spell: BookSpell; school: string; wide: boolean; picked: boolean; extras?: SpellRowExtras; onPick: (spell: BookSpell) => void }) {
+export function SpellRow({ spell, school, wide, picked, extras = {}, onPick }: { spell: BookSpell; school: { name: string; color?: string | null }; wide: boolean; picked: boolean; extras?: SpellRowExtras; onPick: (spell: BookSpell) => void }) {
   const { formula, badge } = extras;
 
   const size = wide ? SIZES.wide : SIZES.narrow;
@@ -27,7 +25,7 @@ export function SpellRow({ spell, school, wide, picked, extras = {}, onPick }: {
   return (
     <button type="button" onClick={() => onPick(spell)} className={cn("flex w-full items-center gap-3 border-b border-[#2a2018]/15 text-left", size.row, picked && "-mx-3 w-[calc(100%+1.5rem)] bg-[#9c2a1d]/10 px-3 shadow-[inset_3px_0_0_#9c2a1d]")}>
       <span className={cn("flex shrink-0 items-center justify-center border-2 bg-[#2a2018]/5", size.frame)} style={{ borderColor: spellSchoolColor(school) }}>
-        {spell.icon ? <OptimizedImage src={spell.icon} alt="" width={size.px} height={size.px} className={cn("object-contain", size.icon)} /> : <Sparkles className="size-5" />}
+        <SpellIcon spell={{ icon: spell.icon, spellGroup: spell.spellGroup ?? null }} size={size.px} className={cn("object-contain", size.icon)} />
       </span>
       <span className="min-w-0 flex-1">
         <span className="flex min-w-0 items-center gap-2">

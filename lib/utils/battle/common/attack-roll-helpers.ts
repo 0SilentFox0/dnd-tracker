@@ -42,16 +42,17 @@ export function resolveAttackRoll(
   data: AttackRollData,
   targetAC: number,
   totalAttackBonus: number,
+  crit: { critOn: number; fumbleOn: number } = { critOn: 20, fumbleOn: 1 },
 ): ResolveAttackRollResult {
   const d20 = getEffectiveD20(data);
 
-  const crit = d20 === 20;
+  const critFail = crit.fumbleOn > 0 && d20 <= crit.fumbleOn;
 
-  const critFail = d20 === 1;
+  const isCrit = !critFail && d20 >= crit.critOn;
 
   const totalRoll = d20 + totalAttackBonus;
 
-  const hit = !critFail && (crit || totalRoll >= targetAC);
+  const hit = !critFail && (isCrit || totalRoll >= targetAC);
 
-  return { hit, crit, critFail };
+  return { hit, crit: isCrit, critFail };
 }

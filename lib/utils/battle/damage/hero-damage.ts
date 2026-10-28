@@ -1,5 +1,6 @@
 import { ParticipantSourceType } from "@/lib/constants/battle";
 import { getHeroDamageDiceForLevel } from "@/lib/constants/hero-scaling";
+import { isFiveE } from "@/lib/utils/battle/attack/ability";
 import { attackKindOf } from "@/lib/utils/battle/common/attack-kind";
 import { diceAverage, diceCount, diceSlots, mergeDiceFormulas, parseDiceLenient } from "@/lib/utils/common/dice";
 import type { BattleAttack, BattleParticipant } from "@/types/battle";
@@ -13,11 +14,11 @@ export interface HeroAttackDamageParts {
 export function heroAttackDamageParts(p: BattleParticipant, attack: BattleAttack): HeroAttackDamageParts {
   const weaponDice = attack.damageDice ?? "";
 
-  if (p.basicInfo.sourceType !== ParticipantSourceType.CHARACTER) return { weaponDice, heroDice: "", formula: weaponDice };
+  if (p.basicInfo.sourceType !== ParticipantSourceType.CHARACTER || isFiveE(p)) return { weaponDice, heroDice: "", formula: weaponDice };
 
   const type = attackKindOf(attack.type);
 
-  const heroDice = getHeroDamageDiceForLevel(p.abilities.level, type);
+  const heroDice = getHeroDamageDiceForLevel(p.abilities.level, type, { meleeDiceByLevel: p.abilities.heroDice?.melee, rangedDiceByLevel: p.abilities.heroDice?.ranged });
 
   return { weaponDice, heroDice, formula: mergeDiceFormulas(weaponDice, heroDice) };
 }
@@ -48,10 +49,10 @@ export function heroDamageContext(p: BattleParticipant, attack: BattleAttack, da
 
   const fullDiceCount = diceCount(weaponDice) + diceCount(heroDice);
 
-  const fullRolls = isHero && fullDiceCount > 0 && damageRolls.length === fullDiceCount;
+  const fullRolls = isHero && fullDiceCount > 0 && (damageRolls.length === fullDiceCount || damageRolls.length === 2 * fullDiceCount);
 
   return {
-    heroLevelPart: isHero ? p.abilities.level : 0,
+    heroLevelPart: isHero && !isFiveE(p) ? p.abilities.level : 0,
     heroDicePart: heroDice && !fullRolls ? diceAverage(heroDice) : 0,
     heroDiceNotation: fullRolls ? "" : heroDice,
     weaponDiceNotation: (fullRolls ? formula : "") || weaponDice || undefined,

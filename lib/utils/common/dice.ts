@@ -1,3 +1,10 @@
+export const DICE_PATTERN = /^(\d+)d(\d+)([+-]\d+)?$/;
+
+export const DICE_TERM_PATTERN = /^(\d+)d(\d+)$/i;
+
+/** Нормалізує запис кісток: без пробілів, нижній регістр, кириличні к/д і латинська k → d. */
+export const normalizeDiceText = (raw: string): string => raw.toLowerCase().replace(/\s+/g, "").replace(/[кkд]/g, "d");
+
 export type DiceGroup = { count: number; size: number };
 
 export type DiceFormula = { groups: DiceGroup[]; flat: number };

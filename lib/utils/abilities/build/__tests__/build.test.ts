@@ -69,8 +69,8 @@ describe("collectCharacterAbilities", () => {
 
     const list = collectCharacterAbilities({
       skills: [
-        { row: skillRow("b", "Хаос — Базовий", 10), level: "basic", mainSkillId: "m", mainSkillSpellGroupId: "chaos" },
-        { row: skillRow("e", "Хаос — Експерт", 30), level: "expert", mainSkillId: "m", mainSkillSpellGroupId: "chaos" },
+        { row: skillRow("b", "Хаос — Базовий", 10), level: "basic", levelNode: true, mainSkillId: "m", mainSkillSpellGroupId: "chaos" },
+        { row: skillRow("e", "Хаос — Експерт", 30), level: "expert", levelNode: true, mainSkillId: "m", mainSkillSpellGroupId: "chaos" },
       ],
       race: null,
       artifacts: [],

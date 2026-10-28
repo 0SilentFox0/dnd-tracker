@@ -4,6 +4,7 @@ import type { CastableSpell } from "./spell-process";
 import type { CriticalEffect } from "@/lib/constants/critical-effects";
 import type { SummonRequest } from "@/lib/utils/abilities/engine/core/types";
 import type { CritPicker } from "@/lib/utils/battle/crit-choice/types";
+import type { Ruleset } from "@/lib/utils/rules";
 import type { BattleAction, BattleAttack, BattleMapConfig, BattleParticipant } from "@/types/battle";
 
 export interface ProcessAttackParams {
@@ -15,6 +16,8 @@ export interface ProcessAttackParams {
   disadvantageRoll?: number;
   /** Вибір гравця; діє лише коли навички не задають перевагу/недолік */
   rollMode?: "normal" | "advantage" | "disadvantage";
+  /** Натхнення дає перевагу цьому кидку */
+  inspiration?: boolean;
   damageRolls: number[];
   allParticipants: BattleParticipant[];
   currentRound: number;
@@ -24,6 +27,8 @@ export interface ProcessAttackParams {
   bonusLabel?: string;
   /** Наступні удари залпу: основну дію вже витратив перший удар */
   actionSpent?: boolean;
+  /** Атака другою рукою: витрачає бонусну дію, а не дію/лічильник атак */
+  offHand?: boolean;
   /** «Перешкода»: шкода влучання ×0.5 після всіх модифікаторів і опорів */
   obstacle?: boolean;
   rng?: () => number;
@@ -33,6 +38,7 @@ export interface ProcessAttackParams {
   /** Що з кубиків докинув сервер: d20 і шкода від цього індексу */
   serverRolled?: { d20?: boolean; damageFrom?: number };
   map?: BattleMapConfig | null;
+  rules?: Ruleset;
   /** Лише текст і зміни учасників: summons і зона закляття на влучання не застосовуються (зараз це Dark 1-3) */
   hitSpells?: ReadonlyMap<string, CastableSpell>;
 }

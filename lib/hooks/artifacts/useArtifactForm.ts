@@ -4,15 +4,17 @@ import { useState } from "react";
 
 import { abilitySaveError, useAbilityValidity } from "@/lib/hooks/abilities";
 import { useConfirm } from "@/lib/hooks/common";
+import type { ArmorStats } from "@/lib/utils/artifacts/armor-stats";
 import {
   type ArtifactFormState,
   type ArtifactFormSubmitPayload,
   buildArtifactPayload,
 } from "@/lib/utils/artifacts/artifact-form";
 import type { WeaponStats } from "@/lib/utils/artifacts/weapon-stats";
+import type { ItemStats } from "@/lib/utils/items/item-stats";
 
 interface UseArtifactFormOptions {
-  initial: Omit<ArtifactFormState, "weapon"> & { weapon?: WeaponStats };
+  initial: Omit<ArtifactFormState, "weapon" | "armor" | "item"> & { weapon?: WeaponStats; armor?: ArmorStats | null; item?: ItemStats | null };
   mode: "create" | "edit";
   onSubmit: (payload: ArtifactFormSubmitPayload) => Promise<void>;
   onDelete?: () => Promise<void>;
@@ -21,7 +23,7 @@ interface UseArtifactFormOptions {
 export function useArtifactForm({ initial, mode, onSubmit, onDelete }: UseArtifactFormOptions) {
   const confirm = useConfirm();
 
-  const [fields, setFields] = useState<ArtifactFormState>({ ...initial, weapon: initial.weapon ?? {} });
+  const [fields, setFields] = useState<ArtifactFormState>({ ...initial, weapon: initial.weapon ?? {}, armor: initial.armor ?? null });
 
   const abilities = useAbilityValidity();
 

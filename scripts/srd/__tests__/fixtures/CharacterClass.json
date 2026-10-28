@@ -1,0 +1,122 @@
+[
+  {
+    "fields": {
+      "caster_type": "FULL",
+      "document": "srd-2024",
+      "hit_dice": "D8",
+      "name": "Bard",
+      "primary_abilities": [],
+      "saving_throws": [
+        "cha",
+        "dex"
+      ],
+      "subclass_of": null
+    },
+    "model": "api_v2.characterclass",
+    "pk": "srd-2024_bard"
+  },
+  {
+    "fields": {
+      "caster_type": "NONE",
+      "desc": "*Pursue Physical Excellence in Combat*\n\nA Champion focuses on the development of martial prowess in a relentless pursuit of victory. Champions combine rigorous training with physical excellence to deal devastating blows, withstand peril, and garner glory. Whether in athletic contests or bloody battle, Champions strive for the crown of the victor.",
+      "document": "srd-2024",
+      "hit_dice": null,
+      "name": "Champion",
+      "primary_abilities": [],
+      "saving_throws": [],
+      "subclass_of": "srd-2024_fighter"
+    },
+    "model": "api_v2.characterclass",
+    "pk": "srd-2024_champion"
+  },
+  {
+    "fields": {
+      "caster_type": "FULL",
+      "desc": "*Plumb the Depths of Magical Knowledge*\n\nBards of the College of Lore collect spells and secrets from diverse sources, such as scholarly tomes, mystical rites, and peasant tales. The college's members gather in libraries and universities to share their lore with one another. They also meet at festivals or affairs of state, where they can expose corruption, unravel lies, and poke fun at self-important figures of authority.",
+      "document": "srd-2024",
+      "hit_dice": "D8",
+      "name": "College of Lore",
+      "primary_abilities": [],
+      "saving_throws": [],
+      "subclass_of": "srd-2024_bard"
+    },
+    "model": "api_v2.characterclass",
+    "pk": "srd-2024_college-of-lore"
+  },
+  {
+    "fields": {
+      "caster_type": "NONE",
+      "desc": "*Create Explosive Elemental Effects*\n\nYour studies focus on magic that creates powerful elemental effects such as bitter cold, searing flame, rolling thunder, crackling lightning, and burning acid. Some Evokers find employment in military forces, serving as artillery to blast armies from afar. Others use their power to protect others, while some seek their own gain.",
+      "document": "srd-2024",
+      "hit_dice": null,
+      "name": "Evoker",
+      "primary_abilities": [],
+      "saving_throws": [],
+      "subclass_of": "srd-2024_wizard"
+    },
+    "model": "api_v2.characterclass",
+    "pk": "srd-2024_evoker"
+  },
+  {
+    "fields": {
+      "caster_type": "NONE",
+      "document": "srd-2024",
+      "hit_dice": "D10",
+      "name": "Fighter",
+      "primary_abilities": [],
+      "saving_throws": [
+        "dex",
+        "str"
+      ],
+      "subclass_of": null
+    },
+    "model": "api_v2.characterclass",
+    "pk": "srd-2024_fighter"
+  },
+  {
+    "fields": {
+      "caster_type": "NONE",
+      "document": "srd-2024",
+      "hit_dice": "D8",
+      "name": "Monk",
+      "primary_abilities": [],
+      "saving_throws": [
+        "dex",
+        "wis"
+      ],
+      "subclass_of": null
+    },
+    "model": "api_v2.characterclass",
+    "pk": "srd-2024_monk"
+  },
+  {
+    "fields": {
+      "caster_type": "NONE",
+      "desc": "*Master Unarmed Combat Techniques*\n\nWarriors of the Open Hand are masters of unarmed combat. They learn techniques to push and trip their opponents and manipulate their own energy to protect themselves from harm.",
+      "document": "srd-2024",
+      "hit_dice": null,
+      "name": "Warrior of the Open Hand",
+      "primary_abilities": [],
+      "saving_throws": [],
+      "subclass_of": "srd-2024_monk"
+    },
+    "model": "api_v2.characterclass",
+    "pk": "srd-2024_warrior-of-the-open-hand"
+  },
+  {
+    "fields": {
+      "caster_type": "FULL",
+      "document": "srd-2024",
+      "hit_dice": "D6",
+      "name": "Wizard",
+      "primary_abilities": [],
+      "saving_throws": [
+        "int",
+        "wis"
+      ],
+      "subclass_of": null
+    },
+    "model": "api_v2.characterclass",
+    "pk": "srd-2024_wizard"
+  }
+]

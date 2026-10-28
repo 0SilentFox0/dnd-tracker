@@ -28,6 +28,7 @@ vi.mock("@/lib/api/battles", async (orig) => {
 });
 vi.mock("@/lib/api/characters", () => ({ getCharacters: vi.fn(async () => [{ id: "ch1", name: "Арвен", type: "player", controlledBy: "u1", avatar: null }]) }));
 vi.mock("@/lib/api/units", () => ({ getUnits: vi.fn(async () => []) }));
+vi.mock("@/lib/api/rules", async () => ({ getCampaignRules: vi.fn(async () => (await import("@/lib/utils/rules")).DEFAULT_RULES), updateCampaignRules: vi.fn() }));
 vi.mock("@/lib/api/races", () => ({ getRaces: vi.fn(async () => []) }));
 
 import { BattleSetupForm } from "@/components/battle/setup/BattleSetupForm";

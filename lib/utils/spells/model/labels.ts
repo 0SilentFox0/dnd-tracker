@@ -14,7 +14,11 @@ export function targetingLabel(t: SpellTargeting): string {
 }
 
 export function resolutionLabel(r: SpellResolution): string {
-  return r.kind === "auto" ? "автоматично" : `рятівний кидок ${ABILITY_LABELS[r.ability]} (${inline(SPELL_SAVE_ON_SUCCESS_LABELS[r.onSuccess])})`;
+  if (r.kind === "auto") return "автоматично";
+
+  if (r.kind === "attack") return "атака заклинанням";
+
+  return `рятівний кидок ${ABILITY_LABELS[r.ability]} (${inline(SPELL_SAVE_ON_SUCCESS_LABELS[r.onSuccess])})`;
 }
 
 export const costLabel = (c: SpellCost): string => inline(SPELL_COST_LABELS[c]);

@@ -9,8 +9,7 @@ export const getDefaultSpellFormData = defaultSpellForm;
 
 const levelOption = (level: number) => ({ value: String(level), label: spellLevelName(level) });
 
-/** Нові заклинання — рівні 1–5; старе заклинання 0-го рівня лишає свій рівень у списку, поки його не змінять. */
-export const spellLevelOptions = (current?: number) => [...(current === 0 ? [0] : []), 1, 2, 3, 4, 5].map(levelOption);
+export const spellLevelOptions = () => [0, 1, 2, 3, 4, 5, 6, 7, 8, 9].map(levelOption);
 
 export const SPELL_COST_OPTIONS = labelOptions(SPELL_COST_LABELS);
 

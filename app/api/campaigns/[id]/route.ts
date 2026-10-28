@@ -1,23 +1,15 @@
 import { NextResponse } from "next/server";
 
-import { invalidateCampaignLists } from "@/lib/cache/campaign-list";
-import { invalidateReference, ReferenceKind } from "@/lib/cache/tags";
 import { API_ERRORS } from "@/lib/constants/api-errors";
 import { prisma } from "@/lib/db";
 import { updateCampaignSchema } from "@/lib/schemas";
-import { PUBLIC_USER_SELECT } from "@/lib/server/users/db-user";
+import { deleteCampaign, updateCampaignSettings } from "@/lib/server/campaigns/action-service";
+import { CAMPAIGN_INCLUDE, CAMPAIGN_OMIT } from "@/lib/server/campaigns/create-campaign";
+import { sessionDmActor } from "@/lib/utils/api/actor";
 import { requireAuth, requireDM } from "@/lib/utils/api/api-auth";
 import { errorResponse } from "@/lib/utils/api/api-response";
 import { handleApiError } from "@/lib/utils/api/error-handler";
 import { parseBody } from "@/lib/utils/api/parse-body";
-
-const CAMPAIGN_INCLUDE = {
-  members: { include: { user: { select: PUBLIC_USER_SELECT } } },
-  dm: { select: PUBLIC_USER_SELECT },
-} as const;
-
-// DM-only; never returned to members
-const CAMPAIGN_OMIT = { aiInstructions: true } as const;
 
 export async function GET(
   request: Request,
@@ -71,22 +63,7 @@ export async function PATCH(
 
     if (data instanceof NextResponse) return data;
 
-    const updatedCampaign = await prisma.campaign.update({
-      where: { id },
-      data: {
-        name: data.name,
-        description:
-          data.description === undefined ? undefined : data.description || null,
-        maxLevel: data.maxLevel,
-        allowPlayerEdit: data.allowPlayerEdit,
-        critChoiceByDm: data.critChoiceByDm,
-        status: data.status,
-      },
-      include: CAMPAIGN_INCLUDE,
-      omit: CAMPAIGN_OMIT,
-    });
-
-    await invalidateCampaignLists(updatedCampaign.members.map((m) => m.userId));
+    const updatedCampaign = await updateCampaignSettings(sessionDmActor(id, accessResult.userId), data);
 
     return NextResponse.json(updatedCampaign);
   } catch (error) {
@@ -107,17 +84,7 @@ export async function DELETE(
       return accessResult;
     }
 
-    const members = await prisma.campaignMember.findMany({
-      where: { campaignId: id },
-      select: { userId: true },
-    });
-
-    // Усі залежні таблиці мають onDelete: Cascade (або SetNull всередині кампанії).
-    await prisma.campaign.delete({ where: { id } });
-
-    await invalidateCampaignLists(members.map((m) => m.userId));
-
-    invalidateReference(Object.values(ReferenceKind), id);
+    await deleteCampaign(sessionDmActor(id, accessResult.userId));
 
     return NextResponse.json({ success: true });
   } catch (error) {

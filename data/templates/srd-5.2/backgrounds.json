@@ -1,0 +1,124 @@
+[
+  {
+    "slug": "srd-2024_acolyte",
+    "name": "Acolyte",
+    "description": "",
+    "choices": [
+      {
+        "id": "ability-scores",
+        "label": "Характеристики передісторії",
+        "level": 1,
+        "kind": "abilityScore",
+        "count": 3,
+        "points": 3,
+        "abilities": [
+          "intelligence",
+          "wisdom",
+          "charisma"
+        ],
+        "maxPerAbility": 2,
+        "max": 20
+      }
+    ],
+    "skillProficiencies": [
+      "insight",
+      "religion"
+    ],
+    "toolProficiencies": [
+      "Calligrapher's Supplies"
+    ],
+    "originFeatId": "Magic Initiate (Cleric)",
+    "equipmentText": "*Choose A or B:* (A) Calligrapher's Supplies, Book (prayers), Holy Symbol, Parchment (10 sheets), Robe, 8 GP; or (B) 50 GP"
+  },
+  {
+    "slug": "srd-2024_criminal",
+    "name": "Criminal",
+    "description": "",
+    "choices": [
+      {
+        "id": "ability-scores",
+        "label": "Характеристики передісторії",
+        "level": 1,
+        "kind": "abilityScore",
+        "count": 3,
+        "points": 3,
+        "abilities": [
+          "dexterity",
+          "constitution",
+          "intelligence"
+        ],
+        "maxPerAbility": 2,
+        "max": 20
+      }
+    ],
+    "skillProficiencies": [
+      "sleightOfHand",
+      "stealth"
+    ],
+    "toolProficiencies": [
+      "Thieves' Tools"
+    ],
+    "originFeatId": "Alert",
+    "equipmentText": "*Choose A or B:* (A) 2 Daggers, Thieves' Tools, Crowbar, 2 Pouches, Traveler's Clothes, 16 GP; or (B) 50 GP"
+  },
+  {
+    "slug": "srd-2024_sage",
+    "name": "Sage",
+    "description": "",
+    "choices": [
+      {
+        "id": "ability-scores",
+        "label": "Характеристики передісторії",
+        "level": 1,
+        "kind": "abilityScore",
+        "count": 3,
+        "points": 3,
+        "abilities": [
+          "constitution",
+          "intelligence",
+          "wisdom"
+        ],
+        "maxPerAbility": 2,
+        "max": 20
+      }
+    ],
+    "skillProficiencies": [
+      "arcana",
+      "history"
+    ],
+    "toolProficiencies": [
+      "Calligrapher's Supplies"
+    ],
+    "originFeatId": "Magic Initiate (Wizard)",
+    "equipmentText": "*Choose A or B:* (A) Quarterstaff, Calligrapher's Supplies, Book (history), Parchment (8 sheets), Robe, 8 GP; or (B) 50 GP"
+  },
+  {
+    "slug": "srd-2024_soldier",
+    "name": "Soldier",
+    "description": "Tool Proficiency: Choose one kind of Gaming Set",
+    "choices": [
+      {
+        "id": "ability-scores",
+        "label": "Характеристики передісторії",
+        "level": 1,
+        "kind": "abilityScore",
+        "count": 3,
+        "points": 3,
+        "abilities": [
+          "strength",
+          "dexterity",
+          "constitution"
+        ],
+        "maxPerAbility": 2,
+        "max": 20
+      }
+    ],
+    "skillProficiencies": [
+      "athletics",
+      "intimidation"
+    ],
+    "toolProficiencies": [],
+    "originFeatId": "Savage Attacker",
+    "equipmentText": "*Choose A or B:* (A) Spear, Shortbow, 20 Arrows, Gaming Set (same as above), Healer's Kit, Quiver, Traveler's Clothes, 14 GP; or (B) 50 GP"
+  }
+]

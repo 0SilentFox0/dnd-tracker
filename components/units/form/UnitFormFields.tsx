@@ -3,8 +3,11 @@
 import { UNIT_FORM_TAB, type UnitFormTabId } from "./unit-form-tabs";
 import { UnitAttacks } from "./UnitAttacks";
 import { UnitBasicInfo } from "./UnitBasicInfo";
+import { UnitFiveEFields } from "./UnitFiveEFields";
 import { UnitImmunities } from "./UnitImmunities";
 import { UnitKnownSpells } from "./UnitKnownSpells";
+import { UnitSpellcastingFields } from "./UnitSpellcastingFields";
+import { UnitStatblockFields } from "./UnitStatblockFields";
 
 import { AbilityListEditor } from "@/components/abilities";
 import { AbilityScoresGrid } from "@/components/common/AbilityScoresGrid";
@@ -22,7 +25,7 @@ interface UnitFormFieldsProps {
 export function unitFormTabs({ campaignId, editor, abilityIssues }: UnitFormFieldsProps): HudTab<UnitFormTabId>[] {
   const { data: formData, change } = editor.form;
 
-  const { races, race, spells } = editor.options;
+  const { races, spells, fiveE } = editor.options;
 
   return [
     {
@@ -31,6 +34,11 @@ export function unitFormTabs({ campaignId, editor, abilityIssues }: UnitFormFiel
       content: (
         <div className="space-y-4">
           <UnitBasicInfo formData={formData} races={races} onChange={change} />
+          {(fiveE || formData.cr != null) && (
+            <HudSection title="5e">
+              <UnitFiveEFields formData={formData} onChange={change} />
+            </HudSection>
+          )}
           <IconUrlField
             id="avatar"
             label="Аватар (посилання на картинку)"
@@ -50,7 +58,7 @@ export function unitFormTabs({ campaignId, editor, abilityIssues }: UnitFormFiel
       content: (
         <>
           <UnitAttacks formData={formData} onChange={change} />
-          <UnitImmunities formData={formData} race={race} onChange={change} />
+          <UnitImmunities formData={formData} onChange={change} />
         </>
       ),
     },
@@ -61,6 +69,7 @@ export function unitFormTabs({ campaignId, editor, abilityIssues }: UnitFormFiel
       content: (
         <AbilityListEditor
           campaignId={campaignId}
+          performChoices={{ attacks: formData.attacks ?? [], spells }}
           value={formData.abilities ?? []}
           onChange={(abilities) => change({ abilities })}
           issues={abilityIssues}
@@ -70,8 +79,9 @@ export function unitFormTabs({ campaignId, editor, abilityIssues }: UnitFormFiel
     },
     {
       id: UNIT_FORM_TAB.magic,
-      label: "Магія",
-      content: <UnitKnownSpells formData={formData} spells={spells} onChange={change} />,
+      label: formData.cr != null ? "Заклинання" : "Магія",
+      content: formData.cr != null ? <UnitSpellcastingFields formData={formData} spells={spells} onChange={change} /> : <UnitKnownSpells formData={formData} spells={spells} onChange={change} />,
     },
+    ...(formData.cr != null ? [{ id: UNIT_FORM_TAB.statblock, label: "Статблок", content: <UnitStatblockFields formData={formData} onChange={change} /> }] : []),
   ];
 }

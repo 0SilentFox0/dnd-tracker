@@ -6,6 +6,7 @@ import { BattleStatus, type CombatStatusType, type ParticipantSourceTypeValue } 
 import { type CampaignRoleValue } from "@/lib/constants/campaigns";
 import type { mazeActionSchema, mazeMarkSchema } from "@/lib/schemas/battles";
 import type { PendingCritChoice } from "@/lib/utils/battle/crit-choice/types";
+import type { Ruleset } from "@/lib/utils/rules";
 import type { BattleAudioState } from "@/types/audio";
 import type { BattleMapConfig, GridPoint, MazeConfig, TerrainDiff, TerrainKind, WeatherKind } from "@/types/battle";
 
@@ -45,6 +46,7 @@ export interface BattleScene {
   currentRound: number;
   currentTurnIndex: number;
   initiativeOrder: BattleParticipant[];
+  rules: Ruleset;
   /** Призвані істоти (з’являться на початку наступного раунду) */
   pendingSummons?: BattleParticipant[];
   battleLog: BattleAction[];
@@ -160,6 +162,8 @@ export interface AttackData {
   rollMode?: "normal" | "advantage" | "disadvantage";
   damageRolls: number[];
   attackId?: string;
+  offHand?: boolean;
+  useInspiration?: boolean;
 }
 
 export interface MoraleCheckData {
@@ -219,14 +223,21 @@ export interface AbilityActionData {
 }
 
 export interface SpellCastData {
+  legendaryKey?: string;
   casterId: string;
   spellId: string;
+  grantKey?: string;
+  castingRounds?: number;
+  cancelCasting?: boolean;
+  castLevel?: number;
   targetIds: string[];
   /** точка шаблону на карті */
   targetCell?: GridPoint;
   diceRolls: number[];
   saveRolls?: Array<{ participantId: string; roll: number }>;
+  attackRolls?: Array<{ participantId: string; roll: number }>;
   free?: boolean;
+  slotKey?: string;
 }
 
 // Skill Trees API

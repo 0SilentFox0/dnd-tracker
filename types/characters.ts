@@ -1,4 +1,5 @@
 import type { PublicUser } from "./campaigns";
+import type { CharacterClassEntry } from "./classes";
 import type { EquippedItems, InventoryItem } from "./inventory";
 import type { StoryChapter } from "./scenario";
 import type { BookSpell } from "./spells";
@@ -6,8 +7,12 @@ import type { BookSpell } from "./spells";
 import type { AbilityKey } from "@/lib/constants/abilities";
 import { type SpellcastingAbility } from "@/lib/constants/abilities";
 import { AttackType } from "@/lib/constants/battle";
+import type { CharacterLogKindValue } from "@/lib/constants/character-log";
 import { type CharacterTypeValue, type GoalAuthorValue, type GoalKind, type GoalStatus, type TOKEN_COLORS } from "@/lib/constants/characters";
 import type { HeroArchetypeKey } from "@/lib/constants/hero-archetypes";
+import type { DndSkill } from "@/lib/constants/skills";
+import type { BackgroundSelection } from "@/types/backgrounds";
+import type { CharacterFeat, Picks, SheetChoices } from "@/types/choices";
 
 export type { AbilityKey };
 
@@ -41,11 +46,15 @@ export interface CharacterFormData {
     level: number;
     class: string;
     subclass?: string;
+    classes?: CharacterClassEntry[];
     archetype?: string;
     race: string;
     subrace?: string;
     alignment?: string;
     background?: string;
+  backgroundId?: string | null;
+  backgroundChoices?: Picks;
+  backgroundFeatPicks?: Picks;
     avatar?: string;
   };
   abilityScores: {
@@ -83,6 +92,7 @@ export interface CharacterFormData {
   abilities: {
     personalSkillId: string;
   };
+  choices?: Partial<BackgroundSelection> & { raceChoices: Picks; feats: CharacterFeat[] };
 }
 
 /**
@@ -97,10 +107,16 @@ export interface Character {
   level: number;
   class: string;
   subclass?: string;
+  raceChoices?: Picks;
+  feats?: CharacterFeat[];
+  classes?: CharacterClassEntry[];
   race: string;
   subrace?: string;
   alignment?: string;
   background?: string;
+  backgroundId?: string | null;
+  backgroundChoices?: Picks;
+  backgroundFeatPicks?: Picks;
   avatar?: string;
   strength: number;
   dexterity: number;
@@ -149,8 +165,8 @@ export interface Character {
 /** Рядок списку персонажів кампанії (GET /characters). */
 export type CharacterListItem = Pick<
   Character,
-  "id" | "campaignId" | "type" | "controlledBy" | "name" | "level" | "class" | "race" | "subrace" | "avatar" | "constitution" | "archetype" | "armorClass" | "initiative"
-> & { user?: { displayName: string } | null; reviewNote?: string | null };
+  "id" | "campaignId" | "type" | "controlledBy" | "name" | "level" | "class" | "race" | "subrace" | "avatar" | "constitution" | "archetype" | "classes" | "armorClass" | "initiative"
+> & { user?: { displayName: string } | null; reviewNote?: string | null; experience?: number; inspiration?: boolean; resources?: CharacterResources };
 
 export type SheetLineSource = "base" | "ability" | "proficiency" | "weapon" | "level" | "dice" | "skill" | "race" | "artifact" | "artifactSet" | "unit" | "character" | "effect" | "action" | "multiplier";
 
@@ -187,6 +203,7 @@ export interface SheetCheck {
   ability: AbilityKey;
   bonus: number;
   proficient: boolean;
+  expertise?: true;
 }
 
 export interface SheetArtifact {
@@ -197,6 +214,8 @@ export interface SheetArtifact {
   rarity: string | null;
   description: string | null;
   effects: string[];
+  attunement?: "attuned" | "required";
+  carried?: true;
 }
 
 export interface SetProgress {
@@ -212,7 +231,7 @@ export interface CharacterSheet {
   viewer: { isDM: boolean; isOwner: boolean };
   review: { pending: boolean; note: string | null };
   maxLevel: number;
-  identity: { id: string; name: string; avatar: string | null; level: number; className: string; archetype: string; subclass: string | null; race: string; raceIcon: string | null; alignment: string | null };
+  identity: { id: string; name: string; avatar: string | null; level: number; className: string; archetype: string; subclass: string | null; race: string; subrace?: string | null; raceIcon: string | null; alignment: string | null };
   abilities: SheetAbility[];
   primaryAbility: AbilityKey | null;
   proficiency: number;
@@ -231,12 +250,18 @@ export interface CharacterSheet {
   skills: SheetCheck[];
   passives: { perception: number; investigation: number; insight: number };
   magic: { ability: string; saveDC: number; attackBonus: number } | null;
-  slots: { level: number; count: number }[];
+  hitDice: string | null;
+  classTable?: string[];
+  classFeatureDescriptions?: Array<{ source: string; level: number; description: string }>;
+  pact: { level: number; max: number; current: number } | null;
+  slots: { level: number; count: number; current: number }[];
+  rest: SheetRest | null;
   spells: BookSpell[];
-  items: { grid: Record<string, SheetArtifact | null>; artifacts: SheetArtifact[]; sets: SetProgress[] };
+  items: { grid: Record<string, SheetArtifact | null>; artifacts: SheetArtifact[]; sets: SetProgress[]; attunement?: { used: number; limit: number } };
   personalSkill: { id: string; name: string; icon: string | null; description: string | null } | null;
   story: { biography: string | null; notes: string | null; goals: CharacterGoal[]; tokens: CharacterToken[]; chapters: StoryChapter[] };
   progression: { freePoints: number; level: number; seenLevel: number | null };
+  choices?: SheetChoices;
 }
 
 export interface RosterHero {
@@ -244,16 +269,20 @@ export interface RosterHero {
   name: string;
   avatar: string | null;
   type: CharacterTypeValue;
-  equipped: Record<string, { id: string; name: string }>;
+  equipped: Record<string, { id: string; name: string; gear?: true }>;
 }
 
 export interface DraftInput {
   name: string;
   race: string;
   class: string;
+  classId?: string;
   archetype: HeroArchetypeKey;
   alignment?: string;
   background?: string;
+  backgroundId?: string | null;
+  backgroundChoices?: Picks;
+  backgroundFeatPicks?: Picks;
   avatar?: string;
   method: "standard" | "pointBuy";
   strength: number;
@@ -264,4 +293,72 @@ export interface DraftInput {
   charisma: number;
   primaryAbility?: AbilityKey;
   goals?: Array<{ text: string; kind: GoalKind }>;
+  choices?: Partial<BackgroundSelection> & { raceChoices?: Picks; feats?: CharacterFeat[]; classChoices?: Picks };
+}
+
+export type RestKindValue = "short" | "long";
+
+export interface CharacterResources {
+  hp?: number;
+  tempHp?: number;
+  dead?: boolean;
+  /** ключі "1".."9" і "pact" */
+  slotsSpent?: Record<string, number>;
+  /** classId → витрачено */
+  hitDiceSpent?: Record<string, number>;
+  /** ключ вміння (ResolvedAbility.key) → використання perRest */
+  charges?: Record<string, { used: number; rest: RestKindValue | null }>;
+  exhaustion?: number;
+  shortRestOpen?: boolean;
+}
+
+export type RestBody = { kind: "short" | "long" | "close"; characterIds: string[] };
+
+export type SheetRollSubject = { kind: "check"; skill: DndSkill } | { kind: "check"; ability: AbilityKey } | { kind: "save"; ability: AbilityKey };
+
+export type SheetRollBody = SheetRollSubject & { useInspiration?: boolean };
+
+export interface SheetRollResult {
+  label: string;
+  rolls: number[];
+  roll: number;
+  mod: number;
+  bonus: number;
+  total: number;
+  mode: "advantage" | "disadvantage" | "normal";
+  autoFail: boolean;
+  inspirationUsed: boolean;
+}
+
+export interface HitDieResult {
+  die: number;
+  roll: number;
+  healed: number;
+  hpBefore: number;
+  hpAfter: number;
+  resources: CharacterResources;
+}
+
+export type AwardXpBody = { characterIds: string[]; amount: number; split: boolean; note?: string };
+
+export type ResourcesEditBody = { hp?: number; tempHp?: number; exhaustion?: number; dead?: boolean; reset?: true; charges?: Record<string, number> };
+
+export interface SheetRest {
+  persist: boolean;
+  hp: { current: number; max: number; temp: number } | null;
+  dead: boolean;
+  exhaustion: number;
+  shortRestOpen: boolean;
+  hitDice: { classId: string; name: string; die: number; total: number; spent: number }[];
+  charges: { key: string; name: string; uses: number; used: number; rest: "short" | "long" | null }[];
+  inspiration: boolean | null;
+  xp: { value: number; next: number | null; levelUp: boolean } | null;
+}
+
+export interface CharacterLogEntry {
+  id: string;
+  kind: CharacterLogKindValue;
+  data: Record<string, unknown>;
+  createdAt: string;
+  actor: { id: string; displayName: string | null } | null;
 }

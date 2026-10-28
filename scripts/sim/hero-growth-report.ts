@@ -101,7 +101,7 @@ async function cell(campaignId: string, race: string, archetype: string, level: 
 }
 
 async function main() {
-  const campaign = await prisma.campaign.findFirst({ where: { name: CAMPAIGN_NAME } });
+  const campaign = await prisma.campaign.findFirst({ where: { name: CAMPAIGN_NAME, kind: "campaign" } });
 
   if (!campaign) throw new Error(`Немає кампанії «${CAMPAIGN_NAME}» — запустіть pnpm balance-library`);
 

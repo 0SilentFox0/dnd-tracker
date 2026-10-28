@@ -1,16 +1,16 @@
-import { cellKey, cellsByDistance, footprint, isPlayable } from "./geometry";
+import { cellKey, cellsByDistance, footprint, footprintDistance, isPlayable } from "./geometry";
 
 import { CombatStatus } from "@/lib/constants/battle";
-import { isAirborne, isEscaped } from "@/lib/utils/abilities/engine/core/participants";
+import { isAirborne, isDying, isEscaped } from "@/lib/utils/abilities/engine/core/participants";
 import type { BattleMapConfig, BattleParticipant, GridPoint } from "@/types/battle";
 
 export function sizeOf(p: BattleParticipant): number {
   return Math.min(3, Math.max(1, p.combatStats.gridSize ?? 1));
 }
 
-/** Мертвий чи непритомний: зникає з поля, поки його не воскресять. */
+/** Мертвий чи непритомний: зникає з поля, поки його не воскресять; герой, що вмирає за 5e, лишається на клітинці. */
 export function isFallen(p: BattleParticipant): boolean {
-  return p.combatStats.status !== CombatStatus.ACTIVE;
+  return p.combatStats.status !== CombatStatus.ACTIVE && !isDying(p);
 }
 
 export function occupiesCells(p: BattleParticipant): boolean {
@@ -27,6 +27,10 @@ export function bothOnMap(map: BattleMapConfig | null | undefined, ...ps: Battle
 
 export function cellsOf(p: BattleParticipant): GridPoint[] {
   return p.battleData.position ? footprint(p.battleData.position, sizeOf(p)) : [];
+}
+
+export function isAdjacent(a: BattleParticipant, b: BattleParticipant): boolean {
+  return isOnMap(a) && isOnMap(b) && footprintDistance(cellsOf(a), cellsOf(b)) <= 1;
 }
 
 export function occupiedBy(participants: BattleParticipant[], filter: (p: BattleParticipant) => boolean): Set<string> {

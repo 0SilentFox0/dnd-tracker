@@ -1,9 +1,9 @@
 import { NextResponse } from "next/server";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-import { updateCharacterSchema } from "@/app/api/campaigns/[id]/characters/[characterId]/update-character-schema";
-import { createCharacterSchema } from "@/app/api/campaigns/[id]/characters/create-character-schema";
 import { prisma } from "@/lib/db";
+import { createCharacterSchema } from "@/lib/server/characters/core/create-character-schema";
+import { updateCharacterSchema } from "@/lib/server/characters/core/update-character-schema";
 import { resolveAvatarForPersistence } from "@/lib/supabase/avatar-storage";
 import * as apiAuth from "@/lib/utils/api/api-auth";
 
@@ -105,3 +105,6 @@ describe("PATCH archetype", () => {
     expect(vi.mocked(prisma.character.update).mock.calls[0][0].data.avatar).toBeUndefined();
   });
 });
+
+// Domain assertions keep their DB doubles; real shared locking is covered by storage integration.
+vi.mock("@/lib/server/content/write", () => ({ withCampaignContentWrite: async (_id: string, fn: (tx: unknown) => unknown) => fn({ $queryRaw: async () => [], $executeRaw: async () => 1 }) }));

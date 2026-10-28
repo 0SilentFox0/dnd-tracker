@@ -1,7 +1,7 @@
 import { elementOf } from "./element";
-import { spellFx } from "./spells";
 import type { FxAuraKind, FxElement } from "./types";
 
+import { EffectMarker } from "@/lib/constants/battle";
 import type { ActiveEffect } from "@/types/battle";
 
 export const MAX_AURAS = 2;
@@ -30,7 +30,7 @@ const hasEffect = (effect: ActiveEffect, type: string) => effect.effects.some((e
 const marksAttackers = (effect: ActiveEffect) => (effect.abilityEffects ?? []).some((e) => e.kind === "flag" && e.flag === "advantageForAttackers");
 
 const ELEMENT_AURA: Partial<Record<FxElement, (effect: ActiveEffect) => FxAuraKind | null>> = {
-  cold: (effect) => (hasEffect(effect, "skip_action") ? "frozen" : "frost"),
+  cold: (effect) => (hasEffect(effect, EffectMarker.SKIP_ACTION) ? "frozen" : "frost"),
   lightning: () => "static",
   fire: () => "burning",
   poison: () => "plague",
@@ -46,7 +46,7 @@ const isShield = (effect: ActiveEffect) =>
 export function auraOf(effect: ActiveEffect): FxAuraKind | null {
   if (effect.permanent || effect.zone || effect.duration < 1) return null;
 
-  const named = spellFx(effect.name)?.aura;
+  const named = effect.fxAura;
 
   if (named) return named;
 
@@ -60,7 +60,7 @@ export function auraOf(effect: ActiveEffect): FxAuraKind | null {
     if (byElement) return byElement;
   }
 
-  if (effect.type === "condition") return hasEffect(effect, "skip_action") ? "stun" : "bind";
+  if (effect.type === "condition") return hasEffect(effect, EffectMarker.SKIP_ACTION) ? "stun" : "bind";
 
   if (effect.dotDamage) return DOT_AURA[effect.dotDamage.damageType] ?? "decay";
 

@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 
-import { formatSkillResponse } from "@/app/api/campaigns/[id]/skills/[skillId]/format-skill-response";
-import { formatSkillsListResponse } from "@/app/api/campaigns/[id]/skills/format-skills-response";
+import { formatSkillResponse } from "@/lib/server/skills/format-skill-response";
+import { formatSkillsListResponse } from "@/lib/server/skills/format-skills-response";
 
 const row = {
   id: "s1", campaignId: "c", name: "Скіл", description: null, icon: "https://x/i.png", spellId: "sp1", spellGroupId: null, grantedSpellId: null,

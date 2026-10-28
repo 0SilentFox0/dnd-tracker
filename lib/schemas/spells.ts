@@ -1,19 +1,24 @@
 import { z } from "zod";
 
+import { SPELL_GROUP_ICON_KEYS } from "@/lib/constants/spell-groups";
 import { SPELL_NAME_MAX } from "@/lib/constants/spells";
+import { SpellListsSchema } from "@/lib/schemas/choices";
 import { EffectSchema } from "@/lib/utils/abilities/schema";
-import { RaceModifierSchema, SpellCostSchema, SpellDiceSchema, SpellResolutionSchema, SpellTargetingSchema } from "@/lib/utils/spells/model/schema";
+import { SpellFxSchema } from "@/lib/utils/battle/fx/spell-fx-schema";
+import { RaceModifierSchema, SpellCastingTimeSchema, SpellCostSchema, SpellDiceSchema, SpellDieSidesSchema, SpellResolutionSchema, SpellTargetingSchema } from "@/lib/utils/spells/model/schema";
 
 const nullableString = z.preprocess((val) => (val === "" ? null : val), z.string().nullable().optional());
 
 const spellFields = {
+  executionMode: z.enum(["native", "manual"]).optional(),
   name: z.string().min(1).max(SPELL_NAME_MAX),
-  level: z.number().int().min(0).max(5),
+  level: z.number().int().min(0).max(9),
   groupId: z.string().nullable(),
   icon: nullableString,
   description: z.string().nullable(),
   appearanceDescription: z.string().nullable(),
   cost: SpellCostSchema,
+  casting: SpellCastingTimeSchema.nullable().optional(),
   dice: SpellDiceSchema,
   targeting: SpellTargetingSchema,
   resolution: SpellResolutionSchema,
@@ -21,11 +26,20 @@ const spellFields = {
   raceModifiers: z.array(RaceModifierSchema),
   stackable: z.boolean(),
   maxStacks: z.number().int().min(1).max(10).nullable(),
+  concentration: z.boolean(),
+  dieSides: SpellDieSidesSchema.nullable(),
+  upcastDice: z.number().int().min(0).max(10).nullable(),
+  upcastTargets: z.number().int().min(0).max(10).nullable(),
+  addAbilityMod: z.boolean().nullable(),
+  fixedDice: z.boolean().nullable(),
+  damageBonus: z.number().int().min(-20).max(40).nullable(),
+  fx: SpellFxSchema.describe("Візуальний ефект заклинання на мапі бою").nullable().optional(),
+  lists: SpellListsSchema.describe("Теги списків заклинань класів (Wizard, Cleric…)"),
 };
 
 export const createSpellSchema = z.object({
   ...spellFields,
-  level: z.number().int().min(1).max(5).default(1),
+  level: z.number().int().min(0).max(9).default(1),
   groupId: spellFields.groupId.optional(),
   description: spellFields.description.optional(),
   appearanceDescription: spellFields.appearanceDescription.optional(),
@@ -37,6 +51,14 @@ export const createSpellSchema = z.object({
   raceModifiers: spellFields.raceModifiers.default([]),
   stackable: spellFields.stackable.default(false),
   maxStacks: spellFields.maxStacks.optional(),
+  concentration: spellFields.concentration.default(false),
+  dieSides: spellFields.dieSides.optional(),
+  upcastDice: spellFields.upcastDice.optional(),
+  upcastTargets: spellFields.upcastTargets.optional(),
+  addAbilityMod: spellFields.addAbilityMod.optional(),
+  fixedDice: spellFields.fixedDice.optional(),
+  damageBonus: spellFields.damageBonus.optional(),
+  lists: spellFields.lists.optional(),
 });
 
 export type CreateSpellInput = z.infer<typeof createSpellSchema>;
@@ -47,10 +69,14 @@ export type UpdateSpellInput = z.infer<typeof updateSpellSchema>;
 
 export const createSpellGroupSchema = z.object({
   name: z.string().min(1).max(SPELL_NAME_MAX),
+  color: z.string().regex(/^#[0-9a-f]{6}$/i).nullable().optional(),
+  icon: z.enum(SPELL_GROUP_ICON_KEYS).nullable().optional(),
 });
 
 export const updateSpellGroupSchema = z.object({
   name: z.string().min(1).max(SPELL_NAME_MAX).optional(),
+  color: z.string().regex(/^#[0-9a-f]{6}$/i).nullable().optional(),
+  icon: z.enum(SPELL_GROUP_ICON_KEYS).nullable().optional(),
 });
 
 export const deleteSpellsByLevelSchema = z.object({
