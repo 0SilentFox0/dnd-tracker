@@ -8,6 +8,7 @@ import { createAssistantExecutor } from "@/lib/server/assistant/execute";
 import type { AssistantCaller, AssistantWriteAction } from "@/lib/server/assistant/types";
 import { currentContentWrite } from "@/lib/server/content/write-context";
 import { runShowOperation } from "@/lib/server/show/action-service";
+import { isLocalDevDatabaseEnv, singleConnectionDatabaseUrl } from "@/lib/server/test-support/local-db";
 
 const generation = vi.hoisted(() => ({ run: undefined as (() => Promise<{ url: string }>) | undefined }));
 
@@ -47,15 +48,7 @@ vi.mock("@/lib/db", async () => {
   return { prisma: createScopedDatabase(base) };
 });
 
-function localUrl(name: string) {
-  const url = new URL(process.env[name] ?? "");
-
-  if (!["postgres:", "postgresql:"].includes(url.protocol) || !["localhost", "127.0.0.1", "[::1]"].includes(url.hostname) || url.port !== "54322" || url.pathname !== "/constructor") throw new Error("ASSISTANT_TEST_REQUIRES_LOCAL_CONSTRUCTOR");
-
-  url.searchParams.set("connection_limit", "1");
-
-  return url.toString();
-}
+const localUrl = (name: "DATABASE_URL" | "DIRECT_URL") => singleConnectionDatabaseUrl(name);
 
 const databaseUrl = localUrl("DATABASE_URL");
 
@@ -117,7 +110,7 @@ const pending = async (operation: string, input: unknown, requestId: string, run
 
 const slide = { id: "slide0001", imageUrl: "https://example.invalid/public.webp" };
 
-describe("T12 real constructor single connection", () => {
+describe.skipIf(!isLocalDevDatabaseEnv())("T12 real constructor single connection", () => {
   beforeAll(async () => {
     await db.user.create({ data: { id: userId, email: `${marker}@example.invalid`, displayName: marker } });
     campaignId = (await db.campaign.create({ data: { name: marker, dmUserId: userId, inviteCode: randomUUID(), members: { create: { userId, role: "dm" } } } })).id;

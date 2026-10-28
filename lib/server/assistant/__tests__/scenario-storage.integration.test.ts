@@ -9,6 +9,7 @@ import { createAssistantExecutor } from "@/lib/server/assistant/execute";
 import { linkLegacyProposal } from "@/lib/server/assistant/legacy-proposals";
 import type { AssistantCaller } from "@/lib/server/assistant/types";
 import { runScenarioOperation } from "@/lib/server/scenario/action-service";
+import { isLocalDevDatabaseEnv, singleConnectionDatabaseUrl } from "@/lib/server/test-support/local-db";
 import { resolveAiOps } from "@/lib/utils/scenario/ai-ops";
 
 // Route helpers and the injected executor use the SAME one-connection client.
@@ -28,17 +29,8 @@ vi.mock("@/lib/db", async () => {
   return { prisma: createScopedDatabase(base) };
 });
 
-function localUrl(name: string): string {
-  const url = new URL(process.env[name] ?? "");
+const localUrl = (name: "DATABASE_URL" | "DIRECT_URL") => singleConnectionDatabaseUrl(name);
 
-  if (!["postgres:", "postgresql:"].includes(url.protocol) || !["localhost", "127.0.0.1", "[::1]"].includes(url.hostname) || url.port !== "54322" || url.pathname !== "/constructor") throw new Error("ASSISTANT_TEST_REQUIRES_LOCAL_CONSTRUCTOR");
-
-  url.searchParams.set("connection_limit", "1");
-
-  return url.toString();
-}
-
-// Validate BOTH URLs before constructing clients or performing fixture writes.
 const databaseUrl = localUrl("DATABASE_URL");
 
 localUrl("DIRECT_URL");
@@ -61,7 +53,7 @@ const actor = () => ({ campaignId, userId, isDM: true, via: "session", scopes: n
 
 const caller = (): AssistantCaller => ({ actor: actor(), channel: "chat", tokenId: null, threadId });
 
-describe("scenario adapters real constructor, connection_limit=1", () => {
+describe.skipIf(!isLocalDevDatabaseEnv())("scenario adapters real constructor, connection_limit=1", () => {
   beforeAll(async () => {
     const migration = await db.$queryRaw<Array<{ migration_name: string }>>`SELECT migration_name FROM _prisma_migrations WHERE migration_name = '20261108000000_assistant_intents' AND finished_at IS NOT NULL`;
 

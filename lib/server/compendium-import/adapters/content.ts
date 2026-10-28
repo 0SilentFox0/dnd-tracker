@@ -1,37 +1,66 @@
 import { renderEntries } from "../entries";
 import { nestedId, stableJson } from "../identity";
 import { type Adapter, issue } from "../types";
+import { EFFECT_FIELDS, itemEffects } from "./item-effects";
+import { type MonsterStats, parseAttack, parseMultiattack, plainName } from "./monster-attacks";
+import { CastingBuilder, defenseAbilities, legendaryAbilities, legendaryResistances, saveProficiencies } from "./monster-traits";
 import { ABILITIES, array, description, num, object, str, unsupported } from "./shared";
+import { spellCast } from "./spell-cast";
+import { BLOCKER_ACTIONS, deriveSpell } from "./spell-derive";
 
+import type { AbilityKey } from "@/lib/constants/abilities";
+import { schoolByCode } from "@/lib/constants/spell-groups";
+import type { Ability } from "@/lib/utils/abilities/schema";
 import { buildSearchText } from "@/lib/utils/scenario/search-text";
+import { castingFields, spellHead } from "@/lib/utils/spells/derive/mechanics";
+import { battleSpeed, coreTrait } from "@/lib/utils/units/monster-core-traits";
 import type { ScenarioContent } from "@/types/scenario";
 
-function simpleAttack(value: unknown): Record<string, unknown> | undefined {
-  const action = object(value);
+const SPELL_CONSUMED = ["level", "school", "classes", "time", "range", "components", "duration", "meta", "damageInflict", "savingThrow", "spellAttack", "scalingLevelDice", "conditionInflict", "damageImmune", "damageResist", "damageVulnerable", "conditionImmune", "abilityCheck", "areaTags", "miscTags"];
 
-  const entries = array(action.entries);
-
-  if (entries.length !== 1 || typeof entries[0] !== "string") return;
-
-  const match = /^\{@atk (mw|rw)\}\s+\{@hit ([+-]?\d+)\}\s+to hit,\s+((?:reach|range) [\d/]+ ft\.),\s+one target\.\s+\{@h\}(?:\d+\s*\()?\{@damage (\d+d\d+(?:\s*[+-]\s*\d+)?)\}\)?\s+(acid|bludgeoning|cold|fire|force|lightning|necrotic|piercing|poison|psychic|radiant|slashing|thunder) damage\.?$/i.exec(entries[0]);
-
-  if (!match) return;
-
-  return { name: action.name, type: match[1].toLowerCase() === "mw" ? "melee" : "ranged", attackBonus: Number(match[2]), range: match[3], damageDice: match[4], damageType: match[5].toLowerCase() };
-}
+const MANUAL_SPELL_BODY = { executionMode: "manual", targeting: { kind: "self" }, resolution: { kind: "auto" }, dice: 0, spellEffects: [] };
 
 export const spell: Adapter = (row, ctx) => {
-  ctx.issues.push(issue("MANUAL_SPELL", ctx.path, "warning", "Налаштуйте механіку заклинання або застосовуйте його вручну"));
+  const cast = spellCast(row);
 
-  return { kind: "spells", body: { name: row.name, level: row.level, description: description(row, ctx), executionMode: "manual", cost: "action", targeting: { kind: "self" }, resolution: { kind: "auto" }, dice: 0, spellEffects: [], concentration: array(row.duration).some((d) => object(d).concentration === true), lists: array(object(row.classes).fromClassList).map((r) => str(object(r).name)).filter(Boolean) }, notes: unsupported(row, ["level", "school", "classes"], ctx) };
+  const lists = array(object(row.classes).fromClassList).map((r) => str(object(r).name)).filter(Boolean);
+
+  const school = schoolByCode(str(row.school))?.name ?? str(row.school);
+
+  const head = spellHead({ level: row.level as number, school, casting: cast.castingText, ritual: cast.ritual, range: cast.rangeText, components: cast.components, duration: cast.durationText, concentration: cast.concentration, classes: lists });
+
+  const text = renderEntries(row.entries, `${ctx.path}.entries`);
+
+  const derived = deriveSpell(row, text.text, renderEntries(row.entriesHigherLevel).text, cast);
+
+  const mechanics = "native" in derived ? { executionMode: "native", ...derived.native.fields } : MANUAL_SPELL_BODY;
+
+  if ("blocker" in derived) ctx.issues.push(issue(`MANUAL_SPELL_${derived.blocker}`, ctx.path, "warning", `${BLOCKER_ACTIONS[derived.blocker]}${derived.detail ? ` (${derived.detail})` : ""}`));
+  else if (derived.native.narrative) ctx.issues.push(issue("SPELL_NARRATIVE_ONLY", ctx.path, "warning", "Заклинання без бойової механіки: каст лише витрачає ресурси, ефект описує ДМ"));
+  else if (derived.native.riders.length > 0) ctx.issues.push(issue("SPELL_RIDER_MANUAL", ctx.path, "warning", `Додаткові ефекти не автоматизовано (${derived.native.riders.join(", ")}): див. опис`));
+
+  return { kind: "spells", body: { name: row.name, level: row.level, description: [head, description(row, ctx)].filter(Boolean).join("\n\n"), ...mechanics, ...castingFields(cast.castingKey, cast.trigger), concentration: cast.concentration, lists }, notes: unsupported(row, SPELL_CONSUMED, ctx) };
 };
 
+const MONSTER_FIELDS = ["trait", "action", "bonus", "reaction", "legendary", "spellcasting"] as const;
+
+const renderRaw = (entries: unknown[]): string => entries.map((e) => (typeof e === "string" ? e : "")).join(" ");
+
 export const monster: Adapter = (row, ctx) => {
+  const movement = object(row.speed);
+
   const ac = array(row.ac).map((v) => num(v) ?? num(object(v).ac)).find((v) => v !== undefined);
 
-  const hp = num(object(row.hp).average);
+  const hpRow = object(row.hp);
 
-  if (ac === undefined || hp === undefined || hp < 1) ctx.issues.push(issue("REQUIRED_MONSTER_STATS", ctx.path, "error", "Укажіть числові HP та AC або виключіть монстра"));
+  const special = /^\s*(\d[\d,]*)\s*\(/.exec(str(hpRow.special))?.[1];
+
+  const parsedHp = num(hpRow.average) ?? (special ? Number(special.replace(/,/g, "")) : undefined);
+
+  const hp = parsedHp !== undefined && parsedHp >= 1 ? parsedHp : undefined;
+
+  if (hp === undefined && typeof hpRow.special === "string") ctx.issues.push(issue("MANUAL_MONSTER_HP", `${ctx.path}.hp`, "warning", `HP «${hpRow.special}» не розпізнано: встановлено 1, задайте значення вручну`));
+  else if (ac === undefined || hp === undefined) ctx.issues.push(issue("REQUIRED_MONSTER_STATS", ctx.path, "error", "Укажіть числові HP та AC або виключіть монстра"));
 
   const scores = Object.fromEntries(Object.entries(ABILITIES).map(([short, long]) => [long, num(row[short])]));
 
@@ -41,30 +70,147 @@ export const monster: Adapter = (row, ctx) => {
 
   const cr = /^\d+\/\d+$/.test(rawCr) ? Number(rawCr.split("/")[0]) / Number(rawCr.split("/")[1]) : rawCr ? Number(rawCr) : null;
 
-  const movement = object(row.speed);
+  const speeds = Object.fromEntries(["walk", "fly", "swim", "climb", "burrow"].map((k) => [k, num(movement[k]) ?? num(object(movement[k]).number)]));
 
   const type = str(row.type) || str(object(row.type).type);
 
   const sizes: Record<string, string> = { T: "tiny", S: "small", M: "medium", L: "large", H: "huge", G: "gargantuan" };
 
-  const attacks = array(row.action).flatMap((action) => simpleAttack(action) ?? []);
+  const complete = Object.values(scores).every((v) => v !== undefined);
 
-  const statblock = { ...(type && { creatureType: type }), ...(sizes[str(array(row.size)[0])] && { size: sizes[str(array(row.size)[0])] }), ...(Array.isArray(row.languages) && { languages: row.languages.map(str).join(", ") }), movement: Object.fromEntries(["fly", "swim", "climb", "burrow"].filter((s) => num(movement[s]) !== undefined).map((s) => [s, movement[s]])) };
+  const stats: MonsterStats = { scores: complete ? (scores as Record<AbilityKey, number>) : null, cr: cr !== null && Number.isFinite(cr) ? cr : null };
 
-  const notes = [description(row, ctx), ...["trait", "action", "bonus", "reaction", "legendary", "spellcasting"].map((field) => {
-    const rendered = renderEntries(row[field], `${ctx.path}.${field}`);
+  const casting = new CastingBuilder(ctx.edition);
+
+  const manual = (field: string, index: number, name: string) => ctx.issues.push(issue("MANUAL_MONSTER_ACTION", `${ctx.path}.${field}[${index}]`, "warning", `Дію «${name}» не автоматизовано: використайте текст або налаштуйте механіку вручну`));
+
+  const unhandled: Record<string, unknown[]> = {};
+
+  const keep = (field: string, item: unknown) => (unhandled[field] ??= []).push(item);
+
+  const attacks: Array<Record<string, unknown>> = [];
+
+  let multiattack = 1;
+
+  const abilities: Ability[] = [];
+
+  let resistances: ReturnType<typeof legendaryResistances>;
+
+  for (const field of MONSTER_FIELDS) {
+    for (const [index, item] of array(row[field]).entries()) {
+      const entry = object(item);
+
+      const name = plainName(str(entry.name));
+
+      if (field === "spellcasting") {
+        casting.block(item);
+        keep(field, { name, entries: array(entry.headerEntries) });
+        continue;
+      }
+
+      if (field === "legendary") {
+        keep(field, item);
+        continue;
+      }
+
+      const entries = array(entry.entries);
+
+      const core = field === "trait" ? coreTrait(name, renderRaw(entries)) : undefined;
+
+      if (core) {
+        abilities.push({ id: `trait-${name.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "") || index}`, name, description: renderEntries(entries).text, ...core });
+        continue;
+      }
+
+      if (field === "trait" && /^Legendary Resistance \(\d+\/Day/i.test(name)) {
+        resistances = legendaryResistances([item]);
+        continue;
+      }
+
+      if (field === "action") {
+        const multi = parseMultiattack({ name, entries });
+
+        if (multi) {
+          multiattack = multi.count;
+          keep(field, item);
+
+          if (multi.complex) ctx.issues.push(issue("MANUAL_MULTIATTACK_DETAIL", `${ctx.path}.action[${index}]`, "warning", "Рушій зберігає лише кількість атак за дію; склад і альтернативи Multiattack лишилися в тексті"));
+
+          continue;
+        }
+
+        const parsed = parseAttack({ name: str(entry.name), entries }, stats);
+
+        if (parsed) {
+          attacks.push(parsed.row);
+
+          if (parsed.rider) ctx.issues.push(issue("MANUAL_ATTACK_RIDER", `${ctx.path}.action[${index}]`, "warning", `Додатковий ефект атаки «${name}» (збереження, стан тощо) збережено текстом у властивостях атаки`));
+
+          if (parsed.mixedDamage) ctx.issues.push(issue("MONSTER_ATTACK_MIXED_DAMAGE", `${ctx.path}.action[${index}]`, "warning", `Атака «${name}» має кілька типів шкоди: сумарні кістки застосовано до першого типу`));
+
+          continue;
+        }
+      }
+
+      if (field !== "trait" && casting.action(str(entry.name), renderRaw(entries))) {
+        keep(field, item);
+        continue;
+      }
+
+      keep(field, item);
+      manual(field, index, name || `#${index + 1}`);
+    }
+  }
+
+  const defenses = defenseAbilities(row);
+
+  abilities.push(...defenses.abilities);
+
+  for (const text of defenses.unresolved) ctx.issues.push(issue("MANUAL_MONSTER_DEFENSE", `${ctx.path}.defenses`, "warning", `Захист «${text}» не автоматизовано: налаштуйте вручну`));
+
+  if (defenses.nonMagicalApprox) ctx.issues.push(issue("MONSTER_NONMAGICAL_APPROX", `${ctx.path}.defenses`, "warning", "Рушій не розрізняє магічну й немагічну зброю: опір/імунітет «від немагічних атак» застосовано до всієї фізичної шкоди"));
+
+  const legendary = legendaryAbilities(row.legendary, attacks.map((a) => String(a.name)));
+
+  abilities.push(...legendary.abilities);
+
+  for (const name of legendary.manual) ctx.issues.push(issue("MANUAL_MONSTER_ACTION", `${ctx.path}.legendary`, "warning", `Легендарну дію «${name}» збережено як нотатку: автоматично виконується лише атака`));
+
+  const built = casting.build();
+
+  if (built?.approximate) ctx.issues.push(issue("MONSTER_SPELL_SLOTS_APPROX", `${ctx.path}.spellcasting`, "warning", "Слоти заклинань монстра не моделюються: ліміт слотів застосовано до кожного заклинання окремо"));
+
+  for (const key of built?.unresolved ?? []) ctx.issues.push(issue("MANUAL_MONSTER_ACTION", `${ctx.path}.${key}`, "warning", "Це обмеження заклинань не автоматизовано"));
+
+  const statblock = { ...(type && { creatureType: type }), ...(sizes[str(array(row.size)[0])] && { size: sizes[str(array(row.size)[0])] }), ...(Array.isArray(row.languages) && { languages: row.languages.map(str).join(", ") }), ...(resistances?.lair !== undefined && { lairResistances: resistances.lair }), movement: { ...Object.fromEntries(["fly", "swim", "climb", "burrow"].filter((k) => (speeds[k] ?? 0) >= 5).map((k) => [k, speeds[k]])), ...(movement.canHover === true && { hover: true }) } };
+
+  const notes = [description(row, ctx), ...MONSTER_FIELDS.map((field) => {
+    const rendered = renderEntries(unhandled[field] ?? [], `${ctx.path}.${field}`);
 
     ctx.issues.push(...rendered.issues);
 
-    if (row[field] !== undefined) ctx.issues.push(issue("MANUAL_MONSTER_ACTION", `${ctx.path}.${field}`, "warning", "Використовуйте текст дії вручну або налаштуйте її механіку"));
+    return rendered.text;
+  }), unsupported(row, ["ac", "hp", "cr", "speed", "size", "type", "languages", "save", "resist", "immune", "vulnerable", "conditionImmune", "legendaryActions", ...Object.keys(ABILITIES), ...MONSTER_FIELDS], ctx)].filter(Boolean).join("\n");
 
-    return field === "spellcasting" && row[field] !== undefined ? `${rendered.text}\n${stableJson(row[field])}` : rendered.text;
-  }), unsupported(row, ["ac", "hp", "cr", "speed", "size", "type", "languages", ...Object.keys(ABILITIES), "trait", "action", "bonus", "reaction", "legendary", "spellcasting"], ctx)].filter(Boolean).join("\n");
+  const legendaryCount = num(row.legendaryActions) ?? (legendary.abilities.length > 0 ? 3 : 0);
 
-  return { kind: "units", body: { name: row.name, ...scores, armorClass: ac, maxHp: hp, speed: num(movement.walk) ?? (num(row.speed) ?? 0), gridSize: str(array(row.size)[0]) === "L" ? 2 : ["H", "G"].includes(str(array(row.size)[0])) ? 3 : 1, cr, statblock, attacks, abilities: [] }, notes };
+  return {
+    kind: "units",
+    refs: built?.refs,
+    body: { name: row.name, ...scores, armorClass: ac, maxHp: hp ?? 1, speed: battleSpeed(speeds) || (num(row.speed) ?? 0), gridSize: str(array(row.size)[0]) === "L" ? 2 : ["H", "G"].includes(str(array(row.size)[0])) ? 3 : 1, cr, statblock, attacks, abilities, multiattack, saveProficiencies: saveProficiencies(row.save, stats.scores), legendaryActions: Math.min(5, legendaryCount), legendaryResistances: Math.min(10, resistances?.count ?? 0), ...(built && { spellcasting: built.config }) },
+    notes,
+  };
 };
 
 const DAMAGE: Record<string, string> = { P: "piercing", S: "slashing", B: "bludgeoning", A: "acid", C: "cold", F: "fire", L: "lightning", N: "necrotic", O: "force", R: "radiant", T: "thunder", Y: "psychic", I: "poison" };
+
+const CONSUMABLE_TYPES = new Set(["P", "SC", "A", "AF", "EXP", "FD"]);
+
+const CONSUMABLE_TYPE_NAME = /^(?:ingredient|potion|scroll|ammunition|food|drink)/i;
+
+const UNIQUE_RARITIES = new Set(["artifact", "unknown", "unknown (magic)"]);
+
+const OTHER_EFFECT_FIELDS = /^(?:bonus|modifySpeed$|attachedSpells$|charges$|recharge|grantsProficiency$|conditionImmune$|immune$|vulnerable$|ability$|crit)/;
 
 export const item: Adapter = (row, ctx) => {
   const type = str(row.type).split("|")[0];
@@ -77,15 +223,35 @@ export const item: Adapter = (row, ctx) => {
 
   const rarities: Record<string, string> = { common: "common", uncommon: "uncommon", rare: "rare", "very rare": "epic", legendary: "legendary" };
 
-  const body: Record<string, unknown> = { name: row.name, description: description(row, ctx), slot, item: { unique: ctx.inputKind !== "baseitem", ...(row.reqAttune !== undefined && { attunement: row.reqAttune !== false }) } };
+  const customType = array(ctx.root.itemType).map(object).find((t) => t.abbreviation === type);
+
+  const consumable = array(row.miscTags).includes("CNS") || CONSUMABLE_TYPES.has(type) || CONSUMABLE_TYPE_NAME.test(str(customType?.name));
+
+  const text = description(row, ctx);
+
+  const hasWeapon = ["M", "R"].includes(type) && typeof row.dmg1 === "string";
+
+  const effects = itemEffects(row, { consumable, potion: type === "P", hasWeapon, text });
+
+  const unique = !consumable && ctx.inputKind !== "baseitem" && UNIQUE_RARITIES.has(rarity);
+
+  const body: Record<string, unknown> = { name: row.name, description: text, slot, item: { unique, ...(consumable && { consumable: true }), ...(row.reqAttune !== undefined && !consumable && { attunement: row.reqAttune !== false }) } };
 
   if (rarities[rarity]) body.rarity = rarities[rarity];
 
-  if (["M", "R"].includes(type) && typeof row.dmg1 === "string") body.weapon = { damageDice: row.dmg1, damageType: DAMAGE[str(row.dmgType)] ?? str(row.dmgType), attackType: type === "M" ? "melee" : "ranged", ...(typeof row.dmg2 === "string" && { versatileDice: row.dmg2 }) };
+  if (hasWeapon) body.weapon = { damageDice: row.dmg1, damageType: DAMAGE[str(row.dmgType)] ?? str(row.dmgType), attackType: type === "M" ? "melee" : "ranged", ...(typeof row.dmg2 === "string" && { versatileDice: row.dmg2 }), ...effects.weapon };
 
   if (["LA", "MA", "HA"].includes(type) && num(row.ac) !== undefined) body.armor = { category: { LA: "light", MA: "medium", HA: "heavy" }[type], base: row.ac, ...(type === "MA" && { dexCap: 2 }), ...(type === "HA" && { dexCap: 0 }) };
 
-  return { kind: "artifacts", body, notes: unsupported(row, ["type", "rarity", "dmg1", "dmg2", "dmgType", "ac", "reqAttune"], ctx) };
+  if (effects.abilities.length > 0) body.abilities = effects.abilities;
+
+  const manual = [...new Set([...effects.manual, ...Object.keys(row).filter((f) => OTHER_EFFECT_FIELDS.test(f) && !EFFECT_FIELDS.includes(f as never))])];
+
+  for (const field of manual) ctx.issues.push(issue("MANUAL_ITEM_EFFECT", `${ctx.path}.${field}`, "warning", "Ефект предмета рушій не моделює: застосовуйте за описом"));
+
+  const notes = [unsupported(row, ["type", "rarity", "dmg1", "dmg2", "dmgType", "ac", "reqAttune", "miscTags", "wondrous", ...EFFECT_FIELDS, ...Object.keys(row).filter((f) => OTHER_EFFECT_FIELDS.test(f))], ctx), ...manual.map((f) => `${f}: ${stableJson(row[f])}`)].filter(Boolean).join("\n");
+
+  return { kind: "artifacts", body, notes };
 };
 
 export const materialPage: Adapter = (row, ctx) => {
@@ -93,11 +259,11 @@ export const materialPage: Adapter = (row, ctx) => {
 
   ctx.issues.push(...rendered.issues);
 
-  const text = rendered.text || stableJson(row);
+  const text = rendered.text;
 
   const id = nestedId(ctx.key);
 
-  const content: ScenarioContent = { legend: [], sections: [{ id, title: str(row.name) || "Матеріали", played: false, rows: [{ id: `${id}-row`, story: { type: "doc", content: [] }, notes: { type: "doc", content: [{ type: "paragraph", content: [{ type: "text", text }] }] } }] }] };
+  const content: ScenarioContent = { legend: [], sections: [{ id, title: str(row.name) || "Матеріали", played: false, rows: [{ id: `${id}-row`, story: { type: "doc", content: [] }, notes: { type: "doc", content: text ? [{ type: "paragraph", content: [{ type: "text", text }] }] : [] } }] }] };
 
   return { kind: "scenarioPages", body: { kind: "note", status: "draft", characterId: null, title: row.name, content, searchText: buildSearchText(str(row.name), content), version: 0 }, notes: "" };
 };

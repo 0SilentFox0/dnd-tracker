@@ -10,11 +10,11 @@ import { BUNDLE_TABLES, delegateOf } from "@/lib/server/templates/bundle";
 import type { Actor } from "@/lib/utils/api/actor";
 
 /** Presentation of the same Task19 adapter output; no alternate planner or writes. */
-export function previewPresentation(input: ImportInput) {
+export function previewPresentation(input: ImportInput, issues: ReadonlyArray<{ code: string; path: string }> = []) {
   const adapted = adaptCompendium(parseCompendium(input.json), input);
 
   return { rulesDiff: input.rulesPatch ?? {}, graph: adapted.entries.map(entry => ({ key: entry.key, name: entry.name, kind: entry.kind, inputPath: entry.inputPath,
-    refs: [...entry.refs, ...(entry.mergeParent ? [entry.mergeParent] : [])].map(ref => ({ key: canonicalKey(ref.kind, ref.name, ref.source, ref.edition, ref.parent), kind: ref.kind, name: ref.name, source: ref.source, edition: ref.edition })),
+    refs: [...entry.refs, ...(entry.mergeParent ? [entry.mergeParent] : [])].map(ref => ({ key: canonicalKey(ref.kind, ref.name, ref.source, ref.edition, ref.parent), kind: ref.kind, name: ref.name, source: ref.source, edition: ref.edition, unresolved: issues.some(i => i.code === "UNRESOLVED_REF" && i.path === `${entry.key}.${ref.path.join(".")}`) })),
     summary: entry.kind === "backgrounds" ? { choices: entry.body.choices ?? [], skills: entry.body.skillProficiencies ?? [], tools: entry.body.toolProficiencies ?? [], originFeat: entry.refs.filter(ref => ref.kind === "feat").map(ref => ({ name: ref.name, source: ref.source })), equipment: "manual", currency: "manual" } : undefined,
   })) };
 }

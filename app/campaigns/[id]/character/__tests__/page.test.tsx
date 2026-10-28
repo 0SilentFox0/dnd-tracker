@@ -2,6 +2,7 @@ import type { ReactElement } from "react";
 import { NextResponse } from "next/server";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
+import { campaignKeys } from "@/lib/hooks/campaigns/keys";
 import { characterKeys } from "@/lib/hooks/characters/keys";
 import { PrefetchedQuery } from "@/lib/providers/prefetched-query";
 import { DEFAULT_RULES } from "@/lib/utils/rules";
@@ -21,7 +22,7 @@ import CharacterPage from "../page";
 
 const render = () =>
   CharacterPage({ params: Promise.resolve({ id: "c1" }), searchParams: Promise.resolve({ tab: "magic" }) }) as Promise<
-    ReactElement<{ queryKey: unknown; data: unknown; children: ReactElement<{ characterId: string; initialTab?: string }> }>
+    ReactElement<{ queryKey: unknown; data: unknown; children: ReactElement<{ queryKey: unknown; data: unknown; children: ReactElement<{ characterId: string; initialTab?: string }> }> }>
   >;
 
 describe("CharacterPage (server)", () => {
@@ -42,7 +43,9 @@ describe("CharacterPage (server)", () => {
     expect(el.type).toBe(PrefetchedQuery);
     expect(el.props.queryKey).toEqual(characterKeys.sheet("c1", "ch1"));
     expect(el.props.data).toEqual(sheet);
-    expect(el.props.children.props).toMatchObject({ characterId: "ch1", initialTab: "magic" });
+    expect(el.props.children.props.queryKey).toEqual(campaignKeys.rules("c1"));
+    expect(el.props.children.props.data).toEqual(DEFAULT_RULES);
+    expect(el.props.children.props.children.props).toMatchObject({ characterId: "ch1", initialTab: "magic" });
   });
 
   it("помилка обробника — без даних", async () => {

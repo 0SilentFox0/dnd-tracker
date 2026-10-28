@@ -136,7 +136,7 @@ export function useCompendiumImport(campaignId: string, initialFile?: File) {
 
   return {
     state: { root, categories, excludedChapters, options, preview, input, result, rights, targets, busy, error: shownError },
-    actions: { selectFile, changeOptions, setOptions, toggleCategory, toggleChapter, setRights, runPreview, confirm, excludeBlockedRows, excludeRow, openRun, close },
+    actions: { selectFile, changeOptions, applyOptions: applyExclusion, setOptions, toggleCategory, toggleChapter, setRights, runPreview, confirm, excludeBlockedRows, excludeRow, openRun, close },
   };
 }
 

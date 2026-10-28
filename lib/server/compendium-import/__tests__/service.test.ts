@@ -263,3 +263,31 @@ it("counts imported corpus manifests and data containers once, rather than repor
 
   expect(none.report.countsByCategory.book).toMatchObject({ mapped: 0, skipped: 1 });
 });
+
+describe("classes mode in the report", () => {
+  const json = JSON.stringify({ _meta: { edition: "one", sources: [{ json: "T" }] }, feat: [{ name: "Gift", source: "T", category: "O" }] });
+
+  const preview = (ctx: Record<string, unknown>, rulesPatch?: Record<string, unknown>) => {
+    const repo = { ...repository().repo, loadContext: async () => ({ campaignId: "c", existing: [], ...ctx }) } as ImportRepository;
+
+    return previewImport(actor, { json, rulesPatch }, secret, repo).then(r => r.report);
+  };
+
+  it("asks to enable classes and recommends a rules patch when classes mode is off", async () => {
+    const report = await preview({ classesEnabled: false, hasClasses: true, hasCharacters: true });
+
+    expect(report.nextActions.map(a => a.code)).toContain("CLASSES_MODE_REQUIRED");
+    expect(report.recommendedRulesPatch).toEqual({ classes: { enabled: true } });
+    expect(report.readyToPlay).toBe(false);
+    expect(report.readyToImport).toBe(true);
+  });
+
+  it("asks for base classes when the mode is on but no classes exist", async () => {
+    expect((await preview({ classesEnabled: true, hasClasses: false })).nextActions.map(a => a.code)).toContain("CLASSES_MODE_REQUIRED");
+  });
+
+  it("stays quiet when classes are enabled and present, or the patch enables them", async () => {
+    expect((await preview({ classesEnabled: true, hasClasses: true })).recommendedRulesPatch).toBeUndefined();
+    expect((await preview({ classesEnabled: false, hasClasses: true }, { classes: { enabled: true } })).nextActions.map(a => a.code)).not.toContain("CLASSES_MODE_REQUIRED");
+  });
+});

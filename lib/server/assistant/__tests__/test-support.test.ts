@@ -5,15 +5,15 @@ import { assertConstructorDatabaseUrls, constructorDatabaseTarget } from "@/lib/
 const local = "postgresql://local:secret@127.0.0.1:54322/constructor?connection_limit=1";
 
 describe("constructor assistant integration target guard", () => {
-  it("accepts only both local constructor URLs and reports no credentials", () => {
+  it("accepts only both local dev URLs, any database name, and reports no credentials", () => {
     expect(assertConstructorDatabaseUrls({ DATABASE_URL: local, DIRECT_URL: local })).toBeUndefined();
     expect(constructorDatabaseTarget({ DATABASE_URL: local, DIRECT_URL: local })).toEqual({ database: "constructor", local: true, bothUrls: true });
+    expect(assertConstructorDatabaseUrls({ DATABASE_URL: "postgresql://u:p@localhost:54322/obojima", DIRECT_URL: "postgresql://u:p@localhost:54322/obojima" })).toBeUndefined();
   });
 
   const rejected = [
     [{ DATABASE_URL: local }, "missing direct URL"],
     [{ DATABASE_URL: local, DIRECT_URL: "postgresql://user:secret@example.com:54322/constructor" }, "remote direct URL"],
-    [{ DATABASE_URL: local, DIRECT_URL: "postgresql://user:secret@localhost:54322/prodcopy" }, "wrong database"],
     [{ DATABASE_URL: "postgresql://user:secret@localhost:54321/constructor", DIRECT_URL: local }, "wrong port"],
   ] as const;
 

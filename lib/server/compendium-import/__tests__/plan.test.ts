@@ -30,6 +30,19 @@ describe("source aware atomic import plan", () => {
     expect(general.errors.some((e) => e.code === "BACKGROUND_FEAT_INVALID")).toBe(true);
   });
 
+  it("binds a ref to the file's own entry of the same name from another source and names missing ones readably", () => {
+    const otherSource = { ...root, feat: [{ ...root.feat[0], name: "GIFT", source: "Other" }] };
+
+    const plan = buildImportPlan(adaptCompendium(otherSource), { campaignId: "c", existing: [] });
+
+    expect(plan.errors).toEqual([]);
+
+    const missing = buildImportPlan(adaptCompendium({ background: root.background }), { campaignId: "c", existing: [] });
+
+    expect(missing.errors[0].action).toContain("«Gift»");
+    expect(missing.errors[0].action).toContain("«Past»");
+  });
+
   it("records explicit bindings for reuse and rejects bindings of the wrong resource kind", () => {
     const adapted = adaptCompendium({ background: root.background });
 
@@ -77,12 +90,39 @@ describe("source aware atomic import plan", () => {
     expect(reimport.writes.map((r) => r.body.name)).toEqual(plan.writes.map((r) => r.body.name));
   });
 
+  it("reuses an existing school group by name and suffixes same-named content with a readable source, never a hash", () => {
+    const input = adaptCompendium({ _meta: { edition: "one" }, spell: [{ name: "Spark", source: "Tale", level: 1, school: "V", time: [{ number: 1, unit: "action" }], range: { type: "point", distance: { type: "self" } }, duration: [{ type: "instant" }], entries: ["Text."] }], race: [{ name: "Elf", source: "Tale" }] });
+
+    const plan = buildImportPlan(input, { campaignId: "c", existing: [], occupiedNames: { "spell-groups": [{ id: "g-evo", name: "Evocation" }], races: [{ id: "r-elf", name: "Elf" }] } });
+
+    expect(plan.errors).toEqual([]);
+    expect(plan.writes.some((w) => w.kind === "spell-groups")).toBe(false);
+    expect(plan.writes.find((w) => w.kind === "spells")?.body.groupId).toBe("g-evo");
+    expect(plan.writes.find((w) => w.kind === "races")?.body.name).toBe("Elf (Tale)");
+  });
+
   it("resolves subraces into parent lineage without creating a second race", () => {
     const plan = buildImportPlan(adaptCompendium({ race: [{ name: "People", source: "T" }], subrace: [{ name: "Hill", source: "T", raceName: "People", raceSource: "T", entries: ["Hill heritage"] }] }), { campaignId: "c", existing: [] });
 
     expect(plan.errors).toEqual([]);
     expect(plan.writes.filter((r) => !r.nested)).toHaveLength(1);
     expect(plan.writes.find((r) => !r.nested)?.body.choices).toMatchObject([{ lineage: true, options: [{ name: "Hill" }] }]);
+  });
+
+  it("writes a race after the spells its subrace lineage grants", () => {
+    const spell = { name: "Spark", source: "T", level: 1, school: "V", entries: ["Synthetic"] };
+
+    const plan = buildImportPlan(adaptCompendium({ race: [{ name: "People", source: "T" }], spell: [spell], subrace: [{ name: "Hill", source: "T", raceName: "People", raceSource: "T", additionalSpells: [{ innate: { _: { daily: { "1e": ["spark|T"] } } } }] }] }), { campaignId: "c", existing: [] });
+
+    const order = plan.writes.filter((r) => !r.nested).map((r) => r.kind);
+
+    expect(plan.errors).toEqual([]);
+    expect(order.indexOf("spells")).toBeLessThan(order.indexOf("races"));
+
+    const option = (plan.writes.find((r) => r.kind === "races")?.body.choices as Array<{ options: Array<{ spells: Array<{ spellId: string; grant: unknown }> }> }>)[0].options[0];
+
+    expect(option.spells[0].spellId).toMatch(/^[a-z0-9-]+$/);
+    expect(option.spells[0].grant).toEqual({ uses: 1, rest: "long" });
   });
 
   it("validates target schemas and never silently truncates long descriptions", () => {
@@ -100,5 +140,91 @@ describe("source aware atomic import plan", () => {
 
     expect(plan.errors).toEqual([]);
     expect(plan.writes).toHaveLength(1);
+  });
+
+  it("drops warnings of excluded entries from the plan", () => {
+    const adapted = adaptCompendium({ _meta: { edition: "one", sources: [{ json: "T" }] }, feat: [{ name: "Odd", source: "T", strange: 1 }, { name: "Fine", source: "T", other: 2 }] });
+
+    const excludedKeys = adapted.entries.filter((r) => r.name === "Odd").map((r) => r.key);
+
+    const all = buildImportPlan(adapted, { campaignId: "c", existing: [] });
+
+    const plan = buildImportPlan(adapted, { campaignId: "c", existing: [], excludedKeys });
+
+    expect(all.warnings.some((w) => w.path.includes("strange"))).toBe(true);
+    expect(plan.warnings.some((w) => w.path.includes("strange"))).toBe(false);
+    expect(plan.warnings.some((w) => w.path.includes("other"))).toBe(true);
+  });
+
+  it("does not report LOCAL_CONFLICT when the stored nested subclass only gained schema defaults", () => {
+    const meta = { edition: "classic", sources: [{ json: "T" }] };
+
+    const adapted = adaptCompendium({
+      _meta: meta,
+      subclass: [{ name: "Path", source: "T", className: "Mage", classSource: "PHB", shortName: "P", subclassFeatures: ["F|Mage|PHB|P|T|3|T"] }],
+      subclassFeature: [{ name: "F", source: "T", className: "Mage", classSource: "PHB", subclassShortName: "P", subclassSource: "T", level: 3, entries: [{ type: "options", count: 1, entries: [{ type: "refOptionalfeature", optionalfeature: "O1|T" }, { type: "refOptionalfeature", optionalfeature: "O2|T" }] }] }],
+      optionalfeature: [{ name: "O1", source: "T", entries: ["a"] }, { name: "O2", source: "T", entries: ["b"] }],
+    });
+
+    const parentKey = canonicalKey("class", "Mage", "PHB", "classic");
+
+    const parent = { key: parentKey, localId: "mage", kind: "classes" as const, edition: "classic" as const, body: { name: "Mage", subclasses: [] }, baseline: {} };
+
+    const first = buildImportPlan(adapted, { campaignId: "c", existing: [], bindings: { [parentKey]: parent } });
+
+    expect(first.errors).toEqual([]);
+
+    const sub = first.writes.find((w) => w.inputKind === "subclass")!;
+
+    const stored = structuredClone(sub.body.subclasses) as Array<{ features: Array<{ choices: Array<Record<string, unknown>> }> }>;
+
+    stored[0].features[0].choices.forEach((c) => { c.level = 1; });
+
+    const again = buildImportPlan(adapted, { campaignId: "c", existing: [{ key: sub.key, localId: "mage", kind: "classes", edition: "classic", body: { name: "Mage", subclasses: stored }, baseline: sub.baseline! }], bindings: { [parentKey]: { ...parent, body: { name: "Mage", subclasses: stored } } } });
+
+    expect(again.writes.flatMap((w) => w.issues).filter((i) => i.code === "LOCAL_CONFLICT")).toEqual([]);
+  });
+
+  it("warns about an allowed mixed-edition binding without blocking", () => {
+    const adapted = adaptCompendium({ _meta: { edition: "classic", sources: [{ json: "T" }] }, background: [{ name: "Past", source: "T", feats: [{ "Gift|Test": true }] }] });
+
+    const key = canonicalKey("feat", "Gift", "Test", "classic");
+
+    const bound = { key, localId: "gift", kind: "feats" as const, edition: "one" as const, body: { name: "Gift", type: "origin" }, baseline: {} };
+
+    const plan = buildImportPlan(adapted, { campaignId: "c", existing: [], bindings: { [key]: bound }, allowMixedEdition: true });
+
+    expect(plan.errors).toEqual([]);
+    expect(plan.warnings.map((w) => w.code)).toContain("MIXED_EDITION_WARNING");
+  });
+
+  it("warns when an own-file fallback crosses sources", () => {
+    const refEntry = (spellSource: string) => adaptCompendium({ _meta: { edition: "classic", sources: [{ json: "T" }] }, spell: [{ name: "Fireball", source: "HB", level: 3, school: "V", entries: ["x"] }], background: [{ name: "Past", source: "T", feats: [{ [`Gift|${spellSource}`]: true }] }], feat: [{ name: "Gift", source: "HB", category: "O" }] });
+
+    const crossSource = buildImportPlan(refEntry("PHB"), { campaignId: "c", existing: [] });
+
+    expect(crossSource.errors).toEqual([]);
+    expect(crossSource.warnings.map((w) => w.code)).toContain("SOURCE_MISMATCH_WARNING");
+
+    const sameSource = buildImportPlan(refEntry("HB"), { campaignId: "c", existing: [] });
+
+    expect(sameSource.warnings.map((w) => w.code)).not.toContain("SOURCE_MISMATCH_WARNING");
+  });
+
+  it("writes an existing parent race after the spells its subrace grants", () => {
+    const spell = { name: "Spark", source: "T", level: 1, school: "V", entries: ["Synthetic"] };
+
+    const adapted = adaptCompendium({ _meta: { edition: "one", sources: [{ json: "T" }] }, spell: [spell], subrace: [{ name: "Hill", source: "T", raceName: "People", raceSource: "T", additionalSpells: [{ innate: { _: { daily: { "1e": ["spark|T"] } } } }] }] });
+
+    const parentKey = canonicalKey("race", "People", "T", "one");
+
+    const parent = { key: parentKey, localId: "people", kind: "races" as const, edition: "one" as const, body: { name: "People", choices: [] }, baseline: {} };
+
+    const plan = buildImportPlan(adapted, { campaignId: "c", existing: [], bindings: { [parentKey]: parent } });
+
+    const order = plan.writes.filter((r) => !r.nested).map((r) => r.kind);
+
+    expect(plan.errors).toEqual([]);
+    expect(order.indexOf("spells")).toBeLessThan(order.indexOf("races"));
   });
 });

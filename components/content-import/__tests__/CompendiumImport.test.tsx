@@ -41,6 +41,31 @@ describe("CompendiumImport", () => {
   expect(calls.find(x => x.url.endsWith("confirm"))?.body).toMatchObject({ token: "signed", rightsConfirmed: true });
   expect(calls.find(x => x.url.endsWith("preview"))?.body).toMatchObject({ input: { categories: ["spell", "background"] } });
  });
+ it("offers the recommended classes-mode patch after preview and re-checks with it applied", async () => {
+  const bodies: Array<Record<string, unknown>> = [];
+
+  const patch = { classes: { enabled: true } };
+
+  vi.stubGlobal("fetch", vi.fn(async (url: string, init?: RequestInit) => {
+    if (url.endsWith("preview")) bodies.push(JSON.parse(String(init?.body)));
+
+    const withOffer = url.endsWith("preview") && !(bodies[bodies.length - 1].input as { rulesPatch?: unknown }).rulesPatch;
+
+    return new Response(JSON.stringify(url.endsWith("preview") ? { token: `t${bodies.length}`, report: { ...report, ...(withOffer && { recommendedRulesPatch: patch }) }, graph: [] } : url.includes("options") ? { local: [], templates: [] } : { runs: [], hasMore: false }));
+  }));
+  render(<CompendiumImport campaignId="c" />);
+  fireEvent.change(screen.getByLabelText("JSON-компендіум"), { target: { files: [new File(["{}"], "synthetic.json")] } });
+  await screen.findByLabelText("Заклинання (1)");
+  fireEvent.click(screen.getByRole("button", { name: "Перевірити JSON" }));
+
+  const offer = await screen.findByLabelText(/Застосувати з імпортом: увімкнути режим класів 5e/);
+
+  expect(document.body.textContent).not.toContain('{"classes"');
+  fireEvent.click(offer);
+  await vi.waitFor(() => expect(bodies).toHaveLength(2));
+  expect(bodies[1].input).toMatchObject({ rulesPatch: patch });
+  await vi.waitFor(() => expect(screen.queryByLabelText(/Застосувати з імпортом/)).toBeNull());
+ });
  it("renders inside HudPage with a header and campaign link", async () => {
   vi.stubGlobal("fetch", vi.fn(async () => new Response(JSON.stringify({ runs: [], hasMore: false }))));
 

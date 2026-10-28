@@ -9,6 +9,7 @@ import { recoverRun } from "./assistant-check/recover";
 import { integrationCounts } from "./assistant-check/results";
 
 import { constructorDatabaseTarget } from "@/lib/server/assistant/test-support";
+import { localDevDatabaseName } from "@/lib/server/test-support/local-db";
 
 const children = new Set<ChildProcess>();
 
@@ -269,7 +270,7 @@ async function main() {
 
     retireManifest(manifestFile, "completed");
 
-    process.stdout.write(`${JSON.stringify({ database: "constructor", local: true, bothUrls: true, connectionLimit: 1, runId, output: dir, appliedMigrationsBefore: before.length, appliedMigrationsAfter: after.length, migrationsUnchanged: true, integration, browser: { total: browserEvidence.total, passed: browserEvidence.passed, failed: browserEvidence.failed, skipped: browserEvidence.skipped }, browserCases: browserEvidence.evidence.length, browserViewports: [1440, 390], ownedFixtureLeftovers: leftovers, apiBoundary: browserEvidence.apiBoundary })}\n`);
+    process.stdout.write(`${JSON.stringify({ database: localDevDatabaseName(process.env), local: true, bothUrls: true, connectionLimit: 1, runId, output: dir, appliedMigrationsBefore: before.length, appliedMigrationsAfter: after.length, migrationsUnchanged: true, integration, browser: { total: browserEvidence.total, passed: browserEvidence.passed, failed: browserEvidence.failed, skipped: browserEvidence.skipped }, browserCases: browserEvidence.evidence.length, browserViewports: [1440, 390], ownedFixtureLeftovers: leftovers, apiBoundary: browserEvidence.apiBoundary })}\n`);
   } finally {
     await db.$disconnect();
   }

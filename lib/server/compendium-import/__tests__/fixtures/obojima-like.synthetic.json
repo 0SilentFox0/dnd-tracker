@@ -1,0 +1,478 @@
+{
+  "_meta": {
+    "edition": "classic",
+    "sources": [
+      {
+        "json": "OBX",
+        "full": "Obojima-like Synthetic Book",
+        "authors": [
+          "Synthetic Author"
+        ],
+        "version": "1.0"
+      }
+    ]
+  },
+  "class": [
+    {
+      "name": "Wanderer",
+      "source": "OBX",
+      "hd": {
+        "number": 1,
+        "faces": 8
+      },
+      "proficiency": [
+        "dex",
+        "int"
+      ],
+      "startingProficiencies": {
+        "skills": [
+          {
+            "choose": {
+              "from": [
+                "stealth",
+                "nature"
+              ],
+              "count": 1
+            }
+          }
+        ]
+      },
+      "classFeatures": [
+        "Trailcraft|Wanderer|OBX|1"
+      ],
+      "optionalfeatureProgression": [
+        {
+          "name": "Charms",
+          "featureType": [
+            "CH"
+          ],
+          "progression": {
+            "3": 1,
+            "7": 2
+          }
+        }
+      ]
+    }
+  ],
+  "classFeature": [
+    {
+      "name": "Trailcraft",
+      "source": "OBX",
+      "className": "Wanderer",
+      "classSource": "OBX",
+      "level": 1,
+      "entries": [
+        "You read the road."
+      ]
+    }
+  ],
+  "subclass": [
+    {
+      "name": "Path of Leaves",
+      "shortName": "Leaves",
+      "source": "OBX",
+      "className": "Wanderer",
+      "classSource": "OBX",
+      "subclassFeatures": [
+        "Leaf Step|Wanderer|OBX|Leaves|OBX|3"
+      ]
+    },
+    {
+      "name": "Hearth Keeper",
+      "shortName": "Hearth",
+      "source": "OBX",
+      "className": "Fighter",
+      "classSource": "PHB",
+      "subclassFeatures": [
+        "Warm Fire|Fighter|PHB|Hearth|OBX|3"
+      ]
+    }
+  ],
+  "subclassFeature": [
+    {
+      "name": "Leaf Step",
+      "source": "OBX",
+      "className": "Wanderer",
+      "classSource": "OBX",
+      "subclassShortName": "Leaves",
+      "subclassSource": "OBX",
+      "level": 3,
+      "entries": [
+        "Light on the leaves.",
+        {
+          "type": "options",
+          "count": 1,
+          "entries": [
+            {
+              "type": "refOptionalfeature",
+              "optionalfeature": "Charm of Rain|OBX"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Warm Fire",
+      "source": "OBX",
+      "className": "Fighter",
+      "classSource": "PHB",
+      "subclassShortName": "Hearth",
+      "subclassSource": "OBX",
+      "level": 3,
+      "entries": [
+        "Warmth for allies."
+      ]
+    }
+  ],
+  "optionalfeature": [
+    {
+      "name": "Charm of Rain",
+      "source": "OBX",
+      "featureType": [
+        "CH"
+      ],
+      "entries": [
+        "A small charm that calls drizzle."
+      ]
+    },
+    {
+      "name": "Charm of Dew",
+      "source": "OBX",
+      "featureType": [
+        "CH"
+      ],
+      "entries": [
+        "A charm of morning dew."
+      ]
+    }
+  ],
+  "spell": [
+    {
+      "name": "Spark Bloom",
+      "source": "OBX",
+      "level": 1,
+      "school": "V",
+      "time": [
+        {
+          "number": 1,
+          "unit": "action"
+        }
+      ],
+      "range": {
+        "type": "point",
+        "distance": {
+          "type": "feet",
+          "amount": 60
+        }
+      },
+      "components": {
+        "v": true,
+        "s": true
+      },
+      "duration": [
+        {
+          "type": "instant"
+        }
+      ],
+      "entries": [
+        "A bloom of sparks deals {@damage 2d6} fire damage; a target makes a {@dc 13} Dexterity saving throw for half."
+      ],
+      "damageInflict": [
+        "fire"
+      ],
+      "savingThrow": [
+        "dex"
+      ],
+      "classes": {
+        "fromClassList": [
+          {
+            "name": "Wizard",
+            "source": "PHB"
+          }
+        ]
+      }
+    },
+    {
+      "name": "Quiet Song",
+      "source": "OBX",
+      "level": 0,
+      "school": "E",
+      "time": [
+        {
+          "number": 1,
+          "unit": "action"
+        }
+      ],
+      "range": {
+        "type": "point",
+        "distance": {
+          "type": "feet",
+          "amount": 30
+        }
+      },
+      "components": {
+        "v": true
+      },
+      "duration": [
+        {
+          "type": "instant"
+        }
+      ],
+      "entries": [
+        "The villagers fall into a peaceful mood as the book describes."
+      ]
+    }
+  ],
+  "monster": [
+    {
+      "name": "Moss Hound",
+      "source": "OBX",
+      "ac": [
+        13
+      ],
+      "hp": {
+        "average": 22,
+        "formula": "4d8+4"
+      },
+      "speed": {
+        "walk": 40
+      },
+      "str": 14,
+      "dex": 14,
+      "con": 12,
+      "int": 4,
+      "wis": 12,
+      "cha": 6,
+      "cr": "1",
+      "action": [
+        {
+          "name": "Bite",
+          "entries": [
+            "{@atk mw} {@hit 4} to hit, reach 5 ft., one target. {@h}7 ({@damage 1d8 + 2}) piercing damage."
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Wisp Keeper",
+      "source": "OBX",
+      "ac": [
+        12
+      ],
+      "hp": {
+        "average": 30
+      },
+      "speed": {
+        "walk": 30,
+        "fly": 30
+      },
+      "str": 8,
+      "dex": 14,
+      "con": 12,
+      "int": 14,
+      "wis": 16,
+      "cha": 12,
+      "cr": "2",
+      "resist": [
+        "cold"
+      ],
+      "spellcasting": [
+        {
+          "name": "Spellcasting",
+          "type": "spellcasting",
+          "headerEntries": [
+            "Its spellcasting ability is Wisdom (spell save {@dc 13})."
+          ],
+          "will": [
+            "{@spell Spark Bloom|OBX}"
+          ],
+          "ability": "wis"
+        }
+      ],
+      "action": [
+        {
+          "name": "Multiattack",
+          "entries": [
+            "The keeper makes two Touch attacks."
+          ]
+        },
+        {
+          "name": "Touch",
+          "entries": [
+            "{@atk ms} {@hit 4} to hit, reach 5 ft., one target. {@h}5 ({@damage 1d6 + 2}) cold damage."
+          ]
+        }
+      ]
+    }
+  ],
+  "baseitem": [
+    {
+      "name": "Reed Staff",
+      "source": "OBX",
+      "type": "M",
+      "weapon": true,
+      "dmg1": "1d6",
+      "dmgType": "B",
+      "weaponCategory": "simple",
+      "rarity": "none"
+    }
+  ],
+  "item": [
+    {
+      "name": "Dewdrop Tonic",
+      "source": "OBX",
+      "type": "P",
+      "rarity": "common",
+      "entries": [
+        "A sip restores {@dice 2d4 + 2} hit points."
+      ]
+    },
+    {
+      "name": "Lantern of Leaves",
+      "source": "OBX",
+      "wondrous": true,
+      "rarity": "rare",
+      "reqAttune": true,
+      "bonusAc": "+1",
+      "entries": [
+        "A lantern that sheds green light."
+      ]
+    }
+  ],
+  "race": [
+    {
+      "name": "Tanuki",
+      "source": "OBX",
+      "size": [
+        "M"
+      ],
+      "speed": 30,
+      "darkvision": 60,
+      "ability": [
+        {
+          "con": 1
+        }
+      ],
+      "languageProficiencies": [
+        {
+          "common": true
+        }
+      ],
+      "entries": [
+        "Cheerful shapeshifters."
+      ]
+    }
+  ],
+  "subrace": [
+    {
+      "name": "Bridge",
+      "source": "OBX",
+      "raceName": "Tanuki",
+      "raceSource": "OBX",
+      "ability": [
+        {
+          "wis": 1
+        }
+      ],
+      "entries": [
+        "Keepers of bridges."
+      ]
+    }
+  ],
+  "feat": [
+    {
+      "name": "Hearth Tale",
+      "source": "OBX",
+      "category": "O",
+      "entries": [
+        "You carry stories."
+      ]
+    },
+    {
+      "name": "Spark Gift",
+      "source": "OBX",
+      "category": "G",
+      "prerequisite": [
+        {
+          "level": 4
+        }
+      ],
+      "additionalSpells": [
+        {
+          "ability": "int",
+          "innate": {
+            "_": {
+              "daily": {
+                "1": [
+                  "Spark Bloom|OBX"
+                ]
+              }
+            }
+          }
+        }
+      ],
+      "entries": [
+        "Learn a spark."
+      ]
+    }
+  ],
+  "background": [
+    {
+      "name": "Village Cook",
+      "source": "OBX",
+      "skillProficiencies": [
+        {
+          "nature": true
+        }
+      ],
+      "feats": [
+        {
+          "Hearth Tale|OBX": true
+        }
+      ],
+      "startingEquipment": [
+        {
+          "_": [
+            "Reed Staff|OBX",
+            {
+              "value": 500
+            }
+          ]
+        }
+      ],
+      "entries": [
+        "You fed the village."
+      ]
+    }
+  ],
+  "adventure": [
+    {
+      "name": "Tall Grass Tale",
+      "id": "OBXA",
+      "source": "OBX",
+      "contents": [
+        {
+          "name": "Chapter One",
+          "headers": [
+            "Start"
+          ]
+        }
+      ]
+    }
+  ],
+  "adventureData": [
+    {
+      "id": "OBXA",
+      "source": "OBX",
+      "data": [
+        {
+          "type": "section",
+          "name": "Chapter One",
+          "entries": [
+            "The story begins."
+          ]
+        }
+      ]
+    }
+  ]
+}

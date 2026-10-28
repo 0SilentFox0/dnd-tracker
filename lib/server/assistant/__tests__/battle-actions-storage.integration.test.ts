@@ -8,6 +8,7 @@ import { createActionCatalog } from "@/lib/server/assistant/catalog";
 import { createAssistantExecutor } from "@/lib/server/assistant/execute";
 import type { AssistantCaller } from "@/lib/server/assistant/types";
 import { executeBattleOperation } from "@/lib/server/battles/execute-battle-operation";
+import { isLocalDevDatabaseEnv, singleConnectionDatabaseUrl } from "@/lib/server/test-support/local-db";
 import { createMockParticipant } from "@/lib/utils/battle/__tests__/fixtures/mock-participant";
 import { loadBattle, saveBattle } from "@/lib/utils/battle/store";
 
@@ -35,15 +36,7 @@ vi.mock("@/lib/db", async () => {
   return { prisma: createScopedDatabase(base) };
 });
 
-function localUrl(name: string) {
-  const url = new URL(process.env[name] ?? "");
-
-  if (!["postgres:", "postgresql:"].includes(url.protocol) || !["localhost", "127.0.0.1", "[::1]"].includes(url.hostname) || url.port !== "54322" || url.pathname !== "/constructor") throw new Error("ASSISTANT_TEST_REQUIRES_LOCAL_CONSTRUCTOR");
-
-  url.searchParams.set("connection_limit", "1");
-
-  return url.toString();
-}
+const localUrl = (name: "DATABASE_URL" | "DIRECT_URL") => singleConnectionDatabaseUrl(name);
 
 const databaseUrl = localUrl("DATABASE_URL");
 
@@ -95,7 +88,7 @@ const executor = () => createAssistantExecutor({ db: faultDb, catalog: createAct
   published(payload);
 } } });
 
-describe("T11 battle adapters real constructor, single connection", () => {
+describe.skipIf(!isLocalDevDatabaseEnv())("T11 battle adapters real constructor, single connection", () => {
   beforeAll(async () => {
     await db.user.create({ data: { id: userId, email: `${marker}@example.invalid`, displayName: marker } });
 

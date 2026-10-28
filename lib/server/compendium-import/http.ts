@@ -116,7 +116,7 @@ export function compendiumRoute(mode: "preview" | "confirm" | "reports" | "entri
       if (mode === "preview") {
         const preview = await previewImport(actor, input, secret, prismaImportRepository);
 
-        return json({ ...preview, ...previewPresentation(input) });
+        return json({ ...preview, ...previewPresentation(input, preview.report.nextActions) });
       }
 
       if (!body.rightsConfirmed || !body.token || !body.idempotencyKey) return json({ code: "CONFIRM_REQUIRED" }, 422);

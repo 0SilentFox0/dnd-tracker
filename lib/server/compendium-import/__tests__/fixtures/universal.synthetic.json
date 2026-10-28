@@ -29,8 +29,9 @@
       "source": "SYN21",
       "level": 0,
       "school": "V",
+      "miscTags": ["SMN"],
       "entries": [
-        "SYN21_PRIVATE_PAYLOAD Resolve {@b manually}; {@spell Synthetic Ray|SYN21}."
+        "SYN21_PRIVATE_PAYLOAD Summon a spirit with a stat block, resolve {@b manually}; {@spell Synthetic Ray|SYN21}."
       ],
       "page": 7
     }

@@ -10,7 +10,6 @@ import { CONTENT_ACTIONS } from "@/lib/server/assistant/actions/content";
 import { CONTENT_EFFECT_HANDLERS } from "@/lib/server/assistant/actions/content-effects";
 import { createActionCatalog } from "@/lib/server/assistant/catalog";
 import { createAssistantExecutor } from "@/lib/server/assistant/execute";
-import { assertConstructorDatabaseUrls } from "@/lib/server/assistant/test-support";
 import type { ActionExecutionContext, AssistantCaller } from "@/lib/server/assistant/types";
 import { ContentError } from "@/lib/server/content/errors";
 import { DEFAULT_IMPORT_DEPS } from "@/lib/server/content/import/import-content";
@@ -19,6 +18,7 @@ import { CONTENT_RESOURCES } from "@/lib/server/content/resources";
 import { createContent, updateContent } from "@/lib/server/content/service";
 import { runContentWriteContext } from "@/lib/server/content/write-context";
 import { getSourceDiff } from "@/lib/server/templates/sync/service";
+import { isLocalDevDatabaseEnv, singleConnectionDatabaseUrl } from "@/lib/server/test-support/local-db";
 
 const database = vi.hoisted(() => ({ client: undefined as PrismaClient | undefined }));
 
@@ -39,19 +39,9 @@ vi.mock("@/lib/db", async () => {
   return { prisma: createScopedDatabase(base) };
 });
 
-assertConstructorDatabaseUrls({ DATABASE_URL: process.env.DATABASE_URL, DIRECT_URL: process.env.DIRECT_URL });
 
-function localUrl(name: string): string {
-  const url = new URL(process.env[name] ?? "");
+const localUrl = (name: "DATABASE_URL" | "DIRECT_URL") => singleConnectionDatabaseUrl(name);
 
-  if (!["postgres:", "postgresql:"].includes(url.protocol) || !["localhost", "127.0.0.1", "[::1]"].includes(url.hostname) || url.port !== "54322" || url.pathname !== "/constructor") throw new Error("ASSISTANT_TEST_REQUIRES_LOCAL_CONSTRUCTOR");
-
-  url.searchParams.set("connection_limit", "1");
-
-  return url.toString();
-}
-
-// Validate BOTH URLs before constructing clients or performing fixture writes.
 const databaseUrl = localUrl("DATABASE_URL");
 
 localUrl("DIRECT_URL");
@@ -76,7 +66,7 @@ const actor = () => ({ campaignId, userId, isDM: true, via: "session", scopes: n
 
 const caller = (): AssistantCaller => ({ actor: actor(), channel: "chat", tokenId: null, threadId });
 
-describe("content adapters real constructor, connection_limit=1", () => {
+describe.skipIf(!isLocalDevDatabaseEnv())("content adapters real constructor, connection_limit=1", () => {
   beforeAll(async () => {
     routeAuth.userId = userId;
 

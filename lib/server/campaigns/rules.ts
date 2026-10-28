@@ -11,7 +11,7 @@ import type { Actor } from "@/lib/utils/api/actor";
 import type { Ruleset, RulesetPatch } from "@/lib/utils/rules/schema";
 import { mergeRules, parseRules } from "@/lib/utils/rules/schema";
 
-async function loadRules(campaignId: string): Promise<Ruleset> {
+export async function loadRules(campaignId: string): Promise<Ruleset> {
   const campaign = await prisma.campaign.findUnique({ where: { id: campaignId }, select: { rules: true } });
 
   if (!campaign) throw new ContentError(API_ERRORS.CAMPAIGN_NOT_FOUND, 404);

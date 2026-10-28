@@ -2,16 +2,16 @@ import type { Prisma } from "@prisma/client";
 import { randomUUID } from "node:crypto";
 import { afterAll, beforeAll, describe, expect, it, vi } from "vitest";
 
-vi.hoisted(() => {
-  for (const key of ["DATABASE_URL", "DIRECT_URL"]) {
-    const url = new URL(process.env[key] ?? "");
+const localDb = await vi.hoisted(async () => {
+  const { isLocalDevDatabaseEnv, singleConnectionDatabaseUrl } = await import("@/lib/server/test-support/local-db");
 
-    if (url.hostname !== "localhost" || url.port !== "54322" || url.pathname !== "/constructor") throw Error("Task19 storage verification requires local constructor only");
+  if (!isLocalDevDatabaseEnv()) return false;
 
-    url.searchParams.set("connection_limit", "1");
-    process.env[key] = url.toString();
-  }
+  for (const key of ["DATABASE_URL", "DIRECT_URL"] as const) process.env[key] = singleConnectionDatabaseUrl(key);
+
+  return true;
 });
+
 vi.mock("@/lib/cache/tags", async (original) => ({ ...await original<object>(), invalidateReference: vi.fn() }));
 
 import { canonicalKey } from "../identity";
@@ -39,44 +39,44 @@ const actor = () => ({ campaignId, userId, isDM: true, via: "session" as const, 
 
 const input = { json: JSON.stringify({ _meta: { edition: "one", sources: [{ json: "Synthetic", full: "Synthetic Test", authors: ["Synthetic Author"] }] }, feat: [{ name: "Storage Gift", source: "Synthetic", category: "O", entries: ["Synthetic description"] }] }) };
 
-beforeAll(async () => {
-  migrationsBefore = await prisma.$queryRaw`SELECT migration_name FROM _prisma_migrations WHERE finished_at IS NOT NULL ORDER BY migration_name`;
-  await prisma.user.create({ data: { id: userId, email: `${userId}@task19.example.test`, displayName: "Task19 storage verification" } });
+describe.skipIf(!localDb)("Task19 local transaction storage (no HTTP/UI)", () => {
+  beforeAll(async () => {
+    migrationsBefore = await prisma.$queryRaw`SELECT migration_name FROM _prisma_migrations WHERE finished_at IS NOT NULL ORDER BY migration_name`;
+    await prisma.user.create({ data: { id: userId, email: `${userId}@task19.example.test`, displayName: "Task19 storage verification" } });
 
-  const campaign = await prisma.campaign.create({ data: { name, inviteCode: randomUUID(), dmUserId: userId, members: { create: { userId, role: "dm" } } } });
+    const campaign = await prisma.campaign.create({ data: { name, inviteCode: randomUUID(), dmUserId: userId, members: { create: { userId, role: "dm" } } } });
 
-  campaignId = campaign.id;
+    campaignId = campaign.id;
 
-  const source = await prisma.campaign.create({ data: { name: "5e SRD 5.2", kind: "template", visibility: "official", inviteCode: randomUUID(), dmUserId: userId, description: name } });
+    const source = await prisma.campaign.create({ data: { name: "5e SRD 5.2", kind: "template", visibility: "official", inviteCode: randomUUID(), dmUserId: userId, description: name } });
 
-  sourceId = source.id;
-});
+    sourceId = source.id;
+  });
 
-afterAll(async () => {
-  if (campaignId) {
-    const campaign = await prisma.campaign.findUnique({ where: { id: campaignId } });
+  afterAll(async () => {
+    if (campaignId) {
+      const campaign = await prisma.campaign.findUnique({ where: { id: campaignId } });
 
-    if (campaign?.name !== name || campaign.dmUserId !== userId) throw Error("Cleanup ownership mismatch");
+      if (campaign?.name !== name || campaign.dmUserId !== userId) throw Error("Cleanup ownership mismatch");
 
-    await prisma.campaign.delete({ where: { id: campaignId } });
-  }
+      await prisma.campaign.delete({ where: { id: campaignId } });
+    }
 
-  if (sourceId) {
-    const source = await prisma.campaign.findUniqueOrThrow({ where: { id: sourceId } });
+    if (sourceId) {
+      const source = await prisma.campaign.findUniqueOrThrow({ where: { id: sourceId } });
 
-    if (source.description !== name || source.dmUserId !== userId) throw Error("Source cleanup ownership mismatch");
+      if (source.description !== name || source.dmUserId !== userId) throw Error("Source cleanup ownership mismatch");
 
-    await prisma.campaign.delete({ where: { id: sourceId } });
-  }
+      await prisma.campaign.delete({ where: { id: sourceId } });
+    }
 
-  await prisma.user.deleteMany({ where: { id: userId, email: `${userId}@task19.example.test` } });
-  expect(await prisma.campaign.count({ where: { dmUserId: userId } })).toBe(0);
-  expect(await prisma.user.count({ where: { id: userId } })).toBe(0);
-  expect(await prisma.$queryRaw`SELECT migration_name FROM _prisma_migrations WHERE finished_at IS NOT NULL ORDER BY migration_name`).toEqual(migrationsBefore);
-  await prisma.$disconnect();
-});
+    await prisma.user.deleteMany({ where: { id: userId, email: `${userId}@task19.example.test` } });
+    expect(await prisma.campaign.count({ where: { dmUserId: userId } })).toBe(0);
+    expect(await prisma.user.count({ where: { id: userId } })).toBe(0);
+    expect(await prisma.$queryRaw`SELECT migration_name FROM _prisma_migrations WHERE finished_at IS NOT NULL ORDER BY migration_name`).toEqual(migrationsBefore);
+    await prisma.$disconnect();
+  });
 
-describe("Task19 local transaction storage (no HTTP/UI)", () => {
   it("rejects cross-campaign bindings including a nested origin feat reference", async () => {
     const foreign = await prisma.feat.create({ data: { campaignId: sourceId, name: "Foreign origin", type: "origin" } });
 

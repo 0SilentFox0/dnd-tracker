@@ -7,6 +7,7 @@ import { byteLength, COMPENDIUM_LIMITS, CompendiumError, type JsonRecord, parseC
 import { ADAPTER_VERSION, buildImportPlan, type ImportPlan, type PlanContext, type PlannedWrite } from "./plan";
 import { type AdaptedEntry, type AdaptOptions, type ImportIssue, issue,type TargetKind } from "./types";
 
+import { COMPENDIUM_INFO_ISSUE_CODES } from "@/lib/constants/compendium-import";
 import { remapIds } from "@/lib/server/templates/remap-ids";
 import type { Actor } from "@/lib/utils/api/actor";
 import { isRecord } from "@/lib/utils/common/is-record";
@@ -48,6 +49,7 @@ export interface CompendiumReport {
   counts: { created: number; updated: number; unchanged: number; errors: number };
   rows: Array<{ canonicalKey: string; kind: TargetKind; targetId: string; status: string; coverage: "native" | "partial" | "manual"; issues: ImportIssue[] }>;
   nextActions: ImportIssue[];
+  recommendedRulesPatch?: JsonRecord;
   readyToImport: boolean;
   readyToPlay: boolean;
   sources: JsonRecord[];
@@ -56,10 +58,10 @@ export interface CompendiumReport {
   issueCounts: Record<string, number>;
   omittedIssues: number;
 }
-export interface RepositoryContext extends PlanContext { extraEntries?: AdaptedEntry[]; hasCharacters?: boolean }
+export interface RepositoryContext extends PlanContext { extraEntries?: AdaptedEntry[]; hasCharacters?: boolean; classesEnabled?: boolean; hasClasses?: boolean }
 export interface ImportRepository {
   authorize(actor: Actor): Promise<void>;
-  loadContext(actor: Actor, input: ImportInput): Promise<RepositoryContext>;
+  loadContext(actor: Actor, input: ImportInput, entries?: AdaptedEntry[]): Promise<RepositoryContext>;
   findRun(actor: Actor, key: string): Promise<{ requestHash: string; report: CompendiumReport } | undefined>;
   transaction<T>(actor: Actor, callback: (repository: ImportRepository) => Promise<T>): Promise<T>;
   write(actor: Actor, row: PlannedWrite): Promise<string>;
@@ -103,7 +105,19 @@ function tokenData(actor: Actor, token: string, fingerprint: string, secret: str
   return data;
 }
 
-function reportOf(plan: ImportPlan, root: JsonRecord, sources: JsonRecord[], embedded: Record<string, number> = {}, hasCharacters?: boolean): CompendiumReport {
+const CLASS_DEPENDENT_KINDS = new Set<TargetKind>(["races", "backgrounds", "feats"]);
+
+interface ClassesMode { enabled: boolean; exists: boolean }
+
+function classesModeOf(plan: ImportPlan, input: ImportInput, ctx: RepositoryContext): ClassesMode | undefined {
+  if (ctx.classesEnabled === undefined && ctx.hasClasses === undefined) return;
+
+  const patched = isRecord(input.rulesPatch?.classes) ? input.rulesPatch.classes.enabled : undefined;
+
+  return { enabled: typeof patched === "boolean" ? patched : ctx.classesEnabled === true, exists: ctx.hasClasses === true || plan.writes.some((w) => w.kind === "classes") };
+}
+
+function reportOf(plan: ImportPlan, root: JsonRecord, sources: JsonRecord[], embedded: Record<string, number> = {}, hasCharacters?: boolean, classesMode?: ClassesMode): CompendiumReport {
   const counts = { created: 0, updated: 0, unchanged: 0, errors: plan.errors.length };
 
   const unique = new Map<string, ImportIssue>();
@@ -113,6 +127,10 @@ function reportOf(plan: ImportPlan, root: JsonRecord, sources: JsonRecord[], emb
   const allIssues = [...unique.values()];
 
   if (hasCharacters === false) allIssues.push(issue("CHARACTERS_REQUIRED", "characters", "warning", "Створіть персонажів у наповненій кампанії"));
+
+  const classesMissing = !!classesMode && (!classesMode.enabled || !classesMode.exists) && plan.writes.some((w) => !w.nested && CLASS_DEPENDENT_KINDS.has(w.kind));
+
+  if (classesMissing) allIssues.push(issue("CLASSES_MODE_REQUIRED", "rules.classes", "warning", "Увімкніть режим класів і додайте базові класи (залежність від SRD), інакше раси, передісторії й риси не збираються на листі героя"));
 
   const issueCounts: Record<string, number> = Object.create(null);
 
@@ -164,7 +182,7 @@ function reportOf(plan: ImportPlan, root: JsonRecord, sources: JsonRecord[], emb
 
   for (const row of plan.writes) editionSummary[row.edition] = (editionSummary[row.edition] ?? 0) + 1;
 
-  return { adapterVersion: ADAPTER_VERSION, counts, rows, sources, editionSummary, countsByCategory, issueCounts, omittedIssues: Math.max(0, allIssues.length - nextActions.length), nextActions, readyToImport: plan.errors.length === 0, readyToPlay: hasCharacters !== false && plan.errors.length === 0 && !allIssues.some((i) => /MANUAL|UNRESOLVED|UNKNOWN|UNSUPPORTED/.test(i.code)) };
+  return { adapterVersion: ADAPTER_VERSION, counts, rows, sources, editionSummary, countsByCategory, issueCounts, omittedIssues: Math.max(0, allIssues.length - nextActions.length), nextActions, ...(classesMissing && { recommendedRulesPatch: { classes: { enabled: true } } }), readyToImport: plan.errors.length === 0, readyToPlay: hasCharacters !== false && !classesMissing && plan.errors.length === 0 && !allIssues.some((i) => !COMPENDIUM_INFO_ISSUE_CODES.has(i.code) && /MANUAL|UNRESOLVED|UNKNOWN|UNSUPPORTED/.test(i.code)) };
 }
 
 function readInput(input: ImportInput) {
@@ -181,7 +199,7 @@ async function planFor(actor: Actor, input: ImportInput, root: ReturnType<typeof
 
   const adapted = adaptCompendium(root, input);
 
-  const ctx = await repository.loadContext(actor, input);
+  const ctx = await repository.loadContext(actor, input, adapted.entries);
 
   if (ctx.campaignId !== actor.campaignId) throw new CompendiumError("FORBIDDEN");
 
@@ -189,7 +207,7 @@ async function planFor(actor: Actor, input: ImportInput, root: ReturnType<typeof
 
   if (Date.now() - started > 15_000) throw new CompendiumError("PLANNING_TIMEOUT");
 
-  return { plan, sources: adapted.sources, embedded: adapted.embedded, hasCharacters: ctx.hasCharacters };
+  return { plan, sources: adapted.sources, embedded: adapted.embedded, hasCharacters: ctx.hasCharacters, classesMode: classesModeOf(plan, input, ctx) };
 }
 
 export async function previewImport(actor: Actor, input: ImportInput, secret: string, repository: ImportRepository) {
@@ -199,9 +217,9 @@ export async function previewImport(actor: Actor, input: ImportInput, secret: st
 
   const { root, fingerprint } = readInput(input);
 
-  const { plan, sources, embedded, hasCharacters } = await planFor(actor, input, root, repository);
+  const { plan, sources, embedded, hasCharacters, classesMode } = await planFor(actor, input, root, repository);
 
-  return { token: tokenFor(actor, fingerprint, plan.hash, secret), report: reportOf(plan, root, sources, embedded, hasCharacters) };
+  return { token: tokenFor(actor, fingerprint, plan.hash, secret), report: reportOf(plan, root, sources, embedded, hasCharacters, classesMode) };
 }
 
 export async function confirmImport(actor: Actor, input: ImportInput, token: string, idempotencyKey: string, secret: string, repository: ImportRepository): Promise<CompendiumReport> {
@@ -227,7 +245,7 @@ export async function confirmImport(actor: Actor, input: ImportInput, token: str
 
     const signed = tokenData(actor, token, fingerprint, secret);
 
-    const { plan, sources, embedded, hasCharacters } = await planFor(actor, input, root, tx);
+    const { plan, sources, embedded, hasCharacters, classesMode } = await planFor(actor, input, root, tx);
 
     if (signed.planHash !== plan.hash) throw new CompendiumError("PREVIEW_STALE");
 
@@ -258,7 +276,7 @@ export async function confirmImport(actor: Actor, input: ImportInput, token: str
       await tx.applyRules(actor, input.rulesPatch);
     }
 
-    const report = remapIds(reportOf(plan, root, sources, embedded, hasCharacters), idMap);
+    const report = remapIds(reportOf(plan, root, sources, embedded, hasCharacters, classesMode), idMap);
 
     await tx.saveRun(actor, idempotencyKey, requestHash, report);
 

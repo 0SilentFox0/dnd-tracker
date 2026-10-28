@@ -46,7 +46,7 @@ export function resolveSpellSource(ctx: BattleMutationContext, caster: BattlePar
 
   if (data.grantKey && data.slotKey) throw new BattleRuleError("action_rejected", API_ERRORS.BATTLE_SPELL_SLOT_OR_SOURCE);
 
-  if (data.castLevel !== undefined && (!grant?.upcast || data.castLevel < (grant.castLevel ?? 0) || data.castLevel > grant.upcast.maxLevel)) throw new BattleRuleError("action_rejected", API_ERRORS.BATTLE_ITEM_UPCAST_LEVEL_INVALID);
+  if (grant && data.castLevel !== undefined && (!grant.upcast || data.castLevel < (grant.castLevel ?? 0) || data.castLevel > grant.upcast.maxLevel)) throw new BattleRuleError("action_rejected", API_ERRORS.BATTLE_ITEM_UPCAST_LEVEL_INVALID);
 
   if (data.castLevel !== undefined && grant?.upcast) grant = { ...grant, cost: (grant.cost ?? 1) + (data.castLevel - (grant.castLevel ?? 0)) * grant.upcast.extraCost };
 

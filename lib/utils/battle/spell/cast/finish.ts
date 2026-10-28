@@ -62,8 +62,10 @@ function settleAllDowned(state: SpellCastState, before: BattleParticipant[]): vo
   }
 }
 
-function hpTotals(state: SpellCastState, before: BattleParticipant[]): { dealt: number; healed: number } {
+function hpTotals(state: SpellCastState, before: BattleParticipant[]): { dealt: number; healed: number; hits: string[] } {
   let dealt = 0;
+
+  const hits: string[] = [];
 
   let healed = 0;
 
@@ -76,11 +78,13 @@ function hpTotals(state: SpellCastState, before: BattleParticipant[]): { dealt: 
 
     const delta = now.combatStats.currentHp - prev.combatStats.currentHp;
 
-    if (delta < 0) dealt -= delta;
-    else healed += delta;
+    if (delta < 0) {
+      dealt -= delta;
+      hits.push(`${now.basicInfo.name} ${-delta}`);
+    } else healed += delta;
   }
 
-  return { dealt, healed };
+  return { dealt, healed, hits };
 }
 
 interface FinishInput {
@@ -101,9 +105,9 @@ export function finishSpellAction(state: SpellCastState, { before, targetsBefore
   settleAllDowned(state, before);
   fire(flow, { type: "spellCast", phase: "after", actorId: casterId, targetIds: state.targetIds, ...state.info });
 
-  const { dealt, healed } = hpTotals(state, before);
+  const { dealt, healed, hits } = hpTotals(state, before);
 
-  const caption = [dealt > 0 ? `шкода: ${dealt}` : "", healed > 0 ? `лікування: ${healed} HP` : ""].filter(Boolean).join(", ");
+  const caption = [dealt > 0 ? `шкода: ${dealt}${hits.length > 1 ? ` (${hits.join(", ")})` : ""}` : "", healed > 0 ? `лікування: ${healed} HP` : ""].filter(Boolean).join(", ");
 
   const action = actionOf(getP(flow, casterId), spell, targetsBefore, battleId, round, [`${caster.basicInfo.name} застосовує ${spell.name}${caption ? ` (${caption})` : ""}`, ...flow.messages].join(" | "));
 

@@ -3,13 +3,16 @@ import { afterAll, beforeAll, describe, expect, it, vi } from "vitest";
 
 import fixture from "./fixtures/universal.synthetic.json";
 
-vi.hoisted(() => {
-  for (const key of ["DATABASE_URL", "DIRECT_URL"]) {
-    const url = new URL(process.env[key] ?? "");
+const localDb = await vi.hoisted(async () => {
+  const { isLocalDevDatabaseEnv, singleConnectionDatabaseUrl } = await import("@/lib/server/test-support/local-db");
 
-    if (url.hostname !== "localhost" || url.port !== "54322" || url.pathname !== "/constructor") throw Error("Task21 requires local constructor");
-  }
+  if (!isLocalDevDatabaseEnv()) return false;
+
+  for (const key of ["DATABASE_URL", "DIRECT_URL"] as const) process.env[key] = singleConnectionDatabaseUrl(key);
+
+  return true;
 });
+
 vi.mock("@/lib/cache/tags", async original => ({ ...await original<object>(), invalidateReference: vi.fn() }));
 
 import { canonicalKey } from "../identity";
@@ -47,26 +50,26 @@ async function commit(value: ImportInput, key: string) {
   return confirmImport(actor(), value, p.token, key, secret, prismaImportRepository);
 }
 
-beforeAll(async () => {
-  await prisma.user.create({ data: { id: userId, email: `${userId}@task21.example.test`, displayName: "Task21 Synthetic DM" } });
+describe.skipIf(!localDb)("Task21 synthetic campaign integration", () => {
+  beforeAll(async () => {
+    await prisma.user.create({ data: { id: userId, email: `${userId}@task21.example.test`, displayName: "Task21 Synthetic DM" } });
 
-  const c = await createCampaignFromBundle({ userId, name, bundle: null });
+    const c = await createCampaignFromBundle({ userId, name, bundle: null });
 
-  campaignId = c.campaign.id; owned.push(campaignId);
-});
-afterAll(async () => {
-  for (const id of owned.reverse()) {
-    const c = await prisma.campaign.findUniqueOrThrow({ where: { id } });
+    campaignId = c.campaign.id; owned.push(campaignId);
+  });
+  afterAll(async () => {
+    for (const id of owned.reverse()) {
+      const c = await prisma.campaign.findUniqueOrThrow({ where: { id } });
 
-    if (c.dmUserId !== userId || !c.name.startsWith(name)) throw Error("Task21 cleanup ownership mismatch");
+      if (c.dmUserId !== userId || !c.name.startsWith(name)) throw Error("Task21 cleanup ownership mismatch");
 
-    await prisma.campaign.delete({ where: { id } });
-  }
-  await prisma.user.deleteMany({ where: { id: userId, email: `${userId}@task21.example.test` } });
-  await prisma.$disconnect();
-});
+      await prisma.campaign.delete({ where: { id } });
+    }
+    await prisma.user.deleteMany({ where: { id: userId, email: `${userId}@task21.example.test` } });
+    await prisma.$disconnect();
+  });
 
-describe("Task21 synthetic campaign integration", () => {
   it("fills every native library and private notes in one confirm, preserves attribution and reports manual work", async () => {
     const before = await prisma.campaign.findUniqueOrThrow({ where: { id: campaignId } });
 
@@ -273,7 +276,7 @@ describe("Task21 synthetic campaign integration", () => {
 
     const manual = await previewImport(actor(), unsupported, secret, prismaImportRepository);
 
-    expect(manual.report.nextActions.some(a => a.code === "UNSUPPORTED_FIELD")).toBe(true);
+    expect(manual.report.nextActions.some(a => a.code === "MANUAL_FEAT_SPELLS")).toBe(true);
     await withCampaignContentWrite(campaignId, () => featsResource.update(actor(), origin, featsResource.schemas.update.parse({ choices: [{ id: "synthetic-spell", label: "Synthetic manual spell choice", kind: "spell", count: 1, spells: { lists: [], minLevel: 0, maxLevel: 0 } }] })));
 
     const before = { raceChoices: {}, feats: [], classes: [{ classId: cls.id, level: 1 }] };

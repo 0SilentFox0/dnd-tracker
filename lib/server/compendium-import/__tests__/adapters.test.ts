@@ -24,6 +24,13 @@ describe("generic compendium adapters", () => {
     expect(result.issues.map((i) => i.code)).toContain("UNSUPPORTED_ENTRY");
   });
 
+  it("never renders an unknown entry shape as raw JSON", () => {
+    const result = renderEntries([{ type: "mystery", payload: { a: 1 } }, { payload: 2 }]);
+
+    expect(result.text).toBe("");
+    expect(result.issues.map((i) => i.code)).toEqual(["UNSUPPORTED_ENTRY", "UNSUPPORTED_ENTRY"]);
+  });
+
   it("imports classic backgrounds without invented ASI or origin feats", () => {
     const result = adaptCompendium({ _meta: { edition: "classic" }, background: [{ ...source, entries: ["Synthetic description"], skillProficiencies: [{ arcana: true, "custom|Test": true }], toolProficiencies: [{ anyArtisansTool: 1 }], startingEquipment: [{ _: [{ value: 50 }] }] }] });
 
@@ -31,7 +38,7 @@ describe("generic compendium adapters", () => {
 
     expect(row.kind).toBe("backgrounds");
     expect(row.body).toMatchObject({ skillProficiencies: ["arcana"], toolProficiencies: [], choices: [], originFeatId: null });
-    expect(row.body.equipmentText).toContain("50");
+    expect(row.body.equipmentText).toBe("5 см");
     expect(row.issues.some((i) => i.code === "MANUAL_CUSTOM_SKILL")).toBe(true);
     expect(row.notes).toContain("anyArtisansTool");
   });
@@ -65,14 +72,14 @@ describe("generic compendium adapters", () => {
   it("automates only a complete simple attack template, retaining complex actions as text", () => {
     const result = adaptCompendium({ monster: [{ ...source, ac: [12], hp: { average: 9 }, str: 10, dex: 12, con: 11, int: 8, wis: 10, cha: 6, action: [{ name: "Poke", entries: ["{@atk mw} {@hit 4} to hit, reach 5 ft., one target. {@h}6 ({@damage 1d6 + 3}) piercing damage."] }, { name: "Special", entries: ["A fictional effect that needs manual resolution."] }] }] });
 
-    expect(result.entries[0].body.attacks).toMatchObject([{ name: "Poke", attackBonus: 4, damageDice: "1d6 + 3", damageType: "piercing" }]);
+    expect(result.entries[0].body.attacks).toMatchObject([{ name: "Poke", attackBonus: 4, damageDice: "1d6+3", damageType: "piercing" }]);
     expect(result.entries[0].notes).toContain("Special");
   });
 
-  it("does not fabricate sources, duplicate identities, or required monster HP", () => {
+  it("does not fabricate sources, duplicate identities, or an error for an unparseable monster HP", () => {
     const result = adaptCompendium({ feat: [{ name: "Missing" }, source, { ...source, name: " synthetic " }], monster: [{ ...source, ac: [12], hp: { special: "Unspecified" } }] });
 
-    expect(result.issues.map((i) => i.code)).toEqual(expect.arrayContaining(["SOURCE_REQUIRED", "DUPLICATE_IDENTITY", "REQUIRED_MONSTER_STATS"]));
+    expect(result.issues.map((i) => i.code)).toEqual(expect.arrayContaining(["SOURCE_REQUIRED", "DUPLICATE_IDENTITY", "MANUAL_MONSTER_HP"]));
   });
 
   it("creates private DM notes only from matching manifest data", () => {

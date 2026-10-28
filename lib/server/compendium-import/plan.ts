@@ -1,5 +1,5 @@
 import { domainSchemas } from "./domain-schemas";
-import { canonicalKey, digest, stableJson } from "./identity";
+import { canonicalKey, digest, nameKey, sameEdition, sameSource, stableJson } from "./identity";
 import type { JsonRecord } from "./parse";
 import { type AdaptedCompendium, type AdaptedEntry, type CompendiumRef, type Edition, type ImportIssue, issue } from "./types";
 
@@ -25,6 +25,9 @@ function managedProjection(local: unknown, baseline: unknown): unknown {
 
     return local.filter((x) => isRecord(x) && ids.has(x.id)).map((x) => managedProjection(x, baseline.find((b) => isRecord(b) && b.id === (x as JsonRecord).id)));
   }
+
+  // Id-less arrays of equal length are compared element-wise so schema defaults added on save do not read as local edits.
+  if (Array.isArray(local) && Array.isArray(baseline) && local.length === baseline.length) return local.map((x, i) => managedProjection(x, baseline[i]));
 
   if (isRecord(local) && isRecord(baseline)) return Object.fromEntries(Object.keys(baseline).map((k) => [k, managedProjection(local[k], baseline[k])]));
 
@@ -67,6 +70,7 @@ function reconcile(body: JsonRecord, existing: ExistingEntry | undefined, entry:
 }
 
 interface PlanState {
+  excludedPaths: string[];
   context: PlanContext;
   writes: PlannedWrite[];
   errors: ImportIssue[];
@@ -76,15 +80,18 @@ interface PlanState {
   ids: Map<string, string>;
   states: Map<string, "visiting" | "done">;
   planned: Map<string, PlannedWrite>;
+  usedNames: Map<string, Set<string>>;
 }
 
 type Resolved = { localId: string; body: JsonRecord; key: string };
 
-const refKey = (ref: CompendiumRef) => canonicalKey(ref.kind, ref.name, ref.source, ref.edition, ref.parent);
+export const refKey = (ref: CompendiumRef) => canonicalKey(ref.kind, ref.name, ref.source, ref.edition, ref.parent);
 
 const REF_KINDS: Record<string, AdaptedEntry["kind"]> = { feat: "feats", spell: "spells", class: "classes", race: "races", background: "backgrounds", monster: "units", item: "artifacts", spellSchool: "spell-groups" };
 
-const expectedKind = (ref: CompendiumRef): AdaptedEntry["kind"] | undefined => REF_KINDS[ref.kind] ?? (ref.kind.startsWith("template:") ? ref.kind.slice(9) as AdaptedEntry["kind"] : undefined);
+const REF_KIND_LABELS: Record<string, string> = { spell: "заклинання", feat: "риса", class: "клас", race: "раса", background: "передісторія", monster: "юніт", item: "предмет", spellSchool: "школа магії" };
+
+export const expectedKind = (ref: CompendiumRef): AdaptedEntry["kind"] | undefined => REF_KINDS[ref.kind] ?? (ref.kind.startsWith("template:") ? ref.kind.slice(9) as AdaptedEntry["kind"] : undefined);
 
 function plannedResolved(ps: PlanState, key: string): Resolved | undefined {
   visitEntry(ps, key);
@@ -110,6 +117,8 @@ function resolveRef(ps: PlanState, ref: CompendiumRef, owner: AdaptedEntry): Res
       return;
     }
 
+    if (bound.edition && bound.edition !== "unknown" && ref.edition !== "unknown" && bound.edition !== ref.edition) owner.issues.push(issue("MIXED_EDITION_WARNING", owner.key, "warning", `Залежність із редакції ${bound.edition} під контентом ${ref.edition}: правила не конвертуються, перевірте результат`));
+
     if (bound.kind && expectedKind(ref) && bound.kind !== expectedKind(ref)) {
       errors.push(issue("BINDING_WRONG_KIND", owner.key, "error", "Зіставте з записом правильного виду"));
 
@@ -121,7 +130,18 @@ function resolveRef(ps: PlanState, ref: CompendiumRef, owner: AdaptedEntry): Res
     return { localId: bound.localId, body: bound.body, key: bound.key };
   }
 
-  const error = issue("UNRESOLVED_REF", `${owner.key}.${ref.path.join(".")}`, "error", "Додайте залежність, виберіть явне зіставлення або виключіть залежний запис");
+  const candidates = ps.entries.filter((e) => e.key !== owner.key && e.kind === expectedKind(ref) && nameKey(e.name) === nameKey(ref.name));
+
+  const own = candidates.find((e) => sameSource(e.source, ref.source) && sameEdition(e.edition, ref.edition)) ?? candidates[0];
+
+  if (own) {
+    if (!sameEdition(own.edition, ref.edition)) owner.issues.push(issue("MIXED_EDITION_WARNING", owner.key, "warning", `Посилання «${ref.name}» (${ref.edition}) зіставлено із записом файлу з редакції ${own.edition}: перевірте результат`));
+    else if (!sameSource(own.source, ref.source)) owner.issues.push(issue("SOURCE_MISMATCH_WARNING", owner.key, "warning", `Посилання «${ref.name}|${ref.source}» зіставлено із записом файлу з іншого джерела (${own.source}): перевірте, що це той самий запис`));
+
+    return plannedResolved(ps, own.key);
+  }
+
+  const error = issue("UNRESOLVED_REF", `${owner.key}.${ref.path.join(".")}`, "error", `Не знайдено «${ref.name}» (${REF_KIND_LABELS[ref.kind] ?? ref.kind}), потрібне для «${owner.name}». Додайте залежність, виберіть зіставлення або виключіть залежний запис`);
 
   owner.issues.push(error);
   errors.push(error);
@@ -158,6 +178,11 @@ function mergeIntoParent(ps: PlanState, entry: AdaptedEntry, parent: Resolved, b
   if (parentWrite) {
     parentWrite.body = merged;
 
+    if (entry.refs.length > 0) {
+      ps.writes.splice(ps.writes.indexOf(parentWrite), 1);
+      ps.writes.push(parentWrite);
+    }
+
     if (parentWrite.operation === "unchanged") parentWrite.operation = "update";
 
     return;
@@ -178,9 +203,21 @@ function disambiguateName(ps: PlanState, entry: AdaptedEntry, body: JsonRecord, 
 
   if (!collision || !isNew) return;
 
-  const suffix = ` [${entry.source}; ${entry.edition}]`;
+  const taken = (name: string) => ps.entries.some((e) => e.kind === entry.kind && e.key !== entry.key && e.name.toLowerCase() === name.toLowerCase()) || ps.context.occupiedNames?.[entry.kind]?.some((r) => r.id !== localId && r.name.toLowerCase() === name.toLowerCase()) || ps.usedNames.get(entry.kind)?.has(name.toLowerCase());
 
-  body.name = `${entry.name.slice(0, Math.max(1, 100 - suffix.length - 9))}-${digest(entry.key).slice(0, 8)}${suffix}`;
+  const room = (suffix: string) => `${entry.name.slice(0, Math.max(1, 100 - suffix.length))}${suffix}`;
+
+  const candidates = [` (${entry.source})`, ` (${entry.source}, ${entry.edition})`];
+
+  let name = candidates.map(room).find((n) => !taken(n));
+
+  for (let n = 2; !name; n++) if (!taken(room(` (${entry.source}) ${n}`))) name = room(` (${entry.source}) ${n}`);
+
+  body.name = name;
+
+  if (!ps.usedNames.has(entry.kind)) ps.usedNames.set(entry.kind, new Set());
+
+  ps.usedNames.get(entry.kind)!.add(name.toLowerCase());
 }
 
 function validateStandalone(ps: PlanState, entry: AdaptedEntry, body: JsonRecord, sourceBody: JsonRecord) {
@@ -290,22 +327,42 @@ function revalidateWrites(ps: PlanState) {
   }
 }
 
+function reuseNamedSchools(entries: AdaptedEntry[], context: PlanContext, existing: Map<string, ExistingEntry>) {
+  const bindings = { ...context.bindings };
+
+  const kept = entries.filter((e) => {
+    const row = e.kind === "spell-groups" && !existing.has(e.key) && !bindings[e.key] ? context.occupiedNames?.["spell-groups"]?.find((r) => nameKey(r.name) === nameKey(e.name)) : undefined;
+
+    if (row) bindings[e.key] = { key: e.key, edition: e.edition, kind: e.kind, localId: row.id, body: { name: row.name }, baseline: { name: row.name } };
+
+    return !row;
+  });
+
+  return { entries: kept, context: { ...context, bindings } };
+}
+
+const isExcludedPath = (excludedPaths: string[], path: string) => excludedPaths.some((p) => path === p || path.startsWith(`${p}.`));
+
 function createPlanState(adapted: AdaptedCompendium, context: PlanContext): PlanState {
   const excluded = new Set(context.excludedKeys);
 
   const excludedPaths = [...(adapted.blocked ?? []).filter((b) => b.key && excluded.has(b.key)).map((b) => b.path), ...adapted.entries.filter((e) => excluded.has(e.key)).flatMap((e) => [e.key, ...(e.inputPath ? [e.inputPath] : [])])];
 
-  const errors = adapted.issues.filter((i) => i.severity === "error" && !excludedPaths.some((p) => i.path === p || i.path.startsWith(`${p}.`)));
-
-  const entries = adapted.entries.filter((e) => !excluded.has(e.key)).map((e) => structuredClone(e));
+  const errors = adapted.issues.filter((i) => i.severity === "error" && !isExcludedPath(excludedPaths, i.path));
 
   const existing = new Map(context.existing.map((e) => [e.key, e]));
+
+  const reused = reuseNamedSchools(adapted.entries.filter((e) => !excluded.has(e.key)), context, existing);
+
+  context = reused.context;
+
+  const entries = reused.entries.map((e) => structuredClone(e));
 
   const fresh = (key: string) => `c${digest([context.campaignId, key]).slice(0, 24)}`;
 
   const ids = new Map(entries.map((e) => [e.key, existing.get(e.key)?.missing ? fresh(e.key) : existing.get(e.key)?.localId ?? fresh(e.key)]));
 
-  return { context, writes: [], errors, entries, byKey: new Map(entries.map((e) => [e.key, e])), existing, ids, states: new Map(), planned: new Map() };
+  return { context, excludedPaths, writes: [], errors, entries, byKey: new Map(entries.map((e) => [e.key, e])), existing, ids, states: new Map(), planned: new Map(), usedNames: new Map() };
 }
 
 export function buildImportPlan(adapted: AdaptedCompendium, context: PlanContext): ImportPlan {
@@ -316,7 +373,7 @@ export function buildImportPlan(adapted: AdaptedCompendium, context: PlanContext
 
   const { writes, errors } = ps;
 
-  const warnings = [...adapted.issues.filter((i) => i.severity !== "error"), ...writes.flatMap((r) => r.issues.filter((i) => i.severity !== "error"))];
+  const warnings = [...adapted.issues.filter((i) => i.severity !== "error" && !isExcludedPath(ps.excludedPaths, i.path)), ...writes.flatMap((r) => r.issues.filter((i) => i.severity !== "error"))];
 
   return { writes, errors, warnings, hash: digest({ version: ADAPTER_VERSION, writes, errors, baseline: context.existing.map((r) => [r.key, r.localId, r.body]), bindings: context.bindings ?? {}, settingsHash: context.settingsHash }) };
 }

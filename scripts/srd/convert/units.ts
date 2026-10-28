@@ -1,6 +1,6 @@
 import { coreAbility, noteAbility, uniqueId } from "../lib/abilities";
 import { type Fixture, type O5Creature, type O5CreatureAction, type O5CreatureAttack, type Open5eData, slugTail } from "../lib/open5e";
-import { bySlug, clamp, numberWord, titleCase } from "../lib/text";
+import { bySlug, clamp, titleCase } from "../lib/text";
 import type { UnitAttackRow, UnitRow } from "../lib/types";
 import { UNIT_OVERRIDES } from "../overrides/units";
 import { actionGrant, saveAction, spellcastingBlock, spellsInText } from "./monster-actions";
@@ -11,7 +11,11 @@ import type { WeaponTrait } from "@/lib/constants/weapon-traits";
 import type { Ability, Effect } from "@/lib/utils/abilities/schema";
 import { getAbilityModifier } from "@/lib/utils/common/calculations";
 import { groupBy } from "@/lib/utils/common/collections";
+import { engineAttackMod, multiattackCount, withFlat } from "@/lib/utils/units/monster-attacks";
+import { battleSpeed, coreTrait } from "@/lib/utils/units/monster-core-traits";
 import type { UnitSpellcasting, UnitStatblock } from "@/types/units";
+
+export { multiattackCount };
 
 const SIZE_CELLS: Record<string, UnitRow["gridSize"]> = { tiny: 1, small: 1, medium: 1, large: 2, huge: 3, gargantuan: 3 };
 
@@ -19,38 +23,13 @@ const TEXT_ATTACK = /^(Melee or Ranged|Melee|Ranged) Attack Roll: \+(\d+)(?: to 
 
 const TEXT_EXTRA = /^,? plus \d+ \((\d+d\d+)\) (\w+) damage/i;
 
-const MULTI_COUNT = /\b(one|two|three|four|five|six|seven|eight|nine|ten)\s(?:[^.,]*?\s)?attacks?\b/gi;
-
-const MULTI_ALT = /,?\s+or (?:it|he|she|the \w+) makes\b/i;
-
 const LEGENDARY_RES = /^Legendary Resistance \((\d+)\/Day/i;
-
-const REGEN = /regains (\d+) Hit Points at the start of (?:each of )?its turns?/i;
 
 const score = (c: O5Creature, k: AbilityKey) => c[`ability_score_${k}`];
 
 const dieOf = (count: number | null, type: string | null) => (count && type ? `${count}d${type.replace(/^D/i, "")}` : null);
 
-export function multiattackCount(desc: string): number {
-  const first = (desc.split(/\.\s/)[0] ?? "").split(MULTI_ALT)[0];
-
-  const total = [...first.matchAll(MULTI_COUNT)].reduce((sum, m) => sum + (numberWord(m[1]) ?? 0), 0);
-
-  return clamp(total, 1, 10);
-}
-
-// the engine rolls attackBonus + ability mod + proficiency (from CR) and adds the ability mod to damage; the rows store only the residual
-function engineMod(c: O5Creature, type: UnitAttackRow["type"], finesse: boolean): number {
-  const str = getAbilityModifier(clamp(score(c, "strength"), 1, 30));
-
-  const dex = getAbilityModifier(clamp(score(c, "dexterity"), 1, 30));
-
-  if (finesse) return dex > str ? dex : str;
-
-  return type === "ranged" ? dex : str;
-}
-
-const withFlat = (dice: string, flat: number) => (flat === 0 ? dice : `${dice}${flat > 0 ? "+" : ""}${flat}`);
+const engineMod = (c: O5Creature, type: UnitAttackRow["type"], finesse: boolean) => engineAttackMod({ strength: score(c, "strength"), dexterity: score(c, "dexterity") }, type, finesse);
 
 function withTraits(row: UnitAttackRow, traits: WeaponTrait[]): UnitAttackRow {
   return traits.length > 0 ? { ...row, traits } : row;
@@ -225,11 +204,9 @@ export function convertUnits(data: Open5eData): UnitRow[] {
 
         const id = uniqueId(seen, slugTail(t.pk));
 
-        const regen = REGEN.exec(t.fields.desc);
+        const core = coreTrait(t.fields.name, t.fields.desc);
 
-        if (t.fields.name.startsWith("Magic Resistance")) abilities.push(coreAbility(id, t.fields.name, t.fields.desc, { trigger: { event: "passive" }, effects: [{ kind: "flag", flag: "saveAdvantage", abilities: "all", vsSpells: true }] }));
-        else if (t.fields.name.startsWith("Regeneration") && regen) abilities.push(coreAbility(id, t.fields.name, t.fields.desc, { trigger: { event: "turnStart" }, effects: [{ kind: "heal", amount: Number(regen[1]), target: "self" }] }));
-        else abilities.push(noteAbility(id, t.fields.name, t.fields.desc));
+        abilities.push(core ? coreAbility(id, t.fields.name, t.fields.desc, core) : noteAbility(id, t.fields.name, t.fields.desc));
       }
 
       const immunities = [
@@ -350,7 +327,7 @@ export function convertUnits(data: Open5eData): UnitRow[] {
         cr,
         armorClass: c.armor_class,
         maxHp: c.hit_points,
-        speed: Math.max(c.walk ?? 0, c.fly ?? 0) || c.swim || 30,
+        speed: battleSpeed(c) || 30,
         initiative: c.initiative_bonus,
         strength: clamp(c.ability_score_strength, 1, 30),
         dexterity: clamp(c.ability_score_dexterity, 1, 30),
