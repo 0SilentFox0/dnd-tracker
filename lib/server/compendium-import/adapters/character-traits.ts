@@ -6,6 +6,7 @@ import { ABILITY_LABELS, type AbilityKey } from "@/lib/constants/abilities";
 import { CHOICE_LIMITS } from "@/lib/constants/choices";
 import { schoolByCode } from "@/lib/constants/spell-groups";
 import type { Ability, Effect } from "@/lib/utils/abilities/schema";
+import { isRecord } from "@/lib/utils/common/is-record";
 
 const SIZES: Record<string, string> = { F: "крихітний", D: "дрібний", T: "крихітний", S: "малий", M: "середній", L: "великий", H: "величезний", G: "гігантський" };
 
@@ -337,7 +338,12 @@ export function featSpells(raw: unknown, ctx: AdapterContext, offset: number): F
     for (const [levelKey, byUse] of Object.entries(object(block.innate))) {
       const level = /^\d+$/.test(levelKey) ? Number(levelKey) : 1;
 
-      for (const [useKey, value] of Object.entries(object(byUse))) {
+      if (!isRecord(byUse)) {
+        out.manual.push({ innate: { [levelKey]: byUse } });
+        continue;
+      }
+
+      for (const [useKey, value] of Object.entries(byUse)) {
         if (useKey === "will" && Array.isArray(value)) {
           group(value, "Заклинання без обмежень", level, undefined, { atWill: true });
         } else if ((useKey === "daily" || useKey === "rest") && value && typeof value === "object") {

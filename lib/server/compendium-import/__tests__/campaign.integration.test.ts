@@ -276,7 +276,7 @@ describe.skipIf(!localDb)("Task21 synthetic campaign integration", () => {
 
     const manual = await previewImport(actor(), unsupported, secret, prismaImportRepository);
 
-    expect(manual.report.nextActions.some(a => a.code === "UNSUPPORTED_FIELD")).toBe(true);
+    expect(manual.report.nextActions.some(a => a.code === "MANUAL_FEAT_SPELLS")).toBe(true);
     await withCampaignContentWrite(campaignId, () => featsResource.update(actor(), origin, featsResource.schemas.update.parse({ choices: [{ id: "synthetic-spell", label: "Synthetic manual spell choice", kind: "spell", count: 1, spells: { lists: [], minLevel: 0, maxLevel: 0 } }] })));
 
     const before = { raceChoices: {}, feats: [], classes: [{ classId: cls.id, level: 1 }] };

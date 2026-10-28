@@ -117,6 +117,13 @@ describe("feat prerequisites, resist and spells", () => {
     expect(codes(entry)).not.toContain("UNSUPPORTED_FIELD");
   });
 
+  it("additionalSpells: innate level without a use map stays manual instead of being dropped", () => {
+    const entry = adapt("feat", { additionalSpells: [{ innate: { "1": ["fog|Test"] } }] });
+
+    expect(codes(entry)).toContain("MANUAL_FEAT_SPELLS");
+    expect(entry.notes).toContain("fog|Test");
+  });
+
   it("additionalSpells: daily, per-spell, filters, cantrips and at-will leveled spells", () => {
     const entry = adapt("feat", {
       ability: [{ choose: { from: ["int", "wis"], amount: 1 } }],
