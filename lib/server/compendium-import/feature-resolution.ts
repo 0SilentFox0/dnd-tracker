@@ -2,7 +2,7 @@ import { array, effectiveEdition, object, str, unsupported } from "./adapters/sh
 import { renderEntries } from "./entries";
 import { canonicalKey, nestedId } from "./identity";
 import { type Compendium, type JsonRecord, normalized } from "./parse";
-import { type AdapterContext, type ImportIssue, issue } from "./types";
+import { type AdapterContext, type Edition, type ImportIssue, issue } from "./types";
 
 export interface FeatureResolutionContext {
   root: Compendium;
@@ -20,7 +20,14 @@ interface FeatureScope {
   featureContext: AdapterContext;
 }
 
-function findFeatureRows(root: Compendium, kind: Kind, parts: string[]): JsonRecord[] {
+// 5etools: an empty class/subclass source in a UID means the edition's default source.
+const defaultSource = (edition: Edition) => edition === "one" ? "xphb" : "phb";
+
+function findFeatureRows(root: Compendium, kind: Kind, parts: string[], edition: Edition): JsonRecord[] {
+  const fallback = defaultSource(edition);
+
+  const sourceOf = (part: string | undefined) => part ? normalized(part) : fallback;
+
   const levelAt = kind === "classFeature" ? 3 : 5;
 
   const sourceAt = kind === "classFeature" ? 4 : 6;
@@ -28,8 +35,8 @@ function findFeatureRows(root: Compendium, kind: Kind, parts: string[]): JsonRec
   return array(root[kind]).map(object).filter((r) =>
     normalized(str(r.name)) === normalized(parts[0] ?? "") &&
     normalized(str(r.className)) === normalized(parts[1] ?? "") &&
-    normalized(str(r.classSource)) === normalized(parts[2] ?? "") &&
-    (kind !== "subclassFeature" || (normalized(str(r.subclassShortName)) === normalized(parts[3] ?? "") && normalized(str(r.subclassSource)) === normalized(parts[4] ?? ""))) &&
+    normalized(str(r.classSource)) === sourceOf(parts[2]) &&
+    (kind !== "subclassFeature" || (normalized(str(r.subclassShortName)) === normalized(parts[3] ?? "") && normalized(str(r.subclassSource)) === sourceOf(parts[4]))) &&
     Number(r.level) === Number(parts[levelAt]) &&
     (!parts[sourceAt] || normalized(str(r.source)) === normalized(parts[sourceAt])));
 }
@@ -130,13 +137,15 @@ function resolveFeature(context: FeatureResolutionContext, kind: Kind, ownerPath
 }
 
 // Explicit feature UIDs include parent identities. No guessing by first matching display name.
-export function resolveCompendiumFeatures(raw: unknown, kind: Kind, ownerPath: string, context: FeatureResolutionContext): JsonRecord[] {
+export function resolveCompendiumFeatures(raw: unknown, kind: Kind, ownerPath: string, context: FeatureResolutionContext, ownerEdition?: Edition): JsonRecord[] {
+  const edition = effectiveEdition(ownerEdition, context.editionFallback);
+
   const out: JsonRecord[] = [];
 
   for (const [i, ref] of array(raw).entries()) {
     const parts = (typeof ref === "string" ? ref : str(object(ref)[kind])).split("|");
 
-    const candidates = findFeatureRows(context.root, kind, parts);
+    const candidates = findFeatureRows(context.root, kind, parts, edition);
 
     if (candidates.length !== 1) {
       context.issues.push(issue("FEATURE_REF_UNRESOLVED", `${ownerPath}[${i}]`, "error", "Додайте точне визначення feature або виключіть залежний клас/підклас"));

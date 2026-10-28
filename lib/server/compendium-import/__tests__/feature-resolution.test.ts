@@ -38,6 +38,28 @@ describe("nested feature characterization", () => {
     expect(result.embedded).toEqual({ optionalfeature: 0 });
   });
 
+  it.each([["classic", "PHB"], ["one", "XPHB"]])("resolves an empty class/subclass source to the %s default (%s)", (edition, source) => {
+    const sf = { name: "Petal", source: "S", className: "Druid", classSource: source, subclassShortName: "Bloom", subclassSource: source, level: 2, entries: ["Petal text"] };
+
+    const uid = "Petal|Druid||Bloom||2|S";
+
+    const result = adaptCompendium({ _meta: { edition, sources: [{ json: "S" }] }, subclass: [{ name: "Bloom", source: "S", shortName: "Bloom", className: "Druid", classSource: source, subclassFeatures: [uid] }], subclassFeature: [sf, { ...sf, classSource: "OTHER", entries: ["wrong"] }] });
+
+    expect(result.issues.filter((i) => i.code === "FEATURE_REF_UNRESOLVED")).toEqual([]);
+    expect(result.entries[0].body.subclasses).toMatchObject([{ features: [{ level: 2, description: "Petal\nPetal text" }] }]);
+  });
+
+  it("resolves an empty class source in a class feature UID and keeps explicit sources strict", () => {
+    const cf = { name: "Gift", source: "S", className: "Mage", classSource: "PHB", level: 1, entries: ["x"] };
+
+    const run = (uid: string) => adaptCompendium({ _meta: { edition: "classic", sources: [{ json: "S" }] }, class: [{ name: "Mage", source: "S", hd: { faces: 8 }, classFeatures: [uid] }], classFeature: [cf] });
+
+    expect(run("Gift|Mage||1|S").entries[0].body.features).toHaveLength(1);
+    expect(run("Gift|Mage|PHB|1|S").entries[0].body.features).toHaveLength(1);
+    expect(run("Gift|Mage|XPHB|1|S").issues.map((i) => i.code)).toContain("FEATURE_REF_UNRESOLVED");
+    expect(run("Gift|Unknown||1|S").issues.map((i) => i.code)).toContain("FEATURE_REF_UNRESOLVED");
+  });
+
   it("preserves subclass identity, mergeParent, bindings, notes and nested IDs", () => {
     const key = canonicalKey("subclass", "School", "T", "classic", ["Mage", "T"]);
 

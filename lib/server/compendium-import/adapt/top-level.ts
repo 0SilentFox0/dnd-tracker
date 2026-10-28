@@ -58,6 +58,6 @@ export function adaptTopLevel(state: AdaptState) {
   for (const entry of state.entries.filter((e) => e.inputKind === "class")) {
     const row = state.sourceRows.get(entry.key);
 
-    entry.body.features = resolveCompendiumFeatures(row?.classFeatures, "classFeature", `${entry.key}.classFeatures`, state.featureContext);
+    entry.body.features = resolveCompendiumFeatures(row?.classFeatures, "classFeature", `${entry.key}.classFeatures`, state.featureContext, entry.edition);
   }
 }

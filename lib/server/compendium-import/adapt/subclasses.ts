@@ -15,7 +15,7 @@ export function attachSubclasses(state: AdaptState) {
         subclasses: [{
           id: nestedId(ctx.key),
           name: row.name,
-          features: resolveCompendiumFeatures(row.subclassFeatures, "subclassFeature", `${ctx.key}.subclassFeatures`, state.featureContext),
+          features: resolveCompendiumFeatures(row.subclassFeatures, "subclassFeature", `${ctx.key}.subclassFeatures`, state.featureContext, ctx.edition),
         }],
       },
       notes: [description(row, ctx), unsupported(row, ["className", "classSource", "shortName", "subclassFeatures"], ctx)].filter(Boolean).join("\n"),
