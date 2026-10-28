@@ -11,5 +11,6 @@ export * from "./music";
 export * from "./prisma-json";
 export * from "./races";
 export * from "./skills";
+export * from "./source-sync";
 export * from "./spells";
 export * from "./units";

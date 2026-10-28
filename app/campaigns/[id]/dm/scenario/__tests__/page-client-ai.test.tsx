@@ -17,12 +17,20 @@ vi.mock("@/components/ai", () => ({
   AiProposalBadge: ({ count, onClick }: { count: number; onClick: () => void }) => <button onClick={onClick}>{`бейдж ${count}`}</button>,
 }));
 vi.mock("@/components/common/states", () => ({ LoadingState: () => null, QueryState: ({ children }: { children: (p: unknown) => React.ReactNode }) => <>{children(page)}</> }));
-vi.mock("@/components/scenario", () => ({ ScenarioBar: ({ actions }: { actions: React.ReactNode }) => <div>{actions}</div>, ScenarioBook: ({ children }: { children: React.ReactNode }) => <div>{children}</div>, ScenarioPageView: () => null }));
+vi.mock("@/components/scenario", () => ({
+  ScenarioBar: ({ actions }: { actions: React.ReactNode }) => <div>{actions}</div>,
+  ScenarioBook: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
+  ScenarioLayout: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
+  ScenarioPageView: () => null,
+  ScenarioToc: () => null,
+  tocItems: () => [],
+}));
 vi.mock("@/components/scenario/editor/VersionsDialog", () => ({ VersionsDialog: () => null }));
 vi.mock("@/components/scenario/play/ScenarioShowDock", () => ({ ScenarioShowDock: () => null }));
 vi.mock("@/lib/hooks/scenario", () => ({
   useScenarioPage: () => ({}),
   useScenarioPlay: () => ({}),
+  useSectionCollapse: () => ({ showPlayed: false, setShowPlayed: vi.fn(), isExpanded: () => true, expand: vi.fn() }),
   useSectionProgress: () => ({ setPlayed: vi.fn(), setRevealed: vi.fn(), isPending: false }),
 }));
 

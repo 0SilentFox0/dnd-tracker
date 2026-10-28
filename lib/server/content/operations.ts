@@ -2,7 +2,7 @@ import type { ZodType } from "zod";
 
 import "server-only";
 import { API_ERRORS } from "@/lib/constants/api-errors";
-import { deleteSpellsByLevelSchema, importUnitsSchema, reorderTracksSchema, saveSkillTreeSchema } from "@/lib/schemas";
+import { deleteSpellsByLevelSchema, importUnitsSchema, reorderTracksSchema, saveSkillTreeSchema, sourceSyncApplySchema, sourceSyncQuerySchema } from "@/lib/schemas";
 import { OwnerKind } from "@/lib/utils/abilities/read";
 import type { ActorNeed } from "@/lib/utils/api/actor";
 import { NEED } from "@/lib/utils/api/need";
@@ -35,6 +35,8 @@ const OPERATION_ROWS = {
   "rules.get": { method: "GET", path: "/rules", summary: "Правила кампанії", description: "Повний набір правил кампанії (ruleset) з урахуванням значень за замовчуванням.", need: NEED.read("member"), response: "object", tag: "Кампанія" },
   "rules.update": { method: "PATCH", path: "/rules", summary: "Змінити правила", description: "Частковий патч правил; не вказані поля лишаються як були.", need: NEED.write, body: RulesetPatchSchema, response: "object", invalidBody: API_ERRORS.INVALID_RULES, tag: "Кампанія" },
   "campaign.export": { method: "GET", path: "/export", summary: "Експорт бандла", description: "Увесь контент і правила кампанії одним JSON — бекап або основа шаблону.", need: NEED.read("dm"), response: "object", tag: "Кампанія" },
+  "source.diff": { method: "GET", path: "/source-sync", summary: "Зміни в джерелі", description: "Різниця між кампанією і шаблоном (або кампанією), з якого її створено: нові, оновлені, конфліктні й видалені записи, правила по механіках, налаштування. query scope — лише одна таблиця.", need: NEED.read("dm"), query: sourceSyncQuerySchema, response: "object", tag: "Кампанія" },
+  "source.apply": { method: "POST", path: "/source-sync", summary: "Застосувати зміни джерела", description: "apply — пункти з diff (scope, key, sourceHash), які взяти з джерела; залежності додаються автоматично. ignore — сховати пункти до наступної зміни джерела. 409 — джерело змінилося, візьміть свіжий diff.", need: NEED.write, body: sourceSyncApplySchema, response: "object", errors: [409], tag: "Кампанія" },
   "skill-trees.list": { method: "GET", path: "/skill-trees", summary: "Дерева скілів", description: "Дерева скілів усіх рас кампанії.", need: NEED.read("member"), response: "list", tag: "Скіли" },
   "skill-trees.save": { method: "PATCH", path: "/skill-trees/{treeId}", summary: "Зберегти дерево скілів", description: "Зберігає дерево раси; створює його, якщо ще немає. Прогрес персонажів переноситься. 409 — прогрес змінився паралельно, повторіть.", need: NEED.write, body: saveSkillTreeSchema, response: "object", errors: [409], invalidBody: API_ERRORS.INVALID_SKILL_TREE, tag: "Скіли" },
   "skills.duplicate": { method: "POST", path: "/skills/{skillId}/duplicate", summary: "Дублювати скіл", description: "Копія скіла з суфіксом «(копія)».", need: NEED.write, response: "item", tag: "Скіли" },

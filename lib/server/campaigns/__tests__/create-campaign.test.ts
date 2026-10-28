@@ -2,7 +2,7 @@ import { Prisma } from "@prisma/client";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 const m = vi.hoisted(() => {
-  const tx = { campaign: { create: vi.fn() } };
+  const tx = { campaign: { create: vi.fn() }, campaignSourceSync: { create: vi.fn() } };
 
   return {
     tx,
@@ -28,7 +28,7 @@ const clash = () => new Prisma.PrismaClientKnownRequestError("dup", { code: "P20
 describe("createCampaignFromBundle", () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    m.importBundle.mockResolvedValue({ idMap: new Map([["a", "b"]]), warnings: ["w"] });
+    m.importBundle.mockResolvedValue({ idMap: new Map([["a", "b"]]), warnings: ["w"], hashes: {} });
   });
 
   it("без бандла створює кампанію й DM-учасника без транзакції", async () => {
@@ -54,6 +54,17 @@ describe("createCampaignFromBundle", () => {
     expect(res.warnings).toEqual(["w"]);
     expect(m.tx.campaign.create.mock.calls[0][0].data).toMatchObject({ maxLevel: 12, xpMultiplier: 3, friendlyFire: true, createdFromId: "t1" });
     expect(m.importBundle).toHaveBeenCalledWith(m.tx, bundle, "c1");
+    expect(m.tx.campaignSourceSync.create).toHaveBeenCalledWith(
+      expect.objectContaining({ data: expect.objectContaining({ campaignId: "c1", sourceCampaignId: "t1" }) }),
+    );
+  });
+
+  it("без createdFromId стан синхронізації не створюється", async () => {
+    m.tx.campaign.create.mockResolvedValue({ id: "c1" });
+
+    await createCampaignFromBundle({ userId: "u1", name: "N", bundle });
+
+    expect(m.tx.campaignSourceSync.create).not.toHaveBeenCalled();
   });
 
   it("колізія коду запрошення — повтор, не більше 5 спроб", async () => {

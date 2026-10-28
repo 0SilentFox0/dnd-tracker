@@ -56,6 +56,7 @@ export interface StrikeFx {
   kind: "hit" | "crit" | "miss";
   damage: number;
   downed: boolean;
+  splash?: boolean;
 }
 
 export type ResultFx =

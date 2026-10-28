@@ -21,7 +21,6 @@ export interface AttackRequest {
   advantageRoll?: number;
   disadvantageRoll?: number;
   rollMode?: "normal" | "advantage" | "disadvantage";
-  obstacle?: boolean;
   damageRolls: number[];
 }
 

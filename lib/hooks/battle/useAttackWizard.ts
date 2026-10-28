@@ -9,15 +9,16 @@ import { AttackType } from "@/lib/constants/battle";
 import { collectModifiers, findFlags } from "@/lib/utils/abilities/engine/core/collect-modifiers";
 import { isAirborne, withSelf } from "@/lib/utils/abilities/engine/core/participants";
 import { predictAttack } from "@/lib/utils/battle/attack/bonus";
+import { attackMaxTargets } from "@/lib/utils/battle/attack/max-targets";
 import { attackKindOf } from "@/lib/utils/battle/common/attack-kind";
 import { resolveAttackRoll } from "@/lib/utils/battle/common/attack-roll-helpers";
 import { computeDamageBreakdown } from "@/lib/utils/battle/damage";
 import { damageDiceSlots } from "@/lib/utils/battle/damage/hero-damage";
 import { obstacleStep } from "@/lib/utils/battle/damage/obstacle";
-import { attackFlow, type AttackMode, attackPayload, effectiveD20, forcedModeOf, initialAttackFlow, type RollOutcome, strikeMode } from "@/lib/utils/battle/flows";
-import { enemiesInReach } from "@/lib/utils/battle/grid";
+import { attackFlow, type AttackMode, type AttackOutcomeSummary, attackPayload, effectiveD20, forcedModeOf, initialAttackFlow, type RollOutcome, strikeMode } from "@/lib/utils/battle/flows";
+import { enemiesInReach, lineOfFire } from "@/lib/utils/battle/grid";
 import { isUp } from "@/lib/utils/battle/participant/state";
-import { canSeeExactStats, critOutcome, formatKnownArmorClass, hiddenTargetSteps, resolveKnownArmorClass, retaliationOutcome, weaponPreview } from "@/lib/utils/battle/view";
+import { canSeeExactStats, critOutcome, formatKnownArmorClass, hiddenTargetSteps, resolveKnownArmorClass, retaliationOutcome, volleyResults, weaponPreview } from "@/lib/utils/battle/view";
 import { cryptoRandom, rollDie } from "@/lib/utils/common/dice";
 import { DEFAULT_RULES } from "@/lib/utils/rules";
 import type { BattleAttack, BattleParticipant, DamageStep } from "@/types/battle";
@@ -43,6 +44,18 @@ export function useAttackWizard(attacker: BattleParticipant | null, onDone?: () 
 
   const byId = (id: string) => order.find((p) => p.basicInfo.id === id);
 
+  const map = scene.battle.map;
+
+  const cover = useMemo(() => {
+    if (state.step === "closed" || !attacker || !attack || !map || attackKindOf(attack.type) !== AttackType.RANGED) return new Set<string>();
+
+    const seen = order.filter((p) => p === attacker || visible(p));
+
+    const candidates = seen.filter((p) => p !== attacker && isUp(p));
+
+    return new Set(candidates.filter((t) => lineOfFire(map, seen, attacker, t).blocked).map((t) => t.basicInfo.id));
+  }, [state.step, attacker, attack, map, order, visible]);
+
   const steps = useMemo<DamageStep[][]>(() => {
     if (!attacker || !attack || state.step !== "summary") return [];
 
@@ -57,11 +70,11 @@ export function useAttackWizard(attacker: BattleParticipant | null, onDone?: () 
 
         const shown = hiddenTargetSteps(full, s.targetId, scene.battle.battleLog ?? [], canSeeExactStats(target, scene.viewer), scene.battle.knowledge);
 
-        return state.obstacle ? [...shown, obstacleStep(shown.at(-1)?.after ?? 0)] : shown;
+        return cover.has(s.targetId) ? [...shown, obstacleStep(shown.at(-1)?.after ?? 0)] : shown;
       });
     // byId читає order, який уже в deps
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [attacker, attack, state.step, state.strikes, state.obstacle, order, scene.battle.battleLog, scene.battle.knowledge, scene.viewer]);
+  }, [attacker, attack, state.step, state.strikes, order, scene.battle.battleLog, scene.battle.knowledge, scene.viewer, cover]);
 
   const estimate = steps.reduce((sum, list) => sum + (list.at(-1)?.after ?? 0), 0);
 
@@ -80,8 +93,12 @@ export function useAttackWizard(attacker: BattleParticipant | null, onDone?: () 
 
   const hitsAll = !!attacker && findFlags(withSelf(order, attacker), attacker.basicInfo.id, "attackHitsAllEnemies").length > 0;
 
+  const chain = !!attacker && findFlags(withSelf(order, attacker), attacker.basicInfo.id, "chainShot").length > 0;
+
   const describe = (a: BattleAttack) => {
-    const maxTargets = Math.max(1, a.maxTargets ?? attacker?.combatStats.maxTargets ?? 1);
+    const onMap = !!scene.battle.map && !!attacker?.battleData.position;
+
+    const maxTargets = attacker ? attackMaxTargets(attacker, a, { chain, onMap }) : 1;
 
     return { attackId: a.id ?? a.name, maxTargets: hitsAll ? Math.max(maxTargets, enemyTargets.length) : maxTargets, diceSlots: attacker ? damageDiceSlots(attacker, a) : [6] };
   };
@@ -123,9 +140,7 @@ export function useAttackWizard(attacker: BattleParticipant | null, onDone?: () 
     const seen = new Set((scene.battle.battleLog ?? []).map((e) => e.actionIndex));
 
     try {
-      const res = await scene.actions.attack.mutateAsync(attackPayload(state, attacker.basicInfo.id));
-
-      const hpChanges = res?.hpChanges ?? [];
+      await scene.actions.attack.mutateAsync(attackPayload(state, attacker.basicInfo.id));
 
       const current = scene.readBattle();
 
@@ -133,18 +148,9 @@ export function useAttackWizard(attacker: BattleParticipant | null, onDone?: () 
 
       const after = current?.initiativeOrder ?? order;
 
-      const results = state.strikes.map((s) => {
-        const now = after.find((p) => p.basicInfo.id === s.targetId);
+      const fromLog = volleyResults(log, seen, attacker.basicInfo.id, after);
 
-        const hit = s.outcome === "hit" || s.outcome === "crit";
-
-        return {
-          kind: (s.outcome === "crit" ? "crit" : hit ? "hit" : "miss") as "crit" | "hit" | "miss",
-          targetId: s.targetId,
-          damage: hpChanges.filter((h) => h.participantId === s.targetId).reduce((sum, h) => sum + Math.max(0, h.change), 0),
-          downed: !!now && !isUp(now),
-        };
-      });
+      const results: AttackOutcomeSummary[] = fromLog.length > 0 ? fromLog : state.strikes.map((s) => ({ kind: s.outcome === "crit" ? ("crit" as const) : s.outcome === "hit" ? ("hit" as const) : ("miss" as const), targetId: s.targetId, damage: 0, downed: false }));
 
       dispatch({ type: "SUCCESS", results });
 
@@ -162,7 +168,7 @@ export function useAttackWizard(attacker: BattleParticipant | null, onDone?: () 
 
       const d20 = effectiveD20(strike, strikeMode(state, strike));
 
-      const strikes = results.length > 1 ? results.map((r) => ({ targetName: byId(r.targetId)?.basicInfo.name ?? "", kind: r.kind, damage: r.damage, downed: r.downed })) : undefined;
+      const strikes = results.length > 1 ? results.map((r) => ({ targetName: byId(r.targetId)?.basicInfo.name ?? "", kind: r.kind, damage: r.damage, downed: r.downed, splash: r.splash })) : undefined;
 
       if (first.kind === "miss" || crit?.type === "fail") {
         const known = formatKnownArmorClass(resolveKnownArmorClass(log, first.targetId, current?.knowledge));
@@ -201,7 +207,7 @@ export function useAttackWizard(attacker: BattleParticipant | null, onDone?: () 
   }, [state.step]);
 
   const view = {
-    attack, attacks, targets, steps, estimate, unknownDefense, previews,
+    attack, attacks, targets, steps, estimate, cover, unknownDefense, previews,
     attackKind: attack ? (attackKindOf(attack.type) === AttackType.RANGED ? ("ranged" as const) : ("melee" as const)) : null,
     /** дальність перевірена картою — лише тоді «ціль поруч» правда */
     reachChecked: !!scene.battle.map && !!attacker?.battleData.position && state.targetIds.every((id) => !!byId(id)?.battleData.position),
@@ -258,7 +264,6 @@ export function useAttackWizard(attacker: BattleParticipant | null, onDone?: () 
     },
     selectAllEnemies: () => dispatch({ type: "SET_TARGETS", ids: enemyTargets.map((p) => p.basicInfo.id) }),
     setMode: (mode: AttackMode) => dispatch({ type: "SET_MODE", mode }),
-    toggleObstacle: () => dispatch({ type: "TOGGLE_OBSTACLE" }),
     roll: (d20: number, second?: number) => dispatch({ type: "ROLL", d20, second, outcome: outcomeOf(d20, second) }),
     aiRoll: () => {
       const d20 = rollDie(20, cryptoRandom);

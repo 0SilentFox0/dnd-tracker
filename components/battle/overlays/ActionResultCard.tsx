@@ -33,7 +33,7 @@ function AttackBody({ fx }: { fx: AttackFx }) {
         <ul className="mt-1 space-y-0.5 text-sm">
           {fx.strikes.map((s, i) => (
             <li key={i} className="flex justify-between gap-3">
-              <span className="truncate">{s.targetName}</span>
+              <span className="truncate">{s.targetName}{s.splash ? " · зачеплено" : ""}</span>
               <span className={cn("shrink-0", TONE[s.kind])}>{strikeText(s)}</span>
             </li>
           ))}

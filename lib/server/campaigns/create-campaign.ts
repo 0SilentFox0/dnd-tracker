@@ -4,7 +4,8 @@ import { CampaignKind, CampaignRole, CampaignVisibility } from "@/lib/constants/
 import { prisma } from "@/lib/db";
 import { type Bundle, TemplateLeakError } from "@/lib/server/templates/bundle";
 import { importBundle } from "@/lib/server/templates/import-bundle";
-import { isDmMember } from "@/lib/utils/api/is-dm";
+import { baselineFromBundle } from "@/lib/server/templates/sync/hash";
+import { canReadSource } from "@/lib/utils/api/is-dm";
 import { generateInviteCode, INVITE_CODE_ATTEMPTS, isInviteCodeClash } from "@/lib/utils/campaigns/invite-code";
 import { parseRules } from "@/lib/utils/rules/schema";
 
@@ -58,7 +59,17 @@ export async function createCampaignFromBundle(input: CreateFromBundleInput): Pr
         async (tx) => {
           const campaign = await tx.campaign.create({ data: campaignData(input), include: { members: true }, omit: { aiInstructions: true } });
 
-          const { warnings } = await importBundle(tx, bundle, campaign.id);
+          const { warnings, hashes } = await importBundle(tx, bundle, campaign.id);
+
+          if (input.createdFromId) {
+            await tx.campaignSourceSync.create({
+              data: {
+                campaignId: campaign.id,
+                sourceCampaignId: input.createdFromId,
+                baseline: baselineFromBundle(bundle, hashes) as Prisma.InputJsonObject,
+              },
+            });
+          }
 
           return { campaign, warnings };
         },
@@ -81,9 +92,5 @@ export async function loadTemplateForUser(
 
   if (!template || template.kind !== CampaignKind.TEMPLATE) return { ok: false, status: 404 };
 
-  if (template.visibility === CampaignVisibility.OFFICIAL || isDmMember(template.members)) {
-    return { ok: true, template };
-  }
-
-  return { ok: false, status: 403 };
+  return canReadSource(template.visibility, template.members) ? { ok: true, template } : { ok: false, status: 403 };
 }

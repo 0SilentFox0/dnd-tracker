@@ -20,7 +20,7 @@ import { AttackWizard } from "@/components/battle/wizards/AttackWizard";
 import { SpellBook } from "@/components/battle/wizards/SpellBook";
 import { BattleSceneContext, type BattleSceneValue, useAttackWizard, useSpellBook } from "@/lib/hooks/battle";
 import { fakeScene } from "@/lib/hooks/battle/__tests__/fake-scene";
-import type { BattleParticipant } from "@/types/battle";
+import type { BattleAction, BattleParticipant } from "@/types/battle";
 
 type ResultApi = BattleSceneValue["result"];
 
@@ -65,9 +65,11 @@ describe("результат дії не закриває карту", () => {
   afterEach(cleanup);
 
   it("атака: після відправки майстер закривається, підсумок не в модалці, а в картці; onDone спрацьовує", async () => {
-    const scene = fakeScene();
+    const afterLog = [{ actionIndex: 9, actionType: "attack", actorId: "me", targets: [{ participantId: "gob", participantName: "Гоблін" }], hpChanges: [{ participantId: "gob", participantName: "Гоблін", oldHp: 20, newHp: 11, change: 9 }], actionDetails: { isHit: true } }] as unknown as BattleAction[];
 
-    scene.mutateAsync.mockResolvedValue({ hpChanges: [{ participantId: "gob", participantName: "Гоблін", oldHp: 20, newHp: 11, change: 9 }] });
+    const scene = fakeScene({ afterLog });
+
+    scene.mutateAsync.mockResolvedValue(undefined);
 
     const onDone = vi.fn();
 

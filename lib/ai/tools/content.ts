@@ -3,7 +3,10 @@ import { z } from "zod";
 import { type AiToolContext, defineTool } from "./define";
 
 import "server-only";
+import { AI_LIMITS } from "@/lib/constants/ai";
+import { SYNC_SCOPES } from "@/lib/constants/source-sync";
 import { saveSkillTreeSchema } from "@/lib/schemas/skills";
+import { sourceSyncApplySchema } from "@/lib/schemas/source-sync";
 import { readCampaignRules, updateCampaignRules } from "@/lib/server/campaigns/rules";
 import type { AnyContentResource, ContentKind } from "@/lib/server/content/define-resource";
 import { ContentError, parseInput } from "@/lib/server/content/errors";
@@ -11,8 +14,10 @@ import { CONTENT_RESOURCES } from "@/lib/server/content/resources";
 import { EXTRA, KINDS, SCHEMA_TARGETS } from "@/lib/server/content/schema-targets";
 import { createContent, getContent, listContent, removeContent, updateContent } from "@/lib/server/content/service";
 import { readSkillTree, saveSkillTree } from "@/lib/server/skills/skill-tree-service";
+import { applySource, getSourceDiff } from "@/lib/server/templates/sync/service";
 import { type Actor, tokenActorOf } from "@/lib/utils/api/actor";
 import { RulesetPatchSchema } from "@/lib/utils/rules/schema";
+import type { SourceDiff } from "@/types/campaigns";
 
 const kindSchema = z.enum(KINDS);
 
@@ -21,6 +26,25 @@ const resourceOf = (kind: ContentKind) => CONTENT_RESOURCES[kind] as AnyContentR
 const toolActor = (ctx: AiToolContext): Actor => tokenActorOf(ctx);
 
 const treeView = (tree: { id: string; race: string; skills: unknown }) => ({ id: tree.id, race: tree.race, skills: tree.skills });
+
+const DEFAULT_LIMIT = 20;
+
+function pageDiff(diff: SourceDiff, offset: number, limit: number) {
+  const total = diff.items.length;
+
+  const counts: Record<string, number> = {};
+
+  for (const { scope } of diff.items) counts[scope] = (counts[scope] ?? 0) + 1;
+
+  // shrink the page until the JSON fits: define.ts clipping would cut it mid-structure
+  for (let n = limit; ; n = Math.max(1, Math.floor(n / 2))) {
+    const end = Math.min(offset + n, total);
+
+    const page = { ...diff, total, offset, items: diff.items.slice(offset, end), counts, nextOffset: end < total ? end : null };
+
+    if (n === 1 || JSON.stringify(page).length <= AI_LIMITS.toolResultChars) return page;
+  }
+}
 
 const OPS = ["list", "get", "create", "update", "delete"] as const;
 
@@ -50,8 +74,6 @@ export const contentSchemaTool = defineTool({
   input: z.object({ kind: z.enum(SCHEMA_TARGETS), op: z.enum(["create", "update"]).optional(), effectKind: z.string().optional() }),
   handler: async (_ctx, input) => (await import("@/lib/server/content/tool-schemas")).contentSchema(input),
 });
-
-const DEFAULT_LIMIT = 20;
 
 export const contentListTool = defineTool({
   name: "content_list",
@@ -166,6 +188,30 @@ export const saveSkillTreeTool = defineTool({
   handler: async (ctx, input) => treeView(await saveSkillTree(toolActor(ctx), input)),
 });
 
+export const sourceDiffTool = defineTool({
+  name: "source_diff",
+  title: "Зміни в джерелі кампанії",
+  description:
+    "Що змінилося в шаблоні (або кампанії), з якого створено цю кампанію: items зі scope (таблиця, rules або settings), key, name, status (new | updated | conflict | deletedInSource | deletedLocally), changedFields, sourceHash, requires. Для застосування передай scope, key, sourceHash і status у source_apply. Сторінками: scope звужує, offset/limit (за замовчуванням 20, до 50) гортають; total — усього пунктів, counts — за scope, nextOffset — з чого продовжити (null — кінець).",
+  scopes: ["content:read"],
+  input: z.object({
+    scope: z.enum(SYNC_SCOPES).optional(),
+    offset: z.number().int().min(0).default(0),
+    limit: z.number().int().min(1).max(50).default(DEFAULT_LIMIT),
+  }),
+  handler: async (ctx, { scope, offset, limit }) => pageDiff(await getSourceDiff(toolActor(ctx), scope), offset, limit),
+});
+
+export const sourceApplyTool = defineTool({
+  name: "source_apply",
+  title: "Застосувати зміни джерела",
+  description:
+    "apply — пункти з source_diff, які взяти з джерела (залежності додаються самі, див. autoAdded); ignore — сховати пункти до наступної зміни джерела. Конфлікт у apply = взяти версію джерела замість своєї. Помилка «Джерело змінилося» — повтори source_diff.",
+  scopes: ["content:write"],
+  input: sourceSyncApplySchema,
+  handler: (ctx, input) => applySource(toolActor(ctx), input),
+});
+
 export const CONTENT_TOOLS = [
   contentKindsTool,
   contentSchemaTool,
@@ -178,4 +224,6 @@ export const CONTENT_TOOLS = [
   updateRulesTool,
   getSkillTreeTool,
   saveSkillTreeTool,
+  sourceDiffTool,
+  sourceApplyTool,
 ];

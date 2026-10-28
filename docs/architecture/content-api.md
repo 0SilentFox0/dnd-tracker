@@ -47,10 +47,11 @@
 
 | Інструмент | Право |
 |---|---|
-| `content_kinds`, `content_schema`, `content_list`, `content_get`, `get_rules`, `get_skill_tree` | `content:read` |
-| `content_create`, `content_update`, `content_delete`, `update_rules`, `save_skill_tree` | `content:write` |
+| `content_kinds`, `content_schema`, `content_list`, `content_get`, `get_rules`, `get_skill_tree`, `source_diff` | `content:read` |
+| `content_create`, `content_update`, `content_delete`, `update_rules`, `save_skill_tree`, `source_apply` | `content:write` |
 
 - `content_schema({ kind, op, effectKind })` (`lib/server/content/tool-schemas.ts`) віддає самодостатню JSON Schema з `$defs`. Здібності й ефекти замінено заглушками з підказкою; вони запитуються окремо: `kind: "abilities"`, а потім `effectKind`. Тож кожна відповідь вміщається в `AI_LIMITS.toolResultChars` (24 000; найбільша — ефект `flag`, ~14 КБ).
+- `source_diff({ scope?, offset?, limit? })` / `source_apply({ apply, ignore })` — оновлення кампанії з джерела (шаблону). `source_diff` повертає сторінку: `items`, `total`, `offset`, `counts` (за scope), `nextOffset` (`null` — кінець); `limit` за замовчуванням 20 (макс. 50) і сам зменшується, щоб сторінка вмістилась у `toolResultChars`. Посилання в `apply`/`ignore` — `{ scope, key, sourceHash, status }`: якщо хеш джерела або статус пункту змінились після diff — 409 «Джерело змінилося». `scope` — таблиця вмісту, `rules` або `settings` (інакше 400). Apply виконується під блокуванням рядка кампанії.
 - `content_list` повертає до 50 записів (`id`, `name`, `listFields`) і `total`, сторінки — через `offset`.
 - Помилки валідації повертаються агентові текстом `шлях: повідомлення`. Інші помилки — загальним текстом, без сирих повідомлень БД.
 - Масового видалення, імпорту й експорту бандла в MCP немає. Бекап — `GET /export` з `content:read`.
@@ -70,3 +71,14 @@
 - Права перевіряються в сервісі (`assertCan`), а не лише в HTTP-шарі. Новий шлях до контенту (інструмент, скрипт) ходить через сервіс.
 - Окремих «API-схем» немає: UI, REST, OpenAPI і MCP використовують одні схеми з `lib/schemas`.
 - Кожен запис через сервіс скидає кеш-теги свого виду. `revalidateTag` діє лише в межах життя обробника роуту: `/api/mcp` для POST дочитує SSE-відповідь `mcp-handler` до кінця перед поверненням, інакше інструмент виконується вже після повернення `Response` і скидання кешу губиться.
+
+## Оновлення з джерела (етап 3)
+
+Спека: `docs/superpowers/specs/2026-10-21-constructor-stage3-source-sync-design.md`. Кампанія або шаблон з `createdFromId` (його пише лише сервер: клон шаблону, «Зберегти як шаблон», скрипт офіційних шаблонів; JSON-імпорт — ні) порівнює себе з джерелом і вибірково бере зміни.
+
+- **Стан** — `campaign_source_syncs` (рядок на кампанію): `baseline` = хеші версії джерела, з якою синхронізовані (`tables[таблиця][sourceId]`, `rules[механіка]`, `settings`), `ignored` = версія джерела, яку ДМ проігнорував (або `"deleted"`). Пишеться в `createCampaignFromBundle` при клонуванні і після кожного apply. Кампанія без рядка — запасний baseline з `sourceId`/`sourceHash` рядків.
+- **Ядро** — `lib/server/templates/sync/` (без `server-only`, тож доступне tsx-скриптам): `context.ts` (джерело + ціль + стан, перевірка доступу до джерела `canReadSource`), `classify.ts` (S/B/L: хеш джерела, baseline, локальний рядок у просторі id джерела → `new`/`updated`/`conflict`/`deletedInSource`/`deletedLocally`), `apply.ts` (замикання залежностей `requires`, перестановка id через `remapIds`, `createMany`/`update` у порядку FK, видалення у зворотному, перенесення ключа прогресу дерева скілів, `assertNoLeak` + чужі id → 422, оновлення baseline/ignored), `diff.ts` (відповідь без повних рядків + `usage` для видалених у джерелі), `state.ts`, `service.ts` (`assertCan`, транзакція з `SELECT … FOR NO KEY UPDATE` на рядку кампанії, `invalidateReference`).
+- **API** — `GET/POST /api/campaigns/[id]/source-sync` (`source.diff` — DM + `content:read`, `?scope=`; `source.apply` — `content:write`, тіло `{ apply, ignore }` з `{ scope, key, sourceHash, status }`; 409 — джерело або статус змінились). MCP: `source_diff`/`source_apply`.
+- **Перевірка вживу** — `scripts/constructor/source-sync-check.ts <templateId> <userId>` (клон → зміни в шаблоні й клоні → diff → apply → порожній diff, паралельний apply → один 409; усе прибирає) і `--diff-only <campaignId>`.
+- **UI (3b)** — кнопка «Оновлення з шаблону» в налаштуваннях кампанії і «Оновлення з джерела» в банері шаблону (лише ДМ і лише з `createdFromId`) відкриває `SourceSyncDialog` (`components/campaigns/templates`): групи за scope, галочки за замовчуванням лише для `new`/`updated`, «Також буде додано» (транзитивні `requires`), підтвердження видалень і «Ігнорувати», після 409 — примітка й свіжий список. Шари: `lib/api/source-sync.ts` → `lib/hooks/campaigns/useSourceSync.ts` → чиста логіка `lib/utils/campaigns/source-sync.ts`. Diff запитується лише при відкритому діалозі.
+- Обмеження: персонажі, бої й сценарій не синхронізуються; у «Змінено: …» — назви колонок без перекладу; id наявних записів не змінюються; файли треків у Storage не видаляються; ключі JSON-об'єктів не перекладаються (як і в `importBundle`).

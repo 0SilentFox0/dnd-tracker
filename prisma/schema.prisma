@@ -24,6 +24,7 @@ model User {
 
 model Campaign {
   id              String           @id @default(cuid())
+  sourceSync      CampaignSourceSync?
   name            String
   description     String?
   inviteCode      String           @unique
@@ -695,4 +696,15 @@ model ApiToken {
 
   @@index([campaignId])
   @@map("api_tokens")
+}
+
+model CampaignSourceSync {
+  campaignId       String   @id
+  sourceCampaignId String
+  baseline         Json
+  ignored          Json     @default("{}")
+  syncedAt         DateTime @default(now())
+  campaign         Campaign @relation(fields: [campaignId], references: [id], onDelete: Cascade)
+
+  @@map("campaign_source_syncs")
 }

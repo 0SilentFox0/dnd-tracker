@@ -1,5 +1,6 @@
 import { diceThrowsOf } from "./dice/from-action";
 import { elementOf } from "./element";
+import { splashTargetIds } from "./impact";
 import type { FxArchetype, FxElement, FxSpec } from "./types";
 
 import type { BattleAction } from "@/types/battle";
@@ -46,7 +47,7 @@ function primary(action: BattleAction): FxSpec | null {
   const base = { key: `${action.id}:0`, actionId: action.id, actorId: action.actorId, actorSide: action.actorSide, targetIds: action.targets.map((t) => t.participantId), critical: d.isCritical === true };
 
   if (action.actionType === "attack" || action.actionType === "retaliation") {
-    return { ...base, archetype: d.attackKind === "ranged" ? "ranged" : "melee", element: elementOf(d.damageRolls?.[0]?.damageType, "physical"), hit: d.isHit !== false && d.isCriticalFail !== true };
+    return { ...base, archetype: d.attackKind === "ranged" ? "ranged" : "melee", element: elementOf(d.damageRolls?.[0]?.damageType, "physical"), hit: d.isHit !== false && d.isCriticalFail !== true, ...(d.chainFromId && { originId: d.chainFromId }) };
   }
 
   if (action.actionType === "spell") return { ...base, ...spellArchetype(action), hit: true, ...(d.aimCell && { at: d.aimCell }) };
@@ -65,5 +66,9 @@ export function mapAction(action: BattleAction): FxSpec[] {
     .filter((h) => h.oldHp > 0 && h.newHp <= 0)
     .map((h) => ({ key: `${action.id}:death:${h.participantId}`, actionId: action.id, archetype: "death", element: "necrotic", actorId: action.actorId, actorSide: action.actorSide, targetIds: [h.participantId], hit: true, critical: false }));
 
-  return [...dice, ...(main ? [main] : []), ...deaths];
+  const splashIds = splashTargetIds(action, main ?? undefined);
+
+  const splash: FxSpec[] = main && splashIds.length > 0 ? [{ ...main, key: `${action.id}:splash`, archetype: "ranged", targetIds: splashIds, originId: main.targetIds[0], critical: false }] : [];
+
+  return [...dice, ...(main ? [main] : []), ...splash, ...deaths];
 }

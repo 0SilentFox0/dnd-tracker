@@ -30,6 +30,7 @@ import {
   isFallen,
   isMoveMark,
   mapSize,
+  parseCellKey,
   playableBounds,
   tokenBox,
   UNIT,
@@ -559,8 +560,18 @@ export function BattleMap({ map, participants, view, actions, className, editing
           {painting && <StrokeLayer preview={preview} pending={view?.pendingStroke} />}
           {from && end && (
             <g pointerEvents="none">
-              <line data-map-attack-hint="ranged" x1={from.box.cx} y1={from.box.cy} x2={end.x} y2={end.y} stroke="#f2c14e" strokeWidth={4} strokeDasharray="12 10" vectorEffect="non-scaling-stroke" pointerEvents="none" />
-              <circle cx={end.x} cy={end.y} r={UNIT * 0.18} fill="#f2c14e" />
+              <line data-map-attack-hint="ranged" x1={from.box.cx} y1={from.box.cy} x2={end.x} y2={end.y} stroke={trajectory?.cover ? "#e0603a" : "#f2c14e"} strokeWidth={4} strokeDasharray="12 10" vectorEffect="non-scaling-stroke" pointerEvents="none" />
+              <circle cx={end.x} cy={end.y} r={UNIT * 0.18} fill={trajectory?.cover ? "#e0603a" : "#f2c14e"} />
+              {trajectory?.cover?.map((key) => {
+                const c = cellCenter(parseCellKey(key));
+
+                return <rect key={key} x={c.x - UNIT / 2} y={c.y - UNIT / 2} width={UNIT} height={UNIT} fill="rgba(224,96,58,.3)" stroke="#e0603a" strokeWidth={2} vectorEffect="non-scaling-stroke" />;
+              })}
+              {trajectory?.cover && (
+                <text x={end.x} y={end.y - UNIT * 0.45} textAnchor="middle" fontSize={UNIT * 0.32} fontWeight={700} fill="#ffd2b8" stroke="#3a1a10" strokeWidth={3} paintOrder="stroke">
+                  🧱 ×0.5
+                </text>
+              )}
             </g>
           )}
         </svg>

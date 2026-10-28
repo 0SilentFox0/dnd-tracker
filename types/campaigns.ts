@@ -1,3 +1,5 @@
+import type { SYNC_SCOPES, SYNC_STATUSES } from "@/lib/constants/source-sync";
+
 export interface Campaign {
   id: string;
   name: string;
@@ -65,6 +67,11 @@ export interface CampaignSettings {
   status: string;
 }
 
+export interface CampaignSettingsMeta {
+  createdFromId: string | null;
+  isTemplate: boolean;
+}
+
 export interface ActiveBattleRef {
   id: string;
   campaignId: string;
@@ -78,3 +85,27 @@ export interface ActiveSessions {
   battles: ActiveBattleRef[];
   shows: ActiveShowRef[];
 }
+
+export type SourceSyncScope = (typeof SYNC_SCOPES)[number];
+
+export type SourceSyncStatus = (typeof SYNC_STATUSES)[number];
+
+export type SyncRef = { scope: SourceSyncScope; key: string; sourceHash: string | null; status: SourceSyncStatus };
+
+export type SourceApplyBody = { apply: SyncRef[]; ignore: SyncRef[] };
+
+export type SourceDiffItem = {
+  scope: SourceSyncScope;
+  key: string;
+  localId: string | null;
+  name: string;
+  status: SourceSyncStatus;
+  changedFields: string[];
+  sourceHash: string | null;
+  requires: Array<{ scope: SourceSyncScope; key: string; name: string }>;
+  usage?: { characters: number; content: number };
+};
+
+export type SourceDiff = { source: { id: string; name: string; kind: string }; syncedAt: string | null; items: SourceDiffItem[] };
+
+export type SourceApplyResult = { applied: number; ignored: number; autoAdded: Array<{ scope: SourceSyncScope; key: string; name: string }>; warnings: string[] };

@@ -56,6 +56,8 @@ export interface ModeEngineHooks<C> {
   meleeBlockedText?(args: { config: C; map: BattleMapConfig; attacker: BattleParticipant; target: BattleParticipant }): string | null;
   /** Чи «зв'язує» сусід стрільця (звичайно — isActive). */
   engages?(args: { config: C; map: BattleMapConfig; attacker: BattleParticipant; neighbour: BattleParticipant }): boolean;
+  /** Лінія вогню (сусідні клітинки по черзі) перетинає стіну режиму. Відсутній — ні. */
+  lineBlocked?(args: { config: C; map: BattleMapConfig; line: GridPoint[] }): boolean;
   /** Зона ходу замість звичайної; `seen` — учасники, яких бачить глядач. */
   moveZone?(args: { config: C; map: BattleMapConfig; seen: BattleParticipant[]; mover: BattleParticipant; view: ModeView | null }): ModeMoveZone | null;
 }

@@ -6,6 +6,7 @@ const m = vi.hoisted(() => ({
     user: { upsert: vi.fn() },
     campaign: { create: vi.fn(), findUnique: vi.fn(), findMany: vi.fn(), update: vi.fn() },
     campaignMember: { create: vi.fn() },
+    campaignSourceSync: { create: vi.fn() },
     $transaction: vi.fn(),
   },
   kvDel: vi.fn(),
@@ -67,7 +68,7 @@ describe("campaign templates API", () => {
     vi.clearAllMocks();
     m.userId.current = "u1";
     m.exportCampaign.mockResolvedValue(bundle);
-    m.importBundle.mockResolvedValue({ idMap: new Map(), warnings: [] });
+    m.importBundle.mockResolvedValue({ idMap: new Map(), warnings: [], hashes: {} });
     m.db.campaign.create.mockImplementation(async ({ data }: { data: object }) => ({ id: "new", ...data }));
     m.db.$transaction.mockImplementation(async (cb: (t: unknown) => unknown) => cb(m.db));
     m.requireDM.mockImplementation(async () => NextResponse.json({ error: "x" }, { status: 403 }));
@@ -82,6 +83,9 @@ describe("campaign templates API", () => {
       expect(res.status).toBe(200);
       expect(m.db.campaign.create.mock.calls[0][0].data).toMatchObject({ createdFromId: "t1", kind: "campaign" });
       expect(m.kvDel).toHaveBeenCalledWith("campaigns:u1");
+      expect(m.db.campaignSourceSync.create).toHaveBeenCalledWith(
+        expect.objectContaining({ data: expect.objectContaining({ sourceCampaignId: "t1" }) }),
+      );
     });
 
     it.each([
@@ -151,6 +155,7 @@ describe("campaign templates API", () => {
   describe("імпорт", () => {
     it("валідний бандл — 200", async () => {
       expect((await importPost(json({ name: "N", bundle }))).status).toBe(200);
+      expect(m.db.campaignSourceSync.create).not.toHaveBeenCalled();
     });
 
     it("formatVersion 2 — 400 з issues", async () => {

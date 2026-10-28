@@ -1,17 +1,20 @@
 "use client";
 
-import { useCallback, useRef, useState } from "react";
+import { useCallback, useMemo, useRef, useState } from "react";
 import dynamic from "next/dynamic";
 import Link from "next/link";
+import { BookOpen, ChevronsUpDown, History, Moon, Sun } from "lucide-react";
 
 import { AiPanel, AiProposalBadge, AiProposalCard } from "@/components/ai";
+import type { ActionsMenuItem } from "@/components/common/ActionsMenu";
 import { LoadingState, QueryState } from "@/components/common/states";
-import { ScenarioBar, ScenarioBook, ScenarioPageView } from "@/components/scenario";
+import { ScenarioBar, ScenarioBook, ScenarioLayout, ScenarioPageView, ScenarioToc, type TocControl, tocItems } from "@/components/scenario";
 import { VersionsDialog } from "@/components/scenario/editor/VersionsDialog";
 import { ScenarioShowDock } from "@/components/scenario/play/ScenarioShowDock";
 import type { AiThreadMode } from "@/lib/constants/ai";
 import { useAiProposals } from "@/lib/hooks/ai";
-import { useScenarioPage, useScenarioPlay, useSectionProgress } from "@/lib/hooks/scenario";
+import { useMediaQuery } from "@/lib/hooks/common";
+import { useScenarioPage, useScenarioPlay, useSectionCollapse, useSectionProgress } from "@/lib/hooks/scenario";
 import { playedLookup } from "@/lib/utils/scenario/reveal";
 import { pickLiveSection } from "@/lib/utils/scenario/structure";
 import type { AiFocus } from "@/types/ai";
@@ -30,6 +33,8 @@ export function ScenarioPageClient({ campaignId, pageId, playedPages, aiEnabled 
 function ScenarioPageBody({ campaignId, page, playedPages, aiEnabled }: { campaignId: string; page: ScenarioPage; playedPages: PlayedPages; aiEnabled: boolean }) {
   const progress = useSectionProgress(campaignId, page.id);
 
+  const collapse = useSectionCollapse();
+
   const [hideNotes, setHideNotes] = useState(false);
 
   const [theme, setTheme] = useState<"light" | "dark" | null>(null);
@@ -43,6 +48,20 @@ function ScenarioPageBody({ campaignId, page, playedPages, aiEnabled }: { campai
   const [versionsOpen, setVersionsOpen] = useState(false);
 
   const [aiOpen, setAiOpen] = useState(false);
+
+  const [tocOpen, setTocOpen] = useState(false);
+
+  const wide = useMediaQuery("(min-width: 1200px)");
+
+  const tocInline = wide && !(aiEnabled && aiOpen);
+
+  const toc: TocControl = { inline: tocInline, drawer: { open: tocOpen, onOpenChange: setTocOpen } };
+
+  const played = useMemo(() => playedLookup(playedPages), [playedPages]);
+
+  const systemDark = useMediaQuery("(prefers-color-scheme: dark)");
+
+  const dark = theme ? theme === "dark" : systemDark;
 
   const [pendingShown, setPendingShown] = useState(false);
 
@@ -78,13 +97,10 @@ function ScenarioPageBody({ campaignId, page, playedPages, aiEnabled }: { campai
     <>
       {!editBase && (
         <>
-          <button type="button" className="toggle" onClick={() => setEditBase(page)}>
+          <button type="button" className="toggle is-primary" onClick={() => setEditBase(page)}>
             Редагувати
           </button>
-          <button type="button" className="toggle" onClick={() => setVersionsOpen(true)}>
-            Версії
-          </button>
-          <Link className="toggle" href={`/campaigns/${campaignId}/show`} target="_blank" rel="noopener">
+          <Link className="toggle sb-hide-sm" href={`/campaigns/${campaignId}/show`} target="_blank" rel="noopener">
             Екран показу ↗
           </Link>
         </>
@@ -97,32 +113,50 @@ function ScenarioPageBody({ campaignId, page, playedPages, aiEnabled }: { campai
           <AiProposalBadge count={proposals.pendingCount} onClick={() => openAi(true)} />
         </>
       )}
-      <Link className="toggle" href={`/campaigns/${campaignId}/dm/scenario`}>
-        До змісту
-      </Link>
     </>
   );
+
+  const menu: ActionsMenuItem[] = [
+    { label: dark ? "Світла тема" : "Темна тема", icon: dark ? Sun : Moon, onSelect: () => setTheme(dark ? "light" : "dark") },
+    ...(editBase ? [] : [{ label: "Версії", icon: History, onSelect: () => setVersionsOpen(true) }]),
+    { label: collapse.showPlayed ? "Згорнути зіграні" : "Розгорнути зіграні", icon: ChevronsUpDown, onSelect: () => collapse.setShowPlayed(!collapse.showPlayed) },
+    { label: "До змісту", icon: BookOpen, href: `/campaigns/${campaignId}/dm/scenario`, separatorBefore: true },
+  ];
 
   return (
     <ScenarioBook hideNotes={hideNotes && !editBase} theme={theme} withAi={aiEnabled && aiOpen}>
       <ScenarioBar
         title={page.title}
-        sections={page.content.sections}
-        hideNotes={hideNotes}
-        onToggleNotes={() => setHideNotes((v) => !v)}
-        theme={theme}
-        onToggleTheme={() => setTheme((t) => (t === "dark" ? "light" : "dark"))}
+        notes={{ hidden: hideNotes, toggle: () => setHideNotes((v) => !v) }}
+        toc={tocInline ? undefined : { onOpen: () => setTocOpen(true) }}
         actions={actions}
+        menu={menu}
       />
       {editBase ? (
-        <ScenarioEditor key={editBase.version} campaignId={campaignId} page={editBase} onExit={() => setEditBase(null)} onDraftReady={onDraftReady} />
+        <ScenarioEditor key={editBase.version} campaignId={campaignId} page={editBase} onExit={() => setEditBase(null)} onDraftReady={onDraftReady} toc={toc} />
       ) : (
-        <ScenarioPageView
-          page={page}
-          campaignId={campaignId}
-          play={playEnabled ? play : undefined}
-          progress={{ onPlayed: (id, v) => void progress.setPlayed(id, v).catch(() => {}), onRevealed: (id, v) => void progress.setRevealed(id, v).catch(() => {}), pending: progress.isPending, played: playedLookup(playedPages) }}
-        />
+        <ScenarioLayout
+          toc={<ScenarioToc items={tocItems(page.content.sections, page.kind === "hero", played)} {...toc} onPick={collapse.expand} />}
+        >
+          <ScenarioPageView
+            page={page}
+            campaignId={campaignId}
+            play={playEnabled ? play : undefined}
+            progress={{
+              onPlayed: (id, v) => {
+                collapse.expand(id);
+                void progress.setPlayed(id, v).catch(() => {});
+              },
+              onRevealed: (id, v) => {
+                collapse.expand(id);
+                void progress.setRevealed(id, v).catch(() => {});
+              },
+              pending: progress.isPending,
+              played,
+            }}
+            collapse={collapse}
+          />
+        </ScenarioLayout>
       )}
       {playEnabled && <ScenarioShowDock campaignId={campaignId} pageId={page.id} content={page.content} play={play} />}
       {aiEnabled && aiOpen && (

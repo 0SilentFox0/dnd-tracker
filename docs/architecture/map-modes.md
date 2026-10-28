@@ -4,6 +4,8 @@
 
 **New mode** = a folder in the three places + a row in both registries (+ `satisfies Record<MapModeKey, …>` objects in `lib/hooks/battle/modes/tools.ts`).
 
+Engine hooks include `lineBlocked({ config, map, line })` — a mode wall on a ranged line of fire (see [battle.md](battle.md)); optional, default `false`.
+
 ## Maze
 
 The first mode: pure geometry/vision/generator, server wake-up in `afterMutation`, hiding client-side in `modes/maze/view.ts`; the server sends the full scene.

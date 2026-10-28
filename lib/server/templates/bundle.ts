@@ -3,7 +3,9 @@ import { z } from "zod";
 
 import { CONTENT_ID_RE } from "./ids";
 
-export type BundleTable = "spellGroups" | "races" | "units" | "spells" | "mainSkills" | "skills" | "skillTrees" | "artifactSets" | "artifacts" | "tracks";
+import type { SYNC_TABLE_SCOPES } from "@/lib/constants/source-sync";
+
+export type BundleTable = (typeof SYNC_TABLE_SCOPES)[number];
 
 type Delegate = "spellGroup" | "race" | "unit" | "spell" | "mainSkill" | "skill" | "skillTree" | "artifactSet" | "artifact" | "campaignTrack";
 
@@ -126,6 +128,12 @@ export class BundleInvalidError extends Error {
   }
 }
 
+export const BUNDLE_SETTING_KEYS = ["maxLevel", "xpMultiplier", "allowPlayerEdit", "friendlyFire"] as const;
+
+export type BundleSettingKey = (typeof BUNDLE_SETTING_KEYS)[number];
+
+export const SETTINGS_SELECT = Object.fromEntries(BUNDLE_SETTING_KEYS.map((k) => [k, true])) as Record<BundleSettingKey, true>;
+
 export function pick(row: Record<string, unknown>, columns: readonly string[]): Record<string, unknown> {
   const out: Record<string, unknown> = {};
 
@@ -134,9 +142,21 @@ export function pick(row: Record<string, unknown>, columns: readonly string[]): 
   return out;
 }
 
+export const settingsOf = (row: Record<string, unknown>) => pick(row, BUNDLE_SETTING_KEYS) as Bundle["settings"];
+
+export function toPrismaJson(row: Record<string, unknown>, t: BundleTableDef) {
+  const out = { ...row };
+
+  for (const col of t.nullableJson) if (out[col] === null) out[col] = Prisma.DbNull;
+
+  return out;
+}
+
 export interface RowDelegate {
   findMany(args: unknown): Promise<Array<Record<string, unknown>>>;
   createMany(args: { data: unknown[] }): Promise<unknown>;
+  updateMany(args: { where: Record<string, unknown>; data: unknown }): Promise<{ count: number }>;
+  deleteMany(args: { where: Record<string, unknown> }): Promise<{ count: number }>;
 }
 
 export const delegateOf = (db: TemplateDb, t: BundleTableDef) => db[t.delegate] as unknown as RowDelegate;

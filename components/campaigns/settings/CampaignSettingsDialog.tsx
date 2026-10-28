@@ -3,6 +3,7 @@
 import { useState } from "react";
 
 import { SaveAsTemplateDialog } from "@/components/campaigns/templates/SaveAsTemplateDialog";
+import { SourceSyncDialog } from "@/components/campaigns/templates/SourceSyncDialog";
 import { HudSection } from "@/components/hud/form";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -11,20 +12,22 @@ import { LabeledInput } from "@/components/ui/labeled-input";
 import { ResponsiveDialog } from "@/components/ui/responsive-dialog";
 import { Textarea } from "@/components/ui/textarea";
 import { CampaignStatus } from "@/lib/constants/campaigns";
+import { syncTitle } from "@/lib/constants/source-sync";
 import { useCampaignExportUrl, useDeleteCampaign, useUpdateCampaign } from "@/lib/hooks/campaigns";
 import { useConfirm } from "@/lib/hooks/common";
-import type { CampaignSettings } from "@/types/campaigns";
+import type { CampaignSettings, CampaignSettingsMeta } from "@/types/campaigns";
 
 interface CampaignSettingsDialogProps {
   campaignId: string;
   campaign: CampaignSettings;
+  meta: CampaignSettingsMeta;
   open: boolean;
   onOpenChange: (open: boolean) => void;
 }
 
 const toFields = (c: CampaignSettings) => ({ ...c, description: c.description || "" });
 
-export function CampaignSettingsDialog({ campaignId, campaign, open, onOpenChange }: CampaignSettingsDialogProps) {
+export function CampaignSettingsDialog({ campaignId, campaign, meta, open, onOpenChange }: CampaignSettingsDialogProps) {
   const update = useUpdateCampaign(campaignId);
 
   const remove = useDeleteCampaign(campaignId);
@@ -36,6 +39,8 @@ export function CampaignSettingsDialog({ campaignId, campaign, open, onOpenChang
   const [error, setError] = useState<string | null>(null);
 
   const [templateOpen, setTemplateOpen] = useState(false);
+
+  const [syncOpen, setSyncOpen] = useState(false);
 
   const exportUrl = useCampaignExportUrl(campaignId);
 
@@ -135,6 +140,18 @@ export function CampaignSettingsDialog({ campaignId, campaign, open, onOpenChang
           >
             Зберегти як шаблон
           </Button>
+          {meta.createdFromId && (
+            <Button
+              variant="outline"
+              onClick={() => {
+                onOpenChange(false);
+                setSyncOpen(true);
+              }}
+              disabled={isSaving}
+            >
+              {syncTitle(meta.isTemplate)}
+            </Button>
+          )}
           <Button variant="outline" asChild>
             <a href={exportUrl} download>
               Експортувати в JSON
@@ -154,6 +171,7 @@ export function CampaignSettingsDialog({ campaignId, campaign, open, onOpenChang
       )}
     </ResponsiveDialog>
     <SaveAsTemplateDialog campaignId={campaignId} defaultName={`${campaign.name} (шаблон)`} open={templateOpen} onOpenChange={setTemplateOpen} />
+    <SourceSyncDialog campaignId={campaignId} isTemplate={meta.isTemplate} open={syncOpen} onOpenChange={setSyncOpen} />
     </>
   );
 }

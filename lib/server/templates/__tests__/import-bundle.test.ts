@@ -5,6 +5,7 @@ import { type Bundle, BUNDLE_TABLES, BundleInvalidError, TemplateLeakError } fro
 import { exportCampaign } from "../export-campaign";
 import { importBundle } from "../import-bundle";
 import { collectKeysAndStrings } from "../remap-ids";
+import { rowHash } from "../sync/hash";
 import { createFakeDb } from "./fake-db";
 
 const id = (c: string) => "c" + c.repeat(24);
@@ -42,6 +43,16 @@ function fullBundle(): Bundle {
 const rowsOf = (store: Map<string, Record<string, unknown>[]>, delegate: string) => store.get(delegate)!;
 
 describe("importBundle", () => {
+  it("returns per-table source hashes equal to rowHash of the source row", async () => {
+    const { db } = createFakeDb();
+
+    const bundle = { ...fullBundle(), spells: [{ id: SP, name: "s" }] } as unknown as Bundle;
+
+    const { hashes } = await importBundle(db, bundle, "camp");
+
+    expect(hashes.spells![SP]).toBe(rowHash(bundle.spells[0] as Record<string, unknown>, BUNDLE_TABLES.find((t) => t.key === "spells")!));
+  });
+
   it("remaps ids, references and records provenance", async () => {
     const { db, store } = createFakeDb();
 

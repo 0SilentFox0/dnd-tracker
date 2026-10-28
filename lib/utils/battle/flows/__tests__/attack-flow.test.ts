@@ -86,21 +86,19 @@ describe("attackFlow", () => {
     expect(attackFlow(s, { type: "SUBMIT" }).step).toBe("submitting");
   });
 
-  it("перешкода — окремий перемикач, незалежний від недоліку; іде в payload", () => {
+  it("недолік іде в payload без поля obstacle", () => {
     const s = run(
       open(),
       { type: "TOGGLE_TARGET", id: "a" },
       { type: "CONFIRM_TARGETS" },
       { type: "SET_MODE", mode: "disadvantage" },
-      { type: "TOGGLE_OBSTACLE" },
       { type: "ROLL", d20: 14, second: 12, outcome: "hit" },
       { type: "DAMAGE", values: [6] },
     );
 
-    expect(s).toMatchObject({ mode: "disadvantage", obstacle: true });
-    expect(attackPayload(s, "me")).toMatchObject({ obstacle: true, disadvantageRoll: 12, attackRoll: 14 });
-    expect(attackFlow(s, { type: "TOGGLE_OBSTACLE" }).obstacle).toBe(false);
-    expect(attackFlow(s, { type: "CLOSE" }).obstacle).toBe(false);
+    expect(s).toMatchObject({ mode: "disadvantage" });
+    expect(attackPayload(s, "me")).toMatchObject({ disadvantageRoll: 12, attackRoll: 14 });
+    expect(attackPayload(s, "me")).not.toHaveProperty("obstacle");
   });
 
   it("дві цілі: кидок на кожну; шкода лише для влучених; промахи теж у payload", () => {

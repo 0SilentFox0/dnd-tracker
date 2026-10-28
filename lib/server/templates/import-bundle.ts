@@ -1,21 +1,12 @@
-import { Prisma } from "@prisma/client";
-
+import type { TableHashes } from "./sync/types";
 import { assertNoLeak, findForeignContentIds } from "./assert-no-leak";
-import { type Bundle, BUNDLE_TABLES, BundleInvalidError, BundleSchema, type BundleTableDef, delegateOf, pick, type TemplateDb } from "./bundle";
+import { type Bundle, BUNDLE_TABLES, BundleInvalidError, BundleSchema, delegateOf, pick, type TemplateDb,toPrismaJson } from "./bundle";
 import { CONTENT_ID_RE, newContentId } from "./ids";
 import { collectKeysAndStrings, remapIds } from "./remap-ids";
 
-import { hashJson } from "@/lib/utils/battle/store/stable-json";
+import { rowHash } from "@/lib/server/templates/sync/hash";
 
 const idCandidates = (bundle: Bundle) => new Set([...collectKeysAndStrings(bundle)].filter((s) => CONTENT_ID_RE.test(s)));
-
-function toPrismaJson(row: Record<string, unknown>, t: BundleTableDef) {
-  const out = { ...row };
-
-  for (const col of t.nullableJson) if (out[col] === null) out[col] = Prisma.DbNull;
-
-  return out;
-}
 
 export async function importBundle(tx: TemplateDb, raw: Bundle, targetCampaignId: string) {
   const parsed = BundleSchema.safeParse(raw);
@@ -47,6 +38,8 @@ export async function importBundle(tx: TemplateDb, raw: Bundle, targetCampaignId
 
   const remappedRows: Record<string, unknown>[] = [];
 
+  const hashes: TableHashes = {};
+
   const writes = BUNDLE_TABLES.map((t) => {
     const rows = bundle[t.key].map((row) => {
       const clean = pick(row, t.columns);
@@ -64,10 +57,11 @@ export async function importBundle(tx: TemplateDb, raw: Bundle, targetCampaignId
 
       remappedRows.push(remapped);
 
-      return toPrismaJson(
-        { ...remapped, id: idMap.get(row.id)!, campaignId: targetCampaignId, sourceId: row.id, sourceHash: hashJson(clean) },
-        t,
-      );
+      const sourceHash = rowHash(clean, t);
+
+      (hashes[t.key] ??= {})[row.id] = sourceHash;
+
+      return toPrismaJson({ ...remapped, id: idMap.get(row.id)!, campaignId: targetCampaignId, sourceId: row.id, sourceHash }, t);
     });
 
     return { t, rows };
@@ -77,5 +71,5 @@ export async function importBundle(tx: TemplateDb, raw: Bundle, targetCampaignId
 
   for (const { t, rows } of writes) if (rows.length > 0) await delegateOf(tx, t).createMany({ data: rows });
 
-  return { idMap, warnings };
+  return { idMap, warnings, hashes };
 }

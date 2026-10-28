@@ -49,14 +49,18 @@ vi.mock("@/lib/server/content/resources", async () => {
   return { CONTENT_RESOURCES: { units: thing } };
 });
 
+const sync = vi.hoisted(() => ({ diff: vi.fn(), apply: vi.fn() }));
+
 const skillTree = vi.hoisted(() => ({ read: vi.fn(), save: vi.fn() }));
 
 vi.mock("@/lib/server/skills/skill-tree-service", () => ({ readSkillTree: skillTree.read, saveSkillTree: skillTree.save }));
+vi.mock("@/lib/server/templates/sync/service", () => ({ getSourceDiff: sync.diff, applySource: sync.apply }));
 vi.mock("@/lib/server/campaigns/rules", () => ({ readCampaignRules: vi.fn(async () => ({ r: 1 })), updateCampaignRules: vi.fn(async (_c: string, p: unknown) => p) }));
 
 import { toolsFor } from "@/lib/ai/tools";
-import { contentCreateTool, contentGetTool, contentKindsTool, contentListTool, contentUpdateTool, getSkillTreeTool, saveSkillTreeTool, updateRulesTool } from "@/lib/ai/tools/content";
+import { contentCreateTool, contentGetTool, contentKindsTool, contentListTool, contentUpdateTool, getSkillTreeTool, saveSkillTreeTool, sourceApplyTool, sourceDiffTool, updateRulesTool } from "@/lib/ai/tools/content";
 import { runTool } from "@/lib/ai/tools/define";
+import { AI_LIMITS } from "@/lib/constants/ai";
 import { ContentError } from "@/lib/server/content/errors";
 
 const ctx = { campaignId: "c1", userId: "u1", scopes: ["content:write"] as const, threadId: null };
@@ -202,5 +206,73 @@ describe("content tools", () => {
     expect(text).not.toContain("prisma");
     expect(spy).toHaveBeenCalled();
     spy.mockRestore();
+  });
+
+  it("source_diff для content:read, source_apply лише для content:write", () => {
+    expect(toolsFor(["content:read"]).map((t) => t.name)).toContain("source_diff");
+    expect(toolsFor(["content:read"]).map((t) => t.name)).not.toContain("source_apply");
+    expect(toolsFor(["content:write"]).map((t) => t.name)).toContain("source_apply");
+  });
+
+  it("source_diff: малий результат повертається як є", async () => {
+    sync.diff.mockResolvedValue({ source: { id: "s", name: "S", kind: "template" }, syncedAt: null, items: [{ scope: "units", key: "a" }] });
+
+    expect(JSON.parse(await runTool(sourceDiffTool, ctx, {})).items).toHaveLength(1);
+  });
+
+  it("source_diff: великий scope гортається сторінками в межах ліміту", async () => {
+    const items = Array.from({ length: 400 }, (_, i) => ({ scope: i % 4 ? "units" : "spells", key: `k${i}`, name: "x".repeat(80), changedFields: ["a", "b"] }));
+
+    sync.diff.mockResolvedValue({ source: { id: "s", name: "S", kind: "template" }, syncedAt: null, items });
+
+    const seen: string[] = [];
+
+    let offset = 0;
+
+    for (let guard = 0; guard < 50; guard++) {
+      const text = await runTool(sourceDiffTool, ctx, { offset });
+
+      expect(text.length).toBeLessThanOrEqual(AI_LIMITS.toolResultChars);
+
+      const page = JSON.parse(text);
+
+      expect(page).toMatchObject({ total: 400, counts: { spells: 100, units: 300 } });
+      seen.push(...page.items.map((i: { key: string }) => i.key));
+
+      if (page.nextOffset === null) break;
+
+      expect(page.nextOffset).toBeGreaterThan(offset);
+      offset = page.nextOffset;
+    }
+
+    expect(seen).toEqual(items.map((i) => i.key));
+  });
+
+  it("source_diff: scope перевіряється, offset/limit обмежують сторінку", async () => {
+    sync.diff.mockResolvedValue({ source: { id: "s", name: "S", kind: "template" }, syncedAt: null, items: Array.from({ length: 5 }, (_, i) => ({ scope: "units", key: `k${i}` })) });
+
+    expect(await runTool(sourceDiffTool, ctx, { scope: "bogus" })).toMatch(/^Помилка:/);
+
+    const page = JSON.parse(await runTool(sourceDiffTool, ctx, { scope: "units", offset: 1, limit: 2 }));
+
+    expect(page.items.map((i: { key: string }) => i.key)).toEqual(["k1", "k2"]);
+    expect(page.nextOffset).toBe(3);
+    expect(sync.diff).toHaveBeenLastCalledWith(expect.anything(), "units");
+  });
+
+  it("source_apply: невалідне тіло → текст помилки, сервіс не викликається", async () => {
+    const text = await runTool(sourceApplyTool, ctx, { apply: [{ scope: "units" }] });
+
+    expect(text).toMatch(/^Помилка:/);
+    expect(sync.apply).not.toHaveBeenCalled();
+  });
+
+  it("source_apply: валідне тіло передається в сервіс", async () => {
+    sync.apply.mockResolvedValue({ applied: 1, ignored: 0, autoAdded: [], warnings: [] });
+
+    const out = JSON.parse(await runTool(sourceApplyTool, ctx, { apply: [{ scope: "units", key: "a", sourceHash: "h", status: "new" }] }));
+
+    expect(out.applied).toBe(1);
+    expect(sync.apply.mock.calls[0][1]).toEqual({ apply: [{ scope: "units", key: "a", sourceHash: "h", status: "new" }], ignore: [] });
   });
 });

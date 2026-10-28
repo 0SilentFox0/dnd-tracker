@@ -222,4 +222,26 @@ describe("signature 2D strikes", () => {
     expect(cast("Блискавка")).toMatchObject({ archetype: "skystrike", element: "lightning" });
     expect(cast("Крижаний болт")).toMatchObject({ archetype: "icefall", element: "cold" });
   });
+
+  describe("chain and splash", () => {
+    const hp = (participantId: string, change: number) => ({ participantId, participantName: participantId, oldHp: 50, newHp: 50 - change, change });
+
+    it("стрибок ланцюга летить від попередньої цілі", () => {
+      const [main] = mapAction(action({ actionType: "attack", targets: [{ participantId: "n1", participantName: "N" }], actionDetails: { attackKind: "ranged", isHit: true, chainFromId: "t" } })).filter((s) => s.archetype !== "dice");
+
+      expect(main.originId).toBe("t");
+    });
+
+    it("вторинні жертви — окремий снаряд від першої цілі", () => {
+      const specs = mapAction(action({ actionType: "attack", actionDetails: { attackKind: "ranged", isHit: true }, hpChanges: [hp("t", 8), hp("s", 4)] }));
+
+      expect(specs.find((s) => s.key.endsWith(":splash"))).toMatchObject({ archetype: "ranged", targetIds: ["s"], originId: "t", hit: true });
+    });
+
+    it("лікування й шкода самому актору — не сплеш", () => {
+      const specs = mapAction(action({ actionType: "attack", actionDetails: { attackKind: "melee", isHit: true }, hpChanges: [hp("t", 8), hp("a", 5), hp("x", -3)] }));
+
+      expect(specs.some((s) => s.key.endsWith(":splash"))).toBe(false);
+    });
+  });
 });

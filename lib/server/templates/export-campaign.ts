@@ -1,23 +1,18 @@
-import { type Bundle, BUNDLE_TABLES, BundleInvalidError, delegateOf, pick, type TemplateDb } from "./bundle";
+import { type Bundle, BUNDLE_TABLES, BundleInvalidError, delegateOf, pick, SETTINGS_SELECT, settingsOf, type TemplateDb } from "./bundle";
 
 import { parseRules } from "@/lib/utils/rules/schema";
 
 export async function exportCampaign(db: TemplateDb, campaignId: string): Promise<Bundle> {
   const campaign = await db.campaign.findUnique({
     where: { id: campaignId },
-    select: { maxLevel: true, xpMultiplier: true, allowPlayerEdit: true, friendlyFire: true, rules: true },
+    select: { ...SETTINGS_SELECT, rules: true },
   });
 
   if (!campaign) throw new BundleInvalidError("Кампанію не знайдено");
 
   const bundle: Record<string, unknown> = {
     formatVersion: 1,
-    settings: {
-      maxLevel: campaign.maxLevel,
-      xpMultiplier: campaign.xpMultiplier,
-      allowPlayerEdit: campaign.allowPlayerEdit,
-      friendlyFire: campaign.friendlyFire,
-    },
+    settings: settingsOf(campaign),
     rules: parseRules(campaign.rules),
   };
 
