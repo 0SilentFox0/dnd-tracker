@@ -12,7 +12,7 @@ export const byteLength = (text: string) => encoder.encode(text).byteLength;
 export const COMPENDIUM_PAGE_SIZES = { graph: 30, reportRows: 50, reportActions: 50, runs: 20, notes: 50 } as const;
 
 export const COMPENDIUM_ERROR_TEXT: Record<string, string> = {
-  PREVIEW_SECRET_REQUIRED: "Серверний ключ COMPENDIUM_PREVIEW_SECRET не налаштований (щонайменше 32 символи). Імпорт недоступний.",
+  PREVIEW_SECRET_REQUIRED: "Імпорт недоступний: на сервері не задано COMPENDIUM_PREVIEW_SECRET (випадковий рядок, щонайменше 32 символи). Додайте його в змінні середовища (.env.local або Vercel) і перезапустіть сервер.",
   PREVIEW_STALE: "Кампанія або термін preview змінилися. Повторіть перевірку.",
   PREVIEW_INVALID: "Підпис preview недійсний. Повторіть перевірку.",
   REQUEST_SIZE: "Вибраний набір завеликий. Виберіть менше категорій або розділів.",

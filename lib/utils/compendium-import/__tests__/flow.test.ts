@@ -1,6 +1,8 @@
 import { describe, expect, it } from "vitest";
 
-import { categoryInventory, destination, excludeBlocked,projectInput } from "../flow";
+import { categoryInventory, compendiumErrorMessage, destination, excludeBlocked, projectInput } from "../flow";
+
+import { ApiError } from "@/lib/api/client";
 
 describe("campaign compendium flow", () => {
   const root = { _meta: { sources: [{ json: "synthetic", full: "Synthetic" }] }, spell: [{ name: "Light", source: "synthetic" }], background: [], feat: [], bookData: [{ id: "notes", data: [] }], monsterFluff: [{ name: "excluded" }], foundrySpell: [{}] };
@@ -44,5 +46,11 @@ describe("projectInput record size", () => {
 
   it("rejects an oversized record in a selected category", () => {
     expect(() => projectInput({ monster: [big] }, ["monster"])).toThrow("RECORD_SIZE: monster");
+  });
+  it("tells the DM that a missing preview secret makes import unavailable", () => {
+    const message = compendiumErrorMessage(new ApiError("x", 503, "/preview", { code: "PREVIEW_SECRET_REQUIRED" }), "fallback");
+
+    expect(message).toContain("COMPENDIUM_PREVIEW_SECRET");
+    expect(message).toContain("Імпорт недоступний");
   });
 });
