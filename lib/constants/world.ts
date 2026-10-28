@@ -36,3 +36,5 @@ export const WORLD_ZONE_LABEL_HIDE_ZOOM = 4;
 export const WORLD_ZONE_LABEL_CONFLICT = 0.06;
 export const WORLD_LABEL_ZOOM_COMPACT = 4;
 export const WORLD_ZONE_LABEL_CONFLICT_COMPACT = 0.14;
+export const WORLD_DIVE_MS = 600;
+export const WORLD_REVEAL_MS = 300;
