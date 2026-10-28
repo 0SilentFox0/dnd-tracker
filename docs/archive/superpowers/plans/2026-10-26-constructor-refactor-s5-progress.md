@@ -6,7 +6,7 @@
 - Worktree: `/Users/silentfox/.codex/worktrees/d300/dnd-tracker-constructor`.
 - Гілка: `refactor/constructor-s5-rules`.
 - HEAD коду: `95181e74deaf8d9e6767c8dbc2ab0814d20b81da` — `refactor(rules): reuse canonical section and hero HP defaults`.
-- Цей checkpoint зберігається наступним окремим документаційним комітом; його точний SHA: `git log -1 --format=%H -- docs/superpowers/plans/2026-10-26-constructor-refactor-s5-progress.md`.
+- Цей checkpoint зберігається наступним окремим документаційним комітом; його точний SHA: `git log -1 --format=%H -- docs/archive/superpowers/plans/2026-10-26-constructor-refactor-s5-progress.md`.
 - Roadmap прочитано з вихідної папки: на старті він untracked і відсутній у зафіксованому HEAD. До S5 не копіювався й не редагувався.
 - Пряме доручення користувача дозволило незалежну S5 паралельно із S1; загальні залежності S1/S4 не оголошуються виконаними цією сесією.
 

@@ -8,7 +8,7 @@
 
 **Tech Stack:** TypeScript strict, Prisma 6 (PostgreSQL), Zod 4, Vitest, Next.js route handlers, TanStack Query, React 19.
 
-**Spec:** `docs/superpowers/specs/2026-10-22-constructor-stage4-5e-design.md` (розділ «4d. Дизайн: поза боєм»; «Загальні правила етапу 4» і розділи 4a/4c-1 — контекст).
+**Spec:** `docs/archive/superpowers/specs/2026-10-22-constructor-stage4-5e-design.md` (розділ «4d. Дизайн: поза боєм»; «Загальні правила етапу 4» і розділи 4a/4c-1 — контекст).
 
 ## Global Constraints
 
@@ -4309,7 +4309,7 @@ Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>"
   - роути: `POST /rest` (ДМ), `…/hit-dice`, `…/roll` (власник або ДМ, `rollCheck`/`rollSave` з `advantage`), `POST /experience`, `…/inspiration`, `PATCH …/resources` (ДМ), `GET …/log`; 409 для вимкнених правил;
   - натхнення в атаці: `useInspiration` → причина переваги «Натхнення» в `rollModeReasons` (лише перший удар), знімається в мутації; клієнт — `SET_INSPIRATION` у майстрі атаки.
 - [ ] **Step 2: `abilities.md`** — у пункті 4c-1 замінити «до 4d рушій трактує як `perBattle = uses` …» на: «у бою `perRest` рахується лічильником `abilityUsage[key].battle` (як `perBattle = uses`); при `rules.outOfCombat.persistResources` використання переживають бій (`resources.charges` з видом відпочинку) і відновлюються коротким (`rest: "short"`) або довгим відпочинком».
-- [ ] **Step 3: `STATUS.md`** — у рядку «Конструктор кампаній» після фрагмента 4c-2 додати: «**4d «поза боєм» готовий** (`rules.outOfCombat`, `characters.resources`/`inspiration`, `character_logs`, старт/завершення бою з ресурсами, відпочинки, кістки хітів, кидки з листа, досвід 5e, натхнення; спек — розділ 4d того ж файлу, план `docs/superpowers/plans/2026-10-22-constructor-4d-out-of-combat.md`; опис — `docs/architecture/battle.md` «5e: поза боєм»)» і замінити «далі 4d поза боєм, 4e…» на «далі 4e…».
+- [ ] **Step 3: `STATUS.md`** — у рядку «Конструктор кампаній» після фрагмента 4c-2 додати: «**4d «поза боєм» готовий** (`rules.outOfCombat`, `characters.resources`/`inspiration`, `character_logs`, старт/завершення бою з ресурсами, відпочинки, кістки хітів, кидки з листа, досвід 5e, натхнення; спек — розділ 4d того ж файлу, план `docs/archive/superpowers/plans/2026-10-22-constructor-4d-out-of-combat.md`; опис — `docs/architecture/battle.md` «5e: поза боєм»)» і замінити «далі 4d поза боєм, 4e…» на «далі 4e…».
 - [ ] **Step 4: Full verification.**
   - `pnpm test:run` — усі зелені (відомий нестабільний `lib/hooks/battle/__tests__/battle-fx.test.tsx` — перезапустити окремо).
   - `pnpm lint` — 0 errors.

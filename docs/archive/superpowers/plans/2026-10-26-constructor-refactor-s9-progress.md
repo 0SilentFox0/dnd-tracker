@@ -139,7 +139,7 @@ git diff --check b97435d8..HEAD
 
 1. `0b79e88e` — `docs(content): map constructor resource contracts` (карта і schema/sessionOnly contract tests).
 2. `7aa2c57d72d5a70132efc1e74432889e8852b1c8` — `refactor(import): isolate compendium feature resolution` (extraction + 13 characterization cases).
-3. Наступний checkpoint/cleanup commit фіксує підсумковий статус, review і EOF cleanup. End HEAD визначається `git log -1 --format=%H -- docs/superpowers/plans/2026-10-26-constructor-refactor-s9-progress.md`.
+3. Наступний checkpoint/cleanup commit фіксує підсумковий статус, review і EOF cleanup. End HEAD визначається `git log -1 --format=%H -- docs/archive/superpowers/plans/2026-10-26-constructor-refactor-s9-progress.md`.
 
 S9.1–S9.2 завершено. S9.3–S9.5 **не виконані**; parser safety/HMAC/rollback/source-sync/benchmark/roundtrip залишаються наступній дозволеній сесії після узгоджених залежностей. Окремо передати власникам findings abilities.get enum/delegates, class/feat nested ownership, DELETE 409 documentation та parse duplication. Не трактувати їх як виправлені або як доведені downstream exploits.
 
@@ -251,6 +251,6 @@ Start code HEAD `52d4e112`; S5–S8 remaining gates закрито.
 
 Comparative baseline для S9 unavailable: нових lookup/cache/optimizations не додано, дані характеризують поточний код, speedup не заявляємо. Extraction feature resolver зберіг попередню семантику (S9.2); current CPU feature adaptation виміряно окремо, всі referenced features реально embedded.
 
-Raw samples/versions/commit/EXPLAIN: `docs/superpowers/plans/2026-10-27-constructor-refactor-content-benchmark.json`. Відтворення: `pnpm exec vitest run --config vitest.integration.config.mts lib/server/templates/__tests__/refactor-roundtrip.integration.test.ts`; результат у `.superpowers/sdd/2026-10-26-constructor-refactor-s10-final-review/content-benchmark.json`. Перевірити both-URL guard перед запуском; тільки local constructor.
+Raw samples/versions/commit/EXPLAIN: `docs/archive/superpowers/plans/2026-10-27-constructor-refactor-content-benchmark.json`. Відтворення: `pnpm exec vitest run --config vitest.integration.config.mts lib/server/templates/__tests__/refactor-roundtrip.integration.test.ts`; результат у `.superpowers/sdd/2026-10-26-constructor-refactor-s10-final-review/content-benchmark.json`. Перевірити both-URL guard перед запуском; тільки local constructor.
 
 TypeScript/zero-warning ESLint/diff check — exit0. Початкові fixture credits/type/damageType/controlledBy та Prisma extension typing виправлено до фінального прогону; production files не змінювалися. S9.1–S9.5 завершено; усі раніше відкриті findings S10-F01–F08/E01 потребують disposition у S10. Full suite/build/final security review — наступні.

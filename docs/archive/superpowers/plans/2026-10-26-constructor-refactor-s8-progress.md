@@ -71,7 +71,7 @@ git diff --check e8b5ebcd..HEAD
 
 1. `76b474f5` — S8.1 keys/polling/tests.
 2. `445fe195` — S8.3 background hook/component/tests.
-3. Документаційний commit із цим checkpoint; його end HEAD: `git log -1 --format=%H -- docs/superpowers/plans/2026-10-26-constructor-refactor-s8-progress.md`.
+3. Документаційний commit із цим checkpoint; його end HEAD: `git log -1 --format=%H -- docs/archive/superpowers/plans/2026-10-26-constructor-refactor-s8-progress.md`.
 
 S8.1 та S8.3 завершено в межах незалежної частини. **S8.2 та S8.4 не виконано й не розпочато.** Наступна задача — узгодження інтегратором залежностей S4/S7 перед S8.2; S8.4 з browser/receipt/disclosure загальними перевірками лишається окремою сесією. Цей checkpoint не оголошує весь S8 завершеним.
 

@@ -8,7 +8,7 @@
 
 **Tech Stack:** TypeScript strict, Next.js 16, React 19, Prisma 6 (PostgreSQL), Zod 4, Vitest (+ happy-dom для компонентів), `tsx`-скрипти (`tsconfig.scripts.json`).
 
-**Spec:** `docs/superpowers/specs/2026-10-22-constructor-stage4-5e-design.md` — розділ «## 4f-3. Дизайн: магічні предмети» (§1–§11), «Загальні правила етапу 4», «Ризики» (останні чотири пункти — 4f-3). Рішення щодо відкритих питань спеку (користувач спав, прийнято рекомендоване): (1) окрема секція `rules.items`; при `enabled` предмети слотів `item`/`ring` зі сховища **носяться** (діють); (2) модель `item` — запис у `modifiers`; (3) ref `<baseId>+<propertyId>` без рядка примірника; (4) колонка `attuned`; (5) витратні — `SpecialItem.artifactId`; (6) магічні предмети SRD **неунікальні**, крім Dragon Orb (рідкість artifact); (7) заряди відновлюються **повністю на довгому відпочинку** (або короткому, якщо так у тексті); (8) однакові складені предмети в одного героя **ділять заряди**; (9) блок «Предмет» у формі артефакта — поля налаштування/зарядів/витратного лише при `items.enabled`.
+**Spec:** `docs/archive/superpowers/specs/2026-10-22-constructor-stage4-5e-design.md` — розділ «## 4f-3. Дизайн: магічні предмети» (§1–§11), «Загальні правила етапу 4», «Ризики» (останні чотири пункти — 4f-3). Рішення щодо відкритих питань спеку (користувач спав, прийнято рекомендоване): (1) окрема секція `rules.items`; при `enabled` предмети слотів `item`/`ring` зі сховища **носяться** (діють); (2) модель `item` — запис у `modifiers`; (3) ref `<baseId>+<propertyId>` без рядка примірника; (4) колонка `attuned`; (5) витратні — `SpecialItem.artifactId`; (6) магічні предмети SRD **неунікальні**, крім Dragon Orb (рідкість artifact); (7) заряди відновлюються **повністю на довгому відпочинку** (або короткому, якщо так у тексті); (8) однакові складені предмети в одного героя **ділять заряди**; (9) блок «Предмет» у формі артефакта — поля налаштування/зарядів/витратного лише при `items.enabled`.
 
 ## Global Constraints
 
@@ -89,7 +89,7 @@
 | `scripts/srd/lib/{source,open5e,types,build-data}.ts`, `scripts/srd/convert/{artifacts,magic-items}.ts`, `scripts/srd/overrides/magic-items.ts`, `scripts/srd/build.ts` | конвертер |
 | `scripts/srd/__tests__/fixtures-4f3/{MagicItem,Item}.json`, `scripts/srd/__tests__/{magic-properties,magic-uniques,data-integrity-4f3}.test.ts` | фікстури й тести |
 | `data/templates/srd-5.2/*.json` | перегенеровані дані |
-| `docs/architecture/{battle,abilities,content-api}.md`, `docs/STATUS.md`, `docs/superpowers/constructor-handoff.md` | документи |
+| `docs/architecture/{battle,abilities,content-api}.md`, `docs/STATUS.md`, `docs/archive/superpowers/constructor-handoff.md` | документи |
 
 ---
 ### Task 1: Секція `rules.items` (схема, реєстр, вкладка, пресет SRD)
@@ -5617,7 +5617,7 @@ Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>"
 ### Task 18: Документи й повна перевірка
 
 **Files:**
-- Modify: `docs/architecture/battle.md`, `docs/architecture/abilities.md`, `docs/architecture/content-api.md`, `docs/STATUS.md`, `docs/superpowers/constructor-handoff.md`
+- Modify: `docs/architecture/battle.md`, `docs/architecture/abilities.md`, `docs/architecture/content-api.md`, `docs/STATUS.md`, `docs/archive/superpowers/constructor-handoff.md`
 
 - [ ] **Step 1: `battle.md`** — новий розділ перед «## Changing battle behavior» (після «## 5e: броня, числа класів, пули (етап 4f-2)»):
 
@@ -5640,7 +5640,7 @@ Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>"
 
 - [ ] **Step 3: `content-api.md`** — у розділ про артефакти (поруч із `armor` 4f-2): поле `item` (`ItemStats { unique?, property?: { appliesTo: { kinds, attackType?, armorCategories?, bases? (≤ 60 назв) }, nameTemplate? ({base}, {name}), overrides? }, attunement?, charges?: { max 1–50, rest: short|long|null }, consumable? }`, запис `modifiers` типу `itemStats` (JSON), `null` у PATCH прибирає; відмови `ITEM_PROPERTY_SLOT`, `ITEM_PROPERTY_STATS`, `ITEM_CONSUMABLE_CONFLICT`), `weapon.damageBonus` (−20…20), імпорт/експорт поля `item`, OpenAPI `ItemStats`; дії сховища `grant { artifactId, baseId?, quantity? }` і `attune`/`unattune { ref }` (відмови `ITEM_PROPERTY_NEEDS_BASE`, `ITEM_BASE_MISMATCH`, `ATTUNEMENT_LIMIT`, `ATTUNEMENT_NOT_REQUIRED`, `ALREADY_ATTUNED`, `ITEM_NOT_ATTUNED`, `ITEM_NOT_HELD`, `ITEM_ALREADY_IN_STASH`, `ITEMS_DISABLED`); міграція `20261102000000_inventory_attuned`. У розділ «Шаблон SRD 5.2» — пункт «4f-3»: джерело `MagicItem.json` (md5 у `OPEN5E_FILES`), спорядження `unique: false`, 32 властивості (31 сімейство варіантів + Dragon Slayer; назви складаються з повної назви бази, перевірка 513 варіантів у `pnpm srd:build` нормалізує слово «Armor»), 248 унікальних (244 + 4 зілля лікування з `Item.json`), неунікальні всі, крім Dragon Orb; регулярки механізації — `scripts/srd/convert/magic-items.ts`.
 
-- [ ] **Step 4: `STATUS.md`** — у рядку «Конструктор кампаній» після фрагмента про 4f-2 замінити «далі живий прогін 4f-2, потім 4f-3 (магічні предмети)» (або актуальний хвіст) на «**4f-3 «магічні предмети» готовий** (`rules.items`, модель `item` у `modifiers`, складені ref `<base>+<property>` через `resolveItemRows`, налаштування з міграцією `20261102000000_inventory_attuned`, заряди-пули й витратні в бою, `damageBonus`/`withThisItem`/`critImmunity`/`atLeast`, конвертер: 32 властивості й 248 предметів; спек — розділ 4f-3 того ж файлу, план `docs/superpowers/plans/2026-10-23-constructor-4f3-magic-items.md`; опис — `docs/architecture/battle.md` «5e: магічні предмети»); далі живий прогін 4f-3, потім 4f-4». Дата «_Оновлено:_» — `2026-10-23`.
+- [ ] **Step 4: `STATUS.md`** — у рядку «Конструктор кампаній» після фрагмента про 4f-2 замінити «далі живий прогін 4f-2, потім 4f-3 (магічні предмети)» (або актуальний хвіст) на «**4f-3 «магічні предмети» готовий** (`rules.items`, модель `item` у `modifiers`, складені ref `<base>+<property>` через `resolveItemRows`, налаштування з міграцією `20261102000000_inventory_attuned`, заряди-пули й витратні в бою, `damageBonus`/`withThisItem`/`critImmunity`/`atLeast`, конвертер: 32 властивості й 248 предметів; спек — розділ 4f-3 того ж файлу, план `docs/archive/superpowers/plans/2026-10-23-constructor-4f3-magic-items.md`; опис — `docs/architecture/battle.md` «5e: магічні предмети»); далі живий прогін 4f-3, потім 4f-4». Дата «_Оновлено:_» — `2026-10-23`.
 
 - [ ] **Step 5: `constructor-handoff.md`** — у «Стан» рядок про 4f-3 (той самий зміст одним реченням); відкладене: заклинання з предметів (4f-5), вибір типу опору/велетня/дракона при видачі (4f-4), кидок відновлення зарядів і знищення на останньому, умови за типом істоти, перемикачі бонусною дією, ціна/вага, прокляття, `character_items`, AI-контекст предметів (`ai/tools/party.ts`), `scripts/constructor/copy-test-heroes.ts` не переписує складені ref (`remapIds` по рядку), DM-редактор сітки (`PATCH inventory`) враховує неунікальність лише при `items.enabled` або складених ref; «Наступний крок» — «живий прогін 4f-3 за §10 спеку (десктоп, окремий субагент, локальна БД `constructor`, шаблон уже перезалито), потім спек і план 4f-4».
 
@@ -5654,7 +5654,7 @@ Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>"
 - [ ] **Step 7: Commit**
 
 ```bash
-git add docs/architecture/battle.md docs/architecture/abilities.md docs/architecture/content-api.md docs/STATUS.md docs/superpowers/constructor-handoff.md
+git add docs/architecture/battle.md docs/architecture/abilities.md docs/architecture/content-api.md docs/STATUS.md docs/archive/superpowers/constructor-handoff.md
 git commit -m "docs(constructor): 4f-3 magic items — architecture, status, handoff
 
 Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>"

@@ -8,7 +8,7 @@
 
 **Tech Stack:** Next.js 16 App Router, React 19, TanStack Query, Prisma 6 / PostgreSQL, Zod, Vitest (+ happy-dom, Testing Library).
 
-**Spec:** `docs/superpowers/specs/2026-10-22-onboarding-design.md`
+**Spec:** `docs/archive/superpowers/specs/2026-10-22-onboarding-design.md`
 
 **Робоче місце:** worktree `/Users/silentfox/Work/dnd-tracker-onboarding`, гілка `feat/onboarding`. Локальна БД `onboarding` на Docker Postgres (`localhost:54322`). Усі команди — з кореня worktree.
 

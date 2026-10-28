@@ -8,7 +8,7 @@
 
 **Tech Stack:** Next.js 16 route handlers, Zod 4, Prisma 6, TanStack Query, Vitest (+ happy-dom для UI).
 
-**Spec:** `docs/superpowers/specs/2026-10-21-constructor-stage2-open-api-design.md` (розділ «2b. Токени й автентифікація»). Попередня частина: `docs/superpowers/plans/2026-10-21-constructor-2a-content-factory.md`.
+**Spec:** `docs/archive/superpowers/specs/2026-10-21-constructor-stage2-open-api-design.md` (розділ «2b. Токени й автентифікація»). Попередня частина: `docs/archive/superpowers/plans/2026-10-21-constructor-2a-content-factory.md`.
 
 ## Global Constraints
 
@@ -976,4 +976,4 @@ git commit -m "feat(tokens): scope checkboxes and chips on /dm/ai, API-only page
    - токен лише `content:read` → `POST` 403;
    - на шаблоні «Порожня» меню показує «API», сторінка — лише токени без галочки AI;
    - створені тестові записи й токени видалити/відкликати.
-4. Фінальне рев'ю всієї частини (opus) → одна хвиля виправлень → коротке повторне рев'ю → `/simplify` → оновити пам'ять `project-constructor.md` і хендоф `docs/superpowers/constructor-handoff.md`.
+4. Фінальне рев'ю всієї частини (opus) → одна хвиля виправлень → коротке повторне рев'ю → `/simplify` → оновити пам'ять `project-constructor.md` і хендоф `docs/archive/superpowers/constructor-handoff.md`.

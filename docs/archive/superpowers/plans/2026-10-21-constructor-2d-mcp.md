@@ -11,7 +11,7 @@
 
 **Tech Stack:** Next.js 16 route handlers, `mcp-handler` / `@modelcontextprotocol/server`, Zod 4.3, Vitest, Prisma 6.
 
-**Spec:** `docs/superpowers/specs/2026-10-21-constructor-stage2-open-api-design.md`, розділ «2d. MCP-інструменти контенту», «Перевірка → 2d» і «Наприкінці». Перенесені пункти — у `docs/superpowers/constructor-handoff.md` («2d: …»).
+**Spec:** `docs/archive/superpowers/specs/2026-10-21-constructor-stage2-open-api-design.md`, розділ «2d. MCP-інструменти контенту», «Перевірка → 2d» і «Наприкінці». Перенесені пункти — у `docs/archive/superpowers/constructor-handoff.md` («2d: …»).
 
 ## Global Constraints
 

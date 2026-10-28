@@ -185,7 +185,7 @@ Campaign setting `critChoiceByDm` (off by default). Triggers: natural 20/1 on an
 Expect to touch the mutation, the engine util, and possibly the hook and UI under `components/battle/`.
 
 
-Backgrounds closure2026-10-25: окремий локальний session-DM HTTP прогін із `connection_limit=1` підтвердив PUT/PATCH select/swap/remove, idempotency, ASI422 без запису та збереження biography/inventory/manual proficiencies/classes. Harness і власні fixtures очищено; SRD збережено. Код не змінювався, збережені suite/build/browser докази не перезапускали. Точний фінальний checkpoint — у `docs/superpowers/plans/2026-10-24-constructor-backgrounds.md`.
+Backgrounds closure2026-10-25: окремий локальний session-DM HTTP прогін із `connection_limit=1` підтвердив PUT/PATCH select/swap/remove, idempotency, ASI422 без запису та збереження biography/inventory/manual proficiencies/classes. Harness і власні fixtures очищено; SRD збережено. Код не змінювався, збережені suite/build/browser докази не перезапускали. Точний фінальний checkpoint — у `docs/archive/superpowers/plans/2026-10-24-constructor-backgrounds.md`.
 
 ## Refactor S6–S8: власники механік
 

@@ -16,7 +16,7 @@
 
 **Tech Stack:** Next.js 16, React 19, TypeScript strict, Prisma 6, PostgreSQL (локальний Docker), Vitest, Zod 4, TanStack Query.
 
-**Spec:** `docs/superpowers/specs/2026-10-20-campaign-constructor-design.md` (розділ C, частина «1c»).
+**Spec:** `docs/archive/superpowers/specs/2026-10-20-campaign-constructor-design.md` (розділ C, частина «1c»).
 
 ## Global Constraints
 
@@ -81,7 +81,7 @@
 ### Task 1: Міграція, константи, адміни платформи
 
 **Files:**
-- Modify: `prisma/schema.prisma`, `lib/constants/campaigns.ts`, `docs/superpowers/specs/2026-10-20-campaign-constructor-design.md` (порядок вставки)
+- Modify: `prisma/schema.prisma`, `lib/constants/campaigns.ts`, `docs/archive/superpowers/specs/2026-10-20-campaign-constructor-design.md` (порядок вставки)
 - Create: `prisma/migrations/20261025000000_campaign_templates/migration.sql`, `lib/utils/api/platform-admin.ts`
 - Test: `lib/utils/api/__tests__/platform-admin.test.ts`
 
@@ -151,7 +151,7 @@ export function isPlatformAdmin(userId: string): boolean {
 ```
 Якщо `server-only` у vitest не мокається (перевірте, як інші `server-only` модулі тестуються), приберіть імпорт `server-only` і залиште модуль лише серверним за розташуванням. Константи додайте в `lib/constants/campaigns.ts` поряд із `CampaignRole`.
 
-- [ ] **Step 3: Спек.** У `docs/superpowers/specs/2026-10-20-campaign-constructor-design.md` (розділ C, `import-bundle.ts`) замініть порядок «групи → юніти → раси → …» на «групи → раси → юніти → заклинання → гілки → скіли → дерева → сети → артефакти → треки» з приміткою «Unit.raceId → Race».
+- [ ] **Step 3: Спек.** У `docs/archive/superpowers/specs/2026-10-20-campaign-constructor-design.md` (розділ C, `import-bundle.ts`) замініть порядок «групи → юніти → раси → …» на «групи → раси → юніти → заклинання → гілки → скіли → дерева → сети → артефакти → треки» з приміткою «Unit.raceId → Race».
 
 - [ ] **Step 4: Коміт.** `pnpm exec tsc --noEmit && pnpm test:run lib/utils/api`, потім `git commit -m "feat(constructor): campaign kind/visibility, content source ids, platform admins"`.
 

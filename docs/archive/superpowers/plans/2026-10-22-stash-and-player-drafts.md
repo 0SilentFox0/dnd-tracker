@@ -8,7 +8,7 @@
 
 **Tech Stack:** Next.js 16 App Router, React 19, Prisma 6 / Postgres, Zod, TanStack Query, Vitest, AI SDK (`ai`, `generateObject`).
 
-**Spec:** `docs/superpowers/specs/2026-10-22-stash-and-player-drafts-design.md`
+**Spec:** `docs/archive/superpowers/specs/2026-10-22-stash-and-player-drafts-design.md`
 
 **Робоча папка:** `/Users/silentfox/Work/dnd-tracker-stash` (worktree, гілка `feat/stash-and-player-drafts`). Локальна БД — Docker `pnpm db:local` (порт 54322); для міграцій окрема БД `stash` (`DATABASE_URL=postgresql://postgres:postgres@localhost:54322/stash`, `DIRECT_URL` — той самий). `.env.local` скопіювати з `../dnd-tracker/.env.local` і замінити обидва URL.
 

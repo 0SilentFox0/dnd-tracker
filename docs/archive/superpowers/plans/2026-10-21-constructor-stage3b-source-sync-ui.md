@@ -14,7 +14,7 @@
 
 **Tech Stack:** React 19, TanStack Query, `ResponsiveDialog hud`, `HudSection`, `HudPill`, `Checkbox`, `EmptyState`/`LoadingState`/`ErrorState`, `useNotify`, Vitest + happy-dom + Testing Library.
 
-**Spec:** `docs/superpowers/specs/2026-10-21-constructor-stage3-source-sync-design.md` (розділ 4 «UI»). API з 3a описано в `docs/architecture/content-api.md` («Оновлення з джерела»).
+**Spec:** `docs/archive/superpowers/specs/2026-10-21-constructor-stage3-source-sync-design.md` (розділ 4 «UI»). API з 3a описано в `docs/architecture/content-api.md` («Оновлення з джерела»).
 
 ## Global Constraints
 

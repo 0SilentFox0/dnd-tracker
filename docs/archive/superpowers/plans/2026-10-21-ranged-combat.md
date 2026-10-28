@@ -8,7 +8,7 @@
 
 **Tech Stack:** TypeScript strict, Next.js 16, React 19, Vitest, Zod.
 
-**Spec:** `docs/superpowers/specs/2026-10-21-ranged-combat-design.md`
+**Spec:** `docs/archive/superpowers/specs/2026-10-21-ranged-combat-design.md`
 
 ## Global Constraints
 

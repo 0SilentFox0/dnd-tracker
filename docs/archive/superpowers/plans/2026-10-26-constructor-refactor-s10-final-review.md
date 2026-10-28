@@ -43,8 +43,8 @@ S9.3–S9.4 вже входять у `feat/constructor` через commits `a818
 
 **Files:**
 
-- Read: усі S1–S9 progress files і `docs/superpowers/plans/2026-10-26-constructor-refactor-execution-guide.md`
-- Create: `docs/superpowers/plans/2026-10-26-constructor-refactor-s10-progress.md`
+- Read: усі S1–S9 progress files і `docs/archive/superpowers/plans/2026-10-26-constructor-refactor-execution-guide.md`
+- Create: `docs/archive/superpowers/plans/2026-10-26-constructor-refactor-s10-progress.md`
 
 **Interfaces:**
 - Consumes: Series start HEAD, integrated end HEAD, per-task commits/checkpoints.
@@ -66,7 +66,7 @@ S9.3–S9.4 вже входять у `feat/constructor` через commits `a818
 
 - Test: `lib/server/assistant/__tests__/authorize.test.ts`, `lib/server/assistant/__tests__/execute.test.ts`, `lib/server/assistant/__tests__/cleanup.test.ts`, `lib/server/assistant/__tests__/handoffs.test.ts`, `lib/server/assistant/__tests__/transport-catalog.test.ts`
 - Test: `lib/ai/context/__tests__/assistant-context.test.ts`, `app/api/__tests__/assistant-intents-api.test.ts`, `app/api/__tests__/assistant-mcp.test.ts`, `lib/server/compendium-import/__tests__/service.test.ts`, `lib/server/compendium-import/__tests__/parse.test.ts`
-- Modify: `docs/superpowers/plans/2026-10-26-constructor-refactor-s10-progress.md`
+- Modify: `docs/archive/superpowers/plans/2026-10-26-constructor-refactor-s10-progress.md`
 
 **Interfaces:**
 - Consumes: S1 security matrix, legacy fixtures, S2/S3 hashes та S9 preview/ref contracts.
@@ -89,7 +89,7 @@ S9.3–S9.4 вже входять у `feat/constructor` через commits `a818
 **Files:**
 
 - Read/Execute: `package.json`, `scripts/constructor/assistant-check.ts`, named local integration suites змінених DB domains
-- Modify: `docs/superpowers/plans/2026-10-26-constructor-refactor-s10-progress.md`
+- Modify: `docs/archive/superpowers/plans/2026-10-26-constructor-refactor-s10-progress.md`
 
 **Interfaces:**
 - Consumes: Stable final source state і tracked harness S1.
@@ -111,8 +111,8 @@ S9.3–S9.4 вже входять у `feat/constructor` через commits `a818
 
 **Files:**
 
-- Modify: `docs/architecture/ai.md`, `docs/architecture/battle.md`, `docs/architecture/abilities.md`, `docs/architecture/characters.md`, `docs/architecture/content-api.md`, `docs/STATUS.md`, `docs/superpowers/constructor-handoff.md`
-- Modify: `docs/superpowers/plans/2026-10-26-constructor-refactor-roadmap.md`, `docs/superpowers/plans/2026-10-26-constructor-refactor-s10-progress.md`
+- Modify: `docs/architecture/ai.md`, `docs/architecture/battle.md`, `docs/architecture/abilities.md`, `docs/architecture/characters.md`, `docs/architecture/content-api.md`, `docs/STATUS.md`, `docs/archive/superpowers/constructor-handoff.md`
+- Modify: `docs/archive/superpowers/plans/2026-10-26-constructor-refactor-roadmap.md`, `docs/archive/superpowers/plans/2026-10-26-constructor-refactor-s10-progress.md`
 
 **Interfaces:**
 - Consumes: Baseline/final raw samples S3/S6/S7/S8/S9 та completed security/regression evidence.
@@ -138,4 +138,4 @@ S9.3–S9.4 вже входять у `feat/constructor` через commits `a818
 
 ## Передача наступній сесії
 
-Оновити `docs/superpowers/plans/2026-10-26-constructor-refactor-s10-progress.md` за execution guide. Передати branch/start-end HEAD, виконані task ids, commits, результати перевірок і залишки. Новий контекст читає roadmap, execution guide, цей план і checkpoint попередника.
+Оновити `docs/archive/superpowers/plans/2026-10-26-constructor-refactor-s10-progress.md` за execution guide. Передати branch/start-end HEAD, виконані task ids, commits, результати перевірок і залишки. Новий контекст читає roadmap, execution guide, цей план і checkpoint попередника.

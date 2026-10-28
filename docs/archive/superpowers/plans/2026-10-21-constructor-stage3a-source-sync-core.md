@@ -15,7 +15,7 @@
 
 **Tech Stack:** Next.js 16 route handlers, Prisma 6, Zod 4, Vitest, MCP (`lib/ai/tools`).
 
-**Spec:** `docs/superpowers/specs/2026-10-21-constructor-stage3-source-sync-design.md`
+**Spec:** `docs/archive/superpowers/specs/2026-10-21-constructor-stage3-source-sync-design.md`
 
 ## Global Constraints
 

@@ -8,7 +8,7 @@
 
 **Tech Stack:** TypeScript strict, Prisma 6 (PostgreSQL), Zod 4, Vitest, Next.js route handlers, TanStack Query, React 19.
 
-**Spec:** `docs/superpowers/specs/2026-10-22-constructor-stage4-5e-design.md` (розділ «4c-1. Дизайн: класи й рівні»; загальні правила етапу 4 — контекст).
+**Spec:** `docs/archive/superpowers/specs/2026-10-22-constructor-stage4-5e-design.md` (розділ «4c-1. Дизайн: класи й рівні»; загальні правила етапу 4 — контекст).
 
 ## Global Constraints
 
@@ -472,7 +472,7 @@ Tests: `components/characters/basic/__tests__/CharacterClassesField.test.tsx` (h
 
 ### Task 10: Документи
 
-**Files:** `docs/architecture/abilities.md` (джерело `"class"`, `perRest` = `perBattle` до 4d), `docs/architecture/content-api.md` (ресурс `classes`, 409 при видаленні використаного, таблиця бандла), `docs/architecture/battle.md` (учасник у режимі класів: HP/рятівні/слоти/пакт; кола 0–9), `docs/STATUS.md` (рядок «Конструктор кампаній»: 4c-1 готовий, далі 4c-2), `docs/superpowers/constructor-handoff.md` (стан і відкладене).
+**Files:** `docs/architecture/abilities.md` (джерело `"class"`, `perRest` = `perBattle` до 4d), `docs/architecture/content-api.md` (ресурс `classes`, 409 при видаленні використаного, таблиця бандла), `docs/architecture/battle.md` (учасник у режимі класів: HP/рятівні/слоти/пакт; кола 0–9), `docs/STATUS.md` (рядок «Конструктор кампаній»: 4c-1 готовий, далі 4c-2), `docs/archive/superpowers/constructor-handoff.md` (стан і відкладене).
 
 - [ ] Оновити, commit `docs(constructor): 4c-1 classes`.
 

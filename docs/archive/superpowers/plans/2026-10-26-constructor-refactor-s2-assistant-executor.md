@@ -132,7 +132,7 @@ expect(readExternalState({
 **Files:**
 
 - Test: `lib/server/assistant/__tests__/execution.integration.test.ts`, `lib/server/assistant/__tests__/runs-storage.integration.test.ts`, `app/api/__tests__/assistant-intents-api.test.ts`, `app/api/__tests__/assistant-run-api.test.ts`
-- Create: `docs/superpowers/plans/2026-10-26-constructor-refactor-s2-progress.md`
+- Create: `docs/archive/superpowers/plans/2026-10-26-constructor-refactor-s2-progress.md`
 
 **Interfaces:**
 - Consumes: Tracked runner S1 і нові internal boundaries S2.
@@ -154,6 +154,6 @@ expect(readExternalState({
 
 ## Передача наступній сесії
 
-Оновити `docs/superpowers/plans/2026-10-26-constructor-refactor-s2-progress.md` за execution guide. Передати branch/start-end HEAD, виконані task ids, commits, результати перевірок і залишки. Новий контекст читає roadmap, execution guide, цей план і checkpoint попередника.
+Оновити `docs/archive/superpowers/plans/2026-10-26-constructor-refactor-s2-progress.md` за execution guide. Передати branch/start-end HEAD, виконані task ids, commits, результати перевірок і залишки. Новий контекст читає roadmap, execution guide, цей план і checkpoint попередника.
 
 Наступний залежний план: [S3](2026-10-26-constructor-refactor-s3-assistant-performance.md). Паралельний порядок і залежності визначає execution guide.

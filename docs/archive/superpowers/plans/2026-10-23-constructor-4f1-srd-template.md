@@ -8,7 +8,7 @@
 
 **Tech Stack:** TypeScript strict, `tsx`-скрипти (`tsconfig.scripts.json`), Prisma 6, Zod 4, Supabase Storage (`createAdminClient`, `ensureBucket`, `staticAssetUploadOptions`), React 19, lucide-react, Vitest (+ happy-dom для компонентів).
 
-**Spec:** `docs/superpowers/specs/2026-10-22-constructor-stage4-5e-design.md` — розділи «## 4f. Шаблон 5e SRD: рішення», «## 4f-1. Дизайн: конвеєр і базовий шаблон», «Загальні правила етапу 4», «Ризики». **Уточнення користувача 2026-10-23 (переважає текст спеку):** жодних сторонніх іконок у 4f-1 — немає DCSS, Painterly, `pnpm srd:icons`, `sharp`, таблиць відповідності іконок; лишаються 8 запасних значків шкіл і `pnpm assets:attach … --kind units|spells|artifacts|classes|races|skills|main-skills`, який для офіційного шаблону працює лише з `--allow-official`; `credits` = атрибуція SRD 5.2 + Open5e (без рядків Painterly/DCSS). Дослідження даних: `/Users/silentfox/.claude/jobs/4ad97a0b/tmp/srd/mapping-report.md` (не комітимо; закріплений SHA той самий).
+**Spec:** `docs/archive/superpowers/specs/2026-10-22-constructor-stage4-5e-design.md` — розділи «## 4f. Шаблон 5e SRD: рішення», «## 4f-1. Дизайн: конвеєр і базовий шаблон», «Загальні правила етапу 4», «Ризики». **Уточнення користувача 2026-10-23 (переважає текст спеку):** жодних сторонніх іконок у 4f-1 — немає DCSS, Painterly, `pnpm srd:icons`, `sharp`, таблиць відповідності іконок; лишаються 8 запасних значків шкіл і `pnpm assets:attach … --kind units|spells|artifacts|classes|races|skills|main-skills`, який для офіційного шаблону працює лише з `--allow-official`; `credits` = атрибуція SRD 5.2 + Open5e (без рядків Painterly/DCSS). Дослідження даних: `/Users/silentfox/.claude/jobs/4ad97a0b/tmp/srd/mapping-report.md` (не комітимо; закріплений SHA той самий).
 
 ## Global Constraints
 
@@ -79,7 +79,7 @@
 | `lib/constants/spell-groups.ts`, `lib/utils/spells/spell-icons.ts`, `components/spells/SpellIcon.tsx`, `components/spells/book/{SpellRow,SpellBookPages}.tsx`, `components/spells/list/{SpellCard,SpellPrintCard,SelectedSpellsList}.tsx` | значки шкіл і запасне правило |
 | `lib/server/content/import/import-content.ts` | `ImportDeps.invalidate`, експорт `DEFAULT_IMPORT_DEPS` |
 | `package.json` | скрипти `srd:build`, `constructor:srd-template`, `assets:attach` |
-| `docs/architecture/content-api.md`, `docs/STATUS.md`, `docs/superpowers/constructor-handoff.md` | документи |
+| `docs/architecture/content-api.md`, `docs/STATUS.md`, `docs/archive/superpowers/constructor-handoff.md` | документи |
 
 ---
 
@@ -3769,7 +3769,7 @@ Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>"
 ### Task 14: Документи й повна перевірка
 
 **Files:**
-- Modify: `docs/architecture/content-api.md`, `docs/STATUS.md`, `docs/superpowers/constructor-handoff.md`
+- Modify: `docs/architecture/content-api.md`, `docs/STATUS.md`, `docs/archive/superpowers/constructor-handoff.md`
 
 - [ ] **Step 1: `content-api.md`** — новий розділ перед «## Оновлення з джерела (етап 3)»:
 
@@ -3785,7 +3785,7 @@ Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>"
 - **Іконки** — сторонніх наборів немає. Заклинання без іконки показують значок школи в її кольорі (`SpellIcon`; ключі `shield|portal|eye|heart|flame|mask|skull|vortex` поруч із 5 ключами HOMM5). `pnpm assets:attach <campaignId> <тека> --kind units|spells|artifacts|classes|races|skills|main-skills [--allow-official]`: ім'я файлу = назва контенту або `slug` рядка даних SRD (з префіксом `srd-2024_` чи без); нормалізація без регістру й пунктуації (`_`, `-`, `:`, апострофи, повторні пробіли → пробіл), суфікси варіантів `A1`/`2`/`v3` відкидаються, із кількох варіантів — перший, завантаження в бакет виду (`<campaignId>/<kind>/<назва>-<sha1>.<ext>`, `cacheControl` рік), прив'язка через `importContent(update)` (юніт — `avatar`, решта — `icon`), звіт без пари. Офіційний шаблон — лише з `--allow-official` (власні AI-іконки; токени Forgotten Adventures — ніколи).
 ```
 
-- [ ] **Step 2: `STATUS.md`** — у рядку «Конструктор кампаній» після фрагмента про 4f-0 додати: «**4f-1 «конвеєр і базовий шаблон SRD» готовий** (конвертер Open5e SRD 5.2 → `data/templates/srd-5.2/*.json`, `pnpm srd:build`, `pnpm constructor:srd-template`, `campaigns.credits` з показом у UI, значки шкіл замість порожньої іконки заклинання, `pnpm assets:attach`; сторонніх іконок немає — рішення користувача 2026-10-23; спек — розділ 4f-1 того ж файлу, план `docs/superpowers/plans/2026-10-23-constructor-4f1-srd-template.md`; опис — `docs/architecture/content-api.md` «Шаблон SRD 5.2»)» і замінити «далі 4f шаблон SRD» на «далі живий прогін 4f-1, потім 4f-2 (броня й числа класів)». Дату «_Оновлено:_» поставити `2026-10-23`.
+- [ ] **Step 2: `STATUS.md`** — у рядку «Конструктор кампаній» після фрагмента про 4f-0 додати: «**4f-1 «конвеєр і базовий шаблон SRD» готовий** (конвертер Open5e SRD 5.2 → `data/templates/srd-5.2/*.json`, `pnpm srd:build`, `pnpm constructor:srd-template`, `campaigns.credits` з показом у UI, значки шкіл замість порожньої іконки заклинання, `pnpm assets:attach`; сторонніх іконок немає — рішення користувача 2026-10-23; спек — розділ 4f-1 того ж файлу, план `docs/archive/superpowers/plans/2026-10-23-constructor-4f1-srd-template.md`; опис — `docs/architecture/content-api.md` «Шаблон SRD 5.2»)» і замінити «далі 4f шаблон SRD» на «далі живий прогін 4f-1, потім 4f-2 (броня й числа класів)». Дату «_Оновлено:_» поставити `2026-10-23`.
 
 - [ ] **Step 3: `constructor-handoff.md`** — у розділі «Стан» блоку хендофу додати рядок про 4f-1 (той самий зміст, що в STATUS, одним реченням) і в «Наступний крок» — «живий прогін 4f-1 за §7 спеку (локальна БД `constructor`, шаблон уже залитий `pnpm constructor:srd-template`), потім спек і план 4f-2».
 
@@ -3799,7 +3799,7 @@ Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>"
 - [ ] **Step 5: Commit**
 
 ```bash
-git add docs/architecture/content-api.md docs/STATUS.md docs/superpowers/constructor-handoff.md
+git add docs/architecture/content-api.md docs/STATUS.md docs/archive/superpowers/constructor-handoff.md
 git commit -m "docs(constructor): 4f-1 SRD template architecture, status and handoff
 
 Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>"

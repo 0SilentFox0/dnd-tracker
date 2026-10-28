@@ -15,7 +15,7 @@
 
 **Tech Stack:** Next.js 16, React 19, TypeScript strict, Prisma 6, PostgreSQL (локальний Docker), Vitest, Zod 4, TanStack Query.
 
-**Spec:** `docs/superpowers/specs/2026-10-20-campaign-constructor-design.md` (розділ A, частина «1b»).
+**Spec:** `docs/archive/superpowers/specs/2026-10-20-campaign-constructor-design.md` (розділ A, частина «1b»).
 
 ## Global Constraints
 

@@ -8,7 +8,7 @@
 
 **Tech Stack:** TypeScript strict, Next.js 16 route handlers, Prisma 6, Zod 4, `csv-parse` 6 (браузерна збірка `csv-parse/browser/esm/sync`), AI SDK (`generateObject`), TanStack Query, React 19, Vitest.
 
-**Spec:** `docs/superpowers/specs/2026-10-22-constructor-stage4-5e-design.md` — розділ «4f-0. Дизайн: імпорт контенту»; «Загальні правила етапу 4» обов'язкові. Контекст: `docs/architecture/content-api.md`, `docs/architecture/ai.md`.
+**Spec:** `docs/archive/superpowers/specs/2026-10-22-constructor-stage4-5e-design.md` — розділ «4f-0. Дизайн: імпорт контенту»; «Загальні правила етапу 4» обов'язкові. Контекст: `docs/architecture/content-api.md`, `docs/architecture/ai.md`.
 
 ## Global Constraints
 
@@ -4853,7 +4853,7 @@ Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>"
 
 Також у таблиці «MCP-інструменти контенту» в рядку `content:write` додати `content_import`, а речення «Масового видалення, імпорту й експорту бандла в MCP немає.» замінити на «Масового видалення й експорту бандла в MCP немає; масовий імпорт — `content_import`.»
 
-- [ ] **Step 2: `STATUS.md`** — у рядку «Конструктор кампаній» після фрагмента про 4e додати: «**4f-0 «імпорт контенту» готовий** (CSV/TSV/JSON-імпорт усіх 9 видів контенту з автомапінгом, перевіркою по рядках і режимами створити/оновити/пропустити, приклад і експорт CSV, `content.import`/`content.export` у REST/OpenAPI, MCP `content_import`, AI-мапінг ключем ДМ, JSON дерев скілів; спек — розділ 4f-0 того ж файлу, план `docs/superpowers/plans/2026-10-22-constructor-4f0-content-import.md`; опис — `docs/architecture/content-api.md` «Імпорт і експорт»)» і замінити «далі 4f-0 «Імпорт контенту», потім 4f шаблон SRD» на «далі 4f шаблон SRD».
+- [ ] **Step 2: `STATUS.md`** — у рядку «Конструктор кампаній» після фрагмента про 4e додати: «**4f-0 «імпорт контенту» готовий** (CSV/TSV/JSON-імпорт усіх 9 видів контенту з автомапінгом, перевіркою по рядках і режимами створити/оновити/пропустити, приклад і експорт CSV, `content.import`/`content.export` у REST/OpenAPI, MCP `content_import`, AI-мапінг ключем ДМ, JSON дерев скілів; спек — розділ 4f-0 того ж файлу, план `docs/archive/superpowers/plans/2026-10-22-constructor-4f0-content-import.md`; опис — `docs/architecture/content-api.md` «Імпорт і експорт»)» і замінити «далі 4f-0 «Імпорт контенту», потім 4f шаблон SRD» на «далі 4f шаблон SRD».
 
 - [ ] **Step 3: Full verification.**
   - `pnpm install --frozen-lockfile` — без змін lockfile.

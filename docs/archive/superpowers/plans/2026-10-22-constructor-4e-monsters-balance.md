@@ -8,7 +8,7 @@
 
 **Tech Stack:** TypeScript strict, Prisma 6 (PostgreSQL), Zod 4, Vitest, Next.js route handlers, TanStack Query, React 19.
 
-**Spec:** `docs/superpowers/specs/2026-10-22-constructor-stage4-5e-design.md` (розділ «4e. Дизайн: монстри й баланс 5e»; «Загальні правила етапу 4» — обов'язкові; розділи 4a–4d — контекст).
+**Spec:** `docs/archive/superpowers/specs/2026-10-22-constructor-stage4-5e-design.md` (розділ «4e. Дизайн: монстри й баланс 5e»; «Загальні правила етапу 4» — обов'язкові; розділи 4a–4d — контекст).
 
 ## Global Constraints
 
@@ -3498,7 +3498,7 @@ Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>"
 
 - [ ] **Step 3: `abilities.md`** — пункт: «Етап 4e (5e): `LimitsSchema.legendaryCost` (1–3, лише `trigger: action` без `aim`) — таке вміння використовується лише легендарною дією (`core-action` `legendary`), у звичайному ході приховане (`abilityOptions`, відмова в `runAbilityUse`). Мультиатака юніта з CR — синтетичне пасивне вміння `modifyStat attacksPerAction`. Дія лігва — тригер `roundStart` + `perRound: 1` (підказка в редакторі). Деталі — [battle.md](battle.md).»
 - [ ] **Step 4: `content-api.md`** — розділ «## Монстри 5e (етап 4e)»: поля юніта `cr` (0, 0.125, 0.25, 0.5, 1–30; `null` — HOMM), `xp` (`null` — з таблиці CR), `multiattack` (1–10), `legendaryActions` (0–5), `legendaryResistances` (0–10), `saveProficiencies` (ключі характеристик); міграція `20261030000000_unit_5e` лише додає колонки; при створенні з `proficiencyBonus: 0` і CR майстерність береться з таблиці CR (клієнтам API краще передавати її явно); бандл, синхронізація, OpenAPI і MCP — автоматично; правила — `rules.encounters`.
-- [ ] **Step 5: `STATUS.md`** — у рядку «Конструктор кампаній» після фрагмента 4d додати: «**4e «монстри й баланс 5e» готовий** (поля юніта CR/XP/мультиатака/легендарні дії й опір/рятівні, міграція `20261030000000_unit_5e`, монстр 5e в бою, легендарні дії поза ходом і легендарний опір, `limits.legendaryCost`, дії лігва через `roundStart`, `rules.encounters` — баланс за бюджетом XP 2014/2024 і авто-досвід; спек — розділ 4e того ж файлу, план `docs/superpowers/plans/2026-10-22-constructor-4e-monsters-balance.md`; опис — `docs/architecture/battle.md` «5e: монстри», `balance.md`)» і замінити «далі 4e монстри/баланс, 4f…» на «далі 4f…».
+- [ ] **Step 5: `STATUS.md`** — у рядку «Конструктор кампаній» після фрагмента 4d додати: «**4e «монстри й баланс 5e» готовий** (поля юніта CR/XP/мультиатака/легендарні дії й опір/рятівні, міграція `20261030000000_unit_5e`, монстр 5e в бою, легендарні дії поза ходом і легендарний опір, `limits.legendaryCost`, дії лігва через `roundStart`, `rules.encounters` — баланс за бюджетом XP 2014/2024 і авто-досвід; спек — розділ 4e того ж файлу, план `docs/archive/superpowers/plans/2026-10-22-constructor-4e-monsters-balance.md`; опис — `docs/architecture/battle.md` «5e: монстри», `balance.md`)» і замінити «далі 4e монстри/баланс, 4f…» на «далі 4f…».
 - [ ] **Step 6: Full verification.**
   - `pnpm test:run` — усі зелені (відомий нестабільний `lib/hooks/battle/__tests__/battle-fx.test.tsx` — перезапустити окремо).
   - `pnpm lint` — 0 errors.

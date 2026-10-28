@@ -8,7 +8,7 @@
 
 **Tech Stack:** TypeScript/tsx, existing Zod schemas and CSV utilities; Python generator with requests/Pillow.
 
-**Spec:** docs/superpowers/specs/2026-10-23-srd-csv-generation-design.md, amended by user: exactly three universal style prompts, automatically combined with record name/context, and immediate CSV delivery.
+**Spec:** docs/archive/superpowers/specs/2026-10-23-srd-csv-generation-design.md, amended by user: exactly three universal style prompts, automatically combined with record name/context, and immediate CSV delivery.
 
 ## Global Constraints
 

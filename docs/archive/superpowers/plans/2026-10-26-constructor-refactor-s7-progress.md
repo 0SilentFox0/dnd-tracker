@@ -128,7 +128,7 @@ Declined-to-judge розглянуто й явно залишено відкри
 
 ## Фінальна перевірка S7.1–S7.3
 
-Code/test HEAD: `6bbbdea565f1e2ab1a43b79dc9de65d0c5aa2a90`. Фінальний документаційний HEAD цього checkpoint: `git log -1 --format=%H -- docs/superpowers/plans/2026-10-26-constructor-refactor-s7-progress.md`.
+Code/test HEAD: `6bbbdea565f1e2ab1a43b79dc9de65d0c5aa2a90`. Фінальний документаційний HEAD цього checkpoint: `git log -1 --format=%H -- docs/archive/superpowers/plans/2026-10-26-constructor-refactor-s7-progress.md`.
 
 ```sh
 pnpm exec vitest run lib/utils/battle/flows/__tests__/spell-flow.test.ts lib/utils/battle/flows/__tests__/spell-blocked-by-slots.test.ts lib/utils/battle/spell/__tests__/slot-choice.test.ts lib/utils/battle/conditions/__tests__/attack-conditions.test.ts app/api/__tests__/battles/attack-off-hand.test.ts app/api/__tests__/battles/core-action-mutation.test.ts lib/utils/battle/attack/__tests__/primary-ability.test.ts lib/utils/battle/attack/__tests__/extra-attack.test.ts lib/utils/battle/grid/__tests__/attack-reach-5e.test.ts lib/utils/battle/grid/__tests__/attack-reach.test.ts app/api/__tests__/battles/spell-mutation.test.ts app/api/__tests__/battles/spell-grants.test.ts app/api/__tests__/battles/spell-slot-key.test.ts lib/utils/battle/turn/__tests__/start-end.test.ts lib/utils/battle/turn/__tests__/advance-turn.test.ts lib/utils/battle/turn/__tests__/advance-after-removal.test.ts lib/utils/battle/turn/__tests__/control-effects.test.ts lib/utils/battle/turn/__tests__/spell-recharge.test.ts lib/utils/battle/death-saves/__tests__/death-saves.test.ts lib/utils/battle/concentration/__tests__/concentration.test.ts
@@ -176,7 +176,7 @@ Branch і native worktree збережено; merge/push/deploy, prod/prodcopy, 
 - План S7 додано до Git із усіма **19 виконаними** кроками/перевірками/commits S7.1–S7.3. Шість пунктів S7.4 лишаються відкритими. Часткові measurements/engine characterization та basic checks не видаються за завершену фінальну pipeline/delta перевірку.
 - Чужі локальні зміни `docs/superpowers/README.md` та інші untracked плани залишено недоторканими й не включено в commit. Спільні roadmap/STATUS/handoff не змінювалися. Робочі копії паралельних S3/S6/інших сесій не редагувались.
 - Native worktree S7 і source-гілка збережені: ними керує середовище. Загальні full suite/build, БД/browser, S7.4 та S8 не запускались.
-- Фінальний HEAD документаційного статусу: `git log -1 --format=%H -- docs/superpowers/plans/2026-10-26-constructor-refactor-s7-battle-mechanics.md`.
+- Фінальний HEAD документаційного статусу: `git log -1 --format=%H -- docs/archive/superpowers/plans/2026-10-26-constructor-refactor-s7-battle-mechanics.md`.
 
 ## S7.4 — integrated pipeline/delta gate (2026-10-27)
 

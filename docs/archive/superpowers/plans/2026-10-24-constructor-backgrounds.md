@@ -8,7 +8,7 @@
 
 **Tech Stack:** Next.js 16, React 19, TypeScript, Zod, Prisma 6/PostgreSQL, Vitest, pnpm.
 
-**Spec:** `docs/superpowers/specs/2026-10-24-constructor-backgrounds-design.md`, погоджено користувачем 2026-10-24 після явного питання про ручну видачу спорядження.
+**Spec:** `docs/archive/superpowers/specs/2026-10-24-constructor-backgrounds-design.md`, погоджено користувачем 2026-10-24 після явного питання про ручну видачу спорядження.
 
 ## Global Constraints
 

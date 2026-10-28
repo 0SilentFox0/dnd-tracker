@@ -45,4 +45,4 @@ Assistant intents зберігають payload/preview до очищення: т
 
 ## Технічні подробиці
 
-Точні tool envelopes, scopes, execution limits, серверні межі та retention описані в [архітектурі AI](../architecture/ai.md). Матриця endpoint → service → action → тест і результати whole-stage review — у [coverage ledger](../superpowers/plans/2026-10-25-constructor-stage6-ai-coverage.md) та [плані етапу 6](../superpowers/plans/2026-10-25-constructor-stage6-ai.md).
+Точні tool envelopes, scopes, execution limits, серверні межі та retention описані в [архітектурі AI](../architecture/ai.md). Матриця endpoint → service → action → тест і результати whole-stage review — у [coverage ledger](../archive/superpowers/plans/2026-10-25-constructor-stage6-ai-coverage.md) та [плані етапу 6](../archive/superpowers/plans/2026-10-25-constructor-stage6-ai.md).

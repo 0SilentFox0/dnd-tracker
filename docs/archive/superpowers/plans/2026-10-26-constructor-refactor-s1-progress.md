@@ -6,7 +6,7 @@
 
 - Worktree `/Users/silentfox/Work/dnd-tracker-constructor`, `feat/constructor` (наявний linked worktree).
 - Start HEAD `73c5de1a1425e90dd4f160c1305c8138f128e72f`; merge-base й локальний `main` — `9a9224f8e0d767958a76c051e9eaad198f1598d9`. S1 не виконувала fetch/merge. End code HEAD — `5c2d7e7d` (checkpoint docs commit іде наступним).
-- Сторонні зміни на старті: modified `docs/superpowers/README.md`, untracked `docs/superpowers/plans/2026-10-26-constructor-refactor-roadmap.md`. Не редагувати й не включати до комітів S1: користувач продовжує деталізацію планів.
+- Сторонні зміни на старті: modified `docs/superpowers/README.md`, untracked `docs/archive/superpowers/plans/2026-10-26-constructor-refactor-roadmap.md`. Не редагувати й не включати до комітів S1: користувач продовжує деталізацію планів.
 - Різниця всієї гілки з main включає constructor, суміжні merge-зміни та generated SRD data. S1 review обмежений diff від start HEAD; механіки й generated data не змінюються.
 - T19/T20 у handoff — історичні свідчення, а не свіжі результати. STATUS має застарілі згадки про зупинку перед T16/T20; звірити в checkpoint S1.
 

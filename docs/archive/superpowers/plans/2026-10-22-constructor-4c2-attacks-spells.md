@@ -8,7 +8,7 @@
 
 **Tech Stack:** TypeScript strict, Prisma 6 (PostgreSQL), Zod 4, Vitest, Next.js route handlers, TanStack Query, React 19.
 
-**Spec:** `docs/superpowers/specs/2026-10-22-constructor-stage4-5e-design.md` (розділ «4c-2. Дизайн: атаки й заклинання 5e»; загальні правила етапу 4 і розділ 4c-1 — контекст).
+**Spec:** `docs/archive/superpowers/specs/2026-10-22-constructor-stage4-5e-design.md` (розділ «4c-2. Дизайн: атаки й заклинання 5e»; загальні правила етапу 4 і розділ 4c-1 — контекст).
 
 ## Global Constraints
 

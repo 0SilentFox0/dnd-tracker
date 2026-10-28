@@ -14,7 +14,7 @@
 
 **Tech Stack:** Next.js 16 route handlers, Prisma 6, Zod 4, vitest.
 
-**Spec:** `docs/superpowers/specs/2026-10-21-constructor-stage2-open-api-design.md` (розділ «2a»).
+**Spec:** `docs/archive/superpowers/specs/2026-10-21-constructor-stage2-open-api-design.md` (розділ «2a»).
 
 ## Global Constraints
 

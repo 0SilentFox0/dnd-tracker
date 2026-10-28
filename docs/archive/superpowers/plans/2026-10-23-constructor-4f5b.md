@@ -8,7 +8,7 @@
 
 **Tech Stack:** Next.js App Router, React 19, TypeScript, Prisma/PostgreSQL, Zod, Vitest, existing ability and spell engines.
 
-**Spec:** `docs/superpowers/specs/2026-10-23-constructor-4f5b-design.md`
+**Spec:** `docs/archive/superpowers/specs/2026-10-23-constructor-4f5b-design.md`
 
 ## Global Constraints
 

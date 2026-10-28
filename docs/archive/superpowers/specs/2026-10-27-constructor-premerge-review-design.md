@@ -13,8 +13,8 @@
 - Обсяг: production-код диффу `main...HEAD` (ts/tsx без `__tests__`, `data/`, `scripts/`, docs) — ~41k рядків, 1150 файлів.
 - Три паралельні Opus-агенти за зонами: (A) `lib/utils` + `lib/constants`; (B) `lib/server` + `app/api` + `lib/ai` + `lib/schemas`; (C) `lib/hooks` + `components` + `app/campaigns` + `lib/api` + `types`.
 - Осі: оптимізація (зайві запити/обчислення/перерендери/egress), декомпозиція великих файлів і функцій, дублікати (усередині гілки й з наявним кодом `main`), винесення магічних значень у `lib/constants`, винесення логіки з компонентів у хуки, порушення шарів із CLAUDE.md.
-- Не перевідкривати закриті S1–S10 findings (`docs/superpowers/plans/2026-10-27-constructor-refactor-s10-findings.md`), не дублювати 4 хвости нижче.
-- Результат: реєстр `docs/superpowers/plans/2026-10-27-constructor-premerge-findings.md` — ID, severity (High/Medium/Low), файл:рядок, суть, конкретна дія; згруповано в задачі для плану.
+- Не перевідкривати закриті S1–S10 findings (`docs/archive/superpowers/plans/2026-10-27-constructor-refactor-s10-findings.md`), не дублювати 4 хвости нижче.
+- Результат: реєстр `docs/archive/superpowers/plans/2026-10-27-constructor-premerge-findings.md` — ID, severity (High/Medium/Low), файл:рядок, суть, конкретна дія; згруповано в задачі для плану.
 
 ## Частина 2 — виправлення
 
@@ -51,7 +51,7 @@
 3. `battle-sweep` на `prodcopy` кодом гілки; відомі збої відокремити від регресій.
 4. Живий прогін під ДМ і гравцем (Sonnet-агент у браузері): лист, бій, схованка, передача артефакта, level-up; результат кожного сценарію.
 
-Регресія блокує merge: виправлення + повтор шлюзу. Звіт — `docs/superpowers/plans/2026-10-27-homm-gate-report.md`.
+Регресія блокує merge: виправлення + повтор шлюзу. Звіт — `docs/archive/superpowers/plans/2026-10-27-homm-gate-report.md`.
 
 ## Критерії готовності
 

@@ -8,7 +8,7 @@
 
 **Tech Stack:** TypeScript strict, Next.js 16, React 19, Prisma 6, Zod 4, Vitest, `tsx`-скрипти.
 
-**Spec:** `docs/superpowers/specs/2026-10-22-constructor-stage4-5e-design.md`, розділ «4f-5a. Дизайн: монстри повністю» §1–§13 і пов'язані пункти «Ризики». Після прямого доручення користувача почати виконання рекомендовані в спеку рішення прийняті як робочі: JSON-статблок; гранти й пули; N/Day як використання на бій; дія з рятівним як заклинання; `perform`/дії лігва/чуття; max(walk, fly); точна площа-диск; OpenAPI ≤145 000. Уточнення користувача під час виконання мають пріоритет і оновлюють спек до відповідного коду. Поділ 4f-5a/4f-5b та близько 150 згенерованих заклинань — межі частини.
+**Spec:** `docs/archive/superpowers/specs/2026-10-22-constructor-stage4-5e-design.md`, розділ «4f-5a. Дизайн: монстри повністю» §1–§13 і пов'язані пункти «Ризики». Після прямого доручення користувача почати виконання рекомендовані в спеку рішення прийняті як робочі: JSON-статблок; гранти й пули; N/Day як використання на бій; дія з рятівним як заклинання; `perform`/дії лігва/чуття; max(walk, fly); точна площа-диск; OpenAPI ≤145 000. Уточнення користувача під час виконання мають пріоритет і оновлюють спек до відповідного коду. Поділ 4f-5a/4f-5b та близько 150 згенерованих заклинань — межі частини.
 
 ## Global Constraints
 
@@ -50,7 +50,7 @@
 ### Task 1: зафіксувати межі та робочі рішення 4f-5a
 
 **Files:**
-- Modify: `docs/superpowers/specs/2026-10-22-constructor-stage4-5e-design.md`
+- Modify: `docs/archive/superpowers/specs/2026-10-22-constructor-stage4-5e-design.md`
 - Modify: this plan
 
 - [ ] Зафіксувати у спеку й плані робоче застосування рекомендованих рішень після доручення «починай виконувати»; будь-яке нове уточнення користувача вносити до коду лише після оновлення обох документів.
@@ -262,7 +262,7 @@
 
 **Files:**
 - Modify: `docs/architecture/battle.md`, `docs/architecture/abilities.md`, `docs/architecture/content-api.md`
-- Modify: `docs/STATUS.md`, `docs/superpowers/constructor-handoff.md`
+- Modify: `docs/STATUS.md`, `docs/archive/superpowers/constructor-handoff.md`
 - Modify: memory files за межами репозиторію лише якщо доступ дозволяє
 
 - [x] Оновити опис монстрів, grants/recharge, `perform`, lair, sense, `exact`/`emanation`, імпорт/експорт і SRD template.
@@ -289,7 +289,7 @@
 ### Task 18: дослідити формат і затвердити мапування
 
 **Files:**
-- Create: `docs/superpowers/specs/2026-10-23-constructor-compendium-json-import-design.md`
+- Create: `docs/archive/superpowers/specs/2026-10-23-constructor-compendium-json-import-design.md`
 - Modify: цей план після висновків дослідження
 - Input: локальний Obojima JSON тільки для читання; [офіційний опис продукту](https://obojima.com/products/obojima-hardcover-book) й [первинні JSON-схеми 5etools](https://github.com/TheGiddyLimit/5etools-utils/tree/master/schema-template)
 
@@ -377,7 +377,7 @@
 
 ## Task21 завершено локально — 2026-10-24
 
-4f-6 Tasks18–21 завершено: синтетичний fixture, integration/user e2e, чотири підтверджені виправлення та документація. [Інструкція користувача](../../guides/compendium-json-import.md) описує форму JSON, категорії, права/attribution, edition, preview/confirm/report, ручні механіки й ready-to-import окремо від ready-to-play.
+4f-6 Tasks18–21 завершено: синтетичний fixture, integration/user e2e, чотири підтверджені виправлення та документація. [Інструкція користувача](../../../guides/compendium-json-import.md) описує форму JSON, категорії, права/attribution, edition, preview/confirm/report, ручні механіки й ready-to-import окремо від ready-to-play.
 
 Докази попереднього перевірочного проходу (не повторні запуски під час документаційного завершення): `.superpowers/sdd/2026-10-24-constructor-compendium/task21/`:
 - `targeted-final.log`:6 файлів/42 тести; `integration-final.log`:1 файл/6 тестів real local constructor; `compatibility.log`:3 файли/27 тестів; `action-green.log`:2 файли/3 тести. Сумарно12 файлів/78 тестів; DB6/6 входять у цей підсумок.

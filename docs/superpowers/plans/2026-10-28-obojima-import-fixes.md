@@ -1,6 +1,6 @@
 # План: Obojima імпортується в повністю робочу кампанію
 
-> Джерело: тест імпорту 2026-10-28 (HOMM-шлюз, частина 3), підсумок — `docs/superpowers/plans/2026-10-27-homm-gate-report.md`, розділ «Obojima». Виконувати **в окремій сесії після мерджу `feat/constructor`** (дефекти в `lib/server/compendium-import/`, етап 4f-6). Файл-приклад: `~/Downloads/1985 Games; Obojima - Tales from the Tall Grass.json` (5etools homebrew, edition `classic`, 2,3 МБ; **не копіювати в репо**, у тестах — мінімальні синтетичні фікстури).
+> Джерело: тест імпорту 2026-10-28 (HOMM-шлюз, частина 3), підсумок — `docs/archive/superpowers/plans/2026-10-27-homm-gate-report.md`, розділ «Obojima». Виконувати **в окремій сесії після мерджу `feat/constructor`** (дефекти в `lib/server/compendium-import/`, етап 4f-6). Файл-приклад: `~/Downloads/1985 Games; Obojima - Tales from the Tall Grass.json` (5etools homebrew, edition `classic`, 2,3 МБ; **не копіювати в репо**, у тестах — мінімальні синтетичні фікстури).
 
 ## Критерій готовності (acceptance)
 

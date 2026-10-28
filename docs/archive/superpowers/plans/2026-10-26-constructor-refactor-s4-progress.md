@@ -91,7 +91,7 @@ git diff --check 8c9bd69a
 - Підтверджених нових security findings немає. Explicit empty recovery return — defense in depth, не доказ початкового SQL витоку.
 - Browser synthetic harness/full suite/build у S4 не запускалися: UI/rendering не змінювалися, full branch gates лишаються S10. Prod/prodcopy/HOMM gateway/provider/Storage/Pusher/Redis/merge/push/deploy не запускалися.
 - Для S8: keyless review/receipt shape, Stop без rollback, retained request recovery без resend сумісні. UI 8.1/8.3 вже на base; 8.2/8.4 залишаються окремими задачами. Загальні STATUS/architecture/roadmap не змінювалися, handoff — тут; загальне узгодження docs заплановано S10.
-- Гілка/worktree зберігаються для інтегратора. Code HEAD `698b1f35`, end HEAD цього checkpoint визначається `git log -1 --format=%H -- docs/superpowers/plans/2026-10-26-constructor-refactor-s4-progress.md`.
+- Гілка/worktree зберігаються для інтегратора. Code HEAD `698b1f35`, end HEAD цього checkpoint визначається `git log -1 --format=%H -- docs/archive/superpowers/plans/2026-10-26-constructor-refactor-s4-progress.md`.
 
 
 ## Review rulings та відкриті питання

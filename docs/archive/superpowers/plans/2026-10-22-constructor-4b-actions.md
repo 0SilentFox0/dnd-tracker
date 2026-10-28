@@ -8,7 +8,7 @@
 
 **Tech Stack:** TypeScript strict, Zod 4, Vitest, Next.js route handlers (`runBattleMutation`), TanStack Query, React 19.
 
-**Spec:** `docs/superpowers/specs/2026-10-22-constructor-stage4-5e-design.md` (розділ «4b. Дизайн: дії 5e в бою»; загальні правила етапу 4 і 4a — контекст).
+**Spec:** `docs/archive/superpowers/specs/2026-10-22-constructor-stage4-5e-design.md` (розділ «4b. Дизайн: дії 5e в бою»; загальні правила етапу 4 і 4a — контекст).
 
 ## Global Constraints
 
@@ -228,7 +228,7 @@ export function resolveOpportunityAttacks(input: {
 
 ### Task 8: Документи
 
-- [ ] `docs/architecture/battle.md` — розділ «5e: базові дії» (каталог, маршрут `core-action`, `rollCheck`, `resolveServerAttack`, атаки при відході в `move-mutation`, схоплення/тягнення, підготовлена атака поза ходом); `docs/architecture/abilities.md` — прапорці `checkAdvantage`/`checkDisadvantage`/`skillProficiency`; `docs/STATUS.md` і `docs/superpowers/constructor-handoff.md` — 4b готова, далі 4c; CLAUDE.md — без змін, якщо нових правил немає. Commit `docs(constructor): 4b — battle docs, status, handoff`.
+- [ ] `docs/architecture/battle.md` — розділ «5e: базові дії» (каталог, маршрут `core-action`, `rollCheck`, `resolveServerAttack`, атаки при відході в `move-mutation`, схоплення/тягнення, підготовлена атака поза ходом); `docs/architecture/abilities.md` — прапорці `checkAdvantage`/`checkDisadvantage`/`skillProficiency`; `docs/STATUS.md` і `docs/archive/superpowers/constructor-handoff.md` — 4b готова, далі 4c; CLAUDE.md — без змін, якщо нових правил немає. Commit `docs(constructor): 4b — battle docs, status, handoff`.
 
 ### Task 9: Повна перевірка
 

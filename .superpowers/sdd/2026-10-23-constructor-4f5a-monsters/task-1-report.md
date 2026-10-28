@@ -10,7 +10,7 @@
 
 ## Changed files
 
-- Design/plan: `docs/superpowers/specs/2026-10-22-constructor-stage4-5e-design.md`, `docs/superpowers/plans/2026-10-23-constructor-4f5a-monsters.md`
+- Design/plan: `docs/archive/superpowers/specs/2026-10-22-constructor-stage4-5e-design.md`, `docs/archive/superpowers/plans/2026-10-23-constructor-4f5a-monsters.md`
 - Persistence/types: `prisma/schema.prisma`, `prisma/migrations/20261104000000_monster_5e_full/migration.sql`, `types/{units,spells,battle}.ts`
 - Schemas/readers/resources/import/OpenAPI: `lib/schemas/{units,spells}.ts`, `lib/utils/spells/model/{schema,read}.ts`, `lib/utils/units/{to-unit,unit-create-data}.ts`, `lib/server/content/{json-schema,openapi}.ts`, resource and import field files for units/spells.
 - Focused tests: migration, unit 5e schema/resource, spell reader, content import, nested refs, import fields/values, and OpenAPI.

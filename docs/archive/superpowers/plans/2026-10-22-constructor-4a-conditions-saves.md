@@ -8,7 +8,7 @@
 
 **Tech Stack:** TypeScript strict, Zod 4, Vitest, Next.js route handlers (`runBattleMutation`), TanStack Query, React 19.
 
-**Spec:** `docs/superpowers/specs/2026-10-22-constructor-stage4-5e-design.md` (розділ «4a. Дизайн»).
+**Spec:** `docs/archive/superpowers/specs/2026-10-22-constructor-stage4-5e-design.md` (розділ «4a. Дизайн»).
 
 ## Global Constraints
 
@@ -550,7 +550,7 @@ export async function POST(req: Request, { params }: { params: Promise<{ id: str
 ### Task 9: Документи
 
 **Files:**
-- Modify: `docs/architecture/battle.md` (розділ «5e: стани, рятівні кидки, смерть, концентрація»: реєстр станів і розгортання в маркери/прапорці, `rollSave`, `applyDamageConsequences` як обов'язковий виклик після кожного примітиву шкоди, кидки смерті в циклі пропуску, концентрація з лінивим згасанням зон, роут `conditions`), `docs/architecture/abilities.md` (нові прапорці, стат `savingThrow`, 5e-ключі `applyCondition`, `saveEnds`, `levels`), `docs/STATUS.md` (рядок «Конструктор»: етап 4a готовий/в роботі; Warhammer — пост-MVP; злиття після 1–4 + 6), `docs/superpowers/constructor-handoff.md` (стан, наступний крок 4b), `CLAUDE.md` — у розділі «Subsystems — rules» до пункту Battle додати: «шкода → `applyDamageConsequences` одразу після примітиву».
+- Modify: `docs/architecture/battle.md` (розділ «5e: стани, рятівні кидки, смерть, концентрація»: реєстр станів і розгортання в маркери/прапорці, `rollSave`, `applyDamageConsequences` як обов'язковий виклик після кожного примітиву шкоди, кидки смерті в циклі пропуску, концентрація з лінивим згасанням зон, роут `conditions`), `docs/architecture/abilities.md` (нові прапорці, стат `savingThrow`, 5e-ключі `applyCondition`, `saveEnds`, `levels`), `docs/STATUS.md` (рядок «Конструктор»: етап 4a готовий/в роботі; Warhammer — пост-MVP; злиття після 1–4 + 6), `docs/archive/superpowers/constructor-handoff.md` (стан, наступний крок 4b), `CLAUDE.md` — у розділі «Subsystems — rules» до пункту Battle додати: «шкода → `applyDamageConsequences` одразу після примітиву».
 - [ ] **Step 1:** оновити документи (українською, стисло, у стилі наявних).
 - [ ] **Step 2: Commit** `docs(constructor): 4a — battle/abilities docs, status, handoff`.
 

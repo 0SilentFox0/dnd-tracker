@@ -1,6 +1,6 @@
 # API контенту (REST, OpenAPI, MCP)
 
-Спека: `docs/superpowers/specs/2026-10-21-constructor-stage2-open-api-design.md` (етап 2 «Конструктора кампаній»).
+Спека: `docs/archive/superpowers/specs/2026-10-21-constructor-stage2-open-api-design.md` (етап 2 «Конструктора кампаній»).
 
 Контент кампанії можна змінювати з UI, через REST з токеном і через MCP. Усі три шляхи проходять через одні й ті самі Zod-схеми, сервіс і перевірки прав. До контенту належать раси, юніти, заклинання, школи магії, основні скіли, скіли, артефакти, сети, треки музики, класи (`classes`), риси (`feats`), а також правила кампанії й дерева скілів.
 
@@ -144,7 +144,7 @@
 
 ## Оновлення з джерела (етап 3)
 
-Спека: `docs/superpowers/specs/2026-10-21-constructor-stage3-source-sync-design.md`. Кампанія або шаблон з `createdFromId` (його пише лише сервер: клон шаблону, «Зберегти як шаблон», скрипт офіційних шаблонів; JSON-імпорт — ні) порівнює себе з джерелом і вибірково бере зміни.
+Спека: `docs/archive/superpowers/specs/2026-10-21-constructor-stage3-source-sync-design.md`. Кампанія або шаблон з `createdFromId` (його пише лише сервер: клон шаблону, «Зберегти як шаблон», скрипт офіційних шаблонів; JSON-імпорт — ні) порівнює себе з джерелом і вибірково бере зміни.
 
 - **Стан** — `campaign_source_syncs` (рядок на кампанію): `baseline` = хеші версії джерела, з якою синхронізовані (`tables[таблиця][sourceId]`, `rules[механіка]`, `settings`), `ignored` = версія джерела, яку ДМ проігнорував (або `"deleted"`). Пишеться в `createCampaignFromBundle` при клонуванні і після кожного apply. Кампанія без рядка — запасний baseline з `sourceId`/`sourceHash` рядків.
 - **Ядро** — `lib/server/templates/sync/` (без `server-only`, тож доступне tsx-скриптам): `context.ts` (джерело + ціль + стан, перевірка доступу до джерела `canReadSource`), `classify.ts` (S/B/L: хеш джерела, baseline, локальний рядок у просторі id джерела → `new`/`updated`/`conflict`/`deletedInSource`/`deletedLocally`), `apply.ts` (замикання залежностей `requires`, перестановка id через `remapIds`, `createMany`/`update` у порядку FK, видалення у зворотному, перенесення ключа прогресу дерева скілів, `assertNoLeak` + чужі id → 422, оновлення baseline/ignored), `diff.ts` (відповідь без повних рядків + `usage` для видалених у джерелі), `state.ts`, `service.ts` (`assertCan`, транзакція з `SELECT … FOR NO KEY UPDATE` на рядку кампанії, `invalidateReference`).
@@ -169,7 +169,7 @@
 
 Неперенесені spells мають `executionMode=manual`; cast відхиляється до витрат ресурсів і побічних ефектів, поки ДМ не налаштує механіку. Backgrounds — існуючий backgroundsResource, Choice/Picks, originFeatId і skill/tool proficiencies; equipment/currency тільки вручну. Офіційні SRD dependencies лише явним вибором існуючого локального шаблону, без зовнішніх завантажень.
 
-Bundle/clone переносить optional compendium section й DM notes; source-sync лише provenance обраних native rows, бо ScenarioPage не входить до sync scopes. Дизайн і ліміти: `docs/superpowers/specs/2026-10-23-constructor-compendium-json-import-design.md`. Migration `20261107000000_compendium_import` локально застосована, production deployment не проводили.
+Bundle/clone переносить optional compendium section й DM notes; source-sync лише provenance обраних native rows, бо ScenarioPage не входить до sync scopes. Дизайн і ліміти: `docs/archive/superpowers/specs/2026-10-23-constructor-compendium-json-import-design.md`. Migration `20261107000000_compendium_import` локально застосована, production deployment не проводили.
 
 
 ### Кампанійний JSON-компендіум (Task20)
@@ -188,7 +188,7 @@ Task21 synthetic integration підтвердила atomic confirm/reimport/idem
 `additionalSpells` DSL лишається manual/UNSUPPORTED_FIELD: native spell Choice/Picks перевірено після явного налаштування чинним ресурсом. Gear/gold вручну; ScenarioPage source-sync відсутній, оновлення notes через JSON reimport/вручну. Окремий backgrounds single-connection live PUT/PATCH checkpoint пройдено2026-10-25 (11 HTTP requests); блок закрито. Applied migration20261107000000_compendium_import незмінна. [Користувацька інструкція](../guides/compendium-json-import.md) описує формат, права, edition й різницю readyToImport/readyToPlay. Етап6 AI не починався.
 
 
-Backgrounds closure2026-10-25: окремий локальний session-DM HTTP прогін із `connection_limit=1` підтвердив PUT/PATCH select/swap/remove, idempotency, ASI422 без запису та збереження biography/inventory/manual proficiencies/classes. Harness і власні fixtures очищено; SRD збережено. Код не змінювався, збережені suite/build/browser докази не перезапускали. Точний фінальний checkpoint — у `docs/superpowers/plans/2026-10-24-constructor-backgrounds.md`.
+Backgrounds closure2026-10-25: окремий локальний session-DM HTTP прогін із `connection_limit=1` підтвердив PUT/PATCH select/swap/remove, idempotency, ASI422 без запису та збереження biography/inventory/manual proficiencies/classes. Harness і власні fixtures очищено; SRD збережено. Код не змінювався, збережені suite/build/browser докази не перезапускали. Точний фінальний checkpoint — у `docs/archive/superpowers/plans/2026-10-24-constructor-backgrounds.md`.
 
 
 ## Етап6: контентні дії асистента (T5)
@@ -211,4 +211,4 @@ Class/feat writers перевіряють нові nested choice spell refs че
 
 `abilities.sources/get` обслуговує всі OwnerKind, включно з class/feat, у межах кампанії. Class projection збирає прямі abilities base/subclass features через `toGameClassData`, не вибирає option grants і не застосовує їх персонажу; feat використовує чинний `readAbilities`.
 
-Compendium orchestration — `adapt.ts`, nested class/optional feature resolution — `feature-resolution.ts`, без іншого adapter registry. SQL export→import→source-update roundtrip і5warm/30sample measurements — [S9 checkpoint](../superpowers/plans/2026-10-26-constructor-refactor-s9-progress.md). Реальна source contention підтверджує NOWAIT refusal до intent; tool transport повертає sanitized500. API/MCP ids/payloads і persisted JSON сумісні; writer validation defects виправлено окремо від extraction.
+Compendium orchestration — `adapt.ts`, nested class/optional feature resolution — `feature-resolution.ts`, без іншого adapter registry. SQL export→import→source-update roundtrip і5warm/30sample measurements — [S9 checkpoint](../archive/superpowers/plans/2026-10-26-constructor-refactor-s9-progress.md). Реальна source contention підтверджує NOWAIT refusal до intent; tool transport повертає sanitized500. API/MCP ids/payloads і persisted JSON сумісні; writer validation defects виправлено окремо від extraction.

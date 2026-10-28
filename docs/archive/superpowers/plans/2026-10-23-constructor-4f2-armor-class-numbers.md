@@ -8,7 +8,7 @@
 
 **Tech Stack:** TypeScript strict, Next.js 16, React 19, Prisma 6 (PostgreSQL), Zod 4, Vitest (+ happy-dom для компонентів), `tsx`-скрипти (`tsconfig.scripts.json`).
 
-**Spec:** `docs/superpowers/specs/2026-10-22-constructor-stage4-5e-design.md` — розділ «## 4f-2. Дизайн: броня 5e і числа класів» (§1–§8), «Загальні правила етапу 4», «Ризики». Рішення щодо відкритих питань спеку (користувач спав, прийнято рекомендоване): (1) КЗ у режимі класів **не читає** `Character.armorClass`; (2) пули Channel Divinity різних класів мультикласу — **окремі**; (3) короткий відпочинок — наближення зі спеку (див. «Рішення»); (4) поля броні у формі артефакта — **лише коли класи ввімкнені**; (5) фільтр школи Evocation — див. «Рішення».
+**Spec:** `docs/archive/superpowers/specs/2026-10-22-constructor-stage4-5e-design.md` — розділ «## 4f-2. Дизайн: броня 5e і числа класів» (§1–§8), «Загальні правила етапу 4», «Ризики». Рішення щодо відкритих питань спеку (користувач спав, прийнято рекомендоване): (1) КЗ у режимі класів **не читає** `Character.armorClass`; (2) пули Channel Divinity різних класів мультикласу — **окремі**; (3) короткий відпочинок — наближення зі спеку (див. «Рішення»); (4) поля броні у формі артефакта — **лише коли класи ввімкнені**; (5) фільтр школи Evocation — див. «Рішення».
 
 ## Global Constraints
 
@@ -88,7 +88,7 @@
 | `scripts/srd/lib/{open5e,types,load-template}.ts`, `scripts/srd/convert/{artifacts,classes}.ts`, `scripts/srd/overrides/classes.ts`, `scripts/srd/load-template.ts` | конвертер броні, колонок, пулів, умінь; школи → id |
 | `scripts/srd/__tests__/fixtures-4f2/*.json`, `scripts/srd/__tests__/{armor-4f2,classes-4f2,data-integrity-4f2}.test.ts` | фікстури й тести |
 | `data/templates/srd-5.2/*.json` | перегенеровані дані |
-| `docs/architecture/{battle,abilities,content-api}.md`, `docs/STATUS.md`, `docs/superpowers/constructor-handoff.md` | документи |
+| `docs/architecture/{battle,abilities,content-api}.md`, `docs/STATUS.md`, `docs/archive/superpowers/constructor-handoff.md` | документи |
 
 ---
 
@@ -4402,7 +4402,7 @@ Expected: exit 0, у звіті `<tmp>/battle-sweep/battle-sweep.md` 0 поми�
 ### Task 17: Документи й повна перевірка
 
 **Files:**
-- Modify: `docs/architecture/battle.md`, `docs/architecture/abilities.md`, `docs/architecture/content-api.md`, `docs/STATUS.md`, `docs/superpowers/constructor-handoff.md`
+- Modify: `docs/architecture/battle.md`, `docs/architecture/abilities.md`, `docs/architecture/content-api.md`, `docs/STATUS.md`, `docs/archive/superpowers/constructor-handoff.md`
 
 - [ ] **Step 1: `battle.md`** — новий розділ перед «## Changing battle behavior»:
 
@@ -4424,7 +4424,7 @@ Expected: exit 0, у звіті `<tmp>/battle-sweep/battle-sweep.md` 0 поми�
 
 - [ ] **Step 3: `content-api.md`** — у розділ «## Класи (етап 4c-1)» додати пункт про `columns` (`ClassColumn { key, label, values[20], pool? }`, міграція `20261101000000_class_columns`, Zod перевіряє посилання `scale`/`pool` вмінь на колонки, оновлення без `columns` перевіряється за збереженою таблицею — `CLASS_COLUMN_UNKNOWN`); у розділ «## Заклинання й зброя 5e (етап 4c-2)» — пункт про `armor` артефакта (`ArmorStats { category, base, dexCap?, strength?, stealthDisadvantage? }`, лише слот `armor` — `ARMOR_SLOT_ONLY`, зберігається записами в `modifiers` з типами `ArmorModifierType`, імпорт/експорт поля `armor`, OpenAPI `ArmorStats`); у розділ «## Шаблон SRD 5.2 (етап 4f-1)» — пункт «4f-2»: 12 обладунків, колонки таблиць класів з пулами (Focus, Sorcery Points, Channel Divinity, Lay on Hands) і додатковими колонками (Action Surge, Divine Spark), 37 механізованих умінь класів; завантажувач замінює назви шкіл у `school` на id груп кампанії (ручний імпорт `classes.json` через UI лишає назву — бонус школи не спрацює). У «## OpenAPI» — спільні схеми `Formula`, `Flat`, `Amount`, `ArmorStats`, `ClassColumn`.
 
-- [ ] **Step 4: `STATUS.md`** — у рядку «Конструктор кампаній» після фрагмента про 4f-1 замінити «живий прогін 4f-1 пройдено; далі 4f-2 (броня й числа класів)» на «живий прогін 4f-1 пройдено; **4f-2 «броня 5e і числа класів» готовий** (модель броні артефакта в `modifiers`, КЗ 5e героя з класами, `classes.columns` з міграцією `20261101000000_class_columns`, `{ scale }`/`class_level`/змінні формул/пули, `armorWorn`/`attackRollMode`/`allyAdjacent`/`evasion`, конвертер: 12 обладунків і 37 умінь класів; спек — розділ 4f-2 того ж файлу, план `docs/superpowers/plans/2026-10-23-constructor-4f2-armor-class-numbers.md`; опис — `docs/architecture/battle.md` «5e: броня, числа класів, пули»); далі живий прогін 4f-2, потім 4f-3 (магічні предмети)». Дата «_Оновлено:_» — `2026-10-23`.
+- [ ] **Step 4: `STATUS.md`** — у рядку «Конструктор кампаній» після фрагмента про 4f-1 замінити «живий прогін 4f-1 пройдено; далі 4f-2 (броня й числа класів)» на «живий прогін 4f-1 пройдено; **4f-2 «броня 5e і числа класів» готовий** (модель броні артефакта в `modifiers`, КЗ 5e героя з класами, `classes.columns` з міграцією `20261101000000_class_columns`, `{ scale }`/`class_level`/змінні формул/пули, `armorWorn`/`attackRollMode`/`allyAdjacent`/`evasion`, конвертер: 12 обладунків і 37 умінь класів; спек — розділ 4f-2 того ж файлу, план `docs/archive/superpowers/plans/2026-10-23-constructor-4f2-armor-class-numbers.md`; опис — `docs/architecture/battle.md` «5e: броня, числа класів, пули»); далі живий прогін 4f-2, потім 4f-3 (магічні предмети)». Дата «_Оновлено:_» — `2026-10-23`.
 
 - [ ] **Step 5: `constructor-handoff.md`** — у «Стан» рядок про 4f-2 (той самий зміст одним реченням) і відкладене: AI-контекст `ai/tools/party.ts` і `DmCharacterCard` показують `Character.armorClass` (у режимі класів застаріле), майстерність у броні не перевіряється, перевірка формул з новими змінними на prod-даних — перед злиттям (після свіжого бекапу); «Наступний крок» — «живий прогін 4f-2 за §7 спеку (десктоп, локальна БД `constructor`, шаблон уже перезалито), потім спек і план 4f-3».
 
@@ -4438,7 +4438,7 @@ Expected: exit 0, у звіті `<tmp>/battle-sweep/battle-sweep.md` 0 поми�
 - [ ] **Step 7: Commit**
 
 ```bash
-git add docs/architecture/battle.md docs/architecture/abilities.md docs/architecture/content-api.md docs/STATUS.md docs/superpowers/constructor-handoff.md
+git add docs/architecture/battle.md docs/architecture/abilities.md docs/architecture/content-api.md docs/STATUS.md docs/archive/superpowers/constructor-handoff.md
 git commit -m "docs(constructor): 4f-2 armor, class tables and pools — architecture, status, handoff
 
 Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>"

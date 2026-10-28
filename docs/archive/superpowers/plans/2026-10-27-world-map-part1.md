@@ -8,7 +8,7 @@
 
 **Tech Stack:** Next.js 16 App Router, React 19, Prisma 6, Supabase Storage, TanStack Query, Zod, Vitest (+ happy-dom для компонентів), sharp (лише seed).
 
-**Spec:** `docs/superpowers/specs/2026-10-27-world-map-design.md`
+**Spec:** `docs/archive/superpowers/specs/2026-10-27-world-map-design.md`
 
 Робоча папка: `/Users/silentfox/Work/dnd-tracker-world`, гілка `feat/world-map`. Якщо немає `node_modules` — `pnpm install --frozen-lockfile`. Локальна БД — `pnpm db:local` (Docker, порт 54322).
 

@@ -89,7 +89,7 @@ S6 commits поверх готового S5 `70825040`:
 1. `5a575d58` — isolate class derivation from loading.
 2. `296c576e` — reuse preloaded choice references.
 3. `96a62dcf` — isolate spell grants and pools.
-4. Наступний документаційний commit завершує цей checkpoint. Його SHA/end HEAD: `git log -1 --format=%H -- docs/superpowers/plans/2026-10-26-constructor-refactor-s6-progress.md`.
+4. Наступний документаційний commit завершує цей checkpoint. Його SHA/end HEAD: `git log -1 --format=%H -- docs/archive/superpowers/plans/2026-10-26-constructor-refactor-s6-progress.md`.
 
 **Наступна задача: S6.4 після інтеграції.** Звірити S1/S2–S4/S5 та інші паралельні checkpoint-и; повторити TypeScript/targeted перевірки на сумарному HEAD і lifecycle create→choices→level-up→rest→battle→finish→sheet. У цій сесії S6.4 не оголошується виконаною.
 

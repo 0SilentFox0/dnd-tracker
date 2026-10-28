@@ -113,7 +113,7 @@
 **Files:**
 
 - Test: `lib/utils/battle/pipeline/__tests__/run-battle-mutation.test.ts`, `lib/utils/battle/pipeline/__tests__/client-delta.test.ts`, `lib/utils/battle/client/__tests__/apply-delta.test.ts`, `lib/utils/battle/store/__tests__/snapshot-state.test.ts`
-- Create: `docs/superpowers/plans/2026-10-26-constructor-refactor-s7-progress.md`
+- Create: `docs/archive/superpowers/plans/2026-10-26-constructor-refactor-s7-progress.md`
 
 **Interfaces:**
 - Consumes: Refactored engine та чинний runBattleMutation/saveBattle/delta contract.
@@ -137,6 +137,6 @@ Spell/turn responsibilities розділені, deterministic behavior і persis
 
 ## Передача наступній сесії
 
-Оновити `docs/superpowers/plans/2026-10-26-constructor-refactor-s7-progress.md` за execution guide. Передати branch/start-end HEAD, виконані task ids, commits, результати перевірок і залишки. Новий контекст читає roadmap, execution guide, цей план і checkpoint попередника.
+Оновити `docs/archive/superpowers/plans/2026-10-26-constructor-refactor-s7-progress.md` за execution guide. Передати branch/start-end HEAD, виконані task ids, commits, результати перевірок і залишки. Новий контекст читає roadmap, execution guide, цей план і checkpoint попередника.
 
 Наступний залежний план: [S8](2026-10-26-constructor-refactor-s8-hooks-ui.md). Паралельний порядок і залежності визначає execution guide.

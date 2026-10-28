@@ -11,7 +11,7 @@
 
 **Tech Stack:** Next.js 16 route handlers, Zod 4.3 (`z.toJSONSchema`, `z.registry`), Vitest, Prisma 6.
 
-**Spec:** `docs/superpowers/specs/2026-10-21-constructor-stage2-open-api-design.md`, розділ «2c. OpenAPI» і «Перевірка → 2c». Перенесені пункти — у `docs/superpowers/constructor-handoff.md` («2c: …», «2c/2d: роути abilities/*»).
+**Spec:** `docs/archive/superpowers/specs/2026-10-21-constructor-stage2-open-api-design.md`, розділ «2c. OpenAPI» і «Перевірка → 2c». Перенесені пункти — у `docs/archive/superpowers/constructor-handoff.md` («2c: …», «2c/2d: роути abilities/*»).
 
 ## Global Constraints
 
@@ -55,7 +55,7 @@
 | `lib/server/content/openapi.ts` (новий) | `buildOpenApi()`, `getOpenApiDocument()` (лінивий кеш) |
 | `app/api/openapi.json/route.ts` (новий) | Публічний `GET` |
 | `app/campaigns/[id]/dm/ai/page-client.tsx` | Панель «REST API»: посилання на `openapi.json` і приклад `curl` |
-| `docs/STATUS.md`, `docs/superpowers/constructor-handoff.md` | Стан після 2c |
+| `docs/STATUS.md`, `docs/archive/superpowers/constructor-handoff.md` | Стан після 2c |
 
 ---
 
@@ -885,7 +885,7 @@ Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>"
 Виконує контролер (не субагент-виконавець), після всіх задач.
 
 **Files:**
-- Modify: `docs/STATUS.md` (рядок «Конструктор кампаній»), `docs/superpowers/constructor-handoff.md`, `docs/architecture/ai.md` (абзац про токени: посилання на `/api/openapi.json`)
+- Modify: `docs/STATUS.md` (рядок «Конструктор кампаній»), `docs/archive/superpowers/constructor-handoff.md`, `docs/architecture/ai.md` (абзац про токени: посилання на `/api/openapi.json`)
 
 - [ ] **Step 1: Повна перевірка**
 

@@ -8,7 +8,7 @@
 
 **Tech Stack:** Next.js 16, Prisma 6, Zod, Vitest, TanStack Query, Pusher (існуючий delta-пайплайн).
 
-**Spec:** `docs/superpowers/specs/2026-10-28-crit-choice-design.md`
+**Spec:** `docs/archive/superpowers/specs/2026-10-28-crit-choice-design.md`
 
 ## Global Constraints
 

@@ -318,7 +318,7 @@
 
 ## Task 29: Фінальна перевірка, ревю, документи
 
-**Files:** `docs/superpowers/plans/2026-10-27-constructor-premerge-findings.md` (колонка Disposition), `docs/STATUS.md`, `docs/superpowers/constructor-handoff.md`, зачеплені `docs/architecture/*.md` (battle.md, ai.md, abilities.md), промпт для частини 3
+**Files:** `docs/archive/superpowers/plans/2026-10-27-constructor-premerge-findings.md` (колонка Disposition), `docs/STATUS.md`, `docs/archive/superpowers/constructor-handoff.md`, зачеплені `docs/architecture/*.md` (battle.md, ai.md, abilities.md), промпт для частини 3
 - [ ] `pnpm test:run`, `pnpm test:integration` (constructor), `pnpm exec tsc --noEmit`, `pnpm lint` (0 errors), `pnpm build` — вивід у звіт.
 - [ ] `/simplify` одним агентом (Sonnet) на `git diff 7ee09df5...HEAD`; застосувати; повторити test:changed.
 - [ ] Одне фінальне ревю Opus (`superpowers:requesting-code-review`) на весь диф частини 2 з Review Focus цього плану; виправлення — Sonnet; повторні перевірки — Sonnet.

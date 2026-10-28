@@ -8,7 +8,7 @@
 
 **Tech Stack:** Next.js 16 App Router, React 19, Prisma 6, Tailwind, lucide-react, Vitest + Testing Library (happy-dom).
 
-**Spec:** `docs/superpowers/specs/2026-10-27-campaign-dashboard-design.md`
+**Spec:** `docs/archive/superpowers/specs/2026-10-27-campaign-dashboard-design.md`
 
 **Worktree:** `/Users/silentfox/Work/dnd-tracker-dashboard`, гілка `feat/campaign-dashboard`. Усі команди — звідти.
 

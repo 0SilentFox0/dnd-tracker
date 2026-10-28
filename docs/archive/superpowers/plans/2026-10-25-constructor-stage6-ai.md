@@ -8,7 +8,7 @@
 
 **Tech Stack:** Чинні Next 16/React 19, TypeScript, Zod 4, Prisma 6/Postgres, AI SDK 7, MCP registry, TanStack Query, Vitest; без нових runtime dependencies.
 
-**Spec:** `docs/superpowers/specs/2026-10-25-constructor-stage6-ai-design.md` — погоджено користувачем 2026-10-25. Обов'язковий companion: [route→service→tool ledger](2026-10-25-constructor-stage6-ai-coverage.md), 146 route files на момент планування.
+**Spec:** `docs/archive/superpowers/specs/2026-10-25-constructor-stage6-ai-design.md` — погоджено користувачем 2026-10-25. Обов'язковий companion: [route→service→tool ledger](2026-10-25-constructor-stage6-ai-coverage.md), 146 route files на момент планування.
 
 ## Global Constraints
 
@@ -274,7 +274,7 @@ Scopes: зберегти `ai`, `content:read`, `content:write`; додати `ca
 
 ## Task 20: T20 — Coverage closure, документація, focused review та завершення етапу
 
-**Files:** update `docs/architecture/{ai,content-api,battle,characters,show}.md` where contracts changed, `docs/STATUS.md`, `docs/superpowers/constructor-handoff.md`, companion coverage ledger; create `docs/guides/campaign-assistant.md`.
+**Files:** update `docs/architecture/{ai,content-api,battle,characters,show}.md` where contracts changed, `docs/STATUS.md`, `docs/archive/superpowers/constructor-handoff.md`, companion coverage ledger; create `docs/guides/campaign-assistant.md`.
 **Interfaces:** docs describe actual tool/scope/pending response, review URLs, auto limits, user-visible errors/recovery, UI handoffs and 90-day receipt retention. No claim that handoff performed upload or unsupported mechanics.
 - [x] Verify coverage test has no unmapped method/path; each domain row points to actual service/action map/test and result. Audit scopes/defaults/foreign ids/legacy alias bypass, lock order, unknown external outcomes, privacy and changed code using independent review.
 - [x] Run targeted domain/AI tests from T1–T18 once as combined affected set; record command/list/count. `pnpm exec tsc --noEmit`; ESLint on changed product/test files. After all product changes, one `pnpm build`; record exit/status without printing env. Rerun only impacted tests/checks after retention regression fix; no full historic 5e suite/browser/live blocks.

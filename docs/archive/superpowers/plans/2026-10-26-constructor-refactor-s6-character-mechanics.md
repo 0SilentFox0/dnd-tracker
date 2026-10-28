@@ -113,7 +113,7 @@
 
 - Test: `app/api/__tests__/character-patch-choices.test.ts`, `app/api/__tests__/character-sheet-choices.test.ts`, `app/api/__tests__/character-level-up-api.test.ts`, `app/api/__tests__/character-create-slots.test.ts`
 - Test: `lib/server/assistant/__tests__/character-progression-storage.integration.test.ts`
-- Create: `docs/superpowers/plans/2026-10-26-constructor-refactor-s6-progress.md`
+- Create: `docs/archive/superpowers/plans/2026-10-26-constructor-refactor-s6-progress.md`
 
 **Interfaces:**
 - Consumes: Pure helpers і preloaded context попередніх задач, чинні rest/resource writers.
@@ -137,6 +137,6 @@ Class/choice/grant derivation має чисті межі, повторні looku
 
 ## Передача наступній сесії
 
-Оновити `docs/superpowers/plans/2026-10-26-constructor-refactor-s6-progress.md` за execution guide. Передати branch/start-end HEAD, виконані task ids, commits, результати перевірок і залишки. Новий контекст читає roadmap, execution guide, цей план і checkpoint попередника.
+Оновити `docs/archive/superpowers/plans/2026-10-26-constructor-refactor-s6-progress.md` за execution guide. Передати branch/start-end HEAD, виконані task ids, commits, результати перевірок і залишки. Новий контекст читає roadmap, execution guide, цей план і checkpoint попередника.
 
 Наступний залежний план: [S7](2026-10-26-constructor-refactor-s7-battle-mechanics.md). Паралельний порядок і залежності визначає execution guide.

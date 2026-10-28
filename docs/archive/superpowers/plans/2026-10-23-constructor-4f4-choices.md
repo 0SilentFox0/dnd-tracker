@@ -8,7 +8,7 @@
 
 **Tech Stack:** TypeScript strict, Next.js 16, React 19, Prisma 6 (PostgreSQL), Zod 4, TanStack Query, Vitest (+ happy-dom для компонентів), `tsx`-скрипти (`tsconfig.scripts.json`).
 
-**Spec:** `docs/superpowers/specs/2026-10-22-constructor-stage4-5e-design.md` — розділ «## 4f-4. Дизайн: вибір при створенні й рівні» (§1–§11), «Загальні правила етапу 4», «Ризики» (останні п'ять пунктів — 4f-4). Рішення щодо відкритих питань спеку (користувач спав, прийнято рекомендоване): (1) без нової секції правил — риси й вибори класів лише в режимі класів, вибори рас — для будь-якого героя; (2) спільна модель `Choice`; (3) риси — тип контенту `feats`; (4) списки — теги на заклинанні; (5) вибори в `classes[i].choices`, `raceChoices`, `feats`; (6) ASI — дельтою в базові колонки; (7) **вибори при підвищенні рівня необов'язкові** (бейдж «Невибрані вибори: N» з кнопкою «Обрати»); (8) правка через `PUT …/choices` — ДМ або власник при `allowPlayerEdit`, `source: "dm"` — лише ДМ, **409 під час активного бою**; (9) `"slots"` = найвище коло слотів цього класу самого; (10) передісторії — поза обсягом (після 4f-5).
+**Spec:** `docs/archive/superpowers/specs/2026-10-22-constructor-stage4-5e-design.md` — розділ «## 4f-4. Дизайн: вибір при створенні й рівні» (§1–§11), «Загальні правила етапу 4», «Ризики» (останні п'ять пунктів — 4f-4). Рішення щодо відкритих питань спеку (користувач спав, прийнято рекомендоване): (1) без нової секції правил — риси й вибори класів лише в режимі класів, вибори рас — для будь-якого героя; (2) спільна модель `Choice`; (3) риси — тип контенту `feats`; (4) списки — теги на заклинанні; (5) вибори в `classes[i].choices`, `raceChoices`, `feats`; (6) ASI — дельтою в базові колонки; (7) **вибори при підвищенні рівня необов'язкові** (бейдж «Невибрані вибори: N» з кнопкою «Обрати»); (8) правка через `PUT …/choices` — ДМ або власник при `allowPlayerEdit`, `source: "dm"` — лише ДМ, **409 під час активного бою**; (9) `"slots"` = найвище коло слотів цього класу самого; (10) передісторії — поза обсягом (після 4f-5).
 
 ## Global Constraints
 
@@ -78,7 +78,7 @@
 | `scripts/srd/lib/{source,open5e,types,build-data}.ts`, `scripts/srd/convert/{feats,race-choices,class-choices,spells}.ts`, `scripts/srd/overrides/{feats,race-choices,class-choices,classes}.ts` | конвертер |
 | `scripts/srd/__tests__/fixtures-4f4/*.json`, `scripts/srd/__tests__/{feats,race-choices,class-choices,data-integrity-4f4}.test.ts` | фікстури й тести |
 | `data/templates/srd-5.2/*.json` | перегенеровані дані (+ `feats.json`) |
-| `docs/architecture/{battle,abilities,content-api}.md`, `docs/STATUS.md`, `docs/superpowers/constructor-handoff.md` | документи |
+| `docs/architecture/{battle,abilities,content-api}.md`, `docs/STATUS.md`, `docs/archive/superpowers/constructor-handoff.md` | документи |
 
 ---
 ### Task 1: Міграція, Prisma, типи й константи виборів
@@ -7901,7 +7901,7 @@ Expected: PASS.
 
 - [ ] **Step 7: Existing tests untouched**
 
-Run: `git diff --name-status $(git log --format=%H -1 -- docs/superpowers/plans/2026-10-23-constructor-4f4-choices.md)..HEAD -- '*.test.ts' '*.test.tsx' | grep -v '^A'`
+Run: `git diff --name-status $(git log --format=%H -1 -- docs/archive/superpowers/plans/2026-10-23-constructor-4f4-choices.md)..HEAD -- '*.test.ts' '*.test.tsx' | grep -v '^A'`
 Expected: лише `M	scripts/srd/__tests__/preset.test.ts`, `M	scripts/srd/__tests__/build-data.test.ts`, `M	scripts/srd/__tests__/data-integrity.test.ts`, `M	lib/utils/content/import/__tests__/fields.test.ts`, `M	lib/server/content/__tests__/import-content.test.ts`, `M	lib/server/content/__tests__/openapi.test.ts`, `M	lib/server/content/__tests__/openapi-4f2.test.ts`. Будь-який інший рядок — повернути наявний тест (`git checkout <base> -- <file>`) і виправити код.
 
 - [ ] **Step 8: Commit**
@@ -7918,7 +7918,7 @@ Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>"
 ### Task 19: Документи й повна перевірка
 
 **Files:**
-- Modify: `docs/architecture/battle.md`, `docs/architecture/abilities.md`, `docs/architecture/content-api.md`, `docs/STATUS.md`, `docs/superpowers/constructor-handoff.md`
+- Modify: `docs/architecture/battle.md`, `docs/architecture/abilities.md`, `docs/architecture/content-api.md`, `docs/STATUS.md`, `docs/archive/superpowers/constructor-handoff.md`
 
 - [ ] **Step 1: `battle.md`** — новий розділ перед «## Changing battle behavior» (після «## 5e: магічні предмети (етап 4f-3)»):
 
@@ -7953,7 +7953,7 @@ Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>"
 
 У розділ «Шаблон SRD 5.2» — пункт «4f-4»: джерела `Feat.json`/`FeatBenefit.json` (md5 у `OPEN5E_FILES`), 17 рис (`convert/feats.ts`, механіка — `overrides/feats.ts`), вибори рас (`convert/race-choices.ts`: таблиці, жирні абзаци, список; 24 опції, 22 заклинання назвами → `nestedRef`), 101 вибір класів (`convert/class-choices.ts`, `overrides/class-choices.ts`; синтетична колонка `metamagic`), `Spell.classes` → `lists`, `spellList` = назва класу для 8 заклиначів.
 
-- [ ] **Step 4: `STATUS.md`** — у рядку «Конструктор кампаній» замінити хвіст про 4f-4 (наступний крок) на «**4f-4 «вибір при створенні й рівні» готовий** (модель `Choice`, тип контенту «Риси», вибори рас/класів/рис, ASI дельтою в характеристики, `PUT …/choices`, `skillExpertise`, списки заклинань тегами; конвертер: 17 рис, 24 опції ліній, 101 вибір класів; спек — розділ 4f-4, план `docs/superpowers/plans/2026-10-23-constructor-4f4-choices.md`; опис — `docs/architecture/battle.md` «5e: риси й вибори»); далі живий прогін 4f-4, потім 4f-5». Дата «_Оновлено:_» — дата виконання.
+- [ ] **Step 4: `STATUS.md`** — у рядку «Конструктор кампаній» замінити хвіст про 4f-4 (наступний крок) на «**4f-4 «вибір при створенні й рівні» готовий** (модель `Choice`, тип контенту «Риси», вибори рас/класів/рис, ASI дельтою в характеристики, `PUT …/choices`, `skillExpertise`, списки заклинань тегами; конвертер: 17 рис, 24 опції ліній, 101 вибір класів; спек — розділ 4f-4, план `docs/archive/superpowers/plans/2026-10-23-constructor-4f4-choices.md`; опис — `docs/architecture/battle.md` «5e: риси й вибори»); далі живий прогін 4f-4, потім 4f-5». Дата «_Оновлено:_» — дата виконання.
 
 - [ ] **Step 5: `constructor-handoff.md`** — у «Стан» рядок про 4f-4 (той самий зміст одним реченням); відкладене: передісторії (після 4f-5), вибір параметра предмета при видачі, безкоштовний каст «1 / довгий» (лінії, Magic Initiate), Breath Weapon драконороджених, Weapon Mastery, метамагія/закляття як активні ефекти, Great Weapon Fighting/Savage Attacker, вибір характеристики заклинань лінії/риси, `skillChoices` класу як вибір, інструменти й мови, AI-контекст рис (`ai/tools/party.ts`), бейдж невибраних у списку персонажів ДМ, Paladin/Ranger 1-го рівня без слотів (`casterLevel` половинного заклинача з 2-го рівня — підготовлені заклинання недоступні до 2-го), правка ASI вручну ДМ між виборами (відкат може вийти за межі); «Наступний крок» — «живий прогін 4f-4 за §10 спеку (десктоп + 500 px, окремий субагент, локальна БД `constructor`, шаблон уже перезалито), потім спек і план 4f-5».
 
@@ -7967,7 +7967,7 @@ Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>"
 - [ ] **Step 7: Commit**
 
 ```bash
-git add docs/architecture/battle.md docs/architecture/abilities.md docs/architecture/content-api.md docs/STATUS.md docs/superpowers/constructor-handoff.md
+git add docs/architecture/battle.md docs/architecture/abilities.md docs/architecture/content-api.md docs/STATUS.md docs/archive/superpowers/constructor-handoff.md
 git commit -m "docs(constructor): 4f-4 choices and feats — architecture, status, handoff
 
 Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>"
