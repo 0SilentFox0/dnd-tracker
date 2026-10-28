@@ -1,4 +1,4 @@
-import { isAttackAction, standUpCost, validateCoreAction } from "./availability";
+import { coreActionCost, isAttackAction, standUpCost, validateCoreAction } from "./availability";
 import { disengageEffect, dodgeEffect, helpEffect, hiddenEffect } from "./effects";
 import { reject } from "./errors";
 import { runEscape, runGrapple, runShove } from "./grapple";
@@ -65,7 +65,11 @@ export function runCoreAction(input: RunCoreActionInput): RunCoreActionResult {
 
   const name = actor.basicInfo.name;
 
-  const spent = def.cost === "action" ? spendAction(actor, participants, body.action) : actor;
+  const cost = coreActionCost(body.action, actor, participants);
+
+  if (cost === "bonusAction" && actor.actionFlags.hasUsedBonusAction) throw new BattleRuleError("action_used", "Бонусну дію вже використано");
+
+  const spent = cost === "action" ? spendAction(actor, participants, body.action) : cost === "bonusAction" ? { ...actor, actionFlags: { ...actor.actionFlags, hasUsedBonusAction: true } } : actor;
 
   const invalid = validateCoreAction(body.action, actor, participants, map, "targetId" in body ? body.targetId : undefined);
 

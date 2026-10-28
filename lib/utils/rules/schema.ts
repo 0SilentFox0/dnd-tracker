@@ -46,7 +46,7 @@ const sectionSchemas = {
   deathSaves: z.strictObject({ enabled: z.boolean(), unitsDieAtZero: z.boolean() }),
   concentration: z.strictObject({ enabled: z.boolean(), dcCap: z.number().int().min(10).max(99).nullable() }),
   conditions: z.strictObject({ enabled: z.boolean(), exhaustion: z.enum(RULES_EDITIONS) }),
-  actions: z.strictObject({ enabled: z.boolean(), opportunityAttacks: z.boolean(), variant: z.enum(RULES_EDITIONS) }),
+  actions: z.strictObject({ enabled: z.boolean(), opportunityAttacks: z.boolean(), retaliation: z.boolean(), variant: z.enum(RULES_EDITIONS) }),
   classes: z.strictObject({ enabled: z.boolean() }),
   outOfCombat: z.strictObject({
     persistResources: z.boolean(),

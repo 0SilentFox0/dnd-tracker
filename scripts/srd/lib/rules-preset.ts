@@ -11,7 +11,7 @@ export const SRD_RULES: Ruleset = RulesetSchema.parse({
   deathSaves: { enabled: true, unitsDieAtZero: true },
   concentration: { enabled: true },
   conditions: { enabled: true, exhaustion: "2024" },
-  actions: { enabled: true, opportunityAttacks: true, variant: "2024" },
+  actions: { enabled: true, opportunityAttacks: true, retaliation: false, variant: "2024" },
   classes: { enabled: true },
   outOfCombat: { persistResources: true, longRestHitDice: "all", xp: true, inspiration: true },
   encounters: { balance: "xp", edition: "2024", autoXp: true },

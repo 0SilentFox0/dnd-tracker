@@ -74,8 +74,8 @@ function CoreActionsBody({ participant, onOpenChange, onDone }: Omit<CoreActions
     >
     <div className="space-y-3">
       <div className="grid grid-cols-1 gap-1 sm:grid-cols-2" role="radiogroup" aria-label="Дія">
-        {items.map(({ key: k, def, ok, reason }) => (
-          <OptionButton key={k} role="radio" checked={key === k} disabled={!ok} title={def.label} meta={COST_LABEL[def.cost]} note={<>{def.description}{!ok && <span className="block text-hud-danger">{reason}</span>}</>} onClick={() => choose(k)} />
+        {items.map(({ key: k, def, cost, ok, reason }) => (
+          <OptionButton key={k} role="radio" checked={key === k} disabled={!ok} title={def.label} meta={COST_LABEL[cost]} note={<>{def.description}{!ok && <span className="block text-hud-danger">{reason}</span>}</>} onClick={() => choose(k)} />
         ))}
       </div>
       {key === "shove" && (

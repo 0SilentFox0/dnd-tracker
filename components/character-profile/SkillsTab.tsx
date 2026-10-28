@@ -45,9 +45,11 @@ export function SkillsTab({ manage = false }: { manage?: boolean }) {
           </div>
         </section>
       )}
-      <div className="-mx-4">
-        <ProgressionPanel campaignId={campaignId} characterId={characterId} canManage={manage} />
-      </div>
+      {!sheet.classProgression?.length && (
+        <div className="-mx-4">
+          <ProgressionPanel campaignId={campaignId} characterId={characterId} canManage={manage} />
+        </div>
+      )}
     </>
   );
 }

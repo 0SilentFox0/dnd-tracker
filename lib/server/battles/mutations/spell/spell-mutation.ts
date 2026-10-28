@@ -20,6 +20,7 @@ import type { CritResume } from "@/lib/utils/battle/crit-choice/types";
 import { spellDiceRolls } from "@/lib/utils/battle/dice-record";
 import { hasEffectMarker } from "@/lib/utils/battle/participant/state";
 import type { BattleMutationContext, MutationResult } from "@/lib/utils/battle/pipeline/run-battle-mutation";
+import { armorPenalty } from "@/lib/utils/battle/proficiency";
 import { castSpell } from "@/lib/utils/battle/spell";
 import { flatEffects, isDamageEffect } from "@/lib/utils/battle/spell/cast/state";
 import { casterSpellDice } from "@/lib/utils/battle/spell/caster-dice";
@@ -104,6 +105,8 @@ export function createSpellMutation(deps: SpellMutationDeps = defaultDeps, optio
     if (hasEffectMarker(caster, "disable_spell_casting")) {
       throw new BattleRuleError("action_rejected", API_ERRORS.BATTLE_CASTER_CANNOT_CAST);
     }
+
+    if (armorPenalty(caster)) throw new BattleRuleError("action_rejected", API_ERRORS.BATTLE_CASTER_ARMOR_NOT_PROFICIENT);
 
     const chosen = !free && !legendaryAbility && !grant && data.slotKey && isFiveE(caster) && spellNeedsSlot(spell.level) ? resolveChosenSlot(caster, spell.level, data.slotKey) : null;
 

@@ -13,6 +13,13 @@ describe("dmSectionsFor", () => {
     expect(p).toEqual(expect.arrayContaining(["spells", "units", "rules", "spell-groups", "music"]));
   });
 
+  it("hides skill libraries in class (5e) campaigns only", () => {
+    expect(paths(dmSectionsFor({ isTemplate: false, classesEnabled: true }))).not.toContain("skills");
+    expect(paths(dmSectionsFor({ isTemplate: false, classesEnabled: true }))).not.toContain("skill-trees");
+    expect(paths(dmSectionsFor({ isTemplate: false, classesEnabled: false }))).toEqual(expect.arrayContaining(["skills", "skill-trees"]));
+    expect(paths(dmTilesFor({ isTemplate: false, classesEnabled: true }))).not.toContain("skills");
+  });
+
   it("template menu keeps the API tokens entry", () => {
     expect(paths(dmSectionsFor({ isTemplate: true, classesEnabled: false }))).toContain("ai");
   });

@@ -6,7 +6,7 @@ import { useBattleScene } from "./useBattleScene";
 
 import type { CoreActionBody } from "@/lib/hooks/battles";
 import { isAttackable } from "@/lib/utils/abilities/engine/core/participants";
-import { coreActionAvailability, coreActionTargets } from "@/lib/utils/battle/actions/availability";
+import { coreActionAvailability, coreActionCost, coreActionTargets } from "@/lib/utils/battle/actions/availability";
 import { reactionBlocker } from "@/lib/utils/battle/actions/reaction";
 import { CORE_ACTION_KEYS, CORE_ACTION_REGISTRY, type CoreActionKey } from "@/lib/utils/battle/actions/registry";
 import type { BattleParticipant } from "@/types/battle";
@@ -73,7 +73,7 @@ export function useCoreActions(participant: BattleParticipant, onDone?: () => vo
 
   const readied = useReadiedAttack(participant, onDone);
 
-  const items = useMemo(() => CORE_ACTION_KEYS.map((key) => ({ key, def: CORE_ACTION_REGISTRY[key], ...coreActionAvailability(key, participant, initiativeOrder, map) })), [participant, initiativeOrder, map]);
+  const items = useMemo(() => CORE_ACTION_KEYS.map((key) => ({ key, def: CORE_ACTION_REGISTRY[key], cost: coreActionCost(key, participant, initiativeOrder), ...coreActionAvailability(key, participant, initiativeOrder, map) })), [participant, initiativeOrder, map]);
 
   return {
     enabled: !!battle.rules?.actions.enabled,

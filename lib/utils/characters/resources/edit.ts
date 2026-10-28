@@ -4,7 +4,7 @@ import { isConsumablePool } from "@/lib/utils/items/pools";
 import type { AbilityPool } from "@/types/battle";
 import type { CharacterResources, ResourcesEditBody } from "@/types/characters";
 
-export function editResources(r: CharacterResources, patch: ResourcesEditBody, maxHp?: number, pools: Record<string, AbilityPool> = {}): CharacterResources {
+export function editResources(r: CharacterResources, patch: ResourcesEditBody, maxHp?: number, pools: Record<string, Pick<AbilityPool, "max" | "rest"> & { regain?: number }> = {}): CharacterResources {
   if (patch.reset) return {};
 
   let next: CharacterResources = { ...r };
@@ -30,7 +30,7 @@ export function editResources(r: CharacterResources, patch: ResourcesEditBody, m
       const n = Math.min(pool.max, Math.max(0, used));
 
       if (n === 0) delete charges[key];
-      else charges[key] = { used: n, rest: pool.rest };
+      else charges[key] = { used: n, rest: pool.rest, ...(pool.regain && { regain: pool.regain }) };
     }
 
     next = { ...next, charges };

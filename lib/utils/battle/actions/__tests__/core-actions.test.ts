@@ -1,10 +1,10 @@
 import { describe, expect, it } from "vitest";
 
-import { canStandUp, coreActionAvailability } from "../availability";
+import { canStandUp, coreActionAvailability, coreActionCost } from "../availability";
 import { runCoreAction } from "../run";
 import { coreActionSchema } from "../schema";
 
-import { createMockParticipant } from "@/lib/utils/battle/__tests__/fixtures/mock-participant";
+import { createMockParticipant, grantPassive } from "@/lib/utils/battle/__tests__/fixtures/mock-participant";
 import { activeEffectIds, consumeAttackEffects } from "@/lib/utils/battle/attack/consume-effects";
 import { passivePerception } from "@/lib/utils/battle/checks";
 import { applyCondition5e } from "@/lib/utils/battle/conditions";
@@ -242,5 +242,24 @@ describe("hide / ready / readiedAttack", () => {
     const marked = [{ ...a, battleData: { ...a.battleData, activeEffects: [{ id: "nr", type: "debuff", name: "Без реакції", effects: [{ type: "no_reaction", value: 1 }], remainingRounds: 1 } as never] } }, foe];
 
     expect(call(marked)).toThrow(expect.objectContaining({ code: "action_rejected" }));
+  });
+});
+
+describe("Cunning Action", () => {
+  const rogue = () => grantPassive(mk("a"), [{ kind: "flag", flag: "cunningAction" }], "Cunning Action");
+
+  it("dash/disengage/hide коштують бонусну дію лише носію", () => {
+    expect(coreActionCost("dash", rogue(), [])).toBe("bonusAction");
+    expect(coreActionCost("hide", rogue(), [])).toBe("bonusAction");
+    expect(coreActionCost("dodge", rogue(), [])).toBe("action");
+    expect(coreActionCost("dash", mk("a"), [])).toBe("action");
+  });
+
+  it("dash витрачає бонусну дію, не дію; повтор заблоковано", () => {
+    const out = get(run([rogue()], { action: "dash", participantId: "a" }), "a");
+
+    expect(out.actionFlags.hasUsedBonusAction).toBe(true);
+    expect(out.actionFlags.hasUsedAction).toBe(false);
+    expect(coreActionAvailability("dash", out, [out], null).ok).toBe(false);
   });
 });

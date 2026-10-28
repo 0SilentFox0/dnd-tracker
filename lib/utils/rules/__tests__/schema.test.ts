@@ -21,7 +21,7 @@ describe("parseRules", () => {
       deathSaves: { enabled: false, unitsDieAtZero: true },
       concentration: { enabled: false, dcCap: null },
       conditions: { enabled: false, exhaustion: "2014" },
-      actions: { enabled: false, opportunityAttacks: true, variant: "2014" },
+      actions: { enabled: false, opportunityAttacks: true, retaliation: true, variant: "2014" },
       classes: { enabled: false },
       outOfCombat: { persistResources: false, longRestHitDice: "half", xp: false, inspiration: false },
       encounters: { balance: "fair", edition: "2014", autoXp: false },

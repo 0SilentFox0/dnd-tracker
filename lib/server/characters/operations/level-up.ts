@@ -37,7 +37,7 @@ async function levelUpCore({ access, character }: Gate, pick: LevelUpPick) {
 
     if (withChoices) await orThrow(rejectIfInActiveBattle(id, [characterId]));
 
-    const refs = withChoices ? await loadChoiceRefs(id, character.race, { classMode: characterClassMode(campaign.rules, classResult.classes) }) : undefined;
+    const refs = withChoices ? await loadChoiceRefs(id, character.race, { classMode: characterClassMode(campaign.rules, classResult.classes), backgroundIds: [choicesStateOf(character).backgroundId] }) : undefined;
 
     return prisma.$transaction(async (tx) => {
       await lockCharacters(tx, [characterId]);

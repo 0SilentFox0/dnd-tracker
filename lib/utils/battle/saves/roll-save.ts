@@ -3,6 +3,7 @@ import { rollD20WithMode } from "./roll-d20";
 import type { AbilityKey } from "@/lib/constants/abilities";
 import { collectModifiers, type ModifierResult } from "@/lib/utils/abilities/engine/core/collect-modifiers";
 import { withSelf } from "@/lib/utils/abilities/engine/core/participants";
+import { ARMOR_PENALTY_LABEL, armorPenalty, armorPenaltyAffects } from "@/lib/utils/battle/proficiency";
 import type { Ruleset } from "@/lib/utils/rules";
 import type { BattleParticipant } from "@/types/battle";
 
@@ -16,12 +17,12 @@ type SaveFlagEntries = ModifierResult["entries"];
 
 const saveFlagEntries = (ps: BattleParticipant[], id: string): SaveFlagEntries => collectModifiers(ps, id, { flags: SAVE_FLAGS }).entries;
 
-function modeFrom(entries: SaveFlagEntries, ability: AbilityKey, vsSpell?: boolean): { mode: SaveRollMode; autoFail: boolean; reasons: { advantage: string[]; disadvantage: string[] } } {
+function modeFrom(entries: SaveFlagEntries, ability: AbilityKey, vsSpell?: boolean, armorBlocked = false): { mode: SaveRollMode; autoFail: boolean; reasons: { advantage: string[]; disadvantage: string[] } } {
   const advantage = entries
     .filter((e) => e.flag?.flag === "saveAdvantage" && covers(e.flag.abilities, ability) && (!e.flag.vsSpells || vsSpell))
     .map((e) => e.label);
 
-  const disadvantage = entries.filter((e) => e.flag?.flag === "saveDisadvantage" && covers(e.flag.abilities, ability)).map((e) => e.label);
+  const disadvantage = [...entries.filter((e) => e.flag?.flag === "saveDisadvantage" && covers(e.flag.abilities, ability)).map((e) => e.label), ...(armorBlocked && armorPenaltyAffects(ability) ? [ARMOR_PENALTY_LABEL] : [])];
 
   const autoFail = entries.some((e) => e.flag?.flag === "autoFailSave" && e.flag.abilities.includes(ability));
 
@@ -40,7 +41,7 @@ export function saveRollMode(
   participants: BattleParticipant[],
   opts: { vsSpell?: boolean } = {},
 ): { mode: SaveRollMode; autoFail: boolean; reasons: { advantage: string[]; disadvantage: string[] } } {
-  return modeFrom(saveFlagEntries(withSelf(participants, target), target.basicInfo.id), ability, opts.vsSpell);
+  return modeFrom(saveFlagEntries(withSelf(participants, target), target.basicInfo.id), ability, opts.vsSpell, armorPenalty(target));
 }
 
 function proficiencyBonus(target: BattleParticipant, ability: AbilityKey, entries: SaveFlagEntries, rules?: Ruleset): number {
@@ -70,7 +71,7 @@ export function rollSave(input: {
 
   const entries = saveFlagEntries(ps, target.basicInfo.id);
 
-  const sm = modeFrom(entries, ability, vsSpell);
+  const sm = modeFrom(entries, ability, vsSpell, armorPenalty(target));
 
   const mode: SaveRollMode = input.advantage ? (sm.reasons.disadvantage.length > 0 ? "normal" : "advantage") : sm.mode;
 

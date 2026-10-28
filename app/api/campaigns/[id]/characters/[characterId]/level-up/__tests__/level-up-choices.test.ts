@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import { prisma } from "@/lib/db";
+import { loadChoiceRefs } from "@/lib/server/characters/choices/load-refs";
 import { classLevelUp } from "@/lib/server/characters/class-level-up";
 import { refs, scores, sorcerer } from "@/lib/utils/characters/choices/__tests__/fixtures";
 import { DEFAULT_RULES } from "@/lib/utils/rules/defaults";
@@ -61,6 +62,14 @@ describe("level-up with choices", () => {
     vi.mocked(prisma.battleParticipant.findFirst).mockResolvedValueOnce({ id: "p" } as never);
 
     expect((await post({ classId: sorcerer.id, choices: { metamagic: [{ id: "quickened" }, { id: "twinned" }] } })).status).toBe(409);
+  });
+
+  it("loads the character's background so its choices resolve", async () => {
+    vi.mocked(prisma.character.findUnique).mockResolvedValue({ ...stored, backgroundId: "bg1" } as never);
+
+    await post({ classId: sorcerer.id, choices: { metamagic: [{ id: "quickened" }] } });
+
+    expect(vi.mocked(loadChoiceRefs).mock.calls[0][2]).toMatchObject({ backgroundIds: ["bg1"] });
   });
 
   it("422 when a pick is invalid", async () => {

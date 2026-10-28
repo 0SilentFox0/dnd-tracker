@@ -48,7 +48,7 @@ export const CLASS_FEATURE_OVERRIDES: Record<string, AbilityCore | FeatureOption
   "srd-2024_fighter_action-surge": { trigger: { event: "action" }, limits: { perRest: { rest: "short", uses: { scale: "action-surge" } } }, effects: [{ kind: "grantAction", extraActions: 2 }] },
   "srd-2024_fighter_second-wind": {
     trigger: { event: "bonusAction" },
-    limits: { perRest: { rest: "long", uses: { scale: "second-wind-uses" } } },
+    limits: { perRest: { rest: "long", uses: { scale: "second-wind-uses" }, shortRegain: 1 } },
     effects: [
       { kind: "heal", amount: "1d10", target: "self" },
       { kind: "heal", amount: { formula: "class_level" }, target: "self" },
@@ -59,6 +59,23 @@ export const CLASS_FEATURE_OVERRIDES: Record<string, AbilityCore | FeatureOption
   "srd-2024_fighter_champion_remarkable-athlete": passive([{ kind: "flag", flag: "checkAdvantage", skills: ["athletics"] }]),
   "srd-2024_fighter_champion_survivor": { trigger: { event: "turnStart" }, condition: { type: "hpBelow", who: "self", percent: 50 }, effects: [{ kind: "heal", amount: { formula: "5 + con_mod" }, target: "self" }] },
   "srd-2024_barbarian_danger-sense": passive([{ kind: "flag", flag: "saveAdvantage", abilities: ["dexterity"] }]),
+  // free in the SRD: the bonus action is refreshed, so use it before Rage; melee approximates "Strength attack rolls"
+  "srd-2024_barbarian_reckless-attack": {
+    trigger: { event: "bonusAction" },
+    effects: [
+      { kind: "flag", flag: "advantage", attackKind: "melee", duration: { rounds: 1 }, target: "self" },
+      { kind: "flag", flag: "advantageForAttackers", duration: { rounds: 1 }, target: "self" },
+      { kind: "grantAction", refreshBonusAction: true, target: "self" },
+    ],
+  },
+  // advantage lasts until the next turn start (not consumed by the first attack), "haven't moved" is not checked
+  "srd-2024_rogue_steady-aim": {
+    trigger: { event: "bonusAction" },
+    effects: [
+      { kind: "flag", flag: "advantage", attackKind: "all", duration: { rounds: 1 }, target: "self" },
+      { kind: "modifyStat", stat: "speed", percent: -100, duration: { rounds: 1 }, target: "self" },
+    ],
+  },
   "srd-2024_barbarian_unarmored-defense": passive([{ kind: "modifyStat", stat: "armor", flat: { formula: "max(0, con_mod)" } }], UNARMORED),
   "srd-2024_barbarian_fast-movement": passive([{ kind: "modifyStat", stat: "speed", flat: 10 }], NOT_HEAVY),
   "srd-2024_barbarian_primal-champion": passive([
@@ -96,6 +113,7 @@ export const CLASS_FEATURE_OVERRIDES: Record<string, AbilityCore | FeatureOption
   "srd-2024_rogue_sneak-attack": { trigger: { event: "hit", role: "attacker" }, condition: SNEAK, limits: { perTurn: 1 }, effects: [{ kind: "dealDamage", amount: { scale: "sneak-attack" }, target: "eventTarget" }] },
   "srd-2024_rogue_uncanny-dodge": { trigger: { event: "hit", role: "target" }, limits: { perRound: 1 }, effects: [{ kind: "heal", amount: { percentOf: "eventDamage", value: 50 }, target: "self" }] },
   "srd-2024_rogue_evasion": passive([{ kind: "flag", flag: "evasion" }]),
+  "srd-2024_rogue_cunning-action": passive([{ kind: "flag", flag: "cunningAction" }]),
   "srd-2024_monk_unarmored-defense": passive([{ kind: "modifyStat", stat: "armor", flat: { formula: "wis_mod" } }], UNARMORED_NO_SHIELD),
   "srd-2024_monk_unarmored-movement": passive([{ kind: "modifyStat", stat: "speed", flat: { scale: "unarmored-movement" } }], UNARMORED_NO_SHIELD),
   "srd-2024_monk_monks-focus": [

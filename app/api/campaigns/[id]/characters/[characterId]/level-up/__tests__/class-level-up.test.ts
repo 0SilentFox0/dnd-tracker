@@ -11,6 +11,8 @@ vi.mock("@/lib/cache/reference-data", () => ({
   getCachedClasses: vi.fn(async () => [
     { id: "c1", name: "Воїн", hitDie: 10, caster: "none", savingThrows: [], proficiencies: {}, skillChoices: {}, features: [], subclasses: [{ id: "s1", name: "Чемпіон", features: [] }, { id: "s2", name: "Майстер", features: [] }], subclassLevel: 3 },
     { id: "c3", name: "Бард", hitDie: 8, caster: "none", savingThrows: [], proficiencies: {}, skillChoices: {}, features: [], subclasses: [], subclassLevel: 3 },
+    { id: "e1", name: "Fighter", hitDie: 10, caster: "none", savingThrows: [], proficiencies: {}, skillChoices: {}, features: [], subclasses: [], subclassLevel: null },
+    { id: "e2", name: "Wizard", hitDie: 6, caster: "full", savingThrows: [], proficiencies: {}, skillChoices: {}, features: [], subclasses: [], subclassLevel: null },
     { id: "c2", name: "Маг", hitDie: 6, caster: "full", savingThrows: [], proficiencies: {}, skillChoices: {}, features: [], subclasses: [], subclassLevel: null },
   ]),
 }));
@@ -65,6 +67,22 @@ describe("POST level-up (classes)", () => {
     await post({ classId: "c2" });
 
     expect(written()).toMatchObject({ level: 3, classes: [{ classId: "c1", level: 2 }, { classId: "c2", level: 1 }] });
+  });
+
+  it("мультиклас SRD: без 13 у ключовій характеристиці — 422", async () => {
+    vi.mocked(prisma.character.findUnique).mockResolvedValue({ ...base, strength: 15, classes: [{ classId: "e1", level: 2 }] } as never);
+
+    const res = await post({ classId: "e2" });
+
+    expect(res.status).toBe(422);
+    expect((await res.json()).error).toContain("Wizard");
+    expect(prisma.character.update).not.toHaveBeenCalled();
+  });
+
+  it("мультиклас SRD: з 13 у обох — додається", async () => {
+    vi.mocked(prisma.character.findUnique).mockResolvedValue({ ...base, strength: 15, intelligence: 13, classes: [{ classId: "e1", level: 2 }] } as never);
+
+    expect((await post({ classId: "e2" })).status).toBe(200);
   });
 
   it("SUBCLASS_REQUIRED на рівні subclassLevel", async () => {

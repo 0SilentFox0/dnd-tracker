@@ -199,6 +199,10 @@ export async function createBattleParticipantFromCharacter(
       ? ABILITY_KEYS.filter((k) => (rawSaves as Record<string, unknown>)[k] === true)
       : [];
 
+  const startClass = resolvedClasses?.[0]?.class?.proficiencies;
+
+  const classProficiencies = startClass && (startClass.armor.length > 0 || startClass.weapons.length > 0) ? { armor: startClass.armor, weapons: startClass.weapons } : undefined;
+
   const rawSkills = character.skills;
 
   const dndSkillProficiencies = rawSkills && typeof rawSkills === "object" && !Array.isArray(rawSkills)
@@ -258,6 +262,7 @@ export async function createBattleParticipantFromCharacter(
       rangedMultiplier: archetype.ranged,
       magicMultiplier: archetype.magic,
       archetypeName: archetype.name,
+      ...(classProficiencies && { proficiencies: classProficiencies }),
       ...(saveProficiencies.length && { saveProficiencies }),
       ...(dndSkillProficiencies.length && { skillProficiencies: dndSkillProficiencies }),
     },

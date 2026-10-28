@@ -3,13 +3,14 @@ import { collectModifiers, statWithModifiers } from "@/lib/utils/abilities/engin
 import { findParticipant, isActive, withSelf } from "@/lib/utils/abilities/engine/core/participants";
 import { runAbilities } from "@/lib/utils/abilities/engine/core/run-abilities";
 import type { StaticEffect } from "@/lib/utils/abilities/schema";
-import { attackRollModifier } from "@/lib/utils/battle/attack/ability";
+import { attackAbilityFor, attackRollModifier } from "@/lib/utils/battle/attack/ability";
 import { INSPIRATION_LABEL } from "@/lib/utils/battle/attack/inspiration";
 import { attackSourceOf } from "@/lib/utils/battle/attack/source";
 import { attackKindOf } from "@/lib/utils/battle/common/attack-kind";
 import { rangeDisadvantageReasons } from "@/lib/utils/battle/grid/attack-reach";
 import { footprintDistance } from "@/lib/utils/battle/grid/geometry";
 import { cellsOf, isAdjacent, isOnMap } from "@/lib/utils/battle/grid/occupancy";
+import { ARMOR_PENALTY_LABEL, armorPenalty, armorPenaltyAffects, isWeaponProficient } from "@/lib/utils/battle/proficiency";
 import type { BattleAttack, BattleMapConfig, BattleParticipant } from "@/types/battle";
 
 export function calculateAttackBonus(
@@ -20,7 +21,7 @@ export function calculateAttackBonus(
 ): number {
   const statModifier = attackRollModifier(attacker, attack);
 
-  const base = (attack.attackBonus || 0) + statModifier + attacker.abilities.proficiencyBonus;
+  const base = (attack.attackBonus || 0) + statModifier + (isWeaponProficient(attacker, attack) ? attacker.abilities.proficiencyBonus : 0);
 
   return base + collectModifiers(withSelf(participants, attacker), attacker.basicInfo.id, { stat: "attackBonus", attackKind: attackKindOf(attack.type) }, extra).flat;
 }
@@ -85,6 +86,7 @@ export function rollModeReasons(attacker: BattleParticipant, attack: BattleAttac
     ...(opts.targetId ? labels(flagEntries(opts.targetId, "disadvantageForAttackers", opts.targetExtra).filter((e) => !(attackerSees && e.condition === "invisible"))) : []),
     ...(adjacent ? [] : proneDefense),
     ...frightenedLabels,
+    ...(armorPenalty(attacker) && armorPenaltyAffects(attackAbilityFor(attacker, attack)) ? [ARMOR_PENALTY_LABEL] : []),
     ...(target ? rangeDisadvantageReasons(opts.map, ps, attacker, attack, target) : []),
   ];
 

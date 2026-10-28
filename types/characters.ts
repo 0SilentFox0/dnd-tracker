@@ -307,7 +307,7 @@ export interface CharacterResources {
   /** classId → витрачено */
   hitDiceSpent?: Record<string, number>;
   /** ключ вміння (ResolvedAbility.key) → використання perRest */
-  charges?: Record<string, { used: number; rest: RestKindValue | null }>;
+  charges?: Record<string, { used: number; rest: RestKindValue | null; /** uses restored by a short rest even though `rest` is long */ regain?: number }>;
   exhaustion?: number;
   shortRestOpen?: boolean;
 }

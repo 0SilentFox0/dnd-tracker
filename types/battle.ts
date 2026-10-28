@@ -117,6 +117,8 @@ export interface BattleAttack {
   hand?: "off";
   /** +N до шкоди цією зброєю (магічний предмет) */
   damageBonus?: number;
+  /** Категорія зброї 5e (з опису предмета); відсутня — вважається володінням */
+  weaponCategory?: "simple" | "martial";
 }
 
 /**
@@ -178,6 +180,8 @@ export interface BattleParticipantAbilities {
   magicMultiplier?: number;
   archetypeName?: string;
   /** Характеристики з майстерністю рятівних кидків (лише герої, якщо є) */
+  /** Володіння бронею й зброєю класу 5e (вільні рядки SRD); відсутнє — без перевірок */
+  proficiencies?: { armor: string[]; weapons: string[] };
   saveProficiencies?: AbilityKey[];
   skillProficiencies?: DndSkill[];
   /** Таблиці кубиків героя з правил кампанії; відсутнє — типова прогресія */
