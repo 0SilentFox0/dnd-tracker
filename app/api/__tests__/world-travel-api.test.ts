@@ -23,7 +23,7 @@ vi.mock("@/lib/db", () => ({
   },
 }));
 
-const dm = { userId: "dm", isDM: true, campaign: { id: "c1", maxLevel: 20, members: [] } } as never;
+const dm = { userId: "dm", isDM: true, campaign: { id: "c1", maxLevel: 20, members: [], rules: { outOfCombat: { persistResources: false } } } } as never;
 
 const player = { userId: "u1", isDM: false, campaign: { id: "c1", maxLevel: 20, members: [] } } as never;
 

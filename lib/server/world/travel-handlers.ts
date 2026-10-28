@@ -3,9 +3,10 @@ import { NextResponse } from "next/server";
 import { API_ERRORS } from "@/lib/constants/api-errors";
 import { TRAVEL_LOG_LIMIT } from "@/lib/constants/world";
 import { prisma } from "@/lib/db";
-import { enterSchema, exitSchema, travelSchema } from "@/lib/schemas/world";
+import { enterSchema, exitSchema, restWorldSchema, travelSchema } from "@/lib/schemas/world";
 import { ownedMap, ownedMarker } from "@/lib/server/world/map-handlers";
-import { activePlayerHeroes, commitTravel, readPositions, readTravelLog, toDmHeroes } from "@/lib/server/world/travel-store";
+import { applyWorldRest } from "@/lib/server/world/rest";
+import { activePlayerHeroes, commitTravel, readPositions, readTravelLog, toDmHeroes, writeRestLog } from "@/lib/server/world/travel-store";
 import { publishWorldChanged } from "@/lib/server/world/world-events";
 import { requireCampaignAccess } from "@/lib/utils/api/api-auth";
 import { errorResponse } from "@/lib/utils/api/api-response";
@@ -45,6 +46,8 @@ export function travelHandler(req: Request, campaignId: string) {
 
     if (heroes instanceof NextResponse) return heroes;
 
+    await applyWorldRest(access, body.rest, body.characterIds);
+
     const marker = body.toMarkerId ? await prisma.worldMarker.findFirst({ where: { id: body.toMarkerId, mapId: map.id }, select: { id: true } }) : null;
 
     const positions = await readPositions(body.characterIds);
@@ -56,6 +59,38 @@ export function travelHandler(req: Request, campaignId: string) {
     publishWorldChanged(campaignId, map.id);
 
     return respond(heroes, plan, map.id);
+  });
+}
+
+export function restHandler(req: Request, campaignId: string) {
+  return withDM(campaignId, "world rest", async (access) => {
+    const body = await parseBody(restWorldSchema, req);
+
+    if (body instanceof NextResponse) return body;
+
+    const map = await ownedMap(campaignId, body.mapId);
+
+    if (map instanceof NextResponse) return map;
+
+    const heroes = await validHeroes(campaignId, body.characterIds);
+
+    if (heroes instanceof NextResponse) return heroes;
+
+    const positions = await readPositions(body.characterIds);
+
+    const first = positions.get(body.characterIds[0]);
+
+    if (body.characterIds.some((id) => positions.get(id)?.mapId !== map.id) || !first) return errorResponse(API_ERRORS.WORLD_HERO_INVALID, 400);
+
+    const { applied } = await applyWorldRest(access, body.kind, body.characterIds);
+
+    if (applied) {
+      await writeRestLog({ campaignId, userId: access.userId, mapId: map.id, kind: body.kind, characterIds: body.characterIds, at: { x: first.x, y: first.y } });
+
+      publishWorldChanged(campaignId, map.id);
+    }
+
+    return NextResponse.json({ ok: true, applied });
   });
 }
 
@@ -76,6 +111,8 @@ export function enterHandler(req: Request, campaignId: string) {
     const heroes = await validHeroes(campaignId, body.characterIds);
 
     if (heroes instanceof NextResponse) return heroes;
+
+    await applyWorldRest(access, body.rest, body.characterIds);
 
     const positions = await readPositions(body.characterIds);
 
@@ -116,6 +153,8 @@ export function exitHandler(req: Request, campaignId: string) {
     if (!dest) return errorResponse(API_ERRORS.WORLD_MAP_NOT_FOUND, 404);
 
     const plan = planExit({ map: { id: map.id, parentMarker }, characterIds: body.characterIds });
+
+    await applyWorldRest(access, body.rest, body.characterIds);
 
     await commitTravel({ campaignId, userId: access.userId, dest, plan, positions, rest: body.rest, toMarkerId: parentMarker.id, kind: "exit" });
 
