@@ -1,1 +1,8 @@
-{}
+{
+  "required": "This field is required",
+  "minLength": "At least {minimum, plural, one {# character} other {# characters}}",
+  "maxLength": "At most {maximum, plural, one {# character} other {# characters}}",
+  "email": "Invalid email address",
+  "invalid": "Invalid value",
+  "passwordMismatch": "Passwords do not match"
+}
