@@ -37,7 +37,7 @@ const fighter: GameClassData = {
   skillChoices: { count: 0, from: [] },
   caster: "none",
   spellcastingAbility: null,
-  features: [],
+  features: [{ level: 5, abilities: [{ id: "ea", name: "Extra Attack", description: "x" }] }],
   subclassLevel: 3,
   subclasses: [{ id: "champion", name: "Чемпіон", features: [] }],
 };
@@ -49,6 +49,17 @@ describe("ClassLevelUpDialog", () => {
   afterEach(() => {
     cleanup();
     submit.mockClear();
+  });
+
+  it("підсумок рівня: назви фіч і кількість виборів, порожній рівень без блоку", () => {
+    renderDialog(4);
+
+    expect(screen.getByText("Що дає рівень 5")).toBeTruthy();
+    expect(screen.getByText("Extra Attack")).toBeTruthy();
+    cleanup();
+    renderDialog(5);
+
+    expect(screen.queryByText(/Що дає рівень/)).toBeNull();
   });
 
   it("підклас обов'язковий, коли новий рівень досягає subclassLevel", async () => {
