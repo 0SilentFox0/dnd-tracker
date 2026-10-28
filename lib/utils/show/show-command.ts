@@ -65,6 +65,8 @@ function autoTrack(audio: BattleAudioState | null, trackId: string | undefined, 
 
 const samePuzzleSpec = (a?: PuzzleSpec, b?: PuzzleSpec) => a === b || (!!a && !!b && a.cut === b.cut && a.count === b.count && a.seed === b.seed && a.imageWidth === b.imageWidth && a.imageHeight === b.imageHeight);
 
+const puzzleKept = (prev: ShowState | null, slide: Slide) => (prev?.puzzle && prev.slide?.id === slide.id && samePuzzleSpec(prev.slide.puzzle, slide.puzzle) ? { puzzle: prev.puzzle } : null);
+
 const puzzleFor = (slide: Slide) => (slide.kind === "puzzle" && slide.puzzle ? { puzzle: initPuzzle(slide.puzzle) } : {});
 
 const slideAt = (deck: ShowDeck, index: number) => ({ slide: deck.slides[index], nextImageUrl: deck.slides[index + 1]?.imageUrl ?? null });
@@ -144,7 +146,7 @@ function moveTo(prev: ShowState | null, cmd: SlideCommand, ctx: Ctx): Outcome {
 
   const at = slideAt(deck, index);
 
-  return done({ deckId: deck.id, deckTitle: deck.title, ...at, audio: autoTrack(prev?.audio ?? null, at.slide.trackId, ctx), ...keepCover(prev), ...puzzleFor(at.slide), seq: (prev?.seq ?? 0) + 1 });
+  return done({ deckId: deck.id, deckTitle: deck.title, ...at, audio: autoTrack(prev?.audio ?? null, at.slide.trackId, ctx), ...keepCover(prev), ...(puzzleKept(prev, at.slide) ?? puzzleFor(at.slide)), seq: (prev?.seq ?? 0) + 1 });
 }
 
 function stopAudio(prev: ShowState | null, ctx: Ctx): BattleAudioState | null {
@@ -219,7 +221,5 @@ export function refreshShowSlide(prev: ShowState, deck: ShowDeck, ctx: { before:
 
   const { puzzle: _puzzle, ...rest } = prev;
 
-  const keepPuzzle = prev.puzzle && prev.slide?.id === slide.id && samePuzzleSpec(prev.slide.puzzle, slide.puzzle);
-
-  return { ...rest, deckTitle: deck.title, slide, nextImageUrl, ...(keepPuzzle ? { puzzle: prev.puzzle } : puzzleFor(slide)), seq: prev.seq + 1 };
+  return { ...rest, deckTitle: deck.title, slide, nextImageUrl, ...(puzzleKept(prev, slide) ?? puzzleFor(slide)), seq: prev.seq + 1 };
 }

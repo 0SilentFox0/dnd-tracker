@@ -86,8 +86,8 @@ describe("generatePuzzle", () => {
     expect(generatePuzzle(spec({ cut, count: 100000 })).length).toBeLessThanOrEqual(PUZZLE_MAX_PIECES);
   });
 
-  it.each(CUTS)("%s: count=7 і count=100 без дірок, id унікальні", (cut) => {
-    for (const count of [7, 100]) {
+  it.each(CUTS)("%s: count=7 і максимум без дірок, id унікальні", (cut) => {
+    for (const count of [7, PUZZLE_MAX_PIECES]) {
       const pieces = generatePuzzle(spec({ cut, count }));
 
       expect(Math.abs(pieces.length - count)).toBeLessThanOrEqual(Math.ceil(count * 0.2));
@@ -104,7 +104,7 @@ describe("generatePuzzle", () => {
   });
 
   it("екстремальна пропорція не перевищує максимум", () => {
-    expect(generatePuzzle(spec({ count: 100, imageWidth: 8000, imageHeight: 100 })).length).toBeLessThanOrEqual(PUZZLE_MAX_PIECES);
+    expect(generatePuzzle(spec({ count: PUZZLE_MAX_PIECES, imageWidth: 8000, imageHeight: 100 })).length).toBeLessThanOrEqual(PUZZLE_MAX_PIECES);
   });
 
   it("pieceSize — середня сторона bbox", () => {

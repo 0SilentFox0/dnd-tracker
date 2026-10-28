@@ -37,7 +37,7 @@ export const SLIDE_CROSSFADE_MS = 600;
 
 export const PUZZLE_MIN_PIECES = 4;
 
-export const PUZZLE_MAX_PIECES = 100;
+export const PUZZLE_MAX_PIECES = 60;
 
 export const PUZZLE_HOLD_MS = 30_000;
 

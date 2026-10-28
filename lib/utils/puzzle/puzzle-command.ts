@@ -21,14 +21,16 @@ export function initPuzzle(spec: PuzzleSpec): PuzzleState {
 
   const state: Record<string, PuzzlePieceState> = {};
 
-  for (const { p } of order) state[p.id] = { x: p.home.x, y: p.home.y, rot: Math.floor(rng() * 8) * ROT_STEP, place: "tray", correct: false };
+  for (const { p } of order) state[p.id] = { x: Math.round(p.home.x), y: Math.round(p.home.y), rot: Math.floor(rng() * 8) * ROT_STEP, place: "tray", correct: false };
 
   return { pieces: state, solved: false };
 }
 
 const normRot = (rot: number) => (((Math.round(rot / ROT_STEP) * ROT_STEP) % 360) + 360) % 360;
 
-const clamp = (v: number, max: number) => Math.min(Math.max(v, 0), max);
+const clamp = (v: number, max: number) => Math.round(Math.min(Math.max(v, 0), max));
+
+const has = (puzzle: PuzzleState, id: string) => Object.hasOwn(puzzle.pieces, id);
 
 const fail = (message: string): Result<ShowState> => ({ ok: false, message });
 
@@ -67,14 +69,20 @@ export function applyPuzzleCommand(prev: ShowState | null, cmd: PuzzleCommand, c
 
   const { user, now } = ctx;
 
-  if (cmd.action === "puzzleReset" || cmd.action === "puzzleRelease") {
+  const hidden = prev.curtain || prev.world || prev.battle;
+
+  const dmOnly = cmd.action === "puzzleReset" || cmd.action === "puzzleRelease";
+
+  if (hidden && !(dmOnly && user.isDM)) return fail(API_ERRORS.PUZZLE_NOT_ACTIVE);
+
+  if (dmOnly) {
     if (!user.isDM) return fail(API_ERRORS.FORBIDDEN);
 
     if (cmd.action === "puzzleReset") return commit(prev, initPuzzle(spec));
 
     const current = withoutExpired(prev.puzzle, now);
 
-    if (cmd.pieceId && !current.pieces[cmd.pieceId]) return fail(API_ERRORS.PUZZLE_PIECE_NOT_FOUND);
+    if (cmd.pieceId && !has(current, cmd.pieceId)) return fail(API_ERRORS.PUZZLE_PIECE_NOT_FOUND);
 
     const ids = cmd.pieceId ? [cmd.pieceId] : Object.keys(current.pieces);
 
@@ -86,16 +94,20 @@ export function applyPuzzleCommand(prev: ShowState | null, cmd: PuzzleCommand, c
 
   const puzzle = withoutExpired(prev.puzzle, now);
 
-  const piece = puzzle.pieces[cmd.pieceId];
+  if (!has(puzzle, cmd.pieceId)) return fail(API_ERRORS.PUZZLE_PIECE_NOT_FOUND);
 
-  if (!piece) return fail(API_ERRORS.PUZZLE_PIECE_NOT_FOUND);
+  const piece = puzzle.pieces[cmd.pieceId];
 
   const mine = piece.holder?.userId === user.id;
 
   if (cmd.action === "puzzleGrab") {
     if (piece.holder && !mine) return fail(API_ERRORS.PUZZLE_PIECE_TAKEN);
 
-    return commit(prev, patchPiece(puzzle, cmd.pieceId, { correct: false, holder: { userId: user.id, name: user.name, until: now + PUZZLE_HOLD_MS } }));
+    const others = Object.entries(puzzle.pieces).filter(([id, p]) => id !== cmd.pieceId && p.holder?.userId === user.id);
+
+    const free = others.reduce((acc, [id]) => patchPiece(acc, id, { place: "tray", correct: false }, ["holder"]), puzzle);
+
+    return commit(prev, patchPiece(free, cmd.pieceId, { correct: false, holder: { userId: user.id, name: user.name, until: now + PUZZLE_HOLD_MS } }));
   }
 
   if (!piece.holder || !mine) return fail(API_ERRORS.PUZZLE_NOT_HOLDER);
@@ -120,7 +132,7 @@ export function applyPuzzleCommand(prev: ShowState | null, cmd: PuzzleCommand, c
 
       const correct = rot === 0 && Math.hypot(x - home.x, y - home.y) <= PUZZLE_SNAP * pieceSize(pieces);
 
-      return commit(prev, patchPiece(puzzle, cmd.pieceId, correct ? { x: home.x, y: home.y, rot, place: "board", correct } : { x, y, rot, place: "board", correct }, ["holder"]));
+      return commit(prev, patchPiece(puzzle, cmd.pieceId, correct ? { x: Math.round(home.x), y: Math.round(home.y), rot, place: "board", correct } : { x, y, rot, place: "board", correct }, ["holder"]));
     }
   }
 }

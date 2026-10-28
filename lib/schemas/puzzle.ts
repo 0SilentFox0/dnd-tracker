@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-const pieceId = z.string().min(1).max(32);
+const pieceId = z.string().regex(/^p\d{1,3}(-\d{1,3})?$/);
 
 export const puzzleCommandSchema = z.discriminatedUnion("action", [
   z.object({ action: z.literal("puzzleGrab"), pieceId }),

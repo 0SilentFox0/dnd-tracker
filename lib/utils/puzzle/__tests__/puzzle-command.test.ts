@@ -4,7 +4,7 @@ import { generatePuzzle, pieceSize } from "../generate";
 import { applyPuzzleCommand, initPuzzle } from "../puzzle-command";
 
 import { API_ERRORS } from "@/lib/constants/api-errors";
-import { PUZZLE_HOLD_MS, PUZZLE_SNAP } from "@/lib/constants/show";
+import { PUZZLE_HOLD_MS, PUZZLE_MAX_PIECES, PUZZLE_SNAP } from "@/lib/constants/show";
 import type { PuzzleCommand, PuzzleSpec, ShowState } from "@/types/show";
 
 const spec: PuzzleSpec = { cut: "classic", count: 6, seed: 3, imageWidth: 1200, imageHeight: 800 };
@@ -40,6 +40,26 @@ const ok = (r: ReturnType<typeof run>) => {
 };
 
 const home0 = pieces[0].home;
+
+describe("payload size", () => {
+  it("ShowState with the maximum pieces and several holds stays under 6 KB", () => {
+    const big: PuzzleSpec = { cut: "straight", count: PUZZLE_MAX_PIECES, seed: 5, imageWidth: 4000, imageHeight: 3000 };
+
+    const all = generatePuzzle(big);
+
+    let show: ShowState = { ...base(), slide: { id: "slide-0001", imageUrl: "https://a/1.webp", kind: "puzzle", puzzle: big }, puzzle: initPuzzle(big) };
+
+    all.forEach((p, i) => {
+      const user = { id: `${i % 5}0000000-0000-4000-8000-000000000000`, name: "Гравець Імена", isDM: false };
+
+      show = ok(run(show, { action: "puzzleGrab", pieceId: p.id }, user));
+
+      if (i < all.length - 4) show = ok(run(show, { action: "puzzleDrop", pieceId: p.id, x: 3999.123, y: 2999.456, rot: 315 }, user));
+    });
+
+    expect(JSON.stringify(show).length).toBeLessThan(6 * 1024);
+  });
+});
 
 describe("initPuzzle", () => {
   it("is deterministic, everything in the tray, angles multiples of 45", () => {
@@ -102,7 +122,7 @@ describe("applyPuzzleCommand", () => {
 
     const dropped = ok(run(held, { action: "puzzleDrop", pieceId: id0, x: home0.x + near, y: home0.y, rot: 0 }));
 
-    expect(dropped.puzzle?.pieces[id0]).toEqual({ x: home0.x, y: home0.y, rot: 0, place: "board", correct: true });
+    expect(dropped.puzzle?.pieces[id0]).toEqual({ x: Math.round(home0.x), y: Math.round(home0.y), rot: 0, place: "board", correct: true });
     expect(dropped.puzzle?.pieces[id0].holder).toBeUndefined();
   });
 
@@ -181,5 +201,49 @@ describe("applyPuzzleCommand", () => {
 
     expect(reset.puzzle).toEqual(initPuzzle(spec));
     expect(reset.seq).toBe(held.seq + 1);
+  });
+
+  it("rounds coordinates to integers", () => {
+    const held = ok(run(base(), { action: "puzzleGrab", pieceId: id0 }));
+
+    const dropped = ok(run(held, { action: "puzzleDrop", pieceId: id0, x: 10.6, y: 20.4, rot: 0 }));
+
+    expect(dropped.puzzle?.pieces[id0]).toMatchObject({ x: 11, y: 20 });
+
+    for (const p of Object.values(initPuzzle(spec).pieces)) {
+      expect(Number.isInteger(p.x)).toBe(true);
+      expect(Number.isInteger(p.y)).toBe(true);
+    }
+  });
+
+  it("a player holds one piece: grabbing another returns the previous to the tray", () => {
+    let show = ok(run(base(), { action: "puzzleGrab", pieceId: id0 }));
+
+    show = ok(run(show, { action: "puzzleDrop", pieceId: id0, x: 10, y: 10, rot: 90 }));
+    show = ok(run(show, { action: "puzzleGrab", pieceId: id0 }));
+    show = ok(run(show, { action: "puzzleGrab", pieceId: id1 }));
+
+    expect(show.puzzle?.pieces[id0]).toMatchObject({ place: "tray", correct: false });
+    expect(show.puzzle?.pieces[id0].holder).toBeUndefined();
+    expect(show.puzzle?.pieces[id1].holder?.userId).toBe("u1");
+    expect(ok(run(show, { action: "puzzleGrab", pieceId: id0 }, bob)).puzzle?.pieces[id0].holder?.userId).toBe("u2");
+  });
+
+  it("prototype keys are not pieces", () => {
+    for (const pieceId of ["constructor", "__proto__", "toString"]) {
+      expect(run(base(), { action: "puzzleGrab", pieceId })).toEqual({ ok: false, message: API_ERRORS.PUZZLE_PIECE_NOT_FOUND });
+    }
+
+    expect(run(base(), { action: "puzzleRelease", pieceId: "constructor" }, dm)).toEqual({ ok: false, message: API_ERRORS.PUZZLE_PIECE_NOT_FOUND });
+  });
+
+  it("player commands are rejected while the puzzle is hidden; DM release/reset still work", () => {
+    for (const hidden of [{ curtain: true }, { world: { mapId: "m" } }, { battle: { id: "b" } }]) {
+      const show = { ...base(), ...hidden } as ShowState;
+
+      expect(run(show, { action: "puzzleGrab", pieceId: id0 })).toEqual({ ok: false, message: API_ERRORS.PUZZLE_NOT_ACTIVE });
+      expect(run(show, { action: "puzzleRelease" }, dm).ok).toBe(true);
+      expect(run(show, { action: "puzzleReset" }, dm).ok).toBe(true);
+    }
   });
 });
