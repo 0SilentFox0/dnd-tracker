@@ -2,6 +2,8 @@ import { z } from "zod";
 
 import { DEFAULT_RULES } from "./defaults";
 
+import { isRecord } from "@/lib/utils/common/is-record";
+
 const level = z.string().regex(/^([1-9]|1\d|20)$/);
 
 const DiceTable = z.record(level, z.string().regex(/^\d+d\d+([+-]\d+d\d+)*$/));
@@ -67,7 +69,7 @@ export const RulesetSchema = z
 export type Ruleset = z.infer<typeof RulesetSchema>;
 
 export function parseRules(raw: unknown): Ruleset {
-  const obj = raw && typeof raw === "object" && !Array.isArray(raw) ? (raw as Record<string, unknown>) : {};
+  const obj = isRecord(raw) ? raw : {};
 
   return Object.fromEntries(
     (Object.keys(sections) as (keyof Sections)[]).map((k) => {

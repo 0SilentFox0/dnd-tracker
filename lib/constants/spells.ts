@@ -58,6 +58,7 @@ export const TEMPLATE_SHAPE_LABELS = {
   cube: "Куб",
   cone: "Конус",
   line: "Лінія",
+  cross: "Хрест",
 } as const;
 
 export const SPELL_SAVE_ON_SUCCESS_LABELS = {

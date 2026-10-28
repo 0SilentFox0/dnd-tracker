@@ -1,0 +1,12 @@
+ALTER TABLE "campaigns" ADD COLUMN "kind" TEXT NOT NULL DEFAULT 'campaign', ADD COLUMN "visibility" TEXT NOT NULL DEFAULT 'private', ADD COLUMN "createdFromId" TEXT;
+CREATE INDEX "campaigns_kind_visibility_idx" ON "campaigns"("kind", "visibility");
+ALTER TABLE "spell_groups" ADD COLUMN "sourceId" TEXT, ADD COLUMN "sourceHash" TEXT;
+ALTER TABLE "races" ADD COLUMN "sourceId" TEXT, ADD COLUMN "sourceHash" TEXT;
+ALTER TABLE "units" ADD COLUMN "sourceId" TEXT, ADD COLUMN "sourceHash" TEXT;
+ALTER TABLE "spells" ADD COLUMN "sourceId" TEXT, ADD COLUMN "sourceHash" TEXT;
+ALTER TABLE "main_skills" ADD COLUMN "sourceId" TEXT, ADD COLUMN "sourceHash" TEXT;
+ALTER TABLE "skills" ADD COLUMN "sourceId" TEXT, ADD COLUMN "sourceHash" TEXT;
+ALTER TABLE "skill_trees" ADD COLUMN "sourceId" TEXT, ADD COLUMN "sourceHash" TEXT;
+ALTER TABLE "artifact_sets" ADD COLUMN "sourceId" TEXT, ADD COLUMN "sourceHash" TEXT;
+ALTER TABLE "artifacts" ADD COLUMN "sourceId" TEXT, ADD COLUMN "sourceHash" TEXT;
+ALTER TABLE "campaign_tracks" ADD COLUMN "sourceId" TEXT, ADD COLUMN "sourceHash" TEXT;

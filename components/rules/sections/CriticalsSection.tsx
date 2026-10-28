@@ -1,4 +1,5 @@
 import { NumberField } from "../NumberField";
+import { RulesSection } from "../RulesSection";
 
 import { HudSection } from "@/components/hud/form";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -6,7 +7,6 @@ import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { CRITICAL_FAIL_EFFECTS, CRITICAL_SUCCESS_EFFECTS, type CriticalEffect } from "@/lib/constants/critical-effects";
 import type { RulesFormState } from "@/lib/hooks/campaigns";
-import { MECHANIC_REGISTRY } from "@/lib/utils/rules";
 
 type Criticals = RulesFormState["data"]["criticals"];
 
@@ -51,8 +51,7 @@ export function CriticalsSection({ form }: { form: RulesFormState }) {
 
   return (
     <>
-      <HudSection title={MECHANIC_REGISTRY.criticals.label}>
-        <p className="mb-3 text-sm text-hud-muted">{MECHANIC_REGISTRY.criticals.description}</p>
+      <RulesSection mechanic="criticals">
         <div className="grid gap-3 sm:grid-cols-2">
           <NumberField label="Крит на (d20 ≥)" value={c.critOn} range={[2, 20]} onCommit={(critOn) => set({ critOn })} />
           <NumberField label="Провал на (d20 ≤)" value={c.fumbleOn} range={[0, 5]} description="0 — без провалу" onCommit={(fumbleOn) => set({ fumbleOn })} />
@@ -64,7 +63,7 @@ export function CriticalsSection({ form }: { form: RulesFormState }) {
         <p className="mt-2 text-xs text-hud-muted">
           Подвоєння шкоди при криті — це ефект таблиці (“{DOUBLE_DAMAGE_NAME}”). Якщо вимкнути таблиці або цей ефект, крит лише позначається, без додаткової шкоди.
         </p>
-      </HudSection>
+      </RulesSection>
       <EffectList title="Ефекти криту" prefix="rules-crit-success" effects={CRITICAL_SUCCESS_EFFECTS} disabled={c.disabledSuccess} locked={!c.effects} onChange={(disabledSuccess) => set({ disabledSuccess })} />
       <EffectList title="Ефекти провалу" prefix="rules-crit-fail" effects={CRITICAL_FAIL_EFFECTS} disabled={c.disabledFail} locked={!c.effects} onChange={(disabledFail) => set({ disabledFail })} />
     </>

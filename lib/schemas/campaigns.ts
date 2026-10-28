@@ -1,12 +1,13 @@
 import { z } from "zod";
 
-import { CampaignStatus } from "@/lib/constants/campaigns";
+import { CampaignStatus, CampaignVisibility } from "@/lib/constants/campaigns";
 
 export const createCampaignSchema = z.object({
   name: z.string().min(1).max(100),
   description: z.string().optional(),
-  maxLevel: z.number().min(1).max(30).default(20),
-  allowPlayerEdit: z.boolean().default(true),
+  maxLevel: z.number().min(1).max(30).optional(),
+  allowPlayerEdit: z.boolean().optional(),
+  templateId: z.string().min(1).optional(),
 });
 
 export const updateCampaignSchema = z.object({
@@ -15,6 +16,7 @@ export const updateCampaignSchema = z.object({
   maxLevel: z.number().min(1).max(30).optional(),
   allowPlayerEdit: z.boolean().optional(),
   status: z.enum([CampaignStatus.ACTIVE, CampaignStatus.ARCHIVED]).optional(),
+  visibility: z.enum([CampaignVisibility.PRIVATE, CampaignVisibility.OFFICIAL]).optional(),
 });
 
 export const joinCampaignSchema = z.object({

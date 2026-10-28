@@ -550,7 +550,7 @@ describe("spell map templates and ranges", () => {
     ["fireball", "circle", 10, 120],
     ["circle-of-winter", "circle", 10, 60],
     ["wasp-swarm", "circle", 5, 60],
-    ["stone-spikes", "line", 30, undefined],
+    ["stone-spikes", "cross", 5, 60],
     ["entangle", "cube", 15, 60],
     ["meteor-shower", "circle", 20, 120],
     ["earthquake", "circle", 20, 60],

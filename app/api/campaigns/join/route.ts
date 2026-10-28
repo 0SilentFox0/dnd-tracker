@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 
 import { invalidateCampaignLists } from "@/lib/cache/campaign-list";
 import { API_ERRORS } from "@/lib/constants/api-errors";
-import { CampaignRole, CampaignStatus } from "@/lib/constants/campaigns";
+import { CampaignKind, CampaignRole, CampaignStatus } from "@/lib/constants/campaigns";
 import { prisma } from "@/lib/db";
 import { joinCampaignSchema } from "@/lib/schemas";
 import { ensureDbUser, PUBLIC_USER_SELECT } from "@/lib/server/users/db-user";
@@ -30,10 +30,15 @@ export async function POST(request: Request) {
     const campaign = await prisma.campaign.findUnique({
       where: { inviteCode },
       include: { members: { select: { userId: true } } },
+      omit: { aiInstructions: true },
     });
 
     if (!campaign) {
       return errorResponse(API_ERRORS.CAMPAIGN_NOT_FOUND, 404);
+    }
+
+    if (campaign.kind === CampaignKind.TEMPLATE) {
+      return errorResponse(API_ERRORS.TEMPLATE_NOT_JOINABLE, 403);
     }
 
     if (campaign.status !== CampaignStatus.ACTIVE) {
@@ -53,7 +58,7 @@ export async function POST(request: Request) {
         role: CampaignRole.PLAYER,
       },
       include: {
-        campaign: true,
+        campaign: { omit: { aiInstructions: true } },
         user: { select: PUBLIC_USER_SELECT },
       },
     });

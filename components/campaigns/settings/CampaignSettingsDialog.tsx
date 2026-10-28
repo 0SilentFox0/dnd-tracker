@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 
+import { SaveAsTemplateDialog } from "@/components/campaigns/templates/SaveAsTemplateDialog";
 import { HudSection } from "@/components/hud/form";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -10,7 +11,7 @@ import { LabeledInput } from "@/components/ui/labeled-input";
 import { ResponsiveDialog } from "@/components/ui/responsive-dialog";
 import { Textarea } from "@/components/ui/textarea";
 import { CampaignStatus } from "@/lib/constants/campaigns";
-import { useDeleteCampaign, useUpdateCampaign } from "@/lib/hooks/campaigns";
+import { useCampaignExportUrl, useDeleteCampaign, useUpdateCampaign } from "@/lib/hooks/campaigns";
 import { useConfirm } from "@/lib/hooks/common";
 import type { CampaignSettings } from "@/types/campaigns";
 
@@ -33,6 +34,10 @@ export function CampaignSettingsDialog({ campaignId, campaign, open, onOpenChang
   const [fields, setFields] = useState(() => toFields(campaign));
 
   const [error, setError] = useState<string | null>(null);
+
+  const [templateOpen, setTemplateOpen] = useState(false);
+
+  const exportUrl = useCampaignExportUrl(campaignId);
 
   const isSaving = update.isPending || remove.isPending;
 
@@ -66,6 +71,7 @@ export function CampaignSettingsDialog({ campaignId, campaign, open, onOpenChang
   };
 
   return (
+    <>
     <ResponsiveDialog
       open={open}
       onOpenChange={onOpenChange}
@@ -117,6 +123,25 @@ export function CampaignSettingsDialog({ campaignId, campaign, open, onOpenChang
           </div>
         </div>
       </HudSection>
+      <HudSection title="Шаблони">
+        <div className="flex flex-wrap gap-2">
+          <Button
+            variant="outline"
+            onClick={() => {
+              onOpenChange(false);
+              setTemplateOpen(true);
+            }}
+            disabled={isSaving}
+          >
+            Зберегти як шаблон
+          </Button>
+          <Button variant="outline" asChild>
+            <a href={exportUrl} download>
+              Експортувати в JSON
+            </a>
+          </Button>
+        </div>
+      </HudSection>
       <HudSection title="Небезпечна зона">
         <Button variant="destructive" onClick={handleDelete} disabled={isSaving}>
           {remove.isPending ? "Видалення..." : "Видалити кампанію"}
@@ -128,5 +153,7 @@ export function CampaignSettingsDialog({ campaignId, campaign, open, onOpenChang
         </p>
       )}
     </ResponsiveDialog>
+    <SaveAsTemplateDialog campaignId={campaignId} defaultName={`${campaign.name} (шаблон)`} open={templateOpen} onOpenChange={setTemplateOpen} />
+    </>
   );
 }

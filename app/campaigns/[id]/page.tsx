@@ -1,15 +1,17 @@
-import { BookOpen, Gem, GitBranch, Images, Music, ScrollText, Shield, Skull, Sparkles, Swords, User, Users } from "lucide-react";
+import { BookOpen, Gem, GitBranch, Images, Info, Music, Scale, ScrollText, Shield, Skull, Sparkles, Swords, User, Users, Wand2 } from "lucide-react";
 
 import { CampaignMembersList } from "@/components/campaigns/members/CampaignMembersList";
 import { CampaignSettingsButton } from "@/components/campaigns/settings/CampaignSettingsButton";
 import { InviteCodeDisplay } from "@/components/campaigns/settings/InviteCodeDisplay";
 import { HudSection } from "@/components/hud/form";
 import { HudPage, HudPageHeader, HudPanel, HudTile } from "@/components/hud/page";
-import { CampaignStatus } from "@/lib/constants/campaigns";
+import { CampaignKind, CampaignStatus } from "@/lib/constants/campaigns";
 import { requireCampaignWithMembers } from "@/lib/server/campaigns/access";
 import { pluralUk } from "@/lib/utils/common/plural";
 
 const TILES_GRID = "grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-3";
+
+const LIBRARY_PATHS = new Set(["spells", "skills", "skill-trees", "races", "units", "artifacts", "music"]);
 
 const LABEL = "text-sm text-hud-muted";
 
@@ -22,7 +24,9 @@ export default async function CampaignDetailPage({
 
   const { campaign, isDM, authUser: user } = await requireCampaignWithMembers(id);
 
-  const dmTiles = [
+  const isTemplate = campaign.kind === CampaignKind.TEMPLATE;
+
+  const allDmTiles = [
     { path: "scenario", icon: ScrollText, title: "Сценарій", subtitle: "Сцени, нотатки майстра й біографії героїв" },
     { path: "characters", icon: Users, title: "Персонажі", subtitle: "Управління персонажами гравців" },
     { path: "units", icon: Skull, title: "NPC Юніти", subtitle: "Управління мобами та юнітами" },
@@ -36,6 +40,13 @@ export default async function CampaignDetailPage({
     { path: "show", icon: Images, title: "Показ сцен", subtitle: "Набори слайдів із музикою для гравців" },
   ];
 
+  const libraryExtras = [
+    { path: "spell-groups", icon: Wand2, title: "Школи магії", subtitle: "Групи заклинань і школи" },
+    { path: "rules", icon: Scale, title: "Правила", subtitle: "Правила кампанії" },
+  ];
+
+  const dmTiles = isTemplate ? [...allDmTiles.filter((t) => LIBRARY_PATHS.has(t.path)), ...libraryExtras] : allDmTiles;
+
   return (
     <HudPage>
       <HudPageHeader
@@ -43,6 +54,13 @@ export default async function CampaignDetailPage({
         subtitle={campaign.description}
         actions={<span className="self-center break-all text-sm text-hud-muted">{user.email}</span>}
       />
+
+      {isTemplate && (
+        <HudPanel className="flex items-start gap-2 border-hud-gold/60">
+          <Info className="mt-0.5 size-4 shrink-0 text-hud-gold" />
+          <p className="text-sm text-hud-bone">Це шаблон: зміни потрапляють у нові кампанії, створені з нього; наявні кампанії не змінюються.</p>
+        </HudPanel>
+      )}
 
       <HudPanel>
         <HudSection
@@ -69,10 +87,12 @@ export default async function CampaignDetailPage({
               <p className={LABEL}>Макс. рівень</p>
               <p className="text-lg font-semibold text-hud-ink">{campaign.maxLevel}</p>
             </div>
-            <div>
-              <p className={`${LABEL} mb-2`}>Код запрошення</p>
-              <InviteCodeDisplay inviteCode={campaign.inviteCode} />
-            </div>
+            {!isTemplate && (
+              <div>
+                <p className={`${LABEL} mb-2`}>Код запрошення</p>
+                <InviteCodeDisplay inviteCode={campaign.inviteCode} />
+              </div>
+            )}
             <div>
               <p className={LABEL}>Статус</p>
               <span className="inline-block rounded-full px-2 text-xs text-hud-bone shadow-[inset_0_0_0_1px_var(--color-hud-line)]">
@@ -83,6 +103,7 @@ export default async function CampaignDetailPage({
         </HudSection>
       </HudPanel>
 
+      {!isTemplate && (
       <HudPanel>
         <HudSection title="Учасники">
           <p className={`${LABEL} mb-2`}>
@@ -91,19 +112,22 @@ export default async function CampaignDetailPage({
           <CampaignMembersList campaignId={id} members={campaign.members} isDM={isDM} />
         </HudSection>
       </HudPanel>
+      )}
 
       <div className={TILES_GRID}>
-        <HudTile
-          href={`/campaigns/${id}/info`}
-          icon={<BookOpen className="size-5" />}
-          title="Інформація — Довідник"
-          subtitle="Скіли, заклинання й артефакти: як діють і в кого що."
-        />
+        {!isTemplate && (
+          <HudTile
+            href={`/campaigns/${id}/info`}
+            icon={<BookOpen className="size-5" />}
+            title="Інформація — Довідник"
+            subtitle="Скіли, заклинання й артефакти: як діють і в кого що."
+          />
+        )}
         {isDM &&
           dmTiles.map(({ path, icon: Icon, title, subtitle }) => (
             <HudTile key={path} href={`/campaigns/${id}/dm/${path}`} icon={<Icon className="size-5" />} title={title} subtitle={subtitle} />
           ))}
-        {!isDM && (
+        {!isDM && !isTemplate && (
           <>
             <HudTile href={`/campaigns/${id}/character`} icon={<User className="size-5" />} title="Мій персонаж" subtitle="Перегляд та редагування персонажа" />
             <HudTile href={`/campaigns/${id}/show`} icon={<Images className="size-5" />} title="Показ" subtitle="Слайди й музику від ДМ під час гри" />

@@ -2,11 +2,6 @@ import { collectModifiers } from "@/lib/utils/abilities/engine/core/collect-modi
 import { withSelf } from "@/lib/utils/abilities/engine/core/participants";
 import { BattleParticipant } from "@/types/battle";
 
-/**
- * Розраховує ініціативу
- * @param participant - учасник бою
- * @returns розрахована ініціатива
- */
 export function calculateInitiative(participant: BattleParticipant, participants: BattleParticipant[] = [participant]): number {
   return participant.abilities.baseInitiative + collectModifiers(withSelf(participants, participant), participant.basicInfo.id, { stat: "initiative" }).flat;
 }

@@ -3,13 +3,14 @@
 import { useRef } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Home, LogOut, Menu, User } from "lucide-react";
+import { Home, LogOut, Menu, Sparkles, User } from "lucide-react";
 
 import { JoinBattleButton } from "@/components/campaigns/JoinBattleButton";
 import { WatchShowButton } from "@/components/campaigns/WatchShowButton";
 import { AbbreviationsInfoDialog } from "@/components/common/AbbreviationsInfoDialog";
 import { HUD_SURFACE } from "@/components/hud";
 import { Breadcrumbs } from "@/components/layout/Breadcrumbs";
+import { isDmLinkVisible } from "@/components/layout/dm-menu";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -19,6 +20,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { HudPortalClassProvider } from "@/components/ui/portal-class";
+import { useIsTemplateCampaign } from "@/lib/hooks/campaigns";
 import { cn } from "@/lib/utils";
 
 const BATTLE_PATH = /^\/campaigns\/[^/]+\/battles\/[^/]+$/;
@@ -27,6 +29,8 @@ export function Header({ email }: { email: string | null }) {
   const pathname = usePathname();
 
   const signOutForm = useRef<HTMLFormElement>(null);
+
+  const isTemplate = useIsTemplateCampaign(pathname?.includes("/dm/") ? pathname.match(/^\/campaigns\/([^/]+)/)?.[1] : undefined);
 
   if (
     pathname?.startsWith("/sign-in") ||
@@ -79,16 +83,20 @@ export function Header({ email }: { email: string | null }) {
                 {isDMPage && (
                   <>
                     <DropdownMenuSeparator />
-                    <DropdownMenuItem asChild>
-                      <Link href={`/campaigns/${campaignId}/dm/characters`}>
-                        Персонажі
-                      </Link>
-                    </DropdownMenuItem>
-                    <DropdownMenuItem asChild>
-                      <Link href={`/campaigns/${campaignId}/dm/characters?type=npc_hero`}>
-                        NPC Герої
-                      </Link>
-                    </DropdownMenuItem>
+                    {isDmLinkVisible("characters", isTemplate) && (
+                      <DropdownMenuItem asChild>
+                        <Link href={`/campaigns/${campaignId}/dm/characters`}>
+                          Персонажі
+                        </Link>
+                      </DropdownMenuItem>
+                    )}
+                    {isDmLinkVisible("characters", isTemplate) && (
+                      <DropdownMenuItem asChild>
+                        <Link href={`/campaigns/${campaignId}/dm/characters?type=npc_hero`}>
+                          NPC Герої
+                        </Link>
+                      </DropdownMenuItem>
+                    )}
                     <DropdownMenuItem asChild>
                       <Link href={`/campaigns/${campaignId}/dm/units`}>
                         NPC Юніти
@@ -119,21 +127,32 @@ export function Header({ email }: { email: string | null }) {
                         Сети артефактів
                       </Link>
                     </DropdownMenuItem>
-                    <DropdownMenuItem asChild>
-                      <Link href={`/campaigns/${campaignId}/dm/battles`}>
-                        Сцени Боїв
-                      </Link>
-                    </DropdownMenuItem>
+                    {isDmLinkVisible("battles", isTemplate) && (
+                      <DropdownMenuItem asChild>
+                        <Link href={`/campaigns/${campaignId}/dm/battles`}>
+                          Сцени Боїв
+                        </Link>
+                      </DropdownMenuItem>
+                    )}
                     <DropdownMenuItem asChild>
                       <Link href={`/campaigns/${campaignId}/dm/music`}>
                         Музика
                       </Link>
                     </DropdownMenuItem>
-                    <DropdownMenuItem asChild>
-                      <Link href={`/campaigns/${campaignId}/dm/scenario`}>
-                        Сценарій
-                      </Link>
-                    </DropdownMenuItem>
+                    {isDmLinkVisible("scenario", isTemplate) && (
+                      <DropdownMenuItem asChild>
+                        <Link href={`/campaigns/${campaignId}/dm/scenario`}>
+                          Сценарій
+                        </Link>
+                      </DropdownMenuItem>
+                    )}
+                    {isDmLinkVisible("ai", isTemplate) && (
+                      <DropdownMenuItem asChild>
+                        <Link href={`/campaigns/${campaignId}/dm/ai`}>
+                          AI і API
+                        </Link>
+                      </DropdownMenuItem>
+                    )}
                   </>
                 )}
                 {isPlayerPage && (
@@ -176,6 +195,12 @@ export function Header({ email }: { email: string | null }) {
                   <DropdownMenuSeparator />
                 </>
               )}
+              <DropdownMenuItem asChild>
+                <Link href="/settings/ai">
+                  <Sparkles className="h-4 w-4 mr-2" />
+                  AI-ключі
+                </Link>
+              </DropdownMenuItem>
               <DropdownMenuItem onSelect={() => signOutForm.current?.requestSubmit()}>
                 <LogOut className="h-4 w-4 mr-2" />
                 Вийти

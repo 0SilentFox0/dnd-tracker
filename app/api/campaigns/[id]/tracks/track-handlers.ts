@@ -6,7 +6,7 @@ import { MAX_TRACKS_PER_CAMPAIGN } from "@/lib/constants/music";
 import { prisma } from "@/lib/db";
 import { createTrackSchema, reorderTracksSchema, trackUploadRequestSchema, updateTrackSchema } from "@/lib/schemas/music";
 import { listTracks, toCampaignTrack } from "@/lib/server/audio/track-store";
-import { createTrackUploadTicket, removeTrackFile, trackPathOwnedBy, verifyUploadedTrack } from "@/lib/supabase/battle-music-storage";
+import { createTrackUploadTicket, removeTrackFile, trackObjectPath, trackPathOwnedBy, verifyUploadedTrack } from "@/lib/supabase/battle-music-storage";
 import { requireDM } from "@/lib/utils/api/api-auth";
 import { errorResponse } from "@/lib/utils/api/api-response";
 import { handleApiError } from "@/lib/utils/api/error-handler";
@@ -148,7 +148,11 @@ export async function deleteTrackHandler(campaignId: string, trackId: string) {
 
     const { url } = track;
 
-    if (track.kind === "file" && url) after(() => removeTrackFile(url));
+    if (track.kind === "file" && url) {
+      const path = trackObjectPath(url);
+
+      if (path && trackPathOwnedBy(path, campaignId)) after(() => removeTrackFile(url));
+    }
 
     return NextResponse.json({ ok: true });
   } catch (error) {

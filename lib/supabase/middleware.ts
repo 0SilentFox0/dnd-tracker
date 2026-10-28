@@ -19,6 +19,9 @@ export function rejectCrossOriginMutation(request: NextRequest): NextResponse | 
 
   if (!pathname.startsWith("/api/") && pathname !== SIGN_OUT_PATH) return null;
 
+  // bearer-only, never reads cookies — browser MCP clients send a foreign Origin
+  if (pathname === "/api/mcp" || pathname.startsWith("/api/mcp/")) return null;
+
   const origin = request.headers.get("origin");
 
   if (!origin) return null;

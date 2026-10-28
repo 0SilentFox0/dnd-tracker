@@ -1,0 +1,33 @@
+/* Self-hosted subsets (latin + cyrillic) of OFL Google Fonts: builds never fetch fonts. Files are served immutable — rename a file when its content changes. */
+
+@font-face { font-family: "Geist"; src: url("/fonts/Geist-Variable.woff2") format("woff2"); font-weight: 100 900; font-style: normal; font-display: swap; }
+
+@font-face { font-family: "Alegreya SC"; src: url("/fonts/AlegreyaSC-Medium.woff2") format("woff2"); font-weight: 500; font-style: normal; font-display: swap; }
+@font-face { font-family: "Alegreya SC"; src: url("/fonts/AlegreyaSC-Bold.woff2") format("woff2"); font-weight: 700; font-style: normal; font-display: swap; }
+@font-face { font-family: "Alegreya SC"; src: url("/fonts/AlegreyaSC-ExtraBold.woff2") format("woff2"); font-weight: 800; font-style: normal; font-display: swap; }
+
+@font-face { font-family: "Alegreya Sans"; src: url("/fonts/AlegreyaSans-Regular.woff2") format("woff2"); font-weight: 400; font-style: normal; font-display: swap; }
+@font-face { font-family: "Alegreya Sans"; src: url("/fonts/AlegreyaSans-Italic.woff2") format("woff2"); font-weight: 400; font-style: italic; font-display: swap; }
+@font-face { font-family: "Alegreya Sans"; src: url("/fonts/AlegreyaSans-Medium.woff2") format("woff2"); font-weight: 500; font-style: normal; font-display: swap; }
+@font-face { font-family: "Alegreya Sans"; src: url("/fonts/AlegreyaSans-MediumItalic.woff2") format("woff2"); font-weight: 500; font-style: italic; font-display: swap; }
+@font-face { font-family: "Alegreya Sans"; src: url("/fonts/AlegreyaSans-Bold.woff2") format("woff2"); font-weight: 700; font-style: normal; font-display: swap; }
+@font-face { font-family: "Alegreya Sans"; src: url("/fonts/AlegreyaSans-BoldItalic.woff2") format("woff2"); font-weight: 700; font-style: italic; font-display: swap; }
+
+@font-face { font-family: "EB Garamond"; src: url("/fonts/EBGaramond-Variable.woff2") format("woff2"); font-weight: 400 800; font-style: normal; font-display: swap; }
+@font-face { font-family: "EB Garamond"; src: url("/fonts/EBGaramond-Italic-Variable.woff2") format("woff2"); font-weight: 400 800; font-style: italic; font-display: swap; }
+
+@font-face { font-family: "Alegreya"; src: url("/fonts/Alegreya-Variable.woff2") format("woff2"); font-weight: 400 900; font-style: normal; font-display: swap; }
+@font-face { font-family: "Alegreya"; src: url("/fonts/Alegreya-Italic-Variable.woff2") format("woff2"); font-weight: 400 900; font-style: italic; font-display: swap; }
+
+.font-geist { --font-geist-sans: "Geist", ui-sans-serif, system-ui, sans-serif; }
+
+.font-hud {
+  --font-hud-sc: "Alegreya SC", Georgia, serif;
+  --font-hud-sans: "Alegreya Sans", system-ui, sans-serif;
+  --font-hud-book: "EB Garamond", Georgia, serif;
+}
+
+.font-scenario {
+  --font-scenario-serif: "Alegreya", Georgia, serif;
+  --font-scenario-sans: "Alegreya Sans", system-ui, sans-serif;
+}

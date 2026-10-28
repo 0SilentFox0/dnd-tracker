@@ -87,7 +87,7 @@
     - рекурсивно обходить **кожне** значення рядка — FK-колонки і будь-який JSON — і замінює рядок, що точно дорівнює ключу `idMap`. Реєстр JSON-шляхів не потрібен: cuid унікальні, тому заміна за точним збігом охоплює й поля, про які ми не знаємо або які з'являться пізніше. Серед них зараз: `Unit.knownSpells`/`attacks`, `Race.availableSkills`/`disabledSkills`, `SkillTree.skills`, `Skill.spellEnhancementData`, `Artifact.bonuses`/`modifiers`, `ArtifactSet.setBonus`, `Spell.spellEffects`/`raceModifiers`, `abilities` усіх власників.
     - `SkillTree.race` — це назва раси, а не id, тому копіюється як є.
   - `import-bundle.ts` — `importBundle(bundle, targetCampaignId, tx)`:
-    - `remapIds`, потім `createMany` по таблицях у порядку FK: групи → юніти → раси → заклинання → гілки → скіли → дерева → сети → артефакти → треки;
+    - `remapIds`, потім `createMany` по таблицях у порядку FK: групи → раси → юніти (Unit.raceId → Race) → заклинання → гілки → скіли → дерева → сети → артефакти → треки;
     - ставить `sourceId` = id джерела і `sourceHash` = хеш вмісту (`lib/utils/battle/store/stable-json`).
   - `assert-no-leak.ts` — той самий обхід. Якщо в імпортованих рядках лишився хоч один id з `idMap`, кидає помилку, і транзакцію відкочено. Під час імпорту файлу JSON від користувача додатково перевіряє, що кожен рядок, схожий на cuid, або є в `idMap`, або не є id контенту іншої кампанії в БД.
   - Клонування = `importBundle(exportCampaign(templateId), newId)`.

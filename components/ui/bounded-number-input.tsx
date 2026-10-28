@@ -9,10 +9,11 @@ type BoundedNumberInputProps = Omit<ComponentProps<typeof Input>, "type" | "valu
   min: number;
   max: number;
   onCommit: (value: number) => void;
+  decimal?: boolean;
 };
 
 /** Чернетка під час введення (можна стерти й набрати заново); обмеження й запис — на blur чи Enter, порожнє повертає останнє значення. */
-export function BoundedNumberInput({ value, min, max, onCommit, onKeyDown, inputMode = "numeric", ...props }: BoundedNumberInputProps) {
+export function BoundedNumberInput({ value, min, max, onCommit, onKeyDown, decimal = false, inputMode = decimal ? "decimal" : "numeric", ...props }: BoundedNumberInputProps) {
   const [draft, setDraft] = useState<string | null>(null);
 
   const commit = () => {
@@ -24,7 +25,7 @@ export function BoundedNumberInput({ value, min, max, onCommit, onKeyDown, input
 
     if (draft.trim() === "" || !Number.isFinite(n)) return;
 
-    const next = Math.max(min, Math.min(max, Math.trunc(n)));
+    const next = Math.max(min, Math.min(max, decimal ? n : Math.trunc(n)));
 
     if (next !== value) onCommit(next);
   };

@@ -33,8 +33,6 @@ export async function createBattleParticipantFromUnit(
     charisma: getAbilityModifier(unit.charisma),
   };
 
-  const hasSpells = Array.isArray(unit.knownSpells) && unit.knownSpells.length > 0;
-
   const attacks =
     (unit.attacks as Array<{
       name: string;
@@ -137,7 +135,8 @@ export async function createBattleParticipantFromUnit(
     },
     spellcasting: {
       spellcastingAbility: undefined,
-      spellSaveDC: hasSpells ? rules.formulas.saveDcBase + unit.proficiencyBonus : undefined,
+      // юніти без заклинальної характеристики: СК росте з тіром (level = тір)
+      spellSaveDC: rules.formulas.saveDcBase + unit.proficiencyBonus + unit.level,
       spellAttackBonus: undefined,
       spellSlots: { universal: { max: UNIT_SPELL_SLOTS, current: UNIT_SPELL_SLOTS } },
       knownSpells: (unit.knownSpells as string[]) || [],

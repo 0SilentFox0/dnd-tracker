@@ -362,7 +362,7 @@ function learnLegally(tree: any, order: string[], level: number, who: string) {
 }
 
 async function prepare() {
-  campaign = await prisma.campaign.findFirstOrThrow({ where: CAMPAIGN ? { id: CAMPAIGN } : { name: "HOMM5" } });
+  campaign = await prisma.campaign.findFirstOrThrow({ where: CAMPAIGN ? { id: CAMPAIGN } : { name: "HOMM5", kind: "campaign" } });
   ctx.campaignId = campaign.id;
   dmId = campaign.dmUserId;
   for (const row of await prisma.skillTree.findMany({ where: { campaignId: campaign.id } })) trees[row.race] = normalizeTree(row);

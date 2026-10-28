@@ -2,7 +2,7 @@ import { pickAttack } from "./attack-reach";
 import { cellKey } from "./geometry";
 import { type CellMark, isMoveMark, moveSteps, moveZoneMarks, targetMarks } from "./map-view";
 import { cellsOf, isOnMap, sizeOf } from "./occupancy";
-import { apexOf, templateAimAllowed, templateArea } from "./template";
+import { aimInRange, apexOf, isCenteredTemplate, templateAimAllowed, templateArea } from "./template";
 
 import { AttackType } from "@/lib/constants/battle";
 import { findParticipant } from "@/lib/utils/abilities/engine/core/participants";
@@ -133,6 +133,16 @@ export function aimView({ map, participants }: AimScene, aim: MapAim, at: GridPo
   return { marks: new Map(cells.map((key) => [key, "template" as const])), aim: hollow ? null : at, pulseFrom };
 }
 
+function outOfRangeMarks(map: BattleMapConfig, origin: GridPoint[], rangeFeet: number): Map<string, CellMark> {
+  const out = new Map<string, CellMark>();
+
+  for (let y = 0; y < map.rows; y++) {
+    for (let x = 0; x < map.cols; x++) if (!aimInRange(origin, { x, y }, rangeFeet)) out.set(cellKey({ x, y }), "out-of-range");
+  }
+
+  return out;
+}
+
 interface MoveZoneInput {
   map: BattleMapConfig;
   participants: BattleParticipant[];
@@ -174,6 +184,10 @@ export function deriveMapScene({ map, selectedId, actor, mode, modeView, ...inpu
   const attacks = current?.battleData.attacks ?? [];
 
   const canAttack = attackReady && canStartAttack(current);
+
+  if (aim && aimCaster && aim.range !== undefined && isCenteredTemplate(aim.template)) {
+    for (const [key, mark] of outOfRangeMarks(map, cellsOf(aimCaster), aim.range)) marks.set(key, mark);
+  }
 
   const aimed = aim?.aim ? aimView({ map, participants }, aim, aim.aim) : null;
 

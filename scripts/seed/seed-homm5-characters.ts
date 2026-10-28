@@ -194,7 +194,7 @@ async function resolveCampaign() {
 
   if (id) return prisma.campaign.findUniqueOrThrow({ where: { id }, select: { id: true, name: true, dmUserId: true } });
 
-  const found = await prisma.campaign.findMany({ where: { name: { contains: "HoMM", mode: "insensitive" } }, select: { id: true, name: true, dmUserId: true } });
+  const found = await prisma.campaign.findMany({ where: { name: { contains: "HoMM", mode: "insensitive" }, kind: "campaign" }, select: { id: true, name: true, dmUserId: true } });
 
   if (found.length !== 1) throw new Error(`Знайдено ${found.length} кампаній з «HoMM» у назві — вкажіть --campaign <id>. ${found.map((c) => `${c.id} «${c.name}»`).join(", ")}`);
 

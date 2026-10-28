@@ -11,6 +11,7 @@ vi.mock("next/navigation", () => ({ notFound: mocks.notFound }));
 vi.mock("@/app/api/campaigns/[id]/scenario/scenario-handlers", () => ({ listScenarioHandler: mocks.listScenarioHandler }));
 vi.mock("@/app/api/campaigns/[id]/scenario/[pageId]/page-handlers", () => ({ getScenarioPageHandler: mocks.getScenarioPageHandler }));
 vi.mock("@/lib/server/campaigns/access", () => ({ requireCampaignDM: vi.fn(async () => ({ campaign: { name: "Кампанія" } })) }));
+vi.mock("@/lib/ai/crypto", () => ({ isAiConfigured: () => true }));
 vi.mock("@/lib/server/scenario/page-store", () => ({ loadPlayedSections: mocks.loadPlayedSections }));
 vi.mock("../page-client", () => ({ ScenarioIndexPageClient: () => null }));
 vi.mock("../[pageId]/page-client", () => ({ ScenarioPageClient: () => null }));
@@ -47,7 +48,7 @@ describe("DM scenario pages (server)", () => {
     expect(el.props.queryKey).toEqual(scenarioKeys.page("c1", "p1"));
     expect(el.props.data).toEqual(page);
     expect(mocks.loadPlayedSections).toHaveBeenCalledWith("c1", ["p9"]);
-    expect(el.props.children.props).toMatchObject({ campaignId: "c1", pageId: "p1", playedPages: [{ id: "p9", played: ["x"] }] });
+    expect(el.props.children.props).toMatchObject({ campaignId: "c1", pageId: "p1", playedPages: [{ id: "p9", played: ["x"] }], aiEnabled: true });
   });
 
   it("404 від обробника → notFound()", async () => {

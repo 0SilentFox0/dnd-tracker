@@ -17,6 +17,7 @@ model User {
   campaignMembers CampaignMember[]
   dmCampaigns     Campaign[]       @relation("DMCampaigns")
   characters      Character[]
+  aiCredentials   AiCredential[]
 
   @@map("users")
 }
@@ -35,6 +36,10 @@ model Campaign {
   updatedAt       DateTime         @updatedAt
   friendlyFire    Boolean          @default(false)
   rules           Json             @default("{}")
+  kind            String           @default("campaign")
+  visibility      String           @default("private")
+  createdFromId   String?
+  aiInstructions  String?
   artifactSets    ArtifactSet[]
   artifacts       Artifact[]
   battles         BattleScene[]
@@ -52,8 +57,12 @@ model Campaign {
   slideDecks      SlideDeck[]
   show            CampaignShow?
   units           Unit[]
+  aiThreads       AiThread[]
+  aiProposals     AiProposal[]
+  apiTokens       ApiToken[]
 
   @@index([dmUserId])
+  @@index([kind, visibility])
   @@map("campaigns")
 }
 
@@ -161,6 +170,8 @@ model Unit {
   campaign         Campaign @relation(fields: [campaignId], references: [id], onDelete: Cascade)
   race             Race?    @relation(fields: [raceId], references: [id], onDelete: SetNull)
   spellsSummoning  Spell[]  @relation("SpellSummonUnit")
+  sourceId         String?
+  sourceHash       String?
 
   @@index([campaignId])
   @@index([raceId])
@@ -211,6 +222,8 @@ model Spell {
   skillsGrantingSpell   Skill[]     @relation("SkillGrantedSpell")
   campaign              Campaign    @relation(fields: [campaignId], references: [id], onDelete: Cascade)
   spellGroup            SpellGroup? @relation(fields: [groupId], references: [id])
+  sourceId              String?
+  sourceHash            String?
 
   @@index([campaignId])
   @@map("spells")
@@ -227,6 +240,8 @@ model SpellGroup {
   campaign   Campaign    @relation(fields: [campaignId], references: [id], onDelete: Cascade)
   spells     Spell[]
   mainSkills MainSkill[]
+  sourceId   String?
+  sourceHash String?
 
   @@index([campaignId])
   @@map("spell_groups")
@@ -247,6 +262,8 @@ model Artifact {
   abilities   Json         @default("[]")
   campaign    Campaign     @relation(fields: [campaignId], references: [id], onDelete: Cascade)
   artifactSet ArtifactSet? @relation(fields: [setId], references: [id])
+  sourceId    String?
+  sourceHash  String?
 
   @@index([campaignId])
   @@map("artifacts")
@@ -263,6 +280,8 @@ model ArtifactSet {
   abilities   Json       @default("[]")
   campaign    Campaign   @relation(fields: [campaignId], references: [id], onDelete: Cascade)
   artifacts   Artifact[]
+  sourceId    String?
+  sourceHash  String?
 
   @@index([campaignId])
   @@map("artifact_sets")
@@ -291,6 +310,8 @@ model SkillTree {
   createdAt       DateTime          @default(now())
   characterSkills CharacterSkills[]
   campaign        Campaign          @relation(fields: [campaignId], references: [id], onDelete: Cascade)
+  sourceId        String?
+  sourceHash      String?
 
   @@index([campaignId, race])
   @@map("skill_trees")
@@ -347,6 +368,8 @@ model CampaignTrack {
   sortOrder   Int      @default(0)
   createdAt   DateTime @default(now())
   campaign    Campaign @relation(fields: [campaignId], references: [id], onDelete: Cascade)
+  sourceId    String?
+  sourceHash  String?
 
   @@index([campaignId, sortOrder])
   @@map("campaign_tracks")
@@ -481,6 +504,8 @@ model Skill {
   spell                   Spell?      @relation(fields: [spellId], references: [id])
   spellNewSpell           Spell?      @relation("SkillNewSpell", fields: [spellNewSpellId], references: [id])
   grantedSpell            Spell?      @relation("SkillGrantedSpell", fields: [grantedSpellId], references: [id])
+  sourceId                String?
+  sourceHash              String?
 
   @@index([campaignId])
   @@index([campaignId, id])
@@ -502,6 +527,8 @@ model Race {
   color                String?
   campaign             Campaign @relation(fields: [campaignId], references: [id], onDelete: Cascade)
   units                Unit[]
+  sourceId             String?
+  sourceHash           String?
 
   @@index([campaignId, name])
   @@map("races")
@@ -521,6 +548,8 @@ model MainSkill {
   campaign            Campaign    @relation(fields: [campaignId], references: [id], onDelete: Cascade)
   spellGroup          SpellGroup? @relation(fields: [spellGroupId], references: [id], onDelete: SetNull)
   skills              Skill[]
+  sourceId            String?
+  sourceHash          String?
 
   @@index([campaignId])
   @@map("main_skills")
@@ -558,6 +587,8 @@ model ScenarioPage {
   character   Character?            @relation(fields: [characterId], references: [id], onDelete: SetNull)
   versions    ScenarioPageVersion[]
   decks       SlideDeck[]
+  aiThreads   AiThread[]
+  aiProposals AiProposal[]
 
   @@index([campaignId, sortOrder])
   @@index([characterId])
@@ -574,4 +605,92 @@ model ScenarioPageVersion {
 
   @@index([pageId, createdAt])
   @@map("scenario_page_versions")
+}
+
+model AiCredential {
+  id           String   @id @default(cuid())
+  userId       String
+  provider     String
+  ciphertext   String
+  iv           String
+  authTag      String
+  keyVersion   Int      @default(1)
+  last4        String
+  defaultModel String?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, provider])
+  @@map("ai_credentials")
+}
+
+model AiThread {
+  id             String        @id @default(cuid())
+  campaignId     String
+  userId         String
+  mode           String
+  scenarioPageId String?
+  title          String
+  provider       String
+  model          String
+  createdAt      DateTime      @default(now())
+  updatedAt      DateTime      @updatedAt
+  campaign       Campaign      @relation(fields: [campaignId], references: [id], onDelete: Cascade)
+  scenarioPage   ScenarioPage? @relation(fields: [scenarioPageId], references: [id], onDelete: SetNull)
+  messages       AiMessage[]
+  proposals      AiProposal[]
+
+  @@index([campaignId, userId, updatedAt])
+  @@map("ai_threads")
+}
+
+model AiMessage {
+  id        String   @id @default(cuid())
+  threadId  String
+  seq       Int
+  role      String
+  parts     Json
+  metadata  Json     @default("{}")
+  createdAt DateTime @default(now())
+  thread    AiThread @relation(fields: [threadId], references: [id], onDelete: Cascade)
+
+  @@unique([threadId, seq])
+  @@map("ai_messages")
+}
+
+model AiProposal {
+  id             String       @id @default(cuid())
+  campaignId     String
+  threadId       String?
+  pageId         String
+  summary        String
+  ops            Json
+  status         String       @default("pending")
+  appliedVersion Int?
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
+  campaign       Campaign     @relation(fields: [campaignId], references: [id], onDelete: Cascade)
+  thread         AiThread?    @relation(fields: [threadId], references: [id], onDelete: SetNull)
+  page           ScenarioPage @relation(fields: [pageId], references: [id], onDelete: Cascade)
+
+  @@index([pageId, status])
+  @@map("ai_proposals")
+}
+
+model ApiToken {
+  id         String    @id @default(cuid())
+  campaignId String
+  userId     String
+  name       String
+  tokenHash  String    @unique
+  prefix     String
+  scopes     String[]
+  lastUsedAt DateTime?
+  revokedAt  DateTime?
+  createdAt  DateTime  @default(now())
+  campaign   Campaign  @relation(fields: [campaignId], references: [id], onDelete: Cascade)
+
+  @@index([campaignId])
+  @@map("api_tokens")
 }

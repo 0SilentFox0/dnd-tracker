@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 import { ScenarioPageClient } from "./page-client";
 
 import { getScenarioPageHandler } from "@/app/api/campaigns/[id]/scenario/[pageId]/page-handlers";
+import { isAiConfigured } from "@/lib/ai/crypto";
 import { scenarioKeys } from "@/lib/hooks/scenario/keys";
 import { PrefetchedQuery } from "@/lib/providers/prefetched-query";
 import { requireCampaignDM } from "@/lib/server/campaigns/access";
@@ -26,7 +27,7 @@ export default async function DMScenarioPageRoute({ params }: { params: Promise<
 
   return (
     <PrefetchedQuery queryKey={scenarioKeys.page(id, pageId)} data={page}>
-      <ScenarioPageClient campaignId={id} pageId={pageId} playedPages={playedPages} />
+      <ScenarioPageClient campaignId={id} pageId={pageId} playedPages={playedPages} aiEnabled={isAiConfigured()} />
     </PrefetchedQuery>
   );
 }

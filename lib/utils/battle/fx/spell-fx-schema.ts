@@ -10,6 +10,8 @@ export const SpellFxSchema = z.strictObject({
 });
 
 export function parseSpellFx(raw: unknown): SpellFx | null {
+  if (raw == null) return null;
+
   const parsed = SpellFxSchema.safeParse(raw);
 
   return parsed.success ? parsed.data : null;

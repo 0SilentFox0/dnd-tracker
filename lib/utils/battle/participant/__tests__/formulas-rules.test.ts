@@ -57,22 +57,16 @@ describe("формули кампанії: герой", () => {
 });
 
 describe("формули кампанії: юніт", () => {
-  it("юніт із заклинанням отримує СК з бази кампанії", async () => {
+  it("СК юніта = база кампанії + майстерність + тір", async () => {
     const p = await createBattleParticipantFromUnit(unit(["s1"]), "b", ParticipantSide.ENEMY, 1, undefined, custom);
 
-    expect(spellSaveDc(p)).toBe(12);
+    expect(spellSaveDc(p)).toBe(13);
   });
 
-  it("DEFAULT_RULES дають попередній запасний СК 8 + майстерність", async () => {
+  it("DEFAULT_RULES: СК юніта 8 + майстерність + тір", async () => {
     const p = await createBattleParticipantFromUnit(unit(["s1"]), "b", ParticipantSide.ENEMY, 1);
 
-    expect(spellSaveDc(p)).toBe(10);
-  });
-
-  it("юніт без заклять не отримує СК", async () => {
-    const p = await createBattleParticipantFromUnit(unit([]), "b", ParticipantSide.ENEMY, 1, undefined, custom);
-
-    expect(p.spellcasting.spellSaveDC).toBeUndefined();
+    expect(spellSaveDc(p)).toBe(11);
   });
 });
 

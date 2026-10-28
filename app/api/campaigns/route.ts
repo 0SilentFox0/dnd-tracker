@@ -1,27 +1,21 @@
 import { NextResponse } from "next/server";
-import { Prisma } from "@prisma/client";
 
 import { campaignListKey, invalidateCampaignLists } from "@/lib/cache/campaign-list";
 import { kvGet, kvSet } from "@/lib/cache/kv";
-import { CampaignRole } from "@/lib/constants/campaigns";
+import { API_ERRORS } from "@/lib/constants/api-errors";
+import { CampaignKind } from "@/lib/constants/campaigns";
 import { prisma } from "@/lib/db";
 import { createCampaignSchema } from "@/lib/schemas";
+import { createCampaignFromBundle, loadTemplateForUser } from "@/lib/server/campaigns/create-campaign";
+import type { Bundle } from "@/lib/server/templates/bundle";
+import { exportCampaign } from "@/lib/server/templates/export-campaign";
 import { ensureDbUser, PUBLIC_USER_SELECT } from "@/lib/server/users/db-user";
 import { requireAuth, requireAuthUser } from "@/lib/utils/api/api-auth";
+import { errorResponse } from "@/lib/utils/api/api-response";
+import { bundleErrorResponse } from "@/lib/utils/api/bundle-error";
 import { PRIVATE_NO_STORE_HEADERS } from "@/lib/utils/api/cache-headers";
 import { handleApiError } from "@/lib/utils/api/error-handler";
 import { parseBody } from "@/lib/utils/api/parse-body";
-import { generateInviteCode } from "@/lib/utils/campaigns/invite-code";
-
-const INVITE_CODE_ATTEMPTS = 5;
-
-function isInviteCodeClash(error: unknown): boolean {
-  return (
-    error instanceof Prisma.PrismaClientKnownRequestError &&
-    error.code === "P2002" &&
-    String(error.meta?.target ?? "").includes("inviteCode")
-  );
-}
 
 export async function POST(request: Request) {
   try {
@@ -39,33 +33,34 @@ export async function POST(request: Request) {
 
     await ensureDbUser(authUser);
 
-    const create = () =>
-      prisma.campaign.create({
-        data: {
-          name: data.name,
-          description: data.description,
-          inviteCode: generateInviteCode(),
-          dmUserId: userId,
-          maxLevel: data.maxLevel,
-          allowPlayerEdit: data.allowPlayerEdit,
-          members: { create: { userId, role: CampaignRole.DM } },
-        },
-        include: { members: true },
-      });
+    let bundle: Bundle | null = null;
 
-    for (let attempt = 1; ; attempt++) {
-      try {
-        const campaign = await create();
+    if (data.templateId) {
+      const loaded = await loadTemplateForUser(userId, data.templateId);
 
-        await invalidateCampaignLists([userId]);
-
-        return NextResponse.json(campaign);
-      } catch (error) {
-        if (attempt >= INVITE_CODE_ATTEMPTS || !isInviteCodeClash(error)) throw error;
+      if (!loaded.ok) {
+        return loaded.status === 404
+          ? errorResponse(API_ERRORS.TEMPLATE_NOT_FOUND, 404)
+          : errorResponse(API_ERRORS.TEMPLATE_FORBIDDEN, 403);
       }
+
+      bundle = await exportCampaign(prisma, loaded.template.id);
     }
+
+    const { campaign, warnings } = await createCampaignFromBundle({
+      userId,
+      name: data.name,
+      description: data.description,
+      bundle,
+      createdFromId: data.templateId ?? null,
+      settings: { maxLevel: data.maxLevel, allowPlayerEdit: data.allowPlayerEdit },
+    });
+
+    await invalidateCampaignLists([userId]);
+
+    return NextResponse.json(warnings.length > 0 ? { ...campaign, warnings } : campaign);
   } catch (error) {
-    return handleApiError(error, { action: "create campaign" });
+    return bundleErrorResponse(error) ?? handleApiError(error, { action: "create campaign" });
   }
 }
 
@@ -88,8 +83,9 @@ export async function GET() {
     }
 
     const campaigns = await prisma.campaign.findMany({
-      where: { members: { some: { userId } } },
+      where: { kind: CampaignKind.CAMPAIGN, members: { some: { userId } } },
       include: { members: { include: { user: { select: PUBLIC_USER_SELECT } } } },
+      omit: { aiInstructions: true },
       orderBy: { updatedAt: "desc" },
     });
 

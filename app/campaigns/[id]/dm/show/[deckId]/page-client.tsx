@@ -74,7 +74,7 @@ export function DeckEditorPageClient({ campaignId, deck }: { campaignId: string;
         <div className="flex flex-col gap-4">
           <Input aria-label="Назва набору" placeholder="Назва набору" maxLength={DECK_TITLE_MAX} value={draft.title} onChange={(e) => dispatch({ type: "rename", title: e.target.value })} />
           <DeckSceneSelect campaignId={campaignId} deck={live} />
-          <AddSlidesBar upload={editor.upload} count={draft.slides.length} />
+          <AddSlidesBar campaignId={campaignId} upload={editor.upload} count={draft.slides.length} />
           {draft.slides.length === 0 ? (
             <EmptyState icon={Images} title="Ще немає слайдів" description="Додайте картинки — файли або посилання" />
           ) : (

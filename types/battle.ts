@@ -189,9 +189,9 @@ export interface MazeConfig {
   moved?: boolean;
 }
 
-export type TemplateShape = "circle" | "cube" | "cone" | "line";
+export type TemplateShape = "circle" | "cube" | "cone" | "line" | "cross";
 
-/** size у футах: радіус кола, сторона куба, довжина конуса/лінії */
+/** size у футах: радіус кола, сторона куба, довжина конуса/лінії, промінь хреста */
 export interface SpellTemplate {
   shape: TemplateShape;
   size: number;
@@ -246,7 +246,7 @@ export interface TerrainDiff {
   removed?: string[];
 }
 
-export type BattleMapMark = "move" | "move-danger" | "target" | "invalid-target" | "template" | "pick" | "picked";
+export type BattleMapMark = "move" | "move-danger" | "target" | "invalid-target" | "template" | "pick" | "picked" | "out-of-range";
 
 export interface BattleMapView {
   selectedId?: string | null;

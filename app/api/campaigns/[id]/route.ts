@@ -3,6 +3,7 @@ import { NextResponse } from "next/server";
 import { invalidateCampaignLists } from "@/lib/cache/campaign-list";
 import { invalidateReference, ReferenceKind } from "@/lib/cache/tags";
 import { API_ERRORS } from "@/lib/constants/api-errors";
+import { CampaignKind } from "@/lib/constants/campaigns";
 import { prisma } from "@/lib/db";
 import { updateCampaignSchema } from "@/lib/schemas";
 import { PUBLIC_USER_SELECT } from "@/lib/server/users/db-user";
@@ -10,11 +11,15 @@ import { requireAuth, requireDM } from "@/lib/utils/api/api-auth";
 import { errorResponse } from "@/lib/utils/api/api-response";
 import { handleApiError } from "@/lib/utils/api/error-handler";
 import { parseBody } from "@/lib/utils/api/parse-body";
+import { isPlatformAdmin } from "@/lib/utils/api/platform-admin";
 
 const CAMPAIGN_INCLUDE = {
   members: { include: { user: { select: PUBLIC_USER_SELECT } } },
   dm: { select: PUBLIC_USER_SELECT },
 } as const;
+
+// DM-only; never returned to members
+const CAMPAIGN_OMIT = { aiInstructions: true } as const;
 
 export async function GET(
   request: Request,
@@ -34,6 +39,7 @@ export async function GET(
     const campaign = await prisma.campaign.findUnique({
       where: { id },
       include: CAMPAIGN_INCLUDE,
+      omit: CAMPAIGN_OMIT,
     });
 
     if (!campaign) {
@@ -67,6 +73,14 @@ export async function PATCH(
 
     if (data instanceof NextResponse) return data;
 
+    if (data.visibility !== undefined) {
+      const isTemplate = (await prisma.campaign.findUnique({ where: { id }, select: { kind: true } }))?.kind === CampaignKind.TEMPLATE;
+
+      if (!isTemplate || !isPlatformAdmin(accessResult.userId)) {
+        return errorResponse(API_ERRORS.FORBIDDEN, 403);
+      }
+    }
+
     const updatedCampaign = await prisma.campaign.update({
       where: { id },
       data: {
@@ -76,8 +90,10 @@ export async function PATCH(
         maxLevel: data.maxLevel,
         allowPlayerEdit: data.allowPlayerEdit,
         status: data.status,
+        visibility: data.visibility,
       },
       include: CAMPAIGN_INCLUDE,
+      omit: CAMPAIGN_OMIT,
     });
 
     await invalidateCampaignLists(updatedCampaign.members.map((m) => m.userId));

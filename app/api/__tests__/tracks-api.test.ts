@@ -11,6 +11,7 @@ vi.mock("@/lib/supabase/battle-music-storage", async (orig) => ({
   ...(await orig<typeof storage>()),
   createTrackUploadTicket: vi.fn(),
   verifyUploadedTrack: vi.fn(),
+  trackObjectPath: vi.fn(),
   removeTrackFile: vi.fn(),
 }));
 vi.mock("@/lib/utils/audio/youtube-oembed", () => ({ fetchYoutubeTitle: vi.fn(async () => null) }));
@@ -144,12 +145,41 @@ describe("tracks API", () => {
     expect((await DELETE(req("DELETE"), params({ trackId: "t1" }))).status).toBe(403);
 
     vi.mocked(prisma.campaignTrack.findUnique).mockResolvedValueOnce(row() as never);
+    vi.mocked(storage.trackObjectPath).mockReturnValue("camp1/0123456789abcdef0123456789abcdef.mp3");
 
     const res = await DELETE(req("DELETE"), params({ trackId: "t1" }));
 
     expect(await res.json()).toEqual({ ok: true });
     expect(prisma.campaignTrack.delete).toHaveBeenCalledWith({ where: { id: "t1" } });
     expect(storage.removeTrackFile).toHaveBeenCalledWith("https://s/battle-music/x.mp3");
+  });
+
+  it("DELETE файлу: шлях іншої кампанії у URL — не видаляє обʼєкт Storage", async () => {
+    const { DELETE } = await import("@/app/api/campaigns/[id]/tracks/[trackId]/route");
+
+    vi.mocked(prisma.campaignTrack.findUnique).mockResolvedValueOnce(
+      row({ url: "https://s/battle-music/other-camp.mp3" }) as never,
+    );
+    vi.mocked(storage.trackObjectPath).mockReturnValue("camp2/0123456789abcdef0123456789abcdef.mp3");
+
+    const res = await DELETE(req("DELETE"), params({ trackId: "t1" }));
+
+    expect(await res.json()).toEqual({ ok: true });
+    expect(prisma.campaignTrack.delete).toHaveBeenCalledWith({ where: { id: "t1" } });
+    expect(storage.removeTrackFile).not.toHaveBeenCalled();
+  });
+
+  it("DELETE файлу: null у trackObjectPath — не видаляє обʼєкт Storage", async () => {
+    const { DELETE } = await import("@/app/api/campaigns/[id]/tracks/[trackId]/route");
+
+    vi.mocked(prisma.campaignTrack.findUnique).mockResolvedValueOnce(row() as never);
+    vi.mocked(storage.trackObjectPath).mockReturnValue(null);
+
+    const res = await DELETE(req("DELETE"), params({ trackId: "t1" }));
+
+    expect(await res.json()).toEqual({ ok: true });
+    expect(prisma.campaignTrack.delete).toHaveBeenCalledWith({ where: { id: "t1" } });
+    expect(storage.removeTrackFile).not.toHaveBeenCalled();
   });
 
   it("PATCH перейменовує", async () => {

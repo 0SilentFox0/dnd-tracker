@@ -7,8 +7,34 @@ export interface Campaign {
   maxLevel: number;
   allowPlayerEdit: boolean;
   status: string;
+  kind?: "campaign" | "template";
   members?: CampaignMembership[];
 }
+
+export type CampaignWithWarnings = Campaign & { warnings?: string[] };
+
+export type CampaignBundle = Record<string, unknown>;
+
+export interface TemplateCard {
+  id: string;
+  name: string;
+  description: string | null;
+  visibility: string;
+  counts: Record<string, number>;
+}
+
+export interface TemplateList {
+  official: TemplateCard[];
+  mine: TemplateCard[];
+}
+
+export interface BundleFile {
+  name: string;
+  bundle: CampaignBundle;
+  entities: number;
+}
+
+export type TemplateSelection = { templateId?: string | null; file?: BundleFile };
 
 /** Рядок campaign_members з user-relation (сторінка кампанії). */
 export interface CampaignMembership {

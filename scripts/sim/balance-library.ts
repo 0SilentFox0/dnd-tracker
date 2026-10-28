@@ -451,16 +451,16 @@ function plan(tree: TreeNodes, level: number, branchNames: string[]): string[] {
 
 async function setupCampaign() {
   if (REUSE) {
-    const existing = await prisma.campaign.findFirst({ where: { name: CAMPAIGN_NAME, dmUserId: SIM_USER.id } });
+    const existing = await prisma.campaign.findFirst({ where: { name: CAMPAIGN_NAME, dmUserId: SIM_USER.id, kind: "campaign" } });
 
     if (existing) return existing.id;
   }
 
-  await prisma.campaign.deleteMany({ where: { name: CAMPAIGN_NAME, dmUserId: SIM_USER.id } });
+  await prisma.campaign.deleteMany({ where: { name: CAMPAIGN_NAME, dmUserId: SIM_USER.id, kind: "campaign" } });
   await prisma.user.upsert({ where: { id: SIM_USER.id }, update: {}, create: SIM_USER });
   await prisma.user.upsert({ where: { id: SIM_PLAYER.id }, update: {}, create: SIM_PLAYER });
 
-  const campaign = await prisma.campaign.create({ data: { name: CAMPAIGN_NAME, inviteCode: `SIMB-${Date.now()}`, dmUserId: SIM_USER.id } });
+  const campaign = await prisma.campaign.create({ data: { name: CAMPAIGN_NAME, inviteCode: `SIMB-${Date.now()}`, dmUserId: SIM_USER.id, kind: "campaign" } });
 
   await prisma.campaignMember.create({ data: { campaignId: campaign.id, userId: SIM_USER.id, role: CampaignRole.DM } });
   await prisma.campaignMember.create({ data: { campaignId: campaign.id, userId: SIM_PLAYER.id, role: CampaignRole.PLAYER } });

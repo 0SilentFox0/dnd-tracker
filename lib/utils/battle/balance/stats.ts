@@ -44,7 +44,6 @@ export interface GetCharacterStatsParams {
   participant: BattleParticipant;
   branchLevels?: Record<string, BranchLevel> | null;
   magicMainSkillIds?: Set<string> | null;
-  /** Branches tied to a spell school: their DPR comes from spells, which ignore AC. */
 }
 
 export interface UnitSpellInput {
@@ -219,19 +218,21 @@ export function getCharacterStats({ participant, branchLevels, magicMainSkillIds
 
   const toHit = calculateAttackBonus(participant, best, [participant]);
 
-  const magicIds = new Set(magicMainSkillIds ?? []);
+  const levels = branchLevels ?? {};
+
+  const magicIds = magicMainSkillIds ?? new Set<string>();
 
   const racialMagicPercent = collectModifiers([participant], participant.basicInfo.id, { damage: { kind: "magic" } }).percent;
 
-  const spellDpr = getSpellDprFromBranchLevels(branchLevels ?? {}, magicIds) * heroMagicMultiplier(participant) * (1 + racialMagicPercent / 100);
+  const spellDpr = getSpellDprFromBranchLevels(levels, magicIds) * heroMagicMultiplier(participant) * (1 + racialMagicPercent / 100);
 
   const bestKindMultiplier = applyHeroDmDamageMultiplier(participant, attackKindOf(best.type), 1).multiplier;
 
-  const nonMagicDpr = getNonMagicBranchDpr(branchLevels ?? {}, magicIds) * bestKindMultiplier;
+  const nonMagicDpr = getNonMagicBranchDpr(levels, magicIds) * bestKindMultiplier;
 
   const dpr = physicalDpr + spellDpr + nonMagicDpr;
 
-  const weaponDpr = physicalDpr + getNonMagicBranchDpr(branchLevels ?? {}, magicIds) * bestKindMultiplier;
+  const weaponDpr = physicalDpr + nonMagicDpr;
 
   const hp = participant.combatStats.maxHp;
 
