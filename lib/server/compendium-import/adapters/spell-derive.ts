@@ -2,7 +2,7 @@ import { array, str } from "./shared";
 import type { SpellCast } from "./spell-cast";
 import { createsPlainObject, isOutOfCombatBuff, type NarrativeReason, withoutObjectConditions, withoutRestOrTravel } from "./spell-narrative";
 
-import { ABILITY_KEYS } from "@/lib/constants/abilities";
+import { ABILITY_KEYS, ABILITY_LABELS, type AbilityKey } from "@/lib/constants/abilities";
 import { type AnyConditionKey, CONDITION_5E_KEYS } from "@/lib/utils/abilities/schema/kinds";
 import { ADDS_MOD, durationRounds, spellEffects, type SpellFacts, spellKind, spellRange, spellResolution, spellSide, spellTargeting, spellUpcast, validDice } from "@/lib/utils/spells/derive/mechanics";
 import { numberWord } from "@/lib/utils/spells/derive/text";
@@ -158,7 +158,7 @@ export function deriveSpell(row: Record<string, unknown>, text: string, higher: 
 
   if (!signals) return narrative("noCombatNumbers");
 
-  if (unknownConditions.length > 0) return { blocker: "UNSUPPORTED_CONDITION", detail: unknownConditions[0] };
+  if (unknownConditions.length > 0) return { blocker: "UNSUPPORTED_CONDITION", detail: `невідомий стан «${unknownConditions[0]}»` };
 
   if (SELF_DAMAGE.test(text)) return { blocker: "SELF_DAMAGE" };
 
@@ -205,7 +205,7 @@ export function deriveSpell(row: Record<string, unknown>, text: string, higher: 
   const kind = spellKind(facts);
 
   if (kind === "none") {
-    const parts = [ability && `рятівний кидок ${ability}`, spellAttack && "атака заклинанням", damageTypes.length > 0 && "шкода без однієї формули"].filter(Boolean);
+    const parts = [ability && `рятівний кидок ${ABILITY_LABELS[ability as AbilityKey] ?? ability}`, spellAttack && "атака заклинанням", damageTypes.length > 0 && "шкода без однієї формули"].filter(Boolean);
 
     return { blocker: "UNMODELED_EFFECT", detail: parts.join(", ") || undefined };
   }

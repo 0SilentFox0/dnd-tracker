@@ -5,7 +5,7 @@ export type { CompendiumReport, ImportInput, ImportIssue, TargetKind };
 
 export type CompendiumOptions = Omit<ImportInput, "json" | "categories">;
 
-export type CompendiumGraphRow = { key: string; name: string; kind: TargetKind; inputPath?: string; refs: Array<{ key: string; kind: string; name: string; source: string; edition: string }>; summary?: unknown };
+export type CompendiumGraphRow = { key: string; name: string; kind: TargetKind; inputPath?: string; refs: Array<{ key: string; kind: string; name: string; source: string; edition: string; unresolved?: boolean }>; summary?: unknown };
 
 export type CompendiumPreview = { token: string; report: CompendiumReport; graph: CompendiumGraphRow[]; rulesDiff?: unknown };
 

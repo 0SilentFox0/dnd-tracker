@@ -183,4 +183,9 @@ describe("native spell mechanics", () => {
     expect(codes(spell)).toEqual([`MANUAL_SPELL_${reason}`]);
     expect(spell.issues.find((i) => i.code.startsWith("MANUAL_SPELL"))?.action).toMatch(/[А-Яа-я]/);
   });
+
+  it("labels the blocker detail in Ukrainian, not raw source values", () => {
+    expect(adapt({ entries: ["The target must succeed on a Strength saving throw or obey you."], savingThrow: ["strength"] }).spell.issues.find((i) => i.code.startsWith("MANUAL_SPELL"))?.action).not.toMatch(/strength/);
+    expect(adapt({ entries: ["The target must make a Wisdom saving throw or be {@condition pacified|Book}."], savingThrow: ["wisdom"] }).spell.issues.find((i) => i.code.startsWith("MANUAL_SPELL"))?.action).toContain("невідомий стан «pacified»");
+  });
 });
