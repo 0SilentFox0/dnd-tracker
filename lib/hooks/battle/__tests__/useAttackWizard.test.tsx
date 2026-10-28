@@ -192,4 +192,29 @@ describe("useAttackWizard", () => {
     await waitFor(() => expect(scene.showResult).toHaveBeenCalledWith(expect.objectContaining({ kind: "hit", damage: 12, critEffect: expect.objectContaining({ name: "Точний удар" }) })));
     expect(hook.result.current.state).toMatchObject({ step: "result", waitingCrit: false });
   });
+
+  it("pending знято без нових записів (скасування, відкат): помилка замість вигаданого результату", async () => {
+    const scene = fakeScene({ afterLog: [] });
+
+    scene.battle.pendingCritChoice = { action: "attack", actorId: "me", triggers: [] };
+    scene.mutateAsync.mockResolvedValue({ hpChanges: [], pendingCritChoice: true });
+
+    const hook = renderHook(() => useAttackWizard(scene.me), { wrapper: scene.wrapper });
+
+    act(() => hook.result.current.actions.open());
+    act(() => hook.result.current.actions.toggleTarget("gob"));
+    act(() => hook.result.current.actions.confirmTargets());
+    act(() => hook.result.current.actions.roll(20));
+    act(() => hook.result.current.actions.damage([6]));
+    act(() => hook.result.current.actions.submit());
+
+    await waitFor(() => expect(hook.result.current.state.waitingCrit).toBe(true));
+
+    scene.battle.pendingCritChoice = null;
+    hook.rerender();
+
+    await waitFor(() => expect(hook.result.current.state).toMatchObject({ waitingCrit: false, error: "Дію скасовано ДМом" }));
+    expect(scene.showResult).not.toHaveBeenCalled();
+    expect(hook.result.current.state.step).not.toBe("result");
+  });
 });

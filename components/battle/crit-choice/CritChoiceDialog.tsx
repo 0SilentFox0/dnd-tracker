@@ -15,11 +15,11 @@ const rowTitle = (t: CritTrigger, actor: string, target: string) =>
   t.source === "save" ? `Рятівний кидок: ${target}` : `${actor} → ${target}: ${t.kind === "success" ? "Критична удача" : "Критичний провал"}`;
 
 export function CritChoiceDialog({ dialog }: { dialog: Dialog }) {
-  return dialog.isDM && dialog.pending ? <CritChoiceForm dialog={dialog} /> : null;
+  return dialog.open ? <CritChoiceForm dialog={dialog} /> : null;
 }
 
 // відокремлено, щоб вибір скидався, коли діалог закривається
-function CritChoiceForm({ dialog: { rows, submit, isSubmitting } }: { dialog: Dialog }) {
+function CritChoiceForm({ dialog: { rows, submit, cancel, isSubmitting } }: { dialog: Dialog }) {
   const [choices, setChoices] = useState<Record<string, Choice>>({});
 
   const complete = rows.every((r) => choices[r.trigger.key] !== undefined);
@@ -33,9 +33,10 @@ function CritChoiceForm({ dialog: { rows, submit, isSubmitting } }: { dialog: Di
       dismissible={false}
       hud
       title="Оберіть ефект критичного кидка"
-      description="Дія гравця зупинена, доки ви не оберете ефект."
+      description="Дію зупинено, доки ви не оберете ефект."
       footer={
         <>
+          <Button variant="ghost" disabled={isSubmitting} onClick={cancel}>Скасувати дію</Button>
           <Button variant="outline" disabled={isSubmitting} onClick={randomAll}>Випадково для всіх</Button>
           <Button type="submit" form="crit-choice-form" disabled={!complete || isSubmitting}>Підтвердити</Button>
         </>
@@ -46,7 +47,7 @@ function CritChoiceForm({ dialog: { rows, submit, isSubmitting } }: { dialog: Di
         className="space-y-5 py-2"
         onSubmit={(e) => {
           e.preventDefault();
-          submit(choices as Record<string, Choice>);
+          submit(choices);
         }}
       >
         {rows.map(({ trigger, actorName, targetName, options }) => (

@@ -47,4 +47,31 @@ describe("useSpellBook: пауза на вибір крита ДМ", () => {
     await waitFor(() => expect(scene.showResult).toHaveBeenCalledWith(expect.objectContaining({ kind: "spell", changes: [{ name: "Гоблін", change: 9 }] })));
     expect(hook.result.current.state).toMatchObject({ step: "result", waitingCrit: false });
   });
+
+  it("pending знято без нових записів: помилка замість порожнього результату", async () => {
+    const scene = fakeScene({ knownSpells: ["ray"], slots: { "2": { max: 2, current: 2 } }, afterLog: [] });
+
+    scene.battle.pendingCritChoice = { action: "spell", actorId: "me", triggers: [] };
+    scene.castSpell.mockResolvedValue({ hpChanges: [], pendingCritChoice: true });
+
+    const hook = renderHook(() => useSpellBook({ ...scene.me, basicInfo: { ...scene.me.basicInfo, sourceType: "character" } }), { wrapper: scene.wrapper });
+
+    act(() => hook.result.current.actions.open(2));
+    await waitFor(() => expect(hook.result.current.view.spells).toHaveLength(1));
+    act(() => hook.result.current.actions.pick(hook.result.current.view.spells[0]));
+    act(() => hook.result.current.actions.toTargets());
+    act(() => hook.result.current.actions.toggleTarget("gob"));
+    act(() => hook.result.current.actions.confirmTargets());
+    act(() => hook.result.current.actions.setDamage(0, 4));
+    act(() => hook.result.current.actions.toSummary());
+    act(() => hook.result.current.actions.submit());
+
+    await waitFor(() => expect(hook.result.current.state.waitingCrit).toBe(true));
+
+    scene.battle.pendingCritChoice = null;
+    hook.rerender();
+
+    await waitFor(() => expect(hook.result.current.state).toMatchObject({ waitingCrit: false, step: "summary", error: "Дію скасовано ДМом" }));
+    expect(scene.showResult).not.toHaveBeenCalled();
+  });
 });

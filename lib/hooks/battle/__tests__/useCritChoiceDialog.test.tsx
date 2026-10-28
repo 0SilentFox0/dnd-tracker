@@ -15,7 +15,7 @@ describe("useCritChoiceDialog", () => {
 
     const { result } = renderHook(() => useCritChoiceDialog(), { wrapper: scene.wrapper });
 
-    expect(result.current).toMatchObject({ pending: null, rows: [], isDM: true });
+    expect(result.current).toMatchObject({ open: false, rows: [] });
   });
 
   it("рядки: імена учасників і опції за джерелом та видом тригера", () => {
@@ -28,6 +28,32 @@ describe("useCritChoiceDialog", () => {
     expect(result.current.rows.map((r) => [r.trigger.key, r.actorName, r.targetName])).toEqual([["t0", "Фрейда", "Гоблін"], ["t1", "Фрейда", "Годрік"]]);
     expect(result.current.rows[0].options).toBe(critEffectsFor("attack", "success"));
     expect(result.current.rows[1].options).toBe(critEffectsFor("save", "fail"));
+  });
+
+  it("open: лише для ДМ із pending", () => {
+    const dm = fakeScene({ isDM: true });
+
+    dm.battle.pendingCritChoice = pending;
+
+    expect(renderHook(() => useCritChoiceDialog(), { wrapper: dm.wrapper }).result.current.open).toBe(true);
+
+    const player = fakeScene({ isDM: false });
+
+    player.battle.pendingCritChoice = pending;
+
+    expect(renderHook(() => useCritChoiceDialog(), { wrapper: player.wrapper }).result.current.open).toBe(false);
+  });
+
+  it("cancel відправляє { cancel: true }", () => {
+    const scene = fakeScene({ isDM: true });
+
+    scene.battle.pendingCritChoice = pending;
+
+    const { result } = renderHook(() => useCritChoiceDialog(), { wrapper: scene.wrapper });
+
+    act(() => result.current.cancel());
+
+    expect(scene.value.actions.critChoice.mutate).toHaveBeenCalledWith({ cancel: true });
   });
 
   it("submit відправляє choices мутацією; isSubmitting береться з мутації", () => {

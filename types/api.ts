@@ -167,9 +167,7 @@ export interface MoraleCheckData {
   d10Roll: number;
 }
 
-export interface CritChoiceData {
-  choices: Record<string, number | "random">;
-}
+export type CritChoiceData = { choices: Record<string, number | "random"> } | { cancel: true };
 
 export interface BonusActionData {
   participantId: string;

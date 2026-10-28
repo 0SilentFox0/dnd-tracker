@@ -1,9 +1,10 @@
 "use client";
 
-import { useEffect, useEffectEvent, useMemo, useReducer, useRef } from "react";
+import { useEffect, useEffectEvent, useMemo, useReducer } from "react";
 
 import { useModeView } from "./modes/useModeView";
 import { useBattleScene } from "./useBattleScene";
+import { CRIT_CANCELLED, useCritPause } from "./useCritPause";
 
 import { AttackType } from "@/lib/constants/battle";
 import { findFlags } from "@/lib/utils/abilities/engine/core/collect-modifiers";
@@ -26,8 +27,6 @@ export function useAttackWizard(attacker: BattleParticipant | null, onDone?: () 
   const scene = useBattleScene();
 
   const [state, dispatch] = useReducer(attackFlow, initialAttackFlow);
-
-  const pendingSeen = useRef(new Set<number>());
 
   const order = scene.battle.initiativeOrder;
 
@@ -132,7 +131,7 @@ export function useAttackWizard(attacker: BattleParticipant | null, onDone?: () 
     return r.crit ? "crit" : r.critFail ? "critFail" : r.hit ? "hit" : "miss";
   };
 
-  const finish = useEffectEvent((attackerId: string, seen: Set<number>) => {
+  const finish = (attackerId: string, seen: Set<number>) => {
     const current = scene.readBattle();
 
     const log = current?.battleLog ?? [];
@@ -188,14 +187,21 @@ export function useAttackWizard(attacker: BattleParticipant | null, onDone?: () 
     }
 
     onDone?.();
-  });
+  };
 
-  const settle = useEffectEvent((attackerId: string, seen: Set<number>) => {
+  const settle = (attackerId: string, seen: Set<number>) => {
     try {
       finish(attackerId, seen);
     } catch (e) {
       dispatch({ type: "FAIL", error: e instanceof Error ? e.message : "Не вдалося виконати атаку" });
     }
+  };
+
+  const pauseCrit = useCritPause({
+    waiting: state.waitingCrit,
+    actorId: attacker?.basicInfo.id,
+    onResolved: (seen) => attacker && settle(attacker.basicInfo.id, seen),
+    onCancelled: () => dispatch({ type: "FAIL", error: CRIT_CANCELLED }),
   });
 
   const send = useEffectEvent(async () => {
@@ -214,7 +220,7 @@ export function useAttackWizard(attacker: BattleParticipant | null, onDone?: () 
     }
 
     if (res?.pendingCritChoice) {
-      pendingSeen.current = seen;
+      pauseCrit(seen);
       dispatch({ type: "WAIT_CRIT" });
 
       return;
@@ -222,16 +228,6 @@ export function useAttackWizard(attacker: BattleParticipant | null, onDone?: () 
 
     settle(attacker.basicInfo.id, seen);
   });
-
-  const resume = useEffectEvent(() => {
-    if (attacker) settle(attacker.basicInfo.id, pendingSeen.current);
-  });
-
-  const critPending = !!scene.battle.pendingCritChoice;
-
-  useEffect(() => {
-    if (state.waitingCrit && !critPending) resume();
-  }, [state.waitingCrit, critPending]);
 
   useEffect(() => {
     if (state.step === "submitting") void send();

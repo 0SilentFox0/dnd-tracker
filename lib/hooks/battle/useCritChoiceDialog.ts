@@ -28,10 +28,10 @@ export function useCritChoiceDialog() {
   }));
 
   return {
-    pending,
-    isDM: viewer.isDM,
+    open: viewer.isDM && pending !== null,
     rows,
     submit: (choices: Record<string, number | "random">) => actions.critChoice.mutate({ choices }),
+    cancel: () => actions.critChoice.mutate({ cancel: true }),
     isSubmitting: actions.critChoice.isPending,
   };
 }

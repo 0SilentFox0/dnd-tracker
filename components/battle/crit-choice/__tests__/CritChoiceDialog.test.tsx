@@ -19,10 +19,10 @@ const triggers = [
   { key: "t1", source: "save", kind: "fail", actorId: "me", targetId: "ally" },
 ] as const;
 
-function dialogOf(submit = vi.fn()): Dialog {
+function dialogOf(submit = vi.fn(), cancel = vi.fn()): Dialog {
   return {
-    pending: { action: "attack", actorId: "me", triggers: [...triggers] },
-    isDM: true,
+    open: true,
+    cancel,
     rows: triggers.map((t) => ({ trigger: t, actorName: "Фрейда", targetName: t.targetId === "gob" ? "Гоблін" : "Годрік", options: critEffectsFor(t.source, t.kind) })),
     submit,
     isSubmitting: false,
@@ -67,8 +67,17 @@ describe("CritChoiceDialog", () => {
     expect(submit).toHaveBeenCalledWith({ t0: "random", t1: "random" });
   });
 
-  it("не-ДМ або без pending: нічого не рендерить", () => {
-    renderWithConfirm(<CritChoiceDialog dialog={{ ...dialogOf(), isDM: false }} />);
+  it("«Скасувати дію» викликає cancel", () => {
+    const cancel = vi.fn();
+
+    renderWithConfirm(<CritChoiceDialog dialog={dialogOf(vi.fn(), cancel)} />);
+
+    fireEvent.click(screen.getByRole("button", { name: "Скасувати дію" }));
+    expect(cancel).toHaveBeenCalledTimes(1);
+  });
+
+  it("закрите: нічого не рендерить", () => {
+    renderWithConfirm(<CritChoiceDialog dialog={{ ...dialogOf(), open: false }} />);
     expect(screen.queryByText("Підтвердити")).toBeNull();
   });
 });
