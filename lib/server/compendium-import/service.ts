@@ -7,6 +7,7 @@ import { byteLength, COMPENDIUM_LIMITS, CompendiumError, type JsonRecord, parseC
 import { ADAPTER_VERSION, buildImportPlan, type ImportPlan, type PlanContext, type PlannedWrite } from "./plan";
 import { type AdaptedEntry, type AdaptOptions, type ImportIssue, issue,type TargetKind } from "./types";
 
+import { COMPENDIUM_INFO_ISSUE_CODES } from "@/lib/constants/compendium-import";
 import { remapIds } from "@/lib/server/templates/remap-ids";
 import type { Actor } from "@/lib/utils/api/actor";
 import { isRecord } from "@/lib/utils/common/is-record";
@@ -181,7 +182,7 @@ function reportOf(plan: ImportPlan, root: JsonRecord, sources: JsonRecord[], emb
 
   for (const row of plan.writes) editionSummary[row.edition] = (editionSummary[row.edition] ?? 0) + 1;
 
-  return { adapterVersion: ADAPTER_VERSION, counts, rows, sources, editionSummary, countsByCategory, issueCounts, omittedIssues: Math.max(0, allIssues.length - nextActions.length), nextActions, ...(classesMissing && { recommendedRulesPatch: { classes: { enabled: true } } }), readyToImport: plan.errors.length === 0, readyToPlay: hasCharacters !== false && !classesMissing && plan.errors.length === 0 && !allIssues.some((i) => /MANUAL|UNRESOLVED|UNKNOWN|UNSUPPORTED/.test(i.code)) };
+  return { adapterVersion: ADAPTER_VERSION, counts, rows, sources, editionSummary, countsByCategory, issueCounts, omittedIssues: Math.max(0, allIssues.length - nextActions.length), nextActions, ...(classesMissing && { recommendedRulesPatch: { classes: { enabled: true } } }), readyToImport: plan.errors.length === 0, readyToPlay: hasCharacters !== false && !classesMissing && plan.errors.length === 0 && !allIssues.some((i) => !COMPENDIUM_INFO_ISSUE_CODES.has(i.code) && /MANUAL|UNRESOLVED|UNKNOWN|UNSUPPORTED/.test(i.code)) };
 }
 
 function readInput(input: ImportInput) {

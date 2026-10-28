@@ -37,3 +37,5 @@ export function oversizedRecordKind(root: JsonRecord, kinds: Iterable<string> = 
 
   return undefined;
 }
+
+export const COMPENDIUM_INFO_ISSUE_CODES: ReadonlySet<string> = new Set(["UNSUPPORTED_CATEGORY", "MEDIA_OR_FOUNDRY_SKIPPED"]);
