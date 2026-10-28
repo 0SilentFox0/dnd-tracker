@@ -10,36 +10,32 @@
 Робоче середовище (обов'язково):
 - Worktree /Users/silentfox/Work/dnd-tracker-constructor, гілка feat/constructor. Основну папку /Users/silentfox/Work/dnd-tracker не чіпати (там паралельно працюють інші сесії).
 - БД тільки локальна: postgresql://postgres:postgres@localhost:54322/constructor (Docker-контейнер dnd-tracker-db-1; якщо зупинений — `docker start dnd-tracker-db-1`). Prisma CLI не читає .env.local сам: `set -a; source .env.local; set +a` перед `pnpm exec prisma migrate deploy` (не migrate dev). Prod і prodcopy не чіпати.
-- НЕ зливати feat/constructor у main і нічого не розгортати на prod, доки не готовий увесь епік (етапи 1–6). main (origin/main) підтягувати В гілку перед кожною новою частиною.
+- НЕ зливати feat/constructor у main і нічого не розгортати на prod, доки не готовий увесь епік (етапи 1–6). main (origin/main) підтягувати В гілку перед кожною новою частиною (після злиття — `prisma migrate deploy` на constructor, якщо прийшли міграції).
 - Бекап prod від 2026-10-21 01:30: ~/dnd-tracker-backups/prod_20261021_013001. Перед роботою з prod наприкінці епіку — свіжий бекап.
 
 Що прочитати спершу:
-1. docs/superpowers/specs/2026-10-21-constructor-stage2-open-api-design.md — затверджений спек етапу 2 (2a фабрика → 2b токени → 2c OpenAPI → 2d MCP).
+1. docs/superpowers/specs/2026-10-20-campaign-constructor-design.md — загальний спек епіку (етапи 1–6; етап 3 «оновити з шаблону», sourceId/sourceHash у бандлі).
 2. docs/STATUS.md (рядок «Конструктор кампаній») і CLAUDE.md.
-3. docs/architecture/ai.md — токени api_tokens і /api/mcp AI-асистента (етап 2 їх розширює, а не створює нові).
-4. Для контексту: docs/superpowers/plans/2026-10-21-constructor-2a-content-factory.md і 2026-10-21-constructor-2b-tokens.md (виконані) і загальний спек docs/superpowers/specs/2026-10-20-campaign-constructor-design.md.
+3. docs/architecture/content-api.md — підсумок етапу 2 (реєстр ресурсів і операцій, сервіс з assertCan, REST-фабрика, токени, OpenAPI, MCP).
+4. Для контексту шаблонів: lib/server/templates/* (export/import бандла, fork шаблону), архівні плани 1c у docs/superpowers/plans/.
 
 Стан:
-- Етап 1 готовий (правила кампанії, шаблони HOMM5 cmvhyai5g0001eyfadqth6y7b і «Порожня» cmvhyai9h0005eyfaiz33jh8g, робоча кампанія HOMM5 cmuylhk0c0001ia06lg5eommv). Банер шаблону зроблено.
-- main з AI-асистентом злитий у гілку (1b56568c).
-- 2a ГОТОВА (до e9ec183e): реєстр ресурсів lib/server/content (define-resource, errors, service, resources/*, CONTENT_RESOURCES), lib/utils/api/content-routes.ts (collectionRoutes/itemRoutes/runContent).
-- 2b ГОТОВА (до ae151fab): права токенів ai/content:read/content:write (lib/constants/ai.ts: API_TOKEN_SCOPES, CONTENT_SCOPES, hasScope); resolveActor/authenticateToken з Bearer (lib/utils/api/actor.ts, lib/utils/api/bearer.ts), пресети NEED.read/write/writeAll (тепер lib/utils/api/need.ts); масове видалення лише з сесії; CSRF пропускає Bearer; правила — lib/server/campaigns/rules.ts; /api/mcp поки вимагає ai; на шаблонах сторінка «API» лише з правами на контент; перевірка id у knownSpells/availableSkills/disabledSkills (лише нові id). 5356 тестів, build, battle-sweep, curl і браузер — зелені.
-- 2c ГОТОВА (до dbadcbb6): публічний GET /api/openapi.json (OpenAPI 3.1, force-static, ~100 КБ, 29 шляхів; lib/server/content/openapi.ts); спільні JSON-схеми з $ref на кожен вид ефекту (lib/server/content/json-schema.ts: SHARED_SCHEMAS, toJsonSchemas, inputJsonSchema); CONTENT_OPERATIONS (lib/server/content/operations.ts, 13 операцій; operationRoute бере need/tag/body з реєстру і сам парсить тіло); ресурси: schemas.query/apiCreate, errors; POST/PATCH віддають toItem (форма = GET); abilities/* приймають content:read; remove-all-spells → {ok:true}, помилки дерева скілів → {error, issues}; панель «REST API» на /dm/ai. План: docs/superpowers/plans/2026-10-21-constructor-2c-openapi.md. 5400+ тестів, build, battle-sweep, curl (токен → create/get/patch/delete юніта, 401/403) і браузер — зелені.
+- Етап 1 готовий: правила кампанії (campaigns.rules, заморожуються в бою), хардкод назв → дані, шаблони (офіційні HOMM5 cmvhyai5g0001eyfadqth6y7b і «Порожня» cmvhyai9h0005eyfaiz33jh8g; робоча кампанія HOMM5 cmuylhk0c0001ia06lg5eommv), банер шаблону.
+- Етап 2 готовий (до ddf1a615): 2a фабрика CRUD (lib/server/content, CONTENT_RESOURCES, lib/utils/api/content-routes.ts); 2b токени зі scopes ai/content:read/content:write, resolveActor з Bearer; 2c публічний /api/openapi.json з CONTENT_RESOURCES + CONTENT_OPERATIONS; 2d права в сервісі (assertCan, Actor.scopes), 11 MCP-інструментів content_* + правила + дерева скілів за правами токена, /api/mcp буферизує POST (інакше revalidateTag з інструментів губився). Останній прогін: 5503 тести, lint 0 errors, build, battle-sweep, живий MCP і браузер — зелені.
 
-Перенесені в наступні частини пункти (обов'язково врахувати в планах):
-- 2d: content_schema — через toJsonSchemas з lib/server/content/json-schema.ts (режим реєстру; одиночний z.toJSONSchema з metadata втрачає .describe()); get_rules/update_rules і дерева — через CONTENT_OPERATIONS (op.body уже парситься в operationRoute — у 2d винести виклик сервісу з роуту, щоб MCP і REST ділили одну функцію).
-- Відкладено з /simplify 2c (за потреби): повні схеми відповідей (поза спеком), дієслова колекції/запису як дані в content-routes (зараз дублюються в openapi.ts resourceSpecs), errors як Record<code,опис>, вкладений блок api{} у ContentResource, зайвий reload сету артефактів після update.
-- 2d: /api/mcp зараз відхиляє токени без ai (403) — замінити на фільтр інструментів за scopes; перевірка доступу всередині сервісу (не лише в HTTP-шарі), типізований сервіс, MCP-інструменти content_* з фільтром за scopes, ліміт 24 000 символів на результат.
-- Дрібне з етапу 1 (при нагоді): форма нової кампанії показує «Макс. рівень 20» незалежно від шаблону; шаблони зберігають rules розгорнутими замість {}; сервер дозволяє бої/персонажів у шаблоні; меню ДМ визначає шаблон через повний GET кампанії; повідомлення «мораль ±N» у лозі при вимкненій моралі; напіванглійські назви ефектів критів. «Ельфійське око» ельфам НЕ додавати без явного рішення користувача.
+Відкладене (за потреби, не блокує етап 3):
+- Етап 2: content_get може обрізатися на дуже великих записах; назва раси в get/save_skill_tree не перевіряється; listFields не типізовані; адаптер «операція → MCP-інструмент» з CONTENT_OPERATIONS; пагінація content_list у БД; повні схеми відповідей в OpenAPI; дієслова колекції/запису як дані (дублюються в openapi.ts); зайвий reload сету артефактів після update.
+- Етап 1: форма нової кампанії показує «Макс. рівень 20» незалежно від шаблону; шаблони зберігають rules розгорнутими замість {}; сервер дозволяє бої/персонажів у шаблоні; меню ДМ визначає шаблон через повний GET кампанії; «мораль ±N» у лозі при вимкненій моралі; напіванглійські назви ефектів критів. Етап 3 не повинен довіряти sourceId від користувача. «Ельфійське око» ельфам НЕ додавати без явного рішення користувача.
 - Розбіжність з main (не наша): balance/stats.ts рахує СК юніта як 8+майстерність без тіру.
+- Після всього епіку — окремий епік «доменні модулі» (запис у STATUS; до злиття конструктора не починати).
 
-Наступний крок — частина 2d (MCP-інструменти контенту). Спек уже затверджений → одразу superpowers:writing-plans для 2d (план у docs/superpowers/plans/2026-10-2x-constructor-2d-*.md), показати план користувачу, після «так» — виконання. Після 2d — кінець етапу 2: docs/architecture/content-api.md (новий) + ai.md.
+Наступний крок — етап 3 «оновити з шаблону». Спеку ще немає → superpowers:brainstorming з користувачем (перед цим — пошук наявного в lib/server/templates, lib/utils, lib/hooks за правилом «reuse before writing») → спек у docs/superpowers/specs/ → плани частин → виконання.
 
 Як працюємо (налаштування користувача):
-- Виконання — superpowers:subagent-driven-development: виконавці на sonnet, БЕЗ рев'ю після кожної задачі, одне фінальне рев'ю всієї частини на opus → одна хвиля виправлень → коротке повторне рев'ю. Повний набір тестів — один раз наприкінці; /simplify — у кінці частини.
-- Робоча тека SDD — .superpowers/sdd/<plan>/ (gitignored, ніколи не комітити). Субагентів, що завершили роботу, зупиняти (TaskStop). У коміти субагентів — трейлер `Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>`.
-- Перевірка: pnpm test:run, pnpm lint (0 errors), pnpm build, battle-sweep на constructor (`set -a; source .env.local; set +a; pnpm battle-sweep --campaign cmuylhk0c0001ia06lg5eommv`; відомий нестабільний сценарій лабіринту «ворог у полі зору прокидається»; нестабільний тест lib/hooks/battle/__tests__/battle-fx.test.tsx), браузер — `pnpm dev -p 3001` у worktree; тестові кампанії/записи після перевірки видаляти.
-- Пам'ять: project-constructor.md і feedback-constructor-no-merge.md у ~/.claude/projects/-Users-silentfox-Work-dnd-tracker/memory/.
+- Виконання — superpowers:subagent-driven-development: виконавці на sonnet, БЕЗ рев'ю після кожної задачі, одне фінальне рев'ю всієї частини на opus → одна хвиля виправлень → коротке повторне рев'ю → /simplify (4 агенти) → живий прогін. Повний набір тестів — наприкінці частини.
+- Робоча тека SDD — .superpowers/sdd/<plan>/ (gitignored, ніколи не комітити). У коміти субагентів — трейлер `Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>`.
+- Перевірка: pnpm test:run, pnpm lint (0 errors), pnpm build, battle-sweep на constructor (`set -a; source .env.local; set +a; pnpm battle-sweep --campaign cmuylhk0c0001ia06lg5eommv`; відомий нестабільний сценарій лабіринту «ворог у полі зору прокидається»; нестабільний тест lib/hooks/battle/__tests__/battle-fx.test.tsx), браузер — `pnpm dev -p 3001` у worktree; тестові токени (можна вставити в api_tokens SHA-256 хешем, скрипти через tsx не можуть імпортувати server-only модулі), кампанії і записи після перевірки видаляти.
+- Наприкінці частини оновлювати docs/architecture/*.md, docs/STATUS.md, цей хендоф і пам'ять (project-constructor.md, feedback-constructor-no-merge.md у ~/.claude/projects/-Users-silentfox-Work-dnd-tracker/memory/).
 
-Почни з: прочитай спек етапу 2 (розділ 2d) і STATUS, підтягни origin/main у feat/constructor (якщо є нове), потім пиши план 2d.
+Почни з: прочитай загальний спек конструктора (етап 3) і STATUS, підтягни origin/main у feat/constructor (якщо є нове), потім brainstorming етапу 3.
 ```

@@ -47,6 +47,7 @@ const unwrap = <T>(result: Result<T>): T => {
 
 export const tracksResource = defineResource<TrackRow, z.infer<typeof createTrackSchema>, z.infer<typeof updateTrackSchema>>({
   kind: "tracks",
+  listFields: ["kind", "durationSec"],
   idParam: "trackId",
   label: "Музика бою",
   description: "Треки плеєра бою. Через API — лише YouTube за посиланням; файли завантажуються в UI.",

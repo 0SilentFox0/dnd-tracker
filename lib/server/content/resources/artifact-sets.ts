@@ -33,6 +33,7 @@ async function syncMembers(campaignId: string, setId: string, artifactIds: strin
 
 export const artifactSetsResource = defineResource<SetRow, z.infer<typeof createArtifactSetSchema>, z.infer<typeof patchArtifactSetSchema>>({
   kind: "artifact-sets",
+  listFields: [],
   idParam: "setId",
   label: "Сети артефактів",
   description: "Сети: склад артефактів, бонус сету (текст і здібності), іконка.",

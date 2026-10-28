@@ -2,11 +2,10 @@ import type { ZodType } from "zod";
 
 import "server-only";
 import type { AnyContentResource } from "@/lib/server/content/define-resource";
-import { inputJsonSchema, SHARED_SCHEMAS, toJsonSchemas } from "@/lib/server/content/json-schema";
+import { inputJsonSchema, pascal, SHARED_SCHEMAS, toJsonSchemas } from "@/lib/server/content/json-schema";
 import { CONTENT_OPERATION_LIST, type ContentOperation, type OperationResponse } from "@/lib/server/content/operations";
 import { CONTENT_RESOURCES } from "@/lib/server/content/resources";
 import { NEED } from "@/lib/utils/api/need";
-import { capitalize } from "@/lib/utils/common/text";
 
 const BASE = "/api/campaigns/{id}";
 
@@ -31,8 +30,6 @@ const SUCCESS_RESPONSES: Record<OperationResponse, { id: string; schema: object 
   ok: { id: "OkOk", schema: ref("Ok") },
   object: { id: "ObjectOk", schema: { type: "object", additionalProperties: true } },
 };
-
-const pascal = (s: string) => s.split(/[^a-zA-Z0-9]+/).filter(Boolean).map(capitalize).join("");
 
 export type OpenApiOperation = { operationId: string; "x-scopes": string[]; parameters?: unknown[]; requestBody?: unknown; responses: Record<string, unknown>; [key: string]: unknown };
 

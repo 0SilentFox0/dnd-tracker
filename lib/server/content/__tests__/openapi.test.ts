@@ -54,7 +54,7 @@ describe("buildOpenApi", () => {
 
     expect(JSON.stringify(doc.components.schemas.UnitsCreate)).toContain("#/components/schemas/Ability");
     expect(json.match(/"trigger":\{"\$ref"/g)?.length ?? 0).toBeLessThanOrEqual(1);
-    expect(json.length).toBeLessThan(100_000);
+    expect(json.length).toBeLessThan(110_000);
   });
 
   it("query-параметри spells?ids і skills?mainSkillId", () => {

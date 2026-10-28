@@ -19,7 +19,7 @@ import { API_ERRORS } from "@/lib/constants/api-errors";
 import { racesResource } from "@/lib/server/content/resources/races";
 import type { Actor } from "@/lib/utils/api/actor";
 
-const actor: Actor = { campaignId: "c1", userId: "u", isDM: true, via: "session" };
+const actor: Actor = { campaignId: "c1", userId: "u", isDM: true, via: "session", scopes: null };
 
 describe("racesResource", () => {
   beforeEach(() => {

@@ -17,6 +17,7 @@ const withSet = { artifactSet: true } as const;
 
 export const artifactsResource = defineResource<ArtifactRow, z.infer<typeof createArtifactSchema>, z.infer<typeof patchArtifactSchema>>({
   kind: "artifacts",
+  listFields: ["slot", "rarity", "setId"],
   idParam: "artifactId",
   label: "Артефакти",
   description: "Артефакти: слот, рідкість, сет, зброя, бонуси (здібності).",

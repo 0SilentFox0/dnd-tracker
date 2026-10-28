@@ -21,7 +21,7 @@ import { artifactsResource } from "@/lib/server/content/resources/artifacts";
 import { createContent, updateContent } from "@/lib/server/content/service";
 import type { Actor } from "@/lib/utils/api/actor";
 
-const actor: Actor = { campaignId: "c1", userId: "u", isDM: true, via: "session" };
+const actor: Actor = { campaignId: "c1", userId: "u", isDM: true, via: "session", scopes: null };
 
 describe("artifact resources", () => {
   beforeEach(() => {

@@ -6,7 +6,7 @@ vi.mock("@/lib/db", () => ({ prisma: { scenarioPage: { findFirst: vi.fn() }, aiP
 
 const doc = (text: string) => ({ type: "doc", content: [{ type: "paragraph", content: [{ type: "text", text }] }] });
 
-const ctx = { campaignId: "camp1", userId: "dm", threadId: "t1" };
+const ctx = { campaignId: "camp1", userId: "dm", scopes: ["ai"] as const, threadId: "t1" };
 
 describe("propose_scenario_edit", () => {
   beforeEach(() => {

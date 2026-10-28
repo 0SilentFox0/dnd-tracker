@@ -20,6 +20,7 @@ const created = vi.fn(async (_a: unknown, input: { name: string }) => ({ id: "n1
 
 const thing = defineResource<{ id: string; campaignId: string }, { name: string }, { name?: string }>({
   kind: "units",
+  listFields: [],
   idParam: "thingId",
   label: "Тест",
   description: "",

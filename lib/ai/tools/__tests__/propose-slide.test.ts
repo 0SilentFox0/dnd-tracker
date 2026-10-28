@@ -21,7 +21,7 @@ vi.mock("@/lib/ai/images", () => {
   return { AiImageError, generateSlideImage: h.generate };
 });
 
-const ctx = { campaignId: "camp1", userId: "dm", threadId: "t1" };
+const ctx = { campaignId: "camp1", userId: "dm", scopes: ["ai"] as const, threadId: "t1" };
 
 const opsOf = () => (vi.mocked(prisma.aiProposal.create).mock.calls[0][0].data as unknown as { ops: Record<string, unknown>[] }).ops;
 

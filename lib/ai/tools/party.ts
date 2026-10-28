@@ -18,6 +18,7 @@ export async function partySummary(campaignId: string): Promise<PartyMember[]> {
 
 export const getPartyTool = defineTool({
   name: "get_party",
+  scopes: ["ai"],
   title: "Партія",
   description: "Player heroes of the campaign: id, name, level, class, race, AC, DM notes.",
   input: z.object({}),
@@ -26,6 +27,7 @@ export const getPartyTool = defineTool({
 
 export const readCharacterTool = defineTool({
   name: "read_character",
+  scopes: ["ai"],
   title: "Лист персонажа",
   description: "Full character sheet (player hero or NPC hero): ability scores, AC, HP-related stats, goals, DM notes and the hero biography from the scenario.",
   input: z.object({ id: z.string().min(1) }),

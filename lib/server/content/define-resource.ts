@@ -10,6 +10,8 @@ export type FindPurpose = "read" | "write";
 
 export interface ContentResource<Row = unknown, Create = unknown, Update = unknown> {
   kind: ContentKind;
+  /** list item fields besides id and name/title, for content_list */
+  listFields: readonly string[];
   /** dynamic segment name of the item route folder */
   idParam: string;
   label: string;

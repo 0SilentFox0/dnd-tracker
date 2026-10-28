@@ -26,6 +26,7 @@ async function assertRefs(campaignId: string, data: { spellData?: { spellId?: st
 
 export const skillsResource = defineResource<SkillRow, CreateSkillInput, UpdateSkillInput>({
   kind: "skills",
+  listFields: ["mainSkillId"],
   idParam: "skillId",
   label: "Скіли",
   description: "Бібліотека скілів: опис, іконка, прив'язка до гілки й заклинань, здібності.",

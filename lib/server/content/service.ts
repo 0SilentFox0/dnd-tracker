@@ -1,9 +1,11 @@
 import "server-only";
 import { invalidateReference } from "@/lib/cache/tags";
 import { API_ERRORS } from "@/lib/constants/api-errors";
+import { assertCan } from "@/lib/server/content/access";
 import type { AnyContentResource, FindPurpose } from "@/lib/server/content/define-resource";
 import { ContentError, parseInput } from "@/lib/server/content/errors";
 import type { Actor } from "@/lib/utils/api/actor";
+import { NEED } from "@/lib/utils/api/need";
 
 async function found(r: AnyContentResource, actor: Actor, id: string | undefined, purpose: FindPurpose) {
   if (!id) throw new ContentError(r.notFound, 404);
@@ -21,15 +23,23 @@ const invalidate = (r: AnyContentResource, actor: Actor) => {
   if (r.invalidates.length > 0) invalidateReference(r.invalidates, actor.campaignId);
 };
 
-export const listContent = (r: AnyContentResource, actor: Actor, query: URLSearchParams) => r.list(actor, query);
+export function listContent(r: AnyContentResource, actor: Actor, query: URLSearchParams) {
+  assertCan(actor, NEED.read(r.access.list));
+
+  return r.list(actor, query);
+}
 
 export async function getContent(r: AnyContentResource, actor: Actor, id: string) {
+  assertCan(actor, NEED.read(r.access.item));
+
   const row = await found(r, actor, id, "read");
 
   return item(r, row);
 }
 
 export async function createContent(r: AnyContentResource, actor: Actor, raw: unknown) {
+  assertCan(actor, NEED.write);
+
   const created = await r.create(actor, parseInput(r.schemas.create, raw));
 
   invalidate(r, actor);
@@ -38,6 +48,8 @@ export async function createContent(r: AnyContentResource, actor: Actor, raw: un
 }
 
 export async function updateContent(r: AnyContentResource, actor: Actor, id: string, raw: unknown) {
+  assertCan(actor, NEED.write);
+
   const existing = await found(r, actor, id, "write");
 
   const updated = await r.update(actor, existing, parseInput(r.schemas.update, raw));
@@ -48,12 +60,16 @@ export async function updateContent(r: AnyContentResource, actor: Actor, id: str
 }
 
 export async function removeContent(r: AnyContentResource, actor: Actor, id: string): Promise<void> {
+  assertCan(actor, NEED.write);
+
   await r.remove(actor, await found(r, actor, id, "write"));
 
   invalidate(r, actor);
 }
 
 export async function removeAllContent(r: AnyContentResource, actor: Actor): Promise<number> {
+  assertCan(actor, NEED.writeAll);
+
   if (!r.removeAll) throw new ContentError(API_ERRORS.METHOD_NOT_ALLOWED, 405);
 
   const deleted = await r.removeAll(actor);

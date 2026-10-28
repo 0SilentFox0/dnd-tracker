@@ -12,6 +12,7 @@ import { defineResource } from "@/lib/server/content/define-resource";
 
 export const mainSkillsResource = defineResource<MainSkillRow, z.infer<typeof createMainSkillSchema>, z.infer<typeof updateMainSkillSchema>>({
   kind: "main-skills",
+  listFields: ["role", "spellGroupId"],
   idParam: "mainSkillId",
   label: "Основні скіли",
   description: "Гілки прокачки (атака, магія, лідерство…): роль, колір, іконка, школа магії.",

@@ -105,7 +105,7 @@ export function DmAiPageClient({ campaignId, isTemplate }: { campaignId: string;
         {!isTemplate && <AssistantPanels campaignId={campaignId} />}
         <TokensPanel campaignId={campaignId} scopes={isTemplate ? CONTENT_SCOPES : API_TOKEN_SCOPES} />
         <RestApiPanel campaignId={campaignId} />
-        {!isTemplate && <McpPanel />}
+        <McpPanel />
       </div>
     </HudPage>
   );

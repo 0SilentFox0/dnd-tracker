@@ -4,6 +4,54 @@ import { hashToken } from "@/lib/ai/api-tokens";
 import { prisma } from "@/lib/db";
 
 vi.mock("@/lib/utils/api/api-auth", () => ({ requireDM: vi.fn() }));
+vi.mock("server-only", () => ({}));
+vi.mock("@/lib/cache/tags", () => ({ invalidateReference: vi.fn() }));
+
+const things = vi.hoisted(() => new Map<string, Record<string, unknown>>());
+
+vi.mock("@/lib/server/content/resources", async () => {
+  const { z } = await import("zod");
+
+  const { defineResource } = await import("@/lib/server/content/define-resource");
+
+  const unit = defineResource<Record<string, unknown>, { name: string }, { name?: string }>({
+    kind: "units",
+    listFields: ["level"],
+    idParam: "unitId",
+    label: "Юніти",
+    description: "Тест",
+    path: "/units",
+    schemas: { create: z.object({ name: z.string().min(2) }), update: z.object({ name: z.string().min(2).optional() }) },
+    access: { list: "member", item: "member" },
+    invalidates: [],
+    notFound: "Юніта не знайдено",
+    list: async () => [...things.values()],
+    find: async (actor, id) => {
+      const row = things.get(id);
+
+      return row && row.campaignId === actor.campaignId ? row : null;
+    },
+    create: async (actor, input) => {
+      const row = { id: `n${things.size + 1}`, campaignId: actor.campaignId, ...input };
+
+      things.set(row.id, row);
+
+      return row;
+    },
+    update: async (_a, existing, input) => {
+      const row = { ...existing, ...input };
+
+      things.set(existing.id as string, row);
+
+      return row;
+    },
+    remove: async (_a, existing) => {
+      things.delete(existing.id as string);
+    },
+  });
+
+  return { CONTENT_RESOURCES: { units: unit } };
+});
 
 vi.mock("@/lib/db", () => ({
   prisma: {
@@ -92,12 +140,96 @@ describe("API tokens + MCP", () => {
     expect(await verifyApiToken("dndt_abc")).toEqual({ campaignId: "camp1", userId: "dm", scopes: ["content:write"] });
   });
 
-  it("токен без права ai на MCP — 403", async () => {
+  it("токен без права ai на MCP — 200, ai-інструментів немає", async () => {
     vi.mocked(prisma.apiToken.findUnique).mockResolvedValue({ id: "k1", campaignId: "camp1", userId: "dm", revokedAt: null, lastUsedAt: new Date(), scopes: ["content:write"] } as never);
 
     const { POST } = await import("@/app/api/mcp/route");
 
-    expect((await POST(mcpReq("dndt_abc"))).status).toBe(403);
+    const res = await POST(mcpReq("dndt_abc"));
+
+    expect(res.status).toBe(200);
+    expect(await res.text()).not.toContain("search_reference");
+  });
+
+  describe("content tools over MCP", () => {
+    const asToken = (scopes: string[]) =>
+      vi.mocked(prisma.apiToken.findUnique).mockResolvedValue({ id: "k1", campaignId: "camp1", userId: "dm", revokedAt: null, lastUsedAt: new Date(), scopes } as never);
+
+    const toolNames = async (scopes: string[]) => {
+      asToken(scopes);
+
+      const { POST } = await import("@/app/api/mcp/route");
+
+      const text = await (await POST(rpc("tools/list", 1, {}, "dndt_abc"))).text();
+
+      return [...text.matchAll(/"name":"([a-z_]+)"/g)].map((m) => m[1]);
+    };
+
+    const call = async (name: string, args: unknown) => {
+      const { POST } = await import("@/app/api/mcp/route");
+
+      const text = await (await POST(rpc("tools/call", 2, { name, arguments: args }, "dndt_abc"))).text();
+
+      const data = text.split("\n").find((l) => l.startsWith("data:")) ?? text;
+
+      return (JSON.parse(data.replace(/^data:\s*/, "")) as { result: { content: Array<{ text: string }> } }).result.content[0].text;
+    };
+
+    beforeEach(() => things.clear());
+
+    it("content:read — читальні інструменти без write і ai", async () => {
+      const names = await toolNames(["content:read"]);
+
+      expect(names).toEqual(expect.arrayContaining(["content_list", "content_get", "content_schema", "content_kinds", "get_rules", "get_skill_tree"]));
+      expect(names).not.toContain("content_create");
+      expect(names).not.toContain("search_reference");
+    });
+
+    it("content:write — плюс запис", async () => {
+      const names = await toolNames(["content:write"]);
+
+      expect(names).toEqual(expect.arrayContaining(["content_create", "content_update", "content_delete", "update_rules", "save_skill_tree", "content_list"]));
+    });
+
+    it("ai — без content_*", async () => {
+      expect((await toolNames(["ai"])).filter((n) => n.startsWith("content_"))).toEqual([]);
+    });
+
+    it("токен без жодного відомого права → 403, не порожній сервер", async () => {
+      asToken(["legacy:unknown"]);
+
+      const { POST } = await import("@/app/api/mcp/route");
+
+      expect((await POST(rpc("tools/list", 1, {}, "dndt_abc"))).status).toBe(403);
+    });
+
+    it("create → get → update → delete", async () => {
+      asToken(["content:write"]);
+
+      const created = JSON.parse(await call("content_create", { kind: "units", data: { name: "Гоблін" } }));
+
+      expect(JSON.parse(await call("content_get", { kind: "units", id: created.id })).name).toBe("Гоблін");
+      expect(JSON.parse(await call("content_update", { kind: "units", id: created.id, patch: { name: "Орк" } })).name).toBe("Орк");
+      expect(JSON.parse(await call("content_delete", { kind: "units", id: created.id }))).toEqual({ ok: true });
+      expect(things.size).toBe(0);
+      expect(await call("content_get", { kind: "units", id: created.id })).toContain("не знайдено");
+    });
+
+    it("POST повертається лише після виконання інструмента (інакше revalidateTag губиться)", async () => {
+      asToken(["content:write"]);
+
+      const { POST } = await import("@/app/api/mcp/route");
+
+      await POST(rpc("tools/call", 2, { name: "content_create", arguments: { kind: "units", data: { name: "Гоблін" } } }, "dndt_abc"));
+
+      expect(things.size).toBe(1);
+    });
+
+    it("невалідні дані → текст зі шляхом поля", async () => {
+      asToken(["content:write"]);
+
+      expect(await call("content_create", { kind: "units", data: { name: "" } })).toContain("name:");
+    });
   });
 
   it("bearerToken: немає заголовка → null, інший формат → порожній рядок", async () => {

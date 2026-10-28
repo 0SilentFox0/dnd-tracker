@@ -10,6 +10,7 @@ import { defineResource } from "@/lib/server/content/define-resource";
 
 export const spellGroupsResource = defineResource<SpellGroupRow, z.infer<typeof createSpellGroupSchema>, z.infer<typeof updateSpellGroupSchema>>({
   kind: "spell-groups",
+  listFields: ["color"],
   idParam: "groupId",
   label: "Школи магії",
   description: "Групи (школи) заклинань: назва, колір, іконка.",

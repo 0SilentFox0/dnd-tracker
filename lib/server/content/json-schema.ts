@@ -7,12 +7,15 @@ import { EffectSchema, NonRandomEffectSchema } from "@/lib/utils/abilities/schem
 import { TriggerSchema } from "@/lib/utils/abilities/schema/triggers";
 import { WeaponStatsSchema } from "@/lib/utils/artifacts/weapon-stats";
 import { SpellFxSchema } from "@/lib/utils/battle/fx/spell-fx-schema";
+import { capitalize } from "@/lib/utils/common/text";
 import { RulesetPatchSchema } from "@/lib/utils/rules/schema";
+
+export const pascal = (s: string) => s.split(/[^a-zA-Z0-9]+/).filter(Boolean).map(capitalize).join("");
 
 type Entry = readonly [ZodType, string];
 
 // the discriminator value lives in _zod.propValues; refined members (summon) have no .shape
-const effectKind = (s: ZodType) => [...(s._zod as unknown as { propValues: { kind: Set<string> } }).propValues.kind][0];
+export const effectKind = (s: ZodType) => [...(s._zod as unknown as { propValues: { kind: Set<string> } }).propValues.kind][0];
 
 export const SHARED_SCHEMAS: ReadonlyArray<Entry> = [
   [AbilitySchema, "Ability"],

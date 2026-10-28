@@ -7,6 +7,7 @@ import { prisma } from "@/lib/db";
 
 export const getCampaignBriefTool = defineTool({
   name: "get_campaign_brief",
+  scopes: ["ai"],
   title: "Опис кампанії",
   description: "Campaign name, description and the DM's standing instructions (tone, atmosphere, setting rules). Call this first when starting work from an external client.",
   input: z.object({}),

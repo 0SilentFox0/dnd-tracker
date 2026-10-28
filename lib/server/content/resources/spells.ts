@@ -17,6 +17,7 @@ const withGroup = { spellGroup: true } as const;
 
 export const spellsResource = defineResource<SpellRow, CreateSpellInput, UpdateSpellInput>({
   kind: "spells",
+  listFields: ["level", "groupId", "cost"],
   idParam: "spellId",
   label: "Заклинання",
   description: "Заклинання кампанії: рівень, школа, ціль, кидок, ефекти, візуальний ефект (fx).",

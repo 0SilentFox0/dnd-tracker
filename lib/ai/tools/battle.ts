@@ -10,6 +10,7 @@ import { loadBattle } from "@/lib/utils/battle/store";
 
 export const getBattleStateTool = defineTool({
   name: "get_battle_state",
+  scopes: ["ai"],
   title: "Стан бою",
   description: "State of a battle (the active one when battleId is omitted): round, turn order, participants with side, HP, AC, status, and the last events.",
   input: z.object({ battleId: z.string().min(1).optional() }),

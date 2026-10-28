@@ -7,7 +7,7 @@ import { aiErrorMessage } from "@/lib/ai/errors";
 import { createModel } from "@/lib/ai/providers";
 import { appendMessage, loadMessages, loadThread } from "@/lib/ai/threads";
 import { toAiSdkTools } from "@/lib/ai/tools";
-import { AI_LIMITS } from "@/lib/constants/ai";
+import { AI_LIMITS, CHAT_SCOPES } from "@/lib/constants/ai";
 import { API_ERRORS } from "@/lib/constants/api-errors";
 import { errorResponse } from "@/lib/utils/api/api-response";
 import type { AiChatMessage, AiFocus, AiMessageMetadata } from "@/types/ai";
@@ -53,7 +53,7 @@ export async function runChat({ campaignId, userId, threadId, text, focus, abort
 
   const toolSignal = AbortSignal.any([AbortSignal.timeout(AI_LIMITS.requestDeadlineMs), ...(abortSignal ? [abortSignal] : [])]);
 
-  const tools = toAiSdkTools({ campaignId, userId, threadId, abortSignal: toolSignal });
+  const tools = toAiSdkTools({ campaignId, userId, scopes: CHAT_SCOPES, threadId, abortSignal: toolSignal });
 
   const [stored, instructions] = await Promise.all([
     loadMessages(threadId, AI_LIMITS.historyMessages),

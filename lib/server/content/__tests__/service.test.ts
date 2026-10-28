@@ -16,6 +16,7 @@ const rows = new Map<string, Row>();
 
 const thing = defineResource<Row, { name: string }, { name?: string }>({
   kind: "units",
+  listFields: [],
   idParam: "thingId",
   label: "Тест",
   description: "",
@@ -42,7 +43,7 @@ const shaped = defineResource<Row, { name: string }, { name?: string }>({
   toItem: (row) => ({ ...row, shaped: true }),
 });
 
-const actor = { campaignId: "c1", userId: "u1", isDM: true, via: "session" as const };
+const actor = { campaignId: "c1", userId: "u1", isDM: true, via: "session" as const, scopes: null };
 
 const rejectsWith = async (p: Promise<unknown>, status: number) => {
   const error = await p.then(() => null, (e: unknown) => e);
@@ -106,5 +107,17 @@ describe("content service", () => {
 
   it("removeAll без підтримки в ресурсі → 405", async () => {
     await rejectsWith(removeAllContent(thing, actor), 405);
+  });
+
+  it("токен content:read не створює — 403, create не викликано", async () => {
+    const create = vi.spyOn(thing, "create");
+
+    await rejectsWith(createContent(thing, { ...actor, via: "token", scopes: ["content:read"] }, { name: "x" }), 403);
+    expect(create).not.toHaveBeenCalled();
+    create.mockRestore();
+  });
+
+  it("removeAll через токен → 403", async () => {
+    await rejectsWith(removeAllContent(thing, { ...actor, via: "token", scopes: ["content:write"] }), 403);
   });
 });

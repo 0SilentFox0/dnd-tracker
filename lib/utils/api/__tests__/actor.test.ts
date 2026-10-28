@@ -22,13 +22,13 @@ describe("resolveActor", () => {
   beforeEach(() => vi.clearAllMocks());
 
   it("без заголовка — сесія учасника", async () => {
-    expect(await resolveActor(new Request("http://x"), "c1", { access: "member", scope: "content:read" })).toEqual({ campaignId: "c1", userId: "p", isDM: false, via: "session" });
+    expect(await resolveActor(new Request("http://x"), "c1", { access: "member", scope: "content:read" })).toEqual({ campaignId: "c1", userId: "p", isDM: false, via: "session", scopes: null });
     expect(verifyApiToken).not.toHaveBeenCalled();
   });
 
   it("токен з правом — актор ДМ через токен, cookie не читається", async () => {
     token(["content:write"]);
-    expect(await resolveActor(withBearer("Bearer dndt_x"), "c1", { access: "dm", scope: "content:read" })).toEqual({ campaignId: "c1", userId: "dm", isDM: true, via: "token" });
+    expect(await resolveActor(withBearer("Bearer dndt_x"), "c1", { access: "dm", scope: "content:read" })).toEqual({ campaignId: "c1", userId: "dm", isDM: true, via: "token", scopes: ["content:write"] });
     expect(apiAuth.requireDM).not.toHaveBeenCalled();
     expect(apiAuth.requireCampaignAccess).not.toHaveBeenCalled();
   });

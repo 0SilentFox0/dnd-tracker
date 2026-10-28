@@ -34,6 +34,7 @@ export async function loadPageForAi(campaignId: string, pageId: string) {
 
 export const listScenarioPagesTool = defineTool({
   name: "list_scenario_pages",
+  scopes: ["ai"],
   title: "Сторінки сценарію",
   description: "List all scenario pages of the campaign: id, kind (scene|hero), arc, title, status.",
   input: z.object({}),
@@ -42,6 +43,7 @@ export const listScenarioPagesTool = defineTool({
 
 export const readScenarioPageTool = defineTool({
   name: "read_scenario_page",
+  scopes: ["ai"],
   title: "Прочитати сторінку сценарію",
   description:
     "Read a scenario page as the scenario markdown dialect: sections with [sectionId], rows with ids, story and DM notes. ||text|| is a DM-only secret. Pass sectionId to read one section.",
@@ -55,6 +57,7 @@ export const readScenarioPageTool = defineTool({
 
 export const searchScenarioTool = defineTool({
   name: "search_scenario",
+  scopes: ["ai"],
   title: "Пошук у сценарії",
   description: "Full-text search across all scenario pages (titles, stories, notes). Returns page, section and a snippet.",
   input: z.object({ query: z.string().trim().min(2).max(100) }),

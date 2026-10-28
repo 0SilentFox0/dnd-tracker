@@ -15,7 +15,7 @@ import { ContentError } from "@/lib/server/content/errors";
 import { unitsResource } from "@/lib/server/content/resources/units";
 import type { Actor } from "@/lib/utils/api/actor";
 
-const actor: Actor = { campaignId: "c1", userId: "u", isDM: true, via: "session" };
+const actor: Actor = { campaignId: "c1", userId: "u", isDM: true, via: "session", scopes: null };
 
 describe("unitsResource", () => {
   beforeEach(() => {

@@ -16,6 +16,7 @@ import { toUnit } from "@/lib/utils/units/to-unit";
 
 export const unitsResource = defineResource<UnitRow, z.infer<typeof createUnitSchema>, z.infer<typeof updateUnitSchema>>({
   kind: "units",
+  listFields: ["raceId", "level", "maxHp", "armorClass"],
   idParam: "unitId",
   label: "Юніти",
   description: "NPC-юніти та моби кампанії: стати, атаки, здібності, відомі заклинання.",

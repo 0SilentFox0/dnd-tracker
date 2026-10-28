@@ -21,6 +21,7 @@ async function assertNameFree(campaignId: string, name: string, exceptId?: strin
 
 export const racesResource = defineResource<RaceRow, z.infer<typeof createRaceSchema>, z.infer<typeof updateRaceSchema>>({
   kind: "races",
+  listFields: ["color"],
   idParam: "raceId",
   label: "Раси",
   description: "Ігрові раси: колір, іконка, доступні скіли, прогресія слотів, расові здібності.",
