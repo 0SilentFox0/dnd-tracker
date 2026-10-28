@@ -3,6 +3,7 @@ import { cleanup, fireEvent, render, screen, waitFor } from "@testing-library/re
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import { ClassLevelUpDialog } from "@/components/character-profile/ClassLevelUpDialog";
+import { makeAbility, makeClass } from "@/lib/utils/characters/classes/__tests__/class-fixtures";
 import type { GameClassData } from "@/types/classes";
 
 vi.mock("@/components/ui/select-field", () => ({
@@ -30,28 +31,20 @@ vi.mock("@/lib/hooks/characters/useClassLevelUp", () => ({
 
 let classes: GameClassData[] = [];
 
-const fighter: GameClassData = {
-  id: "fighter",
+const fighter = makeClass({
   name: "Воїн",
-  icon: null,
   color: null,
-  hitDie: 10,
-  savingThrows: [],
-  proficiencies: { armor: [], weapons: [], tools: [] },
-  skillChoices: { count: 0, from: [] },
-  caster: "none",
-  spellcastingAbility: null,
-  features: [{ level: 5, abilities: [{ id: "ea", name: "Extra Attack", description: "x" } as never] }],
+  features: [{ level: 5, abilities: [makeAbility("ea", "Extra Attack", "x")] }],
   subclassLevel: 3,
   subclasses: [{ id: "champion", name: "Чемпіон", features: [] }],
-};
+});
 
 const renderDialog = (level: number, entry: Record<string, unknown> = {}, hero = false) =>
   render(
     <ClassLevelUpDialog
       open
       onOpenChange={vi.fn()}
-      character={{ campaignId: "c1", id: "h1", entries: [{ classId: "fighter", level, ...entry }], ...(hero && { hero: { race: "human", level, scores: {} as never, skills: {} } }) }}
+      character={{ campaignId: "c1", id: "h1", entries: [{ classId: "fighter", level, ...entry }], ...(hero && { hero: { race: "human", level, scores: { strength: 10, dexterity: 10, constitution: 10, intelligence: 10, wisdom: 10, charisma: 10 }, skills: {} } }) }}
     />,
   );
 
@@ -97,7 +90,7 @@ describe("ClassLevelUpDialog", () => {
   });
 
   it("перелічує фічі обраного підкласу на новому рівні", () => {
-    classes = [{ ...fighter, subclasses: [{ id: "champion", name: "Чемпіон", features: [{ level: 5, abilities: [{ id: "sc", name: "Superior Crit", description: "x" } as never] }] }] }];
+    classes = [{ ...fighter, subclasses: [{ id: "champion", name: "Чемпіон", features: [{ level: 5, abilities: [makeAbility("sc", "Superior Crit", "x")] }] }] }];
     renderDialog(4, { subclassId: "champion" });
 
     expect(screen.getByText("Extra Attack, Superior Crit")).toBeTruthy();

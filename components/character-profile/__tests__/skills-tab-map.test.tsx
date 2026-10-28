@@ -6,8 +6,8 @@ import { sheetFixture } from "./sheet-fixture";
 
 import { SkillsTab } from "@/components/character-profile/SkillsTab";
 import { buildClassProgression } from "@/lib/utils/characters/classes";
+import { makeClass } from "@/lib/utils/characters/classes/__tests__/class-fixtures";
 import type { CharacterSheet } from "@/types/characters";
-import type { GameClassData } from "@/types/classes";
 
 const current = vi.hoisted(() => ({ sheet: null as unknown as CharacterSheet }));
 
@@ -18,14 +18,11 @@ vi.mock("@/components/character-profile/FeatsBlock", () => ({ FeatsBlock: () => 
 vi.mock("@/components/character-profile/rest/ChargesList", () => ({ ChargesList: () => null }));
 vi.mock("@/components/skill-tree/progression", () => ({ ProgressionPanel: () => <div data-testid="panel" /> }));
 
-const cls = {
+const cls = makeClass({
   id: "f",
-  name: "Fighter",
   color: null,
   features: [{ level: 4, abilities: [], choices: [{ id: "asi4", label: "ASI", level: 4, count: 1, kind: "feat" }] }],
-  subclassLevel: null,
-  subclasses: [],
-} as unknown as GameClassData;
+});
 
 describe("SkillsTab class map", () => {
   afterEach(cleanup);
