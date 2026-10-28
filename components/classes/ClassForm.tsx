@@ -1,10 +1,11 @@
 "use client";
 
-import { useState } from "react";
+import { useMemo, useState } from "react";
 
 import { ClassBasicsTab } from "./ClassBasicsTab";
 import { ClassColumnsEditor } from "./ClassColumnsEditor";
 import { ClassFeaturesEditor } from "./ClassFeaturesEditor";
+import { ClassProgressionMap } from "./progression";
 import { SubclassesEditor } from "./SubclassesEditor";
 
 import { withAbilityErrors } from "@/components/abilities";
@@ -12,9 +13,10 @@ import { HudForm, HudFormPage, type HudTab } from "@/components/hud/form";
 import { Button } from "@/components/ui/button";
 import { useClassForm } from "@/lib/hooks/classes";
 import { useErrorTotals } from "@/lib/hooks/common";
+import { buildClassProgression } from "@/lib/utils/characters/classes";
 import type { GameClassData } from "@/types/classes";
 
-type ClassFormTabId = "basics" | "table" | "features" | "subclasses";
+type ClassFormTabId = "map" | "basics" | "table" | "features" | "subclasses";
 
 export function ClassForm({ campaignId, gameClass }: { campaignId: string; gameClass: GameClassData }) {
   const { id, ...initial } = gameClass;
@@ -34,7 +36,16 @@ export function ClassForm({ campaignId, gameClass }: { campaignId: string; gameC
 
   const { data, set } = editor.form;
 
+  const [tab, setTab] = useState<ClassFormTabId>("map");
+
+  const progression = useMemo(() => buildClassProgression({ id, ...data }), [id, data]);
+
   const tabs: HudTab<ClassFormTabId>[] = [
+    {
+      id: "map",
+      label: "Карта",
+      content: <ClassProgressionMap progression={progression} mode="dm" actions={{ onOpenLevel: (_, column) => setTab(column === "subclass" ? "subclasses" : "features") }} />,
+    },
     { id: "basics", label: "Основне", content: <ClassBasicsTab form={editor.form} campaignId={campaignId} /> },
     { id: "table", label: "Таблиця класу", content: <ClassColumnsEditor value={data.columns ?? []} onChange={(columns) => set((prev) => ({ ...prev, columns }))} /> },
     {
@@ -65,6 +76,8 @@ export function ClassForm({ campaignId, gameClass }: { campaignId: string; gameC
         id="class-form"
         onSubmit={editor.actions.submit}
         tabs={tabs}
+        tab={tab}
+        onTabChange={setTab}
         actions={
           <>
             <Button type="button" variant="outline" onClick={editor.actions.cancel}>

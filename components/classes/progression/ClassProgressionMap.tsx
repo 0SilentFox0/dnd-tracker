@@ -47,11 +47,15 @@ export function ClassProgressionMap({ progression, mode, actions }: Props) {
                 {row.level}
                 {row.state === "next" ? <span className="ml-1 text-xs text-hud-muted">наступний</span> : null}
               </td>
-              <td className={CELL}>
+              <td className={cn(CELL, actions?.onOpenLevel && "cursor-pointer")} data-testid={`base-${row.level}`} onClick={() => actions?.onOpenLevel?.(row.level, "base")}>
                 <Items items={row.base} accent={color} />
               </td>
               {subclasses.map((s) => (
-                <td key={s.id} className={cn(CELL, !isTemplate && !s.chosen && "opacity-50")}>
+                <td
+                  key={s.id}
+                  className={cn(CELL, !isTemplate && !s.chosen && "opacity-50", actions?.onOpenLevel && "cursor-pointer")}
+                  onClick={() => actions?.onOpenLevel?.(row.level, "subclass")}
+                >
                   <Items items={row.bySubclass[s.id] ?? []} />
                 </td>
               ))}

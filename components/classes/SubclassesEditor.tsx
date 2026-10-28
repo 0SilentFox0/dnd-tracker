@@ -50,6 +50,7 @@ export function SubclassesEditor({ campaignId, form: { data, set }, onValidityCh
           onChange={(e) => set((prev) => ({ ...prev, subclassLevel: e.target.value === "" ? null : Number(e.target.value) }))}
           className="w-24"
         />
+        <p className="text-xs text-hud-muted">SRD містить лише один підклас на клас; інші додайте самі.</p>
       </div>
 
       {data.subclasses.map((subclass) => (
