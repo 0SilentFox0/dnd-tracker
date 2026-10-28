@@ -3,7 +3,7 @@ import { z } from "zod";
 import { type CampaignScope, characterHandler, defineCharacterOperation, memberScope, orThrow } from "../operation-runner";
 
 import { API_ERRORS } from "@/lib/constants/api-errors";
-import { CharacterStatus } from "@/lib/constants/characters";
+import { CharacterStatus, CharacterType } from "@/lib/constants/characters";
 import { InventoryLogKind } from "@/lib/constants/inventory";
 import { prisma } from "@/lib/db";
 import { ensureInventory, lockCampaignArtifacts } from "@/lib/server/artifacts/lock";
@@ -27,7 +27,7 @@ const ERROR_TEXT: Record<TransferErrorCode, string> = {
   [TransferError.NOT_IN_STASH]: API_ERRORS.ARTIFACT_NOT_IN_STASH,
 };
 
-const characterSelect = { id: true, campaignId: true, controlledBy: true, status: true } as const;
+const characterSelect = { id: true, campaignId: true, controlledBy: true, status: true, type: true } as const;
 
 async function transferCore({ access, campaignId, characterId }: CampaignScope, data: z.infer<typeof transferSchema>) {
   const from = await orThrow(loadOwned(prisma.character.findUnique({ where: { id: characterId }, select: characterSelect }), campaignId, API_ERRORS.CHARACTER_NOT_FOUND));
@@ -37,6 +37,8 @@ async function transferCore({ access, campaignId, characterId }: CampaignScope, 
   const to = await orThrow(loadOwned(prisma.character.findUnique({ where: { id: data.toCharacterId }, select: characterSelect }), campaignId, API_ERRORS.CHARACTER_NOT_FOUND));
 
   if (to.status === CharacterStatus.PENDING) throw new ContentError(API_ERRORS.CHARACTER_NOT_FOUND, 404);
+
+  if (!access.isDM && to.type !== CharacterType.PLAYER) throw new ContentError(API_ERRORS.FORBIDDEN, 403);
 
   return prisma.$transaction(async (tx) => {
     await lockCampaignArtifacts(tx, campaignId);

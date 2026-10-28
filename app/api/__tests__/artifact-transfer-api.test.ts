@@ -53,7 +53,9 @@ describe("artifact transfer API", () => {
     vi.mocked(prisma.character.findUnique).mockImplementation((async ({ where }: { where: { id: string } }) => {
       if (where.id === "a") return { id: "a", campaignId: "camp", controlledBy: "u1", inventory: { gold: 0, silver: 0, copper: 0, equipped: inventories.a, backpack: [], items: [] } };
 
-      if (where.id === "b") return { id: "b", campaignId: "camp", controlledBy: "u3" };
+      if (where.id === "b") return { id: "b", campaignId: "camp", controlledBy: "u3", type: "player" };
+
+      if (where.id === "n") return { id: "n", campaignId: "camp", controlledBy: null, type: "npc_hero" };
 
       if (where.id === "x") return { id: "x", campaignId: "other", controlledBy: null };
 
@@ -98,6 +100,20 @@ describe("artifact transfer API", () => {
     vi.mocked(apiAuth.requireCampaignAccess).mockResolvedValue(access("u1", "player"));
 
     expect((await post({ slot: "helmet", toCharacterId: "b" })).status).toBe(200);
+  });
+
+  it("гравець не може передати артефакт NPC — 403 без транзакції", async () => {
+    vi.mocked(apiAuth.requireCampaignAccess).mockResolvedValue(access("u1", "player"));
+
+    const res = await post({ slot: "helmet", toCharacterId: "n" });
+
+    expect(res.status).toBe(403);
+    expect((await res.json()).error).toBe(API_ERRORS.FORBIDDEN);
+    expect(prisma.$transaction).not.toHaveBeenCalled();
+  });
+
+  it("ДМ може передати артефакт NPC", async () => {
+    expect((await post({ slot: "helmet", toCharacterId: "n" })).status).toBe(200);
   });
 
   it("чужий гравець — 403 без транзакції", async () => {

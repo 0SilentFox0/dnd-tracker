@@ -29,6 +29,23 @@ describe("character roster API", () => {
     expect(await res.json()).toEqual([{ id: "a", name: "Аргон", avatar: "https://x/a.png", type: "player", equipped: { helmet: { id: "h1", name: "Шолом" } } }]);
   });
 
+  it("гравець: запит лише type player", async () => {
+    vi.mocked(prisma.character.findMany).mockResolvedValue([]);
+
+    await get();
+
+    expect(prisma.character.findMany).toHaveBeenCalledWith(expect.objectContaining({ where: expect.objectContaining({ type: "player" }) }));
+  });
+
+  it("ДМ бачить і NPC: без фільтра за типом", async () => {
+    vi.mocked(apiAuth.requireCampaignAccess).mockResolvedValue({ userId: "dm", isDM: true } as never);
+    vi.mocked(prisma.character.findMany).mockResolvedValue([]);
+
+    await get();
+
+    expect((vi.mocked(prisma.character.findMany).mock.calls[0][0] as { where: object }).where).not.toHaveProperty("type");
+  });
+
   it("у ростері лише активні персонажі", async () => {
     vi.mocked(prisma.character.findMany).mockResolvedValue([]);
 

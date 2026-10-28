@@ -3,7 +3,7 @@ import { z } from "zod";
 import { defineCharacterOperation, executeCharacterRoute, memberScope } from "../operation-runner";
 
 import type { CharacterTypeValue } from "@/lib/constants/characters";
-import { ACTIVE_CHARACTER } from "@/lib/constants/characters";
+import { ACTIVE_CHARACTER, CharacterType } from "@/lib/constants/characters";
 import { prisma } from "@/lib/db";
 import type { Actor } from "@/lib/utils/api/actor";
 import { isUniqueRow } from "@/lib/utils/items/item-row";
@@ -20,12 +20,12 @@ export const rosterOperation = defineCharacterOperation({
   unlocked: true,
   gate: memberScope,
   query: () => ({}),
-  run: ({ campaignId }) => readRosterHeroes(campaignId),
+  run: ({ campaignId, access }) => readRosterHeroes(campaignId, access.isDM),
 });
 
-async function readRosterHeroes(campaignId: string): Promise<RosterHero[]> {
+async function readRosterHeroes(campaignId: string, isDM: boolean): Promise<RosterHero[]> {
   const heroes = await prisma.character.findMany({
-    where: { campaignId, ...ACTIVE_CHARACTER },
+    where: { campaignId, ...ACTIVE_CHARACTER, ...(!isDM && { type: CharacterType.PLAYER }) },
     select: { id: true, name: true, avatar: true, type: true, inventory: { select: { equipped: true } } },
     orderBy: { name: "asc" },
   });
