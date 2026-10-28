@@ -8,6 +8,7 @@ import { Label } from "@/components/ui/label";
 import { LabeledInput } from "@/components/ui/labeled-input";
 import { SelectField } from "@/components/ui/select-field";
 import { Textarea } from "@/components/ui/textarea";
+import { SPELL_NAME_MAX } from "@/lib/constants/spells";
 import type { IdName } from "@/types/common";
 import type { SpellCost } from "@/types/spells";
 
@@ -19,7 +20,7 @@ export interface SpellFormFieldsProps {
 export function SpellFormBasicFields({ formData, setFormData, spellGroups }: SpellFormFieldsProps & { spellGroups: IdName[] }) {
   return (
     <div className="grid grid-cols-2 gap-4 [&>*]:min-w-0">
-      <LabeledInput containerClassName="col-span-2" id="name" label="Назва заклинання" value={formData.name} onChange={(e) => setFormData({ ...formData, name: e.target.value })} required placeholder="Назва заклинання" />
+      <LabeledInput containerClassName="col-span-2" id="name" label="Назва заклинання" value={formData.name} onChange={(e) => setFormData({ ...formData, name: e.target.value })} required maxLength={SPELL_NAME_MAX} placeholder="Назва заклинання" />
       <div>
         <Label htmlFor="level">Рівень (слот) *</Label>
         <SelectField id="level" value={String(formData.level)} onValueChange={(value) => setFormData({ ...formData, level: parseInt(value) })} placeholder="Виберіть рівень" options={spellLevelOptions()} />

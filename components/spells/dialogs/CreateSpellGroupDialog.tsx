@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { ResponsiveDialog } from "@/components/ui/responsive-dialog";
+import { SPELL_NAME_MAX } from "@/lib/constants/spells";
 import { useCreateSpellGroup } from "@/lib/hooks/spells";
 
 interface CreateSpellGroupDialogProps {
@@ -66,6 +67,7 @@ export function CreateSpellGroupDialog({
               onChange={(e) => setName(e.target.value)}
               placeholder="Назва групи"
               required
+              maxLength={SPELL_NAME_MAX}
             />
           </div>
 

@@ -24,12 +24,24 @@ export function useRacesList(campaignId: string) {
     }
   };
 
-  const createRace = (data: RaceFormData) => create.mutate(data, { onSuccess: () => setCreateOpen(false) });
+  const createRace = (data: RaceFormData, onSuccess: () => void) =>
+    create.mutate(data, {
+      onSuccess: () => {
+        onSuccess();
+        setCreateOpen(false);
+      },
+    });
+
+  const setOpen = (open: boolean) => {
+    if (open) create.reset();
+
+    setCreateOpen(open);
+  };
 
   return {
     races,
     isLoading,
-    createDialog: { open: createOpen, setOpen: setCreateOpen },
+    createDialog: { open: createOpen, setOpen, status: { isPending: create.isPending, error: create.error } },
     actions: { createRace, deleteRace },
   };
 }

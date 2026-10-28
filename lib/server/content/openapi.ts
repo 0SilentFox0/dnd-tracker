@@ -24,11 +24,12 @@ const ref = (id: string) => ({ $ref: `#/components/schemas/${id}` });
 
 const responseRef = (id: string) => ({ $ref: `#/components/responses/${id}` });
 
-const SUCCESS_RESPONSES: Record<OperationResponse, { id: string; schema: object }> = {
+const SUCCESS_RESPONSES: Record<OperationResponse, { id: string; schema: object; contentType?: string }> = {
   item: { id: "ItemOk", schema: ref("ContentItem") },
   list: { id: "ListOk", schema: { type: "array", items: { type: "object", additionalProperties: true } } },
   ok: { id: "OkOk", schema: ref("Ok") },
   object: { id: "ObjectOk", schema: { type: "object", additionalProperties: true } },
+  csv: { id: "CsvOk", schema: { type: "string" }, contentType: "text/csv" },
 };
 
 export type OpenApiOperation = { operationId: string; "x-scopes": string[]; parameters?: unknown[]; requestBody?: unknown; responses: Record<string, unknown>; [key: string]: unknown };
@@ -127,7 +128,7 @@ export function buildOpenApi(): OpenApiDocument {
     components: {
       responses: {
         ...Object.fromEntries(Object.values(ERROR_RESPONSES).map(({ id, description }) => [id, { description, content: { "application/json": { schema: ref("Error") } } }])),
-        ...Object.fromEntries(Object.values(SUCCESS_RESPONSES).map(({ id, schema }) => [id, { description: "Успіх", content: { "application/json": { schema } } }])),
+        ...Object.fromEntries(Object.values(SUCCESS_RESPONSES).map(({ id, schema, contentType = "application/json" }) => [id, { description: "Успіх", content: { [contentType]: { schema } } }])),
       },
       parameters: { CampaignId: { name: "id", in: "path", required: true, schema: { type: "string" }, description: "Id кампанії" } },
       securitySchemes: { bearerAuth: { type: "http", scheme: "bearer", description: "Токен з /dm/ai (права content:read / content:write)." } },

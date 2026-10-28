@@ -12,7 +12,7 @@ vi.mock("@/lib/utils/api/api-auth", async (orig) => ({
 vi.mock("@/lib/server/users/db-user", async (orig) => ({ ...(await orig<object>()), ensureDbUser: vi.fn() }));
 vi.mock("@/lib/db", () => ({
   prisma: {
-    campaign: { findUnique: vi.fn(), findMany: vi.fn() },
+    campaign: { findUnique: vi.fn(), findFirst: vi.fn(), findMany: vi.fn() },
     campaignMember: { create: vi.fn() },
     character: { findUnique: vi.fn() },
   },
@@ -59,7 +59,7 @@ describe("aiInstructions never reaches members", () => {
   });
 
   it("POST /api/campaigns/join", async () => {
-    vi.mocked(prisma.campaign.findUnique).mockImplementation(honoringOmit({ ...campaignRow, members: [] }) as never);
+    vi.mocked(prisma.campaign.findFirst).mockImplementation(honoringOmit({ ...campaignRow, members: [] }) as never);
     vi.mocked(prisma.campaignMember.create).mockImplementation((async (args: { include: { campaign: Args } }) => ({
       id: "m1",
       campaign: await honoringOmit(campaignRow)(args.include.campaign),

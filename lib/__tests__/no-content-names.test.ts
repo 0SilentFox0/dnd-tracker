@@ -25,14 +25,15 @@ const ALLOWED: Record<string, string> = {
   "lib/constants/skills.ts: Природа": "label of the built-in skill (ability check)",
   "lib/constants/abilities.ts: Захист": "label of the built-in armorClass stat",
   "lib/hooks/battle/useBattleMapPlayground.ts: Вогняна стіна": "dev-only playground hazard label",
+  "lib/constants/field-labels.ts: Аватар": "form field label (avatar image), not the library name",
 };
 
-// статичний маркетинг, не рушій: демо-копірайт може згадувати назви з бібліотеки
+// landing: статичний маркетинг; import/fields: приклади значень і назви колонок, не рушій
 function files(dir: string): string[] {
   return readdirSync(dir).flatMap((f) => {
     const p = join(dir, f);
 
-    if (statSync(p).isDirectory()) return f === "__tests__" || p === "components/landing" ? [] : files(p);
+    if (statSync(p).isDirectory()) return f === "__tests__" || p === "components/landing" || p === "lib/utils/content/import/fields" ? [] : files(p);
 
     return /\.(ts|tsx)$/.test(f) ? [p] : [];
   });

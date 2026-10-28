@@ -2,6 +2,7 @@ import type { Prisma, PrismaClient } from "@prisma/client";
 
 import type { ImportUnitRow } from "@/lib/schemas/units";
 import { abilitiesJson } from "@/lib/utils/abilities/read";
+import { nameKey } from "@/lib/utils/content/import/mapping";
 import { resolveUnitProficiency } from "@/lib/utils/units/monster";
 import { specialAbilitiesToAbilities } from "@/lib/utils/units/special-abilities";
 import type { UnitImportResult } from "@/types/import";
@@ -10,8 +11,6 @@ export interface ImportDb {
   race: Pick<PrismaClient["race"], "findMany">;
   unit: Pick<PrismaClient["unit"], "findMany" | "createMany">;
 }
-
-const nameKey = (name: string) => name.trim().toLocaleLowerCase("uk");
 
 export function resolveImportRaces(names: Array<string | undefined>, races: Array<{ id: string; name: string }>) {
   const byName = new Map<string, string>();

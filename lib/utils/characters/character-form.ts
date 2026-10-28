@@ -44,9 +44,9 @@ export function characterToFormData(
       primaryAbility: character.primaryAbility ?? null,
     },
     combatStats: {
-      armorClass: character.armorClass || 10,
+      armorClass: character.armorClass ?? 10,
       initiative: clampHeroInitiative(character.initiative, { heroMin: HERO_INITIATIVE_BOUNDS.MIN, heroMax: HERO_INITIATIVE_BOUNDS.MAX }),
-      speed: character.speed || 30,
+      speed: character.speed ?? 30,
       minTargets: character.minTargets || 1,
       maxTargets: character.maxTargets || 1,
       morale: (character as { morale?: number }).morale ?? 0,

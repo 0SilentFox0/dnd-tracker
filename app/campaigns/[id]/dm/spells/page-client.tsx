@@ -5,6 +5,7 @@ import { Printer, Wand2 } from "lucide-react";
 
 import { DeleteAllButton } from "@/components/common/DeleteAllButton";
 import { EmptyState, LoadingState } from "@/components/common/states";
+import { ContentTransferButtons } from "@/components/content-import/ContentTransferButtons";
 import { HudPage, HudPageHeader } from "@/components/hud/page";
 import { OnboardingHint } from "@/components/onboarding/OnboardingHint";
 import { CreateSpellGroupDialog } from "@/components/spells/dialogs/CreateSpellGroupDialog";
@@ -26,6 +27,7 @@ export function DMSpellsPageClient({ campaignId }: { campaignId: string }) {
         subtitle={`База заклинань кампанії · Всього: ${count}`}
         actions={
           <>
+            <ContentTransferButtons campaignId={campaignId} kind="spells" />
             <CreateSpellGroupDialog campaignId={campaignId} />
             <Button className="whitespace-nowrap text-xs sm:text-sm" asChild>
               <Link href={`/campaigns/${campaignId}/dm/spells/new`}>+ Створити заклинання</Link>

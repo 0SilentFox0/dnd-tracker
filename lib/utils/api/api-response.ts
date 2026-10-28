@@ -1,5 +1,7 @@
 import { NextResponse } from "next/server";
 
+import { PRIVATE_NO_STORE_HEADERS } from "./cache-headers";
+
 export type ApiErrorBody = { error: string; issues?: unknown };
 
 export function errorResponse(message: string, status: number, issues?: unknown): NextResponse {
@@ -7,3 +9,9 @@ export function errorResponse(message: string, status: number, issues?: unknown)
 
   return NextResponse.json(body, { status });
 }
+
+export const attachmentHeaders = (fileName: string, contentType?: string): Record<string, string> => ({
+  ...(contentType && { "Content-Type": contentType }),
+  "Content-Disposition": `attachment; filename="${fileName}"`,
+  ...PRIVATE_NO_STORE_HEADERS,
+});

@@ -12,3 +12,5 @@ export const MAIN_SKILL_ROLE_LABELS: Record<MainSkillRole, string> = {
   ultimate: "Ультимат",
   personal: "Персональні",
 };
+
+export const MAIN_SKILL_NAME_MAX = 100;

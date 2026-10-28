@@ -8,13 +8,15 @@ import { withAbilityErrors } from "@/components/abilities";
 import { Button } from "@/components/ui/button";
 import { ResponsiveDialog } from "@/components/ui/responsive-dialog";
 import { DEFAULT_SPELL_SLOT_PROGRESSION } from "@/lib/constants/spells";
+import { errorMessage } from "@/lib/utils/common/error-message";
 import type { RaceFormData } from "@/types/races";
 
 interface CreateRaceDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   campaignId: string;
-  onCreateRace: (data: RaceFormData) => void;
+  onCreateRace: (data: RaceFormData, onSuccess: () => void) => void;
+  status?: { isPending: boolean; error: unknown };
 }
 
 const EMPTY_FORM: RaceFormData = {
@@ -36,6 +38,7 @@ export function CreateRaceDialog({
   onOpenChange,
   campaignId,
   onCreateRace,
+  status,
 }: CreateRaceDialogProps) {
   const [formData, setFormData] = useState<RaceFormData>(EMPTY_FORM);
 
@@ -48,9 +51,7 @@ export function CreateRaceDialog({
 
     if (!abilitiesValid) return;
 
-    onCreateRace(formData);
-
-    setFormData(EMPTY_FORM);
+    onCreateRace(formData, () => setFormData(EMPTY_FORM));
   };
 
   return (
@@ -63,11 +64,16 @@ export function CreateRaceDialog({
       hud
       footer={
         <>
+          {status?.error != null && (
+            <p role="alert" className="w-full text-sm text-destructive">
+              {errorMessage(status.error, "Не вдалося створити расу")}
+            </p>
+          )}
           <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
             Скасувати
           </Button>
-          <Button type="submit" form="create-race-form" disabled={!abilitiesValid}>
-            {withAbilityErrors("Створити расу", abilityErrors)}
+          <Button type="submit" form="create-race-form" disabled={!abilitiesValid || status?.isPending}>
+            {status?.isPending ? "Створення..." : withAbilityErrors("Створити расу", abilityErrors)}
           </Button>
         </>
       }

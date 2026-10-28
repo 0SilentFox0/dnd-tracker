@@ -74,6 +74,18 @@ export function useCharacterForm(options: UseCharacterFormOptions) {
       e.preventDefault();
       setError(null);
 
+      if (!formData.basicInfo.race) {
+        setError("Оберіть расу");
+
+        return;
+      }
+
+      if (!formData.basicInfo.class.trim()) {
+        setError("Вкажіть клас");
+
+        return;
+      }
+
       if (
         formData.basicInfo.type === CharacterType.PLAYER &&
         !formData.basicInfo.controlledBy

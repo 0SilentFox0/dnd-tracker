@@ -6,34 +6,39 @@ import { useQueryClient } from "@tanstack/react-query";
 import { scenarioKeys } from "./keys";
 
 import { createScenarioPage, deleteScenarioPage, updateScenarioMeta } from "@/lib/api/scenario";
-import { useCrudMutation } from "@/lib/hooks/common";
+import { useCrudMutation, useNotify } from "@/lib/hooks/common";
+import { errorMessage } from "@/lib/utils/common/error-message";
 import type { CreateScenarioPageData, ScenarioPage, ScenarioPageSummary, UpdateScenarioMetaData } from "@/types/scenario";
 
 export function useScenarioPageActions(campaignId: string) {
   const queryClient = useQueryClient();
+
+  const notify = useNotify();
+
+  const onError = (fallback: string) => (error: unknown) => void notify(errorMessage(error, fallback));
 
   const invalidateKeys = [scenarioKeys.list(campaignId)];
 
   const mergeIntoPageCache = (summary: ScenarioPageSummary) =>
     queryClient.setQueryData<ScenarioPage>(scenarioKeys.page(campaignId, summary.id), (old) => old && { ...old, ...summary, content: old.content, version: old.version });
 
-  const create = useCrudMutation({ mutationFn: (data: CreateScenarioPageData) => createScenarioPage(campaignId, data), invalidateKeys, errorText: "Не вдалося створити сторінку" });
+  const create = useCrudMutation({ mutationFn: (data: CreateScenarioPageData) => createScenarioPage(campaignId, data), invalidateKeys, onError: onError("Не вдалося створити сторінку") });
 
   const update = useCrudMutation({
     mutationFn: ({ id, data }: { id: string; data: UpdateScenarioMetaData }) => updateScenarioMeta(campaignId, id, data),
     invalidateKeys,
     onSuccess: mergeIntoPageCache,
-    errorText: "Не вдалося зберегти властивості",
+    onError: onError("Не вдалося зберегти властивості"),
   });
 
   const reorder = useCrudMutation({
     mutationFn: (patches: { id: string; sortOrder: number }[]) => Promise.all(patches.map(({ id, sortOrder }) => updateScenarioMeta(campaignId, id, { sortOrder }))),
     invalidateKeys,
     onSuccess: (summaries) => summaries.forEach(mergeIntoPageCache),
-    errorText: "Не вдалося зберегти властивості",
+    onError: onError("Не вдалося зберегти властивості"),
   });
 
-  const remove = useCrudMutation({ mutationFn: (id: string) => deleteScenarioPage(campaignId, id), invalidateKeys, errorText: "Не вдалося видалити сторінку" });
+  const remove = useCrudMutation({ mutationFn: (id: string) => deleteScenarioPage(campaignId, id), invalidateKeys, onError: onError("Не вдалося видалити сторінку") });
 
   const move = useCallback(
     async (id: string, dir: -1 | 1, siblings: ScenarioPageSummary[]) => {

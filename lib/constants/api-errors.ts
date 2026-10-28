@@ -155,6 +155,9 @@ export const API_ERRORS = {
   HP_FULL: "Здоров'я вже повне",
   CHARACTER_IN_BATTLE: "Герой зараз у бою — дочекайтеся завершення",
   AI_NOT_CONFIGURED_FOR_PLAYERS: "DM кампанії ще не підключив AI",
+  IMPORT_UNKNOWN_KIND: "Невідомий вид контенту для імпорту",
+  IMPORT_ROW_FAILED: "Не вдалося записати рядок",
+  IMPORT_AI_NO_KEY: "AI-ключ ДМ не налаштовано — зіставте колонки вручну",
 } as const;
 
 export const classNameTakenMessage = (name: string) => `Клас «${name}» уже є в кампанії`;

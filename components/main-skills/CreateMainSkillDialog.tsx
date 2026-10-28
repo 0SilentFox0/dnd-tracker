@@ -33,8 +33,15 @@ export function CreateMainSkillDialog({ open, onOpenChange, campaignId }: Create
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    if (!formData.name.trim()) {
+      void notify("Вкажіть назву");
+
+      return;
+    }
+
     try {
-      await createMainSkillMutation.mutateAsync({ ...formData, icon: formData.icon?.trim() || undefined });
+      await createMainSkillMutation.mutateAsync({ ...formData, name: formData.name.trim(), icon: formData.icon?.trim() || undefined });
       setFormData(EMPTY);
       onOpenChange(false);
       router.refresh();

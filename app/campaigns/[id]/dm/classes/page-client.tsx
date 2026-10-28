@@ -5,6 +5,7 @@ import { GraduationCap, Plus } from "lucide-react";
 import { ClassCard } from "@/components/classes/ClassCard";
 import { CreateClassDialog } from "@/components/classes/CreateClassDialog";
 import { EmptyState, LoadingState } from "@/components/common/states";
+import { ContentTransferButtons } from "@/components/content-import/ContentTransferButtons";
 import { HudPage, HudPageHeader } from "@/components/hud/page";
 import { Button } from "@/components/ui/button";
 import { useClassesList } from "@/lib/hooks/classes";
@@ -21,10 +22,13 @@ export function DMClassesPageClient({ campaignId }: { campaignId: string }) {
         title="Класи"
         subtitle={`${classes.length} ${pluralUk(classes.length, ["клас", "класи", "класів"])}`}
         actions={
-          <Button onClick={() => list.createDialog.setOpen(true)} className="flex items-center gap-2">
-            <Plus className="h-4 w-4" />
-            Новий клас
-          </Button>
+          <>
+            <ContentTransferButtons campaignId={campaignId} kind="classes" />
+            <Button onClick={() => list.createDialog.setOpen(true)} className="flex items-center gap-2">
+              <Plus className="h-4 w-4" />
+              Новий клас
+            </Button>
+          </>
         }
       />
 

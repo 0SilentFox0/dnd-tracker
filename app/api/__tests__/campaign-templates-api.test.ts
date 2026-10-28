@@ -4,7 +4,7 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 const m = vi.hoisted(() => ({
   db: {
     user: { upsert: vi.fn() },
-    campaign: { create: vi.fn(), findUnique: vi.fn(), findMany: vi.fn(), update: vi.fn() },
+    campaign: { create: vi.fn(), findUnique: vi.fn(), findFirst: vi.fn(), findMany: vi.fn(), update: vi.fn() },
     campaignMember: { create: vi.fn() },
     campaignSourceSync: { create: vi.fn() },
     $transaction: vi.fn(),
@@ -182,7 +182,7 @@ describe("campaign templates API", () => {
   });
 
   it("join за кодом шаблону — 403 TEMPLATE_NOT_JOINABLE", async () => {
-    m.db.campaign.findUnique.mockResolvedValue({ id: "t1", kind: "template", status: "active", members: [] });
+    m.db.campaign.findFirst.mockResolvedValue({ id: "t1", kind: "template", status: "active", members: [] });
 
     const res = await joinPost(json({ inviteCode: "ABC123" }));
 

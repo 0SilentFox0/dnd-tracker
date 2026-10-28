@@ -5,6 +5,7 @@ import { Layers } from "lucide-react";
 
 import { ArtifactSetCard } from "@/components/artifact-sets/ArtifactSetCard";
 import { EmptyState } from "@/components/common/states";
+import { ContentTransferButtons } from "@/components/content-import/ContentTransferButtons";
 import { HudPage, HudPageHeader } from "@/components/hud/page";
 import { Button } from "@/components/ui/button";
 import { useArtifactSetsList } from "@/lib/hooks/artifact-sets";
@@ -19,6 +20,7 @@ export function DMArtifactSetsPageClient({ campaignId: id }: { campaignId: strin
         subtitle="Групи артефактів з бонусом за повний комплект (у бою)"
         actions={
           <>
+            <ContentTransferButtons campaignId={id} kind="artifact-sets" />
             <Button asChild>
               <Link href={`/campaigns/${id}/dm/artifact-sets/new`}>
                 + Новий сет

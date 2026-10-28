@@ -674,7 +674,7 @@ type ImportField = {
 
 - `POST /api/campaigns/[id]/content-import/[kind]` — тіло `{ rows, mode, dryRun? }`; операція `<kind>.import` у `CONTENT_OPERATIONS` (OpenAPI), права `content:write`. Наявний `POST /units/import` лишається сумісним (делегує в новий шлях, мапінг — нинішні синоніми).
 - `GET /api/campaigns/[id]/content-import/[kind]/example.csv` — приклад: заголовки (`label`) і 2–3 рядки (`example`).
-- `GET /api/campaigns/[id]/content-export/[kind].csv` — експорт кампанії в тому самому форматі (посилання — назви, вкладене — JSON у клітинці), тож «вивантажив → змінив → завантажив» працює; `content:read`.
+- `GET /api/campaigns/[id]/content-export/[kind]` — експорт кампанії в тому самому форматі (посилання — назви, вкладене — JSON у клітинці), тож «вивантажив → змінив → завантажив» працює; `content:read`.
 - MCP: інструмент `content_import(kind, rows, mode, dryRun)` (рядок в `AI_TOOLS`, scope `content:write`), щоб зовнішній агент переносив дані сам.
 
 ### 4. AI-мапінг (опційно)

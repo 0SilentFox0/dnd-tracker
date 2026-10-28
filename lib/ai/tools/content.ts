@@ -5,17 +5,20 @@ import { type AiToolContext, defineTool } from "./define";
 import "server-only";
 import { AI_LIMITS } from "@/lib/constants/ai";
 import { SYNC_SCOPES } from "@/lib/constants/source-sync";
+import { contentImportSchema } from "@/lib/schemas/content-import";
 import { saveSkillTreeSchema } from "@/lib/schemas/skills";
 import { sourceSyncApplySchema } from "@/lib/schemas/source-sync";
 import { readCampaignRules, updateCampaignRules } from "@/lib/server/campaigns/rules";
 import type { AnyContentResource, ContentKind } from "@/lib/server/content/define-resource";
 import { ContentError, parseInput } from "@/lib/server/content/errors";
+import { compactImportReport, importContent } from "@/lib/server/content/import/import-content";
 import { CONTENT_RESOURCES } from "@/lib/server/content/resources";
 import { EXTRA, KINDS, SCHEMA_TARGETS } from "@/lib/server/content/schema-targets";
 import { createContent, getContent, listContent, removeContent, updateContent } from "@/lib/server/content/service";
 import { readSkillTree, saveSkillTree } from "@/lib/server/skills/skill-tree-service";
 import { applySource, getSourceDiff } from "@/lib/server/templates/sync/service";
 import { type Actor, tokenActorOf } from "@/lib/utils/api/actor";
+import { IMPORT_KINDS, IMPORT_MODES } from "@/lib/utils/content/import/kinds";
 import { RulesetPatchSchema } from "@/lib/utils/rules/schema";
 import type { SourceDiff } from "@/types/campaigns";
 
@@ -212,6 +215,21 @@ export const sourceApplyTool = defineTool({
   handler: (ctx, input) => applySource(toolActor(ctx), input),
 });
 
+export const contentImportTool = defineTool({
+  name: "content_import",
+  title: "Імпорт контенту",
+  description:
+    "Масове створення/оновлення записів одного виду (до 500 рядків за виклик) — для перенесення кампанії з іншого сервісу. rows — об'єкти з полями як у тілі create (content_schema), але посилання на інші записи можна давати назвами, а числа/списки — текстом, як у CSV; у skills поля плоскі: name, description, icon, image, mainSkillId, spellId, spellGroupId, grantedSpellId, abilities. mode: create (дубль назви — помилка рядка) | update (за назвою: оновити, інакше створити) | skip (наявні пропустити). Спершу виклич з dryRun: true — перевірка без запису. Відповідь: counts і до 50 рядків з помилками/попередженнями (omitted — скільки ще).",
+  scopes: ["content:write"],
+  input: z.object({
+    kind: z.enum(IMPORT_KINDS),
+    rows: contentImportSchema.shape.rows,
+    mode: z.enum(IMPORT_MODES).default("create"),
+    dryRun: z.boolean().default(false),
+  }),
+  handler: async (ctx, { kind, rows, mode, dryRun }) => compactImportReport(await importContent(toolActor(ctx), kind, { rows, mode, dryRun })),
+});
+
 export const CONTENT_TOOLS = [
   contentKindsTool,
   contentSchemaTool,
@@ -220,6 +238,7 @@ export const CONTENT_TOOLS = [
   contentCreateTool,
   contentUpdateTool,
   contentDeleteTool,
+  contentImportTool,
   getRulesTool,
   updateRulesTool,
   getSkillTreeTool,

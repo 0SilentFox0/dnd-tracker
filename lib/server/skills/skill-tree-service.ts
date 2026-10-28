@@ -1,7 +1,6 @@
 import type { Prisma, SkillTree } from "@prisma/client";
 
 import "server-only";
-import { API_ERRORS } from "@/lib/constants/api-errors";
 import { prisma } from "@/lib/db";
 import { assertCan } from "@/lib/server/content/access";
 import { ContentError } from "@/lib/server/content/errors";
@@ -9,7 +8,7 @@ import { CONTENT_OPERATIONS } from "@/lib/server/content/operations";
 import { moveSkillTreeProgress } from "@/lib/server/skills/progress-move";
 import type { Actor } from "@/lib/utils/api/actor";
 import { NEED } from "@/lib/utils/api/need";
-import { readTreeJson, validateTree } from "@/lib/utils/skills/progression";
+import { readTreeJson, TREE_ERROR_TEXT, validateTree } from "@/lib/utils/skills/progression";
 
 export function listSkillTrees(actor: Actor): Promise<SkillTree[]> {
   assertCan(actor, CONTENT_OPERATIONS["skill-trees.list"].need);
@@ -39,7 +38,11 @@ export async function saveSkillTree(actor: Actor, input: { treeId?: string; race
 
   const errors = validateTree(raw, { mainSkillIds: new Set(mainSkills.map((m) => m.id)), skillIds: new Set(librarySkills.map((s) => s.id)) });
 
-  if (errors.length > 0) throw new ContentError(API_ERRORS.INVALID_SKILL_TREE, 400, errors);
+  if (errors.length > 0) {
+    const text = errors.map((e) => `${TREE_ERROR_TEXT[e.code]}${e.label ? `: ${e.label}` : ""}`).join("; ");
+
+    throw new ContentError(text, 400, errors);
+  }
 
   const existing =
     (treeId ? await prisma.skillTree.findFirst({ where: { id: treeId, campaignId } }) : null) ??

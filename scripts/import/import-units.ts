@@ -3,6 +3,7 @@ import * as fs from "fs";
 import * as path from "path";
 
 import { importUnitsSchema } from "@/lib/schemas/units";
+import { parseTable } from "@/lib/utils/content/import/table";
 import { importUnitsIntoCampaign } from "@/lib/utils/units/import-units";
 import { convertCSVRowToUnit } from "@/lib/utils/units/unit-parsing";
 import { DEFAULT_CAMPAIGN_ID } from "@/scripts/shared/default-campaign";
@@ -47,100 +48,9 @@ async function main() {
 
   const fileContent = fs.readFileSync(filePath, "utf-8");
 
-  const lines = fileContent.split("\n").filter((line) => line.trim());
+  const table = parseTable(fileContent, filePath);
 
-  if (lines.length === 0) {
-    console.error("CSV файл порожній");
-    process.exit(1);
-  }
-
-  // Простий CSV парсер для Node.js з правильним обробленням лапок та крапкою з комою як роздільником
-  const parseCSVLine = (line: string): string[] => {
-    const result: string[] = [];
-
-    let current = "";
-
-    let inQuotes = false;
-
-    for (let i = 0; i < line.length; i++) {
-      const char = line[i];
-
-      const nextChar = i < line.length - 1 ? line[i + 1] : null;
-
-      if (char === '"') {
-        if (inQuotes && nextChar === '"') {
-          // Подвійні лапки - екранована лапка
-          current += '"';
-          i++; // Пропускаємо наступну лапку
-        } else {
-          // Початок або кінець лапок
-          inQuotes = !inQuotes;
-        }
-      } else if (char === ";" && !inQuotes) {
-        // Крапка з комою як роздільник поза лапками
-        result.push(current.trim());
-        current = "";
-      } else {
-        // Звичайний символ
-        current += char;
-      }
-    }
-    // Додаємо останнє поле
-    result.push(current.trim());
-
-    return result;
-  };
-
-  // Парсимо заголовки
-  const headers = parseCSVLine(lines[0]);
-
-  const csvRows: CSVUnitRow[] = [];
-
-  for (let i = 1; i < lines.length; i++) {
-    const values = parseCSVLine(lines[i]);
-
-    if (values.length > headers.length) {
-      const lastIndex = headers.length - 1;
-
-      const extraValues = values.slice(lastIndex);
-
-      values.splice(
-        lastIndex,
-        values.length - lastIndex,
-        extraValues.join(", "),
-      );
-    }
-
-    if (values.length < headers.length) {
-      while (values.length < headers.length) {
-        values.push("");
-      }
-    }
-
-    const row = {} as CSVUnitRow;
-
-    headers.forEach((header, index) => {
-      let value = values[index] || "";
-
-      if (value.startsWith('"') && value.endsWith('"')) {
-        value = value.slice(1, -1);
-      }
-
-      row[header] = value;
-    });
-
-    // Дебаг: перевіряємо перший рядок
-    if (csvRows.length === 0) {
-      console.log("Перший рядок після парсингу:", {
-        headers: headers.length,
-        values: values.length,
-        group: row.Група || row.group || row.Group,
-        name: row.Назва || row.name || row.Name,
-      });
-    }
-
-    csvRows.push(row);
-  }
+  const csvRows = table.rows as CSVUnitRow[];
 
   console.log(`Знайдено ${csvRows.length} рядків у CSV файлі`);
 

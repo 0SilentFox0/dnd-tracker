@@ -3,6 +3,7 @@
 import { Network } from "lucide-react";
 
 import { EmptyState } from "@/components/common/states";
+import { ContentTransferButtons } from "@/components/content-import/ContentTransferButtons";
 import { HudPage, HudPageHeader } from "@/components/hud/page";
 import { CreateMainSkillDialog } from "@/components/main-skills/CreateMainSkillDialog";
 import { MainSkillCard } from "@/components/main-skills/MainSkillCard";
@@ -23,7 +24,12 @@ export function DMMainSkillsPageClient({ campaignId, initialMainSkills }: DMMain
       <HudPageHeader
         title="Основні Навики"
         subtitle={`Управління основними навиками для дерев прокачки · Всього: ${mainSkills.length}`}
-        actions={<Button onClick={() => createDialog.setOpen(true)}>Створити основний навик</Button>}
+        actions={
+          <>
+            <ContentTransferButtons campaignId={campaignId} kind="main-skills" />
+            <Button onClick={() => createDialog.setOpen(true)}>Створити основний навик</Button>
+          </>
+        }
       />
 
       {mainSkills.length === 0 ? (

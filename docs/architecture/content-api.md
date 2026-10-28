@@ -48,13 +48,13 @@
 | Інструмент | Право |
 |---|---|
 | `content_kinds`, `content_schema`, `content_list`, `content_get`, `get_rules`, `get_skill_tree`, `source_diff` | `content:read` |
-| `content_create`, `content_update`, `content_delete`, `update_rules`, `save_skill_tree`, `source_apply` | `content:write` |
+| `content_create`, `content_update`, `content_delete`, `update_rules`, `save_skill_tree`, `source_apply`, `content_import` | `content:write` |
 
 - `content_schema({ kind, op, effectKind })` (`lib/server/content/tool-schemas.ts`) віддає самодостатню JSON Schema з `$defs`. Здібності й ефекти замінено заглушками з підказкою; вони запитуються окремо: `kind: "abilities"`, а потім `effectKind`. Тож кожна відповідь вміщається в `AI_LIMITS.toolResultChars` (24 000; найбільша — ефект `flag`, ~14 КБ).
 - `source_diff({ scope?, offset?, limit? })` / `source_apply({ apply, ignore })` — оновлення кампанії з джерела (шаблону). `source_diff` повертає сторінку: `items`, `total`, `offset`, `counts` (за scope), `nextOffset` (`null` — кінець); `limit` за замовчуванням 20 (макс. 50) і сам зменшується, щоб сторінка вмістилась у `toolResultChars`. Посилання в `apply`/`ignore` — `{ scope, key, sourceHash, status }`: якщо хеш джерела або статус пункту змінились після diff — 409 «Джерело змінилося». `scope` — таблиця вмісту, `rules` або `settings` (інакше 400). Apply виконується під блокуванням рядка кампанії.
 - `content_list` повертає до 50 записів (`id`, `name`, `listFields`) і `total`, сторінки — через `offset`.
 - Помилки валідації повертаються агентові текстом `шлях: повідомлення`. Інші помилки — загальним текстом, без сирих повідомлень БД.
-- Масового видалення, імпорту й експорту бандла в MCP немає. Бекап — `GET /export` з `content:read`.
+- Масового видалення й експорту бандла в MCP немає; масовий імпорт — `content_import`. Бекап — `GET /export` з `content:read`.
 
 ## Як додати новий вид контенту
 
@@ -94,6 +94,26 @@
 - Шкода атаки при `cr`: рушій 5e сам додає модифікатор СИЛ/СПР, тож кістки зі статблока, де він уже враховано («2d6+4»), порахують його двічі — вказуйте кістки без модифікатора.
 - Синхронізація із джерелом: збережені базові хеші рядків обчислені без нових колонок юніта, тож після деплою юніт, змінений лише в джерелі, показується як `conflict`, а не `updated` (`pairStatus`, `b` не збігається ні з однією стороною). Це властиво будь-якій міграції з новими колонками; юніти без змін з обох боків не зачеплені.
 - Бандл, синхронізація, OpenAPI і MCP — автоматично; правила — `rules.encounters`.
+
+## Імпорт і експорт (етап 4f-0)
+
+Масове перенесення контенту з CSV/TSV/JSON для `units`, `spells`, `skills`, `main-skills`, `spell-groups`, `races`, `classes`, `artifacts`, `artifact-sets` (треки — ні).
+
+- **Реєстр полів** — `lib/utils/content/import/fields/` (`IMPORT_SPECS`, без `server-only`): ключ (= ключ тіла create; у `skills` плоскі, вкладає `toBody`), підпис колонки, синоніми, тип (`string|int|number|bool|enum|list|dice|cr|ref|refList|json|attacks|abilitiesText`), посилання, обов'язковість, два приклади. Синоніми юнітів покривають заголовки старого CSV-імпорту (`docs/units/units-all.csv` дає ті самі дані), «Спасброски» не зіставляється; юніт без колонки «Майстерність» і без CR отримує майстерність за рівнем.
+- **Ядро** — `lib/utils/content/import/`: `parseTable` (`csv-parse/browser/esm/sync`: BOM, рядок `sep=`, автороздільник `;`/`\t`/`,`, лапки з переносами; JSON — масив або об'єкт), `autoMap` (ключ/підпис/синоніми без регістру; `_` = пробіл, `’` = `'`), `applyMapping` (кілька колонок здібностей з'єднуються «. »), `coerceRecord`/`parseFieldValue` (ідемпотентні), `toCsv`/`recordToCells` (BOM, `;`, посилання — назвами, вкладене — JSON, списки з комою в назві — через « | »).
+- **Правила значень**:
+  - Необов'язкове поле, яке не розібралося, дає попередження, і поле відкидається; помилка рядка — лише для обов'язкових. Прочерки (`-`, `—`) у нетекстових полях — порожньо.
+  - Необов'язкове посилання на невідомий запис — попередження і `null`; у режимі `update` таке поле пропускається (не затирає).
+  - CR розбирається з початку клітинки (`1/4 (50 XP)`, `CR 5`); зіпсовані Excel дати (`01.апр`, `1-Apr`) — не CR (попередження). В експорті CR — десяткове (`0.25`), щоб Excel не робив дату.
+  - Захист формул Excel: у експорті клітинки, що починаються з `= + - @`, табуляції або CR (крім простих чисел), а також з `'` перед такими символами, отримують `'` попереду; імпорт знімає один такий `'`.
+  - Кодування: спершу строгий UTF-8, інакше windows-1251 (`decodeImportBytes`).
+- **Сервер** — `importContent` (`lib/server/content/import/import-content.ts`): `assertCan(write)`; усі рядки перевіряються до першого запису (назва, дублі у файлі, режим, посилання за назвою без регістру або точним id, Zod create/update ресурсу); валідні пишуться по одному через `resource.create/update` (без однієї транзакції — ресурси пишуть через Storage й каскади), помилка рядка не зупиняє решту; кеш довідника — один раз. Режими: `create` (дубль — помилка), `update` (за назвою; порожні клітинки не змінюють поле; `refList` з опечаткою не розриває зв'язки), `skip`. `dryRun` нічого не пише. До 500 рядків за запит (`IMPORT_LIMITS`); клієнт ділить: перевірка по 500, запис по 100 і ≤ 3 МБ.
+- **API**: `POST /content-import/{kind}` (`content.import`, `content:write`), `GET /content-import/{kind}/example.csv` (`content.import-example`) і `GET /content-export/{kind}` (`content.export`) — `content:read`, `text/csv`, ім'я файлу `<kind>.csv` — із `Content-Disposition`. `POST /units/import` лишився як був (старий формат, `createMany`).
+- **MCP** `content_import(kind, rows, mode, dryRun)` (`content:write`) — стислий звіт (`compactImportReport`): `counts` + рядки з помилками/попередженнями, кількість зменшується, доки відповідь вміщається в `AI_LIMITS.toolResultChars`.
+- **AI-мапінг** — `GET/POST /content-import/{kind}/ai-map` (лише ДМ із сесії, не в OpenAPI): `pickDmTextModel` + `generateObject`, відповідь лише з відомими колонками й полями; без ключа — 409 `IMPORT_AI_NO_KEY`; ліміт `AI_PLAYER_RATE_LIMIT`.
+- **UI** — `ContentTransferButtons` («Імпорт» + «Експорт CSV») на сторінках бібліотеки ДМ; майстер `ContentImportWizard` (файл → колонки → перевірка → підсумок, лінивий чанк), мапінг запам'ятовується в `localStorage` за набором заголовків, звіт помилок — CSV. Хук `useContentImport` (`lib/hooks/content-import`).
+- **Дерева скілів** — JSON `{ format: "skill-tree/1", race, skills, names }` (`lib/utils/skills/tree-transfer.ts`): експорт додає назви використаних основних скілів, скілів і груп заклинань, імпорт замінює чужі id за назвою й видом (невідомий `spellGroupId` відкидається з попередженням) і зберігає через `skill-trees.save`; перезапис наявних дерев — після `useConfirm` (кнопки на сторінці дерев, `useSkillTreeTransfer`).
+- Обмеження: XLSX — лише через «Зберегти як CSV»; `raceModifiers` заклинань — id (між кампаніями правити вручну); іконки — посилання (data URL у CSV не підтримуються).
 
 ## Оновлення з джерела (етап 3)
 

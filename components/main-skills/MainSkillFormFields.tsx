@@ -6,7 +6,7 @@ import { HudSection } from "@/components/hud/form";
 import { Input } from "@/components/ui/input";
 import { FormField } from "@/components/ui/labeled-input";
 import { SelectField } from "@/components/ui/select-field";
-import { MAIN_SKILL_ROLE_LABELS, MAIN_SKILL_ROLES } from "@/lib/constants/main-skills";
+import { MAIN_SKILL_NAME_MAX, MAIN_SKILL_ROLE_LABELS, MAIN_SKILL_ROLES } from "@/lib/constants/main-skills";
 import type { IdName } from "@/types/common";
 import type { MainSkillFormData } from "@/types/main-skills";
 
@@ -20,7 +20,7 @@ export function MainSkillFormFields({ form, onChange, spellGroups }: MainSkillFo
   return (
     <HudSection title="Основний навик" className="space-y-4">
       <FormField label="Назва" htmlFor="name" required>
-        <Input id="name" value={form.name} onChange={(e) => onChange({ name: e.target.value })} required placeholder="Наприклад: Напад, Захист, Магія" />
+        <Input id="name" value={form.name} onChange={(e) => onChange({ name: e.target.value })} required maxLength={MAIN_SKILL_NAME_MAX} placeholder="Наприклад: Напад, Захист, Магія" />
       </FormField>
       <ColorField
         id="color"

@@ -1,6 +1,7 @@
 import { z } from "zod";
 
 import { SPELL_GROUP_ICON_KEYS } from "@/lib/constants/spell-groups";
+import { SPELL_NAME_MAX } from "@/lib/constants/spells";
 import { EffectSchema } from "@/lib/utils/abilities/schema";
 import { SpellFxSchema } from "@/lib/utils/battle/fx/spell-fx-schema";
 import { RaceModifierSchema, SpellCostSchema, SpellDiceSchema, SpellDieSidesSchema, SpellResolutionSchema, SpellTargetingSchema } from "@/lib/utils/spells/model/schema";
@@ -8,7 +9,7 @@ import { RaceModifierSchema, SpellCostSchema, SpellDiceSchema, SpellDieSidesSche
 const nullableString = z.preprocess((val) => (val === "" ? null : val), z.string().nullable().optional());
 
 const spellFields = {
-  name: z.string().min(1).max(100),
+  name: z.string().min(1).max(SPELL_NAME_MAX),
   level: z.number().int().min(0).max(9),
   groupId: z.string().nullable(),
   icon: nullableString,
@@ -58,13 +59,13 @@ export const updateSpellSchema = z.object(spellFields).partial();
 export type UpdateSpellInput = z.infer<typeof updateSpellSchema>;
 
 export const createSpellGroupSchema = z.object({
-  name: z.string().min(1).max(100),
+  name: z.string().min(1).max(SPELL_NAME_MAX),
   color: z.string().regex(/^#[0-9a-f]{6}$/i).nullable().optional(),
   icon: z.enum(SPELL_GROUP_ICON_KEYS).nullable().optional(),
 });
 
 export const updateSpellGroupSchema = z.object({
-  name: z.string().min(1).max(100).optional(),
+  name: z.string().min(1).max(SPELL_NAME_MAX).optional(),
   color: z.string().regex(/^#[0-9a-f]{6}$/i).nullable().optional(),
   icon: z.enum(SPELL_GROUP_ICON_KEYS).nullable().optional(),
 });

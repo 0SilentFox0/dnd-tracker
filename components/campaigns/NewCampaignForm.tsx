@@ -13,6 +13,7 @@ import { LabeledInput } from "@/components/ui/labeled-input";
 import { Textarea } from "@/components/ui/textarea";
 import { useCreateCampaign, useImportCampaign, useTemplateSelection } from "@/lib/hooks/campaigns";
 import { useNotify } from "@/lib/hooks/common";
+import { errorMessage } from "@/lib/utils/common/error-message";
 
 export function NewCampaignForm() {
   const notify = useNotify();
@@ -43,7 +44,7 @@ export function NewCampaignForm() {
 
         if (campaign.warnings?.length) void notify(`Створено з попередженнями: ${campaign.warnings.length} посилань скинуто`);
       },
-      onError: () => void notify("Помилка при створенні кампанії"),
+      onError: (e: unknown) => void notify(errorMessage(e, "Помилка при створенні кампанії")),
     };
 
     if (selection.file) {
@@ -80,6 +81,7 @@ export function NewCampaignForm() {
               value={formData.name}
               onChange={(e) => setFormData({ ...formData, name: e.target.value })}
               required
+              maxLength={100}
               placeholder={templateName ?? "Назва вашої кампанії"}
             />
             <div>
@@ -106,7 +108,7 @@ export function NewCampaignForm() {
                 min="1"
                 max="30"
                 value={settings.maxLevel ?? 20}
-                onChange={(e) => setSettings({ ...settings, maxLevel: parseInt(e.target.value) || 1 })}
+                onChange={(e) => setSettings({ ...settings, maxLevel: parseInt(e.target.value) || (settings.maxLevel ?? 20) })}
               />
             </div>
             <div className="flex items-center space-x-2">

@@ -68,3 +68,5 @@ export const SPELL_SAVE_ON_SUCCESS_LABELS = {
 
 export const labelOptions = <K extends string>(labels: Record<K, string>) =>
   (Object.entries(labels) as [K, string][]).map(([value, label]) => ({ value, label }));
+
+export const SPELL_NAME_MAX = 100;

@@ -3,8 +3,8 @@ import { NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import { CONTENT_OPERATIONS } from "@/lib/server/content/operations";
 import { exportCampaign } from "@/lib/server/templates/export-campaign";
+import { attachmentHeaders } from "@/lib/utils/api/api-response";
 import { bundleErrorResponse } from "@/lib/utils/api/bundle-error";
-import { PRIVATE_NO_STORE_HEADERS } from "@/lib/utils/api/cache-headers";
 import { operationRoute } from "@/lib/utils/api/content-routes";
 
 export const GET = operationRoute(CONTENT_OPERATIONS["campaign.export"], async ({ actor }) => {
@@ -13,9 +13,7 @@ export const GET = operationRoute(CONTENT_OPERATIONS["campaign.export"], async (
 
     const date = new Date().toISOString().slice(0, 10);
 
-    return NextResponse.json(bundle, {
-      headers: { ...PRIVATE_NO_STORE_HEADERS, "Content-Disposition": `attachment; filename="campaign-${actor.campaignId}-${date}.json"` },
-    });
+    return NextResponse.json(bundle, { headers: attachmentHeaders(`campaign-${actor.campaignId}-${date}.json`) });
   } catch (error) {
     const response = bundleErrorResponse(error);
 

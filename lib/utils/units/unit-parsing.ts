@@ -1,3 +1,4 @@
+import { AttackType } from "@/lib/constants/battle";
 import { getProficiencyBonus } from "@/lib/utils/common/calculations";
 import type { CSVUnitRow, ImportUnit, UnitSpecialAbility } from "@/types/import";
 import type { UnitAttack } from "@/types/units";
@@ -42,7 +43,7 @@ export function parseLevel(value: string): number {
 }
 
 // "Укус +5, 1к6 колючий. Кігті +6, 2к6 рублячий" — атаки через крапку
-export function parseAttacks(value: string): UnitAttack[] {
+function parseLegacyAttacks(value: string): UnitAttack[] {
   if (!value || value.trim() === "Відсутні" || value.trim() === "") {
     return [];
   }
@@ -107,6 +108,44 @@ export function parseAttacks(value: string): UnitAttack[] {
   return attacks;
 }
 
+const NAMED_DICE = /^(.+?)[_\s]+(\d+[dкk]\d+(?:\s*[+-]\s*\d+)?)$/i;
+
+const RANGED_NAME = /ranged|range|shot|bow/i;
+
+const LEGACY_DAMAGE = /\d+[кk]?\d+/i;
+
+// "Name_1d12+2|Name2 1d4" (| ; newline) or the legacy Ukrainian text; parts that fit neither land in `unparsed`
+export function parseAttacksDetailed(value: string): { attacks: UnitAttack[]; unparsed: string[] } {
+  const parts = value.split(/[|;\n]/).map((s) => s.trim()).filter(Boolean);
+
+  if (parts.length <= 1 && !NAMED_DICE.test(parts[0] ?? "")) return { attacks: parseLegacyAttacks(value), unparsed: [] };
+
+  const attacks: UnitAttack[] = [];
+
+  const unparsed: string[] = [];
+
+  for (const part of parts) {
+    const named = NAMED_DICE.exec(part);
+
+    if (named) {
+      const damageDice = named[2].replace(/\s+/g, "").replace(/[кk]/gi, "d").toLowerCase();
+
+      attacks.push({
+        name: named[1].trim(),
+        type: RANGED_NAME.test(named[1]) ? AttackType.RANGED : AttackType.MELEE,
+        attackBonus: 0,
+        damageType: parseLegacyAttacks(part)[0]?.damageType ?? "bludgeoning",
+        damageDice,
+      });
+    } else if (LEGACY_DAMAGE.test(part)) attacks.push(...parseLegacyAttacks(part));
+    else unparsed.push(part);
+  }
+
+  return { attacks, unparsed };
+}
+
+export const parseAttacks = (value: string): UnitAttack[] => parseAttacksDetailed(value).attacks;
+
 export function parseSpecialAbilities(value: string): UnitSpecialAbility[] {
   if (!value || value.trim() === "") {
     return [];
@@ -142,6 +181,10 @@ export function parseSpecialAbilities(value: string): UnitSpecialAbility[] {
   }
 
   return abilities;
+}
+
+export function convertCSVRowsToUnits(rows: CSVUnitRow[]): ImportUnit[] {
+  return rows.map(convertCSVRowToUnit).filter((unit) => unit.name !== "");
 }
 
 export function convertCSVRowToUnit(row: CSVUnitRow): ImportUnit {
