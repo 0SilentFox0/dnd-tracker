@@ -71,6 +71,12 @@ async function translateInRequest(body: { error: string; issues?: unknown; param
   }
 }
 
+export const API_ERROR_SOURCE = Symbol("apiErrorSource");
+
+export type ApiErrorSource = { error: string; issues?: unknown; params?: ErrorParams };
+
+export const apiErrorSourceOf = (response: Response): ApiErrorSource | undefined => (response as unknown as Record<symbol, ApiErrorSource | undefined>)[API_ERROR_SOURCE];
+
 export function apiErrorJson({ error, issues, params, ...rest }: ApiErrorInput, init: ResponseInit = {}): NextResponse {
   const headers = new Headers(init.headers);
 
@@ -86,5 +92,10 @@ export function apiErrorJson({ error, issues, params, ...rest }: ApiErrorInput, 
     },
   });
 
-  return new NextResponse(stream, { ...init, headers });
+  const response = new NextResponse(stream, { ...init, headers });
+
+  // in-process callers (operation-runner) rethrow the untranslated key with its params instead of re-parsing the translated body
+  Object.defineProperty(response, API_ERROR_SOURCE, { value: { error, issues, params } satisfies ApiErrorSource });
+
+  return response;
 }

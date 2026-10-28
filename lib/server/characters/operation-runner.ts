@@ -10,6 +10,7 @@ import type { Actor } from "@/lib/utils/api/actor";
 import type { CampaignAccessResult } from "@/lib/utils/api/api-auth";
 import { handleApiError } from "@/lib/utils/api/error-handler";
 import { parseBody } from "@/lib/utils/api/parse-body";
+import { apiErrorSourceOf } from "@/lib/utils/api/translate-error";
 
 export type CharacterOpCtx = { campaignId: string; characterId: string; actor?: Actor; access?: CampaignAccessResult };
 
@@ -63,6 +64,10 @@ export const dmCharacterGate = <R>(load: (ctx: CharacterOpCtx, access: CampaignA
 export const memberScope = scoped(memberGate);
 
 export const errorStatusMessage = async (response: NextResponse): Promise<never> => {
+  const source = apiErrorSourceOf(response);
+
+  if (source) throw new ContentError(source.error, response.status, source.issues, source.params);
+
   const data = await response.json().catch(() => null);
 
   throw new ContentError(data?.errorKey ?? (typeof data?.error === "string" ? data.error : API_ERRORS.CHARACTER_OPERATION_REJECTED), response.status, data?.issues);
