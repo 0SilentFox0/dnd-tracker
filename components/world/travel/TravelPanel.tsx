@@ -1,6 +1,6 @@
 "use client";
 
-import { Crosshair, DoorOpen, LogIn, Route } from "lucide-react";
+import { Crosshair, DoorOpen, LogIn, Moon, Route } from "lucide-react";
 
 import { TravelLog } from "./TravelLog";
 
@@ -67,6 +67,10 @@ export function TravelPanel({ campaignId, mapId, heroes, onMapIds, target, selec
             Зайти
           </Button>
         ) : null}
+        <Button type="button" variant="outline" disabled={!panel.canRest} onClick={panel.restNow}>
+          <Moon className="size-4" aria-hidden />
+          Відпочити
+        </Button>
         {panel.nested ? (
           <Button type="button" variant="outline" disabled={!panel.canExit} onClick={panel.exitMap}>
             <DoorOpen className="size-4" aria-hidden />
@@ -74,6 +78,8 @@ export function TravelPanel({ campaignId, mapId, heroes, onMapIds, target, selec
           </Button>
         ) : null}
       </div>
+
+      {panel.restOff ? <p className="text-xs text-hud-muted">Ресурси між боями вимкнені в правилах кампанії.</p> : null}
 
       <div>
         <h2 className="mb-1 text-sm font-medium text-hud-ink">Журнал</h2>

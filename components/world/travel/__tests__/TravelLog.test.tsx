@@ -30,4 +30,20 @@ describe("TravelLog", () => {
     expect(screen.getByText("Зайшли")).toBeTruthy();
     expect(screen.getByText("Вийшли")).toBeTruthy();
   });
+
+  it("shows the rest badge", async () => {
+    vi.mocked(api.getTravelLog).mockResolvedValue([{ ...entry("r", "rest"), rest: "long", toMarkerName: "Town" }]);
+
+    render(
+      <QueryClientProvider client={new QueryClient({ defaultOptions: { queries: { retry: false } } })}>
+        <TravelLog campaignId="c1" />
+      </QueryClientProvider>,
+    );
+
+    expect(await screen.findByText("Відпочинок")).toBeTruthy();
+    expect(screen.getByText("Довгий відпочинок")).toBeTruthy();
+    expect(screen.getByText("Aria")).toBeTruthy();
+    expect(screen.queryByText("Town")).toBeNull();
+    expect(screen.queryByText("Map")).toBeNull();
+  });
 });

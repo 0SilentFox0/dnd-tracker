@@ -65,7 +65,7 @@ export type WorldUploadRequest = { size: number; contentType: "image/webp" | "im
 export type RevealShape = { t: "p"; x: number; y: number } | { t: "s"; x1: number; y1: number; x2: number; y2: number };
 export type TravelRest = "none" | "short" | "long";
 
-export const TRAVEL_KINDS = ["travel", "enter", "exit"] as const;
+export const TRAVEL_KINDS = ["travel", "enter", "exit", "rest"] as const;
 export type TravelKind = (typeof TRAVEL_KINDS)[number];
 
 export interface WorldHero {
@@ -129,6 +129,7 @@ export interface WorldTravelEntry {
 }
 
 export type TravelRequest = { mapId: string; characterIds: string[]; to: MapPoint; toMarkerId?: string; rest: TravelRest };
+export type RestRequest = { mapId: string; characterIds: string[]; kind: Exclude<TravelRest, "none"> };
 export type EnterRequest = { markerId: string; characterIds: string[]; rest: TravelRest };
 export type ExitRequest = { mapId: string; characterIds: string[]; rest: TravelRest };
 export type CreateWorldNoteData = { markerId: string; text: string; visibility: "public" | "private"; characterId?: string };

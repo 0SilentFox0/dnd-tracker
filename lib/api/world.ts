@@ -9,6 +9,7 @@ import type {
   CreateWorldNoteData,
   EnterRequest,
   ExitRequest,
+  RestRequest,
   TravelRequest,
   UpdateWorldMapData,
   UpdateWorldMarkerData,
@@ -78,3 +79,5 @@ export const updateWorldNote = (campaignId: string, noteId: string, data: Partia
   campaignPatch<WorldNote>(campaignId, `/world/notes/${noteId}`, data);
 
 export const deleteWorldNote = (campaignId: string, noteId: string) => campaignDelete<{ ok: true }>(campaignId, `/world/notes/${noteId}`);
+
+export const restHeroes = (campaignId: string, data: RestRequest) => campaignPost<{ ok: true; applied: boolean }>(campaignId, "/world/rest", data);
