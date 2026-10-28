@@ -5,7 +5,7 @@ import { ArtifactSlot } from "@/lib/constants/artifacts";
 import type { InventoryModel } from "@/lib/hooks/characters";
 import { cn } from "@/lib/utils";
 
-export function BackpackGrid({ inv, onAdd }: { inv: InventoryModel; onAdd: () => void }) {
+export function BackpackGrid({ inv, onAdd, newIds }: { inv: InventoryModel; onAdd: () => void; newIds?: ReadonlySet<string> }) {
   if (!inv.backpack) return null;
 
   const { selection } = inv;
@@ -30,6 +30,7 @@ export function BackpackGrid({ inv, onAdd }: { inv: InventoryModel; onAdd: () =>
               state={{ selected: selectedId === artifact.id, drop: null }}
               dnd={artifact.slot === ArtifactSlot.ITEM ? { draggable: false } : dragProps(inv, { from: "backpack", artifactId: artifact.id, slotType: artifact.slot })}
               onClick={() => selection.set({ kind: "artifact", id: artifact.id })}
+              isNew={newIds?.has(artifact.id)}
             />
           );
         }

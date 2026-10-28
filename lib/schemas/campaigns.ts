@@ -17,6 +17,7 @@ export const updateCampaignSchema = z.object({
   maxLevel: z.number().min(1).max(30).optional(),
   allowPlayerEdit: z.boolean().optional(),
   critChoiceByDm: z.boolean().optional(),
+  acquaintancesEnabled: z.boolean().optional(),
   status: z.enum([CampaignStatus.ACTIVE, CampaignStatus.ARCHIVED]).optional(),
   visibility: z.enum([CampaignVisibility.PRIVATE, CampaignVisibility.OFFICIAL]).optional(),
 });

@@ -268,5 +268,39 @@
         "b0": "When the DM puts a map on the \"Show\", it opens for you on its own even if you haven't been there; the fog stays yours. When the DM ends the show, the open map is limited again to what you know."
       }
     }
+  },
+  "player-acquaintances": {
+    "title": "Acquaintances",
+    "summary": "NPCs your heroes have met, their journal and your notes.",
+    "sections": {
+      "s0": {
+        "heading": "What acquaintances are",
+        "b0": "The \"Acquaintances\" tile appears once the DM has opened this section. An acquaintance is an NPC with a name, portrait, description and an encounter journal. It appears as soon as the DM marks the scene where you met them as played; new journal entries work the same way.",
+        "b1": "A new acquaintance gets a golden \"new\" mark and a notification; the mark fades when you open the section."
+      },
+      "s1": {
+        "heading": "Notes",
+        "b0": "You can add your own note to every acquaintance. You and the DM can see it; other players cannot. An empty note is removed."
+      }
+    }
+  },
+  "dm-acquaintances": {
+    "title": "Acquaintances",
+    "summary": "NPCs from the scenario: how to create them, when players see them and how to delete them.",
+    "sections": {
+      "s0": {
+        "heading": "How to create",
+        "b0": "In the scenario editor, select an NPC's name and press \"Acquaintance\". Pick a micro NPC (name, description, avatar) or a full NPC from the campaign's characters. The chip in the text leads to the acquaintance card; an @-mention inserts an existing acquaintance instead of creating a duplicate. One character is one acquaintance.",
+        "b1": "The acquaintance dialog has a journal: add entries and tie them to scenario sections. The tool is unavailable on hero pages: their chapters open separately and never become \"played\"."
+      },
+      "s1": {
+        "heading": "When players see them",
+        "b0": "Players see an acquaintance once the section where it was created is marked as played; a journal entry once its own section is played. The section is enabled with the \"Acquaintances are available to players\" switch in the campaign settings. You see everything: hidden items are marked \"Hidden\". Turning the switch on later does not notify players."
+      },
+      "s2": {
+        "heading": "Deleting",
+        "b0": "Removing the chip from the text does not delete the acquaintance. It can only be deleted explicitly, in the acquaintance dialog, after confirmation."
+      }
+    }
   }
 }

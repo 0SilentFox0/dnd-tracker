@@ -5,6 +5,8 @@ export function mentionHref(campaignId: string, type: MentionType, id: string): 
 
   if (type === "marker") return `/campaigns/${campaignId}/dm/world?marker=${id}`;
 
+  if (type === "acquaintance") return `/campaigns/${campaignId}/acquaintances?focus=${id}`;
+
   const section = { unit: "units", artifact: "artifacts", character: "characters", spell: "spells" }[type];
 
   return `/campaigns/${campaignId}/dm/${section}/${id}`;

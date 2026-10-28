@@ -3,11 +3,15 @@
 import { useMemo } from "react";
 import { useRouter } from "next/navigation";
 
+import { NewPill } from "@/components/common/NewPill";
 import { SearchEmptyState } from "@/components/common/SearchEmptyState";
 import { SearchInput } from "@/components/common/SearchInput";
 import { HudTile } from "@/components/hud/page";
 import { COMPACT_GROUPS, DASHBOARD_GROUP_TITLE, type DashboardContext, type DashboardGroupKey, type DashboardSection, DEFAULT_DASHBOARD_CONTEXT, dmDashboardSectionsFor, PLAYER_DASHBOARD_SECTIONS } from "@/lib/constants/campaign-dashboard";
+import { NOTIFICATION_TILE_TYPES } from "@/lib/constants/notifications";
 import { useSearch } from "@/lib/hooks/common";
+import { useNotifications } from "@/lib/hooks/notifications";
+import { hasUnread } from "@/lib/utils/notifications/select";
 
 const fieldsOf = (s: DashboardSection) => [s.title, ...s.keywords];
 
@@ -20,6 +24,8 @@ const COMPACT_GRID = "grid grid-cols-2 gap-2 sm:grid-cols-3";
 export function DashboardGroups({ campaignId, isDM, pendingDrafts, context = DEFAULT_DASHBOARD_CONTEXT, hiddenKeys }: { campaignId: string; isDM: boolean; pendingDrafts: number; context?: DashboardContext; hiddenKeys?: string[] }) {
   const router = useRouter();
 
+  const { data: notifications } = useNotifications(campaignId, { enabled: !isDM });
+
   const sections = isDM ? dmDashboardSectionsFor(context) : PLAYER_DASHBOARD_SECTIONS;
 
   const base = useMemo(() => sections.filter((s) => !hiddenKeys?.includes(s.key)), [sections, hiddenKeys]);
@@ -31,7 +37,7 @@ export function DashboardGroups({ campaignId, isDM, pendingDrafts, context = DEF
 
     const subtitle = s.key === "characters" && pendingDrafts > 0 ? `${s.subtitle} · ${pendingDrafts} на схваленні` : s.subtitle;
 
-    return <HudTile key={s.key} href={s.href(campaignId)} icon={<Icon className="size-5" />} title={s.title} subtitle={subtitle} compact={compact} />;
+    return <HudTile key={s.key} href={s.href(campaignId)} icon={<Icon className="size-5" />} title={s.title} subtitle={subtitle} compact={compact} badge={!isDM && hasUnread(notifications, NOTIFICATION_TILE_TYPES[s.key] ?? []) ? <NewPill /> : undefined} />;
   };
 
   const onSubmit = (e: React.FormEvent) => {

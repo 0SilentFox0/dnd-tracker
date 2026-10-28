@@ -3,6 +3,8 @@
 import { type ReactNode, useCallback, useEffect, useRef, useState } from "react";
 import type { Editor } from "@tiptap/core";
 
+import { type AcquaintanceDialogTarget, acquaintanceTargetFor, acquaintanceToolEnabled } from "./acquaintance-target";
+import { AcquaintanceDialog } from "./AcquaintanceDialog";
 import { OrderButtons } from "./OrderButtons";
 import { PagePropertiesDialog } from "./PagePropertiesDialog";
 import { RevealSettings } from "./RevealSettings";
@@ -20,7 +22,9 @@ import { useMentionSearch, useScenarioDraft, useScenarioPage } from "@/lib/hooks
 import { addRow, addSection, moveRow, moveSection, removeRow, removeSection, setRowBattle, setRowMarker, setRowSlide, setSectionMarker, updateRow, updateSection } from "@/lib/utils/scenario/structure";
 import type { RevealRule, RichDoc, ScenarioPage } from "@/types/scenario";
 
-type ActiveCell = { rowId: string; column: CellColumn } | null;
+type ActiveCell = { rowId: string; sectionId: string; column: CellColumn } | null;
+
+type AcquaintanceSession = { target: AcquaintanceDialogTarget; range: { from: number; to: number } };
 
 export function ScenarioEditor({ campaignId, page, onExit, toolbarActions, onDraftReady, toc }: { campaignId: string; page: ScenarioPage; onExit: () => void; toolbarActions?: ReactNode; onDraftReady?: (draft: { flush: () => Promise<boolean>; hasUnsavedChanges?: () => boolean }) => void; toc: TocControl }) {
   const draft = useScenarioDraft(campaignId, page);
@@ -41,6 +45,8 @@ export function ScenarioEditor({ campaignId, page, onExit, toolbarActions, onDra
 
   const [editor, setEditor] = useState<Editor | null>(null);
 
+  const [acquaintance, setAcquaintance] = useState<AcquaintanceSession | null>(null);
+
   const isHero = page.kind === "hero";
 
   const onReady = useCallback((e: Editor | null) => setEditor(e), []);
@@ -59,6 +65,16 @@ export function ScenarioEditor({ campaignId, page, onExit, toolbarActions, onDra
     if ((await draft.flush()) || (await confirm({ title: "Є незбережені зміни. Вийти без збереження?", confirmLabel: "Вийти" }))) onExit();
   };
 
+  const openAcquaintance = () => {
+    if (editor && active) setAcquaintance(acquaintanceTargetFor(editor, { pageId: page.id, sectionId: active.sectionId }));
+  };
+
+  const insertAcquaintance = ({ id, label }: { id: string; label: string }) => {
+    if (!editor || !acquaintance) return;
+
+    editor.chain().focus().insertContentAt(acquaintance.range, { type: "mention", attrs: { id, label, type: "acquaintance" } }).run();
+  };
+
   const renderCell = (sectionId: string, rowId: string, column: CellColumn, doc: RichDoc) => (
     <ScenarioCell
       campaignId={campaignId}
@@ -67,14 +83,14 @@ export function ScenarioEditor({ campaignId, page, onExit, toolbarActions, onDra
       doc={doc}
       active={active?.rowId === rowId && active.column === column}
       searchMentions={searchMentions}
-      handlers={{ onActivate: () => setActive({ rowId, column }), onReady, onChange: (next) => draft.setContent((c) => updateRow(c, sectionId, rowId, { [column]: next })) }}
+      handlers={{ onActivate: () => setActive({ rowId, sectionId, column }), onReady, onChange: (next) => draft.setContent((c) => updateRow(c, sectionId, rowId, { [column]: next })) }}
     />
   );
 
   return (
     <>
       <div ref={toolbarRef} className="sb-toolbar-wrap">
-        <ScenarioToolbar editor={active ? editor : null} />
+        <ScenarioToolbar editor={active ? editor : null} onAcquaintance={acquaintanceToolEnabled(page.kind) ? openAcquaintance : undefined} />
         <div className="sb-toolbar" style={{ borderTop: 0 }}>
           <SaveStatus state={draft.state} error={draft.error} onRetry={() => void draft.flush()} onReload={() => void draft.reload()} onRetain={draft.retainLocal} />
           <button type="button" className="toggle" onClick={() => setPropsOpen(true)}>
@@ -152,6 +168,9 @@ export function ScenarioEditor({ campaignId, page, onExit, toolbarActions, onDra
           </button>
         </main>
       </ScenarioLayout>
+      {acquaintance && (
+        <AcquaintanceDialog campaignId={campaignId} target={acquaintance.target} sections={draft.content.sections.map(({ id, title }) => ({ id, title }))} onInsert={insertAcquaintance} onClose={() => setAcquaintance(null)} />
+      )}
       {propsOpen && <PagePropertiesDialog campaignId={campaignId} page={live} legend={draft.content.legend} onLegend={(legend) => draft.setContent((c) => ({ ...c, legend }))} onClose={() => setPropsOpen(false)} />}
     </>
   );

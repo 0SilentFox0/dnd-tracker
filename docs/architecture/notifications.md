@@ -1,0 +1,10 @@
+# Сповіщення «нове» для гравця
+
+- Таблиця `player_notifications` (RLS увімкнено): унікальність `userId + type + refId`. Повторна подія того самого предмета/заклинання/рівня видаляє старий рядок і створює новий, тож прочитане знову стає непрочитаним без дубля. Типи рівно чотири: `level`, `item`, `spell`, `acquaintance` (`lib/constants/notifications.ts`).
+- Сповіщення лише гравцям: не DM, не автору дії, лише `type = player` зі `status = active` (`notifyCharacterOwners`). Загальний вхід для всіх гравців кампанії — `notifyCampaignPlayers` (знайомства, частина A).
+- Точки виклику: `writeInventoryLog` (`artifact_grant` і отримувач `artifact_transfer`), `level-up.ts` (обидві гілки), `patch.ts` (рівень і `knownSpells`). Події виводять чисті функції з `lib/utils/notifications/events.ts`.
+- Pusher: приватний канал `private-notify-<userId>` (`notifyChannelName`), подія `notifications-changed` з `{ campaignId }` — лише сигнал, клієнт інвалідує ключ запиту. Окремо від `private-user-*`, бо `usePusherBattleSync` відписується від нього при виході з бою. Без Pusher — полінг раз на 60 с. Поза request scope (`tsx`-скрипти) `after()` кидає, тому є fallback без падіння.
+- Клієнт: `lib/api/notifications.ts` → `lib/hooks/notifications` (`useNotifications`, `useNotificationsSync`, `useMarkRead`, `useSeenOnOpen`). «Прочитано» ставиться лише при відкритті цільового місця (`useSeenOnOpen`: вкладка «Інвентар», «Магія», лист героя); тост закриття чи ігнорування на це не впливає.
+- Тости: `NotificationsHost` у `app/campaigns/[id]/layout.tsx` + `useToasts`/`ToastHost`. Показані тости пам'ятаються в `sessionStorage` (`notifications-toasted`), на шляхах `/battles/` тостів немає (піли лишаються). Піли — `NewPill` (на плитках дашборду через `NOTIFICATION_TILE_TYPES`, на клітинках рюкзака через `isNew`).
+- Retention: прочитані видаляються через 30 днів у cron `app/api/cron/assistant-cleanup` (`cleanupReadNotifications`).
+- **Як додати тип:** константа в `NOTIFICATION_TYPES` → гілка в `notificationHref` → ключ `common.notifications.<type>` в `messages/{uk,en}/common.json` → іконка в `NotificationsHost` → (за потреби) тип у `NOTIFICATION_TILE_TYPES`.

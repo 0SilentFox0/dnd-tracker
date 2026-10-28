@@ -132,6 +132,10 @@ export function CampaignSettingsDialog({ campaignId, campaign, meta, open, onOpe
             <p className="text-xs text-hud-muted">Вимкнено — ефект випадковий</p>
           </div>
           <div className="flex items-center space-x-2">
+            <Checkbox id="acquaintances-enabled" checked={fields.acquaintancesEnabled} onCheckedChange={(v) => set("acquaintancesEnabled", v === true)} disabled={isSaving} />
+            <Label htmlFor="acquaintances-enabled">Знайомства доступні гравцям</Label>
+          </div>
+          <div className="flex items-center space-x-2">
             <Checkbox id="campaign-status" checked={fields.status === CampaignStatus.ACTIVE} onCheckedChange={(v) => set("status", v === true ? CampaignStatus.ACTIVE : CampaignStatus.ARCHIVED)} disabled={isSaving} />
             <Label htmlFor="campaign-status">Кампанія активна</Label>
           </div>

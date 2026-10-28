@@ -6,22 +6,27 @@ import { BookOpen } from "lucide-react";
 import { useProfile } from "./ProfileContext";
 import { ProfileSpellBook } from "./ProfileSpellBook";
 
+import { NewPill } from "@/components/common/NewPill";
 import { spellLevelMetal } from "@/components/hud";
 import { HudSection } from "@/components/hud/form";
 import { EmptySpellBook } from "@/components/spells/book/SpellBookPages";
 import { Button } from "@/components/ui/button";
 import { spellLevelRoman } from "@/lib/constants/spells";
+import { useSeenOnOpen } from "@/lib/hooks/notifications";
 import { cn } from "@/lib/utils";
 import { signed } from "@/lib/utils/common/format";
 import { pluralUk } from "@/lib/utils/common/plural";
 
 export function MagicTab() {
-  const { sheet } = useProfile();
+  const { sheet, campaignId } = useProfile();
+
+  const newSpells = useSeenOnOpen(campaignId, { types: ["spell"], enabled: sheet.viewer.isOwner && !sheet.viewer.isDM });
 
   const [open, setOpen] = useState(false);
 
   return (
     <>
+      {newSpells.size > 0 && <NewPill count={newSpells.size} className="mb-2" />}
       {sheet.magic && (
         <div className="mb-4 flex flex-wrap justify-between gap-2 text-sm text-hud-muted">
           <span>

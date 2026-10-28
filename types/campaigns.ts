@@ -10,6 +10,7 @@ export interface Campaign {
   maxLevel: number;
   allowPlayerEdit: boolean;
   critChoiceByDm: boolean;
+  acquaintancesEnabled: boolean;
   status: string;
   kind?: "campaign" | "template";
   members?: CampaignMembership[];
@@ -68,6 +69,7 @@ export interface CampaignSettings {
   maxLevel: number;
   allowPlayerEdit: boolean;
   critChoiceByDm: boolean;
+  acquaintancesEnabled: boolean;
   status: string;
 }
 

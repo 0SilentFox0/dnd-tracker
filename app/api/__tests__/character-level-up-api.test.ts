@@ -4,8 +4,10 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { getResponseJson } from "./helpers";
 
 import { prisma } from "@/lib/db";
+import { notifyCharacterOwners } from "@/lib/server/notifications/notify";
 import * as apiAuth from "@/lib/utils/api/api-auth";
 
+vi.mock("@/lib/server/notifications/notify", () => ({ notifyCharacterOwners: vi.fn().mockResolvedValue(0) }));
 vi.mock("@/lib/utils/api/api-auth", () => ({ requireDM: vi.fn() }));
 vi.mock("@/lib/db", () => ({ prisma: { character: { findUnique: vi.fn(), update: vi.fn() }, race: { findFirst: vi.fn() } } }));
 
@@ -48,6 +50,15 @@ describe("POST level-up", () => {
     expect(data).not.toHaveProperty("maxHp");
     expect(data).not.toHaveProperty("currentHp");
     expect(await getResponseJson(res)).toMatchObject({ levelUpDetails: { abilityIncreased: "dexterity" } });
+  });
+
+  it("сповіщає власника про новий рівень", async () => {
+    await post();
+
+    expect(notifyCharacterOwners).toHaveBeenCalledWith(
+      { campaignId: "camp", actorUserId: "dm", events: [{ characterId: "ch", type: "level", refId: "ch:4" }] },
+      prisma,
+    );
   });
 
   it("на максимальному рівні кампанії — 422, без запису", async () => {

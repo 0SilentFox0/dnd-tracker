@@ -17,6 +17,13 @@ export const userChannelName = (userId: string): string =>
 export const BATTLE_CHANNEL_PREFIX = "private-battle-";
 export const USER_CHANNEL_PREFIX = "private-user-";
 
+export const NOTIFY_CHANNEL_PREFIX = "private-notify-";
+
+/** Окремо від `private-user-*`: бій відписується від нього при unmount. */
+export const notifyChannelName = (userId: string): string => `${NOTIFY_CHANNEL_PREFIX}${userId}`;
+
+export const NOTIFICATIONS_CHANGED_EVENT = "notifications-changed";
+
 export const PUSHER_AUTH_ENDPOINT = "/api/pusher/auth";
 
 /** Окремо від battle-delta: музика не підвищує версію бою. */

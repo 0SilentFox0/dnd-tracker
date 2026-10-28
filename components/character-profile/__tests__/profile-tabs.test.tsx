@@ -5,6 +5,7 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 
 import { sheetFixture, withSheet } from "./sheet-fixture";
 
+vi.mock("@/lib/hooks/notifications", () => ({ useSeenOnOpen: () => new Set<string>(), useNotifications: () => ({ data: undefined }) }));
 vi.mock("@/components/hud/fonts", () => ({ hudFontClassName: "", HUD_SURFACE: "hud-surface" }));
 vi.mock("@/lib/hooks/characters/useStash", async (orig) => ({
   ...(await orig<object>()),

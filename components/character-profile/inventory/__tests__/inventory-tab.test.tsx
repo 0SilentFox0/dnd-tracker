@@ -18,6 +18,7 @@ const view = {
   artifacts: [{ id: "r1", name: "Перстень сили", icon: null, rarity: "epic", slot: "ring", description: "Дає силу." }],
 };
 
+vi.mock("@/lib/hooks/notifications", () => ({ useSeenOnOpen: () => new Set<string>(), useNotifications: () => ({ data: undefined }) }));
 vi.mock("@/lib/hooks/campaigns", () => ({ useCampaignRules: () => ({ data: { classes: { enabled: false } } }) }));
 
 vi.mock("@/lib/hooks/characters/useStash", async (orig) => ({

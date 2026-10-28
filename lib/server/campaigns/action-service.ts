@@ -41,7 +41,7 @@ function windowItems(items: unknown[], raw: unknown) {
 export async function loadCampaignMembers(campaignId: string) {
   return prisma.campaignMember.findMany({ where: { campaignId }, select: { id: true, userId: true, role: true, user: { select: { id: true, displayName: true, email: true } } }, orderBy: { joinedAt: "asc" } });
 }
-export const CAMPAIGN_SETTINGS_SELECT = { id: true, name: true, description: true, kind: true, visibility: true, maxLevel: true, allowPlayerEdit: true, critChoiceByDm: true, status: true, friendlyFire: true, xpMultiplier: true, credits: true, updatedAt: true } as const;
+export const CAMPAIGN_SETTINGS_SELECT = { id: true, name: true, description: true, kind: true, visibility: true, maxLevel: true, allowPlayerEdit: true, critChoiceByDm: true, acquaintancesEnabled: true, status: true, friendlyFire: true, xpMultiplier: true, credits: true, updatedAt: true } as const;
 export const campaignResult = actionResult("campaign", "Кампанія");
 
 function safeSettings(row: Record<string, unknown>) {

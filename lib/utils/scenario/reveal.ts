@@ -34,3 +34,9 @@ export function sectionDone(section: ScenarioSection, isHero: boolean, played?: 
 
   return { done: !!section.revealedAt || byPlay, byPlay };
 }
+
+export function newlyPlayedSections(before: ScenarioContent, after: ScenarioContent): string[] {
+  const wasPlayed = new Set(before.sections.filter((s) => s.played).map((s) => s.id));
+
+  return after.sections.filter((s) => s.played && !wasPlayed.has(s.id)).map((s) => s.id);
+}

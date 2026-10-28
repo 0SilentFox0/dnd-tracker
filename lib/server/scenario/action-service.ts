@@ -1,6 +1,6 @@
 import { characterInCampaign } from "./loaders";
 import { searchScenarioMentions } from "./mentions";
-import { contentWrite, listPages, OWNED_WITH_CONTENT_SELECT, readContentStrict, SUMMARY_SELECT, toPage, toSummary } from "./page-store";
+import { contentWrite, listPages, OWNED_WITH_CONTENT_SELECT, readContent, readContentStrict, SUMMARY_SELECT, toPage, toSummary } from "./page-store";
 import { searchScenarioPages } from "./search";
 import { pruneVersions, snapshotIfDue } from "./versions";
 
@@ -9,6 +9,7 @@ import { API_ERRORS } from "@/lib/constants/api-errors";
 import { DEFAULT_SCENE_LEGEND, SCENARIO_MAX_CONTENT_BYTES, SCENARIO_MAX_VERSIONS } from "@/lib/constants/scenario";
 import { prisma } from "@/lib/db";
 import { createScenarioPageSchema, scenarioContentSchema, scenarioSectionPatchSchema, updateScenarioMetaSchema } from "@/lib/schemas/scenario";
+import { notifyRevealForContentChange } from "@/lib/server/acquaintances/reveal";
 import { stampDigest } from "@/lib/server/assistant/digest";
 import { actionResult, requestDigest } from "@/lib/server/assistant/json";
 import type { ActionResult } from "@/lib/server/assistant/types";
@@ -104,6 +105,8 @@ async function writeScenarioContent(actor: Actor, id: string, raw: unknown, expe
   const changed = await prisma.scenarioPage.updateMany({ where: { id, campaignId: actor.campaignId, version: expectedVersion }, data: { ...contentWrite(page.title, content), version: { increment: 1 } } });
 
   if (!changed.count) throw new ContentError(API_ERRORS.SCENARIO_CONFLICT, 409);
+
+  await notifyRevealForContentChange(actor.campaignId, id, readContent(page.content), content);
 
   return toPage({ ...page, content, version: expectedVersion + 1, updatedAt: new Date() });
 }

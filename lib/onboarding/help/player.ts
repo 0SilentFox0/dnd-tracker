@@ -31,4 +31,12 @@ export const PLAYER_ARTICLES: HelpArticleDef[] = [
       { blocks: [{ kind: "p" }] },
     ],
   },
+  {
+    slug: "player-acquaintances",
+    audience: "player",
+    sections: [
+      { blocks: [{ kind: "p" }, { kind: "p" }] },
+      { blocks: [{ kind: "p" }] },
+    ],
+  },
 ];

@@ -1,6 +1,8 @@
 import type { WhatsNewEntry } from "@/lib/onboarding/types";
 
 export const WHATS_NEW: WhatsNewEntry[] = [
+  { id: "2026-10-28-acquaintances", date: "2026-10-28", audience: "all", href: "/help/player-acquaintances" },
+  { id: "2026-10-28-notifications", date: "2026-10-28", audience: "player" },
   { id: "2026-10-28-arcane-recovery", date: "2026-10-28", audience: "all" },
   { id: "2026-10-28-cunning-strike", date: "2026-10-28", audience: "all" },
   { id: "2026-10-28-reckless-steady", date: "2026-10-28", audience: "all" },

@@ -10,7 +10,7 @@ import { CombatTab } from "./CombatTab";
 import { LevelUpBadge } from "./LevelUpBadge";
 import { MagicTab } from "./MagicTab";
 import { PendingChoicesBadge } from "./PendingChoicesBadge";
-import { ProfileProvider } from "./ProfileContext";
+import { ProfileProvider, useProfile } from "./ProfileContext";
 import { CompactHero, ProfileHero } from "./ProfileHero";
 import { type ProfileTab, type ProfileTabId, ProfileTabs } from "./ProfileTabs";
 import { SkillsTab } from "./SkillsTab";
@@ -25,6 +25,7 @@ import { PlayerSheetHint } from "@/components/onboarding/OnboardingHint";
 import { LevelUpOverlay } from "@/components/skill-tree/progression";
 import { Button } from "@/components/ui/button";
 import { useCharacterSheet } from "@/lib/hooks/characters";
+import { useSeenOnOpen } from "@/lib/hooks/notifications";
 import { cn } from "@/lib/utils";
 
 const ProfileEditor = dynamic(() => import("./ProfileEditor").then((m) => m.ProfileEditor), { ssr: false, loading: () => <LoadingState /> });
@@ -41,6 +42,14 @@ function viewTabs(withLog: boolean): ProfileTab[] {
   ];
 
   return withLog ? [...tabs, { id: "log", label: "Журнал", content: <CharacterLogTab /> }] : tabs;
+}
+
+function LevelSeen() {
+  const { campaignId, sheet } = useProfile();
+
+  useSeenOnOpen(campaignId, { types: ["level"], enabled: sheet.viewer.isOwner && !sheet.viewer.isDM });
+
+  return null;
 }
 
 function useScrolledPast() {
@@ -78,6 +87,14 @@ export function CharacterProfile({ campaignId, characterId, canEdit, initialTab 
 
   const [tab, setTabState] = useState<ProfileTabId>(() => asTab(initialTab));
 
+  const [seenInitialTab, setSeenInitialTab] = useState(initialTab);
+
+  if (seenInitialTab !== initialTab) {
+    // navigation to the same route with another ?tab= (e.g. a toast link) must switch the tab
+    setSeenInitialTab(initialTab);
+    setTabState(asTab(initialTab));
+  }
+
   const setTab = (id: ProfileTabId) => {
     setTabState(id);
 
@@ -97,6 +114,7 @@ export function CharacterProfile({ campaignId, characterId, canEdit, initialTab 
       {(sheet) => (
         <ProfileProvider campaignId={campaignId} characterId={characterId} sheet={sheet} canEdit={canEdit && sheet.viewer.isDM}>
           <ProfileShell>
+            <LevelSeen />
             {editing ? (
               <ProfileEditor onDone={() => setEditing(false)} />
             ) : (

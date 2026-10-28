@@ -5,6 +5,14 @@
     "new": " · new",
     "open": "Open"
   },
+  "2026-10-28-acquaintances": {
+    "title": "Acquaintances",
+    "body": "The DM selects an NPC's name in the scenario text and turns it into an acquaintance: name, portrait, description and an encounter journal. Players see it as soon as the DM marks the scene as played, and can keep their own notes. The DM enables the section in the campaign settings."
+  },
+  "2026-10-28-notifications": {
+    "title": "\"New\" notifications",
+    "body": "When the DM raises a level or hands out an item or spell, you get a notification, and the tile or item gets a golden \"new\" mark. It disappears as soon as you open the matching tab."
+  },
   "2026-10-28-arcane-recovery": {
     "title": "Wizard's Arcane Recovery",
     "body": "The wizard's sheet now has an Arcane Recovery panel: once a day after a short rest you can restore spell slots within the circle budget."

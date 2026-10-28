@@ -441,5 +441,8 @@
   "safeFetchFailed": "Не вдалося завантажити зображення",
   "slideImageFailed": "Слайд {index}: {detail}",
   "battleCasterArmorNotProficient": "Броня чи щит без володіння: кастер не може чаклувати",
-  "multiclassRequirement": "Мультиклас: для класу «{name}» потрібно мінімум 13 у ключовій характеристиці"
+  "multiclassRequirement": "Мультиклас: для класу «{name}» потрібно мінімум 13 у ключовій характеристиці",
+  "acquaintancesDisabled": "ДМ ще не відкрив знайомства",
+  "acquaintanceNotFound": "Знайомство не знайдено",
+  "acquaintanceEntryNotFound": "Запис не знайдено"
 }

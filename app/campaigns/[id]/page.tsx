@@ -10,6 +10,7 @@ import { SourceSyncButton } from "@/components/campaigns/templates/SourceSyncBut
 import { HudSection } from "@/components/hud/form";
 import { HudPage, HudPageHeader, HudPanel } from "@/components/hud/page";
 import { OnboardingChecklist } from "@/components/onboarding/OnboardingChecklist";
+import { dashboardHiddenKeys } from "@/lib/constants/campaign-dashboard";
 import { CampaignKind } from "@/lib/constants/campaigns";
 import { onboardingKeys } from "@/lib/hooks/onboarding/keys";
 import { PrefetchedQuery } from "@/lib/providers/prefetched-query";
@@ -19,7 +20,6 @@ import { readCampaignOnboarding } from "@/lib/server/onboarding/campaign";
 import { pluralUk } from "@/lib/utils/common/plural";
 import { parseRules } from "@/lib/utils/rules/schema";
 
-const HIDDEN_WITHOUT_WORLD = ["player-world"];
 
 const LABEL = "text-sm text-hud-muted";
 
@@ -42,6 +42,8 @@ export default async function CampaignDetailPage({
     // онбординг не має валити сторінку кампанії
     isTemplate ? null : readCampaignOnboarding(id, user.id, isDM).catch(() => null),
   ]);
+
+  const hiddenKeys = dashboardHiddenKeys({ isDM, hasWorld: !!player?.hasWorld, acquaintancesEnabled: campaign.acquaintancesEnabled });
 
   return (
     <HudPage>
@@ -70,7 +72,7 @@ export default async function CampaignDetailPage({
         <div className="min-w-0 space-y-4">
           {dm && <DmNextSteps campaignId={id} data={dm} />}
           {player && <PlayerHeroCard campaignId={id} data={player} />}
-          <DashboardGroups campaignId={id} isDM={isDM} pendingDrafts={dm?.pendingDrafts ?? 0} context={{ isTemplate, classesEnabled }} hiddenKeys={player?.hasWorld ? undefined : HIDDEN_WITHOUT_WORLD} />
+          <DashboardGroups campaignId={id} isDM={isDM} pendingDrafts={dm?.pendingDrafts ?? 0} context={{ isTemplate, classesEnabled }} hiddenKeys={hiddenKeys} />
         </div>
 
         <div className="space-y-4">

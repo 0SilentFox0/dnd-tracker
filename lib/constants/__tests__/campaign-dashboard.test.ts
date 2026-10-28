@@ -2,7 +2,7 @@ import fs from "node:fs";
 import path from "node:path";
 import { describe, expect, it } from "vitest";
 
-import { DM_DASHBOARD_SECTIONS, PLAYER_DASHBOARD_SECTIONS } from "@/lib/constants/campaign-dashboard";
+import { dashboardHiddenKeys, DM_DASHBOARD_SECTIONS, PLAYER_DASHBOARD_SECTIONS } from "@/lib/constants/campaign-dashboard";
 import { matchesQuery } from "@/lib/utils/common/text-search";
 
 const ALL = [...DM_DASHBOARD_SECTIONS, ...PLAYER_DASHBOARD_SECTIONS];
@@ -29,5 +29,16 @@ describe("dashboard sections", () => {
     expect(find("закл")).toContain("spells");
     expect(find("  СХВАЛ ")).toContain("characters");
     expect(find("довідка")).toContain("info");
+  });
+});
+
+describe("dashboardHiddenKeys", () => {
+  it("never hides the acquaintances tile from the DM, even while the toggle is off", () => {
+    expect(dashboardHiddenKeys({ isDM: true, hasWorld: false, acquaintancesEnabled: false })).not.toContain("acquaintances");
+  });
+
+  it("hides the acquaintances tile from players until the toggle is on, and the map until they have one", () => {
+    expect(dashboardHiddenKeys({ isDM: false, hasWorld: false, acquaintancesEnabled: false })).toEqual(["player-world", "acquaintances"]);
+    expect(dashboardHiddenKeys({ isDM: false, hasWorld: true, acquaintancesEnabled: true })).toEqual([]);
   });
 });
