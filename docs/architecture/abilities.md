@@ -28,3 +28,7 @@ Class/feat джерела копіювання підтримуються нас
 ## Premerge refactor (part 2, 2026-10)
 
 `collectModifiers` accepts several flags in one pass; aura de-duplication per `auraKey` sums strength over the requested flags. Item limits live in `ITEM_LIMITS` (read by `readStats` and the zod schema alike); `itemStatsFromRow` caches by row object (WeakMap), so callers must not mutate its result. Choice owners (class/subclass/feat/race/background) are walked by `forEachChoiceOwner` (`visit` gives both state `path` and `legacyPath`); `plan.ts` uses it only for the class loop. Edition and dice parsing use `RULES_EDITIONS`, `normalizeDiceText` and `DICE_PATTERN`; remaining ad-hoc dice regexes are listed in the findings register (A23).
+
+## Володіння бронею й зброєю (5e)
+
+`abilities.proficiencies` збирає `classProficiencies` (`lib/utils/battle/proficiency/collect.ts`): перший клас дає повний список, наступні — лише `multiclassProficiencies` (SRD «Multiclass proficiencies»; зберігається в JSON `proficiencies.multiclass`, міграції немає). Прапорець `proficiency { kinds: light|medium|heavy|shield|simple|martial }` (раса, риса, предмет) додається `withGrantedProficiencies` у `finalizeCharacter`. Категорія зброї — поле `weaponCategory` у `WeaponStats`/модифікаторах артефакта; опис («Martial Melee Weapon.») — лише fallback у `extract-attacks.ts`.

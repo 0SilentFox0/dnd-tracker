@@ -1013,6 +1013,7 @@
       "damageDice": "1d8",
       "damageType": "slashing",
       "attackType": "melee",
+      "weaponCategory": "martial",
       "traits": [
         "versatile"
       ],
@@ -1292,6 +1293,7 @@
       "damageDice": "1",
       "damageType": "piercing",
       "attackType": "ranged",
+      "weaponCategory": "martial",
       "range": "25/100",
       "traits": [
         "ammunition"
@@ -1759,6 +1761,7 @@
       "damageDice": "1d4",
       "damageType": "bludgeoning",
       "attackType": "melee",
+      "weaponCategory": "simple",
       "traits": [
         "light"
       ],
@@ -1933,6 +1936,7 @@
       "damageDice": "1d4",
       "damageType": "piercing",
       "attackType": "melee",
+      "weaponCategory": "simple",
       "range": "20/60",
       "traits": [
         "light",
@@ -1955,6 +1959,7 @@
       "damageDice": "1d4",
       "damageType": "piercing",
       "attackType": "melee",
+      "weaponCategory": "simple",
       "range": "20/60",
       "traits": [
         "light",
@@ -2005,6 +2010,7 @@
       "damageDice": "1d4",
       "damageType": "piercing",
       "attackType": "ranged",
+      "weaponCategory": "simple",
       "range": "20/60",
       "traits": [
         "finesse",
@@ -2392,6 +2398,7 @@
       "damageDice": "1d8",
       "damageType": "bludgeoning",
       "attackType": "melee",
+      "weaponCategory": "martial",
       "traits": [
         "versatile"
       ],
@@ -2897,6 +2904,7 @@
       "damageDice": "1d8",
       "damageType": "bludgeoning",
       "attackType": "melee",
+      "weaponCategory": "martial",
       "properties": "Mastery: Sap"
     },
     "item": {
@@ -3210,6 +3218,7 @@
       "damageDice": "1d10",
       "damageType": "slashing",
       "attackType": "melee",
+      "weaponCategory": "martial",
       "traits": [
         "twoHanded",
         "reach"
@@ -3292,6 +3301,7 @@
       "damageDice": "1d12",
       "damageType": "slashing",
       "attackType": "melee",
+      "weaponCategory": "martial",
       "traits": [
         "twoHanded"
       ],
@@ -3311,6 +3321,7 @@
       "damageDice": "1d8",
       "damageType": "bludgeoning",
       "attackType": "melee",
+      "weaponCategory": "simple",
       "traits": [
         "twoHanded"
       ],
@@ -3330,6 +3341,7 @@
       "damageDice": "2d6",
       "damageType": "slashing",
       "attackType": "melee",
+      "weaponCategory": "martial",
       "traits": [
         "twoHanded"
       ],
@@ -3349,6 +3361,7 @@
       "damageDice": "1d10",
       "damageType": "slashing",
       "attackType": "melee",
+      "weaponCategory": "martial",
       "traits": [
         "twoHanded",
         "reach"
@@ -3437,6 +3450,7 @@
       "damageDice": "1d6",
       "damageType": "piercing",
       "attackType": "ranged",
+      "weaponCategory": "martial",
       "range": "30/120",
       "traits": [
         "light",
@@ -3458,6 +3472,7 @@
       "damageDice": "1d6",
       "damageType": "slashing",
       "attackType": "melee",
+      "weaponCategory": "simple",
       "range": "20/60",
       "traits": [
         "light",
@@ -3527,6 +3542,7 @@
       "damageDice": "1d10",
       "damageType": "piercing",
       "attackType": "ranged",
+      "weaponCategory": "martial",
       "range": "100/400",
       "traits": [
         "twoHanded",
@@ -3800,6 +3816,7 @@
       "damageDice": "1d6",
       "damageType": "piercing",
       "attackType": "melee",
+      "weaponCategory": "simple",
       "range": "30/120",
       "traits": [
         "thrown"
@@ -3820,6 +3837,7 @@
       "damageDice": "1d6",
       "damageType": "piercing",
       "attackType": "melee",
+      "weaponCategory": "simple",
       "range": "30/120",
       "traits": [
         "thrown"
@@ -3840,6 +3858,7 @@
       "damageDice": "1d10",
       "damageType": "piercing",
       "attackType": "melee",
+      "weaponCategory": "martial",
       "traits": [
         "twoHanded",
         "reach"
@@ -3911,6 +3930,7 @@
       "damageDice": "1d8",
       "damageType": "piercing",
       "attackType": "ranged",
+      "weaponCategory": "simple",
       "range": "80/320",
       "traits": [
         "twoHanded",
@@ -3932,6 +3952,7 @@
       "damageDice": "1d4",
       "damageType": "bludgeoning",
       "attackType": "melee",
+      "weaponCategory": "simple",
       "range": "20/60",
       "traits": [
         "light",
@@ -3953,6 +3974,7 @@
       "damageDice": "1d8",
       "damageType": "piercing",
       "attackType": "ranged",
+      "weaponCategory": "martial",
       "range": "150/600",
       "traits": [
         "twoHanded",
@@ -3974,6 +3996,7 @@
       "damageDice": "1d8",
       "damageType": "slashing",
       "attackType": "melee",
+      "weaponCategory": "martial",
       "traits": [
         "versatile"
       ],
@@ -4066,6 +4089,7 @@
       "damageDice": "1d6",
       "damageType": "bludgeoning",
       "attackType": "melee",
+      "weaponCategory": "simple",
       "properties": "Mastery: Sap"
     },
     "item": {
@@ -4082,6 +4106,7 @@
       "damageDice": "1d6",
       "damageType": "bludgeoning",
       "attackType": "melee",
+      "weaponCategory": "simple",
       "properties": "Mastery: Sap"
     },
     "item": {
@@ -4132,6 +4157,7 @@
       "damageDice": "1d6",
       "damageType": "bludgeoning",
       "attackType": "melee",
+      "weaponCategory": "simple",
       "properties": "Mastery: Sap",
       "attackBonus": 1,
       "damageBonus": 1
@@ -4150,6 +4176,7 @@
       "damageDice": "1d6",
       "damageType": "bludgeoning",
       "attackType": "melee",
+      "weaponCategory": "simple",
       "properties": "Mastery: Sap"
     },
     "item": {
@@ -4271,6 +4298,7 @@
       "damageDice": "2d6",
       "damageType": "bludgeoning",
       "attackType": "melee",
+      "weaponCategory": "martial",
       "traits": [
         "twoHanded"
       ],
@@ -4369,6 +4397,7 @@
       "damageDice": "1d8",
       "damageType": "piercing",
       "attackType": "melee",
+      "weaponCategory": "martial",
       "properties": "Mastery: Sap"
     },
     "item": {
@@ -4385,6 +4414,7 @@
       "damageDice": "1d12",
       "damageType": "piercing",
       "attackType": "ranged",
+      "weaponCategory": "martial",
       "range": "40/120",
       "traits": [
         "twoHanded",
@@ -4711,6 +4741,7 @@
       "damageDice": "1d10",
       "damageType": "piercing",
       "attackType": "melee",
+      "weaponCategory": "martial",
       "traits": [
         "twoHanded",
         "reach"
@@ -4752,6 +4783,7 @@
       "damageDice": "1d10",
       "damageType": "piercing",
       "attackType": "ranged",
+      "weaponCategory": "martial",
       "range": "30/90",
       "traits": [
         "ammunition"
@@ -5437,6 +5469,7 @@
       "damageDice": "1d6",
       "damageType": "bludgeoning",
       "attackType": "melee",
+      "weaponCategory": "simple",
       "traits": [
         "versatile"
       ],
@@ -5457,6 +5490,7 @@
       "damageDice": "1d8",
       "damageType": "piercing",
       "attackType": "melee",
+      "weaponCategory": "martial",
       "traits": [
         "finesse"
       ],
@@ -6196,6 +6230,7 @@
       "damageDice": "1d6",
       "damageType": "bludgeoning",
       "attackType": "melee",
+      "weaponCategory": "simple",
       "properties": "Mastery: Sap",
       "attackBonus": 3,
       "damageBonus": 3
@@ -6358,6 +6393,7 @@
       "damageDice": "1d6",
       "damageType": "slashing",
       "attackType": "melee",
+      "weaponCategory": "martial",
       "traits": [
         "light",
         "finesse"
@@ -6378,6 +6414,7 @@
       "damageDice": "1d6",
       "damageType": "slashing",
       "attackType": "melee",
+      "weaponCategory": "martial",
       "traits": [
         "light",
         "finesse"
@@ -6481,6 +6518,7 @@
       "damageDice": "1d6",
       "damageType": "piercing",
       "attackType": "ranged",
+      "weaponCategory": "simple",
       "range": "80/320",
       "traits": [
         "twoHanded",
@@ -6502,6 +6540,7 @@
       "damageDice": "1d6",
       "damageType": "piercing",
       "attackType": "melee",
+      "weaponCategory": "martial",
       "traits": [
         "light",
         "finesse"
@@ -6522,6 +6561,7 @@
       "damageDice": "1d4",
       "damageType": "slashing",
       "attackType": "melee",
+      "weaponCategory": "simple",
       "traits": [
         "light"
       ],
@@ -6541,6 +6581,7 @@
       "damageDice": "1d4",
       "damageType": "bludgeoning",
       "attackType": "ranged",
+      "weaponCategory": "simple",
       "range": "30/120",
       "traits": [
         "ammunition"
@@ -6605,6 +6646,7 @@
       "damageDice": "1d6",
       "damageType": "piercing",
       "attackType": "melee",
+      "weaponCategory": "simple",
       "range": "20/60",
       "traits": [
         "versatile",
@@ -7539,6 +7581,7 @@
       "damageDice": "1d6",
       "damageType": "bludgeoning",
       "attackType": "melee",
+      "weaponCategory": "simple",
       "traits": [
         "versatile"
       ],
@@ -7653,6 +7696,7 @@
       "damageDice": "1d6",
       "damageType": "bludgeoning",
       "attackType": "melee",
+      "weaponCategory": "simple",
       "traits": [
         "versatile"
       ],
@@ -7751,6 +7795,7 @@
       "damageDice": "1d6",
       "damageType": "bludgeoning",
       "attackType": "melee",
+      "weaponCategory": "simple",
       "traits": [
         "versatile"
       ],
@@ -7913,6 +7958,7 @@
       "damageDice": "1d6",
       "damageType": "bludgeoning",
       "attackType": "melee",
+      "weaponCategory": "simple",
       "traits": [
         "versatile"
       ],
@@ -8004,6 +8050,7 @@
       "damageDice": "1d6",
       "damageType": "bludgeoning",
       "attackType": "melee",
+      "weaponCategory": "simple",
       "traits": [
         "versatile"
       ],
@@ -8048,6 +8095,7 @@
       "damageDice": "1d6",
       "damageType": "bludgeoning",
       "attackType": "melee",
+      "weaponCategory": "simple",
       "traits": [
         "versatile"
       ],
@@ -8130,6 +8178,7 @@
       "damageDice": "1d8",
       "damageType": "radiant",
       "attackType": "melee",
+      "weaponCategory": "martial",
       "traits": [
         "versatile",
         "finesse"
@@ -8301,6 +8350,7 @@
       "damageDice": "1d8",
       "damageType": "piercing",
       "attackType": "melee",
+      "weaponCategory": "martial",
       "range": "20/60",
       "traits": [
         "versatile",
@@ -8323,6 +8373,7 @@
       "damageDice": "1d8",
       "damageType": "piercing",
       "attackType": "melee",
+      "weaponCategory": "martial",
       "range": "20/60",
       "traits": [
         "versatile",
@@ -8984,6 +9035,7 @@
       "damageDice": "1d8",
       "damageType": "piercing",
       "attackType": "melee",
+      "weaponCategory": "martial",
       "traits": [
         "versatile"
       ],
@@ -9004,6 +9056,7 @@
       "damageDice": "1d8",
       "damageType": "bludgeoning",
       "attackType": "melee",
+      "weaponCategory": "martial",
       "traits": [
         "versatile"
       ],
@@ -9119,6 +9172,7 @@
       "damageDice": "1d4",
       "damageType": "slashing",
       "attackType": "melee",
+      "weaponCategory": "martial",
       "traits": [
         "finesse",
         "reach"

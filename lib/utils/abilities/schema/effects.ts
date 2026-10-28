@@ -4,6 +4,7 @@ import { AbilityTargetSchema, AmountSchema, DurationSchema, FlatSchema } from ".
 import { ATTACK_KINDS, CONDITION_5E_KEYS, CONDITION_KEYS, DAMAGE_FILTER_KINDS, STAT_KEYS } from "./kinds";
 
 import { ABILITY_KEYS } from "@/lib/constants/abilities";
+import { PROFICIENCY_KINDS } from "@/lib/constants/artifacts";
 import { DND_SKILLS } from "@/lib/constants/skills";
 
 export {
@@ -126,6 +127,7 @@ const FlagSchema = z.discriminatedUnion("flag", [
   z.object({ ...flagBase, flag: z.literal("checkDisadvantage"), skills: SkillsOrAll }),
   z.object({ ...flagBase, flag: z.literal("skillProficiency"), skills: z.array(DndSkillSchema).min(1) }),
   z.object({ ...flagBase, flag: z.literal("skillExpertise"), skills: z.array(DndSkillSchema).min(1) }),
+  z.object({ ...flagBase, flag: z.literal("proficiency"), kinds: z.array(z.enum(PROFICIENCY_KINDS)).min(1) }),
   z.object({ ...flagBase, flag: z.literal("autoCritAdjacent") }),
   z.object({ ...flagBase, flag: z.literal("proneDefense") }),
   z.object({ ...flagBase, flag: z.literal("twoWeaponFighting") }),

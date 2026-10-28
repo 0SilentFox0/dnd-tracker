@@ -2,6 +2,7 @@ import type { FieldMeta } from "../fields";
 import { CONDITION_LABELS } from "../labels";
 
 import { ABILITY_LABELS, ABILITY_OPTIONS, DEFAULT_AREA_TARGETS } from "@/lib/constants/abilities";
+import { PROFICIENCY_KINDS } from "@/lib/constants/artifacts";
 import { AttackType } from "@/lib/constants/battle";
 import { MONSTER_SENSE_LABELS } from "@/lib/constants/monster";
 import { DND_SKILL_META, DND_SKILLS, type DndSkill } from "@/lib/constants/skills";
@@ -32,6 +33,10 @@ const SAVE_ABILITY_OPTIONS = [{ value: "all", label: "усі" }, ...ABILITY_OPTI
 const SKILL_OPTIONS = DND_SKILLS.map((k) => ({ value: k, label: DND_SKILL_META[k].label }));
 
 const SKILL_OR_ALL_OPTIONS = [{ value: "all", label: "усі" }, ...SKILL_OPTIONS];
+
+const PROFICIENCY_LABELS = { light: "легка броня", medium: "середня броня", heavy: "важка броня", shield: "щити", simple: "проста зброя", martial: "бойова зброя" } as const;
+
+const PROFICIENCY_OPTIONS = PROFICIENCY_KINDS.map((value) => ({ value, label: PROFICIENCY_LABELS[value] }));
 
 const skillsText = (a: readonly string[] | "all") => (a === "all" ? "" : ` (${a.map((k) => DND_SKILL_META[k as DndSkill].label).join(", ")})`);
 
@@ -244,6 +249,12 @@ export const FLAG_REGISTRY: { [K in FlagKey]: FlagDefinition<K> } = {
     fields: [{ name: "skills", label: "Навички", input: "multiselect", options: SKILL_OPTIONS }],
     defaults: { skills: ["stealth"] },
     describe: (e) => `експертиза в навичках${skillsText(e.skills)} (подвійна майстерність)`,
+  },
+  proficiency: {
+    label: "Володіння бронею й зброєю",
+    fields: [{ name: "kinds", label: "Володіння", input: "multiselect", options: PROFICIENCY_OPTIONS }],
+    defaults: { kinds: ["heavy"] },
+    describe: (e) => `володіння (${e.kinds.map((k) => PROFICIENCY_LABELS[k]).join(", ")})`,
   },
   autoCritAdjacent: plain("Криті від сусідів", "ближні атаки з 5 фт по цілі — критичні"),
   twoWeaponFighting: plain("Бій двома зброями", "модифікатор до шкоди другої руки"),

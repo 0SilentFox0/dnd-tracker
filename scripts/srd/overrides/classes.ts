@@ -5,6 +5,22 @@ import { MAX_CLASS_LEVEL } from "@/lib/constants/classes";
 import type { Condition, Effect } from "@/lib/utils/abilities/schema";
 import type { ClassColumn } from "@/types/classes";
 
+// SRD 5.2 "Multiclass proficiencies": what a class grants when it is not the first one
+export const MULTICLASS_PROFICIENCIES: Record<string, { armor: string[]; weapons: string[] }> = {
+  barbarian: { armor: ["Shields"], weapons: ["Martial weapons"] },
+  bard: { armor: ["Light armor"], weapons: [] },
+  cleric: { armor: ["Light armor", "Medium armor", "Shields"], weapons: [] },
+  druid: { armor: ["Light armor", "Shields"], weapons: [] },
+  fighter: { armor: ["Light armor", "Medium armor", "Shields"], weapons: ["Martial weapons"] },
+  monk: { armor: [], weapons: [] },
+  paladin: { armor: ["Light armor", "Medium armor", "Shields"], weapons: ["Martial weapons"] },
+  ranger: { armor: ["Light armor", "Medium armor", "Shields"], weapons: ["Martial weapons"] },
+  rogue: { armor: ["Light armor"], weapons: [] },
+  sorcerer: { armor: [], weapons: [] },
+  warlock: { armor: ["Light armor"], weapons: [] },
+  wizard: { armor: [], weapons: [] },
+};
+
 export type FeatureOption = AbilityCore & { name: string; slug: string };
 
 const EXTRA_ATTACK: AbilityCore = { trigger: { event: "passive" }, effects: [{ kind: "modifyStat", stat: "attacksPerAction", flat: 1 }] };

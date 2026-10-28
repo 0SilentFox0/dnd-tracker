@@ -20,7 +20,7 @@ describe("convertClasses", () => {
 
   it("Fighter core traits", () => {
     expect(cls("Fighter")).toMatchObject({ hitDie: 10, savingThrows: ["strength", "constitution"], caster: "none", spellcastingAbility: null, subclassLevel: 3 });
-    expect(cls("Fighter").proficiencies).toEqual({ armor: ["Light, Medium, and Heavy armor and Shields"], weapons: ["Simple and Martial weapons"], tools: [] });
+    expect(cls("Fighter").proficiencies).toEqual({ armor: ["Light, Medium, and Heavy armor and Shields"], weapons: ["Simple and Martial weapons"], tools: [], multiclass: { armor: ["Light armor", "Medium armor", "Shields"], weapons: ["Martial weapons"] } });
     expect(cls("Fighter").skillChoices.count).toBe(2);
     expect(cls("Fighter").skillChoices.from).toEqual(["acrobatics", "animalHandling", "athletics", "history", "insight", "intimidation", "persuasion", "perception", "survival"]);
   });

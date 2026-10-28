@@ -124,6 +124,7 @@ export enum ArtifactModifierType {
   TRAITS = "traits",
   VERSATILE_DICE = "versatileDice",
   DAMAGE_BONUS = "damageBonus",
+  WEAPON_CATEGORY = "weaponCategory",
 }
 
 // окремо від ArtifactModifierType: weaponStatsFromRow бере лише свої типи
@@ -164,6 +165,12 @@ export const ITEM_LIMITS = {
 export const ITEM_KINDS = ["weapon", "armor", "shield"] as const;
 
 export const ARMOR_CATEGORIES = ["light", "medium", "heavy"] as const;
+
+export const ARMOR_PROFICIENCY_KINDS = [...ARMOR_CATEGORIES, "shield"] as const;
+
+export const WEAPON_PROFICIENCY_KINDS = ["simple", "martial"] as const;
+
+export const PROFICIENCY_KINDS = [...ARMOR_PROFICIENCY_KINDS, ...WEAPON_PROFICIENCY_KINDS] as const;
 
 export const CARRIED_SLOTS: ReadonlySet<string> = new Set([ArtifactSlot.ITEM, ArtifactSlot.RING]);
 

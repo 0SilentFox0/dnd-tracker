@@ -68,6 +68,8 @@ const refineTable = (c: TableInput, ctx: z.RefinementCtx) => {
 
 const profList = z.array(z.string().max(60)).max(20).default([]);
 
+const multiclassProfs = z.object({ armor: profList, weapons: profList }).optional();
+
 const hitDieSchema = z.union([z.literal(6), z.literal(8), z.literal(10), z.literal(12)]);
 
 const casterSchema = z.enum(CLASS_CASTERS);
@@ -85,7 +87,7 @@ export const createClassSchema = z
     color: classColorSchema,
     hitDie: hitDieSchema.default(8),
     savingThrows: z.array(abilityKeySchema).max(6).default([]),
-    proficiencies: z.object({ armor: profList, weapons: profList, tools: profList }).prefault({}),
+    proficiencies: z.object({ armor: profList, weapons: profList, tools: profList, multiclass: multiclassProfs }).prefault({}),
     skillChoices: z
       .object({ count: z.number().int().min(0).max(18).default(0), from: z.array(z.enum(DND_SKILLS)).default([]) })
       .prefault({}),
@@ -107,7 +109,7 @@ export const updateClassSchema = z
     color: classColorSchema,
     hitDie: hitDieSchema.optional(),
     savingThrows: z.array(abilityKeySchema).max(6).optional(),
-    proficiencies: z.object({ armor: profList, weapons: profList, tools: profList }).optional(),
+    proficiencies: z.object({ armor: profList, weapons: profList, tools: profList, multiclass: multiclassProfs }).optional(),
     skillChoices: z.object({ count: z.number().int().min(0).max(18).default(0), from: z.array(z.enum(DND_SKILLS)).default([]) }).optional(),
     caster: casterSchema.optional(),
     spellcastingAbility: abilityKeySchema.nullable().optional(),

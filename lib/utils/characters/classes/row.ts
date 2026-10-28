@@ -38,6 +38,8 @@ export function toGameClassData(row: GameClass): GameClassData {
 
   const skillChoices = asObject(row.skillChoices);
 
+  const multiclass = isRecord(proficiencies.multiclass) ? proficiencies.multiclass : null;
+
   return {
     id: row.id,
     name: row.name,
@@ -46,6 +48,7 @@ export function toGameClassData(row: GameClass): GameClassData {
     hitDie: ((HIT_DICE as readonly number[]).includes(row.hitDie) ? row.hitDie : 8) as HitDie,
     savingThrows: strings(row.savingThrows).flatMap((k) => abilityKey(k) ?? []),
     proficiencies: { armor: strings(proficiencies.armor), weapons: strings(proficiencies.weapons), tools: strings(proficiencies.tools) },
+    ...(multiclass && { multiclassProficiencies: { armor: strings(multiclass.armor), weapons: strings(multiclass.weapons) } }),
     skillChoices: { count: typeof skillChoices.count === "number" ? skillChoices.count : 0, from: strings(skillChoices.from) },
     caster: ((CLASS_CASTERS as readonly string[]).includes(row.caster) ? row.caster : "none") as ClassCaster,
     spellcastingAbility: abilityKey(row.spellcastingAbility),

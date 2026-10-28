@@ -46,6 +46,7 @@ function convertWeapon(w: Fixture<O5Weapon>, data: Open5eData, assignments: Map<
     damageDice: w.fields.damage_dice,
     damageType: w.fields.damage_type,
     attackType: ranged ? "ranged" : "melee",
+    weaponCategory: w.fields.is_simple ? "simple" : "martial",
     ...(w.fields.range > 0 && { range: `${w.fields.range}/${w.fields.long_range}` }),
     ...(traits.length > 0 && { traits }),
     ...(versatile && { versatileDice: versatile }),

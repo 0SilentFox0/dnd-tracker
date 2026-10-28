@@ -12,6 +12,7 @@ import {
   getOptionalModifierValue,
 } from "./artifact-utils";
 
+import { WEAPON_PROFICIENCY_KINDS } from "@/lib/constants/artifacts";
 import { AttackType } from "@/lib/constants/battle";
 import { parseWeaponTraits } from "@/lib/constants/weapon-traits";
 import { resolveItemRow } from "@/lib/utils/items/resolve";
@@ -24,7 +25,12 @@ const defaultAttacks = (names: Ruleset["defaultAttacks"], fiveE: boolean): Extra
   { id: "default-ranged", name: names.rangedName, type: AttackType.RANGED as ExtractedAttack["type"], attackBonus: 0, damageDice: "", damageType: "physical" },
 ];
 
-const weaponCategoryOf = (description: string | null | undefined): ExtractedAttack["weaponCategory"] => {
+/** The structured modifier wins; the description prefix ("Martial Melee Weapon.") is the fallback for older rows. */
+export const weaponCategoryOf = (modifiers: ArtifactModifier[], description: string | null | undefined): ExtractedAttack["weaponCategory"] => {
+  const field = getOptionalModifierValue(modifiers, ArtifactModifierType.WEAPON_CATEGORY);
+
+  if ((WEAPON_PROFICIENCY_KINDS as readonly string[]).includes(field as string)) return field as "simple" | "martial";
+
   const m = /^\s*(simple|martial)\b/i.exec(description ?? "");
 
   return m ? (m[1].toLowerCase() as "simple" | "martial") : undefined;
@@ -180,6 +186,8 @@ function extractWeaponAttacks(
 
     const damageBonus = Number(getOptionalModifierValue(modifiers, ArtifactModifierType.DAMAGE_BONUS) ?? 0) || 0;
 
+    const category = weaponCategoryOf(modifiers, weapon.description);
+
     attacks.push({
       id: isOffHand ? `${ref}:off` : ref,
       name: weapon.name,
@@ -206,7 +214,7 @@ function extractWeaponAttacks(
       ...(versatileDice && { versatileDice }),
       ...(isOffHand && { hand: "off" as const }),
       ...(damageBonus !== 0 && { damageBonus }),
-      ...(fiveE && weaponCategoryOf(weapon.description) && { weaponCategory: weaponCategoryOf(weapon.description) }),
+      ...(fiveE && category && { weaponCategory: category }),
     });
   }
 

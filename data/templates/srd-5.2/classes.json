@@ -25,7 +25,15 @@
       "weapons": [
         "Simple and Martial weapons"
       ],
-      "tools": []
+      "tools": [],
+      "multiclass": {
+        "armor": [
+          "Shields"
+        ],
+        "weapons": [
+          "Martial weapons"
+        ]
+      }
     },
     "caster": "none",
     "spellcastingAbility": null,
@@ -792,7 +800,13 @@
       ],
       "tools": [
         "Choose 3 Musical Instruments"
-      ]
+      ],
+      "multiclass": {
+        "armor": [
+          "Light armor"
+        ],
+        "weapons": []
+      }
     },
     "caster": "full",
     "spellcastingAbility": "charisma",
@@ -1311,7 +1325,15 @@
       "weapons": [
         "Simple weapons"
       ],
-      "tools": []
+      "tools": [],
+      "multiclass": {
+        "armor": [
+          "Light armor",
+          "Medium armor",
+          "Shields"
+        ],
+        "weapons": []
+      }
     },
     "caster": "full",
     "spellcastingAbility": "wisdom",
@@ -1971,7 +1993,14 @@
       ],
       "tools": [
         "Herbalism Kit"
-      ]
+      ],
+      "multiclass": {
+        "armor": [
+          "Light armor",
+          "Shields"
+        ],
+        "weapons": []
+      }
     },
     "caster": "full",
     "spellcastingAbility": "wisdom",
@@ -2597,7 +2626,17 @@
       "weapons": [
         "Simple and Martial weapons"
       ],
-      "tools": []
+      "tools": [],
+      "multiclass": {
+        "armor": [
+          "Light armor",
+          "Medium armor",
+          "Shields"
+        ],
+        "weapons": [
+          "Martial weapons"
+        ]
+      }
     },
     "caster": "none",
     "spellcastingAbility": null,
@@ -3249,7 +3288,11 @@
       ],
       "tools": [
         "Choose one type of Artisan's Tools or Musical Instrument"
-      ]
+      ],
+      "multiclass": {
+        "armor": [],
+        "weapons": []
+      }
     },
     "caster": "none",
     "spellcastingAbility": null,
@@ -4145,7 +4188,17 @@
       "weapons": [
         "Simple and Martial weapons"
       ],
-      "tools": []
+      "tools": [],
+      "multiclass": {
+        "armor": [
+          "Light armor",
+          "Medium armor",
+          "Shields"
+        ],
+        "weapons": [
+          "Martial weapons"
+        ]
+      }
     },
     "caster": "half",
     "spellcastingAbility": "charisma",
@@ -4800,7 +4853,17 @@
       "weapons": [
         "Simple and Martial weapons"
       ],
-      "tools": []
+      "tools": [],
+      "multiclass": {
+        "armor": [
+          "Light armor",
+          "Medium armor",
+          "Shields"
+        ],
+        "weapons": [
+          "Martial weapons"
+        ]
+      }
     },
     "caster": "half",
     "spellcastingAbility": "wisdom",
@@ -5489,7 +5552,13 @@
       ],
       "tools": [
         "Thieves' Tools"
-      ]
+      ],
+      "multiclass": {
+        "armor": [
+          "Light armor"
+        ],
+        "weapons": []
+      }
     },
     "caster": "none",
     "spellcastingAbility": null,
@@ -6101,7 +6170,11 @@
       "weapons": [
         "Simple weapons"
       ],
-      "tools": []
+      "tools": [],
+      "multiclass": {
+        "armor": [],
+        "weapons": []
+      }
     },
     "caster": "full",
     "spellcastingAbility": "charisma",
@@ -6954,7 +7027,13 @@
       "weapons": [
         "Simple weapons"
       ],
-      "tools": []
+      "tools": [],
+      "multiclass": {
+        "armor": [
+          "Light armor"
+        ],
+        "weapons": []
+      }
     },
     "caster": "pact",
     "spellcastingAbility": "charisma",
@@ -8456,7 +8535,11 @@
       "weapons": [
         "Simple weapons"
       ],
-      "tools": []
+      "tools": [],
+      "multiclass": {
+        "armor": [],
+        "weapons": []
+      }
     },
     "caster": "full",
     "spellcastingAbility": "intelligence",
