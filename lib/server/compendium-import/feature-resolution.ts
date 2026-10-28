@@ -43,6 +43,37 @@ function findFeatureRows(root: Compendium, kind: Kind, parts: string[], edition:
     (!parts[sourceAt] || normalized(str(r.source)) === normalized(parts[sourceAt])));
 }
 
+const ABILITY_SHORT: Record<string, string> = { str: "Сила", dex: "Спритність", con: "Статура", int: "Інтелект", wis: "Мудрість", cha: "Харизма" };
+
+function prerequisiteText(raw: unknown): string {
+  return (Array.isArray(raw) ? raw : [raw]).map(object).map((alt) => {
+    const parts: string[] = [];
+
+    const level = alt.level;
+
+    if (typeof level === "number") parts.push(`рівень ${level}+`);
+    else if (level && typeof level === "object") {
+      const l = object(level);
+
+      const who = [str(object(l.class).name), str(object(l.subclass).name)].filter(Boolean).join(", ");
+
+      parts.push([typeof l.level === "number" ? `рівень ${l.level}+` : "", who].filter(Boolean).join(" "));
+    }
+
+    for (const row of array(alt.ability).map(object)) {
+      parts.push(Object.entries(row).map(([k, v]) => `${ABILITY_SHORT[k] ?? k} ${String(v)}+`).join(" або "));
+    }
+
+    for (const o of array(alt.other)) if (typeof o === "string" && o) parts.push(o);
+
+    const rest = Object.keys(alt).filter((k) => !["level", "ability", "other"].includes(k));
+
+    if (rest.length > 0) parts.push(rest.join(", "));
+
+    return parts.filter(Boolean).join(", ");
+  }).filter(Boolean).join("; ");
+}
+
 function optionFromRow(context: FeatureResolutionContext, featureContext: AdapterContext, row: JsonRecord): JsonRecord {
   const name = str(row.name);
 
@@ -56,7 +87,7 @@ function optionFromRow(context: FeatureResolutionContext, featureContext: Adapte
     description: [
       renderEntries(row.entries).text,
       unsupported(row, ["prerequisite", "featureType"], featureContext),
-      row.prerequisite ? `Вимоги (ДМ перевіряє вручну): ${JSON.stringify(row.prerequisite)}` : "",
+      prerequisiteText(row.prerequisite) ? `Вимоги (ДМ перевіряє вручну): ${prerequisiteText(row.prerequisite)}` : "",
     ].filter(Boolean).join("\n"),
     abilities: [],
   };

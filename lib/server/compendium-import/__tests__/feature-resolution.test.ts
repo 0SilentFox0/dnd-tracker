@@ -94,7 +94,7 @@ describe("nested feature characterization", () => {
 
     const result = adaptCompendium({ _meta: meta, class: [mage], classFeature: [{ ...feature, extraRule: 7, entries: [{ type: "options", count: 2, entries: [{ type: "refOptionalfeature", optionalfeature: "A|T" }, { type: "refOptionalfeature", optionalfeature: "B|T" }] }, { type: "refOptionalfeature", optionalfeature: "A|T" }] }], optionalfeature: [{ name: "A", source: "T", entries: ["{@b A} text"], prerequisite: { level: 2 }, extra: "manual" }, { name: "B", source: "T", entries: ["B text"] }, { name: "Unused", source: "T" }] });
 
-    const options = [{ id: nestedId("A|T"), name: "A", description: 'A text\nextra: "manual"\nВимоги (ДМ перевіряє вручну): {"level":2}', abilities: [] }, { id: nestedId("B|T"), name: "B", description: "B text", abilities: [] }];
+    const options = [{ id: nestedId("A|T"), name: "A", description: 'A text\nextra: "manual"\nВимоги (ДМ перевіряє вручну): рівень 2+', abilities: [] }, { id: nestedId("B|T"), name: "B", description: "B text", abilities: [] }];
 
     expect(result.entries[0].body.features).toMatchObject([{ abilities: [], choices: [
       { id: nestedId(`${owner}:${JSON.stringify(uid.split("|"))}:0`), label: "Особливості на вибір", kind: "option", count: 2, options },
