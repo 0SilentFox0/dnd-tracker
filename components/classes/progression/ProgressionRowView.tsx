@@ -42,7 +42,7 @@ export function Picks({ row, actions }: { row: ProgressionRow; actions?: Progres
 
   return (
     <ul className="space-y-1">
-      {row.picks.map((pick) => {
+      {row.picks.map((pick, i) => {
         const isSubclass = pick.kind === "subclass";
 
         const handler = isSubclass ? actions?.onChooseSubclass : actions?.onPick ? () => actions.onPick?.(pick, row.level) : undefined;
@@ -58,7 +58,7 @@ export function Picks({ row, actions }: { row: ProgressionRow; actions?: Progres
           </span>
         );
 
-        return <li key={pick.key}>{open && handler ? <button type="button" onClick={handler}>{badge}</button> : badge}</li>;
+        return <li key={`${i}:${pick.key}`}>{open && handler ? <button type="button" onClick={handler}>{badge}</button> : badge}</li>;
       })}
     </ul>
   );

@@ -71,6 +71,10 @@ export function useClassLevelUpForm({ open, character, onLeveled, onClose }: Use
 
   const nextRow: ProgressionRow | null = cls && raisedEntry ? (buildClassProgression(cls, raisedEntry).rows.find((r) => r.level === nextLevel) ?? null) : null;
 
+  const gained = nextRow ? [...nextRow.base, ...(raisedEntry?.subclassId ? (nextRow.bySubclass[raisedEntry.subclassId] ?? []) : [])] : [];
+
+  const picksCount = stepDefs.length;
+
   const pickClass = (value: string) => {
     setChoice(value);
     setSubclassId("");
@@ -106,6 +110,8 @@ export function useClassLevelUpForm({ open, character, onLeveled, onClose }: Use
     stepDefs,
     raisedEntry,
     nextRow,
+    gained,
+    picksCount,
     nextLevel,
     canSubmit,
     error: levelUp.error,

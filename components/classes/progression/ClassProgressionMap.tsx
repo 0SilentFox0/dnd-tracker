@@ -72,17 +72,29 @@ export function ClassProgressionMap({ progression, mode, actions }: Props) {
           <HudChipTabs ariaLabel="Підклас" items={subclasses.map((s) => ({ key: s.id, label: s.name, active: s.id === mobileSub, onSelect: () => setPicked(s.id) }))} />
         ) : null}
         <ol className="mt-2 space-y-2">
-          {rows.map((row) => (
+          {rows.map((row) => {
+            const sub = mobileSub ? (row.bySubclass[mobileSub] ?? []) : [];
+
+            const isEmpty = row.base.length === 0 && sub.length === 0 && row.picks.length === 0;
+
+            return (
             <li key={row.level} data-state={row.state} className={cn("rounded-lg border border-hud-rule p-2", STATE_CLASS[row.state])}>
               <div className="mb-1 text-sm font-semibold">
                 Рівень {row.level}
                 {row.state === "next" ? <span className="ml-1 text-xs font-normal text-hud-muted">наступний</span> : null}
               </div>
-              <Items items={row.base} accent={color} />
-              {mobileSub ? <Items items={row.bySubclass[mobileSub] ?? []} /> : null}
-              <Picks row={row} actions={actions} />
+              {isEmpty ? (
+                <span className="text-hud-muted">-</span>
+              ) : (
+                <>
+                  {row.base.length > 0 && <Items items={row.base} accent={color} />}
+                  {sub.length > 0 && <Items items={sub} />}
+                  {row.picks.length > 0 && <Picks row={row} actions={actions} />}
+                </>
+              )}
             </li>
-          ))}
+            );
+          })}
         </ol>
       </div>
     </HudPanel>

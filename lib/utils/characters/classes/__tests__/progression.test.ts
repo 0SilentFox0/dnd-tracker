@@ -107,4 +107,27 @@ describe("buildClassProgression", () => {
     expect(p.rows[0].base[0].summary).toHaveLength(120);
     expect(p.rows[0].base[0].description).toHaveLength(300);
   });
+
+  describe("scaled counts follow the character level", () => {
+    const col = { key: "prep", label: "Prepared", values: Array.from({ length: 20 }, (_, i) => (i + 1 >= 9 ? "9" : i + 1 >= 5 ? "4" : "")) };
+
+    const wizard = () => make({ columns: [col], features: [{ level: 1, abilities: [], choices: [choice({ id: "prep", level: 1, kind: "spell", count: { scale: "prep" } })] }] });
+
+    const pickN = (n: number) => ({ prep: Array.from({ length: n }, (_, i) => ({ id: `s${i}` })) });
+
+    it("sizes by entry level: 4/4 done at L5, 4/9 open at L9", () => {
+      const l5 = buildClassProgression(wizard(), { classId: "fighter", level: 5, choices: pickN(4) });
+
+      expect(l5.rows[0].picks[0]).toMatchObject({ required: 4, done: 4, status: "done" });
+
+      const l9 = buildClassProgression(wizard(), { classId: "fighter", level: 9, choices: pickN(4) });
+
+      expect(l9.rows[0].picks[0]).toMatchObject({ required: 9, done: 4, status: "open" });
+    });
+
+    it("keeps a pick whose column is 0 at choice.level but positive at entry level", () => {
+      expect(buildClassProgression(wizard(), { classId: "fighter", level: 5 }).rows[0].picks).toHaveLength(1);
+      expect(buildClassProgression(wizard(), { classId: "fighter", level: 2 }).rows[0].picks).toHaveLength(0);
+    });
+  });
 });

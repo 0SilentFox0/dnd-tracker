@@ -20,15 +20,11 @@ interface ClassLevelUpDialogProps {
 export function ClassLevelUpDialog({ open, onOpenChange, character, onLeveled }: ClassLevelUpDialogProps) {
   const form = useClassLevelUpForm({ open, character, onLeveled, onClose: () => onOpenChange(false) });
 
-  const { byId, available, selection, cls, stepDefs, raisedEntry, nextRow, nextLevel, canSubmit, actions } = form;
+  const { byId, available, selection, cls, stepDefs, raisedEntry, nextRow, gained, picksCount, nextLevel, canSubmit, actions } = form;
 
   const { choice } = selection;
 
   const { entries } = character;
-
-  const gained = nextRow ? [...nextRow.base, ...(raisedEntry?.subclassId ? (nextRow.bySubclass[raisedEntry.subclassId] ?? []) : [])] : [];
-
-  const picksCount = nextRow?.picks.length ?? 0;
 
   const submit = (e: React.FormEvent) => {
     e.preventDefault();

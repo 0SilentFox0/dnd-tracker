@@ -39,7 +39,7 @@ export function buildClassProgression(cls: GameClassData, entry?: CharacterClass
   const addPicks = (features: ClassFeature[], prefix: string) => {
     for (const feature of features) {
       for (const choice of feature.choices ?? []) {
-        const required = resolveChoiceCount(choice, choice.level, columns);
+        const required = resolveChoiceCount(choice, entry ? Math.max(choice.level, entry.level) : choice.level, columns);
 
         if (required === 0) continue;
 
