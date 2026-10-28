@@ -1,4 +1,5 @@
 import { spellLevelRoman } from "@/lib/constants/spells";
+import { isDying } from "@/lib/utils/battle/death-saves";
 import { footprintDistance } from "@/lib/utils/battle/grid/geometry";
 import { cellsOf, isOnMap } from "@/lib/utils/battle/grid/occupancy";
 import { areaRadiusCells, feetToCells, templateArea } from "@/lib/utils/battle/grid/template";
@@ -281,7 +282,7 @@ export function spellTargetCandidates(order: BattleParticipant[], caster: Battle
 
     const mine = p.basicInfo.side === caster.basicInfo.side;
 
-    return side === "dead" ? mine && !isUp(p) : isUp(p) && (side === "ally" ? mine : !mine);
+    return side === "dead" ? mine && !isUp(p) : (isUp(p) || (side === "ally" && isDying(p))) && (side === "ally" ? mine : !mine);
   });
 }
 

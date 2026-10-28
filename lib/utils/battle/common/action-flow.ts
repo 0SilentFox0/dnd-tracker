@@ -1,6 +1,7 @@
 import { findParticipant, isActive, replaceParticipant } from "@/lib/utils/abilities/engine/core/participants";
 import { resolveDowned, runAbilities } from "@/lib/utils/abilities/engine/core/run-abilities";
 import type { AbilityRunContext, AbilityRunResult, SummonRequest } from "@/lib/utils/abilities/engine/core/types";
+import { applyDamageConsequences } from "@/lib/utils/battle/damage/consequences";
 import type { AbilityEvent } from "@/types/abilities";
 import type { BattleAction, BattleParticipant } from "@/types/battle";
 
@@ -32,6 +33,17 @@ export function fire(flow: ActionFlow, event: AbilityEvent): AbilityRunResult {
   flow.summons.push(...r.summons);
 
   return r;
+}
+
+export function applyFlowDamage(flow: ActionFlow, before: BattleParticipant, amount: number, crit?: boolean): void {
+  const { rules } = flow.ctx;
+
+  if (!rules || amount <= 0 || !(rules.deathSaves.enabled || rules.concentration.enabled)) return;
+
+  const r = applyDamageConsequences({ before, after: getP(flow, before.basicInfo.id), amount, crit, rules: flow.ctx.rules, rng: flow.ctx.rng, participants: flow.ps });
+
+  flow.ps = r.participants;
+  flow.messages.push(...r.messages);
 }
 
 /** Летальна шкода й вбивство для учасника, що щойно впав. */

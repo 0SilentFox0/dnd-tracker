@@ -102,7 +102,7 @@ export function libraryPreviewSpell(spell: LibrarySpell, fx?: SpellFx | null): P
     level: spell.level,
     groupId: null,
     fx,
-    rules: { dice: d.dice, cost: d.cost, targeting: d.targeting, resolution: d.resolution, spellEffects: d.effects, stackable: d.stackable ?? false, maxStacks: d.maxStacks ?? null },
+    rules: { dice: d.dice, cost: d.cost, targeting: d.targeting, resolution: d.resolution, spellEffects: d.effects, stackable: d.stackable ?? false, maxStacks: d.maxStacks ?? null, concentration: d.concentration ?? false },
   };
 }
 

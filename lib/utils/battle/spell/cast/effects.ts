@@ -3,7 +3,7 @@ import { findFlags } from "@/lib/utils/abilities/engine/core/collect-modifiers";
 import { applyRawDamage, applyRawHeal } from "@/lib/utils/abilities/engine/effects/hp";
 import { applyEffect } from "@/lib/utils/abilities/registry/effects";
 import type { Effect } from "@/lib/utils/abilities/schema";
-import { getP, put } from "@/lib/utils/battle/common/action-flow";
+import { applyFlowDamage, getP, put } from "@/lib/utils/battle/common/action-flow";
 import { applyBalanceDamageMultiplier } from "@/lib/utils/battle/damage/balance-multiplier";
 import { applyResistance, immunityNote } from "@/lib/utils/battle/resistance";
 import { outcomeFor } from "@/lib/utils/battle/spell/cast/outcome";
@@ -59,6 +59,7 @@ function dealSpellDamage(state: SpellCastState, effect: Extract<Effect, { kind: 
   const resisted = applyResistance(target, planned, effect.damageType ?? "magic", { participants: flow.ps, fromSpell: true, school: spell.groupId, extra: state.actionModifiers[id] });
 
   put(flow, applyRawDamage(target, resisted.finalDamage));
+  applyFlowDamage(flow, target, resisted.finalDamage);
   absorbSpellDamage(state, id, resisted.finalDamage);
   state.damageSteps[id] = [...(state.damageSteps[id] ?? []), ...resisted.steps];
 

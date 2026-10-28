@@ -1,6 +1,6 @@
 import { findParticipant } from "@/lib/utils/abilities/engine/core/participants";
+import { rollSave } from "@/lib/utils/battle/saves/roll-save";
 import type { Outcome, SpellCastState } from "@/lib/utils/battle/spell/cast/state";
-import { rollSavingThrow } from "@/lib/utils/battle/spell/power";
 import { participantImmuneToSpell } from "@/lib/utils/battle/spell/spell-immunity";
 import type { RaceModifier } from "@/lib/utils/spells/model/schema";
 import type { BattleParticipant } from "@/types/battle";
@@ -47,13 +47,21 @@ export function resolveOutcome(state: SpellCastState, id: string, withSave: bool
 
     const dc = state.saveDc;
 
-    const { roll, mod, total, success } = rollSavingThrow(target, saveAbility, dc, state.rng, state.saveRolls.find((s) => s.participantId === id)?.roll);
+    const r = rollSave({ target, ability: saveAbility, dc, participants: flow.ps, rules: flow.ctx.rules, rng: state.rng, presetRoll: state.saveRolls.find((s) => s.participantId === id)?.roll, vsSpell: true });
 
-    state.saves.push({ participantId: id, ability: saveAbility, roll, result: success ? "success" : "fail" });
+    const { roll, mod, bonus, total, success } = r;
+
+    state.saves.push({ participantId: id, ability: saveAbility, roll, result: success ? "success" : "fail", ...(r.mode !== "normal" && { mode: r.mode, rolls: r.rolls }), ...(r.autoFail && { autoFail: true }) });
 
     if (success) factor = onSuccess === "half" ? 0.5 : 0;
 
-    flow.messages.push(`🎲 ${target.basicInfo.name}: рятівний кидок ${roll}${mod < 0 ? "-" : "+"}${Math.abs(mod)}=${total} проти СК ${dc} — ${success ? (factor > 0 ? "успіх, половина шкоди" : "успіх") : "провал"}`);
+    const extra = (bonus ? `${bonus < 0 ? "-" : "+"}${Math.abs(bonus)}` : "");
+
+    const note = r.autoFail ? " (автопровал)" : r.mode !== "normal" ? ` (${r.mode === "advantage" ? "перевага" : "недолік"}: ${r.rolls.join("/")})` : "";
+
+    flow.messages.push(r.autoFail
+      ? `🎲 ${target.basicInfo.name}: рятівний кидок проти СК ${dc} — автопровал`
+      : `🎲 ${target.basicInfo.name}: рятівний кидок ${roll}${mod < 0 ? "-" : "+"}${Math.abs(mod)}${extra}=${total} проти СК ${dc}${note} — ${success ? (factor > 0 ? "успіх, половина шкоди" : "успіх") : "провал"}`);
 
     if (factor === 0) return SKIPPED;
   }

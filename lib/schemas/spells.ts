@@ -22,6 +22,7 @@ const spellFields = {
   raceModifiers: z.array(RaceModifierSchema),
   stackable: z.boolean(),
   maxStacks: z.number().int().min(1).max(10).nullable(),
+  concentration: z.boolean(),
   fx: SpellFxSchema.describe("Візуальний ефект заклинання на мапі бою").nullable().optional(),
 };
 
@@ -39,6 +40,7 @@ export const createSpellSchema = z.object({
   raceModifiers: spellFields.raceModifiers.default([]),
   stackable: spellFields.stackable.default(false),
   maxStacks: spellFields.maxStacks.optional(),
+  concentration: spellFields.concentration.default(false),
 });
 
 export type CreateSpellInput = z.infer<typeof createSpellSchema>;

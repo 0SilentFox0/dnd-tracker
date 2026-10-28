@@ -1,6 +1,6 @@
 "use client";
 
-import { Heart, LogIn, Skull, Trash2 } from "lucide-react";
+import { Heart, LogIn, ShieldAlert, Skull, Trash2 } from "lucide-react";
 
 import { SideDot } from "@/components/battle/hud";
 import { SelectField } from "@/components/ui/select-field";
@@ -28,7 +28,7 @@ interface DmParticipantRowProps {
 }
 
 export function DmParticipantRow({ participant, controlled, actions }: DmParticipantRowProps) {
-  const { onChangeHp, onTakeControl, onRemove, onKill, onDone, unitControl } = actions;
+  const { onChangeHp, onTakeControl, onRemove, onKill, onConditions, conditionsEnabled, onDone, unitControl } = actions;
 
   const confirm = useConfirm();
 
@@ -37,6 +37,8 @@ export function DmParticipantRow({ participant, controlled, actions }: DmPartici
   const label = scaleLabel(participant);
 
   const canKill = onKill && participant.basicInfo.sourceType === ParticipantSourceType.UNIT && participant.combatStats.status !== CombatStatus.DEAD;
+
+  const canConditions = onConditions && conditionsEnabled;
 
   return (
     <div className={cn("flex min-h-10 items-center gap-2 border-b border-white/[.08] py-1", controlled && "bg-[var(--gold)]/[.08]")}>
@@ -74,6 +76,11 @@ export function DmParticipantRow({ participant, controlled, actions }: DmPartici
         >
           <LogIn className="size-3.5" />
         </button>
+        {canConditions && (
+          <button type="button" className={cn(ICON, "text-[#8fd0e8] hover:border-[#8fd0e8]/40")} title="Стани" onClick={() => onConditions(participant)}>
+            <ShieldAlert className="size-3.5" />
+          </button>
+        )}
         {canKill && (
           <button
             type="button"

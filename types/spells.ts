@@ -23,6 +23,7 @@ export interface Spell {
   raceModifiers: unknown;
   stackable?: boolean;
   maxStacks?: number | null;
+  concentration?: boolean;
   spellGroup?: SpellGroupRef | null;
   fx?: unknown;
 }
@@ -49,6 +50,7 @@ export interface SpellFormData {
   raceModifiers: RaceModifier[];
   stackable: boolean;
   maxStacks: number | null;
+  concentration?: boolean;
   fx: SpellFx;
 }
 
@@ -61,6 +63,7 @@ export interface SpellRules {
   spellEffects?: Effect[];
   stackable?: boolean;
   maxStacks?: number | null;
+  concentration?: boolean;
 }
 
 export type BookSpell = SpellRules & {

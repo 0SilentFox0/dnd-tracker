@@ -19,6 +19,7 @@ import {
   useAttack,
   useAuraZone,
   useBattle,
+  useBattleConditions,
   useBonusAction,
   useCastSpell,
   useCompleteBattle,
@@ -115,6 +116,7 @@ export interface BattleSceneActions {
   rollback: ReturnType<typeof useRollbackBattleAction>;
   addParticipant: ReturnType<typeof useAddBattleParticipant>;
   reveal: ReturnType<typeof useRevealBattleParticipants>;
+  conditions: ReturnType<typeof useBattleConditions>;
   updateParticipant: ReturnType<typeof useUpdateBattleParticipant>;
   scaleUnits: ReturnType<typeof useScaleBattleUnits>;
   unitControl: ReturnType<typeof useUnitControl>;
@@ -331,6 +333,7 @@ export function useBattleSceneValue(campaignId: string, battleId: string, userId
     rollback: useRollbackBattleAction(campaignId, battleId, o),
     addParticipant: useAddBattleParticipant(campaignId, battleId, o),
     reveal: useRevealBattleParticipants(campaignId, battleId, o),
+    conditions: useBattleConditions(campaignId, battleId, o),
     updateParticipant: useUpdateBattleParticipant(campaignId, battleId, o),
     scaleUnits: useScaleBattleUnits(campaignId, battleId, o),
     unitControl: useUnitControl(campaignId, battleId, o),

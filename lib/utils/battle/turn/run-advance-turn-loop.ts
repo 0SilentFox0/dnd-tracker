@@ -3,6 +3,7 @@ import { berserkBonusOf, runBerserkTurn } from "./berserk";
 import { SYSTEM_ACTOR } from "@/lib/constants/battle";
 import { idleTurnIndex, isActive, sitsOutTurn, takesTurn } from "@/lib/utils/abilities/engine/core/participants";
 import { runAbilities } from "@/lib/utils/abilities/engine/core/run-abilities";
+import { rollDyingAt } from "@/lib/utils/battle/death-saves";
 import { pruneExpiredTerrain } from "@/lib/utils/battle/grid/terrain";
 import { reserveOf } from "@/lib/utils/battle/participant/reserve";
 import {
@@ -94,7 +95,13 @@ export function runAdvanceTurnLoop(
       nextTurnIndex,
       updatedInitiativeOrder,
       nextRound,
+      { rules: params.rules, rng },
     );
+
+    if (turnTransition.participants) {
+      updatedInitiativeOrder = turnTransition.participants;
+      newLogEntries.push(systemEntry(nextRound, turnTransition.messages?.join("; ") ?? "", "death-saves"));
+    }
 
     const previousRound = nextRound;
 
@@ -147,9 +154,20 @@ export function runAdvanceTurnLoop(
       }
     }
 
-    const nextParticipant = updatedInitiativeOrder[nextTurnIndex];
+    let nextParticipant = updatedInitiativeOrder[nextTurnIndex];
 
     if (!nextParticipant) break;
+
+    const dyingRoll = nextRound > previousRound ? rollDyingAt(updatedInitiativeOrder, nextTurnIndex, params.rules, rng) : null;
+
+    if (dyingRoll) {
+      updatedInitiativeOrder = dyingRoll.participants;
+      newLogEntries.push(systemEntry(nextRound, dyingRoll.messages.join("; "), "death-saves"));
+
+      nextParticipant = updatedInitiativeOrder[nextTurnIndex];
+
+      if (!isActive(nextParticipant)) continue;
+    }
 
     if (sitsOutTurn(nextParticipant, nextRound)) {
       // ніхто з живих не ходить цього раунду: зупиняємось на його початку, ходи пропустить клієнт/ДМ

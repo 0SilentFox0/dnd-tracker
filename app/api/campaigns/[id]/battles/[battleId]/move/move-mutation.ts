@@ -7,7 +7,7 @@ import { DEFAULT_HAZARD_LABEL } from "@/lib/constants/battle";
 import { mapCellSchema } from "@/lib/schemas/battles";
 import { findParticipant, isActive, replaceParticipant } from "@/lib/utils/abilities/engine/core/participants";
 import { resolveDowned } from "@/lib/utils/abilities/engine/core/run-abilities";
-import { canStand, cellKey, checkReturnToStart,hazardHit, hazardOnMove, moveBudget, placeParticipants, reachable } from "@/lib/utils/battle/grid";
+import { canStand, cellKey, checkReturnToStart, frightenedBlocksMove, hazardHit, hazardOnMove, moveBudget, placeParticipants, reachable } from "@/lib/utils/battle/grid";
 import { activeMapMode, type MapModeKey } from "@/lib/utils/battle/modes";
 import type { BattleMutationContext, MutationResult } from "@/lib/utils/battle/pipeline/run-battle-mutation";
 import { BattleRuleError, type NewBattleEvent } from "@/lib/utils/battle/store";
@@ -54,6 +54,8 @@ export function moveMutation(ctx: BattleMutationContext, data: MoveBody): Mutati
 
     if (cost === undefined) throw new BattleRuleError("action_rejected", "Туди не дійти: зайнято, закрито ворогами або не вистачає руху");
 
+    if (frightenedBlocksMove(map, participants, mover, data.to)) throw new BattleRuleError("action_rejected", "Наляканий не може наблизитись до джерела страху");
+
     movementUsed = (movementUsed ?? 0) + cost;
     hazard = hazardOnMove(map, participants, mover, data.to, cost);
   } else if (!canStand(map, participants, mover, data.to)) {
@@ -64,7 +66,7 @@ export function moveMutation(ctx: BattleMutationContext, data: MoveBody): Mutati
 
   const after = replaceParticipant(participants, moved);
 
-  const hit = hazard && hazardHit(moved, hazard, ctx.scene.round, after, ctx.rng ?? Math.random);
+  const hit = hazard && hazardHit(moved, hazard, ctx.scene.round, after, ctx.rng ?? Math.random, ctx.meta.rules);
 
   if (!hazard || !hit) return { participants: after, pending: ctx.pending, events: [] };
 
@@ -92,9 +94,9 @@ function resolveHazardHit(
 ): Pick<MutationResult, "participants" | "events"> {
   const id = before.basicInfo.id;
 
-  let next = replaceParticipant(participants, hit.participant);
+  let next = replaceParticipant(hit.participants, hit.participant);
 
-  const messages = [hit.message];
+  const messages = [hit.message, ...hit.consequences];
 
   if (!isActive(hit.participant)) {
     const downed = resolveDowned(next, { victimId: id, actorId: null }, { round: ctx.scene.round, rng: ctx.rng ?? Math.random, rules: ctx.meta.rules });

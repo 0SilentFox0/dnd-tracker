@@ -25,7 +25,7 @@ export const DAMAGE_FILTER_KINDS = [AttackType.MELEE, AttackType.RANGED, "magic"
 
 export const CONDITION_SUBJECTS = ["self", "eventTarget", "eventActor", "anyAlly", "anyEnemy"] as const;
 
-export const DYNAMIC_STATS = ["armor", "attackBonus", "critThreshold", "actionsPerTurn"] as const;
+export const DYNAMIC_STATS = ["armor", "attackBonus", "critThreshold", "actionsPerTurn", "savingThrow"] as const;
 
 export const BAKED_STATS = [
   "initiative",
@@ -40,7 +40,7 @@ export const BAKED_STATS = [
 
 export const STAT_KEYS = [...DYNAMIC_STATS, ...BAKED_STATS] as const;
 
-export const TIMED_STATS = ["armor", "attackBonus", "critThreshold", "initiative", "speed", "morale", "actionsPerTurn"] as const;
+export const TIMED_STATS = ["armor", "attackBonus", "critThreshold", "initiative", "speed", "morale", "actionsPerTurn", "savingThrow"] as const;
 
 export const CONDITION_KEYS = [
   "no_bonus_action",
@@ -51,6 +51,28 @@ export const CONDITION_KEYS = [
   "skip_action",
   "immobilized",
 ] as const;
+
+export const CONDITION_5E_KEYS = [
+  "blinded",
+  "charmed",
+  "deafened",
+  "frightened",
+  "grappled",
+  "incapacitated",
+  "invisible",
+  "paralyzed",
+  "petrified",
+  "poisoned",
+  "prone",
+  "restrained",
+  "stunned",
+  "unconscious",
+  "exhaustion",
+] as const;
+
+export type Condition5eKey = (typeof CONDITION_5E_KEYS)[number];
+
+export type AnyConditionKey = (typeof CONDITION_KEYS)[number] | Condition5eKey;
 
 export type AbilityTarget = (typeof ABILITY_TARGETS)[number];
 
@@ -64,7 +86,7 @@ export type ConditionSubject = (typeof CONDITION_SUBJECTS)[number];
 
 export type StatKey = (typeof STAT_KEYS)[number];
 
-export type ConditionImmunityKey = (typeof CONDITION_KEYS)[number] | "fear" | "berserk" | "charm";
+export type ConditionImmunityKey = AnyConditionKey | "fear" | "berserk" | "charm";
 
 export function isStaticEffect(e: Effect): e is StaticEffect {
   return e.kind === "modifyStat" || e.kind === "damageBonus" || e.kind === "flag";

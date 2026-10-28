@@ -8,6 +8,8 @@ import { findParticipant, idleTurnIndex, isActive, replaceParticipant, sitsOutTu
 import { resolveDowned, runAbilities } from "@/lib/utils/abilities/engine/core/run-abilities";
 import type { Rng } from "@/lib/utils/abilities/engine/core/types";
 import { dropBreakOnDamage } from "@/lib/utils/abilities/engine/effects/hp";
+import { applyDamageConsequences } from "@/lib/utils/battle/damage/consequences";
+import { rollDyingAt } from "@/lib/utils/battle/death-saves";
 import { hazardHit, hazardUnder } from "@/lib/utils/battle/grid/hazard";
 import { landDive } from "@/lib/utils/battle/maneuvers";
 import { actionsPerTurnPool, setExtraActionPool } from "@/lib/utils/battle/participant/helpers";
@@ -70,6 +72,10 @@ export function processStartOfTurn(
 
   let hazardResult: StartOfTurnHazard | undefined;
 
+  let killedByRules = false;
+
+  let others = allParticipants;
+
   // DoT/HoT — на початку ходу цілі; тривалості зменшуються наприкінці ходу (endTurnCleanup)
   if (
     updatedParticipant.combatStats.status !== CombatStatus.DEAD &&
@@ -78,7 +84,11 @@ export function processStartOfTurn(
   ) {
     const dotResult = applyDOTEffects(updatedParticipant, allParticipants);
 
-    updatedParticipant = dropBreakOnDamage(
+    const beforeDot = updatedParticipant;
+
+    const dotDamage = beforeDot.combatStats.currentHp - dotResult.newHp;
+
+    const hurt = dropBreakOnDamage(
       {
         ...updatedParticipant,
         combatStats: {
@@ -86,13 +96,19 @@ export function processStartOfTurn(
           currentHp: dotResult.newHp,
         },
       },
-      updatedParticipant.combatStats.currentHp - dotResult.newHp,
+      dotDamage,
     );
-    damageMessages.push(...dotResult.damageMessages);
 
-    const hazard = map && updatedParticipant.combatStats.currentHp > 0 ? hazardUnder(map, updatedParticipant) : null;
+    const dotRules = dotDamage > 0 ? applyDamageConsequences({ before: beforeDot, after: hurt, amount: dotDamage, rules, rng, participants: allParticipants }) : null;
 
-    const hit = hazard && hazardHit(updatedParticipant, hazard, currentRound, allParticipants, rng);
+    updatedParticipant = dotRules?.participant ?? hurt;
+    others = dotRules?.participants ?? others;
+    killedByRules = updatedParticipant.combatStats.status === CombatStatus.DEAD;
+    damageMessages.push(...dotResult.damageMessages, ...(dotRules?.messages ?? []));
+
+    const hazard = map && updatedParticipant.combatStats.currentHp > 0 ? hazardUnder(map, updatedParticipant, undefined, others) : null;
+
+    const hit = hazard && hazardHit(updatedParticipant, hazard, currentRound, others, rng, rules);
 
     if (hit) {
       hazardResult = {
@@ -103,6 +119,9 @@ export function processStartOfTurn(
         damageType: hazard.damage?.type ?? "",
       };
       updatedParticipant = hit.participant;
+      others = hit.participants;
+      killedByRules = updatedParticipant.combatStats.status === CombatStatus.DEAD;
+      damageMessages.push(...hit.consequences);
     }
 
     const hotResult = applyHOTEffects(updatedParticipant);
@@ -139,6 +158,8 @@ export function processStartOfTurn(
       },
     };
     statusChanged = true;
+  } else if (killedByRules) {
+    statusChanged = true;
   }
 
   const skippedBy = isActive(updatedParticipant) ? skipChances.find((s) => rng() * 100 < s.percent) : undefined;
@@ -163,13 +184,13 @@ export function processStartOfTurn(
   const ctx = { round: currentRound, rng, map, rules };
 
   let participants = allParticipants.some((p) => p.basicInfo.id === id)
-    ? replaceParticipant(allParticipants, updatedParticipant)
+    ? replaceParticipant(others, updatedParticipant)
     : [updatedParticipant];
 
   const abilityMessages: string[] = [...healMessages];
 
   if (updatedParticipant.battleData.airborne && updatedParticipant.battleData.airborne.since < currentRound) {
-    const landed = landDive(participants, id, { map, rng });
+    const landed = landDive(participants, id, { map, rng, rules });
 
     participants = landed.participants;
     abilityMessages.push(...landed.messages);
@@ -218,7 +239,12 @@ export function processEndOfTurn(
   currentTurnIndex: number,
   initiativeOrder: BattleParticipant[],
   currentRound: number,
-): { nextTurnIndex: number; nextRound: number } {
+  deathSaves?: { rules?: Ruleset; rng?: () => number },
+): { nextTurnIndex: number; nextRound: number; participants?: BattleParticipant[]; messages?: string[] } {
+  let order = initiativeOrder;
+
+  const messages: string[] = [];
+
   let nextTurnIndex = currentTurnIndex;
 
   let nextRound = currentRound;
@@ -236,7 +262,15 @@ export function processEndOfTurn(
       nextRound += 1;
     }
 
-    const nextParticipant = initiativeOrder[nextTurnIndex];
+    // у новому раунді черга перевпорядковується: кидки для нього робить цикл ходу
+    const rolled = nextRound === currentRound ? rollDyingAt(order, nextTurnIndex, deathSaves?.rules, deathSaves?.rng ?? Math.random) : null;
+
+    if (rolled) {
+      order = rolled.participants;
+      messages.push(...rolled.messages);
+    }
+
+    const nextParticipant = order[nextTurnIndex];
 
     if (
       nextParticipant &&
@@ -259,6 +293,7 @@ export function processEndOfTurn(
   return {
     nextTurnIndex,
     nextRound,
+    ...(messages.length > 0 && { participants: order, messages }),
   };
 }
 

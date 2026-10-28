@@ -3,6 +3,7 @@
 import { type ReactNode, useState } from "react";
 import { ChevronLeft, ChevronsDown, ChevronsUp, Dices, type LucideIcon, RefreshCw, ScrollText, Sparkles, Trophy, UserPlus } from "lucide-react";
 
+import { ConditionsDialog } from "./ConditionsDialog";
 import { DmBattleLog } from "./DmBattleLog";
 import { DmParticipantRow } from "./DmParticipantRow";
 
@@ -70,7 +71,7 @@ export function DmQuickActionsPanel({ dialogs, onOpenCastSpell, panel }: DmQuick
 
   const closePanel = () => setOpen(false);
 
-  const { row, refreshSources, randomUnits } = useDmParticipantActions({ onChangeHp: dialogs.hp.show, onDone: closePanel });
+  const { row, refreshSources, randomUnits, conditions } = useDmParticipantActions({ onChangeHp: dialogs.hp.show, onDone: closePanel });
 
   if (!viewer.isDM || battle.status === BattleStatus.PREPARED) return null;
 
@@ -174,6 +175,8 @@ export function DmQuickActionsPanel({ dialogs, onOpenCastSpell, panel }: DmQuick
           )}
         </div>
       </div>
+
+      <ConditionsDialog participant={conditions.target} onClose={conditions.close} onSubmit={conditions.submit} isPending={conditions.isPending} />
 
       {open && (
         <button

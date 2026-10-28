@@ -25,6 +25,7 @@ export function applyManeuver(input: EffectApplyInput<Extract<Effect, { kind: "m
     map: ctx.map,
     round: ctx.round,
     rng: ctx.rng,
+    rules: ctx.rules,
   });
 
   return { participants: r.participants, messages: r.messages, downed: r.downed };

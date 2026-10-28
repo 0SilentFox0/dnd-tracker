@@ -1,7 +1,7 @@
 import { buildBattleActionForMiss } from "./actions";
 import { applyDamageToTarget } from "./damage";
 
-import { type ActionFlow, fire, getP, put, settleDowned } from "@/lib/utils/battle/common/action-flow";
+import { type ActionFlow, applyFlowDamage, fire, getP, put, settleDowned } from "@/lib/utils/battle/common/action-flow";
 import { attackKindOf } from "@/lib/utils/battle/common/attack-kind";
 import { applyBalanceDamageMultiplier } from "@/lib/utils/battle/damage/balance-multiplier";
 import { applyResistance } from "@/lib/utils/battle/resistance";
@@ -34,6 +34,7 @@ export function handleMiss(params: HandleMissParams): Omit<ProcessAttackResult, 
     actualGuaranteedDamage = applyResistance(target, guaranteedDamage, attack.damageType ?? "physical", { participants: flow.ps, attackKind: attackKindOf(attack.type) }).finalDamage;
 
     put(flow, applyDamageToTarget(target, actualGuaranteedDamage).updatedTarget);
+    applyFlowDamage(flow, target, actualGuaranteedDamage);
     settleDowned(flow, targetId, attackerId);
   }
 

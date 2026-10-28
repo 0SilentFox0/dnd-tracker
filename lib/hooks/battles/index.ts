@@ -11,6 +11,7 @@ export {
   useAttack,
   useAuraZone,
   useBattle,
+  useBattleConditions,
   useBonusAction,
   useCastSpell,
   useCompleteBattle,
@@ -32,3 +33,4 @@ export {
   useUpdateBattleParticipant,
 } from "./useBattles";
 export { useBattleSummary } from "./useBattleSummary";
+export type { BattleConditionsBody } from "@/lib/api/battles";

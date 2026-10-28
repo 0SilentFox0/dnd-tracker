@@ -41,3 +41,27 @@ describe("clearFallenEffects", () => {
     expect(clearFallenEffects(list)).toBe(list);
   });
 });
+
+describe("clearFallenEffects: герой, що вмирає (5e)", () => {
+  const dying = (): BattleParticipant => {
+    const p = charmed(CombatStatus.UNCONSCIOUS);
+
+    return { ...p, battleData: { ...p.battleData, deathSaves: { successes: 0, failures: 0, stable: false } } };
+  };
+
+  it("зберігає ефекти й стани", () => {
+    const list = [dying()];
+
+    expect(clearFallenEffects(list)).toBe(list);
+  });
+
+  it("непритомний без кидків смерті (HOMM) очищається як раніше", () => {
+    expect(clearFallenEffects([charmed(CombatStatus.UNCONSCIOUS)])[0].battleData.activeEffects).toEqual([]);
+  });
+
+  it("помер від провалів — ефекти знімаються", () => {
+    const dead = { ...dying(), combatStats: { ...dying().combatStats, status: CombatStatus.DEAD } };
+
+    expect(clearFallenEffects([dead])[0].battleData.activeEffects).toEqual([]);
+  });
+});

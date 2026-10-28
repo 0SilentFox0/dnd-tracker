@@ -5,10 +5,11 @@ import { battleKeys } from "./keys";
 import { battleQueryKey } from "./keys";
 import { useBattleAction } from "./useBattleAction";
 
-import type { AddParticipantData, CreateBattleData, UnitControlData } from "@/lib/api/battles";
+import type { AddParticipantData, BattleConditionsBody, CreateBattleData, UnitControlData } from "@/lib/api/battles";
 import {
   abilityAction,
   addBattleParticipant,
+  applyBattleCondition,
   attack,
   bonusAction,
   castSpell,
@@ -204,6 +205,9 @@ export const useRollbackBattleAction = (c: string, b: string, o: ActionOpts = {}
 
 export const useRevealBattleParticipants = (c: string, b: string, o: ActionOpts = {}) =>
   useBattleAction<{ participantIds: string[] }>(c, b, (body) => revealBattleParticipants(c, b, body), o);
+
+export const useBattleConditions = (c: string, b: string, o: ActionOpts = {}) =>
+  useBattleAction<BattleConditionsBody>(c, b, (body) => applyBattleCondition(c, b, body), o);
 
 export const useAddBattleParticipant = (c: string, b: string, o: ActionOpts = {}) =>
   useBattleAction<AddParticipantData>(c, b, (data) => addBattleParticipant(c, b, data), o);

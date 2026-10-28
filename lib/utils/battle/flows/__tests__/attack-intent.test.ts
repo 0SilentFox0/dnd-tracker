@@ -85,3 +85,23 @@ describe("participantAttackIntent", () => {
     expect(participantAttackIntent(clickScene({ battle: { map, initiativeOrder: order, currentRound: 2, currentTurnIndex: 0 } }, order), "e")).toBeNull();
   });
 });
+
+describe("participantAttackIntent: герой, що вмирає", () => {
+  const downed = (deathSaves?: { successes: number; failures: number; stable: boolean }) => {
+    const p = unit("d", ParticipantSide.ALLY, { deathSaves });
+
+    return { ...p, combatStats: { ...p.combatStats, currentHp: 0, status: "unconscious" as const } };
+  };
+
+  const order = (d: BattleParticipant) => [unit("e", ParticipantSide.ENEMY), d];
+
+  const scene = (d: BattleParticipant) => clickScene({ turn: { current: order(d)[0], isMyTurn: true } }, order(d));
+
+  it("ворог може обрати ціллю", () => {
+    expect(participantAttackIntent(scene(downed({ successes: 0, failures: 0, stable: false })), "d")).toMatchObject({ targetId: "d" });
+  });
+
+  it("без кидків смерті (HOMM) — лише вибір", () => {
+    expect(participantAttackIntent(scene(downed()), "d")).toBeNull();
+  });
+});

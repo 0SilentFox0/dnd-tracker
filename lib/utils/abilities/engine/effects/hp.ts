@@ -1,4 +1,6 @@
 import { CombatStatus } from "@/lib/constants/battle";
+import { removeEffects } from "@/lib/utils/battle/conditions/query";
+import { clearDeathSaves } from "@/lib/utils/battle/death-saves";
 import type { BattleParticipant, BattleParticipantCombatStats } from "@/types/battle";
 
 function downStatus(hp: number): BattleParticipantCombatStats["status"] {
@@ -6,9 +8,9 @@ function downStatus(hp: number): BattleParticipantCombatStats["status"] {
 }
 
 export function dropBreakOnDamage(p: BattleParticipant, damage: number): BattleParticipant {
-  if (damage <= 0 || !p.battleData.activeEffects.some((e) => e.breakOnDamage)) return p;
+  if (damage <= 0) return p;
 
-  return { ...p, battleData: { ...p.battleData, activeEffects: p.battleData.activeEffects.filter((e) => !e.breakOnDamage) } };
+  return removeEffects(p, (e) => !!e.breakOnDamage).participant;
 }
 
 export function applyRawHeal(p: BattleParticipant, amount: number): { participant: BattleParticipant; healed: number } {
@@ -16,7 +18,11 @@ export function applyRawHeal(p: BattleParticipant, amount: number): { participan
 
   if (healed === 0) return { participant: p, healed };
 
-  return { participant: { ...p, combatStats: { ...p.combatStats, currentHp: p.combatStats.currentHp + healed } }, healed };
+  const hp = p.combatStats.currentHp + healed;
+
+  const healedP = { ...p, combatStats: { ...p.combatStats, currentHp: hp } };
+
+  return { participant: hp > 0 && p.battleData.deathSaves ? { ...clearDeathSaves(healedP), combatStats: { ...healedP.combatStats, status: CombatStatus.ACTIVE } } : healedP, healed };
 }
 
 export function applyRawDamage(p: BattleParticipant, amount: number): BattleParticipant {

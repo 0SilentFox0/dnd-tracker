@@ -69,9 +69,11 @@ function advanceFrom({ participants, pending, scene, rng, map, rules }: AdvanceT
 
     if (ended.messages.length > 0) actions.push(turnEndAction(ending, scene, ended.messages));
 
-    const finished = finishTurnEffects(findParticipant(order, ending.basicInfo.id) ?? ending);
+    const finished = finishTurnEffects(findParticipant(order, ending.basicInfo.id) ?? ending, { participants: order, rules, rng: rng ?? Math.random });
 
     order = replaceParticipant(order, finished.participant);
+
+    if (finished.messages.length > 0) actions.push(turnEndAction(ending, scene, finished.messages));
 
     if (finished.expired.length > 0) actions.push(turnEndAction(ending, scene, [`ефекти завершилися: ${finished.expired.join(", ")}`]));
   }

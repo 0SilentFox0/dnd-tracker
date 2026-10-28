@@ -4,6 +4,8 @@ import { SKILL_AREA_RADIUS_FEET } from "@/lib/constants/battle";
 import { collectModifiers } from "@/lib/utils/abilities/engine/core/collect-modifiers";
 import { findParticipant, isActive, isAirborne, isTargetable } from "@/lib/utils/abilities/engine/core/participants";
 import type { FlagEffect } from "@/lib/utils/abilities/schema";
+import { conditionSourceIds } from "@/lib/utils/battle/conditions/query";
+import { isDying } from "@/lib/utils/battle/death-saves";
 import { footprintDistance, inBounds } from "@/lib/utils/battle/grid/geometry";
 import { cellsOf, isOnMap } from "@/lib/utils/battle/grid/occupancy";
 import { aimInRange, feetToCells, templateAimAllowed, templateArea, templateCentre } from "@/lib/utils/battle/grid/template";
@@ -170,7 +172,7 @@ function outOfRange(caster: BattleParticipant, picked: BattleParticipant[], rang
   return picked.some((p) => p.battleData.position !== undefined && footprintDistance(cellsOf(caster), cellsOf(p)) > max);
 }
 
-export function resolveSpellTargets(
+function resolveRaw(
   ps: BattleParticipant[],
   caster: BattleParticipant,
   spell: SpellRef,
@@ -245,7 +247,7 @@ export function resolveSpellTargets(
 
       if (picked.length === 0) return fail("Оберіть ціль заклинання");
 
-      if (picked.some((p) => !isActive(p) || (p.basicInfo.side === side) !== (wanted === "ally"))) {
+      if (picked.some((p) => !(isActive(p) || (wanted === "ally" && isDying(p))) || (p.basicInfo.side === side) !== (wanted === "ally"))) {
         return fail(wanted === "ally" ? "Ціль має бути живим союзником" : "Ціль має бути живим ворогом");
       }
 
@@ -262,4 +264,33 @@ export function resolveSpellTargets(
       return { ok: true, targetIds: picked.map((p) => p.basicInfo.id) };
     }
   }
+}
+
+const HOSTILE_KINDS = new Set(["enemy", "area", "template", "allEnemies"]);
+
+function hostile(targeting: SpellTargetingDef): boolean {
+  if (targeting.kind === "area" || targeting.kind === "template") return targeting.side === "enemy";
+
+  return HOSTILE_KINDS.has(targeting.kind);
+}
+
+export function resolveSpellTargets(
+  ps: BattleParticipant[],
+  caster: BattleParticipant,
+  spell: SpellRef,
+  targeting: SpellTargetingDef,
+  chosenIds: string[],
+  mapCtx?: SpellMapContext,
+): SpellTargetResolution {
+  const res = resolveRaw(ps, caster, spell, targeting, chosenIds, mapCtx);
+
+  const charmers = conditionSourceIds(caster, "charmed");
+
+  if (!res.ok || !charmers.length || !hostile(targeting)) return res;
+
+  const targetIds = res.targetIds.filter((id) => !charmers.includes(id));
+
+  if (targetIds.length === res.targetIds.length) return res;
+
+  return targetIds.length > 0 ? { ...res, targetIds } : fail("Не можна накладати ворожі чари на того, хто зачарував");
 }

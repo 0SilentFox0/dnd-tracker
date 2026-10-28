@@ -1,6 +1,7 @@
 import { CombatStatus, ParticipantSide, SYSTEM_ACTOR } from "@/lib/constants/battle";
 import { isActive, isEscaped } from "@/lib/utils/abilities/engine/core/participants";
 import { restoreCharm } from "@/lib/utils/abilities/engine/effects/charm";
+import { clearDeathSaves } from "@/lib/utils/battle/death-saves";
 import { BattleAction, BattleParticipant } from "@/types/battle";
 
 export interface VictoryCheckResult {
@@ -98,7 +99,7 @@ export function completeBattle(
   const revived = result === "victory" ? restored.filter(revivesOnVictory) : [];
 
   const updatedParticipants = restored.map((p) =>
-    revived.includes(p) ? { ...p, combatStats: { ...p.combatStats, currentHp: p.combatStats.maxHp, status: CombatStatus.ACTIVE } } : p,
+    revived.includes(p) ? { ...clearDeathSaves(p), combatStats: { ...p.combatStats, currentHp: p.combatStats.maxHp, status: CombatStatus.ACTIVE } } : p,
   );
 
   const battleAction: BattleAction = {

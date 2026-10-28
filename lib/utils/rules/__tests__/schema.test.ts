@@ -17,7 +17,10 @@ describe("parseRules", () => {
       formulas: { saveDcBase: 8, proficiencyBase: 2, proficiencyEvery: 4 },
       heroScaling: { meleeDiceByLevel: null, rangedDiceByLevel: null, hpBaseLevels: 3, hpConCoefficient: 1.5 },
       initiative: { heroMin: 10, heroMax: 16 },
-      defaultAttacks: { meleeName: "Звичайний удар", rangedName: "Звичайний постріл" },
+      defaultAttacks: { meleeName: "Звичайний удар", rangedName: "Звичайний постріл" },      saves: { proficiency: false },
+      deathSaves: { enabled: false, unitsDieAtZero: true },
+      concentration: { enabled: false, dcCap: null },
+      conditions: { enabled: false, exhaustion: "2014" },
     });
   });
 

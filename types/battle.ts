@@ -59,6 +59,16 @@ export interface ActiveEffect {
   permanent?: boolean;
   /** ефект зони аури: діє, поки власник живий; key — спільний для однакових аур різних власників */
   zone?: { ownerId: string; key: string };
+  /** стан закінчується, коли власник проходить рятівний кидок наприкінці свого ходу */
+  saveEnds?: { ability: AbilityKey; dc: number };
+  /** ефект, що тримається поки кастер концентрується на закляттi castId */
+  concentrationOf?: { casterId: string; castId: string };
+  /** маркер концентрації на самому кастері */
+  concentration?: { castId: string; spellName: string };
+  /** скільки HP зняло виснаження з maxHp (повертається при зніманні) */
+  exhaustionHpHalved?: number;
+  /** варіант правил виснаження на момент накладання (для перерахунку за сумарним рівнем) */
+  exhaustionVariant?: "2014" | "2024";
 }
 
 /**
@@ -155,6 +165,8 @@ export interface BattleParticipantAbilities {
   rangedMultiplier?: number;
   magicMultiplier?: number;
   archetypeName?: string;
+  /** Характеристики з майстерністю рятівних кидків (лише герої, якщо є) */
+  saveProficiencies?: AbilityKey[];
   /** Таблиці кубиків героя з правил кампанії; відсутнє — типова прогресія */
   heroDice?: { melee?: Record<number, string>; ranged?: Record<number, string> };
 }
@@ -230,6 +242,8 @@ export interface TerrainDamage {
   type: string;
   /** Небезпека від заклинання: імунітет і опори до заклинань діють, як при касті */
   spellId?: string;
+  /** Небезпека тримається, поки кастер концентрується на закляттi castId */
+  concentrationOf?: { casterId: string; castId: string };
 }
 
 export interface TerrainCell {
@@ -339,6 +353,8 @@ export interface BattleParticipantBattleData {
   reserved?: boolean;
   /** Щойно введений з резерву: ходить після поточного, у порядку введення */
   revealPending?: boolean;
+  /** 5e: герой на 0 HP кидає смерті; лічильники живуть, поки він непритомний */
+  deathSaves?: { successes: number; failures: number; stable: boolean };
   resolvedAbilities: ResolvedAbility[];
   abilityUsage?: Record<string, AbilityUsageCounter>;
   /** Чарм скінчився: сторона й контролер повертаються наприкінці цього ходу */
@@ -503,6 +519,9 @@ export interface BattleAction {
       ability: string;
       roll: number;
       result: "success" | "fail";
+      mode?: "advantage" | "disadvantage";
+      rolls?: number[];
+      autoFail?: boolean;
     }>;
     // Для лікування:
     healingRolls?: Array<{

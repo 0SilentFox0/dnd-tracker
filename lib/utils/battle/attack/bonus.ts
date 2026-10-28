@@ -1,8 +1,10 @@
+import { AttackType } from "@/lib/constants/battle";
 import { collectModifiers, statWithModifiers } from "@/lib/utils/abilities/engine/core/collect-modifiers";
-import { findParticipant, withSelf } from "@/lib/utils/abilities/engine/core/participants";
+import { findParticipant, isActive, withSelf } from "@/lib/utils/abilities/engine/core/participants";
 import { runAbilities } from "@/lib/utils/abilities/engine/core/run-abilities";
 import type { StaticEffect } from "@/lib/utils/abilities/schema";
 import { attackKindOf } from "@/lib/utils/battle/common/attack-kind";
+import { isAdjacent, isOnMap } from "@/lib/utils/battle/grid/occupancy";
 import { getAttackAbilityModifier } from "@/lib/utils/common/calculations";
 import type { BattleAttack, BattleParticipant } from "@/types/battle";
 
@@ -17,6 +19,11 @@ export function calculateAttackBonus(
   const base = (attack.attackBonus || 0) + statModifier + attacker.abilities.proficiencyBonus;
 
   return base + collectModifiers(withSelf(participants, attacker), attacker.basicInfo.id, { stat: "attackBonus", attackKind: attackKindOf(attack.type) }, extra).flat;
+}
+
+/** Суміжна атака: на мапі — за клітинками, без мапи — ближня. */
+export function isAdjacentAttack(attacker: BattleParticipant, target: BattleParticipant, attack: BattleAttack): boolean {
+  return isOnMap(attacker) && isOnMap(target) ? isAdjacent(attacker, target) : attack.type === AttackType.MELEE;
 }
 
 export type RollMode = "advantage" | "disadvantage" | "normal";
@@ -35,17 +42,30 @@ export function rollModeReasons(attacker: BattleParticipant, attack: BattleAttac
 
   const id = attacker.basicInfo.id;
 
-  const flagEntries = (pid: string, flag: "advantage" | "disadvantage" | "advantageForAttackers" | "disadvantageForAttackers", extra?: StaticEffect[]) =>
+  const flagEntries = (pid: string, flag: "advantage" | "disadvantage" | "advantageForAttackers" | "disadvantageForAttackers" | "proneDefense", extra?: StaticEffect[]) =>
     collectModifiers(ps, pid, { flag }, extra).entries;
+
+  const target = opts.targetId ? findParticipant(ps, opts.targetId) : undefined;
+
+  const proneDefense = target ? labels(flagEntries(target.basicInfo.id, "proneDefense", opts.targetExtra)) : [];
+
+  const adjacent = !!target && proneDefense.length > 0 && isAdjacentAttack(attacker, target, attack);
+
+  const frightenedLabels = attacker.battleData.activeEffects
+    .filter((e) => e.source && e.effects.some((m) => m.type === "frightened") && ps.some((p) => p.basicInfo.id === e.source?.participantId && isActive(p)))
+    .map((e) => e.name);
 
   const advantage = [
     ...labels(flagEntries(id, "advantage", opts.extra).filter((e) => e.flag?.flag === "advantage" && (e.flag.attackKind === "all" || e.flag.attackKind === kind))),
     ...(opts.targetId ? labels(flagEntries(opts.targetId, "advantageForAttackers", opts.targetExtra)) : []),
+    ...(adjacent ? proneDefense : []),
   ];
 
   const disadvantage = [
     ...labels(flagEntries(id, "disadvantage", opts.extra)),
     ...(opts.targetId ? labels(flagEntries(opts.targetId, "disadvantageForAttackers", opts.targetExtra)) : []),
+    ...(adjacent ? [] : proneDefense),
+    ...frightenedLabels,
   ];
 
   return { advantage: [...new Set(advantage)], disadvantage: [...new Set(disadvantage)] };

@@ -39,4 +39,6 @@ export interface CastSpellResult {
   messages: string[];
   /** кидок шкоди заклинання до опорів — для небезпеки, яку лишає zone */
   spellDamage?: TerrainDamage;
+  /** мітка концентрації цього касту — для зони, що згасає разом із нею */
+  concentration?: { casterId: string; castId: string };
 }

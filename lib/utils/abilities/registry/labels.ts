@@ -1,5 +1,6 @@
 import { ABILITY_LABELS } from "@/lib/constants/abilities";
-import type { AbilityTarget, Amount, CONDITION_KEYS, DamageFilterKind, Flat, Limits, StatKey } from "@/lib/utils/abilities/schema";
+import type { AbilityTarget, Amount, AnyConditionKey, Condition5eKey, DamageFilterKind, Flat, Limits, StatKey } from "@/lib/utils/abilities/schema";
+import { CONDITION_5E_REGISTRY } from "@/lib/utils/battle/conditions/registry";
 import { signed } from "@/lib/utils/common/format";
 import { pluralUk } from "@/lib/utils/common/plural";
 
@@ -8,6 +9,7 @@ export const STAT_LABELS: Record<StatKey, string> = {
   attackBonus: "бонус атаки",
   critThreshold: "поріг криту",
   actionsPerTurn: "дії за хід",
+  savingThrow: "рятівні кидки",
   initiative: "ініціатива",
   maxHp: "макс. HP",
   speed: "швидкість",
@@ -58,7 +60,7 @@ export const TARGET_LABELS: Record<AbilityTarget, string> = {
   nearbyEnemies: "вороги поруч (зона)",
 };
 
-export const CONDITION_LABELS: Record<(typeof CONDITION_KEYS)[number], string> = {
+export const CONDITION_LABELS: Record<AnyConditionKey, string> = {
   no_bonus_action: "без бонусної дії",
   no_reaction: "без реакції",
   disable_melee_attacks: "без ближніх атак",
@@ -66,6 +68,7 @@ export const CONDITION_LABELS: Record<(typeof CONDITION_KEYS)[number], string> =
   disable_spell_casting: "без заклинань",
   skip_action: "втрата дії",
   immobilized: "знерухомлений",
+  ...Object.fromEntries(Object.entries(CONDITION_5E_REGISTRY).map(([k, d]) => [k, d.label.toLowerCase()])) as Record<Condition5eKey, string>,
 };
 
 export function limitsLabel(l: Limits | undefined): string[] {

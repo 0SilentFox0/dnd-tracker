@@ -21,12 +21,13 @@ export function defaultSpellForm(): SpellFormData {
     raceModifiers: [],
     stackable: false,
     maxStacks: null,
+    concentration: false,
     fx: {},
   };
 }
 
 export function spellToForm(spell: Spell): SpellFormData {
-  const def = readSpellDefinition({ id: spell.id, dice: spell.dice, cost: spell.cost, targeting: spell.targeting, resolution: spell.resolution, spellEffects: spell.spellEffects, raceModifiers: spell.raceModifiers, stackable: spell.stackable, maxStacks: spell.maxStacks });
+  const def = readSpellDefinition({ id: spell.id, dice: spell.dice, cost: spell.cost, targeting: spell.targeting, resolution: spell.resolution, spellEffects: spell.spellEffects, raceModifiers: spell.raceModifiers, stackable: spell.stackable, maxStacks: spell.maxStacks, concentration: spell.concentration });
 
   return {
     name: spell.name,
@@ -43,6 +44,7 @@ export function spellToForm(spell: Spell): SpellFormData {
     raceModifiers: def.raceModifiers,
     stackable: def.stackable === true,
     maxStacks: def.maxStacks ?? null,
+    concentration: def.concentration === true,
     fx: parseSpellFx(spell.fx) ?? {},
   };
 }
@@ -58,7 +60,7 @@ export function formToPayload(form: SpellFormData) {
 export function spellFormError(form: SpellFormData): string | null {
   if (!form.name.trim()) return "Вкажіть назву заклинання";
 
-  const parsed = SpellDefinitionSchema.safeParse({ dice: form.dice, cost: form.cost, targeting: form.targeting, resolution: form.resolution, effects: form.spellEffects, raceModifiers: form.raceModifiers, stackable: form.stackable, maxStacks: form.stackable ? (form.maxStacks ?? undefined) : undefined });
+  const parsed = SpellDefinitionSchema.safeParse({ dice: form.dice, cost: form.cost, targeting: form.targeting, resolution: form.resolution, effects: form.spellEffects, raceModifiers: form.raceModifiers, stackable: form.stackable, maxStacks: form.stackable ? (form.maxStacks ?? undefined) : undefined, concentration: form.concentration });
 
   if (parsed.success) return null;
 

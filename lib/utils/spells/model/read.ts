@@ -25,6 +25,7 @@ type SpellRulesRow = {
   raceModifiers?: unknown;
   stackable?: boolean | null;
   maxStacks?: number | null;
+  concentration?: boolean | null;
 };
 
 const DEFAULT_TARGETING: SpellTargeting = { kind: "enemy" };
@@ -87,6 +88,7 @@ export function readSpellDefinition(row: SpellRulesRow): SpellDefinition {
     raceModifiers: spellRaceModifiers(row),
     stackable: row.stackable === true,
     maxStacks: row.stackable === true ? readMaxStacks(row.maxStacks) : undefined,
+    ...(row.concentration === true && { concentration: true }),
   };
 }
 
@@ -100,5 +102,6 @@ export function spellDefinitionColumns(def: SpellDefinition) {
     raceModifiers: def.raceModifiers as unknown as Prisma.InputJsonValue,
     stackable: def.stackable === true,
     maxStacks: def.stackable ? (def.maxStacks ?? null) : null,
+    concentration: def.concentration === true,
   };
 }

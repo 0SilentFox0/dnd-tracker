@@ -9,4 +9,8 @@ export const MECHANIC_REGISTRY = {
   heroScaling: { label: "Сила героїв", description: "Кубики шкоди героя за рівнем і формула HP." },
   initiative: { label: "Ініціатива", description: "Допустимий діапазон ініціативи героя." },
   defaultAttacks: { label: "Базові атаки", description: "Назви атак, які отримує герой без зброї." },
+  saves: { label: "Рятівні кидки", description: "Майстерність у рятівних кидках героя (з листа персонажа). Перевага, перешкода й автопровал приходять від станів і вмінь завжди." },
+  deathSaves: { label: "Кидки смерті", description: "Герой на 0 HP кидає d20 у свою чергу: 3 успіхи — стабільний, 3 провали — смерть, 20 — 1 HP. Юніти на 0 HP помирають." },
+  concentration: { label: "Концентрація", description: "Заклинання з концентрацією: одне на кастера; шкода вимагає рятівного кидка Витривалості СК max(10, ½ шкоди)." },
+  conditions: { label: "Стани 5e", description: "Меню станів 5e для ДМ у бою і група станів 5e в редакторі вмінь; таблиця виснаження 2014 або 2024." },
 } satisfies Record<MechanicKey, { label: string; description: string }>;

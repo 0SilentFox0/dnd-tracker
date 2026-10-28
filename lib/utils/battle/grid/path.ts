@@ -1,8 +1,10 @@
-import { cellKey, footprint, neighbors } from "./geometry";
-import { fits, occupiedBy, sizeOf } from "./occupancy";
+import { cellKey, footprint, footprintDistance, neighbors } from "./geometry";
+import { cellsOf, fits, isOnMap, occupiedBy, sizeOf } from "./occupancy";
 
 import { CELL_FEET } from "@/lib/constants/battle";
 import { statWithModifiers } from "@/lib/utils/abilities/engine/core/collect-modifiers";
+import { isActive } from "@/lib/utils/abilities/engine/core/participants";
+import { conditionSourceIds } from "@/lib/utils/battle/conditions/query";
 import { hasEffectMarker } from "@/lib/utils/battle/participant/state";
 import { controlledByDm } from "@/lib/utils/battle/participant/unit-control";
 import type { BattleMapConfig, BattleParticipant, GridPoint } from "@/types/battle";
@@ -74,4 +76,19 @@ export function moveBudget({ map, dmUserId }: { map: BattleMapConfig; dmUserId: 
   if (dmUserId === null || !controlledByDm(p, dmUserId) || hasEffectMarker(p, "immobilized")) return remainingMovement(p);
 
   return map.cols * map.rows;
+}
+
+/** Наляканий не може наблизитись до живого джерела страху. */
+export function frightenedBlocksMove(map: BattleMapConfig | null | undefined, participants: BattleParticipant[], mover: BattleParticipant, to: GridPoint): boolean {
+  if (!map) return false;
+
+  const sources = conditionSourceIds(mover, "frightened");
+
+  if (!sources.length) return false;
+
+  const destination = footprint(to, sizeOf(mover));
+
+  return participants.some(
+    (p) => sources.includes(p.basicInfo.id) && isActive(p) && isOnMap(p) && footprintDistance(destination, cellsOf(p)) < footprintDistance(cellsOf(mover), cellsOf(p)),
+  );
 }

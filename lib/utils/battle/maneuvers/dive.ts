@@ -4,6 +4,7 @@ import type { ManeuverInput, ManeuverResult } from "./types";
 import { findParticipant, isActive, replaceParticipant } from "@/lib/utils/abilities/engine/core/participants";
 import type { Rng } from "@/lib/utils/abilities/engine/core/types";
 import { cellKey, nearestStandable, participantsInCells } from "@/lib/utils/battle/grid";
+import type { Ruleset } from "@/lib/utils/rules";
 import type { AirborneState, BattleMapConfig, BattleParticipant } from "@/types/battle";
 
 export function startDive(ps: BattleParticipant[], input: ManeuverInput): ManeuverResult {
@@ -35,7 +36,7 @@ function victimOf(ps: BattleParticipant[], actor: BattleParticipant, map: Battle
 }
 
 /** Приземлення на початку ходу: удар по тому, хто на клітинці (без карти — по цілі), і посадка на найближчу вільну клітинку. */
-export function landDive(ps: BattleParticipant[], actorId: string, ctx: { map?: BattleMapConfig | null; rng: Rng }): ManeuverResult {
+export function landDive(ps: BattleParticipant[], actorId: string, ctx: { map?: BattleMapConfig | null; rng: Rng; rules?: Ruleset }): ManeuverResult {
   const actor = findParticipant(ps, actorId);
 
   const airborne = actor?.battleData.airborne;
@@ -56,5 +57,5 @@ export function landDive(ps: BattleParticipant[], actorId: string, ctx: { map?: 
 
   if (!victim) return maneuverResult(next, [`🦅 ${airborne.name}: удар у порожнечу`]);
 
-  return strikeAll(maneuverResult(next), [{ targetId: victim.basicInfo.id, amount: attackShare(actor, next, airborne.percent, ctx.rng) }], { actorId, damageType: primaryDamageType(actor), name: airborne.name });
+  return strikeAll(maneuverResult(next), [{ targetId: victim.basicInfo.id, amount: attackShare(actor, next, airborne.percent, ctx.rng) }], { actorId, damageType: primaryDamageType(actor), name: airborne.name, rules: ctx.rules, rng: ctx.rng });
 }

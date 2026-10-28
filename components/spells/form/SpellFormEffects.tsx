@@ -56,6 +56,16 @@ export function SpellFormEffects({ campaignId, formData, setFormData }: SpellFor
         </Button>
       </HudSection>
 
+      <HudSection title="Концентрація">
+        <div className="flex items-center gap-3">
+          <Checkbox id="spell-concentration" checked={!!formData.concentration} onCheckedChange={(checked) => setFormData({ ...formData, concentration: checked === true })} />
+          <Label htmlFor="spell-concentration" className="cursor-pointer font-medium">
+            Концентрація
+          </Label>
+        </div>
+        <p className="mt-1 text-xs text-muted-foreground">Діє, коли в правилах кампанії увімкнено концентрацію.</p>
+      </HudSection>
+
       <HudSection title="Накладання">
         <div className="flex items-center gap-3">
           <Checkbox id="spell-stackable" checked={formData.stackable} onCheckedChange={(checked) => setFormData({ ...formData, stackable: checked === true, maxStacks: checked === true ? (formData.maxStacks ?? 3) : null })} />

@@ -5,7 +5,9 @@ import {
   campaignPost,
 } from "./client";
 
+import type { AbilityKey } from "@/lib/constants/abilities";
 import { BATTLE_LOG_PAGE_SIZE, BATTLE_VERSION_ONLY_PARAM } from "@/lib/constants/battle";
+import type { Condition5eKey } from "@/lib/utils/abilities/schema/kinds";
 import type { MoraleCheckResult } from "@/lib/utils/battle/morale/check";
 import type {
   AbilityActionData,
@@ -221,6 +223,14 @@ export async function addBattleParticipant(
 
 export async function revealBattleParticipants(campaignId: string, battleId: string, data: WithVersion<{ participantIds: string[] }>): Promise<BattleMutationResponse> {
   return campaignPost<BattleMutationResponse>(campaignId, `/battles/${battleId}/reveal-participant`, data);
+}
+
+export type BattleConditionsBody =
+  | { action: "apply"; participantId: string; condition: Condition5eKey; rounds?: number; levels?: number; saveEnds?: { ability: AbilityKey; dc: number } }
+  | { action: "remove"; participantId: string; condition: Condition5eKey };
+
+export async function applyBattleCondition(campaignId: string, battleId: string, data: WithVersion<BattleConditionsBody>): Promise<BattleMutationResponse> {
+  return campaignPost<BattleMutationResponse>(campaignId, `/battles/${battleId}/conditions`, data);
 }
 
 export async function scaleBattleUnits(campaignId: string, battleId: string, data: WithVersion<{ direction: "buff" | "debuff" }>): Promise<BattleMutationResponse> {

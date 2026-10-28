@@ -88,6 +88,12 @@ export async function createBattleParticipantFromCharacter(
 
   const primaryAbility = (ABILITY_KEYS as readonly string[]).includes(character.primaryAbility ?? "") ? (character.primaryAbility as AbilityKey) : undefined;
 
+  const rawSaves = character.savingThrows;
+
+  const saveProficiencies = rawSaves && typeof rawSaves === "object" && !Array.isArray(rawSaves)
+    ? ABILITY_KEYS.filter((k) => (rawSaves as Record<string, unknown>)[k] === true)
+    : [];
+
   const computedMaxHp = heroBaseHp(character, heroHpFormula(rules.heroScaling)).total;
 
   const resolvedAbilities = [
@@ -134,6 +140,7 @@ export async function createBattleParticipantFromCharacter(
       rangedMultiplier: archetype.ranged,
       magicMultiplier: archetype.magic,
       archetypeName: archetype.name,
+      ...(saveProficiencies.length && { saveProficiencies }),
     },
     combatStats: {
       maxHp: computedMaxHp,

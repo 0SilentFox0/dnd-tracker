@@ -16,6 +16,11 @@ export interface TimedEffectInput {
   charmOrigin?: ActiveEffect["charmOrigin"];
   countdownAtTurnStart?: boolean;
   source?: ActiveEffect["source"];
+  permanent?: boolean;
+  saveEnds?: ActiveEffect["saveEnds"];
+  concentrationOf?: ActiveEffect["concentrationOf"];
+  concentration?: ActiveEffect["concentration"];
+  exhaustionVariant?: ActiveEffect["exhaustionVariant"];
 }
 
 export function effectSource(
@@ -49,6 +54,11 @@ export function upsertTimedEffect(p: BattleParticipant, input: TimedEffectInput,
     ...(input.charmOrigin && { charmOrigin: input.charmOrigin }),
     ...(input.countdownAtTurnStart && { countdownAtTurnStart: true }),
     ...(input.source && { source: input.source }),
+    ...(input.permanent && { permanent: true }),
+    ...(input.saveEnds && { saveEnds: input.saveEnds }),
+    ...(input.concentrationOf && { concentrationOf: input.concentrationOf }),
+    ...(input.concentration && { concentration: input.concentration }),
+    ...(input.exhaustionVariant && { exhaustionVariant: input.exhaustionVariant }),
   };
 
   const sameKey = current.filter((e) => e.abilityKey === input.timedKey);

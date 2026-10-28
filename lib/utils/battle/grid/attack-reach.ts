@@ -2,7 +2,7 @@ import { footprintDistance } from "./geometry";
 import { cellsOf, isOnMap } from "./occupancy";
 
 import { AttackType, CELL_FEET } from "@/lib/constants/battle";
-import { isActive } from "@/lib/utils/abilities/engine/core/participants";
+import { isAttackable } from "@/lib/utils/abilities/engine/core/participants";
 import { attackKindOf } from "@/lib/utils/battle/common/attack-kind";
 import { modeEngages, modeMeleeBlockedText, modeTargetHiddenText } from "@/lib/utils/battle/modes/engine";
 import type { BattleAttack, BattleMapConfig, BattleParticipant } from "@/types/battle";
@@ -49,7 +49,7 @@ export function attackReachError(
 
 export function enemiesInReach(map: BattleMapConfig | null, participants: BattleParticipant[], attacker: BattleParticipant, attack: BattleAttack): BattleParticipant[] {
   return participants.filter(
-    (p) => p.basicInfo.side !== attacker.basicInfo.side && isActive(p) && isOnMap(p) && attackReachError(map, participants, attacker, attack, [p]) === null,
+    (p) => p.basicInfo.side !== attacker.basicInfo.side && isAttackable(p) && isOnMap(p) && attackReachError(map, participants, attacker, attack, [p]) === null,
   );
 }
 

@@ -3,6 +3,7 @@ import type { PatchParticipantData } from "./patch-participant-schema";
 import { CombatStatus } from "@/lib/constants/battle";
 import { findParticipant } from "@/lib/utils/abilities/engine/core/participants";
 import { resolveDowned } from "@/lib/utils/abilities/engine/core/run-abilities";
+import { settleStatusChange } from "@/lib/utils/battle/damage/consequences";
 import { reserveOf } from "@/lib/utils/battle/participant/reserve";
 import { isUp, statusForHp } from "@/lib/utils/battle/participant/state";
 import type { BattleMutationContext, MutationResult } from "@/lib/utils/battle/pipeline/run-battle-mutation";
@@ -101,9 +102,9 @@ function updateHp(ctx: BattleMutationContext, participantId: string, requestedHp
     },
   };
 
-  const order = [...ctx.participants];
+  const settled = settleStatusChange(participant, updated, ctx.participants.map((p, i) => (i === idx ? updated : p)), ctx.meta.rules);
 
-  order[idx] = updated;
+  const order = settled.participants;
 
   const downed = oldHp > 0 && newHp <= 0
     ? resolveDowned(order, { victimId: participantId, actorId: null }, { round: ctx.scene.round, rng: ctx.rng ?? Math.random, rules: ctx.meta.rules }, { allowSurvive: false })
@@ -120,8 +121,10 @@ function updateHp(ctx: BattleMutationContext, participantId: string, requestedHp
     ),
   ];
 
-  if (downed.messages.length > 0) {
-    events.push(systemEvent(ctx.scene.round, downed.messages.join(" | ")));
+  const messages = [...settled.messages, ...downed.messages];
+
+  if (messages.length > 0) {
+    events.push(systemEvent(ctx.scene.round, messages.join(" | ")));
   }
 
   return { participants: downed.participants, pending: ctx.pending, events };
@@ -140,9 +143,9 @@ function revive(ctx: BattleMutationContext, participantId: string): MutationResu
 
   const newHp = Math.min(1, participant.combatStats.maxHp);
 
-  const participants = [...ctx.participants];
+  const revived: BattleParticipant = { ...participant, combatStats: { ...participant.combatStats, currentHp: newHp, status: CombatStatus.ACTIVE } };
 
-  participants[idx] = { ...participant, combatStats: { ...participant.combatStats, currentHp: newHp, status: CombatStatus.ACTIVE } };
+  const participants = settleStatusChange(participant, revived, ctx.participants.map((p, i) => (i === idx ? revived : p)), ctx.meta.rules).participants;
 
   const name = participant.basicInfo.name;
 

@@ -14,7 +14,7 @@ export function squall(ps: BattleParticipant[], input: ManeuverInput): ManeuverR
 
   if (!actor) return maneuverResult(ps);
 
-  const hit = { actorId: actor.basicInfo.id, damageType: primaryDamageType(actor), name: input.name };
+  const hit = { actorId: actor.basicInfo.id, damageType: primaryDamageType(actor), name: input.name, rules: input.rules, rng: input.rng };
 
   const amount = attackShare(actor, ps, input.percentOfAttack, input.rng);
 

@@ -40,6 +40,10 @@ const sections = {
     meleeName: z.string().trim().min(1).max(60).default("Звичайний удар"),
     rangedName: z.string().trim().min(1).max(60).default("Звичайний постріл"),
   }),
+  saves: z.strictObject({ proficiency: z.boolean().default(false) }),
+  deathSaves: z.strictObject({ enabled: z.boolean().default(false), unitsDieAtZero: z.boolean().default(true) }),
+  concentration: z.strictObject({ enabled: z.boolean().default(false), dcCap: z.number().int().min(10).max(99).nullable().default(null) }),
+  conditions: z.strictObject({ enabled: z.boolean().default(false), exhaustion: z.enum(["2014", "2024"]).default("2014") }),
 };
 
 type Sections = typeof sections;
@@ -62,6 +66,10 @@ export const RulesetSchema = z
     heroScaling: sections.heroScaling.prefault({}),
     initiative: sections.initiative.prefault({}),
     defaultAttacks: sections.defaultAttacks.prefault({}),
+    saves: sections.saves.prefault({}),
+    deathSaves: sections.deathSaves.prefault({}),
+    concentration: sections.concentration.prefault({}),
+    conditions: sections.conditions.prefault({}),
   })
   .refine((r) => initiativeOrdered(r.initiative), { message: INITIATIVE_ORDER_MESSAGE, path: ["initiative"] })
   .refine((r) => criticalsOrdered(r.criticals), { message: CRITICALS_ORDER_MESSAGE, path: ["criticals"] });
@@ -93,6 +101,10 @@ export const RulesetPatchSchema = z
     heroScaling: patchSection("heroScaling").optional(),
     initiative: patchSection("initiative").optional(),
     defaultAttacks: patchSection("defaultAttacks").optional(),
+    saves: patchSection("saves").optional(),
+    deathSaves: patchSection("deathSaves").optional(),
+    concentration: patchSection("concentration").optional(),
+    conditions: patchSection("conditions").optional(),
   })
   .refine((p) => !p.initiative || initiativeOrdered(p.initiative), { message: INITIATIVE_ORDER_MESSAGE, path: ["initiative"] });
 

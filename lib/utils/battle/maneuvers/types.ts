@@ -1,4 +1,5 @@
 import type { Downed, Rng } from "@/lib/utils/abilities/engine/core/types";
+import type { Ruleset } from "@/lib/utils/rules";
 import type { BattleMapConfig, BattleParticipant, GridPoint } from "@/types/battle";
 
 export interface ManeuverInput {
@@ -12,6 +13,7 @@ export interface ManeuverInput {
   map?: BattleMapConfig | null;
   round: number;
   rng: Rng;
+  rules?: Ruleset;
 }
 
 export interface ManeuverResult {

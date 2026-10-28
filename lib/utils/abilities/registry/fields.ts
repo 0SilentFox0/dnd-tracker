@@ -12,13 +12,14 @@ export type FieldInput =
   | "toggle"
   | "numberList"
   | "spells"
-  | "unit";
+  | "unit"
+  | "saveEnds";
 
 export interface FieldMeta {
   name: string;
   label: string;
   input: FieldInput;
-  options?: readonly { value: string; label: string }[];
+  options?: readonly { value: string; label: string; group?: string }[];
   optional?: boolean;
   visibleWhen?: (value: Record<string, unknown>) => boolean;
 }

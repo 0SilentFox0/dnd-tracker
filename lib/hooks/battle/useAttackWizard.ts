@@ -7,7 +7,7 @@ import { useBattleScene } from "./useBattleScene";
 
 import { AttackType } from "@/lib/constants/battle";
 import { collectModifiers, findFlags } from "@/lib/utils/abilities/engine/core/collect-modifiers";
-import { isAirborne, withSelf } from "@/lib/utils/abilities/engine/core/participants";
+import { isAirborne, isDying, withSelf } from "@/lib/utils/abilities/engine/core/participants";
 import { predictAttack } from "@/lib/utils/battle/attack/bonus";
 import { attackMaxTargets } from "@/lib/utils/battle/attack/max-targets";
 import { attackKindOf } from "@/lib/utils/battle/common/attack-kind";
@@ -37,7 +37,7 @@ export function useAttackWizard(attacker: BattleParticipant | null, onDone?: () 
   const { visible } = useModeView();
 
   const targets = order.filter(
-    (p) => isUp(p) && !isAirborne(p) && p !== attacker && visible(p) && (p.basicInfo.side !== attacker?.basicInfo.side || scene.battle.campaign?.friendlyFire === true),
+    (p) => (isUp(p) || isDying(p)) && !isAirborne(p) && p !== attacker && visible(p) && (p.basicInfo.side !== attacker?.basicInfo.side || scene.battle.campaign?.friendlyFire === true),
   );
 
   const enemyTargets = targets.filter((p) => p.basicInfo.side !== attacker?.basicInfo.side);
@@ -51,7 +51,7 @@ export function useAttackWizard(attacker: BattleParticipant | null, onDone?: () 
 
     const seen = order.filter((p) => p === attacker || visible(p));
 
-    const candidates = seen.filter((p) => p !== attacker && isUp(p));
+    const candidates = seen.filter((p) => p !== attacker && (isUp(p) || isDying(p)));
 
     return new Set(candidates.filter((t) => lineOfFire(map, seen, attacker, t).blocked).map((t) => t.basicInfo.id));
   }, [state.step, attacker, attack, map, order, visible]);

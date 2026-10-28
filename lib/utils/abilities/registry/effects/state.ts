@@ -7,7 +7,10 @@ import { restoreCharm } from "@/lib/utils/abilities/engine/effects/charm";
 import { countMarks, GUARD_KEY, markKey } from "@/lib/utils/abilities/engine/effects/marks";
 import { clampMorale, moraleCapOf } from "@/lib/utils/abilities/engine/effects/morale";
 import { effectSource, upsertTimedEffect } from "@/lib/utils/abilities/engine/effects/timed-effects";
-import type { ConditionImmunityKey, Effect } from "@/lib/utils/abilities/schema";
+import type { AnyConditionKey, Condition5eKey, ConditionImmunityKey, Effect } from "@/lib/utils/abilities/schema";
+import { CONDITION_5E_KEYS } from "@/lib/utils/abilities/schema/kinds";
+import { applyCondition5e, saveEndsFor } from "@/lib/utils/battle/conditions/apply";
+import { removeEffects } from "@/lib/utils/battle/conditions/query";
 import { grantExtraActions } from "@/lib/utils/battle/participant/helpers";
 import { signed } from "@/lib/utils/common/format";
 import { pluralUk } from "@/lib/utils/common/plural";
@@ -56,8 +59,47 @@ export function immuneTo(ps: BattleParticipant[], id: string, key: ConditionImmu
 
 export { CONDITION_LABELS };
 
+function is5e(key: AnyConditionKey): key is Condition5eKey {
+  return (CONDITION_5E_KEYS as readonly string[]).includes(key);
+}
+
+function applyCondition5eToTargets(input: EffectApplyInput<Of<"applyCondition">>, key: Condition5eKey): EffectApplyResult {
+  const { ability, effect, ctx } = input;
+
+  const owner = findParticipant(input.participants, input.ownerId);
+
+  const source = effectSource(owner, ability);
+
+  let ps = input.participants;
+
+  const messages: string[] = [];
+
+  for (const id of input.targetIds) {
+    const result = applyCondition5e(ps, id, {
+      key,
+      rounds: effect.duration.rounds,
+      levels: effect.levels,
+      saveEnds: effect.saveEnds ? saveEndsFor(owner, effect.saveEnds.ability) : undefined,
+      source,
+      sourceName: ability.name,
+      timedKey: `${ability.key}#${input.effectIndex}@${input.ownerId}`,
+      round: ctx.round,
+      rules: ctx.rules,
+    });
+
+    ps = result.participants;
+    messages.push(...result.messages);
+  }
+
+  return { participants: ps, messages };
+}
+
 export function applyCondition(input: EffectApplyInput<Of<"applyCondition">>): EffectApplyResult {
   const { ability, effect, ctx } = input;
+
+  if (is5e(effect.condition)) return applyCondition5eToTargets(input, effect.condition);
+
+  const condition = effect.condition;
 
   return each(
     input,
@@ -71,16 +113,16 @@ export function applyCondition(input: EffectApplyInput<Of<"applyCondition">>): E
           type: "condition",
           rounds: effect.duration.rounds,
           stackable: false,
-          effects: [{ type: effect.condition, value: effect.condition === "skip_action" ? (effect.percent ?? 100) : 1 }],
+          effects: [{ type: condition, value: condition === "skip_action" ? (effect.percent ?? 100) : 1 }],
           breakOnDamage: effect.breakOnDamage,
         },
         ctx.round,
       );
 
-      return effect.condition === "no_reaction" ? { ...next, actionFlags: { ...next.actionFlags, hasUsedReaction: true } } : next;
+      return condition === "no_reaction" ? { ...next, actionFlags: { ...next.actionFlags, hasUsedReaction: true } } : next;
     },
-    (names) => `⛓ ${ability.name}: ${names} — ${CONDITION_LABELS[effect.condition]} (${effect.duration.rounds} р.)`,
-    (p) => immuneTo(input.participants, p.basicInfo.id, effect.condition),
+    (names) => `⛓ ${ability.name}: ${names} — ${CONDITION_LABELS[condition]} (${effect.duration.rounds} р.)`,
+    (p) => immuneTo(input.participants, p.basicInfo.id, condition),
   );
 }
 
@@ -189,14 +231,12 @@ export function applyCleanse(input: EffectApplyInput<Of<"cleanse">>): EffectAppl
   return each(
     input,
     (p) => {
-      const kept = p.battleData.activeEffects.filter((e) => e.type !== "debuff" && !(effect.includeConditions && e.type === "condition"));
+      const { participant: cleaned, removed } = removeEffects(p, (e) => e.type === "debuff" || (!!effect.includeConditions && e.type === "condition"));
 
-      if (kept.length === p.battleData.activeEffects.length) return null;
+      if (!removed.length) return null;
 
       // знятий чарм більше не поверне учасника наприкінці ходу — повертаємо одразу
-      const charm = p.battleData.activeEffects.find((e) => e.charmOrigin && !kept.includes(e));
-
-      const cleaned = { ...p, battleData: { ...p.battleData, activeEffects: kept } };
+      const charm = removed.find((e) => e.charmOrigin);
 
       return charm ? restoreCharm({ ...cleaned, battleData: { ...cleaned.battleData, charmReturn: charm.charmOrigin } }) : cleaned;
     },

@@ -1,6 +1,6 @@
 import { AttackType } from "@/lib/constants/battle";
 import type { findFlagsMany } from "@/lib/utils/abilities/engine/core/collect-modifiers";
-import { findParticipant, isTargetable } from "@/lib/utils/abilities/engine/core/participants";
+import { findParticipant, isAttackable } from "@/lib/utils/abilities/engine/core/participants";
 import { attackMaxTargets, isCleave } from "@/lib/utils/battle/attack/max-targets";
 import { cleaveTargets } from "@/lib/utils/battle/attack/process/cleave";
 import { piercingTargets } from "@/lib/utils/battle/attack/process/piercing";
@@ -34,7 +34,7 @@ export interface AttackTargets {
   chain: { jumps: number; percent: number } | null;
 }
 
-const enemyOf = (attacker: BattleParticipant) => (t: BattleParticipant) => t.basicInfo.side !== attacker.basicInfo.side && isTargetable(t);
+const enemyOf = (attacker: BattleParticipant) => (t: BattleParticipant) => t.basicInfo.side !== attacker.basicInfo.side && isAttackable(t);
 
 export function resolveAttackTargets({ order, attacker, attack, chosen, targetIds, map, flags }: AttackTargetsInput): AttackTargets {
   const isAoe = attack.targetType === "aoe";

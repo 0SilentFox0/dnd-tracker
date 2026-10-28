@@ -3,7 +3,7 @@ import { z, type ZodType } from "zod";
 import "server-only";
 import { AbilitySchema, LimitsSchema } from "@/lib/utils/abilities/schema/ability";
 import { ConditionSchema } from "@/lib/utils/abilities/schema/conditions";
-import { EffectSchema, NonRandomEffectSchema } from "@/lib/utils/abilities/schema/effects";
+import { AbilityKeySchema, AnyConditionSchema, EffectSchema, NonRandomEffectSchema } from "@/lib/utils/abilities/schema/effects";
 import { TriggerSchema } from "@/lib/utils/abilities/schema/triggers";
 import { WeaponStatsSchema } from "@/lib/utils/artifacts/weapon-stats";
 import { SpellFxSchema } from "@/lib/utils/battle/fx/spell-fx-schema";
@@ -25,6 +25,8 @@ export const SHARED_SCHEMAS: ReadonlyArray<Entry> = [
   [EffectSchema, "Effect"],
   [NonRandomEffectSchema, "NonRandomEffect"],
   ...(NonRandomEffectSchema.options as readonly ZodType[]).map((s): Entry => [s, `Effect.${effectKind(s)}`]),
+  [AbilityKeySchema, "AbilityKey"],
+  [AnyConditionSchema, "AnyCondition"],
   [SpellFxSchema, "SpellFx"],
   [WeaponStatsSchema, "WeaponStats"],
   [RulesetPatchSchema, "RulesetPatch"],

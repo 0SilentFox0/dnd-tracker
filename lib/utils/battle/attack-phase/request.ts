@@ -4,6 +4,7 @@ import { findParticipant, isAirborne } from "@/lib/utils/abilities/engine/core/p
 import { getDisabledAttackKinds } from "@/lib/utils/battle/attack/disabled-attacks";
 import { attackKindOf } from "@/lib/utils/battle/common/attack-kind";
 import { type ActorScope, requireActor } from "@/lib/utils/battle/common/control";
+import { conditionSourceIds } from "@/lib/utils/battle/conditions/query";
 import { BattleAccessError, BattleRuleError } from "@/lib/utils/battle/store/errors";
 import type { BattleAttack, BattleParticipant } from "@/types/battle";
 
@@ -84,6 +85,12 @@ export function validateAttackRequest(scope: ActorScope, data: AttackRequest): V
 
   if (getDisabledAttackKinds(attacker)[attackKind]) {
     throw new BattleRuleError("action_rejected", attackKind === AttackType.RANGED ? "Атакуючий не може атакувати здалеку" : "Атакуючий не може атакувати в ближньому бою");
+  }
+
+  const charmers = conditionSourceIds(attacker, "charmed");
+
+  if (chosenTargets.some((t) => charmers.includes(t.basicInfo.id))) {
+    throw new BattleRuleError("invalid_target", `${attacker.basicInfo.name} не може атакувати того, хто його зачарував`);
   }
 
   return { attacker, attack, targetIds, chosenTargets, singleRoll, usePerTargetRolls };

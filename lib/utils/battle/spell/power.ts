@@ -1,9 +1,7 @@
-import type { AbilityKey } from "@/lib/constants/abilities";
 import { collectModifiers } from "@/lib/utils/abilities/engine/core/collect-modifiers";
 import { withSelf } from "@/lib/utils/abilities/engine/core/participants";
 import type { StaticEffect } from "@/lib/utils/abilities/schema";
 import { archetypeLabel, heroMagicMultiplier } from "@/lib/utils/battle/damage/hero-dm-multiplier";
-import { rollDie } from "@/lib/utils/common/dice";
 import { signed } from "@/lib/utils/common/format";
 import type { BattleParticipant } from "@/types/battle";
 
@@ -19,16 +17,6 @@ function spellcastingModifier(p: BattleParticipant): { mod: number; label: strin
 
 export function spellSaveDc(caster: BattleParticipant): number {
   return caster.spellcasting.spellSaveDC ?? 8 + caster.abilities.proficiencyBonus + spellcastingModifier(caster).mod;
-}
-
-export function rollSavingThrow(target: BattleParticipant, ability: AbilityKey, dc: number, rng: () => number, presetRoll?: number): { roll: number; mod: number; total: number; success: boolean } {
-  const roll = presetRoll ?? rollDie(20, rng);
-
-  const mod = target.abilities.modifiers[ability];
-
-  const total = roll + mod;
-
-  return { roll, mod, total, success: total >= dc };
 }
 
 export interface SpellPower {

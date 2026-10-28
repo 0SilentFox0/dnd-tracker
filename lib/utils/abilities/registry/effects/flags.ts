@@ -1,7 +1,7 @@
 import type { FieldMeta } from "../fields";
 import { CONDITION_LABELS } from "../labels";
 
-import { DEFAULT_AREA_TARGETS } from "@/lib/constants/abilities";
+import { ABILITY_LABELS, ABILITY_OPTIONS, DEFAULT_AREA_TARGETS } from "@/lib/constants/abilities";
 import { AttackType } from "@/lib/constants/battle";
 import type { FlagEffect, FlagKey } from "@/lib/utils/abilities/schema";
 import { signed } from "@/lib/utils/common/format";
@@ -24,6 +24,10 @@ const ATTACK_KIND_ALL = [
 const meleeRanged = (melee: string, ranged: string) => [{ value: AttackType.MELEE, label: melee }, { value: AttackType.RANGED, label: ranged }];
 
 const plain = (label: string, text: string) => ({ label, fields: [] as readonly FieldMeta[], defaults: {} as Record<string, unknown>, describe: () => text });
+
+const SAVE_ABILITY_OPTIONS = [{ value: "all", label: "усі" }, ...ABILITY_OPTIONS];
+
+const abilitiesText = (a: readonly string[] | "all") => (a === "all" ? "" : ` (${a.map((k) => ABILITY_LABELS[k as keyof typeof ABILITY_LABELS]).join(", ")})`);
 
 export const FLAG_REGISTRY: { [K in FlagKey]: FlagDefinition<K> } = {
   advantage: {
@@ -168,6 +172,35 @@ export const FLAG_REGISTRY: { [K in FlagKey]: FlagDefinition<K> } = {
     defaults: { percent: 50 },
     describe: (e) => `прикликані ворогом істоти втрачають ${e.percent}% HP`,
   },
+  saveAdvantage: {
+    label: "Перевага на рятівні кидки",
+    fields: [
+      { name: "abilities", label: "Характеристики", input: "multiselect", options: SAVE_ABILITY_OPTIONS },
+      { name: "vsSpells", label: "Лише проти заклинань", input: "toggle", optional: true },
+    ],
+    defaults: { abilities: "all" },
+    describe: (e) => `перевага на рятівні кидки${abilitiesText(e.abilities)}${e.vsSpells ? " проти заклинань" : ""}`,
+  },
+  saveDisadvantage: {
+    label: "Недолік на рятівні кидки",
+    fields: [{ name: "abilities", label: "Характеристики", input: "multiselect", options: SAVE_ABILITY_OPTIONS }],
+    defaults: { abilities: "all" },
+    describe: (e) => `недолік на рятівні кидки${abilitiesText(e.abilities)}`,
+  },
+  autoFailSave: {
+    label: "Автопровал рятівних кидків",
+    fields: [{ name: "abilities", label: "Характеристики", input: "multiselect", options: ABILITY_OPTIONS }],
+    defaults: { abilities: ["strength", "dexterity"] },
+    describe: (e) => `автопровал рятівних кидків${abilitiesText(e.abilities)}`,
+  },
+  saveProficiency: {
+    label: "Майстерність в рятівних кидках",
+    fields: [{ name: "abilities", label: "Характеристики", input: "multiselect", options: ABILITY_OPTIONS }],
+    defaults: { abilities: ["wisdom"] },
+    describe: (e) => `майстерність в рятівних кидках${abilitiesText(e.abilities)}`,
+  },
+  autoCritAdjacent: plain("Криті від сусідів", "ближні атаки з 5 фт по цілі — критичні"),
+  proneDefense: plain("Захист повалених", "ближні атаки по цілі з перевагою, дальні — з недоліком"),
   conditionImmunity: {
     label: "Імунітет до станів",
     fields: [

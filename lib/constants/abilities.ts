@@ -17,6 +17,8 @@ export const CORE_ABILITY_SCORES = [
 
 export const ABILITY_LABELS = Object.fromEntries(CORE_ABILITY_SCORES.map((a) => [a.key, a.label])) as Record<AbilityKey, string>;
 
+export const ABILITY_OPTIONS = ABILITY_KEYS.map((key) => ({ value: key, label: ABILITY_LABELS[key] }));
+
 export const SPELL_ABILITY_OPTIONS = SPELLCASTING_ABILITIES.map((key) => ({ value: key, label: ABILITY_LABELS[key] }));
 
 export function toSpellcastingAbility(value: string): SpellcastingAbility | undefined {

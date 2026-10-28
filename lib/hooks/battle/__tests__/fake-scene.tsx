@@ -97,6 +97,9 @@ export function fakeScene(opts: FakeSceneOptions = {}) {
     mapWeather: mutation(),
     reveal: mutation(),
     maze: mutation(),
+    unitControl: mutation(),
+    conditions: mutation(),
+    refreshSources: mutation(),
   };
 
   const showResult = vi.fn();
