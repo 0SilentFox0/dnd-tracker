@@ -26,6 +26,9 @@ function managedProjection(local: unknown, baseline: unknown): unknown {
     return local.filter((x) => isRecord(x) && ids.has(x.id)).map((x) => managedProjection(x, baseline.find((b) => isRecord(b) && b.id === (x as JsonRecord).id)));
   }
 
+  // Id-less arrays of equal length are compared element-wise so schema defaults added on save do not read as local edits.
+  if (Array.isArray(local) && Array.isArray(baseline) && local.length === baseline.length) return local.map((x, i) => managedProjection(x, baseline[i]));
+
   if (isRecord(local) && isRecord(baseline)) return Object.fromEntries(Object.keys(baseline).map((k) => [k, managedProjection(local[k], baseline[k])]));
 
   return local;

@@ -101,4 +101,33 @@ describe("source aware atomic import plan", () => {
     expect(plan.errors).toEqual([]);
     expect(plan.writes).toHaveLength(1);
   });
+
+  it("does not report LOCAL_CONFLICT when the stored nested subclass only gained schema defaults", () => {
+    const meta = { edition: "classic", sources: [{ json: "T" }] };
+
+    const adapted = adaptCompendium({
+      _meta: meta,
+      subclass: [{ name: "Path", source: "T", className: "Mage", classSource: "PHB", shortName: "P", subclassFeatures: ["F|Mage|PHB|P|T|3|T"] }],
+      subclassFeature: [{ name: "F", source: "T", className: "Mage", classSource: "PHB", subclassShortName: "P", subclassSource: "T", level: 3, entries: [{ type: "options", count: 1, entries: [{ type: "refOptionalfeature", optionalfeature: "O1|T" }, { type: "refOptionalfeature", optionalfeature: "O2|T" }] }] }],
+      optionalfeature: [{ name: "O1", source: "T", entries: ["a"] }, { name: "O2", source: "T", entries: ["b"] }],
+    });
+
+    const parentKey = canonicalKey("class", "Mage", "PHB", "classic");
+
+    const parent = { key: parentKey, localId: "mage", kind: "classes" as const, edition: "classic" as const, body: { name: "Mage", subclasses: [] }, baseline: {} };
+
+    const first = buildImportPlan(adapted, { campaignId: "c", existing: [], bindings: { [parentKey]: parent } });
+
+    expect(first.errors).toEqual([]);
+
+    const sub = first.writes.find((w) => w.inputKind === "subclass")!;
+
+    const stored = structuredClone(sub.body.subclasses) as Array<{ features: Array<{ choices: Array<Record<string, unknown>> }> }>;
+
+    stored[0].features[0].choices.forEach((c) => { c.level = 1; });
+
+    const again = buildImportPlan(adapted, { campaignId: "c", existing: [{ key: sub.key, localId: "mage", kind: "classes", edition: "classic", body: { name: "Mage", subclasses: stored }, baseline: sub.baseline! }], bindings: { [parentKey]: { ...parent, body: { name: "Mage", subclasses: stored } } } });
+
+    expect(again.writes.flatMap((w) => w.issues).filter((i) => i.code === "LOCAL_CONFLICT")).toEqual([]);
+  });
 });
