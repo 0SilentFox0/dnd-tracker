@@ -148,6 +148,9 @@ importers:
       three:
         specifier: ^0.186.1
         version: 0.186.1
+      use-intl:
+        specifier: 4.14.9
+        version: 4.14.9(@types/react@19.2.14)(react@19.2.3)
       vaul:
         specifier: ^1.1.2
         version: 1.1.2(@types/react-dom@19.2.3(@types/react@19.2.14))(@types/react@19.2.14)(react-dom@19.2.3(react@19.2.3))(react@19.2.3)
