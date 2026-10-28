@@ -18,7 +18,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { ARTIFACT_SLOT_VALUES, type ArtifactRarity, type ArtifactSlot } from "@/lib/constants/artifacts";
+import { ARTIFACT_SLOT_VALUES, type ArtifactRarity } from "@/lib/constants/artifacts";
 import { useUpdateArtifact } from "@/lib/hooks/artifacts";
 import { useNotify } from "@/lib/hooks/common";
 import type { ArtifactCardData } from "@/types/artifacts";
@@ -37,6 +37,8 @@ export function ArtifactCard({
   const t = useTranslations("artifacts");
 
   const notify = useNotify();
+
+  const rarityLabel = artifact.rarity ? t(`rarity.${artifact.rarity as ArtifactRarity}`) : null;
 
   const update = useUpdateArtifact(campaignId);
 
@@ -77,7 +79,7 @@ export function ArtifactCard({
       <SelectContent>
         {ARTIFACT_SLOT_VALUES.map((value) => (
           <SelectItem key={value} value={value}>
-            {t(`slots.${value as ArtifactSlot}`)}
+            {t(`slots.${value}`)}
           </SelectItem>
         ))}
       </SelectContent>
@@ -104,7 +106,7 @@ export function ArtifactCard({
             <div className="mt-1 flex flex-wrap items-center gap-2">
               {artifact.rarity && (
                 <Badge variant="outline" className="text-xs">
-                  {t(`rarity.${artifact.rarity as ArtifactRarity}`)}
+                  {rarityLabel}
                 </Badge>
               )}
               {artifact.itemKind && (
@@ -138,7 +140,7 @@ export function ArtifactCard({
           <h3 className="hud-sc min-w-0 flex-1 truncate text-base text-hud-ink">{artifact.name}</h3>
           {artifact.rarity && (
             <Badge variant="outline" className="shrink-0">
-              {t(`rarity.${artifact.rarity as ArtifactRarity}`)}
+              {rarityLabel}
             </Badge>
           )}
         </div>

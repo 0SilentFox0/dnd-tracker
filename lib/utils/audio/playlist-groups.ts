@@ -21,7 +21,6 @@ export interface TrackGroup<T> {
 // eslint-disable-next-line no-restricted-syntax -- track-title convention stored in DB
 export const BATTLE_TRACK_GROUP = "Битва";
 
- 
 const BATTLE_TITLE = /^Битва(\s|$)/u;
 
 const separatorAt = (title: string) => title.indexOf(TRACK_GROUP_SEPARATOR);
@@ -48,6 +47,12 @@ export function trackGroupLabelKey(name: string): "music.groups.other" | "music.
 
   return name === BATTLE_TRACK_GROUP ? "music.groups.battle" : null;
 }
+
+export const trackGroupLabel = (t: (key: "music.groups.other" | "music.groups.battle") => string, name: string): string => {
+  const key = trackGroupLabelKey(name);
+
+  return key ? t(key) : name;
+};
 
 /** Назва без префікса групи; у групі «Битва» префікс — раса, тож назва лишається повною */
 export function trackLabelInGroup(title: string): string {

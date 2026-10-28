@@ -9,7 +9,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { SwitchField } from "@/components/ui/switch-field";
-import { ArtifactSlot, ITEM_LIMITS, PROPERTY_SLOTS } from "@/lib/constants/artifacts";
+import { ArtifactSlot, ITEM_LIMITS, ITEM_REST_VALUES, PROPERTY_SLOTS } from "@/lib/constants/artifacts";
 import { useArtifactsList } from "@/lib/hooks/artifacts";
 import { ARMOR_CATEGORIES } from "@/lib/utils/artifacts/armor-stats";
 import { toggleItem } from "@/lib/utils/common/collections";
@@ -25,8 +25,6 @@ type AppliesTo = Property["appliesTo"];
 const KIND_VALUES: ItemKind[] = ["weapon", "armor", "shield"];
 
 const [MIN_CHARGES, MAX_CHARGES] = ITEM_LIMITS.charges;
-
-const REST_VALUES = ["long", "short", "none"] as const;
 
 const defaultKind = (slot: string): ItemKind => (slot === ArtifactSlot.ARMOR ? "armor" : slot === ArtifactSlot.SHIELD ? "shield" : "weapon");
 
@@ -189,7 +187,7 @@ export function ArtifactItemFields({ campaignId, name, slot, value, onChange, it
                 value={charges ? (charges.rest ?? "none") : "long"}
                 onChange={(e) => charges && set({ charges: { max: charges.max, rest: e.target.value === "none" ? null : (e.target.value as "short" | "long") } })}
               >
-                {REST_VALUES.map((value) => (
+                {ITEM_REST_VALUES.map((value) => (
                   <option key={value} value={value}>
                     {t(`rest.${value}`)}
                   </option>

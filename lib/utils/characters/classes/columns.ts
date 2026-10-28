@@ -1,4 +1,4 @@
-import type { ErrorParams } from "@/lib/constants/api-errors";
+import type { ErrorIssue } from "@/lib/constants/api-errors";
 import { MAX_CLASS_LEVEL } from "@/lib/constants/classes";
 import { DICE_TERM_PATTERN } from "@/lib/utils/common/dice";
 import type { ClassColumn, ResolvedClassEntry } from "@/types/classes";
@@ -31,8 +31,8 @@ const cellIndex = (level: number) => Math.min(Math.max(level, 1), MAX_CLASS_LEVE
 
 export const columnValueAt = (column: ClassColumn, level: number): ColumnValue | null => parseColumnValue(column.values[cellIndex(level)]);
 
-export function classColumnIssues(columns: readonly ClassColumn[]): { path: (string | number)[]; message: string; params?: ErrorParams }[] {
-  const issues: { path: (string | number)[]; message: string; params?: ErrorParams }[] = [];
+export function classColumnIssues(columns: readonly ClassColumn[]): ErrorIssue[] {
+  const issues: ErrorIssue[] = [];
 
   const seen = new Set<string>();
 

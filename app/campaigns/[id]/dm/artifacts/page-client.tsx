@@ -17,7 +17,6 @@ import { OnboardingHint } from "@/components/onboarding/OnboardingHint";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import type { ArtifactSlot } from "@/lib/constants/artifacts";
 import { useArtifactsCatalog } from "@/lib/hooks/artifact-sets";
 
 export function DMArtifactsPageClient({ campaignId }: { campaignId: string }) {
@@ -90,7 +89,7 @@ export function DMArtifactsPageClient({ campaignId }: { campaignId: string }) {
                     <AccordionItem key={slot} value={slot} className="rounded-lg border last:border-b">
                       <AccordionTrigger className="px-4 hover:no-underline">
                         <span className="flex items-center gap-2">
-                          {t(`slots.${slot as ArtifactSlot}`)}
+                          {t(`slots.${slot}`)}
                           <Badge variant="secondary" className="text-xs">
                             {artifacts.length}
                           </Badge>

@@ -20,7 +20,6 @@ import { Textarea } from "@/components/ui/textarea";
 import {
   ARTIFACT_RARITY_VALUES,
   ARTIFACT_SLOT_VALUES,
-  type ArtifactRarity,
   ArtifactSlot,
 } from "@/lib/constants/artifacts";
 import { useArtifactForm } from "@/lib/hooks/artifacts";
@@ -111,7 +110,7 @@ export function ArtifactForm({ campaignId, artifactSets, initial, mode, labels, 
                 placeholder={t("artifacts.form.rarityPlaceholder")}
                 options={ARTIFACT_RARITY_VALUES.map((value) => ({
                   value,
-                  label: t(`artifacts.rarity.${value as ArtifactRarity}`),
+                  label: t(`artifacts.rarity.${value}`),
                 }))}
               />
             </div>
@@ -124,7 +123,7 @@ export function ArtifactForm({ campaignId, artifactSets, initial, mode, labels, 
                 placeholder={t("artifacts.form.slotPlaceholder")}
                 options={ARTIFACT_SLOT_VALUES.map((value) => ({
                   value,
-                  label: t(`artifacts.slots.${value as ArtifactSlot}`),
+                  label: t(`artifacts.slots.${value}`),
                 }))}
               />
             </div>

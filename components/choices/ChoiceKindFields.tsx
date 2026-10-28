@@ -13,7 +13,6 @@ import { ABILITY_KEYS, ABILITY_LABELS, ABILITY_SCORE_CAP } from "@/lib/constants
 import { CHOICE_LIMITS, FEAT_TYPES } from "@/lib/constants/choices";
 import { DND_SKILLS } from "@/lib/constants/skills";
 import { MAX_SPELL_LEVEL } from "@/lib/constants/spells";
-import { useTranslator } from "@/lib/i18n/use-translator";
 import { toggleItem } from "@/lib/utils/common/collections";
 import type { Choice, ChoiceOwner } from "@/types/choices";
 import type { ClassColumn } from "@/types/classes";
@@ -26,18 +25,16 @@ interface KindFieldsProps {
 const CIRCLES = Array.from({ length: MAX_SPELL_LEVEL + 1 }, (_, i) => i);
 
 export function SkillChoiceFields({ choice, onPatch }: KindFieldsProps) {
-  const t = useTranslations("choices");
-
-  const tc = useTranslations("common");
+  const t = useTranslations();
 
   return (
     <div className="space-y-1">
-      <p className="text-xs text-hud-muted">{t(choice.kind === "expertise" ? "fields.skillsAnyExpertise" : "fields.skillsAny")}</p>
+      <p className="text-xs text-hud-muted">{t(choice.kind === "expertise" ? "choices.fields.skillsAnyExpertise" : "choices.fields.skillsAny")}</p>
       <div className="flex flex-wrap gap-3 text-sm">
         {DND_SKILLS.map((s) => (
           <label key={s} className="flex items-center gap-1">
             <Checkbox checked={choice.skills?.includes(s) ?? false} onCheckedChange={() => onPatch({ skills: toggleItem(choice.skills, s) })} />
-            {tc(`dndSkills.${s}`)}
+            {t(`common.dndSkills.${s}`)}
           </label>
         ))}
       </div>
@@ -123,9 +120,7 @@ interface OptionChoiceFieldsProps extends KindFieldsProps {
 }
 
 export function OptionChoiceFields({ choice, onPatch, campaignId, owner, classColumns, errors }: OptionChoiceFieldsProps) {
-  const t = useTranslations("choices");
-
-  const tf = useTranslator("feats");
+  const t = useTranslations();
 
   return (
     <>
@@ -134,13 +129,13 @@ export function OptionChoiceFields({ choice, onPatch, campaignId, owner, classCo
           {FEAT_TYPES.map((type) => (
             <label key={type} className="flex items-center gap-1">
               <Checkbox checked={choice.featTypes?.includes(type) ?? false} onCheckedChange={() => onPatch({ featTypes: toggleItem(choice.featTypes, type) })} />
-              {tf(`types.${type}`)}
+              {t(`feats.types.${type}`)}
             </label>
           ))}
         </div>
       )}
       <div className="space-y-2">
-        {choice.kind === "feat" && <p className="text-xs text-hud-muted">{t("fields.embeddedOptions")}</p>}
+        {choice.kind === "feat" && <p className="text-xs text-hud-muted">{t("choices.fields.embeddedOptions")}</p>}
         <ChoiceOptionsEditor campaignId={campaignId} owner={owner} value={choice.options ?? []} onChange={(options) => onPatch({ options })} classColumns={classColumns} errors={errors} />
       </div>
     </>

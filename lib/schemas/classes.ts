@@ -1,7 +1,7 @@
 import { z } from "zod";
 
 import { ABILITY_KEYS } from "@/lib/constants/abilities";
-import type { ErrorParams } from "@/lib/constants/api-errors";
+import type { ErrorIssue } from "@/lib/constants/api-errors";
 import { CLASS_CASTERS, CLASS_COLUMN_KEY_RE, MAX_CLASS_COLUMNS, MAX_CLASS_LEVEL } from "@/lib/constants/classes";
 import { DND_SKILLS } from "@/lib/constants/skills";
 import { ClassChoicesSchema, PicksSchema } from "@/lib/schemas/choices";
@@ -37,16 +37,14 @@ export const ClassColumnSchema = z.object({
 
 const columnsSchema = z.array(ClassColumnSchema).max(MAX_CLASS_COLUMNS);
 
-type TableIssue = { path: (string | number)[]; message: string; params?: ErrorParams };
-
-const columnsIssues = (c: { columns?: z.infer<typeof ClassColumnSchema>[] }): TableIssue[] =>
-  classColumnIssues(c.columns ?? []).map((issue) => ({ path: ["columns", ...issue.path], message: issue.message, params: issue.params }));
+const columnsIssues = (c: { columns?: z.infer<typeof ClassColumnSchema>[] }): ErrorIssue[] =>
+  classColumnIssues(c.columns ?? []).map((issue) => ({ ...issue, path: ["columns", ...issue.path] }));
 
 type FeatureLike = { abilities: Parameters<typeof columnRefIssues>[0]; choices?: Parameters<typeof choiceColumnIssues>[0] };
 
 type TableInput = { columns?: z.infer<typeof ClassColumnSchema>[]; features?: FeatureLike[]; subclasses?: { features: FeatureLike[] }[] };
 
-function refsIssues(c: TableInput): TableIssue[] {
+function refsIssues(c: TableInput): ErrorIssue[] {
   // оновлення без columns перевіряє ресурс за збереженою таблицею
   if (c.columns === undefined) return [];
 
@@ -54,14 +52,14 @@ function refsIssues(c: TableInput): TableIssue[] {
 
   const check = (features: FeatureLike[] | undefined, base: (string | number)[]) =>
     (features ?? []).flatMap((f, i) => [
-      ...columnRefIssues(f.abilities, columns).map((issue) => ({ path: [...base, i, "abilities", ...issue.path], message: issue.message })),
-      ...choiceColumnIssues(f.choices, columns).map((issue) => ({ path: [...base, i, "choices", ...issue.path], message: issue.message, params: issue.params })),
+      ...columnRefIssues(f.abilities, columns).map((issue) => ({ ...issue, path: [...base, i, "abilities", ...issue.path] })),
+      ...choiceColumnIssues(f.choices, columns).map((issue) => ({ ...issue, path: [...base, i, "choices", ...issue.path] })),
     ]);
 
   return [...check(c.features, ["features"]), ...(c.subclasses ?? []).flatMap((s, k) => check(s.features, ["subclasses", k, "features"]))];
 }
 
-const tableIssues = (c: TableInput): TableIssue[] => [...columnsIssues(c), ...refsIssues(c), ...classChoiceIdIssues(c.features, c.subclasses)];
+const tableIssues = (c: TableInput): ErrorIssue[] => [...columnsIssues(c), ...refsIssues(c), ...classChoiceIdIssues(c.features, c.subclasses)];
 
 const refineTable = (c: TableInput, ctx: z.RefinementCtx) => {
   for (const issue of tableIssues(c)) ctx.addIssue({ code: "custom", path: issue.path, message: issue.message, params: issue.params });

@@ -430,6 +430,8 @@ export type ApiErrorKey = (typeof API_ERRORS)[keyof typeof API_ERRORS];
 
 export type ErrorParams = Record<string, string | number>;
 
+export type ErrorIssue = { path: (string | number)[]; message: string; params?: ErrorParams };
+
 export const API_ERROR_PARAMS: Partial<Record<ApiErrorKey, ErrorParams>> = {
   [API_ERRORS.TRACK_TITLE_TOO_LONG]: { max: TRACK_TITLE_MAX },
   [API_ERRORS.TRACK_LIMIT]: { max: MAX_TRACKS_PER_CAMPAIGN },

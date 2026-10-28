@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { ArtifactRarity, ArtifactSlot } from "@/lib/constants/artifacts";
+import { ARMOR_CATEGORIES, ArtifactRarity, ArtifactSlot, ITEM_KINDS, ITEM_REST_VALUES } from "@/lib/constants/artifacts";
 import { CHOICE_KINDS, FEAT_TYPES } from "@/lib/constants/choices";
 import { CLASS_CASTERS } from "@/lib/constants/classes";
 import { MAIN_SKILL_ROLES } from "@/lib/constants/main-skills";
@@ -14,6 +14,9 @@ const REGISTRY: Array<[Namespace, string, readonly string[]]> = [
   ["classes", "casters", CLASS_CASTERS],
   ["artifacts", "rarity", Object.values(ArtifactRarity)],
   ["artifacts", "slots", Object.values(ArtifactSlot)],
+  ["artifacts", "armor.categories", ARMOR_CATEGORIES],
+  ["artifacts", "item.rest", ITEM_REST_VALUES],
+  ["artifacts", "item.kinds", ITEM_KINDS],
   ["choices", "kinds", CHOICE_KINDS],
   ["common", "dndSkills", DND_SKILLS],
 ];

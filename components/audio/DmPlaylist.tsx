@@ -7,7 +7,7 @@ import { ChevronDown, ChevronRight, Pencil, Search, X } from "lucide-react";
 import { TrackTitleInput } from "@/components/music/TrackTitleInput";
 import { type PlayerAudioDm, type PlaylistView, usePlayerAudio, usePlaylistView } from "@/lib/hooks/audio";
 import { cn } from "@/lib/utils";
-import { trackGroupLabelKey, trackLabelInGroup } from "@/lib/utils/audio/playlist-groups";
+import { trackGroupLabel, trackLabelInGroup } from "@/lib/utils/audio/playlist-groups";
 import type { CampaignTrack, TrackKind } from "@/types/audio";
 
 function TrackRow({ track, label, current, disabled, actions }: { track: CampaignTrack; label: string; current: boolean; disabled: boolean; actions: { play(): void; rename(title: string): void } }) {
@@ -60,15 +60,11 @@ function PlaylistFilters({ view, total }: { view: PlaylistView; total: number })
         {view.groupNames.length > 1 && (
           <select aria-label={t("music.playlist.group")} value={data.group ?? ""} onChange={(e) => set({ group: e.target.value || null })} className={cn(FIELD, "flex-1")}>
             <option value="">{t("music.playlist.allGroups")}</option>
-            {view.groupNames.map((g) => {
-              const key = trackGroupLabelKey(g);
-
-              return (
-                <option key={g} value={g}>
-                  {key ? t(key) : g}
-                </option>
-              );
-            })}
+            {view.groupNames.map((g) => (
+              <option key={g} value={g}>
+                {trackGroupLabel(t, g)}
+              </option>
+            ))}
           </select>
         )}
         <select aria-label={t("music.playlist.kind")} value={data.kind ?? ""} onChange={(e) => set({ kind: (e.target.value || null) as TrackKind | null })} className={cn(FIELD, "flex-1")}>
@@ -133,9 +129,7 @@ export function DmPlaylist({ dm }: { dm: PlayerAudioDm }) {
               ? view.groups.map((g) => {
                   const folded = view.collapsed.has(g.name);
 
-                  const groupKey = trackGroupLabelKey(g.name);
-
-                  const groupLabel = groupKey ? t(groupKey) : g.name;
+                  const groupLabel = trackGroupLabel(t, g.name);
 
                   return (
                     <li key={g.name}>

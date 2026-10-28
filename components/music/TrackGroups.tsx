@@ -9,7 +9,7 @@ import { SearchInput } from "@/components/common/SearchInput";
 import { Button } from "@/components/ui/button";
 import { usePlaylistView } from "@/lib/hooks/audio";
 import { useTrackPreview } from "@/lib/hooks/music";
-import { trackGroupLabelKey } from "@/lib/utils/audio/playlist-groups";
+import { trackGroupLabel } from "@/lib/utils/audio/playlist-groups";
 import type { CampaignTrack } from "@/types/audio";
 
 export function TrackGroups({ tracks, busy, actions }: { tracks: CampaignTrack[]; busy: boolean; actions: TrackListActions }) {
@@ -39,9 +39,7 @@ export function TrackGroups({ tracks, busy, actions }: { tracks: CampaignTrack[]
         view.groups.map((g) => {
           const folded = view.collapsed.has(g.name);
 
-          const groupKey = trackGroupLabelKey(g.name);
-
-          const groupLabel = groupKey ? t(groupKey) : g.name;
+          const groupLabel = trackGroupLabel(t, g.name);
 
           return (
             <section key={g.name} aria-label={groupLabel} className="flex flex-col gap-2">

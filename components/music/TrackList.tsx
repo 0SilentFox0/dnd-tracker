@@ -40,6 +40,8 @@ function TrackLink({ track }: { track: CampaignTrack }) {
 export function TrackList({ tracks, busy, actions, preview }: { tracks: CampaignTrack[]; busy: boolean; actions: TrackListActions; preview: TrackPreview }) {
   const t = useTranslations();
 
+  const fileKind = t("music.list.fileKind");
+
   return (
     <ol className="grid grid-cols-1 gap-2 min-[480px]:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4">
       {tracks.map((track, i) => {
@@ -60,7 +62,7 @@ export function TrackList({ tracks, busy, actions, preview }: { tracks: Campaign
               </div>
               <TrackLink track={track} />
               <div className="flex items-center gap-2 text-xs text-hud-muted">
-                <span className="rounded bg-white/5 px-1.5 py-0.5">{kindLabel(track, t("music.list.fileKind"))}</span>
+                <span className="rounded bg-white/5 px-1.5 py-0.5">{kindLabel(track, fileKind)}</span>
                 {time && <span>{time}</span>}
                 {failed && <span role="alert" className="text-[var(--enemy)]">{t("music.list.playFailed")}</span>}
               </div>
