@@ -3,6 +3,7 @@ import { NextResponse } from "next/server";
 import { API_ERRORS } from "@/lib/constants/api-errors";
 import { prisma } from "@/lib/db";
 import { scenarioSectionPatchSchema } from "@/lib/schemas/scenario";
+import { notifyRevealForContentChange } from "@/lib/server/acquaintances/reveal";
 import { withCampaignContentWrite } from "@/lib/server/content/write";
 import { loadOwnedPage } from "@/lib/server/scenario/loaders";
 import { InvalidScenarioContentError, OWNED_WITH_CONTENT_SELECT, readContentStrict, toJson } from "@/lib/server/scenario/page-store";
@@ -39,6 +40,8 @@ export async function patchScenarioSectionHandler(req: Request, campaignId: stri
     const { count } = await prisma.scenarioPage.updateMany({ where: { id: pageId, version: page.version }, data: { content: toJson(next), version: { increment: 1 } } });
 
     if (count === 0) return errorResponse(API_ERRORS.SCENARIO_CONFLICT, 409);
+
+    await notifyRevealForContentChange(campaignId, pageId, content, next);
 
     return NextResponse.json({ version: page.version + 1, section: next.sections.find((s) => s.id === sectionId) });
     });

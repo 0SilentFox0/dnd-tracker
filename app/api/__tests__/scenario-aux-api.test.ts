@@ -1,9 +1,11 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import { prisma } from "@/lib/db";
+import { notifyRevealForContentChange } from "@/lib/server/acquaintances/reveal";
 import * as apiAuth from "@/lib/utils/api/api-auth";
 
 vi.mock("@/lib/utils/api/api-auth", () => ({ requireDM: vi.fn() }));
+vi.mock("@/lib/server/acquaintances/reveal", () => ({ notifyRevealForContentChange: vi.fn() }));
 vi.mock("@/lib/db", () => ({
   prisma: {
     $transaction: async (callback: (tx: object) => unknown) => callback({ $queryRaw: async () => [{ id: "camp1" }] }),
@@ -122,5 +124,35 @@ describe("scenario aux API", () => {
     expect(options).toEqual([{ type: "unit", id: "u1", label: "Біс" }, { type: "character", id: "c1", label: "Біара" }, { type: "marker", id: "m1", label: "Біла вежа" }]);
     expect(vi.mocked(prisma.worldMarker.findMany).mock.calls[0][0]?.where).toEqual({ map: { campaignId: "camp1" }, name: { contains: "бі", mode: "insensitive" } });
     expect(vi.mocked(prisma.unit.findMany).mock.calls[0][0]?.where).toEqual({ campaignId: "camp1", name: { contains: "бі", mode: "insensitive" } });
+  });
+});
+
+describe("scenario section PATCH → acquaintance reveal", () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+    vi.mocked(apiAuth.requireDM).mockResolvedValue(dm);
+    vi.mocked(prisma.scenarioPage.findUnique).mockResolvedValue(row() as never);
+    vi.mocked(prisma.scenarioPage.updateMany).mockResolvedValue({ count: 1 } as never);
+  });
+
+  const patch = async (body: unknown) => (await import("@/app/api/campaigns/[id]/scenario/[pageId]/sections/[sectionId]/route")).PATCH(req("PATCH", body), params({ pageId: "p1", sectionId: "s1" }));
+
+  it("passes the before/after content to the reveal notifier after a successful write", async () => {
+    await patch({ played: true });
+
+    expect(notifyRevealForContentChange).toHaveBeenCalledTimes(1);
+
+    const [campaignId, pageId, before, after] = vi.mocked(notifyRevealForContentChange).mock.calls[0];
+
+    expect([campaignId, pageId]).toEqual(["camp1", "p1"]);
+    expect(before.sections[0].played).toBe(false);
+    expect(after.sections[0].played).toBe(true);
+  });
+
+  it("does not notify on a version conflict", async () => {
+    vi.mocked(prisma.scenarioPage.updateMany).mockResolvedValue({ count: 0 } as never);
+
+    expect((await patch({ played: true })).status).toBe(409);
+    expect(notifyRevealForContentChange).not.toHaveBeenCalled();
   });
 });
