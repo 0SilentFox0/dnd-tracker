@@ -7,6 +7,7 @@ import { classLevelUp } from "@/lib/server/characters/class-level-up";
 import { refs, scores, sorcerer } from "@/lib/utils/characters/choices/__tests__/fixtures";
 import { DEFAULT_RULES } from "@/lib/utils/rules/defaults";
 
+vi.mock("@/lib/server/notifications/notify", () => ({ notifyCharacterOwners: vi.fn().mockResolvedValue(0) }));
 vi.mock("server-only", () => ({}));
 vi.mock("@/lib/utils/api/api-auth", () => ({ requireDM: vi.fn(async () => ({ userId: "dm", isDM: true, campaign: { id: "camp", maxLevel: 20, rules: { ...DEFAULT_RULES, classes: { enabled: true } } } })) }));
 vi.mock("@/lib/server/characters/class-level-up", async (importOriginal) => ({ ...(await importOriginal<object>()), classLevelUp: vi.fn() }));

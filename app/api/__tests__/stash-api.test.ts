@@ -3,8 +3,10 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import { API_ERRORS } from "@/lib/constants/api-errors";
 import { prisma } from "@/lib/db";
+import { notifyCharacterOwners } from "@/lib/server/notifications/notify";
 import * as apiAuth from "@/lib/utils/api/api-auth";
 
+vi.mock("@/lib/server/notifications/notify", () => ({ notifyCharacterOwners: vi.fn().mockResolvedValue(0) }));
 vi.mock("@/lib/utils/api/api-auth", () => ({ requireCampaignAccess: vi.fn(), requireDM: vi.fn() }));
 
 const tx = vi.hoisted(() => ({
@@ -123,6 +125,22 @@ describe("stash API", () => {
     expect(res.status).toBe(409);
     expect((await res.json()).error).toContain("Борис");
     expect(tx.characterInventory.update).not.toHaveBeenCalled();
+  });
+
+  it("ДМ видає артефакт — сповіщення власнику героя", async () => {
+    vi.mocked(apiAuth.requireCampaignAccess).mockResolvedValue(access("dm", "dm"));
+
+    expect((await post({ action: "grant", artifactId: "art1" })).status).toBe(200);
+    expect(notifyCharacterOwners).toHaveBeenCalledWith(
+      { campaignId: "camp", actorUserId: "dm", events: [{ characterId: "a", type: "item", refId: "art1" }] },
+      tx,
+    );
+  });
+
+  it("гравець витрачає гроші — сповіщення не створюється", async () => {
+    await post({ action: "spend", amount: 2, coin: "gp", note: "Лікар" });
+
+    expect(notifyCharacterOwners).not.toHaveBeenCalled();
   });
 
   it("артефакт з іншої кампанії — 404", async () => {

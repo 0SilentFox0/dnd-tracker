@@ -7,6 +7,7 @@ import { updateCharacterSchema } from "@/lib/server/characters/core/update-chara
 import { resolveAvatarForPersistence } from "@/lib/supabase/avatar-storage";
 import * as apiAuth from "@/lib/utils/api/api-auth";
 
+vi.mock("@/lib/server/notifications/notify", () => ({ notifyCharacterOwners: vi.fn().mockResolvedValue(0) }));
 vi.mock("@/lib/utils/api/api-auth", () => ({ requireCampaignAccess: vi.fn(), requireAuth: vi.fn(), requireDM: vi.fn() }));
 
 vi.mock("@/lib/db", () => ({

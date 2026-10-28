@@ -3,8 +3,10 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import { API_ERRORS } from "@/lib/constants/api-errors";
 import { prisma } from "@/lib/db";
+import { notifyCharacterOwners } from "@/lib/server/notifications/notify";
 import * as apiAuth from "@/lib/utils/api/api-auth";
 
+vi.mock("@/lib/server/notifications/notify", () => ({ notifyCharacterOwners: vi.fn().mockResolvedValue(0) }));
 vi.mock("@/lib/utils/api/api-auth", () => ({ requireCampaignAccess: vi.fn(), requireDM: vi.fn() }));
 
 const tx = vi.hoisted(() => ({
@@ -83,6 +85,15 @@ describe("artifact transfer API", () => {
     expect((await post({ artifactId: "s1", toCharacterId: "b" })).status).toBe(200);
     expect(tx.characterInventory.update).toHaveBeenCalledWith({ where: { characterId: "a" }, data: { equipped: { helmet: "h1" }, stash: ["s2"] } });
     expect(tx.characterInventory.update).toHaveBeenCalledWith({ where: { characterId: "b" }, data: { stash: ["s1"] } });
+  });
+
+  it("сповіщення лише отримувачу", async () => {
+    await post({ slot: "helmet", toCharacterId: "b" });
+
+    expect(notifyCharacterOwners).toHaveBeenCalledWith(
+      { campaignId: "camp", actorUserId: "dm", events: [{ characterId: "b", type: "item", refId: "h1" }] },
+      tx,
+    );
   });
 
   it("артефакта немає в сховку — 400", async () => {

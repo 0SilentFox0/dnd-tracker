@@ -17,6 +17,7 @@ import { resolveCharacterOwner } from "@/lib/server/characters/core/resolve-char
 import { updateCharacterSchema } from "@/lib/server/characters/core/update-character-schema";
 import { lockCharacters } from "@/lib/server/characters/lock";
 import { ContentError } from "@/lib/server/content/errors";
+import { notifyCharacterOwners } from "@/lib/server/notifications/notify";
 import { PUBLIC_USER_SELECT } from "@/lib/server/users/db-user";
 import { resolveAvatarForPersistence } from "@/lib/supabase/avatar-storage";
 import type { Actor } from "@/lib/utils/api/actor";
@@ -25,6 +26,7 @@ import { mergeBackground } from "@/lib/utils/backgrounds/selection";
 import { choicesStateOf } from "@/lib/utils/characters/choices/picks";
 import { keepStoredPicks } from "@/lib/utils/characters/choices/picks";
 import { seenLevelOnLevelChange } from "@/lib/utils/characters/seen-level";
+import { levelNotificationEvents, spellNotificationEvents } from "@/lib/utils/notifications/events";
 import type { SpellSlots } from "@/lib/utils/spells/spell-slots";
 import type { SpellSlotProgression } from "@/types/races";
 
@@ -161,6 +163,15 @@ async function patchCore({ access, character }: Gate, parsed: z.infer<typeof upd
         return writeUpdate(tx, classes, resolved?.ok ? resolved.fields : undefined);
       })
     : await writeUpdate(prisma, classesInput);
+
+  await notifyCharacterOwners({
+    campaignId,
+    actorUserId: userId,
+    events: [
+      ...levelNotificationEvents(characterId, character.level, updatedCharacter.level),
+      ...spellNotificationEvents(characterId, character.knownSpells, data.knownSpells),
+    ],
+  });
 
   return updatedCharacter;
 }

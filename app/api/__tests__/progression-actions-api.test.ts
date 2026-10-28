@@ -8,6 +8,7 @@ import { prisma } from "@/lib/db";
 import * as apiAuth from "@/lib/utils/api/api-auth";
 import { buildTreeJson } from "@/lib/utils/skills/progression";
 
+vi.mock("@/lib/server/notifications/notify", () => ({ notifyCharacterOwners: vi.fn().mockResolvedValue(0) }));
 vi.mock("@/lib/utils/api/api-auth", () => ({
   requireCampaignAccess: vi.fn(),
   requireAuth: vi.fn(),

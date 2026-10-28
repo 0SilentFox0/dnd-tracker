@@ -15,11 +15,13 @@ import { loadRaceProgression } from "@/lib/server/characters/core/load-race-prog
 import { lockCharacters } from "@/lib/server/characters/lock";
 import { writeCharacterLog } from "@/lib/server/characters/log";
 import { ContentError } from "@/lib/server/content/errors";
+import { notifyCharacterOwners } from "@/lib/server/notifications/notify";
 import { PUBLIC_USER_SELECT } from "@/lib/server/users/db-user";
 import { choicesStateOf, withClassPicks } from "@/lib/utils/characters/choices/picks";
 import { hasPicks } from "@/lib/utils/characters/choices/read";
 import { applyLevelGain } from "@/lib/utils/characters/level-up/apply-level-gain";
 import { seenLevelOnLevelChange } from "@/lib/utils/characters/seen-level";
+import { levelNotificationEvents } from "@/lib/utils/notifications/events";
 
 type Gate = Exclude<Awaited<ReturnType<typeof requireCharacterRecord>>, NextResponse>;
 
@@ -85,6 +87,8 @@ async function levelUpCore({ access, character }: Gate, pick: LevelUpPick) {
         include: { user: { select: PUBLIC_USER_SELECT }, inventory: true },
       });
 
+      await notifyCharacterOwners({ campaignId: id, actorUserId: access.userId, events: levelNotificationEvents(characterId, row.level, fresh.level) }, tx);
+
       if (choices?.ok) await writeCharacterLog(tx, [{ campaignId: id, characterId, actorUserId: access.userId, kind: CharacterLogKind.CHOICES_EDIT, data: { before, after: choices.state } }]);
 
       return { ...updated, levelUpDetails: { abilityIncreased: null, classId: pick.classId } };
@@ -114,6 +118,8 @@ async function levelUpCore({ access, character }: Gate, pick: LevelUpPick) {
       inventory: true,
     },
   });
+
+  await notifyCharacterOwners({ campaignId: id, actorUserId: access.userId, events: levelNotificationEvents(characterId, character.level, newLevel) }, prisma);
 
   return {
     ...updatedCharacter,
