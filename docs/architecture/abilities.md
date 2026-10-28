@@ -24,3 +24,7 @@ Rule default values належать `DEFAULT_RULES`; rules schema зберіг�
 `abilities.sources/get` у content operation service підтримує campaign-scoped class/feat owners. Клас віддає прямі abilities base/subclass features через canonical class reader; опційні choices і level eligibility далі належать character derivation. Ця read projection не є другим ability registry чи writer.
 
 Class/feat джерела копіювання підтримуються наскрізно: `AbilitySourceRef`, labels у `AbilityCopySourcePicker`, discovery/owner service та OpenAPI descriptions. Client callback передає abilities; class/feat picker regressions і guarded content-storage SQL перевіряють ці межі окремо.
+
+## Premerge refactor (part 2, 2026-10)
+
+`collectModifiers` accepts several flags in one pass; aura de-duplication per `auraKey` sums strength over the requested flags. Item limits live in `ITEM_LIMITS` (read by `readStats` and the zod schema alike); `itemStatsFromRow` caches by row object (WeakMap), so callers must not mutate its result. Choice owners (class/subclass/feat/race/background) are walked by `forEachChoiceOwner` (`visit` gives both state `path` and `legacyPath`); `plan.ts` uses it only for the class loop. Edition and dice parsing use `RULES_EDITIONS`, `normalizeDiceText` and `DICE_PATTERN`; remaining ad-hoc dice regexes are listed in the findings register (A23).

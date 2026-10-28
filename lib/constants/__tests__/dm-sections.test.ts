@@ -8,9 +8,13 @@ describe("dmSectionsFor", () => {
   it("template without classes hides classes, feats, backgrounds and campaign-only sections", () => {
     const p = paths(dmSectionsFor({ isTemplate: true, classesEnabled: false }));
 
-    for (const hidden of ["classes", "feats", "backgrounds", "characters", "battles", "scenario", "show", "ai", "assistant"]) expect(p).not.toContain(hidden);
+    for (const hidden of ["classes", "feats", "backgrounds", "characters", "battles", "scenario", "show", "assistant"]) expect(p).not.toContain(hidden);
 
     expect(p).toEqual(expect.arrayContaining(["spells", "units", "rules", "spell-groups", "music"]));
+  });
+
+  it("template menu keeps the API tokens entry", () => {
+    expect(paths(dmSectionsFor({ isTemplate: true, classesEnabled: false }))).toContain("ai");
   });
 
   it("template with classes shows the class library", () => {
@@ -21,11 +25,11 @@ describe("dmSectionsFor", () => {
     expect(paths(dmSectionsFor({ isTemplate: false, classesEnabled: false }))).toEqual(expect.arrayContaining(["characters", "battles", "scenario", "assistant", "ai"]));
   });
 
-  it("menu and page tiles agree on a template", () => {
+  it("menu and page tiles agree on a template except menu-only entries", () => {
     for (const classesEnabled of [false, true]) {
       const ctx = { isTemplate: true, classesEnabled };
 
-      expect(paths(dmTilesFor(ctx))).toEqual(paths(dmSectionsFor(ctx)));
+      expect(paths(dmSectionsFor(ctx)).filter((p) => !paths(dmTilesFor(ctx)).includes(p))).toEqual(["ai"]);
     }
   });
 

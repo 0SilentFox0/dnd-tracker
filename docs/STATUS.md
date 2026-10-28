@@ -2,9 +2,11 @@
 
 Одне місце для відповіді на питання «що зараз у роботі». Оновлюється в кінці кожної гілки, в тому ж коміті, що й злиття.
 
-_Оновлено: 2026-10-26._
+_Оновлено: 2026-10-28._
 
 Останнє уточнення checkpoint: T19 завершено окремим commit `410d1820`; окреме завдання невидимості закомічене `b4c77ae1`. T20 whole-stage незалежний review завершено без blocking/high-risk залишків. Він виявив, що `cleanupAssistantData` не мав production caller та не включав `stale` terminal intents/receipts у retention allowlists. Fix закомічено `41fb9760`: захищений щоденний Vercel Cron route, `CRON_SECRET`, 7-day `stale` intent redaction і 90-day `stale` receipt deletion лише з complete effects. Додано workflow guide та coverage owner/action/test зведення в окремому T20 review commit. Combined target run: 56 файлів/414 тестів; після фінального cleanup edit impacted suite 2/6; tsc, ESLint, `pnpm build` і diff checks exit0. Applied migrations не змінювались; DB/provider/Storage/Pusher/Redis і HOMM не запускались. Vercel Production env заданий, але cleanup не діятиме в deployed runtime до наступного production deployment. Етап6 локально завершений; окремий HOMM gateway лишається наступним завданням.
+
+**Передзлиттєве ревю, частина 2 закрита (2026-10-28, `feat/constructor`):** виправлено 86 знахідок реєстру (76 повністю, 8 частково, A22 і B27 у backlog, B04 довгостроково - epic D3), [Disposition і відкриті пункти](superpowers/plans/2026-10-27-constructor-premerge-findings.md); фінальне Opus-ревю без critical, I1-I3 виправлено. tsc, lint (0 errors), `test:run` 8475/8477 (2 таймаути під навантаженням, окремо зелені), integration 138/138, build пройшли. **Не виконано:** battle-sweep на prodcopy (потрібна перебудована prodcopy, рішення користувача), браузерна перевірка a11y діалогів, реальний Chrome `assistant-check --run`. Далі - частина 3, HOMM-шлюз, у новій сесії ([промпт у handoff](superpowers/constructor-handoff.md)); merge у `main` не робити, доки етапи 1-4 і 6 не завершені.
 
 ## У роботі
 

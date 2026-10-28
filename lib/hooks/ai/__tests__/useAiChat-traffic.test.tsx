@@ -80,7 +80,35 @@ describe("assistant chat traffic", () => {
     unmount();
   });
 
-  it("a normally finished stream does not refetch recovery, an aborted one does", async () => {
+  it("a normal stream makes one status-only call that consumes receipts and learns the lease", async () => {
+    const onReceipt = vi.fn(async () => {});
+
+    const receipt = { id: "x", intentId: "i", status: "applied", effectsStatus: "applied", result: { affected: [{ domain: "spells" }] } };
+
+    const expiresAt = new Date(Date.now() + 100000).toISOString();
+
+    vi.mocked(getAiRunRecovery).mockResolvedValueOnce(idle).mockResolvedValue({ runs: [{ requestId: "r", status: "completed", abortRequested: false, expiresAt }], receipts: [receipt] });
+
+    const { result, unmount } = renderHook(() => useAiChat({ campaignId: "c", thread, initialMessages: [], getFocus: () => undefined, onReceipt }));
+
+    await act(async () => { await vi.advanceTimersByTimeAsync(0); });
+    sdk.sendMessage.mockImplementationOnce(async () => { sdk.onFinish?.({ isAbort: false, isDisconnect: false, isError: false }); });
+    await act(() => result.current.send("Привіт"));
+
+    const calls = vi.mocked(getAiRunRecovery).mock.calls;
+
+    expect(calls).toHaveLength(2);
+    expect(calls[1][3]).toEqual({ statusOnly: true });
+    expect(onReceipt).toHaveBeenCalledWith(receipt);
+    expect(sdk.setMessages).toHaveBeenCalledTimes(1);
+    expect(result.current.blockedUntil).toBe(expiresAt);
+    sdk.sendMessage.mockClear();
+    await act(() => result.current.send("Ще"));
+    expect(sdk.sendMessage).not.toHaveBeenCalled();
+    unmount();
+  });
+
+  it("a normally finished stream does not refetch full recovery, an aborted one does", async () => {
     vi.mocked(getAiRunRecovery).mockResolvedValue(idle);
 
     const { result, unmount } = setup();
@@ -88,10 +116,12 @@ describe("assistant chat traffic", () => {
     await act(async () => { await vi.advanceTimersByTimeAsync(0); });
     sdk.sendMessage.mockImplementationOnce(async () => { sdk.onFinish?.({ isAbort: false, isDisconnect: false, isError: false }); });
     await act(() => result.current.send("Привіт"));
-    expect(vi.mocked(getAiRunRecovery)).toHaveBeenCalledTimes(1);
+    expect(vi.mocked(getAiRunRecovery)).toHaveBeenCalledTimes(2);
+    expect(vi.mocked(getAiRunRecovery).mock.calls[1][3]).toEqual({ statusOnly: true });
     sdk.sendMessage.mockImplementationOnce(async () => { sdk.onFinish?.({ isAbort: false, isDisconnect: true, isError: false }); });
     await act(() => result.current.send("Ще"));
-    expect(vi.mocked(getAiRunRecovery)).toHaveBeenCalledTimes(2);
+    expect(vi.mocked(getAiRunRecovery)).toHaveBeenCalledTimes(3);
+    expect(vi.mocked(getAiRunRecovery).mock.calls[2]).toHaveLength(2);
     unmount();
   });
 });

@@ -64,7 +64,7 @@ export function useAiChat({ campaignId, thread, initialMessages, getFocus, getSe
 
   const { setMessages } = chat;
 
-  const recover = useCallback(async (options?: { statusOnly?: boolean }): Promise<void> => {
+  const recover = useCallback(async (options?: { statusOnly?: boolean; afterStream?: boolean }): Promise<void> => {
     if (localStream.current) return;
 
     const snapshotEpoch = epoch.current;
@@ -76,7 +76,7 @@ export function useAiChat({ campaignId, thread, initialMessages, getFocus, getSe
 
       if (snapshotEpoch !== epoch.current || localStream.current) return;
 
-      if (statusOnly && !state.runs.some(r => r.status === "running")) return recover();
+      if (statusOnly && !options?.afterStream && !state.runs.some(r => r.status === "running")) return recover();
 
       for (const receipt of state.receipts) {
         const result = receipt.result;
@@ -160,7 +160,8 @@ return; }
     try { await chat.sendMessage({ id: requestId, role: "user", parts: [{ type: "text", text }] }); }
     finally { localStream.current = false; sending.current = false;
 
- if (!streamOk.current) await recover();
+ if (streamOk.current) await recover({ statusOnly: true, afterStream: true });
+    else await recover();
 
  onFinish?.(); }
   };

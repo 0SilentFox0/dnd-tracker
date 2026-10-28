@@ -20,13 +20,21 @@ const escapeRegex = (value: string) => value.replace(/[.*+?^${}()|[\]\\]/g, "\\$
 
 const tableName = (model: string) => Prisma.dmmf.datamodel.models.find(entry => entry.name === model)?.dbName ?? model;
 
+const REGEX_CHUNK = 500;
+
 /** Rows of the table whose text mentions one of the ids; the exact match is applied by contentDependencies. */
 async function mentioning(table: string, ids: readonly string[], campaignScope: Prisma.Sql): Promise<string[]> {
-  if (!ids.length) return [];
+  const found = new Set<string>();
 
-  const rows = await prisma.$queryRaw<Array<{ id: string }>>(Prisma.sql`SELECT t.id FROM ${Prisma.raw(`"${table}"`)} t ${campaignScope} AND t::text ~ ${ids.map(escapeRegex).join("|")} ORDER BY t.id`);
+  for (let i = 0; i < ids.length; i += REGEX_CHUNK) {
+    const pattern = ids.slice(i, i + REGEX_CHUNK).map(escapeRegex).join("|");
 
-  return rows.map(row => row.id);
+    const rows = await prisma.$queryRaw<Array<{ id: string }>>(Prisma.sql`SELECT t.id FROM ${Prisma.raw(`"${table}"`)} t ${campaignScope} AND t::text ~ ${pattern} ORDER BY t.id`);
+
+    for (const row of rows) found.add(row.id);
+  }
+
+  return [...found].sort();
 }
 
 /** Only the rows a content preview can show: rows mentioning the target/incoming ids and FK-referencing rows. */
@@ -47,10 +55,19 @@ export async function contentPreviewState(actor: Actor, kind: string, id: string
 
   const tables: Record<string, Row[]> = {};
 
+  const ownKey = id ? undefined : tableKey(kind);
+
   for (const table of BUNDLE_TABLES) {
+    const delegate = prisma[table.delegate] as unknown as Delegate;
+
+    if (table.key === ownKey) {
+      tables[table.key] = await delegate.findMany({ where: { campaignId }, orderBy: { id: "asc" } });
+      continue;
+    }
+
     const found = await mentioning(tableName(table.model), list, Prisma.sql`WHERE t."campaignId" = ${campaignId}`);
 
-    tables[table.key] = found.length ? await (prisma[table.delegate] as unknown as Delegate).findMany({ where: { id: { in: found }, campaignId }, orderBy: { id: "asc" } }) : [];
+    tables[table.key] = found.length ? await delegate.findMany({ where: { id: { in: found }, campaignId }, orderBy: { id: "asc" } }) : [];
   }
 
   const characterIds = await mentioning("characters", list, Prisma.sql`WHERE t."campaignId" = ${campaignId}`);

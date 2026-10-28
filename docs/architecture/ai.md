@@ -109,6 +109,13 @@ Guard-стан превʼю й виконання не читає повні р�
 | credentials PUT/PATCH | parseBody | credentials | 10/60 с, scope `ai-credentials` |
 | MCP POST | boundMcpRequest | 4 MiB | 120/60 с на token id, scope `mcp` |
 
+### Premerge refactor (part 2): chat, preview, помилки
+
+- `useAiChat`: після нормального стріму виконується один `recover({ statusOnly, afterStream })`: споживаються receipts і вивчається lease, без повного recover і заміни повідомлень; `useSourceSync` лише інвалідує queries (без `router.refresh()`).
+- Превʼю `content.<kind>.*` без `id` (`actions/content-preview.ts`): власна таблиця читається `findMany`, залежності шукаються SQL-regex префільтром по id чанками до 500 з обʼєднанням результатів (більше ~2.5k альтернатив ламало Postgres).
+- `ContentError` обробляє `handleApiError` (з `issues`); тексти - `lib/constants/api-errors.ts` (статичний тест `error-literals.test.ts` забороняє кириличні літерали в `lib/server`, `lib/ai`). Fingerprint пропозицій змінено: пропозиції до деплою стануть stale (прийнято).
+- Операції персонажів - `CHARACTER_OPERATIONS` у спільному ядрі для роутів і асистента; `/spells/refs` лише сесійний, поза OpenAPI/MCP.
+
 ### Refactor S1: перевірки й output boundary
 
 Відтворюваний local-only runner — `scripts/constructor/assistant-check.ts`; tracked browser sources, CLI options і prerequisites описано в [README harness](../../scripts/constructor/assistant-check/README.md). `.superpowers` містить тільки ignored outputs, не runtime dependencies. Integration counts читаються з Vitest JSON report; skipped/empty suite не вважається успіхом. Browser залишається synthetic HTTP перевіркою компонентів, SQL authority перевіряється окремо на guarded local constructor з `connection_limit=1` для обох URL.

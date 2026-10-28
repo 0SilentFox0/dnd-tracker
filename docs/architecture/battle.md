@@ -181,3 +181,11 @@ Participant assembly зберігає class pool precedence і persisted resourc
 Spell reducer/payload facade — `flows/spell-flow.ts`; types/costs/selection — `spell-flow-types.ts`, `spell-costs.ts`, `spell-pick.ts`. Turn start/end/round — відповідні `turn-*.ts`/`round-start.ts`; `run-advance-turn-loop.ts` зберігає orchestration, RNG/event order. Version/hash/snapshot/delta інваріанти пройшли integrated gate S7.4.
 
 `useSpellBook` зберігає public API і submit/reducer. `useBattleSpellLibrary` володіє viewer-scoped IDs/loading, bonus/reaction/prefetch; `useSpellMapTargeting` — live callbacks, map registrations, hover і Escape cleanup. S8 extraction на synthetic scenarios не збільшив requests/renders; загальне прискорення battle engine не доведене.
+
+## Premerge refactor (part 2, 2026-10)
+
+- Access recheck after a committed mutation uses `loadBattleAccess` (membership only, `isMember`/`isDM`), not a second full `loadBattle`; `parseRulesCached` returns a shared object per rules JSON, so never mutate loaded `rules`.
+- Save DCs read `rules.formulas.saveDcBase` everywhere (spell, grapple `grappleDc`, fire-burst, monsters via `monsterSaveDc`); crit threshold is `critThresholdOf`, recharge is `RECHARGE_THRESHOLDS`/`isRecharge`.
+- `rollSave`/`rollCheck`/`passivePerception` make one `collectModifiers` flags pass each; broken grapples are released by the pipeline (`withPlacement`) on every mutation, and the release is a separate system event, not part of the move message.
+- `lib/server/battles/guards.ts` (`runGuardedBattleOperationCore`, used by the assistant): actor/tx mismatch is a `ContentError` 409 (was 403); on `dryRun` it returns `delta: null` plus a preview.
+- `createBattleParticipantFromCharacter` without `context` takes artifacts only from `preloaded.artifactRows` (no DB fallback); all production callers pass a context.
