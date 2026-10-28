@@ -50,6 +50,14 @@ describe("scenario markdown", () => {
     expect(docToMarkdown(doc(p(mention)))).toBe("[@Годрик](character:c1)");
   });
 
+  it("згадка місця: round-trip, невідомий тип лишається текстом", () => {
+    const marker: RichNode = { type: "mention", attrs: { id: "m1", label: "Біла вежа", type: "marker" } };
+
+    roundTrip(doc(p(t("Йдіть до "), marker)));
+    expect(docToMarkdown(doc(p(marker)))).toBe("[@Біла вежа](marker:m1)");
+    expect(JSON.stringify(markdownToDoc("[@X](planet:1)"))).not.toContain("\"mention\"");
+  });
+
   it("таблиця", () => {
     const cell = (type: "tableHeader" | "tableCell", text: string): RichNode => ({ type, attrs: { colspan: 1, rowspan: 1, colwidth: null }, content: [p(t(text))] });
 
