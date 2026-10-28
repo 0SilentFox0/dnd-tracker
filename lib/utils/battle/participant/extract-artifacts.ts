@@ -2,7 +2,6 @@ import type { Prisma } from "@prisma/client";
 
 import type { CharacterFromPrisma } from "../types/participant";
 
-import { prisma } from "@/lib/db";
 import { normalizeItems } from "@/lib/utils/inventory/items";
 import { consumableEntries,type ConsumableEntry } from "@/lib/utils/items/consumables";
 import { activeItemRefs, attunedRefs, inventoryArtifactIds, resolveItemRow } from "@/lib/utils/items/resolve";
@@ -11,11 +10,11 @@ import type { EquippedArtifact } from "@/types/battle";
 
 export type EquippedArtifactRow = { row: Prisma.ArtifactGetPayload<object>; slot: string; carried?: true };
 
-export async function loadEquippedArtifactRows(
+export function loadEquippedArtifactRows(
   character: CharacterFromPrisma,
-  preloadedArtifactsById?: Record<string, Prisma.ArtifactGetPayload<object>>,
+  artifactsById: Record<string, Prisma.ArtifactGetPayload<object>>,
   opts: { rules?: Ruleset } = {},
-): Promise<EquippedArtifactRow[]> {
+): EquippedArtifactRow[] {
   if (!character.inventory) return [];
 
   const itemsEnabled = !!opts.rules?.items.enabled;
@@ -24,9 +23,7 @@ export async function loadEquippedArtifactRows(
 
   if (ids.length === 0) return [];
 
-  const rows = preloadedArtifactsById
-    ? ids.map((id) => preloadedArtifactsById[id]).filter((a): a is NonNullable<typeof a> => a != null)
-    : await prisma.artifact.findMany({ where: { id: { in: ids }, campaignId: character.campaignId } });
+  const rows = ids.map((id) => artifactsById[id]).filter((a): a is NonNullable<typeof a> => a != null);
 
   const byId = new Map(rows.map((r) => [r.id, r]));
 
@@ -50,18 +47,16 @@ export function toEquippedArtifacts(rows: EquippedArtifactRow[]): EquippedArtifa
   }));
 }
 
-export async function loadConsumableEntries(
+export function loadConsumableEntries(
   character: CharacterFromPrisma,
-  preloadedArtifactsById?: Record<string, Prisma.ArtifactGetPayload<object>>,
+  artifactsById: Record<string, Prisma.ArtifactGetPayload<object>>,
   rules?: Ruleset,
-): Promise<ConsumableEntry<Prisma.ArtifactGetPayload<object>>[]> {
+): ConsumableEntry<Prisma.ArtifactGetPayload<object>>[] {
   if (!rules?.items.enabled || !character.inventory) return [];
 
   const ids = normalizeItems(character.inventory.items).flatMap((i) => (i.artifactId ? [i.artifactId] : []));
 
   if (ids.length === 0) return [];
 
-  const rows = preloadedArtifactsById ?? Object.fromEntries((await prisma.artifact.findMany({ where: { id: { in: ids }, campaignId: character.campaignId } })).map((r) => [r.id, r]));
-
-  return consumableEntries(character.inventory.items, rows);
+  return consumableEntries(character.inventory.items, artifactsById);
 }

@@ -3,6 +3,7 @@ import { withSelf } from "@/lib/utils/abilities/engine/core/participants";
 import type { StaticEffect } from "@/lib/utils/abilities/schema";
 import { isFiveE } from "@/lib/utils/battle/attack/ability";
 import { archetypeLabel, heroMagicMultiplier } from "@/lib/utils/battle/damage/hero-dm-multiplier";
+import { getSpellSaveDC } from "@/lib/utils/common/calculations";
 import { signed } from "@/lib/utils/common/format";
 import type { BattleParticipant } from "@/types/battle";
 
@@ -16,10 +17,12 @@ function spellcastingModifier(p: BattleParticipant): { mod: number; label: strin
   return { mod: p.abilities.modifiers[ability], label: labels[ability] };
 }
 
-export function spellSaveDc(caster: BattleParticipant, ability?: keyof BattleParticipant["abilities"]["modifiers"]): number {
+export function spellSaveDc(caster: BattleParticipant, ability: keyof BattleParticipant["abilities"]["modifiers"] | undefined, saveDcBase: number): number {
   const modifier = ability ? caster.abilities.modifiers[ability] : spellcastingModifier(caster).mod;
 
-  return ability ? 8 + caster.abilities.proficiencyBonus + modifier : caster.spellcasting.spellSaveDC ?? 8 + caster.abilities.proficiencyBonus + modifier;
+  const computed = getSpellSaveDC(caster.abilities.proficiencyBonus, modifier, saveDcBase);
+
+  return ability ? computed : (caster.spellcasting.spellSaveDC ?? computed);
 }
 
 export function spellAttackBonus(caster: BattleParticipant): number {

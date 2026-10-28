@@ -3,7 +3,8 @@ import { exhaustionLevel, hasCondition, MAX_EXHAUSTION, removeEffects, syncExhau
 import { CONDITION_5E_REGISTRY, type Condition5eKey, conditionEffectInput } from "./registry";
 
 import type { AbilityKey } from "@/lib/constants/abilities";
-import { CombatStatus } from "@/lib/constants/battle";
+import { CombatStatus, EffectMarker } from "@/lib/constants/battle";
+import { DEFAULT_RULES_EDITION } from "@/lib/constants/rules";
 import { findFlags } from "@/lib/utils/abilities/engine/core/collect-modifiers";
 import { findParticipant, updateParticipant, withActiveEffects } from "@/lib/utils/abilities/engine/core/participants";
 import { upsertTimedEffect } from "@/lib/utils/abilities/engine/effects/timed-effects";
@@ -68,7 +69,7 @@ export function applyCondition5e(ps: BattleParticipant[], targetId: string, opts
 
   if (immune(ps, targetId, opts.key)) return { participants: ps, messages: [`⛔ ${opts.sourceName}: ${target.basicInfo.name} — імунітет`], blocked: true };
 
-  const variant = opts.rules?.conditions.exhaustion ?? "2014";
+  const variant = opts.rules?.conditions.exhaustion ?? DEFAULT_RULES_EDITION;
 
   const messages = [`⛓ ${opts.sourceName}: ${target.basicInfo.name} — ${def.label.toLowerCase()}${opts.permanent ? "" : ` (${opts.rounds} р.)`}`];
 
@@ -78,7 +79,7 @@ export function applyCondition5e(ps: BattleParticipant[], targetId: string, opts
 
   let next = upsertTimedEffect(target, input, opts.round);
 
-  if (input.effects?.some((m) => m.type === "no_reaction")) next = { ...next, actionFlags: { ...next.actionFlags, hasUsedReaction: true } };
+  if (input.effects?.some((m) => m.type === EffectMarker.NO_REACTION)) next = { ...next, actionFlags: { ...next.actionFlags, hasUsedReaction: true } };
 
   if (opts.key === "exhaustion") {
     next = syncExhaustion(next);
@@ -94,7 +95,7 @@ export function applyCondition5e(ps: BattleParticipant[], targetId: string, opts
     }
   }
 
-  if (hasCondition(next, "incapacitated") || hasEffectMarker(next, "immobilized")) next = removeEffects(next, (e) => !!e.abilityKey?.startsWith(DODGE_KEY_PREFIX)).participant;
+  if (hasCondition(next, "incapacitated") || hasEffectMarker(next, EffectMarker.IMMOBILIZED)) next = removeEffects(next, (e) => !!e.abilityKey?.startsWith(DODGE_KEY_PREFIX)).participant;
 
   const applied = updateParticipant(ps, targetId, () => next);
 
@@ -107,6 +108,6 @@ export function applyCondition5e(ps: BattleParticipant[], targetId: string, opts
   return { participants: released.participants, messages: [...messages, ...dropped.messages, ...released.messages], blocked: false };
 }
 
-export function saveEndsFor(owner: BattleParticipant | undefined, ability: AbilityKey): { ability: AbilityKey; dc: number } {
-  return { ability, dc: owner ? spellSaveDc(owner) : 10 };
+export function saveEndsFor(owner: BattleParticipant | undefined, ability: AbilityKey, saveDcBase: number): { ability: AbilityKey; dc: number } {
+  return { ability, dc: owner ? spellSaveDc(owner, undefined, saveDcBase) : 10 };
 }

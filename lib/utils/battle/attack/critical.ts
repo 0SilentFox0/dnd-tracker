@@ -1,3 +1,4 @@
+import { EffectMarker } from "@/lib/constants/battle";
 import type { CriticalEffect, CriticalEffectType } from "@/lib/constants/critical-effects";
 import type { StaticEffect } from "@/lib/utils/abilities/schema";
 import { grantExtraActions } from "@/lib/utils/battle/participant/helpers";
@@ -33,12 +34,12 @@ const SPECS: Record<CriticalEffectType, EffectSpec | ((effect: CriticalEffect) =
     modifiers: [{ kind: "modifyStat", stat: "armor", flat: typeof effect.effect.value === "number" ? effect.effect.value : -2 }],
   }),
   combo_attack: { idPart: "combo", type: "debuff", modifiers: [DISADVANTAGE], consumeOn: "ownAttack" },
-  block_bonus_action: { idPart: "block-bonus", type: "debuff", legacy: "no_bonus_action" },
+  block_bonus_action: { idPart: "block-bonus", type: "debuff", legacy: EffectMarker.NO_BONUS_ACTION },
   advantage_on_target: { idPart: "advantage-on-target", type: "debuff", modifiers: [MARK], consumeOn: "attackAgainst", expireAtTurnEnd: true },
   advantage_on_self: { idPart: "advantage-on-self", type: "debuff", modifiers: [MARK], consumeOn: "attackAgainst", expireAtTurnEnd: true },
   prone: { idPart: "prone", type: "condition", modifiers: [MARK, DISADVANTAGE], expireAtTurnEnd: true },
   weakened_next_hit: { idPart: "weakened", type: "debuff", legacy: "weakened_next_hit", legacyValue: 0.5, consumeOn: "ownHit", expireAtTurnEnd: true },
-  lose_action: { idPart: "no-action", type: "debuff", legacy: "skip_action", legacyValue: SKIP_ACTION_CERTAIN, duration: 1 },
+  lose_action: { idPart: "no-action", type: "debuff", legacy: EffectMarker.SKIP_ACTION, legacyValue: SKIP_ACTION_CERTAIN, duration: 1 },
   double_damage: null,
   max_damage: null,
   additional_damage: null,

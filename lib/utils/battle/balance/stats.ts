@@ -16,7 +16,7 @@ import type { BranchLevel } from "@/lib/utils/skills/progression";
 import { spellDice } from "@/lib/utils/spells/model/dice";
 import { readSpellDefinition, spellEffects, spellResolution, spellTargeting } from "@/lib/utils/spells/model/read";
 import type { SpellTargeting } from "@/lib/utils/spells/model/schema";
-import { bestMentalAbility, isMonster5e, unitXp } from "@/lib/utils/units/monster";
+import { isMonster5e, monsterSaveDc, unitXp } from "@/lib/utils/units/monster";
 import type { BattleAttack, BattleParticipant } from "@/types/battle";
 import type { CharacterDprBreakdown, UnitSpellPower } from "@/types/battle-setup";
 
@@ -102,7 +102,7 @@ function spellTargets(targeting: SpellTargeting): number {
 
 type BestSpell = Pick<UnitSpellPower, "dpr" | "damageType" | "save">;
 
-function bestSpell(spells: UnitSpellInput[], unit: { level: number; proficiencyBonus?: number }, saveDcBase = 8, dcBonus = 0): BestSpell | null {
+function bestSpell(spells: UnitSpellInput[], unit: { level: number }, saveDc: number): BestSpell | null {
   let best: BestSpell | null = null;
 
   for (const [index, s] of spells.entries()) {
@@ -124,7 +124,7 @@ function bestSpell(spells: UnitSpellInput[], unit: { level: number; proficiencyB
 
     const resolution = spellResolution(row);
 
-    const save = resolution.kind === "save" ? { ability: resolution.ability, dc: saveDcBase + (unit.proficiencyBonus ?? 0) + dcBonus, half: resolution.onSuccess === "half" } : undefined;
+    const save = resolution.kind === "save" ? { ability: resolution.ability, dc: saveDc, half: resolution.onSuccess === "half" } : undefined;
 
     best = { dpr, damageType: damage.damageType ?? "magic", ...(save && { save }) };
   }
@@ -167,11 +167,13 @@ export function getUnitStats(unit: UnitStatsInput): UnitStats {
 
   const mental = { intelligence: unit.intelligence ?? 10, wisdom: unit.wisdom ?? 10, charisma: unit.charisma ?? 10 };
 
-  const dcBonus = monster ? getAbilityModifier(mental[bestMentalAbility(mental)]) : 0;
+  const saveDcBase = unit.saveDcBase ?? 8;
+
+  const saveDc = monster ? monsterSaveDc(saveDcBase, unit.proficiencyBonus ?? 0, mental) : saveDcBase + (unit.proficiencyBonus ?? 0);
 
   const xp = unitXp(unit);
 
-  const spell = bestSpell(unit.spells ?? [], unit, unit.saveDcBase, dcBonus);
+  const spell = bestSpell(unit.spells ?? [], unit, saveDc);
 
   const spellDpr = spell?.dpr ?? 0;
 

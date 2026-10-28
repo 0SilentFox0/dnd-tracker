@@ -28,10 +28,12 @@ export async function persistConsumables(
     tx.characterInventory.findMany({ where: { characterId: { in: spent.map((s) => s.characterId) } }, select: { characterId: true, items: true } }),
   ]);
 
+  const inventoryOf = new Map(inventories.map((i) => [i.characterId, i]));
+
   const logs: Prisma.InventoryLogCreateManyInput[] = [];
 
   for (const { characterId, byItem } of spent) {
-    const inv = inventories.find((i) => i.characterId === characterId);
+    const inv = inventoryOf.get(characterId);
 
     if (!inv) continue;
 

@@ -142,7 +142,28 @@ export enum ItemModifierType {
   STATS = "itemStats",
 }
 
-export const ITEM_LIMITS = { charges: [1, 50], bases: 60, grantQuantity: [1, 99], quantity: 9999, specialName: 100, specialDescription: 1000 } as const;
+export const ITEM_LIMITS = {
+  charges: [1, 50],
+  bases: 60,
+  grantQuantity: [1, 99],
+  quantity: 9999,
+  specialName: 100,
+  specialDescription: 1000,
+  cost: [0, 50],
+  castLevel: [0, 9],
+  dc: [1, 40],
+  attackBonus: [-10, 30],
+  upcastMaxLevel: [1, 9],
+  upcastExtraCost: [1, 50],
+  options: 50,
+  label: 60,
+  spells: 500,
+  keyPattern: /^[a-z][a-z0-9_-]{0,39}$/,
+} as const;
+
+export const ITEM_KINDS = ["weapon", "armor", "shield"] as const;
+
+export const ARMOR_CATEGORIES = ["light", "medium", "heavy"] as const;
 
 export const CARRIED_SLOTS: ReadonlySet<string> = new Set([ArtifactSlot.ITEM, ArtifactSlot.RING]);
 

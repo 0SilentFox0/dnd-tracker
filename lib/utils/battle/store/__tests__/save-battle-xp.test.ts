@@ -61,9 +61,10 @@ describe("saveBattle: авто-досвід", () => {
 
     expect(tx.character.findMany).toHaveBeenCalledWith({ where: { id: { in: ["ch-1", "ch-2"] }, campaignId: "c1", status: "active" }, select: { id: true } });
     expect(tx.$queryRaw).toHaveBeenCalledTimes(1);
-    expect(tx.character.update).toHaveBeenCalledWith({ where: { id: "ch-1" }, data: { experience: 325 } });
-    expect(tx.character.update).toHaveBeenCalledWith({ where: { id: "ch-2" }, data: { experience: 225 } });
-    expect(tx.characterLog.createMany).toHaveBeenCalledWith({ data: [expect.objectContaining({ characterId: "ch-1", kind: "xp", actorUserId: null, data: { amount: 225, total: 325, note: "Перемога в бою", battleId: "b1" } }), expect.objectContaining({ characterId: "ch-2" })] });
+    expect(tx.character.updateMany).toHaveBeenCalledTimes(1);
+    expect(tx.character.updateMany).toHaveBeenCalledWith({ where: { id: { in: ["ch-1", "ch-2"] } }, data: { experience: { increment: 225 } } });
+    expect(tx.character.update).not.toHaveBeenCalled();
+    expect(tx.characterLog.createMany).toHaveBeenCalledWith({ data: [expect.objectContaining({ characterId: "ch-1", kind: "xp", actorUserId: null, data: { amount: 225, total: 325, note: "Перемога в бою", battleId: "b1" } }), expect.objectContaining({ characterId: "ch-2", data: expect.objectContaining({ total: 225 }) })] });
   });
 
   it("поразка, вимкнене правило або бій не завершується — нічого", async () => {
@@ -77,7 +78,7 @@ describe("saveBattle: авто-досвід", () => {
       await saveBattle(db, loaded(rules, ps()), { participants: ps(), pending: [], events: [...events], scene });
 
       expect(tx.$queryRaw).not.toHaveBeenCalled();
-      expect(tx.character.update).not.toHaveBeenCalled();
+      expect(tx.character.updateMany).not.toHaveBeenCalled();
     }
   });
 });

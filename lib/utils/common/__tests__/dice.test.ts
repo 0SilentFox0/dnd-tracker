@@ -7,6 +7,7 @@ import {
   diceSlots,
   leadingDice,
   mergeDiceFormulas,
+  normalizeDiceText,
   parseDice,
   rollDice,
   rollDiceList,
@@ -114,5 +115,18 @@ describe("rollDice / rollDiceList", () => {
   it("невалідне → 0 / []", () => {
     expect(rollDice("x", seq(0.5))).toBe(0);
     expect(rollDiceList("x")).toEqual([]);
+  });
+});
+
+describe("normalizeDiceText", () => {
+  const legacy = (s: string) => s.toLowerCase().replace(/\s+/g, "").replace(/[кkд]/g, "d");
+
+  it.each(["2к6", "1Д8+2", "3k4", " d20 ", "2D6 + 1", "1 к 4"])("%s збігається зі старою нормалізацією", (raw) => {
+    expect(normalizeDiceText(raw)).toBe(legacy(raw));
+  });
+
+  it("повертає канонічний запис", () => {
+    expect(normalizeDiceText("2К6")).toBe("2d6");
+    expect(normalizeDiceText(" d20 ")).toBe("d20");
   });
 });

@@ -3,9 +3,9 @@ import { calculateAttackBonus, forcedRollMode, type RollMode, rollModeReasons } 
 
 import type { CriticalEffect } from "@/lib/constants/critical-effects";
 import { getRandomCriticalEffect } from "@/lib/constants/critical-effects";
-import { collectModifiers } from "@/lib/utils/abilities/engine/core/collect-modifiers";
 import { withSelf } from "@/lib/utils/abilities/engine/core/participants";
 import type { StaticEffect } from "@/lib/utils/abilities/schema";
+import { critThresholdOf } from "@/lib/utils/battle/attack/crit-threshold";
 import { rollDie } from "@/lib/utils/common/dice";
 import { DEFAULT_RULES, type Ruleset } from "@/lib/utils/rules";
 import type { BattleAttack, BattleMapConfig, BattleParticipant } from "@/types/battle";
@@ -31,7 +31,7 @@ export function calculateAttackRoll(
 
   const manual = !forced.forced && mode !== "normal";
 
-  const critThreshold = Math.max(2, c.critOn + collectModifiers(participants, attacker.basicInfo.id, { stat: "critThreshold" }, opts.extra).flat);
+  const critThreshold = critThresholdOf(opts.rules, participants, attacker.basicInfo.id, opts.extra);
 
   let finalRoll = d20Roll;
 

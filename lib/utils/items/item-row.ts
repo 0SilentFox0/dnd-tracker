@@ -1,15 +1,15 @@
-import { ITEM_LIMITS, ItemModifierType } from "@/lib/constants/artifacts";
+import { ARMOR_CATEGORIES, ITEM_KINDS, ITEM_LIMITS, ItemModifierType } from "@/lib/constants/artifacts";
 import { WEAPON_TRAITS } from "@/lib/constants/weapon-traits";
 import { isRecord } from "@/lib/utils/common/is-record";
 import type { ItemStats } from "@/lib/utils/items/item-stats";
 
-const KINDS = new Set(["weapon", "armor", "shield"]);
+const KINDS: ReadonlySet<string> = new Set(ITEM_KINDS);
 
-const CATEGORIES = new Set(["light", "medium", "heavy"]);
+const CATEGORIES: ReadonlySet<string> = new Set(ARMOR_CATEGORIES);
 
 const TRAITS = new Set<string>(WEAPON_TRAITS);
 
-const isInt = (n: unknown, min: number, max: number): n is number => typeof n === "number" && Number.isInteger(n) && n >= min && n <= max;
+const isInt = (n: unknown, [min, max]: readonly [number, number] | readonly number[]): n is number => typeof n === "number" && Number.isInteger(n) && n >= min && n <= max;
 
 const strings = (v: unknown, allowed?: ReadonlySet<string>): string[] | null =>
   Array.isArray(v) && v.length > 0 && v.every((s) => typeof s === "string" && s.trim() !== "" && (!allowed || allowed.has(s))) ? (v as string[]) : null;
@@ -92,7 +92,7 @@ function readStats(raw: unknown): ItemStats | null {
   if (raw.charges !== undefined) {
     const c = raw.charges;
 
-    if (!isRecord(c) || !isInt(c.max, ...ITEM_LIMITS.charges) || !(c.rest === "short" || c.rest === "long" || c.rest === null)) return null;
+    if (!isRecord(c) || !isInt(c.max, ITEM_LIMITS.charges) || !(c.rest === "short" || c.rest === "long" || c.rest === null)) return null;
 
     out.charges = { max: c.max, rest: c.rest };
   }
@@ -100,14 +100,14 @@ function readStats(raw: unknown): ItemStats | null {
   if (typeof raw.consumable === "boolean") out.consumable = raw.consumable;
 
   if (raw.parameter !== undefined) {
-    if (!isRecord(raw.parameter) || !(raw.parameter.kind === "damageType" || raw.parameter.kind === "creatureType") || !Array.isArray(raw.parameter.options) || raw.parameter.options.length < 1 || raw.parameter.options.length > 50) return null;
+    if (!isRecord(raw.parameter) || !(raw.parameter.kind === "damageType" || raw.parameter.kind === "creatureType") || !Array.isArray(raw.parameter.options) || raw.parameter.options.length < 1 || raw.parameter.options.length > ITEM_LIMITS.options) return null;
 
     const keys = new Set<string>();
 
     const options: NonNullable<ItemStats["parameter"]>["options"] = [];
 
     for (const option of raw.parameter.options) {
-      if (!isRecord(option) || typeof option.key !== "string" || !/^[a-z][a-z0-9_-]{0,39}$/.test(option.key) || typeof option.label !== "string" || !option.label.trim() || option.label.length > 60 || keys.has(option.key)) return null;
+      if (!isRecord(option) || typeof option.key !== "string" || !ITEM_LIMITS.keyPattern.test(option.key) || typeof option.label !== "string" || !option.label.trim() || option.label.length > ITEM_LIMITS.label || keys.has(option.key)) return null;
 
       keys.add(option.key);
       options.push({ key: option.key, label: option.label });
@@ -116,27 +116,27 @@ function readStats(raw: unknown): ItemStats | null {
   }
 
   if (raw.spells !== undefined) {
-    if (!Array.isArray(raw.spells) || raw.spells.length > 500) return null;
+    if (!Array.isArray(raw.spells) || raw.spells.length > ITEM_LIMITS.spells) return null;
 
     const ids = new Set<string>();
 
     const spells: NonNullable<ItemStats["spells"]> = [];
 
     for (const value of raw.spells) {
-      if (!isRecord(value) || typeof value.spellId !== "string" || !value.spellId.trim() || !isInt(value.cost, 0, 50) || ids.has(value.spellId)) return null;
+      if (!isRecord(value) || typeof value.spellId !== "string" || !value.spellId.trim() || !isInt(value.cost, ITEM_LIMITS.cost) || ids.has(value.spellId)) return null;
 
       ids.add(value.spellId);
 
-      if (value.castLevel !== undefined && !isInt(value.castLevel, 0, 9)) return null;
+      if (value.castLevel !== undefined && !isInt(value.castLevel, ITEM_LIMITS.castLevel)) return null;
 
-      if (value.dc !== undefined && !isInt(value.dc, 1, 40)) return null;
+      if (value.dc !== undefined && !isInt(value.dc, ITEM_LIMITS.dc)) return null;
 
-      if (value.attackBonus !== undefined && !isInt(value.attackBonus, -10, 30)) return null;
+      if (value.attackBonus !== undefined && !isInt(value.attackBonus, ITEM_LIMITS.attackBonus)) return null;
 
       let upcast: { maxLevel: number; extraCost: number } | undefined;
 
       if (value.upcast !== undefined) {
-        if (!isRecord(value.upcast) || !isInt(value.upcast.maxLevel, 1, 9) || !isInt(value.upcast.extraCost, 1, 50) || value.castLevel === undefined || value.upcast.maxLevel <= value.castLevel) return null;
+        if (!isRecord(value.upcast) || !isInt(value.upcast.maxLevel, ITEM_LIMITS.upcastMaxLevel) || !isInt(value.upcast.extraCost, ITEM_LIMITS.upcastExtraCost) || value.castLevel === undefined || value.upcast.maxLevel <= value.castLevel) return null;
 
         upcast = { maxLevel: value.upcast.maxLevel, extraCost: value.upcast.extraCost };
       }
@@ -149,8 +149,22 @@ function readStats(raw: unknown): ItemStats | null {
   return out;
 }
 
+const STATS_CACHE = new WeakMap<object, ItemStats | null>();
+
 /** Без zod: ходить у entry-чанки бою й профілю (`lib/__tests__/client-entry-imports.test.ts`). */
 export function itemStatsFromRow(row: { modifiers?: unknown }): ItemStats | null {
+  const cached = STATS_CACHE.get(row);
+
+  if (cached !== undefined) return cached;
+
+  const stats = parseRowStats(row);
+
+  STATS_CACHE.set(row, stats);
+
+  return stats;
+}
+
+function parseRowStats(row: { modifiers?: unknown }): ItemStats | null {
   const record = (Array.isArray(row.modifiers) ? row.modifiers : []).find((m) => isRecord(m) && m.type === ItemModifierType.STATS) as { value?: unknown } | undefined;
 
   if (!record || typeof record.value !== "string") return null;

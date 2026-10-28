@@ -1,4 +1,5 @@
 import { isChallengeRating } from "@/lib/constants/challenge";
+import { normalizeDiceText } from "@/lib/utils/common/dice";
 import { specialAbilitiesToAbilities } from "@/lib/utils/units/special-abilities";
 import { parseAttacksDetailed, parseSpecialAbilities } from "@/lib/utils/units/unit-parsing";
 import type { ImportField, ImportKind } from "@/types/content-import";
@@ -109,7 +110,7 @@ const DICE = /^\d*d\d+([+-]\d+)?$/;
 function parseDice(raw: unknown): ParsedValue {
   if (typeof raw === "number") return Number.isInteger(raw) && raw >= 0 ? { value: raw } : { issue: "Очікується ціла кількість кісток" };
 
-  const s = String(raw).toLowerCase().replace(/\s+/g, "").replace(/[кkд]/g, "d");
+  const s = normalizeDiceText(String(raw));
 
   if (/^\d+$/.test(s)) return { value: Number(s) };
 

@@ -1,19 +1,21 @@
 import { CONDITION_LABELS } from "../labels";
 import type { EffectApplyInput, EffectApplyResult } from "./types";
 
+import { EffectMarker } from "@/lib/constants/battle";
 import { findFlags } from "@/lib/utils/abilities/engine/core/collect-modifiers";
 import { findParticipant, participantNames, updateParticipant } from "@/lib/utils/abilities/engine/core/participants";
 import { restoreCharm } from "@/lib/utils/abilities/engine/effects/charm";
 import { countMarks, GUARD_KEY, markKey } from "@/lib/utils/abilities/engine/effects/marks";
 import { clampMorale, moraleCapOf } from "@/lib/utils/abilities/engine/effects/morale";
 import { effectSource, upsertTimedEffect } from "@/lib/utils/abilities/engine/effects/timed-effects";
-import type { AnyConditionKey, Condition5eKey, ConditionImmunityKey, Effect } from "@/lib/utils/abilities/schema";
-import { CONDITION_5E_KEYS } from "@/lib/utils/abilities/schema/kinds";
+import type { Condition5eKey, ConditionImmunityKey, Effect } from "@/lib/utils/abilities/schema";
+import { isCondition5eKey } from "@/lib/utils/abilities/schema/kinds";
 import { applyCondition5e, saveEndsFor } from "@/lib/utils/battle/conditions/apply";
 import { removeEffects } from "@/lib/utils/battle/conditions/query";
 import { grantExtraActions } from "@/lib/utils/battle/participant/helpers";
 import { signed } from "@/lib/utils/common/format";
 import { pluralUk } from "@/lib/utils/common/plural";
+import { DEFAULT_RULES } from "@/lib/utils/rules";
 import { slotLevel, slotRestoreOrder } from "@/lib/utils/spells/slot-keys";
 import type { BattleParticipant } from "@/types/battle";
 
@@ -60,10 +62,6 @@ export function immuneTo(ps: BattleParticipant[], id: string, key: ConditionImmu
 
 export { CONDITION_LABELS };
 
-function is5e(key: AnyConditionKey): key is Condition5eKey {
-  return (CONDITION_5E_KEYS as readonly string[]).includes(key);
-}
-
 function applyCondition5eToTargets(input: EffectApplyInput<Of<"applyCondition">>, key: Condition5eKey): EffectApplyResult {
   const { ability, effect, ctx } = input;
 
@@ -80,7 +78,7 @@ function applyCondition5eToTargets(input: EffectApplyInput<Of<"applyCondition">>
       key,
       rounds: effect.duration.rounds,
       levels: effect.levels,
-      saveEnds: effect.saveEnds ? saveEndsFor(owner, effect.saveEnds.ability) : undefined,
+      saveEnds: effect.saveEnds ? saveEndsFor(owner, effect.saveEnds.ability, (ctx.rules ?? DEFAULT_RULES).formulas.saveDcBase) : undefined,
       source,
       sourceName: ability.name,
       timedKey: `${ability.key}#${input.effectIndex}@${input.ownerId}`,
@@ -98,7 +96,7 @@ function applyCondition5eToTargets(input: EffectApplyInput<Of<"applyCondition">>
 export function applyCondition(input: EffectApplyInput<Of<"applyCondition">>): EffectApplyResult {
   const { ability, effect, ctx } = input;
 
-  if (is5e(effect.condition)) return applyCondition5eToTargets(input, effect.condition);
+  if (isCondition5eKey(effect.condition)) return applyCondition5eToTargets(input, effect.condition);
 
   const condition = effect.condition;
 
@@ -114,13 +112,13 @@ export function applyCondition(input: EffectApplyInput<Of<"applyCondition">>): E
           type: "condition",
           rounds: effect.duration.rounds,
           stackable: false,
-          effects: [{ type: condition, value: condition === "skip_action" ? (effect.percent ?? 100) : 1 }],
+          effects: [{ type: condition, value: condition === EffectMarker.SKIP_ACTION ? (effect.percent ?? 100) : 1 }],
           breakOnDamage: effect.breakOnDamage,
         },
         ctx.round,
       );
 
-      return condition === "no_reaction" ? { ...next, actionFlags: { ...next.actionFlags, hasUsedReaction: true } } : next;
+      return condition === EffectMarker.NO_REACTION ? { ...next, actionFlags: { ...next.actionFlags, hasUsedReaction: true } } : next;
     },
     (names) => `⛓ ${ability.name}: ${names} — ${CONDITION_LABELS[condition]} (${effect.duration.rounds} р.)`,
     (p) => immuneTo(input.participants, p.basicInfo.id, condition),

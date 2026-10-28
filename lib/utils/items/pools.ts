@@ -1,7 +1,7 @@
 import type { Ability } from "@/lib/utils/abilities/schema";
 import type { ItemRowLike } from "@/lib/utils/items/compose";
 import { itemStatsFromRow } from "@/lib/utils/items/item-row";
-import type { AbilityPool } from "@/types/battle";
+import type { AbilityPool, SpellGrant } from "@/types/battle";
 
 export const ITEM_CHARGES_KEY = "charges";
 
@@ -12,6 +12,22 @@ export const GRANT_POOL_PREFIX = "pool:grant:";
 export const CONSUMABLE_POOL_PREFIX = "pool:consumable:";
 
 export const itemPoolKey = (ref: string) => `${ITEM_POOL_PREFIX}${ref}`;
+
+export const spellPoolKey = (spellId: string) => `pool:spell:${spellId}`;
+
+export const grantPoolKey = (sourceKey: string, sharedPool?: string | null) =>
+  `${GRANT_POOL_PREFIX}${sharedPool ? `${sourceKey.slice(0, sourceKey.lastIndexOf(":"))}:shared:${encodeURIComponent(sharedPool)}` : sourceKey}`;
+
+export const classPoolKey = (classId: string, key: string) => `pool:${classId}:${key}`;
+
+type SpellGrantFields = Pick<SpellGrant, "castLevel" | "dc" | "attackBonus" | "upcast">;
+
+export const spellGrantFields = (spell: SpellGrantFields): Partial<SpellGrantFields> => ({
+  ...(spell.castLevel !== undefined && { castLevel: spell.castLevel }),
+  ...(spell.dc !== undefined && { dc: spell.dc }),
+  ...(spell.attackBonus !== undefined && { attackBonus: spell.attackBonus }),
+  ...(spell.upcast && { upcast: spell.upcast }),
+});
 
 export const consumablePoolKey = (itemId: string) => `${CONSUMABLE_POOL_PREFIX}${itemId}`;
 

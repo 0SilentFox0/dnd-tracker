@@ -7,7 +7,7 @@ import { countMarks, markKey } from "@/lib/utils/abilities/engine/effects/marks"
 import type { Condition, ConditionSubject } from "@/lib/utils/abilities/schema";
 import { armorWornMatches } from "@/lib/utils/artifacts/worn-armor";
 import { isAdjacent } from "@/lib/utils/battle/grid/occupancy";
-import { hasEffectMarker } from "@/lib/utils/battle/participant/state";
+import { findEffectMarker } from "@/lib/utils/battle/participant/state";
 import { hpRatio } from "@/lib/utils/battle/view/health";
 import type { AbilityEvent } from "@/types/abilities";
 import type { BattleParticipant } from "@/types/battle";
@@ -110,7 +110,7 @@ export function evaluateCondition(c: Condition, ctx: ConditionContext): boolean 
     case "attackKind":
       return eventAttackKind(ctx.event) === c.kind;
     case "targetHasCondition":
-      return subjects("eventTarget", ctx).some((p) => hasEffectMarker(p, c.condition));
+      return subjects("eventTarget", ctx).some((p) => findEffectMarker(p, c.condition) !== undefined);
     case "targetCreatureType":
       return subjects("eventTarget", ctx).some((p) => !!p.abilities.creatureType && c.types.some((type) => type.trim().toLowerCase() === p.abilities.creatureType?.trim().toLowerCase()));
     case "targetRace":

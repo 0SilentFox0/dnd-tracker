@@ -14,8 +14,6 @@ import {
 
 import { AttackType } from "@/lib/constants/battle";
 import { parseWeaponTraits } from "@/lib/constants/weapon-traits";
-import { prisma } from "@/lib/db";
-import { refArtifactIds } from "@/lib/utils/items/ref";
 import { resolveItemRow } from "@/lib/utils/items/resolve";
 import { DEFAULT_RULES, type Ruleset } from "@/lib/utils/rules";
 
@@ -26,23 +24,23 @@ const defaultAttacks = (names: Ruleset["defaultAttacks"], fiveE: boolean): Extra
   { id: "default-ranged", name: names.rangedName, type: AttackType.RANGED as ExtractedAttack["type"], attackBonus: 0, damageDice: "", damageType: "physical" },
 ];
 
-export async function extractAttacksFromCharacter(
+export function extractAttacksFromCharacter(
   character: CharacterFromPrisma,
-  preloadedArtifactsById?: Record<string, Prisma.ArtifactGetPayload<object>>,
+  artifactsById: Record<string, Prisma.ArtifactGetPayload<object>>,
   names: Ruleset["defaultAttacks"] = DEFAULT_RULES.defaultAttacks,
   opts: { fiveE?: boolean; items?: { enabled: boolean; attuned: readonly string[] } } = {},
-): Promise<ExtractedAttack[]> {
-  const weapons = await extractWeaponAttacks(character, preloadedArtifactsById, !!opts.fiveE, opts.items);
+): ExtractedAttack[] {
+  const weapons = extractWeaponAttacks(character, artifactsById, !!opts.fiveE, opts.items);
 
   return [...weapons, ...defaultAttacks(names, !!opts.fiveE).filter((d) => !weapons.some((w) => w.type === d.type))];
 }
 
-async function extractWeaponAttacks(
+function extractWeaponAttacks(
   character: CharacterFromPrisma,
-  preloadedArtifactsById: Record<string, Prisma.ArtifactGetPayload<object>> | undefined,
+  rowsById: Record<string, Prisma.ArtifactGetPayload<object>>,
   fiveE: boolean,
   items?: { enabled: boolean; attuned: readonly string[] },
-): Promise<ExtractedAttack[]> {
+): ExtractedAttack[] {
   const attacks: ExtractedAttack[] = [];
 
   if (!character.inventory) {
@@ -110,12 +108,6 @@ async function extractWeaponAttacks(
   if (entries.length === 0) {
     return attacks;
   }
-
-  const ids = [...new Set(entries.flatMap((e) => refArtifactIds(e.ref)))];
-
-  const rowsById =
-    preloadedArtifactsById ??
-    Object.fromEntries((await prisma.artifact.findMany({ where: { id: { in: ids }, campaignId: character.campaignId } })).map((r) => [r.id, r]));
 
   const shieldCellEmpty = !equipped.shield;
 

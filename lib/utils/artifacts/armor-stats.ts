@@ -1,8 +1,8 @@
 import { z } from "zod";
 
-import { ARMOR_LIMITS, ArmorModifierType } from "@/lib/constants/artifacts";
+import { ARMOR_CATEGORIES, ARMOR_LIMITS, ArmorModifierType } from "@/lib/constants/artifacts";
 
-export const ARMOR_CATEGORIES = ["light", "medium", "heavy"] as const;
+export { ARMOR_CATEGORIES };
 
 export type ArmorCategory = (typeof ARMOR_CATEGORIES)[number];
 

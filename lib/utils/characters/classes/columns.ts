@@ -1,11 +1,10 @@
 import { MAX_CLASS_LEVEL } from "@/lib/constants/classes";
+import { DICE_TERM_PATTERN } from "@/lib/utils/common/dice";
 import type { ClassColumn, ResolvedClassEntry } from "@/types/classes";
 
 export type ColumnValue = number | string;
 
 const DIE_ONLY = /^d(\d+)$/i;
-
-const DICE = /^(\d+)d(\d+)$/i;
 
 const NUMBER = /^([+-]?\d+)/;
 
@@ -18,7 +17,7 @@ export function parseColumnValue(cell: string | undefined): ColumnValue | null {
 
   if (die) return `1d${die[1]}`;
 
-  const dice = DICE.exec(s);
+  const dice = DICE_TERM_PATTERN.exec(s);
 
   if (dice) return `${dice[1]}d${dice[2]}`;
 

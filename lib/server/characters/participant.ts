@@ -10,7 +10,7 @@ import type { BattleParticipant } from "@/types/battle";
 export async function buildCharacterParticipant(character: CharacterFromPrisma, campaign: { maxLevel: number; rules: Ruleset }): Promise<CharacterContext & { participant: BattleParticipant }> {
   const loaded = await loadCharacterContext(character, campaign);
 
-  const built = await createBattleParticipantFromCharacter(character, "", ParticipantSide.ALLY, undefined, loaded.context);
+  const built = await createBattleParticipantFromCharacter(character, "", ParticipantSide.ALLY, undefined, loaded.context, { classEntries: loaded.classEntries });
 
   const [participant] = applyBakedAuras([built], new Set([built.basicInfo.id]));
 

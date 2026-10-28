@@ -130,3 +130,12 @@ describe("fix-wave guards", () => {
     expect(applyStashAction(s, { action: "equip", artifactId: "ls" }, { ...ctx, artifactSlotType: "weapon" })).toEqual({ ok: false, error: StashError.ALREADY_IN_STASH });
   });
 });
+
+describe("revoke prunes attunement", () => {
+  it("drops only the attuned refs that are no longer held (3 attuned items)", () => {
+    const r = applyStashAction(base({ stash: ["ring", "wand", "cloak"], attuned: ["ls+ft", "ring", "wand"] }), { action: "revoke", artifactId: "ring" }, ctx);
+
+    expect(r.ok && r.state.attuned).toEqual(["ls+ft", "wand"]);
+    expect(r.ok && r.state.stash).toEqual(["wand", "cloak"]);
+  });
+});

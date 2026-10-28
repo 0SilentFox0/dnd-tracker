@@ -1,7 +1,7 @@
 import { applyDOTEffects, applyHOTEffects, armEffects, countDownAtTurnStart } from "./effects";
 import { resetTurnState } from "./turn-state";
 
-import { CombatStatus, DEFAULT_HAZARD_LABEL } from "@/lib/constants/battle";
+import { CombatStatus, DEFAULT_HAZARD_LABEL, EffectMarker,isRecharge } from "@/lib/constants/battle";
 import { findParticipant, isActive, replaceParticipant, sitsOutTurn } from "@/lib/utils/abilities/engine/core/participants";
 import { resolveDowned, runAbilities } from "@/lib/utils/abilities/engine/core/run-abilities";
 import type { Rng } from "@/lib/utils/abilities/engine/core/types";
@@ -11,6 +11,7 @@ import { hazardHit, hazardUnder } from "@/lib/utils/battle/grid/hazard";
 import { landDive } from "@/lib/utils/battle/maneuvers";
 import { actionsPerTurnPool, setExtraActionPool } from "@/lib/utils/battle/participant/helpers";
 import { hasEffectMarker } from "@/lib/utils/battle/participant/state";
+import { rollDie } from "@/lib/utils/common/dice";
 import type { Ruleset } from "@/lib/utils/rules";
 import type { BattleMapConfig, BattleParticipant } from "@/types/battle";
 
@@ -37,63 +38,65 @@ export interface StartOfTurnHazard {
   damageType: string;
 }
 
-/**
- * Обробляє початок ходу учасника
- * @param participant - учасник бою
- * @param currentRound - поточний раунд
- * @param allParticipants - всі учасники бою (для контексту пасивок)
- * @param map - карта бою: небезпечна клітинка під учасником шкодить після DoT
- * @returns результат обробки
- */
-export function processStartOfTurn(
-  participant: BattleParticipant,
-  currentRound: number,
-  allParticipants: BattleParticipant[],
-  rng: Rng = Math.random,
-  map?: BattleMapConfig | null,
-  rules?: Ruleset,
-): StartOfTurnResult {
-  let updatedParticipant = { ...participant };
+function rechargePools(participant: BattleParticipant, rng: Rng): { participant: BattleParticipant; messages: string[] } {
+  let updated = participant;
 
-  const rechargeMessages: string[] = [];
+  const messages: string[] = [];
 
   for (const [key, pool] of Object.entries(participant.battleData.pools ?? {})) {
     const usage = participant.battleData.abilityUsage?.[key];
 
     const threshold = pool.recharge;
 
-    if (!usage || usage.battle <= 0 || (threshold !== 4 && threshold !== 5 && threshold !== 6)) continue;
+    if (!usage || usage.battle <= 0 || !isRecharge(threshold)) continue;
 
-    const roll = Math.floor(rng() * 6) + 1;
+    const roll = rollDie(6, rng);
 
     const recharged = roll >= threshold;
 
     if (recharged) {
-      updatedParticipant = { ...updatedParticipant, battleData: { ...updatedParticipant.battleData, abilityUsage: { ...updatedParticipant.battleData.abilityUsage, [key]: { ...usage, battle: 0 } } } };
+      updated = { ...updated, battleData: { ...updated.battleData, abilityUsage: { ...updated.battleData.abilityUsage, [key]: { ...usage, battle: 0 } } } };
     }
 
-    rechargeMessages.push(`🔄 ${pool.label} ${recharged ? "перезарядилась" : "не перезарядилась"} (${roll})`);
+    messages.push(`🔄 ${pool.label} ${recharged ? "перезарядилась" : "не перезарядилась"} (${roll})`);
   }
 
-  const hasNoBonusAction = hasEffectMarker(participant, "no_bonus_action");
+  return { participant: updated, messages };
+}
 
-  const hasNoReaction = hasEffectMarker(participant, "no_reaction");
+interface StartOfTurnDamage {
+  participant: BattleParticipant;
+  others: BattleParticipant[];
+  damageMessages: string[];
+  healMessages: string[];
+  expiredEffects: string[];
+  hazard?: StartOfTurnHazard;
+  killedByRules: boolean;
+}
 
-  const skipChances = participant.battleData.activeEffects.flatMap((e) => e.effects.filter((d) => d.type === "skip_action").map((d) => ({ name: e.name, percent: d.value })));
+// DoT/HoT — на початку ходу цілі; тривалості зменшуються наприкінці ходу (endTurnCleanup)
+function applyStartOfTurnDamage(
+  participant: BattleParticipant,
+  allParticipants: BattleParticipant[],
+  currentRound: number,
+  rng: Rng,
+  map: BattleMapConfig | null | undefined,
+  rules: Ruleset | undefined,
+): StartOfTurnDamage {
+  let updatedParticipant = participant;
+
+  let others = allParticipants;
 
   const damageMessages: string[] = [];
 
-  let expiredEffects: string[] = [];
-
   const healMessages: string[] = [];
+
+  let expiredEffects: string[] = [];
 
   let hazardResult: StartOfTurnHazard | undefined;
 
   let killedByRules = false;
 
-  let others = allParticipants;
-
-  // DoT/HoT — на початку ходу цілі; тривалості зменшуються наприкінці ходу (endTurnCleanup)
   if (
     updatedParticipant.combatStats.status !== CombatStatus.DEAD &&
     updatedParticipant.combatStats.status !== CombatStatus.UNCONSCIOUS &&
@@ -159,6 +162,56 @@ export function processStartOfTurn(
     };
   }
 
+  return { participant: updatedParticipant, others, damageMessages, healMessages, expiredEffects, hazard: hazardResult, killedByRules };
+}
+
+// Скидаємо флаги дій; ефекти no_bonus_action / no_reaction блокують відповідні дії
+function resetTurnFlags(updated: BattleParticipant, original: BattleParticipant, allParticipants: BattleParticipant[], rng: Rng): { participant: BattleParticipant; skippedBy: { name: string; percent: number } | undefined } {
+  const skipChances = original.battleData.activeEffects.flatMap((e) => e.effects.filter((d) => d.type === EffectMarker.SKIP_ACTION).map((d) => ({ name: e.name, percent: d.value })));
+
+  const skippedBy = isActive(updated) ? skipChances.find((s) => rng() * 100 < s.percent) : undefined;
+
+  const flagged = {
+    ...updated,
+    actionFlags: {
+      ...updated.actionFlags,
+      hasUsedAction: skippedBy !== undefined,
+      hasUsedBonusAction: hasEffectMarker(original, EffectMarker.NO_BONUS_ACTION),
+      hasUsedReaction: hasEffectMarker(original, EffectMarker.NO_REACTION),
+    },
+    battleData: resetTurnState(updated),
+  };
+
+  // додаткові дії, отримані поза своїм ходом, не переносяться — пул ходу це лише actionsPerTurn
+  return { participant: setExtraActionPool(flagged, isActive(flagged) ? actionsPerTurnPool(flagged, allParticipants) : 0), skippedBy };
+}
+
+/**
+ * Обробляє початок ходу учасника
+ * @param participant - учасник бою
+ * @param currentRound - поточний раунд
+ * @param allParticipants - всі учасники бою (для контексту пасивок)
+ * @param map - карта бою: небезпечна клітинка під учасником шкодить після DoT
+ * @returns результат обробки
+ */
+export function processStartOfTurn(
+  participant: BattleParticipant,
+  currentRound: number,
+  allParticipants: BattleParticipant[],
+  rng: Rng = Math.random,
+  map?: BattleMapConfig | null,
+  rules?: Ruleset,
+): StartOfTurnResult {
+  const recharged = rechargePools({ ...participant }, rng);
+
+  const rechargeMessages = recharged.messages;
+
+  const damage = applyStartOfTurnDamage(recharged.participant, allParticipants, currentRound, rng, map, rules);
+
+  const { others, damageMessages, healMessages, expiredEffects, killedByRules } = damage;
+
+  let updatedParticipant = damage.participant;
+
   // 1. Перевіряємо чи учасник впав в непритомність або помер (після DoT)
   let statusChanged = false;
 
@@ -179,24 +232,13 @@ export function processStartOfTurn(
     statusChanged = true;
   }
 
-  const skippedBy = isActive(updatedParticipant) ? skipChances.find((s) => rng() * 100 < s.percent) : undefined;
+  const reset = resetTurnFlags(updatedParticipant, participant, allParticipants, rng);
 
-  // 5. Скидаємо флаги дій; ефекти no_bonus_action / no_reaction блокують відповідні дії
-  updatedParticipant = {
-    ...updatedParticipant,
-    actionFlags: {
-      ...updatedParticipant.actionFlags,
-      hasUsedAction: skippedBy !== undefined,
-      hasUsedBonusAction: hasNoBonusAction,
-      hasUsedReaction: hasNoReaction,
-    },
-    battleData: resetTurnState(updatedParticipant),
-  };
+  const { skippedBy } = reset;
+
+  updatedParticipant = reset.participant;
 
   const id = participant.basicInfo.id;
-
-  // додаткові дії, отримані поза своїм ходом, не переносяться — пул ходу це лише actionsPerTurn
-  updatedParticipant = setExtraActionPool(updatedParticipant, isActive(updatedParticipant) ? actionsPerTurnPool(updatedParticipant, allParticipants) : 0);
 
   const ctx = { round: currentRound, rng, map, rules };
 
@@ -242,6 +284,6 @@ export function processStartOfTurn(
     abilityMessages,
     rechargeMessages,
     statusChanged,
-    ...(hazardResult && { hazard: hazardResult }),
+    ...(damage.hazard && { hazard: damage.hazard }),
   };
 }

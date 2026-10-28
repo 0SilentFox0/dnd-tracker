@@ -15,11 +15,13 @@ import { inventoryArtifactIds } from "@/lib/utils/items/resolve";
 import type { Ruleset } from "@/lib/utils/rules";
 import { normalizeTree, resolveLearned } from "@/lib/utils/skills/progression";
 import { resolveClassEntries } from "@/lib/utils/spells/class-slots";
+import type { ResolvedClassEntry } from "@/types/classes";
 
 export interface CharacterContext {
   context: CampaignSpellContext;
   race: Prisma.RaceGetPayload<object> | null;
   tree: Prisma.SkillTreeGetPayload<object> | null;
+  classEntries: ResolvedClassEntry[];
 }
 
 /** Learned-вузли дерева й особистий скіл персонажа: що саме з бібліотеки кампанії йому потрібне. */
@@ -99,7 +101,9 @@ export async function loadCharacterContext(character: CharacterFromPrisma, setti
 
   const parsedClasses = rules.classes.enabled ? CharacterClassesSchema.safeParse(character.classes) : null;
 
-  const classMode = parsedClasses?.success ? resolveClassEntries(parsedClasses.data, classesById ?? {}).some((e) => e.class) : false;
+  const classEntries = parsedClasses?.success && parsedClasses.data.length > 0 ? resolveClassEntries(parsedClasses.data, classesById ?? {}) : [];
+
+  const classMode = classEntries.some((e) => e.class);
 
   const state = choicesStateOf(character);
 
@@ -127,6 +131,7 @@ export async function loadCharacterContext(character: CharacterFromPrisma, setti
   return {
     race,
     tree,
+    classEntries,
     context: {
       skillTreeByRace: { [raceName]: tree },
       mainSkills: library?.mainSkills ?? [],

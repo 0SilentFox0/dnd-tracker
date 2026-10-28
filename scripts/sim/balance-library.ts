@@ -538,7 +538,9 @@ async function createParty(partyKey: string, level: number, trees: Map<string, T
     await prisma.characterInventory.create({ data: { characterId: row.id, equipped } });
 
     if (withSets && process.argv.includes("--debug") && i === 0) {
-      const eq = toEquippedArtifacts(await loadEquippedArtifactRows({ ...row, inventory: { equipped } } as never));
+      const artifactsById = Object.fromEntries((await prisma.artifact.findMany({ where: { campaignId } })).map((r) => [r.id, r]));
+
+      const eq = toEquippedArtifacts(loadEquippedArtifactRows({ ...row, inventory: { equipped } } as never, artifactsById));
 
       const { progress } = await findCompletedSets(eq, campaignId);
 

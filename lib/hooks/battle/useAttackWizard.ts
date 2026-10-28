@@ -6,11 +6,12 @@ import { useModeView } from "./modes/useModeView";
 import { useBattleScene } from "./useBattleScene";
 
 import { AttackType } from "@/lib/constants/battle";
-import { collectModifiers, findFlags } from "@/lib/utils/abilities/engine/core/collect-modifiers";
+import { findFlags } from "@/lib/utils/abilities/engine/core/collect-modifiers";
 import { isAirborne, isDying, withSelf } from "@/lib/utils/abilities/engine/core/participants";
 import { attackCounter } from "@/lib/utils/battle/attack/attacks-left";
 import { predictAttack } from "@/lib/utils/battle/attack/bonus";
 import { critDoublesDice } from "@/lib/utils/battle/attack/crit-dice";
+import { critThresholdOf } from "@/lib/utils/battle/attack/crit-threshold";
 import { canUseInspiration } from "@/lib/utils/battle/attack/inspiration";
 import { attackMaxTargets } from "@/lib/utils/battle/attack/max-targets";
 import { attackKindOf } from "@/lib/utils/battle/common/attack-kind";
@@ -137,7 +138,7 @@ export function useAttackWizard(attacker: BattleParticipant | null, onDone?: () 
       { attackRoll: d20, ...(currentMode === "advantage" && second !== undefined && { advantageRoll: second }), ...(currentMode === "disadvantage" && second !== undefined && { disadvantageRoll: second }) },
       targetAC,
       totalBonus,
-      { critOn: Math.max(2, crit.critOn + collectModifiers(order, attacker.basicInfo.id, { stat: "critThreshold" }).flat), fumbleOn: crit.fumbleOn },
+      { critOn: critThresholdOf(scene.battle.rules, order, attacker.basicInfo.id), fumbleOn: crit.fumbleOn },
     );
 
     return r.crit ? "crit" : r.critFail ? "critFail" : r.hit ? "hit" : "miss";

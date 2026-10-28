@@ -1,7 +1,7 @@
 import { z } from "zod";
 
 import { ABILITY_KEYS } from "@/lib/constants/abilities";
-import { AttackType } from "@/lib/constants/battle";
+import { AttackType, RECHARGE_THRESHOLDS } from "@/lib/constants/battle";
 import { isChallengeRating } from "@/lib/constants/challenge";
 import { WEAPON_TRAITS } from "@/lib/constants/weapon-traits";
 import { AbilitiesSchema } from "@/lib/utils/abilities/schema";
@@ -62,7 +62,7 @@ export const UnitStatblockSchema = z.object({
 }).strict();
 
 export const UnitSpellGrantSchema = z.object({
-  spellId: z.string().min(1).max(100), perBattle: z.number().int().min(1).max(9).optional(), recharge: z.union([z.literal(4), z.literal(5), z.literal(6)]).optional(), castLevel: z.number().int().min(1).max(9).optional(), dc: z.number().int().min(5).max(30).optional(), attackBonus: z.number().int().min(-5).max(20).optional(), legendaryOnly: z.boolean().optional(),
+  spellId: z.string().min(1).max(100), perBattle: z.number().int().min(1).max(9).optional(), recharge: z.union([z.literal(RECHARGE_THRESHOLDS[0]), z.literal(RECHARGE_THRESHOLDS[1]), z.literal(RECHARGE_THRESHOLDS[2])]).optional(), castLevel: z.number().int().min(1).max(9).optional(), dc: z.number().int().min(5).max(30).optional(), attackBonus: z.number().int().min(-5).max(20).optional(), legendaryOnly: z.boolean().optional(),
 }).strict().superRefine((v, ctx) => { if (v.recharge !== undefined && v.perBattle !== 1) ctx.addIssue({ code: z.ZodIssueCode.custom, path: ["perBattle"], message: "Recharge потребує perBattle: 1" }); });
 
 export const UnitSpellcastingSchema = z.object({ ability: z.enum(ABILITY_KEYS).optional(), dc: z.number().int().min(5).max(30).optional(), attackBonus: z.number().int().min(-5).max(20).optional(), spells: z.array(UnitSpellGrantSchema).max(60).superRefine((spells, ctx) => {

@@ -1,10 +1,9 @@
 import type { AbilityKey } from "@/lib/constants/abilities";
 import { abilityPicksOf, abilityScoreDelta, applyDelta, capIssues } from "@/lib/utils/characters/choices/ability";
-import { classChoiceDefs } from "@/lib/utils/characters/choices/class-choices";
 import { lineageName } from "@/lib/utils/characters/choices/picks";
 import { hasPicks } from "@/lib/utils/characters/choices/read";
 import { choiceIssue, type PickContext, validatePicks } from "@/lib/utils/characters/choices/validate";
-import { type ChoiceRefs, countFeats, skillFlags, skillPicksOf, visitPicks } from "@/lib/utils/characters/choices/walk";
+import { type ChoiceRefs, countFeats, forEachChoiceOwner, skillFlags, skillPicksOf, visitPicks } from "@/lib/utils/characters/choices/walk";
 import { maxSlotLevelFor } from "@/lib/utils/spells/class-slots";
 import type { Choice, ChoiceErrorCode, ChoiceIssue, ChoicesState, Picks } from "@/types/choices";
 
@@ -88,24 +87,16 @@ export function planChoices(input: PlanInput): PlanResult {
     }
   }
 
-  for (const entry of classMode ? after.classes : []) {
-    const cls = refs.classesById[entry.classId];
+  forEachChoiceOwner({ raceChoices: {}, classes: after.classes, feats: [] }, { ...refs, race: null }, ({ owner, defs, picks, level: classLevel, columns, path }) => {
+    if (owner.kind !== "class") return;
 
-    if (!cls) continue;
-
-    const subclass = cls.subclasses.find((s) => s.id === entry.subclassId) ?? null;
-
-    const defs = classChoiceDefs(cls, subclass);
-
-    const path = `classes.${entry.classId}`;
-
-    const stored = before.classes.find((e) => e.classId === entry.classId)?.choices ?? {};
+    const stored = before.classes.find((e) => e.classId === owner.entry.classId)?.choices ?? {};
 
     issues.push(
-      ...lockedIssues(defs, stored, entry.choices ?? {}, entry.level, path),
-      ...validatePicks(defs, entry.choices ?? {}, { ...base, owner: "class", level: entry.level, columns: cls.columns ?? [], maxSlotLevel: maxSlotLevelFor({ ...entry, class: cls, subclass }) }, path),
+      ...lockedIssues(defs, stored, picks, classLevel, path),
+      ...validatePicks(defs, picks, { ...base, owner: "class", level: classLevel, columns, maxSlotLevel: maxSlotLevelFor({ ...owner.entry, class: owner.cls, subclass: owner.subclass }) }, path),
     );
-  }
+  }, opts);
 
   after.feats.forEach((f, i) => {
     const feat = refs.featsById[f.id];

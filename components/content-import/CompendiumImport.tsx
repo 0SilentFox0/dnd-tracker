@@ -4,7 +4,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { CompendiumReport } from "./CompendiumReport";
 
 import { Button } from "@/components/ui/button";
-import type { JsonRecord } from "@/lib/server/compendium-import/parse";
+import type { JsonRecord } from "@/lib/constants/compendium-import";
 import type { CompendiumReport as Report, ImportInput } from "@/lib/server/compendium-import/service";
 import type { TargetKind } from "@/lib/server/compendium-import/types";
 import { readCompendiumFile } from "@/lib/utils/compendium-import/file";

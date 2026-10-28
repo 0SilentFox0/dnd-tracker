@@ -11,6 +11,7 @@ import { abilityOf, actionOf, isPerTarget, type SpellCastState, targetOf } from 
 import { computeSpellPower, spellSaveDc } from "@/lib/utils/battle/spell/power";
 import { spellNeedsSlot, spellSlotKey } from "@/lib/utils/battle/spell/slot";
 import type { CastSpellParams, CastSpellResult } from "@/lib/utils/battle/types/spell-process";
+import { DEFAULT_RULES } from "@/lib/utils/rules";
 import type { AbilityEvent } from "@/types/abilities";
 
 const DEFAULT_CONCENTRATION_ROUNDS = 10;
@@ -75,7 +76,7 @@ export function castSpell(params: CastSpellParams): CastSpellResult {
     ability: abilityOf(spell),
     grant: params.grant,
     power: computeSpellPower({ caster: readyCaster, groupId: spell.groupId, rolls: diceRolls, participants: flow.ps, extra: actionModifiers[casterId], addAbilityMod: def.addAbilityMod, damageBonus: def.damageBonus }),
-    saveDc: params.grant?.dc ?? spellSaveDc(readyCaster, params.grant?.dcAbility),
+    saveDc: params.grant?.dc ?? spellSaveDc(readyCaster, params.grant?.dcAbility, (params.rules ?? DEFAULT_RULES).formulas.saveDcBase),
     attackBonus: params.grant?.attackBonus,
     actionModifiers,
     rng,

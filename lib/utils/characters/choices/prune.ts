@@ -1,6 +1,5 @@
 import { backgroundFields } from "@/lib/utils/backgrounds/selection";
-import { classChoiceDefs } from "@/lib/utils/characters/choices/class-choices";
-import type { ChoiceRefs } from "@/lib/utils/characters/choices/walk";
+import { type ChoiceRefs, forEachChoiceOwner } from "@/lib/utils/characters/choices/walk";
 import type { Choice, ChoicePick, ChoicesState, Picks } from "@/types/choices";
 import type { CharacterClassEntry } from "@/types/classes";
 
@@ -47,37 +46,41 @@ function prune(defs: readonly Choice[], picks: Picks, refs: ChoiceRefs, count: {
 export function prunePicks(state: ChoicesState, refs: ChoiceRefs): { state: ChoicesState; dropped: number } {
   const count = { n: 0 };
 
-  const raceChoices = prune(refs.race?.choices ?? [], state.raceChoices, refs, count, true);
+  const pruned = new Map<unknown, Picks>();
+
+  forEachChoiceOwner(state, refs, ({ owner, defs, picks }) => {
+    const key = owner.kind === "class" ? owner.entry : owner.kind === "feat" ? owner.entry : owner.kind;
+
+    pruned.set(key, prune(defs, picks, refs, count, owner.kind !== "feat" && owner.kind !== "backgroundFeat"));
+  }, { level: 0, classMode: true });
+
+  const prunedOrDropAll = (key: unknown, picks: Picks) => pruned.get(key) ?? prune([], picks, refs, count, false);
+
+  const raceChoices = prunedOrDropAll("race", state.raceChoices);
 
   const classes = state.classes.map((e) => {
-    const cls = refs.classesById[e.classId];
+    const picks = pruned.get(e);
 
-    if (!cls || !e.choices) return e;
-
-    const picks = prune(classChoiceDefs(cls, cls.subclasses.find((s) => s.id === e.subclassId) ?? null), e.choices, refs, count, true);
+    if (!picks || !e.choices) return e;
 
     return Object.keys(picks).length > 0 ? { ...e, choices: picks } : { classId: e.classId, level: e.level, ...(e.subclassId && { subclassId: e.subclassId }) };
   });
 
   const feats = state.feats.flatMap((f) => {
-    const feat = refs.featsById[f.id];
+    const picks = pruned.get(f);
 
-    if (!feat) {
+    if (!picks) {
       count.n += 1;
 
       return [];
     }
 
-    return [f.picks ? { ...f, picks: prune(feat.choices, f.picks, refs, count, false) } : f];
+    return [f.picks ? { ...f, picks } : f];
   });
 
-  const background = state.backgroundId ? refs.backgroundsById?.[state.backgroundId] : null;
-
-  const backgroundFeat = background?.originFeatId ? refs.featsById[background.originFeatId] : null;
-
   const backgroundFields = state.backgroundId !== undefined ? {
-    backgroundChoices: prune(background?.choices ?? [], state.backgroundChoices ?? {}, refs, count, true),
-    backgroundFeatPicks: prune(backgroundFeat?.choices ?? [], state.backgroundFeatPicks ?? {}, refs, count, false),
+    backgroundChoices: prunedOrDropAll("background", state.backgroundChoices ?? {}),
+    backgroundFeatPicks: prunedOrDropAll("backgroundFeat", state.backgroundFeatPicks ?? {}),
   } : {};
 
   return { state: { ...state, ...backgroundFields, raceChoices, feats, classes }, dropped: count.n };

@@ -1,3 +1,4 @@
+import { spellPoolKey } from "@/lib/utils/items/pools";
 import type { BattleParticipant, BattleParticipantSpellcasting } from "@/types/battle";
 
 function mergeSlots(live: BattleParticipantSpellcasting["spellSlots"], fresh: BattleParticipantSpellcasting["spellSlots"]) {
@@ -26,7 +27,7 @@ export function refreshFromSource(live: BattleParticipant, fresh: BattleParticip
     const liveLabel = live.battleData.pools?.[key]?.label;
 
     // Збирач юніта має лише ID заклинань; назву розв'язує успішний каст.
-    return [key, key === `pool:spell:${pool.label}` && liveLabel ? { ...pool, label: liveLabel } : pool];
+    return [key, key === spellPoolKey(pool.label) && liveLabel ? { ...pool, label: liveLabel } : pool];
   }));
 
   return {

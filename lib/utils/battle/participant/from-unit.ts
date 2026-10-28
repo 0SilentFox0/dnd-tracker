@@ -3,6 +3,7 @@ import type { Prisma } from "@prisma/client";
 import type { UnitFromPrisma } from "../types/participant";
 import { loadUnitRace } from "./load-race";
 
+import type { AbilityKey } from "@/lib/constants/abilities";
 import { AttackType, CombatStatus, ParticipantSide, ParticipantSourceType } from "@/lib/constants/battle";
 import { UNIT_SPELL_SLOTS } from "@/lib/constants/battle-balance";
 import { CONTROLLED_BY_DM } from "@/lib/constants/characters";
@@ -13,11 +14,51 @@ import { immunityAbilities } from "@/lib/utils/abilities/build/immunities";
 import { resolveLimitFormulas } from "@/lib/utils/abilities/build/limit-formulas";
 import { getAbilityModifier } from "@/lib/utils/common/calculations";
 import { logger } from "@/lib/utils/common/logger";
+import { spellGrantFields, spellPoolKey } from "@/lib/utils/items/pools";
 import { getUnitImmunities } from "@/lib/utils/races/race-effects";
 import { DEFAULT_RULES, moraleCapFromRules, type Ruleset } from "@/lib/utils/rules";
-import { bestMentalAbility, isMonster5e, monsterSenseAbilities, multiattackAbilities, readSaveProficiencies, unitXp } from "@/lib/utils/units/monster";
-import type { BattleParticipant } from "@/types/battle";
+import { bestMentalAbility, isMonster5e, monsterSaveDc, monsterSenseAbilities, multiattackAbilities, readSaveProficiencies, unitXp } from "@/lib/utils/units/monster";
+import type { AbilityPool, BattleParticipant, BattleParticipantSpellcasting } from "@/types/battle";
 import type { Unit } from "@/types/units";
+
+function monsterSpellcasting(unit: UnitFromPrisma, rules: Ruleset): { spellcasting: BattleParticipantSpellcasting; pools: Record<string, AbilityPool> } {
+  const monster = isMonster5e(unit);
+
+  const config = monster ? ((unit.spellcasting ?? { spells: [] }) as unknown as NonNullable<Unit["spellcasting"]>) : { spells: [] };
+
+  const configuredSpells = Array.isArray(config.spells) ? config.spells : [];
+
+  const knownSpells = monster ? [...new Set([...(unit.knownSpells as string[] || []), ...configuredSpells.map((grant) => grant.spellId)])] : (unit.knownSpells as string[]) || [];
+
+  const configured = new Set(configuredSpells.map((grant) => grant.spellId));
+
+  const grants = [
+    ...configuredSpells.map((grant) => ({
+      spellId: grant.spellId,
+      ...(grant.perBattle !== undefined && { pool: spellPoolKey(grant.spellId), cost: 1 }),
+      ...spellGrantFields({ castLevel: grant.castLevel, dc: grant.dc, attackBonus: grant.attackBonus }),
+      ...(grant.legendaryOnly && { legendaryOnly: true as const }),
+    })),
+    ...knownSpells.filter((id) => !configured.has(id)).map((spellId) => ({ spellId })),
+  ];
+
+  const pools = Object.fromEntries(configuredSpells.flatMap((grant) => grant.perBattle === undefined ? [] : [[spellPoolKey(grant.spellId), { label: grant.spellId, max: grant.perBattle, rest: null, ...(grant.recharge !== undefined && { recharge: grant.recharge }) }]]));
+
+  const abilityMod = (ability: AbilityKey) => getAbilityModifier(unit[ability]);
+
+  return {
+    pools,
+    spellcasting: {
+      spellcastingAbility: monster ? (config.ability ?? bestMentalAbility(unit)) : undefined,
+      // HOMM-юніт без заклинальної характеристики: СК росте з тіром (level = тір)
+      spellSaveDC: monster ? (config.dc ?? (config.ability ? rules.formulas.saveDcBase + unit.proficiencyBonus + abilityMod(config.ability) : monsterSaveDc(rules.formulas.saveDcBase, unit.proficiencyBonus, unit))) : rules.formulas.saveDcBase + unit.proficiencyBonus + unit.level,
+      spellAttackBonus: monster ? config.attackBonus : undefined,
+      spellSlots: monster ? {} : { universal: { max: UNIT_SPELL_SLOTS, current: UNIT_SPELL_SLOTS } },
+      knownSpells,
+      ...(monster && grants.length > 0 && { grants }),
+    },
+  };
+}
 
 export async function createBattleParticipantFromUnit(
   unit: UnitFromPrisma,
@@ -112,27 +153,7 @@ export async function createBattleParticipantFromUnit(
       ? { actions: unit.legendaryActions, actionsLeft: unit.legendaryActions, resistLeft: unit.legendaryResistances }
       : undefined;
 
-  const spellcasting = monster ? ((unit.spellcasting ?? { spells: [] }) as unknown as NonNullable<Unit["spellcasting"]>) : { spells: [] };
-
-  const configuredSpells = Array.isArray(spellcasting.spells) ? spellcasting.spells : [];
-
-  const knownSpells = monster ? [...new Set([...(unit.knownSpells as string[] || []), ...configuredSpells.map((grant) => grant.spellId)])] : (unit.knownSpells as string[]) || [];
-
-  const configured = new Set(configuredSpells.map((grant) => grant.spellId));
-
-  const grants = [
-    ...configuredSpells.map((grant) => ({
-      spellId: grant.spellId,
-      ...(grant.perBattle !== undefined && { pool: `pool:spell:${grant.spellId}`, cost: 1 }),
-      ...(grant.castLevel !== undefined && { castLevel: grant.castLevel }),
-      ...(grant.dc !== undefined && { dc: grant.dc }),
-      ...(grant.attackBonus !== undefined && { attackBonus: grant.attackBonus }),
-      ...(grant.legendaryOnly && { legendaryOnly: true as const }),
-    })),
-    ...knownSpells.filter((id) => !configured.has(id)).map((spellId) => ({ spellId })),
-  ];
-
-  const pools = Object.fromEntries(configuredSpells.flatMap((grant) => grant.perBattle === undefined ? [] : [[`pool:spell:${grant.spellId}`, { label: grant.spellId, max: grant.perBattle, rest: null, ...(grant.recharge !== undefined && { recharge: grant.recharge }) }]]));
+  const { spellcasting, pools } = monsterSpellcasting(unit, rules);
 
   const participant: BattleParticipant = {
     basicInfo: {
@@ -179,15 +200,7 @@ export async function createBattleParticipantFromUnit(
       minTargets: unit.minTargets ?? 1,
       maxTargets: unit.maxTargets ?? 1,
     },
-    spellcasting: {
-      spellcastingAbility: monster ? (spellcasting.ability ?? bestMentalAbility(unit)) : undefined,
-      // HOMM-юніт без заклинальної характеристики: СК росте з тіром (level = тір)
-      spellSaveDC: monster ? (spellcasting.dc ?? rules.formulas.saveDcBase + unit.proficiencyBonus + modifiers[spellcasting.ability ?? bestMentalAbility(unit)]) : rules.formulas.saveDcBase + unit.proficiencyBonus + unit.level,
-      spellAttackBonus: monster ? spellcasting.attackBonus : undefined,
-      spellSlots: monster ? {} : { universal: { max: UNIT_SPELL_SLOTS, current: UNIT_SPELL_SLOTS } },
-      knownSpells,
-      ...(monster && grants.length > 0 && { grants }),
-    },
+    spellcasting,
     battleData: {
       attacks: battleAttacks,
       activeEffects: [],

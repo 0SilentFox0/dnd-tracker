@@ -1,9 +1,9 @@
 import { type DndSkill, isDndSkill } from "@/lib/constants/skills";
 import type { ScaleContext } from "@/lib/utils/abilities/class-columns";
-import { classChoiceDefs } from "@/lib/utils/characters/choices/class-choices";
 import { isChoiceOpen } from "@/lib/utils/characters/choices/count";
 import { describeFeatPicks } from "@/lib/utils/characters/choices/describe";
 import { hasPicks } from "@/lib/utils/characters/choices/read";
+import { forEachChoiceOwner } from "@/lib/utils/characters/choices/walk";
 import type { Ability, AbilitySource } from "@/types/abilities";
 import type { BackgroundData } from "@/types/backgrounds";
 import type { CharacterFeat, Choice, ChoiceOption, ChoiceOwner, ChoicePick, ChoiceRace, ChoicesState, FeatData, Picks, SelectedSpellGrant, SpellGrantPolicy } from "@/types/choices";
@@ -52,6 +52,20 @@ interface OwnerCtx {
   path: string;
   sourceKey: string;
 }
+
+const uniqueBy = <T>(list: T[], key: (item: T) => string): T[] => {
+  const seen = new Set<string>();
+
+  return list.filter((item) => {
+    const k = key(item);
+
+    if (seen.has(k)) return false;
+
+    seen.add(k);
+
+    return true;
+  });
+};
 
 const prefixed = (abilities: Ability[], prefix: string): Ability[] => abilities.map((a) => ({ ...a, id: `${prefix}.${a.id}` }));
 
@@ -143,56 +157,57 @@ export function choiceSelections(input: SelectionInput): ChoiceSelections {
     }
   }
 
-  const { race } = input;
+  const { background } = input;
 
-  if (race) {
-    take(race.choices, input.raceChoices, { owner: "race", level: input.level, name: race.name, from: () => race.name, sourceFor: (_c, o) => ({ type: "race", id: race.id, name: `${race.name}: ${o.name}` }), spellLabel: `Раса: ${race.name}`, path: "race", sourceKey: `race:${race.id}` });
-  }
+  const walkState = { raceChoices: input.raceChoices, backgroundId: background?.id, backgroundChoices: input.backgroundChoices, backgroundFeatPicks: input.backgroundFeatPicks, classes: input.classes, feats: input.feats };
 
-  const background = input.background;
+  const walkRefs = {
+    race: input.race,
+    classesById: Object.fromEntries(input.classes.flatMap((e) => (e.class ? [[e.classId, e.class]] : []))),
+    featsById: input.featsById,
+    backgroundsById: background ? { [background.id]: background } : {},
+  };
 
-  if (background) {
-    out.skills.push(...background.skillProficiencies);
-    out.tools = [...background.toolProficiencies];
-    out.background = { id: background.id, name: background.name, equipmentText: background.equipmentText, picks: describeFeatPicks(background, input.backgroundChoices ?? {}) };
-    take(background.choices, input.backgroundChoices ?? {}, { owner: "background", level: input.level, name: background.name, from: () => `Передісторія: ${background.name}`, sourceFor: (_c, o) => ({ type: "character", id: background.id, name: `${background.name}: ${o.name}` }), spellLabel: `Передісторія: ${background.name}`, path: `background:${background.id}`, sourceKey: `background:${background.id}` });
+  forEachChoiceOwner(walkState, walkRefs, ({ owner, defs, picks, level, legacyPath }) => {
+    if (owner.kind === "race") {
+      const { race } = owner;
 
-    const feat = background.originFeatId ? input.featsById[background.originFeatId] : null;
+      take(defs, picks, { owner: "race", level, name: race.name, from: () => race.name, sourceFor: (_c, o) => ({ type: "race", id: race.id, name: `${race.name}: ${o.name}` }), spellLabel: `Раса: ${race.name}`, path: "race", sourceKey: `race:${race.id}` });
+    } else if (owner.kind === "background") {
+      const bg = owner.background;
 
-    if (feat) addFeat(feat, input.backgroundFeatPicks ?? {}, `Передісторія: ${background.name}`, `background:${background.id}:feat:${feat.id}`, `background:${background.id}:feat:${feat.id}`);
-  }
+      out.skills.push(...bg.skillProficiencies);
+      out.tools = [...bg.toolProficiencies];
+      out.background = { id: bg.id, name: bg.name, equipmentText: bg.equipmentText, picks: describeFeatPicks(bg, picks) };
+      take(defs, picks, { owner: "background", level, name: bg.name, from: () => `Передісторія: ${bg.name}`, sourceFor: (_c, o) => ({ type: "character", id: bg.id, name: `${bg.name}: ${o.name}` }), spellLabel: `Передісторія: ${bg.name}`, path: `background:${bg.id}`, sourceKey: `background:${bg.id}` });
+    } else if (owner.kind === "backgroundFeat") {
+      addFeat(owner.feat, picks, `Передісторія: ${owner.background.name}`, legacyPath, legacyPath);
+    } else if (owner.kind === "class") {
+      const { cls, entry } = owner;
 
-  for (const entry of input.classes) {
-    const cls = entry.class;
-
-    if (!cls) continue;
-
-    take(classChoiceDefs(cls, entry.subclass), entry.choices ?? {}, {
-      owner: "class",
-      level: entry.level,
-      name: cls.name,
-      from: (choice) => `${cls.name} ${choice.level}`,
-      sourceFor: (choice, o) => ({ type: "class", id: cls.id, name: `${cls.name}: ${choice.label} — ${o.name}`, icon: cls.icon }),
-      spellLabel: `Клас: ${cls.name}`,
-      scale: { classId: cls.id, level: entry.level, columns: cls.columns ?? [] },
-      path: `class:${cls.id}`,
-      sourceKey: `class:${cls.id}`,
-    });
-  }
-
-  input.feats.forEach((f, i) => {
-    const feat = input.featsById[f.id];
-
-    if (feat) addFeat(feat, f.picks ?? {}, f.source === "origin" ? "Походження" : "ДМ", `feat:${i}`);
-  });
+      take(defs, picks, {
+        owner: "class",
+        level,
+        name: cls.name,
+        from: (choice) => `${cls.name} ${choice.level}`,
+        sourceFor: (choice, o) => ({ type: "class", id: cls.id, name: `${cls.name}: ${choice.label} — ${o.name}`, icon: cls.icon }),
+        spellLabel: `Клас: ${cls.name}`,
+        scale: { classId: cls.id, level: entry.level, columns: cls.columns ?? [] },
+        path: legacyPath,
+        sourceKey: legacyPath,
+      });
+    } else {
+      addFeat(owner.feat, picks, owner.entry.source === "origin" ? "Походження" : "ДМ", legacyPath);
+    }
+  }, { level: input.level, classMode: true });
 
   out.skills = [...new Set(out.skills)];
 
   out.expertise = [...new Set(out.expertise)];
 
-  out.spells = out.spells.filter((s, i) => out.spells.findIndex((x) => x.spellId === s.spellId) === i);
+  out.spells = uniqueBy(out.spells, (x) => x.spellId);
 
-  out.spellGrants = out.spellGrants.filter((s, i) => out.spellGrants.findIndex((x) => x.sourceKey === s.sourceKey) === i);
+  out.spellGrants = uniqueBy(out.spellGrants, (x) => x.sourceKey);
 
   const synthetic: AbilitySource = { type: "character", id: "choices", name: "Вибори" };
 

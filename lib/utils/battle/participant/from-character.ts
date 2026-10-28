@@ -36,31 +36,21 @@ import { attunedRefs } from "@/lib/utils/items/resolve";
 import { DEFAULT_RULES, heroDiceTable, heroHpFormula, moraleCapFromRules, proficiencyForLevel, type Ruleset } from "@/lib/utils/rules";
 import { resolveClassEntries } from "@/lib/utils/spells/class-slots";
 import type { BattleParticipant } from "@/types/battle";
+import type { ResolvedClassEntry } from "@/types/classes";
+
+async function resolveCharacterClassEntries(character: CharacterFromPrisma, rules: Ruleset, context?: CampaignSpellContext): Promise<ResolvedClassEntry[]> {
+  const parsed = rules.classes.enabled ? CharacterClassesSchema.safeParse(character.classes) : null;
+
+  const entries = parsed?.success ? parsed.data : [];
+
+  return entries.length > 0 ? resolveClassEntries(entries, await loadClassesById(character.campaignId, context)) : [];
+}
 
 const uniqueById = <T extends { id: string }>(rows: T[]): T[] => [...new Map(rows.map((r) => [r.id, r])).values()];
 
-/**
- * Створює BattleParticipant з Character. Завантажує скіли, артефакти, заклинання.
- */
-export async function createBattleParticipantFromCharacter(
-  character: CharacterFromPrisma,
-  battleId: string,
-  side: ParticipantSide,
-  instanceNumber?: number,
-  context?: CampaignSpellContext,
-  preloaded?: { artifactRows?: EquippedArtifactRow[]; rules?: Ruleset },
-): Promise<BattleParticipant> {
-  const rules = context?.rules ?? preloaded?.rules ?? DEFAULT_RULES;
+type BuildPreloaded = { artifactRows?: EquippedArtifactRow[]; rules?: Ruleset; classEntries?: ResolvedClassEntry[] };
 
-  const modifiers = {
-    strength: getAbilityModifier(character.strength),
-    dexterity: getAbilityModifier(character.dexterity),
-    constitution: getAbilityModifier(character.constitution),
-    intelligence: getAbilityModifier(character.intelligence),
-    wisdom: getAbilityModifier(character.wisdom),
-    charisma: getAbilityModifier(character.charisma),
-  };
-
+async function loadCharacterBuildRefs(character: CharacterFromPrisma, rules: Ruleset, context: CampaignSpellContext | undefined, preloaded: BuildPreloaded | undefined) {
   const mainSkillGroups = context ? new Map(context.mainSkills.map((m) => [m.id, m.spellGroupId])) : undefined;
 
   const skills = await resolveCharacterSkillEntries(
@@ -71,27 +61,31 @@ export async function createBattleParticipantFromCharacter(
     context ? (context.skillTreeByRace[character.race] ?? null) : undefined,
   );
 
-  const artifactRows = preloaded?.artifactRows ?? (await loadEquippedArtifactRows(character, context?.artifactsById, { rules }));
+  const artifactRows = preloaded?.artifactRows ?? loadEquippedArtifactRows(character, context?.artifactsById ?? {}, { rules });
 
-  const artifactsById = context?.artifactsById ?? (preloaded?.artifactRows ? Object.fromEntries(preloaded.artifactRows.map(({ row }) => [row.id, row])) : undefined);
+  const artifactsById = context?.artifactsById ?? Object.fromEntries(artifactRows.map(({ row }) => [row.id, row]));
 
-  const consumables = await loadConsumableEntries(character, artifactsById, rules);
+  const consumables = loadConsumableEntries(character, artifactsById, rules);
 
   const equippedArtifacts = toEquippedArtifacts(artifactRows);
 
   const completed = await findCompletedSets(equippedArtifacts, character.campaignId, context);
 
-  const classEntries = rules.classes.enabled ? CharacterClassesSchema.safeParse(character.classes) : null;
-
-  const entries = classEntries?.success ? classEntries.data : [];
-
-  const resolvedEntries = entries.length > 0 ? resolveClassEntries(entries, await loadClassesById(character.campaignId, context)) : [];
+  const resolvedEntries = preloaded?.classEntries ?? (await resolveCharacterClassEntries(character, rules, context));
 
   const resolvedClasses = resolvedEntries.some((e) => e.class) ? resolvedEntries : null;
 
-  const attacks = await extractAttacksFromCharacter(character, artifactsById, rules.defaultAttacks, { fiveE: !!resolvedClasses, items: { enabled: rules.items.enabled, attuned: attunedRefs(character.inventory) } });
+  const attacks = extractAttacksFromCharacter(character, artifactsById, rules.defaultAttacks, { fiveE: !!resolvedClasses, items: { enabled: rules.items.enabled, attuned: attunedRefs(character.inventory) } });
 
   const race = await loadRace(character.race, character.campaignId, context ? (context.racesByName[character.race] ?? null) : undefined);
+
+  return { skills, artifactRows, consumables, equippedArtifacts, completed, resolvedClasses, attacks, race };
+}
+
+type BuildRefs = Awaited<ReturnType<typeof loadCharacterBuildRefs>>;
+
+async function characterSpellcasting(character: CharacterFromPrisma, refs: BuildRefs, proficiencyBonus: number, context: CampaignSpellContext | undefined) {
+  const { race, resolvedClasses, artifactRows, consumables } = refs;
 
   const choiceState = choicesStateOf(character);
 
@@ -126,21 +120,77 @@ export async function createBattleParticipantFromCharacter(
     ? (rawKnown as unknown[]).map((id) => String(id)).filter(Boolean)
     : [];
 
-  const { knownSpells, schoolMastery } = await resolveLearnedSpellsAndMastery(
-    character,
-    baseKnownSpells,
-    context,
-  );
+  const { knownSpells, schoolMastery } = await resolveLearnedSpellsAndMastery(character, baseKnownSpells, context);
 
   const resolvedSpellSlots = await resolveSpellSlotsFromCharacter(character, context, resolvedClasses ?? undefined);
+
+  const spellcastingAbility = resolvedClasses ? classSpellcastingAbility(resolvedClasses, character.spellcastingAbility) : character.spellcastingAbility;
+
+  const { grants, pools: grantPools } = buildCharacterSpellGrants({ selections, artifactRows, consumables, proficiencyBonus });
+
+  return {
+    selections,
+    schoolMastery,
+    grantPools,
+    spellcastingAbility,
+    spellcasting: {
+      spellcastingAbility: spellcastingAbility as "intelligence" | "wisdom" | "charisma" | undefined,
+      spellSlots: resolvedSpellSlots,
+      slotSpells: [...new Set([...knownSpells, ...(selections?.slotSpells ?? [])])],
+      knownSpells: [...new Set([...knownSpells, ...granted, ...grants.map(({ spellId }) => spellId)])],
+      ...(grants.length > 0 && { grants }),
+    },
+  };
+}
+
+function finalizeCharacter(participant: BattleParticipant, character: CharacterFromPrisma, classMode: boolean, spellcastingAbility: string | null | undefined, rules: Ruleset): BattleParticipant {
+  const baked = bakePassives(participant);
+
+  const armored = resolveLimitFormulas(classMode ? applyClassArmor(baked) : baked);
+
+  // СК і бонус заклять — від характеристики з расовими/артефактними бонусами, тож після запікання
+  const spell = spellcastingDerived(character.level, spellcastingAbility, armored.abilities, rules.formulas);
+
+  const ready = { ...armored, spellcasting: { ...armored.spellcasting, spellSaveDC: spell?.saveDC, spellAttackBonus: spell?.attackBonus } };
+
+  return applyCharacterResources(ready, storedCharacterState(character, rules), rules);
+}
+
+/**
+ * Створює BattleParticipant з Character. Завантажує скіли, артефакти, заклинання.
+ */
+export async function createBattleParticipantFromCharacter(
+  character: CharacterFromPrisma,
+  battleId: string,
+  side: ParticipantSide,
+  instanceNumber?: number,
+  context?: CampaignSpellContext,
+  preloaded?: BuildPreloaded,
+): Promise<BattleParticipant> {
+  const rules = context?.rules ?? preloaded?.rules ?? DEFAULT_RULES;
+
+  const modifiers = {
+    strength: getAbilityModifier(character.strength),
+    dexterity: getAbilityModifier(character.dexterity),
+    constitution: getAbilityModifier(character.constitution),
+    intelligence: getAbilityModifier(character.intelligence),
+    wisdom: getAbilityModifier(character.wisdom),
+    charisma: getAbilityModifier(character.charisma),
+  };
+
+  const refs = await loadCharacterBuildRefs(character, rules, context, preloaded);
+
+  const { skills, artifactRows, consumables, equippedArtifacts, completed, resolvedClasses, attacks, race } = refs;
+
+  const proficiencyBonus = proficiencyForLevel(character.level, rules.formulas);
+
+  const { selections, schoolMastery, grantPools, spellcastingAbility, spellcasting } = await characterSpellcasting(character, refs, proficiencyBonus, context);
 
   const archetype = heroArchetype(resolvedClasses ? null : (character as { archetype?: string | null }).archetype);
 
   const meleeDice = heroDiceTable(rules, "melee");
 
   const rangedDice = heroDiceTable(rules, "ranged");
-
-  const proficiencyBonus = proficiencyForLevel(character.level, rules.formulas);
 
   const primaryAbility = (ABILITY_KEYS as readonly string[]).includes(character.primaryAbility ?? "") ? (character.primaryAbility as AbilityKey) : undefined;
 
@@ -160,8 +210,6 @@ export async function createBattleParticipantFromCharacter(
 
   const computedMaxHp = resolvedClasses ? classHp(resolvedClasses, character.constitution) : heroBaseHp(character, heroHpFormula(rules.heroScaling)).total;
 
-  const spellcastingAbility = resolvedClasses ? classSpellcastingAbility(resolvedClasses, character.spellcastingAbility) : character.spellcastingAbility;
-
   const resolvedAbilities = [
     ...collectCharacterAbilities({
     skills,
@@ -174,8 +222,6 @@ export async function createBattleParticipantFromCharacter(
   }),
     ...immunityAbilities(getCharacterImmunities(character), { type: "character", id: character.id }),
   ];
-
-  const { grants, pools: grantPools } = buildCharacterSpellGrants({ selections, artifactRows, consumables, proficiencyBonus });
 
   const pools = { ...(resolvedClasses ? classPools(resolvedClasses) : {}), ...grantPools };
 
@@ -229,17 +275,7 @@ export async function createBattleParticipantFromCharacter(
       minTargets: character.minTargets ?? 1,
       maxTargets: character.maxTargets ?? 1,
     },
-    spellcasting: {
-      spellcastingAbility: spellcastingAbility as
-        | "intelligence"
-        | "wisdom"
-        | "charisma"
-        | undefined,
-      spellSlots: resolvedSpellSlots,
-      slotSpells: [...new Set([...knownSpells, ...(selections?.slotSpells ?? [])])],
-      knownSpells: [...new Set([...knownSpells, ...granted, ...grants.map(({ spellId }) => spellId)])],
-      ...(grants.length > 0 && { grants }),
-    },
+    spellcasting,
     battleData: {
       attacks,
       activeEffects: [],
@@ -259,14 +295,5 @@ export async function createBattleParticipantFromCharacter(
     },
   };
 
-  const baked = bakePassives(participant);
-
-  const armored = resolveLimitFormulas(resolvedClasses ? applyClassArmor(baked) : baked);
-
-  // СК і бонус заклять — від характеристики з расовими/артефактними бонусами, тож після запікання
-  const spell = spellcastingDerived(character.level, spellcastingAbility, armored.abilities, rules.formulas);
-
-  const ready = { ...armored, spellcasting: { ...armored.spellcasting, spellSaveDC: spell?.saveDC, spellAttackBonus: spell?.attackBonus } };
-
-  return applyCharacterResources(ready, storedCharacterState(character, rules), rules);
+  return finalizeCharacter(participant, character, !!resolvedClasses, spellcastingAbility, rules);
 }

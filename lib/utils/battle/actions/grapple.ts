@@ -7,6 +7,7 @@ import { applyCondition5e, conditionSourceIds, hasCondition, PERMANENT_ROUNDS, r
 import { GRAPPLE_KEY_PREFIX, grappledBy, grappleKey, releaseGrapples } from "@/lib/utils/battle/conditions/grapple-links";
 import { canStand, isAdjacent } from "@/lib/utils/battle/grid/occupancy";
 import { resolveSave, rollSave } from "@/lib/utils/battle/saves";
+import { getSpellSaveDC } from "@/lib/utils/common/calculations";
 import type { Ruleset } from "@/lib/utils/rules";
 import type { BattleMapConfig, BattleParticipant, GridPoint } from "@/types/battle";
 
@@ -22,7 +23,7 @@ function bestSkill(p: BattleParticipant, ps: BattleParticipant[], rules: Ruleset
   return skillBonus(p, "acrobatics", ps, rules) > skillBonus(p, "athletics", ps, rules) ? "acrobatics" : "athletics";
 }
 
-const grappleDc = (grappler: BattleParticipant) => 8 + grappler.abilities.modifiers.strength + grappler.abilities.proficiencyBonus;
+const grappleDc = (grappler: BattleParticipant, rules: Ruleset) => getSpellSaveDC(grappler.abilities.proficiencyBonus, grappler.abilities.modifiers.strength, rules.formulas.saveDcBase);
 
 export function contest(input: { attacker: BattleParticipant; target: BattleParticipant } & RollInput): { success: boolean; message: string; participants: BattleParticipant[] } {
   const { attacker, target, participants, rules, rng } = input;
@@ -30,7 +31,7 @@ export function contest(input: { attacker: BattleParticipant; target: BattlePart
   if (rules.actions.variant === "2024") {
     const ability = target.abilities.modifiers.dexterity > target.abilities.modifiers.strength ? "dexterity" : "strength";
 
-    const dc = grappleDc(attacker);
+    const dc = grappleDc(attacker, rules);
 
     const rolled = rollSave({ target, ability, dc, participants, rules, rng });
 
@@ -56,7 +57,7 @@ export function escapeContest(input: { escaper: BattleParticipant; grappler: Bat
   const mine = rollCheck({ actor: escaper, subject: { skill: bestSkill(escaper, participants, rules) }, participants, rules, rng });
 
   if (rules.actions.variant === "2024") {
-    const dc = grappleDc(grappler);
+    const dc = grappleDc(grappler, rules);
 
     return { success: mine.total >= dc, message: `🎲 ${mine.total} проти СК ${dc}` };
   }

@@ -1,5 +1,6 @@
 import { canReact, pickMeleeAttack } from "./reaction";
 
+import { EffectMarker } from "@/lib/constants/battle";
 import { findParticipant, isActive } from "@/lib/utils/abilities/engine/core/participants";
 import { resolveServerAttack } from "@/lib/utils/battle/attack/server-attack";
 import { type ActionFlow, put } from "@/lib/utils/battle/common/action-flow";
@@ -44,11 +45,27 @@ export function resolveOpportunityAttacks(input: OpportunityInput): OpportunityR
 
   const mover0 = findParticipant(flow.ps, moverId);
 
-  if (!mover0 || hasEffectMarker(mover0, "disengaged")) return { participants: flow.ps, stopAt: null, cost: path.length, actions, messages };
+  if (!mover0 || hasEffectMarker(mover0, EffectMarker.DISENGAGED)) return { participants: flow.ps, stopAt: null, cost: path.length, actions, messages };
 
   const size = sizeOf(mover0);
 
   const enemies = flow.ps.filter((p) => p.basicInfo.side !== mover0.basicInfo.side && isOnMap(p)).map((p) => ({ id: p.basicInfo.id, reach: cellsOf(p) }));
+
+  const melee = new Map<string, { attack: ReturnType<typeof pickMeleeAttack>; range: number }>();
+
+  const meleeOf = (e: BattleParticipant) => {
+    const cached = melee.get(e.basicInfo.id);
+
+    if (cached) return cached;
+
+    const attack = pickMeleeAttack(e);
+
+    const entry = { attack, range: attack ? meleeReachCells(e, attack) : 0 };
+
+    melee.set(e.basicInfo.id, entry);
+
+    return entry;
+  };
 
   let fromCells = footprint(start, size);
 
@@ -62,11 +79,9 @@ export function resolveOpportunityAttacks(input: OpportunityInput): OpportunityR
 
       if (!e || !canProvoke(e, moverId)) continue;
 
-      const attack = pickMeleeAttack(e);
+      const { attack, range } = meleeOf(e);
 
       if (!attack) continue;
-
-      const range = meleeReachCells(e, attack);
 
       if (footprintDistance(fromCells, reach) > range || footprintDistance(toCells, reach) <= range) continue;
 
@@ -80,6 +95,8 @@ export function resolveOpportunityAttacks(input: OpportunityInput): OpportunityR
       const { battleAction } = resolveServerAttack({ flow, attackerId: id, targetId: moverId, attack, currentRound: round, battleId, rng, label: "opportunity" });
 
       actions.push(battleAction);
+
+      melee.delete(id);
 
       const after = findParticipant(flow.ps, moverId);
 

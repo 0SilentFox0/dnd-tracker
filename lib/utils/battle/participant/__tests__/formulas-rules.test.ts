@@ -60,13 +60,13 @@ describe("формули кампанії: юніт", () => {
   it("СК юніта = база кампанії + майстерність + тір", async () => {
     const p = await createBattleParticipantFromUnit(unit(["s1"]), "b", ParticipantSide.ENEMY, 1, undefined, custom);
 
-    expect(spellSaveDc(p)).toBe(13);
+    expect(spellSaveDc(p, undefined, 8)).toBe(13);
   });
 
   it("DEFAULT_RULES: СК юніта 8 + майстерність + тір", async () => {
     const p = await createBattleParticipantFromUnit(unit(["s1"]), "b", ParticipantSide.ENEMY, 1);
 
-    expect(spellSaveDc(p)).toBe(11);
+    expect(spellSaveDc(p, undefined, 8)).toBe(11);
   });
 });
 

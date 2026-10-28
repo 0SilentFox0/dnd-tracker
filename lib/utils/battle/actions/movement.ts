@@ -1,4 +1,4 @@
-import { planDrag, releaseInvalidGrapples } from "./grapple";
+import { planDrag } from "./grapple";
 import { resolveOpportunityAttacks } from "./opportunity";
 
 import { findParticipant, replaceParticipant } from "@/lib/utils/abilities/engine/core/participants";
@@ -92,9 +92,5 @@ export function resolveMovement5e(input: Movement5eInput): Movement5eResult {
     if (t) after = replaceParticipant(after, { ...t, battleData: { ...t.battleData, position: cell } });
   }
 
-  const released = releaseInvalidGrapples(after, map);
-
-  messages.push(...released.messages);
-
-  return { participants: released.participants, moved, destination, spent, messages, events };
+  return { participants: after, moved, destination, spent, messages, events };
 }

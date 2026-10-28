@@ -1,7 +1,7 @@
 import { getDisabledAttackKinds } from "./disabled-attacks";
 import { resolveServerAttack } from "./server-attack";
 
-import { AttackType } from "@/lib/constants/battle";
+import { AttackType, EffectMarker } from "@/lib/constants/battle";
 import type { CriticalEffect } from "@/lib/constants/critical-effects";
 import { findFlags, findFlagsMany } from "@/lib/utils/abilities/engine/core/collect-modifiers";
 import { findParticipant, isActive, withSelf } from "@/lib/utils/abilities/engine/core/participants";
@@ -73,7 +73,7 @@ export function resolveRetaliation(input: RetaliationInput): RetaliationResult |
 
   const used = defender.battleData.retaliationsUsed ?? (defender.actionFlags.hasUsedReaction ? 1 : 0);
 
-  if (provoked ? hasEffectMarker(defender, "no_reaction") : !unlimited && (defender.actionFlags.hasUsedReaction || used >= allowed)) return null;
+  if (provoked ? hasEffectMarker(defender, EffectMarker.NO_REACTION) : !unlimited && (defender.actionFlags.hasUsedReaction || used >= allowed)) return null;
 
   const weapon = weaponFor(defender, participants, kindOf(input.attack));
 

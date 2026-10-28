@@ -1,12 +1,9 @@
 import { z } from "zod";
 
 import { API_ERRORS } from "@/lib/constants/api-errors";
-import { ITEM_LIMITS } from "@/lib/constants/artifacts";
+import { ARMOR_CATEGORIES, ITEM_KINDS, ITEM_LIMITS } from "@/lib/constants/artifacts";
 import { WEAPON_TRAITS } from "@/lib/constants/weapon-traits";
-import { ARMOR_CATEGORIES } from "@/lib/utils/artifacts/armor-stats";
 import { itemStatsRecords } from "@/lib/utils/items/item-row";
-
-const ITEM_KINDS = ["weapon", "armor", "shield"] as const;
 
 export type ItemKind = (typeof ITEM_KINDS)[number];
 
@@ -30,16 +27,16 @@ const PropertySchema = z.object({
 
 export const ItemSpellSchema = z.object({
   spellId: z.string().trim().min(1).max(100),
-  cost: z.number().int().min(0).max(50),
-  castLevel: z.number().int().min(0).max(9).optional(),
-  dc: z.number().int().min(1).max(40).optional(),
-  attackBonus: z.number().int().min(-10).max(30).optional(),
-  upcast: z.object({ maxLevel: z.number().int().min(1).max(9), extraCost: z.number().int().min(1).max(50) }).optional(),
+  cost: z.number().int().min(ITEM_LIMITS.cost[0]).max(ITEM_LIMITS.cost[1]),
+  castLevel: z.number().int().min(ITEM_LIMITS.castLevel[0]).max(ITEM_LIMITS.castLevel[1]).optional(),
+  dc: z.number().int().min(ITEM_LIMITS.dc[0]).max(ITEM_LIMITS.dc[1]).optional(),
+  attackBonus: z.number().int().min(ITEM_LIMITS.attackBonus[0]).max(ITEM_LIMITS.attackBonus[1]).optional(),
+  upcast: z.object({ maxLevel: z.number().int().min(ITEM_LIMITS.upcastMaxLevel[0]).max(ITEM_LIMITS.upcastMaxLevel[1]), extraCost: z.number().int().min(ITEM_LIMITS.upcastExtraCost[0]).max(ITEM_LIMITS.upcastExtraCost[1]) }).optional(),
 });
 
 export const ItemParameterSchema = z.object({
   kind: z.enum(["damageType", "creatureType"]),
-  options: z.array(z.object({ key: z.string().regex(/^[a-z][a-z0-9_-]{0,39}$/), label: z.string().trim().min(1).max(60) })).min(1).max(50),
+  options: z.array(z.object({ key: z.string().regex(ITEM_LIMITS.keyPattern), label: z.string().trim().min(1).max(ITEM_LIMITS.label) })).min(1).max(ITEM_LIMITS.options),
 }).superRefine((parameter, ctx) => {
   const keys = new Set<string>();
 
@@ -57,7 +54,7 @@ export const ItemStatsSchema = z
     attunement: z.boolean().optional(),
     charges: z.object({ max: z.number().int().min(ITEM_LIMITS.charges[0]).max(ITEM_LIMITS.charges[1]), rest: z.enum(["short", "long"]).nullable() }).optional(),
     consumable: z.boolean().optional(),
-    spells: z.array(ItemSpellSchema).max(500).optional(),
+    spells: z.array(ItemSpellSchema).max(ITEM_LIMITS.spells).optional(),
     parameter: ItemParameterSchema.optional(),
   })
   .superRefine((s, ctx) => {

@@ -2,9 +2,10 @@ import type { Effect, StaticEffect } from "./effects";
 import type { Trigger } from "./triggers";
 
 import { ABILITY_KEYS } from "@/lib/constants/abilities";
-import { AttackType } from "@/lib/constants/battle";
+import { AttackType, EffectMarker } from "@/lib/constants/battle";
+import { DICE_PATTERN } from "@/lib/utils/common/dice";
 
-export const DICE_RE = /^(\d+)d(\d+)([+-]\d+)?$/;
+export const DICE_RE = DICE_PATTERN;
 
 export const ABILITY_TARGETS = ["self", "eventTarget", "eventActor", "otherEnemy", "allAllies", "allEnemies", "everyone", "nearbyAllies", "nearbyEnemies"] as const;
 
@@ -43,13 +44,13 @@ export const STAT_KEYS = [...DYNAMIC_STATS, ...BAKED_STATS] as const;
 export const TIMED_STATS = ["armor", "attackBonus", "critThreshold", "initiative", "speed", "morale", "actionsPerTurn", "savingThrow"] as const;
 
 export const CONDITION_KEYS = [
-  "no_bonus_action",
-  "no_reaction",
+  EffectMarker.NO_BONUS_ACTION,
+  EffectMarker.NO_REACTION,
   "disable_melee_attacks",
   "disable_ranged_attacks",
   "disable_spell_casting",
-  "skip_action",
-  "immobilized",
+  EffectMarker.SKIP_ACTION,
+  EffectMarker.IMMOBILIZED,
 ] as const;
 
 export const CONDITION_5E_KEYS = [
@@ -71,6 +72,8 @@ export const CONDITION_5E_KEYS = [
 ] as const;
 
 export type Condition5eKey = (typeof CONDITION_5E_KEYS)[number];
+
+export const isCondition5eKey = (key: unknown): key is Condition5eKey => (CONDITION_5E_KEYS as readonly unknown[]).includes(key);
 
 export type AnyConditionKey = (typeof CONDITION_KEYS)[number] | Condition5eKey;
 

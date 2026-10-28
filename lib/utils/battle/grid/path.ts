@@ -1,7 +1,7 @@
 import { cellKey, footprint, footprintDistance, neighbors } from "./geometry";
 import { cellsOf, fits, isOnMap, occupiedBy, sizeOf } from "./occupancy";
 
-import { CELL_FEET } from "@/lib/constants/battle";
+import { CELL_FEET, EffectMarker } from "@/lib/constants/battle";
 import { statWithModifiers } from "@/lib/utils/abilities/engine/core/collect-modifiers";
 import { isActive } from "@/lib/utils/abilities/engine/core/participants";
 import { conditionSourceIds } from "@/lib/utils/battle/conditions/query";
@@ -11,7 +11,7 @@ import type { BattleMapConfig, BattleParticipant, GridPoint } from "@/types/batt
 
 /** Швидкість у клітинках без Ривка; 0, якщо знерухомлений. */
 export function baseMovement(p: BattleParticipant): number {
-  if (hasEffectMarker(p, "immobilized")) return 0;
+  if (hasEffectMarker(p, EffectMarker.IMMOBILIZED)) return 0;
 
   return Math.max(0, Math.floor(statWithModifiers([p], p.basicInfo.id, "speed", p.combatStats.speed) / CELL_FEET));
 }
@@ -111,7 +111,7 @@ export function searchPaths(
 
 /** Учасник ДМ (не персонаж гравця) у його хід ходить без ліміту швидкості (як фігура на столі); решта — залишок руху. dmUserId — id ДМ, якщо ходить ДМ, інакше null. */
 export function moveBudget({ map, dmUserId }: { map: BattleMapConfig; dmUserId: string | null }, p: BattleParticipant): number {
-  if (dmUserId === null || !controlledByDm(p, dmUserId) || hasEffectMarker(p, "immobilized")) return remainingMovement(p);
+  if (dmUserId === null || !controlledByDm(p, dmUserId) || hasEffectMarker(p, EffectMarker.IMMOBILIZED)) return remainingMovement(p);
 
   return map.cols * map.rows;
 }

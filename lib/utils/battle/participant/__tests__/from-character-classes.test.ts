@@ -1,9 +1,10 @@
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 
 import { ParticipantSide } from "@/lib/constants/battle";
 import { createBattleParticipantFromCharacter } from "@/lib/utils/battle/participant/from-character";
 import { DEFAULT_RULES, type Ruleset } from "@/lib/utils/rules";
 import { parseRules } from "@/lib/utils/rules/schema";
+import * as classSlots from "@/lib/utils/spells/class-slots";
 import type { GameClassData } from "@/types/classes";
 
 const base = {
@@ -116,5 +117,25 @@ describe("учасник від класів", () => {
     expect(p.spellcasting.spellSlots.pact).toEqual({ level: 1, max: 2, current: 2 });
     expect(p.spellcasting.spellcastingAbility).toBe("charisma");
     expect(p.spellcasting.spellSaveDC).toBeDefined();
+  });
+});
+
+describe("classEntries from the character context", () => {
+  it("preloaded entries are reused: same participant, no second resolve", async () => {
+    const character = { ...base, classes: [{ classId: "fighter", level: 3 }] };
+
+    const context = { skillTreeByRace: {}, mainSkills: [], spells: [], allSkills: [], racesByName: { "Людина": null }, campaign: { maxLevel: 20 }, skillsById: {}, artifactsById: {}, artifactSetsById: {}, artifactSetMemberIds: {}, rules: enabled, classesById: { fighter } } as never;
+
+    const strip = (p: Awaited<ReturnType<typeof createBattleParticipantFromCharacter>>) => ({ ...p, basicInfo: { ...p.basicInfo, id: "x" } });
+
+    const plain = strip(await createBattleParticipantFromCharacter(character as never, "b1", ParticipantSide.ALLY, undefined, context));
+
+    const spy = vi.spyOn(classSlots, "resolveClassEntries");
+
+    const reused = strip(await createBattleParticipantFromCharacter(character as never, "b1", ParticipantSide.ALLY, undefined, context, { classEntries: classSlots.resolveClassEntries([{ classId: "fighter", level: 3 }], { fighter }) }));
+
+    expect(spy).toHaveBeenCalledTimes(1);
+    expect(reused).toEqual(plain);
+    spy.mockRestore();
   });
 });

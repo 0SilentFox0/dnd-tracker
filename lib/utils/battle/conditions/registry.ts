@@ -1,3 +1,5 @@
+import { EffectMarker } from "@/lib/constants/battle";
+import { type RulesEdition } from "@/lib/constants/rules";
 import type { TimedEffectInput } from "@/lib/utils/abilities/engine/effects/timed-effects";
 import type { StaticEffect } from "@/lib/utils/abilities/schema";
 import { type Condition5eKey } from "@/lib/utils/abilities/schema/kinds";
@@ -5,7 +7,7 @@ import type { ActiveEffect } from "@/types/battle";
 
 export { CONDITION_5E_KEYS, type Condition5eKey } from "@/lib/utils/abilities/schema/kinds";
 
-export type ExhaustionVariant = "2014" | "2024";
+export type ExhaustionVariant = RulesEdition;
 
 interface Condition5eDef {
   label: string;
@@ -19,7 +21,7 @@ const flag = (f: Record<string, unknown>) => ({ kind: "flag", ...f }) as StaticE
 
 const STR_DEX = ["strength", "dexterity"];
 
-const INCAPACITATED_MARKERS = ["skip_action", "no_bonus_action", "no_reaction"];
+const INCAPACITATED_MARKERS = [EffectMarker.SKIP_ACTION, EffectMarker.NO_BONUS_ACTION, EffectMarker.NO_REACTION];
 
 export const CONDITION_5E_REGISTRY = {
   blinded: {
@@ -44,7 +46,7 @@ export const CONDITION_5E_REGISTRY = {
   grappled: {
     label: "Схоплений",
     description: "Швидкість 0. За правилами 2024 — недолік на атаки по всіх, крім того, хто схопив (виняток для схоплювача не моделюється).",
-    markers: ["immobilized"],
+    markers: [EffectMarker.IMMOBILIZED],
     flags: (v) => (v === "2024" ? [flag({ flag: "disadvantage" })] : []),
   },
   incapacitated: { label: "Недієздатний", description: "Не може діяти й реагувати; концентрація переривається.", markers: INCAPACITATED_MARKERS, flags: () => [] },
@@ -57,14 +59,14 @@ export const CONDITION_5E_REGISTRY = {
   paralyzed: {
     label: "Паралізований",
     description: "Недієздатний і не рухається; автопровал СИЛ/СПР; атаки по ньому з перевагою, ближні з 5 фт — критичні.",
-    markers: ["immobilized"],
+    markers: [EffectMarker.IMMOBILIZED],
     implies: ["incapacitated"],
     flags: () => [flag({ flag: "autoFailSave", abilities: STR_DEX }), flag({ flag: "advantageForAttackers" }), flag({ flag: "autoCritAdjacent" })],
   },
   petrified: {
     label: "Скам'янілий",
     description: "Недієздатний, не рухається; автопровал СИЛ/СПР; опір усій шкоді; імунітет до отруєння.",
-    markers: ["immobilized"],
+    markers: [EffectMarker.IMMOBILIZED],
     implies: ["incapacitated"],
     flags: () => [
       flag({ flag: "autoFailSave", abilities: STR_DEX }),
@@ -83,20 +85,20 @@ export const CONDITION_5E_REGISTRY = {
   restrained: {
     label: "Скутий",
     description: "Швидкість 0; недолік на атаки і рятівні кидки СПР; атаки по ньому з перевагою.",
-    markers: ["immobilized"],
+    markers: [EffectMarker.IMMOBILIZED],
     flags: () => [flag({ flag: "disadvantage" }), flag({ flag: "advantageForAttackers" }), flag({ flag: "saveDisadvantage", abilities: ["dexterity"] })],
   },
   stunned: {
     label: "Приголомшений",
     description: "Недієздатний, не рухається; автопровал СИЛ/СПР; атаки по ньому з перевагою.",
-    markers: ["immobilized"],
+    markers: [EffectMarker.IMMOBILIZED],
     implies: ["incapacitated"],
     flags: () => [flag({ flag: "autoFailSave", abilities: STR_DEX }), flag({ flag: "advantageForAttackers" })],
   },
   unconscious: {
     label: "Непритомний",
     description: "Недієздатний, не рухається, повалений; автопровал СИЛ/СПР; атаки по ньому з перевагою, ближні з 5 фт — критичні.",
-    markers: ["immobilized"],
+    markers: [EffectMarker.IMMOBILIZED],
     implies: ["incapacitated", "prone"],
     flags: () => [flag({ flag: "autoFailSave", abilities: STR_DEX }), flag({ flag: "advantageForAttackers" }), flag({ flag: "autoCritAdjacent" })],
   },
@@ -152,7 +154,7 @@ export function expandCondition5e(key: Condition5eKey, opts: { exhaustion: Exhau
 
     addMarker(k, k === "exhaustion" ? (opts.level ?? 1) : 1);
 
-    for (const m of def.markers) addMarker(m, m === "skip_action" ? 100 : 1);
+    for (const m of def.markers) addMarker(m, m === EffectMarker.SKIP_ACTION ? 100 : 1);
 
     for (const f of k === "exhaustion" ? exhaustionEffects(opts.level ?? 1, opts.exhaustion) : def.flags(opts.exhaustion)) {
       const sig = JSON.stringify(f);

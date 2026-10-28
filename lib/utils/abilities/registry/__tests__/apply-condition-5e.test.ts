@@ -100,7 +100,7 @@ describe("applyCondition 5e", () => {
 
     const e = target(apply(cond("stunned", { saveEnds: { ability: "wisdom" } }))).battleData.activeEffects[0];
 
-    expect(e.saveEnds).toEqual({ ability: "wisdom", dc: spellSaveDc(owner) });
+    expect(e.saveEnds).toEqual({ ability: "wisdom", dc: spellSaveDc(owner, undefined, 8) });
   });
 
   it("two different abilities applying prone give two effects", () => {

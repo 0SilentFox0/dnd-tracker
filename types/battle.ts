@@ -3,6 +3,7 @@ import type { AbilityUsageCounter, ResolvedAbility, StaticEffect } from "./abili
 import { AttackType, type BattleStatus, type CombatStatusType, type MAZE_DIFFICULTIES, type MAZE_MARK_SYMBOLS, ParticipantSide, type ParticipantSourceTypeValue } from "@/lib/constants/battle";
 import type { WEATHER_KINDS } from "@/lib/constants/battle-weather";
 import type { CriticalEffect } from "@/lib/constants/critical-effects";
+import type { RulesEdition } from "@/lib/constants/rules";
 import type { DndSkill } from "@/lib/constants/skills";
 import type { WeaponTrait } from "@/lib/constants/weapon-traits";
 import type { FxAuraKind, FxImpact, SpellFx } from "@/lib/utils/battle/fx";
@@ -70,7 +71,7 @@ export interface ActiveEffect {
   /** скільки HP зняло виснаження з maxHp (повертається при зніманні) */
   exhaustionHpHalved?: number;
   /** варіант правил виснаження на момент накладання (для перерахунку за сумарним рівнем) */
-  exhaustionVariant?: "2014" | "2024";
+  exhaustionVariant?: RulesEdition;
 }
 
 /**

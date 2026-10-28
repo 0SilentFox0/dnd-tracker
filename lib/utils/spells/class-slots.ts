@@ -1,59 +1,13 @@
-import { MAX_CLASS_LEVEL } from "@/lib/constants/classes";
+import { CASTER_LEVEL_DIVISOR, MAX_CLASS_LEVEL, MULTICLASS_SLOTS, PACT_SLOTS } from "@/lib/constants/classes";
 import { PACT_KEY } from "@/lib/utils/spells/slot-keys";
 import type { CharacterClassEntry, GameClassData, ResolvedClassEntry } from "@/types/classes";
 
 export type ClassSlots = Record<string, { max: number; level?: number }>;
 
-const MULTICLASS_SLOTS: number[][] = [
-  [2],
-  [3],
-  [4, 2],
-  [4, 3],
-  [4, 3, 2],
-  [4, 3, 3],
-  [4, 3, 3, 1],
-  [4, 3, 3, 2],
-  [4, 3, 3, 3, 1],
-  [4, 3, 3, 3, 2],
-  [4, 3, 3, 3, 2, 1],
-  [4, 3, 3, 3, 2, 1],
-  [4, 3, 3, 3, 2, 1, 1],
-  [4, 3, 3, 3, 2, 1, 1],
-  [4, 3, 3, 3, 2, 1, 1, 1],
-  [4, 3, 3, 3, 2, 1, 1, 1],
-  [4, 3, 3, 3, 2, 1, 1, 1, 1],
-  [4, 3, 3, 3, 3, 1, 1, 1, 1],
-  [4, 3, 3, 3, 3, 2, 1, 1, 1],
-  [4, 3, 3, 3, 3, 2, 2, 1, 1],
-];
-
-const PACT_SLOTS: { max: number; level: number }[] = [
-  { max: 1, level: 1 },
-  { max: 2, level: 1 },
-  { max: 2, level: 2 },
-  { max: 2, level: 2 },
-  { max: 2, level: 3 },
-  { max: 2, level: 3 },
-  { max: 2, level: 4 },
-  { max: 2, level: 4 },
-  { max: 2, level: 5 },
-  { max: 2, level: 5 },
-  { max: 3, level: 5 },
-  { max: 3, level: 5 },
-  { max: 3, level: 5 },
-  { max: 3, level: 5 },
-  { max: 3, level: 5 },
-  { max: 3, level: 5 },
-  { max: 4, level: 5 },
-  { max: 4, level: 5 },
-  { max: 4, level: 5 },
-  { max: 4, level: 5 },
-];
-
 const clampLevel = (level: number) => Math.max(0, Math.min(MAX_CLASS_LEVEL, Math.floor(level)));
 
 export function casterLevel(entries: ResolvedClassEntry[]): number {
-  const casters = entries.filter((e) => e.class && (e.class.caster === "full" || e.class.caster === "half" || e.class.caster === "third"));
+  const casters = entries.filter((e) => e.class && e.class.caster in CASTER_LEVEL_DIVISOR);
 
   if (casters.length === 0) return 0;
 

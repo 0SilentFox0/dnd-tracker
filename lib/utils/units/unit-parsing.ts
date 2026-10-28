@@ -1,5 +1,6 @@
 import { AttackType } from "@/lib/constants/battle";
 import { getProficiencyBonus } from "@/lib/utils/common/calculations";
+import { normalizeDiceText } from "@/lib/utils/common/dice";
 import type { CSVUnitRow, ImportUnit, UnitSpecialAbility } from "@/types/import";
 import type { UnitAttack } from "@/types/units";
 
@@ -128,7 +129,7 @@ export function parseAttacksDetailed(value: string): { attacks: UnitAttack[]; un
     const named = NAMED_DICE.exec(part);
 
     if (named) {
-      const damageDice = named[2].replace(/\s+/g, "").replace(/[кk]/gi, "d").toLowerCase();
+      const damageDice = normalizeDiceText(named[2]);
 
       attacks.push({
         name: named[1].trim(),

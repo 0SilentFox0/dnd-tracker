@@ -1,5 +1,6 @@
 import type { CoreActionKey } from "./registry";
 
+import { EffectMarker } from "@/lib/constants/battle";
 import type { TimedEffectInput } from "@/lib/utils/abilities/engine/effects/timed-effects";
 import type { StaticEffect } from "@/lib/utils/abilities/schema";
 
@@ -16,7 +17,7 @@ export function disengageEffect(participantId: string): TimedEffectInput {
     type: "buff",
     rounds: 1,
     stackable: false,
-    effects: [{ type: "disengaged", value: 1 }],
+    effects: [{ type: EffectMarker.DISENGAGED, value: 1 }],
     until: "turnEnd",
   };
 }

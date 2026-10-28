@@ -1,4 +1,4 @@
-import { byteLength, COMPENDIUM_KINDS, COMPENDIUM_LIMITS, CompendiumError, type JsonRecord } from "@/lib/server/compendium-import/parse";
+import { byteLength, COMPENDIUM_KINDS, COMPENDIUM_LIMITS, COMPENDIUM_REQUEST_HEADROOM_BYTES, type JsonRecord } from "@/lib/constants/compendium-import";
 import type { ImportInput } from "@/lib/server/compendium-import/service";
 import type { ImportIssue } from "@/lib/server/compendium-import/types";
 
@@ -22,7 +22,7 @@ export function projectInput(root: JsonRecord, categories: string[], options: Om
 
   const input = { ...options, categories, json: JSON.stringify(Object.fromEntries(Object.entries(root).filter(([key]) => key === "_meta" || categories.includes(key)))) };
 
-  if (byteLength(JSON.stringify(input)) > COMPENDIUM_LIMITS.requestBytes - 8192) throw new CompendiumError("REQUEST_SIZE");
+  if (byteLength(JSON.stringify(input)) > COMPENDIUM_LIMITS.requestBytes - COMPENDIUM_REQUEST_HEADROOM_BYTES) throw new Error("REQUEST_SIZE: $");
 
   return input;
 }

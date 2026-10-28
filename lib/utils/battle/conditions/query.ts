@@ -1,7 +1,9 @@
 import { exhaustionEffects } from "./registry";
 
+import { DEFAULT_RULES_EDITION } from "@/lib/constants/rules";
 import { findParticipant, replaceParticipant, withActiveEffects } from "@/lib/utils/abilities/engine/core/participants";
-import { CONDITION_5E_KEYS, type Condition5eKey } from "@/lib/utils/abilities/schema/kinds";
+import { type Condition5eKey, isCondition5eKey } from "@/lib/utils/abilities/schema/kinds";
+import { hasEffectMarker } from "@/lib/utils/battle/participant/state";
 import type { ActiveEffect, BattleParticipant } from "@/types/battle";
 
 export const MAX_EXHAUSTION = 6;
@@ -9,7 +11,7 @@ export const MAX_EXHAUSTION = 6;
 const carries = (e: ActiveEffect, key: string) => e.effects.some((m) => m.type === key);
 
 export function hasCondition(p: BattleParticipant, key: Condition5eKey): boolean {
-  return p.battleData.activeEffects.some((e) => carries(e, key));
+  return hasEffectMarker(p, key);
 }
 
 export function conditionSourceIds(p: BattleParticipant, key: Condition5eKey): string[] {
@@ -35,7 +37,7 @@ export function syncExhaustion(p: BattleParticipant): BattleParticipant {
 
   if (!stacks.length) return p;
 
-  const variant = stacks.find((e) => e.exhaustionVariant)?.exhaustionVariant ?? "2014";
+  const variant = stacks.find((e) => e.exhaustionVariant)?.exhaustionVariant ?? DEFAULT_RULES_EDITION;
 
   const derived = exhaustionEffects(exhaustionLevel(p), variant);
 
@@ -62,7 +64,7 @@ export function removeEffects(p: BattleParticipant, pred: (e: ActiveEffect) => b
   return { participant: removed.some((e) => carries(e, "exhaustion")) ? syncExhaustion(restoreExhaustionHp(stripped, removed)) : stripped, removed };
 }
 
-const isCondition5eEffect = (e: ActiveEffect) => e.type === "condition" && (CONDITION_5E_KEYS as readonly string[]).includes(e.effects[0]?.type);
+const isCondition5eEffect = (e: ActiveEffect) => e.type === "condition" && isCondition5eKey(e.effects[0]?.type);
 
 /** Ефекти-стани 5e: перший маркер ефекту — власний ключ стану (решта — наслідки через implies). */
 export function conditionEffects(p: BattleParticipant): { key: Condition5eKey; effect: ActiveEffect }[] {

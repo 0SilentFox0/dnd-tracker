@@ -1,5 +1,6 @@
 import type { Ability, Effect } from "@/lib/utils/abilities/schema";
 import { columnValueAt } from "@/lib/utils/characters/classes/columns";
+import { classPoolKey } from "@/lib/utils/items/pools";
 import type { AbilityPool } from "@/types/battle";
 import type { ClassColumn, ResolvedClassEntry } from "@/types/classes";
 
@@ -65,8 +66,6 @@ export interface ScaleContext {
   columns: readonly ClassColumn[];
 }
 
-export const poolKey = (classId: string, key: string) => `pool:${classId}:${key}`;
-
 const CLASS_LEVEL_RE = /\bclass_level\b/g;
 
 const HAS_CLASS_LEVEL = /\bclass_level\b/;
@@ -120,7 +119,7 @@ export function applyClassScale(abilities: Ability[], ctx: ScaleContext): Abilit
     const limits = l && {
       ...l,
       ...(l.perRest && { perRest: { ...l.perRest, uses: isScaleRef(uses) ? numberAt(uses, ctx) : l.perRest.uses } }),
-      ...(l.pool && { pool: { ...l.pool, key: poolKey(ctx.classId, l.pool.key) } }),
+      ...(l.pool && { pool: { ...l.pool, key: classPoolKey(ctx.classId, l.pool.key) } }),
     };
 
     return withClassLevel({ ...a, effects: a.effects.map((e) => scaleEffect(e, ctx)), ...(limits && { limits }) }, ctx.level);
@@ -138,7 +137,7 @@ export function classPools(entries: readonly ResolvedClassEntry[]): Record<strin
 
       const max = columnValueAt(column, level);
 
-      if (typeof max === "number" && max > 0) out[poolKey(cls.id, column.key)] = { label: column.label, max, rest: column.pool.rest };
+      if (typeof max === "number" && max > 0) out[classPoolKey(cls.id, column.key)] = { label: column.label, max, rest: column.pool.rest };
     }
   }
 

@@ -2,6 +2,7 @@ import { collectModifiers } from "@/lib/utils/abilities/engine/core/collect-modi
 import { findParticipant, replaceParticipant, withSelf } from "@/lib/utils/abilities/engine/core/participants";
 import { forcedRollMode, rollModeReasons } from "@/lib/utils/battle/attack/bonus";
 import { critDoublesDice } from "@/lib/utils/battle/attack/crit-dice";
+import { critThresholdOf } from "@/lib/utils/battle/attack/crit-threshold";
 import { attackKindOf } from "@/lib/utils/battle/common/attack-kind";
 import { isAdjacent, isOnMap } from "@/lib/utils/battle/grid/occupancy";
 import { getEffectiveArmorClass } from "@/lib/utils/battle/participant/helpers";
@@ -53,7 +54,7 @@ function resolveSpellAttack(state: SpellCastState, target: BattleParticipant, ra
 
   const ac = getEffectiveArmorClass(target, flow.ps);
 
-  const crit = roll >= Math.max(2, (flow.ctx.rules?.criticals.critOn ?? 20) + collectModifiers(mods, caster.basicInfo.id, { stat: "critThreshold" }).flat);
+  const crit = roll >= critThresholdOf(flow.ctx.rules, mods, caster.basicInfo.id);
 
   const fumble = roll <= (flow.ctx.rules?.criticals.fumbleOn ?? 1);
 

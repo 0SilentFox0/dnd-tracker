@@ -37,10 +37,10 @@ export async function persistBattleXp(
 
   const logs: CharacterLogInput[] = [];
 
+  await tx.character.updateMany({ where: { id: { in: rows.map((r) => r.id) } }, data: { experience: { increment: award.share } } });
+
   for (const { id } of rows) {
     const total = addExperience(locked.get(id)?.experience ?? 0, award.share);
-
-    await tx.character.update({ where: { id }, data: { experience: total } });
 
     logs.push({ campaignId: battle.campaignId, characterId: id, actorUserId: null, kind: CharacterLogKind.XP, data: { amount: award.share, total, note: BATTLE_XP_NOTE, battleId: battle.battleId } });
   }

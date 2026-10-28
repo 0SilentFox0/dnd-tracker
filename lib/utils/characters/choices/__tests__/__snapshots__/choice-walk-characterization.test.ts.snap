@@ -1,0 +1,1876 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`choice owner walk characterization > backgroundFeat > prune 1`] = `
+{
+  "dropped": 1,
+  "state": {
+    "backgroundChoices": {
+      "asi": [
+        {
+          "id": "strength",
+        },
+        {
+          "id": "strength",
+        },
+      ],
+    },
+    "backgroundFeatPicks": {
+      "cantrips": [
+        {
+          "id": "sp-guidance",
+        },
+      ],
+    },
+    "backgroundId": "bg",
+    "classes": [],
+    "feats": [
+      {
+        "id": "f-alert",
+        "source": "dm",
+      },
+    ],
+    "raceChoices": {},
+  },
+}
+`;
+
+exports[`choice owner walk characterization > backgroundFeat > selections 1`] = `
+{
+  "selections": {
+    "background": {
+      "equipmentText": "Book",
+      "id": "bg",
+      "name": "Sage",
+      "picks": [
+        "+2 СИЛ",
+      ],
+    },
+    "expertise": [],
+    "feats": [
+      {
+        "feat": {
+          "abilities": [],
+          "choices": [
+            {
+              "count": 2,
+              "id": "cantrips",
+              "kind": "spell",
+              "label": "Cantrips",
+              "level": 1,
+              "spells": {
+                "lists": [
+                  "Cleric",
+                  "Druid",
+                  "Wizard",
+                ],
+                "maxLevel": 0,
+                "minLevel": 0,
+              },
+            },
+          ],
+          "description": null,
+          "icon": null,
+          "id": "f-mi",
+          "name": "Magic Initiate",
+          "prerequisite": {},
+          "repeatable": true,
+          "type": "origin",
+        },
+        "from": "Передісторія: Sage",
+        "key": "background:bg:feat:f-mi",
+        "picks": {
+          "cantrips": [
+            {
+              "id": "sp-guidance",
+            },
+            {
+              "id": "sp-deleted",
+            },
+          ],
+        },
+      },
+      {
+        "feat": {
+          "abilities": [
+            {
+              "effects": [
+                {
+                  "flat": {
+                    "formula": "prof",
+                  },
+                  "kind": "modifyStat",
+                  "stat": "initiative",
+                },
+              ],
+              "id": "alert",
+              "name": "Alert",
+              "trigger": {
+                "event": "passive",
+              },
+            },
+          ],
+          "choices": [],
+          "description": null,
+          "icon": null,
+          "id": "f-alert",
+          "name": "Alert",
+          "prerequisite": {},
+          "repeatable": false,
+          "type": "origin",
+        },
+        "from": "ДМ",
+        "key": "feat:0",
+        "picks": {},
+      },
+    ],
+    "groups": [
+      {
+        "abilities": [
+          {
+            "effects": [
+              {
+                "flat": {
+                  "formula": "prof",
+                },
+                "kind": "modifyStat",
+                "stat": "initiative",
+              },
+            ],
+            "id": "feat:0.alert",
+            "name": "Alert",
+            "trigger": {
+              "event": "passive",
+            },
+          },
+        ],
+        "source": {
+          "icon": null,
+          "id": "f-alert",
+          "name": "Alert",
+          "type": "feat",
+        },
+      },
+      {
+        "abilities": [
+          {
+            "effects": [
+              {
+                "flag": "skillProficiency",
+                "kind": "flag",
+                "skills": [
+                  "arcana",
+                ],
+              },
+            ],
+            "id": "choice-skills",
+            "name": "Майстерність з виборів",
+            "trigger": {
+              "event": "passive",
+            },
+          },
+        ],
+        "source": {
+          "id": "choices",
+          "name": "Вибори",
+          "type": "character",
+        },
+      },
+    ],
+    "lineage": null,
+    "options": [],
+    "skills": [
+      "arcana",
+    ],
+    "slotSpells": [
+      "sp-guidance",
+      "sp-deleted",
+    ],
+    "spellGrants": [],
+    "spells": [
+      {
+        "label": "Риса: Magic Initiate",
+        "spellId": "sp-guidance",
+      },
+      {
+        "label": "Риса: Magic Initiate",
+        "spellId": "sp-deleted",
+      },
+    ],
+    "tools": [
+      "Ink",
+    ],
+  },
+  "withClasses": true,
+}
+`;
+
+exports[`choice owner walk characterization > backgroundFeat > visit 1`] = `
+[
+  {
+    "choice": {
+      "count": 1,
+      "id": "elven-lineage",
+      "kind": "option",
+      "label": "Elven Lineage",
+      "level": 1,
+      "lineage": true,
+      "options": [
+        {
+          "abilities": [
+            {
+              "effects": [
+                {
+                  "kind": "note",
+                  "text": "superior-darkvision",
+                },
+              ],
+              "id": "superior-darkvision",
+              "name": "superior-darkvision",
+              "trigger": {
+                "event": "passive",
+              },
+            },
+          ],
+          "id": "drow",
+          "name": "Drow",
+          "spells": [
+            {
+              "level": 1,
+              "spellId": "sp-dancing",
+            },
+            {
+              "level": 3,
+              "spellId": "sp-faerie",
+            },
+          ],
+        },
+        {
+          "abilities": [
+            {
+              "effects": [
+                {
+                  "flat": 5,
+                  "kind": "modifyStat",
+                  "stat": "speed",
+                },
+              ],
+              "id": "speed",
+              "name": "Speed",
+              "trigger": {
+                "event": "passive",
+              },
+            },
+          ],
+          "id": "wood-elf",
+          "name": "Wood Elf",
+          "spells": [
+            {
+              "level": 1,
+              "spellId": "sp-druidcraft",
+            },
+            {
+              "level": 3,
+              "spellId": "sp-longstrider",
+            },
+          ],
+        },
+      ],
+    },
+    "open": true,
+    "path": "raceChoices.elven-lineage",
+    "picks": [],
+    "target": 1,
+  },
+  {
+    "choice": {
+      "count": 1,
+      "id": "keen-senses",
+      "kind": "skill",
+      "label": "Keen Senses",
+      "level": 1,
+      "skills": [
+        "insight",
+        "perception",
+        "survival",
+      ],
+    },
+    "open": true,
+    "path": "raceChoices.keen-senses",
+    "picks": [],
+    "target": 1,
+  },
+  {
+    "choice": {
+      "abilities": [
+        "strength",
+        "dexterity",
+        "wisdom",
+      ],
+      "count": 3,
+      "id": "asi",
+      "kind": "abilityScore",
+      "label": "ASI",
+      "level": 1,
+      "max": 20,
+      "maxPerAbility": 2,
+      "points": 3,
+    },
+    "open": true,
+    "path": "backgroundChoices.asi",
+    "picks": [
+      {
+        "id": "strength",
+      },
+      {
+        "id": "strength",
+      },
+    ],
+    "target": 3,
+  },
+  {
+    "choice": {
+      "count": 2,
+      "id": "cantrips",
+      "kind": "spell",
+      "label": "Cantrips",
+      "level": 1,
+      "spells": {
+        "lists": [
+          "Cleric",
+          "Druid",
+          "Wizard",
+        ],
+        "maxLevel": 0,
+        "minLevel": 0,
+      },
+    },
+    "open": true,
+    "path": "backgroundFeatPicks.cantrips",
+    "picks": [
+      {
+        "id": "sp-guidance",
+      },
+      {
+        "id": "sp-deleted",
+      },
+    ],
+    "target": 2,
+  },
+]
+`;
+
+exports[`choice owner walk characterization > backgroundFeat > visit-no-class 1`] = `
+[
+  {
+    "choice": {
+      "count": 1,
+      "id": "elven-lineage",
+      "kind": "option",
+      "label": "Elven Lineage",
+      "level": 1,
+      "lineage": true,
+      "options": [
+        {
+          "abilities": [
+            {
+              "effects": [
+                {
+                  "kind": "note",
+                  "text": "superior-darkvision",
+                },
+              ],
+              "id": "superior-darkvision",
+              "name": "superior-darkvision",
+              "trigger": {
+                "event": "passive",
+              },
+            },
+          ],
+          "id": "drow",
+          "name": "Drow",
+          "spells": [
+            {
+              "level": 1,
+              "spellId": "sp-dancing",
+            },
+            {
+              "level": 3,
+              "spellId": "sp-faerie",
+            },
+          ],
+        },
+        {
+          "abilities": [
+            {
+              "effects": [
+                {
+                  "flat": 5,
+                  "kind": "modifyStat",
+                  "stat": "speed",
+                },
+              ],
+              "id": "speed",
+              "name": "Speed",
+              "trigger": {
+                "event": "passive",
+              },
+            },
+          ],
+          "id": "wood-elf",
+          "name": "Wood Elf",
+          "spells": [
+            {
+              "level": 1,
+              "spellId": "sp-druidcraft",
+            },
+            {
+              "level": 3,
+              "spellId": "sp-longstrider",
+            },
+          ],
+        },
+      ],
+    },
+    "open": true,
+    "path": "raceChoices.elven-lineage",
+    "picks": [],
+    "target": 1,
+  },
+  {
+    "choice": {
+      "count": 1,
+      "id": "keen-senses",
+      "kind": "skill",
+      "label": "Keen Senses",
+      "level": 1,
+      "skills": [
+        "insight",
+        "perception",
+        "survival",
+      ],
+    },
+    "open": true,
+    "path": "raceChoices.keen-senses",
+    "picks": [],
+    "target": 1,
+  },
+]
+`;
+
+exports[`choice owner walk characterization > featChain > prune 1`] = `
+{
+  "dropped": 2,
+  "state": {
+    "classes": [
+      {
+        "choices": {
+          "ability-score-improvement-4": [
+            {
+              "id": "f-grappler",
+              "picks": {
+                "grappler-asi": [
+                  {
+                    "id": "strength",
+                  },
+                ],
+              },
+            },
+          ],
+        },
+        "classId": "cls-sorc",
+        "level": 4,
+      },
+    ],
+    "feats": [
+      {
+        "id": "f-mi",
+        "picks": {
+          "cantrips": [
+            {
+              "id": "sp-guidance",
+            },
+          ],
+        },
+        "source": "origin",
+      },
+    ],
+    "raceChoices": {},
+  },
+}
+`;
+
+exports[`choice owner walk characterization > featChain > selections 1`] = `
+{
+  "selections": {
+    "expertise": [],
+    "feats": [
+      {
+        "feat": {
+          "abilities": [
+            {
+              "effects": [
+                {
+                  "kind": "note",
+                  "text": "punch-and-grab",
+                },
+              ],
+              "id": "punch-and-grab",
+              "name": "punch-and-grab",
+              "trigger": {
+                "event": "passive",
+              },
+            },
+          ],
+          "choices": [
+            {
+              "abilities": [
+                "strength",
+                "dexterity",
+              ],
+              "count": 1,
+              "id": "grappler-asi",
+              "kind": "abilityScore",
+              "label": "Ability Score Increase",
+              "level": 1,
+              "max": 20,
+              "points": 1,
+            },
+          ],
+          "description": null,
+          "icon": null,
+          "id": "f-grappler",
+          "name": "Grappler",
+          "prerequisite": {
+            "level": 4,
+            "scores": {
+              "abilities": [
+                "strength",
+                "dexterity",
+              ],
+              "min": 13,
+            },
+          },
+          "repeatable": false,
+          "type": "general",
+        },
+        "from": "Sorcerer 4",
+        "key": "class:cls-sorc.ability-score-improvement-4.0",
+        "picks": {
+          "grappler-asi": [
+            {
+              "id": "strength",
+            },
+          ],
+        },
+      },
+      {
+        "feat": {
+          "abilities": [],
+          "choices": [
+            {
+              "count": 2,
+              "id": "cantrips",
+              "kind": "spell",
+              "label": "Cantrips",
+              "level": 1,
+              "spells": {
+                "lists": [
+                  "Cleric",
+                  "Druid",
+                  "Wizard",
+                ],
+                "maxLevel": 0,
+                "minLevel": 0,
+              },
+            },
+          ],
+          "description": null,
+          "icon": null,
+          "id": "f-mi",
+          "name": "Magic Initiate",
+          "prerequisite": {},
+          "repeatable": true,
+          "type": "origin",
+        },
+        "from": "Походження",
+        "key": "feat:0",
+        "picks": {
+          "cantrips": [
+            {
+              "id": "sp-guidance",
+            },
+          ],
+        },
+      },
+    ],
+    "groups": [
+      {
+        "abilities": [
+          {
+            "effects": [
+              {
+                "kind": "note",
+                "text": "punch-and-grab",
+              },
+            ],
+            "id": "class:cls-sorc.ability-score-improvement-4.0.punch-and-grab",
+            "name": "punch-and-grab",
+            "trigger": {
+              "event": "passive",
+            },
+          },
+        ],
+        "source": {
+          "icon": null,
+          "id": "f-grappler",
+          "name": "Grappler",
+          "type": "feat",
+        },
+      },
+    ],
+    "lineage": null,
+    "options": [],
+    "skills": [],
+    "slotSpells": [
+      "sp-guidance",
+    ],
+    "spellGrants": [],
+    "spells": [
+      {
+        "label": "Риса: Magic Initiate",
+        "spellId": "sp-guidance",
+      },
+    ],
+  },
+  "withClasses": true,
+}
+`;
+
+exports[`choice owner walk characterization > featChain > visit 1`] = `
+[
+  {
+    "choice": {
+      "count": 1,
+      "id": "elven-lineage",
+      "kind": "option",
+      "label": "Elven Lineage",
+      "level": 1,
+      "lineage": true,
+      "options": [
+        {
+          "abilities": [
+            {
+              "effects": [
+                {
+                  "kind": "note",
+                  "text": "superior-darkvision",
+                },
+              ],
+              "id": "superior-darkvision",
+              "name": "superior-darkvision",
+              "trigger": {
+                "event": "passive",
+              },
+            },
+          ],
+          "id": "drow",
+          "name": "Drow",
+          "spells": [
+            {
+              "level": 1,
+              "spellId": "sp-dancing",
+            },
+            {
+              "level": 3,
+              "spellId": "sp-faerie",
+            },
+          ],
+        },
+        {
+          "abilities": [
+            {
+              "effects": [
+                {
+                  "flat": 5,
+                  "kind": "modifyStat",
+                  "stat": "speed",
+                },
+              ],
+              "id": "speed",
+              "name": "Speed",
+              "trigger": {
+                "event": "passive",
+              },
+            },
+          ],
+          "id": "wood-elf",
+          "name": "Wood Elf",
+          "spells": [
+            {
+              "level": 1,
+              "spellId": "sp-druidcraft",
+            },
+            {
+              "level": 3,
+              "spellId": "sp-longstrider",
+            },
+          ],
+        },
+      ],
+    },
+    "open": true,
+    "path": "raceChoices.elven-lineage",
+    "picks": [],
+    "target": 1,
+  },
+  {
+    "choice": {
+      "count": 1,
+      "id": "keen-senses",
+      "kind": "skill",
+      "label": "Keen Senses",
+      "level": 1,
+      "skills": [
+        "insight",
+        "perception",
+        "survival",
+      ],
+    },
+    "open": true,
+    "path": "raceChoices.keen-senses",
+    "picks": [],
+    "target": 1,
+  },
+  {
+    "choice": {
+      "count": {
+        "scale": "cantrips",
+      },
+      "id": "cantrips",
+      "kind": "spell",
+      "label": "Cantrips",
+      "level": 1,
+      "spells": {
+        "lists": [
+          "Sorcerer",
+        ],
+        "maxLevel": 0,
+        "minLevel": 0,
+      },
+    },
+    "maxSlotLevel": 2,
+    "open": true,
+    "path": "classes.cls-sorc.cantrips",
+    "picks": [],
+    "target": 5,
+  },
+  {
+    "choice": {
+      "count": 2,
+      "id": "prepared-spells",
+      "kind": "spell",
+      "label": "Prepared Spells",
+      "level": 1,
+      "spells": {
+        "lists": [
+          "Sorcerer",
+        ],
+        "maxLevel": "slots",
+        "minLevel": 1,
+      },
+    },
+    "maxSlotLevel": 2,
+    "open": true,
+    "path": "classes.cls-sorc.prepared-spells",
+    "picks": [],
+    "target": 2,
+  },
+  {
+    "choice": {
+      "count": {
+        "scale": "metamagic",
+      },
+      "id": "metamagic",
+      "kind": "option",
+      "label": "Metamagic",
+      "level": 2,
+      "options": [
+        {
+          "abilities": [
+            {
+              "effects": [
+                {
+                  "kind": "note",
+                  "text": "quickened",
+                },
+              ],
+              "id": "quickened",
+              "name": "quickened",
+              "trigger": {
+                "event": "passive",
+              },
+            },
+          ],
+          "id": "quickened",
+          "name": "Quickened Spell",
+        },
+        {
+          "abilities": [],
+          "id": "twinned",
+          "name": "Twinned Spell",
+        },
+        {
+          "abilities": [],
+          "id": "careful",
+          "minLevel": 3,
+          "name": "Careful Spell",
+        },
+        {
+          "abilities": [],
+          "id": "empowered",
+          "name": "Empowered Spell",
+          "requires": [
+            "careful",
+          ],
+        },
+      ],
+    },
+    "maxSlotLevel": 2,
+    "open": true,
+    "path": "classes.cls-sorc.metamagic",
+    "picks": [],
+    "target": 2,
+  },
+  {
+    "choice": {
+      "count": 1,
+      "featTypes": [
+        "origin",
+        "general",
+      ],
+      "id": "ability-score-improvement-4",
+      "kind": "feat",
+      "label": "Ability Score Improvement",
+      "level": 4,
+    },
+    "maxSlotLevel": 2,
+    "open": true,
+    "path": "classes.cls-sorc.ability-score-improvement-4",
+    "picks": [
+      {
+        "id": "f-grappler",
+        "picks": {
+          "grappler-asi": [
+            {
+              "id": "strength",
+            },
+          ],
+        },
+      },
+      {
+        "id": "f-gone",
+      },
+    ],
+    "target": 1,
+  },
+  {
+    "choice": {
+      "abilities": [
+        "strength",
+        "dexterity",
+      ],
+      "count": 1,
+      "id": "grappler-asi",
+      "kind": "abilityScore",
+      "label": "Ability Score Increase",
+      "level": 1,
+      "max": 20,
+      "points": 1,
+    },
+    "open": true,
+    "path": "classes.cls-sorc.ability-score-improvement-4.0.grappler-asi",
+    "picks": [
+      {
+        "id": "strength",
+      },
+    ],
+    "target": 1,
+  },
+  {
+    "choice": {
+      "count": 2,
+      "id": "cantrips",
+      "kind": "spell",
+      "label": "Cantrips",
+      "level": 1,
+      "spells": {
+        "lists": [
+          "Cleric",
+          "Druid",
+          "Wizard",
+        ],
+        "maxLevel": 0,
+        "minLevel": 0,
+      },
+    },
+    "open": true,
+    "path": "feats.0.cantrips",
+    "picks": [
+      {
+        "id": "sp-guidance",
+      },
+    ],
+    "target": 2,
+  },
+]
+`;
+
+exports[`choice owner walk characterization > featChain > visit-no-class 1`] = `
+[
+  {
+    "choice": {
+      "count": 1,
+      "id": "elven-lineage",
+      "kind": "option",
+      "label": "Elven Lineage",
+      "level": 1,
+      "lineage": true,
+      "options": [
+        {
+          "abilities": [
+            {
+              "effects": [
+                {
+                  "kind": "note",
+                  "text": "superior-darkvision",
+                },
+              ],
+              "id": "superior-darkvision",
+              "name": "superior-darkvision",
+              "trigger": {
+                "event": "passive",
+              },
+            },
+          ],
+          "id": "drow",
+          "name": "Drow",
+          "spells": [
+            {
+              "level": 1,
+              "spellId": "sp-dancing",
+            },
+            {
+              "level": 3,
+              "spellId": "sp-faerie",
+            },
+          ],
+        },
+        {
+          "abilities": [
+            {
+              "effects": [
+                {
+                  "flat": 5,
+                  "kind": "modifyStat",
+                  "stat": "speed",
+                },
+              ],
+              "id": "speed",
+              "name": "Speed",
+              "trigger": {
+                "event": "passive",
+              },
+            },
+          ],
+          "id": "wood-elf",
+          "name": "Wood Elf",
+          "spells": [
+            {
+              "level": 1,
+              "spellId": "sp-druidcraft",
+            },
+            {
+              "level": 3,
+              "spellId": "sp-longstrider",
+            },
+          ],
+        },
+      ],
+    },
+    "open": true,
+    "path": "raceChoices.elven-lineage",
+    "picks": [],
+    "target": 1,
+  },
+  {
+    "choice": {
+      "count": 1,
+      "id": "keen-senses",
+      "kind": "skill",
+      "label": "Keen Senses",
+      "level": 1,
+      "skills": [
+        "insight",
+        "perception",
+        "survival",
+      ],
+    },
+    "open": true,
+    "path": "raceChoices.keen-senses",
+    "picks": [],
+    "target": 1,
+  },
+]
+`;
+
+exports[`choice owner walk characterization > multiclass > prune 1`] = `
+{
+  "dropped": 0,
+  "state": {
+    "classes": [
+      {
+        "choices": {
+          "cantrips": [
+            {
+              "id": "sp-firebolt",
+            },
+          ],
+          "metamagic": [
+            {
+              "id": "quickened",
+            },
+          ],
+        },
+        "classId": "cls-sorc",
+        "level": 4,
+      },
+      {
+        "choices": {
+          "expertise-1": [
+            {
+              "id": "stealth",
+            },
+          ],
+        },
+        "classId": "cls-rogue",
+        "level": 2,
+      },
+      {
+        "classId": "cls-missing",
+        "level": 1,
+      },
+    ],
+    "feats": [],
+    "raceChoices": {},
+  },
+}
+`;
+
+exports[`choice owner walk characterization > multiclass > selections 1`] = `
+{
+  "selections": {
+    "expertise": [
+      "stealth",
+    ],
+    "feats": [],
+    "groups": [
+      {
+        "abilities": [
+          {
+            "effects": [
+              {
+                "kind": "note",
+                "text": "quickened",
+              },
+            ],
+            "id": "class:cls-sorc.metamagic.quickened.quickened",
+            "name": "quickened",
+            "trigger": {
+              "event": "passive",
+            },
+          },
+        ],
+        "scale": {
+          "classId": "cls-sorc",
+          "columns": [
+            {
+              "key": "cantrips",
+              "label": "cantrips",
+              "values": [
+                "4",
+                "4",
+                "4",
+                "5",
+                "5",
+                "5",
+                "5",
+                "5",
+                "5",
+                "6",
+                "6",
+                "6",
+                "6",
+                "6",
+                "6",
+                "6",
+                "6",
+                "6",
+                "6",
+                "6",
+              ],
+            },
+            {
+              "key": "metamagic",
+              "label": "metamagic",
+              "values": [
+                "",
+                "2",
+                "2",
+                "2",
+                "2",
+                "2",
+                "2",
+                "2",
+                "2",
+                "4",
+                "4",
+                "4",
+                "4",
+                "4",
+                "4",
+                "4",
+                "6",
+                "6",
+                "6",
+                "6",
+              ],
+            },
+          ],
+          "level": 4,
+        },
+        "source": {
+          "icon": null,
+          "id": "cls-sorc",
+          "name": "Sorcerer: Metamagic — Quickened Spell",
+          "type": "class",
+        },
+      },
+      {
+        "abilities": [
+          {
+            "effects": [
+              {
+                "flag": "skillExpertise",
+                "kind": "flag",
+                "skills": [
+                  "stealth",
+                ],
+              },
+            ],
+            "id": "choice-expertise",
+            "name": "Експертиза з виборів",
+            "trigger": {
+              "event": "passive",
+            },
+          },
+        ],
+        "source": {
+          "id": "choices",
+          "name": "Вибори",
+          "type": "character",
+        },
+      },
+    ],
+    "lineage": null,
+    "options": [
+      {
+        "label": "Metamagic",
+        "names": [
+          "Quickened Spell",
+        ],
+        "owner": "Sorcerer",
+      },
+    ],
+    "skills": [],
+    "slotSpells": [
+      "sp-firebolt",
+    ],
+    "spellGrants": [],
+    "spells": [
+      {
+        "label": "Клас: Sorcerer",
+        "spellId": "sp-firebolt",
+      },
+    ],
+  },
+  "withClasses": true,
+}
+`;
+
+exports[`choice owner walk characterization > multiclass > visit 1`] = `
+[
+  {
+    "choice": {
+      "count": 1,
+      "id": "elven-lineage",
+      "kind": "option",
+      "label": "Elven Lineage",
+      "level": 1,
+      "lineage": true,
+      "options": [
+        {
+          "abilities": [
+            {
+              "effects": [
+                {
+                  "kind": "note",
+                  "text": "superior-darkvision",
+                },
+              ],
+              "id": "superior-darkvision",
+              "name": "superior-darkvision",
+              "trigger": {
+                "event": "passive",
+              },
+            },
+          ],
+          "id": "drow",
+          "name": "Drow",
+          "spells": [
+            {
+              "level": 1,
+              "spellId": "sp-dancing",
+            },
+            {
+              "level": 3,
+              "spellId": "sp-faerie",
+            },
+          ],
+        },
+        {
+          "abilities": [
+            {
+              "effects": [
+                {
+                  "flat": 5,
+                  "kind": "modifyStat",
+                  "stat": "speed",
+                },
+              ],
+              "id": "speed",
+              "name": "Speed",
+              "trigger": {
+                "event": "passive",
+              },
+            },
+          ],
+          "id": "wood-elf",
+          "name": "Wood Elf",
+          "spells": [
+            {
+              "level": 1,
+              "spellId": "sp-druidcraft",
+            },
+            {
+              "level": 3,
+              "spellId": "sp-longstrider",
+            },
+          ],
+        },
+      ],
+    },
+    "open": true,
+    "path": "raceChoices.elven-lineage",
+    "picks": [],
+    "target": 1,
+  },
+  {
+    "choice": {
+      "count": 1,
+      "id": "keen-senses",
+      "kind": "skill",
+      "label": "Keen Senses",
+      "level": 1,
+      "skills": [
+        "insight",
+        "perception",
+        "survival",
+      ],
+    },
+    "open": true,
+    "path": "raceChoices.keen-senses",
+    "picks": [],
+    "target": 1,
+  },
+  {
+    "choice": {
+      "count": {
+        "scale": "cantrips",
+      },
+      "id": "cantrips",
+      "kind": "spell",
+      "label": "Cantrips",
+      "level": 1,
+      "spells": {
+        "lists": [
+          "Sorcerer",
+        ],
+        "maxLevel": 0,
+        "minLevel": 0,
+      },
+    },
+    "maxSlotLevel": 2,
+    "open": true,
+    "path": "classes.cls-sorc.cantrips",
+    "picks": [
+      {
+        "id": "sp-firebolt",
+      },
+    ],
+    "target": 5,
+  },
+  {
+    "choice": {
+      "count": 2,
+      "id": "prepared-spells",
+      "kind": "spell",
+      "label": "Prepared Spells",
+      "level": 1,
+      "spells": {
+        "lists": [
+          "Sorcerer",
+        ],
+        "maxLevel": "slots",
+        "minLevel": 1,
+      },
+    },
+    "maxSlotLevel": 2,
+    "open": true,
+    "path": "classes.cls-sorc.prepared-spells",
+    "picks": [],
+    "target": 2,
+  },
+  {
+    "choice": {
+      "count": {
+        "scale": "metamagic",
+      },
+      "id": "metamagic",
+      "kind": "option",
+      "label": "Metamagic",
+      "level": 2,
+      "options": [
+        {
+          "abilities": [
+            {
+              "effects": [
+                {
+                  "kind": "note",
+                  "text": "quickened",
+                },
+              ],
+              "id": "quickened",
+              "name": "quickened",
+              "trigger": {
+                "event": "passive",
+              },
+            },
+          ],
+          "id": "quickened",
+          "name": "Quickened Spell",
+        },
+        {
+          "abilities": [],
+          "id": "twinned",
+          "name": "Twinned Spell",
+        },
+        {
+          "abilities": [],
+          "id": "careful",
+          "minLevel": 3,
+          "name": "Careful Spell",
+        },
+        {
+          "abilities": [],
+          "id": "empowered",
+          "name": "Empowered Spell",
+          "requires": [
+            "careful",
+          ],
+        },
+      ],
+    },
+    "maxSlotLevel": 2,
+    "open": true,
+    "path": "classes.cls-sorc.metamagic",
+    "picks": [
+      {
+        "id": "quickened",
+      },
+    ],
+    "target": 2,
+  },
+  {
+    "choice": {
+      "count": 1,
+      "featTypes": [
+        "origin",
+        "general",
+      ],
+      "id": "ability-score-improvement-4",
+      "kind": "feat",
+      "label": "Ability Score Improvement",
+      "level": 4,
+    },
+    "maxSlotLevel": 2,
+    "open": true,
+    "path": "classes.cls-sorc.ability-score-improvement-4",
+    "picks": [],
+    "target": 1,
+  },
+  {
+    "choice": {
+      "count": 2,
+      "id": "expertise-1",
+      "kind": "expertise",
+      "label": "Expertise",
+      "level": 1,
+    },
+    "maxSlotLevel": 0,
+    "open": true,
+    "path": "classes.cls-rogue.expertise-1",
+    "picks": [
+      {
+        "id": "stealth",
+      },
+    ],
+    "target": 2,
+  },
+]
+`;
+
+exports[`choice owner walk characterization > multiclass > visit-no-class 1`] = `
+[
+  {
+    "choice": {
+      "count": 1,
+      "id": "elven-lineage",
+      "kind": "option",
+      "label": "Elven Lineage",
+      "level": 1,
+      "lineage": true,
+      "options": [
+        {
+          "abilities": [
+            {
+              "effects": [
+                {
+                  "kind": "note",
+                  "text": "superior-darkvision",
+                },
+              ],
+              "id": "superior-darkvision",
+              "name": "superior-darkvision",
+              "trigger": {
+                "event": "passive",
+              },
+            },
+          ],
+          "id": "drow",
+          "name": "Drow",
+          "spells": [
+            {
+              "level": 1,
+              "spellId": "sp-dancing",
+            },
+            {
+              "level": 3,
+              "spellId": "sp-faerie",
+            },
+          ],
+        },
+        {
+          "abilities": [
+            {
+              "effects": [
+                {
+                  "flat": 5,
+                  "kind": "modifyStat",
+                  "stat": "speed",
+                },
+              ],
+              "id": "speed",
+              "name": "Speed",
+              "trigger": {
+                "event": "passive",
+              },
+            },
+          ],
+          "id": "wood-elf",
+          "name": "Wood Elf",
+          "spells": [
+            {
+              "level": 1,
+              "spellId": "sp-druidcraft",
+            },
+            {
+              "level": 3,
+              "spellId": "sp-longstrider",
+            },
+          ],
+        },
+      ],
+    },
+    "open": true,
+    "path": "raceChoices.elven-lineage",
+    "picks": [],
+    "target": 1,
+  },
+  {
+    "choice": {
+      "count": 1,
+      "id": "keen-senses",
+      "kind": "skill",
+      "label": "Keen Senses",
+      "level": 1,
+      "skills": [
+        "insight",
+        "perception",
+        "survival",
+      ],
+    },
+    "open": true,
+    "path": "raceChoices.keen-senses",
+    "picks": [],
+    "target": 1,
+  },
+]
+`;
+
+exports[`choice owner walk characterization > raceSubrace > prune 1`] = `
+{
+  "dropped": 2,
+  "state": {
+    "classes": [],
+    "feats": [],
+    "raceChoices": {
+      "elven-lineage": [
+        {
+          "id": "wood-elf",
+        },
+      ],
+      "keen-senses": [
+        {
+          "id": "perception",
+        },
+      ],
+    },
+  },
+}
+`;
+
+exports[`choice owner walk characterization > raceSubrace > selections 1`] = `
+{
+  "selections": {
+    "expertise": [],
+    "feats": [],
+    "groups": [
+      {
+        "abilities": [
+          {
+            "effects": [
+              {
+                "flat": 5,
+                "kind": "modifyStat",
+                "stat": "speed",
+              },
+            ],
+            "id": "race.elven-lineage.wood-elf.speed",
+            "name": "Speed",
+            "trigger": {
+              "event": "passive",
+            },
+          },
+        ],
+        "source": {
+          "id": "race-elf",
+          "name": "Elf: Wood Elf",
+          "type": "race",
+        },
+      },
+      {
+        "abilities": [
+          {
+            "effects": [
+              {
+                "flag": "skillProficiency",
+                "kind": "flag",
+                "skills": [
+                  "perception",
+                ],
+              },
+            ],
+            "id": "choice-skills",
+            "name": "Майстерність з виборів",
+            "trigger": {
+              "event": "passive",
+            },
+          },
+        ],
+        "source": {
+          "id": "choices",
+          "name": "Вибори",
+          "type": "character",
+        },
+      },
+    ],
+    "lineage": "Wood Elf",
+    "options": [
+      {
+        "label": "Elven Lineage",
+        "names": [
+          "Wood Elf",
+        ],
+        "owner": "Elf",
+      },
+    ],
+    "skills": [
+      "perception",
+    ],
+    "slotSpells": [
+      "sp-druidcraft",
+      "sp-longstrider",
+    ],
+    "spellGrants": [],
+    "spells": [
+      {
+        "label": "Лінія: Wood Elf",
+        "spellId": "sp-druidcraft",
+      },
+      {
+        "label": "Лінія: Wood Elf",
+        "spellId": "sp-longstrider",
+      },
+    ],
+  },
+  "withClasses": false,
+}
+`;
+
+exports[`choice owner walk characterization > raceSubrace > visit 1`] = `
+[
+  {
+    "choice": {
+      "count": 1,
+      "id": "elven-lineage",
+      "kind": "option",
+      "label": "Elven Lineage",
+      "level": 1,
+      "lineage": true,
+      "options": [
+        {
+          "abilities": [
+            {
+              "effects": [
+                {
+                  "kind": "note",
+                  "text": "superior-darkvision",
+                },
+              ],
+              "id": "superior-darkvision",
+              "name": "superior-darkvision",
+              "trigger": {
+                "event": "passive",
+              },
+            },
+          ],
+          "id": "drow",
+          "name": "Drow",
+          "spells": [
+            {
+              "level": 1,
+              "spellId": "sp-dancing",
+            },
+            {
+              "level": 3,
+              "spellId": "sp-faerie",
+            },
+          ],
+        },
+        {
+          "abilities": [
+            {
+              "effects": [
+                {
+                  "flat": 5,
+                  "kind": "modifyStat",
+                  "stat": "speed",
+                },
+              ],
+              "id": "speed",
+              "name": "Speed",
+              "trigger": {
+                "event": "passive",
+              },
+            },
+          ],
+          "id": "wood-elf",
+          "name": "Wood Elf",
+          "spells": [
+            {
+              "level": 1,
+              "spellId": "sp-druidcraft",
+            },
+            {
+              "level": 3,
+              "spellId": "sp-longstrider",
+            },
+          ],
+        },
+      ],
+    },
+    "open": true,
+    "path": "raceChoices.elven-lineage",
+    "picks": [
+      {
+        "id": "wood-elf",
+      },
+      {
+        "id": "ghost",
+      },
+    ],
+    "target": 1,
+  },
+  {
+    "choice": {
+      "count": 1,
+      "id": "keen-senses",
+      "kind": "skill",
+      "label": "Keen Senses",
+      "level": 1,
+      "skills": [
+        "insight",
+        "perception",
+        "survival",
+      ],
+    },
+    "open": true,
+    "path": "raceChoices.keen-senses",
+    "picks": [
+      {
+        "id": "perception",
+      },
+    ],
+    "target": 1,
+  },
+]
+`;
+
+exports[`choice owner walk characterization > raceSubrace > visit-no-class 1`] = `
+[
+  {
+    "choice": {
+      "count": 1,
+      "id": "elven-lineage",
+      "kind": "option",
+      "label": "Elven Lineage",
+      "level": 1,
+      "lineage": true,
+      "options": [
+        {
+          "abilities": [
+            {
+              "effects": [
+                {
+                  "kind": "note",
+                  "text": "superior-darkvision",
+                },
+              ],
+              "id": "superior-darkvision",
+              "name": "superior-darkvision",
+              "trigger": {
+                "event": "passive",
+              },
+            },
+          ],
+          "id": "drow",
+          "name": "Drow",
+          "spells": [
+            {
+              "level": 1,
+              "spellId": "sp-dancing",
+            },
+            {
+              "level": 3,
+              "spellId": "sp-faerie",
+            },
+          ],
+        },
+        {
+          "abilities": [
+            {
+              "effects": [
+                {
+                  "flat": 5,
+                  "kind": "modifyStat",
+                  "stat": "speed",
+                },
+              ],
+              "id": "speed",
+              "name": "Speed",
+              "trigger": {
+                "event": "passive",
+              },
+            },
+          ],
+          "id": "wood-elf",
+          "name": "Wood Elf",
+          "spells": [
+            {
+              "level": 1,
+              "spellId": "sp-druidcraft",
+            },
+            {
+              "level": 3,
+              "spellId": "sp-longstrider",
+            },
+          ],
+        },
+      ],
+    },
+    "open": true,
+    "path": "raceChoices.elven-lineage",
+    "picks": [
+      {
+        "id": "wood-elf",
+      },
+      {
+        "id": "ghost",
+      },
+    ],
+    "target": 1,
+  },
+  {
+    "choice": {
+      "count": 1,
+      "id": "keen-senses",
+      "kind": "skill",
+      "label": "Keen Senses",
+      "level": 1,
+      "skills": [
+        "insight",
+        "perception",
+        "survival",
+      ],
+    },
+    "open": true,
+    "path": "raceChoices.keen-senses",
+    "picks": [
+      {
+        "id": "perception",
+      },
+    ],
+    "target": 1,
+  },
+]
+`;

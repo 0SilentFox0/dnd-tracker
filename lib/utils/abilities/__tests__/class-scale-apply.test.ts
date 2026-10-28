@@ -2,9 +2,10 @@ import { describe, expect, it } from "vitest";
 
 import { collectCharacterAbilities } from "@/lib/utils/abilities/build/collect";
 import { resolveLimitFormulas } from "@/lib/utils/abilities/build/limit-formulas";
-import { applyClassScale, classPools, poolKey } from "@/lib/utils/abilities/class-columns";
+import { applyClassScale, classPools } from "@/lib/utils/abilities/class-columns";
 import type { Ability } from "@/lib/utils/abilities/schema";
 import { createMockParticipant } from "@/lib/utils/battle/__tests__/fixtures/mock-participant";
+import { classPoolKey } from "@/lib/utils/items/pools";
 import type { ClassColumn, GameClassData, ResolvedClassEntry } from "@/types/classes";
 
 const levels = (f: (l: number) => string) => Array.from({ length: 20 }, (_, i) => f(i + 1));
@@ -72,8 +73,8 @@ describe("applyClassScale", () => {
 
     const [renamed, same] = applyClassScale([pd, plain], { classId: "monk", level: 5, columns: [] });
 
-    expect(renamed.limits?.pool).toEqual({ key: poolKey("monk", "focus-points"), cost: 1 });
-    expect(poolKey("monk", "focus-points")).toBe("pool:monk:focus-points");
+    expect(renamed.limits?.pool).toEqual({ key: classPoolKey("monk", "focus-points"), cost: 1 });
+    expect(classPoolKey("monk", "focus-points")).toBe("pool:monk:focus-points");
     expect(same).toBe(plain);
   });
 });

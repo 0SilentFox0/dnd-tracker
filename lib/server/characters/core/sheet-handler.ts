@@ -32,7 +32,7 @@ export async function buildSheetFor(character: SheetCharacter, viewer: Character
 
   const [spells, rows, chapters] = await Promise.all([
     loadBookSpellsByIds(character.campaignId, known),
-    loadEquippedArtifactRows(character, context.artifactsById, { rules: campaign.rules }),
+    loadEquippedArtifactRows(character, context.artifactsById ?? {}, { rules: campaign.rules }),
     loadStoryChapters(character.id, character.campaignId),
   ]);
 

@@ -22,6 +22,16 @@ export const CombatStatus = {
 
 export type CombatStatusType = (typeof CombatStatus)[keyof typeof CombatStatus];
 
+export const EffectMarker = {
+  IMMOBILIZED: "immobilized",
+  SKIP_ACTION: "skip_action",
+  NO_REACTION: "no_reaction",
+  NO_BONUS_ACTION: "no_bonus_action",
+  DISENGAGED: "disengaged",
+} as const;
+
+export type EffectMarker = (typeof EffectMarker)[keyof typeof EffectMarker];
+
 export const BattleStatus = {
   PREPARED: "prepared",
   ACTIVE: "active",
@@ -106,6 +116,14 @@ export const BATTLE_LOG_PAGE_MAX = 100;
 
 // відкат дозволено й для завершеного бою, тож знімки лишаються, але не всі
 export const BATTLE_SNAPSHOTS_KEPT_AFTER_COMPLETE = 20;
+
+export const RECHARGE_THRESHOLDS = [4, 5, 6] as const;
+
+export type RechargeThreshold = (typeof RECHARGE_THRESHOLDS)[number];
+
+export const isRecharge = (value: unknown): value is RechargeThreshold => (RECHARGE_THRESHOLDS as readonly unknown[]).includes(value);
+
+export const MIN_CRIT_ON = 2;
 
 export const CELL_FEET = 5;
 

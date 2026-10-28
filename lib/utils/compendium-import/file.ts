@@ -1,4 +1,4 @@
-import { COMPENDIUM_LIMITS, type JsonRecord } from "@/lib/server/compendium-import/parse";
+import { COMPENDIUM_LIMITS, type JsonRecord } from "@/lib/constants/compendium-import";
 export function readCompendiumFile(file: File, signal?: AbortSignal): Promise<JsonRecord> {
   if (file.size > COMPENDIUM_LIMITS.bytes) return Promise.reject(new Error("FILE_SIZE: максимум 3 MiB; виберіть менший файл"));
 

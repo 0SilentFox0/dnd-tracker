@@ -68,6 +68,25 @@ describe("contest", () => {
   });
 });
 
+describe("СК захоплення з базою кампанії", () => {
+  const strong = mk("a", "ally", 0, 0, 5);
+
+  const weak = mk("t", "enemy", 1, 0, -1);
+
+  const dcOf = (saveDcBase: number) => {
+    const rules = { ...on("2024"), formulas: { ...DEFAULT_RULES.formulas, saveDcBase } };
+
+    return contest({ attacker: strong, target: weak, participants: [strong, weak], rules, rng: () => 0.5 }).message;
+  };
+
+  it("база 10 піднімає СК на 2, дефолт 8 без змін", () => {
+    const prof = strong.abilities.proficiencyBonus;
+
+    expect(dcOf(8)).toContain(`СК ${8 + prof + 5}`);
+    expect(dcOf(10)).toContain(`СК ${10 + prof + 5}`);
+  });
+});
+
 describe("grapple / shove / escape", () => {
   it("grapple суміжного ворога ставить grappled з джерелом", () => {
     const a = mk("a", "ally", 0, 0, 5);

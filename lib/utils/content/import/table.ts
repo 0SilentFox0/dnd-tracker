@@ -2,7 +2,7 @@ import { parse } from "csv-parse/browser/esm/sync";
 
 import { guardFormula, isEmptyValue } from "./values";
 
-import { COMPENDIUM_KINDS } from "@/lib/server/compendium-import/parse";
+import { byteLength, COMPENDIUM_KINDS } from "@/lib/constants/compendium-import";
 import { isRecord } from "@/lib/utils/common/is-record";
 import type { ParsedTable } from "@/types/content-import";
 
@@ -97,13 +97,11 @@ function parseJsonTable(text: string): ParsedTable {
 
   if (!list.every(isRecord)) throw new ImportFileError("JSON має бути масивом об'єктів або одним об'єктом");
 
-  const headers: string[] = [];
+  const headers = new Set<string>();
 
-  for (const row of list) {
-    for (const key of Object.keys(row)) if (!headers.includes(key)) headers.push(key);
-  }
+  for (const row of list) for (const key of Object.keys(row)) headers.add(key);
 
-  return { format: "json", headers, rows: list };
+  return { format: "json", headers: [...headers], rows: list };
 }
 
 export function parseTable(text: string, fileName = ""): ParsedTable {
@@ -130,8 +128,6 @@ export function toCsv(headers: readonly string[], rows: ReadonlyArray<readonly s
   return `﻿${[headers, ...rows].map((r) => r.map(csvCell).join(";")).join("\r\n")}\r\n`;
 }
 
-const encoder = new TextEncoder();
-
 export function chunkRows<T>(rows: readonly T[], maxRows: number, maxBytes: number): T[][] {
   const chunks: T[][] = [];
 
@@ -140,7 +136,7 @@ export function chunkRows<T>(rows: readonly T[], maxRows: number, maxBytes: numb
   let bytes = 0;
 
   for (const row of rows) {
-    const size = encoder.encode(JSON.stringify(row)).length;
+    const size = byteLength(JSON.stringify(row));
 
     if (current.length > 0 && (current.length >= maxRows || bytes + size > maxBytes)) {
       chunks.push(current);

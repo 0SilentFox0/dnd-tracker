@@ -2,6 +2,7 @@ import { z } from "zod";
 
 import { DEFAULT_RULES } from "./defaults";
 
+import { RULES_EDITIONS } from "@/lib/constants/rules";
 import { isRecord } from "@/lib/utils/common/is-record";
 
 const level = z.string().regex(/^([1-9]|1\d|20)$/);
@@ -44,8 +45,8 @@ const sectionSchemas = {
   saves: z.strictObject({ proficiency: z.boolean() }),
   deathSaves: z.strictObject({ enabled: z.boolean(), unitsDieAtZero: z.boolean() }),
   concentration: z.strictObject({ enabled: z.boolean(), dcCap: z.number().int().min(10).max(99).nullable() }),
-  conditions: z.strictObject({ enabled: z.boolean(), exhaustion: z.enum(["2014", "2024"]) }),
-  actions: z.strictObject({ enabled: z.boolean(), opportunityAttacks: z.boolean(), variant: z.enum(["2014", "2024"]) }),
+  conditions: z.strictObject({ enabled: z.boolean(), exhaustion: z.enum(RULES_EDITIONS) }),
+  actions: z.strictObject({ enabled: z.boolean(), opportunityAttacks: z.boolean(), variant: z.enum(RULES_EDITIONS) }),
   classes: z.strictObject({ enabled: z.boolean() }),
   outOfCombat: z.strictObject({
     persistResources: z.boolean(),
@@ -55,7 +56,7 @@ const sectionSchemas = {
   }),
   encounters: z.strictObject({
     balance: z.enum(["fair", "xp"]),
-    edition: z.enum(["2014", "2024"]),
+    edition: z.enum(RULES_EDITIONS),
     autoXp: z.boolean(),
   }),
   items: z.strictObject({ enabled: z.boolean(), attunementLimit: z.number().int().min(1).max(10) }),
