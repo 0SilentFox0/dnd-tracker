@@ -50,6 +50,7 @@ describe("reveal", () => {
 
 describe("newlyPlayedSections", () => {
   const sec = (id: string, played: boolean) => ({ id, title: id, played, rows: [] });
+
   const content = (...sections: ReturnType<typeof sec>[]): ScenarioContent => ({ legend: [], sections });
 
   it("returns sections that went from not played to played", () => {
