@@ -40,6 +40,7 @@ export interface WorldMapDetail {
   map: WorldMap;
   markers: WorldMarker[];
   heroes?: WorldHero[];
+  notes?: WorldNote[];
 }
 
 export type CreateWorldMapData = { name: string; imageUrl: string; width: number; height: number; parentMarkerId?: string };

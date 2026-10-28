@@ -1,4 +1,5 @@
 // @vitest-environment happy-dom
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { cleanup, fireEvent, screen, waitFor } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
@@ -32,9 +33,11 @@ const renderPanel = (m: WorldMarker) => {
   } as unknown as WorldEditorCtx;
 
   return renderWithConfirm(
-    <WorldEditorContext.Provider value={ctx}>
-      <WorldMarkerPanel />
-    </WorldEditorContext.Provider>,
+    <QueryClientProvider client={new QueryClient()}>
+      <WorldEditorContext.Provider value={ctx}>
+        <WorldMarkerPanel />
+      </WorldEditorContext.Provider>
+    </QueryClientProvider>,
   );
 };
 

@@ -14,10 +14,15 @@ import { Button } from "@/components/ui/button";
 import { LabeledInput } from "@/components/ui/labeled-input";
 import { Switch } from "@/components/ui/switch";
 import { Textarea } from "@/components/ui/textarea";
+import { WorldNotesPanel } from "@/components/world/notes/WorldNotesPanel";
 import { WORLD_DM_NOTE_MAX, WORLD_NAME_MAX } from "@/lib/constants/world";
-import { useMarkerFields } from "@/lib/hooks/world";
+import { type RosterHero, useMarkerFields } from "@/lib/hooks/world";
 import { cn } from "@/lib/utils";
-import type { WorldMarker } from "@/types/world";
+import type { WorldMarker, WorldNote } from "@/types/world";
+
+const NO_NOTES: WorldNote[] = [];
+
+const NO_HEROES: RosterHero[] = [];
 
 export function WorldMarkerPanel() {
   const { detail, selectedId } = useWorldEditorContext();
@@ -28,7 +33,7 @@ export function WorldMarkerPanel() {
 }
 
 function MarkerForm({ marker }: { marker: WorldMarker }) {
-  const { detail, editor, select, openMap, redraw, redrawId } = useWorldEditorContext();
+  const { campaignId, detail, editor, select, openMap, redraw, redrawId } = useWorldEditorContext();
 
   const [creating, setCreating] = useState(false);
 
@@ -89,6 +94,11 @@ function MarkerForm({ marker }: { marker: WorldMarker }) {
           </label>
         </div>
       </HudSection>
+      {detail ? (
+        <HudSection title="Нотатки гравців">
+          <WorldNotesPanel campaignId={campaignId} mapId={detail.map.id} marker={marker} notes={detail.notes ?? NO_NOTES} heroes={NO_HEROES} isDM />
+        </HudSection>
+      ) : null}
       <HudSection title="Вкладена карта">
         {marker.childMapId ? (
           <Button type="button" variant="outline" onClick={() => openMap(marker.childMapId)} className="w-full gap-2">

@@ -35,7 +35,7 @@ const FRAME_HEIGHT = "lg:flex lg:h-[calc(100dvh-var(--app-header-h,89px)-9rem)] 
 
 const MAP_HEIGHT = "h-[calc(100dvh-var(--app-header-h,89px)-9rem)] lg:h-auto lg:min-h-0 lg:flex-1";
 
-export function WorldEditorPageClient({ campaignId, campaignName, mapId }: { campaignId: string; campaignName: string; mapId: string | null }) {
+export function WorldEditorPageClient({ campaignId, campaignName, mapId, initialSelectedId }: { campaignId: string; campaignName: string; mapId: string | null; initialSelectedId?: string }) {
   const router = useRouter();
 
   const pathname = usePathname();
@@ -52,7 +52,7 @@ export function WorldEditorPageClient({ campaignId, campaignName, mapId }: { cam
 
   const eyes = useHeroEyes(campaignId, mapId);
 
-  const [selectedId, select] = useState<string | null>(null);
+  const [selectedId, select] = useState<string | null>(initialSelectedId ?? null);
 
   const moveTarget = useMoveTarget(detail.data?.markers ?? NO_MARKERS);
 

@@ -7,6 +7,7 @@ import { prisma } from "@/lib/db";
 import { createWorldMapSchema, updateWorldMapSchema } from "@/lib/schemas/world";
 import { clearShowWorld } from "@/lib/server/show/show-store";
 import { listWorldMaps, orphanedImagesOfSubtree, readWorldMapDetail, toWorldMap } from "@/lib/server/world/map-store";
+import { listPublicMapNotes } from "@/lib/server/world/note-store";
 import { listHeroesOnMap } from "@/lib/server/world/travel-store";
 import { publishWorldChanged } from "@/lib/server/world/world-events";
 import { ownedWorldMapPath, removeWorldMapFiles } from "@/lib/supabase/world-map-storage";
@@ -89,7 +90,7 @@ export function createWorldMapHandler(req: Request, campaignId: string) {
 }
 
 export function getWorldMapHandler(campaignId: string, mapId: string) {
-  return withDM(campaignId, "get world map", async () => {
+  return withDM(campaignId, "get world map", async (access) => {
     const owned = await ownedMap(campaignId, mapId);
 
     if (owned instanceof NextResponse) return owned;
@@ -98,7 +99,7 @@ export function getWorldMapHandler(campaignId: string, mapId: string) {
 
     if (!detail) return errorResponse(API_ERRORS.WORLD_MAP_NOT_FOUND, 404);
 
-    return NextResponse.json({ map: detail.map, markers: detail.markers, heroes: await listHeroesOnMap(campaignId, mapId) });
+    return NextResponse.json({ map: detail.map, markers: detail.markers, heroes: await listHeroesOnMap(campaignId, mapId), notes: await listPublicMapNotes(mapId, access.userId) });
   });
 }
 

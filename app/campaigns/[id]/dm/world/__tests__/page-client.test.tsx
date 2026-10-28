@@ -1,6 +1,6 @@
 // @vitest-environment happy-dom
 import { cleanup, fireEvent, render, screen } from "@testing-library/react";
-import { afterEach, describe, expect, it, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import { WorldEditorPageClient } from "../page-client";
 
@@ -8,7 +8,7 @@ const replace = vi.fn();
 
 vi.mock("next/navigation", () => ({ useRouter: () => ({ replace }), usePathname: () => "/campaigns/c1/dm/world" }));
 vi.mock("@/lib/hooks/world", async (importOriginal) => {
-  const detail = { map: { id: "m2", name: "Печера", entryX: 0.5, entryY: 0.5 }, markers: [], heroes: [] };
+  const detail = { map: { id: "m2", name: "Печера", entryX: 0.5, entryY: 0.5 }, markers: [{ id: "k1", name: "Місто" }], heroes: [] };
 
   return {
     ...(await importOriginal<typeof import("@/lib/hooks/world")>()),
@@ -47,8 +47,12 @@ vi.mock("@/components/world/editor/NewWorldMapDialog", () => ({ NewWorldMapDialo
 vi.mock("@/components/world/editor/WorldBreadcrumbs", () => ({ WorldBreadcrumbs: () => null }));
 vi.mock("@/components/world/editor/WorldInspectorBar", () => ({ WorldInspectorBar: () => null }));
 vi.mock("@/components/world/editor/WorldMapSettings", () => ({ WorldMapSettings: () => null }));
-vi.mock("@/components/world/editor/WorldMarkerPanel", () => ({ WorldMarkerPanel: () => null }));
-vi.mock("@/components/ui/responsive-dialog", () => ({ ResponsiveDialog: () => null }));
+vi.mock("@/components/world/editor/WorldMarkerPanel", () => ({ WorldMarkerPanel: () => <span>marker-panel</span> }));
+vi.mock("@/components/ui/responsive-dialog", () => ({ ResponsiveDialog: ({ open, children }: { open: boolean; children: React.ReactNode }) => (open ? <>{children}</> : null) }));
+
+beforeEach(() => {
+  vi.stubGlobal("matchMedia", (q: string) => ({ matches: false, media: q, addEventListener: vi.fn(), removeEventListener: vi.fn() }));
+});
 
 afterEach(() => {
   cleanup();
@@ -65,6 +69,18 @@ describe("WorldEditorPageClient", () => {
     expect(replace).toHaveBeenCalledWith("/campaigns/c1/dm/world?map=m1");
     expect(screen.getByText("tool:move")).toBeTruthy();
     expect(screen.getByText("travel-panel")).toBeTruthy();
+  });
+
+  it("initialSelectedId відкриває панель маркера", () => {
+    render(<WorldEditorPageClient campaignId="c1" campaignName="Кампанія" mapId="m2" initialSelectedId="k1" />);
+
+    expect(screen.getByText("marker-panel")).toBeTruthy();
+  });
+
+  it("без initialSelectedId маркер не вибрано", () => {
+    render(<WorldEditorPageClient campaignId="c1" campaignName="Кампанія" mapId="m2" />);
+
+    expect(screen.queryByText("marker-panel")).toBeNull();
   });
 
   it("звичайне переміщення карту не змінює", () => {

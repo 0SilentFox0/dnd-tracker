@@ -25,6 +25,8 @@ const player = { userId: "u1", isDM: false, campaign: { id: "c1", maxLevel: 20, 
 
 const notes = () => import("@/app/api/campaigns/[id]/world/notes/route");
 
+const mapById = () => import("@/app/api/campaigns/[id]/world/maps/[mapId]/route");
+
 const noteById = () => import("@/app/api/campaigns/[id]/world/notes/[noteId]/route");
 
 const ctx = <T extends Record<string, string> = Record<never, never>>(extra?: T) => ({ params: Promise.resolve({ id: "c1", ...extra } as { id: string } & T) });
@@ -175,6 +177,21 @@ describe("world notes API", () => {
       vi.mocked(prisma.worldNote.findUnique).mockResolvedValueOnce(null);
 
       expect((await (await noteById()).DELETE(json("DELETE"), ctx({ noteId: "n1" }))).status).toBe(404);
+    });
+  });
+
+  describe("GET map as DM", () => {
+    it("віддає лише публічні нотатки: приватні гравця не потрапляють у запит", async () => {
+      vi.mocked(apiAuth.requireDM).mockResolvedValue(dm);
+      vi.mocked(prisma.worldNote.findMany).mockResolvedValue([noteRow()] as never);
+
+      const res = await (await mapById()).GET(json("GET"), ctx({ mapId: "m1" }));
+
+      const body = await res.json();
+
+      expect(prisma.worldNote.findMany).toHaveBeenCalledWith(expect.objectContaining({ where: { marker: { mapId: "m1" }, visibility: "public" } }));
+      expect(body.notes).toHaveLength(1);
+      expect(body.notes[0].visibility).toBe("public");
     });
   });
 });

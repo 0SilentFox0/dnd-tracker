@@ -71,7 +71,7 @@ describe("WorldNotesPanel", () => {
     expect(screen.getByText("-1")).toBeTruthy();
   });
 
-  it("lets only the author edit and the DM delete without a form", () => {
+  it("lets only the author edit and the DM delete", () => {
     renderPanel();
 
     expect(screen.getAllByRole("button", { name: "Редагувати нотатку" })).toHaveLength(1);
@@ -79,10 +79,19 @@ describe("WorldNotesPanel", () => {
     cleanup();
     renderPanel({ isDM: true });
 
-    expect(screen.queryByLabelText("Нова нотатка")).toBeNull();
     expect(screen.queryByRole("button", { name: "Мої" })).toBeNull();
+    expect(screen.queryByLabelText("Від імені героя")).toBeNull();
     expect(screen.getAllByRole("button", { name: "Редагувати нотатку" })).toHaveLength(1);
     expect(screen.getAllByRole("button", { name: "Видалити нотатку" })).toHaveLength(2);
+  });
+
+  it("DM form always writes a public note without a hero", async () => {
+    vi.mocked(api.createWorldNote).mockResolvedValue({} as never);
+    renderPanel({ isDM: true, heroes: [...heroes, { id: "h2", name: "Bran", avatar: null }] });
+    fireEvent.change(screen.getByLabelText("Нова нотатка"), { target: { value: "підказка" } });
+    fireEvent.click(screen.getByRole("button", { name: "Додати" }));
+
+    await waitFor(() => expect(api.createWorldNote).toHaveBeenCalledWith("c1", { markerId: "k1", text: "підказка", visibility: "public" }));
   });
 
   it("deletes only after confirmation", async () => {

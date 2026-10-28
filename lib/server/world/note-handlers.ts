@@ -5,6 +5,7 @@ import { prisma } from "@/lib/db";
 import { createWorldNoteSchema, updateWorldNoteSchema } from "@/lib/schemas/world";
 import { ownedMarker } from "@/lib/server/world/map-handlers";
 import { readWorldMapDetail } from "@/lib/server/world/map-store";
+import { noteInclude as include, toNote } from "@/lib/server/world/note-store";
 import { activePlayerHeroes } from "@/lib/server/world/travel-store";
 import { readViewerScope } from "@/lib/server/world/view-handlers";
 import { publishWorldChanged } from "@/lib/server/world/world-events";
@@ -13,24 +14,6 @@ import { errorResponse } from "@/lib/utils/api/api-response";
 import { handleApiError } from "@/lib/utils/api/error-handler";
 import { parseBody } from "@/lib/utils/api/parse-body";
 import { visibleMarkerIds } from "@/lib/utils/world/player-view";
-import type { WorldNote } from "@/types/world";
-
-type NoteWithAuthor = { id: string; markerId: string; authorUserId: string; characterId: string | null; visibility: string; text: string; createdAt: Date; updatedAt: Date; author: { displayName: string } };
-
-const include = { author: { select: { displayName: true } } } as const;
-
-const toNote = (n: NoteWithAuthor, userId: string): WorldNote => ({
-  id: n.id,
-  markerId: n.markerId,
-  authorUserId: n.authorUserId,
-  authorName: n.author.displayName,
-  characterId: n.characterId,
-  visibility: n.visibility === "private" ? "private" : "public",
-  text: n.text,
-  mine: n.authorUserId === userId,
-  createdAt: n.createdAt.toISOString(),
-  updatedAt: n.updatedAt.toISOString(),
-});
 
 async function withAccess(campaignId: string, action: string, run: (access: CampaignAccessResult) => Promise<NextResponse>) {
   try {

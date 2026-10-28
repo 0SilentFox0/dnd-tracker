@@ -21,6 +21,7 @@ vi.mock("@/lib/db", () => ({
   prisma: {
     worldMap: { findMany: vi.fn(async () => []), findUnique: vi.fn(), findFirst: vi.fn(), count: vi.fn(async () => 0), create: vi.fn(), update: vi.fn(), delete: vi.fn() },
     worldPosition: { findMany: vi.fn(async () => []) },
+    worldNote: { findMany: vi.fn() },
     campaignShow: { findUnique: vi.fn(async () => null), updateMany: vi.fn(async () => ({ count: 1 })) },
     worldMarker: { findUnique: vi.fn(), findMany: vi.fn(async () => []), aggregate: vi.fn(async () => ({ _count: 0, _max: { sortOrder: null } })), create: vi.fn(), update: vi.fn(), delete: vi.fn() },
   },
@@ -130,6 +131,7 @@ describe("world API", () => {
   });
 
   it("GET карти віддає heroes (порожній список без позицій)", async () => {
+    vi.mocked(prisma.worldNote.findMany).mockResolvedValue([]);
     vi.mocked(prisma.worldMap.findUnique).mockResolvedValue(mapRow({ markers: [] }) as never);
 
     const res = await (await mapById()).GET(json("GET"), ctx({ mapId: "m1" }));
