@@ -77,8 +77,8 @@ describe("навігація артефактів", () => {
   it("кнопка видалення в списку видаляє через мутацію без refresh сторінки", async () => {
     render(<ArtifactDeleteButton campaignId="c1" artifactId="a1" />, { wrapper });
 
-    fireEvent.click(screen.getByTitle("Видалити артефакт"));
-    fireEvent.click(within(await screen.findByRole("alertdialog")).getByRole("button", { name: "Видалити" }));
+    fireEvent.click(screen.getByTitle("artifacts.card.deleteTitle"));
+    fireEvent.click(within(await screen.findByRole("alertdialog")).getByRole("button", { name: "common.actions.delete" }));
 
     await waitFor(() => expect(deleteArtifact).toHaveBeenCalledWith("c1", "a1"));
     expect(nav.calls).toEqual([]);

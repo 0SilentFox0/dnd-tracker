@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useTranslations } from "next-intl";
 import { Plus, Trash2 } from "lucide-react";
 
 import { AbilityListEditor } from "@/components/abilities";
@@ -22,6 +23,8 @@ interface ClassFeaturesEditorProps {
 }
 
 export function ClassFeaturesEditor({ campaignId, value, onChange, onValidityChange, classColumns }: ClassFeaturesEditorProps) {
+  const t = useTranslations("classes");
+
   const { report, drop } = useErrorTotals(onValidityChange);
 
   const used = new Set(value.map((f) => f.level));
@@ -57,9 +60,9 @@ export function ClassFeaturesEditor({ campaignId, value, onChange, onValidityCha
       {sorted.map((feature) => (
         <HudSection
           key={feature.level}
-          title={`Рівень ${feature.level}`}
+          title={t("features.level", { level: feature.level })}
           action={
-            <Button type="button" variant="ghost" size="sm" aria-label={`Видалити рівень ${feature.level}`} onClick={() => remove(feature.level)}>
+            <Button type="button" variant="ghost" size="sm" aria-label={t("features.removeLevel", { level: feature.level })} onClick={() => remove(feature.level)}>
               <Trash2 className="h-4 w-4" />
             </Button>
           }
@@ -72,7 +75,7 @@ export function ClassFeaturesEditor({ campaignId, value, onChange, onValidityCha
             classColumns={classColumns}
           />
           <div className="mt-3 space-y-2">
-            <p className="hud-sc text-xs text-hud-muted">Вибори</p>
+            <p className="hud-sc text-xs text-hud-muted">{t("features.choices")}</p>
             <ChoiceListEditor campaignId={campaignId} owner="class" value={feature.choices ?? []} onChange={(choices) => setChoices(feature.level, choices)} classColumns={classColumns} onValidityChange={(_, n) => report(`choices-${feature.level}`, n)} />
           </div>
         </HudSection>
@@ -80,7 +83,7 @@ export function ClassFeaturesEditor({ campaignId, value, onChange, onValidityCha
 
       {free.length > 0 && (
         <div className="flex flex-wrap items-center gap-2">
-          <select aria-label="Рівень для додавання" className={HUD_SELECT_CLASS} value={next ?? ""} onChange={(e) => setPicked(Number(e.target.value))}>
+          <select aria-label={t("features.levelToAdd")} className={HUD_SELECT_CLASS} value={next ?? ""} onChange={(e) => setPicked(Number(e.target.value))}>
             {free.map((l) => (
               <option key={l} value={l}>
                 {l}
@@ -89,7 +92,7 @@ export function ClassFeaturesEditor({ campaignId, value, onChange, onValidityCha
           </select>
           <Button type="button" variant="outline" size="sm" onClick={add}>
             <Plus className="h-4 w-4" />
-            Додати рівень
+            {t("features.addLevel")}
           </Button>
         </div>
       )}

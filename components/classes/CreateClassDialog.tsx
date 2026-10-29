@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useTranslations } from "next-intl";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -30,6 +31,8 @@ const emptyClass = (name: string): ClassFormData => ({
 });
 
 export function CreateClassDialog({ open, onOpenChange, onCreateClass }: CreateClassDialogProps) {
+  const t = useTranslations();
+
   const [name, setName] = useState("");
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -43,23 +46,23 @@ export function CreateClassDialog({ open, onOpenChange, onCreateClass }: CreateC
     <ResponsiveDialog
       open={open}
       onOpenChange={onOpenChange}
-      title="Новий клас"
-      description="Решту налаштувань можна заповнити після створення"
+      title={t("classes.create.title")}
+      description={t("classes.create.description")}
       hud
       footer={
         <>
           <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
-            Скасувати
+            {t("common.actions.cancel")}
           </Button>
           <Button type="submit" form="create-class-form" disabled={!name.trim()}>
-            Створити клас
+            {t("classes.create.submit")}
           </Button>
         </>
       }
     >
       <form id="create-class-form" onSubmit={handleSubmit} className="space-y-2">
-        <Label htmlFor="new-class-name">Назва класу *</Label>
-        <Input id="new-class-name" value={name} onChange={(e) => setName(e.target.value)} required placeholder="Наприклад: Воїн, Чарівник" />
+        <Label htmlFor="new-class-name">{t("classes.create.nameLabel")}</Label>
+        <Input id="new-class-name" value={name} onChange={(e) => setName(e.target.value)} required placeholder={t("classes.create.namePlaceholder")} />
       </form>
     </ResponsiveDialog>
   );

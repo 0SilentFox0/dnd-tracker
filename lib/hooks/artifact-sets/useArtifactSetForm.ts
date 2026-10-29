@@ -1,6 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
+import { useTranslations } from "next-intl";
 
 import { useDeleteArtifactSet, useSaveArtifactSet } from "./useArtifactSets";
 
@@ -20,6 +21,8 @@ export interface ArtifactSetFormInitial {
 }
 
 export function useArtifactSetForm({ campaignId, setId, initial }: { campaignId: string; setId?: string; initial: ArtifactSetFormInitial }) {
+  const t = useTranslations();
+
   const confirm = useConfirm();
 
   const navigateFresh = useNavigateFresh();
@@ -68,7 +71,7 @@ export function useArtifactSetForm({ campaignId, setId, initial }: { campaignId:
     if (!abilities.valid) return;
 
     if (!fields.name.trim()) {
-      setError("Вкажіть назву сету");
+      setError(t("artifacts.sets.form.nameRequired"));
 
       return;
     }
@@ -86,7 +89,7 @@ export function useArtifactSetForm({ campaignId, setId, initial }: { campaignId:
       });
       navigateFresh(listHref);
     } catch (err) {
-      setError(abilitySaveError(err, "Помилка збереження"));
+      setError(abilitySaveError(err, t("common.form.saveFailed")));
     }
   };
 
@@ -94,8 +97,8 @@ export function useArtifactSetForm({ campaignId, setId, initial }: { campaignId:
     if (!setId) return;
 
     const ok = await confirm({
-      title: "Видалити сет? Артефакти залишаться в кампанії, поле «Сет» у них буде очищено.",
-      confirmLabel: "Видалити",
+      title: t("artifacts.sets.list.confirmDelete"),
+      confirmLabel: t("common.actions.delete"),
       destructive: true,
       onConfirm: () => del.mutateAsync(setId),
     });

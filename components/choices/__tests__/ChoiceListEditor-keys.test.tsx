@@ -44,19 +44,19 @@ describe("ChoiceListEditor stable keys", () => {
     fireEvent.click(screen.getAllByText("report")[2]);
     expect(onValidity).toHaveBeenLastCalledWith(false, 1);
 
-    fireEvent.click(screen.getByRole("button", { name: "Видалити вибір b" }));
+    fireEvent.click(screen.getByRole("button", { name: 'choices.header.remove {"label":"b"}' }));
 
     expect(onValidity).toHaveBeenLastCalledWith(false, 1);
     expect((screen.getAllByTestId("ability-state")[1] as HTMLInputElement).value).toBe("third");
 
-    fireEvent.click(screen.getByRole("button", { name: "Видалити вибір c" }));
+    fireEvent.click(screen.getByRole("button", { name: 'choices.header.remove {"label":"c"}' }));
 
     expect(onValidity).toHaveBeenLastCalledWith(true, 0);
   });
 
   it("does not persist row keys", () => {
     render(<Harness onValidity={vi.fn()} />);
-    fireEvent.click(screen.getByRole("button", { name: "Видалити вибір b" }));
+    fireEvent.click(screen.getByRole("button", { name: 'choices.header.remove {"label":"b"}' }));
 
     expect(screen.getByTestId("json").textContent).not.toMatch(/uid|key/i);
   });

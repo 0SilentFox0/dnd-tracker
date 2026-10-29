@@ -54,7 +54,7 @@ it("allows only origin feats and explains manual equipment", () => {
   mount();
   expect(screen.getByRole("option", { name: "Origin" })).toBeTruthy();
   expect(screen.queryByRole("option", { name: "General" })).toBeNull();
-  expect(screen.getByText(/Спорядження й гроші видає ДМ вручну/)).toBeTruthy();
+  expect(screen.getByText(/backgrounds.form.equipmentNote/)).toBeTruthy();
 });
 
 it("blocks invalid choices, then saves one normalized domain body and navigates with refresh", async () => {
@@ -65,16 +65,16 @@ it("blocks invalid choices, then saves one normalized domain body and navigates 
   client.setQueryData(backgroundKeys.list("c"), [background]);
   client.setQueryData(characterKeys.sheet("c"), {});
   fireEvent.click(screen.getByRole("button", { name: "Invalid choices" }));
-  expect((screen.getByRole("button", { name: "Зберегти" }) as HTMLButtonElement).disabled).toBe(true);
+  expect((screen.getByRole("button", { name: "common.actions.save" }) as HTMLButtonElement).disabled).toBe(true);
   submit();
   expect(updateBackground).not.toHaveBeenCalled();
   fireEvent.click(screen.getByRole("button", { name: "Valid choices" }));
-  fireEvent.change(screen.getByLabelText("Назва передісторії *"), { target: { value: "  Scholar  " } });
-  fireEvent.change(screen.getByLabelText("Опис"), { target: { value: "  Lore  " } });
-  fireEvent.change(screen.getByLabelText("Володіння інструментами (по одному в рядку)"), { target: { value: "  Flute  \n\n Dice " } });
-  fireEvent.blur(screen.getByLabelText("Володіння інструментами (по одному в рядку)"));
-  fireEvent.change(screen.getByLabelText("Риса походження"), { target: { value: "origin" } });
-  fireEvent.change(screen.getByLabelText("Стартове спорядження та гроші"), { target: { value: "  Coins  " } });
+  fireEvent.change(screen.getByLabelText("backgrounds.form.name"), { target: { value: "  Scholar  " } });
+  fireEvent.change(screen.getByLabelText("backgrounds.form.description"), { target: { value: "  Lore  " } });
+  fireEvent.change(screen.getByLabelText("backgrounds.form.tools"), { target: { value: "  Flute  \n\n Dice " } });
+  fireEvent.blur(screen.getByLabelText("backgrounds.form.tools"));
+  fireEvent.change(screen.getByLabelText("backgrounds.form.origin"), { target: { value: "origin" } });
+  fireEvent.change(screen.getByLabelText("backgrounds.form.equipment"), { target: { value: "  Coins  " } });
   submit();
   await waitFor(() => expect(refresh).toHaveBeenCalledTimes(1));
   expect(updateBackground).toHaveBeenCalledExactlyOnceWith("c", "b", {
@@ -90,17 +90,17 @@ it("does not navigate on failure and enables another save", async () => {
   vi.mocked(updateBackground).mockRejectedValue(new Error("Mocked update failure"));
   mount();
   submit();
-  await screen.findByText("Не вдалося зберегти передісторію");
+  await screen.findByText("backgrounds.form.saveError");
   expect(updateBackground).toHaveBeenCalledTimes(1);
   expect(push).not.toHaveBeenCalled();
   expect(refresh).not.toHaveBeenCalled();
   fireEvent.click(screen.getByRole("button", { name: "common.notify.gotIt" }));
-  await waitFor(() => expect((screen.getByRole("button", { name: "Зберегти" }) as HTMLButtonElement).disabled).toBe(false));
+  await waitFor(() => expect((screen.getByRole("button", { name: "common.actions.save" }) as HTMLButtonElement).disabled).toBe(false));
 });
 
 it("cancel returns to the list without mutation or refresh", () => {
   mount();
-  fireEvent.click(screen.getByRole("button", { name: "Скасувати" }));
+  fireEvent.click(screen.getByRole("button", { name: "common.actions.cancel" }));
   expect(updateBackground).not.toHaveBeenCalled();
   expect(push).toHaveBeenCalledExactlyOnceWith("/campaigns/c/dm/backgrounds");
   expect(refresh).not.toHaveBeenCalled();
@@ -112,8 +112,8 @@ it("disables saving until the pending update settles", async () => {
   vi.mocked(updateBackground).mockImplementation(() => new Promise(resolve => { resolveUpdate = resolve; }));
   mount();
   submit();
-  await waitFor(() => expect((screen.getByRole("button", { name: "Збереження..." }) as HTMLButtonElement).disabled).toBe(true));
-  fireEvent.click(screen.getByRole("button", { name: "Збереження..." }));
+  await waitFor(() => expect((screen.getByRole("button", { name: "common.actions.saving" }) as HTMLButtonElement).disabled).toBe(true));
+  fireEvent.click(screen.getByRole("button", { name: "common.actions.saving" }));
   expect(updateBackground).toHaveBeenCalledTimes(1);
   expect(push).not.toHaveBeenCalled();
   await act(async () => resolveUpdate(background));

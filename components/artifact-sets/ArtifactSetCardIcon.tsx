@@ -1,3 +1,4 @@
+import { useTranslations } from "next-intl";
 import { Layers } from "lucide-react";
 
 import { EntityIcon } from "@/components/common/EntityIcon";
@@ -16,13 +17,15 @@ const SIZE = {
 } as const;
 
 export function ArtifactSetCardIcon({ url, name, className, size = "md" }: ArtifactSetCardIconProps) {
+  const t = useTranslations("artifacts.sets.card");
+
   const { frame, glyph, px } = SIZE[size];
 
   return (
     <EntityIcon
       src={url?.trim()}
       name={name}
-      alt={`Іконка сету «${name}»`}
+      alt={t("iconAlt", { name })}
       size={px}
       className={cn("rounded-lg border border-hud-line bg-hud-field text-hud-muted", frame, className)}
       fallback={<Layers className={glyph} aria-hidden />}

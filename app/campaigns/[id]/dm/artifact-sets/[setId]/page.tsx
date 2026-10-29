@@ -3,6 +3,8 @@ import { notFound } from "next/navigation";
 import { ArtifactSetForm } from "@/components/artifact-sets/ArtifactSetForm";
 import { HudFormPage } from "@/components/hud/form";
 import { prisma } from "@/lib/db";
+import { getRequestLocale } from "@/lib/i18n/request-locale";
+import { getTranslator } from "@/lib/i18n/translator";
 import { requireCampaignDM } from "@/lib/server/campaigns/access";
 import { readAbilities } from "@/lib/utils/abilities/read";
 
@@ -14,6 +16,8 @@ export default async function EditArtifactSetPage({
   const { id, setId } = await params;
 
   await requireCampaignDM(id);
+
+  const t = await getTranslator(await getRequestLocale(), "artifacts");
 
   const setRow = await prisma.artifactSet.findFirst({
     where: { id: setId, campaignId: id },
@@ -33,7 +37,7 @@ export default async function EditArtifactSetPage({
   const bonus = (setRow.setBonus ?? {}) as { name?: unknown; description?: unknown };
 
   return (
-    <HudFormPage title="Редагувати сет" aside={setRow.name}>
+    <HudFormPage title={t("sets.edit.title")} aside={setRow.name}>
       <ArtifactSetForm
         campaignId={id}
         setId={setRow.id}

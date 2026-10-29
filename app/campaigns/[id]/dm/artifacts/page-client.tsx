@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { useTranslations } from "next-intl";
 import { Gem } from "lucide-react";
 
 import { ArtifactSetCard } from "@/components/artifact-sets/ArtifactSetCard";
@@ -19,6 +20,8 @@ import { Button } from "@/components/ui/button";
 import { useArtifactsCatalog } from "@/lib/hooks/artifact-sets";
 
 export function DMArtifactsPageClient({ campaignId }: { campaignId: string }) {
+  const t = useTranslations("artifacts");
+
   const catalog = useArtifactsCatalog(campaignId);
 
   const { search } = catalog;
@@ -32,17 +35,17 @@ export function DMArtifactsPageClient({ campaignId }: { campaignId: string }) {
   return (
     <HudPage>
       <HudPageHeader
-        title="Артефакти"
-        subtitle="Управління артефактами та сетами"
+        title={t("page.title")}
+        subtitle={t("page.subtitle")}
         actions={
           <>
             <ContentTransferButtons campaignId={campaignId} kind="artifacts" />
             <DeleteAllArtifactsButton campaignId={campaignId} artifactsCount={catalog.count} />
             <Button variant="outline" className="whitespace-nowrap" asChild>
-              <Link href={`/campaigns/${campaignId}/dm/artifact-sets`}>Сети артефактів</Link>
+              <Link href={`/campaigns/${campaignId}/dm/artifact-sets`}>{t("page.setsLink")}</Link>
             </Button>
             <Button className="whitespace-nowrap" asChild>
-              <Link href={newHref}>+ Створити артефакт</Link>
+              <Link href={newHref}>{t("page.create")}</Link>
             </Button>
           </>
         }
@@ -50,25 +53,25 @@ export function DMArtifactsPageClient({ campaignId }: { campaignId: string }) {
       <OnboardingHint id="dm.artifacts" />
 
       {catalog.isLoading && catalog.isEmpty ? (
-        <LoadingState rows={6} label="Завантаження артефактів…" />
+        <LoadingState rows={6} label={t("page.loading")} />
       ) : catalog.isEmpty ? (
         <EmptyState
           className="bg-hud-panel"
           icon={Gem}
-          title="Ще немає артефактів"
+          title={t("page.emptyTitle")}
           action={
             <Button asChild>
-              <Link href={newHref}>Створити перший артефакт</Link>
+              <Link href={newHref}>{t("page.createFirst")}</Link>
             </Button>
           }
         />
       ) : (
         <>
-          <SearchInput value={search.query.value} onChange={search.query.set} label="Пошук артефактів" placeholder="Пошук за назвою або сетом" />
+          <SearchInput value={search.query.value} onChange={search.query.set} label={t("page.searchLabel")} placeholder={t("page.searchPlaceholder")} />
           {noResults && <SearchEmptyState query={search.query.value} onClear={() => search.query.set("")} />}
           {catalog.view.sets.length > 0 && (
             <HudPanel>
-              <HudSection title="Сети артефактів">
+              <HudSection title={t("page.setsSection")}>
                 <div className="space-y-4">
                   {catalog.view.sets.map(({ set, artifacts }) => (
                     <ArtifactSetCard key={set.id} variant="withArtifacts" campaignId={campaignId} set={set} artifacts={artifacts} />
@@ -80,13 +83,13 @@ export function DMArtifactsPageClient({ campaignId }: { campaignId: string }) {
 
           {catalog.view.bySlot.length > 0 && (
             <HudPanel>
-              <HudSection title="Артефакти без сету">
+              <HudSection title={t("page.ungroupedSection")}>
                 <Accordion key={search.isActive ? slotKeys : "all"} type="multiple" defaultValue={search.isActive ? catalog.view.bySlot.map((g) => g.slot) : []} className="w-full space-y-2">
-                  {catalog.view.bySlot.map(({ slot, label, artifacts }) => (
+                  {catalog.view.bySlot.map(({ slot, artifacts }) => (
                     <AccordionItem key={slot} value={slot} className="rounded-lg border last:border-b">
                       <AccordionTrigger className="px-4 hover:no-underline">
                         <span className="flex items-center gap-2">
-                          {label}
+                          {t(`slots.${slot}`)}
                           <Badge variant="secondary" className="text-xs">
                             {artifacts.length}
                           </Badge>

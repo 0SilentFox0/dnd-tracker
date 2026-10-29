@@ -4,6 +4,8 @@ vi.mock("server-only", () => ({}));
 vi.mock("@/lib/utils/api/translate-error", () => ({ requestTranslator: vi.fn() }));
 
 import { API_ERRORS } from "@/lib/constants/api-errors";
+import { createClassSchema } from "@/lib/schemas";
+import { importContent,type ImportDeps } from "@/lib/server/content/import/import-content";
 import { translateImportReport } from "@/lib/server/content/import/translate-report";
 import type { ImportReport } from "@/types/content-import";
 
@@ -37,5 +39,22 @@ describe("translateImportReport", () => {
     expect(messages[3]).toBe("Сирий український текст");
     expect(messages.every((m) => !/^(errors|validation)\./.test(m))).toBe(true);
     expect(JSON.stringify(out)).not.toMatch(/"params"|"minimum"|"maximum"/);
+  });
+
+  it("переносить params з Zod-проблеми імпорту (ключ повтореної колонки)", async () => {
+    const resource = { schemas: { create: createClassSchema, update: createClassSchema }, access: { list: "member", item: "member" }, invalidates: [] } as never;
+
+    const deps: ImportDeps = { resource: () => resource, loadNames: async () => [] };
+
+    const column = { key: "focus", label: "Focus", values: Array(20).fill("") };
+
+    const rep = await importContent({ campaignId: "c1", userId: "u", isDM: true, via: "session", scopes: null }, "classes", { rows: [{ name: "Monk", columns: [column, column] }], mode: "create", dryRun: true }, deps);
+
+    const out = translateImportReport(await getTranslator("en"), rep);
+
+    const messages = out.results[0].issues.map((i) => i.message).join("|");
+
+    expect(messages).toContain("focus");
+    expect(messages).not.toContain("{key}");
   });
 });

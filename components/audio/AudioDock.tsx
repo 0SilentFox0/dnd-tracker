@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useState } from "react";
+import { useTranslations } from "next-intl";
 
 import { AudioPlayerPanel } from "./AudioPlayerPanel";
 import { NowPlayingLabel } from "./NowPlayingLabel";
@@ -18,6 +19,8 @@ import { cn } from "@/lib/utils";
  * collapseTick — кожне зростання лічильника теж згортає панель.
  */
 export function AudioDock({ placement, collapseOn = null, collapseTick = 0, defaultExpanded }: { placement: "corner" | "strip"; collapseOn?: string | null; collapseTick?: number; defaultExpanded?: boolean }) {
+  const t = useTranslations("music");
+
   const { state, sound, dm, prefs } = usePlayerAudio();
 
   const wide = useMediaQuery(DESKTOP_QUERY);
@@ -73,11 +76,11 @@ export function AudioDock({ placement, collapseOn = null, collapseTick = 0, defa
             {track && !sound.unlocked && <UnlockSoundButton className="px-3" />}
             <button
               type="button"
-              aria-label={`Розгорнути плеєр: ${track?.title ?? "Музика"}`}
+              aria-label={t("player.expand", { title: track?.title ?? t("player.label") })}
               onClick={() => setChoice(true)}
               className="flex max-w-48 items-center gap-1.5 rounded-full border border-hud-rule bg-black/85 px-3 py-1.5 text-xs text-hud-bone shadow-lg"
             >
-              <NowPlayingLabel title={track?.title ?? "Музика"} />
+              <NowPlayingLabel title={track?.title ?? t("player.label")} />
             </button>
           </div>
         )}

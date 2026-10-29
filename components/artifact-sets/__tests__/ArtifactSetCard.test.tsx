@@ -24,13 +24,13 @@ describe("ArtifactSetCard", () => {
     expect(screen.getByText("Кров дракона")).toBeInTheDocument();
     expect(screen.getByText("Шолом зорі")).toBeInTheDocument();
     expect(screen.getByRole("combobox")).toBeInTheDocument();
-    expect(screen.getByRole("link", { name: "Редагувати сет" }).getAttribute("href")).toBe("/campaigns/c1/dm/artifact-sets/s1");
+    expect(screen.getByRole("link", { name: "artifacts.sets.card.editSet" }).getAttribute("href")).toBe("/campaigns/c1/dm/artifact-sets/s1");
   });
 
-  it("рідкість показується українською", () => {
+  it("рідкість показується через ключ, а не сире значення", () => {
     renderWithConfirm(withQuery(<ArtifactSetCard variant="withArtifacts" campaignId="c1" set={set} artifacts={[{ ...artifact, rarity: "legendary" }]} />));
 
-    expect(screen.getByText("Легендарний")).toBeInTheDocument();
+    expect(screen.getByText("artifacts.rarity.legendary")).toBeInTheDocument();
     expect(screen.queryByText("legendary")).toBeNull();
   });
 
@@ -40,8 +40,8 @@ describe("ArtifactSetCard", () => {
     expect(screen.getByRole("heading", { name: "Драконяча луска" })).toBeInTheDocument();
     expect(screen.getByText("Кров дракона")).toBeInTheDocument();
     expect(screen.getByText("Шолом зорі")).toBeInTheDocument();
-    expect(screen.getByText("Частин: 1")).toBeInTheDocument();
+    expect(screen.getByText('artifacts.sets.card.parts {"count":1}')).toBeInTheDocument();
     expect(screen.queryByRole("combobox")).toBeNull();
-    expect(screen.getByRole("link", { name: "Редагувати" }).getAttribute("href")).toBe("/campaigns/c1/dm/artifact-sets/s1");
+    expect(screen.getByRole("link", { name: "artifacts.sets.card.edit" }).getAttribute("href")).toBe("/campaigns/c1/dm/artifact-sets/s1");
   });
 });

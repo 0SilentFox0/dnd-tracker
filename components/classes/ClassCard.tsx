@@ -1,13 +1,12 @@
 "use client";
 
 import Link from "next/link";
+import { useTranslations } from "next-intl";
 import { Edit, Trash2 } from "lucide-react";
 
 import { ActionsMenu } from "@/components/common/ActionsMenu";
 import { HudCard } from "@/components/hud/page";
 import { Badge } from "@/components/ui/badge";
-import { CLASS_CASTER_LABELS } from "@/lib/constants/classes";
-import { pluralUk } from "@/lib/utils/common/plural";
 import type { GameClassData } from "@/types/classes";
 
 interface ClassCardProps {
@@ -17,9 +16,9 @@ interface ClassCardProps {
 }
 
 export function ClassCard({ gameClass, campaignId, onDelete }: ClassCardProps) {
-  const href = `/campaigns/${campaignId}/dm/classes/${gameClass.id}`;
+  const t = useTranslations();
 
-  const subclasses = gameClass.subclasses.length;
+  const href = `/campaigns/${campaignId}/dm/classes/${gameClass.id}`;
 
   return (
     <HudCard accent={gameClass.color ?? undefined} className="flex h-full flex-col gap-3">
@@ -31,16 +30,16 @@ export function ClassCard({ gameClass, campaignId, onDelete }: ClassCardProps) {
           triggerSize="sm"
           triggerClassName="h-8 w-8 p-0"
           actions={[
-            { label: "Редагувати", icon: Edit, href },
-            { label: "Видалити", icon: Trash2, onSelect: () => onDelete(gameClass.id), destructive: true },
+            { label: t("common.actions.edit"), icon: Edit, href },
+            { label: t("common.actions.delete"), icon: Trash2, onSelect: () => onDelete(gameClass.id), destructive: true },
           ]}
         />
       </div>
       <Link href={href} className="flex flex-wrap gap-2">
         <Badge variant="outline">d{gameClass.hitDie}</Badge>
-        <Badge variant="outline">{CLASS_CASTER_LABELS[gameClass.caster]}</Badge>
+        <Badge variant="outline">{t(`classes.casters.${gameClass.caster}`)}</Badge>
         <Badge variant="outline">
-          {subclasses} {pluralUk(subclasses, ["підклас", "підкласи", "підкласів"])}
+          {t("classes.card.subclasses", { count: gameClass.subclasses.length })}
         </Badge>
       </Link>
     </HudCard>

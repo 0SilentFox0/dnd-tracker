@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { useTranslations } from "next-intl";
 
 import { MainSkillFormFields } from "./MainSkillFormFields";
 
@@ -21,6 +22,8 @@ interface CreateMainSkillDialogProps {
 }
 
 export function CreateMainSkillDialog({ open, onOpenChange, campaignId }: CreateMainSkillDialogProps) {
+  const t = useTranslations();
+
   const notify = useNotify();
 
   const router = useRouter();
@@ -35,7 +38,7 @@ export function CreateMainSkillDialog({ open, onOpenChange, campaignId }: Create
     e.preventDefault();
 
     if (!formData.name.trim()) {
-      void notify("Вкажіть назву");
+      void notify(t("common.form.nameRequired"));
 
       return;
     }
@@ -47,7 +50,7 @@ export function CreateMainSkillDialog({ open, onOpenChange, campaignId }: Create
       router.refresh();
     } catch (error) {
       console.error("Error creating main skill:", error);
-      void notify(error instanceof Error ? error.message : "Помилка при створенні основного навику");
+      void notify(error instanceof Error ? error.message : t("skills.mainSkills.list.createFailed"));
     }
   };
 
@@ -55,17 +58,17 @@ export function CreateMainSkillDialog({ open, onOpenChange, campaignId }: Create
     <ResponsiveDialog
       open={open}
       onOpenChange={onOpenChange}
-      title="Створити основний навик"
-      description="Основні навики використовуються для групування скілів в дереві прокачки"
+      title={t("skills.mainSkills.create.title")}
+      description={t("skills.mainSkills.create.description")}
       size="sm"
       hud
       footer={
         <>
           <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
-            Скасувати
+            {t("common.actions.cancel")}
           </Button>
           <Button type="submit" form="create-main-skill-form" disabled={createMainSkillMutation.isPending}>
-            {createMainSkillMutation.isPending ? "Створення..." : "Створити"}
+            {createMainSkillMutation.isPending ? t("common.actions.creating") : t("common.actions.create")}
           </Button>
         </>
       }

@@ -1,3 +1,4 @@
+import type { ErrorIssue } from "@/lib/constants/api-errors";
 import { MAX_CLASS_LEVEL } from "@/lib/constants/classes";
 import { DICE_TERM_PATTERN } from "@/lib/utils/common/dice";
 import type { ClassColumn, ResolvedClassEntry } from "@/types/classes";
@@ -30,20 +31,20 @@ const cellIndex = (level: number) => Math.min(Math.max(level, 1), MAX_CLASS_LEVE
 
 export const columnValueAt = (column: ClassColumn, level: number): ColumnValue | null => parseColumnValue(column.values[cellIndex(level)]);
 
-export function classColumnIssues(columns: readonly ClassColumn[]): { path: (string | number)[]; message: string }[] {
-  const issues: { path: (string | number)[]; message: string }[] = [];
+export function classColumnIssues(columns: readonly ClassColumn[]): ErrorIssue[] {
+  const issues: ErrorIssue[] = [];
 
   const seen = new Set<string>();
 
   columns.forEach((c, i) => {
-    if (seen.has(c.key)) issues.push({ path: [i, "key"], message: `Ключ колонки «${c.key}» повторюється` });
+    if (seen.has(c.key)) issues.push({ path: [i, "key"], message: "classes.validation.columnKeyRepeated", params: { key: c.key } });
 
     seen.add(c.key);
 
     if (!c.pool) return;
 
     c.values.forEach((v, l) => {
-      if (v.trim() && typeof parseColumnValue(v) !== "number") issues.push({ path: [i, "values", l], message: `Пул «${c.label}»: рівень ${l + 1} — не число` });
+      if (v.trim() && typeof parseColumnValue(v) !== "number") issues.push({ path: [i, "values", l], message: "classes.validation.poolNotNumber", params: { label: c.label, level: l + 1 } });
     });
   });
 

@@ -188,5 +188,43 @@
     "item": "Новий предмет",
     "spell": "Нове заклинання",
     "acquaintance": "Нове знайомство"
+  },
+  "actions": {
+    "save": "Зберегти",
+    "saving": "Збереження...",
+    "create": "Створити",
+    "creating": "Створення...",
+    "edit": "Редагувати",
+    "delete": "Видалити",
+    "cancel": "Скасувати",
+    "add": "Додати",
+    "remove": "Прибрати",
+    "back": "Назад"
+  },
+  "form": {
+    "nameRequired": "Вкажіть назву",
+    "createFailed": "Помилка створення",
+    "updateFailed": "Помилка оновлення",
+    "saveFailed": "Помилка збереження"
+  },
+  "dndSkills": {
+    "acrobatics": "Акробатика",
+    "animalHandling": "Поводження з тваринами",
+    "arcana": "Магія",
+    "athletics": "Атлетика",
+    "deception": "Обман",
+    "history": "Історія",
+    "insight": "Проникливість",
+    "intimidation": "Залякування",
+    "investigation": "Розслідування",
+    "medicine": "Медицина",
+    "nature": "Природа",
+    "perception": "Сприйняття",
+    "performance": "Виступ",
+    "persuasion": "Переконання",
+    "religion": "Релігія",
+    "sleightOfHand": "Спритність рук",
+    "stealth": "Скритність",
+    "survival": "Виживання"
   }
 }

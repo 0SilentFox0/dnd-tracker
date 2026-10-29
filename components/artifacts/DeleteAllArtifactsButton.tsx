@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import { Trash2 } from "lucide-react";
 
 import { DeleteAllButton } from "@/components/common/DeleteAllButton";
@@ -11,14 +12,16 @@ interface DeleteAllArtifactsButtonProps {
 }
 
 export function DeleteAllArtifactsButton({ campaignId, artifactsCount }: DeleteAllArtifactsButtonProps) {
+  const t = useTranslations("artifacts.list");
+
   const deleteAll = useDeleteAllArtifacts(campaignId);
 
   return (
     <DeleteAllButton
       count={artifactsCount}
-      nouns={["артефакт", "артефакти", "артефактів"]}
+      nouns={[t("deleteAllNoun"), t("deleteAllNoun"), t("deleteAllNoun")]}
       view={{ variant: "soft", icon: <Trash2 className="h-4 w-4 mr-1.5" /> }}
-      confirm={{ description: `Буде видалено всі артефакти кампанії (${artifactsCount}). Сети артефактів залишаться, але стануть порожніми. Цю дію не можна скасувати.` }}
+      confirm={{ title: t("deleteAllTitle"), description: t("deleteAllDescription", { count: artifactsCount }) }}
       status={{ isPending: deleteAll.isPending }}
       actions={{ onConfirm: () => deleteAll.mutateAsync() }}
     />

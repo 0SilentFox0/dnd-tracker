@@ -30,8 +30,8 @@ describe("TrackList", () => {
     expect(getAllByText("1:01")).toHaveLength(2);
     expect(getByText("M4A")).toBeTruthy();
     expect(getByText("YouTube")).toBeTruthy();
-    expect((getAllByRole("button", { name: "Раніше" })[0] as HTMLButtonElement).disabled).toBe(true);
-    expect((getAllByRole("button", { name: "Пізніше" })[2] as HTMLButtonElement).disabled).toBe(true);
+    expect((getAllByRole("button", { name: "music.list.earlier" })[0] as HTMLButtonElement).disabled).toBe(true);
+    expect((getAllByRole("button", { name: "music.list.later" })[2] as HTMLButtonElement).disabled).toBe(true);
   });
 
   it("показує посилання: файл — публічний URL, YouTube — youtu.be", () => {
@@ -45,13 +45,13 @@ describe("TrackList", () => {
   it("«Слухати» вмикає трек; для активного — «Пауза», прогрес і помилка", () => {
     const { getAllByRole, preview } = setup();
 
-    fireEvent.click(getAllByRole("button", { name: "Слухати" })[1]);
+    fireEvent.click(getAllByRole("button", { name: "music.list.play" })[1]);
     expect(preview.toggle).toHaveBeenCalledWith(expect.objectContaining({ id: "b" }));
     cleanup();
 
     const view = setup(previewOf({ playingId: "a", failedId: "b", progress: 0.4 }));
 
-    expect(view.getAllByRole("button", { name: "Пауза" })).toHaveLength(1);
+    expect(view.getAllByRole("button", { name: "music.list.pause" })).toHaveLength(1);
     expect(view.getByRole("progressbar").getAttribute("aria-valuenow")).toBe("40");
     expect(view.getByRole("alert")).toBeTruthy();
   });
@@ -59,20 +59,20 @@ describe("TrackList", () => {
   it("«Редагувати» передає трек", () => {
     const { getAllByRole, actions } = setup();
 
-    fireEvent.click(getAllByRole("button", { name: "Редагувати" })[1]);
+    fireEvent.click(getAllByRole("button", { name: "common.actions.edit" })[1]);
     expect(actions.onEdit).toHaveBeenCalledWith(expect.objectContaining({ id: "b" }));
   });
 
   it("стрілка, видалення й перейменування викликають дії", () => {
     const { getAllByRole, getAllByLabelText, actions } = setup();
 
-    fireEvent.click(getAllByRole("button", { name: "Пізніше" })[0]);
+    fireEvent.click(getAllByRole("button", { name: "music.list.later" })[0]);
     expect(actions.onMove).toHaveBeenCalledWith("a", 1);
 
-    fireEvent.click(getAllByRole("button", { name: "Видалити" })[1]);
+    fireEvent.click(getAllByRole("button", { name: "common.actions.delete" })[1]);
     expect(actions.onDelete).toHaveBeenCalledWith(expect.objectContaining({ id: "b" }));
 
-    const input = getAllByLabelText("Назва треку")[0];
+    const input = getAllByLabelText("music.list.titleName")[0];
 
     fireEvent.change(input, { target: { value: "Таверна" } });
     fireEvent.blur(input);
@@ -82,7 +82,7 @@ describe("TrackList", () => {
   it("незмінена або порожня назва — без перейменування", () => {
     const { getAllByLabelText, actions } = setup();
 
-    const input = getAllByLabelText("Назва треку")[0];
+    const input = getAllByLabelText("music.list.titleName")[0];
 
     fireEvent.blur(input);
     fireEvent.change(input, { target: { value: "   " } });

@@ -1,6 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
+import { useTranslations } from "next-intl";
 
 import { ArtifactForm } from "./ArtifactForm";
 
@@ -19,6 +20,8 @@ export function ArtifactEditForm({
   artifact,
   artifactSets,
 }: ArtifactEditFormProps) {
+  const t = useTranslations("artifacts.form");
+
   const router = useRouter();
 
   const update = useUpdateArtifact(campaignId);
@@ -31,17 +34,11 @@ export function ArtifactEditForm({
       artifactSets={artifactSets}
       mode="edit"
       labels={{
-        title: "Редагувати артефакт",
-        description: "Зміни зберігаються при натисканні кнопки",
-        submit: "Зберегти",
-        saving: "Збереження...",
-        iconHint: (
-          <>
-            Нове зовнішнє посилання при збереженні завантажується в бакет{" "}
-            <code className="text-xs bg-muted px-1 rounded">artifact-icons</code>
-            . URL уже з Supabase залишається без змін.
-          </>
-        ),
+        title: t("editTitle"),
+        description: t("editDescription"),
+        submit: t("editSubmit"),
+        saving: t("editSaving"),
+        iconHint: t("editIconHint", { bucket: "artifact-icons" }),
       }}
       cancelHref={`/campaigns/${campaignId}/dm/artifacts`}
       initial={{

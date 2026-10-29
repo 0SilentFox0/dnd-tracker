@@ -56,7 +56,7 @@ export function loadYoutubeIframeApi(): Promise<YtNamespace> {
     script.async = true;
     script.onerror = () => {
       loading = null;
-      reject(new Error("YouTube API не завантажився"));
+      reject(new Error("YouTube API failed to load"));
     };
     document.head.appendChild(script);
   });

@@ -19,12 +19,12 @@ function Harness() {
 afterEach(cleanup);
 it("selects a background, shows its origin feat and limits each ASI to two", () => {
  render(<Harness />);
- fireEvent.change(screen.getByLabelText("Передісторія"), { target:{value:"sage"} });
+ fireEvent.change(screen.getByLabelText("choices.editor.background"), { target:{value:"sage"} });
  expect(screen.getByText("Видає ДМ")).toBeTruthy();
 
  const plus=screen.getByRole("button", {name:"+1 Сила"});
 
  fireEvent.click(plus); fireEvent.click(plus);
  expect((plus as HTMLButtonElement).disabled).toBe(true);
- expect(screen.queryByRole("heading", {name:"Риса походження"})).toBeNull();
+ expect(screen.queryByRole("heading", {name:"choices.editor.originFeat"})).toBeNull();
 });

@@ -1,0 +1,58 @@
+{
+  "types": {
+    "origin": "Походження",
+    "general": "Загальна",
+    "fightingStyle": "Стиль бою",
+    "epicBoon": "Епічний дар"
+  },
+  "page": {
+    "title": "Риси",
+    "subtitle": "{count, plural, one {# риса} few {# риси} many {# рис} other {# рис}}",
+    "create": "Нова риса",
+    "filterAll": "Усі",
+    "filterLabel": "Тип риси",
+    "loading": "Завантаження рис…",
+    "emptyTitle": "Ще немає рис",
+    "emptyDescription": "Створіть першу рису або імпортуйте їх з файлу."
+  },
+  "card": {
+    "level": "Рівень {level}+",
+    "repeatable": "Повторювана",
+    "choices": "{count, plural, one {# вибір} few {# вибори} many {# виборів} other {# виборів}}"
+  },
+  "create": {
+    "title": "Нова риса",
+    "description": "Тип, передумови, вміння й вибори — після створення",
+    "submit": "Створити рису",
+    "name": "Назва риси *",
+    "namePlaceholder": "Наприклад: Пильний"
+  },
+  "form": {
+    "editTitle": "Редагувати рису",
+    "editAside": "Тип, передумови, вміння й вкладені вибори",
+    "tabs": {
+      "basics": "Основне",
+      "abilities": "Вміння",
+      "choices": "Вибори"
+    },
+    "name": "Назва риси *",
+    "icon": "Іконка риси",
+    "type": "Тип риси",
+    "prerequisites": "Передумови",
+    "minLevel": "Мінімальний рівень",
+    "scoreMin": "Будь-яка з характеристик не нижче",
+    "scoreMinAria": "Мінімальне значення характеристики",
+    "prereqText": "Інші передумови (текст)",
+    "prereqTextPlaceholder": "Напр.: Spellcasting Feature",
+    "repeatable": "Повторювана",
+    "description": "Опис"
+  },
+  "list": {
+    "confirmDelete": "Видалити цю рису?",
+    "deleteError": "Не вдалося видалити рису",
+    "createError": "Не вдалося створити рису"
+  },
+  "validation": {
+    "iconUrl": "Іконка риси — лише посилання на зображення"
+  }
+}

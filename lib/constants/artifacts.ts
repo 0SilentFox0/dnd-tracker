@@ -13,7 +13,7 @@ export enum ArtifactRarity {
   LEGENDARY = "legendary",
 }
 
-export const ARTIFACT_RARITY_VALUES: readonly [string, ...string[]] = [
+export const ARTIFACT_RARITY_VALUES: readonly [ArtifactRarity, ...ArtifactRarity[]] = [
   ArtifactRarity.COMMON,
   ArtifactRarity.UNCOMMON,
   ArtifactRarity.RARE,
@@ -56,7 +56,7 @@ export enum ArtifactSlot {
   ITEM = "item",
 }
 
-export const ARTIFACT_SLOT_VALUES: readonly [string, ...string[]] = [
+export const ARTIFACT_SLOT_VALUES: readonly [ArtifactSlot, ...ArtifactSlot[]] = [
   ArtifactSlot.WEAPON,
   ArtifactSlot.RANGE_WEAPON,
   ArtifactSlot.SHIELD,
@@ -163,6 +163,8 @@ export const ITEM_LIMITS = {
 } as const;
 
 export const ITEM_KINDS = ["weapon", "armor", "shield"] as const;
+
+export const ITEM_REST_VALUES = ["long", "short", "none"] as const;
 
 export const ARMOR_CATEGORIES = ["light", "medium", "heavy"] as const;
 

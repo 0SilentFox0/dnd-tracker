@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useTranslations } from "next-intl";
 
 import { RaceFormFields } from "./RaceFormFields";
 
@@ -40,6 +41,10 @@ export function CreateRaceDialog({
   onCreateRace,
   status,
 }: CreateRaceDialogProps) {
+  const t = useTranslations("races");
+
+  const tc = useTranslations("common");
+
   const [formData, setFormData] = useState<RaceFormData>(EMPTY_FORM);
 
   const [abilityErrors, setAbilityErrors] = useState(0);
@@ -58,22 +63,22 @@ export function CreateRaceDialog({
     <ResponsiveDialog
       open={open}
       onOpenChange={onOpenChange}
-      title="Створити расу"
-      description="Заповніть інформацію про расу та її здібності"
+      title={t("create.title")}
+      description={t("create.description")}
       size="lg"
       hud
       footer={
         <>
           {status?.error != null && (
             <p role="alert" className="w-full text-sm text-destructive">
-              {errorMessage(status.error, "Не вдалося створити расу")}
+              {errorMessage(status.error, t("create.error"))}
             </p>
           )}
           <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
-            Скасувати
+            {tc("actions.cancel")}
           </Button>
           <Button type="submit" form="create-race-form" disabled={!abilitiesValid || status?.isPending}>
-            {status?.isPending ? "Створення..." : withAbilityErrors("Створити расу", abilityErrors)}
+            {status?.isPending ? tc("actions.creating") : withAbilityErrors(t("create.submit"), abilityErrors)}
           </Button>
         </>
       }

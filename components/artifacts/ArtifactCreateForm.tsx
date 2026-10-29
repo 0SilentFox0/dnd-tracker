@@ -1,6 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
+import { useTranslations } from "next-intl";
 
 import { ArtifactForm } from "./ArtifactForm";
 
@@ -17,6 +18,8 @@ export function ArtifactCreateForm({
   campaignId,
   artifactSets,
 }: ArtifactCreateFormProps) {
+  const t = useTranslations("artifacts.form");
+
   const router = useRouter();
 
   const create = useCreateArtifact(campaignId);
@@ -27,18 +30,11 @@ export function ArtifactCreateForm({
       artifactSets={artifactSets}
       mode="create"
       labels={{
-        title: "Створити артефакт",
-        description: "Бонуси та ефекти артефакту задаються вміннями",
-        submit: "Створити артефакт",
-        saving: "Створення...",
-        iconHint: (
-          <>
-            Зовнішнє посилання при збереженні копіюється в Supabase Storage
-            (бакет{" "}
-            <code className="text-xs bg-muted px-1 rounded">artifact-icons</code>
-            ); у базі залишиться публічний URL з вашого проєкту.
-          </>
-        ),
+        title: t("createTitle"),
+        description: t("createDescription"),
+        submit: t("createSubmit"),
+        saving: t("createSaving"),
+        iconHint: t("createIconHint", { bucket: "artifact-icons" }),
       }}
       cancelHref={`/campaigns/${campaignId}/dm/artifacts`}
       initial={{

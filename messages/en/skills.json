@@ -1,0 +1,133 @@
+{
+  "page": {
+    "title": "Skill Library",
+    "subtitle": "Manage skills and their effects",
+    "newMainSkill": "+ Main skill",
+    "newSkill": "+ Create skill",
+    "print": "Print version",
+    "loading": "Loading skills…",
+    "emptyTitle": "No skills yet",
+    "emptyDescription": "Create your first skill to fill the progression tree.",
+    "createFirst": "Create first skill",
+    "searchLabel": "Search skills",
+    "searchPlaceholder": "Search by name or main skill",
+    "deleteAllNouns": "skills",
+    "deleteAllDescription": "This will delete all skills from the library ({count} {count, plural, one {skill} other {skills}}). This action cannot be undone."
+  },
+  "card": {
+    "menu": "Actions menu",
+    "chooseMainSkill": "Choose main skill",
+    "noMainSkill": "No main skill",
+    "copy": "Copy",
+    "deleteTitle": "Delete skill?",
+    "deleteDescription": "Skill \"{name}\" will be deleted. This action cannot be undone.",
+    "spellUpgrade": "Spell upgrade:"
+  },
+  "group": {
+    "ungrouped": "No main skill",
+    "removeAll": "Delete all skills in the group",
+    "count": "{count} {count, plural, one {skill} other {skills}}"
+  },
+  "form": {
+    "createTitle": "Create skill",
+    "editTitle": "Edit skill",
+    "createAside": "Add a new skill with its stats and effects",
+    "editAside": "Update the skill details",
+    "submitCreate": "Create skill",
+    "submitEdit": "Save changes",
+    "loading": "Loading skill…",
+    "backToLibrary": "Back to the skill library",
+    "tabs": {
+      "basic": "Basics",
+      "spell": "Spell",
+      "abilities": "Abilities"
+    },
+    "basic": {
+      "name": "Name",
+      "namePlaceholder": "For example: Swordsmanship",
+      "description": "Description",
+      "descriptionPlaceholder": "Skill description",
+      "icon": "Icon (URL)"
+    },
+    "spell": {
+      "title": "Spell",
+      "related": "Related spell",
+      "notSelected": "Not selected",
+      "granted": "Grants a spell",
+      "grantedNone": "Grants no spell",
+      "hint": "\"Grants a spell\" — a hero who learns this skill gets the spell in their spellbook. Spell target extensions (area, all) are set by the \"Spell targets\" ability.",
+      "upgrade": "Spell upgrade",
+      "none": "No spell"
+    },
+    "mainSkill": {
+      "label": "Main skill",
+      "none": "No main skill"
+    }
+  },
+  "list": {
+    "duplicateFailed": "Could not duplicate the skill. Please try again.",
+    "appearanceSaveFailed": "Could not save the appearance description"
+  },
+  "print": {
+    "title": "Campaign \"{campaign}\" — Skills",
+    "hint": "Print version. Press Cmd/Ctrl+P to save as PDF.",
+    "button": "Print",
+    "empty": "The campaign has no skills to print.",
+    "school": "School of magic: {group}"
+  },
+  "mainSkills": {
+    "roles": {
+      "attack": "Attack",
+      "ranged": "Ranged",
+      "defense": "Defense",
+      "magic": "Magic",
+      "leadership": "Leadership",
+      "race": "Race",
+      "ultimate": "Ultimate",
+      "personal": "Personal"
+    },
+    "page": {
+      "title": "Main Skills",
+      "subtitle": "Manage main skills for progression trees · Total: {total}",
+      "create": "Create main skill",
+      "emptyTitle": "No main skills yet",
+      "emptyDescription": "Create your first main skill — it groups skills in the progression tree.",
+      "searchLabel": "Search main skills"
+    },
+    "card": {
+      "id": "ID: {id}",
+      "color": "Segment color:",
+      "icon": "Icon:"
+    },
+    "form": {
+      "section": "Main skill",
+      "name": "Name",
+      "namePlaceholder": "For example: Attack, Defense, Magic",
+      "color": "Segment color",
+      "colorDescription": "The color is used to display the segment in the progression tree",
+      "icon": "Icon (URL)",
+      "role": "Role",
+      "roleDescription": "Magic — counts as a magic school in balance; Personal — the branch of a hero's personal skills",
+      "roleNone": "No role",
+      "spellGroup": "Spell group (school of magic)",
+      "spellGroupDescription": "When a hero learns a level of this skill, they gain a spell from the chosen group",
+      "spellGroupPlaceholder": "Choose a spell group",
+      "spellGroupNone": "— No group —"
+    },
+    "create": {
+      "title": "Create main skill",
+      "description": "Main skills are used to group skills in the progression tree"
+    },
+    "edit": {
+      "title": "Edit main skill",
+      "aside": "Update the main skill details",
+      "submit": "Save changes"
+    },
+    "list": {
+      "deleteConfirm": "Are you sure you want to delete this main skill? This will also delete all skills linked to it.",
+      "deleteFailed": "Failed to delete the main skill",
+      "createFailed": "Failed to create the main skill",
+      "updateFailed": "Failed to update the main skill"
+    }
+  }
+}

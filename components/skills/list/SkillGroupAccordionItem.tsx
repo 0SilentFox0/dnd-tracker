@@ -1,10 +1,11 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import { Edit, X } from "lucide-react";
 
 import { GroupAccordionItem } from "@/components/common/GroupAccordionItem";
 import { SkillCard, type SkillCardActions } from "@/components/skills/list/SkillCard";
-import { groupDisplayName, UNGROUPED_LABELS } from "@/lib/constants/ungrouped";
+import { groupDisplayName } from "@/lib/constants/ungrouped";
 import type { Skill } from "@/types/skills";
 
 export interface SkillGroupAccordionItemProps {
@@ -26,18 +27,20 @@ export function SkillGroupAccordionItem({
   skills,
   campaignId,
 }: SkillGroupAccordionItemProps) {
+  const t = useTranslations();
+
   const menuActions = groupMenu
     ? [
-        { label: "Перейменувати групу", icon: Edit, onSelect: groupMenu.onRename },
-        { label: "Видалити всі скіли з групи", icon: X, onSelect: groupMenu.onRemoveAll },
+        { label: t("common.renameGroup.title"), icon: Edit, onSelect: groupMenu.onRename },
+        { label: t("skills.group.removeAll"), icon: X, onSelect: groupMenu.onRemoveAll },
       ]
     : undefined;
 
   return (
     <GroupAccordionItem
       value={groupName}
-      title={groupDisplayName(groupName, UNGROUPED_LABELS.mainSkill)}
-      countLabel={`${totalSkills} скілів`}
+      title={groupDisplayName(groupName, t("skills.group.ungrouped"))}
+      countLabel={t("skills.group.count", { count: totalSkills })}
       accent={accent}
       className="rounded-lg overflow-hidden"
       menuActions={menuActions}

@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import { Award, Plus } from "lucide-react";
 
 import { EmptyState, LoadingState } from "@/components/common/states";
@@ -8,11 +9,12 @@ import { CreateFeatDialog } from "@/components/feats/CreateFeatDialog";
 import { FeatCard } from "@/components/feats/FeatCard";
 import { HudChipTabs, HudPage, HudPageHeader } from "@/components/hud/page";
 import { Button } from "@/components/ui/button";
-import { FEAT_TYPE_LABELS, FEAT_TYPES } from "@/lib/constants/choices";
+import { FEAT_TYPES } from "@/lib/constants/choices";
 import { useFeatsList } from "@/lib/hooks/feats";
-import { pluralUk } from "@/lib/utils/common/plural";
 
 export function DMFeatsPageClient({ campaignId }: { campaignId: string }) {
+  const t = useTranslations("feats");
+
   const list = useFeatsList(campaignId);
 
   const { feats, all, typeFilter } = list;
@@ -20,14 +22,14 @@ export function DMFeatsPageClient({ campaignId }: { campaignId: string }) {
   return (
     <HudPage>
       <HudPageHeader
-        title="Риси"
-        subtitle={`${all.length} ${pluralUk(all.length, ["риса", "риси", "рис"])}`}
+        title={t("page.title")}
+        subtitle={t("page.subtitle", { count: all.length })}
         actions={
           <>
             <ContentTransferButtons campaignId={campaignId} kind="feats" />
             <Button onClick={() => list.createDialog.setOpen(true)} className="flex items-center gap-2">
               <Plus className="h-4 w-4" />
-              Нова риса
+              {t("page.create")}
             </Button>
           </>
         }
@@ -35,15 +37,15 @@ export function DMFeatsPageClient({ campaignId }: { campaignId: string }) {
 
       {all.length > 0 && (
         <HudChipTabs
-          ariaLabel="Тип риси"
-          items={[{ key: "all", label: "Усі", active: typeFilter.value === null, onSelect: () => typeFilter.set(null) }, ...FEAT_TYPES.map((t) => ({ key: t, label: FEAT_TYPE_LABELS[t], active: typeFilter.value === t, onSelect: () => typeFilter.set(t) }))]}
+          ariaLabel={t("page.filterLabel")}
+          items={[{ key: "all", label: t("page.filterAll"), active: typeFilter.value === null, onSelect: () => typeFilter.set(null) }, ...FEAT_TYPES.map((type) => ({ key: type, label: t(`types.${type}`), active: typeFilter.value === type, onSelect: () => typeFilter.set(type) }))]}
         />
       )}
 
       {list.isLoading && all.length === 0 ? (
-        <LoadingState rows={6} label="Завантаження рис…" />
+        <LoadingState rows={6} label={t("page.loading")} />
       ) : all.length === 0 ? (
-        <EmptyState icon={Award} title="Ще немає рис" description="Створіть першу рису або імпортуйте їх з файлу." />
+        <EmptyState icon={Award} title={t("page.emptyTitle")} description={t("page.emptyDescription")} />
       ) : (
         <div className="grid gap-3 md:grid-cols-2 lg:grid-cols-3">
           {feats.map((feat) => (

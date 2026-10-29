@@ -14,6 +14,7 @@ describe("music schemas", () => {
   it("назва 1..120 після обрізання пробілів", () => {
     expect(updateTrackSchema.parse({ title: "  Таверна  " })).toEqual({ title: "Таверна" });
     expect(updateTrackSchema.safeParse({ title: "x".repeat(121) }).success).toBe(false);
+    expect(updateTrackSchema.safeParse({}).error?.issues[0].message).toBe("music.validation.nothingToChange");
   });
 
   it("reorder: 1..200 id", () => {

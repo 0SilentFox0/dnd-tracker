@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import { Plus } from "lucide-react";
 
 import { ChoiceHeaderRow } from "./ChoiceHeaderRow";
@@ -37,6 +38,8 @@ const KIND_DEFAULTS: Record<ChoiceKind, Partial<Choice>> = {
 };
 
 export function ChoiceListEditor({ campaignId, owner, value, onChange, classColumns = [], onValidityChange }: ChoiceListEditorProps) {
+  const t = useTranslations("choices");
+
   const { report, drop } = useErrorTotals(onValidityChange);
 
   const { keys, removeAt } = useRowKeys(value.length);
@@ -51,7 +54,7 @@ export function ChoiceListEditor({ campaignId, owner, value, onChange, classColu
     onChange(value.map((c, k) => (k === i ? { id, label, level, count, ...(description && { description }), ...(lineage && { lineage }), kind, ...KIND_DEFAULTS[kind] } : c)));
   };
 
-  const add = () => onChange([...value, { id: choiceSlug("choice", value.map((c) => c.id)), label: "Новий вибір", level: 1, count: 1, kind: "skill" }]);
+  const add = () => onChange([...value, { id: choiceSlug("choice", value.map((c) => c.id)), label: t("list.newChoice"), level: 1, count: 1, kind: "skill" }]);
 
   const remove = (i: number) => {
     drop(`c${keys[i]}`);
@@ -71,15 +74,15 @@ export function ChoiceListEditor({ campaignId, owner, value, onChange, classColu
             <div className="flex flex-wrap items-end gap-3">
               {choice.kind !== "abilityScore" && (
                 <div className="w-24 space-y-1">
-                  <Label htmlFor={`choice-${i}-count`}>Кількість</Label>
+                  <Label htmlFor={`choice-${i}-count`}>{t("list.count")}</Label>
                   <Input id={`choice-${i}-count`} type="number" min={1} max={CHOICE_LIMITS.count} disabled={typeof choice.count !== "number"} value={typeof choice.count === "number" ? choice.count : ""} onChange={(e) => onPatch({ count: Number(e.target.value) || 1 })} />
                 </div>
               )}
               {owner === "class" && choice.kind !== "abilityScore" && (
                 <div className="space-y-1">
-                  <Label htmlFor={`choice-${i}-scale`}>Кількість з таблиці класу</Label>
+                  <Label htmlFor={`choice-${i}-scale`}>{t("list.scale")}</Label>
                   <select id={`choice-${i}-scale`} className={HUD_SELECT_CLASS} value={typeof choice.count === "number" ? "" : choice.count.scale} onChange={(e) => onPatch({ count: e.target.value ? { scale: e.target.value } : 1 })}>
-                    <option value="">— число —</option>
+                    <option value="">{t("list.scaleNumber")}</option>
                     {classColumns.map((c) => (
                       <option key={c.key} value={c.key}>
                         {c.label}
@@ -91,12 +94,12 @@ export function ChoiceListEditor({ campaignId, owner, value, onChange, classColu
               {owner === "race" && choice.kind === "option" && (
                 <label className="flex items-center gap-2 text-sm">
                   <Checkbox checked={!!choice.lineage} onCheckedChange={(on) => onPatch({ lineage: on ? true : undefined })} />
-                  Лінія (назва опції → підраса)
+                  {t("list.lineage")}
                 </label>
               )}
             </div>
 
-            <Textarea aria-label="Опис вибору" rows={2} value={choice.description ?? ""} onChange={(e) => onPatch({ description: e.target.value || undefined })} />
+            <Textarea aria-label={t("list.description")} rows={2} value={choice.description ?? ""} onChange={(e) => onPatch({ description: e.target.value || undefined })} />
 
             {(choice.kind === "skill" || choice.kind === "expertise") && <SkillChoiceFields choice={choice} onPatch={onPatch} />}
             {choice.kind === "abilityScore" && <AbilityScoreChoiceFields choice={choice} onPatch={onPatch} />}
@@ -109,7 +112,7 @@ export function ChoiceListEditor({ campaignId, owner, value, onChange, classColu
       })}
       <Button type="button" variant="outline" size="sm" onClick={add}>
         <Plus className="h-4 w-4" />
-        Додати вибір
+        {t("list.add")}
       </Button>
     </div>
   );

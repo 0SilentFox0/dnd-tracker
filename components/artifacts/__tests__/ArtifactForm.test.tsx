@@ -62,9 +62,9 @@ describe("ArtifactForm", () => {
       </QueryClientProvider>,
     );
 
-    fireEvent.change(screen.getByLabelText("Кубики шкоди"), { target: { value: "2d8" } });
-    fireEvent.change(screen.getByLabelText("Тип шкоди"), { target: { value: "fire" } });
-    fireEvent.change(screen.getByLabelText("Бонус атаки"), { target: { value: "-1" } });
+    fireEvent.change(screen.getByLabelText("artifacts.weapon.damageDice"), { target: { value: "2d8" } });
+    fireEvent.change(screen.getByLabelText("artifacts.weapon.damageType"), { target: { value: "fire" } });
+    fireEvent.change(screen.getByLabelText("artifacts.weapon.attackBonus"), { target: { value: "-1" } });
     fireEvent.click(screen.getByRole("button", { name: "Зберегти" }));
 
     await vi.waitFor(() => expect(onSubmit).toHaveBeenCalled());
@@ -121,11 +121,11 @@ describe("ArtifactForm", () => {
       </QueryClientProvider>,
     );
 
-    fireEvent.click(screen.getByRole("button", { name: "Видалити" }));
+    fireEvent.click(screen.getByRole("button", { name: "common.actions.delete" }));
 
     const dialog = await screen.findByRole("alertdialog");
 
-    fireEvent.click(within(dialog).getByRole("button", { name: "Видалити" }));
+    fireEvent.click(within(dialog).getByRole("button", { name: "common.actions.delete" }));
 
     expect(await within(dialog).findByRole("alert")).toHaveTextContent("Артефакт екіпіровано");
     expect(onDelete).toHaveBeenCalledTimes(1);
@@ -140,19 +140,19 @@ describe("ArtifactForm", () => {
       </QueryClientProvider>,
     );
 
-    fireEvent.mouseDown(screen.getByRole("tab", { name: "Зброя" }));
-    expect(screen.getByRole("tab", { name: "Зброя" })).toHaveAttribute("data-state", "active");
+    fireEvent.mouseDown(screen.getByRole("tab", { name: "artifacts.form.tabs.weapon" }));
+    expect(screen.getByRole("tab", { name: "artifacts.form.tabs.weapon" })).toHaveAttribute("data-state", "active");
 
     const slotSelect = Array.from(document.querySelectorAll<HTMLSelectElement>("select")).find((el) => el.value === "weapon");
 
     fireEvent.change(slotSelect as HTMLSelectElement, { target: { value: ArtifactSlot.RING } });
 
-    expect(screen.queryByRole("tab", { name: "Зброя" })).toBeNull();
-    expect(screen.getByRole("tab", { name: "Основне" })).toHaveAttribute("data-state", "active");
+    expect(screen.queryByRole("tab", { name: "artifacts.form.tabs.weapon" })).toBeNull();
+    expect(screen.getByRole("tab", { name: "artifacts.form.tabs.basic" })).toHaveAttribute("data-state", "active");
 
     fireEvent.change(Array.from(document.querySelectorAll<HTMLSelectElement>("select")).find((el) => el.value === ArtifactSlot.RING) as HTMLSelectElement, { target: { value: "weapon" } });
 
-    expect(screen.getByRole("tab", { name: "Зброя" })).toHaveAttribute("data-state", "inactive");
-    expect(screen.getByRole("tab", { name: "Основне" })).toHaveAttribute("data-state", "active");
+    expect(screen.getByRole("tab", { name: "artifacts.form.tabs.weapon" })).toHaveAttribute("data-state", "inactive");
+    expect(screen.getByRole("tab", { name: "artifacts.form.tabs.basic" })).toHaveAttribute("data-state", "active");
   });
 });

@@ -31,7 +31,11 @@ export async function uploadTrackFile(campaignId: string, file: File, meta: { ti
 
   const { error } = await createClient().storage.from(ticket.bucket).uploadToSignedUrl(ticket.path, ticket.token, body, { contentType: ticket.contentType, cacheControl: TRACK_CACHE_SECONDS });
 
-  if (error) throw new Error(`Не вдалося завантажити файл: ${error.message}`);
+  if (error) {
+    console.warn("[tracks] upload failed", error.message);
+
+    throw new Error("music.library.uploadFailed");
+  }
 
   return createTrack(campaignId, { kind: "file", path: ticket.path, title: meta.title, ...(meta.durationSec ? { durationSec: Math.max(1, Math.round(meta.durationSec)) } : {}) });
 }

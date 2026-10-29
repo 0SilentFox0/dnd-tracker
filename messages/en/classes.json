@@ -1,0 +1,113 @@
+{
+  "casters": {
+    "none": "Non-caster",
+    "full": "Full caster",
+    "half": "Half caster",
+    "third": "Third caster",
+    "pact": "Pact"
+  },
+  "page": {
+    "title": "Classes",
+    "subtitle": "{count, plural, one {# class} other {# classes}}",
+    "newClass": "New class",
+    "loading": "Loading classes…",
+    "emptyTitle": "No classes yet",
+    "emptyDescription": "Create the first class."
+  },
+  "card": {
+    "subclasses": "{count, plural, one {# subclass} other {# subclasses}}"
+  },
+  "create": {
+    "title": "New class",
+    "description": "You can fill in the rest after creating it",
+    "nameLabel": "Class name *",
+    "namePlaceholder": "E.g. Fighter, Wizard",
+    "submit": "Create class"
+  },
+  "list": {
+    "confirmDelete": "Are you sure you want to delete this class?",
+    "deleteError": "Failed to delete the class",
+    "createError": "Failed to create the class"
+  },
+  "form": {
+    "title": "Edit class",
+    "aside": "Basics, features by level and subclasses",
+    "tabs": {
+      "map": "Map",
+      "basics": "Basics",
+      "table": "Class table",
+      "features": "Features by level",
+      "subclasses": "Subclasses"
+    }
+  },
+  "basics": {
+    "name": "Class name *",
+    "icon": "Class icon",
+    "color": "Class color",
+    "hitDie": "Hit die",
+    "savingThrows": "Saving throws",
+    "armor": "Armor proficiencies",
+    "weapons": "Weapon proficiencies",
+    "tools": "Tool proficiencies",
+    "skillCount": "Skills to choose",
+    "skillList": "Skills to choose from",
+    "caster": "Caster type",
+    "spellAbility": "Spellcasting ability",
+    "spellList": "Spell list"
+  },
+  "spellHint": {
+    "none": "No spell has the tag “{tag}”",
+    "count": "Spells in the list: {count}"
+  },
+  "columns": {
+    "hint": "20 comma-separated values (levels 1–20): “2”, “+2”, “1d6”, “D8”, “+10 ft.”; empty means none. A pool column is the maximum of points shared by the class features.",
+    "defaultLabel": "Column {n}",
+    "remove": "Delete column {n}",
+    "keyLabel": "Column {n} key",
+    "nameLabel": "Column {n} name",
+    "valuesLabel": "Column {n} values",
+    "poolLabel": "Column {n} pool",
+    "restLabel": "Column {n} rest",
+    "pool": "Pool",
+    "restShort": "short rest",
+    "restLong": "long rest",
+    "add": "Add column"
+  },
+  "features": {
+    "level": "Level {level}",
+    "removeLevel": "Delete level {level}",
+    "choices": "Choices",
+    "levelToAdd": "Level to add",
+    "addLevel": "Add level"
+  },
+  "subclasses": {
+    "levelLabel": "Subclass choice level",
+    "srdNote": "The SRD has only one subclass per class; add the others yourself.",
+    "newSubclass": "New subclass",
+    "remove": "Delete subclass {name}",
+    "nameLabel": "Subclass name",
+    "add": "Add subclass"
+  },
+  "progression": {
+    "level": "Level",
+    "base": "Base",
+    "choice": "Choice",
+    "next": "next",
+    "subclass": "Subclass",
+    "chooseSubclass": "Choose a subclass",
+    "statusOpen": "choose",
+    "statusDone": "done",
+    "statusLocked": "closed"
+  },
+  "validation": {
+    "iconLink": "The class icon must be an image link only",
+    "colorFormat": "The class color must be in #RRGGBB format",
+    "columnKeyFormat": "The column key must be Latin kebab-case",
+    "duplicateSubclass": "Duplicate subclass id",
+    "classRepeated": "The class is repeated",
+    "columnKeyRepeated": "The column key “{key}” is repeated",
+    "poolNotNumber": "Pool “{label}”: level {level} is not a number",
+    "columnMissing": "The class table has no column “{key}”",
+    "choiceIdRepeated": "The choice id “{id}” is repeated"
+  }
+}

@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useTranslations } from "next-intl";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -8,7 +9,6 @@ import { ResponsiveDialog } from "@/components/ui/responsive-dialog";
 import { TRACK_TITLE_MAX } from "@/lib/constants/music";
 import { translateIssue } from "@/lib/i18n/translate-issue";
 import { useTranslator } from "@/lib/i18n/use-translator";
-import { BATTLE_TRACK_GROUP, OTHER_TRACK_GROUP } from "@/lib/utils/audio/playlist-groups";
 import { buildTrackPatch, trackToDraft } from "@/lib/utils/audio/track-edit";
 import { trackLink } from "@/lib/utils/audio/track-link";
 import type { CampaignTrack, UpdateTrackData } from "@/types/audio";
@@ -28,6 +28,12 @@ export interface EditTrackDialogProps {
 function EditTrackForm({ track, onClose, onSave, pending, groups }: EditTrackDialogProps & { track: CampaignTrack }) {
   const t = useTranslator();
 
+  const tr = useTranslations();
+
+  const other = tr("music.groups.other");
+
+  const battle = tr("music.groups.battle");
+
   const [draft, setDraft] = useState(() => trackToDraft(track));
 
   const built = buildTrackPatch(track, draft);
@@ -37,11 +43,11 @@ function EditTrackForm({ track, onClose, onSave, pending, groups }: EditTrackDia
       hud
       open
       onOpenChange={(open) => !open && onClose()}
-      title="Редагувати трек"
+      title={tr("music.edit.title")}
       description={track.title}
       footer={
         <Button type="submit" form={FORM_ID} disabled={!built.ok || pending}>
-          Зберегти
+          {tr("common.actions.save")}
         </Button>
       }
     >
@@ -55,30 +61,30 @@ function EditTrackForm({ track, onClose, onSave, pending, groups }: EditTrackDia
         }}
       >
         <label className="flex flex-col gap-1 text-xs text-hud-muted">
-          Група
-          <Input aria-label="Група" list={GROUPS_ID} placeholder={OTHER_TRACK_GROUP} maxLength={TRACK_TITLE_MAX} value={draft.group} onChange={(e) => setDraft({ ...draft, group: e.target.value })} />
+          {tr("music.edit.group")}
+          <Input aria-label={tr("music.edit.group")} list={GROUPS_ID} placeholder={other} maxLength={TRACK_TITLE_MAX} value={draft.group} onChange={(e) => setDraft({ ...draft, group: e.target.value })} />
           <datalist id={GROUPS_ID}>
             {groups.map((g) => <option key={g} value={g} />)}
           </datalist>
-          <span>Оберіть наявну або введіть нову. Порожня — «{OTHER_TRACK_GROUP}». Усі «Раса - Битва N» показуються в групі «{BATTLE_TRACK_GROUP}».</span>
+          <span>{tr("music.edit.groupHint", { other, battle })}</span>
         </label>
         <label className="flex flex-col gap-1 text-xs text-hud-muted">
-          Назва
-          <Input aria-label="Назва" maxLength={TRACK_TITLE_MAX} value={draft.name} onChange={(e) => setDraft({ ...draft, name: e.target.value })} />
+          {tr("music.edit.name")}
+          <Input aria-label={tr("music.edit.name")} maxLength={TRACK_TITLE_MAX} value={draft.name} onChange={(e) => setDraft({ ...draft, name: e.target.value })} />
           {!built.ok && built.error.title && <span className="text-[var(--enemy)]">{translateIssue(t, { message: built.error.title })}</span>}
         </label>
         <label className="flex flex-col gap-1 text-xs text-hud-muted">
-          Посилання
+          {tr("music.edit.link")}
           {track.kind === "youtube" ? (
-            <Input aria-label="Посилання" value={draft.url} onChange={(e) => setDraft({ ...draft, url: e.target.value })} />
+            <Input aria-label={tr("music.edit.link")} value={draft.url} onChange={(e) => setDraft({ ...draft, url: e.target.value })} />
           ) : (
-            <Input aria-label="Посилання" value={trackLink(track) ?? ""} readOnly />
+            <Input aria-label={tr("music.edit.link")} value={trackLink(track) ?? ""} readOnly />
           )}
           {!built.ok && built.error.url && <span className="text-[var(--enemy)]">{translateIssue(t, { message: built.error.url })}</span>}
         </label>
         <label className="flex flex-col gap-1 text-xs text-hud-muted">
-          Тривалість, с
-          <Input aria-label="Тривалість, с" inputMode="numeric" value={draft.durationSec} onChange={(e) => setDraft({ ...draft, durationSec: e.target.value })} />
+          {tr("music.edit.duration")}
+          <Input aria-label={tr("music.edit.duration")} inputMode="numeric" value={draft.durationSec} onChange={(e) => setDraft({ ...draft, durationSec: e.target.value })} />
           {!built.ok && built.error.durationSec && <span className="text-[var(--enemy)]">{translateIssue(t, { message: built.error.durationSec })}</span>}
         </label>
       </form>

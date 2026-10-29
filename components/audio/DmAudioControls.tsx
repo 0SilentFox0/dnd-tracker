@@ -2,6 +2,7 @@
 
 import type { ReactNode } from "react";
 import Link from "next/link";
+import { useTranslations } from "next-intl";
 import { Pause, Play, SkipBack, SkipForward, Square } from "lucide-react";
 
 import { DmPlaylist } from "./DmPlaylist";
@@ -17,6 +18,8 @@ function IconButton({ label, onClick, disabled, children }: { label: string; onC
 }
 
 export function DmAudioControls({ dm }: { dm: PlayerAudioDm }) {
+  const t = useTranslations("music");
+
   const { state } = usePlayerAudio();
 
   const { control, library } = dm;
@@ -32,26 +35,26 @@ export function DmAudioControls({ dm }: { dm: PlayerAudioDm }) {
   return (
     <div className="mt-2 border-t border-hud-rule pt-2">
       <div className="flex justify-center gap-1">
-        <IconButton label="Попередній трек" onClick={() => send({ action: "prev" })} disabled={pending || empty}>
+        <IconButton label={t("dm.prev")} onClick={() => send({ action: "prev" })} disabled={pending || empty}>
           <SkipBack className="size-4" />
         </IconButton>
         <IconButton
-          label={playing ? "Пауза" : "Грати"}
+          label={playing ? t("dm.pause") : t("dm.play")}
           onClick={() => send(playing ? { action: "pause" } : hasTrack ? { action: "resume" } : { action: "next" })}
           disabled={pending || (!hasTrack && empty)}
         >
           {playing ? <Pause className="size-4" /> : <Play className="size-4" />}
         </IconButton>
-        <IconButton label="Наступний трек" onClick={() => send({ action: "next" })} disabled={pending || empty}>
+        <IconButton label={t("dm.next")} onClick={() => send({ action: "next" })} disabled={pending || empty}>
           <SkipForward className="size-4" />
         </IconButton>
-        <IconButton label="Стоп" onClick={() => send({ action: "stop" })} disabled={pending || !hasTrack}>
+        <IconButton label={t("dm.stop")} onClick={() => send({ action: "stop" })} disabled={pending || !hasTrack}>
           <Square className="size-4" />
         </IconButton>
       </div>
       {empty && !library.isLoading ? (
         <p className="mt-2 text-hud-muted">
-          Бібліотека порожня — <Link href={dm.musicHref} className="underline">додайте треки</Link>.
+          {t.rich("dm.emptyLibrary", { link: (chunks) => <Link href={dm.musicHref} className="underline">{chunks}</Link> })}
         </p>
       ) : (
         <DmPlaylist dm={dm} />

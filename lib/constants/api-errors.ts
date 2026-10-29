@@ -400,6 +400,10 @@ export const API_ERRORS = {
   FEAT_NAME_TAKEN: "errors.featNameTaken",
   RACE_NAME_TAKEN: "errors.raceNameTaken",
   BACKGROUND_NAME_TAKEN: "errors.backgroundNameTaken",
+  BACKGROUND_ORIGIN_FEAT_INVALID: "errors.backgroundOriginFeatInvalid",
+  BACKGROUND_SPELL_UNKNOWN: "errors.backgroundSpellUnknown",
+  ARTIFACT_SET_MEMBERS_INVALID: "errors.artifactSetMembersInvalid",
+  TRACK_FILE_DELETE_FAILED: "errors.trackFileDeleteFailed",
   SUBCLASS_TOO_EARLY: "errors.subclassTooEarly",
   MULTICLASS_REQUIREMENT: "errors.multiclassRequirement",
   MAX_LEVEL_EXCEEDED: "errors.maxLevelExceeded",
@@ -428,6 +432,8 @@ export const API_ERRORS = {
 export type ApiErrorKey = (typeof API_ERRORS)[keyof typeof API_ERRORS];
 
 export type ErrorParams = Record<string, string | number>;
+
+export type ErrorIssue = { path: (string | number)[]; message: string; params?: ErrorParams };
 
 export const API_ERROR_PARAMS: Partial<Record<ApiErrorKey, ErrorParams>> = {
   [API_ERRORS.TRACK_TITLE_TOO_LONG]: { max: TRACK_TITLE_MAX },

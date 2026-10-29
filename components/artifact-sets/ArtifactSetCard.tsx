@@ -1,11 +1,11 @@
 import Link from "next/link";
+import { useTranslations } from "next-intl";
 
 import { ArtifactSetBonusDisplay } from "@/components/artifact-sets/ArtifactSetBonusDisplay";
 import { ArtifactSetCardIcon } from "@/components/artifact-sets/ArtifactSetCardIcon";
 import { ArtifactCard } from "@/components/artifacts/ArtifactCard";
 import { HudCard } from "@/components/hud/page";
 import { Button } from "@/components/ui/button";
-import { pluralUk } from "@/lib/utils/common/plural";
 import type { ArtifactSetCardData } from "@/types/artifact-sets";
 import type { ArtifactCardData } from "@/types/artifacts";
 import type { IdName } from "@/types/common";
@@ -16,6 +16,8 @@ type ArtifactSetCardProps = { set: ArtifactSetCardData; campaignId: string } & (
 );
 
 export function ArtifactSetCard(props: ArtifactSetCardProps) {
+  const t = useTranslations("artifacts.sets.card");
+
   const { set, campaignId } = props;
 
   const editHref = `/campaigns/${campaignId}/dm/artifact-sets/${set.id}`;
@@ -31,7 +33,7 @@ export function ArtifactSetCard(props: ArtifactSetCardProps) {
             <h3 className="hud-sc text-lg leading-tight text-hud-ink">{set.name}</h3>
             {props.variant === "withArtifacts" && (
               <p className="text-sm text-hud-muted">
-                {count} {pluralUk(count, ["артефакт", "артефакти", "артефактів"])} в сеті
+                {t("inSet", { count })}
               </p>
             )}
             {props.variant === "summary" && set.description && <p className="text-sm text-hud-muted">{set.description}</p>}
@@ -39,7 +41,7 @@ export function ArtifactSetCard(props: ArtifactSetCardProps) {
         </div>
         {props.variant === "summary" && (
           <Button size="sm" variant="outline" asChild>
-            <Link href={editHref}>Редагувати</Link>
+            <Link href={editHref}>{t("edit")}</Link>
           </Button>
         )}
       </div>
@@ -54,14 +56,14 @@ export function ArtifactSetCard(props: ArtifactSetCardProps) {
             ))}
           </div>
           <Button variant="outline" size="sm" className="flex w-full sm:ml-auto sm:w-fit" asChild>
-            <Link href={editHref}>Редагувати сет</Link>
+            <Link href={editHref}>{t("editSet")}</Link>
           </Button>
         </>
       ) : (
         <>
           <ArtifactSetBonusDisplay setBonus={set.setBonus} abilitySummary={set.abilitySummary} />
           <div>
-            <p className="mb-1.5 text-xs text-hud-muted">Частин: {count}</p>
+            <p className="mb-1.5 text-xs text-hud-muted">{t("parts", { count })}</p>
             <div className="flex flex-wrap gap-1">
               {props.artifacts.map((a) => (
                 <span key={a.id} className="rounded-full px-2 py-0.5 text-xs text-hud-bone shadow-[inset_0_0_0_1px_var(--color-hud-line)]">

@@ -23,8 +23,8 @@ describe("CreateRaceDialog", () => {
       </QueryClientProvider>,
     );
 
-    fireEvent.change(screen.getByLabelText(/Назва раси/), { target: { value: "Гном" } });
-    fireEvent.click(screen.getByRole("button", { name: "Створити расу" }));
+    fireEvent.change(screen.getByLabelText(/races.form.nameRequired/), { target: { value: "Гном" } });
+    fireEvent.click(screen.getByRole("button", { name: "races.create.submit" }));
 
     expect(onCreateRace).toHaveBeenCalledWith(expect.objectContaining({ name: "Гном" }), expect.any(Function));
 
