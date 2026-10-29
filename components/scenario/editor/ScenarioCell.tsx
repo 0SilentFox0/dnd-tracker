@@ -34,7 +34,7 @@ export function ScenarioCell({ campaignId, rowId, column, doc, active, searchMen
 
   return (
     <div className="sb-cell" role="button" tabIndex={0} onClick={handlers.onActivate} onKeyDown={(e) => e.key === "Enter" && handlers.onActivate()}>
-      {isDocEmpty(doc) ? <p className="sb-empty">{column === "story" ? t("storyEmpty") : t("notes")}</p> : <ScenarioRichText doc={doc} campaignId={campaignId} />}
+      {isDocEmpty(doc) ? <p className="sb-empty">{column === "story" ? t("storyEmpty") : t("notes")}</p> : <ScenarioRichText doc={doc} campaignId={campaignId} showMissingMedia />}
     </div>
   );
 }

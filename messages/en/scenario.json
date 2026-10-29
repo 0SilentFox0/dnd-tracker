@@ -115,6 +115,9 @@
     "rowUp": "Move row up",
     "unsavedExit": "There are unsaved changes. Leave without saving?"
   },
+  "image": {
+    "missing": "Image not downloaded"
+  },
   "index": {
     "down": "Move down: {title}",
     "heroes": "Heroes",

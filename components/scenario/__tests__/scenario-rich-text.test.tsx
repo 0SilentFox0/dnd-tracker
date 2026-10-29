@@ -54,4 +54,23 @@ describe("ScenarioRichText", () => {
     expect(screen.queryByRole("link")).toBeNull();
     expect(screen.getByText("Біс")).toBeTruthy();
   });
+
+  describe("image", () => {
+    const withSrc: RichDoc = { type: "doc", content: [{ type: "image", attrs: { mediaId: "a".repeat(24), src: "https://p.supabase.co/storage/v1/object/public/b/x.webp", alt: "Мапа", caption: "Підпис" } }] };
+
+    const noSrc: RichDoc = { type: "doc", content: [{ type: "image", attrs: { mediaId: "a".repeat(24) } }] };
+
+    it("із src — figure з зображенням і підписом", () => {
+      const { container } = render(<ScenarioRichText doc={withSrc} campaignId="c" />);
+
+      expect(container.querySelector("figure img")?.getAttribute("alt")).toBe("Мапа");
+      expect(container.querySelector("figcaption")?.textContent).toBe("Підпис");
+    });
+
+    it("без src — нічого для гравця, плейсхолдер для ДМ", () => {
+      expect(render(<ScenarioRichText doc={noSrc} campaignId="c" />).container.innerHTML).toBe("");
+      cleanup();
+      expect(render(<ScenarioRichText doc={noSrc} campaignId="c" showMissingMedia />).container.textContent).toBe("scenario.image.missing");
+    });
+  });
 });

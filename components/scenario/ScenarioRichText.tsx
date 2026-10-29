@@ -1,11 +1,13 @@
 import { Fragment, type ReactNode } from "react";
 import Link from "next/link";
+import { useTranslations } from "next-intl";
 
+import { OptimizedImage } from "@/components/common/OptimizedImage";
 import { CALLOUT_KINDS, MENTION_TYPES } from "@/lib/constants/scenario";
 import { mentionHref } from "@/lib/utils/scenario/mention-href";
 import type { CalloutKind, MentionType, RichDoc, RichNode } from "@/types/scenario";
 
-type Ctx = { campaignId: string; linkMentions: boolean };
+type Ctx = { campaignId: string; linkMentions: boolean; showMissingMedia: boolean };
 
 const str = (v: unknown) => (typeof v === "string" ? v : "");
 
@@ -39,6 +41,25 @@ function Mention({ node, ctx }: { node: RichNode; ctx: Ctx }) {
   return <span className="mention">{label}</span>;
 }
 
+function ImageBlock({ node, ctx }: { node: RichNode; ctx: Ctx }) {
+  const t = useTranslations("scenario.image");
+
+  const src = str(node.attrs?.src);
+
+  const alt = str(node.attrs?.alt);
+
+  const caption = str(node.attrs?.caption);
+
+  if (!src) return ctx.showMissingMedia ? <p className="sb-empty">{t("missing")}</p> : null;
+
+  return (
+    <figure>
+      <OptimizedImage src={src} alt={alt} width={800} height={600} className="h-auto w-full" />
+      {caption && <figcaption>{caption}</figcaption>}
+    </figure>
+  );
+}
+
 function children(node: RichNode, ctx: Ctx) {
   return (node.content ?? []).map((child, i) => <Fragment key={i}>{renderNode(child, ctx)}</Fragment>);
 }
@@ -51,6 +72,8 @@ function renderNode(node: RichNode, ctx: Ctx): ReactNode {
       return <br />;
     case "token":
       return withMarks(node, <span className={node.attrs?.color === "red" ? "r" : "g"} />);
+    case "image":
+      return <ImageBlock node={node} ctx={ctx} />;
     case "mention":
       return withMarks(node, <Mention node={node} ctx={ctx} />);
     case "paragraph":
@@ -97,6 +120,6 @@ function renderNode(node: RichNode, ctx: Ctx): ReactNode {
   }
 }
 
-export function ScenarioRichText({ doc, campaignId, linkMentions = false }: { doc: RichDoc; campaignId: string; linkMentions?: boolean }) {
-  return <>{children({ type: "doc", content: doc.content }, { campaignId, linkMentions })}</>;
+export function ScenarioRichText({ doc, campaignId, linkMentions = false, showMissingMedia = false }: { doc: RichDoc; campaignId: string; linkMentions?: boolean; showMissingMedia?: boolean }) {
+  return <>{children({ type: "doc", content: doc.content }, { campaignId, linkMentions, showMissingMedia })}</>;
 }

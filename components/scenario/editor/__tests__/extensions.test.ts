@@ -49,6 +49,20 @@ describe("scenario tiptap extensions", () => {
     expect(parsed.success).toBe(true);
   });
 
+  it("вузол image зберігається з attrs через setContent, з src і без", () => {
+    const mediaId = "a".repeat(24);
+
+    const withImages: RichDoc = { type: "doc", content: [{ type: "image", attrs: { mediaId, src: "https://p.supabase.co/storage/v1/object/public/b/x.webp", alt: "A", caption: "C" } }, { type: "image", attrs: { mediaId: "b".repeat(24) } }, { type: "paragraph" }] };
+
+    editor = new Editor({ element: document.createElement("div"), extensions: buildExtensions(async () => []), content: { type: "doc", content: [{ type: "paragraph" }] } });
+    editor.commands.setContent(withImages);
+
+    const json = editor.getJSON() as RichDoc;
+
+    expect(json.content[0]).toMatchObject({ type: "image", attrs: { mediaId, src: "https://p.supabase.co/storage/v1/object/public/b/x.webp", alt: "A", caption: "C" } });
+    expect(json.content[1]).toMatchObject({ type: "image", attrs: { mediaId: "b".repeat(24), src: null } });
+  });
+
   it("вузли й марки редактора збігаються з allowlist схеми", () => {
     const schema = getSchema(buildExtensions(async () => []));
 
