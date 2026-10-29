@@ -138,6 +138,7 @@
     "atLeastScope": "atLeast — для характеристик (до 30) або для броні й швидкості з тривалістю",
     "atLeastNoFlat": "atLeast — без flat/percent",
     "spellRollOnlyInSpell": "Кидок заклинання доступний лише в ефектах заклинання",
+    "distanceMustGrow": "Межі відстані мають зростати",
     "needFlatOrPercent": "Потрібен flat або percent",
     "emptyAction": "Порожня дія",
     "needUnitOrGroup": "Потрібен unitId або group і tier",

@@ -181,7 +181,7 @@ const DealDamageSchema = z.object({
     .array(z.object({ maxFeet: z.number().int().min(5).max(600).multipleOf(5), dice: z.string().regex(DICE_RE) }))
     .min(2)
     .max(6)
-    .refine((r) => r.every((x, i) => i === 0 || x.maxFeet > r[i - 1].maxFeet), { message: "Межі відстані мають зростати" })
+    .refine((r) => r.every((x, i) => i === 0 || x.maxFeet > r[i - 1].maxFeet), { message: "abilities.validation.distanceMustGrow" })
     .optional(),
   delayIfBeyond: z.object({ feet: z.number().int().min(5).max(120).multipleOf(5), perRoundFeet: z.number().int().min(5).max(120).multipleOf(5) }).optional(),
   ...target,

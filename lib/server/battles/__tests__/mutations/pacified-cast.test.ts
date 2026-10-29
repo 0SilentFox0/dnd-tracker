@@ -3,6 +3,7 @@ import { describe, expect, it, vi } from "vitest";
 
 import { context, goblin, participant } from "./fixtures";
 
+import { API_ERRORS } from "@/lib/constants/api-errors";
 import { createSpellMutation } from "@/lib/server/battles/mutations/spell/spell-mutation";
 import { adaptCompendium } from "@/lib/server/compendium-import/adapt";
 import type { BattleParticipant } from "@/types/battle";
@@ -28,7 +29,7 @@ const run = (who: BattleParticipant) =>
 
 describe("каст під станом no_hostile_spells", () => {
   it("ворожий каст відхиляється, без стану проходить", async () => {
-    await expect(run(marked(caster, "no_hostile_spells"))).rejects.toThrow("не може завдавати шкоди й накладати ворожі закляття");
+    await expect(run(marked(caster, "no_hostile_spells"))).rejects.toThrow(API_ERRORS.BATTLE_CASTER_PACIFIED);
     await expect(run(caster)).resolves.toBeTruthy();
   });
 });

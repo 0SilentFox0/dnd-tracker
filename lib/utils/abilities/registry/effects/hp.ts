@@ -12,8 +12,8 @@ import type { Effect } from "@/lib/utils/abilities/schema";
 import { applyDamageConsequences } from "@/lib/utils/battle/damage/consequences";
 import { clearDeathSaves, isDying } from "@/lib/utils/battle/death-saves";
 import { hasImmunity } from "@/lib/utils/battle/resistance";
-import type { BattleParticipant } from "@/types/battle";
 import { forgoDice } from "@/lib/utils/common/dice";
+import type { BattleParticipant } from "@/types/battle";
 
 type Of<K extends Effect["kind"]> = Extract<Effect, { kind: K }>;
 
