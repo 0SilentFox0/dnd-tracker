@@ -24,6 +24,7 @@ import { armorPenalty } from "@/lib/utils/battle/proficiency";
 import { castSpell } from "@/lib/utils/battle/spell";
 import { flatEffects, inputDiceOf, isDamageEffect, optionInRange } from "@/lib/utils/battle/spell/cast/state";
 import { casterSpellDice } from "@/lib/utils/battle/spell/caster-dice";
+import { peekInlineGrant, withInlineDefinition } from "@/lib/utils/battle/spell/inline-grant";
 import { prepareLongCast } from "@/lib/utils/battle/spell/long-cast";
 import { resolveSpellSource } from "@/lib/utils/battle/spell/resolve-source";
 import { splitSaveRolls } from "@/lib/utils/battle/spell/save-rolls";
@@ -61,7 +62,11 @@ export function createSpellMutation(deps: SpellMutationDeps = defaultDeps, optio
 
     if (!spellRow || spellRow.campaignId !== ctx.scene.campaignId) throw new BattleAccessError(404, API_ERRORS.BATTLE_SPELL_NOT_FOUND);
 
-    const spell = toCastableSpell(spellRow);
+    const inlineGrant = peekInlineGrant(order, data.casterId, data);
+
+    const base = toCastableSpell(spellRow);
+
+    const spell = inlineGrant ? withInlineDefinition(base, inlineGrant) : base;
 
     const { definition } = spell;
 

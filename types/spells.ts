@@ -101,4 +101,7 @@ export type BookSpell = SpellRules & {
   icon?: string | null;
   spellGroup?: SpellGroupRef | null;
   fx?: SpellFx | null;
+  /** плитка живого inline-гранту (grantCast): id = ключ гранту, касту йде hostSpellId + grantKey */
+  grantKey?: string;
+  hostSpellId?: string;
 };

@@ -91,6 +91,7 @@ export function buildSpellPick(order: BattleParticipant[], caster: BattlePartici
     needsSaves: def.resolution.kind === "save" && !auto,
     ...(def.resolution.kind === "attack" && !auto && { needsAttackRolls: true }),
     ...(input && { inputDice: { ...input, sides: dice.sides } }),
+    ...(s.grantKey && s.hostSpellId && { inline: { spellId: s.hostSpellId, grantKey: s.grantKey } }),
     diceSlots: Array.from({ length: input ? 1 : dice.count }, () => dice.sides),
   };
 }

@@ -6,6 +6,7 @@ import { beginConcentration, castIdFor, tagConcentration } from "@/lib/utils/bat
 import { removeEffects } from "@/lib/utils/battle/conditions/query";
 import { applyTo } from "@/lib/utils/battle/spell/cast/effects";
 import { finishSpellAction, spendCastCost } from "@/lib/utils/battle/spell/cast/finish";
+import { applyGrantCasts } from "@/lib/utils/battle/spell/cast/grant-cast";
 import { resolveOutcome } from "@/lib/utils/battle/spell/cast/outcome";
 import { abilityOf, actionOf, type ChosenSpell, expandChosen, isPerTarget, readsEventDamage, type SpellCastState, targetOf } from "@/lib/utils/battle/spell/cast/state";
 import { computeSpellPower, spellSaveDc } from "@/lib/utils/battle/spell/power";
@@ -97,7 +98,9 @@ export function castSpell(params: CastSpellParams): CastSpellResult {
 
   const concentrates = !!params.rules?.concentration.enabled && def.concentration === true;
 
-  const tag = concentrates ? { casterId, castId: castIdFor(casterId, spell.id, currentRound, flow.messages.length) } : undefined;
+  const castId = castIdFor(casterId, spell.id, currentRound, flow.messages.length);
+
+  const tag = concentrates ? { casterId, castId } : undefined;
 
   if (tag) {
     const zoneRounds = def.targeting.kind === "template" ? (def.targeting.zone?.rounds ?? 0) : 0;
@@ -137,6 +140,8 @@ export function castSpell(params: CastSpellParams): CastSpellResult {
   }
 
   if (tag) flow.ps = tagConcentration(psBeforeEffects, flow.ps, tag, state.ability.key);
+
+  applyGrantCasts({ flow, effects: source.definition.effects, casterId, targetIds, spell, castId, round: currentRound, concentrationOf: tag });
 
   spendCastCost(state, { slotKey, usesSlot, isDMCast, isLegendaryCast: params.isLegendaryCast, grant: params.grant });
 

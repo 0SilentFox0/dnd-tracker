@@ -11,6 +11,7 @@ import { hazardHit, hazardUnder } from "@/lib/utils/battle/grid/hazard";
 import { landDive } from "@/lib/utils/battle/maneuvers";
 import { actionsPerTurnPool, setExtraActionPool } from "@/lib/utils/battle/participant/helpers";
 import { hasEffectMarker } from "@/lib/utils/battle/participant/state";
+import { pruneDeadInlineGrants } from "@/lib/utils/battle/spell/inline-grant";
 import { rollDie } from "@/lib/utils/common/dice";
 import type { Ruleset } from "@/lib/utils/rules";
 import type { BattleMapConfig, BattleParticipant } from "@/types/battle";
@@ -229,7 +230,7 @@ export function processStartOfTurn(
 
   const { skippedBy } = reset;
 
-  updatedParticipant = reset.participant;
+  updatedParticipant = pruneDeadInlineGrants(reset.participant, currentRound, allParticipants);
 
   const id = participant.basicInfo.id;
 

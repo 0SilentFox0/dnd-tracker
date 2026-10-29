@@ -186,14 +186,14 @@ export function spellPayload(s: SpellFlowState): SpellCastData {
 
   return {
     casterId: s.casterId as string,
-    spellId: s.pick?.spellId as string,
+    spellId: (s.pick?.inline?.spellId ?? s.pick?.spellId) as string,
     targetIds: s.pick?.targetMode === "none" ? [] : s.pick?.chain ? s.targetIds.slice(0, 1) : s.targetIds,
     ...(s.pick?.targetMode === "template" && !selfCentered(s.pick) && s.aim && { targetCell: s.aim }),
     diceRolls: s.damage.filter((v): v is number => typeof v === "number"),
     ...(saves.length > 0 && { saveRolls: saves }),
     ...(attacks.length > 0 && { attackRolls: attacks }),
     ...(s.slotKey && { slotKey: s.slotKey }),
-    ...(s.grantKey && { grantKey: s.grantKey }),
+    ...((s.pick?.inline?.grantKey ?? s.grantKey) && { grantKey: s.pick?.inline?.grantKey ?? s.grantKey }),
     ...(s.castLevel !== undefined && { castLevel: s.castLevel }),
     ...(s.pick?.inputDice && s.inputCount !== undefined && { inputCount: s.inputCount }),
     ...(s.pick?.options && s.optionIndex !== undefined && { optionIndex: s.optionIndex }),

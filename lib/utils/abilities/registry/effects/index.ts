@@ -37,6 +37,7 @@ import type { Ability, Effect, EffectKind } from "@/lib/utils/abilities/schema";
 import { CONDITION_5E_KEYS } from "@/lib/utils/abilities/schema/kinds";
 import { pickOne } from "@/lib/utils/common/dice";
 import { signed } from "@/lib/utils/common/format";
+import type { SpellEffect } from "@/lib/utils/spells/model/schema";
 
 export type { EffectApplyInput, EffectApplyResult };
 
@@ -160,8 +161,10 @@ export function applyEffect(input: EffectApplyInput): EffectApplyResult {
   return def.apply(input as never);
 }
 
-export function describeEffect(effect: Effect | { kind: "chooseOne"; options: Effect[] } | { kind: "inputDice"; label: string; max: number }): string {
+export function describeEffect(effect: Effect | SpellEffect): string {
   if (effect.kind === "inputDice") return `кубики з введення (до ${effect.max}): ${effect.label}`;
+
+  if (effect.kind === "grantCast") return `підкаст «${effect.label}» (${effect.cost === "action" ? "дія" : effect.cost === "bonusAction" ? "бонусна дія" : "реакція"}${effect.uses ? `, ×${effect.uses}` : ""}) на ${effect.duration.rounds} р.`;
 
   if (effect.kind === "chooseOne") return `на вибір: ${effect.options.map(describeEffect).join(" / ")}`;
 

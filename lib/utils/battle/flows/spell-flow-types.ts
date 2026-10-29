@@ -27,6 +27,8 @@ export interface SpellPick {
   options?: string[];
   /** кількість кубиків вводить кастер (напр. висота падіння); diceSlots відповідають поточному вводу */
   inputDice?: { label: string; max: number; sides: number };
+  /** плитка inline-гранту: на сервер йде справжній spellId і ключ гранту */
+  inline?: { spellId: string; grantKey: string };
   needsSaves: boolean;
   needsAttackRolls?: boolean;
   diceSlots: number[];

@@ -20,6 +20,8 @@ import {
   grantLabel as grantLabelOf,
   grantsFor,
   initialSpellFlow,
+  inlineGrantLabel,
+  inlineGrantOf,
   selectedGrantOf,
   slotOptions,
   sourceOptions as sourceOptionsOf,
@@ -177,6 +179,8 @@ export function useSpellBook(caster: BattleParticipant | null, options: { reacti
 
   const grantsOf = (s: BookSpell) => grantsFor(caster, s.id);
 
+  const labelOf = (s: BookSpell) => (s.grantKey ? inlineGrantLabel(caster, inlineGrantOf(caster, s)) : grantLabelOf(caster, s.id));
+
   const grantOf = (s: BookSpell) => selectedGrantOf(grantsOf(s), flow);
 
   const canSlot = (s: BookSpell) => canCastFromSlot(caster, s.id);
@@ -240,18 +244,18 @@ export function useSpellBook(caster: BattleParticipant | null, options: { reacti
     timing: selected?.casting,
     pendingCast: caster?.battleData.pendingCast,
     canFastForward: scene.viewer.isDM,
-    grantLabel: (s: BookSpell) => grantLabelOf(caster, s.id),
+    grantLabel: labelOf,
     sourceOptions,
     sourceValue: flow.grantKey ? `grant:${flow.grantKey}` : flow.slotKey ? `slot:${flow.slotKey}` : "",
     castLevelOptions,
     castLevelValue: flow.castLevel ?? selectedGrant?.castLevel,
     slotLeft: (level: number) => spellSlotsLeft(caster, level, bypassCost || spells.some((s) => s.level === level && !!grantOf(s))),
-    slotCostLabel: (s: BookSpell) => [special ? "Легендарна дія / дія лігва" : undefined, grantLabelOf(caster, s.id)].filter(Boolean).join(" · ") || spellSlotCostLabel(s, { free, universal: universalSlot, chosen: slotChoices.find((o) => o.key === state.slotKey)?.label }),
+    slotCostLabel: (s: BookSpell) => [special ? "Легендарна дія / дія лігва" : undefined, labelOf(s)].filter(Boolean).join(" · ") || spellSlotCostLabel(s, { free, universal: universalSlot, chosen: slotChoices.find((o) => o.key === state.slotKey)?.label }),
     slot: { options: slotChoices, value: state.slotKey },
     noSlot: (s: BookSpell) => !canSlot(s) && spellBlockedBySlots(caster, s.level, bypassCost),
     attackTargets: state.pick?.needsAttackRolls ? targets.filter((t) => state.targetIds.includes(t.basicInfo.id)) : [],
     costUsed: (s: BookSpell) => costBlocked({
-      caster, spell: s, definitionCost: spellDefinition(s).cost, grants: grantsOf(s), grant: grantOf(s), slotKey: state.slotKey, free, bypassCost, special: !!special, isDM: scene.viewer.isDM,
+      caster, spell: s, definitionCost: spellDefinition(s).cost, grants: s.grantKey ? [inlineGrantOf(caster, s)].filter((g) => !!g) : grantsOf(s), grant: s.grantKey ? inlineGrantOf(caster, s) : grantOf(s), slotKey: state.slotKey, free, bypassCost, special: !!special, isDM: scene.viewer.isDM,
       isMyTurn: scene.battle.initiativeOrder[scene.battle.currentTurnIndex]?.basicInfo.id === caster?.basicInfo.id, reactionBlocked: !!caster && !!reactionBlocker(caster),
     }),
   };

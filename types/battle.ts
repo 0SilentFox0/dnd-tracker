@@ -8,6 +8,7 @@ import type { DndSkill } from "@/lib/constants/skills";
 import type { WeaponTrait } from "@/lib/constants/weapon-traits";
 import type { FxAuraKind, FxImpact, SpellFx } from "@/lib/utils/battle/fx";
 import type { ModeView } from "@/lib/utils/battle/modes/types";
+import type { InlineCast, SpellCost } from "@/lib/utils/spells/model/schema";
 import type { StoredSpellSlots } from "@/lib/utils/spells/slot-keys";
 import type { AbilityKey, SetProgress } from "@/types/characters";
 import { SkillLevel } from "@/types/skill-tree";
@@ -204,6 +205,11 @@ export interface SpellGrant {
   attackBonus?: number;
   upcast?: { maxLevel: number; extraCost: number };
   legendaryOnly?: true;
+  /** Власне визначення підкасту (grantCast): плитка замість бібліотечного заклинання. */
+  inline?: InlineCast;
+  expiresRound?: number;
+  concentrationOf?: { casterId: string; castId: string };
+  castCost?: SpellCost;
 }
 
 export interface GridPoint {

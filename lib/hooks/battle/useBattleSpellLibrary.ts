@@ -1,11 +1,13 @@
 "use client";
 
-import { useMemo } from "react";
+import { useCallback, useMemo } from "react";
 
 import { useBattleScene } from "./useBattleScene";
 
 import { usePrefetchSpellsByIds, useSpells, useSpellsByIds } from "@/lib/hooks/spells";
-import type { BattleParticipant } from "@/types/battle";
+import { inlineSpellTiles } from "@/lib/utils/battle/flows";
+import { isGrantLive } from "@/lib/utils/battle/spell/inline-grant";
+import type { BattleParticipant, SpellGrant } from "@/types/battle";
 import type { BookSpell } from "@/types/spells";
 
 const NO_SPELLS: string[] = [];
@@ -21,11 +23,17 @@ export function useBattleSpellIds(): string[] {
   return useMemo(() => (key ? key.split(",") : NO_SPELLS), [key]);
 }
 
-const knownBy = (spells: BookSpell[] | undefined, who: BattleParticipant | null) => {
-  const ids = new Set([...(who?.spellcasting.knownSpells ?? []), ...(who?.spellcasting.grants ?? []).map((g) => g.spellId)]);
+const knownBy = (spells: BookSpell[] | undefined, who: BattleParticipant | null, live: (g: SpellGrant) => boolean) => {
+  const ids = new Set([...(who?.spellcasting.knownSpells ?? []), ...(who?.spellcasting.grants ?? []).filter((g) => !g.inline).map((g) => g.spellId)]);
 
-  return (spells ?? []).filter((s) => ids.has(s.id));
+  return [...(spells ?? []).filter((s) => ids.has(s.id)), ...inlineSpellTiles(who, spells ?? [], live)];
 };
+
+function useGrantLiveness(): (g: SpellGrant) => boolean {
+  const { battle } = useBattleScene();
+
+  return useCallback((g) => isGrantLive(g, battle.currentRound, battle.initiativeOrder), [battle.currentRound, battle.initiativeOrder]);
+}
 
 /** Прогріває закляття бою, поки він простоює. */
 export function useSpellBookPrefetch() {
@@ -42,11 +50,13 @@ export function useSpellsWithCost(hero: BattleParticipant, cost: "bonusAction" |
 
   const known = useSpellsByIds(campaignId, useBattleSpellIds());
 
+  const live = useGrantLiveness();
+
   return useMemo(() => {
-    const bonus = knownBy(known.data, hero).filter((s) => s.cost === cost);
+    const bonus = knownBy(known.data, hero, live).filter((s) => s.cost === cost);
 
     return bonus.length ? bonus : BONUS_NONE;
-  }, [known.data, hero, cost]);
+  }, [known.data, hero, cost, live]);
 }
 
 export const useBonusSpells = (hero: BattleParticipant) => useSpellsWithCost(hero, "bonusAction");
@@ -62,13 +72,15 @@ export function useBattleSpellLibrary(caster: BattleParticipant | null, options:
 
   const known = useSpellsByIds(campaignId, useBattleSpellIds(), { enabled: isOpen && !free });
 
+  const live = useGrantLiveness();
+
   const libraryData = library.data;
 
   const knownData = known.data;
 
   return useMemo(() => {
-    const availableSpells = free ? ((libraryData ?? []) as BookSpell[]) : specialSpellId ? (knownData ?? []).filter((s) => s.id === specialSpellId) : knownBy(knownData, caster);
+    const availableSpells = free ? ((libraryData ?? []) as BookSpell[]) : specialSpellId ? (knownData ?? []).filter((s) => s.id === specialSpellId) : knownBy(knownData, caster, live);
 
     return reactionsOnly ? availableSpells.filter((s) => s.cost === "reaction") : availableSpells;
-  }, [free, libraryData, knownData, specialSpellId, caster, reactionsOnly]);
+  }, [free, libraryData, knownData, specialSpellId, caster, reactionsOnly, live]);
 }

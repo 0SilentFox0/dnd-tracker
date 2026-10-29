@@ -1,6 +1,7 @@
 import { z } from "zod";
 
 import { ABILITY_KEYS } from "@/lib/constants/abilities";
+import { DurationSchema } from "@/lib/utils/abilities/schema/common";
 import { BASE_EFFECTS, NonRandomEffectSchema, RandomOfSchema } from "@/lib/utils/abilities/schema/effects";
 
 export const SPELL_COSTS = ["action", "bonusAction", "reaction", "long"] as const;
@@ -76,11 +77,45 @@ const ChooseOneSchema = z.object({ kind: z.literal("chooseOne"), options: z.arra
 /** Кубики заклинання = число з введення кастера (обрізане до max); у ефекти рушія не потрапляє. */
 const InputDiceSchema = z.object({ kind: z.literal("inputDice"), label: z.string().trim().min(1).max(40), max: z.number().int().min(1).max(40) });
 
-const SPELL_ONLY_EFFECTS = [ChooseOneSchema, InputDiceSchema] as const;
+const attackNeedsEnemy = (d: { resolution: { kind: string }; targeting: { kind: string } }) => d.resolution.kind !== "attack" || d.targeting.kind === "enemy" || d.targeting.kind === "area";
+
+const ATTACK_TARGET_ISSUE = { message: "Атака заклинанням — лише для цілі-ворога або області", path: ["resolution"] };
+
+/** Вкладене визначення підкасту: `grantCast` у ньому неможливий, бо NonRandomEffect його не містить. */
+export const InlineCastSchema = z.object({
+  targeting: SpellTargetingSchema,
+  resolution: SpellResolutionSchema,
+  dice: z.number().int().min(0).max(40),
+  dieSides: SpellDieSidesSchema.optional(),
+  addAbilityMod: z.boolean().optional(),
+  damageBonus: z.number().int().min(-20).max(40).optional(),
+  effects: z.array(NonRandomEffectSchema).min(1).max(6),
+  anchorMarkId: z.string().min(1).max(40).optional(),
+  auto: z.object({ on: z.literal("attackAgainstMarked") }).optional(),
+}).refine(attackNeedsEnemy, ATTACK_TARGET_ISSUE);
+
+export const GRANT_CAST_COSTS = ["action", "bonusAction", "reaction"] as const;
+
+/** Тимчасовий підкаст: носій (кастер або ціль) отримує окрему плитку з власним визначенням. */
+const GrantCastSchema = z.object({
+  kind: z.literal("grantCast"),
+  label: z.string().trim().min(1).max(60),
+  cost: z.enum(GRANT_CAST_COSTS),
+  uses: z.number().int().min(1).max(20).optional(),
+  duration: DurationSchema,
+  target: z.enum(["self", "eventTarget"]).optional(),
+  cast: InlineCastSchema,
+});
+
+const SPELL_ONLY_EFFECTS = [ChooseOneSchema, InputDiceSchema, GrantCastSchema] as const;
 
 export const SpellEffectSchema = z.discriminatedUnion("kind", [...BASE_EFFECTS, RandomOfSchema, ...SPELL_ONLY_EFFECTS]);
 
 export type SpellEffect = z.infer<typeof SpellEffectSchema>;
+
+export type GrantCastEffect = z.infer<typeof GrantCastSchema>;
+
+export type InlineCast = z.infer<typeof InlineCastSchema>;
 
 export const SpellDefinitionSchema = z.object({
   executionMode: z.enum(["native", "manual"]).optional(),
@@ -100,10 +135,7 @@ export const SpellDefinitionSchema = z.object({
   addAbilityMod: z.boolean().optional(),
   fixedDice: z.boolean().optional(),
   damageBonus: z.number().int().min(-20).max(40).optional(),
-}).refine((d) => d.resolution.kind !== "attack" || d.targeting.kind === "enemy" || d.targeting.kind === "area", {
-  message: "Атака заклинанням — лише для цілі-ворога або області",
-  path: ["resolution"],
-});
+}).refine(attackNeedsEnemy, ATTACK_TARGET_ISSUE);
 
 export type SpellCost = z.infer<typeof SpellCostSchema>;
 
