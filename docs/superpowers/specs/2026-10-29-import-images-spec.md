@@ -200,7 +200,7 @@ interface MediaQueueState { version: 1; items: MediaItem[]; skipped: Partial<Rec
 
 ### 10.4 i18n
 
-`messages/{uk,en}/compendium.json`: `import.progress.*`, `import.media.*`, оновлений `import.rights`; `messages/{uk,en}/compendiumReport.json`: `media.reasons.<CODE>` (з `{status}` для `MEDIA_HTTP_STATUS`). Сервер віддає коди, переклад — на межі (`useTranslator`). Тести перевіряють ключі для кожного `MediaReason` в обох мовах.
+`messages/{uk,en}/compendium.json`: `import.progress.*`, `import.media.*`, оновлений `import.rights`; причини — `compendium.import.media.reasons.<CODE>` (з `{status}` для `MEDIA_HTTP_STATUS`; клієнтський namespace, бо `compendiumReport` серверний і на клієнт не передається). Сервер віддає коди, переклад — на межі (`useTranslator`). Тести перевіряють ключі для кожного `MediaReason` в обох мовах.
 
 ## 11. Онбординг, довідка, документація
 
