@@ -23,9 +23,10 @@ export interface ImportDeps {
   resource(kind: ImportKind): AnyContentResource;
   loadNames(campaignId: string, kind: ImportKind): Promise<IdName[]>;
   invalidate?(kinds: readonly ReferenceKindValue[], campaignId: string): void;
+  transactional?: boolean;
 }
 
-export const DEFAULT_IMPORT_DEPS: ImportDeps = { resource: (kind) => CONTENT_RESOURCES[kind] as AnyContentResource, loadNames };
+export const DEFAULT_IMPORT_DEPS: ImportDeps = { resource: (kind) => CONTENT_RESOURCES[kind] as AnyContentResource, loadNames, transactional: true };
 
 export const OFFLINE_IMPORT_DEPS: ImportDeps = { ...DEFAULT_IMPORT_DEPS, invalidate: () => undefined };
 
@@ -245,7 +246,7 @@ export async function importContent(actor: Actor, kind: ImportKind, input: Conte
         plan.body = await resource.prepareUpdate(actor, current, plan.body);
       }
 
-      if (deps === DEFAULT_IMPORT_DEPS || deps === OFFLINE_IMPORT_DEPS) {
+      if (deps.transactional) {
         const current = currentContentWrite();
 
         if (current) {
