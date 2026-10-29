@@ -17,6 +17,7 @@ export * from "./retaliation";
 export * from "./rollback";
 export * from "./scene-maps";
 export * from "./spell-result";
+export * from "./statblock";
 export * from "./strike-steps";
 export * from "./summary";
 export * from "./turn-exhausted";

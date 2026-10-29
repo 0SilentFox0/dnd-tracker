@@ -4,6 +4,7 @@ export * from "./modes";
 export { useAbilityMapAim } from "./useAbilityMapAim";
 export { useAbilityPicker } from "./useAbilityPicker";
 export { ACTION_RESULT_MS, useActionResult } from "./useActionResult";
+export { useAddParticipantForm } from "./useAddParticipantForm";
 export { useAttackWizard } from "./useAttackWizard";
 export { type AuraZoneStep, useAuraZones } from "./useAuraZones";
 export { useBattleActions } from "./useBattleActions";

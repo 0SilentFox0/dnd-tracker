@@ -8,8 +8,8 @@ import { MonsterStatblock } from "@/components/common/MonsterStatblock";
 import { useBattleSceneData, useFxImpacts, useHitFx } from "@/lib/hooks/battle";
 import { cn } from "@/lib/utils";
 import { getEffectiveArmorClass } from "@/lib/utils/battle/participant/helpers";
-import { canSeeExactStats, effectLines, formatKnownArmorClass, resolveKnownArmorClass, resolveObservedTraits } from "@/lib/utils/battle/view";
-import type { BattleParticipant } from "@/types/battle";
+import { canSeeExactStats, effectLines, formatKnownArmorClass, resolveKnownArmorClass, resolveObservedTraits, statblockOf } from "@/lib/utils/battle/view";
+import type { ActiveEffect, BattleParticipant } from "@/types/battle";
 
 function Section({ title, children }: { title: string; children: ReactNode }) {
   return (
@@ -17,6 +17,24 @@ function Section({ title, children }: { title: string; children: ReactNode }) {
       <h4 className="hud-sc flex h-5 items-center text-[13px] tracking-[.08em] text-[var(--hud-muted)]">{title}</h4>
       {children}
     </section>
+  );
+}
+
+function EffectRow({ effect: e }: { effect: ActiveEffect }) {
+  return (
+    <div className="flex gap-3 border-b border-white/[.08] py-2.5">
+      <span className={e.type === "buff" ? "text-[#cdb87e]" : "text-hud-danger"}>
+        <EffectIcon effect={e} size={36} />
+      </span>
+      <div className="min-w-0 flex-1">
+        <div className="flex justify-between text-[15px] font-medium text-[var(--ink)]">
+          <span>{e.name}</span>
+          <span className="text-[13px] font-normal text-[var(--hud-muted)]">{e.zone ? "зона" : e.permanent ? "постійно" : `${e.duration} р.`}</span>
+        </div>
+        {effectLines(e).map((line) => <p key={line} className="mt-0.5 text-[13px] leading-[18px] text-[#a89c88]">{line}</p>)}
+        {e.source && <p className="text-[13px] leading-[18px] text-[#a89c88]">Від: {e.source.abilityName ? `${e.source.abilityName} (${e.source.name})` : e.source.name}</p>}
+      </div>
+    </div>
   );
 }
 
@@ -44,6 +62,8 @@ function ParticipantDetailsBody({ participant: live }: ParticipantDetailsProps) 
 
   const known = resolveKnownArmorClass(log, participant.basicInfo.id, battle.knowledge);
 
+  const statblock = exact ? statblockOf(participant) : null;
+
   const traits = exact ? [] : resolveObservedTraits(log, participant.basicInfo.id, battle.knowledge);
 
   return (
@@ -58,7 +78,7 @@ function ParticipantDetailsBody({ participant: live }: ParticipantDetailsProps) 
         </div>
       </div>
       <HealthBar participant={participant} exact={exact} className="mt-3" />
-      {exact && (participant.abilities.creatureType || participant.battleData.senses || participant.battleData.movement || participant.battleData.languages || participant.battleData.telepathy !== undefined) && <Section title="Статблок"><MonsterStatblock block={{ creatureType: participant.abilities.creatureType, senses: participant.battleData.senses, movement: participant.battleData.movement, languages: participant.battleData.languages, telepathy: participant.battleData.telepathy }} /></Section>}
+      {statblock && <Section title="Статблок"><MonsterStatblock block={statblock} /></Section>}
       <Section title="Броня">
         <div className="flex min-h-10 items-center justify-between border-b border-white/[.08]">
           <span>{exact ? "AC" : "AC між"}</span>
@@ -72,18 +92,7 @@ function ParticipantDetailsBody({ participant: live }: ParticipantDetailsProps) 
       </Section>
       <Section title="Ефекти">
         {effects.length === 0 && <div className="py-2 text-sm text-[var(--hud-muted)]">немає</div>}
-        {effects.map((e) => (
-          <div key={e.id} className="flex gap-3 border-b border-white/[.08] py-2.5">
-            <span className={e.type === "buff" ? "text-[#cdb87e]" : "text-hud-danger"}>
-              <EffectIcon effect={e} size={36} />
-            </span>
-            <div className="min-w-0 flex-1">
-              <div className="flex justify-between text-[15px] font-medium text-[var(--ink)]"><span>{e.name}</span><span className="text-[13px] font-normal text-[var(--hud-muted)]">{e.zone ? "зона" : e.permanent ? "постійно" : `${e.duration} р.`}</span></div>
-              {effectLines(e).map((line) => <p key={line} className="mt-0.5 text-[13px] leading-[18px] text-[#a89c88]">{line}</p>)}
-              {e.source && <p className="text-[13px] leading-[18px] text-[#a89c88]">Від: {e.source.abilityName ? `${e.source.abilityName} (${e.source.name})` : e.source.name}</p>}
-            </div>
-          </div>
-        ))}
+        {effects.map((e) => <EffectRow key={e.id} effect={e} />)}
       </Section>
       {traits.length > 0 && (
         <Section title="Помічено в бою">
