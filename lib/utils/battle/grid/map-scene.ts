@@ -28,7 +28,7 @@ export interface MapAim {
 /** Вибір цілей заклинання кліком по токенах: кого можна обрати, хто вже обраний. */
 export interface MapPick {
   casterId: string;
-  targets: { id: string; reachable: boolean }[];
+  targets: { id: string; reachable: boolean; filteredOut?: boolean }[];
   selectedIds: string[];
   onPick(id: string): void;
 }
@@ -254,7 +254,7 @@ export function deriveMapScene({ map, selectedId, actor, mode, modeView, ...inpu
   function pickAt(id: string): MapClick {
     const entry = pick?.targets.find((t) => t.id === id);
 
-    if (!entry) return { kind: "reject", reason: "Ця ціль не підходить для заклинання" };
+    if (!entry || entry.filteredOut) return { kind: "reject", reason: "Ця ціль не підходить для заклинання" };
 
     return entry.reachable ? { kind: "pick", id } : { kind: "reject", reason: "Поза дальністю" };
   }

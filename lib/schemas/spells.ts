@@ -4,9 +4,8 @@ import { SPELL_GROUP_ICON_KEYS } from "@/lib/constants/spell-groups";
 import { SPELL_NAME_MAX } from "@/lib/constants/spells";
 import { SpellListsSchema } from "@/lib/schemas/choices";
 import { hexColorSchema } from "@/lib/schemas/common";
-import { EffectSchema } from "@/lib/utils/abilities/schema";
 import { SpellFxSchema } from "@/lib/utils/battle/fx/spell-fx-schema";
-import { RaceModifierSchema, SpellCastingTimeSchema, SpellCostSchema, SpellDiceSchema, SpellDieSidesSchema, SpellResolutionSchema, SpellTargetingSchema } from "@/lib/utils/spells/model/schema";
+import { RaceModifierSchema, SpellCastingTimeSchema, SpellCostSchema, SpellDiceSchema, SpellDieSidesSchema, SpellEffectSchema, SpellResolutionSchema, SpellTargetingSchema } from "@/lib/utils/spells/model/schema";
 
 const nullableString = z.preprocess((val) => (val === "" ? null : val), z.string().nullable().optional());
 
@@ -23,7 +22,7 @@ const spellFields = {
   dice: SpellDiceSchema,
   targeting: SpellTargetingSchema,
   resolution: SpellResolutionSchema,
-  spellEffects: z.array(EffectSchema),
+  spellEffects: z.array(SpellEffectSchema),
   raceModifiers: z.array(RaceModifierSchema),
   stackable: z.boolean(),
   maxStacks: z.number().int().min(1).max(10).nullable(),

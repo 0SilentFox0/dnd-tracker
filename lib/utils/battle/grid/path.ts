@@ -1,4 +1,4 @@
-import { cellKey, footprint, footprintDistance, neighbors } from "./geometry";
+import { cellKey, difficultSet, footprint, footprintDistance, neighbors } from "./geometry";
 import { cellsOf, fits, isOnMap, occupiedBy, sizeOf } from "./occupancy";
 
 import { CELL_FEET, EffectMarker } from "@/lib/constants/battle";
@@ -82,27 +82,33 @@ export function searchPaths(
 
   const touchesAvoid = (anchor: GridPoint) => !!avoid?.size && footprint(anchor, size).some((c) => avoid.has(cellKey(c)));
 
+  const difficult = difficultSet(map);
+
+  const stepCost = (anchor: GridPoint) => (difficult.size > 0 && footprint(anchor, size).some((c) => difficult.has(cellKey(c))) ? 2 : 1);
+
   const seen = new Map([[cellKey(start), 0]]);
 
-  const queue = [start];
+  // кошики за вартістю: Дейкстра без черги з пріоритетом, вартість кроку лише 1 або 2
+  const buckets: GridPoint[][] = [[start]];
 
-  for (let i = 0; i < queue.length; i++) {
-    const cur = queue[i];
+  for (let cost = 0; cost < buckets.length && cost < budget; cost++) {
+    for (const cur of buckets[cost] ?? []) {
+      if (seen.get(cellKey(cur)) !== cost) continue;
 
-    const cost = seen.get(cellKey(cur)) ?? 0;
+      for (const next of neighbors(cur)) {
+        const key = cellKey(next);
 
-    if (cost >= budget) continue;
+        const nextCost = cost + stepCost(next);
 
-    for (const next of neighbors(cur)) {
-      const key = cellKey(next);
+        if (nextCost > budget || (seen.get(key) ?? Infinity) <= nextCost || !fits(map, next, size, walls) || touchesAvoid(next)) continue;
 
-      if (seen.has(key) || !fits(map, next, size, walls) || touchesAvoid(next)) continue;
+        seen.set(key, nextCost);
+        parent.set(key, cur);
+        (buckets[nextCost] ??= []).push(next);
 
-      seen.set(key, cost + 1);
-      parent.set(key, cur);
-      queue.push(next);
-
-      if (fits(map, next, size, taken)) result.set(key, cost + 1);
+        if (fits(map, next, size, taken)) result.set(key, nextCost);
+        else result.delete(key);
+      }
     }
   }
 

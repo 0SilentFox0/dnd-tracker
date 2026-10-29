@@ -116,6 +116,10 @@ export function useCompendiumImport(campaignId: string, initialFile?: File) {
 
   const toggleCategory = (kind: string, on: boolean) => { setCategories(on ? [...categories, kind] : categories.filter(item => item !== kind)); invalidate(); };
 
+  const selectCategories = (kinds: string[]) => { setCategories(kinds); invalidate(); };
+
+  const setChapterExclusions = (paths: string[]) => { setExcludedChapters(paths); invalidate(); };
+
   const toggleChapter = (path: string, on: boolean) => { setExcludedChapters(on ? excludedChapters.filter(item => item !== path) : [...excludedChapters, path]); invalidate(); };
 
   const openRun = async (run: CompendiumRun) => {
@@ -139,7 +143,7 @@ export function useCompendiumImport(campaignId: string, initialFile?: File) {
 
   return {
     state: { root, categories, excludedChapters, options, preview, input, result, rights, targets, busy, error: shownError },
-    actions: { selectFile, changeOptions, applyOptions: applyExclusion, setOptions, toggleCategory, toggleChapter, setRights, runPreview, confirm, excludeBlockedRows, excludeRow, openRun, close },
+    actions: { selectFile, changeOptions, applyOptions: applyExclusion, setOptions, toggleCategory, selectCategories, toggleChapter, setChapterExclusions, setRights, runPreview, confirm, excludeBlockedRows, excludeRow, openRun, close },
   };
 }
 

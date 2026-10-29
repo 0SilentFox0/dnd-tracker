@@ -1,7 +1,7 @@
 import { z } from "zod";
 
 import { AbilityTargetSchema, AmountSchema, DurationSchema, FlatSchema, FormulaSchema } from "./common";
-import { ATTACK_KINDS, CONDITION_5E_KEYS, CONDITION_KEYS, DAMAGE_FILTER_KINDS, STAT_KEYS } from "./kinds";
+import { ATTACK_KINDS, CONDITION_5E_KEYS, CONDITION_KEYS, CUSTOM_CONDITION_KEY_RE, type CustomConditionKey, DAMAGE_FILTER_KINDS, DICE_RE, STAT_KEYS, type StatKey } from "./kinds";
 
 import { ABILITY_KEYS } from "@/lib/constants/abilities";
 import { PROFICIENCY_KINDS } from "@/lib/constants/artifacts";
@@ -14,6 +14,7 @@ export {
   CONDITION_KEYS,
   type Condition5eKey,
   type ConditionImmunityKey,
+  type CustomConditionKey,
   DYNAMIC_STATS,
   isBakedStat,
   isStaticEffect,
@@ -26,7 +27,15 @@ const target = { target: AbilityTargetSchema.optional() };
 
 const timed = { ...target, duration: DurationSchema.optional() };
 
+const AT_LEAST_TIMED = ["armor", "speed"] as const;
+
 const hasValue = (e: { flat?: unknown; percent?: unknown }) => e.flat !== undefined || e.percent !== undefined;
+
+function atLeastAllowed(e: { stat: StatKey; atLeast?: number; duration?: unknown }): boolean {
+  if ((ABILITY_KEYS as readonly string[]).includes(e.stat)) return (e.atLeast ?? 0) <= 30;
+
+  return (AT_LEAST_TIMED as readonly string[]).includes(e.stat) && e.duration !== undefined;
+}
 
 const ModifyStatSchema = z
   .object({
@@ -34,23 +43,26 @@ const ModifyStatSchema = z
     stat: z.enum(STAT_KEYS),
     flat: FlatSchema.optional(),
     percent: FlatSchema.optional(),
-    atLeast: z.number().int().min(1).max(30).optional(),
+    atLeast: z.number().int().min(1).max(120).optional(),
     attackKind: z.enum(ATTACK_KINDS).optional(),
     spellLevels: z.array(z.number().int().min(1).max(9)).min(1).optional(),
     until: z.literal("turnEnd").optional(),
     ...timed,
   })
   .refine((e) => hasValue(e) || e.atLeast !== undefined, { message: "abilities.validation.needValue" })
-  .refine((e) => e.atLeast === undefined || ((ABILITY_KEYS as readonly string[]).includes(e.stat) && e.flat === undefined && e.percent === undefined), {
+  .refine((e) => e.atLeast === undefined || (e.flat === undefined && e.percent === undefined), { message: "abilities.validation.atLeastNoFlat", path: ["atLeast"] })
+  .refine((e) => e.atLeast === undefined || atLeastAllowed(e), {
     message: "abilities.validation.atLeastScope",
     path: ["atLeast"],
   });
+
+const SpellRollFlatSchema = z.object({ spellRoll: z.number().int().min(-500).max(500).refine((n) => n !== 0) });
 
 const DamageBonusSchema = z
   .object({
     kind: z.literal("damageBonus"),
     filter: z.object({ kind: z.enum(DAMAGE_FILTER_KINDS), school: z.string().min(1).optional() }),
-    flat: FlatSchema.optional(),
+    flat: z.union([FlatSchema, SpellRollFlatSchema]).optional(),
     percent: FlatSchema.optional(),
     perMark: z.string().min(1).optional(),
     ...timed,
@@ -62,6 +74,8 @@ const flagBase = { kind: z.literal("flag"), ...timed };
 export const AbilityKeySchema = z.enum(ABILITY_KEYS);
 
 export const AnyConditionSchema = z.enum([...CONDITION_KEYS, ...CONDITION_5E_KEYS]);
+
+export const CustomConditionKeySchema = z.string().regex(CUSTOM_CONDITION_KEY_RE) as unknown as z.ZodType<CustomConditionKey>;
 
 const DndSkillSchema = z.enum(DND_SKILLS);
 
@@ -116,6 +130,7 @@ const FlagSchema = z.discriminatedUnion("flag", [
   z.object({ ...flagBase, flag: z.literal("noNegativeMorale") }),
   z.object({ ...flagBase, flag: z.literal("ignoreMorale") }),
   z.object({ ...flagBase, flag: z.literal("minMorale"), value: z.number().int().min(-3).max(3) }),
+  z.object({ ...flagBase, flag: z.literal("damageThreshold"), value: z.number().int().min(1).max(100) }),
   z.object({ ...flagBase, flag: z.literal("extraSummons"), count: z.number().int().min(1).max(5), spellIds: z.array(z.string().min(1)).min(1).optional() }),
   z.object({ ...flagBase, flag: z.literal("piercingShot") }),
   z.object({ ...flagBase, flag: z.literal("fireWave"), percent: z.number().int().min(1).max(100), size: z.number().int().min(5).max(120) }),
@@ -157,11 +172,20 @@ const GrantActionSchema = z
     message: "abilities.validation.emptyAction",
   });
 
+const delayField = z.number({ error: (iss) => (iss.input === undefined ? "validation.spellDelayPair" : undefined) }).int().min(5).max(120).multipleOf(5);
+
 const DealDamageSchema = z.object({
   kind: z.literal("dealDamage"),
   amount: AmountSchema,
   damageType: z.string().min(1).optional(),
   falloff: z.array(z.number().min(0).max(100)).min(1).optional(),
+  byDistance: z
+    .array(z.object({ maxFeet: z.number().int().min(5).max(600).multipleOf(5), dice: z.string().regex(DICE_RE) }))
+    .min(2)
+    .max(6)
+    .refine((r) => r.every((x, i) => i === 0 || x.maxFeet > r[i - 1].maxFeet), { message: "abilities.validation.distanceMustGrow" })
+    .optional(),
+  delayIfBeyond: z.object({ feet: delayField, perRoundFeet: delayField }).optional(),
   ...target,
 });
 
@@ -172,6 +196,7 @@ const DotSchema = z.object({
   damagePerRound: AmountSchema,
   damageType: z.string().min(1),
   duration: DurationSchema,
+  linkedToCondition: z.literal(true).optional(),
   ...target,
 });
 
@@ -193,12 +218,14 @@ const CharmSchema = z.object({ kind: z.literal("charm"), duration: DurationSchem
 
 const ApplyConditionSchema = z.object({
   kind: z.literal("applyCondition"),
-  condition: AnyConditionSchema,
+  condition: z.union([AnyConditionSchema, CustomConditionKeySchema]),
   duration: DurationSchema,
   levels: z.number().int().min(1).max(6).optional(),
   saveEnds: z.object({ ability: AbilityKeySchema }).optional(),
   percent: z.number().int().min(1).max(100).optional(),
   breakOnDamage: z.boolean().optional(),
+  onlyIfAffected: z.boolean().optional(),
+  escapeDc: z.literal(true).optional(),
   ...target,
 });
 
@@ -230,6 +257,10 @@ const SummonSchema = z
 
 const RaiseDeadSchema = z.object({ kind: z.literal("raiseDead"), hpPercent: z.number().int().min(1).max(100), ...target });
 
+const HelpSchema = z.object({ kind: z.literal("help"), ...target });
+
+const PushSchema = z.object({ kind: z.literal("push"), feet: z.number().int().min(5).max(30).multipleOf(5), from: z.literal("caster"), ...target });
+
 const CopySpellBuffsSchema = z.object({ kind: z.literal("copySpellBuffs"), ...target });
 
 const MarkSchema = z.object({ kind: z.literal("mark"), markId: z.string().min(1), duration: DurationSchema, ...target });
@@ -240,7 +271,7 @@ export type Maneuver = (typeof MANEUVERS)[number];
 
 const ManeuverSchema = z.object({ kind: z.literal("maneuver"), maneuver: z.enum(MANEUVERS), percentOfAttack: z.number().int().min(1).max(500) });
 
-const BASE_EFFECTS = [
+export const BASE_EFFECTS = [
   ModifyStatSchema,
   DamageBonusSchema,
   FlagSchema,
@@ -264,15 +295,21 @@ const BASE_EFFECTS = [
   SummonSchema,
   RaiseDeadSchema,
   ManeuverSchema,
+  HelpSchema,
+  PushSchema,
 ] as const;
+
+export const StaticEffectSchema = z.discriminatedUnion("kind", [ModifyStatSchema, DamageBonusSchema, FlagSchema]);
 
 export const NonRandomEffectSchema = z.discriminatedUnion("kind", [...BASE_EFFECTS]);
 
-const RandomOfSchema = z.object({ kind: z.literal("randomOf"), options: z.array(NonRandomEffectSchema).min(2) });
+export const RandomOfSchema = z.object({ kind: z.literal("randomOf"), options: z.array(NonRandomEffectSchema).min(2) });
 
 export const EffectSchema = z.discriminatedUnion("kind", [...BASE_EFFECTS, RandomOfSchema]);
 
 export type Effect = z.infer<typeof EffectSchema>;
+
+export type NonRandomEffect = z.infer<typeof NonRandomEffectSchema>;
 
 export type EffectKind = Effect["kind"];
 

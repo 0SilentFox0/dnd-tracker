@@ -12,11 +12,14 @@ import { syncMapAuras } from "@/lib/utils/abilities/engine/effects/map-auras";
 import type { BATTLE_RATE_LIMITS, RateLimitResult } from "@/lib/utils/api/rate-limit";
 import { releaseInvalidGrapples } from "@/lib/utils/battle/actions/grapple";
 import { controls, currentOf } from "@/lib/utils/battle/common/control";
+import { dropOrphanedConcentration } from "@/lib/utils/battle/concentration";
 import { placeParticipants } from "@/lib/utils/battle/grid/placement";
 import { placeRevived } from "@/lib/utils/battle/grid/revive-placement";
 import { modeBlockedText, withModeAfterMutation } from "@/lib/utils/battle/modes/server";
 import { clearFallenEffects } from "@/lib/utils/battle/participant/fallen";
 import { reserveOf } from "@/lib/utils/battle/participant/reserve";
+import { sweepOrphanedAnchored } from "@/lib/utils/battle/spell/anchored-zone";
+import { sweepDeadZones } from "@/lib/utils/battle/spell/zone-triggers";
 import type {
   BattleDelta,
   BattleMeta,
@@ -32,6 +35,8 @@ import {
   eventToBattleAction,
   systemEvent,
 } from "@/lib/utils/battle/store";
+import { dismissExpiredSummons } from "@/lib/utils/battle/summon/dismiss";
+import { revertExpiredTransforms } from "@/lib/utils/battle/transform/revert";
 import { checkVictoryConditions, completeBattle } from "@/lib/utils/battle/turn/victory";
 import type { BattleKnowledge } from "@/lib/utils/battle/view/knowledge";
 import { alwaysSeesEnemyStats } from "@/lib/utils/battle/view/visibility";
@@ -122,6 +127,14 @@ function withVictory(scene: BattleSceneState, result: MutationResult, rules: Rul
 }
 
 function withPlacement(map: BattleMapConfig | null, scene: { status: BattleStatus; round: number; participants: BattleParticipant[] }, result: MutationResult, place: boolean): MutationResult {
+  const dismissed = dismissExpiredSummons(result.participants, result.scene?.round ?? scene.round);
+
+  if (dismissed.participants !== result.participants) result = { ...result, participants: dismissed.participants, events: [...result.events, systemEvent(result.scene?.round ?? scene.round, dismissed.messages.join("; "))] };
+
+  const reverted = revertExpiredTransforms(result.participants, result.scene?.round ?? scene.round);
+
+  if (reverted.participants !== result.participants) result = { ...result, participants: reverted.participants, events: [...result.events, systemEvent(result.scene?.round ?? scene.round, reverted.messages.join("; "))] };
+
   const cleared = clearFallenEffects(result.participants);
 
   if (cleared !== result.participants) result = { ...result, participants: cleared };
@@ -129,6 +142,14 @@ function withPlacement(map: BattleMapConfig | null, scene: { status: BattleStatu
   const released = releaseInvalidGrapples(result.participants, map);
 
   if (released.participants !== result.participants) result = { ...result, participants: released.participants, events: [...result.events, systemEvent(result.scene?.round ?? scene.round, released.messages.join("; "))] };
+
+  const swept = sweepOrphanedAnchored(result.participants);
+
+  if (swept !== result.participants) result = { ...result, participants: swept };
+
+  const orphaned = dropOrphanedConcentration(result.participants, map, result.scene?.round ?? scene.round);
+
+  if (orphaned.participants !== result.participants) result = { ...result, participants: orphaned.participants, events: [...result.events, systemEvent(result.scene?.round ?? scene.round, orphaned.messages.join("; "))] };
 
   if (!map || (result.scene?.status ?? scene.status) !== BattleStatus.ACTIVE) return result;
 
@@ -222,9 +243,15 @@ export async function runGuardedBattleOperationCore<TBody>(
 
   const mutated = guardTurnOrder(loaded.scene, loaded.participants, await options.mutate(ctx, body), options.operation);
 
-  const map = mutated.scene?.map !== undefined ? mutated.scene.map : loaded.meta.map;
+  const mutatedMap = mutated.scene?.map !== undefined ? mutated.scene.map : loaded.meta.map;
 
-  const placed = withPlacement(map, { status: loaded.scene.status, round: loaded.scene.round, participants: loaded.participants }, mutated, !isDryRun);
+  const unswept = withPlacement(mutatedMap, { status: loaded.scene.status, round: loaded.scene.round, participants: loaded.participants }, mutated, !isDryRun);
+
+  const swept = sweepDeadZones(mutatedMap, unswept.participants);
+
+  const map = swept ?? mutatedMap;
+
+  const placed = swept ? { ...unswept, scene: { ...unswept.scene, map: swept } } : unswept;
 
   const result = withVictory(loaded.scene, isDryRun ? placed : withModeAfterMutation(map, loaded.scene, placed), loaded.meta.rules);
 

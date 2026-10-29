@@ -7,7 +7,7 @@ import { cellKey, hazardDamage } from "@/lib/utils/battle/grid";
 import type { MapTerrainData, MapTerrainResponse } from "@/types/api";
 import type { GridPoint, TerrainKind } from "@/types/battle";
 
-export type TerrainBrush = TerrainKind | "erase";
+export type TerrainBrush = TerrainKind | "erase" | "erase-zone";
 
 const MAX_STROKE_CELLS = 400;
 
@@ -44,12 +44,12 @@ const EMPTY: ReadonlySet<string> = new Set();
 
 const DEFAULT_BRUSH: TerrainBrushSettings = { kind: "wall", rounds: 1, label: DEFAULT_HAZARD_LABEL, dice: DEFAULT_HAZARD_DICE, damageType: DEFAULT_HAZARD_DAMAGE_TYPE };
 
-const sameTerrain = (a: MapTerrainData["terrain"], b: MapTerrainData["terrain"]) => JSON.stringify(a) === JSON.stringify(b);
+const sameTerrain = (a: MapTerrainData, b: MapTerrainData) => JSON.stringify([a.terrain, a.eraseZone]) === JSON.stringify([b.terrain, b.eraseZone]);
 
 function enqueue(queue: MapTerrainData[], next: MapTerrainData) {
   const last = queue.at(-1);
 
-  if (last && sameTerrain(last.terrain, next.terrain)) {
+  if (last && sameTerrain(last, next)) {
     const merged = [...new Set([...last.cells, ...next.cells])];
 
     if (merged.length <= MAX_STROKE_CELLS) {
@@ -128,7 +128,7 @@ export function useMapTerrainTool({ isDM, mutate, onSkipped, onActivate }: Optio
       const damage = hazardDamage(d, t);
 
       const terrain: MapTerrainData["terrain"] =
-        b === "erase"
+        b === "erase" || b === "erase-zone"
           ? null
           : b === "barrier"
             ? { kind: b, rounds: Math.min(MAX_BARRIER_ROUNDS, Math.max(1, Math.trunc(r) || 1)) }
@@ -136,7 +136,7 @@ export function useMapTerrainTool({ isDM, mutate, onSkipped, onActivate }: Optio
               ? { kind: b, label: l.trim() || DEFAULT_HAZARD_LABEL, ...(damage && { damage }) }
               : { kind: b };
 
-      enqueue(queue.current, { cells, terrain });
+      enqueue(queue.current, { cells, terrain, ...(b === "erase-zone" && { eraseZone: true as const }) });
       syncPending();
       void drain();
     },

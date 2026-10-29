@@ -1,18 +1,20 @@
-import { CONDITION_LABELS } from "../labels";
+import { CONDITION_LABELS, conditionLabel } from "../labels";
 import type { EffectApplyInput, EffectApplyResult } from "./types";
 
 import { EffectMarker } from "@/lib/constants/battle";
 import { findFlags } from "@/lib/utils/abilities/engine/core/collect-modifiers";
-import { findParticipant, participantNames, updateParticipant } from "@/lib/utils/abilities/engine/core/participants";
+import { findParticipant, participantNames, updateParticipant, withActiveEffects } from "@/lib/utils/abilities/engine/core/participants";
 import { restoreCharm } from "@/lib/utils/abilities/engine/effects/charm";
 import { countMarks, GUARD_KEY, markKey } from "@/lib/utils/abilities/engine/effects/marks";
 import { clampMorale, moraleCapOf } from "@/lib/utils/abilities/engine/effects/morale";
 import { effectSource, upsertTimedEffect } from "@/lib/utils/abilities/engine/effects/timed-effects";
-import type { Condition5eKey, ConditionImmunityKey, Effect } from "@/lib/utils/abilities/schema";
-import { isCondition5eKey } from "@/lib/utils/abilities/schema/kinds";
-import { applyCondition5e, saveEndsFor } from "@/lib/utils/battle/conditions/apply";
+import type { ConditionImmunityKey, Effect } from "@/lib/utils/abilities/schema";
+import { isCondition5eKey, isCustomConditionKey } from "@/lib/utils/abilities/schema/kinds";
+import { helpEffect } from "@/lib/utils/battle/actions/effects";
+import { applyCondition5e, type ConditionKey, saveEndsFor } from "@/lib/utils/battle/conditions/apply";
 import { removeEffects } from "@/lib/utils/battle/conditions/query";
 import { grantExtraActions } from "@/lib/utils/battle/participant/helpers";
+import { spellSaveDc } from "@/lib/utils/battle/spell/power";
 import { signed } from "@/lib/utils/common/format";
 import { pluralUk } from "@/lib/utils/common/plural";
 import { DEFAULT_RULES } from "@/lib/utils/rules";
@@ -60,9 +62,9 @@ export function immuneTo(ps: BattleParticipant[], id: string, key: ConditionImmu
   return findFlags(ps, id, "conditionImmunity").some((f) => f.conditions === "all" || f.conditions.includes(key));
 }
 
-export { CONDITION_LABELS };
+export { CONDITION_LABELS, conditionLabel };
 
-function applyCondition5eToTargets(input: EffectApplyInput<Of<"applyCondition">>, key: Condition5eKey): EffectApplyResult {
+function applyCondition5eToTargets(input: EffectApplyInput<Of<"applyCondition">>, key: ConditionKey): EffectApplyResult {
   const { ability, effect, ctx } = input;
 
   const owner = findParticipant(input.participants, input.ownerId);
@@ -88,15 +90,20 @@ function applyCondition5eToTargets(input: EffectApplyInput<Of<"applyCondition">>
 
     ps = result.participants;
     messages.push(...result.messages);
+
+    if (effect.escapeDc && owner && !result.blocked) ps = updateParticipant(ps, id, (p) => withEscapeDc(p, `${ability.key}#${input.effectIndex}@${input.ownerId}`, spellSaveDc(owner, undefined, (ctx.rules ?? DEFAULT_RULES).formulas.saveDcBase)));
   }
 
   return { participants: ps, messages };
 }
 
+const withEscapeDc = (p: BattleParticipant, timedKey: string, escapeDc: number): BattleParticipant =>
+  withActiveEffects(p, (list) => list.map((e) => (e.abilityKey === timedKey ? { ...e, escapeDc } : e)));
+
 export function applyCondition(input: EffectApplyInput<Of<"applyCondition">>): EffectApplyResult {
   const { ability, effect, ctx } = input;
 
-  if (isCondition5eKey(effect.condition)) return applyCondition5eToTargets(input, effect.condition);
+  if (isCondition5eKey(effect.condition) || isCustomConditionKey(effect.condition)) return applyCondition5eToTargets(input, effect.condition);
 
   const condition = effect.condition;
 
@@ -145,6 +152,18 @@ export function applyGrantAction(input: EffectApplyInput<Of<"grantAction">>): Ef
       };
     },
     (names) => `⚔️ ${ability.name}: ${names} — ${describeGrantAction(effect)}`,
+  );
+}
+
+export function applyHelp(input: EffectApplyInput<Of<"help">>): EffectApplyResult {
+  const { ability, ctx } = input;
+
+  const owner = findParticipant(input.participants, input.ownerId);
+
+  return each(
+    input,
+    (p) => upsertTimedEffect(p, { ...helpEffect(input.ownerId), source: effectSource(owner, ability) }, ctx.round),
+    (names) => `🤝 ${ability.name}: ${names} має перевагу на наступну атаку`,
   );
 }
 

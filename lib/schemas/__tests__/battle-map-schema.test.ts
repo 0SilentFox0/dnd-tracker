@@ -74,3 +74,40 @@ describe("battleMapSchema.weather", () => {
     expect(battleMapSchema.safeParse({ ...map, weather: "hail" }).success).toBe(false);
   });
 });
+
+describe("battleMapSchema.terrain: складна місцевість і заслонення", () => {
+  it("зберігає difficult/obscured/zoneId і concentrationOf/casterId", () => {
+    const terrain = {
+      "1:1": { kind: "difficult" },
+      "2:2": { kind: "hazard", difficult: true, obscured: true, zoneId: "z1", damage: { dice: "1d6", type: "fire", casterId: "c", concentrationOf: { casterId: "c", castId: "x" } } },
+    };
+
+    const parsed = battleMapSchema.parse({ ...map, terrain });
+
+    expect(parsed.terrain).toEqual(terrain);
+  });
+});
+
+describe("battleMapSchema: id зон і концентрації реальної довжини", () => {
+  const uuid = "123e4567-e89b-12d3-a456-426614174000";
+
+  const castId = `${uuid}:${uuid}@12#3`;
+
+  const zoneId = `${castId}@12`;
+
+  const tag = { casterId: uuid, castId };
+
+  it("приймає zoneId, ключ spellZones і concentrationOf довші за 64", () => {
+    expect(zoneId.length).toBeGreaterThan(64);
+
+    const terrain = { "1:1": { kind: "hazard", zoneId, damage: { type: "fire", amount: 1, spellId: uuid, casterId: uuid, concentrationOf: tag } } };
+
+    const spellZones = { [zoneId]: { casterId: uuid, spellId: uuid, spellName: "Fog", dc: 13, side: "enemies", triggers: {}, untilRound: 15, concentrationOf: tag } };
+
+    expect(battleMapSchema.safeParse({ ...map, terrain, spellZones }).success).toBe(true);
+  });
+
+  it("відхиляє безмежно довгі id", () => {
+    expect(battleMapSchema.safeParse({ ...map, terrain: { "1:1": { kind: "hazard", zoneId: "x".repeat(201) } } }).success).toBe(false);
+  });
+});

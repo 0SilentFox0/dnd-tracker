@@ -1,6 +1,7 @@
 "use client";
 
 import { AmountField } from "./AmountField";
+import { DistanceDiceField } from "./DistanceDiceField";
 import { DurationField } from "./DurationField";
 import { FlatField } from "./FlatField";
 import { MultiSelectField } from "./MultiSelectField";
@@ -71,6 +72,8 @@ export function FieldRenderer({ meta: rawMeta, value, onChange, path, owner }: F
         return <DurationField {...props} />;
       case "numberList":
         return <NumberListField {...props} />;
+      case "distanceDice":
+        return <DistanceDiceField {...props} />;
       case "spells":
         return <SpellPickerField {...props} />;
       case "saveEnds":

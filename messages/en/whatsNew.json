@@ -5,6 +5,30 @@
     "new": " · new",
     "open": "Open"
   },
+  "2026-10-29-compendium-import-guide": {
+    "title": "Compendium import: steps, hint and help",
+    "body": "The JSON compendium import screen now has a step indicator (file, categories, check, confirm), a hint and a help article about the report and why an import is blocked."
+  },
+  "2026-10-29-spell-attack-crits": {
+    "title": "Spell attack crits and fumbles",
+    "body": "The DM's choice for natural 20s and 1s now also applies to spell attacks, including automatic reactions (such as Rageful Nimbus): the battle waits for your pick, and \"Cancel action\" cancels the whole attack."
+  },
+  "2026-10-29-spell-editor-forms": {
+    "title": "Editor for every spell effect",
+    "body": "The spell editor now has forms for all special effects (choose one, sub-cast, aura on a target, summon, transform, terrain). On the Rules page you can delete campaign custom conditions; if a condition is still in use, you will see where."
+  },
+  "2026-10-29-summons-and-transform": {
+    "title": "Summoned objects and transformation",
+    "body": "Spells can summon immobile objects on the map (guardian bushes automatically attack enemies nearby, and the caster can strike with them as a bonus action) and transform a beast into a campaign unit: the form has its own HP, and when the form drops to zero the creature returns to its normal shape, carrying over the excess damage. Objects and the form vanish with the duration or when concentration is lost."
+  },
+  "2026-10-29-spell-zones": {
+    "title": "Difficult terrain and spell zones",
+    "body": "Spells can place difficult terrain, fog and walls on the map: moving through difficult terrain costs twice as much, and attacks in fog have disadvantage. Zones pull back those who leave, an aura on a target affects everyone nearby, and distant strikes (a swarm of paper birds) arrive at the start of the caster's turn. The DM paints difficult terrain with the \"Difficult\" brush."
+  },
+  "2026-10-29-temporary-spell-actions": {
+    "title": "Temporary actions from spells",
+    "body": "Spells can grant separate action tiles for their duration (hurl a cone, strike with a blade, a shell claw), charges of extra damage for the next hits, a grasp that deals damage at the start of a turn, and an automatic reaction when an enemy attacks a marked target. The tile vanishes with the duration or when concentration is lost and does not spend a slot."
+  },
   "2026-10-28-acquaintances": {
     "title": "Acquaintances",
     "body": "The DM selects an NPC's name in the scenario text and turns it into an acquaintance: name, portrait, description and an encounter journal. Players see it as soon as the DM marks the scene as played, and can keep their own notes. The DM enables the section in the campaign settings."
@@ -56,6 +80,14 @@
   "2026-10-28-crit-choice": {
     "title": "DM picks the crit effect",
     "body": "In campaign settings there is a \"DM picks crit/fumble effects\" option: on a natural 20 or 1 the battle waits until you choose an effect from a list. Crits can now also happen on targets' saving throws against spells; without the option the effect is random."
+  },
+  "2026-10-28-book-conditions": {
+    "title": "Book conditions in campaign rules",
+    "body": "Compendium import carries the book's custom conditions (for example, \"Pacified\") into the campaign rules: spells that apply them now work in battle. A pacified creature does not attack, cast hostile spells or deal damage; a repeated saving throw at the end of its turn removes the condition, and the DM can remove it manually."
+  },
+  "2026-10-28-spell-options": {
+    "title": "Spell option choice and fall height",
+    "body": "Spells with options to choose from ask you to pick an option in the cast dialog, and spells like fall ask you to enter a height; the dice are calculated automatically. Damage by distance and pushback have been added."
   },
   "2026-10-27-dashboard": {
     "title": "New campaign dashboard",

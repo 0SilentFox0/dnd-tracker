@@ -29,12 +29,22 @@ function leadingKey(text: string): { key: unknown[]; rest: string } | undefined 
   }
 }
 
-function keyLabel(t: Translator, key: unknown[]) {
+function keyParts(t: Translator, key: unknown[]) {
   const [, kind, source, , name, parent] = key;
 
-  const owner = Array.isArray(parent) && parent.length ? ` (${parent.join(", ")})` : "";
+  return { kind: kindLabel(t, String(kind)), name: String(name), owner: Array.isArray(parent) && parent.length ? ` (${parent.join(", ")})` : "", source: source ? String(source) : "" };
+}
 
-  return `${kindLabel(t, String(kind))} «${String(name)}»${owner}${source ? ` · ${String(source)}` : ""}`;
+function keyLabel(t: Translator, key: unknown[]) {
+  const { kind, name, owner, source } = keyParts(t, key);
+
+  return `${kind} «${name}»${owner}${source ? ` · ${source}` : ""}`;
+}
+
+export function entryParts(t: Translator, key: string) {
+  const parsed = leadingKey(key);
+
+  return parsed ? keyParts(t, parsed.key) : { kind: "", name: key, owner: "", source: "" };
 }
 
 export function entryLabel(t: Translator, key: string) {
@@ -56,6 +66,43 @@ export function readablePath(t: Translator, path: string) {
 }
 
 export const statusLabel = (t: Translator, status: string) => known(t, "statuses", status) ?? status;
+
+export const coverageLabel = (t: Translator, coverage: string) => t(`coverage.${coverage === "native" || coverage === "manual" ? coverage : "partial"}`);
+
+type CategoryCount = { present: number; mapped: number; partial: number; skipped: number };
+
+export function splitCategories(counts: Record<string, CategoryCount>) {
+  const entries = Object.entries(counts).filter(([, count]) => count.present > 0);
+
+  const technical = (count: CategoryCount) => count.mapped === 0 && count.partial === 0 && count.skipped >= count.present;
+
+  return { main: entries.filter(([, count]) => !technical(count)), technical: entries.filter(([, count]) => technical(count)) };
+}
+
+export const issueCodeLabel = (t: Translator, code: string) => known(t, "issueTitles", code) ?? code;
+
+export type IssueGroup = { code: string; title: string; severity: ImportIssue["severity"]; action?: string; items: Array<{ path: string; action?: string }> };
+
+export function groupIssues(t: Translator, issues: ImportIssue[]): IssueGroup[] {
+  const groups = new Map<string, IssueGroup>();
+
+  for (const issue of issues) {
+    const group = groups.get(issue.code) ?? { code: issue.code, title: issueCodeLabel(t, issue.code), severity: issue.severity, action: issue.action, items: [] };
+
+    if (issue.severity === "error") group.severity = "error";
+
+    group.items.push({ path: issue.path, ...(issue.action !== group.action && { action: issue.action }) });
+    groups.set(issue.code, group);
+  }
+
+  return [...groups.values()].sort((a, b) => Number(b.severity === "error") - Number(a.severity === "error") || b.items.length - a.items.length);
+}
+
+type ReportRow = { status: string; issues: ImportIssue[] };
+
+export const rowActionCount = (row: ReportRow) => splitInfoIssues(row.issues).actions.length;
+
+export const REPORT_ROW_FILTERS = { changed: (row: ReportRow) => row.status !== "unchanged", manual: (row: ReportRow) => rowActionCount(row) > 0, all: () => true } as const;
 
 export function sourceLabel(t: Translator, source: unknown) {
   if (!isRecord(source)) return String(source);
@@ -82,7 +129,11 @@ export function describeRulesPatch(t: Translator, patch: JsonRecord | undefined)
 
   if (isRecord(patch.classes) && typeof patch.classes.enabled === "boolean") parts.push(t(patch.classes.enabled ? "rulesPatch.enableClasses" : "rulesPatch.disableClasses"));
 
-  const other = Object.keys(patch).filter((key) => key !== "classes").length;
+  const custom = isRecord(patch.conditions) && Array.isArray(patch.conditions.custom) ? patch.conditions.custom.length : 0;
+
+  if (custom) parts.push(t("rulesPatch.customConditions", { count: custom }));
+
+  const other = Object.keys(patch).filter((key) => key !== "classes" && !(key === "conditions" && custom)).length;
 
   if (other) parts.push(t("rulesPatch.otherSections", { count: other }));
 

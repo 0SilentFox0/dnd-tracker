@@ -1,5 +1,6 @@
 import { background, feat, gameClass, race } from "../adapters/characters";
 import { item, materialPage, monster, spell } from "../adapters/content";
+import { deriveCustomConditions } from "../adapters/custom-conditions";
 import { array, object, str } from "../adapters/shared";
 import { resolveCompendiumFeatures, resolveOptionalProgression } from "../feature-resolution";
 import { canonicalKey } from "../identity";
@@ -60,6 +61,9 @@ export function adaptTopLevel(state: AdaptState) {
       if (kind === "spell" && entry && typeof row.school === "string") addSpellSchool(state, entry, row.school);
     });
   }
+
+  if (isEnabled(state, "condition"))
+    for (const d of deriveCustomConditions(state.root)) if (!d.recognized) state.issues.push(issue("MANUAL_CONDITION_TEXT", `condition[${d.index}]`, "warning"));
 
   for (const entry of state.entries.filter((e) => e.inputKind === "class")) {
     const row = state.sourceRows.get(entry.key);

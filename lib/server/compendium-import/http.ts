@@ -127,7 +127,7 @@ export function compendiumRoute(mode: "preview" | "confirm" | "reports" | "entri
 
       return privateJson(translateCompendiumReport(t, await confirmImport(actor, input, body.token, body.idempotencyKey, secret, prismaImportRepository)));
     } catch (error) {
-      if (error instanceof CompendiumError) return privateJson({ code: error.code }, statusOf(error.code));
+      if (error instanceof CompendiumError) return privateJson({ code: error.code, ...(error.code === "NOTES_SIZE" && error.details && { details: error.details }) }, statusOf(error.code));
 
       // Existing domain guards use ContentError. Return only a fixed code, never their payload.
       if (error && typeof error === "object" && "status" in error && error.status === 409) return privateJson({ code: "CONTENT_CONFLICT" }, 409);

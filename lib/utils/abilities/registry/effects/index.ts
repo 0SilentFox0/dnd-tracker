@@ -6,6 +6,7 @@ import { applyCopySpellBuffs } from "./copy-buffs";
 import { describeFlag, FLAG_FIELDS, FLAG_LABELS } from "./flags";
 import { applyDealDamage, applyDot, applyHeal, applyHot, describeDealDamage, describeDot, describeHeal, describeHot } from "./hp";
 import { applyManeuver, describeManeuver, MANEUVER_LABELS } from "./maneuver";
+import { applyPush, describePush } from "./push";
 import {
   applyChangeMorale,
   applyCleanse,
@@ -13,9 +14,11 @@ import {
   applyDrainSpellSlot,
   applyGrantAction,
   applyGuard,
+  applyHelp,
   applyMark,
   applyRestoreSpellSlot,
   CONDITION_LABELS,
+  conditionLabel,
   describeGrantAction,
 } from "./state";
 import {
@@ -34,6 +37,7 @@ import type { Ability, Effect, EffectKind } from "@/lib/utils/abilities/schema";
 import { CONDITION_5E_KEYS } from "@/lib/utils/abilities/schema/kinds";
 import { pickOne } from "@/lib/utils/common/dice";
 import { signed } from "@/lib/utils/common/format";
+import type { SpellEffect } from "@/lib/utils/spells/model/schema";
 
 export type { EffectApplyInput, EffectApplyResult };
 
@@ -70,9 +74,9 @@ export const EFFECT_REGISTRY: { [K in EffectKind]: EffectDefinition<K> } = {
     describe: (e) => (/\bDM\b/.test(e.text) ? `✋ ${e.text}` : e.text),
     apply: (i) => ({ participants: i.participants, messages: [`📜 ${i.ability.name}: ${i.effect.text}`] }),
   },
-  dealDamage: { kind: "dealDamage", label: "Завдати шкоди", static: false, fields: [AMOUNT, { name: "damageType", label: "Тип", input: "text", optional: true }, { name: "falloff", label: "% шкоди по цілях по черзі (100, 50, 25…)", input: "numberList", optional: true }, TARGET_FIELD], describe: describeDealDamage, apply: applyDealDamage },
+  dealDamage: { kind: "dealDamage", label: "Завдати шкоди", static: false, fields: [AMOUNT, { name: "damageType", label: "Тип", input: "text", optional: true }, { name: "falloff", label: "% шкоди по цілях по черзі (100, 50, 25…)", input: "numberList", optional: true }, { name: "byDistance", label: "Кубики за відстанню (футів:кубики, лише в заклинаннях)", input: "distanceDice", optional: true }, { name: "delayIfBeyond.feet", label: "Відкласти удар, якщо ціль далі, ніж (футів, лише в заклинаннях)", input: "number", optional: true }, { name: "delayIfBeyond.perRoundFeet", label: "…летить за раунд (футів)", input: "number", optional: true }, TARGET_FIELD], describe: describeDealDamage, apply: applyDealDamage },
   heal: { kind: "heal", label: "Лікування", static: false, fields: [AMOUNT, { name: "revive", label: "Воскрешає", input: "toggle", optional: true }, TARGET_FIELD], describe: describeHeal, apply: applyHeal },
-  dot: { kind: "dot", label: "Шкода щораунду (DOT)", static: false, fields: [{ ...AMOUNT, name: "damagePerRound", label: "Шкода/раунд (число, кубики, формула)" }, { name: "damageType", label: "Тип", input: "text" }, TARGET_FIELD, REQUIRED_DURATION], describe: describeDot, apply: applyDot },
+  dot: { kind: "dot", label: "Шкода щораунду (DOT)", static: false, fields: [{ ...AMOUNT, name: "damagePerRound", label: "Шкода/раунд (число, кубики, формула)" }, { name: "damageType", label: "Тип", input: "text" }, { name: "linkedToCondition", label: "Зникає разом зі станом цього заклинання", input: "toggle", optional: true }, TARGET_FIELD, REQUIRED_DURATION], describe: describeDot, apply: applyDot },
   hot: { kind: "hot", label: "Лікування щораунду (HOT)", static: false, fields: [{ ...AMOUNT, name: "healPerRound", label: "Лікування/раунд (число, кубики, формула)" }, TARGET_FIELD, REQUIRED_DURATION], describe: describeHot, apply: applyHot },
   berserk: { kind: "berserk", label: "Шал", static: false, fields: [{ name: "damageBonusPercent", label: "Бонус шкоди, %", input: "number" }, TARGET_FIELD, REQUIRED_DURATION], describe: describeBerserk, apply: applyBerserk },
   charm: { kind: "charm", label: "Перехід на бік заклинателя", static: false, fields: [TARGET_FIELD, REQUIRED_DURATION], describe: describeCharm, apply: applyCharm },
@@ -91,11 +95,13 @@ export const EFFECT_REGISTRY: { [K in EffectKind]: EffectDefinition<K> } = {
       { name: "saveEnds", label: "Рятівний кидок наприкінці ходу", input: "saveEnds", optional: true, visibleWhen: (v) => (CONDITION_5E_KEYS as readonly string[]).includes(String(v.condition)) },
       { name: "percent", label: "Шанс, % (для втрати дії)", input: "number", optional: true, visibleWhen: (v) => v.condition === "skip_action" },
       { name: "breakOnDamage", label: "Знімається при отриманні шкоди", input: "toggle", optional: true },
+      { name: "escapeDc", label: "«Вирватися» проти СК заклинання (для схоплення)", input: "toggle", optional: true, visibleWhen: (v) => v.condition === "grappled" },
+      { name: "onlyIfAffected", label: "Лише якщо хоч одну ціль заклинання уражено (для себе)", input: "toggle", optional: true },
       TARGET_FIELD,
       REQUIRED_DURATION,
     ],
     describe: (e) =>
-      `${CONDITION_LABELS[e.condition]}${e.condition === "skip_action" && e.percent ? ` ${e.percent}%` : ""}${e.levels ? ` ×${e.levels}` : ""} × ${e.duration?.rounds ?? "?"} р.${e.breakOnDamage ? ", до шкоди" : ""}${e.saveEnds ? `, рятівний кидок ${ABILITY_LABELS[e.saveEnds.ability]}` : ""}`,
+      `${conditionLabel(e.condition)}${e.condition === "skip_action" && e.percent ? ` ${e.percent}%` : ""}${e.levels ? ` ×${e.levels}` : ""} × ${e.duration?.rounds ?? "?"} р.${e.breakOnDamage ? ", до шкоди" : ""}${e.saveEnds ? `, рятівний кидок ${ABILITY_LABELS[e.saveEnds.ability]}` : ""}${e.escapeDc ? ", вирватися проти СК" : ""}`,
     apply: applyCondition,
   },
   grantAction: { kind: "grantAction", label: "Дати дію", static: false, fields: [
@@ -140,6 +146,8 @@ export const EFFECT_REGISTRY: { [K in EffectKind]: EffectDefinition<K> } = {
     describe: describeManeuver,
     apply: applyManeuver,
   },
+  help: { kind: "help", label: "Допомога союзнику", static: false, fields: [TARGET_FIELD], describe: () => "перевага союзнику на наступну атаку", apply: applyHelp },
+  push: { kind: "push", label: "Відштовхнути", static: false, fields: [{ name: "feet", label: "Футів (5–30)", input: "number" }, { name: "from", label: "Від", input: "select", options: [{ value: "caster", label: "Від кастера" }] }, TARGET_FIELD], describe: describePush, apply: applyPush },
   randomOf: {
     kind: "randomOf",
     label: "Випадковий з варіантів",
@@ -162,7 +170,25 @@ export function applyEffect(input: EffectApplyInput): EffectApplyResult {
   return def.apply(input as never);
 }
 
-export function describeEffect(effect: Effect): string {
+export function describeEffect(effect: Effect | SpellEffect): string {
+  if (effect.kind === "inputDice") return `кубики з введення (до ${effect.max}): ${effect.label}`;
+
+  if (effect.kind === "grantCast") return `підкаст «${effect.label}» (${effect.cost === "action" ? "дія" : effect.cost === "bonusAction" ? "бонусна дія" : "реакція"}${effect.uses ? `, ×${effect.uses}` : ""}) на ${effect.duration.rounds} р.`;
+
+  if (effect.kind === "hitRider") return `заряди ×${effect.charges}: +${effect.extraDice} ${effect.damageType} на ${effect.attackKind === "any" ? "будь-яку" : effect.attackKind === "melee" ? "ближню" : "дальню"} атаку${effect.consumeOnMiss ? " (і промах)" : ""}${effect.save ? `, СК ${effect.save.ability}: ${effect.save.onFail.map(describeEffect).join(", ")}` : ""}`;
+
+  if (effect.kind === "anchoredZone") return `аура ${effect.radiusFeet} фт на цілі (${effect.side === "enemies" ? "вороги" : effect.side === "allies" ? "союзники" : "усі"}${effect.excludeBearer ? ", крім носія" : ""}) на ${effect.duration.rounds} р.${effect.onEnter ? `; вхід: ${effect.onEnter.effects.map(describeEffect).join(", ")}` : ""}${effect.onTurnStart ? `; початок ходу: ${effect.onTurnStart.effects.map(describeEffect).join(", ")}` : ""}${effect.endsWhenStartOutside ? "; закінчується, якщо хід починається поза аурою" : ""}`;
+
+  if (effect.kind === "summonInline") return `викликає ${effect.count}× «${effect.name}» (${effect.hp === null ? "предмет" : `${effect.hp} HP`}, КЗ ${effect.ac === "spellDc" ? "= СК" : effect.ac}) на ${effect.duration.rounds} р.${effect.upcastEvery ? `; +1 за кожні ${effect.upcastEvery} кола слота` : ""}${effect.aura ? `; аура ${effect.aura.radiusFeet} фт${effect.aura.onEnter?.attack || effect.aura.onTurnStart?.attack ? " (атака заклинанням)" : ""}` : ""}`;
+
+  if (effect.kind === "transform") return `перетворює ціль на форму юніта на ${effect.duration.rounds} р.; на 0 HP форми — відкат, надлишок шкоди переходить на звичайну форму`;
+
+  if (effect.kind === "moveSelf") return "кастер переміщується до цілі";
+
+  if (effect.kind === "createTerrain") return `${effect.terrain === "wall" ? "стіна" : "складна місцевість"}: ${effect.shape === "line" ? "лінія до цілі" : "клітинки області"} (до ${effect.cells}) на ${effect.rounds} р.`;
+
+  if (effect.kind === "chooseOne") return `на вибір: ${effect.options.map(describeEffect).join(" / ")}`;
+
   const def = EFFECT_REGISTRY[effect.kind] as EffectDefinition<EffectKind> | undefined;
 
   return def ? def.describe(effect as never) : `невідомий ефект (${String(effect.kind)})`;

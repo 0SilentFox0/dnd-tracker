@@ -4,10 +4,12 @@ import { memo, type PointerEvent, useMemo } from "react";
 import { Flame } from "lucide-react";
 
 import { DEFAULT_HAZARD_LABEL } from "@/lib/constants/battle";
-import { blockedSet, cellCenter, cellDistance, cellKey, type CellMark, cellPolygon, isMoveMark, parseCellKey, UNIT } from "@/lib/utils/battle/grid";
+import { blockedSet, cellCenter, cellDistance, cellKey, type CellMark, cellPolygon, isDamagingCell, isMoveMark, parseCellKey, UNIT } from "@/lib/utils/battle/grid";
 import type { BattleMapActions, BattleMapConfig, BattleMapView, GridPoint, TerrainCell } from "@/types/battle";
 
 const HATCH_ID = "battle-map-barrier-hatch";
+
+const DIFFICULT_HATCH_ID = "battle-map-difficult-hatch";
 
 const HAZARD_GRADIENT_ID = "battle-map-hazard-fire";
 
@@ -52,10 +54,14 @@ function hazardTitle(t: TerrainCell, round: number | undefined): string {
 function terrainTitle(t: TerrainCell, round: number | undefined): string | null {
   if (t.kind === "barrier") return `Барʼєр${t.untilRound !== undefined ? ` до кінця раунду ${t.untilRound}` : ""}`;
 
+  if (t.kind === "difficult") return t.label ?? "Складна місцевість";
+
   return t.kind === "hazard" ? hazardTitle(t, round) : null;
 }
 
-const TERRAIN_FILL = { wall: "rgba(0,0,0,.6)", barrier: "rgba(0,0,0,.75)", hazard: `url(#${HAZARD_GRADIENT_ID})` } as const;
+const TERRAIN_FILL = { wall: "rgba(0,0,0,.6)", barrier: "rgba(0,0,0,.75)", difficult: "transparent", hazard: `url(#${HAZARD_GRADIENT_ID})` } as const;
+
+const ZONE_FILL = "rgba(160,130,210,.16)";
 
 const FLAME = UNIT * 0.42;
 
@@ -128,7 +134,7 @@ export const GridLayer = memo(function GridLayer({ map, marks, cellActions, onSt
     [cells, terrain, blocked],
   );
 
-  const hazardCells = useMemo(() => terrainCells.flatMap(({ p, cell }) => (cell.kind === "hazard" ? [p] : [])), [terrainCells]);
+  const hazardCells = useMemo(() => terrainCells.flatMap(({ p, cell }) => (isDamagingCell(cell) ? [p] : [])), [terrainCells]);
 
   const zoneCells = cells.flatMap((p) => {
     const zone = blocked.has(cellKey(p)) ? null : zoneOf(marks?.get(cellKey(p)));
@@ -142,6 +148,9 @@ export const GridLayer = memo(function GridLayer({ map, marks, cellActions, onSt
         <pattern id={HATCH_ID} patternUnits="userSpaceOnUse" width={UNIT * 0.14} height={UNIT * 0.14} patternTransform="rotate(45)">
           <line x1="0" y1="0" x2="0" y2={UNIT * 0.14} stroke="rgba(255,255,255,.28)" strokeWidth={UNIT * 0.03} />
         </pattern>
+        <pattern id={DIFFICULT_HATCH_ID} patternUnits="userSpaceOnUse" width={UNIT * 0.2} height={UNIT * 0.2} patternTransform="rotate(-45)">
+          <line x1="0" y1="0" x2="0" y2={UNIT * 0.2} stroke="rgba(190,140,70,.7)" strokeWidth={UNIT * 0.035} />
+        </pattern>
         <radialGradient id={HAZARD_GRADIENT_ID}>
           <stop offset="0%" stopColor="#ffd36b" stopOpacity={0.75} />
           <stop offset="55%" stopColor="#ff7a1a" stopOpacity={0.62} />
@@ -149,12 +158,14 @@ export const GridLayer = memo(function GridLayer({ map, marks, cellActions, onSt
         </radialGradient>
       </defs>
       {terrainCells.map(({ p, cell }) => {
-        const hazard = cell.kind === "hazard";
+        const hazard = isDamagingCell(cell);
 
         return (
           <g key={`t${cellKey(p)}`} data-terrain={cell.kind} data-hazard-timed={hazard && cell.untilRound !== undefined ? "" : undefined} pointerEvents="none">
-            <polygon points={cellPolygon(p)} fill={TERRAIN_FILL[cell.kind]} stroke={hazard ? "#ff9a2a" : "none"} strokeOpacity={0.9} strokeWidth={1.5} vectorEffect="non-scaling-stroke" />
+            <polygon points={cellPolygon(p)} fill={cell.kind === "hazard" && !hazard ? ZONE_FILL : TERRAIN_FILL[cell.kind]} stroke={hazard ? "#ff9a2a" : "none"} strokeOpacity={0.9} strokeWidth={1.5} vectorEffect="non-scaling-stroke" />
             {cell.kind === "barrier" && <polygon points={cellPolygon(p)} fill={`url(#${HATCH_ID})`} stroke="none" />}
+            {(cell.kind === "difficult" || cell.difficult) && <polygon points={cellPolygon(p)} fill={`url(#${DIFFICULT_HATCH_ID})`} stroke="none" data-difficult="" />}
+            {cell.obscured && <polygon points={cellPolygon(p)} fill="rgba(210,215,225,.38)" stroke="none" data-obscured="" />}
           </g>
         );
       })}

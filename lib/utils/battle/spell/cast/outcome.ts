@@ -4,16 +4,16 @@ import { findParticipant, replaceParticipant, withSelf } from "@/lib/utils/abili
 import { forcedRollMode, rollModeReasons } from "@/lib/utils/battle/attack/bonus";
 import { critDoublesDice } from "@/lib/utils/battle/attack/crit-dice";
 import { critThresholdOf } from "@/lib/utils/battle/attack/crit-threshold";
-import { applyCriticalEffect, critFlavorFor } from "@/lib/utils/battle/attack/critical";
+import { applyAttackCritToFlow, applyCriticalEffect, critFlavorFor } from "@/lib/utils/battle/attack/critical";
 import { getP, put } from "@/lib/utils/battle/common/action-flow";
 import { attackKindOf } from "@/lib/utils/battle/common/attack-kind";
-import type { CritKind } from "@/lib/utils/battle/crit-choice/catalog";
+import { type CritKind, randomCritEffect } from "@/lib/utils/battle/crit-choice/catalog";
 import { isAdjacent, isOnMap } from "@/lib/utils/battle/grid/occupancy";
 import { getEffectiveArmorClass } from "@/lib/utils/battle/participant/helpers";
 import { evasionFactor, hasEvasion } from "@/lib/utils/battle/saves/evasion";
 import { resolveSave } from "@/lib/utils/battle/saves/legendary";
 import { rollD20WithMode } from "@/lib/utils/battle/saves/roll-d20";
-import { rollSave } from "@/lib/utils/battle/saves/roll-save";
+import { bestSaveAbility, rollSave } from "@/lib/utils/battle/saves/roll-save";
 import type { Outcome, SpellCastState } from "@/lib/utils/battle/spell/cast/state";
 import { spellAttackBonus } from "@/lib/utils/battle/spell/power";
 import { participantImmuneToSpell } from "@/lib/utils/battle/spell/spell-immunity";
@@ -55,7 +55,7 @@ function resolveSpellAttack(state: SpellCastState, target: BattleParticipant, ra
 
   const mods = withSelf(flow.ps, caster);
 
-  const bonus = (state.attackBonus ?? spellAttackBonus(caster)) + collectModifiers(mods, caster.basicInfo.id, { stat: "attackBonus", attackKind: attackKindOf(pseudoAttack.type) }).flat;
+  const bonus = (state.attackBonus ?? spellAttackBonus(caster, spell.definition.addAbilityMod === true)) + collectModifiers(mods, caster.basicInfo.id, { stat: "attackBonus", attackKind: attackKindOf(pseudoAttack.type) }).flat;
 
   const total = roll + bonus;
 
@@ -75,23 +75,50 @@ function resolveSpellAttack(state: SpellCastState, target: BattleParticipant, ra
 
   const line = `🎯 ${name}: атака заклинанням ${roll}+${bonus}=${total} проти КЗ ${ac}${note}`;
 
-  if (!hit) {
-    flow.messages.push(`${line} — промах`);
+  const kind: CritKind | null = crit && hit ? "success" : fumble ? "fail" : null;
 
-    return SKIPPED;
+  const rules = flow.ctx.rules ?? DEFAULT_RULES;
+
+  const effect = kind && rules.criticals.effects ? pickAttackCrit(state, id, kind) : undefined;
+
+  const type = effect?.effect.type;
+
+  let critExtra = 0;
+
+  const maxed = type === "max_damage" && state.diceCount > 0;
+
+  if (maxed) critExtra = Math.max(0, state.diceCount * state.diceSides - state.diceRolls.reduce((a, b) => a + b, 0));
+  else if (hit && critDoublesDice(flow.ctx.rules, crit) && state.diceCount > 0) critExtra = rollGroups([{ count: state.diceCount, size: state.diceSides }], state.rng).reduce((a, b) => a + b, 0);
+
+  if (type === "additional_damage") critExtra += rollGroups([{ count: 1, size: 6 }], state.rng)[0];
+
+  const doubled = hit && !maxed && critDoublesDice(flow.ctx.rules, crit) && state.diceCount > 0;
+
+  flow.messages.push(`${line} — ${!hit ? "промах" : crit ? (doubled ? "крит — кубики подвоєно" : "крит") : "влучання"}`);
+
+  if (effect) {
+    const flavor = critFlavorFor(effect, caster.basicInfo.name, name, { battleId: state.battleId, round: flow.ctx.round, attackerId: caster.basicInfo.id, targetId: id, suffix: "s" });
+
+    flow.messages.push(`🎯 ${name}: ${effect.name} — ${flavor}`);
+
+    applyAttackCritToFlow(flow, effect, { attackerId: caster.basicInfo.id, targetId: id }, { offTurn: spell.definition.cost === "reaction" });
   }
 
-  if (!critDoublesDice(flow.ctx.rules, crit) || state.diceCount === 0) {
-    flow.messages.push(`${line} — ${crit ? "крит" : "влучання"}`);
+  if (!hit) return SKIPPED;
 
-    return { skip: false, factor: 1, raceMultiplier };
-  }
+  return { skip: false, factor: 1, raceMultiplier: raceMultiplier * (type === "double_damage" ? 2 : 1), ...(critExtra > 0 && { critExtra }) };
+}
 
-  const critExtra = rollGroups([{ count: state.diceCount, size: state.diceSides }], state.rng).reduce((a, b) => a + b, 0);
+function pickAttackCrit(state: SpellCastState, id: string, kind: CritKind): CriticalEffect | undefined {
+  const { flow, caster } = state;
 
-  flow.messages.push(`${line} — крит — кубики подвоєно`);
+  const info = { source: "attack", kind, actorId: caster.basicInfo.id, targetId: id } as const;
 
-  return { skip: false, factor: 1, raceMultiplier, critExtra };
+  if (flow.ctx.crit) return flow.ctx.crit(info);
+
+  const c = (flow.ctx.rules ?? DEFAULT_RULES).criticals;
+
+  return randomCritEffect("attack", kind, state.rng, { success: c.disabledSuccess, fail: c.disabledFail });
 }
 
 function applySaveCrit(state: SpellCastState, id: string, kind: CritKind): CriticalEffect["effect"] | undefined {
@@ -140,7 +167,9 @@ export function resolveOutcome(state: SpellCastState, id: string, withSave: bool
   let factor = 1;
 
   if (withSave && def.resolution.kind === "save") {
-    const { ability: saveAbility, onSuccess } = def.resolution;
+    const { ability: baseAbility, orAbility, onSuccess } = def.resolution;
+
+    const saveAbility = orAbility ? bestSaveAbility(target, [baseAbility, orAbility], flow.ps, flow.ctx.rules) : baseAbility;
 
     const dc = state.saveDc;
 

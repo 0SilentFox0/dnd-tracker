@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 
 import { createMockParticipant } from "@/lib/utils/battle/__tests__/fixtures/mock-participant";
-import { computeSpellPower } from "@/lib/utils/battle/spell/power";
+import { computeSpellPower, spellAttackBonus } from "@/lib/utils/battle/spell/power";
 import { resolveChosenSlot } from "@/lib/utils/battle/spell/slot";
 import type { BattleParticipant } from "@/types/battle";
 
@@ -49,6 +49,21 @@ describe("computeSpellPower addAbilityMod", () => {
     expect(power(wizard("5e"), true).breakdown).toContain("+ мод. INT (+3)");
     expect(power(wizard("5e"), false).damage).toBe(4);
     expect(power(wizard(), true).damage).toBe(4);
+  });
+});
+
+describe("weapon object for a non-caster", () => {
+  const base = createMockParticipant();
+
+  const fighter: BattleParticipant = { ...base, abilities: { ...base.abilities, damageModel: "5e", proficiencyBonus: 2, modifiers: { ...base.abilities.modifiers, strength: 1, dexterity: 4 } }, spellcasting: { ...base.spellcasting, spellcastingAbility: undefined, spellAttackBonus: undefined } };
+
+  it("takes the better of STR/DEX for damage and attack bonus", () => {
+    const power = computeSpellPower({ caster: fighter, groupId: null, rolls: [4], participants: [fighter], addAbilityMod: true });
+
+    expect(power.damage).toBe(8);
+    expect(power.breakdown).toContain("+ мод. DEX (+4)");
+    expect(spellAttackBonus(fighter, true)).toBe(6);
+    expect(spellAttackBonus(fighter)).toBe(2);
   });
 });
 

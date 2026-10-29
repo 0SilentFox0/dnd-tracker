@@ -9,7 +9,7 @@ import { findParticipant, participantNames, updateParticipant } from "@/lib/util
 import { abilityNature } from "@/lib/utils/abilities/engine/effects/effect-nature";
 import { applySpellTimedEffect } from "@/lib/utils/abilities/engine/effects/opposing-spells";
 import { effectSource } from "@/lib/utils/abilities/engine/effects/timed-effects";
-import type { Effect, StaticEffect } from "@/lib/utils/abilities/schema";
+import type { Effect, Flat, StaticEffect } from "@/lib/utils/abilities/schema";
 import { signed } from "@/lib/utils/common/format";
 
 function stripTiming(effect: StaticEffect): StaticEffect {
@@ -94,7 +94,7 @@ const VALUE_FIELDS: readonly FieldMeta[] = [
 export const modifyStatFields: readonly FieldMeta[] = [
   { name: "stat", label: "Стат", input: "select", options: Object.entries(STAT_LABELS).map(([value, label]) => ({ value, label })) },
   ...VALUE_FIELDS,
-  { name: "atLeast", label: "Не менше (значення характеристики)", input: "number", optional: true, visibleWhen: (e) => (ABILITY_KEYS as readonly string[]).includes(String(e.stat)) },
+  { name: "atLeast", label: "Не менше (характеристика, броня, швидкість)", input: "number", optional: true, visibleWhen: (e) => [...ABILITY_KEYS, "armor", "speed"].includes(String(e.stat)) },
   { name: "attackKind", label: "Тип атаки", input: "select", optional: true, options: [{ value: AttackType.MELEE, label: "ближня" }, { value: AttackType.RANGED, label: "дальня" }], visibleWhen: (e) => e.stat === "attackBonus" },
   { name: "spellLevels", label: "Рівні слотів", input: "numberList", visibleWhen: (e) => e.stat === "spellSlots" },
   TARGET_FIELD,
@@ -111,9 +111,9 @@ export const damageBonusFields: readonly FieldMeta[] = [
   DURATION_FIELD,
 ];
 
-const percentLabel = (p: Parameters<typeof flatLabel>[0]) => (typeof p === "number" ? `${signed(p)}%` : "formula" in p ? `(${p.formula})%` : `[${p.scale}]%`);
+const percentLabel = (p: Flat) => (typeof p === "number" ? `${signed(p)}%` : "formula" in p ? `(${p.formula})%` : `[${p.scale}]%`);
 
-function valueLabel(e: { flat?: Parameters<typeof flatLabel>[0]; percent?: Parameters<typeof flatLabel>[0] }): string {
+function valueLabel(e: { flat?: Flat | { spellRoll: number }; percent?: Flat }): string {
   return [e.flat !== undefined ? flatLabel(e.flat) : null, e.percent !== undefined ? percentLabel(e.percent) : null]
     .filter(Boolean)
     .join(" ");

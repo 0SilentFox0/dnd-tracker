@@ -66,7 +66,8 @@
     },
     "conditions": {
       "enabled": "Enabled",
-      "exhaustion": "Exhaustion by 2024 rules (otherwise 2014)"
+      "exhaustion": "Exhaustion by 2024 rules (otherwise 2014)",
+      "custom": "Campaign custom conditions"
     },
     "actions": {
       "enabled": "5e actions enabled",
@@ -155,5 +156,25 @@
       "label": "Items",
       "description": "5e magic items: attunement (at most N items), \"Artifact\" and \"Ring\" slot items work straight from the stash, consumables (potions, ammo) are used in battle and spent afterwards. Properties, non-unique gear and charges are content properties and do not depend on this switch."
     }
+  },
+  "customConditions": {
+    "remove": "Delete",
+    "removeAria": "Delete condition \"{name}\"",
+    "confirmTitle": "Delete condition \"{name}\"?",
+    "confirm": "Spells and abilities that apply it will stop working.",
+    "usageTitle": "Where \"{name}\" is used",
+    "usageHint": "The condition was not deleted. Remove it from these places first.",
+    "usageBattles": "Battles",
+    "usageSpells": "Spells",
+    "usageUnits": "Units",
+    "usageSkills": "Skills",
+    "usageArtifacts": "Artifacts",
+    "usageArtifactSets": "Artifact sets",
+    "usageRaces": "Races",
+    "usageFeats": "Feats",
+    "usageStatusEffects": "Status effects",
+    "statusActive": "active",
+    "statusPrepared": "prepared",
+    "close": "Close"
   }
 }

@@ -158,5 +158,7 @@
   "lib/server/assistant/actions/scenario-edit.ts",
   "lib/server/assistant/actions/scenario.ts",
   "lib/server/assistant/actions/show-coverage.ts",
-  "lib/server/assistant/actions/show.ts"
+  "lib/server/assistant/actions/show.ts",
+  "components/spells/form/effects/**",
+  "lib/utils/spells/editor/**"
 ]

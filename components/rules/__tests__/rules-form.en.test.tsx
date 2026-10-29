@@ -12,6 +12,10 @@ import { ConfirmProvider } from "@/components/ui/confirm-dialog";
 import { renderWithIntl } from "@/lib/i18n/test/render-with-intl";
 import { DEFAULT_RULES } from "@/lib/utils/rules";
 
+vi.mock("@/lib/hooks/campaigns/useRemoveCustomCondition", () => ({ useRemoveCustomCondition: () => ({ remove: vi.fn(), isPending: false, usage: null, closeUsage: vi.fn() }) }));
+
+vi.mock("@/lib/hooks/campaigns/useRemoveCustomCondition", () => ({ useRemoveCustomCondition: () => ({ remove: vi.fn(), isPending: false, usage: null, closeUsage: vi.fn() }) }));
+
 vi.mock("@/lib/hooks/campaigns/useCampaignRules", () => ({
   useCampaignRules: () => ({ data: DEFAULT_RULES, isLoading: false }),
   useUpdateCampaignRules: () => ({ mutateAsync: vi.fn(), isPending: false }),

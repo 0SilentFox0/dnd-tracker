@@ -1,7 +1,7 @@
 import { campaignPatch, campaignPost } from "./client";
 
 import type { AbilityKey } from "@/lib/constants/abilities";
-import type { Condition5eKey } from "@/lib/utils/abilities/schema/kinds";
+import type { Condition5eKey, CustomConditionKey } from "@/lib/utils/abilities/schema/kinds";
 import type { MoraleCheckResult } from "@/lib/utils/battle/morale/check";
 import type {
   AbilityActionData,
@@ -26,8 +26,8 @@ import type { AddParticipantData } from "@/types/battle-setup";
 export type WithVersion<T> = T & { expectedVersion?: number };
 
 export type BattleConditionsBody =
-  | { action: "apply"; participantId: string; condition: Condition5eKey; rounds?: number; levels?: number; saveEnds?: { ability: AbilityKey; dc: number } }
-  | { action: "remove"; participantId: string; condition: Condition5eKey };
+  | { action: "apply"; participantId: string; condition: Condition5eKey | CustomConditionKey; rounds?: number; levels?: number; saveEnds?: { ability: AbilityKey; dc: number } }
+  | { action: "remove"; participantId: string; condition: Condition5eKey | CustomConditionKey };
 
 export type CoreActionBody =
   | { action: "dash" | "disengage" | "dodge" | "hide" | "ready" | "standUp" | "escape"; participantId: string }

@@ -15,6 +15,7 @@ export const COMPENDIUM_ERROR_KEYS: Record<string, string> = {
   PREVIEW_SECRET_REQUIRED: "errors.previewSecretRequired",
   PREVIEW_STALE: "errors.previewStale",
   PREVIEW_INVALID: "errors.previewInvalid",
+  NOTES_SIZE: "errors.notesSize",
   REQUEST_SIZE: "errors.requestSize",
   FORBIDDEN: "errors.forbidden",
   IMPORT_FAILED: "errors.importFailed",

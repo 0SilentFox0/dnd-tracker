@@ -67,7 +67,11 @@ export function operationPreview(id: ContentOperationId, input: Row, t: Translat
 
       const row = { ...before, id: "rules", name: t("results.rules") };
 
-      for (const key of Object.keys(body)) field("rules", row, key, merged.rules[key as keyof typeof merged.rules]);
+      for (const key of Object.keys(body)) {
+        const section = key === "removeCustomConditions" ? "conditions" : (key as keyof typeof merged.rules);
+
+        field("rules", row, section, merged.rules[section]);
+      }
       break;
     }
     case "skill-trees.save": {

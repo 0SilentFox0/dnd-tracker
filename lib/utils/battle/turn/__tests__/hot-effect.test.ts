@@ -53,3 +53,28 @@ describe("hot", () => {
     expect(describeEffect(hot)).toContain("раунд");
   });
 });
+
+describe("dot з кубиками", () => {
+  const dot: Effect = { kind: "dot", damagePerRound: "1d6", damageType: "poison", duration: { rounds: 3 }, target: "eventTarget" };
+
+  const applied = () => {
+    const ps = [makeParticipant({ id: "o" }), makeParticipant({ id: "t", hp: 30, maxHp: 30, side: ParticipantSide.ENEMY })];
+
+    return applyEffect({ participants: ps, ability: resolved({ trigger: { event: "action" }, effects: [dot] }), effectIndex: 0, ownerId: "o", effect: dot, targetIds: ["t"], event: { type: "action", actorId: "o", abilityKey: "k" }, ctx: { round: 1, rng: seq(0.1) } }).participants[1];
+  };
+
+  it("кидає кубики щоразу на початку ходу, а не фіксує при накладанні", () => {
+    const target = applied();
+
+    expect(target.battleData.activeEffects[0].dotDamage).toMatchObject({ damagePerRound: 1, dice: "1d6" });
+    expect(processStartOfTurn(target, 2, [target], () => 0.99).participant.combatStats.currentHp).toBe(24);
+  });
+
+  it("числовий DoT лишається фіксованим", () => {
+    const target = applied();
+
+    const fixed = { ...target, battleData: { ...target.battleData, activeEffects: target.battleData.activeEffects.map((e) => ({ ...e, dotDamage: { damagePerRound: 4, damageType: "poison" } })) } };
+
+    expect(processStartOfTurn(fixed, 2, [fixed], () => 0.99).participant.combatStats.currentHp).toBe(26);
+  });
+});

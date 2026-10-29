@@ -6,8 +6,12 @@ import { DAMAGE_ELEMENT_OPTIONS } from "@/lib/constants/damage";
 import { hexColorSchema } from "@/lib/schemas/common";
 import { CUNNING_STRIKE_EFFECTS } from "@/lib/utils/abilities/schema";
 import { hasPlayableArea } from "@/lib/utils/battle/grid/map-editor";
+import { ZoneTriggerSchema } from "@/lib/utils/spells/model/schema";
 
 const MAP_BACKGROUND_PATTERN = /^(https:\/\/\S+|data:image\/(png|jpeg|webp);base64,[A-Za-z0-9+/=]+|\/battle-maps\/[\w.-]+\.(webp|jpg|png))$/;
+
+/** castId = `<caster>:<spell>@<round>#<seq>` з uuid-id, зона додає `@<round>` або `#<i>`; id призваних — `inline:<castId>:<n>` */
+const SPELL_ID_MAX = 200;
 
 export const weatherKindSchema = z.enum(WEATHER_KINDS);
 
@@ -78,15 +82,35 @@ export const battleMapSchema = z.object({
     .record(
       z.string().regex(/^\d+:\d+$/),
       z.object({
-        kind: z.enum(["wall", "barrier", "hazard"]),
+        kind: z.enum(["wall", "barrier", "hazard", "difficult"]),
         label: z.string().max(60).optional(),
+        difficult: z.literal(true).optional(),
+        obscured: z.literal(true).optional(),
+        zoneId: z.string().max(SPELL_ID_MAX).optional(),
         untilRound: z.number().int().min(1).optional(),
         damage: z
-          .object({ dice: z.string().regex(HAZARD_DICE_PATTERN).optional(), amount: z.number().int().min(0).max(1000).optional(), type: z.string().min(1).max(30), spellId: z.string().max(64).optional() })
+          .object({ dice: z.string().regex(HAZARD_DICE_PATTERN).optional(), amount: z.number().int().min(0).max(1000).optional(), type: z.string().min(1).max(30), spellId: z.string().max(SPELL_ID_MAX).optional(), casterId: z.string().max(SPELL_ID_MAX).optional(), concentrationOf: z.object({ casterId: z.string().max(SPELL_ID_MAX), castId: z.string().max(SPELL_ID_MAX) }).optional() })
           .optional(),
       }).refine((c) => c.kind !== "barrier" || c.untilRound !== undefined, "Барʼєру потрібен строк"),
     )
     .refine((t) => Object.keys(t).length <= 3600, "Забагато клітинок місцевості")
+    .optional(),
+  spellZones: z
+    .record(
+      z.string().max(SPELL_ID_MAX),
+      z.object({
+        casterId: z.string().max(SPELL_ID_MAX),
+        spellId: z.string().max(SPELL_ID_MAX),
+        spellName: z.string().max(120),
+        dc: z.number().int().min(1).max(40),
+        side: z.enum(["enemies", "all"]),
+        centre: mapCellSchema.optional(),
+        triggers: z.object({ onEnter: ZoneTriggerSchema.optional(), onTurnStart: ZoneTriggerSchema.optional(), onExit: ZoneTriggerSchema.optional() }),
+        untilRound: z.number().int().min(1),
+        concentrationOf: z.object({ casterId: z.string().max(SPELL_ID_MAX), castId: z.string().max(SPELL_ID_MAX) }).optional(),
+      }),
+    )
+    .refine((z) => Object.keys(z).length <= 200, "Забагато зон заклинань")
     .optional(),
   backgroundCols: z.number().positive().max(200).optional(),
   gridOffset: z.object({ x: z.number().min(0).lt(1), y: z.number().min(0).lt(1) }).optional(),
@@ -171,9 +195,11 @@ const HAZARD_DAMAGE_TYPES = DAMAGE_ELEMENT_OPTIONS.map((o) => o.value) as [strin
 
 export const mapTerrainSchema = z.object({
   cells: z.array(z.string().regex(/^\d+:\d+$/)).min(1).max(400),
+  /** з terrain: null — стерти цілі зони заклинань, до яких належать клітинки */
+  eraseZone: z.literal(true).optional(),
   terrain: z
     .object({
-      kind: z.enum(["wall", "barrier", "hazard"]),
+      kind: z.enum(["wall", "barrier", "hazard", "difficult"]),
       label: z.string().max(60).optional(),
       rounds: z.number().int().min(1).max(20).optional(),
       damage: z.object({ dice: z.string().regex(HAZARD_DICE_PATTERN), type: z.enum(HAZARD_DAMAGE_TYPES) }).optional(),
@@ -200,6 +226,8 @@ export const castSpellSchema = z.object({
   castingRounds: z.number().int().min(1).max(144000).optional(),
   cancelCasting: z.boolean().optional(),
   free: z.boolean().optional(),
+  optionIndex: z.number().int().min(0).max(6).optional(),
+  inputCount: z.number().int().min(0).max(40).optional(),
   slotKey: z.string().regex(/^([1-9]|pact)$/).optional(),
 });
 

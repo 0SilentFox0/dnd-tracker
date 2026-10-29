@@ -5,6 +5,7 @@
     "CHARACTERS_REQUIRED": "Create characters in a populated campaign",
     "CLASSES_MODE_REQUIRED": "Enable classes mode and add the base classes (an SRD dependency), otherwise races, backgrounds and feats are not assembled on the hero sheet",
     "MANUAL_CUSTOM_SKILL": "Track the custom skill manually",
+    "MANUAL_CONDITION_TEXT": "The condition text could not be reduced to engine markers: the condition is added with its description, configure the action manually",
     "UNSUPPORTED_FIELD": "Check the description and configure manually",
     "MEDIA_OR_FOUNDRY_SKIPPED": "Check the description and configure manually",
     "MANUAL_ABILITY_VARIANTS": "Check the description and configure manually",
@@ -68,7 +69,7 @@
     "UNSUPPORTED_COPY": "Expand copy/inherits in the source file or exclude the entry",
     "SOURCE_METADATA_MISSING": "Add source attribution if it is known",
     "EDITION_UNKNOWN": "Check the rules edition",
-    "NOTES_SIZE": "Shorten the description or exclude the entry",
+    "NOTES_SIZE": "Shorten the description or exclude the entry “{name}”: notes are {kb} KB, the limit is 64 KB",
     "OPTIONAL_FEATURE_WITHOUT_OWNER": "Bind the feature to a class choice or use its description manually"
   }
 }

@@ -2,6 +2,7 @@ import type { SlotOption } from "./spell-flow-types";
 
 import { poolLeft } from "@/lib/utils/abilities/engine/core/usage";
 import type { BattleParticipant, SpellGrant } from "@/types/battle";
+import type { BookSpell } from "@/types/spells";
 
 export interface SourceOption {
   value: string;
@@ -15,7 +16,7 @@ export interface CastLevelOption {
   disabled: boolean;
 }
 
-export const grantsFor = (caster: BattleParticipant | null, spellId: string): SpellGrant[] => (caster?.spellcasting.grants ?? []).filter((g) => g.spellId === spellId);
+export const grantsFor = (caster: BattleParticipant | null, spellId: string): SpellGrant[] => (caster?.spellcasting.grants ?? []).filter((g) => g.spellId === spellId && !g.inline);
 
 export const canCastFromSlot = (caster: BattleParticipant | null, spellId: string): boolean => {
   const grants = grantsFor(caster, spellId);
@@ -115,4 +116,49 @@ export function costBlocked(i: CostBlockInput): boolean {
   if (i.bypassCost) return false;
 
   return i.definitionCost === "reaction" ? caster.actionFlags.hasUsedReaction : i.definitionCost === "bonusAction" ? caster.actionFlags.hasUsedBonusAction : caster.actionFlags.hasUsedAction;
+}
+
+export const inlineGrantOf = (caster: BattleParticipant | null, s: BookSpell): SpellGrant | undefined => (s.grantKey ? caster?.spellcasting.grants?.find((g) => g.key === s.grantKey) : undefined);
+
+export function inlineGrantLabel(caster: BattleParticipant | null, grant: SpellGrant | undefined): string | undefined {
+  if (!grant) return undefined;
+
+  const usage = caster ? poolUsage(caster, grant.pool) : undefined;
+
+  return `${grant.label ?? "Підкаст"}: ${usage ? `${usage.left}/${usage.max}` : "без ліміту"}${grant.expiresRound !== undefined ? ` · до р. ${grant.expiresRound}` : ""}`;
+}
+
+/** Живі inline-гранти носія як плитки книги: власне визначення замість бібліотечного заклинання. */
+export function inlineSpellTiles(caster: BattleParticipant | null, library: BookSpell[], live: (g: SpellGrant) => boolean): BookSpell[] {
+  return (caster?.spellcasting.grants ?? []).flatMap((g) => {
+    const { inline } = g;
+
+    const host = library.find((s) => s.id === g.spellId);
+
+    if (!inline || !g.key || !live(g)) return [];
+
+    return [{
+      id: g.key,
+      hostSpellId: g.spellId,
+      grantKey: g.key,
+      name: g.label ?? host?.name ?? "Підкаст",
+      level: 0,
+      icon: host?.icon,
+      spellGroup: host?.spellGroup,
+      fx: host?.fx,
+      description: host?.description,
+      executionMode: "native",
+      dice: inline.dice,
+      cost: g.castCost ?? "action",
+      targeting: inline.targeting,
+      resolution: inline.resolution,
+      spellEffects: inline.effects,
+      raceModifiers: [],
+      fixedDice: true,
+      ...(inline.dieSides && { dieSides: inline.dieSides }),
+      ...(inline.addAbilityMod && { addAbilityMod: true }),
+      ...(inline.damageBonus !== undefined && { damageBonus: inline.damageBonus }),
+      ...(inline.perObjectFeet && { perObjectFeet: inline.perObjectFeet }),
+    } as BookSpell];
+  });
 }

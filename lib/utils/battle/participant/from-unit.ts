@@ -168,6 +168,7 @@ function unitAbilities(unit: UnitFromPrisma, race: UnitRace, rules: Ruleset, mon
     moraleCap: moraleCapFromRules(rules),
     ...(monster && { damageModel: "5e" as const }),
     ...(statblock.creatureType && { creatureType: statblock.creatureType }),
+    ...(monster && unit.cr != null && { cr: unit.cr }),
     ...(saveProficiencies.length > 0 && { saveProficiencies }),
   };
 }

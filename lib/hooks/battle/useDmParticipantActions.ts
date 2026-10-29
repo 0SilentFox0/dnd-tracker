@@ -73,7 +73,7 @@ export function useDmParticipantActions({ onChangeHp, onDone }: Options) {
 
   return {
     row,
-    conditions: { target: conditionsTarget, close: () => setConditionsId(null), submit: actions.conditions.mutate, isPending: actions.conditions.isPending },
+    conditions: { target: conditionsTarget, custom: battle.rules?.conditions.custom, close: () => setConditionsId(null), submit: actions.conditions.mutate, isPending: actions.conditions.isPending },
     legendary: { target: legendaryTarget, close: () => setLegendaryId(null) },
     refreshSources: { run: refreshSources, isPending: actions.refreshSources.isPending },
     randomUnits: unitControl.random,

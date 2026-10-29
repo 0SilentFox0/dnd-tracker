@@ -12,7 +12,7 @@ const CORE_PATCHABLE_FIELDS = {
   abilities: ["initiative"],
   combatStats: ["currentHp", "tempHp", "maxHp", "morale", "status"],
   spellcasting: ["spellSlots"],
-  battleData: ["activeEffects", "abilityUsage", "pendingExtraActions", "position", "movementUsed", "turnStartPosition", "returnedThisTurn", "airborne", "hazardHitRound", "retaliationsUsed", "dormant", "escaped", "mazeWakeRound"],
+  battleData: ["activeEffects", "abilityUsage", "pendingExtraActions", "position", "movementUsed", "turnStartPosition", "returnedThisTurn", "airborne", "hazardHitRound", "zoneHits", "pendingHits", "retaliationsUsed", "dormant", "escaped", "mazeWakeRound"],
   actionFlags: ["hasUsedAction", "hasUsedBonusAction", "hasUsedReaction", "hasExtraTurn"],
 } as const satisfies PatchableFields;
 

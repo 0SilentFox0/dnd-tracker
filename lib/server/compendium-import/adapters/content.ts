@@ -2,6 +2,7 @@
 import { renderEntries } from "../entries";
 import { nestedId, stableJson } from "../identity";
 import { type Adapter, type AdapterContext, issue } from "../types";
+import { customConditionKeys } from "./custom-conditions";
 import { EFFECT_FIELDS, itemEffects } from "./item-effects";
 import { type MonsterStats, parseAttack, parseMultiattack, plainName } from "./monster-attacks";
 import { CastingBuilder, defenseAbilities, legendaryAbilities, legendaryResistances, saveProficiencies } from "./monster-traits";
@@ -32,7 +33,7 @@ export const spell: Adapter = (row, ctx) => {
 
   const text = renderEntries(row.entries, `${ctx.path}.entries`);
 
-  const derived = deriveSpell(row, text.text, renderEntries(row.entriesHigherLevel).text, cast);
+  const derived = deriveSpell(row, text.text, renderEntries(row.entriesHigherLevel).text, cast, customConditionKeys(ctx.root));
 
   const mechanics = "native" in derived ? { executionMode: "native", ...derived.native.fields } : MANUAL_SPELL_BODY;
 
@@ -40,7 +41,7 @@ export const spell: Adapter = (row, ctx) => {
   else if (derived.native.narrative) ctx.issues.push(issue("SPELL_NARRATIVE_ONLY", ctx.path, "warning"));
   else if (derived.native.riders.length > 0) ctx.issues.push(issue("SPELL_RIDER_MANUAL", ctx.path, "warning", { riders: derived.native.riders.join(", ") }));
 
-  return { kind: "spells", body: { name: row.name, level: row.level, description: [head, description(row, ctx)].filter(Boolean).join("\n\n"), ...mechanics, ...castingFields(cast.castingKey, cast.trigger), concentration: cast.concentration, lists }, notes: unsupported(row, SPELL_CONSUMED, ctx) };
+  return { kind: "spells", refs: "native" in derived ? (derived.native.refs ?? []).map((r) => ({ ...r, edition: ctx.edition })) : [], body: { name: row.name, level: row.level, description: [head, description(row, ctx)].filter(Boolean).join("\n\n"), ...mechanics, ...castingFields(cast.castingKey, cast.trigger), concentration: cast.concentration, lists }, notes: unsupported(row, SPELL_CONSUMED, ctx) };
 };
 
 const MONSTER_FIELDS = ["trait", "action", "bonus", "reaction", "legendary", "spellcasting"] as const;

@@ -88,6 +88,8 @@
   "invalidQuery": "Invalid query parameters",
   "initiativeOutOfRange": "Hero initiative is outside the range allowed by the campaign rules",
   "invalidRules": "Invalid campaign rules",
+  "rulesCustomConditionInUse": "The condition “{name}” is in use — remove it from battles and spells first",
+  "rulesCustomConditionNotFound": "Custom condition not found",
   "invalidSkillTree": "Invalid skill tree",
   "skillTreeProgressChanged": "Character progress changed while saving, try again",
   "invalidJson": "Invalid JSON in the request body",
@@ -458,5 +460,10 @@
   "characterTokenInvalid": "Invalid token",
   "characterGoalsInvalid": "Invalid goals",
   "characterNotesInvalid": "Invalid notes",
-  "characterControllerInvalid": "Invalid user reference (controlledBy). Make sure the selected player exists in users and is a member of the campaign."
+  "characterControllerInvalid": "Invalid user reference (controlledBy). Make sure the selected player exists in users and is a member of the campaign.",
+  "battleSpellOptionRequired": "Choose one of the spell options",
+  "battleSpellInputRequired": "Enter a value for the spell dice",
+  "battleSpellTargetFilter": "The target does not fit the spell restriction (creature type, hazard or flight)",
+  "battleSpellNoObjectNear": "None of your summoned objects from this spell are near the target",
+  "battleCasterPacified": "{state}: cannot deal damage or cast hostile spells"
 }

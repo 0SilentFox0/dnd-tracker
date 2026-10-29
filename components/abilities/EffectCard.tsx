@@ -7,6 +7,7 @@ import { FlagEditor } from "./effect-renderers/FlagEditor";
 import { FieldRenderer } from "./fields/FieldRenderer";
 import { useAbilityEditor, useErrorsUnder } from "./editor-context";
 import { FieldErrors } from "./FieldErrors";
+import { NestedEffectsEditor } from "./NestedEffectsEditor";
 
 import { Button } from "@/components/ui/button";
 import { SelectField } from "@/components/ui/select-field";
@@ -20,11 +21,13 @@ interface EffectCardProps {
   trigger: Trigger;
   path: string;
   /** Without onRemove the ✕ is disabled (e.g. the last two randomOf options). */
-  actions: { onChange: (e: Effect) => void; onRemove?: () => void };
+  actions: { onChange: (e: Effect) => void; onRemove?: () => void; onSwitchKind?: (kind: string) => void };
   kinds?: EffectKind[];
+  /** Extra header-select entries (spell-only kinds); picking one calls `actions.onSwitchKind`. */
+  extraKinds?: { value: string; label: string }[];
 }
 
-export function EffectCard({ effect, trigger, path, actions, kinds }: EffectCardProps) {
+export function EffectCard({ effect, trigger, path, actions, kinds, extraKinds = [] }: EffectCardProps) {
   const t = useTranslations("abilities.effect");
 
   const tr = useTranslator("abilityRegistry");
@@ -50,7 +53,7 @@ export function EffectCard({ effect, trigger, path, actions, kinds }: EffectCard
     );
   }
 
-  const options = (kinds ?? allowedEffectKinds(trigger)).map((k) => ({ value: k, label: tr(`effects.${k}.label`) }));
+  const options = [...(kinds ?? allowedEffectKinds(trigger)).map((k) => ({ value: k, label: tr(`effects.${k}.label`) })), ...extraKinds];
 
   const set = (name: string, v: unknown) => actions.onChange(setAtPath(effect, name, v));
 
@@ -69,7 +72,7 @@ export function EffectCard({ effect, trigger, path, actions, kinds }: EffectCard
     <div className="space-y-2 rounded-md border bg-muted/30 p-2">
       <div className="flex items-start gap-2">
         <div className="flex-1">
-          <SelectField value={effect.kind} options={options} onValueChange={(k) => actions.onChange(changeEffectKind(effect, k as EffectKind, trigger))} />
+          <SelectField value={effect.kind} options={options} onValueChange={(k) => (extraKinds.some((x) => x.value === k) ? actions.onSwitchKind?.(k) : actions.onChange(changeEffectKind(effect, k as EffectKind, trigger)))} />
         </div>
         <Button type="button" size="icon" variant="ghost" onClick={actions.onRemove} disabled={!actions.onRemove} title={actions.onRemove ? undefined : t("minOptions")} aria-label={t("delete")}>
           <X className="h-4 w-4" />
@@ -92,27 +95,17 @@ function RandomOfEditor({ effect, trigger, path, onChange }: { effect: RandomOf;
 
   const kinds = allowedEffectKinds(trigger).filter((k) => k !== "randomOf");
 
-  const setOptions = (options: RandomOf["options"]) => onChange({ ...effect, options });
-
   return (
-    <div className="col-span-6 space-y-2">
-      <p className="text-xs text-muted-foreground">{t("options")}</p>
-      {effect.options.map((option, i) => (
-        <EffectCard
-          key={i}
-          effect={option}
-          trigger={trigger}
-          path={`${path}.options.${i}`}
-          kinds={kinds}
-          actions={{
-            onChange: (next) => setOptions(effect.options.map((o, j) => (j === i ? (next as RandomOf["options"][number]) : o))),
-            onRemove: effect.options.length > 2 ? () => setOptions(effect.options.filter((_, j) => j !== i)) : undefined,
-          }}
-        />
-      ))}
-      <Button type="button" size="sm" variant="outline" onClick={() => setOptions([...effect.options, newEffect("heal", trigger) as RandomOf["options"][number]])}>
-        {t("addOption")}
-      </Button>
-    </div>
+    <NestedEffectsEditor
+      effects={effect.options}
+      path={`${path}.options`}
+      limits={{ min: 2 }}
+      labels={{ heading: t("options"), add: t("addOption") }}
+      create={() => newEffect("heal", trigger) as RandomOf["options"][number]}
+      onChange={(options) => onChange({ ...effect, options })}
+      renderCard={({ effect: option, path: optionPath, actions }) => (
+        <EffectCard effect={option} trigger={trigger} path={optionPath} kinds={kinds} actions={{ ...actions, onChange: (next) => actions.onChange(next as RandomOf["options"][number]) }} />
+      )}
+    />
   );
 }

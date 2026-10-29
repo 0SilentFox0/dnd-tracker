@@ -218,7 +218,7 @@ export const prismaImportRepository: ImportRepository = {
       bindings[refKey] = { key, edition: entry.edition, kind: entry.kind, localId, body: entry.body, baseline: entry.body };
     }
 
-    return { campaignId: actor.campaignId, existing, bindings, occupiedNames, extraEntries: dependencies.entries, settingsHash: digest(settings), hasCharacters, hasClasses, classesEnabled: parseRules(settings.rules).classes.enabled };
+    return { campaignId: actor.campaignId, existing, bindings, occupiedNames, extraEntries: dependencies.entries, settingsHash: digest(settings), hasCharacters, hasClasses, classesEnabled: parseRules(settings.rules).classes.enabled, customConditionKeys: (parseRules(settings.rules).conditions.custom ?? []).map((c) => c.key) };
   },
   async findRun(actor, key) {
     const run = await prisma.compendiumImportRun.findUnique({ where: { campaignId_idempotencyKey: { campaignId: actor.campaignId, idempotencyKey: key } } });

@@ -604,6 +604,10 @@ async function castSpell(actor: any, spell: any) {
 
   const countBefore = P().length;
 
+  const mapOf = () => JSON.stringify([state.map?.terrain ?? null, state.map?.blocked ?? null]);
+
+  const mapBefore = mapOf();
+
   const saveRolls = (targets as string[]).map((id) => ({ participantId: id, roll: 1 }));
 
   const r = await call("spell", SPELL, { casterId: actor.basicInfo.id, spellId: spell.id, targetIds: targets, diceRolls, saveRolls });
@@ -618,9 +622,9 @@ async function castSpell(actor: any, spell: any) {
 
   const after = snap(watched);
 
-  const changed = [...before.keys()].some((id) => before.get(id) !== after.get(id)) || P().length !== countBefore;
+  const changed = [...before.keys()].some((id) => before.get(id) !== after.get(id)) || P().length !== countBefore || mapOf() !== mapBefore;
 
-  const onlyNote = (spell.spellEffects ?? []).every((e: any) => e.kind === "note");
+  const onlyNote = (spell.spellEffects ?? []).every((e: any) => e.kind === "note" || (e.kind === "createTerrain" && !state.map));
 
   if (changed || onlyNote) s.ok++; else { s.noEffect++; issue("warn", `${spell.name} (${actor.basicInfo.name}): каст пройшов, але жодних змін у цілей`); }
 
@@ -806,8 +810,35 @@ function coverageReport(): string[] {
   return out;
 }
 
+// Синтетичні заклинання P1–P4 (зони, стіна, аура, відкладений удар) — без тексту книг; ідемпотентно за назвою.
+const SYNTHETIC_SPELLS = [
+  { name: "SYN Відкладений удар", level: 1, type: "damage", damageType: "slashing", dice: 2, dieSides: 6, targeting: { kind: "enemy", range: 300 }, resolution: { kind: "auto" }, spellEffects: [{ kind: "dealDamage", amount: { spellRoll: 100 }, damageType: "slashing", delayIfBeyond: { feet: 30, perRoundFeet: 30 } }] },
+  { name: "SYN Стіна", level: 1, type: "damage", damageType: "none", dice: 0, targeting: { kind: "template", shape: "cube", size: 5, side: "enemy", maxTargets: 1, range: 30 }, resolution: { kind: "auto" }, spellEffects: [{ kind: "createTerrain", terrain: "wall", shape: "cell", cells: 1, rounds: 10 }] },
+  { name: "SYN Аура", level: 1, type: "damage", damageType: "none", dice: 0, targeting: { kind: "enemy", range: 30 }, resolution: { kind: "auto" }, concentration: true, spellEffects: [{ kind: "anchoredZone", radiusFeet: 20, side: "all", onEnter: { save: { ability: "charisma" }, effects: [{ kind: "applyCondition", condition: "skip_action", duration: { rounds: 3 } }] }, endsWhenStartOutside: true, duration: { rounds: 10 } }] },
+  { name: "SYN Складна зона", level: 1, type: "damage", damageType: "none", dice: 0, targeting: { kind: "template", shape: "circle", size: 20, side: "enemy", maxTargets: 20, range: 60, zone: { rounds: 5, terrain: ["difficult", "obscured"], onExit: { save: { ability: "strength" }, effects: [], pull: "centre" } } }, resolution: { kind: "auto" }, concentration: true, spellEffects: [] },
+];
+
+async function ensureSyntheticSpells() {
+  const ids: string[] = [];
+
+  for (const def of SYNTHETIC_SPELLS) {
+    const found = await prisma.spell.findFirst({ where: { campaignId: ctx.campaignId, name: def.name } });
+
+    ids.push((found ?? (await prisma.spell.create({ data: { campaignId: ctx.campaignId, executionMode: "native", ...def } as any }))).id);
+  }
+
+  for (const h of heroRows) {
+    const row = await prisma.character.findUniqueOrThrow({ where: { id: h.id } });
+
+    const known = (row.knownSpells as string[]) ?? [];
+
+    await prisma.character.update({ where: { id: h.id }, data: { knownSpells: [...new Set([...known, ...ids])] as any } });
+  }
+}
+
 async function main() {
   await prepare();
+  await ensureSyntheticSpells();
 
   const spellRows = await prisma.spell.findMany({ where: { campaignId: ctx.campaignId }, include: { spellGroup: true } });
 
@@ -1677,9 +1708,11 @@ async function mazeCheck() {
 
   tcheck("Лабіринт: кроки до виходу (≤3 за хід)", !!step && step.status === 200 && (byId(hero.basicInfo.id).battleData.movementUsed ?? 0) <= 3, `${step?.status ?? "немає прогресу"} витрачено ${byId(hero.basicInfo.id).battleData.movementUsed}`);
 
+  const usedBeforeOver = byId(hero.basicInfo.id).battleData.movementUsed ?? 0;
+
   const over = await call("move", MOVE, { participantId: hero.basicInfo.id, to: neighbors(posOf(byId(hero.basicInfo.id)) as any).find((n) => canStep(mazeGrid(), wallSet(mazeGrid().maze), posOf(byId(hero.basicInfo.id)) as any, n) && !P().filter(onField).some((p) => cellKey(posOf(p) as any) === cellKey(n))) ?? { x: 0, y: 0 } });
 
-  if ((byId(hero.basicInfo.id).battleData.movementUsed ?? 0) >= 3 && state.currentTurnIndex !== undefined && current().basicInfo.id === hero.basicInfo.id) tcheck("Лабіринт: ліміт кроків вичерпано → 422", over.status === 422 && JSON.stringify(over.body).includes(MAZE_TEXTS.moveBlocked), `${over.status} ${JSON.stringify(over.body).slice(0, 120)}`);
+  if (usedBeforeOver >= 3 && state.currentTurnIndex !== undefined && current().basicInfo.id === hero.basicInfo.id) tcheck("Лабіринт: ліміт кроків вичерпано → 422", over.status === 422 && JSON.stringify(over.body).includes(MAZE_TEXTS.moveBlocked), `${over.status} ${JSON.stringify(over.body).slice(0, 120)}`);
 
   await untilTurnOf(isMazeAlly);
 

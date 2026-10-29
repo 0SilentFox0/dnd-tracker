@@ -39,7 +39,7 @@ export type AbilityEvent =
   | { type: "hit"; actorId: string; targetId: string; attackKind: AttackType; attackSourceId?: string; damage: number; rollMode?: "advantage" | "disadvantage"; cunningDice?: number }
   | { type: "kill"; actorId: string | null; targetId: string }
   | { type: "lethalDamage"; actorId: string | null; targetId: string }
-  | { type: "spellCast"; phase: "before" | "after"; actorId: string; targetIds: string[]; spellId?: string; school?: string | null; level?: number; castLevel?: number; roll?: number }
+  | { type: "spellCast"; phase: "before" | "after"; actorId: string; targetIds: string[]; spellId?: string; school?: string | null; level?: number; castLevel?: number; roll?: number; damage?: number }
   | { type: "moraleCheck"; actorId: string; result: "success" | "fail" }
   | { type: "bonusAction"; actorId: string; abilityKey: string; targetIds?: string[]; targetCell?: GridPoint }
   | { type: "action"; actorId: string; abilityKey: string; targetIds?: string[]; targetCell?: GridPoint };

@@ -19,6 +19,7 @@ import {
 import { isOnMap } from "@/lib/utils/battle/grid";
 import { modeSightedTargets } from "@/lib/utils/battle/modes/engine";
 import { skillAllTargets, spellChain } from "@/lib/utils/battle/spell/spell-targeting";
+import { matchesTargetFilter } from "@/lib/utils/battle/spell/target-filter";
 import type { BattleParticipant, GridPoint } from "@/types/battle";
 
 /** Цілі заклинання: кандидати, дальність, наведення на карті та цілі, що їх зачепить шаблон чи ланцюг. */
@@ -35,7 +36,9 @@ export function useSpellBookTargets(caster: BattleParticipant | null, flow: Spel
 
   const targets = useMemo(() => spellTargetCandidates(order, caster, pickSide).filter(visible), [order, caster, pickSide, visible]);
 
-  const inRange = (t: BattleParticipant) => spellTargetInRange(map, caster, t, flow.pick?.range);
+  const filteredOut = (t: BattleParticipant) => !matchesTargetFilter(t, flow.pick?.filter, { spellLevel: flow.pick?.level ?? 0, castLevel: flow.pick?.castLevel });
+
+  const inRange = (t: BattleParticipant) => spellTargetInRange(map, caster, t, flow.pick?.range) && !filteredOut(t);
 
   const aimPick = flow.pick?.targetMode === "template" ? flow.pick : undefined;
 
@@ -53,7 +56,7 @@ export function useSpellBookTargets(caster: BattleParticipant | null, flow: Spel
   const mapCandidates = useMemo(() => targets.filter(isOnMap), [targets]);
 
   const hover = useSpellMapTargeting(flow, dispatch, {
-    caster, order, map, active: mapTargeting, candidates: mapCandidates, inRange, setMapAim: scene.intents.setMapAim, setMapPick: scene.intents.setMapPick,
+    caster, order, map, active: mapTargeting, candidates: mapCandidates, inRange, filteredOut, setMapAim: scene.intents.setMapAim, setMapPick: scene.intents.setMapPick,
   });
 
   const aimPreviewAt = (cell: GridPoint) => ({ targets: touchedAt(cell).filter(visible).map((p) => ({ participant: p, ally: p.basicInfo.side === caster?.basicInfo.side })) });
@@ -67,5 +70,5 @@ export function useSpellBookTargets(caster: BattleParticipant | null, flow: Spel
   // від точки, а не від id на момент кліку: рух до касту змінює, кого зачепить
   const state = withAllTargets(withChainTargets(withLiveAimTargets(flow, touchedAt(flow.aim).map((p) => p.basicInfo.id)), chain.map((p) => p.basicInfo.id)), allSide);
 
-  return { targets, onMap, inRange, hover, aimPreviewAt, mapTargeting, chain: chain.filter(visible), state };
+  return { targets, onMap, inRange, filteredOut, hover, aimPreviewAt, mapTargeting, chain: chain.filter(visible), state };
 }

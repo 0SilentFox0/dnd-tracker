@@ -1,5 +1,6 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
+import { ParticipantSide } from "@/lib/constants/battle";
 import type { CriticalEffect, CriticalEffectType } from "@/lib/constants/critical-effects";
 import { makeEffect, resolved } from "@/lib/utils/abilities/__tests__/fixtures";
 import { createMockParticipant, grantPassive } from "@/lib/utils/battle/__tests__/fixtures/mock-participant";
@@ -254,5 +255,52 @@ describe("детермінований контракт початку ходу"
     expect(rng).toHaveBeenCalledTimes(values.length);
     expect({ result, rngCalls: rng.mock.results.map((r) => r.value) }).toMatchSnapshot();
     expect([participant, linked]).toEqual(input);
+  });
+});
+
+describe("зона заклинання на початку ходу", () => {
+  const owner = createMockParticipant({ basicInfo: { ...createMockParticipant().basicInfo, id: "mage", side: ParticipantSide.ENEMY } });
+
+  const map: BattleMapConfig = {
+    cols: 10,
+    rows: 10,
+    background: null,
+    opacity: 0.3,
+    terrain: { "1:1": { kind: "hazard", zoneId: "z1", untilRound: 9 } },
+    spellZones: { z1: { casterId: "mage", spellId: "s", spellName: "Спори", dc: 10, side: "enemies", triggers: { onTurnStart: { effects: [{ kind: "dealDamage", amount: 4, damageType: "poison", target: "eventTarget" }] } }, untilRound: 9 } },
+  };
+
+  it("onTurnStart завдає шкоди учаснику в зоні й дає повідомлення", () => {
+    const base = createMockParticipant();
+
+    const p = createMockParticipant({ battleData: { ...base.battleData, position: { x: 1, y: 1 } } });
+
+    const out = processStartOfTurn(p, 2, [p, owner], () => 0, map);
+
+    expect(out.participant.combatStats.currentHp).toBe(16);
+    expect(out.damageMessages.join(" ")).toContain("Спори");
+  });
+});
+
+describe("аура на учаснику на початку ходу", () => {
+  it("onTurnStart аури б'є істоту в радіусі навіть без spellZones", () => {
+    const base = createMockParticipant();
+
+    const bearer = createMockParticipant({
+      basicInfo: { ...base.basicInfo, id: "king", side: ParticipantSide.ENEMY },
+      battleData: {
+        ...base.battleData,
+        position: { x: 3, y: 1 },
+        activeEffects: [{ id: "a1", name: "Аура", type: "buff", duration: 5, appliedAt: { round: 1, timestamp: new Date(0) }, effects: [], anchoredZone: { casterId: "king", spellId: "s", spellName: "Аура", dc: 10, radiusFeet: 10, side: "all", excludeBearer: true, onTurnStart: { effects: [{ kind: "dealDamage", amount: 4, damageType: "psychic", target: "eventTarget" }] } } }],
+      },
+    });
+
+    const p = createMockParticipant({ battleData: { ...base.battleData, position: { x: 1, y: 1 } } });
+
+    const map: BattleMapConfig = { cols: 10, rows: 10, background: null, opacity: 0.3 };
+
+    const out = processStartOfTurn(p, 2, [p, bearer], () => 0, map);
+
+    expect(out.participant.combatStats.currentHp).toBe(16);
   });
 });

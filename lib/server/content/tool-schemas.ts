@@ -18,6 +18,7 @@ const effectStub = `One of the effect kinds: ${EFFECT_KINDS.join(", ")}. Kind sc
 
 const EFFECT_STOPS: Readonly<Record<string, string>> = {
   Effect: effectStub,
+  SpellEffect: effectStub,
   NonRandomEffect: effectStub,
   ...Object.fromEntries(EFFECT_KINDS.map((k) => [`Effect.${k}`, effectStub])),
 };

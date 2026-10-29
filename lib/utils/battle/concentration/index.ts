@@ -4,7 +4,7 @@ import { upsertTimedEffect } from "@/lib/utils/abilities/engine/effects/timed-ef
 import { hasCondition, removeEffects } from "@/lib/utils/battle/conditions/query";
 import { resolveSave, rollSave } from "@/lib/utils/battle/saves";
 import type { Ruleset } from "@/lib/utils/rules";
-import type { ActiveEffect, BattleParticipant } from "@/types/battle";
+import type { ActiveEffect, BattleMapConfig, BattleParticipant } from "@/types/battle";
 
 export type ConcentrationTag = NonNullable<ActiveEffect["concentrationOf"]>;
 
@@ -12,6 +12,29 @@ const concentrationOn = (p: BattleParticipant) => p.battleData.activeEffects.fin
 
 export function castIdFor(casterId: string, spellId: string, round: number, seq: number): string {
   return `${casterId}:${spellId}@${round}#${seq}`;
+}
+
+function castIdTaken(ps: BattleParticipant[], map: BattleMapConfig | null | undefined, castId: string): boolean {
+  const zonePrefix = `${castId}@`;
+
+  return (
+    Object.keys(map?.spellZones ?? {}).some((id) => id.startsWith(zonePrefix)) ||
+    ps.some(
+      (p) =>
+        p.basicInfo.id.startsWith(`inline:${castId}:`) ||
+        (p.spellcasting.grants ?? []).some((g) => g.key?.startsWith(`cast:${castId}:`)) ||
+        p.battleData.activeEffects.some((e) => e.concentration?.castId === castId || e.concentrationOf?.castId === castId),
+    )
+  );
+}
+
+/** Перший вільний seq: два касти одного заклинання кастером у раунді не ділять castId, поки перший живий. */
+export function uniqueCastId(ps: BattleParticipant[], map: BattleMapConfig | null | undefined, casterId: string, spellId: string, round: number): string {
+  let seq = 0;
+
+  while (castIdTaken(ps, map, castIdFor(casterId, spellId, round, seq))) seq += 1;
+
+  return castIdFor(casterId, spellId, round, seq);
 }
 
 export function hasConcentration(p: BattleParticipant): boolean {
@@ -68,7 +91,9 @@ export function beginConcentration(
 export function tagConcentration(before: BattleParticipant[], after: BattleParticipant[], tag: ConcentrationTag, abilityKey: string): BattleParticipant[] {
   const beforeById = new Map(before.map((p) => [p.basicInfo.id, p]));
 
-  return after.map((p) => {
+  let tagged = false;
+
+  const result = after.map((p) => {
     const beforeP = beforeById.get(p.basicInfo.id);
 
     if (p === beforeP) return p;
@@ -77,8 +102,60 @@ export function tagConcentration(before: BattleParticipant[], after: BattleParti
 
     const fresh = (e: ActiveEffect) => !e.concentration && !e.concentrationOf && !known.includes(e) && e.abilityKey?.startsWith(`${abilityKey}#`);
 
-    return p.battleData.activeEffects.some(fresh) ? withActiveEffects(p, (list) => list.map((e) => (fresh(e) ? { ...e, concentrationOf: tag } : e))) : p;
+    if (!p.battleData.activeEffects.some(fresh)) return p;
+
+    tagged = true;
+
+    return withActiveEffects(p, (list) => list.map((e) => (fresh(e) ? { ...e, concentrationOf: tag } : e)));
   });
+
+  if (!tagged) return result;
+
+  return result.map((p) => (p.basicInfo.id === tag.casterId ? withActiveEffects(p, (list) => list.map((e) => (e.concentration?.castId === tag.castId ? { ...e, concentration: { ...e.concentration, tracksEffects: true as const } } : e))) : p));
+}
+
+function carriesCast(p: BattleParticipant, castId: string, round: number): boolean {
+  const is = (tag?: ConcentrationTag) => tag?.castId === castId;
+
+  const { object, transform } = p.battleData;
+
+  return (
+    p.battleData.activeEffects.some((e) => is(e.concentrationOf)) ||
+    (!!object && p.combatStats.status !== CombatStatus.DEAD && is(object.concentrationOf)) ||
+    is(transform?.concentrationOf) ||
+    (p.spellcasting.grants ?? []).some((g) => is(g.concentrationOf) && (g.expiresRound === undefined || round <= g.expiresRound))
+  );
+}
+
+function mapCarriesCast(map: BattleMapConfig | null | undefined, castId: string): boolean {
+  return (
+    Object.values(map?.spellZones ?? {}).some((z) => z.concentrationOf?.castId === castId) ||
+    Object.values(map?.terrain ?? {}).some((c) => c.damage?.concentrationOf?.castId === castId)
+  );
+}
+
+/** Заклинання, чиї ефекти, зони, предмети й гранти всі зняті (втеча, СК, дісел, спливання), більше не тримає концентрацію. */
+export function dropOrphanedConcentration(ps: BattleParticipant[], map?: BattleMapConfig | null, round = 0): { participants: BattleParticipant[]; messages: string[] } {
+  let next = ps;
+
+  const messages: string[] = [];
+
+  for (const p of ps) {
+    const marker = concentrationOn(p);
+
+    if (!marker?.concentration?.tracksEffects) continue;
+
+    const { castId } = marker.concentration;
+
+    if (mapCarriesCast(map, castId) || next.some((q) => carriesCast(q, castId, round))) continue;
+
+    const dropped = dropConcentration(next, p.basicInfo.id, "ефекти заклинання завершилися");
+
+    next = dropped.participants;
+    messages.push(...dropped.messages);
+  }
+
+  return { participants: next, messages };
 }
 
 export function concentrationBroken(p: BattleParticipant): boolean {

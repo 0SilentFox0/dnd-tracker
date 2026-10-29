@@ -1,5 +1,6 @@
 import { buildOffTurnAction, type BuildOffTurnParams } from "./process/actions";
 import { resolveHit } from "./process/hit";
+import { spendRidersOnMiss } from "./process/hit-rider";
 import { activeEffectIds, consumeAttackEffects } from "./consume-effects";
 import { critDamageRolls, critDoublesDice } from "./crit-dice";
 import { applyCriticalEffect, critFlavorFor } from "./critical";
@@ -81,7 +82,7 @@ export function resolveServerAttack(input: ServerAttackInput): { battleAction: B
     });
 
     hit = { damageRolls, hitDamage };
-  }
+  } else spendRidersOnMiss(flow, { attackerId, attack });
 
   const crit = roll.isCriticalFail ? roll.criticalEffect : hit?.hitDamage.criticalEffectApplied;
 

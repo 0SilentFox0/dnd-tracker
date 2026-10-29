@@ -4,7 +4,7 @@ import { castLevelOptions, grantsFor, selectedGrantOf, sourceOptions } from "./s
 import { canCastFromSlot } from "./spell-grants";
 import { spellDefinition } from "./spell-pick";
 
-import { spellFormulaLabel } from "@/lib/utils/battle/spell/caster-dice";
+import { spellEffectsFormula, spellFormulaLabel } from "@/lib/utils/battle/spell/caster-dice";
 import type { BattleParticipant } from "@/types/battle";
 import type { BookSpell } from "@/types/spells";
 
@@ -32,8 +32,17 @@ export function spellSourceModel(caster: BattleParticipant | null, flow: SpellFl
     return slotOptions(caster, s.level).find((o) => o.key === flow.slotKey)?.castLevel;
   };
 
-  const formulaOf = (s: BookSpell): string =>
-    caster ? spellFormulaLabel(caster, { dice: spellDefinition(s).dice, groupId: s.spellGroup?.id ?? null, level: s.level, dieSides: s.dieSides, upcastDice: s.upcastDice, fixedDice: s.fixedDice }, castLevelOf(s)) : "";
+  const formulaOf = (s: BookSpell): string => {
+    if (!caster) return "";
+
+    const def = spellDefinition(s);
+
+    if (flow.pick?.spellId === s.id && flow.pick.inputDice) return `${flow.pick.diceSlots.length}к${flow.pick.inputDice.sides}`;
+
+    if (def.dice === 0) return spellEffectsFormula(s.spellEffects ?? []);
+
+    return spellFormulaLabel(caster, { dice: def.dice, groupId: s.spellGroup?.id ?? null, level: s.level, dieSides: s.dieSides, upcastDice: s.upcastDice, fixedDice: s.fixedDice }, castLevelOf(s));
+  };
 
   return {
     grantsOf,

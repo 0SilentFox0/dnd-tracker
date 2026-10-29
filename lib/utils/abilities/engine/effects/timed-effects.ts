@@ -20,8 +20,11 @@ export interface TimedEffectInput {
   source?: ActiveEffect["source"];
   permanent?: boolean;
   saveEnds?: ActiveEffect["saveEnds"];
+  linkedTo?: ActiveEffect["linkedTo"];
   concentrationOf?: ActiveEffect["concentrationOf"];
   concentration?: ActiveEffect["concentration"];
+  hitRider?: ActiveEffect["hitRider"];
+  anchoredZone?: ActiveEffect["anchoredZone"];
   exhaustionVariant?: ActiveEffect["exhaustionVariant"];
 }
 
@@ -60,8 +63,11 @@ export function upsertTimedEffect(p: BattleParticipant, input: TimedEffectInput,
     ...(input.source && { source: input.source }),
     ...(input.permanent && { permanent: true }),
     ...(input.saveEnds && { saveEnds: input.saveEnds }),
+    ...(input.linkedTo && { linkedTo: input.linkedTo }),
     ...(input.concentrationOf && { concentrationOf: input.concentrationOf }),
     ...(input.concentration && { concentration: input.concentration }),
+    ...(input.hitRider && { hitRider: input.hitRider }),
+    ...(input.anchoredZone && { anchoredZone: input.anchoredZone }),
     ...(input.exhaustionVariant && { exhaustionVariant: input.exhaustionVariant }),
   };
 

@@ -1,3 +1,4 @@
+import { CELL_FEET } from "@/lib/constants/battle";
 import { resolveAmount } from "@/lib/utils/abilities/engine/core/amount";
 import { findFlags } from "@/lib/utils/abilities/engine/core/collect-modifiers";
 import { applyRawDamage, applyRawHeal } from "@/lib/utils/abilities/engine/effects/hp";
@@ -5,17 +6,31 @@ import { applyEffect } from "@/lib/utils/abilities/registry/effects";
 import type { Effect } from "@/lib/utils/abilities/schema";
 import { applyFlowDamage, getP, put } from "@/lib/utils/battle/common/action-flow";
 import { applyBalanceDamageMultiplier } from "@/lib/utils/battle/damage/balance-multiplier";
+import { bothOnMap, cellsOf, footprintDistance } from "@/lib/utils/battle/grid";
+import { dealsNoDamage } from "@/lib/utils/battle/participant/state";
 import { applyResistance, immunityNote } from "@/lib/utils/battle/resistance";
 import { outcomeFor } from "@/lib/utils/battle/spell/cast/outcome";
 import { isDamageEffect, NO_TARGET_KINDS, type SpellCastState, usesRoll } from "@/lib/utils/battle/spell/cast/state";
+import { upcastSteps } from "@/lib/utils/battle/spell/caster-dice";
+import { computeSpellPower } from "@/lib/utils/battle/spell/power";
+import { objectsNear } from "@/lib/utils/battle/summon/objects-near";
+import { rollDice } from "@/lib/utils/common/dice";
 import type { AbilityEvent } from "@/types/abilities";
 
 const casterIdOf = (state: SpellCastState) => state.caster.basicInfo.id;
 
-function runEffect(state: SpellCastState, effect: Effect, effectIndex: number, ids: string[], roll: number): void {
+function freezeSpellRoll(effect: Effect, roll: number): Effect {
+  if (effect.kind !== "damageBonus" || typeof effect.flat !== "object" || !("spellRoll" in effect.flat)) return effect;
+
+  return { ...effect, flat: Math.trunc((roll * effect.flat.spellRoll) / 100) };
+}
+
+function runEffect(state: SpellCastState, source: Effect, effectIndex: number, ids: string[], roll: number): void {
   const { flow } = state;
 
-  const event: AbilityEvent = { type: "spellCast", phase: "after", actorId: casterIdOf(state), targetIds: state.targetIds, ...state.info, roll };
+  const effect = freezeSpellRoll(source, roll);
+
+  const event: AbilityEvent = { type: "spellCast", phase: "after", actorId: casterIdOf(state), targetIds: state.targetIds, ...state.info, roll, damage: state.dealt };
 
   const r = applyEffect({ participants: flow.ps, ability: state.ability, effectIndex, ownerId: casterIdOf(state), effect, targetIds: ids, event, ctx: flow.ctx });
 
@@ -43,12 +58,39 @@ function absorbSpellDamage(state: SpellCastState, id: string, damage: number): v
   }
 }
 
+function scheduleHit(state: SpellCastState, delay: { feet: number; perRoundFeet: number }, damageType: string, id: string, amount: number): boolean {
+  const { flow, spell } = state;
+
+  const me = getP(flow, casterIdOf(state));
+
+  const target = getP(flow, id);
+
+  if (!bothOnMap(flow.ctx.map, me, target)) return false;
+
+  const feet = footprintDistance(cellsOf(me), cellsOf(target)) * CELL_FEET;
+
+  const { feet: near, perRoundFeet } = delay;
+
+  if (feet <= near) return false;
+
+  const atRound = flow.ctx.round + Math.ceil(feet / perRoundFeet) - 1;
+
+  const pending = me.battleData.pendingHits ?? [];
+
+  put(flow, { ...me, battleData: { ...me.battleData, pendingHits: [...pending, { id: `${spell.id}:${flow.ctx.round}:${id}:${pending.length}`, targetId: id, atRound, amount, damageType, spellName: spell.name, school: spell.groupId }] } });
+  flow.messages.push(`⏳ ${target.basicInfo.name}: «${spell.name}» прибуде в раунді ${atRound} (${feet} фт)`);
+
+  return true;
+}
+
 function dealSpellDamage(state: SpellCastState, effect: Extract<Effect, { kind: "dealDamage" }>, id: string, roll: number, index: number): void {
   const { flow, spell } = state;
 
   const target = getP(flow, id);
 
-  const raw = resolveAmount(effect.amount, { owner: getP(flow, casterIdOf(state)), target, spellRoll: roll, rng: state.rng, participants: flow.ps });
+  const rolls = state.spell.definition.perObjectFeet ? objectsNear(flow.ps, casterIdOf(state), spell.id, target, state.spell.definition.perObjectFeet).length : 1;
+
+  const raw = Array.from({ length: rolls }).reduce<number>((sum) => sum + resolveAmount(effect.amount, { owner: getP(flow, casterIdOf(state)), target, spellRoll: roll, rng: state.rng, participants: flow.ps }), 0);
 
   const share = effect.falloff ? effect.falloff[Math.min(index, effect.falloff.length - 1)] : 100;
 
@@ -56,9 +98,18 @@ function dealSpellDamage(state: SpellCastState, effect: Extract<Effect, { kind: 
 
   if (planned <= 0) return;
 
+  if (dealsNoDamage(getP(flow, casterIdOf(state)))) {
+    flow.messages.push(`🕊 ${state.caster.basicInfo.name}: не завдає шкоди (${spell.name})`);
+
+    return;
+  }
+
+  if (effect.delayIfBeyond && scheduleHit(state, effect.delayIfBeyond, effect.damageType ?? "magic", id, planned)) return;
+
   const resisted = applyResistance(target, planned, effect.damageType ?? "magic", { participants: flow.ps, fromSpell: true, school: spell.groupId, extra: state.actionModifiers[id] });
 
   put(flow, applyRawDamage(target, resisted.finalDamage));
+  state.dealt += resisted.finalDamage;
   applyFlowDamage(flow, target, resisted.finalDamage);
   absorbSpellDamage(state, id, resisted.finalDamage);
   state.damageSteps[id] = [...(state.damageSteps[id] ?? []), ...resisted.steps];
@@ -66,12 +117,52 @@ function dealSpellDamage(state: SpellCastState, effect: Extract<Effect, { kind: 
   if (resisted.finalDamage === 0 && resisted.immunityApplied) flow.messages.push(immunityNote(target.basicInfo.name, resisted.steps));
 }
 
-const baseFor = (state: SpellCastState, e: Effect) => (isDamageEffect(e) ? state.power.damage : state.power.heal);
+const DICE_COUNT = /^(\d+)d(\d+)$/;
+
+function rangeDice(state: SpellCastState, dice: string): string {
+  const { definition, level } = state.spell;
+
+  const extra = definition.fixedDice ? 0 : (definition.upcastDice ?? 0) * upcastSteps(level, state.castLevel);
+
+  const m = DICE_COUNT.exec(dice);
+
+  return m && extra > 0 ? `${Number(m[1]) + extra}d${m[2]}` : dice;
+}
+
+function distanceDamage(state: SpellCastState, ranges: NonNullable<Extract<Effect, { kind: "dealDamage" }>["byDistance"]>, id: string): number {
+  const { flow } = state;
+
+  const me = getP(flow, casterIdOf(state));
+
+  const target = getP(flow, id);
+
+  const onMap = bothOnMap(flow.ctx.map, me, target);
+
+  const feet = onMap ? footprintDistance(cellsOf(me), cellsOf(target)) * CELL_FEET : 0;
+
+  if (!onMap) flow.messages.push(`📏 ${state.spell.name}: без мапи — найближчий діапазон`);
+
+  const range = ranges.find((r) => r.maxFeet >= feet) ?? ranges[ranges.length - 1];
+
+  const dice = rangeDice(state, range.dice);
+
+  if (onMap) flow.messages.push(`📏 ${target.basicInfo.name}: дистанція ${feet} фт → ${dice}`);
+
+  const rolled = rollDice(dice, state.rng);
+
+  return computeSpellPower({ caster: me, groupId: state.spell.groupId, rolls: [rolled], participants: flow.ps, extra: state.actionModifiers[casterIdOf(state)], addAbilityMod: state.spell.definition.addAbilityMod, damageBonus: state.spell.definition.damageBonus }).damage;
+}
+
+const baseFor = (state: SpellCastState, e: Effect, id: string) => {
+  if (e.kind === "dealDamage" && e.byDistance) return distanceDamage(state, e.byDistance, id);
+
+  return isDamageEffect(e) ? state.power.damage : state.power.heal;
+};
 
 export function applyTo(state: SpellCastState, effect: Effect, effectIndex: number, id: string, index: number): void {
   state.touchedIds.add(id);
 
-  if (NO_TARGET_KINDS.has(effect.kind)) return runEffect(state, effect, effectIndex, [id], baseFor(state, effect));
+  if (NO_TARGET_KINDS.has(effect.kind)) return runEffect(state, effect, effectIndex, [id], baseFor(state, effect, id));
 
   const outcome = outcomeFor(state, id);
 
@@ -79,7 +170,7 @@ export function applyTo(state: SpellCastState, effect: Effect, effectIndex: numb
 
   if (outcome.skip || (outcome.factor < 1 && !usesRoll(effect))) return;
 
-  const base = baseFor(state, effect) + (isDamageEffect(effect) ? (outcome.critExtra ?? 0) : 0);
+  const base = baseFor(state, effect, id) + (isDamageEffect(effect) ? (outcome.critExtra ?? 0) : 0);
 
   const roll = Math.floor(base * outcome.factor * (isDamageEffect(effect) ? outcome.raceMultiplier : 1));
 

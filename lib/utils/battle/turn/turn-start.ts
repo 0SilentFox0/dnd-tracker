@@ -11,6 +11,10 @@ import { hazardHit, hazardUnder } from "@/lib/utils/battle/grid/hazard";
 import { landDive } from "@/lib/utils/battle/maneuvers";
 import { actionsPerTurnPool, setExtraActionPool } from "@/lib/utils/battle/participant/helpers";
 import { hasEffectMarker } from "@/lib/utils/battle/participant/state";
+import { hasAnchors } from "@/lib/utils/battle/spell/anchored-zone";
+import { pruneDeadInlineGrants } from "@/lib/utils/battle/spell/inline-grant";
+import { resolvePendingHits } from "@/lib/utils/battle/spell/pending-hits";
+import { zoneTurnStart } from "@/lib/utils/battle/spell/zone-triggers";
 import { rollDie } from "@/lib/utils/common/dice";
 import type { Ruleset } from "@/lib/utils/rules";
 import type { BattleMapConfig, BattleParticipant } from "@/types/battle";
@@ -97,12 +101,20 @@ function applyStartOfTurnDamage(
 
   let killedByRules = false;
 
+  if (updatedParticipant.battleData.pendingHits?.length) {
+    const hits = resolvePendingHits(replaceParticipant(allParticipants, updatedParticipant), updatedParticipant.basicInfo.id, { round: currentRound, rng, rules });
+
+    others = hits.participants;
+    updatedParticipant = findParticipant(others, updatedParticipant.basicInfo.id) ?? updatedParticipant;
+    damageMessages.push(...hits.messages);
+  }
+
   if (
     updatedParticipant.combatStats.status !== CombatStatus.DEAD &&
     updatedParticipant.combatStats.status !== CombatStatus.UNCONSCIOUS &&
     !sitsOutTurn(updatedParticipant, currentRound)
   ) {
-    const dotResult = applyDOTEffects(updatedParticipant, allParticipants);
+    const dotResult = applyDOTEffects(updatedParticipant, others, rng);
 
     const beforeDot = updatedParticipant;
 
@@ -119,7 +131,7 @@ function applyStartOfTurnDamage(
       dotDamage,
     );
 
-    const dotRules = dotDamage > 0 ? applyDamageConsequences({ before: beforeDot, after: hurt, amount: dotDamage, rules, rng, participants: allParticipants }) : null;
+    const dotRules = dotDamage > 0 ? applyDamageConsequences({ before: beforeDot, after: hurt, amount: dotDamage, rules, rng, participants: others }) : null;
 
     updatedParticipant = dotRules?.participant ?? hurt;
     others = dotRules?.participants ?? others;
@@ -142,6 +154,15 @@ function applyStartOfTurnDamage(
       others = hit.participants;
       killedByRules = updatedParticipant.combatStats.status === CombatStatus.DEAD;
       damageMessages.push(...hit.consequences);
+    }
+
+    if (map && (map.spellZones || hasAnchors([...others, updatedParticipant])) && updatedParticipant.combatStats.currentHp > 0) {
+      const zones = zoneTurnStart(map, replaceParticipant(others, updatedParticipant), updatedParticipant.basicInfo.id, { round: currentRound, rng, rules });
+
+      others = zones.participants;
+      updatedParticipant = findParticipant(others, updatedParticipant.basicInfo.id) ?? updatedParticipant;
+      killedByRules = updatedParticipant.combatStats.status === CombatStatus.DEAD;
+      damageMessages.push(...zones.messages);
     }
 
     const hotResult = applyHOTEffects(updatedParticipant);
@@ -229,7 +250,7 @@ export function processStartOfTurn(
 
   const { skippedBy } = reset;
 
-  updatedParticipant = reset.participant;
+  updatedParticipant = pruneDeadInlineGrants(reset.participant, currentRound, allParticipants);
 
   const id = participant.basicInfo.id;
 

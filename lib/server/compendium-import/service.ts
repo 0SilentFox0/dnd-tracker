@@ -1,6 +1,7 @@
 import { createHmac, timingSafeEqual } from "node:crypto";
 import { z } from "zod";
 
+import { type CustomConditionRule, deriveCustomConditions } from "./adapters/custom-conditions";
 import { adaptCompendium } from "./adapt";
 import { digest } from "./identity";
 import { byteLength, COMPENDIUM_LIMITS, CompendiumError, type JsonRecord, parseCompendium } from "./parse";
@@ -58,7 +59,7 @@ export interface CompendiumReport {
   issueCounts: Record<string, number>;
   omittedIssues: number;
 }
-export interface RepositoryContext extends PlanContext { extraEntries?: AdaptedEntry[]; hasCharacters?: boolean; classesEnabled?: boolean; hasClasses?: boolean }
+export interface RepositoryContext extends PlanContext { extraEntries?: AdaptedEntry[]; hasCharacters?: boolean; classesEnabled?: boolean; hasClasses?: boolean; customConditionKeys?: string[] }
 export interface ImportRepository {
   authorize(actor: Actor): Promise<void>;
   loadContext(actor: Actor, input: ImportInput, entries?: AdaptedEntry[]): Promise<RepositoryContext>;
@@ -117,7 +118,15 @@ function classesModeOf(plan: ImportPlan, input: ImportInput, ctx: RepositoryCont
   return { enabled: typeof patched === "boolean" ? patched : ctx.classesEnabled === true, exists: ctx.hasClasses === true || plan.writes.some((w) => w.kind === "classes") };
 }
 
-function reportOf(plan: ImportPlan, root: JsonRecord, sources: JsonRecord[], embedded: Record<string, number> = {}, hasCharacters?: boolean, classesMode?: ClassesMode): CompendiumReport {
+function customConditionsToOffer(root: JsonRecord, input: ImportInput, ctx: RepositoryContext): CustomConditionRule[] {
+  const patched = isRecord(input.rulesPatch?.conditions) && Array.isArray(input.rulesPatch.conditions.custom) ? input.rulesPatch.conditions.custom : [];
+
+  const known = new Set<unknown>([...(ctx.customConditionKeys ?? []), ...patched.map((c) => (isRecord(c) ? c.key : undefined))]);
+
+  return deriveCustomConditions(root).flatMap((d) => (d.rule && !known.has(d.rule.key) ? [d.rule] : []));
+}
+
+function reportOf(plan: ImportPlan, root: JsonRecord, sources: JsonRecord[], embedded: Record<string, number> = {}, hasCharacters?: boolean, classesMode?: ClassesMode, customRules: CustomConditionRule[] = []): CompendiumReport {
   const counts = { created: 0, updated: 0, unchanged: 0, errors: plan.errors.length };
 
   const unique = new Map<string, ImportIssue>();
@@ -182,7 +191,7 @@ function reportOf(plan: ImportPlan, root: JsonRecord, sources: JsonRecord[], emb
 
   for (const row of plan.writes) editionSummary[row.edition] = (editionSummary[row.edition] ?? 0) + 1;
 
-  return { adapterVersion: ADAPTER_VERSION, counts, rows, sources, editionSummary, countsByCategory, issueCounts, omittedIssues: Math.max(0, allIssues.length - nextActions.length), nextActions, ...(classesMissing && { recommendedRulesPatch: { classes: { enabled: true } } }), readyToImport: plan.errors.length === 0, readyToPlay: hasCharacters !== false && !classesMissing && plan.errors.length === 0 && !allIssues.some((i) => !COMPENDIUM_INFO_ISSUE_CODES.has(i.code) && /MANUAL|UNRESOLVED|UNKNOWN|UNSUPPORTED/.test(i.code)) };
+  return { adapterVersion: ADAPTER_VERSION, counts, rows, sources, editionSummary, countsByCategory, issueCounts, omittedIssues: Math.max(0, allIssues.length - nextActions.length), nextActions, ...((classesMissing || customRules.length > 0) && { recommendedRulesPatch: { ...(classesMissing && { classes: { enabled: true } }), ...(customRules.length > 0 && { conditions: { custom: customRules } }) } }), readyToImport: plan.errors.length === 0, readyToPlay: hasCharacters !== false && !classesMissing && customRules.length === 0 && plan.errors.length === 0 && !allIssues.some((i) => !COMPENDIUM_INFO_ISSUE_CODES.has(i.code) && /MANUAL|UNRESOLVED|UNKNOWN|UNSUPPORTED/.test(i.code)) };
 }
 
 function readInput(input: ImportInput) {
@@ -207,7 +216,7 @@ async function planFor(actor: Actor, input: ImportInput, root: ReturnType<typeof
 
   if (Date.now() - started > 15_000) throw new CompendiumError("PLANNING_TIMEOUT");
 
-  return { plan, sources: adapted.sources, embedded: adapted.embedded, hasCharacters: ctx.hasCharacters, classesMode: classesModeOf(plan, input, ctx) };
+  return { plan, sources: adapted.sources, embedded: adapted.embedded, hasCharacters: ctx.hasCharacters, classesMode: classesModeOf(plan, input, ctx), customRules: customConditionsToOffer(root, input, ctx) };
 }
 
 export async function previewImport(actor: Actor, input: ImportInput, secret: string, repository: ImportRepository) {
@@ -217,9 +226,9 @@ export async function previewImport(actor: Actor, input: ImportInput, secret: st
 
   const { root, fingerprint } = readInput(input);
 
-  const { plan, sources, embedded, hasCharacters, classesMode } = await planFor(actor, input, root, repository);
+  const { plan, sources, embedded, hasCharacters, classesMode, customRules } = await planFor(actor, input, root, repository);
 
-  return { token: tokenFor(actor, fingerprint, plan.hash, secret), report: reportOf(plan, root, sources, embedded, hasCharacters, classesMode) };
+  return { token: tokenFor(actor, fingerprint, plan.hash, secret), report: reportOf(plan, root, sources, embedded, hasCharacters, classesMode, customRules) };
 }
 
 export async function confirmImport(actor: Actor, input: ImportInput, token: string, idempotencyKey: string, secret: string, repository: ImportRepository): Promise<CompendiumReport> {
@@ -245,7 +254,7 @@ export async function confirmImport(actor: Actor, input: ImportInput, token: str
 
     const signed = tokenData(actor, token, fingerprint, secret);
 
-    const { plan, sources, embedded, hasCharacters, classesMode } = await planFor(actor, input, root, tx);
+    const { plan, sources, embedded, hasCharacters, classesMode, customRules } = await planFor(actor, input, root, tx);
 
     if (signed.planHash !== plan.hash) throw new CompendiumError("PREVIEW_STALE");
 
@@ -276,7 +285,7 @@ export async function confirmImport(actor: Actor, input: ImportInput, token: str
       await tx.applyRules(actor, input.rulesPatch);
     }
 
-    const report = remapIds(reportOf(plan, root, sources, embedded, hasCharacters, classesMode), idMap);
+    const report = remapIds(reportOf(plan, root, sources, embedded, hasCharacters, classesMode, customRules), idMap);
 
     await tx.saveRun(actor, idempotencyKey, requestHash, report);
 

@@ -79,6 +79,18 @@ describe("useRulesForm", () => {
     expect(table?.["2"]).toBe("1d6");
   });
 
+  it("conditions patch never carries custom conditions", async () => {
+    vi.mocked(getCampaignRules).mockResolvedValue({ ...DEFAULT_RULES, conditions: { ...DEFAULT_RULES.conditions, custom: [{ key: "custom:x", name: "X", description: "", markers: [] }] } });
+
+    const { result } = await setup();
+
+    act(() => result.current.form.set("conditions", { ...result.current.form.data.conditions, enabled: true }));
+
+    await act(() => result.current.save());
+
+    expect(updateCampaignRules).toHaveBeenCalledWith("c1", { conditions: { enabled: true, exhaustion: DEFAULT_RULES.conditions.exhaustion } });
+  });
+
   it("reset returns the server data", async () => {
     const { result } = await setup();
 

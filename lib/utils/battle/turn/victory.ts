@@ -24,7 +24,7 @@ export function checkVictoryConditions(
   const reserveHas = (side: ParticipantSide) => reserve.some((p) => p.basicInfo.side === side);
 
   // слот екстра-ходу — не окремий учасник
-  const real = initiativeOrder.filter((p) => !p.basicInfo.isExtraTurnSlot);
+  const real = initiativeOrder.filter((p) => !p.basicInfo.isExtraTurnSlot && !p.battleData.object);
 
   const allies = real.filter((p) => originalSide(p) === ParticipantSide.ALLY);
 

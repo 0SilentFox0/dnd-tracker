@@ -15,6 +15,8 @@ import {
   defaultGrant,
   grantLabel as grantLabelOf,
   initialSpellFlow,
+  inlineGrantLabel,
+  inlineGrantOf,
   slotOptions,
   spellBlockedBySlots,
   spellDefinition,
@@ -72,7 +74,7 @@ export function useSpellBook(caster: BattleParticipant | null, options: { reacti
 
   const map = scene.battle.map ?? null;
 
-  const { targets, onMap, inRange, hover, aimPreviewAt, mapTargeting, chain, state } = useSpellBookTargets(caster, flow, dispatch);
+  const { targets, onMap, inRange, filteredOut, hover, aimPreviewAt, mapTargeting, chain, state } = useSpellBookTargets(caster, flow, dispatch);
 
   const saveTargets = spellSaveTargets(targets, state, scene.viewer);
 
@@ -84,27 +86,29 @@ export function useSpellBook(caster: BattleParticipant | null, options: { reacti
 
   useSpellCastSubmit({ caster, selected, flow: { state, dispatch }, cast: { free, legendaryKey: special?.abilityKey, finishLong }, onDone: options.onDone });
 
+  const labelOf = (s: BookSpell) => (s.grantKey ? inlineGrantLabel(caster, inlineGrantOf(caster, s)) : grantLabelOf(caster, s.id));
+
   const firstUsable = (who: BattleParticipant) => slotLevels(who).find((l) => l.current > 0)?.level ?? 0;
 
   const view = {
-    spells, byLevel, selected, targets, saveTargets, hover, aimPreviewAt, mapTargeting, chain, inRange, formulaOf, wideningOf, definitionOf: spellDefinition, slots: caster ? slotLevels(caster) : [],
+    spells, byLevel, selected, targets, saveTargets, hover, aimPreviewAt, mapTargeting, chain, inRange, filteredOut, formulaOf, wideningOf, definitionOf: spellDefinition, slots: caster ? slotLevels(caster) : [],
     universalSlot,
     free,
     timing: selected?.casting,
     pendingCast: caster?.battleData.pendingCast,
     canFastForward: scene.viewer.isDM,
-    grantLabel: (s: BookSpell) => grantLabelOf(caster, s.id),
+    grantLabel: labelOf,
     sourceOptions,
     sourceValue: flow.grantKey ? `grant:${flow.grantKey}` : flow.slotKey ? `slot:${flow.slotKey}` : "",
     castLevelOptions,
     castLevelValue: flow.castLevel ?? selectedGrant?.castLevel,
     slotLeft: (level: number) => spellSlotsLeft(caster, level, bypassCost || spells.some((s) => s.level === level && !!grantOf(s))),
-    slotCostLabel: (s: BookSpell) => [special ? "Легендарна дія / дія лігва" : undefined, grantLabelOf(caster, s.id)].filter(Boolean).join(" · ") || spellSlotCostLabel(s, { free, universal: universalSlot, chosen: slotChoices.find((o) => o.key === state.slotKey)?.label }),
+    slotCostLabel: (s: BookSpell) => [special ? "Легендарна дія / дія лігва" : undefined, labelOf(s)].filter(Boolean).join(" · ") || spellSlotCostLabel(s, { free, universal: universalSlot, chosen: slotChoices.find((o) => o.key === state.slotKey)?.label }),
     slot: { options: slotChoices, value: state.slotKey },
     noSlot: (s: BookSpell) => !canSlot(s) && spellBlockedBySlots(caster, s.level, bypassCost),
     attackTargets: state.pick?.needsAttackRolls ? targets.filter((t) => state.targetIds.includes(t.basicInfo.id)) : [],
     costUsed: (s: BookSpell) => costBlocked({
-      caster, spell: s, definitionCost: spellDefinition(s).cost, grants: grantsOf(s), grant: grantOf(s), slotKey: state.slotKey, free, bypassCost, special: !!special, isDM: scene.viewer.isDM,
+      caster, spell: s, definitionCost: spellDefinition(s).cost, grants: s.grantKey ? [inlineGrantOf(caster, s)].filter((g) => !!g) : grantsOf(s), grant: s.grantKey ? inlineGrantOf(caster, s) : grantOf(s), slotKey: state.slotKey, free, bypassCost, special: !!special, isDM: scene.viewer.isDM,
       isMyTurn: scene.battle.initiativeOrder[scene.battle.currentTurnIndex]?.basicInfo.id === caster?.basicInfo.id, reactionBlocked: !!caster && !!reactionBlocker(caster),
     }),
   };
@@ -144,6 +148,8 @@ export function useSpellBook(caster: BattleParticipant | null, options: { reacti
     setCastLevel: (castLevel: number) => {
       if (selected && selectedGrant) dispatch({ type: "SET_CAST_LEVEL", castLevel, pick: buildSpellPick(order, caster, selected, map, { castLevel }) });
     },
+    setOption: (index: number) => dispatch({ type: "SET_OPTION", index }),
+    setInputCount: (count: number) => dispatch({ type: "SET_INPUT", count }),
     setAttack: (id: string, v: number | undefined) => dispatch({ type: "SET_ATTACK", id, value: v }),
     prepareCast: async (cancel = false) => {
       if (!caster || !selected) return;

@@ -108,3 +108,40 @@ describe("parseRulesCached", () => {
     expect(parseRulesCached(null)).toEqual(parseRulesCached({}));
   });
 });
+
+describe("mergeRules removeCustomConditions", () => {
+  const cond = (key: string) => ({ key, name: key, description: "", markers: [] as never[] });
+
+  const current = parseRules({ conditions: { enabled: true, exhaustion: "2014", custom: [cond("custom:a"), cond("custom:b")] } });
+
+  it("removes only the listed key", () => {
+    const r = mergeRules(current, RulesetPatchSchema.parse({ removeCustomConditions: ["custom:a"] }));
+
+    expect(r).toMatchObject({ ok: true });
+    expect(r.ok && r.rules.conditions.custom?.map((c) => c.key)).toEqual(["custom:b"]);
+  });
+
+  it("an unknown key is not an error", () => {
+    const r = mergeRules(current, RulesetPatchSchema.parse({ removeCustomConditions: ["custom:zzz"] }));
+
+    expect(r.ok && r.rules.conditions.custom).toHaveLength(2);
+  });
+
+  it("adding and removing the same key in one patch is an issue", () => {
+    const r = mergeRules(current, RulesetPatchSchema.parse({ conditions: { custom: [cond("custom:a")] }, removeCustomConditions: ["custom:a"] }));
+
+    expect(r.ok).toBe(false);
+    expect(!r.ok && r.issues[0].message).toBe("validation.rulesCustomConflict");
+  });
+
+  it("a patch without the field behaves as before", () => {
+    const r = mergeRules(current, RulesetPatchSchema.parse({ morale: { cap: 5 } }));
+
+    expect(r.ok && r.rules.conditions.custom).toHaveLength(2);
+  });
+
+  it("rejects malformed keys and an empty list", () => {
+    expect(RulesetPatchSchema.safeParse({ removeCustomConditions: ["nope"] }).success).toBe(false);
+    expect(RulesetPatchSchema.safeParse({ removeCustomConditions: [] }).success).toBe(false);
+  });
+});

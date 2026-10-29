@@ -80,6 +80,21 @@
     },
     "randomOf": {
       "label": "Random one of several"
+    },
+    "help": {
+      "label": "Help an ally"
+    },
+    "push": {
+      "label": "Push",
+      "fields": {
+        "feet": "Feet (5–30)",
+        "from": "From"
+      },
+      "options": {
+        "from": {
+          "caster": "From the caster"
+        }
+      }
     }
   },
   "flags": {
@@ -285,6 +300,9 @@
       "fields": {
         "conditions": "Conditions"
       }
+    },
+    "damageThreshold": {
+      "label": "Damage threshold"
     }
   },
   "triggers": {
@@ -491,7 +509,15 @@
     "races": "Races",
     "bySelf": "Only my mark",
     "categories": "Categories",
-    "shield": "Shield"
+    "shield": "Shield",
+    "byDistance": "Dice by distance (feet:dice, spells only)",
+    "delayIfBeyond": {
+      "feet": "Delay the hit if the target is farther than (feet, spells only)",
+      "perRoundFeet": "…flies per round (feet)"
+    },
+    "linkedToCondition": "Ends with this spell's condition",
+    "escapeDc": "\"Escape\" against the spell DC (for grapples)",
+    "onlyIfAffected": "Only if at least one spell target is affected (for self)"
   },
   "stats": {
     "armor": "AC",
@@ -545,7 +571,9 @@
       "restrained": "restrained",
       "stunned": "stunned",
       "unconscious": "unconscious",
-      "exhaustion": "exhaustion"
+      "exhaustion": "exhaustion",
+      "no_hostile_spells": "no hostile spells",
+      "no_damage_dealt": "deals no damage"
     },
     "maneuver": {
       "dive": "Dive",
@@ -644,7 +672,9 @@
       "restrained": "restrained",
       "stunned": "stunned",
       "unconscious": "unconscious",
-      "exhaustion": "exhaustion"
+      "exhaustion": "exhaustion",
+      "no_hostile_spells": "no hostile spells",
+      "no_damage_dealt": "deals no damage"
     },
     "phase": {
       "before": "before",

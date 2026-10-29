@@ -13,9 +13,9 @@ const ids = (list: BattleParticipant[]) => list.map((p) => p.basicInfo.id);
 
 const sameIds = (a: string[], b: string[]) => a.length === b.length && a.every((id, i) => id === b[i]);
 
-const baseOf = (map: BattleMapConfig) => JSON.stringify(Object.fromEntries(Object.entries(map).filter(([k]) => k !== "terrain" && !isModeMapKey(k))));
+const baseOf = (map: BattleMapConfig) => JSON.stringify(Object.fromEntries(Object.entries(map).filter(([k]) => k !== "terrain" && k !== "spellZones" && !isModeMapKey(k))));
 
-// повну карту шлемо лише коли змінилось щось, крім місцевості й полів лабіринту: інакше великі штрихи переповнюють Pusher
+// повну карту шлемо лише коли змінилось щось, крім місцевості, тригерів зон (клієнту не потрібні) й полів лабіринту: інакше великі штрихи переповнюють Pusher
 function mapChange(before: BattleMapConfig | null, after: BattleMapConfig | null | undefined): Pick<ClientBattleDelta["scene"], "map" | "terrain" | MapModeKey> {
   if (after === undefined || before === after) return {};
 

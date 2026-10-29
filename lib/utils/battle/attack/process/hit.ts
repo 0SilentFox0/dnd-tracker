@@ -3,6 +3,7 @@ import { applyDamageToTarget } from "./damage";
 import { fireWaveVictims } from "./fire-wave";
 import { splitGuardedDamage } from "./guard";
 import { applyVampirism } from "./hit-effects";
+import { applyHitRiders } from "./hit-rider";
 import { castHitSpell } from "./hit-spell";
 
 import { findFlags } from "@/lib/utils/abilities/engine/core/collect-modifiers";
@@ -98,6 +99,8 @@ export function resolveHit(p: ResolveHitParams): { hitDamage: ComputeHitDamageRe
     ...eventRollMode(p.attackRoll),
     ...(forgo > 0 && { cunningDice: forgo }),
   });
+
+  applyHitRiders(flow, { attackerId, targetId, attack, crit: p.attackRoll.isCritical });
 
   if (p.cunningStrike?.length && offer && forgo > 0 && fired.includes(offer.sneakKey)) {
     applyCunningStrikeEffects(flow, attackerId, targetId, p.cunningStrike);

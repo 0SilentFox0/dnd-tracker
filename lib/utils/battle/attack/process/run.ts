@@ -1,6 +1,7 @@
 import { buildAbortedAttackAction, buildBattleActionForHit } from "./actions";
 import { handleCriticalFail } from "./critical-fail";
 import { resolveHit } from "./hit";
+import { spendRidersOnMiss } from "./hit-rider";
 import { handleMiss } from "./miss";
 
 import { collectModifiers, findFlags } from "@/lib/utils/abilities/engine/core/collect-modifiers";
@@ -18,6 +19,8 @@ import { attackKindOf } from "@/lib/utils/battle/common/attack-kind";
 import { damageDiceSlots, heroAttackDamageParts } from "@/lib/utils/battle/damage/hero-damage";
 import { attackDiceRolls } from "@/lib/utils/battle/dice-record";
 import { getEffectiveArmorClass } from "@/lib/utils/battle/participant";
+import { castSpell } from "@/lib/utils/battle/spell";
+import { runAutoReactions } from "@/lib/utils/battle/spell/auto-reaction";
 import type { AttackRollResult } from "@/lib/utils/battle/types/attack";
 import type { ProcessAttackParams, ProcessAttackResult } from "@/lib/utils/battle/types/attack-process";
 import { rngOf } from "@/lib/utils/common/rng";
@@ -101,7 +104,11 @@ export function processAttack(params: ProcessAttackParams): ProcessAttackResult 
 
   const branch = { critFlavorText, flow, attackerId, targetId, attack, d20Roll, attackRoll, targetAC, currentRound, battleId: params.battleId };
 
+  if (!isHit) spendRidersOnMiss(flow, { attackerId, attack });
+
   if (attackRoll.isCriticalFail && attackRoll.criticalEffect) {
+    reactToAttack(run);
+
     const r = handleCriticalFail(branch);
 
     finish(r.battleAction);
@@ -111,6 +118,8 @@ export function processAttack(params: ProcessAttackParams): ProcessAttackResult 
   }
 
   if (!isHit) {
+    reactToAttack(run);
+
     const r = handleMiss(branch);
 
     finish(r.battleAction);
@@ -120,6 +129,12 @@ export function processAttack(params: ProcessAttackParams): ProcessAttackResult 
   }
 
   return hitResult(run, { attackRoll, targetAC, critFlavorText, dice, actionModifiers, finish });
+}
+
+function reactToAttack(run: AttackRun): void {
+  const { flow, attackerId, targetId, params } = run;
+
+  runAutoReactions(flow, { attackerId, targetId, targetHpBefore: params.target.combatStats.currentHp }, castSpell);
 }
 
 function spendAttackAction(run: AttackRun): void {
@@ -252,6 +267,8 @@ function hitResult(run: AttackRun, stage: HitStage): ProcessAttackResult {
     hitSpells: params.hitSpells,
     battleId,
   });
+
+  reactToAttack(run);
 
   if (params.obstacle) flow.messages.unshift(`🧱 перешкода: шкода ×0.5 → ${hitDamage.totalFinalDamage}`);
 

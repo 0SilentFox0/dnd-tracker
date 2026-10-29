@@ -170,10 +170,10 @@ describe("native spell mechanics", () => {
   it.each([
     ["SUMMON", { entries: ["You summon a guardian with an Armor Class of 15 and 100 hit points."], miscTags: ["SMN"] }],
     ["UNSUPPORTED_CONDITION", { entries: ["The target must make a Wisdom saving throw or be {@condition pacified|Book}."], savingThrow: ["wisdom"] }],
-    ["VARIABLE_DAMAGE", { entries: ["Make a ranged spell attack. On a hit the target takes damage by distance. 1-10 feet: {@dice 5d6} 11-60 feet: {@dice 4d6}"], damageInflict: ["cold"], spellAttack: ["R"] }],
+    ["VARIABLE_DAMAGE", { entries: ["The target takes {@dice 1d6} cold damage for every 10 feet it moved this turn."], damageInflict: ["cold"], spellAttack: ["R"] }],
     ["WEAPON", { entries: ["Three weapons of your choice become enveloped by water."] }],
     ["ZONE_OR_TRIGGER", { entries: ["A creature that starts its turn there takes {@damage 1d6} fire damage."], damageInflict: ["fire"] }],
-    ["SELF_DAMAGE", { entries: ["You take {@damage 1d20} necrotic damage, and the target regains hit points equal to the damage."], damageInflict: ["necrotic"] }],
+    ["SELF_DAMAGE", { entries: ["You take {@damage 1d20} necrotic damage as the spell recoils."], damageInflict: ["necrotic"] }],
     ["BUFF_OR_TRANSFORM", { entries: ["Your Armor Class becomes 20."], damageImmune: ["fire"] }],
     ["UNMODELED_EFFECT", { entries: ["The target must succeed on a Wisdom saving throw or obey you."], savingThrow: ["wisdom"] }],
   ])("keeps %s spells manual with a specific reason", (reason, row) => {
