@@ -1,11 +1,13 @@
 // @vitest-environment happy-dom
-import { cleanup, render } from "@testing-library/react";
+import { cleanup } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
 import { CompendiumDependencies } from "../CompendiumDependencies";
 
 import type { CompendiumImportController } from "@/lib/hooks/compendium-import";
+import { renderWithIntl } from "@/lib/i18n/test/render-with-intl";
 
+vi.unmock("next-intl");
 afterEach(cleanup);
 
 const wizard = (refs: Array<Record<string, unknown>>) => ({
@@ -14,8 +16,8 @@ const wizard = (refs: Array<Record<string, unknown>>) => ({
 }) as unknown as CompendiumImportController;
 
 describe("CompendiumDependencies", () => {
-  it("skips an empty source segment and prompts only for unresolved refs", () => {
-    const { container } = render(<CompendiumDependencies wizard={wizard([{ key: "a", kind: "spell", name: "Fog Cloud", source: "", edition: "classic", unresolved: false }, { key: "b", kind: "spell", name: "Mist", source: "SRD", edition: "one", unresolved: true }])} />);
+  it("skips an empty source segment and prompts only for unresolved refs", async () => {
+    const { container } = await renderWithIntl(<CompendiumDependencies wizard={wizard([{ key: "a", kind: "spell", name: "Fog Cloud", source: "", edition: "classic", unresolved: false }, { key: "b", kind: "spell", name: "Mist", source: "SRD", edition: "one", unresolved: true }])} />, { locale: "uk", namespaces: ["common", "validation", "compendium"] });
 
     const text = container.textContent ?? "";
 

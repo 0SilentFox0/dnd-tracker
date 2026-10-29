@@ -1,9 +1,10 @@
 import { ApiError } from "@/lib/api/client";
-import { byteLength, COMPENDIUM_ERROR_TEXT, COMPENDIUM_KINDS, COMPENDIUM_LIMITS, COMPENDIUM_MATERIAL_KINDS, COMPENDIUM_REQUEST_HEADROOM_BYTES, type JsonRecord, oversizedRecordKind } from "@/lib/constants/compendium-import";
+import { byteLength, COMPENDIUM_ERROR_KEYS, COMPENDIUM_KINDS, COMPENDIUM_LIMITS, COMPENDIUM_MATERIAL_KINDS, COMPENDIUM_REQUEST_HEADROOM_BYTES, type JsonRecord, oversizedRecordKind } from "@/lib/constants/compendium-import";
+import type { Translator } from "@/lib/i18n/translator";
 import type { CompendiumGraphRow, CompendiumOptions, ImportInput, ImportIssue } from "@/types/compendium-import";
 
 export const MATERIAL_KINDS = new Set<string>(COMPENDIUM_MATERIAL_KINDS);
-export const CATEGORY_LABELS: Record<string, string> = { spell: "Заклинання", monster: "Юніти", item: "Предмети", baseitem: "Базові предмети", race: "Раси", subrace: "Підраси", background: "Передісторії", feat: "Риси", class: "Класи", classFeature: "Вміння класів", subclass: "Підкласи", subclassFeature: "Вміння підкласів", optionalfeature: "Опційні вміння", book: "Маніфести книг", bookData: "Сторінки книг", adventure: "Маніфести пригод", adventureData: "Сторінки пригод", table: "Таблиці", reward: "Нагороди", condition: "Стани", skill: "Навички", language: "Мови", itemProperty: "Властивості предметів", itemType: "Типи предметів" };
+export const categoryLabel = (t: Translator, kind: string) => t.has(`categories.${kind}`) ? t(`categories.${kind}`) : kind;
 export function categoryInventory(root: JsonRecord) {
   return Object.entries(root).filter(([kind]) => kind !== "_meta").map(([kind, value]) => ({ kind, count: Array.isArray(value) ? value.length : 1, supported: (COMPENDIUM_KINDS as readonly string[]).includes(kind), selected: (COMPENDIUM_KINDS as readonly string[]).includes(kind) && !MATERIAL_KINDS.has(kind) }));
 }
@@ -65,12 +66,18 @@ export function blockedClosure(graph: CompendiumGraphRow[], issues: ImportIssue[
 export function excludeAllBlocked(options: CompendiumOptions, graph: CompendiumGraphRow[], issues: ImportIssue[]): CompendiumOptions {
   return { ...options, excludedKeys: [...new Set([...(options.excludedKeys ?? []), ...blockedClosure(graph, issues)])], excludedPaths: [...new Set([...(options.excludedPaths ?? []), ...excludeBlocked(issues)])] };
 }
-export function compendiumErrorMessage(error: unknown, fallback: string) {
+export function compendiumErrorMessage(t: Translator, error: unknown, fallbackKey: string) {
   const code = error instanceof ApiError ? (error.body as { code?: unknown } | null)?.code : undefined;
 
-  if (typeof code === "string") return COMPENDIUM_ERROR_TEXT[code] ?? `${code}: перевірте вибір і повторіть preview`;
+  if (typeof code === "string") return COMPENDIUM_ERROR_KEYS[code] ? t(COMPENDIUM_ERROR_KEYS[code]) : t("errors.unknownCode", { code });
 
-  if (error instanceof ApiError) return "HTTP_ERROR: перевірте вибір і повторіть preview";
+  if (error instanceof ApiError) return t("errors.httpError");
 
-  return error instanceof Error ? (COMPENDIUM_ERROR_TEXT[error.message.split(":")[0]] ?? error.message) : fallback;
+  if (!(error instanceof Error)) return t(fallbackKey);
+
+  const [head, ...rest] = error.message.split(":");
+
+  const key = COMPENDIUM_ERROR_KEYS[head];
+
+  return key ? t(key, head === "RECORD_SIZE" ? { kind: categoryLabel(t, rest.join(":").trim()) } : undefined) : error.message;
 }
