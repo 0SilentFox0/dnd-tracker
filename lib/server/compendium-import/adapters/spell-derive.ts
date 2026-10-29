@@ -29,6 +29,7 @@ export interface DerivedSpell {
   narrative: boolean;
   narrativeReason?: NarrativeReason;
   riders: string[];
+  refs?: Array<{ path: (string | number)[]; kind: string; name: string; source: string }>;
 }
 
 export type SpellDerivation = { native: DerivedSpell } | { blocker: SpellBlocker; detail?: string };

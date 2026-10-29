@@ -85,6 +85,8 @@ describe.skipIf(!FILE)("real file import", () => {
 
     const issueCodes = p.report.rows.flatMap((r) => r.issues.map((i) => i.code));
 
+    expect(issueCodes.filter((c) => c.startsWith("MANUAL_SPELL_"))).toEqual([]);
+
     console.info("optionalfeature: without owner", issueCodes.filter((c) => c === "OPTIONAL_FEATURE_WITHOUT_OWNER").length, "bound progressions", issueCodes.filter((c) => c === "MANUAL_OPTIONAL_FEATURE").length, "manual progressions", issueCodes.filter((c) => c === "MANUAL_OPTIONAL_PROGRESSION").length, "item effects manual", issueCodes.filter((c) => c === "MANUAL_ITEM_EFFECT").length);
 
     const errs = p.report.rows.flatMap((r) => r.issues.filter((i) => i.severity === "error").map((i) => `${r.kind} ${i.code} ${JSON.stringify(i).slice(0, 260)}`));
