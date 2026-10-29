@@ -235,7 +235,7 @@ export function AiPanel({ campaignId, campaignName, embedded = false, mode, focu
       data-slot="ai-panel"
       aria-label={t("panel.ariaLabel")}
       style={{ "--ai-panel-w": `${panel.width}px`, width: "var(--ai-panel-w)" } as CSSProperties}
-      className="@container fixed inset-y-0 right-0 z-40 flex flex-col border-l bg-background p-3 shadow-xl"
+      className="@container fixed bottom-0 right-0 top-[var(--app-header-h)] z-40 flex flex-col border-l bg-background p-3 shadow-xl"
     >
       <ResizeHandle panel={panel} />
       {content}
