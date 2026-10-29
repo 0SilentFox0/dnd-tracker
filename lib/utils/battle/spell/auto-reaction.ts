@@ -24,7 +24,7 @@ const inRange = (grant: SpellGrant, target: BattleParticipant, attacker: BattleP
   return footprintDistance(cellsOf(target), cellsOf(attacker)) * CELL_FEET <= range;
 };
 
-export function runAutoReactions(flow: ActionFlow, { attackerId, targetId, damaged }: { attackerId: string; targetId: string; damaged: boolean }, cast: (params: CastSpellParams) => CastSpellResult): void {
+export function runAutoReactions(flow: ActionFlow, { attackerId, targetId, targetHpBefore }: { attackerId: string; targetId: string; targetHpBefore: number }, cast: (params: CastSpellParams) => CastSpellResult): void {
   for (const { basicInfo } of flow.ps) {
     const holderId = basicInfo.id;
 
@@ -38,7 +38,9 @@ export function runAutoReactions(flow: ActionFlow, { attackerId, targetId, damag
 
     if (!grant?.inline?.anchorMarkId || !isGrantLive(grant, flow.ctx.round, flow.ps) || !isActive(attacker)) continue;
 
-    if (grant.inline.auto?.on === "damageToMarked" && !damaged) continue;
+    if (targetHpBefore <= 0) continue;
+
+    if (grant.inline.auto?.on === "damageToMarked" && target.combatStats.currentHp >= targetHpBefore) continue;
 
     if (holderId === attackerId || attacker.basicInfo.side === holder.basicInfo.side) continue;
 

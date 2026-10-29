@@ -3,7 +3,7 @@ import { appendHpChanges, fire, getP, put, settleDowned } from "@/lib/utils/batt
 import { applyBalanceDamageMultiplier } from "@/lib/utils/battle/damage/balance-multiplier";
 import { applyMainActionUsed } from "@/lib/utils/battle/participant";
 import { diffAppliedEffects } from "@/lib/utils/battle/spell/applied-effects";
-import { actionOf, flatEffects, isDamageEffect, type SpellCastState } from "@/lib/utils/battle/spell/cast/state";
+import { actionOf, flatEffects, isDamageEffect, SPELL_ONLY_KINDS, type SpellCastState } from "@/lib/utils/battle/spell/cast/state";
 import type { CastSpellResult } from "@/lib/utils/battle/types/spell-process";
 import type { BattleParticipant, SpellGrant } from "@/types/battle";
 
@@ -39,7 +39,7 @@ export function spendCastCost(state: SpellCastState, cost: { slotKey: string; us
   put(state.flow, caster);
 }
 
-function fxMeta(def: SpellCastState["spell"]["definition"]) {
+function fxMeta(def: SpellCastState["spell"]["definition"], sourceEffects: Array<{ kind: string }>) {
   const effects = flatEffects(def.effects);
 
   const damage = effects.find(isDamageEffect) as { damageType?: string } | undefined;
@@ -47,7 +47,7 @@ function fxMeta(def: SpellCastState["spell"]["definition"]) {
   return {
     ...(damage?.damageType && { spellDamageType: damage.damageType }),
     spellTargeting: def.targeting.kind,
-    spellEffectKinds: [...new Set(effects.map((e) => e.kind))],
+    spellEffectKinds: [...new Set([...effects.map((e) => e.kind), ...sourceEffects.map((e) => e.kind).filter((k) => SPELL_ONLY_KINDS.has(k))])],
   };
 }
 
@@ -93,9 +93,10 @@ interface FinishInput {
   allParticipants: BattleParticipant[];
   battleId: string;
   round: number;
+  sourceEffects: Array<{ kind: string }>;
 }
 
-export function finishSpellAction(state: SpellCastState, { before, targetsBefore, allParticipants, battleId, round }: FinishInput): CastSpellResult {
+export function finishSpellAction(state: SpellCastState, { before, targetsBefore, allParticipants, battleId, round, sourceEffects }: FinishInput): CastSpellResult {
   const { flow, spell, caster } = state;
 
   const def = spell.definition;
@@ -113,7 +114,7 @@ export function finishSpellAction(state: SpellCastState, { before, targetsBefore
 
   const applied = diffAppliedEffects(before, flow.ps, targetsBefore.map((t) => t.basicInfo.id));
 
-  const meta = fxMeta(def);
+  const meta = fxMeta(def, sourceEffects);
 
   const stamp = { ...(meta.spellDamageType && { fxElement: meta.spellDamageType }), ...(spell.fx?.aura && { fxAura: spell.fx.aura }) };
 

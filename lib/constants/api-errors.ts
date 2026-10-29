@@ -297,7 +297,6 @@ export const API_ERRORS = {
   BATTLE_ACTION_NOT_IN_LOG: "Цієї дії вже немає в журналі",
   BATTLE_AURA_ZONE_CHOSEN: "Зону цієї аури вже обрано в цьому раунді",
   BATTLE_CASTER_CANNOT_CAST: "Кастер не може чаклувати",
-  BATTLE_CASTER_PACIFIED: "Кастер під впливом стану: не може накладати ворожі чари",
   BATTLE_CASTER_ARMOR_NOT_PROFICIENT: "Броня чи щит без володіння: кастер не може чаклувати",
   BATTLE_CASTER_UNKNOWN_SPELL: "Кастер не знає цього заклинання",
   BATTLE_CELL_BLOCKED: "Клітинка зайнята, неігрова або поза картою",
@@ -378,6 +377,8 @@ export const API_ERRORS = {
   BATTLE_NO_FREE_SLOT_TO_CAST: "Немає вільного слота для накладання",
   SCENARIO_SLIDE_UNAVAILABLE: "Слайд недоступний",
 } as const;
+
+export const casterPacifiedMessage = (state: string) => `${state}: не може завдавати шкоди й накладати ворожі закляття`;
 
 export const classNameTakenMessage = (name: string) => `Клас «${name}» уже є в кампанії`;
 

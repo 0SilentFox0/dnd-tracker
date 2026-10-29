@@ -3,8 +3,9 @@ import { describe, expect, it } from "vitest";
 import { CombatStatus, ParticipantSide, ParticipantSourceType } from "@/lib/constants/battle";
 import { makeEffect, makeParticipant, seq } from "@/lib/utils/abilities/__tests__/fixtures";
 import type { Effect } from "@/lib/utils/abilities/schema";
-import { beginConcentration, concentrationCheck, dropConcentration, isZoneConcentrationLive } from "@/lib/utils/battle/concentration";
+import { beginConcentration, concentrationCheck, dropConcentration, dropOrphanedConcentration, isZoneConcentrationLive } from "@/lib/utils/battle/concentration";
 import { applyCondition5e } from "@/lib/utils/battle/conditions";
+import { removeEffects } from "@/lib/utils/battle/conditions/query";
 import { applyDamageConsequences } from "@/lib/utils/battle/damage/consequences";
 import { DEATH_SAVES_TIMED_KEY } from "@/lib/utils/battle/death-saves";
 import { hazardHit, hazardUnder } from "@/lib/utils/battle/grid";
@@ -56,6 +57,28 @@ describe("каст із концентрацією", () => {
     expect(marker?.duration).toBe(3);
     expect(effectsOf(r.allParticipantsUpdated, "e1")[0].concentrationOf?.castId).toBe(marker?.concentration?.castId);
     expect(effectsOf(r.allParticipantsUpdated, "e2")[0].concentrationOf?.castId).toBe(marker?.concentration?.castId);
+  });
+
+  it("концентрація знімається, коли в заклинання не лишилось живих ефектів", () => {
+    const r = cast(spellOf(true), [caster(), foe("e1"), foe("e2")], rulesOn());
+
+    const stripped = (ids: string[]) => r.allParticipantsUpdated.map((p) => (ids.includes(p.basicInfo.id) ? removeEffects(p, (e) => !e.concentration).participant : p));
+
+    const one = dropOrphanedConcentration(stripped(["e1"]));
+
+    expect(one.messages).toEqual([]);
+    expect(effectsOf(one.participants, "c").some((e) => e.concentration)).toBe(true);
+
+    const none = dropOrphanedConcentration(stripped(["e1", "e2"]));
+
+    expect(none.messages[0]).toContain("втрачає концентрацію");
+    expect(effectsOf(none.participants, "c")).toEqual([]);
+  });
+
+  it("заклинання без тегованих ефектів (зона) не знімається", () => {
+    const r = cast(spellOf(true, [{ kind: "note", text: "x" } as Effect]), [caster(), foe("e1"), foe("e2")], rulesOn());
+
+    expect(dropOrphanedConcentration(r.allParticipantsUpdated).messages).toEqual([]);
   });
 
   it("без правила або без прапорця заклинання нічого не змінює", () => {

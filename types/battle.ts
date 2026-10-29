@@ -50,6 +50,8 @@ export interface ActiveEffect {
   }>;
   dotDamage?: {
     damagePerRound: number;
+    /** Кубики, що кидаються щоразу на початку ходу; damagePerRound — перший кидок для показу. */
+    dice?: string;
     damageType: string;
     fromSpell?: boolean;
   };
@@ -85,7 +87,7 @@ export interface ActiveEffect {
   /** заряди додаткової шкоди від заклинання (hitRider); на нуль ефект знімається */
   hitRider?: HitRiderState;
   /** маркер концентрації на самому кастері */
-  concentration?: { castId: string; spellName: string };
+  concentration?: { castId: string; spellName: string; /** є ефекти заклинання з concentrationOf: без живих концентрація знімається */ tracksEffects?: true };
   /** скільки HP зняло виснаження з maxHp (повертається при зніманні) */
   exhaustionHpHalved?: number;
   /** варіант правил виснаження на момент накладання (для перерахунку за сумарним рівнем) */

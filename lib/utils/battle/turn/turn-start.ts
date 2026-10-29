@@ -103,7 +103,7 @@ function applyStartOfTurnDamage(
     updatedParticipant.combatStats.status !== CombatStatus.UNCONSCIOUS &&
     !sitsOutTurn(updatedParticipant, currentRound)
   ) {
-    const dotResult = applyDOTEffects(updatedParticipant, allParticipants);
+    const dotResult = applyDOTEffects(updatedParticipant, allParticipants, rng);
 
     const beforeDot = updatedParticipant;
 

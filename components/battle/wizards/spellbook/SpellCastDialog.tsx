@@ -47,7 +47,7 @@ function TargetsStep({ book }: { book: Book }) {
               selected={state.targetIds.includes(t.basicInfo.id)}
               disabled={!reachable}
               onClick={() => actions.toggleTarget(t.basicInfo.id)}
-              trailing={!reachable && <span className="ml-auto text-sm italic">Поза дальністю</span>}
+              trailing={!reachable && <span className="ml-auto text-sm italic">{view.filteredOut(t) ? "Не підходить" : "Поза дальністю"}</span>}
             />
           );
         })}

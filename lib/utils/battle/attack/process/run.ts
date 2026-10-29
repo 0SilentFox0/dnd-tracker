@@ -161,7 +161,7 @@ export function processAttack(params: ProcessAttackParams): ProcessAttackResult 
 
   if (!isHit) spendRidersOnMiss(flow, { attackerId, attack });
 
-  const reactToAttack = () => runAutoReactions(flow, { attackerId, targetId, damaged: getP(flow, targetId).combatStats.currentHp < target.combatStats.currentHp }, castSpell);
+  const reactToAttack = () => runAutoReactions(flow, { attackerId, targetId, targetHpBefore: target.combatStats.currentHp }, castSpell);
 
   if (attackRoll.isCriticalFail && attackRoll.criticalEffect) {
     reactToAttack();

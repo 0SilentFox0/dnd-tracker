@@ -1,5 +1,5 @@
 import { DEFAULT_AREA_TARGETS } from "@/lib/constants/abilities";
-import { API_ERRORS } from "@/lib/constants/api-errors";
+import { API_ERRORS, casterPacifiedMessage } from "@/lib/constants/api-errors";
 import { SKILL_AREA_RADIUS_FEET } from "@/lib/constants/battle";
 import { collectModifiers } from "@/lib/utils/abilities/engine/core/collect-modifiers";
 import { findParticipant, isActive, isAirborne, isTargetable } from "@/lib/utils/abilities/engine/core/participants";
@@ -12,7 +12,7 @@ import { cellsOf, isOnMap } from "@/lib/utils/battle/grid/occupancy";
 import { aimInRange, feetToCells, templateAimAllowed, templateArea, templateCentre } from "@/lib/utils/battle/grid/template";
 import { modeAimHiddenText, modeSightedTargets, modeTargetHiddenText } from "@/lib/utils/battle/modes/engine";
 import { isReserved } from "@/lib/utils/battle/participant/reserve";
-import { hasEffectMarker } from "@/lib/utils/battle/participant/state";
+import { findEffectMarker } from "@/lib/utils/battle/participant/state";
 import { upcastSteps } from "@/lib/utils/battle/spell/caster-dice";
 import { matchesTargetFilter } from "@/lib/utils/battle/spell/target-filter";
 import type { SpellTargeting as SpellTargetingDef } from "@/lib/utils/spells/model/schema";
@@ -310,7 +310,9 @@ function hostile(targeting: SpellTargetingDef): boolean {
 
 /** Кастер зі станом «без ворожих заклинань»: ворожий шаблон або будь-яка ціль-ворог. */
 export function pacifiedBlock(ps: BattleParticipant[], caster: BattleParticipant, targeting: SpellTargetingDef, targetIds: string[]): string | null {
-  if (!hasEffectMarker(caster, "no_hostile_spells")) return null;
+  const marker = findEffectMarker(caster, "no_hostile_spells");
+
+  if (!marker) return null;
 
   const hitsEnemy = targetIds.some((id) => {
     const t = ps.find((p) => p.basicInfo.id === id);
@@ -318,7 +320,7 @@ export function pacifiedBlock(ps: BattleParticipant[], caster: BattleParticipant
     return !!t && t.basicInfo.side !== caster.basicInfo.side;
   });
 
-  return hostile(targeting) || hitsEnemy ? API_ERRORS.BATTLE_CASTER_PACIFIED : null;
+  return hostile(targeting) || hitsEnemy ? casterPacifiedMessage(marker.effect.name) : null;
 }
 
 export function resolveSpellTargets(

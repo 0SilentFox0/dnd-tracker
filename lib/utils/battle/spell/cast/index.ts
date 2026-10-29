@@ -153,7 +153,7 @@ export function castSpell(params: CastSpellParams): CastSpellResult {
   }
 
   if (def.resolution.kind === "attack" && !params.grant?.inline?.auto) {
-    for (const id of targetIds) runAutoReactions(flow, { attackerId: casterId, targetId: id, damaged: (findParticipant(flow.ps, id)?.combatStats.currentHp ?? 0) < (findParticipant(before, id)?.combatStats.currentHp ?? 0) }, castSpell);
+    for (const id of targetIds) runAutoReactions(flow, { attackerId: casterId, targetId: id, targetHpBefore: findParticipant(before, id)?.combatStats.currentHp ?? 0 }, castSpell);
   }
 
   if (tag) flow.ps = tagConcentration(psBeforeEffects, flow.ps, tag, state.ability.key);
@@ -162,7 +162,7 @@ export function castSpell(params: CastSpellParams): CastSpellResult {
 
   spendCastCost(state, { slotKey, usesSlot, isDMCast, isLegendaryCast: params.isLegendaryCast, grant: params.grant });
 
-  const result = finishSpellAction(state, { before, targetsBefore, allParticipants, battleId, round: currentRound });
+  const result = finishSpellAction(state, { before, targetsBefore, allParticipants, battleId, round: currentRound, sourceEffects: source.definition.effects });
 
   return tag ? { ...result, concentration: tag } : result;
 }

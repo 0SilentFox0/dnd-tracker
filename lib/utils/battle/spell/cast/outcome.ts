@@ -55,7 +55,7 @@ function resolveSpellAttack(state: SpellCastState, target: BattleParticipant, ra
 
   const mods = withSelf(flow.ps, caster);
 
-  const bonus = (state.attackBonus ?? spellAttackBonus(caster)) + collectModifiers(mods, caster.basicInfo.id, { stat: "attackBonus", attackKind: attackKindOf(pseudoAttack.type) }).flat;
+  const bonus = (state.attackBonus ?? spellAttackBonus(caster, spell.definition.addAbilityMod === true)) + collectModifiers(mods, caster.basicInfo.id, { stat: "attackBonus", attackKind: attackKindOf(pseudoAttack.type) }).flat;
 
   const total = roll + bonus;
 

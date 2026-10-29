@@ -393,6 +393,14 @@ describe("fx metadata", () => {
     expect(r.battleAction.actionDetails).toMatchObject({ spellDamageType: "fire", spellTargeting: "allEnemies", spellEffectKinds: ["dealDamage"] });
   });
 
+  it("includes spell-only effect kinds", () => {
+    const grant = { kind: "grantCast", label: "x", cost: "action", duration: { rounds: 3 }, cast: { targeting: { kind: "single", range: 5 }, resolution: { kind: "none" }, dice: "" } } as unknown as Effect;
+
+    const r = cast(spellOf({ effects: [grant] }), ["e1"], [enemy("e1")]);
+
+    expect(r.battleAction.actionDetails.spellEffectKinds).toContain("grantCast");
+  });
+
   it("finds damage type and kinds inside randomOf and omits damage type when none", () => {
     const random = { kind: "randomOf", options: [{ kind: "applyCondition", condition: "skip_action", duration: { rounds: 1 } }, dmg("cold")] } as Effect;
 

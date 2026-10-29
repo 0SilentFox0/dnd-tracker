@@ -115,6 +115,15 @@ describe("auto reactions", () => {
     expect(hp(all(strike(ps, "f", "w")), "f")).toBe(100);
   });
 
+  it("no reaction when the marked target is already at 0 HP", () => {
+    const ps = setup().map((p) => (p.basicInfo.id === "w" ? { ...p, combatStats: { ...p.combatStats, currentHp: 0 } } : p));
+
+    const r = strike(ps, "f", "w");
+
+    expect(hp(all(r), "f")).toBe(100);
+    expect(reacted(all(r))).toBe(false);
+  });
+
   it("an ally attacking the marked target does not trigger it", () => {
     const ps = [...setup(), at(makeParticipant({ id: "a2", hp: 100, maxHp: 100 }), 3)];
 

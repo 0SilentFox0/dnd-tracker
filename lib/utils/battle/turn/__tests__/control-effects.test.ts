@@ -230,3 +230,15 @@ describe("автоматичний хід шалу", () => {
     expect(out.newLogEntries.some((e) => e.resultText.includes("Кінець ходу"))).toBe(true);
   });
 });
+
+describe("saveEnds у кінці ходу", () => {
+  it("кінцевий рятівний кидок потрапляє в лог ходу", () => {
+    const victim = unitOf("victim", ParticipantSide.ENEMY, "user-2");
+
+    const withState: BattleParticipant = { ...victim, battleData: { ...victim.battleData, activeEffects: [{ id: "custom:pacified", name: "Умиротворений", type: "condition", duration: 3, appliedAt: { round: 1, timestamp: new Date() }, effects: [{ type: "custom:pacified", value: 1 }], saveEnds: { ability: "wisdom", dc: 10 } }] } };
+
+    const out = advanceTurn({ participants: [withState, caster()], pending: [], scene, rng: seq(0.99) });
+
+    expect(out.actions.some((a) => a.resultText.includes("рятівний кидок") && a.resultText.includes("Умиротворений"))).toBe(true);
+  });
+});

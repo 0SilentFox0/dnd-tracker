@@ -238,7 +238,7 @@ export function useSpellBook(caster: BattleParticipant | null, options: { reacti
   const firstUsable = (who: BattleParticipant) => slotLevels(who).find((l) => l.current > 0)?.level ?? 0;
 
   const view = {
-    spells, byLevel, selected, targets, saveTargets, hover, aimPreviewAt, mapTargeting, chain: chain.filter(visible), inRange, formulaOf, wideningOf, definitionOf: spellDefinition, slots: caster ? slotLevels(caster) : [],
+    spells, byLevel, selected, targets, saveTargets, hover, aimPreviewAt, mapTargeting, chain: chain.filter(visible), inRange, filteredOut, formulaOf, wideningOf, definitionOf: spellDefinition, slots: caster ? slotLevels(caster) : [],
     universalSlot,
     free,
     timing: selected?.casting,

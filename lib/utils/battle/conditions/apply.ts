@@ -78,7 +78,7 @@ export function applyCondition5e(ps: BattleParticipant[], targetId: string, opts
 
   const label = custom ? custom.name : CONDITION_5E_REGISTRY[opts.key as Condition5eKey].label;
 
-  const messages = [`⛓ ${opts.sourceName}: ${target.basicInfo.name} — ${label.toLowerCase()}${opts.permanent ? "" : ` (${opts.rounds} р.)`}`];
+  const messages = [`⛓ ${opts.sourceName}: ${target.basicInfo.name} — ${custom ? label : label.toLowerCase()}${opts.permanent ? "" : ` (${opts.rounds} р.)`}`];
 
   const hadHalved = target.battleData.activeEffects.some((e) => e.exhaustionHpHalved);
 

@@ -142,7 +142,7 @@ export function applyDot(input: EffectApplyInput<Of<"dot">>): EffectApplyResult 
           rounds: effect.duration.rounds,
           stackable: ability.stackable === true,
           maxStacks: ability.maxStacks,
-          dotDamage: { damagePerRound: dmg, damageType: effect.damageType, ...(fromSpell && { fromSpell: true }) },
+          dotDamage: { damagePerRound: dmg, ...(typeof effect.damagePerRound === "string" && { dice: effect.damagePerRound }), damageType: effect.damageType, ...(fromSpell && { fromSpell: true }) },
         },
         ctx.round,
       ),

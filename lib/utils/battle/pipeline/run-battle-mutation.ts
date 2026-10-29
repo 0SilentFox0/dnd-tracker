@@ -13,6 +13,7 @@ import { syncMapAuras } from "@/lib/utils/abilities/engine/effects/map-auras";
 import type { BATTLE_RATE_LIMITS, RateLimitResult } from "@/lib/utils/api/rate-limit";
 import { releaseInvalidGrapples } from "@/lib/utils/battle/actions/grapple";
 import { controls } from "@/lib/utils/battle/common/control";
+import { dropOrphanedConcentration } from "@/lib/utils/battle/concentration";
 import { placeParticipants } from "@/lib/utils/battle/grid/placement";
 import { placeRevived } from "@/lib/utils/battle/grid/revive-placement";
 import { modeBlockedText, withModeAfterMutation } from "@/lib/utils/battle/modes/server";
@@ -144,6 +145,10 @@ function withPlacement(map: BattleMapConfig | null, scene: { status: BattleStatu
   const released = releaseInvalidGrapples(result.participants, map);
 
   if (released.participants !== result.participants) result = { ...result, participants: released.participants, events: [...result.events, systemEvent(result.scene?.round ?? scene.round, released.messages.join("; "))] };
+
+  const orphaned = dropOrphanedConcentration(result.participants);
+
+  if (orphaned.participants !== result.participants) result = { ...result, participants: orphaned.participants, events: [...result.events, systemEvent(result.scene?.round ?? scene.round, orphaned.messages.join("; "))] };
 
   if (!map || (result.scene?.status ?? scene.status) !== BattleStatus.ACTIVE) return result;
 

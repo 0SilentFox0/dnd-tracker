@@ -68,7 +68,9 @@ export function beginConcentration(
 export function tagConcentration(before: BattleParticipant[], after: BattleParticipant[], tag: ConcentrationTag, abilityKey: string): BattleParticipant[] {
   const beforeById = new Map(before.map((p) => [p.basicInfo.id, p]));
 
-  return after.map((p) => {
+  let tagged = false;
+
+  const result = after.map((p) => {
     const beforeP = beforeById.get(p.basicInfo.id);
 
     if (p === beforeP) return p;
@@ -77,8 +79,40 @@ export function tagConcentration(before: BattleParticipant[], after: BattleParti
 
     const fresh = (e: ActiveEffect) => !e.concentration && !e.concentrationOf && !known.includes(e) && e.abilityKey?.startsWith(`${abilityKey}#`);
 
-    return p.battleData.activeEffects.some(fresh) ? withActiveEffects(p, (list) => list.map((e) => (fresh(e) ? { ...e, concentrationOf: tag } : e))) : p;
+    if (!p.battleData.activeEffects.some(fresh)) return p;
+
+    tagged = true;
+
+    return withActiveEffects(p, (list) => list.map((e) => (fresh(e) ? { ...e, concentrationOf: tag } : e)));
   });
+
+  if (!tagged) return result;
+
+  return result.map((p) => (p.basicInfo.id === tag.casterId ? withActiveEffects(p, (list) => list.map((e) => (e.concentration?.castId === tag.castId ? { ...e, concentration: { ...e.concentration, tracksEffects: true as const } } : e))) : p));
+}
+
+/** Заклинання, чиї ефекти всі зняті (втеча, СК, дісел, спливання), більше не тримає концентрацію. */
+export function dropOrphanedConcentration(ps: BattleParticipant[]): { participants: BattleParticipant[]; messages: string[] } {
+  let next = ps;
+
+  const messages: string[] = [];
+
+  for (const p of ps) {
+    const marker = concentrationOn(p);
+
+    if (!marker?.concentration?.tracksEffects) continue;
+
+    const { castId } = marker.concentration;
+
+    if (next.some((q) => q.battleData.activeEffects.some((e) => e.concentrationOf?.castId === castId))) continue;
+
+    const dropped = dropConcentration(next, p.basicInfo.id, "ефекти заклинання завершилися");
+
+    next = dropped.participants;
+    messages.push(...dropped.messages);
+  }
+
+  return { participants: next, messages };
 }
 
 export function concentrationBroken(p: BattleParticipant): boolean {

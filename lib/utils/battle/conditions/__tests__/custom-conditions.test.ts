@@ -48,6 +48,10 @@ describe("правила: custom-стани", () => {
 describe("накладання custom-стану", () => {
   const target = makeParticipant({ id: "t" });
 
+  it("у лозі назва custom-стану лишається як у правилах", () => {
+    expect(apply(target, "custom:pacified").messages[0]).toContain("— Умиротворений (3 р.)");
+  });
+
   it("маркери і назва беруться з правил, перший маркер — ключ стану", () => {
     const [p] = apply(target, "custom:pacified").participants;
 
@@ -97,6 +101,7 @@ describe("pacified: заклинання", () => {
     expect(pacifiedBlock(ps, caster, { kind: "enemy" }, [])).toBeTruthy();
     expect(pacifiedBlock(ps, caster, { kind: "ally" }, ["e"])).toBeTruthy();
     expect(pacifiedBlock(ps, caster, { kind: "ally" }, ["a"])).toBeNull();
+    expect(pacifiedBlock(ps, caster, { kind: "enemy" }, [])).toBe("Умиротворений: не може завдавати шкоди й накладати ворожі закляття");
   });
 
   it("без стану — не блокує", () => {

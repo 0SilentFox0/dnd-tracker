@@ -28,7 +28,7 @@ const run = (who: BattleParticipant) =>
 
 describe("каст під станом no_hostile_spells", () => {
   it("ворожий каст відхиляється, без стану проходить", async () => {
-    await expect(run(marked(caster, "no_hostile_spells"))).rejects.toThrow("не може накладати ворожі чари");
+    await expect(run(marked(caster, "no_hostile_spells"))).rejects.toThrow("не може завдавати шкоди й накладати ворожі закляття");
     await expect(run(caster)).resolves.toBeTruthy();
   });
 });
