@@ -28,7 +28,9 @@ export function useScenarioDraft(campaignId: string, page: ScenarioPage) {
 
   const tRef = useRef(t);
 
-  tRef.current = t;
+  useEffect(() => {
+    tRef.current = t;
+  });
 
   const [content, setLocal] = useState(page.content);
 

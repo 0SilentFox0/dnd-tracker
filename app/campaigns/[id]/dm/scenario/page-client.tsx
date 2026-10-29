@@ -2,8 +2,8 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { Plus } from "lucide-react";
 import { useTranslations } from "next-intl";
+import { Plus } from "lucide-react";
 
 import { EmptyState, QueryState } from "@/components/common/states";
 import { OnboardingHint } from "@/components/onboarding/OnboardingHint";

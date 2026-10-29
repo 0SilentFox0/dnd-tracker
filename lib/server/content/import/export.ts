@@ -51,7 +51,7 @@ export const EXPORT_LOADERS: Record<ImportKind, (campaignId: string) => Promise<
     ),
 };
 
-const DEFAULT_DEPS: ExportDeps = { loadRecords: (c, k) => EXPORT_LOADERS[k](c), loadNames };
+export const DEFAULT_DEPS: ExportDeps = { loadRecords: (c, k) => EXPORT_LOADERS[k](c), loadNames };
 
 export async function exportCsv(actor: Actor, kind: ImportKind, deps: ExportDeps = DEFAULT_DEPS): Promise<string> {
   assertCan(actor, NEED.read("dm"));

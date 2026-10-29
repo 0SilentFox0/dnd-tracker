@@ -73,7 +73,7 @@ describe.skipIf(!FILE)("real file import", () => {
 
     const bindings: NonNullable<typeof base.bindings> = {};
 
-    for (const ref of graph.flatMap((r) => r.refs).filter((r) => r.kind === "spell" && !own.has(r.key) && unresolved.some((i) => i.action.includes(`«${r.name}»`)))) {
+    for (const ref of graph.flatMap((r) => r.refs).filter((r) => r.kind === "spell" && !own.has(r.key) && unresolved.some((i) => i.params?.name === r.name))) {
       bindings[ref.key] = bindings[ref.key] ?? { kind: "spells" as const, id: (await prisma.spell.create({ data: { campaignId, name: ref.name, executionMode: "manual", type: "damage", damageType: "none" } })).id };
     }
 

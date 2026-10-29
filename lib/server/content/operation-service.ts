@@ -13,9 +13,10 @@ import { readCampaignRules, updateCampaignRules } from "@/lib/server/campaigns/r
 import { assertCan } from "@/lib/server/content/access";
 import { ContentError, parseInput } from "@/lib/server/content/errors";
 import { exampleCsv } from "@/lib/server/content/import/example";
-import { exportCsv } from "@/lib/server/content/import/export";
+import { DEFAULT_DEPS as EXPORT_DEFAULT_DEPS, exportCsv } from "@/lib/server/content/import/export";
 import { importContent } from "@/lib/server/content/import/import-content";
-import { translatedImport } from "@/lib/server/content/import/translate-report";
+import { loadNames } from "@/lib/server/content/import/names";
+import { translatedImport, translateImportReport } from "@/lib/server/content/import/translate-report";
 import { CONTENT_OPERATIONS } from "@/lib/server/content/operations";
 import { withCampaignContentWrite } from "@/lib/server/content/write";
 import { afterContentCommit } from "@/lib/server/content/write-context";
@@ -100,9 +101,13 @@ export async function runContentOperation(operationId: ContentOperationId, actor
       case "source.apply": return applySource(actor, bodyOf("source.apply", body));
       case "skill-trees.list": return listSkillTrees(actor);
       case "skill-trees.save": return saveSkillTree(actor, { ...bodyOf("skill-trees.save", body), ...(input.treeId ? { treeId: String(input.treeId) } : {}) });
-      case "content.import": return translatedImport(await importContent(actor, kindOf(input.kind), bodyOf("content.import", body)));
-      case "content.import-example": return exampleCsv(actor, kindOf(input.kind));
-      case "content.export": return exportCsv(actor, kindOf(input.kind));
+      case "content.import": {
+        const report = await importContent(actor, kindOf(input.kind), bodyOf("content.import", body));
+
+        return locale ? translateImportReport(await getTranslator(locale), report) : translatedImport(report);
+      }
+      case "content.import-example": return exampleCsv(actor, kindOf(input.kind), { loadNames, locale });
+      case "content.export": return exportCsv(actor, kindOf(input.kind), { ...EXPORT_DEFAULT_DEPS, locale });
       case "abilities.sources": {
         const where = { campaignId: actor.campaignId }, select = { id: true, name: true } as const;
 

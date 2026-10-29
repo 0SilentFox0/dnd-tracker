@@ -3,8 +3,8 @@
 import { useCallback, useMemo, useRef, useState } from "react";
 import dynamic from "next/dynamic";
 import Link from "next/link";
-import { BookOpen, ChevronsUpDown, History, Moon, Sun } from "lucide-react";
 import { useTranslations } from "next-intl";
+import { BookOpen, ChevronsUpDown, History, Moon, Sun } from "lucide-react";
 
 import { AiPanel, AiProposalBadge, AiProposalCard } from "@/components/ai";
 import { AssistantReview } from "@/components/ai/AssistantReview";
