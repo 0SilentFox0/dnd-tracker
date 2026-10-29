@@ -69,7 +69,7 @@ export function useAttackWizard(attacker: BattleParticipant | null, onDone?: () 
       });
     // byId читає order, який уже в deps
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [attacker, attack, state.step, state.strikes, order, scene.battle.battleLog, scene.battle.knowledge, scene.viewer, cover]);
+  }, [attacker, attack, state.step, state.strikes, order, scene.battle.rules, scene.battle.battleLog, scene.battle.knowledge, scene.viewer, cover]);
 
   const estimate = steps.reduce((sum, list) => sum + (list.at(-1)?.after ?? 0), 0);
 

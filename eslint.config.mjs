@@ -291,17 +291,24 @@ const eslintConfig = defineConfig([
     },
   },
   {
-    files: [...MODE_OWNED_FILES.map((glob) => `${glob}/*.{ts,tsx}`), "**/__tests__/**/*.{ts,tsx}", "**/*.test.{ts,tsx}"],
+    files: ["**/__tests__/**/*.{ts,tsx}", "**/*.test.{ts,tsx}"],
     ignores: ["components/ui/**"],
     rules: {
       "no-restricted-imports": ["error", { paths: RESTRICTED_PATHS, patterns: [THREE_IMPORT_PATTERN] }],
     },
   },
   {
+    files: MODE_OWNED_FILES.filter((g) => g.startsWith("lib/")).map((glob) => `${glob}/*.{ts,tsx}`),
+    ignores: ["**/__tests__/**", "**/*.test.{ts,tsx}"],
+    rules: {
+      "no-restricted-imports": ["error", { paths: RESTRICTED_PATHS, patterns: [APP_IMPORT_PATTERN, THREE_IMPORT_PATTERN] }],
+    },
+  },
+  {
     files: ["lib/utils/battle/modes/**/*.{ts,tsx}"],
     ignores: ["**/__tests__/**", "**/*.test.{ts,tsx}"],
     rules: {
-      "no-restricted-imports": ["error", { paths: [...RESTRICTED_PATHS, DB_IMPORT_PATH], patterns: [THREE_IMPORT_PATTERN] }],
+      "no-restricted-imports": ["error", { paths: [...RESTRICTED_PATHS, DB_IMPORT_PATH], patterns: [APP_IMPORT_PATTERN, THREE_IMPORT_PATTERN] }],
     },
   },
   {
@@ -312,7 +319,7 @@ const eslintConfig = defineConfig([
         "error",
         {
           paths: RESTRICTED_PATHS,
-          patterns: [API_IMPORT_PATTERN, THREE_IMPORT_PATTERN],
+          patterns: [API_IMPORT_PATTERN, APP_API_IMPORT_PATTERN, THREE_IMPORT_PATTERN],
         },
       ],
     },

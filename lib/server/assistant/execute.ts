@@ -15,6 +15,7 @@ import { API_ERRORS } from "@/lib/constants/api-errors";
 import { prisma } from "@/lib/db";
 import { DEFAULT_LOCALE, type Locale } from "@/lib/i18n/config";
 import { actionPreviewSchema, actionResultSchema } from "@/lib/schemas/assistant";
+import { rejectProposal } from "@/lib/server/assistant/proposals";
 import { lockCampaignRow } from "@/lib/server/campaigns/lock";
 import { ContentError, parseInput } from "@/lib/server/content/errors";
 import { runContentWriteContext } from "@/lib/server/content/write-context";
@@ -116,8 +117,6 @@ export function createAssistantExecutor(options: Options = {}) {
       const legacyProposalId = fresh.legacyProposalId;
 
       if (legacyProposalId) {
-        const { rejectProposal } = await import("@/lib/server/assistant/proposals");
-
         await runContentWriteContext(caller.actor.campaignId, tx, () => rejectProposal(caller.actor.campaignId, legacyProposalId), callbacks);
       }
 

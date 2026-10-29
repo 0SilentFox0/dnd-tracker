@@ -9,6 +9,7 @@ const tx = {
 
 vi.mock("@/lib/db", () => ({ prisma: { character: { findUnique: vi.fn() }, $transaction: (fn: (t: typeof tx) => unknown) => fn(tx) } }));
 vi.mock("@/lib/server/artifacts/lock", () => ({ lockCampaignArtifacts: vi.fn() }));
+vi.mock("@/lib/server/artifacts/inventory", () => ({ ensureInventory: vi.fn(async () => { throw new Error("ensureInventory must not be called"); }) }));
 vi.mock("@/lib/server/inventory/log", () => ({ writeInventoryLog: vi.fn() }));
 vi.mock("@/lib/utils/api/api-auth", () => ({ requireDM: vi.fn(async () => ({ userId: "u", isDM: true, campaign: { rules: {} } })) }));
 vi.mock("@/lib/utils/api/load-owned", () => ({ loadOwned: vi.fn(async () => ({ id: "c" })) }));

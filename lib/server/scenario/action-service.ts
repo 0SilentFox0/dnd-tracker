@@ -14,6 +14,7 @@ import { createScenarioPageSchema, scenarioContentSchema, scenarioSectionPatchSc
 import { notifyRevealForContentChange } from "@/lib/server/acquaintances/reveal";
 import { stampDigest } from "@/lib/server/assistant/digest";
 import { actionResult } from "@/lib/server/assistant/json";
+import { discardSlideFiles, pendingSlideUrls } from "@/lib/server/assistant/proposal-media";
 import { resultLabel } from "@/lib/server/assistant/result-labels";
 import type { ActionResult } from "@/lib/server/assistant/types";
 import { assertCan } from "@/lib/server/content/access";
@@ -163,8 +164,6 @@ async function createPage({ actor, input, locale, result }: Omit<ScenarioRun, "p
 }
 
 async function deletePage({ actor, page, id, result }: ScenarioRun): Promise<ActionResult> {
-  const { pendingSlideUrls, discardSlideFiles } = await import("@/lib/server/assistant/proposal-media");
-
   const orphanUrls = await pendingSlideUrls(actor.campaignId, page.id);
 
   afterContentCommit(() => discardSlideFiles(actor.campaignId, orphanUrls));
