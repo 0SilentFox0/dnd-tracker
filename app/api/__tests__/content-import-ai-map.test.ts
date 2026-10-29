@@ -69,7 +69,7 @@ describe("AI-мапінг імпорту", () => {
     const call = generateObject.mock.calls[0][0] as { model: unknown; prompt: string };
 
     expect(call.model).toEqual({ id: "model" });
-    expect(call.prompt).toContain("- maxHp (also known as:");
+    expect(call.prompt).toMatch(/- maxHp \([^)]*; also known as:/);
     expect(call.prompt).toContain('"Ім\'я"');
   });
 
