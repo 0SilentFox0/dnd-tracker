@@ -55,11 +55,23 @@ export function transformScenarioContent(content: ScenarioContent, operation: st
 
   if (operation === "section.delete") return removeSection(content, input.sectionId);
 
-  if (operation === "section.move") return moveSection(content, input.sectionId, input.direction!);
+  const direction = () => {
+    if (input.direction !== 1 && input.direction !== -1) throw new ContentError(API_ERRORS.INVALID_BODY, 400);
 
-  if (operation === "row.delete") return removeRow(content, input.sectionId, input.rowId!);
+    return input.direction;
+  };
 
-  if (operation === "row.move") return moveRow(content, input.sectionId, input.rowId!, input.direction!);
+  const rowId = () => {
+    if (!input.rowId) throw new ContentError(API_ERRORS.ASSISTANT_ROW_NOT_FOUND, 404);
+
+    return input.rowId;
+  };
+
+  if (operation === "section.move") return moveSection(content, input.sectionId, direction());
+
+  if (operation === "row.delete") return removeRow(content, input.sectionId, rowId());
+
+  if (operation === "row.move") return moveRow(content, input.sectionId, rowId(), direction());
 
   if (operation === "section.patch") {
     const patch = parseInput(scenarioSectionPatchSchema, input);
@@ -219,7 +231,11 @@ export async function runScenarioOperation(actor: Actor, operation: string, inpu
       return result(toPage(page), id);
     }
 
-    if (operation === "versions") return result(await prisma.scenarioPageVersion.findMany({ where: { pageId: page!.id }, select: { id: true, createdAt: true, createdBy: true }, orderBy: { createdAt: "desc" }, take: SCENARIO_MAX_VERSIONS }), id);
+    if (operation === "versions") {
+      if (!page) throw new ContentError(API_ERRORS.SCENARIO_NOT_FOUND, 404);
+
+      return result(await prisma.scenarioPageVersion.findMany({ where: { pageId: page.id }, select: { id: true, createdAt: true, createdBy: true }, orderBy: { createdAt: "desc" }, take: SCENARIO_MAX_VERSIONS }), id);
+    }
 
     if (operation === "create") return createPage({ actor, input, locale, result });
 
