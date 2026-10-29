@@ -4,8 +4,6 @@ export type Coin = (typeof COINS)[number];
 
 export const COIN_VALUE: Record<Coin, number> = { gp: 100, sp: 10, cp: 1 };
 
-export const COIN_LABEL: Record<Coin, string> = { gp: "зм", sp: "см", cp: "мм" };
-
 export const InventoryLogKind = {
   MONEY_SPEND: "money_spend",
   MONEY_GAIN: "money_gain",

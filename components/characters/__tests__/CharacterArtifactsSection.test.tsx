@@ -26,13 +26,13 @@ describe("CharacterArtifactsSection", () => {
 
   it("shows a parameterized equipped item through the canonical resolver", () => {
     renderWithConfirm(<QueryClientProvider client={new QueryClient()}><CharacterArtifactsSection campaignId="c" characterId="ch" equipped={{ armor: "resist~fire" }} artifacts={[{ id: "resist", name: "Armor ({param})", slot: "armor", ...itemStatsColumns({ parameter: { kind: "damageType", options: [{ key: "fire", label: "Fire" }] } }) }]} onEquippedChange={onEquippedChange} /></QueryClientProvider>);
-    expect(screen.getByTitle("Броня: Armor (fire)")).toBeTruthy();
+    expect(screen.getByTitle('inventory.grid.filled {"slot":"inventory.grid.slots.armor","name":"Armor (fire)"}')).toBeTruthy();
   });
 
   it("лише сітка: вдягнена річ з літерою, порожні слоти, без книги й сетів", () => {
     renderIt();
 
-    expect(screen.getByTitle("Броня: кольчуга")).toHaveTextContent("К");
+    expect(screen.getByTitle('inventory.grid.filled {"slot":"inventory.grid.slots.armor","name":"кольчуга"}')).toHaveTextContent("К");
     expect(screen.getAllByRole("button")).toHaveLength(9);
     expect(screen.queryByRole("button", { name: /Книга заклинань/ })).toBeNull();
     expect(screen.queryByText("Повні сети артефактів")).toBeNull();
@@ -41,9 +41,9 @@ describe("CharacterArtifactsSection", () => {
   it("артефакт іншого героя неактивний з підписом власника", async () => {
     renderIt({ a2: "Боромир" });
 
-    fireEvent.keyDown(screen.getByTitle("Броня: кольчуга"), { key: "Enter" });
+    fireEvent.keyDown(screen.getByTitle('inventory.grid.filled {"slot":"inventory.grid.slots.armor","name":"кольчуга"}'), { key: "Enter" });
 
-    expect(await screen.findByText("у Боромир")).toBeTruthy();
+    expect(await screen.findByText('inventory.equipment.heldBy {"holder":"Боромир"}')).toBeTruthy();
     expect(screen.getByRole("menuitem", { name: /панцир/ }).getAttribute("data-disabled")).not.toBeNull();
   });
 
@@ -51,7 +51,7 @@ describe("CharacterArtifactsSection", () => {
     vi.mocked(updateInventory).mockResolvedValue({ equipped: { armor: "a2", cape: "c9" } } as never);
     renderIt();
 
-    fireEvent.keyDown(screen.getByTitle("Броня: кольчуга"), { key: "Enter" });
+    fireEvent.keyDown(screen.getByTitle('inventory.grid.filled {"slot":"inventory.grid.slots.armor","name":"кольчуга"}'), { key: "Enter" });
     fireEvent.click(await screen.findByRole("menuitem", { name: /панцир/ }));
 
     await waitFor(() => expect(onEquippedChange).toHaveBeenCalledWith({ armor: "a2", cape: "c9" }));
@@ -61,9 +61,9 @@ describe("CharacterArtifactsSection", () => {
   it("артефакт, уже вдягнений в іншому слоті цього героя, неактивний", async () => {
     renderIt();
 
-    fireEvent.keyDown(screen.getByTitle("Зброя"), { key: "Enter" });
+    fireEvent.keyDown(screen.getByTitle("inventory.grid.slots.weapon"), { key: "Enter" });
 
-    expect(await screen.findByText("вже вдягнено")).toBeTruthy();
+    expect(await screen.findByText("inventory.equipment.worn")).toBeTruthy();
     expect(screen.getByRole("menuitem", { name: /лук/ }).getAttribute("data-disabled")).not.toBeNull();
   });
 });

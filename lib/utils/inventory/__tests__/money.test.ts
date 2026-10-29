@@ -38,7 +38,7 @@ describe("gainCoins / formatCoins", () => {
   });
 
   it("formats signed deltas", () => {
-    expect(formatCoins({ gp: -50 })).toBe("−50 зм");
-    expect(formatCoins({ gp: 1, cp: 5 })).toBe("+1 зм +5 мм");
+    expect(formatCoins({ gp: -50 }, (c) => ({ gp: "зм", sp: "см", cp: "мм" })[c])).toBe("−50 зм");
+    expect(formatCoins({ gp: 1, cp: 5 }, (c) => ({ gp: "зм", sp: "см", cp: "мм" })[c])).toBe("+1 зм +5 мм");
   });
 });

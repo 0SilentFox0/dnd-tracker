@@ -1,4 +1,4 @@
-import { type Coin, COIN_LABEL, COIN_VALUE, COINS } from "@/lib/constants/inventory";
+import { type Coin, COIN_VALUE, COINS } from "@/lib/constants/inventory";
 import type { Purse } from "@/types/inventory";
 
 export const toCopper = (p: Purse) => COINS.reduce((s, c) => s + p[c] * COIN_VALUE[c], 0);
@@ -44,7 +44,7 @@ export function spendCoins(purse: Purse, amount: number, coin: Coin): Purse | nu
 
 export const gainCoins = (purse: Purse, amount: number, coin: Coin): Purse => ({ ...purse, [coin]: purse[coin] + amount });
 
-export const formatCoins = (delta: Partial<Purse>) =>
+export const formatCoins = (delta: Partial<Purse>, label: (coin: Coin) => string) =>
   COINS.filter((c) => delta[c])
-    .map((c) => `${delta[c]! < 0 ? "−" : "+"}${Math.abs(delta[c]!)} ${COIN_LABEL[c]}`)
+    .map((c) => `${delta[c]! < 0 ? "−" : "+"}${Math.abs(delta[c]!)} ${label(c)}`)
     .join(" ");

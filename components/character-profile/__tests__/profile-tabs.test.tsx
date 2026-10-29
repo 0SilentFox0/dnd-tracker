@@ -66,7 +66,7 @@ describe("таби профілю", () => {
     mockMatchMedia(true);
     inProfile(<InventoryTab />);
 
-    fireEvent.click(screen.getByRole("button", { name: "Броня: Кольчуга ельфів" }));
+    fireEvent.click(screen.getByRole("button", { name: 'inventory.grid.filled {"slot":"inventory.grid.slots.armor","name":"Кольчуга ельфів"}' }));
     expect(screen.getByRole("dialog")).toHaveAccessibleName("Кольчуга ельфів");
     expect(screen.getByText("AC +2")).toBeTruthy();
     expect(screen.getByText("Легка і тиха.")).toBeTruthy();
@@ -91,7 +91,7 @@ describe("таби профілю", () => {
     const twin = { ...sheetFixture.items.artifacts[0], effects: ["AC +1", "AC +1"] };
 
     inProfile(<InventoryTab />, withSheet({ items: { ...sheetFixture.items, grid: { armor: twin }, artifacts: [twin] } }));
-    fireEvent.click(screen.getByRole("button", { name: "Броня: Кольчуга ельфів" }));
+    fireEvent.click(screen.getByRole("button", { name: 'inventory.grid.filled {"slot":"inventory.grid.slots.armor","name":"Кольчуга ельфів"}' }));
     expect(screen.getAllByRole("listitem").filter((li) => li.textContent === "AC +1")).toHaveLength(2);
   });
 });

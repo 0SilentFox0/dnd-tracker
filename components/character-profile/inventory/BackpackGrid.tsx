@@ -1,3 +1,5 @@
+import { useTranslations } from "next-intl";
+
 import { dragProps, dropProps } from "./dnd";
 import { InventoryCell } from "./InventoryCell";
 
@@ -6,6 +8,8 @@ import type { InventoryModel } from "@/lib/hooks/characters";
 import { cn } from "@/lib/utils";
 
 export function BackpackGrid({ inv, onAdd, newIds }: { inv: InventoryModel; onAdd: () => void; newIds?: ReadonlySet<string> }) {
+  const t = useTranslations("inventory.grid");
+
   if (!inv.backpack) return null;
 
   const { selection } = inv;
@@ -17,7 +21,7 @@ export function BackpackGrid({ inv, onAdd, newIds }: { inv: InventoryModel; onAd
   const receiving = inv.drag.value?.from === "slot";
 
   return (
-    <div role="group" aria-label="Рюкзак" {...drop} className={cn("grid grid-cols-5 gap-1.5 rounded-lg p-1 lg:grid-cols-6", receiving && "bg-hud-gold-strong/10 ring-1 ring-hud-gold-strong/50")}>
+    <div role="group" aria-label={t("backpack")} {...drop} className={cn("grid grid-cols-5 gap-1.5 rounded-lg p-1 lg:grid-cols-6", receiving && "bg-hud-gold-strong/10 ring-1 ring-hud-gold-strong/50")}>
       {inv.backpack.cells.map((cell) => {
         if (cell.kind === "artifact") {
           const { artifact } = cell;
@@ -52,9 +56,9 @@ export function BackpackGrid({ inv, onAdd, newIds }: { inv: InventoryModel; onAd
           );
         }
 
-        if (cell.kind === "add") return <InventoryCell key={cell.key} label="Додати" placeholder={<span className="text-2xl leading-none">+</span>} state={{ selected: false, drop: null }} dnd={{ draggable: false }} onClick={onAdd} />;
+        if (cell.kind === "add") return <InventoryCell key={cell.key} label={t("add")} placeholder={<span className="text-2xl leading-none">+</span>} state={{ selected: false, drop: null }} dnd={{ draggable: false }} onClick={onAdd} />;
 
-        return <InventoryCell key={cell.key} label="Порожня клітинка" state={{ selected: false, drop: null }} dnd={{ draggable: false }} />;
+        return <InventoryCell key={cell.key} label={t("emptyCell")} state={{ selected: false, drop: null }} dnd={{ draggable: false }} />;
       })}
     </div>
   );

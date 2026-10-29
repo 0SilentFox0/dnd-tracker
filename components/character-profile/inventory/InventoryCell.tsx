@@ -2,7 +2,8 @@ import type { DragEvent, ReactNode } from "react";
 
 import { EntityIcon } from "@/components/common/EntityIcon";
 import { NewPill } from "@/components/common/NewPill";
-import { ARTIFACT_RARITY_COLOR, artifactRarityLabel } from "@/lib/constants/artifacts";
+import { ARTIFACT_RARITY_COLOR } from "@/lib/constants/artifacts";
+import { useTranslator } from "@/lib/i18n/use-translator";
 import { cn } from "@/lib/utils";
 
 interface InventoryCellProps {
@@ -22,9 +23,11 @@ interface InventoryCellProps {
 }
 
 export function InventoryCell({ label, thing, placeholder, state, dnd, onClick, isNew }: InventoryCellProps) {
+  const t = useTranslator();
+
   const inert = !thing && !onClick;
 
-  const title = thing ? (thing.rarity ? `${thing.name} · ${artifactRarityLabel(thing.rarity)}` : thing.name) : undefined;
+  const title = thing ? (thing.rarity ? `${thing.name} · ${t(`artifacts.rarity.${thing.rarity}`)}` : thing.name) : undefined;
 
   return (
     <button

@@ -1,20 +1,19 @@
 "use client";
 
 import { type FormEvent, useState } from "react";
+import { useTranslations } from "next-intl";
 
 import { useProfile } from "../ProfileContext";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { ResponsiveDialog } from "@/components/ui/responsive-dialog";
-import { type Coin, COIN_LABEL, COINS } from "@/lib/constants/inventory";
+import { type Coin, COINS } from "@/lib/constants/inventory";
 import { useStashAction } from "@/lib/hooks/characters";
 import { useNotify } from "@/lib/hooks/common";
 import type { Purse } from "@/types/inventory";
 
 export type MoneyMode = "spend" | "gain" | "set";
-
-const TITLE: Record<MoneyMode, string> = { spend: "Витратити", gain: "Отримати", set: "Задати суму" };
 
 const FORM_ID = "money-form";
 
@@ -27,6 +26,8 @@ interface MoneyDialogProps {
 
 export function MoneyDialog({ mode, purse, open, onOpenChange }: MoneyDialogProps) {
   const { campaignId, characterId } = useProfile();
+
+  const t = useTranslations("inventory");
 
   const action = useStashAction(campaignId, characterId);
 
@@ -52,7 +53,7 @@ export function MoneyDialog({ mode, purse, open, onOpenChange }: MoneyDialogProp
 
       onOpenChange(false);
     } catch (err) {
-      notify((err as Error).message || "Не вдалося виконати дію");
+      notify((err as Error).message || t("errors.actionFailed"));
     }
   };
 
@@ -63,10 +64,10 @@ export function MoneyDialog({ mode, purse, open, onOpenChange }: MoneyDialogProp
       hud
       open={open}
       onOpenChange={onOpenChange}
-      title={TITLE[mode]}
+      title={t(`purse.${mode}`)}
       footer={
         <Button type="submit" form={FORM_ID} disabled={action.isPending || invalid}>
-          Підтвердити
+          {t("money.confirm")}
         </Button>
       }
     >
@@ -74,20 +75,20 @@ export function MoneyDialog({ mode, purse, open, onOpenChange }: MoneyDialogProp
         {mode === "set" ? (
           <div className="grid grid-cols-3 gap-2">
             {COINS.map((c) => (
-              <Input key={c} type="number" min={0} step={1} inputMode="numeric" aria-label={COIN_LABEL[c]} value={set[c]} onChange={(e) => setSet({ ...set, [c]: e.target.value })} className="h-11" />
+              <Input key={c} type="number" min={0} step={1} inputMode="numeric" aria-label={t(`coins.${c}`)} value={set[c]} onChange={(e) => setSet({ ...set, [c]: e.target.value })} className="h-11" />
             ))}
           </div>
         ) : (
           <>
             <div className="flex gap-2">
-              <Input type="number" min={1} step={1} inputMode="numeric" aria-label="Сума" value={amount} onChange={(e) => setAmount(e.target.value)} className="h-11 min-w-0 flex-1" autoFocus />
-              <select aria-label="Монета" value={coin} onChange={(e) => setCoin(e.target.value as Coin)} className="h-11 rounded-md border border-hud-line bg-hud-field px-2 text-hud-ink">
+              <Input type="number" min={1} step={1} inputMode="numeric" aria-label={t("money.amount")} value={amount} onChange={(e) => setAmount(e.target.value)} className="h-11 min-w-0 flex-1" autoFocus />
+              <select aria-label={t("money.coin")} value={coin} onChange={(e) => setCoin(e.target.value as Coin)} className="h-11 rounded-md border border-hud-line bg-hud-field px-2 text-hud-ink">
                 {COINS.map((c) => (
-                  <option key={c} value={c}>{COIN_LABEL[c]}</option>
+                  <option key={c} value={c}>{t(`coins.${c}`)}</option>
                 ))}
               </select>
             </div>
-            <Input aria-label="На що" placeholder={mode === "spend" ? "На що" : "Звідки (необов'язково)"} required={mode === "spend"} maxLength={200} value={note} onChange={(e) => setNote(e.target.value)} className="h-11" />
+            <Input aria-label={t("money.noteSpend")} placeholder={mode === "spend" ? t("money.noteSpend") : t("money.noteGain")} required={mode === "spend"} maxLength={200} value={note} onChange={(e) => setNote(e.target.value)} className="h-11" />
           </>
         )}
       </form>

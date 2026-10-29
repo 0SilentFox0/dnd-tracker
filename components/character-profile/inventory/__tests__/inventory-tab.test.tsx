@@ -38,6 +38,10 @@ const renderTab = (over: Partial<CharacterSheet> = {}) =>
 
 const viewer = (isDM: boolean, isOwner: boolean) => ({ viewer: { isDM, isOwner } });
 
+const empty = (slot: string) => `inventory.grid.empty ${JSON.stringify({ slot: `inventory.grid.slots.${slot}` })}`;
+
+const filled = (slot: string, name: string) => `inventory.grid.filled ${JSON.stringify({ slot: `inventory.grid.slots.${slot}`, name })}`;
+
 describe("InventoryTab", () => {
   beforeEach(() => {
     mocks.mutateAsync.mockResolvedValue({});
@@ -55,9 +59,9 @@ describe("InventoryTab", () => {
 
     fireEvent.click(screen.getByLabelText("Перстень сили"));
 
-    expect(await screen.findByText(/Кільце|Перстень/, { selector: "p" })).toBeTruthy();
+    expect(await screen.findByText(/artifacts\.slots\.ring/, { selector: "p" })).toBeTruthy();
 
-    fireEvent.click(screen.getByRole("button", { name: "Вдягнути" }));
+    fireEvent.click(screen.getByRole("button", { name: "inventory.actions.equip" }));
 
     await waitFor(() => expect(mocks.mutateAsync).toHaveBeenCalledWith({ action: "equip", artifactId: "r1" }));
   });
@@ -72,7 +76,7 @@ describe("InventoryTab", () => {
 
     expect(within(dialog).getByText("Зілля лікування")).toBeTruthy();
 
-    fireEvent.click(within(dialog).getByRole("button", { name: "Використати" }));
+    fireEvent.click(within(dialog).getByRole("button", { name: "inventory.actions.use" }));
 
     await waitFor(() => expect(mocks.mutateAsync).toHaveBeenCalledWith({ action: "useItem", itemId: "p1" }));
   });
@@ -81,14 +85,14 @@ describe("InventoryTab", () => {
     renderTab();
 
     fireEvent.dragStart(screen.getByLabelText("Перстень сили"));
-    fireEvent.drop(screen.getByLabelText("Перстень, порожньо"));
+    fireEvent.drop(screen.getByLabelText(empty("ring1")));
 
     await waitFor(() => expect(mocks.mutateAsync).toHaveBeenCalledWith({ action: "equip", artifactId: "r1" }));
 
     mocks.mutateAsync.mockClear();
 
     fireEvent.dragStart(screen.getByLabelText("Перстень сили"));
-    fireEvent.drop(screen.getByLabelText("Шолом, порожньо"));
+    fireEvent.drop(screen.getByLabelText(empty("helmet")));
 
     await Promise.resolve();
     expect(mocks.mutateAsync).not.toHaveBeenCalled();
@@ -97,7 +101,7 @@ describe("InventoryTab", () => {
   it("drag зі слота «Броня» у рюкзак знімає", async () => {
     renderTab();
 
-    fireEvent.dragStart(screen.getByLabelText("Броня: Кольчуга ельфів"));
+    fireEvent.dragStart(screen.getByLabelText(filled("armor", "Кольчуга ельфів")));
     fireEvent.drop(screen.getByLabelText("Зілля лікування"));
 
     await waitFor(() => expect(mocks.mutateAsync).toHaveBeenCalledWith({ action: "stash", slot: "armor" }));
@@ -107,7 +111,7 @@ describe("InventoryTab", () => {
   it("порожній слот приймає drop: не disabled, без pointer-events-none", async () => {
     renderTab();
 
-    const slot = screen.getByLabelText("Перстень, порожньо");
+    const slot = screen.getByLabelText(empty("ring1"));
 
     expect((slot as HTMLButtonElement).disabled).toBe(false);
     expect(slot.className).not.toContain("pointer-events-none");
@@ -127,46 +131,46 @@ describe("InventoryTab", () => {
     fireEvent.click(screen.getByLabelText("Перстень сили"));
 
     expect(await screen.findByText("Дає силу.")).toBeTruthy();
-    expect(screen.queryByRole("button", { name: "Вдягнути" })).toBeNull();
-    expect(screen.queryByRole("button", { name: "Передати" })).toBeNull();
-    expect(screen.queryByLabelText("Додати")).toBeNull();
-    expect(screen.queryByLabelText("Витратити")).toBeNull();
+    expect(screen.queryByRole("button", { name: "inventory.actions.equip" })).toBeNull();
+    expect(screen.queryByRole("button", { name: "inventory.actions.transfer" })).toBeNull();
+    expect(screen.queryByLabelText("inventory.grid.add")).toBeNull();
+    expect(screen.queryByLabelText("inventory.purse.spend")).toBeNull();
   });
 
   it("на схваленні: 9 слотів і повідомлення, useStash вимкнено", () => {
     mocks.useStash.mockReturnValue({ data: undefined, isPending: true, isError: false, error: null, refetch: vi.fn() });
     renderTab({ review: { pending: true, note: null } });
 
-    expect(screen.getByLabelText("Шолом, порожньо")).toBeTruthy();
-    expect(screen.getByText("Підсумок з'явиться після схвалення персонажа")).toBeTruthy();
+    expect(screen.getByLabelText(empty("helmet"))).toBeTruthy();
+    expect(screen.getByText("inventory.tab.pending")).toBeTruthy();
     expect(mocks.useStash).toHaveBeenCalledWith("camp", "lira", { enabled: false });
   });
 
   it("DM: «+» відкриває меню з двома варіантами", async () => {
     renderTab(viewer(true, false));
 
-    fireEvent.click(screen.getByLabelText("Додати"));
+    fireEvent.click(screen.getByLabelText("inventory.grid.add"));
 
-    expect(await screen.findByRole("button", { name: "Видати артефакт" })).toBeTruthy();
-    expect(screen.getByRole("button", { name: "Додати предмет" })).toBeTruthy();
+    expect(await screen.findByRole("button", { name: "inventory.add.grant" })).toBeTruthy();
+    expect(screen.getByRole("button", { name: "inventory.add.item" })).toBeTruthy();
   });
 
   it("гравець: «+» одразу відкриває діалог предмета", async () => {
     renderTab();
 
-    fireEvent.click(screen.getByLabelText("Додати"));
+    fireEvent.click(screen.getByLabelText("inventory.grid.add"));
 
     expect(await screen.findByRole("dialog")).toBeTruthy();
-    expect(screen.queryByRole("button", { name: "Видати артефакт" })).toBeNull();
+    expect(screen.queryByRole("button", { name: "inventory.add.grant" })).toBeNull();
   });
 
   it("«Витратити» відкриває діалог грошей", async () => {
     renderTab();
 
-    fireEvent.click(screen.getByLabelText("Витратити"));
+    fireEvent.click(screen.getByLabelText("inventory.purse.spend"));
 
     const dialog = await screen.findByRole("dialog");
 
-    expect(within(dialog).getByText("Витратити")).toBeTruthy();
+    expect(within(dialog).getByText("inventory.purse.spend")).toBeTruthy();
   });
 });

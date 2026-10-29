@@ -1,6 +1,7 @@
 "use client";
 
 import { type FormEvent, useState } from "react";
+import { useTranslations } from "next-intl";
 
 import { useProfile } from "../ProfileContext";
 
@@ -22,6 +23,8 @@ const FORM_ID = "stash-item-form";
 
 export function ItemDialog({ item, open, onOpenChange }: ItemDialogProps) {
   const { campaignId, characterId } = useProfile();
+
+  const t = useTranslations("inventory");
 
   const action = useStashAction(campaignId, characterId);
 
@@ -48,7 +51,7 @@ export function ItemDialog({ item, open, onOpenChange }: ItemDialogProps) {
       await action.mutateAsync(item ? { action: "editItem", itemId: item.id, ...fields } : { action: "addItem", ...fields });
       onOpenChange(false);
     } catch (err) {
-      notify((err as Error).message || "Не вдалося зберегти річ");
+      notify((err as Error).message || t("errors.itemSaveFailed"));
     }
   };
 
@@ -57,20 +60,20 @@ export function ItemDialog({ item, open, onOpenChange }: ItemDialogProps) {
       hud
       open={open}
       onOpenChange={onOpenChange}
-      title={item ? "Редагувати річ" : "Додати річ"}
+      title={item ? t("itemDialog.editTitle") : t("itemDialog.addTitle")}
       footer={
         <Button type="submit" form={FORM_ID} disabled={action.isPending || invalid}>
-          Зберегти
+          {t("itemDialog.save")}
         </Button>
       }
     >
       <form id={FORM_ID} onSubmit={(e) => void submit(e)} className="space-y-3">
-        <Input aria-label="Назва" placeholder="Назва" maxLength={80} value={name} onChange={(e) => setName(e.target.value)} className="h-11" autoFocus />
-        <Textarea aria-label="Опис" placeholder="Опис" maxLength={500} value={description} onChange={(e) => setDescription(e.target.value)} rows={3} />
-        <Input type="number" min={1} step={1} inputMode="numeric" aria-label="Кількість" value={quantity} onChange={(e) => setQuantity(e.target.value)} className="h-11" />
+        <Input aria-label={t("itemDialog.name")} placeholder={t("itemDialog.name")} maxLength={80} value={name} onChange={(e) => setName(e.target.value)} className="h-11" autoFocus />
+        <Textarea aria-label={t("itemDialog.description")} placeholder={t("itemDialog.description")} maxLength={500} value={description} onChange={(e) => setDescription(e.target.value)} rows={3} />
+        <Input type="number" min={1} step={1} inputMode="numeric" aria-label={t("itemDialog.quantity")} value={quantity} onChange={(e) => setQuantity(e.target.value)} className="h-11" />
         <label className="flex min-h-11 items-center gap-2 text-sm text-hud-ink">
           <input type="checkbox" checked={consumable} onChange={(e) => setConsumable(e.target.checked)} className="size-4" />
-          Одноразова
+          {t("itemDialog.consumable")}
         </label>
       </form>
     </ResponsiveDialog>
