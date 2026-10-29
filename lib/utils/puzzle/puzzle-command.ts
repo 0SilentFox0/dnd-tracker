@@ -2,6 +2,7 @@ import { generatePuzzle, mulberry32, pieceSize } from "./generate";
 
 import { API_ERRORS } from "@/lib/constants/api-errors";
 import { PUZZLE_HOLD_MS, PUZZLE_SNAP } from "@/lib/constants/show";
+import { clamp } from "@/lib/utils/common/clamp";
 import type { Result } from "@/types/common";
 import type { PuzzleCommand, PuzzlePieceState, PuzzleSpec, PuzzleState, ShowState } from "@/types/show";
 
@@ -28,7 +29,7 @@ export function initPuzzle(spec: PuzzleSpec): PuzzleState {
 
 const normRot = (rot: number) => (((Math.round(rot / ROT_STEP) * ROT_STEP) % 360) + 360) % 360;
 
-const clamp = (v: number, max: number) => Math.round(Math.min(Math.max(v, 0), max));
+const clampRound = (v: number, max: number) => Math.round(clamp(v, 0, max));
 
 const has = (puzzle: PuzzleState, id: string) => Object.hasOwn(puzzle.pieces, id);
 
@@ -126,9 +127,9 @@ export function applyPuzzleCommand(prev: ShowState | null, cmd: PuzzleCommand, c
 
       const rot = normRot(cmd.rot);
 
-      const x = clamp(cmd.x, spec.imageWidth);
+      const x = clampRound(cmd.x, spec.imageWidth);
 
-      const y = clamp(cmd.y, spec.imageHeight);
+      const y = clampRound(cmd.y, spec.imageHeight);
 
       const correct = rot === 0 && Math.hypot(x - home.x, y - home.y) <= PUZZLE_SNAP * pieceSize(pieces);
 

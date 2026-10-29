@@ -4,6 +4,7 @@ import { API_ERRORS } from "@/lib/constants/api-errors";
 import { ownerHeroNames, randomizeUnitControl, setUnitController } from "@/lib/utils/battle/participant/unit-control";
 import type { BattleMutationContext, MutationResult } from "@/lib/utils/battle/pipeline/run-battle-mutation";
 import { BattleRuleError, dmEvent } from "@/lib/utils/battle/store";
+import { rngOf } from "@/lib/utils/common/rng";
 
 export const unitControlSchema = z.discriminatedUnion("mode", [
   z.object({ mode: z.literal("assign"), participantId: z.string().min(1), controlledBy: z.string().min(1) }),
@@ -35,7 +36,7 @@ function assign(ctx: BattleMutationContext, body: Extract<UnitControlBody, { mod
 }
 
 function random(ctx: BattleMutationContext) {
-  const { participants, assigned } = randomizeUnitControl(ctx.participants, ctx.userId, ctx.rng ?? Math.random);
+  const { participants, assigned } = randomizeUnitControl(ctx.participants, ctx.userId, rngOf(ctx));
 
   if (assigned.length === 0) throw new BattleRuleError("action_rejected", API_ERRORS.BATTLE_NO_CONTROLLABLE_UNITS);
 

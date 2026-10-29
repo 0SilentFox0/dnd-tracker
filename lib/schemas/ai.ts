@@ -1,6 +1,7 @@
 import { z } from "zod";
 
 import { AI_IMAGE_ASPECTS, AI_IMAGE_PROMPT_MAX, AI_LIMITS, AI_PROVIDERS, AI_THREAD_MODES, API_TOKEN_SCOPES } from "@/lib/constants/ai";
+import { urlField } from "@/lib/schemas/common";
 
 const id = z.string().min(1).max(40);
 
@@ -59,4 +60,4 @@ export const generateSlideImageSchema = z.object({
   useCampaignStyle: z.boolean(),
 });
 
-export const discardGeneratedImageSchema = z.object({ url: z.string().url().max(2048) });
+export const discardGeneratedImageSchema = z.object({ url: urlField(2048) });

@@ -1,4 +1,4 @@
-import type { Background, Prisma } from "@prisma/client";
+import type { Background } from "@prisma/client";
 import type { z } from "zod";
 
 import "server-only";
@@ -14,8 +14,7 @@ import { nameTaken } from "@/lib/server/content/name-taken";
 import { backgroundAsiRules } from "@/lib/utils/backgrounds/asi";
 import { backgroundSpellIds } from "@/lib/utils/backgrounds/references";
 import { toBackgroundData } from "@/lib/utils/backgrounds/row";
-
-const json = (v: unknown) => v as Prisma.InputJsonValue;
+import { toInputJson } from "@/lib/utils/common/json";
 
 
 async function validateRefs(campaignId: string, originFeatId: string | null | undefined, choices?: unknown) {
@@ -45,7 +44,7 @@ export const backgroundsResource = defineResource<Background, z.infer<typeof cre
     await assertName(actor.campaignId, data.name);
     await validateRefs(actor.campaignId, data.originFeatId, data.choices);
 
-    return prisma.background.create({ data: { ...data, campaignId: actor.campaignId, choices: json(data.choices), skillProficiencies: json(data.skillProficiencies), toolProficiencies: json(data.toolProficiencies) } });
+    return prisma.background.create({ data: { ...data, campaignId: actor.campaignId, choices: toInputJson(data.choices), skillProficiencies: toInputJson(data.skillProficiencies), toolProficiencies: toInputJson(data.toolProficiencies) } });
   },
   async update(actor, existing, data) {
     if (data.name !== undefined) await assertName(actor.campaignId, data.name, existing.id);
@@ -64,7 +63,7 @@ export const backgroundsResource = defineResource<Background, z.infer<typeof cre
 
     const { choices, skillProficiencies, toolProficiencies, ...rest } = data;
 
-    return prisma.background.update({ where: { id: existing.id }, data: { ...rest, ...(choices !== undefined && { choices: json(choices) }), ...(skillProficiencies !== undefined && { skillProficiencies: json(skillProficiencies) }), ...(toolProficiencies !== undefined && { toolProficiencies: json(toolProficiencies) }) } });
+    return prisma.background.update({ where: { id: existing.id }, data: { ...rest, ...(choices !== undefined && { choices: toInputJson(choices) }), ...(skillProficiencies !== undefined && { skillProficiencies: toInputJson(skillProficiencies) }), ...(toolProficiencies !== undefined && { toolProficiencies: toInputJson(toolProficiencies) }) } });
   },
   async remove(actor, existing) {
     if (await backgroundInUse(actor.campaignId, existing.id)) throw new ContentError(API_ERRORS.BACKGROUND_IN_USE, 409);

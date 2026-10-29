@@ -6,7 +6,7 @@ import { contentOperationState } from "./content-preview";
 import { contentSnapshot, jsonContent, snapshotHash } from "./content-snapshot";
 
 import "server-only";
-import { ReferenceKind } from "@/lib/cache/tags";
+import { ALL_REFERENCE_KINDS } from "@/lib/cache/tags";
 import { API_ERRORS } from "@/lib/constants/api-errors";
 import { prisma } from "@/lib/db";
 import type { Locale } from "@/lib/i18n/config";
@@ -143,7 +143,7 @@ export function createContentOperationActions(deps: Deps = {}): AssistantActionD
 
         return { summary: label, targets, changes, warnings, effects, preconditions: { snapshot: snapshotHash(state), input: jsonContent(input), selection: jsonContent(selection) } };
       }),
-      execute: async (ctx, input) => withContentEffects(ctx, Object.values(ReferenceKind), async () => {
+      execute: async (ctx, input) => withContentEffects(ctx, ALL_REFERENCE_KINDS, async () => {
         const data = await invoke(operation.id, ctx.caller.actor, input, ctx.caller.locale);
 
         const report = data as { counts?: { error: number } };

@@ -26,6 +26,7 @@ import { abilitiesJson, OwnerKind, readAbilities, skillAbilities } from "@/lib/u
 import type { Actor } from "@/lib/utils/api/actor";
 import { localeOrRequest } from "@/lib/utils/api/translate-error";
 import { toGameClassData } from "@/lib/utils/characters/classes/row";
+import { byName } from "@/lib/utils/common/text";
 import { IMPORT_KINDS } from "@/lib/utils/content/import/kinds";
 import { importUnitsIntoCampaign } from "@/lib/utils/units/import-units";
 
@@ -117,7 +118,7 @@ export async function runContentOperation(operationId: ContentOperationId, actor
 
         const kinds = ["skill", "race", "artifact", "artifactSet", "unit", "class", "feat"];
 
-        return { sources: groups.flatMap((rows, i) => rows.map((row) => ({ kind: kinds[i], id: row.id, name: row.name })).sort((a, b) => a.name.localeCompare(b.name, "uk"))) };
+        return { sources: groups.flatMap((rows, i) => rows.map((row) => ({ kind: kinds[i], id: row.id, name: row.name })).sort(byName)) };
       }
       case "abilities.get": {
         const kind = input.kind as OwnerKind;

@@ -12,13 +12,13 @@ import {
   TARGET_ROUNDS,
   UNIT_SPELL_SLOTS,
 } from "@/lib/constants/battle-balance";
+import { clamp } from "@/lib/utils/common/clamp";
 
 /** d20 + bonus ≥ AC; natural 1 always misses, natural 20 always hits. */
 export function hitChance(attackBonus: number, ac: number): number {
   return Math.min(0.95, Math.max(0.05, (21 - (ac - attackBonus)) / 20));
 }
 
-const clamp = (x: number, max: number) => Math.min(max, Math.max(ARMOR_FACTOR_MIN, x));
 
 export interface ArmorFactors {
   hp: number;
@@ -76,13 +76,13 @@ function landedDamage(unit: FactorUnit, party: FactorParty): number | null {
 export function armorFactors(unit: FactorUnit, party: FactorParty): ArmorFactors {
   const landed = landedDamage(unit, party);
 
-  const hp = landed === null ? 1 : landed <= 0 ? DEFENSE_FACTOR_MAX : clamp(1 / landed, DEFENSE_FACTOR_MAX);
+  const hp = landed === null ? 1 : landed <= 0 ? DEFENSE_FACTOR_MAX : clamp(1 / landed, ARMOR_FACTOR_MIN, DEFENSE_FACTOR_MAX);
 
   return { hp, dpr: unitHitFactor(unit.attackBonus, party) };
 }
 
 function unitHitFactor(attackBonus: number | undefined, party: FactorParty): number {
-  return attackBonus !== undefined && party.ac !== undefined ? clamp(hitChance(attackBonus, party.ac) / REF_UNIT_HIT, ARMOR_FACTOR_MAX) : 1;
+  return attackBonus !== undefined && party.ac !== undefined ? clamp(hitChance(attackBonus, party.ac) / REF_UNIT_HIT, ARMOR_FACTOR_MIN, ARMOR_FACTOR_MAX) : 1;
 }
 
 function failedSaveShare(save: UnitSpellPower["save"], party: FactorParty): number {

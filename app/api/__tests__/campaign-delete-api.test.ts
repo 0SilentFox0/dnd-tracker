@@ -4,13 +4,13 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import { createRequest, getResponseJson, getResponseStatus } from "./helpers";
 
 import { kvDel } from "@/lib/cache/kv";
-import { invalidateReference, ReferenceKind } from "@/lib/cache/tags";
+import { invalidateAllReference } from "@/lib/cache/tags";
 import { prisma } from "@/lib/db";
 import * as apiAuth from "@/lib/utils/api/api-auth";
 
 vi.mock("@/lib/utils/api/api-auth", () => ({ requireAuth: vi.fn(), requireDM: vi.fn() }));
 vi.mock("@/lib/cache/kv", () => ({ kvDel: vi.fn(), kvGet: vi.fn(), kvSet: vi.fn() }));
-vi.mock("@/lib/cache/tags", async (orig) => ({ ...(await orig<typeof import("@/lib/cache/tags")>()), invalidateReference: vi.fn() }));
+vi.mock("@/lib/cache/tags", async (orig) => ({ ...(await orig<typeof import("@/lib/cache/tags")>()), invalidateAllReference: vi.fn() }));
 vi.mock("@/lib/db", () => ({
   prisma: {
     $transaction: async (callback: (tx: object) => unknown) => callback({ $queryRaw: async () => [{ id: "c1" }] }),
@@ -39,7 +39,7 @@ describe("DELETE /api/campaigns/[id]", () => {
     expect(prisma.campaign.delete).toHaveBeenCalledWith({ where: { id: "c1" } });
     expect(kvDel).toHaveBeenCalledWith("campaigns:dm-1");
     expect(kvDel).toHaveBeenCalledWith("campaigns:p1");
-    expect(invalidateReference).toHaveBeenCalledWith(Object.values(ReferenceKind), "c1");
+    expect(invalidateAllReference).toHaveBeenCalledWith("c1");
   });
 
   it.each([

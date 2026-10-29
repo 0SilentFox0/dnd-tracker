@@ -15,6 +15,7 @@ import { activeMapMode, type MapModeKey } from "@/lib/utils/battle/modes";
 import type { BattleMutationContext, MutationResult } from "@/lib/utils/battle/pipeline/run-battle-mutation";
 import { BattleRuleError, type NewBattleEvent, systemEvent } from "@/lib/utils/battle/store";
 import { assertCanAct } from "@/lib/utils/battle/turn";
+import { rngOf } from "@/lib/utils/common/rng";
 import type { BattleMapConfig, BattleParticipant, GridPoint, TerrainCell } from "@/types/battle";
 
 export const moveSchema = z.object({
@@ -80,7 +81,7 @@ export function moveMutation(ctx: BattleMutationContext, data: MoveBody): Mutati
     return finishMove(ctx, { participants: replaceParticipant(participants, moved), moved, hazard, messages: [], events: [] });
   }
 
-  const out = resolveMovement5e({ map, participants, mover, to: data.to, path: pathFrom(search, mover, data.to), budget, cost, round: ctx.scene.round, battleId: ctx.scene.id, rules, rng: ctx.rng ?? Math.random });
+  const out = resolveMovement5e({ map, participants, mover, to: data.to, path: pathFrom(search, mover, data.to), budget, cost, round: ctx.scene.round, battleId: ctx.scene.id, rules, rng: rngOf(ctx) });
 
   const hazard = isActive(out.moved) ? hazardOnMove(map, participants, mover, out.destination, out.spent) : null;
 
@@ -98,7 +99,7 @@ interface MoveOutcome {
 function finishMove(ctx: BattleMutationContext, { participants, moved, hazard, messages, events: attackEvents }: MoveOutcome): MutationResult {
   const events = [...(messages.length ? [systemEvent(ctx.scene.round, messages.join("; "))] : []), ...attackEvents];
 
-  const hit = hazard && hazardHit(moved, hazard, ctx.scene.round, participants, ctx.rng ?? Math.random, ctx.meta.rules);
+  const hit = hazard && hazardHit(moved, hazard, ctx.scene.round, participants, rngOf(ctx), ctx.meta.rules);
 
   if (!hazard || !hit) return { participants, pending: ctx.pending, events };
 
@@ -133,7 +134,7 @@ function resolveHazardHit(
   const messages = [hit.message, ...hit.consequences];
 
   if (!isActive(hit.participant)) {
-    const downed = resolveDowned(next, { victimId: id, actorId: null }, { round: ctx.scene.round, rng: ctx.rng ?? Math.random, rules: ctx.meta.rules });
+    const downed = resolveDowned(next, { victimId: id, actorId: null }, { round: ctx.scene.round, rng: rngOf(ctx), rules: ctx.meta.rules });
 
     next = downed.participants;
     messages.push(...downed.messages);

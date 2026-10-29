@@ -1,8 +1,9 @@
 import { EMPTY_DOC } from "./doc";
 
+import { shortId } from "@/lib/utils/common/short-id";
 import type { ScenarioContent, ScenarioMarkerRef, ScenarioRow, ScenarioRowSlide, ScenarioSection } from "@/types/scenario";
 
-export const newId = () => crypto.randomUUID().replaceAll("-", "").slice(0, 10);
+export const newId = () => shortId(10);
 
 export const emptyContent = (): ScenarioContent => ({ legend: [], sections: [] });
 

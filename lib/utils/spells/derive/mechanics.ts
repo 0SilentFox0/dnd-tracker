@@ -1,7 +1,8 @@
-import { clamp, numberWord, parseDiceExpr } from "./text";
+import { numberWord, parseDiceExpr } from "./text";
 
 import type { AbilityKey } from "@/lib/constants/abilities";
 import type { Effect } from "@/lib/utils/abilities/schema";
+import { clamp } from "@/lib/utils/common/clamp";
 import type { SpellCastingTime, SpellCost, SpellResolution, SpellTargeting } from "@/lib/utils/spells/model/schema";
 
 export type SpellSide = "ally" | "enemy";

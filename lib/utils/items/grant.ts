@@ -1,4 +1,5 @@
 import { ITEM_LIMITS } from "@/lib/constants/artifacts";
+import { clamp } from "@/lib/utils/common/clamp";
 import { composedName, type ItemRowLike, matchesAppliesTo, parameterizedName } from "@/lib/utils/items/compose";
 import { itemStatsFromRow } from "@/lib/utils/items/item-row";
 import { itemRef } from "@/lib/utils/items/ref";
@@ -8,7 +9,7 @@ export type GrantPlan = { kind: "stash"; ref: string; name: string } | { kind: "
 
 export type GrantError = "ARTIFACT_NOT_FOUND" | "ITEM_PROPERTY_NEEDS_BASE" | "ITEM_BASE_MISMATCH" | "ITEM_PARAMETER_REQUIRED" | "ITEM_PARAMETER_INVALID" | "ITEM_SPELL_REQUIRED" | "ITEM_SPELL_INVALID";
 
-const clamp = (n: number) => Math.min(ITEM_LIMITS.grantQuantity[1], Math.max(ITEM_LIMITS.grantQuantity[0], Math.trunc(n)));
+const clampQuantity = (n: number) => clamp(Math.trunc(n), ITEM_LIMITS.grantQuantity[0], ITEM_LIMITS.grantQuantity[1]);
 
 export function planGrant<R extends ItemRowLike>(body: { artifactId: string; baseId?: string; quantity?: number; parameter?: string; spellId?: string }, rowsById: RowsById<R>): { ok: true; plan: GrantPlan } | { ok: false; error: GrantError } {
   const row = getRow(rowsById, body.artifactId);
@@ -44,7 +45,7 @@ export function planGrant<R extends ItemRowLike>(body: { artifactId: string; bas
   if (stats?.consumable) {
     const description = row.description?.trim().slice(0, ITEM_LIMITS.specialDescription);
 
-    return { ok: true, plan: { kind: "consumable", artifactId: row.id, name: (body.parameter ? parameterizedName(row.name, body.parameter) : row.name).slice(0, ITEM_LIMITS.specialName), ...(description && { description }), quantity: clamp(body.quantity ?? 1), ...(body.parameter && { parameter: body.parameter }), ...(body.spellId && { spellId: body.spellId }) } };
+    return { ok: true, plan: { kind: "consumable", artifactId: row.id, name: (body.parameter ? parameterizedName(row.name, body.parameter) : row.name).slice(0, ITEM_LIMITS.specialName), ...(description && { description }), quantity: clampQuantity(body.quantity ?? 1), ...(body.parameter && { parameter: body.parameter }), ...(body.spellId && { spellId: body.spellId }) } };
   }
 
   return { ok: true, plan: { kind: "stash", ref: itemRef(row.id, null, body.parameter), name: body.parameter ? parameterizedName(row.name, body.parameter) : row.name } };

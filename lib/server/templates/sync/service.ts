@@ -1,5 +1,5 @@
 import "server-only";
-import { invalidateReference, ReferenceKind } from "@/lib/cache/tags";
+import { invalidateAllReference } from "@/lib/cache/tags";
 import { prisma } from "@/lib/db";
 import type { SourceSyncApplyInput } from "@/lib/schemas/source-sync";
 import { assertCan } from "@/lib/server/content/access";
@@ -26,7 +26,7 @@ export async function applySource(actor: Actor, body: SourceSyncApplyInput): Pro
   // NO KEY UPDATE serialises applies without blocking inserts that reference the campaign
   const result = await withCampaignContentWrite(actor.campaignId, tx => applySourceChanges(tx, actor.campaignId, body, actor), { lock: "no-key-update", ...APPLY_TX_OPTIONS });
 
-  afterContentCommit(() => invalidateReference(Object.values(ReferenceKind), actor.campaignId));
+  afterContentCommit(() => invalidateAllReference(actor.campaignId));
 
   return result;
 }

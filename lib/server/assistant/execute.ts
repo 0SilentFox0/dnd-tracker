@@ -15,6 +15,7 @@ import { API_ERRORS } from "@/lib/constants/api-errors";
 import { prisma } from "@/lib/db";
 import { DEFAULT_LOCALE, type Locale } from "@/lib/i18n/config";
 import { actionPreviewSchema, actionResultSchema } from "@/lib/schemas/assistant";
+import { lockCampaignRow } from "@/lib/server/campaigns/lock";
 import { ContentError, parseInput } from "@/lib/server/content/errors";
 import { runContentWriteContext } from "@/lib/server/content/write-context";
 import type { Actor } from "@/lib/utils/api/actor";
@@ -105,7 +106,7 @@ export function createAssistantExecutor(options: Options = {}) {
       if (!row) throw new ContentError(API_ERRORS.AI_PROPOSAL_NOT_FOUND, 404);
 
       await authorizeAssistant(caller, catalog.getAction(row.actionId).need, "prepare", tx);
-      await tx.$queryRaw`SELECT id FROM campaigns WHERE id = ${caller.actor.campaignId} FOR UPDATE`;
+      await lockCampaignRow(tx, caller.actor.campaignId);
       await tx.$queryRaw`SELECT id FROM assistant_intents WHERE id = ${id} FOR UPDATE`;
 
       const fresh = await tx.assistantIntent.findFirst({ where: { id, ...intentOwner(caller) } });

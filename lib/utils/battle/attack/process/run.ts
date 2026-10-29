@@ -19,6 +19,7 @@ import { damageDiceSlots, heroAttackDamageParts } from "@/lib/utils/battle/damag
 import { attackDiceRolls } from "@/lib/utils/battle/dice-record";
 import { getEffectiveArmorClass } from "@/lib/utils/battle/participant";
 import type { ProcessAttackParams, ProcessAttackResult } from "@/lib/utils/battle/types/attack-process";
+import { rngOf } from "@/lib/utils/common/rng";
 import type { BattleAction } from "@/types/battle";
 
 export type { ProcessAttackParams, ProcessAttackResult };
@@ -49,7 +50,7 @@ export function processAttack(params: ProcessAttackParams): ProcessAttackResult 
 
   const before = withSelf(withSelf(allParticipants, target), attacker);
 
-  const flow: ActionFlow = { ps: before, messages: [], summons: [], ctx: { round: currentRound, rng: params.rng ?? Math.random, map: params.map, rules: params.rules, crit: params.crit } };
+  const flow: ActionFlow = { ps: before, messages: [], summons: [], ctx: { round: currentRound, rng: rngOf(params), map: params.map, rules: params.rules, crit: params.crit } };
 
   const existedBefore = activeEffectIds(flow.ps);
 

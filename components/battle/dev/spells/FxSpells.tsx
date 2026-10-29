@@ -13,6 +13,7 @@ import "@/components/battle/fx/fx.css";
 import "@/components/battle/dev/fx-lab.css";
 import { HudChipTabs, HudPage, HudPageHeader } from "@/components/hud/page";
 import { SpellBattlePreview } from "@/components/spells/preview/SpellBattlePreview";
+import { byName } from "@/lib/utils/common/text";
 
 const ALL = "all";
 
@@ -21,7 +22,7 @@ const bySchool = (spells: SpellCardData[]) => {
 
   for (const s of spells) groups.set(s.school, [...(groups.get(s.school) ?? []), s]);
 
-  return [...groups].map(([school, list]) => ({ school, spells: [...list].sort((a, b) => a.level - b.level || a.name.localeCompare(b.name, "uk")) }));
+  return [...groups].map(([school, list]) => ({ school, spells: [...list].sort((a, b) => a.level - b.level || byName(a, b)) }));
 };
 
 export function FxSpells({ spells }: { spells: SpellCardData[] }) {

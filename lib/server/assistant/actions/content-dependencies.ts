@@ -5,6 +5,7 @@ import { jsonContent } from "./content-snapshot";
 
 import { BUNDLE_TABLES } from "@/lib/server/templates/bundle";
 import { collectKeysAndStrings } from "@/lib/server/templates/remap-ids";
+import { asRecord } from "@/lib/utils/common/json";
 
 export const tableKey = (kind: string) => ({ "spell-groups": "spellGroups", "main-skills": "mainSkills", "artifact-sets": "artifactSets" }[kind] ?? kind);
 
@@ -29,19 +30,17 @@ for (const table of BUNDLE_TABLES) {
 
 export const cascadeRelationsOf = (model: string) => cascadeRelations.get(model) ?? [];
 
-const object = (value: unknown): Row => value && typeof value === "object" && !Array.isArray(value) ? value as Row : {};
-
 export function contentIds(state: unknown, kind: string): string[] {
-  const rows = object(object(state).tables)[tableKey(kind)];
+  const rows = asRecord(asRecord(state).tables)[tableKey(kind)];
 
   return Array.isArray(rows) ? rows.map((row: Row) => String(row.id)) : [];
 }
 
 /** Only relevant rows enter the visible preview; the guard hashes all rows. */
 export function contentDependencies(state: unknown, kind: string, id: string | undefined, body: unknown) {
-  const root = object(state);
+  const root = asRecord(state);
 
-  const tables = object(root.tables);
+  const tables = asRecord(root.tables);
 
   const own = Array.isArray(tables[tableKey(kind)]) ? tables[tableKey(kind)] as Row[] : [];
 
@@ -74,7 +73,7 @@ export function contentDependencies(state: unknown, kind: string, id: string | u
 export function contentDeleteCascades(state: unknown, kind: string, ids: readonly string[]): FieldChange[] {
   const targetModel = BUNDLE_TABLES.find((table) => table.key === tableKey(kind))?.model;
 
-  const tables = object(object(state).tables);
+  const tables = asRecord(asRecord(state).tables);
 
   const changes: FieldChange[] = [];
 

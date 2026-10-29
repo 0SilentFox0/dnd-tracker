@@ -4,7 +4,7 @@ import { runAbilities } from "@/lib/utils/abilities/engine/core/run-abilities";
 import type { AbilityRunContext } from "@/lib/utils/abilities/engine/core/types";
 import { cooldownLeft, poolAffordable, withinCountLimits } from "@/lib/utils/abilities/engine/core/usage";
 import { conditionRequiresStill, evaluateCondition } from "@/lib/utils/abilities/registry/conditions";
-import { canActNow } from "@/lib/utils/battle/common/control";
+import { canActNow, currentOf } from "@/lib/utils/battle/common/control";
 import { applyMainActionUsed } from "@/lib/utils/battle/participant";
 import type { BattleMutationContext, MutationResult } from "@/lib/utils/battle/pipeline/run-battle-mutation";
 import { BattleAccessError, BattleRuleError } from "@/lib/utils/battle/store";
@@ -13,6 +13,7 @@ import { assertCanAct } from "@/lib/utils/battle/turn";
 import { assertAbilityAim } from "@/lib/utils/battle/validation/ability-aim";
 import { assertAbilityTargets } from "@/lib/utils/battle/validation/ability-targets";
 import { abilityOnMap } from "@/lib/utils/battle/view";
+import { rngOf } from "@/lib/utils/common/rng";
 import type { BattleParticipant, GridPoint } from "@/types/battle";
 
 export type AbilityUseTrigger = "action" | "bonusAction";
@@ -34,14 +35,14 @@ const spend: Record<AbilityUseTrigger, (p: BattleParticipant) => BattleParticipa
   bonusAction: (p) => ({ ...p, actionFlags: { ...p.actionFlags, hasUsedBonusAction: true } }),
 };
 
-export const abilityRunContext = (ctx: BattleMutationContext): AbilityRunContext => ({ round: ctx.scene.round, rng: ctx.rng ?? Math.random, map: ctx.meta.map, rules: ctx.meta.rules });
+export const abilityRunContext = (ctx: BattleMutationContext): AbilityRunContext => ({ round: ctx.scene.round, rng: rngOf(ctx), map: ctx.meta.map, rules: ctx.meta.rules });
 
 export async function runAbilityUse(ctx: BattleMutationContext, req: AbilityUseRequest, trigger: AbilityUseTrigger, deps: SummonDeps): Promise<MutationResult> {
   const participant = findParticipant(ctx.participants, req.participantId);
 
   if (!participant) throw new BattleAccessError(404, API_ERRORS.BATTLE_PARTICIPANT_NOT_IN_BATTLE);
 
-  if (!canActNow(ctx, participant, ctx.participants[ctx.scene.turnIndex])) throw new BattleAccessError(403, API_ERRORS.FORBIDDEN);
+  if (!canActNow(ctx, participant, currentOf(ctx))) throw new BattleAccessError(403, API_ERRORS.FORBIDDEN);
 
   if (!isActive(participant)) throw new BattleRuleError("participant_dead", "Учасник не може діяти");
 
@@ -79,7 +80,7 @@ export async function runAbilityUse(ctx: BattleMutationContext, req: AbilityUseR
 
   const run = runAbilities(order, { type: trigger, actorId: id, abilityKey: ability.key, targetIds, ...(targetCell && { targetCell }) }, abilityRunContext(ctx));
 
-  const summoned = await applyAbilitySummons(run.summons, run.participants, { campaignId: ctx.scene.campaignId, battleId: ctx.scene.id, rng: ctx.rng ?? Math.random, rules: ctx.meta.rules, deps });
+  const summoned = await applyAbilitySummons(run.summons, run.participants, { campaignId: ctx.scene.campaignId, battleId: ctx.scene.id, rng: rngOf(ctx), rules: ctx.meta.rules, deps });
 
   const participants = usage.spendFirst ? summoned.order : updateParticipant(summoned.order, id, spend[trigger]);
 

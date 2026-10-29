@@ -11,6 +11,7 @@ import { isUp, statusForHp } from "@/lib/utils/battle/participant/state";
 import type { BattleMutationContext, MutationResult } from "@/lib/utils/battle/pipeline/run-battle-mutation";
 import { BattleAccessError, battleActionToEvent, BattleRuleError, dmEvent, systemEvent } from "@/lib/utils/battle/store";
 import { advanceAfterRemoval } from "@/lib/utils/battle/turn";
+import { rngOf } from "@/lib/utils/common/rng";
 import type { BattleParticipant } from "@/types/battle";
 
 export function patchParticipantMutation(
@@ -121,7 +122,7 @@ function updateHp(ctx: BattleMutationContext, participantId: string, requestedHp
   const order = settled.participants;
 
   const downed = oldHp > 0 && newHp <= 0
-    ? resolveDowned(order, { victimId: participantId, actorId: null }, { round: ctx.scene.round, rng: ctx.rng ?? Math.random, rules: ctx.meta.rules }, { allowSurvive: false })
+    ? resolveDowned(order, { victimId: participantId, actorId: null }, { round: ctx.scene.round, rng: rngOf(ctx), rules: ctx.meta.rules }, { allowSurvive: false })
     : { participants: order, messages: [] as string[] };
 
   const name = updated.basicInfo.name;

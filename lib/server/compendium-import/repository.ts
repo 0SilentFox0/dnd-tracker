@@ -9,7 +9,7 @@ import type { CompendiumReport, DependencyChoice, ImportRepository } from "./ser
 import type { TargetKind } from "./types";
 
 import "server-only";
-import { invalidateReference, ReferenceKind } from "@/lib/cache/tags";
+import { invalidateAllReference } from "@/lib/cache/tags";
 import { CampaignKind, CampaignVisibility, SRD_TEMPLATE_NAME } from "@/lib/constants/campaigns";
 import { prisma } from "@/lib/db";
 import { jsonContentInput } from "@/lib/server/assistant/json";
@@ -25,19 +25,17 @@ import { newContentId } from "@/lib/server/templates/ids";
 import type { Actor } from "@/lib/utils/api/actor";
 import { armorStatsFromRow } from "@/lib/utils/artifacts/armor-stats";
 import { weaponStatsFromRow } from "@/lib/utils/artifacts/weapon-stats";
-import { isRecord } from "@/lib/utils/common/is-record";
+import { asRecord } from "@/lib/utils/common/json";
 import { itemStatsFromRow } from "@/lib/utils/items/item-row";
 import { parseRules } from "@/lib/utils/rules/schema";
 import type { ScenarioContent } from "@/types/scenario";
 
 export const kindTable = { "spell-groups": "spellGroups", spells: "spells", units: "units", artifacts: "artifacts", races: "races", classes: "classes", feats: "feats", backgrounds: "backgrounds" } as const;
 
-const object = (v: unknown): JsonRecord => isRecord(v) ? v : {};
-
 export function nativeBody(kind: TargetKind, raw: JsonRecord): JsonRecord {
   const resource = kind !== "scenarioPages" ? CONTENT_RESOURCES[kind] as AnyContentResource : undefined;
 
-  let body = kind === "scenarioPages" ? raw : object(resource?.toItem?.(raw) ?? raw);
+  let body = kind === "scenarioPages" ? raw : asRecord(resource?.toItem?.(raw) ?? raw);
 
   if (kind === "artifacts") body = { ...body, weapon: weaponStatsFromRow(raw), armor: armorStatsFromRow(raw), item: itemStatsFromRow(raw) };
 
@@ -119,7 +117,7 @@ export const prismaImportRepository: ImportRepository = {
 
     const provenance = await prisma.compendiumEntry.findMany({ where: { campaignId: actor.campaignId }, orderBy: { canonicalKey: "asc" }, select: { canonicalKey: true, kind: true, localId: true, edition: true, baseline: true, bindings: true } });
 
-    const bindingRefs = (entry: (typeof provenance)[number]) => Object.values(object(entry.bindings)).map(object).filter((b) => typeof b.kind === "string" && typeof b.id === "string").map((b) => ({ kind: b.kind as TargetKind, id: b.id as string }));
+    const bindingRefs = (entry: (typeof provenance)[number]) => Object.values(asRecord(entry.bindings)).map(asRecord).filter((b) => typeof b.kind === "string" && typeof b.id === "string").map((b) => ({ kind: b.kind as TargetKind, id: b.id as string }));
 
     const rows = await loadRows(actor.campaignId, [
       ...provenance.map((entry) => ({ kind: entry.kind as TargetKind, id: entry.localId })),
@@ -130,7 +128,7 @@ export const prismaImportRepository: ImportRepository = {
     const existing: ExistingEntry[] = provenance.map((entry) => {
       const raw = rows.get(entry.kind as TargetKind)?.get(entry.localId);
 
-      return { key: entry.canonicalKey, kind: entry.kind as TargetKind, edition: entry.edition as "classic" | "one" | "unknown", localId: entry.localId, baseline: object(entry.baseline), body: raw ? nativeBody(entry.kind as TargetKind, raw) : {}, missing: !raw };
+      return { key: entry.canonicalKey, kind: entry.kind as TargetKind, edition: entry.edition as "classic" | "one" | "unknown", localId: entry.localId, baseline: asRecord(entry.baseline), body: raw ? nativeBody(entry.kind as TargetKind, raw) : {}, missing: !raw };
     });
 
     const existingByRef = new Map(existing.map((e) => [entryRefKey(e.kind ?? "", e.localId), e] as const));
@@ -145,8 +143,8 @@ export const prismaImportRepository: ImportRepository = {
 
     const bindings: Record<string, ExistingEntry> = Object.create(null);
 
-    for (const entry of provenance) for (const [key, rawBinding] of Object.entries(object(entry.bindings))) {
-      const binding = object(rawBinding);
+    for (const entry of provenance) for (const [key, rawBinding] of Object.entries(asRecord(entry.bindings))) {
+      const binding = asRecord(rawBinding);
 
       if (typeof binding.kind !== "string" || typeof binding.id !== "string") continue;
 
@@ -257,7 +255,7 @@ export const prismaImportRepository: ImportRepository = {
 
     const result = current ? await resource.update(actor, current, resource.schemas.update.parse(row.body)) : await resource.create(actor, resource.schemas.create.parse(row.body));
 
-    return String(object(result).id);
+    return String(asRecord(result).id);
   },
   async saveEntry(actor, row) {
     const data = { kind: row.kind, localId: row.localId, locator: jsonContentInput(row.nested ? row.body : []), edition: row.edition, sourceJson: row.source, originalName: row.name, attribution: jsonContentInput(row.attribution ?? {}), inputHash: digest(row.baseline ?? row.body), adapterVersion: ADAPTER_VERSION, baseline: jsonContentInput(row.baseline ?? row.body), notes: row.notes, issues: jsonContentInput(row.issues), bindings: jsonContentInput(row.resolvedBindings ?? {}) };
@@ -293,7 +291,7 @@ export const prismaImportRepository: ImportRepository = {
 
     report.runId = id;
     await prisma.compendiumImportRun.create({ data: { id, campaignId: actor.campaignId, userId: actor.userId, idempotencyKey: key, planHash: requestHash, report: jsonContentInput(report) } });
-    afterContentCommit(() => invalidateReference(Object.values(ReferenceKind), actor.campaignId));
+    afterContentCommit(() => invalidateAllReference(actor.campaignId));
   },
   applyRules: async (actor, patch) => { await updateCampaignRules(actor, patch); },
 };

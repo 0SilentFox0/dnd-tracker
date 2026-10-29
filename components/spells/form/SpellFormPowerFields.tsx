@@ -15,12 +15,12 @@ import { SelectField } from "@/components/ui/select-field";
 import { Switch } from "@/components/ui/switch";
 import type { AbilityKey } from "@/lib/constants/abilities";
 import { useTranslator } from "@/lib/i18n/use-translator";
+import { clamp } from "@/lib/utils/common/clamp";
 import type { TemplateShape } from "@/types/battle";
 import type { SpellTargeting } from "@/types/spells";
 
 const RANGED_KINDS = ["ally", "enemy", "allyDead", "area", "template"];
 
-const clamp = (raw: string, min: number, max: number, fallback: number) => Math.max(min, Math.min(max, parseInt(raw) || fallback));
 
 function RangeInput({ value, onCommit }: { value: number | undefined; onCommit: (value: number | undefined) => void }) {
   const t = useTranslator();
@@ -180,11 +180,11 @@ export function SpellFormPowerFields({ formData, setFormData, classesEnabled = f
               </div>
               <div>
                 <Label htmlFor="upcast-dice">{tp("upcastDice")}</Label>
-                <Input id="upcast-dice" type="number" min={0} max={10} value={formData.upcastDice ?? ""} onChange={(e) => setFormData({ ...formData, upcastDice: e.target.value === "" ? null : clamp(e.target.value, 0, 10, 0) })} className="w-24" />
+                <Input id="upcast-dice" type="number" min={0} max={10} value={formData.upcastDice ?? ""} onChange={(e) => setFormData({ ...formData, upcastDice: e.target.value === "" ? null : clamp(parseInt(e.target.value) || 0, 0, 10) })} className="w-24" />
               </div>
               <div>
                 <Label htmlFor="upcast-targets">{tp("upcastTargets")}</Label>
-                <Input id="upcast-targets" type="number" min={0} max={10} value={formData.upcastTargets ?? ""} onChange={(e) => setFormData({ ...formData, upcastTargets: e.target.value === "" ? null : clamp(e.target.value, 0, 10, 0) })} className="w-24" />
+                <Input id="upcast-targets" type="number" min={0} max={10} value={formData.upcastTargets ?? ""} onChange={(e) => setFormData({ ...formData, upcastTargets: e.target.value === "" ? null : clamp(parseInt(e.target.value) || 0, 0, 10) })} className="w-24" />
               </div>
               <div className="col-span-2 flex items-center gap-2">
                 <Checkbox id="add-ability-mod" checked={!!formData.addAbilityMod} onCheckedChange={(checked) => setFormData({ ...formData, addAbilityMod: checked === true })} />
