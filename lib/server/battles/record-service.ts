@@ -23,7 +23,14 @@ export class BattleAudioRateLimitError extends ContentError {
   constructor(readonly rate: RateLimitResult) { super(API_ERRORS.TOO_MANY_REQUESTS, 429); }
 }
 
-export const patchBattleSchema = z.object({ name: z.string().min(1).optional(), description: z.string().nullable().optional(), participants: createBattleSchema.shape.participants.optional(), map: battleMapSchema.nullable().optional() }).strict();
+export const patchBattleSchema = z
+  .object({
+    name: z.string().min(1).optional(),
+    description: z.string().nullable().optional(),
+    participants: createBattleSchema.shape.participants.optional(),
+    map: battleMapSchema.nullable().optional(),
+  })
+  .strict();
 export const recordSchemas = { create: createBattleSchema, patch: patchBattleSchema, delete: z.object({}).strict(), "clear-history": z.object({}).strict(), audio: battleAudioCommandSchema };
 export type RecordOperation = keyof typeof recordSchemas;
 
@@ -67,7 +74,15 @@ export async function prepareHttpBattleRecord(campaignId: string, operation: Rec
 }
 
 /** Called only inside runGuardedBattleRecordOperation, by HTTP and assistant alike. */
-export async function writeBattleRecord(campaignId: string, userId: string, operation: RecordOperation, battleId: string | undefined, raw: unknown, execution?: ActionExecutionContext, preparedMap = false) {
+export async function writeBattleRecord(
+  campaignId: string,
+  userId: string,
+  operation: RecordOperation,
+  battleId: string | undefined,
+  raw: unknown,
+  execution?: ActionExecutionContext,
+  preparedMap = false,
+) {
   const input = parseInput(recordSchemas[operation] as z.ZodType, raw);
 
   if (operation === "create") {
@@ -75,7 +90,18 @@ export async function writeBattleRecord(campaignId: string, userId: string, oper
 
     const map = preparedMap ? data.map : await mapForWrite(data.map, campaignId);
 
-    return prisma.battleScene.create({ data: { campaignId, name: data.name, description: data.description, status: "prepared", participants: data.participants as unknown as Prisma.InputJsonValue, currentRound: 1, currentTurnIndex: 0, ...(map && { map }) } });
+    return prisma.battleScene.create({
+      data: {
+        campaignId,
+        name: data.name,
+        description: data.description,
+        status: "prepared",
+        participants: data.participants as unknown as Prisma.InputJsonValue,
+        currentRound: 1,
+        currentTurnIndex: 0,
+        ...(map && { map }),
+      },
+    });
   }
 
   if (operation === "clear-history" || operation === "delete") {
@@ -102,7 +128,15 @@ export async function writeBattleRecord(campaignId: string, userId: string, oper
 
     const map = preparedMap ? rawMap : await mapForWrite(rawMap, campaignId, row.map);
 
-    await prisma.battleScene.update({ where: { id: row.id, version: row.version }, data: { ...rest, ...(rest.participants && { participants: rest.participants as unknown as Prisma.InputJsonValue }), ...(map !== undefined && { map: map ?? Prisma.DbNull }), version: { increment: 1 } } });
+    await prisma.battleScene.update({
+      where: { id: row.id, version: row.version },
+      data: {
+        ...rest,
+        ...(rest.participants && { participants: rest.participants as unknown as Prisma.InputJsonValue }),
+        ...(map !== undefined && { map: map ?? Prisma.DbNull }),
+        version: { increment: 1 },
+      },
+    });
 
     return { id: row.id, version: row.version + 1 };
   }
@@ -121,7 +155,10 @@ export async function writeBattleRecord(campaignId: string, userId: string, oper
 
   const next = result.value;
 
-  const { count } = await prisma.battleScene.updateMany({ where: { id: row.id, campaignId, audio: prev ? { path: ["seq"], equals: prev.seq } : { equals: Prisma.DbNull } }, data: { audio: next as unknown as Prisma.InputJsonValue } });
+  const { count } = await prisma.battleScene.updateMany({
+    where: { id: row.id, campaignId, audio: prev ? { path: ["seq"], equals: prev.seq } : { equals: Prisma.DbNull } },
+    data: { audio: next as unknown as Prisma.InputJsonValue },
+  });
 
   if (!count) throw new ContentError(API_ERRORS.BATTLE_AUDIO_CONFLICT, 409);
 

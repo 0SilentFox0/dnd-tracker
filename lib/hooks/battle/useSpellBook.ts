@@ -41,7 +41,10 @@ export { useBonusSpells, useReactionSpells, useSpellBookPrefetch } from "./useBa
 
 export type { BookSpell };
 
-export function useSpellBook(caster: BattleParticipant | null, options: { reactionsOnly?: boolean; allSpells?: boolean; onDone?: () => void; legendary?: { abilityKey: string; spellId: string } } = {}) {
+export function useSpellBook(
+  caster: BattleParticipant | null,
+  options: { reactionsOnly?: boolean; allSpells?: boolean; onDone?: () => void; legendary?: { abilityKey: string; spellId: string } } = {},
+) {
   const scene = useBattleScene();
 
   const text = useText();
@@ -96,7 +99,21 @@ export function useSpellBook(caster: BattleParticipant | null, options: { reacti
   const firstUsable = (who: BattleParticipant) => slotLevels(who).find((l) => l.current > 0)?.level ?? 0;
 
   const view = {
-    spells, byLevel, selected, targets, saveTargets, hover, aimPreviewAt, mapTargeting, chain, inRange, filteredOut, formulaOf: (s: BookSpell) => text(formulaOf(s)), wideningOf, definitionOf: spellDefinition, slots: caster ? slotLevels(caster) : [],
+    spells,
+    byLevel,
+    selected,
+    targets,
+    saveTargets,
+    hover,
+    aimPreviewAt,
+    mapTargeting,
+    chain,
+    inRange,
+    filteredOut,
+    formulaOf: (s: BookSpell) => text(formulaOf(s)),
+    wideningOf,
+    definitionOf: spellDefinition,
+    slots: caster ? slotLevels(caster) : [],
     universalSlot,
     free,
     timing: selected?.casting,
@@ -117,7 +134,16 @@ export function useSpellBook(caster: BattleParticipant | null, options: { reacti
     noSlot: (s: BookSpell) => !canSlot(s) && spellBlockedBySlots(caster, s.level, bypassCost),
     attackTargets: state.pick?.needsAttackRolls ? targets.filter((t) => state.targetIds.includes(t.basicInfo.id)) : [],
     costUsed: (s: BookSpell) => costBlocked({
-      caster, spell: s, definitionCost: spellDefinition(s).cost, grants: s.grantKey ? [inlineGrantOf(caster, s)].filter((g) => !!g) : grantsOf(s), grant: s.grantKey ? inlineGrantOf(caster, s) : grantOf(s), slotKey: state.slotKey, free, bypassCost, special: !!special, isDM: scene.viewer.isDM,
+      caster,
+      spell: s,
+      definitionCost: spellDefinition(s).cost,
+      grants: s.grantKey ? [inlineGrantOf(caster, s)].filter((g) => !!g) : grantsOf(s),
+      grant: s.grantKey ? inlineGrantOf(caster, s) : grantOf(s),
+      slotKey: state.slotKey,
+      free,
+      bypassCost,
+      special: !!special,
+      isDM: scene.viewer.isDM,
       isMyTurn: order[scene.battle.currentTurnIndex]?.basicInfo.id === caster?.basicInfo.id, reactionBlocked: !!caster && !!reactionBlocker(caster),
     }),
   };
@@ -138,7 +164,13 @@ export function useSpellBook(caster: BattleParticipant | null, options: { reacti
 
       const grant = defaultGrant(grants, { hasSlotChoices: choices.length > 0, spellLevel: s.level });
 
-      dispatch({ type: "PICK", pick: buildSpellPick(order, caster, s, map, { castLevel: grant?.castLevel ?? first?.castLevel }), ...(first && { slotKey: first.key }), ...(grant?.key && { grantKey: grant.key }), ...(grant?.upcast && grant.castLevel !== undefined && { castLevel: grant.castLevel }) });
+      dispatch({
+        type: "PICK",
+        pick: buildSpellPick(order, caster, s, map, { castLevel: grant?.castLevel ?? first?.castLevel }),
+        ...(first && { slotKey: first.key }),
+        ...(grant?.key && { grantKey: grant.key }),
+        ...(grant?.upcast && grant.castLevel !== undefined && { castLevel: grant.castLevel }),
+      });
     },
     setSlot: (key: string) => {
       const option = selected && slotChoices.find((o) => o.key === key);
@@ -152,7 +184,14 @@ export function useSpellBook(caster: BattleParticipant | null, options: { reacti
 
       const grant = grantsOf(selected).find((g) => g.key === value.slice("grant:".length));
 
-      if (grant?.key) dispatch({ type: "SET_GRANT", grantKey: grant.key, pick: buildSpellPick(order, caster, selected, map, { castLevel: grant.castLevel }), ...(grant.upcast && grant.castLevel !== undefined && { castLevel: grant.castLevel }) });
+      if (grant?.key) {
+        dispatch({
+          type: "SET_GRANT",
+          grantKey: grant.key,
+          pick: buildSpellPick(order, caster, selected, map, { castLevel: grant.castLevel }),
+          ...(grant.upcast && grant.castLevel !== undefined && { castLevel: grant.castLevel }),
+        });
+      }
     },
     setCastLevel: (castLevel: number) => {
       if (selected && selectedGrant) dispatch({ type: "SET_CAST_LEVEL", castLevel, pick: buildSpellPick(order, caster, selected, map, { castLevel }) });
@@ -164,7 +203,13 @@ export function useSpellBook(caster: BattleParticipant | null, options: { reacti
       if (!caster || !selected) return;
 
       try {
-        await scene.actions.castSpell.mutateAsync({ ...spellPayload(state), spellId: cancel ? caster.battleData.pendingCast?.spellId ?? selected.id : selected.id, targetIds: [], diceRolls: [], ...(cancel && { cancelCasting: true }) });
+        await scene.actions.castSpell.mutateAsync({
+          ...spellPayload(state),
+          spellId: cancel ? (caster.battleData.pendingCast?.spellId ?? selected.id) : selected.id,
+          targetIds: [],
+          diceRolls: [],
+          ...(cancel && { cancelCasting: true }),
+        });
         dispatch({ type: "CLOSE" });
         options.onDone?.();
       } catch (e) { dispatch({ type: "FAIL", error: e instanceof Error ? e.message : textRef("battleWizards.spell.continueFailed") }); }
