@@ -40,6 +40,11 @@ export class BattleRuleError extends Error {
   }
 }
 
-export function rejectAction(message: string): never {
-  throw new BattleRuleError("action_rejected", message);
+/** A reason that may be a plain legacy string or a ref (its params must be flat: they travel as error params). */
+export function ruleErrorOf(code: BattleRuleCode, reason: string | { message: string; params?: Record<string, unknown> }): BattleRuleError {
+  return typeof reason === "string" ? new BattleRuleError(code, reason) : new BattleRuleError(code, reason.message, reason.params as ErrorParams | undefined);
+}
+
+export function rejectAction(message: string, params?: ErrorParams): never {
+  throw new BattleRuleError("action_rejected", message, params);
 }

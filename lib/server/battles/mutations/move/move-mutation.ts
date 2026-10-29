@@ -15,6 +15,7 @@ import { lineText, logFields } from "@/lib/utils/battle/log/lines";
 import { activeMapMode, type MapModeKey } from "@/lib/utils/battle/modes";
 import type { BattleMutationContext, MutationResult } from "@/lib/utils/battle/pipeline/run-battle-mutation";
 import { BattleRuleError, type NewBattleEvent, systemEvent } from "@/lib/utils/battle/store";
+import { ruleErrorOf } from "@/lib/utils/battle/store/errors";
 import { assertCanAct } from "@/lib/utils/battle/turn";
 import type { BattleMapConfig, BattleParticipant, GridPoint, TerrainCell } from "@/types/battle";
 import type { LogLine } from "@/types/text";
@@ -112,7 +113,7 @@ function finishMove(ctx: BattleMutationContext, { participants, moved, hazard, m
 function returnToStart(ctx: BattleMutationContext, participants: BattleParticipant[], mover: BattleParticipant, ownTurn: boolean): MutationResult {
   const check = ownTurn ? checkReturnToStart(ctx.meta.map, participants, mover) : { ok: false as const, error: API_ERRORS.BATTLE_RETURN_OWN_TURN };
 
-  if (!check.ok) throw new BattleRuleError("action_rejected", check.error);
+  if (!check.ok) throw ruleErrorOf("action_rejected", check.error);
 
   assertCanAct(ctx, mover.basicInfo.id);
 

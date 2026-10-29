@@ -3,6 +3,7 @@ import { handleCriticalFail } from "./critical-fail";
 import { resolveHit } from "./hit";
 import { handleMiss } from "./miss";
 
+import { textRef } from "@/lib/i18n/text-ref";
 import { collectModifiers, findFlags } from "@/lib/utils/abilities/engine/core/collect-modifiers";
 import { isActive, isAttackable, withSelf } from "@/lib/utils/abilities/engine/core/participants";
 import { spendAttack } from "@/lib/utils/battle/attack/attacks-left";
@@ -10,7 +11,7 @@ import { isAdjacentAttack } from "@/lib/utils/battle/attack/bonus";
 import { activeEffectIds, consumeAttackEffects } from "@/lib/utils/battle/attack/consume-effects";
 import { critDamageRolls, critDoublesDice } from "@/lib/utils/battle/attack/crit-dice";
 import { cancelCritIfImmune } from "@/lib/utils/battle/attack/crit-immunity";
-import { critFlavorFor } from "@/lib/utils/battle/attack/critical";
+import { critFlavorOf } from "@/lib/utils/battle/attack/critical";
 import { calculateAttackRoll, eventRollMode } from "@/lib/utils/battle/attack/roll";
 import { attackSourceOf } from "@/lib/utils/battle/attack/source";
 import { type ActionFlow, appendHpChanges, fire, getP, put } from "@/lib/utils/battle/common/action-flow";
@@ -100,7 +101,7 @@ export function processAttack(params: ProcessAttackParams): ProcessAttackResult 
   const second = rolled.secondRoll;
 
   if (second) {
-    flow.messages.push(`🎲 ${second.mode === "advantage" ? "перевага" : "недолік"}${second.manual ? " (вибір гравця)" : ""}: другий d20 = ${second.value}${second.serverRolled ? " (сервер)" : ""}, обрано ${rolled.chosenD20}`);
+    flow.messages.push(textRef("battleLog.roll.second", { mode: textRef(second.mode === "advantage" ? "battleLog.roll.advantage" : "battleLog.roll.disadvantage"), manual: second.manual ? textRef("battleLog.roll.manualTag") : "", value: second.value, server: second.serverRolled ? textRef("battleLog.roll.serverTag") : "", chosen: rolled.chosenD20 }));
   }
 
   let slots = damageDiceSlots(getP(flow, attackerId), attack);
@@ -137,16 +138,16 @@ export function processAttack(params: ProcessAttackParams): ProcessAttackResult 
 
   const critRoll = adjacentCrit ? { ...rolled, isCritical: true } : rolled;
 
-  if (adjacentCrit) flow.messages.push("💥 влучання впритул — критичне");
+  if (adjacentCrit) flow.messages.push(textRef("battleLog.crit.adjacent"));
 
   const immune = isHit ? cancelCritIfImmune(critRoll, flow.ps, targetId, actionModifiers[targetId]) : { roll: critRoll, cancelled: false };
 
   const attackRoll = immune.roll;
 
-  if (immune.cancelled) flow.messages.push("🛡 крит скасовано — звичайне влучання");
+  if (immune.cancelled) flow.messages.push(textRef("battleLog.crit.cancelled"));
 
-  const critFlavorText = attackRoll.criticalEffect
-    ? critFlavorFor(attackRoll.criticalEffect, getP(flow, attackerId).basicInfo.name, getP(flow, targetId).basicInfo.name, {
+  const critFlavor = attackRoll.criticalEffect
+    ? critFlavorOf(attackRoll.criticalEffect, getP(flow, attackerId).basicInfo.name, getP(flow, targetId).basicInfo.name, {
         battleId,
         round: currentRound,
         attackerId,
@@ -154,7 +155,7 @@ export function processAttack(params: ProcessAttackParams): ProcessAttackResult 
       })
     : undefined;
 
-  const branch = { critFlavorText, flow, attackerId, targetId, attack, d20Roll, attackRoll, targetAC, currentRound, battleId };
+  const branch = { critFlavor, flow, attackerId, targetId, attack, d20Roll, attackRoll, targetAC, currentRound, battleId };
 
   if (attackRoll.isCriticalFail && attackRoll.criticalEffect) {
     const r = handleCriticalFail(branch);
@@ -181,7 +182,7 @@ export function processAttack(params: ProcessAttackParams): ProcessAttackResult 
 
     damageRolls = doubled.rolls;
     slots = [...slots, ...slots];
-    flow.messages.push(`🎲 крит: кубики шкоди подвоєно${doubled.serverRolled.length ? ` (сервер: ${doubled.serverRolled.join(", ")})` : ""}`);
+    flow.messages.push(textRef("battleLog.crit.doubled", { server: doubled.serverRolled.length ? textRef("battleLog.crit.doubledServer", { rolls: doubled.serverRolled.join(", ") }) : "" }));
   }
 
   const { hitDamage, vampirismHeal } = resolveHit({
@@ -202,7 +203,7 @@ export function processAttack(params: ProcessAttackParams): ProcessAttackResult 
     battleId,
   });
 
-  if (params.obstacle) flow.messages.unshift(`🧱 перешкода: шкода ×0.5 → ${hitDamage.totalFinalDamage}`);
+  if (params.obstacle) flow.messages.unshift(textRef("battleLog.attack.obstacle", { damage: hitDamage.totalFinalDamage }));
 
   fire(flow, { type: "attack", phase: "after", actorId: attackerId, targetId, attackKind, ...attackSourceOf(attack), ...eventRollMode(attackRoll) });
 
@@ -219,7 +220,7 @@ export function processAttack(params: ProcessAttackParams): ProcessAttackResult 
     vampirismHeal,
     battleId,
     currentRound,
-    critFlavorText,
+    critFlavor,
   });
 
   withRollDetails(battleAction);

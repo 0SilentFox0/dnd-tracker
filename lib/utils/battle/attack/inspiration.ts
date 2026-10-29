@@ -1,7 +1,8 @@
+import { textRef } from "@/lib/i18n/text-ref";
 import type { Ruleset } from "@/lib/utils/rules";
 import type { BattleParticipant } from "@/types/battle";
 
-export const INSPIRATION_LABEL = "Натхнення";
+export const INSPIRATION_LABEL = textRef("battleLog.rollMode.inspiration");
 
 export function canUseInspiration(p: BattleParticipant | undefined | null, rules: Ruleset | undefined | null): boolean {
   return !!rules?.outOfCombat?.inspiration && !!p?.battleData.inspiration;

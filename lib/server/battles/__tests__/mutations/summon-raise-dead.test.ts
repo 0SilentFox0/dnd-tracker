@@ -13,6 +13,7 @@ import { joinParticipant, splitParticipant } from "@/lib/utils/battle/store/spli
 import type { SummonDeps } from "@/lib/utils/battle/summon/ability-summons";
 import type { UnitFromPrisma } from "@/lib/utils/battle/types/participant";
 import type { BattleParticipant } from "@/types/battle";
+import { eventTextOf } from "@/lib/utils/battle/log/__tests__/event-text";
 
 const unit = (id: string, name: string, level: number, raceId: string) =>
   ({
@@ -73,7 +74,7 @@ describe("summon", () => {
     expect(out.participants).toHaveLength(3);
     expect(added.basicInfo.side).toBe(caster.basicInfo.side);
     expect(added.battleData.summonedBy).toBe("hero");
-    expect(out.events[0].resultText).toContain("прикликано");
+    expect(eventTextOf(out.events[0])).toContain("прикликано");
 
     const restored = joinParticipant(splitParticipant(added, { orderIndex: 2, isPending: false }), added.basicInfo.battleId);
 
@@ -102,14 +103,14 @@ describe("summon", () => {
     const out = await bonus(context({ participants: [caster, goblin] }), { participantId: "hero", abilityKey: gone.key });
 
     expect(out.participants).toHaveLength(2);
-    expect(out.events[0].resultText).toContain("обраного юніта не знайдено");
+    expect(eventTextOf(out.events[0])).toContain("обраного юніта не знайдено");
   });
 
   it("no matching unit: a message and nothing added", async () => {
     const out = await bonus(context({ participants: [caster, goblin] }), { participantId: "hero", abilityKey: missing.key });
 
     expect(out.participants).toHaveLength(2);
-    expect(out.events[0].resultText).toContain("немає юніта групи Демони Tier 7");
+    expect(eventTextOf(out.events[0])).toContain("немає юніта групи Демони Tier 7");
   });
 });
 

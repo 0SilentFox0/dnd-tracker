@@ -1,4 +1,5 @@
 import type { AbilityKey } from "@/lib/constants/abilities";
+import { textRef } from "@/lib/i18n/text-ref";
 import { findParticipant, isActive, resolvedAbilitiesOf } from "@/lib/utils/abilities/engine/core/participants";
 import { withinLimits } from "@/lib/utils/abilities/engine/core/usage";
 import { upsertTimedEffect } from "@/lib/utils/abilities/engine/effects/timed-effects";
@@ -7,10 +8,16 @@ import { disengageEffect } from "@/lib/utils/battle/actions/effects";
 import { type ActionFlow, getP, put } from "@/lib/utils/battle/common/action-flow";
 import { applyCondition5e } from "@/lib/utils/battle/conditions/apply";
 import { rollSave } from "@/lib/utils/battle/saves";
+import { REJECT } from "@/lib/utils/battle/store/reject";
 import { diceCount } from "@/lib/utils/common/dice";
 import type { BattleParticipant } from "@/types/battle";
+import type { TextRef } from "@/types/text";
 
-export const CUNNING_STRIKE_LABELS: Record<CunningStrikeEffect, string> = { poison: "Отрута", trip: "Підніжка", withdraw: "Відхід" };
+export const CUNNING_STRIKE_LABELS: Record<CunningStrikeEffect, TextRef> = {
+  poison: textRef("battleCommon.cunningStrike.poison"),
+  trip: textRef("battleCommon.cunningStrike.trip"),
+  withdraw: textRef("battleCommon.cunningStrike.withdraw"),
+};
 
 const CONDITION_ROUNDS = 10;
 
@@ -42,24 +49,24 @@ export function cunningStrikeOffer(attacker: BattleParticipant, round: number): 
 }
 
 /** Повертає вартість у кубиках, або текст відмови. */
-export function cunningStrikeCost(offer: CunningStrikeOffer | null, effects: CunningStrikeEffect[]): number | string {
-  if (!offer) return "Підступний удар недоступний цього ходу";
+export function cunningStrikeCost(offer: CunningStrikeOffer | null, effects: CunningStrikeEffect[]): number | TextRef {
+  if (!offer) return textRef(REJECT.cunningUnavailable);
 
-  if (new Set(effects).size !== effects.length) return "Ефект Підступного удару не можна повторювати";
+  if (new Set(effects).size !== effects.length) return textRef(REJECT.cunningRepeat);
 
-  if (effects.length > offer.maxEffects) return `Підступний удар: не більше ${offer.maxEffects} ефектів`;
+  if (effects.length > offer.maxEffects) return textRef(REJECT.cunningMax, { max: offer.maxEffects });
 
   let cost = 0;
 
   for (const effect of effects) {
     const option = offer.options.find((o) => o.effect === effect);
 
-    if (!option) return `Підступний удар: ефект «${CUNNING_STRIKE_LABELS[effect]}» не відкритий`;
+    if (!option) return textRef(REJECT.cunningLocked, { effect });
 
     cost += option.dice;
   }
 
-  return cost > offer.sneakDice ? "Підступний удар: недостатньо кубиків Прихованої атаки" : cost;
+  return cost > offer.sneakDice ? textRef(REJECT.cunningDice) : cost;
 }
 
 export function toggleCunningStrike(selected: CunningStrikeEffect[], effect: CunningStrikeEffect, offer: CunningStrikeOffer): CunningStrikeEffect[] {
@@ -80,7 +87,7 @@ export function applyCunningStrikeEffects(flow: ActionFlow, attackerId: string, 
 
     if (effect === "withdraw") {
       put(flow, upsertTimedEffect(attacker, disengageEffect(attackerId), flow.ctx.round));
-      flow.messages.push(`🏃 Підступний удар (${CUNNING_STRIKE_LABELS.withdraw}): ${attacker.basicInfo.name} відходить без атак можливості`);
+      flow.messages.push(textRef("battleLog.cunning.withdraw", { effect: CUNNING_STRIKE_LABELS.withdraw, name: attacker.basicInfo.name }));
       continue;
     }
 
@@ -94,21 +101,21 @@ export function applyCunningStrikeEffects(flow: ActionFlow, attackerId: string, 
 
     const save = rollSave({ target, ability, dc, participants: flow.ps, rules: flow.ctx.rules, rng: flow.ctx.rng });
 
-    const label = `Підступний удар (${CUNNING_STRIKE_LABELS[effect]})`;
+    const label = textRef("battleLog.cunning.label", { effect: CUNNING_STRIKE_LABELS[effect] });
 
     if (save.success) {
-      flow.messages.push(`🛡 ${label}: ${target.basicInfo.name} витримує СК ${dc} (${save.total})`);
+      flow.messages.push(textRef("battleLog.cunning.saved", { label, target: target.basicInfo.name, dc, total: save.total }));
       continue;
     }
 
-    flow.messages.push(`🎲 ${label}: ${target.basicInfo.name} провалює СК ${dc} (${save.total})`);
+    flow.messages.push(textRef("battleLog.cunning.failed", { label, target: target.basicInfo.name, dc, total: save.total }));
 
     const r = applyCondition5e(flow.ps, targetId, {
       key: effect === "poison" ? "poisoned" : "prone",
       rounds: CONDITION_ROUNDS,
       permanent: effect === "trip",
       ...(effect === "poison" && { saveEnds: { ability, dc } }),
-      source: { participantId: attackerId, name: attacker.basicInfo.name, abilityName: label },
+      source: { participantId: attackerId, name: attacker.basicInfo.name },
       sourceName: label,
       timedKey: `cunning:${effect}@${attackerId}`,
       round: flow.ctx.round,

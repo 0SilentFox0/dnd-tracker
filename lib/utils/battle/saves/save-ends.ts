@@ -1,4 +1,5 @@
-import { ABILITY_LABELS } from "@/lib/constants/abilities";
+import { textRef } from "@/lib/i18n/text-ref";
+import { abilityRef, effectName } from "@/lib/utils/battle/common/terms";
 import { removeEffects } from "@/lib/utils/battle/conditions/query";
 import { resolveSave } from "@/lib/utils/battle/saves/legendary";
 import { rollSave } from "@/lib/utils/battle/saves/roll-save";
@@ -29,9 +30,9 @@ export function rollSaveEnds(
 
     current = participant;
 
-    const head = `🎲 ${p.basicInfo.name}: рятівний кидок ${ABILITY_LABELS[ability]} ${rolled.total} проти СК ${dc}`;
+    const head = textRef("battleLog.saves.head", { name: p.basicInfo.name, ability: abilityRef(ability), total: rolled.total, dc });
 
-    messages.push(result.success ? `${head} — звільняється від стану «${e.name}»` : `${head} — стан «${e.name}» лишається`);
+    messages.push(textRef(result.success ? "battleLog.saves.freed" : "battleLog.saves.kept", { head, effect: effectName(e) }));
 
     if (message) messages.push(message);
 

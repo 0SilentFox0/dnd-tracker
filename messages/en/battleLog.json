@@ -1,1 +1,330 @@
-{}
+{
+  "damage": {
+    "rows": {
+      "dice": "Dice",
+      "sum": "Total",
+      "base": "Base",
+      "level": "Level",
+      "levelDice": "Level + level dice",
+      "levelDiceNotation": "Level + level dice ({dice})",
+      "crit": "Critical",
+      "fairBattle": "Fair battle",
+      "archetype": "Archetype",
+      "archetypeNamed": "Archetype: {name}",
+      "obstacle": "Obstacle",
+      "weaponBonus": "Weapon bonus",
+      "abilityHit": "{name}: +{amount}",
+      "abilityTotal": "Abilities: +{total}",
+      "spellMod": "{label} mod",
+      "spellBonus": "Spell bonus"
+    },
+    "steps": {
+      "dice": "Dice",
+      "heroLevel": "Hero level",
+      "crit": "Critical hit",
+      "archetype": "Archetype",
+      "fairBattle": "Fair battle",
+      "counter": "Counterattack",
+      "share": "Damage share",
+      "additional": "Additional damage",
+      "weaponBonus": "Weapon bonus",
+      "obstacle": "Obstacle",
+      "resistance": "Resistance",
+      "berserk": "Berserk"
+    },
+    "sources": {
+      "skill": "Skill bonus",
+      "race": "Racial bonus",
+      "class": "Class bonus",
+      "feat": "Feat bonus",
+      "artifact": "Artifact bonus",
+      "artifactSet": "Set bonus",
+      "unit": "Creature bonus",
+      "character": "Character bonus",
+      "effect": "Effect bonus",
+      "action": "Action bonus"
+    },
+    "immunityStep": "immunity → {after}"
+  },
+  "resistance": {
+    "immune": "{damage} {type} → IMMUNE (0 damage)",
+    "resist": "{damage} {type} → -{percent}% resistance ({final} damage)",
+    "vulnerable": "{damage} {type} → +{percent}% vulnerability ({final} damage)",
+    "plain": "{damage} {type} damage",
+    "targetVulnerable": "{target}: {source} = {percent}% vulnerability",
+    "targetResist": "{target}: {source} = {percent}% resistance",
+    "targetTotal": "Total damage ({target}): {incoming} {sign} {percent}% = {final}",
+    "targetTotalPlain": "Total damage ({target}): {final}",
+    "immunityNote": "⛔ {target}: {label}"
+  },
+  "details": {
+    "damage": "Damage: {rows}",
+    "type": "Type",
+    "attackOfKind": "{kind} attack",
+    "weapon": "Weapon",
+    "attackRoll": "Attack roll",
+    "targetAc": "Target AC",
+    "hit": "Hit",
+    "crit": "Critical!",
+    "critFail": "Critical miss",
+    "effect": "Effect [d10: {id}]",
+    "spell": "Spell",
+    "spellLevel": "{name} (level {level})",
+    "healing": "Healing",
+    "d10": "d10 roll"
+  },
+  "attack": {
+    "critHit": "Critical hit — {name}!{flavor}",
+    "critFail": "Critical failure — {name}.{flavor}",
+    "critFailHeadline": "{attacker}: critical failure — {name}.{flavor}",
+    "critFlavorTail": " {flavor}",
+    "critSuffix": ". {summary}",
+    "critPlain": " (CRITICAL HIT!)",
+    "hit": "{attacker} → {target}: {damage} damage{crit}",
+    "miss": "{attacker} → {target}: miss",
+    "guaranteed": "guaranteed damage: {damage}",
+    "vampirism": "Vampirism: {attacker} +{heal} HP",
+    "aborted": "{attacker} → {target}: the target died before the attack",
+    "serverDamageDice": "🎲 damage dice rolled by the server: {rolls}",
+    "guard": "🛡 {guardian} takes {damage} damage — protecting {target}",
+    "fireWave": "🔥 Fire wave: {parts}",
+    "obstacle": "🧱 obstacle: damage ×0.5 → {damage}"
+  },
+  "offTurn": {
+    "hit": "{title}: {attacker} → {target}: d20 {d20}, {damage} damage{plainCrit}{crit}",
+    "miss": "{title}: {attacker} → {target}: d20 {d20}, miss{crit}",
+    "second": "🎲 {noun}, {mode}: second d20 = {value}",
+    "titles": {
+      "retaliation": "Retaliation",
+      "opportunity": "Opportunity attack",
+      "readied": "Readied attack",
+      "legendary": "Legendary action"
+    },
+    "nouns": {
+      "retaliation": "retaliation",
+      "opportunity": "opportunity attack",
+      "readied": "readied attack",
+      "legendary": "legendary attack"
+    }
+  },
+  "roll": {
+    "second": "🎲 {mode}{manual}: second d20 = {value}{server}, chose {chosen}",
+    "advantage": "advantage",
+    "disadvantage": "disadvantage",
+    "manualTag": " (player's choice)",
+    "serverTag": " (server)"
+  },
+  "crit": {
+    "adjacent": "💥 point-blank hit — critical",
+    "cancelled": "🛡 critical cancelled — normal hit",
+    "doubled": "🎲 critical: damage dice doubled{server}",
+    "doubledServer": " (server: {rolls})"
+  },
+  "rollMode": {
+    "inspiration": "Inspiration",
+    "armorPenalty": "Armor without proficiency",
+    "farRange": "Long range",
+    "enemyNear": "Enemy nearby"
+  },
+  "cunning": {
+    "label": "Cunning Strike ({effect})",
+    "withdraw": "🏃 Cunning Strike ({effect}): {name} withdraws without opportunity attacks",
+    "saved": "🛡 {label}: {target} passes DC {dc} ({total})",
+    "failed": "🎲 {label}: {target} fails DC {dc} ({total})"
+  },
+  "triggers": {
+    "battleStart": "Battle start triggers",
+    "roundStart": "Round {round} start triggers",
+    "roundEnd": "End of round {round}",
+    "turnStart": "Start of turn",
+    "turnEnd": "End of turn"
+  },
+  "turn": {
+    "recharged": "🔄 {pool} recharged ({roll})",
+    "notRecharged": "🔄 {pool} did not recharge ({roll})",
+    "skipLost": "💫 {name} loses the action ({source})",
+    "dot": "{name}: {damage} {type} damage from {effect}",
+    "dotReduced": "{name}: {damage} (of {base}) {type} damage from {effect}",
+    "hot": "{name}: +{heal} HP from {effect}",
+    "effectsEnded": "effects ended: {names}",
+    "effectsEndedCap": "Effects ended: {names}",
+    "extraTurn": "{name} gets an extra turn"
+  },
+  "round": {
+    "start": "🔁 Start of Round {round}",
+    "lair": "🏰 Initiative 20: lair action — {name}"
+  },
+  "hazard": {
+    "defaultLabel": "Hazardous area",
+    "hit": "{name}: {damage} {type} damage from “{label}”"
+  },
+  "berserk": {
+    "prefix": "🤬 Berserk: ",
+    "line": "🤬 Berserk: {name} {reason}",
+    "losesAction": "loses the action",
+    "noTarget": "has nobody to attack"
+  },
+  "victory": {
+    "reserveEnemies": "Enemies remain in reserve — the DM decides",
+    "won": "🎉 Victory! All enemies are defeated!",
+    "escaped": "All living heroes escaped — the DM decides",
+    "reserveAllies": "Allies remain in reserve — the DM decides",
+    "lost": "💀 Defeat! All allies are defeated!",
+    "completeWon": "🎉 Battle over! The allies won!",
+    "completeLost": "💀 Battle over! The allies lost!",
+    "withXp": "{text} · ⭐ Experience: {share} each"
+  },
+  "morale": {
+    "ignored": "{name}: morale has no effect",
+    "neutral": "{name} has neutral morale",
+    "leadership": ", leadership +{bonus}%",
+    "detail": "Morale +{morale}{leadership}, roll: {roll}, needed: >={threshold}",
+    "extra": "⭐ {name}: extra turn! ({detail})",
+    "noExtra": "{name}: no extra turn ({detail})",
+    "skip": "😔 {name}: skips the turn because of low morale (Morale {morale}, roll: {roll}, skip on: <={threshold})",
+    "noSkip": "{name}: turn not skipped (Morale {morale}, roll: {roll}, skip on: <={threshold})",
+    "notFound": "Participant not found in the initiative order"
+  },
+  "death": {
+    "wake": "🎲 {name}: death save 20 — wakes up with 1 HP",
+    "stable": "🎲 {name}: death save {roll} — success, stabilizes",
+    "success": "🎲 {name}: death save {roll} — success ({count}/{max})",
+    "dies": "💀 {name}: death save {roll} — dies",
+    "fail": "🎲 {name}: death save {roll} — failure ({count}/{max})",
+    "massive": "💀 {name}: instant death from massive damage",
+    "unconscious": "💤 {name} falls unconscious",
+    "woundsDeath": "💀 {name} dies of wounds",
+    "damageFail": "🩸 {name}: death save failure from damage"
+  },
+  "concentration": {
+    "lost": "🔮 {name} loses concentration on “{spell}”{reason}",
+    "reasonTail": " ({reason})",
+    "reasons": {
+      "newSpell": "a new spell",
+      "castCancelled": "casting cancelled",
+      "castSkipped": "the casting action was skipped"
+    },
+    "effect": "Concentration: {spell}",
+    "check": "🎲 {name}: concentration — CON saving throw {total} vs DC {dc}",
+    "holds": "{head} — holds",
+    "broke": "{head} — loses concentration on “{spell}”"
+  },
+  "saves": {
+    "head": "🎲 {name}: {ability} saving throw {total} vs DC {dc}",
+    "freed": "{head} — is freed from “{effect}”",
+    "kept": "{head} — “{effect}” remains",
+    "legendaryResist": "👑 {name}: Legendary Resistance — a failure becomes a success ({left} left)"
+  },
+  "summon": {
+    "banish": "🚫 Banishment: {name} −{percent}% HP ({hp}/{max})",
+    "unitNotFound": "the chosen unit was not found",
+    "noGroup": "no unit in group {group} Tier {tier}",
+    "summoned": "🌀 summoned: {names}"
+  },
+  "maneuver": {
+    "damage": "💥 {ability}: {target} −{dealt} HP{note}",
+    "fireNote": " (Dexterity {total} vs DC {dc}{detail})",
+    "evaded": " — evasion",
+    "evadedHalf": " — evasion, half",
+    "half": " — half",
+    "fireNobody": "🔥 {ability}: {name} — nobody nearby",
+    "diveUp": "🦅 {name} takes to the sky ({ability})",
+    "diveMiss": "🦅 {name}: strikes at nothing"
+  },
+  "dm": {
+    "name": "DM",
+    "lairIn": "🏰 {name}: in the lair",
+    "lairOut": "🏰 {name}: outside the lair",
+    "removed": "Removed from battle (DM): {name}",
+    "removedReserve": "Removed from reserve (DM): {name}",
+    "killed": "Killed (DM): {name}",
+    "hpChanged": "HP changed (DM): {name}, {old} → {new}",
+    "revived": "Revived (DM): {name}, {hp} HP",
+    "refreshed": "Refreshed from the library: {count} participants",
+    "scaleBuff": "Enemy units strengthened (DM): HP and damage ×{step}",
+    "scaleNerf": "Enemy units weakened (DM): HP and damage ÷{step}",
+    "cancelled": "The DM cancelled the action",
+    "added": "The DM added to the field: {names}",
+    "conditionRemoved": "DM: {target} — condition removed: {condition}",
+    "revealed": "The DM brought into the battle: {names}",
+    "revealedWith": "The DM brought into the battle: {names}. {rest}",
+    "unitAssigned": "🎮 The DM hands {unit} over to {who}",
+    "unitsRandomized": "🎲 The DM hands out free units: {list}"
+  },
+  "aura": {
+    "inZone": "{ability}: in the zone — {who}",
+    "nobody": "nobody"
+  },
+  "legendary": {
+    "action": "👑 {name}: legendary action — {attack} ({counter})",
+    "use": "👑 {name}: legendary action — {ability} → {attack}",
+    "useLair": "🏰 {name}: lair action — {ability} → {attack}",
+    "run": "👑 {name}: legendary action “{ability}” ({counter}) — {text}",
+    "runLair": "🏰 {name}: lair action “{ability}” ({counter}) — {text}"
+  },
+  "spell": {
+    "castCancelled": "{name}: casting cancelled",
+    "serverSaves": "🎲 saving throws rolled by the server: {names}",
+    "saveCrit": "🎯 {target}: {effect} — {flavor}"
+  },
+  "ability": {
+    "noEffect": "{name}: nothing happened"
+  },
+  "reject": {
+    "bonusActionUsed": "The bonus action has already been used this turn",
+    "cannotAct": "The participant cannot act",
+    "noSuchAbility": "The participant has no such ability",
+    "abilityIsLair": "This ability is a lair action",
+    "abilityIsLegendary": "This ability is a legendary action, used outside your own turn",
+    "abilityLimit": "The usage limit is exhausted",
+    "abilityCooldown": "Cooldown: {rounds} more round(s)",
+    "pickCell": "Pick a cell on the map",
+    "tooFar": "Too far",
+    "tooManyRolls": "Too many rolls: {count} (maximum {max})",
+    "rollImpossible": "A roll of {roll} is impossible for {formula}",
+    "spellDiceCount": "{expected} spell dice are required, got {got}",
+    "wrongStatus": "The action is unavailable in the status “{status}”",
+    "panicSkip": "The participant is panicking and skips the turn",
+    "moraleFirst": "A morale check is needed first",
+    "outOfRange": "Out of range",
+    "pickDirection": "Pick a direction",
+    "badSpellTarget": "This target does not fit the spell",
+    "targetUnreachable": "The target is unreachable",
+    "targetNotNear": "The target is not nearby — move closer first",
+    "targetOutOfAttackRange": "The target is out of attack range",
+    "enemyNearNoShoot": "An enemy is adjacent — you cannot shoot",
+    "returnImpossible": "Cannot return",
+    "returnAfterAttack": "Returning is only possible after an attack",
+    "returnOccupied": "Cannot return: the cell is occupied",
+    "cunningUnavailable": "Cunning Strike is unavailable this turn",
+    "cunningRepeat": "A Cunning Strike effect cannot be repeated",
+    "cunningMax": "Cunning Strike: at most {max} effects",
+    "cunningLocked": "Cunning Strike: the effect “{effect, select, poison {Poison} trip {Trip} withdraw {Withdraw} other {{effect}}}” is not unlocked",
+    "cunningDice": "Cunning Strike: not enough Sneak Attack dice",
+    "cannotAttackRanged": "The attacker cannot attack at range",
+    "cannotAttackMelee": "The attacker cannot attack in melee",
+    "charmedTarget": "{name} cannot attack the one who charmed them",
+    "rollRequired": "A d20 roll is required (d20Roll, attackRoll or attackRolls)",
+    "attackerMissing": "The attacker is not in the battle",
+    "attackForbidden": "Only the DM or whoever is taking the turn can attack",
+    "attackerInactive": "The attacker cannot act (unconscious or dead)",
+    "noTargetsInBattle": "The targets are not in the battle",
+    "notAttackerTurn": "It is not the attacker's turn",
+    "noAttackAvailable": "The attacker has no available attack",
+    "tooManyTargets": "Too many targets. Maximum: {max}",
+    "noEnemyInReach": "No enemy is within reach",
+    "badStrikeRoll": "Invalid attack roll for target {target}",
+    "rollsRequired": "d20Roll, attackRoll or attackRolls is required",
+    "oneTargetRequired": "At least one target is required",
+    "barrierDuration": "A barrier needs a duration in rounds",
+    "mapOccupied": "The cell is occupied or outside the field",
+    "rollbackLimit": "This action can no longer be rolled back: only the last {count} states are kept after the battle ends",
+    "casterMissing": "The caster is not in the battle",
+    "spellForbidden": "Only the DM or the controller of the current turn can cast spells",
+    "casterInactive": "The caster is unconscious or dead",
+    "actForbiddenOwner": "Only the DM or the participant's owner can act",
+    "participantInactive": "The participant cannot act (unconscious or dead)",
+    "unitNotAssignable": "A player cannot control this unit",
+    "playerNotInBattle": "The player is not in the battle"
+  }
+}

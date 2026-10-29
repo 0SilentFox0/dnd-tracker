@@ -10,6 +10,7 @@ import { resolved, seq } from "@/lib/utils/abilities/__tests__/fixtures";
 import type { BattleMutationContext } from "@/lib/utils/battle/pipeline/run-battle-mutation";
 import type { ResolvedAbility } from "@/types/abilities";
 import type { BattleParticipant } from "@/types/battle";
+import { eventTextOf } from "@/lib/utils/battle/log/__tests__/event-text";
 
 const sword = { id: "sword", name: "Меч", type: AttackType.MELEE, attackBonus: 5, damageDice: "1d8", damageType: "slashing" };
 
@@ -53,7 +54,7 @@ describe("abilities through mutations", () => {
     const next = nextTurnMutation(context({ participants: hit.participants }));
 
     expect(find(next.participants, "gob").combatStats.currentHp).toBe(hpAfterHit - 3);
-    expect(next.events.some((e) => e.resultText.includes("bleed"))).toBe(true);
+    expect(next.events.some((e) => eventTextOf(e).includes("bleed"))).toBe(true);
   });
 
   it("відсіч цілі — один раз між її ходами", async () => {

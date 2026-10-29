@@ -5,6 +5,7 @@ import { makeEffect, resolved } from "@/lib/utils/abilities/__tests__/fixtures";
 import { createMockParticipant } from "@/lib/utils/battle/__tests__/fixtures/mock-participant";
 import { testMap } from "@/lib/utils/battle/__tests__/fixtures/placed";
 import { mapAction } from "@/lib/utils/battle/fx/map-action";
+import { eventTextOf } from "@/lib/utils/battle/log/__tests__/event-text";
 import type { BattleSceneState } from "@/lib/utils/battle/store";
 import { advanceTurn } from "@/lib/utils/battle/turn";
 import { DEFAULT_RULES } from "@/lib/utils/rules/defaults";
@@ -86,7 +87,7 @@ describe("advanceTurn", () => {
     });
 
     expect(out.scene.pendingMoraleCheck).toBeNull();
-    expect(out.actions.some((a) => a.resultText.length > 0)).toBe(true);
+    expect(out.actions.some((a) => eventTextOf(a).length > 0)).toBe(true);
   });
 
   it("новий раунд починається з першого в пересортованому порядку (саммон не пропускає хід)", () => {
@@ -222,7 +223,7 @@ describe("advanceTurn", () => {
     const out = advanceTurn({ participants: [withE, goblin], pending: [], scene });
 
     expect(out.participants[0].battleData.activeEffects.map((e) => [e.id, e.duration])).toEqual([["b", 1]]);
-    expect(out.actions.some((a) => a.resultText.includes("Кам'яна шкіра"))).toBe(true);
+    expect(out.actions.some((a) => eventTextOf(a).includes("Кам'яна шкіра"))).toBe(true);
   });
 });
 
@@ -338,7 +339,7 @@ describe("небезпека на початку ходу в advanceTurn", () =>
   it("шкода потрапляє в журнал з hpChanges", () => {
     const out = advanceTurn({ participants: [hero, placed(goblin)], pending: [], scene, map, rng: () => 0 });
 
-    const entry = out.actions.find((a) => a.resultText.includes("«Вогонь»"));
+    const entry = out.actions.find((a) => eventTextOf(a).includes("«Вогонь»"));
 
     expect(entry?.hpChanges).toEqual([expect.objectContaining({ participantId: "gob", oldHp: 20, newHp: 15, change: 5 })]);
     expect(out.participants[1].combatStats.currentHp).toBe(15);

@@ -1,10 +1,12 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import type { CriticalEffect, CriticalEffectType } from "@/lib/constants/critical-effects";
+import { textOf } from "@/lib/i18n/test/text";
 import { makeEffect, resolved } from "@/lib/utils/abilities/__tests__/fixtures";
 import { createMockParticipant, grantPassive } from "@/lib/utils/battle/__tests__/fixtures/mock-participant";
 import { testMap } from "@/lib/utils/battle/__tests__/fixtures/placed";
 import { applyCriticalEffect } from "@/lib/utils/battle/attack";
+import { textsOf } from "@/lib/utils/battle/log/__tests__/event-text";
 import { endTurnCleanup } from "@/lib/utils/battle/turn/end-turn-cleanup";
 import { processStartOfRound, processStartOfTurn } from "@/lib/utils/battle/turn/start-end";
 import { DEFAULT_RULES } from "@/lib/utils/rules/defaults";
@@ -71,7 +73,7 @@ describe("рух на початку ходу", () => {
 });
 
 describe("critical effects at the start of turn", () => {
-  const crit = (type: CriticalEffectType): CriticalEffect => ({ id: 1, name: "Е", description: "о", type: "success", flavor: [], effect: { type, duration: type === "lose_action" ? 1 : 2 } });
+  const crit = (type: CriticalEffectType): CriticalEffect => ({ id: 1, name: "Е", description: "о", type: "success", flavor: [], flavorCount: 0, effect: { type, duration: type === "lose_action" ? 1 : 2 } });
 
   const hit = (type: CriticalEffectType) => applyCriticalEffect(createMockParticipant(), crit(type), 1);
 
@@ -138,7 +140,7 @@ describe("небезпека на початку ходу", () => {
     const out = processStartOfTurn(p, 2, [p], () => 0, map);
 
     expect(out.damageMessages).toEqual([]);
-    expect(out.hazard).toEqual({ message: "Тест: 5 fire шкоди від «Вогонь»", damage: 5, hpBefore: 20, label: "Вогонь", damageType: "fire" });
+    expect(out.hazard && { ...out.hazard, message: textOf(out.hazard.message) }).toEqual({ message: "Тест: 5 fire шкоди від «Вогонь»", damage: 5, hpBefore: 20, label: "Вогонь", damageType: "fire" });
     expect(out.participant.combatStats.currentHp).toBe(15);
     expect(out.participant.battleData.hazardHitRound).toBe(2);
   });
@@ -148,7 +150,7 @@ describe("небезпека на початку ходу", () => {
 
     const out = processStartOfTurn(p, 2, [p], () => 0, map);
 
-    expect(out.damageMessages).toEqual(["Тест: 3 fire шкоди від Опік"]);
+    expect(textsOf(out.damageMessages)).toEqual(["Тест: 3 fire шкоди від Опік"]);
     expect(out.hazard).toMatchObject({ hpBefore: 17, damage: 5 });
     expect(out.participant.combatStats.currentHp).toBe(12);
   });

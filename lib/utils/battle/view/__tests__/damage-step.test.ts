@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 
 import { formatDamageStep } from "@/lib/utils/battle/view/damage-step";
+import { textOf } from "@/lib/i18n/test/text";
 
 describe("formatDamageStep", () => {
   it.each([
@@ -13,6 +14,6 @@ describe("formatDamageStep", () => {
     [{ kind: "multiplier", value: 0.6935483870967742, after: 3 }, "×0.69 → 3"],
     [{ kind: "immunity", value: 0, after: 0 }, "імунітет → 0"],
   ] as const)("%o → %s", (step, text) => {
-    expect(formatDamageStep(step)).toBe(text);
+    expect(textOf(formatDamageStep(step))).toBe(text);
   });
 });

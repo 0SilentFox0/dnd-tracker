@@ -1,3 +1,4 @@
+import { textRef } from "@/lib/i18n/text-ref";
 import { restoreCharm } from "@/lib/utils/abilities/engine/effects/charm";
 import { dropConcentration, hasConcentration } from "@/lib/utils/battle/concentration";
 import { restoreExhaustionHp, syncExhaustion } from "@/lib/utils/battle/conditions/query";
@@ -21,7 +22,7 @@ export function finishTurnEffects(source: BattleParticipant, saves?: SaveEndsCon
   let p = rolled.participant;
 
   if (p.battleData.pendingCast && (!hasConcentration(p) || (saves?.round !== undefined && p.battleData.pendingCast.lastRound < saves.round))) {
-    const dropped = dropConcentration([p], p.basicInfo.id, "пропущено дію накладання");
+    const dropped = dropConcentration([p], p.basicInfo.id, textRef("battleLog.concentration.reasons.castSkipped"));
 
     p = { ...dropped.participants[0], battleData: { ...dropped.participants[0].battleData, pendingCast: undefined } };
     rolled.messages.push(...dropped.messages);

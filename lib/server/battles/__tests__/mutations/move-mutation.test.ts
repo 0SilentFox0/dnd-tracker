@@ -5,6 +5,8 @@ import { context, goblin, hero } from "./fixtures";
 import { moveMutation } from "@/lib/server/battles/mutations/move/move-mutation";
 import { BattleAccessError } from "@/lib/utils/battle/store";
 import type { BattleMapConfig, BattleParticipant, GridPoint, TerrainCell } from "@/types/battle";
+import { eventTextOf } from "@/lib/utils/battle/log/__tests__/event-text";
+import { REJECT } from "@/lib/utils/battle/store/reject";
 
 const map: BattleMapConfig = { cols: 10, rows: 5, background: null, opacity: 0.3 };
 
@@ -131,7 +133,7 @@ describe("move mutation", () => {
     });
 
     it("до атаки, вдруге або без вміння — відмова", () => {
-      expect(() => back(maiden({ attacked: false }))).toThrow(expect.objectContaining({ code: "action_rejected", message: "Повернення доступне лише після атаки" }));
+      expect(() => back(maiden({ attacked: false }))).toThrow(expect.objectContaining({ code: "action_rejected", message: REJECT.returnAfterAttack }));
       expect(() => back(maiden({ returned: true }))).toThrow(expect.objectContaining({ code: "action_rejected" }));
       expect(() => back(at(hero, { x: 4, y: 0 }))).toThrow(expect.objectContaining({ code: "action_rejected" }));
     });
@@ -140,7 +142,7 @@ describe("move mutation", () => {
       const taken = ctx({ participants: [maiden(), at(goblin, { x: 0, y: 0 })] });
 
       expect(() => moveMutation(taken, { participantId: "hero", to: { x: 0, y: 0 }, returnToStart: true })).toThrow(
-        expect.objectContaining({ code: "action_rejected", message: "Повернутися неможливо: клітинка зайнята" }),
+        expect.objectContaining({ code: "action_rejected", message: REJECT.returnOccupied }),
       );
     });
   });
@@ -163,10 +165,10 @@ describe("move mutation", () => {
         expect.objectContaining({
           type: "ability",
           actorId: "hero",
-          resultText: "Тест: 5 fire шкоди від «Вогонь»",
           hpChanges: [expect.objectContaining({ participantId: "hero", change: 5 })],
         }),
       ]);
+      expect(eventTextOf(out.events[0])).toBe("Тест: 5 fire шкоди від «Вогонь»");
       expect(out.events[0]).toMatchObject({ details: { actionDetails: { hazard: { label: "Вогонь", damageType: "fire", damage: 5 } } } });
     });
 
@@ -248,8 +250,8 @@ describe("move mutation", () => {
     it("увімкнено — атака, подія в журналі, витрачена реакція", () => {
       const out = moveMutation(withRules({ enabled: true, opportunityAttacks: true }), { participantId: "hero", to: { x: 4, y: 0 } });
 
-      expect(out.events.some((e) => e.type === "retaliation" && e.resultText?.startsWith("Атака можливості: Гоблін"))).toBe(true);
-      expect(out.events.some((e) => e.resultText === "⚔ Атака при відході: Гоблін → Тест")).toBe(true);
+      expect(out.events.some((e) => e.type === "retaliation" && eventTextOf(e)?.startsWith("Атака можливості: Гоблін"))).toBe(true);
+      expect(out.events.some((e) => eventTextOf(e) === "⚔ Атака при відході: Гоблін → Тест")).toBe(true);
       expect(out.participants[1].actionFlags.hasUsedReaction).toBe(true);
       expect(out.participants[0].battleData).toMatchObject({ position: { x: 4, y: 0 }, movementUsed: 3 });
     });

@@ -1,13 +1,14 @@
 import { applyDOTEffects, applyHOTEffects, armEffects, countDownAtTurnStart } from "./effects";
 import { resetTurnState } from "./turn-state";
 
-import { CombatStatus, DEFAULT_HAZARD_LABEL, EffectMarker,isRecharge } from "@/lib/constants/battle";
+import { CombatStatus, EffectMarker,isRecharge } from "@/lib/constants/battle";
+import { textRef } from "@/lib/i18n/text-ref";
 import { findParticipant, isActive, replaceParticipant, sitsOutTurn } from "@/lib/utils/abilities/engine/core/participants";
 import { resolveDowned, runAbilities } from "@/lib/utils/abilities/engine/core/run-abilities";
 import type { Rng } from "@/lib/utils/abilities/engine/core/types";
 import { dropBreakOnDamage } from "@/lib/utils/abilities/engine/effects/hp";
 import { applyDamageConsequences } from "@/lib/utils/battle/damage/consequences";
-import { hazardHit, hazardUnder } from "@/lib/utils/battle/grid/hazard";
+import { hazardHit, hazardLabel,hazardUnder } from "@/lib/utils/battle/grid/hazard";
 import { landDive } from "@/lib/utils/battle/maneuvers";
 import { actionsPerTurnPool, setExtraActionPool } from "@/lib/utils/battle/participant/helpers";
 import { hasEffectMarker } from "@/lib/utils/battle/participant/state";
@@ -32,10 +33,10 @@ export interface StartOfTurnResult {
 }
 
 export interface StartOfTurnHazard {
-  message: string;
+  message: LogLine;
   damage: number;
   hpBefore: number;
-  label: string;
+  label: LogLine;
   damageType: string;
 }
 
@@ -59,7 +60,7 @@ function rechargePools(participant: BattleParticipant, rng: Rng): { participant:
       updated = { ...updated, battleData: { ...updated.battleData, abilityUsage: { ...updated.battleData.abilityUsage, [key]: { ...usage, battle: 0 } } } };
     }
 
-    messages.push(`🔄 ${pool.label} ${recharged ? "перезарядилась" : "не перезарядилась"} (${roll})`);
+    messages.push(textRef(recharged ? "battleLog.turn.recharged" : "battleLog.turn.notRecharged", { pool: pool.label, roll }));
   }
 
   return { participant: updated, messages };
@@ -69,7 +70,7 @@ interface StartOfTurnDamage {
   participant: BattleParticipant;
   others: BattleParticipant[];
   damageMessages: LogLine[];
-  healMessages: string[];
+  healMessages: LogLine[];
   expiredEffects: string[];
   hazard?: StartOfTurnHazard;
   killedByRules: boolean;
@@ -90,7 +91,7 @@ function applyStartOfTurnDamage(
 
   const damageMessages: LogLine[] = [];
 
-  const healMessages: string[] = [];
+  const healMessages: LogLine[] = [];
 
   let expiredEffects: string[] = [];
 
@@ -136,7 +137,7 @@ function applyStartOfTurnDamage(
         message: hit.message,
         damage: hit.damage,
         hpBefore: updatedParticipant.combatStats.currentHp,
-        label: hazard.label ?? DEFAULT_HAZARD_LABEL,
+        label: hazardLabel(hazard.label),
         damageType: hazard.damage?.type ?? "",
       };
       updatedParticipant = hit.participant;
@@ -256,7 +257,7 @@ export function processStartOfTurn(
     }
   }
 
-  if (skippedBy) abilityMessages.push(`💫 ${participant.basicInfo.name} втрачає дію (${skippedBy.name})`);
+  if (skippedBy) abilityMessages.push(textRef("battleLog.turn.skipLost", { name: participant.basicInfo.name, source: skippedBy.name }));
 
   if (statusChanged) {
     const r = resolveDowned(participants, { victimId: id, actorId: null }, ctx);

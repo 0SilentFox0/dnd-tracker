@@ -17,6 +17,8 @@ import { withLines } from "@/lib/utils/battle/log/lines";
 import type { BattleMutationContext, MutationResult } from "@/lib/utils/battle/pipeline/run-battle-mutation";
 import { toCastableSpell } from "@/lib/utils/battle/spell/to-castable";
 import { battleActionToEvent,BattleRuleError } from "@/lib/utils/battle/store";
+import { ruleErrorOf } from "@/lib/utils/battle/store/errors";
+import { REJECT } from "@/lib/utils/battle/store/reject";
 import { applyAbilitySummons, type SummonDeps } from "@/lib/utils/battle/summon/ability-summons";
 import { advanceTurn, assertCanAct } from "@/lib/utils/battle/turn";
 import type { CastableSpell } from "@/lib/utils/battle/types/spell-process";
@@ -43,10 +45,10 @@ export const attackBodySchema = z
   })
   .refine(
     (d) => d.d20Roll !== undefined || d.attackRoll !== undefined || (Array.isArray(d.attackRolls) && d.attackRolls.length > 0),
-    { message: "d20Roll, attackRoll або attackRolls обов'язковий", path: ["d20Roll"] },
+    { message: REJECT.rollsRequired, path: ["d20Roll"] },
   )
   .refine((d) => d.targetId !== undefined || (d.targetIds !== undefined && d.targetIds.length > 0), {
-    message: "Потрібно вказати хоча б одну ціль",
+    message: REJECT.oneTargetRequired,
     path: ["targetIds"],
   });
 
@@ -69,7 +71,7 @@ function assertAttackInput(ctx: BattleMutationContext, data: Omit<AttackBody, "e
 
   const reach = attackReachError(ctx.meta.map, ctx.participants, attacker, attack, targets);
 
-  if (reach) throw new BattleRuleError("action_rejected", reach);
+  if (reach) throw ruleErrorOf("action_rejected", reach);
 }
 
 export interface AttackMutationDeps extends SummonDeps {

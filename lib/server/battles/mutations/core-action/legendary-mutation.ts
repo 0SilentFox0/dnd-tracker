@@ -1,7 +1,7 @@
 import { getCachedSummonPool } from "@/lib/cache/reference-data";
 import { API_ERRORS } from "@/lib/constants/api-errors";
 import { prisma } from "@/lib/db";
-import { joinLines } from "@/lib/i18n/text-ref";
+import { joinLines, textRef } from "@/lib/i18n/text-ref";
 import { createSpellMutation, type SpellMutationDeps } from "@/lib/server/battles/mutations/spell/spell-mutation";
 import { findParticipant, updateParticipant } from "@/lib/utils/abilities/engine/core/participants";
 import { runAbilities } from "@/lib/utils/abilities/engine/core/run-abilities";
@@ -11,7 +11,7 @@ import { lairAbilities, lairBlocker, spendLair } from "@/lib/utils/battle/action
 import { legendaryAttack } from "@/lib/utils/battle/actions/legendary";
 import { legendaryAbilities, legendaryBlocker, legendaryCostOf, spendLegendary } from "@/lib/utils/battle/actions/legendary-options";
 import type { LegendaryActionBody } from "@/lib/utils/battle/actions/schema";
-import { lineText, logFields } from "@/lib/utils/battle/log/lines";
+import { logFields } from "@/lib/utils/battle/log/lines";
 import { abilityRunContext } from "@/lib/utils/battle/pipeline/ability-use";
 import type { BattleMutationContext, MutationResult } from "@/lib/utils/battle/pipeline/run-battle-mutation";
 import { BattleAccessError, battleActionToEvent, BattleRuleError, systemEvent } from "@/lib/utils/battle/store";
@@ -19,6 +19,7 @@ import { applyAbilitySummons, type SummonDeps } from "@/lib/utils/battle/summon/
 import { assertAbilityTargets } from "@/lib/utils/battle/validation/ability-targets";
 import { abilityOnMap } from "@/lib/utils/battle/view";
 import type { BattleParticipant } from "@/types/battle";
+import type { LogLine } from "@/types/text";
 
 const defaultDeps: SpellMutationDeps = { loadPool: getCachedSummonPool, loadSpell: (id) => prisma.spell.findUnique({ where: { id } }) };
 
@@ -53,7 +54,7 @@ export function createLegendaryMutation(deps: SummonDeps & Partial<Pick<SpellMut
 
       const after = findParticipant(participants, id) ?? actor;
 
-      return { participants, pending: ctx.pending, events: [systemEvent(round, `👑 ${name}: легендарна дія — ${out.attackName} (${counter(after)})`), battleActionToEvent(out.action)] };
+      return { participants, pending: ctx.pending, events: [systemEvent(round, textRef("battleLog.legendary.action", { name, attack: out.attackName, counter: counter(after) })), battleActionToEvent(out.action)] };
     }
 
     const lair = option.kind === "lair";
@@ -99,7 +100,7 @@ export function createLegendaryMutation(deps: SummonDeps & Partial<Pick<SpellMut
 
       const participants = updateParticipant(out.participants, id, (p) => spend(recordUse(p, ability.key, round, ability.limits?.pool)));
 
-      return { participants, pending: ctx.pending, events: [systemEvent(round, `${lair ? "🏰" : "👑"} ${name}: ${lair ? "дія лігва" : "легендарна дія"} — ${ability.name} → ${out.attackName}`), battleActionToEvent(out.action)] };
+      return { participants, pending: ctx.pending, events: [systemEvent(round, textRef(lair ? "battleLog.legendary.useLair" : "battleLog.legendary.use", { name, ability: ability.name, attack: out.attackName })), battleActionToEvent(out.action)] };
     }
 
     const targetIds = assertAbilityTargets(ability, ctx.participants, option.targetIds ?? [], { owner: actor, onMap: abilityOnMap(ctx.meta.map, actor) });
@@ -112,9 +113,9 @@ export function createLegendaryMutation(deps: SummonDeps & Partial<Pick<SpellMut
 
     const after = findParticipant(participants, id) ?? actor;
 
-    const text = run.fired.length ? lineText([...run.messages, ...summoned.messages], " | ") : `${ability.name}: не спрацювало`;
+    const parts: LogLine[] = run.fired.length ? [...run.messages, ...summoned.messages] : [textRef("battleLog.ability.noEffect", { name: ability.name })];
 
-    const legendaryText = logFields(joinLines([`${lair ? "🏰" : "👑"} ${name}: ${lair ? "дія лігва" : "легендарна дія"} «${ability.name}» (${counter(after)}) — `, Array.isArray(text) ? joinLines(text, " | ") : text]));
+    const legendaryText = logFields(textRef(lair ? "battleLog.legendary.runLair" : "battleLog.legendary.run", { name, ability: ability.name, counter: counter(after), text: joinLines(parts, " | ") }));
 
     return {
       participants,

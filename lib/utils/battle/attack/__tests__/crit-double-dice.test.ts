@@ -6,6 +6,7 @@ import { critDamageRolls } from "@/lib/utils/battle/attack/crit-dice";
 import { processAttack } from "@/lib/utils/battle/attack/process";
 import { computeDamageBreakdown } from "@/lib/utils/battle/damage";
 import { heroAttackDamageParts } from "@/lib/utils/battle/damage/hero-damage";
+import { eventTextOf } from "@/lib/utils/battle/log/__tests__/event-text";
 import { diceCount } from "@/lib/utils/common/dice";
 import { parseRules } from "@/lib/utils/rules/schema";
 import type { BattleAttack } from "@/types/battle";
@@ -64,7 +65,7 @@ describe("processAttack crit with doubleDice", () => {
 
     expect(hpLost(r)).toBe(5 + 5 + 4);
     expect(r.battleAction.actionDetails.diceRolls?.find((g) => g.kind === "damage")?.dice.map((d) => !!d.server)).toEqual([false, true]);
-    expect(JSON.stringify(r.battleAction)).toContain("крит: кубики шкоди подвоєно (сервер: 5)");
+    expect(eventTextOf(r.battleAction)).toContain("крит: кубики шкоди подвоєно (сервер: 5)");
   });
 
   it("HOMM default: crit without effects adds nothing", () => {

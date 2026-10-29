@@ -3,8 +3,10 @@ import { describe, expect, it } from "vitest";
 import { attackReachError, enemiesInReach } from "../attack-reach";
 
 import { AttackType, ParticipantSide } from "@/lib/constants/battle";
+import { textRef } from "@/lib/i18n/text-ref";
 import { createMockParticipant } from "@/lib/utils/battle/__tests__/fixtures/mock-participant";
 import { mazeMap } from "@/lib/utils/battle/modes/maze/__tests__/fixtures";
+import { REJECT } from "@/lib/utils/battle/store/reject";
 import type { BattleAttack, BattleMapConfig, BattleParticipant, Direction8, GridPoint, MazeConfig } from "@/types/battle";
 
 const mapOf = (over: Partial<MazeConfig> = {}): BattleMapConfig => mazeMap({ exit: { x: 9, y: 9 }, ...over }, 10);
@@ -43,7 +45,7 @@ describe("ближня атака в лабіринті", () => {
   it("далекий ворог — як раніше «не поруч»", () => {
     const foe = at("e", { x: 8, y: 5 }, ParticipantSide.ENEMY);
 
-    expect(attackReachError(mapOf(), [hero, foe], hero, sword, [foe])).toMatch(/поруч/);
+    expect(attackReachError(mapOf(), [hero, foe], hero, sword, [foe])).toEqual(textRef(REJECT.targetNotNear));
   });
 });
 
@@ -69,7 +71,7 @@ describe("дальня атака в лабіринті", () => {
 
     const ahead = at("e2", { x: 8, y: 5 }, ParticipantSide.ENEMY);
 
-    expect(attackReachError(mapOf(), [hero, adj, ahead], hero, bow, [ahead])).toMatch(/Поруч ворог/);
+    expect(attackReachError(mapOf(), [hero, adj, ahead], hero, bow, [ahead])).toEqual(textRef(REJECT.enemyNearNoShoot));
   });
 
   it("enemiesInReach бере лише видимих", () => {
@@ -83,7 +85,7 @@ describe("дальня атака в лабіринті", () => {
 
 const target = at("t", { x: 8, y: 5 }, ParticipantSide.ENEMY);
 
-const ENGAGED = "Поруч ворог — стріляти не можна";
+const ENGAGED = textRef(REJECT.enemyNearNoShoot);
 
 describe("лабіринт: «поруч ворог» для дальньої атаки", () => {
   it("ворог за стіною поруч не заважає стріляти", () => {
@@ -104,7 +106,7 @@ describe("лабіринт: «поруч ворог» для дальньої а
   it("несплячий ворог поруч без стіни — як і раніше заважає", () => {
     const awake = at("a", { x: 4, y: 5 }, ParticipantSide.ENEMY);
 
-    expect(attackReachError(mapOf(), [hero, awake, target], hero, bow, [target])).toBe(ENGAGED);
+    expect(attackReachError(mapOf(), [hero, awake, target], hero, bow, [target])).toEqual(ENGAGED);
   });
 
   it("поза лабіринтом сплячий прапорець нічого не змінює", () => {
@@ -112,6 +114,6 @@ describe("лабіринт: «поруч ворог» для дальньої а
 
     const plain: BattleMapConfig = { ...mapOf(), maze: null };
 
-    expect(attackReachError(plain, [hero, sleeper, target], hero, bow, [target])).toBe(ENGAGED);
+    expect(attackReachError(plain, [hero, sleeper, target], hero, bow, [target])).toEqual(ENGAGED);
   });
 });

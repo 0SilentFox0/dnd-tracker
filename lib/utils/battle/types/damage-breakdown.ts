@@ -1,10 +1,11 @@
 import type { Ruleset } from "@/lib/utils/rules";
-import type { BattleAttack, BattleParticipant, DamageStep } from "@/types/battle";
+import type { BattleAttack, BattleParticipant, DamageRow, DamageStep } from "@/types/battle";
+import type { LogLine } from "@/types/text";
 
 export interface DamageBreakdownResult {
-  breakdown: string[];
+  breakdown: DamageRow[];
   totalDamage: number;
-  targetBreakdown: string[];
+  targetBreakdown: LogLine[];
   finalDamage: number;
   steps: DamageStep[];
 }

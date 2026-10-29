@@ -1,10 +1,11 @@
 import type { CriticalEffect, CriticalEffectType } from "@/lib/constants/critical-effects";
+import { dynamicTextRef, textRef } from "@/lib/i18n/text-ref";
 import { collectModifiers } from "@/lib/utils/abilities/engine/core/collect-modifiers";
 import { findParticipant, replaceParticipant, withSelf } from "@/lib/utils/abilities/engine/core/participants";
 import { forcedRollMode, rollModeReasons } from "@/lib/utils/battle/attack/bonus";
 import { critDoublesDice } from "@/lib/utils/battle/attack/crit-dice";
 import { critThresholdOf } from "@/lib/utils/battle/attack/crit-threshold";
-import { applyCriticalEffect, critFlavorFor } from "@/lib/utils/battle/attack/critical";
+import { applyCriticalEffect, critFlavorIndex, critNameRef } from "@/lib/utils/battle/attack/critical";
 import { getP, put } from "@/lib/utils/battle/common/action-flow";
 import { attackKindOf } from "@/lib/utils/battle/common/attack-kind";
 import type { CritKind } from "@/lib/utils/battle/crit-choice/catalog";
@@ -105,9 +106,9 @@ function applySaveCrit(state: SpellCastState, id: string, kind: CritKind): Criti
 
   const target = getP(flow, id);
 
-  const flavor = critFlavorFor(effect, caster.basicInfo.name, target.basicInfo.name, { battleId: state.battleId, round: flow.ctx.round, attackerId: caster.basicInfo.id, targetId: id });
+  const flavor = dynamicTextRef(`battleTerms.crits.save.${effect.type}.${effect.id}.flavor.${critFlavorIndex(effect, { battleId: state.battleId, round: flow.ctx.round, attackerId: caster.basicInfo.id, targetId: id })}`, { attacker: caster.basicInfo.name, target: target.basicInfo.name });
 
-  flow.messages.push(`🎯 ${target.basicInfo.name}: ${effect.name} — ${flavor}`);
+  flow.messages.push(textRef("battleLog.spell.saveCrit", { target: target.basicInfo.name, effect: critNameRef(effect, "save"), flavor }));
 
   if (!NON_PARTICIPANT_EFFECTS.has(effect.effect.type)) put(flow, applyCriticalEffect(target, effect, flow.ctx.round));
 

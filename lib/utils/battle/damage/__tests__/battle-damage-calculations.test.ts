@@ -8,6 +8,7 @@ import { describe, expect, it } from "vitest";
 import { AttackType, ParticipantSide } from "@/lib/constants/battle";
 import { grantPassive } from "@/lib/utils/battle/__tests__/fixtures/mock-participant";
 import { calculateDamageWithModifiers } from "@/lib/utils/battle/damage";
+import { rowLines } from "@/lib/utils/battle/log/__tests__/event-text";
 import type { BattleParticipant } from "@/types/battle";
 
 function createBaseParticipant(
@@ -138,7 +139,7 @@ describe("battle-damage-calculations", () => {
         AttackType.RANGED,
       );
 
-      const hasSkillLine = result.breakdown.some(
+      const hasSkillLine = rowLines(result.breakdown).some(
         (s) =>
           s.includes("Бонус зі скілів") &&
           s.includes("30") &&
@@ -158,7 +159,7 @@ describe("battle-damage-calculations", () => {
         AttackType.MELEE,
       );
 
-      const totalLine = result.breakdown.find((s) => s.includes("шкоди"));
+      const totalLine = rowLines(result.breakdown).find((s) => s.startsWith("Сума"));
 
       expect(totalLine).toBeDefined();
       expect(totalLine).toContain("5");
@@ -174,8 +175,8 @@ describe("battle-damage-calculations", () => {
         AttackType.MELEE,
       );
 
-      const diceLine = result.breakdown.find((s) =>
-        s.startsWith("Сума кубиків:"),
+      const diceLine = rowLines(result.breakdown).find((s) =>
+        s.startsWith("Кубики"),
       );
 
       expect(diceLine).toBeDefined();

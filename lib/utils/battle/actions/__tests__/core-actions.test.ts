@@ -14,6 +14,7 @@ import { processStartOfTurn } from "@/lib/utils/battle/turn/start-end";
 import { resetTurnState } from "@/lib/utils/battle/turn/turn-state";
 import { DEFAULT_RULES } from "@/lib/utils/rules";
 import type { BattleMapConfig, BattleParticipant } from "@/types/battle";
+import { eventTextOf } from "@/lib/utils/battle/log/__tests__/event-text";
 
 const map: BattleMapConfig = { cols: 10, rows: 5, background: null, opacity: 0.3 };
 
@@ -203,7 +204,7 @@ describe("hide / ready / readiedAttack", () => {
     const out = run([a, mk("foe", "enemy", 1)], { action: "readiedAttack", participantId: "a", targetId: "foe" }, map);
 
     expect(out.actions?.[0]).toMatchObject({ actionType: "retaliation", actorId: "a" });
-    expect(out.actions?.[0].resultText.startsWith("Підготовлена атака:")).toBe(true);
+    expect(eventTextOf(out.actions?.[0] as never).startsWith("Підготовлена атака:")).toBe(true);
     expect(get(out, "a").actionFlags).toMatchObject({ hasUsedReaction: true, hasUsedAction: false });
     expect(get(out, "a").battleData.readied).toBeUndefined();
   });

@@ -4,6 +4,7 @@ import { AttackType, ParticipantSide } from "@/lib/constants/battle";
 import { makeParticipant, resolved, seq } from "@/lib/utils/abilities/__tests__/fixtures";
 import { predictAttack } from "@/lib/utils/battle/attack/bonus";
 import { processAttack } from "@/lib/utils/battle/attack/process";
+import { eventTextOf } from "@/lib/utils/battle/log/__tests__/event-text";
 import type { BattleAttack, BattleParticipant } from "@/types/battle";
 
 const sword: BattleAttack = { id: "sw", name: "Меч", type: AttackType.MELEE, attackBonus: 5, damageDice: "1d6", damageType: "slashing" };
@@ -31,7 +32,7 @@ describe("server-rolled second d20", () => {
 
     expect(r.attackRoll.secondRoll).toMatchObject({ mode: "disadvantage", serverRolled: true, value: 2 });
     expect(r.attackRoll.isHit).toBe(true);
-    expect(r.battleAction.resultText).toContain("недолік: другий d20 = 2");
+    expect(eventTextOf(r.battleAction)).toContain("недолік: другий d20 = 2");
     expect(r.success).toBe(false);
   });
 

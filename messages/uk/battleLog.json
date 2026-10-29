@@ -1,1 +1,330 @@
-{}
+{
+  "damage": {
+    "rows": {
+      "dice": "Кубики",
+      "sum": "Сума",
+      "base": "База",
+      "level": "Рівень",
+      "levelDice": "Рівень + кубики за рівнем",
+      "levelDiceNotation": "Рівень + кубики за рівнем ({dice})",
+      "crit": "Крит",
+      "fairBattle": "Рівний бій",
+      "archetype": "Архетип",
+      "archetypeNamed": "Архетип: {name}",
+      "obstacle": "Перешкода",
+      "weaponBonus": "Бонус зброї",
+      "abilityHit": "{name}: +{amount}",
+      "abilityTotal": "Вміння: +{total}",
+      "spellMod": "Мод. {label}",
+      "spellBonus": "Бонус заклинання"
+    },
+    "steps": {
+      "dice": "Кубики",
+      "heroLevel": "Рівень героя",
+      "crit": "Критичне влучання",
+      "archetype": "Архетип",
+      "fairBattle": "Рівний бій",
+      "counter": "Контратака",
+      "share": "Частка шкоди",
+      "additional": "Додаткова шкода",
+      "weaponBonus": "Бонус зброї",
+      "obstacle": "Перешкода",
+      "resistance": "Опір",
+      "berserk": "Шал"
+    },
+    "sources": {
+      "skill": "Бонус зі скілів",
+      "race": "Расовий бонус",
+      "class": "Бонус класу",
+      "feat": "Бонус риси",
+      "artifact": "Бонус артефакту",
+      "artifactSet": "Бонус сету",
+      "unit": "Бонус істоти",
+      "character": "Бонус персонажа",
+      "effect": "Бонус ефекту",
+      "action": "Бонус дії"
+    },
+    "immunityStep": "імунітет → {after}"
+  },
+  "resistance": {
+    "immune": "{damage} {type} → ІМУНІТЕТ (0 урону)",
+    "resist": "{damage} {type} → -{percent}% опір ({final} урону)",
+    "vulnerable": "{damage} {type} → +{percent}% вразливість ({final} урону)",
+    "plain": "{damage} {type} урону",
+    "targetVulnerable": "{target}: {source} = вразливість {percent}%",
+    "targetResist": "{target}: {source} = {percent}% резисту",
+    "targetTotal": "Сумарна шкода ({target}): {incoming} {sign} {percent}% = {final}",
+    "targetTotalPlain": "Сумарна шкода ({target}): {final}",
+    "immunityNote": "⛔ {target}: {label}"
+  },
+  "details": {
+    "damage": "Урон: {rows}",
+    "type": "Тип",
+    "attackOfKind": "{kind} атака",
+    "weapon": "Зброя",
+    "attackRoll": "Кидок атаки",
+    "targetAc": "КЛ цілі",
+    "hit": "Попадання",
+    "crit": "Критичне!",
+    "critFail": "Критичний провал",
+    "effect": "Ефект [d10: {id}]",
+    "spell": "Заклинання",
+    "spellLevel": "{name} (рівень {level})",
+    "healing": "Лікування",
+    "d10": "Кидок d10"
+  },
+  "attack": {
+    "critHit": "Критичне влучання — {name}!{flavor}",
+    "critFail": "Критична невдача — {name}.{flavor}",
+    "critFailHeadline": "{attacker}: критична невдача — {name}.{flavor}",
+    "critFlavorTail": " {flavor}",
+    "critSuffix": ". {summary}",
+    "critPlain": " (КРИТИЧНЕ ПОПАДАННЯ!)",
+    "hit": "{attacker} → {target}: {damage} шкоди{crit}",
+    "miss": "{attacker} → {target}: промах",
+    "guaranteed": "гарантована шкода: {damage}",
+    "vampirism": "Вампіризм: {attacker} +{heal} HP",
+    "aborted": "{attacker} → {target}: ціль загинула до атаки",
+    "serverDamageDice": "🎲 кубики шкоди кинув сервер: {rolls}",
+    "guard": "🛡 {guardian} приймає {damage} шкоди — захищає: {target}",
+    "fireWave": "🔥 Вогняна хвиля: {parts}",
+    "obstacle": "🧱 перешкода: шкода ×0.5 → {damage}"
+  },
+  "offTurn": {
+    "hit": "{title}: {attacker} → {target}: d20 {d20}, {damage} шкоди{plainCrit}{crit}",
+    "miss": "{title}: {attacker} → {target}: d20 {d20}, промах{crit}",
+    "second": "🎲 {noun}, {mode}: другий d20 = {value}",
+    "titles": {
+      "retaliation": "Відсіч",
+      "opportunity": "Атака можливості",
+      "readied": "Підготовлена атака",
+      "legendary": "Легендарна дія"
+    },
+    "nouns": {
+      "retaliation": "відсіч",
+      "opportunity": "атака можливості",
+      "readied": "підготовлена атака",
+      "legendary": "легендарна атака"
+    }
+  },
+  "roll": {
+    "second": "🎲 {mode}{manual}: другий d20 = {value}{server}, обрано {chosen}",
+    "advantage": "перевага",
+    "disadvantage": "недолік",
+    "manualTag": " (вибір гравця)",
+    "serverTag": " (сервер)"
+  },
+  "crit": {
+    "adjacent": "💥 влучання впритул — критичне",
+    "cancelled": "🛡 крит скасовано — звичайне влучання",
+    "doubled": "🎲 крит: кубики шкоди подвоєно{server}",
+    "doubledServer": " (сервер: {rolls})"
+  },
+  "rollMode": {
+    "inspiration": "Натхнення",
+    "armorPenalty": "Броня без володіння",
+    "farRange": "Далека дистанція",
+    "enemyNear": "Ворог поруч"
+  },
+  "cunning": {
+    "label": "Підступний удар ({effect})",
+    "withdraw": "🏃 Підступний удар ({effect}): {name} відходить без атак можливості",
+    "saved": "🛡 {label}: {target} витримує СК {dc} ({total})",
+    "failed": "🎲 {label}: {target} провалює СК {dc} ({total})"
+  },
+  "triggers": {
+    "battleStart": "Тригери початку бою",
+    "roundStart": "Тригери початку раунду {round}",
+    "roundEnd": "Кінець раунду {round}",
+    "turnStart": "Початок ходу",
+    "turnEnd": "Кінець ходу"
+  },
+  "turn": {
+    "recharged": "🔄 {pool} перезарядилась ({roll})",
+    "notRecharged": "🔄 {pool} не перезарядилась ({roll})",
+    "skipLost": "💫 {name} втрачає дію ({source})",
+    "dot": "{name}: {damage} {type} шкоди від {effect}",
+    "dotReduced": "{name}: {damage} (з {base}) {type} шкоди від {effect}",
+    "hot": "{name}: +{heal} HP від {effect}",
+    "effectsEnded": "ефекти завершилися: {names}",
+    "effectsEndedCap": "Ефекти завершилися: {names}",
+    "extraTurn": "{name} отримує додатковий хід"
+  },
+  "round": {
+    "start": "🔁 Початок Раунду {round}",
+    "lair": "🏰 Ініціатива 20: дія лігва — {name}"
+  },
+  "hazard": {
+    "defaultLabel": "Небезпечна зона",
+    "hit": "{name}: {damage} {type} шкоди від «{label}»"
+  },
+  "berserk": {
+    "prefix": "🤬 Шал: ",
+    "line": "🤬 Шал: {name} {reason}",
+    "losesAction": "втрачає дію",
+    "noTarget": "нікого не може атакувати"
+  },
+  "victory": {
+    "reserveEnemies": "У резерві ще є вороги — рішення за ДМ",
+    "won": "🎉 Перемога! Всі вороги переможені!",
+    "escaped": "Усі живі герої вибралися — рішення за ДМ",
+    "reserveAllies": "У резерві ще є союзники — рішення за ДМ",
+    "lost": "💀 Поразка! Всі союзники переможені!",
+    "completeWon": "🎉 Бій завершено! Перемога союзників!",
+    "completeLost": "💀 Бій завершено! Поразка союзників!",
+    "withXp": "{text} · ⭐ Досвід: {share} кожному"
+  },
+  "morale": {
+    "ignored": "{name}: мораль не діє",
+    "neutral": "{name} має нейтральну мораль",
+    "leadership": ", лідерство +{bonus}%",
+    "detail": "Мораль +{morale}{leadership}, кидок: {roll}, потрібно: >={threshold}",
+    "extra": "⭐ {name}: додатковий хід! ({detail})",
+    "noExtra": "{name}: без додаткового ходу ({detail})",
+    "skip": "😔 {name}: пропуск ходу через низьку мораль (Мораль {morale}, кидок: {roll}, пропуск на: <={threshold})",
+    "noSkip": "{name}: хід не пропущено (Мораль {morale}, кидок: {roll}, пропуск на: <={threshold})",
+    "notFound": "Учасник не знайдений в initiativeOrder"
+  },
+  "death": {
+    "wake": "🎲 {name}: кидок смерті 20 — приходить до тями з 1 HP",
+    "stable": "🎲 {name}: кидок смерті {roll} — успіх, стабілізується",
+    "success": "🎲 {name}: кидок смерті {roll} — успіх ({count}/{max})",
+    "dies": "💀 {name}: кидок смерті {roll} — помирає",
+    "fail": "🎲 {name}: кидок смерті {roll} — провал ({count}/{max})",
+    "massive": "💀 {name}: миттєва смерть від масивної шкоди",
+    "unconscious": "💤 {name} непритомніє",
+    "woundsDeath": "💀 {name} помирає від ран",
+    "damageFail": "🩸 {name}: провал кидка смерті від шкоди"
+  },
+  "concentration": {
+    "lost": "🔮 {name} втрачає концентрацію на «{spell}»{reason}",
+    "reasonTail": " ({reason})",
+    "reasons": {
+      "newSpell": "нове заклинання",
+      "castCancelled": "накладання скасовано",
+      "castSkipped": "пропущено дію накладання"
+    },
+    "effect": "Концентрація: {spell}",
+    "check": "🎲 {name}: концентрація — рятівний кидок ВИТ {total} проти СК {dc}",
+    "holds": "{head} — утримує",
+    "broke": "{head} — втрачає концентрацію на «{spell}»"
+  },
+  "saves": {
+    "head": "🎲 {name}: рятівний кидок {ability} {total} проти СК {dc}",
+    "freed": "{head} — звільняється від стану «{effect}»",
+    "kept": "{head} — стан «{effect}» лишається",
+    "legendaryResist": "👑 {name}: Легендарний опір — провал стає успіхом ({left} залишилось)"
+  },
+  "summon": {
+    "banish": "🚫 Вигнання: {name} −{percent}% HP ({hp}/{max})",
+    "unitNotFound": "обраного юніта не знайдено",
+    "noGroup": "немає юніта групи {group} Tier {tier}",
+    "summoned": "🌀 прикликано: {names}"
+  },
+  "maneuver": {
+    "damage": "💥 {ability}: {target} −{dealt} HP{note}",
+    "fireNote": " (Спритність {total} проти СК {dc}{detail})",
+    "evaded": " — ухилення",
+    "evadedHalf": " — ухилення, половина",
+    "half": " — половина",
+    "fireNobody": "🔥 {ability}: {name} — поруч нікого",
+    "diveUp": "🦅 {name} злітає в небо ({ability})",
+    "diveMiss": "🦅 {name}: удар у порожнечу"
+  },
+  "dm": {
+    "name": "ДМ",
+    "lairIn": "🏰 {name}: у лігві",
+    "lairOut": "🏰 {name}: поза лігвом",
+    "removed": "Видалено з бою (DM): {name}",
+    "removedReserve": "Видалено з резерву (DM): {name}",
+    "killed": "Вбито (DM): {name}",
+    "hpChanged": "Зміна HP (DM): {name}, {old} → {new}",
+    "revived": "Повернуто до життя (DM): {name}, {hp} HP",
+    "refreshed": "Оновлено з бібліотеки: {count} учасників",
+    "scaleBuff": "Підсилення ворожих юнітів (DM): HP і шкода ×{step}",
+    "scaleNerf": "Послаблення ворожих юнітів (DM): HP і шкода ÷{step}",
+    "cancelled": "ДМ скасував дію",
+    "added": "DM додав на поле: {names}",
+    "conditionRemoved": "ДМ: {target} — стан знято: {condition}",
+    "revealed": "ДМ ввів у бій: {names}",
+    "revealedWith": "ДМ ввів у бій: {names}. {rest}",
+    "unitAssigned": "🎮 ДМ передає {unit} під керування {who}",
+    "unitsRandomized": "🎲 ДМ роздає вільних юнітів: {list}"
+  },
+  "aura": {
+    "inZone": "{ability}: у зоні — {who}",
+    "nobody": "нікого"
+  },
+  "legendary": {
+    "action": "👑 {name}: легендарна дія — {attack} ({counter})",
+    "use": "👑 {name}: легендарна дія — {ability} → {attack}",
+    "useLair": "🏰 {name}: дія лігва — {ability} → {attack}",
+    "run": "👑 {name}: легендарна дія «{ability}» ({counter}) — {text}",
+    "runLair": "🏰 {name}: дія лігва «{ability}» ({counter}) — {text}"
+  },
+  "spell": {
+    "castCancelled": "{name}: накладання скасовано",
+    "serverSaves": "🎲 рятівні кидки кинув сервер: {names}",
+    "saveCrit": "🎯 {target}: {effect} — {flavor}"
+  },
+  "ability": {
+    "noEffect": "{name}: не спрацювало"
+  },
+  "reject": {
+    "bonusActionUsed": "Бонусну дію вже використано цього ходу",
+    "cannotAct": "Учасник не може діяти",
+    "noSuchAbility": "У учасника немає такого вміння",
+    "abilityIsLair": "Це вміння — дія лігва",
+    "abilityIsLegendary": "Це вміння — легендарна дія, її використовують поза своїм ходом",
+    "abilityLimit": "Ліміт використань вичерпано",
+    "abilityCooldown": "Перезарядка: ще {rounds} р.",
+    "pickCell": "Оберіть клітинку на карті",
+    "tooFar": "Задалеко",
+    "tooManyRolls": "Забагато кидків: {count} (максимум {max})",
+    "rollImpossible": "Кидок {roll} неможливий для {formula}",
+    "spellDiceCount": "Потрібно {expected} кубиків заклинання, отримано {got}",
+    "wrongStatus": "Дія недоступна в статусі «{status}»",
+    "panicSkip": "Учасник у паніці й пропускає хід",
+    "moraleFirst": "Спершу потрібна перевірка моралі",
+    "outOfRange": "Поза дальністю",
+    "pickDirection": "Оберіть напрямок",
+    "badSpellTarget": "Ця ціль не підходить для заклинання",
+    "targetUnreachable": "Ціль недосяжна",
+    "targetNotNear": "Ціль не поруч — спершу підійдіть",
+    "targetOutOfAttackRange": "Ціль поза дальністю атаки",
+    "enemyNearNoShoot": "Поруч ворог — стріляти не можна",
+    "returnImpossible": "Повернутися неможливо",
+    "returnAfterAttack": "Повернення доступне лише після атаки",
+    "returnOccupied": "Повернутися неможливо: клітинка зайнята",
+    "cunningUnavailable": "Підступний удар недоступний цього ходу",
+    "cunningRepeat": "Ефект Підступного удару не можна повторювати",
+    "cunningMax": "Підступний удар: не більше {max} ефектів",
+    "cunningLocked": "Підступний удар: ефект «{effect, select, poison {Отрута} trip {Підніжка} withdraw {Відхід} other {{effect}}}» не відкритий",
+    "cunningDice": "Підступний удар: недостатньо кубиків Прихованої атаки",
+    "cannotAttackRanged": "Атакуючий не може атакувати здалеку",
+    "cannotAttackMelee": "Атакуючий не може атакувати в ближньому бою",
+    "charmedTarget": "{name} не може атакувати того, хто його зачарував",
+    "rollRequired": "Потрібен кидок d20 (d20Roll, attackRoll або attackRolls)",
+    "attackerMissing": "Атакуючого немає в бою",
+    "attackForbidden": "Атакувати може лише DM або той, хто зараз ходить",
+    "attackerInactive": "Атакуючий не може діяти (непритомний або мертвий)",
+    "noTargetsInBattle": "Цілей немає в бою",
+    "notAttackerTurn": "Зараз не хід атакуючого",
+    "noAttackAvailable": "У атакуючого немає доступної атаки",
+    "tooManyTargets": "Забагато цілей. Максимум: {max}",
+    "noEnemyInReach": "Жоден ворог не в досяжності",
+    "badStrikeRoll": "Некоректний кидок атаки для цілі {target}",
+    "rollsRequired": "d20Roll, attackRoll або attackRolls обов'язковий",
+    "oneTargetRequired": "Потрібно вказати хоча б одну ціль",
+    "barrierDuration": "Барʼєру потрібна тривалість у раундах",
+    "mapOccupied": "Клітинка зайнята або поза полем",
+    "rollbackLimit": "Цю дію вже не відкотити: після завершення бою зберігаються лише останні {count} станів",
+    "casterMissing": "Кастера немає в бою",
+    "spellForbidden": "Заклинання може кастувати лише DM або контролер поточного ходу",
+    "casterInactive": "Кастер непритомний або мертвий",
+    "actForbiddenOwner": "Діяти може лише DM або власник учасника",
+    "participantInactive": "Учасник не може діяти (непритомний або мертвий)",
+    "unitNotAssignable": "Цим юнітом не можна керувати гравцю",
+    "playerNotInBattle": "Гравець не бере участі в бою"
+  }
+}

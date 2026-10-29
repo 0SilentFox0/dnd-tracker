@@ -3,6 +3,7 @@ import { describe, expect, it } from "vitest";
 import { AttackType, ParticipantSide } from "@/lib/constants/battle";
 import { makeParticipant, resolved, seq } from "@/lib/utils/abilities/__tests__/fixtures";
 import { processAttack } from "@/lib/utils/battle/attack/process";
+import { rowLines } from "@/lib/utils/battle/log/__tests__/event-text";
 
 const dagger = { id: "dg", name: "Кинджал", type: AttackType.MELEE, attackBonus: 5, damageDice: "1d4", damageType: "piercing" };
 
@@ -30,7 +31,7 @@ describe("додаткова шкода вмінь при влучанні (Snea
 
     const d = r.battleAction.actionDetails;
 
-    expect(d?.damageBreakdown).toContain("Sneak Attack: +7");
+    expect(rowLines(d?.damageRows ?? [])).toContain("Sneak Attack: +7");
     expect(d?.totalDamage).toBe(dealt);
     expect(r.battleAction.hpChanges.find((c) => c.participantId === "t")?.change).toBe(dealt);
     expect(r.damage?.finalDamage).toBe(dealt);

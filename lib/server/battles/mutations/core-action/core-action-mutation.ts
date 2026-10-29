@@ -5,6 +5,7 @@ import { requireActor } from "@/lib/utils/battle/common/control";
 import { lineText } from "@/lib/utils/battle/log/lines";
 import type { BattleMutationContext, MutationResult } from "@/lib/utils/battle/pipeline/run-battle-mutation";
 import { battleActionToEvent, BattleRuleError, systemEvent } from "@/lib/utils/battle/store";
+import { REJECT } from "@/lib/utils/battle/store/reject";
 import { assertCanAct } from "@/lib/utils/battle/turn";
 
 function guard(ctx: BattleMutationContext, body: CoreActionBody): void {
@@ -12,8 +13,8 @@ function guard(ctx: BattleMutationContext, body: CoreActionBody): void {
 
   const actor = requireActor(ctx, body.participantId, {
     missing: API_ERRORS.BATTLE_PARTICIPANT_NOT_IN_BATTLE,
-    forbidden: offTurn ? "Діяти може лише DM або власник учасника" : "Діяти може лише DM або той, хто зараз ходить",
-    inactive: { code: "action_rejected", message: "Учасник не може діяти (непритомний або мертвий)" },
+    forbidden: offTurn ? REJECT.actForbiddenOwner : REJECT.attackForbidden,
+    inactive: { code: "action_rejected", message: REJECT.participantInactive },
     anyTurn: offTurn,
   });
 

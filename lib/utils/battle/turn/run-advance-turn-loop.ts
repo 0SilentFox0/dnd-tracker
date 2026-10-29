@@ -1,7 +1,7 @@
 import { berserkBonusOf, runBerserkTurn } from "./berserk";
 
 import { SYSTEM_ACTOR } from "@/lib/constants/battle";
-import { joinLines } from "@/lib/i18n/text-ref";
+import { textRef } from "@/lib/i18n/text-ref";
 import { idleTurnIndex, isActive, sitsOutTurn, takesTurn } from "@/lib/utils/abilities/engine/core/participants";
 import { runAbilities } from "@/lib/utils/abilities/engine/core/run-abilities";
 import { rollDyingAt } from "@/lib/utils/battle/death-saves";
@@ -83,7 +83,7 @@ function roundTransition(st: LoopState, env: LoopEnv, previousRound: number): vo
   st.order = roundEnd.participants;
 
   if (roundEnd.messages.length > 0) {
-    st.log.push(systemEntry(st, env, previousRound, joinLines([`Кінець раунду ${previousRound}: `, joinLines(roundEnd.messages, "; ")]), "triggers-round-end"));
+    st.log.push(systemEntry(st, env, previousRound, [textRef("battleLog.triggers.roundEnd", { round: previousRound }), ...roundEnd.messages], "triggers-round-end"));
   }
 
   st.clearedPendingSummons = true;
@@ -99,7 +99,7 @@ function roundTransition(st: LoopState, env: LoopEnv, previousRound: number): vo
   st.index = 0;
 
   if (roundResult.triggerMessages.length > 0) {
-    st.log.push(systemEntry(st, env, st.round, joinLines([`Тригери початку раунду ${st.round}: `, joinLines(roundResult.triggerMessages, "; ")]), "triggers-round"));
+    st.log.push(systemEntry(st, env, st.round, [textRef("battleLog.triggers.roundStart", { round: st.round }), ...roundResult.triggerMessages], "triggers-round"));
   }
 }
 
@@ -161,7 +161,7 @@ function startTurnEntries(st: LoopState, env: LoopEnv, turnResult: StartOfTurnRe
           hazard: { label: hazard.label, damageType: hazard.damageType, damage: hazard.damage },
           damageRolls: [{ dice: "", results: [], total: hazard.damage, damageType: hazard.damageType }],
         },
-        resultText: hazard.message,
+        ...logFields(hazard.message),
         hpChanges: [
           {
             participantId: participant.basicInfo.id,
@@ -180,14 +180,14 @@ function startTurnEntries(st: LoopState, env: LoopEnv, turnResult: StartOfTurnRe
       entry("effects", {
         actionType: "ability",
         actionDetails: { appliedEffects: turnResult.expiredEffects.map((name) => ({ id: name, name, duration: 0 })) },
-        resultText: `Ефекти завершилися: ${turnResult.expiredEffects.join(", ")}`,
+        ...logFields(textRef("battleLog.turn.effectsEndedCap", { names: turnResult.expiredEffects.join(", ") })),
         hpChanges: [],
       }),
     );
   }
 
   if (turnResult.abilityMessages.length > 0) {
-    st.log.push(entry("triggers-turn", { actionType: "ability", actionDetails: {}, ...logFields(joinLines([`Початок ходу: `, joinLines(turnResult.abilityMessages, "; ")])), hpChanges: [] }));
+    st.log.push(entry("triggers-turn", { actionType: "ability", actionDetails: {}, ...logFields([textRef("battleLog.triggers.turnStart"), ...turnResult.abilityMessages]), hpChanges: [] }));
   }
 }
 

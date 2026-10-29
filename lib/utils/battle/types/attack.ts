@@ -1,4 +1,6 @@
 import type { CriticalEffect } from "@/lib/constants/critical-effects";
+import type { DamageRow } from "@/types/battle";
+import type { LogLine } from "@/types/text";
 
 export interface AttackRollResult {
   isHit: boolean;
@@ -19,8 +21,8 @@ export interface AttackResult {
   damageResult?: {
     totalDamage: number;
     finalDamage: number;
-    breakdown: string[];
-    resistanceBreakdown: string[];
+    breakdown: DamageRow[];
+    resistanceBreakdown: LogLine[];
   };
   targetHpChange: {
     oldHp: number;

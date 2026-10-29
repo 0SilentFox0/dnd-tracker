@@ -1,5 +1,9 @@
+import { multiplierRow } from "./rows";
+
 import { AttackType, ParticipantSourceType } from "@/lib/constants/battle";
-import type { BattleParticipant } from "@/types/battle";
+import { textRef } from "@/lib/i18n/text-ref";
+import type { BattleParticipant, DamageRow } from "@/types/battle";
+import type { LogLine } from "@/types/text";
 
 function clampHeroDamageMultiplier(raw: number | undefined | null): number {
   const x = raw ?? 1;
@@ -9,8 +13,8 @@ function clampHeroDamageMultiplier(raw: number | undefined | null): number {
   return Math.max(0.1, Math.min(3, x));
 }
 
-export function archetypeLabel(p: BattleParticipant): string {
-  return p.abilities.archetypeName ? `архетип: ${p.abilities.archetypeName}` : "архетип";
+export function archetypeRef(p: BattleParticipant): LogLine {
+  return p.abilities.archetypeName ? textRef("battleLog.damage.rows.archetypeNamed", { name: p.abilities.archetypeName }) : textRef("battleLog.damage.rows.archetype");
 }
 
 export function heroMagicMultiplier(p: BattleParticipant): number {
@@ -24,9 +28,9 @@ export function applyHeroDmDamageMultiplier(
   attacker: BattleParticipant,
   attackType: AttackType,
   physicalDamage: number,
-): { damage: number; breakdownLine: string | null; multiplier: number } {
+): { damage: number; breakdownRow: DamageRow | null; multiplier: number } {
   if (attacker.basicInfo.sourceType !== ParticipantSourceType.CHARACTER) {
-    return { damage: physicalDamage, breakdownLine: null, multiplier: 1 };
+    return { damage: physicalDamage, breakdownRow: null, multiplier: 1 };
   }
 
   const mult =
@@ -35,14 +39,14 @@ export function applyHeroDmDamageMultiplier(
       : clampHeroDamageMultiplier(attacker.abilities.rangedMultiplier);
 
   if (mult === 1) {
-    return { damage: physicalDamage, breakdownLine: null, multiplier: 1 };
+    return { damage: physicalDamage, breakdownRow: null, multiplier: 1 };
   }
 
   const damage = Math.floor(physicalDamage * mult);
 
   return {
     damage,
-    breakdownLine: `× ${mult} (${archetypeLabel(attacker)}) = ${damage}`,
+    breakdownRow: multiplierRow(archetypeRef(attacker), mult, damage),
     multiplier: mult,
   };
 }

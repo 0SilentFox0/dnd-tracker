@@ -18,6 +18,7 @@ import type { BattleMutationContext, PipelineDeps } from "@/lib/utils/battle/pip
 import { diffParticipants, splitParticipant } from "@/lib/utils/battle/store";
 import { buildSnapshotState } from "@/lib/utils/battle/store/snapshot-state";
 import { DEFAULT_RULES } from "@/lib/utils/rules";
+import { eventTextOf } from "@/lib/utils/battle/log/__tests__/event-text";
 
 const hero = { ...baseHero, battleData: { ...baseHero.battleData, attacks: [{ id: "sword", name: "Меч", type: AttackType.MELEE, attackBonus: 5, damageDice: "1d8", damageType: "slashing" }] } };
 
@@ -59,7 +60,7 @@ describe("crit-choice mutation", () => {
 
     expect(out.scene?.pendingCritChoice).toBeNull();
     expect(out.events).toHaveLength(1);
-    expect(out.events[0].resultText).toContain(effect.name);
+    expect(eventTextOf(out.events[0])).toContain(effect.name);
   });
 
   it("«random» для всіх дорівнює resume без вибору за тим самим seed", async () => {
@@ -69,7 +70,7 @@ describe("crit-choice mutation", () => {
 
     const direct = await attack(on(), body(), { seed: pending.seed, choices: {} });
 
-    expect(viaRoute.events[0].resultText).toBe(direct.events[0].resultText);
+    expect(eventTextOf(viaRoute.events[0])).toBe(eventTextOf(direct.events[0]));
     expect(viaRoute.participants.map((p) => p.combatStats.currentHp)).toEqual(direct.participants.map((p) => p.combatStats.currentHp));
   });
 
@@ -103,7 +104,7 @@ describe("crit-choice mutation", () => {
 
     const done = await critChoice(ctx, { choices: { [KEY]: "random" } });
 
-    expect(done.events[0].resultText).toContain(all[1].name);
+    expect(eventTextOf(done.events[0])).toContain(all[1].name);
   });
 
   it("серверні кидки асистента: після вибору атака повторюється з serverRolls", async () => {
@@ -153,7 +154,7 @@ describe("crit-choice mutation", () => {
     expect(out.scene?.pendingCritChoice).toBeNull();
     expect(out.participants).toBe(ctx.participants);
     expect(out.events).toHaveLength(1);
-    expect(out.events[0].resultText).toBe("ДМ скасував дію");
+    expect(eventTextOf(out.events[0])).toBe("ДМ скасував дію");
     await expect(critChoice(on(), { cancel: true })).rejects.toMatchObject({ code: "action_rejected" });
   });
 

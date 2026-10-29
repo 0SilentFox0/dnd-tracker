@@ -1,7 +1,7 @@
 import { z } from "zod";
 
 import { API_ERRORS } from "@/lib/constants/api-errors";
-import { joinLines } from "@/lib/i18n/text-ref";
+import { joinLines, textRef } from "@/lib/i18n/text-ref";
 import { applyBakedAuras } from "@/lib/utils/abilities/build/bake";
 import { runAbilities } from "@/lib/utils/abilities/engine/core/run-abilities";
 import { modeEnter } from "@/lib/utils/battle/modes/server";
@@ -59,7 +59,7 @@ export function revealParticipantMutation(ctx: BattleMutationContext, body: Reve
     events: [
       dmEvent(
         ctx.scene.round,
-        joined.messages.length > 0 ? joinLines([`ДМ ввів у бій: ${names}. `, joinLines(joined.messages, "; ")]) : `ДМ ввів у бій: ${names}`,
+        joined.messages.length > 0 ? textRef("battleLog.dm.revealedWith", { names, rest: joinLines(joined.messages, "; ") }) : textRef("battleLog.dm.revealed", { names }),
         revealed.map((p) => ({ participantId: p.basicInfo.id, participantName: p.basicInfo.name })),
       ),
     ],

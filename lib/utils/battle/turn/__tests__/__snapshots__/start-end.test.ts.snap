@@ -4,13 +4,53 @@ exports[`детермінований контракт початку ходу >
 {
   "result": {
     "abilityMessages": [
-      "Тест: +2 HP від regen",
+      {
+        "message": "battleLog.turn.hot",
+        "params": {
+          "effect": "regen",
+          "heal": 2,
+          "name": "Тест",
+        },
+      },
       "💚 Вміння: Тест +2 HP (шанс 50 %)",
     ],
     "damageMessages": [
-      "Тест: 3 fire шкоди від burn",
-      "🎲 Тест: концентрація — рятівний кидок ВИТ 15 проти СК 10 — утримує",
-      "🎲 Тест: концентрація — рятівний кидок ВИТ 2 проти СК 10 — втрачає концентрацію на «Захист»",
+      {
+        "message": "battleLog.turn.dot",
+        "params": {
+          "damage": 3,
+          "effect": "burn",
+          "name": "Тест",
+          "type": "fire",
+        },
+      },
+      {
+        "message": "battleLog.concentration.holds",
+        "params": {
+          "head": {
+            "message": "battleLog.concentration.check",
+            "params": {
+              "dc": 10,
+              "name": "Тест",
+              "total": 15,
+            },
+          },
+        },
+      },
+      {
+        "message": "battleLog.concentration.broke",
+        "params": {
+          "head": {
+            "message": "battleLog.concentration.check",
+            "params": {
+              "dc": 10,
+              "name": "Тест",
+              "total": 2,
+            },
+          },
+          "spell": "Захист",
+        },
+      },
     ],
     "expiredEffects": [
       "expired",
@@ -20,7 +60,15 @@ exports[`детермінований контракт початку ходу >
       "damageType": "fire",
       "hpBefore": 22,
       "label": "Вогонь",
-      "message": "Тест: 1 fire шкоди від «Вогонь»",
+      "message": {
+        "message": "battleLog.hazard.hit",
+        "params": {
+          "damage": 1,
+          "label": "Вогонь",
+          "name": "Тест",
+          "type": "fire",
+        },
+      },
     },
     "participant": {
       "abilities": {
@@ -446,8 +494,20 @@ exports[`детермінований контракт початку ходу >
       },
     ],
     "rechargeMessages": [
-      "🔄 Подих перезарядилась (6)",
-      "🔄 Рик не перезарядилась (1)",
+      {
+        "message": "battleLog.turn.recharged",
+        "params": {
+          "pool": "Подих",
+          "roll": 6,
+        },
+      },
+      {
+        "message": "battleLog.turn.notRecharged",
+        "params": {
+          "pool": "Рик",
+          "roll": 1,
+        },
+      },
     ],
     "statusChanged": false,
   },

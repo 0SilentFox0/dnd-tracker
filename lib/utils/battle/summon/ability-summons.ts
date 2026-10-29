@@ -1,3 +1,4 @@
+import { textRef } from "@/lib/i18n/text-ref";
 import { findFlags } from "@/lib/utils/abilities/engine/core/collect-modifiers";
 import { findParticipant, isActive, withSelf } from "@/lib/utils/abilities/engine/core/participants";
 import type { SummonRequest } from "@/lib/utils/abilities/engine/core/types";
@@ -29,7 +30,7 @@ function extraSummons(order: BattleParticipant[], owner: BattleParticipant, spel
 }
 
 /** Найсильніше «Вигнання» серед живих ворогів власника: прикликана істота втрачає частку HP. */
-function banish(order: BattleParticipant[], summoned: BattleParticipant): { participant: BattleParticipant; message?: string } {
+function banish(order: BattleParticipant[], summoned: BattleParticipant): { participant: BattleParticipant; message?: LogLine } {
   const banishers = order.filter((p) => isActive(p) && p.basicInfo.side !== summoned.basicInfo.side);
 
   const percent = Math.max(0, ...banishers.flatMap((p) => findFlags(order, p.basicInfo.id, "banishSummons").map((f) => f.percent)));
@@ -40,7 +41,7 @@ function banish(order: BattleParticipant[], summoned: BattleParticipant): { part
 
   return {
     participant: { ...summoned, combatStats: { ...summoned.combatStats, currentHp } },
-    message: `🚫 Вигнання: ${summoned.basicInfo.name} −${percent}% HP (${currentHp}/${summoned.combatStats.maxHp})`,
+    message: textRef("battleLog.summon.banish", { name: summoned.basicInfo.name, percent, hp: currentHp, max: summoned.combatStats.maxHp }),
   };
 }
 
@@ -69,7 +70,7 @@ export async function applyAbilitySummons(
       : pool.units.filter((u) => u.level === req.tier && (racesById[u.raceId ?? ""]?.name ?? "").trim().toLowerCase() === group);
 
     if (!owner || candidates.length === 0) {
-      messages.push(req.unitId ? "обраного юніта не знайдено" : `немає юніта групи ${req.group} Tier ${req.tier}`);
+      messages.push(req.unitId ? textRef("battleLog.summon.unitNotFound") : textRef("battleLog.summon.noGroup", { group: req.group ?? "", tier: req.tier ?? "" }));
       continue;
     }
 
@@ -77,7 +78,7 @@ export async function applyAbilitySummons(
 
     const count = req.count + extraSummons(next, owner, req.spellId);
 
-    const banished: string[] = [];
+    const banished: LogLine[] = [];
 
     for (let i = 0; i < count; i++) {
       const unit = pickOne(candidates, opts.rng);
@@ -98,7 +99,7 @@ export async function applyAbilitySummons(
       names.push(added.basicInfo.name);
     }
 
-    messages.push(`🌀 прикликано: ${names.join(", ")}`, ...banished);
+    messages.push(textRef("battleLog.summon.summoned", { names: names.join(", ") }), ...banished);
   }
 
   return { order: next, messages };

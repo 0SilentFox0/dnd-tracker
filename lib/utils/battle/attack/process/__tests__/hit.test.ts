@@ -2,9 +2,11 @@ import { describe, expect, it } from "vitest";
 
 import { AttackType, ParticipantSide } from "@/lib/constants/battle";
 import { getCriticalEffect } from "@/lib/constants/critical-effects";
+import { textRef } from "@/lib/i18n/text-ref";
 import { makeParticipant, resolved, seq } from "@/lib/utils/abilities/__tests__/fixtures";
 import { processAttack } from "@/lib/utils/battle/attack/process";
 import { computeHitDamage } from "@/lib/utils/battle/attack/process/compute";
+import { eventTextOf } from "@/lib/utils/battle/log/__tests__/event-text";
 import type { BattleAttack } from "@/types/battle";
 
 const sword: BattleAttack = { id: "sw", name: "Меч", type: AttackType.MELEE, attackBonus: 5, damageDice: "1d6", damageType: "slashing" };
@@ -37,7 +39,7 @@ describe("крок влучання", () => {
     const boosted = computeHitDamage({ ...input, bonusPercent: 50 });
 
     expect(boosted.physicalDamage).toBe(Math.floor(plain.physicalDamage * 1.5));
-    expect(boosted.damageSteps).toContainEqual(expect.objectContaining({ label: "Контратака", kind: "multiplier", value: 1.5 }));
+    expect(boosted.damageSteps).toContainEqual(expect.objectContaining({ label: textRef("battleLog.damage.steps.counter"), kind: "multiplier", value: 1.5 }));
   });
 
   it("slipping weapon halves physical damage and adds a multiplier step", () => {
@@ -82,12 +84,12 @@ describe("крок влучання", () => {
 
       const r = processAttack({ attacker, target, attack: sword, d20Roll: 20, damageRolls: [4], allParticipants: [attacker, target], currentRound: 1, battleId: "b1", rng: seq(0.55) });
 
-      const flavor = r.battleAction.actionDetails.criticalEffect?.flavor;
+      const flavor = phrases("success", names(attacker, target))[(r.battleAction.actionDetails.criticalEffect?.flavorIndex ?? 0) - 1];
 
-      expect(phrases("success", names(attacker, target))).toContain(flavor);
-      expect(r.battleAction.resultText).toContain("Критичне влучання — Безкоштовна атака!");
-      expect(r.battleAction.resultText).toContain(flavor);
-      expect(r.battleAction.resultText).toContain(`${attacker.basicInfo.name} → `);
+      expect(flavor).toBeDefined();
+      expect(eventTextOf(r.battleAction)).toContain("Критичне влучання — Безкоштовна атака!");
+      expect(eventTextOf(r.battleAction)).toContain(flavor);
+      expect(eventTextOf(r.battleAction)).toContain(`${attacker.basicInfo.name} → `);
     });
 
     it("крит-невдача: фраза в деталях і в тексті", () => {
@@ -95,11 +97,11 @@ describe("крок влучання", () => {
 
       const r = processAttack({ attacker, target, attack: sword, d20Roll: 1, damageRolls: [4], allParticipants: [attacker, target], currentRound: 1, battleId: "b1", rng: seq(0.55) });
 
-      const flavor = r.battleAction.actionDetails.criticalEffect?.flavor;
+      const flavor = phrases("fail", names(attacker, target))[(r.battleAction.actionDetails.criticalEffect?.flavorIndex ?? 0) - 1];
 
-      expect(phrases("fail", names(attacker, target))).toContain(flavor);
-      expect(r.battleAction.resultText.startsWith(`${attacker.basicInfo.name}: критична невдача — `)).toBe(true);
-      expect(r.battleAction.resultText).toContain(flavor);
+      expect(flavor).toBeDefined();
+      expect(eventTextOf(r.battleAction).startsWith(`${attacker.basicInfo.name}: критична невдача — `)).toBe(true);
+      expect(eventTextOf(r.battleAction)).toContain(flavor);
     });
   });
 });

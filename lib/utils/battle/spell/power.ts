@@ -1,11 +1,13 @@
+import { textRef } from "@/lib/i18n/text-ref";
 import { collectModifiers } from "@/lib/utils/abilities/engine/core/collect-modifiers";
 import { withSelf } from "@/lib/utils/abilities/engine/core/participants";
 import type { StaticEffect } from "@/lib/utils/abilities/schema";
 import { isFiveE } from "@/lib/utils/battle/attack/ability";
-import { archetypeLabel, heroMagicMultiplier } from "@/lib/utils/battle/damage/hero-dm-multiplier";
+import { archetypeRef, heroMagicMultiplier } from "@/lib/utils/battle/damage/hero-dm-multiplier";
+import { multiplierRow, stepRow } from "@/lib/utils/battle/damage/rows";
 import { getSpellSaveDC } from "@/lib/utils/common/calculations";
 import { signed } from "@/lib/utils/common/format";
-import type { BattleParticipant } from "@/types/battle";
+import type { BattleParticipant, DamageRow } from "@/types/battle";
 
 function spellcastingModifier(p: BattleParticipant): { mod: number; label: string } {
   const ability = p.spellcasting?.spellcastingAbility;
@@ -32,7 +34,7 @@ export function spellAttackBonus(caster: BattleParticipant): number {
 export interface SpellPower {
   heal: number;
   damage: number;
-  breakdown: string[];
+  breakdown: DamageRow[];
 }
 
 export function computeSpellPower(input: {
@@ -50,7 +52,7 @@ export function computeSpellPower(input: {
 
   const sum = rolls.reduce((a, b) => a + b, 0);
 
-  const breakdown = [`+ сума кубиків (${sum})`];
+  const breakdown: DamageRow[] = [stepRow(textRef("battleLog.damage.rows.dice"), sum)];
 
   const heal = sum + (input.damageBonus ?? 0);
 
@@ -59,16 +61,16 @@ export function computeSpellPower(input: {
   const percentBonus = Math.floor((sum * mods.percent) / 100);
 
   for (const e of mods.entries) {
-    if (e.flat) breakdown.push(`+ бонус ${e.label} (${signed(e.flat)})`);
+    if (e.flat) breakdown.push(stepRow(e.label, signed(e.flat)));
 
-    if (e.percent) breakdown.push(`+ бонус ${e.label}: ${e.percent}% від ${sum} (${signed(Math.floor((sum * e.percent) / 100))})`);
+    if (e.percent) breakdown.push(stepRow(e.label, `+${e.percent}% (${signed(Math.floor((sum * e.percent) / 100))})`));
   }
 
   const abilityMod = isFiveE(caster) && input.addAbilityMod ? spellcastingModifier(caster) : null;
 
-  if (abilityMod) breakdown.push(`+ мод. ${abilityMod.label} (${signed(abilityMod.mod)})`);
+  if (abilityMod) breakdown.push(stepRow(textRef("battleLog.damage.rows.spellMod", { label: abilityMod.label }), signed(abilityMod.mod)));
 
-  if (input.damageBonus) breakdown.push(`+ бонус заклинання (${signed(input.damageBonus)})`);
+  if (input.damageBonus) breakdown.push(stepRow(textRef("battleLog.damage.rows.spellBonus"), signed(input.damageBonus)));
 
   const raw = heal + mods.flat + percentBonus + (abilityMod?.mod ?? 0);
 
@@ -76,7 +78,7 @@ export function computeSpellPower(input: {
 
   const damage = mult === 1 ? raw : Math.floor(raw * mult);
 
-  if (mult !== 1) breakdown.push(`× ${mult} (${archetypeLabel(caster)}) = ${damage}`);
+  if (mult !== 1) breakdown.push(multiplierRow(archetypeRef(caster), mult, damage));
 
   return { heal: heal + (abilityMod?.mod ?? 0), damage, breakdown };
 }

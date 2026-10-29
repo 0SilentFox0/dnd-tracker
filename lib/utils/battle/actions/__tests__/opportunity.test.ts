@@ -10,6 +10,7 @@ import { cellKey } from "@/lib/utils/battle/grid";
 import { pathTo, reachable } from "@/lib/utils/battle/grid/path";
 import { DEFAULT_RULES } from "@/lib/utils/rules";
 import type { BattleAttack, BattleMapConfig, BattleParticipant } from "@/types/battle";
+import { eventTextOf } from "@/lib/utils/battle/log/__tests__/event-text";
 
 const map: BattleMapConfig = { cols: 10, rows: 5, background: null, opacity: 0.3 };
 
@@ -72,7 +73,7 @@ describe("resolveOpportunityAttacks", () => {
     const out = go([m, e], { x: 3, y: 0 });
 
     expect(out.actions).toHaveLength(1);
-    expect(out.actions[0].resultText).toContain("Атака можливості");
+    expect(eventTextOf(out.actions[0])).toContain("Атака можливості");
     expect(out.participants.find((p) => p.basicInfo.id === "e")!.actionFlags.hasUsedReaction).toBe(true);
     expect(out.messages[0]).toBe("⚔ Атака при відході: e → m");
     expect(out.stopAt).toBeNull();

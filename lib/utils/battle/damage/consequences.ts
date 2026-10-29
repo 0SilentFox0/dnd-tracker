@@ -1,4 +1,5 @@
 import { CombatStatus, ParticipantSourceType } from "@/lib/constants/battle";
+import { textRef } from "@/lib/i18n/text-ref";
 import { findParticipant, replaceParticipant } from "@/lib/utils/abilities/engine/core/participants";
 import { concentrationBroken, concentrationCheck, dropConcentration, hasConcentration } from "@/lib/utils/battle/concentration";
 import { clearDeathSaves, deathSaveDamage, startDying } from "@/lib/utils/battle/death-saves";
@@ -44,7 +45,7 @@ function heroGoesDown(input: DamageConsequencesInput, rules: Ruleset): { partici
 
   const instantDeath = (overflow: number, hp: number) =>
     overflow >= before.combatStats.maxHp
-      ? { participant: { ...after, combatStats: { ...after.combatStats, currentHp: hp, status: CombatStatus.DEAD } }, messages: [`💀 ${after.basicInfo.name}: миттєва смерть від масивної шкоди`] }
+      ? { participant: { ...after, combatStats: { ...after.combatStats, currentHp: hp, status: CombatStatus.DEAD } }, messages: [textRef("battleLog.death.massive", { name: after.basicInfo.name })] }
       : null;
 
   if (before.combatStats.currentHp > 0 && after.combatStats.currentHp <= 0) {
@@ -52,7 +53,7 @@ function heroGoesDown(input: DamageConsequencesInput, rules: Ruleset): { partici
 
     if (dead) return dead;
 
-    return { participant: startDying(after, rules), messages: [`💤 ${after.basicInfo.name} непритомніє`] };
+    return { participant: startDying(after, rules), messages: [textRef("battleLog.death.unconscious", { name: after.basicInfo.name })] };
   }
 
   if (before.combatStats.currentHp <= 0 && before.battleData.deathSaves && after.combatStats.status === CombatStatus.UNCONSCIOUS) {
@@ -64,7 +65,7 @@ function heroGoesDown(input: DamageConsequencesInput, rules: Ruleset): { partici
 
     const dead = hit.combatStats.status === CombatStatus.DEAD;
 
-    return { participant: hit, messages: [dead ? `💀 ${after.basicInfo.name} помирає від ран` : `🩸 ${after.basicInfo.name}: провал кидка смерті від шкоди`] };
+    return { participant: hit, messages: [textRef(dead ? "battleLog.death.woundsDeath" : "battleLog.death.damageFail", { name: after.basicInfo.name })] };
   }
 
   return none;

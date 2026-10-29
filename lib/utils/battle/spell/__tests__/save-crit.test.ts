@@ -10,6 +10,7 @@ import { castSpell } from "@/lib/utils/battle/spell";
 import type { CastableSpell } from "@/lib/utils/battle/types/spell-process";
 import { mulberry32 } from "@/lib/utils/common/rng";
 import type { BattleParticipant } from "@/types/battle";
+import { textsOf } from "@/lib/utils/battle/log/__tests__/event-text";
 
 const fire: Effect = { kind: "dealDamage", amount: { spellRoll: 100 }, damageType: "fire" };
 
@@ -63,7 +64,7 @@ describe("криті на рятівних кидках заклинань", () 
     const r = cast(spellOf([fire]), { e1: 20 }, picking(SAVE_SUCCESS_EFFECTS, "negate_damage"));
 
     expect(get(r, "e1").combatStats.currentHp).toBe(200);
-    expect(r.messages.join("\n")).toContain("Повне уникнення");
+    expect(textsOf(r.messages).join("\n")).toContain("Повне уникнення");
   });
 
   it("без crit нат. 20 при half: половина шкоди", () => {

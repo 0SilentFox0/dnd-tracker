@@ -1,6 +1,7 @@
 import { countDownRoundEffects } from "./effects";
 import { calculateInitiative, sortByInitiative } from "./initiative";
 
+import { textRef } from "@/lib/i18n/text-ref";
 import { applyBakedAuras } from "@/lib/utils/abilities/build/bake";
 import { isActive } from "@/lib/utils/abilities/engine/core/participants";
 import { runAbilities } from "@/lib/utils/abilities/engine/core/run-abilities";
@@ -26,7 +27,7 @@ export function processStartOfRound(
   rules?: Ruleset,
 ): {
   updatedInitiativeOrder: BattleParticipant[];
-  message: string;
+  message: LogLine;
   triggerMessages: LogLine[];
   lairMessages: LogLine[];
 } {
@@ -64,8 +65,8 @@ export function processStartOfRound(
 
   return {
     updatedInitiativeOrder: sortedOrder.map(countDownRoundEffects),
-    message: `🔁 Початок Раунду ${currentRound}`,
+    message: textRef("battleLog.round.start", { round: currentRound }),
     triggerMessages: messages,
-    lairMessages: sortedOrder.filter((p) => p.battleData.lair?.active && isActive(p) && p.battleData.resolvedAbilities.some((a) => a.limits?.lair)).map((p) => `🏰 Ініціатива 20: дія лігва — ${p.basicInfo.name}`),
+    lairMessages: sortedOrder.filter((p) => p.battleData.lair?.active && isActive(p) && p.battleData.resolvedAbilities.some((a) => a.limits?.lair)).map((p) => textRef("battleLog.round.lair", { name: p.basicInfo.name })),
   };
 }

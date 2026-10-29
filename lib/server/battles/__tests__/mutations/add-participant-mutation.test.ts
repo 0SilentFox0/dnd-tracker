@@ -9,6 +9,7 @@ import { at, mazeMap, withMap } from "@/lib/utils/battle/modes/maze/__tests__/fi
 import { toReserve } from "@/lib/utils/battle/participant/reserve";
 import { parseRules } from "@/lib/utils/rules/schema";
 import type { BattleParticipant } from "@/types/battle";
+import { eventTextOf } from "@/lib/utils/battle/log/__tests__/event-text";
 
 function deps(over = {}) {
   return {
@@ -34,7 +35,7 @@ describe("add-participant mutation", () => {
 
     expect(out.participants.map((p) => p.basicInfo.id)).toEqual(["hero", "new-u1", "new-u2", "gob"]);
     expect(out.scene?.turnIndex).toBeUndefined();
-    expect(out.events[0].resultText).toContain("DM додав на поле");
+    expect(eventTextOf(out.events[0])).toContain("DM додав на поле");
   });
 
   it("місце вже минуло — поточний не змінюється, turnIndex зсувається", async () => {

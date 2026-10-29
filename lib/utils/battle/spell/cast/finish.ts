@@ -140,7 +140,7 @@ export function finishSpellAction(state: SpellCastState, { before, targetsBefore
     ...(state.chosenCastLevel !== undefined && { castLevel: state.chosenCastLevel }),
     ...(dealt > 0 && { totalDamage: dealt }),
     ...(healed > 0 && { totalHealing: healed }),
-    ...(state.power.breakdown.length > 0 && { damageBreakdown: state.power.breakdown.join("; ") }),
+    ...(state.power.breakdown.length > 0 && { damageRows: state.power.breakdown }),
     ...(state.saves.length > 0 && { savingThrows: state.saves }),
     ...(state.attacks.length > 0 && { spellAttacks: state.attacks }),
     ...(Object.keys(state.damageSteps).length > 0 && { damageSteps: state.damageSteps }),

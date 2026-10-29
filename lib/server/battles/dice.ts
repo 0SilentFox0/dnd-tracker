@@ -5,7 +5,7 @@ import { ContentError } from "@/lib/server/content/errors";
 import { validateAttackRequest } from "@/lib/utils/battle/attack-phase/request";
 import { attackReachError } from "@/lib/utils/battle/grid";
 import type { BattleMutationContext, RunBattleMutationOptions } from "@/lib/utils/battle/pipeline/run-battle-mutation";
-import { BattleRuleError } from "@/lib/utils/battle/store";
+import { ruleErrorOf } from "@/lib/utils/battle/store/errors";
 import { rollDie } from "@/lib/utils/common/dice";
 
 const rollKeys = new Set(["d10Roll", "d20Roll", "attackRoll", "attackRolls", "secondRolls", "advantageRoll", "disadvantageRoll", "damageRolls", "diceRolls", "saveRolls", "roll", "rolls"]);
@@ -29,7 +29,7 @@ export function validateAttackPreview(ctx: BattleMutationContext, body: Record<s
 
   const reach = attackReachError(ctx.meta.map, ctx.participants, checked.attacker, checked.attack, checked.chosenTargets);
 
-  if (reach) throw new BattleRuleError("action_rejected", reach);
+  if (reach) throw ruleErrorOf("action_rejected", reach);
 }
 export function withServerBattleDice(operation: string, definition: RunBattleMutationOptions<unknown>): RunBattleMutationOptions<unknown> {
   if (operation === "spell") return { ...definition, mutate: createSpellMutation(undefined, { serverRolls: true }) as RunBattleMutationOptions<unknown>["mutate"] };

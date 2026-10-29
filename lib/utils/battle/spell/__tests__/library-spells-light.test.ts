@@ -13,6 +13,7 @@ import type { BattleSceneState } from "@/lib/utils/battle/store";
 import { advanceTurn } from "@/lib/utils/battle/turn";
 import type { CastableSpell } from "@/lib/utils/battle/types/spell-process";
 import type { BattleAttack, BattleParticipant } from "@/types/battle";
+import { eventTextOf } from "@/lib/utils/battle/log/__tests__/event-text";
 
 const spellOf = (key: string): CastableSpell => {
   const s = SPELLS.find((x) => x.key === key);
@@ -86,7 +87,7 @@ function attack(attacker: BattleParticipant, target: BattleParticipant, weapon: 
   return processAttack({ attacker, target, attack: weapon, d20Roll: d20, damageRolls: [dmg], allParticipants: [attacker, target], currentRound: 1, battleId: "b", rng: seq(0.99) });
 }
 
-const hits = (r: ReturnType<typeof attack>) => !r.battleAction.resultText.includes("промах");
+const hits = (r: ReturnType<typeof attack>) => !eventTextOf(r.battleAction).includes("промах");
 
 describe("Світло: бібліотека", () => {
   it("13 заклинань школи", () => {
@@ -319,7 +320,7 @@ describe("Телепортація", () => {
 
     expect(r.casterUpdated.spellcasting.spellSlots.universal.current).toBe(4);
     expect(r.casterUpdated.actionFlags.hasUsedAction).toBe(true);
-    expect(r.battleAction.resultText).toContain("📜");
+    expect(eventTextOf(r.battleAction)).toContain("📜");
   });
 });
 

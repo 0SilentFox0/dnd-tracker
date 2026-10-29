@@ -9,6 +9,7 @@ import { grantPassive } from "@/lib/utils/battle/__tests__/fixtures/mock-partici
 import {
   computeDamageBreakdown,
 } from "@/lib/utils/battle/damage";
+import { rowLines,textsOf } from "@/lib/utils/battle/log/__tests__/event-text";
 import type { BattleAttack, BattleParticipant } from "@/types/battle";
 
 function createBaseParticipant(overrides?: Partial<BattleParticipant>): BattleParticipant {
@@ -106,7 +107,7 @@ describe("battle-damage-breakdown", () => {
       expect(result.breakdown.length).toBeGreaterThan(0);
       expect(result.totalDamage).toBeGreaterThanOrEqual(0);
 
-      const totalLine = result.breakdown.find((s) => s.includes("шкоди"));
+      const totalLine = rowLines(result.breakdown).find((s) => s.startsWith("Сума"));
 
       expect(totalLine).toBeDefined();
       expect(totalLine).toContain(String(result.totalDamage));
@@ -143,8 +144,8 @@ describe("battle-damage-breakdown", () => {
 
       expect(critical.totalDamage).toBe(normal.totalDamage * 2);
 
-      const critLine = critical.breakdown.find(
-        (s) => s.includes("крит") || s.includes("× 2"),
+      const critLine = rowLines(critical.breakdown).find(
+        (s) => s.includes("Крит") || s.includes("×2"),
       );
 
       expect(critLine).toBeDefined();
@@ -200,7 +201,7 @@ describe("battle-damage-breakdown", () => {
 
       expect(result.finalDamage).toBeLessThan(result.totalDamage);
 
-      const hasResistLine = result.targetBreakdown.some(
+      const hasResistLine = textsOf(result.targetBreakdown).some(
         (s) => s.includes("−") || s.includes("%") || s.includes("Сумарна шкода"),
       );
 

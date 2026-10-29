@@ -98,6 +98,7 @@ export async function createBattleParticipantFromUnit(
         ? AttackType.RANGED
         : rawType === AttackType.MELEE
           ? AttackType.MELEE
+           
           : attack.range && !/^5\s*(фт|ft)/i.test(attack.range)
             ? AttackType.RANGED
             : AttackType.MELEE;

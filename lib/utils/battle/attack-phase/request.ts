@@ -9,7 +9,8 @@ import { getDisabledAttackKinds } from "@/lib/utils/battle/attack/disabled-attac
 import { attackKindOf } from "@/lib/utils/battle/common/attack-kind";
 import { type ActorScope, requireActor } from "@/lib/utils/battle/common/control";
 import { conditionSourceIds } from "@/lib/utils/battle/conditions/query";
-import { BattleAccessError, BattleRuleError } from "@/lib/utils/battle/store/errors";
+import { BattleAccessError, BattleRuleError, ruleErrorOf } from "@/lib/utils/battle/store/errors";
+import { REJECT } from "@/lib/utils/battle/store/reject";
 import type { BattleAttack, BattleParticipant } from "@/types/battle";
 
 export interface AttackRequest {
@@ -54,13 +55,13 @@ export function assertAttackAllowed(attacker: BattleParticipant, attack: BattleA
   const attackKind = attackKindOf(attack.type);
 
   if (getDisabledAttackKinds(attacker)[attackKind]) {
-    throw new BattleRuleError("action_rejected", attackKind === AttackType.RANGED ? "Атакуючий не може атакувати здалеку" : "Атакуючий не може атакувати в ближньому бою");
+    throw new BattleRuleError("action_rejected", attackKind === AttackType.RANGED ? REJECT.cannotAttackRanged : REJECT.cannotAttackMelee);
   }
 
   const charmers = conditionSourceIds(attacker, "charmed");
 
   if (targets.some((t) => charmers.includes(t.basicInfo.id))) {
-    throw new BattleRuleError("invalid_target", `${attacker.basicInfo.name} не може атакувати того, хто його зачарував`);
+    throw new BattleRuleError("invalid_target", REJECT.charmedTarget, { name: attacker.basicInfo.name });
   }
 }
 
@@ -97,21 +98,21 @@ export function validateAttackRequest(scope: ActorScope, data: AttackRequest): V
   const usePerTargetRolls = Array.isArray(data.attackRolls) && data.attackRolls.length === chosenTargets.length;
 
   if (!singleRoll && !usePerTargetRolls) {
-    throw new BattleRuleError("action_rejected", "Потрібен кидок d20 (d20Roll, attackRoll або attackRolls)");
+    throw new BattleRuleError("action_rejected", REJECT.rollRequired);
   }
 
   const attacker = requireActor(scope, data.attackerId, {
-    missing: "Атакуючого немає в бою",
-    forbidden: "Атакувати може лише DM або той, хто зараз ходить",
-    inactive: { code: "action_rejected", message: "Атакуючий не може діяти (непритомний або мертвий)" },
+    missing: REJECT.attackerMissing,
+    forbidden: REJECT.attackForbidden,
+    inactive: { code: "action_rejected", message: REJECT.attackerInactive },
   });
 
-  if (chosenTargets.length === 0) throw new BattleAccessError(404, "Цілей немає в бою");
+  if (chosenTargets.length === 0) throw new BattleAccessError(404, REJECT.noTargetsInBattle);
 
   if (chosenTargets.some(isAirborne)) throw new BattleRuleError("invalid_target", API_ERRORS.TARGET_AIRBORNE);
 
   if (order[scope.scene.turnIndex]?.basicInfo.id !== attacker.basicInfo.id) {
-    throw new BattleRuleError("action_rejected", "Зараз не хід атакуючого");
+    throw new BattleRuleError("action_rejected", REJECT.notAttackerTurn);
   }
 
   if (data.offHand && !isFiveE(attacker)) throw new BattleRuleError("action_rejected", API_ERRORS.OFF_HAND_NOT_ALLOWED);
@@ -120,7 +121,7 @@ export function validateAttackRequest(scope: ActorScope, data: AttackRequest): V
 
   const attack = findAttack(attacker, data.attackId, data.offHand);
 
-  if (!attack) throw new BattleRuleError("action_rejected", data.offHand ? API_ERRORS.NO_OFF_HAND_WEAPON : "У атакуючого немає доступної атаки");
+  if (!attack) throw new BattleRuleError("action_rejected", data.offHand ? API_ERRORS.NO_OFF_HAND_WEAPON : REJECT.noAttackAvailable);
 
   if (data.offHand) assertOffHand(attacker, attack);
   else if (attack.hand === "off") throw new BattleRuleError("action_rejected", API_ERRORS.OFF_HAND_NEEDS_ATTACK);
@@ -130,7 +131,7 @@ export function validateAttackRequest(scope: ActorScope, data: AttackRequest): V
   if (data.cunningStrike?.length) {
     const cost = cunningStrikeCost(cunningStrikeOffer(attacker, 0), data.cunningStrike);
 
-    if (typeof cost === "string") throw new BattleRuleError("action_rejected", cost);
+    if (typeof cost !== "number") throw ruleErrorOf("action_rejected", cost);
   }
 
   return { attacker, attack, targetIds, chosenTargets, singleRoll, usePerTargetRolls };

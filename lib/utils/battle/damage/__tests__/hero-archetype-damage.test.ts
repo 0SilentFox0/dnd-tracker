@@ -3,6 +3,7 @@ import { describe, expect, it } from "vitest";
 import { AttackType, ParticipantSide, ParticipantSourceType } from "@/lib/constants/battle";
 import { createMockParticipant } from "@/lib/utils/battle/__tests__/fixtures/mock-participant";
 import { applyHeroDmDamageMultiplier } from "@/lib/utils/battle/damage/hero-dm-multiplier";
+import { rowLines } from "@/lib/utils/battle/log/__tests__/event-text";
 import { createBattleParticipantFromCharacter } from "@/lib/utils/battle/participant/from-character";
 import { computeSpellPower } from "@/lib/utils/battle/spell/power";
 import type { BattleParticipant } from "@/types/battle";
@@ -17,7 +18,10 @@ const warrior = { meleeMultiplier: 1.2, rangedMultiplier: 0.8, magicMultiplier: 
 
 describe("hero archetype damage", () => {
   it("melee and ranged use archetype percents with a labelled line", () => {
-    expect(applyHeroDmDamageMultiplier(hero(warrior), AttackType.MELEE, 10)).toEqual({ damage: 12, multiplier: 1.2, breakdownLine: "× 1.2 (архетип: Воїн) = 12" });
+    const melee = applyHeroDmDamageMultiplier(hero(warrior), AttackType.MELEE, 10);
+
+    expect(melee).toMatchObject({ damage: 12, multiplier: 1.2 });
+    expect(melee.breakdownRow && rowLines([melee.breakdownRow])).toEqual(["Архетип: Воїн ×1.2 → 12"]);
     expect(applyHeroDmDamageMultiplier(hero(warrior), AttackType.RANGED, 10).damage).toBe(8);
   });
 
@@ -31,7 +35,7 @@ describe("hero archetype damage", () => {
     const r = applyHeroDmDamageMultiplier(hero({ meleeMultiplier: 1.5, rangedMultiplier: undefined }), AttackType.MELEE, 10);
 
     expect(r.damage).toBe(15);
-    expect(r.breakdownLine).toBe("× 1.5 (архетип) = 15");
+    expect(r.breakdownRow && rowLines([r.breakdownRow])).toEqual(["Архетип ×1.5 → 15"]);
   });
 
   it("spell damage scales by magic multiplier, healing does not", () => {
@@ -41,7 +45,7 @@ describe("hero archetype damage", () => {
 
     expect(power.damage).toBe(10);
     expect(power.heal).toBe(8);
-    expect(power.breakdown).toContain("× 1.25 (архетип: Маг) = 10");
+    expect(rowLines(power.breakdown)).toContain("Архетип: Маг ×1.25 → 10");
   });
 
   it("battle participant takes percents from the archetype, ignoring manual DM values", async () => {

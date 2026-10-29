@@ -1,4 +1,5 @@
 import { CombatStatus } from "@/lib/constants/battle";
+import { textRef } from "@/lib/i18n/text-ref";
 import { isDying } from "@/lib/utils/abilities/engine/core/participants";
 import { upsertTimedEffect } from "@/lib/utils/abilities/engine/effects/timed-effects";
 import { conditionEffectInput, PERMANENT_ROUNDS } from "@/lib/utils/battle/conditions/registry";
@@ -55,7 +56,7 @@ export function deathSaveDamage(p: BattleParticipant, crit: boolean): BattlePart
   return withFailures(p, crit ? 2 : 1);
 }
 
-export function rollDeathSave(p: BattleParticipant, rng: () => number): { participant: BattleParticipant; message: string } {
+export function rollDeathSave(p: BattleParticipant, rng: () => number): { participant: BattleParticipant; message: LogLine } {
   const saves = p.battleData.deathSaves;
 
   if (!saves || saves.stable) return { participant: p, message: "" };
@@ -69,7 +70,7 @@ export function rollDeathSave(p: BattleParticipant, rng: () => number): { partic
 
     return {
       participant: { ...woke, combatStats: { ...woke.combatStats, currentHp: 1, status: CombatStatus.ACTIVE } },
-      message: `🎲 ${name}: кидок смерті 20 — приходить до тями з 1 HP`,
+      message: textRef("battleLog.death.wake", { name }),
     };
   }
 
@@ -80,7 +81,7 @@ export function rollDeathSave(p: BattleParticipant, rng: () => number): { partic
 
     return {
       participant: { ...p, battleData: { ...p.battleData, deathSaves: stable ? { ...FRESH_DEATH_SAVES, stable: true } : { ...saves, successes } } },
-      message: stable ? `🎲 ${name}: кидок смерті ${roll} — успіх, стабілізується` : `🎲 ${name}: кидок смерті ${roll} — успіх (${successes}/${SUCCESSES_TO_STABILIZE})`,
+      message: stable ? textRef("battleLog.death.stable", { name, roll }) : textRef("battleLog.death.success", { name, roll, count: successes, max: SUCCESSES_TO_STABILIZE }),
     };
   }
 
@@ -90,7 +91,7 @@ export function rollDeathSave(p: BattleParticipant, rng: () => number): { partic
 
   return {
     participant: failed,
-    message: dead ? `💀 ${name}: кидок смерті ${roll} — помирає` : `🎲 ${name}: кидок смерті ${roll} — провал (${failed.battleData.deathSaves?.failures}/${FAILURES_TO_DIE})`,
+    message: dead ? textRef("battleLog.death.dies", { name, roll }) : textRef("battleLog.death.fail", { name, roll, count: failed.battleData.deathSaves?.failures ?? 0, max: FAILURES_TO_DIE }),
   };
 }
 

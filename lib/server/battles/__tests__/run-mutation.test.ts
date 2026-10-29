@@ -10,6 +10,8 @@ import type { BattleDelta, LoadedBattle } from "@/lib/utils/battle/store";
 import { BattleConflictError, BattleRuleError } from "@/lib/utils/battle/store";
 import { DEFAULT_RULES } from "@/lib/utils/rules";
 import type { BattleParticipant } from "@/types/battle";
+import { eventTextOf } from "@/lib/utils/battle/log/__tests__/event-text";
+import { textRef } from "@/lib/i18n/text-ref";
 
 const hero = createMockParticipant({ basicInfo: { ...createMockParticipant().basicInfo, id: "hero", controlledBy: "u-player" } });
 
@@ -247,7 +249,7 @@ describe("runBattleMutation", () => {
 
     expect(outcome.scene?.status).toBe("completed");
     expect(outcome.scene?.completedAt).toBeInstanceOf(Date);
-    expect(outcome.events.at(-1)).toMatchObject({ type: "end_turn", resultText: expect.stringContaining("Бій завершено") });
+    expect(outcome.events.at(-1)).toMatchObject({ type: "end_turn", details: { log: [textRef("battleLog.victory.completeWon")] } });
   });
 
   it("успіх — 200, { delta, response } для того, хто діяв, і battle-delta для інших", async () => {
@@ -601,7 +603,7 @@ describe("runBattleMutation: недійсні захоплення", () => {
     const out = await savedAfter([grappledBy(hero, "gob"), deadGrappler, { ...goblin, basicInfo: { ...goblin.basicInfo, id: "gob2" } }]);
 
     expect(out.participants.find((p) => p.basicInfo.id === "hero")!.battleData.activeEffects).toEqual([]);
-    expect(out.events.some((e) => e.resultText?.includes("відпускає"))).toBe(true);
+    expect(out.events.some((e) => eventTextOf(e)?.includes("відпускає"))).toBe(true);
   });
 
   it("живий суміжний схоплювач — без змін і без подій", async () => {

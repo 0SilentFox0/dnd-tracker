@@ -12,6 +12,7 @@ import { diffTerrain } from "@/lib/utils/battle/grid/terrain";
 import { BattleAccessError } from "@/lib/utils/battle/store";
 import type { UnitFromPrisma } from "@/lib/utils/battle/types/participant";
 import type { BattleMapConfig, BattleParticipant, GridPoint } from "@/types/battle";
+import { eventTextOf } from "@/lib/utils/battle/log/__tests__/event-text";
 
 const spellRow = {
   id: "s1",
@@ -125,13 +126,13 @@ describe("spell mutation", () => {
       const out = await mutation(save)(context({ participants: [caster, goblin], rng: () => 0.99 }), saveBody(1) as never);
 
       expect(dealt(out)).toBe(2);
-      expect(out.events[0].resultText).toContain("рятівні кидки кинув сервер");
+      expect(eventTextOf(out.events[0])).toContain("рятівні кидки кинув сервер");
     });
 
     it("без клієнтських кидків нотатки про сервер немає", async () => {
       const out = await mutation(save)(context({ participants: [caster, goblin], rng: () => 0.99 }), body() as never);
 
-      expect(out.events[0].resultText).not.toContain("кинув сервер");
+      expect(eventTextOf(out.events[0])).not.toContain("кинув сервер");
     });
 
     it("DM може передати кидок цілі", async () => {

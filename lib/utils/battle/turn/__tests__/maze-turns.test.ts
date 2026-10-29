@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 
 import { CombatStatus, ParticipantSide } from "@/lib/constants/battle";
+import { textRef } from "@/lib/i18n/text-ref";
 import { makeEffect } from "@/lib/utils/abilities/__tests__/fixtures";
 import { createMockParticipant } from "@/lib/utils/battle/__tests__/fixtures/mock-participant";
 import { mazeMap } from "@/lib/utils/battle/modes/maze/__tests__/fixtures";
@@ -96,7 +97,7 @@ describe("maze: перемога", () => {
   it("усі живі герої вибралися: очікування рішення ДМ", () => {
     const v = checkVictoryConditions([hero("h", { escaped: true }), dead(hero("d")), foe("s", { dormant: true })]);
 
-    expect(v).toMatchObject({ awaiting: "victory", message: "Усі живі герої вибралися — рішення за ДМ" });
+    expect(v).toMatchObject({ awaiting: "victory", message: textRef("battleLog.victory.escaped") });
   });
 
   it("є герой на полі: бій триває", () => {

@@ -23,7 +23,21 @@ exports[`resolveRetaliation якір (байт-у-байт) > rng 0.05 1`] = `
     "hpChanges": [],
     "id": "~",
     "isCancelled": false,
-    "resultText": "Відсіч: d → a: d20 2, промах",
+    "log": [
+      {
+        "message": "battleLog.offTurn.miss",
+        "params": {
+          "attacker": "d",
+          "crit": "",
+          "d20": 2,
+          "target": "a",
+          "title": {
+            "message": "battleLog.offTurn.titles.retaliation",
+          },
+        },
+      },
+    ],
+    "resultText": "",
     "round": 1,
     "targets": [
       {
@@ -48,7 +62,6 @@ exports[`resolveRetaliation якір (байт-у-байт) > rng 0.85 1`] = `
       "attackBonus": 9,
       "attackKind": "melee",
       "attackRoll": 18,
-      "damageBreakdown": "Сума кубиків: 5; + бонус 2 (Сила); = 7 (база); ──────────; Сума 7.0 = 7 шкоди",
       "damageRolls": [
         {
           "damageType": "slashing",
@@ -59,19 +72,57 @@ exports[`resolveRetaliation якір (байт-у-байт) > rng 0.85 1`] = `
           "total": 5,
         },
       ],
+      "damageRows": [
+        {
+          "label": {
+            "message": "battleLog.damage.rows.dice",
+          },
+          "tone": "step",
+          "value": "5",
+        },
+        {
+          "label": {
+            "message": "gameTerms.abilities.strength.label",
+          },
+          "tone": "step",
+          "value": "+2",
+        },
+        {
+          "label": {
+            "message": "battleLog.damage.rows.base",
+          },
+          "tone": "total",
+          "value": "7",
+        },
+        {
+          "label": "",
+          "tone": "rule",
+        },
+        {
+          "label": {
+            "message": "battleLog.damage.rows.sum",
+          },
+          "tone": "total",
+          "value": "7",
+        },
+      ],
       "damageSteps": {
         "a": [
           {
             "after": 5,
             "kind": "dice",
-            "label": "Кубики",
+            "label": {
+              "message": "battleLog.damage.steps.dice",
+            },
             "side": "attacker",
             "value": 5,
           },
           {
             "after": 7,
             "kind": "flat",
-            "label": "Сила",
+            "label": {
+              "message": "gameTerms.abilities.strength.label",
+            },
             "side": "attacker",
             "value": 2,
           },
@@ -102,7 +153,23 @@ exports[`resolveRetaliation якір (байт-у-байт) > rng 0.85 1`] = `
     ],
     "id": "~",
     "isCancelled": false,
-    "resultText": "Відсіч: d → a: d20 18, 7 шкоди",
+    "log": [
+      {
+        "message": "battleLog.offTurn.hit",
+        "params": {
+          "attacker": "d",
+          "crit": "",
+          "d20": 18,
+          "damage": 7,
+          "plainCrit": "",
+          "target": "a",
+          "title": {
+            "message": "battleLog.offTurn.titles.retaliation",
+          },
+        },
+      },
+    ],
+    "resultText": "",
     "round": 1,
     "targets": [
       {
@@ -128,13 +195,11 @@ exports[`resolveRetaliation якір (байт-у-байт) > rng 0.99 1`] = `
       "attackKind": "melee",
       "attackRoll": 20,
       "criticalEffect": {
-        "description": "Атака ігнорує реакції цілі",
-        "flavor": "Удар зі сліпої зони — a не бачить, звідки прийшла смерть.",
+        "flavorIndex": 2,
         "id": "~",
-        "name": "Ігнорування реакцій",
+        "source": "attack",
         "type": "success",
       },
-      "damageBreakdown": "Сума кубиків: 2; + бонус 2 (Сила); = 4 (база); ──────────; Сума 4.0 = 4 шкоди",
       "damageRolls": [
         {
           "damageType": "slashing",
@@ -145,19 +210,57 @@ exports[`resolveRetaliation якір (байт-у-байт) > rng 0.99 1`] = `
           "total": 2,
         },
       ],
+      "damageRows": [
+        {
+          "label": {
+            "message": "battleLog.damage.rows.dice",
+          },
+          "tone": "step",
+          "value": "2",
+        },
+        {
+          "label": {
+            "message": "gameTerms.abilities.strength.label",
+          },
+          "tone": "step",
+          "value": "+2",
+        },
+        {
+          "label": {
+            "message": "battleLog.damage.rows.base",
+          },
+          "tone": "total",
+          "value": "4",
+        },
+        {
+          "label": "",
+          "tone": "rule",
+        },
+        {
+          "label": {
+            "message": "battleLog.damage.rows.sum",
+          },
+          "tone": "total",
+          "value": "4",
+        },
+      ],
       "damageSteps": {
         "a": [
           {
             "after": 2,
             "kind": "dice",
-            "label": "Кубики",
+            "label": {
+              "message": "battleLog.damage.steps.dice",
+            },
             "side": "attacker",
             "value": 2,
           },
           {
             "after": 4,
             "kind": "flat",
-            "label": "Сила",
+            "label": {
+              "message": "gameTerms.abilities.strength.label",
+            },
             "side": "attacker",
             "value": 2,
           },
@@ -188,7 +291,47 @@ exports[`resolveRetaliation якір (байт-у-байт) > rng 0.99 1`] = `
     ],
     "id": "~",
     "isCancelled": false,
-    "resultText": "Відсіч: d → a: d20 20, 4 шкоди. Критичне влучання — Ігнорування реакцій! Удар зі сліпої зони — a не бачить, звідки прийшла смерть.",
+    "log": [
+      {
+        "message": "battleLog.offTurn.hit",
+        "params": {
+          "attacker": "d",
+          "crit": {
+            "message": "battleLog.attack.critSuffix",
+            "params": {
+              "summary": {
+                "message": "battleLog.attack.critHit",
+                "params": {
+                  "flavor": {
+                    "message": "battleLog.attack.critFlavorTail",
+                    "params": {
+                      "flavor": {
+                        "message": "battleTerms.crits.attack.success.8.flavor.2",
+                        "params": {
+                          "attacker": "d",
+                          "target": "a",
+                        },
+                      },
+                    },
+                  },
+                  "name": {
+                    "message": "battleTerms.crits.attack.success.8.name",
+                  },
+                },
+              },
+            },
+          },
+          "d20": 20,
+          "damage": 4,
+          "plainCrit": "",
+          "target": "a",
+          "title": {
+            "message": "battleLog.offTurn.titles.retaliation",
+          },
+        },
+      },
+    ],
+    "resultText": "",
     "round": 1,
     "targets": [
       {

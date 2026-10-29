@@ -4,6 +4,7 @@ import { resolveAttackTargets } from "../targets";
 
 import { AttackType, ParticipantSide } from "@/lib/constants/battle";
 import { CLAWS, placed, testMap } from "@/lib/utils/battle/__tests__/fixtures/placed";
+import { REJECT } from "@/lib/utils/battle/store/reject";
 
 const none = { attackHitsAllEnemies: [], piercingShot: [], multiTargetFalloff: [], chainShot: [] };
 
@@ -25,7 +26,7 @@ describe("resolveAttackTargets", () => {
   });
 
   it("rejects more targets than the attacker may hit", () => {
-    expect(() => resolveAttackTargets({ ...base, chosen: [e1, e2], targetIds: ["e1", "e2"] })).toThrow("Забагато цілей. Максимум: 1");
+    expect(() => resolveAttackTargets({ ...base, chosen: [e1, e2], targetIds: ["e1", "e2"] })).toThrow(REJECT.tooManyTargets);
   });
 
   it("hits every enemy in reach with attackHitsAllEnemies", () => {
@@ -49,7 +50,7 @@ describe("resolveAttackTargets", () => {
     const r = resolveAttackTargets({ ...base, attack: ranged, chosen: [e1], flags });
 
     expect(r).toMatchObject({ targets: [e1], chain: { jumps: 2, percent: 0.5 }, volley: false });
-    expect(() => resolveAttackTargets({ ...base, attack: ranged, chosen: [e1, e2], targetIds: ["e1", "e2"], flags })).toThrow("Максимум: 1");
+    expect(() => resolveAttackTargets({ ...base, attack: ranged, chosen: [e1, e2], targetIds: ["e1", "e2"], flags })).toThrow(REJECT.tooManyTargets);
   });
 });
 
@@ -75,6 +76,6 @@ describe("resolveAttackTargets: герой, що вмирає", () => {
   it("без кидків смерті (HOMM) не вважається ціллю", () => {
     const h = downed();
 
-    expect(() => resolveAttackTargets({ order: [attacker, h], attacker, attack: { ...CLAWS, type: AttackType.RANGED }, chosen: [], targetIds: [], map: testMap(), flags })).toThrow("Жоден ворог не в досяжності");
+    expect(() => resolveAttackTargets({ order: [attacker, h], attacker, attack: { ...CLAWS, type: AttackType.RANGED }, chosen: [], targetIds: [], map: testMap(), flags })).toThrow(REJECT.noEnemyInReach);
   });
 });

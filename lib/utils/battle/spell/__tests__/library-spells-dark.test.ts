@@ -23,6 +23,7 @@ import { runAdvanceTurnLoop } from "@/lib/utils/battle/turn/run-advance-turn-loo
 import { processStartOfTurn } from "@/lib/utils/battle/turn/start-end";
 import type { CastableSpell } from "@/lib/utils/battle/types/spell-process";
 import type { BattleAttack, BattleParticipant } from "@/types/battle";
+import { eventTextOf } from "@/lib/utils/battle/log/__tests__/event-text";
 
 const spell = (key: string): CastableSpell => {
   const s = SPELLS.find((x) => x.key === key);
@@ -298,7 +299,7 @@ describe("Темрява — бібліотечні заклинання", () =>
     const loop = runAdvanceTurnLoop({ initiativeOrder: [find(ps, "mage"), find(ps, "orc"), find(ps, "gob")], currentTurnIndex: 0, currentRound: 1, battleId: "b", currentBattleLogLength: 0, pendingSummons: [], rng: seq(0.99, 0.99, 0.5) });
 
     expect(find(loop.updatedInitiativeOrder, "gob").combatStats.currentHp).toBeLessThan(100);
-    expect(loop.newLogEntries.some((e) => e.resultText.includes("Шал"))).toBe(true);
+    expect(loop.newLogEntries.some((e) => eventTextOf(e).includes("Шал"))).toBe(true);
   });
 
   it("Ляльковод: ворог 1 хід на боці заклинателя під контролем його гравця, потім повертається", () => {

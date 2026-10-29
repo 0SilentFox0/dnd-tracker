@@ -1,10 +1,13 @@
 import { describe, expect, it } from "vitest";
 
 import { ParticipantSide } from "@/lib/constants/battle";
+import { textOf } from "@/lib/i18n/test/text";
 import { makeEffect, makeParticipant, seq } from "@/lib/utils/abilities/__tests__/fixtures";
 import type { Effect } from "@/lib/utils/abilities/schema";
 import { contest } from "@/lib/utils/battle/actions/grapple";
 import { beginConcentration, concentrationCheck } from "@/lib/utils/battle/concentration";
+import { eventTextOf } from "@/lib/utils/battle/log/__tests__/event-text";
+import { textsOf } from "@/lib/utils/battle/log/__tests__/event-text";
 import { ABILITIES, byId, hp, MAP, percentOfAttack, perform, unit } from "@/lib/utils/battle/maneuvers/__tests__/fixtures";
 import { resolveSave } from "@/lib/utils/battle/saves/legendary";
 import { rollSaveEnds } from "@/lib/utils/battle/saves/save-ends";
@@ -25,7 +28,7 @@ describe("resolveSave", () => {
 
     expect(r.result).toEqual({ success: true, total: 3 });
     expect(r.participant.battleData.legendary?.resistLeft).toBe(1);
-    expect(r.message).toBe("👑 d: Легендарний опір — провал стає успіхом (1 залишилось)");
+    expect(textOf(r.message as never)).toBe("👑 d: Легендарний опір — провал стає успіхом (1 залишилось)");
   });
 
   it("успіх або порожній опір — без змін", () => {
@@ -49,7 +52,7 @@ describe("виклики rollSave", () => {
 
     expect(r.participant.battleData.activeEffects).toHaveLength(0);
     expect(r.participant.battleData.legendary?.resistLeft).toBe(0);
-    expect(r.messages[1]).toContain("Легендарний опір");
+    expect(textsOf(r.messages)[1]).toContain("Легендарний опір");
   });
 
   it("концентрація: опір утримує її", () => {
@@ -61,8 +64,8 @@ describe("виклики rollSave", () => {
 
     expect(r.participants[0].battleData.activeEffects.some((e) => e.concentration)).toBe(true);
     expect(resistOf(r.participants, "c")).toBe(0);
-    expect(r.messages.join(" ")).toContain("утримує");
-    expect(r.messages.join(" ")).toContain("Легендарний опір");
+    expect(textsOf(r.messages).join(" ")).toContain("утримує");
+    expect(textsOf(r.messages).join(" ")).toContain("Легендарний опір");
   });
 
   it("Схоплення 2024: опір цілі зриває захоплення", () => {
@@ -76,7 +79,7 @@ describe("виклики rollSave", () => {
 
     expect(r.success).toBe(false);
     expect(resistOf(r.participants, "t")).toBe(0);
-    expect(r.message).toContain("Легендарний опір");
+    expect(textOf(r.message as never)).toContain("Легендарний опір");
   });
 
   it("Вогняний вибух: опір дає половину шкоди", () => {
@@ -123,7 +126,7 @@ describe("виклики rollSave", () => {
       expect(r.allParticipantsUpdated.find((p) => p.basicInfo.id === "e1")?.combatStats.currentHp).toBe(197);
       expect(resistOf(r.allParticipantsUpdated, "e1")).toBe(0);
       expect(r.battleAction.actionDetails.savingThrows?.[0].result).toBe("success");
-      expect(r.battleAction.resultText).toContain("Легендарний опір");
+      expect(eventTextOf(r.battleAction)).toContain("Легендарний опір");
     });
 
     it("ціль на боці кастера: опір не витрачається", () => {

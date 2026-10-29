@@ -1,6 +1,7 @@
 import type { PendingMoraleCheckPayload } from "./pending-morale";
 
 import { ParticipantSide } from "@/lib/constants/battle";
+import { textRef } from "@/lib/i18n/text-ref";
 import { findParticipant, updateParticipant } from "@/lib/utils/abilities/engine/core/participants";
 import { runAbilities } from "@/lib/utils/abilities/engine/core/run-abilities";
 import { newBattleAction } from "@/lib/utils/battle/common/new-action";
@@ -42,7 +43,7 @@ export function applyPendingMoraleCheck(
         actionType: "ability",
         targets: [],
         actionDetails: { d10Roll, morale: 0 },
-        resultText: "Учасник не знайдений в initiativeOrder",
+        ...logFields(textRef("battleLog.morale.notFound")),
         hpChanges: [],
         isCancelled: false,
         stateBefore: undefined,

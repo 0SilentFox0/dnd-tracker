@@ -4,6 +4,8 @@ import { context, participant } from "./fixtures";
 
 import { ParticipantSide } from "@/lib/constants/battle";
 import { unitControlMutation, unitControlSchema } from "@/lib/server/battles/mutations/unit-control/unit-control-mutation";
+import { eventTextOf } from "@/lib/utils/battle/log/__tests__/event-text";
+import { REJECT } from "@/lib/utils/battle/store/reject";
 
 const hero = (id: string, owner: string, name = id) => participant(id, { controlledBy: owner, sourceType: "character", name });
 
@@ -18,11 +20,11 @@ describe("unit-control mutation", () => {
     const out = unitControlMutation(ctx(), { mode: "assign", participantId: "u1", controlledBy: "p2" });
 
     expect(owner(out, "u1")).toBe("p2");
-    expect(out.events[0].resultText).toBe("🎮 ДМ передає u1 під керування Маркел");
+    expect(eventTextOf(out.events[0])).toBe("🎮 ДМ передає u1 під керування Маркел");
   });
 
   it("assign: гравець поза боєм — помилка", () => {
-    expect(() => unitControlMutation(ctx(), { mode: "assign", participantId: "u1", controlledBy: "zzz" })).toThrow("Гравець не бере участі в бою");
+    expect(() => unitControlMutation(ctx(), { mode: "assign", participantId: "u1", controlledBy: "zzz" })).toThrow(REJECT.playerNotInBattle);
   });
 
   it("random: роздає вільних юнітів серед власників героїв", () => {
@@ -30,7 +32,7 @@ describe("unit-control mutation", () => {
 
     expect(owner(out, "u1")).toBe("p2");
     expect(owner(out, "u2")).toBe("p2");
-    expect(out.events[0].resultText).toBe("🎲 ДМ роздає вільних юнітів: u1 → Маркел, u2 → Маркел");
+    expect(eventTextOf(out.events[0])).toBe("🎲 ДМ роздає вільних юнітів: u1 → Маркел, u2 → Маркел");
   });
 
   it("random: немає вільних юнітів чи гравців — помилка", () => {

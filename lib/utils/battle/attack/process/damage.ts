@@ -3,6 +3,7 @@ import { dropBreakOnDamage } from "@/lib/utils/abilities/engine/effects/hp";
 import type { AttackKind } from "@/lib/utils/abilities/schema";
 import { applyResistance } from "@/lib/utils/battle/resistance";
 import type { BattleParticipant } from "@/types/battle";
+import type { LogLine } from "@/types/text";
 
 /** Фізичний + додатковий урон: спершу tempHp, далі HP і статус. Виживання вирішують уміння (lethalDamage). */
 export function applyDamageToTarget(target: BattleParticipant, totalFinalDamage: number): BattleParticipant {
@@ -26,7 +27,7 @@ export function applyDamageToTarget(target: BattleParticipant, totalFinalDamage:
 
 export interface ApplyResistanceForAdditionalResult {
   totalAdditionalDamage: number;
-  additionalDamageBreakdown: string[];
+  additionalDamageBreakdown: LogLine[];
 }
 
 /**
@@ -41,7 +42,7 @@ export function applyResistanceForAdditional(
 ): ApplyResistanceForAdditionalResult {
   let totalAdditionalDamage = 0;
 
-  const additionalDamageBreakdown: string[] = [];
+  const additionalDamageBreakdown: LogLine[] = [];
 
   for (const additionalDamage of additionalDamageList) {
     const additionalValue = Math.floor(additionalDamage.value * dmgMult);

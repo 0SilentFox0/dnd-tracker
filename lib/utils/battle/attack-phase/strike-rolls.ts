@@ -2,6 +2,7 @@ import type { AttackRequest, ValidatedAttackRequest } from "./request";
 
 import type { Rng } from "@/lib/utils/abilities/engine/core/types";
 import { BattleRuleError } from "@/lib/utils/battle/store/errors";
+import { REJECT } from "@/lib/utils/battle/store/reject";
 import { diceCount, diceSlots, rollDie } from "@/lib/utils/common/dice";
 import type { BattleAttack, BattleParticipant } from "@/types/battle";
 
@@ -35,7 +36,7 @@ export function strikeD20(
   const d20 = serverRolled ? rollDie(20, rng) : sent;
 
   if (d20 == null || d20 < 1 || d20 > 20) {
-    throw new BattleRuleError("action_rejected", `Некоректний кидок атаки для цілі ${strike.index + 1}`);
+    throw new BattleRuleError("action_rejected", REJECT.badStrikeRoll, { target: strike.index + 1 });
   }
 
   return { value: d20, serverRolled };

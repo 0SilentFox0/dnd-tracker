@@ -6,6 +6,7 @@ import { ParticipantSide } from "@/lib/constants/battle";
 import { seq } from "@/lib/utils/abilities/__tests__/fixtures";
 import { resolveServerAttack } from "@/lib/utils/battle/attack/server-attack";
 import type { ActionFlow } from "@/lib/utils/battle/common/action-flow";
+import { eventTextOf } from "@/lib/utils/battle/log/__tests__/event-text";
 
 const flowOf = (ps: ReturnType<typeof swordUnit>[], rng: () => number): ActionFlow => ({ ps, messages: [], summons: [], ctx: { round: 1, rng } });
 
@@ -19,11 +20,11 @@ describe("resolveServerAttack", () => {
       return resolveServerAttack({ flow: flowOf(ps, rng), attackerId: "d", targetId: "a", attack: SWORD, currentRound: 1, battleId: "b1", rng, label });
     };
 
-    expect(run("readied").battleAction.resultText.startsWith("Підготовлена атака:")).toBe(true);
-    expect(run("opportunity").battleAction.resultText.startsWith("Атака можливості:")).toBe(true);
-    expect(run("retaliation").battleAction.resultText.startsWith("Відсіч:")).toBe(true);
+    expect(eventTextOf(run("readied").battleAction).startsWith("Підготовлена атака:")).toBe(true);
+    expect(eventTextOf(run("opportunity").battleAction).startsWith("Атака можливості:")).toBe(true);
+    expect(eventTextOf(run("retaliation").battleAction).startsWith("Відсіч:")).toBe(true);
     expect(run("retaliation").hit).toBe(true);
-    expect(retaliate([swordUnit("a", ParticipantSide.ALLY), swordUnit("d", ParticipantSide.ENEMY)])?.battleAction.resultText).toBe(run("retaliation").battleAction.resultText);
+    expect(eventTextOf(retaliate([swordUnit("a", ParticipantSide.ALLY), swordUnit("d", ParticipantSide.ENEMY)])?.battleAction as never)).toBe(eventTextOf(run("retaliation").battleAction));
   });
 
   it("промах: hit=false, ціль не падає", () => {

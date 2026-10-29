@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 
 import { ParticipantSide } from "@/lib/constants/battle";
+import { textOf } from "@/lib/i18n/test/text";
 import { makeParticipant, resolved } from "@/lib/utils/abilities/__tests__/fixtures";
 import type { FlagEffect } from "@/lib/utils/abilities/schema";
 import { checkMorale } from "@/lib/utils/battle/morale/check";
@@ -26,7 +27,7 @@ describe("checkMorale з прапорцями", () => {
     const r = checkMorale(p(3, { kind: "flag", flag: "ignoreMorale" }), 10);
 
     expect(r).toMatchObject({ shouldSkipTurn: false, hasExtraTurn: false });
-    expect(r.message).toContain("мораль не діє");
+    expect(textOf(r.message)).toContain("мораль не діє");
   });
 
   it("moraleChance: кожні повні 10 % знижують поріг d10 на грань, без прихованого кидка; мінус не страждає", () => {
@@ -34,9 +35,9 @@ describe("checkMorale з прапорцями", () => {
 
     expect(checkMorale(p(1, lead), 9).hasExtraTurn).toBe(true);
     expect(checkMorale(p(1, lead), 8).hasExtraTurn).toBe(false);
-    expect(checkMorale(p(1, lead), 8).message).toContain("лідерство +15%, кидок: 8, потрібно: >=9");
+    expect(textOf(checkMorale(p(1, lead), 8).message)).toContain("лідерство +15%, кидок: 8, потрібно: >=9");
     expect(checkMorale(p(1), 9).hasExtraTurn).toBe(false);
-    expect(checkMorale(p(1), 9).message).not.toContain("лідерство");
+    expect(textOf(checkMorale(p(1), 9).message)).not.toContain("лідерство");
     expect(checkMorale(p(1, { kind: "flag", flag: "moraleChance", percent: 5 }), 9).hasExtraTurn).toBe(false);
     expect(checkMorale(p(-2, lead), 3).shouldSkipTurn).toBe(false);
     expect(checkMorale(p(-2, lead), 2).shouldSkipTurn).toBe(true);

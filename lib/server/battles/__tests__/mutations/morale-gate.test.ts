@@ -6,6 +6,7 @@ import { attackBodySchema, attackMutation } from "@/lib/server/battles/mutations
 import { moveMutation } from "@/lib/server/battles/mutations/move/move-mutation";
 import { nextTurnMutation } from "@/lib/server/battles/mutations/next-turn/next-turn-mutation";
 import type { BattleParticipant } from "@/types/battle";
+import { REJECT } from "@/lib/utils/battle/store/reject";
 
 const map = { cols: 10, rows: 5, background: null, opacity: 0.3 };
 
@@ -30,7 +31,7 @@ const move = { participantId: "hero", to: { x: 2, y: 0 } };
 
 describe("мораль блокує дії до перевірки", () => {
   it("рух відхилено, поки перевірку моралі не пройдено", () => {
-    expect(() => moveMutation(ctx(), move)).toThrow(expect.objectContaining({ code: "action_rejected", message: "Спершу потрібна перевірка моралі" }));
+    expect(() => moveMutation(ctx(), move)).toThrow(expect.objectContaining({ code: "action_rejected", message: REJECT.moraleFirst }));
   });
 
   it("атака відхилена до перевірки моралі", async () => {

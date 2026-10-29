@@ -1,15 +1,18 @@
-import { BATTLE_ACTION_LABELS } from "@/lib/constants/battle";
+import { BattleActionType } from "@/lib/constants/battle";
+import { dynamicTextRef, textRef } from "@/lib/i18n/text-ref";
 import { splitLegacyTriggers } from "@/lib/utils/battle/log/legacy";
 import { actionLines } from "@/lib/utils/battle/log/lines";
 import { getLogEntryDetailItems } from "@/lib/utils/battle/view/log-format";
 import type { BattleAction } from "@/types/battle";
 import type { LogLine } from "@/types/text";
 
+const KNOWN_KINDS: ReadonlySet<string> = new Set(Object.values(BattleActionType));
+
 export interface LogEntryView {
   headline: LogLine;
   lines: LogLine[];
   hp: { id: string; name: string; delta: number }[];
-  kindLabel: string;
+  kindLabel: LogLine;
   hasDetails: boolean;
   isTrigger: boolean;
   kind?: "hazard";
@@ -63,7 +66,7 @@ export function logEntryView(e: BattleAction): LogEntryView {
     headline,
     lines,
     hp: [...byId.values()].filter((h) => h.delta !== 0),
-    kindLabel: hazard ? "небезпека" : (BATTLE_ACTION_LABELS[e.actionType] ?? "подія"),
+    kindLabel: hazard ? textRef("battleCommon.actionKinds.hazard") : KNOWN_KINDS.has(e.actionType) ? dynamicTextRef(`battleCommon.actionKinds.${e.actionType}`) : textRef("battleCommon.actionKinds.event"),
     hasDetails: getLogEntryDetailItems(e).length > 0,
     isTrigger,
     ...(hazard && { kind: "hazard" as const }),

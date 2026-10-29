@@ -7,6 +7,7 @@ import { mazeMap } from "@/lib/utils/battle/modes/maze/__tests__/fixtures";
 import { diffParticipants, splitParticipant } from "@/lib/utils/battle/store";
 import { buildSnapshotState } from "@/lib/utils/battle/store/snapshot-state";
 import type { BattleMapConfig, MazeConfig } from "@/types/battle";
+import { REJECT } from "@/lib/utils/battle/store/reject";
 
 const ctx = context({ scene: { ...context().scene, eventSeq: 6, status: "completed" } });
 
@@ -89,7 +90,8 @@ describe("rollback mutation", () => {
   it("немає знімків — action_rejected", async () => {
     await expect(createRollbackMutation(vi.fn(async () => []), vi.fn(async () => true))(ctx, { actionIndex: 1 })).rejects.toMatchObject({
       code: "action_rejected",
-      message: expect.stringContaining("лише останні 20"),
+      message: REJECT.rollbackLimit,
+      params: { count: 20 },
     });
   });
 

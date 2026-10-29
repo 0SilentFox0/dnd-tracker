@@ -6,6 +6,7 @@ import { DAMAGE_ELEMENT_OPTIONS } from "@/lib/constants/damage";
 import { applyTerrain, blockedSet, cellKey, inBounds, occupiedBy } from "@/lib/utils/battle/grid";
 import type { BattleMutationContext, MutationResult } from "@/lib/utils/battle/pipeline/run-battle-mutation";
 import { BattleRuleError } from "@/lib/utils/battle/store";
+import { REJECT } from "@/lib/utils/battle/store/reject";
 import type { MapTerrainResponse } from "@/types/api";
 import type { TerrainCell } from "@/types/battle";
 
@@ -20,13 +21,13 @@ export const mapTerrainSchema = z.object({
       rounds: z.number().int().min(1).max(20).optional(),
       damage: z.object({ dice: z.string().regex(HAZARD_DICE_PATTERN), type: z.enum(HAZARD_DAMAGE_TYPES) }).optional(),
     })
-    .refine((t) => t.kind !== "barrier" || t.rounds !== undefined, { message: "Барʼєру потрібна тривалість у раундах", path: ["rounds"] })
+    .refine((t) => t.kind !== "barrier" || t.rounds !== undefined, { message: REJECT.barrierDuration, path: ["rounds"] })
     .nullable(),
 });
 
 export type MapTerrainBody = z.infer<typeof mapTerrainSchema>;
 
-const REJECTED = "Клітинка зайнята або поза полем";
+const REJECTED = REJECT.mapOccupied;
 
 function parseKey(key: string) {
   const [x, y] = key.split(":").map(Number);

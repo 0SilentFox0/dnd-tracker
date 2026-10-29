@@ -23,13 +23,11 @@ const statLabelKey = (label: string) => {
   return key ? `gameTerms.abilities.${key}.label` : label;
 };
 
-// the battle damage engine names this step in Ukrainian
- 
 const labelParts = (label: LogLine): Pick<SheetLine, "label" | "params"> => (typeof label === "string" ? { label } : { label: label.message, params: label.params });
 
 const plainLabel = (label: LogLine) => (typeof label === "string" ? label : label.message);
 
-const HERO_LEVEL_STEP = "Рівень героя";
+const HERO_LEVEL_STEP = "battleLog.damage.steps.heroLevel";
 
 const asSource = (t: string): SheetLineSource => t as SheetLineSource;
 
@@ -81,7 +79,7 @@ export function attackSheet(p: BattleParticipant, attack: BattleAttack): SheetAt
     ...(avg.heroPart ? [{ label: sheetLineKey("levelDice"), params: { dice: avg.heroDice }, value: avg.heroPart.toFixed(1), source: "level" as const }] : []),
     { label: statLabelKey(avg.statLabel), value: signed(statMod), source: "ability" },
     ...avg.steps
-      .filter((s) => s.kind === "percent" || (s.kind === "flat" && s.label !== avg.statLabel && s.label !== HERO_LEVEL_STEP))
+      .filter((s) => s.kind === "percent" || (s.kind === "flat" && plainLabel(s.label) !== statLabelKey(avg.statLabel) && plainLabel(s.label) !== HERO_LEVEL_STEP))
       .map((s) => ({ ...labelParts(s.label), value: s.kind === "percent" ? `${signed(s.value)}%` : signed(s.value), source: damageSources.get(plainLabel(s.label)) ?? ("skill" as const) })),
     ...(avg.multiplier !== 1 ? [{ label: sheetLineKey("dmMultiplier"), value: `×${avg.multiplier}`, source: "multiplier" as const }] : []),
   ];

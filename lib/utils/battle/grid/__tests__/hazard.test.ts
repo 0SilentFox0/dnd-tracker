@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 
+import { textOf } from "@/lib/i18n/test/text";
 import { createMockParticipant, grantPassive } from "@/lib/utils/battle/__tests__/fixtures/mock-participant";
 import { hazardHit, hazardOnMove, hazardUnder, reachable } from "@/lib/utils/battle/grid";
 import type { BattleMapConfig, BattleParticipant, GridPoint, TerrainCell } from "@/types/battle";
@@ -38,7 +39,7 @@ describe("hazardHit", () => {
     const hit = hazardHit(at({ x: 1, y: 1 }), fire, 2, [], () => 0);
 
     expect(hit?.damage).toBe(5);
-    expect(hit?.message).toBe("Тест: 5 fire шкоди від «Вогонь»");
+    expect(hit && textOf(hit.message)).toBe("Тест: 5 fire шкоди від «Вогонь»");
     expect(hit?.participant.combatStats.currentHp).toBe(15);
     expect(hit?.participant.battleData.hazardHitRound).toBe(2);
   });

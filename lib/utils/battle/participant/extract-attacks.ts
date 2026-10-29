@@ -102,6 +102,7 @@ function extractWeaponAttacks(
 
       attacks.push({
         id: inv.id ?? `inline-${key}`,
+        // eslint-disable-next-line no-restricted-syntax -- default attack name stored in the snapshot (content)
         name: (inv.name as string) ?? "Зброя",
         type: (isRanged ? AttackType.RANGED : AttackType.MELEE) as ExtractedAttack["type"],
         attackBonus: typeof inv.attackBonus === "number" ? inv.attackBonus : 0,

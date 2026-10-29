@@ -40,7 +40,7 @@ const body = (over: Record<string, unknown> = {}) => attackBodySchema.parse({ at
 
 const failure = (run: Promise<unknown>) => run.then(() => undefined, (e: { code?: string; message?: string }) => ({ code: e.code, message: e.message }));
 
-const advantageNotes = (events: unknown) => (JSON.stringify(events).match(/перевага/g) ?? []).length;
+const advantageNotes = (events: unknown) => (JSON.stringify(events).match(/battleLog\.roll\.advantage/g) ?? []).length;
 
 describe("attack with inspiration", () => {
   it("advantage from inspiration; the flag is spent", async () => {

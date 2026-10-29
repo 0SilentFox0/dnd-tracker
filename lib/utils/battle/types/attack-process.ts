@@ -6,7 +6,8 @@ import type { SummonRequest } from "@/lib/utils/abilities/engine/core/types";
 import type { CunningStrikeEffect } from "@/lib/utils/abilities/schema";
 import type { CritPicker } from "@/lib/utils/battle/crit-choice/types";
 import type { Ruleset } from "@/lib/utils/rules";
-import type { BattleAction, BattleAttack, BattleMapConfig, BattleParticipant } from "@/types/battle";
+import type { BattleAction, BattleAttack, BattleMapConfig, BattleParticipant, DamageRow } from "@/types/battle";
+import type { LogLine } from "@/types/text";
 
 export interface ProcessAttackParams {
   attacker: BattleParticipant;
@@ -25,7 +26,7 @@ export interface ProcessAttackParams {
   battleId: string;
   damageMultiplier?: number;
   bonusPercent?: number;
-  bonusLabel?: string;
+  bonusLabel?: LogLine;
   /** Наступні удари залпу: основну дію вже витратив перший удар */
   actionSpent?: boolean;
   /** Атака другою рукою: витрачає бонусну дію, а не дію/лічильник атак */
@@ -52,9 +53,9 @@ export interface ProcessAttackResult {
   damage?: {
     totalDamage: number;
     finalDamage: number;
-    breakdown: string[];
-    resistanceBreakdown: string[];
-    additionalDamageBreakdown: string[];
+    breakdown: DamageRow[];
+    resistanceBreakdown: LogLine[];
+    additionalDamageBreakdown: LogLine[];
   };
   targetUpdated: BattleParticipant;
   attackerUpdated: BattleParticipant;

@@ -10,6 +10,7 @@ import { at, mazeMap, withMap } from "@/lib/utils/battle/modes/maze/__tests__/fi
 import { BattleAccess } from "@/lib/utils/battle/pipeline/run-battle-mutation";
 import { type BattleMutationOutcome, prepareSave } from "@/lib/utils/battle/store";
 import type { BattleMapConfig, BattleParticipant } from "@/types/battle";
+import { eventTextOf } from "@/lib/utils/battle/log/__tests__/event-text";
 
 const reserved = (id: string) => participant(id, { side: ParticipantSide.ENEMY, controlledBy: "dm" }, { battleData: { ...goblin.battleData, reserved: true } });
 
@@ -22,7 +23,7 @@ describe("reveal-participant mutation", () => {
     expect(out.pending).toEqual([]);
     expect(out.participants[1].battleData).toMatchObject({ revealPending: true });
     expect(out.participants[1].battleData.reserved).toBeUndefined();
-    expect(out.events[0].resultText).toContain("ввів у бій");
+    expect(eventTextOf(out.events[0])).toContain("ввів у бій");
   });
 
   it("кілька відкриттів до кінця ходу — у порядку відкриття", () => {

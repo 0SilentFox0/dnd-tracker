@@ -5,6 +5,7 @@ import { context, goblin, hero } from "./fixtures";
 import { coreActionMutation } from "@/lib/server/battles/mutations/core-action/core-action-mutation";
 import { BattleAccessError } from "@/lib/utils/battle/store";
 import { DEFAULT_RULES } from "@/lib/utils/rules";
+import { REJECT } from "@/lib/utils/battle/store/reject";
 
 const on = (over: Parameters<typeof context>[0] = {}) => {
   const base = context(over);
@@ -59,7 +60,7 @@ describe("core-action mutation", () => {
 
     const shaken = { ...base, participants: [{ ...base.participants[0], combatStats: { ...base.participants[0].combatStats, morale: 3 } }, base.participants[1]] };
 
-    expect(() => coreActionMutation(shaken, { action: "dodge", participantId: "hero" })).toThrow(expect.objectContaining({ message: "Спершу потрібна перевірка моралі" }));
+    expect(() => coreActionMutation(shaken, { action: "dodge", participantId: "hero" })).toThrow(expect.objectContaining({ message: REJECT.moraleFirst }));
   });
 });
 

@@ -1,4 +1,4 @@
-import type { DamageStep } from "@/types/battle";
+import type { DamageRow, DamageStep } from "@/types/battle";
 
 /**
  * Типи для розрахунку урону
@@ -13,6 +13,6 @@ export interface DamageCalculationResult {
   passiveAbilityBonus: number;
   additionalDamage: Array<{ type: string; value: number }>;
   totalDamage: number;
-  breakdown: string[];
+  breakdown: DamageRow[];
   steps: DamageStep[];
 }

@@ -2,10 +2,12 @@ import { describe, expect, it } from "vitest";
 
 import { AttackType, ParticipantSide } from "@/lib/constants/battle";
 import type { CriticalEffectType } from "@/lib/constants/critical-effects";
+import { textOf } from "@/lib/i18n/test/text";
 import { makeParticipant, resolved } from "@/lib/utils/abilities/__tests__/fixtures";
 import { computeHitDamage } from "@/lib/utils/battle/attack/process/compute";
 import { handleMiss } from "@/lib/utils/battle/attack/process/miss";
 import { applyBalanceDamageMultiplier, balanceDamageMultiplier, scaleAdditionalDamage } from "@/lib/utils/battle/damage/balance-multiplier";
+import { rowLines } from "@/lib/utils/battle/log/__tests__/event-text";
 import { castSpell } from "@/lib/utils/battle/spell";
 import type { CastableSpell } from "@/lib/utils/battle/types/spell-process";
 import type { BattleAttack, BattleParticipant } from "@/types/battle";
@@ -47,7 +49,7 @@ describe("damageMultiplier юніта", () => {
 
     expect(result.physicalDamage).toBe(Math.round(base * 1.5));
     expect(result.totalFinalDamage).toBe(result.physicalDamage);
-    expect(result.damageSteps.some((s) => s.label === "Рівний бій")).toBe(true);
+    expect(result.damageSteps.some((s) => textOf(s.label) === "Рівний бій")).toBe(true);
   });
 
   it("атака: множник застосовується до опору, а не після", () => {
@@ -93,7 +95,7 @@ describe("множник застосовується рівно раз на к�
     abilities: [resolved({ trigger: { event: "passive" }, effects: [{ kind: "flag", flag: "resistance", damageType: "bludgeoning", percent: 50 }] })],
   });
 
-  const timesMultiplier = (r: ReturnType<typeof hit>) => r.damageCalculation.breakdown.filter((l) => l.includes("рівний бій")).length;
+  const timesMultiplier = (r: ReturnType<typeof hit>) => rowLines(r.damageCalculation.breakdown).filter((l) => l.includes("Рівний бій")).length;
 
   const crit = (effectType: CriticalEffectType, a: BattleParticipant, t: BattleParticipant = target, extra: Partial<Parameters<typeof computeHitDamage>[0]> = {}) =>
     computeHitDamage({
@@ -102,7 +104,7 @@ describe("множник застосовується рівно раз на к�
       attack: club,
       damageRolls: [3, 3],
       allParticipants: [a, t],
-      attackRoll: { isCritical: true, criticalEffect: { id: 1, name: "Крит", description: "", type: "success", flavor: [], effect: { type: effectType } } },
+      attackRoll: { isCritical: true, criticalEffect: { id: 1, name: "Крит", description: "", type: "success", flavor: [], flavorCount: 0, effect: { type: effectType } } },
       currentRound: 1,
       ...extra,
     });

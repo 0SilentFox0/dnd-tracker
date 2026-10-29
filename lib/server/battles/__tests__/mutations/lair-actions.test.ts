@@ -13,6 +13,7 @@ import { resolveSave } from "@/lib/utils/battle/saves/legendary";
 import { joinParticipant, splitParticipant } from "@/lib/utils/battle/store/split-participant";
 import { processStartOfRound } from "@/lib/utils/battle/turn/start-end";
 import type { BattleParticipant } from "@/types/battle";
+import { textsOf } from "@/lib/utils/battle/log/__tests__/event-text";
 
 const a = resolved({ id: "quake", name: "Землетрус", trigger: { event: "action" }, limits: { lair: true }, effects: [{ kind: "changeMorale", delta: 1 }] });
 
@@ -59,7 +60,7 @@ describe("lair actions", () => {
 
     const out = processStartOfRound([p], 2);
 
-    expect(out.lairMessages).toEqual(["🏰 Ініціатива 20: дія лігва — Дракон"]);
+    expect(textsOf(out.lairMessages)).toEqual(["🏰 Ініціатива 20: дія лігва — Дракон"]);
     expect(out.updatedInitiativeOrder[0].combatStats.morale).toBe(0);
   });
 });

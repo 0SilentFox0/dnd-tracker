@@ -7,6 +7,7 @@ import { piercingTargets } from "@/lib/utils/battle/attack/process/piercing";
 import { attackKindOf } from "@/lib/utils/battle/common/attack-kind";
 import { enemiesInReach } from "@/lib/utils/battle/grid";
 import { BattleRuleError } from "@/lib/utils/battle/store/errors";
+import { REJECT } from "@/lib/utils/battle/store/reject";
 import type { BattleAttack, BattleMapConfig, BattleParticipant } from "@/types/battle";
 
 type AttackFlags = ReturnType<typeof findFlagsMany<"attackHitsAllEnemies" | "piercingShot" | "multiTargetFalloff" | "chainShot">>;
@@ -59,7 +60,7 @@ export function resolveAttackTargets({ order, attacker, attack, chosen, targetId
 
   const limit = attackMaxTargets(attacker, attack, { chain: isChain, onMap });
 
-  if (!expanded && chosen.length > limit) throw new BattleRuleError("action_rejected", `Забагато цілей. Максимум: ${limit}`);
+  if (!expanded && chosen.length > limit) throw new BattleRuleError("action_rejected", REJECT.tooManyTargets, { max: limit });
 
   const targets = hitsAllEnemies
     ? [...chosen.filter(enemyOf(attacker)), ...reachable().filter((t) => !targetIds.includes(t.basicInfo.id))]
@@ -69,7 +70,7 @@ export function resolveAttackTargets({ order, attacker, attack, chosen, targetId
         ? [chosen[0], ...cleaveTargets(map, order, attacker, chosen[0], (attack.maxTargets ?? 1) - 1)]
         : chosen;
 
-  if (targets.length === 0) throw new BattleRuleError("action_rejected", "Жоден ворог не в досяжності");
+  if (targets.length === 0) throw new BattleRuleError("action_rejected", REJECT.noEnemyInReach);
 
   const volley = !isChain && (expanded || cleave || (!isAoe && (isRanged || isCleave(attack)) && limit > 1));
 

@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 
 import { CombatStatus, type CombatStatusType, ParticipantSide } from "@/lib/constants/battle";
 import { createMockParticipant } from "@/lib/utils/battle/__tests__/fixtures/mock-participant";
+import { eventTextOf } from "@/lib/utils/battle/log/__tests__/event-text";
 import { autoXpEnabled, battleXpAward } from "@/lib/utils/battle/turn/battle-xp";
 import { originalSide } from "@/lib/utils/battle/turn/original-side";
 import { completeBattle } from "@/lib/utils/battle/turn/victory";
@@ -59,11 +60,11 @@ describe("completeBattle: рядок досвіду в лозі", () => {
   const ps = () => [hero("h1", "ch-1"), hero("h2", "ch-2"), foe("ogre", 450)];
 
   it("перемога з авто-досвідом", () => {
-    expect(completeBattle(ps(), "victory", 3, ON).battleAction.resultText).toBe("🎉 Бій завершено! Перемога союзників! · ⭐ Досвід: 225 кожному");
+    expect(eventTextOf(completeBattle(ps(), "victory", 3, ON).battleAction)).toBe("🎉 Бій завершено! Перемога союзників! · ⭐ Досвід: 225 кожному");
   });
 
   it("поразка або вимкнене правило — як раніше", () => {
-    expect(completeBattle(ps(), "defeat", 3, ON).battleAction.resultText).toBe("💀 Бій завершено! Поразка союзників!");
-    expect(completeBattle(ps(), "victory", 3, DEFAULT_RULES).battleAction.resultText).toBe("🎉 Бій завершено! Перемога союзників!");
+    expect(eventTextOf(completeBattle(ps(), "defeat", 3, ON).battleAction)).toBe("💀 Бій завершено! Поразка союзників!");
+    expect(eventTextOf(completeBattle(ps(), "victory", 3, DEFAULT_RULES).battleAction)).toBe("🎉 Бій завершено! Перемога союзників!");
   });
 });

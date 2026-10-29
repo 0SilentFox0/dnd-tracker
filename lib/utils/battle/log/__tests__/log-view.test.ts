@@ -57,7 +57,7 @@ describe("критичний ефект: текст з battleTerms", () => {
   });
 
   it("деталі логу: ефект [d10] з назвою й описом", () => {
-    const item = getLogEntryDetailItems(action).find((i) => i.kind === "text" && typeof i.label === "string" && i.label.startsWith("Ефект"));
+    const item = getLogEntryDetailItems(action).find((i) => i.kind === "text" && typeof i.label === "object" && i.label.message === "battleLog.details.effect");
 
     expect(item && item.kind === "text" && textOf(item.text, "uk")).toBe("Подвійний урон — Урон подвоюється (x2)");
   });

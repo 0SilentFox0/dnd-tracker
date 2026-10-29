@@ -1,9 +1,11 @@
 import { legacyLines } from "./legacy";
 
-import { formatText, joinLines } from "@/lib/i18n/text-ref";
+import { formatText, joinLines, lineKey } from "@/lib/i18n/text-ref";
 import type { Translator } from "@/lib/i18n/translator";
 import type { BattleAction } from "@/types/battle";
 import type { LogLine } from "@/types/text";
+
+export const uniqueLines = (lines: LogLine[]): LogLine[] => [...new Map(lines.map((l) => [lineKey(l), l])).values()];
 
 export function actionLines(action: Pick<BattleAction, "log" | "resultText">): LogLine[] {
   return action.log ?? legacyLines(action.resultText);
@@ -35,10 +37,10 @@ export function withLines<T extends Pick<BattleAction, "log" | "resultText">>(ac
 }
 
 /** Prepends text to the headline (first line) of an action. */
-export function withPrefix<T extends Pick<BattleAction, "log" | "resultText">>(action: T, prefix: string): T {
-  if (!action.log) return { ...action, resultText: `${prefix}${action.resultText}` };
+export function withPrefix<T extends Pick<BattleAction, "log" | "resultText">>(action: T, prefix: LogLine): T {
+  if (!action.log && typeof prefix === "string") return { ...action, resultText: `${prefix}${action.resultText}` };
 
-  const [first = "", ...rest] = action.log;
+  const [first = "", ...rest] = actionLines(action);
 
-  return { ...action, log: [joinLines([prefix, first]), ...rest] };
+  return { ...action, resultText: "", log: [joinLines([prefix, first]), ...rest] };
 }

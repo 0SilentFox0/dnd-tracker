@@ -6,14 +6,17 @@ import { cellsOf, isOnMap, sizeOf } from "./occupancy";
 import { aimInRange, apexOf, isCenteredTemplate, templateAimAllowed, templateArea } from "./template";
 
 import { AttackType } from "@/lib/constants/battle";
+import { textRef } from "@/lib/i18n/text-ref";
 import { findParticipant } from "@/lib/utils/abilities/engine/core/participants";
 import { canAttackFromPool } from "@/lib/utils/battle/attack/attacks-left";
 import { attackKindOf } from "@/lib/utils/battle/common/attack-kind";
 import { hasCondition } from "@/lib/utils/battle/conditions/query";
 import { modeAimHiddenText, modeMoveZone } from "@/lib/utils/battle/modes/engine";
 import type { ModeMoveZone, ModeView } from "@/lib/utils/battle/modes/types";
+import { REJECT } from "@/lib/utils/battle/store/reject";
 import { canSeeExactStats, type Viewer } from "@/lib/utils/battle/view/visibility";
 import type { BattleMapConfig, BattleMapView, BattleParticipant, GridPoint, SpellTemplate } from "@/types/battle";
+import type { LogLine } from "@/types/text";
 
 export interface MapAim {
   template: SpellTemplate;
@@ -65,7 +68,7 @@ export type MapClick =
   | { kind: "none" }
   | { kind: "move"; participantId: string; to: GridPoint; free: boolean }
   | { kind: "attack"; targetId: string; attackId?: string }
-  | { kind: "reject"; reason: string }
+  | { kind: "reject"; reason: LogLine }
   | { kind: "select"; id: string }
   | { kind: "arm"; id: string }
   | { kind: "aim"; cell: GridPoint }
@@ -242,21 +245,21 @@ export function deriveMapScene({ map, selectedId, actor, mode, modeView, ...inpu
   };
 
   function aimAt(p: GridPoint): MapClick {
-    if (!aim || !aimCaster || !templateAimAllowed(cellsOf(aimCaster), aim.template, p, aim.range)) return { kind: "reject", reason: "Поза дальністю" };
+    if (!aim || !aimCaster || !templateAimAllowed(cellsOf(aimCaster), aim.template, p, aim.range)) return { kind: "reject", reason: textRef(REJECT.outOfRange) };
 
     const hidden = modeAimHiddenText(map, aimCaster, p);
 
     if (hidden) return { kind: "reject", reason: hidden };
 
-    return aimView({ map, participants }, aim, p) ? { kind: "aim", cell: p } : { kind: "reject", reason: "Оберіть напрямок" };
+    return aimView({ map, participants }, aim, p) ? { kind: "aim", cell: p } : { kind: "reject", reason: textRef(REJECT.pickDirection) };
   }
 
   function pickAt(id: string): MapClick {
     const entry = pick?.targets.find((t) => t.id === id);
 
-    if (!entry) return { kind: "reject", reason: "Ця ціль не підходить для заклинання" };
+    if (!entry) return { kind: "reject", reason: textRef(REJECT.badSpellTarget) };
 
-    return entry.reachable ? { kind: "pick", id } : { kind: "reject", reason: "Поза дальністю" };
+    return entry.reachable ? { kind: "pick", id } : { kind: "reject", reason: textRef(REJECT.outOfRange) };
   }
 
   function tokenClick(id: string): MapClick {
@@ -279,7 +282,7 @@ export function deriveMapScene({ map, selectedId, actor, mode, modeView, ...inpu
         return { kind: "attack", targetId: id, ...(attack && { attackId: attack.id ?? attack.name }) };
       }
 
-      if (mark === "invalid-target") return { kind: "reject", reason: pickAttack(map, participants, current, attacks, target).error ?? "Ціль недосяжна" };
+      if (mark === "invalid-target") return { kind: "reject", reason: pickAttack(map, participants, current, attacks, target).error ?? textRef(REJECT.targetUnreachable) };
     }
 
     return { kind: "select", id };

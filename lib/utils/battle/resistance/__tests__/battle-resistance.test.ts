@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 
 import { ParticipantSide } from "@/lib/constants/battle";
 import { grantPassive } from "@/lib/utils/battle/__tests__/fixtures/mock-participant";
+import { textsOf } from "@/lib/utils/battle/log/__tests__/event-text";
 import {
   applyResistance,
   getCombinedResistancePercent,
@@ -122,7 +123,7 @@ describe("battle-resistance", () => {
       expect(result.resistanceApplied).toBe(true);
       expect(result.finalDamage).toBe(70);
       expect(
-        result.breakdown.some((s) => s.includes("30") && s.includes("опір")),
+        textsOf(result.breakdown).some((s) => s.includes("30") && s.includes("опір")),
       ).toBe(true);
     });
   });

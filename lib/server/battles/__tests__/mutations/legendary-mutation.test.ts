@@ -8,6 +8,7 @@ import { legendaryMutation } from "@/lib/server/battles/mutations/core-action/le
 import { resolved } from "@/lib/utils/abilities/__tests__/fixtures";
 import { BattleAccessError } from "@/lib/utils/battle/store";
 import type { BattleParticipant } from "@/types/battle";
+import { eventTextOf } from "@/lib/utils/battle/log/__tests__/event-text";
 
 const wing = resolved({ id: "wing", name: "Удар крилами", trigger: { event: "action" }, limits: { legendaryCost: 2 }, effects: [{ kind: "changeMorale", delta: 1 }] });
 
@@ -43,7 +44,7 @@ describe("legendary mutation", () => {
 
     expect(find(out.participants, "dragon").battleData.legendary?.actionsLeft).toBe(2);
     expect(out.events).toHaveLength(2);
-    expect(out.events[0].resultText).toBe("👑 Дракон: легендарна дія — Хвіст (2/3)");
+    expect(eventTextOf(out.events[0])).toBe("👑 Дракон: легендарна дія — Хвіст (2/3)");
     expect(find(out.participants, "hero").combatStats.currentHp).toBeLessThan(20);
   });
 

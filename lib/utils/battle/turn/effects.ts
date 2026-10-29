@@ -1,13 +1,16 @@
+import { textRef } from "@/lib/i18n/text-ref";
+import { effectName } from "@/lib/utils/battle/common/terms";
 import { applyResistance } from "@/lib/utils/battle/resistance";
 import { ActiveEffect, BattleParticipant } from "@/types/battle";
+import type { LogLine } from "@/types/text";
 
 export function applyDOTEffects(
   participant: BattleParticipant,
   participants: BattleParticipant[] = [participant],
-): { newHp: number; damageMessages: string[] } {
+): { newHp: number; damageMessages: LogLine[] } {
   let currentHp = participant.combatStats.currentHp;
 
-  const damageMessages: string[] = [];
+  const damageMessages: LogLine[] = [];
 
   for (const effect of participant.battleData.activeEffects) {
     if (effect.dotDamage) {
@@ -18,8 +21,8 @@ export function applyDOTEffects(
       currentHp = Math.max(0, currentHp - finalDamage);
       damageMessages.push(
         finalDamage === damagePerRound
-          ? `${participant.basicInfo.name}: ${finalDamage} ${damageType} шкоди від ${effect.name}`
-          : `${participant.basicInfo.name}: ${finalDamage} (з ${damagePerRound}) ${damageType} шкоди від ${effect.name}`,
+          ? textRef("battleLog.turn.dot", { name: participant.basicInfo.name, damage: finalDamage, type: damageType, effect: effectName(effect) })
+          : textRef("battleLog.turn.dotReduced", { name: participant.basicInfo.name, damage: finalDamage, base: damagePerRound, type: damageType, effect: effectName(effect) }),
       );
     }
   }
@@ -30,10 +33,10 @@ export function applyDOTEffects(
   };
 }
 
-export function applyHOTEffects(participant: BattleParticipant): { newHp: number; healMessages: string[] } {
+export function applyHOTEffects(participant: BattleParticipant): { newHp: number; healMessages: LogLine[] } {
   let currentHp = participant.combatStats.currentHp;
 
-  const healMessages: string[] = [];
+  const healMessages: LogLine[] = [];
 
   if (currentHp <= 0) return { newHp: currentHp, healMessages };
 
@@ -42,7 +45,7 @@ export function applyHOTEffects(participant: BattleParticipant): { newHp: number
 
     const healed = Math.min(participant.combatStats.maxHp, currentHp + effect.hotHeal.healPerRound);
 
-    if (healed > currentHp) healMessages.push(`${participant.basicInfo.name}: +${healed - currentHp} HP від ${effect.name}`);
+    if (healed > currentHp) healMessages.push(textRef("battleLog.turn.hot", { name: participant.basicInfo.name, heal: healed - currentHp, effect: effectName(effect) }));
 
     currentHp = healed;
   }

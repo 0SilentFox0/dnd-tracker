@@ -4,6 +4,7 @@ import { damageDiceCursor, damageFractions, strikeD20 } from "./strike-rolls";
 import { resolveAttackTargets } from "./targets";
 
 import { AttackType } from "@/lib/constants/battle";
+import { textRef } from "@/lib/i18n/text-ref";
 import { findFlagsMany } from "@/lib/utils/abilities/engine/core/collect-modifiers";
 import { findParticipant, isActive, mergeParticipants, withSelf } from "@/lib/utils/abilities/engine/core/participants";
 import type { Rng, SummonRequest } from "@/lib/utils/abilities/engine/core/types";
@@ -133,7 +134,7 @@ export function runAttackPhase(input: AttackPhaseInput): AttackPhaseResult {
     summons.push(...attackResult.summons);
 
     if (strikeDice.serverRolled && attackResult.success) {
-      attackResult.battleAction = withLines(attackResult.battleAction, [`🎲 кубики шкоди кинув сервер: ${strikeDice.serverRolled.join(", ")}`]);
+      attackResult.battleAction = withLines(attackResult.battleAction, [textRef("battleLog.attack.serverDamageDice", { rolls: strikeDice.serverRolled.join(", ") })]);
     }
 
     allBattleActions.push(attackResult.battleAction);

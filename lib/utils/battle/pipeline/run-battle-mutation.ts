@@ -33,6 +33,7 @@ import {
   eventToBattleAction,
   systemEvent,
 } from "@/lib/utils/battle/store";
+import { REJECT } from "@/lib/utils/battle/store/reject";
 import { checkVictoryConditions, completeBattle } from "@/lib/utils/battle/turn/victory";
 import type { BattleKnowledge } from "@/lib/utils/battle/view/knowledge";
 import { alwaysSeesEnemyStats } from "@/lib/utils/battle/view/visibility";
@@ -292,7 +293,7 @@ export function guardBattleContext<TBody>(userId: string, loaded: LoadedBattle &
     : null;
 
   if (allowed && !allowed.includes(loaded.scene.status)) {
-    throw new BattleRuleError("wrong_status", `Дія недоступна в статусі «${loaded.scene.status}»`);
+    throw new BattleRuleError("wrong_status", REJECT.wrongStatus, { status: loaded.scene.status });
   }
 
   const blocked = options.blockedByMode ? modeBlockedText(loaded.meta.map) : null;

@@ -1,4 +1,5 @@
 import { CombatStatus } from "@/lib/constants/battle";
+import { textRef } from "@/lib/i18n/text-ref";
 import { findParticipant, replaceParticipant, withActiveEffects } from "@/lib/utils/abilities/engine/core/participants";
 import { upsertTimedEffect } from "@/lib/utils/abilities/engine/effects/timed-effects";
 import { hasCondition, removeEffects } from "@/lib/utils/battle/conditions/query";
@@ -37,14 +38,14 @@ function strip(ps: BattleParticipant[], casterId: string): { participants: Battl
   }) };
 }
 
-export function dropConcentration(ps: BattleParticipant[], casterId: string, reason: string): { participants: BattleParticipant[]; messages: LogLine[] } {
+export function dropConcentration(ps: BattleParticipant[], casterId: string, reason: LogLine): { participants: BattleParticipant[]; messages: LogLine[] } {
   const stripped = strip(ps, casterId);
 
   if (!stripped) return { participants: ps, messages: [] };
 
   const name = findParticipant(ps, casterId)?.basicInfo.name ?? casterId;
 
-  return { participants: stripped.participants, messages: [`🔮 ${name} втрачає концентрацію на «${stripped.spellName}»${reason ? ` (${reason})` : ""}`] };
+  return { participants: stripped.participants, messages: [textRef("battleLog.concentration.lost", { name, spell: stripped.spellName, reason: reason ? textRef("battleLog.concentration.reasonTail", { reason }) : "" })] };
 }
 
 export function beginConcentration(
@@ -55,13 +56,17 @@ export function beginConcentration(
   rounds: number,
   round = 0,
 ): { participants: BattleParticipant[]; messages: LogLine[] } {
-  const dropped = dropConcentration(ps, casterId, "нове заклинання");
+  const dropped = dropConcentration(ps, casterId, textRef("battleLog.concentration.reasons.newSpell"));
 
   const caster = findParticipant(dropped.participants, casterId);
 
   if (!caster) return dropped;
 
-  const next = upsertTimedEffect(caster, { timedKey: "concentration", name: `Концентрація: ${spellName}`, type: "buff", rounds, stackable: false, concentration: { castId, spellName } }, round);
+  const upserted = upsertTimedEffect(caster, { timedKey: "concentration", name: spellName, type: "buff", rounds, stackable: false, concentration: { castId, spellName } }, round);
+
+  const label = textRef("battleLog.concentration.effect", { spell: spellName });
+
+  const next = { ...upserted, battleData: { ...upserted.battleData, activeEffects: upserted.battleData.activeEffects.map((e) => (e.concentration?.castId === castId ? { ...e, label } : e)) } };
 
   return { participants: replaceParticipant(dropped.participants, next), messages: dropped.messages };
 }
@@ -113,9 +118,9 @@ export function concentrationCheck(input: { caster: BattleParticipant; damage: n
 
   const { result: save, participant: resisted, message } = resolveSave(caster, rolled);
 
-  const head = `🎲 ${caster.basicInfo.name}: концентрація — рятівний кидок ВИТ ${rolled.total} проти СК ${dc}`;
+  const head = textRef("battleLog.concentration.check", { name: caster.basicInfo.name, total: rolled.total, dc });
 
-  if (save.success) return { participants: message ? replaceParticipant(ps, resisted) : ps, messages: [`${head} — утримує`, ...(message ? [message] : [])] };
+  if (save.success) return { participants: message ? replaceParticipant(ps, resisted) : ps, messages: [textRef("battleLog.concentration.holds", { head }), ...(message ? [message] : [])] };
 
-  return { participants: strip(ps, id)?.participants ?? ps, messages: [`${head} — втрачає концентрацію на «${marker.concentration.spellName}»`] };
+  return { participants: strip(ps, id)?.participants ?? ps, messages: [textRef("battleLog.concentration.broke", { head, spell: marker.concentration.spellName })] };
 }

@@ -8,6 +8,7 @@ import { resolveSpellTargets } from "@/lib/utils/battle/spell/spell-targeting";
 import type { CastableSpell } from "@/lib/utils/battle/types/spell-process";
 import type { SpellDefinition } from "@/lib/utils/spells/model/schema";
 import type { BattleParticipant } from "@/types/battle";
+import { eventTextOf } from "@/lib/utils/battle/log/__tests__/event-text";
 
 const dmg = (damageType: string): Effect => ({ kind: "dealDamage", amount: { spellRoll: 100 }, damageType });
 
@@ -147,8 +148,8 @@ describe("castSpell", () => {
 
     expect([hp(r, "e1"), hp(r, "e2"), hp(r, "e3")]).toEqual([194, 197, 194]);
     expect(r.battleAction.actionDetails.savingThrows?.map((s) => s.result)).toEqual(["fail", "success", "fail"]);
-    expect(r.battleAction.resultText).toMatch(/рятівний кидок 1[+-]\d+=-?\d+ проти СК \d+ — провал/);
-    expect(r.battleAction.resultText).toMatch(/рятівний кидок 9[+-]\d+=-?\d+ проти СК \d+ — успіх, половина шкоди/);
+    expect(eventTextOf(r.battleAction)).toMatch(/рятівний кидок 1[+-]\d+=-?\d+ проти СК \d+ — провал/);
+    expect(eventTextOf(r.battleAction)).toMatch(/рятівний кидок 9[+-]\d+=-?\d+ проти СК \d+ — успіх, половина шкоди/);
   });
 
   it("рятівний кидок none: успіх скасовує все; half пропускає недіапазонні ефекти", () => {
@@ -175,7 +176,7 @@ describe("castSpell", () => {
     const r = cast(spell, ["h", "o", "g"], [enemy("h", "human"), enemy("o", "orc"), enemy("g", "goblin")]);
 
     expect([hp(r, "h"), hp(r, "o"), hp(r, "g")]).toEqual([200, 200 - 12, 200 - 6]);
-    expect(r.battleAction.resultText).toContain("імунітет раси");
+    expect(eventTextOf(r.battleAction)).toContain("імунітет раси");
   });
 
   it("Армагеддон (everyone) б'є і заклинателя, і його союзників", () => {
@@ -224,7 +225,7 @@ describe("castSpell", () => {
     const r = cast(spellOf(), ["e1"], [immune]);
 
     expect(hp(r, "e1")).toBe(200);
-    expect(r.battleAction.resultText).toContain("⛔ e1:");
+    expect(eventTextOf(r.battleAction)).toContain("⛔ e1:");
   });
 
   it("Відродження лісу: усі полеглі союзники повертаються з 30 % HP", () => {
@@ -331,7 +332,7 @@ describe("castSpell", () => {
 
       expect(target.battleData.activeEffects).toHaveLength(0);
       expect(target.basicInfo.side).toBe(ParticipantSide.ENEMY);
-      expect(r.battleAction.resultText).toContain("⛔");
+      expect(eventTextOf(r.battleAction)).toContain("⛔");
       expect(r.casterUpdated.spellcasting.spellSlots["1"].current).toBe(1);
     }
   });

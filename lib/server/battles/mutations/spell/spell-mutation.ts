@@ -5,6 +5,7 @@ import type { SpellRequestData } from "./cast-spell-schema";
 import { getCachedSummonPool } from "@/lib/cache/reference-data";
 import { API_ERRORS } from "@/lib/constants/api-errors";
 import { prisma } from "@/lib/db";
+import { textRef } from "@/lib/i18n/text-ref";
 import { findParticipant, updateParticipant } from "@/lib/utils/abilities/engine/core/participants";
 import { replaceParticipant } from "@/lib/utils/abilities/engine/core/participants";
 import { recordUse } from "@/lib/utils/abilities/engine/core/usage";
@@ -34,6 +35,7 @@ import { toCastableSpell } from "@/lib/utils/battle/spell/to-castable";
 import { spellZoneHazard } from "@/lib/utils/battle/spell/zone-hazard";
 import { systemEvent } from "@/lib/utils/battle/store";
 import { BattleAccessError, battleActionToEvent, BattleRuleError } from "@/lib/utils/battle/store";
+import { REJECT } from "@/lib/utils/battle/store/reject";
 import { applyAbilitySummons, type SummonDeps } from "@/lib/utils/battle/summon/ability-summons";
 import { assertCanAct } from "@/lib/utils/battle/turn";
 import { assertSpellRolls } from "@/lib/utils/battle/validation/dice-checks";
@@ -74,15 +76,15 @@ export function createSpellMutation(deps: SpellMutationDeps = defaultDeps, optio
 
     let caster = requireActor(ctx, data.casterId, {
       anyTurn: definition.cost === "reaction",
-      missing: "Кастера немає в бою",
-      forbidden: "Заклинання може кастувати лише DM або контролер поточного ходу",
-      inactive: { code: "participant_dead", message: "Кастер непритомний або мертвий" },
+      missing: REJECT.casterMissing,
+      forbidden: REJECT.spellForbidden,
+      inactive: { code: "participant_dead", message: REJECT.casterInactive },
     });
 
     if (data.cancelCasting) {
-      const dropped = dropConcentration(order, caster.basicInfo.id, "накладання скасовано");
+      const dropped = dropConcentration(order, caster.basicInfo.id, textRef("battleLog.concentration.reasons.castCancelled"));
 
-      return { participants: dropped.participants, pending: ctx.pending, events: [systemEvent(ctx.scene.round, `${caster.basicInfo.name}: накладання скасовано`)] };
+      return { participants: dropped.participants, pending: ctx.pending, events: [systemEvent(ctx.scene.round, textRef("battleLog.spell.castCancelled", { name: caster.basicInfo.name }))] };
     }
 
     const { legendaryAbility, free, grant } = resolveSpellSource(ctx, caster, spell, data);
@@ -192,7 +194,7 @@ export function createSpellMutation(deps: SpellMutationDeps = defaultDeps, optio
         if (resolution.centre) result.battleAction.actionDetails.aimCell = resolution.centre;
 
         if (serverRolled.length > 0) {
-          result.battleAction = withLines(result.battleAction, [`🎲 рятівні кидки кинув сервер: ${serverRolled.map((id) => findParticipant(order, id)?.basicInfo.name ?? id).join(", ")}`]);
+          result.battleAction = withLines(result.battleAction, [textRef("battleLog.spell.serverSaves", { names: serverRolled.map((id) => findParticipant(order, id)?.basicInfo.name ?? id).join(", ") })]);
         }
 
         if (data.preview) {

@@ -8,6 +8,7 @@ import { resolveTargetIds } from "@/lib/utils/abilities/engine/core/targets";
 import { withinLimits } from "@/lib/utils/abilities/engine/core/usage";
 import { grantPassive } from "@/lib/utils/battle/__tests__/fixtures/mock-participant";
 import { cellKey, cellsOf } from "@/lib/utils/battle/grid";
+import { textsOf } from "@/lib/utils/battle/log/__tests__/event-text";
 import { processStartOfTurn } from "@/lib/utils/battle/turn/start-end";
 import { checkVictoryConditions } from "@/lib/utils/battle/turn/victory";
 import { assertAbilityTargets } from "@/lib/utils/battle/validation/ability-targets";
@@ -42,7 +43,7 @@ describe("Пікірування", () => {
     const r = land(stripped);
 
     expect(hp(r.participants, "e")).toBeLessThan(200);
-    expect(r.abilityMessages.join(" ")).toContain("Пікірування");
+    expect(textsOf(r.abilityMessages).join(" ")).toContain("Пікірування");
   });
 
   it("на початку наступного ходу падає на ціль: ×2 середньої шкоди з урахуванням опору", () => {
@@ -86,7 +87,7 @@ describe("Пікірування", () => {
 
     const r = land(up);
 
-    expect(r.abilityMessages.join(" ")).toContain("удар у порожнечу");
+    expect(textsOf(r.abilityMessages).join(" ")).toContain("удар у порожнечу");
     expect(byId(r.participants, "g").battleData.position).toEqual({ x: 10, y: 10 });
     expect(hp(r.participants, "e")).toBe(200);
   });

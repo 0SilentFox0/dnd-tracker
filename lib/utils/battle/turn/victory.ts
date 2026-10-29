@@ -2,18 +2,21 @@ import { autoXpEnabled, battleXpAward } from "./battle-xp";
 import { originalSide } from "./original-side";
 
 import { CombatStatus, ParticipantSide, SYSTEM_ACTOR } from "@/lib/constants/battle";
+import { textRef } from "@/lib/i18n/text-ref";
 import { isActive, isEscaped } from "@/lib/utils/abilities/engine/core/participants";
 import { restoreCharm } from "@/lib/utils/abilities/engine/effects/charm";
 import { clearDeathSaves } from "@/lib/utils/battle/death-saves";
+import { logFields } from "@/lib/utils/battle/log/lines";
 import type { Ruleset } from "@/lib/utils/rules";
 import { BattleAction, BattleParticipant } from "@/types/battle";
+import type { LogLine } from "@/types/text";
 
 export interface VictoryCheckResult {
   isVictory: boolean;
   isDefeat: boolean;
   result: "victory" | "defeat" | null;
   awaiting: "victory" | "defeat" | null;
-  message: string;
+  message: LogLine;
 }
 
 /** Перевіряє умови перемоги. */
@@ -40,7 +43,7 @@ export function checkVictoryConditions(
 
   if (allEnemiesDefeated && enemies.length > 0) {
     if (reserveHas(ParticipantSide.ENEMY)) {
-      return { isVictory: false, isDefeat: false, result: null, awaiting: "victory", message: "У резерві ще є вороги — рішення за ДМ" };
+      return { isVictory: false, isDefeat: false, result: null, awaiting: "victory", message: textRef("battleLog.victory.reserveEnemies") };
     }
 
     return {
@@ -48,18 +51,18 @@ export function checkVictoryConditions(
       isDefeat: false,
       result: "victory",
       awaiting: null,
-      message: "🎉 Перемога! Всі вороги переможені!",
+      message: textRef("battleLog.victory.won"),
     };
   }
 
   // escaped ставить лише режим карти (вихід), тож окремий прапорець режиму не потрібен
   if (allies.some(isEscaped) && !allies.some((a) => isActive(a) && !isEscaped(a))) {
-    return { isVictory: false, isDefeat: false, result: null, awaiting: "victory", message: "Усі живі герої вибралися — рішення за ДМ" };
+    return { isVictory: false, isDefeat: false, result: null, awaiting: "victory", message: textRef("battleLog.victory.escaped") };
   }
 
   if (allAlliesDefeated && allies.length > 0) {
     if (reserveHas(ParticipantSide.ALLY)) {
-      return { isVictory: false, isDefeat: false, result: null, awaiting: "defeat", message: "У резерві ще є союзники — рішення за ДМ" };
+      return { isVictory: false, isDefeat: false, result: null, awaiting: "defeat", message: textRef("battleLog.victory.reserveAllies") };
     }
 
     return {
@@ -67,7 +70,7 @@ export function checkVictoryConditions(
       isDefeat: true,
       result: "defeat",
       awaiting: null,
-      message: "💀 Поразка! Всі союзники переможені!",
+      message: textRef("battleLog.victory.lost"),
     };
   }
 
@@ -104,7 +107,7 @@ export function completeBattle(
 
   const award = result === "victory" && autoXpEnabled(rules) ? battleXpAward(updatedParticipants) : null;
 
-  const baseText = result === "victory" ? "🎉 Бій завершено! Перемога союзників!" : "💀 Бій завершено! Поразка союзників!";
+  const baseText = textRef(result === "victory" ? "battleLog.victory.completeWon" : "battleLog.victory.completeLost");
 
   const battleAction: BattleAction = {
     id: `battle-complete-${Date.now()}`,
@@ -116,7 +119,7 @@ export function completeBattle(
     actionType: "end_turn",
     targets: [],
     actionDetails: { battleResult: result },
-    resultText: award ? `${baseText} · ⭐ Досвід: ${award.share} кожному` : baseText,
+    ...logFields(award ? textRef("battleLog.victory.withXp", { text: baseText, share: award.share }) : baseText),
     hpChanges: revived.map((p) => ({
       participantId: p.basicInfo.id,
       participantName: p.basicInfo.name,

@@ -1,11 +1,13 @@
 import { describe, expect, it } from "vitest";
 
 import { AttackType, ParticipantSide } from "@/lib/constants/battle";
+import { textRef } from "@/lib/i18n/text-ref";
 import { makeParticipant, resolved, seq } from "@/lib/utils/abilities/__tests__/fixtures";
 import { placed, testMap } from "@/lib/utils/battle/__tests__/fixtures/placed";
 import { processAttack } from "@/lib/utils/battle/attack/process";
 import { runAttackPhase } from "@/lib/utils/battle/attack-phase/run-attack-phase";
 import { applyObstacle } from "@/lib/utils/battle/damage/obstacle";
+import { eventTextOf } from "@/lib/utils/battle/log/__tests__/event-text";
 import type { BattleAttack, BattleMapConfig, BattleParticipant } from "@/types/battle";
 
 const sword: BattleAttack = { id: "sw", name: "Меч", type: AttackType.MELEE, attackBonus: 5, damageDice: "1d8", damageType: "slashing" };
@@ -61,8 +63,8 @@ describe("Перешкода в атаці", () => {
 
     const steps = half.battleAction.actionDetails.damageSteps?.e ?? [];
 
-    expect(steps.at(-1)).toMatchObject({ label: "Перешкода", kind: "multiplier", value: 0.5, after: half.damage?.finalDamage });
-    expect(half.battleAction.resultText).toContain("перешкода: шкода ×0.5");
+    expect(steps.at(-1)).toMatchObject({ label: textRef("battleLog.damage.steps.obstacle"), kind: "multiplier", value: 0.5, after: half.damage?.finalDamage });
+    expect(eventTextOf(half.battleAction)).toContain("перешкода: шкода ×0.5");
     expect(half.battleAction.hpChanges[0].change).toBe(half.damage?.finalDamage);
   });
 
@@ -99,7 +101,7 @@ describe("Перешкода в атаці", () => {
     const r = strike({ d20: 2, rolls: [7], obstacle: true });
 
     expect(r.success).toBe(false);
-    expect(r.battleAction.resultText).not.toContain("перешкода");
+    expect(eventTextOf(r.battleAction)).not.toContain("перешкода");
   });
 
   it("недолік і перешкода разом: d20 — менший, шкода — половина", () => {
@@ -133,7 +135,7 @@ describe("auto cover", () => {
       map,
     });
 
-  const covered = (r: ReturnType<typeof run>) => r.allBattleActions.filter((e) => e.actionType === "attack").map((e) => e.resultText.includes("перешкода"));
+  const covered = (r: ReturnType<typeof run>) => r.allBattleActions.filter((e) => e.actionType === "attack").map((e) => eventTextOf(e).includes("перешкода"));
 
   it("ціль за союзником — штраф, вільна ціль того ж залпу — ні", () => {
     const order = [archer, placed("ally", { side: ParticipantSide.ALLY, at: { x: 2, y: 5 } }), placed("t1", { at: { x: 5, y: 5 }, hp: 50 }), placed("t2", { at: { x: 0, y: 8 }, hp: 50 })];

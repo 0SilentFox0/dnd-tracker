@@ -17,6 +17,7 @@ import { AttackType, ParticipantSide } from "@/lib/constants/battle";
 import { resolved, seq } from "@/lib/utils/abilities/__tests__/fixtures";
 import { createMockParticipant } from "@/lib/utils/battle/__tests__/fixtures/mock-participant";
 import { BattleAccessError, BattleRuleError } from "@/lib/utils/battle/store";
+import { REJECT } from "@/lib/utils/battle/store/reject";
 import type { BattleAttack, BattleParticipant } from "@/types/battle";
 
 function meleeAttack(over: Partial<BattleAttack> = {}): BattleAttack {
@@ -114,7 +115,7 @@ describe("runAttackPhase — error path validation", () => {
       );
     } catch (e) {
       expect(e).toBeInstanceOf(BattleRuleError);
-      expect((e as Error).message).toContain("d20Roll");
+      expect((e as Error).message).toBe(REJECT.rollRequired);
     }
   });
 
@@ -134,7 +135,7 @@ describe("runAttackPhase — error path validation", () => {
     } catch (e) {
       expect(e).toBeInstanceOf(BattleAccessError);
       expect((e as BattleAccessError).status).toBe(404);
-      expect((e as Error).message).toContain("Атакуючого немає");
+      expect((e as Error).message).toBe(REJECT.attackerMissing);
     }
   });
 
@@ -171,7 +172,7 @@ describe("runAttackPhase — error path validation", () => {
     } catch (e) {
       expect(e).toBeInstanceOf(BattleAccessError);
       expect((e as BattleAccessError).status).toBe(404);
-      expect((e as Error).message).toContain("Цілей немає");
+      expect((e as Error).message).toBe(REJECT.noTargetsInBattle);
     }
   });
 
@@ -190,7 +191,7 @@ describe("runAttackPhase — error path validation", () => {
       throw new Error("should not reach");
     } catch (e) {
       expect(e).toBeInstanceOf(BattleRuleError);
-      expect((e as Error).message).toContain("не хід атакуючого");
+      expect((e as Error).message).toBe(REJECT.notAttackerTurn);
     }
   });
 
@@ -239,7 +240,7 @@ describe("runAttackPhase — error path validation", () => {
       throw new Error("should not reach");
     } catch (e) {
       expect(e).toBeInstanceOf(BattleRuleError);
-      expect((e as Error).message).toContain("не може діяти");
+      expect((e as Error).message).toBe(REJECT.attackerInactive);
     }
   });
 
@@ -265,7 +266,7 @@ describe("runAttackPhase — error path validation", () => {
       throw new Error("should not reach");
     } catch (e) {
       expect(e).toBeInstanceOf(BattleRuleError);
-      expect((e as Error).message).toContain("немає доступної атаки");
+      expect((e as Error).message).toBe(REJECT.noAttackAvailable);
     }
   });
 
@@ -298,7 +299,7 @@ describe("runAttackPhase — error path validation", () => {
       throw new Error("should not reach");
     } catch (e) {
       expect(e).toBeInstanceOf(BattleRuleError);
-      expect((e as Error).message).toContain("Забагато цілей");
+      expect((e as Error).message).toBe(REJECT.tooManyTargets);
     }
   });
 
@@ -308,7 +309,7 @@ describe("runAttackPhase — error path validation", () => {
       throw new Error("should not reach");
     } catch (e) {
       expect(e).toBeInstanceOf(BattleRuleError);
-      expect((e as Error).message).toContain("Некоректний кидок");
+      expect((e as Error).message).toBe(REJECT.badStrikeRoll);
     }
   });
 

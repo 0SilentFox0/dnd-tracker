@@ -3,6 +3,7 @@ import { applyBalanceDamageMultiplier, scaleAdditionalDamage } from "../../damag
 import { heroAttackDamageParts, heroDamageContext } from "../../damage/hero-damage";
 import { applyHeroDmDamageMultiplier } from "../../damage/hero-dm-multiplier";
 import { applyObstacle, obstacleStep } from "../../damage/obstacle";
+import { multiplierRow,ruleRow } from "../../damage/rows";
 import { applyWeaponFlat } from "../../damage/weapon-flat";
 import { applyResistance } from "../../resistance";
 import type { DamageCalculationResult } from "../../types/damage-calculations";
@@ -11,13 +12,16 @@ import { applyResistanceForAdditional } from "./damage";
 
 import { AttackType, ParticipantSourceType } from "@/lib/constants/battle";
 import type { CriticalEffect } from "@/lib/constants/critical-effects";
+import { textRef } from "@/lib/i18n/text-ref";
 import type { StaticEffect } from "@/lib/utils/abilities/schema";
-import { attackAbilityLabelFor, attackDamageModifier } from "@/lib/utils/battle/attack/ability";
+import { attackAbilityFor, attackDamageModifier } from "@/lib/utils/battle/attack/ability";
+import { critNameRef } from "@/lib/utils/battle/attack/critical";
 import { attackKindOf } from "@/lib/utils/battle/common/attack-kind";
 import { findEffectMarker } from "@/lib/utils/battle/participant/state";
 import { maxOf, parseDice, parseDiceLenient, rollGroups } from "@/lib/utils/common/dice";
 import type { BattleParticipant, DamageStep } from "@/types/battle";
 import type { BattleAttack } from "@/types/battle";
+import type { LogLine } from "@/types/text";
 
 export interface ComputeHitDamageParams {
   attacker: BattleParticipant;
@@ -30,7 +34,7 @@ export interface ComputeHitDamageParams {
   currentRound: number;
   actionModifiers?: StaticEffect[];
   bonusPercent?: number;
-  bonusLabel?: string;
+  bonusLabel?: LogLine;
   offTurn?: boolean;
   obstacle?: boolean;
   rng?: () => number;
@@ -40,8 +44,8 @@ export interface ComputeHitDamageResult {
   damageCalculation: DamageCalculationResult;
   physicalDamage: number;
   totalFinalDamage: number;
-  resistanceResult: { finalDamage: number; breakdown: string[] };
-  additionalDamageBreakdown: string[];
+  resistanceResult: { finalDamage: number; breakdown: LogLine[] };
+  additionalDamageBreakdown: LogLine[];
   dmgMult: number;
   statModifier: number;
   updatedAttacker: BattleParticipant;
@@ -85,7 +89,7 @@ export function computeHitDamage(params: ComputeHitDamageParams): ComputeHitDama
       additionalDamage: additionalDamageModifiers,
       ...heroDamageContext(updatedAttacker, attack, damageRolls),
       actionModifiers: params.actionModifiers,
-      statLabel: attackAbilityLabelFor(updatedAttacker, attack),
+      statKey: attackAbilityFor(updatedAttacker, attack),
     },
   );
 
@@ -107,7 +111,7 @@ export function computeHitDamage(params: ComputeHitDamageParams): ComputeHitDama
 
   if (criticalEffectApplied?.effect.type === "double_damage") {
     physicalDamage *= 2;
-    damageSteps.push({ label: criticalEffectApplied.name, side: "attacker", kind: "multiplier", value: 2, after: physicalDamage });
+    damageSteps.push({ label: critNameRef(criticalEffectApplied), side: "attacker", kind: "multiplier", value: 2, after: physicalDamage });
   }
 
   if (criticalEffectApplied?.effect.type === "max_damage") {
@@ -118,14 +122,14 @@ export function computeHitDamage(params: ComputeHitDamageParams): ComputeHitDama
     const weaponFlat = updatedAttacker.basicInfo.sourceType === ParticipantSourceType.CHARACTER ? (parseDice(weaponDice)?.flat ?? 0) + (attack.damageBonus ?? 0) : 0;
 
     physicalDamage = maxOf(parseDiceLenient(formula)) + weaponFlat + statModifier;
-    damageSteps.push({ label: criticalEffectApplied.name, side: "attacker", kind: "flat", value: physicalDamage - before, after: physicalDamage });
+    damageSteps.push({ label: critNameRef(criticalEffectApplied), side: "attacker", kind: "flat", value: physicalDamage - before, after: physicalDamage });
   }
 
   if (criticalEffectApplied?.effect.type === "additional_damage") {
     const extra = rollGroups([{ count: 1, size: 6 }], params.rng)[0];
 
     physicalDamage += extra;
-    damageSteps.push({ label: criticalEffectApplied.name, side: "attacker", kind: "flat", value: extra, after: physicalDamage });
+    damageSteps.push({ label: critNameRef(criticalEffectApplied), side: "attacker", kind: "flat", value: extra, after: physicalDamage });
   }
 
   if (criticalEffectApplied?.effect.type !== "max_damage") {
@@ -133,9 +137,8 @@ export function computeHitDamage(params: ComputeHitDamageParams): ComputeHitDama
 
     physicalDamage = flat.damage;
 
-    if (flat.step && flat.line) {
-      damageCalculation.breakdown.push("──────────");
-      damageCalculation.breakdown.push(flat.line);
+    if (flat.step && flat.rows) {
+      damageCalculation.breakdown.push(...flat.rows);
       damageSteps.push(flat.step);
     }
   }
@@ -155,26 +158,24 @@ export function computeHitDamage(params: ComputeHitDamageParams): ComputeHitDama
 
   physicalDamage = heroDm.damage;
 
-  if (heroDm.breakdownLine) {
-    damageCalculation.breakdown.push("──────────");
-    damageCalculation.breakdown.push(heroDm.breakdownLine);
-    damageSteps.push({ label: "Архетип", side: "attacker", kind: "multiplier", value: heroDm.multiplier, after: physicalDamage });
+  if (heroDm.breakdownRow) {
+    damageCalculation.breakdown.push(ruleRow(), heroDm.breakdownRow);
+    damageSteps.push({ label: textRef("battleLog.damage.steps.archetype"), side: "attacker", kind: "multiplier", value: heroDm.multiplier, after: physicalDamage });
   }
 
   const balance = applyBalanceDamageMultiplier(updatedAttacker, physicalDamage);
 
   if (balance.multiplier !== 1) {
     physicalDamage = balance.damage;
-    damageCalculation.breakdown.push("──────────");
-    damageCalculation.breakdown.push(`× ${balance.multiplier.toFixed(2)} (рівний бій) = ${physicalDamage}`);
-    damageSteps.push({ label: "Рівний бій", side: "attacker", kind: "multiplier", value: balance.multiplier, after: physicalDamage });
+    damageCalculation.breakdown.push(ruleRow(), multiplierRow(textRef("battleLog.damage.rows.fairBattle"), balance.multiplier.toFixed(2), physicalDamage));
+    damageSteps.push({ label: textRef("battleLog.damage.steps.fairBattle"), side: "attacker", kind: "multiplier", value: balance.multiplier, after: physicalDamage });
   }
 
   if (params.bonusPercent) {
     const factor = 1 + params.bonusPercent / 100;
 
     physicalDamage = Math.floor(physicalDamage * factor);
-    damageSteps.push({ label: params.bonusLabel ?? "Контратака", side: "attacker", kind: "multiplier", value: factor, after: physicalDamage });
+    damageSteps.push({ label: params.bonusLabel ?? textRef("battleLog.damage.steps.counter"), side: "attacker", kind: "multiplier", value: factor, after: physicalDamage });
   }
 
   const dmgMult =
@@ -201,16 +202,15 @@ export function computeHitDamage(params: ComputeHitDamageParams): ComputeHitDama
 
   const totalFinalDamage = params.obstacle ? applyObstacle(unhalvedDamage) : unhalvedDamage;
 
-  if (dmgMult !== 1) damageSteps.push({ label: "Частка шкоди", side: "attacker", kind: "multiplier", value: dmgMult, after: physicalDamageForTarget });
+  if (dmgMult !== 1) damageSteps.push({ label: textRef("battleLog.damage.steps.share"), side: "attacker", kind: "multiplier", value: dmgMult, after: physicalDamageForTarget });
 
   damageSteps.push(...resistanceResult.steps);
 
-  if (totalAdditionalDamage > 0) damageSteps.push({ label: "Додаткова шкода", side: "attacker", kind: "flat", value: totalAdditionalDamage, after: unhalvedDamage });
+  if (totalAdditionalDamage > 0) damageSteps.push({ label: textRef("battleLog.damage.steps.additional"), side: "attacker", kind: "flat", value: totalAdditionalDamage, after: unhalvedDamage });
 
   if (params.obstacle) {
     damageSteps.push(obstacleStep(unhalvedDamage));
-    damageCalculation.breakdown.push("──────────");
-    damageCalculation.breakdown.push(`× 0.5 (перешкода) = ${totalFinalDamage}`);
+    damageCalculation.breakdown.push(ruleRow(), multiplierRow(textRef("battleLog.damage.rows.obstacle"), "0.5", totalFinalDamage));
   }
 
   const oldHp = updatedTarget.combatStats.currentHp;

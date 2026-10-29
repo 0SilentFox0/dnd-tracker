@@ -4,7 +4,7 @@ import { calculateDamageWithModifiers } from "./index";
 import { WEAPON_FLAT_LABEL } from "./weapon-flat";
 
 import { ParticipantSourceType } from "@/lib/constants/battle";
-import { attackAbilityLabelFor, attackDamageModifier, isFiveE } from "@/lib/utils/battle/attack/ability";
+import { attackAbilityFor, attackAbilityLabelFor, attackDamageModifier, isFiveE } from "@/lib/utils/battle/attack/ability";
 import { attackKindOf } from "@/lib/utils/battle/common/attack-kind";
 import { diceAverage } from "@/lib/utils/common/dice";
 import type { BattleAttack, BattleParticipant, DamageStep } from "@/types/battle";
@@ -39,7 +39,7 @@ export function averageAttackDamage(p: BattleParticipant, attack: BattleAttack, 
     heroDicePart: heroDiceAvg,
     heroDiceNotation: heroDice,
     weaponDiceNotation: attack.damageDice ?? undefined,
-    statLabel: attackAbilityLabelFor(p, attack),
+    statKey: attackAbilityFor(p, attack),
   });
 
   const bonus = attack.damageBonus ?? 0;

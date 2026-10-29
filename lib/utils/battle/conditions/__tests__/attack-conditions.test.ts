@@ -9,6 +9,7 @@ import { requestedTargetIds, validateAttackRequest } from "@/lib/utils/battle/at
 import { applyCondition5e, type Condition5eKey } from "@/lib/utils/battle/conditions";
 import { resolveSpellTargets } from "@/lib/utils/battle/spell/spell-targeting";
 import type { BattleAttack, BattleParticipant } from "@/types/battle";
+import { REJECT } from "@/lib/utils/battle/store/reject";
 
 const bow: BattleAttack = { ...CLAWS, id: "bow", type: AttackType.RANGED };
 
@@ -114,7 +115,7 @@ describe("зачарований", () => {
     const ps = withCondition([ally(), foe(), placed("other")], "a", "charmed", "e");
 
     expect(requestedTargetIds({ targetId: "e" })).toEqual(["e"]);
-    expect(() => validateAttackRequest(scope(ps), { attackerId: "a", targetId: "e", d20Roll: 10, damageRolls: [1] })).toThrow("не може атакувати того, хто його зачарував");
+    expect(() => validateAttackRequest(scope(ps), { attackerId: "a", targetId: "e", d20Roll: 10, damageRolls: [1] })).toThrow(REJECT.charmedTarget);
   });
 
   it("ворожі заклинання: джерело викидається, інша ціль ок", () => {
