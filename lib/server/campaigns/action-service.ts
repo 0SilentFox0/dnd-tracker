@@ -5,7 +5,7 @@ import { CAMPAIGN_INCLUDE, CAMPAIGN_OMIT, createCampaignForUser, createCampaignF
 import "server-only";
 import { saveAiSettings } from "@/lib/ai/settings";
 import { invalidateCampaignLists } from "@/lib/cache/campaign-list";
-import { invalidateReference, ReferenceKind } from "@/lib/cache/tags";
+import { invalidateAllReference } from "@/lib/cache/tags";
 import { API_ERRORS } from "@/lib/constants/api-errors";
 import { CampaignKind, CampaignRole, CampaignVisibility } from "@/lib/constants/campaigns";
 import { prisma } from "@/lib/db";
@@ -167,7 +167,7 @@ export async function deleteCampaign(actor: Actor) {
     await prisma.campaign.delete({ where: { id: actor.campaignId } });
     afterContentCommit(async () => {
       await invalidateCampaignLists(members.map(m => m.userId));
-      invalidateReference(Object.values(ReferenceKind), actor.campaignId);
+      invalidateAllReference(actor.campaignId);
     });
 
     return { success: true };

@@ -9,7 +9,7 @@ import type { CompendiumReport, DependencyChoice, ImportRepository } from "./ser
 import type { TargetKind } from "./types";
 
 import "server-only";
-import { invalidateReference, ReferenceKind } from "@/lib/cache/tags";
+import { invalidateAllReference } from "@/lib/cache/tags";
 import { CampaignKind, CampaignVisibility, SRD_TEMPLATE_NAME } from "@/lib/constants/campaigns";
 import { prisma } from "@/lib/db";
 import { jsonContentInput } from "@/lib/server/assistant/json";
@@ -291,7 +291,7 @@ export const prismaImportRepository: ImportRepository = {
 
     report.runId = id;
     await prisma.compendiumImportRun.create({ data: { id, campaignId: actor.campaignId, userId: actor.userId, idempotencyKey: key, planHash: requestHash, report: jsonContentInput(report) } });
-    afterContentCommit(() => invalidateReference(Object.values(ReferenceKind), actor.campaignId));
+    afterContentCommit(() => invalidateAllReference(actor.campaignId));
   },
   applyRules: async (actor, patch) => { await updateCampaignRules(actor, patch); },
 };
