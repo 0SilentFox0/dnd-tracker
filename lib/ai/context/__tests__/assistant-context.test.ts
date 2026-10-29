@@ -170,6 +170,6 @@ it("disclosureDescribesActuallyFittedBlocksWithoutReturningPrivateText", async (
 
  expect(disclosure).toHaveBeenCalledOnce();
  expect(disclosure.mock.calls[0][0]).toMatchObject({characters:text.length,focusAvailable:false,sourceNoteCount:0});
- expect(disclosure.mock.calls[0][0].labels).toContain("Campaign (data)");
+ expect(disclosure.mock.calls[0][0].blocks).toContain("campaign");
  expect(JSON.stringify(disclosure.mock.calls)).not.toContain("Поважай стиль");
 });

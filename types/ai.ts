@@ -103,5 +103,5 @@ export interface CreatedApiToken extends ApiTokenSummary {
 }
 
 export type AssistantSessionContext = { sourceNoteKeys: string[] };
-export type AssistantContextDisclosure = { labels: string[]; characters: number; truncated: boolean; focusAvailable: boolean; sourceNoteCount: number };
+export type AssistantContextDisclosure = { blocks: string[]; characters: number; truncated: boolean; focusAvailable: boolean; sourceNoteCount: number };
 export type AssistantContextPreview = AssistantContextDisclosure & { provider: AiProvider; model: string; historyLimit: number };

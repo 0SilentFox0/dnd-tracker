@@ -75,13 +75,13 @@ export async function buildInstructions({ campaignId, mode, pageId, focus, calle
   const domains = [...new Set(assistantCatalog.listActions(actor).map(action => action.id.split(".")[0]))].sort();
 
   const fixed: ContextBlock[] = [
-    { label: "System", text: role, required: true },
-    { label: "Campaign name (data)", value: campaign.name, required: true },
-    { label: "Current server execution policy", value: { executionMode: policy.executionMode, humanConfirmation: "server-only", paid: "always-human" }, required: true },
-    ...(standing ? [{ label: "Standing DM instructions for this campaign (style; server policy takes priority)", text: standing, required: true }] : []),
-    { label: "Mode", text: MODE_RULES[mode], required: true },
-    { label: "Capabilities", text: "Single catalog: assistant_capabilities / assistant_schema; assistant_read for reading, assistant_action for preview/review/auto per server policy, assistant_status for status. Do not bypass unavailable actions with legacy aliases.", required: true },
-    { label: "Available catalog domains", value: domains, required: true },
+    { id: "system", label: "System", text: role, required: true },
+    { id: "campaignName", label: "Campaign name (data)", value: campaign.name, required: true },
+    { id: "policy", label: "Current server execution policy", value: { executionMode: policy.executionMode, humanConfirmation: "server-only", paid: "always-human" }, required: true },
+    ...(standing ? [{ id: "standing", label: "Standing DM instructions for this campaign (style; server policy takes priority)", text: standing, required: true }] : []),
+    { id: "mode", label: "Mode", text: MODE_RULES[mode], required: true },
+    { id: "capabilities", label: "Capabilities", text: "Single catalog: assistant_capabilities / assistant_schema; assistant_read for reading, assistant_action for preview/review/auto per server policy, assistant_status for status. Do not bypass unavailable actions with legacy aliases.", required: true },
+    { id: "domains", label: "Available catalog domains", value: domains, required: true },
   ];
 
   // Validate mandatory content before loading optional private data.
@@ -98,34 +98,34 @@ export async function buildInstructions({ campaignId, mode, pageId, focus, calle
 
   const blocks: ContextBlock[] = [
     ...fixed,
-    { label: "Campaign (data)", maxChars: 3000, value: { name: campaign.name, description: campaign.description } },
-    { label: "Party (first 20; the rest via get_party)", maxChars: 4000, value: { items: party.map(({ id, name, level, class: cls, race, armorClass }) => ({ id, name, level, class: cls, race, armorClass })), truncated: party.length === 20, nextOffset: party.length === 20 ? 20 : null } },
-    ...(mode === "live" ? [{ label: "Current rules snapshot (data; full rules via tool)", maxChars: 6000, value: parseRules(focused?.kind === "battle" && focused.battle.status !== BattleStatus.PREPARED ? focused.battle.rules ?? {} : campaign.rules) }] : []),
-    ...(show ? [{ label: "Show (data)", maxChars: 1500, text: show }] : []),
-    ...(notes ? [{ label: "Explicitly selected source notes (data)", maxChars: 16500, value: notes.data }] : []),
+    { id: "campaign", label: "Campaign (data)", maxChars: 3000, value: { name: campaign.name, description: campaign.description } },
+    { id: "party", label: "Party (first 20; the rest via get_party)", maxChars: 4000, value: { items: party.map(({ id, name, level, class: cls, race, armorClass }) => ({ id, name, level, class: cls, race, armorClass })), truncated: party.length === 20, nextOffset: party.length === 20 ? 20 : null } },
+    ...(mode === "live" ? [{ id: "rules", label: "Current rules snapshot (data; full rules via tool)", maxChars: 6000, value: parseRules(focused?.kind === "battle" && focused.battle.status !== BattleStatus.PREPARED ? focused.battle.rules ?? {} : campaign.rules) }] : []),
+    ...(show ? [{ id: "show", label: "Show (data)", maxChars: 1500, text: show }] : []),
+    ...(notes ? [{ id: "notes", label: "Explicitly selected source notes (data)", maxChars: 16500, value: notes.data }] : []),
   ];
 
-  if (focused?.kind === "unavailable") blocks.push({ label: "Focus", text: "Focus unavailable: the entity was deleted or does not belong to an accessible campaign. Choose another focus.", required: true });
+  if (focused?.kind === "unavailable") blocks.push({ id: "focusUnavailable", label: "Focus", text: "Focus unavailable: the entity was deleted or does not belong to an accessible campaign. Choose another focus.", required: true });
   else if (focused?.kind === "scenario") {
     const { page, focus: selected } = focused;
 
     const content = page.content;
 
-    blocks.push({ label: `DM focus: page ${page.id}${selected.sectionId ? `, section ${selected.sectionId}` : ""}${selected.rowIds?.length ? `, rows ${selected.rowIds.join(", ")}` : ""} (data)`, text: mode === "live" ? liveScene(page.title, content) : contentToMarkdown(page.title, content) });
-  } else if (focused) blocks.push({ label: "DM focus (data)", value: focused.kind === "battle" ? { kind: "battle", battle: { id: focused.battle.id, name: focused.battle.name, status: focused.battle.status, currentRound: focused.battle.currentRound, currentTurnIndex: focused.battle.currentTurnIndex, version: focused.battle.version } } : focused });
+    blocks.push({ id: "focusPage", label: `DM focus: page ${page.id}${selected.sectionId ? `, section ${selected.sectionId}` : ""}${selected.rowIds?.length ? `, rows ${selected.rowIds.join(", ")}` : ""} (data)`, text: mode === "live" ? liveScene(page.title, content) : contentToMarkdown(page.title, content) });
+  } else if (focused) blocks.push({ id: "focus", label: "DM focus (data)", value: focused.kind === "battle" ? { kind: "battle", battle: { id: focused.battle.id, name: focused.battle.name, status: focused.battle.status, currentRound: focused.battle.currentRound, currentTurnIndex: focused.battle.currentTurnIndex, version: focused.battle.version } } : focused });
 
-  let labels: string[] = [];
+  let blockIds: string[] = [];
 
-  const fitted = fitContext(blocks, AI_LIMITS.contextChars, labels);
+  const fitted = fitContext(blocks, AI_LIMITS.contextChars, blockIds);
 
   let text = fitted.text;
 
   if (fitted.truncated) {
-    labels = [];
-    text = fitContext([{ label: "Truncation", text: "[truncated] Optional context was shortened or skipped. Read the full data with tools when needed.", required: true }, ...blocks], AI_LIMITS.contextChars, labels).text;
+    blockIds = [];
+    text = fitContext([{ id: "truncation", label: "Truncation", text: "[truncated] Optional context was shortened or skipped. Read the full data with tools when needed.", required: true }, ...blocks], AI_LIMITS.contextChars, blockIds).text;
   }
 
-  onDisclosure?.({ labels, characters: text.length, truncated: fitted.truncated, focusAvailable: focused?.kind !== "unavailable", sourceNoteCount: sourceNoteSelection?.selectedKeys.length ?? 0 });
+  onDisclosure?.({ blocks: blockIds, characters: text.length, truncated: fitted.truncated, focusAvailable: focused?.kind !== "unavailable", sourceNoteCount: sourceNoteSelection?.selectedKeys.length ?? 0 });
 
   return text;
 }

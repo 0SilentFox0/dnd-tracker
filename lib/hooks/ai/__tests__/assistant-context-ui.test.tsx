@@ -7,7 +7,7 @@ import {useAssistantContext} from '../useAssistantContext';
 import * as api from '@/lib/api/assistant';
 import {chatRequestSchema} from '@/lib/schemas/ai';
 import type { AiFocus, AssistantContextPreview } from '@/types/ai';
-vi.mock('@/lib/api/assistant',()=>({previewAssistantContext:vi.fn(async()=>({provider:'anthropic',model:'actual-model',labels:['Система','Кампанія (дані)'],characters:1200,truncated:false,focusAvailable:true,sourceNoteCount:0,historyLimit:30})),getAssistantSourceNotes:vi.fn(async()=>({items:[{canonicalKey:'chosen',title:'Вибране джерело'}],nextOffset:null}))}));
+vi.mock('@/lib/api/assistant',()=>({previewAssistantContext:vi.fn(async()=>({provider:'anthropic',model:'actual-model',blocks:['system','campaign'],characters:1200,truncated:false,focusAvailable:true,sourceNoteCount:0,historyLimit:30})),getAssistantSourceNotes:vi.fn(async()=>({items:[{canonicalKey:'chosen',title:'Вибране джерело'}],nextOffset:null}))}));
 afterEach(()=>vi.clearAllMocks());
 it('selectionStartsEmptyAndDisclosurePrecedesProviderSend',async()=>{
  const {result,unmount}=renderHook(()=>useAssistantContext('c1','t1',undefined));
@@ -96,7 +96,7 @@ it.each(['campaign', 'thread', 'focus', 'notes'] as const)('%s change rejects an
  if (change === 'notes') act(() => result.current.selectNotes(['chosen']));
  else rerender({ ...initial, ...(change === 'campaign' ? { campaign: 'c2' } : change === 'thread' ? { thread: 't2' } : { focus: { kind: 'campaign' } as AiFocus }) });
 
- await act(async () => { finish({ provider: 'anthropic', model: 'old-model', labels: [], characters: 1, truncated: false, focusAvailable: false, sourceNoteCount: 0, historyLimit: 30 }); await request; });
+ await act(async () => { finish({ provider: 'anthropic', model: 'old-model', blocks: [], characters: 1, truncated: false, focusAvailable: false, sourceNoteCount: 0, historyLimit: 30 }); await request; });
  expect(result.current.disclosure).toBeNull();
  expect(result.current.canSend).toBe(false);
 

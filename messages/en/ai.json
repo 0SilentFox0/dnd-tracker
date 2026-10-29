@@ -198,7 +198,25 @@
     "refresh": "Refresh the context preview",
     "previewFailed": "Could not check the context. The message was not sent to the provider.",
     "notesFailed": "Source notes are unavailable",
-    "sendFailed": "Could not save the editor or send the request. Check the chat state before a new request."
+    "sendFailed": "Could not save the editor or send the request. Check the chat state before a new request.",
+    "blocks": {
+      "system": "System",
+      "campaignName": "Campaign name (data)",
+      "policy": "Current server execution policy",
+      "standing": "Standing DM instructions for this campaign (style; server policy takes priority)",
+      "mode": "Mode",
+      "capabilities": "Capabilities",
+      "domains": "Available catalog domains",
+      "campaign": "Campaign (data)",
+      "party": "Party (first 20; the rest via get_party)",
+      "rules": "Current rules snapshot (data; full rules via tool)",
+      "show": "Show (data)",
+      "notes": "Explicitly selected source notes (data)",
+      "focusUnavailable": "Focus",
+      "focusPage": "DM focus: page (data)",
+      "focus": "DM focus (data)",
+      "truncation": "Truncation"
+    }
   },
   "chat": {
     "receipt": "Receipt {id}: {status, select, applied {action performed} unknown {result is being verified} other {action state: {status}}}.",

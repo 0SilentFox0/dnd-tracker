@@ -17,6 +17,7 @@ describe("ai label registries have translations", () => {
   expectLabelKeys("ai", "composer.quickPrompts", ["npcName", "nextInScenario", "dc"]);
   expectLabelKeys("ai", "workspace.kinds", ["campaign", "scenario", "character", "battle"]);
   expectLabelKeys("ai", "proposal.status", ["applied", "rejected"]);
+  expectLabelKeys("ai", "context.blocks", ["system", "campaignName", "policy", "standing", "mode", "capabilities", "domains", "campaign", "party", "rules", "show", "notes", "focusUnavailable", "focusPage", "focus", "truncation"]);
   expectLabelKeys("ai", "focus", ["character", "battle", "campaign", "page", "rows", "section", "sectionRows"]);
 });
 
