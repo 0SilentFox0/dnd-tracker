@@ -15,7 +15,7 @@ vi.mock("@/lib/server/assistant/actions/compendium-reads", () => ({ readCompendi
 vi.mock("@/lib/ai/tools/party", () => ({ partySummary: vi.fn(async () => []) }));
 vi.mock("@/lib/ai/tools/show", () => ({ showSummary: vi.fn(async () => null) }));
 
-const caller: AssistantCaller = { actor: { campaignId: "c", userId: "dm", isDM: true, via: "session", scopes: null }, channel: "chat", tokenId: null, threadId: "t" };
+const caller: AssistantCaller = { actor: { campaignId: "c", userId: "dm", isDM: true, via: "session", scopes: null }, channel: "chat", tokenId: null, threadId: "t", locale: "uk" as const };
 
 const args = { campaignId: "c", mode: "scenario" as const, pageId: null, caller };
 
@@ -148,7 +148,7 @@ it("all assembled blocks fit, summarize large data, redact signed URLs and prese
   expect(await buildInstructions(args)).not.toContain("PRIVATE_SIGNATURE");
 });
 it("token caller cannot load source notes or session context", async () => {
-  await expect(buildInstructions({ ...args, caller: { ...caller, channel: "mcp", tokenId: "verified", actor: { ...caller.actor, via: "token", scopes: ["ai"] } }, sourceNoteSelection: { source: "session-ui", selectedKeys: ["s"] } })).rejects.toMatchObject({ status: 403 });
+  await expect(buildInstructions({ ...args, caller: { ...caller, channel: "mcp", tokenId: "verified", actor: { ...caller.actor, via: "token", scopes: ["ai"] }, locale: "uk" as const }, sourceNoteSelection: { source: "session-ui", selectedKeys: ["s"] } })).rejects.toMatchObject({ status: 403 });
   expect(prisma.campaign.findUnique).not.toHaveBeenCalled();
   expect(readCompendiumSummary).not.toHaveBeenCalled();
 });

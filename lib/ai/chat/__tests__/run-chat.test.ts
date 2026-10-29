@@ -120,7 +120,7 @@ describe("runChat", () => {
 
     const { toAiSdkTools } = await import("@/lib/ai/tools");
 
-    expect(toAiSdkTools).toHaveBeenCalledWith(expect.objectContaining({ caller: { actor: { campaignId: "camp1", userId: "dm", isDM: true, via: "session", scopes: null }, channel: "chat", threadId: "t1", tokenId: null, runId: "run1" } }));
+    expect(toAiSdkTools).toHaveBeenCalledWith(expect.objectContaining({ caller: { actor: { campaignId: "camp1", userId: "dm", isDM: true, via: "session", scopes: null }, channel: "chat", threadId: "t1", tokenId: null, runId: "run1", locale: "uk" as const } }));
 
     const { buildInstructions } = await import("@/lib/ai/context/prompt");
 

@@ -16,7 +16,7 @@ const dbMocks = vi.hoisted(() => ({
 
 vi.mock("@/lib/db", () => ({ prisma: dbMocks }));
 
-const caller: AssistantCaller = { actor: { campaignId: "campaign", userId: "dm", isDM: true, via: "session", scopes: null }, channel: "chat", threadId: "thread", tokenId: null };
+const caller: AssistantCaller = { actor: { campaignId: "campaign", userId: "dm", isDM: true, via: "session", scopes: null }, channel: "chat", threadId: "thread", tokenId: null, locale: "uk" as const };
 
 const preview: ActionPreview = { summary: "Змінити героя", targets: [{ domain: "characters", id: "hero", name: "Герой" }], changes: [], warnings: [], preconditions: { level: 3 }, effects: [{ kind: "update", targets: [], description: "Оновлення" }] };
 
@@ -73,11 +73,11 @@ describe("assistant intent repository", () => {
     for (const actor of [{ ...caller.actor, campaignId: "other" }, { ...caller.actor, userId: "other" }]) {
       await expect(getIntent({ ...caller, actor }, "intent")).rejects.toMatchObject({ status: 404 });
     }
-    await expect(getIntent({ ...caller, channel: "mcp", tokenId: "foreign", actor: { ...caller.actor, via: "token", scopes: ["characters:write"] } }, "intent")).rejects.toMatchObject({ status: 404 });
+    await expect(getIntent({ ...caller, channel: "mcp", tokenId: "foreign", actor: { ...caller.actor, via: "token", scopes: ["characters:write"] }, locale: "uk" as const }, "intent")).rejects.toMatchObject({ status: 404 });
   });
 
   it("token origin survives a deleted relation and cannot become a session proposal", async () => {
-    const tokenCaller: AssistantCaller = { ...caller, channel: "mcp", threadId: null, tokenId: "token", actor: { ...caller.actor, via: "token", scopes: ["characters:write"] } };
+    const tokenCaller: AssistantCaller = { ...caller, channel: "mcp", threadId: null, tokenId: "token", actor: { ...caller.actor, via: "token", scopes: ["characters:write"] }, locale: "uk" as const };
 
     await createIntent(tokenCaller, { actionId: "characters.update", requestId: "request", input: {} }, preview, { now });
 

@@ -8,7 +8,7 @@ it("toolErrorNotSuccess", async () => {
 
   const def = defineTool({ name: "bad", title: "bad", description: "bad", scopes: ["ai"], input: z.object({}), handler: async () => { throw new Error("secret"); } });
 
-  registerMcpTools({ registerTool } as never, [def], { campaignId: "c", userId: "u", threadId: null, scopes: ["ai"] });
+  registerMcpTools({ registerTool } as never, [def], { campaignId: "c", userId: "u", threadId: null, scopes: ["ai"], locale: "uk" as const });
 
   const output = await registerTool.mock.calls[0][2]({});
 
@@ -24,7 +24,7 @@ it.each(["pending", "handoff"])("%s is a successful non-mutation result", async 
 
   const def = defineTool({ name: "prepare", title: "prepare", description: "prepare", scopes: ["show:write"], input: z.object({}), handler: async () => ({ kind, ...(kind === "pending" ? { intent: { id: "i", status: "pending", targets: [] }, reviewUrl: "/review" } : { href: "/editor", reason: "human" }) }) });
 
-  registerMcpTools({ registerTool } as never, [def], { campaignId: "c", userId: "u", threadId: null, scopes: ["show:write"] });
+  registerMcpTools({ registerTool } as never, [def], { campaignId: "c", userId: "u", threadId: null, scopes: ["show:write"], locale: "uk" as const });
 
   const output = await registerTool.mock.calls[0][2]({});
 

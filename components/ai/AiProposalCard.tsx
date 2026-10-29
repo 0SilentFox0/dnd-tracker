@@ -58,7 +58,7 @@ function LossWarning({ before, after }: { before: RichDoc; after: RichDoc }) {
 
   if (Object.keys(lost).length === 0) return null;
 
-  return <p className="text-sm font-medium text-destructive">{t("proposal.loss", { lost: describeLost(lost) })}</p>;
+  return <p className="text-sm font-medium text-destructive">{t("proposal.loss", { lost: describeLost(lost, (kind, count) => t(`proposal.blocks.${kind}`, { count })) })}</p>;
 }
 
 function SlideView({ op }: { op: Extract<Op, { op: "addSlide" }> }) {

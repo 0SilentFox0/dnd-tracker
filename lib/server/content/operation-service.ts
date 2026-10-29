@@ -4,6 +4,9 @@ import "server-only";
 import { invalidateReference, ReferenceKind, type ReferenceKindValue } from "@/lib/cache/tags";
 import { API_ERRORS } from "@/lib/constants/api-errors";
 import { prisma } from "@/lib/db";
+import { DEFAULT_LOCALE, type Locale } from "@/lib/i18n/config";
+import { getRequestLocale } from "@/lib/i18n/request-locale";
+import { getTranslator } from "@/lib/i18n/translator";
 import { listTracks } from "@/lib/server/audio/track-store";
 import { assertCampaignRefs } from "@/lib/server/campaigns/campaign-refs";
 import { readCampaignRules, updateCampaignRules } from "@/lib/server/campaigns/rules";
@@ -73,7 +76,7 @@ async function owner(kind: OwnerKind, actor: Actor, ownerId: string) {
 }
 
 /** Shared HTTP/action operation. It owns authorization, parsing and the write lock. */
-export async function runContentOperation(operationId: ContentOperationId, actor: Actor, raw: unknown): Promise<unknown> {
+export async function runContentOperation(operationId: ContentOperationId, actor: Actor, raw: unknown, locale?: Locale): Promise<unknown> {
   const operation = CONTENT_OPERATIONS[operationId];
 
   assertCan(actor, operation.need);
@@ -127,8 +130,10 @@ export async function runContentOperation(operationId: ContentOperationId, actor
       case "skills.duplicate": {
         const source = await owned(await prisma.skill.findUnique({ where: { id: param("skillId") } }), actor, API_ERRORS.SKILL_NOT_FOUND);
 
+        const t = await getTranslator(locale ?? await getRequestLocale().catch(() => DEFAULT_LOCALE), "assistant");
+
         const skill = await prisma.skill.create({ data: {
-          campaignId: actor.campaignId, name: source.name.trim() ? `${source.name} (копія)` : "Скіл (копія)", description: source.description, icon: source.icon, image: source.image ?? null,
+          campaignId: actor.campaignId, name: source.name.trim() ? t("defaults.copyOf", { name: source.name }) : t("defaults.skillCopy"), description: source.description, icon: source.icon, image: source.image ?? null,
           spellId: source.spellId, spellGroupId: source.spellGroupId, grantedSpellId: source.grantedSpellId, mainSkillId: source.mainSkillId, spellNewSpellId: source.grantedSpellId, abilities: abilitiesJson(skillAbilities(source)),
         }, include: { spell: true, spellGroup: true, grantedSpell: true, mainSkill: true } });
 

@@ -7,7 +7,7 @@ vi.mock("@/lib/server/scenario/search", () => ({
   searchScenarioPages: vi.fn(async () => [{ pageId: "p1", pageTitle: "Монастир", sectionId: "s1", snippet: "…дзвони…" }]),
 }));
 
-const ctx = { campaignId: "camp1", userId: "dm", scopes: ["ai"] as const, threadId: null };
+const ctx = { campaignId: "camp1", userId: "dm", scopes: ["ai"] as const, threadId: null, locale: "uk" as const };
 
 const content = {
   legend: [{ kind: "read", label: "Читати" }],

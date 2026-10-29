@@ -64,7 +64,7 @@ it("assistant source preview preserves FOR SHARE NOWAIT and refuses a busy sourc
 
   const prepare = action.prepare;
 
-  const caller = { actor: { campaignId: "target", userId: "dm", isDM: true, via: "session" as const, scopes: null }, channel: "chat" as const, tokenId: null, threadId: "thread" };
+  const caller = { actor: { campaignId: "target", userId: "dm", isDM: true, via: "session" as const, scopes: null }, channel: "chat" as const, tokenId: null, threadId: "thread", locale: "uk" as const };
 
   await expect(runContentWriteContext("target", db, () => prepare(caller, { body: { apply: [], ignore: [] } }))).rejects.toBe(busy);
   expect(query).toHaveBeenCalledExactlyOnceWith(expect.any(Array), "source");

@@ -1,6 +1,6 @@
 import type { AssistantActionDef } from "../types";
 import { COMPENDIUM_NEED, COMPENDIUM_READ_INPUTS, readCompendiumSummary } from "./compendium-reads";
-import { buildAssistantHandoff, HANDOFF_INPUTS, HANDOFF_REASONS } from "./handoff-navigation";
+import { buildAssistantHandoff, HANDOFF_INPUTS } from "./handoff-navigation";
 
 import "server-only";
 
@@ -10,8 +10,8 @@ export { buildAssistantHandoff, HANDOFF_INPUTS } from "./handoff-navigation";
 const handoffs: AssistantActionDef[] = Object.entries(HANDOFF_INPUTS).map(
   ([kind, input]) => ({
     id: `handoff.${kind}`,
-    title: `Відкрити у застосунку: ${kind}`,
-    description: HANDOFF_REASONS[kind as keyof typeof HANDOFF_INPUTS],
+    title: `Open in the app: ${kind}`,
+    description: `Returns a link to open ${kind} in the app; the human finishes the step there.`,
     input,
     need: {
       access: "dm",
@@ -35,7 +35,7 @@ const handoffs: AssistantActionDef[] = Object.entries(HANDOFF_INPUTS).map(
     },
     effect: "handoff",
     execute: async (caller, raw) =>
-      buildAssistantHandoff(caller.actor, kind, raw),
+      buildAssistantHandoff(caller.actor, kind, raw, caller.locale),
   })
 );
 
@@ -45,15 +45,15 @@ export const HANDOFF_ACTIONS: readonly AssistantActionDef[] = [
   ...(["options", "reports", "entries"] as const).map(
     (operation): AssistantActionDef => ({
       id: `compendium.${operation}`,
-      title: `Компендіум: ${operation}`,
+      title: `Compendium: ${operation}`,
       description:
-        "Дозволений стислий підсумок; повні матеріали та примітки вибирає людина у застосунку.",
+        "A permitted short summary; the human picks full materials and notes in the app.",
       input: COMPENDIUM_READ_INPUTS[operation],
       need: COMPENDIUM_NEED,
       effect: "read",
       handoff: async (caller) =>
         caller.actor.via === "token"
-          ? buildAssistantHandoff(caller.actor, "source-notes")
+          ? buildAssistantHandoff(caller.actor, "source-notes", {}, caller.locale)
           : null,
       execute: (caller, raw) =>
         readCompendiumSummary(caller.actor, operation, raw),

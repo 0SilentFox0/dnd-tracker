@@ -25,7 +25,7 @@ export function benchmarkFixtures(db: PrismaClient, marker: string, size: keyof 
 
   const spellId = `${prefix}-spell-0`;
 
-  const caller: AssistantCaller = { actor: { userId, campaignId, isDM: true, via: "session", scopes: null }, channel: "chat", tokenId: null, threadId: null };
+  const caller: AssistantCaller = { actor: { userId, campaignId, isDM: true, via: "session", scopes: null }, channel: "chat", tokenId: null, threadId: null, locale: "uk" };
 
   let ownsUser = false;
 

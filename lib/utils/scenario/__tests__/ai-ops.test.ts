@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 
-import { applyAiOps, resolveAiOps } from "@/lib/utils/scenario/ai-ops";
+import { makeT } from "@/lib/i18n/test/mock-t";
+import { applyAiOps, resolveAiOps as resolve } from "@/lib/utils/scenario/ai-ops";
 import type { RichDoc, ScenarioContent } from "@/types/scenario";
 
 const doc = (text: string): RichDoc => ({ type: "doc", content: [{ type: "paragraph", content: [{ type: "text", text }] }] });
@@ -12,6 +13,10 @@ const content = (): ScenarioContent => ({
     { id: "s2", title: "Крипта", played: false, rows: [] },
   ],
 });
+
+const t = makeT("assistant");
+
+const resolveAiOps = (c: ScenarioContent, ops: Parameters<typeof resolve>[1]) => resolve(c, ops, t);
 
 const ok = <T extends { ok: boolean }>(r: T) => {
   if (!r.ok) throw new Error(JSON.stringify(r));
@@ -41,7 +46,7 @@ describe("resolveAiOps", () => {
     const r = resolveAiOps(c, [{ op: "replaceRow", sectionId: "s1", rowId: "r1", story: "нове" }]);
 
     expect(r).toMatchObject({ ok: false });
-    expect(!r.ok && r.error).toContain("вручну");
+    expect(!r.ok && r.error).toEqual({ message: "assistant.scenarioOps.lossyRow", params: { id: "r1" } });
   });
 
   describe("втрата структурних блоків", () => {
@@ -61,8 +66,9 @@ describe("resolveAiOps", () => {
       const r = resolveAiOps(rich(), [{ op: "replaceRow", sectionId: "s1", rowId: "r1", story: "Коротко" }]);
 
       expect(r.ok).toBe(false);
-      expect(!r.ok && r.error).toContain("3 виноски");
-      expect(!r.ok && r.error).toContain("1 секрет");
+      expect(!r.ok && r.error.message).toBe("assistant.scenarioOps.removal");
+      expect(!r.ok && r.error.params?.lost).toContain('assistant.blocks.callout {"count":3}');
+      expect(!r.ok && r.error.params?.lost).toContain('assistant.blocks.secret {"count":1}');
     });
 
     it("allowRemoval: true дозволяє", () => {
@@ -82,7 +88,7 @@ describe("resolveAiOps", () => {
 
       const r = resolveAiOps(c, [{ op: "replaceRow", sectionId: "s1", rowId: "r1", notes: "відкрито" }]);
 
-      expect(!r.ok && r.error).toContain("1 секрет");
+      expect(!r.ok && r.error.params?.lost).toContain('assistant.blocks.secret {"count":1}');
     });
   });
 

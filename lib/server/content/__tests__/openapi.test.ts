@@ -109,10 +109,10 @@ describe("buildOpenApi", () => {
     expect(requiredOp("units.get").op.responses).toHaveProperty("404");
   });
 
-  it("abilities.get: kind — enum власників; skill-trees під тегом «Скіли»; ids має опис", () => {
+  it("abilities.get: kind — enum власників; skill-trees під тегом «Skills»; ids має опис", () => {
     expect(requiredOp("abilities.get").op.parameters).toEqual(expect.arrayContaining([expect.objectContaining({ name: "kind", schema: { type: "string", enum: ["skill", "race", "class", "artifact", "artifactSet", "unit", "feat"] } })]));
-    expect(requiredOp("skill-trees.save").op.tags).toEqual(["Скіли"]);
-    expect(requiredOp("skill-trees.list").op.tags).toEqual(["Скіли"]);
+    expect(requiredOp("skill-trees.save").op.tags).toEqual(["Skills"]);
+    expect(requiredOp("skill-trees.list").op.tags).toEqual(["Skills"]);
     expect(requiredOp("spells.list").op.parameters).toEqual(expect.arrayContaining([expect.objectContaining({ name: "ids", schema: expect.objectContaining({ description: expect.any(String) }) })]));
   });
 

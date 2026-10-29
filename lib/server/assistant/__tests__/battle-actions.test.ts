@@ -35,7 +35,7 @@ vi.mock("@/lib/server/battles/pipeline-deps", () => ({ defaultPipelineDeps: {
 }, defaultReadDeps: {} }));
 vi.mock("@/lib/server/content/write", () => ({ withCampaignContentWrite: async (_id: string, callback: () => unknown) => callback() }));
 
-const caller: AssistantCaller = { actor: { campaignId: "c", userId: "u", isDM: true, via: "session", scopes: null }, channel: "chat", threadId: null, tokenId: null };
+const caller: AssistantCaller = { actor: { campaignId: "c", userId: "u", isDM: true, via: "session", scopes: null }, channel: "chat", threadId: null, tokenId: null, locale: "uk" as const };
 
 const action = (name: string) => BATTLE_ACTIONS.find(a => a.id === `battles.${name}`) as AssistantWriteAction;
 

@@ -49,7 +49,7 @@ let threadId: string;
 
 let time = Date.now();
 
-const caller = (): AssistantCaller => ({ actor: { campaignId, userId: marker, isDM: true, via: "session", scopes: null }, channel: "chat", threadId, tokenId: null });
+const caller = (): AssistantCaller => ({ actor: { campaignId, userId: marker, isDM: true, via: "session", scopes: null }, channel: "chat", threadId, tokenId: null, locale: "uk" as const });
 
 const store = createAssistantRunStore({ db, now: () => new Date(time) });
 

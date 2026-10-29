@@ -8,7 +8,7 @@ import { CONTENT_TOOLS } from "../content";
 import { type AiToolContext,runTool } from "../define";
 import { toolsFor } from "../index";
 
-const ctx: AiToolContext = { campaignId: "c", userId: "dm", scopes: ["content:write"], threadId: null, caller: { actor: { campaignId: "c", userId: "dm", isDM: true, via: "token", scopes: ["content:write"] }, tokenId: "verified", channel: "mcp", threadId: null } };
+const ctx: AiToolContext = { campaignId: "c", userId: "dm", scopes: ["content:write"], threadId: null, caller: { actor: { campaignId: "c", userId: "dm", isDM: true, via: "token", scopes: ["content:write"] }, tokenId: "verified", channel: "mcp", threadId: null, locale: "uk" as const }, locale: "uk" as const };
 
 function toolOf(name: string) {
   const found = CONTENT_TOOLS.find(t => t.name === name);

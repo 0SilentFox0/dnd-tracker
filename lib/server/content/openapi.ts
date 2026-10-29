@@ -10,12 +10,12 @@ import { NEED } from "@/lib/utils/api/need";
 const BASE = "/api/campaigns/{id}";
 
 const ERROR_RESPONSES: Record<number, { id: string; description: string }> = {
-  400: { id: "BadRequest", description: "Невалідний запит" },
-  401: { id: "Unauthorized", description: "Немає або недійсний токен" },
-  403: { id: "Forbidden", description: "Немає прав або токен іншої кампанії" },
-  404: { id: "NotFound", description: "Не знайдено в цій кампанії" },
-  409: { id: "Conflict", description: "Конфлікт" },
-  422: { id: "Unprocessable", description: "Недійсні дані (іконка тощо)" },
+  400: { id: "BadRequest", description: "Invalid request" },
+  401: { id: "Unauthorized", description: "Missing or invalid token" },
+  403: { id: "Forbidden", description: "No access, or the token belongs to another campaign" },
+  404: { id: "NotFound", description: "Not found in this campaign" },
+  409: { id: "Conflict", description: "Conflict" },
+  422: { id: "Unprocessable", description: "Invalid data (icon etc.)" },
 };
 
 const BASE_ERRORS = [400, 401, 403];
@@ -51,11 +51,11 @@ function resourceSpecs(r: AnyContentResource): OpSpec[] {
   const base = { tag: r.label, response: "item" } as const;
 
   return [
-    { ...base, id: `${r.kind}.list`, method: "GET", path: r.path, summary: `${r.label}: список`, need: NEED.read(r.access.list), query: r.schemas.query, response: "list", notFound: false },
-    { ...base, id: `${r.kind}.create`, method: "POST", path: r.path, summary: `${r.label}: створити`, description: r.description, need: NEED.write, body: r.schemas.apiCreate ?? r.schemas.create, errors: r.errors, status: 201, notFound: false },
-    { ...base, id: `${r.kind}.get`, method: "GET", path: item, summary: `${r.label}: один запис`, need: NEED.read(r.access.item) },
-    { ...base, id: `${r.kind}.update`, method: "PATCH", path: item, summary: `${r.label}: змінити`, need: NEED.write, body: r.schemas.update, errors: r.errors },
-    { ...base, id: `${r.kind}.delete`, method: "DELETE", path: item, summary: `${r.label}: видалити`, need: NEED.write, response: "ok", errors: r.errors },
+    { ...base, id: `${r.kind}.list`, method: "GET", path: r.path, summary: `${r.label}: list`, need: NEED.read(r.access.list), query: r.schemas.query, response: "list", notFound: false },
+    { ...base, id: `${r.kind}.create`, method: "POST", path: r.path, summary: `${r.label}: create`, description: r.description, need: NEED.write, body: r.schemas.apiCreate ?? r.schemas.create, errors: r.errors, status: 201, notFound: false },
+    { ...base, id: `${r.kind}.get`, method: "GET", path: item, summary: `${r.label}: one record`, need: NEED.read(r.access.item) },
+    { ...base, id: `${r.kind}.update`, method: "PATCH", path: item, summary: `${r.label}: update`, need: NEED.write, body: r.schemas.update, errors: r.errors },
+    { ...base, id: `${r.kind}.delete`, method: "DELETE", path: item, summary: `${r.label}: delete`, need: NEED.write, response: "ok", errors: r.errors },
   ];
 }
 
@@ -105,7 +105,7 @@ export function buildOpenApi(): OpenApiDocument {
     const operation: OpenApiOperation = {
       operationId: spec.id,
       summary: spec.summary,
-      ...(spec.description || spec.need.access === "dm" ? { description: [spec.description, spec.need.access === "dm" ? "Лише ДМ." : ""].filter(Boolean).join("\n") } : {}),
+      ...(spec.description || spec.need.access === "dm" ? { description: [spec.description, spec.need.access === "dm" ? "DM only." : ""].filter(Boolean).join("\n") } : {}),
       tags: [spec.tag],
       "x-scopes": [scope],
       ...((spec.pathEnums || spec.query) && { parameters: [...pathParams(p, spec.pathEnums).filter((param) => "schema" in param && param.schema && "enum" in param.schema), ...queryParams(spec.query)] }),
@@ -131,10 +131,10 @@ export function buildOpenApi(): OpenApiDocument {
     components: {
       responses: {
         ...Object.fromEntries(Object.values(ERROR_RESPONSES).map(({ id, description }) => [id, { description, content: { "application/json": { schema: ref("Error") } } }])),
-        ...Object.fromEntries(Object.values(SUCCESS_RESPONSES).map(({ id, schema, contentType = "application/json" }) => [id, { description: "Успіх", content: { [contentType]: { schema } } }])),
+        ...Object.fromEntries(Object.values(SUCCESS_RESPONSES).map(({ id, schema, contentType = "application/json" }) => [id, { description: "Success", content: { [contentType]: { schema } } }])),
       },
-      parameters: { CampaignId: { name: "id", in: "path", required: true, schema: { type: "string" }, description: "Id кампанії" } },
-      securitySchemes: { bearerAuth: { type: "http", scheme: "bearer", description: "Токен з /dm/ai (права content:read / content:write)." } },
+      parameters: { CampaignId: { name: "id", in: "path", required: true, schema: { type: "string" }, description: "Campaign id" } },
+      securitySchemes: { bearerAuth: { type: "http", scheme: "bearer", description: "Token from /dm/ai (content:read / content:write scopes)." } },
       schemas: {
         ...toJsonSchemas(entries),
         ContentItem: { type: "object", required: ["id", "name"], properties: { id: { type: "string" }, name: { type: "string" } }, additionalProperties: true },

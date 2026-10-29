@@ -2,7 +2,7 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import { prisma } from "@/lib/db";
 
-const caller = { actor: { campaignId: "camp1", userId: "dm", isDM: true, via: "session" as const, scopes: null }, channel: "chat" as const, tokenId: null, threadId: null };
+const caller = { actor: { campaignId: "camp1", userId: "dm", isDM: true, via: "session" as const, scopes: null }, channel: "chat" as const, tokenId: null, threadId: null, locale: "uk" as const };
 
 vi.mock("@/lib/server/assistant/catalog", () => ({ assistantCatalog: { listActions: () => [{ id: "campaign.read" }] } }));
 vi.mock("@/lib/server/assistant/authorize", () => ({ revalidateAssistantCaller: vi.fn(async (c) => c.actor) }));

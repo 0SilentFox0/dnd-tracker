@@ -7,7 +7,7 @@ vi.mock("@/lib/ai/images", () => ({ generateSlideImage: provider }));
 import { type AiToolContext,runTool } from "../define";
 import { proposeSceneSlideTool } from "../propose-slide";
 
-const ctx: AiToolContext = { campaignId: "c", userId: "dm", scopes: ["show:write"], threadId: null, caller: { actor: { campaignId: "c", userId: "dm", isDM: true, via: "session", scopes: null }, tokenId: null, channel: "chat", threadId: null } };
+const ctx: AiToolContext = { campaignId: "c", userId: "dm", scopes: ["show:write"], threadId: null, caller: { actor: { campaignId: "c", userId: "dm", isDM: true, via: "session", scopes: null }, tokenId: null, channel: "chat", threadId: null, locale: "uk" as const }, locale: "uk" as const };
 
 it("legacy paid alias fails closed before provider, regardless of model runId", async () => {
   for (const input of [{ pageId: "p", prompt: "Forest" }, { pageId: "p", prompt: "Forest", runId: "model", explicitRequest: true }]) {

@@ -7,7 +7,7 @@ vi.mock("@/lib/db", () => ({ prisma: {
 import { assistantStatusTool } from "../assistant-status";
 import { type AiToolContext,runTool } from "../define";
 
-const ctx: AiToolContext = { campaignId: "c", userId: "dm", threadId: null, scopes: ["show:read"], caller: { actor: { campaignId: "c", userId: "dm", isDM: true, via: "session", scopes: null }, channel: "chat", tokenId: null, threadId: null } };
+const ctx: AiToolContext = { campaignId: "c", userId: "dm", threadId: null, scopes: ["show:read"], caller: { actor: { campaignId: "c", userId: "dm", isDM: true, via: "session", scopes: null }, channel: "chat", tokenId: null, threadId: null, locale: "uk" as const }, locale: "uk" as const };
 
 it("status still returns an authorized durable receipt after preview redaction", async () => {
   const text = await runTool(assistantStatusTool, ctx, { intentId: "i" });

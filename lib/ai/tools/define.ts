@@ -6,13 +6,14 @@ import { project, publicToolData } from "./projection";
 import "server-only";
 import { AI_LIMITS, type ApiTokenScope } from "@/lib/constants/ai";
 import { API_ERRORS, type ErrorParams } from "@/lib/constants/api-errors";
+import type { Locale } from "@/lib/i18n/config";
 import { translateIssue } from "@/lib/i18n/translate-issue";
 import { authorizeLegacyAssistantRead } from "@/lib/server/assistant/authorize";
 import type { AssistantCaller } from "@/lib/server/assistant/types";
 import { ContentError } from "@/lib/server/content/errors";
 import { requestTranslator, translateErrorBody } from "@/lib/utils/api/translate-error";
 
-export type AiToolContext = { caller?: AssistantCaller; toolCallId?: string; campaignId: string; userId: string; scopes: readonly ApiTokenScope[]; threadId: string | null; abortSignal?: AbortSignal; usage?: { images: number } };
+export type AiToolContext = { caller?: AssistantCaller; toolCallId?: string; campaignId: string; userId: string; scopes: readonly ApiTokenScope[]; threadId: string | null; locale: Locale; abortSignal?: AbortSignal; usage?: { images: number } };
 
 export class AiToolError extends Error {
   constructor(

@@ -12,6 +12,7 @@ import { toAiSdkTools } from "@/lib/ai/tools";
 import { publicToolData } from "@/lib/ai/tools/projection";
 import { AI_LIMITS, API_TOKEN_SCOPES } from "@/lib/constants/ai";
 import { API_ERRORS } from "@/lib/constants/api-errors";
+import { getRequestLocale } from "@/lib/i18n/request-locale";
 import { chatCaller } from "@/lib/server/assistant/caller";
 import { beginAssistantRun, createRunSignal, finishAssistantRun, isAssistantRunCancelled, recordAssistantRunUsage, RUN_GRACE_MS } from "@/lib/server/assistant/runs";
 import { ContentError } from "@/lib/server/content/errors";
@@ -29,7 +30,7 @@ export async function runChat({ campaignId, userId, threadId, requestId, text, f
 
   const t = await requestTranslator();
 
-  const caller = chatCaller(campaignId, userId, threadId);
+  const caller = chatCaller(campaignId, userId, threadId, await getRequestLocale());
 
   let claim;
 
@@ -89,7 +90,7 @@ export async function runChat({ campaignId, userId, threadId, requestId, text, f
       model = createModel(thread.provider, apiKey, thread.model);
     }
 
-    const tools = toAiSdkTools({ campaignId, userId, scopes: API_TOKEN_SCOPES, threadId, abortSignal: toolSignal, caller });
+    const tools = toAiSdkTools({ campaignId, userId, scopes: API_TOKEN_SCOPES, threadId, abortSignal: toolSignal, caller, locale: caller.locale });
 
     const [stored, instructions] = await Promise.all([
       loadMessages(threadId, AI_LIMITS.historyMessages),

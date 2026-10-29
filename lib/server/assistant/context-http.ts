@@ -6,6 +6,7 @@ import { buildInstructions } from "@/lib/ai/context/prompt";
 import { loadThread } from "@/lib/ai/threads";
 import { AI_BODY_LIMITS, AI_LIMITS } from "@/lib/constants/ai";
 import { API_ERRORS, type ErrorParams } from "@/lib/constants/api-errors";
+import { getRequestLocale } from "@/lib/i18n/request-locale";
 import { assistantContextPreviewSchema } from "@/lib/schemas/ai";
 import { ContentError } from "@/lib/server/content/errors";
 import { requireDM } from "@/lib/utils/api/api-auth";
@@ -61,7 +62,7 @@ return response; }
 
    let disclosure:AssistantContextDisclosure|undefined;
 
-   await buildInstructions({campaignId,mode:thread.mode,pageId:thread.scenarioPageId,focus:body.focus,caller:{actor,channel:"chat",tokenId:null,threadId:thread.id},...(body.sessionContext?.sourceNoteKeys.length&&{sourceNoteSelection:{source:"session-ui" as const,selectedKeys:body.sessionContext.sourceNoteKeys}}),onDisclosure:value=>{ disclosure=value; }});
+   await buildInstructions({campaignId,mode:thread.mode,pageId:thread.scenarioPageId,focus:body.focus,caller:{actor,channel:"chat",tokenId:null,threadId:thread.id,locale:await getRequestLocale()},...(body.sessionContext?.sourceNoteKeys.length&&{sourceNoteSelection:{source:"session-ui" as const,selectedKeys:body.sessionContext.sourceNoteKeys}}),onDisclosure:value=>{ disclosure=value; }});
 
    return json({...disclosure,provider:thread.provider,model:thread.model,historyLimit:AI_LIMITS.historyMessages});
   }catch(error){ if(error instanceof ContentError)return errorJson({error:error.message,params:error.params},error.status);

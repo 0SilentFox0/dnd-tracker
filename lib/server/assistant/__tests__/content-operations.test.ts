@@ -8,7 +8,7 @@ import { createAssistantExecutor } from "@/lib/server/assistant/execute";
 import type { AssistantCaller } from "@/lib/server/assistant/types";
 import { CONTENT_OPERATIONS } from "@/lib/server/content/operations";
 
-const caller: AssistantCaller = { actor: { campaignId: "campaign", userId: "dm", isDM: true, via: "session", scopes: null }, channel: "chat", tokenId: null, threadId: "thread" };
+const caller: AssistantCaller = { actor: { campaignId: "campaign", userId: "dm", isDM: true, via: "session", scopes: null }, channel: "chat", tokenId: null, threadId: "thread", locale: "uk" as const };
 
 function fixture() {
   const { db, state } = executorDatabase();
@@ -78,7 +78,7 @@ describe("shared CONTENT_OPERATIONS adapters", () => {
 
     const result = await f.executor.dispatchAction(caller, { actionId: "content.import", requestId: "import", input: { kind: "units", body: { rows: [{ name: "Гоблін" }, {}] } } });
 
-    expect(result).toMatchObject({ kind: "result", result: { data: { counts: { created: 1, error: 1 }, results: [expect.anything(), { row: 2, status: "error", issues: expect.anything() }] }, warnings: [expect.stringContaining("частково")] } });
+    expect(result).toMatchObject({ kind: "result", result: { data: { counts: { created: 1, error: 1 }, results: [expect.anything(), { row: 2, status: "error", issues: expect.anything() }] }, warnings: ["assistant.warnings.importPartialDone"] } });
     expect(f.writes()).toBe(1);
   });
 
@@ -100,7 +100,7 @@ describe("shared CONTENT_OPERATIONS adapters", () => {
 
     const preview = f.state.intents.get(pending.intent.id)?.preview as { warnings: string[] };
 
-    expect(preview.warnings.join(" ")).toContain("вручну");
+    expect(preview.warnings.join(" ")).toContain("assistant.warnings.manualSetup");
   });
 });
 

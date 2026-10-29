@@ -32,7 +32,7 @@ describe("AiProposalCard", () => {
     const op = { ...base.ops[0], before: { story: { type: "doc", content: [callout, callout, callout] }, notes: doc("") } };
 
     render(<AiProposalCard proposal={{ ...base, ops: [op], status: "pending" } as never} actions={actions()} busy={false} campaignId="c1" />);
-    expect(screen.getByText('ai.proposal.loss {"lost":"3 виноски"}')).toBeTruthy();
+    expect(screen.getByText('ai.proposal.loss {"lost":"ai.proposal.blocks.callout {\\"count\\":3}"}')).toBeTruthy();
   });
 
   it("addSlide: прев'ю, ціль і «Додати слайд»", () => {

@@ -116,6 +116,15 @@
       "notes": "notes"
     },
     "loss": "Warning: the edit removes {lost}",
+    "blocks": {
+      "callout": "{count, plural, one {# callout} other {# callouts}}",
+      "readAloud": "{count, plural, one {# read-aloud block} other {# read-aloud blocks}}",
+      "say": "{count, plural, one {# line of dialogue} other {# lines of dialogue}}",
+      "table": "{count, plural, one {# table} other {# tables}}",
+      "token": "{count, plural, one {# token} other {# tokens}}",
+      "mention": "{count, plural, one {# mention} other {# mentions}}",
+      "secret": "{count, plural, one {# secret} other {# secrets}}"
+    },
     "slideAlt": "Slide",
     "intoDeck": "Into the deck “{title}”",
     "newDeck": "A new deck for the scene",

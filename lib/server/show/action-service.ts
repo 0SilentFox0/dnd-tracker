@@ -3,9 +3,12 @@ import "server-only";
 import { isKnownImageModel } from "@/lib/constants/ai";
 import { API_ERRORS } from "@/lib/constants/api-errors";
 import { prisma } from "@/lib/db";
+import { DEFAULT_LOCALE, type Locale } from "@/lib/i18n/config";
+import { getTranslator } from "@/lib/i18n/translator";
 import { readSlides } from "@/lib/schemas/show";
 import { fullRowDigest, stampDigest } from "@/lib/server/assistant/digest";
 import { jsonContent, requestDigest } from "@/lib/server/assistant/json";
+import { resultLabel } from "@/lib/server/assistant/result-labels";
 import type { ActionExecutionContext, ActionPreview, ActionResult, AssistantCaller, JsonValue } from "@/lib/server/assistant/types";
 import { assertCan } from "@/lib/server/content/access";
 import { ContentError } from "@/lib/server/content/errors";
@@ -73,6 +76,8 @@ export async function prepareShowAction(caller: AssistantCaller, operation: stri
 
     const snapshot = await state(caller.actor, input);
 
+    const t = await getTranslator(caller.locale, "assistant");
+
     const body = input.body ?? {};
 
     if (operation === "decks.save" && snapshot.deck?.updatedAt.toISOString() !== body.expectedUpdatedAt) throw conflict();
@@ -85,7 +90,7 @@ export async function prepareShowAction(caller: AssistantCaller, operation: stri
       if (slide.trackId && !snapshot.tracks.some(t => t.id === slide.trackId)) throw new ContentError(API_ERRORS.TRACK_NOT_FOUND, 404);
     }
 
-    const target = { domain: "show", id: input.deckId ?? caller.actor.campaignId, name: snapshot.deck?.title ?? "Показ" };
+    const target = { domain: "show", id: input.deckId ?? caller.actor.campaignId, name: snapshot.deck?.title ?? t("results.show") };
 
     const removed = operation === "decks.save" && readSlides(snapshot.deck?.slides).some(old => {
       const next = (body.slides as Slide[]).find(s => s.id === old.id);
@@ -93,12 +98,12 @@ export async function prepareShowAction(caller: AssistantCaller, operation: stri
       return !next || old.imageUrl !== next.imageUrl || (["title", "caption", "trackId"] as const).some(k => old[k] && !next[k]);
     });
 
-    return { summary: `Показ: ${operation}`, targets: [target], changes: [{ target, path: operation, before: operation === "decks.save" ? safeMedia(snapshot.deck && toSlideDeck(snapshot.deck)) : null, after: jsonContent(input) }], warnings: [], effects: [{ kind: operation === "generate" ? "paid" : operation === "decks.delete" || operation === "discard" || removed ? "delete" : "update", targets: [target], description: operation }], preconditions: { fingerprint: requestDigest(jsonContent(snapshot)) } };
+    return { summary: t("summary.show", { operation }), targets: [target], changes: [{ target, path: operation, before: operation === "decks.save" ? safeMedia(snapshot.deck && toSlideDeck(snapshot.deck)) : null, after: jsonContent(input) }], warnings: [], effects: [{ kind: operation === "generate" ? "paid" : operation === "decks.delete" || operation === "discard" || removed ? "delete" : "update", targets: [target], description: operation }], preconditions: { fingerprint: requestDigest(jsonContent(snapshot)) } };
   });
 }
 
 /** Shared native/actor writer. Media has already been prepared outside the transaction. */
-export async function runShowOperation(actor: Actor, operation: string, input: ShowInput, expected?: JsonValue, ctx?: ActionExecutionContext): Promise<ActionResult> {
+export async function runShowOperation(actor: Actor, operation: string, input: ShowInput, expected?: JsonValue, ctx?: ActionExecutionContext, locale: Locale = ctx?.caller.locale ?? DEFAULT_LOCALE): Promise<ActionResult> {
   const read = ["get", "decks.list", "decks.get"].includes(operation);
 
   const run = async (): Promise<ActionResult> => {
@@ -112,7 +117,7 @@ export async function runShowOperation(actor: Actor, operation: string, input: S
 
     const campaignId = actor.campaignId;
 
-    const affected = [{ domain: "show", id: input.deckId ?? campaignId, name: snapshot.deck?.title ?? "Показ" }];
+    const affected = [{ domain: "show", id: input.deckId ?? campaignId, name: snapshot.deck?.title ?? resultLabel(locale, "show") }];
 
     const result = (data: unknown): ActionResult => ({ data: safeMedia(data), affected, warnings: [] });
 

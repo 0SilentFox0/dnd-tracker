@@ -3,6 +3,7 @@ import { contentDeleteCascades } from "./content-dependencies";
 import { jsonContent } from "./content-snapshot";
 
 import { API_ERRORS } from "@/lib/constants/api-errors";
+import type { Translator } from "@/lib/i18n/translator";
 import { ContentError } from "@/lib/server/content/errors";
 import type { ContentOperationId } from "@/lib/server/content/operation-service";
 import { mergeRules, parseRules, RulesetPatchSchema } from "@/lib/utils/rules/schema";
@@ -12,7 +13,7 @@ type Row = Record<string, unknown>;
 const object = (value: unknown): Row => value && typeof value === "object" && !Array.isArray(value) ? value as Row : {};
 
 /** Read-only projections over the same uncached, locked rows used by the guard. */
-export function operationPreview(id: ContentOperationId, input: Row, state: unknown): { changes: FieldChange[]; targets: TargetRef[] } | null {
+export function operationPreview(id: ContentOperationId, input: Row, t: Translator, state: unknown): { changes: FieldChange[]; targets: TargetRef[] } | null {
   const root = object(state), tables = object(root.tables), body = object(input.body);
 
   const rows = (key: string): Row[] => Array.isArray(tables[key]) ? tables[key] as Row[] : [];
@@ -34,7 +35,7 @@ export function operationPreview(id: ContentOperationId, input: Row, state: unkn
   switch (id) {
     case "skills.duplicate": { const row = owned("skills", "skillId");
 
- field("skills", row, "name", String(row.name).trim() ? `${row.name} (копія)` : "Скіл (копія)"); break; }
+ field("skills", row, "name", String(row.name).trim() ? t("defaults.copyOf", { name: String(row.name) }) : t("defaults.skillCopy")); break; }
     case "spells.remove-from-group": field("spells", owned("spells", "spellId"), "groupId", null); break;
     case "spell-groups.remove-all-spells": {
       owned("spellGroups", "groupId");
@@ -65,7 +66,7 @@ export function operationPreview(id: ContentOperationId, input: Row, state: unkn
 
       if (!merged.ok) throw new ContentError(API_ERRORS.INVALID_RULES, 400, merged.issues);
 
-      const row = { ...before, id: "rules", name: "Правила" };
+      const row = { ...before, id: "rules", name: t("results.rules") };
 
       for (const key of Object.keys(body)) field("rules", row, key, merged.rules[key as keyof typeof merged.rules]);
       break;

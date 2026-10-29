@@ -9,10 +9,12 @@ import { characterReferenceHash } from "./reference-state";
 import "server-only";
 import { API_ERRORS } from "@/lib/constants/api-errors";
 import { prisma } from "@/lib/db";
+import { DEFAULT_LOCALE, type Locale } from "@/lib/i18n/config";
 import { putGoalsSchema } from "@/lib/schemas/character-goals";
 import { putNotesSchema } from "@/lib/schemas/character-notes";
 import { createTokenSchema } from "@/lib/schemas/character-tokens";
 import { actionResult, requestDigest } from "@/lib/server/assistant/json";
+import { resultLabel } from "@/lib/server/assistant/result-labels";
 import type { ActionResult } from "@/lib/server/assistant/types";
 import { createCharacterSchema } from "@/lib/server/characters/core/create-character-schema";
 import { updateCharacterSchema } from "@/lib/server/characters/core/update-character-schema";
@@ -31,7 +33,6 @@ export const CHARACTER_INPUTS = {
   "tokens.create": createTokenSchema.extend(characterIdSchema.shape), "tokens.delete": characterIdSchema.extend({ tokenId: z.string().min(1).max(100) })
 };
 export const characterReads = new Set(["list", "get", "roster"]);
-export const characterResult = actionResult("characters", "Персонажі");
 export async function characterState(actor: Actor, input: Record<string, unknown>) {
   await actorDmAccess(actor);
 
@@ -56,7 +57,9 @@ async function characterFingerprint(actor: Actor, input: Record<string, unknown>
   return { characters, campaign, refsHash: await characterReferenceHash(actor.campaignId) };
 }
 
-export async function runCharacterOperation(actor: Actor, operation: string, raw: Record<string, unknown>, expected?: string): Promise<ActionResult> {
+export async function runCharacterOperation(actor: Actor, operation: string, raw: Record<string, unknown>, expected?: string, locale: Locale = DEFAULT_LOCALE): Promise<ActionResult> {
+  const characterResult = actionResult("characters", resultLabel(locale, "characters"));
+
   const schema = CHARACTER_INPUTS[operation as keyof typeof CHARACTER_INPUTS];
 
   const core = CHARACTER_OPERATIONS[operation];

@@ -9,6 +9,7 @@ import "server-only";
 import { AI_BODY_LIMITS } from "@/lib/constants/ai";
 import { API_ERRORS, type ErrorParams } from "@/lib/constants/api-errors";
 import { prisma } from "@/lib/db";
+import { getRequestLocale } from "@/lib/i18n/request-locale";
 import { assistantPolicySchema } from "@/lib/schemas/assistant";
 import { ContentError } from "@/lib/server/content/errors";
 import { requireAuth, requireDM } from "@/lib/utils/api/api-auth";
@@ -63,7 +64,7 @@ export function assistantRoute(mode: RouteMode) {
 
       if (access instanceof NextResponse) return privateResponse(access);
 
-      const caller = chatCaller(campaignId, access.userId, null);
+      const caller = chatCaller(campaignId, access.userId, null, await getRequestLocale());
 
       if (!receiptRateChecked) {
         const rate = await checkRateLimit({ userId: access.userId, scope: `assistant-${mode}`, battleId: campaignId, limit: mutation ? 20 : 120, windowSeconds: 60, memoryFallback: true });
@@ -103,7 +104,7 @@ export function assistantRoute(mode: RouteMode) {
 
       if (mode === "receipt") return json(await readReceipt(caller, intentId));
 
-      if (mode === "confirm") return json(await confirmIntent(caller.actor, intentId));
+      if (mode === "confirm") return json(await confirmIntent(caller.actor, intentId, caller.locale));
 
       return json(await rejectIntent(caller, intentId));
     } catch (error) {

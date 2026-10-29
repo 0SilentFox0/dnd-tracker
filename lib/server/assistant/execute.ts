@@ -13,6 +13,7 @@ import type { ActionRequest, AssistantCaller, DispatchResult, ReceiptDto } from 
 import "server-only";
 import { API_ERRORS } from "@/lib/constants/api-errors";
 import { prisma } from "@/lib/db";
+import { DEFAULT_LOCALE, type Locale } from "@/lib/i18n/config";
 import { actionPreviewSchema, actionResultSchema } from "@/lib/schemas/assistant";
 import { ContentError, parseInput } from "@/lib/server/content/errors";
 import { runContentWriteContext } from "@/lib/server/content/write-context";
@@ -89,10 +90,10 @@ export function createAssistantExecutor(options: Options = {}) {
     return { kind: "pending", intent, reviewUrl: `/campaigns/${caller.actor.campaignId}/dm/assistant?intent=${intent.id}` };
   }
 
-  async function confirmIntent(actor: Actor, id: string): Promise<ReceiptDto> {
+  async function confirmIntent(actor: Actor, id: string, locale: Locale = DEFAULT_LOCALE): Promise<ReceiptDto> {
     if (actor.via !== "session" || actor.scopes !== null || !actor.isDM) throw forbidden();
 
-    return executeIntent({ actor, channel: "chat", threadId: null, tokenId: null }, id, true);
+    return executeIntent({ actor, channel: "chat", threadId: null, tokenId: null, locale }, id, true);
   }
 
   async function rejectIntent(caller: AssistantCaller, id: string) {

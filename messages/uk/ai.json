@@ -116,6 +116,15 @@
       "notes": "нотатки"
     },
     "loss": "Увага: правка видаляє {lost}",
+    "blocks": {
+      "callout": "{count, plural, one {# виноску} few {# виноски} many {# виносок} other {# виноски}}",
+      "readAloud": "{count, plural, one {# блок «читати вголос»} few {# блоки «читати вголос»} many {# блоків «читати вголос»} other {# блоку «читати вголос»}}",
+      "say": "{count, plural, one {# репліку} few {# репліки} many {# реплік} other {# репліки}}",
+      "table": "{count, plural, one {# таблицю} few {# таблиці} many {# таблиць} other {# таблиці}}",
+      "token": "{count, plural, one {# токен} few {# токени} many {# токенів} other {# токена}}",
+      "mention": "{count, plural, one {# згадку} few {# згадки} many {# згадок} other {# згадки}}",
+      "secret": "{count, plural, one {# секрет} few {# секрети} many {# секретів} other {# секрету}}"
+    },
     "slideAlt": "Слайд",
     "intoDeck": "У набір «{title}»",
     "newDeck": "Новий набір для сцени",

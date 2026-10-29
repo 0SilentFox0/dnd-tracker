@@ -23,7 +23,7 @@ vi.mock("@/lib/cache/reference-data", () => ({
   getCachedRaces: vi.fn(async () => []),
 }));
 
-const ctx = { campaignId: "camp1", userId: "dm", scopes: ["ai"] as const, threadId: null };
+const ctx = { campaignId: "camp1", userId: "dm", scopes: ["ai"] as const, threadId: null, locale: "uk" as const };
 
 describe("context tools", () => {
   beforeEach(() => vi.clearAllMocks());

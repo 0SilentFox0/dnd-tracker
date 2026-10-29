@@ -33,7 +33,7 @@ describe("AI tool registry", () => {
   it("toAiSdkTools і registerMcpTools покривають усі інструменти", async () => {
     const { AI_TOOLS, registerMcpTools, toAiSdkTools, toolsFor } = preloadedModule0;
 
-    const ctx = { campaignId: "c", userId: "u", scopes: ["ai", "content:write", "scenario:write", "show:write"] as const, threadId: null };
+    const ctx = { campaignId: "c", userId: "u", scopes: ["ai", "content:write", "scenario:write", "show:write"] as const, threadId: null, locale: "uk" as const };
 
     const chatCtx = { ...ctx, scopes: ["ai"] as const };
 
@@ -62,7 +62,7 @@ describe("AI tool registry", () => {
       },
     });
 
-    expect(await runTool(failing, { campaignId: "c", userId: "u", scopes: ["ai"] as const, threadId: null }, {})).toContain('"message":"нема"');
+    expect(await runTool(failing, { campaignId: "c", userId: "u", scopes: ["ai"] as const, threadId: null, locale: "uk" as const }, {})).toContain('"message":"нема"');
     expect(clip("a".repeat(30_000))).toMatch(/…\[обрізано\]$/);
   });
 
@@ -75,7 +75,7 @@ describe("AI tool registry", () => {
 
     const boom = defineTool({ name: "boom", scopes: ["ai"], title: "t", description: "d", input: z.object({}), handler: async () => { throw new Error("secret prisma"); } });
 
-    const text = await runTool(boom, { campaignId: "c", userId: "u", scopes: ["ai"] as const, threadId: null }, {});
+    const text = await runTool(boom, { campaignId: "c", userId: "u", scopes: ["ai"] as const, threadId: null, locale: "uk" as const }, {});
 
     expect(JSON.parse(text)).toMatchObject({ version: 2, kind: "error", error: { status: 500 } });
     expect(text).not.toContain("secret");

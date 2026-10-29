@@ -11,6 +11,7 @@ import { contentSnapshot, jsonContent, snapshotHash } from "./content-snapshot";
 
 import "server-only";
 import { API_ERRORS } from "@/lib/constants/api-errors";
+import { getTranslator } from "@/lib/i18n/translator";
 import type { AnyContentResource } from "@/lib/server/content/define-resource";
 import { ContentError, parseInput } from "@/lib/server/content/errors";
 import { CONTENT_RESOURCES } from "@/lib/server/content/resources";
@@ -64,7 +65,7 @@ export function createContentActions(deps: Deps = {}): AssistantActionDef[] {
 
     const base = { title: resource.label, description: resource.description };
 
-    const target = (id: string, row?: Record<string, unknown>): TargetRef => ({ domain: kind, id, name: String(row?.name ?? row?.title ?? resource.label) });
+    const target = (id: string, row?: Record<string, unknown>, label: string = resource.label): TargetRef => ({ domain: kind, id, name: String(row?.name ?? row?.title ?? label) });
 
     const found = async (caller: AssistantCaller, id: string) => {
       const row = await resource.find(caller.actor, id, "write");
@@ -97,13 +98,15 @@ export function createContentActions(deps: Deps = {}): AssistantActionDef[] {
         prepare: async (caller, input) => guard(caller.actor.campaignId, async (): Promise<ActionPreview> => {
           const value = input as { id?: string; data?: unknown; patch?: unknown };
 
+          const t = await getTranslator(caller.locale, "assistant");
+
           const before = value.id ? await found(caller, value.id) : null;
 
           const body = verb === "create" || verb === "update" ? validatedBody(resource, value.data ?? value.patch, verb === "update") : null;
 
           const state = await snapshot(caller.actor);
 
-          const targets = [target(value.id ?? (verb === "create" ? "new" : "all"), before ?? body ?? undefined)];
+          const targets = [target(value.id ?? (verb === "create" ? "new" : "all"), before ?? body ?? undefined, t(`contentKinds.${kind}`))];
 
           const changes = body ? Object.entries(body).map(([path, after]) => ({ target: targets[0], path, before: jsonContent(before?.[path]), after: jsonContent(after) })) : [{ target: targets[0], path: "$record", before: jsonContent(before ?? state), after: null }];
 
@@ -119,7 +122,9 @@ export function createContentActions(deps: Deps = {}): AssistantActionDef[] {
             changes.push(...contentDeleteCascades(shown, kind, ids));
           }
 
-          return { summary: `${resource.label}: ${verb}`, targets, changes, warnings: verb.startsWith("delete") ? ["Буде застосовано чинні каскади та правила посилань. Зміна залежностей скасує пропозицію."] : [], effects: [{ kind: verb === "create" ? "create" : verb === "update" ? "update" : "delete", targets, description: `${resource.label}: ${verb}` }], preconditions: { snapshot: snapshotHash(state), before: snapshotHash(before), body: jsonContent(body) } };
+          const summary = t("summary.content", { label: t(`contentKinds.${kind}`), verb });
+
+          return { summary, targets, changes, warnings: verb.startsWith("delete") ? [t("warnings.contentCascades")] : [], effects: [{ kind: verb === "create" ? "create" : verb === "update" ? "update" : "delete", targets, description: summary }], preconditions: { snapshot: snapshotHash(state), before: snapshotHash(before), body: jsonContent(body) } };
         }),
         execute: async (ctx, input) => withContentEffects(ctx, resource.invalidates, async () => {
           const value = input as { id?: string; data?: unknown; patch?: unknown };

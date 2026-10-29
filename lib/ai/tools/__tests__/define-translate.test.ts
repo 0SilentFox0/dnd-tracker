@@ -7,7 +7,7 @@ import { ContentError } from "@/lib/server/content/errors";
 
 vi.mock("server-only", () => ({}));
 
-const ctx = { campaignId: "c", userId: "u", scopes: [], threadId: null } as never;
+const ctx = { campaignId: "c", userId: "u", scopes: [], threadId: null, locale: "uk" as const } as never;
 
 const failing = (error: unknown) => defineTool({ name: "x", scopes: [], title: "x", description: "x", input: z.object({ n: z.number() }), handler: async () => { throw error; } });
 
