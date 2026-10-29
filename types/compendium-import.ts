@@ -1,7 +1,8 @@
+import type { MediaPlanSummary, MediaReportState } from "@/lib/server/compendium-import/media/queue";
 import type { CompendiumReport, ImportInput } from "@/lib/server/compendium-import/service";
 import type { ImportIssue, TargetKind } from "@/lib/server/compendium-import/types";
 
-export type { CompendiumReport, ImportInput, ImportIssue, TargetKind };
+export type { CompendiumReport, ImportInput, ImportIssue, MediaPlanSummary, MediaReportState, TargetKind };
 
 export type CompendiumOptions = Omit<ImportInput, "json" | "categories">;
 

@@ -2,6 +2,7 @@ import { createHmac, timingSafeEqual } from "node:crypto";
 import { z } from "zod";
 
 import { type CustomConditionRule, deriveCustomConditions } from "./adapters/custom-conditions";
+import { buildMediaQueue, type MediaReportState, summarizeQueue } from "./media/queue";
 import { adaptCompendium } from "./adapt";
 import { digest } from "./identity";
 import { byteLength, COMPENDIUM_LIMITS, CompendiumError, type JsonRecord, parseCompendium } from "./parse";
@@ -58,6 +59,7 @@ export interface CompendiumReport {
   countsByCategory: Record<string, { present: number; mapped: number; partial: number; skipped: number }>;
   issueCounts: Record<string, number>;
   omittedIssues: number;
+  media?: MediaReportState;
 }
 export interface RepositoryContext extends PlanContext { extraEntries?: AdaptedEntry[]; hasCharacters?: boolean; classesEnabled?: boolean; hasClasses?: boolean; customConditionKeys?: string[] }
 export interface ImportRepository {
@@ -191,7 +193,7 @@ function reportOf(plan: ImportPlan, root: JsonRecord, sources: JsonRecord[], emb
 
   for (const row of plan.writes) editionSummary[row.edition] = (editionSummary[row.edition] ?? 0) + 1;
 
-  return { adapterVersion: ADAPTER_VERSION, counts, rows, sources, editionSummary, countsByCategory, issueCounts, omittedIssues: Math.max(0, allIssues.length - nextActions.length), nextActions, ...((classesMissing || customRules.length > 0) && { recommendedRulesPatch: { ...(classesMissing && { classes: { enabled: true } }), ...(customRules.length > 0 && { conditions: { custom: customRules } }) } }), readyToImport: plan.errors.length === 0, readyToPlay: hasCharacters !== false && !classesMissing && customRules.length === 0 && plan.errors.length === 0 && !allIssues.some((i) => !COMPENDIUM_INFO_ISSUE_CODES.has(i.code) && /MANUAL|UNRESOLVED|UNKNOWN|UNSUPPORTED/.test(i.code)) };
+  return { adapterVersion: ADAPTER_VERSION, counts, rows, sources, editionSummary, countsByCategory, issueCounts, omittedIssues: Math.max(0, allIssues.length - nextActions.length), media: summarizeQueue(buildMediaQueue(plan.writes)), nextActions, ...((classesMissing || customRules.length > 0) && { recommendedRulesPatch: { ...(classesMissing && { classes: { enabled: true } }), ...(customRules.length > 0 && { conditions: { custom: customRules } }) } }), readyToImport: plan.errors.length === 0, readyToPlay: hasCharacters !== false && !classesMissing && customRules.length === 0 && plan.errors.length === 0 && !allIssues.some((i) => !COMPENDIUM_INFO_ISSUE_CODES.has(i.code) && /MANUAL|UNRESOLVED|UNKNOWN|UNSUPPORTED/.test(i.code)) };
 }
 
 function readInput(input: ImportInput) {
