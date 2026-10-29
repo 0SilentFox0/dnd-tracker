@@ -1,7 +1,7 @@
 import { normalizeTree } from "./normalize";
 import type { ProgressionNode } from "./types";
 
-export interface SkillPlacement { group: number; label: string }
+export interface SkillPlacement { group: number; label: string; params?: { tier: string } }
 
 export const PLACEMENT_UNPLACED: SkillPlacement = { group: 6, label: "skillTree.placement.unplaced" };
 
@@ -10,11 +10,11 @@ const CIRCLE_PLACEMENT = { outer: { group: 1, label: "skillTree.placement.outer"
 function placementOf(node: ProgressionNode): SkillPlacement {
   switch (node.kind) {
     case "branchLevel":
-      return { group: 0, label: "skillTree.placement.branchLevel" };
+      return { group: 0, label: "skillTree.placement.branchLevel", params: { tier: node.level } };
     case "slot":
       return { ...CIRCLE_PLACEMENT[node.circle] };
     case "racial":
-      return { group: 4, label: "skillTree.placement.racial" };
+      return { group: 4, label: "skillTree.placement.racial", params: { tier: node.level } };
     case "ultimate":
       return { group: 5, label: "skillTree.placement.ultimate" };
   }

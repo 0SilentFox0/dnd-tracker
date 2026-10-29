@@ -64,10 +64,10 @@
     "usedAt": "already in {where}"
   },
   "treeErrors": {
-    "duplicateSkill": "This skill is already placed elsewhere in the tree",
-    "unknownBranch": "This branch is not among the campaign's main skills",
-    "unknownSkill": "This skill is not in the campaign library",
-    "duplicateBranch": "The branch was added twice"
+    "duplicateSkill": "This skill is already placed elsewhere in the tree: {label}",
+    "unknownBranch": "This branch is not among the campaign's main skills: {label}",
+    "unknownSkill": "This skill is not in the campaign library: {label}",
+    "duplicateBranch": "The branch was added twice: {label}"
   },
   "reasons": {
     "noPoints": "No free points — level up",
@@ -84,11 +84,11 @@
     "hasDependents": "Other learned skills depend on this one — unlearn them first"
   },
   "placement": {
-    "branchLevel": "Branch tier",
+    "branchLevel": "Branch tier · {tier, select, basic {Basics} advanced {Advanced} other {Expert}}",
     "outer": "Outer circle",
     "middle": "Middle circle",
     "inner": "Inner circle",
-    "racial": "Racial",
+    "racial": "Racial · {tier, select, basic {Basics} advanced {Advanced} other {Expert}}",
     "ultimate": "Ultimate",
     "unplaced": "Not placed in a tree"
   },

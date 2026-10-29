@@ -71,7 +71,7 @@ export function SkillTreeEditor({ campaignId }: { campaignId: string }) {
       </div>
       {view.errors.length > 0 && (
         <ul className="mb-3 text-sm text-hud-danger">
-          {view.errors.map((e) => <li key={`${e.code}:${e.ref}`}>{t(`treeErrors.${e.code}`)}: {e.label ?? skillsById.get(e.ref)?.name ?? e.ref}</li>)}
+          {view.errors.map((e) => <li key={`${e.code}:${e.ref}`}>{t(`treeErrors.${e.code}`, { label: e.label ?? skillsById.get(e.ref)?.name ?? e.ref })}</li>)}
         </ul>
       )}
       <EditorTable

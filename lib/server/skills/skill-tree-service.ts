@@ -44,7 +44,7 @@ async function saveLockedSkillTree(actor: Actor, input: { treeId?: string; race:
   const errors = validateTree(raw, { mainSkillIds: new Set(mainSkills.map((m) => m.id)), skillIds: new Set(librarySkills.map((s) => s.id)) });
 
   if (errors.length > 0) {
-    throw new ContentError(`skillTree.treeErrors.${errors[0].code}`, 400, errors);
+    throw new ContentError(`skillTree.treeErrors.${errors[0].code}`, 400, errors, { label: errors[0].label ?? errors[0].ref });
   }
 
   const existing =

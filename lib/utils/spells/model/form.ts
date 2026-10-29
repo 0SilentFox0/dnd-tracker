@@ -1,6 +1,7 @@
 import { readSpellDefinition } from "./read";
 
 import type { ErrorParams } from "@/lib/constants/api-errors";
+import { issueParams } from "@/lib/i18n/translate-issue";
 import { createSpellSchema } from "@/lib/schemas/spells";
 import { parseSpellFx } from "@/lib/utils/battle/fx/spell-fx-schema";
 import type { Spell, SpellFormData } from "@/types/spells";
@@ -105,5 +106,5 @@ export function spellFormIssue(form: SpellFormData): SpellFormIssue | null {
 
   const issue = parsed.error.issues[0];
 
-  return { fieldKey: issueFieldKey(issue.path), message: issue.message, params: (issue as { params?: ErrorParams }).params };
+  return { fieldKey: issueFieldKey(issue.path), message: issue.message, params: issueParams(issue as { message: string; params?: ErrorParams }) };
 }

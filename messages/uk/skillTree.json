@@ -64,10 +64,10 @@
     "usedAt": "вже в {where}"
   },
   "treeErrors": {
-    "duplicateSkill": "Цей скіл уже стоїть в іншому місці дерева",
-    "unknownBranch": "Гілки немає серед основних навичок кампанії",
-    "unknownSkill": "Скіла немає в бібліотеці кампанії",
-    "duplicateBranch": "Гілка додана двічі"
+    "duplicateSkill": "Цей скіл уже стоїть в іншому місці дерева: {label}",
+    "unknownBranch": "Гілки немає серед основних навичок кампанії: {label}",
+    "unknownSkill": "Скіла немає в бібліотеці кампанії: {label}",
+    "duplicateBranch": "Гілка додана двічі: {label}"
   },
   "reasons": {
     "noPoints": "Немає вільних очок — підніміть рівень",
@@ -84,11 +84,11 @@
     "hasDependents": "Від цього вміння залежать інші вивчені — спершу зніміть їх"
   },
   "placement": {
-    "branchLevel": "Рівень гілки",
+    "branchLevel": "Рівень гілки · {tier, select, basic {Основи} advanced {Просунутий} other {Експерт}}",
     "outer": "Зовнішнє коло",
     "middle": "Середнє коло",
     "inner": "Внутрішнє коло",
-    "racial": "Расове",
+    "racial": "Расове · {tier, select, basic {Основи} advanced {Просунутий} other {Експерт}}",
     "ultimate": "Ультимейт",
     "unplaced": "Без місця в дереві"
   },

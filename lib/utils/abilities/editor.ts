@@ -1,4 +1,5 @@
 import type { ErrorParams } from "@/lib/constants/api-errors";
+import { issueParams } from "@/lib/i18n/translate-issue";
 import { columnRefIssues } from "@/lib/utils/abilities/class-columns";
 import { EFFECT_REGISTRY } from "@/lib/utils/abilities/registry/effects";
 import { AbilitiesSchema, type Ability, AbilitySchema, type Effect, type EffectKind, isActionScopedTrigger, isStaticEffect, type Trigger, type TriggerEvent } from "@/lib/utils/abilities/schema";
@@ -147,7 +148,7 @@ export function validateAbilities(list: unknown[], opts: { classColumns?: readon
 
   const r = AbilitiesSchema.safeParse(list);
 
-  if (!r.success) for (const issue of r.error.issues) push(issue.path, issue.message, (issue as { params?: ErrorParams }).params);
+  if (!r.success) for (const issue of r.error.issues) push(issue.path, issue.message, issueParams(issue as { message: string; params?: ErrorParams }));
 
   list.forEach((raw, i) => {
     const one = AbilitySchema.safeParse(raw);

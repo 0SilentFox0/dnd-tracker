@@ -92,7 +92,7 @@ export function PrintSkillsPageClient({
           for (const skill of groupSkills) {
             const place = positions.get(skill.id) ?? PLACEMENT_UNPLACED;
 
-            const entry = byGroup.get(place.group) ?? { label: tRoot(place.label), skills: [] };
+            const entry = byGroup.get(place.group) ?? { label: tRoot(place.label, place.params), skills: [] };
 
             entry.skills.push(skill);
             byGroup.set(place.group, entry);
