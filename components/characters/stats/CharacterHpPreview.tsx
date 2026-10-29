@@ -1,3 +1,7 @@
+"use client";
+
+import { useTranslations } from "next-intl";
+
 import { HudPanel } from "@/components/hud/page";
 import type { SheetTotal } from "@/types/characters";
 
@@ -6,13 +10,15 @@ interface CharacterHpPreviewProps {
 }
 
 export function CharacterHpPreview({ hp }: CharacterHpPreviewProps) {
+  const t = useTranslations("characters.stats.hp");
+
   return (
     <HudPanel as="div" className="space-y-3">
       <div>
         <div className="flex items-start justify-between gap-2">
           <div className="space-y-1.5">
-            <h3 className="text-base font-semibold leading-none">Здоровʼя (HP)</h3>
-            <p className="text-sm text-muted-foreground">Як у бою: рівень, статура, архетип (або класи) і бонуси. Оновлюється після збереження.</p>
+            <h3 className="text-base font-semibold leading-none">{t("title")}</h3>
+            <p className="text-sm text-muted-foreground">{t("description")}</p>
           </div>
         </div>
       </div>

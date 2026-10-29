@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { useTranslations } from "next-intl";
 
 import { HeroPortrait } from "@/components/character-profile/HeroPortrait";
 import { HudSection } from "@/components/hud/form";
@@ -8,13 +9,17 @@ import { HudCard, HudPanel, HudPill } from "@/components/hud/page";
 import { useCharacters } from "@/lib/hooks/characters";
 
 export function PendingDraftsPanel({ campaignId }: { campaignId: string }) {
+  const t = useTranslations("characters.review");
+
+  const tCard = useTranslations("characters.card");
+
   const { data } = useCharacters(campaignId, { status: "pending" });
 
   if (!data?.length) return null;
 
   return (
     <HudPanel>
-      <HudSection title="Очікують схвалення">
+      <HudSection title={t("pendingTitle")}>
         <div className="grid gap-2 md:grid-cols-2 lg:grid-cols-3">
           {data.map((c) => (
             <Link key={c.id} href={`/campaigns/${campaignId}/dm/characters/${c.id}`} className="block">
@@ -25,8 +30,8 @@ export function PendingDraftsPanel({ campaignId }: { campaignId: string }) {
                   <p className="truncate text-xs text-hud-muted">
                     {c.race} · {c.class}
                   </p>
-                  <p className="truncate text-xs text-hud-muted">{c.user?.displayName || "Не призначено"}</p>
-                  {c.reviewNote && <HudPill tone="silver">повернуто з коментарем</HudPill>}
+                  <p className="truncate text-xs text-hud-muted">{c.user?.displayName || tCard("unassigned")}</p>
+                  {c.reviewNote && <HudPill tone="silver">{t("returnedWithNote")}</HudPill>}
                 </div>
               </HudCard>
             </Link>

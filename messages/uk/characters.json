@@ -1,1 +1,232 @@
-{}
+{
+  "archetypes": {
+    "universal": {
+      "name": "Універсал"
+    },
+    "warrior": {
+      "name": "Воїн"
+    },
+    "paladin": {
+      "name": "Паладин"
+    },
+    "ranger": {
+      "name": "Лучник"
+    },
+    "rogue": {
+      "name": "Розбійник"
+    },
+    "mage": {
+      "name": "Маг"
+    }
+  },
+  "form": {
+    "title": "Створити нового персонажа",
+    "aside": "Заповніть основну інформацію про персонажа",
+    "submit": "Створити персонажа",
+    "submitting": "Створення...",
+    "tabs": {
+      "combat": "Бій"
+    },
+    "sections": {
+      "abilityScores": "Характеристики",
+      "combatParams": "Бойові параметри",
+      "personalAbility": "Персональне вміння",
+      "savingThrows": "Рятівні кидки",
+      "skills": "Навички"
+    },
+    "validation": {
+      "raceRequired": "Оберіть расу",
+      "classRequired": "Вкажіть клас",
+      "controllerRequired": "Будь ласка, виберіть гравця для персонажа типу 'Гравець'"
+    },
+    "basic": {
+      "name": "Ім'я",
+      "namePlaceholder": "Ім'я персонажа",
+      "type": "Тип *",
+      "typePlaceholder": "Виберіть тип",
+      "typePlayer": "Гравець",
+      "typeNpcHero": "NPC Герой",
+      "controlledBy": "Контролюється *",
+      "controlledByPlaceholder": "Виберіть гравця",
+      "race": "Раса *",
+      "racePlaceholder": "Виберіть расу",
+      "noRaces": "Спершу створіть расу в розділі Раси",
+      "subrace": "Підраса",
+      "subracePlaceholder": "Наприклад: Темний Ельф",
+      "class": "Клас",
+      "classPlaceholder": "Наприклад: Паладин",
+      "subclass": "Підклас",
+      "subclassPlaceholder": "Наприклад: Клятва Месника",
+      "archetype": "Архетип",
+      "alignment": "Світогляд",
+      "alignmentPlaceholder": "Виберіть світогляд",
+      "level": "Рівень",
+      "avatar": "Фото персонажа"
+    },
+    "classes": {
+      "classN": "Клас {n}",
+      "subclassN": "Підклас {n}",
+      "levelN": "Рівень {n}",
+      "removeN": "Прибрати клас {n}",
+      "class": "Клас",
+      "subclass": "Підклас",
+      "noSubclass": "Без підкласу",
+      "notFound": "Клас не знайдено — оберіть інший",
+      "fromLevel": "з рівня {level}",
+      "add": "Додати клас",
+      "totalLevel": "Загальний рівень: {level}",
+      "hitDice": "Кістки хітів: {dice}",
+      "skillChoice": "Оберіть {count} навички з: {from}"
+    },
+    "personalAbility": {
+      "label": "Уміння (Персональні)",
+      "placeholder": "Виберіть скіл з групи Персональні",
+      "none": "Не обрано",
+      "hint": "Скіл з групи основних навиків «Персональні»"
+    }
+  },
+  "stats": {
+    "hp": {
+      "title": "Здоровʼя (HP)",
+      "description": "Як у бою: рівень, статура, архетип (або класи) і бонуси. Оновлюється після збереження."
+    },
+    "primary": {
+      "legend": "Основна характеристика — від неї влучання і шкода всіх атак",
+      "aria": "{ability} — основна"
+    },
+    "armorClass": "Клас Броні (AC)",
+    "classArmorHint": "КЗ рахується з броні й Спритності",
+    "minTargets": "Мін. цілей",
+    "maxTargets": "Макс. цілей"
+  },
+  "spells": {
+    "loadError": "Помилка завантаження заклинань: {message}",
+    "unknownError": "Невідома помилка",
+    "loading": "Завантаження...",
+    "choose": "Виберіть заклинання",
+    "selected": "Обрано: {count}"
+  },
+  "card": {
+    "npcHero": "NPC герой",
+    "player": "Гравець",
+    "inspiration": "Натхнення",
+    "levelReady": "Рівень доступний",
+    "unassigned": "Не призначено",
+    "actions": "Дії персонажа",
+    "levelUp": "Підняти рівень",
+    "dead": "Загинув",
+    "statLevel": "Рів",
+    "statInitiative": "Ініц"
+  },
+  "review": {
+    "pendingTitle": "Очікують схвалення",
+    "returnedWithNote": "повернуто з коментарем",
+    "panelTitle": "Чернетка гравця",
+    "panelHint": "Відредагуйте персонажа за потреби, потім схваліть або поверніть гравцю. Видалити чернетку можна у вкладці «Основне» редактора.",
+    "approve": "Схвалити",
+    "approveTitle": "Схвалити персонажа?",
+    "approveDescription": "«{name}» стане активним персонажем гравця.",
+    "approved": "Персонажа схвалено",
+    "returnWithNote": "Повернути з коментарем",
+    "return": "Повернути",
+    "returned": "Чернетку повернуто гравцю",
+    "returnFailed": "Не вдалося повернути чернетку",
+    "notePlaceholder": "Що потрібно виправити",
+    "saveFailed": "Не вдалося зберегти рішення. Спробуйте ще раз."
+  },
+  "draftBanner": {
+    "pending": "На розгляді в DM",
+    "note": "Коментар DM: {note}",
+    "edit": "Редагувати чернетку"
+  },
+  "noCharacter": {
+    "title": "У вас поки немає персонажа в цій кампанії",
+    "create": "Створити персонажа",
+    "generate": "🎲 Згенерувати"
+  },
+  "draft": {
+    "titleEdit": "Чернетка персонажа",
+    "titleNew": "Новий персонаж",
+    "aside": "Після відправки чернетку розгляне DM",
+    "waitAnimation": "Зачекайте, поки завершиться анімація",
+    "fixScores": "Виправте характеристики",
+    "submit": "Відправити DM",
+    "submitting": "Відправка...",
+    "regenerate": "🎲 Згенерувати ще раз",
+    "regenAll": "Усе",
+    "regenName": "Ім'я",
+    "regenScores": "Характеристики",
+    "regenBackstory": "Біографія",
+    "aiBackstory": "✨ Оживити передісторію (AI)",
+    "aiBackstoryPending": "Оживлення...",
+    "sections": {
+      "basic": "Основне",
+      "scores": "Характеристики",
+      "choices": "Вибори",
+      "story": "Історія"
+    },
+    "name": "Ім'я *",
+    "namePlaceholder": "Ім'я персонажа",
+    "race": "Раса *",
+    "racePlaceholder": "Виберіть расу",
+    "noRaces": "У кампанії ще немає рас - попросіть DM створити расу.",
+    "class": "Клас *",
+    "classPlaceholder": "Виберіть клас",
+    "classExample": "Наприклад: Паладин",
+    "archetype": "Архетип",
+    "alignment": "Світогляд",
+    "alignmentPlaceholder": "Виберіть світогляд",
+    "avatar": "Фото персонажа",
+    "otherPortrait": "🎲 Інший портрет",
+    "aiAvatar": "🎨 Згенерувати аватар (AI)",
+    "aiAvatarPending": "Малюю...",
+    "biography": "Біографія",
+    "biographyPlaceholder": "Розкажіть, хто ваш герой",
+    "removeGoal": "Видалити ціль",
+    "defaultHeroName": "Герой",
+    "raceRequired": "Оберіть расу",
+    "backstoryFailed": "Не вдалося згенерувати передісторію",
+    "avatarFailed": "Не вдалося згенерувати аватар",
+    "scores": {
+      "method": "Спосіб розподілу",
+      "standard": "Стандартний масив",
+      "pointBuy": "Point-buy ({budget})",
+      "spent": "Витрачено {spent} / {budget}",
+      "uniqueArray": "Кожне значення масиву — рівно один раз",
+      "lessAria": "{ability}: менше",
+      "moreAria": "{ability}: більше"
+    }
+  },
+  "list": {
+    "title": "Персонажі кампанії",
+    "subtitle": "Гравці та NPC герої",
+    "deleteAllNoun": "персонажі",
+    "deleteAllTitle": "Видалити всіх персонажів?",
+    "deleteAllLabel": "Видалити всіх",
+    "deleteAllDescription": "Буде видалено всіх персонажів гравців у цій кампанії. Цю дію не можна скасувати.",
+    "create": "+ Створити персонажа",
+    "typeTabs": "Тип персонажів",
+    "tabs": {
+      "all": "Усі",
+      "players": "Гравці",
+      "npcHeroes": "NPC-герої"
+    },
+    "loading": "Завантаження персонажів…",
+    "emptyTitle": "Ще немає персонажів",
+    "emptyDescription": "Гравці або NPC-герої з'являться тут.",
+    "createFirst": "Створити першого персонажа",
+    "searchLabel": "Пошук персонажів",
+    "searchPlaceholder": "Пошук за ім'ям або гравцем",
+    "levelUpFailed": "Не вдалося підняти рівень. Спробуйте ще раз.",
+    "deleteTitle": "Видалити персонажа?",
+    "deleteDescription": "Персонаж \"{name}\" буде видалено. Цю дію не можна скасувати."
+  },
+  "editor": {
+    "deleteTitle": "Видалити персонажа: {name}?",
+    "deleteDescription": "Персонаж, його інвентар і прогрес зникнуть назавжди.",
+    "levelUpTitle": "Підняти рівень: {name}? (Рівень {from} → {to})",
+    "levelUpConfirm": "Підняти",
+    "levelUpDoneIncreased": "Рівень піднято! {ability}: +1. Магічні слоти оновлено.",
+    "levelUpDoneMaxed": "Рівень піднято! Усі характеристики на максимумі. Магічні слоти оновлено."
+  }
+}

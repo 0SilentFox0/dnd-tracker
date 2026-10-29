@@ -1,5 +1,7 @@
 "use client";
 
+import { useTranslations } from "next-intl";
+
 import { CharacterClassesField } from "@/components/characters/basic/CharacterClassesField";
 import { ImageUpload } from "@/components/ui/image-upload";
 import { Label } from "@/components/ui/label";
@@ -7,8 +9,7 @@ import { LabeledInput } from "@/components/ui/labeled-input";
 import { SelectField } from "@/components/ui/select-field";
 import { ALIGNMENTS } from "@/lib/constants/alignment";
 import { CharacterType, type CharacterTypeValue } from "@/lib/constants/characters";
-import { HERO_ARCHETYPE_OPTIONS } from "@/lib/constants/hero-archetypes";
-import { useClassEntriesField } from "@/lib/hooks/characters";
+import { useArchetypeOptions, useClassEntriesField } from "@/lib/hooks/characters";
 import type { CharacterFormBindings } from "@/lib/utils/characters/form/bindings";
 import { CampaignMember } from "@/types/campaigns";
 import type { GameClassData } from "@/types/classes";
@@ -29,6 +30,10 @@ export function CharacterBasicInfo({
   isPlayerView = false,
   classMode,
 }: CharacterBasicInfoProps) {
+  const t = useTranslations("characters.form.basic");
+
+  const { options: archetypeOptions, universalLabel } = useArchetypeOptions();
+
   const { data, set } = basicInfo;
 
   const setClasses = useClassEntriesField(basicInfo, classMode?.byId);
@@ -39,25 +44,25 @@ export function CharacterBasicInfo({
     <div className="grid grid-cols-2 gap-4 w-full">
       <LabeledInput
         id="name"
-        label="Ім'я"
+        label={t("name")}
         value={name}
         onChange={(e) => set("name", e.target.value)}
         required
-        placeholder="Ім'я персонажа"
+        placeholder={t("namePlaceholder")}
         containerClassName="w-full min-w-0"
         className="w-full"
       />
 
       <div className="w-full min-w-0">
-        <Label htmlFor="type">Тип *</Label>
+        <Label htmlFor="type">{t("type")}</Label>
         <SelectField
           id="type"
           value={type}
           onValueChange={(value) => set("type", value as CharacterTypeValue)}
-          placeholder="Виберіть тип"
+          placeholder={t("typePlaceholder")}
           options={[
-            { value: CharacterType.PLAYER, label: "Гравець" },
-            { value: CharacterType.NPC_HERO, label: "NPC Герой" },
+            { value: CharacterType.PLAYER, label: t("typePlayer") },
+            { value: CharacterType.NPC_HERO, label: t("typeNpcHero") },
           ]}
           required
           triggerClassName="w-full"
@@ -66,12 +71,12 @@ export function CharacterBasicInfo({
 
       {type === CharacterType.PLAYER && (
         <div className="w-full min-w-0">
-          <Label htmlFor="controlledBy">Контролюється *</Label>
+          <Label htmlFor="controlledBy">{t("controlledBy")}</Label>
           <SelectField
             id="controlledBy"
             value={controlledBy}
             onValueChange={(value) => set("controlledBy", value)}
-            placeholder="Виберіть гравця"
+            placeholder={t("controlledByPlaceholder")}
             options={campaignMembers.map((member) => ({
               value: member.id,
               label: member.email ? `${member.displayName} (${member.email})` : member.displayName,
@@ -83,25 +88,25 @@ export function CharacterBasicInfo({
       )}
 
       <div className="w-full min-w-0">
-        <Label htmlFor="race">Раса *</Label>
+        <Label htmlFor="race">{t("race")}</Label>
         <SelectField
           id="race"
           value={race}
           onValueChange={(value) => set("race", value)}
-          placeholder="Виберіть расу"
+          placeholder={t("racePlaceholder")}
           options={races.map((r) => ({ value: r.name, label: r.name }))}
           required
           triggerClassName="w-full"
         />
-        {races.length === 0 && <p className="mt-1 text-xs text-muted-foreground">Спершу створіть расу в розділі Раси</p>}
+        {races.length === 0 && <p className="mt-1 text-xs text-muted-foreground">{t("noRaces")}</p>}
       </div>
 
       <LabeledInput
         id="subrace"
-        label="Підраса"
+        label={t("subrace")}
         value={subrace || ""}
         onChange={(e) => set("subrace", e.target.value)}
-        placeholder="Наприклад: Темний Ельф"
+        placeholder={t("subracePlaceholder")}
         containerClassName="w-full min-w-0"
         className="w-full"
       />
@@ -111,20 +116,20 @@ export function CharacterBasicInfo({
         <>
         <LabeledInput
           id="class"
-          label="Клас"
+          label={t("class")}
           value={className}
           onChange={(e) => set("class", e.target.value)}
           required
-          placeholder="Наприклад: Паладин"
+          placeholder={t("classPlaceholder")}
           containerClassName="w-full min-w-0"
           className="w-full"
         />
         <LabeledInput
           id="subclass"
-          label="Підклас"
+          label={t("subclass")}
           value={subclass || ""}
           onChange={(e) => set("subclass", e.target.value)}
-          placeholder="Наприклад: Клятва Месника"
+          placeholder={t("subclassPlaceholder")}
           containerClassName="w-full min-w-0"
           className="w-full"
         />
@@ -132,26 +137,26 @@ export function CharacterBasicInfo({
       )}
       {!isPlayerView && !classMode && (
         <div className="w-full min-w-0">
-          <Label htmlFor="archetype">Архетип</Label>
+          <Label htmlFor="archetype">{t("archetype")}</Label>
           <SelectField
             id="archetype"
             value={archetype || ""}
             onValueChange={(value) => set("archetype", value)}
-            options={HERO_ARCHETYPE_OPTIONS.filter((o) => o.value)}
+            options={archetypeOptions}
             allowNone
-            noneLabel={HERO_ARCHETYPE_OPTIONS[0].label}
+            noneLabel={universalLabel}
             triggerClassName="w-full"
           />
         </div>
       )}
 
       <div className="w-full min-w-0">
-        <Label htmlFor="alignment">Світогляд</Label>
+        <Label htmlFor="alignment">{t("alignment")}</Label>
         <SelectField
           id="alignment"
           value={alignment || ""}
           onValueChange={(value) => set("alignment", value)}
-          placeholder="Виберіть світогляд"
+          placeholder={t("alignmentPlaceholder")}
           options={ALIGNMENTS.map((align) => ({ value: align, label: align }))}
           allowNone
           triggerClassName="w-full"
@@ -162,7 +167,7 @@ export function CharacterBasicInfo({
         <div className="col-span-2 grid grid-cols-3 gap-2">
           <LabeledInput
             id="level"
-            label="Рівень"
+            label={t("level")}
             labelClassName="text-xs leading-tight"
             type="number"
             min="1"
@@ -176,7 +181,7 @@ export function CharacterBasicInfo({
       )}
       {!isPlayerView && (
         <div className="w-full min-w-0 md:col-span-2">
-          <ImageUpload label="Фото персонажа" value={avatar || ""} onChange={(value) => set("avatar", value)} fallbackText={name} maxSide={1200} />
+          <ImageUpload label={t("avatar")} value={avatar || ""} onChange={(value) => set("avatar", value)} fallbackText={name} maxSide={1200} />
         </div>
       )}
     </div>

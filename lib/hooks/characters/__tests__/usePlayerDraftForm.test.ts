@@ -153,4 +153,17 @@ describe("usePlayerDraftForm", () => {
     await waitFor(() => expect(createDraft).toHaveBeenCalled());
     expect(vi.mocked(createDraft).mock.calls[0][1].choices?.raceChoices).toEqual({ "elven-lineage": [{ id: "drow" }] });
   });
+
+  it("submit без раси дає ключ помилки й не викликає API", () => {
+    classMode.value = { enabled: false, classes: [], pending: false };
+    vi.mocked(createDraft).mockClear();
+
+    const { result } = setup();
+
+    act(() => result.current.form.set("race", ""));
+    act(() => result.current.submit.run());
+
+    expect(result.current.submit.error).toBe("characters.draft.raceRequired");
+    expect(createDraft).not.toHaveBeenCalled();
+  });
 });

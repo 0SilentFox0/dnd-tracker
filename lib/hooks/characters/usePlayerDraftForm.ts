@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
+import { useTranslations } from "next-intl";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
 import { characterKeys } from "./keys";
@@ -9,7 +10,7 @@ import { type RollStep, useRollReveal } from "./useRollReveal";
 import { createDraft, generateBackstory, generateDraftAvatar, getBackstoryAvailability, updateDraft } from "@/lib/api/characters";
 import { ABILITY_KEYS, type AbilityKey } from "@/lib/constants/abilities";
 import { ALIGNMENTS } from "@/lib/constants/alignment";
-import { HERO_ARCHETYPE_KEYS, HERO_ARCHETYPE_OPTIONS } from "@/lib/constants/hero-archetypes";
+import { HERO_ARCHETYPE_KEYS } from "@/lib/constants/hero-archetypes";
 import { useClassMode } from "@/lib/hooks/classes";
 import { useOptionalNotify } from "@/lib/hooks/common";
 import { useRaces } from "@/lib/hooks/races";
@@ -43,8 +44,6 @@ const standardScores = (): AbilityScores => Object.fromEntries(ABILITY_KEYS.map(
 
 const EMPTY_DRAFT: DraftInput = { name: "", race: "", class: ARCHETYPE_CLASS.warrior, archetype: "warrior", method: "standard", ...standardScores(), goals: [] };
 
-const ARCHETYPE_LABEL = Object.fromEntries(HERO_ARCHETYPE_OPTIONS.map((o) => [o.value, o.label]));
-
 const seedNow = () => Date.now();
 
 const scoresOf = (v: DraftInput): AbilityScores => Object.fromEntries(ABILITY_KEYS.map((k) => [k, v[k]])) as AbilityScores;
@@ -56,6 +55,10 @@ export interface PlayerDraftFormOptions {
 }
 
 export function usePlayerDraftForm({ campaignId, characterId, initial }: PlayerDraftFormOptions) {
+  const t = useTranslations("characters.draft");
+
+  const tArchetype = useTranslations("characters.archetypes");
+
   const router = useRouter();
 
   const notify = useOptionalNotify();
@@ -145,14 +148,14 @@ export function usePlayerDraftForm({ campaignId, characterId, initial }: PlayerD
     start([
       raceStep(g.race),
       ...(portrait ? [avatarStep(portrait, pool)] : []),
-      ...(classBased ? [] : [{ key: "archetype" as const, pool: () => ARCHETYPE_LABEL[pick(Math.random, HERO_ARCHETYPE_KEYS)], final: ARCHETYPE_LABEL[g.archetype] }]),
+      ...(classBased ? [] : [{ key: "archetype" as const, pool: () => tArchetype(`${pick(Math.random, HERO_ARCHETYPE_KEYS)}.name`), final: tArchetype(`${g.archetype}.name`) }]),
       { key: "class", pool: () => (classBased ? pick(Math.random, classMode.classes).name : ARCHETYPE_CLASS[pick(Math.random, HERO_ARCHETYPE_KEYS)]), final: g.class },
       { key: "alignment", pool: () => pick(Math.random, ALIGNMENTS), final: g.alignment },
       nameStep(g.name, g.race),
       ...scoreSteps(g.scores),
       backgroundStep(g.background),
     ]);
-  }, [raceNames, raceStep, start, portraitPool, queryClient, campaignId, classBased, classMode.classes]);
+  }, [raceNames, raceStep, start, portraitPool, queryClient, campaignId, classBased, classMode.classes, tArchetype]);
 
   const name = useCallback(() => {
     const next = generateName(values.race, Math.random);
@@ -185,12 +188,12 @@ export function usePlayerDraftForm({ campaignId, characterId, initial }: PlayerD
   );
 
   const backstory = useCallback(() => {
-    const next = generateLocalBackstory({ name: values.name || "Герой", raceName: values.race, archetype: values.archetype }, Math.random);
+    const next = generateLocalBackstory({ name: values.name || t("defaultHeroName"), raceName: values.race, archetype: values.archetype }, Math.random);
 
     setValues((prev) => ({ ...prev, ...next }));
 
     start([backgroundStep(next.background)]);
-  }, [start, values.archetype, values.name, values.race]);
+  }, [start, values.archetype, values.name, values.race, t]);
 
   const portrait = useCallback(() => {
     const pool = portraitPool(values.race);
@@ -209,7 +212,7 @@ export function usePlayerDraftForm({ campaignId, characterId, initial }: PlayerD
 
   const aiMutation = useMutation({
     mutationFn: () => generateBackstory(campaignId, { name: values.name, race: values.race, archetype: values.archetype, class: values.class, background: values.background || undefined }),
-    onError: (error) => notify(error.message || "Не вдалося згенерувати передісторію"),
+    onError: (error) => notify(error.message || t("backstoryFailed")),
     onSuccess: (res) => {
       setValues((prev) => ({ ...prev, background: res.background, goals: res.goals }));
       start([backgroundStep(res.background)]);
@@ -218,7 +221,7 @@ export function usePlayerDraftForm({ campaignId, characterId, initial }: PlayerD
 
   const avatarMutation = useMutation({
     mutationFn: () => generateDraftAvatar(campaignId, { name: values.name, race: values.race, archetype: values.archetype, class: values.class }),
-    onError: (error) => notify(error.message || "Не вдалося згенерувати аватар"),
+    onError: (error) => notify(error.message || t("avatarFailed")),
     onSuccess: (res) => setValues((prev) => ({ ...prev, avatar: res.url })),
   });
 
@@ -240,7 +243,7 @@ export function usePlayerDraftForm({ campaignId, characterId, initial }: PlayerD
 
   const run = (refs?: ChoiceRefs) => {
     if (!values.race) {
-      setValidationError("Оберіть расу");
+      setValidationError(t("raceRequired"));
 
       return;
     }

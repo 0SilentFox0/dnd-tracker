@@ -1,4 +1,5 @@
 export { useArcaneRecovery } from "./useArcaneRecovery";
+export { useArchetypeOptions } from "./useArchetypeOptions";
 export { useCharacterChoices } from "./useCharacterChoices";
 export { useCharacterEditor } from "./useCharacterEditor";
 export { useCharacterForm } from "./useCharacterForm";

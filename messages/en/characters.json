@@ -1,1 +1,232 @@
-{}
+{
+  "archetypes": {
+    "universal": {
+      "name": "Universal"
+    },
+    "warrior": {
+      "name": "Warrior"
+    },
+    "paladin": {
+      "name": "Paladin"
+    },
+    "ranger": {
+      "name": "Archer"
+    },
+    "rogue": {
+      "name": "Rogue"
+    },
+    "mage": {
+      "name": "Mage"
+    }
+  },
+  "form": {
+    "title": "Create a new character",
+    "aside": "Fill in the character's basic information",
+    "submit": "Create character",
+    "submitting": "Creating...",
+    "tabs": {
+      "combat": "Combat"
+    },
+    "sections": {
+      "abilityScores": "Ability scores",
+      "combatParams": "Combat parameters",
+      "personalAbility": "Personal ability",
+      "savingThrows": "Saving throws",
+      "skills": "Skills"
+    },
+    "validation": {
+      "raceRequired": "Choose a race",
+      "classRequired": "Specify a class",
+      "controllerRequired": "Please choose a player for a character of the \"Player\" type"
+    },
+    "basic": {
+      "name": "Name",
+      "namePlaceholder": "Character name",
+      "type": "Type *",
+      "typePlaceholder": "Choose a type",
+      "typePlayer": "Player",
+      "typeNpcHero": "NPC hero",
+      "controlledBy": "Controlled by *",
+      "controlledByPlaceholder": "Choose a player",
+      "race": "Race *",
+      "racePlaceholder": "Choose a race",
+      "noRaces": "Create a race in the Races section first",
+      "subrace": "Subrace",
+      "subracePlaceholder": "For example: Dark Elf",
+      "class": "Class",
+      "classPlaceholder": "For example: Paladin",
+      "subclass": "Subclass",
+      "subclassPlaceholder": "For example: Oath of Vengeance",
+      "archetype": "Archetype",
+      "alignment": "Alignment",
+      "alignmentPlaceholder": "Choose an alignment",
+      "level": "Level",
+      "avatar": "Character portrait"
+    },
+    "classes": {
+      "classN": "Class {n}",
+      "subclassN": "Subclass {n}",
+      "levelN": "Level {n}",
+      "removeN": "Remove class {n}",
+      "class": "Class",
+      "subclass": "Subclass",
+      "noSubclass": "No subclass",
+      "notFound": "Class not found — choose another",
+      "fromLevel": "from level {level}",
+      "add": "Add class",
+      "totalLevel": "Total level: {level}",
+      "hitDice": "Hit dice: {dice}",
+      "skillChoice": "Choose {count} skills from: {from}"
+    },
+    "personalAbility": {
+      "label": "Ability (Personal)",
+      "placeholder": "Choose a skill from the Personal group",
+      "none": "Not chosen",
+      "hint": "A skill from the \"Personal\" main skill group"
+    }
+  },
+  "stats": {
+    "hp": {
+      "title": "Health (HP)",
+      "description": "As in battle: level, constitution, archetype (or classes) and bonuses. Updates after saving."
+    },
+    "primary": {
+      "legend": "Primary ability — drives to-hit and damage of all attacks",
+      "aria": "{ability} — primary"
+    },
+    "armorClass": "Armor class (AC)",
+    "classArmorHint": "AC is calculated from armor and Dexterity",
+    "minTargets": "Min targets",
+    "maxTargets": "Max targets"
+  },
+  "spells": {
+    "loadError": "Failed to load spells: {message}",
+    "unknownError": "Unknown error",
+    "loading": "Loading...",
+    "choose": "Choose spells",
+    "selected": "Selected: {count}"
+  },
+  "card": {
+    "npcHero": "NPC hero",
+    "player": "Player",
+    "inspiration": "Inspiration",
+    "levelReady": "Level available",
+    "unassigned": "Unassigned",
+    "actions": "Character actions",
+    "levelUp": "Level up",
+    "dead": "Dead",
+    "statLevel": "Lvl",
+    "statInitiative": "Init"
+  },
+  "review": {
+    "pendingTitle": "Awaiting approval",
+    "returnedWithNote": "returned with a comment",
+    "panelTitle": "Player draft",
+    "panelHint": "Edit the character if needed, then approve it or return it to the player. You can delete the draft on the \"Basic\" tab of the editor.",
+    "approve": "Approve",
+    "approveTitle": "Approve the character?",
+    "approveDescription": "\"{name}\" will become the player's active character.",
+    "approved": "Character approved",
+    "returnWithNote": "Return with a comment",
+    "return": "Return",
+    "returned": "Draft returned to the player",
+    "returnFailed": "Could not return the draft",
+    "notePlaceholder": "What needs to be fixed",
+    "saveFailed": "Could not save the decision. Please try again."
+  },
+  "draftBanner": {
+    "pending": "Under DM review",
+    "note": "DM comment: {note}",
+    "edit": "Edit draft"
+  },
+  "noCharacter": {
+    "title": "You don't have a character in this campaign yet",
+    "create": "Create character",
+    "generate": "🎲 Generate"
+  },
+  "draft": {
+    "titleEdit": "Character draft",
+    "titleNew": "New character",
+    "aside": "The DM will review the draft after you send it",
+    "waitAnimation": "Wait for the animation to finish",
+    "fixScores": "Fix the ability scores",
+    "submit": "Send to DM",
+    "submitting": "Sending...",
+    "regenerate": "🎲 Generate again",
+    "regenAll": "Everything",
+    "regenName": "Name",
+    "regenScores": "Ability scores",
+    "regenBackstory": "Biography",
+    "aiBackstory": "✨ Bring the backstory to life (AI)",
+    "aiBackstoryPending": "Working...",
+    "sections": {
+      "basic": "Basics",
+      "scores": "Ability scores",
+      "choices": "Choices",
+      "story": "Story"
+    },
+    "name": "Name *",
+    "namePlaceholder": "Character name",
+    "race": "Race *",
+    "racePlaceholder": "Choose a race",
+    "noRaces": "The campaign has no races yet - ask the DM to create one.",
+    "class": "Class *",
+    "classPlaceholder": "Choose a class",
+    "classExample": "For example: Paladin",
+    "archetype": "Archetype",
+    "alignment": "Alignment",
+    "alignmentPlaceholder": "Choose an alignment",
+    "avatar": "Character portrait",
+    "otherPortrait": "🎲 Another portrait",
+    "aiAvatar": "🎨 Generate avatar (AI)",
+    "aiAvatarPending": "Drawing...",
+    "biography": "Biography",
+    "biographyPlaceholder": "Tell us who your hero is",
+    "removeGoal": "Delete goal",
+    "defaultHeroName": "Hero",
+    "raceRequired": "Choose a race",
+    "backstoryFailed": "Could not generate the backstory",
+    "avatarFailed": "Could not generate the avatar",
+    "scores": {
+      "method": "Distribution method",
+      "standard": "Standard array",
+      "pointBuy": "Point-buy ({budget})",
+      "spent": "Spent {spent} / {budget}",
+      "uniqueArray": "Each array value exactly once",
+      "lessAria": "{ability}: decrease",
+      "moreAria": "{ability}: increase"
+    }
+  },
+  "list": {
+    "title": "Campaign characters",
+    "subtitle": "Players and NPC heroes",
+    "deleteAllNoun": "characters",
+    "deleteAllTitle": "Delete all characters?",
+    "deleteAllLabel": "Delete all",
+    "deleteAllDescription": "All player characters in this campaign will be deleted. This action cannot be undone.",
+    "create": "+ Create character",
+    "typeTabs": "Character type",
+    "tabs": {
+      "all": "All",
+      "players": "Players",
+      "npcHeroes": "NPC heroes"
+    },
+    "loading": "Loading characters…",
+    "emptyTitle": "No characters yet",
+    "emptyDescription": "Players or NPC heroes will appear here.",
+    "createFirst": "Create the first character",
+    "searchLabel": "Search characters",
+    "searchPlaceholder": "Search by name or player",
+    "levelUpFailed": "Could not level up. Please try again.",
+    "deleteTitle": "Delete the character?",
+    "deleteDescription": "The character \"{name}\" will be deleted. This action cannot be undone."
+  },
+  "editor": {
+    "deleteTitle": "Delete character: {name}?",
+    "deleteDescription": "The character, their inventory and progress will be lost forever.",
+    "levelUpTitle": "Level up: {name}? (Level {from} → {to})",
+    "levelUpConfirm": "Level up",
+    "levelUpDoneIncreased": "Level up! {ability}: +1. Spell slots updated.",
+    "levelUpDoneMaxed": "Level up! All abilities are at maximum. Spell slots updated."
+  }
+}

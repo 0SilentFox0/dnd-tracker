@@ -1,6 +1,7 @@
 "use client";
 
 import { type FormEvent, useState } from "react";
+import { useTranslations } from "next-intl";
 
 import { HudSection } from "@/components/hud/form";
 import { HudPanel } from "@/components/hud/page";
@@ -13,6 +14,10 @@ import { useConfirm, useNotify } from "@/lib/hooks/common";
 const FORM_ID = "review-return-form";
 
 export function ReviewActions({ campaignId, characterId, name }: { campaignId: string; characterId: string; name: string }) {
+  const t = useTranslations("characters.review");
+
+  const tc = useTranslations("common.actions");
+
   const review = useReviewCharacter(campaignId, characterId);
 
   const confirm = useConfirm();
@@ -25,12 +30,12 @@ export function ReviewActions({ campaignId, characterId, name }: { campaignId: s
 
   const approve = () =>
     confirm({
-      title: "Схвалити персонажа?",
-      description: `«${name}» стане активним персонажем гравця.`,
-      confirmLabel: "Схвалити",
+      title: t("approveTitle"),
+      description: t("approveDescription", { name }),
+      confirmLabel: t("approve"),
       onConfirm: async () => {
         await review.approve();
-        void notify("Персонажа схвалено");
+        void notify(t("approved"));
       },
     });
 
@@ -41,48 +46,48 @@ export function ReviewActions({ campaignId, characterId, name }: { campaignId: s
       await review.returnWithNote(note.trim());
       setOpen(false);
       setNote("");
-      void notify("Чернетку повернуто гравцю");
+      void notify(t("returned"));
     } catch (error) {
-      void notify(error instanceof Error && error.message ? error.message : "Не вдалося повернути чернетку");
+      void notify(error instanceof Error && error.message ? error.message : t("returnFailed"));
     }
   };
 
   return (
     <HudPanel className="mx-3 mt-3">
       <HudSection
-        title="Чернетка гравця"
+        title={t("panelTitle")}
         action={
           <div className="flex flex-wrap gap-2">
             <Button type="button" size="sm" onClick={() => void approve()} disabled={review.isPending}>
-              Схвалити
+              {t("approve")}
             </Button>
             <Button type="button" size="sm" variant="outline" onClick={() => setOpen(true)} disabled={review.isPending}>
-              Повернути з коментарем
+              {t("returnWithNote")}
             </Button>
           </div>
         }
       >
-        <p className="text-sm text-hud-muted">Відредагуйте персонажа за потреби, потім схваліть або поверніть гравцю. Видалити чернетку можна у вкладці «Основне» редактора.</p>
+        <p className="text-sm text-hud-muted">{t("panelHint")}</p>
       </HudSection>
       <ResponsiveDialog
         open={open}
         onOpenChange={setOpen}
         size="sm"
         hud
-        title="Повернути з коментарем"
+        title={t("returnWithNote")}
         footer={
           <>
             <Button variant="outline" onClick={() => setOpen(false)}>
-              Скасувати
+              {tc("cancel")}
             </Button>
             <Button type="submit" form={FORM_ID} disabled={review.isPending || !note.trim()}>
-              Повернути
+              {t("return")}
             </Button>
           </>
         }
       >
         <form id={FORM_ID} onSubmit={(e) => void sendBack(e)}>
-          <Textarea required maxLength={1000} rows={4} value={note} onChange={(e) => setNote(e.target.value)} placeholder="Що потрібно виправити" />
+          <Textarea required maxLength={1000} rows={4} value={note} onChange={(e) => setNote(e.target.value)} placeholder={t("notePlaceholder")} />
         </form>
       </ResponsiveDialog>
     </HudPanel>

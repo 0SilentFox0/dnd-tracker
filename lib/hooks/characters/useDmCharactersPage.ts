@@ -1,5 +1,7 @@
 "use client";
 
+import { useTranslations } from "next-intl";
+
 import { useCharacters, useDeleteAllCharacters, useDeleteCharacter, useLevelUpCharacter } from "./useCharacters";
 
 import type { CharacterTypeValue } from "@/lib/constants/characters";
@@ -11,9 +13,13 @@ const EMPTY: CharacterListItem[] = [];
 const characterFields = (character: CharacterListItem) => [character.name, character.user?.displayName];
 
 export function useDmCharactersPage(campaignId: string, type?: CharacterTypeValue) {
+  const t = useTranslations("characters.list");
+
   const confirm = useConfirm();
 
   const notify = useNotify();
+
+  const tc = useTranslations("common.actions");
 
   const query = useCharacters(campaignId, type ? { type } : undefined);
 
@@ -26,13 +32,13 @@ export function useDmCharactersPage(campaignId: string, type?: CharacterTypeValu
   const levelUpMutation = useLevelUpCharacter(campaignId);
 
   const levelUp = (character: CharacterListItem) =>
-    levelUpMutation.mutate(character.id, { onError: () => void notify("Не вдалося підняти рівень. Спробуйте ще раз.") });
+    levelUpMutation.mutate(character.id, { onError: () => void notify(t("levelUpFailed")) });
 
   const confirmDelete = (character: CharacterListItem) =>
     confirm({
-      title: "Видалити персонажа?",
-      description: `Персонаж "${character.name}" буде видалено. Цю дію не можна скасувати.`,
-      confirmLabel: "Видалити",
+      title: t("deleteTitle"),
+      description: t("deleteDescription", { name: character.name }),
+      confirmLabel: tc("delete"),
       destructive: true,
       onConfirm: () => deleteOne.mutateAsync(character.id),
     });
