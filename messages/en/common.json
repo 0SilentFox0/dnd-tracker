@@ -19,12 +19,10 @@
     "undead": "Undead"
   },
   "confirm": {
-    "cancel": "Cancel",
     "confirm": "Confirm",
     "failed": "Could not complete the action",
     "unsavedTitle": "You have unsaved changes. Leave without saving?",
-    "leave": "Leave",
-    "delete": "Delete"
+    "leave": "Leave"
   },
   "notify": {
     "title": "Notice",
@@ -95,7 +93,16 @@
   },
   "weaponTraits": {
     "label": "Weapon properties",
-    "versatileDice": "Two-handed die"
+    "versatileDice": "Two-handed die",
+    "traits": {
+      "light": "Light",
+      "finesse": "Finesse",
+      "twoHanded": "Two-handed",
+      "versatile": "Versatile",
+      "reach": "Reach",
+      "thrown": "Thrown",
+      "ammunition": "Ammunition"
+    }
   },
   "color": {
     "format": "Format #RRGGBB",
@@ -110,7 +117,21 @@
     "burrow": "Burrow",
     "hover": "Hover",
     "languages": "Languages: {value}",
-    "telepathy": "Telepathy {value} ft"
+    "telepathy": "Telepathy {value} ft",
+    "senses": {
+      "darkvision": "Darkvision",
+      "blindsight": "Blindsight",
+      "tremorsense": "Tremorsense",
+      "truesight": "Truesight"
+    },
+    "sizes": {
+      "tiny": "Tiny",
+      "small": "Small",
+      "medium": "Medium",
+      "large": "Large",
+      "huge": "Huge",
+      "gargantuan": "Gargantuan"
+    }
   },
   "search": {
     "noResults": "Nothing found for “{query}”",
@@ -130,7 +151,7 @@
   },
   "deleteAll": {
     "label": "Delete all",
-    "title": "Delete all {nouns}?"
+    "title": "Delete all {noun}?"
   },
   "states": {
     "error": "Something went wrong",
@@ -226,5 +247,123 @@
     "sleightOfHand": "Sleight of Hand",
     "stealth": "Stealth",
     "survival": "Survival"
+  },
+  "abilities": {
+    "strength": {
+      "label": "Strength",
+      "short": "STR"
+    },
+    "dexterity": {
+      "label": "Dexterity",
+      "short": "DEX"
+    },
+    "constitution": {
+      "label": "Constitution",
+      "short": "CON"
+    },
+    "intelligence": {
+      "label": "Intelligence",
+      "short": "INT"
+    },
+    "wisdom": {
+      "label": "Wisdom",
+      "short": "WIS"
+    },
+    "charisma": {
+      "label": "Charisma",
+      "short": "CHA"
+    }
+  },
+  "stats": {
+    "hitPoints": "Hit points",
+    "speed": "Speed",
+    "armorClass": "Armor class",
+    "initiative": "Initiative",
+    "spellSaveDC": "Spell save DC",
+    "spellAttackBonus": "Spell attack bonus",
+    "spellSlots": "Spell slots",
+    "moral": "Morale"
+  },
+  "spellLevels": {
+    "0": "Cantrip",
+    "1": "1st level",
+    "2": "2nd level",
+    "3": "3rd level",
+    "4": "4th level",
+    "5": "5th level",
+    "6": "6th level",
+    "7": "7th level",
+    "8": "8th level",
+    "9": "9th level"
+  },
+  "ungrouped": {
+    "spellGroup": "No group",
+    "mainSkill": "No main skill",
+    "race": "No race",
+    "artifactSet": "No set",
+    "branch": "No branch"
+  },
+  "damageTypes": {
+    "fire": "Fire",
+    "cold": "Cold",
+    "lightning": "Lightning",
+    "acid": "Acid",
+    "poison": "Poison",
+    "necrotic": "Necrotic",
+    "radiant": "Radiant",
+    "thunder": "Thunder",
+    "psychic": "Psychic",
+    "force": "Force",
+    "bludgeoning": "Bludgeoning",
+    "piercing": "Piercing",
+    "slashing": "Slashing",
+    "bleed": "Bleed"
+  },
+  "dmSections": {
+    "scenario": "Scenario",
+    "characters": "Characters",
+    "units": "Units",
+    "spells": "Spells",
+    "artifacts": "Artifacts",
+    "skills": "Skills",
+    "skill-trees": "Skill trees",
+    "races": "Races",
+    "classes": "Classes",
+    "backgrounds": "Backgrounds",
+    "feats": "Feats",
+    "battles": "Battles",
+    "music": "Music",
+    "show": "Show",
+    "spell-groups": "Schools of magic",
+    "rules": "Rules",
+    "artifact-sets": "Artifact sets",
+    "assistant": "Assistant",
+    "ai": "AI and API"
+  },
+  "dmMenu": {
+    "scenario": "Scenario",
+    "characters": "Characters",
+    "units": "NPC Units",
+    "spells": "Spells",
+    "artifacts": "Artifacts",
+    "skills": "Skill Library",
+    "skill-trees": "Skill Trees",
+    "races": "Playable Races",
+    "classes": "Classes",
+    "backgrounds": "Backgrounds",
+    "feats": "Feats",
+    "battles": "Battle Scenes",
+    "music": "Battle Music",
+    "show": "Scene Show",
+    "spell-groups": "Schools of magic",
+    "rules": "Rules",
+    "artifact-sets": "Artifact sets",
+    "assistant": "Assistant",
+    "ai": "AI and API"
+  },
+  "tabs": {
+    "basic": "Basics",
+    "abilities": "Abilities",
+    "choices": "Choices"
   }
 }

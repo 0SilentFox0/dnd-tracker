@@ -58,11 +58,9 @@
     "editSaving": "Saving...",
     "editIconHint": "On save a new external link is uploaded to the {bucket} bucket. A URL already on Supabase stays unchanged.",
     "tabs": {
-      "basic": "Basics",
       "weapon": "Weapon",
       "armor": "Armor",
-      "item": "Item",
-      "abilities": "Abilities"
+      "item": "Item"
     },
     "name": "Name",
     "namePlaceholder": "For example: Ring of Sar Issa",
@@ -185,9 +183,7 @@
     },
     "form": {
       "tabs": {
-        "basic": "Basics",
-        "members": "Artifacts",
-        "abilities": "Abilities"
+        "members": "Artifacts"
       },
       "name": "Set name *",
       "namePlaceholder": "For example, Dragon's Legacy",

@@ -30,11 +30,6 @@
   "form": {
     "editTitle": "Edit feat",
     "editAside": "Type, prerequisites, abilities and nested choices",
-    "tabs": {
-      "basics": "Basics",
-      "abilities": "Abilities",
-      "choices": "Choices"
-    },
     "name": "Feat name *",
     "icon": "Feat icon",
     "type": "Feat type",

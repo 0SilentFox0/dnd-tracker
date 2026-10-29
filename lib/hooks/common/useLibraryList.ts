@@ -43,7 +43,7 @@ export function useLibraryList<T, TCreate>({ query, create, remove, texts }: Use
     create: (data: TCreate) =>
       create.mutate(data, { onSuccess: () => setCreateOpen(false), onError: (error) => void notify(errorMessage(error, texts.createError)) }),
     remove: async (id: string) => {
-      if (!(await confirm({ title: texts.confirmDelete, confirmLabel: t("confirm.delete"), destructive: true }))) return;
+      if (!(await confirm({ title: texts.confirmDelete, confirmLabel: t("actions.delete"), destructive: true }))) return;
 
       remove.mutate(id, { onError: (error) => void notify(errorMessage(error, texts.deleteError)) });
     },

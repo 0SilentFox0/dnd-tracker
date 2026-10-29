@@ -148,11 +148,11 @@ describe("ArtifactForm", () => {
     fireEvent.change(slotSelect as HTMLSelectElement, { target: { value: ArtifactSlot.RING } });
 
     expect(screen.queryByRole("tab", { name: "artifacts.form.tabs.weapon" })).toBeNull();
-    expect(screen.getByRole("tab", { name: "artifacts.form.tabs.basic" })).toHaveAttribute("data-state", "active");
+    expect(screen.getByRole("tab", { name: "common.tabs.basic" })).toHaveAttribute("data-state", "active");
 
     fireEvent.change(Array.from(document.querySelectorAll<HTMLSelectElement>("select")).find((el) => el.value === ArtifactSlot.RING) as HTMLSelectElement, { target: { value: "weapon" } });
 
     expect(screen.getByRole("tab", { name: "artifacts.form.tabs.weapon" })).toHaveAttribute("data-state", "inactive");
-    expect(screen.getByRole("tab", { name: "artifacts.form.tabs.basic" })).toHaveAttribute("data-state", "active");
+    expect(screen.getByRole("tab", { name: "common.tabs.basic" })).toHaveAttribute("data-state", "active");
   });
 });

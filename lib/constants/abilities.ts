@@ -38,8 +38,7 @@ export const ABILITY_SHORT_LABELS: Record<AbilityKey, string> = {
   charisma: "ХАР",
 };
 
-export const ABILITY_SCORES = [
-  ...CORE_ABILITY_SCORES,
+export const STAT_SCORES = [
   { key: "hitPoints", label: "Хіти", abbreviation: "HP" },
   { key: "speed", label: "Швидкість", abbreviation: "SPD" },
   { key: "armorClass", label: "Захист", abbreviation: "AC" },
@@ -49,6 +48,8 @@ export const ABILITY_SCORES = [
   { key: "spellSlots", label: "Заклинання", abbreviation: "SS" },
   { key: "moral", label: "Мораль", abbreviation: "MOR" },
 ] as const;
+
+export const ABILITY_SCORES = [...CORE_ABILITY_SCORES, ...STAT_SCORES] as const;
 
 
 export const DEFAULT_AREA_TARGETS = 3;

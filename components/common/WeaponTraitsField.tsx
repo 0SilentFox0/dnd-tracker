@@ -5,7 +5,7 @@ import { useTranslations } from "next-intl";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { WEAPON_TRAIT_LABELS, WEAPON_TRAITS, type WeaponTrait } from "@/lib/constants/weapon-traits";
+import { WEAPON_TRAITS, type WeaponTrait } from "@/lib/constants/weapon-traits";
 
 type TraitsValue = { traits?: WeaponTrait[]; versatileDice?: string };
 
@@ -43,7 +43,7 @@ export function WeaponTraitsField<T extends TraitsValue>({ idPrefix, value, onCh
         {WEAPON_TRAITS.map((trait) => (
           <label key={trait} htmlFor={`${idPrefix}-trait-${trait}`} className="flex items-center gap-2 text-sm">
             <Checkbox id={`${idPrefix}-trait-${trait}`} checked={traits.includes(trait)} onCheckedChange={(v) => toggle(trait, v === true)} />
-            {WEAPON_TRAIT_LABELS[trait]}
+            {t(`traits.${trait}`)}
           </label>
         ))}
       </div>

@@ -36,7 +36,7 @@ export function ArtifactSetForm({ campaignId, setId, initial = {} }: ArtifactSet
   const tabs: HudTab<ArtifactSetFormTabId>[] = [
     {
       id: ARTIFACT_SET_FORM_TAB.basic,
-      label: t("tabs.basic"),
+      label: tCommon("tabs.basic"),
       content: (
         <div className="space-y-5">
           <div className="space-y-2">
@@ -89,7 +89,7 @@ export function ArtifactSetForm({ campaignId, setId, initial = {} }: ArtifactSet
     },
     {
       id: ARTIFACT_SET_FORM_TAB.abilities,
-      label: t("tabs.abilities"),
+      label: tCommon("tabs.abilities"),
       invalid: editor.abilities.errors > 0 || abilityIssues.length > 0,
       content: (
         <AbilityListEditor

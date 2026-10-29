@@ -5,7 +5,6 @@ import { useTranslations } from "next-intl";
 import { OptionButton } from "@/components/hud/OptionButton";
 import { ABILITY_KEYS, ABILITY_LABELS, ABILITY_SCORE_CAP, type AbilityKey } from "@/lib/constants/abilities";
 import { DND_SKILLS, type DndSkill } from "@/lib/constants/skills";
-import { spellLevelName } from "@/lib/constants/spells";
 import { useTranslator } from "@/lib/i18n/use-translator";
 import { MULTICLASS_SKILLS_ID } from "@/lib/utils/characters/choices/class-choices";
 import { resolveChoiceCount } from "@/lib/utils/characters/choices/count";
@@ -186,6 +185,8 @@ function AbilityPoints({ choice, value, onChange, scores, after: scoreAfter }: {
 function SpellList({ choice, ids, ctx, onToggle }: { choice: Choice; ids: string[]; ctx: PickerContext; onToggle: (id: string) => void }) {
   const t = useTranslations("choices");
 
+  const tc = useTranslator("common");
+
   const rule = choice.spells;
 
   if (!rule) return null;
@@ -197,7 +198,7 @@ function SpellList({ choice, ids, ctx, onToggle }: { choice: Choice; ids: string
   return (
     <div className="grid max-h-72 gap-1 overflow-y-auto sm:grid-cols-2">
       {shown.map((s) => (
-        <Card key={s.id} role="checkbox" checked={ids.includes(s.id)} onClick={() => onToggle(s.id)} title={s.name} note={spellLevelName(s.level)} />
+        <Card key={s.id} role="checkbox" checked={ids.includes(s.id)} onClick={() => onToggle(s.id)} title={s.name} note={tc(`spellLevels.${s.level}`)} />
       ))}
       {shown.length === 0 && <p className="text-xs text-hud-muted">{t("picker.noSpells", { lists: rule.lists.join(", ") || "—" })}</p>}
     </div>

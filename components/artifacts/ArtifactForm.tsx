@@ -89,7 +89,7 @@ export function ArtifactForm({ campaignId, artifactSets, initial, mode, labels, 
   const tabs: HudTab<ArtifactFormTabId>[] = [
     {
       id: ARTIFACT_FORM_TAB.basic,
-      label: t("artifacts.form.tabs.basic"),
+      label: t("common.tabs.basic"),
       content: (
         <div className="space-y-5">
           <div className="grid gap-4 md:grid-cols-2">
@@ -181,7 +181,7 @@ export function ArtifactForm({ campaignId, artifactSets, initial, mode, labels, 
     },
     {
       id: ARTIFACT_FORM_TAB.abilities,
-      label: t("artifacts.form.tabs.abilities"),
+      label: t("common.tabs.abilities"),
       invalid: editor.abilities.errors > 0 || initial.abilityIssues.length > 0,
       content: (
         <AbilityListEditor

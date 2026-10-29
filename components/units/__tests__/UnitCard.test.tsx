@@ -35,9 +35,9 @@ describe("UnitCard delete", () => {
 
     render(<UnitCard unit={unit} campaignId="c1" onDelete={onDelete} />);
     fireEvent.click(screen.getByRole("button", { name: "Видалити юніт Гоблін" }));
-    fireEvent.click(await screen.findByRole("button", { name: "common.confirm.cancel" }));
+    fireEvent.click(await screen.findByRole("button", { name: "common.actions.cancel" }));
 
-    await waitFor(() => expect(screen.queryByRole("button", { name: "common.confirm.cancel" })).toBeNull());
+    await waitFor(() => expect(screen.queryByRole("button", { name: "common.actions.cancel" })).toBeNull());
     await new Promise((r) => setTimeout(r, 0));
     expect(onDelete).not.toHaveBeenCalled();
   });

@@ -46,7 +46,7 @@ export function DMCharactersClient({ campaignId, type, maxLevel }: DMCharactersC
             <PartyRestActions campaignId={campaignId} characters={page.query.data ?? []} />
             <DeleteAllButton
               count={characterCount}
-              nouns={["персонаж", "персонажі", "персонажів"]}
+              noun="персонажі"
               confirm={{
                 title: "Видалити всіх персонажів?",
                 label: "Видалити всіх",

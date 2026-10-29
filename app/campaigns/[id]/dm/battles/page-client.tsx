@@ -9,7 +9,7 @@ export function DeleteAllBattlesButton({ campaignId, battlesCount }: { campaignI
   return (
     <DeleteAllButton
       count={battlesCount}
-      nouns={["битва", "битви", "битв"]}
+      noun="битви"
       confirm={{ description: `Ця дія видалить всі сцени бою з кампанії (${battlesCount} битв). Цю дію неможливо скасувати.` }}
       status={{ isPending: deleteAll.isPending }}
       actions={{ onConfirm: () => deleteAll.mutateAsync() }}

@@ -1,0 +1,68 @@
+{
+  "sections": {
+    "scenario": {
+      "title": "Scenario",
+      "subtitle": "Scenes, GM notes and hero biographies"
+    },
+    "characters": {
+      "title": "Characters",
+      "subtitle": "Manage player characters"
+    },
+    "units": {
+      "title": "Units",
+      "subtitle": "Manage mobs and units"
+    },
+    "spells": {
+      "title": "Spells",
+      "subtitle": "Campaign spell database"
+    },
+    "artifacts": {
+      "title": "Artifacts",
+      "subtitle": "Manage artifacts and sets"
+    },
+    "skills": {
+      "title": "Skills",
+      "subtitle": "Manage skills and their effects"
+    },
+    "skill-trees": {
+      "title": "Skill trees",
+      "subtitle": "Set up skill trees for races"
+    },
+    "races": {
+      "title": "Races",
+      "subtitle": "Manage races and their abilities"
+    },
+    "classes": {
+      "title": "Classes",
+      "subtitle": "Classes, subclasses and features by level"
+    },
+    "backgrounds": {
+      "title": "Backgrounds",
+      "subtitle": "Hero origin, skills and starting choices"
+    },
+    "feats": {
+      "title": "Feats",
+      "subtitle": "5e feats: origin, general, fighting styles, epic boons"
+    },
+    "battles": {
+      "title": "Battles",
+      "subtitle": "Create and manage battles"
+    },
+    "music": {
+      "title": "Music",
+      "subtitle": "Track library for the battle player"
+    },
+    "show": {
+      "title": "Show",
+      "subtitle": "Slide sets with music for players"
+    },
+    "spell-groups": {
+      "title": "Schools of magic",
+      "subtitle": "Spell groups and schools"
+    },
+    "rules": {
+      "title": "Rules",
+      "subtitle": "Campaign rules"
+    }
+  }
+}

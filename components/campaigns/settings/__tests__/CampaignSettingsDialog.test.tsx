@@ -48,7 +48,7 @@ describe("CampaignSettingsDialog: видалення", () => {
     renderDialog();
     fireEvent.click(screen.getByRole("button", { name: "Видалити кампанію" }));
     await screen.findByText("Видалити кампанію «Зоря»?");
-    fireEvent.click(screen.getAllByRole("button", { name: "common.confirm.cancel" }).pop() as HTMLElement);
+    fireEvent.click(screen.getAllByRole("button", { name: "common.actions.cancel" }).pop() as HTMLElement);
     await waitFor(() => expect(screen.queryByText("Видалити кампанію «Зоря»?")).not.toBeInTheDocument());
     expect(deleteCampaign).not.toHaveBeenCalled();
   });

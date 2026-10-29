@@ -34,7 +34,6 @@
     "aside": "Basics, features by level and subclasses",
     "tabs": {
       "map": "Map",
-      "basics": "Basics",
       "table": "Class table",
       "features": "Features by level",
       "subclasses": "Subclasses"

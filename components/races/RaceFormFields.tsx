@@ -36,6 +36,8 @@ export function RaceFormFields({
 }: RaceFormFieldsProps) {
   const t = useTranslations("races");
 
+  const tc = useTranslations("common");
+
   const [tab, setTab] = useState<RaceFormTabId>(RACE_FORM_TAB.basic);
 
   const [abilityErrors, setAbilityErrors] = useState(0);
@@ -52,7 +54,7 @@ export function RaceFormFields({
   const tabs: HudTab<RaceFormTabId>[] = [
     {
       id: RACE_FORM_TAB.basic,
-      label: t("form.tabs.basic"),
+      label: tc("tabs.basic"),
       content: (
         <div className="space-y-4">
           <div className="space-y-2">
@@ -130,7 +132,7 @@ export function RaceFormFields({
     },
     {
       id: RACE_FORM_TAB.abilities,
-      label: t("form.tabs.abilities"),
+      label: tc("tabs.abilities"),
       invalid: (abilityIssues?.length ?? 0) > 0 || abilityErrors > 0,
       content: (
         <AbilityListEditor

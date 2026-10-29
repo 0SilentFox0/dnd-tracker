@@ -49,7 +49,7 @@ export function DMSkillsPageClient({ campaignId }: { campaignId: string }) {
             )}
             <DeleteAllButton
               count={skills.length}
-              nouns={[t("deleteAllNouns"), t("deleteAllNouns"), t("deleteAllNouns")]}
+              noun={t("deleteAllNouns")}
               confirm={{ description: t("deleteAllDescription", { count: skills.length }) }}
               actions={{ onConfirm: actions.removeAll }}
             />

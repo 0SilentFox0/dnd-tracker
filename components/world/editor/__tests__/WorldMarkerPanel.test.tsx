@@ -70,7 +70,7 @@ describe("WorldMarkerPanel", () => {
 
     expect(await screen.findByText(/вкладені карти/)).toBeTruthy();
 
-    fireEvent.click(screen.getByRole("button", { name: "common.confirm.cancel" }));
+    fireEvent.click(screen.getByRole("button", { name: "common.actions.cancel" }));
     await waitFor(() => expect(screen.queryByText(/вкладені карти/)).toBeNull());
 
     expect(remove).not.toHaveBeenCalled();

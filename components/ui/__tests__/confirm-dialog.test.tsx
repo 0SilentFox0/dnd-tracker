@@ -46,7 +46,7 @@ describe("useConfirm", () => {
     act(() => {
       p = confirm({ title: "Ще раз?" });
     });
-    fireEvent.click(await screen.findByRole("button", { name: "common.confirm.cancel" }));
+    fireEvent.click(await screen.findByRole("button", { name: "common.actions.cancel" }));
     await expect(p).resolves.toBe(false);
   });
 
@@ -142,7 +142,7 @@ describe("useConfirm", () => {
 
     expect(describedBy).toBeTruthy();
     expect(document.getElementById(describedBy ?? "")).toHaveTextContent("Оберіть хоча б одного учасника");
-    expect(screen.queryByRole("button", { name: "common.confirm.cancel" })).toBeNull();
+    expect(screen.queryByRole("button", { name: "common.actions.cancel" })).toBeNull();
     fireEvent.click(screen.getByRole("button", { name: "common.notify.gotIt" }));
     await expect(p).resolves.toBeUndefined();
   });
@@ -163,7 +163,7 @@ describe("useConfirm", () => {
 
     expect(sheet).toHaveAttribute("data-state", "closed");
     expect(sheet).toHaveTextContent("Видалити юніта?");
-    expect(sheet).not.toHaveTextContent("common.confirm.cancel");
+    expect(sheet).not.toHaveTextContent("common.actions.cancel");
   });
 
   it.each([false, true])("confirm без опису не дає попередження про aria-describedby (mobile=%s)", async (mobile) => {

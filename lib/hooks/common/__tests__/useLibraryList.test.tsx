@@ -38,12 +38,12 @@ describe("useLibraryList", () => {
     expect(confirm).toHaveBeenLastCalledWith(expect.objectContaining({ description: "del-fail" }));
   });
 
-  it("delete confirm uses the common.confirm.delete label", async () => {
+  it("delete confirm uses the common.actions.delete label", async () => {
     const { hook, confirm } = setup(false);
 
     await act(() => hook.result.current.remove("1"));
 
-    expect(confirm).toHaveBeenCalledWith(expect.objectContaining({ confirmLabel: "common.confirm.delete" }));
+    expect(confirm).toHaveBeenCalledWith(expect.objectContaining({ confirmLabel: "common.actions.delete" }));
   });
 
   it("closes the create dialog on success", () => {

@@ -38,9 +38,7 @@
     "loading": "Loading skill…",
     "backToLibrary": "Back to the skill library",
     "tabs": {
-      "basic": "Basics",
-      "spell": "Spell",
-      "abilities": "Abilities"
+      "spell": "Spell"
     },
     "basic": {
       "name": "Name",

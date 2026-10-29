@@ -46,7 +46,7 @@ export function DMSpellsPageClient({ campaignId }: { campaignId: string }) {
             )}
             <DeleteAllButton
               count={count}
-              nouns={["заклинання", "заклинання", "заклинань"]}
+              noun="заклинання"
               confirm={{
                 label: "Видалити всі заклинання",
                 description: `Ви впевнені, що хочете видалити всі заклинання з кампанії? Ця дія незворотна. Буде видалено ${count} ${pluralUk(count, ["заклинання", "заклинання", "заклинань"])}.`,

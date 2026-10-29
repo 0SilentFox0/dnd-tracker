@@ -32,7 +32,7 @@ export function SkillCreateForm({ campaignId, spells, initialMainSkills, initial
   const tabs: HudTab<SkillFormTabId>[] = [
     {
       id: SKILL_FORM_TAB.basic,
-      label: t("skills.form.tabs.basic"),
+      label: t("common.tabs.basic"),
       content: (
         <div className="space-y-5">
           <SkillBasicInfo form={form} />
@@ -47,7 +47,7 @@ export function SkillCreateForm({ campaignId, spells, initialMainSkills, initial
     },
     {
       id: SKILL_FORM_TAB.abilities,
-      label: t("skills.form.tabs.abilities"),
+      label: t("common.tabs.abilities"),
       invalid: !abilities.valid,
       content: (
         <AbilityListEditor

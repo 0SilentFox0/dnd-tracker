@@ -21,10 +21,6 @@
   "form": {
     "editTitle": "Edit background",
     "editAside": "Abilities, skills, tools and the origin feat",
-    "tabs": {
-      "basics": "Basics",
-      "choices": "Choices"
-    },
     "name": "Background name *",
     "icon": "Background icon",
     "description": "Description",

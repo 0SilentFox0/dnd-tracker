@@ -94,13 +94,13 @@ lib/constants/{campaigns,campaign-dashboard,source-sync}.ts
 ```
 (`lib/utils/characters/classes/columns.ts`, `choices/columns.ts` уже є — дубль glob-а не шкодить, але прибрати поштучні рядки, якщо покриті.) Перевірка: `pnpm exec eslint "app/campaigns/[id]/dm/units/page-client.tsx"` дає помилки храповика.
 
-- [ ] **Step 1:** `pnpm exec prisma generate`. `rg` у `app/` поза `app/campaigns` на імпорти компонентів скоупу (очікується порожньо; інакше — у звіт). Порожні ns, `NAMESPACES`, `global.d.ts`, `scopes.ts`, layout.
-- [ ] **Step 2: Failing tests** — `scope-size.test.ts` (gzip `JSON.stringify(await loadMessages(locale, CAMPAIGN_NAMESPACES))` < 100 KB, лог розміру); `label-keys.test.ts` на `expectLabelKeys` + нові записи `common.abilities` (`ABILITY_KEYS`), `common.spellLevels` (0..9), `common.ungrouped`, `common.damageTypes`, `common.monster.senses/sizes`, `common.weaponTraits.traits` (`WEAPON_TRAITS`), `common.dmSections` (`DM_SECTIONS.map(s => s.path)`) → FAIL → наповнити → PASS.
-- [ ] **Step 3:** `makeT.rich/markup` + тест у `test-helpers.test.tsx`; `DeleteAllButton` `noun` + 6 викликачів (`t("deleteAll.noun")` у мігрованих; літерал у немігрованих: «персонажі», «юніти», «заклинання», «битви» — їх перекладуть задачі 4, 10, 8; `battles` — ч.6); `NameOnlyCreateDialog` + переведення feat/background (/class) діалогів, їхні тести зелені.
-- [ ] **Step 4:** дублі вкладок → `common.tabs.*` (JSON ч.3 + споживачі), `common.confirm.{cancel,delete}` → `actions.*`; `MonsterStatblock`/`WeaponTraitsField`/`AbilityScoresGrid`/`AbbreviationsInfoDialog`/`Header`/`Breadcrumbs`/`ChoicePicker` → ключі `common.*`; `lib/constants/campaigns.ts` без підписів.
-- [ ] **Step 5:** `API_ERRORS` + `errors.json`; `timeZone` у `request.ts` (перевірити, що `LocaleScope`-провайдер його успадковує — тест `locale-providers`). `pnpm test:run lib/i18n lib/constants/__tests__/api-errors-coverage.test.ts components/common components/layout` PASS; `pnpm test:related` на змінених компонентах ч.1–3.
-- [ ] **Step 6:** `i18n-migrated.json`; `pnpm exec tsc --noEmit` чисто (порожні ns ще ніхто не читає). Записати розмір зі `scope-size` у звіт.
-- [ ] **Step 7: Commit** `feat(i18n): part 4 scaffold — namespaces, shared labels, ratchet globs, tails of part 3`.
+- [x] **Step 1:** `pnpm exec prisma generate`. `rg` у `app/` поза `app/campaigns` на імпорти компонентів скоупу (очікується порожньо; інакше — у звіт). Порожні ns, `NAMESPACES`, `global.d.ts`, `scopes.ts`, layout.
+- [x] **Step 2: Failing tests** — `scope-size.test.ts` (gzip `JSON.stringify(await loadMessages(locale, CAMPAIGN_NAMESPACES))` < 100 KB, лог розміру); `label-keys.test.ts` на `expectLabelKeys` + нові записи `common.abilities` (`ABILITY_KEYS`), `common.spellLevels` (0..9), `common.ungrouped`, `common.damageTypes`, `common.monster.senses/sizes`, `common.weaponTraits.traits` (`WEAPON_TRAITS`), `common.dmSections` (`DM_SECTIONS.map(s => s.path)`) → FAIL → наповнити → PASS.
+- [x] **Step 3:** `makeT.rich/markup` + тест у `test-helpers.test.tsx`; `DeleteAllButton` `noun` + 6 викликачів (`t("deleteAll.noun")` у мігрованих; літерал у немігрованих: «персонажі», «юніти», «заклинання», «битви» — їх перекладуть задачі 4, 10, 8; `battles` — ч.6); `NameOnlyCreateDialog` + переведення feat/background (/class) діалогів, їхні тести зелені.
+- [x] **Step 4:** дублі вкладок → `common.tabs.*` (JSON ч.3 + споживачі), `common.confirm.{cancel,delete}` → `actions.*`; `MonsterStatblock`/`WeaponTraitsField`/`AbilityScoresGrid`/`AbbreviationsInfoDialog`/`Header`/`Breadcrumbs`/`ChoicePicker` → ключі `common.*`; `lib/constants/campaigns.ts` без підписів.
+- [x] **Step 5:** `API_ERRORS` + `errors.json`; `timeZone` у `request.ts` (перевірити, що `LocaleScope`-провайдер його успадковує — тест `locale-providers`). `pnpm test:run lib/i18n lib/constants/__tests__/api-errors-coverage.test.ts components/common components/layout` PASS; `pnpm test:related` на змінених компонентах ч.1–3.
+- [x] **Step 6:** `i18n-migrated.json`; `pnpm exec tsc --noEmit` чисто (порожні ns ще ніхто не читає). Записати розмір зі `scope-size` у звіт.
+- [x] **Step 7: Commit** `feat(i18n): part 4 scaffold — namespaces, shared labels, ratchet globs, tails of part 3`.
 
 ### Task 2: campaigns (≈ 20 файлів)
 
@@ -263,3 +263,5 @@ abilityRegistry.options.<group>.<value> · .stats.<key> · .targets.<t> · .dama
 ## Хід виконання
 
 _(заповнює контролер: коміти задач, розмір ns, рішення задач 12/13 про ключі полів і `templates/sync`)_
+
+- Task 1 (каркас): done. scope-size: uk 38,9 KB raw / 16,0 KB gzip, en 37,9 / 12,6. Відхилення: додано `common.dmMenu.<path>` (назви пунктів меню Header відрізняються від крихт: «NPC Юніти»), `dashboard.sections.<path>.{title,subtitle}` — лише для 16 плиток (без keywords/info/acquaintances/player — це задача 3), `STAT_SCORES` у `lib/constants/abilities.ts`, `APP_TIME_ZONE` у `lib/i18n/config.ts` (передається і в клієнтські провайдери). Храповик навмисно червоніє на `lib/constants/{campaign-dashboard,source-sync}.ts` і всьому скоупі до задач 2–14.

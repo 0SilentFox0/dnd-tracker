@@ -11,7 +11,7 @@ describe("ArtifactWeaponFields traits", () => {
     const onChange = vi.fn();
 
     render(<ArtifactWeaponFields value={{ damageDice: "1d8" }} onChange={onChange} />);
-    fireEvent.click(screen.getByRole("checkbox", { name: "Фехтувальна" }));
+    fireEvent.click(screen.getByRole("checkbox", { name: "common.weaponTraits.traits.finesse" }));
 
     expect(onChange).toHaveBeenCalledWith({ damageDice: "1d8", traits: ["finesse"] });
   });
@@ -20,7 +20,7 @@ describe("ArtifactWeaponFields traits", () => {
     const onChange = vi.fn();
 
     render(<ArtifactWeaponFields value={{ traits: ["light"] }} onChange={onChange} />);
-    fireEvent.click(screen.getByRole("checkbox", { name: "Легка" }));
+    fireEvent.click(screen.getByRole("checkbox", { name: "common.weaponTraits.traits.light" }));
 
     expect(onChange).toHaveBeenCalledWith({});
   });
