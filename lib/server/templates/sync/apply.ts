@@ -144,15 +144,7 @@ async function deleteRemoved(db: SyncDb, ctx: SyncContext, selected: Map<string,
   }
 }
 
-async function writeTables(db: SyncDb, ctx: SyncContext, selected: Map<string, SyncItem>): Promise<string[]> {
-  const warnings: string[] = [];
-
-  const index = indexOf(ctx);
-
-  const map = new Map(index.sourceToLocal);
-
-  for (const i of selected.values()) if (i.status === "new" || i.status === "deletedLocally") map.set(i.key, newContentId());
-
+async function assertResultingGraph(db: SyncDb, ctx: SyncContext, index: ReturnType<typeof indexOf>, selected: Map<string, SyncItem>, map: Map<string, string>) {
   // Validate the resulting graph before any writes, including refs to unchanged local rows.
   const effective = new Map(ctx.target.rows.map((r) => [r.row.id, { table: r.table, row: r.row as Record<string, unknown> }]));
 
@@ -212,6 +204,18 @@ async function writeTables(db: SyncDb, ctx: SyncContext, selected: Map<string, S
       }
     }
   }
+}
+
+async function writeTables(db: SyncDb, ctx: SyncContext, selected: Map<string, SyncItem>): Promise<string[]> {
+  const warnings: string[] = [];
+
+  const index = indexOf(ctx);
+
+  const map = new Map(index.sourceToLocal);
+
+  for (const i of selected.values()) if (i.status === "new" || i.status === "deletedLocally") map.set(i.key, newContentId());
+
+  await assertResultingGraph(db, ctx, index, selected, map);
 
   const written: unknown[] = [];
 

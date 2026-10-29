@@ -47,6 +47,32 @@ const tableOf = (key: string) => BUNDLE_TABLES.find((t) => t.key === key)!;
 
 type DomainRows = Map<TargetKind, Map<string, JsonRecord>>;
 
+async function addOfficialTemplateChoices(choices: DependencyChoice[], stillPending: Parameters<typeof matchTemplateRows>[0], allowMixedEdition: boolean | undefined) {
+  const official = await prisma.campaign.findMany({ where: { kind: CampaignKind.TEMPLATE, visibility: CampaignVisibility.OFFICIAL, name: SRD_TEMPLATE_NAME }, select: { id: true } });
+
+  for (const template of official) {
+    const names = await loadNames(template.id);
+
+    for (const p of matchTemplateRows(stillPending, names, allowMixedEdition)) {
+      if (!choices.some((c) => c.refKey === p.key)) choices.push({ refKey: p.key, templateId: template.id, kind: p.kind, localId: p.row.id, edition: "one" });
+    }
+  }
+}
+
+async function loadTemplateSnapshots(choices: DependencyChoice[]): Promise<TemplateSnapshot[]> {
+  const templates: TemplateSnapshot[] = [];
+
+  for (const templateId of new Set(choices.map((d) => d.templateId))) {
+    const template = await prisma.campaign.findFirst({ where: { id: templateId, kind: CampaignKind.TEMPLATE, visibility: CampaignVisibility.OFFICIAL, name: SRD_TEMPLATE_NAME }, select: { id: true } });
+
+    if (!template) throw new CompendiumError("DEPENDENCY_TEMPLATE_UNAVAILABLE");
+
+    templates.push({ id: templateId, edition: "one", rows: await loadTemplateRows(templateId) });
+  }
+
+  return templates;
+}
+
 async function loadNames(campaignId: string) {
   const names: Record<string, Array<{ id: string; name: string }>> = {};
 
@@ -185,27 +211,9 @@ export const prismaImportRepository: ImportRepository = {
 
     const stillPending = pending.filter((p) => !(p.key in bindings));
 
-    if (stillPending.length) {
-      const official = await prisma.campaign.findMany({ where: { kind: CampaignKind.TEMPLATE, visibility: CampaignVisibility.OFFICIAL, name: SRD_TEMPLATE_NAME }, select: { id: true } });
+    if (stillPending.length) await addOfficialTemplateChoices(choices, stillPending, input.allowMixedEdition);
 
-      for (const template of official) {
-        const names = await loadNames(template.id);
-
-        for (const p of matchTemplateRows(stillPending, names, input.allowMixedEdition)) {
-          if (!choices.some((c) => c.refKey === p.key)) choices.push({ refKey: p.key, templateId: template.id, kind: p.kind, localId: p.row.id, edition: "one" });
-        }
-      }
-    }
-
-    const templates: TemplateSnapshot[] = [];
-
-    for (const templateId of new Set(choices.map((d) => d.templateId))) {
-      const template = await prisma.campaign.findFirst({ where: { id: templateId, kind: CampaignKind.TEMPLATE, visibility: CampaignVisibility.OFFICIAL, name: SRD_TEMPLATE_NAME }, select: { id: true } });
-
-      if (!template) throw new CompendiumError("DEPENDENCY_TEMPLATE_UNAVAILABLE");
-
-      templates.push({ id: templateId, edition: "one", rows: await loadTemplateRows(templateId) });
-    }
+    const templates = await loadTemplateSnapshots(choices);
 
     const dependencies = buildDependencyClosure(templates, choices, input.allowMixedEdition);
 

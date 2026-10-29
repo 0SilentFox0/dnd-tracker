@@ -17,9 +17,9 @@
 
 ## Залишок кроку 6 (за бажанням, окремі малі задачі)
 
-- `loadContext` (`lib/server/compendium-import/repository.ts`) і `writeTables` (`lib/server/templates/sync/apply.ts`): не чіпали через гілку `feat/obojima-import-fixes`; брати після її merge.
-- `useEmailAuth` (227 рядків): у кроці 6 не змінювався, перевірити, чи є очевидний шов.
-- `MapToken` (10 props) і `MapTokenHud` (8) понад ліміт ≤7: треба згрупувати `selected/current/passThrough/dormant`, але це вимагає окремого мемо на жетон.
+- `loadContext` і `writeTables`: закрито в `refactor/audit-step6-rest` (витягнуто `addOfficialTemplateChoices`, `loadTemplateSnapshots`, `assertResultingGraph`; поведінка та сама).
+- `useEmailAuth` (227 рядків): шва немає — файл із 7 малих хуків (<60 рядків кожен) і спільним `useRequestState`; не чіпали.
+- `MapToken` (10 props) і `MapTokenHud` (8) понад ліміт ≤7: треба згрупувати `selected/current/passThrough/dormant`, але група props як об'єкт ламає `memo(MapToken)` без окремого мемо на жетон у `BattleMap`; не робили (ризик перформансу карти).
 - Ручний `ResizeObserver` у `BattleMap` (аудит C37): `useElementSize` дає `getBoundingClientRect`, а не `contentRect`, тож не 1:1.
 - Свідомо пропущено з `/simplify`: спільний хук для `useAttackSubmit`/`useSpellCastSubmit`; `assertNotHeld` для inventory/stash; розбір торб `CastPlan`/`AttackRun`/`PhaseCtx`/`StreamScope`; `calculateAttackRoll` один раз (змінює порядок RNG); вузькі селектори `useBattleScene` (нові хуки читають повний `useBattleScene()`).
 - Поки відкрито: перевірка в браузері карти бою (токени, HUD, pan/zoom), діалогу додавання учасника, редактора світу і діалогу знайомих.
