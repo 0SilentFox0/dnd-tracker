@@ -128,7 +128,7 @@ describe("world API", () => {
   it("карта іншої кампанії — 403, неіснуюча — 404", async () => {
     const mi = await mapById();
 
-    vi.mocked(prisma.worldMap.findUnique).mockResolvedValueOnce(mapRow({ campaignId: "other" }) as never);
+    vi.mocked(prisma.worldMap.findUnique).mockResolvedValueOnce(mapRow({ campaignId: "other", markers: [] }) as never);
     expect((await mi.GET(json("GET"), ctx({ mapId: "m1" }))).status).toBe(403);
 
     vi.mocked(prisma.worldMap.findUnique).mockResolvedValueOnce(null);

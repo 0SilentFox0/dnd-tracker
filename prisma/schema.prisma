@@ -285,6 +285,8 @@ model Spell {
   sourceHash            String?
 
   @@index([campaignId])
+  @@index([groupId])
+  @@index([summonUnitId])
   @@map("spells")
 }
 
@@ -325,6 +327,7 @@ model Artifact {
   sourceHash  String?
 
   @@index([campaignId])
+  @@index([setId])
   @@map("artifacts")
 }
 
@@ -376,6 +379,7 @@ model InventoryLog {
   character   Character @relation(fields: [characterId], references: [id], onDelete: Cascade)
 
   @@index([characterId, createdAt(sort: Desc)])
+  @@index([campaignId])
   @@map("inventory_log")
 }
 
@@ -391,6 +395,7 @@ model CharacterLog {
   character   Character @relation(fields: [characterId], references: [id], onDelete: Cascade)
 
   @@index([characterId, createdAt(sort: Desc)])
+  @@index([campaignId])
   @@map("character_logs")
 }
 
@@ -605,6 +610,11 @@ model Skill {
 
   @@index([campaignId])
   @@index([campaignId, id])
+  @@index([mainSkillId])
+  @@index([spellGroupId])
+  @@index([spellId])
+  @@index([grantedSpellId])
+  @@index([spellNewSpellId])
   @@map("skills")
 }
 
@@ -896,6 +906,8 @@ model AiProposal {
   page           ScenarioPage @relation(fields: [pageId], references: [id], onDelete: Cascade)
 
   @@index([pageId, status])
+  @@index([campaignId])
+  @@index([threadId])
   @@map("ai_proposals")
 }
 
