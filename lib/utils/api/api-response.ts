@@ -1,4 +1,4 @@
-import type { NextResponse } from "next/server";
+import { NextResponse } from "next/server";
 
 import { PRIVATE_NO_STORE_HEADERS } from "./cache-headers";
 import { apiErrorJson } from "./translate-error";
@@ -16,3 +16,5 @@ export const attachmentHeaders = (fileName: string, contentType?: string): Recor
   "Content-Disposition": `attachment; filename="${fileName}"`,
   ...PRIVATE_NO_STORE_HEADERS,
 });
+
+export const privateJson = (body: unknown, status = 200) => NextResponse.json(body, { status, headers: PRIVATE_NO_STORE_HEADERS });

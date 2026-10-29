@@ -5,15 +5,14 @@ import { jsonContent } from "./content-snapshot";
 import { API_ERRORS } from "@/lib/constants/api-errors";
 import { ContentError } from "@/lib/server/content/errors";
 import type { ContentOperationId } from "@/lib/server/content/operation-service";
+import { asRecord } from "@/lib/utils/common/json";
 import { mergeRules, parseRules, RulesetPatchSchema } from "@/lib/utils/rules/schema";
 
 type Row = Record<string, unknown>;
 
-const object = (value: unknown): Row => value && typeof value === "object" && !Array.isArray(value) ? value as Row : {};
-
 /** Read-only projections over the same uncached, locked rows used by the guard. */
 export function operationPreview(id: ContentOperationId, input: Row, state: unknown): { changes: FieldChange[]; targets: TargetRef[] } | null {
-  const root = object(state), tables = object(root.tables), body = object(input.body);
+  const root = asRecord(state), tables = asRecord(root.tables), body = asRecord(input.body);
 
   const rows = (key: string): Row[] => Array.isArray(tables[key]) ? tables[key] as Row[] : [];
 
@@ -59,7 +58,7 @@ export function operationPreview(id: ContentOperationId, input: Row, state: unkn
       break;
     }
     case "rules.update": {
-      const before = parseRules(object(root.campaign).rules);
+      const before = parseRules(asRecord(root.campaign).rules);
 
       const merged = mergeRules(before, RulesetPatchSchema.parse(body));
 

@@ -8,6 +8,7 @@ import { ContentError } from "@/lib/server/content/errors";
 import { errorResponse } from "@/lib/utils/api/api-response";
 import { planChoices } from "@/lib/utils/characters/choices/plan";
 import type { ChoiceRefs } from "@/lib/utils/characters/choices/walk";
+import { toInputJson } from "@/lib/utils/common/json";
 import type { Ruleset } from "@/lib/utils/rules/schema";
 import type { ChoicesState } from "@/types/choices";
 import type { CharacterClassEntry } from "@/types/classes";
@@ -15,8 +16,6 @@ import type { CharacterClassEntry } from "@/types/classes";
 export type ChoiceFields = { raceChoices: Prisma.InputJsonValue; feats: Prisma.InputJsonValue; classes: Prisma.InputJsonValue; subrace?: string | null; backgroundId?: string | null; backgroundChoices?: Prisma.InputJsonValue; backgroundFeatPicks?: Prisma.InputJsonValue } & Partial<Record<AbilityKey, number>>;
 
 export const characterClassMode = (rules: Ruleset, classes: readonly CharacterClassEntry[]): boolean => rules.classes.enabled && classes.length > 0;
-
-const json = (v: unknown) => v as Prisma.InputJsonValue;
 
 export async function resolveCharacterChoices(input: {
   campaignId: string;
@@ -42,10 +41,10 @@ export async function resolveCharacterChoices(input: {
     ok: true,
     state: plan.state,
     fields: {
-      ...(plan.state.backgroundId !== undefined && { backgroundId: plan.state.backgroundId, backgroundChoices: json(plan.state.backgroundChoices ?? {}), backgroundFeatPicks: json(plan.state.backgroundFeatPicks ?? {}) }),
-      raceChoices: json(plan.state.raceChoices),
-      feats: json(plan.state.feats),
-      classes: json(plan.state.classes),
+      ...(plan.state.backgroundId !== undefined && { backgroundId: plan.state.backgroundId, backgroundChoices: toInputJson(plan.state.backgroundChoices ?? {}), backgroundFeatPicks: toInputJson(plan.state.backgroundFeatPicks ?? {}) }),
+      raceChoices: toInputJson(plan.state.raceChoices),
+      feats: toInputJson(plan.state.feats),
+      classes: toInputJson(plan.state.classes),
       ...(plan.subrace !== undefined && { subrace: plan.subrace }),
       ...plan.scores,
     },

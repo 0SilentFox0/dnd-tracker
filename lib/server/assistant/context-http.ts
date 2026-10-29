@@ -9,6 +9,7 @@ import { API_ERRORS, type ErrorParams } from "@/lib/constants/api-errors";
 import { assistantContextPreviewSchema } from "@/lib/schemas/ai";
 import { ContentError } from "@/lib/server/content/errors";
 import { requireDM } from "@/lib/utils/api/api-auth";
+import { privateJson } from "@/lib/utils/api/api-response";
 import { PRIVATE_NO_STORE_HEADERS } from "@/lib/utils/api/cache-headers";
 import { parseBody } from "@/lib/utils/api/parse-body";
 import { checkRateLimit, rateLimitResponse } from "@/lib/utils/api/rate-limit";
@@ -16,7 +17,6 @@ import { isSameOriginRequest } from "@/lib/utils/api/same-origin";
 import { apiErrorJson } from "@/lib/utils/api/translate-error";
 import type { AssistantContextDisclosure } from "@/types/ai";
 
-const json=(body:unknown,status=200)=>NextResponse.json(body,{status,headers:PRIVATE_NO_STORE_HEADERS});
 
 const errorJson=(body:{error:string;params?:ErrorParams},status:number)=>apiErrorJson(body,{status,headers:PRIVATE_NO_STORE_HEADERS});
 
@@ -48,7 +48,7 @@ return response; }
 
     const result=await readCompendiumSummary(actor,"note-options",{offset,limit:20});
 
-    return json(result.data);
+    return privateJson(result.data);
    }
 
    const body=await parseBody(assistantContextPreviewSchema,req,undefined,{maxBytes:AI_BODY_LIMITS.contextPreview});
@@ -63,7 +63,7 @@ return response; }
 
    await buildInstructions({campaignId,mode:thread.mode,pageId:thread.scenarioPageId,focus:body.focus,caller:{actor,channel:"chat",tokenId:null,threadId:thread.id},...(body.sessionContext?.sourceNoteKeys.length&&{sourceNoteSelection:{source:"session-ui" as const,selectedKeys:body.sessionContext.sourceNoteKeys}}),onDisclosure:value=>{ disclosure=value; }});
 
-   return json({...disclosure,provider:thread.provider,model:thread.model,historyLimit:AI_LIMITS.historyMessages});
+   return privateJson({...disclosure,provider:thread.provider,model:thread.model,historyLimit:AI_LIMITS.historyMessages});
   }catch(error){ if(error instanceof ContentError)return errorJson({error:error.message,params:error.params},error.status);
 
 return errorJson({error:API_ERRORS.ASSISTANT_CONTEXT_PREVIEW_FAILED},500); }

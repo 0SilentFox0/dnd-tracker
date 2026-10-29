@@ -4,6 +4,7 @@ import type { ContentKind } from "@/lib/server/content/define-resource";
 
 export type Edition = "classic" | "one" | "unknown";
 export type TargetKind = ContentKind | "scenarioPages";
+export const TARGET_KINDS = ["units", "spells", "spell-groups", "artifacts", "races", "classes", "feats", "backgrounds", "scenarioPages"] as const satisfies readonly TargetKind[];
 export interface ImportIssue { code: string; severity: "warning" | "error"; path: string; action: string }
 export interface CompendiumRef { path: (string | number)[]; kind: string; name: string; source: string; edition: Edition; parent?: string[] }
 export interface AdaptedEntry {
