@@ -94,9 +94,11 @@ async function validateBindings(actor: Actor, content: ScenarioContent) {
       if (row.battleId && !await prisma.battleScene.findFirst({ where: { id: row.battleId, campaignId: actor.campaignId }, select: { id: true } })) throw new ContentError(API_ERRORS.BATTLE_UNAVAILABLE, 422);
 
       if (row.slide) {
+        const { slideId } = row.slide;
+
         const deck = await prisma.slideDeck.findFirst({ where: { id: row.slide.deckId, campaignId: actor.campaignId }, select: { slides: true } });
 
-        if (!deck || !Array.isArray(deck.slides) || !deck.slides.some(s => s && typeof s === "object" && "id" in s && s.id === row.slide!.slideId)) throw new ContentError(API_ERRORS.SCENARIO_SLIDE_UNAVAILABLE, 422);
+        if (!deck || !Array.isArray(deck.slides) || !deck.slides.some(s => s && typeof s === "object" && "id" in s && s.id === slideId)) throw new ContentError(API_ERRORS.SCENARIO_SLIDE_UNAVAILABLE, 422);
       }
     }
   }
