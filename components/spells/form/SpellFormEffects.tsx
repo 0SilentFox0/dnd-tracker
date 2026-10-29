@@ -6,8 +6,8 @@ import { X } from "lucide-react";
 import type { SpellFormFieldsProps } from "./SpellFormBasicFields";
 
 import { AbilityEditorProvider } from "@/components/abilities/editor-context";
-import { EffectCard } from "@/components/abilities/EffectCard";
 import { HudSection } from "@/components/hud/form";
+import { SpellEffectCard } from "@/components/spells/form/effects/SpellEffectCard";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
@@ -15,11 +15,9 @@ import { Label } from "@/components/ui/label";
 import { SelectField } from "@/components/ui/select-field";
 import type { ErrorParams } from "@/lib/constants/api-errors";
 import { useRaces } from "@/lib/hooks/races";
-import { allowedEffectKinds, newEffect } from "@/lib/utils/abilities/editor";
-import type { Effect, Trigger } from "@/lib/utils/abilities/schema";
-import { SpellEffectSchema } from "@/lib/utils/spells/model/schema";
-
-const TRIGGER: Trigger = { event: "action" };
+import { type AbilityError, allowedEffectKinds, newEffect } from "@/lib/utils/abilities/editor";
+import { SPELL_EFFECT_TRIGGER } from "@/lib/utils/spells/editor/spell-only";
+import { type SpellEffect, SpellEffectSchema } from "@/lib/utils/spells/model/schema";
 
 function bounds(issue: object): ErrorParams {
   const { minimum, maximum } = issue as { minimum?: unknown; maximum?: unknown };
@@ -38,13 +36,15 @@ export function SpellFormEffects({ campaignId, formData, setFormData }: SpellFor
 
   const { data: races = [] } = useRaces(campaignId);
 
-  const errorsByPath = Object.fromEntries(
-    formData.spellEffects.flatMap((effect, i) => {
-      const parsed = SpellEffectSchema.safeParse(effect);
+  const errorsByPath: Record<string, AbilityError[]> = {};
 
-      return parsed.success ? [] : [[`effects.${i}`, parsed.error.issues.map((issue) => ({ message: issue.message, params: { ...(issue as { params?: ErrorParams }).params, ...bounds(issue) } }))]];
-    }),
-  );
+  formData.spellEffects.forEach((effect, i) => {
+    const parsed = SpellEffectSchema.safeParse(effect);
+
+    if (parsed.success) return;
+
+    for (const issue of parsed.error.issues) (errorsByPath[["effects", i, ...issue.path].join(".")] ??= []).push({ message: issue.message, params: { ...(issue as { params?: ErrorParams }).params, ...bounds(issue) } });
+  });
 
   return (
     <>
@@ -55,10 +55,9 @@ export function SpellFormEffects({ campaignId, formData, setFormData }: SpellFor
         <AbilityEditorProvider value={{ campaignId, errorsByPath }}>
           <div className="space-y-2">
             {formData.spellEffects.map((effect, i) => (
-              <EffectCard
+              <SpellEffectCard
                 key={i}
-                effect={effect as Effect}
-                trigger={TRIGGER}
+                effect={effect as SpellEffect}
                 path={`effects.${i}`}
                 actions={{
                   onChange: (next) => setFormData({ ...formData, spellEffects: formData.spellEffects.map((x, j) => (j === i ? next : x)) }),
@@ -68,7 +67,7 @@ export function SpellFormEffects({ campaignId, formData, setFormData }: SpellFor
             ))}
           </div>
         </AbilityEditorProvider>
-        <Button type="button" size="sm" variant="outline" className="mt-2" onClick={() => setFormData({ ...formData, spellEffects: [...formData.spellEffects, newEffect(allowedEffectKinds(TRIGGER)[0], TRIGGER)] })}>
+        <Button type="button" size="sm" variant="outline" className="mt-2" onClick={() => setFormData({ ...formData, spellEffects: [...formData.spellEffects, newEffect(allowedEffectKinds(SPELL_EFFECT_TRIGGER)[0], SPELL_EFFECT_TRIGGER)] })}>
           {t("add")}
         </Button>
       </HudSection>

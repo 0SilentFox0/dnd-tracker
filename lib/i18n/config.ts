@@ -12,7 +12,7 @@ export const LOCALE_CHANGE_EVENT = "locale-change";
 
 export const APP_TIME_ZONE = "Europe/Kyiv";
 
-export const NAMESPACES = ["common", "validation", "errors", "auth", "landing", "onboarding", "whatsNew", "help", "races", "skills", "classes", "feats", "backgrounds", "artifacts", "music", "choices", "campaigns", "dashboard", "characters", "characterProfile", "inventory", "rest", "spells", "spellEditor", "units", "abilities", "abilityRegistry", "rules", "skillTree"] as const;
+export const NAMESPACES = ["common", "validation", "errors", "auth", "landing", "onboarding", "whatsNew", "help", "races", "skills", "classes", "feats", "backgrounds", "artifacts", "music", "choices", "campaigns", "dashboard", "characters", "characterProfile", "inventory", "rest", "spells", "spellEditor", "editors", "units", "abilities", "abilityRegistry", "rules", "skillTree"] as const;
 
 export type Namespace = (typeof NAMESPACES)[number];
 

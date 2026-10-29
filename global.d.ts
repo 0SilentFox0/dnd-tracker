@@ -10,6 +10,7 @@ import type choices from "./messages/uk/choices.json";
 import type classes from "./messages/uk/classes.json";
 import type common from "./messages/uk/common.json";
 import type dashboard from "./messages/uk/dashboard.json";
+import type editors from "./messages/uk/editors.json";
 import type errors from "./messages/uk/errors.json";
 import type feats from "./messages/uk/feats.json";
 import type help from "./messages/uk/help.json";
@@ -56,6 +57,7 @@ declare module "next-intl" {
       rest: typeof rest;
       spells: typeof spells;
       spellEditor: typeof spellEditor;
+      editors: typeof editors;
       units: typeof units;
       abilities: typeof abilities;
       abilityRegistry: typeof abilityRegistry;

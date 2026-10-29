@@ -137,7 +137,10 @@ export function setAtPath<T>(obj: T, path: string, value: unknown): T {
     if (value === undefined) delete copy[head];
     else copy[head] = value;
   } else {
-    copy[head] = setAtPath(copy[head], tail.join("."), value);
+    const child = setAtPath(copy[head], tail.join("."), value);
+
+    if (value === undefined && child && typeof child === "object" && !Array.isArray(child) && Object.keys(child).length === 0) delete copy[head];
+    else copy[head] = child;
   }
 
   return copy as T;

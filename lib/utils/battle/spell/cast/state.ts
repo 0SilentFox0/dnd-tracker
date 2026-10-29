@@ -5,7 +5,7 @@ import { newBattleAction } from "@/lib/utils/battle/common/new-action";
 import type { SpellPower } from "@/lib/utils/battle/spell/power";
 import type { TransformRequest } from "@/lib/utils/battle/transform/types";
 import type { CastableSpell } from "@/lib/utils/battle/types/spell-process";
-import type { AnchoredZoneEffect, GrantCastEffect, HitRiderEffect, SpellDefinition, SpellEffect } from "@/lib/utils/spells/model/schema";
+import { type AnchoredZoneEffect, type GrantCastEffect, type HitRiderEffect, SPELL_ONLY_EFFECT_KINDS, type SpellDefinition, type SpellEffect } from "@/lib/utils/spells/model/schema";
 import type { ResolvedAbility } from "@/types/abilities";
 import type { BattleAction, BattleParticipant, DamageStep, SpellGrant } from "@/types/battle";
 
@@ -85,7 +85,7 @@ export const isPerTarget = (e: Effect) => !NO_TARGET_KINDS.has(e.kind) && (targe
 /** Цільові ефекти, що читають шкоду касту: виконуються після нецільових. */
 export const readsEventDamage = (e: Effect) => (e.kind === "heal" || e.kind === "dealDamage") && typeof e.amount === "object" && "percentOf" in e.amount && e.amount.percentOf === "eventDamage";
 
-export const SPELL_ONLY_KINDS = new Set<string>(["inputDice", "grantCast", "hitRider", "moveSelf", "createTerrain", "anchoredZone", "summonInline", "transform"]);
+export const SPELL_ONLY_KINDS = new Set<string>(SPELL_ONLY_EFFECT_KINDS.filter((k) => k !== "chooseOne"));
 
 export const flatEffects = (effects: Array<Effect | SpellEffect>): Effect[] => effects.flatMap((e) => (e.kind === "randomOf" || e.kind === "chooseOne" ? e.options : SPELL_ONLY_KINDS.has(e.kind) ? [] : [e as Effect]));
 

@@ -172,6 +172,8 @@ const GrantActionSchema = z
     message: "abilities.validation.emptyAction",
   });
 
+const delayField = z.number({ error: (iss) => (iss.input === undefined ? "validation.spellDelayPair" : undefined) }).int().min(5).max(120).multipleOf(5);
+
 const DealDamageSchema = z.object({
   kind: z.literal("dealDamage"),
   amount: AmountSchema,
@@ -183,7 +185,7 @@ const DealDamageSchema = z.object({
     .max(6)
     .refine((r) => r.every((x, i) => i === 0 || x.maxFeet > r[i - 1].maxFeet), { message: "abilities.validation.distanceMustGrow" })
     .optional(),
-  delayIfBeyond: z.object({ feet: z.number().int().min(5).max(120).multipleOf(5), perRoundFeet: z.number().int().min(5).max(120).multipleOf(5) }).optional(),
+  delayIfBeyond: z.object({ feet: delayField, perRoundFeet: delayField }).optional(),
   ...target,
 });
 

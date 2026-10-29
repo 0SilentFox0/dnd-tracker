@@ -203,6 +203,8 @@ const TransformSchema = z.object({
 
 const SPELL_ONLY_EFFECTS = [ChooseOneSchema, InputDiceSchema, GrantCastSchema, HitRiderSchema, MoveSelfSchema, CreateTerrainSchema, AnchoredZoneSchema, SummonInlineSchema, TransformSchema] as const;
 
+export const SPELL_ONLY_EFFECT_KINDS = SPELL_ONLY_EFFECTS.map((s) => s.shape.kind.value);
+
 export const SpellEffectSchema = z.discriminatedUnion("kind", [...BASE_EFFECTS, RandomOfSchema, ...SPELL_ONLY_EFFECTS]);
 
 export type SpellEffect = z.infer<typeof SpellEffectSchema>;

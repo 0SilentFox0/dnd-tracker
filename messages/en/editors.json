@@ -1,0 +1,51 @@
+{
+  "spellEffects": {
+    "kinds": {
+      "chooseOne": "Caster's choice",
+      "inputDice": "Dice from input",
+      "grantCast": "Temporary subcast",
+      "hitRider": "Extra damage charges",
+      "moveSelf": "Caster moves to the target",
+      "createTerrain": "Wall / difficult terrain",
+      "anchoredZone": "Aura on the target",
+      "summonInline": "Summon from the spell map",
+      "transform": "Transform"
+    },
+    "fields": {
+      "inputDice": {
+        "label": "Field label",
+        "max": "Max dice"
+      },
+      "createTerrain": {
+        "terrain": "Kind",
+        "shape": "Shape",
+        "cells": "Cells",
+        "rounds": "Rounds"
+      },
+      "transform": {
+        "unitId": "Unit form",
+        "duration": "Duration (rounds)"
+      }
+    },
+    "options": {
+      "terrain": {
+        "wall": "Wall",
+        "difficult": "Difficult terrain"
+      },
+      "shape": {
+        "cell": "Area cells",
+        "line": "Line to the target"
+      }
+    },
+    "hints": {
+      "chooseOne": "The caster picks one of the options when casting.",
+      "moveSelf": "The caster moves to the nearest free cell next to the first target without provoking attacks.",
+      "revertAtZero": "At 0 HP of the form it reverts; excess damage carries over to the normal form."
+    },
+    "delete": "Remove effect",
+    "nested": {
+      "chooseOneHeading": "The caster picks one of the options when casting.",
+      "chooseOneAdd": "+ option"
+    }
+  }
+}

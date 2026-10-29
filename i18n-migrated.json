@@ -119,5 +119,7 @@
   "lib/constants/campaigns.ts",
   "lib/constants/campaign-dashboard.ts",
   "lib/constants/source-sync.ts",
-  "lib/utils/abilities/templates.ts"
+  "lib/utils/abilities/templates.ts",
+  "components/spells/form/effects/**",
+  "lib/utils/spells/editor/**"
 ]
