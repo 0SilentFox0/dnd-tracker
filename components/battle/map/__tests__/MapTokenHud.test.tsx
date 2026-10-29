@@ -1,5 +1,5 @@
 // @vitest-environment happy-dom
-import { cleanup, render } from "@testing-library/react";
+import { cleanup } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
 const fx = vi.hoisted(() => ({ userEnabled: true, motionAllowed: true }));
@@ -7,8 +7,11 @@ const fx = vi.hoisted(() => ({ userEnabled: true, motionAllowed: true }));
 vi.mock("@/lib/hooks/battle/useFxEnabled", () => ({ useFxEnabled: () => ({ enabled: fx.userEnabled && fx.motionAllowed, ...fx, setEnabled: vi.fn() }) }));
 
 import { MapTokenHud } from "@/components/battle/map/MapTokenHud";
+import { render } from "@/lib/i18n/test/render-uk";
 import { createMockParticipant } from "@/lib/utils/battle/__tests__/fixtures/mock-participant";
 import type { ActiveEffect } from "@/types/battle";
+
+vi.unmock("next-intl");
 
 const base = createMockParticipant();
 
@@ -19,7 +22,7 @@ const effect = (name: string, fxElement: string, extra: Partial<ActiveEffect> = 
 
 const hud = (over: { hp?: number; size?: number; exact?: boolean; effects?: ActiveEffect[]; px?: number; onReturn?: () => void } = {}) =>
   render(
-    <MapTokenHud participant={unit(over.hp ?? 30, over.size)} box={{ cx: 50, cy: 50, size: 100 * (over.size ?? 1) }} mapSize={{ width: 1000, height: 1000 }} pxPerUnit={over.px ?? 0.8} exact={over.exact ?? true} raised={false} effects={over.effects} onReturn={over.onReturn} />,
+    <MapTokenHud participant={unit(over.hp ?? 30, over.size)} placement={{ box: { cx: 50, cy: 50, size: 100 * (over.size ?? 1) }, mapSize: { width: 1000, height: 1000 }, pxPerUnit: over.px ?? 0.8 }} exact={over.exact ?? true} raised={false} effects={over.effects} onReturn={over.onReturn} />,
   );
 
 const q = (c: HTMLElement, sel: string) => c.querySelector<HTMLElement>(sel) as HTMLElement;

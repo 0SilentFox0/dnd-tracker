@@ -5,6 +5,8 @@ import { runAttackPhase } from "../run-attack-phase";
 import { AttackType, ParticipantSide } from "@/lib/constants/battle";
 import { resolved, seq } from "@/lib/utils/abilities/__tests__/fixtures";
 import { placed, testMap } from "@/lib/utils/battle/__tests__/fixtures/placed";
+import { eventTextOf } from "@/lib/utils/battle/log/__tests__/event-text";
+import { REJECT } from "@/lib/utils/battle/store/reject";
 import type { BattleAttack, BattleParticipant } from "@/types/battle";
 
 const bow: BattleAttack = { id: "b", name: "Ланцюговий постріл", type: AttackType.RANGED, attackBonus: 30, damageDice: "1d6", damageType: "necrotic" };
@@ -44,7 +46,7 @@ describe("chain shot", () => {
   it("гравець не може обрати дві цілі", () => {
     expect(() =>
       runAttackPhase({ battle: { initiativeOrder: [demoness, ...foes], currentRound: 1, currentTurnIndex: 0 }, data: { attackerId: "d", targetIds: ["t", "n1"], attackRolls: [15, 15], damageRolls: [6, 6] }, battleId: "b", userId: "u", isDM: true, rng: seq(0.9), map: testMap(20) }),
-    ).toThrow("Забагато цілей. Максимум: 1");
+    ).toThrow(REJECT.tooManyTargets);
   });
 
   it("стрибки не отримують штраф перешкоди", () => {
@@ -52,6 +54,6 @@ describe("chain shot", () => {
 
     const s = strikes(run([demoness, ...foes, blocker], 15));
 
-    expect(s.slice(1).some((e) => e.resultText.includes("перешкода"))).toBe(false);
+    expect(s.slice(1).some((e) => eventTextOf(e).includes("перешкода"))).toBe(false);
   });
 });

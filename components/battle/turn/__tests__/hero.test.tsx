@@ -1,8 +1,11 @@
 // @vitest-environment happy-dom
-import { act, fireEvent, render, screen } from "@testing-library/react";
+import { act, fireEvent, screen } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 
 import { TurnCountdown } from "@/components/battle/turn/TurnCountdown";
+import { render } from "@/lib/i18n/test/render-uk";
+
+vi.unmock("next-intl");
 
 describe("TurnCountdown", () => {
   it("рахує секунди і викликає onElapsed; «Залишитись» скасовує", () => {

@@ -29,7 +29,7 @@ interface Drop extends FxPoint {
   len: number;
 }
 
-export const raincloud: FxAnimation = ({ stage, targets }) =>
+export const raincloud: FxAnimation = ({ stage, targets, labels }) =>
   perTarget(stage, targets, 0, async ({ at: target, el }) => {
     const { w, h } = halfSize(el);
 
@@ -103,7 +103,7 @@ export const raincloud: FxAnimation = ({ stage, targets }) =>
           g.restore();
         }
 
-        sinkingBadge(g, target.x + (target.x - face.x) * 0.75, target.y - h - 10, clamp01((t - 1100) / 1400), "−2 мораль", BADGE);
+        sinkingBadge(g, target.x + (target.x - face.x) * 0.75, target.y - h - 10, clamp01((t - 1100) / 1400), labels.raincloud, BADGE);
         g.globalAlpha = 1;
       },
       (t, dt) => {

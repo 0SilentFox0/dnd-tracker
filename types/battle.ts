@@ -13,6 +13,7 @@ import type { InlineCast, SpellCost, ZoneTrigger } from "@/lib/utils/spells/mode
 import type { StoredSpellSlots } from "@/lib/utils/spells/slot-keys";
 import type { AbilityKey, SetProgress } from "@/types/characters";
 import { SkillLevel } from "@/types/skill-tree";
+import type { LogLine } from "@/types/text";
 
 export type { CriticalEffect };
 export { AttackType, ParticipantSide };
@@ -34,6 +35,8 @@ export interface HitRiderState {
 export interface ActiveEffect {
   id: string;
   name: string;
+  /** Engine-made effects: shown instead of `name` (translated per viewer) */
+  label?: LogLine;
   type: "buff" | "debuff" | "condition";
   description?: string;
   icon?: string;
@@ -609,8 +612,15 @@ export interface BattlePreparationParticipant {
   reserved?: number;
 }
 
+export interface DamageRow {
+  label: LogLine;
+  source?: LogLine;
+  value?: string;
+  tone: "step" | "total" | "rule" | "note";
+}
+
 export interface DamageStep {
-  label: string;
+  label: LogLine;
   side: "attacker" | "target";
   kind: "dice" | "flat" | "percent" | "multiplier" | "immunity";
   value: number;
@@ -689,7 +699,8 @@ export interface BattleAction {
       damageType: string;
     }>;
     totalDamage?: number;
-    damageBreakdown?: string; // детальний опис урону
+    damageBreakdown?: string; // детальний опис урону (legacy: розбирається регексами)
+    damageRows?: DamageRow[];
     damageSteps?: Record<string, DamageStep[]>;
     // Для заклинань:
     spellId?: string;
@@ -730,7 +741,7 @@ export interface BattleAction {
     spellDamageType?: string;
     spellTargeting?: string;
     aimCell?: GridPoint;
-    hazard?: { label: string; damageType: string; damage: number };
+    hazard?: { label: LogLine; damageType: string; damage: number };
     spellEffectKinds?: string[];
     // Для пасивок:
     triggeredAbilities?: Array<{
@@ -754,13 +765,18 @@ export interface BattleAction {
     // Критичний ефект (Natural 20/1):
     criticalEffect?: {
       id: number;
-      name: string;
-      description: string;
+      /** Legacy events carry the text; new ones only `source`/`flavorIndex` (text from battleTerms.crits) */
+      name?: string;
+      description?: string;
       type: "success" | "fail";
       flavor?: string;
+      source?: "attack" | "save";
+      flavorIndex?: number;
     };
   };
-  resultText: string; // текстовий опис для лога
+  /** Legacy text log ("a | b"); events written by the structured log have "" and `log` */
+  resultText: string;
+  log?: LogLine[];
   hpChanges: Array<{
     participantId: string;
     participantName: string;

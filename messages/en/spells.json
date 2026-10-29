@@ -273,6 +273,21 @@
       "strings": "Puppet strings",
       "vines": "Thorny vines",
       "stag": "Forest spirit"
+    },
+    "badges": {
+      "thorns": "-{value} attack",
+      "rust": "-{value} AC",
+      "raincloud": "-{value} morale",
+      "might": "+attack",
+      "siphon": "-{value}% damage",
+      "stoneskin": "+AC"
+    },
+    "previewUnits": {
+      "caster": "Sorceress",
+      "ally": "Warrior",
+      "fallen": "Fallen",
+      "e1": "Ogre",
+      "e2": "Lich"
     }
   }
 }

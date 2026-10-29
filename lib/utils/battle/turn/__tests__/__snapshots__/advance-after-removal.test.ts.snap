@@ -15,7 +15,15 @@ exports[`removal зберігає death-save event, participants, turn/round і 
         "hpChanges": [],
         "id": "death-saves-1-1793102400000-1",
         "isCancelled": false,
-        "resultText": "🎲 dying: кидок смерті 20 — приходить до тями з 1 HP",
+        "log": [
+          {
+            "message": "battleLog.death.wake",
+            "params": {
+              "name": "dying",
+            },
+          },
+        ],
+        "resultText": "",
         "round": 1,
         "stateBefore": undefined,
         "targets": [],

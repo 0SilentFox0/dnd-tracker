@@ -5,6 +5,7 @@ import { context, goblin, participant } from "./fixtures";
 import { bonusActionMutation } from "@/lib/server/battles/mutations/bonus-action/bonus-action-mutation";
 import { resolved } from "@/lib/utils/abilities/__tests__/fixtures";
 import { BattleAccessError } from "@/lib/utils/battle/store";
+import { REJECT } from "@/lib/utils/battle/store/reject";
 
 const rally = resolved({ id: "r", trigger: { event: "bonusAction" }, limits: { perBattle: 1 }, effects: [{ kind: "changeMorale", delta: 1, target: "eventTarget" }] });
 
@@ -45,7 +46,7 @@ describe("bonusActionMutation", () => {
   it("ліміт вичерпано → ability_limit", async () => {
     const used = { ...heroWith, battleData: { ...heroWith.battleData, abilityUsage: { [rally.key]: { battle: 1, round: 1, turn: 1 } } } };
 
-    await expect(bonusActionMutation(context({ participants: [used, goblin] }), { participantId: "hero", abilityKey: rally.key })).rejects.toThrow(/ліміт/i);
+    await expect(bonusActionMutation(context({ participants: [used, goblin] }), { participantId: "hero", abilityKey: rally.key })).rejects.toThrow(REJECT.abilityLimit);
   });
 
   it("невідоме вміння → action_rejected", async () => {

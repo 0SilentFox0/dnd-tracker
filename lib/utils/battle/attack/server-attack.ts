@@ -3,9 +3,10 @@ import { resolveHit } from "./process/hit";
 import { spendRidersOnMiss } from "./process/hit-rider";
 import { activeEffectIds, consumeAttackEffects } from "./consume-effects";
 import { critDamageRolls, critDoublesDice } from "./crit-dice";
-import { applyCriticalEffect, critFlavorFor } from "./critical";
+import { applyCriticalEffect, critFlavorOf } from "./critical";
 import { calculateAttackRoll } from "./roll";
 
+import { textRef } from "@/lib/i18n/text-ref";
 import { findFlags } from "@/lib/utils/abilities/engine/core/collect-modifiers";
 import { isActive } from "@/lib/utils/abilities/engine/core/participants";
 import { type ActionFlow, appendHpChanges, getP, put } from "@/lib/utils/battle/common/action-flow";
@@ -13,14 +14,15 @@ import { heroAttackDamageParts } from "@/lib/utils/battle/damage/hero-damage";
 import { getEffectiveArmorClass } from "@/lib/utils/battle/participant";
 import { parseDiceLenient, rollDie, rollGroups } from "@/lib/utils/common/dice";
 import type { BattleAction, BattleAttack } from "@/types/battle";
+import type { TextRef } from "@/types/text";
 
 export type ServerAttackLabel = "retaliation" | "opportunity" | "readied" | "legendary";
 
-const LABELS: Record<ServerAttackLabel, { title: string; noun: string }> = {
-  retaliation: { title: "Відсіч", noun: "відсіч" },
-  opportunity: { title: "Атака можливості", noun: "атака можливості" },
-  readied: { title: "Підготовлена атака", noun: "підготовлена атака" },
-  legendary: { title: "Легендарна дія", noun: "легендарна атака" },
+const LABELS: Record<ServerAttackLabel, { title: TextRef; noun: TextRef }> = {
+  retaliation: { title: textRef("battleLog.offTurn.titles.retaliation"), noun: textRef("battleLog.offTurn.nouns.retaliation") },
+  opportunity: { title: textRef("battleLog.offTurn.titles.opportunity"), noun: textRef("battleLog.offTurn.nouns.opportunity") },
+  readied: { title: textRef("battleLog.offTurn.titles.readied"), noun: textRef("battleLog.offTurn.nouns.readied") },
+  legendary: { title: textRef("battleLog.offTurn.titles.legendary"), noun: textRef("battleLog.offTurn.nouns.legendary") },
 };
 
 export interface ServerAttackInput {
@@ -49,7 +51,7 @@ export function resolveServerAttack(input: ServerAttackInput): { battleAction: B
 
   const roll = calculateAttackRoll(getP(flow, attackerId), attack, first, second, second, { participants: flow.ps, targetId, rng, rules: flow.ctx.rules, map: flow.ctx.map, crit: flow.ctx.crit });
 
-  if (roll.secondRoll) flow.messages.push(`🎲 ${LABELS[label].noun}, ${roll.secondRoll.mode === "advantage" ? "перевага" : "недолік"}: другий d20 = ${roll.secondRoll.value}`);
+  if (roll.secondRoll) flow.messages.push(textRef("battleLog.offTurn.second", { noun: LABELS[label].noun, mode: textRef(roll.secondRoll.mode === "advantage" ? "battleLog.roll.advantage" : "battleLog.roll.disadvantage"), value: roll.secondRoll.value }));
 
   if (roll.isCriticalFail && roll.criticalEffect) put(flow, applyCriticalEffect(getP(flow, attackerId), roll.criticalEffect, round, { offTurn: true }));
 
@@ -86,8 +88,8 @@ export function resolveServerAttack(input: ServerAttackInput): { battleAction: B
 
   const crit = roll.isCriticalFail ? roll.criticalEffect : hit?.hitDamage.criticalEffectApplied;
 
-  const critFlavorText = crit
-    ? critFlavorFor(crit, getP(flow, attackerId).basicInfo.name, getP(flow, targetId).basicInfo.name, { battleId, round, attackerId, targetId, suffix: "r" })
+  const critFlavor = crit
+    ? critFlavorOf(crit, getP(flow, attackerId).basicInfo.name, getP(flow, targetId).basicInfo.name, { battleId, round, attackerId, targetId, suffix: "r" })
     : undefined;
 
   const battleAction = buildOffTurnAction({
@@ -100,7 +102,7 @@ export function resolveServerAttack(input: ServerAttackInput): { battleAction: B
     messages: flow.messages,
     battleId,
     currentRound: round,
-    critFlavorText,
+    critFlavor,
     title: LABELS[label].title,
   });
 

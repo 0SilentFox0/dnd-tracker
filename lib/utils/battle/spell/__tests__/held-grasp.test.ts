@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 
 import { ParticipantSide } from "@/lib/constants/battle";
+import { textOf } from "@/lib/i18n/test/text";
 import { makeParticipant } from "@/lib/utils/abilities/__tests__/fixtures";
 import { createMockParticipant, grantPassive } from "@/lib/utils/battle/__tests__/fixtures/mock-participant";
 import { runEscape } from "@/lib/utils/battle/actions/grapple";
@@ -82,12 +83,12 @@ describe("grasp: escapeDc + linked DoT", () => {
 
     const free = runEscape({ actor: lowDc, participants: [caster, lowDc], rules, rng: () => 0.5, map, round: 2 });
 
-    expect(free.message).toContain("проти СК 1");
+    expect(textOf(free.message)).toContain("проти СК 1");
     expect(free.participants.find((p) => p.basicInfo.id === "f")?.battleData.activeEffects).toEqual([]);
 
     const stuck = runEscape({ actor: f, participants: [caster, f], rules, rng: () => 0.5, map, round: 2 });
 
-    expect(stuck.message).toContain("не вдалося");
+    expect(textOf(stuck.message)).toContain("не вдалося");
     expect(foeOf(stuck.participants).battleData.activeEffects).toHaveLength(2);
   });
 

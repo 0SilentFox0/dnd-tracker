@@ -1,10 +1,12 @@
 import { CombatStatus, ParticipantSourceType } from "@/lib/constants/battle";
+import { textRef } from "@/lib/i18n/text-ref";
 import { findParticipant, replaceParticipant } from "@/lib/utils/abilities/engine/core/participants";
 import { concentrationBroken, concentrationCheck, dropConcentration, hasConcentration } from "@/lib/utils/battle/concentration";
 import { clearDeathSaves, deathSaveDamage, startDying } from "@/lib/utils/battle/death-saves";
 import { revertOnZero } from "@/lib/utils/battle/transform/revert";
 import type { Ruleset } from "@/lib/utils/rules";
 import type { BattleParticipant } from "@/types/battle";
+import type { LogLine } from "@/types/text";
 
 export interface DamageConsequencesInput {
   before: BattleParticipant;
@@ -20,7 +22,7 @@ export interface DamageConsequencesInput {
 export interface DamageConsequencesResult {
   participant: BattleParticipant;
   participants: BattleParticipant[];
-  messages: string[];
+  messages: LogLine[];
 }
 
 function unitDiesAtZero(after: BattleParticipant, rules: Ruleset): BattleParticipant {
@@ -33,7 +35,7 @@ function unitDiesAtZero(after: BattleParticipant, rules: Ruleset): BattlePartici
   return { ...after, combatStats: { ...after.combatStats, status: CombatStatus.DEAD } };
 }
 
-function heroGoesDown(input: DamageConsequencesInput, rules: Ruleset): { participant: BattleParticipant; messages: string[] } {
+function heroGoesDown(input: DamageConsequencesInput, rules: Ruleset): { participant: BattleParticipant; messages: LogLine[] } {
   const { before, after, amount, crit } = input;
 
   const none = { participant: after, messages: [] };
@@ -44,7 +46,7 @@ function heroGoesDown(input: DamageConsequencesInput, rules: Ruleset): { partici
 
   const instantDeath = (overflow: number, hp: number) =>
     overflow >= before.combatStats.maxHp
-      ? { participant: { ...after, combatStats: { ...after.combatStats, currentHp: hp, status: CombatStatus.DEAD } }, messages: [`💀 ${after.basicInfo.name}: миттєва смерть від масивної шкоди`] }
+      ? { participant: { ...after, combatStats: { ...after.combatStats, currentHp: hp, status: CombatStatus.DEAD } }, messages: [textRef("battleLog.death.massive", { name: after.basicInfo.name })] }
       : null;
 
   if (before.combatStats.currentHp > 0 && after.combatStats.currentHp <= 0) {
@@ -52,7 +54,7 @@ function heroGoesDown(input: DamageConsequencesInput, rules: Ruleset): { partici
 
     if (dead) return dead;
 
-    return { participant: startDying(after, rules), messages: [`💤 ${after.basicInfo.name} непритомніє`] };
+    return { participant: startDying(after, rules), messages: [textRef("battleLog.death.unconscious", { name: after.basicInfo.name })] };
   }
 
   if (before.combatStats.currentHp <= 0 && before.battleData.deathSaves && after.combatStats.status === CombatStatus.UNCONSCIOUS) {
@@ -64,13 +66,13 @@ function heroGoesDown(input: DamageConsequencesInput, rules: Ruleset): { partici
 
     const dead = hit.combatStats.status === CombatStatus.DEAD;
 
-    return { participant: hit, messages: [dead ? `💀 ${after.basicInfo.name} помирає від ран` : `🩸 ${after.basicInfo.name}: провал кидка смерті від шкоди`] };
+    return { participant: hit, messages: [textRef(dead ? "battleLog.death.woundsDeath" : "battleLog.death.damageFail", { name: after.basicInfo.name })] };
   }
 
   return none;
 }
 
-function concentrationFallout(input: DamageConsequencesInput, participant: BattleParticipant, rules: Ruleset): { participant: BattleParticipant; participants: BattleParticipant[]; messages: string[] } | null {
+function concentrationFallout(input: DamageConsequencesInput, participant: BattleParticipant, rules: Ruleset): { participant: BattleParticipant; participants: BattleParticipant[]; messages: LogLine[] } | null {
   if ((!rules.concentration.enabled && !participant.battleData.pendingCast) || input.amount <= 0 || !hasConcentration(participant)) return null;
 
   const r = concentrationCheck({ caster: participant, damage: input.amount, participants: input.participants, rules, rng: input.rng });
@@ -82,7 +84,7 @@ export function applyDamageConsequences(input: DamageConsequencesInput): DamageC
   const reverted = revertOnZero(input.before, input.after, input.amount);
 
   if (reverted) {
-    const note = `🐾 ${input.after.basicInfo.name}: форма втрачена${reverted.overflow > 0 ? `, ${reverted.overflow} шкоди переходить на звичайну форму` : ""}`;
+    const note = textRef("battleLog.transform.formLost", { name: input.after.basicInfo.name, hasOverflow: String(reverted.overflow > 0), overflow: reverted.overflow });
 
     const inner = applyDamageConsequences({ ...input, before: reverted.before, after: reverted.after, amount: reverted.overflow, participants: replaceParticipant(input.participants, reverted.after) });
 
@@ -126,7 +128,7 @@ export function settleStatusChange(before: BattleParticipant, after: BattleParti
 
   let ps = next === after ? participants : replaceParticipant(participants, next);
 
-  const messages: string[] = [];
+  const messages: LogLine[] = [];
 
   if (rules.concentration.enabled && concentrationBroken(next)) {
     const dropped = dropConcentration(ps, next.basicInfo.id, "");

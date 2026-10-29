@@ -22,6 +22,7 @@ import { withCampaignContentWrite } from "@/lib/server/content/write";
 import { afterContentCommit } from "@/lib/server/content/write-context";
 import type { Actor } from "@/lib/utils/api/actor";
 import { localeOrRequest } from "@/lib/utils/api/translate-error";
+import { ownHandler } from "@/lib/utils/common/own-handler";
 import { buildDefaultLegend } from "@/lib/utils/scenario/default-legend";
 import { moveRow, moveSection, newSection, removeRow, removeSection, updateSection } from "@/lib/utils/scenario/structure";
 import type { ScenarioContent } from "@/types/scenario";
@@ -55,11 +56,23 @@ export function transformScenarioContent(content: ScenarioContent, operation: st
 
   if (operation === "section.delete") return removeSection(content, input.sectionId);
 
-  if (operation === "section.move") return moveSection(content, input.sectionId, input.direction!);
+  const direction = () => {
+    if (input.direction !== 1 && input.direction !== -1) throw new ContentError(API_ERRORS.INVALID_BODY, 400);
 
-  if (operation === "row.delete") return removeRow(content, input.sectionId, input.rowId!);
+    return input.direction;
+  };
 
-  if (operation === "row.move") return moveRow(content, input.sectionId, input.rowId!, input.direction!);
+  const rowId = () => {
+    if (!input.rowId) throw new ContentError(API_ERRORS.ASSISTANT_ROW_NOT_FOUND, 404);
+
+    return input.rowId;
+  };
+
+  if (operation === "section.move") return moveSection(content, input.sectionId, direction());
+
+  if (operation === "row.delete") return removeRow(content, input.sectionId, rowId());
+
+  if (operation === "row.move") return moveRow(content, input.sectionId, rowId(), direction());
 
   if (operation === "section.patch") {
     const patch = parseInput(scenarioSectionPatchSchema, input);
@@ -82,9 +95,11 @@ async function validateBindings(actor: Actor, content: ScenarioContent) {
       if (row.battleId && !await prisma.battleScene.findFirst({ where: { id: row.battleId, campaignId: actor.campaignId }, select: { id: true } })) throw new ContentError(API_ERRORS.BATTLE_UNAVAILABLE, 422);
 
       if (row.slide) {
+        const { slideId } = row.slide;
+
         const deck = await prisma.slideDeck.findFirst({ where: { id: row.slide.deckId, campaignId: actor.campaignId }, select: { slides: true } });
 
-        if (!deck || !Array.isArray(deck.slides) || !deck.slides.some(s => s && typeof s === "object" && "id" in s && s.id === row.slide!.slideId)) throw new ContentError(API_ERRORS.SCENARIO_SLIDE_UNAVAILABLE, 422);
+        if (!deck || !Array.isArray(deck.slides) || !deck.slides.some(s => s && typeof s === "object" && "id" in s && s.id === slideId)) throw new ContentError(API_ERRORS.SCENARIO_SLIDE_UNAVAILABLE, 422);
       }
     }
   }
@@ -119,22 +134,94 @@ export async function saveScenarioContent(actor: Actor, id: string, raw: unknown
 
   return withCampaignContentWrite(actor.campaignId, () => writeScenarioContent(actor, id, raw, expectedVersion, force));
 }
+type ScenarioRun = {
+  actor: Actor;
+  input: Record<string, unknown>;
+  locale: Locale;
+  id: string | undefined;
+  page: NonNullable<Awaited<ReturnType<typeof scenarioState>>["page"]>;
+  result: (data: unknown, id?: string) => ActionResult;
+};
+
+type PageHandler = (run: ScenarioRun) => Promise<ActionResult>;
+
+const characterOk = async (actor: Actor, characterId: string | null | undefined) => {
+  if (!await characterInCampaign(actor.campaignId, characterId)) throw new ContentError(API_ERRORS.SCENARIO_CHARACTER_INVALID, 400);
+};
+
+async function createPage({ actor, input, locale, result }: Omit<ScenarioRun, "page" | "id">): Promise<ActionResult> {
+  const body = parseInput(createScenarioPageSchema, input.data);
+
+  await characterOk(actor, body.characterId);
+
+  const content: ScenarioContent = { legend: body.kind === "scene" ? buildDefaultLegend(await getTranslator(locale, "scenario")) : [], sections: [newSection((await getTranslator(locale, "assistant"))(body.kind === "hero" ? "defaults.firstChapter" : "defaults.firstSection"))] };
+
+  const last = await prisma.scenarioPage.aggregate({ where: { campaignId: actor.campaignId }, _max: { sortOrder: true } });
+
+  return result(toSummary(await prisma.scenarioPage.create({ data: { ...body, campaignId: actor.campaignId, sortOrder: (last._max.sortOrder ?? -1) + 1, ...contentWrite(body.title, content) }, select: SUMMARY_SELECT })));
+}
+
+async function deletePage({ actor, page, id, result }: ScenarioRun): Promise<ActionResult> {
+  const { pendingSlideUrls, discardSlideFiles } = await import("@/lib/ai/proposal-media");
+
+  const orphanUrls = await pendingSlideUrls(actor.campaignId, page.id);
+
+  afterContentCommit(() => discardSlideFiles(actor.campaignId, orphanUrls));
+  await prisma.scenarioPage.delete({ where: { id: page.id } });
+  await prisma.compendiumEntry.deleteMany({ where: { campaignId: actor.campaignId, kind: "scenarioPages", localId: page.id } });
+
+  return result({ deleted: true }, id);
+}
+
+async function saveContent(run: ScenarioRun, operation: string): Promise<ActionResult> {
+  const { actor, input, page, id, result } = run;
+
+  let next: unknown = input.content;
+
+  if (operation === "restore") {
+    const version = await prisma.scenarioPageVersion.findFirst({ where: { id: String(input.versionId), pageId: page.id } });
+
+    if (!version) throw new ContentError(API_ERRORS.SCENARIO_VERSION_NOT_FOUND, 404);
+
+    next = readContentStrict(version.content);
+  } else if (operation !== "save") next = transformScenarioContent(readContentStrict(page.content), operation, input as Parameters<typeof transformScenarioContent>[2]);
+
+  return result(await saveScenarioContent(actor, page.id, next, page.version), id);
+}
+
+const PAGE_HANDLERS: Record<string, PageHandler> = {
+  meta: async ({ actor, input, page, id, result }) => {
+    const body = parseInput(updateScenarioMetaSchema, input.patch);
+
+    await characterOk(actor, body.characterId);
+
+    return result(toSummary(await prisma.scenarioPage.update({ where: { id: page.id }, data: { ...body, ...contentWrite(body.title ?? page.title, readContentStrict(page.content)) }, select: SUMMARY_SELECT })), id);
+  },
+  delete: deletePage,
+};
+
+type ReadHandler = (actor: Actor, input: Record<string, unknown>) => Promise<unknown>;
+
+const READ_HANDLERS: Record<string, ReadHandler> = {
+  list: (actor) => listPages(actor.campaignId),
+  mentions: (actor, input) => searchScenarioMentions(actor.campaignId, String(input.query ?? "").trim().slice(0, 60)),
+  search: (actor, input) => searchScenarioPages(actor.campaignId, String(input.query).trim().slice(0, 200)),
+};
+
+const READ_OPERATIONS = new Set([...Object.keys(READ_HANDLERS), "get", "versions"]);
+
 export async function runScenarioOperation(actor: Actor, operation: string, input: Record<string, unknown>, expected?: string, explicitLocale?: Locale): Promise<ActionResult> {
   const locale = await localeOrRequest(explicitLocale);
 
   const result = (data: unknown, id?: string) => scenarioResult(data, id, locale);
 
-  const read = ["list", "get", "search", "mentions", "versions"].includes(operation);
-
-  assertCan(actor, { access: "dm", scope: read ? "scenario:read" : "scenario:write" });
+  assertCan(actor, { access: "dm", scope: READ_OPERATIONS.has(operation) ? "scenario:read" : "scenario:write" });
 
   const id = input.id as string | undefined;
 
-  if (operation === "list") return result(await listPages(actor.campaignId));
+  const read = ownHandler(READ_HANDLERS, operation);
 
-  if (operation === "mentions") return result(await searchScenarioMentions(actor.campaignId, String(input.query ?? "").trim().slice(0, 60)));
-
-  if (operation === "search") return result(await searchScenarioPages(actor.campaignId, String(input.query).trim().slice(0, 200)));
+  if (read) return result(await read(actor, input));
 
   return withCampaignContentWrite(actor.campaignId, async () => {
     const state = expected ? await scenarioState(actor, id) : { page: id ? await prisma.scenarioPage.findFirst({ where: { id, campaignId: actor.campaignId }, select: OWNED_WITH_CONTENT_SELECT }) : undefined };
@@ -143,54 +230,26 @@ export async function runScenarioOperation(actor: Actor, operation: string, inpu
 
     const page = state.page;
 
-    if (operation === "get") return result(page ? toPage(page) : (() => { throw new ContentError(API_ERRORS.SCENARIO_NOT_FOUND, 404); })(), id);
+    if (operation === "get") {
+      if (!page) throw new ContentError(API_ERRORS.SCENARIO_NOT_FOUND, 404);
 
-    if (operation === "versions") return result(await prisma.scenarioPageVersion.findMany({ where: { pageId: page!.id }, select: { id: true, createdAt: true, createdBy: true }, orderBy: { createdAt: "desc" }, take: SCENARIO_MAX_VERSIONS }), id);
-
-    if (operation === "create") {
-      const body = parseInput(createScenarioPageSchema, input.data);
-
-      if (!await characterInCampaign(actor.campaignId, body.characterId)) throw new ContentError(API_ERRORS.SCENARIO_CHARACTER_INVALID, 400);
-
-      const content: ScenarioContent = { legend: body.kind === "scene" ? buildDefaultLegend(await getTranslator(locale, "scenario")) : [], sections: [newSection((await getTranslator(locale, "assistant"))(body.kind === "hero" ? "defaults.firstChapter" : "defaults.firstSection"))] };
-
-      const last = await prisma.scenarioPage.aggregate({ where: { campaignId: actor.campaignId }, _max: { sortOrder: true } });
-
-      return result(toSummary(await prisma.scenarioPage.create({ data: { ...body, campaignId: actor.campaignId, sortOrder: (last._max.sortOrder ?? -1) + 1, ...contentWrite(body.title, content) }, select: SUMMARY_SELECT })));
+      return result(toPage(page), id);
     }
+
+    if (operation === "versions") {
+      if (!page) throw new ContentError(API_ERRORS.SCENARIO_NOT_FOUND, 404);
+
+      return result(await prisma.scenarioPageVersion.findMany({ where: { pageId: page.id }, select: { id: true, createdAt: true, createdBy: true }, orderBy: { createdAt: "desc" }, take: SCENARIO_MAX_VERSIONS }), id);
+    }
+
+    if (operation === "create") return createPage({ actor, input, locale, result });
 
     if (!page) throw new ContentError(API_ERRORS.SCENARIO_NOT_FOUND, 404);
 
-    if (operation === "meta") {
-      const body = parseInput(updateScenarioMetaSchema, input.patch);
+    const run: ScenarioRun = { actor, input, locale, id, page, result };
 
-      if (!await characterInCampaign(actor.campaignId, body.characterId)) throw new ContentError(API_ERRORS.SCENARIO_CHARACTER_INVALID, 400);
+    const pageHandler = ownHandler(PAGE_HANDLERS, operation);
 
-      return result(toSummary(await prisma.scenarioPage.update({ where: { id: page.id }, data: { ...body, ...contentWrite(body.title ?? page.title, readContentStrict(page.content)) }, select: SUMMARY_SELECT })), id);
-    }
-
-    if (operation === "delete") {
-      const { pendingSlideUrls, discardSlideFiles } = await import("@/lib/ai/proposal-media");
-
-      const orphanUrls = await pendingSlideUrls(actor.campaignId, page.id);
-
-      afterContentCommit(() => discardSlideFiles(actor.campaignId, orphanUrls));
-      await prisma.scenarioPage.delete({ where: { id: page.id } });
-      await prisma.compendiumEntry.deleteMany({ where: { campaignId: actor.campaignId, kind: "scenarioPages", localId: page.id } });
-
-      return result({ deleted: true }, id);
-    }
-
-    let next: unknown = input.content;
-
-    if (operation === "restore") {
-      const version = await prisma.scenarioPageVersion.findFirst({ where: { id: String(input.versionId), pageId: page.id } });
-
-      if (!version) throw new ContentError(API_ERRORS.SCENARIO_VERSION_NOT_FOUND, 404);
-
-      next = readContentStrict(version.content);
-    } else if (operation !== "save") next = transformScenarioContent(readContentStrict(page.content), operation, input as Parameters<typeof transformScenarioContent>[2]);
-
-    return result(await saveScenarioContent(actor, page.id, next, page.version), id);
+    return pageHandler ? pageHandler(run) : saveContent(run, operation);
   });
 }

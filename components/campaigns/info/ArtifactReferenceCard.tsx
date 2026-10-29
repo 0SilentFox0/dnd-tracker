@@ -1,6 +1,7 @@
 import { useTranslations } from "next-intl";
 import { Gem } from "lucide-react";
 
+import { AbilityFlowList } from "@/components/abilities/AbilityFlow";
 import { EntityIcon } from "@/components/common/EntityIcon";
 import {
   AccordionContent,
@@ -8,11 +9,14 @@ import {
   AccordionTrigger,
 } from "@/components/ui/accordion";
 import { Label } from "@/components/ui/label";
+import { useText } from "@/lib/i18n/use-text";
 import { useTranslator } from "@/lib/i18n/use-translator";
 import type { ArtifactForReference } from "@/types/info-reference";
 
 export function ArtifactReferenceCard({ artifact }: { artifact: ArtifactForReference }) {
   const t = useTranslations("dashboard.reference.card");
+
+  const text = useText();
 
   const ta = useTranslator("artifacts");
 
@@ -48,11 +52,9 @@ export function ArtifactReferenceCard({ artifact }: { artifact: ArtifactForRefer
           {artifact.effects.length > 0 && (
             <div>
               <Label className="hud-sc text-xs text-hud-gold">{t("effects")}</Label>
-              <ul className="list-disc list-inside text-sm mt-0.5 space-y-0.5">
-                {artifact.effects.map((e, i) => (
-                  <li key={i}>{e}</li>
-                ))}
-              </ul>
+              <div className="mt-1">
+                <AbilityFlowList lines={artifact.effects} />
+              </div>
             </div>
           )}
         </div>

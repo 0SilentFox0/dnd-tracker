@@ -47,14 +47,14 @@ const effect = (id: string, name: string, type: ActiveEffect["type"], duration: 
 });
 
 const SPECS: MockSpec[] = [
-  { id: "knight", name: "Лицар", side: ParticipantSide.ALLY, icon: "humans-knight", hp: 52, hpNow: 44, speed: 30, attack: melee("Меч", "1d8+3"), effects: [effect("bless", "Благословення", "buff", 3), effect("slow", "Сповільнення", "debuff", 2)] },
-  { id: "archer", name: "Лучниця", side: ParticipantSide.ALLY, icon: "humans-marksman", hp: 34, speed: 30, attack: ranged("Довгий лук", "80/320 фт", "1d8+2") },
-  { id: "mage", name: "Маг", side: ParticipantSide.ALLY, icon: "mages-mage", hp: 26, hpNow: 18, speed: 30, attack: ranged("Магічна стріла", "60 фт", "2d4+2") },
-  { id: "griffin", name: "Грифон", side: ParticipantSide.ALLY, icon: "humans-griffin", hp: 60, speed: 40, gridSize: 2, attack: melee("Кігті", "2d6+3") },
-  { id: "skel1", name: "Скелет-воїн 1", side: ParticipantSide.ENEMY, icon: "necromancers-skeleton-warrior", hp: 30, speed: 30, attack: melee("Іржавий меч", "1d6+2") },
-  { id: "skel2", name: "Скелет-воїн 2", side: ParticipantSide.ENEMY, icon: "necromancers-skeleton-warrior", hp: 30, hpNow: 9, speed: 30, attack: melee("Іржавий меч", "1d6+2") },
-  { id: "skelArcher", name: "Скелет-лучник", side: ParticipantSide.ENEMY, icon: "necromancers-skeleton-archer", hp: 24, speed: 30, attack: ranged("Кістяний лук", "80/320 фт", "1d6+2"), effects: [effect("poison", "Отрута", "debuff", 4)] },
-  { id: "dragon", name: "Кістяний дракон", side: ParticipantSide.ENEMY, icon: "necromancers-bone-dragon", hp: 120, hpNow: 96, speed: 40, gridSize: 2, attack: melee("Укус", "3d8+5") },
+  { id: "knight", name: "Knight", side: ParticipantSide.ALLY, icon: "humans-knight", hp: 52, hpNow: 44, speed: 30, attack: melee("Sword", "1d8+3"), effects: [effect("bless", "Bless", "buff", 3), effect("slow", "Slow", "debuff", 2)] },
+  { id: "archer", name: "Archer", side: ParticipantSide.ALLY, icon: "humans-marksman", hp: 34, speed: 30, attack: ranged("Longbow", "80/320 ft", "1d8+2") },
+  { id: "mage", name: "Mage", side: ParticipantSide.ALLY, icon: "mages-mage", hp: 26, hpNow: 18, speed: 30, attack: ranged("Magic missile", "60 ft", "2d4+2") },
+  { id: "griffin", name: "Griffin", side: ParticipantSide.ALLY, icon: "humans-griffin", hp: 60, speed: 40, gridSize: 2, attack: melee("Claws", "2d6+3") },
+  { id: "skel1", name: "Skeleton warrior 1", side: ParticipantSide.ENEMY, icon: "necromancers-skeleton-warrior", hp: 30, speed: 30, attack: melee("Rusty sword", "1d6+2") },
+  { id: "skel2", name: "Skeleton warrior 2", side: ParticipantSide.ENEMY, icon: "necromancers-skeleton-warrior", hp: 30, hpNow: 9, speed: 30, attack: melee("Rusty sword", "1d6+2") },
+  { id: "skelArcher", name: "Skeleton archer", side: ParticipantSide.ENEMY, icon: "necromancers-skeleton-archer", hp: 24, speed: 30, attack: ranged("Bone bow", "80/320 ft", "1d6+2"), effects: [effect("poison", "Poison", "debuff", 4)] },
+  { id: "dragon", name: "Bone dragon", side: ParticipantSide.ENEMY, icon: "necromancers-bone-dragon", hp: 120, hpNow: 96, speed: 40, gridSize: 2, attack: melee("Bite", "3d8+5") },
 ];
 
 function build(s: MockSpec, index: number): BattleParticipant {

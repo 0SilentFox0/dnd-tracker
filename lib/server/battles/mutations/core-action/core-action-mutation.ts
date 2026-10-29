@@ -1,9 +1,11 @@
 import { API_ERRORS } from "@/lib/constants/api-errors";
 import { runCoreAction } from "@/lib/utils/battle/actions/run";
 import type { CoreActionBody } from "@/lib/utils/battle/actions/schema";
-import { currentOf,requireActor } from "@/lib/utils/battle/common/control";
+import { currentOf, requireActor } from "@/lib/utils/battle/common/control";
+import { lineText } from "@/lib/utils/battle/log/lines";
 import type { BattleMutationContext, MutationResult } from "@/lib/utils/battle/pipeline/run-battle-mutation";
 import { battleActionToEvent, BattleRuleError, systemEvent } from "@/lib/utils/battle/store";
+import { REJECT } from "@/lib/utils/battle/store/reject";
 import { assertCanAct } from "@/lib/utils/battle/turn";
 import { rngOf } from "@/lib/utils/common/rng";
 
@@ -12,8 +14,8 @@ function guard(ctx: BattleMutationContext, body: CoreActionBody): void {
 
   const actor = requireActor(ctx, body.participantId, {
     missing: API_ERRORS.BATTLE_PARTICIPANT_NOT_IN_BATTLE,
-    forbidden: offTurn ? "Діяти може лише DM або власник учасника" : "Діяти може лише DM або той, хто зараз ходить",
-    inactive: { code: "action_rejected", message: "Учасник не може діяти (непритомний або мертвий)" },
+    forbidden: offTurn ? REJECT.actForbiddenOwner : REJECT.attackForbidden,
+    inactive: { code: "action_rejected", message: REJECT.participantInactive },
     anyTurn: offTurn,
   });
 
@@ -39,7 +41,7 @@ export function coreActionMutation(ctx: BattleMutationContext, body: CoreActionB
     battleId: ctx.scene.id,
   });
 
-  const events = [...(out.messages.length ? [systemEvent(ctx.scene.round, out.messages.join("; "))] : []), ...(out.actions ?? []).map(battleActionToEvent)];
+  const events = [...(out.messages.length ? [systemEvent(ctx.scene.round, lineText(out.messages, "; "))] : []), ...(out.actions ?? []).map(battleActionToEvent)];
 
   return { participants: out.participants, pending: ctx.pending, events };
 }

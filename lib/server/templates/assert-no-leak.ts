@@ -25,5 +25,5 @@ export function assertNoLeak(rows: Iterable<unknown>, sourceIds: ReadonlySet<str
 
   const leaked = [...sourceIds].filter((id) => seen.has(id));
 
-  if (leaked.length > 0) throw new TemplateLeakError(`Шаблон містить id вихідної кампанії: ${leaked.slice(0, 5).join(", ")}`);
+  if (leaked.length > 0) throw new TemplateLeakError(`Template contains source campaign ids: ${leaked.slice(0, 5).join(", ")}`);
 }

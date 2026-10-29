@@ -1,3 +1,4 @@
+/* eslint-disable no-restricted-syntax -- UNGROUPED_LABELS.race is the pure-helper fallback of groupUnitsByRace; UI shows gameTerms.ungrouped.* */
 export const UNGROUPED_KEY = "\u0000ungrouped";
 
 export const UNGROUPED_LABELS = {

@@ -9,7 +9,7 @@ import { Button } from "@/components/ui/button";
 import { ResponsiveDialog } from "@/components/ui/responsive-dialog";
 import { SwitchField } from "@/components/ui/switch-field";
 import { type RulesFormState, useRemoveCustomCondition } from "@/lib/hooks/campaigns";
-import { CONDITION_LABELS } from "@/lib/utils/abilities/registry/labels";
+import { useTranslator } from "@/lib/i18n/use-translator";
 
 const NAMED_CATEGORIES = [
   { key: "spells", label: "usageSpells", path: "spells" },
@@ -26,6 +26,8 @@ export function ConditionsSection({ form }: { form: RulesFormState }) {
   const t = useTranslations("rules");
 
   const tc = useTranslations("rules.customConditions");
+
+  const tr = useTranslator("abilityRegistry");
 
   const { remove, isPending, usage, closeUsage } = useRemoveCustomCondition(form.campaignId);
 
@@ -59,7 +61,7 @@ export function ConditionsSection({ form }: { form: RulesFormState }) {
                   </Button>
                 </div>
                 {c.description && <p className="text-hud-muted">{c.description}</p>}
-                {c.markers.length > 0 && <p className="text-xs text-hud-muted">{c.markers.map((m) => CONDITION_LABELS[m]).join(", ")}</p>}
+                {c.markers.length > 0 && <p className="text-xs text-hud-muted">{c.markers.map((m) => tr(`options.condition.${m}`)).join(", ")}</p>}
               </li>
             ))}
           </ul>

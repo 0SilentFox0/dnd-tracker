@@ -7,7 +7,7 @@ const LOCAL_MAP_PATH = /^\/battle-maps\/[\w.-]+\.(webp|jpg|png)$/;
 export async function resolveMapBackgroundForPersistence(
   background: string | null | undefined,
   opts: { campaignId: string; current?: string | null },
-): Promise<{ ok: true; background: string | null | undefined } | { ok: false; message: string }> {
+): Promise<{ ok: true; background: string | null | undefined } | { ok: false; message: string; params?: Record<string, string | number> }> {
   if (!background || LOCAL_MAP_PATH.test(background)) return { ok: true, background };
 
   const r = await resolveImageForPersistence(background, { ...opts, bucket: BATTLE_MAPS_BUCKET, cacheControl: YEAR_CACHE_SECONDS });

@@ -1,11 +1,15 @@
 "use client";
 
+import { useTranslations } from "next-intl";
+
 import { Button } from "@/components/ui/button";
 import { ResponsiveDialog } from "@/components/ui/responsive-dialog";
 import { ParticipantSide } from "@/lib/constants/battle";
 import { useBattleScene } from "@/lib/hooks/battle";
 
 export function AwaitingDmDialog() {
+  const t = useTranslations("battleDm");
+
   const { awaiting, roster, actions, viewer, dialogs } = useBattleScene();
 
   if (!viewer.isDM || !awaiting || !dialogs.awaitingDm.open) return null;
@@ -22,12 +26,12 @@ export function AwaitingDmDialog() {
       onOpenChange={() => dialogs.awaitingDm.setOpen(false)}
       size="sm"
       hud
-      title={awaiting === "victory" ? "У резерві ще є вороги" : "У резерві ще є союзники"}
-      description={`${awaiting === "victory" ? "Видимих ворогів переможено" : "Видимих союзників переможено"}. Ввести резерв у бій чи завершити бій?`}
+      title={awaiting === "victory" ? t("awaiting.titleVictory") : t("awaiting.titleDefeat")}
+      description={awaiting === "victory" ? t("awaiting.descriptionVictory") : t("awaiting.descriptionDefeat")}
       footer={
         <>
-          <Button variant="outline" disabled={busy} onClick={() => actions.complete.mutate({ result: awaiting })}>Завершити бій</Button>
-          <Button disabled={busy} onClick={() => actions.reveal.mutate({ participantIds: waiting.map((p) => p.basicInfo.id) })}>Ввести всіх</Button>
+          <Button variant="outline" disabled={busy} onClick={() => actions.complete.mutate({ result: awaiting })}>{t("completeBattle")}</Button>
+          <Button disabled={busy} onClick={() => actions.reveal.mutate({ participantIds: waiting.map((p) => p.basicInfo.id) })}>{t("awaiting.revealAll")}</Button>
         </>
       }
     >

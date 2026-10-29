@@ -1,3 +1,4 @@
+import { textRef } from "@/lib/i18n/text-ref";
 import { findParticipant, replaceParticipant } from "@/lib/utils/abilities/engine/core/participants";
 import { effectSource, upsertTimedEffect } from "@/lib/utils/abilities/engine/effects/timed-effects";
 import type { ActionFlow } from "@/lib/utils/battle/common/action-flow";
@@ -49,7 +50,7 @@ export function applyAnchoredZones({ flow, effects, casterId, targetIds, ability
       );
 
       flow.ps = replaceParticipant(flow.ps, next);
-      flow.messages.push(`✨ ${holder.basicInfo.name}: «${ability.name}» — аура ${effect.radiusFeet} фт`);
+      flow.messages.push(textRef("battleLog.spellFx.anchoredAura", { holder: holder.basicInfo.name, ability: ability.name, radius: effect.radiusFeet }));
     }
   }
 }

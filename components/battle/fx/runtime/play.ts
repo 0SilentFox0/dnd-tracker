@@ -1,4 +1,5 @@
 import { resolvePoints } from "./anchors";
+import { DEFAULT_BADGE_LABELS, type FxBadgeLabels } from "./badge-labels";
 import type { FxPoint } from "./geometry";
 import { PALETTE } from "./palette";
 import { layerEpoch, stageFor } from "./stage";
@@ -13,7 +14,7 @@ export const FX_LOAD_TIMEOUT_MS = 800;
  * Plays `spec` on `layer`, with anchors looked up under `root` and points taken relative to the layer.
  * A signature not loaded yet is awaited up to `loadTimeoutMs`; a `cancelLayer` meanwhile drops the run.
  */
-export async function playFx(layer: HTMLElement, spec: FxSpec, root: ParentNode = document, loadTimeoutMs = FX_LOAD_TIMEOUT_MS, onStart?: () => void): Promise<void> {
+export async function playFx(layer: HTMLElement, spec: FxSpec, root: ParentNode = document, loadTimeoutMs = FX_LOAD_TIMEOUT_MS, onStart?: () => void, labels: FxBadgeLabels = DEFAULT_BADGE_LABELS): Promise<void> {
   const epoch = layerEpoch(layer);
 
   // signature animations draw on their targets, so an empty zone plays the base "area"
@@ -33,5 +34,5 @@ export async function playFx(layer: HTMLElement, spec: FxSpec, root: ParentNode 
 
   onStart?.();
 
-  return animation({ spec, stage: stageFor(layer), from: local(points.from), to: targets.map((t) => t.at), targets, ...(points.at && { at: local(points.at) }), actorEl: points.actorEl, palette: PALETTE[spec.element] });
+  return animation({ spec, stage: stageFor(layer), from: local(points.from), to: targets.map((t) => t.at), targets, ...(points.at && { at: local(points.at) }), actorEl: points.actorEl, palette: PALETTE[spec.element], labels });
 }

@@ -56,11 +56,11 @@ export function imageBucketStorage<T extends string>({ bucket, maxBytes, formats
     try {
       const { error } = await createAdminClient().storage.from(bucket).remove(paths);
 
-      if (error && options.strict) throw new Error("Не вдалося очистити медіа");
+      if (error && options.strict) throw new Error("Failed to clean up media");
 
       if (error) console.warn(`[${logTag}] remove failed`, paths, error.message);
     } catch (e) {
-      if (options.strict) throw new Error("Не вдалося очистити медіа");
+      if (options.strict) throw new Error("Failed to clean up media");
 
       console.warn(`[${logTag}] remove failed`, paths, e);
     }

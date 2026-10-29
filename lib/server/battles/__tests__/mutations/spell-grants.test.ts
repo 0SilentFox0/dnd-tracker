@@ -7,6 +7,7 @@ import { API_ERRORS } from "@/lib/constants/api-errors";
 import { castSpellSchema } from "@/lib/schemas/battles";
 import { createSpellMutation } from "@/lib/server/battles/mutations/spell/spell-mutation";
 import { runBattleMutation } from "@/lib/server/battles/run-mutation";
+import { eventTextOf } from "@/lib/utils/battle/log/__tests__/event-text";
 import type { BattleParticipant, SpellGrant } from "@/types/battle";
 
 const row = {
@@ -159,7 +160,7 @@ describe("monster spell grants", () => {
     const out = await cast(caster, { saveRolls: [{ participantId: "gob", roll: 15 }] }, saveSpell);
 
     expect(out.participants.find((p) => p.basicInfo.id === "gob")?.combatStats.currentHp).toBe(goblin.combatStats.currentHp);
-    expect(out.events[0].resultText).toContain("СК 10");
+    expect(eventTextOf(out.events[0])).toContain("СК 10");
   });
 
   it("casts an at-will grant without slots or a duplicate knownSpells entry and spends the action", async () => {
@@ -258,7 +259,7 @@ describe("monster spell grants", () => {
 
     expect(out.participants.find((p) => p.basicInfo.id === "gob")?.combatStats.currentHp).toBe(goblin.combatStats.currentHp - 4);
     expect(casterOf(out).spellcasting.spellSaveDC).toBe(10);
-    expect(out.events[0].resultText).toContain("СК 25");
+    expect(eventTextOf(out.events[0])).toContain("СК 25");
   });
 
   it("uses a zero attack override without persisting it", async () => {

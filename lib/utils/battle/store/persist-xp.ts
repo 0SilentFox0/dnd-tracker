@@ -11,6 +11,7 @@ import { autoXpEnabled, battleXpAward } from "@/lib/utils/battle/turn/battle-xp"
 import type { Ruleset } from "@/lib/utils/rules";
 import type { BattleParticipant } from "@/types/battle";
 
+// eslint-disable-next-line no-restricted-syntax -- note stored in the character log (content)
 export const BATTLE_XP_NOTE = "Перемога в бою";
 
 export function isVictoryOutcome(events: NewBattleEvent[]): boolean {

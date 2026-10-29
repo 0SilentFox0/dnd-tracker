@@ -5,7 +5,7 @@ import { legendaryAbilities, legendaryBlocker, legendaryCostOf } from "@/lib/uti
 import { currentOf } from "@/lib/utils/battle/common/control";
 import type { BattleMutationContext } from "@/lib/utils/battle/pipeline/run-battle-mutation";
 import { isGrantLive } from "@/lib/utils/battle/spell/inline-grant";
-import { BattleRuleError } from "@/lib/utils/battle/store";
+import { BattleRuleError, ruleErrorOf } from "@/lib/utils/battle/store";
 import type { CastableSpell } from "@/lib/utils/battle/types/spell-process";
 import type { BattleParticipant } from "@/types/battle";
 
@@ -19,7 +19,7 @@ export function resolveSpellSource(ctx: BattleMutationContext, caster: BattlePar
 
     const blocker = legendaryAbility.limits?.lair ? lairBlocker(caster, ctx.scene.round, legendaryAbility.key) : legendaryBlocker(caster, currentOf(ctx), legendaryCostOf(legendaryAbility));
 
-    if (blocker) throw new BattleRuleError("action_rejected", blocker);
+    if (blocker) throw ruleErrorOf("action_rejected", blocker);
 
     if (!withinCountLimits(caster, legendaryAbility)) throw new BattleRuleError("ability_limit", API_ERRORS.BATTLE_USES_EXHAUSTED);
 

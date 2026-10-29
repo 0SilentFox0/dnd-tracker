@@ -8,6 +8,7 @@ import { attackMutation } from "@/lib/server/battles/mutations/attack/attack-mut
 import { bonusActionMutation } from "@/lib/server/battles/mutations/bonus-action/bonus-action-mutation";
 import { nextTurnMutation } from "@/lib/server/battles/mutations/next-turn/next-turn-mutation";
 import { resolved, seq } from "@/lib/utils/abilities/__tests__/fixtures";
+import { eventTextOf } from "@/lib/utils/battle/log/__tests__/event-text";
 import type { BattleMutationContext } from "@/lib/utils/battle/pipeline/run-battle-mutation";
 import type { ResolvedAbility } from "@/types/abilities";
 import type { BattleParticipant } from "@/types/battle";
@@ -54,7 +55,7 @@ describe("abilities through mutations", () => {
     const next = nextTurnMutation(context({ participants: hit.participants }));
 
     expect(find(next.participants, "gob").combatStats.currentHp).toBe(hpAfterHit - 3);
-    expect(next.events.some((e) => e.resultText.includes("bleed"))).toBe(true);
+    expect(next.events.some((e) => eventTextOf(e).includes("bleed"))).toBe(true);
   });
 
   it("відсіч цілі — один раз між її ходами", async () => {

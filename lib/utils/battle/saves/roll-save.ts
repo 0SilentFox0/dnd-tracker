@@ -3,9 +3,11 @@ import { rollD20WithMode } from "./roll-d20";
 import type { AbilityKey } from "@/lib/constants/abilities";
 import { collectModifiers, type ModifierResult } from "@/lib/utils/abilities/engine/core/collect-modifiers";
 import { withSelf } from "@/lib/utils/abilities/engine/core/participants";
+import { uniqueLines } from "@/lib/utils/battle/log/lines";
 import { ARMOR_PENALTY_LABEL, armorPenalty, armorPenaltyAffects } from "@/lib/utils/battle/proficiency";
 import type { Ruleset } from "@/lib/utils/rules";
 import type { BattleParticipant } from "@/types/battle";
+import type { LogLine } from "@/types/text";
 
 export type SaveRollMode = "advantage" | "disadvantage" | "normal";
 
@@ -17,7 +19,7 @@ type SaveFlagEntries = ModifierResult["entries"];
 
 const saveFlagEntries = (ps: BattleParticipant[], id: string): SaveFlagEntries => collectModifiers(ps, id, { flags: SAVE_FLAGS }).entries;
 
-function modeFrom(entries: SaveFlagEntries, ability: AbilityKey, vsSpell?: boolean, armorBlocked = false): { mode: SaveRollMode; autoFail: boolean; reasons: { advantage: string[]; disadvantage: string[] } } {
+function modeFrom(entries: SaveFlagEntries, ability: AbilityKey, vsSpell?: boolean, armorBlocked = false): { mode: SaveRollMode; autoFail: boolean; reasons: { advantage: LogLine[]; disadvantage: LogLine[] } } {
   const advantage = entries
     .filter((e) => e.flag?.flag === "saveAdvantage" && covers(e.flag.abilities, ability) && (!e.flag.vsSpells || vsSpell))
     .map((e) => e.label);
@@ -26,7 +28,7 @@ function modeFrom(entries: SaveFlagEntries, ability: AbilityKey, vsSpell?: boole
 
   const autoFail = entries.some((e) => e.flag?.flag === "autoFailSave" && e.flag.abilities.includes(ability));
 
-  const reasons = { advantage: [...new Set(advantage)], disadvantage: [...new Set(disadvantage)] };
+  const reasons = { advantage: uniqueLines(advantage), disadvantage: uniqueLines(disadvantage) };
 
   const adv = reasons.advantage.length > 0;
 
@@ -40,7 +42,7 @@ export function saveRollMode(
   ability: AbilityKey,
   participants: BattleParticipant[],
   opts: { vsSpell?: boolean } = {},
-): { mode: SaveRollMode; autoFail: boolean; reasons: { advantage: string[]; disadvantage: string[] } } {
+): { mode: SaveRollMode; autoFail: boolean; reasons: { advantage: LogLine[]; disadvantage: LogLine[] } } {
   return modeFrom(saveFlagEntries(withSelf(participants, target), target.basicInfo.id), ability, opts.vsSpell, armorPenalty(target));
 }
 

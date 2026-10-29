@@ -2,6 +2,7 @@
 
 import { useCallback, useState } from "react";
 import dynamic from "next/dynamic";
+import { useTranslations } from "next-intl";
 import { Settings2 } from "lucide-react";
 
 import { AwaitingDmBanner } from "./AwaitingDmBanner";
@@ -32,6 +33,10 @@ const ActionResultCard = dynamic(() => import("@/components/battle/overlays/Acti
 const DmPanel = dynamic(() => import("@/components/battle/dm/DmPanel").then((m) => m.DmPanel), { ssr: false });
 
 export function MobileBattleLayout() {
+  const t = useTranslations("battle.scene");
+
+  const ts = useTranslations("battle.sides");
+
   const { battle, awaiting, viewer: { isDM }, turn: { current, isMyTurn }, roster: { hero, allies, enemies }, select, log, intents } = useBattleScene();
 
   const hasMap = !!battle.map;
@@ -60,7 +65,7 @@ export function MobileBattleLayout() {
 
   const turnKey = hero && isMyTurn ? myTurnKey(hero, battle.currentRound) : null;
 
-  const waitingFor = <span className="italic text-[#b8ab95]">ходить <b className="hud-sc not-italic text-[var(--ink)]">{current?.basicInfo.name}</b></span>;
+  const waitingFor = <span className="italic text-[#b8ab95]">{t.rich("waitingFor", { name: current?.basicInfo.name ?? "", b: (chunks) => <b className="hud-sc not-italic text-[var(--ink)]">{chunks}</b> })}</span>;
 
   return (
     <MapStripSlotContext value={slot}>
@@ -76,7 +81,7 @@ export function MobileBattleLayout() {
           ) : awaiting ? (
             <AwaitingDmBanner />
           ) : isMyTurn ? (
-            <div className="hud-sc mx-4 mt-2 flex h-10 items-center justify-center gap-3 border-y border-[var(--enemy)] bg-[var(--enemy)]/20 text-[17px] tracking-[.12em] text-[var(--ink)]">Твій хід</div>
+            <div className="hud-sc mx-4 mt-2 flex h-10 items-center justify-center gap-3 border-y border-[var(--enemy)] bg-[var(--enemy)]/20 text-[17px] tracking-[.12em] text-[var(--ink)]">{t("yourTurn")}</div>
           ) : (
             <div className="flex h-8 items-center px-4 text-[15px]">{waitingFor}</div>
           )}
@@ -84,13 +89,13 @@ export function MobileBattleLayout() {
       )}
       <div className="mx-4 flex h-11 border-b border-white/[.18]">
         <div role="tablist" className="flex flex-1">
-          {hasMap && tabBtn(MAP_TAB, "Карта")}
-          {tabBtn(ParticipantSide.ALLY, "Союзники", allies.length)}
-          {tabBtn(ParticipantSide.ENEMY, "Вороги", enemies.length)}
+          {hasMap && tabBtn(MAP_TAB, t("viewMap"))}
+          {tabBtn(ParticipantSide.ALLY, ts("allies"), allies.length)}
+          {tabBtn(ParticipantSide.ENEMY, ts("enemies"), enemies.length)}
         </div>
         {mapTab && <ReserveSheetButton />}
         {isDM && battle.status !== BattleStatus.PREPARED && (
-          <button type="button" onClick={() => setDmOpen(true)} aria-label="Відкрити швидкі дії DM" className="flex w-11 items-center justify-center text-[var(--gold)]">
+          <button type="button" onClick={() => setDmOpen(true)} aria-label={t("openDmActions")} className="flex w-11 items-center justify-center text-[var(--gold)]">
             <Settings2 className="size-5" />
           </button>
         )}
@@ -114,17 +119,17 @@ export function MobileBattleLayout() {
           {hero && isMyTurn && <MyTurnControls key={turnKey} hero={hero} strip={mapTab ? { onExpand: expand } : undefined} />}
           {mapTab && !(hero && isMyTurn) && !intents.mapAim && !intents.mapPick && (
             <MapStripRow onExpand={expand}>
-              {completed ? <span className="hud-sc">Бій завершено</span> : awaiting ? <span className="hud-sc">{isDM ? "Бій чекає вашого рішення" : "Очікуємо рішення ДМ"}</span> : waitingFor}
+              {completed ? <span className="hud-sc">{t("over")}</span> : awaiting ? <span className="hud-sc">{isDM ? t("awaitingYouShort") : t("awaitingDm")}</span> : waitingFor}
             </MapStripRow>
           )}
         </div>
       )}
       <ActionResultCard />
       {isDM && <DmPanel panel={{ open: dmOpen, onOpenChange: setDmOpen }} />}
-      <ResponsiveDialog open={!!selected} onOpenChange={(o) => !o && select(null)} title="Учасник" className={cn(HUD_SURFACE, "border-white/25 bg-[#15110e]")}>
+      <ResponsiveDialog open={!!selected} onOpenChange={(o) => !o && select(null)} title={t("participant")} className={cn(HUD_SURFACE, "border-white/25 bg-[#15110e]")}>
         {selected && <ParticipantDetails participant={selected} />}
       </ResponsiveDialog>
-      <ResponsiveDialog open={log.open} onOpenChange={(o) => !o && closeLog()} title="Журнал" className={cn(HUD_SURFACE, "border-white/25 bg-[#15110e]")}>
+      <ResponsiveDialog open={log.open} onOpenChange={(o) => !o && closeLog()} title={t("log")} className={cn(HUD_SURFACE, "border-white/25 bg-[#15110e]")}>
         <BattleLog key={log.focus ?? "latest"} />
       </ResponsiveDialog>
     </div>

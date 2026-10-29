@@ -1,0 +1,302 @@
+{
+  "critChoice": {
+    "title": "Choose the critical roll effect",
+    "description": "The action is paused until you choose an effect.",
+    "cancelAction": "Cancel action",
+    "randomAll": "Random for all",
+    "confirm": "Confirm",
+    "random": "Random",
+    "saveRow": "Saving throw: {target}",
+    "attackRow": "{actor} → {target}: {kind}",
+    "kinds": {
+      "success": "Critical success",
+      "fail": "Critical failure"
+    },
+    "waitingBanner": "The DM is choosing an effect…",
+    "waitingNote": "The DM is choosing the critical roll effect…"
+  },
+  "hud": {
+    "dieLabel": "Die {n} (d{sides})",
+    "autoRoll": "Auto roll",
+    "zoomAvatar": "{name}: full-size avatar",
+    "effects": {
+      "collapse": "Collapse effects",
+      "showAll": "Show all effects ({count})",
+      "less": "collapse"
+    },
+    "slots": {
+      "level": "Level {level}: {current} of {max}",
+      "pactLevel": "Pact, level {level}: {current} of {max}",
+      "pact": "Pact · level {level}"
+    }
+  },
+  "log": {
+    "battle": "Battle",
+    "triggers": "triggers",
+    "hideDetails": "Hide details",
+    "details": "Details",
+    "damage": "Damage",
+    "damageBreakdown": "Damage breakdown",
+    "expandAll": "Expand all",
+    "collapseAll": "Collapse all",
+    "round": "Round {round}",
+    "loading": "Loading…",
+    "showEarlier": "Show earlier"
+  },
+  "page": {
+    "loading": "Loading battle…",
+    "notFound": "Battle not found"
+  },
+  "sides": {
+    "allies": "Allies",
+    "enemies": "Enemies",
+    "alliesCount": "Allies · {count}",
+    "enemiesCount": "Enemies · {count}"
+  },
+  "scene": {
+    "awaitingDm": "Waiting for the DM's decision",
+    "awaitingYou": "The battle awaits your decision — reserve",
+    "awaitingYouShort": "The battle awaits your decision",
+    "over": "Battle over",
+    "offline": "No connection — the state may be out of date",
+    "openLog": "log ›",
+    "actionsWait": "Actions become available on your turn",
+    "viewMode": "Battle view",
+    "viewMap": "Map",
+    "viewColumns": "Columns",
+    "participant": "Participant",
+    "log": "Log",
+    "backToLog": "← log",
+    "yourTurn": "Your turn",
+    "waitingFor": "<b>{name}</b> is acting",
+    "openDmActions": "Open DM quick actions"
+  },
+  "topBar": {
+    "fxDisabledHint": "Animations are off: “Reduce motion” is enabled in the system",
+    "resetTitle": "Reset the battle?",
+    "resetDescription": "The battle returns to preparation and the log is cleared.",
+    "reset": "Reset",
+    "yourTurn": "Your turn",
+    "fxOn": "Action animations: on",
+    "fxOff": "Action animations: off",
+    "round": "Round {round}",
+    "complete": "Complete",
+    "nextTurn": "Next turn"
+  },
+  "map": {
+    "hazardDefault": "Hazardous zone",
+    "hazardUntilEnd": "{label} · until the end of round {round}",
+    "hazardRoundsLeft": "{label} · {rounds} more rd.",
+    "barrier": "Barrier",
+    "barrierUntil": "Barrier until the end of round {round}",
+    "returnToToken": "Return",
+    "tools": {
+      "place": "Place",
+      "terrain": "Terrain",
+      "weather": "Weather"
+    },
+    "terrain": {
+      "brushes": {
+        "wall": "Impassable",
+        "barrier": "Barrier",
+        "hazard": "Hazard",
+        "erase": "Erase",
+        "difficult": "Difficult",
+        "erase-zone": "Erase zone"
+      },
+      "rounds": "Rounds",
+      "hazardLabel": "Hazard label",
+      "hazardDefault": "Hazardous zone",
+      "damageDice": "Damage (dice)",
+      "noDamage": "no damage",
+      "type": "Type"
+    },
+    "difficultDefault": "Difficult terrain"
+  },
+  "result": {
+    "title": {
+      "hit": "Hit",
+      "crit": "Critical hit",
+      "miss": "Miss"
+    },
+    "critFail": "Critical failure",
+    "miss": "miss",
+    "critPrefix": "crit ",
+    "downed": "downed",
+    "splash": "splashed",
+    "retaliation": "Target's reply: {name} {outcome}",
+    "applied": "Applied",
+    "appliedTargets": "Applied · targets: {count}",
+    "aria": "Action result"
+  },
+  "prep": {
+    "badge": "Battle preparation",
+    "title": "THE ARENA IS READY",
+    "tagline": "Every warrior is in position. Time to decide the fate of this clash.",
+    "starting": "GATHERING THE ARMY...",
+    "start": "TO BATTLE!",
+    "waiting": "🗡️ Await the DM's order...",
+    "needOne": "At least one participant must be on the field"
+  },
+  "resultScreen": {
+    "stats": {
+      "damageDealt": "Damage",
+      "healingDone": "Healing",
+      "kills": "Kills",
+      "damageTaken": "Taken"
+    },
+    "outcome": {
+      "victory": "Victory",
+      "defeat": "Defeat",
+      "unknown": "Battle over"
+    },
+    "aria": "Battle summary",
+    "rounds": "Rounds: {rounds}",
+    "counting": "Tallying the results…",
+    "exit": "Back to menu",
+    "review": "Review the battle"
+  },
+  "morale": {
+    "extraTitle": "Fighting spirit",
+    "extraText": "{name} gets an extra turn at the end of the round",
+    "detail": "d10 = {d10} · morale {morale}",
+    "toBattle": "Back to battle",
+    "skipTitle": "Panic",
+    "skipText": "{name} loses the turn",
+    "checkD10": "Morale check · d10",
+    "extraOn": "Extra turn on {rolls}",
+    "skipOn": "Turn skipped on {rolls}",
+    "outcome": {
+      "none": "Morale",
+      "extra": "Fighting spirit",
+      "skip": "Panic"
+    }
+  },
+  "details": {
+    "statblock": "Stat block",
+    "armor": "Armor",
+    "ac": "AC",
+    "acBetween": "AC between",
+    "evidence": "{hit, select, hit {hit} other {miss}} {total} · {actor}, round {round}",
+    "effects": "Effects",
+    "none": "none",
+    "zone": "zone",
+    "permanent": "permanent",
+    "rounds": "{count} rd.",
+    "from": "From: {source}",
+    "observed": "Observed in battle",
+    "immunity": "immunity"
+  },
+  "hero": {
+    "morale": "Morale {value}",
+    "yourTurn": "your turn",
+    "acting": "acting",
+    "turnIn": "turn in {count}",
+    "cooldown": "recharge: {count} rd.",
+    "pendingCast": "⏳ {spell}: {rounds} more rounds · concentration"
+  },
+  "participant": {
+    "deathSaves": "Death saves",
+    "stable": "Stable"
+  },
+  "reserve": {
+    "aria": "Reserve",
+    "title": "Reserve ({count})",
+    "removeConfirm": "Remove {name} from the reserve?",
+    "reveal": "Bring into battle: {name}",
+    "revealHint": "Bring into battle — acts right after the current turn",
+    "remove": "Remove from the reserve: {name}"
+  },
+  "coreActions": {
+    "title": "Actions",
+    "description": "Core 5e actions",
+    "run": "Perform",
+    "action": "Action",
+    "movement": "Movement",
+    "shoveMode": "Method",
+    "shove": {
+      "prone": "Knock prone",
+      "push": "Push away"
+    },
+    "descriptions": {
+      "dash": "Adds as much movement to this turn as your speed gives.",
+      "disengage": "Your movement provokes no opportunity attacks for the rest of the turn.",
+      "dodge": "Until the start of your next turn, attacks against you have disadvantage and you have advantage on DEX saving throws.",
+      "help": "An adjacent ally gains advantage on their next attack.",
+      "hide": "A Stealth check against the enemies' passive Perception.",
+      "ready": "An attack as a reaction before the start of your next turn.",
+      "standUp": "Spends half your movement and removes the prone condition.",
+      "grapple": "A contest (2014) or saving throw (2024): the target becomes grappled.",
+      "shove": "A contest (2014) or saving throw (2024): knock the target prone or push it 5 ft.",
+      "escape": "A contest against the grappler (2024: against the DC): removes the grappled condition."
+    }
+  },
+  "actions": {
+    "attack": "Attack",
+    "magic": "Magic",
+    "ability": "Ability",
+    "bonus": "Bonus",
+    "core": "Actions",
+    "strikeAndReturn": "Return",
+    "endTurn": "End turn"
+  },
+  "turnControls": {
+    "strip": {
+      "waiting": "Your turn",
+      "morale": "Morale check",
+      "acting": "Your turn · Actions",
+      "ended": "Your turn"
+    },
+    "pickAuraZone": "Choose the aura zone",
+    "reactionSpell": "Reaction spell"
+  },
+  "readied": {
+    "title": "Readied attack",
+    "description": "Choose a target",
+    "noTargets": "No targets"
+  },
+  "countdown": {
+    "endsIn": "The turn ends in <b>{left}</b>",
+    "stay": "Stay"
+  },
+  "notify": {
+    "yourTurnNamed": "Your turn: {name}",
+    "yourTurn": "Your turn!",
+    "yourTurnTitle": "⚔ Your turn",
+    "conflict": "The battle state changed, repeat the action",
+    "actionFailed": "The action failed",
+    "endTurnTitle": "End the turn?",
+    "endTurnDescription": "The action has not been used yet.",
+    "endTurnConfirm": "End turn",
+    "moraleUnchanged": "{name} · morale: unchanged (d10 = {d10})",
+    "skippedCells": "{count, plural, one {Skipped # cell} other {Skipped # cells}} (occupied or off the map)"
+  },
+  "unitControl": {
+    "dm": "DM"
+  },
+  "view": {
+    "health": {
+      "unhurt": "unhurt",
+      "wounded": "wounded",
+      "bloodied": "bloodied",
+      "dying": "dying",
+      "down": "down"
+    },
+    "heroStatus": {
+      "active": "alive",
+      "unconscious": "unconscious",
+      "dead": "died"
+    },
+    "effects": {
+      "guard": "{name} takes {value}% of the damage from attacks",
+      "guardian": "Guardian",
+      "dot": "{damage} damage ({type}) each round",
+      "hot": "+{heal} HP each round",
+      "zone": "in the aura zone until {name}'s next turn",
+      "owner": "the owner",
+      "permanent": "lasts permanently",
+      "roundsLeft": "{count, plural, one {# more round} other {# more rounds}}",
+      "from": "from: {source}"
+    }
+  }
+}

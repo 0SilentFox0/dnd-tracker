@@ -1,3 +1,4 @@
+import { textRef } from "@/lib/i18n/text-ref";
 import { findParticipant, isActive, replaceParticipant } from "@/lib/utils/abilities/engine/core/participants";
 import { resolveDowned } from "@/lib/utils/abilities/engine/core/run-abilities";
 import type { Rng } from "@/lib/utils/abilities/engine/core/types";
@@ -10,6 +11,7 @@ import type { Ruleset } from "@/lib/utils/rules";
 import type { ZoneTrigger } from "@/lib/utils/spells/model/schema";
 import type { ResolvedAbility } from "@/types/abilities";
 import type { BattleMapConfig, BattleParticipant } from "@/types/battle";
+import type { LogLine } from "@/types/text";
 
 export type TriggerKind = "onEnter" | "onTurnStart" | "onExit";
 
@@ -37,7 +39,7 @@ export interface FireSource {
 
 export interface Fired {
   participants: BattleParticipant[];
-  messages: string[];
+  messages: LogLine[];
   failed: boolean;
 }
 
@@ -63,12 +65,12 @@ export function fireTrigger(ps: BattleParticipant[], src: FireSource, trigger: Z
 
   let next = once ? replaceParticipant(ps, { ...target, battleData: { ...target.battleData, zoneHits: { ...Object.fromEntries(Object.entries(target.battleData.zoneHits ?? {}).filter(([, r]) => r >= ctx.round - 1)), [key]: ctx.round } } }) : ps;
 
-  const messages: string[] = [];
+  const messages: LogLine[] = [];
 
   if (trigger.save) {
     const res = rollSave({ target: findParticipant(next, targetId) ?? target, ability: trigger.save.ability, dc: src.dc, participants: next, rules: ctx.rules, rng: ctx.rng, vsSpell: true });
 
-    messages.push(`🎲 ${target.basicInfo.name}: «${src.spellName}» — рятівний ${trigger.save.ability.toUpperCase()} ${res.total} проти СК ${src.dc}: ${res.success ? "успіх" : "провал"}`);
+    messages.push(textRef("battleLog.spellFx.zoneSave", { target: target.basicInfo.name, spell: src.spellName, ability: trigger.save.ability.toUpperCase(), total: res.total, dc: src.dc, success: String(res.success) }));
 
     if (res.success) return { participants: next, messages, failed: false };
   }
@@ -82,7 +84,7 @@ export function fireTrigger(ps: BattleParticipant[], src: FireSource, trigger: Z
 
     const hit = roll === 20 || (roll !== 1 && total >= ac);
 
-    messages.push(`🎯 ${target.basicInfo.name}: «${src.spellName}» — атака ${roll}+${src.attackBonus ?? 0}=${total} проти КЗ ${ac}: ${hit ? "влучання" : "промах"}`);
+    messages.push(textRef("battleLog.spellFx.zoneAttack", { target: target.basicInfo.name, spell: src.spellName, roll, bonus: src.attackBonus ?? 0, total, ac, hit: String(hit) }));
 
     if (!hit) return { participants: next, messages, failed: false };
   }

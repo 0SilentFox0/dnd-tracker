@@ -19,6 +19,7 @@ const POINT_DEBOUNCE_MS = 400;
 const POINT_DEBOUNCE_DIST = 0.02;
 
 // the Ukrainian letters sit on the same physical keys
+ 
 export const TOOL_HOTKEYS: Record<string, WorldTool> = { v: "select", м: "select", p: "point", з: "point", z: "zone", я: "zone", e: "entry", у: "entry", m: "move", ь: "move" };
 
 const isTyping = (t: EventTarget | null) => t instanceof HTMLElement && (t.isContentEditable || ["INPUT", "TEXTAREA", "SELECT"].includes(t.tagName));

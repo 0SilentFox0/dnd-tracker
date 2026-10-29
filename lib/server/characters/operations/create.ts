@@ -78,7 +78,7 @@ async function createCharacterCore({ access, campaignId }: CampaignScope, data: 
 
   const avatar = await resolveAvatarForPersistence(data.avatar, { campaignId });
 
-  if (!avatar.ok) throw new ContentError(avatar.message, 400);
+  if (!avatar.ok) throw new ContentError(avatar.message, 400, undefined, avatar.params);
 
   const spellSlots = fromClasses?.spellSlots ?? (await deriveCharacterDefaults(campaignId, data)).spellSlots;
 
@@ -155,7 +155,7 @@ export const createOperation = defineCharacterOperation({
 
     const avatar = await resolveAvatarForPersistence(data.avatar, { campaignId });
 
-    if (!avatar.ok) throw new ContentError(avatar.message, 400);
+    if (!avatar.ok) throw new ContentError(avatar.message, 400, undefined, avatar.params);
 
     return { ...data, avatar: avatar.avatar ?? undefined };
   },

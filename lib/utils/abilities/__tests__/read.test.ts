@@ -41,7 +41,7 @@ describe("readAbilities для редактора", () => {
     const r = readAbilities("skill", { id: "s", abilities: [good, bad, 42] });
 
     expect(r.abilities).toEqual([good, bad]);
-    expect(r.issues).toEqual([expect.objectContaining({ severity: "loss", message: expect.stringMatching(/невалідн/) })]);
+    expect(r.issues).toEqual([expect.objectContaining({ severity: "loss", message: { message: "abilities.read.partialInvalid" } })]);
   });
 
   it("не масив — порожній список і loss-плашка", () => {

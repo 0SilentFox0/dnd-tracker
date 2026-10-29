@@ -15,6 +15,7 @@ import { controls, currentOf } from "@/lib/utils/battle/common/control";
 import { dropOrphanedConcentration } from "@/lib/utils/battle/concentration";
 import { placeParticipants } from "@/lib/utils/battle/grid/placement";
 import { placeRevived } from "@/lib/utils/battle/grid/revive-placement";
+import { lineText } from "@/lib/utils/battle/log/lines";
 import { modeBlockedText, withModeAfterMutation } from "@/lib/utils/battle/modes/server";
 import { clearFallenEffects } from "@/lib/utils/battle/participant/fallen";
 import { reserveOf } from "@/lib/utils/battle/participant/reserve";
@@ -35,6 +36,7 @@ import {
   eventToBattleAction,
   systemEvent,
 } from "@/lib/utils/battle/store";
+import { REJECT } from "@/lib/utils/battle/store/reject";
 import { dismissExpiredSummons } from "@/lib/utils/battle/summon/dismiss";
 import { revertExpiredTransforms } from "@/lib/utils/battle/transform/revert";
 import { checkVictoryConditions, completeBattle } from "@/lib/utils/battle/turn/victory";
@@ -129,11 +131,11 @@ function withVictory(scene: BattleSceneState, result: MutationResult, rules: Rul
 function withPlacement(map: BattleMapConfig | null, scene: { status: BattleStatus; round: number; participants: BattleParticipant[] }, result: MutationResult, place: boolean): MutationResult {
   const dismissed = dismissExpiredSummons(result.participants, result.scene?.round ?? scene.round);
 
-  if (dismissed.participants !== result.participants) result = { ...result, participants: dismissed.participants, events: [...result.events, systemEvent(result.scene?.round ?? scene.round, dismissed.messages.join("; "))] };
+  if (dismissed.participants !== result.participants) result = { ...result, participants: dismissed.participants, events: [...result.events, systemEvent(result.scene?.round ?? scene.round, lineText(dismissed.messages, "; "))] };
 
   const reverted = revertExpiredTransforms(result.participants, result.scene?.round ?? scene.round);
 
-  if (reverted.participants !== result.participants) result = { ...result, participants: reverted.participants, events: [...result.events, systemEvent(result.scene?.round ?? scene.round, reverted.messages.join("; "))] };
+  if (reverted.participants !== result.participants) result = { ...result, participants: reverted.participants, events: [...result.events, systemEvent(result.scene?.round ?? scene.round, lineText(reverted.messages, "; "))] };
 
   const cleared = clearFallenEffects(result.participants);
 
@@ -141,7 +143,7 @@ function withPlacement(map: BattleMapConfig | null, scene: { status: BattleStatu
 
   const released = releaseInvalidGrapples(result.participants, map);
 
-  if (released.participants !== result.participants) result = { ...result, participants: released.participants, events: [...result.events, systemEvent(result.scene?.round ?? scene.round, released.messages.join("; "))] };
+  if (released.participants !== result.participants) result = { ...result, participants: released.participants, events: [...result.events, systemEvent(result.scene?.round ?? scene.round, lineText(released.messages, "; "))] };
 
   const swept = sweepOrphanedAnchored(result.participants);
 
@@ -149,7 +151,7 @@ function withPlacement(map: BattleMapConfig | null, scene: { status: BattleStatu
 
   const orphaned = dropOrphanedConcentration(result.participants, map, result.scene?.round ?? scene.round);
 
-  if (orphaned.participants !== result.participants) result = { ...result, participants: orphaned.participants, events: [...result.events, systemEvent(result.scene?.round ?? scene.round, orphaned.messages.join("; "))] };
+  if (orphaned.participants !== result.participants) result = { ...result, participants: orphaned.participants, events: [...result.events, systemEvent(result.scene?.round ?? scene.round, lineText(orphaned.messages, "; "))] };
 
   if (!map || (result.scene?.status ?? scene.status) !== BattleStatus.ACTIVE) return result;
 
@@ -178,6 +180,39 @@ export type BattleOperationOutcome = {
   response?: Record<string, unknown>;
   preview?: BattleScene & { knowledge?: BattleKnowledge };
 };
+
+type PreviewOptions = Pick<RunBattleMutationOptions<unknown>, "includeRecentEvents" | "includeKnowledge">;
+
+type PreviewDeps = Pick<PipelineDeps, "loadRecentEvents" | "loadKnowledge">;
+
+async function buildScenePreview(userId: string, loaded: LoadedBattle, result: MutationResult, options: PreviewOptions, deps: PreviewDeps) {
+  const needsKnowledge = options.includeKnowledge && !loaded.isDM && !alwaysSeesEnemyStats(loaded.participants, userId);
+
+  const [entries, knowledge] = await Promise.all([
+    options.includeRecentEvents ? deps.loadRecentEvents(loaded.scene.id, options.includeRecentEvents) : [],
+    needsKnowledge ? deps.loadKnowledge?.(loaded.scene.id) : undefined,
+  ]);
+
+  const battle = toBattleResponse(
+    loaded,
+    loaded.scene,
+    result.participants,
+    result.pending,
+    { mode: "full", entries },
+    { isDM: loaded.isDM },
+  );
+
+  return knowledge ? { ...battle, knowledge } : battle;
+}
+
+/** Read path: the normalisations a no-op mutation would get, without a request, rate limit or write. */
+export function readScenePreview(userId: string, loaded: LoadedBattle, options: PreviewOptions, deps: PreviewDeps) {
+  const unchanged = guardTurnOrder(loaded.scene, loaded.participants, { participants: loaded.participants, pending: loaded.pending, events: [] });
+
+  const placed = withPlacement(loaded.meta.map, { status: loaded.scene.status, round: loaded.scene.round, participants: loaded.participants }, unchanged, false);
+
+  return buildScenePreview(userId, loaded, withVictory(loaded.scene, placed, loaded.meta.rules), options, deps);
+}
 
 /** Shared guard/mutation/save pipeline. Errors escape the transaction boundary. */
 export async function runGuardedBattleOperationCore<TBody>(
@@ -223,23 +258,7 @@ export async function runGuardedBattleOperationCore<TBody>(
   const result = withVictory(loaded.scene, isDryRun ? placed : withModeAfterMutation(map, loaded.scene, placed), loaded.meta.rules);
 
   if (isDryRun) {
-    const needsKnowledge = options.includeKnowledge && !loaded.isDM && !alwaysSeesEnemyStats(loaded.participants, userId);
-
-    const [entries, knowledge] = await Promise.all([
-      options.includeRecentEvents ? deps.loadRecentEvents(battleId, options.includeRecentEvents) : [],
-      needsKnowledge ? deps.loadKnowledge?.(battleId) : undefined,
-    ]);
-
-    const battle = toBattleResponse(
-      loaded,
-      loaded.scene,
-      result.participants,
-      result.pending,
-      { mode: "full", entries },
-      { isDM: loaded.isDM },
-    );
-
-    return { delta: null, version: loaded.scene.version, response: result.response, preview: knowledge ? { ...battle, knowledge } : battle };
+    return { delta: null, version: loaded.scene.version, response: result.response, preview: await buildScenePreview(userId, loaded, result, options, deps) };
   }
 
   const access = deps.recheckAccess
@@ -318,7 +337,7 @@ export function guardBattleContext<TBody>(userId: string, loaded: LoadedBattle &
     : null;
 
   if (allowed && !allowed.includes(loaded.scene.status)) {
-    throw new BattleRuleError("wrong_status", `Дія недоступна в статусі «${loaded.scene.status}»`);
+    throw new BattleRuleError("wrong_status", REJECT.wrongStatus, { status: loaded.scene.status });
   }
 
   const blocked = options.blockedByMode ? modeBlockedText(loaded.meta.map) : null;

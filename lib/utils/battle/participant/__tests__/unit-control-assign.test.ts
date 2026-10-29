@@ -4,6 +4,7 @@ import { ParticipantSide, ParticipantSourceType } from "@/lib/constants/battle";
 import { CONTROLLED_BY_DM } from "@/lib/constants/characters";
 import { makeEffect, makeParticipant, seq } from "@/lib/utils/abilities/__tests__/fixtures";
 import { allyOwners, freeUnits, randomizeUnitControl, setUnitController } from "@/lib/utils/battle/participant/unit-control";
+import { REJECT } from "@/lib/utils/battle/store/reject";
 import type { BattleParticipant } from "@/types/battle";
 
 const DM = "dm-user";
@@ -54,9 +55,9 @@ describe("setUnitController", () => {
 
     const ps = [...order(), summoned, charmed];
 
-    for (const id of ["e1", "a", "s", "ch", "missing"]) expect(setUnitController(ps, id, "p1", DM)).toEqual({ error: "Цим юнітом не можна керувати гравцю" });
+    for (const id of ["e1", "a", "s", "ch", "missing"]) expect(setUnitController(ps, id, "p1", DM)).toEqual({ error: REJECT.unitNotAssignable });
 
-    expect(setUnitController(ps, "u1", "stranger", DM)).toEqual({ error: "Гравець не бере участі в бою" });
+    expect(setUnitController(ps, "u1", "stranger", DM)).toEqual({ error: REJECT.playerNotInBattle });
   });
 });
 

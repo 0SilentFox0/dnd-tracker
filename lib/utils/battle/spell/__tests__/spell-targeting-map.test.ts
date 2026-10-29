@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 
 import { ParticipantSide } from "@/lib/constants/battle";
+import { textRef } from "@/lib/i18n/text-ref";
 import { makeParticipant, resolved } from "@/lib/utils/abilities/__tests__/fixtures";
 import type { Effect } from "@/lib/utils/abilities/schema";
 import { resolveSpellTargets, type SpellMapContext } from "@/lib/utils/battle/spell/spell-targeting";
@@ -82,11 +83,11 @@ describe("resolveSpellTargets на карті", () => {
   });
 
   it("без точки — відмова", () => {
-    expect(resolve(fireball, [], { map })).toEqual({ ok: false, error: "Оберіть точку на карті" });
+    expect(resolve(fireball, [], { map })).toEqual({ ok: false, error: textRef("battleActions.spell.target.pickPoint") });
   });
 
   it("точка поза дальністю — відмова", () => {
-    expect(resolve(fireball, [], { map, targetCell: { x: 15, y: 2 } })).toEqual({ ok: false, error: "Точка поза дальністю заклинання" });
+    expect(resolve(fireball, [], { map, targetCell: { x: 15, y: 2 } })).toEqual({ ok: false, error: textRef("battleActions.spell.target.pointOutOfRange") });
   });
 
   it("порожній шаблон — каст у порожнечу з aimCell; із zone теж", () => {
@@ -105,8 +106,8 @@ describe("resolveSpellTargets на карті", () => {
 
     const cone: SpellTargeting = { kind: "template", shape: "cone", size: 15, side: "enemy", maxTargets: 6 };
 
-    expect(resolve(wall, [], { map, targetCell: { x: 2, y: 2 } })).toEqual({ ok: false, error: "Оберіть напрямок" });
-    expect(resolve(cone, [], { map, targetCell: { x: 2, y: 2 } })).toEqual({ ok: false, error: "Оберіть напрямок" });
+    expect(resolve(wall, [], { map, targetCell: { x: 2, y: 2 } })).toEqual({ ok: false, error: textRef("battleActions.spell.target.pickDirection") });
+    expect(resolve(cone, [], { map, targetCell: { x: 2, y: 2 } })).toEqual({ ok: false, error: textRef("battleActions.spell.target.pickDirection") });
   });
 
   it("без карти або без позиції заклинателя шаблон — ручний вибір як area", () => {
@@ -122,7 +123,7 @@ describe("resolveSpellTargets на карті", () => {
   it("одиночна ціль поза range — відмова, у межах — ок, без range — ок", () => {
     const bolt: SpellTargeting = { kind: "enemy", range: 20 };
 
-    expect(resolve(bolt, ["far"], { map })).toEqual({ ok: false, error: "Ціль поза дальністю заклинання" });
+    expect(resolve(bolt, ["far"], { map })).toEqual({ ok: false, error: textRef("battleActions.spell.target.targetOutOfRange") });
     expect(resolve(bolt, ["e2"], { map })).toEqual({ ok: true, targetIds: ["e2"] });
     expect(resolve({ kind: "enemy" }, ["far"], { map })).toEqual({ ok: true, targetIds: ["far"] });
     expect(resolve(bolt, ["far"])).toEqual({ ok: true, targetIds: ["far"] });
@@ -186,8 +187,8 @@ describe("заклинання, розширене вмінням, на карт
   it("точка поза дальністю, без точки — відмова; порожній радіус — каст у порожнечу", () => {
     const c = widened("area");
 
-    expect(resolve(bolt, ["n1"], { map, targetCell: { x: 12, y: 3 } }, scene(c), c)).toEqual({ ok: false, error: "Точка поза дальністю заклинання" });
-    expect(resolve(bolt, ["n1"], { map }, scene(c), c)).toEqual({ ok: false, error: "Оберіть точку на карті" });
+    expect(resolve(bolt, ["n1"], { map, targetCell: { x: 12, y: 3 } }, scene(c), c)).toEqual({ ok: false, error: textRef("battleActions.spell.target.pointOutOfRange") });
+    expect(resolve(bolt, ["n1"], { map }, scene(c), c)).toEqual({ ok: false, error: textRef("battleActions.spell.target.pickPoint") });
     expect(resolve(bolt, [], { map, targetCell: { x: 2, y: 8 } }, scene(c), c)).toMatchObject({ ok: true, targetIds: [], centre: { x: 2, y: 8 } });
   });
 
@@ -248,8 +249,8 @@ describe("ланцюг на карті", () => {
   });
 
   it("на карті рівно одна перша ціль у межах дальності", () => {
-    expect(resolve(chain, ["k1", "k2"], { map }, list)).toEqual({ ok: false, error: "Оберіть одну першу ціль ланцюга" });
-    expect(resolve(chain, ["k5"], { map }, list)).toEqual({ ok: false, error: "Ціль поза дальністю заклинання" });
+    expect(resolve(chain, ["k1", "k2"], { map }, list)).toEqual({ ok: false, error: textRef("battleActions.spell.target.pickChainFirst") });
+    expect(resolve(chain, ["k5"], { map }, list)).toEqual({ ok: false, error: textRef("battleActions.spell.target.targetOutOfRange") });
     expect(resolve(chain, ["a"], { map }, list).ok).toBe(false);
   });
 

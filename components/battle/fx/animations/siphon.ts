@@ -41,7 +41,7 @@ function along(pts: FxPoint[], u: number) {
   return { x: pts[i].x + (pts[i + 1].x - pts[i].x) * k, y: pts[i].y + (pts[i + 1].y - pts[i].y) * k };
 }
 
-export const siphon: FxAnimation = ({ stage, from, targets }) =>
+export const siphon: FxAnimation = ({ stage, from, targets, labels }) =>
   perTarget(stage, targets, 0, async ({ at: target, el }) => {
     const { w, h } = halfSize(el);
 
@@ -109,7 +109,7 @@ export const siphon: FxAnimation = ({ stage, from, targets }) =>
         // A grey badge sags off the weakened foe.
         const sag = clamp01((t - 1500) / 1000);
 
-        sinkingBadge(g, target.x + (target.x - face.x) * 0.2, target.y - h - 12, sag, "−25% шкоди", BADGE);
+        sinkingBadge(g, target.x + (target.x - face.x) * 0.2, target.y - h - 12, sag, labels.siphon, BADGE);
 
         g.globalAlpha = 1;
       },

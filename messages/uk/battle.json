@@ -1,0 +1,302 @@
+{
+  "critChoice": {
+    "title": "Оберіть ефект критичного кидка",
+    "description": "Дію зупинено, доки ви не оберете ефект.",
+    "cancelAction": "Скасувати дію",
+    "randomAll": "Випадково для всіх",
+    "confirm": "Підтвердити",
+    "random": "Випадково",
+    "saveRow": "Рятівний кидок: {target}",
+    "attackRow": "{actor} → {target}: {kind}",
+    "kinds": {
+      "success": "Критична удача",
+      "fail": "Критичний провал"
+    },
+    "waitingBanner": "ДМ обирає ефект…",
+    "waitingNote": "ДМ обирає ефект критичного кидка…"
+  },
+  "hud": {
+    "dieLabel": "Кубик {n} (d{sides})",
+    "autoRoll": "Авто-кидок",
+    "zoomAvatar": "{name}: аватар у повний розмір",
+    "effects": {
+      "collapse": "Згорнути ефекти",
+      "showAll": "Показати всі ефекти ({count})",
+      "less": "згорнути"
+    },
+    "slots": {
+      "level": "{level} коло: {current} з {max}",
+      "pactLevel": "Пакт, {level} коло: {current} з {max}",
+      "pact": "Пакт · коло {level}"
+    }
+  },
+  "log": {
+    "battle": "Бій",
+    "triggers": "тригери",
+    "hideDetails": "Сховати деталі",
+    "details": "Деталі",
+    "damage": "Урон",
+    "damageBreakdown": "Розклад шкоди",
+    "expandAll": "Розгорнути всі",
+    "collapseAll": "Згорнути всі",
+    "round": "Раунд {round}",
+    "loading": "Завантаження…",
+    "showEarlier": "Показати раніші"
+  },
+  "page": {
+    "loading": "Завантаження бою…",
+    "notFound": "Бій не знайдено"
+  },
+  "sides": {
+    "allies": "Союзники",
+    "enemies": "Вороги",
+    "alliesCount": "Союзники · {count}",
+    "enemiesCount": "Вороги · {count}"
+  },
+  "scene": {
+    "awaitingDm": "Очікуємо рішення ДМ",
+    "awaitingYou": "Бій чекає вашого рішення — резерв",
+    "awaitingYouShort": "Бій чекає вашого рішення",
+    "over": "Бій завершено",
+    "offline": "Немає зв'язку — стан може бути застарілим",
+    "openLog": "журнал ›",
+    "actionsWait": "Дії стануть доступні у твій хід",
+    "viewMode": "Вигляд бою",
+    "viewMap": "Карта",
+    "viewColumns": "Колонки",
+    "participant": "Учасник",
+    "log": "Журнал",
+    "backToLog": "← журнал",
+    "yourTurn": "Твій хід",
+    "waitingFor": "ходить <b>{name}</b>",
+    "openDmActions": "Відкрити швидкі дії DM"
+  },
+  "topBar": {
+    "fxDisabledHint": "Анімації вимкнено: у системі ввімкнено «Зменшити рух»",
+    "resetTitle": "Скинути бій?",
+    "resetDescription": "Бій повернеться до підготовки, журнал буде очищено.",
+    "reset": "Скинути",
+    "yourTurn": "Твій хід",
+    "fxOn": "Анімації дій: увімк.",
+    "fxOff": "Анімації дій: вимк.",
+    "round": "Раунд {round}",
+    "complete": "Завершити",
+    "nextTurn": "Наступний хід"
+  },
+  "map": {
+    "hazardDefault": "Небезпечна зона",
+    "hazardUntilEnd": "{label} · до кінця раунду {round}",
+    "hazardRoundsLeft": "{label} · ще {rounds} р.",
+    "barrier": "Барʼєр",
+    "barrierUntil": "Барʼєр до кінця раунду {round}",
+    "returnToToken": "Повернутися",
+    "tools": {
+      "place": "Розставити",
+      "terrain": "Місцевість",
+      "weather": "Погода"
+    },
+    "terrain": {
+      "brushes": {
+        "wall": "Непрохідне",
+        "barrier": "Барʼєр",
+        "hazard": "Небезпека",
+        "erase": "Стерти",
+        "difficult": "Складна",
+        "erase-zone": "Стерти зону"
+      },
+      "rounds": "Раундів",
+      "hazardLabel": "Підпис небезпеки",
+      "hazardDefault": "Небезпечна зона",
+      "damageDice": "Шкода (кубики)",
+      "noDamage": "без шкоди",
+      "type": "Тип"
+    },
+    "difficultDefault": "Складна місцевість"
+  },
+  "result": {
+    "title": {
+      "hit": "Влучання",
+      "crit": "Критичне влучання",
+      "miss": "Промах"
+    },
+    "critFail": "Критична невдача",
+    "miss": "промах",
+    "critPrefix": "крит ",
+    "downed": "повалений",
+    "splash": "зачеплено",
+    "retaliation": "Відповідь цілі: {name} {outcome}",
+    "applied": "Застосовано",
+    "appliedTargets": "Застосовано · цілей: {count}",
+    "aria": "Результат дії"
+  },
+  "prep": {
+    "badge": "Підготовка до битви",
+    "title": "АРЕНА ГОТОВА",
+    "tagline": "Кожен воїн на своїй позиції. Час вирішити долю цієї сутички.",
+    "starting": "ЗБІР ВІЙСЬКА...",
+    "start": "ДО БОЮ!",
+    "waiting": "🗡️ Очікуйте наказу DM...",
+    "needOne": "Хоча б один учасник має бути на полі"
+  },
+  "resultScreen": {
+    "stats": {
+      "damageDealt": "Урон",
+      "healingDone": "Лікування",
+      "kills": "Вбивства",
+      "damageTaken": "Отримано"
+    },
+    "outcome": {
+      "victory": "Перемога",
+      "defeat": "Поразка",
+      "unknown": "Бій завершено"
+    },
+    "aria": "Підсумок бою",
+    "rounds": "Раундів: {rounds}",
+    "counting": "Рахуємо підсумок…",
+    "exit": "Вийти в меню",
+    "review": "Переглянути бій"
+  },
+  "morale": {
+    "extraTitle": "Бойовий дух",
+    "extraText": "{name} отримує додатковий хід наприкінці раунду",
+    "detail": "d10 = {d10} · мораль {morale}",
+    "toBattle": "До бою",
+    "skipTitle": "Паніка",
+    "skipText": "{name} втрачає хід",
+    "checkD10": "Перевірка моралі · d10",
+    "extraOn": "Додатковий хід на {rolls}",
+    "skipOn": "Пропуск ходу на {rolls}",
+    "outcome": {
+      "none": "Мораль",
+      "extra": "Бойовий дух",
+      "skip": "Паніка"
+    }
+  },
+  "details": {
+    "statblock": "Статблок",
+    "armor": "Броня",
+    "ac": "AC",
+    "acBetween": "AC між",
+    "evidence": "{hit, select, hit {влучання} other {промах}} {total} · {actor}, раунд {round}",
+    "effects": "Ефекти",
+    "none": "немає",
+    "zone": "зона",
+    "permanent": "постійно",
+    "rounds": "{count} р.",
+    "from": "Від: {source}",
+    "observed": "Помічено в бою",
+    "immunity": "імунітет"
+  },
+  "hero": {
+    "morale": "Мораль {value}",
+    "yourTurn": "твій хід",
+    "acting": "ходить",
+    "turnIn": "хід через {count}",
+    "cooldown": "перезарядка: {count} р.",
+    "pendingCast": "⏳ {spell}: ще {rounds} раундів · концентрація"
+  },
+  "participant": {
+    "deathSaves": "Кидки смерті",
+    "stable": "Стабільний"
+  },
+  "reserve": {
+    "aria": "Резерв",
+    "title": "Резерв ({count})",
+    "removeConfirm": "Видалити {name} з резерву?",
+    "reveal": "Ввести в бій: {name}",
+    "revealHint": "Ввести в бій — ходить одразу після поточного ходу",
+    "remove": "Видалити з резерву: {name}"
+  },
+  "coreActions": {
+    "title": "Дії",
+    "description": "Основні дії 5e",
+    "run": "Виконати",
+    "action": "Дія",
+    "movement": "Рух",
+    "shoveMode": "Спосіб",
+    "shove": {
+      "prone": "Повалити",
+      "push": "Відштовхнути"
+    },
+    "descriptions": {
+      "dash": "Додає до руху цього ходу ще стільки, скільки дає швидкість.",
+      "disengage": "До кінця ходу рух не провокує атак при відході.",
+      "dodge": "До початку наступного ходу атаки по вас з недоліком, перевага на рятівні кидки СПР.",
+      "help": "Союзник поруч отримує перевагу на наступну атаку.",
+      "hide": "Кидок Скритності проти пасивного Сприйняття ворогів.",
+      "ready": "Атака реакцією до початку вашого наступного ходу.",
+      "standUp": "Витрачає половину руху й знімає стан «повалений».",
+      "grapple": "Змагання (2014) або рятівний кидок (2024): ціль стає схопленою.",
+      "shove": "Змагання (2014) або рятівний кидок (2024): повалити ціль або відштовхнути на 5 фт.",
+      "escape": "Змагання проти того, хто схопив (2024: проти СК): знімає стан «схоплений»."
+    }
+  },
+  "actions": {
+    "attack": "Атака",
+    "magic": "Магія",
+    "ability": "Вміння",
+    "bonus": "Бонус",
+    "core": "Дії",
+    "strikeAndReturn": "Повернутися",
+    "endTurn": "Завершити хід"
+  },
+  "turnControls": {
+    "strip": {
+      "waiting": "Твій хід",
+      "morale": "Перевірка моралі",
+      "acting": "Твій хід · Дії",
+      "ended": "Твій хід"
+    },
+    "pickAuraZone": "Оберіть зону аури",
+    "reactionSpell": "Заклинання реакцією"
+  },
+  "readied": {
+    "title": "Підготовлена атака",
+    "description": "Оберіть ціль",
+    "noTargets": "Немає цілей"
+  },
+  "countdown": {
+    "endsIn": "Хід завершиться через <b>{left}</b>",
+    "stay": "Залишитись"
+  },
+  "notify": {
+    "yourTurnNamed": "Твій хід: {name}",
+    "yourTurn": "Твій хід!",
+    "yourTurnTitle": "⚔ Твій хід",
+    "conflict": "Стан бою змінився, повторіть дію",
+    "actionFailed": "Дію не виконано",
+    "endTurnTitle": "Завершити хід?",
+    "endTurnDescription": "Дію ще не використано.",
+    "endTurnConfirm": "Завершити",
+    "moraleUnchanged": "{name} · мораль: без змін (d10 = {d10})",
+    "skippedCells": "{count, plural, one {Пропущено # клітинку} few {Пропущено # клітинки} many {Пропущено # клітинок} other {Пропущено # клітинок}} (зайняті або поза полем)"
+  },
+  "unitControl": {
+    "dm": "ДМ"
+  },
+  "view": {
+    "health": {
+      "unhurt": "неушкоджений",
+      "wounded": "поранений",
+      "bloodied": "закривавлений",
+      "dying": "при смерті",
+      "down": "повалений"
+    },
+    "heroStatus": {
+      "active": "живий",
+      "unconscious": "непритомний",
+      "dead": "загинув"
+    },
+    "effects": {
+      "guard": "{name} бере на себе {value}% шкоди від атак",
+      "guardian": "Захисник",
+      "dot": "{damage} шкоди ({type}) щораунду",
+      "hot": "+{heal} HP щораунду",
+      "zone": "у зоні аури до наступного ходу {name}",
+      "owner": "власника",
+      "permanent": "діє постійно",
+      "roundsLeft": "ще {count, plural, one {# раунд} few {# раунди} many {# раундів} other {# раундів}}",
+      "from": "від: {source}"
+    }
+  }
+}

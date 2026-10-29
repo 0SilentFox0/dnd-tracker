@@ -1,4 +1,5 @@
 import { memo, type ReactNode, useMemo } from "react";
+import { useTranslations } from "next-intl";
 import { ChevronDown, Flame, Frown, Hourglass, type LucideIcon, ScrollText, Shield, Sparkles, Star, Swords, Zap } from "lucide-react";
 
 import { HpChips } from "./HpChips";
@@ -6,6 +7,7 @@ import { HpChips } from "./HpChips";
 import { Portrait } from "@/components/battle/hud";
 import { LogEntryDetails } from "@/components/battle/log/LogEntryDetails";
 import { ParticipantSide } from "@/lib/constants/battle";
+import { useText } from "@/lib/i18n/use-text";
 import { cn } from "@/lib/utils";
 import { logEntryView } from "@/lib/utils/battle/view";
 import type { BattleAction, BattleParticipant } from "@/types/battle";
@@ -28,6 +30,10 @@ export const LogEntryCard = memo(function LogEntryCard({ entry, actor, open, onT
   onToggle: (actionIndex: number) => void;
   actions?: ReactNode;
 }) {
+  const t = useTranslations("battle.log");
+
+  const text = useText();
+
   const view = useMemo(() => logEntryView(entry), [entry]);
 
   const Icon = view.kind === "hazard" ? Flame : (ICON[entry.actionType] ?? Sparkles);
@@ -44,18 +50,18 @@ export const LogEntryCard = memo(function LogEntryCard({ entry, actor, open, onT
       </span>
       <div className="min-w-0 flex-1">
         <div className="mb-0.5 flex items-baseline gap-1.5 text-[11.5px] leading-4">
-          <span className={cn("hud-sc font-bold", enemy ? "text-hud-bad" : "text-hud-good")}>{actor?.basicInfo.name ?? (entry.actorName || "Бій")}</span>
-          <span className="text-[var(--hud-muted)]">· {actor && !view.isTrigger ? view.kindLabel : "тригери"}</span>
+          <span className={cn("hud-sc font-bold", enemy ? "text-hud-bad" : "text-hud-good")}>{actor?.basicInfo.name ?? (entry.actorName || t("battle"))}</span>
+          <span className="text-[var(--hud-muted)]">· {actor && !view.isTrigger ? text(view.kindLabel) : t("triggers")}</span>
         </div>
-        <div className="text-[13.5px] font-medium leading-[18px] text-[var(--ink)]">{view.headline}</div>
+        <div className="text-[13.5px] font-medium leading-[18px] text-[var(--ink)]">{text(view.headline)}</div>
         {view.lines.map((line, n) => (
-          <div key={n} className="mt-0.5 text-[12.5px] leading-[17px] text-[#b3a791]">{line}</div>
+          <div key={n} className="mt-0.5 text-[12.5px] leading-[17px] text-[#b3a791]">{text(line)}</div>
         ))}
         <HpChips hp={view.hp} />
         {view.hasDetails && (
           <button type="button" aria-expanded={open} onClick={() => onToggle(entry.actionIndex)} className="mt-1 flex items-center gap-1 text-[12px] text-[var(--hud-muted)] hover:text-[var(--ink)]">
             <ChevronDown className={cn("size-3.5 transition-transform", open && "rotate-180")} />
-            {open ? "Сховати деталі" : "Деталі"}
+            {open ? t("hideDetails") : t("details")}
           </button>
         )}
         {open && <LogEntryDetails action={entry} />}

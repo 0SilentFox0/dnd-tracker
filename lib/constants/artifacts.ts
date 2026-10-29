@@ -1,3 +1,4 @@
+/* eslint-disable no-restricted-syntax -- data: uk labels matched when importing content */
 /**
  * Єдині константи, типи та enum для артефактів.
  * Використовувати цей файл у формах, API та сітці слотів.

@@ -7,6 +7,7 @@ export const SPELL_IDS_QUERY_MAX = 200;
 
 export const MAX_SPELL_LEVEL = 9;
 
+/* eslint-disable no-restricted-syntax -- spell group names stored in the DB */
 const SPELL_CIRCLE_ORDINALS = ["", "Перше", "Друге", "Третє", "Четверте", "П'яте", "Шосте", "Сьоме", "Восьме", "Дев'яте"];
 
 const CANTRIP_NAME = "Замовляння";
@@ -29,6 +30,8 @@ export function spellLevelFromName(name: string): number {
   return index > 0 ? index : parseInt(name, 10) || 0;
 }
 
+/* eslint-enable no-restricted-syntax */
+
 export function spellLevelRoman(level: number): string {
   return ROMAN_NUMERALS[Math.max(0, level)] ?? String(level);
 }
@@ -37,6 +40,7 @@ export function spellSchoolColor(group: { color?: string | null } | null | undef
   return group?.color || SPELL_GROUP_FALLBACK_COLOR;
 }
 
+/* eslint-disable no-restricted-syntax -- uk facet labels of the cached info reference (lib/utils/spells/model/labels.ts); UI reads spells.* keys */
 export const SPELL_COST_LABELS = {
   action: "Дія",
   bonusAction: "Бонусна дія",
@@ -70,8 +74,5 @@ export const SPELL_SAVE_ON_SUCCESS_LABELS = {
   half: "Половина шкоди",
   none: "Без ефекту",
 } as const;
-
-export const labelOptions = <K extends string>(labels: Record<K, string>) =>
-  (Object.entries(labels) as [K, string][]).map(([value, label]) => ({ value, label }));
 
 export const SPELL_NAME_MAX = 100;

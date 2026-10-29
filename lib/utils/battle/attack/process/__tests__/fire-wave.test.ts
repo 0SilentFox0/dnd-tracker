@@ -8,6 +8,7 @@ import { AttackType, ParticipantSide } from "@/lib/constants/battle";
 import { resolved } from "@/lib/utils/abilities/__tests__/fixtures";
 import { placed, testMap } from "@/lib/utils/battle/__tests__/fixtures/placed";
 import { calculateAttackRoll } from "@/lib/utils/battle/attack";
+import { textsOf } from "@/lib/utils/battle/log/__tests__/event-text";
 import type { BattleAttack, BattleMapConfig, BattleParticipant, GridPoint } from "@/types/battle";
 
 const MAP = testMap();
@@ -58,7 +59,7 @@ describe("Вогняна хвиля при влучанні", () => {
 
     expect(total).toBeGreaterThan(1);
     expect(hpOf(flow, "behind")).toBe(100 - Math.floor(total / 2));
-    expect(flow.messages.some((m) => m.startsWith("🔥 Вогняна хвиля: behind (−"))).toBe(true);
+    expect(textsOf(flow.messages).some((m) => m.startsWith("🔥 Вогняна хвиля: behind (−"))).toBe(true);
   });
 
   it("імун до вогню не отримує шкоди", () => {

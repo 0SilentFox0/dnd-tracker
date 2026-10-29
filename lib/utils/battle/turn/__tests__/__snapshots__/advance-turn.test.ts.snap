@@ -15,7 +15,18 @@ exports[`детермінований контракт turn loop > зберіг�
         "hpChanges": [],
         "id": "triggers-turn-end-gob-1793102400000",
         "isCancelled": false,
-        "resultText": "Кінець ходу: ефекти завершилися: end-expiry",
+        "log": [
+          {
+            "message": "battleLog.triggers.turnEnd",
+          },
+          {
+            "message": "battleLog.turn.effectsEnded",
+            "params": {
+              "names": "end-expiry",
+            },
+          },
+        ],
+        "resultText": "",
         "round": 1,
         "targets": [],
         "timestamp": 2026-10-27T12:00:00.000Z,
@@ -31,7 +42,16 @@ exports[`детермінований контракт turn loop > зберіг�
         "hpChanges": [],
         "id": "spell-recharge-2-1793102400000-1",
         "isCancelled": false,
-        "resultText": "🔄 Подих перезарядилась (6)",
+        "log": [
+          {
+            "message": "battleLog.turn.recharged",
+            "params": {
+              "pool": "Подих",
+              "roll": 6,
+            },
+          },
+        ],
+        "resultText": "",
         "round": 2,
         "stateBefore": undefined,
         "targets": [],
@@ -65,7 +85,18 @@ exports[`детермінований контракт turn loop > зберіг�
         ],
         "id": "turn-0-1793102400000-1",
         "isCancelled": false,
-        "resultText": "Тест: 2 fire шкоди від burn",
+        "log": [
+          {
+            "message": "battleLog.turn.dot",
+            "params": {
+              "damage": 2,
+              "effect": "burn",
+              "name": "Тест",
+              "type": "fire",
+            },
+          },
+        ],
+        "resultText": "",
         "round": 2,
         "stateBefore": undefined,
         "targets": [],
@@ -104,7 +135,18 @@ exports[`детермінований контракт turn loop > зберіг�
         ],
         "id": "hazard-0-1793102400000-1",
         "isCancelled": false,
-        "resultText": "Тест: 1 fire шкоди від «Вогонь»",
+        "log": [
+          {
+            "message": "battleLog.hazard.hit",
+            "params": {
+              "damage": 1,
+              "label": "Вогонь",
+              "name": "Тест",
+              "type": "fire",
+            },
+          },
+        ],
+        "resultText": "",
         "round": 2,
         "stateBefore": undefined,
         "targets": [],
@@ -129,7 +171,15 @@ exports[`детермінований контракт turn loop > зберіг�
         "hpChanges": [],
         "id": "effects-0-1793102400000-1",
         "isCancelled": false,
-        "resultText": "Ефекти завершилися: expired",
+        "log": [
+          {
+            "message": "battleLog.turn.effectsEndedCap",
+            "params": {
+              "names": "expired",
+            },
+          },
+        ],
+        "resultText": "",
         "round": 2,
         "stateBefore": undefined,
         "targets": [],
@@ -146,7 +196,40 @@ exports[`детермінований контракт turn loop > зберіг�
         "hpChanges": [],
         "id": "triggers-turn-0-1793102400000-1",
         "isCancelled": false,
-        "resultText": "Початок ходу: Тест: +1 HP від regen; 💚 Вміння: Тест +1 HP (шанс 50 %)",
+        "log": [
+          {
+            "message": "battleLog.triggers.turnStart",
+          },
+          {
+            "message": "battleLog.turn.hot",
+            "params": {
+              "effect": "regen",
+              "heal": 1,
+              "name": "Тест",
+            },
+          },
+          {
+            "message": "$join",
+            "params": {
+              "p0": {
+                "message": "abilityText.log.heal",
+                "params": {
+                  "amount": 1,
+                  "label": "Вміння",
+                  "target": "Тест",
+                },
+              },
+              "p1": {
+                "message": "abilityText.log.chanceSuffix",
+                "params": {
+                  "chance": 50,
+                },
+              },
+              "separator": "",
+            },
+          },
+        ],
+        "resultText": "",
         "round": 2,
         "stateBefore": undefined,
         "targets": [],

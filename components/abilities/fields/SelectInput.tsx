@@ -5,7 +5,7 @@ import type { FieldProps } from "./FieldRenderer";
 import { SelectField } from "@/components/ui/select-field";
 
 export function SelectInput({ id, value, onChange, meta }: FieldProps<string | undefined>) {
-  const options = [...(meta.options ?? [])];
+  const options = (meta.options ?? []).map((o) => ({ ...o, label: o.label ?? o.value }));
 
   const groupNames = [...new Set(options.map((o) => o.group).filter((g): g is string => !!g))];
 

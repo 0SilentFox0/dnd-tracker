@@ -10,6 +10,7 @@ import { updateParticipant } from "@/lib/utils/abilities/engine/core/participant
 import { processAttack } from "@/lib/utils/battle/attack";
 import { runAttackPhase } from "@/lib/utils/battle/attack-phase/run-attack-phase";
 import { movementBudget } from "@/lib/utils/battle/grid";
+import { eventTextOf } from "@/lib/utils/battle/log/__tests__/event-text";
 import { effectiveMorale } from "@/lib/utils/battle/morale/effective-morale";
 import type { BattleMutationContext } from "@/lib/utils/battle/pipeline/run-battle-mutation";
 import { applyResistance } from "@/lib/utils/battle/resistance";
@@ -298,7 +299,7 @@ describe("Темрява — бібліотечні заклинання", () =>
     const loop = runAdvanceTurnLoop({ initiativeOrder: [find(ps, "mage"), find(ps, "orc"), find(ps, "gob")], currentTurnIndex: 0, currentRound: 1, battleId: "b", currentBattleLogLength: 0, pendingSummons: [], rng: seq(0.99, 0.99, 0.5) });
 
     expect(find(loop.updatedInitiativeOrder, "gob").combatStats.currentHp).toBeLessThan(100);
-    expect(loop.newLogEntries.some((e) => e.resultText.includes("Шал"))).toBe(true);
+    expect(loop.newLogEntries.some((e) => eventTextOf(e).includes("Шал"))).toBe(true);
   });
 
   it("Ляльковод: ворог 1 хід на боці заклинателя під контролем його гравця, потім повертається", () => {

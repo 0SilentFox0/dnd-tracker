@@ -4,10 +4,12 @@ import { resolveOpportunityAttacks } from "../opportunity";
 import { runCoreAction } from "../run";
 
 import { AttackType } from "@/lib/constants/battle";
+import { textOf } from "@/lib/i18n/test/text";
 import { createMockParticipant } from "@/lib/utils/battle/__tests__/fixtures/mock-participant";
 import { applyCondition5e } from "@/lib/utils/battle/conditions";
 import { cellKey } from "@/lib/utils/battle/grid";
 import { pathTo, reachable } from "@/lib/utils/battle/grid/path";
+import { eventTextOf } from "@/lib/utils/battle/log/__tests__/event-text";
 import { DEFAULT_RULES } from "@/lib/utils/rules";
 import type { BattleAttack, BattleMapConfig, BattleParticipant } from "@/types/battle";
 
@@ -72,9 +74,9 @@ describe("resolveOpportunityAttacks", () => {
     const out = go([m, e], { x: 3, y: 0 });
 
     expect(out.actions).toHaveLength(1);
-    expect(out.actions[0].resultText).toContain("Атака можливості");
+    expect(eventTextOf(out.actions[0])).toContain("Атака можливості");
     expect(out.participants.find((p) => p.basicInfo.id === "e")!.actionFlags.hasUsedReaction).toBe(true);
-    expect(out.messages[0]).toBe("⚔ Атака при відході: e → m");
+    expect(textOf(out.messages[0])).toBe("⚔ Атака при відході: e → m");
     expect(out.stopAt).toBeNull();
     expect(out.cost).toBe(2);
   });

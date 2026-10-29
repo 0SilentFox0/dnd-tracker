@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 
 import { CombatStatus, ParticipantSide, ParticipantSourceType } from "@/lib/constants/battle";
+import { textOf } from "@/lib/i18n/test/text";
 import { makeEffect, makeParticipant, seq } from "@/lib/utils/abilities/__tests__/fixtures";
 import type { Effect } from "@/lib/utils/abilities/schema";
 import { beginConcentration, concentrationCheck, dropConcentration, dropOrphanedConcentration, isZoneConcentrationLive, uniqueCastId } from "@/lib/utils/battle/concentration";
@@ -9,6 +10,7 @@ import { removeEffects } from "@/lib/utils/battle/conditions/query";
 import { applyDamageConsequences } from "@/lib/utils/battle/damage/consequences";
 import { DEATH_SAVES_TIMED_KEY } from "@/lib/utils/battle/death-saves";
 import { hazardHit, hazardUnder } from "@/lib/utils/battle/grid";
+import { textsOf } from "@/lib/utils/battle/log/__tests__/event-text";
 import { castSpell } from "@/lib/utils/battle/spell";
 import type { CastableSpell } from "@/lib/utils/battle/types/spell-process";
 import { DEFAULT_RULES, type Ruleset } from "@/lib/utils/rules";
@@ -53,7 +55,8 @@ describe("каст із концентрацією", () => {
 
     const marker = effectsOf(r.allParticipantsUpdated, "c").find((e) => e.concentration);
 
-    expect(marker?.name).toBe("Концентрація: Сповільнення");
+    expect(marker?.name).toBe("Сповільнення");
+    expect(marker?.label && textOf(marker.label)).toBe("Концентрація: Сповільнення");
     expect(marker?.duration).toBe(3);
     expect(effectsOf(r.allParticipantsUpdated, "e1")[0].concentrationOf?.castId).toBe(marker?.concentration?.castId);
     expect(effectsOf(r.allParticipantsUpdated, "e2")[0].concentrationOf?.castId).toBe(marker?.concentration?.castId);
@@ -71,7 +74,7 @@ describe("каст із концентрацією", () => {
 
     const none = dropOrphanedConcentration(stripped(["e1", "e2"]));
 
-    expect(none.messages[0]).toContain("втрачає концентрацію");
+    expect(textOf(none.messages[0])).toContain("втрачає концентрацію");
     expect(effectsOf(none.participants, "c")).toEqual([]);
   });
 
@@ -173,18 +176,18 @@ describe("перевірка концентрації", () => {
     [30, 15],
     [8, 10],
   ])("шкода %i — СК %i", (damage, dc) => {
-    expect(hit(damage, () => 0.5).messages[0]).toContain(`проти СК ${dc}`);
+    expect(textsOf(hit(damage, () => 0.5).messages)[0]).toContain(`проти СК ${dc}`);
   });
 
   it("dcCap обмежує СК; без нього СК = ½ шкоди", () => {
-    expect(hit(100, () => 0.5, rulesOn(30)).messages[0]).toContain("проти СК 30");
-    expect(hit(100, () => 0.5, rulesOn(null)).messages[0]).toContain("проти СК 50");
+    expect(textsOf(hit(100, () => 0.5, rulesOn(30)).messages)[0]).toContain("проти СК 30");
+    expect(textsOf(hit(100, () => 0.5, rulesOn(null)).messages)[0]).toContain("проти СК 50");
   });
 
   it("провал знімає ефекти з усіх цілей і маркер", () => {
     const r = hit(30, () => 0);
 
-    expect(r.messages.join(" ")).toContain("втрачає концентрацію на «Сповільнення»");
+    expect(textsOf(r.messages).join(" ")).toContain("втрачає концентрацію на «Сповільнення»");
     expect(effectsOf(r.participants, "e1")).toEqual([]);
     expect(effectsOf(r.participants, "e2")).toEqual([]);
     expect(effectsOf(r.participants, "c")).toEqual([]);
@@ -193,7 +196,7 @@ describe("перевірка концентрації", () => {
   it("успіх лишає все", () => {
     const r = hit(8, () => 0.99);
 
-    expect(r.messages[0]).toContain("утримує");
+    expect(textsOf(r.messages)[0]).toContain("утримує");
     expect(effectsOf(r.participants, "e1")).toHaveLength(1);
     expect(effectsOf(r.participants, "c")).toHaveLength(1);
   });
@@ -211,7 +214,7 @@ describe("перевірка концентрації", () => {
     const downed = applyDamageConsequences({ before, after: { ...before, combatStats: { ...before.combatStats, currentHp: 0, status: CombatStatus.UNCONSCIOUS } }, amount: 3, rules: rulesOn(), rng: () => 0.99, participants: ps });
 
     expect(effectsOf(downed.participants, "e1")).toEqual([]);
-    expect(downed.messages[0]).toContain("втрачає концентрацію");
+    expect(textsOf(downed.messages)[0]).toContain("втрачає концентрацію");
   });
 
   it("правило вимкнене: хук нічого не кидає", () => {
@@ -219,7 +222,7 @@ describe("перевірка концентрації", () => {
 
     const r = applyDamageConsequences({ before: ps[0], after: ps[0], amount: 30, rules: DEFAULT_RULES, rng: () => 0, participants: ps });
 
-    expect(r.messages).toEqual([]);
+    expect(textsOf(r.messages)).toEqual([]);
     expect(effectsOf(r.participants, "e1")).toHaveLength(1);
   });
 });
@@ -230,7 +233,7 @@ describe("недієздатність", () => {
 
     expect(effectsOf(r.participants, "e1")).toEqual([]);
     expect(effectsOf(r.participants, "c").some((e) => e.concentration)).toBe(false);
-    expect(r.messages.join(" ")).toContain("втрачає концентрацію");
+    expect(textsOf(r.messages).join(" ")).toContain("втрачає концентрацію");
   });
 });
 

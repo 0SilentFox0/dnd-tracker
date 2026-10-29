@@ -19,18 +19,18 @@ import { FieldErrors } from "@/components/abilities/FieldErrors";
 import { localizeField } from "@/components/abilities/fields/registry-labels";
 import { Label } from "@/components/ui/label";
 import { useTranslator } from "@/lib/i18n/use-translator";
-import type { FieldMeta } from "@/lib/utils/abilities/registry/fields";
-import { TARGET_LABELS } from "@/lib/utils/abilities/registry/labels";
+import type { FieldMeta, LocalizedFieldMeta } from "@/lib/utils/abilities/registry/fields";
+import { TARGET_KEYS } from "@/lib/utils/abilities/registry/labels";
 
 export interface FieldProps<V = unknown> {
   id: string;
   value: V;
   onChange: (v: V | undefined) => void;
-  meta: FieldMeta;
+  meta: LocalizedFieldMeta;
 }
 
 interface FieldRendererProps {
-  meta: FieldMeta;
+  meta: FieldMeta | LocalizedFieldMeta;
   value: unknown;
   onChange: (v: unknown) => void;
   path: string;
@@ -43,9 +43,9 @@ export function FieldRenderer({ meta: rawMeta, value, onChange, path, owner }: F
 
   const errors = useErrorsUnder(path);
 
-  const meta = owner ? localizeField(tr, owner, rawMeta) : rawMeta;
+  const meta = owner ? localizeField(tr, owner, rawMeta) : (rawMeta as LocalizedFieldMeta);
 
-  const targetOptions = Object.keys(TARGET_LABELS).map((value) => ({ value, label: tr(`targets.${value}`) }));
+  const targetOptions = TARGET_KEYS.map((value) => ({ value, label: tr(`targets.${value}`) }));
 
   const props = { id: path, value: value as never, onChange, meta };
 

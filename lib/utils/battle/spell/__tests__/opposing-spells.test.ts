@@ -7,6 +7,7 @@ import { collectModifiers } from "@/lib/utils/abilities/engine/core/collect-modi
 import { findParticipant } from "@/lib/utils/abilities/engine/core/participants";
 import { createMockParticipant } from "@/lib/utils/battle/__tests__/fixtures/mock-participant";
 import { movementBudget } from "@/lib/utils/battle/grid";
+import { eventTextOf } from "@/lib/utils/battle/log/__tests__/event-text";
 import { castSpell } from "@/lib/utils/battle/spell";
 import { calculateInitiative } from "@/lib/utils/battle/turn/initiative";
 import type { CastableSpell } from "@/lib/utils/battle/types/spell-process";
@@ -74,7 +75,7 @@ describe("протилежні заклинання знімають одне о
 
     expect(names(out.allParticipantsUpdated)).toEqual(["Поспіх"]);
     expect(calculateInitiative(target(out.allParticipantsUpdated), out.allParticipantsUpdated)).toBe(13);
-    expect(out.battleAction.resultText).toContain("знімає «Сповільнення»");
+    expect(eventTextOf(out.battleAction)).toContain("знімає «Сповільнення»");
   });
 
   it("Кам'яна шкіра ↔ Немічність (усі стеки)", () => {

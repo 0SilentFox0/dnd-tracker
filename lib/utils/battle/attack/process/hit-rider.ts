@@ -1,3 +1,4 @@
+import { textRef } from "@/lib/i18n/text-ref";
 import { findParticipant, isActive } from "@/lib/utils/abilities/engine/core/participants";
 import { applyRawDamage } from "@/lib/utils/abilities/engine/effects/hp";
 import { applyEffect } from "@/lib/utils/abilities/registry/effects";
@@ -50,7 +51,7 @@ function riderSave(flow: ActionFlow, rider: ActiveEffect, attackerId: string, ta
 
   const result = rollSave({ target, ability: state.save.ability, dc: state.save.dc, participants: flow.ps, rules: flow.ctx.rules, rng: flow.ctx.rng, vsSpell: true });
 
-  flow.messages.push(`🎲 ${target.basicInfo.name}: ${rider.name} — рятівний ${state.save.ability.toUpperCase()} ${result.total} проти СК ${state.save.dc}: ${result.success ? "успіх" : "провал"}`);
+  flow.messages.push(textRef("battleLog.spellFx.riderSave", { target: target.basicInfo.name, rider: rider.name, ability: state.save.ability.toUpperCase(), total: result.total, dc: state.save.dc, success: String(result.success) }));
 
   if (result.success) return;
 
@@ -118,7 +119,7 @@ export function spendRidersOnMiss(flow: ActionFlow, a: { attackerId: string; att
   for (const rider of ridersOf(getP(flow, a.attackerId), a.attack)) {
     if (!rider.hitRider?.consumeOnMiss) continue;
 
-    flow.messages.push(`✨ ${rider.name}: заряд витрачено на промах`);
+    flow.messages.push(textRef("battleLog.spellFx.riderMissSpent", { rider: rider.name }));
     spendCharge(flow, a.attackerId, rider);
   }
 }

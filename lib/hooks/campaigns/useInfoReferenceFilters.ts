@@ -73,36 +73,44 @@ export function useInfoReferenceFilters(skills: SkillForReference[], spells: Spe
     };
   }, [skills, spells, artifacts, t]);
 
+  const skillTexts = useMemo(() => new Map(skills.map((s) => [s.id, skillSearchText(s, t)])), [skills, t]);
+
+  const spellTexts = useMemo(() => new Map(spells.map((s) => [s.id, spellSearchText(s, t)])), [spells, t]);
+
+  const artifactTexts = useMemo(() => new Map(artifacts.map((a) => [a.id, artifactSearchText(a, t)])), [artifacts, t]);
+
+  const classTexts = useMemo(() => new Map((classes ?? []).map((c) => [c.id, classSearchText(c, t)])), [classes, t]);
+
   const filteredSkills = useMemo(
-    () => skills.filter((s) => matchSearch(skillSearchText(s, t), deferredSearch) && (!values.mainSkill || s.mainSkillName === values.mainSkill)),
-    [skills, deferredSearch, values.mainSkill, t],
+    () => skills.filter((s) => matchSearch(skillTexts.get(s.id) ?? "", deferredSearch) && (!values.mainSkill || s.mainSkillName === values.mainSkill)),
+    [skills, skillTexts, deferredSearch, values.mainSkill],
   );
 
   const filteredSpells = useMemo(
     () =>
       spells.filter(
         (s) =>
-          matchSearch(spellSearchText(s, t), deferredSearch) &&
+          matchSearch(spellTexts.get(s.id) ?? "", deferredSearch) &&
           (values.spellLevel == null || s.level === values.spellLevel) &&
           (!values.spellGroup || s.groupName === values.spellGroup) &&
           (!values.spellType || s.type === values.spellType),
       ),
-    [spells, deferredSearch, values.spellLevel, values.spellGroup, values.spellType, t],
+    [spells, spellTexts, deferredSearch, values.spellLevel, values.spellGroup, values.spellType],
   );
 
   const filteredArtifacts = useMemo(
     () =>
       artifacts.filter(
         (a) =>
-          matchSearch(artifactSearchText(a), deferredSearch) &&
+          matchSearch(artifactTexts.get(a.id) ?? "", deferredSearch) &&
           (!values.artifactRarity || a.rarity === values.artifactRarity) &&
           (!values.artifactSlot || a.slot === values.artifactSlot) &&
           (!values.artifactSet || a.setName === values.artifactSet),
       ),
-    [artifacts, deferredSearch, values.artifactRarity, values.artifactSlot, values.artifactSet],
+    [artifacts, artifactTexts, deferredSearch, values.artifactRarity, values.artifactSlot, values.artifactSet],
   );
 
-  const filteredClasses = useMemo(() => (classes ?? []).filter((c) => matchSearch(classSearchText(c, t), deferredSearch)), [classes, deferredSearch, t]);
+  const filteredClasses = useMemo(() => (classes ?? []).filter((c) => matchSearch(classTexts.get(c.id) ?? "", deferredSearch)), [classes, classTexts, deferredSearch]);
 
   const field = <K extends keyof FilterValues>(key: K) => ({
     value: values[key],

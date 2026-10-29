@@ -1,5 +1,8 @@
 import { describe, expect, it } from "vitest";
 
+import { logTextOf } from "@/lib/i18n/test/text";
+import { textRef } from "@/lib/i18n/text-ref";
+import { actionLines } from "@/lib/utils/battle/log/lines";
 import { battleActionToEvent, dmEvent, eventToBattleAction, systemEvent } from "@/lib/utils/battle/store/event-mapping";
 import type { BattleAction } from "@/types/battle";
 
@@ -61,5 +64,47 @@ describe("event mapping", () => {
 
     expect(e).toMatchObject({ type: "ability", round: 2, targets: [{ participantId: "p", participantName: "П" }], resultText: "ДМ щось зробив" });
     expect(dmEvent(2, "x")).not.toHaveProperty("targets");
+  });
+});
+
+describe("структурований лог", () => {
+  const log = [textRef("battleCommon.actors.dm"), "Гоблін"];
+
+  it("log іде в details.log, resultText порожній", () => {
+    const event = battleActionToEvent({ ...action, resultText: "", log });
+
+    expect(event.resultText).toBe("");
+    expect(event.details).toMatchObject({ log });
+  });
+
+  it("round-trip зберігає log", () => {
+    const event = battleActionToEvent({ ...action, resultText: "", log });
+
+    const back = eventToBattleAction({ ...event, seq: 3, actorId: "hero", targets: [], details: event.details ?? {}, hpChanges: [] }, "b1");
+
+    expect(back.log).toEqual(log);
+    expect(back.resultText).toBe("");
+  });
+
+  it("legacy-подія без log: actionLines = старі сегменти", () => {
+    const e = { ...battleActionToEvent({ ...action, resultText: "a | b" }), seq: 1, actorId: "hero", targets: [], details: {}, hpChanges: [] };
+
+    const back = eventToBattleAction(e, "b1");
+
+    expect(back.log).toBeUndefined();
+    expect(actionLines(back)).toEqual(["a", "b"]);
+  });
+
+  it("системна подія з ref пише log у details", () => {
+    const ref = textRef("battleCommon.actors.system");
+
+    expect(systemEvent(1, ref)).toMatchObject({ resultText: "", details: { log: [ref] } });
+    expect(systemEvent(1, "текст")).toMatchObject({ resultText: "текст" });
+    expect(systemEvent(1, "текст").details).not.toHaveProperty("log");
+  });
+
+  it("logTextOf на події з log дає ДМ/DM за мовою глядача", () => {
+    expect(logTextOf({ resultText: "", log: [textRef("battleCommon.actors.dm")] }, "uk")).toBe("DM");
+    expect(logTextOf({ resultText: "", log: [textRef("battleCommon.actors.system")] }, "en")).toBe("System");
   });
 });

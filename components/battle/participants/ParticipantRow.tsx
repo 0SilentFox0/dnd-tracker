@@ -1,11 +1,13 @@
 "use client";
 
 import { memo } from "react";
+import { useTranslations } from "next-intl";
 import { Shield } from "lucide-react";
 
 import { HitFrame, PortraitFx } from "@/components/battle/fx/PortraitFx";
 import { EffectLine, HealthBar, HealthLabel, hitFlashClass, HitFloat, Portrait } from "@/components/battle/hud";
 import { useHitFx } from "@/lib/hooks/battle";
+import { useText } from "@/lib/i18n/use-text";
 import { cn } from "@/lib/utils";
 import { legendaryBadge } from "@/lib/utils/battle/actions/legendary-options";
 import type { FxImpact } from "@/lib/utils/battle/fx";
@@ -24,12 +26,14 @@ function Pips({ count, filled, color }: { count: number; filled: number; color: 
 }
 
 function DeathSavePips({ saves }: { saves: NonNullable<BattleParticipant["battleData"]["deathSaves"]> }) {
+  const t = useTranslations("battle.participant");
+
   return (
     <div className="mt-1 flex items-center gap-2 text-xs text-[var(--hud-muted)]">
-      <span>Кидки смерті</span>
+      <span>{t("deathSaves")}</span>
       <Pips count={3} filled={saves.successes} color="var(--hud-good, #5fae5f)" />
       <Pips count={3} filled={saves.failures} color="var(--hud-bad, #e04a35)" />
-      {saves.stable && <span>Стабільний</span>}
+      {saves.stable && <span>{t("stable")}</span>}
     </div>
   );
 }
@@ -43,6 +47,8 @@ export const ParticipantRow = memo(function ParticipantRow({ participant: live, 
   impact: FxImpact | null;
   onSelect: (id: string) => void;
 }) {
+  const text = useText();
+
   const { change, shown: participant, shakeRef } = useHitFx<HTMLDivElement>(live, impact);
 
   const { currentHp, maxHp } = participant.combatStats;
@@ -68,7 +74,7 @@ export const ParticipantRow = memo(function ParticipantRow({ participant: live, 
         <HealthBar participant={participant} exact={exact} />
         <EffectLine effects={effects} />
         {participant.battleData.deathSaves && <DeathSavePips saves={participant.battleData.deathSaves} />}
-        {badge && <div className="mt-1 text-xs text-[var(--hud-muted)]">{badge}</div>}
+        {badge && <div className="mt-1 text-xs text-[var(--hud-muted)]">{text(badge)}</div>}
       </div>
       <span className="mt-3.5 flex w-16 shrink-0 items-center justify-end gap-1.5 self-start text-sm text-[#b8ab95]">
         {acText}

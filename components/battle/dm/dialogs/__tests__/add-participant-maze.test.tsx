@@ -1,5 +1,5 @@
 // @vitest-environment happy-dom
-import { cleanup, fireEvent, render, screen } from "@testing-library/react";
+import { cleanup, fireEvent, screen } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
 vi.mock("@/components/hud/fonts", () => ({ hudFontClassName: "", HUD_SURFACE: "hud-surface" }));
@@ -20,6 +20,9 @@ vi.mock("@/lib/hooks/units", () => ({
 }));
 
 import { AddParticipantDialog } from "@/components/battle/dm/dialogs/AddParticipantDialog";
+import { render } from "@/lib/i18n/test/render-uk";
+
+vi.unmock("next-intl");
 
 afterEach(cleanup);
 

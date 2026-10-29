@@ -1,8 +1,10 @@
 import { useTranslations } from "next-intl";
 
+import { useAbilityText } from "@/components/abilities/use-ability-text";
 import { Button } from "@/components/ui/button";
 import { ArtifactSlot } from "@/lib/constants/artifacts";
 import type { InventoryModel, InventorySelection } from "@/lib/hooks/characters";
+import { formatText } from "@/lib/i18n/text-ref";
 import { useTranslator } from "@/lib/i18n/use-translator";
 import type { SpecialItem } from "@/types/inventory";
 
@@ -17,6 +19,8 @@ export const selectionTitle = (s: InventorySelection): string => (s.kind === "it
 
 export function ItemBody({ selection, withTitle = true }: { selection: InventorySelection | null; withTitle?: boolean }) {
   const t = useTranslator();
+
+  const abilityText = useAbilityText();
 
   if (!selection) return <p className="text-sm text-hud-muted">{t("inventory.details.empty")}</p>;
 
@@ -41,7 +45,7 @@ export function ItemBody({ selection, withTitle = true }: { selection: Inventory
 
   const slot = selection.kind === "equipped" ? t(`inventory.grid.slots.${selection.slot}`) : t(`artifacts.slots.${artifact.slot}`);
 
-  const effects = selection.kind === "equipped" ? selection.artifact.effects : [];
+  const effects = selection.kind === "equipped" ? abilityText.flows(selection.artifact.effects) : [];
 
   return (
     <div className="space-y-1.5">
@@ -58,7 +62,7 @@ export function ItemBody({ selection, withTitle = true }: { selection: Inventory
       {effects.length > 0 && (
         <ul className="list-disc pl-5 text-sm text-hud-ink">
           {effects.map((e, i) => (
-            <li key={`${i}-${e}`}>{e}</li>
+            <li key={i}>{formatText(t, e)}</li>
           ))}
         </ul>
       )}

@@ -64,7 +64,7 @@ describe("compendiumErrorMessage keys", () => {
   it("maps worker and size errors and falls back to the key", () => {
     expect(compendiumErrorMessage(t, new Error("FILE_SIZE"), "errors.readFailed")).toContain("3 MiB");
     expect(compendiumErrorMessage(t, new Error("RECORD_SIZE: monster"), "errors.readFailed")).toContain("Юніти");
-    expect(compendiumErrorMessage(t, new Error("INVALID_TEXT: $@1"), "errors.readFailed")).toBe("INVALID_TEXT: $@1");
+    expect(compendiumErrorMessage(t, new Error("INVALID_TEXT: $@1"), "errors.readFailed")).toContain("позиція 1");
     expect(compendiumErrorMessage(t, "x", "errors.previewFailed")).toBe("Помилка preview");
     expect(compendiumErrorMessage(t, new ApiError("x", 500, "/p", { code: "WEIRD" }), "errors.previewFailed")).toContain("WEIRD");
   });

@@ -94,7 +94,9 @@ export function compendiumRoute(mode: "preview" | "confirm" | "media" | "reports
 
       if (mode === "options") return privateJson(await importTargetOptions(actor));
 
-      const t = await getTranslator(await getRequestLocale(), "compendiumReport");
+      const locale = await getRequestLocale();
+
+      const t = await getTranslator(locale, "compendiumReport");
 
       const url = new URL(req.url);
 
@@ -140,14 +142,14 @@ export function compendiumRoute(mode: "preview" | "confirm" | "media" | "reports
       const input = body.input as Parameters<typeof previewImport>[1];
 
       if (mode === "preview") {
-        const preview = await previewImport(actor, input, secret, prismaImportRepository);
+        const preview = await previewImport(actor, input, secret, prismaImportRepository, locale);
 
         return privateJson({ ...preview, report: translateCompendiumReport(t, preview.report), ...previewPresentation(input, preview.report.nextActions) });
       }
 
       if (!body.rightsConfirmed || !body.token || !body.idempotencyKey) return privateJson({ code: "CONFIRM_REQUIRED" }, 422);
 
-      return privateJson(mediaPresentation(translateCompendiumReport(t, await confirmImport(actor, input, body.token, body.idempotencyKey, secret, prismaImportRepository))));
+      return privateJson(mediaPresentation(translateCompendiumReport(t, await confirmImport(actor, input, body.token, body.idempotencyKey, secret, prismaImportRepository, locale))));
     } catch (error) {
       if (error instanceof CompendiumError) return privateJson({ code: error.code, ...(error.code === "NOTES_SIZE" && error.details && { details: error.details }) }, statusOf(error.code));
 

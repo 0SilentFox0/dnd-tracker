@@ -3,6 +3,7 @@ import { describe, expect, it } from "vitest";
 import { context, goblin, hero, participant } from "./fixtures";
 
 import { moveMutation } from "@/lib/server/battles/mutations/move/move-mutation";
+import { eventTextOf } from "@/lib/utils/battle/log/__tests__/event-text";
 import { at, expectRejected, mazeMap, withMap } from "@/lib/utils/battle/modes/maze/__tests__/fixtures";
 import { MAZE_TEXTS } from "@/lib/utils/battle/modes/maze/texts";
 import { BattleAccessError } from "@/lib/utils/battle/store";
@@ -74,7 +75,7 @@ describe("maze move mutation", () => {
     });
 
     expect(out.participants[0].battleData.escaped).toBe(true);
-    expect(out.events[0].resultText).toContain("вибрався з лабіринту");
+    expect(eventTextOf(out.events[0])).toContain("вибрався з лабіринту");
     expect(out.scene?.turnIndex).toBe(1);
   });
 });

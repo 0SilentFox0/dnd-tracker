@@ -1,7 +1,7 @@
 // @vitest-environment happy-dom
 import { type ComponentProps, type FunctionComponent, memo, type MemoExoticComponent, useEffect } from "react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { act, cleanup, render, screen } from "@testing-library/react";
+import { act, cleanup, screen } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
 const commits = vi.hoisted(() => ({ list: 0, rows: new Map<string, number>() }));
@@ -47,12 +47,16 @@ import { BattleSceneProvider } from "@/components/battle/scene/BattleSceneProvid
 import { BattleScreen } from "@/components/battle/scene/BattleScreen";
 import { campaignPost } from "@/lib/api/client";
 import { ParticipantSide } from "@/lib/constants/battle";
-import { type BattleSceneValue, useBattleScene, useBattleSceneValue } from "@/lib/hooks/battle";
+import { useBattleScene, useBattleSceneValue } from "@/lib/hooks/battle";
+import type { BattleSceneValue } from "@/lib/hooks/battle/types";
 import { battleQueryKey } from "@/lib/hooks/battles";
 import { ConfirmContext } from "@/lib/hooks/common";
+import { render } from "@/lib/i18n/test/render-uk";
 import { createMockParticipant } from "@/lib/utils/battle/__tests__/fixtures/mock-participant";
 import type { BattleScene, ClientBattleDelta } from "@/types/api";
 import type { BattleAction, BattleParticipant } from "@/types/battle";
+
+vi.unmock("next-intl");
 
 const USER = "u1";
 

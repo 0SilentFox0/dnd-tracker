@@ -5,6 +5,8 @@ import { describe, expect, it, vi } from "vitest";
 import { useCoreActions } from "../useCoreActions";
 import { fakeScene } from "./fake-scene";
 
+import { textRef } from "@/lib/i18n/text-ref";
+
 describe("useCoreActions", () => {
   it("items: дію витрачено — дії за дію недоступні з причиною, рух (підвестися) — з іншою", () => {
     const { me, wrapper } = fakeScene();
@@ -15,8 +17,8 @@ describe("useCoreActions", () => {
 
     const by = (k: string) => result.current.items.find((i) => i.key === k);
 
-    expect(by("dash")).toMatchObject({ ok: false, reason: "Дію вже витрачено" });
-    expect(by("standUp")).toMatchObject({ ok: false, reason: "Ви не лежите" });
+    expect(by("dash")).toMatchObject({ ok: false, reason: textRef("battleActions.reject.actionUsed") });
+    expect(by("standUp")).toMatchObject({ ok: false, reason: textRef("battleActions.reject.notProne") });
   });
 
   it("targetsFor без мапи: вороги для схоплення, союзники для допомоги", () => {

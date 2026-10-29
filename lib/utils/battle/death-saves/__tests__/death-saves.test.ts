@@ -7,6 +7,8 @@ import { beginConcentration } from "@/lib/utils/battle/concentration";
 import { hasCondition } from "@/lib/utils/battle/conditions";
 import { applyDamageConsequences, settleStatusChange } from "@/lib/utils/battle/damage/consequences";
 import { clearDeathSaves, deathSaveDamage, rollDeathSave, startDying } from "@/lib/utils/battle/death-saves";
+import { eventTextOf } from "@/lib/utils/battle/log/__tests__/event-text";
+import { textsOf } from "@/lib/utils/battle/log/__tests__/event-text";
 import type { BattleSceneState } from "@/lib/utils/battle/store";
 import { advanceTurn } from "@/lib/utils/battle/turn";
 import { checkVictoryConditions } from "@/lib/utils/battle/turn/victory";
@@ -149,7 +151,7 @@ describe("advanceTurn with death saves", () => {
 
     expect(out.scene.turnIndex).toBe(2);
     expect(out.participants[1].battleData.deathSaves?.successes).toBe(1);
-    expect(out.actions.some((a) => a.resultText.includes("кидок смерті"))).toBe(true);
+    expect(out.actions.some((a) => eventTextOf(a).includes("кидок смерті"))).toBe(true);
   });
 
   it("stable hero does not roll", () => {
@@ -258,6 +260,6 @@ describe("review fixes", () => {
     const r = settleStatusChange(c, dead, [dead], rules);
 
     expect(r.participant.battleData.activeEffects.some((e) => e.concentration)).toBe(false);
-    expect(r.messages.join(" ")).toContain("втрачає концентрацію");
+    expect(textsOf(r.messages).join(" ")).toContain("втрачає концентрацію");
   });
 });

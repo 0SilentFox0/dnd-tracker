@@ -26,7 +26,7 @@ export function usePusherBattleSync(
   campaignId: string,
   battleId: string,
   currentUserId: string | null,
-  onTurnStarted: (message: string) => void,
+  onTurnStarted: (participantName: string | undefined) => void,
 ): { connectionState: PusherConnectionState } {
   const queryClient = useQueryClient();
 
@@ -99,7 +99,7 @@ export function usePusherBattleSync(
     "turn-started": (data) => {
       const name = (data as { participantName?: string } | null)?.participantName;
 
-      onTurnStarted(name ? "Твій хід: " + name : "Твій хід!");
+      onTurnStarted(name);
     },
   });
 

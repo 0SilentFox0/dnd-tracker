@@ -1,4 +1,5 @@
 import { CELL_FEET } from "@/lib/constants/battle";
+import { textRef } from "@/lib/i18n/text-ref";
 import { resolveAmount } from "@/lib/utils/abilities/engine/core/amount";
 import { findFlags } from "@/lib/utils/abilities/engine/core/collect-modifiers";
 import { applyRawDamage, applyRawHeal } from "@/lib/utils/abilities/engine/effects/hp";
@@ -54,7 +55,7 @@ function absorbSpellDamage(state: SpellCastState, id: string, damage: number): v
     if (healed <= 0) continue;
 
     put(flow, participant);
-    flow.messages.push(`💚 ${target.basicInfo.name}: поглинає ${healed} HP (${spell.name})`);
+    flow.messages.push(textRef("battleActions.spell.absorb", { target: target.basicInfo.name, healed, spell: spell.name }));
   }
 }
 
@@ -78,7 +79,7 @@ function scheduleHit(state: SpellCastState, delay: { feet: number; perRoundFeet:
   const pending = me.battleData.pendingHits ?? [];
 
   put(flow, { ...me, battleData: { ...me.battleData, pendingHits: [...pending, { id: `${spell.id}:${flow.ctx.round}:${id}:${pending.length}`, targetId: id, atRound, amount, damageType, spellName: spell.name, school: spell.groupId }] } });
-  flow.messages.push(`⏳ ${target.basicInfo.name}: «${spell.name}» прибуде в раунді ${atRound} (${feet} фт)`);
+  flow.messages.push(textRef("battleLog.spellFx.delayed", { target: target.basicInfo.name, spell: spell.name, round: atRound, feet }));
 
   return true;
 }
@@ -99,7 +100,7 @@ function dealSpellDamage(state: SpellCastState, effect: Extract<Effect, { kind: 
   if (planned <= 0) return;
 
   if (dealsNoDamage(getP(flow, casterIdOf(state)))) {
-    flow.messages.push(`🕊 ${state.caster.basicInfo.name}: не завдає шкоди (${spell.name})`);
+    flow.messages.push(textRef("battleLog.spellFx.pacified", { caster: state.caster.basicInfo.name, spell: spell.name }));
 
     return;
   }
@@ -140,13 +141,13 @@ function distanceDamage(state: SpellCastState, ranges: NonNullable<Extract<Effec
 
   const feet = onMap ? footprintDistance(cellsOf(me), cellsOf(target)) * CELL_FEET : 0;
 
-  if (!onMap) flow.messages.push(`📏 ${state.spell.name}: без мапи — найближчий діапазон`);
+  if (!onMap) flow.messages.push(textRef("battleLog.spellFx.noMapRange", { spell: state.spell.name }));
 
   const range = ranges.find((r) => r.maxFeet >= feet) ?? ranges[ranges.length - 1];
 
   const dice = rangeDice(state, range.dice);
 
-  if (onMap) flow.messages.push(`📏 ${target.basicInfo.name}: дистанція ${feet} фт → ${dice}`);
+  if (onMap) flow.messages.push(textRef("battleLog.spellFx.distanceDice", { target: target.basicInfo.name, feet, dice }));
 
   const rolled = rollDice(dice, state.rng);
 

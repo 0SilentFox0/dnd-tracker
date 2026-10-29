@@ -15,6 +15,12 @@
   "trackFileInvalid": "Потрібен файл {formats} до {maxMb} МБ",
   "trackTitleTooLong": "Група й назва разом — до {max} символів",
   "trackDurationInvalid": "Ціле число секунд від 1 до 86400",
+  "hexColor": "Колір — у форматі #RRGGBB",
+  "image": {
+    "tooLarge": "Картинка завелика для обробки в браузері",
+    "compressFailed": "Не вдалося стиснути картинку"
+  },
   "spellDelayPair": "Заповніть обидва поля або жодного",
-  "rulesCustomConflict": "Один і той самий стан не можна додати й видалити разом"
+  "rulesCustomConflict": "Один і той самий стан не можна додати й видалити разом",
+  "tooManySpellZones": "Забагато зон заклинань"
 }

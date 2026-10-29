@@ -1,8 +1,12 @@
 "use client";
 
+import { useTranslations } from "next-intl";
+
 import { useBattleScene } from "@/lib/hooks/battle";
 
 export function BattleLogLoadEarlier() {
+  const t = useTranslations("battle.log");
+
   const { logHistory } = useBattleScene();
 
   if (!logHistory.canLoadEarlier) return null;
@@ -14,7 +18,7 @@ export function BattleLogLoadEarlier() {
       onClick={logHistory.loadEarlier}
       className="w-full py-2.5 text-center text-xs text-[var(--hud-muted)] hover:text-[var(--gold)] disabled:opacity-60"
     >
-      {logHistory.isLoading ? "Завантаження…" : "Показати раніші"}
+      {logHistory.isLoading ? t("loading") : t("showEarlier")}
     </button>
   );
 }

@@ -1,9 +1,11 @@
 import { describe, expect, it } from "vitest";
 
 import { CombatStatus, ParticipantSide } from "@/lib/constants/battle";
+import { textOf } from "@/lib/i18n/test/text";
 import { makeParticipant } from "@/lib/utils/abilities/__tests__/fixtures";
 import { isAttackable, isTargetable, takesTurn } from "@/lib/utils/abilities/engine/core/participants";
 import { beginConcentration, dropConcentration } from "@/lib/utils/battle/concentration";
+import { textsOf } from "@/lib/utils/battle/log/__tests__/event-text";
 import { castSpell } from "@/lib/utils/battle/spell";
 import { anchorMove, anchorTurnStart } from "@/lib/utils/battle/spell/anchored-zone";
 import { applyAbilitySummons } from "@/lib/utils/battle/summon/ability-summons";
@@ -96,7 +98,7 @@ describe("summonInline: поява", () => {
     expect(isTargetable(b)).toBe(false);
     expect(isAttackable(b)).toBe(false);
     expect(takesTurn(b, 3)).toBe(false);
-    expect(messages.join(" ")).toContain("Кущ");
+    expect(textsOf(messages).join(" ")).toContain("Кущ");
     expect(b.battleData.activeEffects.find((e) => e.anchoredZone)?.anchoredZone).toMatchObject({ radiusFeet: 10, side: "enemies" });
   });
 
@@ -142,7 +144,7 @@ describe("summonInline: аура-атака", () => {
 
     const hurt = out.participants.find((p) => p.basicInfo.id === "orc") as BattleParticipant;
 
-    expect(out.messages.join(" ")).toMatch(/атака 20\+6=26 проти КЗ 14: влучання/);
+    expect(textsOf(out.messages).join(" ")).toMatch(/атака 20\+6=26 проти КЗ 14: влучання/);
     expect(hurt.combatStats.currentHp).toBeLessThan(30);
   });
 
@@ -153,7 +155,7 @@ describe("summonInline: аура-атака", () => {
 
     const out = anchorMove({ participants: order.map((p) => (p.basicInfo.id === "orc" ? moved : p)), moved, from: { x: 8, y: 5 }, path: [{ x: 6, y: 5 }], ctx: ctx(3, [0.05]) });
 
-    expect(out.messages.join(" ")).toContain("промах");
+    expect(textsOf(out.messages).join(" ")).toContain("промах");
     expect(out.participants.find((p) => p.basicInfo.id === "orc")?.combatStats.currentHp).toBe(30);
   });
 
@@ -191,7 +193,7 @@ describe("summonInline: зникнення", () => {
     expect(b.combatStats.status).toBe(CombatStatus.DEAD);
     expect(b.battleData.dismissed).toBe(true);
     expect(b.battleData.position).toBeUndefined();
-    expect(out.messages[0]).toContain("зникає");
+    expect(textOf(out.messages[0])).toContain("зникає");
   });
 
   it("зникає з утратою концентрації", async () => {

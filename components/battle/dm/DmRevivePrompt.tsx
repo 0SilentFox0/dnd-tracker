@@ -1,10 +1,13 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import { HeartPulse, Skull, X } from "lucide-react";
 
 import { useDownedHeroPrompt } from "@/lib/hooks/battle";
 
 export function DmRevivePrompt() {
+  const t = useTranslations("battleDm.revive");
+
   const { heroes, isPending, revive, dismiss } = useDownedHeroPrompt();
 
   if (heroes.length === 0) return null;
@@ -15,7 +18,7 @@ export function DmRevivePrompt() {
         <div key={p.basicInfo.id} role="alert" className="flex min-h-12 items-center gap-2.5 border border-hud-danger/50 bg-[#15110e]/95 px-3 text-sm text-[#d9cfbd]">
           <Skull className="size-4 shrink-0 text-hud-danger" />
           <span className="min-w-0 flex-1">
-            <b className="hud-sc text-[var(--ink)]">{p.basicInfo.name}</b> впав. Повернути до життя з 1 HP?
+            {t.rich("message", { name: p.basicInfo.name, b: (chunks) => <b className="hud-sc text-[var(--ink)]">{chunks}</b> })}
           </span>
           <button
             type="button"
@@ -24,9 +27,9 @@ export function DmRevivePrompt() {
             className="flex h-8 shrink-0 items-center gap-1.5 border border-[var(--gold)]/50 px-2.5 text-[13px] text-[var(--gold)] hover:bg-[var(--gold)]/10 disabled:opacity-50"
           >
             <HeartPulse className="size-3.5" />
-            Повернути
+            {t("action")}
           </button>
-          <button type="button" title="Сховати" onClick={() => dismiss(p)} className="flex size-8 shrink-0 items-center justify-center text-[var(--hud-muted)] hover:text-[var(--ink)]">
+          <button type="button" title={t("hide")} onClick={() => dismiss(p)} className="flex size-8 shrink-0 items-center justify-center text-[var(--hud-muted)] hover:text-[var(--ink)]">
             <X className="size-4" />
           </button>
         </div>

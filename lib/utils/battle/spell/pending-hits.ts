@@ -1,3 +1,4 @@
+import { textRef } from "@/lib/i18n/text-ref";
 import { findParticipant, isActive, replaceParticipant } from "@/lib/utils/abilities/engine/core/participants";
 import { resolveDowned } from "@/lib/utils/abilities/engine/core/run-abilities";
 import type { Rng } from "@/lib/utils/abilities/engine/core/types";
@@ -6,6 +7,7 @@ import { applyDamageConsequences } from "@/lib/utils/battle/damage/consequences"
 import { applyResistance } from "@/lib/utils/battle/resistance";
 import type { Ruleset } from "@/lib/utils/rules";
 import type { BattleParticipant } from "@/types/battle";
+import type { LogLine } from "@/types/text";
 
 interface PendingCtx {
   round: number;
@@ -14,7 +16,7 @@ interface PendingCtx {
 }
 
 /** Відкладені удари кастера, що прибули (atRound ≤ round): число вже кинуте при касті, rng лише для наслідків шкоди. */
-export function resolvePendingHits(ps: BattleParticipant[], casterId: string, ctx: PendingCtx): { participants: BattleParticipant[]; messages: string[] } {
+export function resolvePendingHits(ps: BattleParticipant[], casterId: string, ctx: PendingCtx): { participants: BattleParticipant[]; messages: LogLine[] } {
   const caster = findParticipant(ps, casterId);
 
   const hits = caster?.battleData.pendingHits;
@@ -29,13 +31,13 @@ export function resolvePendingHits(ps: BattleParticipant[], casterId: string, ct
 
   let next = replaceParticipant(ps, { ...caster, battleData: { ...caster.battleData, pendingHits: rest.length > 0 ? rest : undefined } });
 
-  const messages: string[] = [];
+  const messages: LogLine[] = [];
 
   for (const hit of due) {
     const target = findParticipant(next, hit.targetId);
 
     if (!target || !isActive(target) || target.battleData.escaped) {
-      messages.push(`💨 «${hit.spellName}»: ціль недоступна, удар розсіявся`);
+      messages.push(textRef("battleLog.spellFx.pendingMiss", { spell: hit.spellName }));
 
       continue;
     }
@@ -43,7 +45,7 @@ export function resolvePendingHits(ps: BattleParticipant[], casterId: string, ct
     const { finalDamage } = applyResistance(target, hit.amount, hit.damageType, { participants: next, fromSpell: true, school: hit.school });
 
     next = replaceParticipant(next, applyRawDamage(target, finalDamage));
-    messages.push(`💥 «${hit.spellName}» влучає: ${target.basicInfo.name} −${finalDamage} HP`);
+    messages.push(textRef("battleLog.spellFx.pendingHit", { spell: hit.spellName, target: target.basicInfo.name, damage: finalDamage }));
 
     const c = applyDamageConsequences({ before: target, after: findParticipant(next, hit.targetId) ?? target, amount: finalDamage, rules: ctx.rules, rng: ctx.rng, participants: next });
 

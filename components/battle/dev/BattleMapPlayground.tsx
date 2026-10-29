@@ -25,11 +25,11 @@ export function BattleMapPlayground() {
 
   const modeTabs = (
     <HudChipTabs
-      ariaLabel="Режим"
+      ariaLabel="Mode"
       items={[
-        { key: "move", label: "Рух", active: mode === "move", onSelect: () => controls.setMode("move") },
-        { key: "attack", label: "Атака", active: mode === "attack", onSelect: () => controls.setMode("attack") },
-        { key: "template", label: "Шаблон", active: mode === "template", onSelect: () => controls.setMode("template") },
+        { key: "move", label: "Move", active: mode === "move", onSelect: () => controls.setMode("move") },
+        { key: "attack", label: "Attack", active: mode === "attack", onSelect: () => controls.setMode("attack") },
+        { key: "template", label: "Template", active: mode === "template", onSelect: () => controls.setMode("template") },
       ]}
     />
   );
@@ -37,62 +37,62 @@ export function BattleMapPlayground() {
   return (
     <TooltipProvider>
     <div className="battle-hud below-header flex flex-col overflow-hidden p-3 sm:p-4">
-      <h1 className="mb-2 shrink-0 text-lg font-semibold">Карта бою — пісочниця</h1>
+      <h1 className="mb-2 shrink-0 text-lg font-semibold">Battle map playground</h1>
       <div className="mb-2 flex shrink-0 flex-wrap items-center gap-2 lg:hidden">
         {modeTabs}
         <button type="button" className={cn(BUTTON, "h-8")} onClick={controls.nextTurn}>
-          Наступний хід
+          Next turn
         </button>
         <button type="button" className={cn(BUTTON, "h-8")} onClick={controls.reset}>
-          Скинути
+          Reset
         </button>
       </div>
       <div className="grid min-h-0 flex-1 grid-rows-[minmax(0,1fr)] gap-4 lg:grid-cols-[300px_1fr]">
         <div className="hidden min-h-0 flex-col gap-3 overflow-y-auto lg:flex">
           <HudPanel className="flex flex-col gap-3">
             <label className="flex flex-col gap-1 text-sm">
-              Прозорість сітки: {map.opacity.toFixed(2)}
+              Grid opacity: {map.opacity.toFixed(2)}
               <input type="range" min={0} max={1} step={0.05} value={map.opacity} onChange={(e) => setMap({ ...map, opacity: Number(e.target.value) })} />
             </label>
             <div className="grid grid-cols-2 gap-2">
               <label className="flex flex-col gap-1 text-sm">
-                Колонки
+                Columns
                 <input className={FIELD} type="number" min={4} max={40} value={map.cols} onChange={(e) => setMap({ ...map, cols: clampSize(e.target.value, map.cols) })} />
               </label>
               <label className="flex flex-col gap-1 text-sm">
-                Рядки
+                Rows
                 <input className={FIELD} type="number" min={4} max={40} value={map.rows} onChange={(e) => setMap({ ...map, rows: clampSize(e.target.value, map.rows) })} />
               </label>
             </div>
             <label className="flex flex-col gap-1 text-sm">
-              Поля (клітинок)
+              Margins (cells)
               <input className={FIELD} type="number" min={0} max={5} value={margin} onChange={(e) => setMargin(Number(e.target.value))} />
             </label>
             {modeTabs}
             <div className="flex gap-2">
               <button type="button" className={BUTTON} onClick={controls.nextTurn}>
-                Наступний хід
+                Next turn
               </button>
               <button type="button" className={BUTTON} onClick={controls.reset}>
-                Скинути
+                Reset
               </button>
             </div>
           </HudPanel>
           <HudPanel className="text-sm">
             <div className="font-semibold">{active.basicInfo.name}</div>
             <div className="text-hud-muted">
-              HP {active.combatStats.currentHp}/{active.combatStats.maxHp} · Залишок руху: {remainingMovement(active)} кл.
+              HP {active.combatStats.currentHp}/{active.combatStats.maxHp} · Movement left: {remainingMovement(active)} cells
             </div>
             {attack && (
               <div className="text-hud-muted">
-                {attack.name} · {attack.type === "melee" ? "ближня" : "дальня"}
+                {attack.name} · {attack.type === "melee" ? "melee" : "ranged"}
                 {attack.range ? ` · ${attack.range}` : ""}
               </div>
             )}
           </HudPanel>
           <HudPanel className="text-sm">
-            <div className="mb-1 font-semibold">Лог</div>
-            {log.length === 0 ? <div className="text-hud-muted">Порожньо</div> : log.map((line, i) => <div key={`${i}-${line}`}>{line}</div>)}
+            <div className="mb-1 font-semibold">Log</div>
+            {log.length === 0 ? <div className="text-hud-muted">Empty</div> : log.map((line, i) => <div key={`${i}-${line}`}>{line}</div>)}
           </HudPanel>
         </div>
         <div className="h-full min-h-0 min-w-0">

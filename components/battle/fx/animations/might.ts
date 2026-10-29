@@ -51,7 +51,7 @@ function wing(g: CanvasRenderingContext2D, x: number, y: number, side: number, o
   }
 }
 
-export const might: FxAnimation = ({ stage, targets }) =>
+export const might: FxAnimation = ({ stage, targets, labels }) =>
   perTarget(stage, targets, 0, async ({ at: target, el }) => {
     const { w, h } = halfSize(el);
 
@@ -159,7 +159,7 @@ export const might: FxAnimation = ({ stage, targets }) =>
 
       g.globalAlpha = 1;
 
-      risingBadge(g, target.x, target.y - h - 8, clamp01((t - FLARE_MS - 450) / 1250), "+атака", GOLD_BADGE, 26);
+      risingBadge(g, target.x, target.y - h - 8, clamp01((t - FLARE_MS - 450) / 1250), labels.might, GOLD_BADGE, 26);
     });
 
     for (let n = 0; n < 26; n++) {

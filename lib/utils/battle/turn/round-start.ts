@@ -1,6 +1,7 @@
 import { countDownRoundEffects } from "./effects";
 import { calculateInitiative, sortByInitiative } from "./initiative";
 
+import { textRef } from "@/lib/i18n/text-ref";
 import { applyBakedAuras } from "@/lib/utils/abilities/build/bake";
 import { isActive } from "@/lib/utils/abilities/engine/core/participants";
 import { runAbilities } from "@/lib/utils/abilities/engine/core/run-abilities";
@@ -8,6 +9,7 @@ import type { Rng } from "@/lib/utils/abilities/engine/core/types";
 import { summonsOf } from "@/lib/utils/battle/participant/reserve";
 import type { Ruleset } from "@/lib/utils/rules";
 import type { BattleMapConfig, BattleParticipant } from "@/types/battle";
+import type { LogLine } from "@/types/text";
 
 /**
  * Обробляє початок нового раунду
@@ -25,9 +27,9 @@ export function processStartOfRound(
   rules?: Ruleset,
 ): {
   updatedInitiativeOrder: BattleParticipant[];
-  message: string;
-  triggerMessages: string[];
-  lairMessages: string[];
+  message: LogLine;
+  triggerMessages: LogLine[];
+  lairMessages: LogLine[];
 } {
   // 0. Видаляємо тимчасові слоти додаткових ходів з попереднього раунду
   const baseOrder = (initiativeOrder || []).filter((p) => !p.basicInfo?.isExtraTurnSlot);
@@ -40,7 +42,7 @@ export function processStartOfRound(
 
   const ctx = { round: currentRound, rng, map, rules };
 
-  const messages: string[] = [];
+  const messages: LogLine[] = [];
 
   let order = updatedOrder;
 
@@ -63,8 +65,8 @@ export function processStartOfRound(
 
   return {
     updatedInitiativeOrder: sortedOrder.map(countDownRoundEffects),
-    message: `🔁 Початок Раунду ${currentRound}`,
+    message: textRef("battleLog.round.start", { round: currentRound }),
     triggerMessages: messages,
-    lairMessages: sortedOrder.filter((p) => p.battleData.lair?.active && isActive(p) && p.battleData.resolvedAbilities.some((a) => a.limits?.lair)).map((p) => `🏰 Ініціатива 20: дія лігва — ${p.basicInfo.name}`),
+    lairMessages: sortedOrder.filter((p) => p.battleData.lair?.active && isActive(p) && p.battleData.resolvedAbilities.some((a) => a.limits?.lair)).map((p) => textRef("battleLog.round.lair", { name: p.basicInfo.name })),
   };
 }

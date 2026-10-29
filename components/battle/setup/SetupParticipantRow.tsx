@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import { Eye, EyeOff, Minus, Plus } from "lucide-react";
 
 import { EntityIcon } from "@/components/common/EntityIcon";
@@ -24,6 +25,8 @@ export function SetupParticipantRow({
   reserved,
   actions,
 }: SetupParticipantRowProps) {
+  const t = useTranslations("battleSetup.participant");
+
   const isAlly = side === ParticipantSide.ALLY;
 
   const bgClass = isAlly
@@ -44,11 +47,11 @@ export function SetupParticipantRow({
       <div className="flex items-center gap-1 shrink-0">
         {reserved > 0 && (quantity ?? 1) > 1 && (
           <span className="flex items-center gap-1 text-xs text-muted-foreground">
-            <Button type="button" variant="ghost" size="sm" aria-label="Менше в резерві" onClick={() => actions.onReserveChange(reserved - 1)}>
+            <Button type="button" variant="ghost" size="sm" aria-label={t("reserveLess")} onClick={() => actions.onReserveChange(reserved - 1)}>
               <Minus className="size-3" />
             </Button>
-            у резерві: {reserved}
-            <Button type="button" variant="ghost" size="sm" aria-label="Більше в резерві" onClick={() => actions.onReserveChange(reserved + 1)}>
+            {t("reserved", { count: reserved })}
+            <Button type="button" variant="ghost" size="sm" aria-label={t("reserveMore")} onClick={() => actions.onReserveChange(reserved + 1)}>
               <Plus className="size-3" />
             </Button>
           </span>
@@ -58,7 +61,7 @@ export function SetupParticipantRow({
           variant="ghost"
           size="sm"
           aria-pressed={reserved > 0}
-          title={reserved > 0 ? "Прибрати з резерву" : "У резерв: з'явиться, коли ДМ введе в бій"}
+          title={reserved > 0 ? t("unreserve") : t("reserve")}
           onClick={() => actions.onReserveChange(reserved > 0 ? 0 : (quantity ?? 1))}
         >
           {reserved > 0 ? <EyeOff className="size-4" /> : <Eye className="size-4" />}
@@ -68,7 +71,7 @@ export function SetupParticipantRow({
           variant="ghost"
           size="sm"
           onClick={actions.onMoveToOtherSide}
-          title={isAlly ? "Перемістити до ворогів" : "Перемістити до союзників"}
+          title={isAlly ? t("moveToEnemies") : t("moveToAllies")}
         >
           {isAlly ? "→" : "←"}
         </Button>
@@ -77,7 +80,7 @@ export function SetupParticipantRow({
           variant="ghost"
           size="sm"
           onClick={actions.onRemove}
-          title="Видалити зі списку"
+          title={t("remove")}
           className="text-muted-foreground hover:text-destructive"
         >
           ✕

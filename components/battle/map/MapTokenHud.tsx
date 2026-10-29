@@ -1,10 +1,12 @@
 "use client";
 
 import { memo } from "react";
+import { useTranslations } from "next-intl";
 
-import { tokenBoxStyle } from "./token-box";
+import { type MapPlacement, tokenBoxStyle } from "./token-box";
 
 import { useDamageShake, useFxEnabled, useHitChange } from "@/lib/hooks/battle";
+import { useText } from "@/lib/i18n/use-text";
 import { cn } from "@/lib/utils";
 import { type FxImpact, hudMotifsOf } from "@/lib/utils/battle/fx";
 import { isFallen, sizeOf } from "@/lib/utils/battle/grid";
@@ -12,12 +14,11 @@ import { isDown } from "@/lib/utils/battle/participant/state";
 import { HEALTH_LABEL, healthSegments, healthState, hpRatio, hpTone, NO_EFFECTS } from "@/lib/utils/battle/view";
 import { clamp } from "@/lib/utils/common/clamp";
 import type { ActiveEffect, BattleParticipant } from "@/types/battle";
+import type { LogLine } from "@/types/text";
 
 export interface MapTokenHudProps {
   participant: BattleParticipant;
-  box: { cx: number; cy: number; size: number };
-  mapSize: { width: number; height: number };
-  pxPerUnit: number;
+  placement: MapPlacement;
   exact: boolean;
   raised: boolean;
   impact?: FxImpact | null;
@@ -32,7 +33,7 @@ const HUD_MAX_SHARE = 0.42;
 const PLAQUE_CHROME = { text: 6, bar: 4 };
 
 
-function hpView(participant: BattleParticipant, exact: boolean) {
+function hpView(participant: BattleParticipant, exact: boolean): { ratio: number; text: LogLine } {
   const { currentHp, maxHp } = participant.combatStats;
 
   if (exact) {
@@ -46,7 +47,13 @@ function hpView(participant: BattleParticipant, exact: boolean) {
   return { ratio: healthSegments(state) / 4, text: HEALTH_LABEL[state] };
 }
 
-function MapTokenHudImpl({ participant: live, box, mapSize, pxPerUnit, exact, raised, impact = null, effects = NO_EFFECTS, onReturn }: MapTokenHudProps) {
+function MapTokenHudImpl({ participant: live, placement, exact, raised, impact = null, effects = NO_EFFECTS, onReturn }: MapTokenHudProps) {
+  const { box, mapSize, pxPerUnit } = placement;
+
+  const t = useTranslations("battle.map");
+
+  const fmt = useText();
+
   const { change, shown: participant } = useHitChange(live, impact);
 
   const shake = useDamageShake<HTMLDivElement>(change);
@@ -81,7 +88,7 @@ function MapTokenHudImpl({ participant: live, box, mapSize, pxPerUnit, exact, ra
 
   const barPx = showText ? textBarPx : thinBarPx;
 
-  const { ratio, text } = hpView(participant, exact);
+  const { ratio, text: hpText } = hpView(participant, exact);
 
   const width = `${ratio * 100}%`;
 
@@ -102,7 +109,7 @@ function MapTokenHudImpl({ participant: live, box, mapSize, pxPerUnit, exact, ra
             onReturn();
           }}
         >
-          Повернутися
+          {t("returnToToken")}
         </button>
       )}
       {showHud && (
@@ -125,7 +132,7 @@ function MapTokenHudImpl({ participant: live, box, mapSize, pxPerUnit, exact, ra
             <i data-map-hud-fill className="map-hud-fill" style={{ width }} />
             {showText && (
               <span className={cn("map-hud-text", exact ? "font-sans font-semibold" : "hud-sc italic", down && "line-through")} style={{ fontSize: hpFont, lineHeight: `${barPx}px` }}>
-                {text}
+                {fmt(hpText)}
               </span>
             )}
           </div>

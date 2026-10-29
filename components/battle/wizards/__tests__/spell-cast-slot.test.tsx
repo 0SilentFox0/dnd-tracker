@@ -1,9 +1,11 @@
 // @vitest-environment happy-dom
 import { useEffect } from "react";
-import { cleanup, fireEvent, render, screen, waitFor } from "@testing-library/react";
+import { cleanup, fireEvent, screen, waitFor } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
 vi.mock("@/components/hud/fonts", () => ({ hudFontClassName: "" }));
+
+vi.mock("next-intl", async () => (await import("./uk-intl")).catalogIntl());
 
 const lib = vi.hoisted(() => ({
   spells: [
@@ -22,7 +24,11 @@ vi.mock("@/lib/hooks/spells", async (importOriginal) => ({
 import { SpellBook } from "@/components/battle/wizards/SpellBook";
 import { useSpellBook } from "@/lib/hooks/battle";
 import { fakeScene } from "@/lib/hooks/battle/__tests__/fake-scene";
+import { render } from "@/lib/i18n/test/render-uk";
+import { textOf } from "@/lib/i18n/test/text";
 import { slotOptions } from "@/lib/utils/battle/flows";
+
+vi.unmock("next-intl");
 
 type Caster = NonNullable<Parameters<typeof useSpellBook>[0]>;
 
@@ -42,7 +48,7 @@ describe("slotOptions", () => {
   it("лише кола не нижче заклинання з непорожнім слотом і пакт не нижче", () => {
     const { caster } = fakeScene({ slots: SLOTS });
 
-    const keys = (level: number, p = hero(caster, "5e")) => slotOptions(p, level).map((o) => `${o.key}:${o.label}`);
+    const keys = (level: number, p = hero(caster, "5e")) => slotOptions(p, level).map((o) => `${o.key}:${textOf(o.label)}`);
 
     expect(keys(1)).toEqual(["1:Коло 1", "3:Коло 3", "pact:Пакт · коло 3"]);
     expect(keys(2)).toEqual(["3:Коло 3", "pact:Пакт · коло 3"]);

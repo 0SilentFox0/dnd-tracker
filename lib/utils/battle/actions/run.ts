@@ -1,14 +1,16 @@
 import { coreActionCost, isAttackAction, standUpCost, validateCoreAction } from "./availability";
-import { disengageEffect, dodgeEffect, helpEffect, hiddenEffect } from "./effects";
+import { disengageEffect, dodgeEffect, helpEffect, hiddenEffect, upsertLabeled } from "./effects";
 import { reject } from "./errors";
 import { runEscape, runGrapple, runShove } from "./grapple";
 import { pickMeleeAttack, reactionBlocker } from "./reaction";
-import { CORE_ACTION_REGISTRY, type CoreActionKey } from "./registry";
+import { actionReason } from "./reasons";
+import { type CoreActionKey } from "./registry";
 import type { CoreActionBody } from "./schema";
 
 import { API_ERRORS } from "@/lib/constants/api-errors";
+import { dynamicTextRef, textRef } from "@/lib/i18n/text-ref";
 import { findParticipant, isActive, isAttackable, replaceParticipant } from "@/lib/utils/abilities/engine/core/participants";
-import { type TimedEffectInput, upsertTimedEffect } from "@/lib/utils/abilities/engine/effects/timed-effects";
+import { type TimedEffectInput } from "@/lib/utils/abilities/engine/effects/timed-effects";
 import { canAttackFromPool, spendFromPool } from "@/lib/utils/battle/attack/attacks-left";
 import { getDisabledAttackKinds } from "@/lib/utils/battle/attack/disabled-attacks";
 import { resolveServerAttack } from "@/lib/utils/battle/attack/server-attack";
@@ -20,9 +22,10 @@ import { removeEffects } from "@/lib/utils/battle/conditions";
 import { attackReachError } from "@/lib/utils/battle/grid/attack-reach";
 import { baseMovement } from "@/lib/utils/battle/grid/path";
 import { applyMainActionUsed } from "@/lib/utils/battle/participant/helpers";
-import { BattleRuleError } from "@/lib/utils/battle/store/errors";
+import { ruleErrorOf } from "@/lib/utils/battle/store/errors";
 import type { Ruleset } from "@/lib/utils/rules";
 import type { BattleAction, BattleMapConfig, BattleParticipant } from "@/types/battle";
+import type { LogLine } from "@/types/text";
 
 export interface RunCoreActionInput {
   participants: BattleParticipant[];
@@ -36,7 +39,7 @@ export interface RunCoreActionInput {
 
 export interface RunCoreActionResult {
   participants: BattleParticipant[];
-  messages: string[];
+  messages: LogLine[];
   actions?: BattleAction[];
 }
 
@@ -48,7 +51,7 @@ const TIMED_ACTIONS = {
 function spendAction(actor: BattleParticipant, participants: BattleParticipant[], key: CoreActionKey): BattleParticipant {
   const attack = isAttackAction(key);
 
-  if (!(attack && canAttackFromPool(actor)) && actor.actionFlags.hasUsedAction) throw new BattleRuleError("action_used", "Дію вже витрачено");
+  if (!(attack && canAttackFromPool(actor)) && actor.actionFlags.hasUsedAction) throw ruleErrorOf("action_used", actionReason("actionUsed"));
 
   return attack ? spendFromPool(actor, participants) : applyMainActionUsed(actor);
 }
@@ -62,13 +65,11 @@ export function runCoreAction(input: RunCoreActionInput): RunCoreActionResult {
 
   if (body.action === "readiedAttack") return readiedAttack(input, actor, body.targetId);
 
-  const def = CORE_ACTION_REGISTRY[body.action];
-
   const name = actor.basicInfo.name;
 
   const cost = coreActionCost(body.action, actor, participants);
 
-  if (cost === "bonusAction" && actor.actionFlags.hasUsedBonusAction) throw new BattleRuleError("action_used", "Бонусну дію вже використано");
+  if (cost === "bonusAction" && actor.actionFlags.hasUsedBonusAction) throw ruleErrorOf("action_used", actionReason("bonusUsed"));
 
   const spent = cost === "action" ? spendAction(actor, participants, body.action) : cost === "bonusAction" ? { ...actor, actionFlags: { ...actor.actionFlags, hasUsedBonusAction: true } } : actor;
 
@@ -76,34 +77,36 @@ export function runCoreAction(input: RunCoreActionInput): RunCoreActionResult {
 
   if (invalid) return reject(invalid);
 
-  const done = (icon: string, next: BattleParticipant, tail = ""): RunCoreActionResult => ({ participants: replaceParticipant(participants, next), messages: [`${icon} ${name}: ${def.label}${tail}`] });
+  const actionName = dynamicTextRef(`battleCommon.coreActions.${body.action}`);
+
+  const done = (icon: string, next: BattleParticipant, tail: LogLine = ""): RunCoreActionResult => ({ participants: replaceParticipant(participants, next), messages: [textRef("battleActions.core.done", { icon, name, action: actionName, tail })] });
 
   const grappleInput = () => ({ actor: spent, participants: replaceParticipant(participants, spent), map, round, rules, rng });
 
-  const out = (r: { participants: BattleParticipant[]; message: string }): RunCoreActionResult => ({ participants: r.participants, messages: [r.message] });
+  const out = (r: { participants: BattleParticipant[]; message: LogLine }): RunCoreActionResult => ({ participants: r.participants, messages: [r.message] });
 
   switch (body.action) {
     case "dash": {
       const gained = baseMovement(spent);
 
-      return done("🏃", { ...spent, battleData: { ...spent.battleData, extraMovement: (spent.battleData.extraMovement ?? 0) + gained } }, ` (+${gained} кл. руху)`);
+      return done("🏃", { ...spent, battleData: { ...spent.battleData, extraMovement: (spent.battleData.extraMovement ?? 0) + gained } }, textRef("battleActions.core.dashTail", { gained }));
     }
 
     case "disengage":
     case "dodge": {
       const { icon, effect } = TIMED_ACTIONS[body.action];
 
-      return done(icon, upsertTimedEffect(spent, effect(actor.basicInfo.id), round));
+      return done(icon, upsertLabeled(spent, effect(actor.basicInfo.id), round));
     }
 
     case "help": {
-      const target = findParticipant(participants, body.targetId) ?? reject("Цілі немає в бою");
+      const target = findParticipant(participants, body.targetId) ?? reject(actionReason("targetMissing"));
 
       const withSpent = replaceParticipant(participants, spent);
 
-      const helped = upsertTimedEffect(findParticipant(withSpent, target.basicInfo.id) ?? target, { ...helpEffect(actor.basicInfo.id), source: { participantId: actor.basicInfo.id, name } }, round);
+      const helped = upsertLabeled(findParticipant(withSpent, target.basicInfo.id) ?? target, { ...helpEffect(actor.basicInfo.id), source: { participantId: actor.basicInfo.id, name } }, round);
 
-      return { participants: replaceParticipant(withSpent, helped), messages: [`🤝 ${name}: ${def.label} — ${target.basicInfo.name} має перевагу на наступну атаку`] };
+      return { participants: replaceParticipant(withSpent, helped), messages: [textRef("battleActions.core.help", { name, action: actionName, target: target.basicInfo.name })] };
     }
 
     case "standUp": {
@@ -117,9 +120,9 @@ export function runCoreAction(input: RunCoreActionInput): RunCoreActionResult {
 
       const dc = Math.max(0, ...participants.filter((p) => p.basicInfo.side !== actor.basicInfo.side && isActive(p)).map((p) => passivePerception(p, participants, rules)));
 
-      const text = ` — 🎲 Скритність ${check.total} проти пасивного Сприйняття ${dc}`;
+      const params = { total: check.total, dc };
 
-      return check.total < dc ? done("🫥", spent, `${text}, помічено`) : done("🫥", upsertTimedEffect(spent, hiddenEffect(actor.basicInfo.id), round), `${text}, схований`);
+      return check.total < dc ? done("🫥", spent, textRef("battleActions.core.hideSpotted", params)) : done("🫥", upsertLabeled(spent, hiddenEffect(actor.basicInfo.id), round), textRef("battleActions.core.hideHidden", params));
     }
 
     case "ready":
@@ -139,7 +142,7 @@ export function runCoreAction(input: RunCoreActionInput): RunCoreActionResult {
 function readiedAttack(input: RunCoreActionInput, actor: BattleParticipant, targetId: string): RunCoreActionResult {
   const { participants, map, round, rng } = input;
 
-  if (!actor.battleData.readied) return reject("Атаку не підготовлено");
+  if (!actor.battleData.readied) return reject(actionReason("readiedMissing"));
 
   const blocker = reactionBlocker(actor);
 
@@ -147,13 +150,13 @@ function readiedAttack(input: RunCoreActionInput, actor: BattleParticipant, targ
 
   const target = findParticipant(participants, targetId);
 
-  if (!target || target.basicInfo.side === actor.basicInfo.side || !isAttackable(target)) return reject("Ціллю має бути живий ворог");
+  if (!target || target.basicInfo.side === actor.basicInfo.side || !isAttackable(target)) return reject(actionReason("enemyRequired"));
 
   const disabled = getDisabledAttackKinds(actor);
 
   const attack = pickMeleeAttack(actor) ?? actor.battleData.attacks.find((a) => a.hand !== "off" && !disabled[attackKindOf(a.type)]);
 
-  if (!attack) return reject("У учасника немає атаки");
+  if (!attack) return reject(actionReason("noAttack"));
 
   assertAttackAllowed(actor, attack, [target]);
 

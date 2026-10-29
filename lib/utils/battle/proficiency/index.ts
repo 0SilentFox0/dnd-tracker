@@ -1,8 +1,9 @@
 import type { AbilityKey } from "@/lib/constants/abilities";
+import { textRef } from "@/lib/i18n/text-ref";
 import { hasShield, wornArmorCategory } from "@/lib/utils/artifacts/worn-armor";
 import type { BattleAttack, BattleParticipant } from "@/types/battle";
 
-export const ARMOR_PENALTY_LABEL = "Броня без володіння";
+export const ARMOR_PENALTY_LABEL = textRef("battleLog.rollMode.armorPenalty");
 
 export type ArmorProficiency = { light: boolean; medium: boolean; heavy: boolean; shield: boolean };
 

@@ -5,6 +5,7 @@ import { ABILITIES, byId, hp, MAP, percentOfAttack, perform,unit } from "./fixtu
 import { ParticipantSide } from "@/lib/constants/battle";
 import { withinLimits } from "@/lib/utils/abilities/engine/core/usage";
 import { grantPassive } from "@/lib/utils/battle/__tests__/fixtures/mock-participant";
+import { textsOf } from "@/lib/utils/battle/log/__tests__/event-text";
 import type { GridPoint } from "@/types/battle";
 
 const demon = (at?: GridPoint) => unit("g", { side: ParticipantSide.ALLY, at, abilities: [ABILITIES.fireBurst] });
@@ -64,6 +65,6 @@ describe("Вогняний вибух", () => {
   it("нікого поруч — повідомлення в лог", () => {
     const { messages } = perform([unit("g", { side: ParticipantSide.ALLY, at: { x: 1, y: 1 }, abilities: [ABILITIES.fireBurst] }), unit("e1", { at: { x: 15, y: 15 } })], "fireBurst", { map: MAP, rng: FAIL });
 
-    expect(messages.join(" ")).toContain("поруч нікого");
+    expect(textsOf(messages).join(" ")).toContain("поруч нікого");
   });
 });

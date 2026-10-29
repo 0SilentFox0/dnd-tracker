@@ -34,4 +34,8 @@ export const CAMPAIGN_NAMESPACES = [
   "compendium",
   "contentImport",
   "gameTerms",
+  "abilityText",
+  "battleTerms",
 ] as const satisfies readonly Namespace[];
+
+export const BATTLE_NAMESPACES = ["battleCommon", "battle", "battleWizards", "battleDm", "battleSetup", "battleLog", "battleActions"] as const satisfies readonly Namespace[];

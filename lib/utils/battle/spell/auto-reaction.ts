@@ -1,3 +1,4 @@
+import { textRef } from "@/lib/i18n/text-ref";
 import { isActive } from "@/lib/utils/abilities/engine/core/participants";
 import { markKey } from "@/lib/utils/abilities/engine/effects/marks";
 import { canReact } from "@/lib/utils/battle/actions/reaction";
@@ -46,7 +47,7 @@ export function runAutoReactions(flow: ActionFlow, { attackerId, targetId, targe
 
     if (!canReact(holder) || !anchoredOn(target, holderId, grant.inline.anchorMarkId) || !inRange(grant, target, attacker, !!flow.ctx.map)) continue;
 
-    const spell = withInlineDefinition({ id: grant.spellId, name: grant.label ?? "Реакція", level: 0, groupId: null, definition: { dice: 0, cost: "reaction", targeting: { kind: "self" }, resolution: { kind: "auto" }, effects: [], raceModifiers: [] } }, grant);
+    const spell = withInlineDefinition({ id: grant.spellId, name: grant.label ?? grant.spellId, level: 0, groupId: null, definition: { dice: 0, cost: "reaction", targeting: { kind: "self" }, resolution: { kind: "auto" }, effects: [], raceModifiers: [] } }, grant);
 
     const dice = casterSpellDice(holder, { dice: grant.inline.dice, groupId: null, level: 0, dieSides: grant.inline.dieSides, fixedDice: true });
 
@@ -57,6 +58,6 @@ export function runAutoReactions(flow: ActionFlow, { attackerId, targetId, targe
     if (!result.success) continue;
 
     flow.ps = result.allParticipantsUpdated;
-    flow.messages.push(`⚡ ${holder.basicInfo.name}: реакція «${spell.name}» → ${attacker.basicInfo.name}`, ...result.messages);
+    flow.messages.push(textRef("battleLog.spellFx.autoReaction", { holder: holder.basicInfo.name, spell: spell.name, attacker: attacker.basicInfo.name }), ...result.messages);
   }
 }

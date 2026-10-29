@@ -1,11 +1,11 @@
-/* eslint-disable no-restricted-syntax -- derived content written to the DB stays Ukrainian (spec part5, decision 5) */
-import { array, effectiveEdition, object, str, unsupported } from "./adapters/shared";
+import { ABILITIES, array, effectiveEdition, object, str, unsupported } from "./adapters/shared";
 import { renderEntries } from "./entries";
 import { canonicalKey, nestedId } from "./identity";
 import { type Compendium, type JsonRecord, normalized } from "./parse";
 import { type AdapterContext, type Edition, type ImportIssue, issue } from "./types";
 
 import { CHOICE_LIMITS } from "@/lib/constants/choices";
+import type { Translator } from "@/lib/i18n/translator";
 
 export interface FeatureResolutionContext {
   root: Compendium;
@@ -13,6 +13,7 @@ export interface FeatureResolutionContext {
   issues: ImportIssue[];
   embedded: Record<string, number>;
   usedOptionals: Set<string>;
+  t: Translator;
 }
 
 type Kind = "classFeature" | "subclassFeature";
@@ -44,25 +45,23 @@ function findFeatureRows(root: Compendium, kind: Kind, parts: string[], edition:
     (!parts[sourceAt] || normalized(str(r.source)) === normalized(parts[sourceAt])));
 }
 
-const ABILITY_SHORT: Record<string, string> = { str: "Сила", dex: "Спритність", con: "Статура", int: "Інтелект", wis: "Мудрість", cha: "Харизма" };
-
-function prerequisiteText(raw: unknown): string {
+function prerequisiteText(raw: unknown, t: Translator): string {
   return (Array.isArray(raw) ? raw : [raw]).map(object).map((alt) => {
     const parts: string[] = [];
 
     const level = alt.level;
 
-    if (typeof level === "number") parts.push(`рівень ${level}+`);
+    if (typeof level === "number") parts.push(t("derived.level", { level }));
     else if (level && typeof level === "object") {
       const l = object(level);
 
       const who = [str(object(l.class).name), str(object(l.subclass).name)].filter(Boolean).join(", ");
 
-      parts.push([typeof l.level === "number" ? `рівень ${l.level}+` : "", who].filter(Boolean).join(" "));
+      parts.push([typeof l.level === "number" ? t("derived.level", { level: l.level }) : "", who].filter(Boolean).join(" "));
     }
 
     for (const row of array(alt.ability).map(object)) {
-      parts.push(Object.entries(row).map(([k, v]) => `${ABILITY_SHORT[k] ?? k} ${String(v)}+`).join(" або "));
+      parts.push(Object.entries(row).map(([k, v]) => `${ABILITIES[k] ? t(`derived.ability.${ABILITIES[k]}`) : k} ${String(v)}+`).join(t("derived.or")));
     }
 
     for (const o of array(alt.other)) if (typeof o === "string" && o) parts.push(o);
@@ -88,7 +87,7 @@ function optionFromRow(context: FeatureResolutionContext, featureContext: Adapte
     description: [
       renderEntries(row.entries).text,
       unsupported(row, ["prerequisite", "featureType"], featureContext),
-      prerequisiteText(row.prerequisite) ? `Вимоги (ДМ перевіряє вручну): ${prerequisiteText(row.prerequisite)}` : "",
+      prerequisiteText(row.prerequisite, featureContext.t) ? featureContext.t("derived.prerequisite", { text: prerequisiteText(row.prerequisite, featureContext.t) }) : "",
     ].filter(Boolean).join("\n"),
     abilities: [],
   };
@@ -132,7 +131,7 @@ function collectChoices(scope: FeatureScope, entries: unknown, parts: string[]):
       if (children.length && children.every((child) => child.type === "refOptionalfeature") && Number.isInteger(o.count) && Number(o.count) > 0 && Number(o.count) <= children.length) {
         const options = children.flatMap((child) => resolveOptional(scope, child) ?? []);
 
-        if (options.length === children.length) choices.push({ id: nestedId(`${ownerPath}:${JSON.stringify(parts)}:${choices.length}`), label: "Особливості на вибір", kind: "option", count: o.count, options });
+        if (options.length === children.length) choices.push({ id: nestedId(`${ownerPath}:${JSON.stringify(parts)}:${choices.length}`), label: context.t("derived.choice.optionalFeatures"), kind: "option", count: o.count, options });
       } else context.issues.push(issue("MANUAL_OPTIONAL_PROGRESSION", ownerPath, "warning", { variant: "ambiguous" }));
 
       return;
@@ -189,7 +188,7 @@ function resolveFeature(context: FeatureResolutionContext, kind: Kind, ownerPath
 
   const rendered = renderEntries(inlineFeatureRefs(context, row.entries, effectiveEdition(row.edition, editionFallback)), `${kind}.${i}`);
 
-  const featureContext: AdapterContext = { root, inputKind: kind, path: ownerPath, source: str(row.source), edition: effectiveEdition(row.edition, editionFallback), key: ownerPath, issues };
+  const featureContext: AdapterContext = { root, inputKind: kind, path: ownerPath, source: str(row.source), edition: effectiveEdition(row.edition, editionFallback), key: ownerPath, issues, t: context.t };
 
   const featureNotes = unsupported(row, ["className", "classSource", "subclassShortName", "subclassSource", "level", "header"], featureContext);
 
@@ -254,7 +253,7 @@ const progressionLevels = (progression: unknown): Array<[number, number]> =>
 export function resolveOptionalProgression(raw: unknown, ownerPath: string, context: FeatureResolutionContext, owner: OptionalOwner, ownerEdition?: Edition): JsonRecord[] {
   const edition = effectiveEdition(ownerEdition, context.editionFallback);
 
-  const featureContext: AdapterContext = { root: context.root, inputKind: "optionalfeature", path: ownerPath, source: "", edition, key: ownerPath, issues: context.issues };
+  const featureContext: AdapterContext = { root: context.root, inputKind: "optionalfeature", path: ownerPath, source: "", edition, key: ownerPath, issues: context.issues, t: context.t };
 
   const out: JsonRecord[] = [];
 
@@ -263,7 +262,7 @@ export function resolveOptionalProgression(raw: unknown, ownerPath: string, cont
 
     const types = new Set(array(entry.featureType).map(str));
 
-    const label = str(entry.name) || "Особливості на вибір";
+    const label = str(entry.name) || context.t("derived.choice.optionalFeatures");
 
     const rows = array(context.root.optionalfeature).map(object).filter((r) => array(r.featureType).some((t) => types.has(str(t))) && belongsTo(r.prerequisite, owner) && (edition === "unknown" || effectiveEdition(r.edition, context.editionFallback) === edition));
 

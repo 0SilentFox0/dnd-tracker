@@ -1,0 +1,302 @@
+{
+  "crits": {
+    "attack": {
+      "success": {
+        "1": {
+          "name": "Double damage",
+          "description": "Damage is doubled (x2)",
+          "flavor": {
+            "1": "{attacker} puts the whole weight of the body into the blow - {target} is thrown backwards!",
+            "2": "{attacker} cuts through the defence like wet paper - {target} has no time to cover up!",
+            "3": "{attacker} strikes with a crack like thunder over Ashan - {target} reels in pain!"
+          }
+        },
+        "2": {
+          "name": "Maximum damage",
+          "description": "Damage = the maximum value of the dice",
+          "flavor": {
+            "1": "A perfect strike! {attacker} finds the weakest spot - {target} feels it.",
+            "2": "{attacker} is fortune's favourite: every die shows its maximum.",
+            "3": "{attacker} strikes with a master's cold precision - {target} has nothing to soften the blow."
+          }
+        },
+        "3": {
+          "name": "Advantage on the next attack",
+          "description": "The next attack has Advantage",
+          "flavor": {
+            "1": "{attacker} feels the rhythm of battle - the next strike will land even better.",
+            "2": "{attacker}'s eyes flare: every enemy move is now an open book. Target: {target}.",
+            "3": "Blood boils, the hand is steady - {attacker} is already preparing the next strike."
+          }
+        },
+        "4": {
+          "name": "Weakened defence",
+          "description": "The target gets -2 AC until the start of its next turn",
+          "flavor": {
+            "1": "{attacker} splits the armour - {target} feels a gap opening in the plate!",
+            "2": "{target} cannot hold the shield: the straps snap and it sags on the arm.",
+            "3": "{attacker} strikes - {target} loses balance and the defence falls apart."
+          }
+        },
+        "5": {
+          "name": "Extra damage",
+          "description": "Extra damage +1d6",
+          "flavor": {
+            "1": "{attacker} twists the blade in the wound - {target} screams in pain!",
+            "2": "{attacker} adds an elbow to the blow - sneaky, but effective.",
+            "3": "{target} feels a second wave of pain: {attacker} catches the bone."
+          }
+        },
+        "6": {
+          "name": "Free attack",
+          "description": "A free extra attack (once)",
+          "flavor": {
+            "1": "{target} has no time to cover up: {attacker} strikes again!",
+            "2": "{attacker} moves faster than thought - another attack is ready!",
+            "3": "A whirlwind of steel: {attacker} immediately strikes again."
+          }
+        },
+        "7": {
+          "name": "Bonus action blocked",
+          "description": "The enemy loses its Bonus Action next turn",
+          "flavor": {
+            "1": "Stunned: {attacker} strikes so hard that there is no room for tricks next turn. Target: {target}.",
+            "2": "{target} clutches the wound and forgets everything but it.",
+            "3": "{target} hears only ringing in the ears - small manoeuvres will have to wait."
+          }
+        },
+        "8": {
+          "name": "Ignore reactions",
+          "description": "The attack ignores the target's reactions",
+          "flavor": {
+            "1": "{attacker} strikes so suddenly that {target} cannot even swing back.",
+            "2": "A blow from the blind spot - {target} does not see where death came from.",
+            "3": "{attacker} slips under the guard - {target} has no chance to retaliate."
+          }
+        },
+        "9": {
+          "name": "Mark for Advantage",
+          "description": "The next attack against the target has Advantage",
+          "flavor": {
+            "1": "{target} is left open after the blow - {attacker} and allies see the weak spot!",
+            "2": "{target} is bleeding - such a wound is easy to hit again.",
+            "3": "{attacker} marks the target: now {target} is easy prey."
+          }
+        },
+        "10": {
+          "name": "Combo strike",
+          "description": "One more attack with Disadvantage",
+          "flavor": {
+            "1": "{attacker} does not stop - a spin and another desperate strike!",
+            "2": "Combo! {attacker} keeps attacking, even while losing balance.",
+            "3": "{attacker} cannot stop - momentum carries on: another strike, crude but dangerous."
+          }
+        }
+      },
+      "fail": {
+        "1": {
+          "name": "Simple miss",
+          "description": "A miss with no additional effects",
+          "flavor": {
+            "1": "{attacker} slices through the void - {target} does not even flinch.",
+            "2": "{attacker} strikes aside. It happens.",
+            "3": "{attacker} misses so badly that it is embarrassing in front of the comrades."
+          }
+        },
+        "2": {
+          "name": "Fall",
+          "description": "Prone",
+          "flavor": {
+            "1": "{attacker} slips on the bloody ground and lands in the mud!",
+            "2": "The foot twists - and {attacker} is already on the ground, staring at the sky.",
+            "3": "The swing is too wide: {attacker} falls, losing balance."
+          }
+        },
+        "3": {
+          "name": "Disadvantage on the next attack",
+          "description": "Disadvantage on the next attack",
+          "flavor": {
+            "1": "Dust in the eyes - {attacker} strikes blindly with the next blow.",
+            "2": "After the failed swing the hand trembles - {attacker} loses confidence.",
+            "3": "{attacker} can barely see: sweat floods the eyes and the target blurs."
+          }
+        },
+        "4": {
+          "name": "Bonus action lost",
+          "description": "Loses the Bonus Action this turn",
+          "flavor": {
+            "1": "{attacker} frantically fixes the grip - there is no time left for small things.",
+            "2": "A strap tangles - {attacker} loses a precious moment.",
+            "3": "Confusion after the miss - {attacker} forgets the plan."
+          }
+        },
+        "5": {
+          "name": "Weapon slips",
+          "description": "The next hit deals x0.5 damage",
+          "flavor": {
+            "1": "The hilt slips from a sweaty palm: {attacker} strikes weakly with the next blow.",
+            "2": "{attacker} almost drops the weapon, and now the grip is clumsy.",
+            "3": "{attacker} strikes the rocks - the blade goes dull."
+          }
+        },
+        "6": {
+          "name": "Weakened defence",
+          "description": "-2 AC until the start of the next turn",
+          "flavor": {
+            "1": "{attacker} overextends after the swing - the defence is useless.",
+            "2": "The buckle snaps, the armour slides aside - {attacker} is left unprotected.",
+            "3": "{attacker} turns their back to the enemies: the momentum of the swing does its work."
+          }
+        },
+        "7": {
+          "name": "Provocation",
+          "description": "Provokes an Opportunity Attack",
+          "flavor": {
+            "1": "{attacker} stumbles and opens up for a strike. Nearby: {target}.",
+            "2": "A failed lunge - {attacker} is left without cover. Nearby: {target}.",
+            "3": "{attacker} makes a mistake, and {target} notices: the guard is open."
+          }
+        },
+        "8": {
+          "name": "Reaction lost",
+          "description": "Loses the reaction until the next turn",
+          "flavor": {
+            "1": "After the miss {attacker} has no time to answer a blow.",
+            "2": "{attacker} loses focus: the enemy can strike without fear of retaliation.",
+            "3": "{attacker} is too absorbed in their own mistake to watch the enemy."
+          }
+        },
+        "9": {
+          "name": "Mark for the enemy",
+          "description": "The next attack against the character has Advantage",
+          "flavor": {
+            "1": "{attacker} overextends - now every enemy sees the weak spot.",
+            "2": "{attacker} is left unprotected after the miss, and the enemies notice.",
+            "3": "{attacker} stands like a target in the middle of the battlefield."
+          }
+        },
+        "10": {
+          "name": "Action lost",
+          "description": "Loses the Action",
+          "flavor": {
+            "1": "The failed strike is exhausting - {attacker} recovers next turn.",
+            "2": "The weapon gets stuck - {attacker} pries it out next turn.",
+            "3": "{attacker} loses bearings: the head spins, and next turn the fighter is of little use."
+          }
+        }
+      }
+    },
+    "save": {
+      "success": {
+        "1": {
+          "name": "Full evasion",
+          "description": "Spell damage = 0, even on a 'half' save",
+          "flavor": {
+            "1": "{target} dives under the wave of magic - {attacker}'s spell does not leave a scratch.",
+            "2": "{target} slips out from under the blow so easily, as if {attacker} aimed at a shadow."
+          }
+        },
+        "2": {
+          "name": "Counter-rhythm",
+          "description": "The next attack has Advantage",
+          "flavor": {
+            "1": "{target} catches the rhythm of {attacker}'s spell - the next strike will land better.",
+            "2": "{attacker}'s magic slides past, and {target} already spots the enemy's weak point."
+          }
+        },
+        "3": {
+          "name": "Counterattack",
+          "description": "An extra action next turn",
+          "flavor": {
+            "1": "{target} dispels {attacker}'s spell and is already preparing a counterattack before the caster recovers!",
+            "2": "{attacker}'s spell crumbles into sparks - {target} gathers strength for a counterattack."
+          }
+        },
+        "4": {
+          "name": "Hardening",
+          "description": "+2 AC until the start of the next turn",
+          "flavor": {
+            "1": "{attacker}'s magic hardens {target}: the skin turns hard as stone.",
+            "2": "{target} deflects {attacker}'s spell and feels an invisible shield cover the silhouette."
+          }
+        },
+        "5": {
+          "name": "Shake-off",
+          "description": "The spell applies no conditions",
+          "flavor": {
+            "1": "{target} shakes off {attacker}'s spell like raindrops - no affliction sticks.",
+            "2": "{target}'s mind is clear as a spring: {attacker}'s casting dissolves without a trace."
+          }
+        },
+        "6": {
+          "name": "Second wind",
+          "description": "An extra action next turn",
+          "flavor": {
+            "1": "{target} survived {attacker}'s spell and feels an unexpected surge of strength.",
+            "2": "The blow of {attacker}'s magic only quickens {target}'s blood - time seems to slow down."
+          }
+        }
+      },
+      "fail": {
+        "1": {
+          "name": "Double damage",
+          "description": "Spell damage is doubled for this target",
+          "flavor": {
+            "1": "{target} steps right into the point of {attacker}'s spell - the pain is double!",
+            "2": "{attacker}'s magic hits {target} with doubled force."
+          }
+        },
+        "2": {
+          "name": "Knocked down",
+          "description": "Prone",
+          "flavor": {
+            "1": "The wave of {attacker}'s spell knocks {target} off their feet.",
+            "2": "{target} loses balance under the onslaught of {attacker}'s magic and falls flat."
+          }
+        },
+        "3": {
+          "name": "Confusion",
+          "description": "Disadvantage on the next attack",
+          "flavor": {
+            "1": "{attacker}'s spell clouds {target}'s sight - the next strike will go blind.",
+            "2": "{target} is bewildered by {attacker}'s magic: the hand trembles, the target swims before the eyes."
+          }
+        },
+        "4": {
+          "name": "Gap in the defence",
+          "description": "-2 AC until the start of the next turn",
+          "flavor": {
+            "1": "{attacker}'s magic shakes {target}'s defence - a gap appears in the armour.",
+            "2": "{target} is left open under {attacker}'s spell: the defence barely holds."
+          }
+        },
+        "5": {
+          "name": "Reaction lost",
+          "description": "Loses the reaction until the next turn",
+          "flavor": {
+            "1": "{target} freezes under {attacker}'s spell and has no time to react.",
+            "2": "{attacker}'s magic stuns {target} - there will be no answering the blow."
+          }
+        },
+        "6": {
+          "name": "Bonus action lost",
+          "description": "The target loses its Bonus Action next turn",
+          "flavor": {
+            "1": "{attacker}'s spell drains {target} - no strength is left for small manoeuvres.",
+            "2": "{target} clutches the head: {attacker}'s spell wiped every trick from memory."
+          }
+        }
+      }
+    }
+  },
+  "encounterDifficulty": {
+    "trivial": "Trivial",
+    "easy": "Easy",
+    "medium": "Medium",
+    "hard": "Hard",
+    "deadly": "Deadly",
+    "low": "Low",
+    "moderate": "Moderate",
+    "high": "High"
+  }
+}

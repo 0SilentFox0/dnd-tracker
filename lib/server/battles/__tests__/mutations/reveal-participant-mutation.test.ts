@@ -6,6 +6,7 @@ import { ParticipantSide } from "@/lib/constants/battle";
 import { revealParticipantMutation, revealParticipantSchema } from "@/lib/server/battles/mutations/reveal-participant/reveal-participant-mutation";
 import { runBattleMutation } from "@/lib/server/battles/run-mutation";
 import { cellsOf } from "@/lib/utils/battle/grid/occupancy";
+import { eventTextOf } from "@/lib/utils/battle/log/__tests__/event-text";
 import { at, mazeMap, withMap } from "@/lib/utils/battle/modes/maze/__tests__/fixtures";
 import { BattleAccess } from "@/lib/utils/battle/pipeline/run-battle-mutation";
 import { type BattleMutationOutcome, prepareSave } from "@/lib/utils/battle/store";
@@ -22,7 +23,7 @@ describe("reveal-participant mutation", () => {
     expect(out.pending).toEqual([]);
     expect(out.participants[1].battleData).toMatchObject({ revealPending: true });
     expect(out.participants[1].battleData.reserved).toBeUndefined();
-    expect(out.events[0].resultText).toContain("ввів у бій");
+    expect(eventTextOf(out.events[0])).toContain("ввів у бій");
   });
 
   it("кілька відкриттів до кінця ходу — у порядку відкриття", () => {

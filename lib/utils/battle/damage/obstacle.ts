@@ -1,6 +1,7 @@
+import { textRef } from "@/lib/i18n/text-ref";
 import type { DamageStep } from "@/types/battle";
 
-export const OBSTACLE_LABEL = "Перешкода";
+export const OBSTACLE_LABEL = textRef("battleLog.damage.steps.obstacle");
 
 export const OBSTACLE_MULTIPLIER = 0.5;
 

@@ -10,6 +10,7 @@ import { createAttackMutation } from "@/lib/server/battles/mutations/attack/atta
 import { createCritChoiceMutation } from "@/lib/server/battles/mutations/crit-choice/crit-choice-mutation";
 import { createSpellMutation } from "@/lib/server/battles/mutations/spell/spell-mutation";
 import { createMockParticipant } from "@/lib/utils/battle/__tests__/fixtures/mock-participant";
+import { eventTextOf } from "@/lib/utils/battle/log/__tests__/event-text";
 import type { BattleMutationContext } from "@/lib/utils/battle/pipeline/run-battle-mutation";
 import { mulberry32 } from "@/lib/utils/common/rng";
 
@@ -93,7 +94,7 @@ describe("атака: вибір крита ДМ-ом", () => {
     expect(a.scene?.pendingCritChoice).toBeNull();
     expect(a.events).toHaveLength(1);
     expect(hpOf(a)).toBe(hpOf(b));
-    expect(a.events[0].resultText).toBe(b.events[0].resultText);
+    expect(eventTextOf(a.events[0])).toBe(eventTextOf(b.events[0]));
   });
 
   it("пауза → вибір «випадково» дає той самий результат, що й прапор off із тим самим rng", async () => {
@@ -117,7 +118,7 @@ describe("атака: вибір крита ДМ-ом", () => {
 
     random.mockRestore();
 
-    expect(resumed.events[0].resultText).toBe(off.events[0].resultText);
+    expect(eventTextOf(resumed.events[0])).toBe(eventTextOf(off.events[0]));
     expect(hpOf(resumed)).toBe(hpOf(off));
   });
 

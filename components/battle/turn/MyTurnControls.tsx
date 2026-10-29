@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import dynamic from "next/dynamic";
+import { useTranslations } from "next-intl";
 
 import { ActionGrid } from "./ActionGrid";
 import { TurnCountdown } from "./TurnCountdown";
@@ -13,7 +14,7 @@ import { AuraZonePicker } from "@/components/battle/wizards/AuraZonePicker";
 import { useAttackWizard, useAuraZones, useBattleScene, useBonusSpells, usePlayerTurn, useSpellBook } from "@/lib/hooks/battle";
 import { cn } from "@/lib/utils";
 import { canOffHandAttack } from "@/lib/utils/battle/attack/attacks-left";
-import { canConsumeIntent, COUNTDOWN_SECONDS, turnAllowsAttack, type TurnFlowState } from "@/lib/utils/battle/flows";
+import { canConsumeIntent, COUNTDOWN_SECONDS, turnAllowsAttack } from "@/lib/utils/battle/flows";
 import { moraleTriggerRolls } from "@/lib/utils/battle/morale/check";
 import { usableAbilities } from "@/lib/utils/battle/view";
 import { cryptoRandom, rollDie } from "@/lib/utils/common/dice";
@@ -27,17 +28,12 @@ const CoreActionsDialog = dynamic(() => import("@/components/battle/turn/CoreAct
 
 const BonusActionPicker = dynamic(() => import("@/components/battle/wizards/BonusActionPicker").then((m) => m.BonusActionPicker), { ssr: false });
 
-const STRIP_LABEL: Record<Exclude<TurnFlowState["phase"], "countdown">, string> = {
-  waiting: "Твій хід",
-  morale: "Перевірка моралі",
-  acting: "Твій хід · Дії",
-  ended: "Твій хід",
-};
-
-const AURA_STRIP_LABEL = "Оберіть зону аури";
-
-/** strip — вкладка «Карта» на телефоні: замість панелі дій один рядок, а майстри лишаються змонтованими (наведення заклинання живе в них) */
+/** strip: the phone map tab shows one row instead of the action panel while the wizards stay mounted (spell aiming lives in them). */
 export function MyTurnControls({ hero, strip }: { hero: BattleParticipant; strip?: { onExpand: () => void } }) {
+  const t = useTranslations("battle.turnControls");
+
+  const tm = useTranslations("battle.morale");
+
   const { anyPending, battle, intents } = useBattleScene();
 
   const { attack: attackIntent, clearAttack: clearAttackIntent, mapAim, mapPick, setAttackReady } = intents;
@@ -94,10 +90,10 @@ export function MyTurnControls({ hero, strip }: { hero: BattleParticipant; strip
     <>
       {turn.phase === "morale" && (
         <div className="pt-3">
-          <div className="hud-sc text-lg font-bold">Перевірка моралі · d10</div>
+          <div className="hud-sc text-lg font-bold">{tm("checkD10")}</div>
           {morale.kind && (
             <div className={cn("mt-1 text-sm", morale.kind === "extra" ? "text-hud-gold-bright" : "text-hud-bad")}>
-              {morale.kind === "extra" ? `Додатковий хід на ${morale.rolls.join(", ")}` : `Пропуск ходу на ${morale.rolls.join(", ")}`}
+              {tm(morale.kind === "extra" ? "extraOn" : "skipOn", { rolls: morale.rolls.join(", ") })}
             </div>
           )}
           <DiceGrid sides={10} onPick={(v) => void turn.actions.rollMorale(v)} highlight={morale.kind ? { rolls: morale.rolls, tone: morale.kind === "extra" ? "gold" : "danger" } : undefined} />
@@ -119,7 +115,7 @@ export function MyTurnControls({ hero, strip }: { hero: BattleParticipant; strip
 
   const stripRow = strip && phase !== "countdown" && !mapAim && !mapPick && (
     <MapStripRow onExpand={strip.onExpand}>
-      <span className="hud-sc tracking-[.12em]">{phase === "acting" && zone ? AURA_STRIP_LABEL : STRIP_LABEL[phase]}</span>
+      <span className="hud-sc tracking-[.12em]">{phase === "acting" && zone ? t("pickAuraZone") : t(`strip.${phase}`)}</span>
     </MapStripRow>
   );
 

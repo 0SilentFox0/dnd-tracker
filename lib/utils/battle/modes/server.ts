@@ -3,6 +3,7 @@ import type { ModeAwareOutcome } from "./types";
 
 import type { BattleSceneState } from "@/lib/utils/battle/store/types";
 import type { BattleMapConfig, BattleParticipant, GridPoint } from "@/types/battle";
+import type { LogLine } from "@/types/text";
 
 export function modeStart(map: BattleMapConfig | null, order: BattleParticipant[]): { participants: BattleParticipant[]; turnIndex: number } | null {
   const active = activeModeWithConfig(map);
@@ -26,7 +27,7 @@ export function modeBlockedText(map: BattleMapConfig | null): string | null {
   return active?.mode.server.blockedText?.(active.config) ?? null;
 }
 
-export function modeAutoSkipText(map: BattleMapConfig | null): string | null {
+export function modeAutoSkipText(map: BattleMapConfig | null): LogLine | null {
   const active = activeModeWithConfig(map);
 
   return active?.mode.server.autoSkipText?.(active.config) ?? null;

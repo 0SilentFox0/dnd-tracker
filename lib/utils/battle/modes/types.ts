@@ -1,6 +1,7 @@
 import type { CellMark, MoveStep } from "@/lib/utils/battle/grid";
 import type { BattleSceneState, NewBattleEvent, ScenePatch } from "@/lib/utils/battle/store/types";
 import type { BattleAction, BattleMapConfig, BattleParticipant, GridPoint } from "@/types/battle";
+import type { LogLine } from "@/types/text";
 
 /** Що бачить глядач у режимі; null у хуках — бачить усе. */
 export interface ModeView {
@@ -30,7 +31,7 @@ export interface ModeServerHooks<C> {
   /** Текст відмови для роутів з опцією blockedByMode, або null. */
   blockedText?(config: C): string | null;
   /** Хід пропускається з цим записом журналу, або null. */
-  autoSkipText?(config: C): string | null;
+  autoSkipText?(config: C): LogLine | null;
   /** Розставити всіх (заміщує звичайну розстановку). */
   placeAll?(args: { map: BattleMapConfig; config: C; participants: BattleParticipant[] }): BattleParticipant[];
   /** Поставити одного на клітинку; кидає BattleRuleError з текстом відмови. */
@@ -49,11 +50,11 @@ export interface ModeEngineHooks<C> {
   /** Власник бачить ціль (масові вміння, заклинання «всім»). Відсутній — бачить. */
   sees?(args: { config: C; map: BattleMapConfig; viewer: BattleParticipant; target: BattleParticipant }): boolean;
   /** Текст відмови, якщо клітинку прицілу не видно. */
-  aimHiddenText?(args: { config: C; map: BattleMapConfig; caster: BattleParticipant; cell: GridPoint }): string | null;
+  aimHiddenText?(args: { config: C; map: BattleMapConfig; caster: BattleParticipant; cell: GridPoint }): LogLine | null;
   /** Текст відмови, якщо хоч одну ціль не видно. */
-  targetHiddenText?(args: { config: C; map: BattleMapConfig; caster: BattleParticipant; targets: BattleParticipant[] }): string | null;
+  targetHiddenText?(args: { config: C; map: BattleMapConfig; caster: BattleParticipant; targets: BattleParticipant[] }): LogLine | null;
   /** Ближня атака заблокована (стіна) — текст або null. */
-  meleeBlockedText?(args: { config: C; map: BattleMapConfig; attacker: BattleParticipant; target: BattleParticipant }): string | null;
+  meleeBlockedText?(args: { config: C; map: BattleMapConfig; attacker: BattleParticipant; target: BattleParticipant }): LogLine | null;
   /** Чи «зв'язує» сусід стрільця (звичайно — isActive). */
   engages?(args: { config: C; map: BattleMapConfig; attacker: BattleParticipant; neighbour: BattleParticipant }): boolean;
   /** Лінія вогню (сусідні клітинки по черзі) перетинає стіну режиму. Відсутній — ні. */

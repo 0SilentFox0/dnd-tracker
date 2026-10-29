@@ -1,5 +1,6 @@
 import type { SpellFlowState, SpellPick, SpellWidening } from "./spell-flow-types";
 
+import { textRef } from "@/lib/i18n/text-ref";
 import { describeEffect } from "@/lib/utils/abilities/registry/effects";
 import { isFiveE } from "@/lib/utils/battle/attack/ability";
 import { isDying } from "@/lib/utils/battle/death-saves";
@@ -140,8 +141,6 @@ export function spellSaveTargets(targets: BattleParticipant[], s: SpellFlowState
   return targets.filter((t) => s.targetIds.includes(t.basicInfo.id) && (viewer.isDM || t.basicInfo.controlledBy === viewer.userId));
 }
 
-const ALL_OF_SIDE = { enemy: "усі вороги", ally: "усі союзники" } as const;
-
 /** Одиночне заклинання, яке вміння заклинателя б'є по кількох цілях, — з назвою вміння. */
 export function spellWidening(order: BattleParticipant[], caster: BattleParticipant | null, s: BookSpell, onMap: boolean): SpellWidening | null {
   const { targeting } = spellDefinition(s);
@@ -152,9 +151,11 @@ export function spellWidening(order: BattleParticipant[], caster: BattleParticip
 
   if (w.mode === "single") return null;
 
-  const badge = w.mode === "all" ? ALL_OF_SIDE[targeting.kind] : `до ${w.maxTargets} цілей`;
+  const badge = w.mode === "all" ? textRef(targeting.kind === "enemy" ? "battleWizards.flow.widening.allEnemy" : "battleWizards.flow.widening.allAlly") : textRef("battleWizards.flow.widening.maxTargets", { max: w.maxTargets });
 
   const side = 2 * areaRadiusCells(SKILL_AREA_TEMPLATE.size) + 1;
 
-  return { badge, note: `${w.source ?? "Вміння"}: ${badge}${onMap && w.mode === "area" ? ` (на карті — зона ${side}×${side})` : ""}` };
+  const source = w.source ?? textRef("battleWizards.flow.widening.defaultSource");
+
+  return { badge, note: onMap && w.mode === "area" ? textRef("battleWizards.flow.widening.noteArea", { source, badge, side }) : textRef("battleWizards.flow.widening.note", { source, badge }) };
 }

@@ -9,9 +9,11 @@ import { createAttackMutation } from "@/lib/server/battles/mutations/attack/atta
 import { createCritChoiceMutation } from "@/lib/server/battles/mutations/crit-choice/crit-choice-mutation";
 import { createSpellMutation } from "@/lib/server/battles/mutations/spell/spell-mutation";
 import { createMockParticipant } from "@/lib/utils/battle/__tests__/fixtures/mock-participant";
+import { eventTextOf } from "@/lib/utils/battle/log/__tests__/event-text";
 import type { BattleMutationContext } from "@/lib/utils/battle/pipeline/run-battle-mutation";
 import { mulberry32 } from "@/lib/utils/common/rng";
 import type { BattleParticipant } from "@/types/battle";
+import type { LogLine } from "@/types/text";
 
 const base = createMockParticipant();
 
@@ -52,7 +54,7 @@ const ctxOf = (flag: boolean, over: Partial<BattleMutationContext> = {}) => {
   return { ...c, meta: { ...c.meta, critChoiceByDm: flag } };
 };
 
-const text = (out: { events: { resultText?: string }[] }) => out.events.map((e) => e.resultText ?? "").join("\n");
+const text = (out: { events: { resultText?: string; details?: { log?: LogLine[] }; log?: LogLine[] }[] }) => out.events.map((e) => eventTextOf(e)).join("\n");
 
 const foeHp = (out: { participants: BattleParticipant[] }) => out.participants.find((p) => p.basicInfo.id === "gob")?.combatStats.currentHp;
 

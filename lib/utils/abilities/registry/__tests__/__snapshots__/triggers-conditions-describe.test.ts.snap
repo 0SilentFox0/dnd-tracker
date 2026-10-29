@@ -1,0 +1,74 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`describeCondition > pins uk text 1`] = `
+[
+  [
+    "hpBelow",
+    "HP ≤ 50% (я)",
+  ],
+  [
+    "hpAbove",
+    "HP ≥ 30% (будь-який ворог)",
+  ],
+  [
+    "attackKind",
+    "тип атаки: магія",
+  ],
+  [
+    "targetHasCondition",
+    "ціль має стан «приголомшений»",
+  ],
+  [
+    "targetCreatureType",
+    "тип істоти цілі: undead, fiend",
+  ],
+  [
+    "targetRace",
+    "раса цілі: elf",
+  ],
+  [
+    "targetDead",
+    "ціль мертва",
+  ],
+  [
+    "actorIsEnemy",
+    "виконавець події — ворог",
+  ],
+  [
+    "hasMark",
+    "мітка «m» (лише моя): ціль події",
+  ],
+  [
+    "armorWorn",
+    "броня на мені: легка, без броні (без щита)",
+  ],
+  [
+    "attackRollMode",
+    "кидок атаки: перевага",
+  ],
+  [
+    "allyAdjacent",
+    "союзник поруч із ціллю",
+  ],
+  [
+    "notMoved",
+    "не рухався цього ходу",
+  ],
+  [
+    "withThisItem",
+    "атака цим предметом",
+  ],
+  [
+    "not",
+    "НЕ (ціль мертва)",
+  ],
+  [
+    "all",
+    "усі: (ціль мертва, не рухався цього ходу)",
+  ],
+  [
+    "any",
+    "будь-яка з: (ціль мертва, не рухався цього ходу)",
+  ],
+]
+`;

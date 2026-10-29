@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 
+import { textRows } from "@/lib/utils/battle/log/__tests__/event-text";
 import { parseDamageBreakdown } from "@/lib/utils/battle/view/damage-breakdown";
 
 describe("parseDamageBreakdown", () => {
@@ -7,7 +8,7 @@ describe("parseDamageBreakdown", () => {
     const text =
       "Сума кубиків: 7; + бонус 2 (Спритність); + 5 (рівень); = 14 (база); Бонус зі скілів: +15% (Відплата); Расовий бонус: +20% (Стиль бою); Бонус ефекту: +10% (Сурми світанку); Бонус дії: +15% (Ця дія); ──────────; Сума 22.0 = 22 шкоди; ──────────; × 1.5 (архетип: Лучник) = 33";
 
-    expect(parseDamageBreakdown(text)).toEqual([
+    expect(textRows(parseDamageBreakdown(text))).toEqual([
       { label: "Кубики", value: "7", tone: "step" },
       { label: "Спритність", value: "+2", tone: "step" },
       { label: "Рівень", value: "+5", tone: "step" },
@@ -24,7 +25,7 @@ describe("parseDamageBreakdown", () => {
   });
 
   it("від'ємний бонус, flat, крит, рівний бій", () => {
-    expect(parseDamageBreakdown("+ бонус -1 (Сила); Flat бонус зі скілів: -2 (Втома); × 2 (крит) = 18 урону; × 0.95 (рівний бій) = 17")).toEqual([
+    expect(textRows(parseDamageBreakdown("+ бонус -1 (Сила); Flat бонус зі скілів: -2 (Втома); × 2 (крит) = 18 урону; × 0.95 (рівний бій) = 17"))).toEqual([
       { label: "Сила", value: "-1", tone: "step" },
       { label: "Втома", source: "Бонус зі скілів", value: "-2", tone: "step" },
       { label: "Крит", value: "×2 → 18", tone: "total" },
@@ -33,7 +34,7 @@ describe("parseDamageBreakdown", () => {
   });
 
   it("заклинання: бонуси з назвою; невідомий формат — текстом", () => {
-    expect(parseDamageBreakdown("+ сума кубиків (15); + бонус Вогняна магія (+3); + бонус Чародійство: 20% від 15 (+3); 3d6: 4, 5, 6")).toEqual([
+    expect(textRows(parseDamageBreakdown("+ сума кубиків (15); + бонус Вогняна магія (+3); + бонус Чародійство: 20% від 15 (+3); 3d6: 4, 5, 6"))).toEqual([
       { label: "Кубики", value: "15", tone: "step" },
       { label: "Вогняна магія", value: "+3", tone: "step" },
       { label: "Чародійство", value: "+20% (+3)", tone: "step" },
@@ -42,7 +43,7 @@ describe("parseDamageBreakdown", () => {
   });
 
   it("плаский бонус зброї з проміжною сумою", () => {
-    expect(parseDamageBreakdown("+ 2 (бонус зброї) = 16; − 1 (бонус зброї) = 15")).toEqual([
+    expect(textRows(parseDamageBreakdown("+ 2 (бонус зброї) = 16; − 1 (бонус зброї) = 15"))).toEqual([
       { label: "Бонус зброї", value: "+2 → 16", tone: "total" },
       { label: "Бонус зброї", value: "−1 → 15", tone: "total" },
     ]);

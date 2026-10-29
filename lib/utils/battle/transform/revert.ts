@@ -1,9 +1,11 @@
 import { CombatStatus } from "@/lib/constants/battle";
+import { textRef } from "@/lib/i18n/text-ref";
 import { applyRawDamage } from "@/lib/utils/abilities/engine/effects/hp";
 import { isZoneConcentrationLive } from "@/lib/utils/battle/concentration";
 import { removeEffects } from "@/lib/utils/battle/conditions/query";
 import { isFallen } from "@/lib/utils/battle/grid/occupancy";
 import type { BattleParticipant, TransformState } from "@/types/battle";
+import type { LogLine } from "@/types/text";
 
 export const transformKey = (castId: string) => `transform:${castId}`;
 
@@ -60,10 +62,10 @@ const expired = (p: BattleParticipant, round: number, ps: BattleParticipant[]) =
 };
 
 /** Форма закінчилась (час, концентрація, знятий маркер, смерть): стани звичайної форми повертаються. */
-export function revertExpiredTransforms(ps: BattleParticipant[], round: number): { participants: BattleParticipant[]; messages: string[] } {
+export function revertExpiredTransforms(ps: BattleParticipant[], round: number): { participants: BattleParticipant[]; messages: LogLine[] } {
   if (!ps.some((p) => expired(p, round, ps))) return { participants: ps, messages: [] };
 
-  const messages: string[] = [];
+  const messages: LogLine[] = [];
 
   const participants = ps.map((p) => {
     if (!expired(p, round, ps)) return p;
@@ -72,7 +74,7 @@ export function revertExpiredTransforms(ps: BattleParticipant[], round: number):
 
     const restored = restoreSaved(p, t);
 
-    messages.push(`🐾 ${p.basicInfo.name} повертає звичайну форму`);
+    messages.push(textRef("battleLog.transform.reverted", { name: p.basicInfo.name }));
 
     return p.combatStats.status === CombatStatus.DEAD ? { ...restored, combatStats: { ...restored.combatStats, currentHp: 0, status: CombatStatus.DEAD } } : restored;
   });

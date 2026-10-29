@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 
 import { ParticipantSide } from "@/lib/constants/battle";
+import { textRef } from "@/lib/i18n/text-ref";
 import { createMockParticipant } from "@/lib/utils/battle/__tests__/fixtures/mock-participant";
 import { applyVictoryCompletion } from "@/lib/utils/battle/turn/turn-helpers";
 import { checkVictoryConditions, completeBattle } from "@/lib/utils/battle/turn/victory";
@@ -34,7 +35,7 @@ describe("completeBattle", () => {
 
     applyVictoryCompletion({ updatedInitiativeOrder: [regenerated, downed, enemy], battleStatus: "active", battleId: "b", nextRound: 4, currentBattleLogLength: 7, newLogEntries, getStateBeforeForEntry: () => undefined });
 
-    expect(newLogEntries[0]).toMatchObject({ battleId: "b", round: 4, actionIndex: 7, resultText: "🎉 Бій завершено! Перемога союзників!" });
+    expect(newLogEntries[0]).toMatchObject({ battleId: "b", round: 4, actionIndex: 7, log: [textRef("battleLog.victory.completeWon")] });
     expect(newLogEntries[0].hpChanges).toEqual([expect.objectContaining({ participantId: "pal", oldHp: 0, change: -downed.combatStats.maxHp })]);
   });
 

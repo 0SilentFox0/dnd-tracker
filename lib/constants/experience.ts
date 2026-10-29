@@ -35,17 +35,6 @@ export type XpDifficulty = (typeof XP_DIFFICULTIES)[XpEdition][number];
 
 export type XpVerdict = XpDifficulty | "trivial";
 
-export const XP_DIFFICULTY_LABELS: Record<XpVerdict, string> = {
-  trivial: "Дрібниця",
-  easy: "Легка",
-  medium: "Середня",
-  hard: "Складна",
-  deadly: "Смертельна",
-  low: "Низька",
-  moderate: "Помірна",
-  high: "Висока",
-};
-
 export const DEFAULT_XP_DIFFICULTY = { "2014": "medium", "2024": "moderate" } as const satisfies Record<XpEdition, XpDifficulty>;
 
 // DMG 2014: пороги XP на героя — легкий, середній, складний, смертельний

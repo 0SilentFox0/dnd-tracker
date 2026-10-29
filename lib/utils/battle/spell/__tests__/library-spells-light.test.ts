@@ -2,11 +2,13 @@ import { describe, expect, it } from "vitest";
 
 import { SPELLS } from "@/data/library/spells";
 import { AttackType, ParticipantSide, ParticipantSourceType } from "@/lib/constants/battle";
+import { textOf } from "@/lib/i18n/test/text";
 import { seq } from "@/lib/utils/abilities/__tests__/fixtures";
 import { findParticipant } from "@/lib/utils/abilities/engine/core/participants";
 import { createMockParticipant } from "@/lib/utils/battle/__tests__/fixtures/mock-participant";
 import { processAttack } from "@/lib/utils/battle/attack/process";
 import { movementBudget } from "@/lib/utils/battle/grid";
+import { eventTextOf } from "@/lib/utils/battle/log/__tests__/event-text";
 import { castSpell } from "@/lib/utils/battle/spell";
 import { resolveSpellTargets } from "@/lib/utils/battle/spell/spell-targeting";
 import type { BattleSceneState } from "@/lib/utils/battle/store";
@@ -51,7 +53,7 @@ function cast(key: string, caster: BattleParticipant, targetIds: string[], all: 
 
   const resolved = resolveSpellTargets(all, caster, spell, spell.definition.targeting, targetIds);
 
-  if (!resolved.ok) throw new Error(resolved.error);
+  if (!resolved.ok) throw new Error(textOf(resolved.error));
 
   return castSpell({ caster, spell, targetIds: resolved.targetIds, allParticipants: all, currentRound: o.round ?? 1, battleId: "b", diceRolls: o.dice ?? [], saveRolls: o.saveRolls, rng: seq(0.5) });
 }
@@ -86,7 +88,7 @@ function attack(attacker: BattleParticipant, target: BattleParticipant, weapon: 
   return processAttack({ attacker, target, attack: weapon, d20Roll: d20, damageRolls: [dmg], allParticipants: [attacker, target], currentRound: 1, battleId: "b", rng: seq(0.99) });
 }
 
-const hits = (r: ReturnType<typeof attack>) => !r.battleAction.resultText.includes("промах");
+const hits = (r: ReturnType<typeof attack>) => !eventTextOf(r.battleAction).includes("промах");
 
 describe("Світло: бібліотека", () => {
   it("13 заклинань школи", () => {
@@ -319,7 +321,7 @@ describe("Телепортація", () => {
 
     expect(r.casterUpdated.spellcasting.spellSlots.universal.current).toBe(4);
     expect(r.casterUpdated.actionFlags.hasUsedAction).toBe(true);
-    expect(r.battleAction.resultText).toContain("📜");
+    expect(eventTextOf(r.battleAction)).toContain("📜");
   });
 });
 

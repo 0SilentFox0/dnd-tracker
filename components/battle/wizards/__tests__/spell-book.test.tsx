@@ -1,9 +1,11 @@
 // @vitest-environment happy-dom
 import { useEffect } from "react";
-import { act, cleanup, fireEvent, render, screen, waitFor } from "@testing-library/react";
+import { act, cleanup, fireEvent, screen, waitFor } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
 vi.mock("@/components/hud/fonts", () => ({ hudFontClassName: "" }));
+
+vi.mock("next-intl", async () => (await import("./uk-intl")).catalogIntl());
 
 const lib = vi.hoisted(() => ({
   spells: [
@@ -30,9 +32,12 @@ import { SpellBook } from "@/components/battle/wizards/SpellBook";
 import { useSpellBook } from "@/lib/hooks/battle";
 import { fakeScene } from "@/lib/hooks/battle/__tests__/fake-scene";
 import { useSpells, useSpellsByIds } from "@/lib/hooks/spells";
+import { render } from "@/lib/i18n/test/render-uk";
 import { resolved } from "@/lib/utils/abilities/__tests__/fixtures";
 import type { MapAim, MapPick } from "@/lib/utils/battle/grid";
 import type { ResolvedAbility } from "@/types/abilities";
+
+vi.unmock("next-intl");
 
 const asHero = <T extends NonNullable<Parameters<typeof useSpellBook>[0]>>(p: T): T => ({ ...p, basicInfo: { ...p.basicInfo, sourceType: "character" as const } });
 
@@ -74,7 +79,7 @@ describe("SpellBook", () => {
 
     render(<Harness caster={caster} />, { wrapper });
 
-    expect(await screen.findByRole("button", { name: /spells.book.bookmark.*"level":"II".*"slots":1/ })).toBeTruthy();
+    expect(await screen.findByRole("button", { name: /II коло, слотів 1/ })).toBeTruthy();
     expect(screen.getByText("Палаючий промінь")).toBeTruthy();
     expect(screen.queryByText("Крижаний спис")).toBeNull();
 
@@ -172,7 +177,7 @@ describe("SpellBook", () => {
     expect(screen.getByText("Вогняна куля")).toBeTruthy();
     expect(screen.queryByText("Палаючий промінь")).toBeNull();
 
-    fireEvent.click(screen.getByRole("button", { name: "spells.book.allSchools" }));
+    fireEvent.click(screen.getByRole("button", { name: "Усі" }));
 
     expect(screen.getByText("Палаючий промінь")).toBeTruthy();
   });
@@ -182,7 +187,7 @@ describe("SpellBook", () => {
 
     render(<Harness caster={caster} />, { wrapper });
 
-    fireEvent.click(await screen.findByRole("button", { name: /^spells.book.bookmark.*"level":"I"/ }));
+    fireEvent.click(await screen.findByRole("button", { name: /^I коло/ }));
 
     expect(screen.getByText("Крижаний спис")).toBeTruthy();
   });
@@ -192,7 +197,7 @@ describe("SpellBook", () => {
 
     render(<Harness caster={caster} />, { wrapper });
 
-    fireEvent.click(await screen.findByRole("button", { name: /^spells.book.bookmark.*"level":"I"/ }));
+    fireEvent.click(await screen.findByRole("button", { name: /^I коло/ }));
 
     expect(await screen.findByText("Крижаний спис")).toBeTruthy();
     expect(useSpellsByIds).toHaveBeenLastCalledWith(expect.any(String), ["bolt"], { enabled: true });
@@ -315,7 +320,7 @@ describe("SpellBook", () => {
       fireEvent.click(await screen.findByText("Дротик"));
       fireEvent.click(screen.getByRole("button", { name: /Обрати цілі/ }));
 
-      expect(screen.queryByRole("button", { name: /spells.book.bookmark.*"level":"II"/ })).toBeNull();
+      expect(screen.queryByRole("button", { name: /II коло/ })).toBeNull();
       expect(screen.getByRole("region", { name: "Наведення заклинання" })).toBeTruthy();
       expect(screen.getByText("Оберіть ціль на карті")).toBeTruthy();
       expect(screen.queryByRole("button", { name: /Гоблін/ })).toBeNull();

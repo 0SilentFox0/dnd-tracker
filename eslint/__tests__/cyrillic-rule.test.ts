@@ -25,7 +25,7 @@ describe("cyrillic ratchet", () => {
     ["JSX text", jsx],
     ["string literal", literal],
     ["template literal", template],
-  ])("flags %s in a migrated directory", async (_name, code) => {
+  ])("flags %s in a component", async (_name, code) => {
     expect(await cyrillicErrors("components/auth/x.tsx", code)).toHaveLength(1);
   });
 
@@ -39,8 +39,14 @@ describe("cyrillic ratchet", () => {
     expect(await cyrillicErrors("components/auth/x.tsx", code)).toHaveLength(0);
   });
 
-  it("ignores directories not yet migrated", async () => {
-    expect(await cyrillicErrors("components/battle/x.tsx", jsx)).toHaveLength(0);
+  it("flags any non-exempt source file", async () => {
+    expect(await cyrillicErrors("lib/utils/x.ts", literal)).toHaveLength(1);
+  });
+
+  it("ignores exempt paths (scripts, data, import aliases)", async () => {
+    expect(await cyrillicErrors("scripts/x.tsx", jsx)).toHaveLength(0);
+    expect(await cyrillicErrors("data/library/x.ts", literal)).toHaveLength(0);
+    expect(await cyrillicErrors("lib/constants/import-aliases.ts", literal)).toHaveLength(0);
   });
 
   it("ignores __tests__ in migrated directories", async () => {

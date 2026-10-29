@@ -13,9 +13,11 @@ import { runWithCritChoice } from "@/lib/utils/battle/crit-choice/run-with-crit-
 import type { CritResume } from "@/lib/utils/battle/crit-choice/types";
 import { heroAttackDamageParts } from "@/lib/utils/battle/damage/hero-damage";
 import { attackReachError } from "@/lib/utils/battle/grid";
+import { withLines } from "@/lib/utils/battle/log/lines";
 import type { BattleMutationContext, MutationResult } from "@/lib/utils/battle/pipeline/run-battle-mutation";
 import { toCastableSpell } from "@/lib/utils/battle/spell/to-castable";
 import { battleActionToEvent,BattleRuleError } from "@/lib/utils/battle/store";
+import { ruleErrorOf } from "@/lib/utils/battle/store/errors";
 import { applyAbilitySummons, type SummonDeps } from "@/lib/utils/battle/summon/ability-summons";
 import { advanceTurn, assertCanAct } from "@/lib/utils/battle/turn";
 import type { CastableSpell } from "@/lib/utils/battle/types/spell-process";
@@ -41,7 +43,7 @@ function assertAttackInput(ctx: BattleMutationContext, data: Omit<AttackBody, "e
 
   const reach = attackReachError(ctx.meta.map, ctx.participants, attacker, attack, targets);
 
-  if (reach) throw new BattleRuleError("action_rejected", reach);
+  if (reach) throw ruleErrorOf("action_rejected", reach);
 }
 
 export interface AttackMutationDeps extends SummonDeps {
@@ -112,7 +114,7 @@ export function createAttackMutation(deps: AttackMutationDeps = defaultDeps, opt
 
         const order = summoned.order;
 
-        const actions = phase.allBattleActions.map((a, i, all) => (i === all.length - 1 && summoned.messages.length > 0 ? { ...a, resultText: [a.resultText, ...summoned.messages].join(" | ") } : a));
+        const actions = phase.allBattleActions.map((a, i, all) => (i === all.length - 1 ? withLines(a, summoned.messages) : a));
 
         const events = actions.map(battleActionToEvent);
 

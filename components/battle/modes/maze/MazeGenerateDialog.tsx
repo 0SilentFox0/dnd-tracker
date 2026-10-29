@@ -1,6 +1,7 @@
 "use client";
 
 import { type FormEvent, useState } from "react";
+import { useTranslations } from "next-intl";
 
 import { DEFAULT_MAZE_COUNTS, MazeCountsFields } from "./MazeCountsFields";
 
@@ -12,14 +13,6 @@ import { MAZE_DIFFICULTIES } from "@/lib/constants/battle";
 import type { MazeGenerateInput } from "@/lib/hooks/battle/modes/maze";
 import type { MazeDifficulty } from "@/types/battle";
 
-const DIFFICULTY_LABELS: Record<MazeDifficulty, string> = { easy: "Легкий", medium: "Середній", hard: "Складний" };
-
-const DIFFICULTY_OPTIONS = MAZE_DIFFICULTIES.map((value) => ({ value, label: DIFFICULTY_LABELS[value] }));
-
-const EXIT_OPTIONS: { value: MazeGenerateInput["exit"]; label: string }[] = [
-  { value: "random", label: "Випадковий" },
-  { value: "pick", label: "Вибрати на карті" },
-];
 
 interface Props {
   open: boolean;
@@ -31,6 +24,17 @@ interface Props {
 const FORM_ID = "maze-generate-form";
 
 export function MazeGenerateDialog({ open, onOpenChange, difficulty: initial, onSubmit }: Props) {
+  const t = useTranslations("battleDm.maze");
+
+  const tActions = useTranslations("common.actions");
+
+  const difficultyOptions = MAZE_DIFFICULTIES.map((value) => ({ value, label: t(`difficulty.${value}`) }));
+
+  const exitOptions: { value: MazeGenerateInput["exit"]; label: string }[] = [
+    { value: "random", label: t("generate.exitRandom") },
+    { value: "pick", label: t("generate.exitPick") },
+  ];
+
   const [difficulty, setDifficulty] = useState(initial);
 
   const [counts, setCounts] = useState(DEFAULT_MAZE_COUNTS);
@@ -49,28 +53,28 @@ export function MazeGenerateDialog({ open, onOpenChange, difficulty: initial, on
       onOpenChange={onOpenChange}
       size="sm"
       hud
-      title="Згенерувати лабіринт"
-      description="Нові стіни, телепорти й туман; герої стануть на краю."
+      title={t("generate.title")}
+      description={t("generate.description")}
       footer={
         <>
           <Button variant="outline" onClick={() => onOpenChange(false)}>
-            Скасувати
+            {tActions("cancel")}
           </Button>
           <Button type="submit" form={FORM_ID}>
-            Згенерувати
+            {t("generate.submit")}
           </Button>
         </>
       }
     >
       <form id={FORM_ID} onSubmit={submit} className="space-y-4 py-2">
         <div className="space-y-1.5">
-          <Label>Рівень</Label>
-          <SelectField value={difficulty} onValueChange={(v) => setDifficulty(v as MazeDifficulty)} options={DIFFICULTY_OPTIONS} />
+          <Label>{t("generate.level")}</Label>
+          <SelectField value={difficulty} onValueChange={(v) => setDifficulty(v as MazeDifficulty)} options={difficultyOptions} />
         </div>
         <MazeCountsFields value={counts} onChange={setCounts} />
         <div className="space-y-1.5">
-          <Label>Вихід</Label>
-          <SelectField value={exit} onValueChange={(v) => setExit(v as MazeGenerateInput["exit"])} options={EXIT_OPTIONS} />
+          <Label>{t("generate.exit")}</Label>
+          <SelectField value={exit} onValueChange={(v) => setExit(v as MazeGenerateInput["exit"])} options={exitOptions} />
         </div>
       </form>
     </ResponsiveDialog>

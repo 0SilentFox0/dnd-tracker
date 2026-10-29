@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 
 import { createMockParticipant } from "@/lib/utils/battle/__tests__/fixtures/mock-participant";
+import { rowLines } from "@/lib/utils/battle/log/__tests__/event-text";
 import { computeSpellPower, spellAttackBonus } from "@/lib/utils/battle/spell/power";
 import { resolveChosenSlot } from "@/lib/utils/battle/spell/slot";
 import type { BattleParticipant } from "@/types/battle";
@@ -46,7 +47,7 @@ describe("computeSpellPower addAbilityMod", () => {
 
   it("adds the spellcasting modifier in 5e only", () => {
     expect(power(wizard("5e"), true).damage).toBe(7);
-    expect(power(wizard("5e"), true).breakdown).toContain("+ мод. INT (+3)");
+    expect(rowLines(power(wizard("5e"), true).breakdown)).toContain("Мод. INT +3");
     expect(power(wizard("5e"), false).damage).toBe(4);
     expect(power(wizard(), true).damage).toBe(4);
   });
@@ -61,7 +62,7 @@ describe("weapon object for a non-caster", () => {
     const power = computeSpellPower({ caster: fighter, groupId: null, rolls: [4], participants: [fighter], addAbilityMod: true });
 
     expect(power.damage).toBe(8);
-    expect(power.breakdown).toContain("+ мод. DEX (+4)");
+    expect(rowLines(power.breakdown)).toContain("Мод. DEX +4");
     expect(spellAttackBonus(fighter, true)).toBe(6);
     expect(spellAttackBonus(fighter)).toBe(2);
   });
@@ -74,5 +75,5 @@ it("monster spellcasting may use a physical ability from its statblock", () => {
 
   const power = computeSpellPower({ caster, groupId: null, rolls: [4], participants: [caster], addAbilityMod: true });
 
-  expect(power.breakdown).toContain("+ мод. CON (+5)");
+  expect(rowLines(power.breakdown)).toContain("Мод. CON +5");
 });

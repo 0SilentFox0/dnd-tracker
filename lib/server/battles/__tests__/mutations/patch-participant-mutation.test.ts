@@ -4,6 +4,7 @@ import { context, goblin, hero, participant } from "./fixtures";
 
 import { API_ERRORS } from "@/lib/constants/api-errors";
 import { patchParticipantMutation } from "@/lib/server/battles/mutations/participants/patch-participant-mutation";
+import { eventTextOf } from "@/lib/utils/battle/log/__tests__/event-text";
 
 const orc = participant("orc", { controlledBy: "dm" });
 
@@ -22,7 +23,7 @@ describe("patch-participant mutation", () => {
 
     expect(out.pending).toEqual([]);
     expect(out.participants.map((p) => p.basicInfo.id)).toEqual(["hero", "gob"]);
-    expect(out.events[0].resultText).toContain("з резерву");
+    expect(eventTextOf(out.events[0])).toContain("з резерву");
   });
 
   it("HP до 0 — unconscious і подія зі зміною HP", () => {
@@ -67,7 +68,7 @@ describe("patch-participant mutation", () => {
     const out = patchParticipantMutation(context(), "gob", { kill: true });
 
     expect(out.participants.find((p) => p.basicInfo.id === "gob")?.combatStats).toMatchObject({ currentHp: 0, status: "dead" });
-    expect(out.events[0].resultText).toContain("Вбито (DM)");
+    expect(eventTextOf(out.events[0])).toContain("Вбито (DM)");
   });
 
   it("revive — мертвий герой повертається з 1 HP і статусом active", () => {
@@ -76,7 +77,7 @@ describe("patch-participant mutation", () => {
     const out = patchParticipantMutation(context({ participants: [fallen, goblin] }), "hero", { revive: true });
 
     expect(out.participants.find((p) => p.basicInfo.id === "hero")?.combatStats).toMatchObject({ currentHp: 1, status: "active" });
-    expect(out.events[0].resultText).toContain("Повернуто до життя (DM)");
+    expect(eventTextOf(out.events[0])).toContain("Повернуто до життя (DM)");
   });
 
   it("revive живого — помилка", () => {

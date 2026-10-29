@@ -16,8 +16,8 @@ vi.mock("@/lib/server/show/show-store", () => ({ readShowState: vi.fn() }));
 vi.mock("@/lib/utils/battle/store", () => ({ loadBattle: vi.fn() }));
 vi.mock("@/lib/cache/reference-data", () => ({
   getCachedUnits: vi.fn(async () => [
-    { id: "u1", name: "Фенікс", level: 7 },
-    { id: "u2", name: "Грифон", level: 3 },
+    { id: "u1", name: "Фенікс", level: 7, abilitySummary: [{ when: [], if: [], then: [[{ key: "summary.effects.damageBonus", params: { filter: "x", value: "+10%" } }]], limits: [] }] },
+    { id: "u2", name: "Грифон", level: 3, abilitySummary: [] },
   ]),
   getCachedSpells: vi.fn(async () => []),
   getCachedRaces: vi.fn(async () => []),
@@ -54,7 +54,7 @@ describe("context tools", () => {
 
     const { getBattleStateTool } = await import("@/lib/ai/tools/battle");
 
-    expect(await getBattleStateTool.handler(ctx, {})).toBe("Активного бою немає");
+    expect(await getBattleStateTool.handler(ctx, {})).toBe("No active battle");
   });
 
   it("get_battle_state: учасники з hp у форматі cur/max", async () => {
@@ -79,7 +79,7 @@ describe("context tools", () => {
       name: "Засідка",
       round: 2,
       participants: [expect.objectContaining({ name: "Годрик", side: "ally", hp: "12/20", ac: 15 }), expect.objectContaining({ hp: "3/7" })],
-      lastEvents: ["Р2: Удар"],
+      lastEvents: ["R2: Удар"],
     });
   });
 
@@ -96,6 +96,14 @@ describe("context tools", () => {
     const { searchReferenceTool } = await import("@/lib/ai/tools/reference");
 
     expect(await searchReferenceTool.handler(ctx, { kind: "unit", query: "фен" })).toEqual([{ id: "u1", name: "Фенікс" }]);
+  });
+
+  it("read_reference: підсумок здібностей юніта — текст, а не сегменти", async () => {
+    const { readReferenceTool } = await import("@/lib/ai/tools/reference");
+
+    const entry = (await readReferenceTool.handler(ctx, { kind: "unit", id: "u1" })) as { abilitySummary: unknown[] };
+
+    expect(entry.abilitySummary).toEqual([expect.stringContaining("summary.effects.damageBonus")]);
   });
 
   it("read_reference: чужий id — AiToolError", async () => {

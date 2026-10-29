@@ -1,3 +1,4 @@
+/* eslint-disable no-restricted-syntax -- uk ability labels are lookup/import data (import aliases, sheet line matching, derived ability names); UI reads gameTerms.abilities/stats keys */
 export const ABILITY_KEYS = ["strength", "dexterity", "constitution", "intelligence", "wisdom", "charisma"] as const;
 
 export const ABILITY_SCORE_CAP = 20;

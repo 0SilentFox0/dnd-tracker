@@ -4,6 +4,7 @@ import { damageKey, spellResistances } from "./resist";
 import type { AbilityKey } from "@/lib/constants/abilities";
 import { AttackType } from "@/lib/constants/battle";
 import { MIN_UNIT_STAT, TYPICAL_TARGETS } from "@/lib/constants/battle-balance";
+import { textRef } from "@/lib/i18n/text-ref";
 import { collectModifiers } from "@/lib/utils/abilities/engine/core/collect-modifiers";
 import { calculateAttackBonus } from "@/lib/utils/battle/attack/bonus";
 import { attackKindOf } from "@/lib/utils/battle/common/attack-kind";
@@ -277,10 +278,10 @@ export function getCharacterStats({ participant, branchLevels, magicMainSkillIds
       spellDpr,
       nonMagicDpr,
       logLines: [
-        `Ближній бій ${round1(meleeAvg)}, дальній ${round1(rangedAvg)} → фізичний DPR = ${round1(physicalDpr)}`,
-        `Школа магії (найвищий рівень): +${round1(spellDpr)} DPR`,
-        `Немагічні основні навички (сума): +${round1(nonMagicDpr)} DPR`,
-        `Разом DPR = ${round1(physicalDpr)} + ${round1(spellDpr)} + ${round1(nonMagicDpr)} = ${round1(dpr)}`,
+        textRef("battleSetup.dprBreakdown.physical", { melee: String(round1(meleeAvg)), ranged: String(round1(rangedAvg)), physical: String(round1(physicalDpr)) }),
+        textRef("battleSetup.dprBreakdown.spell", { value: String(round1(spellDpr)) }),
+        textRef("battleSetup.dprBreakdown.nonMagic", { value: String(round1(nonMagicDpr)) }),
+        textRef("battleSetup.dprBreakdown.total", { physical: String(round1(physicalDpr)), spell: String(round1(spellDpr)), nonMagic: String(round1(nonMagicDpr)), total: String(round1(dpr)) }),
       ],
     },
   };

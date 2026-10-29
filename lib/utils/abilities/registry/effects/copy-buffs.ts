@@ -1,10 +1,12 @@
 import type { EffectApplyInput, EffectApplyResult } from "./types";
 
+import { textRef } from "@/lib/i18n/text-ref";
 import { findParticipant, updateParticipant } from "@/lib/utils/abilities/engine/core/participants";
 import { applySpellTimedEffect } from "@/lib/utils/abilities/engine/effects/opposing-spells";
 import { effectSource } from "@/lib/utils/abilities/engine/effects/timed-effects";
 import type { Effect } from "@/lib/utils/abilities/schema";
 import type { ActiveEffect, BattleParticipant } from "@/types/battle";
+import type { LogLine } from "@/types/text";
 
 export function applyCopySpellBuffs(input: EffectApplyInput<Extract<Effect, { kind: "copySpellBuffs" }>>): EffectApplyResult {
   const { ability, ownerId, event, ctx } = input;
@@ -27,7 +29,7 @@ export function applyCopySpellBuffs(input: EffectApplyInput<Extract<Effect, { ki
 
   if (!owner || !buffs.length) return none;
 
-  const messages: string[] = [];
+  const messages: LogLine[] = [];
 
   const participants = updateParticipant(input.participants, ownerId, (p) =>
     buffs.reduce((acc, e) => {
@@ -37,7 +39,7 @@ export function applyCopySpellBuffs(input: EffectApplyInput<Extract<Effect, { ki
         ctx.round,
       );
 
-      messages.push(...removed.map((r) => `⚖️ ${e.name} знімає «${r.name}» → ${p.basicInfo.name}`), `✨ ${p.basicInfo.name}: отримує «${e.name}» (${ability.name})`);
+      messages.push(...removed.map((r) => textRef("abilityText.log.cancelsEffect", { ability: e.name, effect: r.name, target: p.basicInfo.name })), textRef("abilityText.log.gainsEffect", { target: p.basicInfo.name, effect: e.name, ability: ability.name }));
 
       return participant;
     }, p),

@@ -6,6 +6,7 @@ import { applyVampirism } from "./hit-effects";
 import { applyHitRiders } from "./hit-rider";
 import { castHitSpell } from "./hit-spell";
 
+import { textRef } from "@/lib/i18n/text-ref";
 import { findFlags } from "@/lib/utils/abilities/engine/core/collect-modifiers";
 import { isActive } from "@/lib/utils/abilities/engine/core/participants";
 import type { CunningStrikeEffect, StaticEffect } from "@/lib/utils/abilities/schema";
@@ -17,7 +18,8 @@ import { attackKindOf } from "@/lib/utils/battle/common/attack-kind";
 import { dealResistedHits } from "@/lib/utils/battle/damage/resisted-ability-damage";
 import type { AttackRollResult } from "@/lib/utils/battle/types/attack";
 import type { CastableSpell } from "@/lib/utils/battle/types/spell-process";
-import type { BattleAttack } from "@/types/battle";
+import type { BattleAttack, DamageRow } from "@/types/battle";
+import type { LogLine } from "@/types/text";
 
 export interface ResolveHitParams {
   flow: ActionFlow;
@@ -30,7 +32,7 @@ export interface ResolveHitParams {
   currentRound: number;
   actionModifiers?: StaticEffect[];
   bonusPercent?: number;
-  bonusLabel?: string;
+  bonusLabel?: LogLine;
   offTurn?: boolean;
   obstacle?: boolean;
   hitSpells?: ReadonlyMap<string, CastableSpell>;
@@ -73,7 +75,7 @@ export function resolveHit(p: ResolveHitParams): { hitDamage: ComputeHitDamageRe
 
     put(flow, applyDamageToTarget(guardian, guarded.guardianDamage));
     applyFlowDamage(flow, guardian, guarded.guardianDamage, p.attackRoll.isCritical);
-    flow.messages.push(`🛡 ${guardian.basicInfo.name} приймає ${guarded.guardianDamage} шкоди — захищає: ${getP(flow, targetId).basicInfo.name}`);
+    flow.messages.push(textRef("battleLog.attack.guard", { guardian: guardian.basicInfo.name, damage: guarded.guardianDamage, target: getP(flow, targetId).basicInfo.name }));
     settleDowned(flow, guarded.guardianId, attackerId);
   }
 
@@ -150,14 +152,33 @@ export function resolveHit(p: ResolveHitParams): { hitDamage: ComputeHitDamageRe
 
 const ABILITY_HIT_LINE = /^💥 (.+?): .+ −(\d+) HP$/;
 
-function abilityDamageLines(messages: string[], targetName: string, total: number): string[] {
-  const lines = messages.flatMap((m) => {
-    const match = ABILITY_HIT_LINE.exec(m);
+const HIT_KEYS: ReadonlySet<string> = new Set(["battleLog.maneuver.damage", "abilityText.log.damage"]);
 
-    return match && m.includes(`${match[1]}: ${targetName} −`) ? [`${match[1]}: +${match[2]}`] : [];
+/** An ability hit on the target from a line: a legacy string, or a ref with `{ ability, target, dealt | amount }`. */
+function abilityHitOf(line: LogLine, targetName: string): { name: LogLine; amount: number } | null {
+  if (typeof line === "string") {
+    const match = ABILITY_HIT_LINE.exec(line);
+
+    return match && line.includes(`${match[1]}: ${targetName} −`) ? { name: match[1], amount: Number(match[2]) } : null;
+  }
+
+  const { params } = line;
+
+  if (!HIT_KEYS.has(line.message) || !params || params.target !== targetName) return null;
+
+  const { ability } = params;
+
+  return { name: typeof ability === "number" ? String(ability) : ability, amount: Number(params.dealt ?? params.amount) };
+}
+
+function abilityDamageLines(messages: LogLine[], targetName: string, total: number): DamageRow[] {
+  const rows = messages.flatMap((m) => {
+    const hit = abilityHitOf(m, targetName);
+
+    return hit ? [{ label: textRef("battleLog.damage.rows.abilityHit", { name: hit.name, amount: hit.amount }), tone: "note" as const }] : [];
   });
 
-  return lines.length > 0 ? lines : [`Вміння: +${total}`];
+  return rows.length > 0 ? rows : [{ label: textRef("battleLog.damage.rows.abilityTotal", { total }), tone: "note" }];
 }
 
 function applyFireWave(flow: ActionFlow, attackerId: string, targetId: string, hitDamage: number): void {
@@ -177,6 +198,6 @@ function applyFireWave(flow: ActionFlow, attackerId: string, targetId: string, h
 
     for (const d of r.downed) settleDowned(flow, d.victimId, attackerId);
 
-    if (parts.length > 0) flow.messages.push(`🔥 Вогняна хвиля: ${parts.join(", ")}`);
+    if (parts.length > 0) flow.messages.push(textRef("battleLog.attack.fireWave", { parts: parts.join(", ") }));
   }
 }

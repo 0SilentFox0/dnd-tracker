@@ -3,6 +3,7 @@ import { describe, expect, it } from "vitest";
 import { AttackType, ParticipantSide } from "@/lib/constants/battle";
 import { makeParticipant, resolved, seq } from "@/lib/utils/abilities/__tests__/fixtures";
 import { processAttack } from "@/lib/utils/battle/attack/process";
+import { eventTextOf } from "@/lib/utils/battle/log/__tests__/event-text";
 import type { BattleAttack, BattleParticipant } from "@/types/battle";
 
 const sword: BattleAttack = { id: "sw", name: "Меч", type: AttackType.MELEE, attackBonus: 5, damageDice: "1d6", damageType: "slashing" };
@@ -32,7 +33,7 @@ describe("ability events in attack", () => {
 
     expect(r.targetUpdated.battleData.activeEffects[0].dotDamage).toEqual({ damagePerRound: 2, damageType: "bleed" });
     expect(r.attackerUpdated.combatStats.currentHp).toBe(19);
-    expect(r.battleAction.resultText).toContain("🔥");
+    expect(eventTextOf(r.battleAction)).toContain("🔥");
   });
 
   it("летальна шкода: виживання з 1 HP; інакше kill і мораль союзників", () => {

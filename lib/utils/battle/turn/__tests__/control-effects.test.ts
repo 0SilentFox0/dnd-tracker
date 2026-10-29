@@ -1,9 +1,11 @@
 import { describe, expect, it } from "vitest";
 
 import { ParticipantSide, ParticipantSourceType } from "@/lib/constants/battle";
+import { textOf } from "@/lib/i18n/test/text";
 import { makeParticipant, resolved, seq } from "@/lib/utils/abilities/__tests__/fixtures";
 import { applyEffect } from "@/lib/utils/abilities/registry/effects";
 import type { Effect } from "@/lib/utils/abilities/schema";
+import { eventTextOf } from "@/lib/utils/battle/log/__tests__/event-text";
 import type { BattleSceneState } from "@/lib/utils/battle/store";
 import { advanceTurn } from "@/lib/utils/battle/turn";
 import { runAdvanceTurnLoop } from "@/lib/utils/battle/turn/run-advance-turn-loop";
@@ -50,7 +52,7 @@ describe("berserk", () => {
     const r = cast(berserk, hero);
 
     expect(r.participants.find((p) => p.basicInfo.id === "hero")?.battleData.activeEffects).toHaveLength(0);
-    expect(r.messages[0]).toContain("не діє на героїв");
+    expect(textOf(r.messages[0])).toContain("не діє на героїв");
   });
 
   it("у свій хід шалений юніт б'є випадкову іншу істоту, зокрема союзника, і хід закінчується", () => {
@@ -76,7 +78,7 @@ describe("berserk", () => {
     const gob = out.updatedInitiativeOrder.find((p) => p.basicInfo.id === "gob") as BattleParticipant;
 
     expect(gob.combatStats.currentHp).toBeLessThan(40);
-    expect(out.newLogEntries.some((e) => e.resultText.includes("Шал"))).toBe(true);
+    expect(out.newLogEntries.some((e) => eventTextOf(e).includes("Шал"))).toBe(true);
     expect(out.nextTurnIndex).toBe(2);
   });
 
@@ -108,7 +110,7 @@ describe("charm", () => {
     const r = cast(charm, hero);
 
     expect(r.participants.find((p) => p.basicInfo.id === "hero")?.basicInfo.side).toBe(ParticipantSide.ENEMY);
-    expect(r.messages[0]).toContain("не діє на героїв");
+    expect(textOf(r.messages[0])).toContain("не діє на героїв");
   });
 
   it("переводить юніта на бік заклинателя під контроль його гравця", () => {
@@ -210,14 +212,14 @@ describe("автоматичний хід шалу", () => {
     const { out, victimHp } = run(withEffects([condition("disable_melee_attacks")]), seq(0.99, 0.9));
 
     expect(victimHp).toBe(40);
-    expect(out.newLogEntries.some((e) => e.resultText.includes("нікого не може атакувати"))).toBe(true);
+    expect(out.newLogEntries.some((e) => eventTextOf(e).includes("нікого не може атакувати"))).toBe(true);
   });
 
   it("втрата дії від skip_action: шал не б'є", () => {
     const { out, victimHp } = run(withEffects([condition("skip_action", 100)]), seq(0, 0.9));
 
     expect(victimHp).toBe(40);
-    expect(out.newLogEntries.some((e) => e.resultText.includes("втрачає дію"))).toBe(true);
+    expect(out.newLogEntries.some((e) => eventTextOf(e).includes("втрачає дію"))).toBe(true);
   });
 
   it("наприкінці автоходу спрацьовує turnEnd, записи лога мають stateBefore", () => {
@@ -227,7 +229,7 @@ describe("автоматичний хід шалу", () => {
 
     expect(out.updatedInitiativeOrder.find((p) => p.basicInfo.id === "ogre")?.combatStats.morale).toBe(1);
     expect(out.newLogEntries.every((e) => "stateBefore" in e)).toBe(true);
-    expect(out.newLogEntries.some((e) => e.resultText.includes("Кінець ходу"))).toBe(true);
+    expect(out.newLogEntries.some((e) => eventTextOf(e).includes("Кінець ходу"))).toBe(true);
   });
 });
 
@@ -239,6 +241,6 @@ describe("saveEnds у кінці ходу", () => {
 
     const out = advanceTurn({ participants: [withState, caster()], pending: [], scene, rng: seq(0.99) });
 
-    expect(out.actions.some((a) => a.resultText.includes("рятівний кидок") && a.resultText.includes("Умиротворений"))).toBe(true);
+    expect(out.actions.some((a) => eventTextOf(a).includes("рятівний кидок") && eventTextOf(a).includes("Умиротворений"))).toBe(true);
   });
 });

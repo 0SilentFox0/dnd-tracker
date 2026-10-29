@@ -60,7 +60,7 @@ export async function persistSlideImages(campaignId: string, slides: Slide[], pr
 
     const stored = await resolveImageForPersistence(slide.imageUrl, { bucket: SCENE_SLIDES_BUCKET, campaignId, cacheControl: YEAR_CACHE_SECONDS });
 
-    if (!stored.ok) return { ok: false, message: API_ERRORS.SLIDE_IMAGE_FAILED, params: { index: slides.indexOf(slide) + 1, detail: stored.message } };
+    if (!stored.ok) return { ok: false, message: API_ERRORS.SLIDE_IMAGE_FAILED, params: { index: slides.indexOf(slide) + 1, detail: stored.message, ...stored.params } };
 
     if (stored.value) mirrored.set(slide.imageUrl, stored.value);
   }

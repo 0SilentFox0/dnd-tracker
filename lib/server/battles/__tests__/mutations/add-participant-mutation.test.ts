@@ -5,6 +5,7 @@ import { context, goblin, hero, participant } from "./fixtures";
 import { ParticipantSide } from "@/lib/constants/battle";
 import { createAddParticipantMutation } from "@/lib/server/battles/mutations/add-participant/add-participant-mutation";
 import { resolved } from "@/lib/utils/abilities/__tests__/fixtures";
+import { eventTextOf } from "@/lib/utils/battle/log/__tests__/event-text";
 import { at, mazeMap, withMap } from "@/lib/utils/battle/modes/maze/__tests__/fixtures";
 import { toReserve } from "@/lib/utils/battle/participant/reserve";
 import { parseRules } from "@/lib/utils/rules/schema";
@@ -34,7 +35,7 @@ describe("add-participant mutation", () => {
 
     expect(out.participants.map((p) => p.basicInfo.id)).toEqual(["hero", "new-u1", "new-u2", "gob"]);
     expect(out.scene?.turnIndex).toBeUndefined();
-    expect(out.events[0].resultText).toContain("DM додав на поле");
+    expect(eventTextOf(out.events[0])).toContain("DM додав на поле");
   });
 
   it("місце вже минуло — поточний не змінюється, turnIndex зсувається", async () => {

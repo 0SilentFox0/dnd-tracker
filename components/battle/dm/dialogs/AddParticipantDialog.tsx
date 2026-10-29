@@ -1,6 +1,6 @@
 "use client";
 
-import { type FormEvent, useState } from "react";
+import { useTranslations } from "next-intl";
 
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -18,8 +18,7 @@ import {
 } from "@/components/ui/select";
 import { ParticipantSide, ParticipantSourceType, type ParticipantSourceTypeValue } from "@/lib/constants/battle";
 import { clampUnitQuantity, UNIT_QUANTITY as QUANTITY } from "@/lib/constants/battle-units";
-import { useCharacters } from "@/lib/hooks/characters";
-import { useUnitPicker } from "@/lib/hooks/units";
+import { useAddParticipantForm } from "@/lib/hooks/battle";
 import type { AddParticipantData } from "@/types/battle";
 
 const FORM_ID = "add-participant-form";
@@ -31,7 +30,7 @@ interface AddParticipantDialogProps {
   onAdd: (data: AddParticipantData) => void;
   isPending?: boolean;
   isError?: boolean;
-  /** лабіринт: юніт не додається одразу, а чекає на клік по клітинці */
+  /** maze: the unit is not added right away but waits for a cell click */
   onPlace?: (data: AddParticipantData) => void;
 }
 
@@ -44,64 +43,13 @@ export function AddParticipantDialog({
   isError,
   onPlace,
 }: AddParticipantDialogProps) {
-  const [type, setType] = useState<ParticipantSourceTypeValue>(ParticipantSourceType.CHARACTER);
+  const t = useTranslations("battleDm.addParticipant");
 
-  const [side, setSide] = useState<ParticipantSide>(ParticipantSide.ALLY);
+  const tActions = useTranslations("common.actions");
 
-  const [characterId, setCharacterId] = useState("");
-
-  const [quantity, setQuantity] = useState<number>(QUANTITY.min);
-
-  const [reserved, setReserved] = useState(false);
-
-  const { data: characters = [] } = useCharacters(campaignId, { compact: true, enabled: open });
-
-  const picker = useUnitPicker(campaignId, open);
+  const { form: { type, side, characterId, quantity, reserved }, set, characters, picker, submit: { placing, canSubmit, handleSubmit } } = useAddParticipantForm({ campaignId, open, onOpenChange, onAdd, onPlace, isError });
 
   const { unitId } = picker;
-
-  const placing = Boolean(onPlace) && type === ParticipantSourceType.UNIT && !reserved;
-
-  const [submitted, setSubmitted] = useState(false);
-
-  const [wasOpen, setWasOpen] = useState(open);
-
-  // батько закриває діалог в onSuccess — лише тоді скидаємо введене
-  if (open !== wasOpen) {
-    setWasOpen(open);
-
-    if (!open && submitted) {
-      setSubmitted(false);
-      setCharacterId("");
-      picker.reset();
-      setQuantity(QUANTITY.min);
-      setReserved(false);
-    }
-  }
-
-  // помилка: діалог лишився відкритим — Скасувати не має стерти введене
-  if (isError && submitted) setSubmitted(false);
-
-  const handleSubmit = (e: FormEvent) => {
-    e.preventDefault();
-
-    if (type === ParticipantSourceType.CHARACTER && characterId) {
-      setSubmitted(true);
-      onAdd({ sourceId: characterId, type: ParticipantSourceType.CHARACTER, side, reserved });
-    } else if (type === ParticipantSourceType.UNIT && unitId) {
-      const data = { sourceId: unitId, type: ParticipantSourceType.UNIT, side, quantity: quantity || QUANTITY.min, reserved };
-
-      setSubmitted(true);
-
-      if (placing && onPlace) {
-        onPlace(data);
-        onOpenChange(false);
-      } else onAdd(data);
-    }
-  };
-
-  const canSubmit =
-    type === ParticipantSourceType.CHARACTER ? Boolean(characterId) : Boolean(unitId);
 
   return (
     <ResponsiveDialog
@@ -109,52 +57,52 @@ export function AddParticipantDialog({
       onOpenChange={onOpenChange}
       size="md"
       hud
-      title="Додати учасника на поле"
-      description="Учасник займе місце в черзі за своєю ініціативою або чекатиме в резерві."
+      title={t("title")}
+      description={t("description")}
       footer={
         <>
-          <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>Скасувати</Button>
-          <Button type="submit" form={FORM_ID} disabled={!canSubmit || isPending}>{isPending ? "Додаємо…" : placing ? "Вибрати клітинку" : "Додати"}</Button>
+          <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>{tActions("cancel")}</Button>
+          <Button type="submit" form={FORM_ID} disabled={!canSubmit || isPending}>{isPending ? t("adding") : placing ? t("pickCell") : tActions("add")}</Button>
         </>
       }
     >
       <form id={FORM_ID} onSubmit={handleSubmit} className="space-y-4 py-2">
         <div className="space-y-2">
-          <Label>Сторона</Label>
+          <Label>{t("side")}</Label>
           <Select
             value={side}
-            onValueChange={(v) => setSide(v as ParticipantSide)}
+            onValueChange={(v) => set.side(v as ParticipantSide)}
           >
             <SelectTrigger className="w-full">
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value={ParticipantSide.ALLY}>Союзник</SelectItem>
-              <SelectItem value={ParticipantSide.ENEMY}>Ворог</SelectItem>
+              <SelectItem value={ParticipantSide.ALLY}>{t("ally")}</SelectItem>
+              <SelectItem value={ParticipantSide.ENEMY}>{t("enemy")}</SelectItem>
             </SelectContent>
           </Select>
         </div>
         <div className="space-y-2">
-          <Label>Тип</Label>
+          <Label>{t("type")}</Label>
           <Select
             value={type}
-            onValueChange={(v) => setType(v as ParticipantSourceTypeValue)}
+            onValueChange={(v) => set.type(v as ParticipantSourceTypeValue)}
           >
             <SelectTrigger className="w-full">
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value={ParticipantSourceType.CHARACTER}>Герой</SelectItem>
-              <SelectItem value={ParticipantSourceType.UNIT}>Юніт</SelectItem>
+              <SelectItem value={ParticipantSourceType.CHARACTER}>{t("hero")}</SelectItem>
+              <SelectItem value={ParticipantSourceType.UNIT}>{t("unit")}</SelectItem>
             </SelectContent>
           </Select>
         </div>
         {type === ParticipantSourceType.CHARACTER && (
           <div className="space-y-2">
-            <Label>Герой</Label>
-            <Select value={characterId} onValueChange={setCharacterId}>
+            <Label>{t("hero")}</Label>
+            <Select value={characterId} onValueChange={set.characterId}>
               <SelectTrigger className="w-full">
-                <SelectValue placeholder="Оберіть героя" />
+                <SelectValue placeholder={t("pickHero")} />
               </SelectTrigger>
               <SelectContent>
                 {characters.map((c) => (
@@ -169,10 +117,10 @@ export function AddParticipantDialog({
         {type === ParticipantSourceType.UNIT && (
           <>
             <div className="space-y-2">
-              <Label>Раса</Label>
+              <Label>{t("race")}</Label>
               <Select value={picker.raceKey} onValueChange={picker.selectRace}>
                 <SelectTrigger className="w-full">
-                  <SelectValue placeholder="Оберіть расу" />
+                  <SelectValue placeholder={t("pickRace")} />
                 </SelectTrigger>
                 <SelectContent>
                   {picker.raceOptions.map((r) => (
@@ -184,15 +132,15 @@ export function AddParticipantDialog({
               </Select>
             </div>
             <div className="space-y-2">
-              <Label>Юніт</Label>
+              <Label>{t("unit")}</Label>
               <Select value={unitId} onValueChange={picker.setUnitId} disabled={!picker.raceKey}>
                 <SelectTrigger className="w-full">
-                  <SelectValue placeholder={picker.raceKey ? "Оберіть юніта" : "Спершу оберіть расу"} />
+                  <SelectValue placeholder={picker.raceKey ? t("pickUnit") : t("pickRaceFirst")} />
                 </SelectTrigger>
                 <SelectContent>
                   {picker.tiers.map((tier) => (
                     <SelectGroup key={tier.level}>
-                      <SelectLabel>Рівень {tier.level}</SelectLabel>
+                      <SelectLabel>{t("level", { level: tier.level })}</SelectLabel>
                       {tier.units.map((u) => (
                         <SelectItem key={u.id} value={u.id}>
                           {u.name}
@@ -204,20 +152,20 @@ export function AddParticipantDialog({
               </Select>
             </div>
             <div className="space-y-2">
-              <Label>Кількість</Label>
+              <Label>{t("quantity")}</Label>
               <Input
                 type="number"
                 min={QUANTITY.min}
                 max={QUANTITY.max}
                 value={quantity}
-                onChange={(e) => setQuantity(clampUnitQuantity(Number(e.target.value), QUANTITY))}
+                onChange={(e) => set.quantity(clampUnitQuantity(Number(e.target.value), QUANTITY))}
               />
             </div>
           </>
         )}
         <label className="flex items-center gap-2 text-sm">
-          <Checkbox checked={reserved} onCheckedChange={(v) => setReserved(v === true)} />
-          У резерв — з&apos;явиться, коли ДМ введе в бій
+          <Checkbox checked={reserved} onCheckedChange={(v) => set.reserved(v === true)} />
+          {t("reserve")}
         </label>
       </form>
     </ResponsiveDialog>

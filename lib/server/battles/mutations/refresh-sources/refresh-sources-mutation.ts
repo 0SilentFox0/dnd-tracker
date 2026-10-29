@@ -2,6 +2,7 @@ import { z } from "zod";
 
 import { ParticipantSourceType } from "@/lib/constants/battle";
 import { prisma } from "@/lib/db";
+import { textRef } from "@/lib/i18n/text-ref";
 import {
   createBattleParticipantFromCharacter,
   createBattleParticipantFromUnit,
@@ -83,7 +84,7 @@ export function createRefreshSourcesMutation(deps: RefreshSourcesDeps = defaultD
     return {
       participants,
       pending,
-      events: [dmEvent(ctx.scene.round, `Оновлено з бібліотеки: ${refreshed} учасників`)],
+      events: [dmEvent(ctx.scene.round, textRef("battleLog.dm.refreshed", { count: refreshed }))],
     };
   };
 }

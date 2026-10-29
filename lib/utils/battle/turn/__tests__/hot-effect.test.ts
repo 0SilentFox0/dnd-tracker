@@ -1,9 +1,12 @@
 import { describe, expect, it } from "vitest";
 
 import { ParticipantSide } from "@/lib/constants/battle";
+import { textOf } from "@/lib/i18n/test/text";
+import { ukT } from "@/lib/utils/abilities/__tests__/describe-fixtures";
 import { makeParticipant, resolved, seq } from "@/lib/utils/abilities/__tests__/fixtures";
 import { applyEffect, describeEffect } from "@/lib/utils/abilities/registry/effects";
 import type { Effect } from "@/lib/utils/abilities/schema";
+import { renderSegments } from "@/lib/utils/abilities/segments";
 import { endTurnCleanup } from "@/lib/utils/battle/turn/end-turn-cleanup";
 import { processStartOfTurn } from "@/lib/utils/battle/turn/start-end";
 
@@ -29,7 +32,7 @@ describe("hot", () => {
     const r = cast();
 
     expect(r.participants[1].battleData.activeEffects[0]).toMatchObject({ type: "buff", duration: 3, hotHeal: { healPerRound: 3 } });
-    expect(r.messages[0]).toContain("💚");
+    expect(textOf(r.messages[0])).toContain("💚");
   });
 
   it("лікує на початку ходу цілі, не вище max HP, і спливає за тривалістю", () => {
@@ -38,7 +41,7 @@ describe("hot", () => {
     const out = processStartOfTurn(target, 2, [target]);
 
     expect(out.participant.combatStats.currentHp).toBe(20);
-    expect(out.abilityMessages.some((m) => m.includes("+1 HP"))).toBe(true);
+    expect(out.abilityMessages.some((m) => textOf(m).includes("+1 HP"))).toBe(true);
     expect(out.participant.battleData.activeEffects[0].duration).toBe(3);
     expect(endTurnCleanup(out.participant).battleData.activeEffects[0].duration).toBe(2);
   });
@@ -49,8 +52,8 @@ describe("hot", () => {
     expect(processStartOfTurn(target, 2, [target]).participant.combatStats.currentHp).toBe(8);
   });
 
-  it("опис", () => {
-    expect(describeEffect(hot)).toContain("раунд");
+  it("опис", async () => {
+    expect(renderSegments(await ukT(), describeEffect(hot)).join(" · ")).toContain("раунд");
   });
 });
 

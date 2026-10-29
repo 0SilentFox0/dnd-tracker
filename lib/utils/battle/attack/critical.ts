@@ -1,10 +1,12 @@
 import { EffectMarker } from "@/lib/constants/battle";
 import type { CriticalEffect, CriticalEffectType } from "@/lib/constants/critical-effects";
+import { dynamicTextRef } from "@/lib/i18n/text-ref";
 import type { StaticEffect } from "@/lib/utils/abilities/schema";
 import { type ActionFlow,getP, put } from "@/lib/utils/battle/common/action-flow";
 import { grantExtraActions } from "@/lib/utils/battle/participant/helpers";
 import { addActiveEffect } from "@/lib/utils/battle/turn/effects";
 import type { ActiveEffect, BattleParticipant } from "@/types/battle";
+import type { TextRef } from "@/types/text";
 
 type EffectSpec = {
   idPart: string;
@@ -75,19 +77,30 @@ function specFor(effect: CriticalEffect): EffectSpec | null {
   return typeof spec === "function" ? spec(effect) : spec;
 }
 
-export function critFlavorFor(
+export const critNameRef = (effect: Pick<CriticalEffect, "id" | "type">, source: "attack" | "save" = "attack"): TextRef => dynamicTextRef(`battleTerms.crits.${source}.${effect.type}.${effect.id}.name`);
+
+export interface CritFlavor {
+  index: number;
+  attacker: string;
+  target: string;
+}
+
+/** 1-based flavor number, the same pick for the same seed. */
+export function critFlavorIndex(
   effect: CriticalEffect,
-  attackerName: string,
-  targetName: string,
   seed: { battleId: string; round: number; attackerId: string; targetId: string; suffix?: string },
-): string {
+): number {
   const key = `${seed.battleId}:${seed.round}:${seed.attackerId}:${seed.targetId}${seed.suffix ? `:${seed.suffix}` : ""}`;
 
   let sum = 0;
 
   for (let i = 0; i < key.length; i++) sum += key.charCodeAt(i);
 
-  return effect.flavor[sum % effect.flavor.length].replaceAll("{attacker}", attackerName).replaceAll("{target}", targetName);
+  return effect.flavorCount > 0 ? (sum % effect.flavorCount) + 1 : 0;
+}
+
+export function critFlavorOf(effect: CriticalEffect, attacker: string, target: string, seed: Parameters<typeof critFlavorIndex>[1]): CritFlavor {
+  return { index: critFlavorIndex(effect, seed), attacker, target };
 }
 
 export function applyCriticalEffect(

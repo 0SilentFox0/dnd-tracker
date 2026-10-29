@@ -20,7 +20,7 @@ const p = (hp: number) => {
 
 const fire: FxImpact = { element: "fire", kind: "damage", delayMs: 400, actionId: "map-a1", waitMs: 5000 };
 
-const token = (hp: number, impact: FxImpact | null) => <MapToken participant={p(hp)} box={{ cx: 50, cy: 50, size: 100 }} mapSize={{ width: 1000, height: 1000 }} pxPerUnit={0.5} impact={impact} />;
+const token = (hp: number, impact: FxImpact | null) => <MapToken participant={p(hp)} placement={{ box: { cx: 50, cy: 50, size: 100 }, mapSize: { width: 1000, height: 1000 }, pxPerUnit: 0.5 }} impact={impact} />;
 
 afterEach(cleanup);
 
@@ -66,7 +66,7 @@ describe("MapToken status auras", () => {
     ({ id: name, name, type: "debuff", duration: 2, permanent: false, appliedAt: { round: 1, timestamp: new Date(0) }, effects: [], fxElement, ...extra }) as unknown as ActiveEffect;
 
   it("горіння й мороз грають ауру на портреті токена, розміром з портрет, усередині якоря", async () => {
-    const { container } = render(<MapToken participant={p(30)} box={{ cx: 50, cy: 50, size: 100 }} mapSize={{ width: 1000, height: 1000 }} pxPerUnit={0.8} effects={[effect("Підпал", "fire"), effect("Холод", "cold")]} />);
+    const { container } = render(<MapToken participant={p(30)} placement={{ box: { cx: 50, cy: 50, size: 100 }, mapSize: { width: 1000, height: 1000 }, pxPerUnit: 0.8 }} effects={[effect("Підпал", "fire"), effect("Холод", "cold")]} />);
 
     const aura = await screen.findByTestId("aura");
 

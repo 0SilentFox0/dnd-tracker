@@ -1,10 +1,12 @@
+import { textRef } from "@/lib/i18n/text-ref";
 import { effectiveMorale, moraleChanceBonus } from "@/lib/utils/battle/morale/effective-morale";
 import type { BattleParticipant } from "@/types/battle";
+import type { LogLine } from "@/types/text";
 
 export interface MoraleCheckResult {
   shouldSkipTurn: boolean;
   hasExtraTurn: boolean;
-  message: string;
+  message: LogLine;
   /** true = перевірка на додатковий хід (+мораль), false = перевірка на пропуск (-мораль) */
   moralePositive: boolean;
 }
@@ -31,13 +33,13 @@ export function checkMorale(
   };
 
   if (ignored) {
-    return { ...result, message: `${participant.basicInfo.name}: мораль не діє` };
+    return { ...result, message: textRef("battleLog.morale.ignored", { name: participant.basicInfo.name }) };
   }
 
   if (currentMorale === 0) {
     return {
       ...result,
-      message: `${participant.basicInfo.name} має нейтральну мораль`,
+      message: textRef("battleLog.morale.neutral", { name: participant.basicInfo.name }),
     };
   }
 
@@ -46,22 +48,22 @@ export function checkMorale(
 
     const { threshold } = moraleThreshold(currentMorale, bonus);
 
-    const detail = `Мораль +${currentMorale}${bonus > 0 ? `, лідерство +${bonus}%` : ""}, кидок: ${d10Roll}, потрібно: >=${threshold}`;
+    const detail = textRef("battleLog.morale.detail", { morale: currentMorale, leadership: bonus > 0 ? textRef("battleLog.morale.leadership", { bonus }) : "", roll: d10Roll, threshold });
 
     if (d10Roll >= threshold) {
       result.hasExtraTurn = true;
-      result.message = `⭐ ${participant.basicInfo.name}: додатковий хід! (${detail})`;
+      result.message = textRef("battleLog.morale.extra", { name: participant.basicInfo.name, detail });
     } else {
-      result.message = `${participant.basicInfo.name}: без додаткового ходу (${detail})`;
+      result.message = textRef("battleLog.morale.noExtra", { name: participant.basicInfo.name, detail });
     }
   } else {
     const { threshold } = moraleThreshold(currentMorale);
 
     if (d10Roll <= threshold) {
       result.shouldSkipTurn = true;
-      result.message = `😔 ${participant.basicInfo.name}: пропуск ходу через низьку мораль (Мораль ${currentMorale}, кидок: ${d10Roll}, пропуск на: <=${threshold})`;
+      result.message = textRef("battleLog.morale.skip", { name: participant.basicInfo.name, morale: currentMorale, roll: d10Roll, threshold });
     } else {
-      result.message = `${participant.basicInfo.name}: хід не пропущено (Мораль ${currentMorale}, кидок: ${d10Roll}, пропуск на: <=${threshold})`;
+      result.message = textRef("battleLog.morale.noSkip", { name: participant.basicInfo.name, morale: currentMorale, roll: d10Roll, threshold });
     }
   }
 

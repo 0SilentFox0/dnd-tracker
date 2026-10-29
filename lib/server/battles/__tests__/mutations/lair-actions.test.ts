@@ -9,6 +9,7 @@ import { legendaryMutation } from "@/lib/server/battles/mutations/core-action/le
 import { patchParticipantMutation } from "@/lib/server/battles/mutations/participants/patch-participant-mutation";
 import { resolved } from "@/lib/utils/abilities/__tests__/fixtures";
 import { legendaryActionSchema } from "@/lib/utils/battle/actions/schema";
+import { textsOf } from "@/lib/utils/battle/log/__tests__/event-text";
 import { resolveSave } from "@/lib/utils/battle/saves/legendary";
 import { joinParticipant, splitParticipant } from "@/lib/utils/battle/store/split-participant";
 import { processStartOfRound } from "@/lib/utils/battle/turn/start-end";
@@ -59,7 +60,7 @@ describe("lair actions", () => {
 
     const out = processStartOfRound([p], 2);
 
-    expect(out.lairMessages).toEqual(["🏰 Ініціатива 20: дія лігва — Дракон"]);
+    expect(textsOf(out.lairMessages)).toEqual(["🏰 Ініціатива 20: дія лігва — Дракон"]);
     expect(out.updatedInitiativeOrder[0].combatStats.morale).toBe(0);
   });
 });

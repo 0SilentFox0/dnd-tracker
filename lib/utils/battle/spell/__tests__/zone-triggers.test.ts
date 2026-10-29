@@ -3,6 +3,7 @@ import { describe, expect, it } from "vitest";
 import { ParticipantSide } from "@/lib/constants/battle";
 import { createMockParticipant } from "@/lib/utils/battle/__tests__/fixtures/mock-participant";
 import { diffTerrain, pruneExpiredTerrain } from "@/lib/utils/battle/grid/terrain";
+import { textsOf } from "@/lib/utils/battle/log/__tests__/event-text";
 import { spellTerrainEffects, spellZoneHazard } from "@/lib/utils/battle/spell/zone-hazard";
 import { sweepDeadZones, zoneMove, zonesAt, zoneTurnStart } from "@/lib/utils/battle/spell/zone-triggers";
 import type { CastableSpell } from "@/lib/utils/battle/types/spell-process";
@@ -81,7 +82,7 @@ describe("zoneMove", () => {
 
     expect(out.moved.battleData.position).toEqual({ x: 4, y: 4 });
     expect(out.moved.battleData.movementUsed).toBeGreaterThanOrEqual(6);
-    expect(out.messages.join(" ")).toContain("тягне");
+    expect(textsOf(out.messages).join(" ")).toContain("тягне");
   });
 
   it("успішний рятівний — виходить із зони", () => {

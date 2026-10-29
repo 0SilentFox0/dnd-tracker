@@ -1,11 +1,13 @@
 import { describe, expect, it } from "vitest";
 
 import { AttackType, ParticipantSide } from "@/lib/constants/battle";
+import { textOf } from "@/lib/i18n/test/text";
 import { makeParticipant, resolved, seq } from "@/lib/utils/abilities/__tests__/fixtures";
 import { createMockParticipant } from "@/lib/utils/battle/__tests__/fixtures/mock-participant";
 import { processAttack } from "@/lib/utils/battle/attack/process";
 import { computeDamageBreakdown } from "@/lib/utils/battle/damage/breakdown";
 import { calculateDamageWithModifiersImpl } from "@/lib/utils/battle/damage/impl";
+import { eventTextOf } from "@/lib/utils/battle/log/__tests__/event-text";
 import { applyResistance } from "@/lib/utils/battle/resistance";
 import { castSpell } from "@/lib/utils/battle/spell";
 import { battleActionToEvent, eventToBattleAction } from "@/lib/utils/battle/store";
@@ -38,7 +40,7 @@ describe("кроки шкоди", () => {
   it("атакувальник: кубики → характеристика → % з умінь, after останнього = totalDamage", () => {
     const r = calculateDamageWithModifiersImpl(attacker, 6, 3, AttackType.MELEE, { allParticipants: [attacker, target] });
 
-    expect(r.steps.map((s) => [s.kind, s.label, s.value])).toEqual([
+    expect(r.steps.map((s) => [s.kind, textOf(s.label), s.value])).toEqual([
       ["dice", "Кубики", 6],
       ["flat", "Сила", 3],
       ["percent", "Експертна атака", 25],
@@ -68,7 +70,7 @@ describe("кроки шкоди", () => {
 
     const r = computeDamageBreakdown({ attacker, target, attack, damageRolls: [6], allParticipants: [attacker, target] });
 
-    expect(r.steps.some((s) => s.side === "target" && s.label === "Експертний захист")).toBe(true);
+    expect(r.steps.some((s) => s.side === "target" && textOf(s.label) === "Експертний захист")).toBe(true);
     expect(r.steps.at(-1)?.after).toBe(r.finalDamage);
   });
 
@@ -113,7 +115,7 @@ describe("кроки шкоди в подіях", () => {
 
     const r = processAttack({ attacker: { ...a, battleData: { ...a.battleData, attacks: [sword] } }, target: t, attack: sword, d20Roll: 15, damageRolls: [4], allParticipants: [a, t], currentRound: 1, battleId: "b1", rng: seq(0) });
 
-    expect(r.battleAction.resultText).toContain("a → e: 0 шкоди | ⛔ e: Кам'яна шкіра");
+    expect(eventTextOf(r.battleAction)).toContain("a → e: 0 шкоди | ⛔ e: Кам'яна шкіра");
   });
 
   it("спел: damageSteps[ціль] містить опір цілі", () => {

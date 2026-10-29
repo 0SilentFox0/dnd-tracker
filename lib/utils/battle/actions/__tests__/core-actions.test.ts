@@ -4,11 +4,13 @@ import { canStandUp, coreActionAvailability, coreActionCost } from "../availabil
 import { runCoreAction } from "../run";
 import { coreActionSchema } from "../schema";
 
+import { textRef } from "@/lib/i18n/text-ref";
 import { createMockParticipant, grantPassive } from "@/lib/utils/battle/__tests__/fixtures/mock-participant";
 import { activeEffectIds, consumeAttackEffects } from "@/lib/utils/battle/attack/consume-effects";
 import { passivePerception } from "@/lib/utils/battle/checks";
 import { applyCondition5e } from "@/lib/utils/battle/conditions";
 import { baseMovement, remainingMovement } from "@/lib/utils/battle/grid/path";
+import { eventTextOf } from "@/lib/utils/battle/log/__tests__/event-text";
 import { finishTurnEffects } from "@/lib/utils/battle/turn/end-turn-cleanup";
 import { processStartOfTurn } from "@/lib/utils/battle/turn/start-end";
 import { resetTurnState } from "@/lib/utils/battle/turn/turn-state";
@@ -125,7 +127,7 @@ describe("core actions", () => {
     expect(out.battleData.movementUsed).toBe(3);
     expect(out.actionFlags.hasUsedAction).toBe(false);
 
-    expect(() => run([a], { action: "standUp", participantId: "a" })).toThrow(expect.objectContaining({ message: "Ви не лежите" }));
+    expect(() => run([a], { action: "standUp", participantId: "a" })).toThrow(expect.objectContaining({ message: "battleActions.reject.notProne" }));
 
     const tired = { ...get(prone, "a"), battleData: { ...get(prone, "a").battleData, movementUsed: 4 } };
 
@@ -146,9 +148,9 @@ describe("core actions", () => {
     const stuck = get({ participants: held }, "a");
 
     expect(baseMovement(stuck)).toBe(0);
-    expect(() => run(held, { action: "standUp", participantId: "a" })).toThrow(expect.objectContaining({ message: "Не можна встати: швидкість 0" }));
+    expect(() => run(held, { action: "standUp", participantId: "a" })).toThrow(expect.objectContaining({ message: "battleActions.reject.standSpeedZero" }));
     expect(canStandUp(stuck)).toBe(false);
-    expect(coreActionAvailability("standUp", stuck, held, null)).toEqual({ ok: false, reason: "Не можна встати: швидкість 0" });
+    expect(coreActionAvailability("standUp", stuck, held, null)).toEqual({ ok: false, reason: textRef("battleActions.reject.standSpeedZero") });
   });
 });
 
@@ -172,7 +174,7 @@ describe("hide / ready / readiedAttack", () => {
     const hidden = get(win, "a");
 
     expect(hidden.actionFlags.hasUsedAction).toBe(true);
-    expect(hidden.battleData.activeEffects[0]).toMatchObject({ name: "Схований", consumeOn: "ownAttack", duration: 10, effects: [{ type: "hidden" }] });
+    expect(hidden.battleData.activeEffects[0]).toMatchObject({ name: "Hidden", consumeOn: "ownAttack", duration: 10, effects: [{ type: "hidden" }] });
     expect(hidden.battleData.activeEffects[0].abilityEffects).toHaveLength(2);
 
     const tie = hideRun(stealthy("a", dc - 11), foe, () => 0.5);
@@ -203,7 +205,7 @@ describe("hide / ready / readiedAttack", () => {
     const out = run([a, mk("foe", "enemy", 1)], { action: "readiedAttack", participantId: "a", targetId: "foe" }, map);
 
     expect(out.actions?.[0]).toMatchObject({ actionType: "retaliation", actorId: "a" });
-    expect(out.actions?.[0].resultText.startsWith("Підготовлена атака:")).toBe(true);
+    expect(eventTextOf(out.actions?.[0] as never).startsWith("Підготовлена атака:")).toBe(true);
     expect(get(out, "a").actionFlags).toMatchObject({ hasUsedReaction: true, hasUsedAction: false });
     expect(get(out, "a").battleData.readied).toBeUndefined();
   });
@@ -215,8 +217,8 @@ describe("hide / ready / readiedAttack", () => {
 
     const call = (ps: BattleParticipant[], target = "foe", m: BattleMapConfig | null = map) => () => run(ps, { action: "readiedAttack", participantId: "a", targetId: target }, m);
 
-    expect(call([withSword(a, false), foe])).toThrow(expect.objectContaining({ message: "Атаку не підготовлено" }));
-    expect(call([{ ...a, actionFlags: { ...a.actionFlags, hasUsedReaction: true } }, foe])).toThrow(expect.objectContaining({ message: "Реакцію вже витрачено" }));
+    expect(call([withSword(a, false), foe])).toThrow(expect.objectContaining({ message: "battleActions.reject.readiedMissing" }));
+    expect(call([{ ...a, actionFlags: { ...a.actionFlags, hasUsedReaction: true } }, foe])).toThrow(expect.objectContaining({ message: "battleActions.reject.reactionUsed" }));
     expect(call([a, mk("friend", "ally", 1)], "friend")).toThrow(expect.objectContaining({ code: "action_rejected" }));
     expect(call([a, mk("far", "enemy", 6)], "far")).toThrow(expect.objectContaining({ code: "action_rejected" }));
     expect(call([a, mk("far", "enemy", 6)], "far", null)).not.toThrow();

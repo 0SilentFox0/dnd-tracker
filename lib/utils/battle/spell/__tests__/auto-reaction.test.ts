@@ -3,6 +3,7 @@ import { describe, expect, it } from "vitest";
 import { AttackType, ParticipantSide } from "@/lib/constants/battle";
 import { makeParticipant } from "@/lib/utils/abilities/__tests__/fixtures";
 import { processAttack } from "@/lib/utils/battle/attack/process";
+import { eventTextOf } from "@/lib/utils/battle/log/__tests__/event-text";
 import { castSpell } from "@/lib/utils/battle/spell";
 import type { CastableSpell } from "@/lib/utils/battle/types/spell-process";
 import { DEFAULT_RULES } from "@/lib/utils/rules";
@@ -73,7 +74,7 @@ describe("auto reactions", () => {
 
     expect(hp(all(r), "f")).toBeLessThan(100);
     expect(reacted(all(r))).toBe(true);
-    expect(r.battleAction.resultText).toContain("Синтетична реакція");
+    expect(eventTextOf(r.battleAction)).toContain("Синтетична реакція");
   });
 
   it("a miss triggers it too", () => {

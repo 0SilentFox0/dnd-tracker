@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 
 import { ParticipantSide } from "@/lib/constants/battle";
+import { textOf } from "@/lib/i18n/test/text";
 import { makeParticipant, resolved, seq } from "@/lib/utils/abilities/__tests__/fixtures";
 import { applyRawDamage } from "@/lib/utils/abilities/engine/effects/hp";
 import { applyEffect } from "@/lib/utils/abilities/registry/effects";
@@ -36,7 +37,7 @@ describe("skip_action", () => {
     const out = processStartOfTurn(t, 2, [t], seq(0.49));
 
     expect(out.participant.actionFlags.hasUsedAction).toBe(true);
-    expect(out.abilityMessages.some((m) => m.includes("втрачає дію"))).toBe(true);
+    expect(out.abilityMessages.some((m) => textOf(m).includes("втрачає дію"))).toBe(true);
   });
 
   it("кидок не нижче шансу — дія доступна", () => {

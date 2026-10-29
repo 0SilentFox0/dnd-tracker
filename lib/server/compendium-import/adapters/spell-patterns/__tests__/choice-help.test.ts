@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 
+import { derivedTranslator } from "../../../derived-text";
 import { renderEntries } from "../../../entries";
 import { spellCast } from "../../spell-cast";
 import { deriveSpell } from "../../spell-derive";
@@ -10,7 +11,7 @@ const base = { name: "Synthetic Spell", source: "Test", level: 2, school: "A", t
 const derive = (entries: unknown[], extra: Record<string, unknown> = {}) => {
   const row = { ...base, ...extra, entries };
 
-  return deriveSpell(row, renderEntries(entries).text, "", spellCast(row));
+  return deriveSpell(row, renderEntries(entries).text, "", spellCast(row), derivedTranslator());
 };
 
 describe("chooseOneSpell", () => {

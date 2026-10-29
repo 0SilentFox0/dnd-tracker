@@ -1,4 +1,5 @@
 import { AttackType, CELL_FEET } from "@/lib/constants/battle";
+import { textRef } from "@/lib/i18n/text-ref";
 import { collectModifiers, statWithModifiers } from "@/lib/utils/abilities/engine/core/collect-modifiers";
 import { findParticipant, isActive, withSelf } from "@/lib/utils/abilities/engine/core/participants";
 import { runAbilities } from "@/lib/utils/abilities/engine/core/run-abilities";
@@ -11,8 +12,10 @@ import { rangeDisadvantageReasons } from "@/lib/utils/battle/grid/attack-reach";
 import { footprintDistance } from "@/lib/utils/battle/grid/geometry";
 import { cellsOf, isAdjacent, isOnMap } from "@/lib/utils/battle/grid/occupancy";
 import { isObscured } from "@/lib/utils/battle/grid/terrain";
+import { uniqueLines } from "@/lib/utils/battle/log/lines";
 import { ARMOR_PENALTY_LABEL, armorPenalty, armorPenaltyAffects, isWeaponProficient } from "@/lib/utils/battle/proficiency";
 import type { BattleAttack, BattleMapConfig, BattleParticipant } from "@/types/battle";
+import type { LogLine } from "@/types/text";
 
 export function calculateAttackBonus(
   attacker: BattleParticipant,
@@ -34,15 +37,15 @@ export function isAdjacentAttack(attacker: BattleParticipant, target: BattlePart
 
 export type RollMode = "advantage" | "disadvantage" | "normal";
 
-export type RollModeReasons = { advantage: string[]; disadvantage: string[] };
+export type RollModeReasons = { advantage: LogLine[]; disadvantage: LogLine[] };
 
 type SourceOpts = { extra?: StaticEffect[]; targetId?: string; targetExtra?: StaticEffect[]; map?: BattleMapConfig | null; inspiration?: boolean };
 
-const OBSCURED_ATTACKER_LABEL = "Не бачить ціль (заслонено)";
+const OBSCURED_ATTACKER_LABEL = textRef("battleLog.rollMode.obscuredAttacker");
 
-const OBSCURED_TARGET_LABEL = "Ціль не бачить нападника (заслонено)";
+const OBSCURED_TARGET_LABEL = textRef("battleLog.rollMode.obscuredTarget");
 
-const labels = (entries: { label: string }[]) => entries.map((e) => e.label);
+const labels = (entries: { label: LogLine }[]) => entries.map((e) => e.label);
 
 /** Що з навичок/ефектів дає перевагу чи недолік — назви джерел. */
 export function rollModeReasons(attacker: BattleParticipant, attack: BattleAttack, participants: BattleParticipant[] = [attacker], opts: SourceOpts = {}): RollModeReasons {
@@ -101,7 +104,7 @@ export function rollModeReasons(attacker: BattleParticipant, attack: BattleAttac
     ...(target ? rangeDisadvantageReasons(opts.map, ps, attacker, attack, target) : []),
   ];
 
-  return { advantage: [...new Set(advantage)], disadvantage: [...new Set(disadvantage)] };
+  return { advantage: uniqueLines(advantage), disadvantage: uniqueLines(disadvantage) };
 }
 
 /** Режим кидка з навичок; forced — якщо хоч одне джерело є (взаємне скасування теж вирішене навичками). */

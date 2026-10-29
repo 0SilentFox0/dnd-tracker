@@ -1,6 +1,7 @@
 import { z } from "zod";
 
 import { API_ERRORS } from "@/lib/constants/api-errors";
+import { textRef } from "@/lib/i18n/text-ref";
 import { ownerHeroNames, randomizeUnitControl, setUnitController } from "@/lib/utils/battle/participant/unit-control";
 import type { BattleMutationContext, MutationResult } from "@/lib/utils/battle/pipeline/run-battle-mutation";
 import { BattleRuleError, dmEvent } from "@/lib/utils/battle/store";
@@ -19,7 +20,7 @@ export function unitControlMutation(ctx: BattleMutationContext, body: UnitContro
   return {
     participants: outcome.participants,
     pending: ctx.pending,
-    events: [dmEvent(ctx.scene.round, outcome.resultText)],
+    events: [dmEvent(ctx.scene.round, outcome.text)],
   };
 }
 
@@ -30,9 +31,9 @@ function assign(ctx: BattleMutationContext, body: Extract<UnitControlBody, { mod
 
   const owner = result.unit.basicInfo.controlledBy;
 
-  const who = ownerHeroNames(result.participants, owner) || "ДМ";
+  const who = ownerHeroNames(result.participants, owner) || textRef("battleLog.dm.name");
 
-  return { participants: result.participants, resultText: `🎮 ДМ передає ${result.unit.basicInfo.name} під керування ${who}` };
+  return { participants: result.participants, text: textRef("battleLog.dm.unitAssigned", { unit: result.unit.basicInfo.name, who }) };
 }
 
 function random(ctx: BattleMutationContext) {
@@ -42,5 +43,5 @@ function random(ctx: BattleMutationContext) {
 
   const given = assigned.map(({ unit, owner }) => `${unit.basicInfo.name} → ${ownerHeroNames(participants, owner)}`);
 
-  return { participants, resultText: `🎲 ДМ роздає вільних юнітів: ${given.join(", ")}` };
+  return { participants, text: textRef("battleLog.dm.unitsRandomized", { list: given.join(", ") }) };
 }

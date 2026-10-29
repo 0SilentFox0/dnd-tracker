@@ -3,7 +3,9 @@ import { describe, expect, it } from "vitest";
 import { checkReturnToStart } from "../return-to-start";
 
 import { ParticipantSide } from "@/lib/constants/battle";
+import { textRef } from "@/lib/i18n/text-ref";
 import { createMockParticipant, grantPassive } from "@/lib/utils/battle/__tests__/fixtures/mock-participant";
+import { REJECT } from "@/lib/utils/battle/store/reject";
 import type { BattleMapConfig, BattleParticipant } from "@/types/battle";
 
 const map: BattleMapConfig = { cols: 10, rows: 5, background: null, opacity: 0.3 };
@@ -42,23 +44,23 @@ describe("checkReturnToStart", () => {
   });
 
   it("без карти — відмова", () => {
-    expect(checkReturnToStart(null, [maiden()], maiden())).toEqual({ ok: false, error: "Повернутися неможливо" });
+    expect(checkReturnToStart(null, [maiden()], maiden())).toEqual({ ok: false, error: textRef(REJECT.returnImpossible) });
   });
 
   it("без прапорця — відмова", () => {
-    expect(err(maiden({ flag: false }))).toBe("Повернутися неможливо");
+    expect(err(maiden({ flag: false }))).toEqual(textRef(REJECT.returnImpossible));
   });
 
   it("до атаки — відмова", () => {
-    expect(err(maiden({ attacked: false }))).toBe("Повернення доступне лише після атаки");
+    expect(err(maiden({ attacked: false }))).toEqual(textRef(REJECT.returnAfterAttack));
   });
 
   it("вже поверталася цього ходу — відмова", () => {
-    expect(err(maiden({ returned: true }))).toBe("Повернутися неможливо");
+    expect(err(maiden({ returned: true }))).toEqual(textRef(REJECT.returnImpossible));
   });
 
   it("немає стартової клітинки — відмова", () => {
-    expect(err(maiden({ start: false }))).toBe("Повернутися неможливо");
+    expect(err(maiden({ start: false }))).toEqual(textRef(REJECT.returnImpossible));
   });
 
   it("стартову клітинку зайняли — без накладання", () => {
@@ -70,6 +72,6 @@ describe("checkReturnToStart", () => {
       battleData: { ...b.battleData, position: { x: 1, y: 2 } },
     };
 
-    expect(err(maiden(), [blocker])).toBe("Повернутися неможливо: клітинка зайнята");
+    expect(err(maiden(), [blocker])).toEqual(textRef(REJECT.returnOccupied));
   });
 });

@@ -6,6 +6,7 @@ import { API_ERRORS } from "@/lib/constants/api-errors";
 import { AttackType, ParticipantSide } from "@/lib/constants/battle";
 import { legendaryMutation } from "@/lib/server/battles/mutations/core-action/legendary-mutation";
 import { resolved } from "@/lib/utils/abilities/__tests__/fixtures";
+import { eventTextOf } from "@/lib/utils/battle/log/__tests__/event-text";
 import { BattleAccessError } from "@/lib/utils/battle/store";
 import type { BattleParticipant } from "@/types/battle";
 
@@ -43,7 +44,7 @@ describe("legendary mutation", () => {
 
     expect(find(out.participants, "dragon").battleData.legendary?.actionsLeft).toBe(2);
     expect(out.events).toHaveLength(2);
-    expect(out.events[0].resultText).toBe("👑 Дракон: легендарна дія — Хвіст (2/3)");
+    expect(eventTextOf(out.events[0])).toBe("👑 Дракон: легендарна дія — Хвіст (2/3)");
     expect(find(out.participants, "hero").combatStats.currentHp).toBeLessThan(20);
   });
 
@@ -62,15 +63,15 @@ describe("legendary mutation", () => {
   });
 
   it("свій хід, бюджет, мертвий, атака по союзнику — відмова без змін", async () => {
-    await expect(legendaryMutation(dm(dragonOf(), 1), attack)).rejects.toMatchObject({ message: "Легендарна дія — лише поза своїм ходом" });
-    await expect(legendaryMutation(dm(dragonOf({ legendary: { actions: 3, actionsLeft: 1, resistLeft: 0 } })), ability(wing.key))).rejects.toMatchObject({ message: "Не вистачає легендарних дій (1 з 2)" });
-    await expect(legendaryMutation(dm(dragonOf({}, { currentHp: 0, status: "dead" })), attack)).rejects.toMatchObject({ message: "Недієздатний учасник не може діяти" });
+    await expect(legendaryMutation(dm(dragonOf(), 1), attack)).rejects.toMatchObject({ message: "battleActions.reject.legendaryOwnTurn" });
+    await expect(legendaryMutation(dm(dragonOf({ legendary: { actions: 3, actionsLeft: 1, resistLeft: 0 } })), ability(wing.key))).rejects.toMatchObject({ message: "battleActions.reject.legendaryShort", params: { left: 1, cost: 2 } });
+    await expect(legendaryMutation(dm(dragonOf({}, { currentHp: 0, status: "dead" })), attack)).rejects.toMatchObject({ message: "battleActions.reject.cannotAct" });
 
     const ally = participant("imp", { side: ParticipantSide.ENEMY, controlledBy: "dm" });
 
     const ctx = context({ participants: [hero, dragonOf(), ally], isDM: true, userId: "dm", rng: () => 0.5 });
 
-    await expect(legendaryMutation(ctx, { ...attack, option: { ...attack.option, targetId: "imp" } })).rejects.toMatchObject({ message: "Ціллю має бути живий ворог" });
+    await expect(legendaryMutation(ctx, { ...attack, option: { ...attack.option, targetId: "imp" } })).rejects.toMatchObject({ message: "battleActions.reject.enemyRequired" });
   });
 
   it("гравець — 403", async () => {

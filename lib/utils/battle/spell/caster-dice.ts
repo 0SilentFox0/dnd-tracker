@@ -1,8 +1,10 @@
 import { ParticipantSourceType } from "@/lib/constants/battle";
+import { joinLines, textRef } from "@/lib/i18n/text-ref";
 import { isFiveE } from "@/lib/utils/battle/attack/ability";
 import { type SpellDice, spellDice, spellDice5e } from "@/lib/utils/spells/model/dice";
 import type { SpellEffect } from "@/lib/utils/spells/model/schema";
 import type { BattleParticipant } from "@/types/battle";
+import type { LogLine } from "@/types/text";
 
 export const upcastSteps = (spellLevel: number, castLevel: number): number => Math.max(0, castLevel - spellLevel);
 
@@ -21,25 +23,29 @@ export function casterSpellDice(
 }
 
 /** «6к10»: кубики за рівнем героя і майстерністю школи, без плоских бонусів. */
-export function spellFormulaLabel(caster: BattleParticipant, spell: Parameters<typeof casterSpellDice>[1], castLevel?: number): string {
+export function spellFormulaLabel(caster: BattleParticipant, spell: Parameters<typeof casterSpellDice>[1], castLevel?: number): LogLine {
   const { count, sides } = casterSpellDice(caster, spell, castLevel);
 
-  return count === 0 ? "без кубиків" : `${count}к${sides}`;
+  return count === 0 ? textRef("battleActions.spell.noDice") : textRef("battleActions.spell.formula", { count, sides });
 }
 
-const diceLabel = (dice: string) => dice.replace("d", "к");
+const diceLabel = (dice: string): LogLine => {
+  const m = /^(\d+)d(\d+)$/.exec(dice);
+
+  return m ? textRef("battleActions.spell.formula", { count: Number(m[1]), sides: Number(m[2]) }) : dice;
+};
 
 /** Сила заклинання без кубиків каста: діапазон byDistance або кубики лікування варіантів; "" — шкоди/лікування немає. */
-export function spellEffectsFormula(effects: SpellEffect[]): string {
+export function spellEffectsFormula(effects: SpellEffect[]): LogLine {
   const list = effects.flatMap((e) => (e.kind === "chooseOne" ? e.options : [e]));
 
   const ranges = list.flatMap((e) => (e.kind === "dealDamage" && e.byDistance ? [e.byDistance] : []))[0];
 
-  if (ranges) return `${diceLabel(ranges[0].dice)}…${diceLabel(ranges[ranges.length - 1].dice)}`;
+  if (ranges) return joinLines([diceLabel(ranges[0].dice), "…", diceLabel(ranges[ranges.length - 1].dice)]);
 
-  const heals = [...new Set(list.flatMap((e) => (e.kind === "heal" && typeof e.amount === "string" ? [diceLabel(e.amount)] : [])))];
+  const heals = [...new Set(list.flatMap((e) => (e.kind === "heal" && typeof e.amount === "string" ? [e.amount] : [])))];
 
-  if (heals.length > 0) return heals.join(" / ");
+  if (heals.length > 0) return joinLines(heals.map(diceLabel), " / ");
 
-  return list.some((e) => e.kind === "dealDamage" || e.kind === "heal") ? "без кубиків" : "";
+  return list.some((e) => e.kind === "dealDamage" || e.kind === "heal") ? textRef("battleActions.spell.noDice") : "";
 }

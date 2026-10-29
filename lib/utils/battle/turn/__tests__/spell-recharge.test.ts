@@ -1,7 +1,9 @@
 import { describe, expect, it, vi } from "vitest";
 
 import { ParticipantSide, SYSTEM_ACTOR } from "@/lib/constants/battle";
+import { textRef } from "@/lib/i18n/text-ref";
 import { createMockParticipant } from "@/lib/utils/battle/__tests__/fixtures/mock-participant";
+import { textsOf } from "@/lib/utils/battle/log/__tests__/event-text";
 import { joinParticipant, splitParticipant } from "@/lib/utils/battle/store/split-participant";
 import { runAdvanceTurnLoop } from "@/lib/utils/battle/turn/run-advance-turn-loop";
 import { processStartOfTurn } from "@/lib/utils/battle/turn/start-end";
@@ -30,7 +32,7 @@ describe("spell recharge at the owner's turn start", () => {
     const out = processStartOfTurn(p, 2, [p], () => seed);
 
     expect(out.participant.battleData.abilityUsage?.[key].battle).toBe(used);
-    expect(out.rechargeMessages).toEqual([`🔄 Вогняний подих ${message}`]);
+    expect(textsOf(out.rechargeMessages)).toEqual([`🔄 Вогняний подих ${message}`]);
     expect(p.battleData.abilityUsage?.[key].battle).toBe(1);
   });
 
@@ -80,6 +82,6 @@ describe("spell recharge at the owner's turn start", () => {
     const out = runAdvanceTurnLoop({ initiativeOrder: [hero, dragon()], currentTurnIndex: 0, currentRound: 1, battleId: "battle", currentBattleLogLength: 7, pendingSummons: [], rng: () => 4 / 6 });
 
     expect(out.updatedInitiativeOrder[1].battleData.abilityUsage?.[key].battle).toBe(0);
-    expect(out.newLogEntries).toContainEqual(expect.objectContaining({ ...SYSTEM_ACTOR, resultText: "🔄 Вогняний подих перезарядилась (5)", actionIndex: 7, actionType: "ability" }));
+    expect(out.newLogEntries).toContainEqual(expect.objectContaining({ ...SYSTEM_ACTOR, log: [textRef("battleLog.turn.recharged", { pool: "Вогняний подих", roll: 5 })], actionIndex: 7, actionType: "ability" }));
   });
 });

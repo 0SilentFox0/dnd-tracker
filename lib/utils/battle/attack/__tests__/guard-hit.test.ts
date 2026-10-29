@@ -3,6 +3,7 @@ import { describe, expect, it } from "vitest";
 import { AttackType, ParticipantSide } from "@/lib/constants/battle";
 import { makeParticipant, seq } from "@/lib/utils/abilities/__tests__/fixtures";
 import { processAttack } from "@/lib/utils/battle/attack/process";
+import { eventTextOf } from "@/lib/utils/battle/log/__tests__/event-text";
 import type { BattleAttack } from "@/types/battle";
 
 const sword: BattleAttack = { id: "sw", name: "Меч", type: AttackType.MELEE, attackBonus: 5, damageDice: "1d6", damageType: "slashing" };
@@ -41,6 +42,6 @@ describe("guard in a hit", () => {
     expect(g?.combatStats.status).not.toBe("active");
     expect(r.targetUpdated.combatStats.currentHp).toBe(50);
     expect(r.battleAction.hpChanges.find((c) => c.participantId === "g")).toBeDefined();
-    expect(r.battleAction.resultText).toContain("🛡");
+    expect(eventTextOf(r.battleAction)).toContain("🛡");
   });
 });

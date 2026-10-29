@@ -3,6 +3,7 @@ import { describe, expect, it } from "vitest";
 import { AttackType, ParticipantSide } from "@/lib/constants/battle";
 import { makeParticipant } from "@/lib/utils/abilities/__tests__/fixtures";
 import { processAttack } from "@/lib/utils/battle/attack/process";
+import { eventTextOf, rowLines, textsOf } from "@/lib/utils/battle/log/__tests__/event-text";
 import { castSpell } from "@/lib/utils/battle/spell";
 import type { CastableSpell } from "@/lib/utils/battle/types/spell-process";
 import { DEFAULT_RULES } from "@/lib/utils/rules";
@@ -64,7 +65,7 @@ describe("hitRider", () => {
 
     const hit = strike(ps, bow, 15);
 
-    expect(hit.damage?.breakdown.join(" ")).toContain("Синтетичний заряд: +");
+    expect(rowLines(hit.damage?.breakdown ?? []).join(" ")).toContain("Синтетичний заряд: +");
     ps = hit.allParticipantsUpdated as BattleParticipant[];
     expect(charges(ps)).toBe(2);
 
@@ -81,8 +82,8 @@ describe("hitRider", () => {
     const ranged = strike(ps, bow, 15);
 
     expect(charges(base.allParticipantsUpdated)).toBe(3);
-    expect(base.battleAction.actionDetails.damageBreakdown).not.toContain("Синтетичний заряд");
-    expect(ranged.battleAction.actionDetails.damageBreakdown).toContain("Синтетичний заряд: +4");
+    expect(rowLines(base.battleAction.actionDetails.damageRows ?? []).join(" ")).not.toContain("Синтетичний заряд");
+    expect(rowLines(ranged.battleAction.actionDetails.damageRows ?? []).join(" ")).toContain("Синтетичний заряд: +4");
   });
 
   it("consumeOnMiss spends a charge on a miss", () => {
@@ -102,8 +103,8 @@ describe("hitRider", () => {
 
     const lost = (r: ReturnType<typeof strike>) => 200 - r.targetUpdated.combatStats.currentHp;
 
-    expect(crit.battleAction.resultText).toContain("2d6 = 8");
-    expect(plain.battleAction.resultText).toContain("1d6 = 4");
+    expect(eventTextOf(crit.battleAction)).toContain("2d6 = 8");
+    expect(eventTextOf(plain.battleAction)).toContain("1d6 = 4");
     expect(lost(crit)).toBeGreaterThan(lost(plain));
   });
 
@@ -146,7 +147,7 @@ describe("moveSelf", () => {
     const { me, r } = run(foe(10));
 
     expect(me.battleData.position).toEqual({ x: 9, y: 5 });
-    expect(r.messages.join(" ")).toContain("переміщується");
+    expect(textsOf(r.messages).join(" ")).toContain("переміщується");
   });
 
   it("a surrounded target leaves the caster in place with a log line", () => {
@@ -155,6 +156,6 @@ describe("moveSelf", () => {
     const { me, r } = run(foe(10), ring);
 
     expect(me.battleData.position).toEqual({ x: 0, y: 5 });
-    expect(r.messages.join(" ")).toContain("немає вільної клітинки");
+    expect(textsOf(r.messages).join(" ")).toContain("немає вільної клітинки");
   });
 });

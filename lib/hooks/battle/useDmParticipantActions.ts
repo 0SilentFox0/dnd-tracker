@@ -1,6 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
+import { useTranslations } from "next-intl";
 
 import { useBattleScene } from "./useBattleScene";
 import { type UnitControlRow, useUnitControlPanel } from "./useUnitControlPanel";
@@ -31,6 +32,8 @@ interface Options {
 export function useDmParticipantActions({ onChangeHp, onDone }: Options) {
   const { battle, dmControl, actions } = useBattleScene();
 
+  const t = useTranslations("battleDm.refresh");
+
   const confirm = useConfirm();
 
   const unitControl = useUnitControlPanel();
@@ -46,9 +49,9 @@ export function useDmParticipantActions({ onChangeHp, onDone }: Options) {
 
   const refreshSources = async () => {
     const ok = await confirm({
-      title: "Оновити з бібліотеки?",
-      description: "Здібності, атаки, закляття, слоти, СК і швидкість учасників оновляться з бази кампанії. HP, мораль, ефекти й використані ліміти залишаться.",
-      confirmLabel: "Оновити",
+      title: t("title"),
+      description: t("description"),
+      confirmLabel: t("confirm"),
     });
 
     if (ok) actions.refreshSources.mutate({});

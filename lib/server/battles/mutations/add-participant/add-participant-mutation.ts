@@ -4,6 +4,7 @@ import { API_ERRORS } from "@/lib/constants/api-errors";
 import { ParticipantSide, ParticipantSourceType } from "@/lib/constants/battle";
 import { UNIT_QUANTITY } from "@/lib/constants/battle-units";
 import { prisma } from "@/lib/db";
+import { textRef } from "@/lib/i18n/text-ref";
 import { mapCellSchema } from "@/lib/schemas/battles";
 import { applyBakedAuras } from "@/lib/utils/abilities/build/bake";
 import { canStand } from "@/lib/utils/battle/grid/occupancy";
@@ -167,7 +168,7 @@ export function createAddParticipantMutation(deps: AddParticipantDeps = defaultD
       participants: order,
       pending: ctx.pending,
       ...(turnIndex !== ctx.scene.turnIndex && { scene: { turnIndex } }),
-      events: [dmEvent(ctx.scene.round, `DM додав на поле: ${added.map((p) => p.basicInfo.name).join(", ")}`, added.map((p) => ({ participantId: p.basicInfo.id, participantName: p.basicInfo.name })))],
+      events: [dmEvent(ctx.scene.round, textRef("battleLog.dm.added", { names: added.map((p) => p.basicInfo.name).join(", ") }), added.map((p) => ({ participantId: p.basicInfo.id, participantName: p.basicInfo.name })))],
     };
   };
 }

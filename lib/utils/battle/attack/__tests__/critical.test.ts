@@ -1,8 +1,10 @@
 import { describe, expect, it } from "vitest";
 
-import { applyCriticalEffect, critFlavorFor } from "../critical";
+import { applyCriticalEffect, critFlavorIndex } from "../critical";
 
 import { type CriticalEffect, type CriticalEffectType, getCriticalEffect } from "@/lib/constants/critical-effects";
+import { textOf } from "@/lib/i18n/test/text";
+import { dynamicTextRef } from "@/lib/i18n/text-ref";
 import { collectModifiers } from "@/lib/utils/abilities/engine/core/collect-modifiers";
 import { createMockParticipant } from "@/lib/utils/battle/__tests__/fixtures/mock-participant";
 
@@ -11,7 +13,7 @@ const crit = (type: CriticalEffectType, extra: Partial<CriticalEffect["effect"]>
   name: "Тест-ефект",
   description: "опис",
   type: "success",
-  flavor: [],
+  flavorCount: 0,
   effect: { type, duration: 1, ...extra },
 });
 
@@ -150,21 +152,26 @@ describe("applyCriticalEffect", () => {
   });
 });
 
-describe("critFlavorFor", () => {
+describe("critFlavorIndex", () => {
   const effect = getCriticalEffect(6, "success") as CriticalEffect;
 
   const seed = { battleId: "b1", round: 2, attackerId: "x", targetId: "y" };
 
   it("substitutes names and is deterministic for a seed", () => {
-    const a = critFlavorFor(effect, "Семгрун", "Бес", seed);
+    const a = critFlavorIndex(effect, seed);
 
-    expect(a).toBe(critFlavorFor(effect, "Семгрун", "Бес", seed));
-    expect(a).toContain("Семгрун");
-    expect(a).not.toContain("{");
+    expect(a).toBe(critFlavorIndex(effect, seed));
+    expect(a).toBeGreaterThanOrEqual(1);
+    expect(a).toBeLessThanOrEqual(effect.flavorCount);
+
+    const text = textOf(dynamicTextRef(`battleTerms.crits.attack.success.6.flavor.${a}`, { attacker: "Семгрун", target: "Бес" }));
+
+    expect(text).toContain("Семгрун");
+    expect(text).not.toContain("{");
   });
 
   it("the suffix is part of the seed", () => {
-    const phrases = new Set(["a", "b", "c", "d", "e", "f"].map((suffix) => critFlavorFor(effect, "A", "B", { ...seed, suffix })));
+    const phrases = new Set(["a", "b", "c", "d", "e", "f"].map((suffix) => critFlavorIndex(effect, { ...seed, suffix })));
 
     expect(phrases.size).toBeGreaterThan(1);
   });

@@ -32,12 +32,16 @@ import type { SpellSlotProgression } from "@/types/races";
 
 type Gate = Exclude<Awaited<ReturnType<typeof requireCharacterRecord>>, NextResponse>;
 
-async function patchCore({ access, character }: Gate, parsed: z.infer<typeof updateCharacterSchema>) {
+type Parsed = z.infer<typeof updateCharacterSchema>;
+
+type Campaign = Gate["access"]["campaign"];
+
+type CharacterRecord = Gate["character"];
+
+type ClassesResult = Awaited<ReturnType<typeof resolveClasses>>;
+
+async function editableData({ access, character }: Gate, parsed: Parsed) {
   const { userId, campaign, isDM } = access;
-
-  const campaignId = character.campaignId;
-
-  const characterId = character.id;
 
   if (parsed.initiative !== undefined) {
     const { heroMin, heroMax } = campaign.rules.initiative;
@@ -50,22 +54,22 @@ async function patchCore({ access, character }: Gate, parsed: z.infer<typeof upd
     : ({ ...parsed, level: undefined, classes: undefined, archetype: undefined, avatar: undefined, controlledBy: character.controlledBy, type: character.type } as typeof parsed);
 
   if (isDM && data.controlledBy !== undefined) {
-    const owner = await resolveCharacterOwner(campaignId, userId, {type: character.type as "player" | "npc_hero", controlledBy: data.controlledBy ?? character.controlledBy ?? ""});
+    const owner = await resolveCharacterOwner(character.campaignId, userId, {type: character.type as "player" | "npc_hero", controlledBy: data.controlledBy ?? character.controlledBy ?? ""});
 
-    if ("error" in owner) return errorStatusMessage(owner.error);
+    if ("error" in owner) return { early: errorStatusMessage(owner.error) };
 
     data.controlledBy = owner.controlledBy;
   }
 
-  const avatar = await resolveAvatarForPersistence(data.avatar, { campaignId, current: character.avatar });
+  return { data };
+}
 
-  if (!avatar.ok) throw new ContentError(avatar.message, 400);
-
+async function resolveClasses(campaign: Campaign, character: CharacterRecord, data: Parsed) {
   const classesInput = data.classes ? keepStoredPicks(data.classes, character.classes) : undefined;
 
   const applied = classesInput
     ? await applyClasses({
-        campaignId,
+        campaignId: character.campaignId,
         rules: campaign.rules,
         maxLevel: campaign.maxLevel,
         entries: classesInput,
@@ -89,9 +93,19 @@ async function patchCore({ access, character }: Gate, parsed: z.infer<typeof upd
     throw new ContentError(API_ERRORS.MAX_LEVEL_EXCEEDED, 422, undefined, { max: campaign.maxLevel });
   }
 
+  return { classesInput, fromClasses, clearingClasses, bodyData, finalLevel };
+}
+
+async function computeUpdate(gate: Gate, data: Parsed, resolved: ClassesResult) {
+  const { campaign } = gate.access;
+
+  const { character } = gate;
+
+  const { fromClasses, clearingClasses, bodyData, finalLevel } = resolved;
+
   const needsRace = !fromClasses && (finalLevel !== character.level || clearingClasses);
 
-  const race = needsRace ? await loadRaceProgression(campaignId, data.race ?? character.race) : null;
+  const race = needsRace ? await loadRaceProgression(character.campaignId, data.race ?? character.race) : null;
 
   const computed = buildCharacterUpdateData({ character, data: bodyData, campaign, race });
 
@@ -103,6 +117,22 @@ async function patchCore({ access, character }: Gate, parsed: z.infer<typeof upd
     ? tableSlots(finalLevel, (data.spellSlots ?? character.spellSlots) as SpellSlots | null, progression, campaign.maxLevel)
     : undefined;
 
+  return { computed, classSeenLevel, restoredSlots };
+}
+
+interface UpdateWriterInput {
+  character: CharacterRecord;
+  data: Parsed;
+  avatar: string | null | undefined;
+  resolved: ClassesResult;
+  computedState: Awaited<ReturnType<typeof computeUpdate>>;
+}
+
+function updateWriter({ character, data, avatar, resolved, computedState }: UpdateWriterInput) {
+  const { fromClasses, finalLevel } = resolved;
+
+  const { computed, classSeenLevel, restoredSlots } = computedState;
+
   const classesData = fromClasses && {
     class: fromClasses.class,
     subclass: fromClasses.subclass,
@@ -110,21 +140,15 @@ async function patchCore({ access, character }: Gate, parsed: z.infer<typeof upd
     ...(fromClasses.spellcastingAbility && { spellcastingAbility: fromClasses.spellcastingAbility }),
   };
 
-  const changesBackground = data.backgroundId !== undefined || data.backgroundChoices !== undefined || data.backgroundFeatPicks !== undefined;
-
-  if (changesBackground) {
-    await orThrow(rejectIfInActiveBattle(campaignId, [characterId]));
-  }
-
-  const writeUpdate = (db: Pick<Prisma.TransactionClient, "character">, classes: typeof classesInput, choiceFields?: ChoiceFields) =>
+  return (db: Pick<Prisma.TransactionClient, "character">, classes: ClassesResult["classesInput"], choiceFields?: ChoiceFields) =>
     db.character.update({
-      where: { id: characterId },
+      where: { id: character.id },
       data: {
         ...data,
         backgroundChoices: undefined,
         backgroundFeatPicks: undefined,
         classes: classes as unknown as Prisma.InputJsonValue | undefined,
-        avatar: avatar.avatar,
+        avatar,
         level: computed.finalLevel,
         ...computed.abilityScores,
         ...(computed.spellSlots && { spellSlots: computed.spellSlots as Prisma.InputJsonValue }),
@@ -143,6 +167,40 @@ async function patchCore({ access, character }: Gate, parsed: z.infer<typeof upd
       include: { user: { select: PUBLIC_USER_SELECT }, inventory: true },
       omit: { notes: true },
     });
+}
+
+async function patchCore(gate: Gate, parsed: Parsed) {
+  const { access, character } = gate;
+
+  const { userId, campaign, isDM } = access;
+
+  const campaignId = character.campaignId;
+
+  const characterId = character.id;
+
+  const editable = await editableData(gate, parsed);
+
+  if ("early" in editable) return editable.early;
+
+  const { data } = editable;
+
+  const avatar = await resolveAvatarForPersistence(data.avatar, { campaignId, current: character.avatar });
+
+  if (!avatar.ok) throw new ContentError(avatar.message, 400, undefined, avatar.params);
+
+  const resolved = await resolveClasses(campaign, character, data);
+
+  const computedState = await computeUpdate(gate, data, resolved);
+
+  const { computed } = computedState;
+
+  const changesBackground = data.backgroundId !== undefined || data.backgroundChoices !== undefined || data.backgroundFeatPicks !== undefined;
+
+  if (changesBackground) {
+    await orThrow(rejectIfInActiveBattle(campaignId, [characterId]));
+  }
+
+  const writeUpdate = updateWriter({ character, data, avatar: avatar.avatar, resolved, computedState });
 
   const updatedCharacter = data.classes || changesBackground
     ? await prisma.$transaction(async (tx) => {
@@ -156,13 +214,13 @@ async function patchCore({ access, character }: Gate, parsed: z.infer<typeof upd
 
         const before = choicesStateOf(fresh);
 
-        const resolved = changesBackground ? await resolveCharacterChoices({ db: tx, campaignId, rules: campaign.rules, isDM, character: { ...fresh, ...computed.abilityScores, level: finalLevel }, before, after: { ...before, ...mergeBackground(before, data), classes: classes ?? before.classes } }) : null;
+        const choices = changesBackground ? await resolveCharacterChoices({ db: tx, campaignId, rules: campaign.rules, isDM, character: { ...fresh, ...computed.abilityScores, level: resolved.finalLevel }, before, after: { ...before, ...mergeBackground(before, data), classes: classes ?? before.classes } }) : null;
 
-        if (resolved && !resolved.ok) throw resolved.error;
+        if (choices && !choices.ok) throw choices.error;
 
-        return writeUpdate(tx, classes, resolved?.ok ? resolved.fields : undefined);
+        return writeUpdate(tx, classes, choices?.ok ? choices.fields : undefined);
       })
-    : await writeUpdate(prisma, classesInput);
+    : await writeUpdate(prisma, resolved.classesInput);
 
   await notifyCharacterOwners({
     campaignId,
@@ -198,7 +256,7 @@ export const patchOperation = defineCharacterOperation({
 
     const avatar = await resolveAvatarForPersistence(data.avatar, { campaignId: character.campaignId, current: character.avatar });
 
-    if (!avatar.ok) throw new ContentError(avatar.message, 400);
+    if (!avatar.ok) throw new ContentError(avatar.message, 400, undefined, avatar.params);
 
     return { ...data, avatar: avatar.avatar };
   },

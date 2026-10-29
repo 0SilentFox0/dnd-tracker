@@ -6,6 +6,7 @@ import { makeParticipant, seq } from "@/lib/utils/abilities/__tests__/fixtures";
 import type { Effect } from "@/lib/utils/abilities/schema";
 import { createCritGate } from "@/lib/utils/battle/crit-choice/gate";
 import type { CritPicker } from "@/lib/utils/battle/crit-choice/types";
+import { textsOf } from "@/lib/utils/battle/log/__tests__/event-text";
 import { castSpell } from "@/lib/utils/battle/spell";
 import type { CastableSpell } from "@/lib/utils/battle/types/spell-process";
 import { mulberry32 } from "@/lib/utils/common/rng";
@@ -63,7 +64,7 @@ describe("криті на рятівних кидках заклинань", () 
     const r = cast(spellOf([fire]), { e1: 20 }, picking(SAVE_SUCCESS_EFFECTS, "negate_damage"));
 
     expect(get(r, "e1").combatStats.currentHp).toBe(200);
-    expect(r.messages.join("\n")).toContain("Повне уникнення");
+    expect(textsOf(r.messages).join("\n")).toContain("Повне уникнення");
   });
 
   it("без crit нат. 20 при half: половина шкоди", () => {
@@ -110,7 +111,7 @@ describe("криті на рятівних кидках заклинань", () 
     const r = cast(spellOf([fire]), { e1: 20 }, crit, { dc: 30 });
 
     expect(crit).toHaveBeenCalledWith(expect.objectContaining({ kind: "success" }));
-    expect(r.messages.join("\n")).toContain("успіх, половина");
+    expect(textsOf(r.messages).join("\n")).toContain("успіх, половина");
     expect(get(r, "e1").combatStats.currentHp).toBe(197);
     expect(r.battleAction.actionDetails.savingThrows?.[0].result).toBe("success");
   });
@@ -118,7 +119,7 @@ describe("криті на рятівних кидках заклинань", () 
   it("нат. 1 з великим модифікатором проти низької СК — провал, повна шкода", () => {
     const r = cast(spellOf([fire]), { e1: 1 }, picking(SAVE_FAIL_EFFECTS, "prone"), { dc: 5, saveMod: 10 });
 
-    expect(r.messages.join("\n")).toContain("провал");
+    expect(textsOf(r.messages).join("\n")).toContain("провал");
     expect(get(r, "e1").combatStats.currentHp).toBe(194);
     expect(r.battleAction.actionDetails.savingThrows?.[0].result).toBe("fail");
   });

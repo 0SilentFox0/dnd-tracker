@@ -8,9 +8,9 @@ export interface PreviewUnit {
 }
 
 export const PREVIEW_UNITS: readonly PreviewUnit[] = [
-  { id: "caster", name: "Чарівниця", side: "ally" },
-  { id: "ally", name: "Воїн", side: "ally" },
-  { id: "fallen", name: "Полеглий", side: "ally" },
-  { id: "e1", name: "Огр", side: "enemy" },
-  { id: "e2", name: "Лич", side: "enemy" },
+  { id: "caster", name: "Sorceress", side: "ally" },
+  { id: "ally", name: "Warrior", side: "ally" },
+  { id: "fallen", name: "Fallen", side: "ally" },
+  { id: "e1", name: "Ogre", side: "enemy" },
+  { id: "e2", name: "Lich", side: "enemy" },
 ];

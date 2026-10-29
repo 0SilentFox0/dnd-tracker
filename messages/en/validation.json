@@ -15,6 +15,12 @@
   "trackFileInvalid": "A {formats} file up to {maxMb} MB is required",
   "trackTitleTooLong": "Group and title together — up to {max} characters",
   "trackDurationInvalid": "A whole number of seconds from 1 to 86400",
+  "hexColor": "The color must be in #RRGGBB format",
+  "image": {
+    "tooLarge": "The image is too large to process in the browser",
+    "compressFailed": "Could not compress the image"
+  },
   "spellDelayPair": "Fill in both fields or neither",
-  "rulesCustomConflict": "The same condition cannot be added and removed at once"
+  "rulesCustomConflict": "The same condition cannot be added and removed at once",
+  "tooManySpellZones": "Too many spell zones"
 }

@@ -1,6 +1,6 @@
 import { buildBattleActionForCriticalFail } from "./actions";
 
-import { applyCriticalEffect } from "@/lib/utils/battle/attack/critical";
+import { applyCriticalEffect, type CritFlavor } from "@/lib/utils/battle/attack/critical";
 import { attackSourceOf } from "@/lib/utils/battle/attack/source";
 import { type ActionFlow, fire, getP, put } from "@/lib/utils/battle/common/action-flow";
 import { attackKindOf } from "@/lib/utils/battle/common/attack-kind";
@@ -18,11 +18,11 @@ export interface HandleCriticalFailParams {
   targetAC: number;
   currentRound: number;
   battleId: string;
-  critFlavorText?: string;
+  critFlavor?: CritFlavor;
 }
 
 export function handleCriticalFail(params: HandleCriticalFailParams): Omit<ProcessAttackResult, "summons"> {
-  const { flow, attackerId, targetId, attack, d20Roll, attackRoll, targetAC, currentRound, battleId, critFlavorText } = params;
+  const { flow, attackerId, targetId, attack, d20Roll, attackRoll, targetAC, currentRound, battleId, critFlavor } = params;
 
   const criticalEffectApplied = attackRoll.criticalEffect;
 
@@ -54,7 +54,7 @@ export function handleCriticalFail(params: HandleCriticalFailParams): Omit<Proce
     messages: flow.messages,
     battleId,
     currentRound,
-    critFlavorText,
+    critFlavor,
   });
 
   return {

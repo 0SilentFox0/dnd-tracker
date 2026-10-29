@@ -1,6 +1,9 @@
 import { describe, expect, it } from "vitest";
 
 import { SPELLS } from "@/data/library/spells";
+import { textOf } from "@/lib/i18n/test/text";
+import { ukT } from "@/lib/utils/abilities/__tests__/describe-fixtures";
+import { linesText } from "@/lib/utils/abilities/segments";
 import { castableOf, previewCastFx, previewSpellFx } from "@/lib/utils/battle/fx/spell-preview";
 import { readSpellDefinition } from "@/lib/utils/spells/model/read";
 import { spellRules, toBookSpell } from "@/lib/utils/spells/to-book-spell";
@@ -46,20 +49,20 @@ describe("previewSpellFx", () => {
     expect(p.auras).toEqual(["frozen"]);
   });
 
-  it("roots entangle the target with nature and the roots aura", () => {
+  it("roots entangle the target with nature and the roots aura", async () => {
     const p = preview("Корені");
 
     expect(p.spec).toMatchObject({ archetype: "entangle", element: "nature" });
     expect(p.auras).toEqual(["roots"]);
-    expect(p.effects).toContain("без ближніх атак × 1 р.");
+    expect(linesText(await ukT(), p.effects)).toContain("без ближніх атак × 1 р.");
   });
 
-  it("avatar is its own necrotic summon on the caster", () => {
+  it("avatar is its own necrotic summon on the caster", async () => {
     const p = preview("Аватар");
 
     expect(p.spec).toMatchObject({ archetype: "avatar", element: "necrotic", targetIds: ["caster"] });
     expect(p.targets).toEqual([]);
-    expect(p.effects).toEqual(["прикликати 1× обраного юніта"]);
+    expect(linesText(await ukT(), p.effects)).toEqual(["прикликати 1× обраного юніта"]);
   });
 
   it("resurrection heals the fallen ally with the heal frame", () => {
@@ -67,7 +70,7 @@ describe("previewSpellFx", () => {
 
     expect(p.spec).toMatchObject({ archetype: "resurrect" });
     expect(p.targets).toEqual([{ id: "fallen", frame: "heal", auras: [] }]);
-    expect(p.targeting).toBe("полеглий союзник");
+    expect(textOf(p.targeting)).toBe("полеглий союзник");
   });
 });
 

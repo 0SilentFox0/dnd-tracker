@@ -5,13 +5,14 @@ import { mapTerrainSchema } from "@/lib/schemas/battles";
 import { applyTerrain, blockedSet, cellKey, inBounds, occupiedBy, removeSpellZones } from "@/lib/utils/battle/grid";
 import type { BattleMutationContext, MutationResult } from "@/lib/utils/battle/pipeline/run-battle-mutation";
 import { BattleRuleError } from "@/lib/utils/battle/store";
+import { REJECT } from "@/lib/utils/battle/store/reject";
 import type { MapTerrainResponse } from "@/types/api";
 import type { TerrainCell } from "@/types/battle";
 
 
 export type MapTerrainBody = z.infer<typeof mapTerrainSchema>;
 
-const REJECTED = "Клітинка зайнята або поза полем";
+const REJECTED = REJECT.mapOccupied;
 
 const isSpellCell = (c: TerrainCell | undefined) => Boolean(c && (c.zoneId || c.obscured));
 

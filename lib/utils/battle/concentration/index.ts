@@ -1,10 +1,12 @@
 import { CombatStatus } from "@/lib/constants/battle";
+import { textRef } from "@/lib/i18n/text-ref";
 import { findParticipant, replaceParticipant, withActiveEffects } from "@/lib/utils/abilities/engine/core/participants";
 import { upsertTimedEffect } from "@/lib/utils/abilities/engine/effects/timed-effects";
 import { hasCondition, removeEffects } from "@/lib/utils/battle/conditions/query";
 import { resolveSave, rollSave } from "@/lib/utils/battle/saves";
 import type { Ruleset } from "@/lib/utils/rules";
 import type { ActiveEffect, BattleMapConfig, BattleParticipant } from "@/types/battle";
+import type { LogLine } from "@/types/text";
 
 export type ConcentrationTag = NonNullable<ActiveEffect["concentrationOf"]>;
 
@@ -59,14 +61,14 @@ function strip(ps: BattleParticipant[], casterId: string): { participants: Battl
   }) };
 }
 
-export function dropConcentration(ps: BattleParticipant[], casterId: string, reason: string): { participants: BattleParticipant[]; messages: string[] } {
+export function dropConcentration(ps: BattleParticipant[], casterId: string, reason: LogLine): { participants: BattleParticipant[]; messages: LogLine[] } {
   const stripped = strip(ps, casterId);
 
   if (!stripped) return { participants: ps, messages: [] };
 
   const name = findParticipant(ps, casterId)?.basicInfo.name ?? casterId;
 
-  return { participants: stripped.participants, messages: [`🔮 ${name} втрачає концентрацію на «${stripped.spellName}»${reason ? ` (${reason})` : ""}`] };
+  return { participants: stripped.participants, messages: [textRef("battleLog.concentration.lost", { name, spell: stripped.spellName, reason: reason ? textRef("battleLog.concentration.reasonTail", { reason }) : "" })] };
 }
 
 export function beginConcentration(
@@ -76,14 +78,18 @@ export function beginConcentration(
   spellName: string,
   rounds: number,
   round = 0,
-): { participants: BattleParticipant[]; messages: string[] } {
-  const dropped = dropConcentration(ps, casterId, "нове заклинання");
+): { participants: BattleParticipant[]; messages: LogLine[] } {
+  const dropped = dropConcentration(ps, casterId, textRef("battleLog.concentration.reasons.newSpell"));
 
   const caster = findParticipant(dropped.participants, casterId);
 
   if (!caster) return dropped;
 
-  const next = upsertTimedEffect(caster, { timedKey: "concentration", name: `Концентрація: ${spellName}`, type: "buff", rounds, stackable: false, concentration: { castId, spellName } }, round);
+  const upserted = upsertTimedEffect(caster, { timedKey: "concentration", name: spellName, type: "buff", rounds, stackable: false, concentration: { castId, spellName } }, round);
+
+  const label = textRef("battleLog.concentration.effect", { spell: spellName });
+
+  const next = { ...upserted, battleData: { ...upserted.battleData, activeEffects: upserted.battleData.activeEffects.map((e) => (e.concentration?.castId === castId ? { ...e, label } : e)) } };
 
   return { participants: replaceParticipant(dropped.participants, next), messages: dropped.messages };
 }
@@ -135,10 +141,10 @@ function mapCarriesCast(map: BattleMapConfig | null | undefined, castId: string)
 }
 
 /** Заклинання, чиї ефекти, зони, предмети й гранти всі зняті (втеча, СК, дісел, спливання), більше не тримає концентрацію. */
-export function dropOrphanedConcentration(ps: BattleParticipant[], map?: BattleMapConfig | null, round = 0): { participants: BattleParticipant[]; messages: string[] } {
+export function dropOrphanedConcentration(ps: BattleParticipant[], map?: BattleMapConfig | null, round = 0): { participants: BattleParticipant[]; messages: LogLine[] } {
   let next = ps;
 
-  const messages: string[] = [];
+  const messages: LogLine[] = [];
 
   for (const p of ps) {
     const marker = concentrationOn(p);
@@ -149,7 +155,7 @@ export function dropOrphanedConcentration(ps: BattleParticipant[], map?: BattleM
 
     if (mapCarriesCast(map, castId) || next.some((q) => carriesCast(q, castId, round))) continue;
 
-    const dropped = dropConcentration(next, p.basicInfo.id, "ефекти заклинання завершилися");
+    const dropped = dropConcentration(next, p.basicInfo.id, textRef("battleLog.concentration.reasons.effectsEnded"));
 
     next = dropped.participants;
     messages.push(...dropped.messages);
@@ -170,7 +176,7 @@ export function isZoneConcentrationLive(ps: BattleParticipant[], tag: Concentrat
   return !!caster && caster.combatStats.status !== CombatStatus.DEAD && caster.battleData.activeEffects.some((e) => e.concentration?.castId === tag.castId);
 }
 
-export function concentrationCheck(input: { caster: BattleParticipant; damage: number; participants: BattleParticipant[]; rules: Ruleset; rng: () => number }): { participants: BattleParticipant[]; messages: string[] } {
+export function concentrationCheck(input: { caster: BattleParticipant; damage: number; participants: BattleParticipant[]; rules: Ruleset; rng: () => number }): { participants: BattleParticipant[]; messages: LogLine[] } {
   const { caster, damage, participants, rules, rng } = input;
 
   const id = caster.basicInfo.id;
@@ -189,9 +195,9 @@ export function concentrationCheck(input: { caster: BattleParticipant; damage: n
 
   const { result: save, participant: resisted, message } = resolveSave(caster, rolled);
 
-  const head = `🎲 ${caster.basicInfo.name}: концентрація — рятівний кидок ВИТ ${rolled.total} проти СК ${dc}`;
+  const head = textRef("battleLog.concentration.check", { name: caster.basicInfo.name, total: rolled.total, dc });
 
-  if (save.success) return { participants: message ? replaceParticipant(ps, resisted) : ps, messages: [`${head} — утримує`, ...(message ? [message] : [])] };
+  if (save.success) return { participants: message ? replaceParticipant(ps, resisted) : ps, messages: [textRef("battleLog.concentration.holds", { head }), ...(message ? [message] : [])] };
 
-  return { participants: strip(ps, id)?.participants ?? ps, messages: [`${head} — втрачає концентрацію на «${marker.concentration.spellName}»`] };
+  return { participants: strip(ps, id)?.participants ?? ps, messages: [textRef("battleLog.concentration.broke", { head, spell: marker.concentration.spellName })] };
 }

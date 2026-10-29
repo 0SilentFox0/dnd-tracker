@@ -1,15 +1,18 @@
 import type { EffectApplyInput, EffectApplyResult } from "./types";
 
 import { CELL_FEET } from "@/lib/constants/battle";
+import { textRef } from "@/lib/i18n/text-ref";
 import { findParticipant, isActive, replaceParticipant } from "@/lib/utils/abilities/engine/core/participants";
 import type { Effect } from "@/lib/utils/abilities/schema";
+import { seg, type Segment } from "@/lib/utils/abilities/segments";
 import { hazardHit, hazardUnder } from "@/lib/utils/battle/grid/hazard";
 import { isOnMap } from "@/lib/utils/battle/grid/occupancy";
 import { pushAway } from "@/lib/utils/battle/grid/push";
+import type { LogLine } from "@/types/text";
 
 type PushEffect = Extract<Effect, { kind: "push" }>;
 
-export const describePush = (e: PushEffect) => `відштовхнути на ${e.feet} фт від кастера`;
+export const describePush = (e: PushEffect): Segment[] => [seg("summary.effects.push", { feet: e.feet })];
 
 export function applyPush(input: EffectApplyInput<PushEffect>): EffectApplyResult {
   const { ability, effect, ctx } = input;
@@ -22,9 +25,9 @@ export function applyPush(input: EffectApplyInput<PushEffect>): EffectApplyResul
 
   const origin = owner?.battleData.position;
 
-  if (!map || !origin) return { participants: ps, messages: [`↔️ ${ability.name}: відштовхування — без мапи не застосовано`] };
+  if (!map || !origin) return { participants: ps, messages: [textRef("abilityText.log.pushNoMap", { ability: ability.name })] };
 
-  const messages: string[] = [];
+  const messages: LogLine[] = [];
 
   const downed: EffectApplyResult["downed"] = [];
 
@@ -36,14 +39,14 @@ export function applyPush(input: EffectApplyInput<PushEffect>): EffectApplyResul
     const { position, steps } = pushAway(map, ps, origin, target, effect.feet / CELL_FEET);
 
     if (steps === 0) {
-      messages.push(`↔️ ${target.basicInfo.name}: відштовхнути нікуди`);
+      messages.push(textRef("abilityText.log.pushNowhere", { target: target.basicInfo.name }));
       continue;
     }
 
     const moved = { ...target, battleData: { ...target.battleData, position } };
 
     ps = replaceParticipant(ps, moved);
-    messages.push(`↔️ ${ability.name}: ${target.basicInfo.name} відштовхнуто на ${steps * CELL_FEET} фт`);
+    messages.push(textRef("abilityText.log.pushed", { ability: ability.name, target: target.basicInfo.name, feet: steps * CELL_FEET }));
 
     const cell = hazardUnder(map, moved, undefined, ps);
 

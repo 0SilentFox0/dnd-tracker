@@ -55,7 +55,7 @@ describe("convertLegacyArtifact", () => {
   it("конвертер не рахує бонус атаки зброї втратою", () => {
     const r = convertLegacyArtifact({ id: "w", name: "Меч", slot: "weapon", bonuses: { attackBonus: 2 }, modifiers: [{ type: "damageDice", value: "1d8" }], passiveAbility: null } as never);
 
-    expect(r.issues.filter((i) => /attackBonus/.test(i.message))).toEqual([]);
+    expect(r.issues.filter((i) => /attackBonus/.test(JSON.stringify(i.message)))).toEqual([]);
   });
 });
 

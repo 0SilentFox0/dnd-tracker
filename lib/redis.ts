@@ -53,7 +53,7 @@ export function getRedisClient(): Redis | null {
 
     return cachedClient;
   } catch (err) {
-    console.warn("[redis] init failed — running без Redis", {
+    console.warn("[redis] init failed — running without Redis", {
       error: String(err),
     });
 

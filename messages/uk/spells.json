@@ -273,6 +273,21 @@
       "strings": "Нитки ляльковода",
       "vines": "Колючі лози",
       "stag": "Дух лісу"
+    },
+    "badges": {
+      "thorns": "−{value} атака",
+      "rust": "−{value} КБ",
+      "raincloud": "−{value} мораль",
+      "might": "+атака",
+      "siphon": "−{value}% шкоди",
+      "stoneskin": "+КБ"
+    },
+    "previewUnits": {
+      "caster": "Чарівниця",
+      "ally": "Воїн",
+      "fallen": "Полеглий",
+      "e1": "Огр",
+      "e2": "Лич"
     }
   }
 }

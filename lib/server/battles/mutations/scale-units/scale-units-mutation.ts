@@ -2,6 +2,7 @@ import { z } from "zod";
 
 import { API_ERRORS } from "@/lib/constants/api-errors";
 import { LIVE_SCALE_STEP } from "@/lib/constants/battle-balance";
+import { textRef } from "@/lib/i18n/text-ref";
 import { liveScaleEnemyUnits } from "@/lib/utils/battle/balance";
 import type { BattleMutationContext, MutationResult } from "@/lib/utils/battle/pipeline/run-battle-mutation";
 import { BattleRuleError, dmEvent } from "@/lib/utils/battle/store";
@@ -15,7 +16,7 @@ export function scaleUnitsMutation(ctx: BattleMutationContext, body: z.infer<typ
 
   const pct = Math.round((LIVE_SCALE_STEP - 1) * 100);
 
-  const label = body.direction === "buff" ? `Підсилення ворожих юнітів (DM): HP і шкода ×${LIVE_SCALE_STEP}` : `Послаблення ворожих юнітів (DM): HP і шкода ÷${LIVE_SCALE_STEP}`;
+  const label = textRef(body.direction === "buff" ? "battleLog.dm.scaleBuff" : "battleLog.dm.scaleNerf", { step: LIVE_SCALE_STEP });
 
   return {
     participants,

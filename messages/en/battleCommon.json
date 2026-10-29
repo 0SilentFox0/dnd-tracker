@@ -1,0 +1,111 @@
+{
+  "conditions": {
+    "blinded": {
+      "label": "Blinded",
+      "description": "Cannot see: attacks have disadvantage, attacks against it have advantage."
+    },
+    "charmed": {
+      "label": "Charmed",
+      "description": "Cannot attack the charmer; the charmer has advantage on social checks (the engine checks the condition source)."
+    },
+    "deafened": {
+      "label": "Deafened",
+      "description": "Cannot hear; no mechanical effect in combat."
+    },
+    "frightened": {
+      "label": "Frightened",
+      "description": "Disadvantage on attacks while the source of fear is in line of sight (the engine checks the condition source)."
+    },
+    "grappled": {
+      "label": "Grappled",
+      "description": "Speed 0. Under 2024 rules: disadvantage on attacks against everyone except the grappler (the grappler exception is not modelled)."
+    },
+    "incapacitated": {
+      "label": "Incapacitated",
+      "description": "Cannot act or react; concentration is broken."
+    },
+    "invisible": {
+      "label": "Invisible",
+      "description": "Attacks have advantage, attacks against it have disadvantage."
+    },
+    "paralyzed": {
+      "label": "Paralyzed",
+      "description": "Incapacitated and cannot move; auto-fails STR/DEX saves; attacks against it have advantage, melee hits from within 5 ft are critical."
+    },
+    "petrified": {
+      "label": "Petrified",
+      "description": "Incapacitated, cannot move; auto-fails STR/DEX saves; resistance to all damage; immune to poison."
+    },
+    "poisoned": {
+      "label": "Poisoned",
+      "description": "Disadvantage on attacks."
+    },
+    "prone": {
+      "label": "Prone",
+      "description": "Disadvantage on its own attacks; melee attacks against it have advantage, ranged ones have disadvantage."
+    },
+    "restrained": {
+      "label": "Restrained",
+      "description": "Speed 0; disadvantage on attacks and DEX saves; attacks against it have advantage."
+    },
+    "stunned": {
+      "label": "Stunned",
+      "description": "Incapacitated, cannot move; auto-fails STR/DEX saves; attacks against it have advantage."
+    },
+    "unconscious": {
+      "label": "Unconscious",
+      "description": "Incapacitated, cannot move, prone; auto-fails STR/DEX saves; attacks against it have advantage, melee hits from within 5 ft are critical."
+    },
+    "exhaustion": {
+      "label": "Exhaustion",
+      "description": "Stacks in levels 1-6; effects depend on the rules edition (2014 / 2024); level 6 is death."
+    }
+  },
+  "coreActions": {
+    "dash": "Dash",
+    "disengage": "Disengage",
+    "dodge": "Dodge",
+    "help": "Help",
+    "hide": "Hide",
+    "ready": "Ready an attack",
+    "standUp": "Stand up",
+    "grapple": "Grapple",
+    "shove": "Shove",
+    "escape": "Escape"
+  },
+  "cunningStrike": {
+    "poison": "Poison",
+    "trip": "Trip",
+    "withdraw": "Withdraw"
+  },
+  "attackKinds": {
+    "melee": "Melee",
+    "ranged": "Ranged"
+  },
+  "actionKinds": {
+    "attack": "attack",
+    "spell": "spell",
+    "bonus_action": "bonus action",
+    "ability": "ability",
+    "end_turn": "end of turn",
+    "skip_turn": "turn skipped",
+    "morale_skip": "morale",
+    "retaliation": "retaliation",
+    "hazard": "hazard",
+    "event": "event"
+  },
+  "weather": {
+    "rain": "Rain",
+    "storm": "Storm",
+    "snow": "Snow",
+    "blizzard": "Blizzard",
+    "fog": "Fog",
+    "embers": "Fire",
+    "crypt": "Crypt",
+    "clear": "Clear"
+  },
+  "actors": {
+    "system": "System",
+    "dm": "DM"
+  }
+}

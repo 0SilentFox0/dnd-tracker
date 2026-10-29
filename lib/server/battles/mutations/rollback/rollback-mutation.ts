@@ -8,6 +8,7 @@ import { restoreModeSlices } from "@/lib/utils/battle/modes/server";
 import type { BattleMutationContext, MutationResult } from "@/lib/utils/battle/pipeline/run-battle-mutation";
 import type { SnapshotState } from "@/lib/utils/battle/store";
 import { BattleRuleError, loadSnapshotsFrom, restoreParticipantsAt } from "@/lib/utils/battle/store";
+import { REJECT } from "@/lib/utils/battle/store/reject";
 import type { BattleMapConfig } from "@/types/battle";
 
 export const rollbackSchema = z.object({ actionIndex: z.number().int().min(1) });
@@ -41,7 +42,8 @@ export function createRollbackMutation(load: LoadSnapshots = defaultLoad, isActi
     if (!first) {
       throw new BattleRuleError(
         "action_rejected",
-        `Цю дію вже не відкотити: після завершення бою зберігаються лише останні ${BATTLE_SNAPSHOTS_KEPT_AFTER_COMPLETE} станів`,
+        REJECT.rollbackLimit,
+        { count: BATTLE_SNAPSHOTS_KEPT_AFTER_COMPLETE },
       );
     }
 

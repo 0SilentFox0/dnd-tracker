@@ -1,3 +1,4 @@
+/* eslint-disable no-restricted-syntax -- name/description are copied into the stored activeEffects (uk data); the battle UI reads battleTerms.crits.* keys */
 export type CriticalEffectType =
   | "double_damage"
   | "max_damage"
@@ -28,7 +29,7 @@ export interface CriticalEffect {
   name: string;
   description: string;
   type: "success" | "fail";
-  flavor: string[];
+  flavorCount: number;
   effect: {
     type: CriticalEffectType;
     value?: number | string;
@@ -46,11 +47,7 @@ export const CRITICAL_SUCCESS_EFFECTS: CriticalEffect[] = [
     name: "Подвійний урон",
     description: "Урон подвоюється (x2)",
     type: "success",
-    flavor: [
-      "{attacker} вкладає в удар усю вагу тіла — {target} аж відкидає назад!",
-      "{attacker} проходить крізь захист, мов крізь вологий папір, — {target} не встигає закритися!",
-      "{attacker} б'є, і удар лунає, як грім над Асханом, — {target} хитається від болю!",
-    ],
+    flavorCount: 3,
     effect: {
       type: "double_damage",
       value: 2,
@@ -61,11 +58,7 @@ export const CRITICAL_SUCCESS_EFFECTS: CriticalEffect[] = [
     name: "Максимальний урон",
     description: "Урон = максимальне значення кубиків",
     type: "success",
-    flavor: [
-      "Ідеальний удар! {attacker} знаходить найвразливіше місце — {target} це відчуває.",
-      "{attacker} — улюбленець долі: кожна грань кубиків показує максимум.",
-      "{attacker} б'є з холодною точністю майстра — {target} не має чим пом'якшити удар.",
-    ],
+    flavorCount: 3,
     effect: {
       type: "max_damage",
     },
@@ -75,11 +68,7 @@ export const CRITICAL_SUCCESS_EFFECTS: CriticalEffect[] = [
     name: "Advantage на наступну атаку",
     description: "Наступна атака з Advantage",
     type: "success",
-    flavor: [
-      "{attacker} відчуває ритм бою — наступний удар буде ще влучнішим.",
-      "{attacker} спалахує поглядом: кожен рух ворога тепер як на долоні. Ціль: {target}.",
-      "Кров кипить, рука певна — {attacker} уже готує наступний удар.",
-    ],
+    flavorCount: 3,
     effect: {
       type: "advantage_next_attack",
       duration: 2,
@@ -91,11 +80,7 @@ export const CRITICAL_SUCCESS_EFFECTS: CriticalEffect[] = [
     name: "Ослаблення захисту",
     description: "Ціль отримує −2 AC до початку її наступного ходу",
     type: "success",
-    flavor: [
-      "{attacker} розколює обладунок — {target} відчуває, як у броні зяє щілина!",
-      "{target} не втримує щит: ремені лопаються, і він провисає на руці.",
-      "{attacker} б'є — {target} втрачає рівновагу, і захист розсипається.",
-    ],
+    flavorCount: 3,
     effect: {
       type: "ac_debuff",
       value: -2,
@@ -108,11 +93,7 @@ export const CRITICAL_SUCCESS_EFFECTS: CriticalEffect[] = [
     name: "Додатковий урон",
     description: "Додатковий урон +1d6",
     type: "success",
-    flavor: [
-      "{attacker} прокручує лезо в рані — {target} кричить від болю!",
-      "{attacker} додає до удару ще й лікоть — підступно, але дієво.",
-      "{target} відчуває другу хвилю болю: {attacker} зачіпає кістку.",
-    ],
+    flavorCount: 3,
     effect: {
       type: "additional_damage",
       value: "1d6",
@@ -123,11 +104,7 @@ export const CRITICAL_SUCCESS_EFFECTS: CriticalEffect[] = [
     name: "Безкоштовна атака",
     description: "Безкоштовна додаткова атака (1 раз)",
     type: "success",
-    flavor: [
-      "{target} не встигає закритися: {attacker} б'є знову!",
-      "{attacker} рухається швидше за думку — ще одна атака напоготові!",
-      "Вихор сталі: {attacker} одразу ж б'є знову.",
-    ],
+    flavorCount: 3,
     effect: {
       type: "free_attack",
       duration: 1,
@@ -139,11 +116,7 @@ export const CRITICAL_SUCCESS_EFFECTS: CriticalEffect[] = [
     name: "Блокування бонусної дії",
     description: "Ворог втрачає Bonus Action наступного ходу",
     type: "success",
-    flavor: [
-      "Оглушення: {attacker} б'є так, що наступного ходу не до хитрощів. Ціль: {target}.",
-      "{target} хапається за рану й забуває про все, крім неї.",
-      "{target} чує лише дзвін у вухах — дрібні маневри доведеться відкласти.",
-    ],
+    flavorCount: 3,
     effect: {
       type: "block_bonus_action",
       duration: 1,
@@ -155,11 +128,7 @@ export const CRITICAL_SUCCESS_EFFECTS: CriticalEffect[] = [
     name: "Ігнорування реакцій",
     description: "Атака ігнорує реакції цілі",
     type: "success",
-    flavor: [
-      "{attacker} б'є так раптово, що {target} навіть не встигає замахнутися у відповідь.",
-      "Удар зі сліпої зони — {target} не бачить, звідки прийшла смерть.",
-      "{attacker} прослизає під захистом — {target} не має шансу на відсіч.",
-    ],
+    flavorCount: 3,
     effect: {
       type: "ignore_reactions",
       target: "target",
@@ -170,11 +139,7 @@ export const CRITICAL_SUCCESS_EFFECTS: CriticalEffect[] = [
     name: "Mark для Advantage",
     description: "Наступна атака по цілі з Advantage",
     type: "success",
-    flavor: [
-      "{target} розкривається після удару — {attacker} і союзники бачать слабке місце!",
-      "{target} стікає кров'ю — по такій рані легко влучити ще раз.",
-      "{attacker} позначає ціль: тепер {target} — легка здобич.",
-    ],
+    flavorCount: 3,
     effect: {
       type: "advantage_on_target",
       duration: 2,
@@ -186,11 +151,7 @@ export const CRITICAL_SUCCESS_EFFECTS: CriticalEffect[] = [
     name: "Комбо-удар",
     description: "Ще одна атака з Disadvantage",
     type: "success",
-    flavor: [
-      "{attacker} не зупиняється — розворот і ще один, відчайдушний удар!",
-      "Комбо! {attacker} продовжує атаку, хоч і втрачаючи рівновагу.",
-      "{attacker} не може зупинитися — інерція несе далі: ще один удар, грубий, але небезпечний.",
-    ],
+    flavorCount: 3,
     effect: {
       type: "combo_attack",
       value: "disadvantage",
@@ -209,11 +170,7 @@ export const CRITICAL_FAIL_EFFECTS: CriticalEffect[] = [
     name: "Простий промах",
     description: "Промах без додаткових ефектів",
     type: "fail",
-    flavor: [
-      "{attacker} розсікає порожнечу — {target} навіть не здригається.",
-      "{attacker} б'є вбік. Буває й таке.",
-      "{attacker} промахується так, що аж соромно перед побратимами.",
-    ],
+    flavorCount: 3,
     effect: {
       type: "simple_miss",
     },
@@ -223,11 +180,7 @@ export const CRITICAL_FAIL_EFFECTS: CriticalEffect[] = [
     name: "Падіння",
     description: "Prone (лежачи)",
     type: "fail",
-    flavor: [
-      "{attacker} послизається на закривавленій землі й гепається в багнюку!",
-      "Нога підвертається — і ось {attacker} уже на землі, дивлячись у небо.",
-      "Замах надто широкий: {attacker} падає, втрачаючи рівновагу.",
-    ],
+    flavorCount: 3,
     effect: {
       type: "prone",
       duration: 2,
@@ -239,11 +192,7 @@ export const CRITICAL_FAIL_EFFECTS: CriticalEffect[] = [
     name: "Disadvantage на наступну атаку",
     description: "Disadvantage на наступну атаку",
     type: "fail",
-    flavor: [
-      "Пил в очах — {attacker} наступним ударом б'є наосліп.",
-      "Після невдалого замаху рука тремтить — {attacker} втрачає певність.",
-      "{attacker} майже нічого не бачить: піт заливає очі, і ціль розпливається.",
-    ],
+    flavorCount: 3,
     effect: {
       type: "disadvantage_next_attack",
       duration: 2,
@@ -255,11 +204,7 @@ export const CRITICAL_FAIL_EFFECTS: CriticalEffect[] = [
     name: "Втрата бонусної дії",
     description: "Втрата Bonus Action цього ходу",
     type: "fail",
-    flavor: [
-      "{attacker} гарячково виправляє хват — на дрібниці часу вже немає.",
-      "Ремінь заплутується — {attacker} втрачає дорогоцінну мить.",
-      "Збентеження після промаху — {attacker} забуває про задум.",
-    ],
+    flavorCount: 3,
     effect: {
       type: "lose_bonus_action",
       duration: 1,
@@ -271,11 +216,7 @@ export const CRITICAL_FAIL_EFFECTS: CriticalEffect[] = [
     name: "Зброя вислизає",
     description: "Наступне влучання завдає ×0.5 шкоди",
     type: "fail",
-    flavor: [
-      "Руків'я вислизає з пітної долоні: {attacker} наступним ударом б'є слабко.",
-      "{attacker} ледь не впускає зброю, і тепер хват незграбний.",
-      "{attacker} б'є об каміння — лезо тупиться.",
-    ],
+    flavorCount: 3,
     effect: {
       type: "weakened_next_hit",
       value: 0.5,
@@ -288,11 +229,7 @@ export const CRITICAL_FAIL_EFFECTS: CriticalEffect[] = [
     name: "Ослаблення захисту",
     description: "−2 AC до початку наступного ходу",
     type: "fail",
-    flavor: [
-      "{attacker} надто розкривається після замаху — захист нікудишній.",
-      "Пряжка лопається, броня з'їжджає набік — {attacker} лишається без захисту.",
-      "{attacker} розвертається спиною до ворогів: інерція замаху робить своє.",
-    ],
+    flavorCount: 3,
     effect: {
       type: "ac_debuff",
       value: -2,
@@ -305,11 +242,7 @@ export const CRITICAL_FAIL_EFFECTS: CriticalEffect[] = [
     name: "Провокація",
     description: "Провокує Opportunity Attack",
     type: "fail",
-    flavor: [
-      "{attacker} спотикається і відкривається для удару. Поруч: {target}.",
-      "Невдалий випад — {attacker} лишається без прикриття. Поруч: {target}.",
-      "{attacker} помиляється, а {target} це помічає: захист відкрито.",
-    ],
+    flavorCount: 3,
     effect: {
       type: "provoke_opportunity_attack",
       target: "self",
@@ -320,11 +253,7 @@ export const CRITICAL_FAIL_EFFECTS: CriticalEffect[] = [
     name: "Втрата реакції",
     description: "Втрата реакції до наступного ходу",
     type: "fail",
-    flavor: [
-      "Після промаху {attacker} не встигає відповісти на удар.",
-      "{attacker} розсіює увагу: ворог може бити без остраху відсічі.",
-      "{attacker} надто зосереджується на власній помилці, щоб стежити за ворогом.",
-    ],
+    flavorCount: 3,
     effect: {
       type: "lose_reaction",
       duration: 1,
@@ -336,11 +265,7 @@ export const CRITICAL_FAIL_EFFECTS: CriticalEffect[] = [
     name: "Mark для ворога",
     description: "Наступна атака по персонажу з Advantage",
     type: "fail",
-    flavor: [
-      "{attacker} розкривається — тепер кожен ворог бачить слабке місце.",
-      "{attacker} лишається без захисту після промаху, і вороги це помічають.",
-      "{attacker} стоїть як мішень посеред поля бою.",
-    ],
+    flavorCount: 3,
     effect: {
       type: "advantage_on_self",
       duration: 2,
@@ -352,11 +277,7 @@ export const CRITICAL_FAIL_EFFECTS: CriticalEffect[] = [
     name: "Втрата дії",
     description: "Втрата дії (Action)",
     type: "fail",
-    flavor: [
-      "Невдалий удар виснажує — {attacker} наступного ходу відновлює сили.",
-      "Зброя застрягає — {attacker} наступного ходу виколупує її.",
-      "{attacker} втрачає орієнтир: у голові паморочиться, і наступного ходу з бійця користі мало.",
-    ],
+    flavorCount: 3,
     effect: {
       type: "lose_action",
       duration: 1,

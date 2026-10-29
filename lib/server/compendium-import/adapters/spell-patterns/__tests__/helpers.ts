@@ -1,3 +1,4 @@
+import { derivedTranslator } from "../../../derived-text";
 import { spellCast } from "../../spell-cast";
 import { deriveSpell } from "../../spell-derive";
 
@@ -8,5 +9,5 @@ export function spellRow(entries: string[], extra: Record<string, unknown> = {},
 
   const text = entries.join(" ").replace(/\{@\w+ ([^}|]*)[^}]*\}/g, "$1");
 
-  return deriveSpell(row, text, higher, spellCast(row));
+  return deriveSpell(row, text, higher, spellCast(row), derivedTranslator());
 }

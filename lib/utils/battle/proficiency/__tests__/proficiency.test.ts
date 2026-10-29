@@ -3,6 +3,7 @@ import { describe, expect, it } from "vitest";
 import classes from "@/data/templates/srd-5.2/classes.json";
 import { ArtifactSlot } from "@/lib/constants/artifacts";
 import { AttackType } from "@/lib/constants/battle";
+import { textRef } from "@/lib/i18n/text-ref";
 import { makeParticipant } from "@/lib/utils/abilities/__tests__/fixtures";
 import { calculateAttackBonus, rollModeReasons } from "@/lib/utils/battle/attack/bonus";
 import { armorPenalty, isWeaponProficient, parseArmorProficiency, parseWeaponProficiency } from "@/lib/utils/battle/proficiency";
@@ -67,7 +68,7 @@ describe("володіння зброєю й бронею (5e)", () => {
     const wizard = withProf("Wizard", heavy);
 
     expect(armorPenalty(wizard)).toBe(true);
-    expect(rollModeReasons(wizard, sword).disadvantage).toContain("Броня без володіння");
+    expect(rollModeReasons(wizard, sword).disadvantage).toContainEqual(textRef("battleLog.rollMode.armorPenalty"));
 
     const save = (p: BattleParticipant, ability: "strength" | "wisdom") => rollSave({ target: p, ability, dc: 10, participants: [p], rng: () => 0.5 }).mode;
 

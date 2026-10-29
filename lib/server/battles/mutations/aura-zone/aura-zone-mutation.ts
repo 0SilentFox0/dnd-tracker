@@ -1,12 +1,15 @@
 import type { z } from "zod";
 
 import { API_ERRORS } from "@/lib/constants/api-errors";
+import { textRef } from "@/lib/i18n/text-ref";
 import { auraZoneSchema } from "@/lib/schemas/battles";
 import { participantNames } from "@/lib/utils/abilities/engine/core/participants";
 import { applyAuraZone, areaAuras, zoneCandidates } from "@/lib/utils/abilities/engine/effects/area-aura";
 import { requireActor } from "@/lib/utils/battle/common/control";
+import { logFields } from "@/lib/utils/battle/log/lines";
 import type { BattleMutationContext, MutationResult } from "@/lib/utils/battle/pipeline/run-battle-mutation";
 import { BattleRuleError } from "@/lib/utils/battle/store";
+import { REJECT } from "@/lib/utils/battle/store/reject";
 import { assertCanAct } from "@/lib/utils/battle/turn";
 
 
@@ -16,7 +19,7 @@ export function auraZoneMutation(ctx: BattleMutationContext, data: AuraZoneBody)
   const owner = requireActor(ctx, data.participantId, {
     missing: API_ERRORS.BATTLE_PARTICIPANT_NOT_IN_BATTLE,
     forbidden: API_ERRORS.FORBIDDEN,
-    inactive: { code: "participant_dead", message: "Учасник не може діяти" },
+    inactive: { code: "participant_dead", message: REJECT.cannotAct },
   });
 
   const aura = areaAuras(owner).find((a) => a.id === data.auraId);
@@ -35,7 +38,9 @@ export function auraZoneMutation(ctx: BattleMutationContext, data: AuraZoneBody)
 
   const participants = applyAuraZone(ctx.participants, owner, aura, targetIds, ctx.scene.round);
 
-  const who = targetIds.length ? participantNames(ctx.participants, targetIds) : "нікого";
+  const who = targetIds.length ? participantNames(ctx.participants, targetIds) : textRef("battleLog.aura.nobody");
+
+  const zoneText = logFields(textRef("battleLog.aura.inZone", { ability: aura.ability.name, who }));
 
   return {
     participants,
@@ -45,8 +50,8 @@ export function auraZoneMutation(ctx: BattleMutationContext, data: AuraZoneBody)
         type: "ability",
         round: ctx.scene.round,
         actorId: owner.basicInfo.id,
-        resultText: `${aura.ability.name}: у зоні — ${who}`,
-        details: { actorName: owner.basicInfo.name, actorSide: owner.basicInfo.side, actionDetails: { abilityKey: aura.ability.key, skillName: aura.ability.name } },
+        resultText: zoneText.resultText,
+        details: { actorName: owner.basicInfo.name, actorSide: owner.basicInfo.side, actionDetails: { abilityKey: aura.ability.key, skillName: aura.ability.name }, ...(zoneText.log && { log: zoneText.log }) },
       },
     ],
   };

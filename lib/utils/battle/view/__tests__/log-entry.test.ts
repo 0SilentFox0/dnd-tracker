@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 
+import { textOf } from "@/lib/i18n/test/text";
 import { groupLogByRound, logEntryView } from "@/lib/utils/battle/view";
 import type { BattleAction } from "@/types/battle";
 
@@ -27,7 +28,7 @@ describe("logEntryView", () => {
   it("мітка дії, ознака тригера й відсутність деталей", () => {
     const attack = logEntryView({ ...entry("Гоблін б'є"), actionType: "attack" } as BattleAction);
 
-    expect(attack.kindLabel).toBe("атака");
+    expect(textOf(attack.kindLabel)).toBe("атака");
     expect(attack.isTrigger).toBe(false);
     expect(logEntryView(entry("Тригери початку раунду 2: a")).isTrigger).toBe(true);
   });
@@ -35,7 +36,7 @@ describe("logEntryView", () => {
   it("запис небезпеки — мітка «небезпека» і kind hazard", () => {
     const v = logEntryView({ ...entry("Тест: 5 fire шкоди від «Вогонь»"), actionType: "ability", actionDetails: { hazard: { label: "Вогонь", damageType: "fire", damage: 5 } } } as BattleAction);
 
-    expect(v.kindLabel).toBe("небезпека");
+    expect(textOf(v.kindLabel)).toBe("небезпека");
     expect(v.kind).toBe("hazard");
     expect(logEntryView({ ...entry("x"), actionType: "ability" } as BattleAction).kind).toBeUndefined();
   });

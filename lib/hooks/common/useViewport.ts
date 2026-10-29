@@ -2,6 +2,8 @@
 
 import { type PointerEvent, useCallback, useEffect, useEffectEvent, useRef, useState } from "react";
 
+import { clampOffset, focusAt, INITIAL_VIEWPORT, type Viewport, zoomAt,type ZoomBounds } from "@/lib/utils/common/viewport-math";
+
 const DEFAULT_MIN_ZOOM = 1;
 
 const DEFAULT_MAX_ZOOM = 3;
@@ -9,37 +11,6 @@ const DEFAULT_MAX_ZOOM = 3;
 const WHEEL_STEP = 1.1;
 
 export const DRAG_THRESHOLD = 4;
-
-interface Viewport {
-  zoom: number;
-  x: number;
-  y: number;
-}
-
-const INITIAL: Viewport = { zoom: 1, x: 0, y: 0 };
-
-interface ZoomBounds {
-  min: number;
-  max: number;
-}
-
-function clampZoom(z: number, { min, max }: ZoomBounds): number {
-  return Math.min(max, Math.max(min, z));
-}
-
-function clampOffset(o: number, zoom: number, size: number): number {
-  return Math.min(0, Math.max(-(zoom - 1) * size, o));
-}
-
-function zoomAt(v: Viewport, zoom: number, px: number, py: number, w: number, h: number, bounds: ZoomBounds): Viewport {
-  const next = clampZoom(zoom, bounds);
-
-  const cx = (px - v.x) / v.zoom;
-
-  const cy = (py - v.y) / v.zoom;
-
-  return { zoom: next, x: clampOffset(px - cx * next, next, w), y: clampOffset(py - cy * next, next, h) };
-}
 
 export interface ViewportOptions {
   /** один палець не тягне карту (малювання місцевості), щипок масштабує як завжди */
@@ -51,7 +22,7 @@ export interface ViewportOptions {
 }
 
 export function useViewport({ panLocked = false, wheelScrolls = false, minZoom = DEFAULT_MIN_ZOOM, maxZoom = DEFAULT_MAX_ZOOM }: ViewportOptions = {}) {
-  const [view, setView] = useState<Viewport>(INITIAL);
+  const [view, setView] = useState<Viewport>(INITIAL_VIEWPORT);
 
   const locked = useRef(panLocked);
 
@@ -166,7 +137,7 @@ export function useViewport({ panLocked = false, wheelScrolls = false, minZoom =
 
   const wasDragged = useCallback(() => dragged.current, []);
 
-  const reset = useCallback(() => setView(INITIAL), []);
+  const reset = useCallback(() => setView(INITIAL_VIEWPORT), []);
 
   const zoomBy = useCallback((factor: number) => {
     const el = containerRef.current;
@@ -187,11 +158,7 @@ export function useViewport({ panLocked = false, wheelScrolls = false, minZoom =
 
     const h = rect?.height ?? 0;
 
-    setView((v) => {
-      const next = clampZoom(Math.max(v.zoom, zoom), bounds.current);
-
-      return { zoom: next, x: clampOffset(w / 2 - nx * w * next, next, w), y: clampOffset(h / 2 - ny * h * next, next, h) };
-    });
+    setView((v) => focusAt(v, nx, ny, zoom, w, h, bounds.current));
   }, []);
 
   return {

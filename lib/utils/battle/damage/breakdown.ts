@@ -7,10 +7,12 @@ import { getDefenderResistanceBreakdown } from "./breakdown-helpers";
 import { heroAttackDamageParts, heroDamageContext } from "./hero-damage";
 import { applyHeroDmDamageMultiplier } from "./hero-dm-multiplier";
 import { calculateDamageWithModifiersImpl } from "./impl";
+import { multiplierRow, ruleRow } from "./rows";
 import { applyWeaponFlat } from "./weapon-flat";
 
 import { AttackType } from "@/lib/constants/battle";
-import { attackAbilityLabelFor, attackDamageModifier, isFiveE } from "@/lib/utils/battle/attack/ability";
+import { textRef } from "@/lib/i18n/text-ref";
+import { attackAbilityFor, attackDamageModifier, isFiveE } from "@/lib/utils/battle/attack/ability";
 import { critDoublesDice } from "@/lib/utils/battle/attack/crit-dice";
 import { attackKindOf } from "@/lib/utils/battle/common/attack-kind";
 import { diceCount } from "@/lib/utils/common/dice";
@@ -68,7 +70,7 @@ export function computeDamageBreakdown(
       targetId: target.basicInfo.id,
       additionalDamage: additionalDamageModifiers,
       ...heroDamageContext(attacker, attack, contextRolls),
-      ...(isFiveE(attacker) && { statLabel: attackAbilityLabelFor(attacker, attack) }),
+      ...(isFiveE(attacker) && { statKey: attackAbilityFor(attacker, attack) }),
     },
   );
 
@@ -80,18 +82,16 @@ export function computeDamageBreakdown(
 
   if (isCritical && !doubleDice) {
     totalDamage *= 2;
-    breakdown.push(`──────────`);
-    breakdown.push(`× 2 (крит) = ${totalDamage} урону`);
-    steps.push({ label: "Критичне влучання", side: "attacker", kind: "multiplier", value: 2, after: totalDamage });
+    breakdown.push(ruleRow(), multiplierRow(textRef("battleLog.damage.rows.crit"), 2, totalDamage));
+    steps.push({ label: textRef("battleLog.damage.steps.crit"), side: "attacker", kind: "multiplier", value: 2, after: totalDamage });
   }
 
   const flat = applyWeaponFlat(totalDamage, attack);
 
   totalDamage = flat.damage;
 
-  if (flat.step && flat.line) {
-    breakdown.push(`──────────`);
-    breakdown.push(flat.line);
+  if (flat.step && flat.rows) {
+    breakdown.push(...flat.rows);
     steps.push(flat.step);
   }
 
@@ -103,19 +103,17 @@ export function computeDamageBreakdown(
 
   totalDamage = heroDm.damage;
 
-  if (heroDm.breakdownLine) {
-    breakdown.push(`──────────`);
-    breakdown.push(heroDm.breakdownLine);
-    steps.push({ label: "Архетип", side: "attacker", kind: "multiplier", value: heroDm.multiplier, after: totalDamage });
+  if (heroDm.breakdownRow) {
+    breakdown.push(ruleRow(), heroDm.breakdownRow);
+    steps.push({ label: textRef("battleLog.damage.steps.archetype"), side: "attacker", kind: "multiplier", value: heroDm.multiplier, after: totalDamage });
   }
 
   const balance = applyBalanceDamageMultiplier(attacker, totalDamage);
 
   if (balance.multiplier !== 1) {
     totalDamage = balance.damage;
-    breakdown.push(`──────────`);
-    breakdown.push(`× ${balance.multiplier.toFixed(2)} (рівний бій) = ${totalDamage}`);
-    steps.push({ label: "Рівний бій", side: "attacker", kind: "multiplier", value: balance.multiplier, after: totalDamage });
+    breakdown.push(ruleRow(), multiplierRow(textRef("battleLog.damage.rows.fairBattle"), balance.multiplier.toFixed(2), totalDamage));
+    steps.push({ label: textRef("battleLog.damage.steps.fairBattle"), side: "attacker", kind: "multiplier", value: balance.multiplier, after: totalDamage });
   }
 
   const damageType = attack.damageType ?? "physical";

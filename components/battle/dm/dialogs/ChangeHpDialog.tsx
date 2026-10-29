@@ -1,6 +1,7 @@
 "use client";
 
 import { type FormEvent, useState } from "react";
+import { useTranslations } from "next-intl";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -17,7 +18,7 @@ interface ChangeHpDialogProps {
   isPending?: boolean;
 }
 
-/** Закриває батько в onSuccess мутації — до того видно «Зберігаємо…», а помилка не губить введене. */
+/** The parent closes it in the mutation onSuccess: until then "Saving…" shows and an error keeps the input. */
 export function ChangeHpDialog({ participant, ...rest }: ChangeHpDialogProps) {
   if (!participant) return null;
 
@@ -25,6 +26,10 @@ export function ChangeHpDialog({ participant, ...rest }: ChangeHpDialogProps) {
 }
 
 function ChangeHpDialogBody({ participant, onClose, onConfirm, isPending }: ChangeHpDialogProps & { participant: BattleParticipant }) {
+  const t = useTranslations("battleDm.changeHp");
+
+  const tActions = useTranslations("common.actions");
+
   const { currentHp, maxHp } = participant.combatStats;
 
   const [value, setValue] = useState(() => String(currentHp));
@@ -45,18 +50,18 @@ function ChangeHpDialogBody({ participant, onClose, onConfirm, isPending }: Chan
       onOpenChange={(open) => !open && onClose()}
       size="md"
       hud
-      title="Змінити HP"
-      description={<>{participant.basicInfo.name} — поточний HP: {currentHp} / {maxHp}</>}
+      title={t("title")}
+      description={t("description", { name: participant.basicInfo.name, current: currentHp, max: maxHp })}
       footer={
         <>
-          <Button type="button" variant="outline" onClick={onClose}>Скасувати</Button>
-          <Button type="submit" form={FORM_ID} disabled={!isValid || isPending}>{isPending ? "Зберігаємо…" : "Зберегти"}</Button>
+          <Button type="button" variant="outline" onClick={onClose}>{tActions("cancel")}</Button>
+          <Button type="submit" form={FORM_ID} disabled={!isValid || isPending}>{isPending ? t("saving") : tActions("save")}</Button>
         </>
       }
     >
-      {/* noValidate: значення понад max обрізається до max, а не блокується браузером */}
+      {/* noValidate: a value above max is clamped, not blocked by the browser */}
       <form id={FORM_ID} noValidate onSubmit={submit} className="space-y-2 py-2">
-        <Label htmlFor="change-hp-value">Нове значення HP (0 … {maxHp})</Label>
+        <Label htmlFor="change-hp-value">{t("value", { max: maxHp })}</Label>
         <Input id="change-hp-value" type="number" min={0} max={maxHp} value={value} onChange={(e) => setValue(e.target.value)} />
       </form>
     </ResponsiveDialog>

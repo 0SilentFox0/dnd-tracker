@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 
 import { CombatStatus, ParticipantSide } from "@/lib/constants/battle";
+import { textOf } from "@/lib/i18n/test/text";
 import { makeParticipant, resolved, seq } from "@/lib/utils/abilities/__tests__/fixtures";
 import { applyEffect } from "@/lib/utils/abilities/registry/effects";
 import type { Effect } from "@/lib/utils/abilities/schema";
@@ -86,7 +87,7 @@ describe("applyCondition 5e", () => {
     const dead = apply(cond("exhaustion", { levels: 2 }), { target: t, ps: second.participants });
 
     expect(target(dead).combatStats.status).toBe(CombatStatus.DEAD);
-    expect(dead.messages.join(" ")).toContain("помирає від виснаження");
+    expect(dead.messages.map((m) => textOf(m)).join(" ")).toContain("помирає від виснаження");
   });
 
   it("2024 exhaustion does not halve max HP", () => {

@@ -1,3 +1,4 @@
+import { textRef } from "@/lib/i18n/text-ref";
 import { findParticipant, replaceParticipant } from "@/lib/utils/abilities/engine/core/participants";
 import type { ActionFlow } from "@/lib/utils/battle/common/action-flow";
 import { grantCastsOf } from "@/lib/utils/battle/spell/cast/state";
@@ -50,7 +51,7 @@ export function applyGrantCasts({ flow, effects, casterId, targetIds, spell, cas
       if (!holder) continue;
 
       flow.ps = replaceParticipant(flow.ps, withGrant(holder, grant, effect.uses ? { key: poolKey, label: effect.label, max: effect.uses } : undefined));
-      flow.messages.push(`✨ ${holder.basicInfo.name}: «${effect.label}» — підкаст на ${effect.duration.rounds} р.`);
+      flow.messages.push(textRef("battleLog.spellFx.grantCast", { holder: holder.basicInfo.name, label: effect.label, rounds: effect.duration.rounds }));
     }
   }
 }

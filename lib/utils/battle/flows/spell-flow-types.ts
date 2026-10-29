@@ -1,6 +1,8 @@
+import type { Segment } from "@/lib/utils/abilities/segments";
 import type { SkillRadius, SpellChain } from "@/lib/utils/battle/spell/spell-targeting";
 import type { SpellTargetFilter } from "@/lib/utils/spells/model/schema";
 import type { GridPoint, SpellTemplate } from "@/types/battle";
+import type { LogLine } from "@/types/text";
 
 export type SpellTargetMode = "none" | "single" | "multi" | "all" | "template";
 
@@ -24,7 +26,7 @@ export interface SpellPick {
   filter?: SpellTargetFilter;
   castLevel?: number;
   /** підписи варіантів chooseOne; гравець обирає один перед кастом */
-  options?: string[];
+  options?: Segment[][];
   /** кількість кубиків вводить кастер (напр. висота падіння); diceSlots відповідають поточному вводу */
   inputDice?: { label: string; max: number; sides: number };
   /** плитка inline-гранту: на сервер йде справжній spellId і ключ гранту */
@@ -36,7 +38,7 @@ export interface SpellPick {
 
 export interface SlotOption {
   key: string;
-  label: string;
+  label: LogLine;
   castLevel: number;
   left: number;
 }
@@ -57,7 +59,7 @@ export interface SpellFlowState {
   optionIndex?: number;
   inputCount?: number;
   damage: (number | undefined)[];
-  error?: string;
+  error?: LogLine;
   /** сервер зупинив каст: ДМ обирає ефект крита */
   waitingCrit?: boolean;
 }
@@ -85,12 +87,12 @@ export type SpellFlowAction =
   | { type: "SUBMIT" }
   | { type: "WAIT_CRIT" }
   | { type: "SUCCESS" }
-  | { type: "FAIL"; error: string }
+  | { type: "FAIL"; error: LogLine }
   | { type: "CLOSE" };
 
 export interface SpellWidening {
   /** коротко для рядка списку */
-  badge: string;
+  badge: LogLine;
   /** повністю для деталей заклинання */
-  note: string;
+  note: LogLine;
 }

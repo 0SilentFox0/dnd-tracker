@@ -37,7 +37,98 @@ export const updateInventorySchema = z.object({
 
 type Gate = Exclude<Awaited<ReturnType<typeof requireCharacterRecord>>, NextResponse>;
 
-async function updateInventoryCore({ access, character }: Gate, data: z.infer<typeof updateInventorySchema>) {
+type Tx = Prisma.TransactionClient;
+
+type Input = z.infer<typeof updateInventorySchema>;
+
+type CurrentInventory = Awaited<ReturnType<Tx["characterInventory"]["findUnique"]>>;
+
+function planEquipSlot(current: CurrentInventory, equipSlot: NonNullable<Input["equipSlot"]>) {
+  const equippedNow = (current?.equipped ?? {}) as EquippedItems;
+
+  const occupant = equippedNow[equipSlot.slot] as string | undefined;
+
+  const displaced = occupant && occupant !== equipSlot.artifactId ? occupant : undefined;
+
+  if (displaced && normalizeStash(current?.stash).includes(displaced)) throw new ContentError(API_ERRORS.ITEM_ALREADY_IN_STASH, 409);
+
+  return { displaced, nextEquipped: buildEquipped(equippedNow, equipSlot.slot, equipSlot.artifactId) };
+}
+
+async function checkOffHand(tx: Tx, scope: { campaignId: string; rules: ReturnType<typeof parseRules> }, nextEquipped: EquippedItems | undefined, current: CurrentInventory) {
+  const { campaignId, rules } = scope;
+
+  const shieldId = nextEquipped?.shield;
+
+  if (typeof shieldId !== "string" || !shieldId || shieldId === (current?.equipped as EquippedItems | undefined)?.shield) return;
+
+  const shieldArtifact = await tx.artifact.findFirst({ where: { id: parseItemRef(shieldId)?.baseId ?? shieldId, campaignId }, select: { slot: true, bonuses: true, modifiers: true } });
+
+  if (shieldArtifact && shieldArtifact.slot !== ArtifactSlot.SHIELD) {
+    if (!canEquipOffHand(shieldArtifact, rules.classes.enabled)) throw new ContentError(API_ERRORS.OFF_HAND_EQUIP, 422);
+  }
+}
+
+async function checkEquippedConflicts(tx: Tx, scope: { campaignId: string; characterId: string; rules: ReturnType<typeof parseRules> }, nextEquipped: EquippedItems, equipSlot: Input["equipSlot"]) {
+  const { campaignId, characterId, rules } = scope;
+
+  const ids = Object.values(nextEquipped).filter((v): v is string => !!v);
+
+  // the legacy grid editor knows non-unique gear only for 5e item campaigns or composed refs: HOMM keeps one query-free check
+  const rows =
+    (rules.items.enabled || ids.some((ref) => isComposedRef(ref) || !!parseItemRef(ref)?.param)) && ids.length > 0
+      ? new Map((await tx.artifact.findMany({ where: { id: { in: [...new Set(ids.flatMap(refArtifactIds))] }, campaignId }, select: { id: true, name: true, slot: true, modifiers: true } })).map((r) => [r.id, r]))
+      : null;
+
+  const isUnique = rows ? uniqueChecker(rows) : undefined;
+
+  if (uniqueConflict(ids, isUnique)) throw new ContentError(API_ERRORS.ARTIFACT_ALREADY_EQUIPPED, 409);
+
+  const checkIds = equipSlot ? (equipSlot.artifactId ? [equipSlot.artifactId] : []) : ids;
+
+  if (rows && checkIds.some((ref) => {
+    const parsed = parseItemRef(ref);
+
+    const owner = parsed && rows.get(parsed.propertyId ?? parsed.baseId);
+
+    return (!!parsed?.param || !!(owner && itemStatsFromRow(owner)?.parameter)) && !resolveItemRow(ref, rows);
+  })) throw new ContentError(API_ERRORS.CHARACTER_ITEM_PARAM_INVALID, 422);
+
+  if (checkIds.length > 0) await rejectIfHeldByOther(tx, { campaignId, characterId }, checkIds, isUnique);
+}
+
+async function rejectIfHeldByOther(tx: Tx, scope: { campaignId: string; characterId: string }, checkIds: string[], isUnique: ReturnType<typeof uniqueChecker> | undefined) {
+  const others = await tx.characterInventory.findMany({
+    where: { character: { campaignId: scope.campaignId }, characterId: { not: scope.characterId } },
+    select: { characterId: true, equipped: true, stash: true, character: { select: { name: true } } },
+  });
+
+  const held = others.map((o) => ({ characterId: o.characterId, equipped: o.equipped as EquippedItems, stash: normalizeStash(o.stash) }));
+
+  for (const artifactId of checkIds) {
+    const holderId = findHolder(held, artifactId, undefined, isUnique);
+
+    if (holderId) {
+      const holderName = others.find((o) => o.characterId === holderId)?.character.name ?? "";
+
+      throw new ContentError(API_ERRORS.ARTIFACT_HELD_BY_OTHER_DETAIL, 409, undefined, { detail: holderName });
+    }
+  }
+}
+
+function inventoryScalars(data: Input, current: CurrentInventory, nextEquipped: EquippedItems | undefined, displaced: string | undefined) {
+  return {
+    ...(data.gold !== undefined && { gold: data.gold }),
+    ...(data.silver !== undefined && { silver: data.silver }),
+    ...(data.copper !== undefined && { copper: data.copper }),
+    ...(nextEquipped && { equipped: nextEquipped as Prisma.InputJsonValue }),
+    ...(data.equipSlot && { stash: [...normalizeStash(current?.stash).filter((id) => id !== data.equipSlot?.artifactId && id !== displaced), ...(displaced ? [displaced] : [])] }),
+    ...(data.backpack && { backpack: data.backpack as Prisma.InputJsonValue }),
+    ...(data.items && { items: data.items as Prisma.InputJsonValue }),
+  };
+}
+
+async function updateInventoryCore({ access, character }: Gate, data: Input) {
   const campaignId = character.campaignId;
 
   const characterId = character.id;
@@ -45,6 +136,8 @@ async function updateInventoryCore({ access, character }: Gate, data: z.infer<ty
   if (data.equipSlot && !ARTIFACT_GRID_9.some((cell) => cell.key === data.equipSlot?.slot)) {
     throw new ContentError(API_ERRORS.ARTIFACT_UNKNOWN_SLOT, 400);
   }
+
+  const rules = parseRules(access.campaign?.rules);
 
   return prisma.$transaction(async (tx) => {
     await lockCampaignArtifacts(tx, campaignId);
@@ -55,84 +148,13 @@ async function updateInventoryCore({ access, character }: Gate, data: z.infer<ty
 
     let displaced: string | undefined;
 
-    if (data.equipSlot) {
-      const equippedNow = (current?.equipped ?? {}) as EquippedItems;
+    if (data.equipSlot) ({ nextEquipped, displaced } = planEquipSlot(current, data.equipSlot));
 
-      const occupant = equippedNow[data.equipSlot.slot] as string | undefined;
+    await checkOffHand(tx, { campaignId, rules }, nextEquipped, current);
 
-      displaced = occupant && occupant !== data.equipSlot.artifactId ? occupant : undefined;
+    if (nextEquipped) await checkEquippedConflicts(tx, { campaignId, characterId, rules }, nextEquipped, data.equipSlot);
 
-      if (displaced && normalizeStash(current?.stash).includes(displaced)) throw new ContentError(API_ERRORS.ITEM_ALREADY_IN_STASH, 409);
-
-      nextEquipped = buildEquipped(equippedNow, data.equipSlot.slot, data.equipSlot.artifactId);
-    }
-
-    const shieldId = nextEquipped?.shield;
-
-    if (typeof shieldId === "string" && shieldId && shieldId !== (current?.equipped as EquippedItems | undefined)?.shield) {
-      const shieldArtifact = await tx.artifact.findFirst({ where: { id: parseItemRef(shieldId)?.baseId ?? shieldId, campaignId }, select: { slot: true, bonuses: true, modifiers: true } });
-
-      if (shieldArtifact && shieldArtifact.slot !== ArtifactSlot.SHIELD) {
-        const campaign = await tx.campaign.findUnique({ where: { id: campaignId }, select: { rules: true } });
-
-        if (!canEquipOffHand(shieldArtifact, parseRules(campaign?.rules).classes.enabled)) throw new ContentError(API_ERRORS.OFF_HAND_EQUIP, 422);
-      }
-    }
-
-    if (nextEquipped) {
-      const ids = Object.values(nextEquipped).filter((v): v is string => !!v);
-
-      const rules = parseRules(access.campaign?.rules);
-
-      // the legacy grid editor knows non-unique gear only for 5e item campaigns or composed refs: HOMM keeps one query-free check
-      const rows =
-        (rules.items.enabled || ids.some((ref) => isComposedRef(ref) || !!parseItemRef(ref)?.param)) && ids.length > 0
-          ? new Map((await tx.artifact.findMany({ where: { id: { in: [...new Set(ids.flatMap(refArtifactIds))] }, campaignId }, select: { id: true, name: true, slot: true, modifiers: true } })).map((r) => [r.id, r]))
-          : null;
-
-      const isUnique = rows ? uniqueChecker(rows) : undefined;
-
-      if (uniqueConflict(ids, isUnique)) throw new ContentError(API_ERRORS.ARTIFACT_ALREADY_EQUIPPED, 409);
-
-      const checkIds = data.equipSlot ? (data.equipSlot.artifactId ? [data.equipSlot.artifactId] : []) : ids;
-
-      if (rows && checkIds.some((ref) => {
-        const parsed = parseItemRef(ref);
-
-        const owner = parsed && rows.get(parsed.propertyId ?? parsed.baseId);
-
-        return (!!parsed?.param || !!(owner && itemStatsFromRow(owner)?.parameter)) && !resolveItemRow(ref, rows);
-      })) throw new ContentError(API_ERRORS.CHARACTER_ITEM_PARAM_INVALID, 422);
-
-      if (checkIds.length > 0) {
-        const others = await tx.characterInventory.findMany({
-          where: { character: { campaignId }, characterId: { not: characterId } },
-          select: { characterId: true, equipped: true, stash: true, character: { select: { name: true } } },
-        });
-
-        const held = others.map((o) => ({ characterId: o.characterId, equipped: o.equipped as EquippedItems, stash: normalizeStash(o.stash) }));
-
-        for (const artifactId of checkIds) {
-          const holderId = findHolder(held, artifactId, undefined, isUnique);
-
-          if (holderId) {
-            const holderName = others.find((o) => o.characterId === holderId)?.character.name ?? "";
-
-            throw new ContentError(API_ERRORS.ARTIFACT_HELD_BY_OTHER_DETAIL, 409, undefined, { detail: holderName });
-          }
-        }
-      }
-    }
-
-    const scalars = {
-      ...(data.gold !== undefined && { gold: data.gold }),
-      ...(data.silver !== undefined && { silver: data.silver }),
-      ...(data.copper !== undefined && { copper: data.copper }),
-      ...(nextEquipped && { equipped: nextEquipped as Prisma.InputJsonValue }),
-      ...(data.equipSlot && { stash: [...normalizeStash(current?.stash).filter((id) => id !== data.equipSlot?.artifactId && id !== displaced), ...(displaced ? [displaced] : [])] }),
-      ...(data.backpack && { backpack: data.backpack as Prisma.InputJsonValue }),
-      ...(data.items && { items: data.items as Prisma.InputJsonValue }),
-    };
+    const scalars = inventoryScalars(data, current, nextEquipped, displaced);
 
     const inventory = await tx.characterInventory.upsert({
       where: { characterId },

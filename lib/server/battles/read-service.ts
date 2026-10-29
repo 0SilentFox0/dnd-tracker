@@ -3,8 +3,11 @@ import { AI_LIMITS } from "@/lib/constants/ai";
 import { API_ERRORS } from "@/lib/constants/api-errors";
 import { BattleStatus } from "@/lib/constants/battle";
 import { prisma } from "@/lib/db";
+import { getTranslator } from "@/lib/i18n/translator";
 import { ContentError } from "@/lib/server/content/errors";
+import { formatBattleLog } from "@/lib/utils/battle/log/lines";
 import { loadBattle } from "@/lib/utils/battle/store";
+import type { LogLine } from "@/types/text";
 
 /** Legacy read remains available on ai; no new write transport is activated here. */
 export async function readLegacyBattleState(ctx: { campaignId: string; userId: string }, battleId?: string) {
@@ -12,7 +15,7 @@ export async function readLegacyBattleState(ctx: { campaignId: string; userId: s
       battleId ??
       (await prisma.battleScene.findFirst({ where: { campaignId: ctx.campaignId, status: BattleStatus.ACTIVE }, orderBy: { startedAt: "desc" }, select: { id: true } }))?.id;
 
-    if (!id) return "Активного бою немає";
+    if (!id) return "No active battle";
 
     const battle = await loadBattle(prisma, { battleId: id, campaignId: ctx.campaignId, userId: ctx.userId });
 
@@ -24,8 +27,10 @@ export async function readLegacyBattleState(ctx: { campaignId: string; userId: s
       where: { battleId: id, cancelledAt: null },
       orderBy: { seq: "desc" },
       take: AI_LIMITS.battleEvents,
-      select: { round: true, resultText: true },
+      select: { round: true, resultText: true, details: true },
     });
+
+    const t = await getTranslator("en");
 
     return {
       name: battle.meta.name,
@@ -39,6 +44,6 @@ export async function readLegacyBattleState(ctx: { campaignId: string; userId: s
         ac: p.combatStats.armorClass,
         status: p.combatStats.status,
       })),
-      lastEvents: events.reverse().map((e) => `Р${e.round}: ${e.resultText}`),
+      lastEvents: events.reverse().map((e) => `R${e.round}: ${formatBattleLog(t, { resultText: e.resultText, log: (e.details as { log?: LogLine[] } | null)?.log })}`),
     };
 }

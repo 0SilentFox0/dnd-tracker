@@ -1,5 +1,7 @@
 "use client";
 
+import { useTranslations } from "next-intl";
+
 import { SetupParticipantRow } from "./SetupParticipantRow";
 
 import { HudSection } from "@/components/hud/form";
@@ -16,17 +18,6 @@ interface SidePanelCardProps {
   actions: Pick<ParticipantActions, "setSide" | "remove" | "setReserve">;
 }
 
-const SIDE_CONFIG = {
-  [ParticipantSide.ALLY]: {
-    title: "Союзники",
-    description: "Учасники на вашій стороні",
-  },
-  [ParticipantSide.ENEMY]: {
-    title: "Вороги",
-    description: "Противники в битві",
-  },
-} as const;
-
 export function SidePanelCard({
   side,
   participants,
@@ -34,15 +25,15 @@ export function SidePanelCard({
   units,
   actions,
 }: SidePanelCardProps) {
-  const config = SIDE_CONFIG[side];
+  const t = useTranslations("battleSetup.roster");
 
   const otherSide = side === ParticipantSide.ALLY ? ParticipantSide.ENEMY : ParticipantSide.ALLY;
 
   const sideParticipants = participants.filter((p) => p.side === side);
 
   const groups: { title: string; type: ParticipantSourceTypeValue; entities: Pick<SetupCharacter, "id" | "name" | "avatar">[] }[] = [
-    { title: "Персонажі", type: ParticipantSourceType.CHARACTER, entities: characters },
-    { title: "Юніти", type: ParticipantSourceType.UNIT, entities: units },
+    { title: t("characters"), type: ParticipantSourceType.CHARACTER, entities: characters },
+    { title: t("units"), type: ParticipantSourceType.UNIT, entities: units },
   ];
 
   const visibleGroups = groups
@@ -50,8 +41,8 @@ export function SidePanelCard({
     .filter((g) => g.members.length > 0);
 
   return (
-    <HudSection title={config.title} className="mt-0 max-h-[500px] space-y-3 overflow-y-auto">
-        <p className="text-xs text-muted-foreground">{config.description}</p>
+    <HudSection title={t(`sides.${side}.title`)} className="mt-0 max-h-[500px] space-y-3 overflow-y-auto">
+        <p className="text-xs text-muted-foreground">{t(`sides.${side}.description`)}</p>
         {visibleGroups.map(({ title, type, entities, members }) => (
           <div key={type}>
             <h4 className="mb-2 text-xs font-semibold uppercase text-muted-foreground">{title}</h4>
@@ -82,7 +73,7 @@ export function SidePanelCard({
         ))}
         {sideParticipants.length === 0 && (
           <p className="text-sm text-muted-foreground text-center py-8">
-            Оберіть учасників зі списку нижче
+            {t("pick")}
           </p>
         )}
     </HudSection>

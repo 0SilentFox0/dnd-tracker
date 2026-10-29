@@ -8,7 +8,7 @@ import type { SpellBlocker } from "@/lib/server/compendium-import/adapters/spell
 
 const SOURCE_ROOT = join(process.cwd(), "lib/server/compendium-import");
 
-const FILES = ["dependencies", "service", "plan", "feature-resolution", "entries", "adapters/shared", "adapters/content", "adapters/characters", "adapters/character-traits", "adapt/state", "adapt/subraces", "adapt/books", "adapt/top-level", "adapt/optional-features"];
+const FILES = ["dependencies", "service", "plan", "feature-resolution", "entries", "adapters/shared", "adapters/content", "adapters/characters", "adapters/race-traits", "adapters/equipment", "adapters/feat-prerequisites", "adapters/feat-spells", "adapt/state", "adapt/subraces", "adapt/books", "adapt/top-level", "adapt/optional-features"];
 
 const BLOCKERS: SpellBlocker[] = ["SUMMON", "BUFF_OR_TRANSFORM", "WEAPON", "VARIABLE_DAMAGE", "SELF_DAMAGE", "ZONE_OR_TRIGGER", "UNSUPPORTED_CONDITION", "UNMODELED_EFFECT"];
 
@@ -20,4 +20,10 @@ for (const file of FILES) {
 
 describe("compendiumReport label keys", () => {
   expectLabelKeys("compendiumReport", "issues", [...codes]);
+  expectLabelKeys("compendiumReport", "derived.size", ["F", "D", "T", "S", "M", "L", "H", "G"]);
+  expectLabelKeys("compendiumReport", "derived.sense", ["darkvision", "blindsight", "tremorsense", "truesight"]);
+  expectLabelKeys("compendiumReport", "derived.movement", ["swim", "fly", "climb", "burrow"]);
+  expectLabelKeys("compendiumReport", "derived.ability", ["strength", "dexterity", "constitution", "intelligence", "wisdom", "charisma"]);
+  expectLabelKeys("compendiumReport", "derived.coin", ["gp", "sp", "cp"]);
+  expectLabelKeys("compendiumReport", "derived.rider", ["push", "terrain", "vulnerability", "speed", "choice", "reaction", "hold", "conditions"]);
 });

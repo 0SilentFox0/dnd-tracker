@@ -1,6 +1,8 @@
+import { joinLines, textRef } from "@/lib/i18n/text-ref";
 import type { CunningStrikeEffect } from "@/lib/utils/abilities/schema";
 import type { PredictedAttack } from "@/lib/utils/battle/attack/bonus";
 import type { AttackData } from "@/types/api";
+import type { LogLine } from "@/types/text";
 
 export type AttackMode = "normal" | "advantage" | "disadvantage";
 
@@ -9,7 +11,7 @@ export type RollOutcome = "hit" | "crit" | "miss" | "critFail";
 /** Режим, який задають навички/ефекти (зокрема взаємне скасування) — гравець його не змінює */
 export interface ForcedMode {
   mode: AttackMode;
-  reason: string;
+  reason: LogLine;
 }
 
 export interface Strike {
@@ -40,7 +42,7 @@ export interface AttackFlowState {
   mode: AttackMode;
   strikes: Strike[];
   index: number;
-  error?: string;
+  error?: LogLine;
   results: AttackOutcomeSummary[];
   /** сервер зупинив атаку: ДМ обирає ефект крита */
   waitingCrit?: boolean;
@@ -67,7 +69,7 @@ export type AttackFlowAction =
   | { type: "SUBMIT" }
   | { type: "WAIT_CRIT" }
   | { type: "SUCCESS"; results: AttackOutcomeSummary[] }
-  | { type: "FAIL"; error: string }
+  | { type: "FAIL"; error: LogLine }
   | { type: "CLOSE" };
 
 export const initialAttackFlow: AttackFlowState = {
@@ -171,11 +173,11 @@ export function forcedModeOf(p: Pick<PredictedAttack, "mode" | "forced" | "reaso
 
   const { advantage, disadvantage } = p.reasons;
 
-  if (p.mode === "advantage") return { mode: p.mode, reason: `Перевага: ${advantage.join(", ")}` };
+  if (p.mode === "advantage") return { mode: p.mode, reason: textRef("battleWizards.flow.forced.advantage", { reasons: joinLines(advantage, ", ") }) };
 
-  if (p.mode === "disadvantage") return { mode: p.mode, reason: `Недолік: ${disadvantage.join(", ")}` };
+  if (p.mode === "disadvantage") return { mode: p.mode, reason: textRef("battleWizards.flow.forced.disadvantage", { reasons: joinLines(disadvantage, ", ") }) };
 
-  return { mode: "normal", reason: `Перевага (${advantage.join(", ")}) і недолік (${disadvantage.join(", ")}) скасовуються` };
+  return { mode: "normal", reason: textRef("battleWizards.flow.forced.cancelled", { advantage: joinLines(advantage, ", "), disadvantage: joinLines(disadvantage, ", ") }) };
 }
 
 export function strikeMode(s: Pick<AttackFlowState, "mode">, strike: Strike | undefined): AttackMode {

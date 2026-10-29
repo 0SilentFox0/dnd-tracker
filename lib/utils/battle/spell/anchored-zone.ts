@@ -1,11 +1,13 @@
 import { type FireSource, fireTrigger, type ZoneCtx } from "./zone-fire";
 
 import { CELL_FEET } from "@/lib/constants/battle";
+import { textRef } from "@/lib/i18n/text-ref";
 import { findParticipant, isActive, isObject, replaceParticipant } from "@/lib/utils/abilities/engine/core/participants";
 import { removeEffects } from "@/lib/utils/battle/conditions/query";
 import { footprint, footprintDistance } from "@/lib/utils/battle/grid/geometry";
 import { isOnMap, sizeOf } from "@/lib/utils/battle/grid/occupancy";
 import type { ActiveEffect, AnchoredZoneState, BattleParticipant, GridPoint } from "@/types/battle";
+import type { LogLine } from "@/types/text";
 
 interface Anchor {
   bearerId: string;
@@ -37,14 +39,14 @@ function inRadius(a: BattleParticipant, aAt: GridPoint, b: BattleParticipant, bA
 
 interface AnchorResult {
   participants: BattleParticipant[];
-  messages: string[];
+  messages: LogLine[];
 }
 
 /** Тригер входу в ауру: рухається істота в радіусі носія або сам носій наближається до інших. */
 export function anchorMove({ participants, moved, from, path, ctx }: { participants: BattleParticipant[]; moved: BattleParticipant; from: GridPoint; path: GridPoint[]; ctx: ZoneCtx }): AnchorResult {
   let ps = participants;
 
-  const messages: string[] = [];
+  const messages: LogLine[] = [];
 
   const movedId = moved.basicInfo.id;
 
@@ -92,7 +94,7 @@ export function anchorMove({ participants, moved, from, path, ctx }: { participa
 export function anchorTurnStart(participants: BattleParticipant[], targetId: string, ctx: ZoneCtx): AnchorResult {
   let ps = participants;
 
-  const messages: string[] = [];
+  const messages: LogLine[] = [];
 
   for (const anchor of anchorsOf(participants)) {
     const target = findParticipant(ps, targetId);
@@ -112,7 +114,7 @@ export function anchorTurnStart(participants: BattleParticipant[], targetId: str
 
       if (out.removed.length > 0) {
         ps = replaceParticipant(ps, out.participant);
-        messages.push(`✨ ${target.basicInfo.name}: «${anchor.state.spellName}» закінчується (початок ходу поза аурою)`);
+        messages.push(textRef("battleLog.spellFx.anchoredEnds", { target: target.basicInfo.name, spell: anchor.state.spellName }));
       }
 
       continue;

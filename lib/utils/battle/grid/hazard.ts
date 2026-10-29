@@ -2,7 +2,7 @@ import { cellKey, footprint, footprintDistance, parseCellKey } from "./geometry"
 import { cellsOf, sizeOf } from "./occupancy";
 import { reachable } from "./path";
 
-import { DEFAULT_HAZARD_LABEL } from "@/lib/constants/battle";
+import { textRef } from "@/lib/i18n/text-ref";
 import type { Rng } from "@/lib/utils/abilities/engine/core/types";
 import { applyRawDamage } from "@/lib/utils/abilities/engine/effects/hp";
 import { isZoneConcentrationLive } from "@/lib/utils/battle/concentration";
@@ -13,6 +13,7 @@ import { participantImmuneToSpell } from "@/lib/utils/battle/spell/spell-immunit
 import { diceAverage, rollDice } from "@/lib/utils/common/dice";
 import type { Ruleset } from "@/lib/utils/rules";
 import type { BattleMapConfig, BattleParticipant, GridPoint, TerrainCell } from "@/types/battle";
+import type { LogLine } from "@/types/text";
 
 const strength = (c: TerrainCell) => (c.damage?.dice ? diceAverage(c.damage.dice) : (c.damage?.amount ?? 0));
 
@@ -53,6 +54,8 @@ export function hazardOnMove(map: BattleMapConfig, participants: BattleParticipa
   return strongest([...avoid].filter((k) => footprintDistance(origin, [parseCellKey(k)]) <= cost).map((k) => hazards.get(k)));
 }
 
+export const hazardLabel = (label?: string | null): LogLine => label || textRef("battleLog.hazard.defaultLabel");
+
 export function hazardHit(
   p: BattleParticipant,
   cell: TerrainCell,
@@ -60,7 +63,7 @@ export function hazardHit(
   participants: BattleParticipant[],
   rng: Rng,
   rules?: Ruleset,
-): { participant: BattleParticipant; participants: BattleParticipant[]; message: string; damage: number; consequences: string[] } | null {
+): { participant: BattleParticipant; participants: BattleParticipant[]; message: LogLine; damage: number; consequences: LogLine[] } | null {
   const hazard = cell.damage;
 
   if (!hazard || p.battleData.hazardHitRound === round) return null;
@@ -75,7 +78,7 @@ export function hazardHit(
     return {
       participant: { ...p, battleData: { ...p.battleData, hazardHitRound: round } },
       participants,
-      message: `${p.basicInfo.name}: «${cell.label ?? DEFAULT_HAZARD_LABEL}» не завдає шкоди (стан кастера)`,
+      message: textRef("battleLog.hazard.harmless", { name: p.basicInfo.name, label: hazardLabel(cell.label) }),
       damage: 0,
       consequences: [],
     };
@@ -92,7 +95,7 @@ export function hazardHit(
   return {
     participant: { ...c.participant, battleData: { ...c.participant.battleData, hazardHitRound: round } },
     participants: c.participants,
-    message: `${p.basicInfo.name}: ${damage} ${hazard.type} шкоди від «${cell.label ?? DEFAULT_HAZARD_LABEL}»`,
+    message: textRef("battleLog.hazard.hit", { name: p.basicInfo.name, damage, type: hazard.type, label: hazardLabel(cell.label) }),
     damage,
     consequences: c.messages,
   };

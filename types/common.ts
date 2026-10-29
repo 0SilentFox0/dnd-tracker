@@ -4,4 +4,4 @@ export interface IdName {
 }
 
 /** Очікувана відмова без винятку: message — текст для користувача (часто з API_ERRORS) */
-export type Result<T> = { ok: true; value: T } | { ok: false; message: string };
+export type Result<T> = { ok: true; value: T } | { ok: false; message: string; params?: Record<string, string | number> };

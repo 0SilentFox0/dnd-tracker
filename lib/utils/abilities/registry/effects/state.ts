@@ -1,32 +1,34 @@
-import { CONDITION_LABELS, conditionLabel } from "../labels";
 import type { EffectApplyInput, EffectApplyResult } from "./types";
 
 import { EffectMarker } from "@/lib/constants/battle";
+import { textRef } from "@/lib/i18n/text-ref";
 import { findFlags } from "@/lib/utils/abilities/engine/core/collect-modifiers";
 import { findParticipant, participantNames, updateParticipant, withActiveEffects } from "@/lib/utils/abilities/engine/core/participants";
 import { restoreCharm } from "@/lib/utils/abilities/engine/effects/charm";
 import { countMarks, GUARD_KEY, markKey } from "@/lib/utils/abilities/engine/effects/marks";
 import { clampMorale, moraleCapOf } from "@/lib/utils/abilities/engine/effects/morale";
 import { effectSource, upsertTimedEffect } from "@/lib/utils/abilities/engine/effects/timed-effects";
+import { logText } from "@/lib/utils/abilities/log-text";
 import type { ConditionImmunityKey, Effect } from "@/lib/utils/abilities/schema";
 import { isCondition5eKey, isCustomConditionKey } from "@/lib/utils/abilities/schema/kinds";
+import { seg, type Segment } from "@/lib/utils/abilities/segments";
 import { helpEffect } from "@/lib/utils/battle/actions/effects";
 import { applyCondition5e, type ConditionKey, saveEndsFor } from "@/lib/utils/battle/conditions/apply";
 import { removeEffects } from "@/lib/utils/battle/conditions/query";
 import { grantExtraActions } from "@/lib/utils/battle/participant/helpers";
 import { spellSaveDc } from "@/lib/utils/battle/spell/power";
 import { signed } from "@/lib/utils/common/format";
-import { pluralUk } from "@/lib/utils/common/plural";
 import { DEFAULT_RULES } from "@/lib/utils/rules";
 import { slotLevel, slotRestoreOrder } from "@/lib/utils/spells/slot-keys";
 import type { BattleParticipant } from "@/types/battle";
+import type { LogLine } from "@/types/text";
 
 type Of<K extends Effect["kind"]> = Extract<Effect, { kind: K }>;
 
 function each(
   input: EffectApplyInput,
   fn: (p: BattleParticipant) => BattleParticipant | null,
-  message: (names: string) => string,
+  message: (names: string) => LogLine,
   immune?: (p: BattleParticipant) => boolean,
 ): EffectApplyResult {
   let ps = input.participants;
@@ -53,16 +55,16 @@ function each(
 
   const messages = touched.length ? [message(participantNames(ps, touched))] : [];
 
-  if (blocked.length) messages.push(`⛔ ${input.ability.name}: ${participantNames(ps, blocked)} — імунітет`);
+  if (blocked.length) messages.push(textRef("abilityText.log.immune", { ability: input.ability.name, target: participantNames(ps, blocked) }));
 
   return { participants: ps, messages };
 }
 
+const flag = (value: unknown): string => String(!!value);
+
 export function immuneTo(ps: BattleParticipant[], id: string, key: ConditionImmunityKey): boolean {
   return findFlags(ps, id, "conditionImmunity").some((f) => f.conditions === "all" || f.conditions.includes(key));
 }
-
-export { CONDITION_LABELS, conditionLabel };
 
 function applyCondition5eToTargets(input: EffectApplyInput<Of<"applyCondition">>, key: ConditionKey): EffectApplyResult {
   const { ability, effect, ctx } = input;
@@ -73,7 +75,7 @@ function applyCondition5eToTargets(input: EffectApplyInput<Of<"applyCondition">>
 
   let ps = input.participants;
 
-  const messages: string[] = [];
+  const messages: LogLine[] = [];
 
   for (const id of input.targetIds) {
     const result = applyCondition5e(ps, id, {
@@ -127,7 +129,7 @@ export function applyCondition(input: EffectApplyInput<Of<"applyCondition">>): E
 
       return condition === EffectMarker.NO_REACTION ? { ...next, actionFlags: { ...next.actionFlags, hasUsedReaction: true } } : next;
     },
-    (names) => `⛓ ${ability.name}: ${names} — ${CONDITION_LABELS[condition]} (${effect.duration.rounds} р.)`,
+    (names) => textRef("abilityText.log.condition", { ability: ability.name, target: names, condition: textRef(`abilityRegistry.options.condition.${condition}`), rounds: effect.duration.rounds }),
     (p) => immuneTo(input.participants, p.basicInfo.id, condition),
   );
 }
@@ -151,7 +153,7 @@ export function applyGrantAction(input: EffectApplyInput<Of<"grantAction">>): Ef
         },
       };
     },
-    (names) => `⚔️ ${ability.name}: ${names} — ${describeGrantAction(effect)}`,
+    (names) => textRef("abilityText.log.grantAction", { ability: ability.name, target: names, text: logText(describeGrantAction(effect)) }),
   );
 }
 
@@ -163,7 +165,7 @@ export function applyHelp(input: EffectApplyInput<Of<"help">>): EffectApplyResul
   return each(
     input,
     (p) => upsertTimedEffect(p, { ...helpEffect(input.ownerId), source: effectSource(owner, ability) }, ctx.round),
-    (names) => `🤝 ${ability.name}: ${names} має перевагу на наступну атаку`,
+    (names) => textRef("abilityText.log.help", { ability: ability.name, target: names }),
   );
 }
 
@@ -186,7 +188,7 @@ export function applyRestoreSpellSlot(input: EffectApplyInput<Of<"restoreSpellSl
         spellcasting: { ...p.spellcasting, spellSlots: { ...slots, [level]: { ...slot, current: Math.min(slot.max, slot.current + effect.count) } } },
       };
     },
-    (names) => `🔮 ${ability.name}: ${names} відновлює ${effect.count} ${pluralUk(effect.count, ["слот", "слоти", "слотів"])}`,
+    (names) => textRef("abilityText.log.restoreSlot", { ability: ability.name, target: names, count: effect.count }),
   );
 }
 
@@ -195,7 +197,7 @@ export function applyDrainSpellSlot(input: EffectApplyInput<Of<"drainSpellSlot">
 
   let ps = input.participants;
 
-  const messages: string[] = [];
+  const messages: LogLine[] = [];
 
   for (const id of input.targetIds) {
     const p = findParticipant(ps, id);
@@ -220,7 +222,7 @@ export function applyDrainSpellSlot(input: EffectApplyInput<Of<"drainSpellSlot">
     if (!lost.length) continue;
 
     ps = updateParticipant(ps, id, (t) => ({ ...t, spellcasting: { ...t.spellcasting, spellSlots: slots } }));
-    messages.push(...lost.map((l) => `🔮 ${p.basicInfo.name} втрачає слот${Number.isNaN(Number(l)) ? "" : ` ${l}-го рівня`}`));
+    messages.push(...lost.map((l) => textRef("abilityText.log.drainSlot", { target: p.basicInfo.name, hasLevel: flag(!Number.isNaN(Number(l))), level: l })));
   }
 
   return { participants: ps, messages };
@@ -236,7 +238,7 @@ export function applyChangeMorale(input: EffectApplyInput<Of<"changeMorale">>): 
 
       return morale === p.combatStats.morale ? null : { ...p, combatStats: { ...p.combatStats, morale } };
     },
-    (names) => `📊 ${ability.name}: ${names} мораль ${signed(effect.delta)}`,
+    (names) => textRef("abilityText.log.morale", { ability: ability.name, target: names, delta: signed(effect.delta) }),
     (p) => effect.delta < 0 && immuneTo(input.participants, p.basicInfo.id, "fear"),
   );
 }
@@ -256,19 +258,19 @@ export function applyCleanse(input: EffectApplyInput<Of<"cleanse">>): EffectAppl
 
       return charm ? restoreCharm({ ...cleaned, battleData: { ...cleaned.battleData, charmReturn: charm.charmOrigin } }) : cleaned;
     },
-    (names) => `✨ ${ability.name}: з ${names} знято ${effect.includeConditions ? "дебафи та стани" : "дебафи"}`,
+    (names) => textRef("abilityText.log.cleanse", { ability: ability.name, target: names, conditions: flag(effect.includeConditions) }),
   );
 }
 
-export function describeGrantAction(e: Of<"grantAction">): string {
-  return [
-    e.extraActions ? `+${e.extraActions} дія` : null,
-    e.refreshAction ? "оновлює дію" : null,
-    e.refreshBonusAction ? "оновлює бонусну дію" : null,
-    e.refreshReaction ? "оновлює реакцію" : null,
-  ]
-    .filter(Boolean)
-    .join(", ");
+export function describeGrantAction(e: Of<"grantAction">): Segment[] {
+  const parts = [
+    e.extraActions ? seg("summary.effects.grantExtra", { n: e.extraActions }) : null,
+    e.refreshAction ? seg("summary.effects.grantRefreshAction") : null,
+    e.refreshBonusAction ? seg("summary.effects.grantRefreshBonusAction") : null,
+    e.refreshReaction ? seg("summary.effects.grantRefreshReaction") : null,
+  ].filter((x): x is Segment => !!x);
+
+  return [seg("summary.effects.grantAction", { parts: { join: ", ", items: parts } })];
 }
 
 export function applyMark(input: EffectApplyInput<Of<"mark">>): EffectApplyResult {
@@ -291,7 +293,7 @@ export function applyMark(input: EffectApplyInput<Of<"mark">>): EffectApplyResul
 
       return next;
     },
-    (names) => `🎯 ${ability.name}: ${names} — мітка${counts.length === 1 ? ` (${counts[0]})` : ""}`,
+    (names) => textRef("abilityText.log.mark", { ability: ability.name, target: names, hasCount: flag(counts.length === 1), count: counts[0] ?? "" }),
   );
 }
 
@@ -316,7 +318,7 @@ export function applyGuard(input: EffectApplyInput<Of<"guard">>): EffectApplyRes
         },
         ctx.round,
       ),
-    (names) => `🛡 ${ability.name}: ${names} — захист ${effect.percent}% (${effect.duration.rounds} р.)`,
+    (names) => textRef("abilityText.log.guard", { ability: ability.name, target: names, percent: effect.percent, rounds: effect.duration.rounds }),
     (p) => p.basicInfo.id === input.ownerId || p.basicInfo.side !== owner?.basicInfo.side,
   );
 }

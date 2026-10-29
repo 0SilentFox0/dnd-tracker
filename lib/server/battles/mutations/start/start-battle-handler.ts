@@ -9,8 +9,10 @@ import { isReservedSlot, partitionReserve } from "./start-reserve";
 import { ParticipantSide, ParticipantSourceType, type ParticipantSourceTypeValue, SYSTEM_ACTOR } from "@/lib/constants/battle";
 import { ACTIVE_CHARACTER } from "@/lib/constants/characters";
 import { prisma } from "@/lib/db";
+import { textRef } from "@/lib/i18n/text-ref";
 import { applyBakedAuras } from "@/lib/utils/abilities/build/bake";
 import { runAbilities } from "@/lib/utils/abilities/engine/core/run-abilities";
+import { logFields } from "@/lib/utils/battle/log/lines";
 import { modeEnter } from "@/lib/utils/battle/modes/server";
 import {
   createBattleParticipantFromCharacter,
@@ -197,7 +199,7 @@ function applyStartOfBattleAndSort(
       actionType: "ability",
       targets: [],
       actionDetails: { triggeredAbilities: [] },
-      resultText: `Тригери початку бою: ${allTriggerMessages.join("; ")}`,
+      ...logFields([textRef("battleLog.triggers.battleStart"), ...allTriggerMessages]),
       hpChanges: [],
       isCancelled: false,
       stateBefore: undefined,

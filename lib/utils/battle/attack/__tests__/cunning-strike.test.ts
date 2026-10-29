@@ -7,7 +7,9 @@ import { calculateAttackRoll } from "@/lib/utils/battle/attack";
 import { cunningStrikeCost, cunningStrikeOffer, toggleCunningStrike } from "@/lib/utils/battle/attack/cunning-strike";
 import { resolveHit } from "@/lib/utils/battle/attack/process/hit";
 import { validateAttackRequest } from "@/lib/utils/battle/attack-phase/request";
+import { textsOf } from "@/lib/utils/battle/log/__tests__/event-text";
 import { hasEffectMarker } from "@/lib/utils/battle/participant/state";
+import { REJECT } from "@/lib/utils/battle/store/reject";
 import { forgoDice } from "@/lib/utils/common/dice";
 import type { BattleAttack, BattleParticipant } from "@/types/battle";
 
@@ -65,17 +67,17 @@ describe("Підступний удар: пропозиція й вартіст�
 
     expect(offer?.maxEffects).toBe(2);
     expect(cunningStrikeCost(offer, ["poison", "trip"])).toBe(2);
-    expect(cunningStrikeCost(offer, ["poison", "poison"])).toEqual(expect.any(String));
+    expect(cunningStrikeCost(offer, ["poison", "poison"])).toEqual(expect.objectContaining({ message: expect.stringContaining("battleLog.reject.cunning") }));
   });
 
   it("один ефект за замовчуванням, вартість не більша за кубики", () => {
     const offer = cunningStrikeOffer(rogue(), 1);
 
     expect(cunningStrikeCost(offer, ["trip"])).toBe(1);
-    expect(cunningStrikeCost(offer, ["trip", "poison"])).toEqual(expect.any(String));
-    expect(cunningStrikeCost(cunningStrikeOffer(rogue([sneak("1d6"), cunning({ options: [{ effect: "trip", dice: 2 }] })]), 1), ["trip"])).toEqual(expect.any(String));
+    expect(cunningStrikeCost(offer, ["trip", "poison"])).toEqual(expect.objectContaining({ message: expect.stringContaining("battleLog.reject.cunning") }));
+    expect(cunningStrikeCost(cunningStrikeOffer(rogue([sneak("1d6"), cunning({ options: [{ effect: "trip", dice: 2 }] })]), 1), ["trip"])).toEqual(expect.objectContaining({ message: expect.stringContaining("battleLog.reject.cunning") }));
     expect(cunningStrikeCost(offer, ["poison"])).toBe(1);
-    expect(cunningStrikeCost(cunningStrikeOffer(rogue([sneak(), cunning({ options: [{ effect: "trip", dice: 1 }] })]), 1), ["poison"])).toEqual(expect.any(String));
+    expect(cunningStrikeCost(cunningStrikeOffer(rogue([sneak(), cunning({ options: [{ effect: "trip", dice: 1 }] })]), 1), ["poison"])).toEqual(expect.objectContaining({ message: expect.stringContaining("battleLog.reject.cunning") }));
   });
 
   it("перемикач: один ефект замінюється, два — додаються до ліміту", () => {
@@ -95,7 +97,7 @@ describe("Підступний удар: пропозиція й вартіст�
 
     const scope = { userId: "u", isDM: true, participants: [attacker, foe(0)], scene: { turnIndex: 0 } };
 
-    expect(() => validateAttackRequest(scope, { attackerId: "r", targetId: "t", d20Roll: 15, damageRolls: [1], cunningStrike: ["trip"] })).toThrow("недоступний");
+    expect(() => validateAttackRequest(scope, { attackerId: "r", targetId: "t", d20Roll: 15, damageRolls: [1], cunningStrike: ["trip"] })).toThrow(REJECT.cunningUnavailable);
     expect(() => validateAttackRequest({ ...scope, participants: [rogue(), foe(0)] }, { attackerId: "r", targetId: "t", d20Roll: 15, damageRolls: [1], cunningStrike: ["trip"] })).not.toThrow();
   });
 });
@@ -112,7 +114,7 @@ describe("Підступний удар у влучанні", () => {
   it("отрута: СК = 8 + DEX + майстерність; провал — poisoned зі збереженням щоходу", () => {
     const failed = strike([rogue(), foe(-5)], ["poison"]);
 
-    expect(failed.flow.messages.join("\n")).toContain("СК 14");
+    expect(textsOf(failed.flow.messages).join("\n")).toContain("СК 14");
     expect(hasEffectMarker(failed.target, "poisoned")).toBe(true);
     expect(failed.target.battleData.activeEffects.some((e) => e.saveEnds?.dc === 14)).toBe(true);
     expect(hasEffectMarker(strike([rogue(), foe(10)], ["poison"]).target, "poisoned")).toBe(false);

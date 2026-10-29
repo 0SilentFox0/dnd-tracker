@@ -1,16 +1,19 @@
 import { DURATION_FIELD, type FieldMeta, TARGET_FIELD } from "../fields";
-import { DAMAGE_FILTER_LABELS, flatLabel, STAT_LABELS } from "../labels";
+import { damageFilterSegment, flatSegment, percentSegment, statSegment } from "../labels";
 import { immuneTo } from "./state";
 import type { EffectApplyInput, EffectApplyResult } from "./types";
 
 import { ABILITY_KEYS } from "@/lib/constants/abilities";
 import { AttackType } from "@/lib/constants/battle";
+import { lineKey, textRef } from "@/lib/i18n/text-ref";
 import { findParticipant, participantNames, updateParticipant } from "@/lib/utils/abilities/engine/core/participants";
 import { abilityNature } from "@/lib/utils/abilities/engine/effects/effect-nature";
 import { applySpellTimedEffect } from "@/lib/utils/abilities/engine/effects/opposing-spells";
 import { effectSource } from "@/lib/utils/abilities/engine/effects/timed-effects";
 import type { Effect, Flat, StaticEffect } from "@/lib/utils/abilities/schema";
-import { signed } from "@/lib/utils/common/format";
+import { DAMAGE_FILTER_KINDS,STAT_KEYS } from "@/lib/utils/abilities/schema/kinds";
+import { seg, type Segment } from "@/lib/utils/abilities/segments";
+import type { LogLine } from "@/types/text";
 
 function stripTiming(effect: StaticEffect): StaticEffect {
   const { duration: _d, target: _t, ...rest } = effect;
@@ -39,7 +42,7 @@ export function applyStatic(input: EffectApplyInput<StaticEffect>, describe: (e:
 
   const timedKey = `${ability.key}#${input.effectIndex}`;
 
-  const cancelled: string[] = [];
+  const cancelled: LogLine[] = [];
 
   const fearBlocked = effect.kind === "modifyStat" && effect.stat === "morale" && typeof effect.flat === "number" && effect.flat < 0;
 
@@ -71,7 +74,7 @@ export function applyStatic(input: EffectApplyInput<StaticEffect>, describe: (e:
         ctx.round,
       );
 
-      for (const e of removed) cancelled.push(`⚖️ ${ability.name} знімає «${e.name}» → ${target.basicInfo.name}`);
+      for (const e of removed) cancelled.push(textRef("abilityText.log.cancelsEffect", { ability: ability.name, effect: e.name, target: target.basicInfo.name }));
 
       return participant;
     });
@@ -79,54 +82,58 @@ export function applyStatic(input: EffectApplyInput<StaticEffect>, describe: (e:
 
   const applied = targetIds.filter((t) => !blocked.includes(t));
 
-  const messages = [...new Set(cancelled), ...(applied.length ? [`✨ ${ability.name}: ${describe(effect)} → ${participantNames(ps, applied)} (${rounds} р.)`] : [])];
+  const messages: LogLine[] = [...new Map(cancelled.map((line) => [lineKey(line), line])).values(), ...(applied.length ? [textRef("abilityText.log.applied", { ability: ability.name, effect: describe(effect), target: participantNames(ps, applied), rounds })] : [])];
 
-  if (blocked.length) messages.push(`⛔ ${ability.name}: ${participantNames(ps, blocked)} — імунітет`);
+  if (blocked.length) messages.push(textRef("abilityText.log.immune", { ability: ability.name, target: participantNames(ps, blocked) }));
 
   return { participants: ps, messages };
 }
 
 const VALUE_FIELDS: readonly FieldMeta[] = [
-  { name: "flat", label: "Число / формула", input: "flat", optional: true },
-  { name: "percent", label: "% (число / формула)", input: "flat", optional: true },
+  { name: "flat", input: "flat", optional: true },
+  { name: "percent", input: "flat", optional: true },
 ];
 
 export const modifyStatFields: readonly FieldMeta[] = [
-  { name: "stat", label: "Стат", input: "select", options: Object.entries(STAT_LABELS).map(([value, label]) => ({ value, label })) },
+  { name: "stat", input: "select", options: STAT_KEYS.map((value) => ({ value })) },
   ...VALUE_FIELDS,
-  { name: "atLeast", label: "Не менше (характеристика, броня, швидкість)", input: "number", optional: true, visibleWhen: (e) => [...ABILITY_KEYS, "armor", "speed"].includes(String(e.stat)) },
-  { name: "attackKind", label: "Тип атаки", input: "select", optional: true, options: [{ value: AttackType.MELEE, label: "ближня" }, { value: AttackType.RANGED, label: "дальня" }], visibleWhen: (e) => e.stat === "attackBonus" },
-  { name: "spellLevels", label: "Рівні слотів", input: "numberList", visibleWhen: (e) => e.stat === "spellSlots" },
+  { name: "atLeast", input: "number", optional: true, visibleWhen: (e) => [...ABILITY_KEYS, "armor", "speed"].includes(String(e.stat)) },
+  { name: "attackKind", input: "select", optional: true, options: [{ value: AttackType.MELEE }, { value: AttackType.RANGED }], visibleWhen: (e) => e.stat === "attackBonus" },
+  { name: "spellLevels", input: "numberList", visibleWhen: (e) => e.stat === "spellSlots" },
   TARGET_FIELD,
   DURATION_FIELD,
-  { name: "until", label: "Зникає в кінці мого ходу", input: "select", optional: true, options: [{ value: "turnEnd", label: "так" }] },
+  { name: "until", input: "select", optional: true, options: [{ value: "turnEnd" }] },
 ];
 
 export const damageBonusFields: readonly FieldMeta[] = [
-  { name: "filter.kind", label: "Тип шкоди", input: "select", options: Object.entries(DAMAGE_FILTER_LABELS).map(([value, label]) => ({ value, label })) },
-  { name: "filter.school", label: "Школа магії", input: "text", optional: true },
+  { name: "filter.kind", input: "select", options: DAMAGE_FILTER_KINDS.map((value) => ({ value })) },
+  { name: "filter.school", input: "text", optional: true },
   ...VALUE_FIELDS,
-  { name: "perMark", label: "За кожну мітку (id мітки)", input: "text", optional: true },
+  { name: "perMark", input: "text", optional: true },
   TARGET_FIELD,
   DURATION_FIELD,
 ];
 
-const percentLabel = (p: Flat) => (typeof p === "number" ? `${signed(p)}%` : "formula" in p ? `(${p.formula})%` : `[${p.scale}]%`);
+function valueSegment(e: { flat?: Flat | { spellRoll: number }; percent?: Flat }): Segment {
+  const items = [e.flat !== undefined ? flatSegment(e.flat) : null, e.percent !== undefined ? percentSegment(e.percent) : null].filter((x): x is Segment => !!x);
 
-function valueLabel(e: { flat?: Flat | { spellRoll: number }; percent?: Flat }): string {
-  return [e.flat !== undefined ? flatLabel(e.flat) : null, e.percent !== undefined ? percentLabel(e.percent) : null]
-    .filter(Boolean)
-    .join(" ");
+  return seg("summary.text", { value: { join: " ", items } });
 }
 
-export function describeModifyStat(e: Extract<Effect, { kind: "modifyStat" }>): string {
-  if (e.atLeast !== undefined) return `${STAT_LABELS[e.stat]} не менше ${e.atLeast}`;
+export function describeModifyStat(e: Extract<Effect, { kind: "modifyStat" }>): Segment[] {
+  if (e.atLeast !== undefined) return [seg("summary.effects.statAtLeast", { stat: statSegment(e.stat), n: e.atLeast })];
 
-  const levels = e.spellLevels ? ` (рівні ${e.spellLevels.join(", ")})` : "";
-
-  return `${STAT_LABELS[e.stat]}${levels} ${valueLabel(e)}`;
+  return [seg("summary.effects.stat", { stat: statSegment(e.stat), hasLevels: e.spellLevels ? "yes" : "no", ...(e.spellLevels && { levels: e.spellLevels.join(", ") }), value: valueSegment(e) })];
 }
 
-export function describeDamageBonus(e: Extract<Effect, { kind: "damageBonus" }>): string {
-  return `шкода (${DAMAGE_FILTER_LABELS[e.filter.kind]}${e.filter.school ? ", школа" : ""}) ${valueLabel(e)}${e.perMark ? ` за мітку «${e.perMark}»` : ""}`;
+export function describeDamageBonus(e: Extract<Effect, { kind: "damageBonus" }>): Segment[] {
+  return [
+    seg("summary.effects.damageBonus", {
+      filter: damageFilterSegment(e.filter.kind),
+      hasSchool: e.filter.school ? "yes" : "no",
+      value: valueSegment(e),
+      hasMark: e.perMark ? "yes" : "no",
+      ...(e.perMark && { mark: e.perMark }),
+    }),
+  ];
 }

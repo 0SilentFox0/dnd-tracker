@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import dynamic from "next/dynamic";
+import { useTranslations } from "next-intl";
 
 import { AwaitingDmBanner } from "./AwaitingDmBanner";
 import { BattleOverBanner } from "./BattleOverBanner";
@@ -34,17 +35,21 @@ const H3 = ({ side, children }: { side: ParticipantSide; children: React.ReactNo
 );
 
 function BattleColumns() {
+  const t = useTranslations("battle.sides");
+
   const { roster: { allies, enemies } } = useBattleScene();
 
   return (
     <>
-      <div className="min-w-0"><H3 side={ParticipantSide.ALLY}>Союзники · {allies.length}</H3><ParticipantList side={ParticipantSide.ALLY} className="px-0" /></div>
-      <div className="min-w-0"><H3 side={ParticipantSide.ENEMY}>Вороги · {enemies.length}</H3><ParticipantList side={ParticipantSide.ENEMY} className="px-0" /></div>
+      <div className="min-w-0"><H3 side={ParticipantSide.ALLY}>{t("alliesCount", { count: allies.length })}</H3><ParticipantList side={ParticipantSide.ALLY} className="px-0" /></div>
+      <div className="min-w-0"><H3 side={ParticipantSide.ENEMY}>{t("enemiesCount", { count: enemies.length })}</H3><ParticipantList side={ParticipantSide.ENEMY} className="px-0" /></div>
     </>
   );
 }
 
 export function DesktopBattleLayout({ onComplete }: { onComplete: () => void }) {
+  const t = useTranslations("battle.scene");
+
   const { battle, battleId, awaiting, roster: { hero }, turn: { isMyTurn }, viewer: { isDM }, select, log, intents } = useBattleScene();
 
   const [storedMode, setViewMode] = useBattleViewMode(battleId);
@@ -70,7 +75,7 @@ export function DesktopBattleLayout({ onComplete }: { onComplete: () => void }) 
         <aside className="flex flex-col gap-3 overflow-y-auto border-r border-white/10 p-5 pb-20">
           {hero && <MyHeroPanel hero={hero} />}
           {isMyTurn && hero && <MyTurnControls key={myTurnKey(hero, battle.currentRound)} hero={hero} />}
-          {!isMyTurn && !isDM && battle.status === BattleStatus.ACTIVE && <div className="flex h-11 items-center justify-center border border-dashed border-white/[.18] text-sm italic text-[var(--hud-muted)]">Дії стануть доступні у твій хід</div>}
+          {!isMyTurn && !isDM && battle.status === BattleStatus.ACTIVE && <div className="flex h-11 items-center justify-center border border-dashed border-white/[.18] text-sm italic text-[var(--hud-muted)]">{t("actionsWait")}</div>}
           {isDM && <DmPanel />}
           {battle.map && viewMode === "map" && <ReserveGroup />}
         </aside>
@@ -79,10 +84,10 @@ export function DesktopBattleLayout({ onComplete }: { onComplete: () => void }) 
             <div className="relative grid grid-cols-[1fr_auto_1fr] items-center gap-3 px-3 pt-2">
               <div ref={setToolsSlot} className="flex min-w-0 items-center" />
               <HudChipTabs
-                ariaLabel="Вигляд бою"
+                ariaLabel={t("viewMode")}
                 items={[
-                  { key: "map", label: "Карта", active: viewMode === "map", onSelect: () => setViewMode("map") },
-                  { key: "columns", label: "Колонки", active: viewMode === "columns", onSelect: () => setViewMode("columns") },
+                  { key: "map", label: t("viewMap"), active: viewMode === "map", onSelect: () => setViewMode("map") },
+                  { key: "columns", label: t("viewColumns"), active: viewMode === "columns", onSelect: () => setViewMode("columns") },
                 ]}
               />
             </div>
@@ -99,8 +104,8 @@ export function DesktopBattleLayout({ onComplete }: { onComplete: () => void }) 
         )}
         <aside className="flex min-h-0 flex-col overflow-y-auto border-l border-white/10 px-5 py-4">
           <h3 className="hud-sc flex h-8 items-center justify-between border-b border-white/[.14] text-[15px] font-bold tracking-[.1em] text-[#a89c88]">
-            {selected ? "Учасник" : "Журнал"}
-            {selected && <button type="button" onClick={() => select(null)} className="font-sans text-[13px] font-normal tracking-normal text-[var(--hud-muted)]">← журнал</button>}
+            {selected ? t("participant") : t("log")}
+            {selected && <button type="button" onClick={() => select(null)} className="font-sans text-[13px] font-normal tracking-normal text-[var(--hud-muted)]">{t("backToLog")}</button>}
           </h3>
           {selected ? <div className="pt-3"><ParticipantDetails participant={selected} /></div> : <BattleLog key={log.focus ?? "latest"} />}
         </aside>

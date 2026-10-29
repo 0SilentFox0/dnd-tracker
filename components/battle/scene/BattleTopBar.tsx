@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import { Loader2, Sparkles } from "lucide-react";
 
 import { BattleStatus } from "@/lib/constants/battle";
@@ -8,16 +9,18 @@ import { useConfirm } from "@/lib/hooks/common";
 import { cn } from "@/lib/utils";
 
 export function BattleTopBar({ onComplete }: { onComplete?: () => void }) {
+  const t = useTranslations("battle.topBar");
+
   const { battle, viewer: { isDM }, turn: { isMyTurn }, connection, actions } = useBattleScene();
 
   const confirm = useConfirm();
 
   const { enabled: fxOn, motionAllowed, setEnabled: setFxOn } = useFxEnabled();
 
-  const fxHint = motionAllowed ? undefined : "Анімації вимкнено: у системі ввімкнено «Зменшити рух»";
+  const fxHint = motionAllowed ? undefined : t("fxDisabledHint");
 
   const reset = async () => {
-    if (await confirm({ title: "Скинути бій?", description: "Бій повернеться до підготовки, журнал буде очищено.", confirmLabel: "Скинути" })) {
+    if (await confirm({ title: t("resetTitle"), description: t("resetDescription"), confirmLabel: t("reset") })) {
       actions.reset.mutate({});
     }
   };
@@ -27,20 +30,20 @@ export function BattleTopBar({ onComplete }: { onComplete?: () => void }) {
   return (
     <header className="flex h-12 items-center gap-3 px-4">
       <span className="hud-sc truncate text-[15px] tracking-[.08em]">{battle.name}</span>
-      {isMyTurn && battle.status === BattleStatus.ACTIVE && <span className="hud-sc hidden h-8 items-center border-y border-[var(--enemy)] bg-[var(--enemy)]/20 px-4 text-[15px] tracking-[.12em] lg:flex">Твій хід</span>}
-      <button type="button" disabled={!motionAllowed} title={fxHint} onClick={() => setFxOn(!fxOn)} aria-label={fxOn ? "Анімації дій: увімк." : "Анімації дій: вимк."} aria-pressed={fxOn} className={cn("ml-auto flex size-8 items-center justify-center hover:bg-white/10 disabled:cursor-not-allowed disabled:hover:bg-transparent", fxOn ? "text-[var(--gold)]" : "text-[#b8ab95]/60")}>
+      {isMyTurn && battle.status === BattleStatus.ACTIVE && <span className="hud-sc hidden h-8 items-center border-y border-[var(--enemy)] bg-[var(--enemy)]/20 px-4 text-[15px] tracking-[.12em] lg:flex">{t("yourTurn")}</span>}
+      <button type="button" disabled={!motionAllowed} title={fxHint} onClick={() => setFxOn(!fxOn)} aria-label={fxOn ? t("fxOn") : t("fxOff")} aria-pressed={fxOn} className={cn("ml-auto flex size-8 items-center justify-center hover:bg-white/10 disabled:cursor-not-allowed disabled:hover:bg-transparent", fxOn ? "text-[var(--gold)]" : "text-[#b8ab95]/60")}>
         <Sparkles className="size-4" />
       </button>
       <span className="hud-sc flex items-center gap-2 text-sm text-[#b8ab95]">
-        Раунд {battle.currentRound}
+        {t("round", { round: battle.currentRound })}
         <i className={cn("size-1.5 rounded-full", connection === "connected" ? "bg-[#9fb98a]" : "bg-[#f0b44c] animate-[hud-pulse_1.2s_infinite]")} />
       </span>
       {isDM && battle.status !== BattleStatus.PREPARED && (
         <span className="hidden gap-2 lg:flex">
-          {onComplete && battle.status === BattleStatus.ACTIVE && <button type="button" onClick={onComplete} className="hud-sc h-8 w-32 border border-[var(--gold)]/60 text-sm text-[var(--gold)] hover:bg-[var(--gold)]/10">Завершити</button>}
-          <button type="button" onClick={() => void reset()} className="hud-sc h-8 w-28 border border-hud-danger/50 text-sm text-hud-danger hover:bg-hud-danger/10">Скинути</button>
+          {onComplete && battle.status === BattleStatus.ACTIVE && <button type="button" onClick={onComplete} className="hud-sc h-8 w-32 border border-[var(--gold)]/60 text-sm text-[var(--gold)] hover:bg-[var(--gold)]/10">{t("complete")}</button>}
+          <button type="button" onClick={() => void reset()} className="hud-sc h-8 w-28 border border-hud-danger/50 text-sm text-hud-danger hover:bg-hud-danger/10">{t("reset")}</button>
           {battle.status === BattleStatus.ACTIVE && <button type="button" disabled={nextPending} onClick={() => actions.nextTurn.mutate({})} className="hud-sc flex h-8 w-36 items-center justify-center bg-[var(--enemy)] text-sm text-[var(--ink)] disabled:opacity-70">
-            {nextPending ? <Loader2 className="size-4 animate-spin" /> : "Наступний хід"}
+            {nextPending ? <Loader2 className="size-4 animate-spin" /> : t("nextTurn")}
           </button>}
         </span>
       )}

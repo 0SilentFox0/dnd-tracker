@@ -1,5 +1,5 @@
 // @vitest-environment happy-dom
-import { cleanup, fireEvent, render, screen } from "@testing-library/react";
+import { cleanup, fireEvent, screen } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
 vi.mock("@/components/hud/fonts", () => ({ hudFontClassName: "" }));
@@ -23,6 +23,9 @@ import { MapStripSlotContext } from "@/components/battle/scene/MapStrip";
 import { MobileBattleLayout } from "@/components/battle/scene/MobileBattleLayout";
 import { SpellAimPanel } from "@/components/battle/wizards/spellbook/SpellAimPanel";
 import { fakeScene } from "@/lib/hooks/battle/__tests__/fake-scene";
+import { render } from "@/lib/i18n/test/render-uk";
+
+vi.unmock("next-intl");
 
 vi.stubGlobal("ResizeObserver", class {
   observe() {}

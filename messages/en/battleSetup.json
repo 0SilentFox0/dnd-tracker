@@ -1,0 +1,198 @@
+{
+  "list": {
+    "page": {
+      "title": "Battle scenes",
+      "subtitle": "Create and manage battles",
+      "create": "+ Create battle scene"
+    },
+    "deleteAll": {
+      "noun": "battles",
+      "description": "This will delete all battle scenes from the campaign ({count, plural, one {# battle} other {# battles}}). This cannot be undone."
+    },
+    "sections": {
+      "active": "Active battles",
+      "prepared": "Prepared battles",
+      "completed": "Completed battles"
+    },
+    "status": {
+      "active": "Active",
+      "prepared": "Prepared",
+      "completed": "Completed"
+    },
+    "card": {
+      "round": "Round:",
+      "participants": "Participants:",
+      "play": "Go to battle",
+      "edit": "Edit",
+      "start": "Start",
+      "view": "View"
+    },
+    "empty": {
+      "title": "No battle scenes yet",
+      "create": "Create the first battle scene"
+    },
+    "search": "Search battles"
+  },
+  "form": {
+    "loading": "Loading...",
+    "title": {
+      "create": "Create battle scene",
+      "edit": "Edit battle scene"
+    },
+    "aside": {
+      "create": "Pick participants and split them into allies and enemies",
+      "edit": "Update the participants and their roles in the battle"
+    },
+    "tabs": {
+      "basic": "Basics",
+      "map": "Map",
+      "heroes": "Heroes",
+      "units": "Units",
+      "roster": "Roster · {count}"
+    },
+    "deleting": "Deleting...",
+    "saveChanges": "Save changes",
+    "confirmDelete": "Are you sure you want to delete this battle scene?",
+    "notify": {
+      "noParticipants": "Pick at least one participant",
+      "updateFailed": "Failed to update the battle",
+      "createFailed": "Failed to create the battle",
+      "deleteFailed": "Failed to delete the battle"
+    }
+  },
+  "basic": {
+    "title": "Basic information",
+    "name": "Battle name *",
+    "namePlaceholder": "Battle name",
+    "description": "Description",
+    "descriptionPlaceholder": "Battle description (optional)"
+  },
+  "map": {
+    "title": "Battle map",
+    "enabled": "Battle on a map",
+    "cols": "Columns",
+    "rows": "Rows",
+    "cellSize": "Cell size · {size} · {cols} × {rows}",
+    "offsetX": "Grid offset X · {value}",
+    "offsetY": "Grid offset Y · {value}",
+    "opacity": "Grid opacity · {value}",
+    "margins": {
+      "title": "Margins (unplayable cells)",
+      "equal": "Equal",
+      "top": "Top",
+      "right": "Right",
+      "bottom": "Bottom",
+      "left": "Left"
+    },
+    "drawing": "Paint cells",
+    "tools": {
+      "blocked": "Unplayable",
+      "wall": "Impassable",
+      "hazard": "Hazard",
+      "erase": "Erase"
+    },
+    "hazardLabel": "Hazard label",
+    "hazardDice": "Damage (dice)",
+    "hazardDicePlaceholder": "no damage",
+    "hazardType": "Type",
+    "background": "Map background",
+    "defaultBackground": "Default background",
+    "noPlayable": "At least one free 2×2 area must remain"
+  },
+  "characters": {
+    "title": "Characters",
+    "hint": "Players and NPC heroes",
+    "players": "Players",
+    "npc": "NPC heroes",
+    "empty": "No characters available",
+    "dprHow": "How DPR is calculated",
+    "dprTitle": "DPR breakdown",
+    "dprSummary": "Physical: {physical} · Magic: {spell} · Skills: {nonMagic}"
+  },
+  "dprBreakdown": {
+    "physical": "Melee {melee}, ranged {ranged} → physical DPR = {physical}",
+    "spell": "Magic school (highest level): +{value} DPR",
+    "nonMagic": "Non-magic main skills (sum): +{value} DPR",
+    "total": "Total DPR = {physical} + {spell} + {nonMagic} = {total}"
+  },
+  "units": {
+    "title": "Units",
+    "hintEmpty": "NPC units. Click to add as an ally; \"To enemies\" puts it in the enemy column.",
+    "hint": "Click a card to add it to the allies or remove it. \"To enemies\" puts it straight into the enemy column.",
+    "empty": "No units available",
+    "tier": "tier {level}",
+    "enemy": "Enemy",
+    "ally": "Ally",
+    "quantity": "Quantity:",
+    "alreadyEnemy": "Already an enemy",
+    "toEnemies": "To enemies"
+  },
+  "autopick": {
+    "title": "Enemy picker",
+    "hintXp": "The system picks a roster for the chosen 5e XP budget, without scaling HP or damage.",
+    "hintFair": "The system picks a roster and scales enemy HP and damage to the heroes' strength so the battle lasts about 3-4 rounds.",
+    "race": "Unit race",
+    "anyRace": "Any",
+    "difficulty": "Difficulty",
+    "suggesting": "Picking…",
+    "suggest": "Pick",
+    "apply": "Apply recommendation",
+    "recommended": "Recommended enemies",
+    "scale": "×{hp} HP · ×{dmg} damage",
+    "noUnits": "No suitable units for this race.",
+    "needAllies": "Add allies on the left to pick enemies."
+  },
+  "roster": {
+    "sides": {
+      "ally": {
+        "title": "Allies",
+        "description": "Participants on your side"
+      },
+      "enemy": {
+        "title": "Enemies",
+        "description": "Opponents in the battle"
+      }
+    },
+    "characters": "Characters",
+    "units": "Units",
+    "pick": "Pick participants from the list below"
+  },
+  "participant": {
+    "reserveLess": "Fewer in reserve",
+    "reserveMore": "More in reserve",
+    "reserved": "in reserve: {count}",
+    "unreserve": "Remove from reserve",
+    "reserve": "Reserve: appears when the DM brings them into the battle",
+    "moveToEnemies": "Move to enemies",
+    "moveToAllies": "Move to allies",
+    "remove": "Remove from the list"
+  },
+  "balance": {
+    "title": "Battle balance",
+    "empty": "Add heroes as allies and units as enemies to see the balance.",
+    "heroPower": "Hero power",
+    "enemyPower": "Enemy power",
+    "npcEnemies": "NPC enemies (not scaled)",
+    "damage": "{value} damage",
+    "even": "even fight ✓",
+    "weak": "Too weak",
+    "excess": "Too strong",
+    "hintWeak": "Too weak: add {list}",
+    "hintExcess": "Too strong: remove {list}"
+  },
+  "xp": {
+    "title": "Battle balance (5e XP)",
+    "empty": "Add heroes as allies and units as enemies to see the difficulty.",
+    "difficulty": "Difficulty: {label}",
+    "enemyXp": "Enemy XP {xp}",
+    "enemyXpScaled": "Enemy XP {xp} × {multiplier} = {adjusted}",
+    "missingCr": "No CR, not counted: {names}"
+  },
+  "validation": {
+    "tooManyMarks": "Too many marks",
+    "background": "Background: an https link, a file or a built-in background is required",
+    "barrierNeedsDuration": "A barrier needs a duration",
+    "tooManyTerrainCells": "Too many terrain cells",
+    "playableAreaTooSmall": "The playable area is too small: at least a free 2×2 area is required"
+  }
+}

@@ -9,6 +9,8 @@ import type { MapAim, MapPick } from "@/lib/utils/battle/grid";
 import type { MapTerrainData } from "@/types/api";
 import type { BattleMapConfig } from "@/types/battle";
 
+vi.unmock("next-intl");
+
 const map: BattleMapConfig = { cols: 10, rows: 5, background: null, opacity: 0.3 };
 
 function setup(isDM: boolean, mapAim: MapAim | null = null, mapPick: MapPick | null = null, morale = 0) {

@@ -2,6 +2,7 @@ import type { AbilityRunContext, Downed, SummonRequest } from "@/lib/utils/abili
 import type { Effect, StaticEffect } from "@/lib/utils/abilities/schema";
 import type { AbilityEvent, ResolvedAbility } from "@/types/abilities";
 import type { BattleParticipant } from "@/types/battle";
+import type { LogLine } from "@/types/text";
 
 export interface EffectApplyInput<E extends Effect = Effect> {
   participants: BattleParticipant[];
@@ -16,7 +17,7 @@ export interface EffectApplyInput<E extends Effect = Effect> {
 
 export interface EffectApplyResult {
   participants: BattleParticipant[];
-  messages: string[];
+  messages: LogLine[];
   actionModifiers?: { participantId: string; effect: StaticEffect }[];
   downed?: Downed[];
   summons?: SummonRequest[];

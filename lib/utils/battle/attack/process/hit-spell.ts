@@ -6,6 +6,7 @@ import { casterSpellDice } from "@/lib/utils/battle/spell/caster-dice";
 import type { CastableSpell } from "@/lib/utils/battle/types/spell-process";
 import { pickOne, rollDiceList } from "@/lib/utils/common/dice";
 import type { BattleParticipant } from "@/types/battle";
+import type { LogLine } from "@/types/text";
 
 export interface HitSpellInput {
   attacker: BattleParticipant;
@@ -18,7 +19,7 @@ export interface HitSpellInput {
   rng: () => number;
 }
 
-export function castHitSpell(input: HitSpellInput): { participants: BattleParticipant[]; messages: string[] } {
+export function castHitSpell(input: HitSpellInput): { participants: BattleParticipant[]; messages: LogLine[] } {
   const { attacker, targetId, participants, rng } = input;
 
   const ids = findFlags(withSelf(participants, attacker), attacker.basicInfo.id, "castSpellOnHit")

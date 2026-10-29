@@ -1,6 +1,6 @@
 // @vitest-environment happy-dom
 import { renderToString } from "react-dom/server";
-import { cleanup, fireEvent, render, screen } from "@testing-library/react";
+import { cleanup, fireEvent, screen } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
 vi.mock("@/components/hud/fonts", () => ({ hudFontClassName: "" }));
@@ -17,7 +17,10 @@ vi.mock("@/components/battle/fx/preload", () => ({ preloadFx: fx.preloadFx }));
 import { BattleScreen } from "@/components/battle/scene/BattleScreen";
 import { ParticipantSide } from "@/lib/constants/battle";
 import { fakeScene } from "@/lib/hooks/battle/__tests__/fake-scene";
+import { render } from "@/lib/i18n/test/render-uk";
 import { createMockParticipant } from "@/lib/utils/battle/__tests__/fixtures/mock-participant";
+
+vi.unmock("next-intl");
 
 vi.stubGlobal("ResizeObserver", class {
   observe() {}

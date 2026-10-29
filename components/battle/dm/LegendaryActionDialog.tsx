@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useTranslations } from "next-intl";
 
 import { SpellBook } from "@/components/battle/wizards/SpellBook";
 import { OptionButton } from "@/components/hud/OptionButton";
@@ -9,6 +10,7 @@ import { Button } from "@/components/ui/button";
 import { ResponsiveDialog } from "@/components/ui/responsive-dialog";
 import { useLegendaryAction } from "@/lib/hooks/battle";
 import { useSpellBook } from "@/lib/hooks/battle/useSpellBook";
+import { useText } from "@/lib/i18n/use-text";
 import { toggleAbilityTarget } from "@/lib/utils/battle/validation/ability-targets";
 import type { BattleParticipant, LegendaryOption } from "@/types/battle";
 
@@ -22,6 +24,12 @@ export function LegendaryActionDialog({ participant, onClose }: LegendaryActionD
 }
 
 function LegendaryActionBody({ participant, onClose }: { participant: BattleParticipant; onClose: () => void }) {
+  const t = useTranslations("battleDm.legendary");
+
+  const tUi = useTranslations("common.ui");
+
+  const text = useText();
+
   const { legendary, choices, run, isPending } = useLegendaryAction(participant);
 
   const [choiceId, setChoiceId] = useState<string | null>(null);
@@ -52,21 +60,21 @@ function LegendaryActionBody({ participant, onClose }: { participant: BattlePart
       onOpenChange={(open) => !open && onClose()}
       size="md"
       hud
-      title={`Легендарна дія: ${participant.basicInfo.name}`}
-      description={legendary ? `Залишилось ${legendary.actionsLeft} з ${legendary.actions}` : ""}
+      title={t("title", { name: participant.basicInfo.name })}
+      description={legendary ? t("left", { left: legendary.actionsLeft, max: legendary.actions }) : ""}
       footer={
         <>
           <Button type="button" variant="outline" onClick={onClose}>
-            Закрити
+            {tUi("close")}
           </Button>
           <Button type="button" disabled={!ready} onClick={() => void submit()}>
-            Виконати
+            {t("run")}
           </Button>
         </>
       }
     >
       <div className="space-y-3">
-        <div className="grid gap-1" role="radiogroup" aria-label="Дія">
+        <div className="grid gap-1" role="radiogroup" aria-label={t("action")}>
           {choices.map((c) => (
             <OptionButton
               key={c.id}
@@ -75,7 +83,7 @@ function LegendaryActionBody({ participant, onClose }: { participant: BattlePart
               disabled={!!c.blocked}
               title={c.label}
               meta={c.cost}
-              note={c.blocked && <span className="text-hud-danger">{c.blocked}</span>}
+              note={c.blocked && <span className="text-hud-danger">{text(c.blocked)}</span>}
               onClick={() => {
                 setChoiceId(c.id);
                 setTargets([]);

@@ -5,10 +5,10 @@ import { newId } from "./structure";
 
 import type { Translator } from "@/lib/i18n/translator";
 import type { ScenarioAiOp, ScenarioAiOpInput } from "@/types/ai";
-import type { TextRef } from "@/types/choices";
+import type { TextParams } from "@/types/choices";
 import type { ScenarioContent, ScenarioRow, ScenarioSection } from "@/types/scenario";
 
-type Resolved = { ok: true; ops: ScenarioAiOp[] } | { ok: false; error: TextRef };
+type Resolved = { ok: true; ops: ScenarioAiOp[] } | { ok: false; error: { message: string; params?: TextParams } };
 
 const fail = (message: string, params: Record<string, string>): Resolved => ({ ok: false, error: { message: `assistant.scenarioOps.${message}`, params } });
 

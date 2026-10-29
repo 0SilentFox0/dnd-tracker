@@ -1,6 +1,7 @@
 import { awaitsMoraleCheck, type MoraleScope } from "@/lib/utils/battle/morale/awaits-check";
 import type { MoraleCheckResult } from "@/lib/utils/battle/morale/check";
 import { BattleRuleError } from "@/lib/utils/battle/store/errors";
+import { REJECT } from "@/lib/utils/battle/store/reject";
 
 export interface PendingMoraleCheckPayload {
   participantId: string;
@@ -12,12 +13,12 @@ export function assertNotPanicking(pendingMoraleCheck: unknown, participantId: s
   const pending = pendingMoraleCheck as PendingMoraleCheckPayload | null;
 
   if (pending?.participantId === participantId && pending.moraleResult.shouldSkipTurn) {
-    throw new BattleRuleError("action_used", "Учасник у паніці й пропускає хід");
+    throw new BattleRuleError("action_used", REJECT.panicSkip);
   }
 }
 
 export function assertMoraleResolved(scope: MoraleScope, participantId: string): void {
-  if (awaitsMoraleCheck(scope, participantId)) throw new BattleRuleError("action_rejected", "Спершу потрібна перевірка моралі");
+  if (awaitsMoraleCheck(scope, participantId)) throw new BattleRuleError("action_rejected", REJECT.moraleFirst);
 }
 
 export function assertCanAct(scope: MoraleScope, participantId: string, opts: { skipMorale?: boolean } = {}): void {

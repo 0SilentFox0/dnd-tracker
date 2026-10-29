@@ -9,6 +9,7 @@ import { createMockParticipant } from "@/lib/utils/battle/__tests__/fixtures/moc
 import { heroAttackDamageParts } from "@/lib/utils/battle/damage/hero-damage";
 import type { BattleMutationContext } from "@/lib/utils/battle/pipeline/run-battle-mutation";
 import { BattleAccessError, BattleRuleError } from "@/lib/utils/battle/store";
+import { REJECT } from "@/lib/utils/battle/store/reject";
 import { diceSlots, mergeDiceFormulas, parseDice } from "@/lib/utils/common/dice";
 
 const base = createMockParticipant();
@@ -170,7 +171,7 @@ describe("attack mutation", () => {
 
       const onMap = { ...ctx, participants: [sweeper, fallen, far], meta: { map } } as unknown as BattleMutationContext;
 
-      await expect(attackMutation(onMap, body())).rejects.toMatchObject({ code: "action_rejected", message: "Жоден ворог не в досяжності" });
+      await expect(attackMutation(onMap, body())).rejects.toMatchObject({ code: "action_rejected", message: REJECT.noEnemyInReach });
     });
 
     it("без карти та сама атака проходить як раніше", async () => {

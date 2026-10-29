@@ -1,5 +1,7 @@
 "use client";
 
+import { useLocale, useTranslations } from "next-intl";
+
 import { SetupEntityCard } from "./SetupEntityCard";
 
 import { HudSection } from "@/components/hud/form";
@@ -13,9 +15,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { ParticipantSide, ParticipantSourceType } from "@/lib/constants/battle";
 import { clampUnitQuantity, UNIT_QUANTITY } from "@/lib/constants/battle-units";
-import { groupDisplayName, UNGROUPED_LABELS } from "@/lib/constants/ungrouped";
+import { groupDisplayName } from "@/lib/constants/ungrouped";
 import type { ParticipantActions, ParticipantSelection } from "@/lib/hooks/battles";
-import { compareUk } from "@/lib/utils/common/text";
 import { groupUnitsByRaceName } from "@/lib/utils/units/group-units";
 import type { EntityStats, SetupUnit } from "@/types/battle-setup";
 
@@ -34,21 +35,23 @@ interface UnitRowProps {
 }
 
 function UnitRow({ unit, stats, state, actions }: UnitRowProps) {
+  const t = useTranslations("battleSetup.units");
+
   const { isSelected, side, quantity } = state;
 
   const isEnemy = side === ParticipantSide.ENEMY;
 
   const badge = isEnemy ? (
-    <span className="text-xs font-medium text-red-600 dark:text-red-400">Ворог</span>
+    <span className="text-xs font-medium text-red-600 dark:text-red-400">{t("enemy")}</span>
   ) : side === ParticipantSide.ALLY ? (
-    <span className="text-xs font-medium text-primary">Союзник</span>
+    <span className="text-xs font-medium text-primary">{t("ally")}</span>
   ) : null;
 
   return (
     <SetupEntityCard
       entity={unit}
       fallbackIcon="⚔️"
-      title={<span className="font-normal text-muted-foreground"> · tier {unit.level ?? 1}</span>}
+      title={<span className="font-normal text-muted-foreground"> · {t("tier", { level: unit.level ?? 1 })}</span>}
       stats={stats}
       state={{ isSelected, isEnemy, badge }}
       onToggle={actions.onToggle}
@@ -56,7 +59,7 @@ function UnitRow({ unit, stats, state, actions }: UnitRowProps) {
       <div className="flex flex-wrap items-center gap-3 border-t border-border/50 px-4 pb-4 pt-0">
         <div className="flex items-center gap-2">
           <label htmlFor={`quantity-${unit.id}`} className="whitespace-nowrap text-sm text-muted-foreground">
-            Кількість:
+            {t("quantity")}
           </label>
           <Input
             id={`quantity-${unit.id}`}
@@ -69,7 +72,7 @@ function UnitRow({ unit, stats, state, actions }: UnitRowProps) {
           />
         </div>
         <Button type="button" variant={isEnemy ? "secondary" : "outline"} size="sm" onClick={actions.onAddToEnemies} disabled={isEnemy}>
-          {isEnemy ? "Вже ворог" : "До ворогів"}
+          {isEnemy ? t("alreadyEnemy") : t("toEnemies")}
         </Button>
       </div>
     </SetupEntityCard>
@@ -77,14 +80,20 @@ function UnitRow({ unit, stats, state, actions }: UnitRowProps) {
 }
 
 export function UnitsListCard({ units, entityStats, selection, actions }: UnitsListCardProps) {
+  const t = useTranslations("battleSetup.units");
+
+  const tGame = useTranslations("gameTerms.ungrouped");
+
+  const locale = useLocale();
+
   if (units.length === 0) {
     return (
-      <HudSection title="Юніти">
+      <HudSection title={t("title")}>
         <p className="text-xs text-muted-foreground">
-          NPC юніти. Клік — до союзників, «До ворогів» — у колонку ворогів.
+          {t("hintEmpty")}
         </p>
         <p className="text-sm text-muted-foreground text-center py-4">
-          Немає доступних юнітів
+          {t("empty")}
         </p>
       </HudSection>
     );
@@ -92,16 +101,16 @@ export function UnitsListCard({ units, entityStats, selection, actions }: UnitsL
 
   const byRace = groupUnitsByRaceName(units);
 
-  const raceLabel = (key: string) => groupDisplayName(key, UNGROUPED_LABELS.race);
+  const raceLabel = (key: string) => groupDisplayName(key, tGame("race"));
 
   const raceOrder = [...byRace.keys()].sort((a, b) =>
-    compareUk(raceLabel(a), raceLabel(b)),
+    raceLabel(a).localeCompare(raceLabel(b), locale),
   );
 
   return (
-    <HudSection title="Юніти" className="mt-0 max-h-[600px] space-y-4 overflow-y-auto">
+    <HudSection title={t("title")} className="mt-0 max-h-[600px] space-y-4 overflow-y-auto">
       <p className="text-xs text-muted-foreground">
-        Клік по картці — додати до союзників або прибрати. «До ворогів» — одразу в колонку ворогів.
+        {t("hint")}
       </p>
         <Accordion
           type="multiple"

@@ -6,6 +6,7 @@ import { API_ERRORS } from "@/lib/constants/api-errors";
 import { context, goblin, hero } from "@/lib/server/battles/__tests__/mutations/fixtures";
 import { beginConcentration, hasConcentration } from "@/lib/utils/battle/concentration";
 import { applyCondition5e, hasCondition } from "@/lib/utils/battle/conditions";
+import { eventTextOf } from "@/lib/utils/battle/log/__tests__/event-text";
 import type { BattleParticipant } from "@/types/battle";
 
 const dmCtx = (participants: BattleParticipant[] = [hero, goblin]) => context({ participants, isDM: true });
@@ -21,7 +22,7 @@ describe("battleConditionsMutation", () => {
     expect(effects).toHaveLength(1);
     expect(effects[0]).toMatchObject({ name: "Повалений", type: "condition" });
     expect(effects[0].source).toBeUndefined();
-    expect(out.events[0].resultText).toContain("ДМ: Гоблін — повалений");
+    expect(eventTextOf(out.events[0])).toContain("ДМ: Гоблін — повалений");
   });
 
   it("без rounds стан постійний", () => {

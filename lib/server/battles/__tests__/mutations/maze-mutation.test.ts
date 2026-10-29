@@ -56,7 +56,7 @@ describe("DM maze route", () => {
   it("бій без лабіринту — відмова", () => {
     const base = ctx();
 
-    expectRejected(() => mazeMutation({ ...base, meta: { ...base.meta, map: { ...mapOf(), maze: null } } }, { op: "dark", on: true }), "Цей бій не лабіринт");
+    expectRejected(() => mazeMutation({ ...base, meta: { ...base.meta, map: { ...mapOf(), maze: null } } }, { op: "dark", on: true }), "battleActions.maze.notMaze");
   });
 
   it("generate: нові стіни, вихід на краю, герої на краях, вороги не прокидаються, dark зберігається", () => {
@@ -81,7 +81,7 @@ describe("DM maze route", () => {
     expect(pos.x === 0 || pos.y === 0 || pos.x === 7 || pos.y === 7).toBe(true);
 
     expectRejected(() => mazeMutation(ctx(), { op: "generate", difficulty: "easy", ...features, exit: { x: 3, y: 3 } }), MAZE_TEXTS.exitOnEdge);
-    expectRejected(() => mazeMutation(ctx({ moved: true }), { op: "generate", difficulty: "easy", ...features, exit: null }), "Лабіринт уже пройдено частково — використайте «Перетасувати»");
+    expectRejected(() => mazeMutation(ctx({ moved: true }), { op: "generate", difficulty: "easy", ...features, exit: null }), "battleActions.maze.alreadyMoved");
   });
 
   it("generate: герой без позиції не стає на зайняту крайню клітинку, ніхто не ділить клітинку", () => {
@@ -124,7 +124,7 @@ describe("DM maze route", () => {
 
     expect(out.scene?.map?.maze?.walls).toEqual(["2:2:s"]);
 
-    expectRejected(() => mazeMutation(ctx(), { op: "walls", add: ["0:2:e", "0:1:s", "0:2:s"], remove: [] }), "Ці стіни замурують учасника — шляху до виходу не залишиться");
+    expectRejected(() => mazeMutation(ctx(), { op: "walls", add: ["0:2:e", "0:1:s", "0:2:s"], remove: [] }), "battleActions.maze.walledIn");
     expectRejected(() => mazeMutation(ctx(), { op: "walls", add: ["7:0:e"], remove: [] }));
   });
 

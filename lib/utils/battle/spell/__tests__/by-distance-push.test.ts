@@ -4,6 +4,7 @@ import { ParticipantSide } from "@/lib/constants/battle";
 import { makeParticipant } from "@/lib/utils/abilities/__tests__/fixtures";
 import { EffectSchema } from "@/lib/utils/abilities/schema";
 import { pushAway } from "@/lib/utils/battle/grid/push";
+import { textsOf } from "@/lib/utils/battle/log/__tests__/event-text";
 import { castSpell } from "@/lib/utils/battle/spell";
 import { expandChosen, flatEffects, inputDiceOf } from "@/lib/utils/battle/spell/cast/state";
 import type { CastableSpell } from "@/lib/utils/battle/types/spell-process";
@@ -53,14 +54,14 @@ describe("dealDamage.byDistance", () => {
   });
 
   it("logs the distance and the band", () => {
-    expect(cast(byDistance, foe(6)).messages.join(" ")).toContain("дистанція 30 фт → 4d6");
+    expect(textsOf(cast(byDistance, foe(6)).messages).join(" ")).toContain("дистанція 30 фт → 4d6");
   });
 
   it("falls back to the first range without a map", () => {
     const r = cast(byDistance, foe(17), { map: undefined });
 
     expect(hpLost(r)).toBe(15);
-    expect(r.messages.join(" ")).toContain("без мапи");
+    expect(textsOf(r.messages).join(" ")).toContain("без мапи");
   });
 
   it("upcast adds dice to every range", () => {
@@ -114,7 +115,7 @@ describe("pushAway / push effect", () => {
     const r = cast(push, foe(2), { map: undefined });
 
     expect(r.allParticipantsUpdated.find((p) => p.basicInfo.id === "f")?.battleData.position).toEqual({ x: 2, y: 5 });
-    expect(r.messages.join(" ")).toContain("без мапи");
+    expect(textsOf(r.messages).join(" ")).toContain("без мапи");
   });
 
   it("landing in a hazard hurts once per round", () => {

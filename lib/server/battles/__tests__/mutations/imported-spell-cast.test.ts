@@ -5,6 +5,7 @@ import { context, goblin, participant } from "./fixtures";
 
 import { createSpellMutation } from "@/lib/server/battles/mutations/spell/spell-mutation";
 import { adaptCompendium } from "@/lib/server/compendium-import/adapt";
+import { eventTextOf } from "@/lib/utils/battle/log/__tests__/event-text";
 import type { BattleParticipant } from "@/types/battle";
 
 const base = { name: "Synthetic Spell", source: "Test", level: 2, school: "V", time: [{ number: 1, unit: "action" }], range: { type: "point", distance: { type: "feet", amount: 60 } }, duration: [{ type: "instant" }], entries: ["Synthetic text."] };
@@ -101,7 +102,7 @@ describe("imported native spells cast through the real spell mutation", () => {
 
     expect(part(out, "gob").combatStats.currentHp).toBe(48);
     expect(part(out, "gob2").combatStats.currentHp).toBe(54);
-    expect(JSON.stringify(out.events[0])).toMatch(/шкода: 18 \(.* 12, Gob2 6\)/);
+    expect(eventTextOf(out.events[0])).toMatch(/шкода: 18 \(.* 12, Gob2 6\)/);
   });
 
   it("a plain spell accepts a castLevel equal to its own level without an item grant", async () => {

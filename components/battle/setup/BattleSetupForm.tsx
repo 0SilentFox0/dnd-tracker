@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { useTranslations } from "next-intl";
 
 import { AutopickCard } from "./AutopickCard";
 import { BalanceSummary } from "./BalanceSummary";
@@ -26,24 +27,30 @@ interface BattleSetupFormProps {
 
 const PAGE_CLASS = "max-w-6xl";
 
-function SetupLoading({ title }: { title: string }) {
+function SetupLoading({ isEdit }: { isEdit: boolean }) {
+  const t = useTranslations("battleSetup.form");
+
   return (
-    <HudFormPage title={title} className={PAGE_CLASS}>
+    <HudFormPage title={isEdit ? t("title.edit") : t("title.create")} className={PAGE_CLASS}>
       <div className="px-4 py-3">
-        <LoadingState label="Завантаження..." />
+        <LoadingState label={t("loading")} />
       </div>
     </HudFormPage>
   );
 }
 
 function BattleSetupLayout({ campaignId, battleId, initial }: BattleSetupFormProps & { initial?: BattleSetupInitial }) {
+  const t = useTranslations("battleSetup.form");
+
   const setup = useBattleSetup(campaignId, battleId, initial);
+
+  const tActions = useTranslations("common.actions");
 
   const isEdit = !!battleId;
 
-  const title = isEdit ? "Редагувати сцену бою" : "Створити сцену бою";
+  const title = isEdit ? t("title.edit") : t("title.create");
 
-  if (setup.loading) return <SetupLoading title={title} />;
+  if (setup.loading) return <SetupLoading isEdit={isEdit} />;
 
   const { participants, details, data, balance, form } = setup;
 
@@ -60,13 +67,13 @@ function BattleSetupLayout({ campaignId, battleId, initial }: BattleSetupFormPro
   const tabs: HudTab<BattleFormTabId>[] = [
     {
       id: BATTLE_FORM_TAB.basic,
-      label: "Основне",
+      label: t("tabs.basic"),
       content: <BattleFormBasicInfo details={details} />,
     },
-    { id: BATTLE_FORM_TAB.map, label: "Карта", content: <BattleFormMap editor={setup.mapEditor} /> },
+    { id: BATTLE_FORM_TAB.map, label: t("tabs.map"), content: <BattleFormMap editor={setup.mapEditor} /> },
     {
       id: BATTLE_FORM_TAB.heroes,
-      label: "Герої",
+      label: t("tabs.heroes"),
       content: (
         <CharactersListCard
           playerCharacters={data.playerCharacters}
@@ -79,7 +86,7 @@ function BattleSetupLayout({ campaignId, battleId, initial }: BattleSetupFormPro
     },
     {
       id: BATTLE_FORM_TAB.units,
-      label: "Юніти",
+      label: t("tabs.units"),
       content: (
         <div className="space-y-4">
           {!isEdit && (
@@ -91,7 +98,7 @@ function BattleSetupLayout({ campaignId, battleId, initial }: BattleSetupFormPro
     },
     {
       id: BATTLE_FORM_TAB.roster,
-      label: `Склад · ${participants.list.length}`,
+      label: t("tabs.roster", { count: participants.list.length }),
       content: (
         <div>
           {setup.encounters.balance === "xp" ? <XpBalanceSummary xp={setup.xp} units={data.units} /> : <BalanceSummary fair={setup.fair} />}
@@ -107,7 +114,7 @@ function BattleSetupLayout({ campaignId, battleId, initial }: BattleSetupFormPro
   return (
     <HudFormPage
       title={title}
-      aside={isEdit ? "Оновіть учасників та їх ролі в битві" : "Оберіть учасників та розподіліть їх на союзників та ворогів"}
+      aside={isEdit ? t("aside.edit") : t("aside.create")}
       className={PAGE_CLASS}
     >
       <OnboardingHint id="dm.battle-setup" className="mb-3" />
@@ -119,14 +126,14 @@ function BattleSetupLayout({ campaignId, battleId, initial }: BattleSetupFormPro
           <>
             {isEdit && (
               <Button type="button" variant="destructive" onClick={form.actions.remove} disabled={form.status.isDeleting}>
-                {form.status.isDeleting ? "Видалення..." : "Видалити"}
+                {form.status.isDeleting ? t("deleting") : tActions("delete")}
               </Button>
             )}
             <Button type="button" variant="outline" asChild>
-              <Link href={`/campaigns/${campaignId}/dm/battles`}>Скасувати</Link>
+              <Link href={`/campaigns/${campaignId}/dm/battles`}>{tActions("cancel")}</Link>
             </Button>
             <Button type="submit" disabled={form.status.isSaving}>
-              {isEdit ? (form.status.isSaving ? "Збереження..." : "Зберегти зміни") : form.status.isSaving ? "Створення..." : "Створити сцену бою"}
+              {isEdit ? (form.status.isSaving ? tActions("saving") : t("saveChanges")) : form.status.isSaving ? tActions("creating") : t("title.create")}
             </Button>
           </>
         }
@@ -138,7 +145,7 @@ function BattleSetupLayout({ campaignId, battleId, initial }: BattleSetupFormPro
 function EditBattleSetup({ campaignId, battleId }: { campaignId: string; battleId: string }) {
   const { initial, loading } = useBattleSetupInitial(campaignId, battleId);
 
-  if (loading) return <SetupLoading title="Редагувати сцену бою" />;
+  if (loading) return <SetupLoading isEdit />;
 
   return <BattleSetupLayout campaignId={campaignId} battleId={battleId} initial={initial} />;
 }

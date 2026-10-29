@@ -72,7 +72,7 @@ function crack(from: FxPoint, angle: number, len: number): FxPoint[] {
   return pts;
 }
 
-export const rust: FxAnimation = ({ stage, from, targets }) =>
+export const rust: FxAnimation = ({ stage, from, targets, labels }) =>
   perTarget(stage, targets, 0, async ({ at: target, el }) => {
     await drip(stage, from, target);
 
@@ -146,7 +146,7 @@ export const rust: FxAnimation = ({ stage, from, targets }) =>
           g.restore();
         }
 
-        sinkingBadge(g, target.x, target.y - h - 12, clamp01((t - 700) / 1300), "−2 КБ", BADGE);
+        sinkingBadge(g, target.x, target.y - h - 12, clamp01((t - 700) / 1300), labels.rust, BADGE);
         g.globalAlpha = 1;
       },
       (t, dt) => {

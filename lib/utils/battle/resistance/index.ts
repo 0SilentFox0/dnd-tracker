@@ -1,9 +1,11 @@
 import { BATTLE_CONSTANTS } from "@/lib/constants/battle";
 import { PHYSICAL_DAMAGE_TYPES } from "@/lib/constants/damage";
+import { textRef } from "@/lib/i18n/text-ref";
 import { collectModifiers } from "@/lib/utils/abilities/engine/core/collect-modifiers";
 import { withSelf } from "@/lib/utils/abilities/engine/core/participants";
 import type { AttackKind, StaticEffect } from "@/lib/utils/abilities/schema";
 import type { BattleParticipant, DamageStep } from "@/types/battle";
+import type { LogLine } from "@/types/text";
 
 export interface ResistanceOptions {
   participants?: BattleParticipant[];
@@ -23,15 +25,15 @@ export interface ResistanceResult {
   finalDamage: number;
   immunityApplied: boolean;
   resistanceApplied: boolean;
-  breakdown: string[];
+  breakdown: LogLine[];
   steps: DamageStep[];
 }
 
 /** Текст для логу, коли шкоду повністю зняв імунітет: «⛔ Дракон: Імунітет до вогню». */
-export function immunityNote(targetName: string, steps: DamageStep[]): string {
+export function immunityNote(targetName: string, steps: DamageStep[]): LogLine {
   const step = steps.find((s) => s.kind === "immunity");
 
-  return step ? `⛔ ${targetName}: ${step.label}` : "";
+  return step ? textRef("battleLog.resistance.immunityNote", { target: targetName, label: step.label }) : "";
 }
 
 const clampPercent = (n: number) => Math.max(-BATTLE_CONSTANTS.RESISTANCE_PERCENT_CAP, Math.min(BATTLE_CONSTANTS.RESISTANCE_PERCENT_CAP, n));
@@ -87,8 +89,8 @@ export function applyResistance(target: BattleParticipant, damage: number, damag
   return {
     ...result,
     finalDamage: 0,
-    breakdown: [...result.breakdown, `${result.finalDamage} < поріг шкоди ${threshold} → 0 урону`],
-    steps: [...result.steps, { label: `Поріг шкоди ${threshold}`, side: "target", kind: "immunity", value: -100, after: 0 }],
+    breakdown: [...result.breakdown, textRef("battleLog.resistance.threshold", { damage: result.finalDamage, threshold })],
+    steps: [...result.steps, { label: textRef("battleLog.resistance.thresholdStep", { threshold }), side: "target", kind: "immunity", value: -100, after: 0 }],
   };
 }
 
@@ -99,7 +101,7 @@ function damageThreshold(target: BattleParticipant, opts: ResistanceOptions = {}
 }
 
 function applyPercentResistance(target: BattleParticipant, damage: number, damageType: string, opts?: ResistanceOptions): ResistanceResult {
-  const breakdown: string[] = [];
+  const breakdown: LogLine[] = [];
 
   let finalDamage = damage;
 
@@ -108,7 +110,7 @@ function applyPercentResistance(target: BattleParticipant, damage: number, damag
   const immune = matches.find((m) => m.percent >= 100);
 
   if (immune) {
-    breakdown.push(`${damage} ${damageType} → ІМУНІТЕТ (0 урону)`);
+    breakdown.push(textRef("battleLog.resistance.immune", { damage, type: damageType }));
 
     return {
       finalDamage: 0,
@@ -124,7 +126,9 @@ function applyPercentResistance(target: BattleParticipant, damage: number, damag
   if (resistancePercent !== 0) {
     finalDamage = Math.floor(damage * (1 - resistancePercent / BATTLE_CONSTANTS.PERCENT_DIVISOR));
     breakdown.push(
-      resistancePercent > 0 ? `${damage} ${damageType} → -${resistancePercent}% опір (${finalDamage} урону)` : `${damage} ${damageType} → +${-resistancePercent}% вразливість (${finalDamage} урону)`,
+      resistancePercent > 0
+        ? textRef("battleLog.resistance.resist", { damage, type: damageType, percent: resistancePercent, final: finalDamage })
+        : textRef("battleLog.resistance.vulnerable", { damage, type: damageType, percent: -resistancePercent, final: finalDamage }),
     );
 
     let used = 0;
@@ -140,7 +144,7 @@ function applyPercentResistance(target: BattleParticipant, damage: number, damag
     return { finalDamage, immunityApplied: false, resistanceApplied: true, breakdown, steps };
   }
 
-  breakdown.push(`${damage} ${damageType} урону`);
+  breakdown.push(textRef("battleLog.resistance.plain", { damage, type: damageType }));
 
   return { finalDamage, immunityApplied: false, resistanceApplied: false, breakdown, steps: [] };
 }

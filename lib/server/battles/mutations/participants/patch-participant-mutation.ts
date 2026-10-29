@@ -1,9 +1,11 @@
 import { API_ERRORS } from "@/lib/constants/api-errors";
 import { CombatStatus } from "@/lib/constants/battle";
+import { textRef } from "@/lib/i18n/text-ref";
 import { findParticipant } from "@/lib/utils/abilities/engine/core/participants";
 import { resolveDowned } from "@/lib/utils/abilities/engine/core/run-abilities";
 import { toggleLair } from "@/lib/utils/battle/actions/lair";
 import { settleStatusChange } from "@/lib/utils/battle/damage/consequences";
+import { lineText } from "@/lib/utils/battle/log/lines";
 import { reserveOf } from "@/lib/utils/battle/participant/reserve";
 import { isUp, statusForHp } from "@/lib/utils/battle/participant/state";
 import type { BattleMutationContext, MutationResult } from "@/lib/utils/battle/pipeline/run-battle-mutation";
@@ -12,6 +14,7 @@ import { advanceAfterRemoval } from "@/lib/utils/battle/turn";
 import { rngOf } from "@/lib/utils/common/rng";
 import type { PatchParticipantData } from "@/types/api";
 import type { BattleParticipant } from "@/types/battle";
+import type { LogLine } from "@/types/text";
 
 export function patchParticipantMutation(
   ctx: BattleMutationContext,
@@ -27,7 +30,7 @@ export function patchParticipantMutation(
 
     const updated = toggleLair(actor, data.lairActive);
 
-    return { participants: ctx.participants.map((p) => p.basicInfo.id === participantId ? updated : p), pending: ctx.pending, events: [dmEvent(ctx.scene.round, `🏰 ${actor.basicInfo.name}: ${data.lairActive ? "у лігві" : "поза лігвом"}`)] };
+    return { participants: ctx.participants.map((p) => p.basicInfo.id === participantId ? updated : p), pending: ctx.pending, events: [dmEvent(ctx.scene.round, textRef(data.lairActive ? "battleLog.dm.lairIn" : "battleLog.dm.lairOut", { name: actor.basicInfo.name }))] };
   }
 
   if (data.removeFromBattle === true) return removeParticipant(ctx, participantId);
@@ -50,7 +53,7 @@ function removeParticipant(ctx: BattleMutationContext, participantId: string): M
 
   const participants = ctx.participants.filter((p) => p.basicInfo.id !== participantId);
 
-  const removalEvent = dmEvent(ctx.scene.round, `Видалено з бою (DM): ${removed.basicInfo.name}`);
+  const removalEvent = dmEvent(ctx.scene.round, textRef("battleLog.dm.removed", { name: removed.basicInfo.name }));
 
   const current = ctx.scene.turnIndex;
 
@@ -92,7 +95,7 @@ function removeFromReserve(ctx: BattleMutationContext, participantId: string): M
   return {
     participants: ctx.participants,
     pending: ctx.pending.filter((p) => p !== removed),
-    events: [dmEvent(ctx.scene.round, `Видалено з резерву (DM): ${removed.basicInfo.name}`)],
+    events: [dmEvent(ctx.scene.round, textRef("battleLog.dm.removedReserve", { name: removed.basicInfo.name }))],
   };
 }
 
@@ -122,14 +125,14 @@ function updateHp(ctx: BattleMutationContext, participantId: string, requestedHp
 
   const downed = oldHp > 0 && newHp <= 0
     ? resolveDowned(order, { victimId: participantId, actorId: null }, { round: ctx.scene.round, rng: rngOf(ctx), rules: ctx.meta.rules }, { allowSurvive: false })
-    : { participants: order, messages: [] as string[] };
+    : { participants: order, messages: [] as LogLine[] };
 
   const name = updated.basicInfo.name;
 
   const events: MutationResult["events"] = [
     dmEvent(
       ctx.scene.round,
-      kill ? `Вбито (DM): ${name}` : `Зміна HP (DM): ${name}, ${oldHp} → ${newHp}`,
+      kill ? textRef("battleLog.dm.killed", { name }) : textRef("battleLog.dm.hpChanged", { name, old: oldHp, new: newHp }),
       [{ participantId, participantName: name }],
       [{ participantId, participantName: name, oldHp, newHp, change: oldHp - newHp }],
     ),
@@ -138,7 +141,7 @@ function updateHp(ctx: BattleMutationContext, participantId: string, requestedHp
   const messages = [...settled.messages, ...downed.messages];
 
   if (messages.length > 0) {
-    events.push(systemEvent(ctx.scene.round, messages.join(" | ")));
+    events.push(systemEvent(ctx.scene.round, lineText(messages, " | ")));
   }
 
   return { participants: downed.participants, pending: ctx.pending, events };
@@ -169,7 +172,7 @@ function revive(ctx: BattleMutationContext, participantId: string): MutationResu
     events: [
       dmEvent(
         ctx.scene.round,
-        `Повернуто до життя (DM): ${name}, ${newHp} HP`,
+        textRef("battleLog.dm.revived", { name, hp: newHp }),
         [{ participantId, participantName: name }],
         [{ participantId, participantName: name, oldHp, newHp, change: oldHp - newHp }],
       ),

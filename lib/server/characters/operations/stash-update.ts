@@ -62,7 +62,112 @@ const GRANT_ERROR: Record<GrantError, { text: string; status: number }> = {
   ITEM_SPELL_INVALID: { text: API_ERRORS.ITEM_SPELL_INVALID, status: 422 },
 };
 
-async function applyStashCore({ access, campaignId, characterId }: CampaignScope, data: z.infer<typeof stashActionSchema>) {
+type Tx = Prisma.TransactionClient;
+
+type StashData = z.infer<typeof stashActionSchema>;
+
+type StashRow = Prisma.ArtifactGetPayload<{ select: typeof STASH_ROW_SELECT }>;
+
+type Rules = ReturnType<typeof parseRules>;
+
+const isAttuneAction = (data: StashData) => data.action === "attune" || data.action === "unattune";
+
+async function loadStashState(tx: Tx, characterId: string) {
+  const inv = await ensureInventory(tx, characterId);
+
+  const state: StashState = {
+    equipped: inv.equipped as EquippedItems,
+    stash: normalizeStash(inv.stash),
+    items: normalizeItems(inv.items),
+    purse: { gp: inv.gold, sp: inv.silver, cp: inv.copper },
+    attuned: attunedRefs(inv),
+  };
+
+  return state;
+}
+
+async function planStashGrant(tx: Tx, campaignId: string, data: Extract<StashData, { action: "grant" }>, grantRow: StashRow): Promise<GrantPlan> {
+  const base = data.baseId ? await tx.artifact.findFirst({ where: { id: data.baseId, campaignId }, select: STASH_ROW_SELECT }) : null;
+
+  const rows = new Map([[data.artifactId, { ...grantRow, id: data.artifactId }], ...(base ? [[base.id, base] as const] : [])]);
+
+  const planned = planGrant(data, rows);
+
+  if (!planned.ok) {
+    const { text, status } = GRANT_ERROR[planned.error];
+
+    throw new ContentError(text, status);
+  }
+
+  const grant = planned.plan;
+
+  if (grant.kind === "stash") {
+    const all = await tx.characterInventory.findMany({
+      where: { character: { campaignId } },
+      select: { characterId: true, equipped: true, stash: true, character: { select: { name: true } } },
+    });
+
+    const holder = findHolder(
+      all.map((o) => ({ characterId: o.characterId, equipped: o.equipped as EquippedItems, stash: normalizeStash(o.stash) })),
+      grant.ref,
+      undefined,
+      uniqueChecker(rows),
+    );
+
+    if (holder) throw new ContentError(API_ERRORS.ARTIFACT_HELD_BY_OTHER_DETAIL, 409, undefined, { detail: all.find((o) => o.characterId === holder)?.character.name ?? "" });
+  }
+
+  return grant;
+}
+
+async function attuneContext(tx: Tx, campaignId: string, data: Extract<StashData, { action: "attune" | "unattune" }>, state: StashState, rules: Rules) {
+  const refs = [...new Set([data.ref, ...(state.attuned ?? [])])];
+
+  const foundRows = await tx.artifact.findMany({ where: { id: { in: [...new Set(refs.flatMap(refArtifactIds))] }, campaignId }, select: STASH_ROW_SELECT });
+
+  const byId = new Map(foundRows.map((r) => [r.id, r]));
+
+  state.attuned = pruneAttuned(state.attuned ?? [], state).filter((r) => resolveItemRow(r, byId) !== null);
+
+  return { items: { enabled: true, limit: rules.items.attunementLimit, attunable: attunementRequired(data.ref, byId) }, name: resolveItemRow(data.ref, byId)?.name };
+}
+
+async function buildActionContext(tx: Tx, scope: { campaignId: string; rules: Rules; isDM: boolean }, data: StashData, state: StashState) {
+  const { campaignId, rules, isDM } = scope;
+
+  let artifactSlotType: string | undefined;
+
+  let artifact: StashRow | undefined;
+
+  let classesEnabled = false;
+
+  let grant: GrantPlan | undefined;
+
+  let items: { enabled: boolean; limit: number; attunable: boolean } | undefined;
+
+  let name: string | undefined;
+
+  if (data.action === "equip" || data.action === "grant") {
+    const lookupId = data.action === "equip" ? (parseItemRef(data.artifactId)?.baseId ?? data.artifactId) : data.artifactId;
+
+    const found = await tx.artifact.findFirst({ where: { id: lookupId, campaignId }, select: STASH_ROW_SELECT });
+
+    if (!found) throw new ContentError(API_ERRORS.ARTIFACT_NOT_FOUND, 404);
+
+    artifact = found;
+    artifactSlotType = found.slot;
+
+    if (data.action === "equip" && data.slot) classesEnabled = rules.classes.enabled;
+
+    if (data.action === "grant") grant = await planStashGrant(tx, campaignId, data, found);
+  }
+
+  if (data.action === "attune" || data.action === "unattune") ({ items, name } = await attuneContext(tx, campaignId, data, state, rules));
+
+  return { newItemId: randomUUID(), artifactSlotType, artifact, classesEnabled, grant, items, name, isDM };
+}
+
+async function applyStashCore({ access, campaignId, characterId }: CampaignScope, data: StashData) {
   const { isDM, userId } = access;
 
   const character = await orThrow(loadOwned(
@@ -77,7 +182,7 @@ async function applyStashCore({ access, campaignId, characterId }: CampaignScope
 
   const rules = parseRules(access.campaign?.rules);
 
-  if (data.action === "attune" || data.action === "unattune") {
+  if (isAttuneAction(data)) {
     if (!rules.items.enabled) throw new ContentError(API_ERRORS.ITEMS_DISABLED, 409);
 
     await orThrow(rejectIfInActiveBattle(campaignId, [characterId]));
@@ -86,89 +191,11 @@ async function applyStashCore({ access, campaignId, characterId }: CampaignScope
   return prisma.$transaction(async (tx) => {
     await lockCampaignArtifacts(tx, campaignId);
 
-    const inv = await ensureInventory(tx, characterId);
+    const state = await loadStashState(tx, characterId);
 
-    const state: StashState = {
-      equipped: inv.equipped as EquippedItems,
-      stash: normalizeStash(inv.stash),
-      items: normalizeItems(inv.items),
-      purse: { gp: inv.gold, sp: inv.silver, cp: inv.copper },
-      attuned: attunedRefs(inv),
-    };
+    const context = await buildActionContext(tx, { campaignId, rules, isDM }, data, state);
 
-    let artifactSlotType: string | undefined;
-
-    let artifact: { slot: string; bonuses: unknown; modifiers: unknown } | undefined;
-
-    let classesEnabled = false;
-
-    let grantRow: Prisma.ArtifactGetPayload<{ select: typeof STASH_ROW_SELECT }> | undefined;
-
-    let grant: GrantPlan | undefined;
-
-    let items: { enabled: boolean; limit: number; attunable: boolean } | undefined;
-
-    let name: string | undefined;
-
-    if (data.action === "equip" || data.action === "grant") {
-      const lookupId = data.action === "equip" ? (parseItemRef(data.artifactId)?.baseId ?? data.artifactId) : data.artifactId;
-
-      const found = await tx.artifact.findFirst({ where: { id: lookupId, campaignId }, select: STASH_ROW_SELECT });
-
-      if (!found) throw new ContentError(API_ERRORS.ARTIFACT_NOT_FOUND, 404);
-
-      artifact = found;
-      grantRow = found;
-      artifactSlotType = found.slot;
-
-      if (data.action === "equip" && data.slot) classesEnabled = rules.classes.enabled;
-    }
-
-    if (data.action === "grant" && grantRow) {
-      const base = data.baseId ? await tx.artifact.findFirst({ where: { id: data.baseId, campaignId }, select: STASH_ROW_SELECT }) : null;
-
-      const rows = new Map([[data.artifactId, { ...grantRow, id: data.artifactId }], ...(base ? [[base.id, base] as const] : [])]);
-
-      const planned = planGrant(data, rows);
-
-      if (!planned.ok) {
-        const { text, status } = GRANT_ERROR[planned.error];
-
-        throw new ContentError(text, status);
-      }
-
-      grant = planned.plan;
-
-      if (grant.kind === "stash") {
-        const all = await tx.characterInventory.findMany({
-          where: { character: { campaignId } },
-          select: { characterId: true, equipped: true, stash: true, character: { select: { name: true } } },
-        });
-
-        const holder = findHolder(
-          all.map((o) => ({ characterId: o.characterId, equipped: o.equipped as EquippedItems, stash: normalizeStash(o.stash) })),
-          grant.ref,
-          undefined,
-          uniqueChecker(rows),
-        );
-
-        if (holder) throw new ContentError(API_ERRORS.ARTIFACT_HELD_BY_OTHER_DETAIL, 409, undefined, { detail: all.find((o) => o.characterId === holder)?.character.name ?? "" });
-      }
-    }
-
-    if (data.action === "attune" || data.action === "unattune") {
-      const refs = [...new Set([data.ref, ...(state.attuned ?? [])])];
-
-      const foundRows = await tx.artifact.findMany({ where: { id: { in: [...new Set(refs.flatMap(refArtifactIds))] }, campaignId }, select: STASH_ROW_SELECT });
-
-      const byId = new Map(foundRows.map((r) => [r.id, r]));
-
-      state.attuned = pruneAttuned(state.attuned ?? [], state).filter((r) => resolveItemRow(r, byId) !== null);
-      items = { enabled: true, limit: rules.items.attunementLimit, attunable: attunementRequired(data.ref, byId) };
-      name = resolveItemRow(data.ref, byId)?.name;
-    }
-
-    const result = applyStashAction(state, data, { newItemId: randomUUID(), artifactSlotType, artifact, classesEnabled, grant, items, name, isDM });
+    const result = applyStashAction(state, data, context);
 
     if (!result.ok) throw new ContentError(STASH_ERROR_TEXT[result.error], STASH_ERROR_STATUS[result.error] ?? 400);
 

@@ -1,10 +1,12 @@
 import { berserkBonusOf, runBerserkTurn } from "./berserk";
 
 import { SYSTEM_ACTOR } from "@/lib/constants/battle";
+import { textRef } from "@/lib/i18n/text-ref";
 import { idleTurnIndex, isActive, sitsOutTurn, takesTurn } from "@/lib/utils/abilities/engine/core/participants";
 import { runAbilities } from "@/lib/utils/abilities/engine/core/run-abilities";
 import { rollDyingAt } from "@/lib/utils/battle/death-saves";
 import { pruneExpiredTerrain } from "@/lib/utils/battle/grid/terrain";
+import { lineText, logFields } from "@/lib/utils/battle/log/lines";
 import { reserveOf } from "@/lib/utils/battle/participant/reserve";
 import { processStartOfRound } from "@/lib/utils/battle/turn/round-start";
 import { processEndOfTurn } from "@/lib/utils/battle/turn/turn-end";
@@ -12,6 +14,7 @@ import { processStartOfTurn, type StartOfTurnResult } from "@/lib/utils/battle/t
 import { checkVictoryConditions } from "@/lib/utils/battle/turn/victory";
 import type { Ruleset } from "@/lib/utils/rules";
 import type { BattleAction, BattleMapConfig, BattleParticipant } from "@/types/battle";
+import type { LogLine } from "@/types/text";
 
 export interface AdvanceTurnLoopParams {
   initiativeOrder: BattleParticipant[];
@@ -54,7 +57,7 @@ interface LoopEnv {
 
 const stateBeforeForEntry = () => undefined;
 
-function systemEntry(st: LoopState, env: LoopEnv, round: number, text: string, tag: string): BattleAction {
+function systemEntry(st: LoopState, env: LoopEnv, round: number, text: LogLine | LogLine[], tag: string): BattleAction {
   return {
     id: `${tag}-${round}-${Date.now()}-${st.attempts}`,
     battleId: env.battleId,
@@ -65,7 +68,7 @@ function systemEntry(st: LoopState, env: LoopEnv, round: number, text: string, t
     actionType: "ability",
     targets: [],
     actionDetails: {},
-    resultText: text,
+    ...logFields(text),
     hpChanges: [],
     isCancelled: false,
     stateBefore: stateBeforeForEntry(),
@@ -80,7 +83,7 @@ function roundTransition(st: LoopState, env: LoopEnv, previousRound: number): vo
   st.order = roundEnd.participants;
 
   if (roundEnd.messages.length > 0) {
-    st.log.push(systemEntry(st, env, previousRound, `Кінець раунду ${previousRound}: ${roundEnd.messages.join("; ")}`, "triggers-round-end"));
+    st.log.push(systemEntry(st, env, previousRound, [textRef("battleLog.triggers.roundEnd", { round: previousRound }), ...roundEnd.messages], "triggers-round-end"));
   }
 
   st.clearedPendingSummons = true;
@@ -96,7 +99,7 @@ function roundTransition(st: LoopState, env: LoopEnv, previousRound: number): vo
   st.index = 0;
 
   if (roundResult.triggerMessages.length > 0) {
-    st.log.push(systemEntry(st, env, st.round, `Тригери початку раунду ${st.round}: ${roundResult.triggerMessages.join("; ")}`, "triggers-round"));
+    st.log.push(systemEntry(st, env, st.round, [textRef("battleLog.triggers.roundStart", { round: st.round }), ...roundResult.triggerMessages], "triggers-round"));
   }
 }
 
@@ -105,7 +108,7 @@ function startTurnEntries(st: LoopState, env: LoopEnv, turnResult: StartOfTurnRe
 
   const actor = { actorId: participant.basicInfo.id, actorName: participant.basicInfo.name, actorSide: participant.basicInfo.side };
 
-  const entry = (tag: string, fields: Pick<BattleAction, "actionType" | "actionDetails" | "resultText" | "hpChanges">): BattleAction => ({
+  const entry = (tag: string, fields: Pick<BattleAction, "actionType" | "actionDetails" | "hpChanges"> & Partial<Pick<BattleAction, "resultText" | "log">>): BattleAction => ({
     id: `${tag}-${st.index}-${Date.now()}-${st.attempts}`,
     battleId: env.battleId,
     round: st.round,
@@ -115,11 +118,12 @@ function startTurnEntries(st: LoopState, env: LoopEnv, turnResult: StartOfTurnRe
     targets: [],
     isCancelled: false,
     stateBefore: stateBeforeForEntry(),
+    resultText: "",
     ...fields,
   });
 
   if (turnResult.rechargeMessages.length > 0) {
-    st.log.push(systemEntry(st, env, st.round, turnResult.rechargeMessages.join("; "), "spell-recharge"));
+    st.log.push(systemEntry(st, env, st.round, lineText(turnResult.rechargeMessages, "; "), "spell-recharge"));
   }
 
   // запис DOT закінчується до шкоди небезпеки — вона має власний запис
@@ -130,7 +134,7 @@ function startTurnEntries(st: LoopState, env: LoopEnv, turnResult: StartOfTurnRe
       entry("turn", {
         actionType: "end_turn",
         actionDetails: { damageRolls: turnResult.damageMessages.map(() => ({ dice: "DOT", results: [], total: 0, damageType: "dot" })) },
-        resultText: turnResult.damageMessages.join("; "),
+        ...logFields(lineText(turnResult.damageMessages, "; ")),
         hpChanges: [
           {
             participantId: participant.basicInfo.id,
@@ -157,7 +161,7 @@ function startTurnEntries(st: LoopState, env: LoopEnv, turnResult: StartOfTurnRe
           hazard: { label: hazard.label, damageType: hazard.damageType, damage: hazard.damage },
           damageRolls: [{ dice: "", results: [], total: hazard.damage, damageType: hazard.damageType }],
         },
-        resultText: hazard.message,
+        ...logFields(hazard.message),
         hpChanges: [
           {
             participantId: participant.basicInfo.id,
@@ -176,14 +180,14 @@ function startTurnEntries(st: LoopState, env: LoopEnv, turnResult: StartOfTurnRe
       entry("effects", {
         actionType: "ability",
         actionDetails: { appliedEffects: turnResult.expiredEffects.map((name) => ({ id: name, name, duration: 0 })) },
-        resultText: `Ефекти завершилися: ${turnResult.expiredEffects.join(", ")}`,
+        ...logFields(textRef("battleLog.turn.effectsEndedCap", { names: turnResult.expiredEffects.join(", ") })),
         hpChanges: [],
       }),
     );
   }
 
   if (turnResult.abilityMessages.length > 0) {
-    st.log.push(entry("triggers-turn", { actionType: "ability", actionDetails: {}, resultText: `Початок ходу: ${turnResult.abilityMessages.join("; ")}`, hpChanges: [] }));
+    st.log.push(entry("triggers-turn", { actionType: "ability", actionDetails: {}, ...logFields([textRef("battleLog.triggers.turnStart"), ...turnResult.abilityMessages]), hpChanges: [] }));
   }
 }
 
@@ -211,7 +215,7 @@ export function runAdvanceTurnLoop(
 
     if (turnTransition.participants) {
       st.order = turnTransition.participants;
-      st.log.push(systemEntry(st, env, st.round, turnTransition.messages?.join("; ") ?? "", "death-saves"));
+      st.log.push(systemEntry(st, env, st.round, lineText(turnTransition.messages ?? [], "; "), "death-saves"));
     }
 
     const previousRound = st.round;
@@ -229,7 +233,7 @@ export function runAdvanceTurnLoop(
 
     if (dyingRoll) {
       st.order = dyingRoll.participants;
-      st.log.push(systemEntry(st, env, st.round, dyingRoll.messages.join("; "), "death-saves"));
+      st.log.push(systemEntry(st, env, st.round, lineText(dyingRoll.messages, "; "), "death-saves"));
 
       nextParticipant = st.order[st.index];
 

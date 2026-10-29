@@ -3,10 +3,11 @@ import { cleanup, fireEvent, screen, waitFor } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import { NewWorldMapDialog } from "../NewWorldMapDialog";
-import { WorldEditorContext, type WorldEditorCtx } from "../WorldEditorContext";
+import { WorldEditorContext } from "../WorldEditorContext";
 
 import { renderWithConfirm } from "@/components/ui/__tests__/uk-intl";
 import { API_ERRORS } from "@/lib/constants/api-errors";
+import type { WorldEditorCtx } from "@/lib/hooks/world";
 
 vi.unmock("next-intl");
 

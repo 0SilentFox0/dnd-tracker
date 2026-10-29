@@ -6,7 +6,7 @@ import { useTranslations } from "next-intl";
 import { uploadSlideImage } from "@/lib/api/decks";
 import { API_ERRORS } from "@/lib/constants/api-errors";
 import { SLIDE_MAX_EDGE_PX } from "@/lib/constants/show";
-import { resizeImageToBlob } from "@/lib/utils/common/image-resize";
+import { ImageResizeError, resizeImageToBlob } from "@/lib/utils/common/image-resize";
 import { newSlideId } from "@/lib/utils/show/deck-draft";
 import type { Slide } from "@/types/show";
 
@@ -34,7 +34,7 @@ export function useSlideUpload(campaignId: string, onError: (message: string) =>
           try {
             slides[i] = { id: newSlideId(), imageUrl: await uploadSlideImage(campaignId, await resizeImageToBlob(files[i], SLIDE_MAX_EDGE_PX), (message) => t(API_ERRORS.IMAGE_UPLOAD_FAILED, { message })) };
           } catch (e) {
-            onError(t("show.errors.uploadFile", { name: files[i].name, message: e instanceof Error ? e.message : t("show.errors.uploadUnknown") }));
+            onError(t("show.errors.uploadFile", { name: files[i].name, message: e instanceof ImageResizeError ? t(e.key) : e instanceof Error ? e.message : t("show.errors.uploadUnknown") }));
           }
 
           done += 1;

@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 
 import { AttackType, ParticipantSide } from "@/lib/constants/battle";
+import { textOf } from "@/lib/i18n/test/text";
 import { attackBodySchema } from "@/lib/schemas/battles";
 import { attackMutation } from "@/lib/server/battles/mutations/attack/attack-mutation";
 import { makeParticipant } from "@/lib/utils/abilities/__tests__/fixtures";
@@ -50,7 +51,7 @@ describe("накладання custom-стану", () => {
   const target = makeParticipant({ id: "t" });
 
   it("у лозі назва custom-стану лишається як у правилах", () => {
-    expect(apply(target, "custom:pacified").messages[0]).toContain("— Умиротворений (3 р.)");
+    expect(textOf(apply(target, "custom:pacified").messages[0])).toContain("— Умиротворений (3 р.)");
   });
 
   it("маркери і назва беруться з правил, перший маркер — ключ стану", () => {
@@ -75,7 +76,7 @@ describe("накладання custom-стану", () => {
     const out = apply(target, "custom:ghost");
 
     expect(out.participants[0]).toBe(target);
-    expect(out.messages[0]).toContain("не визначено в правилах кампанії");
+    expect(textOf(out.messages[0])).toContain("не визначено в правилах кампанії");
     expect(apply(target, "custom:pacified", {}, parseRules({})).participants[0]).toBe(target);
   });
 
@@ -145,7 +146,7 @@ describe("pacified: шкода", () => {
 
     expect(live?.damage).toBe(5);
     expect(calm?.damage).toBe(0);
-    expect(calm?.message).toContain("не завдає шкоди");
+    expect(textOf(calm?.message ?? "")).toContain("не завдає шкоди");
   });
 
   it("атака носія no_damage_dealt не зменшує HP цілі", async () => {

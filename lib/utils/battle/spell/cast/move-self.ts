@@ -1,6 +1,8 @@
+import { textRef } from "@/lib/i18n/text-ref";
 import { cellsByDistance, footprint, footprintDistance } from "@/lib/utils/battle/grid/geometry";
 import { cellsOf, fits, isOnMap, occupiedBy, sizeOf } from "@/lib/utils/battle/grid/occupancy";
 import type { BattleMapConfig, BattleParticipant, GridPoint } from "@/types/battle";
+import type { LogLine } from "@/types/text";
 
 /** Найближча до кастера вільна клітинка впритул до цілі; null — місця немає. */
 export function adjacentFreeCell(map: BattleMapConfig, participants: BattleParticipant[], mover: BattleParticipant, target: BattleParticipant): GridPoint | null {
@@ -23,20 +25,20 @@ export function adjacentFreeCell(map: BattleMapConfig, participants: BattleParti
   return near.reduce<GridPoint | null>((best, a) => (!best || away(a) < away(best) ? a : best), null);
 }
 
-export function moveAdjacent(map: BattleMapConfig | null | undefined, participants: BattleParticipant[], moverId: string, targetId: string): { participants: BattleParticipant[]; message: string } {
+export function moveAdjacent(map: BattleMapConfig | null | undefined, participants: BattleParticipant[], moverId: string, targetId: string): { participants: BattleParticipant[]; message: LogLine } {
   const mover = participants.find((p) => p.basicInfo.id === moverId);
 
   const target = participants.find((p) => p.basicInfo.id === targetId);
 
   if (!mover || !target) return { participants, message: "" };
 
-  if (!map || !isOnMap(mover) || !isOnMap(target)) return { participants, message: `🌀 ${mover.basicInfo.name}: переміщується до ${target.basicInfo.name} (без мапи)` };
+  if (!map || !isOnMap(mover) || !isOnMap(target)) return { participants, message: textRef("battleLog.spellFx.moveSelfNoMap", { mover: mover.basicInfo.name, target: target.basicInfo.name }) };
 
   const cell = adjacentFreeCell(map, participants, mover, target);
 
-  if (!cell) return { participants, message: `🌀 ${mover.basicInfo.name}: немає вільної клітинки біля ${target.basicInfo.name}` };
+  if (!cell) return { participants, message: textRef("battleLog.spellFx.moveSelfNoCell", { mover: mover.basicInfo.name, target: target.basicInfo.name }) };
 
   const moved = { ...mover, battleData: { ...mover.battleData, position: cell } };
 
-  return { participants: participants.map((p) => (p === mover ? moved : p)), message: `🌀 ${mover.basicInfo.name}: переміщується до ${target.basicInfo.name}` };
+  return { participants: participants.map((p) => (p === mover ? moved : p)), message: textRef("battleLog.spellFx.moveSelf", { mover: mover.basicInfo.name, target: target.basicInfo.name }) };
 }

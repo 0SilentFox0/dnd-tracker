@@ -42,10 +42,9 @@ export const BattleStatus = {
 
 export type BattleStatus = (typeof BattleStatus)[keyof typeof BattleStatus];
 
-export const BATTLE_STATUS_LABEL: Record<BattleStatus, string> = { [BattleStatus.PREPARED]: "підготовлений", [BattleStatus.ACTIVE]: "йде", [BattleStatus.COMPLETED]: "завершений" };
-
 export const DM_ACTOR = { actorId: "dm", actorName: "DM", actorSide: ParticipantSide.ALLY } as const;
 
+// eslint-disable-next-line no-restricted-syntax -- actor name is persisted in battle_events.details, not UI text
 export const SYSTEM_ACTOR = { actorId: "system", actorName: "Система", actorSide: ParticipantSide.ALLY } as const;
 
 export const BattleActionType = {
@@ -58,22 +57,6 @@ export const BattleActionType = {
   MORALE_SKIP: "morale_skip",
   RETALIATION: "retaliation",
 } as const;
-
-export const BATTLE_ACTION_LABELS: Record<(typeof BattleActionType)[keyof typeof BattleActionType], string> = {
-  attack: "атака",
-  spell: "заклинання",
-  bonus_action: "бонусна дія",
-  ability: "вміння",
-  end_turn: "кінець ходу",
-  skip_turn: "пропуск ходу",
-  morale_skip: "мораль",
-  retaliation: "відсіч",
-};
-
-export const ATTACK_KIND_LABELS: Record<AttackType, string> = {
-  melee: "Ближня",
-  ranged: "Дальня",
-};
 
 /**
  * Глобальні константи бою
@@ -138,6 +121,7 @@ export const SKILL_AREA_RADIUS_FEET = 10;
 
 export const DEFAULT_MAP_BACKGROUND = "/battle-maps/nicolas-tomb.webp";
 
+// eslint-disable-next-line no-restricted-syntax -- default hazard label is written into battle map data in the author's locale
 export const DEFAULT_HAZARD_LABEL = "Небезпечна зона";
 
 export const DEFAULT_HAZARD_DICE = "1d6";

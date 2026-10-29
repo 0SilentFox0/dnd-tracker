@@ -1,13 +1,16 @@
 import { API_ERRORS } from "@/lib/constants/api-errors";
+import { textRef } from "@/lib/i18n/text-ref";
 import { findParticipant, isActive, updateParticipant } from "@/lib/utils/abilities/engine/core/participants";
 import { runAbilities } from "@/lib/utils/abilities/engine/core/run-abilities";
 import type { AbilityRunContext } from "@/lib/utils/abilities/engine/core/types";
 import { cooldownLeft, poolAffordable, withinCountLimits } from "@/lib/utils/abilities/engine/core/usage";
 import { conditionRequiresStill, evaluateCondition } from "@/lib/utils/abilities/registry/conditions";
 import { canActNow, currentOf } from "@/lib/utils/battle/common/control";
+import { lineText, logFields } from "@/lib/utils/battle/log/lines";
 import { applyMainActionUsed } from "@/lib/utils/battle/participant";
 import type { BattleMutationContext, MutationResult } from "@/lib/utils/battle/pipeline/run-battle-mutation";
 import { BattleAccessError, BattleRuleError } from "@/lib/utils/battle/store";
+import { REJECT } from "@/lib/utils/battle/store/reject";
 import { applyAbilitySummons, type SummonDeps } from "@/lib/utils/battle/summon/ability-summons";
 import { assertCanAct } from "@/lib/utils/battle/turn";
 import { assertAbilityAim } from "@/lib/utils/battle/validation/ability-aim";
@@ -27,7 +30,7 @@ export interface AbilityUseRequest {
 
 const USAGE: Record<AbilityUseTrigger, { used: (p: BattleParticipant) => boolean; error: { code: "action_used"; message: string }; spendFirst: boolean }> = {
   action: { used: (p) => p.actionFlags.hasUsedAction, error: { code: "action_used", message: API_ERRORS.ACTION_USED }, spendFirst: true },
-  bonusAction: { used: (p) => p.actionFlags.hasUsedBonusAction, error: { code: "action_used", message: "Бонусну дію вже використано цього ходу" }, spendFirst: false },
+  bonusAction: { used: (p) => p.actionFlags.hasUsedBonusAction, error: { code: "action_used", message: REJECT.bonusActionUsed }, spendFirst: false },
 };
 
 const spend: Record<AbilityUseTrigger, (p: BattleParticipant) => BattleParticipant> = {
@@ -44,17 +47,17 @@ export async function runAbilityUse(ctx: BattleMutationContext, req: AbilityUseR
 
   if (!canActNow(ctx, participant, currentOf(ctx))) throw new BattleAccessError(403, API_ERRORS.FORBIDDEN);
 
-  if (!isActive(participant)) throw new BattleRuleError("participant_dead", "Учасник не може діяти");
+  if (!isActive(participant)) throw new BattleRuleError("participant_dead", REJECT.cannotAct);
 
   assertCanAct(ctx, participant.basicInfo.id);
 
   const ability = (participant.battleData.resolvedAbilities ?? []).find((a) => a.key === req.abilityKey && a.trigger.event === trigger);
 
-  if (!ability) throw new BattleRuleError("action_rejected", "У учасника немає такого вміння");
+  if (!ability) throw new BattleRuleError("action_rejected", REJECT.noSuchAbility);
 
-  if (ability.limits?.lair) throw new BattleRuleError("action_rejected", "Це вміння — дія лігва");
+  if (ability.limits?.lair) throw new BattleRuleError("action_rejected", REJECT.abilityIsLair);
 
-  if (ability.limits?.legendaryCost) throw new BattleRuleError("action_rejected", "Це вміння — легендарна дія, її використовують поза своїм ходом");
+  if (ability.limits?.legendaryCost) throw new BattleRuleError("action_rejected", REJECT.abilityIsLegendary);
 
   const usage = USAGE[trigger];
 
@@ -62,11 +65,11 @@ export async function runAbilityUse(ctx: BattleMutationContext, req: AbilityUseR
 
   if (!poolAffordable(participant, ability)) throw new BattleRuleError("ability_limit", API_ERRORS.ABILITY_POOL_EMPTY);
 
-  if (!withinCountLimits(participant, ability)) throw new BattleRuleError("ability_limit", "Ліміт використань вичерпано");
+  if (!withinCountLimits(participant, ability)) throw new BattleRuleError("ability_limit", REJECT.abilityLimit);
 
   const wait = cooldownLeft(participant, ability, ctx.scene.round);
 
-  if (wait > 0) throw new BattleRuleError("ability_limit", `Перезарядка: ще ${wait} р.`);
+  if (wait > 0) throw new BattleRuleError("ability_limit", REJECT.abilityCooldown, { rounds: wait });
 
   if (ability.condition && conditionRequiresStill(ability.condition) && !evaluateCondition(ability.condition, { owner: participant, event: null, participants: ctx.participants })) throw new BattleRuleError("action_rejected", API_ERRORS.BATTLE_ABILITY_CONDITION_UNMET);
 
@@ -84,7 +87,9 @@ export async function runAbilityUse(ctx: BattleMutationContext, req: AbilityUseR
 
   const participants = usage.spendFirst ? summoned.order : updateParticipant(summoned.order, id, spend[trigger]);
 
-  const text = run.fired.length ? [...run.messages, ...summoned.messages].join(" | ") : `${ability.name}: не спрацювало`;
+  const text = run.fired.length ? lineText([...run.messages, ...summoned.messages], " | ") : textRef("battleLog.ability.noEffect", { name: ability.name });
+
+  const abilityText = logFields(text || ability.name);
 
   return {
     participants,
@@ -94,8 +99,8 @@ export async function runAbilityUse(ctx: BattleMutationContext, req: AbilityUseR
         type: "ability",
         round: ctx.scene.round,
         actorId: id,
-        resultText: text || ability.name,
-        details: { actorName: participant.basicInfo.name, actorSide: participant.basicInfo.side, actionDetails: { abilityKey: ability.key, skillName: ability.name } },
+        ...abilityText,
+        details: { actorName: participant.basicInfo.name, actorSide: participant.basicInfo.side, actionDetails: { abilityKey: ability.key, skillName: ability.name }, ...(abilityText.log && { log: abilityText.log }) },
       },
     ],
   };

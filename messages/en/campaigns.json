@@ -192,5 +192,8 @@
     "stale": "The source changed — the list was refreshed and the selection reset to default.",
     "failed": "Sync failed",
     "settingsName": "Campaign settings"
+  },
+  "sync": {
+    "compendiumNotSynced": "The DM compendium materials are not part of the source-sync scopes; update them with a repeated JSON import or manually"
   }
 }

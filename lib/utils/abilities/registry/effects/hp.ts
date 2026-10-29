@@ -1,19 +1,21 @@
-import { amountLabel } from "../labels";
+import { amountSegment, damageTypeSegment } from "../labels";
 import type { EffectApplyInput, EffectApplyResult } from "./types";
 
 import { CombatStatus } from "@/lib/constants/battle";
-import { DAMAGE_ELEMENT_LABELS } from "@/lib/constants/damage";
+import { textRef } from "@/lib/i18n/text-ref";
 import { resolveAmount } from "@/lib/utils/abilities/engine/core/amount";
 import { eventDamage, eventSpellRoll } from "@/lib/utils/abilities/engine/core/events";
 import { findParticipant, isActive, replaceParticipant } from "@/lib/utils/abilities/engine/core/participants";
 import { applyRawDamage } from "@/lib/utils/abilities/engine/effects/hp";
 import { effectSource, upsertTimedEffect } from "@/lib/utils/abilities/engine/effects/timed-effects";
 import type { Effect } from "@/lib/utils/abilities/schema";
+import { seg, type Segment } from "@/lib/utils/abilities/segments";
 import { applyDamageConsequences } from "@/lib/utils/battle/damage/consequences";
 import { clearDeathSaves, isDying } from "@/lib/utils/battle/death-saves";
 import { hasImmunity } from "@/lib/utils/battle/resistance";
 import { forgoDice } from "@/lib/utils/common/dice";
 import type { BattleParticipant } from "@/types/battle";
+import type { LogLine } from "@/types/text";
 
 type Of<K extends Effect["kind"]> = Extract<Effect, { kind: K }>;
 
@@ -26,7 +28,7 @@ export function applyDealDamage(input: EffectApplyInput<Of<"dealDamage">>): Effe
 
   if (!owner) return { participants: ps, messages: [] };
 
-  const messages: string[] = [];
+  const messages: LogLine[] = [];
 
   const downed: EffectApplyResult["downed"] = [];
 
@@ -48,7 +50,7 @@ export function applyDealDamage(input: EffectApplyInput<Of<"dealDamage">>): Effe
     const updated = c.participant;
 
     ps = replaceParticipant(c.participants, updated);
-    messages.push(`💥 ${ability.name}: ${t.basicInfo.name} −${amount} HP`, ...c.messages);
+    messages.push(textRef("abilityText.log.damage", { ability: ability.name, target: t.basicInfo.name, amount }), ...c.messages);
 
     if (!isActive(updated)) downed.push({ victimId: id, actorId: input.ownerId });
   }
@@ -65,7 +67,7 @@ export function applyHeal(input: EffectApplyInput<Of<"heal">>): EffectApplyResul
 
   if (!owner) return { participants: ps, messages: [] };
 
-  const messages: string[] = [];
+  const messages: LogLine[] = [];
 
   const label = owner && !input.targetIds.every((id) => id === owner.basicInfo.id) ? `${ability.name} (${owner.basicInfo.name})` : ability.name;
 
@@ -90,8 +92,8 @@ export function applyHeal(input: EffectApplyInput<Of<"heal">>): EffectApplyResul
     ps = replaceParticipant(ps, hp > 0 ? clearDeathSaves(healed) : healed);
     messages.push(
       isActive(t)
-        ? `💚 ${label}: ${t.basicInfo.name} +${hp - before} HP`
-        : `✝️ ${label}: ${t.basicInfo.name} повертається з ${hp} HP`,
+        ? textRef("abilityText.log.heal", { label, target: t.basicInfo.name, amount: hp - before })
+        : textRef("abilityText.log.revive", { label, target: t.basicInfo.name, hp }),
     );
   }
 
@@ -110,7 +112,7 @@ export function applyDot(input: EffectApplyInput<Of<"dot">>): EffectApplyResult 
 
   if (!owner) return { participants: ps, messages: [] };
 
-  const messages: string[] = [];
+  const messages: LogLine[] = [];
 
   const fromSpell = input.event.type === "spellCast";
 
@@ -120,7 +122,7 @@ export function applyDot(input: EffectApplyInput<Of<"dot">>): EffectApplyResult 
     if (!t || !isActive(t)) continue;
 
     if (hasImmunity(t, effect.damageType, { participants: ps, fromSpell })) {
-      messages.push(`⛔ ${ability.name}: ${t.basicInfo.name} — імунітет до ${effect.damageType}`);
+      messages.push(textRef("abilityText.log.immuneTo", { ability: ability.name, target: t.basicInfo.name, type: effect.damageType }));
       continue;
     }
 
@@ -150,7 +152,7 @@ export function applyDot(input: EffectApplyInput<Of<"dot">>): EffectApplyResult 
         ctx.round,
       ),
     );
-    messages.push(`🔥 ${ability.name}: ${effect.damageType} ${dmg}/раунд → ${t.basicInfo.name} (${effect.duration.rounds} р.)`);
+    messages.push(textRef("abilityText.log.dot", { ability: ability.name, type: effect.damageType, amount: dmg, target: t.basicInfo.name, rounds: effect.duration.rounds }));
   }
 
   return { participants: ps, messages };
@@ -165,7 +167,7 @@ export function applyHot(input: EffectApplyInput<Of<"hot">>): EffectApplyResult 
 
   if (!owner) return { participants: ps, messages: [] };
 
-  const messages: string[] = [];
+  const messages: LogLine[] = [];
 
   for (const id of input.targetIds) {
     const t = findParticipant(ps, id);
@@ -193,18 +195,26 @@ export function applyHot(input: EffectApplyInput<Of<"hot">>): EffectApplyResult 
         ctx.round,
       ),
     );
-    messages.push(`💚 ${ability.name}: +${heal} HP/раунд → ${t.basicInfo.name} (${effect.duration.rounds} р.)`);
+    messages.push(textRef("abilityText.log.hot", { ability: ability.name, amount: heal, target: t.basicInfo.name, rounds: effect.duration.rounds }));
   }
 
   return { participants: ps, messages };
 }
 
-const damageTypeLabel = (type: string) => DAMAGE_ELEMENT_LABELS[type] ?? type;
+const rounds = (e: { duration?: { rounds: number } }) => e.duration?.rounds ?? "?";
 
-export const describeDealDamage = (e: Of<"dealDamage">) => `шкода ${amountLabel(e.amount)}${e.damageType ? ` ${damageTypeLabel(e.damageType)}` : ""}${e.falloff ? ` (${e.falloff.join("% → ")}%)` : ""}`;
+export const describeDealDamage = (e: Of<"dealDamage">): Segment[] => [
+  seg("summary.effects.dealDamage", {
+    amount: amountSegment(e.amount),
+    hasType: e.damageType ? "yes" : "no",
+    ...(e.damageType && { type: damageTypeSegment(e.damageType) }),
+    hasFalloff: e.falloff ? "yes" : "no",
+    ...(e.falloff && { falloff: e.falloff.join("% → ") }),
+  }),
+];
 
-export const describeHeal = (e: Of<"heal">) => `${e.revive ? "воскресіння" : "лікування"} ${amountLabel(e.amount)}`;
+export const describeHeal = (e: Of<"heal">): Segment[] => [seg("summary.effects.heal", { revive: e.revive ? "yes" : "no", amount: amountSegment(e.amount) })];
 
-export const describeDot = (e: Of<"dot">) => `${damageTypeLabel(e.damageType)} ${amountLabel(e.damagePerRound)}/раунд × ${e.duration?.rounds ?? "?"} р.${e.linkedToCondition ? ", поки діє стан" : ""}`;
+export const describeDot = (e: Of<"dot">): Segment[] => [seg("summary.effects.dot", { type: damageTypeSegment(e.damageType), amount: amountSegment(e.damagePerRound), rounds: rounds(e), linked: e.linkedToCondition ? "yes" : "no" })];
 
-export const describeHot = (e: Of<"hot">) => `лікування ${amountLabel(e.healPerRound)}/раунд × ${e.duration?.rounds ?? "?"} р.`;
+export const describeHot = (e: Of<"hot">): Segment[] => [seg("summary.effects.hot", { amount: amountSegment(e.healPerRound), rounds: rounds(e) })];

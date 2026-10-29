@@ -3,6 +3,7 @@ import { describe, expect, it } from "vitest";
 import { ParticipantSide } from "@/lib/constants/battle";
 import { makeParticipant } from "@/lib/utils/abilities/__tests__/fixtures";
 import { dropConcentration } from "@/lib/utils/battle/concentration";
+import { textsOf } from "@/lib/utils/battle/log/__tests__/event-text";
 import { hasEffectMarker } from "@/lib/utils/battle/participant/state";
 import { castSpell } from "@/lib/utils/battle/spell";
 import { sweepOrphanedAnchored } from "@/lib/utils/battle/spell/anchored-zone";
@@ -87,7 +88,7 @@ describe("anchoredZone", () => {
     expect(hasEffectMarker(w, "skip_action")).toBe(true);
     expect(hasEffectMarker(w, "no_bonus_action")).toBe(true);
     expect(w.battleData.activeEffects.filter((e) => e.anchorOf).every((e) => e.concentrationOf)).toBe(true);
-    expect(out.messages.join(" ")).toContain("рятівний");
+    expect(textsOf(out.messages).join(" ")).toContain("рятівний");
   });
 
   it("далекий рух не спрацьовує; повторний вхід за раунд — один тригер", () => {

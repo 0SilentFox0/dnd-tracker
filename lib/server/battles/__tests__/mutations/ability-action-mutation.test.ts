@@ -7,6 +7,7 @@ import { ParticipantSide } from "@/lib/constants/battle";
 import { abilityActionMutation } from "@/lib/server/battles/mutations/ability-action/ability-action-mutation";
 import { resolved } from "@/lib/utils/abilities/__tests__/fixtures";
 import { testMap } from "@/lib/utils/battle/__tests__/fixtures/placed";
+import { REJECT } from "@/lib/utils/battle/store/reject";
 import type { BattleParticipant } from "@/types/battle";
 
 const angel = resolved({
@@ -70,7 +71,7 @@ describe("abilityActionMutation", () => {
 
     const cooling = { ...hero, battleData: { ...hero.battleData, resolvedAbilities: [slow], abilityUsage: { [slow.key]: { battle: 1, round: 0, turn: 0, lastRound: 1 } } } };
 
-    await expect(run([cooling, goblin], slow.key)).rejects.toThrow(expect.objectContaining({ code: "ability_limit", message: expect.stringContaining("Перезарядка") }));
+    await expect(run([cooling, goblin], slow.key)).rejects.toThrow(expect.objectContaining({ code: "ability_limit", message: expect.stringContaining(REJECT.abilityCooldown) }));
   });
 
   it("Ангел Хранитель revives a fallen ally at 50 %, a living target is rejected", async () => {
@@ -140,7 +141,7 @@ describe("abilityActionMutation", () => {
     it("пікірування на карті — потрібна клітинка; без карти — ціль", async () => {
       const d = resolved(dive(), { type: "unit", id: "u" });
 
-      await expect(abilityActionMutation(onMap([unit([d]), goblin]), { participantId: "hero", abilityKey: d.key })).rejects.toThrow("Оберіть клітинку на карті");
+      await expect(abilityActionMutation(onMap([unit([d]), goblin]), { participantId: "hero", abilityKey: d.key })).rejects.toThrow(REJECT.pickCell);
 
       const out = await abilityActionMutation(onMap([unit([d]), goblin]), { participantId: "hero", abilityKey: d.key, targetCell: { x: 6, y: 6 } });
 

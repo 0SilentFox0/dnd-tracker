@@ -8,6 +8,8 @@ import { runGuardedBattleRecordOperation } from "./record-operation";
 import { battleRecord, type RecordOperation, writeBattleRecord } from "./record-service";
 
 import { API_ERRORS } from "@/lib/constants/api-errors";
+import { DEFAULT_LOCALE } from "@/lib/i18n/config";
+import { resultLabel } from "@/lib/server/assistant/result-labels";
 import type { ActionExecutionContext, ActionResult } from "@/lib/server/assistant/types";
 import { ContentError } from "@/lib/server/content/errors";
 import { runContentWriteContext } from "@/lib/server/content/write-context";
@@ -33,6 +35,8 @@ export async function executeBattleOperation(
 
   assertWriteScope(actor, execution);
 
+  const locale = execution?.caller.locale ?? DEFAULT_LOCALE;
+
   const input = command.input && typeof command.input === "object" ? command.input as Record<string, unknown> : {};
 
   if (["create", "patch", "delete", "clear-history", "audio"].includes(command.operation)) {
@@ -47,7 +51,7 @@ export async function executeBattleOperation(
 
       const battleId = command.operation === "create" && "id" in data ? data.id : command.battleId;
 
-      return { data: { operation: command.operation, battleId, ...("version" in data ? { version: data.version } : {}) } as Prisma.JsonValue, affected: [{ domain: "battles", id: battleId || actor.campaignId, name: "Бій" }], warnings: [] };
+      return { data: { operation: command.operation, battleId, ...("version" in data ? { version: data.version } : {}) } as Prisma.JsonValue, affected: [{ domain: "battles", id: battleId || actor.campaignId, name: resultLabel(locale, "battle") }], warnings: [] };
     }, execution);
   }
 
@@ -78,7 +82,7 @@ export async function executeBattleOperation(
 
     return {
       data: { operation: command.operation, battleId: command.battleId, version: outcome.version },
-      affected: [{ domain: "battles", id: command.battleId, name: "Бій" }],
+      affected: [{ domain: "battles", id: command.battleId, name: resultLabel(locale, "battle") }],
       warnings: [],
     };
   };

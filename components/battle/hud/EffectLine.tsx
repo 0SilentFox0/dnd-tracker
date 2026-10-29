@@ -1,28 +1,37 @@
 import { useState } from "react";
+import { useTranslations } from "next-intl";
 
 import { EffectIcon } from "./EffectIcon";
 
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
+import { useText } from "@/lib/i18n/use-text";
+import { useTranslator } from "@/lib/i18n/use-translator";
 import { cn } from "@/lib/utils";
-import { effectSummary } from "@/lib/utils/battle/view";
+import { effectSummary, effectTitle } from "@/lib/utils/battle/view";
 import type { ActiveEffect } from "@/types/battle";
 
 const tone = (e: ActiveEffect) => (e.type === "buff" ? "text-[#cdb87e]" : "text-hud-danger");
 
 function EffectChip({ effect }: { effect: ActiveEffect }) {
-  const summary = effectSummary(effect);
+  const t = useTranslator("abilityRegistry");
+
+  const text = useText();
+
+  const summary = effectSummary(effect, t).map(text);
+
+  const name = text(effectTitle(effect));
 
   return (
     <Tooltip>
       <TooltipTrigger asChild>
-        <span tabIndex={0} aria-label={`${effect.name}: ${summary.join("; ")}`} className={cn("relative flex h-5 cursor-help items-center gap-1.5 whitespace-nowrap text-[13px] leading-5", tone(effect))}>
+        <span tabIndex={0} aria-label={`${name}: ${summary.join("; ")}`} className={cn("relative flex h-5 cursor-help items-center gap-1.5 whitespace-nowrap text-[13px] leading-5", tone(effect))}>
           <EffectIcon effect={effect} size={20} />
-          <span className="text-[#d9cfbd]">{effect.name}</span>
+          <span className="text-[#d9cfbd]">{name}</span>
           {!effect.permanent && <span className="opacity-70">{effect.duration}</span>}
         </span>
       </TooltipTrigger>
       <TooltipContent side="bottom" sideOffset={4} className="max-w-64 border border-white/15 bg-[#17130f] text-[13px] leading-[18px] text-[#d9cfbd] shadow-lg [&>span]:hidden">
-        <div className="font-medium text-[var(--ink)]">{effect.name}</div>
+        <div className="font-medium text-[var(--ink)]">{name}</div>
         {summary.map((line) => <div key={line}>{line}</div>)}
       </TooltipContent>
     </Tooltip>
@@ -30,6 +39,8 @@ function EffectChip({ effect }: { effect: ActiveEffect }) {
 }
 
 export function EffectLine({ effects, max = 2 }: { effects: readonly ActiveEffect[]; max?: number }) {
+  const t = useTranslations("battle.hud.effects");
+
   const [expanded, setExpanded] = useState(false);
 
   const overflow = effects.length > max;
@@ -45,11 +56,11 @@ export function EffectLine({ effects, max = 2 }: { effects: readonly ActiveEffec
         <button
           type="button"
           aria-expanded={open}
-          aria-label={open ? "Згорнути ефекти" : `Показати всі ефекти (${effects.length})`}
+          aria-label={open ? t("collapse") : t("showAll", { count: effects.length })}
           onClick={() => setExpanded((v) => !v)}
           className="relative cursor-pointer whitespace-nowrap rounded px-1 text-[13px] leading-5 text-[var(--hud-muted)] hover:bg-white/10 hover:text-[#d9cfbd]"
         >
-          {open ? "згорнути" : `+${effects.length - max}`}
+          {open ? t("less") : `+${effects.length - max}`}
         </button>
       )}
     </div>

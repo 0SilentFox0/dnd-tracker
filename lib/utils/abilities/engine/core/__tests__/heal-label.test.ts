@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 
+import { textOf } from "@/lib/i18n/test/text";
 import { makeParticipant, resolved, seq } from "@/lib/utils/abilities/__tests__/fixtures";
 import { runAbilities } from "@/lib/utils/abilities/engine/core/run-abilities";
 
@@ -13,6 +14,6 @@ describe("лікування союзників", () => {
 
     const r = runAbilities([ivan, agrail], { type: "roundStart" }, { round: 2, rng: seq(0) });
 
-    expect(r.messages).toContain("💚 Сила життя (Айвен): Аграїл +5 HP");
+    expect(r.messages.map((m) => textOf(m))).toContain("💚 Сила життя (Айвен): Аграїл +5 HP");
   });
 });

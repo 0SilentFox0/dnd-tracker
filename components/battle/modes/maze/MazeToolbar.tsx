@@ -1,6 +1,7 @@
 "use client";
 
 import { type ReactNode, useState } from "react";
+import { useTranslations } from "next-intl";
 
 import { MazeGenerateDialog } from "./MazeGenerateDialog";
 import { MazeReshuffleDialog } from "./MazeReshuffleDialog";
@@ -10,14 +11,9 @@ import { useBattleSceneData } from "@/lib/hooks/battle";
 import { type MazeTool, type MazeTools } from "@/lib/hooks/battle/modes/maze";
 import { cn } from "@/lib/utils";
 
-const EDIT_TOOLS: { value: MazeTool; label: string }[] = [
-  { value: "walls", label: "Стіни" },
-  { value: "exit", label: "Вихід" },
-  { value: "teleport", label: "Телепорт" },
-  { value: "fog", label: "Туман" },
-];
+const EDIT_TOOLS = ["walls", "exit", "teleport", "fog"] as const satisfies readonly MazeTool[];
 
-const isEditTool = (t: MazeTool) => EDIT_TOOLS.some((e) => e.value === t);
+const isEditTool = (tool: MazeTool) => (EDIT_TOOLS as readonly MazeTool[]).includes(tool);
 
 const NO_HERO = "none";
 
@@ -40,6 +36,8 @@ function ToolButton({ active, onClick, tall, label, children }: { active?: boole
 }
 
 export function MazeToolbar({ tools, tall }: { tools: MazeTools; tall: boolean }) {
+  const t = useTranslations("battleDm.maze");
+
   const [dialog, setDialog] = useState<"generate" | "reshuffle" | null>(null);
 
   const { battle } = useBattleSceneData();
@@ -54,37 +52,37 @@ export function MazeToolbar({ tools, tall }: { tools: MazeTools; tall: boolean }
     <>
       {canGenerate ? (
         <ToolButton tall={tall} onClick={() => setDialog("generate")}>
-          Згенерувати
+          {t("toolbar.generate")}
         </ToolButton>
       ) : (
         <ToolButton tall={tall} onClick={() => setDialog("reshuffle")}>
-          Перетасувати
+          {t("toolbar.reshuffle")}
         </ToolButton>
       )}
       <ToolButton tall={tall} active={editing} onClick={() => actions.setTool(editing ? "none" : "walls")}>
-        Правити
+        {t("toolbar.edit")}
       </ToolButton>
       <ToolButton tall={tall} active={dark} onClick={actions.toggleDark}>
-        Темрява
+        {t("toolbar.dark")}
       </ToolButton>
       {canGenerate && (
         <ToolButton tall={tall} onClick={actions.scatterStarts}>
-          Розкидати старти
+          {t("toolbar.scatterStarts")}
         </ToolButton>
       )}
       <label className="flex shrink-0 items-center gap-1 text-xs text-hud-muted">
-        Очима гравця
+        {t("toolbar.asHero")}
         <SelectField
           value={asHero.id ?? NO_HERO}
           onValueChange={(v) => asHero.set(v === NO_HERO ? null : v)}
-          options={[{ value: NO_HERO, label: "Вимкнено" }, ...heroes.map((h) => ({ value: h.id, label: h.name }))]}
+          options={[{ value: NO_HERO, label: t("toolbar.asHeroOff") }, ...heroes.map((h) => ({ value: h.id, label: h.name }))]}
           className={cn(tall ? "h-8" : "h-7", "w-32 px-2 text-xs")}
         />
       </label>
-      {/* вихід із погляду гравця не залежить від того, чи вміщується список під тригером */}
+      {/* leaving the player view must not depend on whether the list fits under the trigger */}
       {asHero.id && (
-        <ToolButton tall={tall} onClick={() => asHero.set(null)} label="Вимкнути «Очима гравця»">
-          Вимкнути
+        <ToolButton tall={tall} onClick={() => asHero.set(null)} label={t("toolbar.asHeroExitLabel")}>
+          {t("toolbar.asHeroExit")}
         </ToolButton>
       )}
       {dialog === "generate" && <MazeGenerateDialog open onOpenChange={close} difficulty={battle.map?.maze?.difficulty ?? "medium"} onSubmit={actions.generate} />}
@@ -93,31 +91,29 @@ export function MazeToolbar({ tools, tall }: { tools: MazeTools; tall: boolean }
   );
 }
 
-const HINTS: Partial<Record<MazeTool, string>> = {
-  walls: "Клацніть або протягніть уздовж ребер; перше ребро вирішує — ставити чи прибирати",
-  exit: "Клацніть крайню клітинку",
-  teleport: "Дві клітинки — пара; клацання по телепорту прибирає пару",
-  fog: "Клацання вмикає або вимикає туман у клітинці",
-  placeUnit: "Клацніть клітинку для юніта",
-};
+const HINT_TOOLS = ["walls", "exit", "teleport", "fog", "placeUnit"] as const;
+
+const hasHint = (tool: MazeTool): tool is (typeof HINT_TOOLS)[number] => (HINT_TOOLS as readonly MazeTool[]).includes(tool);
 
 export function MazeEditPalette({ tools }: { tools: MazeTools }) {
+  const t = useTranslations("battleDm.maze");
+
   const { state: { tool, awaitingExit }, actions: { setTool } } = tools;
 
   if (tool === "none") return null;
 
-  const hint = awaitingExit ? "Клацніть крайню клітинку для виходу нового лабіринту" : HINTS[tool];
+  const hint = awaitingExit ? t("hints.awaitingExit") : hasHint(tool) ? t(`hints.${tool}`) : "";
 
   return (
     <div className="flex max-w-[calc(100%-1rem)] flex-wrap items-center gap-1.5 rounded-md border border-hud-rule bg-black/70 p-1.5 text-xs">
       {isEditTool(tool) &&
         !awaitingExit &&
-        EDIT_TOOLS.map(({ value, label }) => (
+        EDIT_TOOLS.map((value) => (
           <ToolButton key={value} tall={false} active={tool === value} onClick={() => setTool(value)}>
-            {label}
+            {t(`tools.${value}`)}
           </ToolButton>
         ))}
-      <span className="text-hud-muted">{hint} · Esc — вийти</span>
+      <span className="text-hud-muted">{t("palette", { hint })}</span>
     </div>
   );
 }

@@ -14,7 +14,7 @@ describe("immunityAbilities", () => {
       { kind: "flag", flag: "resistance", damageType: "spell", percent: 100 },
       { kind: "flag", flag: "conditionImmunity", conditions: "all" },
       { kind: "flag", flag: "conditionImmunity", conditions: ["fear"] },
-      { kind: "note", text: "Імунітет: сповільнення" },
+      { kind: "note", text: "Immunity: сповільнення" },
     ]);
     expect(AbilitiesSchema.safeParse([a]).success).toBe(true);
   });

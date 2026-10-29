@@ -38,7 +38,7 @@ describe("ConditionsSection", () => {
 
     expect(screen.getByText("Умиротворений")).toBeTruthy();
     expect(screen.getByText("Не воює")).toBeTruthy();
-    expect(screen.getByText("не завдає шкоди, без ворожих заклинань")).toBeTruthy();
+    expect(screen.getByText("abilityRegistry.options.condition.no_damage_dealt, abilityRegistry.options.condition.no_hostile_spells")).toBeTruthy();
   });
 
   it("кнопка видалення викликає remove зі станом", () => {

@@ -5,6 +5,7 @@ import { mazeGrid, mazeMap } from "./fixtures";
 
 import { BattleStatus, ParticipantSide } from "@/lib/constants/battle";
 import { byId, placed, testMap } from "@/lib/utils/battle/__tests__/fixtures/placed";
+import { eventTextOf } from "@/lib/utils/battle/log/__tests__/event-text";
 import type { BattleParticipant, Direction8, GridPoint, MazeConfig } from "@/types/battle";
 
 const grid = (over: Partial<MazeConfig> = {}) => mazeGrid({ exit: { x: 9, y: 9 }, ...over }, 10);
@@ -26,7 +27,7 @@ describe("mazeAwareness", () => {
     const out = mazeAwareness(grid(), { participants: [hero({ x: 1, y: 1 }), sleeper({ x: 4, y: 1 })], round: 2, sleep: false });
 
     expect(byId(out.participants, "e").battleData).toMatchObject({ dormant: false, mazeWakeRound: 3 });
-    expect(out.events.map((e) => e.resultText)).toEqual(["Герой помітив Орк"]);
+    expect(out.events.map((e) => eventTextOf(e))).toEqual(["Герой помітив Орк"]);
   });
 
   it("за стіною й у тумані на відстані 2 — спить", () => {
@@ -54,7 +55,7 @@ describe("mazeAwareness", () => {
     const gone = mazeAwareness(grid(), { participants: [hero({ x: 1, y: 1 }), hidden], round: 1, sleep: true });
 
     expect(byId(gone.participants, "b").battleData.dormant).toBe(true);
-    expect(gone.events.map((e) => e.resultText)).toEqual(["Вороги зникли в лабіринті"]);
+    expect(gone.events.map((e) => eventTextOf(e))).toEqual(["Вороги зникли в лабіринті"]);
   });
 
   it("withMazeAwareness: без виходу чи не в активному бою — без змін", () => {

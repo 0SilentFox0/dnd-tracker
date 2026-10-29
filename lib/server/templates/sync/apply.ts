@@ -1,6 +1,7 @@
 import type { Prisma } from "@prisma/client";
 
 import { API_ERRORS } from "@/lib/constants/api-errors";
+import { getTranslator } from "@/lib/i18n/translator";
 import type { SourceSyncApplyInput } from "@/lib/schemas/source-sync";
 import type { CompendiumBundleDb } from "@/lib/server/compendium-import/bundle";
 import { syncCompendiumProvenance } from "@/lib/server/compendium-import/sync";
@@ -15,6 +16,7 @@ import { loadSyncContext, type SyncDb } from "@/lib/server/templates/sync/contex
 import { indexOf } from "@/lib/server/templates/sync/index";
 import { cloneState, setEntry } from "@/lib/server/templates/sync/state";
 import { IGNORED_DELETED, type SyncContext, type SyncItem } from "@/lib/server/templates/sync/types";
+import { localeOrRequest } from "@/lib/utils/api/translate-error";
 import { backgroundAsiRules } from "@/lib/utils/backgrounds/asi";
 import { backgroundReferenceError } from "@/lib/utils/backgrounds/integrity";
 import { parseRules } from "@/lib/utils/rules/schema";
@@ -252,7 +254,7 @@ async function writeTables(db: SyncDb, ctx: SyncContext, selected: Map<string, S
     for (const item of selected.values()) if (item.status === "deletedInSource" && item.localId) await db.compendiumEntry.deleteMany({ where: { campaignId: ctx.campaignId, localId: item.localId } });
   }
 
-  if (ctx.sourceBundle.compendium?.pages.length) warnings.push("Матеріали ДМ компедіуму не входять у scopes source-sync; оновіть їх повторним JSON-імпортом або вручну");
+  if (ctx.sourceBundle.compendium?.pages.length) warnings.push((await getTranslator(await localeOrRequest(), "campaigns"))("sync.compendiumNotSynced"));
 
   return warnings;
 }

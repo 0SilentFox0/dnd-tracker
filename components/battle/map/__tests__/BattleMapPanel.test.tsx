@@ -1,5 +1,5 @@
 // @vitest-environment happy-dom
-import { cleanup, fireEvent, render } from "@testing-library/react";
+import { cleanup, fireEvent } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
 import { BattleMapPanel } from "../BattleMapPanel";
@@ -7,6 +7,9 @@ import { MapToolsSlotContext } from "../MapToolsSlot";
 
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { fakeScene } from "@/lib/hooks/battle/__tests__/fake-scene";
+import { render } from "@/lib/i18n/test/render-uk";
+
+vi.unmock("next-intl");
 
 afterEach(cleanup);
 
@@ -79,7 +82,11 @@ describe("BattleMapPanel", () => {
     expect((getByRole("textbox", { name: "Раундів" }) as HTMLInputElement).value).toBe("20");
 
     fireEvent.click(getByRole("button", { name: "Небезпека" }));
-    expect((getByRole("textbox", { name: "Підпис небезпеки" }) as HTMLInputElement).value).toBe("Небезпечна зона");
+
+    const label = getByRole("textbox", { name: "Підпис небезпеки" }) as HTMLInputElement;
+
+    expect(label.value).toBe("");
+    expect(label.placeholder).toBe("Небезпечна зона");
   });
 
   it("гравець не бачить «Місцевість»", () => {

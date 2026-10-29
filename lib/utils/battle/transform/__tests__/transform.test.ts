@@ -1,9 +1,11 @@
 import { describe, expect, it } from "vitest";
 
 import { CombatStatus, ParticipantSide, ParticipantSourceType } from "@/lib/constants/battle";
+import { textOf } from "@/lib/i18n/test/text";
 import { makeParticipant } from "@/lib/utils/abilities/__tests__/fixtures";
 import { dropConcentration } from "@/lib/utils/battle/concentration";
 import { applyDamageConsequences } from "@/lib/utils/battle/damage/consequences";
+import { textsOf } from "@/lib/utils/battle/log/__tests__/event-text";
 import { castSpell } from "@/lib/utils/battle/spell";
 import { applyTransforms } from "@/lib/utils/battle/transform/apply-transforms";
 import { revertExpiredTransforms } from "@/lib/utils/battle/transform/revert";
@@ -118,7 +120,7 @@ describe("transform: форма", () => {
     expect(orc.battleData.attacks[0].name).toBe("Укус");
     expect(orc.battleData.transform?.saved).toMatchObject({ maxHp: 40, currentHp: 30, tempHp: 3, armorClass: 16, strength: 18 });
     expect(orc.battleData.activeEffects.some((e) => e.abilityKey === "transform:" + orc.battleData.transform?.castId)).toBe(true);
-    expect(out.messages[0]).toContain("Жаба");
+    expect(textOf(out.messages[0])).toContain("Жаба");
   });
 
   it("немає юніта — форма не змінюється", async () => {
@@ -127,7 +129,7 @@ describe("transform: форма", () => {
     const out = await applyTransforms(r.allParticipantsUpdated as BattleParticipant[], r.transforms ?? [], { campaignId: "c", battleId: "b", rules, deps: { loadPool: async () => ({ units: [], races: [] }) }, round: 2 });
 
     expect(out.order.find((p) => p.basicInfo.id === "orc")?.battleData.transform).toBeUndefined();
-    expect(out.messages).toEqual(["форму перетворення не знайдено"]);
+    expect(textsOf(out.messages)).toEqual(["форму перетворення не знайдено"]);
   });
 });
 
@@ -145,7 +147,7 @@ describe("transform: відкат", () => {
     expect(r.participant.battleData.attacks).toEqual(victim().battleData.attacks);
     expect(r.participant.battleData.activeEffects).toEqual([]);
     expect(r.participants[0]).toBe(r.participant);
-    expect(r.messages[0]).toContain("11");
+    expect(textOf(r.messages[0])).toContain("11");
   });
 
   it("надлишок валить справжню форму: наслідки для неї (юніт гине)", async () => {
@@ -196,7 +198,7 @@ describe("transform: згасання", () => {
     expect(orc.abilities.strength).toBe(18);
     expect(orc.battleData.transform).toBeUndefined();
     expect(orc.battleData.activeEffects).toEqual([]);
-    expect(messages[0]).toContain("звичайну форму");
+    expect(textOf(messages[0])).toContain("звичайну форму");
   });
 
   it("втрата концентрації кастера повертає звичайну форму", async () => {

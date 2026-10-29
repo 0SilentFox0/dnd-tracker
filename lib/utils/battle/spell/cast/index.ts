@@ -1,6 +1,8 @@
+import { textRef } from "@/lib/i18n/text-ref";
 import { findParticipant, mergeParticipants, withSelf } from "@/lib/utils/abilities/engine/core/participants";
 import { resolveTargetIds } from "@/lib/utils/abilities/engine/core/targets";
 import { HIDDEN_MARKER } from "@/lib/utils/battle/actions/effects";
+import { actionReason } from "@/lib/utils/battle/actions/reasons";
 import { type ActionFlow, fire, getP } from "@/lib/utils/battle/common/action-flow";
 import { beginConcentration, tagConcentration, uniqueCastId } from "@/lib/utils/battle/concentration";
 import { removeEffects } from "@/lib/utils/battle/conditions/query";
@@ -32,7 +34,7 @@ export function castSpell(params: CastSpellParams): CastSpellResult {
   const def = spell.definition;
 
   if (def.executionMode === "manual") {
-    const message = "Налаштуйте механіку заклинання або застосуйте його вручну";
+    const message = actionReason("manualSpell");
 
     return { success: false, casterUpdated: caster, allParticipantsUpdated: allParticipants, battleAction: actionOf(caster, spell, [], battleId, currentRound, message), summons: [], messages: [message] };
   }
@@ -68,7 +70,7 @@ export function castSpell(params: CastSpellParams): CastSpellResult {
       success: false,
       casterUpdated: readyCaster,
       allParticipantsUpdated: mergeParticipants(allParticipants, flow.ps),
-      battleAction: actionOf(readyCaster, spell, targetsBefore, battleId, currentRound, `${readyCaster.basicInfo.name}: ${spell.name} недоступне — немає spell slots`),
+      battleAction: actionOf(readyCaster, spell, targetsBefore, battleId, currentRound, textRef("battleActions.spell.noSlots", { name: readyCaster.basicInfo.name, spell: spell.name })),
       summons: [],
       messages: [],
     };

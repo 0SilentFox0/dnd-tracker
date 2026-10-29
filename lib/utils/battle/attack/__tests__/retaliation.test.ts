@@ -2,8 +2,10 @@ import { describe, expect, it } from "vitest";
 
 import { AttackType, ParticipantSide, ParticipantSourceType } from "@/lib/constants/battle";
 import { CRITICAL_FAIL_EFFECTS, CRITICAL_SUCCESS_EFFECTS, type CriticalEffect } from "@/lib/constants/critical-effects";
+import { textRef } from "@/lib/i18n/text-ref";
 import { makeEffect, makeParticipant, resolved, seq } from "@/lib/utils/abilities/__tests__/fixtures";
 import { resolveRetaliation, type RetaliationInput } from "@/lib/utils/battle/attack/retaliation";
+import { eventTextOf } from "@/lib/utils/battle/log/__tests__/event-text";
 import type { ResolvedAbility } from "@/types/abilities";
 import type { BattleAttack, BattleParticipant } from "@/types/battle";
 
@@ -47,7 +49,7 @@ describe("resolveRetaliation", () => {
     expect(find(r?.participants, "a")?.combatStats.currentHp).toBeLessThan(30);
     expect(find(r?.participants, "d")?.actionFlags).toMatchObject({ hasUsedReaction: true, hasUsedAction: false });
     expect(r?.battleAction).toMatchObject({ actionType: "retaliation", actorId: "d", targets: [{ participantId: "a" }], actionDetails: { isHit: true, weaponName: "Меч" } });
-    expect(r?.battleAction.resultText.startsWith("Відсіч")).toBe(true);
+    expect(eventTextOf(r?.battleAction as never).startsWith("Відсіч")).toBe(true);
     expect(r?.battleAction.hpChanges).toContainEqual(expect.objectContaining({ participantId: "a" }));
   });
 
@@ -102,7 +104,7 @@ describe("resolveRetaliation", () => {
     const lost = (r: typeof plain) => 30 - (find(r?.participants, "a")?.combatStats.currentHp ?? 30);
 
     expect(lost(boosted)).toBe(Math.floor(lost(plain) * 1.5));
-    expect(boosted?.battleAction.actionDetails.damageSteps?.a).toContainEqual(expect.objectContaining({ label: "Контратака", value: 1.5 }));
+    expect(boosted?.battleAction.actionDetails.damageSteps?.a).toContainEqual(expect.objectContaining({ label: textRef("battleLog.damage.steps.counter"), value: 1.5 }));
   });
 
   it("тригери «перед/після атаки» захисника не спрацьовують, «влучання» — так", () => {

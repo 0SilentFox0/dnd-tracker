@@ -1,63 +1,17 @@
-import { existsSync, readdirSync, readFileSync, statSync } from "node:fs";
-import { join } from "node:path";
 import { describe, expect, it } from "vitest";
 
 import { API_ERRORS } from "@/lib/constants/api-errors";
 import { SERVER_NAMESPACES } from "@/lib/i18n/config";
-
-const ROOT = process.cwd();
+import { reachableSources, readSource, walkSources } from "@/lib/i18n/test/import-graph";
 
 const CLIENT_ROOTS = ["components", "app", "lib/hooks", "lib/providers"];
 
 const SERVER_ONLY = /^(lib\/server|app\/api)\//;
 
-const IMPORT_RE = /(?:from|import)\s*\(?\s*["']@\/([^"']+)["']/g;
-
-const EXTS = [".ts", ".tsx", "/index.ts", "/index.tsx"];
-
-function walk(dir: string, out: string[] = []): string[] {
-  const abs = join(ROOT, dir);
-
-  if (!existsSync(abs)) return out;
-
-  for (const name of readdirSync(abs)) {
-    const rel = `${dir}/${name}`;
-
-    if (name === "__tests__" || name === "node_modules") continue;
-
-    if (statSync(join(ROOT, rel)).isDirectory()) walk(rel, out);
-    else if (/\.tsx?$/.test(name)) out.push(rel);
-  }
-
-  return out;
-}
-
-const resolve = (spec: string) => EXTS.map((ext) => `${spec}${ext}`).concat(spec).find((p) => /\.tsx?$/.test(p) && existsSync(join(ROOT, p)));
-
 function clientGraph(): Map<string, string> {
-  const seen = new Map<string, string>();
+  const roots = CLIENT_ROOTS.flatMap((r) => walkSources(r)).filter((f) => !SERVER_ONLY.test(f) && /^["']use client["']/.test(readSource(f).trimStart()));
 
-  const queue = CLIENT_ROOTS.flatMap((r) => walk(r)).filter((f) => !SERVER_ONLY.test(f) && /^["']use client["']/.test(readFileSync(join(ROOT, f), "utf8").trimStart()));
-
-  while (queue.length) {
-    const file = queue.pop() as string;
-
-    if (seen.has(file) || SERVER_ONLY.test(file)) continue;
-
-    const text = readFileSync(join(ROOT, file), "utf8");
-
-    if (text.includes('"server-only"')) continue;
-
-    seen.set(file, text);
-
-    for (const [, spec] of text.matchAll(IMPORT_RE)) {
-      const next = resolve(spec);
-
-      if (next) queue.push(next);
-    }
-  }
-
-  return seen;
+  return reachableSources(roots, (file, text) => SERVER_ONLY.test(file) || text.includes('"server-only"'));
 }
 
 // reviewed: reached from client code only via pure helpers whose error text is produced and translated on the server

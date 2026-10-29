@@ -1,6 +1,7 @@
 // @vitest-environment happy-dom
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
+import { DEFAULT_BADGE_LABELS } from "@/components/battle/fx/runtime/badge-labels";
 import { FX_ARCHETYPES,type FxArchetype } from "@/lib/utils/battle/fx";
 import { stubCanvasContexts } from "@/lib/utils/canvas/__tests__/recording-canvas";
 
@@ -110,7 +111,7 @@ async function setup() {
 
     let done = false;
 
-    const run = animation({ spec, stage, from: centre(actorEl), to: targetEls.map(centre), targets: targetEls.map((el) => ({ at: centre(el), el })), actorEl, palette: PALETTE[spec.element] }).then(() => {
+    const run = animation({ spec, stage, from: centre(actorEl), to: targetEls.map(centre), targets: targetEls.map((el) => ({ at: centre(el), el })), actorEl, palette: PALETTE[spec.element], labels: DEFAULT_BADGE_LABELS }).then(() => {
       done = true;
     });
 

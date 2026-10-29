@@ -49,7 +49,7 @@ describe("сторінка info", () => {
     expect(skill).not.toHaveProperty("bonuses");
     expect(skill).not.toHaveProperty("skillTriggers");
     expect(skill).not.toHaveProperty("abilities");
-    expect(skill.abilitySummary).toEqual([expect.stringMatching(/шкода \(ближня\) \+10%/)]);
+    expect(skill.abilitySummary).toEqual([expect.objectContaining({ then: [[expect.objectContaining({ key: "summary.effects.damageBonus" })]] })]);
   });
 
   it("у класовому режимі віддає класи й ховає скіли", async () => {

@@ -1,31 +1,39 @@
+import { capitalizeLine, lineKey, textRef } from "@/lib/i18n/text-ref";
+import type { Translator } from "@/lib/i18n/translator";
 import { legacyActiveEffectModifiers } from "@/lib/utils/abilities/engine/effects/legacy-active-effects";
 import { describeEffect } from "@/lib/utils/abilities/registry/effects";
-import { capitalize } from "@/lib/utils/common/text";
+import type { Effect } from "@/lib/utils/abilities/schema";
+import { joinSegments } from "@/lib/utils/abilities/segments";
 import type { ActiveEffect } from "@/types/battle";
+import type { LogLine } from "@/types/text";
 
-const rounds = (n: number) => `${n} ${n % 10 === 1 && n % 100 !== 11 ? "раунд" : n % 10 >= 2 && n % 10 <= 4 && (n % 100 < 12 || n % 100 > 14) ? "раунди" : "раундів"}`;
+const uniqueLines = (lines: LogLine[]): LogLine[] => lines.filter((line, i) => lines.findIndex((other) => lineKey(other) === lineKey(line)) === i);
 
+/** Engine-made effects carry a translatable `label`; the rest show their content `name`. */
+export const effectTitle = (e: Pick<ActiveEffect, "name" | "label">): LogLine => e.label ?? e.name;
 
 /** Що саме робить ефект: опис або описи його модифікаторів (без повторів). */
-export function effectLines(e: ActiveEffect): string[] {
+export function effectLines(e: ActiveEffect, t: Translator): LogLine[] {
   if (e.description) return [e.description];
 
-  const guards = e.effects.filter((d) => d.type === "guard").map((d) => `${e.source?.name ?? "Захисник"} бере на себе ${d.value}% шкоди від атак`);
+  const guards = e.effects.filter((d) => d.type === "guard").map((d) => textRef("battle.view.effects.guard", { name: e.source?.name ?? textRef("battle.view.effects.guardian"), value: d.value ?? 0 }));
 
-  return [...new Set([...(e.abilityEffects ?? legacyActiveEffectModifiers(e)).map((x) => capitalize(describeEffect(x))), ...guards])];
+  const text = (x: Effect) => capitalizeLine(joinSegments(t, describeEffect(x)));
+
+  return uniqueLines([...(e.abilityEffects ?? legacyActiveEffectModifiers(e)).map(text), ...guards]);
 }
 
 /** Що робить активний ефект — для підказки на чипі: опис або описи його модифікаторів, DoT/HoT, залишок і джерело. */
-export function effectSummary(e: ActiveEffect): string[] {
-  const what = effectLines(e);
+export function effectSummary(e: ActiveEffect, t: Translator): LogLine[] {
+  const what = effectLines(e, t);
 
   return [
     ...what,
-    ...(e.dotDamage ? [`${e.dotDamage.dice ?? e.dotDamage.damagePerRound} шкоди (${e.dotDamage.damageType}) щораунду`] : []),
-    ...(e.hotHeal ? [`+${e.hotHeal.healPerRound} HP щораунду`] : []),
-    e.zone ? `у зоні аури до наступного ходу ${e.source?.name ?? "власника"}` : e.permanent ? "діє постійно" : `ще ${rounds(e.duration)}`,
-    ...(e.source ? [`від: ${e.source.abilityName ? `${e.source.abilityName} (${e.source.name})` : e.source.name}`] : []),
-  ].filter(Boolean).filter((line, i, all) => all.indexOf(line) === i);
+    ...(e.dotDamage ? [textRef("battle.view.effects.dot", { damage: e.dotDamage.dice ?? e.dotDamage.damagePerRound, type: e.dotDamage.damageType })] : []),
+    ...(e.hotHeal ? [textRef("battle.view.effects.hot", { heal: e.hotHeal.healPerRound })] : []),
+    e.zone ? textRef("battle.view.effects.zone", { name: e.source?.name ?? textRef("battle.view.effects.owner") }) : e.permanent ? textRef("battle.view.effects.permanent") : textRef("battle.view.effects.roundsLeft", { count: e.duration }),
+    ...(e.source ? [textRef("battle.view.effects.from", { source: e.source.abilityName ? `${e.source.abilityName} (${e.source.name})` : e.source.name })] : []),
+  ].filter(Boolean).filter((line, i, all) => all.findIndex((other) => lineKey(other) === lineKey(line)) === i);
 }
 
 const displayKey = (e: ActiveEffect) =>

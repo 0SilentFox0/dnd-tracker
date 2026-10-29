@@ -2,6 +2,7 @@ import { ParticipantSide, ParticipantSourceType } from "@/lib/constants/battle";
 import { CONTROLLED_BY_DM } from "@/lib/constants/characters";
 import { findParticipant } from "@/lib/utils/abilities/engine/core/participants";
 import type { Rng } from "@/lib/utils/abilities/engine/core/types";
+import { REJECT } from "@/lib/utils/battle/store/reject";
 import { pickOne } from "@/lib/utils/common/dice";
 import type { BattleParticipant } from "@/types/battle";
 
@@ -36,11 +37,11 @@ export type SetControllerResult = { participants: BattleParticipant[]; unit: Bat
 export function setUnitController(order: BattleParticipant[], unitId: string, controlledBy: string, dmUserId: string): SetControllerResult {
   const target = findParticipant(order, unitId);
 
-  if (!target || !isAssignableUnit(target)) return { error: "Цим юнітом не можна керувати гравцю" };
+  if (!target || !isAssignableUnit(target)) return { error: REJECT.unitNotAssignable };
 
   const toDm = controlledBy === CONTROLLED_BY_DM || controlledBy === dmUserId;
 
-  if (!toDm && !allyOwners(order, dmUserId).includes(controlledBy)) return { error: "Гравець не бере участі в бою" };
+  if (!toDm && !allyOwners(order, dmUserId).includes(controlledBy)) return { error: REJECT.playerNotInBattle };
 
   const unit = withController(target, toDm ? CONTROLLED_BY_DM : controlledBy);
 

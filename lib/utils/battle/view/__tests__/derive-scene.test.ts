@@ -1,7 +1,6 @@
-// @vitest-environment happy-dom
 import { describe, expect, it } from "vitest";
 
-import { deriveScene, deriveTurn } from "../useBattleScene";
+import { deriveScene, deriveTurn } from "../derive-scene";
 
 import { ParticipantSide } from "@/lib/constants/battle";
 import { createMockParticipant } from "@/lib/utils/battle/__tests__/fixtures/mock-participant";

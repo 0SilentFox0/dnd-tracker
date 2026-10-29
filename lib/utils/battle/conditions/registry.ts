@@ -1,8 +1,10 @@
+/* eslint-disable no-restricted-syntax -- label/description are stored into the active effect (data); the battle UI reads battleCommon.conditions.* keys */
 import { EffectMarker } from "@/lib/constants/battle";
 import { type RulesEdition } from "@/lib/constants/rules";
-import type { TimedEffectInput } from "@/lib/utils/abilities/engine/effects/timed-effects";
+import { dynamicTextRef } from "@/lib/i18n/text-ref";
 import type { StaticEffect } from "@/lib/utils/abilities/schema";
 import { type Condition5eKey, type CustomConditionKey } from "@/lib/utils/abilities/schema/kinds";
+import type { LabeledEffectInput } from "@/lib/utils/battle/actions/effects";
 import type { Ruleset } from "@/lib/utils/rules";
 import type { ActiveEffect } from "@/types/battle";
 
@@ -182,7 +184,7 @@ export interface ConditionEffectOptions {
   source?: ActiveEffect["source"];
 }
 
-export function conditionEffectInput(key: Condition5eKey, opts: ConditionEffectOptions): TimedEffectInput {
+export function conditionEffectInput(key: Condition5eKey, opts: ConditionEffectOptions): LabeledEffectInput {
   const isExhaustion = key === "exhaustion";
 
   const { markers, flags } = expandCondition5e(key, { exhaustion: opts.exhaustion, level: isExhaustion ? (opts.levels ?? 1) : undefined });
@@ -191,6 +193,7 @@ export function conditionEffectInput(key: Condition5eKey, opts: ConditionEffectO
     timedKey: opts.timedKey,
     source: opts.source,
     name: CONDITION_5E_REGISTRY[key].label,
+    label: dynamicTextRef(`battleCommon.conditions.${key}.label`),
     type: "condition",
     rounds: opts.rounds,
     stackable: isExhaustion,
@@ -208,11 +211,12 @@ export function customConditionDef(key: CustomConditionKey, rules?: Ruleset): Cu
   return rules?.conditions.custom?.find((c) => c.key === key);
 }
 
-export function customConditionInput(def: CustomConditionDef, opts: ConditionEffectOptions): TimedEffectInput {
+export function customConditionInput(def: CustomConditionDef, opts: ConditionEffectOptions): LabeledEffectInput {
   return {
     timedKey: opts.timedKey,
     source: opts.source,
     name: def.name,
+    label: def.name,
     type: "condition",
     rounds: opts.rounds,
     stackable: false,

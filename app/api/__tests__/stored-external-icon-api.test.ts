@@ -67,7 +67,7 @@ describe("PATCH with an already stored external icon", () => {
     const res = await PATCH(req({ icon: "https://game-icons.net/icons/b.svg" }), { params: Promise.resolve({ id: "c1", artifactId: "a1" }) });
 
     expect(res.status).toBe(422);
-    expect((await res.json()).error).toContain("Дозволені формати");
+    expect((await res.json()).errorKey).toBe("errors.imageFormats");
     expect(prisma.artifact.update).not.toHaveBeenCalled();
   });
 
@@ -88,6 +88,6 @@ describe("PATCH with an already stored external icon", () => {
     const res = await PATCH(req({ icon: "https://game-icons.net/new.svg" }), { params: Promise.resolve({ id: "c1", setId: "s1" }) });
 
     expect(res.status).toBe(422);
-    expect((await res.json()).error).toContain("Дозволені формати");
+    expect((await res.json()).errorKey).toBe("errors.imageFormats");
   });
 });

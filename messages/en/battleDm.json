@@ -1,0 +1,202 @@
+{
+  "completeBattle": "End battle",
+  "panel": {
+    "open": "Open DM quick actions",
+    "title": "DM quick actions",
+    "close": "Close",
+    "logOpen": "Battle log is open below",
+    "openLog": "Open battle log",
+    "addParticipant": "Add hero / unit",
+    "castSpell": "Cast a spell",
+    "refreshSources": "Refresh from library",
+    "randomUnits": "Deal units at random",
+    "randomUnitsHint": "Free allied units (under the DM) are distributed among the players",
+    "enemyUnits": "Enemy units (this battle only)",
+    "buff": "Strengthen",
+    "buffHint": "HP and damage ×1.1, stacks",
+    "debuff": "Weaken",
+    "debuffHint": "HP and damage ÷1.1, stacks",
+    "participants": "Participants",
+    "nobody": "Nobody on the field"
+  },
+  "refresh": {
+    "title": "Refresh from the library?",
+    "description": "Abilities, attacks, spells, slots, DC and speed of the participants are refreshed from the campaign database. HP, morale, effects and used limits stay.",
+    "confirm": "Refresh"
+  },
+  "row": {
+    "scaleHp": "{value} HP",
+    "scaleDamage": "{value} damage",
+    "controls": "Controls:",
+    "changeHp": "Change HP",
+    "releaseControl": "Release control",
+    "takeControl": "Take control",
+    "lairOff": "Turn the lair off",
+    "lairOn": "Turn the lair on",
+    "inLair": "In the lair",
+    "outLair": "Outside the lair",
+    "legendary": "Legendary action ({left}/{max})",
+    "conditions": "Conditions",
+    "kill": "Kill",
+    "killConfirm": "Kill {name}?",
+    "remove": "Remove from battle",
+    "removeConfirm": "Remove {name} from the battle?"
+  },
+  "conditions": {
+    "title": "Conditions",
+    "current": "Current conditions",
+    "close": "Close",
+    "apply": "Apply",
+    "remove": "Remove",
+    "state": "Condition",
+    "rounds": "Rounds (empty — until removed)",
+    "roundsLeft": " · {duration} rd.",
+    "levels": "Levels",
+    "saveEnds": "Saving throw at the end of the turn",
+    "ability": "Ability",
+    "dc": "DC"
+  },
+  "changeHp": {
+    "title": "Change HP",
+    "description": "{name} — current HP: {current} / {max}",
+    "saving": "Saving…",
+    "value": "New HP value (0 … {max})"
+  },
+  "awaiting": {
+    "titleVictory": "Enemies are still in reserve",
+    "titleDefeat": "Allies are still in reserve",
+    "descriptionVictory": "The visible enemies are defeated. Bring the reserve into the battle or end the battle?",
+    "descriptionDefeat": "The visible allies are defeated. Bring the reserve into the battle or end the battle?",
+    "revealAll": "Bring in all"
+  },
+  "complete": {
+    "title": "End the battle?",
+    "description": "Pick the result or let it be decided automatically by the victory conditions.",
+    "defeat": "Defeat",
+    "auto": "Auto",
+    "victory": "Victory"
+  },
+  "log": {
+    "title": "Battle log",
+    "close": "Close",
+    "empty": "No entries yet.",
+    "rollback": "Undo the action (roll back to the state before it)",
+    "rollbackConfirm": "Roll the battle back to the state before this action? This and all following actions will be deleted.",
+    "confirm": "Confirm"
+  },
+  "revive": {
+    "message": "<b>{name}</b> has fallen. Revive with 1 HP?",
+    "action": "Revive",
+    "hide": "Hide"
+  },
+  "casterPicker": {
+    "title": "Cast a spell",
+    "description": "Choose the participant who will cast the spell",
+    "empty": "No active participants",
+    "ally": "ally",
+    "enemy": "enemy"
+  },
+  "addParticipant": {
+    "title": "Add a participant to the field",
+    "description": "The participant takes a place in the queue by their initiative or waits in reserve.",
+    "adding": "Adding…",
+    "pickCell": "Pick a cell",
+    "side": "Side",
+    "ally": "Ally",
+    "enemy": "Enemy",
+    "type": "Type",
+    "hero": "Hero",
+    "unit": "Unit",
+    "pickHero": "Choose a hero",
+    "race": "Race",
+    "pickRace": "Choose a race",
+    "pickUnit": "Choose a unit",
+    "pickRaceFirst": "Choose a race first",
+    "level": "Level {level}",
+    "quantity": "Quantity",
+    "reserve": "To reserve — appears when the DM brings them into the battle"
+  },
+  "legendary": {
+    "title": "Legendary action: {name}",
+    "left": "{left} of {max} left",
+    "action": "Action",
+    "run": "Perform",
+    "limitReached": "Use limit reached",
+    "cooldown": "Recharging: {rounds} more rd.",
+    "attackMissing": "The ability's attack was not found"
+  },
+  "maze": {
+    "title": "Maze",
+    "tools": {
+      "walls": "Walls",
+      "exit": "Exit",
+      "teleport": "Teleport",
+      "fog": "Fog"
+    },
+    "hints": {
+      "walls": "Click or drag along the edges; the first edge decides whether to place or remove",
+      "exit": "Click an edge cell",
+      "teleport": "Two cells make a pair; clicking a teleport removes the pair",
+      "fog": "Clicking toggles fog in the cell",
+      "placeUnit": "Click a cell for the unit",
+      "awaitingExit": "Click an edge cell for the new maze's exit"
+    },
+    "palette": "{hint} · Esc to exit",
+    "toolbar": {
+      "generate": "Generate",
+      "reshuffle": "Reshuffle",
+      "edit": "Edit",
+      "dark": "Darkness",
+      "scatterStarts": "Scatter starts",
+      "asHero": "Through a player's eyes",
+      "asHeroOff": "Off",
+      "asHeroExitLabel": "Turn off \"Through a player's eyes\"",
+      "asHeroExit": "Turn off"
+    },
+    "darkScreen": "Darkness",
+    "marks": {
+      "picker": "Mark",
+      "group": "Mark symbol",
+      "arrow-n": "Arrow up",
+      "arrow-e": "Arrow right",
+      "arrow-s": "Arrow down",
+      "arrow-w": "Arrow left",
+      "cross": "Cross",
+      "skull": "Skull",
+      "star": "Star"
+    },
+    "generate": {
+      "title": "Generate a maze",
+      "description": "New walls, teleports and fog; the heroes will stand at the edge.",
+      "submit": "Generate",
+      "level": "Level",
+      "exit": "Exit",
+      "exitRandom": "Random",
+      "exitPick": "Pick on the map"
+    },
+    "difficulty": {
+      "easy": "Easy",
+      "medium": "Medium",
+      "hard": "Hard"
+    },
+    "reshuffle": {
+      "title": "Reshuffle the maze",
+      "submit": "Reshuffle",
+      "mode": "Mode",
+      "modes": {
+        "walls": "Walls only",
+        "scatter": "Walls + scatter everyone",
+        "tunnel": "1 tunnel"
+      },
+      "descriptions": {
+        "walls": "The exit stays in place; nobody will be walled in.",
+        "scatter": "The exit stays in place; nobody will be walled in.",
+        "tunnel": "Enemies go to the DM's reserve and the rest of the map becomes one room. Heroes line up in a straight tunnel from the center to the edge; the exit moves to the end of the tunnel."
+      }
+    },
+    "counts": {
+      "teleportPairs": "Teleport pairs",
+      "fogPatches": "Fog patches"
+    }
+  }
+}

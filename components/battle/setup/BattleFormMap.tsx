@@ -1,5 +1,7 @@
 "use client";
 
+import { useTranslations } from "next-intl";
+
 import { ToggleRow } from "./ToggleRow";
 
 import { BattleMap } from "@/components/battle/map";
@@ -14,26 +16,15 @@ import { SelectField } from "@/components/ui/select-field";
 import { HAZARD_DICE_PATTERN } from "@/lib/constants/battle";
 import { DAMAGE_ELEMENT_OPTIONS } from "@/lib/constants/damage";
 import type { BattleMapEditor } from "@/lib/hooks/battles";
+import { useText } from "@/lib/i18n/use-text";
 import { cn } from "@/lib/utils";
 import { isPreviewSafeBackground, marginLimit, type Margins, MAX_CELL_PX, MAX_GRID_OFFSET, MAX_MARGIN, MAX_SIDE, MIN_CELL_PX, MIN_PLAYABLE, MIN_SIDE, type SetupTool } from "@/lib/utils/battle/grid";
 import type { MapModeKey } from "@/lib/utils/battle/modes";
 import { clamp } from "@/lib/utils/common/clamp";
 
-const MARGIN_FIELDS: { key: keyof Margins; label: string }[] = [
-  { key: "top", label: "Зверху" },
-  { key: "right", label: "Справа" },
-  { key: "bottom", label: "Знизу" },
-  { key: "left", label: "Зліва" },
-];
+const MARGIN_KEYS: (keyof Margins)[] = ["top", "right", "bottom", "left"];
 
-const TOOLS: { value: SetupTool; label: string }[] = [
-  { value: "blocked", label: "Неігрова" },
-  { value: "wall", label: "Непрохідне" },
-  { value: "hazard", label: "Небезпека" },
-  { value: "erase", label: "Стерти" },
-];
-
-const DAMAGE_OPTIONS = DAMAGE_ELEMENT_OPTIONS.map(({ value, label }) => ({ value, label }));
+const TOOLS: SetupTool[] = ["blocked", "wall", "hazard", "erase"];
 
 const SLIDER = "w-full accent-[var(--hud-gold,#f2c14e)] disabled:opacity-40";
 
@@ -47,7 +38,15 @@ function RangeRow({ id, label, value, range, onChange }: { id: string; label: st
 }
 
 export function BattleFormMap({ editor }: { editor: BattleMapEditor }) {
+  const t = useTranslations("battleSetup.map");
+
+  const tDamage = useTranslations("gameTerms.damageTypes");
+
+  const text = useText();
+
   const { enabled, map, mode, margins, tool, notice, cellPx } = editor.state;
+
+  const damageOptions = DAMAGE_ELEMENT_OPTIONS.map(({ value }) => ({ value, label: tDamage(value) }));
 
   const offset = map.gridOffset ?? { x: 0, y: 0 };
 
@@ -70,46 +69,46 @@ export function BattleFormMap({ editor }: { editor: BattleMapEditor }) {
   );
 
   return (
-    <HudSection title="Карта бою" className="space-y-4">
-      <ToggleRow id="map-enabled" label="Бій на карті" checked={enabled} onChange={actions.setEnabled} />
+    <HudSection title={t("title")} className="space-y-4">
+      <ToggleRow id="map-enabled" label={t("enabled")} checked={enabled} onChange={actions.setEnabled} />
       {enabled && modeToggles}
       {enabled && (
         <div className="grid gap-5 lg:grid-cols-[minmax(0,20rem)_minmax(0,1fr)]">
           <div className="space-y-4">
             <div className="grid grid-cols-2 gap-3">
               <div>
-                <Label htmlFor="map-cols">Колонки</Label>
+                <Label htmlFor="map-cols">{t("cols")}</Label>
                 <BoundedNumberInput id="map-cols" value={map.cols} min={MIN_SIDE} max={MAX_SIDE} onCommit={(v) => actions.setSize(v, map.rows)} />
               </div>
               <div>
-                <Label htmlFor="map-rows">Рядки</Label>
+                <Label htmlFor="map-rows">{t("rows")}</Label>
                 <BoundedNumberInput id="map-rows" value={map.rows} min={MIN_SIDE} max={MAX_SIDE} onCommit={(v) => actions.setSize(map.cols, v)} />
               </div>
             </div>
             <RangeRow
               id="map-cell-size"
-              label={`Розмір клітинки · ${cellPx === null ? "…" : `${cellPx} px`} · ${map.cols} × ${map.rows}`}
+              label={t("cellSize", { size: cellPx === null ? "…" : `${cellPx} px`, cols: map.cols, rows: map.rows })}
               value={cellPx ?? MIN_CELL_PX}
               range={{ min: MIN_CELL_PX, max: MAX_CELL_PX, step: 1, disabled: cellPx === null }}
               onChange={actions.setCellSize}
             />
             <div className="grid grid-cols-2 gap-3">
-              <RangeRow id="map-offset-x" label={`Зсув сітки X · ${percent(offset.x)}`} value={offset.x} range={{ min: 0, max: MAX_GRID_OFFSET, step: 0.01 }} onChange={(x) => actions.setGridOffset({ ...offset, x })} />
-              <RangeRow id="map-offset-y" label={`Зсув сітки Y · ${percent(offset.y)}`} value={offset.y} range={{ min: 0, max: MAX_GRID_OFFSET, step: 0.01 }} onChange={(y) => actions.setGridOffset({ ...offset, y })} />
+              <RangeRow id="map-offset-x" label={t("offsetX", { value: percent(offset.x) })} value={offset.x} range={{ min: 0, max: MAX_GRID_OFFSET, step: 0.01 }} onChange={(x) => actions.setGridOffset({ ...offset, x })} />
+              <RangeRow id="map-offset-y" label={t("offsetY", { value: percent(offset.y) })} value={offset.y} range={{ min: 0, max: MAX_GRID_OFFSET, step: 0.01 }} onChange={(y) => actions.setGridOffset({ ...offset, y })} />
             </div>
-            <RangeRow id="map-opacity" label={`Прозорість сітки · ${percent(map.opacity)}`} value={map.opacity} range={{ min: 0, max: 1, step: 0.05 }} onChange={actions.setOpacity} />
+            <RangeRow id="map-opacity" label={t("opacity", { value: percent(map.opacity) })} value={map.opacity} range={{ min: 0, max: 1, step: 0.05 }} onChange={actions.setOpacity} />
             <div className="space-y-2">
               <div className="flex items-center justify-between gap-2">
-                <Label>Поля (неігрові клітинки)</Label>
+                <Label>{t("margins.title")}</Label>
                 <Button type="button" variant="outline" size="sm" onClick={setEqual}>
-                  Однакові
+                  {t("margins.equal")}
                 </Button>
               </div>
               <div className="grid grid-cols-2 gap-3">
-                {MARGIN_FIELDS.map(({ key, label }) => (
+                {MARGIN_KEYS.map((key) => (
                   <div key={key}>
                     <Label htmlFor={`map-margin-${key}`} className="text-xs">
-                      {label}
+                      {t(`margins.${key}`)}
                     </Label>
                     <BoundedNumberInput id={`map-margin-${key}`} value={margins[key]} min={0} max={marginLimit(map, margins, key)} onCommit={(v) => actions.setMargins({ ...margins, [key]: v })} />
                   </div>
@@ -117,9 +116,9 @@ export function BattleFormMap({ editor }: { editor: BattleMapEditor }) {
               </div>
             </div>
             <div className="space-y-2" hidden={!!mode && !!MAP_MODE_UI[mode].hidesTerrain}>
-              <Label>Малювання клітинок</Label>
+              <Label>{t("drawing")}</Label>
               <div className="flex flex-wrap gap-1.5">
-                {TOOLS.map(({ value, label }) => (
+                {TOOLS.map((value) => (
                   <button
                     key={value}
                     type="button"
@@ -130,45 +129,45 @@ export function BattleFormMap({ editor }: { editor: BattleMapEditor }) {
                       tool === value ? "border-[var(--gold)] text-hud-gold-bright" : "border-hud-rule text-hud-muted",
                     )}
                   >
-                    {label}
+                    {t(`tools.${value}`)}
                   </button>
                 ))}
               </div>
               {tool === "hazard" && (
                 <div className="grid gap-2 sm:grid-cols-[1fr_8rem_10rem]">
-                  <Input aria-label="Підпис небезпеки" className="self-end" maxLength={60} value={brush.label} onChange={(e) => actions.setBrush({ label: e.target.value })} />
+                  <Input aria-label={t("hazardLabel")} className="self-end" maxLength={60} value={brush.label} onChange={(e) => actions.setBrush({ label: e.target.value })} />
                   <div className="space-y-1">
                     <Label htmlFor="map-hazard-dice" className="text-xs">
-                      Шкода (кубики)
+                      {t("hazardDice")}
                     </Label>
                     <Input
                       id="map-hazard-dice"
                       aria-invalid={brush.dice.trim() !== "" && !HAZARD_DICE_PATTERN.test(brush.dice.trim())}
                       maxLength={12}
-                      placeholder="без шкоди"
+                      placeholder={t("hazardDicePlaceholder")}
                       value={brush.dice}
                       onChange={(e) => actions.setBrush({ dice: e.target.value })}
                     />
                   </div>
                   <div className="space-y-1">
                     <Label htmlFor="map-hazard-type" className="text-xs">
-                      Тип
+                      {t("hazardType")}
                     </Label>
-                    <SelectField id="map-hazard-type" value={brush.damageType} onValueChange={(damageType) => actions.setBrush({ damageType })} placeholder="Тип" options={DAMAGE_OPTIONS} />
+                    <SelectField id="map-hazard-type" value={brush.damageType} onValueChange={(damageType) => actions.setBrush({ damageType })} placeholder={t("hazardType")} options={damageOptions} />
                   </div>
                 </div>
               )}
             </div>
             <div className="space-y-2">
-              <ImageUpload value={map.background ?? ""} onChange={(v) => actions.setBackground(v || null)} label="Фон карти" maxSide={2400} allowFile />
+              <ImageUpload value={map.background ?? ""} onChange={(v) => actions.setBackground(v || null)} label={t("background")} maxSide={2400} allowFile />
               <Button type="button" variant="outline" size="sm" onClick={() => actions.setBackground(null)} disabled={map.background === null}>
-                Стандартний фон
+                {t("defaultBackground")}
               </Button>
             </div>
           </div>
           <div className="min-w-0 space-y-2">
             <p aria-live="polite" role="status" className="min-h-5 text-sm text-hud-gold-bright">
-              {notice}
+              {notice && text(notice)}
             </p>
             <div className="h-[55vh] lg:h-[60vh]">
               <BattleMap map={previewMap} participants={[]} actions={{ onStroke: actions.onStroke }} className="h-full" editing={{ clickableBlocked: tool !== null, strokeTool: tool !== null, showBlocked: true }} />

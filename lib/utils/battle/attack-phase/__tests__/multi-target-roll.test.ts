@@ -5,6 +5,8 @@ import { type AttackPhaseInput, runAttackPhase } from "../run-attack-phase";
 import { AttackType, ParticipantSide } from "@/lib/constants/battle";
 import { makeParticipant, resolved, seq } from "@/lib/utils/abilities/__tests__/fixtures";
 import { placed, testMap } from "@/lib/utils/battle/__tests__/fixtures/placed";
+import { eventTextOf } from "@/lib/utils/battle/log/__tests__/event-text";
+import { REJECT } from "@/lib/utils/battle/store/reject";
 import type { BattleAttack, BattleParticipant } from "@/types/battle";
 
 const sword: BattleAttack = { id: "sw", name: "Меч", type: AttackType.RANGED, attackBonus: 5, damageDice: "1d6", damageType: "piercing" };
@@ -34,17 +36,17 @@ describe("multi-target advantage resolution", () => {
   it("without client second rolls the server rolls once per affected target", () => {
     const r = run([attacker, foe("t1", [hindering]), foe("t2")], { targetIds: ["t1", "t2"], attackRolls: [17, 17] });
 
-    expect(r.allBattleActions[0].resultText).toContain("недолік: другий d20 = 11 (сервер), обрано 11");
+    expect(eventTextOf(r.allBattleActions[0])).toContain("недолік: другий d20 = 11 (сервер), обрано 11");
     expect(r.allBattleActions[0].actionDetails).toMatchObject({ chosenD20: 11, secondRoll: { serverRolled: true } });
-    expect(r.allBattleActions[1].resultText).not.toContain("другий d20");
+    expect(eventTextOf(r.allBattleActions[1])).not.toContain("другий d20");
   });
 
   it("single target: an explicit client second roll is respected", () => {
     const r = run([attacker, foe("t1", [hindering])], { targetId: "t1", attackRoll: 17, disadvantageRoll: 2 });
 
     expect(hits(r)).toEqual([false]);
-    expect(r.allBattleActions[0].resultText).toContain("другий d20 = 2, обрано 2");
-    expect(r.allBattleActions[0].resultText).not.toContain("(сервер)");
+    expect(eventTextOf(r.allBattleActions[0])).toContain("другий d20 = 2, обрано 2");
+    expect(eventTextOf(r.allBattleActions[0])).not.toContain("(сервер)");
     expect(r.allBattleActions[0].actionDetails).toMatchObject({ chosenD20: 2, secondRoll: { mode: "disadvantage", value: 2, serverRolled: false } });
   });
 
@@ -108,7 +110,7 @@ describe("multi-target advantage resolution", () => {
 
       expect(losses.every((l) => l > 0)).toBe(true);
       expect(losses[1]).toBe(losses[2]);
-      expect(r.allBattleActions.filter((e) => e.actionType === "attack").slice(1).every((e) => e.resultText.includes("кубики шкоди кинув сервер"))).toBe(true);
+      expect(r.allBattleActions.filter((e) => e.actionType === "attack").slice(1).every((e) => eventTextOf(e).includes("кубики шкоди кинув сервер"))).toBe(true);
     });
   });
 
@@ -158,7 +160,7 @@ describe("multi-target advantage resolution", () => {
 
     expect(() =>
       runAttackPhase({ battle: { initiativeOrder: order, currentRound: 1, currentTurnIndex: 0 }, data: { attackerId: "a", targetIds: ["t", "x"], attackRolls: [15, 15], damageRolls: [6, 6] }, battleId: "b", userId: "u", isDM: true, rng: seq(0.5), map: testMap() }),
-    ).toThrow("Забагато цілей. Максимум: 1");
+    ).toThrow(REJECT.tooManyTargets);
   });
 
   it("a consumable advantage effect applies to the first target only and is spent", () => {
@@ -211,7 +213,7 @@ describe("crit effects on the attacker are for the next attack", () => {
   it("S3 advantage from the crit on target 1 is not used by target 2 and survives the action", () => {
     const r = volley(0.25);
 
-    expect(r.allBattleActions[0].resultText).toContain("Advantage на наступну");
+    expect(eventTextOf(r.allBattleActions[0])).toContain("Advantage на наступну");
     expect(r.allBattleActions[1].actionDetails.secondRoll).toBeUndefined();
     expect(effectsOf(r).map((e) => e.consumeOn)).toEqual(["ownAttack"]);
   });

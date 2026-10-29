@@ -2,6 +2,7 @@ import type { AbilityKey } from "@/lib/constants/abilities";
 import { ParticipantSide,type ParticipantSourceTypeValue } from "@/lib/constants/battle";
 import type { XpDifficulty } from "@/lib/utils/battle/balance/xp-budget";
 import type { BattleMapConfig } from "@/types/battle";
+import type { LogLine } from "@/types/text";
 
 export interface SetupCharacter {
   id: string;
@@ -47,7 +48,7 @@ export interface CharacterDprBreakdown {
   rangedAvg: number;
   spellDpr: number;
   nonMagicDpr: number;
-  logLines: string[];
+  logLines: LogLine[];
 }
 
 export interface EntityStats {

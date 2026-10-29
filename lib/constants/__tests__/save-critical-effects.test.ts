@@ -12,14 +12,13 @@ describe("таблиці ефектів спасків", () => {
   it.each([
     ["success", SAVE_SUCCESS_EFFECTS],
     ["fail", SAVE_FAIL_EFFECTS],
-  ] as const)("%s: id 1..N унікальні, тип збігається, flavor >= 2", (kind, table) => {
+  ] as const)("%s: id 1..N унікальні, тип збігається, flavorCount >= 2", (kind, table) => {
     expect(table.map((e) => e.id)).toEqual(table.map((_, i) => i + 1));
     expect(table).toHaveLength(6);
 
     for (const e of table) {
       expect(e.type).toBe(kind);
-      expect(e.flavor.length).toBeGreaterThanOrEqual(2);
-      expect(e.flavor.some((f) => f.includes("{attacker}") || f.includes("{target}"))).toBe(true);
+      expect(e.flavorCount).toBeGreaterThanOrEqual(2);
     }
   });
 

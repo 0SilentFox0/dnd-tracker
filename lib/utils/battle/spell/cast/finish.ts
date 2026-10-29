@@ -1,11 +1,14 @@
+import { joinLines, textRef } from "@/lib/i18n/text-ref";
 import { findParticipant, isActive, mergeParticipants } from "@/lib/utils/abilities/engine/core/participants";
 import { appendHpChanges, fire, getP, put, settleDowned } from "@/lib/utils/battle/common/action-flow";
 import { applyBalanceDamageMultiplier } from "@/lib/utils/battle/damage/balance-multiplier";
+import { lineText } from "@/lib/utils/battle/log/lines";
 import { applyMainActionUsed } from "@/lib/utils/battle/participant";
 import { diffAppliedEffects } from "@/lib/utils/battle/spell/applied-effects";
 import { actionOf, flatEffects, isDamageEffect, SPELL_ONLY_KINDS, type SpellCastState } from "@/lib/utils/battle/spell/cast/state";
 import type { CastSpellResult } from "@/lib/utils/battle/types/spell-process";
 import type { BattleParticipant, SpellGrant } from "@/types/battle";
+import type { LogLine } from "@/types/text";
 
 export function spendCastCost(state: SpellCastState, cost: { slotKey: string; usesSlot: boolean; isDMCast: boolean; isLegendaryCast?: boolean; grant?: SpellGrant }): void {
   let caster = getP(state.flow, state.caster.basicInfo.id);
@@ -108,9 +111,17 @@ export function finishSpellAction(state: SpellCastState, { before, targetsBefore
 
   const { dealt, healed, hits } = hpTotals(state, before);
 
-  const caption = [dealt > 0 ? `шкода: ${dealt}${hits.length > 1 ? ` (${hits.join(", ")})` : ""}` : "", healed > 0 ? `лікування: ${healed} HP` : ""].filter(Boolean).join(", ");
+  const parts: LogLine[] = [];
 
-  const action = actionOf(getP(flow, casterId), spell, targetsBefore, battleId, round, [`${caster.basicInfo.name} застосовує ${spell.name}${caption ? ` (${caption})` : ""}`, ...flow.messages].join(" | "));
+  if (dealt > 0) parts.push(hits.length > 1 ? textRef("battleActions.spell.captionDamageHits", { dealt, hits: hits.join(", ") }) : textRef("battleActions.spell.captionDamage", { dealt }));
+
+  if (healed > 0) parts.push(textRef("battleActions.spell.captionHeal", { healed }));
+
+  const params = { name: caster.basicInfo.name, spell: spell.name };
+
+  const head = parts.length > 0 ? textRef("battleActions.spell.castCaption", { ...params, caption: joinLines(parts, ", ") }) : textRef("battleActions.spell.cast", params);
+
+  const action = actionOf(getP(flow, casterId), spell, targetsBefore, battleId, round, lineText([head, ...flow.messages], " | "));
 
   const applied = diffAppliedEffects(before, flow.ps, targetsBefore.map((t) => t.basicInfo.id));
 
@@ -140,7 +151,7 @@ export function finishSpellAction(state: SpellCastState, { before, targetsBefore
     ...(state.chosenCastLevel !== undefined && { castLevel: state.chosenCastLevel }),
     ...(dealt > 0 && { totalDamage: dealt }),
     ...(healed > 0 && { totalHealing: healed }),
-    ...(state.power.breakdown.length > 0 && { damageBreakdown: state.power.breakdown.join("; ") }),
+    ...(state.power.breakdown.length > 0 && { damageRows: state.power.breakdown }),
     ...(state.saves.length > 0 && { savingThrows: state.saves }),
     ...(state.attacks.length > 0 && { spellAttacks: state.attacks }),
     ...(Object.keys(state.damageSteps).length > 0 && { damageSteps: state.damageSteps }),

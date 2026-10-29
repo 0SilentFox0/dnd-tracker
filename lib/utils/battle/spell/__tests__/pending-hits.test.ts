@@ -3,6 +3,7 @@ import { describe, expect, it } from "vitest";
 import { CombatStatus, ParticipantSide } from "@/lib/constants/battle";
 import { makeParticipant } from "@/lib/utils/abilities/__tests__/fixtures";
 import { EffectSchema } from "@/lib/utils/abilities/schema";
+import { textsOf } from "@/lib/utils/battle/log/__tests__/event-text";
 import { castSpell } from "@/lib/utils/battle/spell";
 import { resolvePendingHits } from "@/lib/utils/battle/spell/pending-hits";
 import { processStartOfTurn } from "@/lib/utils/battle/turn/turn-start";
@@ -50,7 +51,7 @@ describe("dealDamage.delayIfBeyond", () => {
 
     expect(pending).toHaveLength(1);
     expect(pending?.[0]).toMatchObject({ targetId: "f", atRound: 3, damageType: "slashing" });
-    expect(r.messages.join(" ")).toContain("прибуде в раунді 3");
+    expect(textsOf(r.messages).join(" ")).toContain("прибуде в раунді 3");
   });
 
   it("without a map the hit is immediate", () => {
@@ -102,7 +103,7 @@ describe("resolvePendingHits", () => {
 
     expect(hp(r.participants)).toBe(0);
     expect(r.participants.find((p) => p.basicInfo.id === "c")?.battleData.pendingHits).toBeUndefined();
-    expect(r.messages.join(" ")).toContain("недоступна");
+    expect(textsOf(r.messages).join(" ")).toContain("недоступна");
   });
 
   it("start of the caster's turn delivers the hit, even if the caster is down", () => {
@@ -113,7 +114,7 @@ describe("resolvePendingHits", () => {
     const r = processStartOfTurn(casterP, 3, ps, rng, map);
 
     expect(hp(r.participants)).toBe(176);
-    expect(r.damageMessages.join(" ")).toContain("влучає");
+    expect(textsOf(r.damageMessages).join(" ")).toContain("влучає");
     expect(r.participant.battleData.pendingHits).toBeUndefined();
 
     const downed = { ...casterP, combatStats: { ...casterP.combatStats, currentHp: 0, status: CombatStatus.DEAD } };

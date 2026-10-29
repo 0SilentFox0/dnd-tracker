@@ -1,24 +1,29 @@
 import type { DamageCalculationResult } from "../types/damage-calculations";
+import { ruleRow, stepRow, totalRow } from "./rows";
 
+import type { AbilityKey } from "@/lib/constants/abilities";
 import { AttackType, BATTLE_CONSTANTS } from "@/lib/constants/battle";
+import { textRef } from "@/lib/i18n/text-ref";
 import { collectModifiers, type ModifierEntry } from "@/lib/utils/abilities/engine/core/collect-modifiers";
 import { withSelf } from "@/lib/utils/abilities/engine/core/participants";
 import type { StaticEffect } from "@/lib/utils/abilities/schema";
 import { attackKindOf } from "@/lib/utils/battle/common/attack-kind";
+import { abilityRef } from "@/lib/utils/battle/common/terms";
 import { signed } from "@/lib/utils/common/format";
-import type { BattleParticipant, DamageStep } from "@/types/battle";
+import type { BattleParticipant, DamageRow, DamageStep } from "@/types/battle";
+import type { TextRef } from "@/types/text";
 
-const BONUS_PREFIX: Record<ModifierEntry["sourceType"], string> = {
-  skill: "Бонус зі скілів",
-  race: "Расовий бонус",
-  class: "Бонус класу",
-  feat: "Бонус риси",
-  artifact: "Бонус артефакту",
-  artifactSet: "Бонус сету",
-  unit: "Бонус істоти",
-  character: "Бонус персонажа",
-  effect: "Бонус ефекту",
-  action: "Бонус дії",
+const BONUS_PREFIX: Record<ModifierEntry["sourceType"], TextRef> = {
+  skill: textRef("battleLog.damage.sources.skill"),
+  race: textRef("battleLog.damage.sources.race"),
+  class: textRef("battleLog.damage.sources.class"),
+  feat: textRef("battleLog.damage.sources.feat"),
+  artifact: textRef("battleLog.damage.sources.artifact"),
+  artifactSet: textRef("battleLog.damage.sources.artifactSet"),
+  unit: textRef("battleLog.damage.sources.unit"),
+  character: textRef("battleLog.damage.sources.character"),
+  effect: textRef("battleLog.damage.sources.effect"),
+  action: textRef("battleLog.damage.sources.action"),
 };
 
 export function calculateDamageWithModifiersImpl(
@@ -34,11 +39,11 @@ export function calculateDamageWithModifiersImpl(
     heroDiceNotation?: string;
     weaponDiceNotation?: string;
     actionModifiers?: StaticEffect[];
-    statLabel?: string;
+    statKey?: AbilityKey;
     targetId?: string;
   },
 ): DamageCalculationResult {
-  const breakdown: string[] = [];
+  const breakdown: DamageRow[] = [];
 
   const heroLevelPart = context?.heroLevelPart ?? 0;
 
@@ -46,33 +51,31 @@ export function calculateDamageWithModifiersImpl(
 
   const heroDiceNotation = context?.heroDiceNotation;
 
-  const statLabel = context?.statLabel ?? (attackType === AttackType.MELEE ? "Сила" : "Спритність");
+  const statLabel = abilityRef(context?.statKey ?? (attackType === AttackType.MELEE ? "strength" : "dexterity"));
 
   const baseWithStat = Math.max(
     BATTLE_CONSTANTS.MIN_DAMAGE,
     baseDamage + heroLevelPart + heroDicePart + statModifier,
   );
 
-  breakdown.push(`Сума кубиків: ${baseDamage}`);
+  breakdown.push(stepRow(textRef("battleLog.damage.rows.dice"), baseDamage));
+
+  breakdown.push(stepRow(statLabel, signed(statModifier)));
 
   if (heroLevelPart > 0 || heroDicePart > 0) {
-    breakdown.push(`+ бонус ${statModifier} (${statLabel})`);
-
     const levelAndDice = heroLevelPart + heroDicePart;
 
     const levelLabel =
       heroDicePart > 0 && heroDiceNotation
-        ? `рівень + кубики за рівнем (${heroDiceNotation})`
+        ? textRef("battleLog.damage.rows.levelDiceNotation", { dice: heroDiceNotation })
         : heroDicePart > 0
-          ? "рівень + кубики за рівнем"
-          : "рівень";
+          ? textRef("battleLog.damage.rows.levelDice")
+          : textRef("battleLog.damage.rows.level");
 
-    breakdown.push(`+ ${levelAndDice} (${levelLabel})`);
-    breakdown.push(`= ${baseWithStat} (база)`);
-  } else {
-    breakdown.push(`+ бонус ${statModifier} (${statLabel})`);
-    breakdown.push(`= ${baseWithStat} (база)`);
+    breakdown.push(stepRow(levelLabel, `+${levelAndDice}`));
   }
+
+  breakdown.push(totalRow(textRef("battleLog.damage.rows.base"), baseWithStat));
 
   const kind = attackKindOf(attackType);
 
@@ -86,9 +89,9 @@ export function calculateDamageWithModifiersImpl(
   for (const e of mods.entries) {
     const prefix = BONUS_PREFIX[e.sourceType];
 
-    if (e.percent) breakdown.push(`${prefix}: ${signed(e.percent)}% (${e.label})`);
+    if (e.percent) breakdown.push(stepRow(e.label, `${signed(e.percent)}%`, prefix));
 
-    if (e.flat) breakdown.push(`Flat ${prefix.toLowerCase()}: ${signed(e.flat)} (${e.label})`);
+    if (e.flat) breakdown.push(stepRow(e.label, signed(e.flat), prefix));
   }
 
   const isArtifact = (e: ModifierEntry) => e.sourceType === "artifact" || e.sourceType === "artifactSet";
@@ -102,10 +105,10 @@ export function calculateDamageWithModifiersImpl(
 
   const totalDamage = Math.max(0, Math.floor(totalBeforeFloor));
 
-  breakdown.push(`──────────`);
-  breakdown.push(`Сума ${totalBeforeFloor.toFixed(1)} = ${totalDamage} шкоди`);
+  breakdown.push(ruleRow());
+  breakdown.push(totalRow(textRef("battleLog.damage.rows.sum"), totalDamage));
 
-  const steps: DamageStep[] = [{ label: "Кубики", side: "attacker", kind: "dice", value: baseDamage, after: baseDamage }];
+  const steps: DamageStep[] = [{ label: textRef("battleLog.damage.steps.dice"), side: "attacker", kind: "dice", value: baseDamage, after: baseDamage }];
 
   let running = baseDamage;
 
@@ -116,7 +119,7 @@ export function calculateDamageWithModifiersImpl(
 
   if (heroLevelPart + heroDicePart > 0) {
     running += heroLevelPart + heroDicePart;
-    steps.push({ label: "Рівень героя", side: "attacker", kind: "flat", value: heroLevelPart + heroDicePart, after: running });
+    steps.push({ label: textRef("battleLog.damage.steps.heroLevel"), side: "attacker", kind: "flat", value: heroLevelPart + heroDicePart, after: running });
   }
 
   let percentSoFar = 0;

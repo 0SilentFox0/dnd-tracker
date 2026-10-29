@@ -68,7 +68,7 @@ describe("convertLegacySkill", () => {
 
     expect(r.abilities[0].trigger).toEqual({ event: "attack", phase: "before", role: "target" });
     expect(r.abilities[0].effects).toEqual([{ kind: "modifyStat", stat: "armor", flat: 2 }]);
-    expect(r.issues.some((i) => i.message.includes("beforeEnemyAttack"))).toBe(true);
+    expect(r.issues.some((i) => JSON.stringify(i.message).includes("beforeEnemyAttack"))).toBe(true);
   });
 
   it("complex allyHP <= 0.15 → turnStart + hpBelow 15", () => {
@@ -129,7 +129,7 @@ describe("convertLegacySkill", () => {
     expect(r.abilities[0].effects).toEqual(
       expect.arrayContaining([{ kind: "damageBonus", filter: { kind: "melee" }, percent: 10 }, { kind: "note", text: "weird_stat: 3" }]),
     );
-    expect(r.issues.some((i) => i.message.includes("weird_stat"))).toBe(true);
+    expect(r.issues.some((i) => JSON.stringify(i.message).includes("weird_stat"))).toBe(true);
   });
 
   it("школа магії зі skill.spellGroupId", () => {
@@ -165,6 +165,6 @@ describe("convertLegacySkill", () => {
         { kind: "modifyStat", stat: "maxTargets", flat: 2 },
       ],
     });
-    expect(r.issues.some((i) => i.message.includes("цілей"))).toBe(true);
+    expect(r.issues.some((i) => JSON.stringify(i.message).includes("цілей"))).toBe(true);
   });
 });

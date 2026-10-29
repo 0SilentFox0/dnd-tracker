@@ -55,12 +55,12 @@ describe("resizeImageToBlob", () => {
   it("помилка, коли toBlob повертає null", async () => {
     stub({ drawImage: () => {} }, (cb) => cb(null));
 
-    await expect(resizeImageToBlob(new File([""], "a.png"), 50)).rejects.toThrow("Не вдалося стиснути картинку");
+    await expect(resizeImageToBlob(new File([""], "a.png"), 50)).rejects.toThrow("validation.image.compressFailed");
   });
 
   it("помилка, коли canvas не дає контекст", async () => {
     stub(null, (cb) => cb(null));
 
-    await expect(resizeImageToBlob(new File([""], "a.png"), 50)).rejects.toThrow("завелика");
+    await expect(resizeImageToBlob(new File([""], "a.png"), 50)).rejects.toThrow("validation.image.tooLarge");
   });
 });

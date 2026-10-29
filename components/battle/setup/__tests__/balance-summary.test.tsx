@@ -25,7 +25,7 @@ describe("BalanceSummary", () => {
   it("порожній склад: підказка додати учасників", () => {
     render(<BalanceSummary fair={null} />);
 
-    expect(screen.getByText(/Додайте героїв/)).toBeTruthy();
+    expect(screen.getByText("battleSetup.balance.empty")).toBeTruthy();
   });
 
   it("зміна складу перераховує підсумки та підказки", () => {
@@ -33,16 +33,16 @@ describe("BalanceSummary", () => {
 
     const view = render(<BalanceSummary fair={result.current} />);
 
-    expect(screen.getByTestId("balance-verdict").textContent).toContain("рівний бій");
-    expect(screen.getByText(/Сила героїв/)).toBeTruthy();
+    expect(screen.getByTestId("balance-verdict").textContent).toContain("battleSetup.balance.even");
+    expect(screen.getByText("battleSetup.balance.heroPower")).toBeTruthy();
 
     act(() => rerender({ list: [...heroes, ...enemies(1)] }));
     view.rerender(<BalanceSummary fair={result.current} />);
-    expect(screen.getByTestId("balance-verdict").textContent).toMatch(/Слабко: додайте/);
+    expect(screen.getByTestId("balance-verdict").textContent).toMatch(/^battleSetup\.balance\.hintWeak/);
 
     act(() => rerender({ list: [...heroes, ...enemies(12)] }));
     view.rerender(<BalanceSummary fair={result.current} />);
-    expect(screen.getByTestId("balance-verdict").textContent).toMatch(/Забагато: приберіть/);
+    expect(screen.getByTestId("balance-verdict").textContent).toMatch(/^battleSetup\.balance\.hintExcess/);
   });
 
   it("герої без ворогів: стан «порожньо»", () => {
@@ -50,7 +50,7 @@ describe("BalanceSummary", () => {
 
     render(<BalanceSummary fair={result.current} />);
 
-    expect(screen.getByText(/Додайте героїв/)).toBeTruthy();
+    expect(screen.getByText("battleSetup.balance.empty")).toBeTruthy();
   });
 
   it("NPC-вороги показані окремо й входять у силу ворогів", () => {

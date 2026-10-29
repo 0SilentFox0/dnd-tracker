@@ -1,3 +1,4 @@
+import { actionReason } from "./reasons";
 import { CORE_ACTION_REGISTRY, type CoreActionDef, type CoreActionKey } from "./registry";
 
 import { findFlags } from "@/lib/utils/abilities/engine/core/collect-modifiers";
@@ -7,10 +8,11 @@ import { hasCondition } from "@/lib/utils/battle/conditions/query";
 import { bothOnMap, isAdjacent } from "@/lib/utils/battle/grid/occupancy";
 import { baseMovement, remainingMovement } from "@/lib/utils/battle/grid/path";
 import type { BattleMapConfig, BattleParticipant } from "@/types/battle";
+import type { LogLine } from "@/types/text";
 
 export interface CoreActionAvailability {
   ok: boolean;
-  reason?: string;
+  reason?: LogLine;
 }
 
 const STAND_UP_COST_DIVISOR = 2;
@@ -41,24 +43,24 @@ export function coreActionTargets(key: CoreActionKey, actor: BattleParticipant, 
   return participants.filter((p) => p.basicInfo.id !== actor.basicInfo.id && !p.battleData.reserved && sideOk(p) && (!bothOnMap(map, actor, p) || isAdjacent(actor, p)));
 }
 
-export function validateCoreAction(key: CoreActionKey, actor: BattleParticipant, participants: BattleParticipant[], map: BattleMapConfig | null | undefined, targetId?: string): string | null {
+export function validateCoreAction(key: CoreActionKey, actor: BattleParticipant, participants: BattleParticipant[], map: BattleMapConfig | null | undefined, targetId?: string): LogLine | null {
   const { target } = CORE_ACTION_REGISTRY[key];
 
   if (key === "standUp") {
-    if (!hasCondition(actor, "prone")) return "Ви не лежите";
+    if (!hasCondition(actor, "prone")) return actionReason("notProne");
 
-    if (baseMovement(actor) <= 0) return "Не можна встати: швидкість 0";
+    if (baseMovement(actor) <= 0) return actionReason("standSpeedZero");
 
-    if (!canStandUp(actor)) return "Недостатньо руху";
+    if (!canStandUp(actor)) return actionReason("standNoMovement");
   }
 
-  if (key === "escape" && !hasCondition(actor, "grappled")) return "Ви не схоплені";
+  if (key === "escape" && !hasCondition(actor, "grappled")) return actionReason("notGrappled");
 
   if (target === "none") return null;
 
   const targets = coreActionTargets(key, actor, participants, map);
 
-  if (targetId === undefined ? !targets.length : !targets.some((t) => t.basicInfo.id === targetId)) return target === "allyAdjacent" ? "Немає суміжного союзника" : "Немає суміжного ворога";
+  if (targetId === undefined ? !targets.length : !targets.some((t) => t.basicInfo.id === targetId)) return actionReason(target === "allyAdjacent" ? "noAdjacentAlly" : "noAdjacentEnemy");
 
   return null;
 }
@@ -66,9 +68,9 @@ export function validateCoreAction(key: CoreActionKey, actor: BattleParticipant,
 export function coreActionAvailability(key: CoreActionKey, actor: BattleParticipant, participants: BattleParticipant[], map: BattleMapConfig | null | undefined): CoreActionAvailability {
   const cost = coreActionCost(key, actor, participants);
 
-  if (cost === "bonusAction" && actor.actionFlags.hasUsedBonusAction) return { ok: false, reason: "Бонусну дію вже використано" };
+  if (cost === "bonusAction" && actor.actionFlags.hasUsedBonusAction) return { ok: false, reason: actionReason("bonusUsed") };
 
-  if (cost === "action" && actor.actionFlags.hasUsedAction && !(isAttackAction(key) && canAttackFromPool(actor))) return { ok: false, reason: "Дію вже витрачено" };
+  if (cost === "action" && actor.actionFlags.hasUsedAction && !(isAttackAction(key) && canAttackFromPool(actor))) return { ok: false, reason: actionReason("actionUsed") };
 
   const reason = validateCoreAction(key, actor, participants, map);
 

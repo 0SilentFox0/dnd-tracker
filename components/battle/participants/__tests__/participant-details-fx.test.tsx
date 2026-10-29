@@ -1,6 +1,6 @@
 // @vitest-environment happy-dom
 import type { ReactNode } from "react";
-import { cleanup, fireEvent, render, screen } from "@testing-library/react";
+import { cleanup, fireEvent, screen } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
 vi.mock("@/components/hud/fonts", () => ({ hudFontClassName: "" }));
@@ -14,10 +14,14 @@ vi.mock("@/lib/hooks/battle/useFxImpacts", () => ({
 import { ParticipantDetails } from "@/components/battle/participants/ParticipantDetails";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { ParticipantSide } from "@/lib/constants/battle";
-import { BattleSceneDataContext, type BattleSceneValue } from "@/lib/hooks/battle";
+import { BattleSceneDataContext } from "@/lib/hooks/battle";
+import type { BattleSceneValue } from "@/lib/hooks/battle/types";
+import { render } from "@/lib/i18n/test/render-uk";
 import { createMockParticipant } from "@/lib/utils/battle/__tests__/fixtures/mock-participant";
 import { buildDisplayEffects } from "@/lib/utils/battle/view";
 import type { BattleScene } from "@/types/api";
+
+vi.unmock("next-intl");
 
 const p = (id: string, hp: number) => {
   const b = createMockParticipant();

@@ -1,3 +1,4 @@
+import { textRef } from "@/lib/i18n/text-ref";
 import { findParticipant, replaceParticipant } from "@/lib/utils/abilities/engine/core/participants";
 import { upsertTimedEffect } from "@/lib/utils/abilities/engine/effects/timed-effects";
 import { createBattleParticipantFromUnit } from "@/lib/utils/battle/participant";
@@ -7,6 +8,7 @@ import type { TransformRequest } from "@/lib/utils/battle/transform/types";
 import type { UnitFromPrisma } from "@/lib/utils/battle/types/participant";
 import type { Ruleset } from "@/lib/utils/rules";
 import type { BattleParticipant, TransformState } from "@/types/battle";
+import type { LogLine } from "@/types/text";
 
 function savedForm(p: BattleParticipant): TransformState["saved"] {
   const { combatStats: c, abilities: a, battleData: b } = p;
@@ -70,12 +72,12 @@ export async function applyTransforms(
   order: BattleParticipant[],
   requests: TransformRequest[],
   opts: { campaignId: string; battleId: string; rules?: Ruleset; deps: SummonDeps; round: number },
-): Promise<{ order: BattleParticipant[]; messages: string[] }> {
+): Promise<{ order: BattleParticipant[]; messages: LogLine[] }> {
   if (requests.length === 0) return { order, messages: [] };
 
   const pool = await opts.deps.loadPool(opts.campaignId);
 
-  const messages: string[] = [];
+  const messages: LogLine[] = [];
 
   let next = order;
 
@@ -85,14 +87,14 @@ export async function applyTransforms(
     const unit = pool.units.find((u) => u.id === req.unitId);
 
     if (!target || !unit) {
-      messages.push(unit ? "ціль перетворення не знайдено" : "форму перетворення не знайдено");
+      messages.push(textRef(unit ? "battleLog.transform.targetMissing" : "battleLog.transform.formMissing"));
       continue;
     }
 
     const form = await createBattleParticipantFromUnit(unit as UnitFromPrisma, opts.battleId, target.basicInfo.side, 1, {}, opts.rules);
 
     next = replaceParticipant(next, intoForm(target, form, req, opts.round));
-    messages.push(`🐾 ${target.basicInfo.name} перетворюється: ${unit.name} (${form.combatStats.maxHp} HP, КЗ ${form.combatStats.armorClass})`);
+    messages.push(textRef("battleLog.transform.applied", { name: target.basicInfo.name, unit: unit.name, hp: form.combatStats.maxHp, ac: form.combatStats.armorClass }));
   }
 
   return { order: next, messages };

@@ -1,20 +1,24 @@
+import { actionReason } from "./reasons";
+
 import { API_ERRORS } from "@/lib/constants/api-errors";
+import { textRef } from "@/lib/i18n/text-ref";
 import { isActive } from "@/lib/utils/abilities/engine/core/participants";
 import { hasCondition } from "@/lib/utils/battle/conditions/query";
 import type { BattleParticipant } from "@/types/battle";
+import type { LogLine } from "@/types/text";
 
 export const lairAbilities = (p: BattleParticipant) => p.battleData.resolvedAbilities.filter((a) => a.limits?.lair);
 
-export function lairBlocker(p: BattleParticipant, round: number, key: string): string | null {
+export function lairBlocker(p: BattleParticipant, round: number, key: string): LogLine | null {
   const lair = p.battleData.lair;
 
-  if (!lair?.active) return API_ERRORS.LAIR_NOT_ACTIVE;
+  if (!lair?.active) return textRef(API_ERRORS.LAIR_NOT_ACTIVE);
 
-  if (!isActive(p) || hasCondition(p, "incapacitated") || p.battleData.reserved) return "Недієздатний учасник не може діяти";
+  if (!isActive(p) || hasCondition(p, "incapacitated") || p.battleData.reserved) return actionReason("cannotAct");
 
-  if (lair.usedRound === round) return API_ERRORS.LAIR_USED;
+  if (lair.usedRound === round) return textRef(API_ERRORS.LAIR_USED);
 
-  return lair.usedRound === round - 1 && lair.lastKey === key ? API_ERRORS.LAIR_REPEAT : null;
+  return lair.usedRound === round - 1 && lair.lastKey === key ? textRef(API_ERRORS.LAIR_REPEAT) : null;
 }
 
 export function spendLair(p: BattleParticipant, round: number, key: string): BattleParticipant {

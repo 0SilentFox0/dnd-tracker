@@ -3,10 +3,12 @@ import { Play } from "lucide-react";
 
 import type { SpellCardData } from "./types";
 
+import { useAbilityText } from "@/components/abilities/use-ability-text";
 import { ARCHETYPE_LABEL, AURA_LABEL, ELEMENT_LABEL, FRAME_LABEL } from "@/components/battle/fx/labels";
 import { PALETTE } from "@/components/battle/fx/runtime/palette";
 import { EntityIcon } from "@/components/common/EntityIcon";
 import { HudCard, HudPill } from "@/components/hud/page";
+import { useText } from "@/lib/i18n/use-text";
 
 function FxField({ label, children }: { label: string; children: ReactNode }) {
   return (
@@ -20,7 +22,11 @@ function FxField({ label, children }: { label: string; children: ReactNode }) {
 const list = (items: string[]) => (items.length ? items.join(", ") : "—");
 
 export function SpellCard({ spell, onPlay }: { spell: SpellCardData; onPlay: (spell: SpellCardData) => void }) {
+  const text = useText();
+
   const { spec } = spell;
+
+  const effects = useAbilityText().lines(spell.effects);
 
   return (
     <HudCard accent={spec ? PALETTE[spec.element].core : undefined}>
@@ -31,13 +37,13 @@ export function SpellCard({ spell, onPlay }: { spell: SpellCardData; onPlay: (sp
             <div className="min-w-0">
               <h3 className="hud-sc font-bold text-hud-ink">{spell.name}</h3>
               <p className="text-[11px] text-hud-muted">
-                {spell.level} рівень · {spell.school} · {spell.targeting}
+                level {spell.level} · {spell.school} · {text(spell.targeting)}
               </p>
             </div>
             <button
               type="button"
               onClick={() => onPlay(spell)}
-              aria-label={`Програти: ${spell.name}`}
+              aria-label={`Play: ${spell.name}`}
               className="flex size-8 shrink-0 items-center justify-center rounded-full text-[#2a1d05] [background:linear-gradient(135deg,#8a6414,#e6c25a_55%,#8a6414)]"
             >
               <Play className="size-3.5" />
@@ -45,15 +51,15 @@ export function SpellCard({ spell, onPlay }: { spell: SpellCardData; onPlay: (sp
           </div>
           <p className="text-sm text-hud-bone">{spell.description}</p>
           <div className="flex flex-wrap gap-1">
-            {spell.effects.map((e) => (
+            {effects.map((e) => (
               <HudPill key={e} tone="muted">
                 {e}
               </HudPill>
             ))}
           </div>
           <dl className="grid grid-cols-2 gap-2 border-t border-white/[.08] pt-2 sm:grid-cols-4">
-            <FxField label="Анімація">{spec ? ARCHETYPE_LABEL[spec.archetype] : "—"}</FxField>
-            <FxField label="Стихія">
+            <FxField label="Animation">{spec ? ARCHETYPE_LABEL[spec.archetype] : "—"}</FxField>
+            <FxField label="Element">
               {spec ? (
                 <>
                   <span aria-hidden className="size-2.5 shrink-0 rounded-full" style={{ background: PALETTE[spec.element].core }} />
@@ -63,10 +69,10 @@ export function SpellCard({ spell, onPlay }: { spell: SpellCardData; onPlay: (sp
                 "—"
               )}
             </FxField>
-            <FxField label="Рамка влучання">{list(spell.frames.map((f) => FRAME_LABEL[f]))}</FxField>
-            <FxField label="Аура">{list(spell.auras.map((a) => AURA_LABEL[a]))}</FxField>
+            <FxField label="Hit frame">{list(spell.frames.map((f) => FRAME_LABEL[f]))}</FxField>
+            <FxField label="Aura">{list(spell.auras.map((a) => AURA_LABEL[a]))}</FxField>
           </dl>
-          {spell.error && <p className="text-xs text-[#ff8a7a]">Не вдалося обчислити: {spell.error}</p>}
+          {spell.error && <p className="text-xs text-[#ff8a7a]">Could not compute: {spell.error}</p>}
         </div>
       </article>
     </HudCard>

@@ -1,4 +1,3 @@
-/* eslint-disable no-restricted-syntax -- derived content written to the DB stays Ukrainian (spec part5, decision 5) */
 import { renderEntries } from "../entries";
 import { stableJson } from "../identity";
 import type { JsonRecord } from "../parse";
@@ -21,6 +20,7 @@ export const num = (v: unknown): number | undefined => typeof v === "number" && 
 export const ABILITIES: Readonly<Record<string, string>> = { str: "strength", dex: "dexterity", con: "constitution", int: "intelligence", wis: "wisdom", cha: "charisma" };
 export const SAVE_HALF = /\bhalf as much damage\b/i;
 export const SKILLS = Object.fromEntries(DND_SKILLS.map((s) => [s.toLowerCase(), s]));
+export const titled = (v: string): string => v.split("|")[0].replace(/([a-z])([A-Z])/g, "$1 $2").trim();
 export const skillName = (s: string): string | undefined => SKILLS[s.replace(/\s/g, "").toLowerCase()];
 
 export function description(row: JsonRecord, ctx: AdapterContext): string {
@@ -72,7 +72,7 @@ export function skills(raw: unknown, ctx: AdapterContext): { fixed: string[]; ch
 
     const from = row.any !== undefined ? [...DND_SKILLS] : array(choose.from).flatMap((s) => typeof s === "string" && skillName(s) ? [skillName(s)] : []);
 
-    if (count && from.length >= count) choices.push({ id: `import-skills-${i}`, label: "Навички", kind: "skill", count, skills: from });
+    if (count && from.length >= count) choices.push({ id: `import-skills-${i}`, label: ctx.t("derived.choice.skills"), kind: "skill", count, skills: from });
   }
 
   return { fixed: [...new Set(fixed)], choices };
@@ -95,7 +95,7 @@ export function abilityChoices(raw: unknown, ctx: AdapterContext): JsonRecord[] 
 
   const weights = array(weighted.weights);
 
-  if (from.length >= 2 && new Set(from).size === from.length && weights.length === 2 && [...weights].sort().join() === "1,2") return [{ id: "ability-scores", label: "Характеристики", kind: "abilityScore", count: 3, points: 3, abilities: from, maxPerAbility: 2, max: 20 }];
+  if (from.length >= 2 && new Set(from).size === from.length && weights.length === 2 && [...weights].sort().join() === "1,2") return [{ id: "ability-scores", label: ctx.t("derived.choice.abilityScores"), kind: "abilityScore", count: 3, points: 3, abilities: from, maxPerAbility: 2, max: 20 }];
 
   const choose = object(row.choose);
 
@@ -105,7 +105,7 @@ export function abilityChoices(raw: unknown, ctx: AdapterContext): JsonRecord[] 
 
   const count = num(choose.count) ?? 1;
 
-  if (Object.keys(row).length === 1 && pool.length > 0 && pool.length === array(choose.from).length && new Set(pool).size === pool.length && Number.isInteger(amount) && Number.isInteger(count) && amount >= 1 && count >= 1 && amount * count <= 4) return [{ id: "ability-scores", label: "Характеристики", kind: "abilityScore", count: 1, points: amount * count, abilities: pool, maxPerAbility: amount, max: 20 }];
+  if (Object.keys(row).length === 1 && pool.length > 0 && pool.length === array(choose.from).length && new Set(pool).size === pool.length && Number.isInteger(amount) && Number.isInteger(count) && amount >= 1 && count >= 1 && amount * count <= 4) return [{ id: "ability-scores", label: ctx.t("derived.choice.abilityScores"), kind: "abilityScore", count: 1, points: amount * count, abilities: pool, maxPerAbility: amount, max: 20 }];
 
   const fixed = Object.entries(row).filter(([k, v]) => ABILITIES[k] && typeof v === "number" && Number.isInteger(v) && v > 0 && v <= 3);
 

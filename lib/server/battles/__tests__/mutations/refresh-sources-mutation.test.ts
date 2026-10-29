@@ -5,6 +5,7 @@ import { context, participant } from "./fixtures";
 import { ParticipantSide } from "@/lib/constants/battle";
 import { createRefreshSourcesMutation } from "@/lib/server/battles/mutations/refresh-sources/refresh-sources-mutation";
 import { resolved } from "@/lib/utils/abilities/__tests__/fixtures";
+import { eventTextOf } from "@/lib/utils/battle/log/__tests__/event-text";
 import { toReserve } from "@/lib/utils/battle/participant/reserve";
 
 const fresh = (id: string) => {
@@ -40,7 +41,7 @@ describe("refresh-sources mutation", () => {
     expect(out.participants.every((p) => p.battleData.resolvedAbilities[0]?.source.id === "fresh")).toBe(true);
     expect(out.pending[0].battleData.reserved).toBe(true);
     expect(out.pending[0].battleData.resolvedAbilities[0]?.source.id).toBe("fresh");
-    expect(out.events[0].resultText).toBe("Оновлено з бібліотеки: 4 учасників");
+    expect(eventTextOf(out.events[0])).toBe("Оновлено з бібліотеки: 4 учасників");
   });
 
   it("skips missing sources, extra-turn slots, summons and other campaigns", async () => {
@@ -58,7 +59,7 @@ describe("refresh-sources mutation", () => {
 
     const out = await createRefreshSourcesMutation(d)(context({ participants: [hero, missing, foreign, slot, summon] }));
 
-    expect(out.events[0].resultText).toBe("Оновлено з бібліотеки: 1 учасників");
+    expect(eventTextOf(out.events[0])).toBe("Оновлено з бібліотеки: 1 учасників");
     expect(out.participants.map((p) => p.basicInfo.id)).toEqual(["hero", "m", "f", "s", "sum"]);
     expect(out.participants[1]).toBe(missing);
   });

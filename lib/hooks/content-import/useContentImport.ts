@@ -4,8 +4,9 @@ import { useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 
 import { contentImportKeys, importInvalidateKeys } from "./keys";
+import { type ImportPart, postChunks } from "./post-chunks";
 
-import { contentExampleUrl, getImportAiAvailability, importContentRows, suggestImportMapping } from "@/lib/api/content-import";
+import { contentExampleUrl, getImportAiAvailability, suggestImportMapping } from "@/lib/api/content-import";
 import { useTranslator } from "@/lib/i18n/use-translator";
 import { downloadText } from "@/lib/utils/common/download-text";
 import { errorMessage } from "@/lib/utils/common/error-message";
@@ -15,8 +16,6 @@ import { aiSample, loadStoredMapping, mergeReports, readImportFile, reportToCsv,
 import type { ImportKind, ImportMapping, ImportMode, ImportRecord, ImportReport, ParsedTable } from "@/types/content-import";
 
 export type ImportStep = "file" | "columns" | "preview" | "result";
-
-type Part = { offset: number; report: ImportReport };
 
 export function useContentImport(campaignId: string, kind: ImportKind) {
   const t = useTranslator();
@@ -53,16 +52,6 @@ export function useContentImport(campaignId: string, kind: ImportKind) {
 
   const records = (table: ParsedTable): ImportRecord[] => table.rows.map((row) => applyMapping(row, mapping, spec.fields).value);
 
-  async function postChunks(chunks: ImportRecord[][], body: { mode: ImportMode; dryRun: boolean }, parts: Part[], onPart?: (done: number) => void) {
-    let offset = 0;
-
-    for (const rows of chunks) {
-      parts.push({ offset, report: await importContentRows(campaignId, kind, { rows, ...body }) });
-      offset += rows.length;
-      onPart?.(parts.length);
-    }
-  }
-
   async function selectFile(next: File) {
     setError(null);
 
@@ -95,9 +84,9 @@ export function useContentImport(campaignId: string, kind: ImportKind) {
     try {
       saveStoredMapping(kind, table.headers, mapping);
 
-      const parts: Part[] = [];
+      const parts: ImportPart[] = [];
 
-      await postChunks(chunkRows(records(table), IMPORT_LIMITS.rowsPerRequest, IMPORT_LIMITS.chunkBytes), { mode: nextMode, dryRun: true }, parts);
+      await postChunks({ campaignId, kind }, chunkRows(records(table), IMPORT_LIMITS.rowsPerRequest, IMPORT_LIMITS.chunkBytes), { mode: nextMode, dryRun: true }, parts);
 
       setPreview(mergeReports(parts, true));
       setStep("preview");
@@ -115,14 +104,14 @@ export function useContentImport(campaignId: string, kind: ImportKind) {
 
     const chunks = chunkRows(records(table), IMPORT_LIMITS.writeChunkRows, IMPORT_LIMITS.chunkBytes);
 
-    const parts: Part[] = [];
+    const parts: ImportPart[] = [];
 
     setBusy(true);
     setError(null);
     setProgress({ done: 0, total: chunks.length });
 
     try {
-      await postChunks(chunks, { mode, dryRun: false }, parts, (done) => setProgress({ done, total: chunks.length }));
+      await postChunks({ campaignId, kind }, chunks, { mode, dryRun: false }, parts, (done) => setProgress({ done, total: chunks.length }));
     } catch (e) {
       setError(t("contentImport.errors.importInterrupted", { reason: errorMessage(e, t("contentImport.errors.importFailed")), done: parts.length, total: chunks.length }));
     }

@@ -1,33 +1,26 @@
 "use client";
 
-import { useEffect, useEffectEvent, useMemo, useReducer } from "react";
+import { useMemo, useReducer } from "react";
 
-import { useModeView } from "./modes/useModeView";
+import { useAttackSubmit } from "./useAttackSubmit";
+import { useAttackTargets } from "./useAttackTargets";
 import { useBattleScene } from "./useBattleScene";
-import { CRIT_CANCELLED, useCritPause } from "./useCritPause";
 
 import { AttackType } from "@/lib/constants/battle";
 import { findFlags } from "@/lib/utils/abilities/engine/core/collect-modifiers";
-import { isAirborne, isDying, withSelf } from "@/lib/utils/abilities/engine/core/participants";
+import { withSelf } from "@/lib/utils/abilities/engine/core/participants";
 import type { CunningStrikeEffect } from "@/lib/utils/abilities/schema";
 import { attackCounter } from "@/lib/utils/battle/attack/attacks-left";
-import { predictAttack } from "@/lib/utils/battle/attack/bonus";
 import { critDoublesDice } from "@/lib/utils/battle/attack/crit-dice";
-import { critThresholdOf } from "@/lib/utils/battle/attack/crit-threshold";
 import { CUNNING_STRIKE_LABELS, cunningStrikeOffer, toggleCunningStrike } from "@/lib/utils/battle/attack/cunning-strike";
 import { canUseInspiration } from "@/lib/utils/battle/attack/inspiration";
 import { attackMaxTargets } from "@/lib/utils/battle/attack/max-targets";
 import { attackKindOf } from "@/lib/utils/battle/common/attack-kind";
-import { resolveAttackRoll } from "@/lib/utils/battle/common/attack-roll-helpers";
-import { computeDamageBreakdown } from "@/lib/utils/battle/damage";
 import { damageDiceSlots } from "@/lib/utils/battle/damage/hero-damage";
-import { obstacleStep } from "@/lib/utils/battle/damage/obstacle";
-import { attackFlow, type AttackMode, type AttackOutcomeSummary, attackPayload, effectiveD20, forcedModeOf, initialAttackFlow, type RollOutcome, strikeMode } from "@/lib/utils/battle/flows";
-import { enemiesInReach, lineOfFire } from "@/lib/utils/battle/grid";
-import { isUp } from "@/lib/utils/battle/participant/state";
-import { canSeeExactStats, critOutcome, formatKnownArmorClass, hiddenTargetSteps, resolveKnownArmorClass, retaliationOutcome, volleyResults, weaponPreview } from "@/lib/utils/battle/view";
+import { attackFlow, type AttackMode, forcedFor, initialAttackFlow, type RollOutcome, rollOutcomeOf, strikeMode } from "@/lib/utils/battle/flows";
+import { enemiesInReach } from "@/lib/utils/battle/grid";
+import { canSeeExactStats, strikeDamageSteps, weaponPreview } from "@/lib/utils/battle/view";
 import { cryptoRandom, rollDie } from "@/lib/utils/common/dice";
-import { DEFAULT_RULES } from "@/lib/utils/rules";
 import type { BattleAttack, BattleParticipant, DamageStep } from "@/types/battle";
 
 export function useAttackWizard(attacker: BattleParticipant | null, onDone?: () => void) {
@@ -47,27 +40,11 @@ export function useAttackWizard(attacker: BattleParticipant | null, onDone?: () 
 
   const attack = attacks.find((a) => (a.id ?? a.name) === state.attackId) ?? null;
 
-  const { visible } = useModeView();
-
-  const targets = order.filter(
-    (p) => (isUp(p) || isDying(p)) && !isAirborne(p) && p !== attacker && visible(p) && (p.basicInfo.side !== attacker?.basicInfo.side || scene.battle.campaign?.friendlyFire === true),
-  );
-
-  const enemyTargets = targets.filter((p) => p.basicInfo.side !== attacker?.basicInfo.side);
+  const { targets, enemyTargets, cover, visible } = useAttackTargets(attacker, attack, state.step);
 
   const byId = (id: string) => order.find((p) => p.basicInfo.id === id);
 
   const map = scene.battle.map;
-
-  const cover = useMemo(() => {
-    if (state.step === "closed" || !attacker || !attack || !map || attackKindOf(attack.type) !== AttackType.RANGED) return new Set<string>();
-
-    const seen = order.filter((p) => p === attacker || visible(p));
-
-    const candidates = seen.filter((p) => p !== attacker && (isUp(p) || isDying(p)));
-
-    return new Set(candidates.filter((t) => lineOfFire(map, seen, attacker, t).blocked).map((t) => t.basicInfo.id));
-  }, [state.step, attacker, attack, map, order, visible]);
 
   const steps = useMemo<DamageStep[][]>(() => {
     if (!attacker || !attack || state.step !== "summary") return [];
@@ -79,11 +56,16 @@ export function useAttackWizard(attacker: BattleParticipant | null, onDone?: () 
 
         if (!target) return [];
 
-        const full = computeDamageBreakdown({ attacker, target, attack, damageRolls: s.damage, allParticipants: order, isCritical: s.outcome === "crit", rules: scene.battle.rules }).steps;
-
-        const shown = hiddenTargetSteps(full, s.targetId, scene.battle.battleLog ?? [], canSeeExactStats(target, scene.viewer), scene.battle.knowledge);
-
-        return cover.has(s.targetId) ? [...shown, obstacleStep(shown.at(-1)?.after ?? 0)] : shown;
+        return strikeDamageSteps({
+          attacker,
+          target,
+          attack,
+          damage: s.damage,
+          isCritical: s.outcome === "crit",
+          blockedByCover: cover.has(s.targetId),
+          battle: { initiativeOrder: order, rules: scene.battle.rules, battleLog: scene.battle.battleLog, knowledge: scene.battle.knowledge },
+          viewer: scene.viewer,
+        });
       });
     // byId читає order, який уже в deps
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -128,126 +110,17 @@ export function useAttackWizard(attacker: BattleParticipant | null, onDone?: () 
 
   const currentMode = strikeMode(state, currentStrike);
 
+  const attackCtx = { order, round: scene.battle.currentRound, map, rules: scene.battle.rules };
+
   const outcomeOf = (d20: number, second?: number): RollOutcome => {
     const target = byId(state.strikes[state.index]?.targetId ?? "");
 
     if (!attacker || !attack || !target) return "miss";
 
-    const { totalBonus, targetAC } = predictAttack(attacker, target, attack, order, scene.battle.currentRound, map);
-
-    const crit = scene.battle.rules?.criticals ?? DEFAULT_RULES.criticals;
-
-    const r = resolveAttackRoll(
-      { attackRoll: d20, ...(currentMode === "advantage" && second !== undefined && { advantageRoll: second }), ...(currentMode === "disadvantage" && second !== undefined && { disadvantageRoll: second }) },
-      targetAC,
-      totalBonus,
-      { critOn: critThresholdOf(scene.battle.rules, order, attacker.basicInfo.id), fumbleOn: crit.fumbleOn },
-    );
-
-    return r.crit ? "crit" : r.critFail ? "critFail" : r.hit ? "hit" : "miss";
+    return rollOutcomeOf(attacker, target, attack, attackCtx, { d20, second, mode: currentMode });
   };
 
-  const finish = (attackerId: string, seen: Set<number>) => {
-    const current = scene.readBattle();
-
-    const log = current?.battleLog ?? [];
-
-    const after = current?.initiativeOrder ?? order;
-
-    const fromLog = volleyResults(log, seen, attackerId, after);
-
-    const results: AttackOutcomeSummary[] = fromLog.length > 0 ? fromLog : state.strikes.map((s) => ({ kind: s.outcome === "crit" ? ("crit" as const) : s.outcome === "hit" ? ("hit" as const) : ("miss" as const), targetId: s.targetId, damage: 0, downed: false }));
-
-    dispatch({ type: "SUCCESS", results });
-
-    const first = results[0];
-
-    const strike = state.strikes[0];
-
-    const target = byId(first.targetId);
-
-    const retaliation = retaliationOutcome(log, seen);
-
-    const crit = critOutcome(log, seen, attackerId, first.targetId);
-
-    const targetName = target?.basicInfo.name ?? "";
-
-    const d20 = effectiveD20(strike, strikeMode(state, strike));
-
-    const strikes = results.length > 1 ? results.map((r) => ({ targetName: byId(r.targetId)?.basicInfo.name ?? "", kind: r.kind, damage: r.damage, downed: r.downed, splash: r.splash })) : undefined;
-
-    if (first.kind === "miss" || crit?.type === "fail") {
-      const known = formatKnownArmorClass(resolveKnownArmorClass(log, first.targetId, current?.knowledge));
-
-      scene.result.show({
-        kind: "miss",
-        targetName,
-        d20,
-        known,
-        ...(strikes && { strikes }),
-        ...(retaliation && { retaliation }),
-        ...(crit?.type === "fail" && { critFail: crit }),
-      });
-    } else {
-      scene.result.show({
-        kind: first.kind,
-        targetName,
-        damage: results.reduce((s, r) => s + r.damage, 0),
-        downed: first.downed,
-        d20,
-        weapon: attack?.name,
-        ...(strikes && { strikes }),
-        ...(retaliation && { retaliation }),
-        ...(crit?.type === "success" && { critEffect: crit }),
-      });
-    }
-
-    onDone?.();
-  };
-
-  const settle = (attackerId: string, seen: Set<number>) => {
-    try {
-      finish(attackerId, seen);
-    } catch (e) {
-      dispatch({ type: "FAIL", error: e instanceof Error ? e.message : "Не вдалося виконати атаку" });
-    }
-  };
-
-  const pauseCrit = useCritPause({
-    waiting: state.waitingCrit,
-    actorId: attacker?.basicInfo.id,
-    onResolved: (seen) => attacker && settle(attacker.basicInfo.id, seen),
-    onCancelled: () => dispatch({ type: "FAIL", error: CRIT_CANCELLED }),
-  });
-
-  const send = useEffectEvent(async () => {
-    if (!attacker) return;
-
-    const seen = new Set((scene.battle.battleLog ?? []).map((e) => e.actionIndex));
-
-    let res: Awaited<ReturnType<typeof scene.actions.attack.mutateAsync>>;
-
-    try {
-      res = await scene.actions.attack.mutateAsync(attackPayload(state, attacker.basicInfo.id));
-    } catch (e) {
-      dispatch({ type: "FAIL", error: e instanceof Error ? e.message : "Не вдалося виконати атаку" });
-
-      return;
-    }
-
-    if (res?.pendingCritChoice) {
-      pauseCrit(seen);
-      dispatch({ type: "WAIT_CRIT" });
-
-      return;
-    }
-
-    settle(attacker.basicInfo.id, seen);
-  });
-
-  useEffect(() => {
-    if (state.step === "submitting") void send();
-  }, [state.step]);
+  useAttackSubmit({ attacker, attack, flow: { state, dispatch }, onDone });
 
   const cunningOffer = useMemo(() => (attacker && !state.offHand && isOpen ? cunningStrikeOffer(attacker, scene.battle.currentRound) : null), [attacker, state.offHand, isOpen, scene.battle.currentRound]);
 
@@ -297,7 +170,7 @@ export function useAttackWizard(attacker: BattleParticipant | null, onDone?: () 
       if (picked) {
         if (pool.length > 1) dispatch({ type: "SELECT_WEAPON", ...describe(chosen) });
 
-        const forced = attacker ? forcedModeOf(predictAttack(attacker, target, chosen, order, scene.battle.currentRound, map)) : undefined;
+        const forced = attacker ? forcedFor(attacker, target, chosen, attackCtx) : undefined;
 
         dispatch({ type: "CONFIRM_TARGETS", forced: { [target.basicInfo.id]: forced } });
       }
@@ -313,7 +186,7 @@ export function useAttackWizard(attacker: BattleParticipant | null, onDone?: () 
         state.targetIds.map((id) => {
           const t = byId(id);
 
-          return [id, attacker && attack && t ? forcedModeOf(predictAttack(attacker, t, attack, order, scene.battle.currentRound, map)) : undefined];
+          return [id, attacker && attack && t ? forcedFor(attacker, t, attack, attackCtx) : undefined];
         }),
       );
 
@@ -325,7 +198,7 @@ export function useAttackWizard(attacker: BattleParticipant | null, onDone?: () 
     setInspiration: (value: boolean) => {
       const t = byId(state.strikes[0]?.targetId ?? "");
 
-      const forced = attacker && attack && t ? forcedModeOf(predictAttack(attacker, t, attack, order, scene.battle.currentRound, map, { inspiration: value })) : undefined;
+      const forced = attacker && attack && t ? forcedFor(attacker, t, attack, attackCtx, { inspiration: value }) : undefined;
 
       dispatch({ type: "SET_INSPIRATION", value, forced });
     },

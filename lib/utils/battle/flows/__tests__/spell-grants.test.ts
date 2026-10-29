@@ -1,8 +1,12 @@
 import { describe, expect, it } from "vitest";
 
+import { textOf } from "@/lib/i18n/test/text";
 import { makeParticipant } from "@/lib/utils/abilities/__tests__/fixtures";
 import { canCastFromSlot, castLevelOptions, costBlocked, defaultGrant, grantLabel, grantsFor, poolUsage, selectedGrantOf, sourceOptions } from "@/lib/utils/battle/flows/spell-grants";
 import type { BattleParticipant, SpellGrant } from "@/types/battle";
+import type { LogLine } from "@/types/text";
+
+const rendered = <T extends { label: LogLine }>(options: T[], locale: "uk" | "en" = "uk") => options.map((o) => ({ ...o, label: textOf(o.label, locale) }));
 
 const casterWith = (grants: SpellGrant[], pools: Record<string, { max: number; recharge?: number }> = {}, extra: Partial<BattleParticipant["spellcasting"]> = {}): BattleParticipant => {
   const p = makeParticipant({ id: "c" });
@@ -51,8 +55,10 @@ describe("selectedGrantOf / defaultGrant", () => {
 
 describe("poolUsage / labels", () => {
   it("пул 0/1 заряд, recharge і відпочинок", () => {
-    expect(poolUsage(casterWith([], { p: { max: 1 } }), "p")).toEqual({ left: 1, max: 1, label: "1/1 за відпочинок" });
-    expect(poolUsage(casterWith([], { p: { max: 3, recharge: 5 } }), "p")).toEqual({ left: 3, max: 3, label: "3/3 · ⟳ 5–6" });
+    expect(poolUsage(casterWith([], { p: { max: 1 } }), "p")).toEqual({ left: 1, max: 1, label: expect.anything() });
+    expect(textOf(poolUsage(casterWith([], { p: { max: 1 } }), "p")!.label)).toBe("1/1 за відпочинок");
+    expect(textOf(poolUsage(casterWith([], { p: { max: 3, recharge: 5 } }), "p")!.label)).toBe("3/3 · ⟳ 5–6");
+    expect(textOf(poolUsage(casterWith([], { p: { max: 3, recharge: 5 } }), "p")!.label, "en")).toBe("3/3 · ⟳ 5–6");
     expect(poolUsage(casterWith([], {}), "p")).toBeUndefined();
     expect(poolUsage(casterWith([], {}), undefined)).toBeUndefined();
   });
@@ -60,7 +66,7 @@ describe("poolUsage / labels", () => {
   it("grantLabel: легендарний і безпуловий грант", () => {
     const c = casterWith([{ ...innate, legendaryOnly: true }, { spellId: "fog", label: "Дар" }], { p: { max: 2 } });
 
-    expect(grantLabel(c, "fog")).toBe("Туман: Лише легендарна / лігво · 2/2 за відпочинок · Дар: За бажанням");
+    expect(textOf(grantLabel(c, "fog")!)).toBe("Туман: Лише легендарна / лігво · 2/2 за відпочинок · Дар: За бажанням");
     expect(grantLabel(c, "none")).toBeUndefined();
   });
 });
@@ -69,19 +75,19 @@ describe("sourceOptions / castLevelOptions", () => {
   it("слоти плюс гранти; вичерпаний пул вимкнений", () => {
     const full = casterWith([innate], { p: { max: 2 } });
 
-    expect(sourceOptions(full, [innate], [{ key: "1", label: "I" }])).toEqual([
+    expect(rendered(sourceOptions(full, [innate], [{ key: "1", label: "I" }]))).toEqual([
       { value: "slot:1", label: "Слот I", disabled: false },
       { value: "grant:fog-1", label: "Туман · 2/2", disabled: false },
     ]);
     expect(sourceOptions(casterWith([innate], { p: { max: 0 } }), [innate], [])[0].disabled).toBe(true);
-    expect(sourceOptions(full, [{ spellId: "fog" }], [])[0]).toEqual({ value: "grant:fog", label: "Безкоштовний каст · без ліміту", disabled: false });
+    expect(rendered(sourceOptions(full, [{ spellId: "fog" }], []))[0]).toEqual({ value: "grant:fog", label: "Безкоштовний каст · без ліміту", disabled: false });
     expect(sourceOptions(full, [], [{ key: "1", label: "I" }])).toEqual([]);
   });
 
   it("апкаст: вартість росте, нестача заряду вимикає рівень, без пулу — безліміт", () => {
     const opts = castLevelOptions(casterWith([innate], { p: { max: 2 } }), innate);
 
-    expect(opts).toEqual([
+    expect(rendered(opts)).toEqual([
       { value: 1, label: "Коло 1", disabled: false },
       { value: 2, label: "Коло 2 · 2 заряди", disabled: false },
       { value: 3, label: "Коло 3 · 3 заряди", disabled: true },

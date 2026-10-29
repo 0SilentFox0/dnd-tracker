@@ -1,0 +1,178 @@
+{
+  "critCancelled": "Action cancelled by the DM",
+  "attack": {
+    "failed": "Could not perform the attack",
+    "title": "Attack",
+    "titleOffHand": "Off hand · {name}",
+    "titleCounter": "Attack {n}/{m} · {name}",
+    "steps": {
+      "weapon": "Weapon",
+      "target": "Target",
+      "roll": "Roll",
+      "damage": "Damage",
+      "summary": "Summary"
+    },
+    "kinds": {
+      "melee": "Melee attack",
+      "ranged": "Ranged attack"
+    },
+    "nearTarget": "target in reach",
+    "changeWeapon": "Change weapon",
+    "weapon": {
+      "melee": "melee",
+      "ranged": "ranged",
+      "toHit": "{kind} · {bonus} to hit"
+    },
+    "target": {
+      "cover": "There is an obstacle between the attacker and the target",
+      "allEnemies": "All enemies",
+      "next": "Next · roll"
+    },
+    "roll": {
+      "title": "Attack roll · d20",
+      "strike": "Strike {n} of {total} · {name}",
+      "cover": "🧱 Obstacle in the way · damage ×0.5",
+      "inspiration": "Inspiration",
+      "inspirationNote": "✦ Inspiration — advantage on this roll",
+      "diceHint": "First die first, then the second",
+      "rollModes": {
+        "normal": "Normal",
+        "advantage": "Advantage",
+        "disadvantage": "Disadvantage"
+      }
+    },
+    "damage": {
+      "title": "Damage",
+      "crit": "critical",
+      "next": "Next · summary"
+    },
+    "summary": {
+      "unknownDefense": "Target's defenses and resistances",
+      "unknown": "unknown",
+      "estimate": "Estimate",
+      "cunning": "Cunning Strike · instead of Sneak Attack dice ({dice}d6)",
+      "submit": "Attack"
+    }
+  },
+  "spell": {
+    "failed": "Could not apply the spell",
+    "continueFailed": "Could not continue casting",
+    "fallbackName": "Spell",
+    "aim": {
+      "ariaLabel": "Spell targeting",
+      "template": "Pick a point on the map",
+      "chain": "Pick the first target on the map",
+      "multi": "Pick targets on the map · {count}",
+      "multiMax": "Pick targets on the map · {count}/{max}",
+      "single": "Pick a target on the map",
+      "next": "Next · rolls",
+      "hit": "Affected",
+      "hitNone": "Nobody affected",
+      "ally": "⚠ ally",
+      "chosen": "Chosen targets"
+    },
+    "summary": {
+      "targets": "Targets: {targets}",
+      "dice": "Dice: {dice} = {sum} ({formula})",
+      "note": "The battle will work out the final result, taking the targets' defenses into account."
+    },
+    "source": {
+      "label": "Cast source",
+      "pick": "Pick a source",
+      "level": "Cast level"
+    },
+    "slot": "Slot",
+    "cast": {
+      "outOfRange": "Out of range",
+      "chain": "Chain: {chain}",
+      "next": "Next · rolls",
+      "attackRoll": "Attack roll",
+      "serverD20": "An empty d20 will be rolled by the server.",
+      "dice": "Dice",
+      "nextSummary": "Next · summary",
+      "apply": "Apply",
+      "notSuitable": "Not suitable",
+      "pickOption": "Choose an option"
+    },
+    "saveRoll": "Saving throw",
+    "book": {
+      "title": "Spellbook",
+      "toList": "To the list",
+      "reaction": "Reaction: {trigger}",
+      "castingRounds": "{rounds, plural, one {# round} other {# rounds}} of casting · an action and concentration are needed every turn",
+      "startCasting": "Start casting",
+      "continueCasting": "Continue casting",
+      "fastForward": "DM: count the remaining time and finish",
+      "cancelCasting": "Interrupt casting",
+      "targets": {
+        "next": "Next",
+        "template": "Aim on the map",
+        "pick": "Pick targets"
+      }
+    }
+  },
+  "bonus": {
+    "title": "Bonus action",
+    "ability": "Ability",
+    "target": "{name} · target",
+    "offHand": "Off-hand attack",
+    "cooldown": "{rounds} more rd.",
+    "confirm": "Confirm · {picked}/{max}"
+  },
+  "aura": {
+    "title": "Aura zone · {name}",
+    "hintEnemies": "Which enemies are nearby? {effects} — until your next turn.",
+    "hintAllies": "Which allies are nearby? {effects} — until your next turn.",
+    "confirm": "Confirm zone · {count}"
+  },
+  "abilityAim": {
+    "ariaLabel": "Ability targeting",
+    "hint": "Pick a cell on the map"
+  },
+  "flow": {
+    "slot": {
+      "pact": "Pact · level {level}",
+      "circle": "Level {level}"
+    },
+    "cost": {
+      "free": "Free DM cast — no slot is spent.",
+      "chosen": "Spends a slot: {slot}.",
+      "universal": "Spends a universal slot.",
+      "level": "Spends a level {level} slot.",
+      "special": "Legendary action / lair action"
+    },
+    "pool": {
+      "recharge": "{left}/{max} · ⟳ {recharge}–6",
+      "rest": "{left}/{max} per rest"
+    },
+    "grant": {
+      "line": "{label}: {usage}",
+      "lineLegendary": "{label}: Legendary / lair only · {usage}",
+      "defaultLabel": "Grant",
+      "optional": "Optional",
+      "freeCast": "Free cast",
+      "slotOption": "Slot {slot}",
+      "withUsage": "{label} · {left}/{max}",
+      "unlimited": "{label} · unlimited",
+      "castLevel": "Level {level}",
+      "castLevelCost": "Level {level} · {cost} charges",
+      "inline": "{label}: {usage}{expires}",
+      "inlineDefault": "Recast",
+      "noLimit": "no limit",
+      "until": " · until rd. {round}"
+    },
+    "widening": {
+      "allEnemy": "all enemies",
+      "allAlly": "all allies",
+      "maxTargets": "up to {max, plural, one {# target} other {# targets}}",
+      "defaultSource": "Ability",
+      "note": "{source}: {badge}",
+      "noteArea": "{source}: {badge} (on the map — a {side}×{side} zone)"
+    },
+    "forced": {
+      "advantage": "Advantage: {reasons}",
+      "disadvantage": "Disadvantage: {reasons}",
+      "cancelled": "Advantage ({advantage}) and disadvantage ({disadvantage}) cancel out"
+    }
+  }
+}

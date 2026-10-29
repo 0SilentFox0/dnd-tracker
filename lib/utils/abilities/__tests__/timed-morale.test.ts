@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 
 import { makeParticipant, resolved, seq } from "./fixtures";
 
+import { textOf } from "@/lib/i18n/test/text";
 import { runAbilities } from "@/lib/utils/abilities/engine/core/run-abilities";
 import { AbilitySchema } from "@/lib/utils/abilities/schema";
 import type { AbilityEvent } from "@/types/abilities";
@@ -36,6 +37,6 @@ describe("timed morale", () => {
     const blocked = run(makeParticipant({ id: "t", abilities: [immune] }));
 
     expect(blocked.participants[1].battleData.activeEffects).toHaveLength(0);
-    expect(blocked.messages.join()).toContain("імунітет");
+    expect(blocked.messages.map((m) => textOf(m)).join()).toContain("імунітет");
   });
 });

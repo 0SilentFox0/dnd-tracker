@@ -25,8 +25,8 @@ const ability = {
 describe("приціл здібності в лабіринті", () => {
   it("клітинка в полі зору — ок; за стіною чи позаду — відмова", () => {
     expect(assertAbilityAim(ability, map, actor, { x: 6, y: 5 })).toEqual({ x: 6, y: 5 });
-    expect(() => assertAbilityAim(ability, map, actor, { x: 8, y: 5 })).toThrow("Точка поза полем зору");
-    expect(() => assertAbilityAim(ability, map, actor, { x: 2, y: 5 })).toThrow("Точка поза полем зору");
+    expect(() => assertAbilityAim(ability, map, actor, { x: 8, y: 5 })).toThrow("battleActions.maze.aimOutOfSight");
+    expect(() => assertAbilityAim(ability, map, actor, { x: 2, y: 5 })).toThrow("battleActions.maze.aimOutOfSight");
   });
 
   it("прев'ю шаблону на карті не малює приціл поза полем зору", () => {

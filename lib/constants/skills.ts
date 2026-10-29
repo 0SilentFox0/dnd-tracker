@@ -1,3 +1,4 @@
+/* eslint-disable no-restricted-syntax -- DND_SKILL_META.label feeds the character sheet payload; UI elsewhere reads gameTerms.dndSkills keys */
 import { CORE_ABILITY_SCORES } from "./abilities";
 
 export const DND_SKILLS = [

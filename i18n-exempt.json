@@ -1,0 +1,11 @@
+[
+  "scripts/**",
+  "tests/**",
+  "data/**",
+  "prisma/**",
+  "lib/utils/characters/generate/**",
+  "lib/constants/import-aliases.ts",
+  "vitest-setup.ts",
+  "eslint/**",
+  "*.config.*"
+]

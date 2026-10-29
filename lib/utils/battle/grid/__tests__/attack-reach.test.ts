@@ -3,7 +3,9 @@ import { describe, expect, it } from "vitest";
 import { attackRangeCells, attackReachError, enemiesInReach, pickAttack } from "../attack-reach";
 
 import { AttackType, CombatStatus, ParticipantSide } from "@/lib/constants/battle";
+import { textRef } from "@/lib/i18n/text-ref";
 import { createMockParticipant } from "@/lib/utils/battle/__tests__/fixtures/mock-participant";
+import { REJECT } from "@/lib/utils/battle/store/reject";
 import type { BattleAttack, BattleMapConfig, BattleParticipant, GridPoint } from "@/types/battle";
 
 const map: BattleMapConfig = { cols: 30, rows: 10, background: null, opacity: 0.3 };
@@ -43,7 +45,7 @@ describe("правила атак на карті", () => {
     const far = at("e2", { x: 8, y: 5 }, ParticipantSide.ENEMY);
 
     expect(attackReachError(map, [hero, near, far], hero, sword, [near])).toBeNull();
-    expect(attackReachError(map, [hero, near, far], hero, sword, [far])).toMatch(/поруч/);
+    expect(attackReachError(map, [hero, near, far], hero, sword, [far])).toEqual(textRef(REJECT.targetNotNear));
   });
 
   it("стрілок не стріляє, коли поруч живий ворог; мертвий не заважає", () => {
@@ -51,7 +53,7 @@ describe("правила атак на карті", () => {
 
     const target = at("e2", { x: 15, y: 5 }, ParticipantSide.ENEMY);
 
-    expect(attackReachError(map, [hero, adj, target], hero, bow, [target])).toMatch(/ворог/);
+    expect(attackReachError(map, [hero, adj, target], hero, bow, [target])).toEqual(textRef(REJECT.enemyNearNoShoot));
 
     const corpse = at("e1", { x: 5, y: 6 }, ParticipantSide.ENEMY, true);
 
@@ -73,7 +75,7 @@ describe("правила атак на карті", () => {
 
     const breath = { id: "br", name: "Подих", type: AttackType.MELEE, targetType: "aoe" } as BattleAttack;
 
-    expect(attackReachError(map, [hero, far], hero, breath, [far])).toMatch(/поруч/);
+    expect(attackReachError(map, [hero, far], hero, breath, [far])).toEqual(textRef(REJECT.targetNotNear));
     expect(attackReachError(map, [hero, near], hero, breath, [near])).toBeNull();
   });
 
@@ -96,7 +98,7 @@ describe("правила атак на карті", () => {
   it("ціль поза дальністю", () => {
     const target = at("e2", { x: 15, y: 5 }, ParticipantSide.ENEMY);
 
-    expect(attackReachError(map, [hero, target], hero, sling, [target])).toMatch(/дальн/);
+    expect(attackReachError(map, [hero, target], hero, sling, [target])).toEqual(textRef(REJECT.targetOutOfAttackRange));
   });
 
   it("без карти або без позицій — правил немає", () => {
@@ -137,17 +139,17 @@ describe("pickAttack: спершу ближня", () => {
   });
 
   it("ніщо не дістає — помилка", () => {
-    expect(pickAttack(map, [hero, distant], hero, [sword], distant)).toEqual({ attack: null, error: "Ціль не поруч — спершу підійдіть" });
+    expect(pickAttack(map, [hero, distant], hero, [sword], distant)).toEqual({ attack: null, error: textRef(REJECT.targetNotNear) });
   });
 
   it("далека ціль, ніщо не дістає — причина дальньої зброї, а не «підійдіть»", () => {
     const close = at("e3", { x: 5, y: 6 }, ParticipantSide.ENEMY);
 
-    expect(pickAttack(map, [hero, close, distant], hero, [sword, bow], distant).error).toBe("Поруч ворог — стріляти не можна");
-    expect(pickAttack(map, [hero, distant], hero, [sword, sling], distant).error).toBe("Ціль поза дальністю атаки");
+    expect(pickAttack(map, [hero, close, distant], hero, [sword, bow], distant).error).toEqual(textRef(REJECT.enemyNearNoShoot));
+    expect(pickAttack(map, [hero, distant], hero, [sword, sling], distant).error).toEqual(textRef(REJECT.targetOutOfAttackRange));
   });
 
   it("ціль поруч, ніщо не дістає — помилка першої зброї", () => {
-    expect(pickAttack(map, [hero, adjacent], hero, [bow], adjacent).error).toBe("Поруч ворог — стріляти не можна");
+    expect(pickAttack(map, [hero, adjacent], hero, [bow], adjacent).error).toEqual(textRef(REJECT.enemyNearNoShoot));
   });
 });

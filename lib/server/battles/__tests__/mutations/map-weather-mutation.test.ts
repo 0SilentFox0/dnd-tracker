@@ -4,7 +4,7 @@ import { context, goblin, hero } from "./fixtures";
 
 import { API_ERRORS } from "@/lib/constants/api-errors";
 import { BattleStatus } from "@/lib/constants/battle";
-import { CLEAR_WEATHER_LABEL, WEATHER_KINDS, WEATHER_LABELS } from "@/lib/constants/battle-weather";
+import { WEATHER_KINDS } from "@/lib/constants/battle-weather";
 import { mapWeatherSchema } from "@/lib/schemas/battles";
 import { mapWeatherMutation } from "@/lib/server/battles/mutations/map-weather/map-weather-mutation";
 import { BattleAccess } from "@/lib/utils/battle/pipeline/run-battle-mutation";
@@ -24,12 +24,8 @@ const ctx = (m: BattleMapConfig | null = map) => {
 };
 
 describe("weather constants", () => {
-  it("кожен вид має український підпис, «Ясно» — для null", () => {
-    expect(Object.keys(WEATHER_LABELS).sort()).toEqual([...WEATHER_KINDS].sort());
-    expect(WEATHER_LABELS.embers).toBe("Вогонь");
-    expect(WEATHER_LABELS.crypt).toBe("Гробниця");
+  it("список видів завершується crypt", () => {
     expect(WEATHER_KINDS.at(-1)).toBe("crypt");
-    expect(CLEAR_WEATHER_LABEL).toBe("Ясно");
   });
 });
 

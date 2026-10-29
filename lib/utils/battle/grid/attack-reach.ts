@@ -2,11 +2,14 @@ import { footprintDistance } from "./geometry";
 import { cellsOf, isOnMap } from "./occupancy";
 
 import { AttackType, CELL_FEET } from "@/lib/constants/battle";
+import { textRef } from "@/lib/i18n/text-ref";
 import { isAttackable } from "@/lib/utils/abilities/engine/core/participants";
 import { hasTrait, isFiveE } from "@/lib/utils/battle/attack/ability";
 import { attackKindOf } from "@/lib/utils/battle/common/attack-kind";
 import { modeEngages, modeMeleeBlockedText, modeTargetHiddenText } from "@/lib/utils/battle/modes/engine";
+import { REJECT } from "@/lib/utils/battle/store/reject";
 import type { BattleAttack, BattleMapConfig, BattleParticipant } from "@/types/battle";
+import type { LogLine } from "@/types/text";
 
 export function attackRangeCells(range?: string): number | null {
   return rangeBands(range)?.long ?? null;
@@ -35,7 +38,7 @@ export function rangeDisadvantageReasons(
   attacker: BattleParticipant,
   attack: BattleAttack,
   target: BattleParticipant,
-): string[] {
+): LogLine[] {
   if (!map || !isFiveE(attacker) || !attacker.battleData.position || !target.battleData.position) return [];
 
   const mine = cellsOf(attacker);
@@ -46,15 +49,15 @@ export function rangeDisadvantageReasons(
 
   if (attackKindOf(attack.type) !== AttackType.RANGED && !thrown) return [];
 
-  const reasons: string[] = [];
+  const reasons: LogLine[] = [];
 
   const bands = rangeBands(attack.range);
 
-  if (bands && distance > bands.normal) reasons.push("Далека дистанція");
+  if (bands && distance > bands.normal) reasons.push(textRef("battleLog.rollMode.farRange"));
 
   const engaged = participants.some((p) => p.basicInfo.side !== attacker.basicInfo.side && isOnMap(p) && footprintDistance(mine, cellsOf(p)) <= 1 && modeEngages(map, attacker, p));
 
-  if (engaged && !thrown) reasons.push("Ворог поруч");
+  if (engaged && !thrown) reasons.push(textRef("battleLog.rollMode.enemyNear"));
 
   return reasons;
 }
@@ -65,7 +68,7 @@ export function attackReachError(
   attacker: BattleParticipant,
   attack: BattleAttack,
   targets: BattleParticipant[],
-): string | null {
+): LogLine | null {
   if (!map || !attacker.battleData.position) return null;
 
   const mine = cellsOf(attacker);
@@ -84,9 +87,9 @@ export function attackReachError(
     const tooFar = placed.find((t) => distanceTo(t) > reach);
 
     if (tooFar) {
-      if (!bands) return "Ціль не поруч — спершу підійдіть";
+      if (!bands) return textRef(REJECT.targetNotNear);
 
-      if (placed.some((t) => distanceTo(t) > bands.long)) return "Ціль поза дальністю атаки";
+      if (placed.some((t) => distanceTo(t) > bands.long)) return textRef(REJECT.targetOutOfAttackRange);
 
       return modeTargetHiddenText(map, attacker, placed);
     }
@@ -96,11 +99,11 @@ export function attackReachError(
 
   const engaged = !fiveE && participants.some((p) => p.basicInfo.side !== attacker.basicInfo.side && isOnMap(p) && distanceTo(p) <= 1 && modeEngages(map, attacker, p));
 
-  if (engaged) return "Поруч ворог — стріляти не можна";
+  if (engaged) return textRef(REJECT.enemyNearNoShoot);
 
   const range = attackRangeCells(attack.range);
 
-  if (range !== null && placed.some((t) => distanceTo(t) > range)) return "Ціль поза дальністю атаки";
+  if (range !== null && placed.some((t) => distanceTo(t) > range)) return textRef(REJECT.targetOutOfAttackRange);
 
   return modeTargetHiddenText(map, attacker, placed);
 }
@@ -118,14 +121,14 @@ export function pickAttack(
   attacker: BattleParticipant,
   attacks: BattleAttack[],
   target: BattleParticipant,
-): { attack: BattleAttack | null; error: string | null } {
+): { attack: BattleAttack | null; error: LogLine | null } {
   const isMelee = (a: BattleAttack) => attackKindOf(a.type) === AttackType.MELEE;
 
   const usable = attacks.filter((a) => a.hand !== "off");
 
-  let meleeError: string | null = null;
+  let meleeError: LogLine | null = null;
 
-  let rangedError: string | null = null;
+  let rangedError: LogLine | null = null;
 
   for (const attack of [...usable.filter(isMelee), ...usable.filter((a) => !isMelee(a))]) {
     const e = attackReachError(map, participants, attacker, attack, [target]);

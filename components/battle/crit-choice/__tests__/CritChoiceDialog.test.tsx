@@ -5,10 +5,14 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 import { CritChoiceDialog } from "../CritChoiceDialog";
 import { CritChoiceWaitingBanner } from "../CritChoiceWaitingBanner";
 
-import { renderWithConfirm } from "@/components/ui/__tests__/render-with-confirm";
 import type { useCritChoiceDialog } from "@/lib/hooks/battle";
-import { BattleSceneContext, type BattleSceneValue } from "@/lib/hooks/battle";
+import { BattleSceneContext } from "@/lib/hooks/battle";
+import type { BattleSceneValue } from "@/lib/hooks/battle/types";
+import { renderWithConfirm } from "@/lib/i18n/test/render-uk";
 import { critEffectsFor } from "@/lib/utils/battle/crit-choice/catalog";
+
+
+vi.unmock("next-intl");
 
 afterEach(cleanup);
 

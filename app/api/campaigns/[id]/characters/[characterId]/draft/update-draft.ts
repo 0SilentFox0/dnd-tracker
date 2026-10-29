@@ -41,7 +41,7 @@ export async function updateDraft(request: Request, campaignId: string, characte
 
   const { avatar, asClass } = await resolveDraftParts(parsed, campaign);
 
-  if (!avatar.ok) return errorResponse(avatar.message, 400);
+  if (!avatar.ok) return errorResponse(avatar.message, 400, undefined, avatar.params);
 
   if (asClass && !asClass.ok) return errorResponse(asClass.error, asClass.status);
 

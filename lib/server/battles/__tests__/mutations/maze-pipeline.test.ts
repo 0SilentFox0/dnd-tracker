@@ -2,12 +2,14 @@ import { describe, expect, it, vi } from "vitest";
 
 import { goblin, hero } from "./fixtures";
 
+import { textOf } from "@/lib/i18n/test/text";
 import { mazeActionSchema, moveSchema } from "@/lib/schemas/battles";
 import { mazeMutation } from "@/lib/server/battles/mutations/maze/maze-mutation";
 import { moveMutation } from "@/lib/server/battles/mutations/move/move-mutation";
 import { createRollbackMutation, rollbackSchema } from "@/lib/server/battles/mutations/rollback/rollback-mutation";
 import { runBattleMutation } from "@/lib/server/battles/run-mutation";
 import { applyBattleDelta } from "@/lib/utils/battle/client/apply-delta";
+import { eventTextOf } from "@/lib/utils/battle/log/__tests__/event-text";
 import { allInteriorEdges } from "@/lib/utils/battle/modes/maze";
 import { at, mazeMap } from "@/lib/utils/battle/modes/maze/__tests__/fixtures";
 import { MAZE_TEXTS } from "@/lib/utils/battle/modes/maze/texts";
@@ -147,7 +149,7 @@ describe("maze у конвеєрі", () => {
     const delta = await step(b, { x: 1, y: 0 });
 
     expect(delta.patched).toContainEqual({ id: "gob", battleData: { dormant: false, mazeWakeRound: 2 } });
-    expect(delta.log.map((e) => e.resultText)).toEqual([`${hero.basicInfo.name} помітив Гоблін`]);
+    expect(delta.log.map((e) => eventTextOf(e))).toEqual([`${hero.basicInfo.name} помітив Гоблін`]);
 
     const applied = applyBattleDelta(before, wire(delta)) as BattleScene;
 
@@ -170,7 +172,7 @@ describe("maze у конвеєрі", () => {
     expect(b.meta.map?.maze?.walls).not.toEqual(walls);
     expect(b.participant("gob").battleData.position).not.toEqual({ x: 4, y: 0 });
 
-    const reshuffleSeq = b.events().find((e) => e.resultText === MAZE_TEXTS.ops.reshuffle)?.seq as number;
+    const reshuffleSeq = b.events().find((e) => eventTextOf(e) === textOf(MAZE_TEXTS.ops.reshuffle))?.seq as number;
 
     expect(reshuffleSeq).toBeGreaterThan(0);
 
@@ -190,9 +192,9 @@ describe("maze у конвеєрі", () => {
     await maze({ op: "walls", add: ["5:5:s"], remove: [] });
     await maze({ op: "dark", on: false });
 
-    const seqs = b.events().map((e) => [e.resultText, e.seq] as const);
+    const seqs = b.events().map((e) => [eventTextOf(e), e.seq] as const);
 
-    expect(seqs.map(([t]) => t)).toEqual([MAZE_TEXTS.ops.darkOn, MAZE_TEXTS.ops.darkOff]);
+    expect(seqs.map(([t]) => t)).toEqual([textOf(MAZE_TEXTS.ops.darkOn), textOf(MAZE_TEXTS.ops.darkOff)]);
     expect(b.snapshots()).toHaveLength(2);
 
     await b.act(DM, { access: BattleAccess.DM, schema: rollbackSchema, mutate: b.rollback }, { actionIndex: seqs[1][1] });

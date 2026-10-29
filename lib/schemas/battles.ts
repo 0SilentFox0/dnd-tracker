@@ -6,6 +6,7 @@ import { DAMAGE_ELEMENT_OPTIONS } from "@/lib/constants/damage";
 import { hexColorSchema } from "@/lib/schemas/common";
 import { CUNNING_STRIKE_EFFECTS } from "@/lib/utils/abilities/schema";
 import { hasPlayableArea } from "@/lib/utils/battle/grid/map-editor";
+import { REJECT } from "@/lib/utils/battle/store/reject";
 import { ZoneTriggerSchema } from "@/lib/utils/spells/model/schema";
 
 const MAP_BACKGROUND_PATTERN = /^(https:\/\/\S+|data:image\/(png|jpeg|webp);base64,[A-Za-z0-9+/=]+|\/battle-maps\/[\w.-]+\.(webp|jpg|png))$/;
@@ -40,7 +41,7 @@ export const mazeSchema = z.object({
         by: z.string().max(64),
       }),
     )
-    .refine((m) => Object.keys(m).length <= 3600, "Забагато позначок"),
+    .refine((m) => Object.keys(m).length <= 3600, "battleSetup.validation.tooManyMarks"),
   dark: z.boolean(),
   moved: z.boolean().optional(),
 });
@@ -74,7 +75,7 @@ export const battleMapSchema = z.object({
   background: z
     .string()
     .max(7_000_000)
-    .refine((v) => MAP_BACKGROUND_PATTERN.test(v), "Фон: потрібне посилання https, файл або вбудований фон")
+    .refine((v) => MAP_BACKGROUND_PATTERN.test(v), "battleSetup.validation.background")
     .nullable(),
   opacity: z.number().min(0).max(1),
   blocked: z.array(z.string().regex(/^\d+:\d+$/)).max(3600).optional(),
@@ -91,9 +92,9 @@ export const battleMapSchema = z.object({
         damage: z
           .object({ dice: z.string().regex(HAZARD_DICE_PATTERN).optional(), amount: z.number().int().min(0).max(1000).optional(), type: z.string().min(1).max(30), spellId: z.string().max(SPELL_ID_MAX).optional(), casterId: z.string().max(SPELL_ID_MAX).optional(), concentrationOf: z.object({ casterId: z.string().max(SPELL_ID_MAX), castId: z.string().max(SPELL_ID_MAX) }).optional() })
           .optional(),
-      }).refine((c) => c.kind !== "barrier" || c.untilRound !== undefined, "Барʼєру потрібен строк"),
+      }).refine((c) => c.kind !== "barrier" || c.untilRound !== undefined, "battleSetup.validation.barrierNeedsDuration"),
     )
-    .refine((t) => Object.keys(t).length <= 3600, "Забагато клітинок місцевості")
+    .refine((t) => Object.keys(t).length <= 3600, "battleSetup.validation.tooManyTerrainCells")
     .optional(),
   spellZones: z
     .record(
@@ -110,13 +111,13 @@ export const battleMapSchema = z.object({
         concentrationOf: z.object({ casterId: z.string().max(SPELL_ID_MAX), castId: z.string().max(SPELL_ID_MAX) }).optional(),
       }),
     )
-    .refine((z) => Object.keys(z).length <= 200, "Забагато зон заклинань")
+    .refine((z) => Object.keys(z).length <= 200, "validation.tooManySpellZones")
     .optional(),
   backgroundCols: z.number().positive().max(200).optional(),
   gridOffset: z.object({ x: z.number().min(0).lt(1), y: z.number().min(0).lt(1) }).optional(),
   maze: mazeSchema.nullable().optional(),
   weather: weatherKindSchema.nullable().optional(),
-}).refine((m) => hasPlayableArea(m), { message: "Ігрова зона карти замала: потрібно щонайменше 2×2 вільні клітинки", path: ["blocked"] });
+}).refine((m) => hasPlayableArea(m), { message: "battleSetup.validation.playableAreaTooSmall", path: ["blocked"] });
 
 export const createBattleSchema = z.object({
   name: z.string().min(1).max(100),
@@ -171,10 +172,10 @@ export const attackBodySchema = z
   })
   .refine(
     (d) => d.d20Roll !== undefined || d.attackRoll !== undefined || (Array.isArray(d.attackRolls) && d.attackRolls.length > 0),
-    { message: "d20Roll, attackRoll або attackRolls обов'язковий", path: ["d20Roll"] },
+    { message: REJECT.rollsRequired, path: ["d20Roll"] },
   )
   .refine((d) => d.targetId !== undefined || (d.targetIds !== undefined && d.targetIds.length > 0), {
-    message: "Потрібно вказати хоча б одну ціль",
+    message: REJECT.oneTargetRequired,
     path: ["targetIds"],
   });
 
@@ -204,7 +205,7 @@ export const mapTerrainSchema = z.object({
       rounds: z.number().int().min(1).max(20).optional(),
       damage: z.object({ dice: z.string().regex(HAZARD_DICE_PATTERN), type: z.enum(HAZARD_DAMAGE_TYPES) }).optional(),
     })
-    .refine((t) => t.kind !== "barrier" || t.rounds !== undefined, { message: "Барʼєру потрібна тривалість у раундах", path: ["rounds"] })
+    .refine((t) => t.kind !== "barrier" || t.rounds !== undefined, { message: REJECT.barrierDuration, path: ["rounds"] })
     .nullable(),
 });
 

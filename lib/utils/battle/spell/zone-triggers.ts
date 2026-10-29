@@ -1,11 +1,13 @@
 import { anchorMove, anchorTurnStart } from "./anchored-zone";
 import { type Fired, fireTrigger, type TriggerKind, type ZoneCtx } from "./zone-fire";
 
+import { textRef } from "@/lib/i18n/text-ref";
 import { findParticipant, isActive, replaceParticipant } from "@/lib/utils/abilities/engine/core/participants";
 import { isZoneConcentrationLive } from "@/lib/utils/battle/concentration";
 import { canStand, cellDistance, cellKey, footprint, movementBudget, parseCellKey, sizeOf } from "@/lib/utils/battle/grid";
 import { replaceTerrain } from "@/lib/utils/battle/grid/terrain";
 import type { BattleMapConfig, BattleParticipant, GridPoint } from "@/types/battle";
+import type { LogLine } from "@/types/text";
 
 export function zonesAt(map: BattleMapConfig | null | undefined, p: BattleParticipant, at?: GridPoint): Set<string> {
   const anchor = at ?? p.battleData.position;
@@ -42,14 +44,14 @@ function fire(ps: BattleParticipant[], zoneId: string, kind: TriggerKind, target
   return fireTrigger(ps, { casterId, spellId, spellName, dc, side, concentrationOf, hitKey: zoneId }, zone.triggers[kind], kind, targetId, ctx);
 }
 
-export function zoneTurnStart(map: BattleMapConfig | null | undefined, ps: BattleParticipant[], targetId: string, ctx: Omit<ZoneCtx, "map">): { participants: BattleParticipant[]; messages: string[] } {
+export function zoneTurnStart(map: BattleMapConfig | null | undefined, ps: BattleParticipant[], targetId: string, ctx: Omit<ZoneCtx, "map">): { participants: BattleParticipant[]; messages: LogLine[] } {
   const target = findParticipant(ps, targetId);
 
   if (!map || !target) return { participants: ps, messages: [] };
 
   let next = ps;
 
-  const messages: string[] = [];
+  const messages: LogLine[] = [];
 
   for (const id of zonesAt(map, target)) {
     const fired = fire(next, id, "onTurnStart", targetId, { ...ctx, map });
@@ -76,7 +78,7 @@ function pullTarget(map: BattleMapConfig, ps: BattleParticipant[], mover: Battle
 export interface ZoneMoveResult {
   participants: BattleParticipant[];
   moved: BattleParticipant;
-  messages: string[];
+  messages: LogLine[];
 }
 
 /** Тригери зон на шляху: вхід, вихід (невдалий кидок із pull зупиняє мувера біля центру). `path` — клітинки після старту. */
@@ -99,7 +101,7 @@ function spellZonesMove(args: Parameters<typeof zoneMove>[0]): ZoneMoveResult {
 
   let moved = args.moved;
 
-  const messages: string[] = [];
+  const messages: LogLine[] = [];
 
   const id = moved.basicInfo.id;
 
@@ -126,7 +128,7 @@ function spellZonesMove(args: Parameters<typeof zoneMove>[0]): ZoneMoveResult {
 
         moved = { ...moved, battleData: { ...moved.battleData, position: stop, movementUsed: Math.max(moved.battleData.movementUsed ?? 0, movementBudget(moved)) } };
 
-        return { participants: replaceParticipant(ps, moved), moved, messages: [...messages, `🌀 ${moved.basicInfo.name}: «${map.spellZones[zoneId].spellName}» тягне назад до центру`] };
+        return { participants: replaceParticipant(ps, moved), moved, messages: [...messages, textRef("battleLog.spellFx.zonePull", { name: moved.basicInfo.name, spell: map.spellZones[zoneId].spellName })] };
       }
     }
 

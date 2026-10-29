@@ -3,7 +3,9 @@ import { describe, expect, it } from "vitest";
 import { aimView, deriveMapScene, deriveTrajectory, type MapAim, type MapPick, type MapSceneActor, type MapSceneInput, type MapSceneMode } from "../map-scene";
 
 import { AttackType, ParticipantSide } from "@/lib/constants/battle";
+import { textRef } from "@/lib/i18n/text-ref";
 import { createMockParticipant } from "@/lib/utils/battle/__tests__/fixtures/mock-participant";
+import { REJECT } from "@/lib/utils/battle/store/reject";
 import type { BattleAttack, BattleMapConfig, BattleParticipant, GridPoint } from "@/types/battle";
 
 const map: BattleMapConfig = { cols: 10, rows: 5, background: null, opacity: 0.3 };
@@ -116,7 +118,7 @@ describe("deriveMapScene", () => {
     const click = s.tokenClick("e2");
 
     expect(click.kind).toBe("reject");
-    expect(click.kind === "reject" && click.reason.length > 0).toBe(true);
+    expect(click.kind === "reject" && !!click.reason).toBe(true);
   });
 
   it("ДМ поза режимом розстановки: вибраний токен не телепортується, клітинка нічого не робить", () => {
@@ -242,7 +244,7 @@ describe("deriveMapScene: наведення шаблону", () => {
     expect(new Set(s.view.marks?.values())).toEqual(new Set(["out-of-range"]));
     expect(s.aiming).toBe(true);
     expect(s.cellClick({ x: 3, y: 0 })).toEqual({ kind: "aim", cell: { x: 3, y: 0 } });
-    expect(s.cellClick({ x: 4, y: 0 })).toEqual({ kind: "reject", reason: "Поза дальністю" });
+    expect(s.cellClick({ x: 4, y: 0 })).toEqual({ kind: "reject", reason: textRef(REJECT.outOfRange) });
   });
 
   it("клік по токену цілиться в його клітинку, а не атакує", () => {
@@ -317,8 +319,8 @@ describe("deriveMapScene: наведення шаблону", () => {
 
       const s = deriveMapScene(input({ mode: { aim: mapAim } }));
 
-      expect(s.cellClick({ x: 0, y: 0 })).toEqual({ kind: "reject", reason: "Оберіть напрямок" });
-      expect(s.tokenClick("h")).toEqual({ kind: "reject", reason: "Оберіть напрямок" });
+      expect(s.cellClick({ x: 0, y: 0 })).toEqual({ kind: "reject", reason: textRef(REJECT.pickDirection) });
+      expect(s.tokenClick("h")).toEqual({ kind: "reject", reason: textRef(REJECT.pickDirection) });
       expect(aimView({ map, participants: [hero, near, far] }, mapAim, { x: 0, y: 0 })).toBeNull();
       expect(s.cellClick({ x: 3, y: 0 })).toEqual({ kind: "aim", cell: { x: 3, y: 0 } });
     }
@@ -395,14 +397,14 @@ describe("deriveMapScene: вибір цілей заклинання", () => {
     const s = deriveMapScene(input({ mode: { pick: pick() } }));
 
     expect(s.tokenClick("e1")).toEqual({ kind: "pick", id: "e1" });
-    expect(s.tokenClick("e2")).toEqual({ kind: "reject", reason: "Поза дальністю" });
+    expect(s.tokenClick("e2")).toEqual({ kind: "reject", reason: textRef(REJECT.outOfRange) });
     expect(s.tokenClick("h")).toMatchObject({ kind: "reject" });
   });
 
   it("ціль, відхилена фільтром заклинання — «не підходить», а не «Поза дальністю»", () => {
     const s = deriveMapScene(input({ mode: { pick: pick({ targets: [{ id: "e2", reachable: false, filteredOut: true }] }) } }));
 
-    expect(s.tokenClick("e2")).toEqual({ kind: "reject", reason: "Ця ціль не підходить для заклинання" });
+    expect(s.tokenClick("e2")).toEqual({ kind: "reject", reason: textRef(REJECT.badSpellTarget) });
   });
 
   it("клік по клітинці: зайнята кандидатом — pick, порожня — none (не ходить)", () => {

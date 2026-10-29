@@ -1,4 +1,5 @@
 import { API_ERRORS } from "@/lib/constants/api-errors";
+import { textRef } from "@/lib/i18n/text-ref";
 import type { CritChoiceBody } from "@/lib/schemas";
 import type { SpellRequestData } from "@/lib/schemas/battles";
 import type { AttackBody } from "@/lib/server/battles/mutations/attack/attack-mutation";
@@ -23,7 +24,7 @@ export function createCritChoiceMutation(deps: CritChoiceDeps) {
     if (!pending) throw new BattleRuleError("action_rejected", API_ERRORS.CRIT_CHOICE_NONE);
 
     if ("cancel" in body) {
-      return { participants: ctx.participants, pending: ctx.pending, events: [dmEvent(ctx.scene.round, "ДМ скасував дію")], scene: { pendingCritChoice: null } };
+      return { participants: ctx.participants, pending: ctx.pending, events: [dmEvent(ctx.scene.round, textRef("battleLog.dm.cancelled"))], scene: { pendingCritChoice: null } };
     }
 
     const triggers = new Map(pending.triggers.map((t) => [t.key, t]));

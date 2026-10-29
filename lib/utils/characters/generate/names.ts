@@ -11,7 +11,9 @@ const capitalize = (s: string) => s.charAt(0).toUpperCase() + s.slice(1);
 export function generateName(raceName: string, rng: () => number, locale: Locale = "uk"): string {
   const { tables, generic } = TABLES[locale];
 
-  const table = tables.find((t) => t.match.test(raceName)) ?? generic;
+  const matched = NAME_TABLES_UK.find((t, i) => t.match.test(raceName) || NAME_TABLES_EN[i].match.test(raceName));
+
+  const table = (matched && tables.find((t) => t.id === matched.id)) ?? generic;
 
   return capitalize(pick(rng, table.first) + pick(rng, table.second));
 }

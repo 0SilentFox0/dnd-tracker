@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useTranslations } from "next-intl";
 import { ArrowDown, ArrowLeft, ArrowRight, ArrowUp, Skull, Star, X } from "lucide-react";
 
 import { MAZE_MARK_SYMBOLS } from "@/lib/constants/battle";
@@ -9,19 +10,19 @@ import { useMazeView } from "@/lib/hooks/battle/modes/maze";
 import { mazeBudgetLeft } from "@/lib/utils/battle/modes/maze";
 import type { BattleParticipant, MazeMarkSymbol } from "@/types/battle";
 
-const SYMBOL_UI: Record<MazeMarkSymbol, { label: string; Icon: typeof Star }> = {
-  "arrow-n": { label: "Стрілка вгору", Icon: ArrowUp },
-  "arrow-e": { label: "Стрілка праворуч", Icon: ArrowRight },
-  "arrow-s": { label: "Стрілка вниз", Icon: ArrowDown },
-  "arrow-w": { label: "Стрілка ліворуч", Icon: ArrowLeft },
-  cross: { label: "Хрест", Icon: X },
-  skull: { label: "Череп", Icon: Skull },
-  star: { label: "Зірка", Icon: Star },
+const SYMBOL_ICONS: Record<MazeMarkSymbol, typeof Star> = {
+  "arrow-n": ArrowUp,
+  "arrow-e": ArrowRight,
+  "arrow-s": ArrowDown,
+  "arrow-w": ArrowLeft,
+  cross: X,
+  skull: Skull,
+  star: Star,
 };
 
-const SYMBOLS = MAZE_MARK_SYMBOLS.map((symbol) => ({ symbol, ...SYMBOL_UI[symbol] }));
-
 export function MazeMarkPicker({ hero }: { hero: BattleParticipant }) {
+  const t = useTranslations("battleDm.maze.marks");
+
   const { battle, actions, anyPending } = useBattleScene();
 
   const { view } = useMazeView();
@@ -44,15 +45,19 @@ export function MazeMarkPicker({ hero }: { hero: BattleParticipant }) {
         onClick={() => setOpen((v) => !v)}
         className="hud-sc flex h-11 w-full items-center justify-center border border-white/25 bg-black/55 text-[15px] tracking-[.08em] text-[var(--ink)] disabled:opacity-50"
       >
-        Мітка
+        {t("picker")}
       </button>
       {open && (
-        <div role="group" aria-label="Символ мітки" className="mt-1 grid grid-cols-7 gap-1">
-          {SYMBOLS.map(({ symbol, label, Icon }) => (
-            <button key={symbol} type="button" aria-label={label} disabled={anyPending} onClick={() => place(symbol)} className="flex h-11 items-center justify-center border border-white/25 bg-black/55 text-[var(--gold)] disabled:opacity-50">
-              <Icon className="size-5" />
-            </button>
-          ))}
+        <div role="group" aria-label={t("group")} className="mt-1 grid grid-cols-7 gap-1">
+          {MAZE_MARK_SYMBOLS.map((symbol) => {
+            const Icon = SYMBOL_ICONS[symbol];
+
+            return (
+              <button key={symbol} type="button" aria-label={t(symbol)} disabled={anyPending} onClick={() => place(symbol)} className="flex h-11 items-center justify-center border border-white/25 bg-black/55 text-[var(--gold)] disabled:opacity-50">
+                <Icon className="size-5" />
+              </button>
+            );
+          })}
         </div>
       )}
     </div>

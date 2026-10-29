@@ -4,7 +4,8 @@ import { createContext, useContext, useMemo, useState } from "react";
 
 import type { ModeViewValue } from "../useModeView";
 
-import { type BattleSceneData, type BattleSceneValue, useBattleScene, useBattleSceneData } from "@/lib/hooks/battle/useBattleScene";
+import type { BattleSceneData, BattleSceneValue } from "@/lib/hooks/battle/types";
+import { useBattleScene, useBattleSceneData } from "@/lib/hooks/battle/useBattleScene";
 import { modeFxVisible } from "@/lib/utils/battle/modes/client";
 import { deriveMazeView, maskMazeFxAction, maskMazeScene, type MazeView, mazeVisible } from "@/lib/utils/battle/modes/maze";
 import type { BattleScene } from "@/types/api";

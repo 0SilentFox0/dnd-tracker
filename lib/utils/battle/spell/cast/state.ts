@@ -2,12 +2,14 @@ import type { SummonRequest } from "@/lib/utils/abilities/engine/core/types";
 import type { Amount, Effect, StaticEffect } from "@/lib/utils/abilities/schema";
 import type { ActionFlow } from "@/lib/utils/battle/common/action-flow";
 import { newBattleAction } from "@/lib/utils/battle/common/new-action";
+import { logFields } from "@/lib/utils/battle/log/lines";
 import type { SpellPower } from "@/lib/utils/battle/spell/power";
 import type { TransformRequest } from "@/lib/utils/battle/transform/types";
 import type { CastableSpell } from "@/lib/utils/battle/types/spell-process";
 import type { AnchoredZoneEffect, GrantCastEffect, HitRiderEffect, SpellDefinition, SpellEffect } from "@/lib/utils/spells/model/schema";
 import type { ResolvedAbility } from "@/types/abilities";
 import type { BattleAction, BattleParticipant, DamageStep, SpellGrant } from "@/types/battle";
+import type { LogLine } from "@/types/text";
 
 export type ChosenSpell = Omit<CastableSpell, "definition"> & { definition: Omit<SpellDefinition, "effects"> & { effects: Effect[] } };
 
@@ -124,9 +126,9 @@ export function abilityOf(spell: ChosenSpell): ResolvedAbility {
   } as ResolvedAbility;
 }
 
-export function actionOf(caster: BattleParticipant, spell: CastableSpell, targets: BattleParticipant[], battleId: string, round: number, text: string): BattleAction {
+export function actionOf(caster: BattleParticipant, spell: CastableSpell, targets: BattleParticipant[], battleId: string, round: number, text: LogLine | LogLine[]): BattleAction {
   return newBattleAction(caster, "spell", { battleId, round, targets }, {
     actionDetails: { spellId: spell.id, spellName: spell.name, spellLevel: spell.level, ...(spell.fx && { spellFx: spell.fx }) },
-    resultText: text,
+    ...logFields(text),
   });
 }

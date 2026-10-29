@@ -16,6 +16,9 @@ import { mkdirSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 
+import { resultTextOf } from "./log-text";
+
+import { API_ERRORS } from "@/lib/constants/api-errors";
 import { BATTLE_LOG_RECENT_EVENTS, ParticipantSourceType } from "@/lib/constants/battle";
 import { CONTROLLED_BY_DM } from "@/lib/constants/characters";
 import { prisma } from "@/lib/db";
@@ -51,6 +54,7 @@ import { casterSpellDice } from "@/lib/utils/battle/spell/caster-dice";
 import { loadSpellsFromDb } from "@/lib/utils/battle/spell/load-spells-db";
 import { spellTargetingFor } from "@/lib/utils/battle/spell/spell-targeting";
 import { loadBattle, loadRecentEvents, saveBattle } from "@/lib/utils/battle/store";
+import { REJECT } from "@/lib/utils/battle/store/reject";
 import { checkVictoryConditions } from "@/lib/utils/battle/turn/victory";
 import { rollDiceList } from "@/lib/utils/common/dice";
 import { branchLevelNodeId, canLearn, normalizeTree, racialNodeId, writeUnlocked } from "@/lib/utils/skills/progression";
@@ -243,27 +247,27 @@ async function call(label: string, options: any, body: any = {}, as?: string): P
   }
 
   for (const e of newLog) {
-    const t = `[${battleLabel} р${e.round}] ${e.resultText}`;
+    const t = `[${battleLabel} р${e.round}] ${resultTextOf(e)}`;
 
     fullLog.push(t);
 
-    if (/NaN|undefined|\[object|null\b/.test(e.resultText ?? "")) issue("error", `підозрілий текст логу: ${e.resultText}`);
+    if (/NaN|undefined|\[object|null\b/.test(resultTextOf(e) ?? "")) issue("error", `підозрілий текст логу: ${resultTextOf(e)}`);
 
-    const rolled = (e.actionType === "attack" && !/ціль загинула до атаки/.test(e.resultText ?? "") && !(e.resultText ?? "").startsWith("🤬 Шал")) || (e.actionType === "spell" && (e.actionDetails?.damageBreakdown?.includes("сума кубиків") || e.actionDetails?.savingThrows?.length));
+    const rolled = (e.actionType === "attack" && !/ціль загинула до атаки/.test(resultTextOf(e) ?? "") && !(resultTextOf(e) ?? "").startsWith("🤬 Шал")) || (e.actionType === "spell" && (e.actionDetails?.damageBreakdown?.includes("сума кубиків") || e.actionDetails?.savingThrows?.length));
 
     const dice = e.actionDetails?.diceRolls as Array<{ dice: Array<{ sides: number; value: number }> }> | undefined;
 
-    if (rolled && !e.isCancelled && !dice?.length) issue("error", `немає diceRolls: ${e.resultText}`);
+    if (rolled && !e.isCancelled && !dice?.length) issue("error", `немає diceRolls: ${resultTextOf(e)}`);
 
-    for (const die of dice?.flatMap((g) => g.dice) ?? []) if (![4, 6, 8, 10, 12, 20].includes(die.sides) || die.value < 1 || die.value > die.sides) issue("error", `кубик поза межами: d${die.sides}=${die.value} у «${e.resultText}»`);
+    for (const die of dice?.flatMap((g) => g.dice) ?? []) if (![4, 6, 8, 10, 12, 20].includes(die.sides) || die.value < 1 || die.value > die.sides) issue("error", `кубик поза межами: d${die.sides}=${die.value} у «${resultTextOf(e)}»`);
   }
 
   if (res.status === 200) invariants(label);
 
-  if (res.status === 200 && !["next-turn", "start", "attack"].includes(label) && !(label === "move" && newLog.some((e: any) => /вибрався/.test(e.resultText ?? ""))) && state.status === "active") {
+  if (res.status === 200 && !["next-turn", "start", "attack"].includes(label) && !(label === "move" && newLog.some((e: any) => /вибрався/.test(resultTextOf(e) ?? ""))) && state.status === "active") {
     const curAfter = state.initiativeOrder[state.currentTurnIndex]?.basicInfo.id;
 
-    if (curBefore && curAfter !== curBefore) issue("error", `TURN: після ${label} змінився поточний учасник ${byId(curBefore)?.basicInfo.name ?? curBefore} → ${byId(curAfter)?.basicInfo.name}; порядок до=${orderBefore?.join(",")}; після=${state.initiativeOrder.map((p: any) => p.basicInfo.name).join(",")}; log=${JSON.stringify(newLog.map((e: any) => e.resultText)).slice(0, 300)}`);
+    if (curBefore && curAfter !== curBefore) issue("error", `TURN: після ${label} змінився поточний учасник ${byId(curBefore)?.basicInfo.name ?? curBefore} → ${byId(curAfter)?.basicInfo.name}; порядок до=${orderBefore?.join(",")}; після=${state.initiativeOrder.map((p: any) => p.basicInfo.name).join(",")}; log=${JSON.stringify(newLog.map((e: any) => resultTextOf(e))).slice(0, 300)}`);
   }
 
   return { status: res.status, body: json, log: newLog };
@@ -628,7 +632,7 @@ async function castSpell(actor: any, spell: any) {
 
   if (changed || onlyNote) s.ok++; else { s.noEffect++; issue("warn", `${spell.name} (${actor.basicInfo.name}): каст пройшов, але жодних змін у цілей`); }
 
-  if (s.samples.length < 2) s.samples.push(r.log.map((e: any) => e.resultText).join(" | ").slice(0, 400));
+  if (s.samples.length < 2) s.samples.push(r.log.map((e: any) => resultTextOf(e)).join(" | ").slice(0, 400));
 
   return r;
 }
@@ -923,7 +927,7 @@ async function hitBy(target: any, logs: string[], hpBeforeHit?: number, d20 = 20
 
   const r = await call("attack", ATTACK, { attackerId: a.basicInfo.id, targetId: target.basicInfo.id, attackId: w.id, d20Roll: d20, disadvantageRoll: d20, advantageRoll: d20, damageRolls: rollDiceList(heroAttackDamageParts(a, w).formula, rng), endTurn: false });
 
-  logs.push(...r.log.map((e: any) => e.resultText));
+  logs.push(...r.log.map((e: any) => resultTextOf(e)));
 
   return r;
 }
@@ -1006,7 +1010,7 @@ async function targeted(spells: Map<string, any>) {
 
   const hpA = friendsOf(byName("Зехір")).reduce((n: number, p: any) => n + p.combatStats.currentHp, 0);
 
-  tcheck("Світло корони: каст Світла лікує союзників на 5 % HP", lr.status === 200 && hpA > hpB, `HP союзників ${hpB} → ${hpA}; ${lr.status} ${lr.log.map((e: any) => e.resultText).join(" | ").slice(0, 300)} ${lr.status !== 200 ? JSON.stringify(lr.body).slice(0, 200) : ""}`);
+  tcheck("Світло корони: каст Світла лікує союзників на 5 % HP", lr.status === 200 && hpA > hpB, `HP союзників ${hpB} → ${hpA}; ${lr.status} ${lr.log.map((e: any) => resultTextOf(e)).join(" | ").slice(0, 300)} ${lr.status !== 200 ? JSON.stringify(lr.body).slice(0, 200) : ""}`);
 
   // Вибух мани: ворог кастує в Зехіра (шанс 50 %, до 2 разів)
   const bolt = [...spells.values()].find((s: any) => s.name === "Потойбічна стріла");
@@ -1024,7 +1028,7 @@ async function targeted(spells: Map<string, any>) {
 
     const r = await call("spell", SPELL, { casterId: ec.basicInfo.id, spellId: bolt.id, targetIds: [byName("Зехір").basicInfo.id], free: true, diceRolls: rollDiceList(`${dice.count}d${dice.sides}`, rng) });
 
-    burst = r.log.some((e: any) => /Вибух мани/.test(e.resultText));
+    burst = r.log.some((e: any) => /Вибух мани/.test(resultTextOf(e)));
 
     if (r.status !== 200) break;
   }
@@ -1048,7 +1052,7 @@ async function targeted(spells: Map<string, any>) {
 
   const v2 = byName("Айвен");
 
-  tcheck("Ангел Хранитель: воскрешає полеглого союзника з 50 % HP", !!ar && ar.status === 200 && alive(v2), `${ar?.status} HP ${v2.combatStats.currentHp}/${v2.combatStats.maxHp}; ${ar?.log.map((e: any) => e.resultText).join(" | ").slice(0, 250)} ${ar && ar.status !== 200 ? JSON.stringify(ar.body).slice(0, 200) : ""}`);
+  tcheck("Ангел Хранитель: воскрешає полеглого союзника з 50 % HP", !!ar && ar.status === 200 && alive(v2), `${ar?.status} HP ${v2.combatStats.currentHp}/${v2.combatStats.maxHp}; ${ar?.log.map((e: any) => resultTextOf(e)).join(" | ").slice(0, 250)} ${ar && ar.status !== 200 ? JSON.stringify(ar.body).slice(0, 200) : ""}`);
 }
 
 async function controlCheck(spells: Map<string, any>) {
@@ -1105,7 +1109,7 @@ async function controlCheck(spells: Map<string, any>) {
   const r2 = await call("attack", ATTACK, body, top.controlledBy);
 
   tcheck("Чужий гравець не може ходити юнітом", r1.status === 403, `${r1.status} ${JSON.stringify(r1.body).slice(0, 120)}`);
-  tcheck("Гравець-власник ходить союзним юнітом", r2.status === 200, `${r2.status} ${r2.log.map((e: any) => e.resultText).join(" | ").slice(0, 150)} ${r2.status !== 200 ? JSON.stringify(r2.body).slice(0, 150) : ""}`);
+  tcheck("Гравець-власник ходить союзним юнітом", r2.status === 200, `${r2.status} ${r2.log.map((e: any) => resultTextOf(e)).join(" | ").slice(0, 150)} ${r2.status !== 200 ? JSON.stringify(r2.body).slice(0, 150) : ""}`);
 
   const nt = await call("next-turn", NEXT, {}, top.controlledBy);
 
@@ -1202,11 +1206,11 @@ async function level5Check(spells: Map<string, any>) {
 
       const after = snap(P().map((p: any) => p.basicInfo.id));
 
-      const saved = r.log.some((e: any) => /рятівний кидок [^|]*— успіх(\s\||$)/.test(e.resultText));
+      const saved = r.log.some((e: any) => /рятівний кидок [^|]*— успіх(\s\||$)/.test(resultTextOf(e)));
 
       const changed = [...before.keys()].some((id) => before.get(id) !== after.get(id)) || P().length !== n0 || saved;
 
-      tcheck(`L5 ${school}: ${sp.name} (${casterName}, гравець)`, knows && r.status === 200 && slot1 === slot0 - 1 && changed, `знає=${knows} статус=${r.status} слот 5: ${slot0}→${slot1} зміни=${changed}; ${r.status === 200 ? r.log.map((e: any) => e.resultText).join(" | ").slice(0, 220) : JSON.stringify(r.body).slice(0, 200)}`);
+      tcheck(`L5 ${school}: ${sp.name} (${casterName}, гравець)`, knows && r.status === 200 && slot1 === slot0 - 1 && changed, `знає=${knows} статус=${r.status} слот 5: ${slot0}→${slot1} зміни=${changed}; ${r.status === 200 ? r.log.map((e: any) => resultTextOf(e)).join(" | ").slice(0, 220) : JSON.stringify(r.body).slice(0, 200)}`);
     }
   }
   // другий каст 5-го рівня в тому ж бою — немає слота
@@ -1219,7 +1223,7 @@ async function level5Check(spells: Map<string, any>) {
 
   const r2 = await call("spell", SPELL, { casterId: byName("Аграїл").basicInfo.id, spellId: sp2.id, targetIds: [byName("Аграїл").basicInfo.id], diceRolls: [] }, ag.controlledBy);
 
-  tcheck("Другий каст 5-го рівня без слота відхиляється", r2.status === 422 && /Немає вільного слота/.test(JSON.stringify(r2.body)), `${r2.status} ${JSON.stringify(r2.body).slice(0, 150)}`);
+  tcheck("Другий каст 5-го рівня без слота відхиляється", r2.status === 422 && JSON.stringify(r2.body).includes(API_ERRORS.BATTLE_NO_FREE_SLOT), `${r2.status} ${JSON.stringify(r2.body).slice(0, 150)}`);
 
   // Аватар Маркела
   await applyRotation(0);
@@ -1244,7 +1248,7 @@ async function level5Check(spells: Map<string, any>) {
 
   const fresh = P().filter((p: any) => !ids0.has(p.basicInfo.id));
 
-  tcheck("Аватар: Маркел знає закляття і прикликає Аватара Смерті під своїм контролером", knowsAv && ra.status === 200 && fresh.some((p: any) => /Аватар Смерті/.test(p.basicInfo.name) && p.basicInfo.controlledBy === mk.basicInfo.controlledBy && p.basicInfo.side === "ally"), `знає=${knowsAv} ${ra.status} нові: ${fresh.map((p: any) => `${p.basicInfo.name} (${p.basicInfo.side}, ${p.basicInfo.controlledBy.slice(0, 8)}) HP ${p.combatStats.maxHp}`).join(", ")}; ${ra.log.map((e: any) => e.resultText).join(" | ").slice(0, 200)}`);
+  tcheck("Аватар: Маркел знає закляття і прикликає Аватара Смерті під своїм контролером", knowsAv && ra.status === 200 && fresh.some((p: any) => /Аватар Смерті/.test(p.basicInfo.name) && p.basicInfo.controlledBy === mk.basicInfo.controlledBy && p.basicInfo.side === "ally"), `знає=${knowsAv} ${ra.status} нові: ${fresh.map((p: any) => `${p.basicInfo.name} (${p.basicInfo.side}, ${p.basicInfo.controlledBy.slice(0, 8)}) HP ${p.combatStats.maxHp}`).join(", ")}; ${ra.log.map((e: any) => resultTextOf(e)).join(" | ").slice(0, 200)}`);
   for (const h of heroRows) await prisma.character.update({ where: { id: h.id }, data: { level: HERO_LEVEL, spellSlots: fullSpellSlots(HERO_LEVEL, ((await prisma.race.findFirst({ where: { campaignId: ctx.campaignId, name: h.race } }))?.spellSlotProgression as any) ?? [], campaign.maxLevel ?? 20) as any } });
 }
 
@@ -1287,7 +1291,7 @@ async function auraZoneCheck() {
 
   const armorSame = heroes.every((h, i) => statWithModifiers(P(), h.basicInfo.id, "armor", 10) === armorBefore[i]);
 
-  tcheck("Зона аури: Кошмар задає зону, штраф моралі лише на обраних", pending.length === 1 && asPlayer.status === 403 && r.status === 200 && members.join() === zone.join() && zone.every(inZone) && outside && armorSame && pendingAreaAuras(P(), nm.basicInfo.id, state.currentRound).length === 0, `аур=${pending.length} гравець=${asPlayer.status} DM=${r.status} у зоні: ${members.map((id) => byId(id).basicInfo.name).join(", ")}; ${r.log.map((e: any) => e.resultText).join(" | ")}`);
+  tcheck("Зона аури: Кошмар задає зону, штраф моралі лише на обраних", pending.length === 1 && asPlayer.status === 403 && r.status === 200 && members.join() === zone.join() && zone.every(inZone) && outside && armorSame && pendingAreaAuras(P(), nm.basicInfo.id, state.currentRound).length === 0, `аур=${pending.length} гравець=${asPlayer.status} DM=${r.status} у зоні: ${members.map((id) => byId(id).basicInfo.name).join(", ")}; ${r.log.map((e: any) => resultTextOf(e)).join(" | ")}`);
 }
 
 async function reserveCheck() {
@@ -1330,7 +1334,7 @@ async function reserveCheck() {
 
   const r2 = await call("reveal-participant", REVEAL, { participantIds: [reserve()[0].basicInfo.id] });
 
-  tcheck("Резерв: старт, введення, очікування рішення ДМ", startedOk && r.status === 200 && actedNext && awaitingOk && blocked.status === 422 && JSON.stringify(blocked.body).includes("чекає рішення ДМ") && r2.status === 200 && state.status === "active", `старт=${startedOk} reveal=${r.status} ходить-наступним=${actedNext} очікування=${awaitingOk} next-turn=${blocked.status} reveal2=${r2.status}`);
+  tcheck("Резерв: старт, введення, очікування рішення ДМ", startedOk && r.status === 200 && actedNext && awaitingOk && blocked.status === 422 && JSON.stringify(blocked.body).includes(API_ERRORS.BATTLE_AWAITING_DM) && r2.status === 200 && state.status === "active", `старт=${startedOk} reveal=${r.status} ходить-наступним=${actedNext} очікування=${awaitingOk} next-turn=${blocked.status} reveal2=${r2.status}`);
 }
 
 async function mapCheck(spells: Map<string, any>) {
@@ -1387,7 +1391,7 @@ async function mapCheck(spells: Map<string, any>) {
 
   const rm = meleeOk && w && far ? await call("attack", ATTACK, { attackerId: att.basicInfo.id, targetId: far.basicInfo.id, attackId: w.id, d20Roll: 15, disadvantageRoll: 15, advantageRoll: 15, damageRolls: [], endTurn: false }) : null;
 
-  tcheck("Карта: ближня атака не дістає далекої цілі", rm?.status === 422 && /не поруч/.test(JSON.stringify(rm.body)), `${att.basicInfo.name} → ${far?.basicInfo.name}: ${rm?.status ?? "немає сценарію"} ${rm ? JSON.stringify(rm.body).slice(0, 150) : ""}`);
+  tcheck("Карта: ближня атака не дістає далекої цілі", rm?.status === 422 && JSON.stringify(rm.body).includes(REJECT.targetNotNear), `${att.basicInfo.name} → ${far?.basicInfo.name}: ${rm?.status ?? "немає сценарію"} ${rm ? JSON.stringify(rm.body).slice(0, 150) : ""}`);
 
   const fire = [...spells.values()].find((s: any) => s.name === "Вогняна куля");
 
@@ -1441,7 +1445,7 @@ async function mapCheck(spells: Map<string, any>) {
   // change > 0 — шкода (oldHp − newHp), як у решти журналу
   const signOk = !!change && change.change === change.oldHp - change.newHp && change.change > 0;
 
-  tcheck(hazardName, tr?.status === 200 && !!entry && signOk && !!after && after.combatStats.currentHp < hpBefore, `${victim?.basicInfo.name} HP ${hpBefore} → ${after?.combatStats.currentHp}; terrain=${tr?.status}; ${entry ? `${entry.resultText}; hpChanges ${JSON.stringify(change)}` : "запису hazard немає"}`);
+  tcheck(hazardName, tr?.status === 200 && !!entry && signOk && !!after && after.combatStats.currentHp < hpBefore, `${victim?.basicInfo.name} HP ${hpBefore} → ${after?.combatStats.currentHp}; terrain=${tr?.status}; ${entry ? `${resultTextOf(entry)}; hpChanges ${JSON.stringify(change)}` : "запису hazard немає"}`);
 
   await mapSkillAllCheck(spells);
 }
@@ -1560,7 +1564,7 @@ const isMazeAlly = (p: any) => p.basicInfo.side === "ally" && onField(p);
 /** Вільна для кроку клітинка: не зайнята учасником на полі, не вихід і не телепорт. */
 const freeMazeCell = (key: string) => !featureKeys(mazeGrid().maze).has(key) && !P().filter(onField).some((p) => cellKey(posOf(p) as any) === key);
 
-const logText = (log: any[]) => log.map((e: any) => e.resultText ?? "").join(" | ");
+const logText = (log: any[]) => log.map((e: any) => resultTextOf(e) ?? "").join(" | ");
 
 /** Сплять рівно ті вороги, яких не бачить жоден герой. */
 function sleepersMatchSight() {
@@ -1730,7 +1734,7 @@ async function mazeCheck() {
 
   const darkNext = await call("next-turn", NEXT);
 
-  tcheck("Лабіринт: темрява блокує атаку (422), next-turn пропускає хід", darkAtk.status === 422 && JSON.stringify(darkAtk.body).includes(MAZE_TEXTS.dark) && darkNext.status === 200 && logText(darkNext.log).includes(MAZE_TEXTS.darkSkip), `атака ${darkAtk.status} ${JSON.stringify(darkAtk.body).slice(0, 100)}; next-turn ${darkNext.status} ${logText(darkNext.log).slice(0, 100)}`);
+  tcheck("Лабіринт: темрява блокує атаку (422), next-turn пропускає хід", darkAtk.status === 422 && JSON.stringify(darkAtk.body).includes(MAZE_TEXTS.dark) && darkNext.status === 200 && logText(darkNext.log).includes("Темрява — хід пропущено"), `атака ${darkAtk.status} ${JSON.stringify(darkAtk.body).slice(0, 100)}; next-turn ${darkNext.status} ${logText(darkNext.log).slice(0, 100)}`);
 
   const darkOff = await call("maze", MAZE, { op: "dark", on: false });
 

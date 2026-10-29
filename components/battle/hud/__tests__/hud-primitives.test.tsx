@@ -1,6 +1,6 @@
 // @vitest-environment happy-dom
 import type { ReactNode } from "react";
-import { fireEvent, render, screen, within } from "@testing-library/react";
+import { fireEvent, screen, within } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 
 vi.mock("@/components/hud/fonts", () => ({ hudFontClassName: "" }));
@@ -8,8 +8,11 @@ vi.mock("@/components/hud/fonts", () => ({ hudFontClassName: "" }));
 import { EffectLine, HealthBar, SlotGrid } from "@/components/battle/hud";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { ParticipantSide } from "@/lib/constants/battle";
+import { render } from "@/lib/i18n/test/render-uk";
 import { createMockParticipant } from "@/lib/utils/battle/__tests__/fixtures/mock-participant";
 import type { ActiveEffect } from "@/types/battle";
+
+vi.unmock("next-intl");
 
 const withTips = (ui: ReactNode) => <TooltipProvider>{ui}</TooltipProvider>;
 

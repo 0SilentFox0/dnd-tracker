@@ -3,6 +3,7 @@ import { describe, expect, it } from "vitest";
 import { contest, releaseInvalidGrapples } from "../grapple";
 import { runCoreAction } from "../run";
 
+import { textOf } from "@/lib/i18n/test/text";
 import { context } from "@/lib/server/battles/__tests__/mutations/fixtures";
 import { moveMutation } from "@/lib/server/battles/mutations/move/move-mutation";
 import { createMockParticipant } from "@/lib/utils/battle/__tests__/fixtures/mock-participant";
@@ -76,7 +77,7 @@ describe("СК захоплення з базою кампанії", () => {
   const dcOf = (saveDcBase: number) => {
     const rules = { ...on("2024"), formulas: { ...DEFAULT_RULES.formulas, saveDcBase } };
 
-    return contest({ attacker: strong, target: weak, participants: [strong, weak], rules, rng: () => 0.5 }).message;
+    return textOf(contest({ attacker: strong, target: weak, participants: [strong, weak], rules, rng: () => 0.5 }).message);
   };
 
   it("база 10 піднімає СК на 2, дефолт 8 без змін", () => {
@@ -103,7 +104,7 @@ describe("grapple / shove / escape", () => {
   });
 
   it("grapple несуміжного — відмова; невдача витрачає дію без стану", () => {
-    expect(() => run([mk("a", "ally", 0), mk("t", "enemy", 3)], { action: "grapple", participantId: "a", targetId: "t" })).toThrow(expect.objectContaining({ message: "Немає суміжного ворога" }));
+    expect(() => run([mk("a", "ally", 0), mk("t", "enemy", 3)], { action: "grapple", participantId: "a", targetId: "t" })).toThrow(expect.objectContaining({ message: "battleActions.reject.noAdjacentEnemy" }));
 
     const out = run([mk("a", "ally", 0), mk("t", "enemy", 1)], { action: "grapple", participantId: "a", targetId: "t" });
 
@@ -129,7 +130,7 @@ describe("grapple / shove / escape", () => {
 
     expect(get(blocked.participants, "t").battleData.position).toEqual({ x: 1, y: 1 });
     expect(hasCondition(get(blocked.participants, "t"), "prone")).toBe(true);
-    expect(blocked.messages[0]).toContain("лише повалено");
+    expect(textOf(blocked.messages[0])).toContain("лише повалено");
   });
 
   it("escape знімає grappled від схоплювача (2014 і 2024)", () => {
@@ -148,7 +149,7 @@ describe("grapple / shove / escape", () => {
     const stuck = grappled(g, weak);
 
     expect(hasCondition(get(run(stuck, { action: "escape", participantId: "e" }, on("2024")).participants, "e"), "grappled")).toBe(true);
-    expect(() => run([g, mk("x", "ally", 0, 3)], { action: "escape", participantId: "x" })).toThrow(expect.objectContaining({ message: "Ви не схоплені" }));
+    expect(() => run([g, mk("x", "ally", 0, 3)], { action: "escape", participantId: "x" })).toThrow(expect.objectContaining({ message: "battleActions.reject.notGrappled" }));
   });
 
   it("недієздатний схоплювач відпускає цілі", () => {
@@ -163,7 +164,7 @@ describe("grapple / shove / escape", () => {
     const out = applyCondition5e(ps, "g", { key: "incapacitated", rounds: 2, source: undefined, sourceName: "ДМ", timedKey: "dm:incapacitated@1", round: 1 });
 
     expect(grappledBy(out.participants, "g")).toHaveLength(0);
-    expect(out.messages.join(";")).toContain("відпускає");
+    expect(out.messages.map((m) => textOf(m)).join(";")).toContain("відпускає");
     expect(releaseGrapples(ps, "g", "x").messages).toHaveLength(1);
   });
 });
@@ -211,7 +212,7 @@ describe("тягнення при русі", () => {
     const far = mk("hero", "ally", 0, 0);
 
     expect(() => moveMutation(ctxWith(grappled(far, mk("gob", "enemy", 1, 0))), { participantId: "hero", to: { x: 0, y: 3 } })).not.toThrow();
-    expect(() => moveMutation(ctxWith(grappled(far, mk("gob", "enemy", 1, 0))), { participantId: "hero", to: { x: 0, y: 4 } })).toThrow(expect.objectContaining({ message: expect.stringContaining("тягнути") }));
+    expect(() => moveMutation(ctxWith(grappled(far, mk("gob", "enemy", 1, 0))), { participantId: "hero", to: { x: 0, y: 4 } })).toThrow(expect.objectContaining({ message: "battleActions.reject.dragNoMovement" }));
   });
 
   it("клітинка зайнята — схоплення розривається, рух за звичайною вартістю", () => {
