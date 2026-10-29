@@ -3,7 +3,7 @@ import type { MapAim, MapClick, MapPick } from "./map-scene";
 import type { AttackIntent } from "@/lib/utils/battle/flows";
 import type { BattleParticipant, GridPoint } from "@/types/battle";
 
-export type MapClickHandlers = { [K in MapClick["kind"]]: (click: Extract<MapClick, { kind: K }>) => void };
+type MapClickHandlers = { [K in MapClick["kind"]]: (click: Extract<MapClick, { kind: K }>) => void };
 
 interface MapClickDeps {
   current: BattleParticipant | null;

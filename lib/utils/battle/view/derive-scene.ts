@@ -8,7 +8,7 @@ import { checkVictoryConditions } from "@/lib/utils/battle/turn/victory";
 import type { BattleScene } from "@/types/api";
 import type { BattleParticipant } from "@/types/battle";
 
-const NO_ORDER: BattleParticipant[] = [];
+export const NO_ORDER: BattleParticipant[] = [];
 
 export function deriveScene(battle: BattleScene, userId: string | null, dmControlledId: string | null) {
   const isDM = battle.isDM === true;

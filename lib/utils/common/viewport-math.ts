@@ -1,3 +1,5 @@
+import { clamp } from "@/lib/utils/common/clamp";
+
 export interface Viewport {
   zoom: number;
   x: number;
@@ -11,12 +13,10 @@ export interface ZoomBounds {
 
 export const INITIAL_VIEWPORT: Viewport = { zoom: 1, x: 0, y: 0 };
 
-function clampZoom(z: number, { min, max }: ZoomBounds): number {
-  return Math.min(max, Math.max(min, z));
-}
+const clampZoom = (z: number, { min, max }: ZoomBounds): number => clamp(z, min, max);
 
 export function clampOffset(o: number, zoom: number, size: number): number {
-  return Math.min(0, Math.max(-(zoom - 1) * size, o));
+  return clamp(o, -(zoom - 1) * size, 0);
 }
 
 export function zoomAt(v: Viewport, zoom: number, px: number, py: number, w: number, h: number, bounds: ZoomBounds): Viewport {

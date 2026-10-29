@@ -106,21 +106,12 @@ export function processAttack(params: ProcessAttackParams): ProcessAttackResult 
 
   if (!isHit) spendRidersOnMiss(flow, { attackerId, attack });
 
-  if (attackRoll.isCriticalFail && attackRoll.criticalEffect) {
+  const missHandler = attackRoll.isCriticalFail && attackRoll.criticalEffect ? handleCriticalFail : !isHit ? handleMiss : undefined;
+
+  if (missHandler) {
     reactToAttack(run);
 
-    const r = handleCriticalFail(branch);
-
-    finish(r.battleAction);
-    appendHpChanges(r.battleAction, before, flow.ps);
-
-    return consume(run, r, false);
-  }
-
-  if (!isHit) {
-    reactToAttack(run);
-
-    const r = handleMiss(branch);
+    const r = missHandler(branch);
 
     finish(r.battleAction);
     appendHpChanges(r.battleAction, before, flow.ps);

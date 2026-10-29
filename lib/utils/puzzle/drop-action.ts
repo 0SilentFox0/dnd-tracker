@@ -20,9 +20,9 @@ type Rect = Pick<DOMRect, "left" | "right" | "top" | "bottom" | "width" | "heigh
 export function dropAction(cur: Dragged, at: Release, rect: Rect | undefined, spec: Pick<PuzzleSpec, "imageWidth" | "imageHeight">): PuzzleCommand {
   const inside = !!rect && !at.cancelled && rect.width > 0 && at.clientX >= rect.left && at.clientX <= rect.right && at.clientY >= rect.top && at.clientY <= rect.bottom;
 
-  const tap = !at.cancelled && cur.origin.board && Math.hypot(at.clientX - cur.origin.clientX, at.clientY - cur.origin.clientY) <= TAP_PX;
+  const { board } = cur.origin;
 
-  if (tap && cur.origin.board) return { action: "puzzleDrop", pieceId: cur.id, x: cur.origin.board.x, y: cur.origin.board.y, rot: (cur.rot + 45) % 360 };
+  if (board && !at.cancelled && Math.hypot(at.clientX - cur.origin.clientX, at.clientY - cur.origin.clientY) <= TAP_PX) return { action: "puzzleDrop", pieceId: cur.id, x: board.x, y: board.y, rot: (cur.rot + 45) % 360 };
 
   if (inside) {
     return {

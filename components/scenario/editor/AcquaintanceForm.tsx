@@ -49,12 +49,14 @@ export function AcquaintanceForm({ campaignId, fields, onChange, onSubmit }: { c
         <Input id="acq-name" value={fields.name} maxLength={ACQUAINTANCE_LIMITS.name} onChange={(e) => onChange({ name: e.target.value })} />
       </div>
       {fields.kind === "micro" && (
-        <div className="space-y-1">
-          <Label htmlFor="acq-description">{t("description")}</Label>
-          <Textarea id="acq-description" value={fields.description} maxLength={ACQUAINTANCE_LIMITS.description} onChange={(e) => onChange({ description: e.target.value })} />
-        </div>
+        <>
+          <div className="space-y-1">
+            <Label htmlFor="acq-description">{t("description")}</Label>
+            <Textarea id="acq-description" value={fields.description} maxLength={ACQUAINTANCE_LIMITS.description} onChange={(e) => onChange({ description: e.target.value })} />
+          </div>
+          <IconUrlField id="acq-avatar" label={t("avatar")} value={fields.avatarUrl} onChange={(avatarUrl) => onChange({ avatarUrl })} fallbackText={fields.name} />
+        </>
       )}
-      {fields.kind === "micro" && <IconUrlField id="acq-avatar" label={t("avatar")} value={fields.avatarUrl} onChange={(avatarUrl) => onChange({ avatarUrl })} fallbackText={fields.name} />}
     </form>
   );
 }

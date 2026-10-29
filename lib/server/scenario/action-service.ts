@@ -22,6 +22,7 @@ import { withCampaignContentWrite } from "@/lib/server/content/write";
 import { afterContentCommit } from "@/lib/server/content/write-context";
 import type { Actor } from "@/lib/utils/api/actor";
 import { localeOrRequest } from "@/lib/utils/api/translate-error";
+import { ownHandler } from "@/lib/utils/common/own-handler";
 import { buildDefaultLegend } from "@/lib/utils/scenario/default-legend";
 import { moveRow, moveSection, newSection, removeRow, removeSection, updateSection } from "@/lib/utils/scenario/structure";
 import type { ScenarioContent } from "@/types/scenario";
@@ -218,7 +219,9 @@ export async function runScenarioOperation(actor: Actor, operation: string, inpu
 
   const id = input.id as string | undefined;
 
-  if (Object.hasOwn(READ_HANDLERS, operation)) return result(await READ_HANDLERS[operation](actor, input));
+  const read = ownHandler(READ_HANDLERS, operation);
+
+  if (read) return result(await read(actor, input));
 
   return withCampaignContentWrite(actor.campaignId, async () => {
     const state = expected ? await scenarioState(actor, id) : { page: id ? await prisma.scenarioPage.findFirst({ where: { id, campaignId: actor.campaignId }, select: OWNED_WITH_CONTENT_SELECT }) : undefined };
@@ -245,6 +248,8 @@ export async function runScenarioOperation(actor: Actor, operation: string, inpu
 
     const run: ScenarioRun = { actor, input, locale, id, page, result };
 
-    return Object.hasOwn(PAGE_HANDLERS, operation) ? PAGE_HANDLERS[operation](run) : saveContent(run, operation);
+    const pageHandler = ownHandler(PAGE_HANDLERS, operation);
+
+    return pageHandler ? pageHandler(run) : saveContent(run, operation);
   });
 }

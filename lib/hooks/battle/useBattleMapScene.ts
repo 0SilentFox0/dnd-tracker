@@ -2,8 +2,7 @@
 
 import { useCallback, useEffect, useMemo, useState } from "react";
 
-import { useModeTools } from "./modes/tools";
-import { type ModeTools } from "./modes/tools";
+import { type ModeTools, useModeTools } from "./modes/tools";
 import { useModeView } from "./modes/useModeView";
 import { useBattleScene } from "./useBattleScene";
 import { useExclusivePalettes } from "./useExclusivePalettes";
@@ -15,6 +14,7 @@ import { type MapWeatherTool, useMapWeatherTool } from "./useMapWeatherTool";
 
 import { aimView, checkReturnToStart, composeMapView, deriveMapScene, dispatchMapClick, type MapClick, mapClickHandlers, type MapSceneActor, type MapSceneMode } from "@/lib/utils/battle/grid";
 import { awaitsMoraleCheck } from "@/lib/utils/battle/morale/awaits-check";
+import { NO_ORDER } from "@/lib/utils/battle/view";
 import { pluralUk } from "@/lib/utils/common/plural";
 import type { BattleMapActions, BattleMapConfig, BattleMapView, BattleParticipant, GridPoint } from "@/types/battle";
 
@@ -28,8 +28,6 @@ export interface BattleMapScene {
   modeTools: ModeTools | null;
   weatherTool: MapWeatherTool | null;
 }
-
-const NO_ORDER: BattleParticipant[] = [];
 
 export function useBattleMapScene(): BattleMapScene | null {
   const { battle, turn: { current, isMyTurn }, viewer, selectedId, select, actions, anyPending, toast, intents, effects } = useBattleScene();

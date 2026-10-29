@@ -167,12 +167,14 @@ function readSpellInput(row: Record<string, unknown>, text: string, higher: stri
 
   const unknownConditions = [...tags(raw, "condition"), ...strings(row.conditionInflict)].map((c) => c.toLowerCase()).filter((c) => !resolveCondition(c, customConditions));
 
-  const signals = damageTypes.length > 0 || ability !== null || spellAttack || strings(row.conditionInflict).length > 0 || hasAny(row, [...RESIST_KEYS, "conditionImmune"]) || tags(raw, "damage").length > 0 || tags(raw, "condition").length > 0 || SIGNAL_TEXT.test(text);
-
   const rowCombat = damageTypes.length > 0 || spellAttack || strings(row.conditionInflict).length > 0 || hasAny(row, [...RESIST_KEYS, "conditionImmune"]);
+
+  const signals = hasSignals(rowCombat, ability, text, raw);
 
   return { row, text, higher, cast, raw, misc: strings(row.miscTags), damageTypes, ability, spellAttack, moveTrigger, triggerText, unknownConditions, signals, rowCombat, customConditions };
 }
+
+const hasSignals = (rowCombat: boolean, ability: string | null, t: string, r: string) => rowCombat || ability !== null || tags(r, "damage").length > 0 || tags(r, "condition").length > 0 || SIGNAL_TEXT.test(t);
 
 const narrative = (narrativeReason: NarrativeReason): SpellDerivation => ({ native: { fields: { targeting: { kind: "self" }, resolution: { kind: "auto" }, dice: 0, spellEffects: [] }, narrative: true, narrativeReason, riders: [] } });
 
@@ -180,13 +182,11 @@ const narrative = (narrativeReason: NarrativeReason): SpellDerivation => ({ nati
 function screenSpell(i: SpellInput): SpellDerivation | undefined {
   const { row, text, higher, cast, raw, misc, damageTypes, ability, signals, rowCombat } = i;
 
-  const hasSignals = (t: string, r: string) => rowCombat || ability !== null || tags(r, "damage").length > 0 || tags(r, "condition").length > 0 || SIGNAL_TEXT.test(t);
-
   if (!rowCombat && isOutOfCombatBuff(cast, text)) return narrative("outOfCombat");
 
-  if (signals && !hasSignals(withoutRestOrTravel(text), raw)) return narrative("outOfCombat");
+  if (signals && !hasSignals(rowCombat, ability, withoutRestOrTravel(text), raw)) return narrative("outOfCombat");
 
-  if (signals && !hasSignals(text, withoutObjectConditions(raw))) return narrative("objectOnly");
+  if (signals && !hasSignals(rowCombat, ability, text, withoutObjectConditions(raw))) return narrative("objectOnly");
 
   if (!signals && createsPlainObject(misc, text, raw)) return narrative("createdObject");
 

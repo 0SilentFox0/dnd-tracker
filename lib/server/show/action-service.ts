@@ -22,6 +22,7 @@ import { isHostedOnProjectStorage } from "@/lib/supabase/image-storage";
 import type { Actor } from "@/lib/utils/api/actor";
 import { isDmMember } from "@/lib/utils/api/is-dm";
 import { BATTLE_RATE_LIMITS, checkRateLimit } from "@/lib/utils/api/rate-limit";
+import { ownHandler } from "@/lib/utils/common/own-handler";
 import { applyShowCommand, refreshShowSlide } from "@/lib/utils/show/show-command";
 import type { ShowCommand, ShowState, Slide } from "@/types/show";
 
@@ -250,7 +251,7 @@ export async function runShowOperation(actor: Actor, operation: string, input: S
       },
     };
 
-    const handler = Object.hasOwn(SHOW_HANDLERS, operation) ? SHOW_HANDLERS[operation] : undefined;
+    const handler = ownHandler(SHOW_HANDLERS, operation);
 
     if (!handler) {
       requiredDeck(snapshot.deck);

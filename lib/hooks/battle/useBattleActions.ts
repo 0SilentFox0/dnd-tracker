@@ -35,9 +35,7 @@ import {
 export function useBattleActions(campaignId: string, battleId: string, showToast: (message: string) => void): BattleSceneActions {
   const onConflict = useCallback(() => showToast("Стан бою змінився, повторіть дію"), [showToast]);
 
-  const onFailure = useCallback((message: string) => showToast(message), [showToast]);
-
-  const o = { onConflict, onFailure };
+  const o = { onConflict, onFailure: showToast };
 
   return {
     nextTurn: useNextTurn(campaignId, battleId, o),

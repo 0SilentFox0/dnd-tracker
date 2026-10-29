@@ -20,8 +20,10 @@ export function useAttackTargets(attacker: BattleParticipant | null, attack: Bat
 
   const { visible } = useModeView();
 
+  const alive = (p: BattleParticipant) => isUp(p) || isDying(p);
+
   const targets = order.filter(
-    (p) => (isUp(p) || isDying(p)) && !isAirborne(p) && p !== attacker && visible(p) && (p.basicInfo.side !== attacker?.basicInfo.side || scene.battle.campaign?.friendlyFire === true),
+    (p) => alive(p) && !isAirborne(p) && p !== attacker && visible(p) && (p.basicInfo.side !== attacker?.basicInfo.side || scene.battle.campaign?.friendlyFire === true),
   );
 
   const enemyTargets = targets.filter((p) => p.basicInfo.side !== attacker?.basicInfo.side);
@@ -33,7 +35,7 @@ export function useAttackTargets(attacker: BattleParticipant | null, attack: Bat
 
     const seen = order.filter((p) => p === attacker || visible(p));
 
-    const candidates = seen.filter((p) => p !== attacker && (isUp(p) || isDying(p)));
+    const candidates = seen.filter((p) => p !== attacker && alive(p));
 
     return new Set(candidates.filter((t) => lineOfFire(map, seen, attacker, t).blocked).map((t) => t.basicInfo.id));
   }, [step, attacker, attack, map, order, visible]);

@@ -150,13 +150,15 @@ function rollStrike(ctx: PhaseCtx, target: BattleParticipant, i: number, opts: S
 
   const chosenAt = ctx.expanded ? chosenTargets.findIndex((t) => t.basicInfo.id === target.basicInfo.id) : i;
 
-  const strike = (input.serverRolls || opts.serverRolled) ? { value: rollDie(20, rng), serverRolled: true } : strikeD20(data, request, { index: i, chosenAt, expanded: ctx.expanded }, rng);
+  const serverD20 = input.serverRolls || opts.serverRolled;
+
+  const strike = serverD20 ? { value: rollDie(20, rng), serverRolled: true } : strikeD20(data, request, { index: i, chosenAt, expanded: ctx.expanded }, rng);
 
   const serverDamage = input.serverRolls ? damageDiceSlots(attacker, attack).map(sides => rollDie(sides, rng)) : null;
 
   const strikeDice = serverDamage ? { rolls: serverDamage, serverRolled: serverDamage } : ctx.dice.next();
 
-  const second = (input.serverRolls || opts.serverRolled) ? undefined : (data.secondRolls?.[chosenAt] ?? data.advantageRoll ?? data.disadvantageRoll);
+  const second = serverD20 ? undefined : (data.secondRolls?.[chosenAt] ?? data.advantageRoll ?? data.disadvantageRoll);
 
   return { strike, strikeDice, second };
 }

@@ -30,6 +30,7 @@ import { listTemplates } from "@/lib/server/templates/list-templates";
 import type { Actor } from "@/lib/utils/api/actor";
 import { windowOf } from "@/lib/utils/api/page-of";
 import { isPlatformAdmin } from "@/lib/utils/api/platform-admin";
+import { ownHandler } from "@/lib/utils/common/own-handler";
 
 export const campaignWindowSchema = z.object({ offset: z.number().int().min(0).default(0), limit: z.number().int().min(1).max(50).default(20) });
 
@@ -278,8 +279,10 @@ export async function runCampaignOperation(actor: Actor, operation: string, inpu
 
     if (expected && requestDigest(loaded.state) !== expected) throw new ContentError(API_ERRORS.ASSISTANT_CAMPAIGN_SETTINGS_CHANGED, 409);
 
-    if (!Object.hasOwn(CAMPAIGN_HANDLERS, operation)) throw new ContentError(API_ERRORS.ASSISTANT_UNKNOWN_CAMPAIGN_ACTION, 400);
+    const handler = ownHandler(CAMPAIGN_HANDLERS, operation);
 
-    return CAMPAIGN_HANDLERS[operation]({ ...base, loaded });
+    if (!handler) throw new ContentError(API_ERRORS.ASSISTANT_UNKNOWN_CAMPAIGN_ACTION, 400);
+
+    return handler({ ...base, loaded });
   });
 }

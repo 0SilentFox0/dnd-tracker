@@ -1,7 +1,6 @@
 import { slotOptions } from "./spell-costs";
 import type { SpellFlowState } from "./spell-flow-types";
-import { castLevelOptions, grantsFor, selectedGrantOf, sourceOptions } from "./spell-grants";
-import { canCastFromSlot } from "./spell-grants";
+import { canCastFromSlot, castLevelOptions, grantsFor, selectedGrantOf, sourceOptions } from "./spell-grants";
 import { spellDefinition } from "./spell-pick";
 
 import { spellEffectsFormula, spellFormulaLabel } from "@/lib/utils/battle/spell/caster-dice";

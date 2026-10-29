@@ -16,8 +16,7 @@ import { attackAbilityLabelFor, attackDamageModifier } from "@/lib/utils/battle/
 import { attackKindOf } from "@/lib/utils/battle/common/attack-kind";
 import { dealsNoDamage, findEffectMarker } from "@/lib/utils/battle/participant/state";
 import { maxOf, parseDice, parseDiceLenient, rollGroups } from "@/lib/utils/common/dice";
-import type { BattleParticipant, DamageStep } from "@/types/battle";
-import type { BattleAttack } from "@/types/battle";
+import type { BattleAttack, BattleParticipant, DamageStep } from "@/types/battle";
 
 export interface ComputeHitDamageParams {
   attacker: BattleParticipant;

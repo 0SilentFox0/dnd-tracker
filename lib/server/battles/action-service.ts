@@ -25,6 +25,7 @@ import { toBattleResponse } from "@/lib/utils/battle/pipeline/battle-response";
 import { guardBattleContext } from "@/lib/utils/battle/pipeline/run-battle-mutation";
 import { BattleAccessError, BattleRuleError, loadAllEvents, loadEventsBefore, loadRecentEvents } from "@/lib/utils/battle/store";
 import { summarizeBattle } from "@/lib/utils/battle/view/summary";
+import { ownHandler } from "@/lib/utils/common/own-handler";
 import { parseRules } from "@/lib/utils/rules/schema";
 
 const result = actionResult("battles", "Бій");
@@ -127,7 +128,7 @@ async function checkCommand(caller: AssistantCaller, operation: string, value: B
     if (typeof id === "string" && ![...ctx.participants, ...ctx.pending].some(p => p.basicInfo.id === id)) throw new ContentError(API_ERRORS.BATTLE_PARTICIPANT_NOT_IN_BATTLE, 404);
   }
 
-  await (Object.hasOwn(COMMAND_CHECKS, operation) ? COMMAND_CHECKS[operation] : undefined)?.(caller, ctx, parsed);
+  await ownHandler(COMMAND_CHECKS, operation)?.(caller, ctx, parsed);
 }
 
 async function checkParticipantSources(campaignId: string, operation: string, body: Body) {

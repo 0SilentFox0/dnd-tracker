@@ -68,11 +68,11 @@ export function useSpellBook(caster: BattleParticipant | null, options: { reacti
 
   const order = scene.battle.initiativeOrder;
 
-  if (flow.step === "book" && special && spells[0]) {
-    dispatch({ type: "PICK", pick: buildSpellPick(order, caster, spells[0], scene.battle.map ?? null, { castLevel: caster?.spellcasting.grants?.find((g) => g.spellId === special.spellId)?.castLevel }) });
-  }
-
   const map = scene.battle.map ?? null;
+
+  if (flow.step === "book" && special && spells[0]) {
+    dispatch({ type: "PICK", pick: buildSpellPick(order, caster, spells[0], map, { castLevel: caster?.spellcasting.grants?.find((g) => g.spellId === special.spellId)?.castLevel }) });
+  }
 
   const { targets, onMap, inRange, filteredOut, hover, aimPreviewAt, mapTargeting, chain, state } = useSpellBookTargets(caster, flow, dispatch);
 
@@ -109,7 +109,7 @@ export function useSpellBook(caster: BattleParticipant | null, options: { reacti
     attackTargets: state.pick?.needsAttackRolls ? targets.filter((t) => state.targetIds.includes(t.basicInfo.id)) : [],
     costUsed: (s: BookSpell) => costBlocked({
       caster, spell: s, definitionCost: spellDefinition(s).cost, grants: s.grantKey ? [inlineGrantOf(caster, s)].filter((g) => !!g) : grantsOf(s), grant: s.grantKey ? inlineGrantOf(caster, s) : grantOf(s), slotKey: state.slotKey, free, bypassCost, special: !!special, isDM: scene.viewer.isDM,
-      isMyTurn: scene.battle.initiativeOrder[scene.battle.currentTurnIndex]?.basicInfo.id === caster?.basicInfo.id, reactionBlocked: !!caster && !!reactionBlocker(caster),
+      isMyTurn: order[scene.battle.currentTurnIndex]?.basicInfo.id === caster?.basicInfo.id, reactionBlocked: !!caster && !!reactionBlocker(caster),
     }),
   };
 

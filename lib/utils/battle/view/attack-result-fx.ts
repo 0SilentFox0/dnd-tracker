@@ -18,7 +18,7 @@ export function attackResultsOf(log: BattleAction[], seen: ReadonlySet<number>, 
 
   if (fromLog.length > 0) return fromLog;
 
-  return strikes.map((s) => ({ kind: s.outcome === "crit" ? ("crit" as const) : s.outcome === "hit" ? ("hit" as const) : ("miss" as const), targetId: s.targetId, damage: 0, downed: false }));
+  return strikes.map((s) => ({ kind: s.outcome === "crit" || s.outcome === "hit" ? s.outcome : "miss", targetId: s.targetId, damage: 0, downed: false }));
 }
 
 interface AttackResultFxInput {

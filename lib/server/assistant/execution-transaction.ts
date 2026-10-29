@@ -96,6 +96,11 @@ async function markStale({ tx, row, done }: ExecScope) {
   if (row.legacyProposalId) await tx.aiProposal.updateMany({ where: { id: row.legacyProposalId, campaignId: row.campaignId, status: "pending" }, data: { status: "stale" } });
 }
 
+const receiptBase = (row: AssistantIntent) => ({
+  intentId: row.id, campaignId: row.campaignId, userId: row.userId, originTokenId: row.originTokenId,
+  originKey: row.originKey, requestId: row.requestId, requestHash: row.requestHash, actionId: row.actionId,
+});
+
 async function startExternalRun({ tx, row, action }: ExecScope, input: unknown): Promise<IntentTransactionOutcome> {
   // The campaign lock serializes image budget claims as well as domain writes.
   const runId = externalRun(row.expected) ?? row.id;
@@ -107,8 +112,7 @@ async function startExternalRun({ tx, row, action }: ExecScope, input: unknown):
   }
 
   const receipt = await tx.assistantReceipt.create({ data: {
-    intentId: row.id, campaignId: row.campaignId, userId: row.userId, originTokenId: row.originTokenId,
-    originKey: row.originKey, requestId: row.requestId, requestHash: row.requestHash, actionId: row.actionId,
+    ...receiptBase(row),
     status: "unknown", result: Prisma.JsonNull, effectsStatus: "unknown", effects: { items: [], completed: [], external: { phase: "started", runId } },
   } });
 
@@ -125,8 +129,7 @@ async function applyAction({ caller, tx, row, done, action }: ExecScope, input: 
   const result = parseInput(actionResultSchema, await action.execute(ctx, input));
 
   const data = {
-    intentId: row.id, campaignId: row.campaignId, userId: row.userId, originTokenId: row.originTokenId,
-    originKey: row.originKey, requestId: row.requestId, requestHash: row.requestHash, actionId: row.actionId,
+    ...receiptBase(row),
     status: "applied", result: result as Prisma.InputJsonValue,
     effects: { items: effects, completed: [], ...(done && { external: readExternalState(done.effects) }) } as unknown as Prisma.InputJsonValue,
     effectsStatus: effects.length ? "pending" : "complete",
