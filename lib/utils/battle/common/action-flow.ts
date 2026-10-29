@@ -38,7 +38,7 @@ export function fire(flow: ActionFlow, event: AbilityEvent): AbilityRunResult {
 export function applyFlowDamage(flow: ActionFlow, before: BattleParticipant, amount: number, crit?: boolean): void {
   const { rules } = flow.ctx;
 
-  if (!rules || amount <= 0 || !(rules.deathSaves.enabled || rules.concentration.enabled)) return;
+  if (!rules || amount <= 0 || !(rules.deathSaves.enabled || rules.concentration.enabled || before.battleData.transform)) return;
 
   const r = applyDamageConsequences({ before, after: getP(flow, before.basicInfo.id), amount, crit, rules: flow.ctx.rules, rng: flow.ctx.rng, participants: flow.ps });
 

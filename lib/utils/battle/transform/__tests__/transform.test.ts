@@ -222,3 +222,33 @@ describe("transform: згасання", () => {
     expect(again.order.find((p) => p.basicInfo.id === "orc")?.battleData.transform?.saved.maxHp).toBe(40);
   });
 });
+
+describe("transform: шкода заклинанням", () => {
+  const bolt = (): CastableSpell => ({
+    id: "bolt",
+    name: "Снаряд",
+    level: 1,
+    groupId: null,
+    definition: { dice: 2, cost: "action", concentration: false, targeting: { kind: "enemy", range: 30 }, resolution: { kind: "auto" }, effects: [{ kind: "dealDamage", amount: { spellRoll: 100 }, damageType: "force" }], raceModifiers: [] },
+  });
+
+  const hitForm = async (ruleset: typeof rules) => {
+    const { orc } = await transformed();
+
+    const c = mage();
+
+    const r = castSpell({ caster: c, spell: bolt(), targetIds: ["orc"], allParticipants: [c, orc], currentRound: 3, battleId: "b", diceRolls: [4, 4], saveRolls: [], rng: () => 0.5, rules: ruleset });
+
+    return (r.allParticipantsUpdated as BattleParticipant[]).find((p) => p.basicInfo.id === "orc") as BattleParticipant;
+  };
+
+  it.each([
+    ["правила смертельних/концентрації увімкнені", rules],
+    ["правила за замовчуванням", DEFAULT_RULES],
+  ])("шкода 8 при 4 HP форми: форма втрачена, надлишок 4 йде на справжні HP (%s)", async (_n, ruleset) => {
+    const orc = await hitForm(ruleset);
+
+    expect(orc.battleData.transform).toBeUndefined();
+    expect(orc.combatStats).toMatchObject({ maxHp: 40, currentHp: 29, tempHp: 0 });
+  });
+});
