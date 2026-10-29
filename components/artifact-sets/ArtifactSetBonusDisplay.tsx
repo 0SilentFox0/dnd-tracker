@@ -1,7 +1,8 @@
 import { useTranslations } from "next-intl";
 
-import { AbilitySummary } from "@/components/abilities";
+import { AbilityFlowList } from "@/components/abilities/AbilityFlow";
 import { cn } from "@/lib/utils";
+import type { AbilityFlowSummary } from "@/lib/utils/abilities/segments";
 
 export function ArtifactSetBonusDisplay({
   setBonus,
@@ -9,7 +10,7 @@ export function ArtifactSetBonusDisplay({
   className,
 }: {
   setBonus: unknown;
-  abilitySummary?: string[];
+  abilitySummary?: AbilityFlowSummary[];
   className?: string;
 }) {
   const t = useTranslations("artifacts.sets.card");
@@ -29,7 +30,7 @@ export function ArtifactSetBonusDisplay({
       {desc && <p className="mt-1.5 text-xs leading-relaxed text-hud-muted">{desc}</p>}
       {abilitySummary.length > 0 && (
         <div className="mt-2">
-          <AbilitySummary lines={abilitySummary} />
+          <AbilityFlowList lines={abilitySummary} />
         </div>
       )}
     </div>

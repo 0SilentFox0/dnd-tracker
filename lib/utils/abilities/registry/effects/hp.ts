@@ -1,14 +1,14 @@
-import { amountLabel } from "../labels";
+import { amountSegment, damageTypeSegment } from "../labels";
 import type { EffectApplyInput, EffectApplyResult } from "./types";
 
 import { CombatStatus } from "@/lib/constants/battle";
-import { DAMAGE_ELEMENT_LABELS } from "@/lib/constants/damage";
 import { resolveAmount } from "@/lib/utils/abilities/engine/core/amount";
 import { eventDamage, eventSpellRoll } from "@/lib/utils/abilities/engine/core/events";
 import { findParticipant, isActive, replaceParticipant } from "@/lib/utils/abilities/engine/core/participants";
 import { applyRawDamage } from "@/lib/utils/abilities/engine/effects/hp";
 import { effectSource, upsertTimedEffect } from "@/lib/utils/abilities/engine/effects/timed-effects";
 import type { Effect } from "@/lib/utils/abilities/schema";
+import { seg, type Segment } from "@/lib/utils/abilities/segments";
 import { applyDamageConsequences } from "@/lib/utils/battle/damage/consequences";
 import { clearDeathSaves, isDying } from "@/lib/utils/battle/death-saves";
 import { hasImmunity } from "@/lib/utils/battle/resistance";
@@ -199,12 +199,20 @@ export function applyHot(input: EffectApplyInput<Of<"hot">>): EffectApplyResult 
   return { participants: ps, messages };
 }
 
-const damageTypeLabel = (type: string) => DAMAGE_ELEMENT_LABELS[type] ?? type;
+const rounds = (e: { duration?: { rounds: number } }) => e.duration?.rounds ?? "?";
 
-export const describeDealDamage = (e: Of<"dealDamage">) => `шкода ${amountLabel(e.amount)}${e.damageType ? ` ${damageTypeLabel(e.damageType)}` : ""}${e.falloff ? ` (${e.falloff.join("% → ")}%)` : ""}`;
+export const describeDealDamage = (e: Of<"dealDamage">): Segment[] => [
+  seg("summary.effects.dealDamage", {
+    amount: amountSegment(e.amount),
+    hasType: e.damageType ? "yes" : "no",
+    ...(e.damageType && { type: damageTypeSegment(e.damageType) }),
+    hasFalloff: e.falloff ? "yes" : "no",
+    ...(e.falloff && { falloff: e.falloff.join("% → ") }),
+  }),
+];
 
-export const describeHeal = (e: Of<"heal">) => `${e.revive ? "воскресіння" : "лікування"} ${amountLabel(e.amount)}`;
+export const describeHeal = (e: Of<"heal">): Segment[] => [seg("summary.effects.heal", { revive: e.revive ? "yes" : "no", amount: amountSegment(e.amount) })];
 
-export const describeDot = (e: Of<"dot">) => `${damageTypeLabel(e.damageType)} ${amountLabel(e.damagePerRound)}/раунд × ${e.duration?.rounds ?? "?"} р.${e.linkedToCondition ? ", поки діє стан" : ""}`;
+export const describeDot = (e: Of<"dot">): Segment[] => [seg("summary.effects.dot", { type: damageTypeSegment(e.damageType), amount: amountSegment(e.damagePerRound), rounds: rounds(e), linked: e.linkedToCondition ? "yes" : "no" })];
 
-export const describeHot = (e: Of<"hot">) => `лікування ${amountLabel(e.healPerRound)}/раунд × ${e.duration?.rounds ?? "?"} р.`;
+export const describeHot = (e: Of<"hot">): Segment[] => [seg("summary.effects.hot", { amount: amountSegment(e.healPerRound), rounds: rounds(e) })];

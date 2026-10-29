@@ -4,6 +4,7 @@ import { useTranslations } from "next-intl";
 
 import type { AbilitySectionProps } from "../AbilityPanel";
 import { ConditionEditor, DEFAULT_CONDITION } from "../ConditionEditor";
+import { SectionShell } from "./SectionShell";
 import { SectionTitle } from "./SectionTitle";
 
 import { Button } from "@/components/ui/button";
@@ -14,7 +15,7 @@ export function ConditionSection({ ability, path, onChange }: AbilitySectionProp
   const { condition, ...rest } = ability;
 
   return (
-    <div className="space-y-2">
+    <SectionShell path={path} part="if">
       <SectionTitle>{t("title")}</SectionTitle>
       {condition ? (
         <ConditionEditor condition={condition} path={`${path}.condition`} actions={{ onChange: (c) => onChange({ ...ability, condition: c }), onRemove: () => onChange(rest) }} />
@@ -23,6 +24,6 @@ export function ConditionSection({ ability, path, onChange }: AbilitySectionProp
           {t("add")}
         </Button>
       )}
-    </div>
+    </SectionShell>
   );
 }

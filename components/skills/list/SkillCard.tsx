@@ -6,7 +6,7 @@ import { useTranslations } from "next-intl";
 
 import { SkillCardActionsMenu } from "./SkillCardActionsMenu";
 
-import { AbilitySummary } from "@/components/abilities";
+import { AbilityFlowList } from "@/components/abilities/AbilityFlow";
 import { EntityIcon } from "@/components/common/EntityIcon";
 import { HudCard } from "@/components/hud/page";
 import { Button } from "@/components/ui/button";
@@ -114,7 +114,7 @@ export function SkillCard({
         )}
 
         <div className={printMode ? "space-y-1 mb-1.5" : "space-y-2 mb-3"}>
-          {abilitySummary.length > 0 && <AbilitySummary lines={abilitySummary} />}
+          {abilitySummary.length > 0 && <AbilityFlowList lines={abilitySummary} />}
 
           {skillSpell && (
             <div className="text-xs text-muted-foreground">

@@ -18,6 +18,10 @@
   --color-hud-gold-bright: #ffe08a;
   --color-hud-gold-strong: #e6c25a;
   --color-hud-panel: rgba(17, 14, 11, 0.82);
+  --flow-when: #6aa4e0;
+  --flow-if: #e0b04a;
+  --flow-then: #e07a6a;
+  --flow-limit: #9a9184;
 }
 
 @theme inline {

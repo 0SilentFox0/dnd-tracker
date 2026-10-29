@@ -57,10 +57,10 @@ describe("UnitCard вміння", () => {
   afterEach(cleanup);
 
   it("показує опис умінь", () => {
-    render(<UnitCard unit={{ ...unit, abilitySummary: ["Влучання · bleed 1d4/раунд × 2 р."] } as Unit} campaignId="c1" onDelete={vi.fn()} />);
+    render(<UnitCard unit={{ ...unit, abilitySummary: [{ when: [{ key: "summary.text", params: { value: "bleed" } }], if: [], then: [], limits: [] }] } as Unit} campaignId="c1" onDelete={vi.fn()} />);
 
     expect(screen.getByText("units.card.abilities")).toBeInTheDocument();
-    expect(screen.getByText("Влучання · bleed 1d4/раунд × 2 р.")).toBeInTheDocument();
+    expect(screen.getByText('abilityRegistry.summary.text {"value":"bleed"}')).toBeInTheDocument();
   });
 });
 

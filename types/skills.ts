@@ -1,9 +1,10 @@
 import type { Ability, ConversionIssue } from "@/lib/utils/abilities/schema";
+import type { AbilityFlowSummary } from "@/lib/utils/abilities/segments";
 import type { IdName } from "@/types/common";
 
 export interface Skill {
   abilities?: Ability[];
-  abilitySummary?: string[];
+  abilitySummary?: AbilityFlowSummary[];
   abilityIssues?: ConversionIssue[];
   id: string;
   campaignId: string;

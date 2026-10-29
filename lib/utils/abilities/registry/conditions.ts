@@ -1,10 +1,12 @@
 import type { FieldMeta } from "./fields";
+import { CONDITION_KEYS_ALL, conditionKeySegment } from "./labels";
 
 import { AttackType } from "@/lib/constants/battle";
 import { eventActorId, eventAttackKind, eventTargetIds } from "@/lib/utils/abilities/engine/core/events";
 import { findParticipant, isActive } from "@/lib/utils/abilities/engine/core/participants";
 import { countMarks, markKey } from "@/lib/utils/abilities/engine/effects/marks";
-import type { Condition, ConditionSubject } from "@/lib/utils/abilities/schema";
+import type { AnyConditionKey, Condition, ConditionSubject } from "@/lib/utils/abilities/schema";
+import { seg, type Segment } from "@/lib/utils/abilities/segments";
 import { armorWornMatches } from "@/lib/utils/artifacts/worn-armor";
 import { isAdjacent } from "@/lib/utils/battle/grid/occupancy";
 import { findEffectMarker } from "@/lib/utils/battle/participant/state";
@@ -21,48 +23,82 @@ export interface ConditionContext {
 
 const WHO: FieldMeta = {
   name: "who",
-  label: "Хто",
   input: "select",
   options: [
-    { value: "self", label: "я" },
-    { value: "eventTarget", label: "ціль події" },
-    { value: "eventActor", label: "виконавець події" },
-    { value: "anyAlly", label: "будь-який союзник" },
-    { value: "anyEnemy", label: "будь-який ворог" },
+    { value: "self" },
+    { value: "eventTarget" },
+    { value: "eventActor" },
+    { value: "anyAlly" },
+    { value: "anyEnemy" },
   ],
 };
 
-export const CONDITION_REGISTRY: Record<Condition["type"], { label: string; fields: readonly FieldMeta[] }> = {
-  hpBelow: { label: "HP ≤ %", fields: [WHO, { name: "percent", label: "%", input: "number" }] },
-  hpAbove: { label: "HP ≥ %", fields: [WHO, { name: "percent", label: "%", input: "number" }] },
-  attackKind: { label: "Тип атаки", fields: [{ name: "kind", label: "Тип", input: "select", options: [{ value: AttackType.MELEE, label: "ближня" }, { value: AttackType.RANGED, label: "дальня" }, { value: "magic", label: "магія" }] }] },
-  targetHasCondition: { label: "Ціль має стан", fields: [{ name: "condition", label: "Стан", input: "text" }] },
-  targetCreatureType: { label: "Тип істоти цілі", fields: [{ name: "types", label: "Типи істот", input: "strings" }] },
-  targetRace: { label: "Раса цілі", fields: [{ name: "races", label: "Раси", input: "strings" }] },
-  targetDead: { label: "Ціль мертва", fields: [] },
-  actorIsEnemy: { label: "Виконавець події — ворог", fields: [] },
+export const CONDITION_REGISTRY: Record<Condition["type"], { fields: readonly FieldMeta[] }> = {
+  hpBelow: { fields: [WHO, { name: "percent", input: "number" }] },
+  hpAbove: { fields: [WHO, { name: "percent", input: "number" }] },
+  attackKind: { fields: [{ name: "kind", input: "select", options: [{ value: AttackType.MELEE }, { value: AttackType.RANGED }, { value: "magic" }] }] },
+  targetHasCondition: { fields: [{ name: "condition", input: "text" }] },
+  targetCreatureType: { fields: [{ name: "types", input: "strings" }] },
+  targetRace: { fields: [{ name: "races", input: "strings" }] },
+  targetDead: { fields: [] },
+  actorIsEnemy: { fields: [] },
   hasMark: {
-    label: "Має мітку",
-    fields: [WHO, { name: "markId", label: "Мітка", input: "text" }, { name: "bySelf", label: "Лише моя мітка", input: "toggle", optional: true }],
+    fields: [WHO, { name: "markId", input: "text" }, { name: "bySelf", input: "toggle", optional: true }],
   },
   armorWorn: {
-    label: "Броня на мені",
     fields: [
-      { name: "categories", label: "Категорії", input: "multiselect", options: [{ value: "none", label: "без броні" }, { value: "light", label: "легка" }, { value: "medium", label: "середня" }, { value: "heavy", label: "важка" }] },
-      { name: "shield", label: "Щит", input: "select", optional: true, options: [{ value: "with", label: "зі щитом" }, { value: "without", label: "без щита" }] },
+      { name: "categories", input: "multiselect", options: [{ value: "none" }, { value: "light" }, { value: "medium" }, { value: "heavy" }] },
+      { name: "shield", input: "select", optional: true, options: [{ value: "with" }, { value: "without" }] },
     ],
   },
   attackRollMode: {
-    label: "Режим кидка атаки",
-    fields: [{ name: "mode", label: "Режим", input: "select", options: [{ value: "advantage", label: "перевага" }, { value: "disadvantage", label: "недолік" }, { value: "normal", label: "звичайний" }] }],
+    fields: [{ name: "mode", input: "select", options: [{ value: "advantage" }, { value: "disadvantage" }, { value: "normal" }] }],
   },
-  allyAdjacent: { label: "Союзник поруч із ціллю", fields: [] },
-  notMoved: { label: "Не рухався цього ходу", fields: [] },
-  withThisItem: { label: "Атака цим предметом", fields: [] },
-  not: { label: "НЕ (заперечення)", fields: [{ name: "condition", label: "Умова", input: "effects" }] },
-  all: { label: "Усі умови", fields: [{ name: "conditions", label: "Умови", input: "effects" }] },
-  any: { label: "Будь-яка умова", fields: [{ name: "conditions", label: "Умови", input: "effects" }] },
+  allyAdjacent: { fields: [] },
+  notMoved: { fields: [] },
+  withThisItem: { fields: [] },
+  not: { fields: [{ name: "condition", input: "effects" }] },
+  all: { fields: [{ name: "conditions", input: "effects" }] },
+  any: { fields: [{ name: "conditions", input: "effects" }] },
 };
+
+const listParam = (items: readonly string[]) => items.join(", ");
+
+export function describeCondition(c: Condition): Segment[] {
+  const who = (w: ConditionSubject) => seg(`summary.conditions.who.${w}`);
+
+  switch (c.type) {
+    case "hpBelow":
+    case "hpAbove":
+      return [seg(`summary.conditions.${c.type}`, { who: who(c.who), percent: c.percent })];
+    case "attackKind":
+      return [seg("summary.conditions.attackKind", { kind: seg(`summary.conditions.attackKinds.${c.kind}`) })];
+    case "targetHasCondition":
+      return [seg("summary.conditions.targetHasCondition", { condition: (CONDITION_KEYS_ALL as readonly string[]).includes(c.condition) ? conditionKeySegment(c.condition as AnyConditionKey) : c.condition })];
+    case "targetCreatureType":
+      return [seg("summary.conditions.targetCreatureType", { types: listParam(c.types) })];
+    case "targetRace":
+      return [seg("summary.conditions.targetRace", { races: listParam(c.races) })];
+    case "hasMark":
+      return [seg("summary.conditions.hasMark", { who: who(c.who), markId: c.markId, bySelf: c.bySelf ? "yes" : "no" })];
+    case "armorWorn":
+      return [
+        seg("summary.conditions.armorWorn", {
+          categories: { join: ", ", items: c.categories.map((k) => seg(`summary.conditions.armorKinds.${k}`)) },
+          shield: c.shield ?? "any",
+        }),
+      ];
+    case "attackRollMode":
+      return [seg("summary.conditions.attackRollMode", { mode: seg(`summary.conditions.rollModes.${c.mode}`) })];
+    case "not":
+      return [seg("summary.conditions.not", { condition: describeCondition(c.condition) })];
+    case "all":
+    case "any":
+      return [seg(`summary.conditions.${c.type}`, { items: c.conditions.flatMap(describeCondition) })];
+    default:
+      return [seg(`summary.conditions.${c.type}`)];
+  }
+}
 
 function subjects(who: ConditionSubject, ctx: ConditionContext): BattleParticipant[] {
   const { owner, event, participants: ps } = ctx;

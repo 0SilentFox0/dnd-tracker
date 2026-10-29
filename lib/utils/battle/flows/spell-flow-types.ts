@@ -1,3 +1,4 @@
+import type { Segment } from "@/lib/utils/abilities/segments";
 import type { SkillRadius, SpellChain } from "@/lib/utils/battle/spell/spell-targeting";
 import type { SpellTargetFilter } from "@/lib/utils/spells/model/schema";
 import type { GridPoint, SpellTemplate } from "@/types/battle";
@@ -24,7 +25,7 @@ export interface SpellPick {
   filter?: SpellTargetFilter;
   castLevel?: number;
   /** підписи варіантів chooseOne; гравець обирає один перед кастом */
-  options?: string[];
+  options?: Segment[][];
   /** кількість кубиків вводить кастер (напр. висота падіння); diceSlots відповідають поточному вводу */
   inputDice?: { label: string; max: number; sides: number };
   /** плитка inline-гранту: на сервер йде справжній spellId і ключ гранту */

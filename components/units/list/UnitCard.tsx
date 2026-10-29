@@ -7,7 +7,7 @@ import { GripVertical, X } from "lucide-react";
 
 import { UnitQuickStatsEditor } from "./UnitQuickStatsEditor";
 
-import { AbilitySummary } from "@/components/abilities";
+import { AbilityFlowList } from "@/components/abilities/AbilityFlow";
 import { EntityIcon } from "@/components/common/EntityIcon";
 import { MonsterStatblock } from "@/components/common/MonsterStatblock";
 import { HudCard } from "@/components/hud/page";
@@ -110,7 +110,7 @@ export const UnitCard = memo(function UnitCard({ unit, campaignId, onDelete }: U
           <div className="space-y-1 mt-4">
             <div className="text-xs font-semibold">{t("abilities")}</div>
             <div className="text-muted-foreground">
-              <AbilitySummary lines={abilitySummary} />
+              <AbilityFlowList lines={abilitySummary} />
             </div>
           </div>
         )}

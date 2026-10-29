@@ -1,6 +1,7 @@
 import { useTranslations } from "next-intl";
 import { Gem } from "lucide-react";
 
+import { AbilityFlowList } from "@/components/abilities/AbilityFlow";
 import { EntityIcon } from "@/components/common/EntityIcon";
 import {
   AccordionContent,
@@ -44,11 +45,9 @@ export function ArtifactSetReferenceCard({ set }: { set: ArtifactSetForReference
           {set.bonuses.length > 0 && (
             <div>
               <Label className="hud-sc text-xs text-hud-gold">{t("setBonuses")}</Label>
-              <ul className="list-disc list-inside text-sm mt-0.5 space-y-0.5">
-                {set.bonuses.map((b, i) => (
-                  <li key={i}>{b}</li>
-                ))}
-              </ul>
+              <div className="mt-1">
+                <AbilityFlowList lines={set.bonuses} />
+              </div>
             </div>
           )}
         </div>

@@ -5,6 +5,7 @@ import { ParticipantSourceType } from "@/lib/constants/battle";
 import { findParticipant, isActive, replaceParticipant } from "@/lib/utils/abilities/engine/core/participants";
 import { effectSource, upsertTimedEffect } from "@/lib/utils/abilities/engine/effects/timed-effects";
 import type { Effect } from "@/lib/utils/abilities/schema";
+import { seg, type Segment } from "@/lib/utils/abilities/segments";
 
 type Of<K extends Effect["kind"]> = Extract<Effect, { kind: K }>;
 
@@ -104,6 +105,6 @@ export function applyCharm(input: EffectApplyInput<Of<"charm">>): EffectApplyRes
   return { participants: ps, messages };
 }
 
-export const describeBerserk = (e: Of<"berserk">) => `шал: автоатака випадкової істоти, +${e.damageBonusPercent}% шкоди × ${e.duration?.rounds ?? "?"} р.`;
+export const describeBerserk = (e: Of<"berserk">): Segment[] => [seg("summary.effects.berserk", { percent: e.damageBonusPercent, rounds: e.duration?.rounds ?? "?" })];
 
-export const describeCharm = (e: Of<"charm">) => `перехід на бік заклинателя × ${e.duration?.rounds ?? "?"} р.`;
+export const describeCharm = (e: Of<"charm">): Segment[] => [seg("summary.effects.charm", { rounds: e.duration?.rounds ?? "?" })];

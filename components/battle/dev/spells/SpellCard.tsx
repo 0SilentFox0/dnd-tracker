@@ -3,6 +3,7 @@ import { Play } from "lucide-react";
 
 import type { SpellCardData } from "./types";
 
+import { useAbilityText } from "@/components/abilities/use-ability-text";
 import { ARCHETYPE_LABEL, AURA_LABEL, ELEMENT_LABEL, FRAME_LABEL } from "@/components/battle/fx/labels";
 import { PALETTE } from "@/components/battle/fx/runtime/palette";
 import { EntityIcon } from "@/components/common/EntityIcon";
@@ -21,6 +22,8 @@ const list = (items: string[]) => (items.length ? items.join(", ") : "—");
 
 export function SpellCard({ spell, onPlay }: { spell: SpellCardData; onPlay: (spell: SpellCardData) => void }) {
   const { spec } = spell;
+
+  const effects = useAbilityText().lines(spell.effects);
 
   return (
     <HudCard accent={spec ? PALETTE[spec.element].core : undefined}>
@@ -45,7 +48,7 @@ export function SpellCard({ spell, onPlay }: { spell: SpellCardData; onPlay: (sp
           </div>
           <p className="text-sm text-hud-bone">{spell.description}</p>
           <div className="flex flex-wrap gap-1">
-            {spell.effects.map((e) => (
+            {effects.map((e) => (
               <HudPill key={e} tone="muted">
                 {e}
               </HudPill>

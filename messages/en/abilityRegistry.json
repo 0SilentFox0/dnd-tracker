@@ -302,30 +302,40 @@
       }
     },
     "damageThreshold": {
-      "label": "Damage threshold"
+      "label": "Damage threshold",
+      "fields": {
+        "value": "Damage below the threshold (1-100) becomes 0"
+      }
     }
   },
   "triggers": {
     "passive": {
-      "label": "Passive (always)"
+      "label": "Passive (always)",
+      "hint": "Always on, no event needed. Example: +2 AC."
     },
     "battleStart": {
-      "label": "Battle start"
+      "label": "Battle start",
+      "hint": "Fires once when the battle starts. Example: temporary HP at the start."
     },
     "roundStart": {
-      "label": "Round start"
+      "label": "Round start",
+      "hint": "Fires at the start of every round. Example: a 5e lair action — pair it with the “Uses per round” limit = 1."
     },
     "roundEnd": {
-      "label": "Round end"
+      "label": "Round end",
+      "hint": "Fires at the end of every round. Example: regeneration at round end."
     },
     "turnStart": {
-      "label": "My turn start"
+      "label": "My turn start",
+      "hint": "Fires at the start of your turn. Example: heal at the start of the turn."
     },
     "turnEnd": {
-      "label": "My turn end"
+      "label": "My turn end",
+      "hint": "Fires at the end of your turn. Example: remove an effect at the end of the turn."
     },
     "attack": {
-      "label": "Attack"
+      "label": "Attack",
+      "hint": "Fires before or after an attack involving you. Example: before you are attacked — a to-hit penalty."
     },
     "hit": {
       "label": "Hit",
@@ -333,16 +343,19 @@
         "whose": {
           "ally": "another ally's"
         }
-      }
+      },
+      "hint": "Fires when an attack hits. Example: extra damage on hit."
     },
     "kill": {
       "label": "Death",
       "fields": {
         "role": "Who"
-      }
+      },
+      "hint": "Fires when someone dies. Example: a bonus when you kill an enemy."
     },
     "lethalDamage": {
-      "label": "Lethal damage"
+      "label": "Lethal damage",
+      "hint": "Fires when you take lethal damage. Example: stay at 1 HP."
     },
     "spellCast": {
       "label": "Spell",
@@ -355,19 +368,23 @@
         "role": {
           "target": "I am the target"
         }
-      }
+      },
+      "hint": "Fires before or after a spell. Example: a bonus after you cast a spell."
     },
     "moraleCheck": {
       "label": "Morale check",
       "fields": {
         "whose": "Whose"
-      }
+      },
+      "hint": "Fires after a morale check. Example: a bonus after an ally fails morale."
     },
     "action": {
-      "label": "Action (button)"
+      "label": "Action (button)",
+      "hint": "A main-action button the player presses. Example: a special attack."
     },
     "bonusAction": {
-      "label": "Bonus action (button)"
+      "label": "Bonus action (button)",
+      "hint": "A bonus-action button the player presses. Example: a dash."
     }
   },
   "conditionTypes": {
@@ -789,5 +806,243 @@
       "defaultName": "New ability",
       "note": "Describe the ability"
     }
+  },
+  "summary": {
+    "amount": {
+      "value": "{value}",
+      "scale": "[{scale}]",
+      "formula": "({formula})",
+      "spellRollFormula": "({formula})% of the spell roll",
+      "spellRollFull": "spell roll",
+      "spellRollPct": "{value}% of the spell roll",
+      "percentOwnerAttack": "{value}% of the first attack's damage",
+      "percentOfEventDamage": "{value}% of damage dealt",
+      "percentOfMaxHp": "{value}% of max HP"
+    },
+    "flat": {
+      "number": "{value}",
+      "formula": "+({formula})",
+      "scale": "+[{scale}]",
+      "spellRollFull": "+roll",
+      "spellRollNegFull": "−roll",
+      "spellRollPct": "{value}% of the roll"
+    },
+    "limits": {
+      "perBattle": "{n, plural, one {# time} other {# times}} per battle",
+      "perRestN": "{n, plural, one {# time} other {# times}} per {rest}",
+      "perRestExpr": "{expr} times per {rest}",
+      "restShort": "short rest",
+      "restLong": "long rest",
+      "perRound": "{n}/round",
+      "perTurn": "{n}/turn",
+      "cooldown": "cooldown {n} r.",
+      "chance": "{n}%",
+      "lair": "lair action",
+      "legendary": "legendary action ({n})",
+      "pool": "pool \"{key}\": {cost}"
+    },
+    "text": "{value}",
+    "percent": {
+      "number": "{value}%",
+      "formula": "({formula})%",
+      "scale": "[{scale}]%"
+    },
+    "effects": {
+      "dealDamage": "damage {amount}{hasType, select, yes { {type}} other {}}{hasFalloff, select, yes { ({falloff}%)} other {}}",
+      "heal": "{revive, select, yes {revival} other {healing}} {amount}",
+      "dot": "{type} {amount}/round × {rounds} rd.{linked, select, yes {, while the condition lasts} other {}}",
+      "hot": "healing {amount}/round × {rounds} rd.",
+      "berserk": "berserk: auto-attacks a random creature, +{percent}% damage × {rounds} rd.",
+      "charm": "switches to the caster's side × {rounds} rd.",
+      "maneuver": "{name}: {percent}% of attack damage",
+      "summonUnit": "summon {count}× of the chosen unit",
+      "summonGroup": "summon {count}× unit of «{group}», Tier {tier}",
+      "raiseDead": "raise dead units at {percent}% HP",
+      "statAtLeast": "{stat} at least {n}",
+      "stat": "{stat}{hasLevels, select, yes { (levels {levels})} other {}} {value}",
+      "damageBonus": "damage ({filter}{hasSchool, select, yes {, school} other {}}) {value}{hasMark, select, yes { per mark «{mark}»} other {}}",
+      "grantAction": "{parts}",
+      "grantExtra": "+{n} action",
+      "grantRefreshAction": "refreshes the action",
+      "grantRefreshBonusAction": "refreshes the bonus action",
+      "grantRefreshReaction": "refreshes the reaction",
+      "note": "{text}",
+      "noteDm": "✋ {text}",
+      "applyCondition": "{condition}{hasPercent, select, yes { {percent}%} other {}}{hasLevels, select, yes { ×{levels}} other {}} × {rounds} rd.{breakOnDamage, select, yes {, until damaged} other {}}{hasSave, select, yes {, {ability} saving throw} other {}}{hasEscape, select, yes {, escape vs spell DC} other {}}",
+      "restoreSpellSlotLevels": "restores spell slots up to level {level} by level budget on a short rest",
+      "restoreSpellSlot": "+{count} slot",
+      "drainSpellSlot": "−{count} spell slot",
+      "changeMorale": "morale {delta}",
+      "mark": "mark × {rounds} rd.",
+      "copySpellBuffs": "copies spell buffs cast on an ally",
+      "guard": "guard: {percent}% of attack damage × {rounds} rd.",
+      "cleanse": "{includeConditions, select, yes {removes debuffs and conditions} other {removes debuffs}}",
+      "randomOf": "one of: {options}",
+      "help": "advantage for an ally on their next attack",
+      "push": "push {feet} ft away from the caster"
+    },
+    "flags": {
+      "sense": "{sense} {range} ft",
+      "advantage": "advantage on {kind, select, all {attacks} melee {melee attacks} other {ranged attacks}}{hasAbility, select, yes { ({ability})} other {}}{consume, select, yes {, until the first attack} other {}}",
+      "disadvantage": "disadvantage on attacks",
+      "disadvantageForAttackers": "disadvantage for attackers",
+      "advantageForAttackers": "attackers against this target have advantage",
+      "guaranteedHit": "guaranteed hit",
+      "resistance": "{mode, select, immune {immunity: {type}} vuln {vulnerability {type} {n}%} other {resistance {type} {n}%}}{kind, select, ranged { (ranged attacks)} melee { (melee attacks)} other {}}{hasSchool, select, yes { (spells of school {school})} other {}}",
+      "spellAbsorb": "heals for {percent}% of damage from spells of school {school}",
+      "castSpellOnHit": "a hit casts a random spell (of {count})",
+      "spellImmunity": "{hasIds, select, yes {immunity to spells ({count})} other {immunity to all spells}}",
+      "spellTargeting": "{scope, select, school {spells of school {school}} ids {spells ({count})} other {spells}} — {mode, select, all {on everyone} other {area (up to {max} targets)}}",
+      "counterAttack": "retaliation{ranged, select, yes { (also vs ranged)} other {}} +{percent}%",
+      "attackHitsAllEnemies": "every attack hits all enemies",
+      "seeEnemyHp": "sees enemy HP",
+      "multiTargetFalloff": "extra targets of a ranged attack take {percent}% damage",
+      "chainShot": "after a hit the shot jumps to the nearest enemy ({jumps}×), each jump deals {percent}% of the previous damage",
+      "lifesteal": "attacks heal for {percent}% of damage dealt",
+      "moraleChance": "extra turn chance from morale +{percent}%",
+      "noRetaliation": "attacks without retaliation",
+      "strikeAndReturn": "returns to the starting cell after attacking",
+      "unlimitedRetaliation": "retaliates against every attack",
+      "extraRetaliations": "+{count} retaliation per round",
+      "noNegativeMorale": "negative morale = 0",
+      "ignoreMorale": "morale has no effect",
+      "minMorale": "morale at least {value}",
+      "extraSummons": "summons{hasIds, select, yes { from spells ({ids})} other {}} give +{count} creatures",
+      "piercingShot": "a ranged attack hits all enemies in line behind the target",
+      "fireWave": "a hit scorches enemies behind the target (cone {size} ft): {percent}% fire damage",
+      "banishSummons": "creatures summoned by the enemy lose {percent}% HP",
+      "saveAdvantage": "advantage on saving throws{hasList, select, yes { ({list})} other {}}{vsSpells, select, yes { against spells} other {}}",
+      "saveDisadvantage": "disadvantage on saving throws{hasList, select, yes { ({list})} other {}}",
+      "autoFailSave": "automatically fails saving throws{hasList, select, yes { ({list})} other {}}",
+      "saveProficiency": "proficiency in saving throws{hasList, select, yes { ({list})} other {}}",
+      "checkAdvantage": "advantage on checks{hasList, select, yes { ({list})} other {}}",
+      "checkDisadvantage": "disadvantage on checks{hasList, select, yes { ({list})} other {}}",
+      "skillProficiency": "proficiency in skills{hasList, select, yes { ({list})} other {}}",
+      "skillExpertise": "expertise in skills{hasList, select, yes { ({list})} other {}} (double proficiency)",
+      "proficiency": "proficiency ({list})",
+      "autoCritAdjacent": "melee attacks from 5 ft against the target are critical",
+      "twoWeaponFighting": "off-hand damage modifier",
+      "critImmunity": "a critical hit against the owner becomes a normal hit",
+      "cunningAction": "Dash, Disengage and Hide as a bonus action",
+      "evasion": "Dexterity saving throw with half damage: success — 0, failure — half",
+      "proneDefense": "melee attacks against the target have advantage, ranged — disadvantage",
+      "conditionImmunity": "{all, select, yes {immunity to control} other {immunity: {list}}}",
+      "cond": {
+        "fear": "fear",
+        "berserk": "berserk",
+        "charm": "charm"
+      },
+      "damageThreshold": "damage threshold {value}: lower damage is ignored"
+    },
+    "unknownEffect": "unknown effect ({kind})",
+    "triggers": {
+      "otherAlly": "another ally",
+      "spellCount": "spells: {n}",
+      "school": "school {school}",
+      "spellLevels": "levels {levels}"
+    },
+    "conditions": {
+      "hpBelow": "HP ≤ {percent}% ({who})",
+      "hpAbove": "HP ≥ {percent}% ({who})",
+      "attackKind": "attack type: {kind}",
+      "attackKinds": {
+        "melee": "melee",
+        "ranged": "ranged",
+        "magic": "magic"
+      },
+      "targetHasCondition": "target has condition \"{condition}\"",
+      "targetCreatureType": "target creature type: {types}",
+      "targetRace": "target race: {races}",
+      "targetDead": "target is dead",
+      "actorIsEnemy": "event actor is an enemy",
+      "hasMark": "mark \"{markId}\"{bySelf, select, yes { (mine only)} other {}}: {who}",
+      "armorWorn": "armor worn: {categories}{shield, select, with { (with shield)} without { (no shield)} other {}}",
+      "armorKinds": {
+        "none": "no armor",
+        "light": "light",
+        "medium": "medium",
+        "heavy": "heavy"
+      },
+      "attackRollMode": "attack roll: {mode}",
+      "rollModes": {
+        "advantage": "advantage",
+        "disadvantage": "disadvantage",
+        "normal": "normal"
+      },
+      "allyAdjacent": "ally next to the target",
+      "notMoved": "has not moved this turn",
+      "withThisItem": "attack with this item",
+      "not": "NOT ({condition})",
+      "all": "all of: ({items})",
+      "any": "any of: ({items})",
+      "who": {
+        "self": "me",
+        "eventTarget": "event target",
+        "eventActor": "event actor",
+        "anyAlly": "any ally",
+        "anyEnemy": "any enemy"
+      }
+    },
+    "spellOnly": {
+      "inputDice": "dice from input (up to {max}): {label}",
+      "cost": {
+        "action": "action",
+        "bonusAction": "bonus action",
+        "reaction": "reaction"
+      },
+      "grantCast": "sub-cast “{label}” ({cost}{hasUses, select, yes {, ×{uses}} other {}}) for {rounds} rd.",
+      "attack": {
+        "any": "any",
+        "melee": "melee",
+        "ranged": "ranged"
+      },
+      "hitRider": "charges ×{charges}: +{dice} {type} on a {attack} attack{consumeOnMiss, select, yes { (and a miss)} other {}}{hasSave, select, yes {, {ability} save: {onFail}} other {}}",
+      "side": {
+        "enemies": "enemies",
+        "allies": "allies",
+        "all": "everyone"
+      },
+      "anchoredZone": "aura {radius} ft on the target ({side}{excludeBearer, select, yes {, except the bearer} other {}}) for {rounds} rd.{hasEnter, select, yes {; on enter: {enter}} other {}}{hasTurnStart, select, yes {; turn start: {turnStart}} other {}}{endsOutside, select, yes {; ends if the turn starts outside the aura} other {}}",
+      "item": "object",
+      "hp": "{hp} HP",
+      "acSpellDc": "= spell DC",
+      "summonInline": "summons {count}× “{name}” ({hp}, AC {ac}) for {rounds} rd.{hasUpcast, select, yes {; +1 per {upcastEvery} slot levels} other {}}{hasAura, select, yes {; aura {auraRadius} ft{auraAttack, select, yes { (spell attack)} other {}}} other {}}",
+      "transform": "transforms the target into a unit form for {rounds} rd.; at 0 HP of the form it reverts and excess damage carries over to the normal form",
+      "moveSelf": "the caster moves next to the target",
+      "terrain": {
+        "wall": "wall",
+        "difficult": "difficult terrain"
+      },
+      "shape": {
+        "line": "line to the target",
+        "cell": "area cells"
+      },
+      "createTerrain": "{terrain}: {shape} (up to {cells}) for {rounds} rd.",
+      "chooseOne": "choose one: {options}"
+    }
+  },
+  "damageTypes": {
+    "fire": "Fire",
+    "cold": "Cold",
+    "lightning": "Lightning",
+    "acid": "Acid",
+    "poison": "Poison",
+    "necrotic": "Necrotic",
+    "radiant": "Radiant",
+    "thunder": "Thunder",
+    "psychic": "Psychic",
+    "force": "Force",
+    "bludgeoning": "Bludgeoning",
+    "piercing": "Piercing",
+    "slashing": "Slashing",
+    "bleed": "Bleeding"
+  },
+  "triggerGroups": {
+    "always": "Always",
+    "boundaries": "Start and end",
+    "myTurn": "My turn",
+    "incoming": "Attacks on me",
+    "outgoing": "My actions",
+    "other": "Other"
   }
 }

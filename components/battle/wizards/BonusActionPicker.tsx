@@ -2,6 +2,7 @@
 
 import { Swords, Zap } from "lucide-react";
 
+import { useAbilityText } from "@/components/abilities/use-ability-text";
 import { HealthLabel } from "@/components/battle/hud";
 import { AbilityAimPanel } from "@/components/battle/wizards/AbilityAimPanel";
 import { TargetButton } from "@/components/battle/wizards/TargetButton";
@@ -11,12 +12,13 @@ import { ResponsiveDialog } from "@/components/ui/responsive-dialog";
 import { ParticipantSide } from "@/lib/constants/battle";
 import { useAbilityPicker } from "@/lib/hooks/battle";
 import { cn } from "@/lib/utils";
-import { describeEffect } from "@/lib/utils/abilities/registry/effects";
 import { canOffHandAttack } from "@/lib/utils/battle/attack/attacks-left";
 import type { BattleParticipant } from "@/types/battle";
 
 export function BonusActionPicker({ participant, open, onOpenChange, onDone, trigger = "bonusAction", onOffHand }: { participant: BattleParticipant; open: boolean; onOpenChange: (o: boolean) => void; onDone: () => void; trigger?: "bonusAction" | "action"; onOffHand?: () => void }) {
   const { abilities, isPending, aiming, mapAim, pick, reset } = useAbilityPicker(participant, trigger, { onOpenChange, onDone });
+
+  const abilityText = useAbilityText();
 
   const { ability, side, max, candidates, picked } = aiming;
 
@@ -42,7 +44,7 @@ export function BonusActionPicker({ participant, open, onOpenChange, onDone, tri
               {a.source.icon ? <OptimizedImage src={a.source.icon} alt="" width={40} height={40} className="size-10 rounded object-cover" /> : <Zap className="size-10 p-2 text-[var(--gold)]" />}
               <span className="min-w-0">
                 <span className="hud-sc block font-bold">{a.name}{cooldownLeft > 0 && <span className="ml-2 text-xs font-normal text-[#a89c88]">ще {cooldownLeft} р.</span>}{pool && <span className="ml-2 text-xs font-normal text-[#a89c88]">{pool.label} {pool.left}/{pool.max} · −{pool.cost}</span>}</span>
-                <span className="line-clamp-2 block text-xs text-[#a89c88]">{a.description ?? a.effects.map(describeEffect).join(", ")}</span>
+                <span className="line-clamp-2 block text-xs text-[#a89c88]">{a.description ?? a.effects.map(abilityText.effect).join(", ")}</span>
               </span>
             </button>
           ))}

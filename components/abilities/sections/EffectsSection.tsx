@@ -6,6 +6,7 @@ import type { AbilitySectionProps } from "../AbilityPanel";
 import { useAbilityEditor } from "../editor-context";
 import { EffectCard } from "../EffectCard";
 import { FieldErrors } from "../FieldErrors";
+import { SectionShell } from "./SectionShell";
 import { SectionTitle } from "./SectionTitle";
 
 import { Button } from "@/components/ui/button";
@@ -20,7 +21,7 @@ export function EffectsSection({ ability, path, onChange }: AbilitySectionProps)
   const setEffects = (effects: Effect[]) => onChange({ ...ability, effects });
 
   return (
-    <div className="space-y-2">
+    <SectionShell path={path} part="then">
       <SectionTitle>{t("title")}</SectionTitle>
       <FieldErrors errors={errorsByPath[`${path}.effects`] ?? []} />
       {ability.effects.map((effect, i) => (
@@ -40,6 +41,6 @@ export function EffectsSection({ ability, path, onChange }: AbilitySectionProps)
       <Button type="button" size="sm" variant="outline" onClick={() => setEffects([...ability.effects, newEffect(allowedEffectKinds(ability.trigger)[0], ability.trigger)])}>
         {t("add")}
       </Button>
-    </div>
+    </SectionShell>
   );
 }
