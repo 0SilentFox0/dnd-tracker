@@ -117,7 +117,7 @@ export const prismaImportRepository: ImportRepository = {
 
     const hasClasses = (await prisma.gameClass.count({ where: { campaignId: actor.campaignId } })) > 0;
 
-    const provenance = await prisma.compendiumEntry.findMany({ where: { campaignId: actor.campaignId }, orderBy: { canonicalKey: "asc" } });
+    const provenance = await prisma.compendiumEntry.findMany({ where: { campaignId: actor.campaignId }, orderBy: { canonicalKey: "asc" }, select: { canonicalKey: true, kind: true, localId: true, edition: true, baseline: true, bindings: true } });
 
     const bindingRefs = (entry: (typeof provenance)[number]) => Object.values(object(entry.bindings)).map(object).filter((b) => typeof b.kind === "string" && typeof b.id === "string").map((b) => ({ kind: b.kind as TargetKind, id: b.id as string }));
 
