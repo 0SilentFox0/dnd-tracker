@@ -5,8 +5,8 @@ import { context, goblin, hero } from "./fixtures";
 import { attackBodySchema, attackMutation } from "@/lib/server/battles/mutations/attack/attack-mutation";
 import { moveMutation } from "@/lib/server/battles/mutations/move/move-mutation";
 import { nextTurnMutation } from "@/lib/server/battles/mutations/next-turn/next-turn-mutation";
-import type { BattleParticipant } from "@/types/battle";
 import { REJECT } from "@/lib/utils/battle/store/reject";
+import type { BattleParticipant } from "@/types/battle";
 
 const map = { cols: 10, rows: 5, background: null, opacity: 0.3 };
 

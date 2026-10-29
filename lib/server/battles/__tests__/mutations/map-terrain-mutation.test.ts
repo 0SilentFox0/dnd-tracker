@@ -4,8 +4,8 @@ import { context, goblin, hero } from "./fixtures";
 
 import { CombatStatus } from "@/lib/constants/battle";
 import { mapTerrainMutation, mapTerrainSchema } from "@/lib/server/battles/mutations/map-terrain/map-terrain-mutation";
-import type { BattleMapConfig, BattleParticipant, GridPoint } from "@/types/battle";
 import { REJECT } from "@/lib/utils/battle/store/reject";
+import type { BattleMapConfig, BattleParticipant, GridPoint } from "@/types/battle";
 
 const map: BattleMapConfig = { cols: 10, rows: 5, background: null, opacity: 0.3, blocked: ["9:0"] };
 

@@ -5,8 +5,8 @@ import { context, participant } from "./fixtures";
 import { ParticipantSide } from "@/lib/constants/battle";
 import { createRefreshSourcesMutation } from "@/lib/server/battles/mutations/refresh-sources/refresh-sources-mutation";
 import { resolved } from "@/lib/utils/abilities/__tests__/fixtures";
-import { toReserve } from "@/lib/utils/battle/participant/reserve";
 import { eventTextOf } from "@/lib/utils/battle/log/__tests__/event-text";
+import { toReserve } from "@/lib/utils/battle/participant/reserve";
 
 const fresh = (id: string) => {
   const p = participant(id);

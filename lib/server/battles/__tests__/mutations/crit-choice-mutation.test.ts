@@ -14,11 +14,11 @@ import { createSpellMutation } from "@/lib/server/battles/mutations/spell/spell-
 import { runBattleMutation } from "@/lib/server/battles/run-mutation";
 import { critEffectsFor } from "@/lib/utils/battle/crit-choice/catalog";
 import type { StoredPendingCritChoice } from "@/lib/utils/battle/crit-choice/types";
+import { eventTextOf } from "@/lib/utils/battle/log/__tests__/event-text";
 import type { BattleMutationContext, PipelineDeps } from "@/lib/utils/battle/pipeline/run-battle-mutation";
 import { diffParticipants, splitParticipant } from "@/lib/utils/battle/store";
 import { buildSnapshotState } from "@/lib/utils/battle/store/snapshot-state";
 import { DEFAULT_RULES } from "@/lib/utils/rules";
-import { eventTextOf } from "@/lib/utils/battle/log/__tests__/event-text";
 
 const hero = { ...baseHero, battleData: { ...baseHero.battleData, attacks: [{ id: "sword", name: "Меч", type: AttackType.MELEE, attackBonus: 5, damageDice: "1d8", damageType: "slashing" }] } };
 

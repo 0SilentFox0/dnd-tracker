@@ -7,10 +7,10 @@ import { attackBodySchema, attackMutation } from "@/lib/server/battles/mutations
 import { bonusActionMutation } from "@/lib/server/battles/mutations/bonus-action/bonus-action-mutation";
 import { nextTurnMutation } from "@/lib/server/battles/mutations/next-turn/next-turn-mutation";
 import { resolved, seq } from "@/lib/utils/abilities/__tests__/fixtures";
+import { eventTextOf } from "@/lib/utils/battle/log/__tests__/event-text";
 import type { BattleMutationContext } from "@/lib/utils/battle/pipeline/run-battle-mutation";
 import type { ResolvedAbility } from "@/types/abilities";
 import type { BattleParticipant } from "@/types/battle";
-import { eventTextOf } from "@/lib/utils/battle/log/__tests__/event-text";
 
 const sword = { id: "sword", name: "Меч", type: AttackType.MELEE, attackBonus: 5, damageDice: "1d8", damageType: "slashing" };
 

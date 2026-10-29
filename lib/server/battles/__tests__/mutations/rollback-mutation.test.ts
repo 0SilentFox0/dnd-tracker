@@ -5,9 +5,9 @@ import { context, goblin, hero } from "./fixtures";
 import { createRollbackMutation } from "@/lib/server/battles/mutations/rollback/rollback-mutation";
 import { mazeMap } from "@/lib/utils/battle/modes/maze/__tests__/fixtures";
 import { diffParticipants, splitParticipant } from "@/lib/utils/battle/store";
+import { REJECT } from "@/lib/utils/battle/store/reject";
 import { buildSnapshotState } from "@/lib/utils/battle/store/snapshot-state";
 import type { BattleMapConfig, MazeConfig } from "@/types/battle";
-import { REJECT } from "@/lib/utils/battle/store/reject";
 
 const ctx = context({ scene: { ...context().scene, eventSeq: 6, status: "completed" } });
 

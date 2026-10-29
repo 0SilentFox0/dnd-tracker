@@ -7,8 +7,8 @@ import { ParticipantSide } from "@/lib/constants/battle";
 import { abilityActionMutation } from "@/lib/server/battles/mutations/ability-action/ability-action-mutation";
 import { resolved } from "@/lib/utils/abilities/__tests__/fixtures";
 import { testMap } from "@/lib/utils/battle/__tests__/fixtures/placed";
-import type { BattleParticipant } from "@/types/battle";
 import { REJECT } from "@/lib/utils/battle/store/reject";
+import type { BattleParticipant } from "@/types/battle";
 
 const angel = resolved({
   id: "ang",

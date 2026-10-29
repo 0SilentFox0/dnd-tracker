@@ -9,10 +9,10 @@ import { attackBodySchema, attackMutation } from "@/lib/server/battles/mutations
 import { createSpellMutation, type SpellMutationDeps } from "@/lib/server/battles/mutations/spell/spell-mutation";
 import { resolved } from "@/lib/utils/abilities/__tests__/fixtures";
 import { diffTerrain } from "@/lib/utils/battle/grid/terrain";
+import { eventTextOf } from "@/lib/utils/battle/log/__tests__/event-text";
 import { BattleAccessError } from "@/lib/utils/battle/store";
 import type { UnitFromPrisma } from "@/lib/utils/battle/types/participant";
 import type { BattleMapConfig, BattleParticipant, GridPoint } from "@/types/battle";
-import { eventTextOf } from "@/lib/utils/battle/log/__tests__/event-text";
 
 const spellRow = {
   id: "s1",

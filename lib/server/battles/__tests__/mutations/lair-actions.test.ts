@@ -9,11 +9,11 @@ import { patchParticipantMutation } from "@/lib/server/battles/mutations/partici
 import { patchParticipantSchema } from "@/lib/server/battles/mutations/participants/patch-participant-schema";
 import { resolved } from "@/lib/utils/abilities/__tests__/fixtures";
 import { legendaryActionSchema } from "@/lib/utils/battle/actions/schema";
+import { textsOf } from "@/lib/utils/battle/log/__tests__/event-text";
 import { resolveSave } from "@/lib/utils/battle/saves/legendary";
 import { joinParticipant, splitParticipant } from "@/lib/utils/battle/store/split-participant";
 import { processStartOfRound } from "@/lib/utils/battle/turn/start-end";
 import type { BattleParticipant } from "@/types/battle";
-import { textsOf } from "@/lib/utils/battle/log/__tests__/event-text";
 
 const a = resolved({ id: "quake", name: "Землетрус", trigger: { event: "action" }, limits: { lair: true }, effects: [{ kind: "changeMorale", delta: 1 }] });
 

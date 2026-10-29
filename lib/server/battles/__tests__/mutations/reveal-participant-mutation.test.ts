@@ -6,11 +6,11 @@ import { ParticipantSide } from "@/lib/constants/battle";
 import { revealParticipantMutation, revealParticipantSchema } from "@/lib/server/battles/mutations/reveal-participant/reveal-participant-mutation";
 import { runBattleMutation } from "@/lib/server/battles/run-mutation";
 import { cellsOf } from "@/lib/utils/battle/grid/occupancy";
+import { eventTextOf } from "@/lib/utils/battle/log/__tests__/event-text";
 import { at, mazeMap, withMap } from "@/lib/utils/battle/modes/maze/__tests__/fixtures";
 import { BattleAccess } from "@/lib/utils/battle/pipeline/run-battle-mutation";
 import { type BattleMutationOutcome, prepareSave } from "@/lib/utils/battle/store";
 import type { BattleMapConfig, BattleParticipant } from "@/types/battle";
-import { eventTextOf } from "@/lib/utils/battle/log/__tests__/event-text";
 
 const reserved = (id: string) => participant(id, { side: ParticipantSide.ENEMY, controlledBy: "dm" }, { battleData: { ...goblin.battleData, reserved: true } });
 

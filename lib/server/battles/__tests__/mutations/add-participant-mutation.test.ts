@@ -5,11 +5,11 @@ import { context, goblin, hero, participant } from "./fixtures";
 import { ParticipantSide } from "@/lib/constants/battle";
 import { createAddParticipantMutation } from "@/lib/server/battles/mutations/add-participant/add-participant-mutation";
 import { resolved } from "@/lib/utils/abilities/__tests__/fixtures";
+import { eventTextOf } from "@/lib/utils/battle/log/__tests__/event-text";
 import { at, mazeMap, withMap } from "@/lib/utils/battle/modes/maze/__tests__/fixtures";
 import { toReserve } from "@/lib/utils/battle/participant/reserve";
 import { parseRules } from "@/lib/utils/rules/schema";
 import type { BattleParticipant } from "@/types/battle";
-import { eventTextOf } from "@/lib/utils/battle/log/__tests__/event-text";
 
 function deps(over = {}) {
   return {

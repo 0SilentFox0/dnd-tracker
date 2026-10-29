@@ -8,8 +8,8 @@ import { processAttack } from "@/lib/utils/battle/attack/process";
 import { requestedTargetIds, validateAttackRequest } from "@/lib/utils/battle/attack-phase/request";
 import { applyCondition5e, type Condition5eKey } from "@/lib/utils/battle/conditions";
 import { resolveSpellTargets } from "@/lib/utils/battle/spell/spell-targeting";
-import type { BattleAttack, BattleParticipant } from "@/types/battle";
 import { REJECT } from "@/lib/utils/battle/store/reject";
+import type { BattleAttack, BattleParticipant } from "@/types/battle";
 
 const bow: BattleAttack = { ...CLAWS, id: "bow", type: AttackType.RANGED };
 

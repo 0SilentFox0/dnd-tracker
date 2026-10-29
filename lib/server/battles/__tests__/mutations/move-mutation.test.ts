@@ -3,10 +3,10 @@ import { describe, expect, it, vi } from "vitest";
 import { context, goblin, hero } from "./fixtures";
 
 import { moveMutation } from "@/lib/server/battles/mutations/move/move-mutation";
-import { BattleAccessError } from "@/lib/utils/battle/store";
-import type { BattleMapConfig, BattleParticipant, GridPoint, TerrainCell } from "@/types/battle";
 import { eventTextOf } from "@/lib/utils/battle/log/__tests__/event-text";
+import { BattleAccessError } from "@/lib/utils/battle/store";
 import { REJECT } from "@/lib/utils/battle/store/reject";
+import type { BattleMapConfig, BattleParticipant, GridPoint, TerrainCell } from "@/types/battle";
 
 const map: BattleMapConfig = { cols: 10, rows: 5, background: null, opacity: 0.3 };
 

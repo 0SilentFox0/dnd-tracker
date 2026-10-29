@@ -4,8 +4,8 @@ import { context, goblin, hero } from "./fixtures";
 
 import { auraZoneMutation } from "@/lib/server/battles/mutations/aura-zone/aura-zone-mutation";
 import { resolved } from "@/lib/utils/abilities/__tests__/fixtures";
-import { BattleAccessError } from "@/lib/utils/battle/store";
 import { eventTextOf } from "@/lib/utils/battle/log/__tests__/event-text";
+import { BattleAccessError } from "@/lib/utils/battle/store";
 
 const aura = resolved({ trigger: { event: "passive" }, effects: [{ kind: "modifyStat", stat: "attackBonus", flat: 1, target: "nearbyAllies" }] }, { id: "unit-allies-aura-attackBonus" });
 

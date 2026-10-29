@@ -8,8 +8,8 @@ import { createMockParticipant } from "@/lib/utils/battle/__tests__/fixtures/moc
 import { heroAttackDamageParts } from "@/lib/utils/battle/damage/hero-damage";
 import type { BattleMutationContext } from "@/lib/utils/battle/pipeline/run-battle-mutation";
 import { BattleAccessError, BattleRuleError } from "@/lib/utils/battle/store";
-import { diceSlots, mergeDiceFormulas, parseDice } from "@/lib/utils/common/dice";
 import { REJECT } from "@/lib/utils/battle/store/reject";
+import { diceSlots, mergeDiceFormulas, parseDice } from "@/lib/utils/common/dice";
 
 const base = createMockParticipant();
 

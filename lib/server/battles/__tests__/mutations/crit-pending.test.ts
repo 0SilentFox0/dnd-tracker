@@ -8,9 +8,9 @@ import { attackBodySchema, createAttackMutation } from "@/lib/server/battles/mut
 import { createCritChoiceMutation } from "@/lib/server/battles/mutations/crit-choice/crit-choice-mutation";
 import { createSpellMutation } from "@/lib/server/battles/mutations/spell/spell-mutation";
 import { createMockParticipant } from "@/lib/utils/battle/__tests__/fixtures/mock-participant";
+import { eventTextOf } from "@/lib/utils/battle/log/__tests__/event-text";
 import type { BattleMutationContext } from "@/lib/utils/battle/pipeline/run-battle-mutation";
 import { mulberry32 } from "@/lib/utils/common/rng";
-import { eventTextOf } from "@/lib/utils/battle/log/__tests__/event-text";
 
 const base = createMockParticipant();
 

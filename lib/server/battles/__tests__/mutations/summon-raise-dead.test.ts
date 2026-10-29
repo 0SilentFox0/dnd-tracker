@@ -8,12 +8,12 @@ import { ParticipantSide, ParticipantSourceType, type ParticipantSourceTypeValue
 import { createAbilityActionMutation } from "@/lib/server/battles/mutations/ability-action/ability-action-mutation";
 import { createBonusActionMutation } from "@/lib/server/battles/mutations/bonus-action/bonus-action-mutation";
 import { resolved } from "@/lib/utils/abilities/__tests__/fixtures";
+import { eventTextOf } from "@/lib/utils/battle/log/__tests__/event-text";
 import { assertAccess, BattleAccess } from "@/lib/utils/battle/pipeline/run-battle-mutation";
 import { joinParticipant, splitParticipant } from "@/lib/utils/battle/store/split-participant";
 import type { SummonDeps } from "@/lib/utils/battle/summon/ability-summons";
 import type { UnitFromPrisma } from "@/lib/utils/battle/types/participant";
 import type { BattleParticipant } from "@/types/battle";
-import { eventTextOf } from "@/lib/utils/battle/log/__tests__/event-text";
 
 const unit = (id: string, name: string, level: number, raceId: string) =>
   ({

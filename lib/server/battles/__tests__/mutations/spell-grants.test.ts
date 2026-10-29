@@ -7,8 +7,8 @@ import { API_ERRORS } from "@/lib/constants/api-errors";
 import { spellSchema } from "@/lib/server/battles/mutations/spell/cast-spell-schema";
 import { createSpellMutation } from "@/lib/server/battles/mutations/spell/spell-mutation";
 import { runBattleMutation } from "@/lib/server/battles/run-mutation";
-import type { BattleParticipant, SpellGrant } from "@/types/battle";
 import { eventTextOf } from "@/lib/utils/battle/log/__tests__/event-text";
+import type { BattleParticipant, SpellGrant } from "@/types/battle";
 
 const row = {
   id: "breath", campaignId: "c1", name: "Вогняний подих", level: 1, groupId: null, icon: null,
