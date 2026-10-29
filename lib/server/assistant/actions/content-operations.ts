@@ -13,19 +13,21 @@ import type { Locale } from "@/lib/i18n/config";
 import { getTranslator } from "@/lib/i18n/translator";
 import { ContentError } from "@/lib/server/content/errors";
 import { type ContentOperationId, contentOperationSchema, runContentOperation } from "@/lib/server/content/operation-service";
+import { translateImportReport } from "@/lib/server/content/import/translate-report";
 import { CONTENT_OPERATIONS } from "@/lib/server/content/operations";
 import { withCampaignContentWrite } from "@/lib/server/content/write";
 import { previewSourceSelection } from "@/lib/server/templates/sync/apply";
 import { pageSourceDiff } from "@/lib/server/templates/sync/page-diff";
 import type { Actor } from "@/lib/utils/api/actor";
 import type { SourceDiff } from "@/types/campaigns";
+import type { ImportReport } from "@/types/content-import";
 
 type Selection = { sourceId: string; items: Array<{ scope: string; key: string; name: string; status: string; before: unknown; after: unknown }>; autoAdded: unknown[]; credits: { before: string | null; after: string | null } };
 type Deps = {
   snapshot?: (actor: Actor) => Promise<unknown>;
   operationState?: (actor: Actor, state: unknown, operation: string, input: Record<string, unknown>) => Promise<unknown>;
   guard?: <T>(id: string, fn: () => Promise<T>) => Promise<T>;
-  invoke?: (id: ContentOperationId, actor: Actor, input: unknown, locale: Locale) => Promise<unknown>;
+  invoke?: (id: ContentOperationId, actor: Actor, input: unknown, locale: Locale | null) => Promise<unknown>;
   sourcePreview?: (actor: Actor, input: unknown) => Promise<Selection>;
 };
 
@@ -124,13 +126,14 @@ export function createContentOperationActions(deps: Deps = {}): AssistantActionD
             if (handoff) throw new ContentError(handoff, 422, [{ code: "UI_HANDOFF", path: [] }]);
           }
 
-          const report = await invoke("content.import", caller.actor, { ...input, body: { ...parsed, dryRun: true } }, caller.locale);
+          const report = await invoke("content.import", caller.actor, { ...input, body: { ...parsed, dryRun: true } }, null) as ImportReport;
 
-          changes.push({ target, path: "$dryRun", before: null, after: jsonContent(report) });
+          const shown = translateImportReport(await getTranslator(caller.locale), report);
+
+          changes.push({ target, path: "$dryRun", before: null, after: jsonContent(shown) });
           warnings.push(t("warnings.importPartial"), t("warnings.manualSetup"));
 
-          // The report is a guard too: the same rows and resolved references
-          // must validate identically at confirmation.
+          // The report is a guard too, kept untranslated so the digest is locale-independent.
           return { summary: label, targets, changes, warnings, effects, preconditions: { snapshot: snapshotHash(state), input: jsonContent(input), report: jsonContent(report) } };
         } else if (operation.id === "spells.delete-by-level" || operation.id === "spell-groups.remove-all-spells") {
           effects = [{ kind: "delete", targets, description: label }];

@@ -77,7 +77,7 @@ async function owner(kind: OwnerKind, actor: Actor, ownerId: string) {
 }
 
 /** Shared HTTP/action operation. It owns authorization, parsing and the write lock. */
-export async function runContentOperation(operationId: ContentOperationId, actor: Actor, raw: unknown, locale?: Locale): Promise<unknown> {
+export async function runContentOperation(operationId: ContentOperationId, actor: Actor, raw: unknown, locale?: Locale | null): Promise<unknown> {
   const operation = CONTENT_OPERATIONS[operationId];
 
   assertCan(actor, operation.need);
@@ -103,6 +103,8 @@ export async function runContentOperation(operationId: ContentOperationId, actor
       case "skill-trees.save": return saveSkillTree(actor, { ...bodyOf("skill-trees.save", body), ...(input.treeId ? { treeId: String(input.treeId) } : {}) });
       case "content.import": {
         const report = await importContent(actor, kindOf(input.kind), bodyOf("content.import", body));
+
+        if (locale === null) return report;
 
         return locale ? translateImportReport(await getTranslator(locale), report) : translatedImport(report);
       }

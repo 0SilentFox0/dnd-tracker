@@ -82,6 +82,20 @@ describe("shared CONTENT_OPERATIONS adapters", () => {
     expect(f.writes()).toBe(1);
   });
 
+  it("import preconditions are identical for preparers in different locales", async () => {
+    const { actions } = fixture();
+
+    const action = actions.find((a) => a.id === "content.import");
+
+    const input = { kind: "units", body: { rows: [{ name: "Гоблін" }] } };
+
+    const uk = await action?.prepare(caller, input as never);
+
+    const en = await action?.prepare({ ...caller, locale: "en" }, input as never);
+
+    expect(uk?.preconditions).toEqual(en?.preconditions);
+  });
+
   it("dryRun remains a read with no intent or content writes", async () => {
     const f = fixture();
 
