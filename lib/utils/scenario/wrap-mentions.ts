@@ -1,10 +1,10 @@
+import { escapeRe } from "./mentions";
+
 import type { MentionType, RichDoc, RichNode } from "@/types/scenario";
 
 export type MentionTarget = { id: string; type: MentionType };
 
 const WORD_CHAR = /[\p{L}\p{N}_]/u;
-
-const escapeRe = (s: string) => s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 
 export function buildFormsPattern(forms: string[]): RegExp | null {
   const parts = [...new Set(forms.map((f) => f.trim()).filter(Boolean))].sort((a, b) => b.length - a.length).map(escapeRe);

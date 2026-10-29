@@ -12,7 +12,7 @@ const STRIPPABLE = /[аеєиіїоуюяьй]$/iu;
 
 const SNIPPET_RADIUS = 50;
 
-const escapeRe = (s: string) => s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+export const escapeRe = (s: string) => s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 
 // drops case endings so an oblique form of a name finds every other form, keeping at least MIN_STEM letters
 export function wordStem(word: string): string {

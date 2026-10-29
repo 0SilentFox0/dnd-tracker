@@ -125,7 +125,15 @@ export function outlineContent(title: string, content: ScenarioContent, budget =
 
   const head = `# ${oneLine(title)} (${markdown.length} chars, ${content.sections.length} sections, ${rowCount} rows; offsets are for read_scenario_page)`;
 
-  const sizes = content.sections.map((s) => s.rows.map((r) => ({ id: r.id, story: docText(r.story).length, notes: docText(r.notes).length, preview: oneLine(docText(r.story) || docText(r.notes)) })));
+  const sizes = content.sections.map((s) =>
+    s.rows.map((r) => {
+      const story = docText(r.story);
+
+      const notes = docText(r.notes);
+
+      return { id: r.id, story: story.length, notes: notes.length, preview: oneLine(story || notes) };
+    }),
+  );
 
   const render = (previewChars: number | null, maxSections: number) => {
     const lines = [head];

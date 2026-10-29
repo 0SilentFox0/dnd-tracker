@@ -29,8 +29,10 @@ function chunkWithinJson(title: string, content: ScenarioContent, opts: { sectio
   }
 }
 
+const PAGE_SELECT = { id: true, title: true, kind: true, content: true } as const;
+
 export async function loadPageForAi(campaignId: string, pageId: string) {
-  const page = await prisma.scenarioPage.findFirst({ where: { id: pageId, campaignId }, select: { id: true, title: true, kind: true, content: true } });
+  const page = await prisma.scenarioPage.findFirst({ where: { id: pageId, campaignId }, select: PAGE_SELECT });
 
   if (!page) throw new AiToolError(API_ERRORS.SCENARIO_PAGE_NOT_IN_CAMPAIGN, { id: pageId });
 
@@ -84,7 +86,7 @@ export const findScenarioMentionsTool = defineTool({
   handler: async (ctx, { query, pageId, sectionId, offset = 0 }) => {
     const pages = pageId
       ? [await loadPageForAi(ctx.campaignId, pageId)]
-      : (await prisma.scenarioPage.findMany({ where: { campaignId: ctx.campaignId }, select: { id: true, title: true, kind: true, content: true }, orderBy: [{ sortOrder: "asc" }, { title: "asc" }] })).map((p) => ({ ...p, content: readContent(p.content) }));
+      : (await prisma.scenarioPage.findMany({ where: { campaignId: ctx.campaignId }, select: PAGE_SELECT, orderBy: [{ sortOrder: "asc" }, { title: "asc" }] })).map((p) => ({ ...p, content: readContent(p.content) }));
 
     const all = pages.flatMap((p) => findMentions(p.content, query, { sectionId }).map((h) => ({ pageId: p.id, pageTitle: p.title, ...h })));
 
