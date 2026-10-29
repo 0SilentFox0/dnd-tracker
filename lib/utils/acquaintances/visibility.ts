@@ -11,7 +11,7 @@ export interface AcquaintanceRecord {
   description: string;
   sourcePageId: string;
   sourceSectionId: string;
-  character: { name: string; avatar: string | null } | null;
+  character: { name: string; avatar: string | null; background?: string | null } | null;
   entries: { id: string; pageId: string; sectionId: string; text: string; sortOrder: number; createdAt: Date }[];
   notes: { id: string; authorUserId: string; text: string; updatedAt: Date; author: { displayName: string } }[];
 }
@@ -51,7 +51,7 @@ function viewOne(row: AcquaintanceRecord, viewer: Viewer, played: PlayedLookup):
     characterId: row.characterId,
     name: fromCharacter?.name ?? row.name,
     avatarUrl: fromCharacter ? fromCharacter.avatar : row.avatarUrl,
-    description: row.description,
+    description: fromCharacter?.background?.trim() || row.description,
     sourcePageId: row.sourcePageId,
     sourceSectionId: row.sourceSectionId,
     hidden: !isAcquaintanceRevealed(row, played),

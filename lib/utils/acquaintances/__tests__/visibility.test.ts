@@ -91,6 +91,15 @@ describe("viewAcquaintances projection", () => {
     expect(view).toMatchObject({ name: "Король", avatarUrl: "https://x/k.png", characterId: "ch1" });
   });
 
+  it("takes the description from the character biography for kind character, else keeps its own", () => {
+    const withBio = record({ kind: "character", characterId: "ch1", description: "старе", character: { name: "Король", avatar: null, background: " Колишній воїн " } });
+
+    const noBio = record({ kind: "character", characterId: "ch1", description: "своє", character: { name: "Король", avatar: null, background: null } });
+
+    expect(viewAcquaintances([withBio], player, played)[0].description).toBe("Колишній воїн");
+    expect(viewAcquaintances([noBio], player, played)[0].description).toBe("своє");
+  });
+
   it("falls back to own name and avatar when the character is gone", () => {
     const [view] = viewAcquaintances([record({ kind: "character", characterId: null, avatarUrl: "https://x/a.png" })], player, played);
 

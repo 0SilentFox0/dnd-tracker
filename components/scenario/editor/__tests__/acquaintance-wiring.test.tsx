@@ -5,7 +5,7 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 const toolbar = vi.hoisted(() => ({ props: [] as { onAcquaintance?: () => void }[] }));
 
 vi.mock("@/lib/hooks/scenario", () => ({
-  useScenarioDraft: (_c: string, page: { content: unknown }) => ({ content: page.content, state: "saved", setContent: vi.fn(), flush: vi.fn(async () => true), reload: vi.fn() }),
+  useScenarioDraft: (_c: string, page: { content: unknown }) => ({ content: page.content, state: "saved", setContent: vi.fn(), flush: vi.fn(async () => true), hasUnsavedChanges: () => false, reload: vi.fn() }),
   useMentionSearch: () => async () => [],
   useActiveSection: () => null,
   useScenarioPages: () => ({ data: [] }),

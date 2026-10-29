@@ -98,6 +98,22 @@ describe("AcquaintanceDialog create", () => {
     expect(screen.getByRole("button", { name: "Створити" })).toBeEnabled();
   });
 
+  it("sends no avatar or description for a full NPC: both come from the character", async () => {
+    renderCreate();
+
+    fireEvent.click(screen.getByRole("button", { name: "Повний NPC" }));
+    fireEvent.change(screen.getByLabelText("Персонаж"), { target: { value: "ch1" } });
+
+    expect(screen.queryByLabelText("Опис")).toBeNull();
+    expect(screen.queryByLabelText("Аватар (URL)")).toBeNull();
+
+    fireEvent.click(screen.getByRole("button", { name: "Створити" }));
+
+    await waitFor(() => expect(hooks.create.mutateAsync).toHaveBeenCalled());
+    expect(hooks.create.mutateAsync.mock.calls[0][0]).not.toHaveProperty("avatarUrl");
+    expect(hooks.create.mutateAsync.mock.calls[0][0]).not.toHaveProperty("description");
+  });
+
   it("inserts an existing acquaintance without creating a new one", () => {
     hooks.items = [view({ id: "a7", name: "Ярема Коваль" })];
 
