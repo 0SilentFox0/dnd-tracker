@@ -4,7 +4,7 @@ import { upsertTimedEffect } from "@/lib/utils/abilities/engine/effects/timed-ef
 import { hasCondition, removeEffects } from "@/lib/utils/battle/conditions/query";
 import { resolveSave, rollSave } from "@/lib/utils/battle/saves";
 import type { Ruleset } from "@/lib/utils/rules";
-import type { ActiveEffect, BattleParticipant } from "@/types/battle";
+import type { ActiveEffect, BattleMapConfig, BattleParticipant } from "@/types/battle";
 
 export type ConcentrationTag = NonNullable<ActiveEffect["concentrationOf"]>;
 
@@ -91,8 +91,28 @@ export function tagConcentration(before: BattleParticipant[], after: BattleParti
   return result.map((p) => (p.basicInfo.id === tag.casterId ? withActiveEffects(p, (list) => list.map((e) => (e.concentration?.castId === tag.castId ? { ...e, concentration: { ...e.concentration, tracksEffects: true as const } } : e))) : p));
 }
 
-/** Заклинання, чиї ефекти всі зняті (втеча, СК, дісел, спливання), більше не тримає концентрацію. */
-export function dropOrphanedConcentration(ps: BattleParticipant[]): { participants: BattleParticipant[]; messages: string[] } {
+function carriesCast(p: BattleParticipant, castId: string, round: number): boolean {
+  const is = (tag?: ConcentrationTag) => tag?.castId === castId;
+
+  const { object, transform } = p.battleData;
+
+  return (
+    p.battleData.activeEffects.some((e) => is(e.concentrationOf)) ||
+    (!!object && p.combatStats.status !== CombatStatus.DEAD && is(object.concentrationOf)) ||
+    is(transform?.concentrationOf) ||
+    (p.spellcasting.grants ?? []).some((g) => is(g.concentrationOf) && (g.expiresRound === undefined || round <= g.expiresRound))
+  );
+}
+
+function mapCarriesCast(map: BattleMapConfig | null | undefined, castId: string): boolean {
+  return (
+    Object.values(map?.spellZones ?? {}).some((z) => z.concentrationOf?.castId === castId) ||
+    Object.values(map?.terrain ?? {}).some((c) => c.damage?.concentrationOf?.castId === castId)
+  );
+}
+
+/** Заклинання, чиї ефекти, зони, предмети й гранти всі зняті (втеча, СК, дісел, спливання), більше не тримає концентрацію. */
+export function dropOrphanedConcentration(ps: BattleParticipant[], map?: BattleMapConfig | null, round = 0): { participants: BattleParticipant[]; messages: string[] } {
   let next = ps;
 
   const messages: string[] = [];
@@ -104,7 +124,7 @@ export function dropOrphanedConcentration(ps: BattleParticipant[]): { participan
 
     const { castId } = marker.concentration;
 
-    if (next.some((q) => q.battleData.activeEffects.some((e) => e.concentrationOf?.castId === castId))) continue;
+    if (mapCarriesCast(map, castId) || next.some((q) => carriesCast(q, castId, round))) continue;
 
     const dropped = dropConcentration(next, p.basicInfo.id, "ефекти заклинання завершилися");
 

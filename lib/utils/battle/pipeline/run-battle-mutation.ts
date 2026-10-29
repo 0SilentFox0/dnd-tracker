@@ -147,7 +147,7 @@ function withPlacement(map: BattleMapConfig | null, scene: { status: BattleStatu
 
   if (swept !== result.participants) result = { ...result, participants: swept };
 
-  const orphaned = dropOrphanedConcentration(result.participants);
+  const orphaned = dropOrphanedConcentration(result.participants, map, result.scene?.round ?? scene.round);
 
   if (orphaned.participants !== result.participants) result = { ...result, participants: orphaned.participants, events: [...result.events, systemEvent(result.scene?.round ?? scene.round, orphaned.messages.join("; "))] };
 

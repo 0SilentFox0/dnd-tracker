@@ -75,6 +75,54 @@ describe("каст із концентрацією", () => {
     expect(effectsOf(none.participants, "c")).toEqual([]);
   });
 
+  describe("інші носії концентрації тримають її", () => {
+    const bare = () => cast(spellOf(true), [caster(), foe("e1"), foe("e2")], rulesOn()).allParticipantsUpdated.map((p) => removeEffects(p, (e) => !e.concentration).participant);
+
+    const tagOf = (ps: BattleParticipant[]) => ({ casterId: "c", castId: effectsOf(ps, "c").find((e) => e.concentration)?.concentration?.castId as string });
+
+    const survives = (ps: BattleParticipant[], map?: BattleMapConfig) => effectsOf(dropOrphanedConcentration(ps, map, 1).participants, "c").some((e) => e.concentration);
+
+    const onE1 = (ps: BattleParticipant[], patch: (p: BattleParticipant) => BattleParticipant) => ps.map((p) => (p.basicInfo.id === "e1" ? patch(p) : p));
+
+    it("без носіїв знімається", () => {
+      expect(survives(bare())).toBe(false);
+    });
+
+    it("зона мапи", () => {
+      const ps = bare();
+
+      const map = { spellZones: { z: { casterId: "c", spellId: "sp", spellName: "x", dc: 10, side: "enemies", triggers: {}, untilRound: 5, concentrationOf: tagOf(ps) } } } as unknown as BattleMapConfig;
+
+      expect(survives(ps, map)).toBe(true);
+    });
+
+    it("небезпечна клітинка", () => {
+      const ps = bare();
+
+      const map = { terrain: { "1:1": { kind: "hazard", damage: { type: "fire", amount: 1, concentrationOf: tagOf(ps) } } } } as unknown as BattleMapConfig;
+
+      expect(survives(ps, map)).toBe(true);
+    });
+
+    it("предмет: активний тримає, знищений ні", () => {
+      const ps = bare();
+
+      const obj = (status: BattleParticipant["combatStats"]["status"]) => onE1(ps, (p) => ({ ...p, combatStats: { ...p.combatStats, status }, battleData: { ...p.battleData, object: { spellId: "sp", concentrationOf: tagOf(ps) } } }));
+
+      expect(survives(obj(CombatStatus.ACTIVE))).toBe(true);
+      expect(survives(obj(CombatStatus.DEAD))).toBe(false);
+    });
+
+    it("грант тримає, поки не спливе", () => {
+      const ps = bare();
+
+      const grant = (expiresRound: number) => onE1(ps, (p) => ({ ...p, spellcasting: { ...p.spellcasting, grants: [{ spellId: "sp", key: "k", cost: 0, expiresRound, concentrationOf: tagOf(ps) }] } }));
+
+      expect(survives(grant(3))).toBe(true);
+      expect(survives(grant(0))).toBe(false);
+    });
+  });
+
   it("заклинання без тегованих ефектів (зона) не знімається", () => {
     const r = cast(spellOf(true, [{ kind: "note", text: "x" } as Effect]), [caster(), foe("e1"), foe("e2")], rulesOn());
 
