@@ -1,5 +1,6 @@
 /* eslint-disable no-restricted-syntax -- derived content written to the DB stays Ukrainian (spec part5, decision 5) */
-import { fixedAbilityBonuses, lineageSpells, raceTraits } from "../adapters/character-traits";
+import { lineageSpells } from "../adapters/feat-spells";
+import { fixedAbilityBonuses, raceTraits } from "../adapters/race-traits";
 import { array, description, object, str, unsupported } from "../adapters/shared";
 import { nestedId, stableJson } from "../identity";
 import { issue } from "../types";

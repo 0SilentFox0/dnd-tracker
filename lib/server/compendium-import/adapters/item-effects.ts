@@ -1,5 +1,5 @@
 /* eslint-disable no-restricted-syntax -- derived content written to the DB stays Ukrainian (spec part5, decision 5) */
-import { resistFlags } from "./character-traits";
+import { resistFlags } from "./race-traits";
 import { num } from "./shared";
 
 import type { Ability, Effect } from "@/lib/utils/abilities/schema";

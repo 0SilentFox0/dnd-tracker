@@ -99,38 +99,44 @@ function plannedResolved(ps: PlanState, key: string): Resolved | undefined {
   return p && { localId: p.localId, body: p.body, key };
 }
 
-function resolveRef(ps: PlanState, ref: CompendiumRef, owner: AdaptedEntry): Resolved | undefined {
-  const { context, errors, byKey, existing } = ps;
+function resolveBound(ps: PlanState, ref: CompendiumRef, owner: AdaptedEntry, bound: ExistingEntry): Resolved | undefined {
+  const { context, errors, byKey } = ps;
 
-  const key = refKey(ref);
+  if (bound.edition && bound.edition !== "unknown" && ref.edition !== "unknown" && bound.edition !== ref.edition && !context.allowMixedEdition) {
+    errors.push(issue("MIXED_EDITION_CONFIRMATION_REQUIRED", owner.key, "error"));
 
-  if (byKey.has(key)) return plannedResolved(ps, key);
-
-  const bound = context.bindings?.[key] ?? existing.get(key);
-
-  if (bound && !bound.missing) {
-    if (bound.edition && bound.edition !== "unknown" && ref.edition !== "unknown" && bound.edition !== ref.edition && !context.allowMixedEdition) {
-      errors.push(issue("MIXED_EDITION_CONFIRMATION_REQUIRED", owner.key, "error"));
-
-      return;
-    }
-
-    if (bound.edition && bound.edition !== "unknown" && ref.edition !== "unknown" && bound.edition !== ref.edition) owner.issues.push(issue("MIXED_EDITION_WARNING", owner.key, "warning", { variant: "dependency", edition: bound.edition, content: ref.edition }));
-
-    if (bound.kind && expectedKind(ref) && bound.kind !== expectedKind(ref)) {
-      errors.push(issue("BINDING_WRONG_KIND", owner.key, "error"));
-
-      return;
-    }
-
-    if (byKey.has(bound.key)) return plannedResolved(ps, bound.key);
-
-    return { localId: bound.localId, body: bound.body, key: bound.key };
+    return;
   }
 
+  if (bound.edition && bound.edition !== "unknown" && ref.edition !== "unknown" && bound.edition !== ref.edition) owner.issues.push(issue("MIXED_EDITION_WARNING", owner.key, "warning", { variant: "dependency", edition: bound.edition, content: ref.edition }));
+
+  if (bound.kind && expectedKind(ref) && bound.kind !== expectedKind(ref)) {
+    errors.push(issue("BINDING_WRONG_KIND", owner.key, "error"));
+
+    return;
+  }
+
+  if (byKey.has(bound.key)) return plannedResolved(ps, bound.key);
+
+  return { localId: bound.localId, body: bound.body, key: bound.key };
+}
+
+function findOwn(ps: PlanState, ref: CompendiumRef, owner: AdaptedEntry): AdaptedEntry | undefined {
   const candidates = ps.entries.filter((e) => e.key !== owner.key && e.kind === expectedKind(ref) && nameKey(e.name) === nameKey(ref.name));
 
-  const own = candidates.find((e) => sameSource(e.source, ref.source) && sameEdition(e.edition, ref.edition)) ?? candidates[0];
+  return candidates.find((e) => sameSource(e.source, ref.source) && sameEdition(e.edition, ref.edition)) ?? candidates[0];
+}
+
+function resolveRef(ps: PlanState, ref: CompendiumRef, owner: AdaptedEntry): Resolved | undefined {
+  const key = refKey(ref);
+
+  if (ps.byKey.has(key)) return plannedResolved(ps, key);
+
+  const bound = ps.context.bindings?.[key] ?? ps.existing.get(key);
+
+  if (bound && !bound.missing) return resolveBound(ps, ref, owner, bound);
+
+  const own = findOwn(ps, ref, owner);
 
   if (own) {
     if (!sameEdition(own.edition, ref.edition)) owner.issues.push(issue("MIXED_EDITION_WARNING", owner.key, "warning", { variant: "reference", name: ref.name, edition: ref.edition, own: own.edition }));
@@ -142,7 +148,7 @@ function resolveRef(ps: PlanState, ref: CompendiumRef, owner: AdaptedEntry): Res
   const error = issue("UNRESOLVED_REF", `${owner.key}.${ref.path.join(".")}`, "error", { name: ref.name, kind: ref.kind, owner: owner.name });
 
   owner.issues.push(error);
-  errors.push(error);
+  ps.errors.push(error);
 
   return undefined;
 }
@@ -245,26 +251,44 @@ function visitEntry(ps: PlanState, key: string) {
 
   ps.states.set(key, "visiting");
 
-  let body = structuredClone(entry.body);
-
   const resolvedBindings: NonNullable<PlannedWrite["resolvedBindings"]> = Object.create(null);
 
-  bindRefs(ps, entry, body, resolvedBindings);
+  const bound = structuredClone(entry.body);
+
+  bindRefs(ps, entry, bound, resolvedBindings);
 
   const old = ps.existing.get(key);
 
-  const overwrite = ps.context.overwriteKeys?.includes(key) === true;
+  const { body, sourceBody, localId } = placeEntry(ps, entry, old, bound, resolvedBindings);
+
+  const write = buildWrite(entry, old, { body, sourceBody, localId, resolvedBindings });
+
+  ps.planned.set(key, write);
+  ps.writes.push(write);
+  ps.states.set(key, "done");
+}
+
+function reconcileBody(ps: PlanState, entry: AdaptedEntry, old: ExistingEntry | undefined, bound: JsonRecord) {
+  let body = bound;
+
+  const overwrite = ps.context.overwriteKeys?.includes(entry.key) === true;
 
   // A disambiguated display name is stable on reimport; original identity is stored separately.
   if (old && old.baseline.name !== entry.name && typeof old.baseline.name === "string" && body.name === entry.name) body.name = old.baseline.name;
 
-  let sourceBody = structuredClone(body);
+  const sourceBody = structuredClone(body);
 
   body = reconcile(body, old, entry, overwrite);
 
   if (entry.mergeParent) body = managedProjection(body, sourceBody) as JsonRecord;
 
-  let localId = ps.ids.get(key)!;
+  return { body, sourceBody };
+}
+
+function placeEntry(ps: PlanState, entry: AdaptedEntry, old: ExistingEntry | undefined, bound: JsonRecord, resolvedBindings: NonNullable<PlannedWrite["resolvedBindings"]>) {
+  let { body, sourceBody } = reconcileBody(ps, entry, old, bound);
+
+  let localId = ps.ids.get(entry.key)!;
 
   const parent = entry.mergeParent ? resolveRef(ps, entry.mergeParent, entry) : undefined;
 
@@ -278,21 +302,23 @@ function visitEntry(ps: PlanState, key: string) {
     ({ body, sourceBody } = validateStandalone(ps, entry, body, sourceBody));
   }
 
+  return { body, sourceBody, localId };
+}
+
+function buildWrite(entry: AdaptedEntry, old: ExistingEntry | undefined, placed: { body: JsonRecord; sourceBody: JsonRecord; localId: string; resolvedBindings: NonNullable<PlannedWrite["resolvedBindings"]> }): PlannedWrite {
+  const { body, sourceBody, localId, resolvedBindings } = placed;
+
   const unchanged = old && !old.missing && stableJson(managedProjection(old.body, body)) === stableJson(body);
 
   const baseline = structuredClone(sourceBody);
 
   for (const conflict of entry.issues.filter((i) => i.code === "LOCAL_CONFLICT")) {
-    const field = conflict.path.slice(key.length + 1);
+    const field = conflict.path.slice(entry.key.length + 1);
 
     baseline[field] = old?.baseline[field];
   }
 
-  const write: PlannedWrite = { ...entry, body, baseline, resolvedBindings, localId, operation: unchanged ? "unchanged" : old && !old.missing ? "update" : "create", ...(entry.mergeParent && { nested: true }) };
-
-  ps.planned.set(key, write);
-  ps.writes.push(write);
-  ps.states.set(key, "done");
+  return { ...entry, body, baseline, resolvedBindings, localId, operation: unchanged ? "unchanged" : old && !old.missing ? "update" : "create", ...(entry.mergeParent && { nested: true }) };
 }
 
 function resolveSubclassLevel(ps: PlanState, row: PlannedWrite) {

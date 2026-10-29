@@ -100,10 +100,29 @@ function shape(text: string, cast: SpellCast): Pick<SpellFacts, "shape_type" | "
   return { shape_type: "line", shape_size: Number(m[3] ?? m[4] ?? m[5]) };
 }
 
-export function deriveSpell(row: Record<string, unknown>, text: string, higher: string, cast: SpellCast): SpellDerivation {
-  const raw = JSON.stringify(row.entries ?? []);
+interface SpellInput {
+  row: Record<string, unknown>;
+  text: string;
+  higher: string;
+  cast: SpellCast;
+  raw: string;
+  misc: string[];
+  damageTypes: string[];
+  ability: string | null;
+  spellAttack: boolean;
+  moveTrigger: boolean;
+  triggerText: string;
+  unknownConditions: string[];
+  signals: boolean;
+  rowCombat: boolean;
+}
 
-  const misc = strings(row.miscTags);
+const RESIST_KEYS = ["damageImmune", "damageResist", "damageVulnerable"];
+
+const hasAny = (row: Record<string, unknown>, keys: string[]) => keys.some((k) => array(row[k]).length > 0);
+
+function readSpellInput(row: Record<string, unknown>, text: string, higher: string, cast: SpellCast): SpellInput {
+  const raw = JSON.stringify(row.entries ?? []);
 
   const damageTypes = strings(row.damageInflict);
 
@@ -123,11 +142,18 @@ export function deriveSpell(row: Record<string, unknown>, text: string, higher: 
 
   const unknownConditions = [...tags(raw, "condition"), ...strings(row.conditionInflict)].map((c) => c.toLowerCase()).filter((c) => !isCondition(c));
 
-  const signals = damageTypes.length > 0 || ability !== null || spellAttack || strings(row.conditionInflict).length > 0 || ["damageImmune", "damageResist", "damageVulnerable", "conditionImmune"].some((k) => array(row[k]).length > 0) || tags(raw, "damage").length > 0 || tags(raw, "condition").length > 0 || SIGNAL_TEXT.test(text);
+  const signals = damageTypes.length > 0 || ability !== null || spellAttack || strings(row.conditionInflict).length > 0 || [...RESIST_KEYS, "conditionImmune"].some((k) => array(row[k]).length > 0) || tags(raw, "damage").length > 0 || tags(raw, "condition").length > 0 || SIGNAL_TEXT.test(text);
 
-  const narrative = (narrativeReason: NarrativeReason): SpellDerivation => ({ native: { fields: { targeting: { kind: "self" }, resolution: { kind: "auto" }, dice: 0, spellEffects: [] }, narrative: true, narrativeReason, riders: [] } });
+  const rowCombat = damageTypes.length > 0 || spellAttack || strings(row.conditionInflict).length > 0 || [...RESIST_KEYS, "conditionImmune"].some((k) => array(row[k]).length > 0);
 
-  const rowCombat = damageTypes.length > 0 || spellAttack || strings(row.conditionInflict).length > 0 || ["damageImmune", "damageResist", "damageVulnerable", "conditionImmune"].some((k) => array(row[k]).length > 0);
+  return { row, text, higher, cast, raw, misc: strings(row.miscTags), damageTypes, ability, spellAttack, moveTrigger, triggerText, unknownConditions, signals, rowCombat };
+}
+
+const narrative = (narrativeReason: NarrativeReason): SpellDerivation => ({ native: { fields: { targeting: { kind: "self" }, resolution: { kind: "auto" }, dice: 0, spellEffects: [] }, narrative: true, narrativeReason, riders: [] } });
+
+/** Narrative and blocker outcomes decided from the row and text alone, in priority order. */
+function screenSpell(i: SpellInput): SpellDerivation | undefined {
+  const { row, text, cast, raw, misc, ability, signals, rowCombat } = i;
 
   const hasSignals = (t: string, r: string) => rowCombat || ability !== null || tags(r, "damage").length > 0 || tags(r, "condition").length > 0 || SIGNAL_TEXT.test(t);
 
@@ -141,43 +167,57 @@ export function deriveSpell(row: Record<string, unknown>, text: string, higher: 
 
   if (misc.includes("SMN")) return { blocker: "SUMMON" };
 
-  if (BUFF.test(text) || ["damageImmune", "damageResist", "damageVulnerable"].some((k) => array(row[k]).length > 0)) return { blocker: "BUFF_OR_TRANSFORM" };
+  if (BUFF.test(text) || hasAny(row, RESIST_KEYS)) return { blocker: "BUFF_OR_TRANSFORM" };
 
-  if (signals && ZONE.test(triggerText)) return { blocker: "ZONE_OR_TRIGGER" };
+  if (signals && ZONE.test(i.triggerText)) return { blocker: "ZONE_OR_TRIGGER" };
 
   if (WEAPON.test(text)) return { blocker: "WEAPON" };
 
   if (!signals) return narrative("noCombatNumbers");
 
-  if (unknownConditions.length > 0) return { blocker: "UNSUPPORTED_CONDITION", detail: { condition: unknownConditions[0] } };
+  if (i.unknownConditions.length > 0) return { blocker: "UNSUPPORTED_CONDITION", detail: { condition: i.unknownConditions[0] } };
 
   if (SELF_DAMAGE.test(text)) return { blocker: "SELF_DAMAGE" };
 
+  return undefined;
+}
+
+function slowedSpell(i: SpellInput): SpellDerivation | undefined {
+  const { text, cast } = i;
+
   const slowed = SLOWED.exec(text);
 
-  if (slowed && damageTypes.length === 0 && !ability && !spellAttack) {
-    const range = spellRange(cast.facts);
+  if (!slowed || i.damageTypes.length > 0 || i.ability || i.spellAttack) return undefined;
 
-    return { native: { narrative: false, riders: [], fields: { targeting: { kind: "enemy", ...(range !== "self" && { range }) }, resolution: { kind: "auto" }, dice: 0, spellEffects: [{ kind: "modifyStat", stat: "speed", flat: -Number(slowed[1]), duration: { rounds: durationRounds(cast.facts.duration) } }] } } };
-  }
+  const range = spellRange(cast.facts);
+
+  return { native: { narrative: false, riders: [], fields: { targeting: { kind: "enemy", ...(range !== "self" && { range }) }, resolution: { kind: "auto" }, dice: 0, spellEffects: [{ kind: "modifyStat", stat: "speed", flat: -Number(slowed[1]), duration: { rounds: durationRounds(cast.facts.duration) } }] } } };
+}
+
+function speedUpSpell(i: SpellInput): SpellDerivation | undefined {
+  const { row, text, higher, cast } = i;
 
   const sped = SPEED_UP.exec(text);
 
-  if (sped && damageTypes.length === 0 && !ability && !spellAttack && !CHOICE.test(text)) {
-    const withSelf = SELF_AND_OTHERS.exec(text);
+  if (!sped || i.damageTypes.length > 0 || i.ability || i.spellAttack || CHOICE.test(text)) return undefined;
 
-    const upTo = UP_TO_CREATURES.exec(text);
+  const withSelf = SELF_AND_OTHERS.exec(text);
 
-    const count = withSelf ? (numberWord(withSelf[1]) ?? 0) + 1 : upTo ? numberWord(upTo[1]) : null;
+  const upTo = UP_TO_CREATURES.exec(text);
 
-    const facts: SpellFacts = { level: row.level as number, desc: text, higher_level: higher || null, ...cast.facts, shape_type: null, shape_size: null, saving_throw_ability: null, damage_roll: null, damage_types: [], target_count: count };
+  const count = withSelf ? (numberWord(withSelf[1]) ?? 0) + 1 : upTo ? numberWord(upTo[1]) : null;
 
-    const riders = RIDERS.filter(([re, label]) => label !== "швидкість" && re.test(text)).map(([, label]) => label);
+  const facts: SpellFacts = { level: row.level as number, desc: text, higher_level: higher || null, ...cast.facts, shape_type: null, shape_size: null, saving_throw_ability: null, damage_roll: null, damage_types: [], target_count: count };
 
-    if (moveTrigger) riders.push("рух за реакцією");
+  const riders = RIDERS.filter(([re, label]) => label !== "швидкість" && re.test(text)).map(([, label]) => label);
 
-    return { native: { narrative: false, riders, fields: { targeting: spellTargeting(facts, "ally"), resolution: { kind: "auto" }, dice: 0, spellEffects: [{ kind: "modifyStat", stat: "speed", flat: Number(sped[1]), duration: { rounds: durationRounds(cast.facts.duration) } }], ...spellUpcast(facts, "none") } } };
-  }
+  if (i.moveTrigger) riders.push("рух за реакцією");
+
+  return { native: { narrative: false, riders, fields: { targeting: spellTargeting(facts, "ally"), resolution: { kind: "auto" }, dice: 0, spellEffects: [{ kind: "modifyStat", stat: "speed", flat: Number(sped[1]), duration: { rounds: durationRounds(cast.facts.duration) } }], ...spellUpcast(facts, "none") } } };
+}
+
+function damageOrConditionSpell(i: SpellInput): SpellDerivation {
+  const { row, text, higher, cast, raw, damageTypes, ability, spellAttack } = i;
 
   const damageDice = tags(raw, "damage");
 
@@ -230,4 +270,10 @@ export function deriveSpell(row: Record<string, unknown>, text: string, higher: 
       },
     },
   };
+}
+
+export function deriveSpell(row: Record<string, unknown>, text: string, higher: string, cast: SpellCast): SpellDerivation {
+  const input = readSpellInput(row, text, higher, cast);
+
+  return screenSpell(input) ?? slowedSpell(input) ?? speedUpSpell(input) ?? damageOrConditionSpell(input);
 }
