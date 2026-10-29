@@ -183,6 +183,7 @@ export const ASSISTANT_ROUTE_COVERAGE: readonly RouteCoverage[] = [
   { route: 'campaigns/[id]/rest', methods: ['POST'], task: 8, adapter: 'characters', state: "active" },
   { route: 'campaigns/[id]', methods: ['DELETE', 'GET', 'PATCH'], task: 7, adapter: 'campaign/templates', state: "active" },
   { route: 'campaigns/[id]/rules', methods: ['GET', 'PATCH'], task: 5, adapter: 'content', state: "active" },
+  { route: 'campaigns/[id]/rules/custom-conditions/[slug]/usage', methods: ['GET'], task: 5, adapter: 'content', state: "active" },
   { route: 'campaigns/[id]/save-as-template', methods: ['POST'], task: 7, adapter: 'campaign/templates', state: "active" },
   { route: 'campaigns/[id]/scenario/[pageId]', methods: ['DELETE', 'GET', 'PATCH', 'PUT'], task: 6, adapter: 'scenario + legacy proposals', state: "active" },
   { route: 'campaigns/[id]/scenario/[pageId]/sections/[sectionId]', methods: ['PATCH'], task: 6, adapter: 'scenario + legacy proposals', state: "active" },

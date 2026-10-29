@@ -2,11 +2,16 @@ import { describe, expect, it } from "vitest";
 
 import { isSpellOnlyKind, newSpellOnlyEffect, pruneEmpty, SPELL_ONLY_LABEL_KEYS } from "../spell-only";
 
+import { SPELL_ONLY_KINDS } from "@/lib/utils/battle/spell/cast/state";
 import { SPELL_ONLY_EFFECT_KINDS, SpellEffectSchema } from "@/lib/utils/spells/model/schema";
 
 describe("spell-only kinds", () => {
   it("список видів збігається з дискримінаторами схеми", () => {
     expect([...SPELL_ONLY_EFFECT_KINDS].sort()).toEqual(["anchoredZone", "chooseOne", "createTerrain", "grantCast", "hitRider", "inputDice", "moveSelf", "summonInline", "transform"]);
+  });
+
+  it("SPELL_ONLY_KINDS рушія (без zod у клієнті) збігається зі схемою без chooseOne", () => {
+    expect([...SPELL_ONLY_KINDS].sort()).toEqual(SPELL_ONLY_EFFECT_KINDS.filter((k) => k !== "chooseOne").sort());
   });
 
   it.each(SPELL_ONLY_EFFECT_KINDS.filter((k) => k !== "transform"))("новий %s проходить схему", (kind) => {

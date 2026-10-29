@@ -1,6 +1,8 @@
 import type { WhatsNewEntry } from "@/lib/onboarding/types";
 
 export const WHATS_NEW: WhatsNewEntry[] = [
+  { id: "2026-10-29-spell-editor-forms", date: "2026-10-29", audience: "dm" },
+  { id: "2026-10-29-spell-attack-crits", date: "2026-10-29", audience: "dm" },
   { id: "2026-10-29-summons-and-transform", date: "2026-10-29", audience: "all" },
   { id: "2026-10-29-spell-zones", date: "2026-10-29", audience: "all" },
   { id: "2026-10-29-temporary-spell-actions", date: "2026-10-29", audience: "all" },

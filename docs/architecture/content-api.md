@@ -16,6 +16,7 @@
   - `listFields` — короткі поля для `content_list`;
   - `errors?` (409/422);
   - функції `list`/`find`/`create`/`update`/`remove`/`removeAll?`/`toItem?`.
+- **Власні стани (P6)** — `PATCH /rules` приймає `removeCustomConditions: ["custom:<slug>"]` (поза секціями; ідемпотентно; той самий ключ у `conditions.custom` і тут — `validation.rulesCustomConflict`). Стан, що лишається в `prepared`/`active` боях, заклинаннях чи юнітах кампанії, не видаляється: 409 `errors.rules.customConditionInUse`. Операція `rules.condition-usage` (`GET /rules/custom-conditions/{slug}/usage`, лише ДМ; 404 для невідомого стану) повертає `ConditionUsage` (`types/campaigns.ts`, лише id/імена — `lib/server/campaigns/condition-usage.ts`, пошук `::text LIKE` за `"key"`). Клієнт — `useRemoveCustomCondition` (`lib/hooks/campaigns`) і діалог «Де використовується» на `/dm/rules`.
 - **Нестандартні операції** — `lib/server/content/operations.ts`, `CONTENT_OPERATIONS`: правила, експорт, дерева скілів, дублювання скіла, імпорт юнітів, порядок треків, видалення заклинань за рівнем, каталог здібностей та інші. Кожна операція має `method`, `path`, `need`, `tag`, `body?`, `query?`, `response`. `id` дорівнює ключу.
 - **Сервіс** — `lib/server/content/service.ts` (`listContent`/`getContent`/`createContent`/`updateContent`/`removeContent`/`removeAllContent`):
   - кожна функція спершу викликає `assertCan(actor, need)` (`access.ts`);
@@ -36,7 +37,7 @@
 
 ## OpenAPI
 
-`GET /api/openapi.json` — публічний документ OpenAPI 3.1 (~150 КБ, поріг тесту 160 000 символів), статичний (`force-static`, `s-maxage`).
+`GET /api/openapi.json` — публічний документ OpenAPI 3.1 (~150 КБ, поріг тесту 165 000 символів; P6 додав одну операцію й одне поле патча правил), статичний (`force-static`, `s-maxage`).
 - Його будує `lib/server/content/openapi.ts` з обох реєстрів.
 - Тіла запитів — ті самі Zod-схеми через `toJsonSchemas` (`json-schema.ts`, локальний реєстр Zod). Спільні підсхеми підставляються через `$ref` (спел-ефекти — `SpellEffect`: базові ефекти + `randomOf`, `chooseOne`, `inputDice`): здібність, тригер, умова, кожен вид ефекту, `SpellFx`, `WeaponStats`, `RulesetPatch`. Спільні схеми 4f-2: `Formula`, `Flat`, `Amount`, `ArmorStats`, `ClassColumn`.
 - Помилки й успішні відповіді винесені в `components.responses`.

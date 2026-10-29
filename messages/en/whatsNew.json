@@ -5,6 +5,14 @@
     "new": " · new",
     "open": "Open"
   },
+  "2026-10-29-spell-attack-crits": {
+    "title": "Spell attack crits and fumbles",
+    "body": "The DM's choice for natural 20s and 1s now also applies to spell attacks, including automatic reactions (such as Rageful Nimbus): the battle waits for your pick, and \"Cancel action\" cancels the whole attack."
+  },
+  "2026-10-29-spell-editor-forms": {
+    "title": "Editor for every spell effect",
+    "body": "The spell editor now has forms for all special effects (choose one, sub-cast, aura on a target, summon, transform, terrain). On the Rules page you can delete campaign custom conditions; if a condition is still in use, you will see where."
+  },
   "2026-10-29-summons-and-transform": {
     "title": "Summoned objects and transformation",
     "body": "Spells can summon immobile objects on the map (guardian bushes automatically attack enemies nearby, and the caster can strike with them as a bonus action) and transform a beast into a campaign unit: the form has its own HP, and when the form drops to zero the creature returns to its normal shape, carrying over the excess damage. Objects and the form vanish with the duration or when concentration is lost."
