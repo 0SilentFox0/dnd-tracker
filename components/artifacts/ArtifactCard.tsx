@@ -5,7 +5,7 @@ import Link from "next/link";
 import { useTranslations } from "next-intl";
 import { Pencil } from "lucide-react";
 
-import { AbilitySummary } from "@/components/abilities";
+import { AbilityFlowList } from "@/components/abilities";
 import { ArtifactDeleteButton } from "@/components/artifacts/ArtifactDeleteButton";
 import { EntityIcon } from "@/components/common/EntityIcon";
 import { HudCard } from "@/components/hud/page";
@@ -127,7 +127,7 @@ export function ArtifactCard({
         )}
         {artifact.abilitySummary.length > 0 && (
           <div className="mt-2">
-            <AbilitySummary lines={artifact.abilitySummary} />
+            <AbilityFlowList lines={artifact.abilitySummary} />
           </div>
         )}
       </div>
@@ -164,7 +164,7 @@ export function ArtifactCard({
         </p>
       )}
       {artifact.abilitySummary.length > 0 && (
-        <AbilitySummary lines={artifact.abilitySummary} />
+        <AbilityFlowList lines={artifact.abilitySummary} />
       )}
       <div className="flex gap-2">
         <Button variant="outline" size="sm" className="flex-1" asChild>

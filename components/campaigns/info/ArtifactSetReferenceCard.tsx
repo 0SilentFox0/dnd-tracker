@@ -1,7 +1,7 @@
 import { useTranslations } from "next-intl";
 import { Gem } from "lucide-react";
 
-import { useAbilityText } from "@/components/abilities/use-ability-text";
+import { AbilityFlowList } from "@/components/abilities";
 import { EntityIcon } from "@/components/common/EntityIcon";
 import {
   AccordionContent,
@@ -13,8 +13,6 @@ import type { ArtifactSetForReference } from "@/types/info-reference";
 
 export function ArtifactSetReferenceCard({ set }: { set: ArtifactSetForReference }) {
   const t = useTranslations("dashboard.reference.card");
-
-  const bonuses = useAbilityText().flows(set.bonuses);
 
   return (
     <AccordionItem
@@ -47,11 +45,9 @@ export function ArtifactSetReferenceCard({ set }: { set: ArtifactSetForReference
           {set.bonuses.length > 0 && (
             <div>
               <Label className="hud-sc text-xs text-hud-gold">{t("setBonuses")}</Label>
-              <ul className="list-disc list-inside text-sm mt-0.5 space-y-0.5">
-                {bonuses.map((b, i) => (
-                  <li key={i}>{b}</li>
-                ))}
-              </ul>
+              <div className="mt-1">
+                <AbilityFlowList lines={set.bonuses} />
+              </div>
             </div>
           )}
         </div>
