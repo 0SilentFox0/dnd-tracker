@@ -45,7 +45,7 @@ export const saveAcquaintanceNoteSchema = z.object({
   text: z.string().max(ACQUAINTANCE_LIMITS.note),
 });
 
-export type CreateAcquaintanceData = z.infer<typeof createAcquaintanceSchema>;
+export type CreateAcquaintanceData = z.input<typeof createAcquaintanceSchema>;
 export type UpdateAcquaintanceData = z.infer<typeof updateAcquaintanceSchema>;
 export type CreateAcquaintanceEntryData = z.infer<typeof createAcquaintanceEntrySchema>;
 export type UpdateAcquaintanceEntryData = z.infer<typeof updateAcquaintanceEntrySchema>;

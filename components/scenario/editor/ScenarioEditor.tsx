@@ -65,8 +65,15 @@ export function ScenarioEditor({ campaignId, page, onExit, toolbarActions, onDra
     if ((await draft.flush()) || (await confirm({ title: "Є незбережені зміни. Вийти без збереження?", confirmLabel: "Вийти" }))) onExit();
   };
 
-  const openAcquaintance = () => {
-    if (editor && active) setAcquaintance(acquaintanceTargetFor(editor, { pageId: page.id, sectionId: active.sectionId }));
+  const openAcquaintance = async () => {
+    if (!editor || !active) return;
+
+    const session = acquaintanceTargetFor(editor, { pageId: page.id, sectionId: active.sectionId });
+
+    // the server checks the section exists in the saved page, so a just-added section must be saved first
+    if (draft.hasUnsavedChanges() && !(await draft.flush())) return;
+
+    setAcquaintance(session);
   };
 
   const insertAcquaintance = ({ id, label }: { id: string; label: string }) => {
@@ -90,7 +97,7 @@ export function ScenarioEditor({ campaignId, page, onExit, toolbarActions, onDra
   return (
     <>
       <div ref={toolbarRef} className="sb-toolbar-wrap">
-        <ScenarioToolbar editor={active ? editor : null} onAcquaintance={acquaintanceToolEnabled(page.kind) ? openAcquaintance : undefined} />
+        <ScenarioToolbar editor={active ? editor : null} onAcquaintance={acquaintanceToolEnabled(page.kind) ? () => void openAcquaintance() : undefined} />
         <div className="sb-toolbar" style={{ borderTop: 0 }}>
           <SaveStatus state={draft.state} error={draft.error} onRetry={() => void draft.flush()} onReload={() => void draft.reload()} onRetain={draft.retainLocal} />
           <button type="button" className="toggle" onClick={() => setPropsOpen(true)}>

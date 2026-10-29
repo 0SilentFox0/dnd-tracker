@@ -15,7 +15,7 @@ import type { AcquaintancesResponse, AcquaintanceView } from "@/types/acquaintan
 // players only ever see their own note, so other authors' texts never leave the DB for them
 export const acquaintanceInclude = (viewer?: { userId: string; isDM: boolean }) =>
   ({
-    character: { select: { name: true, avatar: true } },
+    character: { select: { name: true, avatar: true, background: true } },
     entries: true,
     notes: { ...(viewer && !viewer.isDM && { where: { authorUserId: viewer.userId } }), include: { author: { select: { displayName: true } } } },
   }) satisfies Prisma.AcquaintanceInclude;

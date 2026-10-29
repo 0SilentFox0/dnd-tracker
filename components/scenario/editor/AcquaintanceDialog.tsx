@@ -81,18 +81,20 @@ function AcquaintanceForm({ campaignId, fields, onChange, onSubmit }: { campaign
         <Label htmlFor="acq-name">Ім&apos;я</Label>
         <Input id="acq-name" value={fields.name} maxLength={ACQUAINTANCE_LIMITS.name} onChange={(e) => onChange({ name: e.target.value })} />
       </div>
-      <div className="space-y-1">
-        <Label htmlFor="acq-description">Опис</Label>
-        <Textarea id="acq-description" value={fields.description} maxLength={ACQUAINTANCE_LIMITS.description} onChange={(e) => onChange({ description: e.target.value })} />
-      </div>
-      <IconUrlField id="acq-avatar" label="Аватар (URL)" value={fields.avatarUrl} onChange={(avatarUrl) => onChange({ avatarUrl })} fallbackText={fields.name} />
+      {fields.kind === "micro" && (
+        <div className="space-y-1">
+          <Label htmlFor="acq-description">Опис</Label>
+          <Textarea id="acq-description" value={fields.description} maxLength={ACQUAINTANCE_LIMITS.description} onChange={(e) => onChange({ description: e.target.value })} />
+        </div>
+      )}
+      {fields.kind === "micro" && <IconUrlField id="acq-avatar" label="Аватар (URL)" value={fields.avatarUrl} onChange={(avatarUrl) => onChange({ avatarUrl })} fallbackText={fields.name} />}
     </form>
   );
 }
 
 const canSubmit = (f: Fields) => !!f.name.trim() && (f.kind !== "character" || !!f.characterId);
 
-const payload = (f: Fields) => ({ kind: f.kind, characterId: f.kind === "character" ? f.characterId : null, name: f.name.trim(), description: f.description, avatarUrl: f.avatarUrl.trim() || null });
+const payload = (f: Fields) => ({ kind: f.kind, characterId: f.kind === "character" ? f.characterId : null, name: f.name.trim(), ...(f.kind === "micro" && { description: f.description, avatarUrl: f.avatarUrl.trim() || null }) });
 
 function useFields(initial: Fields) {
   const [fields, setFields] = useState(initial);
