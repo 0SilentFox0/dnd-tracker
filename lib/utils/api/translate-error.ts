@@ -57,7 +57,15 @@ function translateIssues(t: Translator, issues: unknown): unknown {
 function translateParams(t: Translator, params: ErrorParams | undefined): ErrorParams | undefined {
   if (!params) return params;
 
-  return Object.fromEntries(Object.entries(params).map(([name, value]) => [name, typeof value === "string" && t.has(value) ? t(value) : value]));
+  const translate = (name: string, value: ErrorParams[string]) => {
+    if (typeof value !== "string" || !t.has(value)) return value;
+
+    const { [name]: _self, ...rest } = params;
+
+    return Object.keys(rest).length ? t(value, rest) : t(value);
+  };
+
+  return Object.fromEntries(Object.entries(params).map(([name, value]) => [name, translate(name, value)]));
 }
 
 export function translateErrorBody(t: Translator, body: ApiErrorSource): ApiErrorBody {

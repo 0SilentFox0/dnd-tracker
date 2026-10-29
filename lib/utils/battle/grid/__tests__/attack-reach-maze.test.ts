@@ -3,6 +3,7 @@ import { describe, expect, it } from "vitest";
 import { attackReachError, enemiesInReach } from "../attack-reach";
 
 import { AttackType, ParticipantSide } from "@/lib/constants/battle";
+import { textOf } from "@/lib/i18n/test/text";
 import { textRef } from "@/lib/i18n/text-ref";
 import { createMockParticipant } from "@/lib/utils/battle/__tests__/fixtures/mock-participant";
 import { mazeMap } from "@/lib/utils/battle/modes/maze/__tests__/fixtures";
@@ -31,14 +32,14 @@ describe("ближня атака в лабіринті", () => {
   it("сусід за стіною — «Між вами стіна»; без стіни — ок", () => {
     const foe = at("e", { x: 6, y: 5 }, ParticipantSide.ENEMY);
 
-    expect(attackReachError(mapOf({ walls: ["5:5:e"] }), [hero, foe], hero, sword, [foe])).toBe("Між вами стіна");
+    expect(textOf(attackReachError(mapOf({ walls: ["5:5:e"] }), [hero, foe], hero, sword, [foe]) as never)).toBe("Між вами стіна");
     expect(attackReachError(mapOf(), [hero, foe], hero, sword, [foe])).toBeNull();
   });
 
   it("по діагоналі через закритий кут — стіна; через відкрите ребро — ок", () => {
     const foe = at("e", { x: 6, y: 6 }, ParticipantSide.ENEMY);
 
-    expect(attackReachError(mapOf({ walls: ["5:5:s"] }), [hero, foe], hero, sword, [foe])).toBe("Між вами стіна");
+    expect(textOf(attackReachError(mapOf({ walls: ["5:5:s"] }), [hero, foe], hero, sword, [foe]) as never)).toBe("Між вами стіна");
     expect(attackReachError(mapOf({ walls: ["4:5:e"] }), [hero, foe], hero, sword, [foe])).toBeNull();
   });
 
@@ -56,14 +57,14 @@ describe("дальня атака в лабіринті", () => {
     const behind = at("e2", { x: 2, y: 5 }, ParticipantSide.ENEMY);
 
     expect(attackReachError(mapOf(), [hero, ahead], hero, bow, [ahead])).toBeNull();
-    expect(attackReachError(mapOf({ walls: ["6:5:e"] }), [hero, ahead], hero, bow, [ahead])).toBe("Ціль поза полем зору");
-    expect(attackReachError(mapOf(), [hero, behind], hero, bow, [behind])).toBe("Ціль поза полем зору");
+    expect(textOf(attackReachError(mapOf({ walls: ["6:5:e"] }), [hero, ahead], hero, bow, [ahead]) as never)).toBe("Ціль поза полем зору");
+    expect(textOf(attackReachError(mapOf(), [hero, behind], hero, bow, [behind]) as never)).toBe("Ціль поза полем зору");
   });
 
   it("ціль у тумані видно лише впритул", () => {
     const foe = at("e", { x: 7, y: 5 }, ParticipantSide.ENEMY);
 
-    expect(attackReachError(mapOf({ fog: ["7:5"] }), [hero, foe], hero, bow, [foe])).toBe("Ціль поза полем зору");
+    expect(textOf(attackReachError(mapOf({ fog: ["7:5"] }), [hero, foe], hero, bow, [foe]) as never)).toBe("Ціль поза полем зору");
   });
 
   it("сусідній ворог і далі блокує постріл", () => {

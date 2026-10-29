@@ -1,9 +1,9 @@
 import { describe, expect, it } from "vitest";
 
 import { adaptCompendium } from "../adapt";
-import { derivedTranslator } from "../derived-text";
 import { spellCast } from "../adapters/spell-cast";
 import { deriveSpell } from "../adapters/spell-derive";
+import { derivedTranslator } from "../derived-text";
 
 import { createSpellSchema } from "@/lib/schemas/spells";
 

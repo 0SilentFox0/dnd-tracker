@@ -4,11 +4,14 @@ import { Crosshair, Swords } from "lucide-react";
 import type { AttackWizardModel } from "./shared";
 
 import { AttackType } from "@/lib/constants/battle";
+import { useText } from "@/lib/i18n/use-text";
 import { cn } from "@/lib/utils";
 import { signed } from "@/lib/utils/common/format";
 
 export function WeaponStep({ wizard: { state, view, actions } }: { wizard: AttackWizardModel }) {
   const t = useTranslations("battleWizards.attack.weapon");
+
+  const text = useText();
 
   return (
     <div className="space-y-2">
@@ -24,7 +27,11 @@ export function WeaponStep({ wizard: { state, view, actions } }: { wizard: Attac
               <span className="hud-sc block text-[17px] font-bold">{a.name}</span>
               <span className="block text-[13px] text-[#a89c88]">{t("toHit", { kind: t(a.type === AttackType.MELEE ? "melee" : "ranged"), bonus: signed(preview?.toHit ?? a.attackBonus) })}</span>
               <span className="mt-1 flex flex-wrap gap-x-2.5 text-xs text-[#cdb87e]">
-                {preview?.bonuses.map((b) => <span key={b.label}>{b.label} {b.percent ? `${signed(b.percent)}%` : signed(b.flat)}</span>)}
+                {preview?.bonuses.map((b) => {
+                  const label = text(b.label);
+
+                  return <span key={label}>{label} {b.percent ? `${signed(b.percent)}%` : signed(b.flat)}</span>;
+                })}
               </span>
             </span>
             <span className="w-[72px] text-right text-[15px]">{preview?.formula || a.damageDice}<small className="block text-xs text-[var(--hud-muted)]">≈ {preview?.estimate}</small></span>

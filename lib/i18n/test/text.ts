@@ -55,3 +55,9 @@ export function logTextOf(action: Pick<BattleAction, "log" | "resultText">, loca
 
   return action.log.map((line) => textOf(line, locale)).join(" | ");
 }
+
+/** Asymmetric matcher: a `LogLine` whose uk text matches the pattern. */
+export const textMatching = (pattern: RegExp, locale: Locale = DEFAULT_LOCALE) => ({
+  asymmetricMatch: (line: LogLine) => pattern.test(textOf(line, locale)),
+  toString: () => `textMatching(${pattern})`,
+});

@@ -13,7 +13,6 @@ const crit = (type: CriticalEffectType, extra: Partial<CriticalEffect["effect"]>
   name: "Тест-ефект",
   description: "опис",
   type: "success",
-  flavor: [],
   flavorCount: 0,
   effect: { type, duration: 1, ...extra },
 });

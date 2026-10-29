@@ -30,7 +30,7 @@ describe("у повітрі — поза досяжністю", () => {
 
     const r = resolveSpellTargets(ps, byId(ps, "e"), { id: "bolt", groupId: null, level: 1 }, { kind: "enemy" } as never, ["g"]);
 
-    expect(r).toMatchObject({ ok: false, error: API_ERRORS.TARGET_AIRBORNE });
+    expect(r).toMatchObject({ ok: false, error: { message: API_ERRORS.TARGET_AIRBORNE } });
   });
 
   it("маневр потребує цілі лише без карти", () => {

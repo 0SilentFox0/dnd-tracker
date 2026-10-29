@@ -13,6 +13,7 @@ vi.mock("@/lib/db", () => ({ prisma: { skill: { findMany: vi.fn() }, spell: { fi
 
 import { getCachedInfoReference } from "@/lib/cache/info-reference";
 import { prisma } from "@/lib/db";
+import { textMatching } from "@/lib/i18n/test/text";
 
 describe("довідник кампанії", () => {
   beforeEach(() => {
@@ -44,7 +45,7 @@ describe("довідник кампанії", () => {
     const { skills, spells } = await getCachedInfoReference("c");
 
     expect(skills[0]).toMatchObject({ id: "k", mainSkillName: "Напад", mainSkillColor: "red", grantedSpellName: "Іскра", abilitySummary: [] });
-    expect(spells[0]).toMatchObject({ id: "s", groupName: "Вогонь", type: "ворог", dice: 1, effects: [expect.stringContaining("шкода")] });
+    expect(spells[0]).toMatchObject({ id: "s", groupName: "Вогонь", type: "ворог", dice: 1, effects: [textMatching(/шкода/)] });
   });
 
   it("кеш позначено тегами скілів, основних навиків і заклинань", async () => {

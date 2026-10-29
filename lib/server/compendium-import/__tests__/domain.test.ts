@@ -47,6 +47,6 @@ describe("imported manual domain contracts", () => {
     expect(result.success).toBe(false);
     expect(result.casterUpdated).toEqual(before);
     expect(result.allParticipantsUpdated).toEqual([before]);
-    expect(result.messages.join()).toContain("вручну");
+    expect(JSON.stringify(result.messages)).toContain("battleActions.reject.manualSpell");
   });
 });

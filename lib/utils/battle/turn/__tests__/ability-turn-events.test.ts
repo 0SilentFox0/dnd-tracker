@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 
 import { ParticipantSide } from "@/lib/constants/battle";
+import { textOf } from "@/lib/i18n/test/text";
 import { makeParticipant, resolved, seq } from "@/lib/utils/abilities/__tests__/fixtures";
 import { advanceTurn } from "@/lib/utils/battle/turn/advance-turn";
 import { applyPendingMoraleCheck } from "@/lib/utils/battle/turn/apply-pending-morale";
@@ -16,8 +17,8 @@ describe("turn events", () => {
     const r = processStartOfTurn(p, 1, [p], seq(0));
 
     expect(r.participants[0].combatStats.currentHp).toBe(13);
-    expect(r.abilityMessages[0]).toContain("💚");
-    expect(r.abilityMessages[0]).not.toContain("(a)");
+    expect(textOf(r.abilityMessages[0])).toContain("💚");
+    expect(textOf(r.abilityMessages[0])).not.toContain("(a)");
   });
 
   it("смерть від DOT дає kill-подію союзникам", () => {

@@ -358,7 +358,7 @@ describe("PATCH /api/campaigns/[id]/battles/[battleId] — map", () => {
     const res = await patch({ cols: 4, rows: 4, opacity: 1, background: null, blocked });
 
     expect(await getResponseStatus(res)).toBe(400);
-    expect(JSON.stringify(await getResponseJson(res))).toContain("Ігрова зона");
+    expect(JSON.stringify(await getResponseJson(res))).toContain("battleSetup.validation.playableAreaTooSmall");
     expect(prisma.battleScene.update).not.toHaveBeenCalled();
   });
 });

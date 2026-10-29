@@ -1,4 +1,4 @@
-/* eslint-disable no-restricted-syntax -- TODO(i18n-part6 task 11): uk labels stay until their consumers in tasks 2-9 read keys */
+/* eslint-disable no-restricted-syntax -- UNGROUPED_LABELS.race is the pure-helper fallback of groupUnitsByRace; UI shows gameTerms.ungrouped.* */
 export const UNGROUPED_KEY = "\u0000ungrouped";
 
 export const UNGROUPED_LABELS = {

@@ -19,6 +19,7 @@ vi.mock("@/components/campaigns/info/InfoReferenceClient", () => ({ InfoReferenc
 
 import CampaignInfoPage from "@/app/campaigns/[id]/info/page";
 import { InfoReferenceClient } from "@/components/campaigns/info/InfoReferenceClient";
+import { textMatching } from "@/lib/i18n/test/text";
 
 function findProps(node: ReactNode): Record<string, unknown> | null {
   if (!isValidElement(node)) return null;
@@ -49,7 +50,7 @@ describe("сторінка info", () => {
     expect(skill).not.toHaveProperty("bonuses");
     expect(skill).not.toHaveProperty("skillTriggers");
     expect(skill).not.toHaveProperty("abilities");
-    expect(skill.abilitySummary).toEqual([expect.stringMatching(/шкода \(ближня\) \+10%/)]);
+    expect(skill.abilitySummary).toEqual([textMatching(/шкода \(ближня\) \+10%/)]);
   });
 
   it("у класовому режимі віддає класи й ховає скіли", async () => {

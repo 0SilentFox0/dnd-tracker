@@ -31,18 +31,6 @@
     "castOverrun": "The credited time exceeds the remaining casting time",
     "manualSpell": "Configure the spell mechanics or apply it manually"
   },
-  "coreDescriptions": {
-    "dash": "Adds as much to this turn's movement as your speed gives.",
-    "disengage": "Until the end of the turn, your movement does not provoke opportunity attacks.",
-    "dodge": "Until the start of your next turn, attacks against you have disadvantage and you have advantage on DEX saving throws.",
-    "help": "An adjacent ally gains advantage on the next attack.",
-    "hide": "A Stealth check against the enemies' passive Perception.",
-    "ready": "An attack as a reaction before the start of your next turn.",
-    "standUp": "Spends half of your movement and removes the prone condition.",
-    "grapple": "A contest (2014) or saving throw (2024): the target becomes grappled.",
-    "shove": "A contest (2014) or saving throw (2024): knock the target prone or push it 5 ft.",
-    "escape": "A contest against the grappler (2024: against the DC): removes the grappled condition."
-  },
   "core": {
     "done": "{icon} {name}: {action}{tail}",
     "dashTail": " (+{gained} cells of movement)",

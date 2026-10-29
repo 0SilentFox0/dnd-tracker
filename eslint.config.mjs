@@ -51,7 +51,7 @@ const MODE_OWNED_FILES = [
   "lib/server/battles/mutations/move/**",
 ];
 
-const I18N_MIGRATED = JSON.parse(readFileSync(new URL("./i18n-migrated.json", import.meta.url), "utf8"));
+const I18N_EXEMPT = JSON.parse(readFileSync(new URL("./i18n-exempt.json", import.meta.url), "utf8"));
 
 const CYRILLIC_MESSAGE = "Текст — у messages/*.json через t()";
 
@@ -260,8 +260,8 @@ const eslintConfig = defineConfig([
     },
   },
   {
-    files: I18N_MIGRATED,
-    ignores: ["**/__tests__/**"],
+    files: ["**/*.{ts,tsx}"],
+    ignores: ["**/__tests__/**", ...I18N_EXEMPT],
     rules: {
       "no-restricted-syntax": ["error", ...CYRILLIC_SELECTORS.map((selector) => ({ selector, message: CYRILLIC_MESSAGE }))],
     },

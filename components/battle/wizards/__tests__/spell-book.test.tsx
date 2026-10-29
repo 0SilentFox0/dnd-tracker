@@ -79,7 +79,7 @@ describe("SpellBook", () => {
 
     render(<Harness caster={caster} />, { wrapper });
 
-    expect(await screen.findByRole("button", { name: /spells.book.bookmark.*"level":"II".*"slots":1/ })).toBeTruthy();
+    expect(await screen.findByRole("button", { name: /II коло, слотів 1/ })).toBeTruthy();
     expect(screen.getByText("Палаючий промінь")).toBeTruthy();
     expect(screen.queryByText("Крижаний спис")).toBeNull();
 
@@ -177,7 +177,7 @@ describe("SpellBook", () => {
     expect(screen.getByText("Вогняна куля")).toBeTruthy();
     expect(screen.queryByText("Палаючий промінь")).toBeNull();
 
-    fireEvent.click(screen.getByRole("button", { name: "spells.book.allSchools" }));
+    fireEvent.click(screen.getByRole("button", { name: "Усі" }));
 
     expect(screen.getByText("Палаючий промінь")).toBeTruthy();
   });
@@ -187,7 +187,7 @@ describe("SpellBook", () => {
 
     render(<Harness caster={caster} />, { wrapper });
 
-    fireEvent.click(await screen.findByRole("button", { name: /^spells.book.bookmark.*"level":"I"/ }));
+    fireEvent.click(await screen.findByRole("button", { name: /^I коло/ }));
 
     expect(screen.getByText("Крижаний спис")).toBeTruthy();
   });
@@ -197,7 +197,7 @@ describe("SpellBook", () => {
 
     render(<Harness caster={caster} />, { wrapper });
 
-    fireEvent.click(await screen.findByRole("button", { name: /^spells.book.bookmark.*"level":"I"/ }));
+    fireEvent.click(await screen.findByRole("button", { name: /^I коло/ }));
 
     expect(await screen.findByText("Крижаний спис")).toBeTruthy();
     expect(useSpellsByIds).toHaveBeenLastCalledWith(expect.any(String), ["bolt"], { enabled: true });
@@ -320,7 +320,7 @@ describe("SpellBook", () => {
       fireEvent.click(await screen.findByText("Дротик"));
       fireEvent.click(screen.getByRole("button", { name: /Обрати цілі/ }));
 
-      expect(screen.queryByRole("button", { name: /spells.book.bookmark.*"level":"II"/ })).toBeNull();
+      expect(screen.queryByRole("button", { name: /II коло/ })).toBeNull();
       expect(screen.getByRole("region", { name: "Наведення заклинання" })).toBeTruthy();
       expect(screen.getByText("Оберіть ціль на карті")).toBeTruthy();
       expect(screen.queryByRole("button", { name: /Гоблін/ })).toBeNull();

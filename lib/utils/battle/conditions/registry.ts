@@ -1,4 +1,4 @@
-/* eslint-disable no-restricted-syntax -- TODO(i18n-part6 task 11): uk labels stay until their consumers read keys */
+/* eslint-disable no-restricted-syntax -- label/description are stored into the active effect (data); the battle UI reads battleCommon.conditions.* keys */
 import { EffectMarker } from "@/lib/constants/battle";
 import { type RulesEdition } from "@/lib/constants/rules";
 import { dynamicTextRef } from "@/lib/i18n/text-ref";

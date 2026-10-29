@@ -1,4 +1,3 @@
-import { getDamageElementLabel } from "@/lib/constants/damage";
 import { type Ability, type Amount, type Condition, type Effect } from "@/lib/utils/abilities/schema";
 
 type ModStat = "attackBonus" | "initiative" | "armor" | "morale";
@@ -9,8 +8,12 @@ const CONDITION_LABELS = { disable_ranged_attacks: "дальні атаки", di
 
 const ELEMENT_LABELS: Record<string, string> = { fire: "вогню", cold: "холоду", lightning: "блискавки" };
 
+const DAMAGE_TYPE_LABELS: Record<string, string> = {
+  fire: "вогонь", cold: "лід", lightning: "блискавка", acid: "кислота", poison: "отрута", necrotic: "некротична", radiant: "світло", thunder: "грім", psychic: "психічна", force: "сила", bludgeoning: "дробляча", piercing: "колюча", slashing: "рубляча", bleed: "кровотеча", physical: "фізична",
+};
+
 function typeLabel(type: string): string {
-  return type === "physical" ? "фізична" : getDamageElementLabel(type).toLowerCase();
+  return DAMAGE_TYPE_LABELS[type] ?? type.toLowerCase();
 }
 
 function hash(text: string): string {

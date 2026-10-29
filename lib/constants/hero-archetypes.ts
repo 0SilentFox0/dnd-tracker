@@ -1,4 +1,4 @@
-/* eslint-disable no-restricted-syntax -- className is written to the DB (content in the author's locale); name: TODO(i18n-part6 task 11) */
+/* eslint-disable no-restricted-syntax -- className is written to the DB (content in the author's locale); name feeds the character sheet payload, UI reads characters.archetypes.* */
 export const HERO_ARCHETYPE_KEYS = ["warrior", "paladin", "ranger", "rogue", "mage"] as const;
 
 export type HeroArchetypeKey = (typeof HERO_ARCHETYPE_KEYS)[number];

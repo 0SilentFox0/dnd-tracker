@@ -1,12 +1,12 @@
 import { describe, expect, it } from "vitest";
 
 import { AttackType, ParticipantSide } from "@/lib/constants/battle";
-import { getCriticalEffect } from "@/lib/constants/critical-effects";
 import { textRef } from "@/lib/i18n/text-ref";
 import { makeParticipant, resolved, seq } from "@/lib/utils/abilities/__tests__/fixtures";
 import { processAttack } from "@/lib/utils/battle/attack/process";
 import { computeHitDamage } from "@/lib/utils/battle/attack/process/compute";
 import { eventTextOf } from "@/lib/utils/battle/log/__tests__/event-text";
+import battleTerms from "@/messages/uk/battleTerms.json";
 import type { BattleAttack } from "@/types/battle";
 
 const sword: BattleAttack = { id: "sw", name: "Меч", type: AttackType.MELEE, attackBonus: 5, damageDice: "1d6", damageType: "slashing" };
@@ -77,7 +77,7 @@ describe("крок влучання", () => {
     const names = (a: { basicInfo: { name: string } }, t: { basicInfo: { name: string } }) => ({ attacker: a.basicInfo.name, target: t.basicInfo.name });
 
     const phrases = (type: "success" | "fail", n: { attacker: string; target: string }) =>
-      (getCriticalEffect(6, type)?.flavor ?? []).map((f) => f.replaceAll("{attacker}", n.attacker).replaceAll("{target}", n.target));
+      Object.values((battleTerms.crits.attack[type] as unknown as Record<string, { flavor: Record<string, string> }>)["6"].flavor).map((f) => f.replaceAll("{attacker}", n.attacker).replaceAll("{target}", n.target));
 
     it("крит-влучання: фраза в деталях і в тексті", () => {
       const { attacker, target } = setup();

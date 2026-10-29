@@ -18,6 +18,7 @@ import { join } from "node:path";
 
 import { resultTextOf } from "./log-text";
 
+import { API_ERRORS } from "@/lib/constants/api-errors";
 import { BATTLE_LOG_RECENT_EVENTS, ParticipantSourceType } from "@/lib/constants/battle";
 import { CONTROLLED_BY_DM } from "@/lib/constants/characters";
 import { prisma } from "@/lib/db";
@@ -54,6 +55,7 @@ import { casterSpellDice } from "@/lib/utils/battle/spell/caster-dice";
 import { loadSpellsFromDb } from "@/lib/utils/battle/spell/load-spells-db";
 import { spellTargetingFor } from "@/lib/utils/battle/spell/spell-targeting";
 import { loadBattle, loadRecentEvents, saveBattle } from "@/lib/utils/battle/store";
+import { REJECT } from "@/lib/utils/battle/store/reject";
 import { checkVictoryConditions } from "@/lib/utils/battle/turn/victory";
 import { rollDiceList } from "@/lib/utils/common/dice";
 import { branchLevelNodeId, canLearn, normalizeTree, racialNodeId, writeUnlocked } from "@/lib/utils/skills/progression";
@@ -1191,7 +1193,7 @@ async function level5Check(spells: Map<string, any>) {
 
   const r2 = await call("spell", SPELL, { casterId: byName("Аграїл").basicInfo.id, spellId: sp2.id, targetIds: [byName("Аграїл").basicInfo.id], diceRolls: [] }, ag.controlledBy);
 
-  tcheck("Другий каст 5-го рівня без слота відхиляється", r2.status === 422 && /Немає вільного слота/.test(JSON.stringify(r2.body)), `${r2.status} ${JSON.stringify(r2.body).slice(0, 150)}`);
+  tcheck("Другий каст 5-го рівня без слота відхиляється", r2.status === 422 && JSON.stringify(r2.body).includes(API_ERRORS.BATTLE_NO_FREE_SLOT), `${r2.status} ${JSON.stringify(r2.body).slice(0, 150)}`);
 
   // Аватар Маркела
   await applyRotation(0);
@@ -1302,7 +1304,7 @@ async function reserveCheck() {
 
   const r2 = await call("reveal-participant", REVEAL, { participantIds: [reserve()[0].basicInfo.id] });
 
-  tcheck("Резерв: старт, введення, очікування рішення ДМ", startedOk && r.status === 200 && actedNext && awaitingOk && blocked.status === 422 && JSON.stringify(blocked.body).includes("чекає рішення ДМ") && r2.status === 200 && state.status === "active", `старт=${startedOk} reveal=${r.status} ходить-наступним=${actedNext} очікування=${awaitingOk} next-turn=${blocked.status} reveal2=${r2.status}`);
+  tcheck("Резерв: старт, введення, очікування рішення ДМ", startedOk && r.status === 200 && actedNext && awaitingOk && blocked.status === 422 && JSON.stringify(blocked.body).includes(API_ERRORS.BATTLE_AWAITING_DM) && r2.status === 200 && state.status === "active", `старт=${startedOk} reveal=${r.status} ходить-наступним=${actedNext} очікування=${awaitingOk} next-turn=${blocked.status} reveal2=${r2.status}`);
 }
 
 async function mapCheck(spells: Map<string, any>) {
@@ -1359,7 +1361,7 @@ async function mapCheck(spells: Map<string, any>) {
 
   const rm = meleeOk && w && far ? await call("attack", ATTACK, { attackerId: att.basicInfo.id, targetId: far.basicInfo.id, attackId: w.id, d20Roll: 15, disadvantageRoll: 15, advantageRoll: 15, damageRolls: [], endTurn: false }) : null;
 
-  tcheck("Карта: ближня атака не дістає далекої цілі", rm?.status === 422 && /не поруч/.test(JSON.stringify(rm.body)), `${att.basicInfo.name} → ${far?.basicInfo.name}: ${rm?.status ?? "немає сценарію"} ${rm ? JSON.stringify(rm.body).slice(0, 150) : ""}`);
+  tcheck("Карта: ближня атака не дістає далекої цілі", rm?.status === 422 && JSON.stringify(rm.body).includes(REJECT.targetNotNear), `${att.basicInfo.name} → ${far?.basicInfo.name}: ${rm?.status ?? "немає сценарію"} ${rm ? JSON.stringify(rm.body).slice(0, 150) : ""}`);
 
   const fire = [...spells.values()].find((s: any) => s.name === "Вогняна куля");
 

@@ -12,7 +12,26 @@ exports[`детермінований контракт початку ходу >
           "name": "Тест",
         },
       },
-      "💚 Вміння: Тест +2 HP (шанс 50 %)",
+      {
+        "message": "$join",
+        "params": {
+          "p0": {
+            "message": "abilityText.log.heal",
+            "params": {
+              "amount": 2,
+              "label": "Вміння",
+              "target": "Тест",
+            },
+          },
+          "p1": {
+            "message": "abilityText.log.chanceSuffix",
+            "params": {
+              "chance": 50,
+            },
+          },
+          "separator": "",
+        },
+      },
     ],
     "damageMessages": [
       {

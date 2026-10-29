@@ -1,4 +1,4 @@
-/* eslint-disable no-restricted-syntax -- TODO(i18n-part6 task 11): uk facet strings of the info reference stay until it renders refs */
+/* eslint-disable no-restricted-syntax -- uk facet strings of the cached info reference (stored as plain strings in the cache and used as filter values) */
 import type { SpellCost, SpellResolution, SpellTargeting } from "./schema";
 
 import { ABILITY_LABELS } from "@/lib/constants/abilities";

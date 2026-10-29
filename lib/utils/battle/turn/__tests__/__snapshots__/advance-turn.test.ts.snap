@@ -208,7 +208,26 @@ exports[`детермінований контракт turn loop > зберіг�
               "name": "Тест",
             },
           },
-          "💚 Вміння: Тест +1 HP (шанс 50 %)",
+          {
+            "message": "$join",
+            "params": {
+              "p0": {
+                "message": "abilityText.log.heal",
+                "params": {
+                  "amount": 1,
+                  "label": "Вміння",
+                  "target": "Тест",
+                },
+              },
+              "p1": {
+                "message": "abilityText.log.chanceSuffix",
+                "params": {
+                  "chance": 50,
+                },
+              },
+              "separator": "",
+            },
+          },
         ],
         "resultText": "",
         "round": 2,

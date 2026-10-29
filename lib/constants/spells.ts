@@ -40,7 +40,7 @@ export function spellSchoolColor(group: { color?: string | null } | null | undef
   return group?.color || SPELL_GROUP_FALLBACK_COLOR;
 }
 
-/* eslint-disable no-restricted-syntax -- TODO(i18n-part6 task 11): uk labels stay until their consumers read keys */
+/* eslint-disable no-restricted-syntax -- uk facet labels of the cached info reference (lib/utils/spells/model/labels.ts); UI reads spells.* keys */
 export const SPELL_COST_LABELS = {
   action: "Дія",
   bonusAction: "Бонусна дія",

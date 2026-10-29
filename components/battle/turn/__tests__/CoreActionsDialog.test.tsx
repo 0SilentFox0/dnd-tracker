@@ -7,9 +7,11 @@ import { ReadiedAttackButton } from "../ReadiedAttackButton";
 
 import { fakeScene } from "@/lib/hooks/battle/__tests__/fake-scene";
 import { render } from "@/lib/i18n/test/render-uk";
-import { CORE_ACTION_KEYS, CORE_ACTION_REGISTRY } from "@/lib/utils/battle/actions/registry";
+import { CORE_ACTION_KEYS } from "@/lib/utils/battle/actions/registry";
 import { applyCondition5e } from "@/lib/utils/battle/conditions";
 import { DEFAULT_RULES } from "@/lib/utils/rules";
+import battle from "@/messages/uk/battle.json";
+import battleCommon from "@/messages/uk/battleCommon.json";
 import type { BattleParticipant } from "@/types/battle";
 
 vi.unmock("next-intl");
@@ -39,8 +41,8 @@ describe("CoreActionsDialog", () => {
     setup();
 
     for (const k of CORE_ACTION_KEYS) {
-      expect(screen.getByText(CORE_ACTION_REGISTRY[k].label)).toBeTruthy();
-      expect(screen.getByText(CORE_ACTION_REGISTRY[k].description)).toBeTruthy();
+      expect(screen.getByText(battleCommon.coreActions[k])).toBeTruthy();
+      expect(screen.getByText(battle.coreActions.descriptions[k])).toBeTruthy();
     }
 
     expect(screen.getAllByText("Дія").length).toBeGreaterThan(0);

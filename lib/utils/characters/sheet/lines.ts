@@ -45,8 +45,8 @@ export function armorTotal(p: BattleParticipant): SheetTotal {
     lines: [
       ...base,
       ...mods.entries.flatMap((e) => [
-        ...(e.flat ? [{ label: e.label, value: signed(e.flat), source: asSource(e.sourceType) }] : []),
-        ...(e.percent ? [{ label: e.label, value: `${signed(e.percent)}%`, source: asSource(e.sourceType) }] : []),
+        ...(e.flat ? [{ ...labelParts(e.label), value: signed(e.flat), source: asSource(e.sourceType) }] : []),
+        ...(e.percent ? [{ ...labelParts(e.label), value: `${signed(e.percent)}%`, source: asSource(e.sourceType) }] : []),
       ]),
     ],
   };
@@ -69,10 +69,10 @@ export function attackSheet(p: BattleParticipant, attack: BattleAttack): SheetAt
     { label: statLabelKey(avg.statLabel), suffix: star, value: signed(hitMod), source: "ability" },
     { label: sheetLineKey("proficiency"), value: signed(p.abilities.proficiencyBonus), source: "proficiency" },
     ...(attack.attackBonus ? [{ label: sheetLineKey("weapon"), value: signed(attack.attackBonus), source: "weapon" as const }] : []),
-    ...hitMods.entries.filter((e) => e.flat).map((e) => ({ label: e.label, value: signed(e.flat), source: asSource(e.sourceType) })),
+    ...hitMods.entries.filter((e) => e.flat).map((e) => ({ ...labelParts(e.label), value: signed(e.flat), source: asSource(e.sourceType) })),
   ];
 
-  const damageSources = new Map(collectModifiers([p], p.basicInfo.id, { damage: { kind: type } }).entries.map((e) => [e.label, asSource(e.sourceType)]));
+  const damageSources = new Map(collectModifiers([p], p.basicInfo.id, { damage: { kind: type } }).entries.map((e) => [plainLabel(e.label), asSource(e.sourceType)]));
 
   const damageLines: SheetLine[] = [
     ...(attack.damageDice ? [{ label: sheetLineKey("weaponDice"), params: { dice: attack.damageDice }, value: avg.weaponAvg.toFixed(1), source: "dice" as const }] : []),

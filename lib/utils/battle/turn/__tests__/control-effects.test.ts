@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 
 import { ParticipantSide, ParticipantSourceType } from "@/lib/constants/battle";
+import { textOf } from "@/lib/i18n/test/text";
 import { makeParticipant, resolved, seq } from "@/lib/utils/abilities/__tests__/fixtures";
 import { applyEffect } from "@/lib/utils/abilities/registry/effects";
 import type { Effect } from "@/lib/utils/abilities/schema";
@@ -51,7 +52,7 @@ describe("berserk", () => {
     const r = cast(berserk, hero);
 
     expect(r.participants.find((p) => p.basicInfo.id === "hero")?.battleData.activeEffects).toHaveLength(0);
-    expect(r.messages[0]).toContain("не діє на героїв");
+    expect(textOf(r.messages[0])).toContain("не діє на героїв");
   });
 
   it("у свій хід шалений юніт б'є випадкову іншу істоту, зокрема союзника, і хід закінчується", () => {
@@ -109,7 +110,7 @@ describe("charm", () => {
     const r = cast(charm, hero);
 
     expect(r.participants.find((p) => p.basicInfo.id === "hero")?.basicInfo.side).toBe(ParticipantSide.ENEMY);
-    expect(r.messages[0]).toContain("не діє на героїв");
+    expect(textOf(r.messages[0])).toContain("не діє на героїв");
   });
 
   it("переводить юніта на бік заклинателя під контроль його гравця", () => {

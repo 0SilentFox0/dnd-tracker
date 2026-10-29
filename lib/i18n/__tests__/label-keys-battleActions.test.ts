@@ -10,7 +10,6 @@ import { localSource } from "@/lib/i18n/local-source";
 import { createMockParticipant } from "@/lib/utils/battle/__tests__/fixtures/mock-participant";
 import { legendaryBadge } from "@/lib/utils/battle/actions/legendary-options";
 import { ACTION_REASONS, actionReason } from "@/lib/utils/battle/actions/reasons";
-import { CORE_ACTION_KEYS } from "@/lib/utils/battle/actions/registry";
 import { CONDITION_5E_KEYS } from "@/lib/utils/battle/conditions/registry";
 import { MAZE_TEXTS } from "@/lib/utils/battle/modes/maze/texts";
 
@@ -39,7 +38,6 @@ function sources(dir: string): string[] {
 describe("battleActions has translations", () => {
   expectLabelKeys("battleActions", "reject", ACTION_REASONS);
   expectLabelKeys("battleActions", "spell.target", SPELL_TARGET_KEYS);
-  expectLabelKeys("battleActions", "coreDescriptions", CORE_ACTION_KEYS);
   expectLabelKeys("battleActions", "condition.lower", CONDITION_5E_KEYS);
 
   it("every MAZE_TEXTS entry exists in every locale", async () => {

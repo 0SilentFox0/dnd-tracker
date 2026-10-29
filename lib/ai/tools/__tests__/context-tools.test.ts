@@ -54,7 +54,7 @@ describe("context tools", () => {
 
     const { getBattleStateTool } = await import("@/lib/ai/tools/battle");
 
-    expect(await getBattleStateTool.handler(ctx, {})).toBe("Активного бою немає");
+    expect(await getBattleStateTool.handler(ctx, {})).toBe("No active battle");
   });
 
   it("get_battle_state: учасники з hp у форматі cur/max", async () => {
@@ -79,7 +79,7 @@ describe("context tools", () => {
       name: "Засідка",
       round: 2,
       participants: [expect.objectContaining({ name: "Годрик", side: "ally", hp: "12/20", ac: 15 }), expect.objectContaining({ hp: "3/7" })],
-      lastEvents: ["Р2: Удар"],
+      lastEvents: ["R2: Удар"],
     });
   });
 

@@ -1,4 +1,4 @@
-/* eslint-disable no-restricted-syntax -- TODO(i18n-part6 task 11): uk labels stay until their consumers in tasks 2-9 read keys */
+/* eslint-disable no-restricted-syntax -- DND_SKILL_META.label feeds the character sheet payload; UI elsewhere reads gameTerms.dndSkills keys */
 import { CORE_ABILITY_SCORES } from "./abilities";
 
 export const DND_SKILLS = [

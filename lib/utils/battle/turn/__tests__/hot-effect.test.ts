@@ -30,7 +30,7 @@ describe("hot", () => {
     const r = cast();
 
     expect(r.participants[1].battleData.activeEffects[0]).toMatchObject({ type: "buff", duration: 3, hotHeal: { healPerRound: 3 } });
-    expect(r.messages[0]).toContain("💚");
+    expect(textOf(r.messages[0])).toContain("💚");
   });
 
   it("лікує на початку ходу цілі, не вище max HP, і спливає за тривалістю", () => {
@@ -51,6 +51,6 @@ describe("hot", () => {
   });
 
   it("опис", () => {
-    expect(describeEffect(hot)).toContain("раунд");
+    expect(textOf(describeEffect(hot))).toContain("раунд");
   });
 });

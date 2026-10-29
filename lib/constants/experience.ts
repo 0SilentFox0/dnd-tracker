@@ -1,4 +1,3 @@
-/* eslint-disable no-restricted-syntax -- TODO(i18n-part6 task 11): uk labels stay until their consumers in tasks 2-9 read keys */
 import type { RulesEdition } from "@/lib/constants/rules";
 
 const XP_THRESHOLDS: Record<number, number> = {
@@ -35,17 +34,6 @@ export const XP_DIFFICULTIES = { "2014": ["easy", "medium", "hard", "deadly"], "
 export type XpDifficulty = (typeof XP_DIFFICULTIES)[XpEdition][number];
 
 export type XpVerdict = XpDifficulty | "trivial";
-
-export const XP_DIFFICULTY_LABELS: Record<XpVerdict, string> = {
-  trivial: "Дрібниця",
-  easy: "Легка",
-  medium: "Середня",
-  hard: "Складна",
-  deadly: "Смертельна",
-  low: "Низька",
-  moderate: "Помірна",
-  high: "Висока",
-};
 
 export const DEFAULT_XP_DIFFICULTY = { "2014": "medium", "2024": "moderate" } as const satisfies Record<XpEdition, XpDifficulty>;
 

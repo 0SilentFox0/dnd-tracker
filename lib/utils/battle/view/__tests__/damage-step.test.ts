@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 
-import { formatDamageStep } from "@/lib/utils/battle/view/damage-step";
 import { textOf } from "@/lib/i18n/test/text";
+import { formatDamageStep } from "@/lib/utils/battle/view/damage-step";
 
 describe("formatDamageStep", () => {
   it.each([

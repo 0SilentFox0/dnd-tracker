@@ -55,6 +55,7 @@ describe("translateErrorBody with the real catalogs", () => {
     expect(translateErrorBody(en, { error: API_ERRORS.SLIDE_IMAGE_FAILED, params: { index: 2, detail: API_ERRORS.SAFE_FETCH_FAILED } }).error).toBe(`Slide 2: ${en(API_ERRORS.SAFE_FETCH_FAILED)}`);
     expect(translateErrorBody(uk, { error: API_ERRORS.SLIDE_IMAGE_FAILED, params: { index: 1, detail: "сирий текст" } }).error).toBe("Слайд 1: сирий текст");
     expect(translateErrorBody(en, { error: API_ERRORS.SLIDE_IMAGE_FAILED, params: { index: 2, detail: API_ERRORS.SAFE_FETCH_FAILED } }).error).not.toMatch(/errors\./);
+    expect(translateErrorBody(en, { error: API_ERRORS.SLIDE_IMAGE_FAILED, params: { index: 3, detail: API_ERRORS.IMAGE_FETCH_FAILED, status: 404 } }).error).toBe("Slide 3: Could not download the image (404)");
   });
 
   it("issues do not leak params into the body", () => {

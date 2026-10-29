@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 
-import { parseDamageBreakdown } from "@/lib/utils/battle/view/damage-breakdown";
 import { textRows } from "@/lib/utils/battle/log/__tests__/event-text";
+import { parseDamageBreakdown } from "@/lib/utils/battle/view/damage-breakdown";
 
 describe("parseDamageBreakdown", () => {
   it("атака з бонусами й архетипом — рядки таблиці", () => {

@@ -1,33 +1,18 @@
-/* eslint-disable no-restricted-syntax -- TODO(i18n-part6 task 11): uk labels stay until their consumers in tasks 2-9 read keys */
 export const DAMAGE_ELEMENT_OPTIONS = [
-  { value: "fire", label: "Вогонь" },
-  { value: "cold", label: "Лід" },
-  { value: "lightning", label: "Блискавка" },
-  { value: "acid", label: "Кислота" },
-  { value: "poison", label: "Отрута" },
-  { value: "necrotic", label: "Некротична" },
-  { value: "radiant", label: "Світло" },
-  { value: "thunder", label: "Грім" },
-  { value: "psychic", label: "Психічна" },
-  { value: "force", label: "Сила" },
-  { value: "bludgeoning", label: "Дробляча" },
-  { value: "piercing", label: "Колюча" },
-  { value: "slashing", label: "Рубляча" },
-  { value: "bleed", label: "Кровотеча" },
+  { value: "fire" },
+  { value: "cold" },
+  { value: "lightning" },
+  { value: "acid" },
+  { value: "poison" },
+  { value: "necrotic" },
+  { value: "radiant" },
+  { value: "thunder" },
+  { value: "psychic" },
+  { value: "force" },
+  { value: "bludgeoning" },
+  { value: "piercing" },
+  { value: "slashing" },
+  { value: "bleed" },
 ] as const;
-
-export const DAMAGE_ELEMENT_LABELS = DAMAGE_ELEMENT_OPTIONS.reduce<
-  Record<string, string>
->((acc, option) => {
-  acc[option.value] = option.label;
-
-  return acc;
-}, {});
-
-export function getDamageElementLabel(value?: string | null): string {
-  if (!value) return "Без модифікатора";
-
-  return DAMAGE_ELEMENT_LABELS[value] || value;
-}
 
 export const PHYSICAL_DAMAGE_TYPES: readonly string[] = ["slashing", "piercing", "bludgeoning", "physical"];

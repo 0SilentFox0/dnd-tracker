@@ -50,7 +50,7 @@ describe("DM units list", () => {
 
     await screen.findByText("Гобліни");
 
-    expect(screen.getAllByText(/^(Гобліни|Без раси)$/).map((n) => n.textContent)).toEqual(["Гобліни", "Без раси"]);
+    expect(screen.getAllByText(/^(Гобліни|gameTerms\.ungrouped\.race)$/).map((n) => n.textContent)).toEqual(["Гобліни", "gameTerms.ungrouped.race"]);
     expect(screen.queryByText("Гоблін-лучник")).toBeNull();
     expect(screen.queryByText("Вовк")).toBeNull();
   });
@@ -74,6 +74,6 @@ describe("DM units list", () => {
     fireEvent.click(screen.getByRole("button", { name: /Гобліни · 1/ }));
 
     expect(screen.getByRole("button", { name: /Гобліни · 1/ })).toHaveAttribute("aria-pressed", "true");
-    expect(screen.queryByText("Без раси")).toBeNull();
+    expect(screen.queryByText("gameTerms.ungrouped.race")).toBeNull();
   });
 });

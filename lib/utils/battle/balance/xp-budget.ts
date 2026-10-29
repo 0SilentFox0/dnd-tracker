@@ -5,13 +5,12 @@ import {
   ENCOUNTER_MULTIPLIERS,
   THRESHOLDS_2014,
   XP_DIFFICULTIES,
-  XP_DIFFICULTY_LABELS,
   type XpDifficulty,
   type XpEdition,
   type XpVerdict,
 } from "@/lib/constants/experience";
 
-export { DEFAULT_XP_DIFFICULTY, XP_DIFFICULTIES, XP_DIFFICULTY_LABELS, type XpDifficulty, type XpEdition, type XpVerdict };
+export { DEFAULT_XP_DIFFICULTY, XP_DIFFICULTIES, type XpDifficulty, type XpEdition, type XpVerdict };
 
 const clampLevel = (level: number) => Math.min(MAX_CLASS_LEVEL, Math.max(1, Math.round(level)));
 
