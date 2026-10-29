@@ -5,7 +5,7 @@ import type { Ruleset } from "@/lib/utils/rules";
 import type { BattleParticipant } from "@/types/battle";
 import type { SheetRollResult, SheetRollSubject } from "@/types/characters";
 
-export function sheetRollLabel(subject: SheetRollSubject, t: Translator): string {
+function sheetRollLabel(subject: SheetRollSubject, t: Translator): string {
   if ("skill" in subject) return t(`common.dndSkills.${subject.skill}`);
 
   const ability = t(`common.abilities.${subject.ability}.label`);
