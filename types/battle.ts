@@ -6,6 +6,7 @@ import type { CriticalEffect } from "@/lib/constants/critical-effects";
 import type { RulesEdition } from "@/lib/constants/rules";
 import type { DndSkill } from "@/lib/constants/skills";
 import type { WeaponTrait } from "@/lib/constants/weapon-traits";
+import type { NonRandomEffect } from "@/lib/utils/abilities/schema";
 import type { FxAuraKind, FxImpact, SpellFx } from "@/lib/utils/battle/fx";
 import type { ModeView } from "@/lib/utils/battle/modes/types";
 import type { InlineCast, SpellCost } from "@/lib/utils/spells/model/schema";
@@ -20,6 +21,16 @@ export { SkillLevel };
 /**
  * Типи для активних ефектів
  */
+export interface HitRiderState {
+  attackKind: "melee" | "ranged" | "any";
+  extraDice: string;
+  damageType: string;
+  chargesLeft: number;
+  casterId: string;
+  consumeOnMiss?: boolean;
+  save?: { ability: AbilityKey; dc: number; onFail: NonRandomEffect[] };
+}
+
 export interface ActiveEffect {
   id: string;
   name: string;
@@ -67,6 +78,8 @@ export interface ActiveEffect {
   saveEnds?: { ability: AbilityKey; dc: number };
   /** ефект, що тримається поки кастер концентрується на закляттi castId */
   concentrationOf?: { casterId: string; castId: string };
+  /** заряди додаткової шкоди від заклинання (hitRider); на нуль ефект знімається */
+  hitRider?: HitRiderState;
   /** маркер концентрації на самому кастері */
   concentration?: { castId: string; spellName: string };
   /** скільки HP зняло виснаження з maxHp (повертається при зніманні) */

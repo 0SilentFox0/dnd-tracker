@@ -7,8 +7,10 @@ import { removeEffects } from "@/lib/utils/battle/conditions/query";
 import { applyTo } from "@/lib/utils/battle/spell/cast/effects";
 import { finishSpellAction, spendCastCost } from "@/lib/utils/battle/spell/cast/finish";
 import { applyGrantCasts } from "@/lib/utils/battle/spell/cast/grant-cast";
+import { applyHitRiders } from "@/lib/utils/battle/spell/cast/hit-rider";
+import { moveAdjacent } from "@/lib/utils/battle/spell/cast/move-self";
 import { resolveOutcome } from "@/lib/utils/battle/spell/cast/outcome";
-import { abilityOf, actionOf, type ChosenSpell, expandChosen, isPerTarget, readsEventDamage, type SpellCastState, targetOf } from "@/lib/utils/battle/spell/cast/state";
+import { abilityOf, actionOf, type ChosenSpell, expandChosen, hasMoveSelf, isPerTarget, readsEventDamage, type SpellCastState, targetOf } from "@/lib/utils/battle/spell/cast/state";
 import { computeSpellPower, spellSaveDc } from "@/lib/utils/battle/spell/power";
 import { spellNeedsSlot, spellSlotKey } from "@/lib/utils/battle/spell/slot";
 import type { CastSpellParams, CastSpellResult } from "@/lib/utils/battle/types/spell-process";
@@ -137,6 +139,16 @@ export function castSpell(params: CastSpellParams): CastSpellResult {
     def.effects.forEach((effect, effectIndex) => {
       if (isPerTarget(effect) && readsEventDamage(effect)) applyTo(state, effect, effectIndex, id, index);
     });
+  }
+
+  applyHitRiders({ flow, effects: source.definition.effects, casterId, targetIds, ability: state.ability, saveDc: state.saveDc, round: currentRound });
+
+  if (hasMoveSelf(source.definition.effects) && targetIds[0]) {
+    const moved = moveAdjacent(flow.ctx.map, flow.ps, casterId, targetIds[0]);
+
+    flow.ps = moved.participants;
+
+    if (moved.message) flow.messages.push(moved.message);
   }
 
   if (tag) flow.ps = tagConcentration(psBeforeEffects, flow.ps, tag, state.ability.key);

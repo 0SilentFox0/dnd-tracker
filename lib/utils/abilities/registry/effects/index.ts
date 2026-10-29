@@ -166,6 +166,10 @@ export function describeEffect(effect: Effect | SpellEffect): string {
 
   if (effect.kind === "grantCast") return `підкаст «${effect.label}» (${effect.cost === "action" ? "дія" : effect.cost === "bonusAction" ? "бонусна дія" : "реакція"}${effect.uses ? `, ×${effect.uses}` : ""}) на ${effect.duration.rounds} р.`;
 
+  if (effect.kind === "hitRider") return `заряди ×${effect.charges}: +${effect.extraDice} ${effect.damageType} на ${effect.attackKind === "any" ? "будь-яку" : effect.attackKind === "melee" ? "ближню" : "дальню"} атаку${effect.consumeOnMiss ? " (і промах)" : ""}${effect.save ? `, СК ${effect.save.ability}: ${effect.save.onFail.map(describeEffect).join(", ")}` : ""}`;
+
+  if (effect.kind === "moveSelf") return "кастер переміщується до цілі";
+
   if (effect.kind === "chooseOne") return `на вибір: ${effect.options.map(describeEffect).join(" / ")}`;
 
   const def = EFFECT_REGISTRY[effect.kind] as EffectDefinition<EffectKind> | undefined;

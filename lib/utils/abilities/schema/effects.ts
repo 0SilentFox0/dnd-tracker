@@ -297,6 +297,8 @@ export const EffectSchema = z.discriminatedUnion("kind", [...BASE_EFFECTS, Rando
 
 export type Effect = z.infer<typeof EffectSchema>;
 
+export type NonRandomEffect = z.infer<typeof NonRandomEffectSchema>;
+
 export type EffectKind = Effect["kind"];
 
 export type StaticEffect = Extract<Effect, { kind: "modifyStat" | "damageBonus" | "flag" }>;

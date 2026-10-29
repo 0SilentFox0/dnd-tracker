@@ -1,6 +1,7 @@
 import { buildAbortedAttackAction, buildBattleActionForHit } from "./actions";
 import { handleCriticalFail } from "./critical-fail";
 import { resolveHit } from "./hit";
+import { spendRidersOnMiss } from "./hit-rider";
 import { handleMiss } from "./miss";
 
 import { collectModifiers, findFlags } from "@/lib/utils/abilities/engine/core/collect-modifiers";
@@ -155,6 +156,8 @@ export function processAttack(params: ProcessAttackParams): ProcessAttackResult 
     : undefined;
 
   const branch = { critFlavorText, flow, attackerId, targetId, attack, d20Roll, attackRoll, targetAC, currentRound, battleId };
+
+  if (!isHit) spendRidersOnMiss(flow, { attackerId, attack });
 
   if (attackRoll.isCriticalFail && attackRoll.criticalEffect) {
     const r = handleCriticalFail(branch);

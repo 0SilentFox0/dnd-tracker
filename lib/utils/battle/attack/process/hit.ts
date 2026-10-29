@@ -3,6 +3,7 @@ import { applyDamageToTarget } from "./damage";
 import { fireWaveVictims } from "./fire-wave";
 import { splitGuardedDamage } from "./guard";
 import { applyVampirism } from "./hit-effects";
+import { applyHitRiders } from "./hit-rider";
 import { castHitSpell } from "./hit-spell";
 
 import { findFlags } from "@/lib/utils/abilities/engine/core/collect-modifiers";
@@ -89,6 +90,8 @@ export function resolveHit(p: ResolveHitParams): { hitDamage: ComputeHitDamageRe
     damage: Math.min(hitDamage.resistanceResult.finalDamage, hitDamage.totalFinalDamage),
     ...eventRollMode(p.attackRoll),
   });
+
+  applyHitRiders(flow, { attackerId, targetId, attack, crit: p.attackRoll.isCritical });
 
   const abilityDamage = Math.max(0, hpBeforeHit - getP(flow, targetId).combatStats.currentHp);
 

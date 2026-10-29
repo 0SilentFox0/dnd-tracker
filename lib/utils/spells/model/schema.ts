@@ -3,6 +3,7 @@ import { z } from "zod";
 import { ABILITY_KEYS } from "@/lib/constants/abilities";
 import { DurationSchema } from "@/lib/utils/abilities/schema/common";
 import { BASE_EFFECTS, NonRandomEffectSchema, RandomOfSchema } from "@/lib/utils/abilities/schema/effects";
+import { DICE_RE } from "@/lib/utils/abilities/schema/kinds";
 
 export const SPELL_COSTS = ["action", "bonusAction", "reaction", "long"] as const;
 
@@ -107,13 +108,32 @@ const GrantCastSchema = z.object({
   cast: InlineCastSchema,
 });
 
-const SPELL_ONLY_EFFECTS = [ChooseOneSchema, InputDiceSchema, GrantCastSchema] as const;
+/** Заряди додаткової шкоди на носії: кожне влучання (чи будь-яка атака) відповідного виду витрачає один заряд. */
+const HitRiderSchema = z.object({
+  kind: z.literal("hitRider"),
+  attackKind: z.enum(["melee", "ranged", "any"]),
+  extraDice: z.string().regex(DICE_RE),
+  damageType: z.string().trim().min(1).max(30),
+  charges: z.number().int().min(1).max(10),
+  consumeOnMiss: z.boolean().optional(),
+  save: z.object({ ability: z.enum(ABILITY_KEYS), onFail: z.array(NonRandomEffectSchema).min(1).max(3) }).optional(),
+  expireAtTurnEnd: z.boolean().optional(),
+  duration: DurationSchema,
+  target: z.enum(["self", "eventTarget"]).optional(),
+});
+
+/** Кастер переміщується в найближчу вільну клітинку біля першої цілі; без атак при відході. */
+const MoveSelfSchema = z.object({ kind: z.literal("moveSelf"), to: z.literal("adjacentToTarget") });
+
+const SPELL_ONLY_EFFECTS = [ChooseOneSchema, InputDiceSchema, GrantCastSchema, HitRiderSchema, MoveSelfSchema] as const;
 
 export const SpellEffectSchema = z.discriminatedUnion("kind", [...BASE_EFFECTS, RandomOfSchema, ...SPELL_ONLY_EFFECTS]);
 
 export type SpellEffect = z.infer<typeof SpellEffectSchema>;
 
 export type GrantCastEffect = z.infer<typeof GrantCastSchema>;
+
+export type HitRiderEffect = z.infer<typeof HitRiderSchema>;
 
 export type InlineCast = z.infer<typeof InlineCastSchema>;
 

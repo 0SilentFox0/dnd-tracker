@@ -4,7 +4,7 @@ import type { ActionFlow } from "@/lib/utils/battle/common/action-flow";
 import { newBattleAction } from "@/lib/utils/battle/common/new-action";
 import type { SpellPower } from "@/lib/utils/battle/spell/power";
 import type { CastableSpell } from "@/lib/utils/battle/types/spell-process";
-import type { GrantCastEffect, SpellDefinition, SpellEffect } from "@/lib/utils/spells/model/schema";
+import type { GrantCastEffect, HitRiderEffect, SpellDefinition, SpellEffect } from "@/lib/utils/spells/model/schema";
 import type { ResolvedAbility } from "@/types/abilities";
 import type { BattleAction, BattleParticipant, DamageStep, SpellGrant } from "@/types/battle";
 
@@ -82,9 +82,15 @@ export const isPerTarget = (e: Effect) => !NO_TARGET_KINDS.has(e.kind) && (targe
 /** Цільові ефекти, що читають шкоду касту: виконуються після нецільових. */
 export const readsEventDamage = (e: Effect) => (e.kind === "heal" || e.kind === "dealDamage") && typeof e.amount === "object" && "percentOf" in e.amount && e.amount.percentOf === "eventDamage";
 
-export const flatEffects = (effects: Array<Effect | SpellEffect>): Effect[] => effects.flatMap((e) => (e.kind === "randomOf" || e.kind === "chooseOne" ? e.options : e.kind === "inputDice" || e.kind === "grantCast" ? [] : [e]));
+const SPELL_ONLY_KINDS = new Set<string>(["inputDice", "grantCast", "hitRider", "moveSelf"]);
+
+export const flatEffects = (effects: Array<Effect | SpellEffect>): Effect[] => effects.flatMap((e) => (e.kind === "randomOf" || e.kind === "chooseOne" ? e.options : SPELL_ONLY_KINDS.has(e.kind) ? [] : [e as Effect]));
 
 export const grantCastsOf = (effects: SpellEffect[]): Array<{ effect: GrantCastEffect; index: number }> => effects.flatMap((effect, index) => (effect.kind === "grantCast" ? [{ effect, index }] : []));
+
+export const hitRidersOf = (effects: SpellEffect[]): Array<{ effect: HitRiderEffect; index: number }> => effects.flatMap((effect, index) => (effect.kind === "hitRider" ? [{ effect, index }] : []));
+
+export const hasMoveSelf = (effects: SpellEffect[]) => effects.some((e) => e.kind === "moveSelf");
 
 export const inputDiceOf = (effects: SpellEffect[]): { label: string; max: number } | undefined => {
   const found = effects.find((e) => e.kind === "inputDice");
@@ -98,7 +104,7 @@ export const optionInRange = (effects: SpellEffect[], index: number | undefined)
   effects.every((e) => e.kind !== "chooseOne" || (index !== undefined && Number.isInteger(index) && index >= 0 && index < e.options.length));
 
 export const expandChosen = (effects: SpellEffect[], index = 0): Effect[] =>
-  effects.flatMap((e) => (e.kind === "chooseOne" ? [e.options[index] ?? e.options[0]] : e.kind === "inputDice" || e.kind === "grantCast" ? [] : [e]));
+  effects.flatMap((e) => (e.kind === "chooseOne" ? [e.options[index] ?? e.options[0]] : SPELL_ONLY_KINDS.has(e.kind) ? [] : [e as Effect]));
 
 export function abilityOf(spell: ChosenSpell): ResolvedAbility {
   return {
