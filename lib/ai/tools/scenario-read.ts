@@ -8,22 +8,12 @@ import { API_ERRORS } from "@/lib/constants/api-errors";
 import { prisma } from "@/lib/db";
 import { listPages, readContent } from "@/lib/server/scenario/page-store";
 import { searchScenarioPages } from "@/lib/server/scenario/search";
-import { docToMarkdown } from "@/lib/utils/scenario/markdown";
-import type { ScenarioContent, ScenarioSection } from "@/types/scenario";
+import { findMentions } from "@/lib/utils/scenario/mentions";
+import { chunkContentMarkdown, contentToMarkdown, outlineContent, sectionToMarkdown } from "@/lib/utils/scenario/read-chunks";
 
-export function sectionToMarkdown(s: ScenarioSection): string {
-  const rows = s.rows.map((r) => `### Row ${r.id}\n**Story:**\n${docToMarkdown(r.story) || "—"}\n\n**DM notes:**\n${docToMarkdown(r.notes) || "—"}`);
+export { contentToMarkdown, sectionToMarkdown };
 
-  return [`## ${s.title} [${s.id}]${s.played ? " (played)" : ""}`, ...rows].join("\n\n");
-}
-
-export function contentToMarkdown(title: string, content: ScenarioContent, sectionId?: string): string {
-  const sections = sectionId ? content.sections.filter((s) => s.id === sectionId) : content.sections;
-
-  const legend = content.legend.length ? `Legend: ${content.legend.map((l) => l.label).join(", ")}` : "";
-
-  return [`# ${title}`, legend, ...sections.map(sectionToMarkdown)].filter(Boolean).join("\n\n");
-}
+const MENTION_PAGE_SIZE = 100;
 
 export async function loadPageForAi(campaignId: string, pageId: string) {
   const page = await prisma.scenarioPage.findFirst({ where: { id: pageId, campaignId }, select: { id: true, title: true, kind: true, content: true } });
@@ -47,12 +37,48 @@ export const readScenarioPageTool = defineTool({
   scopes: ["ai"],
   title: "Read scenario page",
   description:
-    "Read a scenario page as the scenario markdown dialect: sections with [sectionId], rows with ids, story and DM notes. ||text|| is a DM-only secret. Pass sectionId to read one section.",
-  input: z.object({ pageId: z.string().min(1), sectionId: z.string().min(1).optional() }),
-  handler: async (ctx, { pageId, sectionId }) => {
+    "Read a scenario page as the scenario markdown dialect: sections with [sectionId], rows with ids, story and DM notes. ||text|| is a DM-only secret. Pass sectionId to read one section. Long pages come in chunks: the last line [next offset N of TOTAL] gives the offset for the next call; [row split] marks one oversize row cut in the middle.",
+  input: z.object({ pageId: z.string().min(1), sectionId: z.string().min(1).optional(), offset: z.number().int().min(0).optional() }),
+  handler: async (ctx, { pageId, sectionId, offset }) => {
     const page = await loadPageForAi(ctx.campaignId, pageId);
 
-    return contentToMarkdown(page.title, page.content, sectionId);
+    return chunkContentMarkdown(page.title, page.content, { sectionId, offset, limit: AI_LIMITS.toolResultChars - 2000 }).text;
+  },
+});
+
+export const outlineScenarioPageTool = defineTool({
+  name: "outline_scenario_page",
+  scopes: ["ai"],
+  title: "Scenario page outline",
+  description:
+    "Compact map of a scenario page: sections [id], row ids with story/notes sizes in characters, a short text start and the offset of each section/row for read_scenario_page. Use it first on a large page, then read only what you need.",
+  input: z.object({ pageId: z.string().min(1) }),
+  handler: async (ctx, { pageId }) => {
+    const page = await loadPageForAi(ctx.campaignId, pageId);
+
+    return outlineContent(page.title, page.content);
+  },
+});
+
+export const findScenarioMentionsTool = defineTool({
+  name: "find_scenario_mentions",
+  scopes: ["ai"],
+  title: "Find scenario mentions",
+  description:
+    "Find every occurrence of a name in scenario story and DM notes, in any grammatical form (matched by word stem). Returns hits {pageId, sectionId, rowId, field, snippet, forms, inMention} (inMention = already a mention chip) and the distinct forms found. Paginated by offset, up to 100 hits per call. Searches the whole campaign unless pageId/sectionId is given.",
+  input: z.object({ query: z.string().trim().min(2).max(100), pageId: z.string().min(1).optional(), sectionId: z.string().min(1).optional(), offset: z.number().int().min(0).optional() }),
+  handler: async (ctx, { query, pageId, sectionId, offset = 0 }) => {
+    const pages = pageId
+      ? [await loadPageForAi(ctx.campaignId, pageId)]
+      : (await prisma.scenarioPage.findMany({ where: { campaignId: ctx.campaignId }, select: { id: true, title: true, kind: true, content: true }, orderBy: [{ sortOrder: "asc" }, { title: "asc" }] })).map((p) => ({ ...p, content: readContent(p.content) }));
+
+    const all = pages.flatMap((p) => findMentions(p.content, query, { sectionId }).map((h) => ({ pageId: p.id, pageTitle: p.title, ...h })));
+
+    const hits = all.slice(offset, offset + MENTION_PAGE_SIZE);
+
+    const next = offset + hits.length;
+
+    return { total: all.length, offset, nextOffset: next < all.length ? next : null, forms: [...new Set(all.flatMap((h) => h.forms))], hits };
   },
 });
 
