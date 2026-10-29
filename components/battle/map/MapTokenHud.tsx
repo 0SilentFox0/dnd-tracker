@@ -1,16 +1,19 @@
 "use client";
 
 import { memo } from "react";
+import { useTranslations } from "next-intl";
 
 import { tokenBoxStyle } from "./token-box";
 
 import { useDamageShake, useFxEnabled, useHitChange } from "@/lib/hooks/battle";
+import { useText } from "@/lib/i18n/use-text";
 import { cn } from "@/lib/utils";
 import { type FxImpact, hudMotifsOf } from "@/lib/utils/battle/fx";
 import { isFallen, sizeOf } from "@/lib/utils/battle/grid";
 import { isDown } from "@/lib/utils/battle/participant/state";
 import { HEALTH_LABEL, healthSegments, healthState, hpRatio, hpTone, NO_EFFECTS } from "@/lib/utils/battle/view";
 import type { ActiveEffect, BattleParticipant } from "@/types/battle";
+import type { LogLine } from "@/types/text";
 
 export interface MapTokenHudProps {
   participant: BattleParticipant;
@@ -32,7 +35,7 @@ const PLAQUE_CHROME = { text: 6, bar: 4 };
 
 const clamp = (min: number, value: number, max: number) => Math.min(max, Math.max(min, value));
 
-function hpView(participant: BattleParticipant, exact: boolean) {
+function hpView(participant: BattleParticipant, exact: boolean): { ratio: number; text: LogLine } {
   const { currentHp, maxHp } = participant.combatStats;
 
   if (exact) {
@@ -47,6 +50,10 @@ function hpView(participant: BattleParticipant, exact: boolean) {
 }
 
 function MapTokenHudImpl({ participant: live, box, mapSize, pxPerUnit, exact, raised, impact = null, effects = NO_EFFECTS, onReturn }: MapTokenHudProps) {
+  const t = useTranslations("battle.map");
+
+  const fmt = useText();
+
   const { change, shown: participant } = useHitChange(live, impact);
 
   const shake = useDamageShake<HTMLDivElement>(change);
@@ -81,7 +88,7 @@ function MapTokenHudImpl({ participant: live, box, mapSize, pxPerUnit, exact, ra
 
   const barPx = showText ? textBarPx : thinBarPx;
 
-  const { ratio, text } = hpView(participant, exact);
+  const { ratio, text: hpText } = hpView(participant, exact);
 
   const width = `${ratio * 100}%`;
 
@@ -102,7 +109,7 @@ function MapTokenHudImpl({ participant: live, box, mapSize, pxPerUnit, exact, ra
             onReturn();
           }}
         >
-          Повернутися
+          {t("returnToToken")}
         </button>
       )}
       {showHud && (
@@ -125,7 +132,7 @@ function MapTokenHudImpl({ participant: live, box, mapSize, pxPerUnit, exact, ra
             <i data-map-hud-fill className="map-hud-fill" style={{ width }} />
             {showText && (
               <span className={cn("map-hud-text", exact ? "font-sans font-semibold" : "hud-sc italic", down && "line-through")} style={{ fontSize: hpFont, lineHeight: `${barPx}px` }}>
-                {text}
+                {fmt(hpText)}
               </span>
             )}
           </div>

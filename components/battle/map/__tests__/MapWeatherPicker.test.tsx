@@ -1,12 +1,15 @@
 // @vitest-environment happy-dom
-import { cleanup, fireEvent, render } from "@testing-library/react";
+import { cleanup, fireEvent } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
 import { BattleMapPanel } from "../BattleMapPanel";
 
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { fakeScene } from "@/lib/hooks/battle/__tests__/fake-scene";
+import { render } from "@/lib/i18n/test/render-uk";
 import type { BattleMapConfig } from "@/types/battle";
+
+vi.unmock("next-intl");
 
 vi.mock("@/lib/utils/canvas/ticker", () => ({ subscribe: vi.fn(() => vi.fn()) }));
 

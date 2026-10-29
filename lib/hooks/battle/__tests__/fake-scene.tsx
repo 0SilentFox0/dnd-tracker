@@ -7,6 +7,7 @@ import { BattleSceneContext, BattleSceneDataContext, type BattleSceneValue, type
 
 import { AttackType, ParticipantSide } from "@/lib/constants/battle";
 import { ConfirmContext } from "@/lib/hooks/common";
+import { IntlWrapper } from "@/lib/i18n/test/intl-wrapper";
 import { createMockParticipant } from "@/lib/utils/battle/__tests__/fixtures/mock-participant";
 import type { MapAim, MapPick } from "@/lib/utils/battle/grid";
 import { buildDisplayEffects, turnQueue } from "@/lib/utils/battle/view";
@@ -16,6 +17,7 @@ import type { BattleScene } from "@/types/api";
 import type { BattleAction, BattleParticipant } from "@/types/battle";
 
 export interface FakeSceneOptions {
+  locale?: "uk" | "en";
   knownSpells?: string[];
   slots?: BattleParticipant["spellcasting"]["spellSlots"];
   abilities?: ResolvedAbility[];
@@ -144,6 +146,7 @@ export function fakeScene(opts: FakeSceneOptions = {}) {
   const MazeTools = ({ children }: { children: ReactNode }) => <MazeToolStateContext.Provider value={useMazeToolStateValue()}>{children}</MazeToolStateContext.Provider>;
 
   const wrapper = ({ children }: { children: ReactNode }) => (
+    <IntlWrapper locale={opts.locale}>
     <QueryClientProvider client={queryClient}>
       <ConfirmContext.Provider value={confirm}>
         <BattleSceneDataContext.Provider value={value}>
@@ -153,6 +156,7 @@ export function fakeScene(opts: FakeSceneOptions = {}) {
         </BattleSceneDataContext.Provider>
       </ConfirmContext.Provider>
     </QueryClientProvider>
+    </IntlWrapper>
   );
 
   return {

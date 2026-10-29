@@ -1,5 +1,7 @@
 "use client";
 
+import { useTranslations } from "next-intl";
+
 import { cn } from "@/lib/utils";
 
 interface BattlePreparationViewProps {
@@ -19,6 +21,10 @@ export function BattlePreparationView({
   isStarting,
   canStart = true,
 }: BattlePreparationViewProps) {
+  const t = useTranslations("battle.prep");
+
+  const ts = useTranslations("battle.sides");
+
   return (
     <div className="flex-1 flex flex-col items-center justify-center p-6 text-center space-y-12 animate-in fade-in duration-1000 relative">
       <div className="absolute inset-0 pointer-events-none bg-[radial-gradient(circle_at_center,transparent_0%,rgba(0,0,0,0.4)_100%)]" />
@@ -26,25 +32,25 @@ export function BattlePreparationView({
       <div className="max-w-2xl w-full space-y-8 relative z-10 animate-in fade-in slide-in-from-bottom-5 duration-300">
         <div className="space-y-4">
           <span className="hud-sc inline-flex h-8 items-center border-y border-[var(--gold)]/60 bg-[var(--gold)]/[.08] px-5 text-sm tracking-[.2em] text-[var(--gold)]">
-            Підготовка до битви
+            {t("badge")}
           </span>
           <h2 className="hud-sc text-4xl font-extrabold tracking-[.12em] text-[var(--ink)] drop-shadow-2xl sm:text-7xl">
-            АРЕНА ГОТОВА
+            {t("title")}
           </h2>
           <p className="hud-book mx-auto max-w-lg text-lg italic leading-relaxed text-[#b8ab95] sm:text-2xl">
-            Кожен воїн на своїй позиції. Час вирішити долю цієї сутички.
+            {t("tagline")}
           </p>
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
           {[
             {
-              label: "Союзники",
+              label: ts("allies"),
               value: alliesCount,
               color: "text-[#8fb0d0]",
             },
             {
-              label: "Вороги",
+              label: ts("enemies"),
               value: enemiesCount,
               color: "text-hud-danger",
             },
@@ -76,14 +82,14 @@ export function BattlePreparationView({
               onClick={onStartBattle}
               disabled={isStarting || !canStart}
             >
-              {isStarting ? "ЗБІР ВІЙСЬКА..." : "ДО БОЮ!"}
+              {isStarting ? t("starting") : t("start")}
             </button>
           ) : (
             <div className="mx-auto inline-block animate-[hud-pulse_2.4s_infinite] border-y border-hud-line bg-black/55 px-6 py-4 text-lg italic text-[#d6cbb7] sm:px-8 sm:text-xl">
-              🗡️ Очікуйте наказу DM...
+              {t("waiting")}
             </div>
           )}
-          {isDM && !canStart && <p className="mt-3 text-sm italic text-[var(--hud-muted)]">Хоча б один учасник має бути на полі</p>}
+          {isDM && !canStart && <p className="mt-3 text-sm italic text-[var(--hud-muted)]">{t("needOne")}</p>}
         </div>
       </div>
     </div>

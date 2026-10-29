@@ -125,7 +125,7 @@ function spike(g: CanvasRenderingContext2D, sp: Thorn, t: number, look: { fill: 
   g.restore();
 }
 
-export const thorns: FxAnimation = ({ stage, from, targets }) =>
+export const thorns: FxAnimation = ({ stage, from, targets, labels }) =>
   perTarget(stage, targets, 0, async ({ at: target, el }) => {
     await hook(stage, from, target);
 
@@ -173,7 +173,7 @@ export const thorns: FxAnimation = ({ stage, from, targets }) =>
 
         for (const sp of spikes) spike(g, sp, t, { fill, beat, wither });
 
-        sinkingBadge(g, target.x + w * 0.35, target.y - h - 10, clamp01((t - 900) / 1300), "−3 атака", BADGE);
+        sinkingBadge(g, target.x + w * 0.35, target.y - h - 10, clamp01((t - 900) / 1300), labels.thorns, BADGE);
         g.globalAlpha = 1;
       },
       (t, dt) => {

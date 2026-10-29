@@ -44,7 +44,7 @@ export interface SpellFxPreview extends SpellFxResult {
   level: number;
   description: string;
   effects: LogLine[];
-  targeting: string;
+  targeting: LogLine;
 }
 
 /** A campaign spell (book or reference) as the preview needs it; rules are re-read, so raw DB columns are fine too. */
@@ -131,7 +131,7 @@ export function previewCastFx(castable: CastableSpell): SpellFxResult {
       rng: () => 0.01,
     });
 
-    if (!result.success) return failed("заклинання не спрацювало");
+    if (!result.success) return failed("the spell did not take effect");
 
     const spec = mapAction(result.battleAction).find((s) => s.archetype !== "dice") ?? null;
 

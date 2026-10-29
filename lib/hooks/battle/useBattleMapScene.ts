@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useTranslations } from "next-intl";
 
 import { palettesToClose } from "./modes/palettes";
 import { type ModeTools, useModeTools } from "./modes/tools";
@@ -10,9 +11,9 @@ import { useFxImpacts } from "./useFxImpacts";
 import { type MapTerrainTool, useMapTerrainTool } from "./useMapTerrainTool";
 import { type MapWeatherTool, useMapWeatherTool } from "./useMapWeatherTool";
 
+import { useText } from "@/lib/i18n/use-text";
 import { aimView, cellKey, checkReturnToStart, deriveMapScene, deriveTrajectory, type MapClick, type MapSceneActor, type MapSceneMode } from "@/lib/utils/battle/grid";
 import { awaitsMoraleCheck } from "@/lib/utils/battle/morale/awaits-check";
-import { pluralUk } from "@/lib/utils/common/plural";
 import type { BattleMapActions, BattleMapConfig, BattleMapView, BattleParticipant, GridPoint } from "@/types/battle";
 
 export interface BattleMapScene {
@@ -37,6 +38,10 @@ function dispatchClick<K extends MapClick["kind"]>(handlers: MapClickHandlers, c
 const sameCell = (a: GridPoint | null, b: GridPoint | null) => a === b || (!!a && !!b && a.x === b.x && a.y === b.y);
 
 export function useBattleMapScene(): BattleMapScene | null {
+  const t = useTranslations("battle.notify");
+
+  const text = useText();
+
   const { battle, turn: { current, isMyTurn }, viewer, selectedId, select, actions, anyPending, toast, intents, effects } = useBattleScene();
 
   const { requestAttack, mapAim, mapPick, attackReady } = intents;
@@ -56,7 +61,7 @@ export function useBattleMapScene(): BattleMapScene | null {
 
   const { show } = toast;
 
-  const onSkipped = useCallback((n: number) => show(`Пропущено ${n} ${pluralUk(n, ["клітинку", "клітинки", "клітинок"])} (зайняті або поза полем)`), [show]);
+  const onSkipped = useCallback((n: number) => show(t("skippedCells", { count: n })), [show, t]);
 
   const { isDM } = viewer;
 
@@ -141,7 +146,7 @@ export function useBattleMapScene(): BattleMapScene | null {
       attack: (c) => {
         if (current) requestAttack({ targetId: c.targetId, ...(c.attackId && { attackId: c.attackId }), actorId: current.basicInfo.id, round: currentRound, turnIndex: currentTurnIndex });
       },
-      reject: (c) => show(c.reason),
+      reject: (c) => show(text(c.reason)),
       select: (c) => select(c.id),
       arm: (c) => setPlacingId(c.id),
       aim: (c) => mapAim?.onAim(c.cell),
@@ -150,7 +155,7 @@ export function useBattleMapScene(): BattleMapScene | null {
     };
 
     return (click: MapClick) => dispatchClick(handlers, click);
-  }, [move, requestAttack, show, select, current, currentRound, currentTurnIndex, mapAim, mapPick]);
+  }, [move, requestAttack, show, text, select, current, currentRound, currentTurnIndex, mapAim, mapPick]);
 
   const { commit } = terrainTool;
 

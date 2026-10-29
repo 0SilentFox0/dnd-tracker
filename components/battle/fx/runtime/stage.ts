@@ -43,7 +43,7 @@ export function stageFor(layer: HTMLElement) {
 
     const g = canvas.getContext("2d");
 
-    if (!g) throw new Error("Canvas 2D недоступний");
+    if (!g) throw new Error("Canvas 2D is not available");
 
     s = { layer, canvas, g, particles: new SpriteParticles(), tweens: new Set(), draws: new Set(), timers: new Set(), waits: new Set(), animations: new Set(), unsubscribe: null, stopped: false };
     stages.set(layer, s);

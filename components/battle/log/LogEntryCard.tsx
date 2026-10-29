@@ -1,4 +1,5 @@
 import { memo, type ReactNode, useMemo } from "react";
+import { useTranslations } from "next-intl";
 import { ChevronDown, Flame, Frown, Hourglass, type LucideIcon, ScrollText, Shield, Sparkles, Star, Swords, Zap } from "lucide-react";
 
 import { HpChips } from "./HpChips";
@@ -29,6 +30,8 @@ export const LogEntryCard = memo(function LogEntryCard({ entry, actor, open, onT
   onToggle: (actionIndex: number) => void;
   actions?: ReactNode;
 }) {
+  const t = useTranslations("battle.log");
+
   const text = useText();
 
   const view = useMemo(() => logEntryView(entry), [entry]);
@@ -47,8 +50,8 @@ export const LogEntryCard = memo(function LogEntryCard({ entry, actor, open, onT
       </span>
       <div className="min-w-0 flex-1">
         <div className="mb-0.5 flex items-baseline gap-1.5 text-[11.5px] leading-4">
-          <span className={cn("hud-sc font-bold", enemy ? "text-hud-bad" : "text-hud-good")}>{actor?.basicInfo.name ?? (entry.actorName || "Бій")}</span>
-          <span className="text-[var(--hud-muted)]">· {actor && !view.isTrigger ? view.kindLabel : "тригери"}</span>
+          <span className={cn("hud-sc font-bold", enemy ? "text-hud-bad" : "text-hud-good")}>{actor?.basicInfo.name ?? (entry.actorName || t("battle"))}</span>
+          <span className="text-[var(--hud-muted)]">· {actor && !view.isTrigger ? text(view.kindLabel) : t("triggers")}</span>
         </div>
         <div className="text-[13.5px] font-medium leading-[18px] text-[var(--ink)]">{text(view.headline)}</div>
         {view.lines.map((line, n) => (
@@ -58,7 +61,7 @@ export const LogEntryCard = memo(function LogEntryCard({ entry, actor, open, onT
         {view.hasDetails && (
           <button type="button" aria-expanded={open} onClick={() => onToggle(entry.actionIndex)} className="mt-1 flex items-center gap-1 text-[12px] text-[var(--hud-muted)] hover:text-[var(--ink)]">
             <ChevronDown className={cn("size-3.5 transition-transform", open && "rotate-180")} />
-            {open ? "Сховати деталі" : "Деталі"}
+            {open ? t("hideDetails") : t("details")}
           </button>
         )}
         {open && <LogEntryDetails action={entry} />}

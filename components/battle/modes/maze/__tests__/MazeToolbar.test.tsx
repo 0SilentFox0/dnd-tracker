@@ -13,6 +13,9 @@ import { fakeScene } from "@/lib/hooks/battle/__tests__/fake-scene";
 import { type MazeTools, useMazeView } from "@/lib/hooks/battle/modes/maze";
 import type { MazeConfig } from "@/types/battle";
 
+
+vi.unmock("next-intl");
+
 afterEach(cleanup);
 
 vi.stubGlobal("ResizeObserver", RO);

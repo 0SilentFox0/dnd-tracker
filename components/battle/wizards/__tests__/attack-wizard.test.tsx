@@ -1,6 +1,6 @@
 // @vitest-environment happy-dom
 import { useEffect } from "react";
-import { cleanup, fireEvent, render, screen, waitFor } from "@testing-library/react";
+import { cleanup, fireEvent, screen, waitFor } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
 vi.mock("@/components/hud/fonts", () => ({ hudFontClassName: "" }));
@@ -11,7 +11,10 @@ import { AttackWizard } from "@/components/battle/wizards/AttackWizard";
 import { AttackType } from "@/lib/constants/battle";
 import { useAttackWizard } from "@/lib/hooks/battle";
 import { fakeScene } from "@/lib/hooks/battle/__tests__/fake-scene";
+import { render } from "@/lib/i18n/test/render-uk";
 import type { BattleAttack } from "@/types/battle";
+
+vi.unmock("next-intl");
 
 function Harness({ attacker, preset }: { attacker: Parameters<typeof useAttackWizard>[0]; preset?: { targetId: string; attackId: string } }) {
   const wizard = useAttackWizard(attacker);

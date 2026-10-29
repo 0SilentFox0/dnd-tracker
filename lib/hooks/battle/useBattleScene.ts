@@ -1,6 +1,7 @@
 "use client";
 
 import { createContext, useCallback, useContext, useMemo, useState } from "react";
+import { useTranslations } from "next-intl";
 import { useQueryClient } from "@tanstack/react-query";
 
 import { type DialogState, useAwaitingDmDialog } from "./useAwaitingDmDialog";
@@ -195,7 +196,7 @@ export const BattleSceneDataContext = createContext<BattleSceneData | null>(null
 export function useBattleScene(): BattleSceneValue {
   const value = useContext(BattleSceneContext);
 
-  if (!value) throw new Error("useBattleScene потребує BattleSceneProvider");
+  if (!value) throw new Error("useBattleScene requires BattleSceneProvider");
 
   return value;
 }
@@ -204,7 +205,7 @@ export function useBattleScene(): BattleSceneValue {
 export function useBattleSceneData(): BattleSceneData {
   const value = useContext(BattleSceneDataContext);
 
-  if (!value) throw new Error("useBattleSceneData потребує BattleSceneProvider");
+  if (!value) throw new Error("useBattleSceneData requires BattleSceneProvider");
 
   return value;
 }
@@ -272,6 +273,8 @@ export function deriveTurn(battle: BattleScene, userId: string | null, isDM: boo
 export function useBattleSceneValue(campaignId: string, battleId: string, userId: string | null) {
   const queryClient = useQueryClient();
 
+  const t = useTranslations("battle.notify");
+
   const toast = useBattleToast();
 
   const { show } = toast;
@@ -300,19 +303,19 @@ export function useBattleSceneValue(campaignId: string, battleId: string, userId
   const closeLog = useCallback(() => setLog({ open: false, focus: null }), []);
 
   const onTurnStarted = useCallback(
-    (message: string) => {
-      show(message);
-      document.title = "⚔ Твій хід";
+    (name?: string) => {
+      show(name ? t("yourTurnNamed", { name }) : t("yourTurn"));
+      document.title = t("yourTurnTitle");
       navigator.vibrate?.(200);
     },
-    [show],
+    [show, t],
   );
 
   const { connectionState } = usePusherBattleSync(campaignId, battleId, userId, onTurnStarted);
 
   const { data: battle, isLoading } = useBattle(campaignId, battleId, { pauseRefetchWhenPusherConnected: connectionState === "connected" });
 
-  const onConflict = useCallback(() => show("Стан бою змінився, повторіть дію"), [show]);
+  const onConflict = useCallback(() => show(t("conflict")), [show, t]);
 
   const onFailure = useCallback((message: string) => show(message), [show]);
 

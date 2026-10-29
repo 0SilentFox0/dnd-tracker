@@ -1,14 +1,16 @@
+import { textRef } from "@/lib/i18n/text-ref";
 import { isDown } from "@/lib/utils/battle/participant/state";
 import type { BattleParticipant } from "@/types/battle";
+import type { TextRef } from "@/types/text";
 
 export type HealthState = "unhurt" | "wounded" | "bloodied" | "dying" | "down";
 
-export const HEALTH_LABEL: Record<HealthState, string> = {
-  unhurt: "неушкоджений",
-  wounded: "поранений",
-  bloodied: "закривавлений",
-  dying: "при смерті",
-  down: "повалений",
+export const HEALTH_LABEL: Record<HealthState, TextRef> = {
+  unhurt: textRef("battle.view.health.unhurt"),
+  wounded: textRef("battle.view.health.wounded"),
+  bloodied: textRef("battle.view.health.bloodied"),
+  dying: textRef("battle.view.health.dying"),
+  down: textRef("battle.view.health.down"),
 };
 
 export function hpRatio(p: Pick<BattleParticipant, "combatStats">): number {

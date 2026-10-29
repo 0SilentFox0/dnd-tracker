@@ -7,6 +7,7 @@ import { preloadAnimation } from "@/components/battle/fx/animations";
 import { DiceStage, type DiceStageHandle } from "@/components/battle/fx/dice/DiceStage";
 import { FX_LOAD_TIMEOUT_MS, playFx } from "@/components/battle/fx/runtime/play";
 import { cancelLayer } from "@/components/battle/fx/runtime/stage";
+import { useFxBadgeLabels } from "@/components/battle/fx/use-badge-labels";
 import { fireFxImpact, useBattleFxQueue, useFxEnabled } from "@/lib/hooks/battle";
 import { ARCHETYPE_FX, type FxSpec, MAX_FX_MS } from "@/lib/utils/battle/fx";
 import { DICE_TOTAL_MS } from "@/lib/utils/battle/fx/dice";
@@ -46,6 +47,8 @@ export function BattleFxLayer() {
 
   const { enabled } = useFxEnabled();
 
+  const labels = useFxBadgeLabels();
+
   const { current, queue, done, active } = useBattleFxQueue(enabled);
 
   // Signatures load the moment they are queued, so they are ready by their turn.
@@ -84,7 +87,7 @@ export function BattleFxLayer() {
     };
 
     const play = () => {
-      if (current.archetype !== "dice") return playFx(el, current, document, FX_LOAD_TIMEOUT_MS, impactStarter(current));
+      if (current.archetype !== "dice") return playFx(el, current, document, FX_LOAD_TIMEOUT_MS, impactStarter(current), labels);
 
       if (!current.dice) return;
 
@@ -116,7 +119,7 @@ export function BattleFxLayer() {
       cancelled = true;
       window.clearTimeout(guard);
     };
-  }, [current, done]);
+  }, [current, done, labels]);
 
   return (
     <>

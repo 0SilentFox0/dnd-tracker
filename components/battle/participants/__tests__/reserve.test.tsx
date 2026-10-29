@@ -5,12 +5,14 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 vi.mock("@/components/hud/fonts", () => ({ hudFontClassName: "" }));
 
 import { ParticipantList } from "@/components/battle/participants/ParticipantList";
-import { renderWithConfirm } from "@/components/ui/__tests__/render-with-confirm";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { ParticipantSide } from "@/lib/constants/battle";
 import { BattleSceneContext, BattleSceneDataContext, type BattleSceneValue } from "@/lib/hooks/battle";
+import { renderWithConfirm } from "@/lib/i18n/test/render-uk";
 import { createMockParticipant } from "@/lib/utils/battle/__tests__/fixtures/mock-participant";
 import type { BattleScene } from "@/types/api";
+
+vi.unmock("next-intl");
 
 afterEach(cleanup);
 

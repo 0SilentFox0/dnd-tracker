@@ -1,7 +1,9 @@
 import { CombatStatus, ParticipantSide, ParticipantSourceType } from "@/lib/constants/battle";
+import { textRef } from "@/lib/i18n/text-ref";
 import { checkVictoryConditions } from "@/lib/utils/battle/turn/victory";
 import type { BattleSummary, BattleSummaryHero } from "@/types/api";
 import type { BattleAction, BattleParticipant } from "@/types/battle";
+import type { TextRef } from "@/types/text";
 
 type SummaryEvent = Pick<BattleAction, "round" | "actorId" | "hpChanges" | "actionDetails"> & { isCancelled?: boolean };
 
@@ -68,8 +70,8 @@ export function summarizeBattle(events: SummaryEvent[], participants: BattlePart
   return { outcome: resolveOutcome(events, participants), rounds, heroes: [...stats.values()] };
 }
 
-export const HERO_STATUS_LABEL: Record<BattleSummaryHero["status"], string> = {
-  [CombatStatus.ACTIVE]: "живий",
-  [CombatStatus.UNCONSCIOUS]: "непритомний",
-  [CombatStatus.DEAD]: "загинув",
+export const HERO_STATUS_LABEL: Record<BattleSummaryHero["status"], TextRef> = {
+  [CombatStatus.ACTIVE]: textRef("battle.view.heroStatus.active"),
+  [CombatStatus.UNCONSCIOUS]: textRef("battle.view.heroStatus.unconscious"),
+  [CombatStatus.DEAD]: textRef("battle.view.heroStatus.dead"),
 };

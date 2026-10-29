@@ -1,3 +1,5 @@
+import { useTranslations } from "next-intl";
+
 import { useText } from "@/lib/i18n/use-text";
 import { cn } from "@/lib/utils";
 import { type DamageBreakdownRow } from "@/lib/utils/battle/view/damage-breakdown";
@@ -5,12 +7,14 @@ import { getLogEntryDetailItems } from "@/lib/utils/battle/view/log-format";
 import type { BattleAction } from "@/types/battle";
 
 function DamageTable({ rows }: { rows: DamageBreakdownRow[] }) {
+  const t = useTranslations("battle.log");
+
   const text = useText();
 
   return (
     <div className="my-1">
-      <div className="text-hud-bone">Урон</div>
-      <dl aria-label="Розклад шкоди" className="mt-0.5 grid grid-cols-[minmax(0,1fr)_auto] gap-x-3 gap-y-px rounded bg-black/25 px-2 py-1">
+      <div className="text-hud-bone">{t("damage")}</div>
+      <dl aria-label={t("damageBreakdown")} className="mt-0.5 grid grid-cols-[minmax(0,1fr)_auto] gap-x-3 gap-y-px rounded bg-black/25 px-2 py-1">
         {rows.map((r, i) =>
           r.tone === "rule" ? (
             <div key={i} role="separator" className="col-span-2 my-0.5 border-t border-hud-line" />

@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useReducer, useRef } from "react";
+import { useTranslations } from "next-intl";
 
 import { afterMoraleDice } from "./morale-dice";
 import { useBattleScene } from "./useBattleScene";
@@ -19,6 +20,8 @@ import type { BattleParticipant } from "@/types/battle";
 type BonusSpell = Parameters<typeof canCastBonusSpell>[1][number];
 
 export function usePlayerTurn(participant: BattleParticipant, bonusSpells: BonusSpell[] = []) {
+  const t = useTranslations("battle.notify");
+
   const scene = useBattleScene();
 
   const confirm = useConfirm();
@@ -79,7 +82,7 @@ export function usePlayerTurn(participant: BattleParticipant, bonusSpells: Bonus
 
   const endTurn = async () => {
     if (!participant.actionFlags.hasUsedAction && moraleResult !== "skip") {
-      const ok = await confirm({ title: "Завершити хід?", description: "Дію ще не використано.", confirmLabel: "Завершити", signal: lifetime.current?.signal });
+      const ok = await confirm({ title: t("endTurnTitle"), description: t("endTurnDescription"), confirmLabel: t("endTurnConfirm"), signal: lifetime.current?.signal });
 
       if (!ok) return;
     }
@@ -134,7 +137,7 @@ export function usePlayerTurn(participant: BattleParticipant, bonusSpells: Bonus
           MORALE_SKIP_MS,
         );
       }
-      else scene.toast.show(`${participant.basicInfo.name} · мораль: без змін (d10 = ${d10})`);
+      else scene.toast.show(t("moraleUnchanged", { name: participant.basicInfo.name, d10 }));
     },
     stay: () => dispatch({ type: "STAY" }),
     endTurn,

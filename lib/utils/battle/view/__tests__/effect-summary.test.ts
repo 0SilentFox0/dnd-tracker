@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 
+import { textOf } from "@/lib/i18n/test/text";
 import { makeEffect } from "@/lib/utils/abilities/__tests__/fixtures";
 import { effectSummary, mergeEffectsForDisplay } from "@/lib/utils/battle/view";
 
@@ -7,13 +8,13 @@ describe("effectSummary", () => {
   it("без опису — описує модифікатори, залишок і джерело", () => {
     const e = makeEffect("drill", { name: "Вишкіл війська", duration: 2, abilityEffects: [{ kind: "modifyStat", stat: "morale", flat: 1 }], source: { participantId: "p", name: "Люди", abilityName: "Вишкіл війська" } });
 
-    expect(effectSummary(e)).toEqual(["Мораль +1", "ще 2 раунди", "від: Вишкіл війська (Люди)"]);
+    expect(effectSummary(e).map((l) => textOf(l))).toEqual(["Мораль +1", "ще 2 раунди", "від: Вишкіл війська (Люди)"]);
   });
 
   it("опис ефекту має перевагу, DoT додає шкоду щораунду", () => {
     const e = makeEffect("burn", { description: "Горить", duration: 1, dotDamage: { damagePerRound: 4, damageType: "fire" } });
 
-    expect(effectSummary(e)).toEqual(["Горить", "4 шкоди (fire) щораунду", "ще 1 раунд"]);
+    expect(effectSummary(e).map((l) => textOf(l))).toEqual(["Горить", "4 шкоди (fire) щораунду", "ще 1 раунд"]);
   });
 
   it("ефекти одного вміння з однаковою тривалістю зливаються в один запис", () => {
@@ -35,7 +36,7 @@ describe("effectSummary", () => {
   it("захист (guard) описаний: хто бере на себе шкоду", () => {
     const e = makeEffect("guard", { name: "Клятва щита", duration: 99, effects: [{ type: "guard", value: 20 }], source: { participantId: "s", name: "Семгрун", abilityName: "Клятва щита" } });
 
-    expect(effectSummary(e)[0]).toBe("Семгрун бере на себе 20% шкоди від атак");
+    expect(textOf(effectSummary(e)[0])).toBe("Семгрун бере на себе 20% шкоди від атак");
   });
 });
 

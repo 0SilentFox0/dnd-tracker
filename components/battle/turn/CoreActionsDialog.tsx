@@ -1,22 +1,18 @@
 "use client";
 
 import { useState } from "react";
+import { useTranslations } from "next-intl";
 
 import { OptionButton } from "@/components/hud/OptionButton";
 import { TargetRadioList } from "@/components/hud/TargetRadioList";
 import { Button } from "@/components/ui/button";
 import { ResponsiveDialog } from "@/components/ui/responsive-dialog";
-import { SPELL_COST_LABELS } from "@/lib/constants/spells";
 import { useCoreActions } from "@/lib/hooks/battle";
+import { useText } from "@/lib/i18n/use-text";
 import type { CoreActionKey } from "@/lib/utils/battle/actions/registry";
 import type { BattleParticipant } from "@/types/battle";
 
-const COST_LABEL = { action: SPELL_COST_LABELS.action, bonusAction: SPELL_COST_LABELS.bonusAction, movement: "Рух" } as const;
-
-const SHOVE_MODES = [
-  { mode: "prone", label: "Повалити" },
-  { mode: "push", label: "Відштовхнути" },
-] as const;
+const SHOVE_MODES = ["prone", "push"] as const;
 
 interface CoreActionsDialogProps {
   participant: BattleParticipant;
@@ -30,6 +26,16 @@ export function CoreActionsDialog({ open, ...rest }: CoreActionsDialogProps) {
 }
 
 function CoreActionsBody({ participant, onOpenChange, onDone }: Omit<CoreActionsDialogProps, "open">) {
+  const t = useTranslations("battle.coreActions");
+
+  const tCost = useTranslations("spells.costs");
+
+  const tCommon = useTranslations("common.ui");
+
+  const tActions = useTranslations("battleCommon.coreActions");
+
+  const text = useText();
+
   const { items, targetsFor, run, isPending } = useCoreActions(participant, onDone);
 
   const [key, setKey] = useState<CoreActionKey | null>(null);
@@ -63,25 +69,25 @@ function CoreActionsBody({ participant, onOpenChange, onDone }: Omit<CoreActions
       onOpenChange={onOpenChange}
       size="md"
       hud
-      title="Дії"
-      description="Основні дії 5e"
+      title={t("title")}
+      description={t("description")}
       footer={
         <>
-          <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>Закрити</Button>
-          <Button type="button" disabled={!ready} onClick={() => void submit()}>Виконати</Button>
+          <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>{tCommon("close")}</Button>
+          <Button type="button" disabled={!ready} onClick={() => void submit()}>{t("run")}</Button>
         </>
       }
     >
     <div className="space-y-3">
-      <div className="grid grid-cols-1 gap-1 sm:grid-cols-2" role="radiogroup" aria-label="Дія">
-        {items.map(({ key: k, def, cost, ok, reason }) => (
-          <OptionButton key={k} role="radio" checked={key === k} disabled={!ok} title={def.label} meta={COST_LABEL[cost]} note={<>{def.description}{!ok && <span className="block text-hud-danger">{reason}</span>}</>} onClick={() => choose(k)} />
+      <div className="grid grid-cols-1 gap-1 sm:grid-cols-2" role="radiogroup" aria-label={t("action")}>
+        {items.map(({ key: k, cost, ok, reason }) => (
+          <OptionButton key={k} role="radio" checked={key === k} disabled={!ok} title={tActions(k)} meta={cost === "movement" ? t("movement") : tCost(cost)} note={<>{t(`descriptions.${k}`)}{!ok && <span className="block text-hud-danger">{reason && text(reason)}</span>}</>} onClick={() => choose(k)} />
         ))}
       </div>
       {key === "shove" && (
-        <div className="grid grid-cols-2 gap-1" role="radiogroup" aria-label="Спосіб">
+        <div className="grid grid-cols-2 gap-1" role="radiogroup" aria-label={t("shoveMode")}>
           {SHOVE_MODES.map((m) => (
-            <OptionButton key={m.mode} role="radio" checked={mode === m.mode} title={m.label} onClick={() => setMode(m.mode)} />
+            <OptionButton key={m} role="radio" checked={mode === m} title={t(`shove.${m}`)} onClick={() => setMode(m)} />
           ))}
         </div>
       )}

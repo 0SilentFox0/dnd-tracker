@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useTranslations } from "next-intl";
 
 import { EffectIcon } from "./EffectIcon";
 
@@ -35,6 +36,8 @@ function EffectChip({ effect }: { effect: ActiveEffect }) {
 }
 
 export function EffectLine({ effects, max = 2 }: { effects: readonly ActiveEffect[]; max?: number }) {
+  const t = useTranslations("battle.hud.effects");
+
   const [expanded, setExpanded] = useState(false);
 
   const overflow = effects.length > max;
@@ -50,11 +53,11 @@ export function EffectLine({ effects, max = 2 }: { effects: readonly ActiveEffec
         <button
           type="button"
           aria-expanded={open}
-          aria-label={open ? "Згорнути ефекти" : `Показати всі ефекти (${effects.length})`}
+          aria-label={open ? t("collapse") : t("showAll", { count: effects.length })}
           onClick={() => setExpanded((v) => !v)}
           className="relative cursor-pointer whitespace-nowrap rounded px-1 text-[13px] leading-5 text-[var(--hud-muted)] hover:bg-white/10 hover:text-[#d9cfbd]"
         >
-          {open ? "згорнути" : `+${effects.length - max}`}
+          {open ? t("less") : `+${effects.length - max}`}
         </button>
       )}
     </div>

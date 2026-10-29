@@ -8,6 +8,7 @@ import { PreviewUnitRow } from "@/components/battle/fx/preview/PreviewUnitRow";
 import { PALETTE } from "@/components/battle/fx/runtime/palette";
 import { playFx } from "@/components/battle/fx/runtime/play";
 import { cancelLayer } from "@/components/battle/fx/runtime/stage";
+import { useFxBadgeLabels } from "@/components/battle/fx/use-badge-labels";
 import { type FxRunner, useFxEnabled, useSpellFxPlayback } from "@/lib/hooks/battle";
 import { useTranslator } from "@/lib/i18n/use-translator";
 import { cn } from "@/lib/utils";
@@ -15,8 +16,6 @@ import { PREVIEW_UNITS, type PreviewSpell, type PreviewUnit } from "@/lib/utils/
 import { castableOf, previewCastFx } from "@/lib/utils/battle/fx/spell-preview";
 
 // a preview has no queue to hold up, so it waits for the signature however long its chunk takes
-const RUNNER: FxRunner = { play: (layer, spec, root) => playFx(layer, spec, root, Infinity), cancel: cancelLayer };
-
 const [CASTER] = PREVIEW_UNITS;
 
 function Chip({ label, book, children }: { label: string; book: boolean; children: ReactNode }) {
@@ -33,6 +32,10 @@ const BOOK_WASH = "radial-gradient(ellipse at 50% 45%, #3b2a1c 0%, #2a1d14 58%, 
 export default function SpellBattlePreviewPanel({ spell, className, variant = "hud" }: { spell: PreviewSpell; className?: string; variant?: "hud" | "book" }) {
   const t = useTranslator("spells");
 
+  const labels = useFxBadgeLabels();
+
+  const runner = useMemo<FxRunner>(() => ({ play: (layer, spec, root) => playFx(layer, spec, root, Infinity, undefined, labels), cancel: cancelLayer }), [labels]);
+
   const book = variant === "book";
 
   const { id, name, level, groupId, fx: spellFx, rules } = spell;
@@ -43,7 +46,7 @@ export default function SpellBattlePreviewPanel({ spell, className, variant = "h
 
   const { spec, targets, targetIds, auras } = preview;
 
-  const { arenaRef, layerRef, hit, settled, replay } = useSpellFxPlayback(spec, fx.enabled, RUNNER);
+  const { arenaRef, layerRef, hit, settled, replay } = useSpellFxPlayback(spec, fx.enabled, runner);
 
   if (!spec && auras.length === 0) return null;
 

@@ -138,7 +138,7 @@ async function thud(stage: Stage, target: FxPoint, el: HTMLElement | null) {
   await Promise.all([animateEl(stage, el, THUD, { duration: 300, easing: "ease-out" }), streakBurst(stage, { x: target.x, y: target.y - RY + 4 }, { colors: SPARKS, count: 10, angle: -Math.PI / 2, cone: 1.2, speed: [120, 260], life: [0.2, 0.4], gravity: 400, width: [1, 1.6] })]);
 }
 
-export const stoneskin: FxAnimation = ({ stage, targets }) =>
+export const stoneskin: FxAnimation = ({ stage, targets, labels }) =>
   perTarget(stage, targets, 0, async ({ at: target, el }) => {
     const list = plates(target);
 
@@ -187,7 +187,7 @@ export const stoneskin: FxAnimation = ({ stage, targets }) =>
           g.restore();
         }
 
-        risingBadge(g, target.x, target.y - RY - 14, clamp01((t - SNAP_MS - 80) / 1300), "+КБ", STONE_BADGE, 24);
+        risingBadge(g, target.x, target.y - RY - 14, clamp01((t - SNAP_MS - 80) / 1300), labels.stoneskin, STONE_BADGE, 24);
       },
       (t) => {
         shake = t > SNAP_MS ? Math.max(0, 1 - (t - SNAP_MS) / 350) : 0;

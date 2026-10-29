@@ -1,8 +1,11 @@
 // @vitest-environment happy-dom
-import { cleanup, fireEvent, render, screen } from "@testing-library/react";
+import { cleanup, fireEvent, screen } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
 import { ActionGrid } from "@/components/battle/turn/ActionGrid";
+import { render } from "@/lib/i18n/test/render-uk";
+
+vi.unmock("next-intl");
 
 const turn = (skipped: boolean, moraleResult?: "extra" | "skip" | "none") =>
   ({ phase: "acting", moraleResult, status: { actionUsed: false, bonusAvailable: true, skipped }, strikeAndReturn: { available: false, run: vi.fn() }, actions: { endTurn: vi.fn(), afterAction: vi.fn(), rollMorale: vi.fn(), stay: vi.fn() } }) as never;

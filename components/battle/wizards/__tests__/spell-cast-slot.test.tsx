@@ -1,6 +1,6 @@
 // @vitest-environment happy-dom
 import { useEffect } from "react";
-import { cleanup, fireEvent, render, screen, waitFor } from "@testing-library/react";
+import { cleanup, fireEvent, screen, waitFor } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
 vi.mock("@/components/hud/fonts", () => ({ hudFontClassName: "" }));
@@ -24,8 +24,11 @@ vi.mock("@/lib/hooks/spells", async (importOriginal) => ({
 import { SpellBook } from "@/components/battle/wizards/SpellBook";
 import { useSpellBook } from "@/lib/hooks/battle";
 import { fakeScene } from "@/lib/hooks/battle/__tests__/fake-scene";
+import { render } from "@/lib/i18n/test/render-uk";
 import { textOf } from "@/lib/i18n/test/text";
 import { slotOptions } from "@/lib/utils/battle/flows";
+
+vi.unmock("next-intl");
 
 type Caster = NonNullable<Parameters<typeof useSpellBook>[0]>;
 

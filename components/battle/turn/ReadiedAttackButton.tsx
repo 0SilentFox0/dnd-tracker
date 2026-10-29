@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useTranslations } from "next-intl";
 import { Crosshair } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
@@ -11,6 +12,10 @@ import type { BattleParticipant } from "@/types/battle";
 const TARGET_BUTTON = "border border-white/15 px-2 py-1.5 text-left text-sm text-[var(--ink)] hover:border-[var(--gold)]/50 disabled:opacity-40";
 
 function ReadiedAttackPicker({ participant }: { participant: BattleParticipant }) {
+  const t = useTranslations("battle.readied");
+
+  const tc = useTranslations("common.ui");
+
   const [open, setOpen] = useState(false);
 
   const { targets, attack, isPending } = useReadiedAttack(participant);
@@ -19,22 +24,22 @@ function ReadiedAttackPicker({ participant }: { participant: BattleParticipant }
     <>
       <button type="button" onClick={() => setOpen(true)} className="hud-sc mt-2 flex h-11 w-full items-center justify-center gap-2 border border-[var(--enemy)] bg-[var(--enemy)]/25 text-[15px] tracking-[.08em] text-[var(--ink)]">
         <Crosshair className="size-5 text-[var(--bone)]" />
-        Підготовлена атака
+        {t("title")}
       </button>
-      <ResponsiveDialog open={open} onOpenChange={setOpen} size="sm" hud title="Підготовлена атака" description="Оберіть ціль" footer={<Button type="button" variant="outline" onClick={() => setOpen(false)}>Закрити</Button>}>
+      <ResponsiveDialog open={open} onOpenChange={setOpen} size="sm" hud title={t("title")} description={t("description")} footer={<Button type="button" variant="outline" onClick={() => setOpen(false)}>{tc("close")}</Button>}>
         <div className="grid gap-1">
-          {targets.length === 0 && <div className="text-sm text-[var(--hud-muted)]">Немає цілей</div>}
-          {targets.map((t) => (
+          {targets.length === 0 && <div className="text-sm text-[var(--hud-muted)]">{t("noTargets")}</div>}
+          {targets.map((target) => (
             <button
-              key={t.basicInfo.id}
+              key={target.basicInfo.id}
               type="button"
               disabled={isPending}
               onClick={async () => {
-                if (await attack(t.basicInfo.id)) setOpen(false);
+                if (await attack(target.basicInfo.id)) setOpen(false);
               }}
               className={TARGET_BUTTON}
             >
-              {t.basicInfo.name}
+              {target.basicInfo.name}
             </button>
           ))}
         </div>

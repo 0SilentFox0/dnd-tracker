@@ -1,15 +1,18 @@
 // @vitest-environment happy-dom
-import { cleanup, fireEvent, render, screen, waitFor } from "@testing-library/react";
+import { cleanup, fireEvent, screen, waitFor } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
 import { CoreActionsDialog } from "../CoreActionsDialog";
 import { ReadiedAttackButton } from "../ReadiedAttackButton";
 
 import { fakeScene } from "@/lib/hooks/battle/__tests__/fake-scene";
+import { render } from "@/lib/i18n/test/render-uk";
 import { CORE_ACTION_KEYS, CORE_ACTION_REGISTRY } from "@/lib/utils/battle/actions/registry";
 import { applyCondition5e } from "@/lib/utils/battle/conditions";
 import { DEFAULT_RULES } from "@/lib/utils/rules";
 import type { BattleParticipant } from "@/types/battle";
+
+vi.unmock("next-intl");
 
 const used = (p: BattleParticipant): BattleParticipant => ({ ...p, actionFlags: { ...p.actionFlags, hasUsedAction: true } });
 

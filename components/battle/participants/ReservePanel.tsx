@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useTranslations } from "next-intl";
 
 import { ReserveParticipantRow } from "./ReserveParticipantRow";
 
@@ -12,11 +13,13 @@ import { useBattleScene } from "@/lib/hooks/battle";
 import { cn } from "@/lib/utils";
 
 const SIDES = [
-  { side: ParticipantSide.ALLY, label: "Союзники" },
-  { side: ParticipantSide.ENEMY, label: "Вороги" },
-];
+  { side: ParticipantSide.ALLY, label: "allies" },
+  { side: ParticipantSide.ENEMY, label: "enemies" },
+] as const;
 
 function ReserveList() {
+  const t = useTranslations("battle.sides");
+
   const { roster: { reserve } } = useBattleScene();
 
   return SIDES.map(({ side, label }) => {
@@ -28,7 +31,7 @@ function ReserveList() {
       <div key={side}>
         <div className="hud-sc flex items-center gap-2 pt-2 text-[13px] tracking-[.1em] text-[var(--hud-muted)]">
           <SideDot side={side} />
-          {label}
+          {t(label)}
         </div>
         {list.map((p) => <ReserveParticipantRow key={p.basicInfo.id} participant={p} />)}
       </div>
@@ -36,23 +39,25 @@ function ReserveList() {
   });
 }
 
-const title = (n: number) => `Резерв (${n})`;
-
 /** Резерв поза картою: у вигляді «Карта» ДМ бачить і вводить його тут (roster.reserve порожній для гравців). */
 export function ReserveGroup() {
+  const t = useTranslations("battle.reserve");
+
   const { roster: { reserve } } = useBattleScene();
 
   if (reserve.length === 0) return null;
 
   return (
-    <section aria-label="Резерв">
-      <h3 className="hud-sc flex h-8 items-center border-b border-white/[.14] text-[15px] font-bold tracking-[.1em] text-[#a89c88]">{title(reserve.length)}</h3>
+    <section aria-label={t("aria")}>
+      <h3 className="hud-sc flex h-8 items-center border-b border-white/[.14] text-[15px] font-bold tracking-[.1em] text-[#a89c88]">{t("title", { count: reserve.length })}</h3>
       <ReserveList />
     </section>
   );
 }
 
 export function ReserveSheetButton() {
+  const t = useTranslations("battle.reserve");
+
   const { roster: { reserve } } = useBattleScene();
 
   const [open, setOpen] = useState(false);
@@ -62,9 +67,9 @@ export function ReserveSheetButton() {
   return (
     <>
       <button type="button" onClick={() => setOpen(true)} className="hud-sc flex shrink-0 items-center px-2 text-[14px] tracking-[.06em] text-[var(--gold)]">
-        {title(reserve.length)}
+        {t("title", { count: reserve.length })}
       </button>
-      <ResponsiveDialog open={open} onOpenChange={setOpen} title={title(reserve.length)} className={cn(HUD_SURFACE, "border-white/25 bg-[#15110e]")}>
+      <ResponsiveDialog open={open} onOpenChange={setOpen} title={t("title", { count: reserve.length })} className={cn(HUD_SURFACE, "border-white/25 bg-[#15110e]")}>
         <ReserveList />
       </ResponsiveDialog>
     </>

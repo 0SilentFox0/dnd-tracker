@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 
-import { DEFAULT_HAZARD_DAMAGE_TYPE, DEFAULT_HAZARD_DICE, DEFAULT_HAZARD_LABEL } from "@/lib/constants/battle";
+import { DEFAULT_HAZARD_DAMAGE_TYPE, DEFAULT_HAZARD_DICE } from "@/lib/constants/battle";
 import { cellKey, hazardDamage } from "@/lib/utils/battle/grid";
 import type { MapTerrainData, MapTerrainResponse } from "@/types/api";
 import type { GridPoint, TerrainKind } from "@/types/battle";
@@ -42,7 +42,7 @@ interface Options {
 
 const EMPTY: ReadonlySet<string> = new Set();
 
-const DEFAULT_BRUSH: TerrainBrushSettings = { kind: "wall", rounds: 1, label: DEFAULT_HAZARD_LABEL, dice: DEFAULT_HAZARD_DICE, damageType: DEFAULT_HAZARD_DAMAGE_TYPE };
+const DEFAULT_BRUSH: TerrainBrushSettings = { kind: "wall", rounds: 1, label: "", dice: DEFAULT_HAZARD_DICE, damageType: DEFAULT_HAZARD_DAMAGE_TYPE };
 
 const sameTerrain = (a: MapTerrainData["terrain"], b: MapTerrainData["terrain"]) => JSON.stringify(a) === JSON.stringify(b);
 
@@ -133,7 +133,7 @@ export function useMapTerrainTool({ isDM, mutate, onSkipped, onActivate }: Optio
           : b === "barrier"
             ? { kind: b, rounds: Math.min(MAX_BARRIER_ROUNDS, Math.max(1, Math.trunc(r) || 1)) }
             : b === "hazard"
-              ? { kind: b, label: l.trim() || DEFAULT_HAZARD_LABEL, ...(damage && { damage }) }
+              ? { kind: b, ...(l.trim() && { label: l.trim() }), ...(damage && { damage }) }
               : { kind: b };
 
       enqueue(queue.current, { cells, terrain });

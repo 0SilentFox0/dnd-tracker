@@ -1,12 +1,15 @@
 // @vitest-environment happy-dom
-import { cleanup, fireEvent, render, screen } from "@testing-library/react";
+import { cleanup, fireEvent, screen } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
 vi.mock("@/components/hud/fonts", () => ({ hudFontClassName: "" }));
 
 import { BonusActionPicker } from "@/components/battle/wizards/BonusActionPicker";
 import { fakeScene } from "@/lib/hooks/battle/__tests__/fake-scene";
+import { render } from "@/lib/i18n/test/render-uk";
 import type { BattleParticipant } from "@/types/battle";
+
+vi.unmock("next-intl");
 
 const OFF = { id: "dagger-off", name: "Кинджал", type: "melee", attackBonus: 3, damageDice: "1d4", damageType: "piercing", hand: "off", traits: ["light"] };
 

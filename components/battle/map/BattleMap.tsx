@@ -1,6 +1,7 @@
 "use client";
 
 import { memo, type PointerEvent, useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useTranslations } from "next-intl";
 import { Flame } from "lucide-react";
 
 import { WeatherLayer } from "./weather/WeatherLayer";
@@ -12,7 +13,6 @@ import { MapTokenHud } from "./MapTokenHud";
 
 import "./battle-map.css";
 import { modeUiOf } from "@/components/battle/modes";
-import { DEFAULT_HAZARD_LABEL } from "@/lib/constants/battle";
 import { type ModeTools } from "@/lib/hooks/battle";
 import { DRAG_THRESHOLD, useViewport } from "@/lib/hooks/common";
 import { cn } from "@/lib/utils";
@@ -94,18 +94,20 @@ function markFill(mark: MarkValue): string {
   return mark === "invalid-target" ? "rgba(120,120,120,.25)" : "transparent";
 }
 
-function hazardTitle(t: TerrainCell, round: number | undefined): string {
-  const label = t.label ?? DEFAULT_HAZARD_LABEL;
+type MapT = ReturnType<typeof useTranslations<"battle.map">>;
 
-  if (t.untilRound === undefined) return label;
+function hazardTitle(t: MapT, cell: TerrainCell, round: number | undefined): string {
+  const label = cell.label ?? t("hazardDefault");
 
-  return round === undefined ? `${label} · до кінця раунду ${t.untilRound}` : `${label} · ще ${Math.max(1, t.untilRound - round + 1)} р.`;
+  if (cell.untilRound === undefined) return label;
+
+  return round === undefined ? t("hazardUntilEnd", { label, round: cell.untilRound }) : t("hazardRoundsLeft", { label, rounds: Math.max(1, cell.untilRound - round + 1) });
 }
 
-function terrainTitle(t: TerrainCell, round: number | undefined): string | null {
-  if (t.kind === "barrier") return `Барʼєр${t.untilRound !== undefined ? ` до кінця раунду ${t.untilRound}` : ""}`;
+function terrainTitle(t: MapT, cell: TerrainCell, round: number | undefined): string | null {
+  if (cell.kind === "barrier") return cell.untilRound !== undefined ? t("barrierUntil", { round: cell.untilRound }) : t("barrier");
 
-  return t.kind === "hazard" ? hazardTitle(t, round) : null;
+  return cell.kind === "hazard" ? hazardTitle(t, cell, round) : null;
 }
 
 const TERRAIN_FILL = { wall: "rgba(0,0,0,.6)", barrier: "rgba(0,0,0,.75)", hazard: `url(#${HAZARD_GRADIENT_ID})` } as const;
@@ -150,6 +152,8 @@ interface GridLayerProps {
 }
 
 const GridLayer = memo(function GridLayer({ map, marks, actions, wasDragged, clickableBlocked, showBlocked, onStrokeStart, scene }: GridLayerProps) {
+  const t = useTranslations("battle.map");
+
   const cells = useMemo(() => {
     const list: GridPoint[] = [];
 
@@ -222,7 +226,7 @@ const GridLayer = memo(function GridLayer({ map, marks, actions, wasDragged, cli
 
         const cell = terrain?.[key];
 
-        const title = cell && terrainTitle(cell, scene.round);
+        const title = cell && terrainTitle(t, cell, scene.round);
 
         const gridless = zoneOf(mark) !== null || cell?.kind === "wall" || cell?.kind === "barrier";
 

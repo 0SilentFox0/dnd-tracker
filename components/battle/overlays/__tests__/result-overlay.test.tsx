@@ -7,6 +7,8 @@ vi.mock("@/components/hud/fonts", () => ({ hudFontClassName: "" }));
 import { ResultOverlay } from "@/components/battle/overlays/ResultOverlay";
 import { fakeScene } from "@/lib/hooks/battle/__tests__/fake-scene";
 
+vi.unmock("next-intl");
+
 describe("ResultOverlay", () => {
   afterEach(cleanup);
 

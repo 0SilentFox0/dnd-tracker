@@ -1,5 +1,5 @@
 // @vitest-environment happy-dom
-import { cleanup, render } from "@testing-library/react";
+import { cleanup } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
 const fx = vi.hoisted(() => ({ userEnabled: true, motionAllowed: true }));
@@ -7,8 +7,11 @@ const fx = vi.hoisted(() => ({ userEnabled: true, motionAllowed: true }));
 vi.mock("@/lib/hooks/battle/useFxEnabled", () => ({ useFxEnabled: () => ({ enabled: fx.userEnabled && fx.motionAllowed, ...fx, setEnabled: vi.fn() }) }));
 
 import { MapTokenHud } from "@/components/battle/map/MapTokenHud";
+import { render } from "@/lib/i18n/test/render-uk";
 import { createMockParticipant } from "@/lib/utils/battle/__tests__/fixtures/mock-participant";
 import type { ActiveEffect } from "@/types/battle";
+
+vi.unmock("next-intl");
 
 const base = createMockParticipant();
 

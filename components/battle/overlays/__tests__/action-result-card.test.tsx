@@ -10,6 +10,9 @@ import { MapStripSlotContext, NoticeStackContext } from "@/components/battle/sce
 import { ACTION_RESULT_MS, type ActionResultFx } from "@/lib/hooks/battle";
 import { fakeScene } from "@/lib/hooks/battle/__tests__/fake-scene";
 
+
+vi.unmock("next-intl");
+
 const card = () => screen.getByRole("status", { name: "Результат дії" });
 
 describe("ActionResultCard", () => {

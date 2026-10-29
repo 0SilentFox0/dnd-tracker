@@ -15,6 +15,8 @@ import { testMap } from "@/lib/utils/battle/__tests__/fixtures/placed";
 import { mazeMap } from "@/lib/utils/battle/modes/maze/__tests__/fixtures";
 import type { BattleAction } from "@/types/battle";
 
+vi.unmock("next-intl");
+
 afterEach(cleanup);
 
 const entry = (actorId: string, targets: string[] = []): BattleAction =>

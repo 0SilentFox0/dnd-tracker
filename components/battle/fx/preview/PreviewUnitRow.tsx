@@ -1,5 +1,7 @@
 "use client";
 
+import { useTranslations } from "next-intl";
+
 import { AuraCanvas } from "@/components/battle/fx/auras/AuraCanvas";
 import { FRAMES } from "@/components/battle/fx/frames";
 import { CanvasFrame } from "@/components/battle/fx/frames/CanvasFrame";
@@ -50,7 +52,11 @@ interface Props {
 }
 
 export function PreviewUnitRow({ unit, target, hit, aurasOn, look = {} }: Props) {
+  const t = useTranslations("spells.fx.previewUnits");
+
   const { still = false, compact = false, book = false } = look;
+
+  const name = t(unit.id);
 
   const tone = ROW_LOOK[book ? "book" : "hud"];
 
@@ -66,12 +72,12 @@ export function PreviewUnitRow({ unit, target, hit, aurasOn, look = {} }: Props)
           className={cn("flex items-center justify-center rounded-full text-xs", tone.portrait, fallen && "opacity-50 grayscale")}
           style={{ width: size.portrait, height: size.portrait, boxShadow: `0 0 0 2px ${unit.side === "ally" ? "var(--ally, #6f8fb0)" : "var(--enemy, #9c2a1d)"}, 0 0 0 3px ${tone.ring}` }}
         >
-          {fallen ? "†" : unit.name.slice(0, 2)}
+          {fallen ? "†" : name.slice(0, 2)}
         </span>
         {aurasOn && target?.auras.length ? <AuraCanvas kinds={target.auras} size={size.portrait} still={still} /> : null}
       </span>
       <span className="min-w-0 flex-1">
-        <span className={cn("block truncate", fallen && tone.fallenName)}>{unit.name}</span>
+        <span className={cn("block truncate", fallen && tone.fallenName)}>{name}</span>
         <span className={cn("mt-1 block rounded-full", tone.track)}>
           <span className={cn("block h-full rounded-full", tone.bar[unit.side])} style={{ width: `${HP[unit.id] * 100}%` }} />
         </span>

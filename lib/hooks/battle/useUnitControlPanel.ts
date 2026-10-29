@@ -1,6 +1,7 @@
 "use client";
 
 import { useMemo } from "react";
+import { useTranslations } from "next-intl";
 
 import { useBattleScene } from "./useBattleScene";
 
@@ -16,6 +17,8 @@ export interface UnitControlRow {
 }
 
 export function useUnitControlPanel() {
+  const t = useTranslations("battle.unitControl");
+
   const { battle, viewer, actions } = useBattleScene();
 
   const order = battle.initiativeOrder;
@@ -26,10 +29,10 @@ export function useUnitControlPanel() {
     const owners = dmId ? allyOwners(order, dmId) : [];
 
     return {
-      options: [{ value: CONTROLLED_BY_DM, label: "ДМ" }, ...owners.map((o) => ({ value: o, label: ownerHeroNames(order, o) }))],
+      options: [{ value: CONTROLLED_BY_DM, label: t("dm") }, ...owners.map((o) => ({ value: o, label: ownerHeroNames(order, o) }))],
       canRandomize: owners.length > 0 && freeUnits(order, dmId).length > 0,
     };
-  }, [order, dmId]);
+  }, [order, dmId, t]);
 
   const { mutate, isPending } = actions.unitControl;
 

@@ -1,3 +1,4 @@
+import { useTranslations } from "next-intl";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 
 import { battleKeys, battleQueryKey } from "./keys";
@@ -13,7 +14,7 @@ export interface BattleActionOptions {
   invalidate?: ("battles" | "active-battles")[];
   onConflict?: () => void;
   onFailure?: (message: string) => void;
-  /** одна повторна спроба після 409 з версією з перечитаного кешу — лише для ідемпотентних дій */
+  /** one retry after a 409 with the version from the re-read cache, for idempotent actions only */
   retryOnConflict?: boolean;
 }
 
@@ -25,6 +26,8 @@ export function useBattleAction<TVars extends object, TResp = Record<string, unk
   fn: (vars: TVars & { expectedVersion?: number }) => Promise<BattleMutationResponse<TResp>>,
   options: BattleActionOptions = {},
 ) {
+  const t = useTranslations("battle.notify");
+
   const queryClient = useQueryClient();
 
   const key = battleQueryKey(campaignId, battleId);
@@ -67,7 +70,7 @@ export function useBattleAction<TVars extends object, TResp = Record<string, unk
         return;
       }
 
-      options.onFailure?.(errorMessage(error, "Дію не виконано"));
+      options.onFailure?.(errorMessage(error, t("actionFailed")));
     },
   });
 }

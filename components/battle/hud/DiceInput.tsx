@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import { Dices } from "lucide-react";
 
 import { cn } from "@/lib/utils";
@@ -28,7 +29,7 @@ export function DiceGrid({ sides, value, onPick, highlight }: { sides: number; v
   );
 }
 
-/** Поле одного кубика: при фокусі вміст виділено, нова цифра замінює стару, Backspace очищає. */
+/** One die field: focus selects the content, a new digit replaces the old one, Backspace clears. */
 export function DieInput({ sides, value, onChange, label, className }: { sides: number; value: number | undefined; onChange: (v: number | undefined) => void; label: string; className?: string }) {
   return (
     <input
@@ -47,27 +48,31 @@ export function DieInput({ sides, value, onChange, label, className }: { sides: 
   );
 }
 
-/** parchment — для світлої книги заклять: темний текст і рамки замість світлих HUD-кольорів. */
+/** parchment: dark text and borders for the light spellbook instead of the HUD colours. */
 type Tone = "hud" | "parchment";
 
 export function DamageDice({ slots, values, onChange, tone = "hud" }: { slots: number[]; values: (number | undefined)[]; onChange: (i: number, v: number | undefined) => void; tone?: Tone }) {
+  const t = useTranslations("battle.hud");
+
   return (
     <div className="mt-3 grid grid-cols-4 gap-2">
       {slots.map((sides, i) => (
         <label key={i} className={cn("flex flex-col gap-1 text-xs", tone === "parchment" ? "text-[#6b5a44]" : "text-[var(--hud-muted)]")}>
           d{sides}
-          <DieInput label={`Кубик ${i + 1} (d${sides})`} sides={sides} value={values[i]} onChange={(v) => onChange(i, v)} className={cn("h-12 border text-center text-lg", tone === "parchment" ? "border-[#2a2018]/35 bg-white/40 text-[#2a2018]" : "border-white/20 bg-black/30 text-[var(--ink)]")} />
+          <DieInput label={t("dieLabel", { n: i + 1, sides })} sides={sides} value={values[i]} onChange={(v) => onChange(i, v)} className={cn("h-12 border text-center text-lg", tone === "parchment" ? "border-[#2a2018]/35 bg-white/40 text-[#2a2018]" : "border-white/20 bg-black/30 text-[var(--ink)]")} />
         </label>
       ))}
     </div>
   );
 }
 
-export function AiRollButton({ onClick, label = "Авто-кидок", tone = "hud" }: { onClick: () => void; label?: string; tone?: Tone }) {
+export function AiRollButton({ onClick, label, tone = "hud" }: { onClick: () => void; label?: string; tone?: Tone }) {
+  const t = useTranslations("battle.hud");
+
   return (
     <button type="button" onClick={onClick} className={cn("hud-sc flex h-[52px] w-full items-center justify-center gap-2.5 whitespace-nowrap border text-[15px] font-bold tracking-[.04em]", tone === "parchment" ? "border-[#2a2018]/40 text-[#2a2018]" : "border-white/25 text-[var(--bone)]")}>
       <Dices className="size-5" />
-      {label}
+      {label ?? t("autoRoll")}
     </button>
   );
 }

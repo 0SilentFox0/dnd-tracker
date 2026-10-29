@@ -1,6 +1,7 @@
 "use client";
 
 import { createPortal } from "react-dom";
+import { useTranslations } from "next-intl";
 
 import { BattleMap } from "./BattleMap";
 import { MapTerrainToolbar } from "./MapTerrainToolbar";
@@ -30,6 +31,8 @@ function ModeButton({ active, onClick, tall, hidden, children }: { active: boole
 }
 
 export function BattleMapPanel({ phone = false }: { phone?: boolean }) {
+  const t = useTranslations("battle.map.tools");
+
   const scene = useBattleMapScene();
 
   const slot = useMapToolsSlot();
@@ -49,14 +52,14 @@ export function BattleMapPanel({ phone = false }: { phone?: boolean }) {
     <div className={cn("z-20 flex flex-col items-start gap-1.5", phone ? "shrink-0 px-1 pb-1" : !inRow && "absolute left-2 top-2")}>
       <div className="flex flex-wrap gap-1.5">
         <ModeButton active={placement.active} onClick={placement.toggle} tall={inRow}>
-          Розставити
+          {t("place")}
         </ModeButton>
         {modeTools && ui?.Toolbar && <ui.Toolbar tools={modeTools.raw} tall={inRow} />}
         <ModeButton active={terrainTool.active} onClick={terrainTool.toggle} tall={inRow} hidden={!!ui?.hidesTerrain}>
-          Місцевість
+          {t("terrain")}
         </ModeButton>
         <ModeButton active={weatherTool.active} onClick={weatherTool.toggle} tall={inRow}>
-          Погода
+          {t("weather")}
         </ModeButton>
       </div>
       {(terrainTool.active || weatherTool.active) && (

@@ -1,5 +1,7 @@
 "use client";
 
+import { useTranslations } from "next-intl";
+
 import { Input } from "@/components/ui/input";
 import { NumberInput } from "@/components/ui/number-input";
 import { SelectField } from "@/components/ui/select-field";
@@ -8,21 +10,20 @@ import { DAMAGE_ELEMENT_OPTIONS } from "@/lib/constants/damage";
 import { type MapTerrainTool, MAX_BARRIER_ROUNDS, type TerrainBrush } from "@/lib/hooks/battle";
 import { cn } from "@/lib/utils";
 
-const BRUSHES: { value: TerrainBrush; label: string }[] = [
-  { value: "wall", label: "Непрохідне" },
-  { value: "barrier", label: "Барʼєр" },
-  { value: "hazard", label: "Небезпека" },
-  { value: "erase", label: "Стерти" },
-];
-
-const DAMAGE_OPTIONS = DAMAGE_ELEMENT_OPTIONS.map(({ value, label }) => ({ value, label }));
+const BRUSHES: TerrainBrush[] = ["wall", "barrier", "hazard", "erase"];
 
 export function MapTerrainToolbar({ tool }: { tool: MapTerrainTool }) {
+  const t = useTranslations("battle.map.terrain");
+
+  const tTypes = useTranslations("gameTerms.damageTypes");
+
   const { brush, setBrush } = tool;
+
+  const damageOptions = DAMAGE_ELEMENT_OPTIONS.map(({ value }) => ({ value, label: tTypes(value) }));
 
   return (
     <div className="flex max-w-[calc(100%-1rem)] flex-wrap items-center gap-1.5 rounded-md border border-hud-rule bg-black/70 p-1.5 text-xs">
-      {BRUSHES.map(({ value, label }) => (
+      {BRUSHES.map((value) => (
         <button
           key={value}
           type="button"
@@ -33,14 +34,14 @@ export function MapTerrainToolbar({ tool }: { tool: MapTerrainTool }) {
             brush.kind === value ? "border-[var(--gold)] text-hud-gold-bright" : "border-hud-rule text-hud-muted",
           )}
         >
-          {label}
+          {t(`brushes.${value}`)}
         </button>
       ))}
       {brush.kind === "barrier" && (
         <label className="flex items-center gap-1 text-hud-muted">
-          Раундів
+          {t("rounds")}
           <NumberInput
-            aria-label="Раундів"
+            aria-label={t("rounds")}
             className="h-7 w-14 px-2 text-xs"
             min={1}
             max={MAX_BARRIER_ROUNDS}
@@ -51,19 +52,19 @@ export function MapTerrainToolbar({ tool }: { tool: MapTerrainTool }) {
       )}
       {brush.kind === "hazard" && (
         <>
-          <Input aria-label="Підпис небезпеки" className="h-7 w-40 px-2 text-xs" maxLength={60} value={brush.label} onChange={(e) => setBrush({ label: e.target.value })} />
+          <Input aria-label={t("hazardLabel")} placeholder={t("hazardDefault")} className="h-7 w-40 px-2 text-xs" maxLength={60} value={brush.label} onChange={(e) => setBrush({ label: e.target.value })} />
           <Input
-            aria-label="Шкода (кубики)"
+            aria-label={t("damageDice")}
             aria-invalid={brush.dice.trim() !== "" && !HAZARD_DICE_PATTERN.test(brush.dice.trim())}
             className="h-7 w-20 px-2 text-xs"
             maxLength={12}
-            placeholder="без шкоди"
+            placeholder={t("noDamage")}
             value={brush.dice}
             onChange={(e) => setBrush({ dice: e.target.value })}
           />
           <label className="flex items-center gap-1 text-hud-muted">
-            Тип
-            <SelectField value={brush.damageType} onValueChange={(damageType) => setBrush({ damageType })} placeholder="Тип" options={DAMAGE_OPTIONS} className="h-7 w-28 px-2 text-xs" />
+            {t("type")}
+            <SelectField value={brush.damageType} onValueChange={(damageType) => setBrush({ damageType })} placeholder={t("type")} options={damageOptions} className="h-7 w-28 px-2 text-xs" />
           </label>
         </>
       )}

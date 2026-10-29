@@ -1,6 +1,7 @@
 "use client";
 
 import { createPortal } from "react-dom";
+import { useTranslations } from "next-intl";
 import { X } from "lucide-react";
 
 import { useInCornerStack } from "@/components/battle/scene/CornerStack";
@@ -10,8 +11,6 @@ import { type ActionResultFx, useActionResult } from "@/lib/hooks/battle";
 import { useText } from "@/lib/i18n/use-text";
 import { cn } from "@/lib/utils";
 
-const TITLE = { hit: "Влучання", crit: "Критичне влучання", miss: "Промах" } as const;
-
 const TONE = { hit: "text-[#e9705a]", crit: "text-[#ffd36a]", miss: "text-[#8f8f96]" } as const;
 
 // десктоп завжди рендерить картку в CornerStack, тож «fixed» — лише телефон до появи стеку сповіщень
@@ -19,10 +18,14 @@ const PLACEMENT = { slot: "mb-1", stack: "", corner: "w-[300px]", fixed: "fixed 
 
 type AttackFx = Exclude<ActionResultFx, { kind: "spell" }>;
 
-const strikeText = (s: { kind: "hit" | "crit" | "miss"; damage: number; downed: boolean }) =>
-  s.kind === "miss" ? "промах" : `${s.kind === "crit" ? "крит " : ""}−${s.damage}${s.downed ? " · повалений" : ""}`;
+type ResultT = ReturnType<typeof useTranslations<"battle.result">>;
+
+const strikeText = (t: ResultT, s: { kind: "hit" | "crit" | "miss"; damage: number; downed: boolean }) =>
+  s.kind === "miss" ? t("miss") : `${s.kind === "crit" ? t("critPrefix") : ""}−${s.damage}${s.downed ? ` · ${t("downed")}` : ""}`;
 
 function AttackBody({ fx }: { fx: AttackFx }) {
+  const t = useTranslations("battle.result");
+
   const text = useText();
 
   const critFail = fx.kind === "miss" ? fx.critFail : undefined;
@@ -31,13 +34,13 @@ function AttackBody({ fx }: { fx: AttackFx }) {
 
   return (
     <>
-      <div className={cn("hud-sc text-lg font-extrabold tracking-[.08em]", critFail ? "text-[#c0564a]" : TONE[fx.kind])}>{critFail ? "Критична невдача" : TITLE[fx.kind]}</div>
+      <div className={cn("hud-sc text-lg font-extrabold tracking-[.08em]", critFail ? "text-[#c0564a]" : TONE[fx.kind])}>{critFail ? t("critFail") : t(`title.${fx.kind}`)}</div>
       {fx.strikes && fx.strikes.length > 1 ? (
         <ul className="mt-1 space-y-0.5 text-sm">
           {fx.strikes.map((s, i) => (
             <li key={i} className="flex justify-between gap-3">
-              <span className="truncate">{s.targetName}{s.splash ? " · зачеплено" : ""}</span>
-              <span className={cn("shrink-0", TONE[s.kind])}>{strikeText(s)}</span>
+              <span className="truncate">{s.targetName}{s.splash ? ` · ${t("splash")}` : ""}</span>
+              <span className={cn("shrink-0", TONE[s.kind])}>{strikeText(t, s)}</span>
             </li>
           ))}
         </ul>
@@ -45,7 +48,7 @@ function AttackBody({ fx }: { fx: AttackFx }) {
         <div className="mt-1 text-sm">{fx.targetName} · d20 {fx.d20} · AC {fx.known}</div>
       ) : (
         <div className="mt-1 flex items-baseline justify-between gap-3 text-sm">
-          <span className="truncate">{fx.targetName}{fx.downed ? " · повалений" : ""}</span>
+          <span className="truncate">{fx.targetName}{fx.downed ? ` · ${t("downed")}` : ""}</span>
           <span className={cn("hud-sc shrink-0 text-2xl font-extrabold", TONE[fx.kind])}>−{fx.damage}</span>
         </div>
       )}
@@ -55,12 +58,14 @@ function AttackBody({ fx }: { fx: AttackFx }) {
           {effect.flavor && <span className="italic text-[#a89c88]"> · {text(effect.flavor)}</span>}
         </div>
       )}
-      {fx.retaliation && <div className="mt-1 text-sm text-[#e9a08f]">Відповідь цілі: {fx.retaliation.name} {fx.retaliation.damage > 0 ? `−${fx.retaliation.damage}` : "промах"}</div>}
+      {fx.retaliation && <div className="mt-1 text-sm text-[#e9a08f]">{t("retaliation", { name: fx.retaliation.name, outcome: fx.retaliation.damage > 0 ? `−${fx.retaliation.damage}` : t("miss") })}</div>}
     </>
   );
 }
 
 function SpellBody({ fx }: { fx: Extract<ActionResultFx, { kind: "spell" }> }) {
+  const t = useTranslations("battle.result");
+
   return (
     <>
       <div className="hud-sc text-lg font-extrabold tracking-[.06em] text-hud-gold-bright">{fx.spellName}</div>
@@ -74,7 +79,7 @@ function SpellBody({ fx }: { fx: Extract<ActionResultFx, { kind: "spell" }> }) {
           ))}
         </ul>
       ) : (
-        <div className="mt-1 text-sm text-[var(--hud-muted)]">Застосовано{fx.targetCount > 0 ? ` · цілей: ${fx.targetCount}` : ""}</div>
+        <div className="mt-1 text-sm text-[var(--hud-muted)]">{fx.targetCount > 0 ? t("appliedTargets", { count: fx.targetCount }) : t("applied")}</div>
       )}
     </>
   );
@@ -82,6 +87,10 @@ function SpellBody({ fx }: { fx: Extract<ActionResultFx, { kind: "spell" }> }) {
 
 /** Підсумок дії в кутку, а не поверх карти: анімація на токенах лишається видимою, клік повз картку йде на карту. */
 export function ActionResultCard() {
+  const t = useTranslations("battle.result");
+
+  const tu = useTranslations("common.ui");
+
   const { fx, close } = useActionResult();
 
   const slot = useMapStripSlot();
@@ -97,7 +106,7 @@ export function ActionResultCard() {
   const card = (
     <div
       role="status"
-      aria-label="Результат дії"
+      aria-label={t("aria")}
       onClick={close}
       className={cn(
         HUD_SURFACE,
@@ -106,7 +115,7 @@ export function ActionResultCard() {
       )}
     >
       {fx.kind === "spell" ? <SpellBody fx={fx} /> : <AttackBody fx={fx} />}
-      <button type="button" aria-label="Закрити" onClick={close} className="absolute right-1 top-1 flex size-7 items-center justify-center text-[var(--hud-muted)]">
+      <button type="button" aria-label={tu("close")} onClick={close} className="absolute right-1 top-1 flex size-7 items-center justify-center text-[var(--hud-muted)]">
         <X className="size-4" />
       </button>
     </div>

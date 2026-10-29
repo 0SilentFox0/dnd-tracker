@@ -1,13 +1,16 @@
 // @vitest-environment happy-dom
-import { cleanup, fireEvent, render } from "@testing-library/react";
+import { cleanup, fireEvent } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
 import { BattleMap } from "@/components/battle/map";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { CombatStatus } from "@/lib/constants/battle";
+import { render } from "@/lib/i18n/test/render-uk";
 import { createMockParticipant } from "@/lib/utils/battle/__tests__/fixtures/mock-participant";
 import { MIN_TAP_CELL_PX } from "@/lib/utils/battle/grid";
 import type { ActiveEffect, BattleMapConfig, BattleParticipant } from "@/types/battle";
+
+vi.unmock("next-intl");
 
 afterEach(() => {
   cleanup();

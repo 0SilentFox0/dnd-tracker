@@ -9,6 +9,8 @@ import { Label } from "@/components/ui/label";
 import { SwitchField } from "@/components/ui/switch-field";
 import { CRITICAL_FAIL_EFFECTS, CRITICAL_SUCCESS_EFFECTS, type CriticalEffect } from "@/lib/constants/critical-effects";
 import type { RulesFormState } from "@/lib/hooks/campaigns";
+import { dynamicTextRef } from "@/lib/i18n/text-ref";
+import { useText } from "@/lib/i18n/use-text";
 import { toggleItem } from "@/lib/utils/common/collections";
 
 type Criticals = RulesFormState["data"]["criticals"];
@@ -26,7 +28,7 @@ interface EffectListProps {
 }
 
 function EffectList({ title, prefix, kind, effects, disabled, locked, onChange }: EffectListProps) {
-  const tTerms = useTranslations("battleTerms");
+  const text = useText();
 
   const toggle = (id: string) => onChange(toggleItem(disabled, id));
 
@@ -41,7 +43,7 @@ function EffectList({ title, prefix, kind, effects, disabled, locked, onChange }
           return (
             <div key={id} className="flex items-center gap-2">
               <Checkbox id={htmlId} checked={!disabled.includes(id)} disabled={locked} onCheckedChange={() => toggle(id)} />
-              <Label htmlFor={htmlId}>{tTerms(`crits.attack.${kind}.${effect.id}.name`)}</Label>
+              <Label htmlFor={htmlId}>{text(dynamicTextRef(`battleTerms.crits.attack.${kind}.${effect.id}.name`))}</Label>
             </div>
           );
         })}
@@ -53,7 +55,7 @@ function EffectList({ title, prefix, kind, effects, disabled, locked, onChange }
 export function CriticalsSection({ form }: { form: RulesFormState }) {
   const t = useTranslations("rules");
 
-  const tTerms = useTranslations("battleTerms");
+  const text = useText();
 
   const c = form.data.criticals;
 
@@ -68,7 +70,7 @@ export function CriticalsSection({ form }: { form: RulesFormState }) {
         </div>
         <SwitchField id="rules-crit-effects" label={t("sections.criticals.effects")} checked={c.effects} onCheckedChange={(effects) => set({ effects })} className="mt-3" />
         <p className="mt-2 text-xs text-hud-muted">
-          {t("sections.criticals.effectsHint", { name: DOUBLE_DAMAGE_ID === undefined ? "" : tTerms(`crits.attack.success.${DOUBLE_DAMAGE_ID}.name`) })}
+          {t("sections.criticals.effectsHint", { name: DOUBLE_DAMAGE_ID === undefined ? "" : text(dynamicTextRef(`battleTerms.crits.attack.success.${DOUBLE_DAMAGE_ID}.name`)) })}
         </p>
         <SwitchField id="rules-crit-double-dice" label={t("sections.criticals.doubleDice")} checked={c.doubleDice} onCheckedChange={(doubleDice) => set({ doubleDice })} className="mt-3" />
         <p className="mt-2 text-xs text-hud-muted">{t("sections.criticals.doubleDiceHint")}</p>

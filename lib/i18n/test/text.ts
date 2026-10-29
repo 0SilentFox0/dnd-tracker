@@ -9,7 +9,7 @@ import type { LogLine } from "@/types/text";
 
 const files = (import.meta as unknown as { glob: (pattern: string, options: { eager: true; import: "default" }) => Record<string, Record<string, unknown>> }).glob("../../../messages/*/*.json", { eager: true, import: "default" });
 
-function catalog(locale: Locale): Record<string, unknown> {
+export function catalog(locale: Locale): Record<string, unknown> {
   const own = (ns: string) => files[`../../../messages/${locale}/${ns}.json`] ?? {};
 
   const base = (ns: string) => files[`../../../messages/${DEFAULT_LOCALE}/${ns}.json`] ?? {};

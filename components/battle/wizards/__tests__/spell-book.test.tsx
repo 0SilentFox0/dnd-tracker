@@ -1,6 +1,6 @@
 // @vitest-environment happy-dom
 import { useEffect } from "react";
-import { act, cleanup, fireEvent, render, screen, waitFor } from "@testing-library/react";
+import { act, cleanup, fireEvent, screen, waitFor } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
 vi.mock("@/components/hud/fonts", () => ({ hudFontClassName: "" }));
@@ -32,9 +32,12 @@ import { SpellBook } from "@/components/battle/wizards/SpellBook";
 import { useSpellBook } from "@/lib/hooks/battle";
 import { fakeScene } from "@/lib/hooks/battle/__tests__/fake-scene";
 import { useSpells, useSpellsByIds } from "@/lib/hooks/spells";
+import { render } from "@/lib/i18n/test/render-uk";
 import { resolved } from "@/lib/utils/abilities/__tests__/fixtures";
 import type { MapAim, MapPick } from "@/lib/utils/battle/grid";
 import type { ResolvedAbility } from "@/types/abilities";
+
+vi.unmock("next-intl");
 
 const asHero = <T extends NonNullable<Parameters<typeof useSpellBook>[0]>>(p: T): T => ({ ...p, basicInfo: { ...p.basicInfo, sourceType: "character" as const } });
 

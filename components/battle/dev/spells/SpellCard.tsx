@@ -35,7 +35,7 @@ export function SpellCard({ spell, onPlay }: { spell: SpellCardData; onPlay: (sp
             <div className="min-w-0">
               <h3 className="hud-sc font-bold text-hud-ink">{spell.name}</h3>
               <p className="text-[11px] text-hud-muted">
-                {spell.level} рівень · {spell.school} · {spell.targeting}
+                {spell.level} рівень · {spell.school} · {text(spell.targeting)}
               </p>
             </div>
             <button

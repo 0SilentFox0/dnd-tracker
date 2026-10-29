@@ -4,8 +4,6 @@ import { useEffect, useEffectEvent, useRef } from "react";
 
 import { useBattleScene } from "./useBattleScene";
 
-export const CRIT_CANCELLED = "Дію скасовано ДМом";
-
 interface CritPauseOptions {
   waiting: boolean | undefined;
   actorId: string | undefined;

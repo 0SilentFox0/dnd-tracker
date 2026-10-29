@@ -1,5 +1,5 @@
 // @vitest-environment happy-dom
-import { cleanup, fireEvent, render, screen, waitFor } from "@testing-library/react";
+import { cleanup, fireEvent, screen, waitFor } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
 vi.mock("@/components/hud/fonts", () => ({ hudFontClassName: "", HUD_SURFACE: "hud-surface" }));
@@ -8,8 +8,11 @@ vi.mock("@/lib/hooks/spells", async (importOriginal) => ({ ...await importOrigin
 
 import { LegendaryActionDialog } from "@/components/battle/dm/LegendaryActionDialog";
 import { fakeScene } from "@/lib/hooks/battle/__tests__/fake-scene";
+import { render } from "@/lib/i18n/test/render-uk";
 import { resolved } from "@/lib/utils/abilities/__tests__/fixtures";
 import type { BattleParticipant } from "@/types/battle";
+
+vi.unmock("next-intl");
 
 function sceneWithDragon(isMyTurn: boolean) {
   const scene = fakeScene({ isDM: true, isMyTurn });

@@ -1,4 +1,5 @@
 import { type ReactNode, useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useTranslations } from "next-intl";
 
 import { LogEntryCard } from "./LogEntryCard";
 import { RoundHeader } from "./RoundHeader";
@@ -13,6 +14,8 @@ export function LogTimeline({ entries, participants, focus = null, renderActions
   focus?: number | null;
   renderActions?: (entry: BattleAction) => ReactNode;
 }) {
+  const t = useTranslations("battle.log");
+
   const [expanded, setExpanded] = useState<number | null>(focus);
 
   const [collapsed, setCollapsed] = useState<ReadonlySet<number>>(() => new Set());
@@ -49,7 +52,7 @@ export function LogTimeline({ entries, participants, focus = null, renderActions
       {groups.length > 1 && (
         <div className="flex justify-end pt-1">
           <button type="button" onClick={toggleAll} className="text-[12px] text-[var(--hud-muted)] hover:text-[var(--ink)]">
-            {allCollapsed ? "Розгорнути всі" : "Згорнути всі"}
+            {allCollapsed ? t("expandAll") : t("collapseAll")}
           </button>
         </div>
       )}

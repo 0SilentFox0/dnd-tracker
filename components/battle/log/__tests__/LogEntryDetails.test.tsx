@@ -1,9 +1,12 @@
 // @vitest-environment happy-dom
-import { cleanup, render } from "@testing-library/react";
-import { afterEach, describe, expect, it } from "vitest";
+import { cleanup } from "@testing-library/react";
+import { afterEach, describe, expect, it, vi } from "vitest";
 
 import { LogEntryDetails } from "@/components/battle/log/LogEntryDetails";
+import { render } from "@/lib/i18n/test/render-uk";
 import type { BattleAction } from "@/types/battle";
+
+vi.unmock("next-intl");
 
 afterEach(cleanup);
 
