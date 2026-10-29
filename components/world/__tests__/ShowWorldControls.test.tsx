@@ -1,14 +1,17 @@
 // @vitest-environment happy-dom
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { cleanup, fireEvent, render, screen } from "@testing-library/react";
+import { cleanup, fireEvent, screen } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import { ShowWorldControls } from "../show/ShowWorldControls";
 
+import { render } from "@/components/ui/__tests__/uk-intl";
 import { getWorldMap, getWorldMaps } from "@/lib/api/world";
 import type { ShowControl } from "@/lib/hooks/show";
 import type { ShowState } from "@/types/show";
 import type { WorldMapSummary } from "@/types/world";
+
+vi.unmock("next-intl");
 
 vi.mock("@/lib/api/world", () => ({ getWorldMaps: vi.fn(), getWorldMap: vi.fn() }));
 vi.mock("@/components/world/show/WorldTravelDialog", () => ({

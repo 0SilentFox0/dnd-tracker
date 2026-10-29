@@ -73,7 +73,7 @@ let failReceipt = false;
 
 const actor = () => ({ campaignId, userId, isDM: true, via: "session", scopes: null } as const);
 
-const caller = (runId?: string): AssistantCaller => ({ actor: actor(), channel: "chat", threadId, tokenId: null, runId });
+const caller = (runId?: string): AssistantCaller => ({ actor: actor(), channel: "chat", threadId, tokenId: null, runId, locale: "uk" as const });
 
 const published = vi.fn();
 

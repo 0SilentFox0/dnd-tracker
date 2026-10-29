@@ -15,21 +15,21 @@ const mount=(target:'thread'|'token',executionMode?:'review'|'auto')=>render(<Qu
 it('newThreadAndTokenDefaultReview',()=>{
  const a=mount('thread');
 
-expect(screen.getByText(/Режим: перегляд/)).toBeTruthy();a.unmount();
- mount('token');expect(screen.getByText(/Режим: перегляд/)).toBeTruthy();expect(api.setAssistantPolicy).not.toHaveBeenCalled();
+expect(screen.getByText(/ai\.policy\.modes\.review/)).toBeTruthy();a.unmount();
+ mount('token');expect(screen.getByText(/ai\.policy\.modes\.review/)).toBeTruthy();expect(api.setAssistantPolicy).not.toHaveBeenCalled();
 });
 it('autoSwitchDoesNotApplyOldPending',async()=>{
  vi.mocked(api.setAssistantPolicy).mockResolvedValue({id:'thread1',executionMode:'auto'});
- mount('thread');fireEvent.click(screen.getByRole('button',{name:'Увімкнути auto'}));
+ mount('thread');fireEvent.click(screen.getByRole('button',{name:'ai.policy.enableAuto'}));
  expect(api.setAssistantPolicy).not.toHaveBeenCalled();
- fireEvent.click(screen.getByRole('button',{name:'Увімкнути для наступних дій'}));
+ fireEvent.click(screen.getByRole('button',{name:'ai.policy.dialog.confirm'}));
  await waitFor(()=>expect(api.setAssistantPolicy).toHaveBeenCalledWith('c1',{target:'thread',id:'thread1',executionMode:'auto'}));
  expect(api.confirmAssistantIntent).not.toHaveBeenCalled();
- expect(screen.getByText(/Наявні pending не застосовуються/)).toBeTruthy();
+ expect(screen.getByText(/ai\.policy\.note/)).toBeTruthy();
 });
 it('dangerousAutoStillShowsConfirm',()=>{
  render(<AssistantIntentCard intent={{id:'i1',actionId:'campaign.delete',status:'pending',channel:'mcp',summary:'Видалення',expiresAt:'2099-01-01',targets:[{domain:'campaign',id:'c1',name:'Моя кампанія'}],preview:{summary:'Видалення',targets:[],changes:[],warnings:['Усі залежні записи буде видалено'],preconditions:null,effects:[{kind:'delete',targets:[{domain:'characters',id:'hero1',name:'Герой'}],description:'Каскадне видалення героя'}]}}} onConfirm={vi.fn()} onReject={vi.fn()} onRefine={vi.fn()}/>);
- expect(screen.getByRole('button',{name:'Застосувати'})).toBeTruthy();expect(screen.getByText(/Каскадне видалення героя/)).toBeTruthy();expect(screen.getByText(/hero1/)).toBeTruthy();
+ expect(screen.getByRole('button',{name:'ai.intent.confirm'})).toBeTruthy();expect(screen.getByText(/Каскадне видалення героя/)).toBeTruthy();expect(screen.getByText(/hero1/)).toBeTruthy();
 });
 
 it('latestServerPolicyReadOverridesAnEarlierAutoResponse',async()=>{
@@ -39,9 +39,9 @@ it('latestServerPolicyReadOverridesAnEarlierAutoResponse',async()=>{
 
  const view=render(<QueryClientProvider client={client}><AssistantPolicyControl campaignId="c1" target="thread" id="thread1" executionMode="review"/></QueryClientProvider>);
 
- fireEvent.click(screen.getByRole('button',{name:'Увімкнути auto'}));fireEvent.click(screen.getByRole('button',{name:'Увімкнути для наступних дій'}));
+ fireEvent.click(screen.getByRole('button',{name:'ai.policy.enableAuto'}));fireEvent.click(screen.getByRole('button',{name:'ai.policy.dialog.confirm'}));
  await waitFor(()=>expect(api.setAssistantPolicy).toHaveBeenCalledOnce());
  view.rerender(<QueryClientProvider client={client}><AssistantPolicyControl campaignId="c1" target="thread" id="thread1" executionMode="auto"/></QueryClientProvider>);
  view.rerender(<QueryClientProvider client={client}><AssistantPolicyControl campaignId="c1" target="thread" id="thread1" executionMode="review"/></QueryClientProvider>);
- expect(screen.getByText('Режим: перегляд')).toBeTruthy();
+ expect(screen.getByText(/ai\.policy\.modes\.review/)).toBeTruthy();
 });

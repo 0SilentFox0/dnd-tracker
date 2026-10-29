@@ -20,7 +20,7 @@ const CREATURE_TYPES = ["aberration", "beast", "celestial", "construct", "dragon
 export function UnitStatblockFields({ formData, onChange }: { formData: Partial<Unit>; onChange: (data: Partial<Unit>) => void }) {
   const t = useTranslations("units.statblock");
 
-  const tMonster = useTranslations("common.monster");
+  const tMonster = useTranslations("gameTerms.monster");
 
   const block = formData.statblock ?? {};
 

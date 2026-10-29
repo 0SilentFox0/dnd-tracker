@@ -1,6 +1,7 @@
 "use client";
 
 import { useMemo } from "react";
+import { useTranslations } from "next-intl";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 
 import { showKeys } from "./keys";
@@ -15,6 +16,8 @@ export interface PuzzleControl {
 }
 
 export function usePuzzleControl(campaignId: string, onFailure: (message: string) => void): PuzzleControl {
+  const t = useTranslations("show");
+
   const queryClient = useQueryClient();
 
   const { mutateAsync } = useMutation({
@@ -23,7 +26,7 @@ export function usePuzzleControl(campaignId: string, onFailure: (message: string
     onError: (error) => {
       void queryClient.invalidateQueries({ queryKey: showKeys.state(campaignId) });
 
-      onFailure(errorMessage(error, "Не вдалося виконати дію з пазлом"));
+      onFailure(errorMessage(error, t("errors.puzzle")));
     },
   });
 

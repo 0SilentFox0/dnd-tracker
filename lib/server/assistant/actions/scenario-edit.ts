@@ -1,7 +1,9 @@
+import { jsonContent } from "../json";
 import type { AssistantWriteAction } from "../types";
 
 import { applyProposal,createProposal } from "@/lib/ai/proposals";
 import { API_ERRORS } from "@/lib/constants/api-errors";
+import { getTranslator } from "@/lib/i18n/translator";
 import { proposeScenarioEditSchema } from "@/lib/schemas/ai";
 import { ContentError } from "@/lib/server/content/errors";
 import { withCampaignContentWrite } from "@/lib/server/content/write";
@@ -11,7 +13,7 @@ import { resolveAiOps } from "@/lib/utils/scenario/ai-ops";
 
 /** Both proposal aliases and generic actions use T6's sole proposal writer. */
 export const SCENARIO_EDIT_ACTION: AssistantWriteAction = {
-  id: "scenario.propose-edit", title: "Правка сценарію", description: "Правка сценарію через чинний T6 proposal writer після перегляду", input: proposeScenarioEditSchema,
+  id: "scenario.propose-edit", title: "Edit scenario", description: "Edits the scenario through the existing proposal writer after review", input: proposeScenarioEditSchema,
   need: { access: "dm", scope: "scenario:write" }, effect: "write", confirmation: "always",
   prepare: (caller, raw) => withCampaignContentWrite(caller.actor.campaignId, async () => {
     const input = proposeScenarioEditSchema.parse(raw);
@@ -22,13 +24,13 @@ export const SCENARIO_EDIT_ACTION: AssistantWriteAction = {
 
     if (!page) throw new ContentError(API_ERRORS.SCENARIO_PAGE_NOT_FOUND, 404);
 
-    const resolved = resolveAiOps(readContentStrict(page.content), input.ops);
+    const resolved = resolveAiOps(readContentStrict(page.content), input.ops, await getTranslator(caller.locale, "assistant"));
 
-    if (!resolved.ok) throw new ContentError(resolved.error, 422);
+    if (!resolved.ok) throw new ContentError(resolved.error.message, 422, undefined, resolved.error.params);
 
     const target = { domain: "scenario", id: input.pageId, name: page.title };
 
-    return { summary: input.summary, targets: [target], changes: [{ target, path: "ops", before: scenarioResult(state.page).data, after: scenarioResult(resolved.ops).data }], warnings: [], preconditions: { fingerprint: scenarioFingerprint(state) }, effects: [{ kind: "update", targets: [target], description: input.summary }] };
+    return { summary: input.summary, targets: [target], changes: [{ target, path: "ops", before: jsonContent(state.page), after: jsonContent(resolved.ops) }], warnings: [], preconditions: { fingerprint: scenarioFingerprint(state) }, effects: [{ kind: "update", targets: [target], description: input.summary }] };
   }),
   execute: async (ctx, raw) => {
     const input = proposeScenarioEditSchema.parse(raw);
@@ -39,16 +41,16 @@ export const SCENARIO_EDIT_ACTION: AssistantWriteAction = {
 
     if (!page) throw new ContentError(API_ERRORS.SCENARIO_PAGE_NOT_FOUND, 404);
 
-    const resolved = resolveAiOps(readContentStrict(page.content), input.ops);
+    const resolved = resolveAiOps(readContentStrict(page.content), input.ops, await getTranslator(ctx.caller.locale, "assistant"));
 
-    if (!resolved.ok) throw new ContentError(resolved.error, 422);
+    if (!resolved.ok) throw new ContentError(resolved.error.message, 422, undefined, resolved.error.params);
 
-    const proposal = await createProposal({ campaignId: ctx.caller.actor.campaignId, userId: ctx.caller.actor.userId, threadId: ctx.caller.threadId, scopes: ctx.caller.actor.scopes ?? [], caller: ctx.caller }, input.pageId, input.summary, resolved.ops);
+    const proposal = await createProposal({ campaignId: ctx.caller.actor.campaignId, userId: ctx.caller.actor.userId, threadId: ctx.caller.threadId, scopes: ctx.caller.actor.scopes ?? [], caller: ctx.caller, locale: ctx.caller.locale }, input.pageId, input.summary, resolved.ops);
 
-    const result = await applyProposal(ctx.caller.actor.campaignId, ctx.caller.actor.userId, proposal.id, ctx.intentId);
+    const result = await applyProposal(ctx.caller.actor.campaignId, ctx.caller.actor.userId, proposal.id, ctx.intentId, ctx.caller.locale);
 
     if (!result.ok) throw new ContentError(result.error, result.status);
 
-    return scenarioResult("page" in result ? { page: result.page } : { deck: result.deck });
+    return scenarioResult("page" in result ? { page: result.page } : { deck: result.deck }, undefined, ctx.caller.locale);
   },
 };

@@ -3,6 +3,7 @@ import { randomUUID } from "node:crypto";
 import { afterAll, beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
 
 import { applyProposal, rejectProposal } from "@/lib/ai/proposals";
+import { makeT } from "@/lib/i18n/test/mock-t";
 import { SCENARIO_ACTIONS } from "@/lib/server/assistant/actions/scenario";
 import { createActionCatalog } from "@/lib/server/assistant/catalog";
 import { createAssistantExecutor } from "@/lib/server/assistant/execute";
@@ -51,7 +52,7 @@ let ready = false;
 
 const actor = () => ({ campaignId, userId, isDM: true, via: "session", scopes: null } as const);
 
-const caller = (): AssistantCaller => ({ actor: actor(), channel: "chat", tokenId: null, threadId });
+const caller = (): AssistantCaller => ({ actor: actor(), channel: "chat", tokenId: null, threadId, locale: "uk" as const });
 
 describe.skipIf(!isLocalDevDatabaseEnv())("scenario adapters real constructor, connection_limit=1", () => {
   beforeAll(async () => {
@@ -141,7 +142,7 @@ describe.skipIf(!isLocalDevDatabaseEnv())("scenario adapters real constructor, c
   it("legacyApplyAndConfirmRaceOnlyOneWrite", async () => {
     const p = await page();
 
-    const resolved = resolveAiOps(content as never, [{ op: "replaceRow", sectionId: "s", rowId: "r", story: "Нова історія" }]);
+    const resolved = resolveAiOps(content as never, [{ op: "replaceRow", sectionId: "s", rowId: "r", story: "Нова історія" }], makeT("assistant"));
 
     if (!resolved.ok) throw new Error("invalid fixture");
 
@@ -173,7 +174,7 @@ describe.skipIf(!isLocalDevDatabaseEnv())("scenario adapters real constructor, c
   it("legacy stale and rejection statuses reconcile atomically", async () => {
     const p = await page();
 
-    const resolved = resolveAiOps(content as never, [{ op: "replaceRow", sectionId: "s", rowId: "r", story: "Оновлена" }]);
+    const resolved = resolveAiOps(content as never, [{ op: "replaceRow", sectionId: "s", rowId: "r", story: "Оновлена" }], makeT("assistant"));
 
     if (!resolved.ok) throw new Error("invalid fixture");
 
@@ -203,7 +204,7 @@ describe.skipIf(!isLocalDevDatabaseEnv())("scenario adapters real constructor, c
 
     const p = await page();
 
-    const ctx = { campaignId, userId, threadId, scopes: ["scenario:write"] as const, caller: caller() };
+    const ctx = { campaignId, userId, threadId, scopes: ["scenario:write"] as const, caller: caller(), locale: "uk" as const };
 
     const out = JSON.parse(await runTool(proposeScenarioEditTool, ctx, { pageId: p.id, summary: "T14 edit", ops: [{ op: "renameSection", sectionId: "s", title: "T14" }] }));
 

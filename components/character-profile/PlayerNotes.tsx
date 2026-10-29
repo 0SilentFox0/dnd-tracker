@@ -16,6 +16,8 @@ export function PlayerNotes() {
 
   const t = useTranslations("characterProfile.notes");
 
+  const tc = useTranslations("common.actions");
+
   const { save, isPending } = useCharacterNotes(campaignId, characterId);
 
   const notes = sheet.story.notes;
@@ -43,10 +45,10 @@ export function PlayerNotes() {
           <Textarea aria-label={t("field")} maxLength={NOTES_MAX} rows={8} value={draft} onChange={(e) => setDraft(e.target.value)} autoFocus />
           <div className="flex gap-2">
             <Button type="button" size="sm" disabled={isPending} onClick={() => void commit()}>
-              {t("save")}
+              {tc("save")}
             </Button>
             <Button type="button" size="sm" variant="ghost" disabled={isPending} onClick={() => setDraft(null)}>
-              {t("cancel")}
+              {tc("cancel")}
             </Button>
           </div>
         </div>

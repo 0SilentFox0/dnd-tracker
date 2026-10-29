@@ -3,6 +3,7 @@ import { join } from "node:path";
 import { describe, expect, it } from "vitest";
 
 import { API_ERRORS } from "@/lib/constants/api-errors";
+import { SERVER_NAMESPACES } from "@/lib/i18n/config";
 
 const ROOT = process.cwd();
 
@@ -71,7 +72,7 @@ const SERVER_ONLY_TEXT = new Set([
 ]);
 
 describe("API_ERRORS in client bundles", () => {
-  it("keys used from a client graph live in the client namespaces (the errors namespace is server-only)", () => {
+  it("keys used from a client graph live in the client namespaces (the server namespaces are server-only)", () => {
     const bad: string[] = [];
 
     for (const [file, text] of clientGraph()) {
@@ -80,7 +81,7 @@ describe("API_ERRORS in client bundles", () => {
       for (const [, name] of text.matchAll(/API_ERRORS\.([A-Z0-9_]+)/g)) {
         const value = (API_ERRORS as Record<string, string>)[name];
 
-        if (value?.startsWith("errors.")) bad.push(`${file}: ${name}`);
+        if (value && SERVER_NAMESPACES.some((ns) => value.startsWith(`${ns}.`))) bad.push(`${file}: ${name}`);
       }
     }
 

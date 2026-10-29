@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import { ChevronDown, ChevronUp, EyeOff, SkipForward } from "lucide-react";
 
 import { AudioDock } from "@/components/audio/AudioDock";
@@ -30,6 +31,8 @@ export function ScenarioShowDock({ campaignId, pageId, content, play }: { campai
 
 /** Що зараз бачать гравці; клік — до рядка зі слайдом. */
 function OnScreen({ campaignId, show, onLocate }: { campaignId: string; show: ShowState | null; onLocate?: () => void }) {
+  const t = useTranslations("scenario.dock");
+
   const { data: maps } = useWorldMaps(campaignId);
 
   const cover = showsCover(show);
@@ -38,10 +41,10 @@ function OnScreen({ campaignId, show, onLocate }: { campaignId: string; show: Sh
 
   const mapName = show?.world && maps?.find((m) => m.id === show.world?.mapId)?.name;
 
-  const label = show?.battle ? `⚔ До бою: ${show.battle.name}` : show?.world && !show.curtain ? `🗺 Карта${mapName ? `: ${mapName}` : ""}` : cover ? (show?.deckId ? "Заглушка" : "Показ не запущено") : (show?.slide?.title ?? show?.deckTitle ?? "Слайд");
+  const label = show?.battle ? t("battle", { name: show.battle.name }) : show?.world && !show.curtain ? (mapName ? t("mapNamed", { name: mapName }) : t("map")) : cover ? (show?.deckId ? t("curtain") : t("notRunning")) : (show?.slide?.title ?? show?.deckTitle ?? t("slide"));
 
   return (
-    <button type="button" className="sb-show-now" data-curtain={(cover && !!show?.deckId) || undefined} disabled={!onLocate} title={onLocate ? "До рядка зі слайдом" : undefined} onClick={onLocate}>
+    <button type="button" className="sb-show-now" data-curtain={(cover && !!show?.deckId) || undefined} disabled={!onLocate} title={onLocate ? t("locate") : undefined} onClick={onLocate}>
       {image ? <OptimizedImage src={image} alt="" width={64} height={36} className="sb-thumb" /> : <span className="sb-thumb sb-show-thumb-empty">{cover && <EyeOff className="size-4" />}</span>}
       <span className="sb-show-title">{label}</span>
     </button>
@@ -49,6 +52,8 @@ function OnScreen({ campaignId, show, onLocate }: { campaignId: string; show: Sh
 }
 
 function DockBody({ campaignId, pageId, play }: { campaignId: string; pageId: string; play: ScenarioPlay }) {
+  const t = useTranslations("scenario.dock");
+
   const notify = useNotify();
 
   const host = useShowAudioHost({ campaignId, isDM: true, onFailure: notify });
@@ -78,10 +83,10 @@ function DockBody({ campaignId, pageId, play }: { campaignId: string; pageId: st
               <AudioDock placement="corner" defaultExpanded={false} />
             </div>
             <ShowTransport campaignId={campaignId} show={show} control={play.control} />
-            <ShowButton aria-label="Наступний рядок" title={play.nextRow ? "Слайд наступного рядка (N)" : "Далі в сценарії слайдів немає"} disabled={play.pending || !play.nextRow} onClick={nextRow}>
+            <ShowButton aria-label={t("nextRow")} title={play.nextRow ? t("nextRowHint") : t("noMoreSlides")} disabled={play.pending || !play.nextRow} onClick={nextRow}>
               <SkipForward className="size-4" />
             </ShowButton>
-            <ShowButton aria-expanded={expanded} aria-label={expanded ? "Згорнути панель показу" : "Розгорнути панель показу"} title={expanded ? "Сховати слайди" : "Слайди"} onClick={() => setExpanded(!expanded)}>
+            <ShowButton aria-expanded={expanded} aria-label={expanded ? t("collapse") : t("expand")} title={expanded ? t("hideSlides") : t("slides")} onClick={() => setExpanded(!expanded)}>
               {expanded ? <ChevronDown className="size-4" /> : <ChevronUp className="size-4" />}
             </ShowButton>
           </div>

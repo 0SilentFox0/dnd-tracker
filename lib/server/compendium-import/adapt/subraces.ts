@@ -1,3 +1,4 @@
+/* eslint-disable no-restricted-syntax -- derived content written to the DB stays Ukrainian (spec part5, decision 5) */
 import { fixedAbilityBonuses, lineageSpells, raceTraits } from "../adapters/character-traits";
 import { array, description, object, str, unsupported } from "../adapters/shared";
 import { nestedId, stableJson } from "../identity";
@@ -18,7 +19,7 @@ export function attachSubraces(state: AdaptState) {
 
       const spells = lineageSpells(row.additionalSpells, ctx);
 
-      if (spells.manual.length > 0) ctx.issues.push(issue("MANUAL_RACE_SPELLS", `${ctx.path}.additionalSpells`, "warning", "Частину заклинань лінії (без обмежень, вибір, розширений список) рушій не моделює: застосовуйте за описом"));
+      if (spells.manual.length > 0) ctx.issues.push(issue("MANUAL_RACE_SPELLS", `${ctx.path}.additionalSpells`, "warning"));
 
       const option = { id: nestedId(ctx.key), name: row.name, description: [traits.head.join("\n"), description(row, ctx)].filter(Boolean).join("\n\n"), abilities: [...fixedAbilityBonuses(row.ability, ctx), ...traits.abilities], ...(spells.spells.length > 0 && { spells: spells.spells }) };
 

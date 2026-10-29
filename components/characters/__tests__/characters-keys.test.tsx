@@ -37,11 +37,11 @@ describe("characters components render keys", () => {
     expect(screen.queryByRole("link", { name: "characters.noCharacter.create" })).toBeNull();
   });
 
-  it("PrimaryAbilityPicker: підписи з common.abilities, aria з параметром", () => {
+  it("PrimaryAbilityPicker: підписи з gameTerms.abilities, aria з параметром", () => {
     render(<PrimaryAbilityPicker value="strength" onChange={vi.fn()} />);
 
     expect(screen.getByText("characters.stats.primary.legend")).toBeTruthy();
-    expect(screen.getByLabelText('characters.stats.primary.aria {"ability":"common.abilities.strength.label"}')).toBeTruthy();
+    expect(screen.getByLabelText('characters.stats.primary.aria {"ability":"gameTerms.abilities.strength.label"}')).toBeTruthy();
   });
 
   it("AbilityScoresPicker: point-buy показує витрати з бюджетом", () => {

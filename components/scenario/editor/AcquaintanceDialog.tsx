@@ -1,6 +1,7 @@
 "use client";
 
 import { type FormEvent, useState } from "react";
+import { useTranslations } from "next-intl";
 
 import type { AcquaintanceDialogTarget } from "./acquaintance-target";
 
@@ -42,17 +43,16 @@ interface Fields {
 
 const FORM_ID = "acquaintance-form";
 
-const KINDS: { kind: AcquaintanceKind; label: string }[] = [
-  { kind: "micro", label: "Мікро-NPC" },
-  { kind: "character", label: "Повний NPC" },
-];
+const KINDS: AcquaintanceKind[] = ["micro", "character"];
 
 const fieldsOf = (a: AcquaintanceView) => [a.name];
 
-const sectionTitle = (sections: Section[], pageId: string, sectionId: string, currentPageId: string) =>
-  pageId !== currentPageId ? "інша сторінка" : (sections.find((s) => s.id === sectionId)?.title ?? "інша сторінка");
+const sectionTitle = (sections: Section[], pageId: string, sectionId: string, currentPageId: string, otherPage: string) =>
+  pageId !== currentPageId ? otherPage : (sections.find((s) => s.id === sectionId)?.title ?? otherPage);
 
 function AcquaintanceForm({ campaignId, fields, onChange, onSubmit }: { campaignId: string; fields: Fields; onChange: (patch: Partial<Fields>) => void; onSubmit: () => void }) {
+  const t = useTranslations("scenario.acquaintance");
+
   const { data: roster = [] } = useCharacters(campaignId, { compact: true, enabled: fields.kind === "character" });
 
   const pickCharacter = (characterId: string) => onChange({ characterId, ...(!fields.name.trim() && { name: roster.find((c) => c.id === characterId)?.name ?? "" }) });
@@ -64,30 +64,30 @@ function AcquaintanceForm({ campaignId, fields, onChange, onSubmit }: { campaign
 
   return (
     <form id={FORM_ID} onSubmit={submit} className="space-y-3">
-      <div className="flex gap-2" role="group" aria-label="Тип знайомства">
-        {KINDS.map(({ kind, label }) => (
+      <div className="flex gap-2" role="group" aria-label={t("kindGroup")}>
+        {KINDS.map((kind) => (
           <Button key={kind} type="button" size="sm" variant={fields.kind === kind ? "secondary" : "outline"} aria-pressed={fields.kind === kind} onClick={() => onChange({ kind })}>
-            {label}
+            {t(`kinds.${kind}`)}
           </Button>
         ))}
       </div>
       {fields.kind === "character" && (
         <div className="space-y-1">
-          <Label htmlFor="acq-character">Персонаж</Label>
+          <Label htmlFor="acq-character">{t("character")}</Label>
           <CharacterSelect campaignId={campaignId} id="acq-character" value={fields.characterId} onValueChange={pickCharacter} />
         </div>
       )}
       <div className="space-y-1">
-        <Label htmlFor="acq-name">Ім&apos;я</Label>
+        <Label htmlFor="acq-name">{t("name")}</Label>
         <Input id="acq-name" value={fields.name} maxLength={ACQUAINTANCE_LIMITS.name} onChange={(e) => onChange({ name: e.target.value })} />
       </div>
       {fields.kind === "micro" && (
         <div className="space-y-1">
-          <Label htmlFor="acq-description">Опис</Label>
+          <Label htmlFor="acq-description">{t("description")}</Label>
           <Textarea id="acq-description" value={fields.description} maxLength={ACQUAINTANCE_LIMITS.description} onChange={(e) => onChange({ description: e.target.value })} />
         </div>
       )}
-      {fields.kind === "micro" && <IconUrlField id="acq-avatar" label="Аватар (URL)" value={fields.avatarUrl} onChange={(avatarUrl) => onChange({ avatarUrl })} fallbackText={fields.name} />}
+      {fields.kind === "micro" && <IconUrlField id="acq-avatar" label={t("avatar")} value={fields.avatarUrl} onChange={(avatarUrl) => onChange({ avatarUrl })} fallbackText={fields.name} />}
     </form>
   );
 }
@@ -103,14 +103,16 @@ function useFields(initial: Fields) {
 }
 
 function ExistingList({ items, onPick }: { items: AcquaintanceView[]; onPick: (a: AcquaintanceView) => void }) {
+  const t = useTranslations("scenario.acquaintance");
+
   const search = useSearch(items, fieldsOf);
 
   if (!items.length) return null;
 
   return (
     <div className="space-y-2">
-      <p className="text-sm text-hud-muted">Наявні</p>
-      <SearchInput value={search.query.value} onChange={search.query.set} label="Пошук знайомства" />
+      <p className="text-sm text-hud-muted">{t("existing")}</p>
+      <SearchInput value={search.query.value} onChange={search.query.set} label={t("search")} />
       <div className="flex max-h-40 flex-col gap-1 overflow-y-auto">
         {search.items.map((a) => (
           <Button key={a.id} type="button" variant="ghost" className="justify-start" onClick={() => onPick(a)}>
@@ -124,6 +126,10 @@ function ExistingList({ items, onPick }: { items: AcquaintanceView[]; onPick: (a
 }
 
 function CreateBody({ campaignId, target, onInsert, onClose }: Props & { target: Extract<AcquaintanceDialogTarget, { mode: "create" }> }) {
+  const t = useTranslations("scenario.acquaintance");
+
+  const tActions = useTranslations("common.actions");
+
   const { data } = useAcquaintances(campaignId);
 
   const { create } = useAcquaintanceActions(campaignId);
@@ -144,14 +150,14 @@ function CreateBody({ campaignId, target, onInsert, onClose }: Props & { target:
       hud
       open
       onOpenChange={(open) => !open && onClose()}
-      title="Знайомство"
+      title={t("title")}
       footer={
         <>
           <Button type="button" variant="outline" onClick={onClose}>
-            Скасувати
+            {tActions("cancel")}
           </Button>
           <Button type="submit" form={FORM_ID} disabled={!canSubmit(fields) || create.isPending}>
-            Створити
+            {tActions("create")}
           </Button>
         </>
       }
@@ -165,6 +171,10 @@ function CreateBody({ campaignId, target, onInsert, onClose }: Props & { target:
 }
 
 function Journal({ campaignId, item, target, sections }: { campaignId: string; item: AcquaintanceView; target: Extract<AcquaintanceDialogTarget, { mode: "edit" }>; sections: Section[] }) {
+  const t = useTranslations("scenario.acquaintance");
+
+  const tActions = useTranslations("common.actions");
+
   const { addEntry, removeEntry } = useAcquaintanceActions(campaignId);
 
   const confirm = useConfirm();
@@ -180,33 +190,37 @@ function Journal({ campaignId, item, target, sections }: { campaignId: string; i
   };
 
   const remove = async (entryId: string) => {
-    if (await confirm({ title: "Видалити запис?", confirmLabel: "Видалити" })) await removeEntry.mutateAsync({ id: item.id, entryId }).catch(() => null);
+    if (await confirm({ title: t("deleteEntryTitle"), confirmLabel: tActions("delete") })) await removeEntry.mutateAsync({ id: item.id, entryId }).catch(() => null);
   };
 
   return (
     <div className="space-y-2">
-      <p className="text-sm text-hud-muted">Журнал</p>
+      <p className="text-sm text-hud-muted">{t("journal")}</p>
       {item.entries.map((e) => (
         <div key={e.id} className="flex items-start justify-between gap-2 rounded border border-hud-line p-2 text-sm">
           <div>
             <p>{e.text}</p>
-            <p className="text-xs text-hud-muted">{sectionTitle(sections, e.pageId, e.sectionId, target.pageId)}{e.hidden ? " · приховано" : ""}</p>
+            <p className="text-xs text-hud-muted">{sectionTitle(sections, e.pageId, e.sectionId, target.pageId, t("otherPage"))}{e.hidden ? t("hiddenSuffix") : ""}</p>
           </div>
           <Button type="button" size="sm" variant="ghost" onClick={() => void remove(e.id)}>
-            Видалити
+            {tActions("delete")}
           </Button>
         </div>
       ))}
-      <SelectField aria-label="Секція запису" value={sectionId} onValueChange={setSectionId} options={sections.map((s) => ({ value: s.id, label: s.title }))} />
-      <Textarea aria-label="Текст запису" value={text} maxLength={ACQUAINTANCE_LIMITS.entry} onChange={(e) => setText(e.target.value)} />
+      <SelectField aria-label={t("entrySection")} value={sectionId} onValueChange={setSectionId} options={sections.map((s) => ({ value: s.id, label: s.title }))} />
+      <Textarea aria-label={t("entryText")} value={text} maxLength={ACQUAINTANCE_LIMITS.entry} onChange={(e) => setText(e.target.value)} />
       <Button type="button" size="sm" disabled={!text.trim() || addEntry.isPending} onClick={() => void add()}>
-        Додати запис
+        {t("addEntry")}
       </Button>
     </div>
   );
 }
 
 function EditBody({ campaignId, target, sections, onClose }: Props & { target: Extract<AcquaintanceDialogTarget, { mode: "edit" }> }) {
+  const t = useTranslations("scenario.acquaintance");
+
+  const tActions = useTranslations("common.actions");
+
   const { data } = useAcquaintances(campaignId);
 
   const { update, remove } = useAcquaintanceActions(campaignId);
@@ -224,7 +238,7 @@ function EditBody({ campaignId, target, sections, onClose }: Props & { target: E
   };
 
   const destroy = async () => {
-    if (!(await confirm({ title: "Видалити знайомство?", description: "Чипи в тексті лишаться, але не вестимуть нікуди.", confirmLabel: "Видалити" }))) return;
+    if (!(await confirm({ title: t("deleteTitle"), description: t("deleteDescription"), confirmLabel: tActions("delete") }))) return;
 
     if (await remove.mutateAsync(target.id).then(() => true, () => false)) onClose();
   };
@@ -234,26 +248,26 @@ function EditBody({ campaignId, target, sections, onClose }: Props & { target: E
       hud
       open
       onOpenChange={(open) => !open && onClose()}
-      title="Знайомство"
+      title={t("title")}
       footer={
         <>
           <Button type="button" variant="destructive" onClick={() => void destroy()}>
-            Видалити знайомство
+            {t("delete")}
           </Button>
           <Button type="button" variant="outline" onClick={onClose}>
-            Скасувати
+            {tActions("cancel")}
           </Button>
           <Button type="submit" form={FORM_ID} disabled={!item || !canSubmit(fields) || update.isPending}>
-            Зберегти
+            {tActions("save")}
           </Button>
         </>
       }
     >
       {!item ? (
-        <p className="text-sm text-hud-muted">Знайомство не знайдено</p>
+        <p className="text-sm text-hud-muted">{t("notFound")}</p>
       ) : (
         <div className="space-y-4">
-          <p className="text-xs text-hud-muted">Джерело: {sectionTitle(sections, item.sourcePageId, item.sourceSectionId, target.pageId)}</p>
+          <p className="text-xs text-hud-muted">{t("source", { section: sectionTitle(sections, item.sourcePageId, item.sourceSectionId, target.pageId, t("otherPage")) })}</p>
           <AcquaintanceForm campaignId={campaignId} fields={fields} onChange={change} onSubmit={() => void save()} />
           <Journal campaignId={campaignId} item={item} target={target} sections={sections} />
         </div>

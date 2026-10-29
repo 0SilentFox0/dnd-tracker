@@ -1,6 +1,7 @@
 "use client";
 
 import { useSyncExternalStore } from "react";
+import { useTranslations } from "next-intl";
 import { Maximize, Minimize } from "lucide-react";
 
 const subscribe = (onChange: () => void) => {
@@ -16,6 +17,8 @@ const readActive = () => !!document.fullscreenElement;
 const readOnServer = () => false;
 
 export function FullscreenButton() {
+  const t = useTranslations("show");
+
   const supported = useSyncExternalStore(subscribe, readSupported, readOnServer);
 
   const active = useSyncExternalStore(subscribe, readActive, readOnServer);
@@ -27,7 +30,7 @@ export function FullscreenButton() {
   const Icon = active ? Minimize : Maximize;
 
   return (
-    <button type="button" onClick={toggle} aria-label={active ? "Вийти з повноекранного режиму" : "На весь екран"} className="flex size-9 items-center justify-center rounded-full border border-hud-rule bg-black/70 text-hud-bone hover:bg-black/90">
+    <button type="button" onClick={toggle} aria-label={active ? t("fullscreen.exit") : t("fullscreen.enter")} className="flex size-9 items-center justify-center rounded-full border border-hud-rule bg-black/70 text-hud-bone hover:bg-black/90">
       <Icon className="size-4" />
     </button>
   );

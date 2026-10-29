@@ -5,7 +5,7 @@ import { createAssistantExecutor } from "../execute";
 import type { AssistantCaller } from "../types";
 import { executorDatabase } from "./fixtures/executor-db";
 
-const caller: AssistantCaller = { actor: { campaignId: "campaign", userId: "dm", via: "session", isDM: true, scopes: null }, tokenId: null, threadId: "thread", channel: "chat" };
+const caller: AssistantCaller = { actor: { campaignId: "campaign", userId: "dm", via: "session", isDM: true, scopes: null }, tokenId: null, threadId: "thread", channel: "chat", locale: "uk" as const };
 
 it("default catalog includes every completed domain with no confirm/apply/policy action", () => {
   for (const id of ["content.units.get", "campaign.status", "scenario.get", "scenario.propose-edit", "scenario.legacy-proposal", "characters.get", "characters.choices", "battles.attack", "show.generate", "show.get", "compendium.entries", "handoff.source-notes"]) expect(assistantCatalog.getAction(id)).toBeDefined();

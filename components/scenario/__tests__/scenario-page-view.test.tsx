@@ -1,12 +1,15 @@
 // @vitest-environment happy-dom
-import { cleanup, fireEvent, render, screen } from "@testing-library/react";
+import { cleanup, fireEvent, screen } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
 import { ScenarioPageView } from "@/components/scenario";
+import { render } from "@/components/ui/__tests__/uk-intl";
 import type { ScenarioPlay, SectionCollapse } from "@/lib/hooks/scenario";
 import type { ScenarioPage, ScenarioRow } from "@/types/scenario";
 
 afterEach(cleanup);
+
+vi.unmock("next-intl");
 
 const p = (text: string) => ({ type: "doc" as const, content: [{ type: "paragraph" as const, content: [{ type: "text" as const, text }] }] });
 

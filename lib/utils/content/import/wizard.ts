@@ -21,21 +21,14 @@ export function decodeImportBytes(bytes: ArrayBuffer | Uint8Array): string {
 export async function readImportFile(file: File): Promise<string> {
   const ext = file.name.split(".").pop()?.toLowerCase() ?? "";
 
-  if (SPREADSHEETS.has(ext)) throw new ImportFileError("XLSX не підтримується — збережіть таблицю як CSV (UTF-8) і завантажте його");
+  if (SPREADSHEETS.has(ext)) throw new ImportFileError("contentImport.file.xlsxUnsupported");
 
-  if (!TEXT_EXTENSIONS.has(ext)) throw new ImportFileError("Підтримуються файли CSV, TSV і JSON");
+  if (!TEXT_EXTENSIONS.has(ext)) throw new ImportFileError("contentImport.file.unsupportedType");
 
   return decodeImportBytes(await file.arrayBuffer());
 }
 
-const STATUS_LABELS: Record<ImportRowStatus, readonly [string, string]> = {
-  created: ["Створено", "Буде створено"],
-  updated: ["Оновлено", "Буде оновлено"],
-  skipped: ["Пропущено", "Буде пропущено"],
-  error: ["Помилка", "Помилка"],
-};
-
-export const statusLabel = (status: ImportRowStatus, dryRun: boolean) => STATUS_LABELS[status][dryRun ? 1 : 0];
+export const statusKey = (status: ImportRowStatus, dryRun: boolean) => `contentImport.status.${status}.${dryRun ? "planned" : "done"}`;
 
 export function mergeReports(parts: ReadonlyArray<{ offset: number; report: ImportReport }>, dryRun: boolean): ImportReport {
   const counts = emptyCounts();
@@ -49,12 +42,18 @@ export function mergeReports(parts: ReadonlyArray<{ offset: number; report: Impo
 
 export const cellText = (v: unknown) => (v === undefined || v === null ? "" : typeof v === "string" ? v : JSON.stringify(v));
 
-export function reportToCsv(table: ParsedTable, report: ImportReport): string {
+export interface ErrorReportText {
+  statusHeader: string;
+  errorsHeader: string;
+  status: (status: ImportRowStatus, dryRun: boolean) => string;
+}
+
+export function reportToCsv(table: ParsedTable, report: ImportReport, text: ErrorReportText): string {
   const rows = report.results
     .filter((r) => r.status === "error")
-    .map((r) => [...table.headers.map((h) => cellText(table.rows[r.row - 1]?.[h])), statusLabel(r.status, report.dryRun), r.issues.map((i) => i.message).join("; ")]);
+    .map((r) => [...table.headers.map((h) => cellText(table.rows[r.row - 1]?.[h])), text.status(r.status, report.dryRun), r.issues.map((i) => i.message).join("; ")]);
 
-  return toCsv([...table.headers, "Статус", "Помилки"], rows);
+  return toCsv([...table.headers, text.statusHeader, text.errorsHeader], rows);
 }
 
 export function aiSample(table: ParsedTable): Array<Record<string, string>> {

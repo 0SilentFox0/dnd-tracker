@@ -28,7 +28,7 @@ export interface SpellBookPagesProps {
 export function SpellBookPages({ byLevel, page, pick, layout, detail }: SpellBookPagesProps) {
   const t = useTranslations("spells.book");
 
-  const tc = useTranslator("common");
+  const tg = useTranslator("gameTerms");
 
   const { level, slotOf, onLevel } = page;
 
@@ -47,7 +47,7 @@ export function SpellBookPages({ byLevel, page, pick, layout, detail }: SpellBoo
             {filter.schools.length > 1 && <SchoolTabs schools={filter.schools} active={filter.school} countOf={filter.countOf} onPick={filter.setSchool} />}
             <div className="text-[13px] italic text-[#7a6650]">{t("title")}</div>
             <div className="hud-sc flex items-center gap-3 text-2xl font-bold leading-8">
-              {tc(`spellLevels.${level}`)}
+              {tg(`spellLevels.${level}`)}
             </div>
             <div className="my-1 h-px bg-[#2a2018]/35" />
             {filter.shown.length === 0 && <p className="py-6 text-center italic text-[#7a6650]">{filter.isAll ? t("emptyLevel") : t("emptyLevelSchool")}</p>}
@@ -87,7 +87,7 @@ export function EmptySpellBook({ text }: { text: string }) {
 export function SpellDetail({ spell, formula, children }: { spell: BookSpell; formula?: string; children?: ReactNode }) {
   const t = useTranslations("spells.book");
 
-  const tc = useTranslator("common");
+  const tg = useTranslator("gameTerms");
 
   const locale = useLocale();
 
@@ -108,7 +108,7 @@ export function SpellDetail({ spell, formula, children }: { spell: BookSpell; fo
         </span>
         <div>
           <div className="hud-sc text-[26px] font-bold leading-[30px]">{spell.name}</div>
-          <div className="text-sm italic text-[#7a6650]">{t("schoolAndLevel", { school: spell.spellGroup?.name ?? t("noSchool"), level: tc(`spellLevels.${spell.level}`).toLocaleLowerCase(locale) })}</div>
+          <div className="text-sm italic text-[#7a6650]">{t("schoolAndLevel", { school: spell.spellGroup?.name ?? t("noSchool"), level: tg(`spellLevels.${spell.level}`).toLocaleLowerCase(locale) })}</div>
         </div>
       </div>
       {spell.executionMode === "manual" && <p role="status">{t("manual")}</p>}

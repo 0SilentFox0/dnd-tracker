@@ -1,14 +1,16 @@
 "use client";
 
 import { type Ref, useImperativeHandle, useState } from "react";
+import { useTranslations } from "next-intl";
 import type { MentionNodeAttrs } from "@tiptap/extension-mention";
 
-import { MENTION_LABELS } from "@/lib/constants/scenario";
 import type { MentionOption } from "@/types/scenario";
 
 export type MentionListHandle = { onKeyDown: (event: KeyboardEvent) => boolean };
 
 export function MentionList({ items, command, ref }: { items: MentionOption[]; command: (attrs: MentionNodeAttrs) => void; ref?: Ref<MentionListHandle> }) {
+  const t = useTranslations("scenario");
+
   const [active, setActive] = useState(0);
 
   const index = active < items.length ? active : 0;
@@ -31,7 +33,7 @@ export function MentionList({ items, command, ref }: { items: MentionOption[]; c
 
   return (
     <div className="hud-surface max-h-72 w-72 overflow-y-auto rounded-md border border-[#3a2f20] bg-[#14110d] p-1 text-sm shadow-xl" role="listbox">
-      {items.length === 0 && <div className="px-2 py-1.5 text-hud-muted">Нічого не знайдено</div>}
+      {items.length === 0 && <div className="px-2 py-1.5 text-hud-muted">{t("search.empty")}</div>}
       {items.map((item, i) => (
         <button
           key={`${item.type}-${item.id}`}
@@ -43,7 +45,7 @@ export function MentionList({ items, command, ref }: { items: MentionOption[]; c
           onClick={() => pick(item)}
         >
           <span className="truncate">{item.label}</span>
-          <span className="shrink-0 text-xs text-hud-muted">{MENTION_LABELS[item.type]}</span>
+          <span className="shrink-0 text-xs text-hud-muted">{t(`mentionTypes.${item.type}`)}</span>
         </button>
       ))}
     </div>

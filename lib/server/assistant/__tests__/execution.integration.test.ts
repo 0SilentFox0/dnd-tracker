@@ -60,7 +60,7 @@ let srds: { spells: number; units: number; artifacts: number };
 
 const actor = () => ({ campaignId: fixture.campaignId, userId: fixture.userId, isDM: true, via: "session", scopes: null } as const);
 
-const caller = (): AssistantCaller => ({ actor: actor(), channel: "chat", threadId: fixture.threadId, tokenId: null });
+const caller = (): AssistantCaller => ({ actor: actor(), channel: "chat", threadId: fixture.threadId, tokenId: null, locale: "uk" as const });
 
 const executor = (actions: readonly import("@/lib/server/assistant/types").AssistantActionDef[] = CAMPAIGN_ACTIONS) => createAssistantExecutor({ db, catalog: createActionCatalog(actions) });
 
@@ -161,7 +161,7 @@ describe.skipIf(!isLocalDevDatabaseEnv())("T19 local constructor execution integ
 
     const token = await db.apiToken.create({ data: { campaignId: fixture.campaignId, userId: fixture.userId, name: "synthetic", tokenHash: randomUUID(), prefix: "fixture", scopes: ["campaign:write", "campaign:read"] } });
 
-    const tokenCaller: AssistantCaller = { actor: { ...actor(), via: "token", scopes: token.scopes as never }, channel: "mcp", threadId: null, tokenId: token.id };
+    const tokenCaller: AssistantCaller = { actor: { ...actor(), via: "token", scopes: token.scopes as never }, channel: "mcp", threadId: null, tokenId: token.id, locale: "uk" as const };
 
     const mcpPending = await action.dispatchAction(tokenCaller, { actionId: "campaign.settings", requestId: randomUUID(), input: { patch: { description: "MCP" } } });
 
@@ -222,7 +222,7 @@ describe.skipIf(!isLocalDevDatabaseEnv())("T19 local constructor execution integ
   it("revoking the originating MCP token during an in-flight dispatch prevents confirmation", async () => {
     const token = await db.apiToken.create({ data: { campaignId: fixture.campaignId, userId: fixture.userId, name: "synthetic", tokenHash: randomUUID(), prefix: "fixture", scopes: ["campaign:write", "campaign:read"] } });
 
-    const mcp: AssistantCaller = { actor: { ...actor(), via: "token", scopes: token.scopes as never }, channel: "mcp", threadId: null, tokenId: token.id };
+    const mcp: AssistantCaller = { actor: { ...actor(), via: "token", scopes: token.scopes as never }, channel: "mcp", threadId: null, tokenId: token.id, locale: "uk" as const };
 
     const original = CAMPAIGN_ACTIONS.find(action => action.id === "campaign.settings");
 

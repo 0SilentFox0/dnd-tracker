@@ -24,7 +24,7 @@ const CELL = "hud-roll-field flex items-center justify-between gap-2 rounded-lg 
 export function AbilityScoresPicker({ form, scoreStatus, reveal }: AbilityScoresPickerProps) {
   const t = useTranslations("characters.draft.scores");
 
-  const tc = useTranslations("common");
+  const tg = useTranslations("gameTerms");
 
   const { values, setScore, method, setMethod } = form;
 
@@ -53,7 +53,7 @@ export function AbilityScoresPicker({ form, scoreStatus, reveal }: AbilityScores
           return (
             <div key={key} data-settled={reveal.settled.has(key)} data-rolling={spinning} className={CELL}>
               <label htmlFor={`score-${key}`} className="text-sm">
-                {tc(`abilities.${key}.label`)}
+                {tg(`abilities.${key}.label`)}
               </label>
               {spinning ? (
                 <span aria-hidden className="hud-roll-display w-10 text-center text-base font-semibold tabular-nums">
@@ -74,13 +74,13 @@ export function AbilityScoresPicker({ form, scoreStatus, reveal }: AbilityScores
                 </select>
               ) : (
                 <div className="flex items-center gap-1">
-                  <Button type="button" size="icon" variant="outline" className="size-8" aria-label={t("lessAria", { ability: tc(`abilities.${key}.label`) })} disabled={values[key] <= MIN_SCORE} onClick={() => setScore(key, values[key] - 1)}>
+                  <Button type="button" size="icon" variant="outline" className="size-8" aria-label={t("lessAria", { ability: tg(`abilities.${key}.label`) })} disabled={values[key] <= MIN_SCORE} onClick={() => setScore(key, values[key] - 1)}>
                     -
                   </Button>
                   <output id={`score-${key}`} className="w-7 text-center text-base font-semibold tabular-nums">
                     {values[key]}
                   </output>
-                  <Button type="button" size="icon" variant="outline" className="size-8" aria-label={t("moreAria", { ability: tc(`abilities.${key}.label`) })} disabled={values[key] >= MAX_SCORE} onClick={() => setScore(key, values[key] + 1)}>
+                  <Button type="button" size="icon" variant="outline" className="size-8" aria-label={t("moreAria", { ability: tg(`abilities.${key}.label`) })} disabled={values[key] >= MAX_SCORE} onClick={() => setScore(key, values[key] + 1)}>
                     +
                   </Button>
                 </div>

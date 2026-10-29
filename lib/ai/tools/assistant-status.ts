@@ -16,7 +16,7 @@ import { readReceipt } from "@/lib/server/assistant/receipts";
 import { ContentError } from "@/lib/server/content/errors";
 
 export const assistantStatusTool = defineTool({
-  name: "assistant_status", scopes: API_TOKEN_SCOPES.filter(scope => scope !== "ai"), title: "Стан пропозицій", description: "Стан власних пропозицій і квитанцій; не підтверджує та не виконує зміни.",
+  name: "assistant_status", scopes: API_TOKEN_SCOPES.filter(scope => scope !== "ai"), title: "Proposal status", description: "Status of your own proposals and receipts; does not confirm or apply changes.",
   input: z.strictObject({ path: z.array(z.string().max(200)).max(30).default([]), offset: z.number().int().min(0).max(1000000).default(0), intentId: z.string().min(1).max(100).optional(), cursor: z.string().max(1000).optional(), limit: z.number().int().min(1).max(20).default(10) }),
   handler: async (ctx, input) => {
     const caller = callerOf(ctx);
@@ -66,7 +66,7 @@ export const assistantStatusTool = defineTool({
 });
 
 export const assistantRejectTool = defineTool({
-  name: "assistant_reject", scopes: API_TOKEN_SCOPES.filter(scope => scope !== "ai"), title: "Відхилити пропозицію", description: "Відхилити власну пропозицію без виконання доменної зміни; підтвердження лише у UI.",
+  name: "assistant_reject", scopes: API_TOKEN_SCOPES.filter(scope => scope !== "ai"), title: "Reject proposal", description: "Rejects your own proposal without applying the domain change; confirmation is in the UI only.",
   input: z.strictObject({ intentId: z.string().min(1).max(100) }),
   handler: (ctx, input) => rejectIntent(callerOf(ctx), input.intentId),
 });

@@ -2,6 +2,8 @@
 import { cleanup, fireEvent, screen, waitFor } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
+vi.unmock("next-intl");
+
 const hooks = vi.hoisted(() => ({
   items: [] as unknown[],
   create: { mutateAsync: vi.fn() },
@@ -28,7 +30,7 @@ vi.mock("@/components/scenario/CharacterSelect", () => ({
 
 import { acquaintanceTargetFor, acquaintanceToolEnabled } from "@/components/scenario/editor/acquaintance-target";
 import { AcquaintanceDialog } from "@/components/scenario/editor/AcquaintanceDialog";
-import { renderWithConfirm } from "@/components/ui/__tests__/render-with-confirm";
+import { renderWithConfirm } from "@/components/ui/__tests__/uk-intl";
 import type { AcquaintanceView } from "@/types/acquaintances";
 
 Object.assign(Element.prototype, { hasPointerCapture: () => false, releasePointerCapture: () => {}, setPointerCapture: () => {}, scrollIntoView: () => {} });

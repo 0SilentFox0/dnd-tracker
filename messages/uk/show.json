@@ -1,0 +1,151 @@
+{
+  "slide": "Слайд {index}",
+  "slideBare": "Слайд",
+  "startShow": "Почати показ",
+  "waiting": {
+    "notStarted": "ДМ ще не почав показ",
+    "paused": "Перерва — скоро продовжимо"
+  },
+  "battleCall": {
+    "go": "До бою!"
+  },
+  "fullscreen": {
+    "enter": "На весь екран",
+    "exit": "Вийти з повноекранного режиму"
+  },
+  "transport": {
+    "prev": "Попередній слайд (←)",
+    "next": "Наступний слайд (→)",
+    "curtain": "Заглушка",
+    "curtainTitle": "Заглушка замість слайда (B)",
+    "end": "Завершити показ",
+    "endConfirm": {
+      "title": "Завершити показ?",
+      "description": "Гравці побачать заглушку або очікування, музика зупиниться.",
+      "confirm": "Завершити"
+    }
+  },
+  "deckStrip": {
+    "thisScene": "Ця сцена",
+    "otherDecks": "Інші набори",
+    "deck": "Набір",
+    "chooseDeck": "Оберіть набір",
+    "cover": "Заглушка",
+    "coverTitle": "Заглушка: {title}",
+    "untitledLower": "без назви",
+    "untitled": "Без назви",
+    "clearCover": "Прибрати заглушку",
+    "slideTitled": "Слайд {index}: {title}",
+    "hasTrack": "Слайд з треком",
+    "isCover": "Це заглушка",
+    "makeCover": "Зробити заглушкою"
+  },
+  "puzzle": {
+    "resetConfirm": {
+      "title": "Скинути пазл?",
+      "description": "Усі шматочки повернуться в сайдбар.",
+      "confirm": "Скинути"
+    },
+    "releaseAll": "Відпустити всі",
+    "reset": "Скинути",
+    "rotateLeft": "Повернути проти годинникової",
+    "rotateRight": "Повернути за годинниковою",
+    "preview": "Нарізка пазла",
+    "player": "Гравець",
+    "addFailed": "{name}: не вдалося додати пазл"
+  },
+  "grid": {
+    "puzzle": "Пазл",
+    "hasTrack": "Є трек",
+    "moveLeft": "Посунути вліво",
+    "moveRight": "Посунути вправо",
+    "remove": "Видалити слайд"
+  },
+  "addSlides": {
+    "partial": "Додано {added} з {picked}: у наборі максимум {max} слайдів",
+    "images": "Додати картинки",
+    "puzzle": "Додати пазл",
+    "urlLabel": "Посилання на картинку",
+    "generate": "Згенерувати",
+    "max": "Максимум {max} слайдів",
+    "progress": "Завантаження {done} з {total}"
+  },
+  "generate": {
+    "title": "Згенерувати зображення",
+    "again": "Ще раз",
+    "addSlide": "Додати слайд",
+    "prompt": "Опис зображення",
+    "campaignStyle": "Додати стиль кампанії",
+    "aspect": "Співвідношення сторін",
+    "provider": "Провайдер",
+    "model": "Модель",
+    "pending": "Генерую… це може тривати до хвилини",
+    "resultAlt": "Згенероване зображення"
+  },
+  "newDeck": {
+    "title": "Новий набір",
+    "name": "Назва"
+  },
+  "deckCard": {
+    "confirmTitle": "Видалити набір «{title}»?",
+    "confirmDescription": "Картинки буде стерто.",
+    "slides": "{count, plural, one {# слайд} few {# слайди} many {# слайдів} other {# слайдів}}",
+    "scene": "Сцена: {scene}"
+  },
+  "slideDialog": {
+    "cuts": {
+      "classic": "Класична",
+      "organic": "Органічна",
+      "straight": "Прямі зрізи"
+    },
+    "shuffle": "Перемішати",
+    "pieces": "Шматочків: {count}",
+    "piecesLabel": "Кількість шматочків",
+    "title": "Заголовок",
+    "caption": "Підпис",
+    "done": "Готово"
+  },
+  "trackPicker": {
+    "search": "Пошук треку",
+    "none": "Без треку"
+  },
+  "sceneSelect": {
+    "label": "Сцена",
+    "none": "Без сцени"
+  },
+  "deckEditor": {
+    "title": "Набір слайдів",
+    "back": "← До наборів",
+    "nameRequired": "Вкажіть назву набору",
+    "nameLabel": "Назва набору",
+    "emptyTitle": "Ще немає слайдів",
+    "emptyDescription": "Додайте картинки — файли або посилання"
+  },
+  "decksPage": {
+    "title": "Показ сцен",
+    "count": "{count, plural, one {# набір} few {# набори} many {# наборів} other {# наборів}}",
+    "openShow": "Відкрити показ",
+    "emptyTitle": "Ще немає наборів",
+    "emptyDescription": "Створіть набір слайдів із картинок і музики та покажіть його гравцям."
+  },
+  "conflict": {
+    "title": "Набір змінено в іншому місці. Зберегти ваші зміни поверх?",
+    "confirm": "Зберегти поверх",
+    "cancel": "Відкинути мої зміни",
+    "discarded": "Ваші зміни відкинуто — відкрито версію з іншого місця"
+  },
+  "errors": {
+    "control": "Не вдалося керувати показом",
+    "puzzle": "Не вдалося виконати дію з пазлом",
+    "action": "Не вдалося виконати дію",
+    "bindScene": "Не вдалося прив'язати набір до сцени",
+    "save": "Не вдалося зберегти набір",
+    "uploadFile": "{name}: {message}",
+    "uploadUnknown": "помилка"
+  },
+  "validation": {
+    "httpUrl": "Потрібне посилання http(s)",
+    "puzzleParams": "Пазл і його параметри йдуть разом",
+    "duplicateSlideId": "Повторюваний id слайда"
+  }
+}

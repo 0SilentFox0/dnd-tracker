@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useTranslations } from "next-intl";
 import { Images } from "lucide-react";
 
 import { OptimizedImage } from "@/components/common/OptimizedImage";
@@ -13,6 +14,8 @@ import type { ScenarioRowSlide } from "@/types/scenario";
 type Props = { campaignId: string; pageId: string; open: boolean; onOpenChange(open: boolean): void; onPick(v: ScenarioRowSlide): void };
 
 export function SlidePickerDialog({ campaignId, pageId, open, onOpenChange, onPick }: Props) {
+  const t = useTranslations("scenario.slidePicker");
+
   const { data: decks = [], isLoading } = useDecks(campaignId, { enabled: open });
 
   const own = decks.filter((d) => d.scenarioPageId === pageId);
@@ -32,17 +35,17 @@ export function SlidePickerDialog({ campaignId, pageId, open, onOpenChange, onPi
   );
 
   return (
-    <ResponsiveDialog hud open={open} onOpenChange={onOpenChange} title="Слайд для абзацу">
+    <ResponsiveDialog hud open={open} onOpenChange={onOpenChange} title={t("title")}>
       {isLoading ? (
         <LoadingState />
       ) : decks.length === 0 ? (
-        <EmptyState icon={Images} title="Немає наборів слайдів" />
+        <EmptyState icon={Images} title={t("empty")} />
       ) : (
         <div className="flex flex-col gap-3">
           <div className="flex flex-wrap gap-2">{own.map(deckButton)}</div>
           {others.length > 0 && (
             <>
-              <p className="text-sm text-hud-muted">Інші набори</p>
+              <p className="text-sm text-hud-muted">{t("others")}</p>
               <div className="flex flex-wrap gap-2">{others.map(deckButton)}</div>
             </>
           )}
@@ -53,7 +56,7 @@ export function SlidePickerDialog({ campaignId, pageId, open, onOpenChange, onPi
                 <button
                   key={slide.id}
                   type="button"
-                  aria-label={slide.title ?? `Слайд ${i + 1}`}
+                  aria-label={slide.title ?? t("slideN", { n: i + 1 })}
                   className="overflow-hidden rounded border border-hud-rule"
                   onClick={() => {
                     onPick({ deckId: deck.id, slideId: slide.id });

@@ -64,7 +64,7 @@ let ready = false;
 
 const actor = () => ({ campaignId, userId, isDM: true, via: "session", scopes: null } as const);
 
-const caller = (): AssistantCaller => ({ actor: actor(), channel: "chat", tokenId: null, threadId });
+const caller = (): AssistantCaller => ({ actor: actor(), channel: "chat", tokenId: null, threadId, locale: "uk" as const });
 
 describe.skipIf(!isLocalDevDatabaseEnv())("content adapters real constructor, connection_limit=1", () => {
   beforeAll(async () => {
@@ -235,7 +235,7 @@ describe.skipIf(!isLocalDevDatabaseEnv())("content adapters real constructor, co
 
           throw error;
         }
-      } }, { campaignId, userId, scopes: [], threadId }, {});
+      } }, { campaignId, userId, scopes: [], threadId, locale: "uk" as const }, {});
 
       expect(sqlCode).toBe("55P03");
       expect(result).toEqual({ version: 2, kind: "error", error: { code: "ASSISTANT_FAILED", status: 500, message: "Внутрішня помилка сервера. Спробуй ще раз пізніше." } });

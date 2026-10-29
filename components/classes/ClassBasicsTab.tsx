@@ -35,7 +35,7 @@ function ListInput({ id, label, value, onChange }: { id: string; label: string; 
 export function ClassBasicsTab({ form: { data, set }, campaignId }: ClassBasicsTabProps) {
   const t = useTranslations();
 
-  const tc = useTranslator("common");
+  const tg = useTranslator("gameTerms");
 
   const patch = (next: Partial<ClassFormData>) => set((prev) => ({ ...prev, ...next }));
 
@@ -68,7 +68,7 @@ export function ClassBasicsTab({ form: { data, set }, campaignId }: ClassBasicsT
           {ABILITY_KEYS.map((key) => (
             <label key={key} className="flex items-center gap-2 text-sm">
               <Checkbox checked={data.savingThrows.includes(key)} onCheckedChange={() => patch({ savingThrows: toggleItem(data.savingThrows, key) })} />
-              {tc(`abilities.${key}.label`)}
+              {tg(`abilities.${key}.label`)}
             </label>
           ))}
         </div>
@@ -97,7 +97,7 @@ export function ClassBasicsTab({ form: { data, set }, campaignId }: ClassBasicsT
           {DND_SKILLS.map((skill) => (
             <label key={skill} className="flex items-center gap-2 text-sm">
               <Checkbox checked={data.skillChoices.from.includes(skill)} onCheckedChange={() => patch({ skillChoices: { ...data.skillChoices, from: toggleItem(data.skillChoices.from, skill) } })} />
-              {t(`common.dndSkills.${skill}`)}
+              {t(`gameTerms.dndSkills.${skill}`)}
             </label>
           ))}
         </div>
@@ -120,7 +120,7 @@ export function ClassBasicsTab({ form: { data, set }, campaignId }: ClassBasicsT
             id="class-spell-ability"
             value={data.spellcastingAbility ?? ""}
             onValueChange={(v) => patch({ spellcastingAbility: (v || null) as AbilityKey | null })}
-            options={ABILITY_KEYS.map((k) => ({ value: k, label: tc(`abilities.${k}.label`) }))}
+            options={ABILITY_KEYS.map((k) => ({ value: k, label: tg(`abilities.${k}.label`) }))}
             allowNone
           />
         </div>

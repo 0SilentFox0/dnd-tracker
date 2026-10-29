@@ -1,13 +1,14 @@
 import { z } from "zod";
 
-import { requestDigest } from "../json";
+import { jsonContent, requestDigest } from "../json";
 import type { AssistantActionDef } from "../types";
 
 import "server-only";
+import { getTranslator } from "@/lib/i18n/translator";
 import { aiSettingsSchema } from "@/lib/schemas/ai";
 import { createCampaignSchema, updateCampaignSchema } from "@/lib/schemas/campaigns";
 import { saveAsTemplateSchema } from "@/lib/schemas/templates";
-import { campaignResult, campaignState, campaignWindowSchema, runCampaignOperation } from "@/lib/server/campaigns/action-service";
+import { campaignState, campaignWindowSchema, runCampaignOperation } from "@/lib/server/campaigns/action-service";
 import { withCampaignContentWrite } from "@/lib/server/content/write";
 
 const empty = z.object({});
@@ -25,9 +26,9 @@ export const CAMPAIGN_ACTIONS: readonly AssistantActionDef[] = Object.entries(de
 
   const sessionOnly = ["create", "clone", "delete", "template.save", "template.update"].includes(operation);
 
-  const base = { id: `campaign.${operation}`, title: `Кампанія: ${operation}`, description: "Поточна кампанія та доступні шаблони", input, need: { access: "dm" as const, scope: read ? "campaign:read" as const : "campaign:write" as const, ...(sessionOnly && { sessionOnly: true as const }) } };
+  const base = { id: `campaign.${operation}`, title: `Campaign: ${operation}`, description: "The current campaign and the available templates", input, need: { access: "dm" as const, scope: read ? "campaign:read" as const : "campaign:write" as const, ...(sessionOnly && { sessionOnly: true as const }) } };
 
-  if (read) return { ...base, effect: "read", execute: (caller, raw) => runCampaignOperation(caller.actor, operation, input.parse(raw) as Record<string, unknown>) };
+  if (read) return { ...base, effect: "read", execute: (caller, raw) => runCampaignOperation(caller.actor, operation, input.parse(raw) as Record<string, unknown>, undefined, caller.locale) };
 
   return { ...base, effect: "write", confirmation: ["delete", "members.remove", "template.update"].includes(operation) ? "always" : "standard",
     prepare: (caller, raw) => withCampaignContentWrite(caller.actor.campaignId, async () => {
@@ -37,8 +38,10 @@ export const CAMPAIGN_ACTIONS: readonly AssistantActionDef[] = Object.entries(de
 
       const target = { domain: "campaign", id: caller.actor.campaignId, name: String(state.settings.name) };
 
-      return { summary: `Кампанія: ${operation}`, targets: [target], changes: [{ target, path: operation, before: campaignResult(state, caller.actor.campaignId).data, after: campaignResult(value, caller.actor.campaignId).data }], warnings: operation === "delete" ? ["Кампанія та всі залежні записи будуть видалені."] : [], preconditions: { fingerprint: requestDigest(state) }, effects: [{ kind: operation === "delete" ? "delete" : operation === "members.remove" ? "change-access" : ["create", "clone", "template.save"].includes(operation) ? "create" : "update", targets: [target], description: operation }] };
+      const t = await getTranslator(caller.locale, "assistant");
+
+      return { summary: t("summary.campaign", { operation }), targets: [target], changes: [{ target, path: operation, before: jsonContent(state), after: jsonContent(value) }], warnings: operation === "delete" ? [t("warnings.campaignDelete")] : [], preconditions: { fingerprint: requestDigest(state) }, effects: [{ kind: operation === "delete" ? "delete" : operation === "members.remove" ? "change-access" : ["create", "clone", "template.save"].includes(operation) ? "create" : "update", targets: [target], description: operation }] };
     }),
-    execute: (ctx, raw) => runCampaignOperation(ctx.caller.actor, operation, input.parse(raw) as Record<string, unknown>, (ctx.expected as { fingerprint: string }).fingerprint),
+    execute: (ctx, raw) => runCampaignOperation(ctx.caller.actor, operation, input.parse(raw) as Record<string, unknown>, (ctx.expected as { fingerprint: string }).fingerprint, ctx.caller.locale),
   };
 });

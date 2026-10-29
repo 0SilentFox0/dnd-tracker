@@ -2,6 +2,7 @@
 
 import { type CSSProperties, type KeyboardEvent, type PointerEvent, type ReactNode, useCallback, useRef, useState } from "react";
 import Link from "next/link";
+import { useFormatter, useTranslations } from "next-intl";
 import { KeyRound } from "lucide-react";
 
 import { AiComposer } from "./AiComposer";
@@ -12,11 +13,12 @@ import { AssistantContextDisclosure } from "./AssistantContextDisclosure";
 import { EmptyState, LoadingState } from "@/components/common/states";
 import { Button } from "@/components/ui/button";
 import { ResponsiveDialog } from "@/components/ui/responsive-dialog";
-import { AI_MODE_LABELS, type AiProvider, type AiThreadMode, DEFAULT_THREAD_TITLE } from "@/lib/constants/ai";
+import { type AiProvider, type AiThreadMode, DEFAULT_THREAD_TITLE } from "@/lib/constants/ai";
 import { AI_PANEL_WIDTH, useAiChat, useAiCredentials, useAiPanelWidth, useAiProposals, useAiThreadMessages, useAiThreads } from "@/lib/hooks/ai";
 import { useAssistantContext } from "@/lib/hooks/ai/useAssistantContext";
 import { useAssistantEffects } from "@/lib/hooks/ai/useAssistantEffects";
 import { DESKTOP_QUERY, useMediaQuery } from "@/lib/hooks/common";
+import { useTranslator } from "@/lib/i18n/use-translator";
 import { focusLabelOf } from "@/lib/utils/ai/focus";
 import type { AiChatMessage, AiFocus, AiThread } from "@/types/ai";
 import type { ScenarioPage } from "@/types/scenario";
@@ -53,6 +55,10 @@ function AiThreadChat({ campaignId, thread, focus, focusLabel, renderProposal, a
 }
 
 function AiThreadChatBody({ campaignId, thread, initialMessages, focus, focusLabel, renderProposal, actions }: ThreadChatProps & { initialMessages: AiChatMessage[] }) {
+  const t = useTranslations("ai");
+
+  const format = useFormatter();
+
   const getFocus = useCallback(() => focus, [focus]);
 
   const context = useAssistantContext(campaignId,thread.id,focus,`${thread.provider}:${thread.model}`);
@@ -70,7 +76,7 @@ function AiThreadChatBody({ campaignId, thread, initialMessages, focus, focusLab
       <div className="min-h-0 flex-1 overflow-y-auto py-2">
         <AiMessageList campaignId={campaignId} messages={chat.messages} error={chat.error?.message} renderProposal={renderProposal && ((id) => renderProposal(id, { send: (text)=>void context.requestSend(text) }))} onRedo={redo} />
       </div>
-      {chat.blockedUntil&&<p role="status" className="text-sm">Новий запит після захисного інтервалу: {new Date(chat.blockedUntil).toLocaleTimeString("uk-UA")}. «Відновити стан» лише читає дані.</p>}
+      {chat.blockedUntil&&<p role="status" className="text-sm">{t("panel.blockedUntil", { time: format.dateTime(new Date(chat.blockedUntil), { timeStyle: "medium" }) })}</p>}
       <AssistantContextDisclosure context={context} onSend={chat.send} />
       <AiComposer mode={thread.mode} busy={busy} focusLabel={focusLabel} actions={{ onSend: (text)=>void context.requestSend(text), onStop: chat.stop, onClearFocus: actions.onClearFocus }} />
     </>
@@ -78,6 +84,8 @@ function AiThreadChatBody({ campaignId, thread, initialMessages, focus, focusLab
 }
 
 function ResizeHandle({ panel }: { panel: ReturnType<typeof useAiPanelWidth> }) {
+  const t = useTranslations("ai");
+
   const drag = useRef<{ startX: number; startWidth: number } | null>(null);
 
   const onPointerDown = (e: PointerEvent<HTMLDivElement>) => {
@@ -100,7 +108,7 @@ function ResizeHandle({ panel }: { panel: ReturnType<typeof useAiPanelWidth> }) 
     <div
       role="separator"
       aria-orientation="vertical"
-      aria-label="Ширина панелі AI"
+      aria-label={t("panel.resizeLabel")}
       aria-valuenow={panel.width}
       aria-valuemin={AI_PANEL_WIDTH.min}
       aria-valuemax={panel.max}
@@ -117,6 +125,10 @@ function ResizeHandle({ panel }: { panel: ReturnType<typeof useAiPanelWidth> }) 
 }
 
 export function AiPanel({ campaignId, campaignName, embedded = false, mode, focus, proposals, actions }: AiPanelProps) {
+  const t = useTranslations("ai");
+
+  const tr = useTranslator("ai");
+
   const { value: focusValue, page, onClear: onClearFocus } = focus;
 
   const { data: proposalData, render: renderProposal, showPending = false, review } = proposals ?? {};
@@ -163,24 +175,24 @@ export function AiPanel({ campaignId, campaignName, embedded = false, mode, focu
     body = (
       <EmptyState
         icon={KeyRound}
-        title="Підключіть ключ AI"
-        description="Додайте ключ провайдера, щоб користуватися помічником."
+        title={t("panel.connect.title")}
+        description={t("panel.connect.description")}
         action={
           <Button asChild>
-            <Link href="/settings/ai">Налаштування AI</Link>
+            <Link href="/settings/ai">{t("panel.connect.action")}</Link>
           </Button>
         }
       />
     );
   } else if (!thread) {
-    body = <EmptyState title={`Немає тредів: ${AI_MODE_LABELS[mode]}`} />;
+    body = <EmptyState title={t("panel.noThreads", { mode: t(`modes.${mode}`) })} />;
   } else {
-    body = <AiThreadChat campaignId={campaignId} thread={thread} focus={focusValue} focusLabel={focusLabelOf(page, focusValue)} renderProposal={renderProposal} actions={{ onFinish, onClearFocus }} />;
+    body = <AiThreadChat campaignId={campaignId} thread={thread} focus={focusValue} focusLabel={focusLabelOf(tr, page, focusValue)} renderProposal={renderProposal} actions={{ onFinish, onClearFocus }} />;
   }
 
   const content = (
     <div className="flex h-full min-h-0 flex-col gap-2">
-      {campaignName && <h1 className="font-semibold">Асистент · {campaignName}</h1>}
+      {campaignName && <h1 className="font-semibold">{t("panel.heading", { name: campaignName })}</h1>}
       {providers.length || thread ? (
         <AiThreadHeader
           campaignId={campaignId}
@@ -196,8 +208,8 @@ export function AiPanel({ campaignId, campaignName, embedded = false, mode, focu
         />
       ) : null}
       {showPending && !review && renderProposal && proposalData && proposalData.pending.length ? (
-        <section className="max-h-[40%] space-y-2 overflow-y-auto" aria-label="Пропозиції AI">
-          <h3 className="text-sm font-medium">Пропозиції AI</h3>
+        <section className="max-h-[40%] space-y-2 overflow-y-auto" aria-label={t("panel.proposals")}>
+          <h3 className="text-sm font-medium">{t("panel.proposals")}</h3>
           {proposalData.pending.map((p) => (
             <div key={p.id}>{renderProposal(p.id, {})}</div>
           ))}
@@ -212,7 +224,7 @@ export function AiPanel({ campaignId, campaignName, embedded = false, mode, focu
 
   if (!desktop) {
     return (
-      <ResponsiveDialog open onOpenChange={(open) => !open && actions.onClose()} title={AI_MODE_LABELS[mode]} hud>
+      <ResponsiveDialog open onOpenChange={(open) => !open && actions.onClose()} title={t(`modes.${mode}`)} hud>
         <div className="h-[70dvh]">{content}</div>
       </ResponsiveDialog>
     );
@@ -221,7 +233,7 @@ export function AiPanel({ campaignId, campaignName, embedded = false, mode, focu
   return (
     <aside
       data-slot="ai-panel"
-      aria-label="AI-помічник"
+      aria-label={t("panel.ariaLabel")}
       style={{ "--ai-panel-w": `${panel.width}px`, width: "var(--ai-panel-w)" } as CSSProperties}
       className="@container fixed inset-y-0 right-0 z-40 flex flex-col border-l bg-background p-3 shadow-xl"
     >

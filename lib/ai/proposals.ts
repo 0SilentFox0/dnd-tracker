@@ -8,6 +8,8 @@ import { API_ERRORS } from "@/lib/constants/api-errors";
 import { SCENARIO_MAX_CONTENT_BYTES } from "@/lib/constants/scenario";
 import { DECK_TITLE_MAX, MAX_DECKS_PER_CAMPAIGN, MAX_SLIDES_PER_DECK } from "@/lib/constants/show";
 import { prisma } from "@/lib/db";
+import { DEFAULT_LOCALE, type Locale } from "@/lib/i18n/config";
+import { getTranslator } from "@/lib/i18n/translator";
 import { scenarioContentSchema } from "@/lib/schemas/scenario";
 import { slidesSchema } from "@/lib/schemas/show";
 import { chatCaller } from "@/lib/server/assistant/caller";
@@ -48,7 +50,7 @@ export async function listProposalSummaries(campaignId: string, filter: { pageId
 
 type ApplyResult = { ok: true; page: ScenarioPage } | { ok: true; deck: SlideDeck } | { ok: false; status: 400 | 404 | 409 | 413; error: string };
 
-export async function applyProposal(campaignId: string, userId: string, proposalId: string, executingIntentId?: string): Promise<ApplyResult> {
+export async function applyProposal(campaignId: string, userId: string, proposalId: string, executingIntentId?: string, locale: Locale = DEFAULT_LOCALE): Promise<ApplyResult> {
   return withCampaignContentWrite(campaignId, async (tx): Promise<ApplyResult> => {
     const proposal = await tx.aiProposal.findFirst({ where: { id: proposalId, campaignId }, select: SELECT });
 
@@ -61,7 +63,7 @@ export async function applyProposal(campaignId: string, userId: string, proposal
     if (linked && !executingIntentId) {
       if (linked.userId !== userId || linked.status !== "pending" || linked.expiresAt <= new Date()) return { ok: false, status: 409, error: API_ERRORS.AI_PROPOSAL_DONE };
 
-      const fresh = await legacyPreview(chatCaller(campaignId, userId, null), proposalId);
+      const fresh = await legacyPreview(chatCaller(campaignId, userId, null, locale), proposalId);
 
       if (requestDigest(fresh.preconditions) !== requestDigest(linked.expected)) {
         await tx.aiProposal.update({ where: { id: proposalId }, data: { status: "stale" } });
@@ -75,11 +77,11 @@ export async function applyProposal(campaignId: string, userId: string, proposal
 
     if (claimed.count === 0) return { ok: false, status: 409, error: API_ERRORS.AI_PROPOSAL_DONE };
 
-    const result = await applyClaimed(tx, campaignId, userId, proposal);
+    const result = await applyClaimed(tx, campaignId, userId, proposal, locale);
 
     if (!result.ok && !KEEPS_STATUS.has(result.error)) await tx.aiProposal.updateMany({ where: { id: proposalId }, data: { status: "pending" } });
 
-    if (result.ok) await reconcileLegacyProposal(tx, campaignId, proposalId, "applied", scenarioResult("page" in result ? { page: result.page } : { deck: result.deck }), executingIntentId);
+    if (result.ok) await reconcileLegacyProposal(tx, campaignId, proposalId, "applied", scenarioResult("page" in result ? { page: result.page } : { deck: result.deck }, undefined, locale), executingIntentId);
     else if (KEEPS_STATUS.has(result.error)) await reconcileLegacyProposal(tx, campaignId, proposalId, "stale");
 
     return result;
@@ -89,14 +91,14 @@ export async function applyProposal(campaignId: string, userId: string, proposal
 // these outcomes persist their own status (stale); any other failure hands the claim back
 const KEEPS_STATUS = new Set<string>([API_ERRORS.AI_PROPOSAL_STALE, API_ERRORS.AI_PROPOSAL_STALE_DECK]);
 
-async function applyClaimed(tx: Tx, campaignId: string, userId: string, proposal: Row): Promise<ApplyResult> {
+async function applyClaimed(tx: Tx, campaignId: string, userId: string, proposal: Row, locale: Locale): Promise<ApplyResult> {
   const proposalId = proposal.id;
 
   const ops = proposal.ops as unknown as AiProposalOp[];
 
   const slideOps = ops.filter((o): o is AddSlideAiOp => o.op === "addSlide");
 
-  if (slideOps.length > 0) return slideOps.length === ops.length ? applySlideOps(tx, campaignId, proposal, slideOps) : { ok: false, status: 400, error: API_ERRORS.AI_PROPOSAL_INVALID };
+  if (slideOps.length > 0) return slideOps.length === ops.length ? applySlideOps(tx, campaignId, proposal, slideOps, locale) : { ok: false, status: 400, error: API_ERRORS.AI_PROPOSAL_INVALID };
 
   const page = await tx.scenarioPage.findFirst({ where: { id: proposal.pageId, campaignId }, select: OWNED_WITH_CONTENT_SELECT });
 
@@ -128,7 +130,7 @@ async function applyClaimed(tx: Tx, campaignId: string, userId: string, proposal
 
 type Tx = Prisma.TransactionClient;
 
-async function applySlideOps(tx: Tx, campaignId: string, proposal: Pick<Row, "id" | "pageId">, ops: AddSlideAiOp[]): Promise<ApplyResult> {
+async function applySlideOps(tx: Tx, campaignId: string, proposal: Pick<Row, "id" | "pageId">, ops: AddSlideAiOp[], locale: Locale): Promise<ApplyResult> {
   const stale = async (): Promise<ApplyResult> => {
     await tx.aiProposal.update({ where: { id: proposal.id }, data: { status: "stale" } });
 
@@ -154,7 +156,7 @@ async function applySlideOps(tx: Tx, campaignId: string, proposal: Pick<Row, "id
 
     if (existing._count >= MAX_DECKS_PER_CAMPAIGN) return { ok: false, status: 409, error: API_ERRORS.DECK_LIMIT };
 
-    deck = await tx.slideDeck.create({ data: { campaignId, title: page.title.slice(0, DECK_TITLE_MAX) || "Сцена", scenarioPageId: proposal.pageId, sortOrder: (existing._max.sortOrder ?? -1) + 1 } });
+    deck = await tx.slideDeck.create({ data: { campaignId, title: page.title.slice(0, DECK_TITLE_MAX) || (await getTranslator(locale, "scenario"))("pageKinds.scene"), scenarioPageId: proposal.pageId, sortOrder: (existing._max.sortOrder ?? -1) + 1 } });
   }
 
   const stored = slidesSchema.safeParse(deck.slides);

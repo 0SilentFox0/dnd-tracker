@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
+import { useTranslations } from "next-intl";
 
 import { flushAssistantBeforeApply } from "./useAssistantEffects";
 
@@ -8,6 +9,8 @@ import { getAssistantSourceNotes, previewAssistantContext } from "@/lib/api/assi
 import type { AiFocus, AssistantContextPreview, AssistantSessionContext } from "@/types/ai";
 
 export function useAssistantContext(campaignId: string, threadId: string, focus: AiFocus | undefined, configuration = "") {
+  const t = useTranslations("ai");
+
   const [selected, setSelected] = useState<string[]>([]);
 
   const [pendingText, setPendingText] = useState<string | null>(null);
@@ -54,7 +57,7 @@ export function useAssistantContext(campaignId: string, threadId: string, focus:
 
       if (current === epoch.current && latest.current === stamp) { setDisclosure(value); setApprovedStamp(stamp); }
     } catch {
-      if (current === epoch.current) setError("Не вдалося перевірити контекст. Повідомлення провайдеру не надіслано.");
+      if (current === epoch.current) setError(t("context.previewFailed"));
     } finally { if (current === epoch.current) setBusy(false); }
   };
 
@@ -64,7 +67,7 @@ export function useAssistantContext(campaignId: string, threadId: string, focus:
       const page = await getAssistantSourceNotes(campaignId, offset);
 
       setNotes(page.items); setNextOffset(page.nextOffset);
-    } catch { setError("Примітки джерел недоступні"); }
+    } catch { setError(t("context.notesFailed")); }
   };
 
   const cancel = () => {
@@ -87,7 +90,7 @@ export function useAssistantContext(campaignId: string, threadId: string, focus:
 
       cancel();
       await send(text);
-    } catch { setError("Не вдалося зберегти редактор або надіслати запит. Перевірте стан чату перед новим запитом."); }
+    } catch { setError(t("context.sendFailed")); }
     finally { sending.current = false; setBusy(false); }
   };
 

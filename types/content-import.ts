@@ -6,7 +6,8 @@ export type ImportFieldType = "string" | "int" | "number" | "bool" | "enum" | "l
 
 export interface ImportField {
   key: string;
-  label: string;
+  /** `contentImport.fields.<kind>.<key>` */
+  labelKey: string;
   aliases: readonly string[];
   type: ImportFieldType;
   enumValues?: readonly string[];
@@ -20,14 +21,17 @@ export interface ImportField {
   /** json: глибоко замінює назви на id у властивості `key` (напр. spellId у виборах раси) */
   nestedRef?: { kind: ImportKind; key: string };
   required?: boolean;
-  examples: readonly [string, string];
+}
+
+export interface ImportMessage {
+  message: string;
+  params?: Record<string, string | number>;
 }
 
 export type ImportRecord = Record<string, unknown>;
 
 export interface ImportSpec {
   kind: ImportKind;
-  label: string;
   fields: readonly ImportField[];
   toBody?: (record: ImportRecord, op: "create" | "update") => ImportRecord;
 }

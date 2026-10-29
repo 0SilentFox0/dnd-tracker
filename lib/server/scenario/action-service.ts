@@ -6,26 +6,29 @@ import { pruneVersions, snapshotIfDue } from "./versions";
 
 import "server-only";
 import { API_ERRORS } from "@/lib/constants/api-errors";
-import { DEFAULT_SCENE_LEGEND, SCENARIO_MAX_CONTENT_BYTES, SCENARIO_MAX_VERSIONS } from "@/lib/constants/scenario";
+import { SCENARIO_MAX_CONTENT_BYTES, SCENARIO_MAX_VERSIONS } from "@/lib/constants/scenario";
 import { prisma } from "@/lib/db";
+import { DEFAULT_LOCALE, type Locale } from "@/lib/i18n/config";
+import { getTranslator } from "@/lib/i18n/translator";
 import { createScenarioPageSchema, scenarioContentSchema, scenarioSectionPatchSchema, updateScenarioMetaSchema } from "@/lib/schemas/scenario";
 import { notifyRevealForContentChange } from "@/lib/server/acquaintances/reveal";
 import { stampDigest } from "@/lib/server/assistant/digest";
 import { actionResult, requestDigest } from "@/lib/server/assistant/json";
+import { resultLabel } from "@/lib/server/assistant/result-labels";
 import type { ActionResult } from "@/lib/server/assistant/types";
 import { assertCan } from "@/lib/server/content/access";
 import { ContentError, parseInput } from "@/lib/server/content/errors";
 import { withCampaignContentWrite } from "@/lib/server/content/write";
 import { afterContentCommit } from "@/lib/server/content/write-context";
 import type { Actor } from "@/lib/utils/api/actor";
+import { localeOrRequest } from "@/lib/utils/api/translate-error";
+import { buildDefaultLegend } from "@/lib/utils/scenario/default-legend";
 import { moveRow, moveSection, newSection, removeRow, removeSection, updateSection } from "@/lib/utils/scenario/structure";
 import type { ScenarioContent } from "@/types/scenario";
 
 export const scenarioFingerprint = requestDigest;
 
-const scenarioActionResult = actionResult("scenario", "Сценарій");
-
-export const scenarioResult = (data: unknown, id = "all"): ActionResult => scenarioActionResult(data, id);
+export const scenarioResult = (data: unknown, id = "all", locale: Locale = DEFAULT_LOCALE): ActionResult => actionResult("scenario", resultLabel(locale, "scenario"))(data, id);
 export async function scenarioState(actor: Actor, id?: string) {
   const where = { campaignId: actor.campaignId };
 
@@ -116,18 +119,22 @@ export async function saveScenarioContent(actor: Actor, id: string, raw: unknown
 
   return withCampaignContentWrite(actor.campaignId, () => writeScenarioContent(actor, id, raw, expectedVersion, force));
 }
-export async function runScenarioOperation(actor: Actor, operation: string, input: Record<string, unknown>, expected?: string): Promise<ActionResult> {
+export async function runScenarioOperation(actor: Actor, operation: string, input: Record<string, unknown>, expected?: string, explicitLocale?: Locale): Promise<ActionResult> {
+  const locale = await localeOrRequest(explicitLocale);
+
+  const result = (data: unknown, id?: string) => scenarioResult(data, id, locale);
+
   const read = ["list", "get", "search", "mentions", "versions"].includes(operation);
 
   assertCan(actor, { access: "dm", scope: read ? "scenario:read" : "scenario:write" });
 
   const id = input.id as string | undefined;
 
-  if (operation === "list") return scenarioResult(await listPages(actor.campaignId));
+  if (operation === "list") return result(await listPages(actor.campaignId));
 
-  if (operation === "mentions") return scenarioResult(await searchScenarioMentions(actor.campaignId, String(input.query ?? "").trim().slice(0, 60)));
+  if (operation === "mentions") return result(await searchScenarioMentions(actor.campaignId, String(input.query ?? "").trim().slice(0, 60)));
 
-  if (operation === "search") return scenarioResult(await searchScenarioPages(actor.campaignId, String(input.query).trim().slice(0, 200)));
+  if (operation === "search") return result(await searchScenarioPages(actor.campaignId, String(input.query).trim().slice(0, 200)));
 
   return withCampaignContentWrite(actor.campaignId, async () => {
     const state = expected ? await scenarioState(actor, id) : { page: id ? await prisma.scenarioPage.findFirst({ where: { id, campaignId: actor.campaignId }, select: OWNED_WITH_CONTENT_SELECT }) : undefined };
@@ -136,20 +143,20 @@ export async function runScenarioOperation(actor: Actor, operation: string, inpu
 
     const page = state.page;
 
-    if (operation === "get") return scenarioResult(page ? toPage(page) : (() => { throw new ContentError(API_ERRORS.SCENARIO_NOT_FOUND, 404); })(), id);
+    if (operation === "get") return result(page ? toPage(page) : (() => { throw new ContentError(API_ERRORS.SCENARIO_NOT_FOUND, 404); })(), id);
 
-    if (operation === "versions") return scenarioResult(await prisma.scenarioPageVersion.findMany({ where: { pageId: page!.id }, select: { id: true, createdAt: true, createdBy: true }, orderBy: { createdAt: "desc" }, take: SCENARIO_MAX_VERSIONS }), id);
+    if (operation === "versions") return result(await prisma.scenarioPageVersion.findMany({ where: { pageId: page!.id }, select: { id: true, createdAt: true, createdBy: true }, orderBy: { createdAt: "desc" }, take: SCENARIO_MAX_VERSIONS }), id);
 
     if (operation === "create") {
       const body = parseInput(createScenarioPageSchema, input.data);
 
       if (!await characterInCampaign(actor.campaignId, body.characterId)) throw new ContentError(API_ERRORS.SCENARIO_CHARACTER_INVALID, 400);
 
-      const content: ScenarioContent = { legend: body.kind === "scene" ? DEFAULT_SCENE_LEGEND : [], sections: [newSection(body.kind === "hero" ? "Історія" : "Розділ 1")] };
+      const content: ScenarioContent = { legend: body.kind === "scene" ? buildDefaultLegend(await getTranslator(locale, "scenario")) : [], sections: [newSection((await getTranslator(locale, "assistant"))(body.kind === "hero" ? "defaults.firstChapter" : "defaults.firstSection"))] };
 
       const last = await prisma.scenarioPage.aggregate({ where: { campaignId: actor.campaignId }, _max: { sortOrder: true } });
 
-      return scenarioResult(toSummary(await prisma.scenarioPage.create({ data: { ...body, campaignId: actor.campaignId, sortOrder: (last._max.sortOrder ?? -1) + 1, ...contentWrite(body.title, content) }, select: SUMMARY_SELECT })));
+      return result(toSummary(await prisma.scenarioPage.create({ data: { ...body, campaignId: actor.campaignId, sortOrder: (last._max.sortOrder ?? -1) + 1, ...contentWrite(body.title, content) }, select: SUMMARY_SELECT })));
     }
 
     if (!page) throw new ContentError(API_ERRORS.SCENARIO_NOT_FOUND, 404);
@@ -159,7 +166,7 @@ export async function runScenarioOperation(actor: Actor, operation: string, inpu
 
       if (!await characterInCampaign(actor.campaignId, body.characterId)) throw new ContentError(API_ERRORS.SCENARIO_CHARACTER_INVALID, 400);
 
-      return scenarioResult(toSummary(await prisma.scenarioPage.update({ where: { id: page.id }, data: { ...body, ...contentWrite(body.title ?? page.title, readContentStrict(page.content)) }, select: SUMMARY_SELECT })), id);
+      return result(toSummary(await prisma.scenarioPage.update({ where: { id: page.id }, data: { ...body, ...contentWrite(body.title ?? page.title, readContentStrict(page.content)) }, select: SUMMARY_SELECT })), id);
     }
 
     if (operation === "delete") {
@@ -171,7 +178,7 @@ export async function runScenarioOperation(actor: Actor, operation: string, inpu
       await prisma.scenarioPage.delete({ where: { id: page.id } });
       await prisma.compendiumEntry.deleteMany({ where: { campaignId: actor.campaignId, kind: "scenarioPages", localId: page.id } });
 
-      return scenarioResult({ deleted: true }, id);
+      return result({ deleted: true }, id);
     }
 
     let next: unknown = input.content;
@@ -184,6 +191,6 @@ export async function runScenarioOperation(actor: Actor, operation: string, inpu
       next = readContentStrict(version.content);
     } else if (operation !== "save") next = transformScenarioContent(readContentStrict(page.content), operation, input as Parameters<typeof transformScenarioContent>[2]);
 
-    return scenarioResult(await saveScenarioContent(actor, page.id, next, page.version), id);
+    return result(await saveScenarioContent(actor, page.id, next, page.version), id);
   });
 }

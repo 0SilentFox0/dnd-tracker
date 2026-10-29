@@ -19,7 +19,7 @@ describe("groupIndex", () => {
     expect(groups.arcs.map((g) => [g.arc, g.pages.map((p) => `${p.id}${p.number}`)])).toEqual([
       ["Арка перша", ["c1", "a2"]],
       ["Особисті", ["b3"]],
-      ["Без арки", ["z4"]],
+      ["", ["z4"]],
     ]);
     expect(groups.heroes.map((p) => p.id)).toEqual(["h"]);
     expect(groups.notes.map((p) => p.id)).toEqual(["n"]);

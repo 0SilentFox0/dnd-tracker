@@ -4,6 +4,8 @@ import type { HandoffResult } from "../types";
 
 import "server-only";
 import { API_ERRORS } from "@/lib/constants/api-errors";
+import { DEFAULT_LOCALE, type Locale } from "@/lib/i18n/config";
+import { getTranslator } from "@/lib/i18n/translator";
 import { handoffContentKind, handoffId, isAssistantHandoffHref } from "@/lib/schemas/assistant-handoff";
 import { ContentError, parseInput } from "@/lib/server/content/errors";
 import type { Actor } from "@/lib/utils/api/actor";
@@ -28,35 +30,13 @@ export const HANDOFF_INPUTS = {
 
 type HandoffKind = keyof typeof HANDOFF_INPUTS;
 
-export const HANDOFF_REASONS: Record<HandoffKind, string> = {
-  "compendium-read": "Перегляньте дозволені звіти та варіанти імпорту через власну сесію у застосунку.",
-  credentials: "Додайте або змініть ключ провайдера у налаштуваннях AI.",
-  tokens: "Керуйте API-токенами та їхніми правами у застосунку.",
-  invite:
-    "Перегляньте запрошення у кампанії та передайте його людині самостійно.",
-  "campaign-import": "Виберіть локальний файл у формі створення кампанії.",
-  "campaign-join": "Введіть код запрошення у діалозі входу в кампанію.",
-  "content-import":
-    "Виберіть файл, перевірте мапінг і підтвердіть імпорт у чинному редакторі.",
-  "ai-map": "Оберіть дані та запустіть AI-мапінг у діалозі імпорту.",
-  "slide-upload": "Виберіть зображення у редакторі набору слайдів.",
-  "track-upload": "Виберіть аудіофайл у бібліотеці музики.",
-  "player-draft":
-    "Чернетка та AI-функції гравця доступні лише у власному флоу гравця.",
-  "compendium-preview":
-    "Виберіть локальний JSON, перевірте preview і підтвердіть права на матеріали у застосунку.",
-  "compendium-confirm":
-    "Відкрийте чинний preview, перевірте вибір і підтвердіть права на імпорт у застосунку.",
-  "source-notes":
-    "ДМ має явно вибрати примітки джерела перед передачею AI. Автоматично примітки не передаються.",
-};
-
 /** A link grants no rights. The destination keeps its current session/ownership guards. */
-export function buildAssistantHandoff(
+export async function buildAssistantHandoff(
   actor: Actor,
   kind: string,
-  target: unknown = {}
-): HandoffResult {
+  target: unknown = {},
+  locale: Locale = DEFAULT_LOCALE
+): Promise<HandoffResult> {
   if (!actor.isDM || !actor.userId)
     throw new ContentError(API_ERRORS.ASSISTANT_DM_ONLY, 403);
 
@@ -100,5 +80,5 @@ export function buildAssistantHandoff(
   if (!isAssistantHandoffHref(href))
     throw new ContentError(API_ERRORS.ASSISTANT_HANDOFF_UNAVAILABLE, 400);
 
-  return { href, reason: HANDOFF_REASONS[key] };
+  return { href, reason: (await getTranslator(locale, "assistant"))(`handoffs.${key}`) };
 }

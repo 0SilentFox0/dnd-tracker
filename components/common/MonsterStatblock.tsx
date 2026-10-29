@@ -4,7 +4,7 @@ import { MONSTER_SENSE_LABELS } from "@/lib/constants/monster";
 import type { UnitStatblock } from "@/types/units";
 
 export function MonsterStatblock({ block }: { block: UnitStatblock }) {
-  const t = useTranslations("common.monster");
+  const t = useTranslations("gameTerms.monster");
 
   const senses = (Object.keys(MONSTER_SENSE_LABELS) as Array<keyof typeof MONSTER_SENSE_LABELS>).flatMap((key) => {
     const value = block.senses?.[key];

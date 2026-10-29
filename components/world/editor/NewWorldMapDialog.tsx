@@ -1,6 +1,7 @@
 "use client";
 
 import { type FormEvent, useState } from "react";
+import { useTranslations } from "next-intl";
 
 import { MapFileDropzone } from "./MapFileDropzone";
 import { useWorldEditorContext } from "./WorldEditorContext";
@@ -34,6 +35,10 @@ function NewWorldMapDialogForm({ open, onOpenChange, parentMarker }: Props) {
 
   const notify = useNotify();
 
+  const t = useTranslations("world");
+
+  const tc = useTranslations("common.actions");
+
   const [name, setName] = useState(parentMarker?.name ?? "");
 
   const [file, setFile] = useState<File | null>(null);
@@ -54,7 +59,7 @@ function NewWorldMapDialogForm({ open, onOpenChange, parentMarker }: Props) {
     try {
       image = await upload(file);
     } catch (err) {
-      void notify(errorMessage(err, "Не вдалося завантажити картинку"));
+      void notify(errorMessage(err, t("errors.uploadFailed")));
 
       return;
     }
@@ -65,7 +70,7 @@ function NewWorldMapDialogForm({ open, onOpenChange, parentMarker }: Props) {
       onOpenChange(false);
       openMap(created.id);
     } catch (err) {
-      setError(errorMessage(err, "Не вдалося створити карту"));
+      setError(errorMessage(err, t("errors.createMap")));
       void discard(image.imageUrl);
     }
   };
@@ -75,22 +80,22 @@ function NewWorldMapDialogForm({ open, onOpenChange, parentMarker }: Props) {
       hud
       open={open}
       onOpenChange={onOpenChange}
-      title={parentMarker ? "Карта для маркера" : "Нова карта"}
-      description={parentMarker ? `Вкладена карта для «${parentMarker.name}»: відкриється, коли герої зайдуть у це місце.` : "Назва й картинка карти. Маркери, зони та вкладені карти додаються в редакторі."}
+      title={parentMarker ? t("newMap.titleMarker") : t("newMap.title")}
+      description={parentMarker ? t("newMap.descriptionMarker", { name: parentMarker.name }) : t("newMap.description")}
       footer={
         <>
           <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
-            Скасувати
+            {tc("cancel")}
           </Button>
           <Button type="submit" form={FORM_ID} disabled={!file || !name.trim() || busy}>
-            {busy ? "Завантаження…" : "Створити"}
+            {busy ? t("newMap.uploading") : tc("create")}
           </Button>
         </>
       }
     >
       <form id={FORM_ID} onSubmit={(e) => void submit(e)} className="space-y-3">
-        <LabeledInput label="Назва" required maxLength={WORLD_NAME_MAX} value={name} error={error ?? undefined} onChange={(e) => setName(e.target.value)} />
-        <FormField label="Картинка" required>
+        <LabeledInput label={t("name")} required maxLength={WORLD_NAME_MAX} value={name} error={error ?? undefined} onChange={(e) => setName(e.target.value)} />
+        <FormField label={t("newMap.image")} required>
           <MapFileDropzone file={file} onFile={setFile} />
         </FormField>
       </form>

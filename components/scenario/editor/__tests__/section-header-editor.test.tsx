@@ -1,11 +1,14 @@
 // @vitest-environment happy-dom
-import { cleanup, fireEvent, render, screen } from "@testing-library/react";
+import { cleanup, fireEvent, screen } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
 import { SectionHeaderEditor } from "@/components/scenario/editor/SectionHeaderEditor";
+import { render } from "@/components/ui/__tests__/uk-intl";
 import type { ScenarioSection } from "@/types/scenario";
 
 afterEach(cleanup);
+
+vi.unmock("next-intl");
 
 const section: ScenarioSection = { id: "s1", title: "2.3 Орлине Гніздо", played: false, rows: [{ id: "r", story: { type: "doc", content: [] }, notes: { type: "doc", content: [] }, battleId: "b" }] };
 

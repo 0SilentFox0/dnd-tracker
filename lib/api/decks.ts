@@ -17,14 +17,14 @@ export const setDeckScene = (campaignId: string, deckId: string, data: DeckScene
 export const deleteDeck = (campaignId: string, deckId: string) => campaignDelete<{ ok: true }>(campaignId, `/decks/${deckId}`);
 
 /** Файл іде з браузера прямо в Storage: тіло запиту до Vercel обмежене 4,5 МБ. */
-export async function uploadSlideImage(campaignId: string, blob: Blob): Promise<string> {
+export async function uploadSlideImage(campaignId: string, blob: Blob, uploadFailed: (message: string) => string): Promise<string> {
   const request: SlideUploadRequest = { size: blob.size, contentType: blob.type };
 
   const ticket = await campaignPost<SlideUploadTicket>(campaignId, "/decks/upload-url", request);
 
   const { error } = await createClient().storage.from(ticket.bucket).uploadToSignedUrl(ticket.path, ticket.token, blob, { contentType: ticket.contentType, cacheControl: YEAR_CACHE_SECONDS });
 
-  if (error) throw new Error(`Не вдалося завантажити картинку: ${error.message}`);
+  if (error) throw new Error(uploadFailed(error.message));
 
   return ticket.publicUrl;
 }

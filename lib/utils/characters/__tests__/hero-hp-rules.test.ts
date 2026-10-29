@@ -15,6 +15,6 @@ describe("heroBaseHp з формулою кампанії", () => {
     const custom = heroBaseHp(hero, { baseLevels: 1, conCoefficient: 1 });
 
     expect(custom.total).toBe(152);
-    expect(custom.breakdown[0]).toContain("1 × 12");
+    expect(custom.breakdown[0].params).toMatchObject({ baseLevels: "1", hpPerLevel: "12" });
   });
 });

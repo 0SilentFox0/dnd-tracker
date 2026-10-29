@@ -2,6 +2,7 @@ import { z } from "zod";
 
 import { API_ERRORS } from "@/lib/constants/api-errors";
 import { prisma } from "@/lib/db";
+import { DEFAULT_LOCALE } from "@/lib/i18n/config";
 import { BATTLE_COMMANDS, BATTLE_READS, type BattleActionInput,battleActionInput, HUMAN_BATTLE_ACTIONS } from "@/lib/server/assistant/actions/battle-actions";
 import { contentSnapshot } from "@/lib/server/assistant/actions/content-snapshot";
 import { actionResult, jsonContent, requestDigest } from "@/lib/server/assistant/json";
@@ -186,7 +187,7 @@ export async function runBattleAction(actor: Actor, operation: string, raw: unkn
   const value = parseInput(battleActionInput, raw);
 
   const run = () => withCampaignContentWrite(actor.campaignId, async () => {
-    const fresh = await prepareBattleAction({ actor, channel: execution?.caller.channel ?? "chat", threadId: null, tokenId: null }, operation, value);
+    const fresh = await prepareBattleAction({ actor, channel: execution?.caller.channel ?? "chat", threadId: null, tokenId: null, locale: execution?.caller.locale ?? DEFAULT_LOCALE }, operation, value);
 
     if (requestDigest(fresh.preconditions) !== requestDigest(expected)) throw new ContentError(API_ERRORS.BATTLE_CHANGED_PREVIEW_AGAIN, 409);
 

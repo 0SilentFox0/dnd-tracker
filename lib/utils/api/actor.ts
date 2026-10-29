@@ -3,6 +3,7 @@ import { NextResponse } from "next/server";
 import { verifyApiToken } from "@/lib/ai/api-tokens";
 import { type ActionScope, type ApiTokenScope } from "@/lib/constants/ai";
 import { API_ERRORS } from "@/lib/constants/api-errors";
+import type { Locale } from "@/lib/i18n/config";
 import { requireCampaignAccess, requireDM } from "@/lib/utils/api/api-auth";
 import { errorResponse } from "@/lib/utils/api/api-response";
 import { bearerToken } from "@/lib/utils/api/bearer";
@@ -18,14 +19,14 @@ export const tokenActorOf = (t: { campaignId: string; userId: string; scopes: re
 
 export const sessionDmActor = (campaignId: string, userId: string): Actor => ({ campaignId, userId, isDM: true, via: "session", scopes: null });
 
-export async function verifyBearer(raw: string | null, campaignId: string | null): Promise<{ tokenId: string; campaignId: string; userId: string; scopes: ApiTokenScope[] } | NextResponse> {
+export async function verifyBearer(raw: string | null, campaignId: string | null): Promise<{ tokenId: string; campaignId: string; userId: string; scopes: ApiTokenScope[]; locale: Locale } | NextResponse> {
   const token = raw ? await verifyApiToken(raw) : null;
 
   if (!token) return errorResponse(API_ERRORS.UNAUTHORIZED, 401);
 
   if (campaignId !== null && token.campaignId !== campaignId) return errorResponse(API_ERRORS.API_TOKEN_WRONG_CAMPAIGN, 403);
 
-  return { tokenId: token.id, campaignId: token.campaignId, userId: token.userId, scopes: token.scopes };
+  return { tokenId: token.id, campaignId: token.campaignId, userId: token.userId, scopes: token.scopes, locale: token.locale };
 }
 
 export async function authenticateToken(raw: string | null, campaignId: string | null, need: ActorNeed): Promise<Actor | NextResponse> {

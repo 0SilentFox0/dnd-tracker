@@ -3,6 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { useTranslations } from "next-intl";
 import { Images } from "lucide-react";
 
 import { EmptyState } from "@/components/common/states";
@@ -19,6 +20,10 @@ import { useDeck, useDeckEditor, useShowControl } from "@/lib/hooks/show";
 import type { SlideDeck } from "@/types/show";
 
 export function DeckEditorPageClient({ campaignId, deck }: { campaignId: string; deck: SlideDeck }) {
+  const t = useTranslations("show");
+
+  const tc = useTranslations("common");
+
   const router = useRouter();
 
   const notify = useNotify();
@@ -47,16 +52,16 @@ export function DeckEditorPageClient({ campaignId, deck }: { campaignId: string;
 
   return (
     <HudFormPage
-      title="Набір слайдів"
+      title={t("deckEditor.title")}
       aside={
         <Link href={`${base}/dm/show`} className="underline">
-          ← До наборів
+          {t("deckEditor.back")}
         </Link>
       }
     >
       <HudForm
         id="deck-editor-form"
-        error={draft.title.trim() ? null : "Вкажіть назву набору"}
+        error={draft.title.trim() ? null : t("deckEditor.nameRequired")}
         onSubmit={(e) => {
           e.preventDefault();
           void editor.save();
@@ -64,20 +69,20 @@ export function DeckEditorPageClient({ campaignId, deck }: { campaignId: string;
         actions={
           <>
             <Button type="submit" disabled={!dirty || saving || !draft.title.trim()}>
-              Зберегти
+              {tc("actions.save")}
             </Button>
             <Button type="button" variant="outline" disabled={saving || control.pending || draft.slides.length === 0} onClick={() => void startShow()}>
-              Почати показ
+              {t("startShow")}
             </Button>
           </>
         }
       >
         <div className="flex flex-col gap-4">
-          <Input aria-label="Назва набору" placeholder="Назва набору" maxLength={DECK_TITLE_MAX} value={draft.title} onChange={(e) => dispatch({ type: "rename", title: e.target.value })} />
+          <Input aria-label={t("deckEditor.nameLabel")} placeholder={t("deckEditor.nameLabel")} maxLength={DECK_TITLE_MAX} value={draft.title} onChange={(e) => dispatch({ type: "rename", title: e.target.value })} />
           <DeckSceneSelect campaignId={campaignId} deck={live} />
           <AddSlidesBar campaignId={campaignId} upload={editor.upload} count={draft.slides.length} />
           {draft.slides.length === 0 ? (
-            <EmptyState icon={Images} title="Ще немає слайдів" description="Додайте картинки — файли або посилання" />
+            <EmptyState icon={Images} title={t("deckEditor.emptyTitle")} description={t("deckEditor.emptyDescription")} />
           ) : (
             <SlideGrid slides={draft.slides} actions={{ dispatch, edit: setEditingId }} />
           )}

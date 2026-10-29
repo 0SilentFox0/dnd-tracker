@@ -22,7 +22,7 @@ const publicUrl = (url: string) => { const u = new URL(url);
 
  return !u.search && !u.hash && !u.username && !u.password; };
 
-const save = saveDeckSchema.refine(v => v.slides.every(s => publicUrl(s.imageUrl)), "Потрібні публічні посилання без credentials");
+const save = saveDeckSchema.refine(v => v.slides.every(s => publicUrl(s.imageUrl)), "Public links without credentials are required");
 
 export const SHOW_INPUTS = {
   get: z.strictObject({}), command: z.strictObject({ body: showCommandSchema }),
@@ -37,9 +37,9 @@ export const SHOW_INPUTS = {
 export const SHOW_ACTIONS: readonly AssistantActionDef[] = Object.entries(SHOW_INPUTS).map(([operation, input]): AssistantActionDef => {
   const read = ["get", "decks.list", "decks.get"].includes(operation);
 
-  const base = { id: `show.${operation}`, title: `Показ: ${operation}`, description: "Набори, слайди, прив’язки, показ і музика. Генерація лише за явним запитом, з людським підтвердженням.", input, need: { access: "dm" as const, scope: read ? "show:read" as const : "show:write" as const } };
+  const base = { id: `show.${operation}`, title: `Show: ${operation}`, description: "Slide decks, slides, bindings, the show and music. Generation only on explicit request, with human confirmation.", input, need: { access: "dm" as const, scope: read ? "show:read" as const : "show:write" as const } };
 
-  if (read) return { ...base, effect: "read", execute: (caller, raw) => runShowOperation(caller.actor, operation, input.parse(raw) as ShowInput) };
+  if (read) return { ...base, effect: "read", execute: (caller, raw) => runShowOperation(caller.actor, operation, input.parse(raw) as ShowInput, undefined, undefined, caller.locale) };
 
   return { ...base, effect: operation === "generate" ? "paid" : "write", confirmation: ["generate", "discard", "decks.delete"].includes(operation) ? "always" : "standard",
     prepare: (caller, raw) => prepareShowAction(caller, operation, input.parse(raw) as ShowInput),

@@ -27,7 +27,7 @@ export function SpellDropdownContent({
 }: SpellDropdownContentProps) {
   const t = useTranslations("spells.dropdown");
 
-  const tc = useTranslations("common.ungrouped");
+  const tc = useTranslations("gameTerms.ungrouped");
 
   if (isLoading) {
     return (

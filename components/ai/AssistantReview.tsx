@@ -1,5 +1,6 @@
 "use client";
 import { useState } from "react";
+import { useTranslations } from "next-intl";
 
 import { AiProposalCard } from "./AiProposalCard";
 import { AssistantIntentCard } from "./AssistantIntentCard";
@@ -21,6 +22,8 @@ interface QueuePaneProps {
 }
 
 function AssistantQueuePane({ queue, intentId, hasPrevious, legacyItems, actions }: QueuePaneProps) {
+  const t = useTranslations("ai");
+
   return (
     <div>
       <AssistantQueue
@@ -32,34 +35,40 @@ function AssistantQueuePane({ queue, intentId, hasPrevious, legacyItems, actions
       />
       {legacyItems.map((p) => (
         <Button key={p.id} variant="outline" className="mt-2 h-auto w-full whitespace-normal" onClick={() => actions.onSelectLegacy(p.id)}>
-          {p.summary} · Сценарій
+          {t("review.legacyItem", { summary: p.summary })}
         </Button>
       ))}
-      {(queue.query.isError || queue.legacy.isError) && <p role="alert">Не вдалося завантажити чергу</p>}
+      {(queue.query.isError || queue.legacy.isError) && <p role="alert">{t("review.queueError")}</p>}
     </div>
   );
 }
 
 function DetailStatus({ queue, intentId }: { queue: Queue; intentId?: string }) {
+  const t = useTranslations("ai");
+
   return (
     <>
-      {queue.detail.isLoading && intentId && <p role="status">Завантаження пропозиції…</p>}
-      {queue.detail.isError && intentId && queue.receipt.data?.status !== "applied" && <p role="alert">Пропозиція недоступна або її вміст очищено</p>}
+      {queue.detail.isLoading && intentId && <p role="status">{t("review.detailLoading")}</p>}
+      {queue.detail.isError && intentId && queue.receipt.data?.status !== "applied" && <p role="alert">{t("review.detailUnavailable")}</p>}
     </>
   );
 }
 
 function ReviewMessages({ queue, error, refinement }: { queue: Queue; error: string; refinement: string }) {
+  const t = useTranslations("ai");
+
   return (
     <>
-      {(error || queue.error) && <p role="alert">{error || "Не вдалося виконати дію"}</p>}
-      {queue.receipt.isError && <p role="alert">Не вдалося прочитати квитанцію. Відновіть стан.</p>}
+      {(error || queue.error) && <p role="alert">{error || t("review.actionFailedShort")}</p>}
+      {queue.receipt.isError && <p role="alert">{t("review.receiptFailed")}</p>}
       {refinement && <p role="status">{refinement}</p>}
     </>
   );
 }
 
 export function AssistantReview({ campaignId, initialIntentId }: { campaignId: string; initialIntentId?: string }) {
+  const t = useTranslations("ai");
+
   const [intentId, setIntentId] = useState(initialIntentId);
 
   const [cursors, setCursors] = useState<(string | undefined)[]>([undefined]);
@@ -88,7 +97,7 @@ export function AssistantReview({ campaignId, initialIntentId }: { campaignId: s
     try {
       await action();
     } catch {
-      setError("Не вдалося виконати дію. Відновіть стан і перевірте пропозицію.");
+      setError(t("review.actionFailed"));
     }
   };
 
@@ -126,10 +135,10 @@ export function AssistantReview({ campaignId, initialIntentId }: { campaignId: s
             busy={queue.busy}
             onConfirm={() => void run(() => queue.confirm(detail.id))}
             onReject={() => void run(() => queue.reject(detail.id))}
-            onRefine={() => setRefinement(`Уточніть запит для пропозиції «${detail.summary}». Надішліть новий запит у чаті; це не застосовує змін.`)}
+            onRefine={() => setRefinement(t("review.refine", { summary: detail.summary }))}
           />
         )}
-        {deletedReceipt && <p role="status">Кампанію видалено. Квитанція {deletedReceipt.id}</p>}
+        {deletedReceipt && <p role="status">{t("review.campaignDeleted", { id: deletedReceipt.id })}</p>}
         {proposal && (
           <AiProposalCard
             campaignId={campaignId}
@@ -154,13 +163,13 @@ export function AssistantReview({ campaignId, initialIntentId }: { campaignId: s
                   await legacy.refetch();
                   await queue.refresh();
                 }),
-              onRedo: () => setRefinement("Уточніть запит у чаті та створіть нову пропозицію."),
+              onRedo: () => setRefinement(t("review.refineLegacy")),
             }}
           />
         )}
         <ReviewMessages queue={queue} error={error} refinement={refinement} />
         <Button variant="outline" onClick={() => void queue.refresh()}>
-          Відновити чергу
+          {t("review.refresh")}
         </Button>
       </div>
     </div>

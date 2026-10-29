@@ -17,7 +17,7 @@ describe("assistant chat recovery API", () => {
     const res = await GET(new Request("http://local/chat"), { params });
 
     expect(res.status).toBe(200);
-    expect(readAssistantRuns).toHaveBeenCalledWith({ actor: { campaignId: "campaign", userId: "dm", via: "session", scopes: null, isDM: true }, threadId: "thread", tokenId: null, channel: "chat" });
+    expect(readAssistantRuns).toHaveBeenCalledWith({ actor: { campaignId: "campaign", userId: "dm", via: "session", scopes: null, isDM: true }, threadId: "thread", tokenId: null, channel: "chat", locale: "uk" as const });
   });
   it("statusOnly=1 skips messages, the plain request keeps them", async () => {
     vi.mocked(loadMessages).mockClear();

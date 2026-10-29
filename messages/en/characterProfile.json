@@ -10,9 +10,6 @@
     "log": "Log",
     "things": "Gear"
   },
-  "actions": {
-    "edit": "Edit"
-  },
   "hero": {
     "level": "Lv {level}",
     "hpCurrent": "HP {current} / {max}",
@@ -82,7 +79,6 @@
     },
     "labelField": "Token label",
     "deleteConfirm": "Delete token “{label}”?",
-    "delete": "Delete",
     "title": "TOKENS",
     "add": "+ Token",
     "counters": {
@@ -95,7 +91,6 @@
   },
   "goals": {
     "deleteConfirm": "Delete goal “{name}”?",
-    "delete": "Delete",
     "title": "GOALS",
     "empty": "No goals yet.",
     "statusLabel": "Status of “{name}”: {status}",
@@ -115,7 +110,6 @@
     "namePlaceholder": "Title (optional)",
     "textField": "Goal text",
     "save": "Save goal",
-    "cancel": "Cancel",
     "add": "Add goal",
     "saveFailed": "Could not save the goals"
   },
@@ -124,8 +118,6 @@
     "edit": "Edit notes",
     "empty": "No notes yet.",
     "field": "Notes",
-    "save": "Save",
-    "cancel": "Cancel",
     "saveFailed": "Could not save the notes"
   },
   "biography": {
@@ -172,7 +164,6 @@
   },
   "classLevelUp": {
     "title": "Level up",
-    "cancel": "Cancel",
     "later": "Choose later",
     "confirm": "Level up",
     "classNotFound": "Class not found",
@@ -194,9 +185,7 @@
     "spellAbility": "Spellcasting ability",
     "none": "None",
     "spellAbilityHint": "The spell save DC and spell attack in the profile are based on it.",
-    "cancel": "Cancel",
-    "saving": "Saving…",
-    "save": "Save"
+    "saving": "Saving…"
   },
   "sheet": {
     "lines": {
@@ -224,6 +213,10 @@
       "classLevel": "{name} {level}",
       "origin": "Origin",
       "dm": "DM"
+    },
+    "heroHp": {
+      "formula": "{archetype, select, warrior {Warrior} paladin {Paladin} ranger {Archer} rogue {Rogue} mage {Mage} other {Universal}}: {baseLevels} × {hpPerLevel} + level × ({hpPerLevel} + CON mod {conMod} × {conCoefficient})",
+      "total": "= {base} + {level} × {perLevel} = {total}"
     }
   }
 }

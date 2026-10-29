@@ -1,5 +1,7 @@
 "use client";
 
+import { useTranslations } from "next-intl";
+
 import { worldKeys } from "./keys";
 
 import { enterMarker, exitMap, restHeroes, travelHeroes } from "@/lib/api/world";
@@ -8,6 +10,8 @@ import { useCrudMutation } from "@/lib/hooks/common";
 import type { RestRequest, TravelRest } from "@/types/world";
 
 export function useWorldTravel(campaignId: string) {
+  const t = useTranslations("world.travel.errors");
+
   const worldKeysFor = () => [worldKeys.viewAll(campaignId), worldKeys.mapAll(campaignId), worldKeys.log(campaignId)];
 
   const characterKeysFor = () => [characterKeys.sheet(campaignId), characterKeys.lists(campaignId), characterKeys.logs(campaignId)];
@@ -17,25 +21,25 @@ export function useWorldTravel(campaignId: string) {
   const travel = useCrudMutation({
     mutationFn: (data: Parameters<typeof travelHeroes>[1]) => travelHeroes(campaignId, data),
     invalidateKeys,
-    errorText: "Не вдалося перемістити героїв",
+    errorText: t("travel"),
   });
 
   const enter = useCrudMutation({
     mutationFn: (data: Parameters<typeof enterMarker>[1]) => enterMarker(campaignId, data),
     invalidateKeys,
-    errorText: "Не вдалося зайти на карту",
+    errorText: t("enter"),
   });
 
   const exit = useCrudMutation({
     mutationFn: (data: Parameters<typeof exitMap>[1]) => exitMap(campaignId, data),
     invalidateKeys,
-    errorText: "Не вдалося вийти з карти",
+    errorText: t("exit"),
   });
 
   const rest = useCrudMutation({
     mutationFn: (data: RestRequest) => restHeroes(campaignId, data),
     invalidateKeys: () => [...worldKeysFor(), ...characterKeysFor()],
-    errorText: "Не вдалося провести відпочинок",
+    errorText: t("rest"),
   });
 
   return { travel, enter, exit, rest, isPending: travel.isPending || enter.isPending || exit.isPending || rest.isPending };

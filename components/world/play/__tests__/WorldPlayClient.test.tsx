@@ -5,9 +5,11 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import { WorldPlayClient } from "../WorldPlayClient";
 
-import { renderWithConfirm } from "@/components/ui/__tests__/render-with-confirm";
+import { renderWithConfirm } from "@/components/ui/__tests__/uk-intl";
 import * as api from "@/lib/api/world";
 import type { WorldMarker, WorldView } from "@/types/world";
+
+vi.unmock("next-intl");
 
 vi.mock("@/lib/api/world");
 

@@ -19,7 +19,7 @@ export function classArmorBase(p: BattleParticipant): { base: number; lines: She
 
   const worn = wornArmor(p);
 
-  if (!worn) return { base: 10 + dex, lines: [{ label: sheetLineKey("noArmor"), value: "10", source: "base" }, { label: "common.abilities.dexterity.label", value: signed(dex), source: "ability" }] };
+  if (!worn) return { base: 10 + dex, lines: [{ label: sheetLineKey("noArmor"), value: "10", source: "base" }, { label: "gameTerms.abilities.dexterity.label", value: signed(dex), source: "ability" }] };
 
   const cap = armorDexCap(worn.stats);
 
@@ -29,7 +29,7 @@ export function classArmorBase(p: BattleParticipant): { base: number; lines: She
     base: worn.stats.base + dexPart,
     lines: [
       { label: worn.artifact.name, value: String(worn.stats.base), source: "artifact" },
-      ...(cap === 0 ? [] : [{ label: cap === null ? "common.abilities.dexterity.label" : sheetLineKey("dexterityCapped"), ...(cap !== null && { params: { cap } }), value: signed(dexPart), source: "ability" as const }]),
+      ...(cap === 0 ? [] : [{ label: cap === null ? "gameTerms.abilities.dexterity.label" : sheetLineKey("dexterityCapped"), ...(cap !== null && { params: { cap } }), value: signed(dexPart), source: "ability" as const }]),
     ],
   };
 }

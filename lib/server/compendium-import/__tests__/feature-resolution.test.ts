@@ -34,7 +34,7 @@ describe("nested feature characterization", () => {
     const result = adaptCompendium({ _meta: meta, class: [{ ...mage, classFeatures: [variant === "source" ? "Gift|Mage|T|1" : mage.classFeatures[0]] }], classFeature: candidates });
 
     expect(result.entries[0].body.features).toEqual([]);
-    expect(result.issues).toEqual([{ code: "FEATURE_REF_UNRESOLVED", severity: "error", path: `${result.entries[0].key}.classFeatures[0]`, action: "Додайте точне визначення feature або виключіть залежний клас/підклас" }]);
+    expect(result.issues).toEqual([{ code: "FEATURE_REF_UNRESOLVED", severity: "error", path: `${result.entries[0].key}.classFeatures[0]` }]);
     expect(result.embedded).toEqual({ optionalfeature: 0 });
   });
 

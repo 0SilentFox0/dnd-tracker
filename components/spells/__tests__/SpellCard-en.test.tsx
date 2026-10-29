@@ -15,7 +15,7 @@ const spell = { id: "s1", name: "Spark", level: 1, description: null, dice: 2, c
 
 describe("SpellCard in en", () => {
   it("renders English level, mechanics and actions", async () => {
-    await renderWithIntl(<SpellCard spell={spell} campaignId="c1" spellGroups={[]} onRemoveFromGroup={vi.fn()} onMoveToGroup={vi.fn()} />, { locale: "en", namespaces: ["common", "spells"] });
+    await renderWithIntl(<SpellCard spell={spell} campaignId="c1" spellGroups={[]} onRemoveFromGroup={vi.fn()} onMoveToGroup={vi.fn()} />, { locale: "en", namespaces: ["common", "gameTerms", "spells"] });
 
     expect(screen.getByText("1st level")).toBeInTheDocument();
     expect(screen.getByText("2 dice")).toBeInTheDocument();

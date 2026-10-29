@@ -57,3 +57,45 @@ describe("generateCharacter", () => {
     });
   });
 });
+
+describe("generateCharacter locales", () => {
+  const CYR = /\p{Script=Cyrillic}/u;
+
+  const RACES = ["Humans", "Orcs", "Dark Elves", "Elves", "Gnomes", "Undead", "Demons", "Mages", "Unknown"];
+
+  it("en output has no Cyrillic and matches the uk structure", () => {
+    for (let seed = 0; seed < 60; seed++) {
+      const en = generateCharacter({ races: RACES, seed, locale: "en" });
+
+      const uk = generateCharacter({ races: RACES, seed, locale: "uk" });
+
+      expect(JSON.stringify(en)).not.toMatch(CYR);
+      expect(en.archetype).toBe(uk.archetype);
+      expect(en.scores).toEqual(uk.scores);
+      expect(en.goals.map((g) => g.kind)).toEqual(uk.goals.map((g) => g.kind));
+      expect(en.background.split(". ").length).toBe(uk.background.split(". ").length);
+    }
+  });
+
+  it("uk stays the default", () => {
+    expect(generateCharacter({ races: ["Люди"], seed: 7 })).toEqual(generateCharacter({ races: ["Люди"], seed: 7, locale: "uk" }));
+  });
+
+  it("en names and tables mirror uk shapes", async () => {
+    const { NAME_TABLES_EN } = await import("../names.en");
+
+    const { NAME_TABLES_UK } = await import("../names.uk");
+
+    const { BACKSTORY_EN } = await import("../backstory.en");
+
+    const { BACKSTORY_UK } = await import("../backstory.uk");
+
+    expect(NAME_TABLES_EN.map((t) => [t.first.length, t.second.length])).toEqual(NAME_TABLES_UK.map((t) => [t.first.length, t.second.length]));
+    expect(BACKSTORY_EN.origin).toHaveLength(BACKSTORY_UK.origin.length);
+    expect(BACKSTORY_EN.drive).toHaveLength(BACKSTORY_UK.drive.length);
+    expect(BACKSTORY_EN.mainGoals).toHaveLength(BACKSTORY_UK.mainGoals.length);
+    expect(BACKSTORY_EN.personalGoals).toHaveLength(BACKSTORY_UK.personalGoals.length);
+
+    for (const k of Object.keys(BACKSTORY_UK.turn) as Array<keyof typeof BACKSTORY_UK.turn>) expect(BACKSTORY_EN.turn[k]).toHaveLength(BACKSTORY_UK.turn[k].length);
+  });
+});

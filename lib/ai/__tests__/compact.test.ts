@@ -10,7 +10,7 @@ describe("compactToolOutputs", () => {
   it("minChars compacts only long string outputs in old messages", () => {
     const out = compactToolOutputs(Array.from({ length: 10 }, (_, i) => msg(`m${i}`)) as never, { minChars: 2000 });
 
-    expect((out[0].parts[0] as { output: string }).output).toContain("стиснуто");
+    expect((out[0].parts[0] as { output: string }).output).toContain("compacted");
     expect((out[0].parts[1] as { output: string }).output).toBe('{"proposalId":"ap1"}');
     expect((out[9].parts[0] as { output: string }).output).toBe(big);
   });

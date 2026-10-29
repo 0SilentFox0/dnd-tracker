@@ -31,7 +31,7 @@ interface ReferenceSectionAccordionProps {
 export function ReferenceSectionAccordion({ campaignId, isDM, shown, items }: ReferenceSectionAccordionProps) {
   const t = useTranslations("dashboard.reference.sections");
 
-  const tu = useTranslations("common.ungrouped");
+  const tu = useTranslations("gameTerms.ungrouped");
 
   const { skills: filteredSkills, spells: filteredSpells, artifacts: filteredArtifacts, artifactSets, classes: filteredClasses } = items;
 

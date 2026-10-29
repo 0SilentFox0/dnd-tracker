@@ -5,10 +5,12 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 
 import { WorldNotesPanel, type WorldNotesPanelProps } from "../WorldNotesPanel";
 
-import { renderWithConfirm } from "@/components/ui/__tests__/render-with-confirm";
+import { renderWithConfirm } from "@/components/ui/__tests__/uk-intl";
 import * as api from "@/lib/api/world";
 import { WORLD_NOTE_MAX } from "@/lib/constants/world";
 import type { WorldMarker, WorldNote } from "@/types/world";
+
+vi.unmock("next-intl");
 
 vi.mock("@/lib/api/world");
 

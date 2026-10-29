@@ -29,7 +29,7 @@ it("deleteAllAlwaysHuman", async () => {
 
   if (!def || def.effect !== "write") throw Error("write");
 
-  const preview = await def.prepare({ actor, channel: "chat", threadId: null, tokenId: null }, {});
+  const preview = await def.prepare({ actor, channel: "chat", threadId: null, tokenId: null, locale: "uk" as const }, {});
 
   expect(confirmationFor(def, "auto", preview)).toBe("human");
 });
@@ -101,7 +101,7 @@ it("deleteAllPreviewNamesOnlyPlayerCharacters",async()=>{
 
 if(!action||action.effect!=="write")throw Error("action");
 
- const preview=await action.prepare({actor,channel:"chat",threadId:null,tokenId:null},{});
+ const preview=await action.prepare({actor,channel:"chat",threadId:null,tokenId:null, locale: "uk" as const},{});
 
  expect(preview.targets).toEqual([{domain:"characters",id:"player",name:"Гравець"}]);
  expect(JSON.stringify(preview.changes)).not.toContain("NPC");

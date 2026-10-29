@@ -11,7 +11,7 @@ describe("ArtifactWeaponFields traits", () => {
     const onChange = vi.fn();
 
     render(<ArtifactWeaponFields value={{ damageDice: "1d8" }} onChange={onChange} />);
-    fireEvent.click(screen.getByRole("checkbox", { name: "common.weaponTraits.traits.finesse" }));
+    fireEvent.click(screen.getByRole("checkbox", { name: "gameTerms.weaponTraits.traits.finesse" }));
 
     expect(onChange).toHaveBeenCalledWith({ damageDice: "1d8", traits: ["finesse"] });
   });
@@ -20,7 +20,7 @@ describe("ArtifactWeaponFields traits", () => {
     const onChange = vi.fn();
 
     render(<ArtifactWeaponFields value={{ traits: ["light"] }} onChange={onChange} />);
-    fireEvent.click(screen.getByRole("checkbox", { name: "common.weaponTraits.traits.light" }));
+    fireEvent.click(screen.getByRole("checkbox", { name: "gameTerms.weaponTraits.traits.light" }));
 
     expect(onChange).toHaveBeenCalledWith({});
   });
@@ -28,10 +28,10 @@ describe("ArtifactWeaponFields traits", () => {
   it("кубик двома руками лише для універсальної", () => {
     const { rerender } = render(<ArtifactWeaponFields value={{}} onChange={vi.fn()} />);
 
-    expect(screen.queryByLabelText("common.weaponTraits.versatileDice")).toBeNull();
+    expect(screen.queryByLabelText("gameTerms.weaponTraits.versatileDice")).toBeNull();
 
     rerender(<ArtifactWeaponFields value={{ traits: ["versatile"] }} onChange={vi.fn()} />);
 
-    expect(screen.getByLabelText("common.weaponTraits.versatileDice")).toBeTruthy();
+    expect(screen.getByLabelText("gameTerms.weaponTraits.versatileDice")).toBeTruthy();
   });
 });

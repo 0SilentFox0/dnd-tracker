@@ -63,7 +63,7 @@ const published = vi.fn();
 
 const actor = () => ({ campaignId, userId, isDM: true, via: "session", scopes: null } as const);
 
-const caller = (): AssistantCaller => ({ actor: actor(), channel: "chat", threadId, tokenId: null });
+const caller = (): AssistantCaller => ({ actor: actor(), channel: "chat", threadId, tokenId: null, locale: "uk" as const });
 
 const faultDb = new Proxy(db, { get(target, property) {
   if (property === "$transaction") return (callback: (tx: unknown) => unknown, options: unknown) => target.$transaction(async tx => callback(new Proxy(tx, { get(transaction, key) {

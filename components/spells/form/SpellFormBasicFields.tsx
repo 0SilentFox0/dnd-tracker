@@ -27,7 +27,7 @@ export function SpellFormBasicFields({ formData, setFormData, spellGroups }: Spe
       <LabeledInput containerClassName="col-span-2" id="name" label={t("spellEditor.basic.name")} value={formData.name} onChange={(e) => setFormData({ ...formData, name: e.target.value })} required maxLength={SPELL_NAME_MAX} placeholder={t("spellEditor.basic.name")} />
       <div>
         <Label htmlFor="level">{t("spellEditor.basic.level")}</Label>
-        <SelectField id="level" value={String(formData.level)} onValueChange={(value) => setFormData({ ...formData, level: parseInt(value) })} placeholder={t("spellEditor.basic.levelPlaceholder")} options={SPELL_LEVELS.map((n) => ({ value: String(n), label: t(`common.spellLevels.${n}`) }))} />
+        <SelectField id="level" value={String(formData.level)} onValueChange={(value) => setFormData({ ...formData, level: parseInt(value) })} placeholder={t("spellEditor.basic.levelPlaceholder")} options={SPELL_LEVELS.map((n) => ({ value: String(n), label: t(`gameTerms.spellLevels.${n}`) }))} />
       </div>
       <div>
         <Label htmlFor="cost">{t("spellEditor.basic.cost")}</Label>

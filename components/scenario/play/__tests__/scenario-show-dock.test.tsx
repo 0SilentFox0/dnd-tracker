@@ -1,13 +1,16 @@
 // @vitest-environment happy-dom
 import { renderToString } from "react-dom/server";
-import { cleanup, fireEvent, render, screen } from "@testing-library/react";
+import { cleanup, fireEvent, screen } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import { ScenarioShowDock } from "../ScenarioShowDock";
 
+import { IntlWrapper, render } from "@/components/ui/__tests__/uk-intl";
 import type { ScenarioPlay } from "@/lib/hooks/scenario";
 import type { ScenarioContent } from "@/types/scenario";
 import type { ShowState } from "@/types/show";
+
+vi.unmock("next-intl");
 
 vi.mock("@/components/audio/AudioDock", () => ({ AudioDock: () => <div>audio-dock</div> }));
 vi.mock("@/components/audio/AudioPlayerProvider", () => ({ AudioPlayerProvider: ({ children }: { children: React.ReactNode }) => <>{children}</> }));
@@ -73,7 +76,7 @@ describe("ScenarioShowDock", () => {
   it("стан із localStorage не читається при серверному рендері (без hydration mismatch)", () => {
     localStorage.setItem("scenario-show-dock", "on");
 
-    expect(renderToString(<ScenarioShowDock campaignId="c" pageId="pg" content={bound} play={play(null)} />)).not.toContain("control-panel");
+    expect(renderToString(<IntlWrapper><ScenarioShowDock campaignId="c" pageId="pg" content={bound} play={play(null)} /></IntlWrapper>)).not.toContain("control-panel");
   });
 
   it("збережене розгортання відновлюється на клієнті й переживає перемикання", () => {

@@ -31,7 +31,7 @@ const issueFor = (issues: ChoiceIssue[] | undefined, path: string) => issues?.fi
 export function ChoicesEditor({ state: { data, set }, refs, hero, issues, saved, only }: ChoicesEditorProps) {
   const t = useTranslations("choices");
 
-  const tc = useTranslator("common");
+  const tg = useTranslator("gameTerms");
 
   const visits = visitPicks(data, refs, { level: hero.level, classMode: hero.classMode });
 
@@ -77,7 +77,7 @@ export function ChoicesEditor({ state: { data, set }, refs, hero, issues, saved,
           <p className="text-xs text-hud-muted">{t("editor.backgroundHint")}</p>
           {background && <div className="space-y-3">
             {background.description && <p className="whitespace-pre-line text-sm">{background.description}</p>}
-            <p>{background.skillProficiencies.map((s) => tc(`dndSkills.${s}`)).join(", ")}</p>
+            <p>{background.skillProficiencies.map((s) => tg(`dndSkills.${s}`)).join(", ")}</p>
             <p>{background.toolProficiencies.join(", ")}</p>
             {background.equipmentText && <p className="whitespace-pre-line text-sm">{background.equipmentText}</p>}
             {origin && <div role="alert" className="text-sm text-hud-danger">{t("editor.originFirst")}

@@ -12,7 +12,7 @@ describe("UnitFiveEFields", () => {
 
     render(<UnitFiveEFields formData={{ cr: 5, saveProficiencies: ["wisdom"] }} onChange={onChange} />);
 
-    fireEvent.click(screen.getByRole("checkbox", { name: "common.abilities.dexterity.label" }));
+    fireEvent.click(screen.getByRole("checkbox", { name: "gameTerms.abilities.dexterity.label" }));
 
     expect(onChange).toHaveBeenCalledWith({ saveProficiencies: ["dexterity", "wisdom"] });
   });

@@ -8,33 +8,31 @@ import {
   WORLD_DM_NOTE_MAX,
   WORLD_MAP_MAX_EDGE_PX,
   WORLD_MAP_UPLOAD_TYPES,
-  WORLD_MARKER_ICONS,
+  WORLD_MARKER_ICON_KEYS,
   WORLD_NAME_MAX,
   WORLD_NOTE_MAX,
 } from "@/lib/constants/world";
 import { hexColorSchema } from "@/lib/schemas/common";
 
-const coord = z.number().min(0, "Координата поза межами карти").max(1, "Координата поза межами карти");
+const coord = z.number().min(0, "world.validation.coordinateOutOfBounds").max(1, "world.validation.coordinateOutOfBounds");
 
 const polygonSchema = z
   .array(z.tuple([coord, coord]))
-  .min(3, "Зона має мати щонайменше 3 вершини")
-  .max(POLYGON_MAX_VERTICES, `Забагато вершин (максимум ${POLYGON_MAX_VERTICES})`)
+  .min(3, "world.validation.polygonMin")
+  .max(POLYGON_MAX_VERTICES, "world.validation.polygonMax")
   .superRefine((poly, ctx) => {
-    if (new Set(poly.map(([x, y]) => `${x},${y}`)).size < 3) ctx.addIssue({ code: "custom", message: "Зона має мати щонайменше 3 різні вершини" });
+    if (new Set(poly.map(([x, y]) => `${x},${y}`)).size < 3) ctx.addIssue({ code: "custom", message: "world.validation.polygonDistinct" });
   });
 
-const hexColor = hexColorSchema("Колір має бути у форматі #rrggbb");
+const hexColor = hexColorSchema("world.validation.color");
 
-const nameSchema = z.string().trim().min(1, "Вкажіть назву").max(WORLD_NAME_MAX, `Назва — до ${WORLD_NAME_MAX} символів`);
+const nameSchema = z.string().trim().min(1, "world.validation.nameRequired").max(WORLD_NAME_MAX, "world.validation.nameMax");
 
-const imageUrl = z.string().url("Некоректне посилання").max(1000);
+const imageUrl = z.string().url("world.validation.urlInvalid").max(1000);
 
 const edge = z.number().int().min(1).max(WORLD_MAP_MAX_EDGE_PX);
 
-const iconKeys = Object.keys(WORLD_MARKER_ICONS) as [string, ...string[]];
-
-const iconSchema = z.enum(iconKeys);
+const iconSchema = z.enum(WORLD_MARKER_ICON_KEYS);
 
 export const createWorldMapSchema = z.object({
   name: nameSchema,
@@ -57,7 +55,7 @@ export const updateWorldMapSchema = z
   })
   .partial()
   .strict()
-  .refine((o) => Object.keys(o).length > 0, "Немає полів для оновлення");
+  .refine((o) => Object.keys(o).length > 0, "world.validation.nothingToUpdate");
 
 export const createWorldMarkerSchema = z
   .object({
@@ -72,11 +70,11 @@ export const createWorldMarkerSchema = z
   })
   .superRefine((v, ctx) => {
     if (v.kind === "zone" && !v.polygon) {
-      ctx.addIssue({ code: "custom", path: ["polygon"], message: "Для зони потрібен контур" });
+      ctx.addIssue({ code: "custom", path: ["polygon"], message: "world.validation.zoneNeedsPolygon" });
     }
 
     if (v.kind === "point" && v.polygon) {
-      ctx.addIssue({ code: "custom", path: ["polygon"], message: "Точка не має контуру" });
+      ctx.addIssue({ code: "custom", path: ["polygon"], message: "world.validation.pointNoPolygon" });
     }
   });
 
@@ -94,10 +92,10 @@ export const updateWorldMarkerSchema = z
   })
   .partial()
   .strict()
-  .refine((o) => Object.keys(o).length > 0, "Немає полів для оновлення");
+  .refine((o) => Object.keys(o).length > 0, "world.validation.nothingToUpdate");
 
 export const worldUploadRequestSchema = z.object({
-  size: z.number().int().min(1).max(MAX_WORLD_MAP_BYTES, "Файл завеликий"),
+  size: z.number().int().min(1).max(MAX_WORLD_MAP_BYTES, "world.validation.fileTooLarge"),
   contentType: z.enum(WORLD_MAP_UPLOAD_TYPES),
 });
 
@@ -107,9 +105,9 @@ const restSchema = z.enum(["none", "short", "long"]);
 
 const characterIds = z
   .array(z.string().min(1))
-  .min(1, "Оберіть хоча б одного героя")
-  .max(MAX_TRAVEL_HEROES, `Забагато героїв (максимум ${MAX_TRAVEL_HEROES})`)
-  .refine((ids) => new Set(ids).size === ids.length, "Герої не мають повторюватися");
+  .min(1, "world.validation.heroesRequired")
+  .max(MAX_TRAVEL_HEROES, "world.validation.heroesMax")
+  .refine((ids) => new Set(ids).size === ids.length, "world.validation.heroesUnique");
 
 export const travelSchema = z.object({
   mapId: z.string().min(1),
@@ -125,7 +123,7 @@ export const exitSchema = z.object({ mapId: z.string().min(1), characterIds, res
 
 export const restWorldSchema = z.object({ mapId: z.string().min(1), characterIds, kind: z.enum(["short", "long"]) });
 
-const noteText = z.string().trim().min(1, "Нотатка порожня").max(WORLD_NOTE_MAX, `Нотатка — до ${WORLD_NOTE_MAX} символів`);
+const noteText = z.string().trim().min(1, "world.validation.noteEmpty").max(WORLD_NOTE_MAX, "world.validation.noteMax");
 
 const noteVisibility = z.enum(["public", "private"]);
 
@@ -140,6 +138,6 @@ export const updateWorldNoteSchema = z
   .object({ text: noteText, visibility: noteVisibility })
   .partial()
   .strict()
-  .refine((o) => Object.keys(o).length > 0, "Немає полів для оновлення");
+  .refine((o) => Object.keys(o).length > 0, "world.validation.nothingToUpdate");
 
 export const worldViewQuerySchema = z.object({ mapId: z.string().min(1), asHeroId: z.string().min(1).optional() });

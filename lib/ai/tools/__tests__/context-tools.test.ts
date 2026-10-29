@@ -23,7 +23,7 @@ vi.mock("@/lib/cache/reference-data", () => ({
   getCachedRaces: vi.fn(async () => []),
 }));
 
-const ctx = { campaignId: "camp1", userId: "dm", scopes: ["ai"] as const, threadId: null };
+const ctx = { campaignId: "camp1", userId: "dm", scopes: ["ai"] as const, threadId: null, locale: "uk" as const };
 
 describe("context tools", () => {
   beforeEach(() => vi.clearAllMocks());
@@ -46,7 +46,7 @@ describe("context tools", () => {
 
     const { getShowStateTool } = await import("@/lib/ai/tools/show");
 
-    expect(await getShowStateTool.handler(ctx, {})).toBe("Показ зараз не запущено");
+    expect(await getShowStateTool.handler(ctx, {})).toBe("No show is running right now");
   });
 
   it("get_battle_state: без активного бою — повідомлення", async () => {

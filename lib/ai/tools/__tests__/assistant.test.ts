@@ -12,9 +12,9 @@ import { runTool } from "../define";
 
 import type { AssistantCaller } from "@/lib/server/assistant/types";
 
-export const session: AiToolContext & { caller: AssistantCaller } = { campaignId: "c", userId: "u", scopes: ["content:write"], threadId: null, caller: { actor: { campaignId: "c", userId: "u", via: "session", isDM: true, scopes: null }, channel: "chat", tokenId: null, threadId: null } };
+export const session: AiToolContext & { caller: AssistantCaller } = { campaignId: "c", userId: "u", scopes: ["content:write"], threadId: null, caller: { actor: { campaignId: "c", userId: "u", via: "session", isDM: true, scopes: null }, channel: "chat", tokenId: null, threadId: null, locale: "uk" as const }, locale: "uk" as const };
 
-const mcp: AiToolContext = { ...session, caller: { ...session.caller, actor: { ...session.caller.actor, via: "token", scopes: ["content:write"] }, channel: "mcp", tokenId: "verified" } };
+const mcp: AiToolContext = { ...session, caller: { ...session.caller, actor: { ...session.caller.actor, via: "token", scopes: ["content:write"] }, channel: "mcp", tokenId: "verified", locale: "uk" as const } };
 
 const tool = (name: string) => {
   const found = ASSISTANT_TOOLS.find(t => t.name === name);
@@ -108,7 +108,7 @@ it.each(["HTTPS", "hTtPs"])("redacts signed URLs with %s scheme before tool outp
 
   const text = await runTool(tool("assistant_read"), session, { actionId: "show.get", input: {} });
 
-  expect(JSON.parse(text)).toMatchObject({ kind: "result", data: { result: { data: { image: "[приховане посилання]" } } } });
+  expect(JSON.parse(text)).toMatchObject({ kind: "result", data: { result: { data: { image: "[hidden link]" } } } });
   expect(text).not.toContain("PRIVATE_SIGNATURE");
 
   const { fitContext } = await import("@/lib/ai/context/budget");

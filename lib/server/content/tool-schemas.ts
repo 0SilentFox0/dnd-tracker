@@ -14,7 +14,7 @@ export const EFFECT_KINDS: readonly string[] = (NonRandomEffectSchema.options as
 
 type Schema = Record<string, unknown>;
 
-const effectStub = `Один з видів ефекту: ${EFFECT_KINDS.join(", ")}. Схема виду: content_schema(kind: "abilities", effectKind: "<вид>")`;
+const effectStub = `One of the effect kinds: ${EFFECT_KINDS.join(", ")}. Kind schema: content_schema(kind: "abilities", effectKind: "<kind>")`;
 
 const EFFECT_STOPS: Readonly<Record<string, string>> = {
   Effect: effectStub,
@@ -22,7 +22,7 @@ const EFFECT_STOPS: Readonly<Record<string, string>> = {
   ...Object.fromEntries(EFFECT_KINDS.map((k) => [`Effect.${k}`, effectStub])),
 };
 
-const STOPS: Readonly<Record<string, string>> = { Ability: 'Схема здібності: content_schema(kind: "abilities")', ...EFFECT_STOPS };
+const STOPS: Readonly<Record<string, string>> = { Ability: 'Ability schema: content_schema(kind: "abilities")', ...EFFECT_STOPS };
 
 const resources = Object.values(CONTENT_RESOURCES) as AnyContentResource[];
 

@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import { useQueryClient } from "@tanstack/react-query";
 
 import { worldKeys } from "./keys";
@@ -10,6 +11,8 @@ import type { CreateWorldMapData, CreateWorldMarkerData, UpdateWorldMapData, Upd
 
 export function useWorldEditor(campaignId: string, mapId: string | null) {
   const queryClient = useQueryClient();
+
+  const t = useTranslations("world.errors");
 
   const mapKey = worldKeys.map(campaignId, mapId ?? "");
 
@@ -30,25 +33,25 @@ export function useWorldEditor(campaignId: string, mapId: string | null) {
   const createMap = useCrudMutation({
     mutationFn: (data: CreateWorldMapData) => createWorldMap(campaignId, data),
     invalidateKeys: mapKeys,
-    errorText: "Не вдалося створити карту",
+    errorText: t("createMap"),
   });
 
   const updateMap = useCrudMutation({
     mutationFn: ({ id, data }: { id: string; data: UpdateWorldMapData }) => updateWorldMap(campaignId, id, data),
     invalidateKeys: (_d, { id }) => [worldKeys.maps(campaignId), worldKeys.map(campaignId, id)],
-    errorText: "Не вдалося зберегти карту",
+    errorText: t("saveMap"),
   });
 
   const removeMap = useCrudMutation({
     mutationFn: (id: string) => deleteWorldMap(campaignId, id),
     invalidateKeys: [worldKeys.maps(campaignId)],
-    errorText: "Не вдалося видалити карту",
+    errorText: t("deleteMap"),
   });
 
   const createMarker = useCrudMutation({
     mutationFn: (data: CreateWorldMarkerData) => createWorldMarker(campaignId, data),
     invalidateKeys: () => [worldKeys.map(campaignId, mapId ?? "")],
-    errorText: "Не вдалося створити маркер",
+    errorText: t("createMarker"),
   });
 
   const updateMarker = useCrudMutation({
@@ -62,7 +65,7 @@ export function useWorldEditor(campaignId: string, mapId: string | null) {
     },
     onError: restore,
     invalidateKeys: () => [worldKeys.map(campaignId, mapId ?? "")],
-    errorText: "Не вдалося зберегти маркер",
+    errorText: t("saveMarker"),
   });
 
   const removeMarker = useCrudMutation({
@@ -76,7 +79,7 @@ export function useWorldEditor(campaignId: string, mapId: string | null) {
     },
     onError: restore,
     invalidateKeys: () => [worldKeys.maps(campaignId), worldKeys.map(campaignId, mapId ?? "")],
-    errorText: "Не вдалося видалити маркер",
+    errorText: t("deleteMarker"),
   });
 
   return {

@@ -15,7 +15,7 @@ vi.mock("@/lib/server/assistant/actions/compendium-reads", () => ({ readCompendi
 vi.mock("@/lib/ai/tools/party", () => ({ partySummary: vi.fn(async () => []) }));
 vi.mock("@/lib/ai/tools/show", () => ({ showSummary: vi.fn(async () => null) }));
 
-const caller: AssistantCaller = { actor: { campaignId: "c", userId: "dm", isDM: true, via: "session", scopes: null }, channel: "chat", tokenId: null, threadId: "t" };
+const caller: AssistantCaller = { actor: { campaignId: "c", userId: "dm", isDM: true, via: "session", scopes: null }, channel: "chat", tokenId: null, threadId: "t", locale: "uk" as const };
 
 const args = { campaignId: "c", mode: "scenario" as const, pageId: null, caller };
 
@@ -32,14 +32,14 @@ it("foreignFocusNeverLoadsSecret", async () => {
   const out = await buildInstructions({ ...args, focus: { kind: "character", characterId: "foreign" } });
 
   expect(prisma.character.findFirst).toHaveBeenCalledWith(expect.objectContaining({ where: expect.objectContaining({ id: "foreign", campaignId: "c" }) }));
-  expect(out).toContain("недоступний");
+  expect(out).toContain("unavailable");
   expect(out).not.toContain("FOREIGN_PRIVATE_TEXT");
   expect(prisma.scenarioPage.findFirst).not.toHaveBeenCalled();
 });
 it("deletedFocusClearlyUnavailable", async () => {
   const out = await buildInstructions({ ...args, pageId: "deleted", focus: { pageId: "deleted" } });
 
-  expect(out).toContain("Фокус недоступний");
+  expect(out).toContain("Focus unavailable");
   expect(out).not.toContain("Сторінка, яку редагує");
 });
 it("allBlocksFit40000", async () => {
@@ -65,8 +65,8 @@ it("importPromptCannotEnableAuto", async () => {
   const out = await buildInstructions(args);
 
   expect(out).toContain('"executionMode":"review"');
-  expect(out).toContain("дані, не повноваження");
-  expect(out).toContain("людське підтвердження");
+  expect(out).toContain("data, not authority");
+  expect(out).toContain("human confirmation");
   expect(prisma.aiThread.findFirst).toHaveBeenCalledWith(expect.objectContaining({ where: { id: "t", campaignId: "c", userId: "dm" } }));
 });
 it("noRawBookOrAllSrdInContext", async () => {
@@ -102,7 +102,7 @@ it("liveRulesUseCurrentSnapshot", async () => {
 
   expect(second).toContain('"morale":{"enabled":false');
   expect(second).not.toContain('"morale":{"enabled":true');
-  expect(second).toContain("свіже читання перед записом");
+  expect(second).toContain("fresh read before writing");
 });
 it("rejects missing, mismatched and revoked callers before loading private content", async () => {
   await expect(buildInstructions({ ...args, caller: undefined as never })).rejects.toThrow();
@@ -117,14 +117,14 @@ it("active battle uses its current persisted rules snapshot, prepared uses curre
 
   const active = await buildInstructions({ ...args, mode: "live", focus: { kind: "battle", battleId: "b" } });
 
-  const ruleBlock = active.split("\n\n").find(b => b.startsWith("Чинний snapshot правил")) ?? "";
+  const ruleBlock = active.split("\n\n").find(b => b.startsWith("Current rules snapshot")) ?? "";
 
   expect(JSON.parse(ruleBlock.slice(ruleBlock.indexOf("\n") + 1)).morale.enabled).toBe(true);
   vi.mocked(prisma.battleScene.findFirst).mockResolvedValue({ id: "b", status: "prepared", rules: { morale: { enabled: true } } } as never);
 
   const prepared = await buildInstructions({ ...args, mode: "live", focus: { kind: "battle", battleId: "b" } });
 
-  const preparedRules = prepared.split("\n\n").find(b => b.startsWith("Чинний snapshot правил")) ?? "";
+  const preparedRules = prepared.split("\n\n").find(b => b.startsWith("Current rules snapshot")) ?? "";
 
   expect(JSON.parse(preparedRules.slice(preparedRules.indexOf("\n") + 1)).morale.enabled).toBe(false);
 });
@@ -148,7 +148,7 @@ it("all assembled blocks fit, summarize large data, redact signed URLs and prese
   expect(await buildInstructions(args)).not.toContain("PRIVATE_SIGNATURE");
 });
 it("token caller cannot load source notes or session context", async () => {
-  await expect(buildInstructions({ ...args, caller: { ...caller, channel: "mcp", tokenId: "verified", actor: { ...caller.actor, via: "token", scopes: ["ai"] } }, sourceNoteSelection: { source: "session-ui", selectedKeys: ["s"] } })).rejects.toMatchObject({ status: 403 });
+  await expect(buildInstructions({ ...args, caller: { ...caller, channel: "mcp", tokenId: "verified", actor: { ...caller.actor, via: "token", scopes: ["ai"] }, locale: "uk" as const }, sourceNoteSelection: { source: "session-ui", selectedKeys: ["s"] } })).rejects.toMatchObject({ status: 403 });
   expect(prisma.campaign.findUnique).not.toHaveBeenCalled();
   expect(readCompendiumSummary).not.toHaveBeenCalled();
 });
@@ -170,6 +170,6 @@ it("disclosureDescribesActuallyFittedBlocksWithoutReturningPrivateText", async (
 
  expect(disclosure).toHaveBeenCalledOnce();
  expect(disclosure.mock.calls[0][0]).toMatchObject({characters:text.length,focusAvailable:false,sourceNoteCount:0});
- expect(disclosure.mock.calls[0][0].labels).toContain("Кампанія (дані)");
+ expect(disclosure.mock.calls[0][0].blocks).toContain("campaign");
  expect(JSON.stringify(disclosure.mock.calls)).not.toContain("Поважай стиль");
 });

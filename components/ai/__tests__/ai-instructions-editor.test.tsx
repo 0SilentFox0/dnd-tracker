@@ -4,9 +4,9 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 
 import { AiInstructionsEditor } from "@/components/ai";
 
-const save = () => screen.getByRole("button", { name: "Зберегти" }) as HTMLButtonElement;
+const save = () => screen.getByRole("button", { name: "common.actions.save" }) as HTMLButtonElement;
 
-const type = (text: string) => fireEvent.change(screen.getByLabelText("Постійні інструкції"), { target: { value: text } });
+const type = (text: string) => fireEvent.change(screen.getByLabelText("ai.instructions.label"), { target: { value: text } });
 
 describe("AiInstructionsEditor", () => {
   afterEach(cleanup);

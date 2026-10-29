@@ -53,14 +53,14 @@ function resolveRefs(record: ImportRecord, fields: readonly ImportField[], refs:
 
     const index = refs.get(field.ref);
 
-    const kindLabel = IMPORT_SPECS[field.ref].label;
+    const kind = `contentImport.kinds.${field.ref}`;
 
     const resolve = (v: unknown) => {
       const s = String(v);
 
       const id = index?.ids.has(s) ? s : index?.byName.get(nameKey(s))?.[0];
 
-      if (!id) issues.push({ field: field.key, level: field.required || field.strictRef ? "error" : "warning", message: `${field.label}: не знайдено «${s}» (${kindLabel})` });
+      if (!id) issues.push({ field: field.key, level: field.required || field.strictRef ? "error" : "warning", message: "contentImport.issues.refNotFound", params: { field: field.labelKey, value: s, kind } });
 
       return id;
     };
@@ -90,7 +90,7 @@ function resolveNestedRefs(record: ImportRecord, fields: readonly ImportField[],
 
     const index = refs.get(nested.kind);
 
-    const kindLabel = IMPORT_SPECS[nested.kind].label;
+    const kind = `contentImport.kinds.${nested.kind}`;
 
     const walk = (v: unknown): unknown => {
       if (Array.isArray(v)) return v.map(walk);
@@ -103,7 +103,7 @@ function resolveNestedRefs(record: ImportRecord, fields: readonly ImportField[],
 
           const id = index?.ids.has(x) ? x : index?.byName.get(nameKey(x))?.[0];
 
-          if (!id) issues.push({ field: field.key, level: "error", message: `${field.label}: не знайдено «${x}» (${kindLabel})` });
+          if (!id) issues.push({ field: field.key, level: "error", message: "contentImport.issues.refNotFound", params: { field: field.labelKey, value: x, kind } });
 
           return [k, id ?? x];
         }),
@@ -135,12 +135,12 @@ function planRow(raw: Record<string, unknown>, row: number, ctx: PlanCtx): Plan 
 
   const name = typeof record.name === "string" ? record.name : undefined;
 
-  if (!name) return { row, status: "error", issues: [...issues, err("Немає назви", "name")] };
+  if (!name) return { row, status: "error", issues: [...issues, err("contentImport.issues.noName", "name")] };
 
   const key = nameKey(name);
 
   if (ctx.seen.has(key)) {
-    const message = "Назва повторюється у файлі";
+    const message = "contentImport.issues.duplicateName";
 
     return ctx.mode === "skip" ? { row, name, status: "skipped", issues: [...issues, { level: "warning", message }] } : { row, name, status: "error", issues: [...issues, err(message, "name")] };
   }
@@ -149,13 +149,13 @@ function planRow(raw: Record<string, unknown>, row: number, ctx: PlanCtx): Plan 
 
   const matches = ctx.existing.byName.get(key) ?? [];
 
-  if (matches.length > 0 && ctx.mode === "create") return { row, name, status: "error", issues: [...issues, err(`«${name}» вже є в кампанії`, "name")] };
+  if (matches.length > 0 && ctx.mode === "create") return { row, name, status: "error", issues: [...issues, err("contentImport.issues.alreadyExists", "name", { params: { name } })] };
 
   if (matches.length > 0 && ctx.mode === "skip") return { row, name, status: "skipped", issues };
 
   const op = matches.length > 0 ? "update" : "create";
 
-  if (matches.length > 1) issues.push({ level: "warning", message: `Кілька записів «${name}» — оновлено перший` });
+  if (matches.length > 1) issues.push({ level: "warning", message: "contentImport.issues.multipleMatches", params: { name } });
 
   resolveRefs(record, ctx.spec.fields, ctx.refs, issues, op);
 

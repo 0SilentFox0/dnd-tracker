@@ -7,6 +7,7 @@ import { type AbilityKey } from "@/lib/constants/abilities";
 import { ALIGNMENTS } from "@/lib/constants/alignment";
 import type { GoalKind } from "@/lib/constants/characters";
 import { HERO_ARCHETYPE_KEYS, type HeroArchetypeKey } from "@/lib/constants/hero-archetypes";
+import type { Locale } from "@/lib/i18n/config";
 import type { GameClassData } from "@/types/classes";
 
 export type GeneratorClass = Pick<GameClassData, "id" | "name" | "spellcastingAbility" | "savingThrows">;
@@ -25,20 +26,22 @@ export interface GeneratedCharacter {
   goals: Array<{ text: string; kind: GoalKind }>;
 }
 
+const ARCHETYPE_CLASS_EN: Record<HeroArchetypeKey, string> = { warrior: "Warrior", paladin: "Paladin", ranger: "Ranger", rogue: "Rogue", mage: "Mage" };
+
 export const GENERATOR_POOLS = {
   alignments: ALIGNMENTS,
   archetypes: HERO_ARCHETYPE_KEYS,
   classes: HERO_ARCHETYPE_KEYS.map((k) => ARCHETYPE_CLASS[k]),
 } as const;
 
-export function generateCharacter({ races, seed, classes = [] }: { races: string[]; seed: number; classes?: GeneratorClass[] }): GeneratedCharacter {
+export function generateCharacter({ races, seed, classes = [], locale = "uk" }: { races: string[]; seed: number; classes?: GeneratorClass[]; locale?: Locale }): GeneratedCharacter {
   const rng = createRng(seed);
 
   const race = races.length ? pick(rng, races) : "";
 
   const archetype = pick(rng, HERO_ARCHETYPE_KEYS);
 
-  const name = generateName(race, rng);
+  const name = generateName(race, rng, locale);
 
   const cls = classes.length ? pick(rng, classes) : undefined;
 
@@ -46,13 +49,13 @@ export function generateCharacter({ races, seed, classes = [] }: { races: string
 
   const scores = cls ? assignByPriority(priority, rng) : assignStandardArray(archetype, rng);
 
-  const story = generateBackstory({ name, raceName: race, archetype }, rng);
+  const story = generateBackstory({ name, raceName: race, archetype }, rng, locale);
 
   return {
     name,
     race,
     archetype,
-    class: cls?.name ?? ARCHETYPE_CLASS[archetype],
+    class: cls?.name ?? (locale === "en" ? ARCHETYPE_CLASS_EN : ARCHETYPE_CLASS)[archetype],
     ...(cls && { classId: cls.id }),
     alignment: pick(rng, ALIGNMENTS),
     method: "standard",

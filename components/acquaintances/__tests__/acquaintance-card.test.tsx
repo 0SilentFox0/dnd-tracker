@@ -37,8 +37,8 @@ describe("AcquaintanceCard", () => {
     expect(screen.getByText("Ярема")).toBeTruthy();
     expect(screen.getByText("Коваль із містечка")).toBeTruthy();
     expect(screen.getByText("Продав меч")).toBeTruthy();
-    expect((screen.getByLabelText("Моя нотатка") as HTMLTextAreaElement).value).toBe("моя нотатка");
-    expect(screen.queryByText("Приховано")).toBeNull();
+    expect((screen.getByLabelText("acquaintances.note.label") as HTMLTextAreaElement).value).toBe("моя нотатка");
+    expect(screen.queryByText("acquaintances.card.hidden")).toBeNull();
   });
 
   it("marks hidden acquaintances for the DM and lists other authors' notes with names", () => {
@@ -46,7 +46,7 @@ describe("AcquaintanceCard", () => {
 
     render(<AcquaintanceCard campaignId="c1" item={item({ hidden: true, notes: others })} flags={flags({ isDM: true })} />);
 
-    expect(screen.getByText("Приховано")).toBeTruthy();
+    expect(screen.getByText("acquaintances.card.hidden")).toBeTruthy();
     expect(screen.getByText("Борис")).toBeTruthy();
     expect(screen.getByText("підозрілий")).toBeTruthy();
   });
@@ -61,6 +61,6 @@ describe("AcquaintanceCard", () => {
     render(<AcquaintanceCard campaignId="c1" item={item({ entries: [{ id: "e2", pageId: "p1", sectionId: "s9", text: "Таємний запис", sortOrder: 1, hidden: true }] })} flags={flags({ isDM: true })} />);
 
     expect(screen.getByText(/Таємний запис/)).toBeTruthy();
-    expect(screen.getByText(/приховано/)).toBeTruthy();
+    expect(screen.getByText(/acquaintances.card.entryHidden/)).toBeTruthy();
   });
 });

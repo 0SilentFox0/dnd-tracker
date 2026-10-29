@@ -1,15 +1,19 @@
 // @vitest-environment happy-dom
 import type { ReactElement } from "react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { cleanup, fireEvent, render as rtlRender, screen } from "@testing-library/react";
+import { cleanup, fireEvent, screen } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
+
+import { renderWithIntl } from "@/lib/i18n/test/render-with-intl";
+
+vi.unmock("next-intl");
 
 const fixture = { _meta: { sources: [{ json: "s", full: "Synthetic" }] }, spell: [{ name: "Light", source: "s" }], background: [], bookData: [{ id: "b", data: [] }] };
 
 vi.mock("@/lib/utils/compendium-import/file", () => ({ readCompendiumFile: vi.fn(async () => fixture) }));
 import { CompendiumImport } from "../CompendiumImport";
 
-const render = (ui: ReactElement) => rtlRender(<QueryClientProvider client={new QueryClient({ defaultOptions: { queries: { retry: false } } })}>{ui}</QueryClientProvider>);
+const render = (ui: ReactElement) => renderWithIntl(<QueryClientProvider client={new QueryClient({ defaultOptions: { queries: { retry: false } } })}>{ui}</QueryClientProvider>, { locale: "uk", namespaces: ["common", "validation", "compendium"] });
 
 afterEach(() => { cleanup(); vi.unstubAllGlobals(); });
 
@@ -24,7 +28,7 @@ describe("CompendiumImport", () => {
 
     return new Response(JSON.stringify(url.endsWith("preview") ? { token: "signed", report, graph: [] } : url.endsWith("confirm") ? { ...report, runId: "run" } : url.includes("options") ? { local: [], templates: [] } : { runs: [{ id: "old", report: { ...report, runId: "old" } }], hasMore: false }));
   }));
-  render(<CompendiumImport campaignId="c" />);
+  await render(<CompendiumImport campaignId="c" />);
   await screen.findByText("Звіт old");
   fireEvent.change(screen.getByLabelText("JSON-компендіум"), { target: { files: [new File(["{}"], "synthetic.json")] } });
   await screen.findByLabelText("Заклинання (1)");
@@ -53,7 +57,7 @@ describe("CompendiumImport", () => {
 
     return new Response(JSON.stringify(url.endsWith("preview") ? { token: `t${bodies.length}`, report: { ...report, ...(withOffer && { recommendedRulesPatch: patch }) }, graph: [] } : url.includes("options") ? { local: [], templates: [] } : { runs: [], hasMore: false }));
   }));
-  render(<CompendiumImport campaignId="c" />);
+  await render(<CompendiumImport campaignId="c" />);
   fireEvent.change(screen.getByLabelText("JSON-компендіум"), { target: { files: [new File(["{}"], "synthetic.json")] } });
   await screen.findByLabelText("Заклинання (1)");
   fireEvent.click(screen.getByRole("button", { name: "Перевірити JSON" }));
@@ -69,7 +73,7 @@ describe("CompendiumImport", () => {
  it("renders inside HudPage with a header and campaign link", async () => {
   vi.stubGlobal("fetch", vi.fn(async () => new Response(JSON.stringify({ runs: [], hasMore: false }))));
 
-  const { container } = render(<CompendiumImport campaignId="c" />);
+  const { container } = await render(<CompendiumImport campaignId="c" />);
 
   expect(container.querySelector(".hud-page")).not.toBeNull();
   expect(screen.getByRole("heading", { level: 1 }).textContent).toBe("Імпорт JSON-компендіуму");
@@ -78,14 +82,14 @@ describe("CompendiumImport", () => {
  });
  it("shows saved report on refresh without file selection", async () => {
   vi.stubGlobal("fetch", vi.fn(async () => new Response(JSON.stringify({ runs: [{ id: "old", report }], hasMore: false }))));
-  render(<CompendiumImport campaignId="c" />);
+  await render(<CompendiumImport campaignId="c" />);
   fireEvent.click(await screen.findByRole("button", { name: "Звіт old" }));
   await screen.findByText("Налаштуйте цілі");
   expect(screen.queryByRole("button", { name: "Імпортувати" })).toBeNull();
  });
- it("shows the ERROR_TEXT message for a coded preview failure", async () => {
+ it("shows the translated message for a coded preview failure", async () => {
   vi.stubGlobal("fetch", vi.fn(async (url: string) => url.endsWith("preview") ? new Response(JSON.stringify({ code: "PREVIEW_STALE" }), { status: 409 }) : new Response(JSON.stringify({ runs: [], hasMore: false }))));
-  render(<CompendiumImport campaignId="c" />);
+  await render(<CompendiumImport campaignId="c" />);
   fireEvent.change(screen.getByLabelText("JSON-компендіум"), { target: { files: [new File(["{}"], "synthetic.json")] } });
   fireEvent.click(await screen.findByRole("button", { name: "Перевірити JSON" }));
   expect((await screen.findByRole("alert")).textContent).toBe("Кампанія або термін preview змінилися. Повторіть перевірку.");

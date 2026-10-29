@@ -47,7 +47,7 @@ describe("T15 chat recovery", () => {
     vi.mocked(getAiRunRecovery).mockResolvedValue({ runs: [], messages: [], receipts: [{ id: "receipt", intentId: "i", status: "applied", result: null, effectsStatus: "complete" }] });
     await act(() => result.current.stop());
     expect(cancelAiRun).toHaveBeenCalledWith("c", "t", "req");
-    expect(JSON.stringify(sdk.setMessages.mock.calls.at(-1))).toContain("дію виконано");
+    expect(JSON.stringify(sdk.setMessages.mock.calls.at(-1))).toContain("ai.chat.receipt");
     await act(async () => { window.dispatchEvent(new Event("online")); });
     expect(sdk.sendMessage).not.toHaveBeenCalled();
     unmount();
@@ -84,5 +84,5 @@ it("terminalLeaseNeverPretendsNewRequestIsAvailable",async()=>{
 
  await waitFor(()=>expect(result.current.blockedUntil).toBeTruthy());
  await act(()=>result.current.send("Новий запит"));
- expect(sdk.sendMessage).not.toHaveBeenCalled();expect(result.current.error?.message).toMatch(/інтервал|стан/);
+ expect(sdk.sendMessage).not.toHaveBeenCalled();expect(result.current.error?.message).toMatch(/chat\.leaseBlocked/);
 });

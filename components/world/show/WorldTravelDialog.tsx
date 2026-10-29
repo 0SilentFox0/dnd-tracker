@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useTranslations } from "next-intl";
 
 import { QueryState } from "@/components/common/states";
 import { ResponsiveDialog } from "@/components/ui/responsive-dialog";
@@ -24,8 +25,10 @@ interface WorldTravelDialogProps {
 }
 
 export function WorldTravelDialog({ campaignId, mapId, open, onOpenChange, onMoved }: WorldTravelDialogProps) {
+  const t = useTranslations("world.travel");
+
   return (
-    <ResponsiveDialog hud size="lg" className="sm:max-w-4xl" open={open} onOpenChange={onOpenChange} title="Подорож героїв" description="Оберіть героїв, ціль на карті й перемістіть їх">
+    <ResponsiveDialog hud size="lg" className="sm:max-w-4xl" open={open} onOpenChange={onOpenChange} title={t("dialogTitle")} description={t("dialogDescription")}>
       {open && <TravelBody campaignId={campaignId} mapId={mapId} onMoved={onMoved} />}
     </ResponsiveDialog>
   );

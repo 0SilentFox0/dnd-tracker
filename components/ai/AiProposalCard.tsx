@@ -1,5 +1,7 @@
 "use client";
 
+import { useTranslations } from "next-intl";
+
 import { ScenarioRichText } from "@/components/scenario/ScenarioRichText";
 import { Button } from "@/components/ui/button";
 import { describeLost, lostBlocks } from "@/lib/utils/scenario/block-inventory";
@@ -14,8 +16,6 @@ interface AiProposalCardProps {
 }
 
 type Op = AiProposal["ops"][number];
-
-const STATUS_LABELS = { applied: "Застосовано", rejected: "Відхилено" } as const;
 
 function Doc({ doc, campaignId }: { doc: RichDoc; campaignId: string }) {
   return (
@@ -35,14 +35,16 @@ function Row({ row, campaignId }: { row: Pick<ScenarioRow, "story" | "notes">; c
 }
 
 function Diff({ label, before, after, campaignId }: { label: string; before: RichDoc; after: RichDoc; campaignId: string }) {
+  const t = useTranslations("ai");
+
   return (
     <div className="grid grid-cols-1 gap-2 @[560px]:grid-cols-2">
       <div className="rounded border p-2">
-        <p className="mb-1 text-xs text-muted-foreground">Було · {label}</p>
+        <p className="mb-1 text-xs text-muted-foreground">{t("proposal.before", { label })}</p>
         <Doc doc={before} campaignId={campaignId} />
       </div>
       <div className="rounded border border-primary/40 p-2">
-        <p className="mb-1 text-xs text-muted-foreground">Стало · {label}</p>
+        <p className="mb-1 text-xs text-muted-foreground">{t("proposal.after", { label })}</p>
         <Doc doc={after} campaignId={campaignId} />
       </div>
     </div>
@@ -50,34 +52,40 @@ function Diff({ label, before, after, campaignId }: { label: string; before: Ric
 }
 
 function LossWarning({ before, after }: { before: RichDoc; after: RichDoc }) {
+  const t = useTranslations("ai");
+
   const lost = lostBlocks(before, after);
 
   if (Object.keys(lost).length === 0) return null;
 
-  return <p className="text-sm font-medium text-destructive">Увага: правка видаляє {describeLost(lost)}</p>;
+  return <p className="text-sm font-medium text-destructive">{t("proposal.loss", { lost: describeLost(lost, (kind, count) => t(`proposal.blocks.${kind}`, { count })) })}</p>;
 }
 
 function SlideView({ op }: { op: Extract<Op, { op: "addSlide" }> }) {
+  const t = useTranslations("ai");
+
   return (
     <div className="space-y-1 rounded border border-primary/40 p-2">
       {/* eslint-disable-next-line @next/next/no-img-element -- AI preview from storage, not a layout image */}
-      <img src={op.slide.imageUrl} alt={op.slide.title ?? "Слайд"} className="max-h-60 w-full rounded object-contain" />
-      <p className="text-xs text-muted-foreground">{op.deckId && op.deckTitle ? `У набір «${op.deckTitle}»` : "Новий набір для сцени"}</p>
+      <img src={op.slide.imageUrl} alt={op.slide.title ?? t("proposal.slideAlt")} className="max-h-60 w-full rounded object-contain" />
+      <p className="text-xs text-muted-foreground">{op.deckId && op.deckTitle ? t("proposal.intoDeck", { title: op.deckTitle }) : t("proposal.newDeck")}</p>
       {op.slide.title ? <p className="text-sm">{op.slide.title}</p> : null}
     </div>
   );
 }
 
 function OpView({ op, campaignId }: { op: Op; campaignId: string }) {
+  const t = useTranslations("ai");
+
   if (op.op === "addSlide") return <SlideView op={op} />;
 
   if (op.op === "replaceRow") {
     return (
       <div className="space-y-2">
         {op.story ? <LossWarning before={op.before.story} after={op.story} /> : null}
-        {op.story ? <Diff label="історія" before={op.before.story} after={op.story} campaignId={campaignId} /> : null}
+        {op.story ? <Diff label={t("proposal.parts.story")} before={op.before.story} after={op.story} campaignId={campaignId} /> : null}
         {op.notes ? <LossWarning before={op.before.notes} after={op.notes} /> : null}
-        {op.notes ? <Diff label="нотатки" before={op.before.notes} after={op.notes} campaignId={campaignId} /> : null}
+        {op.notes ? <Diff label={t("proposal.parts.notes")} before={op.before.notes} after={op.notes} campaignId={campaignId} /> : null}
       </div>
     );
   }
@@ -85,7 +93,7 @@ function OpView({ op, campaignId }: { op: Op; campaignId: string }) {
   if (op.op === "insertRow") {
     return (
       <div className="rounded border border-primary/40 p-2">
-        <p className="mb-1 text-xs text-muted-foreground">Новий рядок</p>
+        <p className="mb-1 text-xs text-muted-foreground">{t("proposal.newRow")}</p>
         <Row row={op.row} campaignId={campaignId} />
       </div>
     );
@@ -94,7 +102,7 @@ function OpView({ op, campaignId }: { op: Op; campaignId: string }) {
   if (op.op === "addSection") {
     return (
       <div className="rounded border border-primary/40 p-2">
-        <p className="mb-1 text-xs text-muted-foreground">Новий розділ «{op.section.title}»</p>
+        <p className="mb-1 text-xs text-muted-foreground">{t("proposal.newSection", { title: op.section.title })}</p>
         {op.section.rows.map((r) => (
           <Row key={r.id} row={r} campaignId={campaignId} />
         ))}
@@ -103,35 +111,35 @@ function OpView({ op, campaignId }: { op: Op; campaignId: string }) {
   }
 
   return (
-    <p className="text-sm">
-      «{op.before.title}» → «{op.title}»
-    </p>
+    <p className="text-sm">{t("proposal.rename", { from: op.before.title, to: op.title })}</p>
   );
 }
 
 export function AiProposalCard({ proposal, actions, busy, campaignId }: AiProposalCardProps) {
+  const t = useTranslations("ai");
+
   const { status } = proposal;
 
   return (
     <div className="space-y-2 rounded-lg border bg-card p-3 text-card-foreground" data-slot="ai-proposal-card">
       <p className="text-sm font-medium">{proposal.summary}</p>
-      <p className="break-words text-xs">Ціль: сторінка {proposal.pageId}. Застосування лише після людського підтвердження.</p>
+      <p className="break-words text-xs">{t("proposal.target", { pageId: proposal.pageId })}</p>
       {status === "pending" || status === "stale" ? proposal.ops.map((op, i) => <OpView key={i} op={op} campaignId={campaignId} />) : null}
-      {status === "stale" ? <p className="text-sm text-muted-foreground">Фрагмент змінився після пропозиції</p> : null}
-      {status === "applied" || status === "rejected" ? <p className="text-xs text-muted-foreground">{STATUS_LABELS[status]}</p> : null}
+      {status === "stale" ? <p className="text-sm text-muted-foreground">{t("proposal.stale")}</p> : null}
+      {status === "applied" || status === "rejected" ? <p className="text-xs text-muted-foreground">{t(`proposal.status.${status}`)}</p> : null}
       {status === "pending" || status === "stale" ? (
         <div className="flex gap-2">
           {status === "pending" ? (
             <Button type="button" size="sm" disabled={busy} onClick={actions.onApply}>
-              {proposal.ops.some((o) => o.op === "addSlide") ? "Додати слайд" : "Застосувати"}
+              {proposal.ops.some((o) => o.op === "addSlide") ? t("proposal.addSlide") : t("proposal.apply")}
             </Button>
           ) : (
             <Button type="button" size="sm" disabled={busy} onClick={actions.onRedo}>
-              Переробити
+              {t("proposal.redo")}
             </Button>
           )}
           <Button type="button" size="sm" variant="outline" disabled={busy} onClick={actions.onReject}>
-            Відхилити
+            {t("proposal.reject")}
           </Button>
         </div>
       ) : null}

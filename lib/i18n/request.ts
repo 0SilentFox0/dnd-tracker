@@ -1,15 +1,15 @@
 import { getRequestConfig } from "next-intl/server";
 
-import { APP_TIME_ZONE } from "./config";
 import { loadMessages } from "./messages";
 import { getRequestLocale } from "./request-locale";
+import { getRequestTimeZone } from "./request-time-zone";
 
 export default getRequestConfig(async () => {
-  const locale = await getRequestLocale();
+  const [locale, timeZone] = await Promise.all([getRequestLocale(), getRequestTimeZone()]);
 
   return {
     locale,
-    timeZone: APP_TIME_ZONE,
+    timeZone,
     messages: await loadMessages(locale, ["common", "validation"]),
     getMessageFallback: ({ namespace, key }) => (namespace ? `${namespace}.${key}` : key),
     onError: (error) => {

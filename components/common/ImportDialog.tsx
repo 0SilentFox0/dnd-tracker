@@ -33,6 +33,8 @@ export function ImportDialog({
 }: ImportDialogProps) {
   const t = useTranslations("common.import");
 
+  const tc = useTranslations("common.actions");
+
   const { file, status, actions } = importHook;
 
   const { error, success, isLoading } = status;
@@ -129,7 +131,7 @@ export function ImportDialog({
               onClick={() => handleDialogOpenChange(false)}
               disabled={isLoading}
             >
-              {t("cancel")}
+              {tc("cancel")}
             </Button>
             <Button onClick={handleImportClick} disabled={isLoading || !file}>
               {isLoading ? t("submitting") : t("submit")}

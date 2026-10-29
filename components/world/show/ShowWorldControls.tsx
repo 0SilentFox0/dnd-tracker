@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useTranslations } from "next-intl";
 import { Footprints, Map as MapIcon, Presentation } from "lucide-react";
 
 import { SHOW_TONE, ShowButton } from "@/components/show/stage/show-ui";
@@ -20,6 +21,8 @@ interface Pick {
 }
 
 export function ShowWorldControls({ campaignId, show, control }: { campaignId: string; show: ShowState | null; control: ShowControl }) {
+  const t = useTranslations("world.show");
+
   const { data: maps } = useWorldMaps(campaignId);
 
   const shownMapId = show?.world?.mapId;
@@ -60,11 +63,11 @@ export function ShowWorldControls({ campaignId, show, control }: { campaignId: s
 
   return (
     <div className="flex flex-wrap items-center gap-2">
-      <ShowButton aria-label="Вивести карту гравцям" title="Вивести карту гравцям" disabled={control.pending || !mapId} aria-pressed={showing} onClick={() => send(focusId || undefined)}>
+      <ShowButton aria-label={t("present")} title={t("present")} disabled={control.pending || !mapId} aria-pressed={showing} onClick={() => send(focusId || undefined)}>
         <MapIcon className="size-4" />
-        <span className="text-xs">Вивести карту гравцям</span>
+        <span className="text-xs">{t("present")}</span>
       </ShowButton>
-      <select aria-label="Карта" value={mapId ?? ""} onChange={(e) => setMapPick({ base: shownMapId, id: e.target.value })} className={SELECT}>
+      <select aria-label={t("map")} value={mapId ?? ""} onChange={(e) => setMapPick({ base: shownMapId, id: e.target.value })} className={SELECT}>
         {rows.map(({ map, path }) => (
           <option key={map.id} value={map.id}>
             {"  ".repeat(path.length - 1)}
@@ -72,8 +75,8 @@ export function ShowWorldControls({ campaignId, show, control }: { campaignId: s
           </option>
         ))}
       </select>
-      <select aria-label="Фокус на маркері" value={focusId ?? ""} onChange={(e) => pickFocus(e.target.value)} className={SELECT} disabled={control.pending}>
-        <option value="">Без фокусу</option>
+      <select aria-label={t("focus")} value={focusId ?? ""} onChange={(e) => pickFocus(e.target.value)} className={SELECT} disabled={control.pending}>
+        <option value="">{t("noFocus")}</option>
         {detail?.markers.map((m) => (
           <option key={m.id} value={m.id}>
             {m.name}
@@ -81,14 +84,14 @@ export function ShowWorldControls({ campaignId, show, control }: { campaignId: s
         ))}
       </select>
       {show?.world && (
-        <ShowButton aria-label="До слайдів" title="Повернути слайди" disabled={control.pending} onClick={() => void control.send({ action: "worldOff" })}>
+        <ShowButton aria-label={t("toSlides")} title={t("toSlidesTitle")} disabled={control.pending} onClick={() => void control.send({ action: "worldOff" })}>
           <Presentation className="size-4" />
-          <span className="text-xs">До слайдів</span>
+          <span className="text-xs">{t("toSlides")}</span>
         </ShowButton>
       )}
-      <ShowButton aria-label="Подорож" title="Перемістити героїв по карті" disabled={!mapId} onClick={() => setTravelOpen(true)}>
+      <ShowButton aria-label={t("travel")} title={t("travelTitle")} disabled={!mapId} onClick={() => setTravelOpen(true)}>
         <Footprints className="size-4" />
-        <span className="text-xs">Подорож</span>
+        <span className="text-xs">{t("travel")}</span>
       </ShowButton>
       {mapId && <WorldTravelDialog campaignId={campaignId} mapId={mapId} open={travelOpen} onOpenChange={setTravelOpen} onMoved={followTravel} />}
       <WorldLink campaignId={campaignId} />

@@ -2,6 +2,8 @@ import { after, NextResponse } from "next/server";
 
 import { API_ERRORS } from "@/lib/constants/api-errors";
 import { prisma } from "@/lib/db";
+import { getRequestLocale } from "@/lib/i18n/request-locale";
+import { getTranslator } from "@/lib/i18n/translator";
 import { puzzleCommandSchema } from "@/lib/schemas/puzzle";
 import { publishShow, readShowState, writeShowState } from "@/lib/server/show/show-store";
 import { requireCampaignAccess } from "@/lib/utils/api/api-auth";
@@ -17,7 +19,7 @@ const ATTEMPTS = 3;
 async function displayName(userId: string): Promise<string> {
   const user = await prisma.user.findUnique({ where: { id: userId }, select: { displayName: true } });
 
-  return user?.displayName ?? "Гравець";
+  return user?.displayName ?? (await getTranslator(await getRequestLocale(), "show"))("puzzle.player");
 }
 
 export async function commandPuzzle(req: Request, campaignId: string): Promise<NextResponse> {

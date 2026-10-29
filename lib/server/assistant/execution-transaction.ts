@@ -78,7 +78,7 @@ export async function executeIntentTransaction(deps: ExecutorDeps, caller: Assis
 
       if (!original || original.revokedAt || original.userId !== row.userId || original.campaignId !== row.campaignId) throw forbidden();
 
-      await authorizeAssistant({ actor: { ...caller.actor, via: "token", scopes: original.scopes.filter(isApiTokenScope) }, channel: "mcp", tokenId: row.originTokenId, threadId: null }, action.need, "prepare", tx);
+      await authorizeAssistant({ actor: { ...caller.actor, via: "token", scopes: original.scopes.filter(isApiTokenScope) }, channel: "mcp", tokenId: row.originTokenId, threadId: null, locale: caller.locale }, action.need, "prepare", tx);
     }
 
     // All content writes in this scope reuse the same transaction/connection.

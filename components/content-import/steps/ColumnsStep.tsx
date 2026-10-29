@@ -1,10 +1,12 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import { Sparkles } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { SelectField } from "@/components/ui/select-field";
 import type { ContentImportState } from "@/lib/hooks/content-import";
+import { useTranslator } from "@/lib/i18n/use-translator";
 import { duplicateTargets } from "@/lib/utils/content/import";
 import { cellText } from "@/lib/utils/content/import/wizard";
 
@@ -19,33 +21,37 @@ function sampleOf(wizard: ContentImportState, header: string): string {
 }
 
 export function ColumnsStep({ wizard }: { wizard: ContentImportState }) {
+  const t = useTranslations("contentImport.columns");
+
+  const label = useTranslator();
+
   const { table, name } = wizard.file;
 
   if (!table) return null;
 
   const duplicates = duplicateTargets(wizard.spec.fields, wizard.mapping.value);
 
-  const options = wizard.spec.fields.map((f) => ({ value: f.key, label: f.required ? `${f.label} *` : f.label }));
+  const options = wizard.spec.fields.map((f) => ({ value: f.key, label: f.required ? `${label(f.labelKey)} *` : label(f.labelKey) }));
 
   return (
     <div className="space-y-3">
       <p className="text-sm text-hud-muted">
-        Файл «{name}» · рядків: {table.rows.length}. Оберіть поле для кожної колонки.
+        {t("summary", { name: name ?? "", rows: table.rows.length })}
       </p>
       {wizard.mapping.missing.length > 0 && (
         <p role="alert" className="text-sm text-red-400">
-          {`Не зіставлено обов'язкові поля: ${wizard.mapping.missing.map((f) => f.label).join(", ")}`}
+          {t("missing", { fields: wizard.mapping.missing.map((f) => label(f.labelKey)).join(", ") })}
         </p>
       )}
       {duplicates.length > 0 && (
         <p role="status" className="text-sm text-amber-400">
-          {`Кілька колонок → одне поле, використано першу: ${duplicates.map((f) => f.label).join(", ")}`}
+          {t("duplicates", { fields: duplicates.map((f) => label(f.labelKey)).join(", ") })}
         </p>
       )}
       {wizard.ai.available && (
         <Button type="button" variant="outline" size="sm" disabled={wizard.ai.busy} onClick={() => void wizard.ai.suggest()}>
           <Sparkles className="h-4 w-4" />
-          {wizard.ai.busy ? "AI думає…" : "Підказати AI"}
+          {wizard.ai.busy ? t("aiBusy") : t("aiSuggest")}
         </Button>
       )}
       {wizard.ai.notes.length > 0 && (
@@ -62,7 +68,7 @@ export function ColumnsStep({ wizard }: { wizard: ContentImportState }) {
               <p className="truncate text-sm font-medium">{header}</p>
               <p className="truncate text-xs text-hud-muted">{sampleOf(wizard, header)}</p>
             </div>
-            <SelectField aria-label={`Поле для «${header}»`} value={wizard.mapping.value[header] ?? ""} onValueChange={(v) => wizard.mapping.set(header, v || null)} options={options} allowNone noneLabel="— пропустити —" />
+            <SelectField aria-label={t("fieldFor", { header })} value={wizard.mapping.value[header] ?? ""} onValueChange={(v) => wizard.mapping.set(header, v || null)} options={options} allowNone noneLabel={t("skip")} />
           </div>
         ))}
       </div>

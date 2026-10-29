@@ -1,20 +1,21 @@
 import { publicToolData } from "@/lib/ai/tools/projection";
 import { API_ERRORS } from "@/lib/constants/api-errors";
 import { ContentError } from "@/lib/server/content/errors";
+import type { ContextBlockId } from "@/types/ai";
 
-export type ContextBlock = { label: string; required?: boolean; maxChars?: number } & ({ text: string; value?: never } | { value: unknown; text?: never });
+export type ContextBlock = { id?: ContextBlockId; label: string; required?: boolean; maxChars?: number } & ({ text: string; value?: never } | { value: unknown; text?: never });
 
 const render = (b: ContextBlock) => `${b.label}:\n${typeof b.text === "string" ? publicToolData(b.text) : JSON.stringify(publicToolData(b.value))}`;
 
 /** Required blocks are indivisible. Optional blocks are valid JSON pages, never sliced JSON. */
-export function fitContext(blocks: readonly ContextBlock[], budget: number, includedLabels?: string[]): { text: string; truncated: boolean } {
+export function fitContext(blocks: readonly ContextBlock[], budget: number, includedIds?: ContextBlockId[]): { text: string; truncated: boolean } {
   if (!Number.isSafeInteger(budget) || budget < 0) throw new ContentError(API_ERRORS.ASSISTANT_CONTEXT_BUDGET_INVALID, 400);
 
   const parts = blocks.filter(b => b.required).map(render);
 
   if (parts.join("\n\n").length > budget) throw new ContentError(API_ERRORS.ASSISTANT_INSTRUCTIONS_TOO_LONG, 413);
 
-  includedLabels?.push(...blocks.filter(b => b.required).map(b => b.label));
+  includedIds?.push(...blocks.filter(b => b.required).flatMap(b => b.id ? [b.id] : []));
 
   let truncated = false;
 
@@ -23,7 +24,11 @@ export function fitContext(blocks: readonly ContextBlock[], budget: number, incl
 
     const full = render(block);
 
-    if (full.length <= remaining) { parts.push(full); includedLabels?.push(block.label); continue; }
+    if (full.length <= remaining) { parts.push(full);
+
+ if (block.id) includedIds?.push(block.id);
+
+ continue; }
 
     truncated = true;
 
@@ -33,7 +38,7 @@ export function fitContext(blocks: readonly ContextBlock[], budget: number, incl
 
     const total = entries ? entries.length : (value as string).length;
 
-    const page = (count: number) => `${block.label}:\n${JSON.stringify({ truncated: true, notice: "[обрізано] Повні дані читайте інструментом за потреби.", ...(entries ? { items: entries.slice(0, count) } : { text: (value as string).slice(0, count) }), total, nextOffset: count })}`;
+    const page = (count: number) => `${block.label}:\n${JSON.stringify({ truncated: true, notice: "[truncated] Read the full data with a tool if needed.", ...(entries ? { items: entries.slice(0, count) } : { text: (value as string).slice(0, count) }), total, nextOffset: count })}`;
 
     let low = 0;
 
@@ -45,11 +50,15 @@ export function fitContext(blocks: readonly ContextBlock[], budget: number, incl
       if (page(mid).length <= remaining) low = mid; else high = mid - 1;
     }
 
-    if (page(low).length <= remaining) { parts.push(page(low)); includedLabels?.push(block.label); }
+    if (page(low).length <= remaining) { parts.push(page(low));
+
+ if (block.id) includedIds?.push(block.id); }
     else {
       const marker = `${block.label}:\n${JSON.stringify({ truncated: true, nextOffset: 0 })}`;
 
-      if (marker.length <= remaining) { parts.push(marker); includedLabels?.push(block.label); }
+      if (marker.length <= remaining) { parts.push(marker);
+
+ if (block.id) includedIds?.push(block.id); }
     }
   }
 

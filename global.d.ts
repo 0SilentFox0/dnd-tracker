@@ -1,6 +1,9 @@
 import type abilities from "./messages/uk/abilities.json";
 import type abilityRegistry from "./messages/uk/abilityRegistry.json";
+import type acquaintances from "./messages/uk/acquaintances.json";
+import type ai from "./messages/uk/ai.json";
 import type artifacts from "./messages/uk/artifacts.json";
+import type assistant from "./messages/uk/assistant.json";
 import type auth from "./messages/uk/auth.json";
 import type backgrounds from "./messages/uk/backgrounds.json";
 import type campaigns from "./messages/uk/campaigns.json";
@@ -9,9 +12,13 @@ import type characters from "./messages/uk/characters.json";
 import type choices from "./messages/uk/choices.json";
 import type classes from "./messages/uk/classes.json";
 import type common from "./messages/uk/common.json";
+import type compendium from "./messages/uk/compendium.json";
+import type compendiumReport from "./messages/uk/compendiumReport.json";
+import type contentImport from "./messages/uk/contentImport.json";
 import type dashboard from "./messages/uk/dashboard.json";
 import type errors from "./messages/uk/errors.json";
 import type feats from "./messages/uk/feats.json";
+import type gameTerms from "./messages/uk/gameTerms.json";
 import type help from "./messages/uk/help.json";
 import type inventory from "./messages/uk/inventory.json";
 import type landing from "./messages/uk/landing.json";
@@ -20,6 +27,8 @@ import type onboarding from "./messages/uk/onboarding.json";
 import type races from "./messages/uk/races.json";
 import type rest from "./messages/uk/rest.json";
 import type rules from "./messages/uk/rules.json";
+import type scenario from "./messages/uk/scenario.json";
+import type show from "./messages/uk/show.json";
 import type skills from "./messages/uk/skills.json";
 import type skillTree from "./messages/uk/skillTree.json";
 import type spellEditor from "./messages/uk/spellEditor.json";
@@ -27,6 +36,7 @@ import type spells from "./messages/uk/spells.json";
 import type units from "./messages/uk/units.json";
 import type validation from "./messages/uk/validation.json";
 import type whatsNew from "./messages/uk/whatsNew.json";
+import type world from "./messages/uk/world.json";
 
 declare module "next-intl" {
   interface AppConfig {
@@ -61,6 +71,16 @@ declare module "next-intl" {
       abilityRegistry: typeof abilityRegistry;
       rules: typeof rules;
       skillTree: typeof skillTree;
+      scenario: typeof scenario;
+      show: typeof show;
+      acquaintances: typeof acquaintances;
+      world: typeof world;
+      ai: typeof ai;
+      compendium: typeof compendium;
+      contentImport: typeof contentImport;
+      gameTerms: typeof gameTerms;
+      assistant: typeof assistant;
+      compendiumReport: typeof compendiumReport;
     };
   }
 }

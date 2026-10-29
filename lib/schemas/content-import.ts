@@ -7,9 +7,9 @@ export const contentImportSchema = z.object({
     .array(z.record(z.string(), z.unknown()))
     .min(1)
     .max(IMPORT_LIMITS.rowsPerRequest)
-    .describe("Рядки: ключі — поля імпорту виду (як у тілі create; у skills — плоскі name, description, icon, image, mainSkillId, spellId, spellGroupId, grantedSpellId, abilities); посилання — назвою або id цієї кампанії; значення можна давати текстом, як у CSV"),
-  mode: z.enum(IMPORT_MODES).default("create").describe("create — дубль назви = помилка рядка; update — оновити за назвою, інакше створити; skip — наявні пропустити"),
-  dryRun: z.boolean().default(false).describe("Лише перевірка, без запису"),
+    .describe("Rows: keys are the import fields of the kind (as in the create body; for skills the flat name, description, icon, image, mainSkillId, spellId, spellGroupId, grantedSpellId, abilities); references are given by name or by id of this campaign; values may be text, as in CSV"),
+  mode: z.enum(IMPORT_MODES).default("create").describe("create: a duplicate name is a row error; update: update by name, otherwise create; skip: skip existing ones"),
+  dryRun: z.boolean().default(false).describe("Validate only, write nothing"),
 });
 
 export type ContentImportInput = z.infer<typeof contentImportSchema>;

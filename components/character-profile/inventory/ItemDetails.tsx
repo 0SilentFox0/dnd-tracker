@@ -69,6 +69,8 @@ export function ItemBody({ selection, withTitle = true }: { selection: Inventory
 export function ItemActions({ inv, on }: ItemDetailsProps) {
   const t = useTranslations("inventory.actions");
 
+  const tc = useTranslations("common.actions");
+
   const { value } = inv.selection;
 
   if (!value || !inv.access.canAct) return null;
@@ -101,8 +103,8 @@ export function ItemActions({ inv, on }: ItemDetailsProps) {
           ]
         : [
             value.item.consumable && btn(t("use"), () => void inv.actions.use(value.item.id)),
-            btn(t("edit"), () => on.edit(value.item)),
-            btn(t("remove"), () => inv.actions.remove(value.item)),
+            btn(tc("edit"), () => on.edit(value.item)),
+            btn(tc("delete"), () => inv.actions.remove(value.item)),
           ];
 
   return <div className="flex flex-wrap gap-2">{buttons}</div>;

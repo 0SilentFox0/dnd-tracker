@@ -10,7 +10,7 @@ describe("ShowBattleCall", () => {
   it("посилання на бій з назвою", () => {
     render(<ShowBattleCall campaignId="c1" battle={{ id: "b1", name: "Засідка" }} />);
 
-    const link = screen.getByRole("link", { name: /До бою!/ });
+    const link = screen.getByRole("link", { name: /show.battleCall.go/ });
 
     expect(link.getAttribute("href")).toBe("/campaigns/c1/battles/b1");
     expect(screen.getByText("Засідка")).toBeTruthy();
@@ -19,7 +19,7 @@ describe("ShowBattleCall", () => {
   it("посилання повністю непрозоре: пульсує лише ореол", () => {
     render(<ShowBattleCall campaignId="c1" battle={{ id: "b1", name: "Засідка" }} />);
 
-    const link = screen.getByRole("link", { name: /До бою!/ });
+    const link = screen.getByRole("link", { name: /show.battleCall.go/ });
 
     expect(link.className).not.toContain("animate-pulse");
     expect(link.querySelector(".animate-pulse")).toBeTruthy();

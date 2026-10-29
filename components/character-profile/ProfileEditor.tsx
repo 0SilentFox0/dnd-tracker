@@ -41,6 +41,8 @@ export function ProfileEditor({ onDone }: { onDone: () => void }) {
 
   const tc = useTranslations("common.tabs");
 
+  const tca = useTranslations("common.actions");
+
   const editor = useDmCharacterEditor({ campaignId, characterId, onSaved: onDone });
 
   const [tab, setTab] = useState<ProfileTabId>("basic");
@@ -191,10 +193,10 @@ export function ProfileEditor({ onDone }: { onDone: () => void }) {
       />
       <ActionBar className="bg-[#110e0b]/95 px-4">
         <Button type="button" variant="outline" onClick={onDone}>
-          {t("editor.cancel")}
+          {tca("cancel")}
         </Button>
         <Button type="submit" form="profile-edit" disabled={form.status.isLoading || editor.options.membersLoading}>
-          {form.status.isLoading ? t("editor.saving") : t("editor.save")}
+          {form.status.isLoading ? t("editor.saving") : tca("save")}
         </Button>
       </ActionBar>
     </form>

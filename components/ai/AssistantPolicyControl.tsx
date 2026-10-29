@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useTranslations } from "next-intl";
 
 import { Button } from "@/components/ui/button";
 import { ResponsiveDialog } from "@/components/ui/responsive-dialog";
@@ -8,6 +9,8 @@ import { useAssistantPolicy } from "@/lib/hooks/ai/useAssistantPolicy";
 import type { ExecutionMode } from "@/types/assistant";
 
 export function AssistantPolicyControl({ campaignId, target, id, executionMode = "review" }: { campaignId: string; target: "thread" | "token"; id: string; executionMode?: ExecutionMode }) {
+  const t = useTranslations("ai");
+
   const [open, setOpen] = useState(false);
 
   const policy = useAssistantPolicy(campaignId);
@@ -19,14 +22,14 @@ export function AssistantPolicyControl({ campaignId, target, id, executionMode =
     catch { /* The error is shown without trusting a raw server payload. */ }
   };
 
-  return <section aria-label="Режим виконання" className="space-y-2 text-sm">
-    <p>Режим: {mode === "auto" ? "auto" : "перегляд"}</p>
-    <p className="text-xs">Наявні pending не застосовуються. Видалення, скидання, доступ, session-only та платні дії потребують окремого підтвердження.</p>
-    <Button variant="outline" disabled={policy.isPending} onClick={() => mode === "auto" ? void change("review") : setOpen(true)}>{mode === "auto" ? "Повернути перегляд" : "Увімкнути auto"}</Button>
-    {policy.isSuccess && policy.data.executionMode !== mode && <p role="status">Сервер прийняв зміну режиму. Чекаємо свіжого стану; за потреби оновіть сторінку.</p>}
-    {policy.isError && <p role="alert">Не вдалося змінити режим. Це може зробити лише власник.</p>}
-    <ResponsiveDialog open={open} onOpenChange={setOpen} title="Увімкнути auto для наступних дій?" description="Звичайні нові дії виконуватимуться за серверною політикою. Наявні пропозиції не застосуються, права не розширюються." footer={<Button disabled={policy.isPending} onClick={() => void change("auto")}>Увімкнути для наступних дій</Button>}>
-      <p>Небезпечні та платні дії завжди залишаються для людського підтвердження. Змінюється лише цей {target === "thread" ? "тред" : "токен"}.</p>
+  return <section aria-label={t("policy.ariaLabel")} className="space-y-2 text-sm">
+    <p>{t("policy.mode", { mode: t(`policy.modes.${mode === "auto" ? "auto" : "review"}`) })}</p>
+    <p className="text-xs">{t("policy.note")}</p>
+    <Button variant="outline" disabled={policy.isPending} onClick={() => mode === "auto" ? void change("review") : setOpen(true)}>{mode === "auto" ? t("policy.backToReview") : t("policy.enableAuto")}</Button>
+    {policy.isSuccess && policy.data.executionMode !== mode && <p role="status">{t("policy.accepted")}</p>}
+    {policy.isError && <p role="alert">{t("policy.failed")}</p>}
+    <ResponsiveDialog open={open} onOpenChange={setOpen} title={t("policy.dialog.title")} description={t("policy.dialog.description")} footer={<Button disabled={policy.isPending} onClick={() => void change("auto")}>{t("policy.dialog.confirm")}</Button>}>
+      <p>{t("policy.dialog.body", { target })}</p>
     </ResponsiveDialog>
   </section>;
 }

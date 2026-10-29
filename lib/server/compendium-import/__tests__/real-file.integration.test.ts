@@ -65,7 +65,7 @@ describe.skipIf(!FILE)("real file import", () => {
 
     const unresolved = bare.report.rows.flatMap((r) => r.issues.filter((i) => i.code === "UNRESOLVED_REF"));
 
-    console.info("auto-bind: unresolved refs", unresolved.length, "in rows", bare.report.rows.filter((r) => r.issues.some((i) => i.code === "UNRESOLVED_REF")).length, [...new Set(unresolved.map((i) => i.action.match(/«[^»]+»/)?.[0]))].join(", "));
+    console.info("auto-bind: unresolved refs", unresolved.length, "in rows", bare.report.rows.filter((r) => r.issues.some((i) => i.code === "UNRESOLVED_REF")).length, [...new Set(unresolved.map((i) => i.params?.name))].join(", "));
 
     const { graph } = previewPresentation(base);
 
@@ -73,7 +73,7 @@ describe.skipIf(!FILE)("real file import", () => {
 
     const bindings: NonNullable<typeof base.bindings> = {};
 
-    for (const ref of graph.flatMap((r) => r.refs).filter((r) => r.kind === "spell" && !own.has(r.key) && unresolved.some((i) => i.action.includes(`«${r.name}»`)))) {
+    for (const ref of graph.flatMap((r) => r.refs).filter((r) => r.kind === "spell" && !own.has(r.key) && unresolved.some((i) => i.params?.name === r.name))) {
       bindings[ref.key] = bindings[ref.key] ?? { kind: "spells" as const, id: (await prisma.spell.create({ data: { campaignId, name: ref.name, executionMode: "manual", type: "damage", damageType: "none" } })).id };
     }
 
@@ -81,7 +81,7 @@ describe.skipIf(!FILE)("real file import", () => {
 
     const p = await previewImport(actor(), input, secret, prismaImportRepository);
 
-    console.info(JSON.stringify({ ready: p.report.readyToImport, counts: p.report.counts, next: p.report.nextActions.filter((a) => !/^MANUAL_/.test(a.code)).slice(0, 15).map((a) => `${a.code}: ${a.action}`) }, null, 1));
+    console.info(JSON.stringify({ ready: p.report.readyToImport, counts: p.report.counts, next: p.report.nextActions.filter((a) => !/^MANUAL_/.test(a.code)).slice(0, 15).map((a) => `${a.code}: ${JSON.stringify(a.params ?? {})}`) }, null, 1));
 
     const issueCodes = p.report.rows.flatMap((r) => r.issues.map((i) => i.code));
 

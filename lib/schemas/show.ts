@@ -28,7 +28,7 @@ const imageUrlSchema = z
   .trim()
   .max(2000)
   .url()
-  .refine((v) => v.startsWith("https://") || v.startsWith("http://"), "Потрібне посилання http(s)");
+  .refine((v) => v.startsWith("https://") || v.startsWith("http://"), "show.validation.httpUrl");
 
 const puzzleSpecSchema = z.object({
   cut: z.enum(["classic", "organic", "straight"]),
@@ -48,12 +48,12 @@ const slideSchema = z
     kind: z.literal("puzzle").optional(),
     puzzle: puzzleSpecSchema.optional(),
   })
-  .refine((s) => (s.kind === "puzzle") === (s.puzzle !== undefined), "Пазл і його параметри йдуть разом");
+  .refine((s) => (s.kind === "puzzle") === (s.puzzle !== undefined), "show.validation.puzzleParams");
 
 export const slidesSchema = z
   .array(slideSchema)
   .max(MAX_SLIDES_PER_DECK)
-  .refine((slides) => new Set(slides.map((s) => s.id)).size === slides.length, "Повторюваний id слайда");
+  .refine((slides) => new Set(slides.map((s) => s.id)).size === slides.length, "show.validation.duplicateSlideId");
 
 const deckTitleSchema = z.string().trim().min(1).max(DECK_TITLE_MAX);
 

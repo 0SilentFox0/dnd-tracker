@@ -35,7 +35,7 @@ async function assertName(campaignId: string, name: string, exceptId?: string) {
 }
 
 export const backgroundsResource = defineResource<Background, z.infer<typeof createBackgroundSchema>, z.infer<typeof updateBackgroundSchema>>({
-  kind: "backgrounds", idParam: "backgroundId", label: "Передісторії", description: "Передісторії: характеристики, навички, інструменти й риса походження.", path: "/backgrounds", listFields: ["originFeatId"],
+  kind: "backgrounds", idParam: "backgroundId", label: "Backgrounds", description: "Backgrounds: ability scores, skills, tools and an origin feat.", path: "/backgrounds", listFields: ["originFeatId"],
   schemas: { create: createBackgroundSchema, update: updateBackgroundSchema }, errors: [409, 422],
   access: { list: "member", item: "dm" }, invalidates: [ReferenceKind.BACKGROUNDS], notFound: API_ERRORS.BACKGROUND_NOT_FOUND,
   list: async (actor) => (await getCachedBackgrounds(actor.campaignId)).map(toBackgroundData),

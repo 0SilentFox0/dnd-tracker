@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 
 import { acquaintanceKeys } from "./keys";
@@ -26,6 +27,8 @@ function withOwnNote(data: AcquaintancesResponse | undefined, acquaintanceId: st
 }
 
 export function useAcquaintanceNote(campaignId: string, acquaintanceId: string) {
+  const t = useTranslations("acquaintances");
+
   const queryClient = useQueryClient();
 
   const key = acquaintanceKeys.list(campaignId);
@@ -45,7 +48,7 @@ export function useAcquaintanceNote(campaignId: string, acquaintanceId: string) 
     },
     onError: (_error, _text, context) => {
       queryClient.setQueryData(key, context?.previous);
-      notify("Не вдалося зберегти нотатку");
+      notify(t("notify.noteSaveFailed"));
     },
     onSettled: () => void queryClient.invalidateQueries({ queryKey: key }),
   });

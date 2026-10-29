@@ -1,5 +1,7 @@
 "use client";
 
+import { useTranslations } from "next-intl";
+
 import { ColorSwatch } from "@/components/common/ColorSwatch";
 import type { LegendEntry, LegendKind } from "@/types/scenario";
 
@@ -9,5 +11,7 @@ const KIND_HEX: Record<LegendKind, string> = {
 };
 
 export function LegendColorPicker({ entry, onChange }: { entry: LegendEntry; onChange: (color: string) => void }) {
-  return <ColorSwatch color={entry.color ?? KIND_HEX[entry.kind]} label="Колір позначки" onChange={onChange} />;
+  const t = useTranslations("scenario");
+
+  return <ColorSwatch color={entry.color ?? KIND_HEX[entry.kind]} label={t("legendColor")} onChange={onChange} />;
 }

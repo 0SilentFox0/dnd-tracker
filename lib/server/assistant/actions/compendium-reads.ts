@@ -56,13 +56,13 @@ function safeText(value: unknown, max = 200): string {
           parsed.hash ||
           parsed.username ||
           parsed.password
-          ? "[Приватне посилання у застосунку]"
+          ? "[private link in the app]"
           : url;
       } catch {
-        return "[Посилання у застосунку]";
+        return "[link in the app]";
       }
     })
-    .replace(/\bBearer\s+\S+|\bsk-[A-Za-z0-9_-]{8,}/gi, "[Приховано]")
+    .replace(/\bBearer\s+\S+|\bsk-[A-Za-z0-9_-]{8,}/gi, "[redacted]")
     .slice(0, max);
 }
 
@@ -112,7 +112,7 @@ async function readNotes(actor: Actor, { selectedKeys }: z.infer<typeof COMPENDI
       canonicalKey: safeText(r.canonicalKey, 512),
       originalName: safeText(r.originalName),
       edition: safeText(r.edition, 20),
-      notes: /^[\s]*[\[{]/.test(r.notes) ? "Структуровані примітки перегляньте у застосунку." : safeText(r.notes, 3000),
+      notes: /^[\s]*[\[{]/.test(r.notes) ? "Structured notes: view them in the app." : safeText(r.notes, 3000),
     })),
     explicitlySelected: true,
   });

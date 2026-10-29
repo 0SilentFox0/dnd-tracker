@@ -1,5 +1,5 @@
 // @vitest-environment happy-dom
-import { cleanup, fireEvent, render, screen } from "@testing-library/react";
+import { cleanup, fireEvent, screen } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
 import { ColumnsStep } from "../steps/ColumnsStep";
@@ -7,10 +7,14 @@ import { PreviewStep } from "../steps/PreviewStep";
 import { ResultStep } from "../steps/ResultStep";
 
 import type { ContentImportState } from "@/lib/hooks/content-import";
+import { renderWithIntl } from "@/lib/i18n/test/render-with-intl";
 import { IMPORT_SPECS } from "@/lib/utils/content/import";
 import type { ImportReport } from "@/types/content-import";
 
+vi.unmock("next-intl");
 afterEach(cleanup);
+
+const render = (ui: React.ReactElement, locale: "uk" | "en" = "uk") => renderWithIntl(ui, { locale, namespaces: ["common", "validation", "contentImport"] });
 
 const REPORT = (n: number, dryRun: boolean): ImportReport => ({
   dryRun,
@@ -36,30 +40,30 @@ function wizard(over: Partial<ContentImportState> = {}): ContentImportState {
 }
 
 describe("ColumnsStep", () => {
-  it("підсвічує незіставлені обов'язкові поля, показує приклад значення", () => {
-    render(<ColumnsStep wizard={wizard()} />);
+  it("підсвічує незіставлені обов'язкові поля, показує приклад значення", async () => {
+    await render(<ColumnsStep wizard={wizard()} />);
 
     expect(screen.getByRole("alert").textContent).toBe("Не зіставлено обов'язкові поля: Назва");
     expect(screen.getByText("Демони")).toBeTruthy();
   });
 
-  it("попереджає, коли кілька колонок ведуть в одне поле, що не з'єднується", () => {
+  it("попереджає, коли кілька колонок ведуть в одне поле, що не з'єднується", async () => {
     const w = wizard({ mapping: { value: { Назва: "name", Хто: "maxHp", Ще: "maxHp", А: "abilities", Б: "abilities" }, set: vi.fn(), missing: [] } as unknown as ContentImportState["mapping"] });
 
-    render(<ColumnsStep wizard={w} />);
+    await render(<ColumnsStep wizard={w} />);
 
     expect(screen.getByRole("status").textContent).toBe("Кілька колонок → одне поле, використано першу: ХП");
   });
 
-  it("кнопка AI — лише коли ключ є", () => {
-    render(<ColumnsStep wizard={wizard()} />);
+  it("кнопка AI — лише коли ключ є", async () => {
+    await render(<ColumnsStep wizard={wizard()} />);
 
     expect(screen.queryByRole("button", { name: "Підказати AI" })).toBeNull();
     cleanup();
 
     const w = wizard({ ai: { available: true, busy: false, notes: ["Перевірте ХП"], suggest: vi.fn(async () => {}) } });
 
-    render(<ColumnsStep wizard={w} />);
+    await render(<ColumnsStep wizard={w} />);
     fireEvent.click(screen.getByRole("button", { name: "Підказати AI" }));
 
     expect(w.ai.suggest).toHaveBeenCalled();
@@ -67,11 +71,20 @@ describe("ColumnsStep", () => {
   });
 });
 
+describe("English", () => {
+  it("renders the columns step without raw keys", async () => {
+    const { container } = await render(<ColumnsStep wizard={wizard()} />, "en");
+
+    expect(screen.getByRole("alert").textContent).toBe("Required fields are not mapped: Name");
+    expect(container.textContent).not.toMatch(/contentImport\./);
+  });
+});
+
 describe("PreviewStep", () => {
-  it("лічильники, помилки рядків, перші 50 рядків, звіт помилок", () => {
+  it("лічильники, помилки рядків, перші 50 рядків, звіт помилок", async () => {
     const w = wizard({ step: "preview", preview: REPORT(60, true) });
 
-    render(<PreviewStep wizard={w} />);
+    await render(<PreviewStep wizard={w} />);
 
     expect(screen.getByText("Буде створено: 59")).toBeTruthy();
     expect(screen.getByText("ХП: Очікується ціле число")).toBeTruthy();
@@ -85,8 +98,8 @@ describe("PreviewStep", () => {
 });
 
 describe("ResultStep", () => {
-  it("підсумок і помилка часткового запису", () => {
-    render(<ResultStep wizard={wizard({ step: "result", result: REPORT(3, false), status: { busy: false, progress: null, error: "Мережа. Записано частин: 1 з 2" } })} />);
+  it("підсумок і помилка часткового запису", async () => {
+    await render(<ResultStep wizard={wizard({ step: "result", result: REPORT(3, false), status: { busy: false, progress: null, error: "Мережа. Записано частин: 1 з 2" } })} />);
 
     expect(screen.getByText("Створено: 2")).toBeTruthy();
     expect(screen.getByRole("alert").textContent).toBe("Мережа. Записано частин: 1 з 2");

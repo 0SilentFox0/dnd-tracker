@@ -36,7 +36,7 @@ describe("content durable effects", () => {
 
     const effects: DurableEffect[] = [];
 
-    const ctx: ActionExecutionContext = { caller: { actor, channel: "chat", tokenId: null, threadId: null }, db: createScopedDatabase(db) as never, expected: {}, intentId: "intent", afterCommit: (effect) => effects.push(effect) };
+    const ctx: ActionExecutionContext = { caller: { actor, channel: "chat", tokenId: null, threadId: null, locale: "uk" as const }, db: createScopedDatabase(db) as never, expected: {}, intentId: "intent", afterCommit: (effect) => effects.push(effect) };
 
     await runContentWriteContext("camp", db, () => action.execute(ctx, { id: "track" }));
     expect(exists).toBe(false);

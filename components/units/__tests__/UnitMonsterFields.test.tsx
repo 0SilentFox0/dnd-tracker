@@ -24,7 +24,7 @@ describe("monster unit form", () => {
     const tab = unitFormTabs({ campaignId: "c", editor: editor(2, change), t }).find((t) => t.label === "units.form.tabs.statblock");
 
     render(<>{tab?.content}</>);
-    fireEvent.change(screen.getByLabelText('units.statblock.feet {"label":"common.monster.senses.blindsight"}'), { target: { value: "60" } });
+    fireEvent.change(screen.getByLabelText('units.statblock.feet {"label":"gameTerms.monster.senses.blindsight"}'), { target: { value: "60" } });
     expect(change).toHaveBeenCalledWith({ statblock: { senses: { blindsight: 60 } } });
   });
 

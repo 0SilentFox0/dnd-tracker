@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useTranslations } from "next-intl";
 import { MapPinned, PenLine } from "lucide-react";
 
 import { DmMarkerNotes } from "./DmMarkerNotes";
@@ -31,6 +32,10 @@ export function WorldMarkerPanel() {
 function MarkerForm({ marker }: { marker: WorldMarker }) {
   const { detail, editor, select, openMap, redraw, redrawId } = useWorldEditorContext();
 
+  const t = useTranslations("world");
+
+  const tc = useTranslations("common.actions");
+
   const [creating, setCreating] = useState(false);
 
   const { name, setName, commitName, note, setNote, commitNote, color, pickColor, save, remove } = useMarkerFields({ marker, editor, select });
@@ -41,18 +46,18 @@ function MarkerForm({ marker }: { marker: WorldMarker }) {
 
   return (
     <div>
-      <WorldPanelHeader badge={<HeaderIcon className="size-5 text-[#2a1d05]" aria-hidden />} title={marker.name} subtitle={`${marker.kind === "zone" ? "Зона" : "Точка"} · ${detail?.map.name ?? ""}`} />
-      <HudSection title="Основне">
+      <WorldPanelHeader badge={<HeaderIcon className="size-5 text-[#2a1d05]" aria-hidden />} title={marker.name} subtitle={t("editor.markerSubtitle", { shape: t(`shape.${marker.kind}`), map: detail?.map.name ?? "" })} />
+      <HudSection title={t("editor.basic")}>
         <div className="space-y-3">
-          <LabeledInput label="Назва" maxLength={WORLD_NAME_MAX} value={name} onChange={(e) => setName(e.target.value)} onBlur={commitName} />
+          <LabeledInput label={t("name")} maxLength={WORLD_NAME_MAX} value={name} onChange={(e) => setName(e.target.value)} onBlur={commitName} />
           {marker.kind === "point" ? (
-            <div role="group" aria-label="Іконка" className="grid grid-cols-4 gap-1.5">
-              {ICON_OPTIONS.map(({ value, label, Icon }) => (
+            <div role="group" aria-label={t("editor.icon")} className="grid grid-cols-4 gap-1.5">
+              {ICON_OPTIONS.map(({ value, Icon }) => (
                 <button
                   key={value}
                   type="button"
-                  title={label}
-                  aria-label={label}
+                  title={t(`markerKinds.${value}`)}
+                  aria-label={t(`markerKinds.${value}`)}
                   aria-pressed={marker.icon === value}
                   onClick={() => void save({ icon: value })}
                   className={cn("flex h-11 items-center justify-center rounded-md border bg-black/40 text-hud-muted hover:text-hud-ink", marker.icon === value ? "metal-gold metal-fill border-[var(--gold)]" : "border-hud-rule")}
@@ -63,52 +68,52 @@ function MarkerForm({ marker }: { marker: WorldMarker }) {
             </div>
           ) : (
             <div className="flex items-center gap-3 text-sm">
-              <ColorSwatch color={color} label="Колір зони" onChange={pickColor} />
-              Колір зони
+              <ColorSwatch color={color} label={t("editor.zoneColor")} onChange={pickColor} />
+              {t("editor.zoneColor")}
             </div>
           )}
           {marker.kind === "zone" ? (
             <Button type="button" variant={redrawing ? "default" : "outline"} onClick={() => redraw(redrawing ? null : marker.id)} className="w-full gap-2">
               <PenLine className="size-4" />
-              {redrawing ? "Малюйте нову зону…" : "Перемалювати зону"}
+              {redrawing ? t("editor.drawNewZone") : t("editor.redrawZone")}
             </Button>
           ) : null}
         </div>
       </HudSection>
-      <HudSection title="Для майстра">
+      <HudSection title={t("editor.forDm")}>
         <div className="space-y-3">
           <label className="block space-y-1 text-sm">
-            Нотатка ДМ
+            {t("editor.dmNote")}
             <Textarea value={note} maxLength={WORLD_DM_NOTE_MAX} onChange={(e) => setNote(e.target.value)} onBlur={commitNote} />
           </label>
           <label className="flex items-center justify-between gap-3 text-sm">
             <span>
-              Відома локація
-              <span className="block text-xs text-hud-muted">Гравці бачать її й без відкритого туману</span>
+              {t("editor.knownLocation")}
+              <span className="block text-xs text-hud-muted">{t("editor.knownLocationHint")}</span>
             </span>
             <Switch checked={marker.alwaysVisible} onCheckedChange={(v) => void save({ alwaysVisible: v })} />
           </label>
         </div>
       </HudSection>
       {detail ? (
-        <HudSection title="Нотатки гравців">
+        <HudSection title={t("editor.playerNotes")}>
           <DmMarkerNotes marker={marker} />
         </HudSection>
       ) : null}
-      <HudSection title="Вкладена карта">
+      <HudSection title={t("editor.childMap")}>
         {marker.childMapId ? (
           <Button type="button" variant="outline" onClick={() => openMap(marker.childMapId)} className="w-full gap-2">
             <MapPinned className="size-4" />
-            Відкрити вкладену карту
+            {t("editor.openChild")}
           </Button>
         ) : (
           <Button type="button" variant="outline" onClick={() => setCreating(true)} className="w-full gap-2">
             <MapPinned className="size-4" />
-            Створити вкладену карту
+            {t("editor.createChild")}
           </Button>
         )}
       </HudSection>
-      <QuietDeleteButton label="Видалити" onClick={() => void remove()} />
+      <QuietDeleteButton label={tc("delete")} onClick={() => void remove()} />
       <NewWorldMapDialog open={creating} onOpenChange={setCreating} parentMarker={{ id: marker.id, name: marker.name }} />
     </div>
   );

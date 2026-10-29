@@ -3,6 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { useTranslations } from "next-intl";
 import { Images, Plus } from "lucide-react";
 
 import { EmptyState } from "@/components/common/states";
@@ -15,10 +16,11 @@ import { WorldMapLink } from "@/components/world/WorldMapLink";
 import { useNotify } from "@/lib/hooks/common";
 import { useScenarioPages } from "@/lib/hooks/scenario";
 import { useDeckMutations, useDecks, useShowControl } from "@/lib/hooks/show";
-import { pluralUk } from "@/lib/utils/common/plural";
 import type { SlideDeckSummary } from "@/types/show";
 
 export function DMShowPageClient({ campaignId, initialDecks }: { campaignId: string; initialDecks: SlideDeckSummary[] }) {
+  const t = useTranslations("show");
+
   const router = useRouter();
 
   const notify = useNotify();
@@ -42,16 +44,16 @@ export function DMShowPageClient({ campaignId, initialDecks }: { campaignId: str
   return (
     <HudPage>
       <HudPageHeader
-        title="Показ сцен"
-        subtitle={`${decks.length} ${pluralUk(decks.length, ["набір", "набори", "наборів"])}`}
+        title={t("decksPage.title")}
+        subtitle={t("decksPage.count", { count: decks.length })}
         actions={
           <>
             <Button onClick={() => setCreating(true)} className="flex items-center gap-2">
               <Plus className="size-4" />
-              Новий набір
+              {t("newDeck.title")}
             </Button>
             <Button asChild variant="outline">
-              <Link href={`${base}/show`}>Відкрити показ</Link>
+              <Link href={`${base}/show`}>{t("decksPage.openShow")}</Link>
             </Button>
             <WorldMapLink campaignId={campaignId} variant="button" />
           </>
@@ -59,7 +61,7 @@ export function DMShowPageClient({ campaignId, initialDecks }: { campaignId: str
       />
       <OnboardingHint id="dm.show" />
       {decks.length === 0 ? (
-        <EmptyState icon={Images} title="Ще немає наборів" description="Створіть набір слайдів із картинок і музики та покажіть його гравцям." />
+        <EmptyState icon={Images} title={t("decksPage.emptyTitle")} description={t("decksPage.emptyDescription")} />
       ) : (
         <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
           {decks.map((deck) => (

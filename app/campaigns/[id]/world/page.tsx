@@ -4,6 +4,8 @@ import { WorldPageClient } from "./page-client";
 
 import { ErrorState } from "@/components/common/states";
 import { worldKeys } from "@/lib/hooks/world/keys";
+import { getRequestLocale } from "@/lib/i18n/request-locale";
+import { getTranslator } from "@/lib/i18n/translator";
 import { PrefetchedQuery } from "@/lib/providers/prefetched-query";
 import { requireCampaignMember } from "@/lib/server/campaigns/access";
 import { viewHandler } from "@/lib/server/world/view-handlers";
@@ -30,7 +32,7 @@ export default async function WorldPage({ params, searchParams }: { params: Prom
 
   const { view, failed } = first?.view ? first : await readView(id);
 
-  if (failed) return <ErrorState error="Не вдалося завантажити карту світу" className="m-4" />;
+  if (failed) return <ErrorState error={(await getTranslator(await getRequestLocale(), "world"))("play.loadFailed")} className="m-4" />;
 
   const client = <WorldPageClient campaignId={id} campaignName={campaign.name} mapId={view?.map.id ?? null} />;
 

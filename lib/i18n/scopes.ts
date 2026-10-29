@@ -25,4 +25,12 @@ export const CAMPAIGN_NAMESPACES = [
   "abilityRegistry",
   "rules",
   "skillTree",
+  "scenario",
+  "show",
+  "acquaintances",
+  "world",
+  "ai",
+  "compendium",
+  "contentImport",
+  "gameTerms",
 ] as const satisfies readonly Namespace[];

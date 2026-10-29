@@ -39,8 +39,8 @@ describe("rollFromSheet", () => {
   it("saving throw has its own label", () => {
     const r = rollFromSheet(rogue(), { kind: "save", ability: "wisdom" }, opts(false));
 
-    expect(r.label).toBe('rest.rollLabel.save {"ability":"common.abilities.wisdom.label"}');
-    expect(rollFromSheet(rogue(), { kind: "check", skill: "stealth" }, opts(false)).label).toBe("common.dndSkills.stealth");
+    expect(r.label).toBe('rest.rollLabel.save {"ability":"gameTerms.abilities.wisdom.label"}');
+    expect(rollFromSheet(rogue(), { kind: "check", skill: "stealth" }, opts(false)).label).toBe("gameTerms.dndSkills.stealth");
     expect(r).toMatchObject({ total: 11, autoFail: false });
   });
 });

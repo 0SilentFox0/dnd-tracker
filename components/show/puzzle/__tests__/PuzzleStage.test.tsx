@@ -84,7 +84,7 @@ describe("PuzzleStage", () => {
 
     fireEvent.pointerDown(screen.getByTestId(`tray-piece-${a}`), { clientX: 10, clientY: 10 });
     await flush();
-    fireEvent.click(screen.getByLabelText("Повернути за годинниковою"));
+    fireEvent.click(screen.getByLabelText("show.puzzle.rotateRight"));
     fireEvent.keyDown(window, { code: "KeyE" });
     fireEvent.keyDown(window, { code: "KeyQ" });
     fireEvent.pointerUp(window, { clientX: 200, clientY: 300 });
@@ -108,10 +108,10 @@ describe("PuzzleStage", () => {
   it("кнопки ДМ лише в режимі ДМ", async () => {
     const { unmount } = mount(state());
 
-    expect(screen.queryByText("Відпустити всі")).toBeNull();
+    expect(screen.queryByText("show.puzzle.releaseAll")).toBeNull();
     unmount();
     mount(state(), true);
-    fireEvent.click(screen.getByText("Відпустити всі"));
+    fireEvent.click(screen.getByText("show.puzzle.releaseAll"));
 
     expect(send).toHaveBeenCalledWith({ action: "puzzleRelease" });
   });
@@ -119,9 +119,9 @@ describe("PuzzleStage", () => {
   it("скинути питає підтвердження", async () => {
     mount(state(), true);
 
-    fireEvent.click(screen.getByText("Скинути"));
+    fireEvent.click(screen.getByText("show.puzzle.reset"));
 
-    fireEvent.click(await within(await screen.findByRole("alertdialog")).findByRole("button", { name: "Скинути" }));
+    fireEvent.click(await within(await screen.findByRole("alertdialog")).findByRole("button", { name: "show.puzzle.resetConfirm.confirm" }));
     await waitFor(() => expect(send).toHaveBeenCalledWith({ action: "puzzleReset" }));
   });
 

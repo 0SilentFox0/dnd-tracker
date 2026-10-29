@@ -152,7 +152,7 @@ describe("useDeckEditor", () => {
 
     await act(async () => void (ok = await result.current.save()));
     expect(ok).toBe(true);
-    expect(notify).toHaveBeenCalledWith(expect.objectContaining({ title: "Набір змінено в іншому місці. Зберегти ваші зміни поверх?" }));
+    expect(notify).toHaveBeenCalledWith(expect.objectContaining({ title: "show.conflict.title" }));
     expect(vi.mocked(saveDeck).mock.calls[1][2]).toEqual({ title: "Моя", slides: [slide(1)], expectedUpdatedAt: T2 });
     expect(result.current.dirty).toBe(false);
   });

@@ -2,12 +2,13 @@ import type { Prisma } from "@prisma/client";
 import type { z } from "zod";
 
 import type { ASSISTANT_EFFECT_STATUSES,ASSISTANT_INTENT_STATUSES } from "@/lib/constants/assistant";
+import type { Locale } from "@/lib/i18n/config";
 import type { Actor, ActorNeed } from "@/lib/utils/api/actor";
 
 export type JsonValue = Prisma.JsonValue;
 export type AssistantChannel = "chat" | "mcp";
 export type ExecutionMode = "review" | "auto";
-export type AssistantCaller = { actor: Actor; channel: AssistantChannel; threadId: string | null; tokenId: string | null; runId?: string };
+export type AssistantCaller = { actor: Actor; channel: AssistantChannel; threadId: string | null; tokenId: string | null; locale: Locale; runId?: string };
 export type ActionRequest = { actionId: string; input: unknown; requestId: string };
 export type TargetRef = { domain: string; id: string; name: string };
 export type FieldChange = { target: TargetRef; path: string; before: JsonValue; after: JsonValue };

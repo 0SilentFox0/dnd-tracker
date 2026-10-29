@@ -34,7 +34,7 @@ vi.mock("@/lib/server/show/show-store", async (original) => ({ ...await original
 vi.mock("@/lib/supabase/scene-slide-storage", () => ({ ownedSlidePath: (_c: string, url: string) => url.startsWith("https://owned/c/") ? "c/x.webp" : null, removeSlideFiles: async (_c: string, urls: string[]) => { f.deleted.push(...urls); } }));
 vi.mock("@/lib/supabase/image-storage", () => ({ isHostedOnProjectStorage: (url: string) => url.startsWith("https://owned/") }));
 
-const caller: AssistantCaller = { actor: { campaignId: "campaign", userId: "dm", isDM: true, via: "session", scopes: null }, channel: "chat", threadId: "thread", tokenId: null, runId: "run" };
+const caller: AssistantCaller = { actor: { campaignId: "campaign", userId: "dm", isDM: true, via: "session", scopes: null }, channel: "chat", threadId: "thread", tokenId: null, runId: "run", locale: "uk" as const };
 
 const slide = { id: "slide0001", imageUrl: "https://owned/c/x.webp" };
 

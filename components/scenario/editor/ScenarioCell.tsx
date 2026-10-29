@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import type { Editor } from "@tiptap/core";
 
 import { RichTextEditor } from "./RichTextEditor";
@@ -21,17 +22,19 @@ export function ScenarioCell({ campaignId, rowId, column, doc, active, searchMen
   searchMentions: (query: string) => Promise<MentionOption[]>;
   handlers: Handlers;
 }) {
+  const t = useTranslations("scenario.cell");
+
   if (active) {
     return (
       <div className="sb-cell is-active">
-        <RichTextEditor key={`${rowId}-${column}`} doc={doc} label={column === "story" ? "Сюжет" : "Нотатки майстра"} searchMentions={searchMentions} onReady={handlers.onReady} onChange={handlers.onChange} />
+        <RichTextEditor key={`${rowId}-${column}`} doc={doc} label={column === "story" ? t("story") : t("notes")} searchMentions={searchMentions} onReady={handlers.onReady} onChange={handlers.onChange} />
       </div>
     );
   }
 
   return (
     <div className="sb-cell" role="button" tabIndex={0} onClick={handlers.onActivate} onKeyDown={(e) => e.key === "Enter" && handlers.onActivate()}>
-      {isDocEmpty(doc) ? <p className="sb-empty">{column === "story" ? "Сюжет — натисніть, щоб писати" : "Нотатки майстра"}</p> : <ScenarioRichText doc={doc} campaignId={campaignId} />}
+      {isDocEmpty(doc) ? <p className="sb-empty">{column === "story" ? t("storyEmpty") : t("notes")}</p> : <ScenarioRichText doc={doc} campaignId={campaignId} />}
     </div>
   );
 }

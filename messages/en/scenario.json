@@ -1,0 +1,312 @@
+{
+  "acquaintance": {
+    "addEntry": "Add an entry",
+    "avatar": "Avatar (URL)",
+    "character": "Character",
+    "delete": "Delete acquaintance",
+    "deleteDescription": "Chips in the text will stay but lead nowhere.",
+    "deleteEntryTitle": "Delete the entry?",
+    "deleteTitle": "Delete the acquaintance?",
+    "description": "Description",
+    "entrySection": "Entry section",
+    "entryText": "Entry text",
+    "existing": "Existing",
+    "hiddenSuffix": " · hidden",
+    "journal": "Journal",
+    "kindGroup": "Acquaintance type",
+    "kinds": {
+      "character": "Full NPC",
+      "micro": "Micro NPC"
+    },
+    "name": "Name",
+    "notFound": "Acquaintance not found",
+    "otherPage": "another page",
+    "search": "Search acquaintances",
+    "source": "Source: {section}",
+    "title": "Acquaintance"
+  },
+  "actions": {
+    "createFailed": "Could not create the page",
+    "deleteFailed": "Could not delete the page",
+    "saveFailed": "Could not save the properties"
+  },
+  "bar": {
+    "hideNotes": "Hide notes",
+    "more": "More",
+    "sections": "Sections",
+    "showNotes": "Show notes"
+  },
+  "battlePicker": {
+    "empty": "No battles",
+    "title": "Battle for the paragraph"
+  },
+  "bindings": {
+    "battle": "Battle",
+    "battleMissing": "Battle unavailable",
+    "bindBattle": "Bind a battle",
+    "bindMarker": "Bind a place",
+    "bindSlide": "Bind a slide",
+    "marker": "Place",
+    "slide": "Slide",
+    "slideMissing": "Slide unavailable",
+    "unbindBattle": "Unbind the battle",
+    "unbindSlide": "Unbind the slide"
+  },
+  "calloutKinds": {
+    "artifact": "Artifact",
+    "check": "Check",
+    "choice": "Player choice",
+    "confide": "Secret",
+    "event": "Event",
+    "goal": "Goal",
+    "hero": "What to watch for",
+    "shadow": "Shadow line",
+    "token": "Token"
+  },
+  "cell": {
+    "notes": "DM notes",
+    "story": "Story",
+    "storyEmpty": "Story — click to write"
+  },
+  "create": {
+    "arc": "Arc",
+    "arcPlaceholder": "Arc one: Isabel and Godric",
+    "character": "Character",
+    "kind": "Type",
+    "name": "Name *",
+    "submit": "Create",
+    "title": "New page"
+  },
+  "dock": {
+    "battle": "⚔ To battle: {name}",
+    "collapse": "Collapse the show panel",
+    "curtain": "Curtain",
+    "expand": "Expand the show panel",
+    "hideSlides": "Hide slides",
+    "locate": "To the row with the slide",
+    "map": "🗺 Map",
+    "mapNamed": "🗺 Map: {name}",
+    "nextRow": "Next row",
+    "nextRowHint": "Next row's slide (N)",
+    "noMoreSlides": "No more slides further in the scenario",
+    "notRunning": "Show not running",
+    "slide": "Slide",
+    "slides": "Slides"
+  },
+  "draft": {
+    "conflict": "The page was changed in another tab. Your edits are still here — reload the page to see the new version.",
+    "localKept": "The local draft stays in the open editor. Autosave is paused until you reload explicitly.",
+    "notSaved": "Not saved",
+    "reloadFailed": "Could not load the latest version. Your local edits stay in the editor."
+  },
+  "editor": {
+    "addRow": "Add a row",
+    "addSection": "Add a section",
+    "done": "Done",
+    "exit": "Leave",
+    "newChapter": "New chapter",
+    "newSection": "New section",
+    "properties": "Properties",
+    "removeHint": "You can undo this through “Versions”.",
+    "removeRow": "Delete the row?",
+    "removeSection": "Delete the section “{title}”?",
+    "rowDown": "Move row down",
+    "rowRemove": "Delete row",
+    "rowUp": "Move row up",
+    "unsavedExit": "There are unsaved changes. Leave without saving?"
+  },
+  "index": {
+    "down": "Move down: {title}",
+    "heroes": "Heroes",
+    "notes": "Notes",
+    "scenes": "Scenes",
+    "up": "Move up: {title}"
+  },
+  "indexPage": {
+    "emptyDescription": "Create the first scene or import existing ones.",
+    "emptyTitle": "The scenario is empty",
+    "lead": "The DM's book: scenes to run, each on its own page.",
+    "newPage": "New page"
+  },
+  "legend": "Legend",
+  "legendColor": "Entry colour",
+  "legendKinds": {
+    "artifact": "Mini-quest and artifact",
+    "check": "Perception check",
+    "choice": "Player choice",
+    "notes": "DM notes",
+    "read": "Read aloud and events",
+    "shadow": "Shadow line",
+    "token": "Token"
+  },
+  "marker": {
+    "unavailable": "Place unavailable",
+    "unbind": "Unbind the place"
+  },
+  "markerPicker": {
+    "noMaps": "No world maps",
+    "noMarkers": "This map has no places",
+    "pickMap": "Pick a map",
+    "search": "Search places",
+    "title": "Place on the world map",
+    "toMaps": "Back to maps"
+  },
+  "mentionTypes": {
+    "acquaintance": "Acquaintance",
+    "artifact": "Artifact",
+    "battle": "Battle",
+    "character": "Character",
+    "marker": "Place",
+    "spell": "Spell",
+    "unit": "Unit"
+  },
+  "noBinding": "— no binding —",
+  "page": {
+    "doubleClickSlide": "Double-click to show the slide",
+    "played": "Played",
+    "playedDone": "✓ Played",
+    "reveal": "Reveal to the player",
+    "revealed": "✓ Revealed to the player",
+    "revealedAfterSection": "✓ Revealed (after the section)"
+  },
+  "pageBody": {
+    "collapsePlayed": "Collapse played",
+    "darkTheme": "Dark theme",
+    "edit": "Edit",
+    "expandPlayed": "Expand played",
+    "lightTheme": "Light theme",
+    "showScreen": "Show screen ↗",
+    "toIndex": "To the contents",
+    "versions": "Versions"
+  },
+  "pageKinds": {
+    "hero": "Hero",
+    "note": "Note",
+    "scene": "Scene"
+  },
+  "pageStatuses": {
+    "draft": "In progress",
+    "personal": "Personal",
+    "ready": "Ready"
+  },
+  "play": {
+    "battleDone": "Battle finished",
+    "battleFailed": "Could not start the battle",
+    "battleMissing": "Battle unavailable",
+    "callAgain": "Call again",
+    "callToBattle": "Call to the battle",
+    "onScreen": "● On screen",
+    "show": "Show",
+    "showOnMap": "Show on the map",
+    "showSlide": "Show the slide",
+    "slide": "Slide",
+    "slideLoading": "Slide…",
+    "slideMissing": "Slide unavailable",
+    "startBattle": "Start the battle",
+    "toBattle": "To the battle ↗"
+  },
+  "props": {
+    "addLegend": "Add an entry",
+    "arc": "Arc",
+    "character": "Character",
+    "deleteDescription": "The page and all its versions will be deleted permanently.",
+    "deletePage": "Delete page",
+    "deleteTitle": "Delete the page “{title}”?",
+    "legend": "Legend",
+    "legendLabel": "Legend entry label",
+    "name": "Name *",
+    "status": "Status",
+    "subtitle": "Subtitle",
+    "title": "Page properties"
+  },
+  "reveal": {
+    "afterSection": "After a played section",
+    "manual": "Manually",
+    "pickSection": "— pick a section —",
+    "revealNow": "Reveal to the player now",
+    "revealed": "✓ Revealed to the player",
+    "scene": "Scene",
+    "sceneSection": "Scene section",
+    "when": "When to reveal to the player"
+  },
+  "save": {
+    "conflict": "Version conflict",
+    "conflictNote": "The remote version changed; your local edits were not overwritten.",
+    "dirty": "Unsaved changes…",
+    "discard": "Discard local edits and reload",
+    "error": "Not saved",
+    "keepLocal": "Keep the local draft",
+    "retry": "Retry",
+    "saved": "Saved",
+    "saving": "Saving…"
+  },
+  "search": {
+    "empty": "Nothing found",
+    "label": "Search the scenario",
+    "placeholder": "Search the scenario…"
+  },
+  "sectionHeader": {
+    "auto": "automatic",
+    "autoItem": "Automatic",
+    "bindMarker": "Bind a place to the section",
+    "down": "Move section down: {title}",
+    "icon": "Section icon: {icon}",
+    "remove": "Delete section: {title}",
+    "title": "Section title",
+    "up": "Move section up: {title}"
+  },
+  "sectionIcons": {
+    "battle": "Battle",
+    "choice": "Choice",
+    "dialogue": "Dialogue",
+    "journey": "Journey",
+    "prep": "Preparation",
+    "rest": "Rest",
+    "scene": "Scene",
+    "secret": "Secret"
+  },
+  "sectionUpdateFailed": "Could not update the section — reload the page",
+  "slidePicker": {
+    "empty": "No slide decks",
+    "others": "Other decks",
+    "slideN": "Slide {n}",
+    "title": "Slide for the paragraph"
+  },
+  "toc": {
+    "played": "played",
+    "sections": "Sections"
+  },
+  "toolbar": {
+    "acquaintance": "Acquaintance",
+    "bold": "Bold",
+    "callout": "Callout",
+    "calloutPlaceholder": "Callout…",
+    "calloutTitle": "Callout title",
+    "formatting": "Formatting",
+    "greenToken": "Green token",
+    "italic": "Italic",
+    "list": "List",
+    "mention": "Link to an entity (@)",
+    "readAloud": "Read aloud",
+    "redToken": "Red token",
+    "redo": "Redo",
+    "say": "Line of speech",
+    "secret": "Secret (hidden from the player)",
+    "subheading": "Subheading",
+    "table": "Table",
+    "undo": "Undo"
+  },
+  "unarched": "No arc",
+  "validation": {
+    "duplicateIds": "Duplicate section or row ids",
+    "emptyChange": "Empty change"
+  },
+  "versions": {
+    "empty": "No versions yet — they appear at most once per 10 minutes of editing.",
+    "restore": "Restore",
+    "restoreDescription": "The current state will be saved as a separate version.",
+    "restoreFailed": "Could not restore the version",
+    "restoreTitle": "Restore the version from {date}?",
+    "title": "Page versions"
+  }
+}

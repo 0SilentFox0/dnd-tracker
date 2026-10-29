@@ -3,6 +3,7 @@ import { createHash, randomBytes } from "node:crypto";
 import "server-only";
 import { API_TOKEN_PREFIX, type ApiTokenScope, isApiTokenScope } from "@/lib/constants/ai";
 import { prisma } from "@/lib/db";
+import { isLocale, type Locale } from "@/lib/i18n/config";
 import { isDmMember } from "@/lib/utils/api/is-dm";
 import type { ApiTokenSummary, CreateApiTokenInput, CreatedApiToken } from "@/types/ai";
 
@@ -43,7 +44,7 @@ export async function revokeApiToken(campaignId: string, userId: string, tokenId
   return (await prisma.apiToken.updateMany({ where: { id: tokenId, campaignId, userId, revokedAt: null }, data: { revokedAt: new Date() } })).count > 0;
 }
 
-export async function verifyApiToken(raw: string): Promise<{ id: string; campaignId: string; userId: string; scopes: ApiTokenScope[] } | null> {
+export async function verifyApiToken(raw: string): Promise<{ id: string; campaignId: string; userId: string; scopes: ApiTokenScope[]; locale: Locale } | null> {
   if (!raw.startsWith(API_TOKEN_PREFIX)) return null;
 
   const row = await prisma.apiToken.findUnique({
@@ -53,7 +54,10 @@ export async function verifyApiToken(raw: string): Promise<{ id: string; campaig
 
   if (!row || row.revokedAt) return null;
 
-  const members = await prisma.campaignMember.findMany({ where: { campaignId: row.campaignId, userId: row.userId }, select: { role: true } });
+  const [members, owner] = await Promise.all([
+    prisma.campaignMember.findMany({ where: { campaignId: row.campaignId, userId: row.userId }, select: { role: true } }),
+    prisma.user.findUnique({ where: { id: row.userId }, select: { locale: true } }),
+  ]);
 
   if (!isDmMember(members)) return null;
 
@@ -62,5 +66,5 @@ export async function verifyApiToken(raw: string): Promise<{ id: string; campaig
     data: { lastUsedAt: new Date() },
   });
 
-  return { id: row.id, campaignId: row.campaignId, userId: row.userId, scopes: knownScopes(row.scopes) };
+  return { id: row.id, campaignId: row.campaignId, userId: row.userId, scopes: knownScopes(row.scopes), locale: isLocale(owner?.locale) ? owner.locale : "en" };
 }

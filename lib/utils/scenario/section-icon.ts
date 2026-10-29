@@ -9,7 +9,7 @@ const storyHas = (section: ScenarioSection, kinds: readonly string[]) => section
 export function sectionIcon(section: ScenarioSection): SectionIconKey {
   if (section.icon) return section.icon;
 
-  if (/^підготов/i.test(section.title.trim())) return "prep";
+  if (/^(підготов|prepar)/i.test(section.title.trim())) return "prep";
 
   if (section.rows.some((r) => r.battleId)) return "battle";
 

@@ -1,23 +1,27 @@
-import { describeLost, lostBlocks } from "./block-inventory";
+import { type BlockKind, describeLost, lostBlocks } from "./block-inventory";
 import { EMPTY_DOC } from "./doc";
 import { canonicalJson, isLosslessDoc, markdownToDoc } from "./markdown";
 import { newId } from "./structure";
 
+import type { Translator } from "@/lib/i18n/translator";
 import type { ScenarioAiOp, ScenarioAiOpInput } from "@/types/ai";
+import type { TextRef } from "@/types/choices";
 import type { ScenarioContent, ScenarioRow, ScenarioSection } from "@/types/scenario";
 
-type Resolved = { ok: true; ops: ScenarioAiOp[] } | { ok: false; error: string };
+type Resolved = { ok: true; ops: ScenarioAiOp[] } | { ok: false; error: TextRef };
+
+const fail = (message: string, params: Record<string, string>): Resolved => ({ ok: false, error: { message: `assistant.scenarioOps.${message}`, params } });
 
 const md = (text: string | undefined) => (text === undefined ? EMPTY_DOC : markdownToDoc(text));
 
 const findSection = (c: ScenarioContent, id: string) => c.sections.find((s) => s.id === id);
 
-export function resolveAiOps(content: ScenarioContent, inputs: ScenarioAiOpInput[]): Resolved {
+export function resolveAiOps(content: ScenarioContent, inputs: ScenarioAiOpInput[], t: Translator): Resolved {
   const ops: ScenarioAiOp[] = [];
 
   for (const input of inputs) {
     if (input.op === "addSection") {
-      if (input.afterSectionId && !findSection(content, input.afterSectionId)) return { ok: false, error: `Розділу ${input.afterSectionId} немає на сторінці` };
+      if (input.afterSectionId && !findSection(content, input.afterSectionId)) return fail("sectionMissing", { id: input.afterSectionId });
 
       const section: ScenarioSection = { id: newId(), title: input.title, played: false, rows: input.rows.map((r) => ({ id: newId(), story: md(r.story), notes: md(r.notes) })) };
 
@@ -27,7 +31,7 @@ export function resolveAiOps(content: ScenarioContent, inputs: ScenarioAiOpInput
 
     const section = findSection(content, input.sectionId);
 
-    if (!section) return { ok: false, error: `Розділу ${input.sectionId} немає на сторінці` };
+    if (!section) return fail("sectionMissing", { id: input.sectionId });
 
     if (input.op === "renameSection") {
       ops.push({ op: "renameSection", sectionId: section.id, title: input.title, before: { title: section.title } });
@@ -35,7 +39,7 @@ export function resolveAiOps(content: ScenarioContent, inputs: ScenarioAiOpInput
     }
 
     if (input.op === "insertRow") {
-      if (input.afterRowId && !section.rows.some((r) => r.id === input.afterRowId)) return { ok: false, error: `Рядка ${input.afterRowId} немає в розділі «${section.title}»` };
+      if (input.afterRowId && !section.rows.some((r) => r.id === input.afterRowId)) return fail("rowMissing", { id: input.afterRowId, section: section.title });
 
       const row: ScenarioRow = { id: newId(), story: md(input.story), notes: md(input.notes) };
 
@@ -45,18 +49,18 @@ export function resolveAiOps(content: ScenarioContent, inputs: ScenarioAiOpInput
 
     const row = section.rows.find((r) => r.id === input.rowId);
 
-    if (!row) return { ok: false, error: `Рядка ${input.rowId} немає в розділі «${section.title}»` };
+    if (!row) return fail("rowMissing", { id: input.rowId, section: section.title });
 
     const touched = [input.story !== undefined && row.story, input.notes !== undefined && row.notes].filter((d) => d !== false);
 
-    if (touched.some((d) => !isLosslessDoc(d))) return { ok: false, error: `Рядок ${row.id} містить розмітку, яку AI не може відтворити без втрат (вкладені списки чи складні таблиці) — редагуйте його вручну` };
+    if (touched.some((d) => !isLosslessDoc(d))) return fail("lossyRow", { id: row.id });
 
     if (!input.allowRemoval) {
       const lost = { story: input.story !== undefined ? lostBlocks(row.story, md(input.story)) : {}, notes: input.notes !== undefined ? lostBlocks(row.notes, md(input.notes)) : {} };
 
-      const parts = (["story", "notes"] as const).filter((f) => Object.keys(lost[f]).length > 0).map((f) => describeLost(lost[f]));
+      const parts = (["story", "notes"] as const).filter((f) => Object.keys(lost[f]).length > 0).map((f) => describeLost(lost[f], (kind: BlockKind, count: number) => t(`blocks.${kind}`, { count })));
 
-      if (parts.length > 0) return { ok: false, error: `Правка видаляє з рядка ${row.id}: ${parts.join("; ")}. replaceRow замінює все поле — перенеси ці блоки в новий текст без змін, або передай allowRemoval: true, лише якщо ДМ прямо просив їх прибрати.` };
+      if (parts.length > 0) return fail("removal", { id: row.id, lost: parts.join("; ") });
     }
 
     ops.push({

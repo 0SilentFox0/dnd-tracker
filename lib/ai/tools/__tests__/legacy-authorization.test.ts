@@ -12,7 +12,7 @@ vi.mock("@/lib/db", () => ({ prisma: {
 import { getCampaignBriefTool } from "../campaign";
 import { type AiToolContext, runTool } from "../define";
 
-const ctx: AiToolContext = { campaignId: "c", userId: "dm", threadId: null, scopes: ["ai"], caller: { actor: { campaignId: "c", userId: "dm", via: "token", isDM: true, scopes: ["ai"] }, tokenId: "token", channel: "mcp", threadId: null } };
+const ctx: AiToolContext = { campaignId: "c", userId: "dm", threadId: null, scopes: ["ai"], caller: { actor: { campaignId: "c", userId: "dm", via: "token", isDM: true, scopes: ["ai"] }, tokenId: "token", channel: "mcp", threadId: null, locale: "uk" as const }, locale: "uk" as const };
 
 beforeEach(() => { f.member = true; f.revoked = false; f.grants = ["ai"]; f.reads = 0; });
 it.each(["revoked", "membership", "scopes"])("legacy ai read repeats live authorization: %s", async kind => {

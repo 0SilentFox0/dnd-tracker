@@ -12,7 +12,8 @@ import { getSpellGroupIcon } from "@/lib/utils/spells/spell-icons";
 import type { Spell } from "@/types/spells";
 
 export function SpellPrintCard({ spell }: { spell: Spell }) {
-  const tc = useTranslator("common");
+
+  const tg = useTranslator("gameTerms");
 
   const mechanics = useSpellMechanics();
 
@@ -30,7 +31,7 @@ export function SpellPrintCard({ spell }: { spell: Spell }) {
               <CardTitle className="text-sm sm:text-base truncate flex-1 min-w-0">{spell.name}</CardTitle>
               <Badge variant={spell.level === 0 ? "secondary" : "default"} className="flex items-center gap-1 shrink-0 text-xs">
                 <Sparkles className="h-3 w-3" />
-                <span className="hidden sm:inline">{tc(`spellLevels.${spell.level}`)}</span>
+                <span className="hidden sm:inline">{tg(`spellLevels.${spell.level}`)}</span>
                 <span className="sm:hidden">{spellLevelRoman(spell.level)}</span>
               </Badge>
             </div>
@@ -39,7 +40,7 @@ export function SpellPrintCard({ spell }: { spell: Spell }) {
         <CardDescription className="flex flex-wrap gap-1 sm:gap-2 mt-2">
           <Badge variant="outline" className="flex items-center gap-1 text-xs">
             <SpellGroupIcon className="h-3 w-3" />
-            <span className="hidden sm:inline">{spell.spellGroup?.name || tc("ungrouped.spellGroup")}</span>
+            <span className="hidden sm:inline">{spell.spellGroup?.name || tg("ungrouped.spellGroup")}</span>
             <span className="sm:hidden truncate max-w-[60px]">{spell.spellGroup?.name?.[0] || "-"}</span>
           </Badge>
           {mechanics(spell).map((label) => (

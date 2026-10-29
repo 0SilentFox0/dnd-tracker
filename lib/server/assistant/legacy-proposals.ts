@@ -2,15 +2,16 @@ import type { Prisma } from "@prisma/client";
 
 import { authorizeAssistant } from "./authorize";
 import { intentSummary } from "./intent-store";
-import { requestDigest } from "./json";
+import { jsonContent, requestDigest } from "./json";
 import type { ActionPreview, ActionResult,AssistantCaller } from "./types";
 
 import "server-only";
 import { API_ERRORS } from "@/lib/constants/api-errors";
 import { prisma } from "@/lib/db";
+import { getTranslator } from "@/lib/i18n/translator";
 import { ContentError } from "@/lib/server/content/errors";
 import { withCampaignContentWrite } from "@/lib/server/content/write";
-import { scenarioResult,scenarioState } from "@/lib/server/scenario/action-service";
+import { scenarioState } from "@/lib/server/scenario/action-service";
 
 const need = { access: "dm" as const, scope: "scenario:write" as const, sessionOnly: true as const };
 
@@ -23,9 +24,9 @@ export async function legacyPreview(caller: AssistantCaller, proposalId: string)
 
   const state = await scenarioState(caller.actor, proposal.pageId);
 
-  const target = { domain: "scenario", id: proposal.pageId, name: state.page?.title ?? "Сценарій" };
+  const target = { domain: "scenario", id: proposal.pageId, name: state.page?.title ?? (await getTranslator(caller.locale, "assistant"))("results.scenario") };
 
-  return { summary: proposal.summary, targets: [target], changes: [{ target, path: "ops", before: scenarioResult(state.page).data, after: proposal.ops }], warnings: [], effects: [{ kind: "update", targets: [target], description: proposal.summary }], preconditions: { fingerprint: requestDigest({ proposal, state }) } };
+  return { summary: proposal.summary, targets: [target], changes: [{ target, path: "ops", before: jsonContent(state.page), after: proposal.ops }], warnings: [], effects: [{ kind: "update", targets: [target], description: proposal.summary }], preconditions: { fingerprint: requestDigest({ proposal, state }) } };
 }
 export async function linkLegacyProposal(caller: AssistantCaller, proposalId: string) {
   // Old proposals have no trusted originating token identity. Only a real DM session may claim them.

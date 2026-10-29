@@ -86,6 +86,8 @@ const asTab = (v: string | undefined): ProfileTabId => {
 export function CharacterProfile({ campaignId, characterId, canEdit, initialTab }: { campaignId: string; characterId: string; canEdit: boolean; initialTab?: string }) {
   const t = useTranslations("characterProfile");
 
+  const tc = useTranslations("common.actions");
+
   const query = useCharacterSheet(campaignId, characterId);
 
   const [tab, setTabState] = useState<ProfileTabId>(() => asTab(initialTab));
@@ -134,7 +136,7 @@ export function CharacterProfile({ campaignId, characterId, canEdit, initialTab 
                     canEdit && sheet.viewer.isDM ? (
                       <>
                         <Button type="button" size="sm" variant="outline" onClick={() => setEditing(true)}>
-                          {t("actions.edit")}
+                          {tc("edit")}
                         </Button>
                         <DmRestActions />
                       </>
