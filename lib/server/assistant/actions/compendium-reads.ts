@@ -7,13 +7,13 @@ import "server-only";
 import { API_ERRORS } from "@/lib/constants/api-errors";
 import { prisma } from "@/lib/db";
 import { handoffId } from "@/lib/schemas/assistant-handoff";
-import { jsonContent } from "@/lib/server/assistant/json";
 import { kindTable } from "@/lib/server/compendium-import/repository";
 import { assertCan } from "@/lib/server/content/access";
 import { ContentError, parseInput } from "@/lib/server/content/errors";
 import { BUNDLE_TABLES, delegateOf } from "@/lib/server/templates/bundle";
 import type { Actor, ActorNeed } from "@/lib/utils/api/actor";
 import { pageOf } from "@/lib/utils/api/page-of";
+import { jsonContent } from "@/lib/utils/common/json";
 
 export const COMPENDIUM_NEED: ActorNeed = {
   access: "dm",

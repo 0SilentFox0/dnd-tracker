@@ -24,3 +24,5 @@ export const jsonEqual = (a: unknown, b: unknown): boolean => stableStringify(a)
 export function hashJson(value: unknown): string {
   return createHash("sha1").update(stableStringify(value)).digest("hex");
 }
+
+export const requestDigest = (value: unknown): string => createHash("sha256").update(stableStringify(value)).digest("hex");

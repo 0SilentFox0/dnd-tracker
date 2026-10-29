@@ -2,12 +2,12 @@ import { PrismaClient } from "@prisma/client";
 import { randomUUID } from "node:crypto";
 import { afterAll, beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
 
-import { applyProposal, rejectProposal } from "@/lib/ai/proposals";
 import { makeT } from "@/lib/i18n/test/mock-t";
 import { SCENARIO_ACTIONS } from "@/lib/server/assistant/actions/scenario";
 import { createActionCatalog } from "@/lib/server/assistant/catalog";
 import { createAssistantExecutor } from "@/lib/server/assistant/execute";
 import { linkLegacyProposal } from "@/lib/server/assistant/legacy-proposals";
+import { applyProposal, rejectProposal } from "@/lib/server/assistant/proposals";
 import type { AssistantCaller } from "@/lib/server/assistant/types";
 import { runScenarioOperation } from "@/lib/server/scenario/action-service";
 import { isLocalDevDatabaseEnv, singleConnectionDatabaseUrl } from "@/lib/server/test-support/local-db";

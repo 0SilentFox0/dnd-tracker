@@ -1,13 +1,12 @@
 import { NextResponse } from "next/server";
 
-import { readCompendiumSummary } from "./actions/handoffs";
-
 import { buildInstructions } from "@/lib/ai/context/prompt";
 import { loadThread } from "@/lib/ai/threads";
 import { AI_BODY_LIMITS, AI_LIMITS } from "@/lib/constants/ai";
 import { API_ERRORS, type ErrorParams } from "@/lib/constants/api-errors";
 import { getRequestLocale } from "@/lib/i18n/request-locale";
 import { assistantContextPreviewSchema } from "@/lib/schemas/ai";
+import { readCompendiumSummary } from "@/lib/server/assistant/actions/handoffs";
 import { ContentError } from "@/lib/server/content/errors";
 import { requireDM } from "@/lib/utils/api/api-auth";
 import { privateJson } from "@/lib/utils/api/api-response";

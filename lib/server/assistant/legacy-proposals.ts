@@ -2,7 +2,6 @@ import type { Prisma } from "@prisma/client";
 
 import { authorizeAssistant } from "./authorize";
 import { intentSummary } from "./intent-store";
-import { jsonContent, requestDigest } from "./json";
 import type { ActionPreview, ActionResult,AssistantCaller } from "./types";
 
 import "server-only";
@@ -12,6 +11,8 @@ import { getTranslator } from "@/lib/i18n/translator";
 import { ContentError } from "@/lib/server/content/errors";
 import { withCampaignContentWrite } from "@/lib/server/content/write";
 import { scenarioState } from "@/lib/server/scenario/action-service";
+import { requestDigest } from "@/lib/utils/battle/store/stable-json";
+import { jsonContent } from "@/lib/utils/common/json";
 
 const need = { access: "dm" as const, scope: "scenario:write" as const, sessionOnly: true as const };
 

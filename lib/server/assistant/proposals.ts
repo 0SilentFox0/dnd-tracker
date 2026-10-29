@@ -3,7 +3,6 @@ import type { Prisma } from "@prisma/client";
 import { discardSlideFiles, slideUrls } from "./proposal-media";
 
 import "server-only";
-import type { AiToolContext } from "@/lib/ai/tools/define";
 import { API_ERRORS } from "@/lib/constants/api-errors";
 import { SCENARIO_MAX_CONTENT_BYTES } from "@/lib/constants/scenario";
 import { DECK_TITLE_MAX, MAX_DECKS_PER_CAMPAIGN, MAX_SLIDES_PER_DECK } from "@/lib/constants/show";
@@ -13,7 +12,6 @@ import { getTranslator } from "@/lib/i18n/translator";
 import { scenarioContentSchema } from "@/lib/schemas/scenario";
 import { slidesSchema } from "@/lib/schemas/show";
 import { chatCaller } from "@/lib/server/assistant/caller";
-import { requestDigest } from "@/lib/server/assistant/json";
 import { legacyPreview, reconcileLegacyProposal } from "@/lib/server/assistant/legacy-proposals";
 import { withCampaignContentWrite } from "@/lib/server/content/write";
 import { afterContentCommit } from "@/lib/server/content/write-context";
@@ -21,6 +19,7 @@ import { scenarioResult } from "@/lib/server/scenario/action-service";
 import { contentWrite, OWNED_WITH_CONTENT_SELECT, readContentStrict, toPage } from "@/lib/server/scenario/page-store";
 import { pruneVersions, snapshotIfDue } from "@/lib/server/scenario/versions";
 import { toSlideDeck } from "@/lib/server/show/deck-store";
+import { requestDigest } from "@/lib/utils/battle/store/stable-json";
 import { applyAiOps } from "@/lib/utils/scenario/ai-ops";
 import type { AddSlideAiOp, AiProposal, AiProposalOp, AiProposalStatus, ScenarioAiOp } from "@/types/ai";
 import type { ScenarioPage } from "@/types/scenario";
@@ -32,7 +31,7 @@ type Row = Prisma.AiProposalGetPayload<{ select: typeof SELECT }>;
 
 const toProposal = (r: Row): AiProposal => ({ ...r, ops: r.ops as unknown as AiProposalOp[], status: r.status as AiProposalStatus, createdAt: r.createdAt.toISOString() });
 
-export async function createProposal(ctx: AiToolContext, pageId: string, summary: string, ops: AiProposalOp[]): Promise<AiProposal> {
+export async function createProposal(ctx: { campaignId: string; threadId: string | null }, pageId: string, summary: string, ops: AiProposalOp[]): Promise<AiProposal> {
   const row = await prisma.aiProposal.create({ data: { campaignId: ctx.campaignId, threadId: ctx.threadId, pageId, summary, ops: ops as unknown as Prisma.InputJsonValue }, select: SELECT });
 
   return toProposal(row);

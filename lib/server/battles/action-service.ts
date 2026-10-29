@@ -6,7 +6,7 @@ import { DEFAULT_LOCALE, type Locale } from "@/lib/i18n/config";
 import { getTranslator, type Translator } from "@/lib/i18n/translator";
 import { BATTLE_COMMANDS, BATTLE_READS, type BattleActionInput,battleActionInput, HUMAN_BATTLE_ACTIONS } from "@/lib/server/assistant/actions/battle-actions";
 import { contentSnapshot } from "@/lib/server/assistant/actions/content-snapshot";
-import { actionResult, jsonContent, requestDigest } from "@/lib/server/assistant/json";
+import { actionResult } from "@/lib/server/assistant/json";
 import { resultLabel } from "@/lib/server/assistant/result-labels";
 import type { ActionExecutionContext, ActionPreview, ActionResult, AssistantCaller } from "@/lib/server/assistant/types";
 import { loadAudioLibrary } from "@/lib/server/audio/track-store";
@@ -26,7 +26,9 @@ import { pageOf } from "@/lib/utils/api/page-of";
 import { toBattleResponse } from "@/lib/utils/battle/pipeline/battle-response";
 import { guardBattleContext } from "@/lib/utils/battle/pipeline/run-battle-mutation";
 import { BattleAccessError, BattleRuleError, loadAllEvents, loadEventsBefore, loadRecentEvents } from "@/lib/utils/battle/store";
+import { requestDigest } from "@/lib/utils/battle/store/stable-json";
 import { summarizeBattle } from "@/lib/utils/battle/view/summary";
+import { jsonContent } from "@/lib/utils/common/json";
 import { ownHandler } from "@/lib/utils/common/own-handler";
 import { parseRules } from "@/lib/utils/rules/schema";
 

@@ -4,7 +4,7 @@ import { legacyPreview } from "../legacy-proposals";
 import type { AssistantWriteAction } from "../types";
 
 import "server-only";
-import { applyProposal } from "@/lib/ai/proposals";
+import { applyProposal } from "@/lib/server/assistant/proposals";
 import { ContentError } from "@/lib/server/content/errors";
 import { scenarioResult } from "@/lib/server/scenario/action-service";
 

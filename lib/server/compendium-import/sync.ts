@@ -2,7 +2,7 @@ import type { CompendiumBundle, CompendiumBundleDb } from "./bundle";
 import { remapCompendiumSection } from "./bundle";
 import { CompendiumError } from "./parse";
 
-import { jsonContentInput } from "@/lib/server/assistant/json";
+import { jsonContentInput } from "@/lib/utils/common/json";
 
 /** Selected native rows only; campaign source lineage and compendium identity remain independent. */
 export async function syncCompendiumProvenance(db: Pick<CompendiumBundleDb, "compendiumEntry" | "compendiumSource">, source: CompendiumBundle | undefined, campaignId: string, idMap: ReadonlyMap<string, string>, selectedSourceIds: ReadonlySet<string>): Promise<void> {

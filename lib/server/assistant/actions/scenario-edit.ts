@@ -1,14 +1,14 @@
-import { jsonContent } from "../json";
 import type { AssistantWriteAction } from "../types";
 
-import { applyProposal,createProposal } from "@/lib/ai/proposals";
 import { API_ERRORS } from "@/lib/constants/api-errors";
 import { getTranslator } from "@/lib/i18n/translator";
 import { proposeScenarioEditSchema } from "@/lib/schemas/ai";
+import { applyProposal,createProposal } from "@/lib/server/assistant/proposals";
 import { ContentError } from "@/lib/server/content/errors";
 import { withCampaignContentWrite } from "@/lib/server/content/write";
 import { scenarioFingerprint, scenarioResult, scenarioState } from "@/lib/server/scenario/action-service";
 import { readContentStrict } from "@/lib/server/scenario/page-store";
+import { jsonContent } from "@/lib/utils/common/json";
 import { resolveAiOps } from "@/lib/utils/scenario/ai-ops";
 
 /** Both proposal aliases and generic actions use T6's sole proposal writer. */
@@ -45,7 +45,7 @@ export const SCENARIO_EDIT_ACTION: AssistantWriteAction = {
 
     if (!resolved.ok) throw new ContentError(resolved.error.message, 422, undefined, resolved.error.params);
 
-    const proposal = await createProposal({ campaignId: ctx.caller.actor.campaignId, userId: ctx.caller.actor.userId, threadId: ctx.caller.threadId, scopes: ctx.caller.actor.scopes ?? [], caller: ctx.caller, locale: ctx.caller.locale }, input.pageId, input.summary, resolved.ops);
+    const proposal = await createProposal({ campaignId: ctx.caller.actor.campaignId, threadId: ctx.caller.threadId }, input.pageId, input.summary, resolved.ops);
 
     const result = await applyProposal(ctx.caller.actor.campaignId, ctx.caller.actor.userId, proposal.id, ctx.intentId, ctx.caller.locale);
 

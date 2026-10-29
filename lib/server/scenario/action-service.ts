@@ -14,7 +14,6 @@ import { createScenarioPageSchema, scenarioContentSchema, scenarioSectionPatchSc
 import { notifyRevealForContentChange } from "@/lib/server/acquaintances/reveal";
 import { stampDigest } from "@/lib/server/assistant/digest";
 import { actionResult } from "@/lib/server/assistant/json";
-import { requestDigest } from "@/lib/utils/battle/store/stable-json";
 import { resultLabel } from "@/lib/server/assistant/result-labels";
 import type { ActionResult } from "@/lib/server/assistant/types";
 import { assertCan } from "@/lib/server/content/access";
@@ -23,6 +22,7 @@ import { withCampaignContentWrite } from "@/lib/server/content/write";
 import { afterContentCommit } from "@/lib/server/content/write-context";
 import type { Actor } from "@/lib/utils/api/actor";
 import { localeOrRequest } from "@/lib/utils/api/translate-error";
+import { requestDigest } from "@/lib/utils/battle/store/stable-json";
 import { ownHandler } from "@/lib/utils/common/own-handler";
 import { buildDefaultLegend } from "@/lib/utils/scenario/default-legend";
 import { moveRow, moveSection, newSection, removeRow, removeSection, updateSection } from "@/lib/utils/scenario/structure";

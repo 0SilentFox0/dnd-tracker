@@ -1,6 +1,6 @@
-import { publicToolData } from "@/lib/ai/tools/projection";
 import { API_ERRORS } from "@/lib/constants/api-errors";
 import { ContentError } from "@/lib/server/content/errors";
+import { publicToolData } from "@/lib/utils/common/public-tool-data";
 import type { ContextBlockId } from "@/types/ai";
 
 export type ContextBlock = { id?: ContextBlockId; label: string; required?: boolean; maxChars?: number } & ({ text: string; value?: never } | { value: unknown; text?: never });

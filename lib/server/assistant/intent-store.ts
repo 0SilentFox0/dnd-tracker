@@ -1,6 +1,5 @@
 import { type AssistantIntent,Prisma } from "@prisma/client";
 
-import { requestDigest } from "./json";
 import type { ActionPreview, ActionRequest, AssistantCaller, IntentDetail, IntentStatus,IntentSummary } from "./types";
 
 import "server-only";
@@ -10,6 +9,7 @@ import { prisma } from "@/lib/db";
 import { actionPreviewSchema, assistantRequestSchema, assistantTargetSchema, intentPageSchema, intentStatusSchema } from "@/lib/schemas/assistant";
 import { ContentError, parseInput } from "@/lib/server/content/errors";
 import { pageOf } from "@/lib/utils/api/page-of";
+import { requestDigest } from "@/lib/utils/battle/store/stable-json";
 import type { IntentPage } from "@/types/assistant";
 
 type IntentDb = Pick<Prisma.TransactionClient, "assistantIntent">;

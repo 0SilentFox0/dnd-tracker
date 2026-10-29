@@ -1,7 +1,7 @@
 import { z } from "zod";
 
 import { formatIssues } from "./issues";
-import { project, publicToolData } from "./projection";
+import { project } from "./projection";
 
 import "server-only";
 import { AI_LIMITS, type ApiTokenScope } from "@/lib/constants/ai";
@@ -13,6 +13,7 @@ import { authorizeLegacyAssistantRead } from "@/lib/server/assistant/authorize";
 import type { AssistantCaller } from "@/lib/server/assistant/types";
 import { ContentError } from "@/lib/server/content/errors";
 import { translateErrorBody } from "@/lib/utils/api/translate-error";
+import { publicToolData } from "@/lib/utils/common/public-tool-data";
 
 export type AiToolContext = { caller?: AssistantCaller; toolCallId?: string; campaignId: string; userId: string; scopes: readonly ApiTokenScope[]; threadId: string | null; locale: Locale; abortSignal?: AbortSignal; usage?: { images: number } };
 

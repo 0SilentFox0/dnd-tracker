@@ -1,6 +1,7 @@
 import { APICallError, consumeStream, convertToModelMessages, createUIMessageStreamResponse, isStepCount, type LanguageModel, streamText, toUIMessageStream, type UIMessage } from "ai";
 
 import "server-only";
+import { createRunSignal } from "@/lib/ai/chat/run-signal";
 import { compactToolOutputs } from "@/lib/ai/compact";
 import { buildInstructions } from "@/lib/ai/context/prompt";
 import { AiKeyUnreadableError, loadApiKey } from "@/lib/ai/credentials";
@@ -9,17 +10,17 @@ import { createModel } from "@/lib/ai/providers";
 import { recoveredState } from "@/lib/ai/recovered-state";
 import { appendMessage, loadMessages, loadThread } from "@/lib/ai/threads";
 import { toAiSdkTools } from "@/lib/ai/tools";
-import { publicToolData } from "@/lib/ai/tools/projection";
 import { AI_LIMITS, API_TOKEN_SCOPES } from "@/lib/constants/ai";
 import { API_ERRORS } from "@/lib/constants/api-errors";
 import { getRequestLocale } from "@/lib/i18n/request-locale";
 import { getTranslator } from "@/lib/i18n/translator";
 import { chatCaller } from "@/lib/server/assistant/caller";
-import { beginAssistantRun, createRunSignal, finishAssistantRun, isAssistantRunCancelled, recordAssistantRunUsage, RUN_GRACE_MS } from "@/lib/server/assistant/runs";
+import { beginAssistantRun, finishAssistantRun, isAssistantRunCancelled, recordAssistantRunUsage, RUN_GRACE_MS } from "@/lib/server/assistant/runs";
 import { ContentError } from "@/lib/server/content/errors";
 import { errorResponse } from "@/lib/utils/api/api-response";
 import { PRIVATE_NO_STORE_HEADERS } from "@/lib/utils/api/cache-headers";
 import { translateErrorBody } from "@/lib/utils/api/translate-error";
+import { publicToolData } from "@/lib/utils/common/public-tool-data";
 import type { AiFocus, AiMessageMetadata, AssistantSessionContext } from "@/types/ai";
 
 type RunChatArgs = { campaignId: string; userId: string; threadId: string; requestId: string; text: string; focus?: AiFocus; sessionContext?: AssistantSessionContext; abortSignal?: AbortSignal };

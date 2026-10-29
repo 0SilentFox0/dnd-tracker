@@ -1,7 +1,9 @@
 import type { AssistantRun, Prisma, PrismaClient } from "@prisma/client";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
-import { createAssistantRunStore, createRunSignal, toolRequestKey } from "@/lib/server/assistant/runs";
+import { createRunSignal } from "@/lib/ai/chat/run-signal";
+import { toolRequestKey } from "@/lib/ai/tools/request-key";
+import { createAssistantRunStore } from "@/lib/server/assistant/runs";
 import type { AssistantCaller } from "@/lib/server/assistant/types";
 
 const caller: AssistantCaller = { actor: { campaignId: "c", userId: "u", via: "session", scopes: null, isDM: true }, channel: "chat", tokenId: null, threadId: "t", locale: "uk" as const };

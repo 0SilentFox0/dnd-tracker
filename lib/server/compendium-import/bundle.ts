@@ -5,9 +5,9 @@ import { CompendiumError } from "./parse";
 import { TARGET_KINDS } from "./types";
 
 import { scenarioContentSchema } from "@/lib/schemas/scenario";
-import { jsonContentInput } from "@/lib/server/assistant/json";
 import { newContentId } from "@/lib/server/templates/ids";
 import { remapIds } from "@/lib/server/templates/remap-ids";
+import { jsonContentInput } from "@/lib/utils/common/json";
 
 const object = z.record(z.string(), z.unknown());
 

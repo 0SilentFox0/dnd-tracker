@@ -29,7 +29,7 @@ describe("applyProposal", () => {
 
     vi.mocked(applyAiOps).mockReturnValue({ ok: true, content: applied } as never);
 
-    const { applyProposal } = await import("@/lib/ai/proposals");
+    const { applyProposal } = await import("@/lib/server/assistant/proposals");
 
     return applyProposal("camp", "dm", "pr");
   };

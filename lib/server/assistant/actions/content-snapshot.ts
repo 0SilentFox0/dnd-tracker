@@ -1,10 +1,9 @@
-import { requestDigest } from "../json";
-
 import "server-only";
 import { prisma } from "@/lib/db";
 import { FULL_ROW_TABLES, fullRowDigest, stampDigest } from "@/lib/server/assistant/digest";
-import { jsonContent } from "@/lib/server/assistant/json";
 import type { Actor } from "@/lib/utils/api/actor";
+import { requestDigest } from "@/lib/utils/battle/store/stable-json";
+import { jsonContent } from "@/lib/utils/common/json";
 
 /** Uncached guard state: updatedAt stamps and Postgres row digests, never full rows. No credentials or ScenarioPage text. */
 export async function contentSnapshot(actor: Actor) {
@@ -33,5 +32,5 @@ export async function contentSnapshot(actor: Actor) {
   };
 }
 
-export { jsonContent } from "@/lib/server/assistant/json";
+export { jsonContent } from "@/lib/utils/common/json";
 export const snapshotHash = (value: unknown) => requestDigest(jsonContent(value));

@@ -3,8 +3,8 @@ import { renderToStaticMarkup } from "react-dom/server";
 import { expect, it, vi } from "vitest";
 
 import { CompendiumReport } from "@/components/content-import/CompendiumReport";
-import { publicToolData } from "@/lib/ai/tools/projection";
 import type { CompendiumReport as Report } from "@/lib/server/compendium-import/service";
+import { publicToolData } from "@/lib/utils/common/public-tool-data";
 vi.mock("../repository", () => ({ kindTable: {}, prismaImportRepository: {} }));
 vi.mock("@/lib/db", () => ({ prisma: {} }));
 vi.mock("@/lib/server/templates/bundle", () => ({ BUNDLE_TABLES: [], delegateOf: vi.fn() }));

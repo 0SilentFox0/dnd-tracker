@@ -116,7 +116,7 @@ export function createAssistantExecutor(options: Options = {}) {
       const legacyProposalId = fresh.legacyProposalId;
 
       if (legacyProposalId) {
-        const { rejectProposal } = await import("@/lib/ai/proposals");
+        const { rejectProposal } = await import("@/lib/server/assistant/proposals");
 
         await runContentWriteContext(caller.actor.campaignId, tx, () => rejectProposal(caller.actor.campaignId, legacyProposalId), callbacks);
       }

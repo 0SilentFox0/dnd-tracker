@@ -9,10 +9,10 @@ import { prisma } from "@/lib/db";
 import { discardGeneratedImageSchema, generateSlideImageSchema } from "@/lib/schemas/ai";
 import { readSlides } from "@/lib/schemas/show";
 import { createDeckSchema, deckSceneSchema, saveDeckSchema, showCommandSchema } from "@/lib/schemas/show";
-import { jsonContent } from "@/lib/server/assistant/json";
 import { ContentError } from "@/lib/server/content/errors";
 import { prepareShowAction, runShowOperation, type ShowInput } from "@/lib/server/show/action-service";
 import { persistSlideImages } from "@/lib/server/show/deck-store";
+import { jsonContent } from "@/lib/utils/common/json";
 
 const deckId = z.string().regex(/^[A-Za-z0-9_-]{1,64}$/);
 

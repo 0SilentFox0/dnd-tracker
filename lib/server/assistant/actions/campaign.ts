@@ -1,6 +1,5 @@
 import { z } from "zod";
 
-import { jsonContent, requestDigest } from "../json";
 import type { AssistantActionDef } from "../types";
 
 import "server-only";
@@ -10,6 +9,8 @@ import { createCampaignSchema, updateCampaignSchema } from "@/lib/schemas/campai
 import { saveAsTemplateSchema } from "@/lib/schemas/templates";
 import { campaignState, campaignWindowSchema, runCampaignOperation } from "@/lib/server/campaigns/action-service";
 import { withCampaignContentWrite } from "@/lib/server/content/write";
+import { requestDigest } from "@/lib/utils/battle/store/stable-json";
+import { jsonContent } from "@/lib/utils/common/json";
 
 const empty = z.object({});
 

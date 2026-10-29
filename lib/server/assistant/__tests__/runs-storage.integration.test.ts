@@ -5,9 +5,10 @@ import { afterAll, beforeAll, describe, expect, it, vi } from "vitest";
 import { z } from "zod";
 
 import { appendMessage, loadMessages } from "@/lib/ai/threads";
+import { toolRequestKey } from "@/lib/ai/tools/request-key";
 import { createActionCatalog } from "@/lib/server/assistant/catalog";
 import { createAssistantExecutor } from "@/lib/server/assistant/execute";
-import { createAssistantRunStore, toolRequestKey } from "@/lib/server/assistant/runs";
+import { createAssistantRunStore } from "@/lib/server/assistant/runs";
 import type { AssistantCaller } from "@/lib/server/assistant/types";
 import { createScopedDatabase } from "@/lib/server/content/write-context";
 import { isLocalDevDatabaseEnv, singleConnectionDatabaseUrl } from "@/lib/server/test-support/local-db";

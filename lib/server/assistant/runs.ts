@@ -3,12 +3,10 @@ import type { Prisma, PrismaClient } from "@prisma/client";
 import { revalidateAssistantCaller } from "./authorize";
 import { createAssistantExecutor } from "./execute";
 import { intentOwner, intentSummary } from "./intent-store";
-import { requestDigest } from "./json";
 import type { AssistantCaller } from "./types";
 
 import "server-only";
 import { appendMessageInTransaction } from "@/lib/ai/threads";
-import { publicToolData } from "@/lib/ai/tools/projection";
 import { AI_LIMITS } from "@/lib/constants/ai";
 import { API_ERRORS } from "@/lib/constants/api-errors";
 import { RUN_GRACE_MS } from "@/lib/constants/assistant";
@@ -17,10 +15,10 @@ import { assistantRequestIdSchema } from "@/lib/schemas/ai";
 import { actionResultSchema } from "@/lib/schemas/assistant";
 import { lockCampaignRow } from "@/lib/server/campaigns/lock";
 import { ContentError } from "@/lib/server/content/errors";
+import { requestDigest } from "@/lib/utils/battle/store/stable-json";
+import { publicToolData } from "@/lib/utils/common/public-tool-data";
 import type { AiFocus, AiUsage } from "@/types/ai";
 
-export { createRunSignal } from "@/lib/ai/chat/run-signal";
-export { toolRequestKey } from "@/lib/ai/tools/request-key";
 export { RUN_GRACE_MS } from "@/lib/constants/assistant";
 
 function terminalStatus(refs: Prisma.JsonValue): "complete" | "failed" | "aborted" | null {

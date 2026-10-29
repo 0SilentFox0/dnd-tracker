@@ -35,7 +35,7 @@ describe("applyProposal addSlide", () => {
     h.tx.slideDeck.findUniqueOrThrow.mockImplementation(async () => deckRow([...stored(1), slide]));
   });
 
-  const apply = async () => (await import("@/lib/ai/proposals")).applyProposal("camp", "dm", "pr");
+  const apply = async () => (await import("@/lib/server/assistant/proposals")).applyProposal("camp", "dm", "pr");
 
   it("додає слайд у наявний набір", async () => {
     h.tx.aiProposal.findFirst.mockResolvedValue(proposal("d1"));
@@ -117,7 +117,7 @@ describe("rejectProposal addSlide", () => {
   it("видаляє згенерований файл, якщо його немає в наборах", async () => {
     h.tx.slideDeck.findMany.mockResolvedValue([]);
 
-    const { rejectProposal } = await import("@/lib/ai/proposals");
+    const { rejectProposal } = await import("@/lib/server/assistant/proposals");
 
     await rejectProposal("camp", "pr");
     expect(h.remove).toHaveBeenCalledWith("camp", [slide.imageUrl]);
@@ -126,7 +126,7 @@ describe("rejectProposal addSlide", () => {
   it("не видаляє файл, що використовує набір", async () => {
     h.tx.slideDeck.findMany.mockResolvedValue([{ slides: [slide] }]);
 
-    const { rejectProposal } = await import("@/lib/ai/proposals");
+    const { rejectProposal } = await import("@/lib/server/assistant/proposals");
 
     await rejectProposal("camp", "pr");
     expect(h.remove).toHaveBeenCalledWith("camp", []);

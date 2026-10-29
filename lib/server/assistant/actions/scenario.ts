@@ -1,6 +1,5 @@
 import { z } from "zod";
 
-import { jsonContent } from "../json";
 import type { AssistantActionDef } from "../types";
 import { LEGACY_PROPOSAL_ACTION } from "./legacy-proposal";
 import { SCENARIO_EDIT_ACTION } from "./scenario-edit";
@@ -9,6 +8,7 @@ import { getTranslator } from "@/lib/i18n/translator";
 import { createScenarioPageSchema, scenarioContentSchema, updateScenarioMetaSchema } from "@/lib/schemas/scenario";
 import { withCampaignContentWrite } from "@/lib/server/content/write";
 import { runScenarioOperation, scenarioFingerprint, scenarioState } from "@/lib/server/scenario/action-service";
+import { jsonContent } from "@/lib/utils/common/json";
 
 const id = z.string().min(1).max(40);
 

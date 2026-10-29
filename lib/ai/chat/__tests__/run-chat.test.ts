@@ -19,7 +19,6 @@ vi.mock("@/lib/i18n/translator", async () => {
 });
 
 vi.mock("@/lib/server/assistant/runs", async () => ({
-  createRunSignal: (await import("@/lib/ai/chat/run-signal")).createRunSignal,
   RUN_GRACE_MS: 30000,
   beginAssistantRun: vi.fn(async (_caller, requestId, input) => {
     const { appendMessage } = await import("@/lib/ai/threads");

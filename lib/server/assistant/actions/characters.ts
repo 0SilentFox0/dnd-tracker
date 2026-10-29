@@ -1,4 +1,3 @@
-import { jsonContent, requestDigest } from "../json";
 import type { AssistantActionDef } from "../types";
 
 import "server-only";
@@ -9,6 +8,8 @@ import { CHARACTER_INPUTS, characterReads, characterState, runCharacterOperation
 import { assertSafeCharacterAvatar } from "@/lib/server/characters/avatar-input";
 import { withCharacterOperation } from "@/lib/server/characters/operation-context";
 import { ContentError } from "@/lib/server/content/errors";
+import { requestDigest } from "@/lib/utils/battle/store/stable-json";
+import { jsonContent } from "@/lib/utils/common/json";
 
 export const CHARACTER_ACTIONS: readonly AssistantActionDef[] = Object.entries(CHARACTER_INPUTS).map(([operation, input]): AssistantActionDef => {
   const read = characterReads.has(operation);

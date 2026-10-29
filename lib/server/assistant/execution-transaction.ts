@@ -5,7 +5,6 @@ import { conflict,forbidden } from "./errors";
 import { actionExpected, actionExternalResult, externalRun, readExternalState } from "./execution-state";
 import { executionModeFor, type ExecutorDeps } from "./executor-deps";
 import { intentOwner } from "./intent-store";
-import { requestDigest } from "./json";
 import { confirmationFor } from "./policy";
 import type { ActionExecutionContext, AssistantCaller, AssistantWriteAction, DurableEffect } from "./types";
 
@@ -17,6 +16,7 @@ import { actionPreviewSchema, actionResultSchema } from "@/lib/schemas/assistant
 import { lockCampaignRow } from "@/lib/server/campaigns/lock";
 import { ContentError, parseInput } from "@/lib/server/content/errors";
 import { runContentWriteContext } from "@/lib/server/content/write-context";
+import { requestDigest } from "@/lib/utils/battle/store/stable-json";
 
 export type IntentTransactionOutcome =
   | { kind: "receipt"; receipt: AssistantReceipt; effects?: DurableEffect[] }

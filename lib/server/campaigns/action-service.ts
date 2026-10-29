@@ -16,7 +16,7 @@ import { stepText } from "@/lib/onboarding/step-text";
 import { aiSettingsSchema } from "@/lib/schemas/ai";
 import { createCampaignSchema, updateCampaignSchema } from "@/lib/schemas/campaigns";
 import { saveAsTemplateSchema } from "@/lib/schemas/templates";
-import { actionResult, requestDigest } from "@/lib/server/assistant/json";
+import { actionResult } from "@/lib/server/assistant/json";
 import { resultLabel } from "@/lib/server/assistant/result-labels";
 import type { ActionResult } from "@/lib/server/assistant/types";
 import { assertCan } from "@/lib/server/content/access";
@@ -30,6 +30,7 @@ import { listTemplates } from "@/lib/server/templates/list-templates";
 import type { Actor } from "@/lib/utils/api/actor";
 import { windowOf } from "@/lib/utils/api/page-of";
 import { isPlatformAdmin } from "@/lib/utils/api/platform-admin";
+import { requestDigest } from "@/lib/utils/battle/store/stable-json";
 import { ownHandler } from "@/lib/utils/common/own-handler";
 
 export const campaignWindowSchema = z.object({ offset: z.number().int().min(0).default(0), limit: z.number().int().min(1).max(50).default(20) });

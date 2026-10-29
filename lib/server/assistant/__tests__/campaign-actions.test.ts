@@ -4,8 +4,8 @@ import { CAMPAIGN_ACTIONS } from "@/lib/server/assistant/actions/campaign";
 import { CONTENT_ACTIONS } from "@/lib/server/assistant/actions/content";
 import { SCENARIO_ACTIONS } from "@/lib/server/assistant/actions/scenario";
 import { createActionCatalog } from "@/lib/server/assistant/catalog";
-import { requestDigest } from "@/lib/server/assistant/json";
 import { campaignState, runCampaignOperation } from "@/lib/server/campaigns/action-service";
+import { requestDigest } from "@/lib/utils/battle/store/stable-json";
 
 const h = vi.hoisted(() => ({
   campaign: { findUnique: vi.fn(), update: vi.fn(), delete: vi.fn() },

@@ -1,10 +1,11 @@
-import { jsonContent, requestDigest } from "../json";
 import type { AssistantActionDef, EffectKind } from "../types";
 
 import "server-only";
 import { getTranslator } from "@/lib/i18n/translator";
 import { withCharacterOperation } from "@/lib/server/characters/operation-context";
 import { PROGRESSION_INPUTS, progressionReads, progressionState, runCharacterProgression } from "@/lib/server/characters/progression-service";
+import { requestDigest } from "@/lib/utils/battle/store/stable-json";
+import { jsonContent } from "@/lib/utils/common/json";
 
 const alwaysHuman = new Set(["progression.reset", "progression.unlearn", "choices", "resources", "inventory.patch", "stash.apply"]);
 

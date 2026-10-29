@@ -1,9 +1,9 @@
 import { beforeEach, expect, it, vi } from "vitest";
 
 import { CHARACTER_PROGRESSION_ACTIONS } from "@/lib/server/assistant/actions/character-progression";
-import { requestDigest } from "@/lib/server/assistant/json";
 import { confirmationFor } from "@/lib/server/assistant/policy";
 import { progressionState, runCharacterProgression } from "@/lib/server/characters/progression-service";
+import { requestDigest } from "@/lib/utils/battle/store/stable-json";
 import { parseRules } from "@/lib/utils/rules/schema";
 
 const h = vi.hoisted(() => ({ campaign: { findUnique: vi.fn() }, character: { findMany: vi.fn(), findUnique: vi.fn(), update: vi.fn() }, battleParticipant: { findFirst: vi.fn() }, race: { findMany: vi.fn(async () => []) }, gameClass: { findMany: vi.fn(async () => []) }, background: { findMany: vi.fn(async () => []) }, feat: { findMany: vi.fn(async () => []) }, spell: { findMany: vi.fn(async () => []) }, skill: { findMany: vi.fn(async () => []) }, mainSkill: { findMany: vi.fn(async () => []) }, skillTree: { findMany: vi.fn(async () => []) }, artifactSet: { findMany: vi.fn(async () => []) }, spellGroup: { findMany: vi.fn(async () => []) }, artifact: { findMany: vi.fn(async () => []) }, characterInventory: { findUnique: vi.fn(async()=>({equipped:{},stash:[]})), upsert:vi.fn(async()=>({equipped:{weapon:"foreign"}})),findMany: vi.fn(async () => []) }, $executeRaw:vi.fn(async()=>1),$queryRaw: vi.fn(async () => [{ id: "c" }]) }));

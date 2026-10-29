@@ -1,8 +1,8 @@
 import { describe, expect, it } from "vitest";
 
 import { jsonContent as compatibilityJson, snapshotHash } from "@/lib/server/assistant/actions/content-snapshot";
-import { requestDigest } from "@/lib/server/assistant/json";
-import { jsonContent } from "@/lib/server/assistant/json";
+import { requestDigest } from "@/lib/utils/battle/store/stable-json";
+import { jsonContent } from "@/lib/utils/common/json";
 
 const legacy = (value: unknown) => JSON.parse(JSON.stringify(value ?? null));
 
