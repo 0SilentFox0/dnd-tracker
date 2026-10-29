@@ -18,6 +18,7 @@ import { createContent, getContent, listContent, removeAllContent, removeContent
 import { withCampaignContentWrite } from "@/lib/server/content/write";
 import type { Actor } from "@/lib/utils/api/actor";
 import { NEED } from "@/lib/utils/api/need";
+import { windowOf } from "@/lib/utils/api/page-of";
 import { parseYoutubeId } from "@/lib/utils/audio/youtube-id";
 
 const idSchema = z.string().min(1).max(200);
@@ -82,7 +83,9 @@ export function createContentActions(deps: Deps = {}): AssistantActionDef[] {
 
       if (!Array.isArray(rows)) throw new ContentError(API_ERRORS.ASSISTANT_LIST_INVALID, 500);
 
-      return contentResult({ total: rows.length, offset, items: rows.slice(offset, offset + limit).map((row) => ({ id: row.id, name: row.name ?? row.title, ...Object.fromEntries(resource.listFields.map((field) => [field, row[field]])) })), nextOffset: offset + limit < rows.length ? offset + limit : null });
+      const window = windowOf(rows, offset, limit);
+
+      return contentResult({ ...window, items: window.items.map((row) => ({ id: row.id, name: row.name ?? row.title, ...Object.fromEntries(resource.listFields.map((field) => [field, row[field]])) })) });
     } });
 
     const createSchema = z.object({ data: resource.schemas.apiCreate ?? resource.schemas.create });

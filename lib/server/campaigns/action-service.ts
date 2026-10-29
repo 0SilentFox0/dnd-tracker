@@ -28,6 +28,7 @@ import { type Bundle,BUNDLE_FORMAT_VERSION } from "@/lib/server/templates/bundle
 import { exportCampaign } from "@/lib/server/templates/export-campaign";
 import { listTemplates } from "@/lib/server/templates/list-templates";
 import type { Actor } from "@/lib/utils/api/actor";
+import { windowOf } from "@/lib/utils/api/page-of";
 import { isPlatformAdmin } from "@/lib/utils/api/platform-admin";
 
 export const campaignWindowSchema = z.object({ offset: z.number().int().min(0).default(0), limit: z.number().int().min(1).max(50).default(20) });
@@ -35,7 +36,7 @@ export const campaignWindowSchema = z.object({ offset: z.number().int().min(0).d
 function windowItems(items: unknown[], raw: unknown) {
   const { offset, limit } = parseInput(campaignWindowSchema, raw);
 
-  return { offset, items: items.slice(offset, offset + limit), total: items.length, nextOffset: offset + limit < items.length ? offset + limit : null };
+  return windowOf(items, offset, limit);
 }
 
 export async function loadCampaignMembers(campaignId: string) {
