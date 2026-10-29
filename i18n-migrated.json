@@ -118,5 +118,6 @@
   "lib/server/characters/operations/**",
   "lib/constants/campaigns.ts",
   "lib/constants/campaign-dashboard.ts",
-  "lib/constants/source-sync.ts"
+  "lib/constants/source-sync.ts",
+  "lib/utils/abilities/templates.ts"
 ]

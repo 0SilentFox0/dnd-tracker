@@ -169,7 +169,9 @@
     "password": "Password",
     "aiKeys": "AI keys",
     "switchAccount": "Switch account",
-    "signOut": "Sign out"
+    "signOut": "Sign out",
+    "watchShow": "Show",
+    "watchShowAria": "Watch the show"
   },
   "breadcrumbs": {
     "label": "Breadcrumb",

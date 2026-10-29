@@ -190,6 +190,7 @@
     "apply": "Apply ({count})",
     "alsoAdded": "Also to be added: {names}",
     "stale": "The source changed — the list was refreshed and the selection reset to default.",
-    "failed": "Sync failed"
+    "failed": "Sync failed",
+    "settingsName": "Campaign settings"
   }
 }

@@ -26,6 +26,14 @@ interface SourceSyncDialogProps {
 
 const NO_ITEMS: SourceDiffItem[] = [];
 
+function itemName(item: SourceDiffItem, t: Translator, tr: Translator): string {
+  if (item.scope === "rules" && tr.has(`mechanics.${item.key}.label`)) return tr(`mechanics.${item.key}.label`);
+
+  if (item.scope === "settings") return t("sourceSync.settingsName");
+
+  return item.name;
+}
+
 function itemDetails(i: SourceDiffItem, t: Translator): string[] {
   const lines: string[] = [];
 
@@ -54,6 +62,8 @@ interface SyncItemRowProps {
 const SyncItemRow = memo(function SyncItemRow({ item, isTemplate, checked, onToggle }: SyncItemRowProps) {
   const t = useTranslator("campaigns");
 
+  const tr = useTranslator("rules");
+
   const id = useId();
 
   const details = itemDetails(item, t);
@@ -64,7 +74,7 @@ const SyncItemRow = memo(function SyncItemRow({ item, isTemplate, checked, onTog
         <Checkbox className="mt-0.5" checked={checked} onCheckedChange={() => onToggle(item)} aria-labelledby={`${id}-name`} aria-describedby={`${id}-status ${id}-info`} />
         <span className="min-w-0 flex-1">
           <span className="flex flex-wrap items-center gap-2">
-            <span id={`${id}-name`}>{item.name}</span>
+            <span id={`${id}-name`}>{itemName(item, t, tr)}</span>
             <span id={`${id}-status`}>
               <HudPill tone={pillTone(item.status)}>{t(`sourceSync.status.${syncStatusKey(item.status, !isTemplate)}`)}</HudPill>
             </span>

@@ -169,7 +169,9 @@
     "password": "Пароль",
     "aiKeys": "AI-ключі",
     "switchAccount": "Змінити акаунт",
-    "signOut": "Вийти"
+    "signOut": "Вийти",
+    "watchShow": "Показ",
+    "watchShowAria": "Дивитися показ"
   },
   "breadcrumbs": {
     "label": "Навігація",

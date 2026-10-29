@@ -11,7 +11,6 @@ const art = (over: Partial<ArtifactForReference>): ArtifactForReference => ({
   icon: null,
   rarity: "rare",
   slot: "weapon",
-  slotLabel: "Зброя",
   description: null,
   effects: [],
   setName: null,
@@ -21,7 +20,7 @@ const art = (over: Partial<ArtifactForReference>): ArtifactForReference => ({
 
 const artifacts = [
   art({ id: "1", name: "Меч", rarity: "rare", holderName: "Боромир" }),
-  art({ id: "2", name: "Щит", rarity: "epic", slot: "shield", slotLabel: "Щит", setName: "Набір" }),
+  art({ id: "2", name: "Щит", rarity: "epic", slot: "shield", setName: "Набір" }),
 ];
 
 describe("useInfoReferenceFilters: артефакти", () => {

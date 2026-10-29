@@ -43,7 +43,6 @@ export interface ArtifactForReference {
   icon: string | null;
   rarity: string | null;
   slot: string;
-  slotLabel: string;
   description: string | null;
   effects: string[];
   setName: string | null;

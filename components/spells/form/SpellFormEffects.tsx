@@ -20,6 +20,18 @@ import { EffectSchema, type Trigger } from "@/lib/utils/abilities/schema";
 
 const TRIGGER: Trigger = { event: "action" };
 
+function bounds(issue: object): ErrorParams {
+  const { minimum, maximum } = issue as { minimum?: unknown; maximum?: unknown };
+
+  const out: ErrorParams = {};
+
+  if (typeof minimum === "number") out.minimum = minimum;
+
+  if (typeof maximum === "number") out.maximum = maximum;
+
+  return out;
+}
+
 export function SpellFormEffects({ campaignId, formData, setFormData }: SpellFormFieldsProps & { campaignId: string }) {
   const t = useTranslations("spellEditor.effects");
 
@@ -29,7 +41,7 @@ export function SpellFormEffects({ campaignId, formData, setFormData }: SpellFor
     formData.spellEffects.flatMap((effect, i) => {
       const parsed = EffectSchema.safeParse(effect);
 
-      return parsed.success ? [] : [[`effects.${i}`, parsed.error.issues.map((issue) => ({ message: issue.message, params: (issue as { params?: ErrorParams }).params }))]];
+      return parsed.success ? [] : [[`effects.${i}`, parsed.error.issues.map((issue) => ({ message: issue.message, params: { ...(issue as { params?: ErrorParams }).params, ...bounds(issue) } }))]];
     }),
   );
 

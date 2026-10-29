@@ -9,7 +9,7 @@ import { useWatchShow } from "@/lib/hooks/campaigns";
 export function WatchShowButton() {
   const { href } = useWatchShow();
 
-  const t = useTranslations("common.dmSections");
+  const t = useTranslations("common.header");
 
-  return href ? <HeaderPillLink href={href} icon={Images} label={t("show").toUpperCase()} srLabel={t("show")} /> : null;
+  return href ? <HeaderPillLink href={href} icon={Images} label={t("watchShow").toUpperCase()} srLabel={t("watchShowAria")} /> : null;
 }

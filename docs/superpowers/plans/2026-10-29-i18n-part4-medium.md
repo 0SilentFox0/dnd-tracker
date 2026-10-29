@@ -111,8 +111,8 @@ lib/constants/{campaigns,campaign-dashboard,source-sync}.ts
 - `CampaignSettingsDialog`: статуси (`CampaignStatus`) → `campaigns.status.<v>`; ролі учасників → `campaigns.roles.<role>`.
 - Плюралі у списку кампаній/учасників → ICU.
 
-- [ ] **Step 1:** extract → тести на ключі (9 `__tests__` каталогу) → FAIL. `label-keys-campaigns`: статуси, ролі, id груп `source-sync`.
-- [ ] **Step 2:** реалізація + `en`. **Step 3:** `renderWithIntl` `en` — `NewCampaignForm` (ns `common`,`campaigns`). **Step 4:** перевірки. **Step 5: Commit** `feat(i18n): campaigns list, settings and templates on next-intl`.
+- [x] **Step 1:** extract → тести на ключі (9 `__tests__` каталогу) → FAIL. `label-keys-campaigns`: статуси, ролі, id груп `source-sync`.
+- [x] **Step 2:** реалізація + `en`. **Step 3:** `renderWithIntl` `en` — `NewCampaignForm` (ns `common`,`campaigns`). **Step 4:** перевірки. **Step 5: Commit** `feat(i18n): campaigns list, settings and templates on next-intl`.
 
 ### Task 3: dashboard + довідник (≈ 18 файлів)
 
@@ -134,7 +134,7 @@ lib/constants/{campaigns,campaign-dashboard,source-sync}.ts
 - `DeleteAllButton noun` у `dm/characters` → `t("list.deleteAllNoun")`.
 - Генератор (`lib/utils/characters/generate/**`) — не чіпати; підписи кнопок «Згенерувати» — ключі.
 
-- [ ] **Step 1:** extract → тести на ключі (8 + 5 хуків) → FAIL; `label-keys-characters`: `XP_DIFFICULTIES`, id архетипів. **Step 2:** реалізація + `en`. **Step 3:** `renderWithIntl` `en` — `NewCharacterForm`. **Step 4:** перевірки. **Step 5: Commit** `feat(i18n): character editor, player drafts and review on next-intl`.
+- [x] **Step 1:** extract → тести на ключі (8 + 5 хуків) → FAIL; `label-keys-characters`: `XP_DIFFICULTIES`, id архетипів. **Step 2:** реалізація + `en`. **Step 3:** `renderWithIntl` `en` — `NewCharacterForm`. **Step 4:** перевірки. **Step 5: Commit** `feat(i18n): character editor, player drafts and review on next-intl`.
 
 ### Task 5: characterProfile (≈ 34 файли)
 
@@ -145,7 +145,7 @@ lib/constants/{campaigns,campaign-dashboard,source-sync}.ts
 - `GOAL_KIND_LABEL` → `characterProfile.goals.<kind>`; `FEAT_TYPE_LABELS` (`FeatsBlock`) → `feats.types.*`; `DND_SKILL_META` (`CombatTab`, `SkillsTab`) → `common.dndSkills.*`; `TokenList` дата → `useFormatter`.
 - `CharacterProfile`/`ProfileContext` — `throw new Error(...)` англійською.
 
-- [ ] **Step 1:** extract → тести на ключі (≈ 14 тестів верхнього рівня + utils `sheet`/`choices`) → FAIL; тест: `buildSheet` віддає `label` = ключ + `params`, `translateIssue` з реальним `uk`-JSON → «Спритність (межа 2)» слово в слово. **Step 2:** реалізація + `en`. **Step 3:** `renderWithIntl` `en` — `ProfileHero` або `GoalList`. **Step 4:** перевірки. **Step 5: Commit** `feat(i18n): character profile on next-intl`.
+- [x] **Step 1:** extract → тести на ключі (≈ 14 тестів верхнього рівня + utils `sheet`/`choices`) → FAIL; тест: `buildSheet` віддає `label` = ключ + `params`, `translateIssue` з реальним `uk`-JSON → «Спритність (межа 2)» слово в слово. **Step 2:** реалізація + `en`. **Step 3:** `renderWithIntl` `en` — `ProfileHero` або `GoalList`. **Step 4:** перевірки. **Step 5: Commit** `feat(i18n): character profile on next-intl`.
 
 ### Task 6: inventory (≈ 20 файлів)
 
@@ -153,7 +153,7 @@ lib/constants/{campaigns,campaign-dashboard,source-sync}.ts
 
 **Рішення:** `COIN_LABEL` → `inventory.coins.<c>`; `stash/describe-log.ts` (опис записів логу інвентаря з даних) → ключі + `params`; дати `InventoryLogPanel` → `useFormatter`; рідкість/слоти — `artifacts.rarity/slots`.
 
-- [ ] **Step 1–5** як у задачі 2; `en`-тест — `MoneyDialog` (ns `common`,`inventory`). **Commit** `feat(i18n): inventory and stash on next-intl`.
+- [x] **Step 1–5** як у задачі 2; `en`-тест — `MoneyDialog` (ns `common`,`inventory`). **Commit** `feat(i18n): inventory and stash on next-intl`.
 
 ### Task 7: rest (≈ 18 файлів)
 
@@ -161,7 +161,7 @@ lib/constants/{campaigns,campaign-dashboard,source-sync}.ts
 
 **Рішення:** `describeCharacterLog` → `{ key, params }` (`rest.log.<kind>`; `MODE_NOTE` → `rest.log.mode.<m>`; емодзі лишаються в ключі); `d.label` з БД — як є. `sheet-roll.ts` пише `label` у `character_log.data` (дані) — текст мови автора через параметр, не ключ (як «Новий вибір» ч.3). Дата/час `CharacterLogTab` → `useFormatter`; «Система» → ключ.
 
-- [ ] **Step 1–5** як у задачі 2; тест `describeCharacterLog` на ключі; `en`-тест — `RestDialog`. **Commit** `feat(i18n): rest, resources and character log on next-intl`.
+- [x] **Step 1–5** як у задачі 2; тест `describeCharacterLog` на ключі; `en`-тест — `RestDialog`. **Commit** `feat(i18n): rest, resources and character log on next-intl`.
 
 ### Task 8: spells (≈ 22 файли)
 
@@ -169,7 +169,7 @@ lib/constants/{campaigns,campaign-dashboard,source-sync}.ts
 
 **Рішення:** `SPELL_COST_LABELS`, `SPELL_TARGETING_LABELS`, `TEMPLATE_SHAPE_LABELS`, `SPELL_SAVE_ON_SUCCESS_LABELS` лишаються (бій/лог) → UI `spells.{costs,targeting,shapes,saveOnSuccess}.<v>`; рівні — `common.spellLevels.*`; `ROMAN_NUMERALS` — нейтральні. `CreateSpellGroupDialog` → `NameOnlyCreateDialog`, якщо має лише назву. `DeleteAllButton noun` → ключ.
 
-- [ ] **Step 1–5** як у задачі 2; `en`-тест — `SpellCard`. **Commit** `feat(i18n): spells list, book and groups on next-intl`.
+- [x] **Step 1–5** як у задачі 2; `en`-тест — `SpellCard`. **Commit** `feat(i18n): spells list, book and groups on next-intl`.
 
 ### Task 9: spellEditor (≈ 16 файлів; після 8)
 
@@ -177,7 +177,7 @@ lib/constants/{campaigns,campaign-dashboard,source-sync}.ts
 
 **Рішення:** модульні масиви полів (`SpellFormPowerFields`, `SpellFormEffects`) → `labelKey`; переліки — ключі `spells.*` (ns задачі 8, читати повним ключем). `model/schema.ts` (клієнтська Zod) → ключі `spellEditor.validation.*`; показ issue — `translateIssue(useTranslator(), issue)`; вбудовані Zod-повідомлення клієнта поки з `client-locale` (задача 15). `model/labels.ts`, `summary.ts`, `execution.ts`: якщо читає бій/сервер — константа лишається, UI — ключі; інакше → ключі.
 
-- [ ] **Step 1–5** як у задачі 2; тест `model/schema`: issue — ключ; `en`-тест — `SpellFormBasicFields`. **Commit** `feat(i18n): spell editor on next-intl`.
+- [x] **Step 1–5** як у задачі 2; тест `model/schema`: issue — ключ; `en`-тест — `SpellFormBasicFields`. **Commit** `feat(i18n): spell editor on next-intl`.
 
 ### Task 10: units (≈ 24 файли)
 
@@ -185,7 +185,7 @@ lib/constants/{campaigns,campaign-dashboard,source-sync}.ts
 
 **Рішення:** `units.ts` Zod: `refine`/`addIssue` → `units.validation.*` (`avatarUrl`, `challengeRating`, `rechargePerBattle`, …), 14 `.describe` → англійською. Сенси/розміри — `common.monster.*`; типи шкоди (`UnitAttack`, `UnitImmunities`) — `common.damageTypes.*`; характеристики — `common.abilities.*`. `unit-parsing.ts` (помилки розбору статблоку, бачить DM) → ключі + `params`. `DeleteAllButton noun` → ключ. Сортування `localeCompare(…, "uk")` — без змін.
 
-- [ ] **Step 1–5** як у задачі 2; `en`-тест — `UnitCard`. **Commit** `feat(i18n): units editor on next-intl`.
+- [x] **Step 1–5** як у задачі 2; `en`-тест — `UnitCard`. **Commit** `feat(i18n): units editor on next-intl`.
 
 ### Task 11: abilities (≈ 22 файли)
 
@@ -197,7 +197,7 @@ lib/constants/{campaigns,campaign-dashboard,source-sync}.ts
 - `schema/ability.ts` issues (`Пасивка допускає лише …`, `${stat} не діє через зону аури`) → `abilities.validation.*` + `params`; показ у редакторі — `translateIssue`.
 - Підписи з реєстру в цій задачі **не** чіпати (задача 12): компоненти поки показують `def.label`.
 
-- [ ] **Step 1–5** як у задачі 2; тест `schema/ability`: issue — ключ + `params`; `en`-тест — `LimitsSection`. **Commit** `feat(i18n): ability editor chrome on next-intl`.
+- [x] **Step 1–5** як у задачі 2; тест `schema/ability`: issue — ключ + `params`; `en`-тест — `LimitsSection`. **Commit** `feat(i18n): ability editor chrome on next-intl`.
 
 ### Task 12: abilityRegistry (≈ 14 файлів; після 11)
 
@@ -212,7 +212,7 @@ abilityRegistry.options.<group>.<value> · .stats.<key> · .targets.<t> · .dama
 ```
 `fieldKey`/`group` — маленький чистий хелпер у `components/abilities/fields/` (не в реєстрі). Тест підписів обходить `EFFECT_REGISTRY`, `FLAG_REGISTRY`, `TRIGGER_REGISTRY`, `CONDITION_REGISTRY`, `ABILITY_TEMPLATES`, `STAT_LABELS`, `TARGET_LABELS`, `DAMAGE_FILTER_LABELS` + `fields`/`options` кожного визначення. `AbilityChips`/`AbilitySummary` показують `describe`/`summary` як є (ч.6).
 
-- [ ] **Step 1:** згенерувати `uk`-JSON скриптом з реєстру (одноразово, у scratchpad, не комітити) — тексти слово в слово; `label-keys-abilityRegistry` → PASS лише з повним `uk`/`en`. **Step 2:** компоненти на ключі; тести редактора на ключі. **Step 3:** `renderWithIntl` `en` — `EffectCard` для `modifyStat` і `flag`. **Step 4:** перевірки. **Step 5: Commit** `feat(i18n): ability registry labels in editor on next-intl`.
+- [x] **Step 1:** згенерувати `uk`-JSON скриптом з реєстру (одноразово, у scratchpad, не комітити) — тексти слово в слово; `label-keys-abilityRegistry` → PASS лише з повним `uk`/`en`. **Step 2:** компоненти на ключі; тести редактора на ключі. **Step 3:** `renderWithIntl` `en` — `EffectCard` для `modifyStat` і `flag`. **Step 4:** перевірки. **Step 5: Commit** `feat(i18n): ability registry labels in editor on next-intl`.
 
 ### Task 13: rules (≈ 24 файли)
 
@@ -220,7 +220,7 @@ abilityRegistry.options.<group>.<value> · .stats.<key> · .targets.<t> · .dama
 
 **Рішення:** `MECHANIC_REGISTRY` `label/description` → `rules.mechanics.<key>.{label,description}`; читає ще `lib/server/templates/sync/**` — перевірити: якщо підпис іде у відповідь синхронізації — віддавати ключ механіки (показ у `SourceSyncDialog`, задача 2), інакше лишити поле в реєстрі. `defaults.ts`: назви базових атак — дані (стають назвами атак героя) → лишити з `eslint-disable … -- default attack names stored in campaign rules`. `CriticalsSection`: обгортка — ключі; назви/описи `CRITICAL_*_EFFECTS` — як є (ч.6). `schema.ts` Zod → `rules.validation.*`.
 
-- [ ] **Step 1–5** як у задачі 2; `en`-тест — `RulesForm` (секція морали). **Commit** `feat(i18n): campaign rules on next-intl`.
+- [x] **Step 1–5** як у задачі 2; `en`-тест — `RulesForm` (секція морали). **Commit** `feat(i18n): campaign rules on next-intl`.
 
 ### Task 14: skillTree (≈ 28 файлів)
 
@@ -228,7 +228,7 @@ abilityRegistry.options.<group>.<value> · .stats.<key> · .targets.<t> · .dama
 
 **Рішення:** причини блокування (`rules.ts`: `noPoints`, `alreadyLearned`, …) — уже коди: сервер віддає ключ `skillTree.reasons.<code>`, клієнт `translateIssue`; споживачі `lib/server/characters/**`, `lib/server/skills/**` лише передають рядок — перевірити, що не склеюють текст. `validate.ts`/`tree-transfer.ts` (помилки імпорту дерева, клієнт) → ключі + `params`. Рівні гілки (`labels.ts`: Базовий/Експерт…) → `skillTree.tiers.<t>` (константа лишається, якщо читає бій/AI). `ungrouped.branch` → `common.ungrouped.branch`.
 
-- [ ] **Step 1–5** як у задачі 2; тест: `rules.ts` віддає ключ, `translateIssue` з реальним `uk` — текст слово в слово; `en`-тест — `ProgressionPanel`. **Commit** `feat(i18n): skill tree editor and progression on next-intl`.
+- [x] **Step 1–5** як у задачі 2; тест: `rules.ts` віддає ключ, `translateIssue` з реальним `uk` — текст слово в слово; `en`-тест — `ProgressionPanel`. **Commit** `feat(i18n): skill tree editor and progression on next-intl`.
 
 ### Task 15: Замикання (≈ 6 файлів; після всіх)
 
@@ -265,3 +265,7 @@ abilityRegistry.options.<group>.<value> · .stats.<key> · .targets.<t> · .dama
 _(заповнює контролер: коміти задач, розмір ns, рішення задач 12/13 про ключі полів і `templates/sync`)_
 
 - Task 1 (каркас): done. scope-size: uk 38,9 KB raw / 16,0 KB gzip, en 37,9 / 12,6. Відхилення: додано `common.dmMenu.<path>` (назви пунктів меню Header відрізняються від крихт: «NPC Юніти»), `dashboard.sections.<path>.{title,subtitle}` — лише для 16 плиток (без keywords/info/acquaintances/player — це задача 3), `STAT_SCORES` у `lib/constants/abilities.ts`, `APP_TIME_ZONE` у `lib/i18n/config.ts` (передається і в клієнтські провайдери). Храповик навмисно червоніє на `lib/constants/{campaign-dashboard,source-sync}.ts` і всьому скоупі до задач 2–14.
+- Task 2 (campaigns): done. Відхилення: `WatchShowButton` (у Header) бере `common.dmSections.show` (uppercase для підпису, він же sr-label) замість окремих ключів — нові ключі в `common` заборонені; якщо потрібне «Дивитися показ» — додати `common.header.watchShow*` в задачі 15. `campaigns.status.*` не створено (статуси ніде не рендеряться, лише чекбокс), ролі — `campaigns.roles.{dm,player}`; `syncTitle/syncStatusLabel/SYNC_*_LABELS/PLURAL_*` замінено на `syncTitleKey/syncStatusKey` + ключі `campaigns.sourceSync.*`, `formatUsage(usage, t)`; назви механік правил у диффі — `item.name` із сервера як є (rules.mechanics — задача 13). `JoinBattleButton` без кирилиці — не чіпано.
+- Task 8 (spells): done. Відхилення: `CreateSpellGroupDialog` лишився власним (має error/pending/maxLength, яких нема в `NameOnlyCreateDialog`); `lib/constants/spells.ts` без змін (поза храповиком, `eslint-disable` не потрібні); `NO_SCHOOL` = `UNGROUPED_KEY` (показ через `spells.book.noSchool`); нові `useSpellLabels` (`lib/hooks/spells`, перекладені targeting/resolution/cost/mechanics за `spells.inline.*`) і `spells.fx.{archetypes,elements,auras}` (UI не читає `components/battle/fx/labels`). Для задач 9/ч.6: `model/labels.ts`/`summary.ts` лишились українськими (їх читає `battle/wizards/spellbook/SpellSummary`), UI форми може брати `spells.{costs,targeting,shapes,saveOnSuccess}`. Підправлені очікування в `battle/wizards/__tests__/spell-book.test.tsx` і `character-profile/__tests__/profile-spell-book.test.tsx` (ключі `spells.book.*`).
+- Task 11 (abilities): done. Відхилення: `withAbilityErrors(label, count, t)` і `abilitySaveError(err, fallback, t)` приймають перекладач `abilities` (`useTranslator("abilities")`), тож у 9 викликачів (feats/skills/artifacts/artifact-sets/classes/races/units форми, 3 хуки форм) додано `ta`; `errorsByPath` — `(string | {message, params})[]` (`AbilityError`), `FieldErrors` перекладає через `translateIssue`. Для задачі 9: `SpellFormEffects` збирає `"path: message"` — ключі `abilities.validation.*` з EffectSchema показуватимуться сирими, треба передавати `{ message, params }` у `errorsByPath`. `.describe()` схеми — англійською. Дефолтні note-тексти («Опис», «Виконує атаку», «Застосовує заклинання») — дані, з eslint-disable. Реєстрові підписи (`def.label`) не чіпав — задача 12.
+- Task 15 (замикання): done. Клієнтський Zod переключено на `lib/zod/locale.ts` (`client-locale.ts` видалено; єдиний клієнтський показ Zod-issue — `SpellFormEffects`, передає `minimum`/`maximum` у `params`). `SourceSyncDialog`: `rules.mechanics.<key>.label`, `campaigns.sourceSync.settingsName` (серверний `name`/`MECHANIC_REGISTRY.label` лишились як дані). `common.header.watchShow{,Aria}`. Споживачі `ABILITY_LABELS` у choices/classes/feats → `common.abilities.<k>.label`. Видалено: `artifactRarityLabel`, `artifactSlotLabel`/`slotLabel`, `ARTIFACT_GRID_9[].label`, `GOAL_KIND_LABEL`, `WEAPON_TRAIT_LABELS`. Лишено (є споживачі): `ABILITY_LABELS`, `MONSTER_*`, `DAMAGE_ELEMENT_*` (battle/setup, registry), `ATTACK_KIND_LABELS` (log-format), `XP_DIFFICULTY_LABELS`, `UNGROUPED_LABELS`, `FEAT_TYPE/MAIN_SKILL_ROLE/CLASS_CASTER_LABELS` (імпорт), `DND_SKILL_META`, `SPELL_*_LABELS`. scope-size: uk 112,0 KB raw / 43,6 KB gzip, en 109,4 / 34,5 (ліміт 100 gzip).

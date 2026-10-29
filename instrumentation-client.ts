@@ -1,1 +1,1 @@
-import "@/lib/zod/client-locale";
+import "@/lib/zod/locale";

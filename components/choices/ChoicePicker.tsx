@@ -3,7 +3,7 @@
 import { useTranslations } from "next-intl";
 
 import { OptionButton } from "@/components/hud/OptionButton";
-import { ABILITY_KEYS, ABILITY_LABELS, ABILITY_SCORE_CAP, type AbilityKey } from "@/lib/constants/abilities";
+import { ABILITY_KEYS, ABILITY_SCORE_CAP, type AbilityKey } from "@/lib/constants/abilities";
 import { DND_SKILLS, type DndSkill } from "@/lib/constants/skills";
 import { useTranslator } from "@/lib/i18n/use-translator";
 import { MULTICLASS_SKILLS_ID } from "@/lib/utils/characters/choices/class-choices";
@@ -152,6 +152,9 @@ function FeatList({ choice, value, ctx, actions }: { choice: Choice; value: Choi
 }
 
 function AbilityPoints({ choice, value, onChange, scores, after: scoreAfter }: { choice: Choice; value: ChoicePick[]; onChange: (next: ChoicePick[]) => void; scores: Record<AbilityKey, number>; after?: Record<AbilityKey, number> }) {
+
+  const tc = useTranslator("common");
+
   const points = choice.points ?? 1;
 
   const max = choice.max ?? ABILITY_SCORE_CAP;
@@ -167,11 +170,11 @@ function AbilityPoints({ choice, value, onChange, scores, after: scoreAfter }: {
 
         return (
           <div key={a} className="flex items-center gap-2 text-sm">
-            <span className="w-28">{ABILITY_LABELS[a]}</span>
-            <button type="button" aria-label={`−1 ${ABILITY_LABELS[a]}`} disabled={added === 0} onClick={() => onChange(value.filter((p, i) => !(p.id === a && i === value.map((x) => x.id).lastIndexOf(a))))} className="rounded border border-hud-line/50 px-2 disabled:opacity-40">
+            <span className="w-28">{tc(`abilities.${a}.label`)}</span>
+            <button type="button" aria-label={`−1 ${tc(`abilities.${a}.label`)}`} disabled={added === 0} onClick={() => onChange(value.filter((p, i) => !(p.id === a && i === value.map((x) => x.id).lastIndexOf(a))))} className="rounded border border-hud-line/50 px-2 disabled:opacity-40">
               −
             </button>
-            <button type="button" aria-label={`+1 ${ABILITY_LABELS[a]}`} disabled={value.length >= points || after + 1 > max || (choice.maxPerAbility !== undefined && added >= choice.maxPerAbility)} onClick={() => onChange([...value, { id: a }])} className="rounded border border-hud-line/50 px-2 disabled:opacity-40">
+            <button type="button" aria-label={`+1 ${tc(`abilities.${a}.label`)}`} disabled={value.length >= points || after + 1 > max || (choice.maxPerAbility !== undefined && added >= choice.maxPerAbility)} onClick={() => onChange([...value, { id: a }])} className="rounded border border-hud-line/50 px-2 disabled:opacity-40">
               +
             </button>
             {after !== scores[a] && <span className="text-xs text-hud-muted">{`${scores[a]} → ${after}`}</span>}

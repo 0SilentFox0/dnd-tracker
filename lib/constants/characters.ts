@@ -36,13 +36,6 @@ export const GoalKind = { MAIN: "main", PERSONAL: "personal", INNER: "inner", SE
 
 export type GoalKind = (typeof GoalKind)[keyof typeof GoalKind];
 
-export const GOAL_KIND_LABEL: Record<GoalKind, string> = {
-  [GoalKind.MAIN]: "Головна мета",
-  [GoalKind.PERSONAL]: "Особиста мета",
-  [GoalKind.INNER]: "Внутрішній конфлікт",
-  [GoalKind.SECRET]: "Таємна мета",
-};
-
 export const GoalStatus = { ACTIVE: "active", DONE: "done", FAILED: "failed" } as const;
 
 export type GoalStatus = (typeof GoalStatus)[keyof typeof GoalStatus];

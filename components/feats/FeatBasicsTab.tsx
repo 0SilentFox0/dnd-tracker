@@ -8,14 +8,17 @@ import { ImageUpload } from "@/components/ui/image-upload";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { ABILITY_KEYS, ABILITY_LABELS, type AbilityKey } from "@/lib/constants/abilities";
+import { ABILITY_KEYS, type AbilityKey } from "@/lib/constants/abilities";
 import { CHOICE_LIMITS, FEAT_TYPES } from "@/lib/constants/choices";
 import { MAX_CLASS_LEVEL } from "@/lib/constants/classes";
+import { useTranslator } from "@/lib/i18n/use-translator";
 import { toggleItem } from "@/lib/utils/common/collections";
 import type { FeatFormData, FeatType } from "@/types/choices";
 
 export function FeatBasicsTab({ form: { data, set } }: { form: { data: FeatFormData; set: React.Dispatch<React.SetStateAction<FeatFormData>> } }) {
   const t = useTranslations("feats");
+
+  const tc = useTranslator("common");
 
   const patch = (next: Partial<FeatFormData>) => set((prev) => ({ ...prev, ...next }));
 
@@ -60,7 +63,7 @@ export function FeatBasicsTab({ form: { data, set } }: { form: { data: FeatFormD
           {ABILITY_KEYS.map((a) => (
             <label key={a} className="flex items-center gap-1">
               <Checkbox checked={scoreAbilities.includes(a)} onCheckedChange={() => toggleAbility(a)} />
-              {ABILITY_LABELS[a]}
+              {tc(`abilities.${a}.label`)}
             </label>
           ))}
         </div>

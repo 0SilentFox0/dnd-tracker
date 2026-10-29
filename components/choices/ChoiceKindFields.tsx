@@ -9,10 +9,11 @@ import { HUD_SELECT_CLASS } from "@/components/hud/form";
 import { Checkbox } from "@/components/ui/checkbox";
 import { CommaListInput } from "@/components/ui/comma-list-input";
 import { Input } from "@/components/ui/input";
-import { ABILITY_KEYS, ABILITY_LABELS, ABILITY_SCORE_CAP } from "@/lib/constants/abilities";
+import { ABILITY_KEYS, ABILITY_SCORE_CAP } from "@/lib/constants/abilities";
 import { CHOICE_LIMITS, FEAT_TYPES } from "@/lib/constants/choices";
 import { DND_SKILLS } from "@/lib/constants/skills";
 import { MAX_SPELL_LEVEL } from "@/lib/constants/spells";
+import { useTranslator } from "@/lib/i18n/use-translator";
 import { toggleItem } from "@/lib/utils/common/collections";
 import type { Choice, ChoiceOwner } from "@/types/choices";
 import type { ClassColumn } from "@/types/classes";
@@ -45,6 +46,8 @@ export function SkillChoiceFields({ choice, onPatch }: KindFieldsProps) {
 export function AbilityScoreChoiceFields({ choice, onPatch }: KindFieldsProps) {
   const t = useTranslations("choices");
 
+  const tc = useTranslator("common");
+
   return (
     <>
       <label className="block text-sm">
@@ -55,7 +58,7 @@ export function AbilityScoreChoiceFields({ choice, onPatch }: KindFieldsProps) {
         {ABILITY_KEYS.map((a) => (
           <label key={a} className="flex items-center gap-1">
             <Checkbox checked={choice.abilities?.includes(a) ?? false} onCheckedChange={() => onPatch({ abilities: toggleItem(choice.abilities, a) })} />
-            {ABILITY_LABELS[a]}
+            {tc(`abilities.${a}.label`)}
           </label>
         ))}
         <label className="flex items-center gap-2">
