@@ -8,7 +8,6 @@ import { BattleRuleError } from "@/lib/utils/battle/store";
 import type { MapTerrainResponse } from "@/types/api";
 import type { TerrainCell } from "@/types/battle";
 
-export { mapTerrainSchema };
 
 export type MapTerrainBody = z.infer<typeof mapTerrainSchema>;
 

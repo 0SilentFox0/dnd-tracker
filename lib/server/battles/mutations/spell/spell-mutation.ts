@@ -1,10 +1,9 @@
 import type { Spell } from "@prisma/client";
 
-import type { SpellRequestData } from "./cast-spell-schema";
-
 import { getCachedSummonPool } from "@/lib/cache/reference-data";
 import { API_ERRORS } from "@/lib/constants/api-errors";
 import { prisma } from "@/lib/db";
+import type { SpellRequestData } from "@/lib/schemas/battles";
 import { findParticipant, updateParticipant } from "@/lib/utils/abilities/engine/core/participants";
 import { replaceParticipant } from "@/lib/utils/abilities/engine/core/participants";
 import { recordUse } from "@/lib/utils/abilities/engine/core/usage";

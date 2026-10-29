@@ -1,5 +1,6 @@
 import { API_ERRORS } from "@/lib/constants/api-errors";
 import { BattleStatus } from "@/lib/constants/battle";
+import { abilityActionSchema, attackBodySchema, auraZoneSchema, bonusActionSchema, castSpellSchema, mapTerrainSchema, mapWeatherSchema, mazeActionSchema, mazeMarkSchema, moveSchema, patchParticipantSchema } from "@/lib/schemas/battles";
 import { ContentError } from "@/lib/server/content/errors";
 import { BattleAccess, type RunBattleMutationOptions } from "@/lib/utils/battle/pipeline/run-battle-mutation";
 import { BattleAccessError } from "@/lib/utils/battle/store";
@@ -23,7 +24,7 @@ const OPERATIONS: Record<string, Loader> = {
     rateLimitScope: "abilityAction",
     respond: "wrapped",
     load: async () => {
-      const { abilityActionMutation, abilityActionSchema } = await import("@/lib/server/battles/mutations/ability-action/ability-action-mutation");
+      const { abilityActionMutation } = await import("@/lib/server/battles/mutations/ability-action/ability-action-mutation");
 
       return { schema: abilityActionSchema, mutate: abilityActionMutation };
     },
@@ -42,7 +43,7 @@ const OPERATIONS: Record<string, Loader> = {
     blockedByMode: true,
     rateLimitScope: "attack",
     load: async () => {
-      const { attackBodySchema, attackMutation } = await import("@/lib/server/battles/mutations/attack/attack-mutation");
+      const { attackMutation } = await import("@/lib/server/battles/mutations/attack/attack-mutation");
 
       return { schema: attackBodySchema, mutate: attackMutation };
     },
@@ -53,7 +54,7 @@ const OPERATIONS: Record<string, Loader> = {
     rateLimitScope: "abilityAction",
     respond: "wrapped",
     load: async () => {
-      const { auraZoneMutation, auraZoneSchema } = await import("@/lib/server/battles/mutations/aura-zone/aura-zone-mutation");
+      const { auraZoneMutation } = await import("@/lib/server/battles/mutations/aura-zone/aura-zone-mutation");
 
       return { schema: auraZoneSchema, mutate: auraZoneMutation };
     },
@@ -64,7 +65,7 @@ const OPERATIONS: Record<string, Loader> = {
     rateLimitScope: "bonusAction",
     respond: "wrapped",
     load: async () => {
-      const { bonusActionMutation, bonusActionSchema } = await import("@/lib/server/battles/mutations/bonus-action/bonus-action-mutation");
+      const { bonusActionMutation } = await import("@/lib/server/battles/mutations/bonus-action/bonus-action-mutation");
 
       return { schema: bonusActionSchema, mutate: bonusActionMutation };
     },
@@ -117,7 +118,7 @@ const OPERATIONS: Record<string, Loader> = {
     access: DM,
     rateLimitScope: "mapTerrain",
     load: async () => {
-      const { mapTerrainMutation, mapTerrainSchema } = await import("@/lib/server/battles/mutations/map-terrain/map-terrain-mutation");
+      const { mapTerrainMutation } = await import("@/lib/server/battles/mutations/map-terrain/map-terrain-mutation");
 
       return { schema: mapTerrainSchema, mutate: mapTerrainMutation };
     },
@@ -126,7 +127,7 @@ const OPERATIONS: Record<string, Loader> = {
     access: DM,
     rateLimitScope: "mapWeather",
     load: async () => {
-      const { mapWeatherMutation, mapWeatherSchema } = await import("@/lib/server/battles/mutations/map-weather/map-weather-mutation");
+      const { mapWeatherMutation } = await import("@/lib/server/battles/mutations/map-weather/map-weather-mutation");
 
       return { schema: mapWeatherSchema, mutate: mapWeatherMutation };
     },
@@ -135,7 +136,7 @@ const OPERATIONS: Record<string, Loader> = {
     access: DM,
     rateLimitScope: "maze",
     load: async () => {
-      const { mazeActionSchema, mazeMutation } = await import("@/lib/server/battles/mutations/maze/maze-mutation");
+      const { mazeMutation } = await import("@/lib/server/battles/mutations/maze/maze-mutation");
 
       return { schema: mazeActionSchema, mutate: mazeMutation };
     },
@@ -145,7 +146,7 @@ const OPERATIONS: Record<string, Loader> = {
     blockedByMode: true,
     rateLimitScope: "mazeMark",
     load: async () => {
-      const { mazeMarkMutation, mazeMarkSchema } = await import("@/lib/server/battles/mutations/maze-mark/maze-mark-mutation");
+      const { mazeMarkMutation } = await import("@/lib/server/battles/mutations/maze-mark/maze-mark-mutation");
 
       return { schema: mazeMarkSchema, mutate: mazeMarkMutation };
     },
@@ -168,7 +169,7 @@ const OPERATIONS: Record<string, Loader> = {
     rateLimitScope: "move",
     respond: "wrapped",
     load: async () => {
-      const { moveMutation, moveSchema } = await import("@/lib/server/battles/mutations/move/move-mutation");
+      const { moveMutation } = await import("@/lib/server/battles/mutations/move/move-mutation");
 
       return { schema: moveSchema, mutate: moveMutation };
     },
@@ -237,11 +238,9 @@ const OPERATIONS: Record<string, Loader> = {
     rateLimitScope: "spell",
     dryRun: (body) => body.preview === true,
     load: async () => {
-      const { spellSchema } = await import("@/lib/server/battles/mutations/spell/cast-spell-schema");
-
       const { createSpellMutation } = await import("@/lib/server/battles/mutations/spell/spell-mutation");
 
-      return { schema: spellSchema, mutate: createSpellMutation() };
+      return { schema: castSpellSchema, mutate: createSpellMutation() };
     },
   }),
   start: operation({
@@ -268,8 +267,6 @@ const OPERATIONS: Record<string, Loader> = {
     rateLimitScope: "participantPatch",
     load: async ({ participantId }: BattleOperationParams) => {
       const { patchParticipantMutation } = await import("@/lib/server/battles/mutations/participants/patch-participant-mutation");
-
-      const { patchParticipantSchema } = await import("@/lib/server/battles/mutations/participants/patch-participant-schema");
 
       if (!participantId) throw new ContentError(API_ERRORS.BATTLE_PARTICIPANT_ID_REQUIRED, 400);
 

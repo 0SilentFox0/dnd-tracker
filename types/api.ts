@@ -9,6 +9,7 @@ import type {
   attackBodySchema,
   auraZoneSchema,
   bonusActionSchema,
+  castSpellSchema,
   critChoiceSchema,
   mapTerrainSchema,
   mapWeatherSchema,
@@ -17,7 +18,6 @@ import type {
   moraleCheckSchema,
   moveSchema,
   patchParticipantSchema,
-  spellSchema,
 } from "@/lib/schemas/battles";
 import type { PendingCritChoice } from "@/lib/utils/battle/crit-choice/types";
 import type { Ruleset } from "@/lib/utils/rules";
@@ -159,7 +159,7 @@ export interface BattleMutationResponse<R = Record<string, unknown>> {
   response?: R;
 }
 
-export type AttackData = z.input<typeof attackBodySchema>;
+export type AttackData = Omit<z.input<typeof attackBodySchema>, "damageRolls"> & { damageRolls: number[] };
 
 export type MoraleCheckData = z.infer<typeof moraleCheckSchema>;
 
@@ -188,7 +188,7 @@ export type AbilityActionData = z.infer<typeof abilityActionSchema>;
 
 export type PatchParticipantData = z.infer<typeof patchParticipantSchema>;
 
-export type SpellCastData = z.input<typeof spellSchema>;
+export type SpellCastData = Omit<z.input<typeof castSpellSchema>, "targetIds" | "diceRolls"> & { targetIds: string[]; diceRolls: number[] };
 
 // Skill Trees API
 

@@ -18,7 +18,6 @@ import { assertCanAct } from "@/lib/utils/battle/turn";
 import { rngOf } from "@/lib/utils/common/rng";
 import type { BattleMapConfig, BattleParticipant, GridPoint, TerrainCell } from "@/types/battle";
 
-export { moveSchema };
 
 export type MoveBody = z.infer<typeof moveSchema>;
 

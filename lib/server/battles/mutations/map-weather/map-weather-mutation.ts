@@ -4,7 +4,6 @@ import type { BattleMutationContext, MutationResult } from "@/lib/utils/battle/p
 import { BattleRuleError } from "@/lib/utils/battle/store";
 import type { MapWeatherData } from "@/types/api";
 
-export { mapWeatherSchema };
 
 export function mapWeatherMutation(ctx: BattleMutationContext, body: MapWeatherData): MutationResult {
   const map = ctx.meta.map;

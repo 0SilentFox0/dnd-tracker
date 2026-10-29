@@ -132,13 +132,16 @@ export const attackBodySchema = z
     d20Roll: z.number().min(1).max(20).optional(),
     attackRoll: z.number().min(1).max(20).optional(),
     attackRolls: z.array(z.number().min(1).max(20)).optional(),
+    /** другий d20 на ціль у порядку attackRolls; сервер сам вирішує перевагу/недолік */
     secondRolls: z.array(z.number().min(1).max(20).nullable()).optional(),
     advantageRoll: z.number().min(1).max(20).optional(),
     disadvantageRoll: z.number().min(1).max(20).optional(),
+    /** вибір гравця; сервер застосовує, лише коли навички не задають режим */
     rollMode: z.enum(["normal", "advantage", "disadvantage"]).optional(),
     damageRolls: z.array(z.number()).default([]),
     offHand: z.boolean().optional(),
     useInspiration: z.boolean().optional(),
+    /** Підступний удар (Rogue): ефекти замість кубиків Прихованої атаки */
     cunningStrike: z.array(z.enum(CUNNING_STRIKE_EFFECTS)).min(1).max(3).optional(),
     endTurn: z.boolean().default(false),
   })
@@ -181,13 +184,14 @@ export const mapTerrainSchema = z.object({
 
 export const mapWeatherSchema = z.object({ weather: weatherKindSchema.nullable() });
 
-export const spellSchema = z.object({
+export const castSpellSchema = z.object({
   casterId: z.string(),
   legendaryKey: z.string().min(1).optional(),
   spellId: z.string(),
   grantKey: z.string().min(1).max(300).optional(),
   castLevel: z.number().int().min(0).max(9).optional(),
   targetIds: z.array(z.string()).default([]),
+  /** точка шаблону на карті */
   targetCell: mapCellSchema.optional(),
   diceRolls: z.array(z.number()).default([]),
   saveRolls: z.array(z.object({ participantId: z.string(), roll: z.number().int().min(1).max(20) })).optional(),
@@ -198,6 +202,8 @@ export const spellSchema = z.object({
   free: z.boolean().optional(),
   slotKey: z.string().regex(/^([1-9]|pact)$/).optional(),
 });
+
+export type SpellRequestData = z.infer<typeof castSpellSchema>;
 
 export const abilityActionSchema = z.object({
   participantId: z.string(),

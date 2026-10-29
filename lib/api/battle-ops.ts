@@ -50,6 +50,7 @@ export interface BattleOp<TBody extends object, TRes = Record<string, unknown>> 
   invalidate?: ("battles" | "active-battles")[];
   retryOnConflict?: true;
   mapResponse?: (res: BattleMutationResponse) => BattleMutationResponse<TRes>;
+  /** лише для виведення типу TBody; у рантаймі не використовується */
   readonly _body?: TBody;
 }
 

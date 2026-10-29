@@ -5,7 +5,8 @@ import { context, goblin, hero, participant } from "./fixtures";
 
 import { API_ERRORS } from "@/lib/constants/api-errors";
 import { AttackType, ParticipantSide, ParticipantSourceType } from "@/lib/constants/battle";
-import { attackBodySchema, attackMutation } from "@/lib/server/battles/mutations/attack/attack-mutation";
+import { attackBodySchema, castSpellSchema } from "@/lib/schemas/battles";
+import { attackMutation } from "@/lib/server/battles/mutations/attack/attack-mutation";
 import { createSpellMutation, type SpellMutationDeps } from "@/lib/server/battles/mutations/spell/spell-mutation";
 import { resolved } from "@/lib/utils/abilities/__tests__/fixtures";
 import { diffTerrain } from "@/lib/utils/battle/grid/terrain";
@@ -167,9 +168,7 @@ describe("spell mutation", () => {
     });
 
     it("нецілий кидок відхиляє схема", async () => {
-      const { spellSchema } = await import("@/lib/server/battles/mutations/spell/cast-spell-schema");
-
-      expect(spellSchema.safeParse(saveBody(10.5)).success).toBe(false);
+      expect(castSpellSchema.safeParse(saveBody(10.5)).success).toBe(false);
     });
   });
 

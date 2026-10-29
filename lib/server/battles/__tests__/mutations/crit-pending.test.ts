@@ -4,7 +4,8 @@ import { describe, expect, it, vi } from "vitest";
 import { context, goblin as baseGoblin, participant } from "./fixtures";
 
 import { AttackType } from "@/lib/constants/battle";
-import { attackBodySchema, createAttackMutation } from "@/lib/server/battles/mutations/attack/attack-mutation";
+import { attackBodySchema } from "@/lib/schemas/battles";
+import { createAttackMutation } from "@/lib/server/battles/mutations/attack/attack-mutation";
 import { createCritChoiceMutation } from "@/lib/server/battles/mutations/crit-choice/crit-choice-mutation";
 import { createSpellMutation } from "@/lib/server/battles/mutations/spell/spell-mutation";
 import { createMockParticipant } from "@/lib/utils/battle/__tests__/fixtures/mock-participant";

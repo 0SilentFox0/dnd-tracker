@@ -5,7 +5,6 @@ import { createAbilityUseMutation } from "../ability-use/ability-use-mutation";
 import { bonusActionSchema } from "@/lib/schemas/battles";
 import type { SummonDeps } from "@/lib/utils/battle/summon/ability-summons";
 
-export { bonusActionSchema };
 
 export type BonusActionBody = z.infer<typeof bonusActionSchema>;
 

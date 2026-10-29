@@ -21,7 +21,6 @@ import { advanceTurn, assertCanAct } from "@/lib/utils/battle/turn";
 import type { CastableSpell } from "@/lib/utils/battle/types/spell-process";
 import { assertAttackRolls } from "@/lib/utils/battle/validation/dice-checks";
 
-export { attackBodySchema };
 
 export type AttackBody = z.infer<typeof attackBodySchema>;
 

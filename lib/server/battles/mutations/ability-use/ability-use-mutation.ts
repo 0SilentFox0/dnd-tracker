@@ -1,17 +1,14 @@
+import type { z } from "zod";
+
 import { getCachedSummonPool } from "@/lib/cache/reference-data";
+import type { bonusActionSchema } from "@/lib/schemas/battles";
 import { runAbilityUse } from "@/lib/utils/battle/pipeline/ability-use";
 import type { BattleMutationContext, MutationResult } from "@/lib/utils/battle/pipeline/run-battle-mutation";
 import type { SummonDeps } from "@/lib/utils/battle/summon/ability-summons";
 
 export type AbilityUseSlot = "action" | "bonusAction";
 
-export interface AbilityUseBody {
-  participantId: string;
-  abilityKey: string;
-  targetParticipantIds?: string[];
-  targetParticipantId?: string;
-  targetCell?: { x: number; y: number };
-}
+export type AbilityUseBody = z.infer<typeof bonusActionSchema>;
 
 const defaultDeps: SummonDeps = { loadPool: getCachedSummonPool };
 

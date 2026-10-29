@@ -9,7 +9,6 @@ import type { BattleMutationContext, MutationResult } from "@/lib/utils/battle/p
 import { BattleRuleError } from "@/lib/utils/battle/store";
 import { assertCanAct } from "@/lib/utils/battle/turn";
 
-export { auraZoneSchema };
 
 export type AuraZoneBody = z.infer<typeof auraZoneSchema>;
 
