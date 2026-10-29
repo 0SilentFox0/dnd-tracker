@@ -2,17 +2,16 @@ import { describe, expect, it } from "vitest";
 
 import { ukT } from "../../__tests__/describe-fixtures";
 
-import { describeFlag, FLAG_DEFAULTS, FLAG_FIELDS, FLAG_LABELS, FLAG_REGISTRY } from "@/lib/utils/abilities/registry/effects/flags";
+import { describeFlag, FLAG_DEFAULTS, FLAG_FIELDS, FLAG_KEYS, FLAG_REGISTRY } from "@/lib/utils/abilities/registry/effects/flags";
 import { renderSegments } from "@/lib/utils/abilities/segments";
 
 describe("FLAG_REGISTRY", () => {
   it("one entry feeds labels, fields and editor defaults for every flag", () => {
     const keys = Object.keys(FLAG_REGISTRY).sort();
 
-    expect(Object.keys(FLAG_LABELS).sort()).toEqual(keys);
+    expect([...FLAG_KEYS].sort()).toEqual(keys);
     expect(Object.keys(FLAG_FIELDS).sort()).toEqual(keys);
     expect(Object.keys(FLAG_DEFAULTS).sort()).toEqual(keys);
-    expect(new Set(Object.values(FLAG_LABELS)).size).toBe(keys.length);
   });
 
   it("every default field name is described in fields", () => {

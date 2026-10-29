@@ -11,7 +11,7 @@ import { SectionTitle } from "./SectionTitle";
 
 import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
-import type { FieldMeta } from "@/lib/utils/abilities/registry/fields";
+import type { LocalizedFieldMeta } from "@/lib/utils/abilities/registry/fields";
 import type { Limits } from "@/lib/utils/abilities/schema";
 import { patchDefined } from "@/lib/utils/common/patch-defined";
 import { ITEM_CHARGES_KEY } from "@/lib/utils/items/pools";
@@ -23,7 +23,7 @@ export function LimitsSection({ ability, path, onChange }: AbilitySectionProps) 
 
   const { classColumns: columns, itemCharges } = useAbilityEditor();
 
-  const limitFields: readonly FieldMeta[] = LIMIT_FIELD_NAMES.map((name) => ({ name, label: t(name), input: "number", optional: true }));
+  const limitFields: readonly LocalizedFieldMeta[] = LIMIT_FIELD_NAMES.map((name) => ({ name, label: t(name), input: "number", optional: true }));
 
   const restOptions = [
     { value: "short", label: t("restShort") },

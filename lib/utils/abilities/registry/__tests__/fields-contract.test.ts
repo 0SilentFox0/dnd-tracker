@@ -4,9 +4,10 @@ import type { z } from "zod";
 import { ukT } from "@/lib/utils/abilities/__tests__/describe-fixtures";
 import { CONDITION_REGISTRY } from "@/lib/utils/abilities/registry/conditions";
 import { describeAbilityText, EFFECT_REGISTRY, FLAG_FIELDS } from "@/lib/utils/abilities/registry/effects";
-import { limitsLabel } from "@/lib/utils/abilities/registry/labels";
+import { limitsSegments } from "@/lib/utils/abilities/registry/labels";
 import { TRIGGER_REGISTRY } from "@/lib/utils/abilities/registry/triggers";
 import { ConditionSchema, EffectSchema, TriggerSchema } from "@/lib/utils/abilities/schema";
+import { renderSegments } from "@/lib/utils/abilities/segments";
 
 const keysOf = (s: z.ZodType) => Object.keys((s as unknown as { shape: Record<string, unknown> }).shape);
 
@@ -69,8 +70,10 @@ describe("fields contract", () => {
     ).toBe("Влучання · 1 раз за бій · 30% · Кровотеча 1d4/раунд × 2 р.");
   });
 
-  it("ліміт за бій узгоджується з числом", () => {
-    expect(limitsLabel({ perBattle: 2 })).toEqual(["2 рази за бій"]);
-    expect(limitsLabel({ perBattle: 5 })).toEqual(["5 разів за бій"]);
+  it("ліміт за бій узгоджується з числом", async () => {
+    const t = await ukT();
+
+    expect(renderSegments(t, limitsSegments({ perBattle: 2 }))).toEqual(["2 рази за бій"]);
+    expect(renderSegments(t, limitsSegments({ perBattle: 5 }))).toEqual(["5 разів за бій"]);
   });
 });

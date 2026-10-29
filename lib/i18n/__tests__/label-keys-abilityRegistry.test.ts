@@ -7,10 +7,11 @@ import { LOCALES } from "@/lib/i18n/config";
 import { localSource } from "@/lib/i18n/local-source";
 import { CONDITION_REGISTRY } from "@/lib/utils/abilities/registry/conditions";
 import { EFFECT_REGISTRY } from "@/lib/utils/abilities/registry/effects";
-import { FLAG_FIELDS, FLAG_LABELS } from "@/lib/utils/abilities/registry/effects/flags";
+import { FLAG_FIELDS, FLAG_KEYS } from "@/lib/utils/abilities/registry/effects/flags";
 import { DURATION_FIELD, type FieldMeta, TARGET_FIELD } from "@/lib/utils/abilities/registry/fields";
-import { DAMAGE_FILTER_LABELS, STAT_LABELS, TARGET_KEYS } from "@/lib/utils/abilities/registry/labels";
+import { TARGET_KEYS } from "@/lib/utils/abilities/registry/labels";
 import { TRIGGER_REGISTRY } from "@/lib/utils/abilities/registry/triggers";
+import { DAMAGE_FILTER_KINDS, STAT_KEYS } from "@/lib/utils/abilities/schema/kinds";
 import { ABILITY_TEMPLATES } from "@/lib/utils/abilities/templates";
 
 const keys = <T extends object>(o: T) => Object.keys(o);
@@ -25,12 +26,12 @@ const owners: { owner: string; fields: readonly FieldMeta[] }[] = [
 ];
 
 describe("ability registry labels have translations", () => {
-  expectLabelKeys("abilityRegistry", "stats", keys(STAT_LABELS));
+  expectLabelKeys("abilityRegistry", "stats", [...STAT_KEYS]);
   expectLabelKeys("abilityRegistry", "targets", [...TARGET_KEYS]);
-  expectLabelKeys("abilityRegistry", "damageFilters", keys(DAMAGE_FILTER_LABELS));
+  expectLabelKeys("abilityRegistry", "damageFilters", [...DAMAGE_FILTER_KINDS]);
   expectLabelKeys("abilityRegistry", "optionGroups", ["conditions5e", "mechanicalConditions"]);
 
-  for (const [prefix, registry] of [["effects", EFFECT_REGISTRY], ["triggers", TRIGGER_REGISTRY], ["conditionTypes", CONDITION_REGISTRY], ["flags", FLAG_LABELS]] as const) {
+  for (const [prefix, registry] of [["effects", EFFECT_REGISTRY], ["triggers", TRIGGER_REGISTRY], ["conditionTypes", CONDITION_REGISTRY], ["flags", Object.fromEntries(FLAG_KEYS.map((k) => [k, k]))]] as const) {
     expectLabelKeys("abilityRegistry", prefix, keys(registry).map((id) => `${id}.label`));
   }
 

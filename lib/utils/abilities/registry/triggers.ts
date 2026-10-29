@@ -21,11 +21,11 @@ interface TriggerDefinition<E extends TriggerEvent> {
   describe?: (trigger: Extract<Trigger, { event: E }>) => Segment[];
 }
 
-const PHASE: FieldMeta = { name: "phase", label: "Фаза", input: "select", options: [{ value: "before", label: "до" }, { value: "after", label: "після" }] };
+const PHASE: FieldMeta = { name: "phase", input: "select", options: [{ value: "before" }, { value: "after" }] };
 
-const ATTACK_KIND: FieldMeta = { name: "attackKind", label: "Тип атаки", input: "select", optional: true, options: [{ value: AttackType.MELEE, label: "ближня" }, { value: AttackType.RANGED, label: "дальня" }] };
+const ATTACK_KIND: FieldMeta = { name: "attackKind", input: "select", optional: true, options: [{ value: AttackType.MELEE }, { value: AttackType.RANGED }] };
 
-const ATTACK_ROLE: FieldMeta = { name: "role", label: "Роль", input: "select", options: [{ value: "attacker", label: "атакую я" }, { value: "target", label: "атакують мене" }] };
+const ATTACK_ROLE: FieldMeta = { name: "role", input: "select", options: [{ value: "attacker" }, { value: "target" }] };
 
 const id = (p: BattleParticipant) => p.basicInfo.id;
 
@@ -55,7 +55,7 @@ export const TRIGGER_REGISTRY: { [E in TriggerEvent]: TriggerDefinition<E> } = {
     event: "hit",
     fields: [
       ATTACK_ROLE,
-      { name: "whose", label: "Чия роль", input: "select", optional: true, options: [{ value: "self", label: "моя" }, { value: "ally", label: "іншого союзника" }] },
+      { name: "whose", input: "select", optional: true, options: [{ value: "self" }, { value: "ally" }] },
       ATTACK_KIND,
     ],
     matches: (t, e, o, ps) => {
@@ -73,7 +73,7 @@ export const TRIGGER_REGISTRY: { [E in TriggerEvent]: TriggerDefinition<E> } = {
   },
   kill: {
     event: "kill",
-    fields: [{ name: "role", label: "Хто", input: "select", options: [{ value: "killer", label: "я вбив" }, { value: "killerSide", label: "вбив хтось із моїх" }, { value: "victimSide", label: "загинув союзник" }] }],
+    fields: [{ name: "role", input: "select", options: [{ value: "killer" }, { value: "killerSide" }, { value: "victimSide" }] }],
     matches: (t, e, o, ps) => {
       if (e.type !== "kill") return false;
 
@@ -96,11 +96,11 @@ export const TRIGGER_REGISTRY: { [E in TriggerEvent]: TriggerDefinition<E> } = {
     event: "spellCast",
     fields: [
       PHASE,
-      { name: "role", label: "Роль", input: "select", options: [{ value: "caster", label: "кастую я" }, { value: "target", label: "ціль — я" }] },
-      { name: "whose", label: "Чия ціль", input: "select", optional: true, options: [{ value: "self", label: "моя" }, { value: "ally", label: "союзника" }], visibleWhen: (v) => v.role === "target" },
-      { name: "spellIds", label: "Закляття", input: "spells", optional: true },
-      { name: "school", label: "Школа", input: "text", optional: true },
-      { name: "spellLevels", label: "Рівні закляття", input: "numberList", optional: true },
+      { name: "role", input: "select", options: [{ value: "caster" }, { value: "target" }] },
+      { name: "whose", input: "select", optional: true, options: [{ value: "self" }, { value: "ally" }], visibleWhen: (v) => v.role === "target" },
+      { name: "spellIds", input: "spells", optional: true },
+      { name: "school", input: "text", optional: true },
+      { name: "spellLevels", input: "numberList", optional: true },
     ],
     matches: (t, e, o, ps) =>
       e.type === "spellCast" &&
@@ -118,8 +118,8 @@ export const TRIGGER_REGISTRY: { [E in TriggerEvent]: TriggerDefinition<E> } = {
   moraleCheck: {
     event: "moraleCheck",
     fields: [
-      { name: "result", label: "Результат", input: "select", options: [{ value: "success", label: "успіх" }, { value: "fail", label: "провал" }, { value: "any", label: "будь-який" }] },
-      { name: "whose", label: "Чия", input: "select", options: [{ value: "self", label: "моя" }, { value: "ally", label: "союзника" }] },
+      { name: "result", input: "select", options: [{ value: "success" }, { value: "fail" }, { value: "any" }] },
+      { name: "whose", input: "select", options: [{ value: "self" }, { value: "ally" }] },
     ],
     matches: (t, e, o, ps) => {
       if (e.type !== "moraleCheck" || (t.result !== "any" && t.result !== e.result)) return false;

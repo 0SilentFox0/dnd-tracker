@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 
 import { enT, ukT } from "../../__tests__/describe-fixtures";
-import { amountLabel, amountSegment, flatLabel, flatSegment, limitsSegments, statSegment, targetSegment } from "../labels";
+import { amountSegment, flatSegment, limitsSegments, statSegment, targetSegment } from "../labels";
 
 import { renderSegment, renderSegments } from "@/lib/utils/abilities/segments";
 
@@ -24,12 +24,14 @@ describe("limitsSegments perBattle plural", () => {
 describe("amountSegment / flatSegment", () => {
   const amounts = [5, "2d6", { scale: "x" }, { formula: "1+2" }, { spellRoll: 100 }, { spellRoll: 50 }, { spellRoll: { formula: "a" } }, { percentOf: "eventDamage", value: 30 }, { percentOf: "maxHp", value: 10 }, { percentOf: "ownerAttack", value: 50 }] as Parameters<typeof amountSegment>[0][];
 
-  it("uk matches text labels", async () => {
+  it("uk text", async () => {
     const t = await ukT();
 
-    for (const a of amounts) expect(renderSegment(t, amountSegment(a)), JSON.stringify(a)).toBe(amountLabel(a));
+    expect(amounts.map((a) => renderSegment(t, amountSegment(a)))).toEqual(["5", "2d6", "[x]", "(1+2)", "кидок заклинання", "50% кидка заклинання", "(a)% кидка заклинання", "30% від завданої шкоди", "10% від макс. HP", "50 % шкоди першої атаки"]);
 
-    for (const f of [3, -2, { formula: "x" }, { scale: "y" }] as Parameters<typeof flatSegment>[0][]) expect(renderSegment(t, flatSegment(f))).toBe(flatLabel(f));
+    const flats = [3, -2, { formula: "x" }, { scale: "y" }] as Parameters<typeof flatSegment>[0][];
+
+    expect(flats.map((f) => renderSegment(t, flatSegment(f)))).toEqual(["+3", "-2", "+(x)", "+[y]"]);
   });
 
   it("stat and target keys", async () => {

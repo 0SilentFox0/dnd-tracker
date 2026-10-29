@@ -828,7 +828,7 @@ exports[`describe golden (uk) > describeTrigger 1`] = `
 ]
 `;
 
-exports[`describe golden (uk) > limitsLabel 1`] = `
+exports[`describe golden (uk) > limitsSegments (uk) 1`] = `
 [
   [
     "{"perBattle":1}",

@@ -17,14 +17,18 @@ export type FieldInput =
 
 export interface FieldMeta {
   name: string;
-  label: string;
   input: FieldInput;
-  options?: readonly { value: string; label: string; group?: string }[];
+  options?: readonly { value: string }[];
   optional?: boolean;
   visibleWhen?: (value: Record<string, unknown>) => boolean;
 }
 
-export const TARGET_FIELD: FieldMeta = { name: "target", label: "Ціль", input: "target", optional: true };
+export const TARGET_FIELD: FieldMeta = { name: "target", input: "target", optional: true };
 
 
-export const DURATION_FIELD: FieldMeta = { name: "duration", label: "Тривалість (раунди)", input: "duration", optional: true };
+export const DURATION_FIELD: FieldMeta = { name: "duration", input: "duration", optional: true };
+
+export interface LocalizedFieldMeta extends Omit<FieldMeta, "options"> {
+  label: string;
+  options?: readonly { value: string; label: string; group?: string }[];
+}

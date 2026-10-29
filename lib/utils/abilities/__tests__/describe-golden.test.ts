@@ -3,7 +3,7 @@ import { describe, expect, it } from "vitest";
 import { ABILITY_FIXTURES, EFFECT_FIXTURES, enT, LIMITS_FIXTURES, ukT } from "./describe-fixtures";
 
 import { describeAbilityText, describeEffect } from "@/lib/utils/abilities/registry/effects";
-import { limitsLabel, limitsSegments } from "@/lib/utils/abilities/registry/labels";
+import { limitsSegments } from "@/lib/utils/abilities/registry/labels";
 import { describeTrigger } from "@/lib/utils/abilities/registry/triggers";
 import { renderSegments } from "@/lib/utils/abilities/segments";
 
@@ -39,14 +39,10 @@ describe("describe golden (uk)", () => {
     expect(ABILITY_FIXTURES.filter((a) => a.id.startsWith("trigger-")).map((a) => [a.id, renderSegments(t, describeTrigger(a.trigger))])).toMatchSnapshot();
   });
 
-  it("limitsLabel", () => {
-    expect(LIMITS_FIXTURES.map((l) => [JSON.stringify(l), limitsLabel(l)])).toMatchSnapshot();
-  });
-
-  it("limitsSegments render to the same uk text", async () => {
+  it("limitsSegments (uk)", async () => {
     const t = await ukT();
 
-    for (const l of LIMITS_FIXTURES) expect(renderSegments(t, limitsSegments(l)), JSON.stringify(l)).toEqual(limitsLabel(l));
+    expect(LIMITS_FIXTURES.map((l) => [JSON.stringify(l), renderSegments(t, limitsSegments(l))])).toMatchSnapshot();
   });
 
   it("limitsSegments in en have no cyrillic or raw ICU", async () => {

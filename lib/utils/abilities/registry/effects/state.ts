@@ -1,4 +1,3 @@
-import { CONDITION_LABELS } from "../labels";
 import type { EffectApplyInput, EffectApplyResult } from "./types";
 
 import { EffectMarker } from "@/lib/constants/battle";
@@ -62,8 +61,6 @@ function each(
 export function immuneTo(ps: BattleParticipant[], id: string, key: ConditionImmunityKey): boolean {
   return findFlags(ps, id, "conditionImmunity").some((f) => f.conditions === "all" || f.conditions.includes(key));
 }
-
-export { CONDITION_LABELS };
 
 // i18n part 6: battle log
 const CONDITION_LOG_LABELS: Record<AnyConditionKey, string> = {
