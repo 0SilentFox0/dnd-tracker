@@ -5,12 +5,14 @@ import type { EffectApplyInput, EffectApplyResult } from "./types";
 
 import { ABILITY_KEYS } from "@/lib/constants/abilities";
 import { AttackType } from "@/lib/constants/battle";
+import { joinLines } from "@/lib/i18n/text-ref";
 import { findParticipant, participantNames, updateParticipant } from "@/lib/utils/abilities/engine/core/participants";
 import { abilityNature } from "@/lib/utils/abilities/engine/effects/effect-nature";
 import { applySpellTimedEffect } from "@/lib/utils/abilities/engine/effects/opposing-spells";
 import { effectSource } from "@/lib/utils/abilities/engine/effects/timed-effects";
 import type { Effect, StaticEffect } from "@/lib/utils/abilities/schema";
 import { signed } from "@/lib/utils/common/format";
+import type { LogLine } from "@/types/text";
 
 function stripTiming(effect: StaticEffect): StaticEffect {
   const { duration: _d, target: _t, ...rest } = effect;
@@ -18,7 +20,7 @@ function stripTiming(effect: StaticEffect): StaticEffect {
   return rest as StaticEffect;
 }
 
-export function applyStatic(input: EffectApplyInput<StaticEffect>, describe: (e: Effect) => string): EffectApplyResult {
+export function applyStatic(input: EffectApplyInput<StaticEffect>, describe: (e: Effect) => LogLine): EffectApplyResult {
   const { effect, ability, targetIds, ctx } = input;
 
   const stripped = stripTiming(effect);
@@ -79,7 +81,7 @@ export function applyStatic(input: EffectApplyInput<StaticEffect>, describe: (e:
 
   const applied = targetIds.filter((t) => !blocked.includes(t));
 
-  const messages = [...new Set(cancelled), ...(applied.length ? [`✨ ${ability.name}: ${describe(effect)} → ${participantNames(ps, applied)} (${rounds} р.)`] : [])];
+  const messages: LogLine[] = [...new Set(cancelled), ...(applied.length ? [joinLines([`✨ ${ability.name}: `, describe(effect), ` → ${participantNames(ps, applied)} (${rounds} р.)`])] : [])];
 
   if (blocked.length) messages.push(`⛔ ${ability.name}: ${participantNames(ps, blocked)} — імунітет`);
 

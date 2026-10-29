@@ -18,13 +18,14 @@ import { pluralUk } from "@/lib/utils/common/plural";
 import { DEFAULT_RULES } from "@/lib/utils/rules";
 import { slotLevel, slotRestoreOrder } from "@/lib/utils/spells/slot-keys";
 import type { BattleParticipant } from "@/types/battle";
+import type { LogLine } from "@/types/text";
 
 type Of<K extends Effect["kind"]> = Extract<Effect, { kind: K }>;
 
 function each(
   input: EffectApplyInput,
   fn: (p: BattleParticipant) => BattleParticipant | null,
-  message: (names: string) => string,
+  message: (names: string) => LogLine,
   immune?: (p: BattleParticipant) => boolean,
 ): EffectApplyResult {
   let ps = input.participants;
@@ -49,7 +50,7 @@ function each(
     touched.push(id);
   }
 
-  const messages = touched.length ? [message(participantNames(ps, touched))] : [];
+  const messages: LogLine[] = touched.length ? [message(participantNames(ps, touched))] : [];
 
   if (blocked.length) messages.push(`⛔ ${input.ability.name}: ${participantNames(ps, blocked)} — імунітет`);
 
@@ -71,7 +72,7 @@ function applyCondition5eToTargets(input: EffectApplyInput<Of<"applyCondition">>
 
   let ps = input.participants;
 
-  const messages: string[] = [];
+  const messages: LogLine[] = [];
 
   for (const id of input.targetIds) {
     const result = applyCondition5e(ps, id, {
@@ -176,7 +177,7 @@ export function applyDrainSpellSlot(input: EffectApplyInput<Of<"drainSpellSlot">
 
   let ps = input.participants;
 
-  const messages: string[] = [];
+  const messages: LogLine[] = [];
 
   for (const id of input.targetIds) {
     const p = findParticipant(ps, id);

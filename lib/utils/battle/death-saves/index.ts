@@ -5,6 +5,7 @@ import { conditionEffectInput, PERMANENT_ROUNDS } from "@/lib/utils/battle/condi
 import { rollDie } from "@/lib/utils/common/dice";
 import type { Ruleset } from "@/lib/utils/rules";
 import type { BattleParticipant } from "@/types/battle";
+import type { LogLine } from "@/types/text";
 
 export const DEATH_SAVES_TIMED_KEY = "death-saves:unconscious";
 
@@ -93,7 +94,7 @@ export function rollDeathSave(p: BattleParticipant, rng: () => number): { partic
   };
 }
 
-export function rollDyingAt(order: BattleParticipant[], index: number, rules: Ruleset | undefined, rng: () => number): { participants: BattleParticipant[]; messages: string[] } | null {
+export function rollDyingAt(order: BattleParticipant[], index: number, rules: Ruleset | undefined, rng: () => number): { participants: BattleParticipant[]; messages: LogLine[] } | null {
   const p = order[index];
 
   if (!rules?.deathSaves.enabled || !p || !needsDeathSave(p)) return null;

@@ -14,6 +14,7 @@ import { hasEffectMarker } from "@/lib/utils/battle/participant/state";
 import { spellSaveDc } from "@/lib/utils/battle/spell/power";
 import type { Ruleset } from "@/lib/utils/rules";
 import type { ActiveEffect, BattleParticipant } from "@/types/battle";
+import type { LogLine } from "@/types/text";
 
 export interface ApplyCondition5eOptions {
   key: Condition5eKey;
@@ -30,7 +31,7 @@ export interface ApplyCondition5eOptions {
 
 export interface ApplyCondition5eResult {
   participants: BattleParticipant[];
-  messages: string[];
+  messages: LogLine[];
   blocked: boolean;
 }
 
@@ -38,7 +39,7 @@ function immune(ps: BattleParticipant[], id: string, key: Condition5eKey): boole
   return findFlags(ps, id, "conditionImmunity").some((f) => f.conditions === "all" || f.conditions.includes(key));
 }
 
-function dropConcentrationIfIncapacitated(ps: BattleParticipant[], targetId: string): { participants: BattleParticipant[]; messages: string[] } {
+function dropConcentrationIfIncapacitated(ps: BattleParticipant[], targetId: string): { participants: BattleParticipant[]; messages: LogLine[] } {
   const target = findParticipant(ps, targetId);
 
   if (!target) return { participants: ps, messages: [] };

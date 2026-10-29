@@ -12,6 +12,7 @@ import { participantImmuneToSpell } from "@/lib/utils/battle/spell/spell-immunit
 import { diceAverage, rollDice } from "@/lib/utils/common/dice";
 import type { Ruleset } from "@/lib/utils/rules";
 import type { BattleMapConfig, BattleParticipant, GridPoint, TerrainCell } from "@/types/battle";
+import type { LogLine } from "@/types/text";
 
 const strength = (c: TerrainCell) => (c.damage?.dice ? diceAverage(c.damage.dice) : (c.damage?.amount ?? 0));
 
@@ -59,7 +60,7 @@ export function hazardHit(
   participants: BattleParticipant[],
   rng: Rng,
   rules?: Ruleset,
-): { participant: BattleParticipant; participants: BattleParticipant[]; message: string; damage: number; consequences: string[] } | null {
+): { participant: BattleParticipant; participants: BattleParticipant[]; message: string; damage: number; consequences: LogLine[] } | null {
   const hazard = cell.damage;
 
   if (!hazard || p.battleData.hazardHitRound === round) return null;

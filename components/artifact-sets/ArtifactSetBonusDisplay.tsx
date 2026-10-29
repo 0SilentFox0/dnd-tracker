@@ -2,6 +2,7 @@ import { useTranslations } from "next-intl";
 
 import { AbilitySummary } from "@/components/abilities";
 import { cn } from "@/lib/utils";
+import type { LogLine } from "@/types/text";
 
 export function ArtifactSetBonusDisplay({
   setBonus,
@@ -9,7 +10,7 @@ export function ArtifactSetBonusDisplay({
   className,
 }: {
   setBonus: unknown;
-  abilitySummary?: string[];
+  abilitySummary?: LogLine[];
   className?: string;
 }) {
   const t = useTranslations("artifacts.sets.card");

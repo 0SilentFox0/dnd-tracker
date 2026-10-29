@@ -18,6 +18,7 @@ import { dropConcentration } from "@/lib/utils/battle/concentration";
 import { runWithCritChoice } from "@/lib/utils/battle/crit-choice/run-with-crit-choice";
 import type { CritResume } from "@/lib/utils/battle/crit-choice/types";
 import { spellDiceRolls } from "@/lib/utils/battle/dice-record";
+import { withLines, withPrefix } from "@/lib/utils/battle/log/lines";
 import { hasEffectMarker } from "@/lib/utils/battle/participant/state";
 import type { BattleMutationContext, MutationResult } from "@/lib/utils/battle/pipeline/run-battle-mutation";
 import { armorPenalty } from "@/lib/utils/battle/proficiency";
@@ -191,7 +192,7 @@ export function createSpellMutation(deps: SpellMutationDeps = defaultDeps, optio
         if (resolution.centre) result.battleAction.actionDetails.aimCell = resolution.centre;
 
         if (serverRolled.length > 0) {
-          result.battleAction.resultText = [result.battleAction.resultText, `🎲 рятівні кидки кинув сервер: ${serverRolled.map((id) => findParticipant(order, id)?.basicInfo.name ?? id).join(", ")}`].join(" | ");
+          result.battleAction = withLines(result.battleAction, [`🎲 рятівні кидки кинув сервер: ${serverRolled.map((id) => findParticipant(order, id)?.basicInfo.name ?? id).join(", ")}`]);
         }
 
         if (data.preview) {
@@ -211,9 +212,9 @@ export function createSpellMutation(deps: SpellMutationDeps = defaultDeps, optio
           return legendaryAbility.limits?.lair ? spendLair(used, ctx.scene.round, legendaryAbility.key) : spendLegendary(used, legendaryCostOf(legendaryAbility));
         });
 
-        if (legendaryAbility) result.battleAction.resultText = `${legendaryAbility.limits?.lair ? "🏰" : "👑"} ${legendaryAbility.name} — ${result.battleAction.resultText}`;
+        if (legendaryAbility) result.battleAction = withPrefix(result.battleAction, `${legendaryAbility.limits?.lair ? "🏰" : "👑"} ${legendaryAbility.name} — `);
 
-        const action = summoned.messages.length > 0 ? { ...result.battleAction, resultText: [result.battleAction.resultText, ...summoned.messages].join(" | ") } : result.battleAction;
+        const action = withLines(result.battleAction, summoned.messages);
 
         const hazard = spellZoneHazard({ map: ctx.meta.map, spell, cells: resolution.cells, round: ctx.scene.round, spellDamage: result.spellDamage, concentrationOf: result.concentration });
 

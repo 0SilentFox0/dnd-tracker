@@ -1,6 +1,7 @@
 import { getCachedSummonPool } from "@/lib/cache/reference-data";
 import { API_ERRORS } from "@/lib/constants/api-errors";
 import { prisma } from "@/lib/db";
+import { joinLines } from "@/lib/i18n/text-ref";
 import { createSpellMutation, type SpellMutationDeps } from "@/lib/server/battles/mutations/spell/spell-mutation";
 import { findParticipant, updateParticipant } from "@/lib/utils/abilities/engine/core/participants";
 import { runAbilities } from "@/lib/utils/abilities/engine/core/run-abilities";
@@ -10,6 +11,7 @@ import { lairAbilities, lairBlocker, spendLair } from "@/lib/utils/battle/action
 import { legendaryAttack } from "@/lib/utils/battle/actions/legendary";
 import { legendaryAbilities, legendaryBlocker, legendaryCostOf, spendLegendary } from "@/lib/utils/battle/actions/legendary-options";
 import type { LegendaryActionBody } from "@/lib/utils/battle/actions/schema";
+import { lineText, logFields } from "@/lib/utils/battle/log/lines";
 import { abilityRunContext } from "@/lib/utils/battle/pipeline/ability-use";
 import type { BattleMutationContext, MutationResult } from "@/lib/utils/battle/pipeline/run-battle-mutation";
 import { BattleAccessError, battleActionToEvent, BattleRuleError, systemEvent } from "@/lib/utils/battle/store";
@@ -110,7 +112,9 @@ export function createLegendaryMutation(deps: SummonDeps & Partial<Pick<SpellMut
 
     const after = findParticipant(participants, id) ?? actor;
 
-    const text = run.fired.length ? [...run.messages, ...summoned.messages].join(" | ") : `${ability.name}: не спрацювало`;
+    const text = run.fired.length ? lineText([...run.messages, ...summoned.messages], " | ") : `${ability.name}: не спрацювало`;
+
+    const legendaryText = logFields(joinLines([`${lair ? "🏰" : "👑"} ${name}: ${lair ? "дія лігва" : "легендарна дія"} «${ability.name}» (${counter(after)}) — `, Array.isArray(text) ? joinLines(text, " | ") : text]));
 
     return {
       participants,
@@ -120,8 +124,8 @@ export function createLegendaryMutation(deps: SummonDeps & Partial<Pick<SpellMut
           type: "ability",
           round,
           actorId: id,
-          resultText: `${lair ? "🏰" : "👑"} ${name}: ${lair ? "дія лігва" : "легендарна дія"} «${ability.name}» (${counter(after)}) — ${text}`,
-          details: { actorName: name, actorSide: actor.basicInfo.side, actionDetails: { abilityKey: ability.key, skillName: ability.name } },
+          resultText: legendaryText.resultText,
+          details: { actorName: name, actorSide: actor.basicInfo.side, actionDetails: { abilityKey: ability.key, skillName: ability.name }, ...(legendaryText.log && { log: legendaryText.log }) },
         },
       ],
     };

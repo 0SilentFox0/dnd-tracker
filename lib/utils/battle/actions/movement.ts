@@ -7,6 +7,7 @@ import { battleActionToEvent, type NewBattleEvent } from "@/lib/utils/battle/sto
 import { BattleRuleError } from "@/lib/utils/battle/store/errors";
 import type { Ruleset } from "@/lib/utils/rules";
 import type { BattleMapConfig, BattleParticipant, GridPoint } from "@/types/battle";
+import type { LogLine } from "@/types/text";
 
 export interface Movement5eInput {
   map: BattleMapConfig;
@@ -27,14 +28,14 @@ export interface Movement5eResult {
   moved: BattleParticipant;
   destination: GridPoint;
   spent: number;
-  messages: string[];
+  messages: LogLine[];
   events: NewBattleEvent[];
 }
 
 export function resolveMovement5e(input: Movement5eInput): Movement5eResult {
   const { map, participants, mover, to, path, budget, cost, rules } = input;
 
-  const messages: string[] = [];
+  const messages: LogLine[] = [];
 
   const events: NewBattleEvent[] = [];
 

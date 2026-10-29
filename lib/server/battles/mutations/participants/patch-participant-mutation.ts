@@ -6,12 +6,14 @@ import { findParticipant } from "@/lib/utils/abilities/engine/core/participants"
 import { resolveDowned } from "@/lib/utils/abilities/engine/core/run-abilities";
 import { toggleLair } from "@/lib/utils/battle/actions/lair";
 import { settleStatusChange } from "@/lib/utils/battle/damage/consequences";
+import { lineText } from "@/lib/utils/battle/log/lines";
 import { reserveOf } from "@/lib/utils/battle/participant/reserve";
 import { isUp, statusForHp } from "@/lib/utils/battle/participant/state";
 import type { BattleMutationContext, MutationResult } from "@/lib/utils/battle/pipeline/run-battle-mutation";
 import { BattleAccessError, battleActionToEvent, BattleRuleError, dmEvent, systemEvent } from "@/lib/utils/battle/store";
 import { advanceAfterRemoval } from "@/lib/utils/battle/turn";
 import type { BattleParticipant } from "@/types/battle";
+import type { LogLine } from "@/types/text";
 
 export function patchParticipantMutation(
   ctx: BattleMutationContext,
@@ -122,7 +124,7 @@ function updateHp(ctx: BattleMutationContext, participantId: string, requestedHp
 
   const downed = oldHp > 0 && newHp <= 0
     ? resolveDowned(order, { victimId: participantId, actorId: null }, { round: ctx.scene.round, rng: ctx.rng ?? Math.random, rules: ctx.meta.rules }, { allowSurvive: false })
-    : { participants: order, messages: [] as string[] };
+    : { participants: order, messages: [] as LogLine[] };
 
   const name = updated.basicInfo.name;
 
@@ -138,7 +140,7 @@ function updateHp(ctx: BattleMutationContext, participantId: string, requestedHp
   const messages = [...settled.messages, ...downed.messages];
 
   if (messages.length > 0) {
-    events.push(systemEvent(ctx.scene.round, messages.join(" | ")));
+    events.push(systemEvent(ctx.scene.round, lineText(messages, " | ")));
   }
 
   return { participants: downed.participants, pending: ctx.pending, events };

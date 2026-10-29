@@ -2,11 +2,14 @@
 
 import { useTranslations } from "next-intl";
 
+import { useText } from "@/lib/i18n/use-text";
 import { cn } from "@/lib/utils";
 import type { SetProgress } from "@/types/characters";
 
 export function SetList({ sets }: { sets: SetProgress[] }) {
   const t = useTranslations("characterProfile.sets");
+
+  const text = useText();
 
   if (sets.length === 0) return null;
 
@@ -17,7 +20,7 @@ export function SetList({ sets }: { sets: SetProgress[] }) {
           <span className={cn("block text-sm", s.complete ? "text-hud-gold-strong" : "text-hud-ink")}>
             ✦ {t("name", { name: s.name, have: s.have, total: s.total })}
           </span>
-          <span className="block text-xs text-hud-muted">{s.complete ? s.effects.join(" · ") : t("withFull", { effects: s.effects.join(" · ") || "—" })}</span>
+          <span className="block text-xs text-hud-muted">{s.complete ? s.effects.map(text).join(" · ") : t("withFull", { effects: s.effects.map(text).join(" · ") || "—" })}</span>
         </li>
       ))}
     </ul>

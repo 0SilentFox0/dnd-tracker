@@ -1,6 +1,7 @@
 import { findParticipant, isActive, mergeParticipants } from "@/lib/utils/abilities/engine/core/participants";
 import { appendHpChanges, fire, getP, put, settleDowned } from "@/lib/utils/battle/common/action-flow";
 import { applyBalanceDamageMultiplier } from "@/lib/utils/battle/damage/balance-multiplier";
+import { lineText } from "@/lib/utils/battle/log/lines";
 import { applyMainActionUsed } from "@/lib/utils/battle/participant";
 import { diffAppliedEffects } from "@/lib/utils/battle/spell/applied-effects";
 import { actionOf, flatEffects, isDamageEffect, type SpellCastState } from "@/lib/utils/battle/spell/cast/state";
@@ -109,7 +110,7 @@ export function finishSpellAction(state: SpellCastState, { before, targetsBefore
 
   const caption = [dealt > 0 ? `шкода: ${dealt}${hits.length > 1 ? ` (${hits.join(", ")})` : ""}` : "", healed > 0 ? `лікування: ${healed} HP` : ""].filter(Boolean).join(", ");
 
-  const action = actionOf(getP(flow, casterId), spell, targetsBefore, battleId, round, [`${caster.basicInfo.name} застосовує ${spell.name}${caption ? ` (${caption})` : ""}`, ...flow.messages].join(" | "));
+  const action = actionOf(getP(flow, casterId), spell, targetsBefore, battleId, round, lineText([`${caster.basicInfo.name} застосовує ${spell.name}${caption ? ` (${caption})` : ""}`, ...flow.messages], " | "));
 
   const applied = diffAppliedEffects(before, flow.ps, targetsBefore.map((t) => t.basicInfo.id));
 

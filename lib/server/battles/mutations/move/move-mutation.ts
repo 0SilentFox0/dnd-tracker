@@ -11,11 +11,13 @@ import { resolveDowned } from "@/lib/utils/abilities/engine/core/run-abilities";
 import { releaseInvalidGrapples } from "@/lib/utils/battle/actions/grapple";
 import { resolveMovement5e } from "@/lib/utils/battle/actions/movement";
 import { canStand, cellKey, checkReturnToStart, frightenedBlocksMove, hazardHit, hazardOnMove, moveBudget, pathFrom, placeParticipants, searchPaths } from "@/lib/utils/battle/grid";
+import { lineText, logFields } from "@/lib/utils/battle/log/lines";
 import { activeMapMode, type MapModeKey } from "@/lib/utils/battle/modes";
 import type { BattleMutationContext, MutationResult } from "@/lib/utils/battle/pipeline/run-battle-mutation";
 import { BattleRuleError, type NewBattleEvent, systemEvent } from "@/lib/utils/battle/store";
 import { assertCanAct } from "@/lib/utils/battle/turn";
 import type { BattleMapConfig, BattleParticipant, GridPoint, TerrainCell } from "@/types/battle";
+import type { LogLine } from "@/types/text";
 
 export const moveSchema = z.object({
   participantId: z.string(),
@@ -91,12 +93,12 @@ interface MoveOutcome {
   participants: BattleParticipant[];
   moved: BattleParticipant;
   hazard: TerrainCell | null;
-  messages: string[];
+  messages: LogLine[];
   events: NewBattleEvent[];
 }
 
 function finishMove(ctx: BattleMutationContext, { participants, moved, hazard, messages, events: attackEvents }: MoveOutcome): MutationResult {
-  const events = [...(messages.length ? [systemEvent(ctx.scene.round, messages.join("; "))] : []), ...attackEvents];
+  const events = [...(messages.length ? [systemEvent(ctx.scene.round, lineText(messages, "; "))] : []), ...attackEvents];
 
   const hit = hazard && hazardHit(moved, hazard, ctx.scene.round, participants, ctx.rng ?? Math.random, ctx.meta.rules);
 
@@ -143,16 +145,19 @@ function resolveHazardHit(
 
   const oldHp = before.combatStats.currentHp;
 
+  const moveText = logFields(lineText(messages, "; "));
+
   const event: NewBattleEvent = {
     type: "ability",
     round: ctx.scene.round,
     actorId: id,
     targets: [],
     hpChanges: [{ participantId: id, participantName: before.basicInfo.name, oldHp, newHp: hp, change: oldHp - hp }],
-    resultText: messages.join("; "),
+    resultText: moveText.resultText,
     details: {
       actorName: before.basicInfo.name,
       actorSide: before.basicInfo.side,
+      ...(moveText.log && { log: moveText.log }),
       actionDetails: {
         hazard: { label: cell.label ?? DEFAULT_HAZARD_LABEL, damageType: cell.damage?.type ?? "", damage: hit.damage },
         damageRolls: [{ dice: cell.damage?.dice ?? String(cell.damage?.amount ?? 0), results: [], total: hit.damage, damageType: cell.damage?.type ?? "" }],

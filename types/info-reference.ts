@@ -1,6 +1,7 @@
 import type { ErrorParams } from "@/lib/constants/api-errors";
 import type { SpellFx } from "@/lib/utils/battle/fx/spells";
 import type { SpellRules } from "@/types/spells";
+import type { LogLine } from "@/types/text";
 
 
 export interface SkillForReference {
@@ -8,7 +9,7 @@ export interface SkillForReference {
   name: string;
   description: string | null;
   appearanceDescription: string | null;
-  abilitySummary: string[];
+  abilitySummary: LogLine[];
   mainSkillId: string | null;
   mainSkillName: string | null;
   mainSkillIcon: string | null;
@@ -29,7 +30,7 @@ export interface SpellForReference {
   dice: number;
   description: string | null;
   /** описи ефектів із моделі вмінь, порахував сервер */
-  effects: string[];
+  effects: LogLine[];
   appearanceDescription: string | null;
   groupName: string | null;
   icon: string | null;
@@ -44,7 +45,7 @@ export interface ArtifactForReference {
   rarity: string | null;
   slot: string;
   description: string | null;
-  effects: string[];
+  effects: LogLine[];
   setName: string | null;
   holderName: string | null;
   gear?: true;
@@ -55,7 +56,7 @@ export interface ArtifactSetForReference {
   name: string;
   icon: string | null;
   description: string | null;
-  bonuses: string[];
+  bonuses: LogLine[];
   artifactNames: string[];
 }
 

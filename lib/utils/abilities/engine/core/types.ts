@@ -3,6 +3,7 @@ import type { CritPicker } from "@/lib/utils/battle/crit-choice/types";
 import type { Rng } from "@/lib/utils/common/rng";
 import type { Ruleset } from "@/lib/utils/rules";
 import type { BattleMapConfig, BattleParticipant } from "@/types/battle";
+import type { LogLine } from "@/types/text";
 
 export type { Rng };
 
@@ -28,7 +29,7 @@ export interface SummonRequest {
 
 export interface AbilityRunResult {
   participants: BattleParticipant[];
-  messages: string[];
+  messages: LogLine[];
   actionModifiers: Record<string, StaticEffect[]>;
   fired: string[];
   summons: SummonRequest[];

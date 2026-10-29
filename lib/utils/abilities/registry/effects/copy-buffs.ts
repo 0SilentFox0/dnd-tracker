@@ -5,6 +5,7 @@ import { applySpellTimedEffect } from "@/lib/utils/abilities/engine/effects/oppo
 import { effectSource } from "@/lib/utils/abilities/engine/effects/timed-effects";
 import type { Effect } from "@/lib/utils/abilities/schema";
 import type { ActiveEffect, BattleParticipant } from "@/types/battle";
+import type { LogLine } from "@/types/text";
 
 export function applyCopySpellBuffs(input: EffectApplyInput<Extract<Effect, { kind: "copySpellBuffs" }>>): EffectApplyResult {
   const { ability, ownerId, event, ctx } = input;
@@ -27,7 +28,7 @@ export function applyCopySpellBuffs(input: EffectApplyInput<Extract<Effect, { ki
 
   if (!owner || !buffs.length) return none;
 
-  const messages: string[] = [];
+  const messages: LogLine[] = [];
 
   const participants = updateParticipant(input.participants, ownerId, (p) =>
     buffs.reduce((acc, e) => {

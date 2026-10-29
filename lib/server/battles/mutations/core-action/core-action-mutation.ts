@@ -2,6 +2,7 @@ import { API_ERRORS } from "@/lib/constants/api-errors";
 import { runCoreAction } from "@/lib/utils/battle/actions/run";
 import type { CoreActionBody } from "@/lib/utils/battle/actions/schema";
 import { requireActor } from "@/lib/utils/battle/common/control";
+import { lineText } from "@/lib/utils/battle/log/lines";
 import type { BattleMutationContext, MutationResult } from "@/lib/utils/battle/pipeline/run-battle-mutation";
 import { battleActionToEvent, BattleRuleError, systemEvent } from "@/lib/utils/battle/store";
 import { assertCanAct } from "@/lib/utils/battle/turn";
@@ -38,7 +39,7 @@ export function coreActionMutation(ctx: BattleMutationContext, body: CoreActionB
     battleId: ctx.scene.id,
   });
 
-  const events = [...(out.messages.length ? [systemEvent(ctx.scene.round, out.messages.join("; "))] : []), ...(out.actions ?? []).map(battleActionToEvent)];
+  const events = [...(out.messages.length ? [systemEvent(ctx.scene.round, lineText(out.messages, "; "))] : []), ...(out.actions ?? []).map(battleActionToEvent)];
 
   return { participants: out.participants, pending: ctx.pending, events };
 }

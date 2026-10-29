@@ -1,5 +1,7 @@
 import { BattleActionType } from "@/lib/constants/battle";
+import { lineKey } from "@/lib/i18n/text-ref";
 import type { BattleAction, DamageStep } from "@/types/battle";
+import type { LogLine } from "@/types/text";
 
 export interface KnownArmorClass {
   min?: number;
@@ -8,7 +10,7 @@ export interface KnownArmorClass {
 }
 
 export interface ObservedTrait {
-  label: string;
+  label: LogLine;
   kind: DamageStep["kind"];
   value: number;
   icon?: string | null;
@@ -64,9 +66,9 @@ export function observedTraits(log: BattleAction[], targetId: string): ObservedT
 
   for (const e of log) {
     for (const s of e.actionDetails?.damageSteps?.[targetId] ?? []) {
-      if (s.side !== "target" || seen.has(s.label)) continue;
+      if (s.side !== "target" || seen.has(lineKey(s.label))) continue;
 
-      seen.set(s.label, { label: s.label, kind: s.kind, value: s.value, ...(s.icon && { icon: s.icon }) });
+      seen.set(lineKey(s.label), { label: s.label, kind: s.kind, value: s.value, ...(s.icon && { icon: s.icon }) });
     }
   }
 
@@ -104,9 +106,9 @@ export function mergeKnownArmorClass(a: KnownArmorClass | undefined, b: KnownArm
 export function mergeObservedTraits(a: ObservedTrait[] | undefined, b: ObservedTrait[]): ObservedTrait[] {
   if (!a?.length) return b;
 
-  const labels = new Set(a.map((t) => t.label));
+  const labels = new Set(a.map((t) => lineKey(t.label)));
 
-  return [...a, ...b.filter((t) => !labels.has(t.label))];
+  return [...a, ...b.filter((t) => !labels.has(lineKey(t.label)))];
 }
 
 export function resolveKnownArmorClass(log: BattleAction[], targetId: string, knowledge?: BattleKnowledge): KnownArmorClass {

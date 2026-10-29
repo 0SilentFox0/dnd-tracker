@@ -1,6 +1,7 @@
 import { type BattleKnowledge, resolveObservedTraits } from "./knowledge";
 
 import { ParticipantSide } from "@/lib/constants/battle";
+import { lineKey } from "@/lib/i18n/text-ref";
 import { findFlags } from "@/lib/utils/abilities/engine/core/collect-modifiers";
 import { withSelf } from "@/lib/utils/abilities/engine/core/participants";
 import type { BattleAction, BattleParticipant, DamageStep } from "@/types/battle";
@@ -31,7 +32,7 @@ export function alwaysSeesEnemyStats(order: BattleParticipant[], userId: string)
 export function sanitizeLogEntry(e: BattleAction, viewer: Viewer): BattleAction {
   if (viewer.isDM) return e;
 
-  const { targetAC: _ac, damageBreakdown: _b, ...rest } = e.actionDetails ?? {};
+  const { targetAC: _ac, damageBreakdown: _b, damageRows: _r, ...rest } = e.actionDetails ?? {};
 
   return { ...e, actionDetails: rest };
 }
@@ -39,9 +40,9 @@ export function sanitizeLogEntry(e: BattleAction, viewer: Viewer): BattleAction 
 export function hiddenTargetSteps(steps: DamageStep[], targetId: string, log: BattleAction[], exact: boolean, knowledge?: BattleKnowledge): DamageStep[] {
   if (exact) return steps;
 
-  const known = new Set(resolveObservedTraits(log, targetId, knowledge).map((t) => t.label));
+  const known = new Set(resolveObservedTraits(log, targetId, knowledge).map((t) => lineKey(t.label)));
 
-  const allKnown = steps.every((s) => s.side === "attacker" || known.has(s.label));
+  const allKnown = steps.every((s) => s.side === "attacker" || known.has(lineKey(s.label)));
 
   // after відомого кроку вже містить прихований опір, тож або всі кроки цілі, або жодного
   return allKnown ? steps : steps.filter((s) => s.side === "attacker");

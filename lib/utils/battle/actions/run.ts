@@ -23,6 +23,7 @@ import { applyMainActionUsed } from "@/lib/utils/battle/participant/helpers";
 import { BattleRuleError } from "@/lib/utils/battle/store/errors";
 import type { Ruleset } from "@/lib/utils/rules";
 import type { BattleAction, BattleMapConfig, BattleParticipant } from "@/types/battle";
+import type { LogLine } from "@/types/text";
 
 export interface RunCoreActionInput {
   participants: BattleParticipant[];
@@ -36,7 +37,7 @@ export interface RunCoreActionInput {
 
 export interface RunCoreActionResult {
   participants: BattleParticipant[];
-  messages: string[];
+  messages: LogLine[];
   actions?: BattleAction[];
 }
 
@@ -80,7 +81,7 @@ export function runCoreAction(input: RunCoreActionInput): RunCoreActionResult {
 
   const grappleInput = () => ({ actor: spent, participants: replaceParticipant(participants, spent), map, round, rules, rng });
 
-  const out = (r: { participants: BattleParticipant[]; message: string }): RunCoreActionResult => ({ participants: r.participants, messages: [r.message] });
+  const out = (r: { participants: BattleParticipant[]; message: LogLine }): RunCoreActionResult => ({ participants: r.participants, messages: [r.message] });
 
   switch (body.action) {
     case "dash": {

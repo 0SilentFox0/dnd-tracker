@@ -9,6 +9,7 @@ import type { Ruleset } from "@/lib/utils/rules";
 import { scaleSummon } from "@/lib/utils/units/level-scaling";
 import type { BattleParticipant } from "@/types/battle";
 import type { RaceRow } from "@/types/races";
+import type { LogLine } from "@/types/text";
 
 export interface SummonPool {
   units: Omit<UnitFromPrisma, "createdAt">[];
@@ -47,14 +48,14 @@ export async function applyAbilitySummons(
   requests: SummonRequest[],
   order: BattleParticipant[],
   opts: { campaignId: string; battleId: string; rng: () => number; rules?: Ruleset; deps: SummonDeps },
-): Promise<{ order: BattleParticipant[]; messages: string[] }> {
+): Promise<{ order: BattleParticipant[]; messages: LogLine[] }> {
   if (requests.length === 0) return { order, messages: [] };
 
   const pool = await opts.deps.loadPool(opts.campaignId);
 
   const racesById = Object.fromEntries(pool.races.map((r) => [r.id, r]));
 
-  const messages: string[] = [];
+  const messages: LogLine[] = [];
 
   let next = order;
 

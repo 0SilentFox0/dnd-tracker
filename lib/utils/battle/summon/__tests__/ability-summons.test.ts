@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 
 import { ParticipantSide } from "@/lib/constants/battle";
+import { textOf } from "@/lib/i18n/test/text";
 import { makeParticipant, resolved } from "@/lib/utils/abilities/__tests__/fixtures";
 import { applyAbilitySummons, type SummonDeps } from "@/lib/utils/battle/summon/ability-summons";
 import type { UnitFromPrisma } from "@/lib/utils/battle/types/participant";
@@ -39,7 +40,7 @@ describe("applyAbilitySummons", () => {
     const [fire] = summoned(r.order);
 
     expect(fire.combatStats.currentHp).toBe(Math.ceil(fire.combatStats.maxHp / 2));
-    expect(r.messages.some((m) => m.startsWith("🚫 Вигнання"))).toBe(true);
+    expect(r.messages.some((m) => textOf(m).startsWith("🚫 Вигнання"))).toBe(true);
   });
 
   it("союзне «Вигнання» не діє на власних прикликаних", async () => {

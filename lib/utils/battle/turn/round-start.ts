@@ -8,6 +8,7 @@ import type { Rng } from "@/lib/utils/abilities/engine/core/types";
 import { summonsOf } from "@/lib/utils/battle/participant/reserve";
 import type { Ruleset } from "@/lib/utils/rules";
 import type { BattleMapConfig, BattleParticipant } from "@/types/battle";
+import type { LogLine } from "@/types/text";
 
 /**
  * Обробляє початок нового раунду
@@ -26,8 +27,8 @@ export function processStartOfRound(
 ): {
   updatedInitiativeOrder: BattleParticipant[];
   message: string;
-  triggerMessages: string[];
-  lairMessages: string[];
+  triggerMessages: LogLine[];
+  lairMessages: LogLine[];
 } {
   // 0. Видаляємо тимчасові слоти додаткових ходів з попереднього раунду
   const baseOrder = (initiativeOrder || []).filter((p) => !p.basicInfo?.isExtraTurnSlot);
@@ -40,7 +41,7 @@ export function processStartOfRound(
 
   const ctx = { round: currentRound, rng, map, rules };
 
-  const messages: string[] = [];
+  const messages: LogLine[] = [];
 
   let order = updatedOrder;
 

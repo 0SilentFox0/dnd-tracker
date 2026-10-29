@@ -3,6 +3,7 @@ import { idleTurnIndex, isActive, sitsOutTurn } from "@/lib/utils/abilities/engi
 import { rollDyingAt } from "@/lib/utils/battle/death-saves";
 import type { Ruleset } from "@/lib/utils/rules";
 import type { BattleParticipant } from "@/types/battle";
+import type { LogLine } from "@/types/text";
 
 /**
  * Обробляє завершення ходу та перехід до наступного
@@ -16,10 +17,10 @@ export function processEndOfTurn(
   initiativeOrder: BattleParticipant[],
   currentRound: number,
   deathSaves?: { rules?: Ruleset; rng?: () => number },
-): { nextTurnIndex: number; nextRound: number; participants?: BattleParticipant[]; messages?: string[] } {
+): { nextTurnIndex: number; nextRound: number; participants?: BattleParticipant[]; messages?: LogLine[] } {
   let order = initiativeOrder;
 
-  const messages: string[] = [];
+  const messages: LogLine[] = [];
 
   let nextTurnIndex = currentTurnIndex;
 

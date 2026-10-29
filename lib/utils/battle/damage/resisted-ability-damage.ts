@@ -5,6 +5,7 @@ import { applyDamageConsequences } from "@/lib/utils/battle/damage/consequences"
 import { applyResistance } from "@/lib/utils/battle/resistance";
 import type { Ruleset } from "@/lib/utils/rules";
 import type { BattleParticipant } from "@/types/battle";
+import type { LogLine } from "@/types/text";
 
 export interface ResistedHit {
   targetId: string;
@@ -15,7 +16,7 @@ export interface ResistedHitsResult {
   participants: BattleParticipant[];
   results: { targetId: string; dealt: number }[];
   downed: Downed[];
-  messages: string[];
+  messages: LogLine[];
 }
 
 export interface ResistedDamageOptions {
@@ -29,7 +30,7 @@ export function dealResistedDamage(
   amount: number,
   damageType: string,
   opts: ResistedDamageOptions = {},
-): { participants: BattleParticipant[]; dealt: number; downed: boolean; messages: string[] } | null {
+): { participants: BattleParticipant[]; dealt: number; downed: boolean; messages: LogLine[] } | null {
   const target = findParticipant(ps, targetId);
 
   if (!target) return null;

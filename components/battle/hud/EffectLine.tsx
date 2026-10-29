@@ -3,26 +3,31 @@ import { useState } from "react";
 import { EffectIcon } from "./EffectIcon";
 
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
+import { useText } from "@/lib/i18n/use-text";
 import { cn } from "@/lib/utils";
-import { effectSummary } from "@/lib/utils/battle/view";
+import { effectSummary, effectTitle } from "@/lib/utils/battle/view";
 import type { ActiveEffect } from "@/types/battle";
 
 const tone = (e: ActiveEffect) => (e.type === "buff" ? "text-[#cdb87e]" : "text-hud-danger");
 
 function EffectChip({ effect }: { effect: ActiveEffect }) {
-  const summary = effectSummary(effect);
+  const text = useText();
+
+  const summary = effectSummary(effect).map(text);
+
+  const name = text(effectTitle(effect));
 
   return (
     <Tooltip>
       <TooltipTrigger asChild>
-        <span tabIndex={0} aria-label={`${effect.name}: ${summary.join("; ")}`} className={cn("relative flex h-5 cursor-help items-center gap-1.5 whitespace-nowrap text-[13px] leading-5", tone(effect))}>
+        <span tabIndex={0} aria-label={`${name}: ${summary.join("; ")}`} className={cn("relative flex h-5 cursor-help items-center gap-1.5 whitespace-nowrap text-[13px] leading-5", tone(effect))}>
           <EffectIcon effect={effect} size={20} />
-          <span className="text-[#d9cfbd]">{effect.name}</span>
+          <span className="text-[#d9cfbd]">{name}</span>
           {!effect.permanent && <span className="opacity-70">{effect.duration}</span>}
         </span>
       </TooltipTrigger>
       <TooltipContent side="bottom" sideOffset={4} className="max-w-64 border border-white/15 bg-[#17130f] text-[13px] leading-[18px] text-[#d9cfbd] shadow-lg [&>span]:hidden">
-        <div className="font-medium text-[var(--ink)]">{effect.name}</div>
+        <div className="font-medium text-[var(--ink)]">{name}</div>
         {summary.map((line) => <div key={line}>{line}</div>)}
       </TooltipContent>
     </Tooltip>

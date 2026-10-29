@@ -12,7 +12,9 @@ import { SelectField } from "@/components/ui/select-field";
 import { ABILITY_OPTIONS, type AbilityKey } from "@/lib/constants/abilities";
 import { CONDITION_LIMITS } from "@/lib/constants/battle";
 import type { BattleConditionsBody } from "@/lib/hooks/battles";
+import { useText } from "@/lib/i18n/use-text";
 import { CONDITION_5E_KEYS, CONDITION_5E_REGISTRY, type Condition5eKey, conditionEffects, MAX_EXHAUSTION } from "@/lib/utils/battle/conditions";
+import { effectTitle } from "@/lib/utils/battle/view";
 import type { BattleParticipant } from "@/types/battle";
 
 const FORM_ID = "conditions-form";
@@ -39,6 +41,8 @@ export function ConditionsDialog({ participant, ...rest }: ConditionsDialogProps
 }
 
 function ConditionsDialogBody({ participant, onClose, onSubmit, isPending }: ConditionsDialogProps & { participant: BattleParticipant }) {
+  const text = useText();
+
   const [selected, setSelected] = useState<Condition5eKey>(CONDITION_5E_KEYS[0]);
 
   const [rounds, setRounds] = useState("");
@@ -101,7 +105,7 @@ function ConditionsDialogBody({ participant, onClose, onSubmit, isPending }: Con
           <div className="text-xs text-[var(--hud-muted)]">Поточні стани</div>
           {current.map(({ key, effect }) => (
             <div key={effect.id} className="flex items-center justify-between gap-2 text-sm">
-              <span>{effect.name}{effect.permanent ? "" : ` · ${effect.duration} р.`}</span>
+              <span>{text(effectTitle(effect))}{effect.permanent ? "" : ` · ${effect.duration} р.`}</span>
               <Button type="button" size="sm" variant="outline" disabled={isPending} onClick={() => onSubmit({ action: "remove", participantId, condition: key })}>
                 Зняти
               </Button>

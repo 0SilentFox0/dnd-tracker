@@ -6,6 +6,7 @@ import { rollSaveEnds } from "@/lib/utils/battle/saves/save-ends";
 import { decreaseEffectDurations } from "@/lib/utils/battle/turn/effects";
 import type { Ruleset } from "@/lib/utils/rules";
 import type { BattleParticipant } from "@/types/battle";
+import type { LogLine } from "@/types/text";
 
 export interface SaveEndsContext {
   participants: BattleParticipant[];
@@ -14,7 +15,7 @@ export interface SaveEndsContext {
   rng: () => number;
 }
 
-export function finishTurnEffects(source: BattleParticipant, saves?: SaveEndsContext): { participant: BattleParticipant; expired: string[]; messages: string[] } {
+export function finishTurnEffects(source: BattleParticipant, saves?: SaveEndsContext): { participant: BattleParticipant; expired: string[]; messages: LogLine[] } {
   const rolled = saves ? rollSaveEnds(source, saves.participants, saves.rules, saves.rng) : { participant: source, messages: [] };
 
   let p = rolled.participant;

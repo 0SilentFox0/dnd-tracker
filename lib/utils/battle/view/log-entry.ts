@@ -1,10 +1,13 @@
 import { BATTLE_ACTION_LABELS } from "@/lib/constants/battle";
-import { getLogEntryDetailLines } from "@/lib/utils/battle/view/log-format";
+import { splitLegacyTriggers } from "@/lib/utils/battle/log/legacy";
+import { actionLines } from "@/lib/utils/battle/log/lines";
+import { getLogEntryDetailItems } from "@/lib/utils/battle/view/log-format";
 import type { BattleAction } from "@/types/battle";
+import type { LogLine } from "@/types/text";
 
 export interface LogEntryView {
-  headline: string;
-  lines: string[];
+  headline: LogLine;
+  lines: LogLine[];
   hp: { id: string; name: string; delta: number }[];
   kindLabel: string;
   hasDetails: boolean;
@@ -31,15 +34,20 @@ export function groupLogByRound(entries: BattleAction[]): LogRoundGroup[] {
   return groups;
 }
 
+/** Headline and sub-lines of an entry: structured logs are used as they are, legacy rows are split the old way. */
+export function logParts(e: Pick<BattleAction, "log" | "resultText">): { headline: LogLine; lines: LogLine[]; isTrigger: boolean } {
+  const parts = splitLegacyTriggers(actionLines(e));
+
+  if (!e.log) return parts;
+
+  const first = e.log[0];
+
+  return { ...parts, isTrigger: typeof first === "object" && first.message.startsWith("battleLog.triggers.") };
+}
+
 /** Запис журналу для показу: перший сегмент — заголовок, решта — підрядки; зміни HP — окремо (шкода з мінусом). */
 export function logEntryView(e: BattleAction): LogEntryView {
-  const [first = "", ...rest] = e.resultText.split(" | ").map((s) => s.trim()).filter(Boolean);
-
-  const triggers = /^(Тригери [^:]+):\s*(.+)$/.exec(first);
-
-  const headline = triggers ? triggers[1] : first;
-
-  const lines = triggers ? [...triggers[2].split("; ").filter(Boolean), ...rest] : rest;
+  const { headline, lines, isTrigger } = logParts(e);
 
   const byId = new Map<string, { id: string; name: string; delta: number }>();
 
@@ -56,8 +64,8 @@ export function logEntryView(e: BattleAction): LogEntryView {
     lines,
     hp: [...byId.values()].filter((h) => h.delta !== 0),
     kindLabel: hazard ? "небезпека" : (BATTLE_ACTION_LABELS[e.actionType] ?? "подія"),
-    hasDetails: getLogEntryDetailLines(e).length > 0,
-    isTrigger: !!triggers,
+    hasDetails: getLogEntryDetailItems(e).length > 0,
+    isTrigger,
     ...(hazard && { kind: "hazard" as const }),
   };
 }

@@ -6,8 +6,9 @@ import type { Rng } from "@/lib/utils/abilities/engine/core/types";
 import { dealResistedHits, type ResistedHit } from "@/lib/utils/battle/damage/resisted-ability-damage";
 import type { Ruleset } from "@/lib/utils/rules";
 import type { BattleParticipant } from "@/types/battle";
+import type { LogLine } from "@/types/text";
 
-export const maneuverResult = (participants: BattleParticipant[], messages: string[] = []): ManeuverResult => ({ participants, messages, downed: [] });
+export const maneuverResult = (participants: BattleParticipant[], messages: LogLine[] = []): ManeuverResult => ({ participants, messages, downed: [] });
 
 export function attackShare(owner: BattleParticipant, ps: BattleParticipant[], percent: number, rng: Rng): number {
   return resolveAmount({ percentOf: "ownerAttack", value: percent }, { owner, rng, participants: ps });

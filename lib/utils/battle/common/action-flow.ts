@@ -4,11 +4,12 @@ import type { AbilityRunContext, AbilityRunResult, SummonRequest } from "@/lib/u
 import { applyDamageConsequences } from "@/lib/utils/battle/damage/consequences";
 import type { AbilityEvent } from "@/types/abilities";
 import type { BattleAction, BattleParticipant } from "@/types/battle";
+import type { LogLine } from "@/types/text";
 
 /** Стан однієї дії (атака, закляття): свіжий список учасників і накопичений лог умінь. */
 export interface ActionFlow {
   ps: BattleParticipant[];
-  messages: string[];
+  messages: LogLine[];
   summons: SummonRequest[];
   ctx: AbilityRunContext;
 }

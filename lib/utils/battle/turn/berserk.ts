@@ -1,13 +1,16 @@
 import { AttackType } from "@/lib/constants/battle";
+import { joinLines } from "@/lib/i18n/text-ref";
 import { findParticipant, isActive, isTargetable, updateParticipant } from "@/lib/utils/abilities/engine/core/participants";
 import { runAbilities } from "@/lib/utils/abilities/engine/core/run-abilities";
 import { processAttack } from "@/lib/utils/battle/attack";
 import { getDisabledAttackKinds } from "@/lib/utils/battle/attack/disabled-attacks";
 import { heroAttackDamageParts } from "@/lib/utils/battle/damage/hero-damage";
+import { logFields, withPrefix } from "@/lib/utils/battle/log/lines";
 import { endTurnCleanup } from "@/lib/utils/battle/turn/end-turn-cleanup";
 import { pickOne, rollDiceList, rollDie } from "@/lib/utils/common/dice";
 import type { Ruleset } from "@/lib/utils/rules";
 import type { BattleAction, BattleMapConfig, BattleParticipant } from "@/types/battle";
+import type { LogLine } from "@/types/text";
 
 export function berserkBonusOf(p: BattleParticipant): number | undefined {
   return p.battleData.activeEffects.flatMap((e) => e.effects.filter((d) => d.type === "berserk").map((d) => d.value)).at(0);
@@ -27,7 +30,7 @@ interface BerserkTurnParams {
   rules?: Ruleset;
 }
 
-function note(p: BattleParticipant, params: BerserkTurnParams, text: string): BattleAction {
+function note(p: BattleParticipant, params: BerserkTurnParams, text: LogLine): BattleAction {
   return {
     id: `berserk-${p.basicInfo.id}-${params.round}-${params.actionIndex}`,
     battleId: params.battleId,
@@ -40,7 +43,7 @@ function note(p: BattleParticipant, params: BerserkTurnParams, text: string): Ba
     actionType: "ability",
     targets: [],
     actionDetails: {},
-    resultText: text,
+    ...logFields(text),
     hpChanges: [],
     isCancelled: false,
   };
@@ -54,7 +57,7 @@ function finishTurn(participants: BattleParticipant[], actions: BattleAction[], 
 
   const order = updateParticipant(ended.participants, id, endTurnCleanup);
 
-  const turnEnd = ended.messages.length > 0 ? [{ ...note(findParticipant(order, id) as BattleParticipant, { ...params, actionIndex: params.actionIndex + actions.length }, `Кінець ходу: ${ended.messages.join("; ")}`) }] : [];
+  const turnEnd = ended.messages.length > 0 ? [{ ...note(findParticipant(order, id) as BattleParticipant, { ...params, actionIndex: params.actionIndex + actions.length }, joinLines([`Кінець ходу: `, joinLines(ended.messages, "; ")])) }] : [];
 
   return { participants: order, actions: [...actions, ...turnEnd] };
 }
@@ -102,5 +105,5 @@ export function runBerserkTurn(params: BerserkTurnParams): { participants: Battl
 
   const updated = new Map((result.allParticipantsUpdated ?? []).map((p) => [p.basicInfo.id, p]));
 
-  return finishTurn(participants.map((p) => updated.get(p.basicInfo.id) ?? p), [{ ...result.battleAction, actionIndex: params.actionIndex, resultText: `🤬 Шал: ${result.battleAction.resultText}` }], params);
+  return finishTurn(participants.map((p) => updated.get(p.basicInfo.id) ?? p), [{ ...withPrefix(result.battleAction, "🤬 Шал: "), actionIndex: params.actionIndex }], params);
 }

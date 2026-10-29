@@ -5,6 +5,7 @@ import { findParticipant, isActive } from "@/lib/utils/abilities/engine/core/par
 import type { Trigger, TriggerEvent } from "@/lib/utils/abilities/schema";
 import type { AbilityEvent } from "@/types/abilities";
 import type { BattleParticipant } from "@/types/battle";
+import type { LogLine } from "@/types/text";
 
 type Matcher<E extends TriggerEvent> = (
   trigger: Extract<Trigger, { event: E }>,
@@ -148,7 +149,7 @@ function spellTargetMatches(whose: "self" | "ally" | undefined, targetIds: strin
   });
 }
 
-export function describeTrigger(trigger: Trigger): string[] {
+export function describeTrigger(trigger: Trigger): LogLine[] {
   const def = TRIGGER_REGISTRY[trigger.event] as TriggerDefinition<TriggerEvent>;
 
   return [def.label, ...(def.describe?.(trigger as never) ?? [])];

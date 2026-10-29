@@ -1,3 +1,5 @@
+import type { LogLine } from "@/types/text";
+
 export interface ArtifactSetSummaryArtifact {
   id: string;
   name: string;
@@ -15,7 +17,7 @@ export interface ArtifactSetRow {
   icon?: string | null;
   createdAt: string;
   artifacts?: ArtifactSetSummaryArtifact[];
-  abilitySummary?: string[];
+  abilitySummary?: LogLine[];
 }
 
 export interface ArtifactSetCardData {
@@ -24,5 +26,5 @@ export interface ArtifactSetCardData {
   icon: string | null;
   description: string | null;
   setBonus: unknown;
-  abilitySummary: string[];
+  abilitySummary: LogLine[];
 }

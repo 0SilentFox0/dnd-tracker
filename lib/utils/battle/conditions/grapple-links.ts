@@ -2,6 +2,7 @@ import { removeEffects } from "./query";
 
 import { findParticipant, replaceParticipant } from "@/lib/utils/abilities/engine/core/participants";
 import type { BattleParticipant } from "@/types/battle";
+import type { LogLine } from "@/types/text";
 
 export const GRAPPLE_KEY_PREFIX = "core:grapple:";
 
@@ -11,12 +12,12 @@ export function grappledBy(ps: BattleParticipant[], grapplerId: string): BattleP
   return ps.filter((p) => p.battleData.activeEffects.some((e) => e.abilityKey === grappleKey(grapplerId)));
 }
 
-export function releaseGrapples(ps: BattleParticipant[], grapplerId: string, reason: string, only?: string): { participants: BattleParticipant[]; messages: string[] } {
+export function releaseGrapples(ps: BattleParticipant[], grapplerId: string, reason: string, only?: string): { participants: BattleParticipant[]; messages: LogLine[] } {
   const grappler = findParticipant(ps, grapplerId);
 
   let next = ps;
 
-  const messages: string[] = [];
+  const messages: LogLine[] = [];
 
   for (const target of grappledBy(ps, grapplerId)) {
     if (only && target.basicInfo.id !== only) continue;

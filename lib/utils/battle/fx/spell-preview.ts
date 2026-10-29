@@ -9,6 +9,7 @@ import type { FxAuraKind, FxSpec } from "./types";
 
 import type { LibrarySpell } from "@/data/library/types";
 import { CombatStatus, ParticipantSide } from "@/lib/constants/battle";
+import { lineKey } from "@/lib/i18n/text-ref";
 import { describeEffect } from "@/lib/utils/abilities/registry/effects";
 import { castSpell } from "@/lib/utils/battle/spell";
 import type { CastableSpell } from "@/lib/utils/battle/types/spell-process";
@@ -17,6 +18,7 @@ import { readSpellDefinition } from "@/lib/utils/spells/model/read";
 import type { SpellTargeting } from "@/lib/utils/spells/model/schema";
 import type { BattleParticipant } from "@/types/battle";
 import type { SpellRules } from "@/types/spells";
+import type { LogLine } from "@/types/text";
 
 export interface SpellFxTarget {
   id: string;
@@ -41,7 +43,7 @@ export interface SpellFxPreview extends SpellFxResult {
   school: string;
   level: number;
   description: string;
-  effects: string[];
+  effects: LogLine[];
   targeting: string;
 }
 
@@ -166,7 +168,7 @@ export function previewSpellFx(spell: LibrarySpell, fx?: SpellFx | null): SpellF
     school: spell.school,
     level: spell.level,
     description: spell.description ?? "",
-    effects: [...new Set(castable.definition.effects.map(describeEffect))],
+    effects: [...new Map(castable.definition.effects.map((e) => [lineKey(describeEffect(e)), describeEffect(e)])).values()],
     targeting: targetingLabel(castable.definition.targeting),
     ...previewCastFx(castable),
   };

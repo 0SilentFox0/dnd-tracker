@@ -1,10 +1,6 @@
-export interface DamageBreakdownRow {
-  label: string;
-  /** звідки бонус: «Бонус зі скілів», «Расовий бонус»… */
-  source?: string;
-  value?: string;
-  tone: "step" | "total" | "rule" | "note";
-}
+import type { DamageRow } from "@/types/battle";
+
+export type DamageBreakdownRow = DamageRow;
 
 const capitalize = (s: string) => s.charAt(0).toLocaleUpperCase("uk") + s.slice(1);
 

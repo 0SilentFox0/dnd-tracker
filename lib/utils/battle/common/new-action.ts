@@ -6,7 +6,7 @@ export interface ActionAt {
   targets?: BattleParticipant[];
 }
 
-type ActionRest = Pick<BattleAction, "actionDetails" | "resultText"> & Partial<Pick<BattleAction, "id" | "actionIndex" | "hpChanges">>;
+type ActionRest = Pick<BattleAction, "actionDetails"> & Partial<Pick<BattleAction, "id" | "actionIndex" | "hpChanges" | "resultText" | "log">>;
 
 export function newBattleAction(actor: BattleParticipant, actionType: BattleAction["actionType"], at: ActionAt, rest: ActionRest): BattleAction {
   return {
@@ -22,6 +22,7 @@ export function newBattleAction(actor: BattleParticipant, actionType: BattleActi
     targets: (at.targets ?? []).map((t) => ({ participantId: t.basicInfo.id, participantName: t.basicInfo.name })),
     hpChanges: [],
     isCancelled: false,
+    resultText: "",
     ...rest,
   };
 }

@@ -13,6 +13,7 @@ import { runWithCritChoice } from "@/lib/utils/battle/crit-choice/run-with-crit-
 import type { CritResume } from "@/lib/utils/battle/crit-choice/types";
 import { heroAttackDamageParts } from "@/lib/utils/battle/damage/hero-damage";
 import { attackReachError } from "@/lib/utils/battle/grid";
+import { withLines } from "@/lib/utils/battle/log/lines";
 import type { BattleMutationContext, MutationResult } from "@/lib/utils/battle/pipeline/run-battle-mutation";
 import { toCastableSpell } from "@/lib/utils/battle/spell/to-castable";
 import { battleActionToEvent,BattleRuleError } from "@/lib/utils/battle/store";
@@ -139,7 +140,7 @@ export function createAttackMutation(deps: AttackMutationDeps = defaultDeps, opt
 
         const order = summoned.order;
 
-        const actions = phase.allBattleActions.map((a, i, all) => (i === all.length - 1 && summoned.messages.length > 0 ? { ...a, resultText: [a.resultText, ...summoned.messages].join(" | ") } : a));
+        const actions = phase.allBattleActions.map((a, i, all) => (i === all.length - 1 ? withLines(a, summoned.messages) : a));
 
         const events = actions.map(battleActionToEvent);
 

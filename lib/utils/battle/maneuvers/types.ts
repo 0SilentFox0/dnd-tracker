@@ -1,6 +1,7 @@
 import type { Downed, Rng } from "@/lib/utils/abilities/engine/core/types";
 import type { Ruleset } from "@/lib/utils/rules";
 import type { BattleMapConfig, BattleParticipant, GridPoint } from "@/types/battle";
+import type { LogLine } from "@/types/text";
 
 export interface ManeuverInput {
   actorId: string;
@@ -18,6 +19,6 @@ export interface ManeuverInput {
 
 export interface ManeuverResult {
   participants: BattleParticipant[];
-  messages: string[];
+  messages: LogLine[];
   downed: Downed[];
 }

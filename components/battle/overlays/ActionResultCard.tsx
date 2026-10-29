@@ -7,6 +7,7 @@ import { useInCornerStack } from "@/components/battle/scene/CornerStack";
 import { useMapStripSlot, useNoticeStack } from "@/components/battle/scene/MapStrip";
 import { HUD_SURFACE } from "@/components/hud";
 import { type ActionResultFx, useActionResult } from "@/lib/hooks/battle";
+import { useText } from "@/lib/i18n/use-text";
 import { cn } from "@/lib/utils";
 
 const TITLE = { hit: "Влучання", crit: "Критичне влучання", miss: "Промах" } as const;
@@ -22,6 +23,8 @@ const strikeText = (s: { kind: "hit" | "crit" | "miss"; damage: number; downed: 
   s.kind === "miss" ? "промах" : `${s.kind === "crit" ? "крит " : ""}−${s.damage}${s.downed ? " · повалений" : ""}`;
 
 function AttackBody({ fx }: { fx: AttackFx }) {
+  const text = useText();
+
   const critFail = fx.kind === "miss" ? fx.critFail : undefined;
 
   const effect = fx.kind === "miss" ? critFail : fx.critEffect;
@@ -48,8 +51,8 @@ function AttackBody({ fx }: { fx: AttackFx }) {
       )}
       {effect && (
         <div className="mt-1 text-sm">
-          <b className="hud-sc">{effect.name}</b>
-          {effect.flavor && <span className="italic text-[#a89c88]"> · {effect.flavor}</span>}
+          <b className="hud-sc">{text(effect.name)}</b>
+          {effect.flavor && <span className="italic text-[#a89c88]"> · {text(effect.flavor)}</span>}
         </div>
       )}
       {fx.retaliation && <div className="mt-1 text-sm text-[#e9a08f]">Відповідь цілі: {fx.retaliation.name} {fx.retaliation.damage > 0 ? `−${fx.retaliation.damage}` : "промах"}</div>}

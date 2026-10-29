@@ -4,6 +4,7 @@ import { concentrationBroken, concentrationCheck, dropConcentration, hasConcentr
 import { clearDeathSaves, deathSaveDamage, startDying } from "@/lib/utils/battle/death-saves";
 import type { Ruleset } from "@/lib/utils/rules";
 import type { BattleParticipant } from "@/types/battle";
+import type { LogLine } from "@/types/text";
 
 export interface DamageConsequencesInput {
   before: BattleParticipant;
@@ -19,7 +20,7 @@ export interface DamageConsequencesInput {
 export interface DamageConsequencesResult {
   participant: BattleParticipant;
   participants: BattleParticipant[];
-  messages: string[];
+  messages: LogLine[];
 }
 
 function unitDiesAtZero(after: BattleParticipant, rules: Ruleset): BattleParticipant {
@@ -32,7 +33,7 @@ function unitDiesAtZero(after: BattleParticipant, rules: Ruleset): BattlePartici
   return { ...after, combatStats: { ...after.combatStats, status: CombatStatus.DEAD } };
 }
 
-function heroGoesDown(input: DamageConsequencesInput, rules: Ruleset): { participant: BattleParticipant; messages: string[] } {
+function heroGoesDown(input: DamageConsequencesInput, rules: Ruleset): { participant: BattleParticipant; messages: LogLine[] } {
   const { before, after, amount, crit } = input;
 
   const none = { participant: after, messages: [] };
@@ -69,7 +70,7 @@ function heroGoesDown(input: DamageConsequencesInput, rules: Ruleset): { partici
   return none;
 }
 
-function concentrationFallout(input: DamageConsequencesInput, participant: BattleParticipant, rules: Ruleset): { participant: BattleParticipant; participants: BattleParticipant[]; messages: string[] } | null {
+function concentrationFallout(input: DamageConsequencesInput, participant: BattleParticipant, rules: Ruleset): { participant: BattleParticipant; participants: BattleParticipant[]; messages: LogLine[] } | null {
   if ((!rules.concentration.enabled && !participant.battleData.pendingCast) || input.amount <= 0 || !hasConcentration(participant)) return null;
 
   const r = concentrationCheck({ caster: participant, damage: input.amount, participants: input.participants, rules, rng: input.rng });
@@ -115,7 +116,7 @@ export function settleStatusChange(before: BattleParticipant, after: BattleParti
 
   let ps = next === after ? participants : replaceParticipant(participants, next);
 
-  const messages: string[] = [];
+  const messages: LogLine[] = [];
 
   if (rules.concentration.enabled && concentrationBroken(next)) {
     const dropped = dropConcentration(ps, next.basicInfo.id, "");

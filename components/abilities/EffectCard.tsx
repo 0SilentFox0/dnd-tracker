@@ -10,6 +10,7 @@ import { FieldErrors } from "./FieldErrors";
 
 import { Button } from "@/components/ui/button";
 import { SelectField } from "@/components/ui/select-field";
+import { useText } from "@/lib/i18n/use-text";
 import { useTranslator } from "@/lib/i18n/use-translator";
 import { allowedEffectKinds, changeEffectKind, getAtPath, newEffect, setAtPath } from "@/lib/utils/abilities/editor";
 import { describeEffect, EFFECT_REGISTRY } from "@/lib/utils/abilities/registry/effects";
@@ -26,6 +27,8 @@ interface EffectCardProps {
 
 export function EffectCard({ effect, trigger, path, actions, kinds }: EffectCardProps) {
   const t = useTranslations("abilities.effect");
+
+  const text = useText();
 
   const tr = useTranslator("abilityRegistry");
 
@@ -79,7 +82,7 @@ export function EffectCard({ effect, trigger, path, actions, kinds }: EffectCard
       <div className="grid grid-cols-6 items-end gap-2 [&>*]:min-w-0">{body}</div>
       <p className="text-xs text-primary">
         <span aria-hidden>= </span>
-        <span>{describeEffect(effect)}</span>
+        <span>{text(describeEffect(effect))}</span>
       </p>
     </div>
   );

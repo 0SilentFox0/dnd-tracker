@@ -14,6 +14,7 @@ import { releaseInvalidGrapples } from "@/lib/utils/battle/actions/grapple";
 import { controls } from "@/lib/utils/battle/common/control";
 import { placeParticipants } from "@/lib/utils/battle/grid/placement";
 import { placeRevived } from "@/lib/utils/battle/grid/revive-placement";
+import { lineText } from "@/lib/utils/battle/log/lines";
 import { modeBlockedText, withModeAfterMutation } from "@/lib/utils/battle/modes/server";
 import { clearFallenEffects } from "@/lib/utils/battle/participant/fallen";
 import { reserveOf } from "@/lib/utils/battle/participant/reserve";
@@ -128,7 +129,7 @@ function withPlacement(map: BattleMapConfig | null, scene: { status: BattleStatu
 
   const released = releaseInvalidGrapples(result.participants, map);
 
-  if (released.participants !== result.participants) result = { ...result, participants: released.participants, events: [...result.events, systemEvent(result.scene?.round ?? scene.round, released.messages.join("; "))] };
+  if (released.participants !== result.participants) result = { ...result, participants: released.participants, events: [...result.events, systemEvent(result.scene?.round ?? scene.round, lineText(released.messages, "; "))] };
 
   if (!map || (result.scene?.status ?? scene.status) !== BattleStatus.ACTIVE) return result;
 

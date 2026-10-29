@@ -3,10 +3,12 @@ import type { ComputeHitDamageResult } from "./compute";
 import type { CriticalEffect } from "@/lib/constants/critical-effects";
 import { attackKindOf } from "@/lib/utils/battle/common/attack-kind";
 import { newBattleAction } from "@/lib/utils/battle/common/new-action";
+import { lineText, logFields } from "@/lib/utils/battle/log/lines";
 import { immunityNote } from "@/lib/utils/battle/resistance";
 import type { AttackRollResult } from "@/lib/utils/battle/types/attack";
 import { lowerFirst } from "@/lib/utils/common/text";
 import type { BattleAction, BattleAttack, BattleParticipant } from "@/types/battle";
+import type { LogLine } from "@/types/text";
 
 const critDetails = (effect: CriticalEffect, flavor?: string) => ({ id: effect.id, name: effect.name, description: effect.description, type: effect.type, flavor });
 
@@ -32,7 +34,7 @@ interface AttackActionBase {
   d20Roll: number;
   attackRoll: AttackRollResult;
   targetAC: number;
-  messages: string[];
+  messages: LogLine[];
   battleId: string;
   currentRound: number;
 }
@@ -53,7 +55,7 @@ export function buildBattleActionForCriticalFail(p: BuildCriticalFailActionParam
       isCriticalFail: true,
       criticalEffect: critDetails(criticalEffect, critFlavorText),
     },
-    resultText: [`${attacker.basicInfo.name}: ${lowerFirst(critSummary(criticalEffect, critFlavorText, true))}`, ...p.messages].filter(Boolean).join(" | "),
+    ...logFields(lineText([`${attacker.basicInfo.name}: ${lowerFirst(critSummary(criticalEffect, critFlavorText, true))}`, ...p.messages].filter(Boolean), " | ")),
   });
 }
 
@@ -73,11 +75,11 @@ export function buildBattleActionForMiss(p: BuildMissActionParams): BattleAction
       isCritical: false,
       isCriticalFail: p.attackRoll.isCriticalFail,
     },
-    resultText: [
+    ...logFields(lineText([
       `${attacker.basicInfo.name} → ${target.basicInfo.name}: промах`,
       ...((p.attack.guaranteedDamage ?? 0) > 0 ? [`гарантована шкода: ${guaranteedDamage}`] : []),
       ...p.messages,
-    ].filter(Boolean).join(" | "),
+    ].filter(Boolean), " | ")),
     hpChanges:
       guaranteedDamage > 0
         ? [{ participantId: target.basicInfo.id, participantName: target.basicInfo.name, oldHp: target.combatStats.currentHp, newHp: p.targetAfter.combatStats.currentHp, change: guaranteedDamage }]
@@ -111,11 +113,11 @@ export function buildBattleActionForHit(p: BuildHitActionParams): BattleAction {
       damageBreakdown: damageCalculation.breakdown.join("; "),
       damageSteps: { [target.basicInfo.id]: damageSteps },
     },
-    resultText: [
+    ...logFields(lineText([
       `${attacker.basicInfo.name} → ${target.basicInfo.name}: ${totalFinalDamage} шкоди${critText}${vampirismHeal > 0 ? ` | Вампіризм: ${attacker.basicInfo.name} +${vampirismHeal} HP` : ""}`,
       totalFinalDamage === 0 ? immunityNote(target.basicInfo.name, damageSteps) : "",
       ...p.messages,
-    ].filter(Boolean).join(" | "),
+    ].filter(Boolean), " | ")),
     hpChanges: [
       { participantId: target.basicInfo.id, participantName: target.basicInfo.name, oldHp, newHp: target.combatStats.currentHp, change: totalFinalDamage },
       ...(vampirismHeal > 0
@@ -130,13 +132,13 @@ export function buildAbortedAttackAction(
   attacker: BattleParticipant,
   target: BattleParticipant,
   attack: BattleAttack,
-  messages: string[],
+  messages: LogLine[],
   battleId: string,
   currentRound: number,
 ): BattleAction {
   return newBattleAction(attacker, "attack", { battleId, round: currentRound, targets: [target] }, {
     actionDetails: { weaponName: attack.name, attackKind: attackKindOf(attack.type), isHit: false },
-    resultText: [`${attacker.basicInfo.name} → ${target.basicInfo.name}: ціль загинула до атаки`, ...messages].join(" | "),
+    ...logFields(lineText([`${attacker.basicInfo.name} → ${target.basicInfo.name}: ціль загинула до атаки`, ...messages], " | ")),
   });
 }
 
@@ -147,7 +149,7 @@ export interface BuildOffTurnParams {
   attackRoll: AttackRollResult;
   targetAC: number;
   hit: { damageRolls: number[]; hitDamage: ComputeHitDamageResult } | null;
-  messages: string[];
+  messages: LogLine[];
   battleId: string;
   currentRound: number;
   critFlavorText?: string;
@@ -183,6 +185,6 @@ export function buildOffTurnAction(p: BuildOffTurnParams): BattleAction {
         damageSteps: { [target.basicInfo.id]: hit.hitDamage.damageSteps },
       }),
     },
-    resultText: [summary, immune, ...p.messages].filter(Boolean).join(" | "),
+    ...logFields(lineText([summary, immune, ...p.messages].filter(Boolean), " | ")),
   });
 }

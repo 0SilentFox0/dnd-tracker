@@ -29,11 +29,13 @@ import { applyRaiseDead, applySummon, describeRaiseDead, describeSummon } from "
 import type { EffectApplyInput, EffectApplyResult } from "./types";
 
 import { ABILITY_LABELS } from "@/lib/constants/abilities";
+import { joinLines } from "@/lib/i18n/text-ref";
 import { resolveTargetIds } from "@/lib/utils/abilities/engine/core/targets";
 import type { Ability, Effect, EffectKind } from "@/lib/utils/abilities/schema";
 import { CONDITION_5E_KEYS } from "@/lib/utils/abilities/schema/kinds";
 import { pickOne } from "@/lib/utils/common/dice";
 import { signed } from "@/lib/utils/common/format";
+import type { LogLine } from "@/types/text";
 
 export type { EffectApplyInput, EffectApplyResult };
 
@@ -42,7 +44,7 @@ interface EffectDefinition<K extends EffectKind> {
   label: string;
   static: boolean;
   fields: readonly FieldMeta[];
-  describe: (e: Extract<Effect, { kind: K }>) => string;
+  describe: (e: Extract<Effect, { kind: K }>) => LogLine;
   apply: (input: EffectApplyInput<Extract<Effect, { kind: K }>>) => EffectApplyResult;
 }
 
@@ -145,7 +147,7 @@ export const EFFECT_REGISTRY: { [K in EffectKind]: EffectDefinition<K> } = {
     label: "Випадковий з варіантів",
     static: false,
     fields: [{ name: "options", label: "Варіанти", input: "effects" }],
-    describe: (e) => `одне з: ${e.options.map(describeEffect).join(" / ")}`,
+    describe: (e) => joinLines(["одне з: ", joinLines(e.options.map(describeEffect), " / ")]),
     apply: (i) => {
       const option = pickOne(i.effect.options, i.ctx.rng);
 
@@ -162,7 +164,7 @@ export function applyEffect(input: EffectApplyInput): EffectApplyResult {
   return def.apply(input as never);
 }
 
-export function describeEffect(effect: Effect): string {
+export function describeEffect(effect: Effect): LogLine {
   const def = EFFECT_REGISTRY[effect.kind] as EffectDefinition<EffectKind> | undefined;
 
   return def ? def.describe(effect as never) : `невідомий ефект (${String(effect.kind)})`;
@@ -170,6 +172,6 @@ export function describeEffect(effect: Effect): string {
 
 export { FLAG_FIELDS, FLAG_LABELS };
 
-export function describeAbility(a: Ability): string {
-  return [...describeTrigger(a.trigger), ...limitsLabel(a.limits), ...a.effects.map(describeEffect)].join(" · ");
+export function describeAbility(a: Ability): LogLine {
+  return joinLines([...describeTrigger(a.trigger), ...limitsLabel(a.limits), ...a.effects.map(describeEffect)], " · ");
 }

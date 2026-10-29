@@ -5,6 +5,7 @@ import type { Ruleset } from "@/lib/utils/rules";
 import type { SpellDice } from "@/lib/utils/spells/model/dice";
 import type { SpellDefinition } from "@/lib/utils/spells/model/schema";
 import type { BattleAction, BattleMapConfig, BattleParticipant, SpellGrant, TerrainDamage } from "@/types/battle";
+import type { LogLine } from "@/types/text";
 
 export interface CastableSpell {
   id: string;
@@ -45,7 +46,7 @@ export interface CastSpellResult {
   allParticipantsUpdated: BattleParticipant[];
   battleAction: BattleAction;
   summons: SummonRequest[];
-  messages: string[];
+  messages: LogLine[];
   /** кидок шкоди заклинання до опорів — для небезпеки, яку лишає zone */
   spellDamage?: TerrainDamage;
   /** мітка концентрації цього касту — для зони, що згасає разом із нею */

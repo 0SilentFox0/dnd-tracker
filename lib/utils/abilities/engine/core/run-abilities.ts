@@ -3,6 +3,7 @@ import { resolveTargetIds } from "./targets";
 import type { AbilityRunContext, AbilityRunResult, Downed, SummonRequest } from "./types";
 import { recordUse, resetUsage, withinLimits } from "./usage";
 
+import { joinLines } from "@/lib/i18n/text-ref";
 import { restoreCharm } from "@/lib/utils/abilities/engine/effects/charm";
 import { conditionEventForTarget, evaluateCondition, hasCreatureTypeCondition } from "@/lib/utils/abilities/registry/conditions";
 import { applyEffect } from "@/lib/utils/abilities/registry/effects";
@@ -10,6 +11,7 @@ import { triggerMatches } from "@/lib/utils/abilities/registry/triggers";
 import type { StaticEffect } from "@/lib/utils/abilities/schema";
 import type { AbilityEvent } from "@/types/abilities";
 import type { BattleParticipant } from "@/types/battle";
+import type { LogLine } from "@/types/text";
 
 function applyUsageResets(ps: BattleParticipant[], event: AbilityEvent): BattleParticipant[] {
   if (event.type === "roundStart") return ps.map((p) => resetUsage(p, "round"));
@@ -26,7 +28,7 @@ function canAct(owner: BattleParticipant, event: AbilityEvent): boolean {
 export function runAbilities(participants: BattleParticipant[], event: AbilityEvent, ctx: AbilityRunContext): AbilityRunResult {
   let ps = applyUsageResets(participants, event);
 
-  const messages: string[] = [];
+  const messages: LogLine[] = [];
 
   const actionModifiers: Record<string, StaticEffect[]> = {};
 
@@ -74,7 +76,7 @@ export function runAbilities(participants: BattleParticipant[], event: AbilityEv
         const r = applyEffect({ participants: ps, ability, effectIndex, ownerId, effect, targetIds, event, ctx });
 
         ps = r.participants;
-        messages.push(...r.messages.map((m) => (ability.limits?.chance !== undefined ? `${m} (шанс ${ability.limits.chance} %)` : m)));
+        messages.push(...r.messages.map((m) => (ability.limits?.chance !== undefined ? joinLines([m, ` (шанс ${ability.limits.chance} %)`]) : m)));
 
         for (const m of r.actionModifiers ?? []) (actionModifiers[m.participantId] ??= []).push(m.effect);
 
@@ -102,7 +104,7 @@ export function resolveDowned(
   downed: Downed,
   ctx: AbilityRunContext,
   opts: { allowSurvive?: boolean } = {},
-): { participants: BattleParticipant[]; messages: string[]; survived: boolean; summons: SummonRequest[] } {
+): { participants: BattleParticipant[]; messages: LogLine[]; survived: boolean; summons: SummonRequest[] } {
   const victim = findParticipant(participants, downed.victimId);
 
   if (!victim || isActive(victim)) return { participants, messages: [], survived: true, summons: [] };
@@ -111,7 +113,7 @@ export function resolveDowned(
 
   let ps = replaceParticipant(participants, restoreCharm(victim));
 
-  const messages: string[] = [];
+  const messages: LogLine[] = [];
 
   const summons: SummonRequest[] = [];
 

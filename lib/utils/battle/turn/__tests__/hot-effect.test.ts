@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 
 import { ParticipantSide } from "@/lib/constants/battle";
+import { textOf } from "@/lib/i18n/test/text";
 import { makeParticipant, resolved, seq } from "@/lib/utils/abilities/__tests__/fixtures";
 import { applyEffect, describeEffect } from "@/lib/utils/abilities/registry/effects";
 import type { Effect } from "@/lib/utils/abilities/schema";
@@ -38,7 +39,7 @@ describe("hot", () => {
     const out = processStartOfTurn(target, 2, [target]);
 
     expect(out.participant.combatStats.currentHp).toBe(20);
-    expect(out.abilityMessages.some((m) => m.includes("+1 HP"))).toBe(true);
+    expect(out.abilityMessages.some((m) => textOf(m).includes("+1 HP"))).toBe(true);
     expect(out.participant.battleData.activeEffects[0].duration).toBe(3);
     expect(endTurnCleanup(out.participant).battleData.activeEffects[0].duration).toBe(2);
   });

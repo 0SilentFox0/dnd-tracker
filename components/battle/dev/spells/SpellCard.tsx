@@ -7,6 +7,8 @@ import { ARCHETYPE_LABEL, AURA_LABEL, ELEMENT_LABEL, FRAME_LABEL } from "@/compo
 import { PALETTE } from "@/components/battle/fx/runtime/palette";
 import { EntityIcon } from "@/components/common/EntityIcon";
 import { HudCard, HudPill } from "@/components/hud/page";
+import { lineKey } from "@/lib/i18n/text-ref";
+import { useText } from "@/lib/i18n/use-text";
 
 function FxField({ label, children }: { label: string; children: ReactNode }) {
   return (
@@ -20,6 +22,8 @@ function FxField({ label, children }: { label: string; children: ReactNode }) {
 const list = (items: string[]) => (items.length ? items.join(", ") : "—");
 
 export function SpellCard({ spell, onPlay }: { spell: SpellCardData; onPlay: (spell: SpellCardData) => void }) {
+  const text = useText();
+
   const { spec } = spell;
 
   return (
@@ -46,8 +50,8 @@ export function SpellCard({ spell, onPlay }: { spell: SpellCardData; onPlay: (sp
           <p className="text-sm text-hud-bone">{spell.description}</p>
           <div className="flex flex-wrap gap-1">
             {spell.effects.map((e) => (
-              <HudPill key={e} tone="muted">
-                {e}
+              <HudPill key={lineKey(e)} tone="muted">
+                {text(e)}
               </HudPill>
             ))}
           </div>

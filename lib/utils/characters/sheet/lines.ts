@@ -11,6 +11,7 @@ import { getAbilityModifier } from "@/lib/utils/common/calculations";
 import { signed } from "@/lib/utils/common/format";
 import type { BattleAttack, BattleParticipant } from "@/types/battle";
 import type { AbilityKey, SheetAttack, SheetLine, SheetLineSource, SheetTotal } from "@/types/characters";
+import type { LogLine } from "@/types/text";
 
 export const abilityLabel = (key: AbilityKey) => ABILITY_LABELS[key];
 
@@ -23,13 +24,17 @@ const statLabelKey = (label: string) => {
 };
 
 // the battle damage engine names this step in Ukrainian
-// eslint-disable-next-line no-restricted-syntax -- data convention
+ 
+const labelParts = (label: LogLine): Pick<SheetLine, "label" | "params"> => (typeof label === "string" ? { label } : { label: label.message, params: label.params });
+
+const plainLabel = (label: LogLine) => (typeof label === "string" ? label : label.message);
+
 const HERO_LEVEL_STEP = "Рівень героя";
 
 const asSource = (t: string): SheetLineSource => t as SheetLineSource;
 
 export function abilityLines(p: BattleParticipant, key: AbilityKey, base: number): SheetLine[] {
-  return [{ label: sheetLineKey("base"), value: String(base), source: "base" }, ...bakedStatSources(p, key).map((s) => ({ label: s.label, value: signed(s.value), source: asSource(s.sourceType) }))];
+  return [{ label: sheetLineKey("base"), value: String(base), source: "base" }, ...bakedStatSources(p, key).map((s) => ({ ...labelParts(s.label), value: signed(s.value), source: asSource(s.sourceType) }))];
 }
 
 export function armorTotal(p: BattleParticipant): SheetTotal {
@@ -77,7 +82,7 @@ export function attackSheet(p: BattleParticipant, attack: BattleAttack): SheetAt
     { label: statLabelKey(avg.statLabel), value: signed(statMod), source: "ability" },
     ...avg.steps
       .filter((s) => s.kind === "percent" || (s.kind === "flat" && s.label !== avg.statLabel && s.label !== HERO_LEVEL_STEP))
-      .map((s) => ({ label: s.label, value: s.kind === "percent" ? `${signed(s.value)}%` : signed(s.value), source: damageSources.get(s.label) ?? ("skill" as const) })),
+      .map((s) => ({ ...labelParts(s.label), value: s.kind === "percent" ? `${signed(s.value)}%` : signed(s.value), source: damageSources.get(plainLabel(s.label)) ?? ("skill" as const) })),
     ...(avg.multiplier !== 1 ? [{ label: sheetLineKey("dmMultiplier"), value: `×${avg.multiplier}`, source: "multiplier" as const }] : []),
   ];
 

@@ -16,6 +16,7 @@ import { attackKindOf } from "@/lib/utils/battle/common/attack-kind";
 import type { CritPicker } from "@/lib/utils/battle/crit-choice/types";
 import { damageDiceSlots, heroAttackDamageParts } from "@/lib/utils/battle/damage/hero-damage";
 import { lineOfFire } from "@/lib/utils/battle/grid";
+import { withLines } from "@/lib/utils/battle/log/lines";
 import type { CastableSpell } from "@/lib/utils/battle/types/spell-process";
 import { rollDie } from "@/lib/utils/common/dice";
 import type { Ruleset } from "@/lib/utils/rules";
@@ -132,7 +133,7 @@ export function runAttackPhase(input: AttackPhaseInput): AttackPhaseResult {
     summons.push(...attackResult.summons);
 
     if (strikeDice.serverRolled && attackResult.success) {
-      attackResult.battleAction.resultText = `${attackResult.battleAction.resultText} | 🎲 кубики шкоди кинув сервер: ${strikeDice.serverRolled.join(", ")}`;
+      attackResult.battleAction = withLines(attackResult.battleAction, [`🎲 кубики шкоди кинув сервер: ${strikeDice.serverRolled.join(", ")}`]);
     }
 
     allBattleActions.push(attackResult.battleAction);

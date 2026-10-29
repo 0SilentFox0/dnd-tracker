@@ -3,6 +3,7 @@ import { useTranslations } from "next-intl";
 import { Button } from "@/components/ui/button";
 import { ArtifactSlot } from "@/lib/constants/artifacts";
 import type { InventoryModel, InventorySelection } from "@/lib/hooks/characters";
+import { formatText } from "@/lib/i18n/text-ref";
 import { useTranslator } from "@/lib/i18n/use-translator";
 import type { SpecialItem } from "@/types/inventory";
 
@@ -58,7 +59,7 @@ export function ItemBody({ selection, withTitle = true }: { selection: Inventory
       {effects.length > 0 && (
         <ul className="list-disc pl-5 text-sm text-hud-ink">
           {effects.map((e, i) => (
-            <li key={`${i}-${e}`}>{e}</li>
+            <li key={i}>{formatText(t, e)}</li>
           ))}
         </ul>
       )}

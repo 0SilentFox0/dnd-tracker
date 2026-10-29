@@ -5,6 +5,7 @@ import { hasCondition, removeEffects } from "@/lib/utils/battle/conditions/query
 import { resolveSave, rollSave } from "@/lib/utils/battle/saves";
 import type { Ruleset } from "@/lib/utils/rules";
 import type { ActiveEffect, BattleParticipant } from "@/types/battle";
+import type { LogLine } from "@/types/text";
 
 export type ConcentrationTag = NonNullable<ActiveEffect["concentrationOf"]>;
 
@@ -36,7 +37,7 @@ function strip(ps: BattleParticipant[], casterId: string): { participants: Battl
   }) };
 }
 
-export function dropConcentration(ps: BattleParticipant[], casterId: string, reason: string): { participants: BattleParticipant[]; messages: string[] } {
+export function dropConcentration(ps: BattleParticipant[], casterId: string, reason: string): { participants: BattleParticipant[]; messages: LogLine[] } {
   const stripped = strip(ps, casterId);
 
   if (!stripped) return { participants: ps, messages: [] };
@@ -53,7 +54,7 @@ export function beginConcentration(
   spellName: string,
   rounds: number,
   round = 0,
-): { participants: BattleParticipant[]; messages: string[] } {
+): { participants: BattleParticipant[]; messages: LogLine[] } {
   const dropped = dropConcentration(ps, casterId, "нове заклинання");
 
   const caster = findParticipant(dropped.participants, casterId);
@@ -93,7 +94,7 @@ export function isZoneConcentrationLive(ps: BattleParticipant[], tag: Concentrat
   return !!caster && caster.combatStats.status !== CombatStatus.DEAD && caster.battleData.activeEffects.some((e) => e.concentration?.castId === tag.castId);
 }
 
-export function concentrationCheck(input: { caster: BattleParticipant; damage: number; participants: BattleParticipant[]; rules: Ruleset; rng: () => number }): { participants: BattleParticipant[]; messages: string[] } {
+export function concentrationCheck(input: { caster: BattleParticipant; damage: number; participants: BattleParticipant[]; rules: Ruleset; rng: () => number }): { participants: BattleParticipant[]; messages: LogLine[] } {
   const { caster, damage, participants, rules, rng } = input;
 
   const id = caster.basicInfo.id;

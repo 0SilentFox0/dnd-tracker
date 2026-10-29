@@ -2,7 +2,9 @@ import { describeAbility } from "./registry/effects";
 import { type OwnerKind, readAbilities } from "./read";
 import { AbilitySchema } from "./schema";
 
-export function abilitySummary(kind: OwnerKind, row: { id: string; abilities?: unknown }): string[] {
+import type { LogLine } from "@/types/text";
+
+export function abilitySummary(kind: OwnerKind, row: { id: string; abilities?: unknown }): LogLine[] {
   return readAbilities(kind, row).abilities.filter((a) => AbilitySchema.safeParse(a).success).map(describeAbility);
 }
 

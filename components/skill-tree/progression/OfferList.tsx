@@ -3,6 +3,7 @@ import { useTranslations } from "next-intl";
 
 import { OptimizedImage } from "@/components/common/OptimizedImage";
 import { Button } from "@/components/ui/button";
+import { useText } from "@/lib/i18n/use-text";
 import { useTranslator } from "@/lib/i18n/use-translator";
 import type { ProgressionNode } from "@/lib/utils/skills/progression";
 import { nodeLabel } from "@/lib/utils/skills/progression/labels";
@@ -10,6 +11,8 @@ import type { CharacterProgressionDto } from "@/types/progression";
 
 export function OfferList({ offers, dto, filter, onClearFilter, onSelect }: { offers: ProgressionNode[]; dto: CharacterProgressionDto; filter: { label: string; match: (n: ProgressionNode) => boolean } | null; onClearFilter: () => void; onSelect: (node: ProgressionNode) => void }) {
   const t = useTranslations("skillTree.offers");
+
+  const text = useText();
 
   const tr = useTranslator("skillTree");
 
@@ -44,7 +47,7 @@ export function OfferList({ offers, dto, filter, onClearFilter, onSelect }: { of
                 <span className="min-w-0 text-left">
                   <span className="hud-sc block text-base text-hud-ink">{title}</span>
                   <span className="block text-xs text-hud-gold">{tag}</span>
-                  {skill?.summary[0] && <span className="mt-1 block text-[13px] leading-snug text-[#b8ab95]">{skill.summary.join(" · ")}</span>}
+                  {skill?.summary[0] && <span className="mt-1 block text-[13px] leading-snug text-[#b8ab95]">{skill.summary.map(text).join(" · ")}</span>}
                 </span>
               </Button>
             </li>

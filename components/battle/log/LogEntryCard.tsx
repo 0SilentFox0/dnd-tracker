@@ -6,6 +6,7 @@ import { HpChips } from "./HpChips";
 import { Portrait } from "@/components/battle/hud";
 import { LogEntryDetails } from "@/components/battle/log/LogEntryDetails";
 import { ParticipantSide } from "@/lib/constants/battle";
+import { useText } from "@/lib/i18n/use-text";
 import { cn } from "@/lib/utils";
 import { logEntryView } from "@/lib/utils/battle/view";
 import type { BattleAction, BattleParticipant } from "@/types/battle";
@@ -28,6 +29,8 @@ export const LogEntryCard = memo(function LogEntryCard({ entry, actor, open, onT
   onToggle: (actionIndex: number) => void;
   actions?: ReactNode;
 }) {
+  const text = useText();
+
   const view = useMemo(() => logEntryView(entry), [entry]);
 
   const Icon = view.kind === "hazard" ? Flame : (ICON[entry.actionType] ?? Sparkles);
@@ -47,9 +50,9 @@ export const LogEntryCard = memo(function LogEntryCard({ entry, actor, open, onT
           <span className={cn("hud-sc font-bold", enemy ? "text-hud-bad" : "text-hud-good")}>{actor?.basicInfo.name ?? (entry.actorName || "Бій")}</span>
           <span className="text-[var(--hud-muted)]">· {actor && !view.isTrigger ? view.kindLabel : "тригери"}</span>
         </div>
-        <div className="text-[13.5px] font-medium leading-[18px] text-[var(--ink)]">{view.headline}</div>
+        <div className="text-[13.5px] font-medium leading-[18px] text-[var(--ink)]">{text(view.headline)}</div>
         {view.lines.map((line, n) => (
-          <div key={n} className="mt-0.5 text-[12.5px] leading-[17px] text-[#b3a791]">{line}</div>
+          <div key={n} className="mt-0.5 text-[12.5px] leading-[17px] text-[#b3a791]">{text(line)}</div>
         ))}
         <HpChips hp={view.hp} />
         {view.hasDetails && (

@@ -14,6 +14,7 @@ import { hasEffectMarker } from "@/lib/utils/battle/participant/state";
 import { rollDie } from "@/lib/utils/common/dice";
 import type { Ruleset } from "@/lib/utils/rules";
 import type { BattleMapConfig, BattleParticipant } from "@/types/battle";
+import type { LogLine } from "@/types/text";
 
 /**
  * Результат обробки початку ходу
@@ -22,10 +23,10 @@ export interface StartOfTurnResult {
   participant: BattleParticipant;
   /** повний список: вміння turnStart і смерть від DOT можуть змінити інших */
   participants: BattleParticipant[];
-  damageMessages: string[];
+  damageMessages: LogLine[];
   expiredEffects: string[];
-  abilityMessages: string[];
-  rechargeMessages: string[];
+  abilityMessages: LogLine[];
+  rechargeMessages: LogLine[];
   statusChanged: boolean; // чи змінився статус (unconscious/dead)
   hazard?: StartOfTurnHazard;
 }
@@ -38,10 +39,10 @@ export interface StartOfTurnHazard {
   damageType: string;
 }
 
-function rechargePools(participant: BattleParticipant, rng: Rng): { participant: BattleParticipant; messages: string[] } {
+function rechargePools(participant: BattleParticipant, rng: Rng): { participant: BattleParticipant; messages: LogLine[] } {
   let updated = participant;
 
-  const messages: string[] = [];
+  const messages: LogLine[] = [];
 
   for (const [key, pool] of Object.entries(participant.battleData.pools ?? {})) {
     const usage = participant.battleData.abilityUsage?.[key];
@@ -67,7 +68,7 @@ function rechargePools(participant: BattleParticipant, rng: Rng): { participant:
 interface StartOfTurnDamage {
   participant: BattleParticipant;
   others: BattleParticipant[];
-  damageMessages: string[];
+  damageMessages: LogLine[];
   healMessages: string[];
   expiredEffects: string[];
   hazard?: StartOfTurnHazard;
@@ -87,7 +88,7 @@ function applyStartOfTurnDamage(
 
   let others = allParticipants;
 
-  const damageMessages: string[] = [];
+  const damageMessages: LogLine[] = [];
 
   const healMessages: string[] = [];
 
@@ -239,7 +240,7 @@ export function processStartOfTurn(
     ? replaceParticipant(others, updatedParticipant)
     : [updatedParticipant];
 
-  const abilityMessages: string[] = [...healMessages];
+  const abilityMessages: LogLine[] = [...healMessages];
 
   if (updatedParticipant.battleData.airborne && updatedParticipant.battleData.airborne.since < currentRound) {
     const landed = landDive(participants, id, { map, rng, rules });

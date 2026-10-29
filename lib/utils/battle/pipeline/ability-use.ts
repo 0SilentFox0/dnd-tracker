@@ -5,6 +5,7 @@ import type { AbilityRunContext } from "@/lib/utils/abilities/engine/core/types"
 import { cooldownLeft, poolAffordable, withinCountLimits } from "@/lib/utils/abilities/engine/core/usage";
 import { conditionRequiresStill, evaluateCondition } from "@/lib/utils/abilities/registry/conditions";
 import { canActNow } from "@/lib/utils/battle/common/control";
+import { lineText, logFields } from "@/lib/utils/battle/log/lines";
 import { applyMainActionUsed } from "@/lib/utils/battle/participant";
 import type { BattleMutationContext, MutationResult } from "@/lib/utils/battle/pipeline/run-battle-mutation";
 import { BattleAccessError, BattleRuleError } from "@/lib/utils/battle/store";
@@ -83,7 +84,9 @@ export async function runAbilityUse(ctx: BattleMutationContext, req: AbilityUseR
 
   const participants = usage.spendFirst ? summoned.order : updateParticipant(summoned.order, id, spend[trigger]);
 
-  const text = run.fired.length ? [...run.messages, ...summoned.messages].join(" | ") : `${ability.name}: не спрацювало`;
+  const text = run.fired.length ? lineText([...run.messages, ...summoned.messages], " | ") : `${ability.name}: не спрацювало`;
+
+  const abilityText = logFields(text || ability.name);
 
   return {
     participants,
@@ -93,8 +96,8 @@ export async function runAbilityUse(ctx: BattleMutationContext, req: AbilityUseR
         type: "ability",
         round: ctx.scene.round,
         actorId: id,
-        resultText: text || ability.name,
-        details: { actorName: participant.basicInfo.name, actorSide: participant.basicInfo.side, actionDetails: { abilityKey: ability.key, skillName: ability.name } },
+        ...abilityText,
+        details: { actorName: participant.basicInfo.name, actorSide: participant.basicInfo.side, actionDetails: { abilityKey: ability.key, skillName: ability.name }, ...(abilityText.log && { log: abilityText.log }) },
       },
     ],
   };

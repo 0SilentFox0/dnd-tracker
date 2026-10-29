@@ -10,6 +10,7 @@ import { meleeReachCells } from "@/lib/utils/battle/grid/attack-reach";
 import { hasEffectMarker } from "@/lib/utils/battle/participant/state";
 import type { Ruleset } from "@/lib/utils/rules";
 import type { BattleAction, BattleMapConfig, BattleParticipant, GridPoint } from "@/types/battle";
+import type { LogLine } from "@/types/text";
 
 export interface OpportunityInput {
   participants: BattleParticipant[];
@@ -28,7 +29,7 @@ export interface OpportunityResult {
   stopAt: GridPoint | null;
   cost: number;
   actions: BattleAction[];
-  messages: string[];
+  messages: LogLine[];
 }
 
 const canProvoke = (e: BattleParticipant, moverId: string) => canReact(e) && isOnMap(e) && !conditionSourceIds(e, "charmed").includes(moverId);
@@ -41,7 +42,7 @@ export function resolveOpportunityAttacks(input: OpportunityInput): OpportunityR
 
   const actions: BattleAction[] = [];
 
-  const messages: string[] = [];
+  const messages: LogLine[] = [];
 
   const mover0 = findParticipant(flow.ps, moverId);
 

@@ -6,9 +6,11 @@ import { HitFrame } from "@/components/battle/fx/PortraitFx";
 import { EffectIcon, HealthBar, HealthLabel, hitFlashClass, HitFloat, ZoomablePortrait } from "@/components/battle/hud";
 import { MonsterStatblock } from "@/components/common/MonsterStatblock";
 import { useBattleSceneData, useFxImpacts, useHitFx } from "@/lib/hooks/battle";
+import { lineKey } from "@/lib/i18n/text-ref";
+import { useText } from "@/lib/i18n/use-text";
 import { cn } from "@/lib/utils";
 import { getEffectiveArmorClass } from "@/lib/utils/battle/participant/helpers";
-import { canSeeExactStats, effectLines, formatKnownArmorClass, resolveKnownArmorClass, resolveObservedTraits } from "@/lib/utils/battle/view";
+import { canSeeExactStats, effectLines, effectTitle, formatKnownArmorClass, resolveKnownArmorClass, resolveObservedTraits } from "@/lib/utils/battle/view";
 import type { BattleParticipant } from "@/types/battle";
 
 function Section({ title, children }: { title: string; children: ReactNode }) {
@@ -30,6 +32,8 @@ export function ParticipantDetails({ participant }: ParticipantDetailsProps) {
 }
 
 function ParticipantDetailsBody({ participant: live }: ParticipantDetailsProps) {
+  const text = useText();
+
   const { battle, viewer, effects: allEffects } = useBattleSceneData();
 
   const impactFor = useFxImpacts();
@@ -78,8 +82,8 @@ function ParticipantDetailsBody({ participant: live }: ParticipantDetailsProps) 
               <EffectIcon effect={e} size={36} />
             </span>
             <div className="min-w-0 flex-1">
-              <div className="flex justify-between text-[15px] font-medium text-[var(--ink)]"><span>{e.name}</span><span className="text-[13px] font-normal text-[var(--hud-muted)]">{e.zone ? "зона" : e.permanent ? "постійно" : `${e.duration} р.`}</span></div>
-              {effectLines(e).map((line) => <p key={line} className="mt-0.5 text-[13px] leading-[18px] text-[#a89c88]">{line}</p>)}
+              <div className="flex justify-between text-[15px] font-medium text-[var(--ink)]"><span>{text(effectTitle(e))}</span><span className="text-[13px] font-normal text-[var(--hud-muted)]">{e.zone ? "зона" : e.permanent ? "постійно" : `${e.duration} р.`}</span></div>
+              {effectLines(e).map(text).map((line) => <p key={line} className="mt-0.5 text-[13px] leading-[18px] text-[#a89c88]">{line}</p>)}
               {e.source && <p className="text-[13px] leading-[18px] text-[#a89c88]">Від: {e.source.abilityName ? `${e.source.abilityName} (${e.source.name})` : e.source.name}</p>}
             </div>
           </div>
@@ -88,8 +92,8 @@ function ParticipantDetailsBody({ participant: live }: ParticipantDetailsProps) 
       {traits.length > 0 && (
         <Section title="Помічено в бою">
           {traits.map((t) => (
-            <div key={t.label} className="flex min-h-10 items-center justify-between border-b border-white/[.08]">
-              <span>{t.label}</span>
+            <div key={lineKey(t.label)} className="flex min-h-10 items-center justify-between border-b border-white/[.08]">
+              <span>{text(t.label)}</span>
               <span className="font-medium text-[var(--ink)]">{t.kind === "immunity" ? "імунітет" : `${t.value}%`}</span>
             </div>
           ))}

@@ -1,6 +1,7 @@
 import { coreTimedKey } from "./effects";
 import { reject } from "./errors";
 
+import { joinLines } from "@/lib/i18n/text-ref";
 import { findParticipant, isActive, replaceParticipant } from "@/lib/utils/abilities/engine/core/participants";
 import { checkBonus, rollCheck } from "@/lib/utils/battle/checks";
 import { applyCondition5e, conditionSourceIds, hasCondition, PERMANENT_ROUNDS, removeEffects } from "@/lib/utils/battle/conditions";
@@ -10,6 +11,7 @@ import { resolveSave, rollSave } from "@/lib/utils/battle/saves";
 import { getSpellSaveDC } from "@/lib/utils/common/calculations";
 import type { Ruleset } from "@/lib/utils/rules";
 import type { BattleMapConfig, BattleParticipant, GridPoint } from "@/types/battle";
+import type { LogLine } from "@/types/text";
 
 type RollInput = { participants: BattleParticipant[]; rules: Ruleset; rng: () => number };
 
@@ -76,7 +78,7 @@ export interface GrappleActionInput extends RollInput {
 
 export interface GrappleActionResult {
   participants: BattleParticipant[];
-  message: string;
+  message: LogLine;
 }
 
 function applyHeld(input: GrappleActionInput, target: BattleParticipant, key: "grappled" | "prone", timedKey: string) {
@@ -111,7 +113,7 @@ export function runGrapple(input: GrappleActionInput): GrappleActionResult {
 
   const result = applyHeld(input, target, "grappled", grappleKey(actor.basicInfo.id));
 
-  return { participants: result.participants, message: [`🤲 ${name}: Схопити ${check.message}`, ...result.messages].join("; ") };
+  return { participants: result.participants, message: joinLines([`🤲 ${name}: Схопити ${check.message}`, ...result.messages], "; ") };
 }
 
 export function runShove(input: GrappleActionInput & { mode: "prone" | "push" }): GrappleActionResult {
@@ -138,16 +140,16 @@ export function runShove(input: GrappleActionInput & { mode: "prone" | "push" })
   if (dest && map && canStand(map, participants, target, dest)) {
     messages.push(`${target.basicInfo.name} відштовхнуто на клітинку`);
 
-    return { participants: replaceParticipant(participants, { ...target, battleData: { ...target.battleData, position: dest } }), message: messages.join("; ") };
+    return { participants: replaceParticipant(participants, { ...target, battleData: { ...target.battleData, position: dest } }), message: joinLines(messages, "; ") };
   }
 
   if (mode === "push") messages.push("відштовхнути нікуди — лише повалено");
 
-  if (hasCondition(target, "prone")) return { participants, message: messages.join("; ") };
+  if (hasCondition(target, "prone")) return { participants, message: joinLines(messages, "; ") };
 
   const result = applyHeld(input, target, "prone", coreTimedKey("shove", actor.basicInfo.id));
 
-  return { participants: result.participants, message: [...messages, ...result.messages].join("; ") };
+  return { participants: result.participants, message: joinLines([...messages, ...result.messages], "; ") };
 }
 
 export function runEscape(input: Omit<GrappleActionInput, "targetId">): GrappleActionResult {
@@ -181,8 +183,8 @@ function grapplerIds(p: BattleParticipant): Set<string> {
 }
 
 /** Без захоплень повертає той самий масив. */
-export function releaseInvalidGrapples(ps: BattleParticipant[], map?: BattleMapConfig | null): { participants: BattleParticipant[]; messages: string[] } {
-  const messages: string[] = [];
+export function releaseInvalidGrapples(ps: BattleParticipant[], map?: BattleMapConfig | null): { participants: BattleParticipant[]; messages: LogLine[] } {
+  const messages: LogLine[] = [];
 
   if (!ps.some((p) => p.battleData.activeEffects.some(isGrappleEffect))) return { participants: ps, messages };
 

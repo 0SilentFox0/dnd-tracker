@@ -5,14 +5,17 @@ import { runAdvanceTurnLoop } from "./run-advance-turn-loop";
 import { applyVictoryCompletion } from "./turn-helpers";
 import { resetTurnState } from "./turn-state";
 
+import { joinLines } from "@/lib/i18n/text-ref";
 import { findParticipant, replaceParticipant, takesTurn } from "@/lib/utils/abilities/engine/core/participants";
 import { runAbilities } from "@/lib/utils/abilities/engine/core/run-abilities";
 import { pruneExpiredTerrain } from "@/lib/utils/battle/grid/terrain";
+import { logFields } from "@/lib/utils/battle/log/lines";
 import { actionsPerTurnPool, setExtraActionPool } from "@/lib/utils/battle/participant/helpers";
 import { dropBattleFlag, reserveOf } from "@/lib/utils/battle/participant/reserve";
 import type { BattleSceneState, ScenePatch } from "@/lib/utils/battle/store";
 import type { Ruleset } from "@/lib/utils/rules";
 import type { BattleAction, BattleMapConfig, BattleParticipant } from "@/types/battle";
+import type { LogLine } from "@/types/text";
 
 export interface AdvanceTurnInput {
   rng?: () => number;
@@ -191,7 +194,7 @@ function extraTurnAction(p: BattleParticipant, scene: BattleSceneState): BattleA
   };
 }
 
-function turnEndAction(p: BattleParticipant, scene: AdvanceTurnInput["scene"], messages: string[]): BattleAction {
+function turnEndAction(p: BattleParticipant, scene: AdvanceTurnInput["scene"], messages: LogLine[]): BattleAction {
   return {
     id: `triggers-turn-end-${p.basicInfo.id}-${Date.now()}`,
     battleId: scene.id,
@@ -204,7 +207,7 @@ function turnEndAction(p: BattleParticipant, scene: AdvanceTurnInput["scene"], m
     actionType: "ability",
     targets: [],
     actionDetails: {},
-    resultText: `Кінець ходу: ${messages.join("; ")}`,
+    ...logFields(joinLines([`Кінець ходу: `, joinLines(messages, "; ")])),
     hpChanges: [],
     isCancelled: false,
   };

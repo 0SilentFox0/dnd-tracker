@@ -3,14 +3,11 @@ import type { CHOICE_KINDS, FEAT_TYPES } from "@/lib/constants/choices";
 import type { DndSkill } from "@/lib/constants/skills";
 import type { Ability } from "@/types/abilities";
 import type { CharacterClassEntry } from "@/types/classes";
+import type { TextRef } from "@/types/text";
+
+export type { TextRef };
 
 export type TextParams = Record<string, string | number>;
-
-/** A translation key with params, or plain content text (shown as is). */
-export interface TextRef {
-  message: string;
-  params?: TextParams;
-}
 
 export type ChoiceKind = (typeof CHOICE_KINDS)[number];
 

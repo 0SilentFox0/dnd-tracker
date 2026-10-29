@@ -1,12 +1,12 @@
 import { getHeroMaxHpBreakdown, type HeroHpFormula } from "@/lib/constants/hero-scaling";
 import { classHp, hitDiceLabel } from "@/lib/utils/characters/classes";
 import { sheetLineKey } from "@/lib/utils/characters/sheet/line-key";
-import type { TextParams } from "@/types/choices";
+import type { TextRef } from "@/types/choices";
 import type { ResolvedClassEntry } from "@/types/classes";
 
 export interface HpBreakdownLine {
   label: string;
-  params?: TextParams;
+  params?: TextRef["params"];
 }
 
 export function heroBaseHp(c: { level: number; constitution: number; archetype?: string | null }, hp?: HeroHpFormula) {

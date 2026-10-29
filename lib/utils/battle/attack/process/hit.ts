@@ -17,6 +17,7 @@ import { dealResistedHits } from "@/lib/utils/battle/damage/resisted-ability-dam
 import type { AttackRollResult } from "@/lib/utils/battle/types/attack";
 import type { CastableSpell } from "@/lib/utils/battle/types/spell-process";
 import type { BattleAttack } from "@/types/battle";
+import type { LogLine } from "@/types/text";
 
 export interface ResolveHitParams {
   flow: ActionFlow;
@@ -147,8 +148,10 @@ export function resolveHit(p: ResolveHitParams): { hitDamage: ComputeHitDamageRe
 
 const ABILITY_HIT_LINE = /^💥 (.+?): .+ −(\d+) HP$/;
 
-function abilityDamageLines(messages: string[], targetName: string, total: number): string[] {
+function abilityDamageLines(messages: LogLine[], targetName: string, total: number): string[] {
   const lines = messages.flatMap((m) => {
+    if (typeof m !== "string") return [];
+
     const match = ABILITY_HIT_LINE.exec(m);
 
     return match && m.includes(`${match[1]}: ${targetName} −`) ? [`${match[1]}: +${match[2]}`] : [];

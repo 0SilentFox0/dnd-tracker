@@ -4,14 +4,15 @@ import { resolveSave } from "@/lib/utils/battle/saves/legendary";
 import { rollSave } from "@/lib/utils/battle/saves/roll-save";
 import type { Ruleset } from "@/lib/utils/rules";
 import type { BattleParticipant } from "@/types/battle";
+import type { LogLine } from "@/types/text";
 
 export function rollSaveEnds(
   p: BattleParticipant,
   participants: BattleParticipant[],
   rules: Ruleset | undefined,
   rng: () => number,
-): { participant: BattleParticipant; messages: string[] } {
-  const messages: string[] = [];
+): { participant: BattleParticipant; messages: LogLine[] } {
+  const messages: LogLine[] = [];
 
   const freed = new Set<string>();
 

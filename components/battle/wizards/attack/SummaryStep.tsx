@@ -3,10 +3,13 @@ import { Loader2, Swords } from "lucide-react";
 import { type AttackWizardModel,btn, primaryBtn } from "./shared";
 
 import { CritWaitingNote } from "@/components/battle/crit-choice/CritWaitingNote";
+import { useText } from "@/lib/i18n/use-text";
 import { cn } from "@/lib/utils";
 import { formatDamageStep } from "@/lib/utils/battle/view";
 
 export function SummaryStep({ wizard: { state, view, actions } }: { wizard: AttackWizardModel }) {
+  const text = useText();
+
   const submitting = state.step === "submitting";
 
   return (
@@ -15,7 +18,7 @@ export function SummaryStep({ wizard: { state, view, actions } }: { wizard: Atta
         <div key={k} className="mt-1">
           {list.map((s, i) => (
             <div key={i} className={cn("flex min-h-9 items-center justify-between border-b border-white/[.06] text-sm", s.side === "attacker" && s.kind === "percent" && s.value > 0 && "text-[#cdb87e]", s.side === "target" && "text-hud-danger")}>
-              <span>{s.label}</span>
+              <span>{text(s.label)}</span>
               <span>{formatDamageStep(s)}</span>
             </div>
           ))}

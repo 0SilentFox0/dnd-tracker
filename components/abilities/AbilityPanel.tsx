@@ -15,6 +15,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { useText } from "@/lib/i18n/use-text";
 import { describeAbility } from "@/lib/utils/abilities/registry/effects";
 import type { Ability } from "@/lib/utils/abilities/schema";
 
@@ -26,6 +27,8 @@ export interface AbilitySectionProps {
 
 export function AbilityPanel({ ability, path, actions }: { ability: Ability; path: string; actions: { onChange: (a: Ability) => void; onRemove: () => void } }) {
   const t = useTranslations("abilities.panel");
+
+  const text = useText();
 
   const section = { ability, path, onChange: actions.onChange };
 
@@ -45,7 +48,7 @@ export function AbilityPanel({ ability, path, actions }: { ability: Ability; pat
           <X className="h-4 w-4" />
         </Button>
       </div>
-      <p className="text-xs text-[#b8ab95]">{describeAbility(ability)}</p>
+      <p className="text-xs text-[#b8ab95]">{text(describeAbility(ability))}</p>
       <div className="space-y-1">
         <Label htmlFor={`${path}.description`} className="text-xs text-muted-foreground">
           {t("description")}

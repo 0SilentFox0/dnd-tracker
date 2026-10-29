@@ -1,15 +1,22 @@
+import { critTexts } from "./crit-outcome";
 import { type DamageBreakdownRow, parseDamageBreakdown } from "./damage-breakdown";
 
 import { ATTACK_KIND_LABELS, type AttackType } from "@/lib/constants/battle";
+import { formatText, joinLines } from "@/lib/i18n/text-ref";
+import type { Translator } from "@/lib/i18n/translator";
 import type { BattleAction } from "@/types/battle";
+import type { LogLine } from "@/types/text";
 
-export type LogDetailItem = { kind: "text"; label?: string; text: string } | { kind: "damage"; raw: string; rows: DamageBreakdownRow[] };
+export type LogDetailItem = { kind: "text"; label?: LogLine; text: LogLine } | { kind: "damage"; rows: DamageBreakdownRow[]; raw?: string };
 
-const itemText = (i: LogDetailItem) => (i.kind === "damage" ? "Урон: " + i.raw : i.label ? `${i.label}: ${i.text}` : i.text);
+const rowText = (t: Translator, row: DamageBreakdownRow) => [formatText(t, row.label), row.value].filter(Boolean).join(" ");
+
+const itemText = (t: Translator, i: LogDetailItem) =>
+  i.kind === "damage" ? "Урон: " + (i.raw ?? i.rows.map((row) => rowText(t, row)).join("; ")) : i.label ? `${formatText(t, i.label)}: ${formatText(t, i.text)}` : formatText(t, i.text);
 
 /** Рядки розгорнутого блоку деталей запису логу */
-export function getLogEntryDetailLines(action: BattleAction): string[] {
-  return getLogEntryDetailItems(action).map(itemText);
+export function getLogEntryDetailLines(action: BattleAction, t: Translator): string[] {
+  return getLogEntryDetailItems(action).map((item) => itemText(t, item));
 }
 
 export function getLogEntryDetailItems(action: BattleAction): LogDetailItem[] {
@@ -17,7 +24,7 @@ export function getLogEntryDetailItems(action: BattleAction): LogDetailItem[] {
 
   const lines: LogDetailItem[] = [];
 
-  const push = (label: string | undefined, text: string) => lines.push({ kind: "text", label, text });
+  const push = (label: LogLine | undefined, text: LogLine) => lines.push({ kind: "text", label, text });
 
   if (action.actionType === "attack" && d?.attackKind) {
     push("Тип", (ATTACK_KIND_LABELS[d.attackKind as AttackType] ?? d.attackKind) + " атака");
@@ -40,10 +47,13 @@ export function getLogEntryDetailItems(action: BattleAction): LogDetailItem[] {
   if (d?.isCriticalFail === true) push(undefined, "Критичний провал");
 
   if (d?.criticalEffect) {
-    push("Ефект [d10: " + d.criticalEffect.id + "]", d.criticalEffect.name + " — " + d.criticalEffect.description);
+    const { name, description } = critTexts(d.criticalEffect, action);
+
+    push("Ефект [d10: " + d.criticalEffect.id + "]", joinLines([name, " — ", description ?? ""]));
   }
 
-  if (d?.damageBreakdown) lines.push({ kind: "damage", raw: d.damageBreakdown, rows: parseDamageBreakdown(d.damageBreakdown) });
+  if (d?.damageRows?.length) lines.push({ kind: "damage", rows: d.damageRows });
+  else if (d?.damageBreakdown) lines.push({ kind: "damage", raw: d.damageBreakdown, rows: parseDamageBreakdown(d.damageBreakdown) });
 
   if (d?.spellName) {
     const level = d.spellLevel != null ? " (рівень " + d.spellLevel + ")" : "";
@@ -63,7 +73,8 @@ export function getLogEntryDetailItems(action: BattleAction): LogDetailItem[] {
 
   if (d?.d10Roll != null) push("Кидок d10", String(d.d10Roll));
 
-  if (action.resultText) push(undefined, action.resultText);
+  if (action.log?.length) push(undefined, joinLines(action.log, " | "));
+  else if (action.resultText) push(undefined, action.resultText);
 
   return lines;
 }

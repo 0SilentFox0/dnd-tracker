@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 
+import { textOf } from "@/lib/i18n/test/text";
 import { describeAbility } from "@/lib/utils/abilities/registry/effects";
 import { AbilitySchema } from "@/lib/utils/abilities/schema";
 import { ABILITY_TEMPLATES } from "@/lib/utils/abilities/templates";
@@ -12,7 +13,7 @@ describe("templates", () => {
       const a = { id: "a1", ...t.build({ name: "n", note: "t" }) };
 
       expect(AbilitySchema.safeParse(a).success, t.id).toBe(true);
-      expect(describeAbility(a).length).toBeGreaterThan(0);
+      expect(textOf(describeAbility(a)).length).toBeGreaterThan(0);
     }
   });
 });

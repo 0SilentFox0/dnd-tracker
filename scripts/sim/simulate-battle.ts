@@ -8,6 +8,7 @@
  */
 import type { Prisma } from "@prisma/client";
 
+import { resultTextOf } from "./log-text";
 import { artifactRows, DEMON_RACE, DEMON_UNIT, DRAGON_SET, FAIR_CAMPAIGN_NAME, FAIR_HEROES, FAIR_UNITS, FAIR_WEAPONS, MECHANICS_CAMPAIGN_NAME, MECHANICS_UNITS, RACES, RACIAL_CAMPAIGN_NAME, RACIAL_UNITS, SIM_CAMPAIGN_NAME, SIM_PLAYER, SIM_USER, SKILLS, SPELL_MODEL_CAMPAIGN_NAME, SPELL_MODEL_UNITS, UNITS } from "./simulate-battle-scenario";
 
 import { buildLibrary } from "@/data/library/build";
@@ -245,7 +246,7 @@ async function call<T>(label: string, options: Omit<RunBattleMutationOptions<T>,
     for (const e of delta.log) {
       if (!log.some((l) => l.actionIndex === e.actionIndex)) log.push(e);
 
-      if (!quiet) console.info(`   📜 [р${e.round}] ${e.resultText}`);
+      if (!quiet) console.info(`   📜 [р${e.round}] ${resultTextOf(e)}`);
     }
   } else if (res.status === 200) {
     state = await readState();
@@ -445,7 +446,7 @@ async function scenario() {
 
   const lyraHit = await attack("Ліра", "Орк-шаман #1", 17, [5]);
 
-  check("Ліра влучає в шамана", lyraHit.details?.isHit === true, lyraHit.ev?.resultText ?? "");
+  check("Ліра влучає в шамана", lyraHit.details?.isHit === true, resultTextOf(lyraHit.ev) ?? "");
   check("Аура шамана: AC шамана 11 + 1 = 12", lyraHit.details?.targetAC === 12, `targetAC ${lyraHit.details?.targetAC}`);
   check("Кровопускання наклало DOT на шамана", effectNames(by("Орк-шаман #1")).length > 0, JSON.stringify(by("Орк-шаман #1").battleData.activeEffects.map((e) => [e.name, e.duration])));
 
@@ -465,8 +466,8 @@ async function scenario() {
 
   const spellEv = logSince(beforeSpell).find((e) => e.actionType === "spell");
 
-  check("Мирон (гравець) кастує Вогняну стрілу", sp.status === 200, spellEv?.resultText ?? "");
-  check("Лог закляття не показує шкоду, якої не було", !/завдавши/.test(spellEv?.resultText ?? ""), spellEv?.resultText ?? "");
+  check("Мирон (гравець) кастує Вогняну стрілу", sp.status === 200, resultTextOf(spellEv) ?? "");
+  check("Лог закляття не показує шкоду, якої не було", !/завдавши/.test(resultTextOf(spellEv) ?? ""), resultTextOf(spellEv) ?? "");
   check("Голем з імунітетом до вогню не отримує шкоди", hp(by("Кам'яний голем #1")) === golemHpBefore, `HP ${golemHpBefore} → ${hp(by("Кам'яний голем #1"))}`);
   check("Слот 1 рівня витрачено (каст гравця)", by("Мирон").spellcasting.spellSlots["1"]?.current === 1, JSON.stringify(by("Мирон").spellcasting.spellSlots));
 
@@ -479,7 +480,7 @@ async function scenario() {
   const g1 = await attack("Гоблін-лучник #1", "Торін", 12, [4]);
 
   check("AC Торіна в атаці = 16 + 2 (шкіра) + 1 (аура сету) = 19", g1.details?.targetAC === 19, `targetAC ${g1.details?.targetAC}`);
-  check("Гоблін промахується по Торіну (16 < 19)", g1.details?.isHit === false, g1.ev?.resultText ?? "");
+  check("Гоблін промахується по Торіну (16 < 19)", g1.details?.isHit === false, resultTextOf(g1.ev) ?? "");
 
   await until("Гоблін-лучник #2");
 
@@ -505,7 +506,7 @@ async function scenario() {
   check(
     "Відсіч при влучанні: голем відповідає Торіну",
     golemRet?.actorName === "Кам'яний голем #1" && golemRet.actionDetails.isHit === true && hp(by("Торін")) < torinHp0,
-    `${golemRet?.resultText ?? "немає події"} → HP ${torinHp0} → ${hp(by("Торін"))}`,
+    `${resultTextOf(golemRet) ?? "немає події"} → HP ${torinHp0} → ${hp(by("Торін"))}`,
   );
 
   const dealt = golemHp1 - hp(by("Кам'яний голем #1"));
@@ -515,7 +516,7 @@ async function scenario() {
 
   await until("Орк-шаман #1");
 
-  const shamanTurn = logSince(0).filter((e) => e.round === 1).map((e) => e.resultText);
+  const shamanTurn = logSince(0).filter((e) => e.round === 1).map((e) => resultTextOf(e));
 
   check("На початку ходу шамана тікнув DOT і спрацювало зцілення", shamanTurn.some((t) => /bleed|кров/i.test(t)) && shamanTurn.some((t) => /зцілення|Шаманське/i.test(t)), shamanTurn.slice(-4).join(" | "));
   rolls.push(die(15, 20), die(15, 20));
@@ -524,7 +525,7 @@ async function scenario() {
 
   const myronRet = shamanSwing.events.filter((e) => e.actionType === "retaliation");
 
-  check("Відсіч при промаху: Мирон відповідає шаману", shamanSwing.details?.isHit === false && myronRet[0]?.actorName === "Мирон", myronRet.map((e) => e.resultText).join(" | ") || "немає події");
+  check("Відсіч при промаху: Мирон відповідає шаману", shamanSwing.details?.isHit === false && myronRet[0]?.actorName === "Мирон", myronRet.map((e) => resultTextOf(e)).join(" | ") || "немає події");
   check(
     "Контратака людини +50% у кроках шкоди відсічі",
     Object.values(myronRet[0]?.actionDetails.damageSteps ?? {}).flat().some((s) => s.label === "Контратака" && s.value === 1.5),
@@ -538,7 +539,7 @@ async function scenario() {
 
   const lethal = await attack("Кам'яний голем #1", "Торін", 18, [6, 6]);
 
-  check("Летальний удар: Невмирущий лишає Торіна з 1 HP", hp(by("Торін")) === 1, `${lethal.ev?.resultText ?? ""} → HP ${hp(by("Торін"))}`);
+  check("Летальний удар: Невмирущий лишає Торіна з 1 HP", hp(by("Торін")) === 1, `${resultTextOf(lethal.ev) ?? ""} → HP ${hp(by("Торін"))}`);
 
   console.info("\n🎲 Раунд 2");
   await until("Ліра");
@@ -579,7 +580,7 @@ async function scenario() {
 
   const secondBattleUse = await call("bonus-action", BONUS, { participantId: by("Ліра").basicInfo.id, abilityKey: key });
 
-  check("DOT шамана: 2 тики, потім ефект знято", shamanFx >= 0 && log.filter((e) => /bleed шкоди від Кровопускання/.test(e.resultText) && /Орк-шаман/.test(e.resultText)).length === 2 && !effectNames(by("Орк-шаман #1")).includes("Кровопускання"), log.filter((e) => /Кровопускання/.test(e.resultText)).map((e) => `р${e.round}: ${e.resultText}`).join(" | "));
+  check("DOT шамана: 2 тики, потім ефект знято", shamanFx >= 0 && log.filter((e) => /bleed шкоди від Кровопускання/.test(resultTextOf(e)) && /Орк-шаман/.test(resultTextOf(e))).length === 2 && !effectNames(by("Орк-шаман #1")).includes("Кровопускання"), log.filter((e) => /Кровопускання/.test(resultTextOf(e))).map((e) => `р${e.round}: ${resultTextOf(e)}`).join(" | "));
   check("Друге дихання вдруге за бій не лікує (perBattle 1)", secondBattleUse.status !== 200 || hp(by("Ліра")) === lyraHp2, `status ${secondBattleUse.status} ${JSON.stringify(secondBattleUse.body).slice(0, 120)}, HP ${lyraHp2} → ${hp(by("Ліра"))}`);
 
   console.info("\n🏁 Добиваємо ворогів");
@@ -820,7 +821,7 @@ async function newMechanics() {
   quiet = false;
   check("Мітки складаються: три влучання — три мітки на цілі", countMarks(by(u("Опудало")), "seq", hunterId) === 3, `міток: ${countMarks(by(u("Опудало")), "seq", hunterId)}`);
   check("Шкода росте з кількістю міток", h1.dealt > 0 && h2.dealt > h1.dealt && h3.dealt > h2.dealt, `${h1.dealt} → ${h2.dealt} → ${h3.dealt}`);
-  check("У лозі видно шанс спрацювання («шанс 100 %»)", log.some((e) => /Азарт.*\(шанс 100 %\)/.test(e.resultText)), log.filter((e) => /шанс/.test(e.resultText)).map((e) => e.resultText).join(" | ") || "немає");
+  check("У лозі видно шанс спрацювання («шанс 100 %»)", log.some((e) => /Азарт.*\(шанс 100 %\)/.test(resultTextOf(e))), log.filter((e) => /шанс/.test(resultTextOf(e))).map((e) => resultTextOf(e)).join(" | ") || "немає");
   quiet = true;
 
   await reach(u("Страж"));
@@ -841,7 +842,7 @@ async function newMechanics() {
   quiet = false;
   check(
     "Захист ділить шкоду між підопічним і стражем",
-    hp(by(u("Страж"))) < guardianHp && hp(by(u("Підопічний"))) < wardHp && logSince(beforeGuard).some((e) => /🛡/.test(e.resultText)),
+    hp(by(u("Страж"))) < guardianHp && hp(by(u("Підопічний"))) < wardHp && logSince(beforeGuard).some((e) => /🛡/.test(resultTextOf(e))),
     `страж ${guardianHp} → ${hp(by(u("Страж")))}, підопічний ${wardHp} → ${hp(by(u("Підопічний")))}`,
   );
   quiet = true;
@@ -880,7 +881,7 @@ async function newMechanics() {
   quiet = false;
   check(
     "Випереджальний удар вбиває нападника і скасовує атаку",
-    strike.status === 200 && by(u("Новачок")).combatStats.status !== "active" && hp(by(u("Дуелянт"))) === duelistHp && strike.events.some((e) => /Випереджальний удар/.test(e.resultText)),
+    strike.status === 200 && by(u("Новачок")).combatStats.status !== "active" && hp(by(u("Дуелянт"))) === duelistHp && strike.events.some((e) => /Випереджальний удар/.test(resultTextOf(e))),
     `Новачок ${by(u("Новачок")).combatStats.status}, Дуелянт HP ${duelistHp} → ${hp(by(u("Дуелянт")))}`,
   );
 }
@@ -942,7 +943,7 @@ async function racialMechanics() {
 
     const ev = logSince(before).find((e) => e.actionType === "attack");
 
-    return { details: ev?.actionDetails, text: ev?.resultText ?? "" };
+    return { details: ev?.actionDetails, text: resultTextOf(ev) ?? "" };
   };
 
   for (const name of ["Кістяк #1", "Кістяк #2", "Жертва #1"]) await setHp(name, 0);
@@ -1142,7 +1143,7 @@ async function spellModel() {
 
   quiet = false;
   check("Слово світла: людина має імунітет, гобліни отримують шкоду", word.status === 200 && hpOf("Воїн") === enemyHp.get("Воїн") && hpOf("Гоблін А") === (enemyHp.get("Гоблін А") ?? 0) - 3 * wordDice, `Воїн ${enemyHp.get("Воїн")} → ${hpOf("Воїн")}, Гоблін А ${enemyHp.get("Гоблін А")} → ${hpOf("Гоблін А")}`);
-  check("Слово світла: у логу видно імунітет раси", log.some((e) => /імунітет раси/.test(e.resultText)), log.find((e) => e.actionType === "spell" && /Слово світла/.test(e.resultText))?.resultText ?? "");
+  check("Слово світла: у логу видно імунітет раси", log.some((e) => /імунітет раси/.test(resultTextOf(e))), resultTextOf(log.find((e) => e.actionType === "spell" && /Слово світла/.test(resultTextOf(e)))) ?? "");
   quiet = true;
 
   const sides = ["Хаотик", "Паладин", "Гоблін А"].map((n) => [n, hpOf(n)] as const);
@@ -1191,7 +1192,7 @@ async function spellModel() {
   await nextTurn();
 
   quiet = false;
-  check("Шал: ворог під шалом б'є свого союзника в свій хід", frenzy.status === 200 && frenzied && hpOf(target) < targetHp && logSince(beforeFrenzy).some((e) => /Шал/.test(e.resultText)), `${target} ${targetHp} → ${hpOf(target)}; ${logSince(beforeFrenzy).map((e) => e.resultText).join(" | ").slice(0, 160)}`);
+  check("Шал: ворог під шалом б'є свого союзника в свій хід", frenzy.status === 200 && frenzied && hpOf(target) < targetHp && logSince(beforeFrenzy).some((e) => /Шал/.test(resultTextOf(e))), `${target} ${targetHp} → ${hpOf(target)}; ${logSince(beforeFrenzy).map((e) => resultTextOf(e)).join(" | ").slice(0, 160)}`);
   quiet = true;
 
   const puppet = await cast("Лялькар", spells.puppeteer.id, ["Маріонетка"], []);

@@ -1,10 +1,11 @@
 import { AttackType } from "@/lib/constants/battle";
 import type { RawTree } from "@/lib/utils/skills/progression";
+import type { LogLine } from "@/types/text";
 
 export interface ProgressionSkillDto {
   name: string;
   icon: string | null;
-  summary: string[];
+  summary: LogLine[];
   description: string;
   spellGroupId: string | null;
   grantedSpellId: string | null;

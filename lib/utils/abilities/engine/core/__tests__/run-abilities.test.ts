@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 
 import { ParticipantSide } from "@/lib/constants/battle";
+import { textOf } from "@/lib/i18n/test/text";
 import { makeParticipant, resolved, seq } from "@/lib/utils/abilities/__tests__/fixtures";
 import { resolveDowned, runAbilities } from "@/lib/utils/abilities/engine/core/run-abilities";
 
@@ -127,9 +128,9 @@ describe("resolveDowned", () => {
 
     const run = (a: typeof lucky) => runAbilities([makeParticipant({ id: "a", abilities: [a] }), makeParticipant({ id: "e", side: ParticipantSide.ENEMY })], hit, { round: 1, rng: () => 0 }).messages;
 
-    expect(run(lucky).every((m) => m.endsWith(" (шанс 40 %)"))).toBe(true);
+    expect(run(lucky).every((m) => textOf(m).endsWith(" (шанс 40 %)"))).toBe(true);
     expect(run(lucky).length).toBeGreaterThan(0);
-    expect(run(plain).some((m) => m.includes("шанс"))).toBe(false);
+    expect(run(plain).some((m) => textOf(m).includes("шанс"))).toBe(false);
   });
 
   it("невдалий chance власного вміння діяча видно в журналі; чужі вміння мовчать", () => {

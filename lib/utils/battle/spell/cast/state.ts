@@ -2,10 +2,12 @@ import type { SummonRequest } from "@/lib/utils/abilities/engine/core/types";
 import type { Amount, Effect, StaticEffect } from "@/lib/utils/abilities/schema";
 import type { ActionFlow } from "@/lib/utils/battle/common/action-flow";
 import { newBattleAction } from "@/lib/utils/battle/common/new-action";
+import { logFields } from "@/lib/utils/battle/log/lines";
 import type { SpellPower } from "@/lib/utils/battle/spell/power";
 import type { CastableSpell } from "@/lib/utils/battle/types/spell-process";
 import type { ResolvedAbility } from "@/types/abilities";
 import type { BattleAction, BattleParticipant, DamageStep, SpellGrant } from "@/types/battle";
+import type { LogLine } from "@/types/text";
 
 export interface Outcome {
   skip: boolean;
@@ -89,9 +91,9 @@ export function abilityOf(spell: CastableSpell): ResolvedAbility {
   } as ResolvedAbility;
 }
 
-export function actionOf(caster: BattleParticipant, spell: CastableSpell, targets: BattleParticipant[], battleId: string, round: number, text: string): BattleAction {
+export function actionOf(caster: BattleParticipant, spell: CastableSpell, targets: BattleParticipant[], battleId: string, round: number, text: LogLine | LogLine[]): BattleAction {
   return newBattleAction(caster, "spell", { battleId, round, targets }, {
     actionDetails: { spellId: spell.id, spellName: spell.name, spellLevel: spell.level, ...(spell.fx && { spellFx: spell.fx }) },
-    resultText: text,
+    ...logFields(text),
   });
 }

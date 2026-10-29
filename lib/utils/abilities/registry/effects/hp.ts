@@ -13,6 +13,7 @@ import { applyDamageConsequences } from "@/lib/utils/battle/damage/consequences"
 import { clearDeathSaves, isDying } from "@/lib/utils/battle/death-saves";
 import { hasImmunity } from "@/lib/utils/battle/resistance";
 import { forgoDice } from "@/lib/utils/common/dice";
+import type { LogLine } from "@/types/text";
 
 type Of<K extends Effect["kind"]> = Extract<Effect, { kind: K }>;
 
@@ -25,7 +26,7 @@ export function applyDealDamage(input: EffectApplyInput<Of<"dealDamage">>): Effe
 
   if (!owner) return { participants: ps, messages: [] };
 
-  const messages: string[] = [];
+  const messages: LogLine[] = [];
 
   const downed: EffectApplyResult["downed"] = [];
 
@@ -64,7 +65,7 @@ export function applyHeal(input: EffectApplyInput<Of<"heal">>): EffectApplyResul
 
   if (!owner) return { participants: ps, messages: [] };
 
-  const messages: string[] = [];
+  const messages: LogLine[] = [];
 
   const label = owner && !input.targetIds.every((id) => id === owner.basicInfo.id) ? `${ability.name} (${owner.basicInfo.name})` : ability.name;
 
@@ -106,7 +107,7 @@ export function applyDot(input: EffectApplyInput<Of<"dot">>): EffectApplyResult 
 
   if (!owner) return { participants: ps, messages: [] };
 
-  const messages: string[] = [];
+  const messages: LogLine[] = [];
 
   const fromSpell = input.event.type === "spellCast";
 
@@ -156,7 +157,7 @@ export function applyHot(input: EffectApplyInput<Of<"hot">>): EffectApplyResult 
 
   if (!owner) return { participants: ps, messages: [] };
 
-  const messages: string[] = [];
+  const messages: LogLine[] = [];
 
   for (const id of input.targetIds) {
     const t = findParticipant(ps, id);

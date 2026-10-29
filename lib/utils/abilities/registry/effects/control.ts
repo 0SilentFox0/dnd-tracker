@@ -5,6 +5,7 @@ import { ParticipantSourceType } from "@/lib/constants/battle";
 import { findParticipant, isActive, replaceParticipant } from "@/lib/utils/abilities/engine/core/participants";
 import { effectSource, upsertTimedEffect } from "@/lib/utils/abilities/engine/effects/timed-effects";
 import type { Effect } from "@/lib/utils/abilities/schema";
+import type { LogLine } from "@/types/text";
 
 type Of<K extends Effect["kind"]> = Extract<Effect, { kind: K }>;
 
@@ -15,7 +16,7 @@ export function applyBerserk(input: EffectApplyInput<Of<"berserk">>): EffectAppl
 
   const owner = findParticipant(ps, input.ownerId);
 
-  const messages: string[] = [];
+  const messages: LogLine[] = [];
 
   for (const id of input.targetIds) {
     const t = findParticipant(ps, id);
@@ -63,7 +64,7 @@ export function applyCharm(input: EffectApplyInput<Of<"charm">>): EffectApplyRes
 
   if (!owner) return { participants: ps, messages: [] };
 
-  const messages: string[] = [];
+  const messages: LogLine[] = [];
 
   for (const id of input.targetIds) {
     const t = findParticipant(ps, id);
