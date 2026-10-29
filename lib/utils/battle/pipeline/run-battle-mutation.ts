@@ -158,6 +158,39 @@ export type BattleOperationOutcome = {
   preview?: BattleScene & { knowledge?: BattleKnowledge };
 };
 
+type PreviewOptions = Pick<RunBattleMutationOptions<unknown>, "includeRecentEvents" | "includeKnowledge">;
+
+type PreviewDeps = Pick<PipelineDeps, "loadRecentEvents" | "loadKnowledge">;
+
+async function buildScenePreview(userId: string, loaded: LoadedBattle, result: MutationResult, options: PreviewOptions, deps: PreviewDeps) {
+  const needsKnowledge = options.includeKnowledge && !loaded.isDM && !alwaysSeesEnemyStats(loaded.participants, userId);
+
+  const [entries, knowledge] = await Promise.all([
+    options.includeRecentEvents ? deps.loadRecentEvents(loaded.scene.id, options.includeRecentEvents) : [],
+    needsKnowledge ? deps.loadKnowledge?.(loaded.scene.id) : undefined,
+  ]);
+
+  const battle = toBattleResponse(
+    loaded,
+    loaded.scene,
+    result.participants,
+    result.pending,
+    { mode: "full", entries },
+    { isDM: loaded.isDM },
+  );
+
+  return knowledge ? { ...battle, knowledge } : battle;
+}
+
+/** Read path: the normalisations a no-op mutation would get, without a request, rate limit or write. */
+export function readScenePreview(userId: string, loaded: LoadedBattle, options: PreviewOptions, deps: PreviewDeps) {
+  const unchanged = guardTurnOrder(loaded.scene, loaded.participants, { participants: loaded.participants, pending: loaded.pending, events: [] });
+
+  const placed = withPlacement(loaded.meta.map, { status: loaded.scene.status, round: loaded.scene.round, participants: loaded.participants }, unchanged, false);
+
+  return buildScenePreview(userId, loaded, withVictory(loaded.scene, placed, loaded.meta.rules), options, deps);
+}
+
 /** Shared guard/mutation/save pipeline. Errors escape the transaction boundary. */
 export async function runGuardedBattleOperationCore<TBody>(
   userId: string,
@@ -196,23 +229,7 @@ export async function runGuardedBattleOperationCore<TBody>(
   const result = withVictory(loaded.scene, isDryRun ? placed : withModeAfterMutation(map, loaded.scene, placed), loaded.meta.rules);
 
   if (isDryRun) {
-    const needsKnowledge = options.includeKnowledge && !loaded.isDM && !alwaysSeesEnemyStats(loaded.participants, userId);
-
-    const [entries, knowledge] = await Promise.all([
-      options.includeRecentEvents ? deps.loadRecentEvents(battleId, options.includeRecentEvents) : [],
-      needsKnowledge ? deps.loadKnowledge?.(battleId) : undefined,
-    ]);
-
-    const battle = toBattleResponse(
-      loaded,
-      loaded.scene,
-      result.participants,
-      result.pending,
-      { mode: "full", entries },
-      { isDM: loaded.isDM },
-    );
-
-    return { delta: null, version: loaded.scene.version, response: result.response, preview: knowledge ? { ...battle, knowledge } : battle };
+    return { delta: null, version: loaded.scene.version, response: result.response, preview: await buildScenePreview(userId, loaded, result, options, deps) };
   }
 
   const access = deps.recheckAccess

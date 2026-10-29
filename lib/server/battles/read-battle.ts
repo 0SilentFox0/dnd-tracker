@@ -1,11 +1,11 @@
 import { NextResponse } from "next/server";
 
-import { defaultReadDeps } from "./pipeline-deps";
-import { battleErrorResponse, runBattleMutation } from "./run-mutation";
+import { defaultPipelineDeps, defaultReadDeps } from "./pipeline-deps";
+import { battleErrorResponse } from "./run-mutation";
 
 import { API_ERRORS } from "@/lib/constants/api-errors";
 import { BATTLE_LOG_RECENT_EVENTS } from "@/lib/constants/battle";
-import { BattleAccess } from "@/lib/utils/battle/pipeline/run-battle-mutation";
+import { type PipelineDeps, readScenePreview } from "@/lib/utils/battle/pipeline/run-battle-mutation";
 import { BattleAccessError } from "@/lib/utils/battle/store";
 import { summarizeBattle } from "@/lib/utils/battle/view/summary";
 import type { BattleEventsPage, BattleSummary, BattleVersion } from "@/types/api";
@@ -36,15 +36,22 @@ async function authorize(params: BattleParams, deps: BattleReadDeps) {
 }
 
 /** Full scene for a member, as `GET /battles/[battleId]` answers it; the battle page reuses it for the first HTML. */
-export function readBattleScene(params: BattleParams): Promise<NextResponse> {
-  return runBattleMutation(new Request("http://internal/battle"), {
-    params,
-    access: BattleAccess.MEMBER,
-    dryRun: () => true,
-    includeRecentEvents: BATTLE_LOG_RECENT_EVENTS,
-    includeKnowledge: true,
-    mutate: (ctx) => ({ participants: ctx.participants, pending: ctx.pending, events: [] }),
-  });
+export async function readBattleScene(params: BattleParams, deps: PipelineDeps = defaultPipelineDeps): Promise<NextResponse> {
+  try {
+    const userId = await deps.getUserId();
+
+    if (!userId) throw new BattleAccessError(401, API_ERRORS.UNAUTHORIZED);
+
+    const loaded = await deps.loadBattle({ battleId: params.battleId, campaignId: params.id, userId });
+
+    if (!loaded) throw new BattleAccessError(404, API_ERRORS.NOT_FOUND);
+
+    if (!loaded.isMember) throw new BattleAccessError(403, API_ERRORS.FORBIDDEN);
+
+    return NextResponse.json(await readScenePreview(userId, loaded, { includeRecentEvents: BATTLE_LOG_RECENT_EVENTS, includeKnowledge: true }, deps));
+  } catch (err) {
+    return battleErrorResponse(err);
+  }
 }
 
 export async function readBattleVersion(params: BattleParams, deps: BattleReadDeps = defaultReadDeps): Promise<NextResponse> {
