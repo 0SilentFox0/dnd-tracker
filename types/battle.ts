@@ -9,7 +9,7 @@ import type { WeaponTrait } from "@/lib/constants/weapon-traits";
 import type { NonRandomEffect } from "@/lib/utils/abilities/schema";
 import type { FxAuraKind, FxImpact, SpellFx } from "@/lib/utils/battle/fx";
 import type { ModeView } from "@/lib/utils/battle/modes/types";
-import type { InlineCast, SpellCost } from "@/lib/utils/spells/model/schema";
+import type { InlineCast, SpellCost, ZoneTrigger } from "@/lib/utils/spells/model/schema";
 import type { StoredSpellSlots } from "@/lib/utils/spells/slot-keys";
 import type { AbilityKey, SetProgress } from "@/types/characters";
 import { SkillLevel } from "@/types/skill-tree";
@@ -286,6 +286,8 @@ export interface BattleMapConfig {
   blocked?: string[];
   /** Місцевість за ключем "x:y" */
   terrain?: Record<string, TerrainCell>;
+  /** Тригери зон заклинань за TerrainCell.zoneId; клієнту не потрібні, лише серверу */
+  spellZones?: Record<string, SpellZoneRuntime>;
   /** Ширина фону в клітинках (з повзунка «Розмір клітинки»); без неї фон вписується в cols×rows */
   backgroundCols?: number;
   /** Зсув сітки відносно фону, частки клітинки 0 ≤ v < 1 */
@@ -297,6 +299,18 @@ export interface BattleMapConfig {
 
 /** difficult — лише пензель ДМ (прохідна складна місцевість); зони заклинань ставлять прапорці на hazard */
 export type TerrainKind = "wall" | "barrier" | "hazard" | "difficult";
+
+export interface SpellZoneRuntime {
+  casterId: string;
+  spellId: string;
+  spellName: string;
+  dc: number;
+  side: "enemies" | "all";
+  centre?: GridPoint;
+  triggers: { onEnter?: ZoneTrigger; onTurnStart?: ZoneTrigger; onExit?: ZoneTrigger };
+  untilRound: number;
+  concentrationOf?: { casterId: string; castId: string };
+}
 
 /** type — тип шкоди (fire, cold…) */
 export interface TerrainDamage {
@@ -484,6 +498,8 @@ export interface BattleParticipantBattleData {
   retaliationsUsed?: number;
   /** Раунд, у якому учасник востаннє отримав шкоду від небезпечної клітинки */
   hazardHitRound?: number;
+  /** Раунд останнього входу/виходу зони заклинання за ключем "zoneId:in|out": раз на зону за раунд */
+  zoneHits?: Record<string, number>;
   /** Масштаб шкоди ворога-юніта для рівного бою (старт бою); немає = ×1 */
   damageMultiplier?: number;
   /** Масштаб HP ворога-юніта для рівного бою; лише для показу ДМу */

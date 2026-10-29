@@ -171,6 +171,8 @@ export function describeEffect(effect: Effect | SpellEffect): string {
 
   if (effect.kind === "moveSelf") return "кастер переміщується до цілі";
 
+  if (effect.kind === "createTerrain") return `${effect.terrain === "wall" ? "стіна" : "складна місцевість"}: ${effect.shape === "line" ? "лінія до цілі" : "клітинки області"} (до ${effect.cells}) на ${effect.rounds} р.`;
+
   if (effect.kind === "chooseOne") return `на вибір: ${effect.options.map(describeEffect).join(" / ")}`;
 
   const def = EFFECT_REGISTRY[effect.kind] as EffectDefinition<EffectKind> | undefined;

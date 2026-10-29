@@ -675,3 +675,27 @@ describe("runBattleMutation: pending крита", () => {
     expect(JSON.stringify(json)).not.toContain("424242");
   });
 });
+
+describe("runBattleMutation: зони без концентрації", () => {
+  it("зона зі зламаною концентрацією кастера зникає з карти при збереженні", async () => {
+    const base = withMap();
+
+    const zoneMap = {
+      cols: 10,
+      rows: 5,
+      background: null,
+      opacity: 0.3,
+      terrain: { "2:2": { kind: "hazard" as const, zoneId: "z1", obscured: true as const, untilRound: 9 } },
+      spellZones: { z1: { casterId: "hero", spellId: "s", spellName: "Туман", dc: 10, side: "enemies" as const, triggers: {}, untilRound: 9, concentrationOf: { casterId: "hero", castId: "c1" } } },
+    };
+
+    const saveBattle = vi.fn(async () => delta());
+
+    await runBattleMutation(req(), { params, access: "member", mutate: noop }, deps({ saveBattle, loadBattle: vi.fn(async () => ({ ...base, meta: { ...base.meta, map: zoneMap } })) }));
+
+    const saved = saveBattle.mock.calls[0] as unknown as [unknown, { scene?: { map?: { terrain?: unknown; spellZones?: unknown } } }];
+
+    expect(saved[1].scene?.map?.terrain).toBeUndefined();
+    expect(saved[1].scene?.map?.spellZones).toBeUndefined();
+  });
+});

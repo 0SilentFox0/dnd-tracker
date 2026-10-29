@@ -21,7 +21,28 @@ export const TEMPLATE_SHAPES = ["circle", "cube", "cone", "line", "cross", "eman
 
 const rangeField = z.number().int().min(5).max(600).optional();
 
-export const SpellZoneSchema = z.object({ rounds: z.number().int().min(1).max(10), label: z.string().max(60).optional() });
+/** Тригер зони: рятівний кидок проти СК заклинання (провал — ефекти й тяга до центру); без кидка ефекти діють завжди. */
+export const ZoneTriggerSchema = z.object({
+  save: z.object({ ability: z.enum(ABILITY_KEYS) }).optional(),
+  effects: z.array(NonRandomEffectSchema).max(4),
+  pull: z.literal("centre").optional(),
+});
+
+export type ZoneTrigger = z.infer<typeof ZoneTriggerSchema>;
+
+export const ZONE_TERRAIN = ["difficult", "obscured"] as const;
+
+export const SpellZoneSchema = z.object({
+  rounds: z.number().int().min(1).max(10),
+  label: z.string().max(60).optional(),
+  terrain: z.array(z.enum(ZONE_TERRAIN)).min(1).max(2).optional(),
+  side: z.enum(["enemies", "all"]).optional(),
+  onEnter: ZoneTriggerSchema.optional(),
+  onTurnStart: ZoneTriggerSchema.optional(),
+  onExit: ZoneTriggerSchema.optional(),
+});
+
+export type SpellZone = z.infer<typeof SpellZoneSchema>;
 
 export const SpellTargetFilterSchema = z.object({
   creatureTypes: z.array(z.string().trim().min(1).max(40)).min(1).max(10).optional(),
@@ -125,13 +146,24 @@ const HitRiderSchema = z.object({
 /** Кастер переміщується в найближчу вільну клітинку біля першої цілі; без атак при відході. */
 const MoveSelfSchema = z.object({ kind: z.literal("moveSelf"), to: z.literal("adjacentToTarget") });
 
-const SPELL_ONLY_EFFECTS = [ChooseOneSchema, InputDiceSchema, GrantCastSchema, HitRiderSchema, MoveSelfSchema] as const;
+/** Стіна чи складна місцевість із шаблону касту: cell — клітинки області, line — лінія від кастера до першої цілі. */
+const CreateTerrainSchema = z.object({
+  kind: z.literal("createTerrain"),
+  terrain: z.enum(["wall", "difficult"]),
+  shape: z.enum(["cell", "line"]),
+  cells: z.number().int().min(1).max(20),
+  rounds: z.number().int().min(1).max(100),
+});
+
+const SPELL_ONLY_EFFECTS = [ChooseOneSchema, InputDiceSchema, GrantCastSchema, HitRiderSchema, MoveSelfSchema, CreateTerrainSchema] as const;
 
 export const SpellEffectSchema = z.discriminatedUnion("kind", [...BASE_EFFECTS, RandomOfSchema, ...SPELL_ONLY_EFFECTS]);
 
 export type SpellEffect = z.infer<typeof SpellEffectSchema>;
 
 export type GrantCastEffect = z.infer<typeof GrantCastSchema>;
+
+export type CreateTerrainEffect = z.infer<typeof CreateTerrainSchema>;
 
 export type HitRiderEffect = z.infer<typeof HitRiderSchema>;
 

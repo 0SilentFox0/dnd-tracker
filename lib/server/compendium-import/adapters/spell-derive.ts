@@ -1,4 +1,5 @@
 import { withTargetFilter } from "./spell-patterns/target-filter";
+import { lineTerrainEffect } from "./spell-patterns/zone-terrain";
 import { array, str } from "./shared";
 import type { SpellCast } from "./spell-cast";
 import { createsPlainObject, isOutOfCombatBuff, type NarrativeReason, withoutObjectConditions, withoutRestOrTravel } from "./spell-narrative";
@@ -250,7 +251,9 @@ export function deriveSpell(row: Record<string, unknown>, text: string, higher: 
 
   const push = pushFeet >= 5 && pushFeet <= 30 && pushFeet % 5 === 0 && (kind === "damage" || kind === "condition") ? pushFeet : 0;
 
-  const riders = RIDERS.filter(([re, label]) => re.test(text) && !(push && label === "поштовх/притягання")).map(([, label]) => label);
+  const lineTerrain = lineTerrainEffect(text, spellRange(cast.facts));
+
+  const riders = RIDERS.filter(([re, label]) => re.test(text) && !(push && label === "поштовх/притягання") && !(lineTerrain && label === "складна місцевість")).map(([, label]) => label);
 
   if (applied === "immobilized") riders.push("утримання цілей: умови й переміщення (див. опис)");
 
@@ -265,7 +268,7 @@ export function deriveSpell(row: Record<string, unknown>, text: string, higher: 
       fields: {
         targeting: withTargetFilter(targeting, text, higher),
         resolution: spellResolution(facts, kind, targeting),
-        spellEffects: [...withSaveEnds(spellEffects(facts, kind), ability as AbilityKey | null, text, applied), ...(push ? [{ kind: "push", feet: push, from: "caster" }] : [])],
+        spellEffects: [...withSaveEnds(spellEffects(facts, kind), ability as AbilityKey | null, text, applied), ...(push ? [{ kind: "push", feet: push, from: "caster" }] : []), ...(lineTerrain ? [lineTerrain] : [])],
         dice: dice?.count ?? 0,
         ...(dice && { dieSides: dice.sides }),
         ...spellUpcast(facts, kind),

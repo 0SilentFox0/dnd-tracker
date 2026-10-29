@@ -12,6 +12,7 @@ import { landDive } from "@/lib/utils/battle/maneuvers";
 import { actionsPerTurnPool, setExtraActionPool } from "@/lib/utils/battle/participant/helpers";
 import { hasEffectMarker } from "@/lib/utils/battle/participant/state";
 import { pruneDeadInlineGrants } from "@/lib/utils/battle/spell/inline-grant";
+import { zoneTurnStart } from "@/lib/utils/battle/spell/zone-triggers";
 import { rollDie } from "@/lib/utils/common/dice";
 import type { Ruleset } from "@/lib/utils/rules";
 import type { BattleMapConfig, BattleParticipant } from "@/types/battle";
@@ -143,6 +144,15 @@ function applyStartOfTurnDamage(
       others = hit.participants;
       killedByRules = updatedParticipant.combatStats.status === CombatStatus.DEAD;
       damageMessages.push(...hit.consequences);
+    }
+
+    if (map?.spellZones && updatedParticipant.combatStats.currentHp > 0) {
+      const zones = zoneTurnStart(map, replaceParticipant(others, updatedParticipant), updatedParticipant.basicInfo.id, { round: currentRound, rng, rules });
+
+      others = zones.participants;
+      updatedParticipant = findParticipant(others, updatedParticipant.basicInfo.id) ?? updatedParticipant;
+      killedByRules = updatedParticipant.combatStats.status === CombatStatus.DEAD;
+      damageMessages.push(...zones.messages);
     }
 
     const hotResult = applyHOTEffects(updatedParticipant);

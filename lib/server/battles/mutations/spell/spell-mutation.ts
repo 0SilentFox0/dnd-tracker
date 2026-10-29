@@ -26,12 +26,13 @@ import { flatEffects, inputDiceOf, isDamageEffect, optionInRange } from "@/lib/u
 import { casterSpellDice } from "@/lib/utils/battle/spell/caster-dice";
 import { peekInlineGrant, withInlineDefinition } from "@/lib/utils/battle/spell/inline-grant";
 import { prepareLongCast } from "@/lib/utils/battle/spell/long-cast";
+import { spellSaveDc } from "@/lib/utils/battle/spell/power";
 import { resolveSpellSource } from "@/lib/utils/battle/spell/resolve-source";
 import { splitSaveRolls } from "@/lib/utils/battle/spell/save-rolls";
 import { resolveChosenSlot, spellNeedsSlot, spellSlotKey } from "@/lib/utils/battle/spell/slot";
 import { pacifiedBlock, resolveSpellTargets } from "@/lib/utils/battle/spell/spell-targeting";
 import { toCastableSpell } from "@/lib/utils/battle/spell/to-castable";
-import { spellZoneHazard } from "@/lib/utils/battle/spell/zone-hazard";
+import { spellTerrainEffects, spellZoneHazard } from "@/lib/utils/battle/spell/zone-hazard";
 import { systemEvent } from "@/lib/utils/battle/store";
 import { BattleAccessError, battleActionToEvent, BattleRuleError } from "@/lib/utils/battle/store";
 import { applyAbilitySummons, type SummonDeps } from "@/lib/utils/battle/summon/ability-summons";
@@ -237,9 +238,15 @@ export function createSpellMutation(deps: SpellMutationDeps = defaultDeps, optio
 
         const action = summoned.messages.length > 0 ? { ...result.battleAction, resultText: [result.battleAction.resultText, ...summoned.messages].join(" | ") } : result.battleAction;
 
-        const hazard = spellZoneHazard({ map: ctx.meta.map, spell, cells: resolution.cells, round: ctx.scene.round, spellDamage: result.spellDamage, concentrationOf: result.concentration, casterId: caster.basicInfo.id });
+        const dc = grant?.dc ?? spellSaveDc(caster, grant?.dcAbility, ctx.meta.rules.formulas.saveDcBase);
 
-        return { participants: summoned.order, pending: ctx.pending, events: [battleActionToEvent(action)], ...(hazard && { scene: { map: hazard } }) };
+        const zoneMap = spellZoneHazard({ map: ctx.meta.map, spell, cells: resolution.cells, round: ctx.scene.round, spellDamage: result.spellDamage, concentrationOf: result.concentration, casterId: caster.basicInfo.id, dc, centre: resolution.centre, castKey: result.concentration?.castId });
+
+        const terrainMap = spellTerrainEffects({ map: zoneMap ?? ctx.meta.map, effects: definition.effects.filter((e) => e.kind === "createTerrain"), spell, caster, participants: summoned.order, targetIds: resolution.targetIds, cells: resolution.cells, round: ctx.scene.round, concentrationOf: result.concentration, dc });
+
+        const map = terrainMap ?? zoneMap;
+
+        return { participants: summoned.order, pending: ctx.pending, events: [battleActionToEvent(action)], ...(map && { scene: { map } }) };
       },
     });
   };

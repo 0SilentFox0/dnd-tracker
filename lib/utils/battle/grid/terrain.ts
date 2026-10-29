@@ -20,10 +20,13 @@ export function isObscured(map: Pick<BattleMapConfig, "terrain"> | null | undefi
   return !!terrain && isOnMap(p) && cellsOf(p).some((c) => terrain[cellKey(c)]?.obscured);
 }
 
+/** Зона заклинання без шкоди (туман, тригер-зона) небезпекою не вважається. */
+export const isDamagingCell = (c: TerrainCell) => c.kind === "hazard" && (!!c.damage || !c.zoneId);
+
 export function hazardCells(map: Pick<BattleMapConfig, "terrain">): Set<string> {
   const terrain = map.terrain ?? {};
 
-  return new Set(Object.keys(terrain).filter((k) => terrain[k].kind === "hazard"));
+  return new Set(Object.keys(terrain).filter((k) => isDamagingCell(terrain[k])));
 }
 
 function threatens(p: BattleParticipant, mover: BattleParticipant): boolean {
@@ -56,17 +59,29 @@ export function threatCells(
   return result;
 }
 
+function withoutOrphanZones(map: BattleMapConfig): BattleMapConfig {
+  const { spellZones, ...rest } = map;
+
+  if (!spellZones) return map;
+
+  const used = new Set(Object.values(map.terrain ?? {}).flatMap((c) => (c.zoneId ? [c.zoneId] : [])));
+
+  const kept = Object.fromEntries(Object.entries(spellZones).filter(([id]) => used.has(id)));
+
+  return Object.keys(kept).length > 0 ? { ...rest, spellZones: kept } : rest;
+}
+
 export function replaceTerrain(map: BattleMapConfig, terrain: Record<string, TerrainCell> | null | undefined): BattleMapConfig {
   const { terrain: _old, ...rest } = map;
 
-  return terrain && Object.keys(terrain).length > 0 ? { ...rest, terrain } : rest;
+  return withoutOrphanZones(terrain && Object.keys(terrain).length > 0 ? { ...rest, terrain } : rest);
 }
 
-// барʼєр без строку не має жити вічно: прибирається на першому ж переході раунду; небезпека без строку — постійна
+// барʼєр без строку не має жити вічно: прибирається на першому ж переході раунду; решта місцевості без строку — постійна
 function isExpired(c: TerrainCell, round: number): boolean {
   if (c.kind === "barrier") return c.untilRound === undefined || c.untilRound < round;
 
-  return c.kind === "hazard" && c.untilRound !== undefined && c.untilRound < round;
+  return c.untilRound !== undefined && c.untilRound < round;
 }
 
 export function pruneExpiredTerrain(map: BattleMapConfig, round: number): BattleMapConfig | null {

@@ -28,6 +28,7 @@ import {
   cellPolygon,
   centreCell,
   fitMapView,
+  isDamagingCell,
   isFallen,
   isMoveMark,
   mapSize,
@@ -114,6 +115,8 @@ function terrainTitle(t: TerrainCell, round: number | undefined): string | null 
 
 const TERRAIN_FILL = { wall: "rgba(0,0,0,.6)", barrier: "rgba(0,0,0,.75)", difficult: "transparent", hazard: `url(#${HAZARD_GRADIENT_ID})` } as const;
 
+const ZONE_FILL = "rgba(160,130,210,.16)";
+
 const FLAME = UNIT * 0.42;
 
 /** Жар і полум'я поверх небезпечних клітинок; на повернутій телефонній карті гліфи стоять прямо. */
@@ -171,7 +174,7 @@ const GridLayer = memo(function GridLayer({ map, marks, actions, wasDragged, cli
     [cells, terrain, blocked],
   );
 
-  const hazardCells = useMemo(() => terrainCells.flatMap(({ p, cell }) => (cell.kind === "hazard" ? [p] : [])), [terrainCells]);
+  const hazardCells = useMemo(() => terrainCells.flatMap(({ p, cell }) => (isDamagingCell(cell) ? [p] : [])), [terrainCells]);
 
   const zoneCells = cells.flatMap((p) => {
     const zone = blocked.has(cellKey(p)) ? null : zoneOf(marks?.get(cellKey(p)));
@@ -195,11 +198,11 @@ const GridLayer = memo(function GridLayer({ map, marks, actions, wasDragged, cli
         </radialGradient>
       </defs>
       {terrainCells.map(({ p, cell }) => {
-        const hazard = cell.kind === "hazard";
+        const hazard = isDamagingCell(cell);
 
         return (
           <g key={`t${cellKey(p)}`} data-terrain={cell.kind} data-hazard-timed={hazard && cell.untilRound !== undefined ? "" : undefined} pointerEvents="none">
-            <polygon points={cellPolygon(p)} fill={TERRAIN_FILL[cell.kind]} stroke={hazard ? "#ff9a2a" : "none"} strokeOpacity={0.9} strokeWidth={1.5} vectorEffect="non-scaling-stroke" />
+            <polygon points={cellPolygon(p)} fill={cell.kind === "hazard" && !hazard ? ZONE_FILL : TERRAIN_FILL[cell.kind]} stroke={hazard ? "#ff9a2a" : "none"} strokeOpacity={0.9} strokeWidth={1.5} vectorEffect="non-scaling-stroke" />
             {cell.kind === "barrier" && <polygon points={cellPolygon(p)} fill={`url(#${HATCH_ID})`} stroke="none" />}
             {(cell.kind === "difficult" || cell.difficult) && <polygon points={cellPolygon(p)} fill={`url(#${DIFFICULT_HATCH_ID})`} stroke="none" data-difficult="" />}
             {cell.obscured && <polygon points={cellPolygon(p)} fill="rgba(210,215,225,.38)" stroke="none" data-obscured="" />}

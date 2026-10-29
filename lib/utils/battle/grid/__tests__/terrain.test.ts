@@ -234,3 +234,18 @@ describe("diffTerrain / applyTerrainDiff", () => {
     expect(applyTerrainDiff(before, { removed: ["1:1", "5:5"] })).not.toHaveProperty("terrain");
   });
 });
+
+describe("місцевість із строком і зонами", () => {
+  const map: BattleMapConfig = { cols: 6, rows: 6, background: null, opacity: 0.3 };
+
+  it("стіна й складна місцевість зі строком згасають, без строку — постійні", () => {
+    const timed: BattleMapConfig = { ...map, terrain: { "1:1": { kind: "wall", untilRound: 3 }, "2:2": { kind: "difficult", untilRound: 3 }, "3:3": { kind: "wall" } } };
+
+    expect(pruneExpiredTerrain(timed, 3)).toBeNull();
+    expect(pruneExpiredTerrain(timed, 4)?.terrain).toEqual({ "3:3": { kind: "wall" } });
+  });
+
+  it("зона заклинання без шкоди не вважається небезпекою для підсвітки ходу", () => {
+    expect(hazardCells({ terrain: { "1:1": { kind: "hazard", zoneId: "z" }, "2:2": { kind: "hazard" }, "3:3": { kind: "hazard", zoneId: "z", damage: { amount: 1, type: "fire" } } } })).toEqual(new Set(["2:2", "3:3"]));
+  });
+});

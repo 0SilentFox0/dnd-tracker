@@ -19,6 +19,7 @@ import { placeRevived } from "@/lib/utils/battle/grid/revive-placement";
 import { modeBlockedText, withModeAfterMutation } from "@/lib/utils/battle/modes/server";
 import { clearFallenEffects } from "@/lib/utils/battle/participant/fallen";
 import { reserveOf } from "@/lib/utils/battle/participant/reserve";
+import { sweepDeadZones } from "@/lib/utils/battle/spell/zone-triggers";
 import type {
   BattleDelta,
   BattleMeta,
@@ -209,9 +210,15 @@ export async function runGuardedBattleOperationCore<TBody>(
 
   const mutated = guardTurnOrder(loaded.scene, loaded.participants, await options.mutate(ctx, body), options.operation);
 
-  const map = mutated.scene?.map !== undefined ? mutated.scene.map : loaded.meta.map;
+  const mutatedMap = mutated.scene?.map !== undefined ? mutated.scene.map : loaded.meta.map;
 
-  const placed = withPlacement(map, { status: loaded.scene.status, round: loaded.scene.round, participants: loaded.participants }, mutated, !isDryRun);
+  const unswept = withPlacement(mutatedMap, { status: loaded.scene.status, round: loaded.scene.round, participants: loaded.participants }, mutated, !isDryRun);
+
+  const swept = sweepDeadZones(mutatedMap, unswept.participants);
+
+  const map = swept ?? mutatedMap;
+
+  const placed = swept ? { ...unswept, scene: { ...unswept.scene, map: swept } } : unswept;
 
   const result = withVictory(loaded.scene, isDryRun ? placed : withModeAfterMutation(map, loaded.scene, placed), loaded.meta.rules);
 

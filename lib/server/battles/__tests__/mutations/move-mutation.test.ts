@@ -308,3 +308,33 @@ describe("move mutation", () => {
     });
   });
 });
+
+describe("зони заклинань", () => {
+  const cells = Object.fromEntries(["3:0", "4:0", "5:0", "3:1", "4:1", "5:1", "3:2", "4:2", "5:2"].map((k) => [k, { kind: "hazard" as const, zoneId: "z1", difficult: true as const, untilRound: 9 }]));
+
+  const zoned = (dc: number): BattleMapConfig => ({
+    ...map,
+    terrain: cells,
+    spellZones: { z1: { casterId: goblin.basicInfo.id, spellId: "s", spellName: "Хмара", dc, side: "enemies", centre: { x: 4, y: 1 }, triggers: { onExit: { save: { ability: "strength" }, effects: [], pull: "centre" } }, untilRound: 9 } },
+  });
+
+  const run = (dc: number) => {
+    const base = ctx({ participants: [at(hero, { x: 4, y: 1 }), at(goblin, { x: 9, y: 4 })] });
+
+    return moveMutation({ ...base, rng: () => 0, meta: { ...base.meta, map: zoned(dc) } }, { participantId: "hero", to: { x: 8, y: 1 } });
+  };
+
+  it("невдалий рятівний при виході: мувер повертається до центру й втрачає решту руху", () => {
+    const out = run(99);
+
+    expect(out.participants[0].battleData.position).toEqual({ x: 4, y: 1 });
+    expect(out.events.map((e) => e.resultText).join(" ")).toContain("тягне");
+  });
+
+  it("успіх (низька СК) — мувер виходить із зони", () => {
+    const out = run(1);
+
+    expect(out.participants[0].battleData.position).toEqual({ x: 8, y: 1 });
+  });
+});
+

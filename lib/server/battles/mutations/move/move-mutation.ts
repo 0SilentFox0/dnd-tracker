@@ -13,6 +13,7 @@ import { resolveMovement5e } from "@/lib/utils/battle/actions/movement";
 import { canStand, cellKey, checkReturnToStart, frightenedBlocksMove, hazardHit, hazardOnMove, moveBudget, pathFrom, placeParticipants, searchPaths } from "@/lib/utils/battle/grid";
 import { activeMapMode, type MapModeKey } from "@/lib/utils/battle/modes";
 import type { BattleMutationContext, MutationResult } from "@/lib/utils/battle/pipeline/run-battle-mutation";
+import { zoneMove } from "@/lib/utils/battle/spell/zone-triggers";
 import { BattleRuleError, type NewBattleEvent, systemEvent } from "@/lib/utils/battle/store";
 import { assertCanAct } from "@/lib/utils/battle/turn";
 import type { BattleMapConfig, BattleParticipant, GridPoint, TerrainCell } from "@/types/battle";
@@ -77,14 +78,18 @@ export function moveMutation(ctx: BattleMutationContext, data: MoveBody): Mutati
 
     const hazard = isActive(moved) ? hazardOnMove(map, participants, mover, data.to, cost) : null;
 
-    return finishMove(ctx, { participants: replaceParticipant(participants, moved), moved, hazard, messages: [], events: [] });
+    return finishMove(ctx, { participants: replaceParticipant(participants, moved), moved, hazard, messages: [], events: [], trail: { from: mover.battleData.position, path: pathFrom(search, mover, data.to) ?? [] } });
   }
 
   const out = resolveMovement5e({ map, participants, mover, to: data.to, path: pathFrom(search, mover, data.to), budget, cost, round: ctx.scene.round, battleId: ctx.scene.id, rules, rng: ctx.rng ?? Math.random });
 
   const hazard = isActive(out.moved) ? hazardOnMove(map, participants, mover, out.destination, out.spent) : null;
 
-  return finishMove(ctx, { participants: out.participants, moved: out.moved, hazard, messages: out.messages, events: out.events });
+  const full = pathFrom(search, mover, data.to) ?? [];
+
+  const stopAt = full.findIndex((c) => cellKey(c) === cellKey(out.destination));
+
+  return finishMove(ctx, { participants: out.participants, moved: out.moved, hazard, messages: out.messages, events: out.events, trail: { from: mover.battleData.position, path: stopAt >= 0 ? full.slice(0, stopAt + 1) : full } });
 }
 
 interface MoveOutcome {
@@ -93,18 +98,28 @@ interface MoveOutcome {
   hazard: TerrainCell | null;
   messages: string[];
   events: NewBattleEvent[];
+  /** шлях пройдено вільно від from; лише тоді спрацьовують зони заклинань */
+  trail?: { from: GridPoint | undefined; path: GridPoint[] };
 }
 
-function finishMove(ctx: BattleMutationContext, { participants, moved, hazard, messages, events: attackEvents }: MoveOutcome): MutationResult {
+function finishMove(ctx: BattleMutationContext, { participants, moved, hazard, messages, events: attackEvents, trail }: MoveOutcome): MutationResult {
   const events = [...(messages.length ? [systemEvent(ctx.scene.round, messages.join("; "))] : []), ...attackEvents];
 
   const hit = hazard && hazardHit(moved, hazard, ctx.scene.round, participants, ctx.rng ?? Math.random, ctx.meta.rules);
 
-  if (!hazard || !hit) return { participants, pending: ctx.pending, events };
+  const hazardHitResult = hazard && hit ? resolveHazardHit(ctx, participants, moved, hazard, hit) : null;
 
-  const resolved = resolveHazardHit(ctx, participants, moved, hazard, hit);
+  const resolved = { participants: hazardHitResult?.participants ?? participants, events: [...events, ...(hazardHitResult?.events ?? [])] };
 
-  return { ...resolved, events: [...events, ...resolved.events], pending: ctx.pending };
+  const after = findParticipant(resolved.participants, moved.basicInfo.id);
+
+  const map = ctx.meta.map;
+
+  if (!trail?.from || !map?.spellZones || !after || !isActive(after)) return { ...resolved, pending: ctx.pending };
+
+  const zones = zoneMove({ map, participants: resolved.participants, moved: after, from: trail.from, path: trail.path, round: ctx.scene.round, rng: ctx.rng ?? Math.random, rules: ctx.meta.rules });
+
+  return { participants: zones.participants, events: [...resolved.events, ...(zones.messages.length ? [systemEvent(ctx.scene.round, zones.messages.join("; "))] : [])], pending: ctx.pending };
 }
 
 function returnToStart(ctx: BattleMutationContext, participants: BattleParticipant[], mover: BattleParticipant, ownTurn: boolean): MutationResult {

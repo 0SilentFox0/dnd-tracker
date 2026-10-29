@@ -3,6 +3,7 @@ import { z } from "zod";
 import { HAZARD_DICE_PATTERN, MAZE_DIFFICULTIES, MAZE_LIMITS, MAZE_MARK_SYMBOLS, ParticipantSide, ParticipantSourceType } from "@/lib/constants/battle";
 import { WEATHER_KINDS } from "@/lib/constants/battle-weather";
 import { hasPlayableArea } from "@/lib/utils/battle/grid/map-editor";
+import { ZoneTriggerSchema } from "@/lib/utils/spells/model/schema";
 
 const MAP_BACKGROUND_PATTERN = /^(https:\/\/\S+|data:image\/(png|jpeg|webp);base64,[A-Za-z0-9+/=]+|\/battle-maps\/[\w.-]+\.(webp|jpg|png))$/;
 
@@ -87,6 +88,23 @@ export const battleMapSchema = z.object({
       }).refine((c) => c.kind !== "barrier" || c.untilRound !== undefined, "Барʼєру потрібен строк"),
     )
     .refine((t) => Object.keys(t).length <= 3600, "Забагато клітинок місцевості")
+    .optional(),
+  spellZones: z
+    .record(
+      z.string().max(80),
+      z.object({
+        casterId: z.string().max(64),
+        spellId: z.string().max(64),
+        spellName: z.string().max(120),
+        dc: z.number().int().min(1).max(40),
+        side: z.enum(["enemies", "all"]),
+        centre: mapCellSchema.optional(),
+        triggers: z.object({ onEnter: ZoneTriggerSchema.optional(), onTurnStart: ZoneTriggerSchema.optional(), onExit: ZoneTriggerSchema.optional() }),
+        untilRound: z.number().int().min(1),
+        concentrationOf: z.object({ casterId: z.string().max(64), castId: z.string().max(64) }).optional(),
+      }),
+    )
+    .refine((z) => Object.keys(z).length <= 200, "Забагато зон заклинань")
     .optional(),
   backgroundCols: z.number().positive().max(200).optional(),
   gridOffset: z.object({ x: z.number().min(0).lt(1), y: z.number().min(0).lt(1) }).optional(),

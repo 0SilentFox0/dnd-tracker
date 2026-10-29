@@ -52,6 +52,7 @@ export interface ParticipantState {
   returnedThisTurn?: boolean;
   airborne?: AirborneState;
   hazardHitRound?: number;
+  zoneHits?: Record<string, number>;
   retaliationsUsed?: number;
   dormant?: boolean;
   facing?: Direction8;
