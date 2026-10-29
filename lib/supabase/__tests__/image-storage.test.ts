@@ -1,7 +1,8 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-import { isHostedOnProjectStorage, mirrorImageUrl, resolveImageForPersistence, uploadImageDataUrl } from "@/lib/supabase/image-storage";
+import { mirrorImageUrl, resolveImageForPersistence, uploadImageDataUrl } from "@/lib/supabase/image-storage";
 import { safeFetchBuffer, SafeFetchError } from "@/lib/utils/api/safe-fetch";
+import { isHostedOnProjectStorage } from "@/lib/utils/common/image-url";
 
 const upload = vi.hoisted(() => vi.fn());
 

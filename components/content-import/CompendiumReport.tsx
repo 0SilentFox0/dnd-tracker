@@ -2,6 +2,7 @@
 import { useMemo, useState } from "react";
 import Link from "next/link";
 
+import { CompendiumMediaSummary } from "./CompendiumMediaSummary";
 import { SourceNotes } from "./SourceNotes";
 
 import { PagerNav } from "@/components/common/PagerNav";
@@ -118,7 +119,7 @@ export function CompendiumReport({ campaignId, report, committed = false, blocke
   return <section className="space-y-4 break-words text-sm" aria-label={t("report.ariaLabel")}>
     <div className="space-y-3 rounded-xl border border-hud-line p-3">
       <div className="flex flex-wrap items-baseline gap-x-4 gap-y-1">
-        <p className={`text-base font-semibold ${report.readyToImport ? "text-hud-good" : "text-hud-bad"}`}>{t(report.readyToImport ? "report.canImport" : "report.blocked")}</p>
+        <p className={`text-base font-semibold ${report.readyToImport ? "text-hud-good" : "text-hud-bad"}`}>{t(report.readyToImport ? (committed ? "report.imported" : "report.canImport") : "report.blocked")}</p>
         <p className="text-hud-muted">{t(report.readyToPlay ? "report.playReady" : "report.manualNeeded")}</p>
       </div>
       <Counts counts={report.counts} />
@@ -150,6 +151,7 @@ export function CompendiumReport({ campaignId, report, committed = false, blocke
       <PagerNav ariaLabel={t("report.rowsPager")} pager={rows} labels={{ prev: t("report.rowsPrev"), next: t("report.rowsNext") }} />
     </div>
     {groups.length > 0 && <div className="space-y-2"><h3 className="hud-sc text-base text-hud-ink">{t("report.next")}</h3><ul className="space-y-2">{groups.map(group => <IssueGroupCard key={group.code} group={group} link={committed ? actionLink : undefined} />)}</ul></div>}
+    {!committed && report.media && <CompendiumMediaSummary media={report.media} />}
     {info.length > 0 && <p className="text-hud-muted">{t("report.infoNote", { summary: infoSummary(t, info) })}</p>}
     {report.omittedIssues > 0 && <p>{t("report.omitted", { count: report.omittedIssues, codes: Object.entries(report.issueCounts).map(([code, n]) => t("report.codeCount", { code, count: n })).join("; ") })}</p>}
     <p>{t("report.backstories")}</p>

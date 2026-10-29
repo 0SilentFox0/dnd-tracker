@@ -3,6 +3,7 @@ import { array } from "../adapters/shared";
 import { derivedTranslator } from "../derived-text";
 import type { FeatureResolutionContext } from "../feature-resolution";
 import { canonicalKey } from "../identity";
+import { collectEntryMedia } from "../media/collect";
 import { byteLength, type Compendium, COMPENDIUM_LIMITS, type JsonRecord, normalized } from "../parse";
 import { type AdaptedCompendium, type AdaptedEntry, type Adapter, type AdapterContext, type AdaptOptions, issue } from "../types";
 
@@ -111,6 +112,10 @@ export function addEntry(state: AdaptState, kind: string, row: JsonRecord, path:
   const attribution = Object.fromEntries(["page", "additionalSources", "otherSources", "referenceSources"].filter((k) => row[k] !== undefined).map((k) => [k, row[k]]));
 
   const entry: AdaptedEntry = { key, inputPath: path, inputKind: kind, name, source, edition, body: result.body, refs: result.refs ?? [], notes: result.notes ?? "", kind: result.kind, issues: local, attribution };
+
+  const media = [...collectEntryMedia(result.kind, kind, row, root, path, parent.length > 0), ...(result.media ?? [])];
+
+  if (media.length > 0) entry.media = media;
 
   state.sourceRows.set(key, row);
   state.entries.push(entry);

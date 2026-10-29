@@ -6,7 +6,8 @@ vi.mock("server-only", () => ({}));
 vi.mock("@/lib/db", () => ({ prisma: {} }));
 vi.mock("@/lib/supabase/admin", () => ({ createAdminClient: () => ({}) }));
 vi.mock("@/lib/supabase/scene-slide-storage", () => ({ ensureSlidesBucket: async () => ({ ok: true, value: undefined }) }));
-vi.mock("@/lib/supabase/image-storage", () => ({ isHostedOnProjectStorage: () => false, resolveImageForPersistence }));
+vi.mock("@/lib/utils/common/image-url", async (original) => ({ ...await original<object>(), isHostedOnProjectStorage: () => false }));
+vi.mock("@/lib/supabase/image-storage", () => ({ resolveImageForPersistence }));
 
 import { API_ERRORS } from "@/lib/constants/api-errors";
 import { persistSlideImages } from "@/lib/server/show/deck-store";

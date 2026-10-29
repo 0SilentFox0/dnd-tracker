@@ -17,8 +17,8 @@ vi.mock("next/server", async (orig) => ({ ...(await orig<typeof import("next/ser
 vi.mock("@/lib/pusher/server", () => ({ pusherServer: { trigger } }));
 vi.mock("@/lib/utils/api/api-auth", () => ({ requireDM: vi.fn(), requireCampaignAccess: vi.fn() }));
 vi.mock("@/lib/supabase/scene-slide-storage", () => ({ removeSlideFiles: vi.fn(async () => undefined), createSlideUploadTicket: vi.fn(), ensureSlidesBucket: vi.fn(async () => ({ ok: true })) }));
+vi.mock("@/lib/utils/common/image-url", async (original) => ({ ...await original<object>(), isHostedOnProjectStorage: (u: string) => u.includes(".supabase.co/") }));
 vi.mock("@/lib/supabase/image-storage", () => ({
-  isHostedOnProjectStorage: (u: string) => u.includes(".supabase.co/"),
   resolveImageForPersistence: vi.fn(async () => ({ ok: true, value: "https://p.supabase.co/storage/v1/object/public/scene-slides/c1/mirrored.png" })),
 }));
 vi.mock("@/lib/supabase/admin", () => ({ createAdminClient: vi.fn(() => ({})) }));

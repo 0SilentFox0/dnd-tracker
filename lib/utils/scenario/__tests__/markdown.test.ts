@@ -20,6 +20,14 @@ const sortMarks = (n: RichNode): RichNode => ({
 const roundTrip = (d: RichDoc) => expect(canonicalJson(markdownToDoc(docToMarkdown(d)))).toBe(canonicalJson({ ...d, content: d.content.map(sortMarks) }));
 
 describe("scenario markdown", () => {
+  it("зображення серіалізується як {{image:alt}} і не є lossless", () => {
+    const d = doc(p(t("a")), { type: "image", attrs: { mediaId: "a".repeat(24), alt: "Мапа" } }, { type: "image", attrs: { mediaId: "b".repeat(24) } });
+
+    expect(docToMarkdown(d)).toBe(`a\n\n{{image:Мапа}}\n\n{{image:${"b".repeat(24)}}}`);
+    expect(isLosslessDoc(d)).toBe(false);
+    expect(markdownToDoc("{{image:Мапа}}").content.some((n) => n.type === "image")).toBe(false);
+  });
+
   it("абзаци, жирний, курсив, секрет", () => {
     const d = doc(p(t("Дзвони "), t("б'ють", "bold"), t(" і "), t("тиша", "italic", "secret")), p(t("Другий")));
 

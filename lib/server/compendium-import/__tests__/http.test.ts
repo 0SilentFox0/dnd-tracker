@@ -1,12 +1,16 @@
 import { NextResponse } from "next/server";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-const mocks = vi.hoisted(() => ({ actor: vi.fn(), preview: vi.fn(), confirm: vi.fn(), authorize: vi.fn(), runs: vi.fn(), entry: vi.fn(), rate: vi.fn() }));
+const mocks = vi.hoisted(() => ({ actor: vi.fn(), media: vi.fn(), preview: vi.fn(), confirm: vi.fn(), authorize: vi.fn(), runs: vi.fn(), entry: vi.fn(), rate: vi.fn() }));
 
 vi.mock("@/lib/utils/api/actor", () => ({ resolveActor: mocks.actor }));
-vi.mock("../presentation", () => ({ previewPresentation: () => ({ graph: [], rulesDiff: {} }), importTargetOptions: vi.fn() }));
+vi.mock("../presentation", () => ({ previewPresentation: () => ({ graph: [], rulesDiff: {} }), importTargetOptions: vi.fn(), mediaPresentation: (r: unknown) => r }));
 vi.mock("../repository", () => ({ prismaImportRepository: { authorize: mocks.authorize } }));
 vi.mock("@/lib/i18n/request-locale", () => ({ getRequestLocale: async () => "uk" }));
+vi.mock("../media/service", () => ({ processMediaBatch: mocks.media }));
+vi.mock("../media/repository", () => ({ prismaMediaRepository: {} }));
+vi.mock("../media/fetch-image", () => ({ fetchImportImage: vi.fn() }));
+vi.mock("@/lib/supabase/compendium-media-storage", () => ({ storeCompendiumImage: vi.fn() }));
 vi.mock("../service", () => ({ previewImport: mocks.preview, confirmImport: mocks.confirm }));
 vi.mock("@/lib/db", () => ({ prisma: { compendiumImportRun: { findMany: mocks.runs }, compendiumEntry: { findMany: mocks.entry } } }));
 vi.mock("@/lib/utils/api/rate-limit", () => ({ checkRateLimit: mocks.rate, rateLimitResponse: () => NextResponse.json({}, { status: 429 }) }));
@@ -106,4 +110,55 @@ it("rejects a foreign origin even with a normalized internal URL", async () => {
 
   request.headers.set("host", "127.0.0.1:3133");
   expect((await compendiumRoute("preview")(request, ctx)).status).toBe(403);
+});
+
+describe("media route", () => {
+  const mediaReq = (body: unknown, origin = "http://localhost") => new Request("http://localhost/api/campaigns/c/compendium/media", { method: "POST", headers: { origin, "content-type": "application/json" }, body: JSON.stringify(body) });
+
+  const progress = { runId: "r", total: 1, saved: 1, failed: 0, pending: 0, skipped: 0, failures: [] };
+
+  it("returns progress without items", async () => {
+    mocks.media.mockResolvedValue(progress);
+
+    const response = await compendiumRoute("media")(mediaReq({ runId: "r", retryFailed: true }), ctx);
+
+    expect(response.status).toBe(200);
+    expect(await response.json()).toEqual(progress);
+    expect(mocks.media).toHaveBeenCalledWith(expect.objectContaining({ campaignId: "c" }), "r", expect.anything(), { retryFailed: true });
+    expect(mocks.rate).toHaveBeenCalledWith(expect.objectContaining({ scope: "compendium-media", limit: 60 }));
+  });
+  it("rejects foreign origin, non-DM, token and missing session", async () => {
+    expect((await compendiumRoute("media")(mediaReq({ runId: "r" }, "https://evil.test"), ctx)).status).toBe(403);
+    mocks.actor.mockResolvedValue({ isDM: false, via: "session" });
+    expect((await compendiumRoute("media")(mediaReq({ runId: "r" }), ctx)).status).toBe(403);
+    mocks.actor.mockResolvedValue({ isDM: true, via: "token" });
+    expect((await compendiumRoute("media")(mediaReq({ runId: "r" }), ctx)).status).toBe(403);
+    mocks.actor.mockResolvedValue(NextResponse.json({}, { status: 401 }));
+    expect((await compendiumRoute("media")(mediaReq({ runId: "r" }), ctx)).status).toBe(401);
+    expect(mocks.media).not.toHaveBeenCalled();
+  });
+  it("maps a foreign runId to 404", async () => {
+    const { CompendiumError } = await import("../parse");
+
+    mocks.media.mockRejectedValue(new CompendiumError("FORBIDDEN"));
+
+    const response = await compendiumRoute("media")(mediaReq({ runId: "other" }), ctx);
+
+    expect(response.status).toBe(404);
+    expect(await response.json()).toEqual({ code: "RUN_NOT_FOUND" });
+  });
+  it("returns 429 when rate limited and rejects unknown/oversized bodies", async () => {
+    mocks.rate.mockResolvedValue({ allowed: false });
+    expect((await compendiumRoute("media")(mediaReq({ runId: "r" }), ctx)).status).toBe(429);
+    mocks.rate.mockResolvedValue({ allowed: true });
+    expect((await compendiumRoute("media")(mediaReq({ runId: "r", extra: 1 }), ctx)).status).toBe(422);
+    expect((await compendiumRoute("media")(mediaReq({ runId: "r".repeat(5000) }), ctx)).status).toBe(413);
+  });
+  it("confirm response carries media as MediaProgress", async () => {
+    mocks.confirm.mockResolvedValue({ rows: [], nextActions: [], runId: "r", media: progress });
+
+    const response = await compendiumRoute("confirm")(req({ input: {}, token: "t", idempotencyKey: "k", rightsConfirmed: true }), ctx);
+
+    expect((await response.json()).media).toEqual(progress);
+  });
 });

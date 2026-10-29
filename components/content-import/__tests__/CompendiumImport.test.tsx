@@ -39,7 +39,7 @@ describe("CompendiumImport", () => {
   expect(screen.getByText("Потрібні ручні дії до гри")).toBeTruthy();
   expect(calls.filter(x => x.url.endsWith("confirm"))).toHaveLength(0);
   expect((screen.getByRole("button", { name: "Імпортувати" }) as HTMLButtonElement).disabled).toBe(true);
-  fireEvent.click(screen.getByLabelText("Маю право використати цей файл у цій кампанії"));
+  fireEvent.click(screen.getByLabelText("Маю право використати цей файл і його зображення в цій кампанії"));
   fireEvent.click(screen.getByRole("button", { name: "Імпортувати" }));
   await screen.findByText("Імпорт збережено: run");
   expect(calls.find(x => x.url.endsWith("confirm"))?.body).toMatchObject({ token: "signed", rightsConfirmed: true });

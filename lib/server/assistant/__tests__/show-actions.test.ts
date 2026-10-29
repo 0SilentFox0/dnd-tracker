@@ -32,7 +32,7 @@ vi.mock("@/lib/db", () => ({ prisma: {
 vi.mock("@/lib/server/content/write", () => ({ withCampaignContentWrite: async (_id: string, cb: () => unknown) => cb() }));
 vi.mock("@/lib/server/show/show-store", async (original) => ({ ...await original<object>(), publishShow: vi.fn() }));
 vi.mock("@/lib/supabase/scene-slide-storage", () => ({ ownedSlidePath: (_c: string, url: string) => url.startsWith("https://owned/c/") ? "c/x.webp" : null, removeSlideFiles: async (_c: string, urls: string[]) => { f.deleted.push(...urls); } }));
-vi.mock("@/lib/supabase/image-storage", () => ({ isHostedOnProjectStorage: (url: string) => url.startsWith("https://owned/") }));
+vi.mock("@/lib/utils/common/image-url", async (original) => ({ ...await original<object>(), isHostedOnProjectStorage: (url: string) => url.startsWith("https://owned/") }));
 
 const caller: AssistantCaller = { actor: { campaignId: "campaign", userId: "dm", isDM: true, via: "session", scopes: null }, channel: "chat", threadId: "thread", tokenId: null, runId: "run", locale: "uk" as const };
 

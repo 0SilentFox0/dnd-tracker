@@ -291,3 +291,24 @@ describe("classes mode in the report", () => {
     expect((await preview({ classesEnabled: false, hasClasses: true }, { classes: { enabled: true } })).nextActions.map(a => a.code)).not.toContain("CLASSES_MODE_REQUIRED");
   });
 });
+
+describe("confirm media queue", () => {
+  it("stores the full queue with real ids in the run report without fetching", async () => {
+    const fetchSpy = vi.spyOn(globalThis, "fetch");
+
+    const db = repository();
+
+    const media = { json: JSON.stringify({ spell: [{ name: "Pic", source: "T", level: 1, foundryImg: "https://img.test/a.png" }] }) };
+
+    const preview = await previewImport(actor, media, secret, db.repo);
+
+    expect(preview.report.media).toMatchObject({ queued: 1 });
+
+    const report = await confirmImport(actor, media, preview.token, "media", secret, db.repo);
+
+    expect(report.media?.items).toHaveLength(1);
+    expect(report.media?.items?.[0]).toMatchObject({ url: "https://img.test/a.png", status: "pending", attempts: 0, targets: [{ kind: "spells", field: "icon" }] });
+    expect(report.media?.items?.[0].targets[0].localId).toBeTruthy();
+    expect(fetchSpy).not.toHaveBeenCalled();
+  });
+});
