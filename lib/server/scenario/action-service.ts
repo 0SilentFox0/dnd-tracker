@@ -6,8 +6,10 @@ import { pruneVersions, snapshotIfDue } from "./versions";
 
 import "server-only";
 import { API_ERRORS } from "@/lib/constants/api-errors";
-import { DEFAULT_SCENE_LEGEND, SCENARIO_MAX_CONTENT_BYTES, SCENARIO_MAX_VERSIONS } from "@/lib/constants/scenario";
+import { SCENARIO_MAX_CONTENT_BYTES, SCENARIO_MAX_VERSIONS } from "@/lib/constants/scenario";
 import { prisma } from "@/lib/db";
+import { DEFAULT_LOCALE } from "@/lib/i18n/config";
+import { getTranslator } from "@/lib/i18n/translator";
 import { createScenarioPageSchema, scenarioContentSchema, scenarioSectionPatchSchema, updateScenarioMetaSchema } from "@/lib/schemas/scenario";
 import { notifyRevealForContentChange } from "@/lib/server/acquaintances/reveal";
 import { stampDigest } from "@/lib/server/assistant/digest";
@@ -18,6 +20,7 @@ import { ContentError, parseInput } from "@/lib/server/content/errors";
 import { withCampaignContentWrite } from "@/lib/server/content/write";
 import { afterContentCommit } from "@/lib/server/content/write-context";
 import type { Actor } from "@/lib/utils/api/actor";
+import { buildDefaultLegend } from "@/lib/utils/scenario/default-legend";
 import { moveRow, moveSection, newSection, removeRow, removeSection, updateSection } from "@/lib/utils/scenario/structure";
 import type { ScenarioContent } from "@/types/scenario";
 
@@ -145,7 +148,7 @@ export async function runScenarioOperation(actor: Actor, operation: string, inpu
 
       if (!await characterInCampaign(actor.campaignId, body.characterId)) throw new ContentError(API_ERRORS.SCENARIO_CHARACTER_INVALID, 400);
 
-      const content: ScenarioContent = { legend: body.kind === "scene" ? DEFAULT_SCENE_LEGEND : [], sections: [newSection(body.kind === "hero" ? "Історія" : "Розділ 1")] };
+      const content: ScenarioContent = { legend: body.kind === "scene" ? buildDefaultLegend(await getTranslator(DEFAULT_LOCALE, "scenario")) : [], sections: [newSection(body.kind === "hero" ? "Історія" : "Розділ 1")] };
 
       const last = await prisma.scenarioPage.aggregate({ where: { campaignId: actor.campaignId }, _max: { sortOrder: true } });
 

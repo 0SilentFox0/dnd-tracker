@@ -1,4 +1,3 @@
-import { UNARCHED_LABEL } from "@/lib/constants/scenario";
 import type { ScenarioIndexGroups, ScenarioPageSummary } from "@/types/scenario";
 
 const bySort = (a: ScenarioPageSummary, b: ScenarioPageSummary) => a.sortOrder - b.sortOrder || a.title.localeCompare(b.title, "uk");
@@ -9,7 +8,7 @@ export function groupIndex(pages: ScenarioPageSummary[]): ScenarioIndexGroups {
   const arcs = new Map<string, ScenarioIndexGroups["arcs"][number]>();
 
   scenes.forEach((page, i) => {
-    const arc = page.arc?.trim() || UNARCHED_LABEL;
+    const arc = page.arc?.trim() || "";
 
     if (!arcs.has(arc)) arcs.set(arc, { arc, pages: [] });
 

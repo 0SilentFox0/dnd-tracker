@@ -143,7 +143,7 @@ describe("useScenarioDraft", () => {
 
     expect(flushed).toBe(false);
     expect(result.current.state).toBe("error");
-    expect(result.current.error).toEqual({ message: "Не збережено", retryable: true });
+    expect(result.current.error).toEqual({ message: "scenario.draft.notSaved", retryable: true });
   });
 
   it("413 → повідомлення сервера без повтору", async () => {

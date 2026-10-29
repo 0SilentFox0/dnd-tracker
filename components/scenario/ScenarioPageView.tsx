@@ -1,5 +1,7 @@
 "use client";
 
+import { useTranslations } from "next-intl";
+
 import { MarkerPlay, RowPlayControls } from "./play/RowPlayControls";
 import { ScenarioLegend } from "./ScenarioLegend";
 import { ScenarioRichText } from "./ScenarioRichText";
@@ -16,6 +18,8 @@ import type { ScenarioPage } from "@/types/scenario";
 type Progress = { onPlayed: (sectionId: string, played: boolean) => void; onRevealed: (sectionId: string, revealed: boolean) => void; pending: boolean; played?: PlayedLookup };
 
 export function ScenarioPageView({ page, campaignId, progress, play, collapse }: { page: ScenarioPage; campaignId: string; progress?: Progress; play?: ScenarioPlay; collapse?: SectionCollapse }) {
+  const t = useTranslations("scenario.page");
+
   const isHero = page.kind === "hero";
 
   return (
@@ -35,7 +39,7 @@ export function ScenarioPageView({ page, campaignId, progress, play, collapse }:
 
           const playedButton = progress && (
             <button type="button" className="toggle played" aria-pressed={done} disabled={progress.pending} onClick={() => (isHero ? progress.onRevealed(s.id, !s.revealedAt) : progress.onPlayed(s.id, !done))}>
-              {isHero ? (byPlay ? "✓ Відкрито (після розділу)" : done ? "✓ Відкрито гравцеві" : "Відкрити гравцеві") : done ? "✓ Зіграно" : "Зіграно"}
+              {isHero ? (byPlay ? t("revealedAfterSection") : done ? t("revealed") : t("reveal")) : done ? t("playedDone") : t("played")}
             </button>
           );
 
@@ -75,7 +79,7 @@ export function ScenarioPageView({ page, campaignId, progress, play, collapse }:
                       key={r.id}
                       id={`row-${r.id}`}
                       className={cn("row", clickable && "is-slide", slideState?.kind === "ready" && slideState.current && "is-current")}
-                      title={clickable ? "Подвійний клік — показати слайд" : undefined}
+                      title={clickable ? t("doubleClickSlide") : undefined}
                       onDoubleClick={
                         clickable
                           ? (e) => {

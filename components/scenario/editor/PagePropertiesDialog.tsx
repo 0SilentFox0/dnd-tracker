@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { useTranslations } from "next-intl";
 
 import { CharacterSelect } from "@/components/scenario/CharacterSelect";
 import { LegendColorPicker } from "@/components/scenario/editor/LegendColorPicker";
@@ -10,14 +11,22 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { ResponsiveDialog } from "@/components/ui/responsive-dialog";
 import { SelectField } from "@/components/ui/select-field";
-import { LEGEND_LABELS, PAGE_STATUS_LABELS, PAGE_STATUSES, SCENARIO_MAX_LEGEND } from "@/lib/constants/scenario";
+import { PAGE_STATUSES, SCENARIO_MAX_LEGEND } from "@/lib/constants/scenario";
 import { useConfirm } from "@/lib/hooks/common";
 import { useScenarioPageActions } from "@/lib/hooks/scenario";
 import type { LegendEntry, ScenarioPage, ScenarioPageStatus } from "@/types/scenario";
 
-const STATUS_OPTIONS = PAGE_STATUSES.map((s) => ({ value: s, label: PAGE_STATUS_LABELS[s] }));
-
 export function PagePropertiesDialog({ campaignId, page, legend, onLegend, onClose }: { campaignId: string; page: ScenarioPage; legend: LegendEntry[]; onLegend: (legend: LegendEntry[]) => void; onClose: () => void }) {
+  const t = useTranslations("scenario.props");
+
+  const tActions = useTranslations("common.actions");
+
+  const tStatuses = useTranslations("scenario.pageStatuses");
+
+  const tLegend = useTranslations("scenario.legendKinds");
+
+  const statusOptions = PAGE_STATUSES.map((s) => ({ value: s, label: tStatuses(s) }));
+
   const actions = useScenarioPageActions(campaignId);
 
   const [form, setForm] = useState({ title: page.title, subtitle: page.subtitle ?? "", arc: page.arc ?? "", status: page.status, characterId: page.characterId ?? "" });
@@ -33,7 +42,7 @@ export function PagePropertiesDialog({ campaignId, page, legend, onLegend, onClo
   const confirm = useConfirm();
 
   const removePage = async () => {
-    if (!(await confirm({ title: `Видалити сторінку «${page.title}»?`, description: "Сторінку і всі її версії буде видалено назавжди.", confirmLabel: "Видалити" }))) return;
+    if (!(await confirm({ title: t("deleteTitle", { title: page.title }), description: t("deleteDescription"), confirmLabel: tActions("delete") }))) return;
 
     try {
       await actions.remove(page.id);
@@ -64,14 +73,14 @@ export function PagePropertiesDialog({ campaignId, page, legend, onLegend, onClo
       hud
       open
       onOpenChange={(o) => !o && onClose()}
-      title="Властивості сторінки"
+      title={t("title")}
       footer={
         <>
           <Button type="button" variant="destructive" disabled={actions.isPending} onClick={() => void removePage()}>
-            Видалити сторінку
+            {t("deletePage")}
           </Button>
           <Button type="submit" form="scenario-props-form" disabled={actions.isPending || !form.title.trim()}>
-            Зберегти
+            {tActions("save")}
           </Button>
         </>
       }
@@ -85,43 +94,43 @@ export function PagePropertiesDialog({ campaignId, page, legend, onLegend, onClo
         }}
       >
         <div className="space-y-1.5">
-          <Label htmlFor="sp-title">Назва *</Label>
+          <Label htmlFor="sp-title">{t("name")}</Label>
           <Input id="sp-title" required value={form.title} maxLength={200} onChange={(e) => set("title", e.target.value)} />
         </div>
         <div className="space-y-1.5">
-          <Label htmlFor="sp-subtitle">Підзаголовок</Label>
+          <Label htmlFor="sp-subtitle">{t("subtitle")}</Label>
           <Input id="sp-subtitle" value={form.subtitle} maxLength={500} onChange={(e) => set("subtitle", e.target.value)} />
         </div>
         {page.kind === "scene" && (
           <div className="space-y-1.5">
-            <Label htmlFor="sp-arc">Арка</Label>
+            <Label htmlFor="sp-arc">{t("arc")}</Label>
             <Input id="sp-arc" value={form.arc} maxLength={120} onChange={(e) => set("arc", e.target.value)} />
           </div>
         )}
         <div className="space-y-1.5">
-          <Label htmlFor="sp-status">Статус</Label>
-          <SelectField id="sp-status" value={form.status} onValueChange={(v) => set("status", v as ScenarioPageStatus)} options={STATUS_OPTIONS} />
+          <Label htmlFor="sp-status">{t("status")}</Label>
+          <SelectField id="sp-status" value={form.status} onValueChange={(v) => set("status", v as ScenarioPageStatus)} options={statusOptions} />
         </div>
         {page.kind === "hero" && (
           <div className="space-y-1.5">
-            <Label htmlFor="sp-character">Персонаж</Label>
+            <Label htmlFor="sp-character">{t("character")}</Label>
             <CharacterSelect campaignId={campaignId} id="sp-character" value={form.characterId} onValueChange={(v) => set("characterId", v)} />
           </div>
         )}
         <div className="space-y-2">
-          <Label>Легенда</Label>
+          <Label>{t("legend")}</Label>
           {items.map((item, i) => (
             <div key={i} className="flex flex-wrap items-center gap-2 sm:flex-nowrap">
               <LegendColorPicker entry={item} onChange={(color) => patchItem(i, { color })} />
-              <Input aria-label="Підпис позначки" className="min-w-0 flex-1" value={item.label} maxLength={80} onChange={(e) => patchItem(i, { label: e.target.value })} />
+              <Input aria-label={t("legendLabel")} className="min-w-0 flex-1" value={item.label} maxLength={80} onChange={(e) => patchItem(i, { label: e.target.value })} />
               <Button type="button" variant="outline" onClick={() => setItems((l) => l.filter((_, j) => j !== i))}>
-                Прибрати
+                {tActions("remove")}
               </Button>
             </div>
           ))}
           {items.length < SCENARIO_MAX_LEGEND && (
-            <Button type="button" variant="outline" onClick={() => setItems((l) => [...l, { kind: "read", label: LEGEND_LABELS.read }])}>
-              Додати позначку
+            <Button type="button" variant="outline" onClick={() => setItems((l) => [...l, { kind: "read", label: tLegend("read") }])}>
+              {t("addLegend")}
             </Button>
           )}
         </div>

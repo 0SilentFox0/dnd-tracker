@@ -1,6 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
+import { useTranslations } from "next-intl";
 import { ChevronLeft, MapPin } from "lucide-react";
 
 import { SearchEmptyState } from "@/components/common/SearchEmptyState";
@@ -46,17 +47,19 @@ function treeOrder(maps: WorldMapSummary[]): WorldMapSummary[] {
 }
 
 function MarkerList({ campaignId, mapId, onPick }: { campaignId: string; mapId: string; onPick(markerId: string): void }) {
+  const t = useTranslations("scenario.markerPicker");
+
   const { data, isLoading } = useWorldMap(campaignId, mapId);
 
   const search = useSearch(data?.markers ?? [], markerFields);
 
   if (isLoading) return <LoadingState />;
 
-  if (!data?.markers.length) return <EmptyState icon={MapPin} title="На карті немає місць" />;
+  if (!data?.markers.length) return <EmptyState icon={MapPin} title={t("noMarkers")} />;
 
   return (
     <div className="flex flex-col gap-2">
-      <SearchInput value={search.query.value} onChange={search.query.set} label="Пошук місця" />
+      <SearchInput value={search.query.value} onChange={search.query.set} label={t("search")} />
       {search.items.length === 0 ? (
         <SearchEmptyState query={search.query.value} onClear={() => search.query.set("")} />
       ) : (
@@ -71,6 +74,8 @@ function MarkerList({ campaignId, mapId, onPick }: { campaignId: string; mapId: 
 }
 
 export function MarkerPickerDialog({ campaignId, open, onOpenChange, onPick }: Props) {
+  const t = useTranslations("scenario.markerPicker");
+
   const isWide = useMediaQuery(DESKTOP_QUERY);
 
   const { data: maps = [], isLoading } = useWorldMaps(campaignId);
@@ -99,12 +104,12 @@ export function MarkerPickerDialog({ campaignId, open, onOpenChange, onPick }: P
   let body;
 
   if (isLoading) body = <LoadingState />;
-  else if (maps.length === 0) body = <EmptyState icon={MapPin} title="Немає карт світу" action={<WorldMapLink campaignId={campaignId} variant="button" newTab />} />;
+  else if (maps.length === 0) body = <EmptyState icon={MapPin} title={t("noMaps")} action={<WorldMapLink campaignId={campaignId} variant="button" newTab />} />;
   else if (isWide)
     body = (
       <div className="grid grid-cols-[minmax(0,1fr)_minmax(0,1.4fr)] gap-4">
         {tree}
-        {mapId ? <MarkerList campaignId={campaignId} mapId={mapId} onPick={pick} /> : <EmptyState title="Оберіть карту" />}
+        {mapId ? <MarkerList campaignId={campaignId} mapId={mapId} onPick={pick} /> : <EmptyState title={t("pickMap")} />}
       </div>
     );
   else if (!mapId) body = tree;
@@ -112,14 +117,14 @@ export function MarkerPickerDialog({ campaignId, open, onOpenChange, onPick }: P
     body = (
       <div className="flex flex-col gap-2">
         <Button type="button" variant="ghost" className="self-start" onClick={() => setMapId(null)}>
-          <ChevronLeft className="size-4" aria-hidden /> До карт
+          <ChevronLeft className="size-4" aria-hidden /> {t("toMaps")}
         </Button>
         <MarkerList campaignId={campaignId} mapId={mapId} onPick={pick} />
       </div>
     );
 
   return (
-    <ResponsiveDialog hud open={open} onOpenChange={onOpenChange} title="Місце на карті світу">
+    <ResponsiveDialog hud open={open} onOpenChange={onOpenChange} title={t("title")}>
       {body}
     </ResponsiveDialog>
   );

@@ -1,11 +1,12 @@
 "use client";
 
 import type { ReactNode } from "react";
+import { useTranslations } from "next-intl";
 import type { Editor } from "@tiptap/core";
 import { useEditorState } from "@tiptap/react";
 import { AtSign, Bold, Contact, Heading3, Italic, List, Megaphone, MessageSquareQuote, Redo2, Table, Undo2, VenetianMask } from "lucide-react";
 
-import { CALLOUT_KINDS, CALLOUT_LABELS } from "@/lib/constants/scenario";
+import { CALLOUT_KINDS } from "@/lib/constants/scenario";
 import type { CalloutKind } from "@/types/scenario";
 
 function Tool({ label, active = false, disabled = false, onClick, children }: { label: string; active?: boolean; disabled?: boolean; onClick: () => void; children: ReactNode }) {
@@ -17,6 +18,10 @@ function Tool({ label, active = false, disabled = false, onClick, children }: { 
 }
 
 export function ScenarioToolbar({ editor, onAcquaintance }: { editor: Editor | null; onAcquaintance?: () => void }) {
+  const t = useTranslations("scenario.toolbar");
+
+  const tCallouts = useTranslations("scenario.calloutKinds");
+
   const state = useEditorState({
     editor,
     selector: ({ editor: e }) =>
@@ -42,15 +47,15 @@ export function ScenarioToolbar({ editor, onAcquaintance }: { editor: Editor | n
   const off = !editor || !state;
 
   return (
-    <div className="sb-toolbar" role="toolbar" aria-label="Форматування">
-      <Tool label="Жирний" active={state?.bold} disabled={off} onClick={() => run((e) => e.chain().focus().toggleBold().run())}><Bold className="size-4" /></Tool>
-      <Tool label="Курсив" active={state?.italic} disabled={off} onClick={() => run((e) => e.chain().focus().toggleItalic().run())}><Italic className="size-4" /></Tool>
-      <Tool label="Підзаголовок" active={state?.h3} disabled={off} onClick={() => run((e) => e.chain().focus().toggleHeading({ level: 3 }).run())}><Heading3 className="size-4" /></Tool>
-      <Tool label="Список" active={state?.list} disabled={off} onClick={() => run((e) => e.chain().focus().toggleBulletList().run())}><List className="size-4" /></Tool>
-      <Tool label="Читати вголос" active={state?.read} disabled={off} onClick={() => run((e) => e.chain().focus().toggleWrap("readAloud").run())}><Megaphone className="size-4" /></Tool>
-      <Tool label="Репліка" active={state?.say} disabled={off} onClick={() => run((e) => (e.isActive("say") ? e.chain().focus().setParagraph().run() : e.chain().focus().setNode("say").run()))}><MessageSquareQuote className="size-4" /></Tool>
+    <div className="sb-toolbar" role="toolbar" aria-label={t("formatting")}>
+      <Tool label={t("bold")} active={state?.bold} disabled={off} onClick={() => run((e) => e.chain().focus().toggleBold().run())}><Bold className="size-4" /></Tool>
+      <Tool label={t("italic")} active={state?.italic} disabled={off} onClick={() => run((e) => e.chain().focus().toggleItalic().run())}><Italic className="size-4" /></Tool>
+      <Tool label={t("subheading")} active={state?.h3} disabled={off} onClick={() => run((e) => e.chain().focus().toggleHeading({ level: 3 }).run())}><Heading3 className="size-4" /></Tool>
+      <Tool label={t("list")} active={state?.list} disabled={off} onClick={() => run((e) => e.chain().focus().toggleBulletList().run())}><List className="size-4" /></Tool>
+      <Tool label={t("readAloud")} active={state?.read} disabled={off} onClick={() => run((e) => e.chain().focus().toggleWrap("readAloud").run())}><Megaphone className="size-4" /></Tool>
+      <Tool label={t("say")} active={state?.say} disabled={off} onClick={() => run((e) => (e.isActive("say") ? e.chain().focus().setParagraph().run() : e.chain().focus().setNode("say").run()))}><MessageSquareQuote className="size-4" /></Tool>
       <select
-        aria-label="Маркер"
+        aria-label={t("callout")}
         disabled={off}
         value={state?.callout ? state.calloutKind : ""}
         onChange={(ev) =>
@@ -61,28 +66,28 @@ export function ScenarioToolbar({ editor, onAcquaintance }: { editor: Editor | n
 
             if (e.isActive("callout")) return void e.chain().focus().updateAttributes("callout", { kind }).run();
 
-            e.chain().focus().toggleWrap("callout", { kind, tag: CALLOUT_LABELS[kind] }).run();
+            e.chain().focus().toggleWrap("callout", { kind, tag: tCallouts(kind) }).run();
           })
         }
       >
-        <option value="">Маркер…</option>
+        <option value="">{t("calloutPlaceholder")}</option>
         {CALLOUT_KINDS.map((k) => (
           <option key={k} value={k}>
-            {CALLOUT_LABELS[k]}
+            {tCallouts(k)}
           </option>
         ))}
       </select>
       {state?.callout && (
-        <input aria-label="Заголовок маркера" value={state.calloutTag} maxLength={120} onChange={(ev) => run((e) => e.chain().updateAttributes("callout", { tag: ev.target.value }).run())} />
+        <input aria-label={t("calloutTitle")} value={state.calloutTag} maxLength={120} onChange={(ev) => run((e) => e.chain().updateAttributes("callout", { tag: ev.target.value }).run())} />
       )}
-      <Tool label="Зелений жетон" disabled={off} onClick={() => run((e) => e.chain().focus().insertContent({ type: "token", attrs: { color: "green" } }).run())}><span className="g" /></Tool>
-      <Tool label="Червоний жетон" disabled={off} onClick={() => run((e) => e.chain().focus().insertContent({ type: "token", attrs: { color: "red" } }).run())}><span className="r" /></Tool>
-      <Tool label="Секрет (не бачить гравець)" active={state?.secret} disabled={off} onClick={() => run((e) => e.chain().focus().toggleMark("secret").run())}><VenetianMask className="size-4" /></Tool>
-      <Tool label="Знайомство" active={state?.acquaintance} disabled={off || !onAcquaintance} onClick={() => onAcquaintance?.()}><Contact className="size-4" /></Tool>
-      <Tool label="Таблиця" disabled={off} onClick={() => run((e) => e.chain().focus().insertTable({ rows: 3, cols: 2, withHeaderRow: false }).run())}><Table className="size-4" /></Tool>
-      <Tool label="Посилання на сутність (@)" disabled={off} onClick={() => run((e) => e.chain().focus().insertContent("@").run())}><AtSign className="size-4" /></Tool>
-      <Tool label="Скасувати" disabled={off || !state?.canUndo} onClick={() => run((e) => e.chain().focus().undo().run())}><Undo2 className="size-4" /></Tool>
-      <Tool label="Повторити" disabled={off || !state?.canRedo} onClick={() => run((e) => e.chain().focus().redo().run())}><Redo2 className="size-4" /></Tool>
+      <Tool label={t("greenToken")} disabled={off} onClick={() => run((e) => e.chain().focus().insertContent({ type: "token", attrs: { color: "green" } }).run())}><span className="g" /></Tool>
+      <Tool label={t("redToken")} disabled={off} onClick={() => run((e) => e.chain().focus().insertContent({ type: "token", attrs: { color: "red" } }).run())}><span className="r" /></Tool>
+      <Tool label={t("secret")} active={state?.secret} disabled={off} onClick={() => run((e) => e.chain().focus().toggleMark("secret").run())}><VenetianMask className="size-4" /></Tool>
+      <Tool label={t("acquaintance")} active={state?.acquaintance} disabled={off || !onAcquaintance} onClick={() => onAcquaintance?.()}><Contact className="size-4" /></Tool>
+      <Tool label={t("table")} disabled={off} onClick={() => run((e) => e.chain().focus().insertTable({ rows: 3, cols: 2, withHeaderRow: false }).run())}><Table className="size-4" /></Tool>
+      <Tool label={t("mention")} disabled={off} onClick={() => run((e) => e.chain().focus().insertContent("@").run())}><AtSign className="size-4" /></Tool>
+      <Tool label={t("undo")} disabled={off || !state?.canUndo} onClick={() => run((e) => e.chain().focus().undo().run())}><Undo2 className="size-4" /></Tool>
+      <Tool label={t("redo")} disabled={off || !state?.canRedo} onClick={() => run((e) => e.chain().focus().redo().run())}><Redo2 className="size-4" /></Tool>
     </div>
   );
 }

@@ -1,6 +1,7 @@
 "use client";
 
 import type { MouseEvent } from "react";
+import { useTranslations } from "next-intl";
 
 import { scenarioFontClassName } from "./fonts";
 import { SectionIcon } from "./SectionIcon";
@@ -28,15 +29,17 @@ export type TocControl = { inline: boolean; drawer: { open: boolean; onOpenChang
 type Props = TocControl & { items: TocItem[]; onPick?: (id: string) => void };
 
 function TocList({ items, onPick }: { items: TocItem[]; onPick: (id: string, event: MouseEvent<HTMLAnchorElement>) => void }) {
+  const t = useTranslations("scenario.toc");
+
   const active = useActiveSection(items.map((i) => i.id));
 
   return (
-    <nav aria-label="Розділи" className="sb-toc-list">
+    <nav aria-label={t("sections")} className="sb-toc-list">
       {items.map((i) => (
         <a key={i.id} href={`#sec-${i.id}`} data-toc={i.id} data-done={i.done || undefined} aria-current={active === i.id ? "location" : undefined} className={cn(active === i.id && "is-active")} onClick={(e) => onPick(i.id, e)}>
           <SectionIcon name={i.icon} className="sb-toc-icon" />
           <span className="sb-toc-title">{i.title}</span>
-          {i.done && <span className="sb-toc-done" aria-label="зіграно">✓</span>}
+          {i.done && <span className="sb-toc-done" aria-label={t("played")}>✓</span>}
         </a>
       ))}
     </nav>
@@ -44,6 +47,8 @@ function TocList({ items, onPick }: { items: TocItem[]; onPick: (id: string, eve
 }
 
 export function ScenarioToc({ items, inline, drawer, onPick }: Props) {
+  const t = useTranslations("scenario.toc");
+
   if (inline) return <aside className="sb-toc"><TocList items={items} onPick={(id) => onPick?.(id)} /></aside>;
 
   // на iOS vaul фіксує body і при закритті повертає стару прокрутку — переходимо вже після закриття
@@ -60,7 +65,7 @@ export function ScenarioToc({ items, inline, drawer, onPick }: Props) {
   };
 
   return (
-    <ResponsiveDialog hud open={drawer.open} onOpenChange={drawer.onOpenChange} title="Розділи" size="sm">
+    <ResponsiveDialog hud open={drawer.open} onOpenChange={drawer.onOpenChange} title={t("sections")} size="sm">
       <div className={cn("scenario-book sb-toc-drawer", scenarioFontClassName)} data-theme="dark"><TocList items={items} onPick={pick} /></div>
     </ResponsiveDialog>
   );

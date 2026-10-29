@@ -4,6 +4,7 @@ import { useCallback, useMemo, useRef, useState } from "react";
 import dynamic from "next/dynamic";
 import Link from "next/link";
 import { BookOpen, ChevronsUpDown, History, Moon, Sun } from "lucide-react";
+import { useTranslations } from "next-intl";
 
 import { AiPanel, AiProposalBadge, AiProposalCard } from "@/components/ai";
 import { AssistantReview } from "@/components/ai/AssistantReview";
@@ -33,6 +34,8 @@ export function ScenarioPageClient({ campaignId, pageId, playedPages, aiEnabled 
 }
 
 function ScenarioPageBody({ campaignId, page, playedPages, aiEnabled }: { campaignId: string; page: ScenarioPage; playedPages: PlayedPages; aiEnabled: boolean }) {
+  const t = useTranslations("scenario.pageBody");
+
   const progress = useSectionProgress(campaignId, page.id);
 
   const collapse = useSectionCollapse();
@@ -94,16 +97,16 @@ function ScenarioPageBody({ campaignId, page, playedPages, aiEnabled }: { campai
     setAiOpen(true);
   };
 
-  // edit mode leaves through the editor's own «Готово», which awaits the last save first
+  // edit mode leaves through the editor's own "Done" button, which awaits the last save first
   const actions = (
     <>
       {!editBase && (
         <>
           <button type="button" className="toggle is-primary" onClick={() => setEditBase(page)}>
-            Редагувати
+            {t("edit")}
           </button>
           <Link className="toggle sb-hide-sm" href={`/campaigns/${campaignId}/show`} target="_blank" rel="noopener">
-            Екран показу ↗
+            {t("showScreen")}
           </Link>
           <WorldMapLink campaignId={campaignId} variant="toggle" />
         </>
@@ -120,10 +123,10 @@ function ScenarioPageBody({ campaignId, page, playedPages, aiEnabled }: { campai
   );
 
   const menu: ActionsMenuItem[] = [
-    { label: dark ? "Світла тема" : "Темна тема", icon: dark ? Sun : Moon, onSelect: () => setTheme(dark ? "light" : "dark") },
-    ...(editBase ? [] : [{ label: "Версії", icon: History, onSelect: () => setVersionsOpen(true) }]),
-    { label: collapse.showPlayed ? "Згорнути зіграні" : "Розгорнути зіграні", icon: ChevronsUpDown, onSelect: () => collapse.setShowPlayed(!collapse.showPlayed) },
-    { label: "До змісту", icon: BookOpen, href: `/campaigns/${campaignId}/dm/scenario`, separatorBefore: true },
+    { label: dark ? t("lightTheme") : t("darkTheme"), icon: dark ? Sun : Moon, onSelect: () => setTheme(dark ? "light" : "dark") },
+    ...(editBase ? [] : [{ label: t("versions"), icon: History, onSelect: () => setVersionsOpen(true) }]),
+    { label: collapse.showPlayed ? t("collapsePlayed") : t("expandPlayed"), icon: ChevronsUpDown, onSelect: () => collapse.setShowPlayed(!collapse.showPlayed) },
+    { label: t("toIndex"), icon: BookOpen, href: `/campaigns/${campaignId}/dm/scenario`, separatorBefore: true },
   ];
 
   return (
@@ -176,7 +179,7 @@ function ScenarioPageBody({ campaignId, page, playedPages, aiEnabled }: { campai
 
               if (!proposal) return null;
 
-              const onRedo = () => send?.(`Пропозиція «${proposal.summary}» застаріла: перечитай сторінку й запропонуй її заново.`);
+              const onRedo = () => send?.(`The proposal "${proposal.summary}" is outdated: re-read the page and propose it again.`);
 
               return <AiProposalCard campaignId={campaignId} proposal={proposal} busy={proposals.isApplying} actions={{ onApply: () => proposals.apply(id), onReject: () => proposals.reject(id), onRedo }} />;
             },

@@ -1,10 +1,13 @@
 // @vitest-environment happy-dom
-import { cleanup, fireEvent, render, screen } from "@testing-library/react";
+import { cleanup, fireEvent, screen } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import { MarkerPickerDialog } from "../MarkerPickerDialog";
 
+import { render } from "@/components/scenario/__tests__/uk-intl";
 import { MarkerChip } from "@/components/scenario/MarkerChip";
+
+vi.unmock("next-intl");
 
 const world = vi.hoisted(() => ({
   maps: { data: undefined as unknown, isLoading: false },

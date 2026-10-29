@@ -1,8 +1,11 @@
 // @vitest-environment happy-dom
-import { cleanup, fireEvent, render, screen } from "@testing-library/react";
+import { cleanup, fireEvent, screen } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
+import { render } from "@/components/scenario/__tests__/uk-intl";
 import { RowBindings } from "@/components/scenario/editor/RowBindings";
+
+vi.unmock("next-intl");
 
 vi.mock("@/lib/hooks/show", () => ({
   useDeck: (_c: string, id: string | null) => ({ data: id === "d1" ? { id: "d1", title: "Ліс", scenarioPageId: "p1", slides: [{ id: "slide-a", imageUrl: "https://x/a.webp", title: "Галявина" }], updatedAt: "" } : undefined }),

@@ -2,6 +2,8 @@
 import { cleanup, fireEvent, screen, waitFor } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
+vi.unmock("next-intl");
+
 const draft = vi.hoisted(() => ({ setContent: vi.fn(), flush: vi.fn(async () => true), reload: vi.fn() }));
 
 vi.mock("@/lib/hooks/scenario", () => ({
@@ -17,8 +19,8 @@ vi.mock("@/lib/hooks/show", () => ({ useDeck: () => ({ data: undefined }), useDe
 vi.mock("@/lib/hooks/battles", () => ({ useBattleBriefs: () => ({ data: [] }) }));
 vi.mock("@/components/scenario/editor/RichTextEditor", () => ({ RichTextEditor: ({ label }: { label: string }) => <div data-testid="tiptap">{label}</div> }));
 
+import { renderWithConfirm } from "@/components/scenario/__tests__/uk-intl";
 import ScenarioEditor from "@/components/scenario/editor";
-import { renderWithConfirm } from "@/components/ui/__tests__/render-with-confirm";
 import type { ScenarioContent, ScenarioPage } from "@/types/scenario";
 
 afterEach(() => {
