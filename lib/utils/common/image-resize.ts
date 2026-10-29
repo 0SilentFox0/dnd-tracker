@@ -1,3 +1,9 @@
+export class ImageResizeError extends Error {
+  constructor(readonly key: "validation.image.tooLarge" | "validation.image.compressFailed") {
+    super(key);
+  }
+}
+
 export function fitWithin(w: number, h: number, maxSide: number, maxPixels = Infinity): { width: number; height: number } {
   const k = Math.min(1, maxSide / Math.max(w, h), Math.sqrt(maxPixels / (w * h)));
 
@@ -19,7 +25,7 @@ async function drawResized(file: File, maxSide: number, maxPixels?: number): Pro
   // iOS Safari returns a null context once the canvas exceeds its memory limit
   if (!ctx) {
     bitmap.close();
-    throw new Error("Картинка завелика для обробки в браузері");
+    throw new ImageResizeError("validation.image.tooLarge");
   }
 
   ctx.drawImage(bitmap, 0, 0, width, height);
@@ -49,7 +55,7 @@ export async function resizeImageToBlob(file: File, maxSide: number, quality = 0
 
   const jpeg = await toBlob(canvas, "image/jpeg", quality);
 
-  if (!jpeg) throw new Error("Не вдалося стиснути картинку");
+  if (!jpeg) throw new ImageResizeError("validation.image.compressFailed");
 
   return jpeg;
 }

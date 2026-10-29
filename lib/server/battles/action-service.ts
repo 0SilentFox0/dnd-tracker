@@ -2,10 +2,12 @@ import { z } from "zod";
 
 import { API_ERRORS } from "@/lib/constants/api-errors";
 import { prisma } from "@/lib/db";
-import { DEFAULT_LOCALE } from "@/lib/i18n/config";
+import { DEFAULT_LOCALE, type Locale } from "@/lib/i18n/config";
+import { getTranslator } from "@/lib/i18n/translator";
 import { BATTLE_COMMANDS, BATTLE_READS, type BattleActionInput,battleActionInput, HUMAN_BATTLE_ACTIONS } from "@/lib/server/assistant/actions/battle-actions";
 import { contentSnapshot } from "@/lib/server/assistant/actions/content-snapshot";
 import { actionResult, jsonContent, requestDigest } from "@/lib/server/assistant/json";
+import { resultLabel } from "@/lib/server/assistant/result-labels";
 import type { ActionExecutionContext, ActionPreview, ActionResult, AssistantCaller } from "@/lib/server/assistant/types";
 import { loadAudioLibrary } from "@/lib/server/audio/track-store";
 import { assertDiceMode, schemaDiceInput, validateAttackPreview } from "@/lib/server/battles/dice";
@@ -27,8 +29,6 @@ import { BattleAccessError, BattleRuleError, loadAllEvents, loadEventsBefore, lo
 import { summarizeBattle } from "@/lib/utils/battle/view/summary";
 import { parseRules } from "@/lib/utils/rules/schema";
 
-const result = actionResult("battles", "Бій");
-
 const isCommand = (op: string) => (BATTLE_COMMANDS as readonly string[]).includes(op);
 
 const isRead = (op: string) => (BATTLE_READS as readonly string[]).includes(op);
@@ -45,7 +45,7 @@ async function liveAccess(actor: Actor, write: boolean) {
 }
 
 /** loadBattle already derives membership and role, so the separate member query only runs when the battle is missing. */
-async function loadDmBattle(actor: Actor, battleId: string, denied: string = API_ERRORS.DM_ONLY) {
+async function loadDmBattle(actor: Actor, battleId: string) {
   const loaded = await defaultPipelineDeps.loadBattle({ campaignId: actor.campaignId, battleId, userId: actor.userId });
 
   if (!loaded) {
@@ -53,7 +53,7 @@ async function loadDmBattle(actor: Actor, battleId: string, denied: string = API
     throw new ContentError(API_ERRORS.BATTLE_NOT_FOUND, 404);
   }
 
-  if (!loaded.isMember || !loaded.isDM) throw new ContentError(denied, 403);
+  if (!loaded.isMember || !loaded.isDM) throw new ContentError(API_ERRORS.DM_ONLY, 403);
 
   return loaded;
 }
@@ -89,6 +89,8 @@ async function state(actor: Actor, operation: string, value: BattleActionInput) 
 
 async function prepared(caller: AssistantCaller, operation: string, raw: unknown): Promise<ActionPreview> {
   const value = parseInput(battleActionInput, raw);
+
+  const t = await getTranslator(caller.locale, "assistant");
 
   assertDiceMode(value.body, value.dice);
 
@@ -154,7 +156,7 @@ async function prepared(caller: AssistantCaller, operation: string, raw: unknown
 
   for (const participant of [...current.loaded?.participants ?? [], ...current.loaded?.pending ?? []]) if (selectedIds.has(participant.basicInfo.id)) targets.push({ domain: "battle-participants", id: participant.basicInfo.id, name: participant.basicInfo.name });
 
-  const target = targets[0] ?? { domain: "battles", id: caller.actor.campaignId, name: "Новий бій" };
+  const target = targets[0] ?? { domain: "battles", id: caller.actor.campaignId, name: t("results.newBattle") };
 
   const deletion = ["delete", "clear-history"].includes(operation) || (operation === "participants.patch" && value.body.removeFromBattle === true);
 
@@ -165,9 +167,9 @@ async function prepared(caller: AssistantCaller, operation: string, raw: unknown
   const destructive = HUMAN_BATTLE_ACTIONS.has(operation) || deletion || erasure;
 
   return {
-    summary: `Бої: ${operation}`, targets,
+    summary: t("summary.battles", { operation }), targets,
     changes: [{ target, path: operation, before: jsonContent({ version: current.version, battle: current.row, participants: current.loaded?.participants ?? [], reserve: current.loaded?.pending ?? [] }), after: jsonContent(value) }],
-    warnings: ["Кубики та випадкові ефекти обчислюються лише під час виконання; результат ще невідомий.", ...(operation === "clear-history" ? ["Буде видалено всі бої кампанії разом із подіями та знімками."] : []), ...(value.dice === "manual" ? ["Використовуються явно задані ДМ значення кидків."] : [])],
+    warnings: [t("warnings.battleDice"), ...(operation === "clear-history" ? [t("warnings.battleClearHistory")] : []), ...(value.dice === "manual" ? [t("warnings.battleManualDice")] : [])],
     preconditions: { version: current.version, fingerprint: current.fingerprint },
     effects: [{ kind: accessChange ? "change-access" : destructive ? (deletion ? "delete" : "erase-progress") : operation === "create" ? "create" : "update", targets, description: operation }],
   };
@@ -199,7 +201,9 @@ export async function runBattleAction(actor: Actor, operation: string, raw: unkn
   return execution ? runContentWriteContext(actor.campaignId, execution.db, run) : run();
 }
 
-export async function readBattleAction(actor: Actor, operation: string, raw: unknown): Promise<ActionResult> {
+export async function readBattleAction(actor: Actor, operation: string, raw: unknown, locale: Locale = DEFAULT_LOCALE): Promise<ActionResult> {
+  const result = actionResult("battles", resultLabel(locale, "battle"));
+
   const dmLoaded = operation === "summary" || operation === "get";
 
   if (dmLoaded) assertScope(actor, false);
@@ -230,7 +234,7 @@ export async function readBattleAction(actor: Actor, operation: string, raw: unk
   if (!value.battleId) throw new ContentError(API_ERRORS.BATTLE_ID_REQUIRED, 400);
 
   if (dmLoaded) {
-    const loaded = await loadDmBattle(actor, value.battleId, "Доступ заборонено");
+    const loaded = await loadDmBattle(actor, value.battleId);
 
     if (operation === "summary") return result(summarizeBattle(await loadAllEvents(prisma, loaded.scene.id), loaded.participants), loaded.scene.id);
 

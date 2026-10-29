@@ -70,5 +70,104 @@
     "EDITION_UNKNOWN": "Check the rules edition",
     "NOTES_SIZE": "Shorten the description or exclude the entry",
     "OPTIONAL_FEATURE_WITHOUT_OWNER": "Bind the feature to a class choice or use its description manually"
+  },
+  "derived": {
+    "size": {
+      "F": "fine",
+      "D": "diminutive",
+      "T": "tiny",
+      "S": "small",
+      "M": "medium",
+      "L": "large",
+      "H": "huge",
+      "G": "gargantuan"
+    },
+    "sense": {
+      "darkvision": "Darkvision",
+      "blindsight": "Blindsight",
+      "tremorsense": "Tremorsense",
+      "truesight": "Truesight"
+    },
+    "movement": {
+      "swim": "swimming",
+      "fly": "flying",
+      "climb": "climbing",
+      "burrow": "burrowing"
+    },
+    "feet": "{value} ft.",
+    "walk": "walking {value}",
+    "ability": {
+      "strength": "Strength",
+      "dexterity": "Dexterity",
+      "constitution": "Constitution",
+      "intelligence": "Intelligence",
+      "wisdom": "Wisdom",
+      "charisma": "Charisma"
+    },
+    "trait": {
+      "speed": "Speed",
+      "resist": "Damage resistance",
+      "asi": "Ability score bonuses",
+      "itemBonuses": "Item bonuses"
+    },
+    "head": {
+      "size": "Size: {value}",
+      "speed": "Speed: {value}",
+      "languages": "Languages: {value}",
+      "age": "Age: {value}",
+      "tools": "Tools: {value}"
+    },
+    "or": " or ",
+    "age": {
+      "mature": "adult at {age}",
+      "max": "lives up to {age}"
+    },
+    "proficiency": {
+      "choose": "choose {count} from: {list}",
+      "anyChoice": "{name} (choice: {count})"
+    },
+    "coin": {
+      "gp": "gp",
+      "sp": "sp",
+      "cp": "cp"
+    },
+    "equipment": {
+      "anyOf": "any: {name}",
+      "options": "choose: {list}"
+    },
+    "level": "level {level}+",
+    "prerequisite": "Requirements (the DM checks manually): {text}",
+    "choice": {
+      "optionalFeatures": "Optional features",
+      "lineage": "Lineage",
+      "skills": "Skills",
+      "abilityScores": "Ability scores"
+    },
+    "spells": {
+      "filterSchools": "schools: {list}",
+      "levelChoice": "Level {level} spell",
+      "unchecked": "The restrictions from the trait description ({extra}) are not checked by the engine",
+      "block": "Spells (block {index})",
+      "atWill": "At-will spells",
+      "daily": "Spells once per day",
+      "rest": "Spells once per rest"
+    },
+    "item": {
+      "drink": "Drink",
+      "use": "Use",
+      "drinkPotion": "Drink the potion",
+      "useItem": "Use the item"
+    },
+    "material": "Materials",
+    "rider": {
+      "push": "push/pull",
+      "terrain": "difficult terrain",
+      "vulnerability": "vulnerability/resistance/immunity",
+      "speed": "speed",
+      "choice": "choice of variant",
+      "reaction": "movement as a reaction",
+      "hold": "holding the targets: conditions and movement (see the description)",
+      "conditions": "conditions: {list}"
+    }
   }
 }

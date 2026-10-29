@@ -1,3 +1,4 @@
+/* eslint-disable no-restricted-syntax -- data: legacy CSV column names */
 import type { UnitAttack } from "@/types/units";
 
 // Unit Import

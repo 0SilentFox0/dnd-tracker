@@ -73,7 +73,7 @@ export const ItemStatsSchema = z
     }
   })
   .refine((s) => !s.consumable || (!s.property && !s.charges?.rest), { message: API_ERRORS.ITEM_CONSUMABLE_CONFLICT, path: ["consumable"] })
-  .describe("Предмет 5e: unique=false — звичайне спорядження; property — властивість, що видається разом із базою; attunement; charges (rest null — не відновлюються); consumable — видається кількістю; spells — касти за спільні заряди предмета");
+  .describe("5e item: unique=false is ordinary gear; property is a property granted with the base item; attunement; charges (rest null means they do not recharge); consumable is granted by quantity; spells are cast using the item's shared charges");
 
 export type ItemStats = z.infer<typeof ItemStatsSchema>;
 

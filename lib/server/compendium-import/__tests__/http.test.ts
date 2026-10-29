@@ -26,7 +26,7 @@ describe("compendium HTTP boundary", () => {
 
  const response = await compendiumRoute("preview")(req({ input: { json: "{}" } }), ctx);
 
- expect(response.status).toBe(200); expect(mocks.preview).toHaveBeenCalledWith(expect.objectContaining({ campaignId: "c" }), { json: "{}" }, "s".repeat(32), expect.anything()); expect(mocks.confirm).not.toHaveBeenCalled(); expect(response.headers.get("cache-control")).toContain("no-store"); });
+ expect(response.status).toBe(200); expect(mocks.preview).toHaveBeenCalledWith(expect.objectContaining({ campaignId: "c" }), { json: "{}" }, "s".repeat(32), expect.anything(), "uk"); expect(mocks.confirm).not.toHaveBeenCalled(); expect(response.headers.get("cache-control")).toContain("no-store"); });
   it("bounds streaming request bodies and fails closed without secret", async () => { delete process.env.COMPENDIUM_PREVIEW_SECRET; expect((await compendiumRoute("preview")(req({}), ctx)).status).toBe(503); expect(mocks.preview).not.toHaveBeenCalled(); });
   it("returns sanitized stale errors without payload", async () => { const { CompendiumError } = await import("../parse");
 

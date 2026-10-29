@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 
 import { adaptCompendium } from "../adapt";
+import { derivedTranslator } from "../derived-text";
 import { spellCast } from "../adapters/spell-cast";
 import { deriveSpell } from "../adapters/spell-derive";
 
@@ -94,7 +95,7 @@ describe("native spell mechanics", () => {
     const reasonOf = (row: Record<string, unknown>) => {
       const full = { ...base, ...row } as Record<string, unknown>;
 
-      const derived = deriveSpell(full, (row.entries as string[]).join(" ").replace(/\{@\w+ ([^}|]*)[^}]*\}/g, "$1"), "", spellCast(full));
+      const derived = deriveSpell(full, (row.entries as string[]).join(" ").replace(/\{@\w+ ([^}|]*)[^}]*\}/g, "$1"), "", spellCast(full), derivedTranslator());
 
       return "native" in derived && derived.native.narrative ? derived.native.narrativeReason : "mechanical";
     };

@@ -6,7 +6,9 @@
     "scenario": "Scenario",
     "show": "Show",
     "newPage": "New page",
-    "rules": "Rules"
+    "rules": "Rules",
+    "battle": "Battle",
+    "newBattle": "New battle"
   },
   "summary": {
     "campaign": "Campaign: {operation}",
@@ -15,7 +17,8 @@
     "show": "Show: {operation}",
     "deleteAllPlayers": "Delete all characters of the \"Player\" type",
     "cleared": "Proposal content cleared",
-    "content": "{label}: {verb}"
+    "content": "{label}: {verb}",
+    "battles": "Battles: {operation}"
   },
   "warnings": {
     "campaignDelete": "The campaign and all dependent records will be deleted.",
@@ -25,7 +28,10 @@
     "sourceApply": "Dependencies are added automatically; attribution is updated for ignore too. The DM's ScenarioPage materials are not synced.",
     "importPartial": "The import may complete partially: errors and skips are returned for each row.",
     "manualSetup": "additionalSpells, equipment and gold are set up manually.",
-    "importPartialDone": "The import completed partially; check the row errors in the report."
+    "importPartialDone": "The import completed partially; check the row errors in the report.",
+    "battleDice": "Dice and random effects are computed only at execution time; the result is not known yet.",
+    "battleClearHistory": "All battles of the campaign will be deleted together with their events and snapshots.",
+    "battleManualDice": "The roll values explicitly set by the DM are used."
   },
   "effects": {
     "sourceMarks": "Source marks and attribution",
@@ -47,7 +53,9 @@
     "compendium-confirm": "Open the current preview, check the selection and confirm your import rights in the app.",
     "source-notes": "The DM must explicitly pick the source notes before they are passed to AI. Notes are never passed automatically.",
     "campaignExport": "Download the campaign export in the app; its content is not sent to the model.",
-    "contentMedia": "Add the icon or file in the existing editor, then repeat the change of the other fields without media."
+    "contentMedia": "Add the icon or file in the existing editor, then repeat the change of the other fields without media.",
+    "battleCritChoice": "The DM picks the crit effect, \"Random\" or cancels the action in the battle dialog; other battle commands are rejected until then.",
+    "battleMapBackground": "Add the image in the map editor; after saving, its link can be used."
   },
   "media": {
     "icon": "Add the icon in the existing content editor",

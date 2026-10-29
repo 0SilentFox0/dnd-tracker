@@ -79,5 +79,9 @@ export function compendiumErrorMessage(t: Translator, error: unknown, fallbackKe
 
   const key = COMPENDIUM_ERROR_KEYS[head];
 
-  return key ? t(key, head === "RECORD_SIZE" ? { kind: categoryLabel(t, rest.join(":").trim()) } : undefined) : error.message;
+  if (!key) return error.message;
+
+  const path = rest.join(":").trim();
+
+  return t(key, { kind: categoryLabel(t, path), position: path.replace(/^\$@?/, "") });
 }

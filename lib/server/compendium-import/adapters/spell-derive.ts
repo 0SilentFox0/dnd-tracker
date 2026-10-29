@@ -1,10 +1,10 @@
-/* eslint-disable no-restricted-syntax -- derived content written to the DB stays Ukrainian (spec part5, decision 5) */
 import { array, str } from "./shared";
 import type { SpellCast } from "./spell-cast";
 import { createsPlainObject, isOutOfCombatBuff, type NarrativeReason, withoutObjectConditions, withoutRestOrTravel } from "./spell-narrative";
 
 import { ABILITY_KEYS } from "@/lib/constants/abilities";
 import type { ErrorParams } from "@/lib/constants/api-errors";
+import type { Translator } from "@/lib/i18n/translator";
 import { type AnyConditionKey, CONDITION_5E_KEYS } from "@/lib/utils/abilities/schema/kinds";
 import { ADDS_MOD, durationRounds, spellEffects, type SpellFacts, spellKind, spellRange, spellResolution, spellSide, spellTargeting, spellUpcast, validDice } from "@/lib/utils/spells/derive/mechanics";
 import { numberWord } from "@/lib/utils/spells/derive/text";
@@ -58,12 +58,12 @@ const UP_TO_CREATURES = /\bup to (\w+) (?:other |willing |hostile |(?:tiny|small
 
 const SHAPE_TEXT = /(\d+)-foot(?:-radius)?(?:, \d+-foot-(?:high|tall))? (sphere|cube|cone|cylinder)\b|(\d+)-foot-long[^.]{0,20}\bline\b|(\d+)-foot line\b|\bline up to (\d+) feet long/i;
 
-const RIDERS: Array<[RegExp, string]> = [
-  [/\bpush(?:ed)?\b|\bpull(?:ed)?\b|\bknock(?:ed)?\b|carried along/i, "поштовх/притягання"],
-  [/difficult terrain/i, "складна місцевість"],
-  [/vulnerab|resistan|immun/i, "вразливість/опір/імунітет"],
-  [/\bspeed\b/i, "швидкість"],
-  [CHOICE, "вибір варіанта"],
+const RIDERS: Array<[RegExp, "push" | "terrain" | "vulnerability" | "speed" | "choice"]> = [
+  [/\bpush(?:ed)?\b|\bpull(?:ed)?\b|\bknock(?:ed)?\b|carried along/i, "push"],
+  [/difficult terrain/i, "terrain"],
+  [/vulnerab|resistan|immun/i, "vulnerability"],
+  [/\bspeed\b/i, "speed"],
+  [CHOICE, "choice"],
 ];
 
 const tags = (raw: string, name: string): string[] => [...new Set([...raw.matchAll(new RegExp(`\\{@${name} ([^}|]*)`, "g"))].map((m) => m[1].trim()))];
@@ -100,7 +100,7 @@ function shape(text: string, cast: SpellCast): Pick<SpellFacts, "shape_type" | "
   return { shape_type: "line", shape_size: Number(m[3] ?? m[4] ?? m[5]) };
 }
 
-export function deriveSpell(row: Record<string, unknown>, text: string, higher: string, cast: SpellCast): SpellDerivation {
+export function deriveSpell(row: Record<string, unknown>, text: string, higher: string, cast: SpellCast, t: Translator): SpellDerivation {
   const raw = JSON.stringify(row.entries ?? []);
 
   const misc = strings(row.miscTags);
@@ -172,9 +172,9 @@ export function deriveSpell(row: Record<string, unknown>, text: string, higher: 
 
     const facts: SpellFacts = { level: row.level as number, desc: text, higher_level: higher || null, ...cast.facts, shape_type: null, shape_size: null, saving_throw_ability: null, damage_roll: null, damage_types: [], target_count: count };
 
-    const riders = RIDERS.filter(([re, label]) => label !== "швидкість" && re.test(text)).map(([, label]) => label);
+    const riders = RIDERS.filter(([re, id]) => id !== "speed" && re.test(text)).map(([, id]) => t(`derived.rider.${id}`));
 
-    if (moveTrigger) riders.push("рух за реакцією");
+    if (moveTrigger) riders.push(t("derived.rider.reaction"));
 
     return { native: { narrative: false, riders, fields: { targeting: spellTargeting(facts, "ally"), resolution: { kind: "auto" }, dice: 0, spellEffects: [{ kind: "modifyStat", stat: "speed", flat: Number(sped[1]), duration: { rounds: durationRounds(cast.facts.duration) } }], ...spellUpcast(facts, "none") } } };
   }
@@ -207,13 +207,13 @@ export function deriveSpell(row: Record<string, unknown>, text: string, higher: 
 
   const applied = kind === "condition" ? condition : null;
 
-  const riders = RIDERS.filter(([re]) => re.test(text)).map(([, label]) => label);
+  const riders = RIDERS.filter(([re]) => re.test(text)).map(([, id]) => t(`derived.rider.${id}`));
 
-  if (applied === "immobilized") riders.push("утримання цілей: умови й переміщення (див. опис)");
+  if (applied === "immobilized") riders.push(t("derived.rider.hold"));
 
   const otherConditions = tags(raw, "condition").filter((c) => c.toLowerCase() !== applied);
 
-  if (otherConditions.length > 0) riders.push(`стани: ${otherConditions.join(", ")}`);
+  if (otherConditions.length > 0) riders.push(t("derived.rider.conditions", { list: otherConditions.join(", ") }));
 
   return {
     native: {

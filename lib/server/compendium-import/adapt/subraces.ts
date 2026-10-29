@@ -1,4 +1,3 @@
-/* eslint-disable no-restricted-syntax -- derived content written to the DB stays Ukrainian (spec part5, decision 5) */
 import { fixedAbilityBonuses, lineageSpells, raceTraits } from "../adapters/character-traits";
 import { array, description, object, str, unsupported } from "../adapters/shared";
 import { nestedId, stableJson } from "../identity";
@@ -25,7 +24,7 @@ export function attachSubraces(state: AdaptState) {
 
       return {
         kind: "races",
-        body: { choices: [{ id: "import-lineage", label: "Походження", kind: "option", count: 1, lineage: true, options: [option] }] },
+        body: { choices: [{ id: "import-lineage", label: ctx.t("derived.choice.lineage"), kind: "option", count: 1, lineage: true, options: [option] }] },
         refs: spells.refs,
         notes: [unsupported(row, HANDLED, ctx), spells.manual.length > 0 ? `additionalSpells: ${stableJson(spells.manual)}` : ""].filter(Boolean).join("\n"),
       };

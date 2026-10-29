@@ -131,7 +131,7 @@ function classifySettings(ctx: SyncContext): SyncItem[] {
     item(ctx, {
       scope: "settings",
       key: "settings",
-      name: "Налаштування кампанії",
+      name: "Campaign settings",
       status,
       changedFields: changed(ctx.sourceBundle.settings, ctx.target.settings, BUNDLE_SETTING_KEYS),
       sourceHash: s,

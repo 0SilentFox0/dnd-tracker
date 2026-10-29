@@ -20,7 +20,7 @@ import { applyAudioCommand, commandNeedsLibrary } from "@/lib/utils/audio/audio-
 import type { BattleAudioState } from "@/types/audio";
 
 export class BattleAudioRateLimitError extends ContentError {
-  constructor(readonly rate: RateLimitResult) { super("Забагато запитів", 429); }
+  constructor(readonly rate: RateLimitResult) { super(API_ERRORS.TOO_MANY_REQUESTS, 429); }
 }
 
 export const patchBattleSchema = z.object({ name: z.string().min(1).optional(), description: z.string().nullable().optional(), participants: createBattleSchema.shape.participants.optional(), map: battleMapSchema.nullable().optional() }).strict();

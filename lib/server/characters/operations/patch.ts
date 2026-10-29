@@ -59,7 +59,7 @@ async function patchCore({ access, character }: Gate, parsed: z.infer<typeof upd
 
   const avatar = await resolveAvatarForPersistence(data.avatar, { campaignId, current: character.avatar });
 
-  if (!avatar.ok) throw new ContentError(avatar.message, 400);
+  if (!avatar.ok) throw new ContentError(avatar.message, 400, undefined, avatar.params);
 
   const classesInput = data.classes ? keepStoredPicks(data.classes, character.classes) : undefined;
 
@@ -198,7 +198,7 @@ export const patchOperation = defineCharacterOperation({
 
     const avatar = await resolveAvatarForPersistence(data.avatar, { campaignId: character.campaignId, current: character.avatar });
 
-    if (!avatar.ok) throw new ContentError(avatar.message, 400);
+    if (!avatar.ok) throw new ContentError(avatar.message, 400, undefined, avatar.params);
 
     return { ...data, avatar: avatar.avatar };
   },

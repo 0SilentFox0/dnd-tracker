@@ -34,5 +34,5 @@ describe("ownedSlidePath", () => {
 });
 
 it("strict durable cleanup reports failure rather than completed effect", async () => {
-  await expect(removeSlideFiles("c1", [url(`c1/${id}.webp`)], { strict: true })).rejects.toThrow("Не вдалося очистити медіа");
+  await expect(removeSlideFiles("c1", [url(`c1/${id}.webp`)], { strict: true })).rejects.toThrow("Failed to clean up media");
 });

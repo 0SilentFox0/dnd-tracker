@@ -1,5 +1,6 @@
 import { effectiveEdition, object, str } from "../adapters/shared";
 import { array } from "../adapters/shared";
+import { derivedTranslator } from "../derived-text";
 import type { FeatureResolutionContext } from "../feature-resolution";
 import { canonicalKey } from "../identity";
 import { byteLength, type Compendium, COMPENDIUM_LIMITS, type JsonRecord, normalized } from "../parse";
@@ -48,7 +49,7 @@ export function createAdaptState(root: Compendium, options: AdaptOptions): Adapt
     seen: new Set(),
     usedOptionals,
     embedded,
-    featureContext: { root, editionFallback: meta.edition, issues, embedded, usedOptionals },
+    featureContext: { root, editionFallback: meta.edition, issues, embedded, usedOptionals, t: derivedTranslator(options.locale) },
     selected: 0,
   };
 }
@@ -99,7 +100,7 @@ export function addEntry(state: AdaptState, kind: string, row: JsonRecord, path:
 
   if (edition === "unknown") local.push(issue("EDITION_UNKNOWN", path, "warning"));
 
-  const ctx: AdapterContext = { root, inputKind: kind, path, source, edition, key, issues: local };
+  const ctx: AdapterContext = { root, inputKind: kind, path, source, edition, key, issues: local, t: state.featureContext.t };
 
   const result = adapter(row, ctx);
 

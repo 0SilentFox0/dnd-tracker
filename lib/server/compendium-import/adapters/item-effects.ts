@@ -1,7 +1,7 @@
-/* eslint-disable no-restricted-syntax -- derived content written to the DB stays Ukrainian (spec part5, decision 5) */
 import { resistFlags } from "./character-traits";
 import { num } from "./shared";
 
+import type { Translator } from "@/lib/i18n/translator";
 import type { Ability, Effect } from "@/lib/utils/abilities/schema";
 
 const SIGNED = /^([+-]\d+)$/;
@@ -33,7 +33,7 @@ export function durationRounds(text: string): number | undefined {
 }
 
 /** +N bonuses and damage resistances become passive abilities (equipped item) or a timed drink/use ability (consumable); the rest is reported by field name. */
-export function itemEffects(row: Record<string, unknown>, opts: { consumable: boolean; potion: boolean; hasWeapon: boolean; text: string }): ItemEffects {
+export function itemEffects(row: Record<string, unknown>, opts: { consumable: boolean; potion: boolean; hasWeapon: boolean; text: string }, t: Translator): ItemEffects {
   const effects: Effect[] = [];
 
   const weapon: ItemEffects["weapon"] = {};
@@ -79,19 +79,19 @@ export function itemEffects(row: Record<string, unknown>, opts: { consumable: bo
 
     const timed = effects.map((e) => ({ ...e, duration: { rounds: rounds as number } }) as Effect);
 
-    return { abilities: [consumableAbility(opts.potion, timed)], weapon, manual };
+    return { abilities: [consumableAbility(opts.potion, timed, t)], weapon, manual };
   }
 
-  return { abilities: effects.length > 0 ? [{ id: "bonuses", name: "Бонуси предмета", trigger: { event: "passive" }, effects }] : [], weapon, manual };
+  return { abilities: effects.length > 0 ? [{ id: "bonuses", name: t("derived.trait.itemBonuses"), trigger: { event: "passive" }, effects }] : [], weapon, manual };
 }
 
-function consumableAbility(potion: boolean, effects: Effect[]): Ability {
+function consumableAbility(potion: boolean, effects: Effect[], t: Translator): Ability {
   return {
     id: potion ? "drink" : "use",
-    name: potion ? "Випити" : "Використати",
+    name: t(potion ? "derived.item.drink" : "derived.item.use"),
     trigger: { event: potion ? "bonusAction" : "action" },
     limits: { pool: { key: "charges", cost: 1 } },
-    effects: effects.length > 0 ? effects : [{ kind: "note", text: potion ? "Випити зілля" : "Використати предмет" }],
+    effects: effects.length > 0 ? effects : [{ kind: "note", text: t(potion ? "derived.item.drinkPotion" : "derived.item.useItem") }],
   };
 }
 

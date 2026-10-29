@@ -15,7 +15,7 @@ export async function readLegacyBattleState(ctx: { campaignId: string; userId: s
       battleId ??
       (await prisma.battleScene.findFirst({ where: { campaignId: ctx.campaignId, status: BattleStatus.ACTIVE }, orderBy: { startedAt: "desc" }, select: { id: true } }))?.id;
 
-    if (!id) return "Активного бою немає";
+    if (!id) return "No active battle";
 
     const battle = await loadBattle(prisma, { battleId: id, campaignId: ctx.campaignId, userId: ctx.userId });
 
@@ -44,6 +44,6 @@ export async function readLegacyBattleState(ctx: { campaignId: string; userId: s
         ac: p.combatStats.armorClass,
         status: p.combatStats.status,
       })),
-      lastEvents: events.reverse().map((e) => `Р${e.round}: ${formatBattleLog(t, { resultText: e.resultText, log: (e.details as { log?: LogLine[] } | null)?.log })}`),
+      lastEvents: events.reverse().map((e) => `R${e.round}: ${formatBattleLog(t, { resultText: e.resultText, log: (e.details as { log?: LogLine[] } | null)?.log })}`),
     };
 }

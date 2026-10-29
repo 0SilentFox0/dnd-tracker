@@ -20,4 +20,10 @@ for (const file of FILES) {
 
 describe("compendiumReport label keys", () => {
   expectLabelKeys("compendiumReport", "issues", [...codes]);
+  expectLabelKeys("compendiumReport", "derived.size", ["F", "D", "T", "S", "M", "L", "H", "G"]);
+  expectLabelKeys("compendiumReport", "derived.sense", ["darkvision", "blindsight", "tremorsense", "truesight"]);
+  expectLabelKeys("compendiumReport", "derived.movement", ["swim", "fly", "climb", "burrow"]);
+  expectLabelKeys("compendiumReport", "derived.ability", ["strength", "dexterity", "constitution", "intelligence", "wisdom", "charisma"]);
+  expectLabelKeys("compendiumReport", "derived.coin", ["gp", "sp", "cp"]);
+  expectLabelKeys("compendiumReport", "derived.rider", ["push", "terrain", "vulnerability", "speed", "choice", "reaction", "hold", "conditions"]);
 });

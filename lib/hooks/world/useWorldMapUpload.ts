@@ -6,7 +6,7 @@ import { useTranslations } from "next-intl";
 import { discardWorldMapUpload, uploadWorldMapImage } from "@/lib/api/world";
 import { API_ERRORS } from "@/lib/constants/api-errors";
 import { WORLD_MAP_MAX_EDGE_PX, WORLD_MAP_MAX_PIXELS } from "@/lib/constants/world";
-import { fitWithin, resizeImageToBlob } from "@/lib/utils/common/image-resize";
+import { fitWithin, ImageResizeError, resizeImageToBlob } from "@/lib/utils/common/image-resize";
 
 export function useWorldMapUpload(campaignId: string) {
   const t = useTranslations();
@@ -26,7 +26,7 @@ export function useWorldMapUpload(campaignId: string) {
 
         bitmap.close();
 
-        const imageUrl = await uploadWorldMapImage(campaignId, await resizeImageToBlob(file, WORLD_MAP_MAX_EDGE_PX, undefined, WORLD_MAP_MAX_PIXELS), (message) => t(API_ERRORS.IMAGE_UPLOAD_FAILED, { message }));
+        const imageUrl = await uploadWorldMapImage(campaignId, await resizeImageToBlob(file, WORLD_MAP_MAX_EDGE_PX, undefined, WORLD_MAP_MAX_PIXELS).catch((e: unknown) => { throw e instanceof ImageResizeError ? new Error(t(e.key)) : e; }), (message) => t(API_ERRORS.IMAGE_UPLOAD_FAILED, { message }));
 
         return { imageUrl, width, height };
       } finally {

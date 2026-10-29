@@ -1,4 +1,3 @@
-/* eslint-disable no-restricted-syntax -- derived content written to the DB stays Ukrainian (spec part5, decision 5) */
 import { stableJson } from "../identity";
 import { type Adapter, issue } from "../types";
 import { equipmentText, featPrerequisite, featSpells, proficiencyText, raceTraits, resistFlags } from "./character-traits";
@@ -13,13 +12,13 @@ export const background: Adapter = (row, ctx) => {
 
   const tools = array(row.toolProficiencies).flatMap((v) => Object.entries(object(v)).filter(([k, enabled]) => enabled === true && !/^(?:any|choose)/.test(k)).map(([k]) => k));
 
-  const toolText = proficiencyText(row.toolProficiencies);
+  const toolText = proficiencyText(row.toolProficiencies, ctx.t);
 
   if (toolText.choice) ctx.issues.push(issue("MANUAL_TOOL_CHOICE", `${ctx.path}.toolProficiencies`, "warning"));
 
-  const languages = proficiencyText(row.languageProficiencies).text;
+  const languages = proficiencyText(row.languageProficiencies, ctx.t).text;
 
-  const head = [toolText.choice ? `Інструменти: ${toolText.text}` : "", languages ? `Мови: ${languages}` : ""].filter(Boolean).join("\n");
+  const head = [toolText.choice ? ctx.t("derived.head.tools", { value: toolText.text }) : "", languages ? ctx.t("derived.head.languages", { value: languages }) : ""].filter(Boolean).join("\n");
 
   const choices = [...abilityChoices(row.ability, ctx), ...skill.choices];
 
@@ -33,7 +32,7 @@ export const background: Adapter = (row, ctx) => {
 
   const notes = [unsupported(row, ["ability", "feats", "skillProficiencies", "startingEquipment", "toolProficiencies", "languageProficiencies"], ctx), toolText.choice ? `toolProficiencies: ${stableJson(row.toolProficiencies)}` : "", customSkills ? `skillProficiencies: ${stableJson(row.skillProficiencies)}` : ""].filter(Boolean).join("\n");
 
-  const equipment = row.startingEquipment !== undefined ? equipmentText(row.startingEquipment) : "";
+  const equipment = row.startingEquipment !== undefined ? equipmentText(row.startingEquipment, ctx.t) : "";
 
   return { kind: "backgrounds", body: { name: row.name, description: [head, description(row, ctx)].filter(Boolean).join("\n\n"), choices, skillProficiencies: skill.fixed, toolProficiencies: tools, originFeatId: null, equipmentText: equipment || null }, refs, notes };
 };
@@ -61,7 +60,7 @@ export const feat: Adapter = (row, ctx) => {
 
   if (resist && !resist.complete) ctx.issues.push(issue("MANUAL_FEAT_RESIST", `${ctx.path}.resist`, "warning"));
 
-  const abilities = resist && resist.effects.length > 0 ? [{ id: "resist", name: "Опір шкоді", trigger: { event: "passive" }, effects: resist.effects }] : [];
+  const abilities = resist && resist.effects.length > 0 ? [{ id: "resist", name: ctx.t("derived.trait.resist"), trigger: { event: "passive" }, effects: resist.effects }] : [];
 
   const notes = [unsupported(row, ["category", "repeatable", "prerequisite", "ability", "skillProficiencies", "additionalSpells", "resist"], ctx), spells.manual.length > 0 ? `additionalSpells: ${stableJson(spells.manual)}` : "", resist && !resist.complete ? `resist: ${stableJson(row.resist)}` : ""].filter(Boolean).join("\n");
 

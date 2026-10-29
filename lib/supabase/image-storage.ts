@@ -36,7 +36,7 @@ const EXTENSIONS: Record<string, string> = {
 
 const ALLOWED_MIME = new Set([...Object.keys(EXTENSIONS), "image/jpg"]);
 
-const FORMATS_ERROR = "Дозволені формати: PNG, JPEG, GIF, WebP";
+const FORMATS_ERROR = API_ERRORS.IMAGE_FORMATS;
 
 /** Вже на нашому Storage — не дзеркалимо повторно. */
 export function isHostedOnProjectStorage(url: string): boolean {
@@ -67,8 +67,8 @@ async function putImage(buffer: Buffer, mime: string, target: StoredImage): Prom
 
   try {
     supabase = createAdminClient();
-  } catch (e) {
-    return { ok: false, message: e instanceof Error ? e.message : "Не налаштовано Supabase (URL або service role)" };
+  } catch {
+    return { ok: false, message: API_ERRORS.IMAGE_STORAGE_NOT_CONFIGURED };
   }
 
   const ensured = await ensureBucket(supabase, target.bucket);
@@ -77,7 +77,7 @@ async function putImage(buffer: Buffer, mime: string, target: StoredImage): Prom
 
   const safeBase = target.objectBaseName.replace(/[^a-zA-Z0-9_-]/g, "");
 
-  if (!safeBase) return { ok: false, message: "Невалідне ім'я файлу" };
+  if (!safeBase) return { ok: false, message: API_ERRORS.IMAGE_NAME_INVALID };
 
   const fullPath = `${target.campaignId}/${safeBase}${EXTENSIONS[mime] ?? ".png"}`;
 
@@ -94,11 +94,11 @@ async function putImage(buffer: Buffer, mime: string, target: StoredImage): Prom
 export async function uploadImageDataUrl(dataUrl: string, target: StoredImage): Promise<Result<string>> {
   const trimmed = dataUrl.trim();
 
-  if (trimmed.length > MAX_DATA_URL_CHARS) return { ok: false, message: "Зображення завелике" };
+  if (trimmed.length > MAX_DATA_URL_CHARS) return { ok: false, message: API_ERRORS.IMAGE_DATA_TOO_LARGE };
 
   const match = trimmed.match(/^data:(image\/[a-z0-9.+-]+);base64,([\s\S]+)$/i);
 
-  if (!match) return { ok: false, message: "Невалідний формат зображення (очікується data:image/*;base64,...)" };
+  if (!match) return { ok: false, message: API_ERRORS.IMAGE_DATA_URL_INVALID };
 
   let mime = match[1].toLowerCase();
 
@@ -108,9 +108,9 @@ export async function uploadImageDataUrl(dataUrl: string, target: StoredImage): 
 
   const buffer = Buffer.from(match[2].replace(/\s/g, ""), "base64");
 
-  if (buffer.length === 0) return { ok: false, message: "Порожній файл" };
+  if (buffer.length === 0) return { ok: false, message: API_ERRORS.IMAGE_EMPTY };
 
-  if (buffer.length > MAX_BYTES) return { ok: false, message: "Файл завеликий (макс. 5 МБ)" };
+  if (buffer.length > MAX_BYTES) return { ok: false, message: API_ERRORS.IMAGE_FILE_TOO_LARGE };
 
   if (sniffImageMime(buffer) !== mime) return { ok: false, message: FORMATS_ERROR };
 
@@ -130,12 +130,12 @@ export async function mirrorImageUrl(sourceUrl: string, target: StoredImage): Pr
   }
 
   if (fetched.status < 200 || fetched.status >= 300) {
-    return { ok: false, message: `Не вдалося завантажити зображення (${fetched.status})` };
+    return { ok: false, message: API_ERRORS.IMAGE_FETCH_FAILED, params: { status: fetched.status } };
   }
 
   const declared = fetched.contentType?.split(";")[0].trim().toLowerCase() ?? "";
 
-  if (!declared.startsWith("image/")) return { ok: false, message: "URL не вказує на зображення" };
+  if (!declared.startsWith("image/")) return { ok: false, message: API_ERRORS.IMAGE_URL_NOT_IMAGE };
 
   const mime = sniffImageMime(fetched.body);
 
@@ -172,7 +172,7 @@ export async function resolveImageForPersistence(
   if (isImageDataUrl(t)) return uploadImageDataUrl(t, stored);
 
   if (t.length > STORED_URL_MAX_LEN) {
-    return { ok: false, message: `Посилання занадто довге (макс. ${STORED_URL_MAX_LEN} символів)` };
+    return { ok: false, message: API_ERRORS.IMAGE_URL_TOO_LONG, params: { max: STORED_URL_MAX_LEN } };
   }
 
   return { ok: true, value: t };

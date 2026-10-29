@@ -1,4 +1,3 @@
-/* eslint-disable no-restricted-syntax -- derived content written to the DB stays Ukrainian (spec part5, decision 5) */
 import { renderEntries } from "../entries";
 import { nestedId, stableJson } from "../identity";
 import { type Adapter, issue } from "../types";
@@ -32,7 +31,7 @@ export const spell: Adapter = (row, ctx) => {
 
   const text = renderEntries(row.entries, `${ctx.path}.entries`);
 
-  const derived = deriveSpell(row, text.text, renderEntries(row.entriesHigherLevel).text, cast);
+  const derived = deriveSpell(row, text.text, renderEntries(row.entriesHigherLevel).text, cast, ctx.t);
 
   const mechanics = "native" in derived ? { executionMode: "native", ...derived.native.fields } : MANUAL_SPELL_BODY;
 
@@ -232,7 +231,7 @@ export const item: Adapter = (row, ctx) => {
 
   const hasWeapon = ["M", "R"].includes(type) && typeof row.dmg1 === "string";
 
-  const effects = itemEffects(row, { consumable, potion: type === "P", hasWeapon, text });
+  const effects = itemEffects(row, { consumable, potion: type === "P", hasWeapon, text }, ctx.t);
 
   const unique = !consumable && ctx.inputKind !== "baseitem" && UNIQUE_RARITIES.has(rarity);
 
@@ -264,7 +263,7 @@ export const materialPage: Adapter = (row, ctx) => {
 
   const id = nestedId(ctx.key);
 
-  const content: ScenarioContent = { legend: [], sections: [{ id, title: str(row.name) || "Матеріали", played: false, rows: [{ id: `${id}-row`, story: { type: "doc", content: [] }, notes: { type: "doc", content: text ? [{ type: "paragraph", content: [{ type: "text", text }] }] : [] } }] }] };
+  const content: ScenarioContent = { legend: [], sections: [{ id, title: str(row.name) || ctx.t("derived.material"), played: false, rows: [{ id: `${id}-row`, story: { type: "doc", content: [] }, notes: { type: "doc", content: text ? [{ type: "paragraph", content: [{ type: "text", text }] }] : [] } }] }] };
 
   return { kind: "scenarioPages", body: { kind: "note", status: "draft", characterId: null, title: row.name, content, searchText: buildSearchText(str(row.name), content), version: 0 }, notes: "" };
 };

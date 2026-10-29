@@ -8,6 +8,7 @@ import { ADAPTER_VERSION, buildImportPlan, type ImportPlan, type PlanContext, ty
 import { type AdaptedEntry, type AdaptOptions, type ImportIssue, issue,type TargetKind } from "./types";
 
 import { COMPENDIUM_INFO_ISSUE_CODES } from "@/lib/constants/compendium-import";
+import type { Locale } from "@/lib/i18n/config";
 import { remapIds } from "@/lib/server/templates/remap-ids";
 import type { Actor } from "@/lib/utils/api/actor";
 import { isRecord } from "@/lib/utils/common/is-record";
@@ -194,10 +195,10 @@ function readInput(input: ImportInput) {
   return { root, fingerprint: digest({ ...input, json: root, version: ADAPTER_VERSION }) };
 }
 
-async function planFor(actor: Actor, input: ImportInput, root: ReturnType<typeof parseCompendium>, repository: ImportRepository) {
+async function planFor(actor: Actor, input: ImportInput, root: ReturnType<typeof parseCompendium>, repository: ImportRepository, locale?: Locale) {
   const started = Date.now();
 
-  const adapted = adaptCompendium(root, input);
+  const adapted = adaptCompendium(root, { ...input, locale });
 
   const ctx = await repository.loadContext(actor, input, adapted.entries);
 
@@ -210,19 +211,19 @@ async function planFor(actor: Actor, input: ImportInput, root: ReturnType<typeof
   return { plan, sources: adapted.sources, embedded: adapted.embedded, hasCharacters: ctx.hasCharacters, classesMode: classesModeOf(plan, input, ctx) };
 }
 
-export async function previewImport(actor: Actor, input: ImportInput, secret: string, repository: ImportRepository) {
+export async function previewImport(actor: Actor, input: ImportInput, secret: string, repository: ImportRepository, locale?: Locale) {
   requireActor(actor); signingKey(secret);
   input = validatedInput(input);
   await repository.authorize(actor);
 
   const { root, fingerprint } = readInput(input);
 
-  const { plan, sources, embedded, hasCharacters, classesMode } = await planFor(actor, input, root, repository);
+  const { plan, sources, embedded, hasCharacters, classesMode } = await planFor(actor, input, root, repository, locale);
 
   return { token: tokenFor(actor, fingerprint, plan.hash, secret), report: reportOf(plan, root, sources, embedded, hasCharacters, classesMode) };
 }
 
-export async function confirmImport(actor: Actor, input: ImportInput, token: string, idempotencyKey: string, secret: string, repository: ImportRepository): Promise<CompendiumReport> {
+export async function confirmImport(actor: Actor, input: ImportInput, token: string, idempotencyKey: string, secret: string, repository: ImportRepository, locale?: Locale): Promise<CompendiumReport> {
   requireActor(actor); signingKey(secret);
   input = validatedInput(input);
 
@@ -245,7 +246,7 @@ export async function confirmImport(actor: Actor, input: ImportInput, token: str
 
     const signed = tokenData(actor, token, fingerprint, secret);
 
-    const { plan, sources, embedded, hasCharacters, classesMode } = await planFor(actor, input, root, tx);
+    const { plan, sources, embedded, hasCharacters, classesMode } = await planFor(actor, input, root, tx, locale);
 
     if (signed.planHash !== plan.hash) throw new CompendiumError("PREVIEW_STALE");
 

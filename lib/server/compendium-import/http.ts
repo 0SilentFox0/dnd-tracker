@@ -86,7 +86,9 @@ export function compendiumRoute(mode: "preview" | "confirm" | "reports" | "entri
 
       if (mode === "options") return json(await importTargetOptions(actor));
 
-      const t = await getTranslator(await getRequestLocale(), "compendiumReport");
+      const locale = await getRequestLocale();
+
+      const t = await getTranslator(locale, "compendiumReport");
 
       const url = new URL(req.url);
 
@@ -120,14 +122,14 @@ export function compendiumRoute(mode: "preview" | "confirm" | "reports" | "entri
       const input = body.input as Parameters<typeof previewImport>[1];
 
       if (mode === "preview") {
-        const preview = await previewImport(actor, input, secret, prismaImportRepository);
+        const preview = await previewImport(actor, input, secret, prismaImportRepository, locale);
 
         return json({ ...preview, report: translateCompendiumReport(t, preview.report), ...previewPresentation(input, preview.report.nextActions) });
       }
 
       if (!body.rightsConfirmed || !body.token || !body.idempotencyKey) return json({ code: "CONFIRM_REQUIRED" }, 422);
 
-      return json(translateCompendiumReport(t, await confirmImport(actor, input, body.token, body.idempotencyKey, secret, prismaImportRepository)));
+      return json(translateCompendiumReport(t, await confirmImport(actor, input, body.token, body.idempotencyKey, secret, prismaImportRepository, locale)));
     } catch (error) {
       if (error instanceof CompendiumError) return json({ code: error.code }, statusOf(error.code));
 
