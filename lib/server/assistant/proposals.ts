@@ -1,4 +1,5 @@
 import type { Prisma } from "@prisma/client";
+import { randomUUID } from "node:crypto";
 
 import { discardSlideFiles, slideUrls } from "./proposal-media";
 
@@ -11,6 +12,7 @@ import { DEFAULT_LOCALE, type Locale } from "@/lib/i18n/config";
 import { getTranslator } from "@/lib/i18n/translator";
 import { scenarioContentSchema } from "@/lib/schemas/scenario";
 import { slidesSchema } from "@/lib/schemas/show";
+import { createAcquaintance, findAcquaintanceByName } from "@/lib/server/acquaintances/service";
 import { chatCaller } from "@/lib/server/assistant/caller";
 import { legacyPreview, reconcileLegacyProposal } from "@/lib/server/assistant/legacy-proposals";
 import { withCampaignContentWrite } from "@/lib/server/content/write";
@@ -21,6 +23,7 @@ import { pruneVersions, snapshotIfDue } from "@/lib/server/scenario/versions";
 import { toSlideDeck } from "@/lib/server/show/deck-store";
 import { requestDigest } from "@/lib/utils/battle/store/stable-json";
 import { applyAiOps } from "@/lib/utils/scenario/ai-ops";
+import { hasRefPlaceholder, substituteRefs } from "@/lib/utils/scenario/ai-refs";
 import type { AddSlideAiOp, AiProposal, AiProposalOp, AiProposalStatus, ScenarioAiOp } from "@/types/ai";
 import type { ScenarioPage } from "@/types/scenario";
 import type { SlideDeck } from "@/types/show";
@@ -47,7 +50,7 @@ export async function listProposalSummaries(campaignId: string, filter: { pageId
   return prisma.aiProposal.findMany({ where: { campaignId, ...filter }, select: { id: true, status: true }, orderBy: { createdAt: "desc" }, take: 50 }) as Promise<Pick<AiProposal, "id" | "status">[]>;
 }
 
-type ApplyResult = { ok: true; page: ScenarioPage } | { ok: true; deck: SlideDeck } | { ok: false; status: 400 | 404 | 409 | 413; error: string };
+type ApplyResult = { ok: true; page: ScenarioPage } | { ok: true; deck: SlideDeck } | { ok: false; status: 400 | 403 | 404 | 409 | 413; error: string };
 
 export async function applyProposal(campaignId: string, userId: string, proposalId: string, executingIntentId?: string, locale: Locale = DEFAULT_LOCALE): Promise<ApplyResult> {
   return withCampaignContentWrite(campaignId, async (tx): Promise<ApplyResult> => {
@@ -103,13 +106,54 @@ async function applyClaimed(tx: Tx, campaignId: string, userId: string, proposal
 
   if (!page) return { ok: false, status: 404, error: API_ERRORS.SCENARIO_NOT_FOUND };
 
-  const applied = applyAiOps(readContentStrict(page.content), ops as ScenarioAiOp[]);
+  const scenarioOps = ops as ScenarioAiOp[];
+
+  const newcomers = scenarioOps.filter((o): o is Extract<ScenarioAiOp, { op: "createAcquaintance" }> => o.op === "createAcquaintance");
+
+  if (newcomers.length > 0) {
+    const campaign = await tx.campaign.findUnique({ where: { id: campaignId }, select: { acquaintancesEnabled: true } });
+
+    if (!campaign?.acquaintancesEnabled) return { ok: false, status: 403, error: API_ERRORS.ACQUAINTANCES_DISABLED };
+  }
+
+  const content = readContentStrict(page.content);
+
+  let applied = applyAiOps(content, scenarioOps);
 
   if (!applied.ok) {
     await tx.aiProposal.update({ where: { id: proposalId }, data: { status: "stale" } });
 
     return { ok: false, status: 409, error: API_ERRORS.AI_PROPOSAL_STALE };
   }
+
+  const ids = new Map<string, string>();
+
+  const byName = new Map<string, string>();
+
+  const created: { id: string; name: string; description: string }[] = [];
+
+  for (const n of newcomers) {
+    const key = n.name.trim().toLowerCase();
+
+    const seen = byName.get(key);
+
+    const existing = seen ?? (await findAcquaintanceByName(tx, campaignId, n.name))?.id;
+
+    const id = existing ?? randomUUID();
+
+    byName.set(key, id);
+    ids.set(n.ref, id);
+
+    if (!existing) created.push({ id, name: n.name.trim(), description: n.description });
+  }
+
+  const finalOps = newcomers.length > 0 ? substituteRefs(scenarioOps, ids) : scenarioOps;
+
+  if (hasRefPlaceholder(finalOps)) return { ok: false, status: 400, error: API_ERRORS.AI_PROPOSAL_INVALID };
+
+  if (newcomers.length > 0) applied = applyAiOps(content, finalOps);
+
+  if (!applied.ok) return { ok: false, status: 409, error: API_ERRORS.AI_PROPOSAL_STALE };
 
   if (!scenarioContentSchema.safeParse(applied.content).success) return { ok: false, status: 400, error: API_ERRORS.AI_PROPOSAL_INVALID };
 
@@ -121,6 +165,10 @@ async function applyClaimed(tx: Tx, campaignId: string, userId: string, proposal
   const { count } = await tx.scenarioPage.updateMany({ where: { id: page.id, version: page.version }, data: { ...contentWrite(page.title, applied.content), version: { increment: 1 } } });
 
   if (count === 0) return { ok: false, status: 409, error: API_ERRORS.SCENARIO_CONFLICT };
+
+  const sourceSectionId = scenarioOps.find((o) => o.op === "replaceRow")?.sectionId ?? applied.content.sections[0]?.id;
+
+  for (const n of created) await createAcquaintance(tx, campaignId, { id: n.id, kind: "micro", name: n.name, description: n.description, sourcePageId: page.id, sourceSectionId: sourceSectionId ?? "" });
 
   await tx.aiProposal.update({ where: { id: proposalId }, data: { status: "applied", appliedVersion: page.version + 1 } });
 

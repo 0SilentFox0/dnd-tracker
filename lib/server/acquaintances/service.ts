@@ -5,6 +5,7 @@ import { ACQUAINTANCE_INCLUDE } from "./store";
 import "server-only";
 
 export interface CreateAcquaintanceInput {
+  id?: string;
   kind: "character" | "micro";
   characterId?: string | null;
   name: string;
@@ -23,6 +24,7 @@ export const findAcquaintanceByName = (tx: Prisma.TransactionClient, campaignId:
 export const createAcquaintance = (tx: Prisma.TransactionClient, campaignId: string, input: CreateAcquaintanceInput) =>
   tx.acquaintance.create({
     data: {
+      ...(input.id && { id: input.id }),
       campaignId,
       kind: input.kind,
       characterId: input.kind === "character" ? (input.characterId ?? null) : null,
