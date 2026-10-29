@@ -216,7 +216,9 @@
       "focusPage": "DM focus: page (data)",
       "focus": "DM focus (data)",
       "truncation": "Truncation"
-    }
+    },
+    "flushFailed": "Failed to save the open editor. The changes were not applied.",
+    "refreshFailed": "Failed to refresh the data after the receipt."
   },
   "chat": {
     "receipt": "Receipt {id}: {status, select, applied {action performed} unknown {result is being verified} other {action state: {status}}}.",
