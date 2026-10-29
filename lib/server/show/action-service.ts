@@ -102,6 +102,119 @@ export async function prepareShowAction(caller: AssistantCaller, operation: stri
   });
 }
 
+type ShowRun = {
+  actor: Actor;
+  body: Record<string, unknown>;
+  snapshot: Awaited<ReturnType<typeof state>>;
+  ctx?: ActionExecutionContext;
+  result: (data: unknown) => ActionResult;
+  emit: (next: ShowState) => Promise<void>;
+  schedulePublish: (next: ShowState) => void;
+  scheduleCleanup: (effect: { kind: "media-cleanup"; key: string; payload: JsonValue }) => void;
+};
+
+type ShowHandler = (run: ShowRun) => Promise<ActionResult>;
+
+function queueRemoved(run: ShowRun, before: Slide[], remaining: Slide[]) {
+  const urls = before.filter(s => !remaining.some(n => n.imageUrl === s.imageUrl)).map(s => s.imageUrl);
+
+  if (!urls.length) return;
+
+  run.scheduleCleanup({ kind: "media-cleanup", key: "show.removed", payload: { campaignId: run.actor.campaignId, urls } });
+}
+
+const validSceneBinding = (snapshot: ShowRun["snapshot"], pageId: unknown) => !pageId || snapshot.scenes.some(p => p.id === pageId && p.kind === "scene");
+
+async function saveDeck(run: ShowRun): Promise<ActionResult> {
+  const { body, snapshot, ctx } = run;
+
+  const campaignId = run.actor.campaignId;
+
+  const deck = requiredDeck(snapshot.deck);
+
+  const before = readSlides(deck.slides);
+
+  if (deck.updatedAt.toISOString() !== body.expectedUpdatedAt) throw conflict();
+
+  const remaining = ctx?.externalResult ? (ctx.externalResult as unknown as { slides: Slide[] }).slides : body.slides as Slide[];
+
+  // No copying or provider call under the DB guard.
+  if (remaining.some(s => !before.some(p => p.imageUrl === s.imageUrl) && !isHostedOnProjectStorage(s.imageUrl))) throw new ContentError(API_ERRORS.ASSISTANT_MEDIA_PREPARE_REQUIRED, 409);
+
+  for (const s of remaining) if (s.trackId && !snapshot.tracks.some(t => t.id === s.trackId)) throw new ContentError(API_ERRORS.TRACK_NOT_FOUND, 404);
+
+  const savedRow = await saveDeckRecord(campaignId, deck.id, deck.updatedAt, String(body.title), remaining);
+
+  if (!savedRow) throw conflict();
+
+  const saved = toSlideDeck(savedRow);
+
+  const next = snapshot.show && refreshShowSlide(snapshot.show, saved, { before, now: Date.now() });
+
+  if (next) await run.emit(next);
+
+  queueRemoved(run, before, remaining);
+
+  return run.result(saved);
+}
+
+async function deleteDeck(run: ShowRun): Promise<ActionResult> {
+  const { snapshot } = run;
+
+  const deck = requiredDeck(snapshot.deck);
+
+  const before = readSlides(deck.slides);
+
+  await deleteDeckRecord(run.actor.campaignId, deck.id);
+
+  if (snapshot.show?.deckId === deck.id) {
+    const ended = applyShowCommand(snapshot.show, { action: "end" }, { now: Date.now(), deck: null, library: [] });
+
+    if (ended.ok) await run.emit(ended.value);
+  }
+
+  queueRemoved(run, before, []);
+
+  return run.result({ ok: true });
+}
+
+const SHOW_HANDLERS: Record<string, ShowHandler> = {
+  get: async ({ result, snapshot }) => result({ show: snapshot.show }),
+  "decks.list": async ({ result, actor }) => result(await listDecks(actor.campaignId)),
+  "decks.get": async ({ result, snapshot }) => result(toSlideDeck(requiredDeck(snapshot.deck))),
+  generate: async ({ result, ctx }) => {
+    if (!ctx?.externalResult) throw new ContentError(API_ERRORS.ASSISTANT_NO_GENERATION_RESULT, 409);
+
+    return result(ctx.externalResult);
+  },
+  discard: async ({ result, body, actor, scheduleCleanup }) => {
+    scheduleCleanup({ kind: "media-cleanup", key: "show.discard", payload: { campaignId: actor.campaignId, urls: [String(body.url)] } });
+
+    return result({ scheduled: true });
+  },
+  command: async ({ result, body, actor, snapshot, schedulePublish }) => {
+    const rate = await checkRateLimit({ userId: actor.userId, scope: "show", battleId: actor.campaignId, ...BATTLE_RATE_LIMITS.show });
+
+    if (!rate.allowed) throw new ContentError(API_ERRORS.ASSISTANT_TOO_MANY_REQUESTS, 429);
+
+    const next = await applyAndWriteShowCommand(actor.campaignId, snapshot.show, body as ShowCommand);
+
+    if (next !== snapshot.show) schedulePublish(next);
+
+    return result({ show: next });
+  },
+  "decks.create": async ({ result, body, actor }) => result(toSlideDeck(await createDeckRecord(actor.campaignId, String(body.title)))),
+  "decks.scene": async ({ result, body, actor, snapshot }) => {
+    const deck = requiredDeck(snapshot.deck);
+
+    if (!validSceneBinding(snapshot, body.scenarioPageId)) throw new ContentError(API_ERRORS.DECK_SCENE_INVALID, 400);
+
+    return result(toSlideDeck(await bindDeckRecord(actor.campaignId, deck.id, deck.updatedAt, body.scenarioPageId as string | null)));
+  },
+  "decks.save": saveDeck,
+  "decks.delete": deleteDeck,
+};
+
 /** Shared native/actor writer. Media has already been prepared outside the transaction. */
 export async function runShowOperation(actor: Actor, operation: string, input: ShowInput, expected?: JsonValue, ctx?: ActionExecutionContext, locale: Locale = ctx?.caller.locale ?? DEFAULT_LOCALE): Promise<ActionResult> {
   const read = ["get", "decks.list", "decks.get"].includes(operation);
@@ -113,130 +226,39 @@ export async function runShowOperation(actor: Actor, operation: string, input: S
 
     if (expected && requestDigest(jsonContent(snapshot)) !== (expected as { fingerprint: string }).fingerprint) throw conflict();
 
-    const body = input.body ?? {};
-
     const campaignId = actor.campaignId;
 
     const affected = [{ domain: "show", id: input.deckId ?? campaignId, name: snapshot.deck?.title ?? resultLabel(locale, "show") }];
-
-    const result = (data: unknown): ActionResult => ({ data: safeMedia(data), affected, warnings: [] });
 
     const schedulePublish = (next: ShowState) => {
       if (ctx) ctx.afterCommit({ kind: "publish", key: "show", payload: jsonContent({ campaignId, show: next }) });
       else afterContentCommit(() => publishShow(campaignId, next));
     };
 
-    const scheduleCleanup = (effect: { kind: "media-cleanup"; key: string; payload: JsonValue }) => {
-      if (ctx) ctx.afterCommit(effect);
-      else afterContentCommit(async () => (await import("./media-effects")).runShowMediaCleanup(effect.payload));
-    };
+    const showRun: ShowRun = {
+      actor, snapshot, ctx, schedulePublish,
+      body: input.body ?? {},
+      result: (data) => ({ data: safeMedia(data), affected, warnings: [] }),
+      scheduleCleanup: (effect) => {
+        if (ctx) ctx.afterCommit(effect);
+        else afterContentCommit(async () => (await import("./media-effects")).runShowMediaCleanup(effect.payload));
+      },
+      emit: async (next) => {
+        if (!(await writeShowState(campaignId, snapshot.show, next))) throw new ContentError(API_ERRORS.SHOW_CONFLICT, 409);
 
-    const emit = async (next: ShowState) => {
-      if (!(await writeShowState(campaignId, snapshot.show, next))) throw new ContentError(API_ERRORS.SHOW_CONFLICT, 409);
-
-      schedulePublish(next);
-    };
-
-    if (operation === "get") return result({ show: snapshot.show });
-
-    if (operation === "decks.list") return result(await listDecks(campaignId));
-
-    if (operation === "decks.get") return result(toSlideDeck(requiredDeck(snapshot.deck)));
-
-    if (operation === "generate") {
-      if (!ctx?.externalResult) throw new ContentError(API_ERRORS.ASSISTANT_NO_GENERATION_RESULT, 409);
-
-      return result(ctx.externalResult);
-    }
-
-    if (operation === "discard") {
-      const effect = { kind: "media-cleanup" as const, key: "show.discard", payload: { campaignId, urls: [String(body.url)] } };
-
-      scheduleCleanup(effect);
-
-      return result({ scheduled: true });
-    }
-
-    if (operation === "command") {
-      const rate = await checkRateLimit({ userId: actor.userId, scope: "show", battleId: campaignId, ...BATTLE_RATE_LIMITS.show });
-
-      if (!rate.allowed) throw new ContentError(API_ERRORS.ASSISTANT_TOO_MANY_REQUESTS, 429);
-
-      const next = await applyAndWriteShowCommand(campaignId, snapshot.show, body as ShowCommand);
-
-      if (next !== snapshot.show) {
         schedulePublish(next);
-      }
+      },
+    };
 
-      return result({ show: next });
+    const handler = Object.hasOwn(SHOW_HANDLERS, operation) ? SHOW_HANDLERS[operation] : undefined;
+
+    if (!handler) {
+      requiredDeck(snapshot.deck);
+
+      throw new ContentError(API_ERRORS.ASSISTANT_UNKNOWN_SHOW_ACTION, 400);
     }
 
-    if (operation === "decks.create") {
-      const row = await createDeckRecord(campaignId, String(body.title));
-
-      return result(toSlideDeck(row));
-    }
-
-    const deck = requiredDeck(snapshot.deck);
-
-    if (operation === "decks.scene") {
-      if (body.scenarioPageId && !snapshot.scenes.some(p => p.id === body.scenarioPageId && p.kind === "scene")) throw new ContentError(API_ERRORS.DECK_SCENE_INVALID, 400);
-
-      return result(toSlideDeck(await bindDeckRecord(campaignId, deck.id, deck.updatedAt, body.scenarioPageId as string | null)));
-    }
-
-    const before = readSlides(deck.slides);
-
-    let remaining: Slide[] = [];
-
-    if (operation === "decks.save") {
-      if (deck.updatedAt.toISOString() !== body.expectedUpdatedAt) throw conflict();
-
-      remaining = ctx?.externalResult ? (ctx.externalResult as unknown as { slides: Slide[] }).slides : body.slides as Slide[];
-
-      // No copying or provider call under the DB guard.
-      if (remaining.some(s => !before.some(p => p.imageUrl === s.imageUrl) && !isHostedOnProjectStorage(s.imageUrl))) throw new ContentError(API_ERRORS.ASSISTANT_MEDIA_PREPARE_REQUIRED, 409);
-
-      for (const s of remaining) if (s.trackId && !snapshot.tracks.some(t => t.id === s.trackId)) throw new ContentError(API_ERRORS.TRACK_NOT_FOUND, 404);
-
-      const savedRow = await saveDeckRecord(campaignId, deck.id, deck.updatedAt, String(body.title), remaining);
-
-      if (!savedRow) throw conflict();
-
-      const saved = toSlideDeck(savedRow);
-
-      const next = snapshot.show && refreshShowSlide(snapshot.show, saved, { before, now: Date.now() });
-
-      if (next) await emit(next);
-
-      queueRemoved();
-
-      return result(saved);
-    }
-
-    if (operation !== "decks.delete") throw new ContentError(API_ERRORS.ASSISTANT_UNKNOWN_SHOW_ACTION, 400);
-
-    await deleteDeckRecord(campaignId, deck.id);
-
-    if (snapshot.show?.deckId === deck.id) {
-      const ended = applyShowCommand(snapshot.show, { action: "end" }, { now: Date.now(), deck: null, library: [] });
-
-      if (ended.ok) await emit(ended.value);
-    }
-
-    queueRemoved();
-
-    return result({ ok: true });
-
-    function queueRemoved() {
-      const urls = before.filter(s => !remaining.some(n => n.imageUrl === s.imageUrl)).map(s => s.imageUrl);
-
-      if (!urls.length) return;
-
-      const payload = { campaignId, urls };
-
-      scheduleCleanup({ kind: "media-cleanup", key: "show.removed", payload });
-    }
+    return handler(showRun);
   };
 
   return read ? run() : withCampaignContentWrite(actor.campaignId, run);

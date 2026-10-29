@@ -187,6 +187,77 @@ export async function saveCampaignAsTemplate(actor: Actor, raw: unknown, prepare
     return created;
   });
 }
+type CampaignRun = {
+  actor: Actor;
+  input: Record<string, unknown>;
+  locale: Locale;
+  loaded: Awaited<ReturnType<typeof loadCampaignState>>;
+  result: ReturnType<typeof actionResult>;
+};
+
+type CampaignHandler = (run: CampaignRun) => Promise<ActionResult>;
+
+const createdResult = ({ result }: CampaignRun, created: { campaign: { id: string; name: string }; warnings: ActionResult["warnings"] }): ActionResult => ({ ...result({ id: created.campaign.id, name: created.campaign.name, href: `/campaigns/${created.campaign.id}/dm` }, created.campaign.id), warnings: created.warnings });
+
+async function createFromSource(run: CampaignRun, operation: "create" | "clone"): Promise<ActionResult> {
+  const { actor, input, loaded } = run;
+
+  const creation = operation === "create" ? parseInput(createCampaignSchema, input) : undefined;
+
+  const data = creation ?? parseInput(saveAsTemplateSchema, input);
+
+  const created = await createCampaignForUser(actor.userId, { ...data, ...(creation && { maxLevel: creation.maxLevel, allowPlayerEdit: creation.allowPlayerEdit, critChoiceByDm: creation.critChoiceByDm }) }, { source: loaded.source ?? undefined, defer: afterContentCommit });
+
+  if (!created.ok) throw new ContentError(API_ERRORS.ASSISTANT_TEMPLATE_UNAVAILABLE, created.status);
+
+  return createdResult(run, created);
+}
+
+async function updateSettings(run: CampaignRun, templateOnly: boolean): Promise<ActionResult> {
+  const { actor, input, loaded, result } = run;
+
+  if (templateOnly && loaded.state.settings.kind !== CampaignKind.TEMPLATE) throw new ContentError(API_ERRORS.FORBIDDEN, 403);
+
+  return result(safeSettings(await updateCampaignSettings(actor, input.patch)), actor.campaignId);
+}
+
+const CAMPAIGN_HANDLERS: Record<string, CampaignHandler> = {
+  status: async ({ result, loaded, actor }) => result(loaded.state.settings, actor.campaignId),
+  instructions: async ({ result, loaded, actor }) => result({ instructions: loaded.state.instructions }, actor.campaignId),
+  members: async ({ result, actor, input }) => result(windowItems((await loadCampaignMembers(actor.campaignId)).map(row => ({ id: row.id, userId: row.userId, role: row.role, displayName: row.user.displayName })), input), actor.campaignId),
+  export: async ({ result, actor }) => result({ href: `/api/campaigns/${actor.campaignId}/export`, formatVersion: BUNDLE_FORMAT_VERSION, description: "Download the current campaign in the app" }, actor.campaignId),
+  settings: run => updateSettings(run, false),
+  "template.update": run => updateSettings(run, true),
+  "instructions.set": async ({ result, actor, input }) => {
+    const body = parseInput(aiSettingsSchema, input);
+
+    return result(await saveAiSettings(actor.campaignId, body.instructions.trim() || null), actor.campaignId);
+  },
+  "members.remove": async ({ result, actor, input }) => result(await removeCampaignMember(actor, String(input.memberId)), actor.campaignId),
+  delete: async ({ result, actor }) => result(await deleteCampaign(actor), actor.campaignId),
+  "template.save": async (run) => createdResult(run, await saveCampaignAsTemplate(run.actor, run.input, run.loaded.source?.bundle)),
+  create: run => createFromSource(run, "create"),
+  clone: run => createFromSource(run, "clone"),
+};
+
+async function listTemplatesResult({ result, actor, input }: Omit<CampaignRun, "loaded">) {
+  const templates = await listTemplates(actor.userId);
+
+  return result(windowItems([...templates.official.map(item => ({ ...item, group: "official" })), ...templates.mine.map(item => ({ ...item, group: "mine" }))], input), actor.campaignId);
+}
+
+async function onboardingResult({ result, actor, locale }: Omit<CampaignRun, "loaded" | "input">) {
+  const { facts, checklistFlag } = await readOnboardingSnapshot(actor.campaignId, actor.userId, true);
+
+  const progress = checklistProgress(facts, actor.campaignId);
+
+  const t = await getTranslator(locale, "onboarding");
+
+  const steps = progress.steps.map((s) => ({ ...s, ...stepText(t, facts.role, s) }));
+
+  return result({ role: facts.role, state: checklistState(checklistFlag ?? undefined, progress.allRequiredDone, new Date()), steps, requiredDone: progress.requiredDone, requiredTotal: progress.requiredTotal }, actor.campaignId);
+}
+
 export async function runCampaignOperation(actor: Actor, operation: string, input: Record<string, unknown>, expected?: string, locale: Locale = DEFAULT_LOCALE): Promise<ActionResult> {
   const campaignResult = actionResult("campaign", resultLabel(locale, "campaign"));
 
@@ -196,73 +267,19 @@ export async function runCampaignOperation(actor: Actor, operation: string, inpu
 
   assertCan(actor, need(!read, sessionOnly));
 
-  if (operation === "templates") {
-    const templates = await listTemplates(actor.userId);
+  const base = { actor, input, locale, result: campaignResult };
 
-    return campaignResult(windowItems([...templates.official.map(item => ({ ...item, group: "official" })), ...templates.mine.map(item => ({ ...item, group: "mine" }))], input), actor.campaignId);
-  }
+  if (operation === "templates") return listTemplatesResult(base);
 
-  if (operation === "onboarding") {
-    const { facts, checklistFlag } = await readOnboardingSnapshot(actor.campaignId, actor.userId, true);
-
-    const progress = checklistProgress(facts, actor.campaignId);
-
-    const t = await getTranslator(locale, "onboarding");
-
-    const steps = progress.steps.map((s) => ({ ...s, ...stepText(t, facts.role, s) }));
-
-    return campaignResult({ role: facts.role, state: checklistState(checklistFlag ?? undefined, progress.allRequiredDone, new Date()), steps, requiredDone: progress.requiredDone, requiredTotal: progress.requiredTotal }, actor.campaignId);
-  }
+  if (operation === "onboarding") return onboardingResult(base);
 
   return withCampaignContentWrite(actor.campaignId, async () => {
-    const { state, source } = await loadCampaignState(actor, operation, input);
+    const loaded = await loadCampaignState(actor, operation, input);
 
-    if (expected && requestDigest(state) !== expected) throw new ContentError(API_ERRORS.ASSISTANT_CAMPAIGN_SETTINGS_CHANGED, 409);
+    if (expected && requestDigest(loaded.state) !== expected) throw new ContentError(API_ERRORS.ASSISTANT_CAMPAIGN_SETTINGS_CHANGED, 409);
 
-    if (operation === "status") return campaignResult(state.settings, actor.campaignId);
+    if (!Object.hasOwn(CAMPAIGN_HANDLERS, operation)) throw new ContentError(API_ERRORS.ASSISTANT_UNKNOWN_CAMPAIGN_ACTION, 400);
 
-    if (operation === "instructions") return campaignResult({ instructions: state.instructions }, actor.campaignId);
-
-    if (operation === "members") return campaignResult(windowItems((await loadCampaignMembers(actor.campaignId)).map(row => ({ id: row.id, userId: row.userId, role: row.role, displayName: row.user.displayName })), input), actor.campaignId);
-
-    if (operation === "export") {
-      return campaignResult({ href: `/api/campaigns/${actor.campaignId}/export`, formatVersion: BUNDLE_FORMAT_VERSION, description: "Download the current campaign in the app" }, actor.campaignId);
-    }
-
-    if (operation === "settings" || operation === "template.update") {
-      if (operation === "template.update" && state.settings.kind !== CampaignKind.TEMPLATE) throw new ContentError(API_ERRORS.FORBIDDEN, 403);
-
-      return campaignResult(safeSettings(await updateCampaignSettings(actor, input.patch)), actor.campaignId);
-    }
-
-    if (operation === "instructions.set") {
-      const body = parseInput(aiSettingsSchema, input);
-
-      return campaignResult(await saveAiSettings(actor.campaignId, body.instructions.trim() || null), actor.campaignId);
-    }
-
-    if (operation === "members.remove") return campaignResult(await removeCampaignMember(actor, String(input.memberId)), actor.campaignId);
-
-    if (operation === "delete") return campaignResult(await deleteCampaign(actor), actor.campaignId);
-
-    if (operation === "template.save") {
-      const created = await saveCampaignAsTemplate(actor, input, source?.bundle);
-
-      return { ...campaignResult({ id: created.campaign.id, name: created.campaign.name, href: `/campaigns/${created.campaign.id}/dm` }, created.campaign.id), warnings: created.warnings };
-    }
-
-    if (["create", "clone"].includes(operation)) {
-      const creation = operation === "create" ? parseInput(createCampaignSchema, input) : undefined;
-
-      const data = creation ?? parseInput(saveAsTemplateSchema, input);
-
-      const created = await createCampaignForUser(actor.userId, { ...data, ...(creation && { maxLevel: creation.maxLevel, allowPlayerEdit: creation.allowPlayerEdit, critChoiceByDm: creation.critChoiceByDm }) }, { source: source ?? undefined, defer: afterContentCommit });
-
-      if (!created.ok) throw new ContentError(API_ERRORS.ASSISTANT_TEMPLATE_UNAVAILABLE, created.status);
-
-      return { ...campaignResult({ id: created.campaign.id, name: created.campaign.name, href: `/campaigns/${created.campaign.id}/dm` }, created.campaign.id), warnings: created.warnings };
-    }
-
-    throw new ContentError(API_ERRORS.ASSISTANT_UNKNOWN_CAMPAIGN_ACTION, 400);
+    return CAMPAIGN_HANDLERS[operation]({ ...base, loaded });
   });
 }
