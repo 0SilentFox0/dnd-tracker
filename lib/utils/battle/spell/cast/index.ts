@@ -92,6 +92,7 @@ export function castSpell(params: CastSpellParams): CastSpellResult {
     rng,
     saveRolls,
     attackRolls,
+    diceRolls,
     diceCount: params.dice?.count ?? 0,
     diceSides: params.dice?.sides ?? 0,
     attacks: [],

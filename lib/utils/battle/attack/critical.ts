@@ -1,6 +1,7 @@
 import { EffectMarker } from "@/lib/constants/battle";
 import type { CriticalEffect, CriticalEffectType } from "@/lib/constants/critical-effects";
 import type { StaticEffect } from "@/lib/utils/abilities/schema";
+import { type ActionFlow,getP, put } from "@/lib/utils/battle/common/action-flow";
 import { grantExtraActions } from "@/lib/utils/battle/participant/helpers";
 import { addActiveEffect } from "@/lib/utils/battle/turn/effects";
 import type { ActiveEffect, BattleParticipant } from "@/types/battle";
@@ -126,4 +127,10 @@ export function applyCriticalEffect(
       ),
     },
   };
+}
+
+export function applyAttackCritToFlow(flow: ActionFlow, effect: CriticalEffect, ids: { attackerId: string; targetId: string }, opts: { offTurn: boolean }): void {
+  const who = effect.effect.target === "target" ? ids.targetId : effect.effect.target === "self" ? ids.attackerId : null;
+
+  if (who) put(flow, applyCriticalEffect(getP(flow, who), effect, flow.ctx.round, opts));
 }

@@ -41,6 +41,7 @@ export interface SpellCastState {
   rng: () => number;
   saveRolls: Array<{ participantId: string; roll: number }>;
   attackRolls: Array<{ participantId: string; roll: number }>;
+  diceRolls: number[];
   diceCount: number;
   diceSides: number;
   attacks: NonNullable<BattleAction["actionDetails"]["spellAttacks"]>;
