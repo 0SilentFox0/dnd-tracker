@@ -1,6 +1,7 @@
 "use client";
 
 import { type FormEvent, useState } from "react";
+import { useFormatter, useTranslations } from "next-intl";
 
 import { AssistantPolicyControl } from "./AssistantPolicyControl";
 
@@ -10,7 +11,7 @@ import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
 import { ResponsiveDialog } from "@/components/ui/responsive-dialog";
-import { API_TOKEN_SCOPE_LABELS, type ApiTokenScope } from "@/lib/constants/ai";
+import { type ApiTokenScope, tokenScopeKey } from "@/lib/constants/ai";
 import { useConfirm } from "@/lib/hooks/common";
 import type { ApiTokenSummary, CreateApiTokenInput, CreatedApiToken } from "@/types/ai";
 
@@ -27,6 +28,12 @@ interface ApiTokenListProps {
 }
 
 export function ApiTokenList({ campaignId, tokens, scopes, actions }: ApiTokenListProps) {
+  const t = useTranslations("ai");
+
+  const tc = useTranslations("common");
+
+  const format = useFormatter();
+
   const confirm = useConfirm();
 
   const initialScopes = scopes.slice(0, 1);
@@ -60,7 +67,7 @@ export function ApiTokenList({ campaignId, tokens, scopes, actions }: ApiTokenLi
   };
 
   const revoke = async (token: ApiTokenSummary) => {
-    const ok = await confirm({ title: "Відкликати токен?", description: `«${token.name}» перестане працювати.`, confirmLabel: "Відкликати", destructive: true });
+    const ok = await confirm({ title: t("tokens.revokeConfirm.title"), description: t("tokens.revokeConfirm.description", { name: token.name }), confirmLabel: t("tokens.revoke"), destructive: true });
 
     if (ok) actions.onRevoke(token.id);
   };
@@ -72,40 +79,40 @@ export function ApiTokenList({ campaignId, tokens, scopes, actions }: ApiTokenLi
           <div className="min-w-0">
             <p className="font-semibold text-hud-ink">{token.name}</p>
             <p className="text-sm text-hud-muted">
-              {token.prefix}… · {token.lastUsedAt ? new Date(token.lastUsedAt).toLocaleString("uk") : "ще не використовувався"}
+              {token.prefix}… · {token.lastUsedAt ? format.dateTime(new Date(token.lastUsedAt), { dateStyle: "short", timeStyle: "short" }) : t("tokens.neverUsed")}
             </p>
             {campaignId && <AssistantPolicyControl key={token.id} campaignId={campaignId} target="token" id={token.id} executionMode={token.executionMode} />}
             <div className="mt-1 flex flex-wrap gap-1">
               {token.scopes.map((s) => (
                 <Badge key={s} variant="outline">
-                  {API_TOKEN_SCOPE_LABELS[s]}
+                  {t(`tokenScopes.${tokenScopeKey(s)}`)}
                 </Badge>
               ))}
             </div>
           </div>
           <Button variant="ghost" onClick={() => void revoke(token)}>
-            Відкликати
+            {t("tokens.revoke")}
           </Button>
         </HudCard>
       ))}
-      <Button onClick={() => setOpen(true)}>Створити токен</Button>
+      <Button onClick={() => setOpen(true)}>{t("tokens.create")}</Button>
       <ResponsiveDialog
         hud
         open={open}
         onOpenChange={(next) => !next && close()}
-        title={created ? "Токен створено" : "Новий токен"}
-        description={created ? "Скопіюйте токен зараз — пізніше його не буде видно." : "Дайте токену назву й оберіть права. Змінити права пізніше не можна — лише відкликати й створити новий."}
+        title={created ? t("tokens.dialog.createdTitle") : t("tokens.dialog.newTitle")}
+        description={created ? t("tokens.dialog.createdDescription") : t("tokens.dialog.newDescription")}
         footer={
           created ? (
             <>
               <Button variant="ghost" onClick={() => void navigator.clipboard.writeText(created.token)}>
-                Скопіювати
+                {t("tokens.dialog.copy")}
               </Button>
-              <Button onClick={close}>Готово</Button>
+              <Button onClick={close}>{t("tokens.dialog.done")}</Button>
             </>
           ) : (
             <Button type="submit" form="api-token-form" disabled={pending || !name.trim() || selected.length === 0}>
-              Створити
+              {tc("actions.create")}
             </Button>
           )
         }
@@ -115,19 +122,19 @@ export function ApiTokenList({ campaignId, tokens, scopes, actions }: ApiTokenLi
         ) : (
           <form id="api-token-form" onSubmit={(e) => void submit(e)} className="space-y-1">
             <label htmlFor="api-token-name" className="text-sm text-hud-muted">
-              Назва
+              {t("tokens.dialog.name")}
             </label>
             <Input id="api-token-name" value={name} onChange={(e) => setName(e.target.value)} maxLength={60} autoComplete="off" />
             <fieldset className="space-y-2 pt-2">
-              <legend className="text-sm text-hud-muted">Права</legend>
+              <legend className="text-sm text-hud-muted">{t("tokens.dialog.scopes")}</legend>
               {scopes.map((scope) => (
                 <label key={scope} className="flex items-center gap-2 text-sm text-hud-ink">
                   <Checkbox
                     checked={selected.includes(scope)}
                     onCheckedChange={(on) => setSelected((prev) => (on === true ? [...prev, scope] : prev.filter((s) => s !== scope)))}
-                    aria-label={API_TOKEN_SCOPE_LABELS[scope]}
+                    aria-label={t(`tokenScopes.${tokenScopeKey(scope)}`)}
                   />
-                  {API_TOKEN_SCOPE_LABELS[scope]}
+                  {t(`tokenScopes.${tokenScopeKey(scope)}`)}
                 </label>
               ))}
             </fieldset>

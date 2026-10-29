@@ -1,1 +1,293 @@
-{}
+{
+  "modes": {
+    "scenario": "Campaign assistant / co-author",
+    "live": "Live mode"
+  },
+  "tokenScopes": {
+    "ai": "AI assistant (MCP)",
+    "contentRead": "Read content",
+    "contentWrite": "Write content",
+    "campaignRead": "Read campaign settings",
+    "campaignWrite": "Manage campaign",
+    "scenarioRead": "Read scenario",
+    "scenarioWrite": "Edit scenario",
+    "charactersRead": "Read characters",
+    "charactersWrite": "Manage characters",
+    "battlesRead": "Read battles",
+    "battlesWrite": "Manage battles",
+    "showRead": "Read show",
+    "showWrite": "Manage show"
+  },
+  "tools": {
+    "readScenarioPage": "Reading the page…",
+    "searchReference": "Searching the reference: {query}",
+    "getBattleState": "Looking at the battle…",
+    "getParty": "Looking at the party…",
+    "proposeScenarioEdit": "Preparing a proposal…",
+    "proposeSceneSlide": "Paid image: an explicit request and confirmation are required"
+  },
+  "toolStatus": {
+    "error": "Error",
+    "pending": "Awaiting review",
+    "handoff": "Action needed in the app",
+    "running": "Running",
+    "result": "Tool result"
+  },
+  "intentStatus": {
+    "pending": "Awaiting review",
+    "executing": "Running",
+    "applied": "Applied",
+    "rejected": "Rejected",
+    "stale": "The proposal is out of date: a new review is needed",
+    "expired": "The proposal has expired",
+    "failed": "Execution failed",
+    "unknown": "Result unknown — restore the state"
+  },
+  "effectsStatus": {
+    "complete": "complete",
+    "failed": "failed",
+    "unknown": "unknown",
+    "pending": "pending"
+  },
+  "usage": {
+    "line": "↑{input} ↓{output}",
+    "linePartial": "↑{input} ↓{output} (incomplete data)",
+    "unknown": "unknown"
+  },
+  "panel": {
+    "ariaLabel": "AI assistant",
+    "resizeLabel": "AI panel width",
+    "heading": "Assistant · {name}",
+    "connect": {
+      "title": "Connect an AI key",
+      "description": "Add a provider key to use the assistant.",
+      "action": "AI settings"
+    },
+    "noThreads": "No threads: {mode}",
+    "proposals": "AI proposals",
+    "blockedUntil": "A new request is possible after the safety interval: {time}. “Restore state” only reads data.",
+    "badge": "AI proposals: {count}"
+  },
+  "thread": {
+    "new": "New thread",
+    "untitled": "New thread",
+    "close": "Close",
+    "thread": "Thread",
+    "provider": "Provider",
+    "model": "Model",
+    "providerModel": "Provider: {provider} · Model: {model}",
+    "tokens": "Thread tokens"
+  },
+  "messages": {
+    "replyModel": "Reply model: {model}",
+    "reviewAction": "Review the action",
+    "recover": "Restore state"
+  },
+  "composer": {
+    "quickPrompts": {
+      "npcName": "A name for an NPC",
+      "nextInScenario": "What's next in the scenario?",
+      "dc": "What's the DC?"
+    },
+    "clearFocus": "Clear focus",
+    "message": "Message",
+    "placeholder": "Write a message…",
+    "stop": "Stop",
+    "send": "Send"
+  },
+  "instructions": {
+    "label": "Standing instructions",
+    "placeholder": "Grim dark fantasy in the spirit of Heroes V. Answer briefly, no modern slang. NPCs speak in an archaic style…",
+    "hint": "Added to every assistant request in both modes."
+  },
+  "provider": {
+    "apiKey": "API key",
+    "replacePlaceholder": "A new key to replace it",
+    "pastePlaceholder": "Paste the key",
+    "defaultModel": "Default model",
+    "automatic": "Automatic",
+    "verifyAndSave": "Verify and save"
+  },
+  "proposal": {
+    "before": "Before · {label}",
+    "after": "After · {label}",
+    "parts": {
+      "story": "story",
+      "notes": "notes"
+    },
+    "loss": "Warning: the edit removes {lost}",
+    "slideAlt": "Slide",
+    "intoDeck": "Into the deck “{title}”",
+    "newDeck": "A new deck for the scene",
+    "newRow": "New row",
+    "newSection": "New section “{title}”",
+    "target": "Target: page {pageId}. Applied only after human confirmation.",
+    "stale": "The fragment changed after the proposal",
+    "status": {
+      "applied": "Applied",
+      "rejected": "Rejected"
+    },
+    "addSlide": "Add slide",
+    "apply": "Apply",
+    "redo": "Redo",
+    "reject": "Reject",
+    "rename": "“{from}” → “{to}”"
+  },
+  "tokens": {
+    "neverUsed": "never used",
+    "revoke": "Revoke",
+    "create": "Create token",
+    "revokeConfirm": {
+      "title": "Revoke the token?",
+      "description": "“{name}” will stop working."
+    },
+    "dialog": {
+      "createdTitle": "Token created",
+      "newTitle": "New token",
+      "createdDescription": "Copy the token now — it will not be shown again.",
+      "newDescription": "Give the token a name and choose its permissions. Permissions cannot be changed later — only revoke and create a new one.",
+      "copy": "Copy",
+      "done": "Done",
+      "name": "Name",
+      "scopes": "Permissions"
+    }
+  },
+  "policy": {
+    "ariaLabel": "Execution mode",
+    "mode": "Mode: {mode}",
+    "modes": {
+      "auto": "auto",
+      "review": "review"
+    },
+    "note": "Existing pending items are not applied. Deletion, reset, access, session-only and paid actions need separate confirmation.",
+    "backToReview": "Back to review",
+    "enableAuto": "Enable auto",
+    "accepted": "The server accepted the mode change. Waiting for the fresh state; refresh the page if needed.",
+    "failed": "Could not change the mode. Only the owner can do this.",
+    "dialog": {
+      "title": "Enable auto for upcoming actions?",
+      "description": "Ordinary new actions will run under the server policy. Existing proposals are not applied, permissions are not widened.",
+      "confirm": "Enable for upcoming actions",
+      "body": "Dangerous and paid actions always stay for human confirmation. Only this {target, select, thread {thread} other {token}} changes."
+    }
+  },
+  "context": {
+    "pickNotes": "Choose source notes ({count}/5)",
+    "notesLegend": "Only explicitly chosen notes: up to 5, up to 3000 characters each",
+    "notesEmpty": "The initial selection is empty. No selection does not mean “all”.",
+    "nextSources": "Next sources",
+    "clearNotes": "Clear note selection",
+    "dialogTitle": "Before sending to the provider",
+    "dialogDescription": "Check the context that is actually selected. Private data is sent only after your explicit action.",
+    "sendSelected": "Send the selected context",
+    "checking": "Checking the available context…",
+    "size": "{characters}/{max} characters of system context; {truncated, select, true {some optional data was shortened} other {nothing was shortened}}.",
+    "history": "History: up to {limit} messages. Tools can read the current permitted data on request.",
+    "sourceNotes": "Explicitly chosen source notes: {count}. {keys}",
+    "focusUnavailable": "Focus unavailable: the entity was deleted or is not available in the campaign.",
+    "paid": "Image generation is paid and needs separate confirmation. No cost estimate is calculated.",
+    "refresh": "Refresh the context preview",
+    "previewFailed": "Could not check the context. The message was not sent to the provider.",
+    "notesFailed": "Source notes are unavailable",
+    "sendFailed": "Could not save the editor or send the request. Check the chat state before a new request."
+  },
+  "chat": {
+    "receipt": "Receipt {id}: {status, select, applied {action performed} unknown {result is being verified} other {action state: {status}}}.",
+    "intentLine": "{status, select, pending {Confirmation needed} other {Result is being verified}}: {summary}. [Review the action]({href})",
+    "recoverFailed": "Could not restore the chat state. Try again.",
+    "leaseBlocked": "The previous request still has a safety interval or an unknown result. Restore the state and wait for it to finish.",
+    "stopFailed": "Could not confirm the stop. Check the chat state."
+  },
+  "review": {
+    "queueTitle": "Review queue · pending {count}",
+    "queueAria": "Review queue",
+    "perPage": "{size} per page, up to {max}",
+    "prev": "Previous proposals",
+    "next": "Next proposals",
+    "legacyItem": "{summary} · Scenario",
+    "queueError": "Could not load the queue",
+    "detailLoading": "Loading the proposal…",
+    "detailUnavailable": "The proposal is unavailable or its content was cleared",
+    "campaignDeleted": "The campaign was deleted. Receipt {id}",
+    "refine": "Refine the request for the proposal “{summary}”. Send a new request in the chat; this does not apply any changes.",
+    "refineLegacy": "Refine the request in the chat and create a new proposal.",
+    "actionFailed": "Could not perform the action. Restore the state and check the proposal.",
+    "actionFailedShort": "Could not perform the action",
+    "receiptFailed": "Could not read the receipt. Restore the state.",
+    "refresh": "Restore the queue"
+  },
+  "intent": {
+    "channelChat": "Chat",
+    "validUntil": "Valid until: {date}",
+    "paid": "Paid generation: explicit confirmation required",
+    "effects": "Effects",
+    "effectLine": "{label}: {description}",
+    "fullPreview": "Full change preview: {count}. Page {page} of {pages}",
+    "pagesAria": "Change pages",
+    "prevChanges": "Previous changes",
+    "nextChanges": "Next changes",
+    "before": "Before",
+    "after": "After",
+    "receiptLine": "{status} · Updates: {effects}",
+    "confirm": "Apply",
+    "reject": "Reject",
+    "refine": "Refine"
+  },
+  "handoff": {
+    "unavailable": "Navigation unavailable",
+    "ariaLabel": "Continue in the app",
+    "open": "Open in the app",
+    "notesLegend": "Choose source notes to pass to the AI",
+    "notesHint": "Only explicitly chosen notes are passed. Nothing is chosen by default.",
+    "useNotes": "Use the chosen notes for the AI"
+  },
+  "workspace": {
+    "focusKind": "Focus type",
+    "kinds": {
+      "campaign": "Campaign",
+      "scenario": "Page",
+      "character": "Hero",
+      "battle": "Battle"
+    },
+    "focusId": "Focus ID",
+    "pick": "Set focus",
+    "clear": "Clear focus"
+  },
+  "focus": {
+    "character": "Focus: hero {id}",
+    "battle": "Focus: battle {id}",
+    "campaign": "Focus: campaign",
+    "page": "Focus: page {id}",
+    "rows": "Focus: {rows, plural, one {# row} other {# rows}}",
+    "section": "Focus: section “{title}”",
+    "sectionRows": "Focus: section “{title}”, {rows, plural, one {# row} other {# rows}}"
+  },
+  "page": {
+    "title": "AI and API",
+    "titleTemplate": "API",
+    "subtitle": "Tokens for external AI clients and MCP connection.",
+    "subtitleTemplate": "Tokens for accessing the template content through the API.",
+    "tokensHeading": "API tokens",
+    "instructionsHeading": "Assistant instructions",
+    "keysHeading": "Provider keys",
+    "keysBody": "OpenAI, Anthropic and other keys are set up in <link>AI settings</link>.",
+    "mcpHeading": "MCP connection",
+    "restHeading": "REST API",
+    "restBody": "Description of all content operations: <link>openapi.json</link>. The token permissions are listed in each operation (x-scopes).",
+    "tokenPlaceholder": "your token",
+    "curlTokenPlaceholder": "token"
+  },
+  "settings": {
+    "notConfigured": "The AI assistant is not configured on the server",
+    "title": "AI keys",
+    "subtitle": "The key is stored encrypted and is never shown in full. Billing goes directly through your provider account.",
+    "deleteKey": {
+      "title": "Delete the key?",
+      "description": "AI chats of this provider will stop working."
+    }
+  },
+  "validation": {
+    "emptyPatch": "Empty change",
+    "replaceRowNeedsContent": "replaceRow: story or notes is required"
+  }
+}

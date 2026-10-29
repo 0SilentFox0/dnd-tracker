@@ -19,7 +19,7 @@ describe("AiMessageList", () => {
     );
 
     expect(screen.getByText("Хто такий Фенікс?")).toBeTruthy();
-    expect(screen.getByText("Шукаю в довіднику: Фенікс")).toBeTruthy();
+    expect(screen.getByText('ai.tools.searchReference {"query":"Фенікс"}')).toBeTruthy();
     expect(screen.getByText("Птах вогню.")).toBeTruthy();
     expect(screen.getByText(API_ERRORS.AI_RATE_LIMIT)).toBeTruthy();
   });
@@ -52,11 +52,11 @@ describe("AiMessageList", () => {
 
 it("canonical pending has an exact local review link and is not a completed action", () => {
  render(<AiMessageList campaignId="c1" messages={[{id:"m",role:"assistant",parts:[{type:"tool-assistant_action",state:"output-available",output:{version:2,kind:"result",data:{kind:"pending",intent:{id:"intent1"},reviewUrl:"https://evil.invalid"}}}]}] as never} />);
- expect(screen.getByRole("link",{name:"Переглянути дію"}).getAttribute("href")).toBe("/campaigns/c1/dm/assistant?intent=intent1");
- expect(screen.getByText("Очікує перегляду")).toBeTruthy();
+ expect(screen.getByRole("link",{name:"ai.messages.reviewAction"}).getAttribute("href")).toBe("/campaigns/c1/dm/assistant?intent=intent1");
+ expect(screen.getByText("ai.toolStatus.pending")).toBeTruthy();
 });
 
 it("showsActualMessageModelAndPartialUnknownUsage",()=>{
  render(<AiMessageList messages={[{id:"actual",role:"assistant",parts:[{type:"text",text:"Відповідь"}],metadata:{model:"actual-model",usage:{inputTokens:null,outputTokens:12,partial:true}}}]}/>);
- expect(screen.getByText(/actual-model/)).toBeTruthy();expect(screen.getByText(/↑невідомо.*↓12/)).toBeTruthy();expect(screen.getByText(/неповні/)).toBeTruthy();
+ expect(screen.getByText(/actual-model/)).toBeTruthy();expect(screen.getByText(/ai\.usage\.linePartial.*"input":"ai\.usage\.unknown".*"output":12/)).toBeTruthy();
 });

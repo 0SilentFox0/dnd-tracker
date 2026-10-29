@@ -33,7 +33,7 @@ const dispose=registerAssistantBeforeApply({campaignId:'c1',domain:'scenario',id
  try { const {result}=renderHook(()=>useAssistantIntents('c1'),{wrapper});
 
 await waitFor(()=>expect(result.current.legacy.data).toHaveLength(1));
- await act(async()=>{ await expect(result.current.confirm('i1')).rejects.toThrow(/зберегти/i);await expect(result.current.applyLegacy('old1')).rejects.toThrow(/зберегти/i); });
+ await act(async()=>{ await expect(result.current.confirm('i1')).rejects.toThrow(/save the open editor/i);await expect(result.current.applyLegacy('old1')).rejects.toThrow(/save the open editor/i); });
  expect(api.confirmAssistantIntent).not.toHaveBeenCalled();expect(ai.applyAiProposal).not.toHaveBeenCalled();
  }finally{ dispose(); }
 });
@@ -122,7 +122,7 @@ it('failed invalidation can retry and dedup is independent per campaign and Quer
 
  const a = renderHook(() => useAssistantEffects('c1'), { wrapper: first.wrapper });
 
- await act(async () => { await expect(a.result.current.consumeReceipt(receipt)).rejects.toThrow(/оновити/); });
+ await act(async () => { await expect(a.result.current.consumeReceipt(receipt)).rejects.toThrow(/refresh the data/); });
  await act(() => a.result.current.consumeReceipt(receipt));
  await act(() => a.result.current.consumeReceipt(receipt));
  expect(invalidate).toHaveBeenCalledTimes(2);
@@ -148,7 +148,7 @@ it('throwing editor blocks confirmation and unregister removes the mounted edito
  try {
   const { result } = renderHook(() => useAssistantIntents('throwing'), { wrapper });
 
-  await act(async () => { await expect(result.current.confirm('i1')).rejects.toThrow(/зберегти/); });
+  await act(async () => { await expect(result.current.confirm('i1')).rejects.toThrow(/save the open editor/); });
   expect(api.confirmAssistantIntent).not.toHaveBeenCalled();
  } finally { dispose(); }
 

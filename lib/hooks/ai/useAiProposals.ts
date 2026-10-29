@@ -44,7 +44,7 @@ export function useAiProposals(campaignId: string, pageId: string, { enabled = t
     onSuccess: (result, id) => {
       if (!result) return;
 
-      void consumeReceipt({ id: `legacy:${id}`, status: "applied", effectsStatus: "complete", result: { data: null, affected: ["deck" in result ? { domain: "show", id: result.deck.id, name: "Показ" } : { domain: "scenario", id: result.id, name: "Сценарій" }], warnings: [] } });
+      void consumeReceipt({ id: `legacy:${id}`, status: "applied", effectsStatus: "complete", result: { data: null, affected: ["deck" in result ? { domain: "show", id: result.deck.id, name: "Show" } : { domain: "scenario", id: result.id, name: "Scenario" }], warnings: [] } });
 
       if ("deck" in result) {
         queryClient.invalidateQueries({ queryKey: showKeys.decks(campaignId) });

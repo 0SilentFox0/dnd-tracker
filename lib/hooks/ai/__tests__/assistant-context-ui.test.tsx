@@ -57,7 +57,7 @@ await act(()=>result.current.requestSend('Запит'));
 
  const send=vi.fn();
 
-await act(()=>result.current.approve(send));expect(send).not.toHaveBeenCalled();expect(result.current.error).toMatch(/зберегти/);
+await act(()=>result.current.approve(send));expect(send).not.toHaveBeenCalled();expect(result.current.error).toMatch(/context\.sendFailed/);
  }finally{ dispose(); }
 });
 

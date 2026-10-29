@@ -62,7 +62,7 @@ export async function flushAssistantBeforeApply(campaignId: string): Promise<voi
 
     try { saved = await flush(); } catch { /* Fail closed; never expose editor internals. */ }
 
-    if (!saved) throw new Error("Не вдалося зберегти відкритий редактор. Зміни не застосовано.");
+    if (!saved) throw new Error("Failed to save the open editor. The changes were not applied.");
   }
 }
 
@@ -91,7 +91,7 @@ export function useAssistantEffects(campaignId: string) {
       await invalidateAffected(client, campaignId, [...new Set(refs.map(r => r.domain))]);
 
       if (refs.some(r => ["battles", "show", "campaign"].includes(r.domain))) await client.invalidateQueries({ queryKey: battleKeys.active() });
-    } catch { receipts.delete(receipt.id); throw new Error("Не вдалося оновити дані. Відновіть стан."); }
+    } catch { receipts.delete(receipt.id); throw new Error("Failed to refresh the data after the receipt."); }
   }, [campaignId, client]);
 
   return { consumeReceipt };

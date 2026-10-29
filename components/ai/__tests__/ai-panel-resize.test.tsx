@@ -17,7 +17,7 @@ const proposals = { pending: [], refresh: vi.fn() } as never;
 
 const mount = () => render(<AiPanel campaignId="c1" mode="scenario" focus={{ page, onClear: vi.fn() }} proposals={{ data: proposals }} actions={{ onClose: vi.fn() }} />);
 
-const handle = () => screen.getByRole("separator", { name: "Ширина панелі AI" });
+const handle = () => screen.getByRole("separator", { name: "ai.panel.resizeLabel" });
 
 beforeEach(() => {
   window.localStorage.clear();

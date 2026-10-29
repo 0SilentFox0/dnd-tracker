@@ -20,9 +20,9 @@ describe("AiProposalCard", () => {
     expect(screen.getByText("Похмуріший вхід")).toBeTruthy();
     expect(screen.getByText("Дзвони б'ють")).toBeTruthy();
     expect(screen.getByText("Дзвони мовчать")).toBeTruthy();
-    fireEvent.click(screen.getByRole("button", { name: "Застосувати" }));
+    fireEvent.click(screen.getByRole("button", { name: "ai.proposal.apply" }));
     expect(a.onApply).toHaveBeenCalled();
-    fireEvent.click(screen.getByRole("button", { name: "Відхилити" }));
+    fireEvent.click(screen.getByRole("button", { name: "ai.proposal.reject" }));
     expect(a.onReject).toHaveBeenCalled();
   });
 
@@ -32,7 +32,7 @@ describe("AiProposalCard", () => {
     const op = { ...base.ops[0], before: { story: { type: "doc", content: [callout, callout, callout] }, notes: doc("") } };
 
     render(<AiProposalCard proposal={{ ...base, ops: [op], status: "pending" } as never} actions={actions()} busy={false} campaignId="c1" />);
-    expect(screen.getByText("Увага: правка видаляє 3 виноски")).toBeTruthy();
+    expect(screen.getByText('ai.proposal.loss {"lost":"3 виноски"}')).toBeTruthy();
   });
 
   it("addSlide: прев'ю, ціль і «Додати слайд»", () => {
@@ -42,8 +42,8 @@ describe("AiProposalCard", () => {
 
     render(<AiProposalCard proposal={{ ...base, ops, status: "pending" } as never} actions={a} busy={false} campaignId="c1" />);
     expect(screen.getByRole("img").getAttribute("src")).toBe("https://x/i.webp");
-    expect(screen.getByText("У набір «Собор»")).toBeTruthy();
-    fireEvent.click(screen.getByRole("button", { name: "Додати слайд" }));
+    expect(screen.getByText('ai.proposal.intoDeck {"title":"Собор"}')).toBeTruthy();
+    fireEvent.click(screen.getByRole("button", { name: "ai.proposal.addSlide" }));
     expect(a.onApply).toHaveBeenCalled();
   });
 
@@ -51,22 +51,22 @@ describe("AiProposalCard", () => {
     const ops = [{ op: "addSlide", deckId: null, slide: { id: "s", imageUrl: "https://x/i.webp" } }];
 
     render(<AiProposalCard proposal={{ ...base, ops, status: "pending" } as never} actions={actions()} busy={false} campaignId="c1" />);
-    expect(screen.getByText("Новий набір для сцени")).toBeTruthy();
+    expect(screen.getByText("ai.proposal.newDeck")).toBeTruthy();
   });
 
   it("stale: пояснення і «Переробити»", () => {
     const a = actions();
 
     render(<AiProposalCard proposal={{ ...base, status: "stale" } as never} actions={a} busy={false} campaignId="c1" />);
-    expect(screen.getByText("Фрагмент змінився після пропозиції")).toBeTruthy();
-    fireEvent.click(screen.getByRole("button", { name: "Переробити" }));
+    expect(screen.getByText("ai.proposal.stale")).toBeTruthy();
+    fireEvent.click(screen.getByRole("button", { name: "ai.proposal.redo" }));
     expect(a.onRedo).toHaveBeenCalled();
-    expect(screen.queryByRole("button", { name: "Застосувати" })).toBeNull();
+    expect(screen.queryByRole("button", { name: "ai.proposal.apply" })).toBeNull();
   });
 
   it("applied: лише статус", () => {
     render(<AiProposalCard proposal={{ ...base, status: "applied", appliedVersion: 4 } as never} actions={actions()} busy={false} campaignId="c1" />);
-    expect(screen.getByText("Застосовано")).toBeTruthy();
+    expect(screen.getByText("ai.proposal.status.applied")).toBeTruthy();
     expect(screen.queryByRole("button")).toBeNull();
   });
 });

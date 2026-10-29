@@ -21,7 +21,7 @@ vi.mock("@/lib/hooks/ai", () => ({
 describe("T15 retry affordance", () => {
   it("retry after an interrupted request reads recovery instead of creating another intent", () => {
     render(<QueryClientProvider client={new QueryClient()}><AiPanel campaignId="c" mode="scenario" focus={{ page: { id: "p" } as never, onClear: vi.fn() }} proposals={{ data: { refresh: vi.fn() } as never }} actions={{ onClose: vi.fn() }} /></QueryClientProvider>);
-    fireEvent.click(screen.getByRole("button", { name: /Повторити|Відновити стан/ }));
+    fireEvent.click(screen.getByRole("button", { name: "ai.messages.recover" }));
     expect(chat.recover).toHaveBeenCalledOnce();
     expect(chat.send).not.toHaveBeenCalled();
   });
