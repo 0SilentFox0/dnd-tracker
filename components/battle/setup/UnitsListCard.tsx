@@ -15,6 +15,7 @@ import { ParticipantSide, ParticipantSourceType } from "@/lib/constants/battle";
 import { clampUnitQuantity, UNIT_QUANTITY } from "@/lib/constants/battle-units";
 import { groupDisplayName, UNGROUPED_LABELS } from "@/lib/constants/ungrouped";
 import type { ParticipantActions, ParticipantSelection } from "@/lib/hooks/battles";
+import { compareUk } from "@/lib/utils/common/text";
 import { groupUnitsByRaceName } from "@/lib/utils/units/group-units";
 import type { EntityStats, SetupUnit } from "@/types/battle-setup";
 
@@ -94,7 +95,7 @@ export function UnitsListCard({ units, entityStats, selection, actions }: UnitsL
   const raceLabel = (key: string) => groupDisplayName(key, UNGROUPED_LABELS.race);
 
   const raceOrder = [...byRace.keys()].sort((a, b) =>
-    raceLabel(a).localeCompare(raceLabel(b), "uk"),
+    compareUk(raceLabel(a), raceLabel(b)),
   );
 
   return (

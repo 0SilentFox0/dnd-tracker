@@ -1,3 +1,4 @@
+import { byName } from "@/lib/utils/common/text";
 import type { PlayedLookup } from "@/lib/utils/scenario/reveal";
 import type { AcquaintanceEntryView, AcquaintanceKind, AcquaintanceNoteView, AcquaintanceView } from "@/types/acquaintances";
 
@@ -64,5 +65,5 @@ export function viewAcquaintances(rows: AcquaintanceRecord[], viewer: Viewer, pl
   return rows
     .map((r) => viewOne(r, viewer, played))
     .filter((a) => viewer.isDM || !a.hidden)
-    .sort((a, b) => a.name.localeCompare(b.name, "uk"));
+    .sort(byName);
 }
