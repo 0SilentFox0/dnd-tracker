@@ -85,6 +85,7 @@ export const AI_LIMITS = {
   cancelPollMs: 2500,
   slimOutputChars: 2000,
   toolResultChars: 25_000,
+  keptReadingChars: 60_000,
   contextChars: 40_000,
   maxSteps: 8,
   battleEvents: 10,
@@ -92,6 +93,8 @@ export const AI_LIMITS = {
   threadTitleChars: 80,
   instructionsChars: 8000,
 } as const;
+
+export const AI_SCENARIO_READ_TOOLS = ["read_scenario_page", "outline_scenario_page", "find_scenario_mentions"] as const;
 
 export const AI_TOOL_OUTPUT_COMPACTED = "[tool result compacted]";
 
