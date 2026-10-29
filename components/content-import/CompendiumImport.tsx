@@ -7,10 +7,12 @@ import { CompendiumDependencies } from "./CompendiumDependencies";
 import { CompendiumFileStep } from "./CompendiumFileStep";
 import { CompendiumReport, DEPENDENCIES_ANCHOR } from "./CompendiumReport";
 import { CompendiumRunsList } from "./CompendiumRunsList";
+import { CompendiumSteps } from "./CompendiumSteps";
 import { RulesPatchOffer } from "./RulesPatchOffer";
 
 import { ActionBar } from "@/components/common/ActionBar";
 import { HudPage, HudPageHeader, HudPanel } from "@/components/hud/page";
+import { OnboardingHint } from "@/components/onboarding/OnboardingHint";
 import { Button } from "@/components/ui/button";
 import { useCompendiumImport } from "@/lib/hooks/compendium-import";
 
@@ -29,6 +31,8 @@ export function CompendiumImport({ campaignId, initialFile }: { campaignId: stri
       subtitle={t("subtitle")}
       actions={<Button variant="outline" asChild><Link href={`/campaigns/${campaignId}`}>{t("back")}</Link></Button>}
     />
+    {!initialFile && <OnboardingHint id="dm.compendium-import" />}
+    <CompendiumSteps wizard={wizard} />
     <CompendiumFileStep wizard={wizard} />
     {root && <CompendiumCategories wizard={wizard} />}
     {preview && <>

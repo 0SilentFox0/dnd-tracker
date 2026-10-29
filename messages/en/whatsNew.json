@@ -5,6 +5,10 @@
     "new": " · new",
     "open": "Open"
   },
+  "2026-10-29-compendium-import-guide": {
+    "title": "Compendium import: steps, hint and help",
+    "body": "The JSON compendium import screen now has a step indicator (file, categories, check, confirm), a hint and a help article about the report and why an import is blocked."
+  },
   "2026-10-29-spell-attack-crits": {
     "title": "Spell attack crits and fumbles",
     "body": "The DM's choice for natural 20s and 1s now also applies to spell attacks, including automatic reactions (such as Rageful Nimbus): the battle waits for your pick, and \"Cancel action\" cancels the whole attack."

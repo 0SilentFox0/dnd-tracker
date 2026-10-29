@@ -111,7 +111,14 @@
     "previewTtl": "The preview is valid for 15 minutes. A new check is required after the campaign or the selection changes.",
     "confirm": "Import",
     "saved": "Import saved: {runId}",
-    "close": "Clear the file and close the wizard"
+    "close": "Clear the file and close the wizard",
+    "steps": {
+      "label": "Import steps",
+      "file": "File",
+      "categories": "Categories",
+      "check": "Check",
+      "confirm": "Confirm"
+    }
   },
   "file": {
     "intro": "One file → check → confirm. The campaign is not changed until you confirm. UTF-8 JSON up to 3 MiB; up to 2000 selected records per atomic import.",
