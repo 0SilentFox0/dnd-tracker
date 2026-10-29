@@ -10,27 +10,35 @@
 
 ## Не в обсязі
 
-Форма заклинань, рецепти/галерея, згортання секцій, таймлайн класів, перейменування тригерів/ефектів, зміни схеми `Ability`, переклад `describe*` (це i18n part 6).
+Форма заклинань, рецепти/галерея, згортання секцій, таймлайн класів, перейменування тригерів/ефектів, зміни схеми `Ability`. Решта i18n part 6 (UI бою, crit-ефекти) теж поза обсягом; ability-описи з нього забираємо в цю гілку (див. крок 0).
 
 ## Дизайн
+
+### 0. `describe*` через ключі (передумова)
+
+Усі `describe*` у `lib/utils/abilities/registry/` (ефекти в `effects/*.ts`, `triggers.ts`, `limitsLabel` у `labels.ts`, опис умов) перестають повертати українські рядки й повертають `Segment = { key: string; params?: Record<string, string | number> }` (ключі в `abilityRegistry.json`, `summary.*`). Вкладені значення (назва стану, стат, ціль, тип шкоди) віддаються як ключі існуючих груп (`flags`, `stats`, `targets`, `conditionTypes`, `damageFilters`), а не як готовий текст, і розгортаються на межі. `randomOf` та інші складені ефекти містять вкладені `Segment[]`.
+
+- Переклад на межі: `renderSegment(t, segment)` (одна функція в `lib/i18n/`, поруч із `getTranslator`/`translateIssue`); у серверному коді перекладу немає, він віддає сегменти.
+- `describeAbility(a, t)` лишається для місць, що потребують рядка (AI-контекст, друк, `abilitySummary`-споживачі, що показують текст): збирає сегменти та перекладає.
+- ~60–80 нових ICU-повідомлень у `messages/{uk,en}/abilityRegistry.json`; існуючі `effects.*.label`, `flags`, `fields`, `conditionTypes` перевикористовуються.
+- Тести: параметризований по `EFFECT_REGISTRY`/`TRIGGER_REGISTRY` тест, що кожен вид має ключ у обох локалях і що `renderSegment` не лишає незаповнених `{param}`; наявні тести, що порівнюють рядки, переходять на сегменти або на перекладений рядок.
+- Каталог `lib/utils/abilities/**` після кроку потрапляє до `i18n-migrated.json` (ESLint забороняє кирилицю); частина part 6 про ability-описи вважається виконаною (оновити `docs/architecture/i18n.md` і `STATUS.md`).
 
 ### 1. Структурований підсумок
 
 `lib/utils/abilities/summary.ts` отримує чисту `summarizeAbility(a: Ability): AbilityFlowSummary`:
 
 ```ts
-interface AbilityFlowSummary { when: string[]; if: string[]; then: string[]; limits: string[] }
+interface AbilityFlowSummary { when: Segment[]; if: Segment[]; then: Segment[][]; limits: Segment[] }
 ```
 
-- `when` = `describeTrigger(a.trigger)`; `if` = опис `a.condition` (повторно використати describe з `registry/conditions.ts`, якщо його немає — додати поруч); `then` = `a.effects.map(describeEffect)`; `limits` = `limitsLabel(a.limits)`.
-- Нових i18n-ключів немає: структура береться групуванням наявних `describe*`, тож коли part 6 переведе їх, підсумок успадкує переклад. Це свідомо, щоб не конфліктувати з `feat/i18n-part6`.
-- `describeAbility` лишається (рядок для AI-контексту, друку, тестів) і збирається з `summarizeAbility`.
-- `abilitySummary(kind, row)` повертає `AbilityFlowSummary[]`; `withAbilitySummary` віддає їх у полі `abilitySummary`. Додаємо `flow`-структуру, старі споживачі `string[]` (`format-skills-response`, `info-reference`, `artifact-reference`, `sheet-handler`, `get-progression-handler`, `to-unit`, print/skills) переводяться на неї в тому ж PR. Типи — `types/abilities.ts`.
+- `when` = сегменти тригера; `if` = сегменти `a.condition`; `then` = по масиву сегментів на кожен ефект; `limits` = сегменти лімітів.
+- `abilitySummary(kind, row)` повертає `AbilityFlowSummary[]`; `withAbilitySummary` віддає їх у полі `abilitySummary`. Споживачі `string[]` (`format-skills-response`, `info-reference`, `artifact-reference`, `sheet-handler`, `get-progression-handler`, `to-unit`, print/skills) переходять на структуру в тому ж PR. Типи — `types/abilities.ts`.
 
 ### 2. `AbilityFlow` (`components/abilities/AbilityFlow.tsx`)
 
 - Чотири типи чипів: КОЛИ (синій), ЯКЩО (жовтий), ТОДІ (червоний), ЛІМІТ (сірий). Кольори — токени `--hud-*` у `app/globals.css` / HUD, спільні з секціями редактора.
-- Props: `summary: AbilityFlowSummary`, `variant: "editor" | "card"`, `onChipClick?: (part: "when" | "if" | "then" | "limits") => void`.
+- Перекладає сегменти через `renderSegment` (клієнтський `useTranslations`). Props: `summary: AbilityFlowSummary`, `variant: "editor" | "card"`, `onChipClick?: (part: "when" | "if" | "then" | "limits") => void`.
 - Порожній `if`/`limits` не рендеряться. Кілька ефектів — кілька ТОДІ-чипів. На вузьких екранах (<640px) чипи йдуть стовпчиком, стрілки ховаються.
 - `AbilitySummary` замінюється на `AbilityFlow variant="card"`; його споживачі: `SkillCard`, `UnitCard`, `ArtifactCard`, `ArtifactSetCard`, `ArtifactSetBonusDisplay`, `app/campaigns/[id]/info`, dm/artifact-sets. `AbilitySummary` видаляється, якщо споживачів не лишиться.
 
@@ -52,7 +60,7 @@ interface AbilityFlowSummary { when: string[]; if: string[]; then: string[]; lim
 ## Тести
 
 - Юніт `summarizeAbility`: по одному випадку на кожен вид тригера та ефекту (параметризовано по реєстрах, щоб новий запис без опису падав), порожні умова/ліміти, `randomOf`.
-- `describeAbility` дає той самий рядок, що й раніше (регресія).
+- `describeAbility(a, t)` в uk дає той самий рядок, що й раніше (регресія, golden-тест по шаблонах `templates`).
 - Компонент `AbilityFlow`: обидва варіанти, порожні частини, клік по чипу.
 - `AbilityPanel`: клік по чипу веде до секції; чип оновлюється при зміні тригера/ефекту.
 - Реєстр: кожен тригер має `group` і `hint` в обох локалях (тест на ключі, як у `i18n.md`).
@@ -61,5 +69,6 @@ interface AbilityFlowSummary { when: string[]; if: string[]; then: string[]; lim
 ## Ризики
 
 - Зміна форми `abilitySummary` зачіпає кеші (`info-reference`, `artifact-reference`): перевірити інвалідацію й розмір відповіді (egress).
-- Паралельна гілка `feat/i18n-part6` змінює ті самі `registry/*` і `messages/*/abilityRegistry.json`: перед мерджем зробити rebase на `main` з part 6.
+- Воркттрі `../dnd-tracker-t6` (`feat/i18n-part6`) на момент спеку чисте й на `main`, тобто part 6 не розпочато. Попередити в новій сесії part 6, що ability-описи вже тут; перед мерджем rebase на `main`.
+- Крок 0 найбільший за обсягом: ризик розбіжності uk-тексту з поточним. Захист: golden-тест на `describeAbility` у uk до й після.
 - `docs/architecture/abilities.md` і `docs/STATUS.md` оновити в кінці гілки; `whats-new` не потрібен, якщо змінюється лише вигляд існуючих екранів (вирішити в плані).
