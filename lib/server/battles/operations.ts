@@ -1,312 +1,288 @@
 import { API_ERRORS } from "@/lib/constants/api-errors";
 import { BattleStatus } from "@/lib/constants/battle";
 import { ContentError } from "@/lib/server/content/errors";
-import type { RunBattleMutationOptions } from "@/lib/utils/battle/pipeline/run-battle-mutation";
+import { BattleAccess, type RunBattleMutationOptions } from "@/lib/utils/battle/pipeline/run-battle-mutation";
 import { BattleAccessError } from "@/lib/utils/battle/store";
 
 export type BattleOperationParams = { id: string; battleId: string; participantId?: string };
 type Definition = Omit<RunBattleMutationOptions<unknown>, "params">;
+type Loader = (params: BattleOperationParams) => Promise<Definition>;
+type Loaded<T> = Pick<RunBattleMutationOptions<T>, "schema" | "mutate">;
+type Settings<T> = Omit<RunBattleMutationOptions<T>, "params" | "schema" | "mutate">;
 
-function define<T>(definition: Omit<RunBattleMutationOptions<T>, "params">): Definition { return definition as Definition; }
+function operation<T>({ load, ...settings }: Settings<T> & { load: (params: BattleOperationParams) => Promise<Loaded<T>> }): Loader {
+  return async (params) => ({ requireStatus: BattleStatus.ACTIVE, ...settings, ...(await load(params)) }) as Definition;
+}
 
-/** The HTTP and actor entry points consume these same schemas, guards and mutations. */
-export async function getBattleOperation(operation: string, params: BattleOperationParams): Promise<Definition> {
-  switch (operation) {
-    case "ability-action": {
+const { DM, MEMBER, CURRENT_CONTROLLER } = BattleAccess;
+
+const OPERATIONS: Record<string, Loader> = {
+  "ability-action": operation({
+    access: MEMBER,
+    blockedByMode: true,
+    rateLimitScope: "abilityAction",
+    respond: "wrapped",
+    load: async () => {
       const { abilityActionMutation, abilityActionSchema } = await import("@/lib/server/battles/mutations/ability-action/ability-action-mutation");
 
-      return define({
-        access: "member",
-        requireStatus: BattleStatus.ACTIVE,
-        blockedByMode: true,
-        rateLimitScope: "abilityAction",
-        schema: abilityActionSchema,
-        respond: "wrapped",
-        mutate: abilityActionMutation,
-      });
-    }
-    case "add-participant": {
+      return { schema: abilityActionSchema, mutate: abilityActionMutation };
+    },
+  }),
+  "add-participant": operation({
+    access: DM,
+    allowWhileAwaitingDm: true,
+    load: async () => {
       const { addParticipantSchema, createAddParticipantMutation } = await import("@/lib/server/battles/mutations/add-participant/add-participant-mutation");
 
-      const mutate = createAddParticipantMutation();
-
-      return define({
-        access: "dm",
-        requireStatus: BattleStatus.ACTIVE,
-        allowWhileAwaitingDm: true,
-        schema: addParticipantSchema,
-        mutate,
-      });
-    }
-    case "attack": {
+      return { schema: addParticipantSchema, mutate: createAddParticipantMutation() };
+    },
+  }),
+  attack: operation({
+    access: MEMBER,
+    blockedByMode: true,
+    rateLimitScope: "attack",
+    load: async () => {
       const { attackBodySchema, attackMutation } = await import("@/lib/server/battles/mutations/attack/attack-mutation");
 
-      return define({
-        access: "member",
-        requireStatus: BattleStatus.ACTIVE,
-        blockedByMode: true,
-        rateLimitScope: "attack",
-        schema: attackBodySchema,
-        mutate: attackMutation,
-      });
-    }
-    case "aura-zone": {
+      return { schema: attackBodySchema, mutate: attackMutation };
+    },
+  }),
+  "aura-zone": operation({
+    access: MEMBER,
+    blockedByMode: true,
+    rateLimitScope: "abilityAction",
+    respond: "wrapped",
+    load: async () => {
       const { auraZoneMutation, auraZoneSchema } = await import("@/lib/server/battles/mutations/aura-zone/aura-zone-mutation");
 
-      return define({
-        access: "member",
-        requireStatus: BattleStatus.ACTIVE,
-        blockedByMode: true,
-        rateLimitScope: "abilityAction",
-        schema: auraZoneSchema,
-        respond: "wrapped",
-        mutate: auraZoneMutation,
-      });
-    }
-    case "bonus-action": {
+      return { schema: auraZoneSchema, mutate: auraZoneMutation };
+    },
+  }),
+  "bonus-action": operation({
+    access: MEMBER,
+    blockedByMode: true,
+    rateLimitScope: "bonusAction",
+    respond: "wrapped",
+    load: async () => {
       const { bonusActionMutation, bonusActionSchema } = await import("@/lib/server/battles/mutations/bonus-action/bonus-action-mutation");
 
-      return define({
-        access: "member",
-        requireStatus: BattleStatus.ACTIVE,
-        blockedByMode: true,
-        rateLimitScope: "bonusAction",
-        schema: bonusActionSchema,
-        respond: "wrapped",
-        mutate: bonusActionMutation,
-      });
-    }
-    case "crit-choice": {
+      return { schema: bonusActionSchema, mutate: bonusActionMutation };
+    },
+  }),
+  "crit-choice": operation({
+    access: DM,
+    allowWhileAwaitingDm: true,
+    allowWhileCritPending: true,
+    respond: "wrapped",
+    load: async () => {
       const { critChoiceMutation } = await import("@/lib/server/battles/mutations/crit-choice/crit-choice-mutation");
 
       const { critChoiceSchema } = await import("@/lib/schemas");
 
-      return define({
-        access: "dm",
-        requireStatus: BattleStatus.ACTIVE,
-        allowWhileAwaitingDm: true,
-        allowWhileCritPending: true,
-        schema: critChoiceSchema,
-        respond: "wrapped",
-        mutate: critChoiceMutation,
-      });
-    }
-    case "complete": {
+      return { schema: critChoiceSchema, mutate: critChoiceMutation };
+    },
+  }),
+  complete: operation({
+    access: DM,
+    allowWhileAwaitingDm: true,
+    allowWhileCritPending: true,
+    load: async () => {
       const { completeBattleSchema, completeMutation } = await import("@/lib/server/battles/mutations/complete/complete-mutation");
 
-      return define({
-        access: "dm",
-        requireStatus: BattleStatus.ACTIVE,
-        allowWhileAwaitingDm: true,
-        allowWhileCritPending: true,
-        schema: completeBattleSchema,
-        mutate: completeMutation,
-      });
-    }
-    case "conditions": {
+      return { schema: completeBattleSchema, mutate: completeMutation };
+    },
+  }),
+  conditions: operation({
+    access: DM,
+    load: async () => {
       const { battleConditionsMutation, battleConditionsSchema } = await import("@/lib/server/battles/mutations/conditions/conditions-mutation");
 
-      return define({
-        access: "dm",
-        requireStatus: BattleStatus.ACTIVE,
-        schema: battleConditionsSchema,
-        mutate: battleConditionsMutation,
-      });
-    }
-    case "core-action": {
+      return { schema: battleConditionsSchema, mutate: battleConditionsMutation };
+    },
+  }),
+  "core-action": operation({
+    access: MEMBER,
+    blockedByMode: true,
+    load: async () => {
       const { coreActionMutation } = await import("@/lib/server/battles/mutations/core-action/core-action-mutation");
 
       const { legendaryMutation } = await import("@/lib/server/battles/mutations/core-action/legendary-mutation");
 
       const { coreActionRouteSchema } = await import("@/lib/utils/battle/actions/schema");
 
-      return define({
-        access: "member",
-        requireStatus: BattleStatus.ACTIVE,
-        blockedByMode: true,
-        schema: coreActionRouteSchema,
-        mutate: (ctx, body) => (body.action === "legendary" ? legendaryMutation(ctx, body) : coreActionMutation(ctx, body)),
-      });
-    }
-    case "map-terrain": {
+      return { schema: coreActionRouteSchema, mutate: (ctx, body) => (body.action === "legendary" ? legendaryMutation(ctx, body) : coreActionMutation(ctx, body)) };
+    },
+  }),
+  "map-terrain": operation({
+    access: DM,
+    rateLimitScope: "mapTerrain",
+    load: async () => {
       const { mapTerrainMutation, mapTerrainSchema } = await import("@/lib/server/battles/mutations/map-terrain/map-terrain-mutation");
 
-      return define({
-        access: "dm",
-        requireStatus: BattleStatus.ACTIVE,
-        rateLimitScope: "mapTerrain",
-        schema: mapTerrainSchema,
-        mutate: mapTerrainMutation,
-      });
-    }
-    case "map-weather": {
+      return { schema: mapTerrainSchema, mutate: mapTerrainMutation };
+    },
+  }),
+  "map-weather": operation({
+    access: DM,
+    rateLimitScope: "mapWeather",
+    load: async () => {
       const { mapWeatherMutation, mapWeatherSchema } = await import("@/lib/server/battles/mutations/map-weather/map-weather-mutation");
 
-      return define({
-        access: "dm",
-        requireStatus: BattleStatus.ACTIVE,
-        rateLimitScope: "mapWeather",
-        schema: mapWeatherSchema,
-        mutate: mapWeatherMutation,
-      });
-    }
-    case "maze": {
-      const { mazeActionSchema,mazeMutation } = await import("@/lib/server/battles/mutations/maze/maze-mutation");
+      return { schema: mapWeatherSchema, mutate: mapWeatherMutation };
+    },
+  }),
+  maze: operation({
+    access: DM,
+    rateLimitScope: "maze",
+    load: async () => {
+      const { mazeActionSchema, mazeMutation } = await import("@/lib/server/battles/mutations/maze/maze-mutation");
 
-      return define({
-        access: "dm",
-        requireStatus: BattleStatus.ACTIVE,
-        rateLimitScope: "maze",
-        schema: mazeActionSchema,
-        mutate: mazeMutation,
-      });
-    }
-    case "maze-mark": {
+      return { schema: mazeActionSchema, mutate: mazeMutation };
+    },
+  }),
+  "maze-mark": operation({
+    access: MEMBER,
+    blockedByMode: true,
+    rateLimitScope: "mazeMark",
+    load: async () => {
       const { mazeMarkMutation, mazeMarkSchema } = await import("@/lib/server/battles/mutations/maze-mark/maze-mark-mutation");
 
-      return define({
-        access: "member",
-        requireStatus: BattleStatus.ACTIVE,
-        blockedByMode: true,
-        rateLimitScope: "mazeMark",
-        schema: mazeMarkSchema,
-        mutate: mazeMarkMutation,
-      });
-    }
-    case "morale-check": {
+      return { schema: mazeMarkSchema, mutate: mazeMarkMutation };
+    },
+  }),
+  "morale-check": operation({
+    access: MEMBER,
+    blockedByMode: true,
+    allowWhileAwaitingDm: true,
+    respond: "wrapped",
+    load: async () => {
       const { moraleCheckMutation } = await import("@/lib/server/battles/mutations/morale-check/morale-check-mutation");
 
       const { moraleCheckSchema } = await import("@/lib/schemas");
 
-      return define({
-        access: "member",
-        requireStatus: BattleStatus.ACTIVE,
-        blockedByMode: true,
-        allowWhileAwaitingDm: true,
-        schema: moraleCheckSchema,
-        respond: "wrapped",
-        mutate: moraleCheckMutation,
-      });
-    }
-    case "move": {
+      return { schema: moraleCheckSchema, mutate: moraleCheckMutation };
+    },
+  }),
+  move: operation({
+    access: MEMBER,
+    rateLimitScope: "move",
+    respond: "wrapped",
+    load: async () => {
       const { moveMutation, moveSchema } = await import("@/lib/server/battles/mutations/move/move-mutation");
 
-      return define({
-        access: "member",
-        requireStatus: BattleStatus.ACTIVE,
-        rateLimitScope: "move",
-        schema: moveSchema,
-        respond: "wrapped",
-        mutate: moveMutation,
-      });
-    }
-    case "next-turn": {
+      return { schema: moveSchema, mutate: moveMutation };
+    },
+  }),
+  "next-turn": operation({
+    access: CURRENT_CONTROLLER,
+    rateLimitScope: "nextTurn",
+    load: async () => {
       const { nextTurnMutation } = await import("@/lib/server/battles/mutations/next-turn/next-turn-mutation");
 
-      return define({
-        access: "currentController",
-        requireStatus: BattleStatus.ACTIVE,
-        rateLimitScope: "nextTurn",
-        mutate: nextTurnMutation,
-      });
-    }
-    case "refresh-sources": {
+      return { mutate: nextTurnMutation };
+    },
+  }),
+  "refresh-sources": operation({
+    access: DM,
+    allowWhileAwaitingDm: true,
+    load: async () => {
       const { createRefreshSourcesMutation, refreshSourcesSchema } = await import("@/lib/server/battles/mutations/refresh-sources/refresh-sources-mutation");
 
-      const mutate = createRefreshSourcesMutation();
-
-      return define({
-        access: "dm",
-        requireStatus: BattleStatus.ACTIVE,
-        allowWhileAwaitingDm: true,
-        schema: refreshSourcesSchema,
-        mutate,
-      });
-    }
-    case "reset": {
+      return { schema: refreshSourcesSchema, mutate: createRefreshSourcesMutation() };
+    },
+  }),
+  reset: operation({
+    access: DM,
+    requireStatus: undefined,
+    allowWhileAwaitingDm: true,
+    allowWhileCritPending: true,
+    load: async () => {
       const { resetMutation } = await import("@/lib/server/battles/mutations/reset/reset-mutation");
 
-      return define({
-        access: "dm", allowWhileAwaitingDm: true, allowWhileCritPending: true, mutate: resetMutation });
-    }
-    case "reveal-participant": {
+      return { mutate: resetMutation };
+    },
+  }),
+  "reveal-participant": operation({
+    access: DM,
+    allowWhileAwaitingDm: true,
+    load: async () => {
       const { revealParticipantMutation, revealParticipantSchema } = await import("@/lib/server/battles/mutations/reveal-participant/reveal-participant-mutation");
 
-      return define({
-        access: "dm",
-        requireStatus: BattleStatus.ACTIVE,
-        allowWhileAwaitingDm: true,
-        schema: revealParticipantSchema,
-        mutate: revealParticipantMutation,
-      });
-    }
-    case "rollback": {
+      return { schema: revealParticipantSchema, mutate: revealParticipantMutation };
+    },
+  }),
+  rollback: operation({
+    access: DM,
+    requireStatus: undefined,
+    allowWhileAwaitingDm: true,
+    allowWhileCritPending: true,
+    load: async () => {
       const { createRollbackMutation, rollbackSchema } = await import("@/lib/server/battles/mutations/rollback/rollback-mutation");
 
-      const mutate = createRollbackMutation();
-
-      return define({
-        access: "dm", allowWhileAwaitingDm: true, allowWhileCritPending: true, schema: rollbackSchema, mutate });
-    }
-    case "scale-units": {
+      return { schema: rollbackSchema, mutate: createRollbackMutation() };
+    },
+  }),
+  "scale-units": operation({
+    access: DM,
+    rateLimitScope: "participantPatch",
+    load: async () => {
       const { scaleUnitsMutation, scaleUnitsSchema } = await import("@/lib/server/battles/mutations/scale-units/scale-units-mutation");
 
-      return define({
-        access: "dm",
-        requireStatus: BattleStatus.ACTIVE,
-        rateLimitScope: "participantPatch",
-        schema: scaleUnitsSchema,
-        mutate: scaleUnitsMutation,
-      });
-    }
-    case "spell": {
+      return { schema: scaleUnitsSchema, mutate: scaleUnitsMutation };
+    },
+  }),
+  spell: operation({
+    access: MEMBER,
+    blockedByMode: true,
+    rateLimitScope: "spell",
+    dryRun: (body) => body.preview === true,
+    load: async () => {
       const { spellSchema } = await import("@/lib/server/battles/mutations/spell/cast-spell-schema");
 
       const { createSpellMutation } = await import("@/lib/server/battles/mutations/spell/spell-mutation");
 
-      const mutate = createSpellMutation();
-
-      return define({
-        access: "member",
-        requireStatus: BattleStatus.ACTIVE,
-        blockedByMode: true,
-        rateLimitScope: "spell",
-        schema: spellSchema,
-        dryRun: (body) => body.preview === true,
-        mutate,
-      });
-    }
-    case "start": {
+      return { schema: spellSchema, mutate: createSpellMutation() };
+    },
+  }),
+  start: operation({
+    access: DM,
+    requireStatus: BattleStatus.PREPARED,
+    load: async () => {
       const { createStartMutation } = await import("@/lib/server/battles/mutations/start/start-mutation");
 
-      const mutate = createStartMutation();
-
-      return define({
-        access: "dm", requireStatus: BattleStatus.PREPARED, mutate });
-    }
-    case "unit-control": {
+      return { mutate: createStartMutation() };
+    },
+  }),
+  "unit-control": operation({
+    access: DM,
+    rateLimitScope: "participantPatch",
+    load: async () => {
       const { unitControlMutation, unitControlSchema } = await import("@/lib/server/battles/mutations/unit-control/unit-control-mutation");
 
-      return define({
-        access: "dm",
-        requireStatus: BattleStatus.ACTIVE,
-        rateLimitScope: "participantPatch",
-        schema: unitControlSchema,
-        mutate: unitControlMutation,
-      });
-    }
-    case "participants.patch": {
+      return { schema: unitControlSchema, mutate: unitControlMutation };
+    },
+  }),
+  "participants.patch": operation({
+    access: DM,
+    allowWhileAwaitingDm: true,
+    rateLimitScope: "participantPatch",
+    load: async ({ participantId }: BattleOperationParams) => {
       const { patchParticipantMutation } = await import("@/lib/server/battles/mutations/participants/patch-participant-mutation");
 
       const { patchParticipantSchema } = await import("@/lib/server/battles/mutations/participants/patch-participant-schema");
 
-      if (!params.participantId) throw new ContentError(API_ERRORS.BATTLE_PARTICIPANT_ID_REQUIRED, 400);
+      if (!participantId) throw new ContentError(API_ERRORS.BATTLE_PARTICIPANT_ID_REQUIRED, 400);
 
-      const participantId = params.participantId;
+      return { schema: patchParticipantSchema, mutate: (ctx, body) => patchParticipantMutation(ctx, participantId, body) };
+    },
+  }),
+};
 
-      return define({
-        access: "dm", requireStatus: BattleStatus.ACTIVE, allowWhileAwaitingDm: true, rateLimitScope: "participantPatch", schema: patchParticipantSchema, mutate: (ctx, body) => patchParticipantMutation(ctx, participantId, body) });
-    }
-    default: throw new BattleAccessError(404, API_ERRORS.BATTLE_UNKNOWN_OPERATION);
-  }
+/** The HTTP and actor entry points consume these same schemas, guards and mutations. */
+export async function getBattleOperation(name: string, params: BattleOperationParams): Promise<Definition> {
+  const load = Object.hasOwn(OPERATIONS, name) ? OPERATIONS[name] : undefined;
+
+  if (!load) throw new BattleAccessError(404, API_ERRORS.BATTLE_UNKNOWN_OPERATION);
+
+  return load(params);
 }
