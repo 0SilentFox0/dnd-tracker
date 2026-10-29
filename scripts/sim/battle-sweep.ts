@@ -605,6 +605,10 @@ async function castSpell(actor: any, spell: any) {
 
   const countBefore = P().length;
 
+  const mapOf = () => JSON.stringify([state.map?.terrain ?? null, state.map?.blocked ?? null]);
+
+  const mapBefore = mapOf();
+
   const saveRolls = (targets as string[]).map((id) => ({ participantId: id, roll: 1 }));
 
   const r = await call("spell", SPELL, { casterId: actor.basicInfo.id, spellId: spell.id, targetIds: targets, diceRolls, saveRolls });
@@ -619,9 +623,9 @@ async function castSpell(actor: any, spell: any) {
 
   const after = snap(watched);
 
-  const changed = [...before.keys()].some((id) => before.get(id) !== after.get(id)) || P().length !== countBefore;
+  const changed = [...before.keys()].some((id) => before.get(id) !== after.get(id)) || P().length !== countBefore || mapOf() !== mapBefore;
 
-  const onlyNote = (spell.spellEffects ?? []).every((e: any) => e.kind === "note");
+  const onlyNote = (spell.spellEffects ?? []).every((e: any) => e.kind === "note" || (e.kind === "createTerrain" && !state.map));
 
   if (changed || onlyNote) s.ok++; else { s.noEffect++; issue("warn", `${spell.name} (${actor.basicInfo.name}): каст пройшов, але жодних змін у цілей`); }
 
@@ -1705,9 +1709,11 @@ async function mazeCheck() {
 
   tcheck("Лабіринт: кроки до виходу (≤3 за хід)", !!step && step.status === 200 && (byId(hero.basicInfo.id).battleData.movementUsed ?? 0) <= 3, `${step?.status ?? "немає прогресу"} витрачено ${byId(hero.basicInfo.id).battleData.movementUsed}`);
 
+  const usedBeforeOver = byId(hero.basicInfo.id).battleData.movementUsed ?? 0;
+
   const over = await call("move", MOVE, { participantId: hero.basicInfo.id, to: neighbors(posOf(byId(hero.basicInfo.id)) as any).find((n) => canStep(mazeGrid(), wallSet(mazeGrid().maze), posOf(byId(hero.basicInfo.id)) as any, n) && !P().filter(onField).some((p) => cellKey(posOf(p) as any) === cellKey(n))) ?? { x: 0, y: 0 } });
 
-  if ((byId(hero.basicInfo.id).battleData.movementUsed ?? 0) >= 3 && state.currentTurnIndex !== undefined && current().basicInfo.id === hero.basicInfo.id) tcheck("Лабіринт: ліміт кроків вичерпано → 422", over.status === 422 && JSON.stringify(over.body).includes(MAZE_TEXTS.moveBlocked), `${over.status} ${JSON.stringify(over.body).slice(0, 120)}`);
+  if (usedBeforeOver >= 3 && state.currentTurnIndex !== undefined && current().basicInfo.id === hero.basicInfo.id) tcheck("Лабіринт: ліміт кроків вичерпано → 422", over.status === 422 && JSON.stringify(over.body).includes(MAZE_TEXTS.moveBlocked), `${over.status} ${JSON.stringify(over.body).slice(0, 120)}`);
 
   await untilTurnOf(isMazeAlly);
 
