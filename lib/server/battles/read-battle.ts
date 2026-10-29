@@ -42,13 +42,17 @@ export async function readBattleScene(params: BattleParams, deps: PipelineDeps =
 
     if (!userId) throw new BattleAccessError(401, API_ERRORS.UNAUTHORIZED);
 
-    const loaded = await deps.loadBattle({ battleId: params.battleId, campaignId: params.id, userId });
+    const run = async () => {
+      const loaded = await deps.loadBattle({ battleId: params.battleId, campaignId: params.id, userId });
 
-    if (!loaded) throw new BattleAccessError(404, API_ERRORS.NOT_FOUND);
+      if (!loaded) throw new BattleAccessError(404, API_ERRORS.NOT_FOUND);
 
-    if (!loaded.isMember) throw new BattleAccessError(403, API_ERRORS.FORBIDDEN);
+      if (!loaded.isMember) throw new BattleAccessError(403, API_ERRORS.FORBIDDEN);
 
-    return NextResponse.json(await readScenePreview(userId, loaded, { includeRecentEvents: BATTLE_LOG_RECENT_EVENTS, includeKnowledge: true }, deps));
+      return NextResponse.json(await readScenePreview(userId, loaded, { includeRecentEvents: BATTLE_LOG_RECENT_EVENTS, includeKnowledge: true }, deps));
+    };
+
+    return await (deps.withWrite ? deps.withWrite(params.id, run) : run());
   } catch (err) {
     return battleErrorResponse(err);
   }
