@@ -17,6 +17,7 @@ Details that used to live in `CLAUDE.md`. Read the file of the subsystem you are
 | [onboarding.md](onboarding.md) | First-steps checklists, hints, what's new, /help; progress derived from facts |
 | [notifications.md](notifications.md) | Сповіщення «нове»: таблиця, `notify*`, канал `private-notify-*`, тости й піли, retention |
 | [acquaintances.md](acquaintances.md) | Знайомства: NPC зі сценарію, видимість за «зіграно», журнал, нотатки, розкриття → сповіщення |
+| [platform.md](platform.md) | Auth session (`getClaims`), self-hosted fonts, Pusher, prefetched first HTML, egress, prodcopy battle-sweep |
 | [i18n.md](i18n.md) | Мультимовність uk/en: next-intl, потік мови, лендинг `/` і `/en`, ESLint-храповик, перенесення доменів |
 
 The folder-by-folder overview (in Ukrainian) is `ARCHITECTURE.md` in the repo root. When a subsystem changes, update its file here in the same branch.
