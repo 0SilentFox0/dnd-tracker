@@ -299,7 +299,8 @@
   "unarched": "No arc",
   "validation": {
     "duplicateIds": "Duplicate section or row ids",
-    "emptyChange": "Empty change"
+    "emptyChange": "Empty change",
+    "image": "Invalid image node"
   },
   "versions": {
     "empty": "No versions yet — they appear at most once per 10 minutes of editing.",

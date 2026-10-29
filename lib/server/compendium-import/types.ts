@@ -28,7 +28,7 @@ export interface AdaptedEntry {
 }
 export interface AdaptedCompendium { entries: AdaptedEntry[]; issues: ImportIssue[]; sources: JsonRecord[]; blocked?: Array<{ key?: string; path: string }>; embedded?: Record<string, number> }
 export interface AdaptOptions { excludedPaths?: readonly string[]; categories?: readonly string[]; sourceBindings?: Readonly<Record<string, string>> }
-export type Adapter = (row: JsonRecord, context: AdapterContext) => { kind: TargetKind; body: JsonRecord; refs?: CompendiumRef[]; notes?: string } | null;
+export type Adapter = (row: JsonRecord, context: AdapterContext) => { kind: TargetKind; body: JsonRecord; refs?: CompendiumRef[]; notes?: string; media?: MediaRef[] } | null;
 export interface AdapterContext {
   root: Compendium;
   inputKind: string;

@@ -2,7 +2,7 @@ import { API_ERRORS } from "@/lib/constants/api-errors";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { ensureBucket } from "@/lib/supabase/buckets";
 import { safeFetchBuffer, SafeFetchError, sniffImageMime } from "@/lib/utils/api/safe-fetch";
-import { parsePublicStorageUrl } from "@/lib/utils/common/image-url";
+import { isHostedOnProjectStorage } from "@/lib/utils/common/image-url";
 import type { Result } from "@/types/common";
 
 export type ImageTarget = {
@@ -18,6 +18,7 @@ type PersistOptions = ImageTarget & {
   objectBaseName?: string;
 };
 
+export { isHostedOnProjectStorage };
 export { YEAR_CACHE_SECONDS } from "@/lib/constants/storage";
 
 const MAX_BYTES = 5 * 1024 * 1024;
@@ -37,21 +38,6 @@ const EXTENSIONS: Record<string, string> = {
 const ALLOWED_MIME = new Set([...Object.keys(EXTENSIONS), "image/jpg"]);
 
 const FORMATS_ERROR = "Дозволені формати: PNG, JPEG, GIF, WebP";
-
-/** Вже на нашому Storage — не дзеркалимо повторно. */
-export function isHostedOnProjectStorage(url: string): boolean {
-  const base = process.env.NEXT_PUBLIC_SUPABASE_URL;
-
-  const parsed = base ? parsePublicStorageUrl(url)?.url : undefined;
-
-  if (!base || !parsed) return false;
-
-  try {
-    return parsed.protocol === "https:" && parsed.host === new URL(base).host;
-  } catch {
-    return false;
-  }
-}
 
 function shouldMirror(url: string): boolean {
   return (url.startsWith("http://") || url.startsWith("https://")) && !isHostedOnProjectStorage(url);

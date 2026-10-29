@@ -1,7 +1,10 @@
 import { array, object, str } from "../adapters/shared";
 import type { Compendium, JsonRecord } from "../parse";
 import type { TargetKind } from "../types";
-import { MEDIA_LIMITS, type MediaReason, type MediaRef, type MediaRole } from "./types";
+import { MEDIA_LIMITS, type MediaRef, type MediaRole } from "./types";
+import { normalizeMediaUrl } from "./url";
+
+export { normalizeMediaUrl };
 
 const FIELD_OF: Partial<Record<TargetKind, "avatar" | "icon">> = {
   units: "avatar",
@@ -12,34 +15,6 @@ const FIELD_OF: Partial<Record<TargetKind, "avatar" | "icon">> = {
   feats: "icon",
   backgrounds: "icon",
 };
-
-export function normalizeMediaUrl(href: unknown): { url: string } | { reason: MediaReason } {
-  let raw = href;
-
-  if (href !== null && typeof href === "object") {
-    const record = object(href);
-
-    if (record.type === "internal") return { reason: "MEDIA_INTERNAL_PATH" };
-
-    raw = record.url;
-  }
-
-  if (typeof raw !== "string" || raw.length === 0 || raw.length > MEDIA_LIMITS.urlLength) return { reason: "MEDIA_INVALID_URL" };
-
-  let parsed: URL;
-
-  try {
-    parsed = new URL(raw.trim());
-  } catch {
-    return { reason: "MEDIA_INVALID_URL" };
-  }
-
-  if (parsed.protocol !== "https:") return { reason: "MEDIA_HTTPS_ONLY" };
-
-  if (parsed.href.length > MEDIA_LIMITS.urlLength) return { reason: "MEDIA_INVALID_URL" };
-
-  return { url: parsed.href };
-}
 
 const imagesOf = (fluff: unknown): unknown[] => array(object(fluff).images).map((image) => object(image).href).filter((href) => href !== undefined);
 

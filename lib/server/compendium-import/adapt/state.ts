@@ -112,7 +112,7 @@ export function addEntry(state: AdaptState, kind: string, row: JsonRecord, path:
 
   const entry: AdaptedEntry = { key, inputPath: path, inputKind: kind, name, source, edition, body: result.body, refs: result.refs ?? [], notes: result.notes ?? "", kind: result.kind, issues: local, attribution };
 
-  const media = collectEntryMedia(result.kind, kind, row, root, path, parent.length > 0);
+  const media = [...collectEntryMedia(result.kind, kind, row, root, path, parent.length > 0), ...(result.media ?? [])];
 
   if (media.length > 0) entry.media = media;
 
