@@ -113,7 +113,19 @@ export const prismaMediaRepository: MediaRepository = {
         }
       }
 
-      const items = media.items.filter((item) => item.status === "pending" && (item.leaseUntil ?? 0) < opts.now).slice(0, opts.max);
+      const due = media.items.filter((item) => item.status === "pending" && (item.leaseUntil ?? 0) < opts.now);
+
+      let exhausted = false;
+
+      for (const item of due) if (item.attempts >= MEDIA_LIMITS.maxAttempts) {
+        exhausted = true;
+        item.status = "failed";
+        item.reason = "MEDIA_FETCH_FAILED";
+        item.retryable = false;
+        delete item.leaseUntil;
+      }
+
+      const items = due.filter((item) => item.status === "pending").slice(0, opts.max);
 
       for (const item of items) {
         item.leaseUntil = opts.now + opts.leaseMs;
@@ -123,16 +135,19 @@ export const prismaMediaRepository: MediaRepository = {
       const known = new Map<string, string>();
 
       if (items.length) {
-        const wanted = new Set(items.map((i) => i.url));
+        const urls = [...new Set(items.map((i) => i.url))];
 
-        const runs = await tx.compendiumImportRun.findMany({ where: { campaignId: actor.campaignId }, orderBy: { createdAt: "desc" }, take: MEDIA_LIMITS.knownRuns, select: { report: true } });
+        const rows = await tx.$queryRaw<Array<{ url: string; storedUrl: string }>>`
+          SELECT DISTINCT ON (m->>'url') m->>'url' AS "url", m->>'storedUrl' AS "storedUrl"
+          FROM (
+            SELECT report FROM compendium_import_runs WHERE "campaignId" = ${actor.campaignId} ORDER BY "createdAt" DESC LIMIT ${MEDIA_LIMITS.knownRuns}
+          ) r, jsonb_array_elements(COALESCE(r.report->'media'->'items', '[]'::jsonb)) m
+          WHERE m->>'status' = 'saved' AND m->>'storedUrl' IS NOT NULL AND m->>'url' = ANY(${urls})`;
 
-        for (const run of runs) for (const item of mediaOf(run.report as unknown as Report).items) {
-          if (item.status === "saved" && item.storedUrl && wanted.has(item.url)) known.set(item.url, item.storedUrl);
-        }
+        for (const row of rows) known.set(row.url, row.storedUrl);
       }
 
-      if (items.length || opts.retryFailed) await saveReport(tx, runId, report, media);
+      if (items.length || exhausted || opts.retryFailed) await saveReport(tx, runId, report, media);
 
       return { items: structuredClone(items), known };
     });

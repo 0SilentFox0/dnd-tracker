@@ -14,9 +14,9 @@ const MEDIA_ID = /^[a-f0-9]{24}$/;
 const imageAttrsOk = (attrs: Record<string, unknown> | undefined) => {
   const { mediaId, src, alt, caption } = attrs ?? {};
 
-  const short = (v: unknown) => v === undefined || (typeof v === "string" && v.length <= 300);
+  const short = (v: unknown) => v == null || (typeof v === "string" && v.length <= 300);
 
-  return typeof mediaId === "string" && MEDIA_ID.test(mediaId) && (src === undefined || (typeof src === "string" && isHostedOnProjectStorage(src))) && short(alt) && short(caption);
+  return typeof mediaId === "string" && MEDIA_ID.test(mediaId) && (src == null || (typeof src === "string" && isHostedOnProjectStorage(src))) && short(alt) && short(caption);
 };
 
 export const richNodeSchema: z.ZodType<RichNode> = z.lazy(() =>

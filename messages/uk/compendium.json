@@ -167,7 +167,7 @@
   "categoriesStep": {
     "title": "Категорії · матеріали ДМ оберіть явно",
     "row": "{label} ({count})",
-    "unsupported": "не підтримується; пропущено, зображення/Foundry не завантажуються",
+    "unsupported": "не підтримується; пропущено, дані Foundry не завантажуються",
     "chapters": "Обрати розділи матеріалів ДМ",
     "chapterDefault": "Розділ {n}",
     "sources": "Джерела та явні зіставлення source",
@@ -181,7 +181,7 @@
     "all": "Усе",
     "none": "Нічого",
     "recommended": "Рекомендоване",
-    "skippedTechnical": "Пропущено: {count} технічних категорій (зображення/Foundry не завантажуються)",
+    "skippedTechnical": "Пропущено: {count} технічних категорій (дані Foundry не завантажуються)",
     "summary": "Обрано {categories} категорій, ≈{records} записів",
     "groups": {
       "rules": "Правила й стани",
@@ -218,6 +218,7 @@
   "report": {
     "ariaLabel": "Звіт імпорту",
     "canImport": "Можна імпортувати",
+    "imported": "Імпортовано",
     "blocked": "Імпорт заблоковано",
     "playReady": "Готовність до гри підтверджена",
     "manualNeeded": "Потрібні ручні дії до гри",
@@ -268,7 +269,7 @@
     "colMappedShort": "Перен.",
     "colPartialShort": "Частк.",
     "colSkippedShort": "Проп.",
-    "technical": "Технічні категорії ({count}): пропущено, зображення/Foundry не завантажуються",
+    "technical": "Технічні категорії ({count}): пропущено, дані Foundry не завантажуються",
     "records": "Записи",
     "noRows": "Немає записів за цим фільтром.",
     "showUnchanged": "{count} без змін — показати"

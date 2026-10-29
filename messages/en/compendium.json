@@ -167,7 +167,7 @@
   "categoriesStep": {
     "title": "Categories · pick DM materials explicitly",
     "row": "{label} ({count})",
-    "unsupported": "not supported; skipped, images/Foundry are not loaded",
+    "unsupported": "not supported; skipped, Foundry data is not loaded",
     "chapters": "Choose DM material chapters",
     "chapterDefault": "Chapter {n}",
     "sources": "Sources and explicit source bindings",
@@ -181,7 +181,7 @@
     "all": "All",
     "none": "None",
     "recommended": "Recommended",
-    "skippedTechnical": "Skipped: {count} technical categories (images/Foundry are not loaded)",
+    "skippedTechnical": "Skipped: {count} technical categories (Foundry data is not loaded)",
     "summary": "Selected {categories} categories, ≈{records} records",
     "groups": {
       "rules": "Rules and conditions",
@@ -218,6 +218,7 @@
   "report": {
     "ariaLabel": "Import report",
     "canImport": "Ready to import",
+    "imported": "Imported",
     "blocked": "Import is blocked",
     "playReady": "Play readiness confirmed",
     "manualNeeded": "Manual steps are needed before play",
@@ -268,7 +269,7 @@
     "colMappedShort": "Map.",
     "colPartialShort": "Part.",
     "colSkippedShort": "Skip.",
-    "technical": "Technical categories ({count}): skipped, images/Foundry are not loaded",
+    "technical": "Technical categories ({count}): skipped, Foundry data is not loaded",
     "records": "Records",
     "noRows": "No records for this filter.",
     "showUnchanged": "{count} unchanged — show"

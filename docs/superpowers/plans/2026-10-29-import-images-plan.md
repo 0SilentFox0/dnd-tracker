@@ -24,7 +24,7 @@ Worktree `../dnd-tracker-images`, гілка `feat/import-images`. Викона�
 export type MediaRole = "avatar" | "icon" | "inline";
 export type MediaReason = /* повний список зі спеки §6 */;
 export interface MediaRef { url: string; role: MediaRole; path: string; mediaId?: string; alt?: string; skip?: MediaReason }
-export const MEDIA_LIMITS = { perImport: 1000, bytes: 1024 * 1024, urlLength: 1024, batch: 30, concurrency: 6, deadlineMs: 40_000, leaseMs: 90_000, maxAttempts: 3, knownRuns: 50, failuresShown: 100 } as const;
+export const MEDIA_LIMITS = { perImport: 1000, bytes: 1024 * 1024, urlLength: 1024, batch: 30, concurrency: 6, deadlineMs: 25_000, leaseMs: 90_000, maxAttempts: 3, knownRuns: 50, failuresShown: 100 } as const;
 export const mediaIdOf = (url: string) => sha256(url).slice(0, 24);
 
 // media/collect.ts

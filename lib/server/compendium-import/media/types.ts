@@ -30,6 +30,6 @@ export interface MediaQueueState { version: 1; items: MediaItem[]; skipped: Part
 
 export const emptyMediaState = (): MediaQueueState => ({ version: 1, items: [], skipped: {} });
 
-export const MEDIA_LIMITS = { perImport: 1000, bytes: 1024 * 1024, urlLength: 1024, batch: 30, concurrency: 6, deadlineMs: 40_000, leaseMs: 90_000, maxAttempts: 3, knownRuns: 50, failuresShown: 100 } as const;
+export const MEDIA_LIMITS = { perImport: 1000, bytes: 1024 * 1024, urlLength: 1024, batch: 30, concurrency: 6, deadlineMs: 25_000, leaseMs: 90_000, maxAttempts: 3, knownRuns: 50, failuresShown: 100 } as const;
 
 export const mediaIdOf = (url: string): string => createHash("sha256").update(url).digest("hex").slice(0, 24);

@@ -92,6 +92,11 @@ describe("image node", () => {
     expect(withImage({ mediaId, caption: "x".repeat(301) })).toBe(false);
   });
 
+  it("treats null src/alt/caption (tiptap getJSON) as absent", () => {
+    expect(withImage({ mediaId, src: null, alt: null, caption: null })).toBe(true);
+    expect(withImage({ mediaId, src: "https://evil.example/x.png", alt: null })).toBe(false);
+  });
+
   it("rejects a foreign src host and accepts project storage", () => {
     const base = process.env.NEXT_PUBLIC_SUPABASE_URL;
 

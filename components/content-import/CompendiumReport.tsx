@@ -119,7 +119,7 @@ export function CompendiumReport({ campaignId, report, committed = false, blocke
   return <section className="space-y-4 break-words text-sm" aria-label={t("report.ariaLabel")}>
     <div className="space-y-3 rounded-xl border border-hud-line p-3">
       <div className="flex flex-wrap items-baseline gap-x-4 gap-y-1">
-        <p className={`text-base font-semibold ${report.readyToImport ? "text-hud-good" : "text-hud-bad"}`}>{t(report.readyToImport ? "report.canImport" : "report.blocked")}</p>
+        <p className={`text-base font-semibold ${report.readyToImport ? "text-hud-good" : "text-hud-bad"}`}>{t(report.readyToImport ? (committed ? "report.imported" : "report.canImport") : "report.blocked")}</p>
         <p className="text-hud-muted">{t(report.readyToPlay ? "report.playReady" : "report.manualNeeded")}</p>
       </div>
       <Counts counts={report.counts} />
