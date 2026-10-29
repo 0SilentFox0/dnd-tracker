@@ -110,6 +110,8 @@ function OpView({ op, campaignId }: { op: Op; campaignId: string }) {
     );
   }
 
+  if (op.op === "createAcquaintance") return <p className="text-sm">{t("proposal.newAcquaintance", { name: op.name })}</p>;
+
   return (
     <p className="text-sm">{t("proposal.rename", { from: op.before.title, to: op.title })}</p>
   );

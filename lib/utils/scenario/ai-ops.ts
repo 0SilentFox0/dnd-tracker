@@ -29,6 +29,13 @@ export function resolveAiOps(content: ScenarioContent, inputs: ScenarioAiOpInput
       continue;
     }
 
+    if (input.op === "createAcquaintance") {
+      ops.push({ op: "createAcquaintance", ref: input.ref, name: input.name, description: input.description ?? "" });
+      continue;
+    }
+
+    if (input.op === "linkMentions") return fail("notImplemented", { op: input.op });
+
     const section = findSection(content, input.sectionId);
 
     if (!section) return fail("sectionMissing", { id: input.sectionId });
@@ -92,6 +99,8 @@ function applyOne(c: ScenarioContent, op: ScenarioAiOp): ScenarioContent | null 
 
     return sections && { ...c, sections };
   }
+
+  if (op.op === "createAcquaintance") return c;
 
   const section = findSection(c, op.sectionId);
 

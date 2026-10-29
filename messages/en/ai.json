@@ -130,6 +130,7 @@
     "newDeck": "A new deck for the scene",
     "newRow": "New row",
     "newSection": "New section “{title}”",
+    "newAcquaintance": "New micro NPC: {name}",
     "target": "Target: page {pageId}. Applied only after human confirmation.",
     "stale": "The fragment changed after the proposal",
     "status": {

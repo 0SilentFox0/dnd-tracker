@@ -102,6 +102,20 @@ describe("resolveAiOps", () => {
   });
 });
 
+describe("resolveAiOps createAcquaintance", () => {
+  it("зберігає ref, ім'я та порожній опис за замовчуванням", () => {
+    const { ops } = ok(resolveAiOps(content(), [{ op: "createAcquaintance", ref: "b", name: "Беатріс" }]));
+
+    expect(ops).toEqual([{ op: "createAcquaintance", ref: "b", name: "Беатріс", description: "" }]);
+  });
+
+  it("applyAiOps не змінює сценарій для createAcquaintance", () => {
+    const c = content();
+
+    expect(applyAiOps(c, [{ op: "createAcquaintance", ref: "b", name: "Беатріс", description: "" }])).toEqual({ ok: true, content: c });
+  });
+});
+
 describe("applyAiOps", () => {
   it("застосовує всі чотири операції в правильні місця", () => {
     const { ops } = ok(resolveAiOps(content(), [
