@@ -2,7 +2,7 @@ import { findParticipant, mergeParticipants, withSelf } from "@/lib/utils/abilit
 import { resolveTargetIds } from "@/lib/utils/abilities/engine/core/targets";
 import { HIDDEN_MARKER } from "@/lib/utils/battle/actions/effects";
 import { type ActionFlow, fire, getP } from "@/lib/utils/battle/common/action-flow";
-import { beginConcentration, castIdFor, tagConcentration } from "@/lib/utils/battle/concentration";
+import { beginConcentration, tagConcentration, uniqueCastId } from "@/lib/utils/battle/concentration";
 import { removeEffects } from "@/lib/utils/battle/conditions/query";
 import { runAutoReactions } from "@/lib/utils/battle/spell/auto-reaction";
 import { applyAnchoredZones } from "@/lib/utils/battle/spell/cast/anchored-zone";
@@ -107,7 +107,7 @@ export function castSpell(params: CastSpellParams): CastSpellResult {
 
   const concentrates = !!params.rules?.concentration.enabled && def.concentration === true;
 
-  const castId = castIdFor(casterId, spell.id, currentRound, flow.messages.length);
+  const castId = uniqueCastId(flow.ps, params.map, casterId, spell.id, currentRound);
 
   const tag = concentrates ? { casterId, castId } : undefined;
 

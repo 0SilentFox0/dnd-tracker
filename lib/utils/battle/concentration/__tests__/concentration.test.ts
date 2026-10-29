@@ -3,7 +3,7 @@ import { describe, expect, it } from "vitest";
 import { CombatStatus, ParticipantSide, ParticipantSourceType } from "@/lib/constants/battle";
 import { makeEffect, makeParticipant, seq } from "@/lib/utils/abilities/__tests__/fixtures";
 import type { Effect } from "@/lib/utils/abilities/schema";
-import { beginConcentration, concentrationCheck, dropConcentration, dropOrphanedConcentration, isZoneConcentrationLive } from "@/lib/utils/battle/concentration";
+import { beginConcentration, concentrationCheck, dropConcentration, dropOrphanedConcentration, isZoneConcentrationLive, uniqueCastId } from "@/lib/utils/battle/concentration";
 import { applyCondition5e } from "@/lib/utils/battle/conditions";
 import { removeEffects } from "@/lib/utils/battle/conditions/query";
 import { applyDamageConsequences } from "@/lib/utils/battle/damage/consequences";
@@ -312,5 +312,41 @@ describe("review fixes", () => {
     expect(r.participants.find((p) => p.basicInfo.id === "c")?.combatStats.status).toBe(CombatStatus.DEAD);
     expect(effectsOf(r.participants, "c").some((e) => e.concentration)).toBe(false);
     expect(effectsOf(r.participants, "e1")).toEqual([]);
+  });
+});
+
+describe("uniqueCastId", () => {
+  const base = "c:sp@1#";
+
+  it("вільний id — #0", () => {
+    expect(uniqueCastId([caster()], null, "c", "sp", 1)).toBe(`${base}0`);
+  });
+
+  it("зайняті ефектом, грантом, предметом чи зоною — наступний seq", () => {
+    const c = caster();
+
+    const withEffect = [{ ...c, battleData: { ...c.battleData, activeEffects: [makeEffect("x", { concentrationOf: { casterId: "c", castId: `${base}0` } })] } }];
+
+    expect(uniqueCastId(withEffect, null, "c", "sp", 1)).toBe(`${base}1`);
+
+    const withGrant = [{ ...c, spellcasting: { ...c.spellcasting, grants: [{ spellId: "sp", key: `cast:${base}0:0`, cost: 0 }] } }];
+
+    expect(uniqueCastId(withGrant, null, "c", "sp", 1)).toBe(`${base}1`);
+
+    const withObject = [c, makeParticipant({ id: `inline:${base}0:1` }), makeParticipant({ id: `inline:${base}1:1` })];
+
+    expect(uniqueCastId(withObject, null, "c", "sp", 1)).toBe(`${base}2`);
+
+    const map = { spellZones: { [`${base}0@1`]: {} } } as unknown as BattleMapConfig;
+
+    expect(uniqueCastId([c], map, "c", "sp", 1)).toBe(`${base}1`);
+  });
+
+  it("інший раунд чи заклинання не заважає", () => {
+    const c = caster();
+
+    const ps = [{ ...c, battleData: { ...c.battleData, activeEffects: [makeEffect("x", { concentrationOf: { casterId: "c", castId: "c:sp@2#0" } })] } }];
+
+    expect(uniqueCastId(ps, null, "c", "sp", 1)).toBe(`${base}0`);
   });
 });
