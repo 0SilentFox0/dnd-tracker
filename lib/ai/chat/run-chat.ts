@@ -31,7 +31,17 @@ type Caller = ReturnType<typeof chatCaller>;
 
 interface RunState { usage: NonNullable<AiMessageMetadata["usage"]>; error: string | undefined; completedSteps: number }
 
-interface StreamScope { args: RunChatArgs; thread: Thread; caller: Caller; t: Awaited<ReturnType<typeof getTranslator>>; runId: string; toolSignal: AbortSignal; cancellation: AbortController; state: RunState; dispose: () => void }
+interface StreamScope {
+  args: RunChatArgs;
+  thread: Thread;
+  caller: Caller;
+  t: Awaited<ReturnType<typeof getTranslator>>;
+  runId: string;
+  toolSignal: AbortSignal;
+  cancellation: AbortController;
+  state: RunState;
+  dispose: () => void;
+}
 
 async function claimRun(caller: Caller, { requestId, text, focus, sessionContext }: RunChatArgs) {
   try {
