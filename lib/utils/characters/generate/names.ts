@@ -1,28 +1,17 @@
+import { GENERIC_EN, NAME_TABLES_EN } from "./names.en";
+import { GENERIC_UK, NAME_TABLES_UK } from "./names.uk";
 import { pick } from "./rng";
 
-interface NameTable {
-  match: RegExp;
-  first: string[];
-  second: string[];
-}
+import type { Locale } from "@/lib/i18n/config";
 
-const NAME_TABLES: NameTable[] = [
-  { match: /орк|стронгхолд/i, first: ["Гра", "Ур", "Тор", "Маг", "Зуг", "Кра"], second: ["ш", "ак", "гол", "руг", "нар", "зог"] },
-  { match: /темн.*ельф|ельф.*темн|підзем|дандж/i, first: ["Ліс", "Равен", "Шад", "Мал", "Зір", "Нів"], second: ["ендра", "ара", "ікс", "ірель", "аврін", "ітра"] },
-  { match: /ельф|ельв|сильван/i, first: ["Ел", "Ліра", "Ен", "Фа", "Сі", "Тал"], second: ["раніль", "дір", "ваель", "морін", "ілас", "енділ"] },
-  { match: /гном|дварф|фортрес/i, first: ["Бру", "Тор", "Дур", "Гім", "Кра", "Бал"], second: ["нгар", "ін", "рік", "дум", "бор", "гальм"] },
-  { match: /нежит|некро|мертв/i, first: ["Мор", "Аз", "Вор", "Нек", "Мал", "Гра"], second: ["тагор", "рахіль", "дрет", "ус", "ахар", "забет"] },
-  { match: /демон|інферн|пекл/i, first: ["Мал", "Заг", "Бал", "Аз", "Кер", "Вар"], second: ["ґар", "мок", "ізар", "зул", "рат", "акс"] },
-  { match: /маг|академ|чарод/i, first: ["Ра", "Зе", "Сол", "Ніка", "Ота", "Дан"], second: ["зіель", "хір", "мір", "рен", "ліас", "бар"] },
-  { match: /люд|лицар|орден|хейвен/i, first: ["Годр", "Ален", "Ізабел", "Річ", "Вільм", "Мар"], second: ["ік", "ард", "ла", "ен", "ін", "ус"] },
-];
-
-const GENERIC: NameTable = { match: /./, first: ["Ар", "Бель", "Дор", "Кал", "Вен", "Тар"], second: ["ион", "ан", "ек", "ора", "ис", "ген"] };
+const TABLES = { uk: { tables: NAME_TABLES_UK, generic: GENERIC_UK }, en: { tables: NAME_TABLES_EN, generic: GENERIC_EN } };
 
 const capitalize = (s: string) => s.charAt(0).toUpperCase() + s.slice(1);
 
-export function generateName(raceName: string, rng: () => number): string {
-  const table = NAME_TABLES.find((t) => t.match.test(raceName)) ?? GENERIC;
+export function generateName(raceName: string, rng: () => number, locale: Locale = "uk"): string {
+  const { tables, generic } = TABLES[locale];
+
+  const table = tables.find((t) => t.match.test(raceName)) ?? generic;
 
   return capitalize(pick(rng, table.first) + pick(rng, table.second));
 }
