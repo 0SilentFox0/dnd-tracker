@@ -3,13 +3,13 @@ import type { Prisma } from "@prisma/client";
 import type { z } from "zod";
 
 import { requireCharacterRecord } from "../access";
-import { characterHandler, defineCharacterOperation, errorStatusMessage, gateOptions, orThrow } from "../operation-runner";
+import { characterHandler, defineCharacterOperation, errorStatusMessage, gateOptions } from "../operation-runner";
 
 import { API_ERRORS } from "@/lib/constants/api-errors";
 import { CharacterStatus } from "@/lib/constants/characters";
 import { prisma } from "@/lib/db";
 import { applyClasses } from "@/lib/server/characters/apply-classes";
-import { rejectIfInActiveBattle } from "@/lib/server/characters/battle-lock";
+import { assertNotInActiveBattle } from "@/lib/server/characters/battle-lock";
 import { type ChoiceFields,resolveCharacterChoices } from "@/lib/server/characters/choices/resolve-choices";
 import { buildCharacterUpdateData, resolveFinalLevel, tableSlots } from "@/lib/server/characters/core/build-character-update-data";
 import { loadRaceProgression } from "@/lib/server/characters/core/load-race-progression";
@@ -197,7 +197,7 @@ async function patchCore(gate: Gate, parsed: Parsed) {
   const changesBackground = data.backgroundId !== undefined || data.backgroundChoices !== undefined || data.backgroundFeatPicks !== undefined;
 
   if (changesBackground) {
-    await orThrow(rejectIfInActiveBattle(campaignId, [characterId]));
+    await assertNotInActiveBattle(campaignId, [characterId]);
   }
 
   const writeUpdate = updateWriter({ character, data, avatar: avatar.avatar, resolved, computedState });

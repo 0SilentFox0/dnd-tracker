@@ -7,8 +7,9 @@ import { type CampaignScope, characterHandler, defineCharacterOperation, memberS
 import { API_ERRORS } from "@/lib/constants/api-errors";
 import { CharacterStatus } from "@/lib/constants/characters";
 import { prisma } from "@/lib/db";
-import { ensureInventory, lockCampaignArtifacts } from "@/lib/server/artifacts/lock";
-import { rejectIfInActiveBattle } from "@/lib/server/characters/battle-lock";
+import { ensureInventory } from "@/lib/server/artifacts/inventory";
+import { lockCampaignArtifacts } from "@/lib/server/artifacts/lock";
+import { assertNotInActiveBattle } from "@/lib/server/characters/battle-lock";
 import { buildStashView, STASH_ROW_SELECT } from "@/lib/server/characters/core/read-stash";
 import { stashActionSchema } from "@/lib/server/characters/core/stash-schema";
 import { ContentError } from "@/lib/server/content/errors";
@@ -185,7 +186,7 @@ async function applyStashCore({ access, campaignId, characterId }: CampaignScope
   if (isAttuneAction(data)) {
     if (!rules.items.enabled) throw new ContentError(API_ERRORS.ITEMS_DISABLED, 409);
 
-    await orThrow(rejectIfInActiveBattle(campaignId, [characterId]));
+    await assertNotInActiveBattle(campaignId, [characterId]);
   }
 
   return prisma.$transaction(async (tx) => {

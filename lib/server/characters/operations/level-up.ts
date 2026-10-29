@@ -7,7 +7,7 @@ import { characterRoute, defineCharacterOperation, dmCharacterGate, orThrow } fr
 import { API_ERRORS } from "@/lib/constants/api-errors";
 import { CharacterLogKind } from "@/lib/constants/character-log";
 import { prisma } from "@/lib/db";
-import { rejectIfInActiveBattle } from "@/lib/server/characters/battle-lock";
+import { assertNotInActiveBattle } from "@/lib/server/characters/battle-lock";
 import { loadChoiceRefs } from "@/lib/server/characters/choices/load-refs";
 import { characterClassMode, resolveCharacterChoices } from "@/lib/server/characters/choices/resolve-choices";
 import { classLevelUp, LevelUpBodySchema, type LevelUpPick, readLevelUpPick } from "@/lib/server/characters/class-level-up";
@@ -37,7 +37,7 @@ async function levelUpCore({ access, character }: Gate, pick: LevelUpPick) {
   if (classResult) {
     const withChoices = hasPicks(pick.choices);
 
-    if (withChoices) await orThrow(rejectIfInActiveBattle(id, [characterId]));
+    if (withChoices) await assertNotInActiveBattle(id, [characterId]);
 
     const refs = withChoices ? await loadChoiceRefs(id, character.race, { classMode: characterClassMode(campaign.rules, classResult.classes), backgroundIds: [choicesStateOf(character).backgroundId] }) : undefined;
 
