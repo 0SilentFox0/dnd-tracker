@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useTranslations } from "next-intl";
 import { Settings } from "lucide-react";
 
 import { CampaignSettingsDialog } from "@/components/campaigns/settings/CampaignSettingsDialog";
@@ -14,6 +15,8 @@ interface CampaignSettingsButtonProps {
 }
 
 export function CampaignSettingsButton({ campaignId, campaign, meta }: CampaignSettingsButtonProps) {
+  const t = useTranslations("campaigns");
+
   const [open, setOpen] = useState(false);
 
   const [openCount, setOpenCount] = useState(0);
@@ -25,7 +28,7 @@ export function CampaignSettingsButton({ campaignId, campaign, meta }: CampaignS
           setOpen(true);
         }}>
         <Settings className="h-4 w-4" />
-        <span className="sr-only">Редагувати налаштування</span>
+        <span className="sr-only">{t("settings.open")}</span>
       </Button>
       {/* Remount per opening so the form starts from the saved values. */}
       <CampaignSettingsDialog key={openCount} campaignId={campaignId} campaign={campaign} meta={meta} open={open} onOpenChange={setOpen} />

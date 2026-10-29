@@ -1,12 +1,12 @@
 "use client";
 
 import { useState } from "react";
+import { useTranslations } from "next-intl";
 
 import { ImportDialog } from "@/components/common/ImportDialog";
 import { HudSection } from "@/components/hud/form";
 import { SelectField, type SelectOptionGroup } from "@/components/ui/select-field";
 import { useBundleFilePicker, useTemplates } from "@/lib/hooks/campaigns";
-import { pluralUk } from "@/lib/utils/common/plural";
 import type { TemplateCard, TemplateSelection } from "@/types/campaigns";
 
 interface TemplatePickerProps {
@@ -18,16 +18,9 @@ const FILE_VALUE = "__file";
 
 const NONE_VALUE = "__none";
 
-const countPart = (n = 0, forms: [string, string, string]) => `${n} ${pluralUk(n, forms)}`;
-
-const countsLabel = ({ counts }: TemplateCard) =>
-  [
-    countPart(counts.races, ["раса", "раси", "рас"]),
-    countPart(counts.units, ["юніт", "юніти", "юнітів"]),
-    countPart(counts.spells, ["заклинання", "заклинання", "заклинань"]),
-  ].join(" · ");
-
 export function TemplatePicker({ value, onChange }: TemplatePickerProps) {
+  const t = useTranslations("campaigns.templatePicker");
+
   const { data } = useTemplates();
 
   const [importOpen, setImportOpen] = useState(false);
@@ -39,20 +32,23 @@ export function TemplatePicker({ value, onChange }: TemplatePickerProps) {
 
   const templates = [...(data?.official ?? []), ...(data?.mine ?? [])];
 
-  const selected = value.file ? undefined : templates.find((t) => t.id === value.templateId);
+  const selected = value.file ? undefined : templates.find((tpl) => tpl.id === value.templateId);
 
   const current = value.file ? FILE_VALUE : (value.templateId ?? NONE_VALUE);
 
-  const toOption = (t: TemplateCard) => ({ value: t.id, label: t.name });
+  const toOption = (tpl: TemplateCard) => ({ value: tpl.id, label: tpl.name });
+
+  const countsLabel = ({ counts }: TemplateCard) =>
+    [t("counts.races", { count: counts.races ?? 0 }), t("counts.units", { count: counts.units ?? 0 }), t("counts.spells", { count: counts.spells ?? 0 })].join(" · ");
 
   const groups: SelectOptionGroup[] = [
-    { label: "Офіційні", options: (data?.official ?? []).map(toOption) },
-    { label: "Мої", options: (data?.mine ?? []).map(toOption) },
+    { label: t("official"), options: (data?.official ?? []).map(toOption) },
+    { label: t("mine"), options: (data?.mine ?? []).map(toOption) },
     {
-      label: "Інше",
+      label: t("other"),
       options: [
-        { value: FILE_VALUE, label: value.file ? `Файл: ${value.file.name}` : "Імпорт з файлу" },
-        { value: NONE_VALUE, label: "Без шаблону" },
+        { value: FILE_VALUE, label: value.file ? t("file", { name: value.file.name }) : t("importFile") },
+        { value: NONE_VALUE, label: t("none") },
       ],
     },
   ].filter((g) => g.options.length > 0);
@@ -66,19 +62,19 @@ export function TemplatePicker({ value, onChange }: TemplatePickerProps) {
 
   return (
     <>
-      <HudSection title="Шаблон">
+      <HudSection title={t("section")}>
         <div className="space-y-2">
           <p className="text-sm text-hud-muted">
-            Шаблон — готова основа кампанії: набір правил і контенту (раси, класи, юніти, заклинання, артефакти, навички, музика), який копіюється у вашу кампанію. Далі ви змінюєте його як завгодно. «Без шаблону» дає порожню бібліотеку.
+            {t("intro")}
           </p>
-          <SelectField aria-label="Шаблон" value={current} onValueChange={handleChange} groups={groups} />
+          <SelectField aria-label={t("ariaLabel")} value={current} onValueChange={handleChange} groups={groups} />
           {selected && <p className="text-xs text-hud-muted">{[selected.description, countsLabel(selected)].filter(Boolean).join(" — ")}</p>}
           {selected?.credits && <p className="line-clamp-2 text-[11px] leading-4 text-hud-muted/80">{selected.credits}</p>}
           {value.file && (
             <p className="text-xs text-hud-muted">
-              {value.file.entities} {pluralUk(value.file.entities, ["сутність", "сутності", "сутностей"])} ·{" "}
+              {t("entities", { count: value.file.entities })} ·{" "}
               <button type="button" className="underline" onClick={() => setImportOpen(true)}>
-                Обрати інший файл
+                {t("pickAnother")}
               </button>
             </p>
           )}
@@ -87,8 +83,8 @@ export function TemplatePicker({ value, onChange }: TemplatePickerProps) {
       <ImportDialog
         hideTrigger
         accept=".json"
-        title="Імпорт з файлу"
-        description="Оберіть JSON, експортований з кампанії"
+        title={t("importFile")}
+        description={t("importDescription")}
         importHook={picker}
         open={importOpen}
         onOpenChange={setImportOpen}

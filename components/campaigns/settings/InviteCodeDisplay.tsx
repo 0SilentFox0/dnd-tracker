@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useTranslations } from "next-intl";
 import { Check, Copy } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
@@ -10,6 +11,8 @@ interface InviteCodeDisplayProps {
 }
 
 export function InviteCodeDisplay({ inviteCode }: InviteCodeDisplayProps) {
+  const t = useTranslations("campaigns");
+
   const [copied, setCopied] = useState(false);
 
   const handleCopy = async () => {
@@ -32,7 +35,7 @@ export function InviteCodeDisplay({ inviteCode }: InviteCodeDisplayProps) {
         size="icon"
         onClick={handleCopy}
         className="h-8 w-8"
-        title="Скопіювати код"
+        title={t("settings.copyCode")}
       >
         {copied ? (
           <Check className="h-4 w-4 text-hud-gold" />

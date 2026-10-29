@@ -1,6 +1,7 @@
 "use client";
 
 import { memo, useId, useMemo } from "react";
+import { useFormatter } from "next-intl";
 
 import { EmptyState, ErrorState, FormAlert, LoadingState } from "@/components/common/states";
 import { HudSection } from "@/components/hud/form";
@@ -8,11 +9,12 @@ import { HudPill } from "@/components/hud/page";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { ResponsiveDialog } from "@/components/ui/responsive-dialog";
-import { syncStatusLabel, syncTitle } from "@/lib/constants/source-sync";
+import { syncStatusKey, syncTitleKey } from "@/lib/constants/source-sync";
 import { useSourceDiff, useSourceSyncApply, useSourceSyncSelection } from "@/lib/hooks/campaigns";
 import { useConfirm, useNotify } from "@/lib/hooks/common";
-import { formatUsage, groupItems, itemKey, PLURAL_RECORDS, usageTotals } from "@/lib/utils/campaigns/source-sync";
-import { pluralUk } from "@/lib/utils/common/plural";
+import type { Translator } from "@/lib/i18n/translator";
+import { useTranslator } from "@/lib/i18n/use-translator";
+import { formatUsage, groupItems, itemKey, usageTotals } from "@/lib/utils/campaigns/source-sync";
 import type { SourceDiffItem } from "@/types/campaigns";
 
 interface SourceSyncDialogProps {
@@ -24,18 +26,18 @@ interface SourceSyncDialogProps {
 
 const NO_ITEMS: SourceDiffItem[] = [];
 
-function itemDetails(i: SourceDiffItem): string[] {
+function itemDetails(i: SourceDiffItem, t: Translator): string[] {
   const lines: string[] = [];
 
-  if (i.changedFields.length > 0) lines.push(`Змінено: ${i.changedFields.join(", ")}`);
+  if (i.changedFields.length > 0) lines.push(t("sourceSync.details.changed", { fields: i.changedFields.join(", ") }));
 
-  if (i.status === "conflict") lines.push("Ви теж змінили цей запис — галочка замінить вашу версію версією джерела");
+  if (i.status === "conflict") lines.push(t("sourceSync.details.conflict"));
 
-  const usage = i.status === "deletedInSource" && i.usage ? formatUsage(i.usage) : null;
+  const usage = i.status === "deletedInSource" && i.usage ? formatUsage(i.usage, t) : null;
 
-  if (usage) lines.push(`Використовується: ${usage}`);
+  if (usage) lines.push(t("sourceSync.details.usage", { usage }));
 
-  if (i.status === "deletedLocally") lines.push("Ви видалили цей запис; галочка поверне його");
+  if (i.status === "deletedLocally") lines.push(t("sourceSync.details.deletedLocally"));
 
   return lines;
 }
@@ -50,9 +52,11 @@ interface SyncItemRowProps {
 }
 
 const SyncItemRow = memo(function SyncItemRow({ item, isTemplate, checked, onToggle }: SyncItemRowProps) {
+  const t = useTranslator("campaigns");
+
   const id = useId();
 
-  const details = itemDetails(item);
+  const details = itemDetails(item, t);
 
   return (
     <li>
@@ -62,7 +66,7 @@ const SyncItemRow = memo(function SyncItemRow({ item, isTemplate, checked, onTog
           <span className="flex flex-wrap items-center gap-2">
             <span id={`${id}-name`}>{item.name}</span>
             <span id={`${id}-status`}>
-              <HudPill tone={pillTone(item.status)}>{syncStatusLabel(item.status, !isTemplate)}</HudPill>
+              <HudPill tone={pillTone(item.status)}>{t(`sourceSync.status.${syncStatusKey(item.status, !isTemplate)}`)}</HudPill>
             </span>
           </span>
           <span id={`${id}-info`}>
@@ -85,14 +89,16 @@ interface SyncGroupProps {
 }
 
 function SyncGroup({ group, isTemplate, selection }: SyncGroupProps) {
+  const t = useTranslator("campaigns");
+
   const allSelected = group.items.every((i) => selection.isSelected(i));
 
   return (
     <HudSection
-      title={`${group.label} (${group.items.length})`}
+      title={t("sourceSync.groupTitle", { label: t(`sourceSync.scope.${group.scope}`), count: group.items.length })}
       action={
         <Button variant="ghost" size="sm" onClick={() => selection.setGroup(group.scope, !allSelected)}>
-          {allSelected ? "Зняти все" : "Вибрати все"}
+          {allSelected ? t("sourceSync.deselectAll") : t("sourceSync.selectAll")}
         </Button>
       }
     >
@@ -106,6 +112,12 @@ function SyncGroup({ group, isTemplate, selection }: SyncGroupProps) {
 }
 
 export function SourceSyncDialog({ campaignId, isTemplate, open, onOpenChange }: SourceSyncDialogProps) {
+  const t = useTranslator("campaigns");
+
+  const tc = useTranslator("common");
+
+  const format = useFormatter();
+
   const diff = useSourceDiff(campaignId, open);
 
   const confirm = useConfirm();
@@ -124,7 +136,11 @@ export function SourceSyncDialog({ campaignId, isTemplate, open, onOpenChange }:
 
   const syncedAt = diff.data?.syncedAt;
 
-  const description = diff.data ? `Джерело: «${diff.data.source.name}»${syncedAt ? ` · остання синхронізація ${new Date(syncedAt).toLocaleString("uk-UA")}` : ""}` : "Зміни у джерелі";
+  const description = !diff.data
+    ? t("sourceSync.description.fallback")
+    : syncedAt
+      ? t("sourceSync.description.synced", { name: diff.data.source.name, date: format.dateTime(new Date(syncedAt), { dateStyle: "short", timeStyle: "medium" }) })
+      : t("sourceSync.description.source", { name: diff.data.source.name });
 
   const handleOpenChange = (next: boolean) => {
     if (!next) apply.reset();
@@ -136,12 +152,12 @@ export function SourceSyncDialog({ campaignId, isTemplate, open, onOpenChange }:
     const removed = items.filter((i) => i.status === "deletedInSource" && selection.isSelected(i));
 
     if (removed.length > 0) {
-      const usage = formatUsage(usageTotals(removed));
+      const usage = formatUsage(usageTotals(removed), t);
 
       const ok = await confirm({
-        title: `Видалити ${removed.length} ${pluralUk(removed.length, PLURAL_RECORDS)}, яких немає в ${isTemplate ? "джерелі" : "шаблоні"}?`,
-        description: usage ? `Використовується: ${usage}.` : undefined,
-        confirmLabel: "Видалити",
+        title: t("sourceSync.confirmDelete.title", { count: removed.length, where: t(isTemplate ? "sourceSync.where.source" : "sourceSync.where.template") }),
+        description: usage ? t("sourceSync.confirmDelete.usage", { usage }) : undefined,
+        confirmLabel: tc("actions.delete"),
         destructive: true,
       });
 
@@ -149,23 +165,27 @@ export function SourceSyncDialog({ campaignId, isTemplate, open, onOpenChange }:
     }
 
     apply.run({ apply: refs, ignore: [] }, (r) => {
-      const added = r.autoAdded.length > 0 ? `, автоматично додано: ${r.autoAdded.map((a) => a.name).join(", ")}` : "";
-
-      const warnings = r.warnings.length > 0 ? `. ${r.warnings.join(" ")}` : "";
-
       handleOpenChange(false);
-      void notify(`Застосовано: ${r.applied}${added}${warnings}`);
+      void notify(
+        t("sourceSync.applied", {
+          applied: r.applied,
+          hasAdded: String(r.autoAdded.length > 0),
+          added: r.autoAdded.map((a) => a.name).join(", "),
+          hasWarnings: String(r.warnings.length > 0),
+          warnings: r.warnings.join(" "),
+        }),
+      );
     });
   };
 
   const handleIgnore = async () => {
     const ok = await confirm({
-      title: `Приховати ${refs.length} ${pluralUk(refs.length, ["зміну", "зміни", "змін"])}?`,
-      description: "Вони з'являться знову, лише коли джерело змінить ці записи.",
-      confirmLabel: "Приховати",
+      title: t("sourceSync.confirmIgnore.title", { count: refs.length }),
+      description: t("sourceSync.confirmIgnore.description"),
+      confirmLabel: t("sourceSync.confirmIgnore.confirm"),
     });
 
-    if (ok) apply.run({ apply: [], ignore: refs }, (r) => void notify(`Приховано: ${r.ignored}`));
+    if (ok) apply.run({ apply: [], ignore: refs }, (r) => void notify(t("sourceSync.ignored", { count: r.ignored })));
   };
 
   const hasItems = items.length > 0;
@@ -179,7 +199,7 @@ export function SourceSyncDialog({ campaignId, isTemplate, open, onOpenChange }:
 
     if (diff.isError) return <ErrorState error={diff.error} />;
 
-    if (!hasItems) return <EmptyState title="Усе синхронізовано" description="Джерело не має змін, яких би не було у вас" />;
+    if (!hasItems) return <EmptyState title={t("sourceSync.empty.title")} description={t("sourceSync.empty.description")} />;
 
     return groups.map((group) => <SyncGroup key={group.scope} group={group} isTemplate={isTemplate} selection={selection} />);
   };
@@ -188,21 +208,21 @@ export function SourceSyncDialog({ campaignId, isTemplate, open, onOpenChange }:
     <ResponsiveDialog
       open={open}
       onOpenChange={handleOpenChange}
-      title={syncTitle(isTemplate)}
+      title={t(`sourceSync.title.${syncTitleKey(isTemplate)}`)}
       description={description}
       hud
       footer={
         <div className="flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
           <Button variant="outline" onClick={() => handleOpenChange(false)}>
-            {hasItems ? "Скасувати" : "Закрити"}
+            {hasItems ? tc("actions.cancel") : t("sourceSync.close")}
           </Button>
           {hasItems && (
             <>
               <Button variant="outline" onClick={handleIgnore} disabled={noSelection || busy}>
-                Ігнорувати вибране
+                {t("sourceSync.ignore")}
               </Button>
               <Button onClick={handleApply} disabled={noSelection || busy}>
-                Застосувати ({refs.length})
+                {t("sourceSync.apply", { count: refs.length })}
               </Button>
             </>
           )}
@@ -210,8 +230,8 @@ export function SourceSyncDialog({ campaignId, isTemplate, open, onOpenChange }:
       }
     >
       {renderBody()}
-      {autoAdded.length > 0 && <p className="mt-4 text-sm text-hud-muted">Також буде додано: {autoAdded.map((n) => n.name).join(", ")}</p>}
-      {apply.staleNotice && !diff.isFetching && <p className="mt-4 text-sm text-hud-muted">Джерело змінилося — список оновлено, вибір скинуто до типового.</p>}
+      {autoAdded.length > 0 && <p className="mt-4 text-sm text-hud-muted">{t("sourceSync.alsoAdded", { names: autoAdded.map((n) => n.name).join(", ") })}</p>}
+      {apply.staleNotice && !diff.isFetching && <p className="mt-4 text-sm text-hud-muted">{t("sourceSync.stale")}</p>}
       {apply.error && (
         <FormAlert className="mt-4">{apply.error}</FormAlert>
       )}

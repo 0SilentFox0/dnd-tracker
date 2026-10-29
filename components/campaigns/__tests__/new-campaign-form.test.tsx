@@ -21,10 +21,10 @@ describe("NewCampaignForm default template", () => {
   it("creates without a template by default and never sends an empty id", async () => {
     vi.mocked(getTemplates).mockResolvedValue({ official: [card("srd", "5e SRD 5.2")], mine: [] } as never);
     render(<QueryClientProvider client={new QueryClient()}><ConfirmProvider><NewCampaignForm /></ConfirmProvider></QueryClientProvider>);
-    await waitFor(() => expect((screen.getByRole("button", { name: "Створити кампанію" }) as HTMLButtonElement).disabled).toBe(false));
-    expect(screen.getByRole("combobox", { name: "Шаблон" }).textContent).toContain("Без шаблону");
-    fireEvent.change(screen.getByLabelText(/Назва кампанії/), { target: { value: "Test" } });
-    fireEvent.click(screen.getByRole("button", { name: "Створити кампанію" }));
+    await waitFor(() => expect((screen.getByRole("button", { name: "campaigns.form.submit" }) as HTMLButtonElement).disabled).toBe(false));
+    expect(screen.getByRole("combobox", { name: "campaigns.templatePicker.ariaLabel" }).textContent).toContain("campaigns.templatePicker.none");
+    fireEvent.change(screen.getByLabelText(/campaigns.form.name/), { target: { value: "Test" } });
+    fireEvent.click(screen.getByRole("button", { name: "campaigns.form.submit" }));
     await waitFor(() => expect(createCampaign).toHaveBeenCalledTimes(1));
     expect(vi.mocked(createCampaign).mock.calls[0][0].templateId).toBeUndefined();
   });
