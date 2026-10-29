@@ -28,6 +28,7 @@ const sourceOf = ({ bearerId, effect, state }: Anchor): FireSource => ({
   hitKey: `anchor:${effect.id}`,
   anchorId: effect.id,
   ...(state.excludeBearer && { excludeId: bearerId }),
+  ...(state.attackBonus !== undefined && { attackBonus: state.attackBonus }),
 });
 
 function inRadius(a: BattleParticipant, aAt: GridPoint, b: BattleParticipant, bAt: GridPoint, feet: number): boolean {

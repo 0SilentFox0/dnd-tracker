@@ -3,7 +3,9 @@ import { resolveDowned } from "@/lib/utils/abilities/engine/core/run-abilities";
 import type { Rng } from "@/lib/utils/abilities/engine/core/types";
 import { applyEffect } from "@/lib/utils/abilities/registry/effects";
 import { type ConcentrationTag, isZoneConcentrationLive } from "@/lib/utils/battle/concentration";
+import { getEffectiveArmorClass } from "@/lib/utils/battle/participant/helpers";
 import { rollSave } from "@/lib/utils/battle/saves/roll-save";
+import { rollDie } from "@/lib/utils/common/dice";
 import type { Ruleset } from "@/lib/utils/rules";
 import type { ZoneTrigger } from "@/lib/utils/spells/model/schema";
 import type { ResolvedAbility } from "@/types/abilities";
@@ -28,6 +30,7 @@ export interface FireSource {
   concentrationOf?: ConcentrationTag;
   hitKey: string;
   excludeId?: string;
+  attackBonus?: number;
   /** id ефекту-аури: накладені тригером ефекти прив'язуються до нього */
   anchorId?: string;
 }
@@ -68,6 +71,20 @@ export function fireTrigger(ps: BattleParticipant[], src: FireSource, trigger: Z
     messages.push(`🎲 ${target.basicInfo.name}: «${src.spellName}» — рятівний ${trigger.save.ability.toUpperCase()} ${res.total} проти СК ${src.dc}: ${res.success ? "успіх" : "провал"}`);
 
     if (res.success) return { participants: next, messages, failed: false };
+  }
+
+  if (trigger.attack) {
+    const roll = rollDie(20, ctx.rng);
+
+    const total = roll + (src.attackBonus ?? 0);
+
+    const ac = getEffectiveArmorClass(findParticipant(next, targetId) ?? target, next);
+
+    const hit = roll === 20 || (roll !== 1 && total >= ac);
+
+    messages.push(`🎯 ${target.basicInfo.name}: «${src.spellName}» — атака ${roll}+${src.attackBonus ?? 0}=${total} проти КЗ ${ac}: ${hit ? "влучання" : "промах"}`);
+
+    if (!hit) return { participants: next, messages, failed: false };
   }
 
   const event = { type: "spellCast" as const, phase: "after" as const, actorId: src.casterId, targetIds: [targetId] };

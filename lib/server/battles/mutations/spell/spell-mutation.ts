@@ -36,6 +36,7 @@ import { spellTerrainEffects, spellZoneHazard } from "@/lib/utils/battle/spell/z
 import { systemEvent } from "@/lib/utils/battle/store";
 import { BattleAccessError, battleActionToEvent, BattleRuleError } from "@/lib/utils/battle/store";
 import { applyAbilitySummons, type SummonDeps } from "@/lib/utils/battle/summon/ability-summons";
+import { objectsNear } from "@/lib/utils/battle/summon/objects-near";
 import { assertCanAct } from "@/lib/utils/battle/turn";
 import { assertSpellRolls } from "@/lib/utils/battle/validation/dice-checks";
 import { rollDiceList } from "@/lib/utils/common/dice";
@@ -146,6 +147,16 @@ export function createSpellMutation(deps: SpellMutationDeps = defaultDeps, optio
 
     if (!resolution.ok) throw new BattleRuleError("invalid_target", resolution.error);
 
+    if (definition.perObjectFeet && !data.preview) {
+      const reach = definition.perObjectFeet;
+
+      const orphan = resolution.targetIds.some((id) => { const t = findParticipant(order, id);
+
+ return !t || objectsNear(order, caster.basicInfo.id, spell.id, t, reach).length === 0; });
+
+      if (orphan) throw new BattleRuleError("invalid_target", API_ERRORS.BATTLE_SPELL_NO_OBJECT_NEAR);
+    }
+
     const pacifiedHit = pacifiedBlock(order, caster, { kind: "self" }, resolution.targetIds);
 
     if (pacifiedHit) throw new BattleRuleError("action_rejected", pacifiedHit);
@@ -226,7 +237,7 @@ export function createSpellMutation(deps: SpellMutationDeps = defaultDeps, optio
           };
         }
 
-        const summoned = await applyAbilitySummons(result.summons, result.allParticipantsUpdated, { campaignId: ctx.scene.campaignId, battleId: ctx.scene.id, rng, rules: ctx.meta.rules, deps });
+        const summoned = await applyAbilitySummons(result.summons.map((r) => (r.inline && resolution.centre ? { ...r, atCell: resolution.centre } : r)), result.allParticipantsUpdated, { campaignId: ctx.scene.campaignId, battleId: ctx.scene.id, rng, rules: ctx.meta.rules, deps, map: ctx.meta.map, round: ctx.scene.round });
 
         if (legendaryAbility) summoned.order = updateParticipant(summoned.order, caster.basicInfo.id, (p) => {
           const used = recordUse(p, legendaryAbility.key, ctx.scene.round, legendaryAbility.limits?.pool);

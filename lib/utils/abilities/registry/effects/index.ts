@@ -171,6 +171,8 @@ export function describeEffect(effect: Effect | SpellEffect): string {
 
   if (effect.kind === "anchoredZone") return `аура ${effect.radiusFeet} фт на цілі (${effect.side === "enemies" ? "вороги" : effect.side === "allies" ? "союзники" : "усі"}${effect.excludeBearer ? ", крім носія" : ""}) на ${effect.duration.rounds} р.${effect.onEnter ? `; вхід: ${effect.onEnter.effects.map(describeEffect).join(", ")}` : ""}${effect.onTurnStart ? `; початок ходу: ${effect.onTurnStart.effects.map(describeEffect).join(", ")}` : ""}${effect.endsWhenStartOutside ? "; закінчується, якщо хід починається поза аурою" : ""}`;
 
+  if (effect.kind === "summonInline") return `викликає ${effect.count}× «${effect.name}» (${effect.hp === null ? "предмет" : `${effect.hp} HP`}, КЗ ${effect.ac === "spellDc" ? "= СК" : effect.ac}) на ${effect.duration.rounds} р.${effect.upcastEvery ? `; +1 за кожні ${effect.upcastEvery} кола слота` : ""}${effect.aura ? `; аура ${effect.aura.radiusFeet} фт${effect.aura.onEnter?.attack || effect.aura.onTurnStart?.attack ? " (атака заклинанням)" : ""}` : ""}`;
+
   if (effect.kind === "moveSelf") return "кастер переміщується до цілі";
 
   if (effect.kind === "createTerrain") return `${effect.terrain === "wall" ? "стіна" : "складна місцевість"}: ${effect.shape === "line" ? "лінія до цілі" : "клітинки області"} (до ${effect.cells}) на ${effect.rounds} р.`;

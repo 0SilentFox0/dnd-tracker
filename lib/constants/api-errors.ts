@@ -336,6 +336,7 @@ export const API_ERRORS = {
   BATTLE_SPELL_OPTION_REQUIRED: "Оберіть один із варіантів заклинання",
   BATTLE_SPELL_INPUT_REQUIRED: "Вкажіть значення для кубиків заклинання",
   BATTLE_SPELL_TARGET_FILTER: "Ціль не підходить під обмеження заклинання (тип істоти, небезпека чи політ)",
+  BATTLE_SPELL_NO_OBJECT_NEAR: "Поруч із ціллю немає ваших викликаних предметів цього заклинання",
   BATTLE_SPELL_NOT_FOUND: "Заклинання не знайдено",
   BATTLE_SPELL_SLOT_OR_SOURCE: "Оберіть слот або джерело заклинання",
   BATTLE_SPELL_SOURCE_REQUIRED: "Оберіть джерело заклинання",

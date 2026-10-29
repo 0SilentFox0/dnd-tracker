@@ -82,7 +82,7 @@ export const isPerTarget = (e: Effect) => !NO_TARGET_KINDS.has(e.kind) && (targe
 /** Цільові ефекти, що читають шкоду касту: виконуються після нецільових. */
 export const readsEventDamage = (e: Effect) => (e.kind === "heal" || e.kind === "dealDamage") && typeof e.amount === "object" && "percentOf" in e.amount && e.amount.percentOf === "eventDamage";
 
-export const SPELL_ONLY_KINDS = new Set<string>(["inputDice", "grantCast", "hitRider", "moveSelf", "createTerrain", "anchoredZone"]);
+export const SPELL_ONLY_KINDS = new Set<string>(["inputDice", "grantCast", "hitRider", "moveSelf", "createTerrain", "anchoredZone", "summonInline"]);
 
 export const flatEffects = (effects: Array<Effect | SpellEffect>): Effect[] => effects.flatMap((e) => (e.kind === "randomOf" || e.kind === "chooseOne" ? e.options : SPELL_ONLY_KINDS.has(e.kind) ? [] : [e as Effect]));
 

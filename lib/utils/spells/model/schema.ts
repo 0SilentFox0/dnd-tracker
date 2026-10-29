@@ -21,11 +21,12 @@ export const TEMPLATE_SHAPES = ["circle", "cube", "cone", "line", "cross", "eman
 
 const rangeField = z.number().int().min(5).max(600).optional();
 
-/** Тригер зони: рятівний кидок проти СК заклинання (провал — ефекти й тяга до центру); без кидка ефекти діють завжди. */
+/** Тригер зони: атака заклинанням власника (влучання — ефекти) або рятівний кидок проти СК (провал — ефекти й тяга до центру); без перевірки ефекти діють завжди. */
 export const ZoneTriggerSchema = z.object({
   save: z.object({ ability: z.enum(ABILITY_KEYS) }).optional(),
   effects: z.array(NonRandomEffectSchema).max(4),
   pull: z.literal("centre").optional(),
+  attack: z.literal("spell").optional(),
 });
 
 export type ZoneTrigger = z.infer<typeof ZoneTriggerSchema>;
@@ -113,6 +114,7 @@ export const InlineCastSchema = z.object({
   damageBonus: z.number().int().min(-20).max(40).optional(),
   effects: z.array(NonRandomEffectSchema).min(1).max(6),
   anchorMarkId: z.string().min(1).max(40).optional(),
+  perObjectFeet: z.number().int().min(5).max(60).optional(),
   auto: z.object({ on: z.enum(["attackAgainstMarked", "damageToMarked"]) }).optional(),
 }).refine(attackNeedsEnemy, ATTACK_TARGET_ISSUE);
 
@@ -167,7 +169,31 @@ export const AnchoredZoneSchema = z.object({
   duration: DurationSchema,
 });
 
-const SPELL_ONLY_EFFECTS = [ChooseOneSchema, InputDiceSchema, GrantCastSchema, HitRiderSchema, MoveSelfSchema, CreateTerrainSchema, AnchoredZoneSchema] as const;
+export const SUMMON_INLINE_SIZES = ["tiny", "small", "medium", "large"] as const;
+
+const InlineAttackSchema = z.object({
+  name: z.string().trim().min(1).max(60),
+  attackBonus: z.number().int().min(-5).max(20),
+  damageDice: z.string().regex(DICE_RE),
+  damageType: z.string().trim().min(1).max(30),
+  range: z.string().trim().min(1).max(20).optional(),
+});
+
+/** Викликає нерухомого учасника з мапи заклинання (без запису в БД); hp null — предмет: не ціль, не рахується в перемозі. aura — тригери на ворогів поруч. */
+const SummonInlineSchema = z.object({
+  kind: z.literal("summonInline"),
+  name: z.string().trim().min(1).max(60),
+  size: z.enum(SUMMON_INLINE_SIZES),
+  ac: z.union([z.number().int().min(1).max(30), z.literal("spellDc")]),
+  hp: z.number().int().min(1).max(500).nullable(),
+  count: z.number().int().min(1).max(4),
+  upcastEvery: z.number().int().min(1).max(9).optional(),
+  attacks: z.array(InlineAttackSchema).max(2).optional(),
+  aura: z.object({ radiusFeet: z.number().int().min(5).max(60), side: z.enum(["enemies", "allies", "all"]), onEnter: ZoneTriggerSchema.optional(), onTurnStart: ZoneTriggerSchema.optional() }).optional(),
+  duration: DurationSchema,
+});
+
+const SPELL_ONLY_EFFECTS = [ChooseOneSchema, InputDiceSchema, GrantCastSchema, HitRiderSchema, MoveSelfSchema, CreateTerrainSchema, AnchoredZoneSchema, SummonInlineSchema] as const;
 
 export const SpellEffectSchema = z.discriminatedUnion("kind", [...BASE_EFFECTS, RandomOfSchema, ...SPELL_ONLY_EFFECTS]);
 
@@ -176,6 +202,8 @@ export type SpellEffect = z.infer<typeof SpellEffectSchema>;
 export type GrantCastEffect = z.infer<typeof GrantCastSchema>;
 
 export type AnchoredZoneEffect = z.infer<typeof AnchoredZoneSchema>;
+
+export type SummonInlineEffect = z.infer<typeof SummonInlineSchema>;
 
 export type CreateTerrainEffect = z.infer<typeof CreateTerrainSchema>;
 
@@ -201,6 +229,7 @@ export const SpellDefinitionSchema = z.object({
   addAbilityMod: z.boolean().optional(),
   fixedDice: z.boolean().optional(),
   damageBonus: z.number().int().min(-20).max(40).optional(),
+  perObjectFeet: z.number().int().min(5).max(60).optional(),
 }).refine(attackNeedsEnemy, ATTACK_TARGET_ISSUE);
 
 export type SpellCost = z.infer<typeof SpellCostSchema>;

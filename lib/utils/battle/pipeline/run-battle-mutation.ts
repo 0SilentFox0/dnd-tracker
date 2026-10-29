@@ -36,6 +36,7 @@ import {
   eventToBattleAction,
   systemEvent,
 } from "@/lib/utils/battle/store";
+import { dismissExpiredSummons } from "@/lib/utils/battle/summon/dismiss";
 import { checkVictoryConditions, completeBattle } from "@/lib/utils/battle/turn/victory";
 import type { BattleKnowledge } from "@/lib/utils/battle/view/knowledge";
 import { alwaysSeesEnemyStats } from "@/lib/utils/battle/view/visibility";
@@ -140,6 +141,10 @@ function withVictory(scene: BattleSceneState, result: MutationResult, rules: Rul
 }
 
 function withPlacement(map: BattleMapConfig | null, scene: { status: BattleStatus; round: number; participants: BattleParticipant[] }, result: MutationResult, place: boolean): MutationResult {
+  const dismissed = dismissExpiredSummons(result.participants, result.scene?.round ?? scene.round);
+
+  if (dismissed.participants !== result.participants) result = { ...result, participants: dismissed.participants, events: [...result.events, systemEvent(result.scene?.round ?? scene.round, dismissed.messages.join("; "))] };
+
   const cleared = clearFallenEffects(result.participants);
 
   if (cleared !== result.participants) result = { ...result, participants: cleared };

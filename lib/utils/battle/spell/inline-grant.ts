@@ -16,13 +16,13 @@ export function withInlineDefinition(spell: CastableSpell, grant: SpellGrant): C
 
   if (!inline) return spell;
 
-  const { targeting, resolution, dice, dieSides, addAbilityMod, damageBonus, effects } = inline;
+  const { targeting, resolution, dice, dieSides, addAbilityMod, damageBonus, perObjectFeet, effects } = inline;
 
   return {
     ...spell,
     name: grant.label ?? spell.name,
     level: 0,
-    definition: { executionMode: "native", dice, cost: grant.castCost ?? "action", targeting, resolution, effects, raceModifiers: [], fixedDice: true, ...(dieSides && { dieSides }), ...(addAbilityMod && { addAbilityMod }), ...(damageBonus !== undefined && { damageBonus }) },
+    definition: { executionMode: "native", dice, cost: grant.castCost ?? "action", targeting, resolution, effects, raceModifiers: [], fixedDice: true, ...(dieSides && { dieSides }), ...(addAbilityMod && { addAbilityMod }), ...(damageBonus !== undefined && { damageBonus }), ...(perObjectFeet && { perObjectFeet }) },
   };
 }
 

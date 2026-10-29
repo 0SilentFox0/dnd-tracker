@@ -315,6 +315,7 @@ export interface AnchoredZoneState {
   onEnter?: ZoneTrigger;
   onTurnStart?: ZoneTrigger;
   endsWhenStartOutside?: boolean;
+  attackBonus?: number;
 }
 
 export interface PendingHit {
@@ -484,6 +485,10 @@ export interface BattleParticipantBattleData {
   attackedWithLight?: boolean;
   /** Хто прикликав або підняв учасника здібністю */
   summonedBy?: string;
+  /** Предмет заклинання: не ціль, не ходить, не рахується в перемозі; зникає за expiresRound чи з концентрацією */
+  object?: { spellId: string; expiresRound?: number; concentrationOf?: { casterId: string; castId: string } };
+  /** Предмет зник (а не загинув) */
+  dismissed?: boolean;
   /** Учасник зараз робить додатковий хід від моралі (наприкінці раунду) */
   extraTurnActive?: boolean;
   /** Учасник у резерві бою: ще не на полі, бачить лише ДМ */

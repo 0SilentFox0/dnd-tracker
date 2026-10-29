@@ -158,6 +158,7 @@ export function inlineSpellTiles(caster: BattleParticipant | null, library: Book
       ...(inline.dieSides && { dieSides: inline.dieSides }),
       ...(inline.addAbilityMod && { addAbilityMod: true }),
       ...(inline.damageBonus !== undefined && { damageBonus: inline.damageBonus }),
+      ...(inline.perObjectFeet && { perObjectFeet: inline.perObjectFeet }),
     } as BookSpell];
   });
 }

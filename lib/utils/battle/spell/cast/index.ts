@@ -13,6 +13,7 @@ import { applyHitRiders } from "@/lib/utils/battle/spell/cast/hit-rider";
 import { moveAdjacent } from "@/lib/utils/battle/spell/cast/move-self";
 import { resolveOutcome } from "@/lib/utils/battle/spell/cast/outcome";
 import { abilityOf, actionOf, type ChosenSpell, expandChosen, hasMoveSelf, isPerTarget, readsEventDamage, type SpellCastState, targetOf } from "@/lib/utils/battle/spell/cast/state";
+import { inlineSummonRequests } from "@/lib/utils/battle/spell/cast/summon-inline";
 import { computeSpellPower, spellSaveDc } from "@/lib/utils/battle/spell/power";
 import { spellNeedsSlot, spellSlotKey } from "@/lib/utils/battle/spell/slot";
 import type { CastSpellParams, CastSpellResult } from "@/lib/utils/battle/types/spell-process";
@@ -162,6 +163,8 @@ export function castSpell(params: CastSpellParams): CastSpellResult {
   if (tag) flow.ps = tagConcentration(psBeforeEffects, flow.ps, tag, state.ability.key);
 
   applyGrantCasts({ flow, effects: source.definition.effects, casterId, targetIds, spell, castId, round: currentRound, concentrationOf: tag });
+
+  state.summons.push(...inlineSummonRequests({ effects: source.definition.effects, caster: readyCaster, spell, castLevel, saveDc: state.saveDc, round: currentRound, castId, concentrationOf: tag }));
 
   spendCastCost(state, { slotKey, usesSlot, isDMCast, isLegendaryCast: params.isLegendaryCast, grant: params.grant });
 

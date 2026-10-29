@@ -13,6 +13,7 @@ import { outcomeFor } from "@/lib/utils/battle/spell/cast/outcome";
 import { isDamageEffect, NO_TARGET_KINDS, type SpellCastState, usesRoll } from "@/lib/utils/battle/spell/cast/state";
 import { upcastSteps } from "@/lib/utils/battle/spell/caster-dice";
 import { computeSpellPower } from "@/lib/utils/battle/spell/power";
+import { objectsNear } from "@/lib/utils/battle/summon/objects-near";
 import { rollDice } from "@/lib/utils/common/dice";
 import type { AbilityEvent } from "@/types/abilities";
 
@@ -87,7 +88,9 @@ function dealSpellDamage(state: SpellCastState, effect: Extract<Effect, { kind: 
 
   const target = getP(flow, id);
 
-  const raw = resolveAmount(effect.amount, { owner: getP(flow, casterIdOf(state)), target, spellRoll: roll, rng: state.rng, participants: flow.ps });
+  const rolls = state.spell.definition.perObjectFeet ? objectsNear(flow.ps, casterIdOf(state), spell.id, target, state.spell.definition.perObjectFeet).length : 1;
+
+  const raw = Array.from({ length: rolls }).reduce<number>((sum) => sum + resolveAmount(effect.amount, { owner: getP(flow, casterIdOf(state)), target, spellRoll: roll, rng: state.rng, participants: flow.ps }), 0);
 
   const share = effect.falloff ? effect.falloff[Math.min(index, effect.falloff.length - 1)] : 100;
 
