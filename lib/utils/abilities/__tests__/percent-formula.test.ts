@@ -1,13 +1,16 @@
 import { describe, expect, it } from "vitest";
 
+import { ukT } from "./describe-fixtures";
 import { makeParticipant, resolved } from "./fixtures";
 
 import { collectModifiers } from "@/lib/utils/abilities/engine/core/collect-modifiers";
-import { logText } from "@/lib/utils/abilities/log-text";
 import { describeEffect as describeEffectSegments } from "@/lib/utils/abilities/registry/effects";
+import { renderSegments } from "@/lib/utils/abilities/segments";
 import type { BattleParticipant } from "@/types/battle";
 
-const describeEffect = (e: Parameters<typeof describeEffectSegments>[0]) => logText(describeEffectSegments(e));
+const t = await ukT();
+
+const describeEffect = (e: Parameters<typeof describeEffectSegments>[0]) => renderSegments(t, describeEffectSegments(e)).join(" · ");
 
 const hero = (morale: number): BattleParticipant => {
   const p = makeParticipant({

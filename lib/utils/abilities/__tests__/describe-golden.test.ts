@@ -2,16 +2,18 @@ import { describe, expect, it } from "vitest";
 
 import { ABILITY_FIXTURES, EFFECT_FIXTURES, enT, LIMITS_FIXTURES, ukT } from "./describe-fixtures";
 
-import { describeAbility, describeEffect } from "@/lib/utils/abilities/registry/effects";
+import { describeAbilityText, describeEffect } from "@/lib/utils/abilities/registry/effects";
 import { limitsLabel, limitsSegments } from "@/lib/utils/abilities/registry/labels";
 import { describeTrigger } from "@/lib/utils/abilities/registry/triggers";
 import { renderSegments } from "@/lib/utils/abilities/segments";
 
-const CONVERTED_KINDS = new Set(["dealDamage", "heal", "dot", "hot", "berserk", "charm", "maneuver", "summon", "raiseDead", "modifyStat", "damageBonus", "grantAction", "flag"]);
+const CONVERTED_KINDS = new Set(["dealDamage", "heal", "dot", "hot", "berserk", "charm", "maneuver", "summon", "raiseDead", "modifyStat", "damageBonus", "grantAction", "flag", "applyCondition", "restoreSpellSlotLevels", "restoreSpellSlot", "drainSpellSlot", "changeMorale", "mark", "copySpellBuffs", "guard", "cleanse", "randomOf"]);
 
 describe("describe golden (uk)", () => {
-  it("describeAbility", () => {
-    expect(Object.fromEntries(ABILITY_FIXTURES.map((a) => [a.id, describeAbility(a)]))).toMatchSnapshot();
+  it("describeAbility", async () => {
+    const t = await ukT();
+
+    expect(Object.fromEntries(ABILITY_FIXTURES.map((a) => [a.id, describeAbilityText(a, t)]))).toMatchSnapshot();
   });
 
   it("describeEffect", async () => {

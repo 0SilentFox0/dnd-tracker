@@ -816,6 +816,17 @@
       "grantRefreshAction": "refreshes the action",
       "grantRefreshBonusAction": "refreshes the bonus action",
       "grantRefreshReaction": "refreshes the reaction",
+      "note": "{text}",
+      "noteDm": "✋ {text}",
+      "applyCondition": "{condition}{hasPercent, select, yes { {percent}%} other {}}{hasLevels, select, yes { ×{levels}} other {}} × {rounds} rd.{breakOnDamage, select, yes {, until damaged} other {}}{hasSave, select, yes {, {ability} saving throw} other {}}",
+      "restoreSpellSlotLevels": "restores spell slots up to level {level} by level budget on a short rest",
+      "restoreSpellSlot": "+{count} slot",
+      "drainSpellSlot": "−{count} spell slot",
+      "changeMorale": "morale {delta}",
+      "mark": "mark × {rounds} rd.",
+      "copySpellBuffs": "copies spell buffs cast on an ally",
+      "guard": "guard: {percent}% of attack damage × {rounds} rd.",
+      "cleanse": "{includeConditions, select, yes {removes debuffs and conditions} other {removes debuffs}}",
       "randomOf": "one of: {options}"
     },
     "flags": {
@@ -869,7 +880,8 @@
         "berserk": "berserk",
         "charm": "charm"
       }
-    }
+    },
+    "unknownEffect": "unknown effect ({kind})"
   },
   "damageTypes": {
     "fire": "Fire",

@@ -1,9 +1,11 @@
 import { describe, expect, it } from "vitest";
 
 import { ParticipantSide } from "@/lib/constants/battle";
+import { ukT } from "@/lib/utils/abilities/__tests__/describe-fixtures";
 import { makeParticipant, resolved, seq } from "@/lib/utils/abilities/__tests__/fixtures";
 import { applyEffect, describeEffect } from "@/lib/utils/abilities/registry/effects";
 import type { Effect } from "@/lib/utils/abilities/schema";
+import { renderSegments } from "@/lib/utils/abilities/segments";
 import { endTurnCleanup } from "@/lib/utils/battle/turn/end-turn-cleanup";
 import { processStartOfTurn } from "@/lib/utils/battle/turn/start-end";
 
@@ -49,7 +51,7 @@ describe("hot", () => {
     expect(processStartOfTurn(target, 2, [target]).participant.combatStats.currentHp).toBe(8);
   });
 
-  it("опис", () => {
-    expect(describeEffect(hot)).toContain("раунд");
+  it("опис", async () => {
+    expect(renderSegments(await ukT(), describeEffect(hot)).join(" · ")).toContain("раунд");
   });
 });

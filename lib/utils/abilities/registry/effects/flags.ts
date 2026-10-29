@@ -1,5 +1,5 @@
 import type { FieldMeta } from "../fields";
-import { CONDITION_LABELS } from "../labels";
+import { CONDITION_LABELS, conditionKeySegment, damageTypeSegment } from "../labels";
 
 import { ABILITY_OPTIONS, DEFAULT_AREA_TARGETS } from "@/lib/constants/abilities";
 import { PROFICIENCY_KINDS } from "@/lib/constants/artifacts";
@@ -82,7 +82,7 @@ export const FLAG_REGISTRY: { [K in FlagKey]: FlagDefinition<K> } = {
     describe: (e) => [
       flagSeg("resistance", {
         mode: e.percent >= 100 ? "immune" : e.percent < 0 ? "vuln" : "resist",
-        type: e.damageType,
+        type: damageTypeSegment(e.damageType),
         n: Math.abs(e.percent),
         kind: e.attackKind ?? "none",
         hasSchool: e.school ? "yes" : "no",
@@ -291,7 +291,7 @@ export const FLAG_REGISTRY: { [K in FlagKey]: FlagDefinition<K> } = {
     describe: (e) => [
       flagSeg("conditionImmunity", {
         all: e.conditions === "all" ? "yes" : "no",
-        list: { join: ", ", items: e.conditions === "all" ? [] : e.conditions.map((c) => (c === "fear" || c === "berserk" || c === "charm" ? seg(`summary.flags.cond.${c}`) : seg("summary.text", { value: c }))) },
+        list: { join: ", ", items: e.conditions === "all" ? [] : e.conditions.map((c) => (c === "fear" || c === "berserk" || c === "charm" ? seg(`summary.flags.cond.${c}`) : conditionKeySegment(c))) },
       }),
     ],
   },

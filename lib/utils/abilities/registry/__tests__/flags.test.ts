@@ -28,7 +28,7 @@ describe("FLAG_REGISTRY", () => {
 
     const text = (e: Parameters<typeof describeFlag>[0]) => renderSegments(t, describeFlag(e)).join(" ");
 
-    expect(text({ kind: "flag", flag: "resistance", damageType: "fire", percent: 100 })).toBe("імунітет: fire");
+    expect(text({ kind: "flag", flag: "resistance", damageType: "fire", percent: 100 })).toBe("імунітет: Вогонь");
     expect(text({ kind: "flag", flag: "piercingShot" })).toContain("на лінії");
     expect(text({ kind: "flag", flag: "advantage", attackKind: "melee" })).toBe("перевага на ближні атаки");
   });

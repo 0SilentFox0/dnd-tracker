@@ -1,8 +1,9 @@
 import { describe, expect, it } from "vitest";
 import type { z } from "zod";
 
+import { ukT } from "@/lib/utils/abilities/__tests__/describe-fixtures";
 import { CONDITION_REGISTRY } from "@/lib/utils/abilities/registry/conditions";
-import { describeAbility, EFFECT_REGISTRY, FLAG_FIELDS } from "@/lib/utils/abilities/registry/effects";
+import { describeAbilityText, EFFECT_REGISTRY, FLAG_FIELDS } from "@/lib/utils/abilities/registry/effects";
 import { limitsLabel } from "@/lib/utils/abilities/registry/labels";
 import { TRIGGER_REGISTRY } from "@/lib/utils/abilities/registry/triggers";
 import { ConditionSchema, EffectSchema, TriggerSchema } from "@/lib/utils/abilities/schema";
@@ -60,9 +61,11 @@ describe("fields contract", () => {
     }
   });
 
-  it("describeAbility", () => {
+  it("describeAbilityText", async () => {
+    const t = await ukT();
+
     expect(
-      describeAbility({ id: "a", name: "Кровотеча", trigger: { event: "hit", role: "attacker" }, limits: { perBattle: 1, chance: 30 }, effects: [{ kind: "dot", damagePerRound: "1d4", damageType: "bleed", duration: { rounds: 2 }, target: "eventTarget" }] }),
+      describeAbilityText({ id: "a", name: "Кровотеча", trigger: { event: "hit", role: "attacker" }, limits: { perBattle: 1, chance: 30 }, effects: [{ kind: "dot", damagePerRound: "1d4", damageType: "bleed", duration: { rounds: 2 }, target: "eventTarget" }] }, t),
     ).toBe("Влучання · 1 раз за бій · 30% · Кровотеча 1d4/раунд × 2 р.");
   });
 

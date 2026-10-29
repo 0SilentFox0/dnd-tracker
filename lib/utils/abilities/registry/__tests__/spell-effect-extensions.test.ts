@@ -1,13 +1,16 @@
 import { describe, expect, it } from "vitest";
 
 import { ParticipantSide } from "@/lib/constants/battle";
+import { ukT } from "@/lib/utils/abilities/__tests__/describe-fixtures";
 import { makeParticipant, resolved, seq } from "@/lib/utils/abilities/__tests__/fixtures";
 import { resolveTargetIds } from "@/lib/utils/abilities/engine/core/targets";
-import { logText } from "@/lib/utils/abilities/log-text";
 import { applyEffect, describeEffect as describeEffectSegments } from "@/lib/utils/abilities/registry/effects";
 import { EffectSchema } from "@/lib/utils/abilities/schema";
+import { renderSegments } from "@/lib/utils/abilities/segments";
 
-const describeEffect = (e: Parameters<typeof describeEffectSegments>[0]) => logText(describeEffectSegments(e));
+const t = await ukT();
+
+const describeEffect = (e: Parameters<typeof describeEffectSegments>[0]) => renderSegments(t, describeEffectSegments(e)).join(" · ");
 
 const enemy = (id: string) => makeParticipant({ id, side: ParticipantSide.ENEMY, hp: 200, maxHp: 200 });
 

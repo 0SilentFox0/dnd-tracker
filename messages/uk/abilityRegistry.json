@@ -816,6 +816,17 @@
       "grantRefreshAction": "оновлює дію",
       "grantRefreshBonusAction": "оновлює бонусну дію",
       "grantRefreshReaction": "оновлює реакцію",
+      "note": "{text}",
+      "noteDm": "✋ {text}",
+      "applyCondition": "{condition}{hasPercent, select, yes { {percent}%} other {}}{hasLevels, select, yes { ×{levels}} other {}} × {rounds} р.{breakOnDamage, select, yes {, до шкоди} other {}}{hasSave, select, yes {, рятівний кидок {ability}} other {}}",
+      "restoreSpellSlotLevels": "відновлює слоти до {level}-го кола за бюджетом кіл на короткому відпочинку",
+      "restoreSpellSlot": "+{count} слот",
+      "drainSpellSlot": "−{count} слот заклинань",
+      "changeMorale": "мораль {delta}",
+      "mark": "мітка × {rounds} р.",
+      "copySpellBuffs": "копіює бафи закляття, накладені на союзника",
+      "guard": "захист: {percent}% шкоди від атак × {rounds} р.",
+      "cleanse": "{includeConditions, select, yes {зняття дебафів і станів} other {зняття дебафів}}",
       "randomOf": "одне з: {options}"
     },
     "flags": {
@@ -869,7 +880,8 @@
         "berserk": "шал",
         "charm": "чарування"
       }
-    }
+    },
+    "unknownEffect": "невідомий ефект ({kind})"
   },
   "damageTypes": {
     "fire": "Вогонь",
