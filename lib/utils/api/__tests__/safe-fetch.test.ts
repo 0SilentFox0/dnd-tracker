@@ -74,6 +74,35 @@ describe("safe-fetch", () => {
     await expect(safeFetchBuffer("https://ok.example/a.png", OPTS)).rejects.toThrow(API_ERRORS.SAFE_FETCH_TOO_LARGE);
   });
 
+  it("rejects decimal and mapped/link-local IP literals", async () => {
+    vi.stubGlobal("fetch", vi.fn());
+
+    for (const u of ["https://2130706433/", "https://[::ffff:127.0.0.1]/", "https://[fe80::1]/"]) {
+      await expect(safeFetchBuffer(u, OPTS), u).rejects.toThrow(API_ERRORS.SAFE_FETCH_INTERNAL_URL);
+    }
+  });
+
+  it("rejects redirect to http and to a host resolving to 10.0.0.1", async () => {
+    vi.stubGlobal("fetch", vi.fn().mockResolvedValueOnce(new Response(null, { status: 301, headers: { location: "http://ok.example/n" } })));
+    await expect(safeFetchBuffer("https://ok.example/a.png", OPTS)).rejects.toThrow(API_ERRORS.SAFE_FETCH_HTTPS_ONLY);
+
+    vi.stubGlobal("fetch", vi.fn().mockResolvedValueOnce(new Response(null, { status: 301, headers: { location: "https://10.0.0.1/n" } })));
+    await expect(safeFetchBuffer("https://ok.example/a.png", OPTS)).rejects.toThrow(API_ERRORS.SAFE_FETCH_INTERNAL_URL);
+  });
+
+  it("rejects a stream over maxBytes without content-length", async () => {
+    const stream = new ReadableStream<Uint8Array>({
+      start(c) {
+        c.enqueue(new Uint8Array(60));
+        c.enqueue(new Uint8Array(60));
+        c.close();
+      },
+    });
+
+    vi.stubGlobal("fetch", vi.fn().mockResolvedValueOnce(new Response(stream, { status: 200, headers: { "content-type": "image/png" } })));
+    await expect(safeFetchBuffer("https://ok.example/a.png", OPTS)).rejects.toThrow(API_ERRORS.SAFE_FETCH_TOO_LARGE);
+  });
+
   it("returns body for a valid response", async () => {
     vi.stubGlobal("fetch", vi.fn().mockResolvedValueOnce(imgResponse(PNG)));
 
