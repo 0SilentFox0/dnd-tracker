@@ -51,6 +51,19 @@ const MODE_OWNED_FILES = [
   "lib/server/battles/mutations/move/**",
 ];
 
+const DB_IMPORT_PATH = {
+  name: "@/lib/db",
+  message: "lib/utils — чиста логіка без БД: завантаження в lib/server/<domain> (ratchet-список DB_IN_UTILS_EXEMPT лише скорочується).",
+};
+
+const DB_IN_UTILS_EXEMPT = [
+  "lib/utils/api/api-auth.ts",
+  "lib/utils/battle/participant/{from-character-spell-slots,load-race,load-character-context,extract-skills,from-character-learned-spells}.ts",
+  "lib/utils/battle/spell/load-spells-db.ts",
+  "lib/utils/battle/balance/unit-library.ts",
+  "lib/utils/battle/artifact-sets/load-maps.ts",
+];
+
 const I18N_EXEMPT = JSON.parse(readFileSync(new URL("./i18n-exempt.json", import.meta.url), "utf8"));
 
 const CYRILLIC_MESSAGE = "Текст — у messages/*.json через t()";
@@ -222,6 +235,19 @@ const eslintConfig = defineConfig([
         "error",
         {
           paths: RESTRICTED_PATHS,
+          patterns: [APP_IMPORT_PATTERN, MODE_IMPORT_PATTERN, THREE_IMPORT_PATTERN],
+        },
+      ],
+    },
+  },
+  {
+    files: ["lib/utils/**/*.{ts,tsx}"],
+    ignores: ["**/__tests__/**", "**/*.test.{ts,tsx}", ...DB_IN_UTILS_EXEMPT, ...MODE_OWNED_FILES.filter((g) => g.startsWith("lib/utils"))],
+    rules: {
+      "no-restricted-imports": [
+        "error",
+        {
+          paths: [...RESTRICTED_PATHS, DB_IMPORT_PATH],
           patterns: [APP_IMPORT_PATTERN, MODE_IMPORT_PATTERN, THREE_IMPORT_PATTERN],
         },
       ],
