@@ -1,8 +1,7 @@
 import { useRouter } from "next/navigation";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
-import { battleKeys } from "./keys";
-import { battleQueryKey } from "./keys";
+import { battleKeys, battleQueryKey } from "./keys";
 import { useBattleAction } from "./useBattleAction";
 
 import type { AddParticipantData, BattleConditionsBody, CoreActionBody, CreateBattleData, UnitControlData } from "@/lib/api/battles";
@@ -73,9 +72,8 @@ export function useBattle(
   campaignId: string,
   battleId: string,
   options?: {
-    pauseRefetchWhen?: boolean;
-    /** Вимкнути polling, коли Pusher підключено — оновлення йдуть по Realtime. */
-    pauseRefetchWhenPusherConnected?: boolean;
+    /** Вимкнути polling (напр. коли Pusher підключено — оновлення йдуть по Realtime). */
+    pausePolling?: boolean;
   },
 ) {
   const queryClient = useQueryClient();
@@ -86,9 +84,7 @@ export function useBattle(
       acceptFullBattle(queryClient.getQueryData<BattleScene>(battleQueryKey(campaignId, battleId)), await getBattle(campaignId, battleId)),
     staleTime: 15_000,
     refetchInterval: (query) => {
-      if (options?.pauseRefetchWhen) return false;
-
-      if (options?.pauseRefetchWhenPusherConnected) return false;
+      if (options?.pausePolling) return false;
 
       const data = query.state.data as BattleScene | undefined;
 

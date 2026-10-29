@@ -310,7 +310,7 @@ export function useBattleSceneValue(campaignId: string, battleId: string, userId
 
   const { connectionState } = usePusherBattleSync(campaignId, battleId, userId, onTurnStarted);
 
-  const { data: battle, isLoading } = useBattle(campaignId, battleId, { pauseRefetchWhenPusherConnected: connectionState === "connected" });
+  const { data: battle, isLoading } = useBattle(campaignId, battleId, { pausePolling: connectionState === "connected" });
 
   const onConflict = useCallback(() => show("Стан бою змінився, повторіть дію"), [show]);
 

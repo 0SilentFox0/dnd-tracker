@@ -70,7 +70,7 @@ export function useBattleSetup(campaignId: string, battleId?: string, initial?: 
 export type BattleSetup = ReturnType<typeof useBattleSetup>;
 
 export function useBattleSetupInitial(campaignId: string, battleId: string) {
-  const { data: battle, isLoading } = useBattle(campaignId, battleId, { pauseRefetchWhen: true });
+  const { data: battle, isLoading } = useBattle(campaignId, battleId, { pausePolling: true });
 
   const initial = useMemo<BattleSetupInitial | undefined>(
     () =>
