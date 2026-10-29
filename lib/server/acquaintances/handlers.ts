@@ -5,21 +5,10 @@ import { ACQUAINTANCE_INCLUDE, assertSectionInCampaign, ownedAcquaintance, readA
 import { API_ERRORS } from "@/lib/constants/api-errors";
 import { prisma } from "@/lib/db";
 import { createAcquaintanceSchema, updateAcquaintanceSchema } from "@/lib/schemas/acquaintances";
-import { type CampaignAccessResult, requireCampaignAccess, requireDM } from "@/lib/utils/api/api-auth";
 import { errorResponse } from "@/lib/utils/api/api-response";
-import { handleApiError } from "@/lib/utils/api/error-handler";
+import { withAccess } from "@/lib/utils/api/as-dm";
 import { loadOwned } from "@/lib/utils/api/load-owned";
 import { parseBody } from "@/lib/utils/api/parse-body";
-
-export async function withAccess(campaignId: string, action: string, run: (access: CampaignAccessResult) => Promise<NextResponse>, dmOnly = false) {
-  try {
-    const access = await (dmOnly ? requireDM(campaignId) : requireCampaignAccess(campaignId));
-
-    return access instanceof NextResponse ? access : await run(access);
-  } catch (error) {
-    return handleApiError(error, { action });
-  }
-}
 
 const ownedCharacter = (campaignId: string, characterId: string) =>
   loadOwned(prisma.character.findUnique({ where: { id: characterId }, select: { campaignId: true, name: true } }), campaignId, API_ERRORS.CHARACTER_NOT_FOUND);
