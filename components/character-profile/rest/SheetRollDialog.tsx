@@ -1,6 +1,7 @@
 "use client";
 
 import { useRef, useState } from "react";
+import { useTranslations } from "next-intl";
 
 import { useProfile } from "../ProfileContext";
 
@@ -20,9 +21,9 @@ export interface SheetRollRequest {
   subject: SheetRollSubject;
 }
 
-const MODE_TEXT = { advantage: "з перевагою", disadvantage: "з перешкодою", normal: "" } as const;
-
 export function SheetRollDialog({ request, onClose }: { request: SheetRollRequest | null; onClose: () => void }) {
+  const t = useTranslations("rest");
+
   const { campaignId, characterId, sheet } = useProfile();
 
   const roll = useSheetRoll(campaignId, characterId);
@@ -54,7 +55,7 @@ export function SheetRollDialog({ request, onClose }: { request: SheetRollReques
       setUseInspiration(false);
       void stage.current?.play({ seed: Math.floor(cryptoRandom() * 2 ** 31), groups: [r.rolls.map((value) => ({ sides: 20 as const, value }))] });
     } catch (e) {
-      setError(e instanceof Error ? e.message : "Не вдалося кинути");
+      setError(e instanceof Error ? e.message : t("errors.rollFailed"));
     }
   };
 
@@ -66,18 +67,18 @@ export function SheetRollDialog({ request, onClose }: { request: SheetRollReques
       title={request?.label ?? ""}
       footer={
         <Button type="button" disabled={roll.isPending} onClick={() => void throwDice()}>
-          Кинути
+          {t("sheetRoll.roll")}
         </Button>
       }
     >
       {sheet.rest?.inspiration && !result && (
-        <SwitchField id="sheet-roll-inspiration" ariaLabel="Натхнення" label="✦ Натхнення — перевага, натхнення буде витрачено" checked={useInspiration} onCheckedChange={setUseInspiration} />
+        <SwitchField id="sheet-roll-inspiration" ariaLabel={t("sheetRoll.inspirationAria")} label={t("sheetRoll.inspiration")} checked={useInspiration} onCheckedChange={setUseInspiration} />
       )}
       {result && (
         <div aria-live="polite" className="text-center">
           <div className="text-4xl font-bold tabular-nums text-hud-gold-bright">{result.autoFail ? "✕" : result.total}</div>
           <div className="text-xs text-hud-muted">
-            {result.autoFail ? "Автопровал" : `d20 ${result.rolls.join(" / ")} ${MODE_TEXT[result.mode]} · ${signed(result.mod + result.bonus)}`}
+            {result.autoFail ? t("sheetRoll.autoFail") : t("sheetRoll.result", { rolls: result.rolls.join(" / "), mode: result.mode, bonus: signed(result.mod + result.bonus) })}
           </div>
         </div>
       )}

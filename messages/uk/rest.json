@@ -1,1 +1,113 @@
-{}
+{
+  "errors": {
+    "restFailed": "Не вдалося провести відпочинок",
+    "xpFailed": "Не вдалося нарахувати досвід",
+    "arcaneFailed": "Не вдалося відновити слоти",
+    "inspirationFailed": "Не вдалося змінити натхнення",
+    "resourcesFailed": "Не вдалося змінити ресурси",
+    "rollFailed": "Не вдалося кинути",
+    "hitDieFailed": "Не вдалося витратити кістку хітів"
+  },
+  "validation": {
+    "xpZero": "Сума досвіду не може бути 0",
+    "emptyPatch": "Порожня правка"
+  },
+  "rollLabel": {
+    "save": "Рятівний кидок: {ability}",
+    "check": "Перевірка: {ability}"
+  },
+  "restDialog": {
+    "title": "Відпочинок",
+    "description": "Короткий: слоти пакту, заряди «до короткого відпочинку», вікно кісток хітів. Довгий: усе, половина кісток хітів, виснаження −1. Мертві пропускаються.",
+    "short": "Короткий",
+    "long": "Довгий",
+    "start": "Почати відпочинок"
+  },
+  "party": {
+    "rest": "Відпочинок",
+    "closeRest": "Завершити відпочинок",
+    "xp": "Досвід"
+  },
+  "xpDialog": {
+    "title": "Досвід",
+    "submit": "Нарахувати",
+    "amount": "Сума (від’ємна — виправлення)",
+    "split": "Поділити між обраними",
+    "note": "Примітка"
+  },
+  "resources": {
+    "title": "Ресурси героя",
+    "restore": "Повністю відновити",
+    "revive": "Воскресити",
+    "markDead": "Позначити загиблим",
+    "deadConfirmTitle": "Позначити героя загиблим?",
+    "deadConfirm": "Позначити",
+    "hp": "HP (макс. {max})",
+    "tempHp": "Тимч. HP",
+    "exhaustion": "Виснаження",
+    "charge": "{name} (з {uses})",
+    "chargeSpent": "{name}: витрачено"
+  },
+  "sheetRoll": {
+    "roll": "Кинути",
+    "inspirationAria": "Натхнення",
+    "inspiration": "✦ Натхнення — перевага, натхнення буде витрачено",
+    "autoFail": "Автопровал",
+    "result": "d20 {rolls}{mode, select, advantage { з перевагою} disadvantage { з перешкодою} other {}} · {bonus}"
+  },
+  "hitDice": {
+    "aria": "Кістки хітів",
+    "spent": "{name} · d{die}: витрачено {spent} / {total}",
+    "spend": "Витратити",
+    "rolled": "Кістка хітів: {roll} → +{healed} HP"
+  },
+  "arcane": {
+    "aria": "Arcane Recovery",
+    "budget": "Arcane Recovery: кіл відновлення {total} / {budget}",
+    "noSlots": "Немає витрачених слотів до {level}-го кола",
+    "slot": "{level}-е коло: витрачено {spent}",
+    "less": "Менше {level}-го кола",
+    "more": "Більше {level}-го кола",
+    "restore": "Відновити слоти",
+    "used": "Arcane Recovery використано — до довгого відпочинку"
+  },
+  "badges": {
+    "dead": "Загинув",
+    "exhaustion": "Виснаження {level}",
+    "inspiration": "✦ Натхнення",
+    "shortRest": "Короткий відпочинок",
+    "xp": "Досвід {value}",
+    "xpNext": " / {next}",
+    "levelUp": "· доступне підвищення рівня"
+  },
+  "dm": {
+    "resources": "Ресурси",
+    "inspiration": "✦ Натхнення"
+  },
+  "charges": {
+    "title": "ЗАРЯДИ",
+    "left": "{left} / {uses}",
+    "short": "короткий відпочинок",
+    "long": "довгий відпочинок",
+    "never": "не відновлюються"
+  },
+  "log": {
+    "title": "ЖУРНАЛ",
+    "loading": "Завантаження…",
+    "empty": "Записів ще немає.",
+    "more": "Показати ще",
+    "system": "Система",
+    "roll": "🎲 {hasLabel, select, yes {{label}} other {Кидок}}: {autoFail, select, yes {автопровал} other {{rolls} → {total}{mode, select, advantage { (перевага)} disadvantage { (перешкода)} other {}}}}{inspiration, select, yes { · натхнення} other {}}",
+    "shortRest": "☕ Короткий відпочинок",
+    "longRest": "🛏 Довгий відпочинок",
+    "restClosed": "Відпочинок завершено",
+    "hitDie": "🎲 Кістка хітів d{die}: {roll} → +{healed} HP ({hpBefore} → {hpAfter})",
+    "arcaneRecovery": "🔮 Arcane Recovery: відновлено {levels} кіл слотів",
+    "xp": "⭐ Досвід {amount} (разом {total}){hasNote, select, yes { · {note}} other {}}",
+    "inspirationGained": "✦ Отримано натхнення",
+    "inspirationRemoved": "✦ Натхнення знято",
+    "resourcesEdit": "ДМ змінив ресурси",
+    "choicesEdit": "✎ Змінено вибори (раса, риси, опції класу)",
+    "battleResult": "⚔ Після бою: HP {hpBefore} → {hpAfter} / {maxHp}{dead, select, yes { · загинув} other {}}"
+  }
+}

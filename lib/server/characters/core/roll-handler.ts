@@ -2,6 +2,8 @@
 import { API_ERRORS } from "@/lib/constants/api-errors";
 import { CharacterLogKind } from "@/lib/constants/character-log";
 import { prisma } from "@/lib/db";
+import { getRequestLocale } from "@/lib/i18n/request-locale";
+import { getTranslator } from "@/lib/i18n/translator";
 import type { SheetRollInput } from "@/lib/schemas/out-of-combat";
 import type { CharacterGate } from "@/lib/server/characters/access";
 import { assertNotInActiveBattle } from "@/lib/server/characters/battle-lock";
@@ -23,7 +25,7 @@ export async function rollForSheet({ access, character }: CharacterGate, body: S
 
   const { participant } = await buildCharacterParticipant(character, { maxLevel, rules });
 
-  const result = rollFromSheet(participant, body, { rules, rng: Math.random, inspiration: inspired });
+  const result = rollFromSheet(participant, body, { rules, rng: Math.random, inspiration: inspired, t: await getTranslator(await getRequestLocale()) });
 
   const logged = await prisma.$transaction(async (tx) => {
     if (inspired) {

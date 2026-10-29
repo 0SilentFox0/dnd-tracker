@@ -30,7 +30,7 @@ export type SheetRollInput = z.infer<typeof sheetRollSchema>;
 
 export const experienceSchema = z.object({
   characterIds,
-  amount: z.number().int().min(-1_000_000).max(1_000_000).refine((n) => n !== 0, "Сума досвіду не може бути 0"),
+  amount: z.number().int().min(-1_000_000).max(1_000_000).refine((n) => n !== 0, "rest.validation.xpZero"),
   split: z.boolean().default(false),
   note: z.string().trim().max(200).optional(),
 });
@@ -48,6 +48,6 @@ export const resourcesEditSchema = z
     reset: z.literal(true).optional(),
     charges: z.record(z.string().min(1).max(300), z.number().int().min(0).max(999)).optional(),
   })
-  .refine((b) => Object.values(b).some((v) => v !== undefined), "Порожня правка");
+  .refine((b) => Object.values(b).some((v) => v !== undefined), "rest.validation.emptyPatch");
 
 export type ResourcesEditInput = z.infer<typeof resourcesEditSchema>;

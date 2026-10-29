@@ -42,14 +42,14 @@ describe("ResourcesDialog: persistent charges", () => {
       </ProfileProvider>,
     );
 
-    expect(screen.getByLabelText("Magic Initiate: Guidance: витрачено")).toBeTruthy();
-    expect(screen.queryByLabelText("Spell Scroll: витрачено")).toBeNull();
-    expect(screen.queryByLabelText("Rage: витрачено")).toBeNull();
+    expect(screen.getByLabelText('rest.resources.chargeSpent {"name":"Magic Initiate: Guidance"}')).toBeTruthy();
+    expect(screen.queryByLabelText('rest.resources.chargeSpent {"name":"Spell Scroll"}')).toBeNull();
+    expect(screen.queryByLabelText('rest.resources.chargeSpent {"name":"Rage"}')).toBeNull();
 
-    const input = screen.getByLabelText("Wand of Magic Missiles: витрачено");
+    const input = screen.getByLabelText('rest.resources.chargeSpent {"name":"Wand of Magic Missiles"}');
 
     fireEvent.change(input, { target: { value: "0" } });
-    fireEvent.change(screen.getByLabelText("Magic Initiate: Guidance: витрачено"), { target: { value: "0" } });
+    fireEvent.change(screen.getByLabelText('rest.resources.chargeSpent {"name":"Magic Initiate: Guidance"}'), { target: { value: "0" } });
 
     const form = input.closest("form");
 

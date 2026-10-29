@@ -25,8 +25,8 @@ describe("RestDialog", () => {
     renderWithConfirm(<RestDialog campaignId="c" characters={[hero("a", "Ліра"), hero("b", "Торін")]} open onOpenChange={onOpenChange} />);
 
     fireEvent.click(screen.getByRole("checkbox", { name: "Торін" }));
-    fireEvent.click(screen.getByRole("button", { name: "Довгий" }));
-    fireEvent.click(screen.getByRole("button", { name: "Почати відпочинок" }));
+    fireEvent.click(screen.getByRole("button", { name: "rest.restDialog.long" }));
+    fireEvent.click(screen.getByRole("button", { name: "rest.restDialog.start" }));
 
     expect(h.rest.mutateOk).toHaveBeenCalledWith({ kind: "long", characterIds: ["a"] });
     await waitFor(() => expect(onOpenChange).toHaveBeenCalledWith(false));
@@ -38,6 +38,6 @@ describe("RestDialog", () => {
 
     fireEvent.click(screen.getByRole("checkbox", { name: "Ліра" }));
 
-    expect((screen.getByRole("button", { name: "Почати відпочинок" }) as HTMLButtonElement).disabled).toBe(true);
+    expect((screen.getByRole("button", { name: "rest.restDialog.start" }) as HTMLButtonElement).disabled).toBe(true);
   });
 });

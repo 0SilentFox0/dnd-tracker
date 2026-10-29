@@ -32,6 +32,7 @@ function withExhaustion(p: BattleParticipant, level: number, rules: Ruleset): Ba
     permanent: true,
     levels: level,
     source: undefined,
+    // eslint-disable-next-line no-restricted-syntax -- battle-condition source name is persisted data
     sourceName: "Виснаження",
     timedKey: REST_EXHAUSTION_KEY,
     round: 0,

@@ -1,1 +1,113 @@
-{}
+{
+  "errors": {
+    "restFailed": "Failed to take the rest",
+    "xpFailed": "Failed to award experience",
+    "arcaneFailed": "Failed to recover slots",
+    "inspirationFailed": "Failed to change inspiration",
+    "resourcesFailed": "Failed to change resources",
+    "rollFailed": "Failed to roll",
+    "hitDieFailed": "Failed to spend a hit die"
+  },
+  "validation": {
+    "xpZero": "Experience amount cannot be 0",
+    "emptyPatch": "Empty update"
+  },
+  "rollLabel": {
+    "save": "Saving throw: {ability}",
+    "check": "Check: {ability}"
+  },
+  "restDialog": {
+    "title": "Rest",
+    "description": "Short: pact slots, “until short rest” charges, the hit dice window. Long: everything, half of the hit dice, exhaustion −1. Dead characters are skipped.",
+    "short": "Short",
+    "long": "Long",
+    "start": "Start rest"
+  },
+  "party": {
+    "rest": "Rest",
+    "closeRest": "End rest",
+    "xp": "Experience"
+  },
+  "xpDialog": {
+    "title": "Experience",
+    "submit": "Award",
+    "amount": "Amount (negative — correction)",
+    "split": "Split among selected",
+    "note": "Note"
+  },
+  "resources": {
+    "title": "Hero resources",
+    "restore": "Fully restore",
+    "revive": "Revive",
+    "markDead": "Mark as dead",
+    "deadConfirmTitle": "Mark the hero as dead?",
+    "deadConfirm": "Mark",
+    "hp": "HP (max {max})",
+    "tempHp": "Temp. HP",
+    "exhaustion": "Exhaustion",
+    "charge": "{name} (of {uses})",
+    "chargeSpent": "{name}: spent"
+  },
+  "sheetRoll": {
+    "roll": "Roll",
+    "inspirationAria": "Inspiration",
+    "inspiration": "✦ Inspiration — advantage, inspiration will be spent",
+    "autoFail": "Automatic failure",
+    "result": "d20 {rolls}{mode, select, advantage { with advantage} disadvantage { with disadvantage} other {}} · {bonus}"
+  },
+  "hitDice": {
+    "aria": "Hit dice",
+    "spent": "{name} · d{die}: spent {spent} / {total}",
+    "spend": "Spend",
+    "rolled": "Hit die: {roll} → +{healed} HP"
+  },
+  "arcane": {
+    "aria": "Arcane Recovery",
+    "budget": "Arcane Recovery: levels recovered {total} / {budget}",
+    "noSlots": "No spent slots up to level {level}",
+    "slot": "Level {level}: spent {spent}",
+    "less": "Fewer level {level}",
+    "more": "More level {level}",
+    "restore": "Recover slots",
+    "used": "Arcane Recovery used — until a long rest"
+  },
+  "badges": {
+    "dead": "Dead",
+    "exhaustion": "Exhaustion {level}",
+    "inspiration": "✦ Inspiration",
+    "shortRest": "Short rest",
+    "xp": "Experience {value}",
+    "xpNext": " / {next}",
+    "levelUp": "· level up available"
+  },
+  "dm": {
+    "resources": "Resources",
+    "inspiration": "✦ Inspiration"
+  },
+  "charges": {
+    "title": "CHARGES",
+    "left": "{left} / {uses}",
+    "short": "short rest",
+    "long": "long rest",
+    "never": "do not recharge"
+  },
+  "log": {
+    "title": "LOG",
+    "loading": "Loading…",
+    "empty": "No entries yet.",
+    "more": "Show more",
+    "system": "System",
+    "roll": "🎲 {hasLabel, select, yes {{label}} other {Roll}}: {autoFail, select, yes {automatic failure} other {{rolls} → {total}{mode, select, advantage { (advantage)} disadvantage { (disadvantage)} other {}}}}{inspiration, select, yes { · inspiration} other {}}",
+    "shortRest": "☕ Short rest",
+    "longRest": "🛏 Long rest",
+    "restClosed": "Rest ended",
+    "hitDie": "🎲 Hit die d{die}: {roll} → +{healed} HP ({hpBefore} → {hpAfter})",
+    "arcaneRecovery": "🔮 Arcane Recovery: recovered {levels} slot levels",
+    "xp": "⭐ Experience {amount} (total {total}){hasNote, select, yes { · {note}} other {}}",
+    "inspirationGained": "✦ Inspiration gained",
+    "inspirationRemoved": "✦ Inspiration removed",
+    "resourcesEdit": "DM changed resources",
+    "choicesEdit": "✎ Choices changed (race, feats, class options)",
+    "battleResult": "⚔ After battle: HP {hpBefore} → {hpAfter} / {maxHp}{dead, select, yes { · died} other {}}"
+  }
+}

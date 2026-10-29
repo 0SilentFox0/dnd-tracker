@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useTranslations } from "next-intl";
 
 import { CharacterPickList } from "./CharacterPickList";
 
@@ -11,7 +12,7 @@ import { useCheckedIds } from "@/lib/hooks/common";
 import { cn } from "@/lib/utils";
 import type { CharacterListItem } from "@/types/characters";
 
-const KINDS = [["short", "Короткий"], ["long", "Довгий"]] as const;
+const KINDS = ["short", "long"] as const;
 
 interface RestDialogProps {
   campaignId: string;
@@ -21,6 +22,8 @@ interface RestDialogProps {
 }
 
 export function RestDialog({ campaignId, characters, open, onOpenChange }: RestDialogProps) {
+  const t = useTranslations("rest.restDialog");
+
   const rest = useRest(campaignId);
 
   const [kind, setKind] = useState<"short" | "long">("short");
@@ -36,18 +39,18 @@ export function RestDialog({ campaignId, characters, open, onOpenChange }: RestD
       hud
       open={open}
       onOpenChange={onOpenChange}
-      title="Відпочинок"
-      description="Короткий: слоти пакту, заряди «до короткого відпочинку», вікно кісток хітів. Довгий: усе, половина кісток хітів, виснаження −1. Мертві пропускаються."
+      title={t("title")}
+      description={t("description")}
       footer={
         <Button type="button" disabled={picked.size === 0 || rest.isPending} onClick={start}>
-          Почати відпочинок
+          {t("start")}
         </Button>
       }
     >
       <div className="mb-3 grid grid-cols-2 gap-2">
-        {KINDS.map(([k, label]) => (
+        {KINDS.map((k) => (
           <Button key={k} type="button" variant="outline" aria-pressed={kind === k} onClick={() => setKind(k)} className={cn(kind === k && "border-hud-gold-strong bg-hud-gold-strong/20")}>
-            {label}
+            {t(k)}
           </Button>
         ))}
       </div>

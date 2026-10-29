@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useTranslations } from "next-intl";
 
 import { useProfile } from "../ProfileContext";
 import { ResourcesDialog } from "./ResourcesDialog";
@@ -19,6 +20,8 @@ export function DmRestActions() {
 }
 
 function DmRestControls({ rest }: { rest: SheetRest }) {
+  const t = useTranslations("rest.dm");
+
   const { campaignId, characterId } = useProfile();
 
   const inspiration = useInspiration(campaignId, characterId);
@@ -29,11 +32,11 @@ function DmRestControls({ rest }: { rest: SheetRest }) {
     <>
       {rest.persist && (
         <Button type="button" size="sm" variant="outline" onClick={() => setOpen(true)}>
-          Ресурси
+          {t("resources")}
         </Button>
       )}
       {rest.inspiration !== null && (
-        <SwitchField id="dm-inspiration" label="✦ Натхнення" checked={rest.inspiration} disabled={inspiration.isPending} onCheckedChange={(v) => void inspiration.mutateOk(v)} />
+        <SwitchField id="dm-inspiration" label={t("inspiration")} checked={rest.inspiration} disabled={inspiration.isPending} onCheckedChange={(v) => void inspiration.mutateOk(v)} />
       )}
       {open && <ResourcesDialog rest={rest} open onOpenChange={setOpen} />}
     </>
