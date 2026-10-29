@@ -759,5 +759,37 @@
       "defaultName": "New ability",
       "note": "Describe the ability"
     }
+  },
+  "summary": {
+    "amount": {
+      "value": "{value}",
+      "scale": "[{scale}]",
+      "formula": "({formula})",
+      "spellRollFormula": "({formula})% of the spell roll",
+      "spellRollFull": "spell roll",
+      "spellRollPct": "{value}% of the spell roll",
+      "percentOwnerAttack": "{value}% of the first attack's damage",
+      "percentOfEventDamage": "{value}% of damage dealt",
+      "percentOfMaxHp": "{value}% of max HP"
+    },
+    "flat": {
+      "number": "{value}",
+      "formula": "+({formula})",
+      "scale": "+[{scale}]"
+    },
+    "limits": {
+      "perBattle": "{n, plural, one {# time} other {# times}} per battle",
+      "perRestN": "{n, plural, one {# time} other {# times}} per {rest}",
+      "perRestExpr": "{expr} times per {rest}",
+      "restShort": "short rest",
+      "restLong": "long rest",
+      "perRound": "{n}/round",
+      "perTurn": "{n}/turn",
+      "cooldown": "cooldown {n} r.",
+      "chance": "{n}%",
+      "lair": "lair action",
+      "legendary": "legendary action ({n})",
+      "pool": "pool \"{key}\": {cost}"
+    }
   }
 }

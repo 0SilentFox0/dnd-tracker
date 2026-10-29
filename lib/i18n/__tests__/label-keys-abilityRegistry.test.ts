@@ -9,7 +9,7 @@ import { CONDITION_REGISTRY } from "@/lib/utils/abilities/registry/conditions";
 import { EFFECT_REGISTRY } from "@/lib/utils/abilities/registry/effects";
 import { FLAG_FIELDS, FLAG_LABELS } from "@/lib/utils/abilities/registry/effects/flags";
 import { DURATION_FIELD, type FieldMeta, TARGET_FIELD } from "@/lib/utils/abilities/registry/fields";
-import { DAMAGE_FILTER_LABELS, STAT_LABELS, TARGET_LABELS } from "@/lib/utils/abilities/registry/labels";
+import { DAMAGE_FILTER_LABELS, STAT_LABELS, TARGET_KEYS } from "@/lib/utils/abilities/registry/labels";
 import { TRIGGER_REGISTRY } from "@/lib/utils/abilities/registry/triggers";
 import { ABILITY_TEMPLATES } from "@/lib/utils/abilities/templates";
 
@@ -26,7 +26,7 @@ const owners: { owner: string; fields: readonly FieldMeta[] }[] = [
 
 describe("ability registry labels have translations", () => {
   expectLabelKeys("abilityRegistry", "stats", keys(STAT_LABELS));
-  expectLabelKeys("abilityRegistry", "targets", keys(TARGET_LABELS));
+  expectLabelKeys("abilityRegistry", "targets", [...TARGET_KEYS]);
   expectLabelKeys("abilityRegistry", "damageFilters", keys(DAMAGE_FILTER_LABELS));
   expectLabelKeys("abilityRegistry", "optionGroups", ["conditions5e", "mechanicalConditions"]);
 

@@ -19,7 +19,7 @@ import { localizeField } from "@/components/abilities/fields/registry-labels";
 import { Label } from "@/components/ui/label";
 import { useTranslator } from "@/lib/i18n/use-translator";
 import type { FieldMeta } from "@/lib/utils/abilities/registry/fields";
-import { TARGET_LABELS } from "@/lib/utils/abilities/registry/labels";
+import { TARGET_KEYS } from "@/lib/utils/abilities/registry/labels";
 
 export interface FieldProps<V = unknown> {
   id: string;
@@ -44,7 +44,7 @@ export function FieldRenderer({ meta: rawMeta, value, onChange, path, owner }: F
 
   const meta = owner ? localizeField(tr, owner, rawMeta) : rawMeta;
 
-  const targetOptions = Object.keys(TARGET_LABELS).map((value) => ({ value, label: tr(`targets.${value}`) }));
+  const targetOptions = TARGET_KEYS.map((value) => ({ value, label: tr(`targets.${value}`) }));
 
   const props = { id: path, value: value as never, onChange, meta };
 

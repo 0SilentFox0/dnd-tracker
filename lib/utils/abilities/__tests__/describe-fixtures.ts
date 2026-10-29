@@ -1,9 +1,13 @@
+import { vi } from "vitest";
+
 import { CONDITION_REGISTRY } from "../registry/conditions";
 import { EFFECT_REGISTRY } from "../registry/effects";
 import { FLAG_REGISTRY } from "../registry/effects/flags";
 import { TRIGGER_REGISTRY } from "../registry/triggers";
 import type { Ability, Condition, Effect, EffectKind, FlagKey, Limits, Trigger } from "../schema";
 
+import type { Locale } from "@/lib/i18n/config";
+import type { Translator } from "@/lib/i18n/translator";
 import { CONDITION_5E_KEYS, CONDITION_KEYS } from "@/lib/utils/abilities/schema/kinds";
 
 const duration = { rounds: 2 };
@@ -213,3 +217,13 @@ export const REGISTRY_COVERAGE = {
   conditionTypes: Object.keys(CONDITION_REGISTRY) as Condition["type"][],
   conditionKeys: [...CONDITION_KEYS, ...CONDITION_5E_KEYS],
 };
+
+const realTranslator = async (locale: Locale): Promise<Translator> => {
+  const { getTranslator } = await vi.importActual<typeof import("@/lib/i18n/translator")>("@/lib/i18n/translator");
+
+  return getTranslator(locale, "abilityRegistry");
+};
+
+export const ukT = () => realTranslator("uk");
+
+export const enT = () => realTranslator("en");

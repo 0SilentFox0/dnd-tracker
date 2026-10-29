@@ -759,5 +759,37 @@
       "defaultName": "Нове вміння",
       "note": "Опишіть вміння"
     }
+  },
+  "summary": {
+    "amount": {
+      "value": "{value}",
+      "scale": "[{scale}]",
+      "formula": "({formula})",
+      "spellRollFormula": "({formula})% кидка заклинання",
+      "spellRollFull": "кидок заклинання",
+      "spellRollPct": "{value}% кидка заклинання",
+      "percentOwnerAttack": "{value} % шкоди першої атаки",
+      "percentOfEventDamage": "{value}% від завданої шкоди",
+      "percentOfMaxHp": "{value}% від макс. HP"
+    },
+    "flat": {
+      "number": "{value}",
+      "formula": "+({formula})",
+      "scale": "+[{scale}]"
+    },
+    "limits": {
+      "perBattle": "{n, plural, one {# раз} few {# рази} many {# разів} other {# разів}} за бій",
+      "perRestN": "{n, plural, one {# раз} few {# рази} many {# разів} other {# разів}} за {rest}",
+      "perRestExpr": "{expr} разів за {rest}",
+      "restShort": "короткий відпочинок",
+      "restLong": "довгий відпочинок",
+      "perRound": "{n}/раунд",
+      "perTurn": "{n}/хід",
+      "cooldown": "перезарядка {n} р.",
+      "chance": "{n}%",
+      "lair": "дія лігва",
+      "legendary": "легендарна дія ({n})",
+      "pool": "пул «{key}»: {cost}"
+    }
   }
 }
