@@ -295,7 +295,8 @@ export interface BattleMapConfig {
   weather?: WeatherKind | null;
 }
 
-export type TerrainKind = "wall" | "barrier" | "hazard";
+/** difficult — лише пензель ДМ (прохідна складна місцевість); зони заклинань ставлять прапорці на hazard */
+export type TerrainKind = "wall" | "barrier" | "hazard" | "difficult";
 
 /** type — тип шкоди (fire, cold…) */
 export interface TerrainDamage {
@@ -316,6 +317,12 @@ export interface TerrainCell {
   /** Барʼєр або небезпека діє до кінця цього раунду */
   untilRound?: number;
   damage?: TerrainDamage;
+  /** Вхід у клітинку коштує подвійний рух */
+  difficult?: true;
+  /** Сильно заслонена: хто в ній або дивиться в неї, не бачить */
+  obscured?: true;
+  /** Зона заклинання, якій належить клітинка */
+  zoneId?: string;
 }
 
 /** зміни місцевості в дельті: однакові значення згруповані, щоб підпис не повторювався на кожній клітинці */

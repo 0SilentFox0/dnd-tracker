@@ -75,8 +75,11 @@ export const battleMapSchema = z.object({
     .record(
       z.string().regex(/^\d+:\d+$/),
       z.object({
-        kind: z.enum(["wall", "barrier", "hazard"]),
+        kind: z.enum(["wall", "barrier", "hazard", "difficult"]),
         label: z.string().max(60).optional(),
+        difficult: z.literal(true).optional(),
+        obscured: z.literal(true).optional(),
+        zoneId: z.string().max(64).optional(),
         untilRound: z.number().int().min(1).optional(),
         damage: z
           .object({ dice: z.string().regex(HAZARD_DICE_PATTERN).optional(), amount: z.number().int().min(0).max(1000).optional(), type: z.string().min(1).max(30), spellId: z.string().max(64).optional(), casterId: z.string().max(64).optional(), concentrationOf: z.object({ casterId: z.string().max(64), castId: z.string().max(64) }).optional() })

@@ -105,8 +105,25 @@ export function impassableSet(map: Pick<BattleMapConfig, "terrain">): ReadonlySe
   let set = impassableCache.get(terrain);
 
   if (!set) {
-    set = new Set(Object.keys(terrain).filter((k) => terrain[k].kind !== "hazard"));
+    set = new Set(Object.keys(terrain).filter((k) => terrain[k].kind === "wall" || terrain[k].kind === "barrier"));
     impassableCache.set(terrain, set);
+  }
+
+  return set;
+}
+
+const difficultCache = new WeakMap<Record<string, TerrainCell>, Set<string>>();
+
+export function difficultSet(map: Pick<BattleMapConfig, "terrain">): ReadonlySet<string> {
+  const terrain = map.terrain;
+
+  if (!terrain) return EMPTY_SET;
+
+  let set = difficultCache.get(terrain);
+
+  if (!set) {
+    set = new Set(Object.keys(terrain).filter((k) => terrain[k].kind === "difficult" || terrain[k].difficult));
+    difficultCache.set(terrain, set);
   }
 
   return set;

@@ -14,6 +14,12 @@ export function hazardDamage(dice: string, type: string): (TerrainDamage & { dic
   return HAZARD_DICE_PATTERN.test(formula) ? { dice: formula, type } : undefined;
 }
 
+export function isObscured(map: Pick<BattleMapConfig, "terrain"> | null | undefined, p: BattleParticipant): boolean {
+  const terrain = map?.terrain;
+
+  return !!terrain && isOnMap(p) && cellsOf(p).some((c) => terrain[cellKey(c)]?.obscured);
+}
+
 export function hazardCells(map: Pick<BattleMapConfig, "terrain">): Set<string> {
   const terrain = map.terrain ?? {};
 
@@ -82,7 +88,7 @@ export function applyTerrain(map: BattleMapConfig, cells: string[], value: Terra
   return replaceTerrain(map, terrain);
 }
 
-const terrainId = (c: TerrainCell) => `${c.kind}|${c.label ?? ""}|${c.untilRound ?? ""}|${c.damage ? JSON.stringify(c.damage) : ""}`;
+const terrainId = (c: TerrainCell) => `${c.kind}|${c.label ?? ""}|${c.untilRound ?? ""}|${c.damage ? JSON.stringify(c.damage) : ""}|${c.difficult ? 1 : 0}${c.obscured ? 1 : 0}|${c.zoneId ?? ""}`;
 
 export function diffTerrain(before: BattleMapConfig["terrain"], after: BattleMapConfig["terrain"]): TerrainDiff | null {
   const prev = before ?? {};

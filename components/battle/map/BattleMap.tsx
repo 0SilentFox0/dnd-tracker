@@ -62,6 +62,8 @@ export interface BattleMapEditing {
 
 const HATCH_ID = "battle-map-barrier-hatch";
 
+const DIFFICULT_HATCH_ID = "battle-map-difficult-hatch";
+
 const HAZARD_GRADIENT_ID = "battle-map-hazard-fire";
 
 // приглушено: яскрава заливка перекривала фон карти; від недосяжних клітинок відрізняє контур
@@ -105,10 +107,12 @@ function hazardTitle(t: TerrainCell, round: number | undefined): string {
 function terrainTitle(t: TerrainCell, round: number | undefined): string | null {
   if (t.kind === "barrier") return `Барʼєр${t.untilRound !== undefined ? ` до кінця раунду ${t.untilRound}` : ""}`;
 
+  if (t.kind === "difficult") return t.label ?? "Складна місцевість";
+
   return t.kind === "hazard" ? hazardTitle(t, round) : null;
 }
 
-const TERRAIN_FILL = { wall: "rgba(0,0,0,.6)", barrier: "rgba(0,0,0,.75)", hazard: `url(#${HAZARD_GRADIENT_ID})` } as const;
+const TERRAIN_FILL = { wall: "rgba(0,0,0,.6)", barrier: "rgba(0,0,0,.75)", difficult: "transparent", hazard: `url(#${HAZARD_GRADIENT_ID})` } as const;
 
 const FLAME = UNIT * 0.42;
 
@@ -181,6 +185,9 @@ const GridLayer = memo(function GridLayer({ map, marks, actions, wasDragged, cli
         <pattern id={HATCH_ID} patternUnits="userSpaceOnUse" width={UNIT * 0.14} height={UNIT * 0.14} patternTransform="rotate(45)">
           <line x1="0" y1="0" x2="0" y2={UNIT * 0.14} stroke="rgba(255,255,255,.28)" strokeWidth={UNIT * 0.03} />
         </pattern>
+        <pattern id={DIFFICULT_HATCH_ID} patternUnits="userSpaceOnUse" width={UNIT * 0.2} height={UNIT * 0.2} patternTransform="rotate(-45)">
+          <line x1="0" y1="0" x2="0" y2={UNIT * 0.2} stroke="rgba(190,140,70,.7)" strokeWidth={UNIT * 0.035} />
+        </pattern>
         <radialGradient id={HAZARD_GRADIENT_ID}>
           <stop offset="0%" stopColor="#ffd36b" stopOpacity={0.75} />
           <stop offset="55%" stopColor="#ff7a1a" stopOpacity={0.62} />
@@ -194,6 +201,8 @@ const GridLayer = memo(function GridLayer({ map, marks, actions, wasDragged, cli
           <g key={`t${cellKey(p)}`} data-terrain={cell.kind} data-hazard-timed={hazard && cell.untilRound !== undefined ? "" : undefined} pointerEvents="none">
             <polygon points={cellPolygon(p)} fill={TERRAIN_FILL[cell.kind]} stroke={hazard ? "#ff9a2a" : "none"} strokeOpacity={0.9} strokeWidth={1.5} vectorEffect="non-scaling-stroke" />
             {cell.kind === "barrier" && <polygon points={cellPolygon(p)} fill={`url(#${HATCH_ID})`} stroke="none" />}
+            {(cell.kind === "difficult" || cell.difficult) && <polygon points={cellPolygon(p)} fill={`url(#${DIFFICULT_HATCH_ID})`} stroke="none" data-difficult="" />}
+            {cell.obscured && <polygon points={cellPolygon(p)} fill="rgba(210,215,225,.38)" stroke="none" data-obscured="" />}
           </g>
         );
       })}

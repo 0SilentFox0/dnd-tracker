@@ -12,6 +12,7 @@ const BRUSHES: { value: TerrainBrush; label: string }[] = [
   { value: "wall", label: "Непрохідне" },
   { value: "barrier", label: "Барʼєр" },
   { value: "hazard", label: "Небезпека" },
+  { value: "difficult", label: "Складна" },
   { value: "erase", label: "Стерти" },
 ];
 

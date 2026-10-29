@@ -15,7 +15,7 @@ export const mapTerrainSchema = z.object({
   cells: z.array(z.string().regex(/^\d+:\d+$/)).min(1).max(400),
   terrain: z
     .object({
-      kind: z.enum(["wall", "barrier", "hazard"]),
+      kind: z.enum(["wall", "barrier", "hazard", "difficult"]),
       label: z.string().max(60).optional(),
       rounds: z.number().int().min(1).max(20).optional(),
       damage: z.object({ dice: z.string().regex(HAZARD_DICE_PATTERN), type: z.enum(HAZARD_DAMAGE_TYPES) }).optional(),
@@ -50,7 +50,7 @@ export function mapTerrainMutation(ctx: BattleMutationContext, body: MapTerrainB
 
   const blocked = blockedSet(map);
 
-  const occupied = terrain.kind === "hazard" ? new Set<string>() : occupiedBy(ctx.participants, () => true);
+  const occupied = terrain.kind === "hazard" || terrain.kind === "difficult" ? new Set<string>() : occupiedBy(ctx.participants, () => true);
 
   const usable = (k: string) => inBounds(map, parseKey(k)) && !blocked.has(k) && !occupied.has(k);
 

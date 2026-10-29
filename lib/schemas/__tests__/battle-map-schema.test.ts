@@ -74,3 +74,16 @@ describe("battleMapSchema.weather", () => {
     expect(battleMapSchema.safeParse({ ...map, weather: "hail" }).success).toBe(false);
   });
 });
+
+describe("battleMapSchema.terrain: складна місцевість і заслонення", () => {
+  it("зберігає difficult/obscured/zoneId і concentrationOf/casterId", () => {
+    const terrain = {
+      "1:1": { kind: "difficult" },
+      "2:2": { kind: "hazard", difficult: true, obscured: true, zoneId: "z1", damage: { dice: "1d6", type: "fire", casterId: "c", concentrationOf: { casterId: "c", castId: "x" } } },
+    };
+
+    const parsed = battleMapSchema.parse({ ...map, terrain });
+
+    expect(parsed.terrain).toEqual(terrain);
+  });
+});
