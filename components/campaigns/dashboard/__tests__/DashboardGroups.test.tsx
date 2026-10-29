@@ -1,9 +1,13 @@
 // @vitest-environment happy-dom
-import { act, cleanup, fireEvent, render, screen } from "@testing-library/react";
+import { act, cleanup, fireEvent, screen } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import { DashboardGroups } from "@/components/campaigns/dashboard/DashboardGroups";
 import { useNotifications } from "@/lib/hooks/notifications";
+import { renderWithIntl } from "@/lib/i18n/test/render-with-intl";
+
+// real uk messages: search matches the translated titles and keywords
+vi.unmock("next-intl");
 
 const push = vi.fn();
 
@@ -17,6 +21,10 @@ beforeEach(() => {
 
 afterEach(cleanup);
 
+const NAMESPACES = ["common", "validation", "dashboard"] as const;
+
+const render = (ui: React.ReactElement) => renderWithIntl(ui, { namespaces: NAMESPACES });
+
 const type = (value: string) => {
   act(() => {
     fireEvent.change(screen.getByLabelText("Пошук розділу"), { target: { value } });
@@ -26,22 +34,22 @@ const type = (value: string) => {
 const tileLinks = () => screen.getAllByRole("link");
 
 describe("DashboardGroups", () => {
-  it("DM without query shows group headings and 13 links", () => {
-    render(<DashboardGroups campaignId="c1" isDM pendingDrafts={0} />);
+  it("DM without query shows group headings and 13 links", async () => {
+    await render(<DashboardGroups campaignId="c1" isDM pendingDrafts={0} />);
 
     for (const t of ["Гра", "Герої", "Бібліотеки"]) expect(screen.getByRole("heading", { name: t })).toBeTruthy();
 
     expect(tileLinks()).toHaveLength(13);
   });
 
-  it("shows pending drafts in the characters subtitle", () => {
-    render(<DashboardGroups campaignId="c1" isDM pendingDrafts={2} />);
+  it("shows pending drafts in the characters subtitle", async () => {
+    await render(<DashboardGroups campaignId="c1" isDM pendingDrafts={2} />);
 
     expect(screen.getByText(/2 на схваленні/)).toBeTruthy();
   });
 
-  it("player sees own sections without group headings", () => {
-    render(<DashboardGroups campaignId="c1" isDM={false} pendingDrafts={0} />);
+  it("player sees own sections without group headings", async () => {
+    await render(<DashboardGroups campaignId="c1" isDM={false} pendingDrafts={0} />);
 
     for (const t of ["Мій персонаж", "Показ", "Карта", "Довідник"]) expect(screen.getByText(t)).toBeTruthy();
 
@@ -49,8 +57,8 @@ describe("DashboardGroups", () => {
     expect(screen.queryByRole("heading")).toBeNull();
   });
 
-  it("hides the world tile for the keys the page hides", () => {
-    render(<DashboardGroups campaignId="c1" isDM={false} pendingDrafts={0} hiddenKeys={["player-world"]} />);
+  it("hides the world tile for the keys the page hides", async () => {
+    await render(<DashboardGroups campaignId="c1" isDM={false} pendingDrafts={0} hiddenKeys={["player-world"]} />);
 
     expect(screen.queryByText("Карта")).toBeNull();
     expect(screen.getByText("Показ")).toBeTruthy();
@@ -58,7 +66,7 @@ describe("DashboardGroups", () => {
   });
 
   it("the world tile links to the player map and is found by search", async () => {
-    render(<DashboardGroups campaignId="c1" isDM={false} pendingDrafts={0} />);
+    await render(<DashboardGroups campaignId="c1" isDM={false} pendingDrafts={0} />);
 
     type("світ");
 
@@ -66,7 +74,7 @@ describe("DashboardGroups", () => {
   });
 
   it("query filters to a flat grid without headings", async () => {
-    render(<DashboardGroups campaignId="c1" isDM pendingDrafts={0} />);
+    await render(<DashboardGroups campaignId="c1" isDM pendingDrafts={0} />);
 
     type("моби");
 
@@ -76,19 +84,19 @@ describe("DashboardGroups", () => {
   });
 
   it("empty result can be cleared", async () => {
-    render(<DashboardGroups campaignId="c1" isDM pendingDrafts={0} />);
+    await render(<DashboardGroups campaignId="c1" isDM pendingDrafts={0} />);
 
     type("zzz");
 
-    expect(await screen.findByText(/common.search.noResults/)).toBeTruthy();
+    expect(await screen.findByText(/Нічого не знайдено за/)).toBeTruthy();
 
-    fireEvent.click(screen.getAllByRole("button", { name: "common.search.clear" }).at(-1)!);
+    fireEvent.click(screen.getAllByRole("button", { name: "Очистити пошук" }).at(-1)!);
 
     expect(await screen.findAllByRole("link")).toHaveLength(13);
   });
 
   it("Enter with a padded uppercase query navigates to the match", async () => {
-    render(<DashboardGroups campaignId="c1" isDM pendingDrafts={0} />);
+    await render(<DashboardGroups campaignId="c1" isDM pendingDrafts={0} />);
 
     type("  ЗАКЛ ");
 
@@ -100,7 +108,7 @@ describe("DashboardGroups", () => {
   });
 
   it("Enter navigates to the first match, and does nothing without one", async () => {
-    render(<DashboardGroups campaignId="c1" isDM pendingDrafts={0} />);
+    await render(<DashboardGroups campaignId="c1" isDM pendingDrafts={0} />);
 
     type("закл");
 
@@ -113,53 +121,53 @@ describe("DashboardGroups", () => {
     push.mockClear();
     type("zzz");
 
-    await screen.findByText(/common.search.noResults/);
+    await screen.findByText(/Нічого не знайдено за/);
 
     fireEvent.submit(screen.getByLabelText("Пошук розділу").closest("form")!);
 
     expect(push).not.toHaveBeenCalled();
   });
 
-  it("player with unread item sees a pill on the character tile", () => {
+  it("player with unread item sees a pill on the character tile", async () => {
     vi.mocked(useNotifications).mockReturnValue({ data: [{ id: "n1", type: "item", refId: "a1", href: "/h", createdAt: "x" }] } as never);
 
-    render(<DashboardGroups campaignId="c1" isDM={false} pendingDrafts={0} />);
+    await render(<DashboardGroups campaignId="c1" isDM={false} pendingDrafts={0} />);
 
-    expect(screen.getAllByText("common.notifications.new")).toHaveLength(1);
+    expect(screen.getAllByText("нове")).toHaveLength(1);
     expect(useNotifications).toHaveBeenCalledWith("c1", { enabled: true });
   });
 
-  it("DM in a campaign sees the acquaintances tile in the game group, a template does not", () => {
-    const { unmount } = render(<DashboardGroups campaignId="c1" isDM pendingDrafts={0} />);
+  it("DM in a campaign sees the acquaintances tile in the game group, a template does not", async () => {
+    const { unmount } = await render(<DashboardGroups campaignId="c1" isDM pendingDrafts={0} />);
 
     expect(screen.getByText("Знайомства").closest("a")?.getAttribute("href")).toBe("/campaigns/c1/acquaintances");
 
     unmount();
-    render(<DashboardGroups campaignId="c1" isDM pendingDrafts={0} context={{ isTemplate: true, classesEnabled: false }} />);
+    await render(<DashboardGroups campaignId="c1" isDM pendingDrafts={0} context={{ isTemplate: true, classesEnabled: false }} />);
 
     expect(screen.queryByText("Знайомства")).toBeNull();
   });
 
-  it("player does not see the acquaintances tile when the page hides it", () => {
-    render(<DashboardGroups campaignId="c1" isDM={false} pendingDrafts={0} hiddenKeys={["acquaintances"]} />);
+  it("player does not see the acquaintances tile when the page hides it", async () => {
+    await render(<DashboardGroups campaignId="c1" isDM={false} pendingDrafts={0} hiddenKeys={["acquaintances"]} />);
 
     expect(screen.queryByText("Знайомства")).toBeNull();
   });
 
-  it("player with an unread acquaintance sees a pill on its tile", () => {
+  it("player with an unread acquaintance sees a pill on its tile", async () => {
     vi.mocked(useNotifications).mockReturnValue({ data: [{ id: "n1", type: "acquaintance", refId: "a1", href: "/h", createdAt: "x" }] } as never);
 
-    render(<DashboardGroups campaignId="c1" isDM={false} pendingDrafts={0} />);
+    await render(<DashboardGroups campaignId="c1" isDM={false} pendingDrafts={0} />);
 
-    expect(screen.getAllByText("common.notifications.new")).toHaveLength(1);
+    expect(screen.getAllByText("нове")).toHaveLength(1);
   });
 
-  it("DM gets no pill and the query is disabled", () => {
+  it("DM gets no pill and the query is disabled", async () => {
     vi.mocked(useNotifications).mockReturnValue({ data: [{ id: "n1", type: "item", refId: "a1", href: "/h", createdAt: "x" }] } as never);
 
-    render(<DashboardGroups campaignId="c1" isDM pendingDrafts={0} />);
+    await render(<DashboardGroups campaignId="c1" isDM pendingDrafts={0} />);
 
-    expect(screen.queryByText("common.notifications.new")).toBeNull();
+    expect(screen.queryByText("нове")).toBeNull();
     expect(useNotifications).toHaveBeenCalledWith("c1", { enabled: false });
   });
 });

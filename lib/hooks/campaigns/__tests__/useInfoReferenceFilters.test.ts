@@ -54,7 +54,7 @@ describe("useInfoReferenceFilters: артефакти", () => {
 });
 
 describe("useInfoReferenceFilters: класи", () => {
-  const cls: ClassForReference = { id: "k", name: "Воїн", icon: null, color: null, summary: ["Кістка здоров'я: к10"], features: [{ level: 2, name: "Сплеск дій", description: null }], subclasses: [] };
+  const cls: ClassForReference = { id: "k", name: "Воїн", icon: null, color: null, summary: [{ key: "hitDie", params: { die: 10 } }], features: [{ level: 2, name: "Сплеск дій", description: null }], subclasses: [] };
 
   it("у класовому режимі ховає скіли та шукає за вміннями класу", () => {
     const { result } = renderHook(() => useInfoReferenceFilters([], [], [], [cls]));

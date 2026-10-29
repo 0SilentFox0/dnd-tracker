@@ -1,3 +1,4 @@
+import type { ErrorParams } from "@/lib/constants/api-errors";
 import type { SpellFx } from "@/lib/utils/battle/fx/spells";
 import type { SpellRules } from "@/types/spells";
 
@@ -65,12 +66,17 @@ export interface ClassFeatureForReference {
   description: string | null;
 }
 
+export interface ClassSummaryLine {
+  key: string;
+  params?: ErrorParams;
+}
+
 export interface ClassForReference {
   id: string;
   name: string;
   icon: string | null;
   color: string | null;
-  summary: string[];
+  summary: ClassSummaryLine[];
   features: ClassFeatureForReference[];
   subclasses: { id: string; name: string; features: ClassFeatureForReference[] }[];
 }

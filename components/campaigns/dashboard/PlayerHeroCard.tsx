@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { useTranslations } from "next-intl";
 
 import { HeroHp } from "@/components/campaigns/dashboard/HeroHp";
 import { OptimizedImage } from "@/components/common/OptimizedImage";
@@ -8,6 +9,8 @@ import { CharacterStatus } from "@/lib/constants/characters";
 import type { PlayerDashboardData } from "@/types/campaigns";
 
 export function PlayerHeroCard({ campaignId, data }: { campaignId: string; data: PlayerDashboardData }) {
+  const t = useTranslations("dashboard.hero");
+
   const base = `/campaigns/${campaignId}`;
 
   const { hero, activeBattle } = data;
@@ -15,9 +18,9 @@ export function PlayerHeroCard({ campaignId, data }: { campaignId: string; data:
   if (!hero) {
     return (
       <HudPanel>
-        <p className="text-hud-ink">У тебе ще немає героя</p>
+        <p className="text-hud-ink">{t("none")}</p>
         <Button asChild className="mt-3">
-          <Link href={`${base}/character`}>Створити персонажа</Link>
+          <Link href={`${base}/character`}>{t("create")}</Link>
         </Button>
       </HudPanel>
     );
@@ -41,14 +44,14 @@ export function PlayerHeroCard({ campaignId, data }: { campaignId: string; data:
             {hero.race} · {hero.class}
           </p>
           <p className="text-xs text-hud-muted">
-            Рівень {hero.level} · КБ {hero.armorClass} · Швидкість {hero.speed}
+            {t("stats", { level: hero.level, armorClass: hero.armorClass, speed: hero.speed })}
           </p>
         </div>
       </div>
       <div className="mt-2 flex flex-wrap gap-1.5">
-        {pending && !hero.reviewNote && <HudPill tone="muted">На схваленні</HudPill>}
-        {pending && hero.reviewNote && <HudPill tone="accent">Повернуто ДМ</HudPill>}
-        {hero.seenLevel != null && hero.seenLevel < hero.level && <HudPill tone="gold">Новий рівень</HudPill>}
+        {pending && !hero.reviewNote && <HudPill tone="muted">{t("pending")}</HudPill>}
+        {pending && hero.reviewNote && <HudPill tone="accent">{t("returned")}</HudPill>}
+        {hero.seenLevel != null && hero.seenLevel < hero.level && <HudPill tone="gold">{t("newLevel")}</HudPill>}
       </div>
       {pending && hero.reviewNote && <p className="mt-1 break-words text-sm text-hud-muted">{hero.reviewNote}</p>}
       {activeBattle && (
@@ -57,12 +60,12 @@ export function PlayerHeroCard({ campaignId, data }: { campaignId: string; data:
             <HeroHp hp={activeBattle.hp} />
           </div>
           <Button asChild>
-            <Link href={`${base}/battles/${activeBattle.battleId}`}>До бою</Link>
+            <Link href={`${base}/battles/${activeBattle.battleId}`}>{t("toBattle")}</Link>
           </Button>
         </div>
       )}
       <Button asChild variant="outline" className="mt-3">
-        <Link href={`${base}/character`}>Відкрити героя</Link>
+        <Link href={`${base}/character`}>{t("open")}</Link>
       </Button>
     </HudPanel>
   );

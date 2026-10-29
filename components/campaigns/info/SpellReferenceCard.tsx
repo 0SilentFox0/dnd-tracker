@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import { Loader2, Sparkles } from "lucide-react";
 
 import { EntityIcon } from "@/components/common/EntityIcon";
@@ -13,6 +14,7 @@ import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { useUpdateSpellAppearance } from "@/lib/hooks/spells";
+import { useTranslator } from "@/lib/i18n/use-translator";
 import {
   formatMechanicsSpell,
   getShortSpellSummary,
@@ -36,7 +38,11 @@ export function SpellReferenceCard({
     spell.appearanceDescription ?? "",
   );
 
-  const shortSummary = getShortSpellSummary(spell);
+  const t = useTranslations("dashboard.reference.card");
+
+  const translate = useTranslator();
+
+  const shortSummary = getShortSpellSummary(spell, translate);
 
   return (
     <AccordionItem
@@ -51,7 +57,7 @@ export function SpellReferenceCard({
               {spell.name}
             </span>
             <span className="text-xs text-hud-muted">
-              рів. {spell.level}
+              {t("levelShort", { level: spell.level })}
               {spell.groupName ? ` · ${spell.groupName}` : ""}
             </span>
             <p className="mt-1.5 line-clamp-2 text-xs text-hud-muted">
@@ -63,18 +69,18 @@ export function SpellReferenceCard({
       <AccordionContent>
         <div className="space-y-3 border-t border-hud-line px-3 pt-2 pb-3 text-hud-bone">
           <div>
-            <Label className="hud-sc text-xs text-hud-gold">Механіка</Label>
-            <p className="text-sm mt-0.5">{formatMechanicsSpell(spell)}</p>
+            <Label className="hud-sc text-xs text-hud-gold">{t("mechanics")}</Label>
+            <p className="text-sm mt-0.5">{formatMechanicsSpell(spell, translate)}</p>
           </div>
           {spell.description && (
             <div>
-              <Label className="hud-sc text-xs text-hud-gold">Опис</Label>
+              <Label className="hud-sc text-xs text-hud-gold">{t("description")}</Label>
               <p className="text-sm mt-0.5">{spell.description}</p>
             </div>
           )}
           {spell.effects.length > 0 && (
             <div>
-              <Label className="hud-sc text-xs text-hud-gold">Ефекти</Label>
+              <Label className="hud-sc text-xs text-hud-gold">{t("effects")}</Label>
               <ul className="list-disc list-inside text-sm mt-0.5 space-y-0.5">
                 {spell.effects.map((e, i) => (
                   <li key={i}>{e}</li>
@@ -84,14 +90,14 @@ export function SpellReferenceCard({
           )}
           <div>
             <Label className="hud-sc text-xs text-hud-gold">
-              Опис вигляду (як виглядає заклинання)
+              {t("appearanceSpell")}
             </Label>
             {isDM ? (
               <div className="mt-1 space-y-2">
                 <Textarea
                   value={appearance}
                   onChange={(e) => setAppearance(e.target.value)}
-                  placeholder="Наприклад: вогняна куля, що вибухає яскравим полум'ям..."
+                  placeholder={t("appearancePlaceholderSpell")}
                   rows={3}
                   className="text-sm min-h-[80px]"
                 />
@@ -104,7 +110,7 @@ export function SpellReferenceCard({
                   {saving ? (
                     <Loader2 className="h-4 w-4 animate-spin" />
                   ) : (
-                    "Зберегти опис вигляду"
+                    t("saveAppearance")
                   )}
                 </Button>
               </div>

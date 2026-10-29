@@ -1,30 +1,32 @@
 import Link from "next/link";
+import { useTranslations } from "next-intl";
 import { ScrollText } from "lucide-react";
 
 import { HudSection } from "@/components/hud/form";
 import { HudPanel, HudPill } from "@/components/hud/page";
 import { Button } from "@/components/ui/button";
-import { BATTLE_STATUS_LABEL } from "@/lib/constants/battle";
 import type { DmDashboardData } from "@/types/campaigns";
 
 const ROW = "flex min-w-0 items-center gap-2 rounded-md px-2 py-1.5 text-sm text-hud-ink hover:bg-white/5";
 
 export function DmNextSteps({ campaignId, data }: { campaignId: string; data: DmDashboardData }) {
+  const t = useTranslations("dashboard");
+
   const base = `/campaigns/${campaignId}`;
 
   const hasPrep = data.pendingDrafts > 0 || data.scenarioPages.length > 0 || data.battles.length > 0;
 
   return (
     <HudPanel className="shadow-[inset_0_0_0_1px_var(--color-hud-gold-strong)]">
-      <HudSection title="Що далі">
+      <HudSection title={t("nextSteps.title")}>
         {hasPrep && (
           <div className="mb-3">
-            <h3 className="hud-sc mb-1 text-xs text-hud-muted">Підготовка</h3>
+            <h3 className="hud-sc mb-1 text-xs text-hud-muted">{t("nextSteps.prep")}</h3>
             <ul>
               {data.pendingDrafts > 0 && (
                 <li>
                   <Link href={`${base}/dm/characters`} className={ROW}>
-                    <span className="truncate">На схваленні: {data.pendingDrafts}</span>
+                    <span className="truncate">{t("nextSteps.pending", { count: data.pendingDrafts })}</span>
                   </Link>
                 </li>
               )}
@@ -40,7 +42,7 @@ export function DmNextSteps({ campaignId, data }: { campaignId: string; data: Dm
                 <li key={b.id}>
                   <Link href={`${base}/battles/${b.id}`} className={ROW}>
                     <span className="min-w-0 flex-1 truncate">{b.name}</span>
-                    <HudPill tone="accent">{BATTLE_STATUS_LABEL[b.status]}</HudPill>
+                    <HudPill tone="accent">{t(`battleStatus.${b.status}`)}</HudPill>
                   </Link>
                 </li>
               ))}
@@ -48,16 +50,16 @@ export function DmNextSteps({ campaignId, data }: { campaignId: string; data: Dm
           </div>
         )}
         <div>
-          <h3 className="hud-sc mb-1 text-xs text-hud-muted">Сесія</h3>
+          <h3 className="hud-sc mb-1 text-xs text-hud-muted">{t("nextSteps.session")}</h3>
           <div className="flex flex-wrap gap-2">
             <Button asChild variant="outline">
-              <Link href={`${base}/dm/show`}>Показ</Link>
+              <Link href={`${base}/dm/show`}>{t("nextSteps.show")}</Link>
             </Button>
             <Button asChild variant="outline">
-              <Link href={`${base}/dm/world`}>Глобальна карта</Link>
+              <Link href={`${base}/dm/world`}>{t("nextSteps.world")}</Link>
             </Button>
             <Button asChild variant="outline">
-              <Link href={`${base}/dm/music`}>Музика</Link>
+              <Link href={`${base}/dm/music`}>{t("nextSteps.music")}</Link>
             </Button>
           </div>
         </div>

@@ -2,6 +2,7 @@
 
 import { useDeferredValue, useMemo, useState } from "react";
 
+import { useTranslator } from "@/lib/i18n/use-translator";
 import {
   artifactSearchText,
   classSearchText,
@@ -44,6 +45,8 @@ function uniqueSorted<T, V extends string | number>(items: T[], pick: (item: T) 
 }
 
 export function useInfoReferenceFilters(skills: SkillForReference[], spells: SpellForReference[], artifacts: ArtifactForReference[] = [], classes: ClassForReference[] | null = null) {
+  const t = useTranslator();
+
   const classMode = classes !== null;
 
   const [searchQuery, setSearchQuery] = useState("");
@@ -57,7 +60,7 @@ export function useInfoReferenceFilters(skills: SkillForReference[], spells: Spe
   const deferredSearch = useDeferredValue(searchQuery);
 
   const options = useMemo(() => {
-    const slots = new Map(artifacts.map((a) => [a.slot, a.slotLabel]));
+    const slots = new Map(artifacts.map((a) => [a.slot, t(`artifacts.slots.${a.slot}`)]));
 
     return {
       mainSkill: uniqueSorted(skills, (s) => s.mainSkillName),
@@ -68,23 +71,23 @@ export function useInfoReferenceFilters(skills: SkillForReference[], spells: Spe
       artifactSlot: Array.from(slots, ([value, label]) => ({ value, label })).sort((a, b) => a.label.localeCompare(b.label)),
       artifactSet: uniqueSorted(artifacts, (a) => a.setName),
     };
-  }, [skills, spells, artifacts]);
+  }, [skills, spells, artifacts, t]);
 
   const filteredSkills = useMemo(
-    () => skills.filter((s) => matchSearch(skillSearchText(s), deferredSearch) && (!values.mainSkill || s.mainSkillName === values.mainSkill)),
-    [skills, deferredSearch, values.mainSkill],
+    () => skills.filter((s) => matchSearch(skillSearchText(s, t), deferredSearch) && (!values.mainSkill || s.mainSkillName === values.mainSkill)),
+    [skills, deferredSearch, values.mainSkill, t],
   );
 
   const filteredSpells = useMemo(
     () =>
       spells.filter(
         (s) =>
-          matchSearch(spellSearchText(s), deferredSearch) &&
+          matchSearch(spellSearchText(s, t), deferredSearch) &&
           (values.spellLevel == null || s.level === values.spellLevel) &&
           (!values.spellGroup || s.groupName === values.spellGroup) &&
           (!values.spellType || s.type === values.spellType),
       ),
-    [spells, deferredSearch, values.spellLevel, values.spellGroup, values.spellType],
+    [spells, deferredSearch, values.spellLevel, values.spellGroup, values.spellType, t],
   );
 
   const filteredArtifacts = useMemo(
@@ -99,7 +102,7 @@ export function useInfoReferenceFilters(skills: SkillForReference[], spells: Spe
     [artifacts, deferredSearch, values.artifactRarity, values.artifactSlot, values.artifactSet],
   );
 
-  const filteredClasses = useMemo(() => (classes ?? []).filter((c) => matchSearch(classSearchText(c), deferredSearch)), [classes, deferredSearch]);
+  const filteredClasses = useMemo(() => (classes ?? []).filter((c) => matchSearch(classSearchText(c, t), deferredSearch)), [classes, deferredSearch, t]);
 
   const field = <K extends keyof FilterValues>(key: K) => ({
     value: values[key],

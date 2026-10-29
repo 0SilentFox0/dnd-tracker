@@ -4,6 +4,7 @@ import { describe, expect, it } from "vitest";
 
 import { dashboardHiddenKeys, DM_DASHBOARD_SECTIONS, PLAYER_DASHBOARD_SECTIONS } from "@/lib/constants/campaign-dashboard";
 import { matchesQuery } from "@/lib/utils/common/text-search";
+import uk from "@/messages/uk/dashboard.json";
 
 const ALL = [...DM_DASHBOARD_SECTIONS, ...PLAYER_DASHBOARD_SECTIONS];
 
@@ -22,8 +23,18 @@ describe("dashboard sections", () => {
     });
   });
 
+  it("кожна плитка має title, subtitle і keywords у uk", () => {
+    for (const s of ALL) expect(uk.sections[s.key as keyof typeof uk.sections], s.key).toMatchObject({ title: expect.any(String), subtitle: expect.any(String), keywords: expect.any(String) });
+  });
+
   it("пошук за title і keywords", () => {
-    const find = (q: string) => DM_DASHBOARD_SECTIONS.filter((s) => matchesQuery([s.title, ...s.keywords], q)).map((s) => s.key);
+    const fields = (key: string) => {
+      const sec = uk.sections[key as keyof typeof uk.sections];
+
+      return [sec.title, ...sec.keywords.split(",").map((k) => k.trim())];
+    };
+
+    const find = (q: string) => DM_DASHBOARD_SECTIONS.filter((s) => matchesQuery(fields(s.key), q)).map((s) => s.key);
 
     expect(find("моби")).toContain("units");
     expect(find("закл")).toContain("spells");

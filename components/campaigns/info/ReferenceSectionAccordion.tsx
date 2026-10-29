@@ -1,6 +1,7 @@
 "use client";
 
 import { useMemo } from "react";
+import { useTranslations } from "next-intl";
 
 import { ArtifactReferenceCard } from "./ArtifactReferenceCard";
 import { ArtifactSetReferenceCard } from "./ArtifactSetReferenceCard";
@@ -11,7 +12,7 @@ import { SpellReferenceCard } from "./SpellReferenceCard";
 
 import { HudPanel } from "@/components/hud/page";
 import { Accordion } from "@/components/ui/accordion";
-import { groupDisplayName, UNGROUPED_KEY, UNGROUPED_LABELS } from "@/lib/constants/ungrouped";
+import { groupDisplayName, UNGROUPED_KEY } from "@/lib/constants/ungrouped";
 import type { ArtifactForReference, ArtifactSetForReference, ClassForReference, SkillForReference, SpellForReference } from "@/types/info-reference";
 
 interface ReferenceSectionAccordionProps {
@@ -28,6 +29,10 @@ interface ReferenceSectionAccordionProps {
 }
 
 export function ReferenceSectionAccordion({ campaignId, isDM, shown, items }: ReferenceSectionAccordionProps) {
+  const t = useTranslations("dashboard.reference.sections");
+
+  const tu = useTranslations("common.ungrouped");
+
   const { skills: filteredSkills, spells: filteredSpells, artifacts: filteredArtifacts, artifactSets, classes: filteredClasses } = items;
 
   const skillsByMain = useMemo(() => {
@@ -87,12 +92,10 @@ export function ReferenceSectionAccordion({ campaignId, isDM, shown, items }: Re
         <HudPanel className="space-y-3">
           {showBoth && (
             <h2 className="hud-sc scroll-mt-4 text-lg text-hud-gold" id="ref-classes">
-              Класи
+              {t("classes.title")}
             </h2>
           )}
-          <p className="text-sm text-hud-muted">
-            Класи кампанії: особливості, вміння за рівнями та підкласи.
-          </p>
+          <p className="text-sm text-hud-muted">{t("classes.intro")}</p>
           <Accordion
             type="multiple"
             defaultValue={[]}
@@ -109,13 +112,10 @@ export function ReferenceSectionAccordion({ campaignId, isDM, shown, items }: Re
         <HudPanel className="space-y-3">
           {showBoth && (
             <h2 className="hud-sc scroll-mt-4 text-lg text-hud-gold" id="ref-skills">
-              Скіли
+              {t("skills.title")}
             </h2>
           )}
-          <p className="text-sm text-hud-muted">
-            Як діють скіли та як вони виглядають у грі. Опис вигляду може
-            редагувати лише DM.
-          </p>
+          <p className="text-sm text-hud-muted">{t("skills.intro")}</p>
           <Accordion
             type="multiple"
             defaultValue={[]}
@@ -137,7 +137,7 @@ export function ReferenceSectionAccordion({ campaignId, isDM, shown, items }: Re
                     key={mainName}
                     group={{
                       accordionValue: mainName,
-                      title: groupDisplayName(mainName, UNGROUPED_LABELS.branch),
+                      title: groupDisplayName(mainName, tu("branch")),
                       icon: first?.mainSkillIcon ?? null,
                       accentColor: first?.mainSkillColor ?? null,
                       count: list.length,
@@ -167,13 +167,10 @@ export function ReferenceSectionAccordion({ campaignId, isDM, shown, items }: Re
         <HudPanel className="space-y-3">
           {showBoth && (
             <h2 className="hud-sc scroll-mt-4 text-lg text-hud-gold" id="ref-spells">
-              Заклинання
+              {t("spells.title")}
             </h2>
           )}
-          <p className="text-sm text-hud-muted">
-            Як діють заклинання та як вони виглядають. Опис вигляду може
-            редагувати лише DM.
-          </p>
+          <p className="text-sm text-hud-muted">{t("spells.intro")}</p>
           <Accordion
             type="multiple"
             defaultValue={[]}
@@ -192,7 +189,7 @@ export function ReferenceSectionAccordion({ campaignId, isDM, shown, items }: Re
                   key={groupName}
                   group={{
                     accordionValue: groupName,
-                    title: groupDisplayName(groupName, UNGROUPED_LABELS.spellGroup),
+                    title: groupDisplayName(groupName, tu("spellGroup")),
                     count: list.length,
                   }}
                 >
@@ -219,13 +216,10 @@ export function ReferenceSectionAccordion({ campaignId, isDM, shown, items }: Re
         <HudPanel className="space-y-3">
           {showBoth && (
             <h2 className="hud-sc scroll-mt-4 text-lg text-hud-gold" id="ref-artifacts">
-              Артефакти
+              {t("artifacts.title")}
             </h2>
           )}
-          <p className="text-sm text-hud-muted">
-            Артефакти кампанії: що дають і хто їх носить. Кожен артефакт
-            унікальний і належить одному герою.
-          </p>
+          <p className="text-sm text-hud-muted">{t("artifacts.intro")}</p>
           <Accordion
             type="multiple"
             defaultValue={[]}
@@ -244,7 +238,7 @@ export function ReferenceSectionAccordion({ campaignId, isDM, shown, items }: Re
                   key={setName}
                   group={{
                     accordionValue: setName,
-                    title: groupDisplayName(setName, UNGROUPED_LABELS.artifactSet),
+                    title: groupDisplayName(setName, tu("artifactSet")),
                     count: list.length,
                   }}
                 >
@@ -261,7 +255,7 @@ export function ReferenceSectionAccordion({ campaignId, isDM, shown, items }: Re
           </Accordion>
           {artifactSets.length > 0 && (
             <div className="space-y-2">
-              <h3 className="hud-sc text-base text-hud-gold">Сети</h3>
+              <h3 className="hud-sc text-base text-hud-gold">{t("sets.title")}</h3>
               <Accordion
                 type="multiple"
                 className="grid grid-cols-1 sm:grid-cols-2 gap-3 w-full"

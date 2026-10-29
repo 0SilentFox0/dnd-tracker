@@ -13,11 +13,12 @@ import { OnboardingChecklist } from "@/components/onboarding/OnboardingChecklist
 import { dashboardHiddenKeys } from "@/lib/constants/campaign-dashboard";
 import { CampaignKind } from "@/lib/constants/campaigns";
 import { onboardingKeys } from "@/lib/hooks/onboarding/keys";
+import { getRequestLocale } from "@/lib/i18n/request-locale";
+import { getTranslator } from "@/lib/i18n/translator";
 import { PrefetchedQuery } from "@/lib/providers/prefetched-query";
 import { requireCampaignWithMembers } from "@/lib/server/campaigns/access";
 import { readDmDashboard, readPlayerDashboard } from "@/lib/server/campaigns/dashboard";
 import { readCampaignOnboarding } from "@/lib/server/onboarding/campaign";
-import { pluralUk } from "@/lib/utils/common/plural";
 import { parseRules } from "@/lib/utils/rules/schema";
 
 
@@ -29,6 +30,8 @@ export default async function CampaignDetailPage({
   params: Promise<{ id: string }>;
 }) {
   const { id } = await params;
+
+  const t = await getTranslator(await getRequestLocale(), "dashboard");
 
   const { campaign, isDM, authUser: user } = await requireCampaignWithMembers(id);
 
@@ -56,7 +59,7 @@ export default async function CampaignDetailPage({
       {isTemplate && (
         <HudPanel className="flex flex-wrap items-start gap-2 border-hud-gold/60">
           <Info className="mt-0.5 size-4 shrink-0 text-hud-gold" />
-          <p className="min-w-0 flex-1 text-sm text-hud-bone">Це шаблон: зміни потрапляють у нові кампанії, створені з нього; наявні кампанії не змінюються.</p>
+          <p className="min-w-0 flex-1 text-sm text-hud-bone">{t("page.templateNotice")}</p>
           {campaign.credits && <CreditsText credits={campaign.credits} className="basis-full" />}
           {isDM && campaign.createdFromId && (
             <div className="ml-auto">
@@ -66,7 +69,7 @@ export default async function CampaignDetailPage({
         </HudPanel>
       )}
 
-      {isDM && <HudPanel><a className="underline" href={`/campaigns/${id}/dm/compendium`}>Імпорт JSON-компендіуму та збережені звіти</a><p>Наповніть кампанію одним JSON: бібліотеки, матеріали ДМ і наступні дії.</p></HudPanel>}
+      {isDM && <HudPanel><a className="underline" href={`/campaigns/${id}/dm/compendium`}>{t("page.compendium.link")}</a><p>{t("page.compendium.text")}</p></HudPanel>}
 
       <div className="grid grid-cols-1 gap-4 lg:grid-cols-[minmax(0,1fr)_320px]">
         <div className="min-w-0 space-y-4">
@@ -80,9 +83,9 @@ export default async function CampaignDetailPage({
 
           {!isTemplate && (
             <HudPanel>
-              <HudSection title="Учасники">
+              <HudSection title={t("page.members.title")}>
                 <p className={`${LABEL} mb-2`}>
-                  {campaign.members.length} {pluralUk(campaign.members.length, ["учасник", "учасники", "учасників"])} в кампанії
+                  {t("page.members.count", { count: campaign.members.length })}
                 </p>
                 <CampaignMembersList campaignId={id} members={campaign.members} isDM={isDM} />
               </HudSection>
