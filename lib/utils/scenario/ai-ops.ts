@@ -1,7 +1,9 @@
+import { refPlaceholder } from "./ai-refs";
 import { type BlockKind, describeLost, lostBlocks } from "./block-inventory";
 import { EMPTY_DOC } from "./doc";
 import { canonicalJson, isLosslessDoc, markdownToDoc } from "./markdown";
 import { newId } from "./structure";
+import { wrapMentions } from "./wrap-mentions";
 
 import type { Translator } from "@/lib/i18n/translator";
 import type { ScenarioAiOp, ScenarioAiOpInput } from "@/types/ai";
@@ -15,6 +17,40 @@ const fail = (message: string, params: Record<string, string>): Resolved => ({ o
 const md = (text: string | undefined) => (text === undefined ? EMPTY_DOC : markdownToDoc(text));
 
 const findSection = (c: ScenarioContent, id: string) => c.sections.find((s) => s.id === id);
+
+const applied = (content: ScenarioContent, ops: ScenarioAiOp[]) => {
+  const r = applyAiOps(content, ops);
+
+  return r.ok ? r.content : content;
+};
+
+type LinkInput = Extract<ScenarioAiOpInput, { op: "linkMentions" }>;
+
+function linkMentionOps(content: ScenarioContent, input: LinkInput): ScenarioAiOp[] {
+  const target = { id: "ref" in input.acquaintance ? refPlaceholder(input.acquaintance.ref) : input.acquaintance.id, type: "acquaintance" as const };
+
+  const fields = input.fields ?? ["story", "notes"];
+
+  const out: ScenarioAiOp[] = [];
+
+  for (const section of content.sections) {
+    if (input.sectionId && section.id !== input.sectionId) continue;
+
+    for (const row of section.rows) {
+      if (input.rowIds && !input.rowIds.includes(row.id)) continue;
+
+      const story = fields.includes("story") ? wrapMentions(row.story, input.forms, target) : null;
+
+      const notes = fields.includes("notes") ? wrapMentions(row.notes, input.forms, target) : null;
+
+      if (!story?.count && !notes?.count) continue;
+
+      out.push({ op: "replaceRow", sectionId: section.id, rowId: row.id, ...(story?.count && { story: story.doc }), ...(notes?.count && { notes: notes.doc }), before: { story: row.story, notes: row.notes } });
+    }
+  }
+
+  return out;
+}
 
 export function resolveAiOps(content: ScenarioContent, inputs: ScenarioAiOpInput[], t: Translator): Resolved {
   const ops: ScenarioAiOp[] = [];
@@ -34,7 +70,20 @@ export function resolveAiOps(content: ScenarioContent, inputs: ScenarioAiOpInput
       continue;
     }
 
-    if (input.op === "linkMentions") return fail("notImplemented", { op: input.op });
+    if (input.op === "linkMentions") {
+      const who = input.acquaintance;
+
+      if ("ref" in who && !ops.some((o) => o.op === "createAcquaintance" && o.ref === who.ref)) return fail("refMissing", { ref: who.ref });
+
+      if (input.sectionId && !findSection(content, input.sectionId)) return fail("sectionMissing", { id: input.sectionId });
+
+      const linked = linkMentionOps(applied(content, ops), input);
+
+      if (linked.length === 0) return fail("noMentions", { forms: input.forms.join(", ") });
+
+      ops.push(...linked);
+      continue;
+    }
 
     const section = findSection(content, input.sectionId);
 

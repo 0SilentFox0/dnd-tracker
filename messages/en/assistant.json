@@ -136,8 +136,9 @@
   "scenarioOps": {
     "sectionMissing": "Section {id} is not on the page",
     "rowMissing": "Row {id} is not in the section \"{section}\"",
+    "refMissing": "Reference {ref} has no createAcquaintance operation before it",
+    "noMentions": "No occurrences of the forms {forms} found to turn into mention chips",
     "lossyRow": "Row {id} contains markup that AI cannot reproduce without loss (nested lists or complex tables) — edit it manually",
-    "notImplemented": "Operation {op} is not supported yet",
     "removal": "The edit removes from row {id}: {lost}. replaceRow replaces the whole field — carry these blocks into the new text unchanged, or pass allowRemoval: true only if the DM explicitly asked to remove them."
   }
 }
