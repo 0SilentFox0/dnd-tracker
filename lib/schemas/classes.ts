@@ -4,6 +4,7 @@ import { ABILITY_KEYS } from "@/lib/constants/abilities";
 import { CLASS_CASTERS, CLASS_COLUMN_KEY_RE, MAX_CLASS_COLUMNS, MAX_CLASS_LEVEL } from "@/lib/constants/classes";
 import { DND_SKILLS } from "@/lib/constants/skills";
 import { ClassChoicesSchema, PicksSchema } from "@/lib/schemas/choices";
+import { hexColorSchema } from "@/lib/schemas/common";
 import { columnRefIssues } from "@/lib/utils/abilities/class-columns";
 import { AbilitiesSchema } from "@/lib/utils/abilities/schema";
 import { choiceColumnIssues, classChoiceIdIssues } from "@/lib/utils/characters/choices/columns";
@@ -16,7 +17,7 @@ const classIconSchema = z.preprocess(
 
 const classColorSchema = z.preprocess(
   (v) => (v === "" ? null : v),
-  z.string().regex(/^#[0-9a-fA-F]{6}$/, "Колір класу — у форматі #RRGGBB").nullable().optional(),
+  hexColorSchema("Колір класу — у форматі #RRGGBB").nullable().optional(),
 );
 
 const featureSchema = z.object({ level: z.number().int().min(1).max(MAX_CLASS_LEVEL), description: z.string().max(8000).optional(), abilities: AbilitiesSchema, choices: ClassChoicesSchema.optional() });

@@ -1,7 +1,7 @@
 import type { Prisma } from "@prisma/client";
 
 import { ContentError } from "./errors";
-import { currentContentWrite, runContentWriteContext } from "./write-context";
+import { type ContentEffect, currentContentWrite, runContentEffects, runContentWriteContext } from "./write-context";
 
 import "server-only";
 import { API_ERRORS } from "@/lib/constants/api-errors";
@@ -16,7 +16,7 @@ export async function withCampaignContentWrite<T>(campaignId: string, callback: 
     return callback(current.db as Prisma.TransactionClient);
   }
 
-  const afterCommit: Array<() => void> = [];
+  const afterCommit: ContentEffect[] = [];
 
   const result = await prisma.$transaction(async (tx) => {
     const rows = await tx.$queryRaw<Array<{ id: string }>>`SELECT id FROM campaigns WHERE id = ${campaignId} FOR UPDATE`;
@@ -26,7 +26,7 @@ export async function withCampaignContentWrite<T>(campaignId: string, callback: 
     return runContentWriteContext(campaignId, tx, () => callback(tx), afterCommit);
   }, { timeout: 30_000, maxWait: 5_000 });
 
-  for (const effect of afterCommit) await effect();
+  await runContentEffects(afterCommit);
 
   return result;
 }

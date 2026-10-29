@@ -1,6 +1,7 @@
 import { z } from "zod";
 
 import { RaceChoicesSchema } from "@/lib/schemas/choices";
+import { hexColorSchema } from "@/lib/schemas/common";
 import { AbilitiesSchema } from "@/lib/utils/abilities/schema";
 
 const passiveAbilitySchema = z
@@ -40,7 +41,7 @@ const raceIconSchema = z.preprocess(
 
 const raceColorSchema = z.preprocess(
   (v) => (v === "" ? null : v),
-  z.string().regex(/^#[0-9a-fA-F]{6}$/, "Колір раси — у форматі #RRGGBB").nullable().optional(),
+  hexColorSchema("Колір раси — у форматі #RRGGBB").nullable().optional(),
 );
 
 export const createRaceSchema = z.object({

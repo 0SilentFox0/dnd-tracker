@@ -1,3 +1,4 @@
+import { removeEffects } from "@/lib/utils/battle/conditions/query";
 import type { ActiveEffect, BattleParticipant } from "@/types/battle";
 
 export const effectKey = (participantId: string, effectId: string) => `${participantId}:${effectId}`;
@@ -6,11 +7,7 @@ export function activeEffectIds(ps: BattleParticipant[]): Set<string> {
   return new Set(ps.flatMap((p) => p.battleData.activeEffects.map((e) => effectKey(p.basicInfo.id, e.id))));
 }
 
-export const withoutEffects = (p: BattleParticipant, drop: (e: ActiveEffect) => boolean): BattleParticipant => {
-  if (!p.battleData.activeEffects.some(drop)) return p;
-
-  return { ...p, battleData: { ...p.battleData, activeEffects: p.battleData.activeEffects.filter((e) => !drop(e)) } };
-};
+export const withoutEffects = (p: BattleParticipant, drop: (e: ActiveEffect) => boolean): BattleParticipant => removeEffects(p, drop).participant;
 
 export function consumeAttackEffects(
   ps: BattleParticipant[],

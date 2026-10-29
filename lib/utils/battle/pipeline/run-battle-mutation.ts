@@ -7,7 +7,6 @@ import { guardTurnOrder } from "./turn-order-guard";
 
 import { API_ERRORS } from "@/lib/constants/api-errors";
 import { BattleStatus } from "@/lib/constants/battle";
-import { isActive } from "@/lib/utils/abilities/engine/core/participants";
 import type { Rng } from "@/lib/utils/abilities/engine/core/types";
 import { syncMapAuras } from "@/lib/utils/abilities/engine/effects/map-auras";
 import type { BATTLE_RATE_LIMITS, RateLimitResult } from "@/lib/utils/api/rate-limit";
@@ -42,7 +41,7 @@ import type { BattleAction, BattleMapConfig, BattleParticipant } from "@/types/b
 
 export { PUSHER_DELTA_LIMIT_BYTES } from "./limits";
 
-export const BattleAccess = { DM: "dm", TURN_CONTROLLER: "turnController", CURRENT_CONTROLLER: "currentController", MEMBER: "member" } as const;
+export const BattleAccess = { DM: "dm", CURRENT_CONTROLLER: "currentController", MEMBER: "member" } as const;
 
 export type BattleAccess = (typeof BattleAccess)[keyof typeof BattleAccess];
 
@@ -96,22 +95,8 @@ export function assertAccess(access: BattleAccess, ctx: BattleMutationContext): 
 
   if (access === BattleAccess.DM) throw new BattleAccessError(403, API_ERRORS.DM_ONLY);
 
-  const current = ctx.participants[ctx.scene.turnIndex];
-
-  if (access === BattleAccess.CURRENT_CONTROLLER) {
-    if (!controls(ctx, current)) {
-      throw new BattleRuleError("not_your_turn", "Зараз не ваш хід");
-    }
-
-    return;
-  }
-
-  if (!controls(ctx, current)) {
-    throw new BattleRuleError("not_your_turn", "Зараз не ваш хід");
-  }
-
-  if (!isActive(current)) {
-    throw new BattleRuleError("participant_dead", "Учасник не може діяти");
+  if (!controls(ctx, ctx.participants[ctx.scene.turnIndex])) {
+    throw new BattleRuleError("not_your_turn", API_ERRORS.BATTLE_NOT_YOUR_TURN);
   }
 }
 
@@ -293,6 +278,10 @@ export function guardBattleContext<TBody>(userId: string, loaded: LoadedBattle &
 
   assertAccess(options.access, ctx);
 
+  if (expectedVersion !== undefined && expectedVersion !== loaded.scene.version) {
+    throw new BattleConflictError(loaded.scene.version);
+  }
+
   const isDryRun = options.dryRun?.(body) ?? false;
 
   const awaiting = loaded.scene.status === BattleStatus.ACTIVE ? checkVictoryConditions(loaded.participants, reserveOf(loaded.pending)).awaiting : null;
@@ -317,12 +306,6 @@ export function guardBattleContext<TBody>(userId: string, loaded: LoadedBattle &
 
   if (loaded.scene.pendingCritChoice && !options.allowWhileCritPending && !isDryRun) {
     throw new BattleRuleError("crit_pending", API_ERRORS.CRIT_PENDING);
-  }
-
-  const expected = expectedVersion;
-
-  if (expected !== undefined && expected !== loaded.scene.version) {
-    throw new BattleConflictError(loaded.scene.version);
   }
 
   return { ctx, awaiting, isDryRun };

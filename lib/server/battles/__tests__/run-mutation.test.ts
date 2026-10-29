@@ -147,28 +147,15 @@ describe("runBattleMutation", () => {
     expect(res.status).toBe(403);
   });
 
-  it("turnController: не твій хід — 422 not_your_turn", async () => {
+  it("currentController: не твій хід — 422 not_your_turn", async () => {
     const res = await runBattleMutation(
       req(),
-      { params, access: "turnController", mutate: noop },
+      { params, access: "currentController", mutate: noop },
       deps({ loadBattle: vi.fn(async () => loaded({ scene: { ...loaded().scene, turnIndex: 1 } })) }),
     );
 
     expect(res.status).toBe(422);
     expect(await res.json()).toMatchObject({ code: "not_your_turn" });
-  });
-
-  it("turnController: твій учасник непритомний — 422 participant_dead", async () => {
-    const downed = { ...hero, combatStats: { ...hero.combatStats, status: "unconscious" as const } };
-
-    const res = await runBattleMutation(
-      req(),
-      { params, access: "turnController", mutate: noop },
-      deps({ loadBattle: vi.fn(async () => loaded({ participants: [downed, goblin] })) }),
-    );
-
-    expect(res.status).toBe(422);
-    expect(await res.json()).toMatchObject({ code: "participant_dead" });
   });
 
   it("невідповідний статус бою — 422 wrong_status", async () => {

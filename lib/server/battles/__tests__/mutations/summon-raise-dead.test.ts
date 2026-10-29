@@ -3,6 +3,7 @@ import { describe, expect, it } from "vitest";
 
 import { context, goblin, participant } from "./fixtures";
 
+import { API_ERRORS } from "@/lib/constants/api-errors";
 import { ParticipantSide, ParticipantSourceType, type ParticipantSourceTypeValue } from "@/lib/constants/battle";
 import { createAbilityActionMutation } from "@/lib/server/battles/mutations/ability-action/ability-action-mutation";
 import { createBonusActionMutation } from "@/lib/server/battles/mutations/bonus-action/bonus-action-mutation";
@@ -171,7 +172,7 @@ describe("summoned units are controlled by the summoner's player", () => {
     const turn = context({ participants: [playerCaster, imp], userId: "user-1" });
 
     expect(() => assertAccess(BattleAccess.CURRENT_CONTROLLER, { ...turn, scene: { ...turn.scene, turnIndex: 1 } })).not.toThrow();
-    expect(() => assertAccess(BattleAccess.CURRENT_CONTROLLER, { ...turn, userId: "someone", scene: { ...turn.scene, turnIndex: 1 } })).toThrow();
+    expect(() => assertAccess(BattleAccess.CURRENT_CONTROLLER, { ...turn, userId: "someone", scene: { ...turn.scene, turnIndex: 1 } })).toThrow(API_ERRORS.BATTLE_NOT_YOUR_TURN);
   });
 
   it("a DM-controlled summoner keeps DM control", async () => {
