@@ -19,7 +19,7 @@ const abilityKeyOf = (label: string) => ABILITY_KEYS.find((k) => ABILITY_LABELS[
 const statLabelKey = (label: string) => {
   const key = abilityKeyOf(label);
 
-  return key ? `common.abilities.${key}.label` : label;
+  return key ? `gameTerms.abilities.${key}.label` : label;
 };
 
 // the battle damage engine names this step in Ukrainian

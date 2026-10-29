@@ -22,7 +22,7 @@ export function UnitSpellcastingFields({ formData, spells, onChange }: { formDat
 
   const tCommon = useTranslations("common.actions");
 
-  const tAbilities = useTranslations("common.abilities");
+  const tAbilities = useTranslations("gameTerms.abilities");
 
   const block = { ...formData.spellcasting, spells: formData.spellcasting?.spells ?? [] };
 

@@ -36,6 +36,8 @@ export function ArtifactCard({
 }: ArtifactCardProps) {
   const t = useTranslations("artifacts");
 
+  const tc = useTranslations("common.actions");
+
   const notify = useNotify();
 
   const rarityLabel = artifact.rarity ? ((ARTIFACT_RARITY_VALUES as readonly string[]).includes(artifact.rarity) ? t(`rarity.${artifact.rarity as ArtifactRarity}`) : artifact.rarity) : null;
@@ -96,7 +98,7 @@ export function ArtifactCard({
               <p className="min-w-0 flex-1 text-sm font-semibold leading-snug text-hud-ink [overflow-wrap:anywhere]">{artifact.name}</p>
               <div className="-mr-1 -mt-1 flex shrink-0">
                 <Button variant="ghost" size="icon" className="size-7 text-hud-muted hover:text-hud-ink" asChild>
-                  <Link href={`/campaigns/${campaignId}/dm/artifacts/${artifact.id}`} aria-label={t("card.edit")} title={t("card.edit")}>
+                  <Link href={`/campaigns/${campaignId}/dm/artifacts/${artifact.id}`} aria-label={tc("edit")} title={tc("edit")}>
                     <Pencil className="size-3.5" />
                   </Link>
                 </Button>
@@ -166,7 +168,7 @@ export function ArtifactCard({
       )}
       <div className="flex gap-2">
         <Button variant="outline" size="sm" className="flex-1" asChild>
-          <Link href={`/campaigns/${campaignId}/dm/artifacts/${artifact.id}`}>{t("card.edit")}</Link>
+          <Link href={`/campaigns/${campaignId}/dm/artifacts/${artifact.id}`}>{tc("edit")}</Link>
         </Button>
         <ArtifactDeleteButton
           campaignId={campaignId}

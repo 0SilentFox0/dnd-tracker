@@ -21,6 +21,8 @@ export function BackgroundForm({ campaignId, background }: { campaignId: string;
 
   const tc = useTranslations("common");
 
+  const tg = useTranslations("gameTerms");
+
   const { form: { data, patch }, validation: { invalid, setInvalid }, status: { isSaving }, actions } = useBackgroundForm(campaignId, background);
 
   const { data: feats = [] } = useFeats(campaignId);
@@ -35,7 +37,7 @@ export function BackgroundForm({ campaignId, background }: { campaignId: string;
           <Label htmlFor="background-description">{t("form.description")}</Label>
           <Textarea id="background-description" value={data.description ?? ""} onChange={(e) => patch({ description: e.target.value || null })} />
           <fieldset className="space-y-2"><legend>{t("form.skills")}</legend><div className="flex flex-wrap gap-3">
-            {DND_SKILLS.map((skill) => <label key={skill} className="flex items-center gap-2 text-sm"><Checkbox checked={data.skillProficiencies.includes(skill)} onCheckedChange={() => patch({ skillProficiencies: toggleItem(data.skillProficiencies, skill) })} />{tc(`dndSkills.${skill}`)}</label>)}
+            {DND_SKILLS.map((skill) => <label key={skill} className="flex items-center gap-2 text-sm"><Checkbox checked={data.skillProficiencies.includes(skill)} onCheckedChange={() => patch({ skillProficiencies: toggleItem(data.skillProficiencies, skill) })} />{tg(`dndSkills.${skill}`)}</label>)}
           </div></fieldset>
           <Label htmlFor="background-tools">{t("form.tools")}</Label>
           <Textarea id="background-tools" value={data.toolProficiencies.join("\n")} onChange={(e) => patch({ toolProficiencies: e.target.value.split("\n") })} onBlur={() => patch({ toolProficiencies: data.toolProficiencies.map((s) => s.trim()).filter(Boolean) })} />

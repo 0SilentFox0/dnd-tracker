@@ -34,7 +34,6 @@
   "card": {
     "slotChangeFailed": "Не вдалося змінити слот",
     "slotPlaceholder": "Слот",
-    "edit": "Редагувати",
     "kindProperty": "Властивість",
     "kindGear": "Спорядження",
     "set": "Сет: {name}",
@@ -50,12 +49,9 @@
     "createTitle": "Створити артефакт",
     "createDescription": "Бонуси та ефекти артефакту задаються вміннями",
     "createSubmit": "Створити артефакт",
-    "createSaving": "Створення...",
     "createIconHint": "Зовнішнє посилання при збереженні копіюється в Supabase Storage (бакет {bucket}); у базі залишиться публічний URL з вашого проєкту.",
     "editTitle": "Редагувати артефакт",
     "editDescription": "Зміни зберігаються при натисканні кнопки",
-    "editSubmit": "Зберегти",
-    "editSaving": "Збереження...",
     "editIconHint": "Нове зовнішнє посилання при збереженні завантажується в бакет {bucket}. URL уже з Supabase залишається без змін.",
     "tabs": {
       "weapon": "Зброя",
@@ -177,7 +173,6 @@
       "iconAlt": "Іконка сету «{name}»",
       "bonus": "Ефект сету",
       "inSet": "{count} {count, plural, one {артефакт} few {артефакти} many {артефактів} other {артефакту}} в сеті",
-      "edit": "Редагувати",
       "editSet": "Редагувати сет",
       "parts": "Частин: {count}"
     },

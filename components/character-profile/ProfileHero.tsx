@@ -19,7 +19,7 @@ export function ProfileHero({ actions, badge, ref }: { actions?: ReactNode; badg
 
   const t = useTranslations("characterProfile.hero");
 
-  const tc = useTranslations("common.stats");
+  const tc = useTranslations("gameTerms.stats");
 
   const [hpOpen, setHpOpen] = useState(false);
 

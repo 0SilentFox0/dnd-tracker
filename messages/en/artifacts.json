@@ -34,7 +34,6 @@
   "card": {
     "slotChangeFailed": "Failed to change the slot",
     "slotPlaceholder": "Slot",
-    "edit": "Edit",
     "kindProperty": "Property",
     "kindGear": "Gear",
     "set": "Set: {name}",
@@ -50,12 +49,9 @@
     "createTitle": "Create artifact",
     "createDescription": "Artifact bonuses and effects are defined by abilities",
     "createSubmit": "Create artifact",
-    "createSaving": "Creating...",
     "createIconHint": "On save the external link is copied to Supabase Storage (bucket {bucket}); the database keeps a public URL from your project.",
     "editTitle": "Edit artifact",
     "editDescription": "Changes are saved when you press the button",
-    "editSubmit": "Save",
-    "editSaving": "Saving...",
     "editIconHint": "On save a new external link is uploaded to the {bucket} bucket. A URL already on Supabase stays unchanged.",
     "tabs": {
       "weapon": "Weapon",
@@ -177,7 +173,6 @@
       "iconAlt": "Icon of set “{name}”",
       "bonus": "Set effect",
       "inSet": "{count, plural, one {# artifact} other {# artifacts}} in the set",
-      "edit": "Edit",
       "editSet": "Edit set",
       "parts": "Parts: {count}"
     },

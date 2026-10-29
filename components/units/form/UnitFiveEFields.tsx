@@ -27,7 +27,7 @@ interface UnitFiveEFieldsProps {
 export function UnitFiveEFields({ formData, onChange }: UnitFiveEFieldsProps) {
   const t = useTranslations("units.fiveE");
 
-  const tAbilities = useTranslations("common.abilities");
+  const tAbilities = useTranslations("gameTerms.abilities");
 
   const cr = formData.cr ?? null;
 

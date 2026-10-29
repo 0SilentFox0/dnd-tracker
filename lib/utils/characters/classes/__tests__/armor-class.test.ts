@@ -44,7 +44,7 @@ describe("classArmorBase", () => {
     expect(classArmorBase(hero({ dex: -1 })).base).toBe(9);
     expect(classArmorBase(hero({ dex: 3 })).lines).toEqual([
       { label: "characterProfile.sheet.lines.noArmor", value: "10", source: "base" },
-      { label: "common.abilities.dexterity.label", value: "+3", source: "ability" },
+      { label: "gameTerms.abilities.dexterity.label", value: "+3", source: "ability" },
     ]);
   });
 

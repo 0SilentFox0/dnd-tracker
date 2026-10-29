@@ -18,6 +18,8 @@ type ArtifactSetCardProps = { set: ArtifactSetCardData; campaignId: string } & (
 export function ArtifactSetCard(props: ArtifactSetCardProps) {
   const t = useTranslations("artifacts.sets.card");
 
+  const tc = useTranslations("common.actions");
+
   const { set, campaignId } = props;
 
   const editHref = `/campaigns/${campaignId}/dm/artifact-sets/${set.id}`;
@@ -41,7 +43,7 @@ export function ArtifactSetCard(props: ArtifactSetCardProps) {
         </div>
         {props.variant === "summary" && (
           <Button size="sm" variant="outline" asChild>
-            <Link href={editHref}>{t("edit")}</Link>
+            <Link href={editHref}>{tc("edit")}</Link>
           </Button>
         )}
       </div>

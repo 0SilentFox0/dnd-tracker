@@ -8,6 +8,7 @@ import { heroArchetype } from "@/lib/constants/hero-archetypes";
 import { getAbilityModifier } from "@/lib/utils/common/calculations";
 import { DEFAULT_RULES } from "@/lib/utils/rules/defaults";
 import { heroHpFormula } from "@/lib/utils/rules/formulas";
+import type { TextRef } from "@/types/choices";
 
 /** Коефіцієнти масштабування (можна перевизначити на рівні кампанії) */
 export interface HeroScalingOptions {
@@ -65,7 +66,7 @@ export function getHeroMaxHpBreakdown(
   constitution: number,
   archetype: string | null | undefined,
   hp: HeroHpFormula = heroHpFormula(DEFAULT_RULES.heroScaling),
-): { total: number; breakdown: string[] } {
+): { total: number; breakdown: TextRef[] } {
   const a = heroArchetype(archetype);
 
   const conMod = getAbilityModifier(constitution);
@@ -78,7 +79,10 @@ export function getHeroMaxHpBreakdown(
 
   return {
     total,
-    breakdown: [`${a.name}: ${hp.baseLevels} × ${a.hpPerLevel} + рівень × (${a.hpPerLevel} + мод. ВИТ ${conMod} × ${hp.conCoefficient})`, `= ${base} + ${level} × ${perLevel} = ${total}`],
+    breakdown: [
+      { message: "characterProfile.sheet.heroHp.formula", params: { archetype: a.key ?? "universal", baseLevels: String(hp.baseLevels), hpPerLevel: String(a.hpPerLevel), conMod: String(conMod), conCoefficient: String(hp.conCoefficient) } },
+      { message: "characterProfile.sheet.heroHp.total", params: { base: String(base), level: String(level), perLevel: String(perLevel), total: String(total) } },
+    ],
   };
 }
 

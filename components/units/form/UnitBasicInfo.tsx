@@ -33,7 +33,7 @@ interface UnitBasicInfoProps {
 export function UnitBasicInfo({ formData, races, onChange }: UnitBasicInfoProps) {
   const t = useTranslations("units.basic");
 
-  const tCommon = useTranslations("common");
+  const tg = useTranslations("gameTerms");
 
   return (
     <div className="grid gap-4 md:grid-cols-2">
@@ -51,7 +51,7 @@ export function UnitBasicInfo({ formData, races, onChange }: UnitBasicInfoProps)
           placeholder={t("racePlaceholder")}
           options={races.map((r) => ({ value: r.id, label: r.name }))}
           allowNone
-          noneLabel={tCommon("ungrouped.race")}
+          noneLabel={tg("ungrouped.race")}
         />
       </div>
 

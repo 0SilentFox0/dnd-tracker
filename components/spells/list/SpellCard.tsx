@@ -38,7 +38,7 @@ export function SpellCard({ spell, campaignId, spellGroups, onRemoveFromGroup, o
 
   const ta = useTranslations("common.actions");
 
-  const tc = useTranslator("common");
+  const tg = useTranslator("gameTerms");
 
   const mechanics = useSpellMechanics();
 
@@ -46,7 +46,7 @@ export function SpellCard({ spell, campaignId, spellGroups, onRemoveFromGroup, o
 
   if (printMode) return <SpellPrintCard spell={spell} />;
 
-  const groupName = spell.spellGroup?.name || tc("ungrouped.spellGroup");
+  const groupName = spell.spellGroup?.name || tg("ungrouped.spellGroup");
 
   const GroupIcon = getSpellGroupIcon(spell.spellGroup);
 
@@ -66,7 +66,7 @@ export function SpellCard({ spell, campaignId, spellGroups, onRemoveFromGroup, o
         <div className="min-w-0 flex-1">
           <h3 className="hud-sc truncate text-[15px] text-hud-ink">{spell.name}</h3>
           <div className="mt-1 flex flex-wrap gap-1">
-            <HudPill icon={<Sparkles className="size-3" />}>{tc(`spellLevels.${spell.level}`)}</HudPill>
+            <HudPill icon={<Sparkles className="size-3" />}>{tg(`spellLevels.${spell.level}`)}</HudPill>
             {groupName === "Monster Actions" && <HudPill>Monster Actions</HudPill>}
             {mechanics(spell).map((label) => (
               <HudPill key={label}>{label}</HudPill>
@@ -91,7 +91,7 @@ export function SpellCard({ spell, campaignId, spellGroups, onRemoveFromGroup, o
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
-              <DropdownMenuItem onClick={() => onMoveToGroup(spell.id, null)}>{tc("ungrouped.spellGroup")}</DropdownMenuItem>
+              <DropdownMenuItem onClick={() => onMoveToGroup(spell.id, null)}>{tg("ungrouped.spellGroup")}</DropdownMenuItem>
               {spellGroups.map((group) => (
                 <DropdownMenuItem key={group.id} onClick={() => onMoveToGroup(spell.id, group.id)}>
                   {group.name}

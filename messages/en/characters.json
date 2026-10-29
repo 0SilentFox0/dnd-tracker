@@ -23,7 +23,6 @@
     "title": "Create a new character",
     "aside": "Fill in the character's basic information",
     "submit": "Create character",
-    "submitting": "Creating...",
     "tabs": {
       "combat": "Combat"
     },

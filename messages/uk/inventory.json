@@ -50,9 +50,7 @@
     "transfer": "Передати",
     "revoke": "Забрати",
     "unequip": "Зняти",
-    "use": "Використати",
-    "edit": "Редагувати",
-    "remove": "Видалити"
+    "use": "Використати"
   },
   "confirm": {
     "revokeTitle": "Забрати «{name}»?",
@@ -68,7 +66,6 @@
   "itemDialog": {
     "addTitle": "Додати річ",
     "editTitle": "Редагувати річ",
-    "save": "Зберегти",
     "name": "Назва",
     "description": "Опис",
     "quantity": "Кількість",
@@ -84,7 +81,6 @@
   "grant": {
     "title": "Видати артефакт",
     "baseTitle": "База для «{name}»",
-    "back": "Назад",
     "submit": "Видати",
     "baseSearch": "Пошук бази",
     "noBases": "Немає підхожих вільних баз",

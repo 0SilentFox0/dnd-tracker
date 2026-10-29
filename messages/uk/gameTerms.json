@@ -1,1 +1,154 @@
-{}
+{
+  "abilities": {
+    "strength": {
+      "label": "Сила",
+      "short": "СИЛ"
+    },
+    "dexterity": {
+      "label": "Спритність",
+      "short": "СПР"
+    },
+    "constitution": {
+      "label": "Статура",
+      "short": "ТІЛ"
+    },
+    "intelligence": {
+      "label": "Інтелект",
+      "short": "ІНТ"
+    },
+    "wisdom": {
+      "label": "Мудрість",
+      "short": "МУД"
+    },
+    "charisma": {
+      "label": "Харизма",
+      "short": "ХАР"
+    }
+  },
+  "stats": {
+    "hitPoints": "Хіти",
+    "speed": "Швидкість",
+    "armorClass": "Захист",
+    "initiative": "Ініціатива",
+    "spellSaveDC": "Захист від Заклинань",
+    "spellAttackBonus": "Бонус до заклинань",
+    "spellSlots": "Заклинання",
+    "moral": "Мораль"
+  },
+  "spellLevels": {
+    "0": "Замовляння",
+    "1": "Перше коло",
+    "2": "Друге коло",
+    "3": "Третє коло",
+    "4": "Четверте коло",
+    "5": "П'яте коло",
+    "6": "Шосте коло",
+    "7": "Сьоме коло",
+    "8": "Восьме коло",
+    "9": "Дев'яте коло"
+  },
+  "dndSkills": {
+    "acrobatics": "Акробатика",
+    "animalHandling": "Поводження з тваринами",
+    "arcana": "Магія",
+    "athletics": "Атлетика",
+    "deception": "Обман",
+    "history": "Історія",
+    "insight": "Проникливість",
+    "intimidation": "Залякування",
+    "investigation": "Розслідування",
+    "medicine": "Медицина",
+    "nature": "Природа",
+    "perception": "Сприйняття",
+    "performance": "Виступ",
+    "persuasion": "Переконання",
+    "religion": "Релігія",
+    "sleightOfHand": "Спритність рук",
+    "stealth": "Скритність",
+    "survival": "Виживання"
+  },
+  "ungrouped": {
+    "spellGroup": "Без групи",
+    "mainSkill": "Без основного навику",
+    "race": "Без раси",
+    "artifactSet": "Без сету",
+    "branch": "Без гілки"
+  },
+  "damageTypes": {
+    "fire": "Вогонь",
+    "cold": "Лід",
+    "lightning": "Блискавка",
+    "acid": "Кислота",
+    "poison": "Отрута",
+    "necrotic": "Некротична",
+    "radiant": "Світло",
+    "thunder": "Грім",
+    "psychic": "Психічна",
+    "force": "Сила",
+    "bludgeoning": "Дробляча",
+    "piercing": "Колюча",
+    "slashing": "Рубляча",
+    "bleed": "Кровотеча"
+  },
+  "monster": {
+    "distance": "{label} {value} фт",
+    "passivePerception": "Пасивна Уважність {value}",
+    "fly": "Політ",
+    "swim": "Плавання",
+    "climb": "Лазіння",
+    "burrow": "Риття",
+    "hover": "Зависання",
+    "languages": "Мови: {value}",
+    "telepathy": "Телепатія {value} фт",
+    "senses": {
+      "darkvision": "Темнозір",
+      "blindsight": "Сліпочуття",
+      "tremorsense": "Чуття вібрацій",
+      "truesight": "Справжній зір"
+    },
+    "sizes": {
+      "tiny": "Крихітний",
+      "small": "Малий",
+      "medium": "Середній",
+      "large": "Великий",
+      "huge": "Величезний",
+      "gargantuan": "Гігантський"
+    }
+  },
+  "weaponTraits": {
+    "label": "Властивості зброї",
+    "versatileDice": "Кубик двома руками",
+    "traits": {
+      "light": "Легка",
+      "finesse": "Фехтувальна",
+      "twoHanded": "Дворучна",
+      "versatile": "Універсальна",
+      "reach": "Досяжність",
+      "thrown": "Метальна",
+      "ammunition": "Боєприпаси"
+    }
+  },
+  "creatureTypes": {
+    "aberration": "Аберації",
+    "beast": "Звірі",
+    "celestial": "Небожителі",
+    "construct": "Конструкти",
+    "dragon": "Дракони",
+    "elemental": "Елементалі",
+    "fey": "Феї",
+    "fiend": "Пекельні створіння",
+    "giant": "Велетні",
+    "humanoid": "Гуманоїди",
+    "monstrosity": "Монстри",
+    "ooze": "Слизи",
+    "plant": "Рослини",
+    "undead": "Нежить"
+  },
+  "abbreviations": {
+    "title": "Довідка про абревіатури",
+    "srOnly": "Інформація про абревіатури",
+    "description": "Пояснення скорочень характеристик та параметрів",
+    "main": "Основні характеристики:",
+    "other": "Інші параметри:"
+  }
+}

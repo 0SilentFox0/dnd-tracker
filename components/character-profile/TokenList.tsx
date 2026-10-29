@@ -21,6 +21,8 @@ export function TokenList() {
 
   const t = useTranslations("characterProfile.tokens");
 
+  const tc = useTranslations("common.actions");
+
   const format = useFormatter();
 
   const { add, remove, isPending } = useCharacterTokens(campaignId, characterId);
@@ -34,7 +36,7 @@ export function TokenList() {
   const tokens = sheet.story.tokens;
 
   const askRemove = async (id: string, label: string) => {
-    if (await confirm({ title: t("deleteConfirm", { label }), confirmLabel: t("delete") })) await remove(id);
+    if (await confirm({ title: t("deleteConfirm", { label }), confirmLabel: tc("delete") })) await remove(id);
   };
 
   return (

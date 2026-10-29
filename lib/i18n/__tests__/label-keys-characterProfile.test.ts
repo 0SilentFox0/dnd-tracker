@@ -17,18 +17,19 @@ describe("character profile labels have translations", () => {
   expectLabelKeys("characterProfile", "tokens.counters", ["red", "green"]);
   expectLabelKeys("characterProfile", "sheet.lines", ["base", "proficiency", "weapon", "weaponDice", "levelDice", "dmMultiplier", "noArmor", "dexterityCapped", "hitDice", "bonuses"]);
   expectLabelKeys("characterProfile", "sheet.spellOrigin", ["lineage", "feat", "race", "background", "class"]);
+  expectLabelKeys("characterProfile", "sheet.heroHp", ["formula", "total"]);
   expectLabelKeys("characterProfile", "sheet.from", ["background", "classLevel", "origin", "dm"]);
 });
 
 describe("sheet line keys render the Ukrainian text word for word", () => {
   it("capped dexterity and ability picks", async () => {
-    const messages = { common: await localSource.load("uk", "common"), characterProfile: await localSource.load("uk", "characterProfile") };
+    const messages = { common: await localSource.load("uk", "common"), gameTerms: await localSource.load("uk", "gameTerms"), characterProfile: await localSource.load("uk", "characterProfile") };
 
     const t = createTranslator({ locale: "uk", messages }) as unknown as Translator;
 
     expect(translateIssue(t, { message: "characterProfile.sheet.lines.dexterityCapped", params: { cap: 2 } })).toBe("Спритність (межа 2)");
     expect(translateIssue(t, { message: "characterProfile.sheet.lines.hitDice", params: { dice: "3d10" } })).toBe("Кістки хітів: 3d10");
-    expect(translateIssue(t, { message: "common.abilities.dexterity.label" })).toBe("Спритність");
+    expect(translateIssue(t, { message: "gameTerms.abilities.dexterity.label" })).toBe("Спритність");
     expect(translateIssue(t, { message: "Fire Ring" })).toBe("Fire Ring");
 
     for (const ability of ABILITY_KEYS) expect(translateIssue(t, { message: "characterProfile.sheet.abilityPick", params: { n: 2, ability } })).toMatch(/^\+2 [А-ЯІ]{3}$/);

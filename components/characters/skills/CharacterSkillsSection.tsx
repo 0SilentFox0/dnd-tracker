@@ -13,7 +13,7 @@ export function CharacterSkillsSection({
 }: CharacterSkillsSectionProps) {
   const t = useTranslations("characters.form.sections");
 
-  const tc = useTranslations("common");
+  const tg = useTranslations("gameTerms");
 
   const { data: { savingThrows, skills }, handlers } = skillsGroup;
   
@@ -29,7 +29,7 @@ export function CharacterSkillsSection({
                 onChange={() => handlers.toggleSavingThrow(ability)}
                 className="rounded"
               />
-              <span className="text-sm">{tc(`abilities.${ability}.label`)}</span>
+              <span className="text-sm">{tg(`abilities.${ability}.label`)}</span>
             </label>
           ))}
         </div>
@@ -45,7 +45,7 @@ export function CharacterSkillsSection({
                 onChange={() => handlers.toggleSkill(skill)}
                 className="rounded"
               />
-              <span className="text-sm">{tc(`dndSkills.${skill}`)}</span>
+              <span className="text-sm">{tg(`dndSkills.${skill}`)}</span>
             </label>
           ))}
         </div>

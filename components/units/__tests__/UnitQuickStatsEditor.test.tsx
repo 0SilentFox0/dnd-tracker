@@ -40,7 +40,7 @@ describe("UnitQuickStatsEditor", () => {
   it("Enter on a new initiative saves it", async () => {
     renderIt();
 
-    const init = screen.getByLabelText("common.stats.initiative") as HTMLInputElement;
+    const init = screen.getByLabelText("gameTerms.stats.initiative") as HTMLInputElement;
 
     fireEvent.change(init, { target: { value: "5" } });
     fireEvent.keyDown(init, { key: "Enter" });

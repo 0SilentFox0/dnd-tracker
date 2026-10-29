@@ -87,7 +87,7 @@ export function UnitQuickStatsEditor({
 }: UnitQuickStatsEditorProps) {
   const t = useTranslations("units.quickStats");
 
-  const tStats = useTranslations("common.stats");
+  const tStats = useTranslations("gameTerms.stats");
 
   const { field, isBusy } = useUnitQuickStats(unit, campaignId, primaryAttackIndex);
 

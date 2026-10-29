@@ -31,7 +31,7 @@ export function UnitAttack({
 }: UnitAttackProps) {
   const t = useTranslations("units.attacks");
 
-  const tDamage = useTranslations("common.damageTypes");
+  const tDamage = useTranslations("gameTerms.damageTypes");
 
   const tCommon = useTranslations("common.actions");
 

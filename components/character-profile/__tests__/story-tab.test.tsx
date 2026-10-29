@@ -115,7 +115,7 @@ describe("Історія", () => {
 
     fireEvent.click(screen.getByRole("button", { name: "characterProfile.notes.edit" }));
     fireEvent.change(screen.getByRole("textbox", { name: "characterProfile.notes.field" }), { target: { value: "Нове" } });
-    fireEvent.click(screen.getByRole("button", { name: "characterProfile.notes.save" }));
+    fireEvent.click(screen.getByRole("button", { name: "common.actions.save" }));
 
     await waitFor(() => expect(saveNotes).toHaveBeenCalledWith("Нове"));
   });

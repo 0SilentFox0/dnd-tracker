@@ -42,7 +42,7 @@ export function NewPasswordForm({ pending, error, submitLabel, onSubmit }: NewPa
       <PasswordInput label={t("common.confirmPassword")} name="confirm" autoComplete="new-password" error={errors.confirm} />
       <FormError message={error} />
       <Button type="submit" className="w-full" size="lg" disabled={pending}>
-        {pending ? t("newPassword.saving") : submitLabel}
+        {pending ? tRoot("common.actions.saving") : submitLabel}
       </Button>
     </form>
   );

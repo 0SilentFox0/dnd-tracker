@@ -30,7 +30,7 @@ export function SpellGroupAccordion({
 }: SpellGroupAccordionProps) {
   const t = useTranslations("spells");
 
-  const tc = useTranslations("common.ungrouped");
+  const tc = useTranslations("gameTerms.ungrouped");
 
   const group = spellGroups.find((g) => g.name === groupName);
 

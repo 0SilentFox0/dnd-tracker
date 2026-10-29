@@ -12,7 +12,7 @@ afterEach(cleanup);
 
 describe("SpellFormBasicFields in en", () => {
   it("renders English labels and level options", async () => {
-    await renderWithIntl(<SpellFormBasicFields formData={{ ...defaultSpellForm(), cost: "reaction" }} setFormData={vi.fn()} spellGroups={[]} />, { locale: "en", namespaces: ["common", "spells", "spellEditor"] });
+    await renderWithIntl(<SpellFormBasicFields formData={{ ...defaultSpellForm(), cost: "reaction" }} setFormData={vi.fn()} spellGroups={[]} />, { locale: "en", namespaces: ["common", "gameTerms", "spells", "spellEditor"] });
 
     expect(screen.getByText(/^Spell name/)).toBeInTheDocument();
     expect(screen.getByText("Level (slot) *")).toBeInTheDocument();

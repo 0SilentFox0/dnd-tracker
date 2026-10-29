@@ -26,6 +26,8 @@ export function ItemDialog({ item, open, onOpenChange }: ItemDialogProps) {
 
   const t = useTranslations("inventory");
 
+  const tc = useTranslations("common.actions");
+
   const action = useStashAction(campaignId, characterId);
 
   const notify = useNotify();
@@ -63,7 +65,7 @@ export function ItemDialog({ item, open, onOpenChange }: ItemDialogProps) {
       title={item ? t("itemDialog.editTitle") : t("itemDialog.addTitle")}
       footer={
         <Button type="submit" form={FORM_ID} disabled={action.isPending || invalid}>
-          {t("itemDialog.save")}
+          {tc("save")}
         </Button>
       }
     >

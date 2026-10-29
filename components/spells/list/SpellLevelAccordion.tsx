@@ -46,9 +46,9 @@ export function SpellLevelAccordion({
 
   const ta = useTranslations("common.actions");
 
-  const tl = useTranslator("common");
+  const tg = useTranslator("gameTerms");
 
-  const levelLabel = tl(`spellLevels.${level}`);
+  const levelLabel = tg(`spellLevels.${level}`);
 
   const confirm = useConfirm();
 

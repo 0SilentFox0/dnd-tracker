@@ -18,7 +18,7 @@ import type { FeatFormData, FeatType } from "@/types/choices";
 export function FeatBasicsTab({ form: { data, set } }: { form: { data: FeatFormData; set: React.Dispatch<React.SetStateAction<FeatFormData>> } }) {
   const t = useTranslations("feats");
 
-  const tc = useTranslator("common");
+  const tg = useTranslator("gameTerms");
 
   const patch = (next: Partial<FeatFormData>) => set((prev) => ({ ...prev, ...next }));
 
@@ -63,7 +63,7 @@ export function FeatBasicsTab({ form: { data, set } }: { form: { data: FeatFormD
           {ABILITY_KEYS.map((a) => (
             <label key={a} className="flex items-center gap-1">
               <Checkbox checked={scoreAbilities.includes(a)} onCheckedChange={() => toggleAbility(a)} />
-              {tc(`abilities.${a}.label`)}
+              {tg(`abilities.${a}.label`)}
             </label>
           ))}
         </div>

@@ -25,7 +25,7 @@ describe("RulesForm", () => {
 
     expect(screen.getByLabelText("rules.sections.morale.cap")).toBeDisabled();
 
-    fireEvent.click(screen.getByRole("button", { name: "rules.form.save" }));
+    fireEvent.click(screen.getByRole("button", { name: "common.actions.save" }));
 
     await vi.waitFor(() => expect(mutateAsync).toHaveBeenCalledWith({ morale: { enabled: false, cap: 3 } }));
   });

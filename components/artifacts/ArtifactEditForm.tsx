@@ -22,6 +22,8 @@ export function ArtifactEditForm({
 }: ArtifactEditFormProps) {
   const t = useTranslations("artifacts.form");
 
+  const tc = useTranslations("common.actions");
+
   const router = useRouter();
 
   const update = useUpdateArtifact(campaignId);
@@ -36,8 +38,8 @@ export function ArtifactEditForm({
       labels={{
         title: t("editTitle"),
         description: t("editDescription"),
-        submit: t("editSubmit"),
-        saving: t("editSaving"),
+        submit: tc("save"),
+        saving: tc("saving"),
         iconHint: t("editIconHint", { bucket: "artifact-icons" }),
       }}
       cancelHref={`/campaigns/${campaignId}/dm/artifacts`}

@@ -22,6 +22,8 @@ interface ClassLevelUpDialogProps {
 export function ClassLevelUpDialog({ open, onOpenChange, character, onLeveled }: ClassLevelUpDialogProps) {
   const t = useTranslations("characterProfile.classLevelUp");
 
+  const tc = useTranslations("common.actions");
+
   const form = useClassLevelUpForm({ open, character, onLeveled, onClose: () => onOpenChange(false) });
 
   const { byId, available, selection, cls, stepDefs, multiclass, raisedEntry, nextRow, gained, picksCount, nextLevel, canSubmit, actions } = form;
@@ -44,7 +46,7 @@ export function ClassLevelUpDialog({ open, onOpenChange, character, onLeveled }:
       footer={
         <>
           <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
-            {t("cancel")}
+            {tc("cancel")}
           </Button>
           {stepDefs.length > 0 && (
             <Button type="button" variant="outline" disabled={!canSubmit} onClick={() => void actions.send(false)}>

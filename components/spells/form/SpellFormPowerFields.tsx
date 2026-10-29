@@ -156,7 +156,7 @@ export function SpellFormPowerFields({ formData, setFormData, classesEnabled = f
         <>
           <div>
             <Label htmlFor="save-ability">{tp("saveAbility")}</Label>
-            <SelectField id="save-ability" value={resolution.ability} onValueChange={(ability) => setFormData({ ...formData, resolution: { ...resolution, ability: ability as AbilityKey } })} placeholder={tp("saveAbility")} options={SAVE_ABILITY_KEYS.map((k) => ({ value: k, label: t(`common.abilities.${k}.label`) }))} />
+            <SelectField id="save-ability" value={resolution.ability} onValueChange={(ability) => setFormData({ ...formData, resolution: { ...resolution, ability: ability as AbilityKey } })} placeholder={tp("saveAbility")} options={SAVE_ABILITY_KEYS.map((k) => ({ value: k, label: t(`gameTerms.abilities.${k}.label`) }))} />
           </div>
           <div>
             <Label htmlFor="save-on-success">{tp("onSuccess")}</Label>

@@ -9,11 +9,11 @@ import { ResponsiveDialog } from "@/components/ui/responsive-dialog";
 import { CORE_ABILITY_SCORES, STAT_SCORES } from "@/lib/constants/abilities";
 
 export function AbbreviationsInfoDialog() {
-  const t = useTranslations("common.abbreviations");
+  const t = useTranslations("gameTerms.abbreviations");
 
-  const tAbility = useTranslations("common.abilities");
+  const tAbility = useTranslations("gameTerms.abilities");
 
-  const tStat = useTranslations("common.stats");
+  const tStat = useTranslations("gameTerms.stats");
 
   const [open, setOpen] = useState(false);
 

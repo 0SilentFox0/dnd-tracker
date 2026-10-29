@@ -35,6 +35,8 @@ function bounds(issue: object): ErrorParams {
 export function SpellFormEffects({ campaignId, formData, setFormData }: SpellFormFieldsProps & { campaignId: string }) {
   const t = useTranslations("spellEditor.effects");
 
+  const tc = useTranslations("common.actions");
+
   const { data: races = [] } = useRaces(campaignId);
 
   const errorsByPath = Object.fromEntries(
@@ -116,7 +118,7 @@ export function SpellFormEffects({ campaignId, formData, setFormData }: SpellFor
                 onChange={(e) => setFormData({ ...formData, raceModifiers: formData.raceModifiers.map((x, j) => (j === i ? { ...x, percent: Math.max(-100, Math.min(200, parseInt(e.target.value) || 0)) } : x)) })}
                 className="w-24"
               />
-              <Button type="button" variant="ghost" size="icon" aria-label={t("remove")} onClick={() => setFormData({ ...formData, raceModifiers: formData.raceModifiers.filter((_, j) => j !== i) })}>
+              <Button type="button" variant="ghost" size="icon" aria-label={tc("remove")} onClick={() => setFormData({ ...formData, raceModifiers: formData.raceModifiers.filter((_, j) => j !== i) })}>
                 <X className="h-4 w-4" />
               </Button>
             </li>

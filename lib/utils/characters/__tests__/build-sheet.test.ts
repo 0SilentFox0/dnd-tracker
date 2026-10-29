@@ -61,7 +61,7 @@ describe("buildCharacterSheet", () => {
 
     expect(dagger?.toHit.total).toBe(calculateAttackBonus(input.participant, sword));
     expect(dagger?.toHit.total).toBe(4 + 9);
-    expect(dagger?.toHit.lines[0]).toMatchObject({ label: "common.abilities.dexterity.label", suffix: " ★", value: "+4" });
+    expect(dagger?.toHit.lines[0]).toMatchObject({ label: "gameTerms.abilities.dexterity.label", suffix: " ★", value: "+4" });
     expect(s.abilities.find((a) => a.key === "dexterity")?.isPrimary).toBe(true);
   });
 

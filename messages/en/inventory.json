@@ -50,9 +50,7 @@
     "transfer": "Transfer",
     "revoke": "Take away",
     "unequip": "Unequip",
-    "use": "Use",
-    "edit": "Edit",
-    "remove": "Delete"
+    "use": "Use"
   },
   "confirm": {
     "revokeTitle": "Take away “{name}”?",
@@ -68,7 +66,6 @@
   "itemDialog": {
     "addTitle": "Add item",
     "editTitle": "Edit item",
-    "save": "Save",
     "name": "Name",
     "description": "Description",
     "quantity": "Quantity",
@@ -84,7 +81,6 @@
   "grant": {
     "title": "Grant artifact",
     "baseTitle": "Base for “{name}”",
-    "back": "Back",
     "submit": "Grant",
     "baseSearch": "Search bases",
     "noBases": "No suitable free bases",

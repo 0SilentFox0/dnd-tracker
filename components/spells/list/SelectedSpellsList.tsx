@@ -22,7 +22,7 @@ export function SelectedSpellsList({
 }: SelectedSpellsListProps) {
   const t = useTranslations("spells.selected");
 
-  const tc = useTranslator("common");
+  const tg = useTranslator("gameTerms");
 
   const mechanics = useSpellMechanics();
 
@@ -64,7 +64,7 @@ export function SelectedSpellsList({
 
                   <div className="flex items-center gap-1 flex-wrap">
                     <Badge variant="secondary" className="text-xs">
-                      {tc(`spellLevels.${spell.level}`)}
+                      {tg(`spellLevels.${spell.level}`)}
                     </Badge>
                     {mechanics(spell).map((label) => (
                       <Badge key={label} variant="outline" className="text-xs">
