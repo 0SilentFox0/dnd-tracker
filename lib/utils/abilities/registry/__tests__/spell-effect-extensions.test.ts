@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 
 import { ParticipantSide } from "@/lib/constants/battle";
+import { textOf } from "@/lib/i18n/test/text";
 import { makeParticipant, resolved, seq } from "@/lib/utils/abilities/__tests__/fixtures";
 import { resolveTargetIds } from "@/lib/utils/abilities/engine/core/targets";
 import { applyEffect, describeEffect } from "@/lib/utils/abilities/registry/effects";
@@ -45,7 +46,7 @@ describe("dealDamage falloff", () => {
   });
 
   it("опис містить спад", () => {
-    expect(describeEffect(effect)).toContain("100% → 50% → 25%");
+    expect(textOf(describeEffect(effect))).toContain("100% → 50% → 25%");
   });
 });
 
@@ -70,6 +71,6 @@ describe("spellRoll amount", () => {
   });
 
   it("опис показує формулу", () => {
-    expect(describeEffect({ kind: "dealDamage", amount: { spellRoll: { formula: "100 + lost_hp_percent" } } })).toContain("100 + lost_hp_percent");
+    expect(textOf(describeEffect({ kind: "dealDamage", amount: { spellRoll: { formula: "100 + lost_hp_percent" } } }))).toContain("100 + lost_hp_percent");
   });
 });

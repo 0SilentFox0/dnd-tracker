@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import type { z } from "zod";
 
+import { textOf } from "@/lib/i18n/test/text";
 import { CONDITION_REGISTRY } from "@/lib/utils/abilities/registry/conditions";
 import { describeAbility, EFFECT_REGISTRY, FLAG_FIELDS } from "@/lib/utils/abilities/registry/effects";
 import { limitsLabel } from "@/lib/utils/abilities/registry/labels";
@@ -62,12 +63,12 @@ describe("fields contract", () => {
 
   it("describeAbility", () => {
     expect(
-      describeAbility({ id: "a", name: "Кровотеча", trigger: { event: "hit", role: "attacker" }, limits: { perBattle: 1, chance: 30 }, effects: [{ kind: "dot", damagePerRound: "1d4", damageType: "bleed", duration: { rounds: 2 }, target: "eventTarget" }] }),
+      textOf(describeAbility({ id: "a", name: "Кровотеча", trigger: { event: "hit", role: "attacker" }, limits: { perBattle: 1, chance: 30 }, effects: [{ kind: "dot", damagePerRound: "1d4", damageType: "bleed", duration: { rounds: 2 }, target: "eventTarget" }] })),
     ).toBe("Влучання · 1 раз за бій · 30% · Кровотеча 1d4/раунд × 2 р.");
   });
 
   it("ліміт за бій узгоджується з числом", () => {
-    expect(limitsLabel({ perBattle: 2 })).toEqual(["2 рази за бій"]);
-    expect(limitsLabel({ perBattle: 5 })).toEqual(["5 разів за бій"]);
+    expect(limitsLabel({ perBattle: 2 }).map((l) => textOf(l))).toEqual(["2 рази за бій"]);
+    expect(limitsLabel({ perBattle: 5 }).map((l) => textOf(l))).toEqual(["5 разів за бій"]);
   });
 });

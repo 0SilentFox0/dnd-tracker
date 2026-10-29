@@ -3,6 +3,7 @@ import { describe, expect, it } from "vitest";
 import { makeParticipant, resolved, seq } from "./fixtures";
 
 import { ParticipantSide } from "@/lib/constants/battle";
+import { textOf } from "@/lib/i18n/test/text";
 import { runAbilities } from "@/lib/utils/abilities/engine/core/run-abilities";
 import type { AbilityEvent } from "@/types/abilities";
 
@@ -22,7 +23,7 @@ describe("guard targets", () => {
     const self = cast("g");
 
     expect(guardsOn(self, "g")).toBe(0);
-    expect(self.messages.join()).toContain("⛔");
+    expect(self.messages.map((m) => textOf(m)).join()).toContain("⛔");
     expect(guardsOn(cast("foe"), "foe")).toBe(0);
   });
 });

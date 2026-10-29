@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 
 import { ParticipantSide } from "@/lib/constants/battle";
+import { textOf } from "@/lib/i18n/test/text";
 import { makeParticipant, resolved, seq } from "@/lib/utils/abilities/__tests__/fixtures";
 import { applyEffect } from "@/lib/utils/abilities/registry/effects";
 import { AbilitySchema, type Effect } from "@/lib/utils/abilities/schema";
@@ -27,7 +28,7 @@ describe("immunities", () => {
     const r = apply({ kind: "applyCondition", condition: "no_reaction", duration: { rounds: 1 }, target: "eventTarget" }, t);
 
     expect(r.participants[1].battleData.activeEffects).toHaveLength(0);
-    expect(r.messages[0]).toContain("⛔");
+    expect(textOf(r.messages[0])).toContain("⛔");
   });
 
   it("страх блокує лише втрату моралі", () => {

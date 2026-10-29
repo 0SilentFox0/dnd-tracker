@@ -3,7 +3,7 @@ import { resolveTargetIds } from "./targets";
 import type { AbilityRunContext, AbilityRunResult, Downed, SummonRequest } from "./types";
 import { recordUse, resetUsage, withinLimits } from "./usage";
 
-import { joinLines } from "@/lib/i18n/text-ref";
+import { joinLines, textRef } from "@/lib/i18n/text-ref";
 import { restoreCharm } from "@/lib/utils/abilities/engine/effects/charm";
 import { conditionEventForTarget, evaluateCondition, hasCreatureTypeCondition } from "@/lib/utils/abilities/registry/conditions";
 import { applyEffect } from "@/lib/utils/abilities/registry/effects";
@@ -62,7 +62,7 @@ export function runAbilities(participants: BattleParticipant[], event: AbilityEv
 
       if (ability.limits?.chance !== undefined && ctx.rng() * 100 >= ability.limits.chance) {
         // лише вміння самого діяча: чужі шансові тригери на кожну подію засмітили б журнал
-        if ("actorId" in event && event.actorId === ownerId) messages.push(`🎲 ${ability.name}: не спрацювало (шанс ${ability.limits.chance} %)`);
+        if ("actorId" in event && event.actorId === ownerId) messages.push(textRef("abilityText.log.chanceMissed", { ability: ability.name, chance: ability.limits.chance }));
 
         continue;
       }
@@ -76,7 +76,7 @@ export function runAbilities(participants: BattleParticipant[], event: AbilityEv
         const r = applyEffect({ participants: ps, ability, effectIndex, ownerId, effect, targetIds, event, ctx });
 
         ps = r.participants;
-        messages.push(...r.messages.map((m) => (ability.limits?.chance !== undefined ? joinLines([m, ` (шанс ${ability.limits.chance} %)`]) : m)));
+        messages.push(...r.messages.map((m) => (ability.limits?.chance !== undefined ? joinLines([m, textRef("abilityText.log.chanceSuffix", { chance: ability.limits.chance })]) : m)));
 
         for (const m of r.actionModifiers ?? []) (actionModifiers[m.participantId] ??= []).push(m.effect);
 

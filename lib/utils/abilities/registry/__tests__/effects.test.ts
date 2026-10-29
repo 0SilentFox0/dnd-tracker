@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 
 import { ParticipantSide } from "@/lib/constants/battle";
+import { textOf } from "@/lib/i18n/test/text";
 import { makeParticipant, resolved, seq } from "@/lib/utils/abilities/__tests__/fixtures";
 import { applyEffect, describeEffect, FLAG_FIELDS } from "@/lib/utils/abilities/registry/effects";
 import type { Effect } from "@/lib/utils/abilities/schema";
@@ -27,7 +28,7 @@ describe("effects", () => {
     const t = r.participants[1];
 
     expect(t.battleData.activeEffects[0]).toMatchObject({ type: "debuff", duration: 3, dotDamage: { damagePerRound: 3, damageType: "bleed" } });
-    expect(r.messages[0]).toContain("🔥");
+    expect(textOf(r.messages[0])).toContain("🔥");
   });
 
   it("статичний ефект без duration повертає actionModifiers і не змінює стан", () => {
@@ -78,23 +79,23 @@ describe("effects", () => {
   });
 
   it("describe", () => {
-    expect(describeEffect({ kind: "damageBonus", filter: { kind: "melee" }, percent: 10 })).toBe("шкода (ближня) +10%");
-    expect(describeEffect({ kind: "dot", damagePerRound: "1d4", damageType: "bleed", duration: { rounds: 3 } })).toBe("Кровотеча 1d4/раунд × 3 р.");
+    expect(textOf(describeEffect({ kind: "damageBonus", filter: { kind: "melee" }, percent: 10 }))).toBe("шкода (ближня) +10%");
+    expect(textOf(describeEffect({ kind: "dot", damagePerRound: "1d4", damageType: "bleed", duration: { rounds: 3 } }))).toBe("Кровотеча 1d4/раунд × 3 р.");
   });
 });
 
 describe("counterAttack у редакторі", () => {
   it("на вибір лише ближня і дальня; опис згадує дальні", () => {
     expect(FLAG_FIELDS.counterAttack[0].options?.map((o) => o.value)).toEqual(["melee", "ranged"]);
-    expect(describeEffect({ kind: "flag", flag: "counterAttack", attackKinds: ["ranged"], bonusPercent: 20 })).toBe("відсіч (і на дальні) +20%");
-    expect(describeEffect({ kind: "flag", flag: "counterAttack", attackKinds: ["melee"], bonusPercent: 15 })).toBe("відсіч +15%");
+    expect(textOf(describeEffect({ kind: "flag", flag: "counterAttack", attackKinds: ["ranged"], bonusPercent: 20 }))).toBe("відсіч (і на дальні) +20%");
+    expect(textOf(describeEffect({ kind: "flag", flag: "counterAttack", attackKinds: ["melee"], bonusPercent: 15 }))).toBe("відсіч +15%");
   });
 });
 
 describe("прапорці моралі", () => {
   it("мітки й описи", () => {
-    expect(describeEffect({ kind: "flag", flag: "noNegativeMorale" })).toBe("від'ємна мораль = 0");
-    expect(describeEffect({ kind: "flag", flag: "ignoreMorale" })).toBe("мораль не діє");
+    expect(textOf(describeEffect({ kind: "flag", flag: "noNegativeMorale" }))).toBe("від'ємна мораль = 0");
+    expect(textOf(describeEffect({ kind: "flag", flag: "ignoreMorale" }))).toBe("мораль не діє");
     expect(FLAG_FIELDS.noNegativeMorale).toEqual([]);
     expect(FLAG_FIELDS.ignoreMorale).toEqual([]);
   });

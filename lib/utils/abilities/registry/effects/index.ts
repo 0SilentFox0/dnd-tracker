@@ -1,11 +1,12 @@
 import { DURATION_FIELD, type FieldMeta, TARGET_FIELD } from "../fields";
-import { limitsLabel } from "../labels";
+import { CONDITION_LABELS, limitsLabel } from "../labels";
+import { abilityArg, flag, roundsOf } from "../text";
 import { describeTrigger } from "../triggers";
 import { applyBerserk, applyCharm, describeBerserk, describeCharm } from "./control";
 import { applyCopySpellBuffs } from "./copy-buffs";
 import { describeFlag, FLAG_FIELDS, FLAG_LABELS } from "./flags";
 import { applyDealDamage, applyDot, applyHeal, applyHot, describeDealDamage, describeDot, describeHeal, describeHot } from "./hp";
-import { applyManeuver, describeManeuver, MANEUVER_LABELS } from "./maneuver";
+import { applyManeuver, describeManeuver, MANEUVERS } from "./maneuver";
 import {
   applyChangeMorale,
   applyCleanse,
@@ -15,7 +16,6 @@ import {
   applyGuard,
   applyMark,
   applyRestoreSpellSlot,
-  CONDITION_LABELS,
   describeGrantAction,
 } from "./state";
 import {
@@ -28,8 +28,7 @@ import {
 import { applyRaiseDead, applySummon, describeRaiseDead, describeSummon } from "./summon";
 import type { EffectApplyInput, EffectApplyResult } from "./types";
 
-import { ABILITY_LABELS } from "@/lib/constants/abilities";
-import { joinLines } from "@/lib/i18n/text-ref";
+import { joinLines, textRef } from "@/lib/i18n/text-ref";
 import { resolveTargetIds } from "@/lib/utils/abilities/engine/core/targets";
 import type { Ability, Effect, EffectKind } from "@/lib/utils/abilities/schema";
 import { CONDITION_5E_KEYS } from "@/lib/utils/abilities/schema/kinds";
@@ -41,113 +40,114 @@ export type { EffectApplyInput, EffectApplyResult };
 
 interface EffectDefinition<K extends EffectKind> {
   kind: K;
-  label: string;
   static: boolean;
   fields: readonly FieldMeta[];
   describe: (e: Extract<Effect, { kind: K }>) => LogLine;
   apply: (input: EffectApplyInput<Extract<Effect, { kind: K }>>) => EffectApplyResult;
 }
 
-const AMOUNT: FieldMeta = { name: "amount", label: "Кількість (число, кубики, формула, %)", input: "amount" };
+const AMOUNT: FieldMeta = { name: "amount", input: "amount" };
 
 const REQUIRED_DURATION: FieldMeta = { ...DURATION_FIELD, optional: false };
 
+const CONDITION_KEY_LIST = Object.keys(CONDITION_LABELS);
+
 export const EFFECT_REGISTRY: { [K in EffectKind]: EffectDefinition<K> } = {
-  modifyStat: { kind: "modifyStat", label: "Змінити стат", static: true, fields: modifyStatFields, describe: describeModifyStat, apply: (i) => applyStatic(i, describeEffect) },
-  damageBonus: { kind: "damageBonus", label: "Бонус шкоди", static: true, fields: damageBonusFields, describe: describeDamageBonus, apply: (i) => applyStatic(i, describeEffect) },
+  modifyStat: { kind: "modifyStat", static: true, fields: modifyStatFields, describe: describeModifyStat, apply: (i) => applyStatic(i, describeEffect) },
+  damageBonus: { kind: "damageBonus", static: true, fields: damageBonusFields, describe: describeDamageBonus, apply: (i) => applyStatic(i, describeEffect) },
   flag: {
     kind: "flag",
-    label: "Прапорець",
     static: true,
-    fields: [{ name: "flag", label: "Прапорець", input: "select", options: Object.entries(FLAG_LABELS).map(([value, label]) => ({ value, label })) }, TARGET_FIELD, DURATION_FIELD],
+    fields: [{ name: "flag", input: "select", options: Object.keys(FLAG_LABELS).map((value) => ({ value })) }, TARGET_FIELD, DURATION_FIELD],
     describe: describeFlag,
     apply: (i) => applyStatic(i, describeEffect),
   },
   note: {
     kind: "note",
-    label: "Нотатка для DM",
     static: true,
-    fields: [{ name: "text", label: "Текст", input: "text" }],
+    fields: [{ name: "text", input: "text" }],
     // ✋ — механіку відпрацьовує DM вручну (рушій її не автоматизує)
     describe: (e) => (/\bDM\b/.test(e.text) ? `✋ ${e.text}` : e.text),
     apply: (i) => ({ participants: i.participants, messages: [`📜 ${i.ability.name}: ${i.effect.text}`] }),
   },
-  dealDamage: { kind: "dealDamage", label: "Завдати шкоди", static: false, fields: [AMOUNT, { name: "damageType", label: "Тип", input: "text", optional: true }, { name: "falloff", label: "% шкоди по цілях по черзі (100, 50, 25…)", input: "numberList", optional: true }, TARGET_FIELD], describe: describeDealDamage, apply: applyDealDamage },
-  heal: { kind: "heal", label: "Лікування", static: false, fields: [AMOUNT, { name: "revive", label: "Воскрешає", input: "toggle", optional: true }, TARGET_FIELD], describe: describeHeal, apply: applyHeal },
-  dot: { kind: "dot", label: "Шкода щораунду (DOT)", static: false, fields: [{ ...AMOUNT, name: "damagePerRound", label: "Шкода/раунд (число, кубики, формула)" }, { name: "damageType", label: "Тип", input: "text" }, TARGET_FIELD, REQUIRED_DURATION], describe: describeDot, apply: applyDot },
-  hot: { kind: "hot", label: "Лікування щораунду (HOT)", static: false, fields: [{ ...AMOUNT, name: "healPerRound", label: "Лікування/раунд (число, кубики, формула)" }, TARGET_FIELD, REQUIRED_DURATION], describe: describeHot, apply: applyHot },
-  berserk: { kind: "berserk", label: "Шал", static: false, fields: [{ name: "damageBonusPercent", label: "Бонус шкоди, %", input: "number" }, TARGET_FIELD, REQUIRED_DURATION], describe: describeBerserk, apply: applyBerserk },
-  charm: { kind: "charm", label: "Перехід на бік заклинателя", static: false, fields: [TARGET_FIELD, REQUIRED_DURATION], describe: describeCharm, apply: applyCharm },
+  dealDamage: { kind: "dealDamage", static: false, fields: [AMOUNT, { name: "damageType", input: "text", optional: true }, { name: "falloff", input: "numberList", optional: true }, TARGET_FIELD], describe: describeDealDamage, apply: applyDealDamage },
+  heal: { kind: "heal", static: false, fields: [AMOUNT, { name: "revive", input: "toggle", optional: true }, TARGET_FIELD], describe: describeHeal, apply: applyHeal },
+  dot: { kind: "dot", static: false, fields: [{ ...AMOUNT, name: "damagePerRound" }, { name: "damageType", input: "text" }, TARGET_FIELD, REQUIRED_DURATION], describe: describeDot, apply: applyDot },
+  hot: { kind: "hot", static: false, fields: [{ ...AMOUNT, name: "healPerRound" }, TARGET_FIELD, REQUIRED_DURATION], describe: describeHot, apply: applyHot },
+  berserk: { kind: "berserk", static: false, fields: [{ name: "damageBonusPercent", input: "number" }, TARGET_FIELD, REQUIRED_DURATION], describe: describeBerserk, apply: applyBerserk },
+  charm: { kind: "charm", static: false, fields: [TARGET_FIELD, REQUIRED_DURATION], describe: describeCharm, apply: applyCharm },
   applyCondition: {
     kind: "applyCondition",
-    label: "Накласти стан",
     static: false,
     fields: [
       {
         name: "condition",
-        label: "Стан",
         input: "select",
-        options: Object.entries(CONDITION_LABELS).map(([value, label]) => ({ value, label, group: (CONDITION_5E_KEYS as readonly string[]).includes(value) ? "Стани 5e" : "Механічні стани" })),
+        options: CONDITION_KEY_LIST.map((value) => ({ value, group: (CONDITION_5E_KEYS as readonly string[]).includes(value) ? "conditions5e" : "mechanicalConditions" })),
       },
-      { name: "levels", label: "Рівні виснаження (1–6)", input: "number", optional: true, visibleWhen: (v) => v.condition === "exhaustion" },
-      { name: "saveEnds", label: "Рятівний кидок наприкінці ходу", input: "saveEnds", optional: true, visibleWhen: (v) => (CONDITION_5E_KEYS as readonly string[]).includes(String(v.condition)) },
-      { name: "percent", label: "Шанс, % (для втрати дії)", input: "number", optional: true, visibleWhen: (v) => v.condition === "skip_action" },
-      { name: "breakOnDamage", label: "Знімається при отриманні шкоди", input: "toggle", optional: true },
+      { name: "levels", input: "number", optional: true, visibleWhen: (v) => v.condition === "exhaustion" },
+      { name: "saveEnds", input: "saveEnds", optional: true, visibleWhen: (v) => (CONDITION_5E_KEYS as readonly string[]).includes(String(v.condition)) },
+      { name: "percent", input: "number", optional: true, visibleWhen: (v) => v.condition === "skip_action" },
+      { name: "breakOnDamage", input: "toggle", optional: true },
       TARGET_FIELD,
       REQUIRED_DURATION,
     ],
     describe: (e) =>
-      `${CONDITION_LABELS[e.condition]}${e.condition === "skip_action" && e.percent ? ` ${e.percent}%` : ""}${e.levels ? ` ×${e.levels}` : ""} × ${e.duration?.rounds ?? "?"} р.${e.breakOnDamage ? ", до шкоди" : ""}${e.saveEnds ? `, рятівний кидок ${ABILITY_LABELS[e.saveEnds.ability]}` : ""}`,
+      textRef("abilityText.effects.applyCondition", {
+        condition: CONDITION_LABELS[e.condition],
+        percent: e.condition === "skip_action" && e.percent ? ` ${e.percent}%` : "",
+        levels: e.levels ? ` ×${e.levels}` : "",
+        rounds: roundsOf(e),
+        breakOnDamage: flag(e.breakOnDamage),
+        hasSave: flag(e.saveEnds),
+        ability: e.saveEnds ? abilityArg(e.saveEnds.ability) : "",
+      }),
     apply: applyCondition,
   },
-  grantAction: { kind: "grantAction", label: "Дати дію", static: false, fields: [
-      { name: "extraActions", label: "Додаткові дії", input: "number", optional: true },
-      { name: "refreshAction", label: "Оновити дію", input: "toggle", optional: true },
-      { name: "refreshBonusAction", label: "Оновити бонусну дію", input: "toggle", optional: true },
-      { name: "refreshReaction", label: "Оновити реакцію", input: "toggle", optional: true },
+  grantAction: { kind: "grantAction", static: false, fields: [
+      { name: "extraActions", input: "number", optional: true },
+      { name: "refreshAction", input: "toggle", optional: true },
+      { name: "refreshBonusAction", input: "toggle", optional: true },
+      { name: "refreshReaction", input: "toggle", optional: true },
       TARGET_FIELD,
     ], describe: describeGrantAction, apply: applyGrantAction },
   restoreSpellSlotLevels: {
     kind: "restoreSpellSlotLevels",
-    label: "Відновити слоти за бюджетом кіл (короткий відпочинок)",
     static: false,
-    fields: [{ name: "budget", label: "Бюджет кіл", input: "flat" }, { name: "maxSlotLevel", label: "Макс. коло слота", input: "number" }],
-    describe: (e) => `відновлює слоти до ${e.maxSlotLevel}-го кола за бюджетом кіл на короткому відпочинку`,
+    fields: [{ name: "budget", input: "flat" }, { name: "maxSlotLevel", input: "number" }],
+    describe: (e) => textRef("abilityText.effects.restoreSpellSlotLevels", { level: e.maxSlotLevel }),
     apply: (input) => ({ participants: input.participants, messages: [] }),
   },
-  restoreSpellSlot: { kind: "restoreSpellSlot", label: "Відновити слот", static: false, fields: [{ name: "count", label: "Скільки", input: "number" }, TARGET_FIELD], describe: (e) => `+${e.count} слот`, apply: applyRestoreSpellSlot },
-  drainSpellSlot: { kind: "drainSpellSlot", label: "Крадіжка слоту заклинань", static: false, fields: [{ name: "count", label: "Скільки", input: "number" }, TARGET_FIELD], describe: (e) => `−${e.count} слот заклинань`, apply: applyDrainSpellSlot },
-  changeMorale: { kind: "changeMorale", label: "Змінити мораль", static: false, fields: [{ name: "delta", label: "Зміна", input: "number" }, TARGET_FIELD], describe: (e) => `мораль ${signed(e.delta)}`, apply: applyChangeMorale },
-  mark: { kind: "mark", label: "Мітка на ціль", static: false, fields: [{ name: "markId", label: "Ідентифікатор мітки", input: "text" }, TARGET_FIELD, REQUIRED_DURATION], describe: (e) => `мітка × ${e.duration.rounds} р.`, apply: applyMark },
-  copySpellBuffs: { kind: "copySpellBuffs", label: "Копіювати бафи закляття союзника", static: false, fields: [TARGET_FIELD], describe: () => "копіює бафи закляття, накладені на союзника", apply: applyCopySpellBuffs },
-  guard: { kind: "guard", label: "Захист союзника", static: false, fields: [{ name: "percent", label: "% шкоди від атак, що бере на себе", input: "number" }, TARGET_FIELD, REQUIRED_DURATION], describe: (e) => `захист: ${e.percent}% шкоди від атак × ${e.duration.rounds} р.`, apply: applyGuard },
+  restoreSpellSlot: { kind: "restoreSpellSlot", static: false, fields: [{ name: "count", input: "number" }, TARGET_FIELD], describe: (e) => textRef("abilityText.effects.restoreSpellSlot", { count: e.count }), apply: applyRestoreSpellSlot },
+  drainSpellSlot: { kind: "drainSpellSlot", static: false, fields: [{ name: "count", input: "number" }, TARGET_FIELD], describe: (e) => textRef("abilityText.effects.drainSpellSlot", { count: e.count }), apply: applyDrainSpellSlot },
+  changeMorale: { kind: "changeMorale", static: false, fields: [{ name: "delta", input: "number" }, TARGET_FIELD], describe: (e) => textRef("abilityText.effects.changeMorale", { delta: signed(e.delta) }), apply: applyChangeMorale },
+  mark: { kind: "mark", static: false, fields: [{ name: "markId", input: "text" }, TARGET_FIELD, REQUIRED_DURATION], describe: (e) => textRef("abilityText.effects.mark", { rounds: e.duration.rounds }), apply: applyMark },
+  copySpellBuffs: { kind: "copySpellBuffs", static: false, fields: [TARGET_FIELD], describe: () => textRef("abilityText.effects.copySpellBuffs"), apply: applyCopySpellBuffs },
+  guard: { kind: "guard", static: false, fields: [{ name: "percent", input: "number" }, TARGET_FIELD, REQUIRED_DURATION], describe: (e) => textRef("abilityText.effects.guard", { percent: e.percent, rounds: e.duration.rounds }), apply: applyGuard },
   summon: {
     kind: "summon",
-    label: "Прикликати юнітів",
     static: false,
-    fields: [{ name: "unitId", label: "Конкретний юніт (замість групи і Tier)", input: "unit", optional: true }, { name: "group", label: "Група (раса юнітів)", input: "text", optional: true }, { name: "tier", label: "Tier (рівень юніта 1–7)", input: "number", optional: true }, { name: "count", label: "Кількість", input: "number", optional: true }],
+    fields: [{ name: "unitId", input: "unit", optional: true }, { name: "group", input: "text", optional: true }, { name: "tier", input: "number", optional: true }, { name: "count", input: "number", optional: true }],
     describe: describeSummon,
     apply: applySummon,
   },
-  raiseDead: { kind: "raiseDead", label: "Підняти мертвих", static: false, fields: [{ name: "hpPercent", label: "HP, %", input: "number" }, TARGET_FIELD], describe: describeRaiseDead, apply: applyRaiseDead },
-  cleanse: { kind: "cleanse", label: "Зняти дебафи", static: false, fields: [{ name: "includeConditions", label: "Зняти й стани", input: "toggle", optional: true }, TARGET_FIELD], describe: (e) => (e.includeConditions ? "зняття дебафів і станів" : "зняття дебафів"), apply: applyCleanse },
+  raiseDead: { kind: "raiseDead", static: false, fields: [{ name: "hpPercent", input: "number" }, TARGET_FIELD], describe: describeRaiseDead, apply: applyRaiseDead },
+  cleanse: { kind: "cleanse", static: false, fields: [{ name: "includeConditions", input: "toggle", optional: true }, TARGET_FIELD], describe: (e) => textRef("abilityText.effects.cleanse", { conditions: flag(e.includeConditions) }), apply: applyCleanse },
   maneuver: {
     kind: "maneuver",
-    label: "Маневр",
     static: false,
     fields: [
-      { name: "maneuver", label: "Маневр", input: "select", options: Object.entries(MANEUVER_LABELS).map(([value, label]) => ({ value, label })) },
-      { name: "percentOfAttack", label: "% шкоди атаки", input: "number" },
+      { name: "maneuver", input: "select", options: MANEUVERS.map((value) => ({ value })) },
+      { name: "percentOfAttack", input: "number" },
     ],
     describe: describeManeuver,
     apply: applyManeuver,
   },
   randomOf: {
     kind: "randomOf",
-    label: "Випадковий з варіантів",
     static: false,
-    fields: [{ name: "options", label: "Варіанти", input: "effects" }],
-    describe: (e) => joinLines(["одне з: ", joinLines(e.options.map(describeEffect), " / ")]),
+    fields: [{ name: "options", input: "effects" }],
+    describe: (e) => textRef("abilityText.effects.randomOf", { options: joinLines(e.options.map(describeEffect), " / ") }),
     apply: (i) => {
       const option = pickOne(i.effect.options, i.ctx.rng);
 
@@ -167,7 +167,7 @@ export function applyEffect(input: EffectApplyInput): EffectApplyResult {
 export function describeEffect(effect: Effect): LogLine {
   const def = EFFECT_REGISTRY[effect.kind] as EffectDefinition<EffectKind> | undefined;
 
-  return def ? def.describe(effect as never) : `невідомий ефект (${String(effect.kind)})`;
+  return def ? def.describe(effect as never) : textRef("abilityText.effects.unknown", { kind: String(effect.kind) });
 }
 
 export { FLAG_FIELDS, FLAG_LABELS };

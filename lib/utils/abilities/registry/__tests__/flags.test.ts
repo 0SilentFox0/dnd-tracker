@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 
+import { textOf } from "@/lib/i18n/test/text";
 import { describeFlag, FLAG_DEFAULTS, FLAG_FIELDS, FLAG_LABELS, FLAG_REGISTRY } from "@/lib/utils/abilities/registry/effects/flags";
 
 describe("FLAG_REGISTRY", () => {
@@ -9,7 +10,7 @@ describe("FLAG_REGISTRY", () => {
     expect(Object.keys(FLAG_LABELS).sort()).toEqual(keys);
     expect(Object.keys(FLAG_FIELDS).sort()).toEqual(keys);
     expect(Object.keys(FLAG_DEFAULTS).sort()).toEqual(keys);
-    expect(new Set(Object.values(FLAG_LABELS)).size).toBe(keys.length);
+    expect(new Set(Object.values(FLAG_LABELS).map((l) => l.message)).size).toBe(keys.length);
   });
 
   it("every default field name is described in fields", () => {
@@ -21,8 +22,8 @@ describe("FLAG_REGISTRY", () => {
   });
 
   it("describes flags through the registry", () => {
-    expect(describeFlag({ kind: "flag", flag: "resistance", damageType: "fire", percent: 100 })).toBe("імунітет: fire");
-    expect(describeFlag({ kind: "flag", flag: "piercingShot" })).toContain("на лінії");
-    expect(describeFlag({ kind: "flag", flag: "advantage", attackKind: "melee" })).toBe("перевага на ближні атаки");
+    expect(textOf(describeFlag({ kind: "flag", flag: "resistance", damageType: "fire", percent: 100 }))).toBe("імунітет: fire");
+    expect(textOf(describeFlag({ kind: "flag", flag: "piercingShot" }))).toContain("на лінії");
+    expect(textOf(describeFlag({ kind: "flag", flag: "advantage", attackKind: "melee" }))).toBe("перевага на ближні атаки");
   });
 });

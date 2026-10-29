@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 
 import { ParticipantSide } from "@/lib/constants/battle";
+import { textOf } from "@/lib/i18n/test/text";
 import { makeParticipant, resolved, seq } from "@/lib/utils/abilities/__tests__/fixtures";
 import { runAbilities } from "@/lib/utils/abilities/engine/core/run-abilities";
 import type { BattleParticipant } from "@/types/battle";
@@ -24,7 +25,7 @@ describe("ефект drainSpellSlot", () => {
     const r = drain(enemy({ "1": { max: 2, current: 2 }, "3": { max: 1, current: 1 } }));
 
     expect(r.participants[1].spellcasting.spellSlots).toEqual({ "1": { max: 2, current: 2 }, "3": { max: 1, current: 0 } });
-    expect(r.messages.join()).toContain("🔮 e втрачає слот 3-го рівня");
+    expect(r.messages.map((m) => textOf(m)).join()).toContain("🔮 e втрачає слот 3-го рівня");
   });
 
   it("без слотів нічого не змінює і не пише повідомлень", () => {

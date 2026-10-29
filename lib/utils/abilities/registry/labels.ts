@@ -1,33 +1,14 @@
-import { ABILITY_LABELS } from "@/lib/constants/abilities";
-import type { AbilityTarget, Amount, AnyConditionKey, Condition5eKey, DamageFilterKind, Flat, Limits, StatKey } from "@/lib/utils/abilities/schema";
-import { CONDITION_5E_REGISTRY } from "@/lib/utils/battle/conditions/registry";
+import { refMap } from "./text";
+
+import { textRef } from "@/lib/i18n/text-ref";
+import type { Amount } from "@/lib/utils/abilities/schema";
+import { ABILITY_TARGETS, CONDITION_5E_KEYS, CONDITION_KEYS, DAMAGE_FILTER_KINDS, type Flat, type Limits, STAT_KEYS } from "@/lib/utils/abilities/schema";
 import { signed } from "@/lib/utils/common/format";
-import { pluralUk } from "@/lib/utils/common/plural";
+import type { LogLine, TextArg } from "@/types/text";
 
-export const STAT_LABELS: Record<StatKey, string> = {
-  armor: "AC",
-  attackBonus: "бонус атаки",
-  critThreshold: "поріг криту",
-  actionsPerTurn: "дії за хід",
-  savingThrow: "рятівні кидки",
-  attacksPerAction: "Атак за дію «Атака»",
-  initiative: "ініціатива",
-  maxHp: "макс. HP",
-  speed: "швидкість",
-  morale: "мораль",
-  minTargets: "мін. цілей",
-  maxTargets: "макс. цілей",
-  spellSlots: "слоти заклинань",
-  ...ABILITY_LABELS,
-};
+export const STAT_LABELS = refMap("abilityRegistry.stats", STAT_KEYS);
 
-export const DAMAGE_FILTER_LABELS: Record<DamageFilterKind, string> = {
-  melee: "ближня",
-  ranged: "дальня",
-  magic: "магічна",
-  physical: "фізична",
-  all: "вся",
-};
+export const DAMAGE_FILTER_LABELS = refMap("abilityRegistry.damageFilters", DAMAGE_FILTER_KINDS);
 
 export function flatLabel(flat: Flat): string {
   if (typeof flat === "number") return signed(flat);
@@ -35,7 +16,7 @@ export function flatLabel(flat: Flat): string {
   return "formula" in flat ? `+(${flat.formula})` : `+[${flat.scale}]`;
 }
 
-export function amountLabel(amount: Amount): string {
+export function amountLabel(amount: Amount): TextArg {
   if (typeof amount === "number" || typeof amount === "string") return String(amount);
 
   if ("scale" in amount) return `[${amount.scale}]`;
@@ -43,54 +24,36 @@ export function amountLabel(amount: Amount): string {
   if ("formula" in amount) return `(${amount.formula})`;
 
   if ("spellRoll" in amount) {
-    if (typeof amount.spellRoll !== "number") return `(${amount.spellRoll.formula})% кидка заклинання`;
+    if (typeof amount.spellRoll !== "number") return textRef("abilityText.amount.spellRollFormula", { formula: amount.spellRoll.formula });
 
-    return amount.spellRoll === 100 ? "кидок заклинання" : `${amount.spellRoll}% кидка заклинання`;
+    return amount.spellRoll === 100 ? textRef("abilityText.amount.spellRoll") : textRef("abilityText.amount.spellRollPercent", { value: amount.spellRoll });
   }
 
-  if (amount.percentOf === "ownerAttack") return `${amount.value} % шкоди першої атаки`;
+  if (amount.percentOf === "ownerAttack") return textRef("abilityText.amount.ownerAttack", { value: amount.value });
 
-  return `${amount.value}% від ${amount.percentOf === "eventDamage" ? "завданої шкоди" : "макс. HP"}`;
+  return textRef(amount.percentOf === "eventDamage" ? "abilityText.amount.eventDamage" : "abilityText.amount.maxHp", { value: amount.value });
 }
 
-export const TARGET_LABELS: Record<AbilityTarget, string> = {
-  self: "я",
-  eventTarget: "ціль події",
-  eventActor: "виконавець події",
-  otherEnemy: "інший ворог (не ціль)",
-  allAllies: "усі союзники",
-  allEnemies: "усі вороги",
-  everyone: "усі учасники",
-  nearbyAllies: "союзники поруч (зона)",
-  nearbyEnemies: "вороги поруч (зона)",
-};
+export const TARGET_LABELS = refMap("abilityRegistry.targets", ABILITY_TARGETS);
 
-export const CONDITION_LABELS: Record<AnyConditionKey, string> = {
-  no_bonus_action: "без бонусної дії",
-  no_reaction: "без реакції",
-  disable_melee_attacks: "без ближніх атак",
-  disable_ranged_attacks: "без дальніх атак",
-  disable_spell_casting: "без заклинань",
-  skip_action: "втрата дії",
-  immobilized: "знерухомлений",
-  ...Object.fromEntries(Object.entries(CONDITION_5E_REGISTRY).map(([k, d]) => [k, d.label.toLowerCase()])) as Record<Condition5eKey, string>,
-};
+export const CONDITION_LABELS = refMap("abilityRegistry.options.condition", [...CONDITION_KEYS, ...CONDITION_5E_KEYS]);
 
-const usesLabel = (uses: NonNullable<Limits["perRest"]>["uses"]) =>
-  typeof uses === "number" ? `${uses} ${pluralUk(uses, ["раз", "рази", "разів"])}` : `${"formula" in uses ? `(${uses.formula})` : `[${uses.scale}]`} разів`;
+const usesLabel = (uses: NonNullable<Limits["perRest"]>["uses"]) => (typeof uses === "number" ? uses : "formula" in uses ? `(${uses.formula})` : `[${uses.scale}]`);
 
-export function limitsLabel(l: Limits | undefined): string[] {
+export function limitsLabel(l: Limits | undefined): LogLine[] {
   if (!l) return [];
 
-  return [
-    l.perBattle ? `${l.perBattle} ${pluralUk(l.perBattle, ["раз", "рази", "разів"])} за бій` : null,
-    l.perRest ? `${usesLabel(l.perRest.uses)} за ${l.perRest.rest === "short" ? "короткий" : "довгий"} відпочинок` : null,
-    l.perRound ? `${l.perRound}/раунд` : null,
-    l.perTurn ? `${l.perTurn}/хід` : null,
-    l.cooldownRounds ? `перезарядка ${l.cooldownRounds} р.` : null,
+  const lines: (LogLine | null)[] = [
+    l.perBattle ? textRef("abilityText.limits.perBattle", { count: l.perBattle }) : null,
+    l.perRest ? textRef(typeof l.perRest.uses === "number" ? "abilityText.limits.perRest" : "abilityText.limits.perRestFormula", { uses: usesLabel(l.perRest.uses), rest: l.perRest.rest }) : null,
+    l.perRound ? textRef("abilityText.limits.perRound", { count: l.perRound }) : null,
+    l.perTurn ? textRef("abilityText.limits.perTurn", { count: l.perTurn }) : null,
+    l.cooldownRounds ? textRef("abilityText.limits.cooldown", { count: l.cooldownRounds }) : null,
     l.chance ? `${l.chance}%` : null,
-    l.lair ? "дія лігва" : null,
-    l.legendaryCost ? `легендарна дія (${l.legendaryCost})` : null,
-    l.pool ? `пул «${l.pool.key}»: ${l.pool.cost}` : null,
-  ].filter((x): x is string => !!x);
+    l.lair ? textRef("abilityText.limits.lair") : null,
+    l.legendaryCost ? textRef("abilityText.limits.legendaryCost", { cost: l.legendaryCost }) : null,
+    l.pool ? textRef("abilityText.limits.pool", { key: l.pool.key, cost: l.pool.cost }) : null,
+  ];
+
+  return lines.filter((x): x is LogLine => x !== null);
 }

@@ -144,7 +144,7 @@ describe("resolveDowned", () => {
       { round: 1, rng: () => 0.99 },
     );
 
-    expect(r.messages).toEqual(["🎲 Спокуса: не спрацювало (шанс 15 %)"]);
+    expect(r.messages.map((m) => textOf(m))).toEqual(["🎲 Спокуса: не спрацювало (шанс 15 %)"]);
     expect(r.fired).toEqual([]);
   });
 });

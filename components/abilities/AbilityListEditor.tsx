@@ -9,6 +9,7 @@ import { AbilityTemplatePicker } from "./AbilityTemplatePicker";
 import { AbilityEditorProvider } from "./editor-context";
 
 import { HudSection } from "@/components/hud/form";
+import { useText } from "@/lib/i18n/use-text";
 import { validateAbilities, withFreshIds } from "@/lib/utils/abilities/editor";
 import type { ConversionIssue } from "@/lib/utils/abilities/schema";
 import type { Ability } from "@/lib/utils/abilities/schema";
@@ -27,6 +28,8 @@ interface AbilityListEditorProps {
 
 export function AbilityListEditor({ campaignId, value, onChange, issues = [], onValidityChange, classColumns, itemCharges, performChoices }: AbilityListEditorProps) {
   const t = useTranslations("abilities.editor");
+
+  const text = useText();
 
   const [pickerOpen, setPickerOpen] = useState(false);
 
@@ -83,7 +86,7 @@ export function AbilityListEditor({ campaignId, value, onChange, issues = [], on
             <p className="font-medium">{t("storedInvalid")}</p>
             <ul className="list-disc pl-4">
               {issues.map((i, idx) => (
-                <li key={`${idx}-${i.message}`}>{i.message}</li>
+                <li key={idx}>{text(i.message)}</li>
               ))}
             </ul>
           </div>

@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 
 import { makeParticipant, resolved, seq } from "./fixtures";
 
+import { textOf } from "@/lib/i18n/test/text";
 import { runAbilities } from "@/lib/utils/abilities/engine/core/run-abilities";
 import type { AbilityEvent } from "@/types/abilities";
 import type { ActiveEffect } from "@/types/battle";
@@ -29,6 +30,6 @@ describe("cleanse", () => {
     const r = cleanse(true);
 
     expect(r.participants[0].battleData.activeEffects.map((e) => e.id)).toEqual(["b"]);
-    expect(r.messages.join()).toContain("знято дебафи та стани");
+    expect(r.messages.map((m) => textOf(m)).join()).toContain("знято дебафи та стани");
   });
 });

@@ -2,6 +2,7 @@ import { resolveFlat } from "./amount";
 import { staticEffectStrength } from "./effect-strength";
 import { findParticipant, isActive, isDormant, isEscaped, resolvedAbilitiesOf } from "./participants";
 
+import { textRef } from "@/lib/i18n/text-ref";
 import { legacyActiveEffectModifiers } from "@/lib/utils/abilities/engine/effects/legacy-active-effects";
 import { countMarks } from "@/lib/utils/abilities/engine/effects/marks";
 import { liveActiveEffects } from "@/lib/utils/abilities/engine/effects/zone-effects";
@@ -10,6 +11,7 @@ import type { AttackKind, DamageKind, FlagEffect, FlagKey, StaticEffect, StatKey
 import { isBakedStat, isStaticEffect } from "@/lib/utils/abilities/schema/kinds";
 import type { AbilitySource, ResolvedAbility } from "@/types/abilities";
 import type { BattleParticipant } from "@/types/battle";
+import type { LogLine } from "@/types/text";
 
 export type ModifierQuery =
   | { stat: StatKey; attackKind?: AttackKind }
@@ -18,7 +20,7 @@ export type ModifierQuery =
   | { flags: readonly FlagKey[] };
 
 export interface ModifierEntry {
-  label: string;
+  label: LogLine;
   sourceType: AbilitySource["type"] | "effect" | "action";
   flat: number;
   percent: number;
@@ -193,7 +195,7 @@ export function collectModifiers(
     for (const effect of ae.abilityEffects ?? legacyActiveEffectModifiers(ae)) add(effect, owner, { label: ae.name, sourceType: "effect", icon: ae.icon ?? ae.source?.icon, source: ae.name, ...(condition && { condition }) });
   }
 
-  for (const effect of extra) add(effect, subject, { label: "Ця дія", sourceType: "action" });
+  for (const effect of extra) add(effect, subject, { label: textRef("abilityText.thisAction"), sourceType: "action" });
 
   return result;
 }

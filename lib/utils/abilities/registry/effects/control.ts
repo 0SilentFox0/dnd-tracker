@@ -1,7 +1,9 @@
+import { roundsOf } from "../text";
 import { immuneTo } from "./state";
 import type { EffectApplyInput, EffectApplyResult } from "./types";
 
 import { ParticipantSourceType } from "@/lib/constants/battle";
+import { textRef } from "@/lib/i18n/text-ref";
 import { findParticipant, isActive, replaceParticipant } from "@/lib/utils/abilities/engine/core/participants";
 import { effectSource, upsertTimedEffect } from "@/lib/utils/abilities/engine/effects/timed-effects";
 import type { Effect } from "@/lib/utils/abilities/schema";
@@ -24,12 +26,12 @@ export function applyBerserk(input: EffectApplyInput<Of<"berserk">>): EffectAppl
     if (!t || !isActive(t)) continue;
 
     if (t.basicInfo.sourceType === ParticipantSourceType.CHARACTER) {
-      messages.push(`⛔ ${ability.name}: ${t.basicInfo.name} — не діє на героїв`);
+      messages.push(textRef("abilityText.log.notOnHeroes", { ability: ability.name, target: t.basicInfo.name }));
       continue;
     }
 
     if (immuneTo(ps, id, "berserk")) {
-      messages.push(`⛔ ${ability.name}: ${t.basicInfo.name} — імунітет`);
+      messages.push(textRef("abilityText.log.immune", { ability: ability.name, target: t.basicInfo.name }));
       continue;
     }
 
@@ -49,7 +51,7 @@ export function applyBerserk(input: EffectApplyInput<Of<"berserk">>): EffectAppl
         ctx.round,
       ),
     );
-    messages.push(`🤬 ${ability.name}: ${t.basicInfo.name} у люті (${effect.duration.rounds} р.)`);
+    messages.push(textRef("abilityText.log.berserk", { ability: ability.name, target: t.basicInfo.name, rounds: effect.duration.rounds }));
   }
 
   return { participants: ps, messages };
@@ -72,12 +74,12 @@ export function applyCharm(input: EffectApplyInput<Of<"charm">>): EffectApplyRes
     if (!t || !isActive(t)) continue;
 
     if (t.basicInfo.sourceType === ParticipantSourceType.CHARACTER) {
-      messages.push(`⛔ ${ability.name}: ${t.basicInfo.name} — не діє на героїв`);
+      messages.push(textRef("abilityText.log.notOnHeroes", { ability: ability.name, target: t.basicInfo.name }));
       continue;
     }
 
     if (immuneTo(ps, id, "charm")) {
-      messages.push(`⛔ ${ability.name}: ${t.basicInfo.name} — імунітет`);
+      messages.push(textRef("abilityText.log.immune", { ability: ability.name, target: t.basicInfo.name }));
       continue;
     }
 
@@ -99,12 +101,12 @@ export function applyCharm(input: EffectApplyInput<Of<"charm">>): EffectApplyRes
     );
 
     ps = replaceParticipant(ps, { ...charmed, basicInfo: { ...charmed.basicInfo, side: owner.basicInfo.side, controlledBy: owner.basicInfo.controlledBy } });
-    messages.push(`🪄 ${ability.name}: ${t.basicInfo.name} переходить під контроль — ${owner.basicInfo.name} (${effect.duration.rounds} р.)`);
+    messages.push(textRef("abilityText.log.charm", { ability: ability.name, target: t.basicInfo.name, owner: owner.basicInfo.name, rounds: effect.duration.rounds }));
   }
 
   return { participants: ps, messages };
 }
 
-export const describeBerserk = (e: Of<"berserk">) => `шал: автоатака випадкової істоти, +${e.damageBonusPercent}% шкоди × ${e.duration?.rounds ?? "?"} р.`;
+export const describeBerserk = (e: Of<"berserk">) => textRef("abilityText.effects.berserk", { percent: e.damageBonusPercent, rounds: roundsOf(e) });
 
-export const describeCharm = (e: Of<"charm">) => `перехід на бік заклинателя × ${e.duration?.rounds ?? "?"} р.`;
+export const describeCharm = (e: Of<"charm">) => textRef("abilityText.effects.charm", { rounds: roundsOf(e) });

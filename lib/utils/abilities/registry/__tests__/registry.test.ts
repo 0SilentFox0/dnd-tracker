@@ -9,7 +9,7 @@ import { TRIGGER_REGISTRY, triggerMatches } from "@/lib/utils/abilities/registry
 describe("registry contract", () => {
   it("кожен ефект має label, fields, describe, apply", () => {
     for (const def of Object.values(EFFECT_REGISTRY)) {
-      expect(def.label, def.kind).toBeTruthy();
+      expect(def.kind).toBeTruthy();
       expect(Array.isArray(def.fields), def.kind).toBe(true);
       expect(typeof def.describe, def.kind).toBe("function");
       expect(typeof def.apply, def.kind).toBe("function");
@@ -18,7 +18,7 @@ describe("registry contract", () => {
 
   it("кожен тригер має label і matches", () => {
     for (const def of Object.values(TRIGGER_REGISTRY)) {
-      expect(def.label).toBeTruthy();
+      expect(def.event).toBeTruthy();
       expect(typeof def.matches).toBe("function");
     }
   });

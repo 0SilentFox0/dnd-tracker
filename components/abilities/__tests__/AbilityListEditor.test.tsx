@@ -38,7 +38,7 @@ describe("AbilityListEditor", () => {
     fireEvent.click(screen.getByText("abilityRegistry.templates.damage.label"));
 
     expect(json()).toHaveLength(1);
-    expect(screen.getAllByText(/шкода \(ближня\) \+10%/).length).toBeGreaterThan(0);
+    expect(screen.getAllByText(/abilityText\.effects\.damageBonus/).length).toBeGreaterThan(0);
   });
 
   it("зміна тригера на пасивку з DOT → помилка і onValidityChange(false)", async () => {

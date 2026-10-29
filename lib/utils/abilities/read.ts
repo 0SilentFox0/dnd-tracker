@@ -1,5 +1,6 @@
 import type { Prisma } from "@prisma/client";
 
+import { textRef } from "@/lib/i18n/text-ref";
 import { type Ability, AbilitySchema, type ConversionIssue, parseAbilities } from "@/lib/utils/abilities/schema";
 import { readChoices } from "@/lib/utils/characters/choices/read";
 import type { Choice } from "@/types/choices";
@@ -58,12 +59,12 @@ export function readAbilities(_kind: OwnerKind, row: OwnerRow): { abilities: Abi
   if (Array.isArray(row.abilities)) {
     return {
       abilities: row.abilities.filter((a): a is Ability => !!a && typeof a === "object" && !Array.isArray(a)),
-      issues: [{ severity: "loss", message: "Частина збережених вмінь має невалідні дані — виправте або видаліть їх перед збереженням" }],
+      issues: [{ severity: "loss", message: textRef("abilities.read.partialInvalid") }],
     };
   }
 
   if (row.abilities !== null && row.abilities !== undefined) {
-    return { abilities: [], issues: [{ severity: "loss", message: "Дані вмінь у колонці невалідні — список порожній" }] };
+    return { abilities: [], issues: [{ severity: "loss", message: textRef("abilities.read.columnInvalid") }] };
   }
 
   return { abilities: [], issues: [] };

@@ -1,8 +1,9 @@
 import { amountLabel } from "../labels";
+import { damageTypeArg, flag, roundsOf } from "../text";
 import type { EffectApplyInput, EffectApplyResult } from "./types";
 
 import { CombatStatus } from "@/lib/constants/battle";
-import { DAMAGE_ELEMENT_LABELS } from "@/lib/constants/damage";
+import { textRef } from "@/lib/i18n/text-ref";
 import { resolveAmount } from "@/lib/utils/abilities/engine/core/amount";
 import { eventDamage, eventSpellRoll } from "@/lib/utils/abilities/engine/core/events";
 import { findParticipant, isActive, replaceParticipant } from "@/lib/utils/abilities/engine/core/participants";
@@ -48,7 +49,7 @@ export function applyDealDamage(input: EffectApplyInput<Of<"dealDamage">>): Effe
     const updated = c.participant;
 
     ps = replaceParticipant(c.participants, updated);
-    messages.push(`💥 ${ability.name}: ${t.basicInfo.name} −${amount} HP`, ...c.messages);
+    messages.push(textRef("abilityText.log.damage", { ability: ability.name, target: t.basicInfo.name, amount }), ...c.messages);
 
     if (!isActive(updated)) downed.push({ victimId: id, actorId: input.ownerId });
   }
@@ -90,8 +91,8 @@ export function applyHeal(input: EffectApplyInput<Of<"heal">>): EffectApplyResul
     ps = replaceParticipant(ps, hp > 0 ? clearDeathSaves(healed) : healed);
     messages.push(
       isActive(t)
-        ? `💚 ${label}: ${t.basicInfo.name} +${hp - before} HP`
-        : `✝️ ${label}: ${t.basicInfo.name} повертається з ${hp} HP`,
+        ? textRef("abilityText.log.heal", { label, target: t.basicInfo.name, amount: hp - before })
+        : textRef("abilityText.log.revive", { label, target: t.basicInfo.name, hp }),
     );
   }
 
@@ -117,7 +118,7 @@ export function applyDot(input: EffectApplyInput<Of<"dot">>): EffectApplyResult 
     if (!t || !isActive(t)) continue;
 
     if (hasImmunity(t, effect.damageType, { participants: ps, fromSpell })) {
-      messages.push(`⛔ ${ability.name}: ${t.basicInfo.name} — імунітет до ${effect.damageType}`);
+      messages.push(textRef("abilityText.log.immuneTo", { ability: ability.name, target: t.basicInfo.name, type: effect.damageType }));
       continue;
     }
 
@@ -142,7 +143,7 @@ export function applyDot(input: EffectApplyInput<Of<"dot">>): EffectApplyResult 
         ctx.round,
       ),
     );
-    messages.push(`🔥 ${ability.name}: ${effect.damageType} ${dmg}/раунд → ${t.basicInfo.name} (${effect.duration.rounds} р.)`);
+    messages.push(textRef("abilityText.log.dot", { ability: ability.name, type: effect.damageType, amount: dmg, target: t.basicInfo.name, rounds: effect.duration.rounds }));
   }
 
   return { participants: ps, messages };
@@ -185,18 +186,22 @@ export function applyHot(input: EffectApplyInput<Of<"hot">>): EffectApplyResult 
         ctx.round,
       ),
     );
-    messages.push(`💚 ${ability.name}: +${heal} HP/раунд → ${t.basicInfo.name} (${effect.duration.rounds} р.)`);
+    messages.push(textRef("abilityText.log.hot", { ability: ability.name, amount: heal, target: t.basicInfo.name, rounds: effect.duration.rounds }));
   }
 
   return { participants: ps, messages };
 }
 
-const damageTypeLabel = (type: string) => DAMAGE_ELEMENT_LABELS[type] ?? type;
+export const describeDealDamage = (e: Of<"dealDamage">) =>
+  textRef("abilityText.effects.dealDamage", {
+    amount: amountLabel(e.amount),
+    hasType: flag(e.damageType),
+    type: e.damageType ? damageTypeArg(e.damageType) : "",
+    falloff: e.falloff ? ` (${e.falloff.join("% → ")}%)` : "",
+  });
 
-export const describeDealDamage = (e: Of<"dealDamage">) => `шкода ${amountLabel(e.amount)}${e.damageType ? ` ${damageTypeLabel(e.damageType)}` : ""}${e.falloff ? ` (${e.falloff.join("% → ")}%)` : ""}`;
+export const describeHeal = (e: Of<"heal">) => textRef("abilityText.effects.heal", { revive: flag(e.revive), amount: amountLabel(e.amount) });
 
-export const describeHeal = (e: Of<"heal">) => `${e.revive ? "воскресіння" : "лікування"} ${amountLabel(e.amount)}`;
+export const describeDot = (e: Of<"dot">) => textRef("abilityText.effects.dot", { type: damageTypeArg(e.damageType), amount: amountLabel(e.damagePerRound), rounds: roundsOf(e) });
 
-export const describeDot = (e: Of<"dot">) => `${damageTypeLabel(e.damageType)} ${amountLabel(e.damagePerRound)}/раунд × ${e.duration?.rounds ?? "?"} р.`;
-
-export const describeHot = (e: Of<"hot">) => `лікування ${amountLabel(e.healPerRound)}/раунд × ${e.duration?.rounds ?? "?"} р.`;
+export const describeHot = (e: Of<"hot">) => textRef("abilityText.effects.hot", { amount: amountLabel(e.healPerRound), rounds: roundsOf(e) });

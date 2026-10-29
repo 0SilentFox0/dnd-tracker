@@ -1,5 +1,6 @@
 import type { EffectApplyInput, EffectApplyResult } from "./types";
 
+import { textRef } from "@/lib/i18n/text-ref";
 import { findParticipant, updateParticipant } from "@/lib/utils/abilities/engine/core/participants";
 import { applySpellTimedEffect } from "@/lib/utils/abilities/engine/effects/opposing-spells";
 import { effectSource } from "@/lib/utils/abilities/engine/effects/timed-effects";
@@ -38,7 +39,7 @@ export function applyCopySpellBuffs(input: EffectApplyInput<Extract<Effect, { ki
         ctx.round,
       );
 
-      messages.push(...removed.map((r) => `⚖️ ${e.name} знімає «${r.name}» → ${p.basicInfo.name}`), `✨ ${p.basicInfo.name}: отримує «${e.name}» (${ability.name})`);
+      messages.push(...removed.map((r) => textRef("abilityText.log.cancelsEffect", { ability: e.name, effect: r.name, target: p.basicInfo.name })), textRef("abilityText.log.gainsEffect", { target: p.basicInfo.name, effect: e.name, ability: ability.name }));
 
       return participant;
     }, p),

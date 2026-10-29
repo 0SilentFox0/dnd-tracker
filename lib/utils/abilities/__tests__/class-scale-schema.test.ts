@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 
+import { textOf } from "@/lib/i18n/test/text";
 import { makeParticipant, resolved } from "@/lib/utils/abilities/__tests__/fixtures";
 import { resolveAmount, resolveFlat } from "@/lib/utils/abilities/engine/core/amount";
 import { battleLimit, restUses, withinCountLimits } from "@/lib/utils/abilities/engine/core/usage";
@@ -42,8 +43,8 @@ describe("unresolved refs in the engine", () => {
   it("labels show the column key", () => {
     expect(flatLabel({ scale: "rage-damage" })).toBe("+[rage-damage]");
     expect(amountLabel({ scale: "sneak-attack" })).toBe("[sneak-attack]");
-    expect(limitsLabel({ perRest: { rest: "long", uses: { scale: "rages" } } })).toEqual(["[rages] разів за довгий відпочинок"]);
-    expect(limitsLabel({ perRest: { rest: "long", uses: { formula: "max(1, cha_mod)" } } })).toEqual(["(max(1, cha_mod)) разів за довгий відпочинок"]);
-    expect(limitsLabel({ pool: { key: "focus-points", cost: 3 } })).toEqual(["пул «focus-points»: 3"]);
+    expect(limitsLabel({ perRest: { rest: "long", uses: { scale: "rages" } } }).map((l) => textOf(l))).toEqual(["[rages] разів за довгий відпочинок"]);
+    expect(limitsLabel({ perRest: { rest: "long", uses: { formula: "max(1, cha_mod)" } } }).map((l) => textOf(l))).toEqual(["(max(1, cha_mod)) разів за довгий відпочинок"]);
+    expect(limitsLabel({ pool: { key: "focus-points", cost: 3 } }).map((l) => textOf(l))).toEqual(["пул «focus-points»: 3"]);
   });
 });

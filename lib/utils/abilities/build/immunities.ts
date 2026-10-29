@@ -3,6 +3,7 @@ import { resolveAbilities } from "./resolve";
 import type { Effect } from "@/lib/utils/abilities/schema";
 import type { ResolvedAbility } from "@/types/abilities";
 
+ 
 const RULES: Array<{ match: RegExp; effect: Effect }> = [
   { match: /^(вогн(ю|я|ь)|вогонь|fire)$/, effect: { kind: "flag", flag: "resistance", damageType: "fire", percent: 100 } },
   { match: /^(отру(єння|ти|та)|poison)$/, effect: { kind: "flag", flag: "resistance", damageType: "poison", percent: 100 } },
@@ -10,6 +11,7 @@ const RULES: Array<{ match: RegExp; effect: Effect }> = [
   { match: /^(контролю|контроль|control)$/, effect: { kind: "flag", flag: "conditionImmunity", conditions: "all" } },
   { match: /^(страху|страх|fear)$/, effect: { kind: "flag", flag: "conditionImmunity", conditions: ["fear"] } },
 ];
+ 
 
 export function immunityAbilities(immunities: string[], source: { type: "unit" | "character"; id: string }): ResolvedAbility[] {
   const effects: Effect[] = [];
@@ -23,7 +25,7 @@ export function immunityAbilities(immunities: string[], source: { type: "unit" |
 
     const rule = RULES.find((r) => r.match.test(text));
 
-    const effect: Effect = rule?.effect ?? { kind: "note", text: `Імунітет: ${text}` };
+    const effect: Effect = rule?.effect ?? { kind: "note", text: `Immunity: ${text}` };
 
     const key = JSON.stringify(effect);
 
@@ -35,7 +37,7 @@ export function immunityAbilities(immunities: string[], source: { type: "unit" |
 
   if (effects.length === 0) return [];
 
-  return resolveAbilities({ type: source.type, id: source.id, name: "Імунітети" }, [
-    { id: "immunities", name: "Імунітети", trigger: { event: "passive" }, effects },
+  return resolveAbilities({ type: source.type, id: source.id, name: "Immunities" }, [
+    { id: "immunities", name: "Immunities", trigger: { event: "passive" }, effects },
   ]);
 }

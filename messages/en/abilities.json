@@ -144,5 +144,9 @@
     "columnNotPool": "Column “{label}” is not a pool",
     "attackNotFound": "The attack was not found among the unit's attacks",
     "spellNotFound": "The spell was not found in the library"
+  },
+  "read": {
+    "partialInvalid": "Some of the stored abilities have invalid data — fix or remove them before saving",
+    "columnInvalid": "The abilities data in the column is invalid — the list is empty"
   }
 }

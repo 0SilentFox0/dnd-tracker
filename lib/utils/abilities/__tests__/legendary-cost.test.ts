@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 
+import { textOf } from "@/lib/i18n/test/text";
 import { makeParticipant, resolved } from "@/lib/utils/abilities/__tests__/fixtures";
 import { limitsLabel } from "@/lib/utils/abilities/registry/labels";
 import { AbilitySchema } from "@/lib/utils/abilities/schema";
@@ -16,7 +17,7 @@ describe("limits.legendaryCost", () => {
   });
 
   it("підпис ліміту", () => {
-    expect(limitsLabel({ legendaryCost: 2 })).toEqual(["легендарна дія (2)"]);
+    expect(limitsLabel({ legendaryCost: 2 }).map((l) => textOf(l))).toEqual(["легендарна дія (2)"]);
   });
 
   it("у звичайному ході легендарне вміння приховане", () => {

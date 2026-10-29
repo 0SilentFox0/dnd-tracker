@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 
 import { makeParticipant, resolved } from "./fixtures";
 
+import { textOf } from "@/lib/i18n/test/text";
 import { collectModifiers } from "@/lib/utils/abilities/engine/core/collect-modifiers";
 import { describeEffect } from "@/lib/utils/abilities/registry/effects";
 import type { BattleParticipant } from "@/types/battle";
@@ -24,7 +25,7 @@ describe("formula in percent", () => {
   });
 
   it("describes the formula", () => {
-    expect(describeEffect({ kind: "damageBonus", filter: { kind: "all" }, percent: { formula: "3*morale" } })).toContain("(3*morale)%");
+    expect(textOf(describeEffect({ kind: "damageBonus", filter: { kind: "all" }, percent: { formula: "3*morale" } }))).toContain("(3*morale)%");
   });
 
   it("morale у формулі враховує власний тимчасовий бонус і прапорець noNegativeMorale", () => {

@@ -1,9 +1,12 @@
+import { flag } from "../text";
 import type { EffectApplyInput, EffectApplyResult } from "./types";
 
 import { CombatStatus, ParticipantSourceType } from "@/lib/constants/battle";
+import { textRef } from "@/lib/i18n/text-ref";
 import { applyBakedAuras } from "@/lib/utils/abilities/build/bake";
 import { findParticipant, participantNames, updateParticipant } from "@/lib/utils/abilities/engine/core/participants";
 import type { Effect } from "@/lib/utils/abilities/schema";
+import type { LogLine } from "@/types/text";
 
 type Of<K extends Effect["kind"]> = Extract<Effect, { kind: K }>;
 
@@ -17,7 +20,7 @@ export function applySummon(input: EffectApplyInput<Of<"summon">>): EffectApplyR
   return { participants: input.participants, messages: [], summons: [{ ownerId, group: effect.group, tier: effect.tier, unitId: effect.unitId, count: effect.count ?? 1, casterLevel, spellId }] };
 }
 
-export const describeSummon = (e: Of<"summon">) => (e.unitId ? `прикликати ${e.count ?? 1}× обраного юніта` : `прикликати ${e.count ?? 1}× юніта «${e.group}», Tier ${e.tier}`);
+export const describeSummon = (e: Of<"summon">) => textRef("abilityText.effects.summon", { unit: flag(e.unitId), count: e.count ?? 1, group: e.group ?? "", tier: e.tier ?? "" });
 
 export function applyRaiseDead(input: EffectApplyInput<Of<"raiseDead">>): EffectApplyResult {
   const { effect, ability, ownerId } = input;
@@ -52,11 +55,11 @@ export function applyRaiseDead(input: EffectApplyInput<Of<"raiseDead">>): Effect
 
   if (raised.length) ps = applyBakedAuras(ps, new Set(raised));
 
-  const messages = raised.length ? [`💀 ${ability.name}: ${participantNames(ps, raised)} повстали (${effect.hpPercent}% HP)`] : [];
+  const messages: LogLine[] = raised.length ? [textRef("abilityText.log.raisedDead", { ability: ability.name, target: participantNames(ps, raised), percent: effect.hpPercent })] : [];
 
-  if (refused.length) messages.push(`⛔ ${ability.name}: ${participantNames(ps, refused)} — не можна підняти`);
+  if (refused.length) messages.push(textRef("abilityText.log.raiseRefused", { ability: ability.name, target: participantNames(ps, refused) }));
 
   return { participants: ps, messages };
 }
 
-export const describeRaiseDead = (e: Of<"raiseDead">) => `підняти мертвих юнітів на ${e.hpPercent}% HP`;
+export const describeRaiseDead = (e: Of<"raiseDead">) => textRef("abilityText.effects.raiseDead", { percent: e.hpPercent });
