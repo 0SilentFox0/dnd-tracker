@@ -1,19 +1,23 @@
 "use client";
 
+import { useMemo } from "react";
+
 import { useTranslator } from "@/lib/i18n/use-translator";
-import { describeAbilityText, describeEffect } from "@/lib/utils/abilities/registry/effects";
-import type { Ability, Effect } from "@/lib/utils/abilities/schema";
-import { type AbilityFlowSummary, flowSegments, renderSegment, renderSegments, type Segment } from "@/lib/utils/abilities/segments";
+import { describeEffect } from "@/lib/utils/abilities/registry/effects";
+import type { Effect } from "@/lib/utils/abilities/schema";
+import { type AbilityFlowSummary, flowSegments, joinSegments, linesText, type Segment } from "@/lib/utils/abilities/segments";
 
 export function useAbilityText() {
   const t = useTranslator("abilityRegistry");
 
-  return {
-    effect: (e: Effect) => renderSegments(t, describeEffect(e)).join(" · "),
-    ability: (a: Ability) => describeAbilityText(a, t),
-    segments: (s: readonly Segment[]) => renderSegments(t, s).join(" · "),
-    line: (s: Segment) => renderSegment(t, s),
-    flows: (list: readonly AbilityFlowSummary[]) => list.map((f) => renderSegments(t, flowSegments(f)).join(" · ")),
-    lines: (list: readonly (readonly Segment[])[]) => list.map((s) => renderSegments(t, s).join(" · ")),
-  };
+  return useMemo(
+    () => ({
+      effect: (e: Effect) => joinSegments(t, describeEffect(e)),
+      segments: (s: readonly Segment[]) => joinSegments(t, s),
+      flows: (list: readonly AbilityFlowSummary[]) => linesText(t, list.map(flowSegments)),
+      flowsText: (list: readonly AbilityFlowSummary[]) => linesText(t, list.map(flowSegments)).join(" · "),
+      lines: (list: readonly (readonly Segment[])[]) => linesText(t, list),
+    }),
+    [t],
+  );
 }

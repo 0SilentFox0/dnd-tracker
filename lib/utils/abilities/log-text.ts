@@ -1,6 +1,6 @@
 import { createTranslator } from "use-intl/core";
 
-import { renderSegments, type Segment } from "./segments";
+import { joinSegments, type Segment } from "./segments";
 
 import type { Translator } from "@/lib/i18n/translator";
 import ukMessages from "@/messages/uk/abilityRegistry.json";
@@ -13,4 +13,4 @@ const t = createTranslator({
   onError: () => {},
 } as Parameters<typeof createTranslator>[0]) as unknown as Translator;
 
-export const logText = (list: readonly Segment[]): string => renderSegments(t, list).join(" · ");
+export const logText = (list: readonly Segment[]): string => joinSegments(t, list);

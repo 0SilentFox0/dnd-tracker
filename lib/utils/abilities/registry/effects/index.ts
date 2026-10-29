@@ -32,7 +32,7 @@ import { resolveTargetIds } from "@/lib/utils/abilities/engine/core/targets";
 import { logText } from "@/lib/utils/abilities/log-text";
 import type { Ability, Effect, EffectKind } from "@/lib/utils/abilities/schema";
 import { CONDITION_5E_KEYS, MANEUVERS } from "@/lib/utils/abilities/schema/kinds";
-import { renderSegments, seg, type Segment } from "@/lib/utils/abilities/segments";
+import { joinSegments, seg, type Segment } from "@/lib/utils/abilities/segments";
 import { pickOne } from "@/lib/utils/common/dice";
 import { signed } from "@/lib/utils/common/format";
 
@@ -180,5 +180,5 @@ export function describeAbilitySegments(a: Ability): Segment[] {
 }
 
 export function describeAbilityText(a: Ability, t: Translator): string {
-  return renderSegments(t, describeAbilitySegments(a)).join(" · ");
+  return joinSegments(t, describeAbilitySegments(a));
 }

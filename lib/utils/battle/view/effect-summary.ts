@@ -1,7 +1,8 @@
 import type { Translator } from "@/lib/i18n/translator";
 import { legacyActiveEffectModifiers } from "@/lib/utils/abilities/engine/effects/legacy-active-effects";
 import { describeEffect } from "@/lib/utils/abilities/registry/effects";
-import { renderSegments } from "@/lib/utils/abilities/segments";
+import type { Effect } from "@/lib/utils/abilities/schema";
+import { joinSegments } from "@/lib/utils/abilities/segments";
 import { capitalize } from "@/lib/utils/common/text";
 import type { ActiveEffect } from "@/types/battle";
 
@@ -14,7 +15,9 @@ export function effectLines(e: ActiveEffect, t: Translator): string[] {
 
   const guards = e.effects.filter((d) => d.type === "guard").map((d) => `${e.source?.name ?? "Захисник"} бере на себе ${d.value}% шкоди від атак`);
 
-  return [...new Set([...(e.abilityEffects ?? legacyActiveEffectModifiers(e)).map((x) => capitalize(renderSegments(t, describeEffect(x)).join(" · "))), ...guards])];
+  const text = (x: Effect) => capitalize(joinSegments(t, describeEffect(x)));
+
+  return [...new Set([...(e.abilityEffects ?? legacyActiveEffectModifiers(e)).map(text), ...guards])];
 }
 
 /** Що робить активний ефект — для підказки на чипі: опис або описи його модифікаторів, DoT/HoT, залишок і джерело. */

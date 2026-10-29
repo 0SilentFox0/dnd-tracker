@@ -11,7 +11,7 @@ export function SetList({ sets }: { sets: SetProgress[] }) {
 
   const abilityText = useAbilityText();
 
-  const effectsOf = (s: SetProgress) => abilityText.flows(s.effects).join(" · ");
+  const effectsOf = (s: SetProgress) => abilityText.flowsText(s.effects);
 
   if (sets.length === 0) return null;
 

@@ -1,30 +1,20 @@
 "use client";
 
-import type { ReactNode } from "react";
+import { type ReactNode, useMemo } from "react";
 import { useTranslations } from "next-intl";
 import { ChevronRight } from "lucide-react";
 
+import { FLOW_BORDER, FLOW_TEXT, type FlowPart } from "./flow-part";
 import { useAbilityText } from "./use-ability-text";
 
 import { cn } from "@/lib/utils";
 import type { AbilityFlowSummary, Segment } from "@/lib/utils/abilities/segments";
-
-export type FlowPart = "when" | "if" | "then" | "limits";
 
 interface AbilityFlowProps {
   summary: AbilityFlowSummary;
   variant: "editor" | "card";
   onChipClick?: (part: FlowPart) => void;
 }
-
-const TONE: Record<FlowPart, string> = {
-  when: "border-[color:var(--flow-when)] text-[color:var(--flow-when)]",
-  if: "border-[color:var(--flow-if)] text-[color:var(--flow-if)]",
-  then: "border-[color:var(--flow-then)] text-[color:var(--flow-then)]",
-  limits: "border-[color:var(--flow-limit)] text-[color:var(--flow-limit)]",
-};
-
-const LABEL: Record<FlowPart, "when" | "if" | "then" | "limit"> = { when: "when", if: "if", then: "then", limits: "limit" };
 
 export function AbilityFlow({ summary, variant, onChipClick }: AbilityFlowProps) {
   const t = useTranslations("abilities.flow");
@@ -34,11 +24,11 @@ export function AbilityFlow({ summary, variant, onChipClick }: AbilityFlowProps)
   const compact = variant === "card";
 
   const chip = (part: FlowPart, key: string, body: string): ReactNode => {
-    const className = cn("inline-flex min-w-0 items-baseline gap-1.5 rounded-md border bg-hud-field/60 px-2 py-0.5 text-left", compact ? "text-xs" : "text-sm", TONE[part]);
+    const className = cn("inline-flex min-w-0 items-baseline gap-1.5 rounded-md border bg-hud-field/60 px-2 py-0.5 text-left", compact ? "text-xs" : "text-sm", FLOW_BORDER[part], FLOW_TEXT[part]);
 
     const content = (
       <>
-        <span className="hud-sc shrink-0 text-[10px] uppercase tracking-wide">{t(LABEL[part])}</span>
+        <span className="hud-sc shrink-0 text-[10px] uppercase tracking-wide">{t(part)}</span>
         <span className="min-w-0 text-hud-bone">{body}</span>
       </>
     );
@@ -54,19 +44,23 @@ export function AbilityFlow({ summary, variant, onChipClick }: AbilityFlowProps)
     );
   };
 
-  const groups: { part: FlowPart; items: Segment[][] }[] = [
-    { part: "when", items: summary.when.length ? [summary.when] : [] },
-    { part: "if", items: summary.if.length ? [summary.if] : [] },
-    { part: "then", items: summary.then },
-    { part: "limits", items: summary.limits.length ? [summary.limits] : [] },
-  ];
+  const chips = useMemo(() => {
+    const one = (segs: Segment[]) => (segs.length ? [segs] : []);
 
-  const nodes = groups
-    .filter((g) => g.items.length)
-    .flatMap((g, i) => [
-      ...(i > 0 ? [<ChevronRight key={`arrow-${g.part}`} aria-hidden className="hidden size-3 shrink-0 self-center text-hud-muted sm:block" />] : []),
-      ...g.items.map((segs, j) => chip(g.part, `${g.part}-${j}`, text.segments(segs))),
-    ]);
+    const groups: { part: FlowPart; items: Segment[][] }[] = [
+      { part: "when", items: one(summary.when) },
+      { part: "if", items: one(summary.if) },
+      { part: "then", items: summary.then },
+      { part: "limits", items: one(summary.limits) },
+    ];
+
+    return groups.filter((g) => g.items.length).map((g) => ({ part: g.part, bodies: g.items.map((segs) => text.segments(segs)) }));
+  }, [summary, text]);
+
+  const nodes = chips.flatMap((g, i) => [
+    ...(i > 0 ? [<ChevronRight key={`arrow-${g.part}`} aria-hidden className="hidden size-3 shrink-0 self-center text-hud-muted sm:block" />] : []),
+    ...g.bodies.map((body, j) => chip(g.part, `${g.part}-${j}`, body)),
+  ]);
 
   return <div className="flex flex-wrap items-center gap-1">{nodes}</div>;
 }

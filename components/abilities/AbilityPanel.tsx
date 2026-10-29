@@ -10,9 +10,10 @@ import { LimitsSection } from "./sections/LimitsSection";
 import { PerformSection } from "./sections/PerformSection";
 import { sectionId } from "./sections/SectionShell";
 import { TriggerSection } from "./sections/TriggerSection";
-import { AbilityFlow, type FlowPart } from "./AbilityFlow";
+import { AbilityFlow } from "./AbilityFlow";
 import { useErrorsUnder } from "./editor-context";
 import { FieldErrors } from "./FieldErrors";
+import type { FlowPart } from "./flow-part";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";

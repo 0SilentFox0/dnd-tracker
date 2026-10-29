@@ -13,7 +13,7 @@ import { Label } from "@/components/ui/label";
 import { SelectField } from "@/components/ui/select-field";
 import { useTranslator } from "@/lib/i18n/use-translator";
 import { changeTriggerEvent, getAtPath, setAtPath } from "@/lib/utils/abilities/editor";
-import { TRIGGER_GROUPS, TRIGGER_REGISTRY } from "@/lib/utils/abilities/registry/triggers";
+import { TRIGGER_GROUPS, TRIGGER_REGISTRY, TRIGGERS_BY_GROUP } from "@/lib/utils/abilities/registry/triggers";
 import type { Trigger, TriggerEvent } from "@/lib/utils/abilities/schema";
 
 export function TriggerSection({ ability, path, onChange }: AbilitySectionProps) {
@@ -23,9 +23,7 @@ export function TriggerSection({ ability, path, onChange }: AbilitySectionProps)
 
   const groups = TRIGGER_GROUPS.map((group) => ({
     label: tr(`triggerGroups.${group}`),
-    options: Object.values(TRIGGER_REGISTRY)
-      .filter((def) => def.group === group)
-      .map((def) => ({ value: def.event, label: tr(`triggers.${def.event}.label`) })),
+    options: TRIGGERS_BY_GROUP[group].map((event) => ({ value: event, label: tr(`triggers.${event}.label`) })),
   })).filter((g) => g.options.length);
 
   const fields = TRIGGER_REGISTRY[ability.trigger.event].fields;

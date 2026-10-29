@@ -152,6 +152,10 @@ function spellTargetMatches(whose: "self" | "ally" | undefined, targetIds: strin
   });
 }
 
+export const TRIGGERS_BY_GROUP: Record<TriggerGroup, TriggerEvent[]> = Object.fromEntries(
+  TRIGGER_GROUPS.map((g) => [g, Object.values(TRIGGER_REGISTRY).filter((d) => d.group === g).map((d) => d.event)]),
+) as Record<TriggerGroup, TriggerEvent[]>;
+
 export function describeTrigger(trigger: Trigger): Segment[] {
   const def = TRIGGER_REGISTRY[trigger.event] as TriggerDefinition<TriggerEvent>;
 
