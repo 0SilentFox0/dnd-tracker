@@ -1,6 +1,7 @@
 export * from "./crit-outcome";
 export * from "./damage-step";
 export * from "./damage-taken";
+export * from "./derive-scene";
 export * from "./downed-heroes";
 export * from "./effect-summary";
 export * from "./health";
@@ -10,6 +11,7 @@ export * from "./log-entry";
 export * from "./my-turn-key";
 export * from "./personal-effects";
 export * from "./queue";
+export * from "./result-fx";
 export * from "./retaliation";
 export * from "./rollback";
 export * from "./scene-maps";

@@ -6,8 +6,9 @@ vi.mock("@/components/hud/fonts", () => ({ hudFontClassName: "", HUD_SURFACE: "h
 
 import { AwaitingDmDialog } from "@/components/battle/dm/dialogs/AwaitingDmDialog";
 import { ParticipantSide } from "@/lib/constants/battle";
-import { BattleSceneContext, type BattleSceneValue } from "@/lib/hooks/battle";
+import { BattleSceneContext } from "@/lib/hooks/battle";
 import { createMockParticipant } from "@/lib/utils/battle/__tests__/fixtures/mock-participant";
+import type { BattleSceneValue } from "@/types/battle-scene";
 
 afterEach(cleanup);
 

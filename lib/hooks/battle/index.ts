@@ -6,17 +6,15 @@ export { useAbilityPicker } from "./useAbilityPicker";
 export { ACTION_RESULT_MS, useActionResult } from "./useActionResult";
 export { useAttackWizard } from "./useAttackWizard";
 export { type AuraZoneStep, useAuraZones } from "./useAuraZones";
+export { useBattleActions } from "./useBattleActions";
 export { useBattleAudioHost } from "./useBattleAudioHost";
 export { useBattleFxQueue } from "./useBattleFxQueue";
 export { type BattleMapScene, useBattleMapScene } from "./useBattleMapScene";
 export { type BattlePageDialogs, useBattlePageDialogs } from "./useBattlePageDialogs";
 export { RESYNC_AFTER_HIDDEN_MS, useBattleResync } from "./useBattleResync";
 export {
-  type ActionResultFx,
   BattleSceneContext,
   BattleSceneDataContext,
-  type BattleSceneValue,
-  type CritEffectFx,
   useBattleScene,
   useBattleSceneData,
   useBattleSceneDataValue,

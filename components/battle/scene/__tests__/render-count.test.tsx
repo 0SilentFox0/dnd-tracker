@@ -47,12 +47,13 @@ import { BattleSceneProvider } from "@/components/battle/scene/BattleSceneProvid
 import { BattleScreen } from "@/components/battle/scene/BattleScreen";
 import { campaignPost } from "@/lib/api/client";
 import { ParticipantSide } from "@/lib/constants/battle";
-import { type BattleSceneValue, useBattleScene, useBattleSceneValue } from "@/lib/hooks/battle";
+import { useBattleScene, useBattleSceneValue } from "@/lib/hooks/battle";
 import { battleQueryKey } from "@/lib/hooks/battles";
 import { ConfirmContext } from "@/lib/hooks/common";
 import { createMockParticipant } from "@/lib/utils/battle/__tests__/fixtures/mock-participant";
 import type { BattleScene, ClientBattleDelta } from "@/types/api";
 import type { BattleAction, BattleParticipant } from "@/types/battle";
+import type { BattleSceneValue } from "@/types/battle-scene";
 
 const USER = "u1";
 

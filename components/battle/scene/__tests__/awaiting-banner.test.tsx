@@ -3,7 +3,8 @@ import { cleanup, fireEvent, render, screen } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
 import { AwaitingDmBanner } from "@/components/battle/scene/AwaitingDmBanner";
-import { BattleSceneContext, type BattleSceneValue } from "@/lib/hooks/battle";
+import { BattleSceneContext } from "@/lib/hooks/battle";
+import type { BattleSceneValue } from "@/types/battle-scene";
 
 afterEach(cleanup);
 

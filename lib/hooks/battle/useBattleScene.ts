@@ -4,165 +4,23 @@ import { createContext, useCallback, useContext, useMemo, useState } from "react
 import { useQueryClient } from "@tanstack/react-query";
 
 import { type DialogState, useAwaitingDmDialog } from "./useAwaitingDmDialog";
-import { type BattleLogHistory, useBattleLogHistory } from "./useBattleLogHistory";
-import { type BattleToastApi, useBattleToast } from "./useBattleToast";
+import { useBattleActions } from "./useBattleActions";
+import { useBattleLogHistory } from "./useBattleLogHistory";
+import { useBattleToast } from "./useBattleToast";
 import { useDisplayEffectMap } from "./useDisplayEffectMap";
 import { useParticipantClick } from "./useParticipantClick";
-import { type PusherConnectionState, usePusherBattleSync } from "./usePusherBattleSync";
+import { usePusherBattleSync } from "./usePusherBattleSync";
 
-import { battleOps } from "@/lib/api/battle-ops";
-import { BattleStatus,ParticipantSide } from "@/lib/constants/battle";
-import { CONTROLLED_BY_DM } from "@/lib/constants/characters";
-import {
-  type BattleOpMutation,
-  battleQueryKey,
-  useAbilityAction,
-  useAddBattleParticipant,
-  useAttack,
-  useAuraZone,
-  useBattle,
-  useBattleConditions,
-  useBattleCoreAction,
-  useBonusAction,
-  useCastSpell,
-  useCompleteBattle,
-  useCritChoice,
-  useMapTerrain,
-  useMapWeather,
-  useMazeAction,
-  useMazeMark,
-  useMoraleCheck,
-  useMoveParticipant,
-  useNextTurn,
-  useRefreshBattleSources,
-  useResetBattle,
-  useRevealBattleParticipants,
-  useRollbackBattleAction,
-  useScaleBattleUnits,
-  useStartBattle,
-  useUnitControl,
-  useUpdateBattleParticipant,
-} from "@/lib/hooks/battles";
+import { BattleStatus } from "@/lib/constants/battle";
+import { battleQueryKey, useBattle } from "@/lib/hooks/battles";
 import { type AttackIntent, isIntentStale } from "@/lib/utils/battle/flows";
 import type { MapAim, MapPick } from "@/lib/utils/battle/grid";
-import { reserveOf } from "@/lib/utils/battle/participant/reserve";
-import { checkVictoryConditions } from "@/lib/utils/battle/turn/victory";
-import { canSeeEnemyHp, type CritEffectFx, type ParticipantFace, type QueueEntry, type RetaliationOutcome, turnQueue, type Viewer } from "@/lib/utils/battle/view";
+import { deriveScene } from "@/lib/utils/battle/view";
 import type { BattleScene } from "@/types/api";
-import type { ActiveEffect, BattleParticipant } from "@/types/battle";
-
-export type { CritEffectFx, ParticipantFace };
+import type { BattleParticipant } from "@/types/battle";
+import type { BattleLogState, BattleSceneData, BattleSceneValue, DmControl, ResultFx } from "@/types/battle-scene";
 
 const NO_ORDER: BattleParticipant[] = [];
-
-/** Удар по одній цілі багатоцільової атаки */
-export interface StrikeFx {
-  targetName: string;
-  kind: "hit" | "crit" | "miss";
-  damage: number;
-  downed: boolean;
-  splash?: boolean;
-}
-
-export type ResultFx =
-  | { kind: "hit" | "crit"; targetName: string; damage: number; downed: boolean; d20: number; weapon?: string; retaliation?: RetaliationOutcome; critEffect?: CritEffectFx; strikes?: StrikeFx[] }
-  | { kind: "miss"; targetName: string; d20: number; known: string; retaliation?: RetaliationOutcome; critFail?: CritEffectFx; strikes?: StrikeFx[] }
-  | { kind: "spell"; spellName: string; changes: { name: string; change: number }[]; targetCount: number }
-  | { kind: "morale-extra" | "morale-skip"; name: string; d10: number; morale: number };
-
-export type ActionResultFx = Extract<ResultFx, { kind: "hit" | "crit" | "miss" | "spell" }>;
-
-export const isActionResult = (fx: ResultFx | null): fx is ActionResultFx => !!fx && fx.kind !== "morale-extra" && fx.kind !== "morale-skip";
-
-export interface BattleLogState {
-  open: boolean;
-  focus: number | null;
-}
-
-export interface BattleLogPanel extends BattleLogState {
-  show(focus?: number | null): void;
-  close(): void;
-}
-
-/** Наміри гравця, що їх карта передає майстрам (не мутації — ті в `actions`). */
-export interface BattleSceneIntents {
-  attack: AttackIntent | null;
-  requestAttack(intent: AttackIntent): void;
-  clearAttack(): void;
-  /** Наведення шаблону заклинання на карті: клік по клітинці ставить точку замість руху чи атаки */
-  mapAim: MapAim | null;
-  setMapAim(aim: MapAim | null): void;
-  /** Вибір цілей заклинання на карті: клік по токену обирає ціль замість руху чи атаки */
-  mapPick: MapPick | null;
-  setMapPick(pick: MapPick | null): void;
-  /** Фаза ходу поточного героя дозволяє атаку — лише тоді клік по ворогу стає наміром, а не вибором */
-  attackReady: boolean;
-  /** MyTurnControls повідомляє id героя, чия фаза дозволяє атаку; null — не дозволяє */
-  setAttackReady(heroId: string | null): void;
-}
-
-export type BattleSceneActions = { [K in keyof typeof battleOps]: BattleOpMutation<K> };
-
-export interface BattleSceneTurn {
-  current: BattleParticipant | null;
-  isMyTurn: boolean;
-  queue: QueueEntry[];
-}
-
-export interface BattleSceneRoster {
-  allies: BattleParticipant[];
-  enemies: BattleParticipant[];
-  reserve: BattleParticipant[];
-  myParticipants: BattleParticipant[];
-  hero: BattleParticipant | null;
-}
-
-export interface DmControl {
-  id: string | null;
-  set(id: string | null): void;
-}
-
-/** Змінюється лише разом з даними бою — список учасників, черга, герой. */
-export interface BattleSceneData {
-  campaignId: string;
-  battleId: string;
-  battle: BattleScene;
-  viewer: Viewer;
-  turn: BattleSceneTurn;
-  roster: BattleSceneRoster;
-  awaiting: "victory" | "defeat" | null;
-  effects: Map<string, ActiveEffect[]>;
-  dmControl: DmControl;
-  select(id: string | null): void;
-  /** Клік по учаснику в списку: ворог у свій хід — атака, інакше — вибір */
-  clickParticipant(id: string): void;
-  readBattle(): BattleScene | undefined;
-}
-
-export type { DialogState } from "./useAwaitingDmDialog";
-
-export interface BattleSceneDialogs {
-  awaitingDm: DialogState;
-  resultScreen: DialogState;
-}
-
-export interface BattleSceneResult {
-  fx: ResultFx | null;
-  show(fx: ResultFx | null): void;
-}
-
-export interface BattleSceneValue extends BattleSceneData {
-  dialogs: BattleSceneDialogs;
-  connection: PusherConnectionState;
-  selectedId: string | null;
-  intents: BattleSceneIntents;
-  toast: BattleToastApi;
-  result: BattleSceneResult;
-  log: BattleLogPanel;
-  logHistory: BattleLogHistory;
-  actions: BattleSceneActions;
-  anyPending: boolean;
-}
 
 export const BattleSceneContext = createContext<BattleSceneValue | null>(null);
 
@@ -194,56 +52,6 @@ export function useBattleSceneDataValue(value: BattleSceneValue): BattleSceneDat
   );
 }
 
-export function deriveScene(battle: BattleScene, userId: string | null, dmControlledId: string | null) {
-  const isDM = battle.isDM === true;
-
-  const order = battle.initiativeOrder ?? [];
-
-  const reserveAll = reserveOf(battle.pendingSummons ?? []);
-
-  const awaiting = battle.status === BattleStatus.ACTIVE ? checkVictoryConditions(order, reserveAll).awaiting : null;
-
-  const { current, isMyTurn, myParticipants, hero } = deriveTurn(battle, userId, isDM, dmControlledId, awaiting !== null);
-
-  return {
-    viewer: { userId, isDM, canSeeEnemyHp: canSeeEnemyHp(hero, order) },
-    turn: { current, isMyTurn, queue: turnQueue(order, battle.currentTurnIndex, battle.currentRound) },
-    roster: {
-      allies: order.filter((p) => p.basicInfo.side === ParticipantSide.ALLY),
-      enemies: order.filter((p) => p.basicInfo.side === ParticipantSide.ENEMY),
-      reserve: isDM ? reserveAll : NO_ORDER,
-      myParticipants,
-      hero,
-    },
-    awaiting,
-  };
-}
-
-export function deriveTurn(battle: BattleScene, userId: string | null, isDM: boolean, dmControlledId: string | null, awaiting = false) {
-  const order = battle.initiativeOrder ?? [];
-
-  const current = order[battle.currentTurnIndex] ?? null;
-
-  const myParticipants = order.filter((p) => p.basicInfo.controlledBy === userId);
-
-  const controls = (p: BattleParticipant) =>
-    p.basicInfo.controlledBy === userId ||
-    (isDM && (p.basicInfo.id === dmControlledId || p.basicInfo.controlledBy === CONTROLLED_BY_DM || p.basicInfo.side === ParticipantSide.ENEMY));
-
-  const isMyTurn = battle.status === BattleStatus.ACTIVE && !awaiting && !!current && !!userId && controls(current);
-
-  const dmHero = isDM && dmControlledId ? order.find((p) => p.basicInfo.id === dmControlledId) ?? null : null;
-
-  const mine = new Set(myParticipants.map((p) => p.basicInfo.id));
-
-  const nextMine = turnQueue(order, battle.currentTurnIndex, battle.currentRound ?? 1).find(
-    (e): e is Extract<QueueEntry, { participant: BattleParticipant }> => e.kind !== "round" && !e.down && mine.has(e.participant.basicInfo.id),
-  )?.participant;
-
-  const hero = (isMyTurn ? current : null) ?? dmHero ?? nextMine ?? myParticipants[0] ?? (isDM ? current : null);
-
-  return { current, isMyTurn, myParticipants, hero };
-}
 
 export function useBattleSceneValue(campaignId: string, battleId: string, userId: string | null) {
   const queryClient = useQueryClient();
@@ -288,39 +96,7 @@ export function useBattleSceneValue(campaignId: string, battleId: string, userId
 
   const { data: battle, isLoading } = useBattle(campaignId, battleId, { pausePolling: connectionState === "connected" });
 
-  const onConflict = useCallback(() => show("Стан бою змінився, повторіть дію"), [show]);
-
-  const onFailure = useCallback((message: string) => show(message), [show]);
-
-  const o = { onConflict, onFailure };
-
-  const actions: BattleSceneActions = {
-    nextTurn: useNextTurn(campaignId, battleId, o),
-    attack: useAttack(campaignId, battleId, o),
-    moraleCheck: useMoraleCheck(campaignId, battleId, o),
-    critChoice: useCritChoice(campaignId, battleId, o),
-    move: useMoveParticipant(campaignId, battleId, o),
-    mapTerrain: useMapTerrain(campaignId, battleId, o),
-    maze: useMazeAction(campaignId, battleId, o),
-    mazeMark: useMazeMark(campaignId, battleId, o),
-    mapWeather: useMapWeather(campaignId, battleId, o),
-    bonusAction: useBonusAction(campaignId, battleId, o),
-    abilityAction: useAbilityAction(campaignId, battleId, o),
-    auraZone: useAuraZone(campaignId, battleId, o),
-    castSpell: useCastSpell(campaignId, battleId, o),
-    start: useStartBattle(campaignId, battleId, o),
-    reset: useResetBattle(campaignId, battleId, o),
-    complete: useCompleteBattle(campaignId, battleId, o),
-    rollback: useRollbackBattleAction(campaignId, battleId, o),
-    addParticipant: useAddBattleParticipant(campaignId, battleId, o),
-    reveal: useRevealBattleParticipants(campaignId, battleId, o),
-    conditions: useBattleConditions(campaignId, battleId, o),
-    coreAction: useBattleCoreAction(campaignId, battleId, o),
-    updateParticipant: useUpdateBattleParticipant(campaignId, battleId, o),
-    scaleUnits: useScaleBattleUnits(campaignId, battleId, o),
-    unitControl: useUnitControl(campaignId, battleId, o),
-    refreshSources: useRefreshBattleSources(campaignId, battleId, o),
-  };
+  const actions = useBattleActions(campaignId, battleId, show);
 
   const readBattle = useCallback(
     () => queryClient.getQueryData<BattleScene>(battleQueryKey(campaignId, battleId)),

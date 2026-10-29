@@ -2,7 +2,9 @@
 
 import { useCallback, useEffect } from "react";
 
-import { isActionResult, useBattleScene } from "./useBattleScene";
+import { useBattleScene } from "./useBattleScene";
+
+import { isActionResult } from "@/lib/utils/battle/view";
 
 export const ACTION_RESULT_MS = 4_000;
 

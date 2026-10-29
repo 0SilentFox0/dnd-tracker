@@ -6,8 +6,9 @@ import { X } from "lucide-react";
 import { useInCornerStack } from "@/components/battle/scene/CornerStack";
 import { useMapStripSlot, useNoticeStack } from "@/components/battle/scene/MapStrip";
 import { HUD_SURFACE } from "@/components/hud";
-import { type ActionResultFx, useActionResult } from "@/lib/hooks/battle";
+import { useActionResult } from "@/lib/hooks/battle";
 import { cn } from "@/lib/utils";
+import type { ActionResultFx } from "@/types/battle-scene";
 
 const TITLE = { hit: "Влучання", crit: "Критичне влучання", miss: "Промах" } as const;
 

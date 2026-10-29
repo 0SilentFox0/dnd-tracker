@@ -4,8 +4,8 @@ import type { ReactNode } from "react";
 
 import { ModeSceneProvider } from "@/components/battle/modes";
 import { TooltipProvider } from "@/components/ui/tooltip";
-import { BattleSceneContext, BattleSceneDataContext, type BattleSceneValue, ParticipantFacesContext, useBattleSceneDataValue, useParticipantFacesValue } from "@/lib/hooks/battle";
-
+import { BattleSceneContext, BattleSceneDataContext, ParticipantFacesContext, useBattleSceneDataValue, useParticipantFacesValue } from "@/lib/hooks/battle";
+import type { BattleSceneValue } from "@/types/battle-scene";
 
 const NO_ORDER: BattleSceneValue["battle"]["initiativeOrder"] = [];
 
