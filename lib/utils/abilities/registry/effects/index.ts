@@ -63,7 +63,7 @@ export const EFFECT_REGISTRY: { [K in EffectKind]: EffectDefinition<K> } = {
     label: "Прапорець",
     static: true,
     fields: [{ name: "flag", label: "Прапорець", input: "select", options: Object.entries(FLAG_LABELS).map(([value, label]) => ({ value, label })) }, TARGET_FIELD, DURATION_FIELD],
-    describe: (e) => legacy(describeFlag(e)),
+    describe: describeFlag,
     apply: (i) => applyStatic(i, describeEffectText),
   },
   note: {

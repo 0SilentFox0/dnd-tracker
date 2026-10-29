@@ -7,7 +7,7 @@ import { limitsLabel, limitsSegments } from "@/lib/utils/abilities/registry/labe
 import { describeTrigger } from "@/lib/utils/abilities/registry/triggers";
 import { renderSegments } from "@/lib/utils/abilities/segments";
 
-const CONVERTED_KINDS = new Set(["dealDamage", "heal", "dot", "hot", "berserk", "charm", "maneuver", "summon", "raiseDead", "modifyStat", "damageBonus", "grantAction"]);
+const CONVERTED_KINDS = new Set(["dealDamage", "heal", "dot", "hot", "berserk", "charm", "maneuver", "summon", "raiseDead", "modifyStat", "damageBonus", "grantAction", "flag"]);
 
 describe("describe golden (uk)", () => {
   it("describeAbility", () => {

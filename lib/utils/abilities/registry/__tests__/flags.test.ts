@@ -1,6 +1,9 @@
 import { describe, expect, it } from "vitest";
 
+import { ukT } from "../../__tests__/describe-fixtures";
+
 import { describeFlag, FLAG_DEFAULTS, FLAG_FIELDS, FLAG_LABELS, FLAG_REGISTRY } from "@/lib/utils/abilities/registry/effects/flags";
+import { renderSegments } from "@/lib/utils/abilities/segments";
 
 describe("FLAG_REGISTRY", () => {
   it("one entry feeds labels, fields and editor defaults for every flag", () => {
@@ -20,9 +23,13 @@ describe("FLAG_REGISTRY", () => {
     }
   });
 
-  it("describes flags through the registry", () => {
-    expect(describeFlag({ kind: "flag", flag: "resistance", damageType: "fire", percent: 100 })).toBe("імунітет: fire");
-    expect(describeFlag({ kind: "flag", flag: "piercingShot" })).toContain("на лінії");
-    expect(describeFlag({ kind: "flag", flag: "advantage", attackKind: "melee" })).toBe("перевага на ближні атаки");
+  it("describes flags through the registry", async () => {
+    const t = await ukT();
+
+    const text = (e: Parameters<typeof describeFlag>[0]) => renderSegments(t, describeFlag(e)).join(" ");
+
+    expect(text({ kind: "flag", flag: "resistance", damageType: "fire", percent: 100 })).toBe("імунітет: fire");
+    expect(text({ kind: "flag", flag: "piercingShot" })).toContain("на лінії");
+    expect(text({ kind: "flag", flag: "advantage", attackKind: "melee" })).toBe("перевага на ближні атаки");
   });
 });
