@@ -3,8 +3,11 @@ import { describe, expect, it } from "vitest";
 import { makeParticipant, resolved } from "./fixtures";
 
 import { collectModifiers } from "@/lib/utils/abilities/engine/core/collect-modifiers";
-import { describeEffect } from "@/lib/utils/abilities/registry/effects";
+import { logText } from "@/lib/utils/abilities/log-text";
+import { describeEffect as describeEffectSegments } from "@/lib/utils/abilities/registry/effects";
 import type { BattleParticipant } from "@/types/battle";
+
+const describeEffect = (e: Parameters<typeof describeEffectSegments>[0]) => logText(describeEffectSegments(e));
 
 const hero = (morale: number): BattleParticipant => {
   const p = makeParticipant({

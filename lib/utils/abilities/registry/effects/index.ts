@@ -30,8 +30,10 @@ import type { EffectApplyInput, EffectApplyResult } from "./types";
 
 import { ABILITY_LABELS } from "@/lib/constants/abilities";
 import { resolveTargetIds } from "@/lib/utils/abilities/engine/core/targets";
+import { logText } from "@/lib/utils/abilities/log-text";
 import type { Ability, Effect, EffectKind } from "@/lib/utils/abilities/schema";
 import { CONDITION_5E_KEYS } from "@/lib/utils/abilities/schema/kinds";
+import { seg, type Segment } from "@/lib/utils/abilities/segments";
 import { pickOne } from "@/lib/utils/common/dice";
 import { signed } from "@/lib/utils/common/format";
 
@@ -42,24 +44,27 @@ interface EffectDefinition<K extends EffectKind> {
   label: string;
   static: boolean;
   fields: readonly FieldMeta[];
-  describe: (e: Extract<Effect, { kind: K }>) => string;
+  describe: (e: Extract<Effect, { kind: K }>) => Segment[];
   apply: (input: EffectApplyInput<Extract<Effect, { kind: K }>>) => EffectApplyResult;
 }
+
+// temporary until Task 5: unconverted definitions wrap their old text
+const legacy = (text: string): Segment[] => [seg("summary.text", { value: text })];
 
 const AMOUNT: FieldMeta = { name: "amount", label: "Кількість (число, кубики, формула, %)", input: "amount" };
 
 const REQUIRED_DURATION: FieldMeta = { ...DURATION_FIELD, optional: false };
 
 export const EFFECT_REGISTRY: { [K in EffectKind]: EffectDefinition<K> } = {
-  modifyStat: { kind: "modifyStat", label: "Змінити стат", static: true, fields: modifyStatFields, describe: describeModifyStat, apply: (i) => applyStatic(i, describeEffect) },
-  damageBonus: { kind: "damageBonus", label: "Бонус шкоди", static: true, fields: damageBonusFields, describe: describeDamageBonus, apply: (i) => applyStatic(i, describeEffect) },
+  modifyStat: { kind: "modifyStat", label: "Змінити стат", static: true, fields: modifyStatFields, describe: describeModifyStat, apply: (i) => applyStatic(i, describeEffectText) },
+  damageBonus: { kind: "damageBonus", label: "Бонус шкоди", static: true, fields: damageBonusFields, describe: describeDamageBonus, apply: (i) => applyStatic(i, describeEffectText) },
   flag: {
     kind: "flag",
     label: "Прапорець",
     static: true,
     fields: [{ name: "flag", label: "Прапорець", input: "select", options: Object.entries(FLAG_LABELS).map(([value, label]) => ({ value, label })) }, TARGET_FIELD, DURATION_FIELD],
-    describe: describeFlag,
-    apply: (i) => applyStatic(i, describeEffect),
+    describe: (e) => legacy(describeFlag(e)),
+    apply: (i) => applyStatic(i, describeEffectText),
   },
   note: {
     kind: "note",
@@ -67,7 +72,7 @@ export const EFFECT_REGISTRY: { [K in EffectKind]: EffectDefinition<K> } = {
     static: true,
     fields: [{ name: "text", label: "Текст", input: "text" }],
     // ✋ — механіку відпрацьовує DM вручну (рушій її не автоматизує)
-    describe: (e) => (/\bDM\b/.test(e.text) ? `✋ ${e.text}` : e.text),
+    describe: (e) => legacy(/\bDM\b/.test(e.text) ? `✋ ${e.text}` : e.text),
     apply: (i) => ({ participants: i.participants, messages: [`📜 ${i.ability.name}: ${i.effect.text}`] }),
   },
   dealDamage: { kind: "dealDamage", label: "Завдати шкоди", static: false, fields: [AMOUNT, { name: "damageType", label: "Тип", input: "text", optional: true }, { name: "falloff", label: "% шкоди по цілях по черзі (100, 50, 25…)", input: "numberList", optional: true }, TARGET_FIELD], describe: describeDealDamage, apply: applyDealDamage },
@@ -95,7 +100,7 @@ export const EFFECT_REGISTRY: { [K in EffectKind]: EffectDefinition<K> } = {
       REQUIRED_DURATION,
     ],
     describe: (e) =>
-      `${CONDITION_LABELS[e.condition]}${e.condition === "skip_action" && e.percent ? ` ${e.percent}%` : ""}${e.levels ? ` ×${e.levels}` : ""} × ${e.duration?.rounds ?? "?"} р.${e.breakOnDamage ? ", до шкоди" : ""}${e.saveEnds ? `, рятівний кидок ${ABILITY_LABELS[e.saveEnds.ability]}` : ""}`,
+      legacy(`${CONDITION_LABELS[e.condition]}${e.condition === "skip_action" && e.percent ? ` ${e.percent}%` : ""}${e.levels ? ` ×${e.levels}` : ""} × ${e.duration?.rounds ?? "?"} р.${e.breakOnDamage ? ", до шкоди" : ""}${e.saveEnds ? `, рятівний кидок ${ABILITY_LABELS[e.saveEnds.ability]}` : ""}`),
     apply: applyCondition,
   },
   grantAction: { kind: "grantAction", label: "Дати дію", static: false, fields: [
@@ -110,15 +115,15 @@ export const EFFECT_REGISTRY: { [K in EffectKind]: EffectDefinition<K> } = {
     label: "Відновити слоти за бюджетом кіл (короткий відпочинок)",
     static: false,
     fields: [{ name: "budget", label: "Бюджет кіл", input: "flat" }, { name: "maxSlotLevel", label: "Макс. коло слота", input: "number" }],
-    describe: (e) => `відновлює слоти до ${e.maxSlotLevel}-го кола за бюджетом кіл на короткому відпочинку`,
+    describe: (e) => legacy(`відновлює слоти до ${e.maxSlotLevel}-го кола за бюджетом кіл на короткому відпочинку`),
     apply: (input) => ({ participants: input.participants, messages: [] }),
   },
-  restoreSpellSlot: { kind: "restoreSpellSlot", label: "Відновити слот", static: false, fields: [{ name: "count", label: "Скільки", input: "number" }, TARGET_FIELD], describe: (e) => `+${e.count} слот`, apply: applyRestoreSpellSlot },
-  drainSpellSlot: { kind: "drainSpellSlot", label: "Крадіжка слоту заклинань", static: false, fields: [{ name: "count", label: "Скільки", input: "number" }, TARGET_FIELD], describe: (e) => `−${e.count} слот заклинань`, apply: applyDrainSpellSlot },
-  changeMorale: { kind: "changeMorale", label: "Змінити мораль", static: false, fields: [{ name: "delta", label: "Зміна", input: "number" }, TARGET_FIELD], describe: (e) => `мораль ${signed(e.delta)}`, apply: applyChangeMorale },
-  mark: { kind: "mark", label: "Мітка на ціль", static: false, fields: [{ name: "markId", label: "Ідентифікатор мітки", input: "text" }, TARGET_FIELD, REQUIRED_DURATION], describe: (e) => `мітка × ${e.duration.rounds} р.`, apply: applyMark },
-  copySpellBuffs: { kind: "copySpellBuffs", label: "Копіювати бафи закляття союзника", static: false, fields: [TARGET_FIELD], describe: () => "копіює бафи закляття, накладені на союзника", apply: applyCopySpellBuffs },
-  guard: { kind: "guard", label: "Захист союзника", static: false, fields: [{ name: "percent", label: "% шкоди від атак, що бере на себе", input: "number" }, TARGET_FIELD, REQUIRED_DURATION], describe: (e) => `захист: ${e.percent}% шкоди від атак × ${e.duration.rounds} р.`, apply: applyGuard },
+  restoreSpellSlot: { kind: "restoreSpellSlot", label: "Відновити слот", static: false, fields: [{ name: "count", label: "Скільки", input: "number" }, TARGET_FIELD], describe: (e) => legacy(`+${e.count} слот`), apply: applyRestoreSpellSlot },
+  drainSpellSlot: { kind: "drainSpellSlot", label: "Крадіжка слоту заклинань", static: false, fields: [{ name: "count", label: "Скільки", input: "number" }, TARGET_FIELD], describe: (e) => legacy(`−${e.count} слот заклинань`), apply: applyDrainSpellSlot },
+  changeMorale: { kind: "changeMorale", label: "Змінити мораль", static: false, fields: [{ name: "delta", label: "Зміна", input: "number" }, TARGET_FIELD], describe: (e) => legacy(`мораль ${signed(e.delta)}`), apply: applyChangeMorale },
+  mark: { kind: "mark", label: "Мітка на ціль", static: false, fields: [{ name: "markId", label: "Ідентифікатор мітки", input: "text" }, TARGET_FIELD, REQUIRED_DURATION], describe: (e) => legacy(`мітка × ${e.duration.rounds} р.`), apply: applyMark },
+  copySpellBuffs: { kind: "copySpellBuffs", label: "Копіювати бафи закляття союзника", static: false, fields: [TARGET_FIELD], describe: () => legacy("копіює бафи закляття, накладені на союзника"), apply: applyCopySpellBuffs },
+  guard: { kind: "guard", label: "Захист союзника", static: false, fields: [{ name: "percent", label: "% шкоди від атак, що бере на себе", input: "number" }, TARGET_FIELD, REQUIRED_DURATION], describe: (e) => legacy(`захист: ${e.percent}% шкоди від атак × ${e.duration.rounds} р.`), apply: applyGuard },
   summon: {
     kind: "summon",
     label: "Прикликати юнітів",
@@ -128,7 +133,7 @@ export const EFFECT_REGISTRY: { [K in EffectKind]: EffectDefinition<K> } = {
     apply: applySummon,
   },
   raiseDead: { kind: "raiseDead", label: "Підняти мертвих", static: false, fields: [{ name: "hpPercent", label: "HP, %", input: "number" }, TARGET_FIELD], describe: describeRaiseDead, apply: applyRaiseDead },
-  cleanse: { kind: "cleanse", label: "Зняти дебафи", static: false, fields: [{ name: "includeConditions", label: "Зняти й стани", input: "toggle", optional: true }, TARGET_FIELD], describe: (e) => (e.includeConditions ? "зняття дебафів і станів" : "зняття дебафів"), apply: applyCleanse },
+  cleanse: { kind: "cleanse", label: "Зняти дебафи", static: false, fields: [{ name: "includeConditions", label: "Зняти й стани", input: "toggle", optional: true }, TARGET_FIELD], describe: (e) => legacy(e.includeConditions ? "зняття дебафів і станів" : "зняття дебафів"), apply: applyCleanse },
   maneuver: {
     kind: "maneuver",
     label: "Маневр",
@@ -145,7 +150,7 @@ export const EFFECT_REGISTRY: { [K in EffectKind]: EffectDefinition<K> } = {
     label: "Випадковий з варіантів",
     static: false,
     fields: [{ name: "options", label: "Варіанти", input: "effects" }],
-    describe: (e) => `одне з: ${e.options.map(describeEffect).join(" / ")}`,
+    describe: (e) => [seg("summary.effects.randomOf", { options: { join: " / ", items: e.options.flatMap(describeEffect) } })],
     apply: (i) => {
       const option = pickOne(i.effect.options, i.ctx.rng);
 
@@ -162,14 +167,16 @@ export function applyEffect(input: EffectApplyInput): EffectApplyResult {
   return def.apply(input as never);
 }
 
-export function describeEffect(effect: Effect): string {
+export function describeEffect(effect: Effect): Segment[] {
   const def = EFFECT_REGISTRY[effect.kind] as EffectDefinition<EffectKind> | undefined;
 
-  return def ? def.describe(effect as never) : `невідомий ефект (${String(effect.kind)})`;
+  return def ? def.describe(effect as never) : legacy(`невідомий ефект (${String(effect.kind)})`);
 }
+
+const describeEffectText = (effect: Effect) => logText(describeEffect(effect));
 
 export { FLAG_FIELDS, FLAG_LABELS };
 
 export function describeAbility(a: Ability): string {
-  return [...describeTrigger(a.trigger), ...limitsLabel(a.limits), ...a.effects.map(describeEffect)].join(" · ");
+  return [...describeTrigger(a.trigger), ...limitsLabel(a.limits), ...a.effects.map(describeEffectText)].join(" · ");
 }

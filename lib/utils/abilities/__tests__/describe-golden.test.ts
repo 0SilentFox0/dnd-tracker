@@ -7,13 +7,28 @@ import { limitsLabel, limitsSegments } from "@/lib/utils/abilities/registry/labe
 import { describeTrigger } from "@/lib/utils/abilities/registry/triggers";
 import { renderSegments } from "@/lib/utils/abilities/segments";
 
+const CONVERTED_KINDS = new Set(["dealDamage", "heal", "dot", "hot", "berserk", "charm", "maneuver", "summon", "raiseDead", "modifyStat", "damageBonus", "grantAction"]);
+
 describe("describe golden (uk)", () => {
   it("describeAbility", () => {
     expect(Object.fromEntries(ABILITY_FIXTURES.map((a) => [a.id, describeAbility(a)]))).toMatchSnapshot();
   });
 
-  it("describeEffect", () => {
-    expect(EFFECT_FIXTURES.map((e) => [e.kind === "flag" ? `flag:${e.flag}` : e.kind, describeEffect(e)])).toMatchSnapshot();
+  it("describeEffect", async () => {
+    const t = await ukT();
+
+    expect(EFFECT_FIXTURES.map((e) => [e.kind === "flag" ? `flag:${e.flag}` : e.kind, renderSegments(t, describeEffect(e)).join(" · ")])).toMatchSnapshot();
+  });
+
+  it("describeEffect in en has no cyrillic or raw ICU for converted kinds", async () => {
+    const t = await enT();
+
+    for (const e of EFFECT_FIXTURES.filter((f) => CONVERTED_KINDS.has(f.kind))) {
+      const text = renderSegments(t, describeEffect(e)).join(" · ");
+
+      expect(text, e.kind).not.toMatch(/[А-Яа-яІіЇїЄєҐґ]/);
+      expect(text, e.kind).not.toMatch(/[{}]/);
+    }
   });
 
   it("describeTrigger", () => {

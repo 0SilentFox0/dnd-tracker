@@ -790,6 +790,49 @@
       "lair": "lair action",
       "legendary": "legendary action ({n})",
       "pool": "pool \"{key}\": {cost}"
+    },
+    "text": "{value}",
+    "percent": {
+      "number": "{value}%",
+      "formula": "({formula})%",
+      "scale": "[{scale}]%"
+    },
+    "effects": {
+      "dealDamage": "damage {amount}{hasType, select, yes { {type}} other {}}{hasFalloff, select, yes { ({falloff}%)} other {}}",
+      "heal": "{revive, select, yes {revival} other {healing}} {amount}",
+      "dot": "{type} {amount}/round × {rounds} rd.",
+      "hot": "healing {amount}/round × {rounds} rd.",
+      "berserk": "berserk: auto-attacks a random creature, +{percent}% damage × {rounds} rd.",
+      "charm": "switches to the caster's side × {rounds} rd.",
+      "maneuver": "{name}: {percent}% of attack damage",
+      "summonUnit": "summon {count}× of the chosen unit",
+      "summonGroup": "summon {count}× unit of «{group}», Tier {tier}",
+      "raiseDead": "raise dead units at {percent}% HP",
+      "statAtLeast": "{stat} at least {n}",
+      "stat": "{stat}{hasLevels, select, yes { (levels {levels})} other {}} {value}",
+      "damageBonus": "damage ({filter}{hasSchool, select, yes {, school} other {}}) {value}{hasMark, select, yes { per mark «{mark}»} other {}}",
+      "grantAction": "{parts}",
+      "grantExtra": "+{n} action",
+      "grantRefreshAction": "refreshes the action",
+      "grantRefreshBonusAction": "refreshes the bonus action",
+      "grantRefreshReaction": "refreshes the reaction",
+      "randomOf": "one of: {options}"
     }
+  },
+  "damageTypes": {
+    "fire": "Fire",
+    "cold": "Cold",
+    "lightning": "Lightning",
+    "acid": "Acid",
+    "poison": "Poison",
+    "necrotic": "Necrotic",
+    "radiant": "Radiant",
+    "thunder": "Thunder",
+    "psychic": "Psychic",
+    "force": "Force",
+    "bludgeoning": "Bludgeoning",
+    "piercing": "Piercing",
+    "slashing": "Slashing",
+    "bleed": "Bleeding"
   }
 }

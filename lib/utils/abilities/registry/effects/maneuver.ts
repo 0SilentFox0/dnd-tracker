@@ -1,13 +1,14 @@
 import type { EffectApplyInput, EffectApplyResult } from "./types";
 
 import type { Effect, Maneuver } from "@/lib/utils/abilities/schema";
+import { seg, type Segment } from "@/lib/utils/abilities/segments";
 import { MANEUVER_RUNNERS } from "@/lib/utils/battle/maneuvers";
 
 export const MANEUVER_LABELS: Record<Maneuver, string> = { dive: "Пікірування", squall: "Шквал", fireBurst: "Вогняний вибух" };
 
-export function describeManeuver(e: Extract<Effect, { kind: "maneuver" }>): string {
-  return `${MANEUVER_LABELS[e.maneuver]}: ${e.percentOfAttack} % шкоди атаки`;
-}
+export const describeManeuver = (e: Extract<Effect, { kind: "maneuver" }>): Segment[] => [
+  seg("summary.effects.maneuver", { name: seg(`options.maneuver.${e.maneuver}`), percent: e.percentOfAttack }),
+];
 
 export function applyManeuver(input: EffectApplyInput<Extract<Effect, { kind: "maneuver" }>>): EffectApplyResult {
   const { event, ability, effect, ctx } = input;

@@ -790,6 +790,49 @@
       "lair": "дія лігва",
       "legendary": "легендарна дія ({n})",
       "pool": "пул «{key}»: {cost}"
+    },
+    "text": "{value}",
+    "percent": {
+      "number": "{value}%",
+      "formula": "({formula})%",
+      "scale": "[{scale}]%"
+    },
+    "effects": {
+      "dealDamage": "шкода {amount}{hasType, select, yes { {type}} other {}}{hasFalloff, select, yes { ({falloff}%)} other {}}",
+      "heal": "{revive, select, yes {воскресіння} other {лікування}} {amount}",
+      "dot": "{type} {amount}/раунд × {rounds} р.",
+      "hot": "лікування {amount}/раунд × {rounds} р.",
+      "berserk": "шал: автоатака випадкової істоти, +{percent}% шкоди × {rounds} р.",
+      "charm": "перехід на бік заклинателя × {rounds} р.",
+      "maneuver": "{name}: {percent} % шкоди атаки",
+      "summonUnit": "прикликати {count}× обраного юніта",
+      "summonGroup": "прикликати {count}× юніта «{group}», Tier {tier}",
+      "raiseDead": "підняти мертвих юнітів на {percent}% HP",
+      "statAtLeast": "{stat} не менше {n}",
+      "stat": "{stat}{hasLevels, select, yes { (рівні {levels})} other {}} {value}",
+      "damageBonus": "шкода ({filter}{hasSchool, select, yes {, школа} other {}}) {value}{hasMark, select, yes { за мітку «{mark}»} other {}}",
+      "grantAction": "{parts}",
+      "grantExtra": "+{n} дія",
+      "grantRefreshAction": "оновлює дію",
+      "grantRefreshBonusAction": "оновлює бонусну дію",
+      "grantRefreshReaction": "оновлює реакцію",
+      "randomOf": "одне з: {options}"
     }
+  },
+  "damageTypes": {
+    "fire": "Вогонь",
+    "cold": "Лід",
+    "lightning": "Блискавка",
+    "acid": "Кислота",
+    "poison": "Отрута",
+    "necrotic": "Некротична",
+    "radiant": "Світло",
+    "thunder": "Грім",
+    "psychic": "Психічна",
+    "force": "Сила",
+    "bludgeoning": "Дробляча",
+    "piercing": "Колюча",
+    "slashing": "Рубляча",
+    "bleed": "Кровотеча"
   }
 }

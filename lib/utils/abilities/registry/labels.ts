@@ -1,4 +1,5 @@
 import { ABILITY_LABELS } from "@/lib/constants/abilities";
+import { DAMAGE_ELEMENT_LABELS } from "@/lib/constants/damage";
 import type { AbilityTarget, Amount, AnyConditionKey, Condition5eKey, DamageFilterKind, Flat, Limits, StatKey } from "@/lib/utils/abilities/schema";
 import { ABILITY_TARGETS } from "@/lib/utils/abilities/schema/kinds";
 import { seg,type Segment } from "@/lib/utils/abilities/segments";
@@ -87,6 +88,8 @@ export function limitsLabel(l: Limits | undefined): string[] {
 
 export const TARGET_KEYS: readonly AbilityTarget[] = ABILITY_TARGETS;
 
+export const damageTypeSegment = (type: string): Segment => (type in DAMAGE_ELEMENT_LABELS ? seg(`damageTypes.${type}`) : seg("summary.text", { value: type }));
+
 export const statSegment = (k: StatKey): Segment => seg(`stats.${k}`);
 
 export const targetSegment = (k: AbilityTarget): Segment => seg(`targets.${k}`);
@@ -141,4 +144,10 @@ export function limitsSegments(l: Limits | undefined): Segment[] {
     l.legendaryCost ? seg("summary.limits.legendary", { n: l.legendaryCost }) : null,
     l.pool ? seg("summary.limits.pool", { key: l.pool.key, cost: l.pool.cost }) : null,
   ].filter((x): x is Segment => !!x);
+}
+
+export function percentSegment(p: Flat): Segment {
+  if (typeof p === "number") return seg("summary.percent.number", { value: signed(p) });
+
+  return "formula" in p ? seg("summary.percent.formula", { formula: p.formula }) : seg("summary.percent.scale", { scale: p.scale });
 }

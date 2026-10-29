@@ -3,8 +3,11 @@ import { describe, expect, it } from "vitest";
 import { ParticipantSide } from "@/lib/constants/battle";
 import { makeParticipant, resolved, seq } from "@/lib/utils/abilities/__tests__/fixtures";
 import { resolveTargetIds } from "@/lib/utils/abilities/engine/core/targets";
-import { applyEffect, describeEffect } from "@/lib/utils/abilities/registry/effects";
+import { logText } from "@/lib/utils/abilities/log-text";
+import { applyEffect, describeEffect as describeEffectSegments } from "@/lib/utils/abilities/registry/effects";
 import { EffectSchema } from "@/lib/utils/abilities/schema";
+
+const describeEffect = (e: Parameters<typeof describeEffectSegments>[0]) => logText(describeEffectSegments(e));
 
 const enemy = (id: string) => makeParticipant({ id, side: ParticipantSide.ENEMY, hp: 200, maxHp: 200 });
 

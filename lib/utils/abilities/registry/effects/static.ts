@@ -1,5 +1,6 @@
 import { DURATION_FIELD, type FieldMeta, TARGET_FIELD } from "../fields";
-import { DAMAGE_FILTER_LABELS, flatLabel, STAT_LABELS } from "../labels";
+import { DAMAGE_FILTER_LABELS, STAT_LABELS } from "../labels";
+import { damageFilterSegment, flatSegment, percentSegment, statSegment } from "../labels";
 import { immuneTo } from "./state";
 import type { EffectApplyInput, EffectApplyResult } from "./types";
 
@@ -9,8 +10,8 @@ import { findParticipant, participantNames, updateParticipant } from "@/lib/util
 import { abilityNature } from "@/lib/utils/abilities/engine/effects/effect-nature";
 import { applySpellTimedEffect } from "@/lib/utils/abilities/engine/effects/opposing-spells";
 import { effectSource } from "@/lib/utils/abilities/engine/effects/timed-effects";
-import type { Effect, StaticEffect } from "@/lib/utils/abilities/schema";
-import { signed } from "@/lib/utils/common/format";
+import type { Effect, Flat, StaticEffect } from "@/lib/utils/abilities/schema";
+import { seg, type Segment } from "@/lib/utils/abilities/segments";
 
 function stripTiming(effect: StaticEffect): StaticEffect {
   const { duration: _d, target: _t, ...rest } = effect;
@@ -111,22 +112,26 @@ export const damageBonusFields: readonly FieldMeta[] = [
   DURATION_FIELD,
 ];
 
-const percentLabel = (p: Parameters<typeof flatLabel>[0]) => (typeof p === "number" ? `${signed(p)}%` : "formula" in p ? `(${p.formula})%` : `[${p.scale}]%`);
+function valueSegment(e: { flat?: Flat; percent?: Flat }): Segment {
+  const items = [e.flat !== undefined ? flatSegment(e.flat) : null, e.percent !== undefined ? percentSegment(e.percent) : null].filter((x): x is Segment => !!x);
 
-function valueLabel(e: { flat?: Parameters<typeof flatLabel>[0]; percent?: Parameters<typeof flatLabel>[0] }): string {
-  return [e.flat !== undefined ? flatLabel(e.flat) : null, e.percent !== undefined ? percentLabel(e.percent) : null]
-    .filter(Boolean)
-    .join(" ");
+  return seg("summary.text", { value: { join: " ", items } });
 }
 
-export function describeModifyStat(e: Extract<Effect, { kind: "modifyStat" }>): string {
-  if (e.atLeast !== undefined) return `${STAT_LABELS[e.stat]} не менше ${e.atLeast}`;
+export function describeModifyStat(e: Extract<Effect, { kind: "modifyStat" }>): Segment[] {
+  if (e.atLeast !== undefined) return [seg("summary.effects.statAtLeast", { stat: statSegment(e.stat), n: e.atLeast })];
 
-  const levels = e.spellLevels ? ` (рівні ${e.spellLevels.join(", ")})` : "";
-
-  return `${STAT_LABELS[e.stat]}${levels} ${valueLabel(e)}`;
+  return [seg("summary.effects.stat", { stat: statSegment(e.stat), hasLevels: e.spellLevels ? "yes" : "no", levels: e.spellLevels ? e.spellLevels.join(", ") : "", value: valueSegment(e) })];
 }
 
-export function describeDamageBonus(e: Extract<Effect, { kind: "damageBonus" }>): string {
-  return `шкода (${DAMAGE_FILTER_LABELS[e.filter.kind]}${e.filter.school ? ", школа" : ""}) ${valueLabel(e)}${e.perMark ? ` за мітку «${e.perMark}»` : ""}`;
+export function describeDamageBonus(e: Extract<Effect, { kind: "damageBonus" }>): Segment[] {
+  return [
+    seg("summary.effects.damageBonus", {
+      filter: damageFilterSegment(e.filter.kind),
+      hasSchool: e.filter.school ? "yes" : "no",
+      value: valueSegment(e),
+      hasMark: e.perMark ? "yes" : "no",
+      mark: e.perMark ?? "",
+    }),
+  ];
 }

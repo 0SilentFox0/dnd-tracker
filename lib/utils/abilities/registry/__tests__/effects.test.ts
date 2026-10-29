@@ -2,8 +2,11 @@ import { describe, expect, it } from "vitest";
 
 import { ParticipantSide } from "@/lib/constants/battle";
 import { makeParticipant, resolved, seq } from "@/lib/utils/abilities/__tests__/fixtures";
-import { applyEffect, describeEffect, FLAG_FIELDS } from "@/lib/utils/abilities/registry/effects";
+import { logText } from "@/lib/utils/abilities/log-text";
+import { applyEffect, describeEffect as describeEffectSegments, FLAG_FIELDS } from "@/lib/utils/abilities/registry/effects";
 import type { Effect } from "@/lib/utils/abilities/schema";
+
+const describeEffect = (e: Parameters<typeof describeEffectSegments>[0]) => logText(describeEffectSegments(e));
 
 function run(effect: Effect, targetIds: string[], ps = [makeParticipant({ id: "o" }), makeParticipant({ id: "t", side: ParticipantSide.ENEMY })]) {
   const ability = resolved({ trigger: { event: "hit", role: "attacker" }, effects: [effect] });

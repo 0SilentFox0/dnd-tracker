@@ -8,10 +8,13 @@ import { restoreCharm } from "@/lib/utils/abilities/engine/effects/charm";
 import { countMarks, GUARD_KEY, markKey } from "@/lib/utils/abilities/engine/effects/marks";
 import { clampMorale, moraleCapOf } from "@/lib/utils/abilities/engine/effects/morale";
 import { effectSource, upsertTimedEffect } from "@/lib/utils/abilities/engine/effects/timed-effects";
-import type { Condition5eKey, ConditionImmunityKey, Effect } from "@/lib/utils/abilities/schema";
+import { logText } from "@/lib/utils/abilities/log-text";
+import type { AnyConditionKey, Condition5eKey, ConditionImmunityKey, Effect } from "@/lib/utils/abilities/schema";
 import { isCondition5eKey } from "@/lib/utils/abilities/schema/kinds";
+import { seg, type Segment } from "@/lib/utils/abilities/segments";
 import { applyCondition5e, saveEndsFor } from "@/lib/utils/battle/conditions/apply";
 import { removeEffects } from "@/lib/utils/battle/conditions/query";
+import { CONDITION_5E_REGISTRY } from "@/lib/utils/battle/conditions/registry";
 import { grantExtraActions } from "@/lib/utils/battle/participant/helpers";
 import { signed } from "@/lib/utils/common/format";
 import { pluralUk } from "@/lib/utils/common/plural";
@@ -61,6 +64,18 @@ export function immuneTo(ps: BattleParticipant[], id: string, key: ConditionImmu
 }
 
 export { CONDITION_LABELS };
+
+// i18n part 6: battle log
+const CONDITION_LOG_LABELS: Record<AnyConditionKey, string> = {
+  no_bonus_action: "без бонусної дії",
+  no_reaction: "без реакції",
+  disable_melee_attacks: "без ближніх атак",
+  disable_ranged_attacks: "без дальніх атак",
+  disable_spell_casting: "без заклинань",
+  skip_action: "втрата дії",
+  immobilized: "знерухомлений",
+  ...(Object.fromEntries(Object.entries(CONDITION_5E_REGISTRY).map(([k, d]) => [k, d.label.toLowerCase()])) as Record<Condition5eKey, string>),
+};
 
 function applyCondition5eToTargets(input: EffectApplyInput<Of<"applyCondition">>, key: Condition5eKey): EffectApplyResult {
   const { ability, effect, ctx } = input;
@@ -120,7 +135,7 @@ export function applyCondition(input: EffectApplyInput<Of<"applyCondition">>): E
 
       return condition === EffectMarker.NO_REACTION ? { ...next, actionFlags: { ...next.actionFlags, hasUsedReaction: true } } : next;
     },
-    (names) => `⛓ ${ability.name}: ${names} — ${CONDITION_LABELS[condition]} (${effect.duration.rounds} р.)`,
+    (names) => `⛓ ${ability.name}: ${names} — ${CONDITION_LOG_LABELS[condition]} (${effect.duration.rounds} р.)`,
     (p) => immuneTo(input.participants, p.basicInfo.id, condition),
   );
 }
@@ -144,7 +159,7 @@ export function applyGrantAction(input: EffectApplyInput<Of<"grantAction">>): Ef
         },
       };
     },
-    (names) => `⚔️ ${ability.name}: ${names} — ${describeGrantAction(effect)}`,
+    (names) => `⚔️ ${ability.name}: ${names} — ${logText(describeGrantAction(effect))}`,
   );
 }
 
@@ -241,15 +256,15 @@ export function applyCleanse(input: EffectApplyInput<Of<"cleanse">>): EffectAppl
   );
 }
 
-export function describeGrantAction(e: Of<"grantAction">): string {
-  return [
-    e.extraActions ? `+${e.extraActions} дія` : null,
-    e.refreshAction ? "оновлює дію" : null,
-    e.refreshBonusAction ? "оновлює бонусну дію" : null,
-    e.refreshReaction ? "оновлює реакцію" : null,
-  ]
-    .filter(Boolean)
-    .join(", ");
+export function describeGrantAction(e: Of<"grantAction">): Segment[] {
+  const parts = [
+    e.extraActions ? seg("summary.effects.grantExtra", { n: e.extraActions }) : null,
+    e.refreshAction ? seg("summary.effects.grantRefreshAction") : null,
+    e.refreshBonusAction ? seg("summary.effects.grantRefreshBonusAction") : null,
+    e.refreshReaction ? seg("summary.effects.grantRefreshReaction") : null,
+  ].filter((x): x is Segment => !!x);
+
+  return [seg("summary.effects.grantAction", { parts: { join: ", ", items: parts } })];
 }
 
 export function applyMark(input: EffectApplyInput<Of<"mark">>): EffectApplyResult {
