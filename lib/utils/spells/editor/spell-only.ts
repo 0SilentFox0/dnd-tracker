@@ -22,11 +22,11 @@ const DEFAULTS: { [K in SpellOnlyKind]: Omit<SpellOnlyEffect<K>, "kind"> } = {
   grantCast: {
     label: DEFAULT_TEXT,
     cost: "action",
-    duration: { rounds: 1 },
-    cast: { targeting: { kind: "enemy" }, resolution: { kind: "auto" }, dice: 0, effects: [{ kind: "dealDamage", amount: { spellRoll: 100 } }] },
+    duration: { rounds: 10 },
+    cast: { targeting: { kind: "enemy", range: 30 }, resolution: { kind: "attack" }, dice: 1, dieSides: 6, effects: [{ kind: "dealDamage", amount: { spellRoll: 100 } }] },
   },
-  hitRider: { attackKind: "any", extraDice: "1d6", damageType: "magic", charges: 1, duration: { rounds: 1 } },
-  anchoredZone: { radiusFeet: 10, side: "enemies", duration: { rounds: 1 } },
+  hitRider: { attackKind: "any", extraDice: "1d6", damageType: "fire", charges: 1, duration: { rounds: 10 } },
+  anchoredZone: { radiusFeet: 10, side: "enemies", duration: { rounds: 10 }, onEnter: { effects: [{ kind: "dealDamage", amount: { spellRoll: 100 } }] } },
   summonInline: { name: DEFAULT_TEXT, size: "small", ac: 10, hp: 10, count: 1, duration: { rounds: 1 } },
 };
 

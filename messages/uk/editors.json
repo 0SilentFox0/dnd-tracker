@@ -25,6 +25,48 @@
       "transform": {
         "unitId": "Юніт-форма",
         "duration": "Тривалість (раунди)"
+      },
+      "hitRider": {
+        "attackKind": "Вид атаки",
+        "extraDice": "Додаткові кубики",
+        "damageType": "Тип шкоди",
+        "charges": "Заряди",
+        "duration": "Тривалість (раунди)",
+        "target": "Носій",
+        "consumeOnMiss": "Заряд витрачається й на промах",
+        "expireAtTurnEnd": "Згасає в кінці ходу",
+        "save": "Рятівний кидок цілі",
+        "onFail": "Ефекти при провалі"
+      },
+      "grantCast": {
+        "label": "Назва підкасту",
+        "cost": "Вартість",
+        "uses": "Використань",
+        "duration": "Тривалість (раунди)",
+        "target": "Носій",
+        "castHeading": "Підкаст",
+        "cast": {
+          "dice": "Кубики",
+          "dieSides": "Грані кубика",
+          "damageBonus": "Бонус шкоди",
+          "addAbilityMod": "Додати модифікатор характеристики",
+          "anchorMarkId": "Ідентифікатор мітки",
+          "perObjectFeet": "Футів на об'єкт",
+          "auto": {
+            "on": "Авто-спрацювання"
+          }
+        },
+        "castEffects": "Ефекти підкасту",
+        "advanced": "Додатково"
+      },
+      "anchoredZone": {
+        "radiusFeet": "Радіус (футів)",
+        "side": "Кого зачіпає",
+        "duration": "Тривалість (раунди)",
+        "excludeBearer": "Крім носія",
+        "endsWhenStartOutside": "Закінчується, якщо хід починається поза аурою",
+        "onEnter": "Тригер входу",
+        "onTurnStart": "Тригер початку ходу"
       }
     },
     "options": {
@@ -35,6 +77,33 @@
       "shape": {
         "cell": "Клітинки області",
         "line": "Лінія до цілі"
+      },
+      "attackKind": {
+        "melee": "Ближня",
+        "ranged": "Дальня",
+        "any": "Будь-яка"
+      },
+      "target": {
+        "self": "Я",
+        "eventTarget": "Ціль події"
+      },
+      "cost": {
+        "action": "Дія",
+        "bonusAction": "Бонусна дія",
+        "reaction": "Реакція"
+      },
+      "side": {
+        "enemies": "Вороги",
+        "allies": "Союзники",
+        "all": "Усі"
+      },
+      "cast": {
+        "auto": {
+          "on": {
+            "attackAgainstMarked": "Атака по позначеному",
+            "damageToMarked": "Шкода позначеному"
+          }
+        }
       }
     },
     "hints": {
@@ -46,6 +115,18 @@
     "nested": {
       "chooseOneHeading": "Кастер обирає один із варіантів під час касту.",
       "chooseOneAdd": "+ варіант"
+    },
+    "zone": {
+      "check": "Перевірка",
+      "checks": {
+        "none": "Без перевірки",
+        "save": "Рятівний кидок",
+        "attack": "Атака заклинанням"
+      },
+      "ability": "Характеристика",
+      "pull": "Тягне до центру",
+      "effects": "Ефекти",
+      "addEffect": "+ ефект"
     }
   }
 }

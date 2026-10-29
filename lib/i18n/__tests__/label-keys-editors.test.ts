@@ -16,3 +16,11 @@ describe("spell effect editor labels have translations", () => {
 describe("spell effect editor nested labels", () => {
   expectLabelKeys("editors", "spellEffects", ["delete", "nested.chooseOneHeading", "nested.chooseOneAdd", "hints.moveSelf", "hints.revertAtZero"]);
 });
+
+describe("spell effect editor T6.3 labels", () => {
+  expectLabelKeys("editors", "spellEffects.fields.hitRider", ["attackKind", "extraDice", "damageType", "charges", "duration", "target", "consumeOnMiss", "expireAtTurnEnd", "save", "onFail"]);
+  expectLabelKeys("editors", "spellEffects.fields.grantCast", ["label", "cost", "uses", "duration", "target", "castHeading", "castEffects", "advanced", "cast.dice", "cast.dieSides", "cast.damageBonus", "cast.addAbilityMod", "cast.anchorMarkId", "cast.perObjectFeet", "cast.auto.on"]);
+  expectLabelKeys("editors", "spellEffects.fields.anchoredZone", ["radiusFeet", "side", "duration", "excludeBearer", "endsWhenStartOutside", "onEnter", "onTurnStart"]);
+  expectLabelKeys("editors", "spellEffects.options", ["attackKind.melee", "attackKind.ranged", "attackKind.any", "target.self", "target.eventTarget", "cost.action", "cost.bonusAction", "cost.reaction", "side.enemies", "side.allies", "side.all", "cast.auto.on.attackAgainstMarked", "cast.auto.on.damageToMarked"]);
+  expectLabelKeys("editors", "spellEffects.zone", ["check", "ability", "pull", "effects", "addEffect", "checks.none", "checks.save", "checks.attack"]);
+});

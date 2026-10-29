@@ -25,6 +25,48 @@
       "transform": {
         "unitId": "Unit form",
         "duration": "Duration (rounds)"
+      },
+      "hitRider": {
+        "attackKind": "Attack kind",
+        "extraDice": "Extra dice",
+        "damageType": "Damage type",
+        "charges": "Charges",
+        "duration": "Duration (rounds)",
+        "target": "Bearer",
+        "consumeOnMiss": "Charge is spent on a miss too",
+        "expireAtTurnEnd": "Expires at turn end",
+        "save": "Target saving throw",
+        "onFail": "Effects on failure"
+      },
+      "grantCast": {
+        "label": "Subcast name",
+        "cost": "Cost",
+        "uses": "Uses",
+        "duration": "Duration (rounds)",
+        "target": "Bearer",
+        "castHeading": "Subcast",
+        "cast": {
+          "dice": "Dice",
+          "dieSides": "Die sides",
+          "damageBonus": "Damage bonus",
+          "addAbilityMod": "Add ability modifier",
+          "anchorMarkId": "Mark id",
+          "perObjectFeet": "Feet per object",
+          "auto": {
+            "on": "Auto trigger"
+          }
+        },
+        "castEffects": "Subcast effects",
+        "advanced": "Advanced"
+      },
+      "anchoredZone": {
+        "radiusFeet": "Radius (feet)",
+        "side": "Affects",
+        "duration": "Duration (rounds)",
+        "excludeBearer": "Except the bearer",
+        "endsWhenStartOutside": "Ends if the turn starts outside the aura",
+        "onEnter": "On enter trigger",
+        "onTurnStart": "On turn start trigger"
       }
     },
     "options": {
@@ -35,6 +77,33 @@
       "shape": {
         "cell": "Area cells",
         "line": "Line to the target"
+      },
+      "attackKind": {
+        "melee": "Melee",
+        "ranged": "Ranged",
+        "any": "Any"
+      },
+      "target": {
+        "self": "Self",
+        "eventTarget": "Event target"
+      },
+      "cost": {
+        "action": "Action",
+        "bonusAction": "Bonus action",
+        "reaction": "Reaction"
+      },
+      "side": {
+        "enemies": "Enemies",
+        "allies": "Allies",
+        "all": "Everyone"
+      },
+      "cast": {
+        "auto": {
+          "on": {
+            "attackAgainstMarked": "Attack against marked",
+            "damageToMarked": "Damage to marked"
+          }
+        }
       }
     },
     "hints": {
@@ -46,6 +115,18 @@
     "nested": {
       "chooseOneHeading": "The caster picks one of the options when casting.",
       "chooseOneAdd": "+ option"
+    },
+    "zone": {
+      "check": "Check",
+      "checks": {
+        "none": "No check",
+        "save": "Saving throw",
+        "attack": "Spell attack"
+      },
+      "ability": "Ability",
+      "pull": "Pulls to the centre",
+      "effects": "Effects",
+      "addEffect": "+ effect"
     }
   }
 }

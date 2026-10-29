@@ -1,7 +1,10 @@
 import type { ComponentType } from "react";
 
+import { AnchoredZoneEditor } from "./editors/AnchoredZoneEditor";
 import { ChooseOneEditor } from "./editors/ChooseOneEditor";
 import { CreateTerrainEditor } from "./editors/CreateTerrainEditor";
+import { GrantCastEditor } from "./editors/GrantCastEditor";
+import { HitRiderEditor } from "./editors/HitRiderEditor";
 import { InputDiceEditor } from "./editors/InputDiceEditor";
 import { MoveSelfEditor } from "./editors/MoveSelfEditor";
 import { TransformEditor } from "./editors/TransformEditor";
@@ -17,4 +20,7 @@ export const SPELL_ONLY_EDITORS: EditorMap = {
   moveSelf: MoveSelfEditor,
   createTerrain: CreateTerrainEditor,
   transform: TransformEditor,
+  hitRider: HitRiderEditor,
+  grantCast: GrantCastEditor,
+  anchoredZone: AnchoredZoneEditor,
 };
