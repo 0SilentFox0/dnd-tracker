@@ -113,6 +113,17 @@ describe("anchoredZone", () => {
     expect(get(out.participants, "king").combatStats.currentHp).toBe(100);
   });
 
+  it("предмет заклинання (кущ) поруч із носієм не отримує ефектів ауры", () => {
+    const base = walker(5);
+
+    const bush = { ...base, basicInfo: { ...base.basicInfo, id: "bush" }, battleData: { ...base.battleData, object: { spellId: "x" } } };
+
+    const out = walk(cast(aura({ onEnter: { effects: [damage as never] } }), [bush, walker(5)]), 10, 7, "king");
+
+    expect(get(out.participants, "bush").combatStats.currentHp).toBe(100);
+    expect(get(out.participants, "walker").combatStats.currentHp).toBe(95);
+  });
+
   it("сторона allies не чіпає ворогів кастера", () => {
     const foes = cast(aura({ side: "allies", onEnter: { effects: [damage as never] } }), [walker(16)]);
 

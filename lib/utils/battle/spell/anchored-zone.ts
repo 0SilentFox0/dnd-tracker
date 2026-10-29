@@ -1,7 +1,7 @@
 import { type FireSource, fireTrigger, type ZoneCtx } from "./zone-fire";
 
 import { CELL_FEET } from "@/lib/constants/battle";
-import { findParticipant, isActive, replaceParticipant } from "@/lib/utils/abilities/engine/core/participants";
+import { findParticipant, isActive, isObject, replaceParticipant } from "@/lib/utils/abilities/engine/core/participants";
 import { removeEffects } from "@/lib/utils/battle/conditions/query";
 import { footprint, footprintDistance } from "@/lib/utils/battle/grid/geometry";
 import { isOnMap, sizeOf } from "@/lib/utils/battle/grid/occupancy";
@@ -55,7 +55,7 @@ export function anchorMove({ participants, moved, from, path, ctx }: { participa
 
     const mover = bearer.basicInfo.id === movedId;
 
-    const others = mover ? ps.filter((p) => p.basicInfo.id !== movedId && isActive(p) && isOnMap(p)) : [moved];
+    const others = mover ? ps.filter((p) => p.basicInfo.id !== movedId && isActive(p) && isOnMap(p) && !isObject(p)) : [moved];
 
     for (const other of others) {
       const otherAt = other.battleData.position;
