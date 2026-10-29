@@ -21,7 +21,7 @@ export function splitParticipant(
 
   const { currentHp, tempHp, maxHp, morale, status, ...combatRest } = p.combatStats;
 
-  const { activeEffects, abilityUsage, pendingExtraActions, position, movementUsed, turnStartPosition, returnedThisTurn, airborne, hazardHitRound, zoneHits, retaliationsUsed, dormant, facing, escaped, mazeWakeRound, ...battleDataWithScoped } = p.battleData;
+  const { activeEffects, abilityUsage, pendingExtraActions, position, movementUsed, turnStartPosition, returnedThisTurn, airborne, hazardHitRound, zoneHits, pendingHits, retaliationsUsed, dormant, facing, escaped, mazeWakeRound, ...battleDataWithScoped } = p.battleData;
 
   // потрібне лише під час старту бою
   const battleDataRest = omit(battleDataWithScoped as typeof battleDataWithScoped & { pendingScopedArtifactBonuses?: unknown }, ["pendingScopedArtifactBonuses"]);
@@ -54,6 +54,7 @@ export function splitParticipant(
     ...(airborne !== undefined && { airborne }),
     ...(hazardHitRound !== undefined && { hazardHitRound }),
     ...(zoneHits !== undefined && { zoneHits }),
+    ...(pendingHits !== undefined && { pendingHits }),
     ...(retaliationsUsed !== undefined && { retaliationsUsed }),
     ...(dormant !== undefined && { dormant }),
     ...(facing !== undefined && { facing }),
@@ -139,6 +140,7 @@ export function joinParticipant(stored: StoredParticipant, battleId: string): Ba
       ...(state.airborne !== undefined && { airborne: state.airborne }),
       ...(state.hazardHitRound !== undefined && { hazardHitRound: state.hazardHitRound }),
       ...(state.zoneHits !== undefined && { zoneHits: state.zoneHits }),
+      ...(state.pendingHits !== undefined && { pendingHits: state.pendingHits }),
       ...(state.retaliationsUsed !== undefined && { retaliationsUsed: state.retaliationsUsed }),
       ...(state.dormant !== undefined && { dormant: state.dormant }),
       ...(state.facing !== undefined && { facing: state.facing }),

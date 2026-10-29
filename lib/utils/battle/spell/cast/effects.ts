@@ -57,6 +57,31 @@ function absorbSpellDamage(state: SpellCastState, id: string, damage: number): v
   }
 }
 
+function scheduleHit(state: SpellCastState, delay: { feet: number; perRoundFeet: number }, damageType: string, id: string, amount: number): boolean {
+  const { flow, spell } = state;
+
+  const me = getP(flow, casterIdOf(state));
+
+  const target = getP(flow, id);
+
+  if (!bothOnMap(flow.ctx.map, me, target)) return false;
+
+  const feet = footprintDistance(cellsOf(me), cellsOf(target)) * CELL_FEET;
+
+  const { feet: near, perRoundFeet } = delay;
+
+  if (feet <= near) return false;
+
+  const atRound = flow.ctx.round + Math.ceil(feet / perRoundFeet) - 1;
+
+  const pending = me.battleData.pendingHits ?? [];
+
+  put(flow, { ...me, battleData: { ...me.battleData, pendingHits: [...pending, { id: `${spell.id}:${flow.ctx.round}:${id}:${pending.length}`, targetId: id, atRound, amount, damageType, spellName: spell.name, school: spell.groupId }] } });
+  flow.messages.push(`⏳ ${target.basicInfo.name}: «${spell.name}» прибуде в раунді ${atRound} (${feet} фт)`);
+
+  return true;
+}
+
 function dealSpellDamage(state: SpellCastState, effect: Extract<Effect, { kind: "dealDamage" }>, id: string, roll: number, index: number): void {
   const { flow, spell } = state;
 
@@ -75,6 +100,8 @@ function dealSpellDamage(state: SpellCastState, effect: Extract<Effect, { kind: 
 
     return;
   }
+
+  if (effect.delayIfBeyond && scheduleHit(state, effect.delayIfBeyond, effect.damageType ?? "magic", id, planned)) return;
 
   const resisted = applyResistance(target, planned, effect.damageType ?? "magic", { participants: flow.ps, fromSpell: true, school: spell.groupId, extra: state.actionModifiers[id] });
 

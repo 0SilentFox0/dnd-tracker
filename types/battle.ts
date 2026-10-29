@@ -317,6 +317,16 @@ export interface AnchoredZoneState {
   endsWhenStartOutside?: boolean;
 }
 
+export interface PendingHit {
+  id: string;
+  targetId: string;
+  atRound: number;
+  amount: number;
+  damageType: string;
+  spellName: string;
+  school: string | null;
+}
+
 export interface SpellZoneRuntime {
   casterId: string;
   spellId: string;
@@ -515,6 +525,8 @@ export interface BattleParticipantBattleData {
   retaliationsUsed?: number;
   /** Раунд, у якому учасник востаннє отримав шкоду від небезпечної клітинки */
   hazardHitRound?: number;
+  /** Відкладені удари заклинань кастера: число вже кинуте, прибувають на початку його ходу в раунді atRound */
+  pendingHits?: PendingHit[];
   /** Раунд останнього входу/виходу зони заклинання за ключем "zoneId:in|out": раз на зону за раунд */
   zoneHits?: Record<string, number>;
   /** Масштаб шкоди ворога-юніта для рівного бою (старт бою); немає = ×1 */

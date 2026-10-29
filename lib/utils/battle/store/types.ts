@@ -3,7 +3,7 @@ import type { StoredPendingCritChoice } from "@/lib/utils/battle/crit-choice/typ
 import type { Ruleset } from "@/lib/utils/rules";
 import type { AbilityUsageCounter } from "@/types/abilities";
 import type { BattleAudioState } from "@/types/audio";
-import type { AirborneState, BattleMapConfig, BattleParticipant, BattlePreparationParticipant, Direction8, GridPoint } from "@/types/battle";
+import type { AirborneState, BattleMapConfig, BattleParticipant, BattlePreparationParticipant, Direction8, GridPoint, PendingHit } from "@/types/battle";
 
 export interface BattleSceneState {
   id: string;
@@ -53,6 +53,7 @@ export interface ParticipantState {
   airborne?: AirborneState;
   hazardHitRound?: number;
   zoneHits?: Record<string, number>;
+  pendingHits?: PendingHit[];
   retaliationsUsed?: number;
   dormant?: boolean;
   facing?: Direction8;

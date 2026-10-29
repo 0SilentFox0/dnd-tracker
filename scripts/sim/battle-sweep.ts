@@ -807,8 +807,35 @@ function coverageReport(): string[] {
   return out;
 }
 
+// Синтетичні заклинання P1–P4 (зони, стіна, аура, відкладений удар) — без тексту книг; ідемпотентно за назвою.
+const SYNTHETIC_SPELLS = [
+  { name: "SYN Відкладений удар", level: 1, type: "damage", damageType: "slashing", dice: 2, dieSides: 6, targeting: { kind: "enemy", range: 300 }, resolution: { kind: "auto" }, spellEffects: [{ kind: "dealDamage", amount: { spellRoll: 100 }, damageType: "slashing", delayIfBeyond: { feet: 30, perRoundFeet: 30 } }] },
+  { name: "SYN Стіна", level: 1, type: "damage", damageType: "none", dice: 0, targeting: { kind: "template", shape: "cube", size: 5, side: "enemy", maxTargets: 1, range: 30 }, resolution: { kind: "auto" }, spellEffects: [{ kind: "createTerrain", terrain: "wall", shape: "cell", cells: 1, rounds: 10 }] },
+  { name: "SYN Аура", level: 1, type: "damage", damageType: "none", dice: 0, targeting: { kind: "enemy", range: 30 }, resolution: { kind: "auto" }, concentration: true, spellEffects: [{ kind: "anchoredZone", radiusFeet: 20, side: "all", onEnter: { save: { ability: "charisma" }, effects: [{ kind: "applyCondition", condition: "skip_action", duration: { rounds: 3 } }] }, endsWhenStartOutside: true, duration: { rounds: 10 } }] },
+  { name: "SYN Складна зона", level: 1, type: "damage", damageType: "none", dice: 0, targeting: { kind: "template", shape: "circle", size: 20, side: "enemy", maxTargets: 20, range: 60, zone: { rounds: 5, terrain: ["difficult", "obscured"], onExit: { save: { ability: "strength" }, effects: [], pull: "centre" } } }, resolution: { kind: "auto" }, concentration: true, spellEffects: [] },
+];
+
+async function ensureSyntheticSpells() {
+  const ids: string[] = [];
+
+  for (const def of SYNTHETIC_SPELLS) {
+    const found = await prisma.spell.findFirst({ where: { campaignId: ctx.campaignId, name: def.name } });
+
+    ids.push((found ?? (await prisma.spell.create({ data: { campaignId: ctx.campaignId, executionMode: "native", ...def } as any }))).id);
+  }
+
+  for (const h of heroRows) {
+    const row = await prisma.character.findUniqueOrThrow({ where: { id: h.id } });
+
+    const known = (row.knownSpells as string[]) ?? [];
+
+    await prisma.character.update({ where: { id: h.id }, data: { knownSpells: [...new Set([...known, ...ids])] as any } });
+  }
+}
+
 async function main() {
   await prepare();
+  await ensureSyntheticSpells();
 
   const spellRows = await prisma.spell.findMany({ where: { campaignId: ctx.campaignId }, include: { spellGroup: true } });
 

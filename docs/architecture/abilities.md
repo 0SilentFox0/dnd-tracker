@@ -34,6 +34,7 @@ Class/feat джерела копіювання підтримуються нас
 - **Спел-only ефекти** — `SpellEffectSchema` (`lib/utils/spells/model/schema.ts`) = `BASE_EFFECTS` + `randomOf` + `chooseOne` + `inputDice`; їх приймають спел-схеми (форма, REST, OpenAPI `SpellEffect`), але не `AbilitySchema` (вміння `chooseOne`/`inputDice` відхиляє). Ці види не мають `EFFECT_REGISTRY`-запису: `castSpell` розгортає їх до рушія (`expandChosen`); у `describeEffect` лише підпис. Новий спел-only вид — Zod у `SPELL_ONLY_EFFECTS` + розгортання в `expandChosen`/`flatEffects`.
 - **`help`** — ефект у `BASE_EFFECTS` (`registry/effects/state.ts` `applyHelp`, той самий `helpEffect`, що й дія «Допомога»): ціль отримує перевагу на наступну атаку.
 - **`push`** — `registry/effects/push.ts` (`feet` 5..30, `from: "caster"`); логіка геометрії в `battle/grid/push.ts`; без мапи не застосовується.
+- **`dealDamage.delayIfBeyond`** — `{ feet, perRoundFeet }` (кратні 5, ≤120), лише в заклинаннях: далека ціль отримує удар на початку ходу кастера (`battleData.pendingHits`, див. battle.md); поля немає у формі `AbilityListEditor`.
 - **`dealDamage.byDistance`** — таблиця дальностей (`maxFeet` кратне 5, зростає), працює лише в заклинаннях (у вмінні без `spellRoll`-контексту береться `amount`).
 - **`modifyStat.atLeast`** — нижня межа стату; окрім характеристик (`build/bake.ts`) діє для `armor` і `speed` (до 120) з тривалістю: `collectModifiers` повертає максимум `atLeast`, `statWithModifiers` його застосовує.
 - **`damageBonus.flat: { spellRoll: ±N }`** — відсоток від кидка заклинання (наприклад −100 = мінус кидок); лише в ефектах заклинань (`validateAbilities` відхиляє у вміннях), `freezeSpellRoll` підставляє кидок перед застосуванням.
@@ -45,5 +46,5 @@ Class/feat джерела копіювання підтримуються нас
 
 ## Spell engine coverage (P3)
 
-- **`flag damageThreshold`** (`value` 1..100) читає `applyResistance`; **`applyCondition.escapeDc`** і **`dot.linkedToCondition`** (`ActiveEffect.linkedTo`) — схоплення заклинанням, `removeEffects` знімає прив'язаний DoT каскадом; спел-only ефекти `grantCast`, `hitRider`, `moveSelf` (`SPELL_ONLY_KINDS`, поза `AbilityListEditor`-формою — показуються як невідомий ефект).
+- **`flag damageThreshold`** (`value` 1..100) читає `applyResistance`; **`applyCondition.escapeDc`** і **`dot.linkedToCondition`** (`ActiveEffect.linkedTo`) — схоплення заклинанням, `removeEffects` знімає прив'язаний DoT каскадом; спел-only ефекти `grantCast`, `hitRider`, `moveSelf`, `createTerrain`, `anchoredZone` (`SPELL_ONLY_KINDS`, поза `AbilityListEditor`-формою — показуються як невідомий ефект).
 

@@ -84,3 +84,33 @@ describe("push rider", () => {
     expect(JSON.stringify(d)).toContain("поштовх");
   });
 });
+
+describe("delayedStrike", () => {
+  const entries = [
+    "A swarm flies toward a creature you can see within range. If the target is within 30 feet of you when you cast the spell, the swarm collides with the target, dealing {@damage 8d6} slashing damage to it.",
+    "If the target is farther than 30 feet away from you when you cast the spell, the swarm travels at a rate of 30 feet per round toward the target. While the swarm is traveling, it can be attacked.",
+  ];
+
+  const higher = "When you cast this spell using a spell slot of 6th level or higher, the target takes an extra 2d6 slashing damage for each slot level above 5th.";
+
+  it("near-hit dice plus travel speed become delayIfBeyond with an automatic hit", () => {
+    expect(spellRow(entries, { range: { type: "point", distance: { type: "feet", amount: 300 } }, damageInflict: ["slashing"] }, higher)).toMatchObject({
+      native: {
+        riders: [expect.stringContaining("атакувати")],
+        fields: {
+          targeting: { kind: "enemy", range: 300 },
+          resolution: { kind: "auto" },
+          dice: 8,
+          dieSides: 6,
+          upcastDice: 2,
+          spellEffects: [{ kind: "dealDamage", damageType: "slashing", delayIfBeyond: { feet: 30, perRoundFeet: 30 } }],
+        },
+      },
+    });
+  });
+
+  it("without a travel clause or with a save it is not matched", () => {
+    expect(JSON.stringify(spellRow([entries[0]], { range, damageInflict: ["slashing"] }))).not.toContain("delayIfBeyond");
+    expect(JSON.stringify(spellRow(entries, { range, damageInflict: ["slashing"], savingThrow: ["dexterity"] }))).not.toContain("delayIfBeyond");
+  });
+});

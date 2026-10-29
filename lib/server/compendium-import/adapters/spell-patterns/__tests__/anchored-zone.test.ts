@@ -32,6 +32,14 @@ describe("anchoredZoneSpell", () => {
     });
   });
 
+  it("aura wording: enters or starts the turn within the radius, spends action and bonus action", () => {
+    const aura = "Choose a creature within range. The target becomes the Herald and has an aura. Any creature that moves to a space within 20 feet of the Herald for the first time on a turn or starts its turn there must make a Charisma saving throw. On a failed save, the creature spends its action and bonus action at the start of its turn admiring the Herald. If a creature starts its turn outside of the Herald's aura, it is no longer under the effects of the spell.";
+
+    expect(spellRow([aura], timed)).toMatchObject({
+      native: { fields: { spellEffects: [{ kind: "anchoredZone", radiusFeet: 20, endsWhenStartOutside: true, onEnter: { effects: [{ condition: "skip_action" }, { condition: "no_bonus_action" }] }, onTurnStart: { save: { ability: "charisma" } } }] } },
+    });
+  });
+
   it("the derived fields pass the spell schema", () => {
     const d = spellRow([text], timed);
 

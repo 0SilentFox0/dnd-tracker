@@ -4,20 +4,20 @@ import type { NonRandomEffect } from "@/lib/utils/abilities/schema";
 import { durationRounds, spellRange } from "@/lib/utils/spells/derive/mechanics";
 import type { SpellEffect } from "@/lib/utils/spells/model/schema";
 
-const AROUND_TARGET = /\beach creature (?:of your choice )?within (\d+) feet of (?:the|that) target\b/i;
+const AROUND_TARGET = /\beach creature (?:of your choice )?within (\d+) feet of (?:the|that) target\b|\bmoves? to a space within (\d+) feet of (?:the|that) [^.]*?\bstarts its turn there\b/i;
 
-const NO_ACTION = /\bcan(?:'|’)?t take (?:any )?actions?\b/i;
+const NO_ACTION = /\bcan(?:'|’)?t take (?:any )?actions?\b|\bspends? (?:their|its) action\b/i;
 
-const NO_BONUS = /\bcan(?:'|’)?t take (?:any )?(?:actions? (?:or|and) )?bonus actions?\b/i;
+const NO_BONUS = /\bcan(?:'|’)?t take (?:any )?(?:actions? (?:or|and) )?bonus actions?\b|\bspends? (?:their|its) action and bonus action\b/i;
 
-const ENDS_OUTSIDE = /\bends (?:if|when) it starts its turn outside\b/i;
+const ENDS_OUTSIDE = /\bstarts its turn outside\b/i;
 
 const EXCEPT_TARGET = /\b(?:other than|except) the target\b/i;
 
 export const anchoredZoneSpell: SpellRecognizer = ({ text, cast, ability }) => {
   const around = AROUND_TARGET.exec(text);
 
-  const radius = Number(around?.[1]);
+  const radius = Number(around?.[1] ?? around?.[2]);
 
   const range = spellRange(cast.facts);
 
