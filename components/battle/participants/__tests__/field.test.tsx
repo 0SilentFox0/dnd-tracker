@@ -13,12 +13,12 @@ import { ParticipantRow } from "@/components/battle/participants/ParticipantRow"
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { ParticipantSide } from "@/lib/constants/battle";
 import { BattleSceneContext, BattleSceneDataContext } from "@/lib/hooks/battle";
+import type { BattleSceneValue } from "@/lib/hooks/battle/types";
 import { createMockParticipant } from "@/lib/utils/battle/__tests__/fixtures/mock-participant";
 import type { FxImpact } from "@/lib/utils/battle/fx";
 import { buildDisplayEffects, turnQueue } from "@/lib/utils/battle/view";
 import type { BattleScene } from "@/types/api";
 import type { ActiveEffect, BattleAction } from "@/types/battle";
-import type { BattleSceneValue } from "@/types/battle-scene";
 
 const p = (id: string, name: string, side: ParticipantSide, hp = 20, extra = false) => {
   const b = createMockParticipant();

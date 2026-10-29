@@ -12,13 +12,14 @@ import { useParticipantClick } from "./useParticipantClick";
 import { usePusherBattleSync } from "./usePusherBattleSync";
 
 import { BattleStatus } from "@/lib/constants/battle";
+import type { BattleSceneData, BattleSceneValue } from "@/lib/hooks/battle/types";
 import { battleQueryKey, useBattle } from "@/lib/hooks/battles";
 import { type AttackIntent, isIntentStale } from "@/lib/utils/battle/flows";
 import type { MapAim, MapPick } from "@/lib/utils/battle/grid";
 import { deriveScene } from "@/lib/utils/battle/view";
 import type { BattleScene } from "@/types/api";
 import type { BattleParticipant } from "@/types/battle";
-import type { BattleLogState, BattleSceneData, BattleSceneValue, DmControl, ResultFx } from "@/types/battle-scene";
+import type { BattleLogState, DmControl, ResultFx } from "@/types/battle-scene";
 
 const NO_ORDER: BattleParticipant[] = [];
 

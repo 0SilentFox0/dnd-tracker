@@ -8,8 +8,8 @@ import { CritChoiceWaitingBanner } from "../CritChoiceWaitingBanner";
 import { renderWithConfirm } from "@/components/ui/__tests__/render-with-confirm";
 import type { useCritChoiceDialog } from "@/lib/hooks/battle";
 import { BattleSceneContext } from "@/lib/hooks/battle";
+import type { BattleSceneValue } from "@/lib/hooks/battle/types";
 import { critEffectsFor } from "@/lib/utils/battle/crit-choice/catalog";
-import type { BattleSceneValue } from "@/types/battle-scene";
 
 afterEach(cleanup);
 

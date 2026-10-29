@@ -4,7 +4,7 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 
 import { AwaitingDmBanner } from "@/components/battle/scene/AwaitingDmBanner";
 import { BattleSceneContext } from "@/lib/hooks/battle";
-import type { BattleSceneValue } from "@/types/battle-scene";
+import type { BattleSceneValue } from "@/lib/hooks/battle/types";
 
 afterEach(cleanup);
 

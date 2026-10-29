@@ -15,10 +15,10 @@ import { ParticipantDetails } from "@/components/battle/participants/Participant
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { ParticipantSide } from "@/lib/constants/battle";
 import { BattleSceneDataContext } from "@/lib/hooks/battle";
+import type { BattleSceneValue } from "@/lib/hooks/battle/types";
 import { createMockParticipant } from "@/lib/utils/battle/__tests__/fixtures/mock-participant";
 import { buildDisplayEffects } from "@/lib/utils/battle/view";
 import type { BattleScene } from "@/types/api";
-import type { BattleSceneValue } from "@/types/battle-scene";
 
 const p = (id: string, hp: number) => {
   const b = createMockParticipant();

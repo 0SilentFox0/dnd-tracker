@@ -6,6 +6,7 @@ import { ClassForm } from "@/components/classes/ClassForm";
 import { RulesForm } from "@/components/rules/RulesForm";
 import { ConfirmProvider } from "@/components/ui/confirm-dialog";
 import { battleOps, callBattleOp } from "@/lib/api/battle-ops";
+import type { BattleSceneValue } from "@/lib/hooks/battle/types";
 import { useAttackWizard } from "@/lib/hooks/battle/useAttackWizard";
 import { BattleSceneContext, BattleSceneDataContext } from "@/lib/hooks/battle/useBattleScene";
 import { useSpellMapTargeting } from "@/lib/hooks/battle/useSpellMapTargeting";
@@ -15,7 +16,6 @@ import type { MapAim, MapPick } from "@/lib/utils/battle/grid";
 import { DEFAULT_RULES } from "@/lib/utils/rules";
 import type { AttackData, BattleScene } from "@/types/api";
 import type { BackgroundData } from "@/types/backgrounds";
-import type { BattleSceneValue } from "@/types/battle-scene";
 import type { GameClassData } from "@/types/classes";
 
 export const browserBackground: BackgroundData = { id: "background", name: "Browser Scholar", icon: null, description: null, choices: [], skillProficiencies: [], toolProficiencies: [], originFeatId: null, equipmentText: null };

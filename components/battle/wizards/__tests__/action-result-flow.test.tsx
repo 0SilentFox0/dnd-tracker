@@ -20,8 +20,8 @@ import { AttackWizard } from "@/components/battle/wizards/AttackWizard";
 import { SpellBook } from "@/components/battle/wizards/SpellBook";
 import { BattleSceneContext,  useAttackWizard, useSpellBook } from "@/lib/hooks/battle";
 import { fakeScene } from "@/lib/hooks/battle/__tests__/fake-scene";
+import type { BattleSceneValue } from "@/lib/hooks/battle/types";
 import type { BattleAction, BattleParticipant } from "@/types/battle";
-import type { BattleSceneValue } from "@/types/battle-scene";
 
 type ResultApi = BattleSceneValue["result"];
 

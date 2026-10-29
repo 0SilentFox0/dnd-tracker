@@ -6,6 +6,7 @@ import { MazeToolStateContext, useMazeToolStateValue } from "../modes/maze/useMa
 import { BattleSceneContext, BattleSceneDataContext } from "../useBattleScene";
 
 import { AttackType, ParticipantSide } from "@/lib/constants/battle";
+import type { BattleSceneValue } from "@/lib/hooks/battle/types";
 import { ConfirmContext } from "@/lib/hooks/common";
 import { createMockParticipant } from "@/lib/utils/battle/__tests__/fixtures/mock-participant";
 import type { MapAim, MapPick } from "@/lib/utils/battle/grid";
@@ -14,7 +15,7 @@ import { DEFAULT_RULES } from "@/lib/utils/rules";
 import type { ResolvedAbility } from "@/types/abilities";
 import type { BattleScene } from "@/types/api";
 import type { BattleAction, BattleParticipant } from "@/types/battle";
-import type { BattleSceneValue, ResultFx } from "@/types/battle-scene";
+import type { ResultFx } from "@/types/battle-scene";
 
 export interface FakeSceneOptions {
   knownSpells?: string[];

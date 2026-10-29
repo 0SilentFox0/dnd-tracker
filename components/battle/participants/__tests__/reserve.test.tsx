@@ -9,9 +9,9 @@ import { renderWithConfirm } from "@/components/ui/__tests__/render-with-confirm
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { ParticipantSide } from "@/lib/constants/battle";
 import { BattleSceneContext, BattleSceneDataContext } from "@/lib/hooks/battle";
+import type { BattleSceneValue } from "@/lib/hooks/battle/types";
 import { createMockParticipant } from "@/lib/utils/battle/__tests__/fixtures/mock-participant";
 import type { BattleScene } from "@/types/api";
-import type { BattleSceneValue } from "@/types/battle-scene";
 
 afterEach(cleanup);
 

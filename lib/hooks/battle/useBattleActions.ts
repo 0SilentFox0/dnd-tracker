@@ -2,6 +2,7 @@
 
 import { useCallback } from "react";
 
+import type { BattleSceneActions } from "@/lib/hooks/battle/types";
 import {
   useAbilityAction,
   useAddBattleParticipant,
@@ -29,7 +30,6 @@ import {
   useUnitControl,
   useUpdateBattleParticipant,
 } from "@/lib/hooks/battles";
-import type { BattleSceneActions } from "@/types/battle-scene";
 
 /** Усі мутації бою; збої й конфлікти йдуть у тост. */
 export function useBattleActions(campaignId: string, battleId: string, showToast: (message: string) => void): BattleSceneActions {
