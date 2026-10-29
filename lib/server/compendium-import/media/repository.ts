@@ -1,8 +1,9 @@
 import type { Prisma } from "@prisma/client";
 import { ZodError } from "zod";
 
+import { bump } from "./queue";
 import type { MediaClaimOptions, MediaRepository, MediaResult } from "./service";
-import { MEDIA_LIMITS, type MediaItem, type MediaQueueState, type MediaReason, type MediaTarget } from "./types";
+import { emptyMediaState, MEDIA_LIMITS, type MediaItem, type MediaQueueState, type MediaReason, type MediaTarget } from "./types";
 
 import "server-only";
 import { invalidateAllReference } from "@/lib/cache/tags";
@@ -21,27 +22,21 @@ import type { ScenarioContent } from "@/types/scenario";
 
 type Report = Record<string, unknown> & { media?: MediaQueueState & Record<string, unknown> };
 
-const mediaOf = (report: Report): MediaQueueState => report.media ?? { version: 1, items: [], skipped: {} };
+const mediaOf = (report: Report): MediaQueueState => report.media ?? emptyMediaState();
 
 async function lockRun(tx: Prisma.TransactionClient, actor: Actor, runId: string) {
-  const rows = await tx.$queryRaw<Array<{ id: string }>>`SELECT id FROM compendium_import_runs WHERE id = ${runId} AND "campaignId" = ${actor.campaignId} FOR UPDATE`;
+  const rows = await tx.$queryRaw<Array<{ report: Report }>>`SELECT report FROM compendium_import_runs WHERE id = ${runId} AND "campaignId" = ${actor.campaignId} FOR UPDATE`;
 
-  if (rows.length !== 1) return null;
-
-  const run = await tx.compendiumImportRun.findUniqueOrThrow({ where: { id: runId }, select: { report: true } });
-
-  return run.report as unknown as Report;
+  return rows.length === 1 ? rows[0].report : null;
 }
 
 const saveReport = (tx: Prisma.TransactionClient, runId: string, report: Report, media: MediaQueueState) =>
   tx.compendiumImportRun.update({ where: { id: runId }, data: { report: jsonContentInput({ ...report, media: { ...report.media, ...media } }) } });
 
-const bump = (state: MediaQueueState, reason: MediaReason) => { state.skipped[reason] = (state.skipped[reason] ?? 0) + 1; };
-
 const skip = (state: MediaQueueState, target: MediaTarget, reason: MediaReason) => {
   target.status = "skipped";
   target.reason = reason;
-  bump(state, reason);
+  bump(state.skipped, reason);
 };
 
 async function applyField(actor: Actor, target: MediaTarget, storedUrl: string, state: MediaQueueState) {
@@ -151,12 +146,15 @@ export const prismaMediaRepository: MediaRepository = {
 
       const media = mediaOf(report);
 
+      let changed = false;
+
       for (const item of media.items) if (ids.includes(item.id) && item.status === "pending") {
         delete item.leaseUntil;
         item.attempts = Math.max(0, item.attempts - 1);
+        changed = true;
       }
 
-      await saveReport(tx, runId, report, media);
+      if (changed) await saveReport(tx, runId, report, media);
     });
   },
 
@@ -164,7 +162,7 @@ export const prismaMediaRepository: MediaRepository = {
     return withCampaignContentWrite(actor.campaignId, async (tx) => {
       const report = await lockRun(tx, actor, runId);
 
-      if (!report) return { version: 1, items: [], skipped: {} };
+      if (!report) return emptyMediaState();
 
       const media = mediaOf(report);
 
@@ -172,8 +170,10 @@ export const prismaMediaRepository: MediaRepository = {
 
       const saved: Array<{ item: MediaItem; storedUrl: string }> = [];
 
+      const byId = new Map(media.items.map((i) => [i.id, i]));
+
       for (const result of results) {
-        const item = media.items.find((i) => i.id === result.id);
+        const item = byId.get(result.id);
 
         if (!item || item.status !== "pending") continue;
 

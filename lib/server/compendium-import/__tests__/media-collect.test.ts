@@ -1,8 +1,9 @@
 import { describe, expect, it } from "vitest";
 
 import { adaptCompendium } from "../adapt";
-import { collectEntryMedia, normalizeMediaUrl } from "../media/collect";
+import { collectEntryMedia } from "../media/collect";
 import { MEDIA_LIMITS, mediaIdOf } from "../media/types";
+import { normalizeMediaUrl } from "../media/url";
 import sample from "./fixtures/media-sample.json";
 
 const adapted = adaptCompendium(sample);

@@ -59,7 +59,7 @@ describe("processMediaBatch", () => {
 
     const fetchImage = vi.fn(async (url: string) => url.endsWith("1.png") ? { ok: false as const, reason: "MEDIA_HTTP_STATUS" as const, params: { status: 503 }, retryable: true } : url.endsWith("2.png") ? image : Promise.reject(new Error("boom")));
 
-    const put = vi.fn(async (..._args: unknown[]) => ({ ok: false as const, message: "MEDIA_BAD_FORMAT" }));
+    const put = vi.fn(async (..._args: unknown[]) => ({ ok: false as const, message: "MEDIA_BAD_FORMAT" as const }));
 
     const progress = await processMediaBatch(actor, "run", { repository, fetchImage: fetchImage as never, store: put });
 

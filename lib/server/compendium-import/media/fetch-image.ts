@@ -5,7 +5,9 @@ import { MEDIA_LIMITS, type MediaReason } from "./types";
 import { API_ERRORS } from "@/lib/constants/api-errors";
 import { safeFetchBuffer, SafeFetchError, sniffImageMime } from "@/lib/utils/api/safe-fetch";
 
-export type ImageMime = "image/png" | "image/jpeg" | "image/gif" | "image/webp";
+export const IMAGE_MIMES = ["image/png", "image/jpeg", "image/gif", "image/webp"] as const;
+
+export type ImageMime = typeof IMAGE_MIMES[number];
 
 export type FetchedImage =
   | { ok: true; bytes: Buffer; mime: ImageMime; sha256: string }

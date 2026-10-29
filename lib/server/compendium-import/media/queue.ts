@@ -1,5 +1,5 @@
 import type { PlannedWrite } from "../plan";
-import { MEDIA_LIMITS, mediaIdOf,type MediaItem, type MediaQueueState, type MediaReason, type MediaRef } from "./types";
+import { MEDIA_LIMITS, mediaIdOf, type MediaItem, type MediaQueueState, type MediaReason, type MediaRef } from "./types";
 
 export interface MediaPlanSummary { queued: number; skipped: Partial<Record<MediaReason, number>> }
 
@@ -7,7 +7,7 @@ export type MediaReportState = MediaPlanSummary & { items?: MediaItem[] };
 
 type QueueWrite = Pick<PlannedWrite, "kind" | "localId" | "nested" | "media">;
 
-const bump = (skipped: MediaQueueState["skipped"], reason: MediaReason) => {
+export const bump = (skipped: MediaQueueState["skipped"], reason: MediaReason) => {
   skipped[reason] = (skipped[reason] ?? 0) + 1;
 };
 

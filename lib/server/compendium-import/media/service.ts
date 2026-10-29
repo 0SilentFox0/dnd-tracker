@@ -35,15 +35,13 @@ async function processItem(item: MediaItem, known: Map<string, string>, deps: Me
   try {
     const image: FetchedImage = await deps.fetchImage(item.url);
 
-    if (!image.ok) return { id: item.id, ok: false, reason: image.reason, retryable: image.retryable, ...(image.params && { params: image.params }) };
+    if (!image.ok) return { id: item.id, ...image };
 
     const stored = await deps.store(image, variantOf(item));
 
     if (stored.ok) return { id: item.id, ok: true, storedUrl: stored.value };
 
-    const reason = stored.message as MediaReason;
-
-    return { id: item.id, ok: false, reason, retryable: reason === "MEDIA_STORAGE_FAILED" };
+    return { id: item.id, ok: false, reason: stored.message, retryable: stored.message === "MEDIA_STORAGE_FAILED" };
   } catch {
     return { id: item.id, ok: false, reason: "MEDIA_FETCH_FAILED", retryable: true };
   }

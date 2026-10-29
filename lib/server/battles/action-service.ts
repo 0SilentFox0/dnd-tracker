@@ -19,7 +19,6 @@ import { battleRecord, type RecordOperation, recordSchemas, requireBattleId } fr
 import { ContentError, parseInput } from "@/lib/server/content/errors";
 import { withCampaignContentWrite } from "@/lib/server/content/write";
 import { runContentWriteContext } from "@/lib/server/content/write-context";
-import { isHostedOnProjectStorage } from "@/lib/supabase/image-storage";
 import type { Actor } from "@/lib/utils/api/actor";
 import { needFailure } from "@/lib/utils/api/need";
 import { pageOf } from "@/lib/utils/api/page-of";
@@ -27,6 +26,7 @@ import { toBattleResponse } from "@/lib/utils/battle/pipeline/battle-response";
 import { guardBattleContext } from "@/lib/utils/battle/pipeline/run-battle-mutation";
 import { BattleAccessError, BattleRuleError, loadAllEvents, loadEventsBefore, loadRecentEvents } from "@/lib/utils/battle/store";
 import { summarizeBattle } from "@/lib/utils/battle/view/summary";
+import { isHostedOnProjectStorage } from "@/lib/utils/common/image-url";
 import { ownHandler } from "@/lib/utils/common/own-handler";
 import { parseRules } from "@/lib/utils/rules/schema";
 

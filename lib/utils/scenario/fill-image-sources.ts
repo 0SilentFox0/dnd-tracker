@@ -23,7 +23,13 @@ export function fillImageSources(content: ScenarioContent, urls: ReadonlyMap<str
       }
     }
 
-    if (node.content) next = { ...next, content: node.content.map(visit) };
+    const children = node.content;
+
+    if (children) {
+      const content = children.map(visit);
+
+      if (content.some((child, i) => child !== children[i])) next = { ...next, content };
+    }
 
     return next;
   };
@@ -37,5 +43,5 @@ export function fillImageSources(content: ScenarioContent, urls: ReadonlyMap<str
     })),
   }));
 
-  return { content: { ...content, sections }, found, changed };
+  return { content: changed ? { ...content, sections } : content, found, changed };
 }

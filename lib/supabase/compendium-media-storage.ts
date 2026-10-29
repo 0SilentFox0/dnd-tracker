@@ -2,17 +2,16 @@ import sharp from "sharp";
 
 import "server-only";
 import { YEAR_CACHE_SECONDS } from "@/lib/constants/storage";
-import type { FetchedImage } from "@/lib/server/compendium-import/media/fetch-image";
-import { MEDIA_LIMITS, type MediaRole } from "@/lib/server/compendium-import/media/types";
+import { type FetchedImage, IMAGE_MIMES } from "@/lib/server/compendium-import/media/fetch-image";
+import { MEDIA_LIMITS, type MediaReason, type MediaRole } from "@/lib/server/compendium-import/media/types";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { ensureBucket } from "@/lib/supabase/buckets";
-import type { Result } from "@/types/common";
 
 type Admin = ReturnType<typeof createAdminClient>;
 
 export const COMPENDIUM_MEDIA_BUCKET = "compendium-media";
 
-const ALLOWED_MIME = ["image/png", "image/jpeg", "image/gif", "image/webp"];
+type StoreResult = { ok: true; value: string } | { ok: false; message: MediaReason };
 
 const MAX_EDGE: Record<MediaRole, number> = { avatar: 512, icon: 512, inline: 1600 };
 
@@ -35,12 +34,11 @@ async function encode(image: Extract<FetchedImage, { ok: true }>, variant: Media
   return { bytes, mime: "image/webp", path: `${image.sha256.slice(0, 2)}/${image.sha256}-${max}.webp` };
 }
 
-/** Result.message is a MediaReason key. */
 export async function storeCompendiumImage(
   image: Extract<FetchedImage, { ok: true }>,
   variant: MediaRole,
   admin?: Admin,
-): Promise<Result<string>> {
+): Promise<StoreResult> {
   let encoded: Awaited<ReturnType<typeof encode>>;
 
   try {
@@ -51,18 +49,18 @@ export async function storeCompendiumImage(
 
   let timer: ReturnType<typeof setTimeout> | undefined;
 
-  const timeout = new Promise<Result<string>>((resolve) => {
+  const timeout = new Promise<StoreResult>((resolve) => {
     timer = setTimeout(() => resolve({ ok: false, message: "MEDIA_STORAGE_FAILED" }), STORAGE_TIMEOUT_MS);
   });
 
-  const upload = async (): Promise<Result<string>> => {
+  const upload = async (): Promise<StoreResult> => {
     try {
       const supabase = admin ?? createAdminClient();
 
       const ensured = await ensureBucket(supabase, COMPENDIUM_MEDIA_BUCKET, {
         public: true,
         fileSizeLimit: MEDIA_LIMITS.bytes,
-        allowedMimeTypes: ALLOWED_MIME,
+        allowedMimeTypes: [...IMAGE_MIMES],
       });
 
       if (!ensured.ok) return { ok: false, message: "MEDIA_STORAGE_FAILED" };
