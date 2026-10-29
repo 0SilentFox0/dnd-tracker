@@ -2,9 +2,8 @@ import type { AbilityKey } from "@/lib/constants/abilities";
 import { textRef } from "@/lib/i18n/text-ref";
 import { findParticipant, isActive, resolvedAbilitiesOf } from "@/lib/utils/abilities/engine/core/participants";
 import { withinLimits } from "@/lib/utils/abilities/engine/core/usage";
-import { upsertTimedEffect } from "@/lib/utils/abilities/engine/effects/timed-effects";
 import type { CunningStrikeEffect } from "@/lib/utils/abilities/schema";
-import { disengageEffect } from "@/lib/utils/battle/actions/effects";
+import { disengageEffect, upsertLabeled } from "@/lib/utils/battle/actions/effects";
 import { type ActionFlow, getP, put } from "@/lib/utils/battle/common/action-flow";
 import { applyCondition5e } from "@/lib/utils/battle/conditions/apply";
 import { rollSave } from "@/lib/utils/battle/saves";
@@ -86,7 +85,7 @@ export function applyCunningStrikeEffects(flow: ActionFlow, attackerId: string, 
     const attacker = getP(flow, attackerId);
 
     if (effect === "withdraw") {
-      put(flow, upsertTimedEffect(attacker, disengageEffect(attackerId), flow.ctx.round));
+      put(flow, upsertLabeled(attacker, disengageEffect(attackerId), flow.ctx.round));
       flow.messages.push(textRef("battleLog.cunning.withdraw", { effect: CUNNING_STRIKE_LABELS.withdraw, name: attacker.basicInfo.name }));
       continue;
     }

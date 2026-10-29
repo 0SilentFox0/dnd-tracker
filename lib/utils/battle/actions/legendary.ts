@@ -1,4 +1,5 @@
 import { reject } from "./errors";
+import { actionReason } from "./reasons";
 
 import { API_ERRORS } from "@/lib/constants/api-errors";
 import { findParticipant, isAttackable } from "@/lib/utils/abilities/engine/core/participants";
@@ -28,13 +29,13 @@ export function legendaryAttack(input: LegendaryAttackInput): { participants: Ba
 
   const actor = findParticipant(participants, actorId) ?? reject(API_ERRORS.BATTLE_PARTICIPANT_NOT_IN_BATTLE);
 
-  const attack = actor.battleData.attacks[input.attackIndex] ?? reject("У учасника немає такої атаки");
+  const attack = actor.battleData.attacks[input.attackIndex] ?? reject(actionReason("noSuchAttack"));
 
-  if (attack.hand === "off" || getDisabledAttackKinds(actor)[attackKindOf(attack.type)]) return reject("Ця атака зараз недоступна");
+  if (attack.hand === "off" || getDisabledAttackKinds(actor)[attackKindOf(attack.type)]) return reject(actionReason("attackUnavailable"));
 
   const target = findParticipant(participants, targetId);
 
-  if (!target || target.basicInfo.side === actor.basicInfo.side || !isAttackable(target) || target.battleData.reserved) return reject("Ціллю має бути живий ворог");
+  if (!target || target.basicInfo.side === actor.basicInfo.side || !isAttackable(target) || target.battleData.reserved) return reject(actionReason("enemyRequired"));
 
   assertAttackAllowed(actor, attack, [target]);
 

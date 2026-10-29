@@ -1,5 +1,6 @@
 import { removeEffects } from "./query";
 
+import { textRef } from "@/lib/i18n/text-ref";
 import { findParticipant, replaceParticipant } from "@/lib/utils/abilities/engine/core/participants";
 import type { BattleParticipant } from "@/types/battle";
 import type { LogLine } from "@/types/text";
@@ -12,7 +13,7 @@ export function grappledBy(ps: BattleParticipant[], grapplerId: string): BattleP
   return ps.filter((p) => p.battleData.activeEffects.some((e) => e.abilityKey === grappleKey(grapplerId)));
 }
 
-export function releaseGrapples(ps: BattleParticipant[], grapplerId: string, reason: string, only?: string): { participants: BattleParticipant[]; messages: LogLine[] } {
+export function releaseGrapples(ps: BattleParticipant[], grapplerId: string, reason: LogLine, only?: string): { participants: BattleParticipant[]; messages: LogLine[] } {
   const grappler = findParticipant(ps, grapplerId);
 
   let next = ps;
@@ -25,7 +26,7 @@ export function releaseGrapples(ps: BattleParticipant[], grapplerId: string, rea
     const { participant } = removeEffects(target, (e) => e.abilityKey === grappleKey(grapplerId));
 
     next = replaceParticipant(next, participant);
-    messages.push(`🤲 ${grappler?.basicInfo.name ?? "Схоплювач"} відпускає ${target.basicInfo.name}${reason ? ` (${reason})` : ""}`);
+    messages.push(textRef("battleActions.grapple.release", { name: grappler?.basicInfo.name ?? textRef("battleActions.grapple.grappler"), target: target.basicInfo.name, reason: reason ? textRef("battleActions.grapple.releaseReason", { reason }) : "" }));
   }
 
   return { participants: next, messages };

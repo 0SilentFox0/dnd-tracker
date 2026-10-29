@@ -3,9 +3,11 @@ import { describe, expect, it } from "vitest";
 import { context, goblin, hero, participant } from "./fixtures";
 
 import { CombatStatus, ParticipantSide } from "@/lib/constants/battle";
+import { textOf } from "@/lib/i18n/test/text";
 import { mazeMutation } from "@/lib/server/battles/mutations/maze/maze-mutation";
 import { createRollbackMutation } from "@/lib/server/battles/mutations/rollback/rollback-mutation";
 import { cellKey } from "@/lib/utils/battle/grid/geometry";
+import { eventTextOf } from "@/lib/utils/battle/log/__tests__/event-text";
 import { heroTunnel, mazeDistances } from "@/lib/utils/battle/modes/maze";
 import { at, mazeMap, withMap } from "@/lib/utils/battle/modes/maze/__tests__/fixtures";
 import { MAZE_TEXTS } from "@/lib/utils/battle/modes/maze/texts";
@@ -134,8 +136,8 @@ describe("перетасовка «1 тунель»", () => {
   it("одна подія ДМа (прихована з журналу), перша — ціль відкату", () => {
     const out = tunnel(ctx());
 
-    expect(out.events[0]).toMatchObject({ resultText: MAZE_TEXTS.ops.tunnel, details: { actionDetails: { mazeEvent: "reshuffle" } } });
-    expect(out.events.filter((e) => e.resultText === MAZE_TEXTS.ops.tunnel)).toHaveLength(1);
+    expect(out.events[0]).toMatchObject({ details: { log: [MAZE_TEXTS.ops.tunnel], actionDetails: { mazeEvent: "reshuffle" } } });
+    expect(out.events.filter((e) => eventTextOf(e) === textOf(MAZE_TEXTS.ops.tunnel))).toHaveLength(1);
   });
 
   it("хід був на ворогові, що зник — переходить до наступного, не завершуючи вдруге хід попереднього", () => {

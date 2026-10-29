@@ -1,7 +1,8 @@
 import { coreTimedKey } from "./effects";
 import { reject } from "./errors";
+import { actionReason } from "./reasons";
 
-import { joinLines } from "@/lib/i18n/text-ref";
+import { joinLines, textRef } from "@/lib/i18n/text-ref";
 import { findParticipant, isActive, replaceParticipant } from "@/lib/utils/abilities/engine/core/participants";
 import { checkBonus, rollCheck } from "@/lib/utils/battle/checks";
 import { applyCondition5e, conditionSourceIds, hasCondition, PERMANENT_ROUNDS, removeEffects } from "@/lib/utils/battle/conditions";
@@ -27,7 +28,7 @@ function bestSkill(p: BattleParticipant, ps: BattleParticipant[], rules: Ruleset
 
 const grappleDc = (grappler: BattleParticipant, rules: Ruleset) => getSpellSaveDC(grappler.abilities.proficiencyBonus, grappler.abilities.modifiers.strength, rules.formulas.saveDcBase);
 
-export function contest(input: { attacker: BattleParticipant; target: BattleParticipant } & RollInput): { success: boolean; message: string; participants: BattleParticipant[] } {
+export function contest(input: { attacker: BattleParticipant; target: BattleParticipant } & RollInput): { success: boolean; message: LogLine; participants: BattleParticipant[] } {
   const { attacker, target, participants, rules, rng } = input;
 
   if (rules.actions.variant === "2024") {
@@ -41,7 +42,7 @@ export function contest(input: { attacker: BattleParticipant; target: BattlePart
 
     return {
       success: !result.success,
-      message: `🎲 СК ${dc}, ${target.basicInfo.name} кидає ${rolled.total}${message ? `; ${message}` : ""}`,
+      message: textRef(message ? "battleActions.grapple.contestSaveNote" : "battleActions.grapple.contestSave", { dc, target: target.basicInfo.name, total: rolled.total, ...(message && { note: message }) }),
       participants: message ? replaceParticipant(participants, participant) : participants,
     };
   }
@@ -50,10 +51,10 @@ export function contest(input: { attacker: BattleParticipant; target: BattlePart
 
   const theirs = rollCheck({ actor: target, subject: { skill: bestSkill(target, participants, rules) }, participants, rules, rng });
 
-  return { success: mine.total > theirs.total, message: `🎲 ${mine.total} проти ${theirs.total}`, participants };
+  return { success: mine.total > theirs.total, message: textRef("battleActions.grapple.contestRoll", { mine: mine.total, theirs: theirs.total }), participants };
 }
 
-export function escapeContest(input: { escaper: BattleParticipant; grappler: BattleParticipant } & RollInput): { success: boolean; message: string } {
+export function escapeContest(input: { escaper: BattleParticipant; grappler: BattleParticipant } & RollInput): { success: boolean; message: LogLine } {
   const { escaper, grappler, participants, rules, rng } = input;
 
   const mine = rollCheck({ actor: escaper, subject: { skill: bestSkill(escaper, participants, rules) }, participants, rules, rng });
@@ -61,12 +62,12 @@ export function escapeContest(input: { escaper: BattleParticipant; grappler: Bat
   if (rules.actions.variant === "2024") {
     const dc = grappleDc(grappler, rules);
 
-    return { success: mine.total >= dc, message: `🎲 ${mine.total} проти СК ${dc}` };
+    return { success: mine.total >= dc, message: textRef("battleActions.grapple.contestDc", { mine: mine.total, dc }) };
   }
 
   const theirs = rollCheck({ actor: grappler, subject: { skill: "athletics" }, participants, rules, rng });
 
-  return { success: mine.total > theirs.total, message: `🎲 ${mine.total} проти ${theirs.total}` };
+  return { success: mine.total > theirs.total, message: textRef("battleActions.grapple.contestRoll", { mine: mine.total, theirs: theirs.total }) };
 }
 
 export interface GrappleActionInput extends RollInput {
@@ -96,7 +97,7 @@ function applyHeld(input: GrappleActionInput, target: BattleParticipant, key: "g
   });
 }
 
-const targetOf = (input: GrappleActionInput) => findParticipant(input.participants, input.targetId) ?? reject("Цілі немає в бою");
+const targetOf = (input: GrappleActionInput) => findParticipant(input.participants, input.targetId) ?? reject(actionReason("targetMissing"));
 
 export function runGrapple(input: GrappleActionInput): GrappleActionResult {
   const { actor, participants, rules } = input;
@@ -105,15 +106,15 @@ export function runGrapple(input: GrappleActionInput): GrappleActionResult {
 
   const name = actor.basicInfo.name;
 
-  if (hasCondition(target, "grappled") && conditionSourceIds(target, "grappled").includes(actor.basicInfo.id)) return reject("Ціль уже схоплена");
+  if (hasCondition(target, "grappled") && conditionSourceIds(target, "grappled").includes(actor.basicInfo.id)) return reject(actionReason("alreadyGrappled"));
 
   const check = contest({ attacker: actor, target, participants, rules, rng: input.rng });
 
-  if (!check.success) return { participants: check.participants, message: `🤲 ${name}: Схопити — ${target.basicInfo.name} вислизає ${check.message}` };
+  if (!check.success) return { participants: check.participants, message: textRef("battleActions.grapple.grabFail", { name, target: target.basicInfo.name, check: check.message }) };
 
   const result = applyHeld(input, target, "grappled", grappleKey(actor.basicInfo.id));
 
-  return { participants: result.participants, message: joinLines([`🤲 ${name}: Схопити ${check.message}`, ...result.messages], "; ") };
+  return { participants: result.participants, message: joinLines([textRef("battleActions.grapple.grab", { name, check: check.message }), ...result.messages], "; ") };
 }
 
 export function runShove(input: GrappleActionInput & { mode: "prone" | "push" }): GrappleActionResult {
@@ -121,15 +122,15 @@ export function runShove(input: GrappleActionInput & { mode: "prone" | "push" })
 
   const target = targetOf(input);
 
-  if (mode === "push" && !map) return reject("Для відштовхування потрібна карта");
+  if (mode === "push" && !map) return reject(actionReason("pushNeedsMap"));
 
   const name = actor.basicInfo.name;
 
   const check = contest({ attacker: actor, target, participants, rules, rng: input.rng });
 
-  if (!check.success) return { participants: check.participants, message: `💥 ${name}: Штовхнути — ${target.basicInfo.name} встоює ${check.message}` };
+  if (!check.success) return { participants: check.participants, message: textRef("battleActions.grapple.shoveFail", { name, target: target.basicInfo.name, check: check.message }) };
 
-  const messages = [`💥 ${name}: Штовхнути ${check.message}`];
+  const messages: LogLine[] = [textRef("battleActions.grapple.shove", { name, check: check.message })];
 
   const from = actor.battleData.position;
 
@@ -138,12 +139,12 @@ export function runShove(input: GrappleActionInput & { mode: "prone" | "push" })
   const dest = mode === "push" && from && at ? { x: at.x + Math.sign(at.x - from.x), y: at.y + Math.sign(at.y - from.y) } : null;
 
   if (dest && map && canStand(map, participants, target, dest)) {
-    messages.push(`${target.basicInfo.name} відштовхнуто на клітинку`);
+    messages.push(textRef("battleActions.grapple.pushed", { target: target.basicInfo.name }));
 
     return { participants: replaceParticipant(participants, { ...target, battleData: { ...target.battleData, position: dest } }), message: joinLines(messages, "; ") };
   }
 
-  if (mode === "push") messages.push("відштовхнути нікуди — лише повалено");
+  if (mode === "push") messages.push(textRef("battleActions.grapple.pushBlocked"));
 
   if (hasCondition(target, "prone")) return { participants, message: joinLines(messages, "; ") };
 
@@ -161,15 +162,15 @@ export function runEscape(input: Omit<GrappleActionInput, "targetId">): GrappleA
 
   const grappler = grapplerId ? findParticipant(participants, grapplerId) : undefined;
 
-  const check = grappler ? escapeContest({ escaper: actor, grappler, participants, rules, rng: input.rng }) : { success: true, message: "" };
+  const check = grappler ? escapeContest({ escaper: actor, grappler, participants, rules, rng: input.rng }) : { success: true, message: "" as LogLine };
 
-  const tail = check.message ? ` ${check.message}` : "";
+  const tail = check.message ? joinLines([" ", check.message]) : "";
 
-  if (!check.success) return { participants, message: `🤲 ${name}: Вирватися — не вдалося${tail}` };
+  if (!check.success) return { participants, message: textRef("battleActions.grapple.escapeFail", { name, tail }) };
 
   const { participant } = removeEffects(actor, (e) => e.type === "condition" && e.effects[0]?.type === "grappled" && (!grapplerId || e.source?.participantId === grapplerId));
 
-  return { participants: replaceParticipant(participants, participant), message: `🤲 ${name}: Вирватися${tail} — вільний` };
+  return { participants: replaceParticipant(participants, participant), message: textRef("battleActions.grapple.escapeFree", { name, tail }) };
 }
 
 const isGrappleEffect = (e: BattleParticipant["battleData"]["activeEffects"][number]) => !!e.abilityKey?.startsWith(GRAPPLE_KEY_PREFIX);
@@ -204,7 +205,7 @@ export function releaseInvalidGrapples(ps: BattleParticipant[], map?: BattleMapC
 
       if (!gone && !apart) continue;
 
-      const out = releaseGrapples(next, id, gone ? "схоплювач не в строю" : "розійшлися", target.basicInfo.id);
+      const out = releaseGrapples(next, id, textRef(gone ? "battleActions.grapple.reasons.gone" : "battleActions.grapple.reasons.apart"), target.basicInfo.id);
 
       next = out.participants;
       byId = new Map(next.map((p) => [p.basicInfo.id, p]));

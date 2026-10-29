@@ -7,6 +7,7 @@ import { SelectField } from "@/components/ui/select-field";
 import { CombatStatus, ParticipantSourceType } from "@/lib/constants/battle";
 import type { DmParticipantActions } from "@/lib/hooks/battle";
 import { useConfirm } from "@/lib/hooks/common";
+import { useText } from "@/lib/i18n/use-text";
 import { cn } from "@/lib/utils";
 import { lairAbilities } from "@/lib/utils/battle/actions/lair";
 import { hasLegendaryActions, legendaryBadge } from "@/lib/utils/battle/actions/legendary-options";
@@ -44,6 +45,8 @@ export function DmParticipantRow({ participant, controlled, actions }: DmPartici
 
   const hasLair = !!participant.battleData.lair || lairAbilities(participant).length > 0;
 
+  const text = useText();
+
   const badge = legendaryBadge(participant);
 
   const canConditions = onConditions && conditionsEnabled;
@@ -54,7 +57,7 @@ export function DmParticipantRow({ participant, controlled, actions }: DmPartici
       <div className="min-w-0 flex-1">
         <div className="truncate text-sm font-medium text-[var(--ink)]">{participant.basicInfo.name}</div>
         {label && <div className="truncate text-xs text-[var(--hud-muted)]" data-testid="balance-scale">{label}</div>}
-        {badge && <div className="truncate text-xs text-[var(--hud-muted)]" data-testid="legendary-badge">{badge}</div>}
+        {badge && <div className="truncate text-xs text-[var(--hud-muted)]" data-testid="legendary-badge">{text(badge)}</div>}
         {unitControl?.isAssignable(participant) && (
           <label className="flex items-center gap-1.5 pt-1 text-xs text-[var(--hud-muted)]">
             Керує:

@@ -14,6 +14,7 @@ import { mazeFxVisible, mazeLogVisible } from "./view";
 
 import { API_ERRORS } from "@/lib/constants/api-errors";
 import { ParticipantSide } from "@/lib/constants/battle";
+import { textRef } from "@/lib/i18n/text-ref";
 import { inPlay } from "@/lib/utils/abilities/engine/core/participants";
 import { BattleRuleError } from "@/lib/utils/battle/store/errors";
 import type { BattleMapConfig, MazeConfig } from "@/types/battle";
@@ -49,9 +50,9 @@ export const mazeMode: MapModeDefinition<MazeConfig> = {
   },
   engine: {
     sees: ({ map, viewer, target }) => seesTarget(gridOf(map), viewer, target),
-    aimHiddenText: ({ map, caster, cell }) => (mazeAimHidden(map, caster, cell) ? MAZE_TEXTS.aimOutOfSight : null),
-    targetHiddenText: ({ map, caster, targets }) => (mazeTargetHidden(map, caster, targets) ? MAZE_TEXTS.targetOutOfSight : null),
-    meleeBlockedText: ({ map, attacker, target }) => (meleeWallBetween(gridOf(map), attacker, target) ? MAZE_TEXTS.wallBetween : null),
+    aimHiddenText: ({ map, caster, cell }) => (mazeAimHidden(map, caster, cell) ? textRef(MAZE_TEXTS.aimOutOfSight) : null),
+    targetHiddenText: ({ map, caster, targets }) => (mazeTargetHidden(map, caster, targets) ? textRef(MAZE_TEXTS.targetOutOfSight) : null),
+    meleeBlockedText: ({ map, attacker, target }) => (meleeWallBetween(gridOf(map), attacker, target) ? textRef(MAZE_TEXTS.wallBetween) : null),
     engages: ({ map, attacker, neighbour }) => inPlay(neighbour) && !meleeWallBetween(gridOf(map), attacker, neighbour),
     lineBlocked: ({ map, line }) => mazeLineBlocked(gridOf(map), line),
     moveZone: mazeMoveZone,

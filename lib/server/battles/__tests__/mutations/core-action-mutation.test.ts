@@ -4,8 +4,8 @@ import { context, goblin, hero } from "./fixtures";
 
 import { coreActionMutation } from "@/lib/server/battles/mutations/core-action/core-action-mutation";
 import { BattleAccessError } from "@/lib/utils/battle/store";
-import { DEFAULT_RULES } from "@/lib/utils/rules";
 import { REJECT } from "@/lib/utils/battle/store/reject";
+import { DEFAULT_RULES } from "@/lib/utils/rules";
 
 const on = (over: Parameters<typeof context>[0] = {}) => {
   const base = context(over);
@@ -50,9 +50,9 @@ describe("core-action mutation", () => {
 
     const body = { action: "readiedAttack" as const, participantId: "hero", targetId: "gob" };
 
-    expect(() => coreActionMutation(gobTurn, body)).toThrow(expect.objectContaining({ message: "Атаку не підготовлено" }));
+    expect(() => coreActionMutation(gobTurn, body)).toThrow(expect.objectContaining({ message: "battleActions.reject.readiedMissing" }));
     expect(() => coreActionMutation(gobTurn, { ...body, participantId: "gob", targetId: "hero" })).toThrow(BattleAccessError);
-    expect(() => coreActionMutation({ ...gobTurn, userId: "dm", isDM: true }, body)).toThrow(expect.objectContaining({ message: "Атаку не підготовлено" }));
+    expect(() => coreActionMutation({ ...gobTurn, userId: "dm", isDM: true }, body)).toThrow(expect.objectContaining({ message: "battleActions.reject.readiedMissing" }));
   });
 
   it("очікувана перевірка моралі блокує дії ядра у свій хід", () => {

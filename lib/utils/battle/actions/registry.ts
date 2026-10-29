@@ -1,3 +1,4 @@
+/* eslint-disable no-restricted-syntax -- TODO(i18n-part6 task 11): uk labels stay until their consumers read keys */
 export const CORE_ACTION_KEYS = ["dash", "disengage", "dodge", "help", "hide", "ready", "standUp", "grapple", "shove", "escape"] as const;
 
 export type CoreActionKey = (typeof CORE_ACTION_KEYS)[number];

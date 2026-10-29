@@ -3,12 +3,12 @@ import { describe, expect, it } from "vitest";
 import { ParticipantSide } from "@/lib/constants/battle";
 import { makeParticipant, resolved, seq } from "@/lib/utils/abilities/__tests__/fixtures";
 import type { Effect } from "@/lib/utils/abilities/schema";
+import { eventTextOf } from "@/lib/utils/battle/log/__tests__/event-text";
 import { castSpell } from "@/lib/utils/battle/spell";
 import { resolveSpellTargets } from "@/lib/utils/battle/spell/spell-targeting";
 import type { CastableSpell } from "@/lib/utils/battle/types/spell-process";
 import type { SpellDefinition } from "@/lib/utils/spells/model/schema";
 import type { BattleParticipant } from "@/types/battle";
-import { eventTextOf } from "@/lib/utils/battle/log/__tests__/event-text";
 
 const dmg = (damageType: string): Effect => ({ kind: "dealDamage", amount: { spellRoll: 100 }, damageType });
 

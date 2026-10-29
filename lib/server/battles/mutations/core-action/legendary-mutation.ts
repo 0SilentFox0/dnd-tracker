@@ -14,7 +14,7 @@ import type { LegendaryActionBody } from "@/lib/utils/battle/actions/schema";
 import { logFields } from "@/lib/utils/battle/log/lines";
 import { abilityRunContext } from "@/lib/utils/battle/pipeline/ability-use";
 import type { BattleMutationContext, MutationResult } from "@/lib/utils/battle/pipeline/run-battle-mutation";
-import { BattleAccessError, battleActionToEvent, BattleRuleError, systemEvent } from "@/lib/utils/battle/store";
+import { BattleAccessError, battleActionToEvent, BattleRuleError, ruleErrorOf, systemEvent } from "@/lib/utils/battle/store";
 import { applyAbilitySummons, type SummonDeps } from "@/lib/utils/battle/summon/ability-summons";
 import { assertAbilityTargets } from "@/lib/utils/battle/validation/ability-targets";
 import { abilityOnMap } from "@/lib/utils/battle/view";
@@ -26,7 +26,7 @@ const defaultDeps: SpellMutationDeps = { loadPool: getCachedSummonPool, loadSpel
 function assertLegendaryAllowed(ctx: BattleMutationContext, actor: BattleParticipant, cost: number): void {
   const blocker = legendaryBlocker(actor, ctx.participants[ctx.scene.turnIndex], cost);
 
-  if (blocker) throw new BattleRuleError("action_rejected", blocker);
+  if (blocker) throw ruleErrorOf("action_rejected", blocker);
 }
 
 const counter = (p: BattleParticipant) => `${p.battleData.legendary?.actionsLeft ?? 0}/${p.battleData.legendary?.actions ?? 0}`;
@@ -68,7 +68,7 @@ export function createLegendaryMutation(deps: SummonDeps & Partial<Pick<SpellMut
     if (lair) {
       const blocker = lairBlocker(actor, round, ability.key);
 
-      if (blocker) throw new BattleRuleError("action_rejected", blocker);
+      if (blocker) throw ruleErrorOf("action_rejected", blocker);
     } else assertLegendaryAllowed(ctx, actor, cost);
 
     const spend = (p: BattleParticipant) => lair ? spendLair(p, round, ability.key) : spendLegendary(p, cost);

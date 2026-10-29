@@ -6,7 +6,7 @@ import { useBattleScene } from "./useBattleScene";
 import { useSendCoreAction } from "./useCoreActions";
 
 import { useSpellsByIds } from "@/lib/hooks/spells";
-import { translateIssue } from "@/lib/i18n/translate-issue";
+import { formatText } from "@/lib/i18n/text-ref";
 import { useTranslator } from "@/lib/i18n/use-translator";
 import { isAttackable } from "@/lib/utils/abilities/engine/core/participants";
 import { cooldownLeft, withinCountLimits } from "@/lib/utils/abilities/engine/core/usage";
@@ -15,6 +15,7 @@ import { legendaryAbilities, legendaryBlocker, legendaryCostOf } from "@/lib/uti
 import { abilityMaxTargets } from "@/lib/utils/battle/validation/ability-targets";
 import { bonusTargetCandidates, needsBonusTarget } from "@/lib/utils/battle/view";
 import type { BattleParticipant, LegendaryOption } from "@/types/battle";
+import type { LogLine } from "@/types/text";
 
 export interface LegendaryChoice {
   id: string;
@@ -27,7 +28,7 @@ export interface LegendaryChoice {
   needsTarget: boolean;
   maxTargets: number;
   candidates: BattleParticipant[];
-  blocked: string | null;
+  blocked: LogLine | null;
 }
 
 export function useLegendaryAction(participant: BattleParticipant) {
@@ -68,7 +69,7 @@ export function useLegendaryAction(participant: BattleParticipant) {
       return { id: `ability:${a.key}`, kind: a.limits?.lair ? "lair" : "ability", label, cost, abilityKey: a.key, ...(perform?.kind === "spell" && { spellId: perform.spellId }), needsTarget: perform?.kind === "spell" ? false : perform?.kind === "attack" ? true : needsBonusTarget(a), maxTargets: perform?.kind === "attack" ? 1 : abilityMaxTargets(a), candidates: perform?.kind === "attack" ? enemies.filter(isAttackable) : bonusTargetCandidates(a, allies, enemies, participant), blocked };
     });
 
-    return [...attacks, ...abilities].map((c) => (c.blocked ? { ...c, blocked: translateIssue(t, { message: c.blocked }) } : c));
+    return [...attacks, ...abilities].map((c) => (c.blocked ? { ...c, blocked: formatText(t, c.blocked) } : c));
   }, [order, participant, current, spells.data, battle.currentRound, t]);
 
   const { send, isPending } = useSendCoreAction();

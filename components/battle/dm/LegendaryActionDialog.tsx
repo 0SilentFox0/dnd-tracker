@@ -8,6 +8,7 @@ import { TargetRadioList } from "@/components/hud/TargetRadioList";
 import { Button } from "@/components/ui/button";
 import { ResponsiveDialog } from "@/components/ui/responsive-dialog";
 import { useLegendaryAction } from "@/lib/hooks/battle";
+import { useText } from "@/lib/i18n/use-text";
 import { useSpellBook } from "@/lib/hooks/battle/useSpellBook";
 import { toggleAbilityTarget } from "@/lib/utils/battle/validation/ability-targets";
 import type { BattleParticipant, LegendaryOption } from "@/types/battle";
@@ -22,6 +23,8 @@ export function LegendaryActionDialog({ participant, onClose }: LegendaryActionD
 }
 
 function LegendaryActionBody({ participant, onClose }: { participant: BattleParticipant; onClose: () => void }) {
+  const text = useText();
+
   const { legendary, choices, run, isPending } = useLegendaryAction(participant);
 
   const [choiceId, setChoiceId] = useState<string | null>(null);
@@ -75,7 +78,7 @@ function LegendaryActionBody({ participant, onClose }: { participant: BattlePart
               disabled={!!c.blocked}
               title={c.label}
               meta={c.cost}
-              note={c.blocked && <span className="text-hud-danger">{c.blocked}</span>}
+              note={c.blocked && <span className="text-hud-danger">{text(c.blocked)}</span>}
               onClick={() => {
                 setChoiceId(c.id);
                 setTargets([]);

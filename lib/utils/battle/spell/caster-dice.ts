@@ -1,7 +1,9 @@
 import { ParticipantSourceType } from "@/lib/constants/battle";
+import { textRef } from "@/lib/i18n/text-ref";
 import { isFiveE } from "@/lib/utils/battle/attack/ability";
 import { type SpellDice, spellDice, spellDice5e } from "@/lib/utils/spells/model/dice";
 import type { BattleParticipant } from "@/types/battle";
+import type { LogLine } from "@/types/text";
 
 export const upcastSteps = (spellLevel: number, castLevel: number): number => Math.max(0, castLevel - spellLevel);
 
@@ -20,8 +22,8 @@ export function casterSpellDice(
 }
 
 /** «6к10»: кубики за рівнем героя і майстерністю школи, без плоских бонусів. */
-export function spellFormulaLabel(caster: BattleParticipant, spell: Parameters<typeof casterSpellDice>[1], castLevel?: number): string {
+export function spellFormulaLabel(caster: BattleParticipant, spell: Parameters<typeof casterSpellDice>[1], castLevel?: number): LogLine {
   const { count, sides } = casterSpellDice(caster, spell, castLevel);
 
-  return count === 0 ? "без кубиків" : `${count}к${sides}`;
+  return count === 0 ? textRef("battleActions.spell.noDice") : textRef("battleActions.spell.formula", { count, sides });
 }

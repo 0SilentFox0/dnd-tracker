@@ -586,7 +586,7 @@ it("AoE preview і server cast вражають невидимого учасн�
   expect(preview).toEqual(["invisible"]);
   expect(resolution).toMatchObject({ ok: true, targetIds: preview });
 
-  if (!resolution.ok) throw new Error(resolution.error);
+  if (!resolution.ok) throw new Error(textOf(resolution.error));
 
   const result = castSpell({ caster, spell, targetIds: resolution.targetIds, allParticipants: participants, currentRound: 1, battleId: "b", diceRolls: [4], map, rng: () => 0.5 });
 

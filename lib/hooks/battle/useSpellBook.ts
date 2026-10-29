@@ -12,6 +12,7 @@ export { useBonusSpells, useReactionSpells,useSpellBookPrefetch } from "./useBat
 import { useTranslations } from "next-intl";
 
 import { joinLines, textRef } from "@/lib/i18n/text-ref";
+import { useText } from "@/lib/i18n/use-text";
 import { reactionBlocker } from "@/lib/utils/battle/actions/reaction";
 import {
   buildSpellPick,
@@ -74,6 +75,8 @@ export function useSpellBook(caster: BattleParticipant | null, options: { reacti
   const scene = useBattleScene();
 
   const t = useTranslations("battleWizards");
+
+  const text = useText();
 
   const [finishLong, setFinishLong] = useState(false);
 
@@ -167,7 +170,7 @@ export function useSpellBook(caster: BattleParticipant | null, options: { reacti
   };
 
   const formulaOf = (s: BookSpell): string =>
-    caster ? spellFormulaLabel(caster, { dice: spellDefinition(s).dice, groupId: s.spellGroup?.id ?? null, level: s.level, dieSides: s.dieSides, upcastDice: s.upcastDice, fixedDice: s.fixedDice }, castLevelOf(s)) : "";
+    caster ? text(spellFormulaLabel(caster, { dice: spellDefinition(s).dice, groupId: s.spellGroup?.id ?? null, level: s.level, dieSides: s.dieSides, upcastDice: s.upcastDice, fixedDice: s.fixedDice }, castLevelOf(s))) : "";
 
   const grantsOf = (s: BookSpell) => grantsFor(caster, s.id);
 

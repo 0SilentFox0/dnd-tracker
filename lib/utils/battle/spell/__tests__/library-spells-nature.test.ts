@@ -3,6 +3,7 @@ import { describe, expect, it, vi } from "vitest";
 
 import { SPELLS } from "@/data/library/spells";
 import { ParticipantSide, ParticipantSourceType } from "@/lib/constants/battle";
+import { textOf } from "@/lib/i18n/test/text";
 import { context } from "@/lib/server/battles/__tests__/mutations/fixtures";
 import { createSpellMutation } from "@/lib/server/battles/mutations/spell/spell-mutation";
 import { makeParticipant, seq } from "@/lib/utils/abilities/__tests__/fixtures";
@@ -63,7 +64,7 @@ function cast(key: string, order: BattleParticipant[], targetIds: string[], opts
 
   const resolved = resolveSpellTargets(order, caster, def, def.definition.targeting, targetIds);
 
-  if (!resolved.ok) throw new Error(resolved.error);
+  if (!resolved.ok) throw new Error(textOf(resolved.error));
 
   return castSpell({
     caster,

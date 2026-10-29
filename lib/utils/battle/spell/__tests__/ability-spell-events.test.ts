@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 
 import { ParticipantSide } from "@/lib/constants/battle";
 import { makeParticipant, resolved, seq } from "@/lib/utils/abilities/__tests__/fixtures";
+import { eventTextOf } from "@/lib/utils/battle/log/__tests__/event-text";
 import { castSpell } from "@/lib/utils/battle/spell";
 import type { CastableSpell } from "@/lib/utils/battle/types/spell-process";
 
@@ -28,7 +29,7 @@ describe("spell ability events", () => {
     const r = cast(makeParticipant({ id: "c", abilities: [focus] }), [makeParticipant({ id: "e", side: ParticipantSide.ENEMY, hp: 50, maxHp: 50 })]);
 
     expect(r.casterUpdated.combatStats.morale).toBe(1);
-    expect(r.battleAction.resultText).toContain("📊");
+    expect(eventTextOf(r.battleAction)).toContain("📊");
   });
 
   it("смерть від заклинання дає kill: вбивця і союзники загиблого", () => {
@@ -56,7 +57,7 @@ describe("spell ability events", () => {
 
     expect(hpOf(r, "e")).toBe(0);
     expect(r.casterUpdated.combatStats.morale).toBe(1);
-    expect(r.battleAction.resultText).toContain("шкода: 3");
+    expect(eventTextOf(r.battleAction)).toContain("шкода: 3");
     expect(r.battleAction.actionDetails.totalDamage).toBe(3);
   });
 
@@ -69,7 +70,7 @@ describe("spell ability events", () => {
 
     expect(hpOf(r, "c")).toBe(0);
     expect(hpOf(r, "e")).toBe(45);
-    expect(r.battleAction.resultText).toContain("шкода: 5)");
+    expect(eventTextOf(r.battleAction)).toContain("шкода: 5)");
     expect(r.battleAction.actionDetails.totalDamage).toBe(5);
     expect(r.casterUpdated.combatStats.morale).toBe(0);
   });

@@ -34,7 +34,7 @@ import { resolveSpellTargets } from "@/lib/utils/battle/spell/spell-targeting";
 import { toCastableSpell } from "@/lib/utils/battle/spell/to-castable";
 import { spellZoneHazard } from "@/lib/utils/battle/spell/zone-hazard";
 import { systemEvent } from "@/lib/utils/battle/store";
-import { BattleAccessError, battleActionToEvent, BattleRuleError } from "@/lib/utils/battle/store";
+import { BattleAccessError, battleActionToEvent, BattleRuleError, ruleErrorOf } from "@/lib/utils/battle/store";
 import { REJECT } from "@/lib/utils/battle/store/reject";
 import { applyAbilitySummons, type SummonDeps } from "@/lib/utils/battle/summon/ability-summons";
 import { assertCanAct } from "@/lib/utils/battle/turn";
@@ -93,7 +93,7 @@ export function createSpellMutation(deps: SpellMutationDeps = defaultDeps, optio
       if (definition.cost === "reaction" && !free) {
         const blocker = reactionBlocker(caster);
 
-        if (blocker) throw new BattleRuleError("action_rejected", blocker);
+        if (blocker) throw ruleErrorOf("action_rejected", blocker);
       } else assertCanAct(ctx, caster.basicInfo.id, { skipMorale: free });
 
       const isBonus = definition.cost === "bonusAction";
@@ -113,7 +113,7 @@ export function createSpellMutation(deps: SpellMutationDeps = defaultDeps, optio
 
     const chosen = !free && !legendaryAbility && !grant && data.slotKey && isFiveE(caster) && spellNeedsSlot(spell.level) ? resolveChosenSlot(caster, spell.level, data.slotKey) : null;
 
-    if (chosen && !chosen.ok) throw new BattleRuleError("action_rejected", chosen.error);
+    if (chosen && !chosen.ok) throw ruleErrorOf("action_rejected", chosen.error);
 
     const castLevel = (grant ? data.castLevel : undefined) ?? grant?.castLevel ?? (chosen?.ok ? chosen.castLevel : undefined);
 
@@ -135,7 +135,7 @@ export function createSpellMutation(deps: SpellMutationDeps = defaultDeps, optio
       upcastTargets: definition.upcastTargets,
     });
 
-    if (!resolution.ok) throw new BattleRuleError("invalid_target", resolution.error);
+    if (!resolution.ok) throw ruleErrorOf("invalid_target", resolution.error);
 
     if (legendaryAbility?.condition && !evaluateCondition(legendaryAbility.condition, { owner: caster, event: { type: "action", actorId: caster.basicInfo.id, abilityKey: legendaryAbility.key, targetIds: resolution.targetIds }, participants: order, sourceId: legendaryAbility.source.id })) throw new BattleRuleError("action_rejected", API_ERRORS.BATTLE_ABILITY_CONDITION_UNMET);
 

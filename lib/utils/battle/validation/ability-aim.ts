@@ -1,7 +1,7 @@
 import { cellsOf } from "@/lib/utils/battle/grid/occupancy";
 import { aimInRange } from "@/lib/utils/battle/grid/template";
 import { modeAimHiddenText } from "@/lib/utils/battle/modes/engine";
-import { BattleRuleError } from "@/lib/utils/battle/store/errors";
+import { BattleRuleError, ruleErrorOf } from "@/lib/utils/battle/store/errors";
 import { REJECT } from "@/lib/utils/battle/store/reject";
 import type { ResolvedAbility } from "@/types/abilities";
 import type { BattleMapConfig, BattleParticipant, GridPoint } from "@/types/battle";
@@ -17,7 +17,7 @@ export function assertAbilityAim(ability: ResolvedAbility, map: BattleMapConfig 
 
   const hidden = modeAimHiddenText(map, actor, cell);
 
-  if (hidden) throw new BattleRuleError("invalid_target", hidden);
+  if (hidden) throw ruleErrorOf("invalid_target", hidden);
 
   return cell;
 }

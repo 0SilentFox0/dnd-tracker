@@ -1,8 +1,10 @@
+/* eslint-disable no-restricted-syntax -- TODO(i18n-part6 task 11): uk labels stay until their consumers read keys */
 import { EffectMarker } from "@/lib/constants/battle";
 import { type RulesEdition } from "@/lib/constants/rules";
-import type { TimedEffectInput } from "@/lib/utils/abilities/engine/effects/timed-effects";
+import { dynamicTextRef } from "@/lib/i18n/text-ref";
 import type { StaticEffect } from "@/lib/utils/abilities/schema";
 import { type Condition5eKey } from "@/lib/utils/abilities/schema/kinds";
+import type { LabeledEffectInput } from "@/lib/utils/battle/actions/effects";
 import type { ActiveEffect } from "@/types/battle";
 
 export { CONDITION_5E_KEYS, type Condition5eKey } from "@/lib/utils/abilities/schema/kinds";
@@ -181,7 +183,7 @@ export interface ConditionEffectOptions {
   source?: ActiveEffect["source"];
 }
 
-export function conditionEffectInput(key: Condition5eKey, opts: ConditionEffectOptions): TimedEffectInput {
+export function conditionEffectInput(key: Condition5eKey, opts: ConditionEffectOptions): LabeledEffectInput {
   const isExhaustion = key === "exhaustion";
 
   const { markers, flags } = expandCondition5e(key, { exhaustion: opts.exhaustion, level: isExhaustion ? (opts.levels ?? 1) : undefined });
@@ -190,6 +192,7 @@ export function conditionEffectInput(key: Condition5eKey, opts: ConditionEffectO
     timedKey: opts.timedKey,
     source: opts.source,
     name: CONDITION_5E_REGISTRY[key].label,
+    label: dynamicTextRef(`battleCommon.conditions.${key}.label`),
     type: "condition",
     rounds: opts.rounds,
     stackable: isExhaustion,

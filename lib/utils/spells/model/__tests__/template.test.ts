@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 
+import { textOf } from "@/lib/i18n/test/text";
 import { formToPayload, spellFormIssue, spellToForm } from "@/lib/utils/spells/model/form";
 import { targetingLabel } from "@/lib/utils/spells/model/labels";
 import { SpellTargetingSchema } from "@/lib/utils/spells/model/schema";
@@ -60,11 +61,11 @@ describe("шаблон, дальність і зона заклинання", ()
   });
 
   it("emanation has a Ukrainian label", () => {
-    expect(targetingLabel({ ...template, shape: "emanation" })).toBe("Еманація 15 фт");
+    expect(textOf(targetingLabel({ ...template, shape: "emanation" }))).toBe("Еманація 15 фт");
   });
 
   it("лейбли", () => {
-    expect(targetingLabel(template)).toBe("Конус 15 фт");
-    expect(targetingLabel({ ...template, shape: "circle", size: 10 })).toBe("Коло 10 фт");
+    expect(textOf(targetingLabel(template))).toBe("Конус 15 фт");
+    expect(textOf(targetingLabel({ ...template, shape: "circle", size: 10 }))).toBe("Коло 10 фт");
   });
 });

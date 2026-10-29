@@ -10,6 +10,7 @@ import { updateParticipant } from "@/lib/utils/abilities/engine/core/participant
 import { processAttack } from "@/lib/utils/battle/attack";
 import { runAttackPhase } from "@/lib/utils/battle/attack-phase/run-attack-phase";
 import { movementBudget } from "@/lib/utils/battle/grid";
+import { eventTextOf } from "@/lib/utils/battle/log/__tests__/event-text";
 import { effectiveMorale } from "@/lib/utils/battle/morale/effective-morale";
 import type { BattleMutationContext } from "@/lib/utils/battle/pipeline/run-battle-mutation";
 import { applyResistance } from "@/lib/utils/battle/resistance";
@@ -23,7 +24,6 @@ import { runAdvanceTurnLoop } from "@/lib/utils/battle/turn/run-advance-turn-loo
 import { processStartOfTurn } from "@/lib/utils/battle/turn/start-end";
 import type { CastableSpell } from "@/lib/utils/battle/types/spell-process";
 import type { BattleAttack, BattleParticipant } from "@/types/battle";
-import { eventTextOf } from "@/lib/utils/battle/log/__tests__/event-text";
 
 const spell = (key: string): CastableSpell => {
   const s = SPELLS.find((x) => x.key === key);

@@ -70,27 +70,27 @@ function resolveSpellAttack(state: SpellCastState, target: BattleParticipant, ra
 
   state.attacks.push({ participantId: id, roll, total, ac, hit, crit: hit && crit });
 
-  const note = mode !== "normal" ? ` (${mode === "advantage" ? "перевага" : "недолік"}: ${rolls.join("/")})` : "";
+  const note = mode !== "normal" ? textRef("battleActions.spell.rollNote", { mode, rolls: rolls.join("/") }) : "";
 
   const name = target.basicInfo.name;
 
-  const line = `🎯 ${name}: атака заклинанням ${roll}+${bonus}=${total} проти КЗ ${ac}${note}`;
+  const line = textRef("battleActions.spell.attack", { name, roll, bonus, total, ac, note });
 
   if (!hit) {
-    flow.messages.push(`${line} — промах`);
+    flow.messages.push(textRef("battleActions.spell.attackMiss", { line }));
 
     return SKIPPED;
   }
 
   if (!critDoublesDice(flow.ctx.rules, crit) || state.diceCount === 0) {
-    flow.messages.push(`${line} — ${crit ? "крит" : "влучання"}`);
+    flow.messages.push(textRef(crit ? "battleActions.spell.attackCrit" : "battleActions.spell.attackHit", { line }));
 
     return { skip: false, factor: 1, raceMultiplier };
   }
 
   const critExtra = rollGroups([{ count: state.diceCount, size: state.diceSides }], state.rng).reduce((a, b) => a + b, 0);
 
-  flow.messages.push(`${line} — крит — кубики подвоєно`);
+  flow.messages.push(textRef("battleActions.spell.attackCritDouble", { line }));
 
   return { skip: false, factor: 1, raceMultiplier, critExtra };
 }
@@ -125,7 +125,7 @@ export function resolveOutcome(state: SpellCastState, id: string, withSave: bool
   if (!target) return SKIPPED;
 
   if (participantImmuneToSpell(target, spell.id, flow.ps, state.actionModifiers[id])) {
-    flow.messages.push(`⛔ ${target.basicInfo.name}: імунітет до цього заклинання`);
+    flow.messages.push(textRef("battleActions.spell.immune", { target: target.basicInfo.name }));
 
     return SKIPPED;
   }
@@ -133,7 +133,7 @@ export function resolveOutcome(state: SpellCastState, id: string, withSave: bool
   const race = raceEffect(def.raceModifiers, target);
 
   if (race.immune) {
-    flow.messages.push(`⛔ ${target.basicInfo.name}: імунітет раси до ${spell.name}`);
+    flow.messages.push(textRef("battleActions.spell.raceImmune", { target: target.basicInfo.name, spell: spell.name }));
 
     return SKIPPED;
   }
@@ -168,13 +168,17 @@ export function resolveOutcome(state: SpellCastState, id: string, withSave: bool
     if (evasive) factor = evasionFactor(success, true);
     else if (success) factor = onSuccess === "half" ? 0.5 : 0;
 
-    const extra = (bonus ? `${bonus < 0 ? "-" : "+"}${Math.abs(bonus)}` : "");
+    const extra = bonus ? `${bonus < 0 ? "-" : "+"}${Math.abs(bonus)}` : "";
 
-    const note = r.autoFail ? " (автопровал)" : r.mode !== "normal" ? ` (${r.mode === "advantage" ? "перевага" : "недолік"}: ${r.rolls.join("/")})` : "";
+    const note = r.mode !== "normal" ? textRef("battleActions.spell.rollNote", { mode: r.mode, rolls: r.rolls.join("/") }) : "";
 
-    flow.messages.push(r.autoFail
-      ? `🎲 ${target.basicInfo.name}: рятівний кидок проти СК ${dc} — автопровал`
-      : `🎲 ${target.basicInfo.name}: рятівний кидок ${roll}${mod < 0 ? "-" : "+"}${Math.abs(mod)}${extra}=${total} проти СК ${dc}${note} — ${success ? (factor > 0 ? "успіх, половина шкоди" : "успіх") : "провал"}${evasive ? " · ухилення" : ""}`);
+    const outcome = success ? (factor > 0 ? "half" : "success") : "fail";
+
+    flow.messages.push(
+      r.autoFail
+        ? textRef("battleActions.spell.saveAutoFail", { target: target.basicInfo.name, dc })
+        : textRef("battleActions.spell.save", { target: target.basicInfo.name, roll, mod: `${mod < 0 ? "-" : "+"}${Math.abs(mod)}`, extra, total, dc, note, outcome, evasive: evasive ? "yes" : "no" }),
+    );
 
     if (resisted.message) flow.messages.push(resisted.message);
 

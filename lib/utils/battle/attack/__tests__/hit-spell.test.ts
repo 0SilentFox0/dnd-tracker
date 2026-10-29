@@ -4,6 +4,7 @@ import { SPELLS } from "@/data/library/spells";
 import { ParticipantSide } from "@/lib/constants/battle";
 import { makeParticipant, resolved, seq } from "@/lib/utils/abilities/__tests__/fixtures";
 import { castHitSpell } from "@/lib/utils/battle/attack/process/hit-spell";
+import { textsOf } from "@/lib/utils/battle/log/__tests__/event-text";
 import type { CastableSpell } from "@/lib/utils/battle/types/spell-process";
 
 const spellOf = (key: string): CastableSpell => {
@@ -40,7 +41,7 @@ describe("castHitSpell", () => {
     const r = run(["frailty"], ["frailty"], victim());
 
     expect(effectNames(r)).toContain("Немічність");
-    expect(r.messages[0]).toContain("Немічність");
+    expect(textsOf(r.messages)[0]).toContain("Немічність");
   });
 
   it("рятівний кидок цілі: успіх — без ефекту, провал — ефект", () => {
@@ -54,7 +55,7 @@ describe("castHitSpell", () => {
     const r = run(["frailty"], ["frailty"], victim([immune]));
 
     expect(effectNames(r)).toEqual([]);
-    expect(r.messages.join(" ")).toContain("імунітет");
+    expect(textsOf(r.messages).join(" ")).toContain("імунітет");
   });
 
   it("заклинання з кубиками кидає їх сервером", () => {

@@ -1,6 +1,7 @@
 import { DEFAULT_AREA_TARGETS } from "@/lib/constants/abilities";
 import { API_ERRORS } from "@/lib/constants/api-errors";
 import { SKILL_AREA_RADIUS_FEET } from "@/lib/constants/battle";
+import { textRef } from "@/lib/i18n/text-ref";
 import { collectModifiers } from "@/lib/utils/abilities/engine/core/collect-modifiers";
 import { findParticipant, isActive, isAirborne, isTargetable } from "@/lib/utils/abilities/engine/core/participants";
 import type { FlagEffect } from "@/lib/utils/abilities/schema";
@@ -15,6 +16,7 @@ import { isReserved } from "@/lib/utils/battle/participant/reserve";
 import { upcastSteps } from "@/lib/utils/battle/spell/caster-dice";
 import type { SpellTargeting as SpellTargetingDef } from "@/lib/utils/spells/model/schema";
 import type { BattleMapConfig, BattleParticipant, GridPoint, SpellTemplate } from "@/types/battle";
+import type { LogLine } from "@/types/text";
 
 export interface SpellRef {
   id: string;
@@ -33,7 +35,7 @@ const fitsSpell = (f: TargetingFlag, spell: SpellRef) =>
   (f.maxLevel === undefined || spell.level <= f.maxLevel) && (!f.spellIds || f.spellIds.includes(spell.id)) && (!f.school || f.school === spell.groupId);
 
 /** Найсильніше розширення заклинання разом із назвою вміння/артефакту, що його дало. */
-export function spellWideningOf(ps: BattleParticipant[], casterId: string, spell: SpellRef): SkillSpellTargeting & { source?: string } {
+export function spellWideningOf(ps: BattleParticipant[], casterId: string, spell: SpellRef): SkillSpellTargeting & { source?: LogLine } {
   const found = collectModifiers(ps, casterId, { flag: "spellTargeting" }).entries.flatMap((e) =>
     e.flag?.flag === "spellTargeting" && fitsSpell(e.flag, spell) ? [{ flag: e.flag, source: e.source ?? e.label }] : [],
   );
@@ -117,7 +119,7 @@ export function validateSpellTargetCount(targeting: SkillSpellTargeting, count: 
   return targeting.mode === "all" || count <= targeting.maxTargets;
 }
 
-export type SpellTargetResolution = { ok: true; targetIds: string[]; cells?: string[]; centre?: GridPoint } | { ok: false; error: string };
+export type SpellTargetResolution = { ok: true; targetIds: string[]; cells?: string[]; centre?: GridPoint } | { ok: false; error: LogLine };
 
 export interface SpellMapContext {
   map: BattleMapConfig | null;
@@ -128,7 +130,7 @@ export interface SpellMapContext {
 
 const SIGHTED_KINDS: ReadonlySet<SpellTargetingDef["kind"]> = new Set(["ally", "enemy", "allyDead", "area", "template"]);
 
-const fail = (error: string): SpellTargetResolution => ({ ok: false, error });
+const fail = (error: LogLine): SpellTargetResolution => ({ ok: false, error });
 
 type TemplateTargeting = Extract<SpellTargetingDef, { kind: "template" }>;
 
@@ -141,11 +143,11 @@ function resolveTemplate(ps: BattleParticipant[], caster: BattleParticipant, tar
     return { ok: true, targetIds: targets.map((p) => p.basicInfo.id), cells, centre };
   }
 
-  if (!aim) return fail("Оберіть точку на карті");
+  if (!aim) return fail(textRef("battleActions.spell.target.pickPoint"));
 
-  if (!inBounds(map, aim)) return fail("Точка поза картою");
+  if (!inBounds(map, aim)) return fail(textRef("battleActions.spell.target.pointOutOfMap"));
 
-  if (!templateAimAllowed(cellsOf(caster), targeting, aim, targeting.range)) return fail("Точка поза дальністю заклинання");
+  if (!templateAimAllowed(cellsOf(caster), targeting, aim, targeting.range)) return fail(textRef("battleActions.spell.target.pointOutOfRange"));
 
   const hidden = modeAimHiddenText(map, caster, aim);
 
@@ -155,7 +157,7 @@ function resolveTemplate(ps: BattleParticipant[], caster: BattleParticipant, tar
 
   // конус/лінія у власну клітинку не мають напрямку — інакше слот згорів би без зони
 
-  if (cells.length === 0) return fail("Оберіть напрямок");
+  if (cells.length === 0) return fail(textRef("battleActions.spell.target.pickDirection"));
 
   // промах повз усіх — теж каст: слот і дія витрачаються, FX летить у точку
 
@@ -163,11 +165,11 @@ function resolveTemplate(ps: BattleParticipant[], caster: BattleParticipant, tar
 }
 
 function resolveSkillRadius(scene: AimScene, radius: SkillRadius, aim: { cell?: GridPoint; range?: number }): SpellTargetResolution {
-  if (!aim.cell) return fail("Оберіть точку на карті");
+  if (!aim.cell) return fail(textRef("battleActions.spell.target.pickPoint"));
 
-  if (!inBounds(scene.map, aim.cell)) return fail("Точка поза картою");
+  if (!inBounds(scene.map, aim.cell)) return fail(textRef("battleActions.spell.target.pointOutOfMap"));
 
-  if (!aimInRange(cellsOf(scene.caster), aim.cell, aim.range)) return fail("Точка поза дальністю заклинання");
+  if (!aimInRange(cellsOf(scene.caster), aim.cell, aim.range)) return fail(textRef("battleActions.spell.target.pointOutOfRange"));
 
   const hidden = modeAimHiddenText(scene.map, scene.caster, aim.cell);
 
@@ -206,7 +208,7 @@ function resolveRaw(
     if (skill.mode === "all") {
       const all = modeSightedTargets(map, ps, caster, skillAllTargets(ps, caster, targeting.kind));
 
-      return all.length > 0 ? { ok: true, targetIds: all } : fail("Немає цілей заклинання");
+      return all.length > 0 ? { ok: true, targetIds: all } : fail(textRef("battleActions.spell.target.noTargets"));
     }
 
     if (map && skill.mode === "area") {
@@ -218,13 +220,13 @@ function resolveRaw(
 
   const chosen = [...new Set(chosenIds)].map((id) => findParticipant(ps, id));
 
-  if (chosen.some((p) => !p)) return fail("Ціль заклинання відсутня в бою");
+  if (chosen.some((p) => !p)) return fail(textRef("battleActions.spell.target.targetMissing"));
 
   const picked = chosen as BattleParticipant[];
 
-  if (picked.some(isAirborne)) return fail(API_ERRORS.TARGET_AIRBORNE);
+  if (picked.some(isAirborne)) return fail(textRef(API_ERRORS.TARGET_AIRBORNE));
 
-  if (map && "range" in targeting && outOfRange(caster, picked, targeting.range)) return fail("Ціль поза дальністю заклинання");
+  if (map && "range" in targeting && outOfRange(caster, picked, targeting.range)) return fail(textRef("battleActions.spell.target.targetOutOfRange"));
 
   const targetHidden = map && SIGHTED_KINDS.has(targeting.kind) ? modeTargetHiddenText(map, caster, picked) : null;
 
@@ -248,12 +250,12 @@ function resolveRaw(
     case "allAlliesDead": {
       const fallen = ids((p) => !isActive(p) && p.basicInfo.side === side);
 
-      return fallen.length > 0 ? { ok: true, targetIds: fallen } : fail("Немає полеглих союзників");
+      return fallen.length > 0 ? { ok: true, targetIds: fallen } : fail(textRef("battleActions.spell.target.noFallen"));
     }
     case "allyDead": {
-      if (picked.length !== 1) return fail("Оберіть одного полеглого союзника");
+      if (picked.length !== 1) return fail(textRef("battleActions.spell.target.pickOneFallen"));
 
-      return picked[0].basicInfo.side === side && !isActive(picked[0]) ? { ok: true, targetIds: [picked[0].basicInfo.id] } : fail("Ціль має бути полеглим союзником");
+      return picked[0].basicInfo.side === side && !isActive(picked[0]) ? { ok: true, targetIds: [picked[0].basicInfo.id] } : fail(textRef("battleActions.spell.target.mustBeFallen"));
     }
     case "ally":
     case "enemy":
@@ -263,14 +265,14 @@ function resolveRaw(
 
       const wanted = multi ? targeting.side : targeting.kind;
 
-      if (picked.length === 0) return fail("Оберіть ціль заклинання");
+      if (picked.length === 0) return fail(textRef("battleActions.spell.target.pickTarget"));
 
       if (picked.some((p) => !(isActive(p) || (wanted === "ally" && isDying(p))) || (p.basicInfo.side === side) !== (wanted === "ally"))) {
-        return fail(wanted === "ally" ? "Ціль має бути живим союзником" : "Ціль має бути живим ворогом");
+        return fail(textRef(wanted === "ally" ? "battleActions.spell.target.mustBeAlly" : "battleActions.spell.target.mustBeEnemy"));
       }
 
       if (map && targeting.kind === "area" && targeting.chain) {
-        if (picked.length !== 1) return fail("Оберіть одну першу ціль ланцюга");
+        if (picked.length !== 1) return fail(textRef("battleActions.spell.target.pickChainFirst"));
 
         return { ok: true, targetIds: spellChain({ participants: ps, caster }, targeting, picked[0]).map((p) => p.basicInfo.id) };
       }
@@ -279,7 +281,7 @@ function resolveRaw(
 
       const skill = multi ? base : { ...base, maxTargets: base.maxTargets + upcastExtra(caster, spell, mapCtx) };
 
-      if (!validateSpellTargetCount(skill, picked.length)) return fail("Забагато цілей");
+      if (!validateSpellTargetCount(skill, picked.length)) return fail(textRef("battleActions.spell.target.tooMany"));
 
       return { ok: true, targetIds: picked.map((p) => p.basicInfo.id) };
     }
@@ -319,5 +321,5 @@ export function resolveSpellTargets(
 
   if (targetIds.length === res.targetIds.length) return res;
 
-  return targetIds.length > 0 ? { ...res, targetIds } : fail("Не можна накладати ворожі чари на того, хто зачарував");
+  return targetIds.length > 0 ? { ...res, targetIds } : fail(textRef("battleActions.spell.target.charmerHostile"));
 }

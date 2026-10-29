@@ -1,3 +1,5 @@
+import { actionReason } from "./reasons";
+
 import { AttackType, EffectMarker } from "@/lib/constants/battle";
 import { isActive } from "@/lib/utils/abilities/engine/core/participants";
 import { getDisabledAttackKinds } from "@/lib/utils/battle/attack/disabled-attacks";
@@ -5,11 +7,12 @@ import { attackKindOf } from "@/lib/utils/battle/common/attack-kind";
 import { hasCondition } from "@/lib/utils/battle/conditions/query";
 import { hasEffectMarker } from "@/lib/utils/battle/participant/state";
 import type { BattleAttack, BattleParticipant } from "@/types/battle";
+import type { LogLine } from "@/types/text";
 
-export function reactionBlocker(p: BattleParticipant): string | null {
-  if (p.actionFlags.hasUsedReaction) return "Реакцію вже витрачено";
+export function reactionBlocker(p: BattleParticipant): LogLine | null {
+  if (p.actionFlags.hasUsedReaction) return actionReason("reactionUsed");
 
-  return !isActive(p) || hasCondition(p, "incapacitated") || hasEffectMarker(p, EffectMarker.NO_REACTION) ? "Недієздатний учасник не може реагувати" : null;
+  return !isActive(p) || hasCondition(p, "incapacitated") || hasEffectMarker(p, EffectMarker.NO_REACTION) ? actionReason("cannotReact") : null;
 }
 
 export const canReact = (p: BattleParticipant) => reactionBlocker(p) === null;

@@ -1700,7 +1700,7 @@ async function mazeCheck() {
 
   const darkNext = await call("next-turn", NEXT);
 
-  tcheck("Лабіринт: темрява блокує атаку (422), next-turn пропускає хід", darkAtk.status === 422 && JSON.stringify(darkAtk.body).includes(MAZE_TEXTS.dark) && darkNext.status === 200 && logText(darkNext.log).includes(MAZE_TEXTS.darkSkip), `атака ${darkAtk.status} ${JSON.stringify(darkAtk.body).slice(0, 100)}; next-turn ${darkNext.status} ${logText(darkNext.log).slice(0, 100)}`);
+  tcheck("Лабіринт: темрява блокує атаку (422), next-turn пропускає хід", darkAtk.status === 422 && JSON.stringify(darkAtk.body).includes(MAZE_TEXTS.dark) && darkNext.status === 200 && logText(darkNext.log).includes("Темрява — хід пропущено"), `атака ${darkAtk.status} ${JSON.stringify(darkAtk.body).slice(0, 100)}; next-turn ${darkNext.status} ${logText(darkNext.log).slice(0, 100)}`);
 
   const darkOff = await call("maze", MAZE, { op: "dark", on: false });
 

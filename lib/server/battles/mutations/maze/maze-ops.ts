@@ -25,6 +25,7 @@ import type { BattleMutationContext, MutationResult } from "@/lib/utils/battle/p
 import { dmEvent, type NewBattleEvent, rejectAction } from "@/lib/utils/battle/store";
 import type { MazeActionData } from "@/types/api";
 import type { BattleMapConfig, BattleParticipant, GridPoint, MazeConfig } from "@/types/battle";
+import type { LogLine } from "@/types/text";
 
 export interface MazeEnv {
   map: BattleMapConfig;
@@ -50,7 +51,7 @@ function canonicalCell(key: string, grid: GridSize): string {
 }
 
 // подія потрібна, щоб зміну лабіринту можна було відкотити (знімок пишеться лише з подією)
-export function mazeOpEvent(round: number, text: string, kind: "op" | "reshuffle"): NewBattleEvent {
+export function mazeOpEvent(round: number, text: LogLine, kind: "op" | "reshuffle"): NewBattleEvent {
   const event = dmEvent(round, text);
 
   return { ...event, details: { ...event.details, actionDetails: { mazeEvent: kind } } };
@@ -60,7 +61,7 @@ interface FinishArgs {
   ctx: BattleMutationContext;
   map: BattleMapConfig;
   maze: MazeConfig;
-  text: string;
+  text: LogLine;
   kind?: "op" | "reshuffle";
   extra?: Partial<MutationResult>;
 }

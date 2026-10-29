@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 
+import { textOf } from "@/lib/i18n/test/text";
 import { makeEffect, makeParticipant, resolved } from "@/lib/utils/abilities/__tests__/fixtures";
 import { hasLegendaryActions, legendaryAbilities, legendaryBadge, legendaryBlocker, legendaryCostOf, spendLegendary } from "@/lib/utils/battle/actions/legendary-options";
 import { resetTurnState } from "@/lib/utils/battle/turn/turn-state";
@@ -24,15 +25,15 @@ describe("legendary options", () => {
   });
 
   it("блокування: немає дій, свій хід, недієздатний, мертвий, резерв, бюджет", () => {
-    expect(legendaryBlocker(other, undefined)).toBe("У учасника немає легендарних дій");
-    expect(legendaryBlocker(dragon(), dragon())).toBe("Легендарна дія — лише поза своїм ходом");
+    expect(textOf(legendaryBlocker(other, undefined)!)).toBe("У учасника немає легендарних дій");
+    expect(textOf(legendaryBlocker(dragon(), dragon())!)).toBe("Легендарна дія — лише поза своїм ходом");
 
     const stunned = { ...dragon(), battleData: { ...dragon().battleData, activeEffects: [makeEffect("s", { type: "condition", effects: [{ type: "incapacitated", value: 1 }] })] } };
 
-    expect(legendaryBlocker(stunned, other)).toBe("Недієздатний учасник не може діяти");
-    expect(legendaryBlocker({ ...dragon(), combatStats: { ...dragon().combatStats, currentHp: 0, status: "dead" } }, other)).toBe("Недієздатний учасник не може діяти");
-    expect(legendaryBlocker({ ...dragon(), battleData: { ...dragon().battleData, reserved: true } }, other)).toBe("Недієздатний учасник не може діяти");
-    expect(legendaryBlocker(dragon(1), other, 2)).toBe("Не вистачає легендарних дій (1 з 2)");
+    expect(textOf(legendaryBlocker(stunned, other)!)).toBe("Недієздатний учасник не може діяти");
+    expect(textOf(legendaryBlocker({ ...dragon(), combatStats: { ...dragon().combatStats, currentHp: 0, status: "dead" } }, other)!)).toBe("Недієздатний учасник не може діяти");
+    expect(textOf(legendaryBlocker({ ...dragon(), battleData: { ...dragon().battleData, reserved: true } }, other)!)).toBe("Недієздатний учасник не може діяти");
+    expect(textOf(legendaryBlocker(dragon(1), other, 2)!)).toBe("Не вистачає легендарних дій (1 з 2)");
     expect(legendaryBlocker(dragon(), other, 2)).toBeNull();
   });
 
@@ -40,7 +41,7 @@ describe("legendary options", () => {
     const spent = spendLegendary(dragon(), 2);
 
     expect(spent.battleData.legendary?.actionsLeft).toBe(1);
-    expect(legendaryBadge(spent)).toBe("Леґ. дії 1/3 · Леґ. опір 1");
+    expect(textOf(legendaryBadge(spent)!)).toBe("Леґ. дії 1/3 · Леґ. опір 1");
     expect(legendaryBadge(other)).toBeNull();
     expect(resetTurnState(spent).legendary).toEqual({ actions: 3, actionsLeft: 3, resistLeft: 1 });
     expect(resetTurnState(other)).not.toHaveProperty("legendary");

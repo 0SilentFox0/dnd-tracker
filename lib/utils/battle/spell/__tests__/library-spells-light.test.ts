@@ -2,18 +2,19 @@ import { describe, expect, it } from "vitest";
 
 import { SPELLS } from "@/data/library/spells";
 import { AttackType, ParticipantSide, ParticipantSourceType } from "@/lib/constants/battle";
+import { textOf } from "@/lib/i18n/test/text";
 import { seq } from "@/lib/utils/abilities/__tests__/fixtures";
 import { findParticipant } from "@/lib/utils/abilities/engine/core/participants";
 import { createMockParticipant } from "@/lib/utils/battle/__tests__/fixtures/mock-participant";
 import { processAttack } from "@/lib/utils/battle/attack/process";
 import { movementBudget } from "@/lib/utils/battle/grid";
+import { eventTextOf } from "@/lib/utils/battle/log/__tests__/event-text";
 import { castSpell } from "@/lib/utils/battle/spell";
 import { resolveSpellTargets } from "@/lib/utils/battle/spell/spell-targeting";
 import type { BattleSceneState } from "@/lib/utils/battle/store";
 import { advanceTurn } from "@/lib/utils/battle/turn";
 import type { CastableSpell } from "@/lib/utils/battle/types/spell-process";
 import type { BattleAttack, BattleParticipant } from "@/types/battle";
-import { eventTextOf } from "@/lib/utils/battle/log/__tests__/event-text";
 
 const spellOf = (key: string): CastableSpell => {
   const s = SPELLS.find((x) => x.key === key);
@@ -52,7 +53,7 @@ function cast(key: string, caster: BattleParticipant, targetIds: string[], all: 
 
   const resolved = resolveSpellTargets(all, caster, spell, spell.definition.targeting, targetIds);
 
-  if (!resolved.ok) throw new Error(resolved.error);
+  if (!resolved.ok) throw new Error(textOf(resolved.error));
 
   return castSpell({ caster, spell, targetIds: resolved.targetIds, allParticipants: all, currentRound: o.round ?? 1, battleId: "b", diceRolls: o.dice ?? [], saveRolls: o.saveRolls, rng: seq(0.5) });
 }

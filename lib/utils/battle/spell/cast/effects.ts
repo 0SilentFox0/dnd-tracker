@@ -1,3 +1,4 @@
+import { textRef } from "@/lib/i18n/text-ref";
 import { resolveAmount } from "@/lib/utils/abilities/engine/core/amount";
 import { findFlags } from "@/lib/utils/abilities/engine/core/collect-modifiers";
 import { applyRawDamage, applyRawHeal } from "@/lib/utils/abilities/engine/effects/hp";
@@ -39,7 +40,7 @@ function absorbSpellDamage(state: SpellCastState, id: string, damage: number): v
     if (healed <= 0) continue;
 
     put(flow, participant);
-    flow.messages.push(`💚 ${target.basicInfo.name}: поглинає ${healed} HP (${spell.name})`);
+    flow.messages.push(textRef("battleActions.spell.absorb", { target: target.basicInfo.name, healed, spell: spell.name }));
   }
 }
 

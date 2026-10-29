@@ -1,7 +1,7 @@
 import { CombatStatus } from "@/lib/constants/battle";
 import { textRef } from "@/lib/i18n/text-ref";
 import { isDying } from "@/lib/utils/abilities/engine/core/participants";
-import { upsertTimedEffect } from "@/lib/utils/abilities/engine/effects/timed-effects";
+import { upsertLabeled } from "@/lib/utils/battle/actions/effects";
 import { conditionEffectInput, PERMANENT_ROUNDS } from "@/lib/utils/battle/conditions/registry";
 import { rollDie } from "@/lib/utils/common/dice";
 import type { Ruleset } from "@/lib/utils/rules";
@@ -29,7 +29,7 @@ export function clearDeathSaves(p: BattleParticipant): BattleParticipant {
 }
 
 export function startDying(p: BattleParticipant, rules: Ruleset): BattleParticipant {
-  const down = upsertTimedEffect(p, conditionEffectInput("unconscious", { timedKey: DEATH_SAVES_TIMED_KEY, rounds: PERMANENT_ROUNDS, permanent: true, exhaustion: rules.conditions.exhaustion }), 0);
+  const down = upsertLabeled(p, conditionEffectInput("unconscious", { timedKey: DEATH_SAVES_TIMED_KEY, rounds: PERMANENT_ROUNDS, permanent: true, exhaustion: rules.conditions.exhaustion }), 0);
 
   return {
     ...down,

@@ -5,12 +5,14 @@ import { describe, expect, it, vi } from "vitest";
 import { context, goblin, hero } from "./fixtures";
 
 import { API_ERRORS } from "@/lib/constants/api-errors";
+import { textOf } from "@/lib/i18n/test/text";
 import { attackBodySchema } from "@/lib/server/battles/mutations/attack/attack-mutation";
 import { moveMutation } from "@/lib/server/battles/mutations/move/move-mutation";
 import { nextTurnMutation } from "@/lib/server/battles/mutations/next-turn/next-turn-mutation";
 import { spellSchema } from "@/lib/server/battles/mutations/spell/cast-spell-schema";
 import { getBattleOperation } from "@/lib/server/battles/operations";
 import { runBattleMutation } from "@/lib/server/battles/run-mutation";
+import { eventTextOf } from "@/lib/utils/battle/log/__tests__/event-text";
 import { at, mazeMap, withMap } from "@/lib/utils/battle/modes/maze/__tests__/fixtures";
 import { MAZE_TEXTS } from "@/lib/utils/battle/modes/maze/texts";
 import type { BattleMutationContext, PipelineDeps, RunBattleMutationOptions } from "@/lib/utils/battle/pipeline/run-battle-mutation";
@@ -84,12 +86,12 @@ describe("темрява в лабіринті", () => {
   it("next-turn у темряві пише «Темрява — хід пропущено» для того, чий хід завершився", () => {
     const out = nextTurnMutation(ctx(mapOf()));
 
-    const skip = out.events.find((e) => e.resultText === MAZE_TEXTS.darkSkip);
+    const skip = out.events.find((e) => eventTextOf(e) === textOf(MAZE_TEXTS.darkSkip));
 
     expect(skip).toMatchObject({ actorId: "hero" });
     expect(out.events[0]).toBe(skip);
 
-    expect(nextTurnMutation(ctx(mapOf({ dark: false }))).events.some((e) => e.resultText === MAZE_TEXTS.darkSkip)).toBe(false);
+    expect(nextTurnMutation(ctx(mapOf({ dark: false }))).events.some((e) => eventTextOf(e) === textOf(MAZE_TEXTS.darkSkip))).toBe(false);
   });
 });
 

@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 
 import { ParticipantSide } from "@/lib/constants/battle";
+import { textRef } from "@/lib/i18n/text-ref";
 import { makeParticipant, resolved } from "@/lib/utils/abilities/__tests__/fixtures";
 import { resolveTargetIds } from "@/lib/utils/abilities/engine/core/targets";
 import type { Effect } from "@/lib/utils/abilities/schema";
@@ -38,8 +39,8 @@ const resolve = (targeting: SpellTargeting, chosen: string[], ctx: SpellMapConte
 describe("заклинання в лабіринті", () => {
   it("одиночна ціль: у полі зору — ок, позаду чи за стіною — відмова", () => {
     expect(resolve(bolt, ["e1"], { map: mapOf() })).toEqual({ ok: true, targetIds: ["e1"] });
-    expect(resolve(bolt, ["e2"], { map: mapOf() })).toEqual({ ok: false, error: "Ціль поза полем зору" });
-    expect(resolve(bolt, ["e1"], { map: mapOf({ walls: ["6:5:e"] }) })).toEqual({ ok: false, error: "Ціль поза полем зору" });
+    expect(resolve(bolt, ["e2"], { map: mapOf() })).toEqual({ ok: false, error: textRef("battleActions.maze.targetOutOfSight") });
+    expect(resolve(bolt, ["e1"], { map: mapOf({ walls: ["6:5:e"] }) })).toEqual({ ok: false, error: textRef("battleActions.maze.targetOutOfSight") });
   });
 
   it("на себе й без лабіринту — як раніше", () => {
@@ -51,7 +52,7 @@ describe("заклинання в лабіринті", () => {
   });
 
   it("шаблон: приціл поза полем зору — відмова; у полі зору — зона не зупиняється тонкими стінами", () => {
-    expect(resolve(fireball, [], { map: mapOf(), targetCell: { x: 2, y: 5 } })).toEqual({ ok: false, error: "Точка поза полем зору" });
+    expect(resolve(fireball, [], { map: mapOf(), targetCell: { x: 2, y: 5 } })).toEqual({ ok: false, error: textRef("battleActions.maze.aimOutOfSight") });
 
     const r = resolve(fireball, [], { map: mapOf({ walls: ["8:5:e"] }), targetCell: { x: 8, y: 5 } });
 
@@ -62,7 +63,7 @@ describe("заклинання в лабіринті", () => {
   it("розширення вмінням (радіус): приціл поза полем зору — відмова", () => {
     const wide = at("c", { x: 5, y: 5 }, ParticipantSide.ALLY, { facing: "e", effects: [{ kind: "flag", flag: "spellTargeting", mode: "area", maxTargets: 3 }] });
 
-    expect(resolve(bolt, [], { map: mapOf(), targetCell: { x: 2, y: 5 } }, [wide, ahead, behind], wide)).toEqual({ ok: false, error: "Точка поза полем зору" });
+    expect(resolve(bolt, [], { map: mapOf(), targetCell: { x: 2, y: 5 } }, [wide, ahead, behind], wide)).toEqual({ ok: false, error: textRef("battleActions.maze.aimOutOfSight") });
     expect(resolve(bolt, [], { map: mapOf(), targetCell: { x: 8, y: 5 } }, [wide, ahead, behind], wide)).toMatchObject({ ok: true, targetIds: ["e1"] });
   });
 
@@ -74,7 +75,7 @@ describe("заклинання в лабіринті", () => {
     const map = mapOf({ walls: ["8:5:e"] });
 
     expect(resolve(chain, ["e1"], { map }, [caster, ahead, next])).toEqual({ ok: true, targetIds: ["e1", "e3"] });
-    expect(resolve(chain, ["e2"], { map }, [caster, behind, next])).toEqual({ ok: false, error: "Ціль поза полем зору" });
+    expect(resolve(chain, ["e2"], { map }, [caster, behind, next])).toEqual({ ok: false, error: textRef("battleActions.maze.targetOutOfSight") });
   });
 });
 
@@ -87,7 +88,7 @@ describe("spellTargetInRange у лабіринті", () => {
 
 describe("ціль без дальності", () => {
   it("теж лише в полі зору", () => {
-    expect(resolve({ kind: "enemy" }, ["e2"], { map: mapOf() })).toEqual({ ok: false, error: "Ціль поза полем зору" });
+    expect(resolve({ kind: "enemy" }, ["e2"], { map: mapOf() })).toEqual({ ok: false, error: textRef("battleActions.maze.targetOutOfSight") });
     expect(spellTargetInRange(mapOf(), caster, behind, undefined)).toBe(false);
   });
 });

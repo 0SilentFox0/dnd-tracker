@@ -1,14 +1,14 @@
 import { releaseGrapples } from "./grapple-links";
 import { exhaustionLevel, hasCondition, MAX_EXHAUSTION, removeEffects, syncExhaustion } from "./query";
-import { CONDITION_5E_REGISTRY, type Condition5eKey, conditionEffectInput } from "./registry";
+import { type Condition5eKey, conditionEffectInput } from "./registry";
 
 import type { AbilityKey } from "@/lib/constants/abilities";
 import { CombatStatus, EffectMarker } from "@/lib/constants/battle";
 import { DEFAULT_RULES_EDITION } from "@/lib/constants/rules";
+import { dynamicTextRef, textRef } from "@/lib/i18n/text-ref";
 import { findFlags } from "@/lib/utils/abilities/engine/core/collect-modifiers";
 import { findParticipant, updateParticipant, withActiveEffects } from "@/lib/utils/abilities/engine/core/participants";
-import { upsertTimedEffect } from "@/lib/utils/abilities/engine/effects/timed-effects";
-import { DODGE_KEY_PREFIX } from "@/lib/utils/battle/actions/effects";
+import { DODGE_KEY_PREFIX, upsertLabeled } from "@/lib/utils/battle/actions/effects";
 import { concentrationBroken, dropConcentration } from "@/lib/utils/battle/concentration";
 import { hasEffectMarker } from "@/lib/utils/battle/participant/state";
 import { spellSaveDc } from "@/lib/utils/battle/spell/power";
@@ -23,7 +23,7 @@ export interface ApplyCondition5eOptions {
   levels?: number;
   saveEnds?: { ability: AbilityKey; dc: number };
   source: ActiveEffect["source"];
-  sourceName: string;
+  sourceName: LogLine;
   timedKey: string;
   round: number;
   rules?: Ruleset;
@@ -46,7 +46,7 @@ function dropConcentrationIfIncapacitated(ps: BattleParticipant[], targetId: str
 
   if (!concentrationBroken(target)) return { participants: ps, messages: [] };
 
-  return dropConcentration(ps, targetId, target.combatStats.status === CombatStatus.DEAD || target.combatStats.currentHp <= 0 ? "" : "недієздатний");
+  return dropConcentration(ps, targetId, target.combatStats.status === CombatStatus.DEAD || target.combatStats.currentHp <= 0 ? "" : textRef("battleActions.condition.incapacitatedReason"));
 }
 
 function halveMaxHp(p: BattleParticipant, timedKey: string): BattleParticipant {
@@ -66,19 +66,17 @@ export function applyCondition5e(ps: BattleParticipant[], targetId: string, opts
 
   if (!target) return { participants: ps, messages: [], blocked: false };
 
-  const def = CONDITION_5E_REGISTRY[opts.key];
-
-  if (immune(ps, targetId, opts.key)) return { participants: ps, messages: [`⛔ ${opts.sourceName}: ${target.basicInfo.name} — імунітет`], blocked: true };
+  if (immune(ps, targetId, opts.key)) return { participants: ps, messages: [textRef("battleActions.condition.immune", { source: opts.sourceName, target: target.basicInfo.name })], blocked: true };
 
   const variant = opts.rules?.conditions.exhaustion ?? DEFAULT_RULES_EDITION;
 
-  const messages = [`⛓ ${opts.sourceName}: ${target.basicInfo.name} — ${def.label.toLowerCase()}${opts.permanent ? "" : ` (${opts.rounds} р.)`}`];
+  const messages: LogLine[] = [textRef(opts.permanent ? "battleActions.condition.applied" : "battleActions.condition.appliedTimed", { source: opts.sourceName, target: target.basicInfo.name, condition: dynamicTextRef(`battleActions.condition.lower.${opts.key}`), rounds: opts.rounds })];
 
   const hadHalved = target.battleData.activeEffects.some((e) => e.exhaustionHpHalved);
 
   const input = conditionEffectInput(opts.key, { ...opts, exhaustion: variant });
 
-  let next = upsertTimedEffect(target, input, opts.round);
+  let next = upsertLabeled(target, input, opts.round);
 
   if (input.effects?.some((m) => m.type === EffectMarker.NO_REACTION)) next = { ...next, actionFlags: { ...next.actionFlags, hasUsedReaction: true } };
 
@@ -89,10 +87,10 @@ export function applyCondition5e(ps: BattleParticipant[], targetId: string, opts
 
     if (level >= MAX_EXHAUSTION) {
       next = { ...next, combatStats: { ...next.combatStats, currentHp: 0, status: CombatStatus.DEAD } };
-      messages.push(`💀 ${next.basicInfo.name} помирає від виснаження`);
+      messages.push(textRef("battleActions.condition.exhaustionDeath", { name: next.basicInfo.name }));
     } else if (variant === "2014" && level >= 4 && !hadHalved) {
       next = halveMaxHp(next, opts.timedKey);
-      messages.push(`🩸 ${next.basicInfo.name}: максимум HP зменшено вдвічі`);
+      messages.push(textRef("battleActions.condition.exhaustionHalved", { name: next.basicInfo.name }));
     }
   }
 
@@ -104,7 +102,7 @@ export function applyCondition5e(ps: BattleParticipant[], targetId: string, opts
 
   if (!hasCondition(next, "incapacitated")) return { participants: dropped.participants, messages: [...messages, ...dropped.messages], blocked: false };
 
-  const released = releaseGrapples(dropped.participants, targetId, "недієздатний");
+  const released = releaseGrapples(dropped.participants, targetId, textRef("battleActions.grapple.reasons.incapacitated"));
 
   return { participants: released.participants, messages: [...messages, ...dropped.messages, ...released.messages], blocked: false };
 }

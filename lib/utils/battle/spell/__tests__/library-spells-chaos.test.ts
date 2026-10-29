@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 
 import { SPELLS } from "@/data/library/spells";
 import { ParticipantSide, ParticipantSourceType } from "@/lib/constants/battle";
+import { textOf } from "@/lib/i18n/test/text";
 import { seq } from "@/lib/utils/abilities/__tests__/fixtures";
 import { findParticipant, isActive } from "@/lib/utils/abilities/engine/core/participants";
 import { createMockParticipant, grantPassive } from "@/lib/utils/battle/__tests__/fixtures/mock-participant";
@@ -63,7 +64,7 @@ function cast(key: string, caster: BattleParticipant, order: BattleParticipant[]
 
   const res = resolveSpellTargets(order, caster, sp, sp.definition.targeting, targets);
 
-  if (!res.ok) throw new Error(res.error);
+  if (!res.ok) throw new Error(textOf(res.error));
 
   return castSpell({ caster, spell: sp, targetIds: res.targetIds, allParticipants: order, currentRound: over.round ?? 1, battleId: "b", diceRolls: over.rolls ?? [], saveRolls: over.saves ?? [], rng: seq(0.99) });
 }

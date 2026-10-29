@@ -7,7 +7,7 @@ import { prisma } from "@/lib/db";
 import { describeEffect } from "@/lib/utils/abilities/registry/effects";
 import { abilitySummary } from "@/lib/utils/abilities/summary";
 import { parseSpellFx } from "@/lib/utils/battle/fx/spell-fx-schema";
-import { costLabel, resolutionLabel, targetingLabel } from "@/lib/utils/spells/model/labels";
+import { costLabel, resolutionLabel, targetingFacetLabel } from "@/lib/utils/spells/model/labels";
 import { readSpellDefinition } from "@/lib/utils/spells/model/read";
 import { spellRules } from "@/lib/utils/spells/to-book-spell";
 import type { SkillForReference, SpellForReference } from "@/types/info-reference";
@@ -75,7 +75,7 @@ async function loadInfoReference(campaignId: string): Promise<InfoReference> {
         id: s.id,
         name: s.name,
         level: s.level,
-        type: targetingLabel(def.targeting),
+        type: targetingFacetLabel(def.targeting),
         cost: costLabel(def.cost),
         resolution: resolutionLabel(def.resolution),
         dice: def.dice,

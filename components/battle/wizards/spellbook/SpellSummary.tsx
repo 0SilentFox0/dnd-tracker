@@ -27,7 +27,7 @@ export function SpellSummary({ spell, state, targets, formula, targeting, slotCo
       <div className="hud-sc text-xl font-bold">{spell.name}</div>
       <div className="mt-2 text-[15px]">
         {state.targetIds.length > 0 && <p>{tw("targets", { targets: state.targetIds.map((id) => targets.find((t) => t.basicInfo.id === id)?.basicInfo.name).join(", ") })}</p>}
-        {state.pick?.targetMode === "none" && <p>{tw("targets", { targets: targetingLabel(targeting) })}</p>}
+        {state.pick?.targetMode === "none" && <p>{tw("targets", { targets: text(targetingLabel(targeting)) })}</p>}
         {state.damage.length > 0 && <p>{tw("dice", { dice: state.damage.join(" + "), sum: state.damage.reduce<number>((a, b) => a + (b ?? 0), 0), formula })}</p>}
         <p className="mt-2 text-sm italic text-[var(--hud-muted)]">{tw("note")}</p>
         {slotCost && <p className="text-sm italic text-[var(--hud-muted)]">{text(slotCost)}</p>}

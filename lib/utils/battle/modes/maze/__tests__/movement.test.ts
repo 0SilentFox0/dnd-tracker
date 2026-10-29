@@ -93,7 +93,7 @@ describe("applyMazeMove", () => {
   it("помилки: далеко, стіна, зайнято, ті ж координати", () => {
     const h = hero({ x: 0, y: 0 });
 
-    const msg = "Туди не пройти: стіна, зайнято або не вистачає кроків";
+    const msg = "battleActions.maze.moveBlocked";
 
     expect(applyMazeMove(mk(), { participants: [h], mover: h, to: { x: 4, y: 0 } })).toEqual({ error: msg });
     expect(applyMazeMove(mk({ walls: ["0:0:e"] }, 10, 1), { participants: [h], mover: h, to: { x: 1, y: 0 } })).toEqual({ error: msg });

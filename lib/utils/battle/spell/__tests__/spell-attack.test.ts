@@ -3,6 +3,7 @@ import { describe, expect, it } from "vitest";
 import { ParticipantSide } from "@/lib/constants/battle";
 import { makeParticipant, resolved, seq } from "@/lib/utils/abilities/__tests__/fixtures";
 import type { Effect } from "@/lib/utils/abilities/schema";
+import { textsOf } from "@/lib/utils/battle/log/__tests__/event-text";
 import { castSpell } from "@/lib/utils/battle/spell";
 import { spellAttackBonus } from "@/lib/utils/battle/spell/power";
 import type { CastableSpell } from "@/lib/utils/battle/types/spell-process";
@@ -80,7 +81,7 @@ describe("атака заклинанням", () => {
     const r = cast({ roll: 5 });
 
     expect(hp(r, "e1")).toBe(200);
-    expect(r.messages.join("|")).toContain("атака заклинанням 5+5=10 проти КЗ 14 — промах");
+    expect(textsOf(r.messages).join("|")).toContain("атака заклинанням 5+5=10 проти КЗ 14 — промах");
     expect(r.battleAction.actionDetails.spellAttacks?.[0]).toMatchObject({ hit: false, crit: false });
   });
 
@@ -89,7 +90,7 @@ describe("атака заклинанням", () => {
 
     expect(hp(r, "e1")).toBe(200 - 6 - 8);
     expect(r.battleAction.actionDetails.spellAttacks?.[0]).toMatchObject({ hit: true, crit: true });
-    expect(r.messages.join("|")).toContain("крит — кубики подвоєно");
+    expect(textsOf(r.messages).join("|")).toContain("крит — кубики подвоєно");
   });
 
   it("a crit without doubleDice is a plain hit", () => {

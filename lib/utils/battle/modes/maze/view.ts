@@ -93,7 +93,7 @@ export function deriveMazeView({ map, participants, userId, isDM, asHeroId }: De
   };
 }
 
-export const MAZE_UNKNOWN_NAME = "невідомий";
+export const MAZE_UNKNOWN_NAME = "???";
 
 const hidesFrom = (view: MazeView | null | undefined): view is MazeView => view?.role === "player";
 

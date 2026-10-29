@@ -3,6 +3,7 @@ import type { ModeMoveZone, ModeView } from "./types";
 
 import { isActive } from "@/lib/utils/abilities/engine/core/participants";
 import type { BattleMapConfig, BattleParticipant, GridPoint } from "@/types/battle";
+import type { LogLine } from "@/types/text";
 
 type MapArg = BattleMapConfig | null | undefined;
 
@@ -12,19 +13,19 @@ export function modeSees(map: MapArg, viewer: BattleParticipant, target: BattleP
   return active?.mode.engine.sees?.({ config: active.config, map: active.map, viewer, target }) ?? true;
 }
 
-export function modeAimHiddenText(map: MapArg, caster: BattleParticipant, cell: GridPoint): string | null {
+export function modeAimHiddenText(map: MapArg, caster: BattleParticipant, cell: GridPoint): LogLine | null {
   const active = activeModeWithConfig(map);
 
   return active?.mode.engine.aimHiddenText?.({ config: active.config, map: active.map, caster, cell }) ?? null;
 }
 
-export function modeTargetHiddenText(map: MapArg, caster: BattleParticipant, targets: BattleParticipant[]): string | null {
+export function modeTargetHiddenText(map: MapArg, caster: BattleParticipant, targets: BattleParticipant[]): LogLine | null {
   const active = activeModeWithConfig(map);
 
   return active?.mode.engine.targetHiddenText?.({ config: active.config, map: active.map, caster, targets }) ?? null;
 }
 
-export function modeMeleeBlockedText(map: MapArg, attacker: BattleParticipant, target: BattleParticipant): string | null {
+export function modeMeleeBlockedText(map: MapArg, attacker: BattleParticipant, target: BattleParticipant): LogLine | null {
   const active = activeModeWithConfig(map);
 
   return active?.mode.engine.meleeBlockedText?.({ config: active.config, map: active.map, attacker, target }) ?? null;

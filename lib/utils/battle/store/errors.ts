@@ -1,4 +1,5 @@
 import { API_ERRORS, type ErrorParams } from "@/lib/constants/api-errors";
+import type { TextRef } from "@/types/text";
 
 export class BattleConflictError extends Error {
   constructor(readonly currentVersion?: number) {
@@ -45,6 +46,6 @@ export function ruleErrorOf(code: BattleRuleCode, reason: string | { message: st
   return typeof reason === "string" ? new BattleRuleError(code, reason) : new BattleRuleError(code, reason.message, reason.params as ErrorParams | undefined);
 }
 
-export function rejectAction(message: string, params?: ErrorParams): never {
-  throw new BattleRuleError("action_rejected", message, params);
+export function rejectAction(message: string | TextRef, params?: ErrorParams): never {
+  throw typeof message === "string" ? new BattleRuleError("action_rejected", message, params) : ruleErrorOf("action_rejected", message);
 }

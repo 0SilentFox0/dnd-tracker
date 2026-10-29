@@ -3,7 +3,7 @@ import { cooldownLeft, poolLeft, withinCountLimits } from "@/lib/utils/abilities
 import { lairAbilities, lairBlocker } from "@/lib/utils/battle/actions/lair";
 import { legendaryAbilities, legendaryBlocker, legendaryCostOf } from "@/lib/utils/battle/actions/legendary-options";
 import type { BattleMutationContext } from "@/lib/utils/battle/pipeline/run-battle-mutation";
-import { BattleRuleError } from "@/lib/utils/battle/store";
+import { BattleRuleError, ruleErrorOf } from "@/lib/utils/battle/store";
 import type { CastableSpell } from "@/lib/utils/battle/types/spell-process";
 import type { BattleParticipant } from "@/types/battle";
 
@@ -17,7 +17,7 @@ export function resolveSpellSource(ctx: BattleMutationContext, caster: BattlePar
 
     const blocker = legendaryAbility.limits?.lair ? lairBlocker(caster, ctx.scene.round, legendaryAbility.key) : legendaryBlocker(caster, ctx.participants[ctx.scene.turnIndex], legendaryCostOf(legendaryAbility));
 
-    if (blocker) throw new BattleRuleError("action_rejected", blocker);
+    if (blocker) throw ruleErrorOf("action_rejected", blocker);
 
     if (!withinCountLimits(caster, legendaryAbility)) throw new BattleRuleError("ability_limit", API_ERRORS.BATTLE_USES_EXHAUSTED);
 

@@ -1,3 +1,4 @@
+import { joinLines, textRef } from "@/lib/i18n/text-ref";
 import { findParticipant, isActive, mergeParticipants } from "@/lib/utils/abilities/engine/core/participants";
 import { appendHpChanges, fire, getP, put, settleDowned } from "@/lib/utils/battle/common/action-flow";
 import { applyBalanceDamageMultiplier } from "@/lib/utils/battle/damage/balance-multiplier";
@@ -7,6 +8,7 @@ import { diffAppliedEffects } from "@/lib/utils/battle/spell/applied-effects";
 import { actionOf, flatEffects, isDamageEffect, type SpellCastState } from "@/lib/utils/battle/spell/cast/state";
 import type { CastSpellResult } from "@/lib/utils/battle/types/spell-process";
 import type { BattleParticipant, SpellGrant } from "@/types/battle";
+import type { LogLine } from "@/types/text";
 
 export function spendCastCost(state: SpellCastState, cost: { slotKey: string; usesSlot: boolean; isDMCast: boolean; isLegendaryCast?: boolean; grant?: SpellGrant }): void {
   let caster = getP(state.flow, state.caster.basicInfo.id);
@@ -108,9 +110,17 @@ export function finishSpellAction(state: SpellCastState, { before, targetsBefore
 
   const { dealt, healed, hits } = hpTotals(state, before);
 
-  const caption = [dealt > 0 ? `шкода: ${dealt}${hits.length > 1 ? ` (${hits.join(", ")})` : ""}` : "", healed > 0 ? `лікування: ${healed} HP` : ""].filter(Boolean).join(", ");
+  const parts: LogLine[] = [];
 
-  const action = actionOf(getP(flow, casterId), spell, targetsBefore, battleId, round, lineText([`${caster.basicInfo.name} застосовує ${spell.name}${caption ? ` (${caption})` : ""}`, ...flow.messages], " | "));
+  if (dealt > 0) parts.push(hits.length > 1 ? textRef("battleActions.spell.captionDamageHits", { dealt, hits: hits.join(", ") }) : textRef("battleActions.spell.captionDamage", { dealt }));
+
+  if (healed > 0) parts.push(textRef("battleActions.spell.captionHeal", { healed }));
+
+  const params = { name: caster.basicInfo.name, spell: spell.name };
+
+  const head = parts.length > 0 ? textRef("battleActions.spell.castCaption", { ...params, caption: joinLines(parts, ", ") }) : textRef("battleActions.spell.cast", params);
+
+  const action = actionOf(getP(flow, casterId), spell, targetsBefore, battleId, round, lineText([head, ...flow.messages], " | "));
 
   const applied = diffAppliedEffects(before, flow.ps, targetsBefore.map((t) => t.basicInfo.id));
 

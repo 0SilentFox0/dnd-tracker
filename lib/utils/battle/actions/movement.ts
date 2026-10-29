@@ -1,10 +1,12 @@
 import { planDrag } from "./grapple";
 import { resolveOpportunityAttacks } from "./opportunity";
+import { actionReason } from "./reasons";
 
+import { textRef } from "@/lib/i18n/text-ref";
 import { findParticipant, replaceParticipant } from "@/lib/utils/abilities/engine/core/participants";
 import { releaseGrapples } from "@/lib/utils/battle/conditions/grapple-links";
 import { battleActionToEvent, type NewBattleEvent } from "@/lib/utils/battle/store";
-import { BattleRuleError } from "@/lib/utils/battle/store/errors";
+import { ruleErrorOf } from "@/lib/utils/battle/store/errors";
 import type { Ruleset } from "@/lib/utils/rules";
 import type { BattleMapConfig, BattleParticipant, GridPoint } from "@/types/battle";
 import type { LogLine } from "@/types/text";
@@ -69,7 +71,7 @@ export function resolveMovement5e(input: Movement5eInput): Movement5eResult {
   const plan = opportunity?.stopAt ? null : planDrag({ map, participants, mover, to, path });
 
   for (const id of plan?.blocked ?? []) {
-    const out = releaseGrapples(base, mover.basicInfo.id, "немає місця", id);
+    const out = releaseGrapples(base, mover.basicInfo.id, textRef("battleActions.grapple.reasons.noRoom"), id);
 
     base = out.participants;
     messages.push(...out.messages);
@@ -80,7 +82,7 @@ export function resolveMovement5e(input: Movement5eInput): Movement5eResult {
   if (dragged.length) {
     spent = cost * 2;
 
-    if (spent > budget) throw new BattleRuleError("action_rejected", "Не вистачає руху, щоб тягнути схоплену ціль");
+    if (spent > budget) throw ruleErrorOf("action_rejected", actionReason("dragNoMovement"));
   }
 
   const moved = { ...current, battleData: { ...current.battleData, position: destination, movementUsed: (mover.battleData.movementUsed ?? 0) + spent } };

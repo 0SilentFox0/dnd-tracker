@@ -1,6 +1,7 @@
 import { canReact, pickMeleeAttack } from "./reaction";
 
 import { EffectMarker } from "@/lib/constants/battle";
+import { textRef } from "@/lib/i18n/text-ref";
 import { findParticipant, isActive } from "@/lib/utils/abilities/engine/core/participants";
 import { resolveServerAttack } from "@/lib/utils/battle/attack/server-attack";
 import { type ActionFlow, put } from "@/lib/utils/battle/common/action-flow";
@@ -91,7 +92,7 @@ export function resolveOpportunityAttacks(input: OpportunityInput): OpportunityR
       put(flow, { ...mover, battleData: { ...mover.battleData, position: from } });
       put(flow, { ...e, actionFlags: { ...e.actionFlags, hasUsedReaction: true } });
 
-      messages.push(`⚔ Атака при відході: ${e.basicInfo.name} → ${mover.basicInfo.name}`);
+      messages.push(textRef("battleActions.opportunity.attack", { attacker: e.basicInfo.name, mover: mover.basicInfo.name }));
 
       const { battleAction } = resolveServerAttack({ flow, attackerId: id, targetId: moverId, attack, currentRound: round, battleId, rng, label: "opportunity" });
 
