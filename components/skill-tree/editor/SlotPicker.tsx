@@ -5,11 +5,11 @@ import { useAbilityText } from "@/components/abilities/use-ability-text";
 import { HUD_SURFACE } from "@/components/hud";
 import { Button } from "@/components/ui/button";
 import { ResponsiveDialog } from "@/components/ui/responsive-dialog";
-import type { Segment } from "@/lib/utils/abilities/segments";
+import type { AbilityFlowSummary } from "@/lib/utils/abilities/segments";
 import { matchesQuery } from "@/lib/utils/common/text-search";
 import type { CellRef } from "@/lib/utils/skills/progression";
 
-type LibrarySkill = { id: string; name: string; icon: string | null; mainSkillId: string | null; summary: Segment[][] };
+type LibrarySkill = { id: string; name: string; icon: string | null; mainSkillId: string | null; summary: AbilityFlowSummary[] };
 
 export function SlotPicker({ target, current, skills, usedAt, onPick, onClose }: {
   target: { ref: CellRef; label: string } | null;
@@ -67,7 +67,7 @@ export function SlotPicker({ target, current, skills, usedAt, onPick, onClose }:
           return (
             <li key={s.id} role="option" aria-selected={selected === s.id} aria-disabled={used ? "true" : "false"} onClick={() => !used && setSelected(s.id)} className={`picker-item ${selected === s.id ? "on" : ""} ${used ? "used" : ""}`}>
               <span className="font-medium">{s.name}</span>
-              {s.summary.length > 0 && <span className="block text-xs opacity-70">{abilityText.lines(s.summary).join(" · ")}</span>}
+              {s.summary.length > 0 && <span className="block text-xs opacity-70">{abilityText.flows(s.summary).join(" · ")}</span>}
               {used && <span className="text-[11px] text-[#b07842]">{t("usedAt", { where: used })}</span>}
             </li>
           );

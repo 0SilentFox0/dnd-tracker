@@ -2,7 +2,7 @@ import { useTranslations } from "next-intl";
 
 import { AbilitySummary } from "@/components/abilities";
 import { cn } from "@/lib/utils";
-import type { Segment } from "@/lib/utils/abilities/segments";
+import type { AbilityFlowSummary } from "@/lib/utils/abilities/segments";
 
 export function ArtifactSetBonusDisplay({
   setBonus,
@@ -10,7 +10,7 @@ export function ArtifactSetBonusDisplay({
   className,
 }: {
   setBonus: unknown;
-  abilitySummary?: Segment[][];
+  abilitySummary?: AbilityFlowSummary[];
   className?: string;
 }) {
   const t = useTranslations("artifacts.sets.card");

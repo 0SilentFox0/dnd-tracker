@@ -3,7 +3,7 @@
 import { useTranslator } from "@/lib/i18n/use-translator";
 import { describeAbilityText, describeEffect } from "@/lib/utils/abilities/registry/effects";
 import type { Ability, Effect } from "@/lib/utils/abilities/schema";
-import { renderSegment, renderSegments, type Segment } from "@/lib/utils/abilities/segments";
+import { type AbilityFlowSummary, flowSegments, renderSegment, renderSegments, type Segment } from "@/lib/utils/abilities/segments";
 
 export function useAbilityText() {
   const t = useTranslator("abilityRegistry");
@@ -13,6 +13,7 @@ export function useAbilityText() {
     ability: (a: Ability) => describeAbilityText(a, t),
     segments: (s: readonly Segment[]) => renderSegments(t, s).join(" · "),
     line: (s: Segment) => renderSegment(t, s),
+    flows: (list: readonly AbilityFlowSummary[]) => list.map((f) => renderSegments(t, flowSegments(f)).join(" · ")),
     lines: (list: readonly (readonly Segment[])[]) => list.map((s) => renderSegments(t, s).join(" · ")),
   };
 }

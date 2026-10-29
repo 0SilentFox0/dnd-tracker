@@ -17,7 +17,7 @@ export function ArtifactReferenceCard({ artifact }: { artifact: ArtifactForRefer
 
   const ta = useTranslator("artifacts");
 
-  const effects = useAbilityText().lines(artifact.effects);
+  const effects = useAbilityText().flows(artifact.effects);
 
   const meta = [artifact.rarity ? ta(`rarity.${artifact.rarity}`) : null, ta(`slots.${artifact.slot}`)].filter(Boolean).join(" · ");
 

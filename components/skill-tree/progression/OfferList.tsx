@@ -47,7 +47,7 @@ export function OfferList({ offers, dto, filter, onClearFilter, onSelect }: { of
                 <span className="min-w-0 text-left">
                   <span className="hud-sc block text-base text-hud-ink">{title}</span>
                   <span className="block text-xs text-hud-gold">{tag}</span>
-                  {skill?.summary[0] && <span className="mt-1 block text-[13px] leading-snug text-[#b8ab95]">{abilityText.lines(skill.summary).join(" · ")}</span>}
+                  {skill?.summary[0] && <span className="mt-1 block text-[13px] leading-snug text-[#b8ab95]">{abilityText.flows(skill.summary).join(" · ")}</span>}
                 </span>
               </Button>
             </li>

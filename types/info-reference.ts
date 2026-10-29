@@ -1,5 +1,5 @@
 import type { ErrorParams } from "@/lib/constants/api-errors";
-import type { Segment } from "@/lib/utils/abilities/segments";
+import type { AbilityFlowSummary, Segment } from "@/lib/utils/abilities/segments";
 import type { SpellFx } from "@/lib/utils/battle/fx/spells";
 import type { SpellRules } from "@/types/spells";
 
@@ -9,7 +9,7 @@ export interface SkillForReference {
   name: string;
   description: string | null;
   appearanceDescription: string | null;
-  abilitySummary: Segment[][];
+  abilitySummary: AbilityFlowSummary[];
   mainSkillId: string | null;
   mainSkillName: string | null;
   mainSkillIcon: string | null;
@@ -45,7 +45,7 @@ export interface ArtifactForReference {
   rarity: string | null;
   slot: string;
   description: string | null;
-  effects: Segment[][];
+  effects: AbilityFlowSummary[];
   setName: string | null;
   holderName: string | null;
   gear?: true;
@@ -56,7 +56,7 @@ export interface ArtifactSetForReference {
   name: string;
   icon: string | null;
   description: string | null;
-  bonuses: Segment[][];
+  bonuses: AbilityFlowSummary[];
   artifactNames: string[];
 }
 

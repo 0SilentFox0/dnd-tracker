@@ -2,16 +2,16 @@ import { describe, expect, it, vi } from "vitest";
 
 import { makeT } from "@/lib/i18n/test/mock-t";
 import type { Translator } from "@/lib/i18n/translator";
-import type { Segment } from "@/lib/utils/abilities/segments";
+import type { AbilityFlowSummary } from "@/lib/utils/abilities/segments";
 import { classSearchText, classSummaryText, formatMechanicsSkill, formatMechanicsSpell, skillSearchText, toClassForReference } from "@/lib/utils/campaigns/info-reference";
 import type { GameClassData } from "@/types/classes";
 import type { SkillForReference } from "@/types/info-reference";
 
 const t = makeT();
 
-const line = (value: string) => [{ key: "summary.text", params: { value } }];
+const line = (value: string): AbilityFlowSummary => ({ when: [{ key: "summary.text", params: { value } }], if: [], then: [], limits: [] });
 
-const skill = (abilitySummary: Segment[][]): SkillForReference => ({
+const skill = (abilitySummary: AbilityFlowSummary[]): SkillForReference => ({
   id: "s", name: "Лють", description: null, appearanceDescription: null, abilitySummary, mainSkillId: null, mainSkillName: "Бій", mainSkillIcon: null, mainSkillColor: null, grantedSpellName: null, icon: null, image: null,
 });
 

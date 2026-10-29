@@ -100,7 +100,7 @@ describe("SkillCard", () => {
   });
 
   it("показує опис умінь", () => {
-    const skill = minimalSkill({ abilitySummary: [[{ key: "summary.text", params: { value: "шкода +10%" } }]] });
+    const skill = minimalSkill({ abilitySummary: [{ when: [{ key: "summary.text", params: { value: "шкода +10%" } }], if: [], then: [], limits: [] }] });
 
     renderWithConfirm(<SkillCard skill={skill} campaignId="c1" />);
     expect(screen.getByText('abilityRegistry.summary.text {"value":"шкода +10%"}')).toBeInTheDocument();

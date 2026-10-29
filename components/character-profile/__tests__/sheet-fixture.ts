@@ -41,9 +41,9 @@ export const sheetFixture: CharacterSheet = {
   rest: null,
   spells: [{ id: "mark", name: "Мітка мисливця", level: 1, dice: 1, targeting: { kind: "enemy" } }],
   items: {
-    grid: { armor: { id: "a1", name: "Кольчуга ельфів", icon: null, slot: "armor", rarity: "rare", description: "Легка і тиха.", effects: [[{ key: "summary.text", params: { value: "AC +2" } }]] } },
-    artifacts: [{ id: "a1", name: "Кольчуга ельфів", icon: null, slot: "armor", rarity: "rare", description: "Легка і тиха.", effects: [[{ key: "summary.text", params: { value: "AC +2" } }]] }],
-    sets: [{ setId: "s1", name: "Мисливець", have: 2, total: 3, complete: false, effects: [[{ key: "summary.text", params: { value: "Ініціатива +1" } }]] }],
+    grid: { armor: { id: "a1", name: "Кольчуга ельфів", icon: null, slot: "armor", rarity: "rare", description: "Легка і тиха.", effects: [{ when: [{ key: "summary.text", params: { value: "AC +2" } }], if: [], then: [], limits: [] }] } },
+    artifacts: [{ id: "a1", name: "Кольчуга ельфів", icon: null, slot: "armor", rarity: "rare", description: "Легка і тиха.", effects: [{ when: [{ key: "summary.text", params: { value: "AC +2" } }], if: [], then: [], limits: [] }] }],
+    sets: [{ setId: "s1", name: "Мисливець", have: 2, total: 3, complete: false, effects: [{ when: [{ key: "summary.text", params: { value: "Ініціатива +1" } }], if: [], then: [], limits: [] }] }],
   },
   personalSkill: null,
   progression: { freePoints: 0, level: 5, seenLevel: null },

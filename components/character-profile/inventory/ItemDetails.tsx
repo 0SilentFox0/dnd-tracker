@@ -44,7 +44,7 @@ export function ItemBody({ selection, withTitle = true }: { selection: Inventory
 
   const slot = selection.kind === "equipped" ? t(`inventory.grid.slots.${selection.slot}`) : t(`artifacts.slots.${artifact.slot}`);
 
-  const effects = selection.kind === "equipped" ? abilityText.lines(selection.artifact.effects) : [];
+  const effects = selection.kind === "equipped" ? abilityText.flows(selection.artifact.effects) : [];
 
   return (
     <div className="space-y-1.5">

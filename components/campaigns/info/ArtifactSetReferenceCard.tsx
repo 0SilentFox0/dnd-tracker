@@ -14,7 +14,7 @@ import type { ArtifactSetForReference } from "@/types/info-reference";
 export function ArtifactSetReferenceCard({ set }: { set: ArtifactSetForReference }) {
   const t = useTranslations("dashboard.reference.card");
 
-  const bonuses = useAbilityText().lines(set.bonuses);
+  const bonuses = useAbilityText().flows(set.bonuses);
 
   return (
     <AccordionItem

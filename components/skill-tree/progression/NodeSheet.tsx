@@ -44,7 +44,7 @@ export function NodeSheet({ target, dto, actions }: {
     <ResponsiveDialog open onOpenChange={(open) => !open && actions.onClose()} title={title} description={tag} footer={footer} className={HUD_SURFACE}>
       {skill ? (
         <div className="space-y-2 text-sm">
-          {skill.summary.length > 0 && <p className="text-hud-gold">{abilityText.lines(skill.summary).join(" · ")}</p>}
+          {skill.summary.length > 0 && <p className="text-hud-gold">{abilityText.flows(skill.summary).join(" · ")}</p>}
           {skill.description && <p className="whitespace-pre-line">{skill.description}</p>}
         </div>
       ) : (

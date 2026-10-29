@@ -100,7 +100,7 @@ describe("лист персонажа: запити до БД", () => {
 
     const sheet = await buildSheetFor(character as never, { isDM: false, isOwner: true }, { maxLevel: 20, rules: DEFAULT_RULES });
 
-    expect(sheet.items.sets).toEqual([{ setId: "s1", name: "Мисливець", have: 1, total: 1, complete: true, effects: [expect.arrayContaining([expect.objectContaining({ key: "summary.effects.damageBonus" })])] }]);
+    expect(sheet.items.sets).toEqual([{ setId: "s1", name: "Мисливець", have: 1, total: 1, complete: true, effects: [expect.objectContaining({ then: [[expect.objectContaining({ key: "summary.effects.damageBonus" })]] })] }]);
     expect(db.calls["artifactSet.findMany"]).toBeUndefined();
     expect(db.calls["artifact.findMany"]).toBe(1);
   });

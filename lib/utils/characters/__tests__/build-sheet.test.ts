@@ -32,7 +32,7 @@ function lira(over: Partial<SheetInput["character"]> = {}, attacks: BattleAttack
     },
     raceIcon: null,
     immunities: [],
-    artifacts: [{ id: "a1", name: "Кольчуга ельфів", icon: null, slot: "armor", rarity: "rare", description: null, effects: [[{ key: "summary.text", params: { value: "AC +2" } }]] }],
+    artifacts: [{ id: "a1", name: "Кольчуга ельфів", icon: null, slot: "armor", rarity: "rare", description: null, effects: [{ when: [{ key: "summary.text", params: { value: "AC +2" } }], if: [], then: [], limits: [] }] }],
     spells: [],
     personalSkill: null,
     progression: { freePoints: 0, level: 5, seenLevel: null },
@@ -103,7 +103,7 @@ describe("buildCharacterSheet", () => {
 
     expect(s.story.biography).toBe("Вона ==вірить== у брата");
     expect(s.story.goals).toHaveLength(1);
-    expect(s.items.artifacts[0].effects).toEqual([[{ key: "summary.text", params: { value: "AC +2" } }]]);
+    expect(s.items.artifacts[0].effects).toEqual([{ when: [{ key: "summary.text", params: { value: "AC +2" } }], if: [], then: [], limits: [] }]);
     expect(s.items.grid.armor?.id).toBe("a1");
   });
 
@@ -150,7 +150,7 @@ describe("buildCharacterSheet", () => {
   it("сети бере з учасника", () => {
     const input = lira();
 
-    const set = { setId: "s1", name: "Мисливець", have: 2, total: 3, complete: false, effects: [[{ key: "summary.text", params: { value: "Ініціатива +1" } }]] };
+    const set = { setId: "s1", name: "Мисливець", have: 2, total: 3, complete: false, effects: [{ when: [{ key: "summary.text", params: { value: "Ініціатива +1" } }], if: [], then: [], limits: [] }] };
 
     input.participant.battleData.artifactSets = [set];
 

@@ -2,10 +2,10 @@
 
 import { useAbilityText } from "./use-ability-text";
 
-import type { Segment } from "@/lib/utils/abilities/segments";
+import type { AbilityFlowSummary } from "@/lib/utils/abilities/segments";
 
-export function AbilitySummary({ lines }: { lines: Segment[][] }) {
-  const items = useAbilityText().lines(lines);
+export function AbilitySummary({ lines }: { lines: AbilityFlowSummary[] }) {
+  const items = useAbilityText().flows(lines);
 
   if (!items.length) return <p className="text-xs text-muted-foreground">—</p>;
 

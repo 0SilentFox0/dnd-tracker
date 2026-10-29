@@ -6,6 +6,7 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 import { ArtifactSetBonusDisplay } from "@/components/artifact-sets/ArtifactSetBonusDisplay";
 import { ArtifactCard } from "@/components/artifacts/ArtifactCard";
 import { renderWithConfirm } from "@/components/ui/__tests__/render-with-confirm";
+import type { AbilityFlowSummary } from "@/lib/utils/abilities/segments";
 
 vi.mock("next/navigation", () => ({ useRouter: () => ({ push: vi.fn(), refresh: vi.fn() }) }));
 vi.mock("@/lib/api/artifacts", () => ({ updateArtifact: vi.fn(async () => { throw new Error("offline"); }) }));
@@ -14,7 +15,7 @@ Object.assign(Element.prototype, { hasPointerCapture: () => false, releasePointe
 
 const withQuery = (ui: React.ReactElement) => <QueryClientProvider client={new QueryClient()}>{ui}</QueryClientProvider>;
 
-const line = (value: string) => [{ key: "summary.text", params: { value } }];
+const line = (value: string): AbilityFlowSummary => ({ when: [{ key: "summary.text", params: { value } }], if: [], then: [], limits: [] });
 
 const shown = (value: string) => `abilityRegistry.summary.text {"value":"${value}"}`;
 

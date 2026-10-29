@@ -3,8 +3,9 @@ import { cleanup, render, screen } from "@testing-library/react";
 import { afterEach, describe, expect, it } from "vitest";
 
 import { SetList } from "@/components/character-profile/SetList";
+import type { AbilityFlowSummary } from "@/lib/utils/abilities/segments";
 
-const line = (value: string) => [{ key: "summary.text", params: { value } }];
+const line = (value: string): AbilityFlowSummary => ({ when: [{ key: "summary.text", params: { value } }], if: [], then: [], limits: [] });
 
 const shown = (value: string) => `abilityRegistry.summary.text {"value":"${value}"}`;
 

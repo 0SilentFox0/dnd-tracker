@@ -26,7 +26,7 @@ vi.mock("@/lib/hooks/skills", () => ({
       tree: loading ? null : normalizeTree({ id: "row", skills: raw }),
       errors,
       locations: new Map([["o1", [{ kind: "slot", branchId: "attack", circle: "outer", index: 0 }]]]),
-      librarySkills: [{ id: "o1", name: "Кровопуск", icon: null, mainSkillId: "attack", summary: [] }, { id: "o2", name: "Шквал", icon: null, mainSkillId: "attack", summary: [[{ key: "summary.text", params: { value: "1/бій" } }]] }, { id: "x", name: "Чужий", icon: null, mainSkillId: "defense", summary: [] }],
+      librarySkills: [{ id: "o1", name: "Кровопуск", icon: null, mainSkillId: "attack", summary: [] }, { id: "o2", name: "Шквал", icon: null, mainSkillId: "attack", summary: [{ when: [{ key: "summary.text", params: { value: "1/бій" } }], if: [], then: [], limits: [] }] }, { id: "x", name: "Чужий", icon: null, mainSkillId: "defense", summary: [] }],
       availableBranches: [{ id: "defense", name: "Захист", color: "blue", icon: null }],
     },
     actions: { ...actions, setRace: vi.fn() },

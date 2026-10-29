@@ -34,7 +34,7 @@ const dto = () => ({
   isOwner: true,
   isDM: false,
   unlocked,
-  skills: Object.fromEntries(["atk-b", "o1", "o2", "m1", "i1", "d1"].map((id) => [id, { name: `Скіл ${id}`, icon: null, summary: [[{ key: "summary.text", params: { value: `опис ${id}` } }]], description: `повний ${id}`, spellGroupId: null, grantedSpellId: null, damageAffinity: { affectsDamage: false, damageType: null } }])),
+  skills: Object.fromEntries(["atk-b", "o1", "o2", "m1", "i1", "d1"].map((id) => [id, { name: `Скіл ${id}`, icon: null, summary: [{ when: [{ key: "summary.text", params: { value: `опис ${id}` } }], if: [], then: [], limits: [] }], description: `повний ${id}`, spellGroupId: null, grantedSpellId: null, damageAffinity: { affectsDamage: false, damageType: null } }])),
   branches: { attack: { name: "Напад", color: "red", icon: null, spellGroupId: null }, defense: { name: "Захист", color: "blue", icon: null, spellGroupId: null } },
 });
 

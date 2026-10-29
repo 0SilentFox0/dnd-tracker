@@ -2,7 +2,7 @@ import type { AbilityKey } from "@/lib/constants/abilities";
 import { AttackType } from "@/lib/constants/battle";
 import type { WeaponTrait } from "@/lib/constants/weapon-traits";
 import type { Ability, ConversionIssue } from "@/lib/utils/abilities/schema";
-import type { Segment } from "@/lib/utils/abilities/segments";
+import type { AbilityFlowSummary } from "@/lib/utils/abilities/segments";
 
 export interface UnitAttack {
   name: string;
@@ -28,7 +28,7 @@ export interface UnitSpellcasting { ability?: AbilityKey; dc?: number; attackBon
 
 export interface Unit {
   abilities?: Ability[];
-  abilitySummary?: Segment[][];
+  abilitySummary?: AbilityFlowSummary[];
   abilityIssues?: ConversionIssue[];
   id: string;
   campaignId: string;

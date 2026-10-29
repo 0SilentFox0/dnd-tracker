@@ -7,6 +7,15 @@ export interface Segment {
   params?: Record<string, SegmentParam>;
 }
 
+export interface AbilityFlowSummary {
+  when: Segment[];
+  if: Segment[];
+  then: Segment[][];
+  limits: Segment[];
+}
+
+export const flowSegments = (f: AbilityFlowSummary): Segment[] => [...f.when, ...f.limits, ...f.then.flat()];
+
 export const seg = (key: string, params?: Record<string, SegmentParam>): Segment => (params ? { key, params } : { key });
 
 const isSegment = (p: SegmentParam): p is Segment => typeof p === "object" && !Array.isArray(p) && "key" in p;
