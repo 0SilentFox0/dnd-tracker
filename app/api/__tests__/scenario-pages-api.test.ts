@@ -1,10 +1,10 @@
 import { NextResponse } from "next/server";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-import { discardSlideFiles } from "@/lib/server/assistant/proposal-media";
 import { API_ERRORS } from "@/lib/constants/api-errors";
 import { prisma } from "@/lib/db";
 import { notifyRevealForContentChange } from "@/lib/server/acquaintances/reveal";
+import { discardSlideFiles } from "@/lib/server/assistant/proposal-media";
 import * as apiAuth from "@/lib/utils/api/api-auth";
 
 vi.mock("@/lib/server/assistant/proposal-media", () => ({ pendingSlideUrls: vi.fn(async () => ["https://x/orphan.webp"]), discardSlideFiles: vi.fn() }));

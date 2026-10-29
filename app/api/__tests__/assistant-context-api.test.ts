@@ -2,8 +2,8 @@ import {NextResponse} from 'next/server';
 import {beforeEach,expect,it,vi} from 'vitest';
 
 import {buildInstructions} from '@/lib/ai/context/prompt';
-import {loadThread} from '@/lib/ai/threads';
 import {assistantContextRoute} from '@/lib/ai/context-http';
+import {loadThread} from '@/lib/ai/threads';
 import {requireDM} from '@/lib/utils/api/api-auth';
 vi.mock('@/lib/utils/api/rate-limit',()=>({checkRateLimit:vi.fn(async()=>({allowed:true})),rateLimitResponse:vi.fn()}));
 vi.mock('@/lib/ai/context/prompt',()=>({buildInstructions:vi.fn(async(args)=>{ args.onDisclosure?.({blocks:['system'],characters:100,truncated:false,focusAvailable:true,sourceNoteCount:args.sourceNoteSelection?.selectedKeys.length??0});
