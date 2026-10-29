@@ -6,6 +6,8 @@ import { Button } from "@/components/ui/button";
 import { loadArtifactReference } from "@/lib/cache/artifact-reference";
 import { getCachedInfoReference } from "@/lib/cache/info-reference";
 import { getCachedClasses } from "@/lib/cache/reference-data";
+import { getRequestLocale } from "@/lib/i18n/request-locale";
+import { getTranslator } from "@/lib/i18n/translator";
 import { requireCampaignMember } from "@/lib/server/campaigns/access";
 import { toClassForReference } from "@/lib/utils/campaigns/info-reference";
 import { toGameClassData } from "@/lib/utils/characters/classes/row";
@@ -17,6 +19,8 @@ export default async function CampaignInfoPage({
   params: Promise<{ id: string }>;
 }) {
   const { id: campaignId } = await params;
+
+  const t = await getTranslator(await getRequestLocale(), "dashboard");
 
   const { isDM, campaign } = await requireCampaignMember(campaignId);
 
@@ -33,11 +37,11 @@ export default async function CampaignInfoPage({
   return (
     <HudPage width="md">
       <HudPageHeader
-        title="Інформація — Довідник"
-        subtitle={classes ? "Класи, заклинання та артефакти кампанії: як діють, опис вигляду, у кого артефакти." : "Скіли, заклинання та артефакти кампанії: як діють, опис вигляду, у кого артефакти."}
+        title={t("info.title")}
+        subtitle={t(classes ? "info.subtitleClasses" : "info.subtitleSkills")}
         actions={
           <Button variant="outline" className="min-h-11 touch-manipulation sm:min-h-9 shrink-0" asChild>
-            <Link href={`/campaigns/${campaignId}`}>Назад до кампанії</Link>
+            <Link href={`/campaigns/${campaignId}`}>{t("info.back")}</Link>
           </Button>
         }
       />

@@ -45,7 +45,7 @@ it("emits background skill, tool and origin feat without copying character feats
 
   expect(result.skills).toContain("arcana");
   expect(result.tools).toContain("Tools");
-  expect(result.feats).toContainEqual(expect.objectContaining({ from: "Передісторія: A", feat: expect.objectContaining({ id: "f-alert" }) }));
+  expect(result.feats).toContainEqual(expect.objectContaining({ from: { message: "characterProfile.sheet.from.background", params: { name: "A" } }, feat: expect.objectContaining({ id: "f-alert" }) }));
 });
 
 it("keeps background spell pool keys across renames and separates two backgrounds", () => {
@@ -60,7 +60,7 @@ it("keeps background spell pool keys across renames and separates two background
   expect(first.spellGrants[0].sourceKey).toContain(feat.id);
   expect(selected({ ...a, name: "Renamed" }).spellGrants[0].sourceKey).toBe(first.spellGrants[0].sourceKey);
   expect(selected(b).spellGrants[0].sourceKey).not.toBe(first.spellGrants[0].sourceKey);
-  expect(first.background?.picks).toEqual(["+2 СИЛ", "+1 СПР"]);
+  expect(first.background?.picks).toEqual([{ message: "characterProfile.sheet.abilityPick", params: { n: 2, ability: "strength" } }, { message: "characterProfile.sheet.abilityPick", params: { n: 1, ability: "dexterity" } }]);
 });
 
 import { prunePicks } from "@/lib/utils/characters/choices/prune";

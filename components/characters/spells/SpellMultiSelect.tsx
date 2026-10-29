@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import { ChevronDown } from "lucide-react";
 
 import { SelectedSpellsList } from "@/components/spells/list/SelectedSpellsList";
@@ -22,6 +23,8 @@ export function SpellMultiSelect({
   selectedSpellIds,
   onSelectionChange,
 }: SpellMultiSelectProps) {
+  const t = useTranslations("characters.spells");
+
   const {
     data: spells = [],
     isLoading: spellsLoading,
@@ -44,10 +47,7 @@ export function SpellMultiSelect({
   if (spellsError) {
     return (
       <div className="text-sm text-destructive">
-        Помилка завантаження заклинань:{" "}
-        {spellsError instanceof Error
-          ? spellsError.message
-          : "Невідома помилка"}
+        {t("loadError", { message: spellsError instanceof Error ? spellsError.message : t("unknownError") })}
       </div>
     );
   }
@@ -64,10 +64,10 @@ export function SpellMultiSelect({
           >
             <span>
               {spellsLoading
-                ? "Завантаження..."
+                ? t("loading")
                 : selectedSpells.length === 0
-                ? "Виберіть заклинання"
-                : `Обрано: ${selectedSpells.length}`}
+                ? t("choose")
+                : t("selected", { count: selectedSpells.length })}
             </span>
             <ChevronDown className="h-4 w-4 opacity-50" />
           </Button>

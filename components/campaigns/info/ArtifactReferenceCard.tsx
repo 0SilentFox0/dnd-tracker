@@ -1,3 +1,4 @@
+import { useTranslations } from "next-intl";
 import { Gem } from "lucide-react";
 
 import { EntityIcon } from "@/components/common/EntityIcon";
@@ -7,11 +8,15 @@ import {
   AccordionTrigger,
 } from "@/components/ui/accordion";
 import { Label } from "@/components/ui/label";
-import { artifactRarityLabel } from "@/lib/constants/artifacts";
+import { useTranslator } from "@/lib/i18n/use-translator";
 import type { ArtifactForReference } from "@/types/info-reference";
 
 export function ArtifactReferenceCard({ artifact }: { artifact: ArtifactForReference }) {
-  const meta = [artifact.rarity ? artifactRarityLabel(artifact.rarity) : null, artifact.slotLabel].filter(Boolean).join(" · ");
+  const t = useTranslations("dashboard.reference.card");
+
+  const ta = useTranslator("artifacts");
+
+  const meta = [artifact.rarity ? ta(`rarity.${artifact.rarity}`) : null, ta(`slots.${artifact.slot}`)].filter(Boolean).join(" · ");
 
   return (
     <AccordionItem
@@ -27,7 +32,7 @@ export function ArtifactReferenceCard({ artifact }: { artifact: ArtifactForRefer
             </span>
             <span className="text-xs text-hud-muted">{meta}</span>
             <p className="mt-1.5 text-xs text-hud-muted">
-              {artifact.gear ? "спорядження" : artifact.holderName ? `у ${artifact.holderName}` : "вільний"}
+              {artifact.gear ? t("gear") : artifact.holderName ? t("heldBy", { name: artifact.holderName }) : t("free")}
             </p>
           </div>
         </div>
@@ -36,13 +41,13 @@ export function ArtifactReferenceCard({ artifact }: { artifact: ArtifactForRefer
         <div className="space-y-3 border-t border-hud-line px-3 pt-2 pb-3 text-hud-bone">
           {artifact.description && (
             <div>
-              <Label className="hud-sc text-xs text-hud-gold">Опис</Label>
+              <Label className="hud-sc text-xs text-hud-gold">{t("description")}</Label>
               <p className="text-sm mt-0.5">{artifact.description}</p>
             </div>
           )}
           {artifact.effects.length > 0 && (
             <div>
-              <Label className="hud-sc text-xs text-hud-gold">Ефекти</Label>
+              <Label className="hud-sc text-xs text-hud-gold">{t("effects")}</Label>
               <ul className="list-disc list-inside text-sm mt-0.5 space-y-0.5">
                 {artifact.effects.map((e, i) => (
                   <li key={i}>{e}</li>

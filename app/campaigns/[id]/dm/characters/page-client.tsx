@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { useTranslations } from "next-intl";
 import { Trash2, Users } from "lucide-react";
 
 import { DmCharacterCard } from "@/components/characters/list/DmCharacterCard";
@@ -15,10 +16,10 @@ import { Button } from "@/components/ui/button";
 import { CharacterType, type CharacterTypeValue } from "@/lib/constants/characters";
 import { useDmCharactersPage } from "@/lib/hooks/characters";
 
-const TABS: { type?: CharacterTypeValue; label: string }[] = [
-  { label: "Усі" },
-  { type: CharacterType.PLAYER, label: "Гравці" },
-  { type: CharacterType.NPC_HERO, label: "NPC-герої" },
+const TABS: { id: "all" | "players" | "npcHeroes"; type?: CharacterTypeValue }[] = [
+  { id: "all" },
+  { id: "players", type: CharacterType.PLAYER },
+  { id: "npcHeroes", type: CharacterType.NPC_HERO },
 ];
 
 interface DMCharactersClientProps {
@@ -28,6 +29,8 @@ interface DMCharactersClientProps {
 }
 
 export function DMCharactersClient({ campaignId, type, maxLevel }: DMCharactersClientProps) {
+  const t = useTranslations("characters.list");
+
   const page = useDmCharactersPage(campaignId, type);
 
   const characterCount = page.query.data?.length ?? 0;
@@ -39,36 +42,36 @@ export function DMCharactersClient({ campaignId, type, maxLevel }: DMCharactersC
   return (
     <HudPage>
       <HudPageHeader
-        title="Персонажі кампанії"
-        subtitle="Гравці та NPC герої"
+        title={t("title")}
+        subtitle={t("subtitle")}
         actions={
           <>
             <PartyRestActions campaignId={campaignId} characters={page.query.data ?? []} />
             <DeleteAllButton
               count={characterCount}
-              nouns={["персонаж", "персонажі", "персонажів"]}
+              noun={t("deleteAllNoun")}
               confirm={{
-                title: "Видалити всіх персонажів?",
-                label: "Видалити всіх",
-                description: "Буде видалено всіх персонажів гравців у цій кампанії. Цю дію не можна скасувати.",
+                title: t("deleteAllTitle"),
+                label: t("deleteAllLabel"),
+                description: t("deleteAllDescription"),
               }}
               view={{ icon: <Trash2 className="mr-2 h-4 w-4" /> }}
               status={{ isPending: page.status.isDeletingAll }}
               actions={{ onConfirm: page.actions.removeAll }}
             />
             <Button className="whitespace-nowrap" asChild>
-              <Link href={newHref}>+ Створити персонажа</Link>
+              <Link href={newHref}>{t("create")}</Link>
             </Button>
           </>
         }
       >
         <HudChipTabs
-          ariaLabel="Тип персонажів"
-          items={TABS.map((t) => ({
-            key: t.label,
-            label: t.label,
-            href: t.type ? `${base}?type=${t.type}` : base,
-            active: t.type === type,
+          ariaLabel={t("typeTabs")}
+          items={TABS.map((tab) => ({
+            key: tab.id,
+            label: t(`tabs.${tab.id}`),
+            href: tab.type ? `${base}?type=${tab.type}` : base,
+            active: tab.type === type,
           }))}
         />
       </HudPageHeader>
@@ -77,15 +80,15 @@ export function DMCharactersClient({ campaignId, type, maxLevel }: DMCharactersC
 
       <QueryState
         query={page.query}
-        loading={<LoadingState rows={6} label="Завантаження персонажів…" />}
+        loading={<LoadingState rows={6} label={t("loading")} />}
         empty={
           <EmptyState
             icon={Users}
-            title="Ще немає персонажів"
-            description="Гравці або NPC-герої з'являться тут."
+            title={t("emptyTitle")}
+            description={t("emptyDescription")}
             action={
               <Button asChild>
-                <Link href={newHref}>Створити першого персонажа</Link>
+                <Link href={newHref}>{t("createFirst")}</Link>
               </Button>
             }
           />
@@ -93,7 +96,7 @@ export function DMCharactersClient({ campaignId, type, maxLevel }: DMCharactersC
       >
         {() => (
           <>
-            <SearchInput value={page.search.query.value} onChange={page.search.query.set} label="Пошук персонажів" placeholder="Пошук за ім'ям або гравцем" />
+            <SearchInput value={page.search.query.value} onChange={page.search.query.set} label={t("searchLabel")} placeholder={t("searchPlaceholder")} />
             {page.search.items.length === 0 ? (
               <SearchEmptyState query={page.search.query.value} onClear={() => page.search.query.set("")} />
             ) : (

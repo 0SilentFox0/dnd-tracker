@@ -1,13 +1,17 @@
+import { useTranslations } from "next-intl";
+
 import { characterKeys, characterWriteKeys } from "./keys";
 
 import { type ReviewBody, reviewCharacter } from "@/lib/api/characters";
 import { useCrudMutation } from "@/lib/hooks/common";
 
 export function useReviewCharacter(campaignId: string, characterId: string) {
+  const t = useTranslations("characters.review");
+
   const mutation = useCrudMutation({
     mutationFn: (body: ReviewBody) => reviewCharacter(campaignId, characterId, body),
     awaitInvalidation: true,
-    errorText: "Не вдалося зберегти рішення. Спробуйте ще раз.",
+    errorText: t("saveFailed"),
     invalidateKeys: [...characterWriteKeys(campaignId), characterKeys.sheet(campaignId, characterId), characterKeys.list(campaignId, "pending", false)],
   });
 

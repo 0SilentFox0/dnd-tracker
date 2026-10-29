@@ -105,7 +105,7 @@ describe("useProgressionActions", () => {
     await act(() => result.current.learn("b"));
 
     expect(invalidate).toHaveBeenCalledWith(expect.objectContaining({ queryKey: skillKeys.progression("camp", "ch") }));
-    expect(notify).toHaveBeenCalledWith("Прогрес змінився — оновлено");
+    expect(notify).toHaveBeenCalledWith("skillTree.progression.changed");
   });
 
   it("422 → текст причини", async () => {
@@ -115,7 +115,7 @@ describe("useProgressionActions", () => {
 
     await act(() => result.current.learn("b"));
 
-    expect(notify).toHaveBeenCalledWith("Потрібне хоча б одне вміння зовнішнього кола цієї гілки");
+    expect(notify).toHaveBeenCalledWith('skillTree.reasons.needOuter {"level":9}');
   });
 
   it("подвійний тап: другий виклик під час першого не надсилає запит", async () => {

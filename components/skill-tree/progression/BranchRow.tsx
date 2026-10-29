@@ -1,20 +1,24 @@
+import { useTranslations } from "next-intl";
+
 import { SlotButton } from "./SlotButton";
 
 import { OptimizedImage } from "@/components/common/OptimizedImage";
 import { BRANCH_LEVEL_METAL } from "@/components/hud";
 import { Button } from "@/components/ui/button";
 import type { BranchRow as Row, NodeState } from "@/lib/utils/skills/progression";
-import { BRANCH_LEVEL_LABEL, branchLevelNodeId } from "@/lib/utils/skills/progression";
+import { branchLevelNodeId } from "@/lib/utils/skills/progression";
 import type { CharacterProgressionDto } from "@/types/progression";
 
 export function BranchRow({ row, dto, onSelect }: { row: Row; dto: CharacterProgressionDto; onSelect: (state: NodeState) => void }) {
+  const t = useTranslations("skillTree");
+
   const branch = dto.branches[row.branchId];
 
-  const label = (s: NodeState) => (s.nodeId ? (dto.skills[s.nodeId]?.name ?? "Невідомий скіл") : "Порожній слот");
+  const label = (s: NodeState) => (s.nodeId ? (dto.skills[s.nodeId]?.name ?? t("row.unknownSkill")) : t("row.emptySlot"));
 
   const icon = (s: NodeState) => (s.nodeId ? (dto.skills[s.nodeId]?.icon ?? branch?.icon ?? null) : null);
 
-  const levelText = row.level ? BRANCH_LEVEL_LABEL[row.level] : "—";
+  const levelText = row.level ? t(`tiers.${row.level}`) : "—";
 
   const renderSlot = (s: NodeState, i: number) => <SlotButton key={i} state={s} label={label(s)} icon={icon(s)} onSelect={() => onSelect(s)} />;
 
@@ -23,7 +27,7 @@ export function BranchRow({ row, dto, onSelect }: { row: Row; dto: CharacterProg
       <Button
         type="button"
         variant="ghost"
-        aria-label={`Рівень гілки: ${branch?.name ?? row.branchId} · ${levelText}`}
+        aria-label={t("row.branchLevelAria", { branch: branch?.name ?? row.branchId, tier: levelText })}
         disabled={!row.level}
         onClick={() => row.level && onSelect({ nodeId: branchLevelNodeId(row.branchId, row.level), state: "learned" })}
         className={`h-auto whitespace-normal rounded-none p-0 font-normal hover:bg-transparent dark:hover:bg-transparent flex w-14 shrink-0 flex-col items-center gap-1 disabled:opacity-100 ${row.level ? BRANCH_LEVEL_METAL[row.level] : "metal-iron"}`}

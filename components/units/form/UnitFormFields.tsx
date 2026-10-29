@@ -14,15 +14,17 @@ import { AbilityScoresGrid } from "@/components/common/AbilityScoresGrid";
 import { IconUrlField } from "@/components/common/IconUrlField";
 import { HudSection, type HudTab } from "@/components/hud/form";
 import type { UnitFormFieldsState } from "@/lib/hooks/units";
+import type { Translator } from "@/lib/i18n/translator";
 import type { ConversionIssue } from "@/lib/utils/abilities/schema";
 
 interface UnitFormFieldsProps {
   campaignId: string;
   editor: UnitFormFieldsState;
   abilityIssues?: ConversionIssue[];
+  t: Translator;
 }
 
-export function unitFormTabs({ campaignId, editor, abilityIssues }: UnitFormFieldsProps): HudTab<UnitFormTabId>[] {
+export function unitFormTabs({ campaignId, editor, abilityIssues, t }: UnitFormFieldsProps): HudTab<UnitFormTabId>[] {
   const { data: formData, change } = editor.form;
 
   const { races, spells, fiveE } = editor.options;
@@ -30,7 +32,7 @@ export function unitFormTabs({ campaignId, editor, abilityIssues }: UnitFormFiel
   return [
     {
       id: UNIT_FORM_TAB.basic,
-      label: "Основне",
+      label: t("common.tabs.basic"),
       content: (
         <div className="space-y-4">
           <UnitBasicInfo formData={formData} races={races} onChange={change} />
@@ -41,12 +43,12 @@ export function unitFormTabs({ campaignId, editor, abilityIssues }: UnitFormFiel
           )}
           <IconUrlField
             id="avatar"
-            label="Аватар (посилання на картинку)"
+            label={t("units.basic.avatar")}
             value={formData.avatar ?? ""}
             onChange={(avatar) => change({ avatar: avatar || null })}
             fallbackText={formData.name || "?"}
           />
-          <HudSection title="Характеристики">
+          <HudSection title={t("units.basic.abilityScores")}>
             <AbilityScoresGrid data={formData} set={(key, value) => change({ [key]: value })} />
           </HudSection>
         </div>
@@ -54,7 +56,7 @@ export function unitFormTabs({ campaignId, editor, abilityIssues }: UnitFormFiel
     },
     {
       id: UNIT_FORM_TAB.attacks,
-      label: "Атаки",
+      label: t("units.form.tabs.attacks"),
       content: (
         <>
           <UnitAttacks formData={formData} onChange={change} />
@@ -64,7 +66,7 @@ export function unitFormTabs({ campaignId, editor, abilityIssues }: UnitFormFiel
     },
     {
       id: UNIT_FORM_TAB.abilities,
-      label: "Вміння",
+      label: t("common.tabs.abilities"),
       invalid: editor.abilities.errors > 0 || (abilityIssues?.length ?? 0) > 0,
       content: (
         <AbilityListEditor
@@ -79,9 +81,9 @@ export function unitFormTabs({ campaignId, editor, abilityIssues }: UnitFormFiel
     },
     {
       id: UNIT_FORM_TAB.magic,
-      label: formData.cr != null ? "Заклинання" : "Магія",
+      label: formData.cr != null ? t("units.form.tabs.spells") : t("units.form.tabs.magic"),
       content: formData.cr != null ? <UnitSpellcastingFields formData={formData} spells={spells} onChange={change} /> : <UnitKnownSpells formData={formData} spells={spells} onChange={change} />,
     },
-    ...(formData.cr != null ? [{ id: UNIT_FORM_TAB.statblock, label: "Статблок", content: <UnitStatblockFields formData={formData} onChange={change} /> }] : []),
+    ...(formData.cr != null ? [{ id: UNIT_FORM_TAB.statblock, label: t("units.form.tabs.statblock"), content: <UnitStatblockFields formData={formData} onChange={change} /> }] : []),
   ];
 }

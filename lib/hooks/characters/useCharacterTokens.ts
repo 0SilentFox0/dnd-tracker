@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import { useQueryClient } from "@tanstack/react-query";
 
 import { characterKeys } from "./keys";
@@ -9,9 +10,9 @@ import { useCrudMutation } from "@/lib/hooks/common";
 import type { CreateTokenInput } from "@/lib/schemas/character-tokens";
 import type { CharacterSheet, CharacterToken } from "@/types/characters";
 
-const TOKEN_ERROR = "Не вдалося зберегти жетон";
-
 export function useCharacterTokens(campaignId: string, characterId: string) {
+  const t = useTranslations("characterProfile.tokens");
+
   const queryClient = useQueryClient();
 
   const key = characterKeys.sheet(campaignId, characterId);
@@ -21,13 +22,13 @@ export function useCharacterTokens(campaignId: string, characterId: string) {
 
   const addMutation = useCrudMutation({
     mutationFn: (input: CreateTokenInput) => createCharacterToken(campaignId, characterId, input),
-    errorText: TOKEN_ERROR,
+    errorText: t("saveFailed"),
     onSuccess: ({ token }) => patchTokens((tokens) => [token, ...tokens]),
   });
 
   const removeMutation = useCrudMutation({
     mutationFn: (tokenId: string) => deleteCharacterToken(campaignId, characterId, tokenId),
-    errorText: TOKEN_ERROR,
+    errorText: t("saveFailed"),
     onSuccess: (_res, tokenId) => patchTokens((tokens) => tokens.filter((t) => t.id !== tokenId)),
   });
 

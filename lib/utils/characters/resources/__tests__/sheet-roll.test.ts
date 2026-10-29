@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { ABILITY_LABELS } from "@/lib/constants/abilities";
+import { makeT } from "@/lib/i18n/test/mock-t";
 import { seq } from "@/lib/utils/abilities/__tests__/fixtures";
 import { createMockParticipant } from "@/lib/utils/battle/__tests__/fixtures/mock-participant";
 import { rollFromSheet } from "@/lib/utils/characters/resources/sheet-roll";
@@ -20,7 +20,7 @@ const rogue = (exhausted = false): BattleParticipant => {
   };
 };
 
-const opts = (inspiration: boolean) => ({ rules: DEFAULT_RULES, rng: seq(0.5, 0.95), inspiration });
+const opts = (inspiration: boolean) => ({ rules: DEFAULT_RULES, rng: seq(0.5, 0.95), inspiration, t: makeT() });
 
 describe("rollFromSheet", () => {
   it("skill check: d20 + DEX + proficiency", () => {
@@ -39,7 +39,8 @@ describe("rollFromSheet", () => {
   it("saving throw has its own label", () => {
     const r = rollFromSheet(rogue(), { kind: "save", ability: "wisdom" }, opts(false));
 
-    expect(r.label).toContain(ABILITY_LABELS.wisdom);
+    expect(r.label).toBe('rest.rollLabel.save {"ability":"common.abilities.wisdom.label"}');
+    expect(rollFromSheet(rogue(), { kind: "check", skill: "stealth" }, opts(false)).label).toBe("common.dndSkills.stealth");
     expect(r).toMatchObject({ total: 11, autoFail: false });
   });
 });

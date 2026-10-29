@@ -10,8 +10,8 @@ import { ApiError } from "@/lib/api/client";
 import { battleKeys } from "@/lib/hooks/battles/keys";
 import { characterKeys } from "@/lib/hooks/characters/keys";
 import { useNotify, useSingleFlight } from "@/lib/hooks/common";
-import type { LearnBlockReason, UnlearnBlockReason } from "@/lib/utils/skills/progression";
-import { LEARN_BLOCK_TEXT, normalizeTree, skillPoints, UNLEARN_BLOCK_TEXT } from "@/lib/utils/skills/progression";
+import { useTranslator } from "@/lib/i18n/use-translator";
+import { BRANCH_MIN_LEVEL, normalizeTree, skillPoints } from "@/lib/utils/skills/progression";
 import type { CharacterSheet } from "@/types/characters";
 import type { CharacterProgressionDto } from "@/types/progression";
 
@@ -19,6 +19,8 @@ const SHEET_REFRESH_DELAY_MS = 1000;
 
 export function useProgressionActions(campaignId: string, characterId: string) {
   const queryClient = useQueryClient();
+
+  const t = useTranslator("skillTree");
 
   const notify = useNotify();
 
@@ -70,11 +72,11 @@ export function useProgressionActions(campaignId: string, characterId: string) {
       } catch (error) {
         if (error instanceof ApiError && error.status === 409) {
           void queryClient.invalidateQueries({ queryKey: key });
-          await notify("Прогрес змінився — оновлено");
+          await notify(t("progression.changed"));
         } else if (error instanceof ApiError && error.status === 422) {
           const reason = (error.body as { reason?: string } | undefined)?.reason ?? "";
 
-          await notify(LEARN_BLOCK_TEXT[reason as LearnBlockReason] ?? UNLEARN_BLOCK_TEXT[reason as UnlearnBlockReason] ?? error.message);
+          await notify(t.has(`reasons.${reason}`) ? t(`reasons.${reason}`, { level: BRANCH_MIN_LEVEL.expert }) : error.message);
         } else {
           await notify((error as Error).message);
         }

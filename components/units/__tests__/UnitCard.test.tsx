@@ -34,10 +34,10 @@ describe("UnitCard delete", () => {
     const onDelete = vi.fn();
 
     render(<UnitCard unit={unit} campaignId="c1" onDelete={onDelete} />);
-    fireEvent.click(screen.getByRole("button", { name: "Видалити юніт Гоблін" }));
-    fireEvent.click(await screen.findByRole("button", { name: "common.confirm.cancel" }));
+    fireEvent.click(screen.getByRole("button", { name: 'units.card.deleteLabel {"name":"Гоблін"}' }));
+    fireEvent.click(await screen.findByRole("button", { name: "common.actions.cancel" }));
 
-    await waitFor(() => expect(screen.queryByRole("button", { name: "common.confirm.cancel" })).toBeNull());
+    await waitFor(() => expect(screen.queryByRole("button", { name: "common.actions.cancel" })).toBeNull());
     await new Promise((r) => setTimeout(r, 0));
     expect(onDelete).not.toHaveBeenCalled();
   });
@@ -46,8 +46,8 @@ describe("UnitCard delete", () => {
     const onDelete = vi.fn();
 
     render(<UnitCard unit={unit} campaignId="c1" onDelete={onDelete} />);
-    fireEvent.click(screen.getByRole("button", { name: "Видалити юніт Гоблін" }));
-    fireEvent.click(await screen.findByRole("button", { name: "Видалити" }));
+    fireEvent.click(screen.getByRole("button", { name: 'units.card.deleteLabel {"name":"Гоблін"}' }));
+    fireEvent.click(await screen.findByRole("button", { name: "common.actions.delete" }));
 
     await waitFor(() => expect(onDelete).toHaveBeenCalledWith("unit-1"));
   });
@@ -59,7 +59,7 @@ describe("UnitCard вміння", () => {
   it("показує опис умінь", () => {
     render(<UnitCard unit={{ ...unit, abilitySummary: ["Влучання · bleed 1d4/раунд × 2 р."] } as Unit} campaignId="c1" onDelete={vi.fn()} />);
 
-    expect(screen.getByText("Вміння:")).toBeInTheDocument();
+    expect(screen.getByText("units.card.abilities")).toBeInTheDocument();
     expect(screen.getByText("Влучання · bleed 1d4/раунд × 2 р.")).toBeInTheDocument();
   });
 });
@@ -72,7 +72,7 @@ describe("UnitCard середня шкода", () => {
 
     render(<UnitCard unit={archer} campaignId="c1" onDelete={vi.fn()} />);
 
-    expect(screen.getByText(/Урон ~8/)).toBeInTheDocument();
+    expect(screen.getByText(/units.card.damage \{"average":8\}/)).toBeInTheDocument();
     expect(screen.getByText("(1d8 +3 СПР)")).toBeInTheDocument();
   });
 });

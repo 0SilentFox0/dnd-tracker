@@ -101,7 +101,7 @@ export function ConfirmProvider({ children }: { children: ReactNode }) {
           <>
             {shown?.cancelLabel === null ? null : (
               <Button variant="outline" onClick={() => settle(false)} disabled={busy}>
-                {shown?.cancelLabel ?? t("confirm.cancel")}
+                {shown?.cancelLabel ?? t("actions.cancel")}
               </Button>
             )}
             <Button variant={shown?.destructive ? "destructive" : "default"} onClick={accept} disabled={busy}>

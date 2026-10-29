@@ -1,3 +1,4 @@
+/* eslint-disable no-restricted-syntax -- Ukrainian labels read by the battle UI, info-reference cache and fx preview; the editor uses spells.* keys */
 import type { SpellCost, SpellResolution, SpellTargeting } from "./schema";
 
 import { ABILITY_LABELS } from "@/lib/constants/abilities";

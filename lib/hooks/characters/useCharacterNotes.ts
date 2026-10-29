@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import { useQueryClient } from "@tanstack/react-query";
 
 import { characterKeys } from "./keys";
@@ -9,13 +10,15 @@ import { useCrudMutation } from "@/lib/hooks/common";
 import type { CharacterSheet } from "@/types/characters";
 
 export function useCharacterNotes(campaignId: string, characterId: string) {
+  const t = useTranslations("characterProfile.notes");
+
   const queryClient = useQueryClient();
 
   const key = characterKeys.sheet(campaignId, characterId);
 
   const mutation = useCrudMutation({
     mutationFn: (notes: string) => putCharacterNotes(campaignId, characterId, notes),
-    errorText: "Не вдалося зберегти нотатки",
+    errorText: t("saveFailed"),
     onSuccess: ({ notes }) => queryClient.setQueryData<CharacterSheet>(key, (old) => (old ? { ...old, story: { ...old.story, notes } } : old)),
   });
 

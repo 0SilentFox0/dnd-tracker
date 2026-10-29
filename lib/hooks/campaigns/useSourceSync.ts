@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useMemo, useState } from "react";
+import { useTranslations } from "next-intl";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
 import { invalidateCampaignQueries } from "./invalidate";
@@ -44,6 +45,8 @@ export function useApplySourceChanges(campaignId: string) {
 }
 
 export function useSourceSyncApply(campaignId: string, items: SourceDiffItem[]) {
+  const t = useTranslations("campaigns");
+
   const apply = useApplySourceChanges(campaignId);
 
   const [errorState, setErrorState] = useState<{ message: string; items: SourceDiffItem[] } | null>(null);
@@ -61,7 +64,7 @@ export function useSourceSyncApply(campaignId: string, items: SourceDiffItem[]) 
       onSuccess,
       onError: (err) => {
         if (err instanceof ApiError && err.status === 409) setStaleNotice(true);
-        else setErrorState({ message: errorMessage(err, "Помилка синхронізації"), items });
+        else setErrorState({ message: errorMessage(err, t("sourceSync.failed")), items });
       },
     });
   };

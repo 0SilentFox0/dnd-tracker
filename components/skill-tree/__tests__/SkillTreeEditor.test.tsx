@@ -2,10 +2,12 @@
 import { cleanup, fireEvent, screen, waitFor, within } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
+import { renderSkillTree } from "./render-intl";
+
 import { SkillTreeEditor } from "@/components/skill-tree/editor";
-import { renderWithConfirm } from "@/components/ui/__tests__/render-with-confirm";
 import { buildTreeJson, normalizeTree } from "@/lib/utils/skills/progression";
 
+vi.unmock("next-intl");
 vi.mock("@/components/hud/fonts", () => ({ hudFontClassName: "", HUD_SURFACE: "hud-surface" }));
 
 const actions = { setCell: vi.fn(), addBranch: vi.fn(), createBranch: vi.fn(), removeBranch: vi.fn(), moveBranch: vi.fn(), save: vi.fn(), cancel: vi.fn() };
@@ -39,8 +41,8 @@ afterEach(() => {
 });
 
 describe("SkillTreeEditor", () => {
-  it("клітинка → пікер скілів гілки; вже використаний недоступний; «Поставити»", () => {
-    renderWithConfirm(<SkillTreeEditor campaignId="c" />);
+  it("клітинка → пікер скілів гілки; вже використаний недоступний; «Поставити»", async () => {
+    await renderSkillTree(<SkillTreeEditor campaignId="c" />);
     fireEvent.click(screen.getByRole("button", { name: "Напад · Зовнішнє 2" }));
 
     const picker = screen.getByRole("dialog");
@@ -54,33 +56,33 @@ describe("SkillTreeEditor", () => {
     expect(actions.setCell).toHaveBeenCalledWith({ kind: "slot", branchId: "attack", circle: "outer", index: 1 }, "o2");
   });
 
-  it("«+ Додати гілку» → вибір існуючої", () => {
-    renderWithConfirm(<SkillTreeEditor campaignId="c" />);
+  it("«+ Додати гілку» → вибір існуючої", async () => {
+    await renderSkillTree(<SkillTreeEditor campaignId="c" />);
     fireEvent.click(screen.getByRole("button", { name: "+ Додати гілку" }));
     fireEvent.click(screen.getByRole("button", { name: "Захист" }));
 
     expect(actions.addBranch).toHaveBeenCalledWith("defense");
   });
 
-  it("помилки валідації блокують «Зберегти»", () => {
+  it("помилки валідації блокують «Зберегти»", async () => {
     errors = [{ code: "duplicateSkill", ref: "o1" }];
-    renderWithConfirm(<SkillTreeEditor campaignId="c" />);
+    await renderSkillTree(<SkillTreeEditor campaignId="c" />);
 
     expect((screen.getByRole("button", { name: "Зберегти" }) as HTMLButtonElement).disabled).toBe(true);
     expect(screen.getByText(/Цей скіл уже стоїть в іншому місці дерева/)).toBeTruthy();
   });
 
-  it("поки дані вантажаться — стан завантаження, не «Додайте расу»", () => {
+  it("поки дані вантажаться — стан завантаження, не «Додайте расу»", async () => {
     loading = true;
-    renderWithConfirm(<SkillTreeEditor campaignId="c" />);
+    await renderSkillTree(<SkillTreeEditor campaignId="c" />);
 
     expect(screen.queryByText(/Додайте расу/)).toBeNull();
-    expect(screen.getByText("common.states.loading")).toBeTruthy();
+    expect(screen.getByText("Завантаження…")).toBeTruthy();
   });
 
   it("невдале створення гілки лишає шторку відкритою; вдале — закриває", async () => {
     actions.createBranch.mockResolvedValueOnce(false).mockResolvedValueOnce(true);
-    renderWithConfirm(<SkillTreeEditor campaignId="c" />);
+    await renderSkillTree(<SkillTreeEditor campaignId="c" />);
     fireEvent.click(screen.getByRole("button", { name: "+ Додати гілку" }));
 
     const input = screen.getByPlaceholderText("Назва нової гілки");
@@ -96,9 +98,9 @@ describe("SkillTreeEditor", () => {
     await waitFor(() => expect(screen.queryByPlaceholderText("Назва нової гілки")).toBeNull());
   });
 
-  it("помилка невідомої гілки показує її назву, а не id", () => {
+  it("помилка невідомої гілки показує її назву, а не id", async () => {
     errors = [{ code: "unknownBranch", ref: "cm-ghost-id", label: "Тінь" }];
-    renderWithConfirm(<SkillTreeEditor campaignId="c" />);
+    await renderSkillTree(<SkillTreeEditor campaignId="c" />);
 
     expect(screen.getByText("Гілки немає серед основних навичок кампанії: Тінь")).toBeTruthy();
     expect(screen.queryByText(/cm-ghost-id/)).toBeNull();

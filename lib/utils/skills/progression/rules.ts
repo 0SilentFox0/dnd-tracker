@@ -2,24 +2,6 @@ import { branchLevelNodeId, racialNodeId } from "./ids";
 import type { Check, LearnBlockReason, ProgressionNode, TreeNodes, UnlearnBlockReason } from "./types";
 import { BRANCH_LEVELS, BRANCH_MIN_LEVEL, RACIAL_MIN_LEVEL } from "./types";
 
-export const LEARN_BLOCK_TEXT: Record<LearnBlockReason, string> = {
-  noPoints: "Немає вільних очок — підніміть рівень",
-  alreadyLearned: "Уже вивчено",
-  notInTree: "Цього вміння немає в дереві",
-  branchOrder: "Спершу вивчіть попередній рівень",
-  outerLimit: "Зовнішніх умінь у гілці не більше, ніж її рівнів — підвищте рівень гілки",
-  needOuter: "Потрібне хоча б одне вміння зовнішнього кола цієї гілки",
-  needMiddleAndExpert: "Потрібні вміння середнього кола й рівень Експерт цієї гілки",
-  racialLevel: "Доступно з вищого рівня персонажа",
-  expertLevel: `Експертом гілки можна стати з ${BRANCH_MIN_LEVEL.expert} рівня персонажа`,
-  needInner: "Потрібні 3 вміння внутрішнього кола",
-};
-
-export const UNLEARN_BLOCK_TEXT: Record<UnlearnBlockReason, string> = {
-  notLearned: "Це вміння не вивчене",
-  hasDependents: "Від цього вміння залежать інші вивчені — спершу зніміть їх",
-};
-
 const no = <R>(reason: R): Check<R> => ({ ok: false, reason });
 
 const OK = { ok: true } as const;

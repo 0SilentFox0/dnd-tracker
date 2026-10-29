@@ -22,6 +22,6 @@ describe("choices constants", () => {
   it("error key and log line", () => {
     expect(API_ERRORS.FEAT_IN_USE).toBe("errors.featInUse");
     expect(CharacterLogKind.CHOICES_EDIT).toBe("choices_edit");
-    expect(describeCharacterLog({ kind: "choices_edit", data: {} })).toBe("✎ Змінено вибори (раса, риси, опції класу)");
+    expect(describeCharacterLog({ kind: "choices_edit", data: {} })).toEqual({ key: "rest.log.choicesEdit" });
   });
 });

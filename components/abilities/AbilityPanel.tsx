@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import { X } from "lucide-react";
 
 import { ConditionSection } from "./sections/ConditionSection";
@@ -24,6 +25,8 @@ export interface AbilitySectionProps {
 }
 
 export function AbilityPanel({ ability, path, actions }: { ability: Ability; path: string; actions: { onChange: (a: Ability) => void; onRemove: () => void } }) {
+  const t = useTranslations("abilities.panel");
+
   const section = { ability, path, onChange: actions.onChange };
 
   const nameErrors = useErrorsUnder(`${path}.name`);
@@ -33,19 +36,19 @@ export function AbilityPanel({ ability, path, actions }: { ability: Ability; pat
       <div className="flex items-start gap-2">
         <div className="min-w-0 flex-1 space-y-1">
           <Label htmlFor={`${path}.name`} className="text-xs text-muted-foreground">
-            Назва
+            {t("name")}
           </Label>
           <Input id={`${path}.name`} value={ability.name} onChange={(e) => actions.onChange({ ...ability, name: e.target.value })} />
           <FieldErrors errors={nameErrors} testId={`field-errors-${path}.name`} />
         </div>
-        <Button type="button" size="icon" variant="ghost" className="mt-5 text-hud-danger" aria-label={`Видалити вміння ${ability.name}`} onClick={actions.onRemove}>
+        <Button type="button" size="icon" variant="ghost" className="mt-5 text-hud-danger" aria-label={t("delete", { name: ability.name })} onClick={actions.onRemove}>
           <X className="h-4 w-4" />
         </Button>
       </div>
       <p className="text-xs text-[#b8ab95]">{describeAbility(ability)}</p>
       <div className="space-y-1">
         <Label htmlFor={`${path}.description`} className="text-xs text-muted-foreground">
-          Опис (необов&apos;язково)
+          {t("description")}
         </Label>
         <Textarea
           id={`${path}.description`}

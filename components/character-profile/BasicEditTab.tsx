@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useTranslations } from "next-intl";
 
 import { useProfile } from "./ProfileContext";
 
@@ -10,10 +11,13 @@ import { Button } from "@/components/ui/button";
 import type { DmCharacterEditor } from "@/lib/hooks/characters";
 import { useClassMode } from "@/lib/hooks/classes";
 import { classHp, hitDiceLabel } from "@/lib/utils/characters/classes";
+import { sheetLineKey } from "@/lib/utils/characters/sheet/line-key";
 import { resolveClassEntries } from "@/lib/utils/spells/class-slots";
 
 export function BasicEditTab({ editor, onDeleted }: { editor: DmCharacterEditor; onDeleted: () => void }) {
   const { form, options } = editor;
+
+  const t = useTranslations("characterProfile.basic");
 
   const { campaignId, sheet } = useProfile();
 
@@ -28,7 +32,7 @@ export function BasicEditTab({ editor, onDeleted }: { editor: DmCharacterEditor;
   const classEntries = resolveClassEntries(form.basicInfo.data.classes ?? [], classMode.byId);
 
   const hp = classUi && classEntries.some((e) => e.class)
-    ? { total: classHp(classEntries, form.abilityScores.data.constitution), lines: [{ label: `Кістки хітів: ${hitDiceLabel(classEntries)}`, value: "" }] }
+    ? { total: classHp(classEntries, form.abilityScores.data.constitution), lines: [{ label: sheetLineKey("hitDice"), params: { dice: hitDiceLabel(classEntries) }, value: "" }] }
     : sheet.hp;
 
   const remove = async () => {
@@ -40,12 +44,12 @@ export function BasicEditTab({ editor, onDeleted }: { editor: DmCharacterEditor;
       <CharacterBasicInfo basicInfo={form.basicInfo} campaignMembers={options.members} races={options.races} classMode={classUi ? classMode : undefined} />
       {classMode.enabled && !classUi && (
         <Button type="button" variant="outline" size="sm" onClick={() => setConverting(true)}>
-          Перевести на класи
+          {t("toClasses")}
         </Button>
       )}
       <CharacterHpPreview hp={hp} />
       <Button type="button" variant="destructive" className="h-11 w-full" onClick={() => void remove()}>
-        Видалити персонажа
+        {t("delete")}
       </Button>
     </div>
   );

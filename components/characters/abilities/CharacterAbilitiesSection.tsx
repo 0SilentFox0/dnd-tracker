@@ -1,6 +1,7 @@
 "use client";
 
 import { useMemo } from "react";
+import { useTranslations } from "next-intl";
 
 import { Label } from "@/components/ui/label";
 import { SelectField } from "@/components/ui/select-field";
@@ -16,6 +17,8 @@ export function CharacterAbilitiesSection({
   campaignId,
   abilities,
 }: CharacterAbilitiesSectionProps) {
+  const t = useTranslations("characters.form.personalAbility");
+
   const { data: mainSkills = [] } = useMainSkills(campaignId);
 
   const personalMainSkillId = mainSkills.find((ms) => ms.role === "personal")?.id;
@@ -27,19 +30,19 @@ export function CharacterAbilitiesSection({
   return (
     <div className="space-y-4 w-full">
       <div className="w-full min-w-0">
-        <Label htmlFor="personalSkillId">Уміння (Персональні)</Label>
+        <Label htmlFor="personalSkillId">{t("label")}</Label>
         <SelectField
           id="personalSkillId"
           value={abilities.data.personalSkillId}
           onValueChange={(value) => abilities.set("personalSkillId", value)}
           options={options}
-          placeholder="Виберіть скіл з групи Персональні"
+          placeholder={t("placeholder")}
           triggerClassName="w-full mt-1"
           allowNone
-          noneLabel="Не обрано"
+          noneLabel={t("none")}
         />
         <p className="text-xs text-muted-foreground mt-1">
-          Скіл з групи основних навиків «Персональні»
+          {t("hint")}
         </p>
       </div>
     </div>

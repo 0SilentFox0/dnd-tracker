@@ -1,8 +1,6 @@
-import { ABILITY_LABELS } from "@/lib/constants/abilities";
-import { CLASS_CASTER_LABELS } from "@/lib/constants/classes";
-import { spellLevelName } from "@/lib/constants/spells";
+import type { Translator } from "@/lib/i18n/translator";
 import type { ClassFeature, GameClassData } from "@/types/classes";
-import type { ArtifactForReference, ClassFeatureForReference, ClassForReference, SkillForReference, SpellForReference } from "@/types/info-reference";
+import type { ArtifactForReference, ClassFeatureForReference, ClassForReference, ClassSummaryLine, SkillForReference, SpellForReference } from "@/types/info-reference";
 
 function featuresForReference(features: ClassFeature[]): ClassFeatureForReference[] {
   return features
@@ -15,21 +13,21 @@ function featuresForReference(features: ClassFeature[]): ClassFeatureForReferenc
 }
 
 export function toClassForReference(c: GameClassData): ClassForReference {
-  const summary = [`Кістка здоров'я: к${c.hitDie}`];
+  const summary: ClassSummaryLine[] = [{ key: "hitDie", params: { die: c.hitDie } }];
 
-  if (c.savingThrows.length > 0) summary.push(`Рятівні кидки: ${c.savingThrows.map((k) => ABILITY_LABELS[k]).join(", ")}`);
+  if (c.savingThrows.length > 0) summary.push({ key: "savingThrows", params: { list: c.savingThrows.join(",") } });
 
-  if (c.caster !== "none") summary.push(`${CLASS_CASTER_LABELS[c.caster]}${c.spellcastingAbility ? ` (${ABILITY_LABELS[c.spellcastingAbility]})` : ""}`);
+  if (c.caster !== "none") summary.push(c.spellcastingAbility ? { key: "casterAbility", params: { caster: c.caster, ability: c.spellcastingAbility } } : { key: "caster", params: { caster: c.caster } });
 
   const { armor, weapons, tools } = c.proficiencies;
 
-  if (armor.length > 0) summary.push(`Обладунки: ${armor.join(", ")}`);
+  if (armor.length > 0) summary.push({ key: "armor", params: { list: armor.join(", ") } });
 
-  if (weapons.length > 0) summary.push(`Зброя: ${weapons.join(", ")}`);
+  if (weapons.length > 0) summary.push({ key: "weapons", params: { list: weapons.join(", ") } });
 
-  if (tools.length > 0) summary.push(`Інструменти: ${tools.join(", ")}`);
+  if (tools.length > 0) summary.push({ key: "tools", params: { list: tools.join(", ") } });
 
-  if (c.skillChoices.count > 0) summary.push(`Навички: ${c.skillChoices.count} з ${c.skillChoices.from.join(", ")}`);
+  if (c.skillChoices.count > 0) summary.push({ key: "skills", params: { count: c.skillChoices.count, list: c.skillChoices.from.join(", ") } });
 
   return {
     id: c.id,
@@ -42,58 +40,71 @@ export function toClassForReference(c: GameClassData): ClassForReference {
   };
 }
 
-export function classSearchText(c: ClassForReference): string {
+/** Id params (abilities, caster type) are translated here: ICU cannot translate a key passed as a parameter. */
+export function classSummaryText(t: Translator, line: ClassSummaryLine): string {
+  const params: Record<string, string | number> = { ...line.params };
+
+  if (line.key === "savingThrows") params.list = String(params.list).split(",").map((id) => t(`common.abilities.${id}.label`)).join(", ");
+
+  if (params.caster) params.caster = t(`classes.casters.${params.caster}`);
+
+  if (params.ability) params.ability = t(`common.abilities.${params.ability}.label`);
+
+  return t(`dashboard.reference.summary.${line.key}`, params);
+}
+
+export function classSearchText(c: ClassForReference, t: Translator): string {
   const featureText = (f: ClassFeatureForReference) => [f.name, f.description];
 
-  return [c.name, ...c.summary, ...c.features.flatMap(featureText), ...c.subclasses.flatMap((s) => [s.name, ...s.features.flatMap(featureText)])]
+  return [c.name, ...c.summary.map((line) => classSummaryText(t, line)), ...c.features.flatMap(featureText), ...c.subclasses.flatMap((s) => [s.name, ...s.features.flatMap(featureText)])]
     .filter(Boolean)
     .join(" ")
     .toLowerCase();
 }
 
-export function formatMechanicsSkill(s: SkillForReference): string {
+export function formatMechanicsSkill(s: SkillForReference, t: Translator): string {
   const parts: string[] = [];
 
-  if (s.mainSkillName) parts.push(`Гілка: ${s.mainSkillName}`);
+  if (s.mainSkillName) parts.push(t("dashboard.reference.mechanics.branch", { name: s.mainSkillName }));
 
-  if (s.abilitySummary.length > 0) parts.push(`Вміння: ${s.abilitySummary.join("; ")}`);
+  if (s.abilitySummary.length > 0) parts.push(t("dashboard.reference.mechanics.abilities", { list: s.abilitySummary.join("; ") }));
 
-  if (s.grantedSpellName) parts.push(`Додає заклинання: ${s.grantedSpellName}`);
+  if (s.grantedSpellName) parts.push(t("dashboard.reference.mechanics.grantedSpell", { name: s.grantedSpellName }));
 
   return parts.join(". ") || "—";
 }
 
-export function formatMechanicsSpell(s: SpellForReference): string {
-  const parts: string[] = [`${spellLevelName(s.level)}, ${s.type}`];
+export function formatMechanicsSpell(s: SpellForReference, t: Translator): string {
+  const parts: string[] = [t("dashboard.reference.mechanics.spell", { level: t(`common.spellLevels.${s.level}`), type: s.type })];
 
-  if (s.dice > 0) parts.push(`Кубики: ${s.dice}к`);
+  if (s.dice > 0) parts.push(t("dashboard.reference.mechanics.dice", { count: s.dice }));
 
-  parts.push(`Перевірка: ${s.resolution}`, `Вартість: ${s.cost}`);
+  parts.push(t("dashboard.reference.mechanics.resolution", { value: s.resolution }), t("dashboard.reference.mechanics.cost", { value: s.cost }));
 
   return parts.join(". ");
 }
 
-export function skillSearchText(s: SkillForReference): string {
+export function skillSearchText(s: SkillForReference, t: Translator): string {
   return [
     s.name,
     s.description ?? "",
     s.appearanceDescription ?? "",
     s.mainSkillName ?? "",
     s.grantedSpellName ?? "",
-    formatMechanicsSkill(s),
+    formatMechanicsSkill(s, t),
   ]
     .join(" ")
     .toLowerCase();
 }
 
-export function spellSearchText(s: SpellForReference): string {
+export function spellSearchText(s: SpellForReference, t: Translator): string {
   return [
     s.name,
     s.description ?? "",
     s.appearanceDescription ?? "",
     s.groupName ?? "",
     s.type,
-    formatMechanicsSpell(s),
+    formatMechanicsSpell(s, t),
     (s.effects || []).join(" "),
   ]
     .join(" ")
@@ -114,7 +125,7 @@ export function matchSearch(text: string, query: string): boolean {
 
 const SHORT_SUMMARY_LENGTH = 72;
 
-export function getShortSkillSummary(s: SkillForReference): string {
+export function getShortSkillSummary(s: SkillForReference, t: Translator): string {
   if (s.description?.trim()) {
     const first = s.description.split(/\n/)[0]?.trim() ?? "";
 
@@ -123,14 +134,14 @@ export function getShortSkillSummary(s: SkillForReference): string {
     return first.slice(0, SHORT_SUMMARY_LENGTH - 2) + "…";
   }
 
-  const mechanics = formatMechanicsSkill(s);
+  const mechanics = formatMechanicsSkill(s, t);
 
   if (mechanics.length <= SHORT_SUMMARY_LENGTH) return mechanics;
 
   return mechanics.slice(0, SHORT_SUMMARY_LENGTH - 2) + "…";
 }
 
-export function getShortSpellSummary(s: SpellForReference): string {
+export function getShortSpellSummary(s: SpellForReference, t: Translator): string {
   if (s.description?.trim()) {
     const first = s.description.split(/\n/)[0]?.trim() ?? "";
 
@@ -139,7 +150,7 @@ export function getShortSpellSummary(s: SpellForReference): string {
     return first.slice(0, SHORT_SUMMARY_LENGTH - 2) + "…";
   }
 
-  const mechanics = formatMechanicsSpell(s);
+  const mechanics = formatMechanicsSpell(s, t);
 
   if (mechanics.length <= SHORT_SUMMARY_LENGTH) return mechanics;
 

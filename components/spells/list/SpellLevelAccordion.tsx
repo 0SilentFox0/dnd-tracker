@@ -1,6 +1,7 @@
 "use client";
 
 import * as React from "react";
+import { useTranslations } from "next-intl";
 import { Trash2 } from "lucide-react";
 
 import { spellLevelMetal } from "@/components/hud";
@@ -14,8 +15,8 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { useConfirm } from "@/lib/hooks/common";
 import { useDeleteSpellsByLevel } from "@/lib/hooks/spells";
+import { useTranslator } from "@/lib/i18n/use-translator";
 import { cn } from "@/lib/utils";
-import { pluralUk } from "@/lib/utils/common/plural";
 import type { Spell, SpellGroup } from "@/types/spells";
 
 
@@ -41,15 +42,23 @@ export function SpellLevelAccordion({
   spellGroups,
   actions,
 }: SpellLevelAccordionProps) {
+  const t = useTranslations("spells.list");
+
+  const ta = useTranslations("common.actions");
+
+  const tl = useTranslator("common");
+
+  const levelLabel = tl(`spellLevels.${level}`);
+
   const confirm = useConfirm();
 
   const deleteSpellsByLevelMutation = useDeleteSpellsByLevel(campaignId);
 
   const handleDelete = () =>
     confirm({
-      title: "Видалити всі заклинання рівня?",
-      description: `Ви впевнені, що хочете видалити всі заклинання рівня "${levelName}"? Ця дія незворотна. Буде видалено ${spells.length} ${pluralUk(spells.length, ["заклинання", "заклинання", "заклинань"])}.`,
-      confirmLabel: "Видалити",
+      title: t("deleteLevel.title"),
+      description: t("deleteLevel.description", { level: levelLabel, count: spells.length }),
+      confirmLabel: ta("delete"),
       destructive: true,
       onConfirm: () => deleteSpellsByLevelMutation.mutateAsync(level),
     });
@@ -64,7 +73,7 @@ export function SpellLevelAccordion({
                 <span aria-hidden className={cn("metal-fill flex size-6 shrink-0 rotate-45 items-center justify-center rounded-[3px]", spellLevelMetal(level))}>
                   <span className="-rotate-45 text-[11px] font-semibold">{level}</span>
                 </span>
-                <span className="font-medium text-sm sm:text-base truncate">{levelName}</span>
+                <span className="font-medium text-sm sm:text-base truncate">{levelLabel}</span>
               </span>
               <Badge variant="secondary" className="ml-2 shrink-0">
                 {spells.length}
@@ -82,7 +91,7 @@ export function SpellLevelAccordion({
                 size="icon"
                 className="h-10 w-10 sm:h-12 sm:w-12"
                 onClick={() => void handleDelete()}
-                title="Видалити всі заклинання рівня"
+                title={t("deleteLevel.tooltip")}
               >
                 <Trash2 className="h-5 w-5 sm:h-6 sm:w-6" />
               </Button>

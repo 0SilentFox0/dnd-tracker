@@ -12,7 +12,7 @@ import { type CharacterTypeValue, type GoalAuthorValue, type GoalKind, type Goal
 import type { HeroArchetypeKey } from "@/lib/constants/hero-archetypes";
 import type { DndSkill } from "@/lib/constants/skills";
 import type { BackgroundSelection } from "@/types/backgrounds";
-import type { CharacterFeat, Picks, SheetChoices } from "@/types/choices";
+import type { CharacterFeat, Picks, SheetChoices, TextParams } from "@/types/choices";
 
 export type { AbilityKey };
 
@@ -172,6 +172,8 @@ export type SheetLineSource = "base" | "ability" | "proficiency" | "weapon" | "l
 
 export interface SheetLine {
   label: string;
+  params?: TextParams;
+  suffix?: string;
   value: string;
   source?: SheetLineSource;
 }
@@ -249,7 +251,7 @@ export interface CharacterSheet {
   saves: SheetCheck[];
   skills: SheetCheck[];
   passives: { perception: number; investigation: number; insight: number };
-  magic: { ability: string; saveDC: number; attackBonus: number } | null;
+  magic: { ability: AbilityKey; saveDC: number; attackBonus: number } | null;
   hitDice: string | null;
   classTable?: string[];
   classProgression?: ClassProgression[];

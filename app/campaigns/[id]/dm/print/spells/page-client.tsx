@@ -1,11 +1,13 @@
 "use client";
 
 import { useMemo } from "react";
+import { useTranslations } from "next-intl";
 import { Printer } from "lucide-react";
 
 import { SpellCard } from "@/components/spells/list/SpellCard";
 import { Button } from "@/components/ui/button";
-import { groupDisplayName, UNGROUPED_LABELS } from "@/lib/constants/ungrouped";
+import { groupDisplayName } from "@/lib/constants/ungrouped";
+import { useTranslator } from "@/lib/i18n/use-translator";
 import {
   convertGroupedSpellsToArray,
   groupSpellsByGroupAndLevel,
@@ -29,6 +31,10 @@ export function PrintSpellsPageClient({
   initialSpells,
   spellGroups,
 }: PrintSpellsPageClientProps) {
+  const t = useTranslations("spells.print");
+
+  const tc = useTranslator("common");
+
   const groupedSpells = useMemo(() => {
     const map = groupSpellsByGroupAndLevel(initialSpells);
 
@@ -40,10 +46,10 @@ export function PrintSpellsPageClient({
       <div className="no-print mb-6 flex items-center justify-between gap-4 border-b pb-4">
         <div>
           <h1 className="text-2xl font-bold">
-            Кампанія «{campaignName}» — Заклинання
+            {t("title", { campaignName })}
           </h1>
           <p className="text-sm text-muted-foreground mt-1">
-            Версія для друку. Натисніть Cmd/Ctrl+P щоб зберегти PDF.
+            {t("hint")}
           </p>
         </div>
         <Button
@@ -52,19 +58,19 @@ export function PrintSpellsPageClient({
           className="shrink-0"
         >
           <Printer className="h-4 w-4 mr-2" />
-          Друкувати
+          {t("button")}
         </Button>
       </div>
 
       <header className="mb-6 hidden print:block">
         <h1 className="text-2xl font-bold">
-          Кампанія «{campaignName}» — Заклинання
+          {t("title", { campaignName })}
         </h1>
       </header>
 
       {groupedSpells.length === 0 ? (
         <p className="text-muted-foreground">
-          У кампанії немає заклинань для друку.
+          {t("empty")}
         </p>
       ) : (
         groupedSpells.map(([groupName, levels]) => {
@@ -76,16 +82,16 @@ export function PrintSpellsPageClient({
           return (
             <section key={groupName} className="print-section mb-8">
               <div className="flex items-baseline gap-3 py-3 border-b mb-4">
-                <h2 className="text-xl font-semibold">{groupDisplayName(groupName, UNGROUPED_LABELS.spellGroup)}</h2>
+                <h2 className="text-xl font-semibold">{groupDisplayName(groupName, tc("ungrouped.spellGroup"))}</h2>
                 <span className="text-sm text-muted-foreground">
-                  {totalSpells} закл.
+                  {t("count", { count: totalSpells })}
                 </span>
               </div>
 
               {levels.map(([levelLabel, levelSpells]) => (
                 <div key={levelLabel} className="mb-6">
                   <h3 className="text-base font-semibold mb-2 uppercase tracking-wide text-muted-foreground">
-                    {levelLabel}
+                    {tc(`spellLevels.${levelSpells[0]?.level ?? 0}`)}
                     <span className="ml-2 text-xs font-normal">
                       ({levelSpells.length})
                     </span>

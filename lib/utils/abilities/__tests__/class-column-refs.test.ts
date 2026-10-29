@@ -38,8 +38,8 @@ describe("column refs", () => {
       { path: [0, "effects", 0, "flat"], message: CLASS_REF_OUTSIDE },
       { path: [0, "limits", "perRest", "uses"], message: CLASS_REF_OUTSIDE },
     ]);
-    expect(columnRefIssues([rage], columns)).toEqual([{ path: [0, "effects", 0, "flat"], message: "Немає колонки «rage-damage» у таблиці класу" }]);
-    expect(columnRefIssues([patient], columns)).toEqual([{ path: [0, "limits", "pool", "key"], message: "Колонка «Rages» не є пулом" }]);
+    expect(columnRefIssues([rage], columns)).toEqual([{ path: [0, "effects", 0, "flat"], message: "abilities.validation.columnMissing", params: { key: "rage-damage" } }]);
+    expect(columnRefIssues([patient], columns)).toEqual([{ path: [0, "limits", "pool", "key"], message: "abilities.validation.columnNotPool", params: { label: "Rages" } }]);
   });
 
   it("validateAbilities: issues without classColumns, none with matching columns", () => {

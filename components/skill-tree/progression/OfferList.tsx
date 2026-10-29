@@ -1,13 +1,18 @@
 import { useState } from "react";
+import { useTranslations } from "next-intl";
 
 import { OptimizedImage } from "@/components/common/OptimizedImage";
 import { Button } from "@/components/ui/button";
-import { pluralUk } from "@/lib/utils/common/plural";
+import { useTranslator } from "@/lib/i18n/use-translator";
 import type { ProgressionNode } from "@/lib/utils/skills/progression";
 import { nodeLabel } from "@/lib/utils/skills/progression/labels";
 import type { CharacterProgressionDto } from "@/types/progression";
 
 export function OfferList({ offers, dto, filter, onClearFilter, onSelect }: { offers: ProgressionNode[]; dto: CharacterProgressionDto; filter: { label: string; match: (n: ProgressionNode) => boolean } | null; onClearFilter: () => void; onSelect: (node: ProgressionNode) => void }) {
+  const t = useTranslations("skillTree.offers");
+
+  const tr = useTranslator("skillTree");
+
   const [expanded, setExpanded] = useState(false);
 
   const list = filter ? offers.filter(filter.match) : offers;
@@ -16,15 +21,15 @@ export function OfferList({ offers, dto, filter, onClearFilter, onSelect }: { of
 
   return (
     <section id="progression-offers" className="pb-2">
-      <h3 className="hud-sc mx-4 mb-1.5 mt-3.5 text-[13px] uppercase tracking-[.12em] text-hud-muted">Вивчити (1 очко)</h3>
+      <h3 className="hud-sc mx-4 mb-1.5 mt-3.5 text-[13px] uppercase tracking-[.12em] text-hud-muted">{t("heading")}</h3>
       {filter && (
         <Button type="button" variant="ghost" size="sm" onClick={onClearFilter} className="mx-4 mb-2 h-auto rounded-full border border-[#4a4036] px-3 py-1 text-xs text-[#d6cbb7]">
           {filter.label} ✕
         </Button>
       )}
-      <ul aria-label="Вивчити" className="flex flex-col gap-2 px-4">
+      <ul aria-label={t("listLabel")} className="flex flex-col gap-2 px-4">
         {shown.map((node, i) => {
-          const { title, tag } = nodeLabel(node, dto);
+          const { title, tag } = nodeLabel(node, dto, tr);
 
           const skill = node.skillId ? dto.skills[node.skillId] : undefined;
 
@@ -48,7 +53,7 @@ export function OfferList({ offers, dto, filter, onClearFilter, onSelect }: { of
       </ul>
       {!filter && !expanded && list.length > 3 && (
         <Button type="button" variant="link" size="sm" onClick={() => setExpanded(true)} className="mx-4 mt-2 h-auto p-0 text-xs text-hud-muted">
-          Ще {list.length - 3} {pluralUk(list.length - 3, ["варіант", "варіанти", "варіантів"])} ▾
+          {t("more", { count: list.length - 3 })} ▾
         </Button>
       )}
     </section>

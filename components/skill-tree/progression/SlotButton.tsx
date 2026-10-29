@@ -1,9 +1,13 @@
+import { useTranslations } from "next-intl";
+
 import { OptimizedImage } from "@/components/common/OptimizedImage";
 import { Button } from "@/components/ui/button";
 import type { NodeState } from "@/lib/utils/skills/progression";
 
 export function SlotButton({ state, label, icon, onSelect }: { state: NodeState; label: string; icon: string | null; onSelect: () => void }) {
-  const aria = state.state === "learned" ? label : state.state === "available" ? `Вивчити: ${label}` : `Закрито: ${label}`;
+  const t = useTranslations("skillTree.slot");
+
+  const aria = state.state === "learned" ? label : state.state === "available" ? t("learn", { label }) : t("locked", { label });
 
   const tone = state.state === "learned" ? "skill-slot learned" : state.state === "available" ? "skill-slot available" : "skill-slot locked";
 

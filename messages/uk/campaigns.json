@@ -1,0 +1,196 @@
+{
+  "page": {
+    "title": "Мої Кампанії",
+    "new": "+ Нова Кампанія",
+    "templates": "Мої шаблони",
+    "dbError": {
+      "title": "Помилка підключення до бази даних",
+      "message": "Не вдається підключитися до бази даних. Перевірте DATABASE_URL в .env файлі.",
+      "fixTitle": "Як виправити:",
+      "steps": {
+        "dashboard": "Відкрийте Supabase Dashboard → Settings → Database",
+        "pooling": "Скопіюйте Connection Pooling URI (порт 6543)",
+        "env": "Оновіть DATABASE_URL в .env файлі",
+        "restart": "Перезапустіть dev сервер"
+      }
+    },
+    "empty": {
+      "title": "У вас поки немає кампаній",
+      "action": "Створити першу кампанію"
+    }
+  },
+  "card": {
+    "level": "Рівень: до {level}",
+    "players": "Гравців: {count}",
+    "inviteCode": "Код запрошення:"
+  },
+  "roles": {
+    "dm": "DM",
+    "player": "Player"
+  },
+  "join": {
+    "trigger": "Приєднатися до кампанії",
+    "title": "Приєднатися до кампанії",
+    "description": "Введіть код запрошення, який вам надав DM кампанії",
+    "codeLabel": "Код запрошення",
+    "codePlaceholder": "Введіть код запрошення",
+    "codeRequired": "Введіть код запрошення",
+    "submit": "Приєднатися",
+    "joining": "Приєднання...",
+    "done": "Успішно!",
+    "success": "Успішно приєднано! Перенаправлення..."
+  },
+  "form": {
+    "title": "Створити нову кампанію",
+    "aside": "Станьте Dungeon Master",
+    "submit": "Створити кампанію",
+    "campaign": "Кампанія",
+    "name": "Назва кампанії",
+    "namePlaceholder": "Назва вашої кампанії",
+    "description": "Опис",
+    "descriptionPlaceholder": "Короткий опис кампанії (опціонально)",
+    "rules": "Правила",
+    "maxLevel": "Максимальний рівень",
+    "allowPlayerEdit": "Дозволити гравцям редагувати своїх персонажів",
+    "createFailed": "Помилка при створенні кампанії",
+    "warnings": "Створено з попередженнями: {count} посилань скинуто"
+  },
+  "settings": {
+    "open": "Редагувати налаштування",
+    "copyCode": "Скопіювати код",
+    "title": "Налаштування кампанії",
+    "description": "Оновіть основні параметри кампанії",
+    "campaign": "Кампанія",
+    "name": "Назва",
+    "descriptionLabel": "Опис",
+    "rules": "Правила",
+    "maxLevel": "Макс. рівень",
+    "allowPlayerEdit": "Дозволити гравцям редагувати своїх персонажів",
+    "critChoiceByDm": "ДМ обирає ефекти крита/провалу",
+    "critChoiceHint": "Вимкнено — ефект випадковий",
+    "acquaintances": "Знайомства доступні гравцям",
+    "active": "Кампанія активна",
+    "templates": "Шаблони",
+    "saveAsTemplate": "Зберегти як шаблон",
+    "export": "Експортувати в JSON",
+    "credits": "Джерела й ліцензії",
+    "danger": "Небезпечна зона",
+    "delete": "Видалити кампанію",
+    "deleting": "Видалення...",
+    "deleteFailed": "Помилка видалення",
+    "defaultTemplateName": "{name} (шаблон)",
+    "confirmDelete": {
+      "title": "Видалити кампанію «{name}»?",
+      "description": "Усі персонажі, бої, юніти та бібліотеку кампанії буде видалено назавжди."
+    }
+  },
+  "members": {
+    "remove": "Виключити",
+    "removing": "Видалення...",
+    "confirmRemove": "Ви впевнені, що хочете виключити цього учасника з кампанії?"
+  },
+  "saveAsTemplate": {
+    "title": "Зберегти як шаблон",
+    "description": "Бібліотека кампанії (без героїв і боїв) стане шаблоном для нових кампаній",
+    "name": "Назва",
+    "descriptionLabel": "Опис",
+    "submit": "Створити шаблон",
+    "created": "Шаблон створено.",
+    "open": "Відкрити",
+    "failed": "Помилка збереження шаблону"
+  },
+  "templatePicker": {
+    "section": "Шаблон",
+    "ariaLabel": "Шаблон",
+    "intro": "Шаблон — готова основа кампанії: набір правил і контенту (раси, класи, юніти, заклинання, артефакти, навички, музика), який копіюється у вашу кампанію. Далі ви змінюєте його як завгодно. «Без шаблону» дає порожню бібліотеку.",
+    "official": "Офіційні",
+    "mine": "Мої",
+    "other": "Інше",
+    "file": "Файл: {name}",
+    "importFile": "Імпорт з файлу",
+    "none": "Без шаблону",
+    "pickAnother": "Обрати інший файл",
+    "importDescription": "Оберіть JSON, експортований з кампанії",
+    "entities": "{count, plural, one {# сутність} few {# сутності} many {# сутностей} other {# сутностей}}",
+    "counts": {
+      "races": "{count, plural, one {# раса} few {# раси} many {# рас} other {# рас}}",
+      "units": "{count, plural, one {# юніт} few {# юніти} many {# юнітів} other {# юнітів}}",
+      "spells": "{count, plural, one {# заклинання} few {# заклинання} many {# заклинань} other {# заклинань}}"
+    }
+  },
+  "sourceSync": {
+    "title": {
+      "fromSource": "Оновлення з джерела",
+      "fromTemplate": "Оновлення з шаблону"
+    },
+    "scope": {
+      "rules": "Правила",
+      "settings": "Налаштування",
+      "spellGroups": "Школи магії",
+      "races": "Раси",
+      "classes": "Класи",
+      "feats": "Риси",
+      "backgrounds": "Передісторії",
+      "units": "Юніти",
+      "spells": "Заклинання",
+      "mainSkills": "Основні скіли",
+      "skills": "Скіли",
+      "skillTrees": "Дерева прокачки",
+      "artifactSets": "Сети артефактів",
+      "artifacts": "Артефакти",
+      "tracks": "Музика"
+    },
+    "status": {
+      "new": "Нове",
+      "updated": "Оновлено",
+      "conflict": "Конфлікт",
+      "deletedInSource": "Видалено в джерелі",
+      "deletedLocally": "Видалено у вас",
+      "deletedInTemplate": "Видалено в шаблоні"
+    },
+    "details": {
+      "changed": "Змінено: {fields}",
+      "conflict": "Ви теж змінили цей запис — галочка замінить вашу версію версією джерела",
+      "usage": "Використовується: {usage}",
+      "deletedLocally": "Ви видалили цей запис; галочка поверне його"
+    },
+    "usage": {
+      "characters": "{count, plural, one {# персонаж} few {# персонажі} many {# персонажів} other {# персонажів}}",
+      "records": "{count, plural, one {# запис} few {# записи} many {# записів} other {# записів}}"
+    },
+    "groupTitle": "{label} ({count})",
+    "selectAll": "Вибрати все",
+    "deselectAll": "Зняти все",
+    "description": {
+      "fallback": "Зміни у джерелі",
+      "source": "Джерело: «{name}»",
+      "synced": "Джерело: «{name}» · остання синхронізація {date}"
+    },
+    "where": {
+      "source": "джерелі",
+      "template": "шаблоні"
+    },
+    "confirmDelete": {
+      "title": "{count, plural, one {Видалити # запис, якого немає} few {Видалити # записи, яких немає} many {Видалити # записів, яких немає} other {Видалити # записів, яких немає}} в {where}?",
+      "usage": "Використовується: {usage}."
+    },
+    "confirmIgnore": {
+      "title": "{count, plural, one {Приховати # зміну?} few {Приховати # зміни?} many {Приховати # змін?} other {Приховати # змін?}}",
+      "description": "Вони з'являться знову, лише коли джерело змінить ці записи.",
+      "confirm": "Приховати"
+    },
+    "applied": "Застосовано: {applied}{hasAdded, select, true {, автоматично додано: {added}} other {}}{hasWarnings, select, true {. {warnings}} other {}}",
+    "ignored": "Приховано: {count}",
+    "empty": {
+      "title": "Усе синхронізовано",
+      "description": "Джерело не має змін, яких би не було у вас"
+    },
+    "close": "Закрити",
+    "ignore": "Ігнорувати вибране",
+    "apply": "Застосувати ({count})",
+    "alsoAdded": "Також буде додано: {names}",
+    "stale": "Джерело змінилося — список оновлено, вибір скинуто до типового.",
+    "failed": "Помилка синхронізації",
+    "settingsName": "Налаштування кампанії"
+  }
+}

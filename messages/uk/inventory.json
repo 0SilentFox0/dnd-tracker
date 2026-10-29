@@ -1,0 +1,144 @@
+{
+  "coins": {
+    "gp": "зм",
+    "sp": "см",
+    "cp": "мм"
+  },
+  "grid": {
+    "slots": {
+      "ring1": "Перстень",
+      "helmet": "Шолом",
+      "necklace": "Намисто",
+      "range_weapon": "Дальнобійна",
+      "armor": "Броня",
+      "shield": "Щит",
+      "weapon": "Зброя",
+      "boots": "Черевики",
+      "cape": "Плащ"
+    },
+    "filled": "{slot}: {name}",
+    "empty": "{slot}, порожньо",
+    "backpack": "Рюкзак",
+    "add": "Додати",
+    "emptyCell": "Порожня клітинка"
+  },
+  "purse": {
+    "spend": "Витратити",
+    "gain": "Отримати",
+    "set": "Задати суму"
+  },
+  "tab": {
+    "attunement": "Налаштування {used}/{limit}",
+    "pending": "Підсумок з'явиться після схвалення персонажа",
+    "combatNote": "Зміни під час бою діють з наступного бою.",
+    "log": "Журнал"
+  },
+  "details": {
+    "empty": "Вибери предмет, щоб побачити деталі",
+    "quantity": "Кількість: {count}",
+    "consumable": "одноразова",
+    "carried": "Носиться",
+    "attuned": "Налаштовано",
+    "attunementRequired": "Не діє без налаштування",
+    "charges": "Заряди {left}/{max}"
+  },
+  "actions": {
+    "attune": "Налаштувати",
+    "unattune": "Зняти налаштування",
+    "equip": "Вдягнути",
+    "offHand": "У другу руку",
+    "transfer": "Передати",
+    "revoke": "Забрати",
+    "unequip": "Зняти",
+    "use": "Використати",
+    "edit": "Редагувати",
+    "remove": "Видалити"
+  },
+  "confirm": {
+    "revokeTitle": "Забрати «{name}»?",
+    "revoke": "Забрати",
+    "removeTitle": "Викинути «{name}»?",
+    "remove": "Викинути"
+  },
+  "add": {
+    "title": "Додати",
+    "grant": "Видати артефакт",
+    "item": "Додати предмет"
+  },
+  "itemDialog": {
+    "addTitle": "Додати річ",
+    "editTitle": "Редагувати річ",
+    "save": "Зберегти",
+    "name": "Назва",
+    "description": "Опис",
+    "quantity": "Кількість",
+    "consumable": "Одноразова"
+  },
+  "money": {
+    "confirm": "Підтвердити",
+    "amount": "Сума",
+    "coin": "Монета",
+    "noteSpend": "На що",
+    "noteGain": "Звідки (необов'язково)"
+  },
+  "grant": {
+    "title": "Видати артефакт",
+    "baseTitle": "База для «{name}»",
+    "back": "Назад",
+    "submit": "Видати",
+    "baseSearch": "Пошук бази",
+    "noBases": "Немає підхожих вільних баз",
+    "parameter": "Параметр предмета",
+    "chooseParameter": "Оберіть параметр",
+    "spell": "Заклинання сувою",
+    "chooseSpell": "Оберіть заклинання",
+    "spellOption": "{label} · коло {level}",
+    "spellNote": "Каст автоматизовано; право читати сувій визначає ДМ.",
+    "quantity": "Кількість",
+    "noArtifacts": "Немає вільних артефактів",
+    "kind": {
+      "property": "властивість",
+      "consumable": "витратний",
+      "gear": "спорядження"
+    }
+  },
+  "equipment": {
+    "none": "Не обрано",
+    "noArtifacts": "Немає артефактів для цього слоту",
+    "heldBy": "у {holder}",
+    "worn": "вже вдягнено"
+  },
+  "log": {
+    "title": "ЖУРНАЛ",
+    "loading": "Завантаження…",
+    "empty": "Записів ще немає.",
+    "more": "Показати ще",
+    "money": "{coins}",
+    "moneySet": "{coins} (DM)",
+    "withNote": "{text} — {note}",
+    "artifactFallback": "артефакт",
+    "item": {
+      "item_add": "додано: {name}",
+      "item_use": "використано: {name}",
+      "item_edit": "змінено: {name}",
+      "item_remove": "викинуто: {name}"
+    },
+    "artifact": {
+      "artifact_stash": "знято в підсумок: {name}",
+      "artifact_equip": "вдягнено: {name}",
+      "artifact_unequip": "знято в підсумок (DM): {name}",
+      "artifact_grant": "отримано від DM: {name}",
+      "artifact_revoke": "забрано DM: {name}",
+      "artifact_transfer": "передано: {name}",
+      "artifact_attune": "налаштовано: {name}",
+      "artifact_unattune": "знято налаштування: {name}"
+    },
+    "unknown": "{kind}: {name}"
+  },
+  "errors": {
+    "actionFailed": "Не вдалося виконати дію",
+    "grantFailed": "Не вдалося видати артефакт",
+    "equipFailed": "Не вдалося змінити спорядження",
+    "itemSaveFailed": "Не вдалося зберегти річ"
+  }
+}

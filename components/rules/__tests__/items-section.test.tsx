@@ -17,7 +17,7 @@ describe("ItemsSection", () => {
 
     render(<ItemsSection form={form} />);
 
-    fireEvent.click(screen.getByRole("switch", { name: "Предмети 5e: налаштування, носіння зі сховища, витратні в бою" }));
+    fireEvent.click(screen.getByRole("switch", { name: "rules.sections.items.enabled" }));
 
     expect(form.set).toHaveBeenCalledWith("items", { enabled: true, attunementLimit: 3 });
   });

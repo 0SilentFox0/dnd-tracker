@@ -1,25 +1,23 @@
+import type { Translator } from "@/lib/i18n/translator";
 import { formatCoins } from "@/lib/utils/inventory/money";
 import type { InventoryLogEntry, Purse } from "@/types/inventory";
 
-const ARTIFACT_VERB: Record<string, string> = {
-  artifact_stash: "знято в підсумок",
-  artifact_equip: "вдягнено",
-  artifact_unequip: "знято в підсумок (DM)",
-  artifact_grant: "отримано від DM",
-  artifact_revoke: "забрано DM",
-  artifact_transfer: "передано",
-  artifact_attune: "налаштовано",
-  artifact_unattune: "знято налаштування",
-};
+const ITEM_KINDS = new Set(["item_add", "item_use", "item_edit", "item_remove"]);
 
-const ITEM_VERB: Record<string, string> = { item_add: "додано", item_use: "використано", item_edit: "змінено", item_remove: "викинуто" };
+const ARTIFACT_KINDS = new Set(["artifact_stash", "artifact_equip", "artifact_unequip", "artifact_grant", "artifact_revoke", "artifact_transfer", "artifact_attune", "artifact_unattune"]);
 
-export function describeLog({ kind, delta, note }: InventoryLogEntry): string {
-  const tail = note ? ` — ${note}` : "";
+export function describeLog({ kind, delta, note }: InventoryLogEntry, t: Translator): string {
+  const withNote = (text: string) => (note ? t("log.withNote", { text, note }) : text);
 
-  if (kind.startsWith("money_")) return `${formatCoins(delta as Partial<Purse>) || "0"}${kind === "money_set" ? " (DM)" : ""}${tail}`;
+  if (kind.startsWith("money_")) {
+    const coins = formatCoins(delta as Partial<Purse>, (c) => t(`coins.${c}`)) || "0";
 
-  if (kind in ITEM_VERB) return `${ITEM_VERB[kind]}: ${String(delta.item)}${tail}`;
+    return withNote(t(kind === "money_set" ? "log.moneySet" : "log.money", { coins }));
+  }
 
-  return `${ARTIFACT_VERB[kind] ?? kind}: ${String(delta.artifactName ?? "артефакт")}${tail}`;
+  if (ITEM_KINDS.has(kind)) return withNote(t(`log.item.${kind}`, { name: String(delta.item) }));
+
+  const name = String(delta.artifactName ?? t("log.artifactFallback"));
+
+  return withNote(ARTIFACT_KINDS.has(kind) ? t(`log.artifact.${kind}`, { name }) : t("log.unknown", { kind, name }));
 }

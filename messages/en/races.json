@@ -39,9 +39,7 @@
   },
   "form": {
     "tabs": {
-      "basic": "Basics",
       "stats": "Stats",
-      "abilities": "Abilities",
       "choices": "Choices and lineages"
     },
     "name": "Race name",

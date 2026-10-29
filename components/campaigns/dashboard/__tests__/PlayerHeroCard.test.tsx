@@ -16,7 +16,7 @@ describe("PlayerHeroCard", () => {
   it("offers creation when there is no hero", () => {
     render(<PlayerHeroCard campaignId="c1" data={{ hero: null, activeBattle: null, hasWorld: false }} />);
 
-    expect(screen.getByRole("link", { name: "Створити персонажа" }).getAttribute("href")).toBe("/campaigns/c1/character");
+    expect(screen.getByRole("link", { name: "dashboard.hero.create" }).getAttribute("href")).toBe("/campaigns/c1/character");
   });
 
   it("shows hero stats and the initial fallback without avatar", () => {
@@ -24,9 +24,9 @@ describe("PlayerHeroCard", () => {
 
     expect(screen.getByText("З")).toBeTruthy();
     expect(screen.getByText("Ельф · Маг")).toBeTruthy();
-    expect(screen.getByText("Рівень 3 · КБ 14 · Швидкість 30")).toBeTruthy();
-    expect(screen.getByRole("link", { name: "Відкрити героя" }).getAttribute("href")).toBe("/campaigns/c1/character");
-    expect(screen.queryByText("До бою")).toBeNull();
+    expect(screen.getByText('dashboard.hero.stats {"level":3,"armorClass":14,"speed":30}')).toBeTruthy();
+    expect(screen.getByRole("link", { name: "dashboard.hero.open" }).getAttribute("href")).toBe("/campaigns/c1/character");
+    expect(screen.queryByText("dashboard.hero.toBattle")).toBeNull();
   });
 
   it("empty avatar string falls back to the initial", () => {
@@ -38,22 +38,22 @@ describe("PlayerHeroCard", () => {
   it("pending without note is awaiting approval", () => {
     render(<PlayerHeroCard campaignId="c1" data={data({ status: CharacterStatus.PENDING })} />);
 
-    expect(screen.getByText("На схваленні")).toBeTruthy();
-    expect(screen.queryByText("Повернуто ДМ")).toBeNull();
+    expect(screen.getByText("dashboard.hero.pending")).toBeTruthy();
+    expect(screen.queryByText("dashboard.hero.returned")).toBeNull();
   });
 
   it("pending with note is returned by the DM with the note", () => {
     render(<PlayerHeroCard campaignId="c1" data={data({ status: CharacterStatus.PENDING, reviewNote: "Додай біографію" })} />);
 
-    expect(screen.getByText("Повернуто ДМ")).toBeTruthy();
+    expect(screen.getByText("dashboard.hero.returned")).toBeTruthy();
     expect(screen.getByText("Додай біографію")).toBeTruthy();
-    expect(screen.queryByText("На схваленні")).toBeNull();
+    expect(screen.queryByText("dashboard.hero.pending")).toBeNull();
   });
 
   it("flags a new level", () => {
     render(<PlayerHeroCard campaignId="c1" data={data({ seenLevel: 2, level: 3 })} />);
 
-    expect(screen.getByText("Новий рівень")).toBeTruthy();
+    expect(screen.getByText("dashboard.hero.newLevel")).toBeTruthy();
   });
 
   it("shows HP and battle link when in an active battle", () => {
@@ -61,6 +61,6 @@ describe("PlayerHeroCard", () => {
 
     expect(screen.getByText(/23\/40/)).toBeTruthy();
     expect(screen.getByText(/\+5/)).toBeTruthy();
-    expect(screen.getByRole("link", { name: "До бою" }).getAttribute("href")).toBe("/campaigns/c1/battles/b1");
+    expect(screen.getByRole("link", { name: "dashboard.hero.toBattle" }).getAttribute("href")).toBe("/campaigns/c1/battles/b1");
   });
 });

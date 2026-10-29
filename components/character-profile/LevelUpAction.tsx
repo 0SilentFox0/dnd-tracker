@@ -1,4 +1,5 @@
 import { type ComponentProps, useState } from "react";
+import { useTranslations } from "next-intl";
 
 import { ClassLevelUpDialog } from "./ClassLevelUpDialog";
 
@@ -13,6 +14,8 @@ interface LevelUpActionProps {
 }
 
 export function LevelUpAction({ level, maxLevel, onLevelUp, classLevelUp }: LevelUpActionProps) {
+  const t = useTranslations("characterProfile.levelUp");
+
   const [open, setOpen] = useState(false);
 
   if (level >= maxLevel) return null;
@@ -20,7 +23,7 @@ export function LevelUpAction({ level, maxLevel, onLevelUp, classLevelUp }: Leve
   return (
     <>
       <Button type="button" size="sm" variant="outline" onClick={classLevelUp ? () => setOpen(true) : onLevelUp}>
-        + рівень
+        {t("action")}
       </Button>
       {classLevelUp && open && <ClassLevelUpDialog open onOpenChange={setOpen} {...classLevelUp} />}
     </>

@@ -6,11 +6,10 @@ import { useTranslations } from "next-intl";
 import { Button } from "@/components/ui/button";
 import { useConfirm } from "@/lib/hooks/common";
 import { cn } from "@/lib/utils";
-import { pluralUk } from "@/lib/utils/common/plural";
 
 interface DeleteAllButtonProps {
   count: number;
-  nouns: [string, string, string];
+  noun: string;
   confirm: { description: string; title?: string; label?: string };
   actions: { onConfirm: () => Promise<unknown> };
   view?: { variant?: "solid" | "soft"; icon?: ReactNode };
@@ -19,7 +18,7 @@ interface DeleteAllButtonProps {
 
 const SOFT = "text-destructive hover:text-destructive hover:bg-destructive/10 border-destructive/30";
 
-export function DeleteAllButton({ count, nouns, confirm: texts, actions, view, status }: DeleteAllButtonProps) {
+export function DeleteAllButton({ count, noun, confirm: texts, actions, view, status }: DeleteAllButtonProps) {
   const t = useTranslations("common.deleteAll");
 
   const confirm = useConfirm();
@@ -30,7 +29,7 @@ export function DeleteAllButton({ count, nouns, confirm: texts, actions, view, s
 
   if (count === 0) return null;
 
-  const heading = title ?? t("title", { nouns: pluralUk(2, nouns) });
+  const heading = title ?? t("title", { noun });
 
   const ask = () => confirm({ title: heading, description, confirmLabel: label, destructive: true, onConfirm: actions.onConfirm });
 

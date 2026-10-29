@@ -1,8 +1,11 @@
 "use client";
 
+import { useTranslations } from "next-intl";
+
 import type { AbilitySectionProps } from "../AbilityPanel";
 import { useAbilityEditor } from "../editor-context";
 import { EffectCard } from "../EffectCard";
+import { FieldErrors } from "../FieldErrors";
 import { SectionTitle } from "./SectionTitle";
 
 import { Button } from "@/components/ui/button";
@@ -10,25 +13,19 @@ import { allowedEffectKinds, newEffect } from "@/lib/utils/abilities/editor";
 import type { Effect } from "@/lib/utils/abilities/schema";
 
 export function EffectsSection({ ability, path, onChange }: AbilitySectionProps) {
+  const t = useTranslations("abilities.effects");
+
   const { errorsByPath } = useAbilityEditor();
 
   const setEffects = (effects: Effect[]) => onChange({ ...ability, effects });
 
   return (
     <div className="space-y-2">
-      <SectionTitle>Що робить</SectionTitle>
-      {(errorsByPath[`${path}.effects`] ?? []).map((e) => (
-        <p key={e} className="text-xs text-destructive">
-          {e}
-        </p>
-      ))}
+      <SectionTitle>{t("title")}</SectionTitle>
+      <FieldErrors errors={errorsByPath[`${path}.effects`] ?? []} />
       {ability.effects.map((effect, i) => (
         <div key={i} className="space-y-1">
-          {(errorsByPath[`${path}.effects.${i}`] ?? []).map((e) => (
-            <p key={e} className="text-xs text-destructive">
-              {e}
-            </p>
-          ))}
+          <FieldErrors errors={errorsByPath[`${path}.effects.${i}`] ?? []} />
           <EffectCard
             effect={effect}
             trigger={ability.trigger}
@@ -41,7 +38,7 @@ export function EffectsSection({ ability, path, onChange }: AbilitySectionProps)
         </div>
       ))}
       <Button type="button" size="sm" variant="outline" onClick={() => setEffects([...ability.effects, newEffect(allowedEffectKinds(ability.trigger)[0], ability.trigger)])}>
-        + ефект
+        {t("add")}
       </Button>
     </div>
   );

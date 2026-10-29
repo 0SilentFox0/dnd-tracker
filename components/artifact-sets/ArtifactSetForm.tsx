@@ -14,6 +14,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { type ArtifactSetFormInitial, useArtifactSetForm } from "@/lib/hooks/artifact-sets";
+import { useTranslator } from "@/lib/i18n/use-translator";
 import type { ConversionIssue } from "@/lib/utils/abilities/schema";
 
 export interface ArtifactSetFormProps {
@@ -24,6 +25,8 @@ export interface ArtifactSetFormProps {
 
 export function ArtifactSetForm({ campaignId, setId, initial = {} }: ArtifactSetFormProps) {
   const t = useTranslations("artifacts.sets.form");
+
+  const ta = useTranslator("abilities");
 
   const tCommon = useTranslations("common");
 
@@ -36,7 +39,7 @@ export function ArtifactSetForm({ campaignId, setId, initial = {} }: ArtifactSet
   const tabs: HudTab<ArtifactSetFormTabId>[] = [
     {
       id: ARTIFACT_SET_FORM_TAB.basic,
-      label: t("tabs.basic"),
+      label: tCommon("tabs.basic"),
       content: (
         <div className="space-y-5">
           <div className="space-y-2">
@@ -89,7 +92,7 @@ export function ArtifactSetForm({ campaignId, setId, initial = {} }: ArtifactSet
     },
     {
       id: ARTIFACT_SET_FORM_TAB.abilities,
-      label: t("tabs.abilities"),
+      label: tCommon("tabs.abilities"),
       invalid: editor.abilities.errors > 0 || abilityIssues.length > 0,
       content: (
         <AbilityListEditor
@@ -121,7 +124,7 @@ export function ArtifactSetForm({ campaignId, setId, initial = {} }: ArtifactSet
               <Link href={`/campaigns/${campaignId}/dm/artifact-sets`}>{tCommon("actions.cancel")}</Link>
             </Button>
             <Button type="submit" disabled={editor.status.isBusy || !editor.abilities.valid}>
-              {editor.status.isBusy ? t("saving") : withAbilityErrors(setId ? t("saveChanges") : t("create"), editor.abilities.errors)}
+              {editor.status.isBusy ? t("saving") : withAbilityErrors(setId ? t("saveChanges") : t("create"), editor.abilities.errors, ta)}
             </Button>
           </>
         }

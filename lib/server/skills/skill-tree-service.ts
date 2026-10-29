@@ -9,7 +9,7 @@ import { withCampaignContentWrite } from "@/lib/server/content/write";
 import { moveSkillTreeProgress } from "@/lib/server/skills/progress-move";
 import type { Actor } from "@/lib/utils/api/actor";
 import { NEED } from "@/lib/utils/api/need";
-import { readTreeJson, TREE_ERROR_TEXT, validateTree } from "@/lib/utils/skills/progression";
+import { readTreeJson, validateTree } from "@/lib/utils/skills/progression";
 
 export function listSkillTrees(actor: Actor): Promise<SkillTree[]> {
   assertCan(actor, CONTENT_OPERATIONS["skill-trees.list"].need);
@@ -44,9 +44,7 @@ async function saveLockedSkillTree(actor: Actor, input: { treeId?: string; race:
   const errors = validateTree(raw, { mainSkillIds: new Set(mainSkills.map((m) => m.id)), skillIds: new Set(librarySkills.map((s) => s.id)) });
 
   if (errors.length > 0) {
-    const text = errors.map((e) => `${TREE_ERROR_TEXT[e.code]}${e.label ? `: ${e.label}` : ""}`).join("; ");
-
-    throw new ContentError(text, 400, errors);
+    throw new ContentError(`skillTree.treeErrors.${errors[0].code}`, 400, errors, { label: errors[0].label ?? errors[0].ref });
   }
 
   const existing =

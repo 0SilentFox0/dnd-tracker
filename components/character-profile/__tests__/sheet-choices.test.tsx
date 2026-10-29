@@ -17,7 +17,7 @@ const choices: NonNullable<CharacterSheet["choices"]> = {
   pending: 2,
   canEdit: true,
   lineage: "Wood Elf",
-  feats: [{ key: "k", id: "f-asi", name: "Ability Score Improvement", type: "general", from: "Rogue 4", picks: ["+2 СПР"] }],
+  feats: [{ key: "k", id: "f-asi", name: "Ability Score Improvement", type: "general", from: { message: "characterProfile.sheet.from.classLevel", params: { name: "Rogue", level: 4 } }, picks: [{ message: "characterProfile.sheet.abilityPick", params: { n: 2, ability: "dexterity" } }] }],
   options: [{ owner: "Sorcerer", label: "Metamagic", names: ["Quickened Spell", "Twinned Spell"] }],
   spellSources: {},
   expertise: ["stealth"],
@@ -50,10 +50,10 @@ describe("sheet choices UI", () => {
     );
 
     expect(screen.getByText("Ability Score Improvement")).toBeTruthy();
-    expect(screen.getByText(/Rogue 4 · \+2 СПР/)).toBeTruthy();
+    expect(screen.getByText(/from\.classLevel \{"name":"Rogue","level":4\} · characterProfile\.sheet\.abilityPick/)).toBeTruthy();
     expect(screen.getByText("Metamagic: Quickened Spell, Twinned Spell")).toBeTruthy();
-    expect(screen.getByText("Невибрані вибори: 2")).toBeTruthy();
-    fireEvent.click(screen.getByRole("button", { name: "Обрати" }));
+    expect(screen.getByText('characterProfile.choices.pending {"pending":2}')).toBeTruthy();
+    fireEvent.click(screen.getByRole("button", { name: "characterProfile.choices.pick" }));
 
     expect(screen.getByTestId("choices-dialog")).toBeTruthy();
   });
@@ -63,14 +63,14 @@ describe("sheet choices UI", () => {
 
     render(<PendingChoicesBadge />);
 
-    expect(screen.queryByRole("button", { name: "Обрати" })).toBeNull();
+    expect(screen.queryByRole("button", { name: "characterProfile.choices.pick" })).toBeNull();
   });
 });
 
 it("shows background and manual equipment even without a feat", () => {
-  current.sheet = { ...sheetFixture, choices: { ...choices, feats: [], options: [], background: { id: "b", name: "Sage", picks: ["+2 ІНТ"], equipmentText: "Book or 50 GP" } } };
+  current.sheet = { ...sheetFixture, choices: { ...choices, feats: [], options: [], background: { id: "b", name: "Sage", picks: [{ message: "characterProfile.sheet.abilityPick", params: { n: 2, ability: "intelligence" } }], equipmentText: "Book or 50 GP" } } };
   render(<FeatsBlock />);
   expect(screen.getByText(/Sage/)).toBeTruthy();
-  expect(screen.getByText(/\+2 ІНТ/)).toBeTruthy();
+  expect(screen.getByText(/characterProfile\.sheet\.abilityPick/)).toBeTruthy();
   expect(screen.getByText(/Book or 50 GP/)).toBeTruthy();
 });

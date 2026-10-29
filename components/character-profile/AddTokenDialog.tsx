@@ -1,6 +1,7 @@
 "use client";
 
 import { type FormEvent, useState } from "react";
+import { useTranslations } from "next-intl";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -9,8 +10,6 @@ import { TOKEN_COLORS, TOKEN_LABEL_MAX } from "@/lib/constants/characters";
 import type { CreateTokenInput } from "@/lib/schemas/character-tokens";
 import { cn } from "@/lib/utils";
 import type { TokenColor } from "@/types/characters";
-
-export const TOKEN_COLOR_LABEL: Record<TokenColor, string> = { red: "Червоний", green: "Зелений" };
 
 export const TOKEN_DOT: Record<TokenColor, string> = { red: "bg-red-600", green: "bg-emerald-600" };
 
@@ -22,6 +21,8 @@ interface AddTokenDialogProps {
 }
 
 export function AddTokenDialog({ open, onOpenChange, onSubmit, isPending }: AddTokenDialogProps) {
+  const t = useTranslations("characterProfile.tokens");
+
   const [color, setColor] = useState<TokenColor>("green");
 
   const [label, setLabel] = useState("");
@@ -42,15 +43,15 @@ export function AddTokenDialog({ open, onOpenChange, onSubmit, isPending }: AddT
       hud
       open={open}
       onOpenChange={onOpenChange}
-      title="Видати жетон"
+      title={t("giveTitle")}
       footer={
         <Button type="submit" form="add-token-form" disabled={isPending || !label.trim()}>
-          Видати
+          {t("give")}
         </Button>
       }
     >
       <form id="add-token-form" onSubmit={(e) => void submit(e)} className="space-y-3">
-        <div className="flex gap-2" role="group" aria-label="Колір жетона">
+        <div className="flex gap-2" role="group" aria-label={t("colorLabel")}>
           {TOKEN_COLORS.map((c) => (
             <button
               key={c}
@@ -60,11 +61,11 @@ export function AddTokenDialog({ open, onOpenChange, onSubmit, isPending }: AddT
               className={cn("flex h-11 flex-1 items-center justify-center gap-2 rounded border border-[#2a2218] text-sm", color === c && "border-hud-gold text-hud-gold")}
             >
               <span className={cn("size-3 rounded-full", TOKEN_DOT[c])} />
-              {TOKEN_COLOR_LABEL[c]}
+              {t(`colors.${c}`)}
             </button>
           ))}
         </div>
-        <Input aria-label="Підпис жетона" maxLength={TOKEN_LABEL_MAX} value={label} onChange={(e) => setLabel(e.target.value)} className="h-11" autoFocus />
+        <Input aria-label={t("labelField")} maxLength={TOKEN_LABEL_MAX} value={label} onChange={(e) => setLabel(e.target.value)} className="h-11" autoFocus />
       </form>
     </ResponsiveDialog>
   );

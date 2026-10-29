@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import { X } from "lucide-react";
 
 import { FieldRenderer } from "./fields/FieldRenderer";
@@ -7,11 +8,10 @@ import { FieldRenderer } from "./fields/FieldRenderer";
 import { Button } from "@/components/ui/button";
 import { SelectField } from "@/components/ui/select-field";
 import { AttackType } from "@/lib/constants/battle";
+import { useTranslator } from "@/lib/i18n/use-translator";
 import { getAtPath, setAtPath } from "@/lib/utils/abilities/editor";
 import { CONDITION_REGISTRY } from "@/lib/utils/abilities/registry/conditions";
 import type { Condition } from "@/lib/utils/abilities/schema";
-
-const TYPE_OPTIONS = Object.entries(CONDITION_REGISTRY).map(([value, d]) => ({ value, label: d.label }));
 
 export const DEFAULT_CONDITION: Condition = { type: "hpBelow", who: "self", percent: 50 };
 
@@ -49,15 +49,21 @@ function defaultFor(type: Condition["type"]): Condition {
 }
 
 export function ConditionEditor({ condition, path, actions }: { condition: Condition; path: string; actions: { onChange: (c: Condition) => void; onRemove: () => void } }) {
+  const t = useTranslations("abilities.condition");
+
+  const tr = useTranslator("abilityRegistry");
+
+  const typeOptions = Object.keys(CONDITION_REGISTRY).map((value) => ({ value, label: tr(`conditionTypes.${value}.label`) }));
+
   const isGroup = condition.type === "all" || condition.type === "any";
 
   return (
     <div className="space-y-2 rounded-md border border-dashed p-2">
       <div className="flex items-start gap-2">
         <div className="flex-1">
-          <SelectField value={condition.type} options={TYPE_OPTIONS} onValueChange={(t) => actions.onChange(defaultFor(t as Condition["type"]))} />
+          <SelectField value={condition.type} options={typeOptions} onValueChange={(t) => actions.onChange(defaultFor(t as Condition["type"]))} />
         </div>
-        <Button type="button" size="icon" variant="ghost" aria-label="Видалити умову" onClick={actions.onRemove}>
+        <Button type="button" size="icon" variant="ghost" aria-label={t("delete")} onClick={actions.onRemove}>
           <X className="h-4 w-4" />
         </Button>
       </div>
@@ -84,7 +90,7 @@ export function ConditionEditor({ condition, path, actions }: { condition: Condi
             />
           ))}
           <Button type="button" size="sm" variant="outline" onClick={() => actions.onChange({ ...condition, conditions: [...condition.conditions, DEFAULT_CONDITION] })}>
-            + умова
+            {t("add")}
           </Button>
         </div>
       ) : (
@@ -93,6 +99,7 @@ export function ConditionEditor({ condition, path, actions }: { condition: Condi
             <FieldRenderer
               key={f.name}
               meta={f}
+              owner={`conditionTypes.${condition.type}`}
               path={`${path}.${f.name}`}
               value={getAtPath(condition, f.name)}
               onChange={(v) => actions.onChange(setAtPath(condition, f.name, v))}

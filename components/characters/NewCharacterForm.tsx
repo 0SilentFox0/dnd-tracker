@@ -3,6 +3,7 @@
 import { useEffect, useRef } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { useTranslations } from "next-intl";
 
 import { CharacterAbilitiesSection } from "@/components/characters/abilities/CharacterAbilitiesSection";
 import { CharacterBasicInfo } from "@/components/characters/basic/CharacterBasicInfo";
@@ -23,6 +24,10 @@ import { pruneFormChoices } from "@/lib/utils/characters/choices/prune";
 
 export function NewCharacterForm({ campaignId: id, characterType }: { campaignId: string; characterType: CharacterTypeValue }) {
   const router = useRouter();
+
+  const t = useTranslations("characters");
+
+  const tc = useTranslations("common");
 
   const create = useCreateCharacter(id);
 
@@ -64,18 +69,18 @@ export function NewCharacterForm({ campaignId: id, characterType }: { campaignId
   const tabs: HudTab<CharacterFormTabId>[] = [
     {
       id: CHARACTER_FORM_TAB.basic,
-      label: "Основне",
+      label: tc("tabs.basic"),
       content: <CharacterBasicInfo basicInfo={basicInfo} campaignMembers={members} races={races} classMode={classMode.enabled ? classMode : undefined} />,
     },
     {
       id: CHARACTER_FORM_TAB.combat,
-      label: "Бій",
+      label: t("form.tabs.combat"),
       content: (
         <>
-          <HudSection title="Характеристики">
+          <HudSection title={t("form.sections.abilityScores")}>
             <CharacterAbilityScores abilityScores={abilityScores} />
           </HudSection>
-          <HudSection title="Бойові параметри">
+          <HudSection title={t("form.sections.combatParams")}>
             <CharacterCombatParams campaignId={id} combatStats={combatStats} classArmor={classMode.enabled && (basicInfo.data.classes ?? []).length > 0 ? null : undefined} />
           </HudSection>
         </>
@@ -83,23 +88,23 @@ export function NewCharacterForm({ campaignId: id, characterType }: { campaignId
     },
     {
       id: CHARACTER_FORM_TAB.skills,
-      label: "Вміння",
+      label: tc("tabs.abilities"),
       content: (
         <>
           <CharacterSkillsSection skills={skills} />
-          <HudSection title="Персональне вміння">
+          <HudSection title={t("form.sections.personalAbility")}>
             <CharacterAbilitiesSection campaignId={id} abilities={abilities} />
           </HudSection>
         </>
       ),
     },
     ...(raceHasChoices || heroClassMode
-      ? [{ id: CHARACTER_FORM_TAB.choices, label: "Вибори", content: <CharacterChoicesTab campaignId={id} form={{ data: formData, set: setFormData }} classesEnabled={classMode.enabled} /> }]
+      ? [{ id: CHARACTER_FORM_TAB.choices, label: tc("tabs.choices"), content: <CharacterChoicesTab campaignId={id} form={{ data: formData, set: setFormData }} classesEnabled={classMode.enabled} /> }]
       : []),
   ];
 
   return (
-    <HudFormPage title="Створити нового персонажа" aside="Заповніть основну інформацію про персонажа">
+    <HudFormPage title={t("form.title")} aside={t("form.aside")}>
       <HudForm
         id="character-form"
         onSubmit={handleSubmit}
@@ -108,10 +113,10 @@ export function NewCharacterForm({ campaignId: id, characterType }: { campaignId
         actions={
           <>
             <Button type="submit" disabled={isLoading || membersLoading}>
-              {isLoading ? "Створення..." : "Створити персонажа"}
+              {isLoading ? t("form.submitting") : t("form.submit")}
             </Button>
             <Button type="button" variant="outline" asChild>
-              <Link href={`/campaigns/${id}/dm/characters`}>Скасувати</Link>
+              <Link href={`/campaigns/${id}/dm/characters`}>{tc("actions.cancel")}</Link>
             </Button>
           </>
         }

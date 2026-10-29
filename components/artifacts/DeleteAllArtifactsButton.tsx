@@ -19,7 +19,7 @@ export function DeleteAllArtifactsButton({ campaignId, artifactsCount }: DeleteA
   return (
     <DeleteAllButton
       count={artifactsCount}
-      nouns={[t("deleteAllNoun"), t("deleteAllNoun"), t("deleteAllNoun")]}
+      noun={t("deleteAllNoun")}
       view={{ variant: "soft", icon: <Trash2 className="h-4 w-4 mr-1.5" /> }}
       confirm={{ title: t("deleteAllTitle"), description: t("deleteAllDescription", { count: artifactsCount }) }}
       status={{ isPending: deleteAll.isPending }}

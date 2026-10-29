@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { useTranslations } from "next-intl";
 
 import { useUnitFormFields } from "./useUnitFormFields";
 import { useDeleteUnit, useUnit, useUpdateUnit } from "./useUnits";
@@ -11,6 +12,10 @@ import { buildUnitFormData, buildUnitUpdatePayload, emptyUnitFormDefaults } from
 import type { Unit } from "@/types/units";
 
 export function useUnitEditForm(campaignId: string, unitId: string) {
+  const t = useTranslations("units.form");
+
+  const tActions = useTranslations("common.actions");
+
   const confirm = useConfirm();
 
   const router = useRouter();
@@ -45,8 +50,8 @@ export function useUnitEditForm(campaignId: string, unitId: string) {
 
   const remove = async () => {
     const ok = await confirm({
-      title: "Ви впевнені, що хочете видалити цього юніта?",
-      confirmLabel: "Видалити",
+      title: t("deleteConfirm"),
+      confirmLabel: tActions("delete"),
       destructive: true,
       onConfirm: () => del.mutateAsync(unitId),
     });

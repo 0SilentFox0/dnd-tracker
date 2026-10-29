@@ -22,14 +22,14 @@ describe("EffectCard", () => {
   it("показує поля з реєстру і підсумок", () => {
     renderCard({ kind: "dot", damagePerRound: "1d4", damageType: "bleed", duration: { rounds: 2 }, target: "eventTarget" });
 
-    expect(screen.getByLabelText("Шкода/раунд (число, кубики, формула)")).toHaveValue("1d4");
+    expect(screen.getByLabelText("abilityRegistry.effects.dot.fields.damagePerRound")).toHaveValue("1d4");
     expect(screen.getByText("Кровотеча 1d4/раунд × 2 р.")).toBeInTheDocument();
   });
 
   it("зміна поля → onChange з оновленим ефектом", () => {
     const onChange = renderCard({ kind: "modifyStat", stat: "armor", flat: 1, duration: { rounds: 1 } });
 
-    fireEvent.change(screen.getByLabelText("Число / формула"), { target: { value: "3" } });
+    fireEvent.change(screen.getByLabelText("abilityRegistry.effects.modifyStat.fields.flat"), { target: { value: "3" } });
 
     expect(onChange).toHaveBeenCalledWith({ kind: "modifyStat", stat: "armor", flat: 3, duration: { rounds: 1 } });
   });
@@ -37,7 +37,7 @@ describe("EffectCard", () => {
   it("поле, приховане visibleWhen, не показується", () => {
     renderCard({ kind: "modifyStat", stat: "armor", flat: 1, duration: { rounds: 1 } });
 
-    expect(screen.queryByLabelText("Рівні слотів")).toBeNull();
+    expect(screen.queryByLabelText("abilityRegistry.effects.modifyStat.fields.spellLevels")).toBeNull();
   });
 
   it("помилка біля поля", () => {
@@ -49,18 +49,18 @@ describe("EffectCard", () => {
   it("невідомий вид — картка лише для читання", () => {
     renderCard({ kind: "teleport", range: 5 } as unknown as Effect);
 
-    expect(screen.getByText("Невідомий ефект")).toBeInTheDocument();
+    expect(screen.getByText("abilities.effect.unknown")).toBeInTheDocument();
   });
 
   it("випадковий ефект з 2 варіантами: ✕ варіанта неактивний і пояснює чому", () => {
     renderCard({ kind: "randomOf", options: [{ kind: "heal", amount: 1 }, { kind: "heal", amount: 2 }] } as Effect);
 
-    const removes = screen.getAllByRole("button", { name: "Видалити ефект" }).slice(1);
+    const removes = screen.getAllByRole("button", { name: "abilities.effect.delete" }).slice(1);
 
     expect(removes).toHaveLength(2);
     for (const b of removes) {
       expect(b).toBeDisabled();
-      expect(b).toHaveAttribute("title", "Потрібно щонайменше 2 варіанти");
+      expect(b).toHaveAttribute("title", "abilities.effect.minOptions");
     }
   });
 });

@@ -1,3 +1,5 @@
+import { useTranslations } from "next-intl";
+
 import { HudSection } from "@/components/hud/form";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -14,12 +16,14 @@ export function UnitImmunities({
   formData,
   onChange,
 }: UnitImmunitiesProps) {
+  const t = useTranslations("units.immunities");
+
   const unitImmunities = formData.immunities || [];
 
   const allImmunities = getUnitImmunities(formData as Unit);
 
   const handleAdd = () => {
-    const newImmunity = prompt("Введіть назву імунітету:");
+    const newImmunity = prompt(t("prompt"));
 
     if (newImmunity && newImmunity.trim()) {
       onChange({
@@ -36,18 +40,18 @@ export function UnitImmunities({
 
   return (
     <HudSection
-      title="Імунітети"
+      title={t("title")}
       className="space-y-4"
       action={
         <Button type="button" variant="outline" size="sm" onClick={handleAdd}>
-          + Додати імунітет
+          {t("add")}
         </Button>
       }
     >
       {unitImmunities.length > 0 && (
         <div className="space-y-2">
           <Label className="text-sm text-muted-foreground">
-            Імунітети юніта:
+            {t("own")}
           </Label>
           <div className="flex flex-wrap gap-2">
             {unitImmunities.map((immunity, index) => (
@@ -74,7 +78,7 @@ export function UnitImmunities({
       {allImmunities.length > 0 && (
         <div className="space-y-2 border-t pt-2">
           <Label className="text-sm font-semibold">
-            Всі імунітети:
+            {t("all")}
           </Label>
           <div className="flex flex-wrap gap-2">
             {allImmunities.map((immunity, index) => (
@@ -88,8 +92,7 @@ export function UnitImmunities({
 
       {allImmunities.length === 0 && (
         <p className="text-sm text-muted-foreground text-center py-2">
-          Немає доданих імунітетів. Натисніть &quot;Додати імунітет&quot; щоб додати
-          новий.
+          {t("empty")}
         </p>
       )}
     </HudSection>

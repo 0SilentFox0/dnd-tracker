@@ -28,7 +28,7 @@ export function BackgroundForm({ campaignId, background }: { campaignId: string;
   return (
     <HudFormPage title={t("form.editTitle")} aside={t("form.editAside")}>
       <HudForm id="background-form" onSubmit={actions.submit} tabs={[
-        { id: "basics", label: t("form.tabs.basics"), content: <div className="space-y-4">
+        { id: "basics", label: tc("tabs.basic"), content: <div className="space-y-4">
           <Label htmlFor="background-name">{t("form.name")}</Label>
           <Input id="background-name" required value={data.name} onChange={(e) => patch({ name: e.target.value })} />
           <ImageUpload value={data.icon ?? ""} onChange={(icon) => patch({ icon: icon || null })} label={t("form.icon")} fallbackText={data.name} allowFile={false} />
@@ -47,7 +47,7 @@ export function BackgroundForm({ campaignId, background }: { campaignId: string;
           <Textarea id="background-equipment" value={data.equipmentText ?? ""} onChange={(e) => patch({ equipmentText: e.target.value || null })} />
           <p className="text-sm text-muted-foreground">{t("form.equipmentNote")}</p>
         </div> },
-        { id: "choices", label: t("form.tabs.choices"), invalid, content: <ChoiceListEditor campaignId={campaignId} owner="background" value={data.choices} onChange={(choices) => patch({ choices })} onValidityChange={(valid) => setInvalid(!valid)} /> },
+        { id: "choices", label: tc("tabs.choices"), invalid, content: <ChoiceListEditor campaignId={campaignId} owner="background" value={data.choices} onChange={(choices) => patch({ choices })} onValidityChange={(valid) => setInvalid(!valid)} /> },
       ]} actions={<><Button type="button" variant="outline" onClick={actions.cancel}>{tc("actions.cancel")}</Button><Button type="submit" disabled={invalid || isSaving}>{isSaving ? tc("actions.saving") : tc("actions.save")}</Button></>} />
     </HudFormPage>
   );

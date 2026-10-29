@@ -8,9 +8,13 @@ import { Button } from "@/components/ui/button";
 import { getAuthUser } from "@/lib/auth";
 import { CampaignKind, CampaignRole, CampaignStatus } from "@/lib/constants/campaigns";
 import { prisma } from "@/lib/db";
+import { getRequestLocale } from "@/lib/i18n/request-locale";
+import { getTranslator } from "@/lib/i18n/translator";
 
 export default async function CampaignsPage() {
   const user = await getAuthUser();
+
+  const t = await getTranslator(await getRequestLocale(), "campaigns");
 
   const userId = user.id;
 
@@ -74,15 +78,15 @@ export default async function CampaignsPage() {
       return (
         <HudPage>
           <HudPanel className="space-y-3">
-            <h2 className="hud-sc text-xl text-hud-ink">Помилка підключення до бази даних</h2>
-            <ErrorState error={new Error("Не вдається підключитися до бази даних. Перевірте DATABASE_URL в .env файлі.")} />
+            <h2 className="hud-sc text-xl text-hud-ink">{t("page.dbError.title")}</h2>
+            <ErrorState error={new Error(t("page.dbError.message"))} />
             <div className="rounded-lg bg-hud-field p-4">
-              <p className="mb-2 text-sm font-semibold text-hud-gold">Як виправити:</p>
+              <p className="mb-2 text-sm font-semibold text-hud-gold">{t("page.dbError.fixTitle")}</p>
               <ol className="list-inside list-decimal space-y-1 text-sm text-hud-bone">
-                <li>Відкрийте Supabase Dashboard → Settings → Database</li>
-                <li>Скопіюйте Connection Pooling URI (порт 6543)</li>
-                <li>Оновіть DATABASE_URL в .env файлі</li>
-                <li>Перезапустіть dev сервер</li>
+                <li>{t("page.dbError.steps.dashboard")}</li>
+                <li>{t("page.dbError.steps.pooling")}</li>
+                <li>{t("page.dbError.steps.env")}</li>
+                <li>{t("page.dbError.steps.restart")}</li>
               </ol>
             </div>
           </HudPanel>
@@ -90,18 +94,18 @@ export default async function CampaignsPage() {
       );
     }
 
-    throw error; // Якщо інша помилка - пробрасываем далі
+    throw error;
   }
 
   return (
     <HudPage>
       <HudPageHeader
-        title="Мої Кампанії"
+        title={t("page.title")}
         actions={
           <>
             <JoinCampaignDialog />
             <Button className="whitespace-nowrap" asChild>
-              <Link href="/campaigns/new">+ Нова Кампанія</Link>
+              <Link href="/campaigns/new">{t("page.new")}</Link>
             </Button>
           </>
         }
@@ -119,15 +123,15 @@ export default async function CampaignsPage() {
                 <div className="flex items-start justify-between gap-2">
                   <h2 className="hud-sc text-lg text-hud-ink">{campaign.name}</h2>
                   {isDM && (
-                    <span className="shrink-0 rounded-full bg-[linear-gradient(135deg,#8a6414,var(--color-hud-gold-strong)_55%,#8a6414)] px-2 text-[11px] text-[#2a1d05]">DM</span>
+                    <span className="shrink-0 rounded-full bg-[linear-gradient(135deg,#8a6414,var(--color-hud-gold-strong)_55%,#8a6414)] px-2 text-[11px] text-[#2a1d05]">{t("roles.dm")}</span>
                   )}
                 </div>
                 {campaign.description && <p className="text-sm text-hud-muted">{campaign.description}</p>}
                 <div className="space-y-1 text-sm text-hud-muted">
-                  <p>Рівень: до {campaign.maxLevel}</p>
-                  <p>Гравців: {campaign.members.filter((m) => m.role === CampaignRole.PLAYER).length}</p>
+                  <p>{t("card.level", { level: campaign.maxLevel })}</p>
+                  <p>{t("card.players", { count: campaign.members.filter((m) => m.role === CampaignRole.PLAYER).length })}</p>
                   <p>
-                    Код запрошення: <code className="rounded bg-hud-field px-1.5 font-mono text-hud-bone">{campaign.inviteCode}</code>
+                    {t("card.inviteCode")} <code className="rounded bg-hud-field px-1.5 font-mono text-hud-bone">{campaign.inviteCode}</code>
                   </p>
                 </div>
               </Link>
@@ -138,7 +142,7 @@ export default async function CampaignsPage() {
 
       {templates.length > 0 && (
         <section className="mt-8 space-y-3">
-          <h2 className="hud-sc text-xl text-hud-ink">Мої шаблони</h2>
+          <h2 className="hud-sc text-xl text-hud-ink">{t("page.templates")}</h2>
           <div className="grid gap-3 md:grid-cols-2 lg:grid-cols-3">
             {templates.map((template) => (
               <HudCard key={template.id} asChild className="space-y-2">
@@ -155,10 +159,10 @@ export default async function CampaignsPage() {
       {campaigns.length === 0 && (
         <EmptyState
           icon={MapIcon}
-          title="У вас поки немає кампаній"
+          title={t("page.empty.title")}
           action={
             <Button asChild>
-              <Link href="/campaigns/new">Створити першу кампанію</Link>
+              <Link href="/campaigns/new">{t("page.empty.action")}</Link>
             </Button>
           }
         />

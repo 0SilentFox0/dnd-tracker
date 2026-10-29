@@ -1,0 +1,229 @@
+{
+  "tabs": {
+    "basic": "Basic",
+    "combat": "Combat",
+    "skills": "Skills",
+    "choices": "Choices",
+    "magic": "Magic",
+    "items": "Inventory",
+    "story": "Story",
+    "log": "Log",
+    "things": "Gear"
+  },
+  "actions": {
+    "edit": "Edit"
+  },
+  "hero": {
+    "level": "Lv {level}",
+    "hpCurrent": "HP {current} / {max}",
+    "hpTotal": "HP {total}",
+    "toHit": "To hit",
+    "proficiency": "Proficiency",
+    "short": {
+      "initiative": "Init",
+      "speed": "Speed",
+      "toHit": "Hit",
+      "proficiency": "Prof"
+    }
+  },
+  "combat": {
+    "roll": "Roll",
+    "abilities": "ABILITIES",
+    "primaryHint": "★ primary ability: all attack rolls and damage use it",
+    "attacks": "ATTACKS",
+    "noAttacks": "No weapons — no attacks yet",
+    "hitShort": "hit",
+    "damage": "damage",
+    "toHit": "To hit",
+    "avgDamage": "Average damage",
+    "defense": "DEFENSE AND STATS",
+    "targets": "Targets per attack",
+    "immunities": "Immunities",
+    "saves": "SAVING THROWS",
+    "saveRoll": "{ability} saving throw",
+    "skills": "SKILLS",
+    "passives": "Passive: perception {perception} · investigation {investigation} · insight {insight}",
+    "languages": "Languages: {list}",
+    "proficiencies": "Proficiencies: {list}"
+  },
+  "magic": {
+    "saveDC": "Spell save DC",
+    "attack": "Spell attack",
+    "pact": "PACT",
+    "pactSlots": "Pact slots: {current} of {max}, level {level}",
+    "slots": "SLOTS",
+    "slotsLeft": "Level {level}: {current} of {count} left",
+    "slotsTotal": "Level {level}: {count} {count, plural, one {slot} other {slots}}",
+    "fromChoices": "SPELLS FROM CHOICES",
+    "book": "Spellbook",
+    "emptyBook": "For now the hero trusts their sword and bow more"
+  },
+  "skills": {
+    "personal": "Personal skill",
+    "race": "Race: {race}"
+  },
+  "feats": {
+    "title": "Feats and choices",
+    "background": "Background: {name}",
+    "equipmentNote": "The DM hands out equipment and money manually."
+  },
+  "sets": {
+    "title": "SETS",
+    "name": "Set “{name}” {have}/{total}",
+    "withFull": "With the full set: {effects}"
+  },
+  "tokens": {
+    "giveTitle": "Give a token",
+    "give": "Give",
+    "colorLabel": "Token color",
+    "colors": {
+      "red": "Red",
+      "green": "Green"
+    },
+    "labelField": "Token label",
+    "deleteConfirm": "Delete token “{label}”?",
+    "delete": "Delete",
+    "title": "TOKENS",
+    "add": "+ Token",
+    "counters": {
+      "red": "Red tokens",
+      "green": "Green tokens"
+    },
+    "empty": "No tokens yet",
+    "deleteLabel": "Delete token",
+    "saveFailed": "Could not save the token"
+  },
+  "goals": {
+    "deleteConfirm": "Delete goal “{name}”?",
+    "delete": "Delete",
+    "title": "GOALS",
+    "empty": "No goals yet.",
+    "statusLabel": "Status of “{name}”: {status}",
+    "status": {
+      "active": "active",
+      "done": "completed",
+      "failed": "failed"
+    },
+    "main": "Main goal",
+    "personal": "Personal goal",
+    "inner": "Inner conflict",
+    "secret": "Secret goal",
+    "fromPlayer": "from the player",
+    "editLabel": "Edit goal {name}",
+    "deleteLabel": "Delete goal {name}",
+    "nameField": "Goal title",
+    "namePlaceholder": "Title (optional)",
+    "textField": "Goal text",
+    "save": "Save goal",
+    "cancel": "Cancel",
+    "add": "Add goal",
+    "saveFailed": "Could not save the goals"
+  },
+  "notes": {
+    "title": "NOTES",
+    "edit": "Edit notes",
+    "empty": "No notes yet.",
+    "field": "Notes",
+    "save": "Save",
+    "cancel": "Cancel",
+    "saveFailed": "Could not save the notes"
+  },
+  "biography": {
+    "title": "BIOGRAPHY",
+    "marker": "Highlight",
+    "field": "Biography",
+    "hint": "Select a fragment and press “Highlight” — the player will see it highlighted. Pressing inside a highlight removes it. An empty line starts a new paragraph."
+  },
+  "story": {
+    "chapters": "STORY CHAPTERS",
+    "biography": "BIOGRAPHY",
+    "noBiography": "The biography has not been written yet"
+  },
+  "levelUp": {
+    "action": "+ level",
+    "freePoints": "Free skill points: {free}",
+    "loadingChoices": "Loading choices…",
+    "choices": "Level choices"
+  },
+  "choices": {
+    "pending": "Unchosen choices: {pending}",
+    "pick": "Choose",
+    "title": "Hero choices",
+    "loadingHero": "Loading the hero…",
+    "saveFailed": "Could not save the choices"
+  },
+  "portrait": {
+    "add": "Add a photo",
+    "open": "Open the photo"
+  },
+  "spellBook": {
+    "toList": "← To the list",
+    "title": "Spellbook",
+    "back": "← Back"
+  },
+  "transfer": {
+    "confirm": "Give “{artifact}” to {hero}?",
+    "give": "Give",
+    "failed": "Could not give the artifact",
+    "titleFor": "Give: {artifact}",
+    "loading": "Loading heroes…",
+    "noHeroes": "No other heroes in the campaign",
+    "toStash": "to the stash"
+  },
+  "classLevelUp": {
+    "title": "Level up",
+    "cancel": "Cancel",
+    "later": "Choose later",
+    "confirm": "Level up",
+    "classNotFound": "Class not found",
+    "newClass": "New class",
+    "pickClass": "Pick a class",
+    "subclass": "Subclass",
+    "pickSubclass": "Pick a subclass",
+    "gainsLabel": "What the level gives",
+    "gains": "What level {level} gives",
+    "picks": "Choices: {count}",
+    "failed": "Could not level up."
+  },
+  "basic": {
+    "toClasses": "Switch to classes",
+    "delete": "Delete character"
+  },
+  "editor": {
+    "loading": "Loading the editor…",
+    "spellAbility": "Spellcasting ability",
+    "none": "None",
+    "spellAbilityHint": "The spell save DC and spell attack in the profile are based on it.",
+    "cancel": "Cancel",
+    "saving": "Saving…",
+    "save": "Save"
+  },
+  "sheet": {
+    "lines": {
+      "base": "Base",
+      "proficiency": "Proficiency",
+      "weapon": "Weapon",
+      "weaponDice": "Weapon {dice}",
+      "levelDice": "Level + {dice}",
+      "dmMultiplier": "DM multiplier",
+      "noArmor": "No armor",
+      "dexterityCapped": "Dexterity (cap {cap})",
+      "hitDice": "Hit dice: {dice}",
+      "bonuses": "Bonuses"
+    },
+    "abilityPick": "+{n} {ability, select, strength {STR} dexterity {DEX} constitution {CON} intelligence {INT} wisdom {WIS} charisma {CHA} other {}}",
+    "spellOrigin": {
+      "lineage": "Lineage: {name}",
+      "feat": "Feat: {name}",
+      "race": "Race: {name}",
+      "background": "Background: {name}",
+      "class": "Class: {name}"
+    },
+    "from": {
+      "background": "Background: {name}",
+      "classLevel": "{name} {level}",
+      "origin": "Origin",
+      "dm": "DM"
+    }
+  }
+}

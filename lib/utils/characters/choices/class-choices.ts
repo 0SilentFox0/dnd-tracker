@@ -12,7 +12,7 @@ const multiclassSkillDefs = (cls: GameClassData): Choice[] => {
 
   const skills: DndSkill[] = grant.from.filter(isDndSkill);
 
-  return [{ id: MULTICLASS_SKILLS_ID, label: "Навички мультикласу", level: 1, count: grant.count, kind: "skill", skills: skills.length > 0 ? skills : [...DND_SKILLS] }];
+  return [{ id: MULTICLASS_SKILLS_ID, label: "choices.picker.multiclassSkills", level: 1, count: grant.count, kind: "skill", skills: skills.length > 0 ? skills : [...DND_SKILLS] }];
 };
 
 export const classChoiceDefs = (cls: GameClassData, subclass: Subclass | null, multiclass = false): Choice[] => [

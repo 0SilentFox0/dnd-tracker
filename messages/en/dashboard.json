@@ -1,0 +1,305 @@
+{
+  "groups": {
+    "game": "Game",
+    "heroes": "Heroes",
+    "libraries": "Libraries",
+    "player": "Campaign"
+  },
+  "sections": {
+    "scenario": {
+      "title": "Scenario",
+      "subtitle": "Scenes, GM notes and hero biographies",
+      "keywords": "plot, notes, manuscript"
+    },
+    "characters": {
+      "title": "Characters",
+      "subtitle": "Manage player characters",
+      "keywords": "heroes, players, approval"
+    },
+    "units": {
+      "title": "Units",
+      "subtitle": "Manage mobs and units",
+      "keywords": "mobs, npc, monsters, enemies"
+    },
+    "spells": {
+      "title": "Spells",
+      "subtitle": "Campaign spell database",
+      "keywords": "spell, magic"
+    },
+    "artifacts": {
+      "title": "Artifacts",
+      "subtitle": "Manage artifacts and sets",
+      "keywords": "items, gear, sets"
+    },
+    "skills": {
+      "title": "Skills",
+      "subtitle": "Manage skills and their effects",
+      "keywords": "abilities, talents"
+    },
+    "skill-trees": {
+      "title": "Skill trees",
+      "subtitle": "Set up skill trees for races",
+      "keywords": "leveling, levels"
+    },
+    "races": {
+      "title": "Races",
+      "subtitle": "Manage races and their abilities",
+      "keywords": "peoples"
+    },
+    "classes": {
+      "title": "Classes",
+      "subtitle": "Classes, subclasses and features by level",
+      "keywords": "subclasses"
+    },
+    "backgrounds": {
+      "title": "Backgrounds",
+      "subtitle": "Hero origin, skills and starting choices",
+      "keywords": "origin"
+    },
+    "feats": {
+      "title": "Feats",
+      "subtitle": "5e feats: origin, general, fighting styles, epic boons",
+      "keywords": "feats"
+    },
+    "battles": {
+      "title": "Battles",
+      "subtitle": "Create and manage battles",
+      "keywords": "battle, fights, scenes"
+    },
+    "music": {
+      "title": "Music",
+      "subtitle": "Track library for the battle player",
+      "keywords": "tracks, player"
+    },
+    "show": {
+      "title": "Show",
+      "subtitle": "Slide sets with music for players",
+      "keywords": "slides"
+    },
+    "spell-groups": {
+      "title": "Schools of magic",
+      "subtitle": "Spell groups and schools",
+      "keywords": "spell groups"
+    },
+    "rules": {
+      "title": "Rules",
+      "subtitle": "Campaign rules",
+      "keywords": "settings"
+    },
+    "acquaintances": {
+      "title": "Acquaintances",
+      "subtitle": "NPCs the heroes have met",
+      "keywords": "npc, characters, journal"
+    },
+    "info": {
+      "title": "Reference",
+      "subtitle": "Skills, spells and artifacts: how they work and who has what.",
+      "keywords": "reference, information, rules"
+    },
+    "my-character": {
+      "title": "My character",
+      "subtitle": "View and edit your character",
+      "keywords": "hero, sheet"
+    },
+    "player-show": {
+      "title": "Show",
+      "subtitle": "Slides and music from the DM during play",
+      "keywords": "slides"
+    },
+    "player-world": {
+      "title": "Map",
+      "subtitle": "Your heroes and the discovered places of the world",
+      "keywords": "world, map"
+    }
+  },
+  "pendingSubtitle": "{subtitle} · {count} awaiting approval",
+  "search": {
+    "label": "Search sections",
+    "placeholder": "Where to? (spells, mobs, battles…)"
+  },
+  "page": {
+    "templateNotice": "This is a template: changes go into new campaigns created from it; existing campaigns are not affected.",
+    "compendium": {
+      "link": "JSON compendium import and saved reports",
+      "text": "Fill the campaign from a single JSON: libraries, GM materials and next steps."
+    },
+    "members": {
+      "title": "Members",
+      "count": "{count, plural, one {# member} other {# members}} in the campaign"
+    }
+  },
+  "summary": {
+    "title": "Campaign",
+    "maxLevel": "Max level",
+    "inviteCode": "Invite code",
+    "status": "Status",
+    "active": "Active",
+    "archived": "Archived"
+  },
+  "nextSteps": {
+    "title": "What's next",
+    "prep": "Preparation",
+    "pending": "Awaiting approval: {count}",
+    "session": "Session",
+    "show": "Show",
+    "world": "World map",
+    "music": "Music"
+  },
+  "battleStatus": {
+    "prepared": "prepared",
+    "active": "in progress",
+    "completed": "completed"
+  },
+  "hero": {
+    "none": "You don't have a hero yet",
+    "create": "Create a character",
+    "stats": "Level {level} · AC {armorClass} · Speed {speed}",
+    "pending": "Awaiting approval",
+    "returned": "Returned by DM",
+    "newLevel": "New level",
+    "toBattle": "To battle",
+    "open": "Open hero"
+  },
+  "info": {
+    "title": "Information — Reference",
+    "subtitleClasses": "Campaign classes, spells and artifacts: how they work, appearance, who holds the artifacts.",
+    "subtitleSkills": "Campaign skills, spells and artifacts: how they work, appearance, who holds the artifacts.",
+    "back": "Back to campaign"
+  },
+  "reference": {
+    "summary": {
+      "hitDie": "Hit die: d{die}",
+      "savingThrows": "Saving throws: {list}",
+      "caster": "{caster}",
+      "casterAbility": "{caster} ({ability})",
+      "armor": "Armor: {list}",
+      "weapons": "Weapons: {list}",
+      "tools": "Tools: {list}",
+      "skills": "Skills: {count} from {list}"
+    },
+    "tabs": {
+      "label": "Reference section",
+      "all": "All",
+      "skills": "Skills",
+      "classes": "Classes",
+      "spells": "Spells",
+      "artifacts": "Artifacts"
+    },
+    "search": {
+      "placeholder": "Search by name, description, mechanics...",
+      "ariaClasses": "Search classes, spells and artifacts",
+      "ariaSkills": "Search skills, spells and artifacts",
+      "clear": "Clear search",
+      "filters": "Filters",
+      "filtersActive": "on",
+      "reset": "Reset filters"
+    },
+    "filters": {
+      "mainSkill": {
+        "label": "Skill branch",
+        "all": "All branches"
+      },
+      "spellLevel": {
+        "label": "Spell level",
+        "all": "Any"
+      },
+      "spellGroup": {
+        "label": "Spell group",
+        "all": "All groups"
+      },
+      "spellType": {
+        "label": "Spell type",
+        "all": "All types"
+      },
+      "rarity": {
+        "label": "Artifact rarity",
+        "all": "Any"
+      },
+      "slot": {
+        "label": "Artifact slot",
+        "all": "All slots"
+      },
+      "artifactSet": {
+        "label": "Artifact set",
+        "all": "All sets"
+      }
+    },
+    "count": {
+      "classes": "Classes: <strong>{count}</strong>",
+      "skills": "Skills: <strong>{count}</strong>",
+      "spells": "Spells: <strong>{count}</strong>",
+      "artifacts": "Artifacts: <strong>{count}</strong>"
+    },
+    "shown": {
+      "classes": "Classes shown: <strong>{count}</strong>",
+      "skills": "Skills shown: <strong>{count}</strong>",
+      "spells": "Spells shown: <strong>{count}</strong>",
+      "artifacts": "Artifacts shown: <strong>{count}</strong>"
+    },
+    "jump": {
+      "classes": "To classes",
+      "skills": "To skills",
+      "spells": "To spells",
+      "artifacts": "To artifacts"
+    },
+    "empty": {
+      "nothing": "Nothing found",
+      "nothingHint": "Change the search or filters, or reset them.",
+      "resetAll": "Reset filters and search",
+      "classes": "No classes match this search.",
+      "skills": "No skills match these filters.",
+      "spells": "No spells match these filters.",
+      "artifacts": "No artifacts match these filters."
+    },
+    "sections": {
+      "classes": {
+        "title": "Classes",
+        "intro": "Campaign classes: features, abilities by level and subclasses."
+      },
+      "skills": {
+        "title": "Skills",
+        "intro": "How skills work and how they look in the game. Only the DM can edit the appearance description."
+      },
+      "spells": {
+        "title": "Spells",
+        "intro": "How spells work and how they look. Only the DM can edit the appearance description."
+      },
+      "artifacts": {
+        "title": "Artifacts",
+        "intro": "Campaign artifacts: what they grant and who carries them. Each artifact is unique and belongs to one hero."
+      },
+      "sets": {
+        "title": "Sets"
+      }
+    },
+    "card": {
+      "levelShort": "lvl {level}",
+      "description": "Description",
+      "effects": "Effects",
+      "mechanics": "Mechanics",
+      "skillDescription": "Description / mechanics",
+      "skillHow": "How it works (bonuses, effects, triggers)",
+      "appearanceSkill": "Appearance description (how it looks in the game)",
+      "appearanceSpell": "Appearance description (how the spell looks)",
+      "appearancePlaceholderSkill": "For example: a bright fire orb flying at the target...",
+      "appearancePlaceholderSpell": "For example: a fireball exploding in bright flames...",
+      "saveAppearance": "Save appearance description",
+      "featuresByLevel": "Features by level",
+      "subclass": "Subclass: {name}",
+      "gear": "gear",
+      "heldBy": "held by {name}",
+      "free": "free",
+      "setItems": "Items: {names}",
+      "setBonuses": "Set bonuses"
+    },
+    "mechanics": {
+      "branch": "Branch: {name}",
+      "abilities": "Abilities: {list}",
+      "grantedSpell": "Grants spell: {name}",
+      "spell": "{level}, {type}",
+      "dice": "Dice: {count}d",
+      "resolution": "Check: {value}",
+      "cost": "Cost: {value}"
+    }
+  }
+}

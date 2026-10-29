@@ -1,0 +1,140 @@
+{
+  "page": {
+    "createTitle": "Create a new spell",
+    "createAside": "Add information about the new spell",
+    "createSubmit": "Create spell",
+    "editTitle": "Edit spell",
+    "editTitleNamed": "Edit spell: {name}",
+    "editAside": "Update the spell information",
+    "editSubmit": "Save changes",
+    "loading": "Loading...",
+    "deleteConfirm": "Are you sure you want to delete this spell?",
+    "deleting": "Deleting..."
+  },
+  "tabs": {
+    "basic": "Basics",
+    "power": "Power",
+    "effects": "Effects"
+  },
+  "body": {
+    "manualNotice": "Manual spell: use the description. Automatic casting is locked until the mechanics are configured.",
+    "verified": "Mechanics verified: allow automatic use after saving"
+  },
+  "basic": {
+    "name": "Spell name",
+    "level": "Level (slot) *",
+    "levelPlaceholder": "Select a level",
+    "cost": "Cost",
+    "castingRounds": "Casting rounds (1 min = 10 rounds)",
+    "reactionTrigger": "Reaction trigger",
+    "school": "School",
+    "schoolPlaceholder": "Select a school",
+    "noSchool": "No school",
+    "description": "What it does (exact mechanics)",
+    "descriptionPlaceholder": "In plain words, with numbers",
+    "appearance": "What it looks like",
+    "appearancePlaceholder": "Atmospheric description, 2–4 sentences",
+    "icon": "Image link"
+  },
+  "power": {
+    "baseDice": "Base dice N",
+    "baseDiceHint": "Hero: N + ⌊level / 3⌋ dice, die size from the school mastery (d6 / d8 / d10). Unit: N + ⌊level / 2⌋ dice, die size from the level (1–4 d6, 5–9 d8, 10+ d10). 0 means no dice.",
+    "targets": "Targets",
+    "shape": "Shape",
+    "size": "Size, feet",
+    "exact": "Exact 5e area",
+    "hollow": "Ring: the center cell is not hit",
+    "side": "Side",
+    "sideNoMap": "Without a map: side",
+    "maxTargets": "Max targets",
+    "maxTargetsNoMap": "Without a map: max targets",
+    "chain": "Chain: next nearest target",
+    "range": "Range, feet",
+    "rangePlaceholder": "unlimited",
+    "zone": "Leaves a hazard",
+    "zoneRounds": "Rounds",
+    "zoneLabel": "Label",
+    "check": "Check",
+    "saveAbility": "Ability (DC = 8 + mastery + caster modifier)",
+    "onSuccess": "On success",
+    "fixedDice": "Fixed dice",
+    "damageBonus": "Damage / healing bonus",
+    "lists": "Lists",
+    "dieSides": "Die size",
+    "dieSidesDefault": "d6 (default)",
+    "dieSide": "d{n}",
+    "upcastDice": "+dice per circle",
+    "upcastTargets": "+targets per circle",
+    "addAbilityMod": "Add ability modifier",
+    "resolution": {
+      "auto": "Automatic",
+      "save": "Target's saving throw",
+      "attack": "Spell attack"
+    },
+    "sides": {
+      "enemy": "Enemies",
+      "ally": "Allies"
+    }
+  },
+  "effects": {
+    "title": "Effects",
+    "hint": "Effects apply to the spell's targets (target “event target”) or to the caster (target “self”). The spell roll in sums is “% of spell roll”.",
+    "add": "+ effect",
+    "concentrationTitle": "Concentration",
+    "concentration": "Concentration",
+    "concentrationHint": "Applies when concentration is enabled in the campaign rules.",
+    "stackingTitle": "Stacking",
+    "stackable": "Effects stack on repeated casts",
+    "maxStacks": "Max stacks",
+    "stackingHint": "At the limit, the stack with the shortest duration is refreshed.",
+    "raceTitle": "Race damage modifiers",
+    "raceHint": "−100 % — race immunity, +100 % — double damage.",
+    "racePlaceholder": "Race",
+    "percent": "Percent",
+    "remove": "Remove",
+    "addRace": "+ race"
+  },
+  "fx": {
+    "animation": "Animation",
+    "element": "Element",
+    "aura": "Aura",
+    "auto": "Auto"
+  },
+  "fields": {
+    "spell": "Spell",
+    "name": "Name",
+    "level": "Level",
+    "groupId": "School",
+    "icon": "Icon",
+    "description": "Description",
+    "appearanceDescription": "Appearance",
+    "cost": "Cost",
+    "dice": "Base dice",
+    "targeting": "Targets",
+    "targetingRange": "Range",
+    "targetingSize": "Size",
+    "targetingMaxTargets": "Max targets",
+    "targetingSide": "Side",
+    "targetingShape": "Shape",
+    "targetingZone": "Hazard",
+    "targetingZoneRounds": "Hazard rounds",
+    "resolution": "Check",
+    "spellEffects": "Effects",
+    "raceModifiers": "Race modifiers",
+    "stackable": "Stacking",
+    "maxStacks": "Max stacks",
+    "dieSides": "Die size",
+    "upcastDice": "Dice per circle",
+    "upcastTargets": "Targets per circle",
+    "fx": "Animation"
+  },
+  "validation": {
+    "nameRequired": "Enter a spell name",
+    "problem": "{field}: {message}",
+    "exactCircleOnly": "Exact area is only available for circles",
+    "attackTargets": "A spell attack needs an enemy or area target"
+  },
+  "appearance": {
+    "saveFailed": "Could not save the appearance description"
+  }
+}

@@ -1,0 +1,28 @@
+import type { Namespace } from "./config";
+
+export const CAMPAIGN_NAMESPACES = [
+  "common",
+  "validation",
+  "onboarding",
+  "races",
+  "skills",
+  "classes",
+  "feats",
+  "backgrounds",
+  "artifacts",
+  "music",
+  "choices",
+  "campaigns",
+  "dashboard",
+  "characters",
+  "characterProfile",
+  "inventory",
+  "rest",
+  "spells",
+  "spellEditor",
+  "units",
+  "abilities",
+  "abilityRegistry",
+  "rules",
+  "skillTree",
+] as const satisfies readonly Namespace[];

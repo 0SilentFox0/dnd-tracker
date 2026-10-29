@@ -5,6 +5,7 @@ import { useTranslations } from "next-intl";
 
 import { abilitySaveError, useAbilityValidity } from "@/lib/hooks/abilities";
 import { useConfirm } from "@/lib/hooks/common";
+import { useTranslator } from "@/lib/i18n/use-translator";
 import type { ArmorStats } from "@/lib/utils/artifacts/armor-stats";
 import {
   type ArtifactFormState,
@@ -23,6 +24,8 @@ interface UseArtifactFormOptions {
 
 export function useArtifactForm({ initial, mode, onSubmit, onDelete }: UseArtifactFormOptions) {
   const t = useTranslations();
+
+  const ta = useTranslator("abilities");
 
   const confirm = useConfirm();
 
@@ -54,7 +57,7 @@ export function useArtifactForm({ initial, mode, onSubmit, onDelete }: UseArtifa
     try {
       await onSubmit(buildArtifactPayload(fields, mode));
     } catch (err) {
-      setError(abilitySaveError(err, mode === "edit" ? t("common.form.updateFailed") : t("common.form.createFailed")));
+      setError(abilitySaveError(err, mode === "edit" ? t("common.form.updateFailed") : t("common.form.createFailed"), ta));
     } finally {
       setIsSaving(false);
     }

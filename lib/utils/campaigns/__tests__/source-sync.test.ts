@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 
+import { makeT } from "@/lib/i18n/test/mock-t";
 import { autoAddedPreview, defaultSelection, formatUsage, groupItems, itemKey, toRefs, usageTotals } from "@/lib/utils/campaigns/source-sync";
 import type { SourceDiffItem } from "@/types/campaigns";
 
@@ -32,7 +33,6 @@ describe("source sync selection", () => {
     const groups = groupItems([item({ scope: "units", key: "u" }), item({ scope: "rules", key: "morale" }), item({ scope: "spellGroups", key: "g" })]);
 
     expect(groups.map((g) => g.scope)).toEqual(["rules", "spellGroups", "units"]);
-    expect(groups[0].label).toBe("Правила");
   });
 
   it("autoAddedPreview lists requires that are not selected, once", () => {
@@ -72,14 +72,15 @@ describe("source sync selection", () => {
 });
 
 describe("formatUsage", () => {
-  it("pluralizes both counts and skips zeros", () => {
-    expect(formatUsage({ characters: 2, content: 1 })).toBe("2 персонажі, 1 запис");
-    expect(formatUsage({ characters: 5, content: 0 })).toBe("5 персонажів");
-    expect(formatUsage({ characters: 0, content: 3 })).toBe("3 записи");
+  const t = makeT("campaigns");
+
+  it("emits both counts and skips zeros", () => {
+    expect(formatUsage({ characters: 2, content: 1 }, t)).toBe('campaigns.sourceSync.usage.characters {"count":2}, campaigns.sourceSync.usage.records {"count":1}');
+    expect(formatUsage({ characters: 5, content: 0 }, t)).toBe('campaigns.sourceSync.usage.characters {"count":5}');
   });
 
   it("returns null when nothing uses it", () => {
-    expect(formatUsage({ characters: 0, content: 0 })).toBeNull();
+    expect(formatUsage({ characters: 0, content: 0 }, t)).toBeNull();
   });
 });
 

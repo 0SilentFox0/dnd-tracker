@@ -37,13 +37,13 @@ describe("ClassLevelUpDialog: level choices", () => {
   it("«Обрати пізніше» levels up without choices; no hero → no step", async () => {
     open({ race: "Elf", level: 1, scores, skills: {} });
 
-    fireEvent.click(screen.getByRole("button", { name: "Обрати пізніше" }));
+    fireEvent.click(screen.getByRole("button", { name: "characterProfile.classLevelUp.later" }));
 
     await waitFor(() => expect(submit).toHaveBeenCalledWith({ classId: sorcerer.id }));
 
     cleanup();
     open();
 
-    expect(screen.queryByRole("button", { name: "Обрати пізніше" })).toBeNull();
+    expect(screen.queryByRole("button", { name: "characterProfile.classLevelUp.later" })).toBeNull();
   });
 });

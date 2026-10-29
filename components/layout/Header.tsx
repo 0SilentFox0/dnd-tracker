@@ -25,12 +25,15 @@ import { HudPortalClassProvider } from "@/components/ui/portal-class";
 import { dmSectionsFor } from "@/lib/constants/campaigns";
 import { useSessionEmail, useSwitchGoogleAccount } from "@/lib/hooks/auth";
 import { useCampaignRules, useIsTemplateCampaign } from "@/lib/hooks/campaigns";
+import { useTranslator } from "@/lib/i18n/use-translator";
 import { cn } from "@/lib/utils";
 
 const BATTLE_PATH = /^\/campaigns\/[^/]+\/battles\/[^/]+$/;
 
 export function Header() {
   const t = useTranslations("common.header");
+
+  const tCommon = useTranslator("common");
 
   const pathname = usePathname();
 
@@ -89,10 +92,10 @@ export function Header() {
                 {isDMPage && (
                   <>
                     <DropdownMenuSeparator />
-                    {dmSections.map(({ path, label, title }) => (
+                    {dmSections.map(({ path }) => (
                       <Fragment key={path}>
                         <DropdownMenuItem asChild>
-                          <Link href={`/campaigns/${campaignId}/dm/${path}`}>{title ?? label}</Link>
+                          <Link href={`/campaigns/${campaignId}/dm/${path}`}>{tCommon(`dmMenu.${path}`)}</Link>
                         </DropdownMenuItem>
                         {path === "characters" && (
                           <DropdownMenuItem asChild>

@@ -19,12 +19,10 @@
     "undead": "Нежить"
   },
   "confirm": {
-    "cancel": "Скасувати",
     "confirm": "Підтвердити",
     "failed": "Не вдалося виконати дію",
     "unsavedTitle": "Є незбережені зміни. Вийти без збереження?",
-    "leave": "Вийти",
-    "delete": "Видалити"
+    "leave": "Вийти"
   },
   "notify": {
     "title": "Повідомлення",
@@ -95,7 +93,16 @@
   },
   "weaponTraits": {
     "label": "Властивості зброї",
-    "versatileDice": "Кубик двома руками"
+    "versatileDice": "Кубик двома руками",
+    "traits": {
+      "light": "Легка",
+      "finesse": "Фехтувальна",
+      "twoHanded": "Дворучна",
+      "versatile": "Універсальна",
+      "reach": "Досяжність",
+      "thrown": "Метальна",
+      "ammunition": "Боєприпаси"
+    }
   },
   "color": {
     "format": "Формат #RRGGBB",
@@ -110,7 +117,21 @@
     "burrow": "Риття",
     "hover": "Зависання",
     "languages": "Мови: {value}",
-    "telepathy": "Телепатія {value} фт"
+    "telepathy": "Телепатія {value} фт",
+    "senses": {
+      "darkvision": "Темнозір",
+      "blindsight": "Сліпочуття",
+      "tremorsense": "Чуття вібрацій",
+      "truesight": "Справжній зір"
+    },
+    "sizes": {
+      "tiny": "Крихітний",
+      "small": "Малий",
+      "medium": "Середній",
+      "large": "Великий",
+      "huge": "Величезний",
+      "gargantuan": "Гігантський"
+    }
   },
   "search": {
     "noResults": "Нічого не знайдено за «{query}»",
@@ -130,7 +151,7 @@
   },
   "deleteAll": {
     "label": "Видалити всі",
-    "title": "Видалити всі {nouns}?"
+    "title": "Видалити всі {noun}?"
   },
   "states": {
     "error": "Щось пішло не так",
@@ -148,7 +169,9 @@
     "password": "Пароль",
     "aiKeys": "AI-ключі",
     "switchAccount": "Змінити акаунт",
-    "signOut": "Вийти"
+    "signOut": "Вийти",
+    "watchShow": "Показ",
+    "watchShowAria": "Дивитися показ"
   },
   "breadcrumbs": {
     "label": "Навігація",
@@ -226,5 +249,123 @@
     "sleightOfHand": "Спритність рук",
     "stealth": "Скритність",
     "survival": "Виживання"
+  },
+  "abilities": {
+    "strength": {
+      "label": "Сила",
+      "short": "СИЛ"
+    },
+    "dexterity": {
+      "label": "Спритність",
+      "short": "СПР"
+    },
+    "constitution": {
+      "label": "Статура",
+      "short": "ТІЛ"
+    },
+    "intelligence": {
+      "label": "Інтелект",
+      "short": "ІНТ"
+    },
+    "wisdom": {
+      "label": "Мудрість",
+      "short": "МУД"
+    },
+    "charisma": {
+      "label": "Харизма",
+      "short": "ХАР"
+    }
+  },
+  "stats": {
+    "hitPoints": "Хіти",
+    "speed": "Швидкість",
+    "armorClass": "Захист",
+    "initiative": "Ініціатива",
+    "spellSaveDC": "Захист від Заклинань",
+    "spellAttackBonus": "Бонус до заклинань",
+    "spellSlots": "Заклинання",
+    "moral": "Мораль"
+  },
+  "spellLevels": {
+    "0": "Замовляння",
+    "1": "Перше коло",
+    "2": "Друге коло",
+    "3": "Третє коло",
+    "4": "Четверте коло",
+    "5": "П'яте коло",
+    "6": "Шосте коло",
+    "7": "Сьоме коло",
+    "8": "Восьме коло",
+    "9": "Дев'яте коло"
+  },
+  "ungrouped": {
+    "spellGroup": "Без групи",
+    "mainSkill": "Без основного навику",
+    "race": "Без раси",
+    "artifactSet": "Без сету",
+    "branch": "Без гілки"
+  },
+  "damageTypes": {
+    "fire": "Вогонь",
+    "cold": "Лід",
+    "lightning": "Блискавка",
+    "acid": "Кислота",
+    "poison": "Отрута",
+    "necrotic": "Некротична",
+    "radiant": "Світло",
+    "thunder": "Грім",
+    "psychic": "Психічна",
+    "force": "Сила",
+    "bludgeoning": "Дробляча",
+    "piercing": "Колюча",
+    "slashing": "Рубляча",
+    "bleed": "Кровотеча"
+  },
+  "dmSections": {
+    "scenario": "Сценарій",
+    "characters": "Персонажі",
+    "units": "Юніти",
+    "spells": "Заклинання",
+    "artifacts": "Артефакти",
+    "skills": "Скіли",
+    "skill-trees": "Дерева прокачки",
+    "races": "Раси",
+    "classes": "Класи",
+    "backgrounds": "Передісторії",
+    "feats": "Риси",
+    "battles": "Бої",
+    "music": "Музика",
+    "show": "Показ",
+    "spell-groups": "Школи магії",
+    "rules": "Правила",
+    "artifact-sets": "Сети артефактів",
+    "assistant": "Асистент",
+    "ai": "AI і API"
+  },
+  "dmMenu": {
+    "scenario": "Сценарій",
+    "characters": "Персонажі",
+    "units": "NPC Юніти",
+    "spells": "Заклинання",
+    "artifacts": "Артефакти",
+    "skills": "Бібліотека Скілів",
+    "skill-trees": "Дерева Прокачки",
+    "races": "Ігрові Раси",
+    "classes": "Класи",
+    "backgrounds": "Передісторії",
+    "feats": "Риси",
+    "battles": "Сцени Боїв",
+    "music": "Музика бою",
+    "show": "Показ сцен",
+    "spell-groups": "Школи магії",
+    "rules": "Правила",
+    "artifact-sets": "Сети артефактів",
+    "assistant": "Асистент",
+    "ai": "AI і API"
+  },
+  "tabs": {
+    "basic": "Основне",
+    "abilities": "Вміння",
+    "choices": "Вибори"
   }
 }

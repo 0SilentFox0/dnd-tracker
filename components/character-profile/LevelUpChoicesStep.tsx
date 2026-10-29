@@ -1,5 +1,7 @@
 "use client";
 
+import { useTranslations } from "next-intl";
+
 import { ChoicesEditor } from "@/components/choices/ChoicesEditor";
 import { LoadingState } from "@/components/common/states";
 import type { AbilityKey } from "@/lib/constants/abilities";
@@ -17,15 +19,17 @@ interface LevelUpChoicesStepProps {
 }
 
 export function LevelUpChoicesStep({ campaignId, hero, entry, multiclass, value, onChange }: LevelUpChoicesStepProps) {
+  const t = useTranslations("characterProfile.levelUp");
+
   const refs = useChoiceRefs(campaignId, hero.race);
 
-  if (!refs.ready) return <LoadingState rows={2} label="Завантаження виборів…" />;
+  if (!refs.ready) return <LoadingState rows={2} label={t("loadingChoices")} />;
 
   const merged = { ...entry, choices: { ...(entry.choices ?? {}), ...value } };
 
   return (
     <div className="space-y-2">
-      <p className="hud-sc text-sm text-hud-ink">Вибори рівня</p>
+      <p className="hud-sc text-sm text-hud-ink">{t("choices")}</p>
       <ChoicesEditor
         state={{
           data: { raceChoices: {}, feats: [], classes: [merged] },

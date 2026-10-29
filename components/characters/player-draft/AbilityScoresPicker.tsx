@@ -1,6 +1,8 @@
+import { useTranslations } from "next-intl";
+
 import { HudChipTabs } from "@/components/hud/page";
 import { Button } from "@/components/ui/button";
-import { ABILITY_KEYS, ABILITY_LABELS, type AbilityKey } from "@/lib/constants/abilities";
+import { ABILITY_KEYS, type AbilityKey } from "@/lib/constants/abilities";
 import type { usePlayerDraftForm } from "@/lib/hooks/characters";
 import { cn } from "@/lib/utils";
 import { type AbilityMethod, POINT_BUY_BUDGET, STANDARD_ARRAY } from "@/lib/utils/characters/generate";
@@ -13,11 +15,6 @@ interface AbilityScoresPickerProps {
   reveal: DraftForm["reveal"];
 }
 
-const METHODS: Array<{ key: AbilityMethod; label: string }> = [
-  { key: "standard", label: "Стандартний масив" },
-  { key: "pointBuy", label: `Point-buy (${POINT_BUY_BUDGET})` },
-];
-
 const MIN_SCORE = 8;
 
 const MAX_SCORE = 15;
@@ -25,20 +22,29 @@ const MAX_SCORE = 15;
 const CELL = "hud-roll-field flex items-center justify-between gap-2 rounded-lg border border-hud-rule px-3 py-2";
 
 export function AbilityScoresPicker({ form, scoreStatus, reveal }: AbilityScoresPickerProps) {
+  const t = useTranslations("characters.draft.scores");
+
+  const tc = useTranslations("common");
+
   const { values, setScore, method, setMethod } = form;
+
+  const methods: Array<{ key: AbilityMethod; label: string }> = [
+    { key: "standard", label: t("standard") },
+    { key: "pointBuy", label: t("pointBuy", { budget: POINT_BUY_BUDGET }) },
+  ];
 
   const shown = (key: AbilityKey) => (reveal.rolling && !reveal.settled.has(key) && key in reveal.display ? reveal.display[key] : values[key]);
 
   return (
     <div className="flex flex-col gap-3">
-      <HudChipTabs ariaLabel="Спосіб розподілу" items={METHODS.map((m) => ({ key: m.key, label: m.label, active: method === m.key, onSelect: () => setMethod(m.key) }))} />
+      <HudChipTabs ariaLabel={t("method")} items={methods.map((m) => ({ key: m.key, label: m.label, active: method === m.key, onSelect: () => setMethod(m.key) }))} />
 
       {method === "pointBuy" && (
         <p className={cn("text-sm tabular-nums", scoreStatus.valid ? "text-hud-muted" : "text-[#f0b4a6]")}>
-          Витрачено {scoreStatus.spent} / {POINT_BUY_BUDGET}
+          {t("spent", { spent: scoreStatus.spent ?? 0, budget: POINT_BUY_BUDGET })}
         </p>
       )}
-      {method === "standard" && !scoreStatus.valid && <p className="text-sm text-[#f0b4a6]">Кожне значення масиву — рівно один раз</p>}
+      {method === "standard" && !scoreStatus.valid && <p className="text-sm text-[#f0b4a6]">{t("uniqueArray")}</p>}
 
       <div className="grid grid-cols-1 gap-2 min-[400px]:grid-cols-2 sm:grid-cols-3">
         {ABILITY_KEYS.map((key) => {
@@ -47,7 +53,7 @@ export function AbilityScoresPicker({ form, scoreStatus, reveal }: AbilityScores
           return (
             <div key={key} data-settled={reveal.settled.has(key)} data-rolling={spinning} className={CELL}>
               <label htmlFor={`score-${key}`} className="text-sm">
-                {ABILITY_LABELS[key]}
+                {tc(`abilities.${key}.label`)}
               </label>
               {spinning ? (
                 <span aria-hidden className="hud-roll-display w-10 text-center text-base font-semibold tabular-nums">
@@ -68,13 +74,13 @@ export function AbilityScoresPicker({ form, scoreStatus, reveal }: AbilityScores
                 </select>
               ) : (
                 <div className="flex items-center gap-1">
-                  <Button type="button" size="icon" variant="outline" className="size-8" aria-label={`${ABILITY_LABELS[key]}: менше`} disabled={values[key] <= MIN_SCORE} onClick={() => setScore(key, values[key] - 1)}>
+                  <Button type="button" size="icon" variant="outline" className="size-8" aria-label={t("lessAria", { ability: tc(`abilities.${key}.label`) })} disabled={values[key] <= MIN_SCORE} onClick={() => setScore(key, values[key] - 1)}>
                     -
                   </Button>
                   <output id={`score-${key}`} className="w-7 text-center text-base font-semibold tabular-nums">
                     {values[key]}
                   </output>
-                  <Button type="button" size="icon" variant="outline" className="size-8" aria-label={`${ABILITY_LABELS[key]}: більше`} disabled={values[key] >= MAX_SCORE} onClick={() => setScore(key, values[key] + 1)}>
+                  <Button type="button" size="icon" variant="outline" className="size-8" aria-label={t("moreAria", { ability: tc(`abilities.${key}.label`) })} disabled={values[key] >= MAX_SCORE} onClick={() => setScore(key, values[key] + 1)}>
                     +
                   </Button>
                 </div>

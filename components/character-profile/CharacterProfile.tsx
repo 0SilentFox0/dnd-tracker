@@ -2,6 +2,7 @@
 
 import { type ReactNode, useEffect, useRef, useState } from "react";
 import dynamic from "next/dynamic";
+import { useTranslations } from "next-intl";
 
 import { InventoryTab } from "./inventory/InventoryTab";
 import { CharacterLogTab } from "./rest/CharacterLogTab";
@@ -32,16 +33,16 @@ const ProfileEditor = dynamic(() => import("./ProfileEditor").then((m) => m.Prof
 
 const VIEW_TABS: ProfileTabId[] = ["combat", "skills", "magic", "items", "story", "log"];
 
-function viewTabs(withLog: boolean): ProfileTab[] {
+function viewTabs(withLog: boolean, t: (key: ProfileTabId) => string): ProfileTab[] {
   const tabs: ProfileTab[] = [
-    { id: "combat", label: "Бій", content: <CombatTab /> },
-    { id: "skills", label: "Вміння", content: <SkillsTab /> },
-    { id: "magic", label: "Магія", content: <MagicTab /> },
-    { id: "items", label: "Інвентар", content: <InventoryTab /> },
-    { id: "story", label: "Історія", content: <StoryTab /> },
+    { id: "combat", label: t("combat"), content: <CombatTab /> },
+    { id: "skills", label: t("skills"), content: <SkillsTab /> },
+    { id: "magic", label: t("magic"), content: <MagicTab /> },
+    { id: "items", label: t("items"), content: <InventoryTab /> },
+    { id: "story", label: t("story"), content: <StoryTab /> },
   ];
 
-  return withLog ? [...tabs, { id: "log", label: "Журнал", content: <CharacterLogTab /> }] : tabs;
+  return withLog ? [...tabs, { id: "log", label: t("log"), content: <CharacterLogTab /> }] : tabs;
 }
 
 function LevelSeen() {
@@ -83,6 +84,8 @@ const asTab = (v: string | undefined): ProfileTabId => {
 };
 
 export function CharacterProfile({ campaignId, characterId, canEdit, initialTab }: { campaignId: string; characterId: string; canEdit: boolean; initialTab?: string }) {
+  const t = useTranslations("characterProfile");
+
   const query = useCharacterSheet(campaignId, characterId);
 
   const [tab, setTabState] = useState<ProfileTabId>(() => asTab(initialTab));
@@ -131,7 +134,7 @@ export function CharacterProfile({ campaignId, characterId, canEdit, initialTab 
                     canEdit && sheet.viewer.isDM ? (
                       <>
                         <Button type="button" size="sm" variant="outline" onClick={() => setEditing(true)}>
-                          Редагувати
+                          {t("actions.edit")}
                         </Button>
                         <DmRestActions />
                       </>
@@ -141,7 +144,7 @@ export function CharacterProfile({ campaignId, characterId, canEdit, initialTab 
                 {sheet.viewer.isOwner && !sheet.viewer.isDM && !sheet.review.pending && <PlayerSheetHint className="mx-3 my-2" />}
                 {sheet.review.pending && <DraftBanner campaignId={campaignId} note={sheet.review.note} isOwner={sheet.viewer.isOwner} />}
                 {sheet.review.pending && sheet.viewer.isDM && canEdit && <ReviewActions campaignId={campaignId} characterId={characterId} name={sheet.identity.name} />}
-                <ProfileTabs value={tab === "log" && !sheet.rest ? "combat" : tab} onValueChange={setTab} tabs={viewTabs(!!sheet.rest)} header={hero.past ? <CompactHero /> : null} />
+                <ProfileTabs value={tab === "log" && !sheet.rest ? "combat" : tab} onValueChange={setTab} tabs={viewTabs(!!sheet.rest, (id) => t(`tabs.${id}`))} header={hero.past ? <CompactHero /> : null} />
                 <LevelUpOverlay campaignId={campaignId} characterId={characterId} name={sheet.identity.name} />
               </>
             )}

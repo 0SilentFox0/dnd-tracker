@@ -2,10 +2,12 @@
 import { cleanup, fireEvent, screen, within } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
+import { renderSkillTree } from "./render-intl";
+
 import { ProgressionPanel } from "@/components/skill-tree/progression";
-import { renderWithConfirm } from "@/components/ui/__tests__/render-with-confirm";
 import { buildTreeJson, normalizeTree, progressionView, rankOffers, resolveLearned } from "@/lib/utils/skills/progression";
 
+vi.unmock("next-intl");
 vi.mock("@/components/hud/fonts", () => ({ hudFontClassName: "", HUD_SURFACE: "hud-surface" }));
 
 const learn = vi.fn(async () => true);
@@ -55,8 +57,8 @@ beforeEach(() => {
 });
 
 describe("ProgressionPanel", () => {
-  it("очки, рядок гілки, пропозиції в порядку", () => {
-    renderWithConfirm(<ProgressionPanel campaignId="c" characterId="ch" />);
+  it("очки, рядок гілки, пропозиції в порядку", async () => {
+    await renderSkillTree(<ProgressionPanel campaignId="c" characterId="ch" />);
 
     expect(screen.getByText(/2 вільні очки/)).toBeTruthy();
     expect(screen.getByRole("group", { name: "Напад · Основи" })).toBeTruthy();
@@ -66,8 +68,8 @@ describe("ProgressionPanel", () => {
     expect(offers.map((li) => li.textContent)).toEqual([expect.stringContaining("Напад → Просунутий"), expect.stringContaining("Скіл m1"), expect.stringContaining("Захист → Основи")]);
   });
 
-  it("тап по вивченому — шторка з описом без «Вивчити»", () => {
-    renderWithConfirm(<ProgressionPanel campaignId="c" characterId="ch" />);
+  it("тап по вивченому — шторка з описом без «Вивчити»", async () => {
+    await renderSkillTree(<ProgressionPanel campaignId="c" characterId="ch" />);
     fireEvent.click(screen.getByRole("button", { name: "Скіл o1" }));
 
     expect(screen.getByText("повний o1")).toBeTruthy();
@@ -75,7 +77,7 @@ describe("ProgressionPanel", () => {
   });
 
   it("золотий «?» фільтрує пропозиції до слота; «Вивчити» викликає learn", async () => {
-    renderWithConfirm(<ProgressionPanel campaignId="c" characterId="ch" />);
+    await renderSkillTree(<ProgressionPanel campaignId="c" characterId="ch" />);
     fireEvent.click(screen.getByRole("button", { name: "Вивчити: Скіл m1" }));
 
     expect(within(screen.getByRole("list", { name: "Вивчити" })).getAllByRole("listitem")).toHaveLength(1);
@@ -86,41 +88,52 @@ describe("ProgressionPanel", () => {
     expect(learn).toHaveBeenCalledWith("m1");
   });
 
-  it("закритий «?» — причина", () => {
-    renderWithConfirm(<ProgressionPanel campaignId="c" characterId="ch" />);
+  it("закритий «?» — причина", async () => {
+    await renderSkillTree(<ProgressionPanel campaignId="c" characterId="ch" />);
     fireEvent.click(screen.getByRole("button", { name: "Закрито: Скіл o2" }));
 
     expect(screen.getByText(/Зовнішніх умінь у гілці не більше/)).toBeTruthy();
   });
 
-  it("DM бачить «Розвчити»", () => {
-    renderWithConfirm(<ProgressionPanel campaignId="c" characterId="ch" canManage />);
+  it("DM бачить «Розвчити»", async () => {
+    await renderSkillTree(<ProgressionPanel campaignId="c" characterId="ch" canManage />);
     fireEvent.click(screen.getByRole("button", { name: "Скіл o1" }));
 
     expect(screen.getByRole("button", { name: "Розвчити" })).toBeTruthy();
   });
 
-  it("вивчений скіл без іконки показує першу літеру, не «?»", () => {
-    renderWithConfirm(<ProgressionPanel campaignId="c" characterId="ch" />);
+  it("вивчений скіл без іконки показує першу літеру, не «?»", async () => {
+    await renderSkillTree(<ProgressionPanel campaignId="c" characterId="ch" />);
 
     expect(screen.getByRole("button", { name: "Скіл o1" }).textContent).toBe("С");
   });
 
-  it("тап по рамці гілки відкриває вивчений рівень гілки", () => {
-    renderWithConfirm(<ProgressionPanel campaignId="c" characterId="ch" />);
+  it("тап по рамці гілки відкриває вивчений рівень гілки", async () => {
+    await renderSkillTree(<ProgressionPanel campaignId="c" characterId="ch" />);
     fireEvent.click(screen.getByRole("button", { name: "Рівень гілки: Напад · Основи" }));
 
     expect(screen.getByRole("dialog")).toBeTruthy();
     expect(within(screen.getByRole("dialog")).getByText("Напад → Основи")).toBeTruthy();
   });
 
-  it("«Застарілі вузли · Прибрати» — один виклик з усіма сиротами", () => {
+  it("«Застарілі вузли · Прибрати» — один виклик з усіма сиротами", async () => {
     unlocked = ["attack_basic_level", "o1", "gone-1", "gone-2"];
-    renderWithConfirm(<ProgressionPanel campaignId="c" characterId="ch" canManage />);
+    await renderSkillTree(<ProgressionPanel campaignId="c" characterId="ch" canManage />);
 
     fireEvent.click(screen.getByRole("button", { name: /Застарілі вузли: 2/ }));
 
     expect(unlearn).toHaveBeenCalledTimes(1);
     expect(unlearn).toHaveBeenCalledWith(["gone-1", "gone-2"]);
+  });
+});
+
+describe("ProgressionPanel en", () => {
+  it("renders English labels without raw keys", async () => {
+    await renderSkillTree(<ProgressionPanel campaignId="c" characterId="ch" />, "en");
+
+    expect(screen.getByText("Progression · level 4")).toBeTruthy();
+    expect(screen.getByText(/2 free points/)).toBeTruthy();
+    expect(screen.getByRole("button", { name: "Branch tier: Напад · Basics" })).toBeTruthy();
+    expect(document.body.textContent).not.toMatch(/skillTree\./);
   });
 });

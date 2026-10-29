@@ -9,6 +9,7 @@ import { useCreateSkill, useUpdateSkill } from "./useSkills";
 
 import { abilitySaveError, useAbilityValidity } from "@/lib/hooks/abilities";
 import { useNavigateFresh } from "@/lib/hooks/common";
+import { useTranslator } from "@/lib/i18n/use-translator";
 import { initialSkillFormValues } from "@/lib/utils/skills/form/normalize";
 import { buildSkillFormPayload } from "@/lib/utils/skills/form/payload";
 import type { MainSkill } from "@/types/main-skills";
@@ -19,6 +20,8 @@ export function useSkillForm(
   { initialData, initialMainSkills }: { initialData?: Skill; initialMainSkills?: MainSkill[] } = {},
 ) {
   const t = useTranslations("common.form");
+
+  const ta = useTranslator("abilities");
 
   const router = useRouter();
 
@@ -63,7 +66,7 @@ export function useSkillForm(
 
       navigateFresh(listHref);
     } catch (err) {
-      setError(abilitySaveError(err, initialData ? t("updateFailed") : t("createFailed")));
+      setError(abilitySaveError(err, initialData ? t("updateFailed") : t("createFailed"), ta));
     }
   };
 

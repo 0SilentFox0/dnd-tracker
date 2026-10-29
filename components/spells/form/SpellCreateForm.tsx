@@ -2,17 +2,22 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { useTranslations } from "next-intl";
 
 import { HudFormPage } from "@/components/hud/form";
 import type { SpellFormData } from "@/components/spells/form/spell-form-defaults";
 import { getDefaultSpellFormData } from "@/components/spells/form/spell-form-defaults";
 import { SpellFormBody } from "@/components/spells/form/SpellFormBody";
 import { useNotify } from "@/lib/hooks/common";
-import { useCreateSpell, useSpellGroups } from "@/lib/hooks/spells";
-import { formToPayload, spellFormError } from "@/lib/utils/spells/model/form";
+import { useCreateSpell, useSpellGroups, useSpellIssueText } from "@/lib/hooks/spells";
+import { formToPayload, spellFormIssue } from "@/lib/utils/spells/model/form";
 
 export function SpellCreateForm({ campaignId: id }: { campaignId: string }) {
+  const t = useTranslations("spellEditor.page");
+
   const notify = useNotify();
+
+  const issueText = useSpellIssueText();
 
   const router = useRouter();
 
@@ -25,10 +30,10 @@ export function SpellCreateForm({ campaignId: id }: { campaignId: string }) {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    const problem = spellFormError(formData);
+    const problem = spellFormIssue(formData);
 
     if (problem) {
-      void notify(problem);
+      void notify(issueText(problem));
 
       return;
     }
@@ -40,7 +45,7 @@ export function SpellCreateForm({ campaignId: id }: { campaignId: string }) {
   };
 
   return (
-    <HudFormPage title="Створити нове заклинання" aside="Додайте інформацію про нове заклинання">
+    <HudFormPage title={t("createTitle")} aside={t("createAside")}>
       <SpellFormBody
         campaignId={id}
         form={{ data: formData, set: setFormData }}
@@ -48,7 +53,7 @@ export function SpellCreateForm({ campaignId: id }: { campaignId: string }) {
         submit={{
           onSubmit: handleSubmit,
           isPending: createSpellMutation.isPending,
-          label: "Створити заклинання",
+          label: t("createSubmit"),
           error: (createSpellMutation.error as Error)?.message ?? null,
         }}
       />

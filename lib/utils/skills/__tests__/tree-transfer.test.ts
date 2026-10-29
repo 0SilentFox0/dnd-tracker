@@ -67,11 +67,11 @@ describe("planSkillTreeImport", () => {
   });
 
   it("немає раси або скіла — помилка з назвами", () => {
-    expect(planSkillTreeImport(file, { ...target, races: [] })).toEqual({ race: "Ельфи", error: "Раси «Ельфи» немає в кампанії" });
+    expect(planSkillTreeImport(file, { ...target, races: [] })).toEqual({ race: "Ельфи", error: { message: "skillTree.transfer.raceMissing", params: { race: "Ельфи" } } });
 
     const missing = planSkillTreeImport(file, { ...target, skills: target.skills.filter((s) => s.id !== "S2") });
 
-    expect(isTreeImportFailure(missing) && missing.error).toBe("Не знайдено в кампанії: Удар");
+    expect(isTreeImportFailure(missing) && missing.error).toEqual({ message: "skillTree.transfer.missing", params: { list: "Удар" } });
   });
 });
 
@@ -81,9 +81,9 @@ describe("readSkillTreeFiles", () => {
 
     expect(readSkillTreeFiles(JSON.stringify([file, file]))).toHaveLength(2);
     expect(readSkillTreeFiles(JSON.stringify(file))).toHaveLength(1);
-    expect(() => readSkillTreeFiles('{"race":"Ельфи"}')).toThrow("Файл не схожий на експорт дерев скілів");
-    expect(() => readSkillTreeFiles("[]")).toThrow("Файл не схожий на експорт дерев скілів");
-    expect(() => readSkillTreeFiles("{oops")).toThrow("Некоректний JSON");
+    expect(() => readSkillTreeFiles('{"race":"Ельфи"}')).toThrow("skillTree.transfer.notTreeFile");
+    expect(() => readSkillTreeFiles("[]")).toThrow("skillTree.transfer.notTreeFile");
+    expect(() => readSkillTreeFiles("{oops")).toThrow("skillTree.transfer.invalidJson");
   });
 });
 
@@ -103,13 +103,13 @@ describe("spellGroupId", () => {
   it("школа переноситься за назвою, невідома прибирається з попередженням", () => {
     const plan = planSkillTreeImport(file, { ...target, spellGroups: [{ id: "G9", name: "вогонь" }] });
 
-    expect(plan).toMatchObject({ skills: { mainSkills: [{ id: "M1", spellGroupId: "G9" }, { id: "M2" }] }, warnings: [expect.stringContaining("gX")] });
+    expect(plan).toMatchObject({ skills: { mainSkills: [{ id: "M1", spellGroupId: "G9" }, { id: "M2" }] }, warnings: [{ message: "skillTree.transfer.spellGroupDropped", params: { list: expect.stringContaining("gX") } }] });
   });
 
   it("школи немає в цільовій кампанії — поле прибрано з попередженням", () => {
     const plan = planSkillTreeImport(file, target);
 
-    expect(plan).toMatchObject({ skills: { mainSkills: [{ id: "M1" }, { id: "M2" }] }, warnings: [expect.stringContaining("Вогонь")] });
+    expect(plan).toMatchObject({ skills: { mainSkills: [{ id: "M1" }, { id: "M2" }] }, warnings: [{ message: "skillTree.transfer.spellGroupDropped", params: { list: expect.stringContaining("Вогонь") } }] });
   });
 
   it("школа тієї ж кампанії лишається", () => {

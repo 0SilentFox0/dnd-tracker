@@ -31,7 +31,7 @@ describe("довідник артефактів", () => {
   it("показує, хто носить артефакт, і вільні як null", async () => {
     const { artifacts } = await loadArtifactReference("c");
 
-    expect(artifacts[0]).toMatchObject({ id: "a1", holderName: "Боромир", setName: "Набір", slotLabel: "Зброя", effects: [expect.stringMatching(/шкода \(ближня\) \+10%/)] });
+    expect(artifacts[0]).toMatchObject({ id: "a1", holderName: "Боромир", setName: "Набір", effects: [expect.stringMatching(/шкода \(ближня\) \+10%/)] });
     expect(artifacts[1]).toMatchObject({ id: "a2", holderName: null, setName: null });
   });
 

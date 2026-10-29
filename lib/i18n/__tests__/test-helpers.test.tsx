@@ -20,6 +20,13 @@ describe("makeT", () => {
     expect(makeT()("a.b")).toBe("a.b");
     expect(t.has("x")).toBe(true);
   });
+
+  it("rich and markup behave like t and drop tag callbacks", () => {
+    const t = makeT("auth") as unknown as { rich: (k: string, v?: Record<string, unknown>) => string; markup: (k: string, v?: Record<string, unknown>) => string };
+
+    expect(t.rich("a", { n: 2, b: () => "x" })).toBe('auth.a {"n":2}');
+    expect(t.markup("a")).toBe("auth.a");
+  });
 });
 
 describe("global mock vs renderWithIntl", () => {

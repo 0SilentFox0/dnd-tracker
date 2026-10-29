@@ -41,16 +41,16 @@ describe("GrantArtifactDialog: magic items", () => {
 
     fireEvent.click(screen.getByRole("button", { name: /Flame Tongue/ }));
 
-    expect(screen.getByText("База для «Flame Tongue»")).toBeTruthy();
+    expect(screen.getByText('inventory.grant.baseTitle {"name":"Flame Tongue"}')).toBeTruthy();
 
-    fireEvent.change(screen.getByLabelText("Пошук бази"), { target: { value: "great" } });
+    fireEvent.change(screen.getByLabelText("inventory.grant.baseSearch"), { target: { value: "great" } });
 
     expect(screen.queryByRole("button", { name: /^Longsword/ })).toBeNull();
-    expect(screen.getByText("Flame Tongue Greatsword · Рідкісний")).toBeTruthy();
+    expect(screen.getByText("Flame Tongue Greatsword · artifacts.rarity.rare")).toBeTruthy();
 
     fireEvent.click(screen.getByRole("button", { name: /^Greatsword/ }));
 
-    fireEvent.click(screen.getByRole("button", { name: "Видати" }));
+    fireEvent.click(screen.getByRole("button", { name: "inventory.grant.submit" }));
 
     await vi.waitFor(() => expect(h.mutateAsync).toHaveBeenCalledWith({ action: "grant", artifactId: "ft", baseId: "gs" }));
   });
@@ -60,10 +60,10 @@ describe("GrantArtifactDialog: magic items", () => {
 
     fireEvent.click(screen.getByRole("button", { name: /Spell Scroll/ }));
 
-    expect(screen.getByText("Каст автоматизовано; право читати сувій визначає ДМ.")).toBeTruthy();
-    fireEvent.change(screen.getByLabelText("Заклинання сувою"), { target: { value: "spell-light" } });
-    fireEvent.change(screen.getByLabelText("Кількість"), { target: { value: "3" } });
-    fireEvent.click(screen.getByRole("button", { name: "Видати" }));
+    expect(screen.getByText("inventory.grant.spellNote")).toBeTruthy();
+    fireEvent.change(screen.getByLabelText("inventory.grant.spell"), { target: { value: "spell-light" } });
+    fireEvent.change(screen.getByLabelText("inventory.grant.quantity"), { target: { value: "3" } });
+    fireEvent.click(screen.getByRole("button", { name: "inventory.grant.submit" }));
 
     await vi.waitFor(() => expect(h.mutateAsync).toHaveBeenCalledWith({ action: "grant", artifactId: "pot", quantity: 3, spellId: "spell-light" }));
   });
@@ -71,8 +71,8 @@ describe("GrantArtifactDialog: magic items", () => {
   it("asks for a typed item parameter and sends the selected key", async () => {
     open();
     fireEvent.click(screen.getByRole("button", { name: /Armor of Resistance/ }));
-    fireEvent.change(screen.getByLabelText("Параметр предмета"), { target: { value: "fire" } });
-    fireEvent.click(screen.getByRole("button", { name: "Видати" }));
+    fireEvent.change(screen.getByLabelText("inventory.grant.parameter"), { target: { value: "fire" } });
+    fireEvent.click(screen.getByRole("button", { name: "inventory.grant.submit" }));
     await vi.waitFor(() => expect(h.mutateAsync).toHaveBeenCalledWith({ action: "grant", artifactId: "res", parameter: "fire" }));
   });
 

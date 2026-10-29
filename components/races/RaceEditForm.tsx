@@ -8,6 +8,7 @@ import { withAbilityErrors } from "@/components/abilities";
 import { HudForm, HudFormPage } from "@/components/hud/form";
 import { Button } from "@/components/ui/button";
 import { useRaceForm } from "@/lib/hooks/races";
+import { useTranslator } from "@/lib/i18n/use-translator";
 import { errorMessage } from "@/lib/utils/common/error-message";
 import { getInitialRaceFormData } from "@/lib/utils/races/race-form";
 import type { Race } from "@/types/races";
@@ -19,6 +20,8 @@ interface RaceEditFormProps {
 
 export function RaceEditForm({ campaignId, race }: RaceEditFormProps) {
   const t = useTranslations("races");
+
+  const ta = useTranslator("abilities");
 
   const tc = useTranslations("common");
 
@@ -40,7 +43,7 @@ export function RaceEditForm({ campaignId, race }: RaceEditFormProps) {
               </p>
             )}
             <Button type="submit" disabled={editor.status.isSaving || !editor.abilities.valid}>
-              {editor.status.isSaving ? tc("actions.saving") : withAbilityErrors(tc("actions.save"), editor.abilities.errors)}
+              {editor.status.isSaving ? tc("actions.saving") : withAbilityErrors(tc("actions.save"), editor.abilities.errors, ta)}
             </Button>
           </>
         }

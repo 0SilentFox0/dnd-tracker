@@ -1,0 +1,763 @@
+{
+  "effects": {
+    "modifyStat": {
+      "label": "Змінити стат"
+    },
+    "damageBonus": {
+      "label": "Бонус шкоди"
+    },
+    "flag": {
+      "label": "Прапорець"
+    },
+    "note": {
+      "label": "Нотатка для DM"
+    },
+    "dealDamage": {
+      "label": "Завдати шкоди"
+    },
+    "heal": {
+      "label": "Лікування"
+    },
+    "dot": {
+      "label": "Шкода щораунду (DOT)"
+    },
+    "hot": {
+      "label": "Лікування щораунду (HOT)"
+    },
+    "berserk": {
+      "label": "Шал"
+    },
+    "charm": {
+      "label": "Перехід на бік заклинателя"
+    },
+    "applyCondition": {
+      "label": "Накласти стан",
+      "fields": {
+        "percent": "Шанс, % (для втрати дії)"
+      }
+    },
+    "grantAction": {
+      "label": "Дати дію"
+    },
+    "restoreSpellSlotLevels": {
+      "label": "Відновити слоти за бюджетом кіл (короткий відпочинок)"
+    },
+    "restoreSpellSlot": {
+      "label": "Відновити слот"
+    },
+    "drainSpellSlot": {
+      "label": "Крадіжка слоту заклинань"
+    },
+    "changeMorale": {
+      "label": "Змінити мораль"
+    },
+    "mark": {
+      "label": "Мітка на ціль"
+    },
+    "copySpellBuffs": {
+      "label": "Копіювати бафи закляття союзника"
+    },
+    "guard": {
+      "label": "Захист союзника",
+      "fields": {
+        "percent": "% шкоди від атак, що бере на себе"
+      }
+    },
+    "summon": {
+      "label": "Прикликати юнітів",
+      "fields": {
+        "count": "Кількість"
+      }
+    },
+    "raiseDead": {
+      "label": "Підняти мертвих"
+    },
+    "cleanse": {
+      "label": "Зняти дебафи"
+    },
+    "maneuver": {
+      "label": "Маневр"
+    },
+    "randomOf": {
+      "label": "Випадковий з варіантів"
+    }
+  },
+  "flags": {
+    "sense": {
+      "label": "Чуття"
+    },
+    "advantage": {
+      "label": "Перевага",
+      "fields": {
+        "attackKind": "Атаки"
+      },
+      "options": {
+        "attackKind": {
+          "melee": "ближні",
+          "ranged": "дальні"
+        }
+      }
+    },
+    "disadvantage": {
+      "label": "Недолік на свої атаки"
+    },
+    "disadvantageForAttackers": {
+      "label": "Недолік для атакувальників"
+    },
+    "advantageForAttackers": {
+      "label": "Перевага для атакувальників"
+    },
+    "guaranteedHit": {
+      "label": "Гарантоване влучання"
+    },
+    "resistance": {
+      "label": "Опір / імунітет до шкоди",
+      "fields": {
+        "percent": "%, 100 = імунітет, від'ємне = вразливість",
+        "attackKind": "Лише проти атак",
+        "damageType": "Тип шкоди (all, physical, spell, fire…)",
+        "school": "Лише від заклинань школи"
+      },
+      "options": {
+        "attackKind": {
+          "melee": "ближніх",
+          "ranged": "дальніх"
+        }
+      }
+    },
+    "spellAbsorb": {
+      "label": "Поглинання шкоди заклинань",
+      "fields": {
+        "percent": "% шкоди, що лікує",
+        "school": "Школа заклинань"
+      }
+    },
+    "castSpellOnHit": {
+      "label": "Закляття при влучанні",
+      "fields": {
+        "attackKind": "Лише атаки"
+      },
+      "options": {
+        "attackKind": {
+          "melee": "ближні",
+          "ranged": "дальні"
+        }
+      }
+    },
+    "spellImmunity": {
+      "label": "Імунітет до заклинань",
+      "fields": {
+        "spellIds": "Заклинання (порожньо = усі)"
+      }
+    },
+    "spellTargeting": {
+      "label": "Режим цілей заклять",
+      "fields": {
+        "spellIds": "Заклинання"
+      }
+    },
+    "counterAttack": {
+      "label": "Контратака"
+    },
+    "attackHitsAllEnemies": {
+      "label": "Атака б'є всіх ворогів"
+    },
+    "seeEnemyHp": {
+      "label": "Бачить HP ворогів"
+    },
+    "multiTargetFalloff": {
+      "label": "Шкода додаткових цілей дальньої атаки",
+      "fields": {
+        "percent": "% шкоди додаткових цілей"
+      }
+    },
+    "chainShot": {
+      "label": "Ланцюговий постріл",
+      "fields": {
+        "percent": "% шкоди від попереднього"
+      }
+    },
+    "lifesteal": {
+      "label": "Вампіризм (лікування від шкоди атак)",
+      "fields": {
+        "percent": "% завданої шкоди"
+      }
+    },
+    "moraleChance": {
+      "label": "Шанс додаткового ходу від моралі",
+      "fields": {
+        "percent": "+% до шансу додаткового ходу"
+      }
+    },
+    "noRetaliation": {
+      "label": "Без відповіді"
+    },
+    "strikeAndReturn": {
+      "label": "Удар і повернення"
+    },
+    "unlimitedRetaliation": {
+      "label": "Безмежна відсіч"
+    },
+    "extraRetaliations": {
+      "label": "Додаткові відсічі за раунд",
+      "fields": {
+        "count": "Додаткових відсічей"
+      }
+    },
+    "noNegativeMorale": {
+      "label": "Мораль не нижче 0"
+    },
+    "ignoreMorale": {
+      "label": "Мораль не діє"
+    },
+    "minMorale": {
+      "label": "Мінімальна мораль"
+    },
+    "extraSummons": {
+      "label": "Додаткові прикликані істоти",
+      "fields": {
+        "count": "Додаткових істот",
+        "spellIds": "Заклинання (порожньо = усі прикликання заклять)"
+      }
+    },
+    "piercingShot": {
+      "label": "Наскрізний постріл"
+    },
+    "fireWave": {
+      "label": "Вогняна хвиля",
+      "fields": {
+        "percent": "% шкоди удару"
+      }
+    },
+    "banishSummons": {
+      "label": "Вигнання прикликаних ворогом",
+      "fields": {
+        "percent": "% HP, які втрачають"
+      }
+    },
+    "saveAdvantage": {
+      "label": "Перевага на рятівні кидки"
+    },
+    "saveDisadvantage": {
+      "label": "Недолік на рятівні кидки"
+    },
+    "autoFailSave": {
+      "label": "Автопровал рятівних кидків"
+    },
+    "saveProficiency": {
+      "label": "Майстерність в рятівних кидках"
+    },
+    "checkAdvantage": {
+      "label": "Перевага на перевірки"
+    },
+    "checkDisadvantage": {
+      "label": "Недолік на перевірки"
+    },
+    "skillProficiency": {
+      "label": "Майстерність у навичках"
+    },
+    "skillExpertise": {
+      "label": "Експертиза в навичках"
+    },
+    "proficiency": {
+      "label": "Володіння бронею й зброєю"
+    },
+    "autoCritAdjacent": {
+      "label": "Криті від сусідів"
+    },
+    "twoWeaponFighting": {
+      "label": "Бій двома зброями"
+    },
+    "critImmunity": {
+      "label": "Імунітет до критів"
+    },
+    "cunningAction": {
+      "label": "Хитра дія (Cunning Action)"
+    },
+    "evasion": {
+      "label": "Ухилення (Evasion)"
+    },
+    "proneDefense": {
+      "label": "Захист повалених"
+    },
+    "conditionImmunity": {
+      "label": "Імунітет до станів",
+      "fields": {
+        "conditions": "Стани"
+      }
+    }
+  },
+  "triggers": {
+    "passive": {
+      "label": "Пасивно (завжди)"
+    },
+    "battleStart": {
+      "label": "Початок бою"
+    },
+    "roundStart": {
+      "label": "Початок раунду"
+    },
+    "roundEnd": {
+      "label": "Кінець раунду"
+    },
+    "turnStart": {
+      "label": "Початок мого ходу"
+    },
+    "turnEnd": {
+      "label": "Кінець мого ходу"
+    },
+    "attack": {
+      "label": "Атака"
+    },
+    "hit": {
+      "label": "Влучання",
+      "options": {
+        "whose": {
+          "ally": "іншого союзника"
+        }
+      }
+    },
+    "kill": {
+      "label": "Смерть",
+      "fields": {
+        "role": "Хто"
+      }
+    },
+    "lethalDamage": {
+      "label": "Летальна шкода"
+    },
+    "spellCast": {
+      "label": "Заклинання",
+      "fields": {
+        "spellLevels": "Рівні закляття",
+        "spellIds": "Закляття",
+        "whose": "Чия ціль"
+      },
+      "options": {
+        "role": {
+          "target": "ціль — я"
+        }
+      }
+    },
+    "moraleCheck": {
+      "label": "Перевірка моралі",
+      "fields": {
+        "whose": "Чия"
+      }
+    },
+    "action": {
+      "label": "Основна дія (кнопка)"
+    },
+    "bonusAction": {
+      "label": "Бонусна дія (кнопка)"
+    }
+  },
+  "conditionTypes": {
+    "hpBelow": {
+      "label": "HP ≤ %",
+      "fields": {
+        "percent": "%"
+      }
+    },
+    "hpAbove": {
+      "label": "HP ≥ %",
+      "fields": {
+        "percent": "%"
+      }
+    },
+    "attackKind": {
+      "label": "Тип атаки"
+    },
+    "targetHasCondition": {
+      "label": "Ціль має стан"
+    },
+    "targetCreatureType": {
+      "label": "Тип істоти цілі"
+    },
+    "targetRace": {
+      "label": "Раса цілі"
+    },
+    "targetDead": {
+      "label": "Ціль мертва"
+    },
+    "actorIsEnemy": {
+      "label": "Виконавець події — ворог"
+    },
+    "hasMark": {
+      "label": "Має мітку",
+      "fields": {
+        "markId": "Мітка"
+      }
+    },
+    "armorWorn": {
+      "label": "Броня на мені"
+    },
+    "attackRollMode": {
+      "label": "Режим кидка атаки"
+    },
+    "allyAdjacent": {
+      "label": "Союзник поруч із ціллю"
+    },
+    "notMoved": {
+      "label": "Не рухався цього ходу"
+    },
+    "withThisItem": {
+      "label": "Атака цим предметом"
+    },
+    "not": {
+      "label": "НЕ (заперечення)",
+      "fields": {
+        "condition": "Умова"
+      }
+    },
+    "all": {
+      "label": "Усі умови"
+    },
+    "any": {
+      "label": "Будь-яка умова"
+    }
+  },
+  "fields": {
+    "stat": "Стат",
+    "flat": "Число / формула",
+    "percent": "% (число / формула)",
+    "atLeast": "Не менше (значення характеристики)",
+    "attackKind": "Тип атаки",
+    "spellLevels": "Рівні слотів",
+    "target": "Ціль",
+    "duration": "Тривалість (раунди)",
+    "until": "Зникає в кінці мого ходу",
+    "filter": {
+      "kind": "Тип шкоди",
+      "school": "Школа магії"
+    },
+    "perMark": "За кожну мітку (id мітки)",
+    "flag": "Прапорець",
+    "text": "Текст",
+    "amount": "Кількість (число, кубики, формула, %)",
+    "damageType": "Тип",
+    "falloff": "% шкоди по цілях по черзі (100, 50, 25…)",
+    "revive": "Воскрешає",
+    "damagePerRound": "Шкода/раунд (число, кубики, формула)",
+    "healPerRound": "Лікування/раунд (число, кубики, формула)",
+    "damageBonusPercent": "Бонус шкоди, %",
+    "condition": "Стан",
+    "levels": "Рівні виснаження (1–6)",
+    "saveEnds": "Рятівний кидок наприкінці ходу",
+    "breakOnDamage": "Знімається при отриманні шкоди",
+    "extraActions": "Додаткові дії",
+    "refreshAction": "Оновити дію",
+    "refreshBonusAction": "Оновити бонусну дію",
+    "refreshReaction": "Оновити реакцію",
+    "budget": "Бюджет кіл",
+    "maxSlotLevel": "Макс. коло слота",
+    "count": "Скільки",
+    "delta": "Зміна",
+    "markId": "Ідентифікатор мітки",
+    "unitId": "Конкретний юніт (замість групи і Tier)",
+    "group": "Група (раса юнітів)",
+    "tier": "Tier (рівень юніта 1–7)",
+    "hpPercent": "HP, %",
+    "includeConditions": "Зняти й стани",
+    "maneuver": "Маневр",
+    "percentOfAttack": "% шкоди атаки",
+    "options": "Варіанти",
+    "sense": "Чуття",
+    "range": "Дальність, фути",
+    "attackAbility": "Лише атаки цією характеристикою",
+    "consumeOn": "Зникає після першої атаки",
+    "school": "Школа",
+    "spellIds": "Заклинання (одне з них, випадково)",
+    "mode": "Режим",
+    "maxTargets": "Макс. цілей (область)",
+    "maxLevel": "Макс. рівень закляття",
+    "attackKinds": "На атаки",
+    "bonusPercent": "Бонус шкоди, %",
+    "jumps": "Стрибків",
+    "value": "Мінімум (−3…3)",
+    "size": "Конус, фт",
+    "abilities": "Характеристики",
+    "vsSpells": "Лише проти заклинань",
+    "skills": "Навички",
+    "kinds": "Володіння",
+    "conditions": "Умови",
+    "phase": "Фаза",
+    "role": "Роль",
+    "whose": "Чия роль",
+    "result": "Результат",
+    "who": "Хто",
+    "kind": "Тип",
+    "types": "Типи істот",
+    "races": "Раси",
+    "bySelf": "Лише моя мітка",
+    "categories": "Категорії",
+    "shield": "Щит"
+  },
+  "stats": {
+    "armor": "AC",
+    "attackBonus": "бонус атаки",
+    "critThreshold": "поріг криту",
+    "actionsPerTurn": "дії за хід",
+    "savingThrow": "рятівні кидки",
+    "attacksPerAction": "Атак за дію «Атака»",
+    "initiative": "ініціатива",
+    "maxHp": "макс. HP",
+    "speed": "швидкість",
+    "morale": "мораль",
+    "minTargets": "мін. цілей",
+    "maxTargets": "макс. цілей",
+    "spellSlots": "слоти заклинань",
+    "strength": "Сила",
+    "dexterity": "Спритність",
+    "constitution": "Статура",
+    "intelligence": "Інтелект",
+    "wisdom": "Мудрість",
+    "charisma": "Харизма"
+  },
+  "options": {
+    "attackKind": {
+      "melee": "ближня",
+      "ranged": "дальня",
+      "all": "усі"
+    },
+    "until": {
+      "turnEnd": "так"
+    },
+    "condition": {
+      "no_bonus_action": "без бонусної дії",
+      "no_reaction": "без реакції",
+      "disable_melee_attacks": "без ближніх атак",
+      "disable_ranged_attacks": "без дальніх атак",
+      "disable_spell_casting": "без заклинань",
+      "skip_action": "втрата дії",
+      "immobilized": "знерухомлений",
+      "blinded": "засліплений",
+      "charmed": "зачарований",
+      "deafened": "оглухлий",
+      "frightened": "наляканий",
+      "grappled": "схоплений",
+      "incapacitated": "недієздатний",
+      "invisible": "невидимий",
+      "paralyzed": "паралізований",
+      "petrified": "скам'янілий",
+      "poisoned": "отруєний",
+      "prone": "повалений",
+      "restrained": "скутий",
+      "stunned": "приголомшений",
+      "unconscious": "непритомний",
+      "exhaustion": "виснаження"
+    },
+    "maneuver": {
+      "dive": "Пікірування",
+      "squall": "Шквал",
+      "fireBurst": "Вогняний вибух"
+    },
+    "sense": {
+      "darkvision": "Темнозір",
+      "blindsight": "Сліпочуття",
+      "tremorsense": "Чуття вібрацій",
+      "truesight": "Справжній зір"
+    },
+    "attackAbility": {
+      "strength": "Сила",
+      "dexterity": "Спритність",
+      "constitution": "Статура",
+      "intelligence": "Інтелект",
+      "wisdom": "Мудрість",
+      "charisma": "Харизма"
+    },
+    "consumeOn": {
+      "ownAttack": "так"
+    },
+    "mode": {
+      "area": "по області",
+      "all": "на всіх",
+      "advantage": "перевага",
+      "disadvantage": "недолік",
+      "normal": "звичайний"
+    },
+    "attackKinds": {
+      "melee": "ближня",
+      "ranged": "дальня"
+    },
+    "abilities": {
+      "all": "усі",
+      "strength": "Сила",
+      "dexterity": "Спритність",
+      "constitution": "Статура",
+      "intelligence": "Інтелект",
+      "wisdom": "Мудрість",
+      "charisma": "Харизма"
+    },
+    "skills": {
+      "all": "усі",
+      "acrobatics": "Акробатика",
+      "animalHandling": "Поводження з тваринами",
+      "arcana": "Магія",
+      "athletics": "Атлетика",
+      "deception": "Обман",
+      "history": "Історія",
+      "insight": "Проникливість",
+      "intimidation": "Залякування",
+      "investigation": "Розслідування",
+      "medicine": "Медицина",
+      "nature": "Природа",
+      "perception": "Сприйняття",
+      "performance": "Виступ",
+      "persuasion": "Переконання",
+      "religion": "Релігія",
+      "sleightOfHand": "Спритність рук",
+      "stealth": "Скритність",
+      "survival": "Виживання"
+    },
+    "kinds": {
+      "light": "легка броня",
+      "medium": "середня броня",
+      "heavy": "важка броня",
+      "shield": "щити",
+      "simple": "проста зброя",
+      "martial": "бойова зброя"
+    },
+    "conditions": {
+      "all": "усі (контроль)",
+      "fear": "страх",
+      "berserk": "шал",
+      "charm": "чарування (Ляльковод)",
+      "no_bonus_action": "без бонусної дії",
+      "no_reaction": "без реакції",
+      "disable_melee_attacks": "без ближніх атак",
+      "disable_ranged_attacks": "без дальніх атак",
+      "disable_spell_casting": "без заклинань",
+      "skip_action": "втрата дії",
+      "immobilized": "знерухомлений",
+      "blinded": "засліплений",
+      "charmed": "зачарований",
+      "deafened": "оглухлий",
+      "frightened": "наляканий",
+      "grappled": "схоплений",
+      "incapacitated": "недієздатний",
+      "invisible": "невидимий",
+      "paralyzed": "паралізований",
+      "petrified": "скам'янілий",
+      "poisoned": "отруєний",
+      "prone": "повалений",
+      "restrained": "скутий",
+      "stunned": "приголомшений",
+      "unconscious": "непритомний",
+      "exhaustion": "виснаження"
+    },
+    "phase": {
+      "before": "до",
+      "after": "після"
+    },
+    "role": {
+      "attacker": "атакую я",
+      "target": "атакують мене",
+      "killer": "я вбив",
+      "killerSide": "вбив хтось із моїх",
+      "victimSide": "загинув союзник",
+      "caster": "кастую я"
+    },
+    "whose": {
+      "self": "моя",
+      "ally": "союзника"
+    },
+    "result": {
+      "success": "успіх",
+      "fail": "провал",
+      "any": "будь-який"
+    },
+    "who": {
+      "self": "я",
+      "eventTarget": "ціль події",
+      "eventActor": "виконавець події",
+      "anyAlly": "будь-який союзник",
+      "anyEnemy": "будь-який ворог"
+    },
+    "kind": {
+      "melee": "ближня",
+      "ranged": "дальня",
+      "magic": "магія"
+    },
+    "categories": {
+      "none": "без броні",
+      "light": "легка",
+      "medium": "середня",
+      "heavy": "важка"
+    },
+    "shield": {
+      "with": "зі щитом",
+      "without": "без щита"
+    }
+  },
+  "damageFilters": {
+    "melee": "ближня",
+    "ranged": "дальня",
+    "magic": "магічна",
+    "physical": "фізична",
+    "all": "вся"
+  },
+  "targets": {
+    "self": "я",
+    "eventTarget": "ціль події",
+    "eventActor": "виконавець події",
+    "otherEnemy": "інший ворог (не ціль)",
+    "allAllies": "усі союзники",
+    "allEnemies": "усі вороги",
+    "everyone": "усі учасники",
+    "nearbyAllies": "союзники поруч (зона)",
+    "nearbyEnemies": "вороги поруч (зона)"
+  },
+  "optionGroups": {
+    "conditions5e": "Стани 5e",
+    "mechanicalConditions": "Механічні стани"
+  },
+  "templates": {
+    "stats": {
+      "label": "Пасивний бонус статів",
+      "hint": "+Сила, +AC, +HP… завжди",
+      "defaultName": "Бонус статів"
+    },
+    "damage": {
+      "label": "Бонус шкоди",
+      "hint": "+% / +число до ближньої, дальньої, магії (школа)",
+      "defaultName": "Бонус шкоди"
+    },
+    "onHit": {
+      "label": "Ефект при влучанні",
+      "hint": "DOT, дебаф, стан на ціль",
+      "defaultName": "Кровотеча"
+    },
+    "resistance": {
+      "label": "Опір / імунітет",
+      "hint": "фізичний, магічний, стихія, заклинання",
+      "defaultName": "Опір"
+    },
+    "aura": {
+      "label": "Аура",
+      "hint": "бонус усім союзникам / штраф ворогам",
+      "defaultName": "Аура"
+    },
+    "survive": {
+      "label": "Раз за бій: вижити з 1 HP",
+      "hint": "летальна шкода → 1 HP",
+      "defaultName": "Невмирущий"
+    },
+    "bonusAction": {
+      "label": "Бонусна дія",
+      "hint": "кнопка гравця: лікування, мораль, слот…",
+      "defaultName": "Друге дихання"
+    },
+    "spellSlots": {
+      "label": "Слоти заклинань",
+      "hint": "+N слотів рівня",
+      "defaultName": "Слоти"
+    },
+    "custom": {
+      "label": "Власне",
+      "hint": "порожнє вміння",
+      "defaultName": "Нове вміння",
+      "note": "Опишіть вміння"
+    }
+  }
+}

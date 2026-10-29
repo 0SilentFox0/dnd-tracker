@@ -28,25 +28,25 @@ export const unitAvatarSchema = z.preprocess(
     .string()
     .trim()
     .max(2000)
-    .refine((v) => /^(https?:\/\/|\/)/i.test(v), "Аватар — посилання на зображення (http(s):// або /)")
+    .refine((v) => /^(https?:\/\/|\/)/i.test(v), "units.validation.avatarUrl")
     .nullable()
     .optional(),
 );
 
-const challengeSchema = z.number().refine(isChallengeRating, "CR: 0, 1/8, 1/4, 1/2 або ціле 1–30").describe("Рівень небезпеки 5e (0.125 = 1/8); null — юніт HOMM");
+const challengeSchema = z.number().refine(isChallengeRating, "units.validation.challengeRating").describe("5e challenge rating (0.125 = 1/8); null for an HOMM unit");
 
 const monsterFields = {
   cr: challengeSchema.nullable().optional(),
-  xp: z.number().int().min(0).max(1_000_000).nullable().optional().describe("XP за перемогу; порожньо — з таблиці CR"),
+  xp: z.number().int().min(0).max(1_000_000).nullable().optional().describe("XP awarded for the win; empty uses the CR table"),
 };
 
-const multiattack = z.number().int().min(1).max(10).describe("Атак за дію «Атака» (монстр 5e)");
+const multiattack = z.number().int().min(1).max(10).describe("Attacks per Attack action (5e monster)");
 
-const legendaryActions = z.number().int().min(0).max(5).describe("Легендарних дій за раунд");
+const legendaryActions = z.number().int().min(0).max(5).describe("Legendary actions per round");
 
-const legendaryResistances = z.number().int().min(0).max(10).describe("Легендарного опору за бій");
+const legendaryResistances = z.number().int().min(0).max(10).describe("Legendary resistances per battle");
 
-const saveProficiencies = z.array(z.enum(ABILITY_KEYS)).max(6).describe("Характеристики з майстерністю рятівних кидків (5e)");
+const saveProficiencies = z.array(z.enum(ABILITY_KEYS)).max(6).describe("Abilities with saving throw proficiency (5e)");
 
 const distance = z.number().int().min(5).max(1000);
 
@@ -63,13 +63,13 @@ export const UnitStatblockSchema = z.object({
 
 export const UnitSpellGrantSchema = z.object({
   spellId: z.string().min(1).max(100), perBattle: z.number().int().min(1).max(9).optional(), recharge: z.union([z.literal(RECHARGE_THRESHOLDS[0]), z.literal(RECHARGE_THRESHOLDS[1]), z.literal(RECHARGE_THRESHOLDS[2])]).optional(), castLevel: z.number().int().min(1).max(9).optional(), dc: z.number().int().min(5).max(30).optional(), attackBonus: z.number().int().min(-5).max(20).optional(), legendaryOnly: z.boolean().optional(),
-}).strict().superRefine((v, ctx) => { if (v.recharge !== undefined && v.perBattle !== 1) ctx.addIssue({ code: z.ZodIssueCode.custom, path: ["perBattle"], message: "Recharge потребує perBattle: 1" }); });
+}).strict().superRefine((v, ctx) => { if (v.recharge !== undefined && v.perBattle !== 1) ctx.addIssue({ code: z.ZodIssueCode.custom, path: ["perBattle"], message: "units.validation.rechargeNeedsPerBattle" }); });
 
 export const UnitSpellcastingSchema = z.object({ ability: z.enum(ABILITY_KEYS).optional(), dc: z.number().int().min(5).max(30).optional(), attackBonus: z.number().int().min(-5).max(20).optional(), spells: z.array(UnitSpellGrantSchema).max(60).superRefine((spells, ctx) => {
   const seen = new Set<string>();
 
   spells.forEach((spell, index) => {
-    if (seen.has(spell.spellId)) ctx.addIssue({ code: z.ZodIssueCode.custom, path: [index, "spellId"], message: "Заклинання повторюється у грантах" });
+    if (seen.has(spell.spellId)) ctx.addIssue({ code: z.ZodIssueCode.custom, path: [index, "spellId"], message: "units.validation.duplicateSpell" });
 
     seen.add(spell.spellId);
   });
@@ -101,10 +101,10 @@ export const createUnitSchema = z.object({
   proficiencyBonus: z.number().min(0).optional(),
   minTargets: z.number().min(1).default(1),
   maxTargets: z.number().min(1).default(1),
-  attacks: z.array(unitAttackSchema).describe("Атаки юніта: назва, бонус, кістки шкоди, тип").default([]),
-  abilities: AbilitiesSchema.describe("Здібності юніта").optional(),
+  attacks: z.array(unitAttackSchema).describe("Unit attacks: name, bonus, damage dice, type").default([]),
+  abilities: AbilitiesSchema.describe("Unit abilities").optional(),
   immunities: z.array(z.string()).default([]),
-  knownSpells: z.array(z.string()).describe("id заклинань кампанії, які юніт може кастувати").default([]),
+  knownSpells: z.array(z.string()).describe("Campaign spell ids the unit can cast").default([]),
   statblock: UnitStatblockSchema.default({}),
   spellcasting: UnitSpellcastingSchema.default({ spells: [] }),
   morale: z.number().min(-10).max(10).default(0),
@@ -128,10 +128,10 @@ export const updateUnitSchema = z.object({
   gridSize: z.number().int().min(1).max(3).optional(),
   maxHp: z.number().min(1).optional(),
   proficiencyBonus: z.number().min(0).optional(),
-  attacks: z.array(unitAttackSchema).describe("Атаки юніта: назва, бонус, кістки шкоди, тип").optional(),
-  abilities: AbilitiesSchema.describe("Здібності юніта").optional(),
+  attacks: z.array(unitAttackSchema).describe("Unit attacks: name, bonus, damage dice, type").optional(),
+  abilities: AbilitiesSchema.describe("Unit abilities").optional(),
   immunities: z.array(z.string()).optional(),
-  knownSpells: z.array(z.string()).describe("id заклинань кампанії, які юніт може кастувати").optional(),
+  knownSpells: z.array(z.string()).describe("Campaign spell ids the unit can cast").optional(),
   statblock: UnitStatblockSchema.optional(),
   spellcasting: UnitSpellcastingSchema.optional(),
   minTargets: z.number().min(1).optional(),
@@ -161,7 +161,7 @@ export const importUnitSchema = z.object({
   gridSize: z.number().int().min(1).max(3).default(1),
   maxHp: z.number().min(1).default(10),
   proficiencyBonus: z.number().min(0).optional(),
-  attacks: z.array(unitAttackSchema).describe("Атаки юніта: назва, бонус, кістки шкоди, тип").default([]),
+  attacks: z.array(unitAttackSchema).describe("Unit attacks: name, bonus, damage dice, type").default([]),
   specialAbilities: z
     .array(
       z.object({
@@ -172,7 +172,7 @@ export const importUnitSchema = z.object({
       }),
     )
     .default([]),
-  knownSpells: z.array(z.string()).describe("id заклинань кампанії, які юніт може кастувати").default([]),
+  knownSpells: z.array(z.string()).describe("Campaign spell ids the unit can cast").default([]),
   statblock: UnitStatblockSchema.default({}),
   spellcasting: UnitSpellcastingSchema.default({ spells: [] }),
   avatar: unitAvatarSchema,

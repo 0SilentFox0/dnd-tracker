@@ -1,0 +1,144 @@
+{
+  "coins": {
+    "gp": "gp",
+    "sp": "sp",
+    "cp": "cp"
+  },
+  "grid": {
+    "slots": {
+      "ring1": "Ring",
+      "helmet": "Helmet",
+      "necklace": "Necklace",
+      "range_weapon": "Ranged",
+      "armor": "Armor",
+      "shield": "Shield",
+      "weapon": "Weapon",
+      "boots": "Boots",
+      "cape": "Cloak"
+    },
+    "filled": "{slot}: {name}",
+    "empty": "{slot}, empty",
+    "backpack": "Backpack",
+    "add": "Add",
+    "emptyCell": "Empty cell"
+  },
+  "purse": {
+    "spend": "Spend",
+    "gain": "Receive",
+    "set": "Set amount"
+  },
+  "tab": {
+    "attunement": "Attunement {used}/{limit}",
+    "pending": "The stash appears once the character is approved",
+    "combatNote": "Changes made during battle take effect from the next battle.",
+    "log": "Log"
+  },
+  "details": {
+    "empty": "Select an item to see its details",
+    "quantity": "Quantity: {count}",
+    "consumable": "single-use",
+    "carried": "Carried",
+    "attuned": "Attuned",
+    "attunementRequired": "Inactive without attunement",
+    "charges": "Charges {left}/{max}"
+  },
+  "actions": {
+    "attune": "Attune",
+    "unattune": "Break attunement",
+    "equip": "Equip",
+    "offHand": "Off hand",
+    "transfer": "Transfer",
+    "revoke": "Take away",
+    "unequip": "Unequip",
+    "use": "Use",
+    "edit": "Edit",
+    "remove": "Delete"
+  },
+  "confirm": {
+    "revokeTitle": "Take away “{name}”?",
+    "revoke": "Take away",
+    "removeTitle": "Discard “{name}”?",
+    "remove": "Discard"
+  },
+  "add": {
+    "title": "Add",
+    "grant": "Grant artifact",
+    "item": "Add item"
+  },
+  "itemDialog": {
+    "addTitle": "Add item",
+    "editTitle": "Edit item",
+    "save": "Save",
+    "name": "Name",
+    "description": "Description",
+    "quantity": "Quantity",
+    "consumable": "Single-use"
+  },
+  "money": {
+    "confirm": "Confirm",
+    "amount": "Amount",
+    "coin": "Coin",
+    "noteSpend": "Spent on",
+    "noteGain": "Source (optional)"
+  },
+  "grant": {
+    "title": "Grant artifact",
+    "baseTitle": "Base for “{name}”",
+    "back": "Back",
+    "submit": "Grant",
+    "baseSearch": "Search bases",
+    "noBases": "No suitable free bases",
+    "parameter": "Item parameter",
+    "chooseParameter": "Choose a parameter",
+    "spell": "Scroll spell",
+    "chooseSpell": "Choose a spell",
+    "spellOption": "{label} · level {level}",
+    "spellNote": "Casting is automated; whether the scroll may be read is up to the DM.",
+    "quantity": "Quantity",
+    "noArtifacts": "No free artifacts",
+    "kind": {
+      "property": "property",
+      "consumable": "consumable",
+      "gear": "gear"
+    }
+  },
+  "equipment": {
+    "none": "None",
+    "noArtifacts": "No artifacts for this slot",
+    "heldBy": "held by {holder}",
+    "worn": "already equipped"
+  },
+  "log": {
+    "title": "LOG",
+    "loading": "Loading…",
+    "empty": "No entries yet.",
+    "more": "Show more",
+    "money": "{coins}",
+    "moneySet": "{coins} (DM)",
+    "withNote": "{text} — {note}",
+    "artifactFallback": "artifact",
+    "item": {
+      "item_add": "added: {name}",
+      "item_use": "used: {name}",
+      "item_edit": "changed: {name}",
+      "item_remove": "discarded: {name}"
+    },
+    "artifact": {
+      "artifact_stash": "moved to stash: {name}",
+      "artifact_equip": "equipped: {name}",
+      "artifact_unequip": "moved to stash (DM): {name}",
+      "artifact_grant": "received from DM: {name}",
+      "artifact_revoke": "taken by DM: {name}",
+      "artifact_transfer": "transferred: {name}",
+      "artifact_attune": "attuned: {name}",
+      "artifact_unattune": "attunement broken: {name}"
+    },
+    "unknown": "{kind}: {name}"
+  },
+  "errors": {
+    "actionFailed": "Could not complete the action",
+    "grantFailed": "Could not grant the artifact",
+    "equipFailed": "Could not change the equipment",
+    "itemSaveFailed": "Could not save the item"
+  }
+}

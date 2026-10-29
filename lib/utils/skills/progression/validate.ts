@@ -7,13 +7,6 @@ export type TreeErrorCode = "duplicateSkill" | "unknownBranch" | "unknownSkill" 
 
 export interface TreeError { code: TreeErrorCode; ref: string; label?: string }
 
-export const TREE_ERROR_TEXT: Record<TreeErrorCode, string> = {
-  duplicateSkill: "Цей скіл уже стоїть в іншому місці дерева",
-  unknownBranch: "Гілки немає серед основних навичок кампанії",
-  unknownSkill: "Скіла немає в бібліотеці кампанії",
-  duplicateBranch: "Гілка додана двічі",
-};
-
 export function validateTree(raw: RawTree, ctx: { mainSkillIds: Set<string>; skillIds: Set<string> }): TreeError[] {
   const errors: TreeError[] = [];
 

@@ -16,7 +16,7 @@ export const ProfileContext = createContext<ProfileContextValue | null>(null);
 export function useProfile(): ProfileContextValue {
   const ctx = useContext(ProfileContext);
 
-  if (!ctx) throw new Error("useProfile поза ProfileContext");
+  if (!ctx) throw new Error("useProfile outside ProfileContext");
 
   return ctx;
 }

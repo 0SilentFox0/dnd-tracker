@@ -11,9 +11,10 @@ import { ImageUpload } from "@/components/ui/image-upload";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { SelectField } from "@/components/ui/select-field";
-import { ABILITY_KEYS, ABILITY_LABELS, type AbilityKey } from "@/lib/constants/abilities";
+import { ABILITY_KEYS, type AbilityKey } from "@/lib/constants/abilities";
 import { CLASS_CASTERS, HIT_DICE } from "@/lib/constants/classes";
 import { DND_SKILLS } from "@/lib/constants/skills";
+import { useTranslator } from "@/lib/i18n/use-translator";
 import { toggleItem } from "@/lib/utils/common/collections";
 import type { ClassCaster, ClassFormData, HitDie } from "@/types/classes";
 
@@ -33,6 +34,8 @@ function ListInput({ id, label, value, onChange }: { id: string; label: string; 
 
 export function ClassBasicsTab({ form: { data, set }, campaignId }: ClassBasicsTabProps) {
   const t = useTranslations();
+
+  const tc = useTranslator("common");
 
   const patch = (next: Partial<ClassFormData>) => set((prev) => ({ ...prev, ...next }));
 
@@ -65,7 +68,7 @@ export function ClassBasicsTab({ form: { data, set }, campaignId }: ClassBasicsT
           {ABILITY_KEYS.map((key) => (
             <label key={key} className="flex items-center gap-2 text-sm">
               <Checkbox checked={data.savingThrows.includes(key)} onCheckedChange={() => patch({ savingThrows: toggleItem(data.savingThrows, key) })} />
-              {ABILITY_LABELS[key]}
+              {tc(`abilities.${key}.label`)}
             </label>
           ))}
         </div>
@@ -117,7 +120,7 @@ export function ClassBasicsTab({ form: { data, set }, campaignId }: ClassBasicsT
             id="class-spell-ability"
             value={data.spellcastingAbility ?? ""}
             onValueChange={(v) => patch({ spellcastingAbility: (v || null) as AbilityKey | null })}
-            options={ABILITY_KEYS.map((k) => ({ value: k, label: ABILITY_LABELS[k] }))}
+            options={ABILITY_KEYS.map((k) => ({ value: k, label: tc(`abilities.${k}.label`) }))}
             allowNone
           />
         </div>

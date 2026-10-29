@@ -1,19 +1,18 @@
 "use client";
 
-import { useMemo } from "react";
+import { useCallback, useMemo } from "react";
 import { useRouter } from "next/navigation";
 
 import { NewPill } from "@/components/common/NewPill";
 import { SearchEmptyState } from "@/components/common/SearchEmptyState";
 import { SearchInput } from "@/components/common/SearchInput";
 import { HudTile } from "@/components/hud/page";
-import { COMPACT_GROUPS, DASHBOARD_GROUP_TITLE, type DashboardContext, type DashboardGroupKey, type DashboardSection, DEFAULT_DASHBOARD_CONTEXT, dmDashboardSectionsFor, PLAYER_DASHBOARD_SECTIONS } from "@/lib/constants/campaign-dashboard";
+import { COMPACT_GROUPS, type DashboardContext, type DashboardGroupKey, type DashboardSection, DEFAULT_DASHBOARD_CONTEXT, dmDashboardSectionsFor, PLAYER_DASHBOARD_SECTIONS } from "@/lib/constants/campaign-dashboard";
 import { NOTIFICATION_TILE_TYPES } from "@/lib/constants/notifications";
 import { useSearch } from "@/lib/hooks/common";
 import { useNotifications } from "@/lib/hooks/notifications";
+import { useTranslator } from "@/lib/i18n/use-translator";
 import { hasUnread } from "@/lib/utils/notifications/select";
-
-const fieldsOf = (s: DashboardSection) => [s.title, ...s.keywords];
 
 const GROUP_ORDER: DashboardGroupKey[] = ["game", "heroes", "libraries"];
 
@@ -22,6 +21,8 @@ const GRID = "grid grid-cols-1 gap-2 sm:grid-cols-2 xl:grid-cols-3";
 const COMPACT_GRID = "grid grid-cols-2 gap-2 sm:grid-cols-3";
 
 export function DashboardGroups({ campaignId, isDM, pendingDrafts, context = DEFAULT_DASHBOARD_CONTEXT, hiddenKeys }: { campaignId: string; isDM: boolean; pendingDrafts: number; context?: DashboardContext; hiddenKeys?: string[] }) {
+  const t = useTranslator("dashboard");
+
   const router = useRouter();
 
   const { data: notifications } = useNotifications(campaignId, { enabled: !isDM });
@@ -30,14 +31,18 @@ export function DashboardGroups({ campaignId, isDM, pendingDrafts, context = DEF
 
   const base = useMemo(() => sections.filter((s) => !hiddenKeys?.includes(s.key)), [sections, hiddenKeys]);
 
+  const fieldsOf = useCallback((s: DashboardSection) => [t(`sections.${s.key}.title`), ...t(`sections.${s.key}.keywords`).split(",").map((k) => k.trim())], [t]);
+
   const { query, items, isActive } = useSearch(base, fieldsOf);
 
   const tile = (s: DashboardSection, compact = false) => {
     const Icon = s.icon;
 
-    const subtitle = s.key === "characters" && pendingDrafts > 0 ? `${s.subtitle} · ${pendingDrafts} на схваленні` : s.subtitle;
+    const sectionSubtitle = t(`sections.${s.key}.subtitle`);
 
-    return <HudTile key={s.key} href={s.href(campaignId)} icon={<Icon className="size-5" />} title={s.title} subtitle={subtitle} compact={compact} badge={!isDM && hasUnread(notifications, NOTIFICATION_TILE_TYPES[s.key] ?? []) ? <NewPill /> : undefined} />;
+    const subtitle = s.key === "characters" && pendingDrafts > 0 ? t("pendingSubtitle", { subtitle: sectionSubtitle, count: pendingDrafts }) : sectionSubtitle;
+
+    return <HudTile key={s.key} href={s.href(campaignId)} icon={<Icon className="size-5" />} title={t(`sections.${s.key}.title`)} subtitle={subtitle} compact={compact} badge={!isDM && hasUnread(notifications, NOTIFICATION_TILE_TYPES[s.key] ?? []) ? <NewPill /> : undefined} />;
   };
 
   const onSubmit = (e: React.FormEvent) => {
@@ -60,7 +65,7 @@ export function DashboardGroups({ campaignId, isDM, pendingDrafts, context = DEF
 
           return (
             <section key={g} className="space-y-2">
-              <h2 className="hud-sc text-sm text-hud-muted">{DASHBOARD_GROUP_TITLE[g]}</h2>
+              <h2 className="hud-sc text-sm text-hud-muted">{t(`groups.${g}`)}</h2>
               <div className={compact ? COMPACT_GRID : GRID}>{base.filter((s) => s.group === g).map((s) => tile(s, compact))}</div>
             </section>
           );
@@ -72,7 +77,7 @@ export function DashboardGroups({ campaignId, isDM, pendingDrafts, context = DEF
   return (
     <div className="space-y-4">
       <form onSubmit={onSubmit}>
-        <SearchInput value={query.value} onChange={query.set} label="Пошук розділу" placeholder="Куди йдемо? (закл, моби, бої…)" />
+        <SearchInput value={query.value} onChange={query.set} label={t("search.label")} placeholder={t("search.placeholder")} />
       </form>
       {content}
     </div>

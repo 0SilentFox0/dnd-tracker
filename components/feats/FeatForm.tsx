@@ -11,12 +11,15 @@ import { HudForm, HudFormPage, type HudTab } from "@/components/hud/form";
 import { Button } from "@/components/ui/button";
 import { useErrorTotals } from "@/lib/hooks/common";
 import { useFeatForm } from "@/lib/hooks/feats";
+import { useTranslator } from "@/lib/i18n/use-translator";
 import type { FeatData } from "@/types/choices";
 
 type FeatFormTabId = "basics" | "abilities" | "choices";
 
 export function FeatForm({ campaignId, feat }: { campaignId: string; feat: FeatData }) {
   const t = useTranslations("feats");
+
+  const ta = useTranslator("abilities");
 
   const tc = useTranslations("common");
 
@@ -36,9 +39,9 @@ export function FeatForm({ campaignId, feat }: { campaignId: string; feat: FeatD
   };
 
   const tabs: HudTab<FeatFormTabId>[] = [
-    { id: "basics", label: t("form.tabs.basics"), content: <FeatBasicsTab form={editor.form} /> },
-    { id: "abilities", label: t("form.tabs.abilities"), invalid: invalid.abilities, content: <AbilityListEditor campaignId={campaignId} value={data.abilities} onChange={(abilities) => set((p) => ({ ...p, abilities }))} onValidityChange={track("abilities")} /> },
-    { id: "choices", label: t("form.tabs.choices"), invalid: invalid.choices, content: <ChoiceListEditor campaignId={campaignId} owner="feat" value={data.choices} onChange={(choices) => set((p) => ({ ...p, choices }))} onValidityChange={track("choices")} /> },
+    { id: "basics", label: tc("tabs.basic"), content: <FeatBasicsTab form={editor.form} /> },
+    { id: "abilities", label: tc("tabs.abilities"), invalid: invalid.abilities, content: <AbilityListEditor campaignId={campaignId} value={data.abilities} onChange={(abilities) => set((p) => ({ ...p, abilities }))} onValidityChange={track("abilities")} /> },
+    { id: "choices", label: tc("tabs.choices"), invalid: invalid.choices, content: <ChoiceListEditor campaignId={campaignId} owner="feat" value={data.choices} onChange={(choices) => set((p) => ({ ...p, choices }))} onValidityChange={track("choices")} /> },
   ];
 
   return (
@@ -53,7 +56,7 @@ export function FeatForm({ campaignId, feat }: { campaignId: string; feat: FeatD
               {tc("actions.cancel")}
             </Button>
             <Button type="submit" disabled={editor.status.isSaving || !editor.abilities.valid}>
-              {editor.status.isSaving ? tc("actions.saving") : withAbilityErrors(tc("actions.save"), editor.abilities.errors)}
+              {editor.status.isSaving ? tc("actions.saving") : withAbilityErrors(tc("actions.save"), editor.abilities.errors, ta)}
             </Button>
           </>
         }

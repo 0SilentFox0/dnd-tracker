@@ -1,3 +1,4 @@
+import { useTranslations } from "next-intl";
 import { X } from "lucide-react";
 
 import { HudSection } from "@/components/hud/form";
@@ -18,6 +19,8 @@ export function UnitKnownSpells({
   spells,
   onChange,
 }: UnitKnownSpellsProps) {
+  const t = useTranslations("units.knownSpells");
+
   const knownSpellIds = formData.knownSpells || [];
 
   const knownSpells = spells.filter((spell) =>
@@ -46,17 +49,17 @@ export function UnitKnownSpells({
 
   return (
     <HudSection
-      title="Заклинання"
+      title={t("title")}
       className="space-y-4"
       action={
         availableSpells.length > 0 && (
           <SelectField
             value=""
             onValueChange={handleAdd}
-            placeholder="Додати заклинання"
+            placeholder={t("add")}
             options={availableSpells.map((spell) => ({
               value: spell.id,
-              label: `${spell.name}${spell.level > 0 ? ` (${spell.level} рівень)` : ""}`,
+              label: `${spell.name}${spell.level > 0 ? t("levelSuffix", { level: spell.level }) : ""}`,
             }))}
             triggerClassName="w-[200px]"
           />
@@ -66,7 +69,7 @@ export function UnitKnownSpells({
       {knownSpells.length > 0 && (
         <div className="space-y-2">
           <Label className="text-sm text-muted-foreground">
-            Відомі заклинання:
+            {t("known")}
           </Label>
           <div className="flex flex-wrap gap-2">
             {knownSpells.map((spell) => (
@@ -99,14 +102,13 @@ export function UnitKnownSpells({
 
       {knownSpells.length === 0 && (
         <p className="text-sm text-muted-foreground text-center py-2">
-          Немає доданих заклинань. Виберіть заклинання зі списку вище.
+          {t("empty")}
         </p>
       )}
 
       {spells.length === 0 && (
         <p className="text-sm text-muted-foreground text-center py-2">
-          Немає доступних заклинань у кампанії. Створіть заклинання в розділі
-          &quot;Заклинання&quot;.
+          {t("none")}
         </p>
       )}
     </HudSection>

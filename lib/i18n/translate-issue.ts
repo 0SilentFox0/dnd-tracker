@@ -13,9 +13,7 @@ function toNumber(value: unknown): number | undefined {
   return typeof value === "number" || typeof value === "bigint" ? Number(value) : undefined;
 }
 
-export function translateIssue(t: Translator, issue: TranslatableIssue): string {
-  if (!t.has(issue.message)) return issue.message;
-
+export function issueParams(issue: TranslatableIssue): ErrorParams {
   const values: ErrorParams = { ...API_ERROR_PARAMS[issue.message as ApiErrorKey], ...issue.params };
 
   const minimum = toNumber(issue.minimum);
@@ -26,5 +24,9 @@ export function translateIssue(t: Translator, issue: TranslatableIssue): string 
 
   if (maximum !== undefined) values.maximum = maximum;
 
-  return t(issue.message, values);
+  return values;
+}
+
+export function translateIssue(t: Translator, issue: TranslatableIssue): string {
+  return t.has(issue.message) ? t(issue.message, issueParams(issue)) : issue.message;
 }

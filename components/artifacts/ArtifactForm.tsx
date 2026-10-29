@@ -24,6 +24,7 @@ import {
 } from "@/lib/constants/artifacts";
 import { useArtifactForm } from "@/lib/hooks/artifacts";
 import { useCampaignRules } from "@/lib/hooks/campaigns";
+import { useTranslator } from "@/lib/i18n/use-translator";
 import type { ConversionIssue } from "@/lib/utils/abilities/schema";
 import type { Ability } from "@/lib/utils/abilities/schema";
 import type { ArmorStats } from "@/lib/utils/artifacts/armor-stats";
@@ -62,6 +63,8 @@ export interface ArtifactFormProps {
 export function ArtifactForm({ campaignId, artifactSets, initial, mode, labels, actions, cancelHref }: ArtifactFormProps) {
   const t = useTranslations();
 
+  const ta = useTranslator("abilities");
+
   const router = useRouter();
 
   const editor = useArtifactForm({ initial, mode, ...actions });
@@ -89,7 +92,7 @@ export function ArtifactForm({ campaignId, artifactSets, initial, mode, labels, 
   const tabs: HudTab<ArtifactFormTabId>[] = [
     {
       id: ARTIFACT_FORM_TAB.basic,
-      label: t("artifacts.form.tabs.basic"),
+      label: t("common.tabs.basic"),
       content: (
         <div className="space-y-5">
           <div className="grid gap-4 md:grid-cols-2">
@@ -181,7 +184,7 @@ export function ArtifactForm({ campaignId, artifactSets, initial, mode, labels, 
     },
     {
       id: ARTIFACT_FORM_TAB.abilities,
-      label: t("artifacts.form.tabs.abilities"),
+      label: t("common.tabs.abilities"),
       invalid: editor.abilities.errors > 0 || initial.abilityIssues.length > 0,
       content: (
         <AbilityListEditor
@@ -216,7 +219,7 @@ export function ArtifactForm({ campaignId, artifactSets, initial, mode, labels, 
               {t("common.actions.cancel")}
             </Button>
             <Button type="submit" disabled={editor.status.isBusy || !editor.abilities.valid}>
-              {editor.status.isSaving ? labels.saving : withAbilityErrors(labels.submit, editor.abilities.errors)}
+              {editor.status.isSaving ? labels.saving : withAbilityErrors(labels.submit, editor.abilities.errors, ta)}
             </Button>
           </>
         }

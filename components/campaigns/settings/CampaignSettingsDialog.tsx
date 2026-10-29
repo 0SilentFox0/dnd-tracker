@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useTranslations } from "next-intl";
 
 import { CreditsText } from "@/components/campaigns/templates/CreditsText";
 import { SaveAsTemplateDialog } from "@/components/campaigns/templates/SaveAsTemplateDialog";
@@ -14,7 +15,7 @@ import { LabeledInput } from "@/components/ui/labeled-input";
 import { ResponsiveDialog } from "@/components/ui/responsive-dialog";
 import { Textarea } from "@/components/ui/textarea";
 import { CampaignStatus } from "@/lib/constants/campaigns";
-import { syncTitle } from "@/lib/constants/source-sync";
+import { syncTitleKey } from "@/lib/constants/source-sync";
 import { useCampaignExportUrl, useDeleteCampaign, useUpdateCampaign } from "@/lib/hooks/campaigns";
 import { useConfirm } from "@/lib/hooks/common";
 import type { CampaignSettings, CampaignSettingsMeta } from "@/types/campaigns";
@@ -30,6 +31,10 @@ interface CampaignSettingsDialogProps {
 const toFields = (c: CampaignSettings) => ({ ...c, description: c.description || "" });
 
 export function CampaignSettingsDialog({ campaignId, campaign, meta, open, onOpenChange }: CampaignSettingsDialogProps) {
+  const t = useTranslations("campaigns");
+
+  const tc = useTranslations("common");
+
   const update = useUpdateCampaign(campaignId);
 
   const remove = useDeleteCampaign(campaignId);
@@ -56,16 +61,16 @@ export function CampaignSettingsDialog({ campaignId, campaign, meta, open, onOpe
       { ...fields, name: fields.name.trim(), description: fields.description.trim() || null },
       {
         onSuccess: () => onOpenChange(false),
-        onError: (err) => setError(err instanceof Error ? err.message : "Помилка збереження"),
+        onError: (err) => setError(err instanceof Error ? err.message : tc("form.saveFailed")),
       },
     );
   };
 
   const handleDelete = async () => {
     const ok = await confirm({
-      title: `Видалити кампанію «${campaign.name}»?`,
-      description: "Усі персонажі, бої, юніти та бібліотеку кампанії буде видалено назавжди.",
-      confirmLabel: "Видалити",
+      title: t("settings.confirmDelete.title", { name: campaign.name }),
+      description: t("settings.confirmDelete.description"),
+      confirmLabel: tc("actions.delete"),
       destructive: true,
     });
 
@@ -73,7 +78,7 @@ export function CampaignSettingsDialog({ campaignId, campaign, meta, open, onOpe
 
     setError(null);
     remove.mutate(undefined, {
-      onError: (err) => setError(err instanceof Error ? err.message : "Помилка видалення"),
+      onError: (err) => setError(err instanceof Error ? err.message : t("settings.deleteFailed")),
     });
   };
 
@@ -82,35 +87,35 @@ export function CampaignSettingsDialog({ campaignId, campaign, meta, open, onOpe
     <ResponsiveDialog
       open={open}
       onOpenChange={onOpenChange}
-      title="Налаштування кампанії"
-      description="Оновіть основні параметри кампанії"
+      title={t("settings.title")}
+      description={t("settings.description")}
       hud
       footer={
         <>
           <Button variant="outline" onClick={() => onOpenChange(false)} disabled={isSaving}>
-            Скасувати
+            {tc("actions.cancel")}
           </Button>
           <Button onClick={handleSave} disabled={isSaving || !fields.name.trim()}>
-            {isSaving ? "Збереження..." : "Зберегти"}
+            {isSaving ? tc("actions.saving") : tc("actions.save")}
           </Button>
         </>
       }
     >
-      <HudSection title="Кампанія">
+      <HudSection title={t("settings.campaign")}>
         <div className="space-y-4">
-          <LabeledInput id="campaign-name" label="Назва" value={fields.name} onChange={(e) => set("name", e.target.value)} disabled={isSaving} />
+          <LabeledInput id="campaign-name" label={t("settings.name")} value={fields.name} onChange={(e) => set("name", e.target.value)} disabled={isSaving} />
           <div className="space-y-2">
-            <Label htmlFor="campaign-description">Опис</Label>
+            <Label htmlFor="campaign-description">{t("settings.descriptionLabel")}</Label>
             <Textarea id="campaign-description" value={fields.description} onChange={(e) => set("description", e.target.value)} disabled={isSaving} rows={3} />
           </div>
         </div>
       </HudSection>
-      <HudSection title="Правила">
+      <HudSection title={t("settings.rules")}>
         <div className="space-y-4">
           <div className="grid grid-cols-3 items-end gap-2 sm:grid-cols-4">
             <LabeledInput
               id="campaign-max-level"
-              label="Макс. рівень"
+              label={t("settings.maxLevel")}
               labelClassName="text-xs leading-tight"
               type="number"
               min="1"
@@ -122,26 +127,26 @@ export function CampaignSettingsDialog({ campaignId, campaign, meta, open, onOpe
           </div>
           <div className="flex items-center space-x-2">
             <Checkbox id="allow-player-edit" checked={fields.allowPlayerEdit} onCheckedChange={(v) => set("allowPlayerEdit", v === true)} disabled={isSaving} />
-            <Label htmlFor="allow-player-edit">Дозволити гравцям редагувати своїх персонажів</Label>
+            <Label htmlFor="allow-player-edit">{t("settings.allowPlayerEdit")}</Label>
           </div>
           <div className="space-y-1">
             <div className="flex items-center space-x-2">
               <Checkbox id="crit-choice-by-dm" checked={fields.critChoiceByDm} onCheckedChange={(v) => set("critChoiceByDm", v === true)} disabled={isSaving} />
-              <Label htmlFor="crit-choice-by-dm">ДМ обирає ефекти крита/провалу</Label>
+              <Label htmlFor="crit-choice-by-dm">{t("settings.critChoiceByDm")}</Label>
             </div>
-            <p className="text-xs text-hud-muted">Вимкнено — ефект випадковий</p>
+            <p className="text-xs text-hud-muted">{t("settings.critChoiceHint")}</p>
           </div>
           <div className="flex items-center space-x-2">
             <Checkbox id="acquaintances-enabled" checked={fields.acquaintancesEnabled} onCheckedChange={(v) => set("acquaintancesEnabled", v === true)} disabled={isSaving} />
-            <Label htmlFor="acquaintances-enabled">Знайомства доступні гравцям</Label>
+            <Label htmlFor="acquaintances-enabled">{t("settings.acquaintances")}</Label>
           </div>
           <div className="flex items-center space-x-2">
             <Checkbox id="campaign-status" checked={fields.status === CampaignStatus.ACTIVE} onCheckedChange={(v) => set("status", v === true ? CampaignStatus.ACTIVE : CampaignStatus.ARCHIVED)} disabled={isSaving} />
-            <Label htmlFor="campaign-status">Кампанія активна</Label>
+            <Label htmlFor="campaign-status">{t("settings.active")}</Label>
           </div>
         </div>
       </HudSection>
-      <HudSection title="Шаблони">
+      <HudSection title={t("settings.templates")}>
         <div className="flex flex-wrap gap-2">
           <Button
             variant="outline"
@@ -151,7 +156,7 @@ export function CampaignSettingsDialog({ campaignId, campaign, meta, open, onOpe
             }}
             disabled={isSaving}
           >
-            Зберегти як шаблон
+            {t("settings.saveAsTemplate")}
           </Button>
           {meta.createdFromId && (
             <Button
@@ -162,31 +167,31 @@ export function CampaignSettingsDialog({ campaignId, campaign, meta, open, onOpe
               }}
               disabled={isSaving}
             >
-              {syncTitle(meta.isTemplate)}
+              {t(`sourceSync.title.${syncTitleKey(meta.isTemplate)}`)}
             </Button>
           )}
           <Button variant="outline" asChild>
             <a href={exportUrl} download>
-              Експортувати в JSON
+              {t("settings.export")}
             </a>
           </Button>
         </div>
       </HudSection>
       {meta.credits && (
-        <HudSection title="Джерела й ліцензії">
+        <HudSection title={t("settings.credits")}>
           <CreditsText credits={meta.credits} />
         </HudSection>
       )}
-      <HudSection title="Небезпечна зона">
+      <HudSection title={t("settings.danger")}>
         <Button variant="destructive" onClick={handleDelete} disabled={isSaving}>
-          {remove.isPending ? "Видалення..." : "Видалити кампанію"}
+          {remove.isPending ? t("settings.deleting") : t("settings.delete")}
         </Button>
       </HudSection>
       {error && (
         <FormAlert className="mt-4">{error}</FormAlert>
       )}
     </ResponsiveDialog>
-    <SaveAsTemplateDialog campaignId={campaignId} defaultName={`${campaign.name} (шаблон)`} open={templateOpen} onOpenChange={setTemplateOpen} />
+    <SaveAsTemplateDialog campaignId={campaignId} defaultName={t("settings.defaultTemplateName", { name: campaign.name })} open={templateOpen} onOpenChange={setTemplateOpen} />
     <SourceSyncDialog campaignId={campaignId} isTemplate={meta.isTemplate} open={syncOpen} onOpenChange={setSyncOpen} />
     </>
   );

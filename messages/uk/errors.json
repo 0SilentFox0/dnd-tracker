@@ -448,5 +448,13 @@
   "backgroundOriginFeatInvalid": "Риса походження передісторії має бути origin-рисою цієї кампанії",
   "backgroundSpellUnknown": "Передісторія посилається на невідоме заклинання",
   "artifactSetMembersInvalid": "Усі артефакти мають належати цій кампанії та існувати в базі.",
-  "trackFileDeleteFailed": "Не вдалося видалити файл музики"
+  "trackFileDeleteFailed": "Не вдалося видалити файл музики",
+  "itemParameterRequired": "Оберіть параметр предмета",
+  "itemParameterInvalid": "Недозволений параметр предмета",
+  "itemSpellRequired": "Оберіть заклинання предмета",
+  "itemSpellInvalid": "Недозволене заклинання предмета",
+  "characterTokenInvalid": "Некоректний жетон",
+  "characterGoalsInvalid": "Некоректні цілі",
+  "characterNotesInvalid": "Некоректні нотатки",
+  "characterControllerInvalid": "Невірне посилання на користувача (controlledBy). Переконайтесь, що обраний гравець існує в users і є учасником кампанії."
 }

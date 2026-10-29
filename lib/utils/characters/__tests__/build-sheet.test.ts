@@ -61,7 +61,7 @@ describe("buildCharacterSheet", () => {
 
     expect(dagger?.toHit.total).toBe(calculateAttackBonus(input.participant, sword));
     expect(dagger?.toHit.total).toBe(4 + 9);
-    expect(dagger?.toHit.lines[0]).toMatchObject({ label: "Спритність ★", value: "+4" });
+    expect(dagger?.toHit.lines[0]).toMatchObject({ label: "common.abilities.dexterity.label", suffix: " ★", value: "+4" });
     expect(s.abilities.find((a) => a.key === "dexterity")?.isPrimary).toBe(true);
   });
 
@@ -122,7 +122,7 @@ describe("buildCharacterSheet", () => {
     input.participant.abilities.intelligence = 12;
     input.participant.spellcasting = { ...input.participant.spellcasting, spellSaveDC: 17, spellAttackBonus: 9 };
 
-    expect(buildCharacterSheet(input).magic).toEqual({ ability: "Інтелект", saveDC: 17, attackBonus: 9 });
+    expect(buildCharacterSheet(input).magic).toEqual({ ability: "intelligence", saveDC: 17, attackBonus: 9 });
   });
 
   it("імунітети — зібрані з персонажа й раси (як у бою)", () => {

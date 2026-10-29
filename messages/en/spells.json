@@ -1,0 +1,278 @@
+{
+  "page": {
+    "title": "Spells",
+    "subtitle": "Campaign spell library · Total: {count}",
+    "create": "+ Create spell",
+    "print": "Print version",
+    "listAria": "Spell list",
+    "filterAll": "All",
+    "loading": "Loading spells…",
+    "emptyTitle": "No spells yet",
+    "emptyDescription": "Create your first spell or import them from a file.",
+    "search": "Search spells"
+  },
+  "deleteAll": {
+    "noun": "spells",
+    "label": "Delete all spells",
+    "description": "Are you sure you want to delete all spells from the campaign? This cannot be undone. {count, plural, one {# spell} other {# spells}} will be deleted."
+  },
+  "schools": {
+    "title": "Schools of magic",
+    "subtitle": "School color and icon — in the spellbook and on the skill tree"
+  },
+  "groupDialog": {
+    "title": "School of magic",
+    "description": "School color and icon",
+    "name": "Name",
+    "color": "Color",
+    "icon": "Icon",
+    "saveFailed": "Failed to save the school of magic"
+  },
+  "createGroup": {
+    "trigger": "+ Create spell group",
+    "title": "Create a new spell group",
+    "description": "Spell groups let you organize spells and skills",
+    "name": "Group name *",
+    "placeholder": "Group name",
+    "submit": "Create group",
+    "failed": "Failed to create the group"
+  },
+  "groupActions": {
+    "rename": "Rename group",
+    "removeAll": "Remove all spells from the group",
+    "removeAllTitle": "Remove all spells from the group?",
+    "removeAllDescription": "Are you sure you want to remove all spells from the group \"{group}\"? The spells will not be deleted, but they will lose their link to this group.",
+    "removeAllConfirm": "Remove all from group"
+  },
+  "list": {
+    "count": "{count, plural, one {# spell} other {# spells}}",
+    "deleteLevel": {
+      "title": "Delete all spells of this level?",
+      "description": "Are you sure you want to delete all spells of the level \"{level}\"? This cannot be undone. {count, plural, one {# spell} other {# spells}} will be deleted.",
+      "tooltip": "Delete all spells of this level"
+    }
+  },
+  "card": {
+    "removeFromGroup": "Remove from group",
+    "moveToGroup": "Move to group",
+    "copied": "Copied",
+    "copyId": "Copy ID"
+  },
+  "selected": {
+    "empty": "The spellbook is empty. Pick spells from the list above.",
+    "title": "Spellbook:"
+  },
+  "dropdown": {
+    "loading": "Loading spells...",
+    "empty": "No spells found. Add spells to the campaign library."
+  },
+  "print": {
+    "title": "Campaign “{campaignName}” — Spells",
+    "hint": "Print version. Press Cmd/Ctrl+P to save as PDF.",
+    "button": "Print",
+    "empty": "The campaign has no spells to print.",
+    "count": "{count, plural, one {# spell} other {# spells}}"
+  },
+  "book": {
+    "title": "Spellbook",
+    "allSchools": "All",
+    "schoolsAria": "Schools of magic",
+    "noSchool": "No school",
+    "emptyLevel": "There are no spells on this level",
+    "emptyLevelSchool": "There are no spells of this school on this level",
+    "pick": "Pick a spell",
+    "bookmark": "Level {level}, slots: {slots}",
+    "schoolAndLevel": "{school} · {level}",
+    "manual": "Manual spell: read the description and agree on its use with the DM. Automatic application is unavailable until the mechanics are configured.",
+    "power": "Power",
+    "target": "Target",
+    "check": "Check",
+    "cost": "Cost",
+    "baseDice": "{dice} base dice",
+    "hintSave": "saving throw"
+  },
+  "mechanics": {
+    "dice": "{dice, plural, one {# die} other {# dice}}",
+    "noDice": "no dice"
+  },
+  "costs": {
+    "action": "Action",
+    "bonusAction": "Bonus action",
+    "reaction": "Reaction",
+    "long": "Long casting"
+  },
+  "targeting": {
+    "enemy": "One enemy",
+    "ally": "One ally",
+    "self": "Caster",
+    "allyDead": "Fallen ally",
+    "allAlliesDead": "All fallen allies",
+    "area": "Area (up to N targets)",
+    "template": "Map template",
+    "allAllies": "All allies",
+    "allEnemies": "All enemies",
+    "everyone": "Everyone"
+  },
+  "shapes": {
+    "circle": "Circle",
+    "cube": "Cube",
+    "cone": "Cone",
+    "line": "Line",
+    "cross": "Cross",
+    "emanation": "Emanation",
+    "ring": "Ring"
+  },
+  "saveOnSuccess": {
+    "half": "Half damage",
+    "none": "No effect"
+  },
+  "inline": {
+    "cost": {
+      "action": "action",
+      "bonusAction": "bonus action",
+      "reaction": "reaction",
+      "long": "long casting"
+    },
+    "targeting": {
+      "enemy": "enemy",
+      "ally": "ally",
+      "self": "caster",
+      "allyDead": "fallen ally",
+      "allAlliesDead": "all fallen allies",
+      "allAllies": "all allies",
+      "allEnemies": "all enemies",
+      "everyone": "everyone"
+    },
+    "saveOnSuccess": {
+      "half": "half damage",
+      "none": "no effect"
+    },
+    "area": {
+      "enemy": "up to {count} enemies",
+      "ally": "up to {count} allies"
+    },
+    "template": "{shape} {size} ft",
+    "resolution": {
+      "auto": "automatic",
+      "attack": "spell attack",
+      "save": "{ability} saving throw ({onSuccess})"
+    }
+  },
+  "fx": {
+    "aria": "Effect in battle",
+    "animation": "Animation",
+    "element": "Element",
+    "aura": "Aura",
+    "replay": "Play again",
+    "archetypes": {
+      "melee": "Melee",
+      "ranged": "Ranged",
+      "bolt": "Bolt",
+      "area": "Area",
+      "heal": "Healing",
+      "buff": "Buff",
+      "debuff": "Debuff",
+      "summon": "Summon",
+      "death": "Death",
+      "swarm": "Swarm",
+      "quake": "Earthquake",
+      "teleport": "Teleport",
+      "entangle": "Entangle",
+      "meteor": "Meteor",
+      "eldritch": "Eldritch blast",
+      "slow": "Slow",
+      "haste": "Haste",
+      "stoneskin": "Stoneskin",
+      "cleanse": "Cleanse",
+      "regenerate": "Regeneration",
+      "might": "Righteous might",
+      "deflect": "Deflection",
+      "holyword": "Word of light",
+      "empower": "Divine power",
+      "spellward": "Spell immunity",
+      "sunbeam": "Eternal light",
+      "retribution": "Divine retribution",
+      "resurrect": "Resurrection",
+      "siphon": "Weakening",
+      "rust": "Frailty",
+      "pestilence": "Plague",
+      "whispers": "Distraction",
+      "thorns": "Torment",
+      "raincloud": "Sorrow",
+      "blindfold": "Blindness",
+      "puppet": "Puppeteer",
+      "netherhands": "Curse of the Beyond",
+      "firesummon": "Fire elemental",
+      "watersummon": "Water elemental",
+      "earthsummon": "Earth elemental",
+      "airsummon": "Air elemental",
+      "phoenix": "Phoenix",
+      "avatar": "Avatar",
+      "healword": "Healing word",
+      "healwave": "Healing wave",
+      "rebirth": "Forest rebirth",
+      "forestspirit": "Forest spirit",
+      "thornvines": "Thorny vines",
+      "moonbeam": "Moonbeam",
+      "vampire": "Vampirism",
+      "skystrike": "Lightning from the sky",
+      "icefall": "Ice boulder",
+      "dice": "Dice roll"
+    },
+    "elements": {
+      "fire": "Fire",
+      "cold": "Cold",
+      "lightning": "Lightning",
+      "poison": "Poison",
+      "necrotic": "Necrotic",
+      "radiant": "Radiant",
+      "arcane": "Arcane",
+      "physical": "Physical",
+      "nature": "Nature",
+      "earth": "Earth",
+      "fury": "Fury",
+      "wind": "Wind"
+    },
+    "auras": {
+      "stun": "Stun",
+      "charm": "Charm",
+      "rage": "Rage",
+      "bind": "Binding",
+      "plague": "Plague",
+      "burning": "Burning",
+      "frost": "Frost",
+      "decay": "Decay",
+      "bleeding": "Bleeding",
+      "static": "Static",
+      "marked": "Mark",
+      "curse": "Curse",
+      "regen": "Regeneration",
+      "shield": "Protection",
+      "blessing": "Blessing",
+      "frozen": "Frozen",
+      "moonmark": "Moon mark",
+      "dust": "Dust",
+      "stings": "Stings",
+      "roots": "Roots",
+      "blind": "Blindness",
+      "bloodlust": "Bloodlust",
+      "haste": "Haste",
+      "shackles": "Shackles",
+      "stoneskin": "Stoneskin",
+      "lifedome": "Life shield",
+      "sunglow": "Sunglow",
+      "spellward": "Antimagic dome",
+      "deflect": "Arrow deflection",
+      "might": "Righteous blade",
+      "holyweapon": "Holy weapon",
+      "sapped": "Sapped",
+      "rust": "Rust",
+      "dizzy": "Whisper",
+      "thorncrown": "Crown of thorns",
+      "raincloud": "Rain cloud",
+      "strings": "Puppet strings",
+      "vines": "Thorny vines",
+      "stag": "Forest spirit"
+    }
+  }
+}

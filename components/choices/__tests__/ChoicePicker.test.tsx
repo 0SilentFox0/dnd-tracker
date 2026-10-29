@@ -43,16 +43,16 @@ describe("ChoicePicker", () => {
 
     render(<Harness choice={choice} context={ctx(4, { scores: { ...scores, charisma: 19 } })} />);
 
-    fireEvent.click(screen.getByRole("button", { name: "+1 Сила" }));
-    fireEvent.click(screen.getByRole("button", { name: "+1 Сила" }));
+    fireEvent.click(screen.getByRole("button", { name: "+1 common.abilities.strength.label" }));
+    fireEvent.click(screen.getByRole("button", { name: "+1 common.abilities.strength.label" }));
 
     expect(screen.getByText("15 → 17")).toBeTruthy();
     expect(json()).toEqual([{ id: "strength" }, { id: "strength" }]);
 
-    fireEvent.click(screen.getByRole("button", { name: "−1 Сила" }));
-    fireEvent.click(screen.getByRole("button", { name: "+1 Харизма" }));
+    fireEvent.click(screen.getByRole("button", { name: "−1 common.abilities.strength.label" }));
+    fireEvent.click(screen.getByRole("button", { name: "+1 common.abilities.charisma.label" }));
 
-    expect(screen.getByRole("button", { name: "+1 Харизма" }).hasAttribute("disabled")).toBe(true);
+    expect(screen.getByRole("button", { name: "+1 common.abilities.charisma.label" }).hasAttribute("disabled")).toBe(true);
   });
 
   it("ability score: saved picks already inside the scores are not counted twice", () => {
@@ -78,7 +78,7 @@ describe("ChoicePicker", () => {
 
     expect(screen.queryByRole("radio", { name: /Archery/ })).toBeNull();
     fireEvent.click(screen.getByRole("radio", { name: /Ability Score Improvement/ }));
-    fireEvent.click(screen.getByRole("button", { name: "+1 Спритність" }));
+    fireEvent.click(screen.getByRole("button", { name: "+1 common.abilities.dexterity.label" }));
 
     expect(json()).toEqual([{ id: "f-asi", picks: { asi: [{ id: "dexterity" }] } }]);
   });

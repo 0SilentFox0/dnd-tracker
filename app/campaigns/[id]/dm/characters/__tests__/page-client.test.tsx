@@ -48,19 +48,19 @@ describe("DMCharactersClient delete all", () => {
   it("deletes everyone after confirm", async () => {
     deleteAllCharacters.mockResolvedValue({});
     renderIt();
-    fireEvent.click(await screen.findByRole("button", { name: /Видалити всіх/ }));
-    fireEvent.click(within(await screen.findByRole("alertdialog")).getByRole("button", { name: "Видалити всіх" }));
+    fireEvent.click(await screen.findByRole("button", { name: "characters.list.deleteAllLabel" }));
+    fireEvent.click(within(await screen.findByRole("alertdialog")).getByRole("button", { name: "characters.list.deleteAllLabel" }));
     await vi.waitFor(() => expect(deleteAllCharacters).toHaveBeenCalledWith("c1"));
   });
 
   it("keeps the dialog open with the server error", async () => {
     deleteAllCharacters.mockRejectedValue(new Error("Збій"));
     renderIt();
-    fireEvent.click(await screen.findByRole("button", { name: /Видалити всіх/ }));
+    fireEvent.click(await screen.findByRole("button", { name: "characters.list.deleteAllLabel" }));
 
     const dialog = await screen.findByRole("alertdialog");
 
-    fireEvent.click(within(dialog).getByRole("button", { name: "Видалити всіх" }));
+    fireEvent.click(within(dialog).getByRole("button", { name: "characters.list.deleteAllLabel" }));
     expect(await within(dialog).findByRole("alert")).toHaveTextContent("Збій");
   });
 });
@@ -72,10 +72,10 @@ describe("DMCharactersClient tabs", () => {
     await screen.findByText("Борин");
 
     expect(getCharacters).toHaveBeenCalledWith("c1", { type: "npc_hero" });
-    expect(screen.getByRole("link", { name: "NPC-герої" })).toHaveAttribute("aria-current", "page");
-    expect(screen.getByRole("link", { name: "Усі" })).toHaveAttribute("href", "/campaigns/c1/dm/characters");
-    expect(screen.getByRole("link", { name: "Гравці" })).toHaveAttribute("href", "/campaigns/c1/dm/characters?type=player");
-    expect(screen.getByRole("link", { name: /Створити персонажа/ })).toHaveAttribute("href", "/campaigns/c1/dm/characters/new?type=npc_hero");
+    expect(screen.getByRole("link", { name: "characters.list.tabs.npcHeroes" })).toHaveAttribute("aria-current", "page");
+    expect(screen.getByRole("link", { name: "characters.list.tabs.all" })).toHaveAttribute("href", "/campaigns/c1/dm/characters");
+    expect(screen.getByRole("link", { name: "characters.list.tabs.players" })).toHaveAttribute("href", "/campaigns/c1/dm/characters?type=player");
+    expect(screen.getByRole("link", { name: "characters.list.create" })).toHaveAttribute("href", "/campaigns/c1/dm/characters/new?type=npc_hero");
   });
 
   it("без type — усі персонажі, активна «Усі»", async () => {
@@ -84,8 +84,8 @@ describe("DMCharactersClient tabs", () => {
     await screen.findByText("Арвен");
 
     expect(getCharacters).toHaveBeenCalledWith("c1", undefined);
-    expect(screen.getByRole("link", { name: "Усі" })).toHaveAttribute("aria-current", "page");
-    expect(screen.getByRole("link", { name: /Створити персонажа/ })).toHaveAttribute("href", "/campaigns/c1/dm/characters/new");
+    expect(screen.getByRole("link", { name: "characters.list.tabs.all" })).toHaveAttribute("aria-current", "page");
+    expect(screen.getByRole("link", { name: "characters.list.create" })).toHaveAttribute("href", "/campaigns/c1/dm/characters/new");
   });
 });
 
@@ -93,7 +93,7 @@ describe("DMCharactersClient level up", () => {
   const openMenu = async (name: string) => {
     const card = (await screen.findByText(name)).closest(".space-y-3") as HTMLElement;
 
-    fireEvent.pointerDown(within(card).getByRole("button", { name: "Дії персонажа" }), { button: 0, ctrlKey: false, pointerType: "mouse" });
+    fireEvent.pointerDown(within(card).getByRole("button", { name: "characters.card.actions" }), { button: 0, ctrlKey: false, pointerType: "mouse" });
 
     return screen.findByRole("menu");
   };
@@ -101,11 +101,11 @@ describe("DMCharactersClient level up", () => {
   it("«Підняти рівень» лише нижче максимального рівня кампанії", async () => {
     renderIt();
 
-    expect(within(await openMenu("Арвен")).getByRole("menuitem", { name: /Підняти рівень/ })).toBeInTheDocument();
+    expect(within(await openMenu("Арвен")).getByRole("menuitem", { name: "characters.card.levelUp" })).toBeInTheDocument();
 
     fireEvent.keyDown(document.activeElement ?? document.body, { key: "Escape" });
     await vi.waitFor(() => expect(screen.queryByRole("menu")).toBeNull());
 
-    expect(within(await openMenu("Борин")).queryByRole("menuitem", { name: /Підняти рівень/ })).toBeNull();
+    expect(within(await openMenu("Борин")).queryByRole("menuitem", { name: "characters.card.levelUp" })).toBeNull();
   });
 });

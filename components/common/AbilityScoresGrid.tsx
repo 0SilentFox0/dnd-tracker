@@ -1,8 +1,10 @@
 "use client";
 
+import { useTranslations } from "next-intl";
+
 import { BoundedNumberInput } from "@/components/ui/bounded-number-input";
 import { Label } from "@/components/ui/label";
-import { type AbilityKey, CORE_ABILITY_SCORES } from "@/lib/constants/abilities";
+import { ABILITY_KEYS, type AbilityKey } from "@/lib/constants/abilities";
 import { getAbilityModifier } from "@/lib/utils/common/calculations";
 import { signed } from "@/lib/utils/common/format";
 
@@ -15,15 +17,17 @@ interface AbilityScoresGridProps {
 }
 
 export function AbilityScoresGrid({ data, set, showModifier = false }: AbilityScoresGridProps) {
+  const t = useTranslations("common.abilities");
+
   return (
     <div className="grid w-full grid-cols-3 items-end gap-2 sm:grid-cols-6">
-      {CORE_ABILITY_SCORES.map(({ key, label }) => {
+      {ABILITY_KEYS.map((key) => {
         const value = data[key] ?? DEFAULT_SCORE;
 
         return (
           <div key={key} className="w-full min-w-0">
             <Label htmlFor={key} className="text-xs leading-tight">
-              {label}
+              {t(`${key}.label`)}
               {showModifier && <span className="text-muted-foreground"> ({signed(getAbilityModifier(value))})</span>}
             </Label>
             <BoundedNumberInput id={key} min={1} max={30} value={value} onCommit={(v) => set(key, v)} className="w-full" />

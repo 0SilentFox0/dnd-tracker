@@ -1,3 +1,4 @@
+import { UNGROUPED_KEY } from "@/lib/constants/ungrouped";
 import { groupBy } from "@/lib/utils/common/collections";
 import type { BookSpell } from "@/types/spells";
 
@@ -7,7 +8,7 @@ export interface SchoolGroup {
   spells: BookSpell[];
 }
 
-const NO_SCHOOL = "Без школи";
+export const NO_SCHOOL = UNGROUPED_KEY;
 
 export function groupSpellsBySchool(spells: BookSpell[]): SchoolGroup[] {
   const map = groupBy(spells, (s) => s.spellGroup?.name ?? NO_SCHOOL);

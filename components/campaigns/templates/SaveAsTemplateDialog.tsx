@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import { useTranslations } from "next-intl";
 
 import { FormAlert } from "@/components/common/states";
 import { Button } from "@/components/ui/button";
@@ -22,6 +23,10 @@ interface SaveAsTemplateDialogProps {
 const FORM_ID = "save-as-template-form";
 
 export function SaveAsTemplateDialog({ campaignId, defaultName, open, onOpenChange }: SaveAsTemplateDialogProps) {
+  const t = useTranslations("campaigns");
+
+  const tc = useTranslations("common");
+
   const save = useSaveAsTemplate(campaignId);
 
   const notify = useNotify();
@@ -42,14 +47,14 @@ export function SaveAsTemplateDialog({ campaignId, defaultName, open, onOpenChan
           onOpenChange(false);
           void notify(
             <span>
-              Шаблон створено.{" "}
+              {t("saveAsTemplate.created")}{" "}
               <Link href={`/campaigns/${template.id}`} className="underline">
-                Відкрити
+                {t("saveAsTemplate.open")}
               </Link>
             </span>,
           );
         },
-        onError: (err) => setError(err instanceof Error ? err.message : "Помилка збереження шаблону"),
+        onError: (err) => setError(err instanceof Error ? err.message : t("saveAsTemplate.failed")),
       },
     );
   };
@@ -59,23 +64,23 @@ export function SaveAsTemplateDialog({ campaignId, defaultName, open, onOpenChan
       hud
       open={open}
       onOpenChange={onOpenChange}
-      title="Зберегти як шаблон"
-      description="Бібліотека кампанії (без героїв і боїв) стане шаблоном для нових кампаній"
+      title={t("saveAsTemplate.title")}
+      description={t("saveAsTemplate.description")}
       footer={
         <>
           <Button variant="outline" onClick={() => onOpenChange(false)} disabled={save.isPending}>
-            Скасувати
+            {tc("actions.cancel")}
           </Button>
           <Button type="submit" form={FORM_ID} disabled={save.isPending || !name.trim()}>
-            {save.isPending ? "Збереження..." : "Створити шаблон"}
+            {save.isPending ? tc("actions.saving") : t("saveAsTemplate.submit")}
           </Button>
         </>
       }
     >
       <form id={FORM_ID} onSubmit={handleSubmit} className="space-y-4">
-        <LabeledInput id="template-name" label="Назва" value={name} onChange={(e) => setName(e.target.value)} disabled={save.isPending} required />
+        <LabeledInput id="template-name" label={t("saveAsTemplate.name")} value={name} onChange={(e) => setName(e.target.value)} disabled={save.isPending} required />
         <div className="space-y-2">
-          <Label htmlFor="template-description">Опис</Label>
+          <Label htmlFor="template-description">{t("saveAsTemplate.descriptionLabel")}</Label>
           <Textarea id="template-description" value={description} onChange={(e) => setDescription(e.target.value)} disabled={save.isPending} rows={3} />
         </div>
         {error && (

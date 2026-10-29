@@ -427,6 +427,14 @@ export const API_ERRORS = {
   SAFE_FETCH_TOO_LARGE: "errors.safeFetchTooLarge",
   SAFE_FETCH_TOO_MANY_REDIRECTS: "errors.safeFetchTooManyRedirects",
   SAFE_FETCH_FAILED: "errors.safeFetchFailed",
+  ITEM_PARAMETER_REQUIRED: "errors.itemParameterRequired",
+  ITEM_PARAMETER_INVALID: "errors.itemParameterInvalid",
+  ITEM_SPELL_REQUIRED: "errors.itemSpellRequired",
+  ITEM_SPELL_INVALID: "errors.itemSpellInvalid",
+  CHARACTER_TOKEN_INVALID: "errors.characterTokenInvalid",
+  CHARACTER_GOALS_INVALID: "errors.characterGoalsInvalid",
+  CHARACTER_NOTES_INVALID: "errors.characterNotesInvalid",
+  CHARACTER_CONTROLLER_INVALID: "errors.characterControllerInvalid",
 } as const;
 
 export type ApiErrorKey = (typeof API_ERRORS)[keyof typeof API_ERRORS];

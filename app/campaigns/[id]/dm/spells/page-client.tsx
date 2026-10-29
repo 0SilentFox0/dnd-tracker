@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { useTranslations } from "next-intl";
 import { Printer, Wand2 } from "lucide-react";
 
 import { DeleteAllButton } from "@/components/common/DeleteAllButton";
@@ -15,9 +16,10 @@ import { SpellGroupAccordion } from "@/components/spells/list/SpellGroupAccordio
 import { Accordion } from "@/components/ui/accordion";
 import { Button } from "@/components/ui/button";
 import { useSpellsList } from "@/lib/hooks/spells";
-import { pluralUk } from "@/lib/utils/common/plural";
 
 export function DMSpellsPageClient({ campaignId }: { campaignId: string }) {
+  const t = useTranslations("spells");
+
   const list = useSpellsList(campaignId);
 
   const count = list.spells.length;
@@ -27,29 +29,29 @@ export function DMSpellsPageClient({ campaignId }: { campaignId: string }) {
   return (
     <HudPage>
       <HudPageHeader
-        title="Заклинання"
-        subtitle={`База заклинань кампанії · Всього: ${count}`}
+        title={t("page.title")}
+        subtitle={t("page.subtitle", { count })}
         actions={
           <>
             <ContentTransferButtons campaignId={campaignId} kind="spells" />
             <CreateSpellGroupDialog campaignId={campaignId} />
             <Button className="whitespace-nowrap text-xs sm:text-sm" asChild>
-              <Link href={`/campaigns/${campaignId}/dm/spells/new`}>+ Створити заклинання</Link>
+              <Link href={`/campaigns/${campaignId}/dm/spells/new`}>{t("page.create")}</Link>
             </Button>
             {count > 0 && (
               <Button variant="outline" className="whitespace-nowrap text-xs sm:text-sm" asChild>
                 <Link href={`/campaigns/${campaignId}/dm/print/spells`} target="_blank" rel="noopener noreferrer">
                   <Printer className="h-4 w-4 mr-1" />
-                  Версія для друку
+                  {t("page.print")}
                 </Link>
               </Button>
             )}
             <DeleteAllButton
               count={count}
-              nouns={["заклинання", "заклинання", "заклинань"]}
+              noun={t("deleteAll.noun")}
               confirm={{
-                label: "Видалити всі заклинання",
-                description: `Ви впевнені, що хочете видалити всі заклинання з кампанії? Ця дія незворотна. Буде видалено ${count} ${pluralUk(count, ["заклинання", "заклинання", "заклинань"])}.`,
+                label: t("deleteAll.label"),
+                description: t("deleteAll.description", { count }),
               }}
               actions={{ onConfirm: list.actions.removeAll }}
             />
@@ -59,21 +61,21 @@ export function DMSpellsPageClient({ campaignId }: { campaignId: string }) {
       <OnboardingHint id="dm.spells" />
       {list.listFilter.tags.length > 0 && (
         <HudChipTabs
-          ariaLabel="Список заклинань"
+          ariaLabel={t("page.listAria")}
           items={[
-            { key: "all", label: "Усі", active: list.listFilter.value === null, onSelect: () => list.listFilter.set(null) },
+            { key: "all", label: t("page.filterAll"), active: list.listFilter.value === null, onSelect: () => list.listFilter.set(null) },
             ...list.listFilter.tags.map((tag) => ({ key: tag, label: tag, active: list.listFilter.value === tag, onSelect: () => list.listFilter.set(tag) })),
           ]}
         />
       )}
 
       {list.isLoading && count === 0 ? (
-        <LoadingState rows={6} label="Завантаження заклинань…" />
+        <LoadingState rows={6} label={t("page.loading")} />
       ) : count === 0 ? (
-        <EmptyState icon={Wand2} title="Ще немає заклинань" description="Створіть перше заклинання або імпортуйте їх з файлу." />
+        <EmptyState icon={Wand2} title={t("page.emptyTitle")} description={t("page.emptyDescription")} />
       ) : (
         <>
-          <SearchInput value={list.search.query.value} onChange={list.search.query.set} label="Пошук заклинань" />
+          <SearchInput value={list.search.query.value} onChange={list.search.query.set} label={t("page.search")} />
           {list.view.groups.length === 0 ? (
             <SearchEmptyState query={list.search.query.value} onClear={() => list.search.query.set("")} />
           ) : (

@@ -30,10 +30,10 @@ describe("CharacterClassesField", () => {
   it("підклас вимкнений до subclassLevel і вмикається з нього", () => {
     const { rerender } = renderField([{ classId: "fighter", level: 2 }]);
 
-    expect((screen.getByRole("combobox", { name: "Підклас 1" }) as HTMLButtonElement).disabled).toBe(true);
-    expect(screen.getByText("з рівня 3")).toBeTruthy();
+    expect((screen.getByRole("combobox", { name: `characters.form.classes.subclassN {"n":1}` }) as HTMLButtonElement).disabled).toBe(true);
+    expect(screen.getByText(`characters.form.classes.fromLevel {"level":3}`)).toBeTruthy();
     rerender(<CharacterClassesField value={[{ classId: "fighter", level: 3 }]} classes={[fighter, wizard]} onChange={vi.fn()} />);
-    expect((screen.getByRole("combobox", { name: "Підклас 1" }) as HTMLButtonElement).disabled).toBe(false);
+    expect((screen.getByRole("combobox", { name: `characters.form.classes.subclassN {"n":1}` }) as HTMLButtonElement).disabled).toBe(false);
   });
 
   it("показує загальний рівень, кістки хітів і підказку навичок першого класу", () => {
@@ -42,15 +42,15 @@ describe("CharacterClassesField", () => {
       { classId: "wizard", level: 2 },
     ]);
 
-    expect(screen.getByText("Загальний рівень: 7")).toBeTruthy();
-    expect(screen.getByText("Кістки хітів: 5d10 + 2d6")).toBeTruthy();
-    expect(screen.getByText("Оберіть 2 навички з: Атлетика, Залякування")).toBeTruthy();
+    expect(screen.getByText(`characters.form.classes.totalLevel {"level":7}`)).toBeTruthy();
+    expect(screen.getByText(`characters.form.classes.hitDice {"dice":"5d10 + 2d6"}`)).toBeTruthy();
+    expect(screen.getByText(`characters.form.classes.skillChoice {"count":2,"from":"Атлетика, Залякування"}`)).toBeTruthy();
   });
 
   it("невідомий клас — підказка", () => {
     renderField([{ classId: "gone", level: 1 }]);
 
-    expect(screen.getByText("Клас не знайдено — оберіть інший")).toBeTruthy();
+    expect(screen.getByText("characters.form.classes.notFound")).toBeTruthy();
   });
 
   it("вже використаний клас не пропонується в іншому рядку", () => {
@@ -59,7 +59,7 @@ describe("CharacterClassesField", () => {
       { classId: "wizard", level: 1 },
     ]);
 
-    fireEvent.click(screen.getByRole("combobox", { name: "Клас 2" }));
+    fireEvent.click(screen.getByRole("combobox", { name: `characters.form.classes.classN {"n":2}` }));
 
     expect(screen.queryByRole("option", { name: "Воїн" })).toBeNull();
     expect(screen.getAllByRole("option", { name: "Чарівник" }).length).toBeGreaterThan(0);
@@ -78,7 +78,7 @@ describe("CharacterClassesField", () => {
     rerender(<CharacterClassesField value={value} classes={[fighter, wizard]} onChange={onChange} />);
 
     expect(onChange).not.toHaveBeenCalled();
-    expect(screen.queryByText("Клас не знайдено — оберіть інший")).toBeNull();
+    expect(screen.queryByText("characters.form.classes.notFound")).toBeNull();
   });
 
   it("невідомий клас зберігає свій classId, поки користувач не обере інший", () => {

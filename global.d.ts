@@ -1,17 +1,30 @@
+import type abilities from "./messages/uk/abilities.json";
+import type abilityRegistry from "./messages/uk/abilityRegistry.json";
 import type artifacts from "./messages/uk/artifacts.json";
 import type auth from "./messages/uk/auth.json";
 import type backgrounds from "./messages/uk/backgrounds.json";
+import type campaigns from "./messages/uk/campaigns.json";
+import type characterProfile from "./messages/uk/characterProfile.json";
+import type characters from "./messages/uk/characters.json";
 import type choices from "./messages/uk/choices.json";
 import type classes from "./messages/uk/classes.json";
 import type common from "./messages/uk/common.json";
+import type dashboard from "./messages/uk/dashboard.json";
 import type errors from "./messages/uk/errors.json";
 import type feats from "./messages/uk/feats.json";
 import type help from "./messages/uk/help.json";
+import type inventory from "./messages/uk/inventory.json";
 import type landing from "./messages/uk/landing.json";
 import type music from "./messages/uk/music.json";
 import type onboarding from "./messages/uk/onboarding.json";
 import type races from "./messages/uk/races.json";
+import type rest from "./messages/uk/rest.json";
+import type rules from "./messages/uk/rules.json";
 import type skills from "./messages/uk/skills.json";
+import type skillTree from "./messages/uk/skillTree.json";
+import type spellEditor from "./messages/uk/spellEditor.json";
+import type spells from "./messages/uk/spells.json";
+import type units from "./messages/uk/units.json";
 import type validation from "./messages/uk/validation.json";
 import type whatsNew from "./messages/uk/whatsNew.json";
 
@@ -35,6 +48,19 @@ declare module "next-intl" {
       artifacts: typeof artifacts;
       music: typeof music;
       choices: typeof choices;
+      campaigns: typeof campaigns;
+      dashboard: typeof dashboard;
+      characters: typeof characters;
+      characterProfile: typeof characterProfile;
+      inventory: typeof inventory;
+      rest: typeof rest;
+      spells: typeof spells;
+      spellEditor: typeof spellEditor;
+      units: typeof units;
+      abilities: typeof abilities;
+      abilityRegistry: typeof abilityRegistry;
+      rules: typeof rules;
+      skillTree: typeof skillTree;
     };
   }
 }

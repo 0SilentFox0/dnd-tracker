@@ -1,3 +1,4 @@
+/* eslint-disable no-restricted-syntax -- Ukrainian CSV import keywords (data format, not UI text) */
 import { AttackType } from "@/lib/constants/battle";
 import { getProficiencyBonus } from "@/lib/utils/common/calculations";
 import { normalizeDiceText } from "@/lib/utils/common/dice";

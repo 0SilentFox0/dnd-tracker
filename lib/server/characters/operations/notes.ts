@@ -12,7 +12,7 @@ export const notesOperation = defineCharacterOperation({
   name: "notes",
   action: "update character notes",
   schema: putNotesSchema,
-  parseMessage: "Некоректні нотатки",
+  parseMessage: API_ERRORS.CHARACTER_NOTES_INVALID,
   gate: async ctx => {
     const gate = await requireCharacterSelect(ctx.campaignId, ctx.characterId, { campaignId: true, controlledBy: true }, { ...gateOptions(ctx), notFound: API_ERRORS.NOT_FOUND, foreign404: true });
 

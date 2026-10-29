@@ -11,7 +11,6 @@ const art = (over: Partial<ArtifactForReference>): ArtifactForReference => ({
   icon: null,
   rarity: "rare",
   slot: "weapon",
-  slotLabel: "Зброя",
   description: null,
   effects: [],
   setName: null,
@@ -21,7 +20,7 @@ const art = (over: Partial<ArtifactForReference>): ArtifactForReference => ({
 
 const artifacts = [
   art({ id: "1", name: "Меч", rarity: "rare", holderName: "Боромир" }),
-  art({ id: "2", name: "Щит", rarity: "epic", slot: "shield", slotLabel: "Щит", setName: "Набір" }),
+  art({ id: "2", name: "Щит", rarity: "epic", slot: "shield", setName: "Набір" }),
 ];
 
 describe("useInfoReferenceFilters: артефакти", () => {
@@ -54,7 +53,7 @@ describe("useInfoReferenceFilters: артефакти", () => {
 });
 
 describe("useInfoReferenceFilters: класи", () => {
-  const cls: ClassForReference = { id: "k", name: "Воїн", icon: null, color: null, summary: ["Кістка здоров'я: к10"], features: [{ level: 2, name: "Сплеск дій", description: null }], subclasses: [] };
+  const cls: ClassForReference = { id: "k", name: "Воїн", icon: null, color: null, summary: [{ key: "hitDie", params: { die: 10 } }], features: [{ level: 2, name: "Сплеск дій", description: null }], subclasses: [] };
 
   it("у класовому режимі ховає скіли та шукає за вміннями класу", () => {
     const { result } = renderHook(() => useInfoReferenceFilters([], [], [], [cls]));

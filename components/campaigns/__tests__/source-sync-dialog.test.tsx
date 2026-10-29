@@ -20,6 +20,8 @@ vi.mock("@/lib/hooks/campaigns", async (importActual) => ({
 vi.mock("next/navigation", () => ({ useRouter: () => ({ refresh: vi.fn() }) }));
 vi.mock("@/lib/api/source-sync", () => ({ applySourceChanges: (...args: unknown[]) => mocks.apply(...args), getSourceDiff: vi.fn() }));
 
+const k = (key: string, params?: object) => `campaigns.${key}${params ? ` ${JSON.stringify(params)}` : ""}`;
+
 const item = (over: Partial<SourceDiffItem>): SourceDiffItem => ({ scope: "spells", key: "k", localId: null, name: "X", status: "new", changedFields: [], sourceHash: "h", requires: [], ...over });
 
 const queryClient = new QueryClient({ defaultOptions: { mutations: { retry: false } } });
@@ -48,19 +50,19 @@ describe("SourceSyncDialog", () => {
   it("групує, за замовчуванням вибирає нове, показує деталі", () => {
     render();
 
-    expect(screen.getByText("Заклинання (2)")).toBeTruthy();
-    expect(screen.getByText("Артефакти (1)")).toBeTruthy();
+    expect(screen.getByText(k("sourceSync.groupTitle", { label: k("sourceSync.scope.spells"), count: 2 }))).toBeTruthy();
+    expect(screen.getByText(k("sourceSync.groupTitle", { label: k("sourceSync.scope.artifacts"), count: 1 }))).toBeTruthy();
     expect(screen.getByRole("checkbox", { name: "Fireball" }).getAttribute("aria-checked")).toBe("true");
     expect(screen.getByRole("checkbox", { name: "Bless" }).getAttribute("aria-checked")).toBe("false");
     expect(screen.getByRole("checkbox", { name: "Old" }).getAttribute("aria-checked")).toBe("false");
-    expect(screen.getByText(/Ви теж змінили цей запис/)).toBeTruthy();
-    expect(screen.getByText("Використовується: 2 персонажі, 1 запис")).toBeTruthy();
-    expect(screen.getByRole("button", { name: "Застосувати (1)" })).toBeTruthy();
+    expect(screen.getByText(k("sourceSync.details.conflict"))).toBeTruthy();
+    expect(screen.getByText(k("sourceSync.details.usage", { usage: `${k("sourceSync.usage.characters", { count: 2 })}, ${k("sourceSync.usage.records", { count: 1 })}` }))).toBeTruthy();
+    expect(screen.getByRole("button", { name: k("sourceSync.apply", { count: 1 }) })).toBeTruthy();
   });
 
   it("застосування шле вибрані refs", async () => {
     render();
-    fireEvent.click(screen.getByRole("button", { name: "Застосувати (1)" }));
+    fireEvent.click(screen.getByRole("button", { name: k("sourceSync.apply", { count: 1 }) }));
 
     await vi.waitFor(() => expect(mocks.apply).toHaveBeenCalledWith("c1", { apply: [{ scope: "spells", key: "fireball", sourceHash: "h", status: "new" }], ignore: [] }));
   });
@@ -68,8 +70,8 @@ describe("SourceSyncDialog", () => {
   it("видалення з джерела потребує підтвердження", async () => {
     render();
     fireEvent.click(screen.getByRole("checkbox", { name: "Old" }));
-    fireEvent.click(screen.getByRole("button", { name: "Застосувати (2)" }));
-    fireEvent.click(await screen.findByRole("button", { name: "Видалити" }));
+    fireEvent.click(screen.getByRole("button", { name: k("sourceSync.apply", { count: 2 }) }));
+    fireEvent.click(await screen.findByRole("button", { name: "common.actions.delete" }));
     await vi.waitFor(() => expect(mocks.apply).toHaveBeenCalled());
 
     expect(mocks.apply.mock.calls[0][1].apply.map((r: { key: string }) => r.key)).toEqual(["fireball", "old"]);
@@ -77,20 +79,20 @@ describe("SourceSyncDialog", () => {
 
   it("ігнорувати вибране питає підтвердження", async () => {
     render();
-    fireEvent.click(screen.getByRole("button", { name: "Ігнорувати вибране" }));
-    expect(await screen.findByText("Приховати 1 зміну?")).toBeTruthy();
+    fireEvent.click(screen.getByRole("button", { name: k("sourceSync.ignore") }));
+    expect(await screen.findByText(k("sourceSync.confirmIgnore.title", { count: 1 }))).toBeTruthy();
     expect(mocks.apply).not.toHaveBeenCalled();
-    fireEvent.click(screen.getByRole("button", { name: "Приховати" }));
+    fireEvent.click(screen.getByRole("button", { name: k("sourceSync.confirmIgnore.confirm") }));
 
     await vi.waitFor(() => expect(mocks.apply).toHaveBeenCalledWith("c1", { apply: [], ignore: [{ scope: "spells", key: "fireball", sourceHash: "h", status: "new" }] }));
   });
 
   it("скасування підтвердження ігнорування не шле запит", async () => {
     render();
-    fireEvent.click(screen.getByRole("button", { name: "Ігнорувати вибране" }));
-    await screen.findByText("Приховати 1 зміну?");
-    fireEvent.click(screen.getAllByRole("button", { name: "common.confirm.cancel" }).pop() as HTMLElement);
-    await vi.waitFor(() => expect(screen.queryByText("Приховати 1 зміну?")).toBeNull());
+    fireEvent.click(screen.getByRole("button", { name: k("sourceSync.ignore") }));
+    await screen.findByText(k("sourceSync.confirmIgnore.title", { count: 1 }));
+    fireEvent.click(screen.getAllByRole("button", { name: "common.actions.cancel" }).pop() as HTMLElement);
+    await vi.waitFor(() => expect(screen.queryByText(k("sourceSync.confirmIgnore.title", { count: 1 }))).toBeNull());
 
     expect(mocks.apply).not.toHaveBeenCalled();
   });
@@ -98,26 +100,26 @@ describe("SourceSyncDialog", () => {
   it("підтвердження видалення згадує використання", async () => {
     render();
     fireEvent.click(screen.getByRole("checkbox", { name: "Old" }));
-    fireEvent.click(screen.getByRole("button", { name: "Застосувати (2)" }));
+    fireEvent.click(screen.getByRole("button", { name: k("sourceSync.apply", { count: 2 }) }));
 
-    expect(await screen.findByText("Використовується: 2 персонажі, 1 запис.")).toBeTruthy();
+    expect(await screen.findByText(k("sourceSync.confirmDelete.usage", { usage: `${k("sourceSync.usage.characters", { count: 2 })}, ${k("sourceSync.usage.records", { count: 1 })}` }))).toBeTruthy();
   });
 
   it("«Вибрати все / Зняти все» перемикає групу", () => {
     render();
-    fireEvent.click(screen.getAllByRole("button", { name: "Вибрати все" })[0]);
+    fireEvent.click(screen.getAllByRole("button", { name: k("sourceSync.selectAll") })[0]);
     expect(screen.getByRole("checkbox", { name: "Bless" }).getAttribute("aria-checked")).toBe("true");
-    fireEvent.click(screen.getAllByRole("button", { name: "Зняти все" })[0]);
+    fireEvent.click(screen.getAllByRole("button", { name: k("sourceSync.deselectAll") })[0]);
     expect(screen.getByRole("checkbox", { name: "Fireball" }).getAttribute("aria-checked")).toBe("false");
-    expect(screen.getByRole("button", { name: "Застосувати (0)" })).toBeTruthy();
+    expect(screen.getByRole("button", { name: k("sourceSync.apply", { count: 0 }) })).toBeTruthy();
   });
 
   it("під час оновлення діффу дії вимкнені", () => {
     mocks.isFetching = true;
     render();
 
-    expect(screen.getByRole("button", { name: "Застосувати (1)" }).hasAttribute("disabled")).toBe(true);
-    expect(screen.getByRole("button", { name: "Ігнорувати вибране" }).hasAttribute("disabled")).toBe(true);
+    expect(screen.getByRole("button", { name: k("sourceSync.apply", { count: 1 }) }).hasAttribute("disabled")).toBe(true);
+    expect(screen.getByRole("button", { name: k("sourceSync.ignore") }).hasAttribute("disabled")).toBe(true);
   });
 
   it("409 лишає пояснення після нового діффу і не показує тривогу", async () => {
@@ -125,13 +127,13 @@ describe("SourceSyncDialog", () => {
 
     const { rerender } = render();
 
-    fireEvent.click(screen.getByRole("button", { name: "Застосувати (1)" }));
-    expect(await screen.findByText(/Джерело змінилося — список оновлено/)).toBeTruthy();
+    fireEvent.click(screen.getByRole("button", { name: k("sourceSync.apply", { count: 1 }) }));
+    expect(await screen.findByText(k("sourceSync.stale"))).toBeTruthy();
 
     mocks.items = [...(mocks.items as SourceDiffItem[])];
     rerender(<ConfirmProvider>{ui()}</ConfirmProvider>);
     expect(screen.queryByRole("alert")).toBeNull();
-    expect(screen.getByText(/Джерело змінилося — список оновлено/)).toBeTruthy();
+    expect(screen.getByText(k("sourceSync.stale"))).toBeTruthy();
   });
 
   it("повідомлення про 409 ховається під час оновлення та після закриття", async () => {
@@ -139,17 +141,17 @@ describe("SourceSyncDialog", () => {
 
     const { rerender } = render();
 
-    fireEvent.click(screen.getByRole("button", { name: "Застосувати (1)" }));
+    fireEvent.click(screen.getByRole("button", { name: k("sourceSync.apply", { count: 1 }) }));
     await vi.waitFor(() => expect(mocks.apply).toHaveBeenCalled());
-    await screen.findByText(/Джерело змінилося/);
+    await screen.findByText(k("sourceSync.stale"));
     mocks.isFetching = true;
     rerender(<ConfirmProvider>{ui()}</ConfirmProvider>);
-    expect(screen.queryByText(/Джерело змінилося/)).toBeNull();
+    expect(screen.queryByText(k("sourceSync.stale"))).toBeNull();
 
     mocks.isFetching = false;
     rerender(<ConfirmProvider>{ui()}</ConfirmProvider>);
-    fireEvent.click(screen.getByRole("button", { name: "Скасувати" }));
-    expect(screen.queryByText(/Джерело змінилося/)).toBeNull();
+    fireEvent.click(screen.getByRole("button", { name: "common.actions.cancel" }));
+    expect(screen.queryByText(k("sourceSync.stale"))).toBeNull();
   });
 
   it("закриття очищає помилку", async () => {
@@ -158,9 +160,9 @@ describe("SourceSyncDialog", () => {
     const onOpenChange = vi.fn();
 
     render(onOpenChange);
-    fireEvent.click(screen.getByRole("button", { name: "Застосувати (1)" }));
+    fireEvent.click(screen.getByRole("button", { name: k("sourceSync.apply", { count: 1 }) }));
     expect(await screen.findByRole("alert")).toBeTruthy();
-    fireEvent.click(screen.getByRole("button", { name: "Скасувати" }));
+    fireEvent.click(screen.getByRole("button", { name: "common.actions.cancel" }));
 
     expect(onOpenChange).toHaveBeenCalledWith(false);
     expect(screen.queryByRole("alert")).toBeNull();
@@ -170,17 +172,17 @@ describe("SourceSyncDialog", () => {
     mocks.items = [];
     render();
 
-    expect(screen.getByText("Усе синхронізовано")).toBeTruthy();
-    expect(screen.getAllByRole("button", { name: "Закрити" })).toHaveLength(1);
+    expect(screen.getByText(k("sourceSync.empty.title"))).toBeTruthy();
+    expect(screen.getAllByRole("button", { name: k("sourceSync.close") })).toHaveLength(1);
     expect(screen.getByRole("button", { name: "common.ui.close" })).toBeTruthy();
-    expect(screen.queryByRole("button", { name: /Ігнорувати/ })).toBeNull();
-    expect(screen.queryByRole("button", { name: /Застосувати/ })).toBeNull();
+    expect(screen.queryByRole("button", { name: new RegExp(k("sourceSync.ignore")) })).toBeNull();
+    expect(screen.queryByRole("button", { name: /sourceSync\.apply/ })).toBeNull();
   });
 
   it("показує автододане за requires", () => {
     mocks.items = [item({ scope: "units", key: "angel", name: "Angel", requires: [{ scope: "races", key: "inferno", name: "Inferno" }] })];
     render();
 
-    expect(screen.getByText(/Також буде додано: Inferno/)).toBeTruthy();
+    expect(screen.getByText(k("sourceSync.alsoAdded", { names: "Inferno" }))).toBeTruthy();
   });
 });

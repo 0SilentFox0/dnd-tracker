@@ -38,7 +38,7 @@ export const SpellTargetingSchema = z.discriminatedUnion("kind", [
     zone: SpellZoneSchema.optional(),
     hollow: z.boolean().optional(),
     exact: z.boolean().optional(),
-  }).refine((t) => t.exact === undefined || t.shape === "circle", { message: "Точна площа доступна лише для кола", path: ["exact"] }),
+  }).refine((t) => t.exact === undefined || t.shape === "circle", { message: "spellEditor.validation.exactCircleOnly", path: ["exact"] }),
   z.object({ kind: z.literal("allAllies") }),
   z.object({ kind: z.literal("allEnemies") }),
   z.object({ kind: z.literal("everyone") }),
@@ -78,7 +78,7 @@ export const SpellDefinitionSchema = z.object({
   fixedDice: z.boolean().optional(),
   damageBonus: z.number().int().min(-20).max(40).optional(),
 }).refine((d) => d.resolution.kind !== "attack" || d.targeting.kind === "enemy" || d.targeting.kind === "area", {
-  message: "Атака заклинанням — лише для цілі-ворога або області",
+  message: "spellEditor.validation.attackTargets",
   path: ["resolution"],
 });
 

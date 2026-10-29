@@ -1,5 +1,7 @@
 "use client";
 
+import { useTranslations } from "next-intl";
+
 import { useProfile } from "./ProfileContext";
 
 import { EntityIcon } from "@/components/common/EntityIcon";
@@ -18,6 +20,8 @@ interface TransferArtifactDialogProps {
 export function TransferArtifactDialog({ artifact, source, open, onOpenChange }: TransferArtifactDialogProps) {
   const { campaignId, characterId } = useProfile();
 
+  const t = useTranslations("characterProfile.transfer");
+
   const roster = useCharacterRoster(campaignId);
 
   const transfer = useTransferArtifact(campaignId, characterId);
@@ -32,22 +36,22 @@ export function TransferArtifactDialog({ artifact, source, open, onOpenChange }:
     if (!artifact) return;
 
     void confirm({
-      title: `Передати «${artifact.name}» герою ${heroName}?`,
-      confirmLabel: "Передати",
+      title: t("confirm", { artifact: artifact.name, hero: heroName }),
+      confirmLabel: t("give"),
       onConfirm: () =>
         transfer.mutateAsync({ ...source, toCharacterId: heroId }).then(
           () => onOpenChange(false),
-          (e: Error) => notify(e.message || "Не вдалося передати артефакт"),
+          (e: Error) => notify(e.message || t("failed")),
         ),
     });
   };
 
   return (
-    <ResponsiveDialog hud open={open} onOpenChange={onOpenChange} title={artifact ? `Передати: ${artifact.name}` : "Передати"}>
+    <ResponsiveDialog hud open={open} onOpenChange={onOpenChange} title={artifact ? t("titleFor", { artifact: artifact.name }) : t("give")}>
       {roster.isLoading ? (
-        <LoadingState rows={3} label="Завантаження героїв…" />
+        <LoadingState rows={3} label={t("loading")} />
       ) : recipients.length === 0 ? (
-        <EmptyState title="Немає інших героїв у кампанії" />
+        <EmptyState title={t("noHeroes")} />
       ) : (
         <ul>
           {recipients.map((h) => (
@@ -56,7 +60,7 @@ export function TransferArtifactDialog({ artifact, source, open, onOpenChange }:
                   <EntityIcon src={h.avatar} name={h.name} size={36} className="size-9 rounded-full" />
                   <span className="min-w-0">
                     <span className="block text-sm text-hud-ink">{h.name}</span>
-                    <span className="block text-xs text-hud-muted">у підсумок</span>
+                    <span className="block text-xs text-hud-muted">{t("toStash")}</span>
                   </span>
                 </button>
               </li>

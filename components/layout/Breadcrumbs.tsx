@@ -5,8 +5,10 @@ import { usePathname } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { ChevronRight } from "lucide-react";
 
-import { DM_SECTION_LABELS } from "@/lib/constants/campaigns";
+import { DM_SECTIONS } from "@/lib/constants/campaigns";
 import { LANDING_PATHS } from "@/lib/constants/site";
+import type { Translator } from "@/lib/i18n/translator";
+import { useTranslator } from "@/lib/i18n/use-translator";
 
 const SEGMENT_KEYS = ["campaigns", "dm", "character", "inventory", "new", "edit", "sets", "groups", "main-skills", "info", "print", "world", "show", "scenario"] as const;
 
@@ -16,10 +18,12 @@ const isIn = <T extends string>(keys: readonly T[], value: string | undefined): 
 
 type Translate = ReturnType<typeof useTranslations<"common.breadcrumbs">>;
 
-function getLabel(t: Translate, segment: string, previous?: string) {
+const DM_SECTION_PATHS = DM_SECTIONS.map((s) => s.path);
+
+function getLabel(t: Translate, tCommon: Translator, segment: string, previous?: string) {
   if (isIn(SEGMENT_KEYS, segment)) return t(`segments.${segment}`);
 
-  if (DM_SECTION_LABELS[segment]) return DM_SECTION_LABELS[segment];
+  if (isIn(DM_SECTION_PATHS, segment)) return tCommon(`dmSections.${segment}`);
 
   if (isIn(ID_KEYS, previous)) return t(`ids.${previous}`);
 
@@ -28,6 +32,8 @@ function getLabel(t: Translate, segment: string, previous?: string) {
 
 export function Breadcrumbs() {
   const t = useTranslations("common.breadcrumbs");
+
+  const tCommon = useTranslator("common");
 
   const pathname = usePathname();
 
@@ -60,7 +66,7 @@ export function Breadcrumbs() {
 
     crumbs.push({
       href: `/${allSegments.slice(0, i + 1).join("/")}`,
-      label: getLabel(t, segment, previousDisplaySegment),
+      label: getLabel(t, tCommon, segment, previousDisplaySegment),
       isLast: isLastSegment,
     });
 

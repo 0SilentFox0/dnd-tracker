@@ -22,7 +22,7 @@ it("selects a background, shows its origin feat and limits each ASI to two", () 
  fireEvent.change(screen.getByLabelText("choices.editor.background"), { target:{value:"sage"} });
  expect(screen.getByText("Видає ДМ")).toBeTruthy();
 
- const plus=screen.getByRole("button", {name:"+1 Сила"});
+ const plus=screen.getByRole("button", {name:"+1 common.abilities.strength.label"});
 
  fireEvent.click(plus); fireEvent.click(plus);
  expect((plus as HTMLButtonElement).disabled).toBe(true);

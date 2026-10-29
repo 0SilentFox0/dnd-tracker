@@ -4,12 +4,12 @@ import { type ReactNode, useMemo } from "react";
 import { Play } from "lucide-react";
 
 import "@/components/battle/fx/fx.css";
-import { ARCHETYPE_LABEL, AURA_LABEL, ELEMENT_LABEL } from "@/components/battle/fx/labels";
 import { PreviewUnitRow } from "@/components/battle/fx/preview/PreviewUnitRow";
 import { PALETTE } from "@/components/battle/fx/runtime/palette";
 import { playFx } from "@/components/battle/fx/runtime/play";
 import { cancelLayer } from "@/components/battle/fx/runtime/stage";
 import { type FxRunner, useFxEnabled, useSpellFxPlayback } from "@/lib/hooks/battle";
+import { useTranslator } from "@/lib/i18n/use-translator";
 import { cn } from "@/lib/utils";
 import { PREVIEW_UNITS, type PreviewSpell, type PreviewUnit } from "@/lib/utils/battle/fx";
 import { castableOf, previewCastFx } from "@/lib/utils/battle/fx/spell-preview";
@@ -31,6 +31,8 @@ function Chip({ label, book, children }: { label: string; book: boolean; childre
 const BOOK_WASH = "radial-gradient(ellipse at 50% 45%, #3b2a1c 0%, #2a1d14 58%, rgba(42,29,20,.6) 82%, rgba(42,29,20,0) 100%)";
 
 export default function SpellBattlePreviewPanel({ spell, className, variant = "hud" }: { spell: PreviewSpell; className?: string; variant?: "hud" | "book" }) {
+  const t = useTranslator("spells");
+
   const book = variant === "book";
 
   const { id, name, level, groupId, fx: spellFx, rules } = spell;
@@ -60,7 +62,7 @@ export default function SpellBattlePreviewPanel({ spell, className, variant = "h
 
   return (
     <section
-      aria-label="Ефект у бою"
+      aria-label={t("fx.aria")}
       className={cn(
         "fx-preview text-[13px] not-italic",
         book ? "text-[#2a2018]" : "rounded-xl border border-black/50 bg-[rgba(17,14,11,.94)] p-2.5 text-[#e6dccb] shadow-[inset_0_0_0_1px_rgba(230,194,90,.14)]",
@@ -84,14 +86,14 @@ export default function SpellBattlePreviewPanel({ spell, className, variant = "h
       <div className="flex flex-wrap items-center gap-1.5">
         {spec && (
           <>
-            <Chip book={book} label="Анімація">{ARCHETYPE_LABEL[spec.archetype]}</Chip>
-            <Chip book={book} label="Стихія">
+            <Chip book={book} label={t("fx.animation")}>{t(`fx.archetypes.${spec.archetype}`)}</Chip>
+            <Chip book={book} label={t("fx.element")}>
               <span aria-hidden className="size-2 rounded-full" style={{ background: PALETTE[spec.element].core }} />
-              {ELEMENT_LABEL[spec.element]}
+              {t(`fx.elements.${spec.element}`)}
             </Chip>
           </>
         )}
-        {auras.length > 0 && <Chip book={book} label="Аура">{auras.map((a) => AURA_LABEL[a]).join(", ")}</Chip>}
+        {auras.length > 0 && <Chip book={book} label={t("fx.aura")}>{auras.map((a) => t(`fx.auras.${a}`)).join(", ")}</Chip>}
         {fx.enabled && spec && (
           <button
             type="button"
@@ -102,7 +104,7 @@ export default function SpellBattlePreviewPanel({ spell, className, variant = "h
             )}
           >
             <Play className="size-3" aria-hidden />
-            Показати ще раз
+            {t("fx.replay")}
           </button>
         )}
       </div>

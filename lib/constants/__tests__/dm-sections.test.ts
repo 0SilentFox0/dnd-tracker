@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { DM_SECTION_LABELS, dmSectionsFor, dmTilesFor } from "@/lib/constants/campaigns";
+import { dmSectionsFor, dmTilesFor } from "@/lib/constants/campaigns";
 
 const paths = (s: { path: string }[]) => s.map((x) => x.path);
 
@@ -47,9 +47,5 @@ describe("dmSectionsFor", () => {
 
     expect(menu).toEqual(expect.arrayContaining(paths(dmTilesFor(ctx))));
     expect(paths(dmTilesFor(ctx))).not.toContain("rules");
-  });
-
-  it("exposes breadcrumb labels by path", () => {
-    expect(DM_SECTION_LABELS.units).toBe("Юніти");
   });
 });

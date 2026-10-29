@@ -7,6 +7,7 @@ import { Printer } from "lucide-react";
 import { SkillCard } from "@/components/skills/list/SkillCard";
 import { Button } from "@/components/ui/button";
 import { groupDisplayName } from "@/lib/constants/ungrouped";
+import { useTranslator } from "@/lib/i18n/use-translator";
 import { PLACEMENT_UNPLACED, skillPlacements } from "@/lib/utils/skills/progression";
 import {
   convertGroupedSkillsToArray,
@@ -35,6 +36,8 @@ export function PrintSkillsPageClient({
   skillTrees,
 }: PrintSkillsPageClientProps) {
   const t = useTranslations("skills.print");
+
+  const tRoot = useTranslator();
 
   const tGroup = useTranslations("skills.group");
 
@@ -89,7 +92,7 @@ export function PrintSkillsPageClient({
           for (const skill of groupSkills) {
             const place = positions.get(skill.id) ?? PLACEMENT_UNPLACED;
 
-            const entry = byGroup.get(place.group) ?? { label: place.label.split(" · ")[0], skills: [] };
+            const entry = byGroup.get(place.group) ?? { label: tRoot(place.label, place.params), skills: [] };
 
             entry.skills.push(skill);
             byGroup.set(place.group, entry);

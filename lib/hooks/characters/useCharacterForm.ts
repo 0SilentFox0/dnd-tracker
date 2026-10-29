@@ -1,4 +1,5 @@
 import { useCallback, useMemo, useState } from "react";
+import { useTranslations } from "next-intl";
 
 import { CharacterType, type CharacterTypeValue } from "@/lib/constants/characters";
 import { characterToFormData } from "@/lib/utils/characters/character-form";
@@ -15,6 +16,8 @@ interface UseCharacterFormOptions {
 }
 
 export function useCharacterForm(options: UseCharacterFormOptions) {
+  const t = useTranslations("characters.form.validation");
+
   const base = options.initialData
     ? "basicInfo" in options.initialData
       ? { ...defaultCharacterFormData, ...options.initialData }
@@ -75,13 +78,13 @@ export function useCharacterForm(options: UseCharacterFormOptions) {
       setError(null);
 
       if (!formData.basicInfo.race) {
-        setError("Оберіть расу");
+        setError(t("raceRequired"));
 
         return;
       }
 
       if (!formData.basicInfo.class.trim()) {
-        setError("Вкажіть клас");
+        setError(t("classRequired"));
 
         return;
       }
@@ -90,7 +93,7 @@ export function useCharacterForm(options: UseCharacterFormOptions) {
         formData.basicInfo.type === CharacterType.PLAYER &&
         !formData.basicInfo.controlledBy
       ) {
-        setError("Будь ласка, виберіть гравця для персонажа типу 'Гравець'");
+        setError(t("controllerRequired"));
 
         return;
       }
@@ -106,7 +109,7 @@ export function useCharacterForm(options: UseCharacterFormOptions) {
         setIsLoading(false);
       }
     },
-    [formData, options],
+    [formData, options, t],
   );
 
   const handleCancel = useCallback(() => {

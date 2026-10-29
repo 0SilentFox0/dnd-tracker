@@ -45,6 +45,16 @@ describe("AbilitySchema", () => {
     expect(conditional.success).toBe(false);
   });
 
+  it("issues carry a message key and params", () => {
+    const r = AbilitySchema.safeParse({
+      ...base,
+      trigger: { event: "passive" },
+      effects: [{ kind: "modifyStat", stat: "maxHp", flat: 5, target: "nearbyAllies" }],
+    });
+
+    expect(r.error?.issues).toEqual(expect.arrayContaining([expect.objectContaining({ message: "abilities.validation.bakedStatArea", params: { stat: "maxHp" } })]));
+  });
+
   it("статичний ефект без duration дозволений лише у фазі before", () => {
     const before = AbilitySchema.safeParse({
       ...base,

@@ -35,15 +35,15 @@ describe("ArcaneRecoveryPanel", () => {
   it("picks slots within the budget and submits them", async () => {
     show(rest());
 
-    const more = (level: number) => screen.getByRole("button", { name: `Більше ${level}-го кола` }) as HTMLButtonElement;
+    const more = (level: number) => screen.getByRole("button", { name: `rest.arcane.more {"level":${level}}` }) as HTMLButtonElement;
 
     fireEvent.click(more(2));
     fireEvent.click(more(1));
 
-    expect(screen.getByText(/кіл відновлення 3 \/ 3/)).toBeTruthy();
+    expect(screen.getByText('rest.arcane.budget {"total":3,"budget":3}')).toBeTruthy();
     expect(more(1).disabled).toBe(true);
 
-    fireEvent.click(screen.getByRole("button", { name: "Відновити слоти" }));
+    fireEvent.click(screen.getByRole("button", { name: "rest.arcane.restore" }));
 
     await waitFor(() => expect(h.post).toHaveBeenCalledWith("c", "ch", { "1": 1, "2": 1 }));
   });
@@ -51,26 +51,26 @@ describe("ArcaneRecoveryPanel", () => {
   it("submit is disabled with nothing picked", () => {
     show(rest());
 
-    expect((screen.getByRole("button", { name: "Відновити слоти" }) as HTMLButtonElement).disabled).toBe(true);
+    expect((screen.getByRole("button", { name: "rest.arcane.restore" }) as HTMLButtonElement).disabled).toBe(true);
   });
 
   it("shows the used note instead of the picker", () => {
     show(rest({ arcaneRecovery: { ...offer, used: true } }));
 
-    expect(screen.getByText(/використано/)).toBeTruthy();
-    expect(screen.queryByRole("button", { name: "Відновити слоти" })).toBeNull();
+    expect(screen.getByText("rest.arcane.used")).toBeTruthy();
+    expect(screen.queryByRole("button", { name: "rest.arcane.restore" })).toBeNull();
   });
 
   it("hidden outside the short rest window, for a stranger and without the feature", () => {
     show(rest({ shortRestOpen: false }));
-    expect(screen.queryByLabelText("Arcane Recovery")).toBeNull();
+    expect(screen.queryByLabelText("rest.arcane.aria")).toBeNull();
     cleanup();
 
     show(rest(), { isDM: false, isOwner: false });
-    expect(screen.queryByLabelText("Arcane Recovery")).toBeNull();
+    expect(screen.queryByLabelText("rest.arcane.aria")).toBeNull();
     cleanup();
 
     show(rest({ arcaneRecovery: null }));
-    expect(screen.queryByLabelText("Arcane Recovery")).toBeNull();
+    expect(screen.queryByLabelText("rest.arcane.aria")).toBeNull();
   });
 });

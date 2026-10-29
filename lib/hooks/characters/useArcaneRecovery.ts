@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useTranslations } from "next-intl";
 
 import { characterKeys } from "./keys";
 
@@ -10,12 +11,14 @@ import { pickedLevels } from "@/lib/utils/characters/resources/arcane-recovery";
 import type { SheetRest } from "@/types/characters";
 
 export function useArcaneRecovery(campaignId: string, characterId: string, offer: NonNullable<SheetRest["arcaneRecovery"]>) {
+  const t = useTranslations("rest.errors");
+
   const [picks, setPicks] = useState<Record<string, number>>({});
 
   const save = useCrudMutation({
     mutationFn: (p: Record<string, number>) => postArcaneRecovery(campaignId, characterId, p),
     invalidateKeys: [characterKeys.sheet(campaignId, characterId), characterKeys.lists(campaignId), characterKeys.log(campaignId, characterId)],
-    errorText: "Не вдалося відновити слоти",
+    errorText: t("arcaneFailed"),
   });
 
   const total = pickedLevels(picks);

@@ -1,0 +1,148 @@
+{
+  "save": {
+    "labelWithErrors": "{label} (помилок у вміннях: {count})",
+    "errors": "Помилки у вміннях: {list}"
+  },
+  "editor": {
+    "title": "Вміння · {count}",
+    "errorsCount": "помилок: {count}",
+    "storedInvalid": "Збережені вміння мають невалідні дані — перевірте перед збереженням:",
+    "empty": "Вмінь ще немає"
+  },
+  "panel": {
+    "name": "Назва",
+    "delete": "Видалити вміння {name}",
+    "description": "Опис (необов'язково)"
+  },
+  "chips": {
+    "aria": "Вміння",
+    "noName": "Без назви",
+    "hasErrors": "є помилки",
+    "add": "+ Вміння"
+  },
+  "templates": {
+    "copyTitle": "Скопіювати вміння з…",
+    "addTitle": "Додати вміння",
+    "copyFrom": "Скопіювати з…"
+  },
+  "copy": {
+    "search": "Пошук…",
+    "loading": "Завантаження…",
+    "loadFailed": "Не вдалося завантажити вміння «{name}». Спробуйте ще раз.",
+    "kinds": {
+      "skill": "Скіли",
+      "race": "Раси",
+      "artifact": "Артефакти",
+      "artifactSet": "Сети",
+      "unit": "Юніти",
+      "class": "Класи",
+      "feat": "Риси"
+    }
+  },
+  "effect": {
+    "unknown": "Невідомий ефект",
+    "minOptions": "Потрібно щонайменше 2 варіанти",
+    "delete": "Видалити ефект",
+    "options": "Варіанти (обирається один випадково)",
+    "addOption": "+ варіант"
+  },
+  "effects": {
+    "title": "Що робить",
+    "add": "+ ефект"
+  },
+  "condition": {
+    "title": "Умова",
+    "add": "+ умова",
+    "delete": "Видалити умову"
+  },
+  "trigger": {
+    "title": "Коли",
+    "event": "Подія",
+    "roundStartHint": "Дія лігва 5e: «Початок раунду» + ліміт «Разів за раунд» = 1."
+  },
+  "perform": {
+    "title": "Виконання",
+    "kindAria": "Виконує",
+    "effects": "Ефекти вміння",
+    "attack": "Атаку",
+    "spell": "Заклинання",
+    "attackAria": "Атака вміння",
+    "spellAria": "Заклинання вміння",
+    "pickAttack": "Оберіть атаку",
+    "pickSpell": "Оберіть заклинання"
+  },
+  "limits": {
+    "title": "Ліміти",
+    "passive": "Пасивка діє постійно — ліміти не застосовуються.",
+    "perBattle": "Разів за бій",
+    "perRound": "Разів за раунд",
+    "perTurn": "Разів за хід",
+    "cooldownRounds": "Перезарядка (раунди)",
+    "chance": "Шанс, %",
+    "rest": "Відпочинок",
+    "restShort": "Короткий",
+    "restLong": "Довгий",
+    "restUses": "Разів за відпочинок",
+    "uses": "Разів",
+    "pool": "Пул (колонка, ціна)",
+    "poolCost": "Ціна пулу",
+    "itemCharges": "Витрачає заряди предмета",
+    "chargesPerUse": "Зарядів за раз",
+    "lair": "Дія лігва",
+    "stackable": "Ефекти складаються",
+    "maxStacks": "Макс. стаків",
+    "maxTargets": "Макс. цілей",
+    "legendaryCost": "Легендарна дія (вартість 1–3)"
+  },
+  "fields": {
+    "modes": {
+      "number": "число",
+      "dice": "кубики",
+      "formula": "формула",
+      "scale": "з таблиці класу",
+      "spellRoll": "% кидка заклинання",
+      "eventDamage": "% від шкоди",
+      "maxHp": "% від макс. HP",
+      "ownerAttack": "% шкоди моєї атаки"
+    },
+    "classRefOutside": "Посилання на таблицю класу — лише у вміннях класу",
+    "variables": "Змінні: {list}",
+    "classColumn": "Колонка таблиці класу",
+    "unitsLoading": "Завантаження юнітів...",
+    "unitsEmpty": "Немає юнітів у кампанії",
+    "pickUnit": "Оберіть юніта",
+    "flag": "Прапорець"
+  },
+  "validation": {
+    "passiveEffectKinds": "Пасивка допускає лише modifyStat, damageBonus, flag, note",
+    "passiveNoDuration": "Пасивка діє постійно — без duration",
+    "passiveTarget": "Ціль пасивки: self, allAllies, allEnemies, nearbyAllies або nearbyEnemies",
+    "bakedStatArea": "{stat} не діє через зону аури",
+    "bakedStatCondition": "{stat} застосовується при побудові учасника — умова неможлива",
+    "areaOnlyPassive": "Зона (поруч) — лише для пасивних",
+    "statPassiveOnly": "{stat} змінюється лише пасивкою",
+    "maneuverTrigger": "Маневр доступний лише для бонусної дії та дії",
+    "summonTrigger": "Прикликання доступне лише для бонусної дії, дії та вбивства",
+    "moraleNeedsDuration": "Тимчасова мораль потребує duration",
+    "durationRequired": "Потрібна duration (без неї — лише у фазі before)",
+    "passiveNoLimits": "Пасивка без лімітів",
+    "maxStacksNeedsStackable": "maxStacks має сенс лише зі stackable",
+    "maxTargetsTrigger": "maxTargets доступний лише для бонусної дії та дії",
+    "legendaryAction": "Легендарна дія — лише для вміння-дії без прицілу на клітинку",
+    "lairAction": "Дія лігва — лише вміння-дія без легендарної вартості й прицілу",
+    "perform": "Виконання атаки чи заклинання — лише легендарна дія або дія лігва з ефектами-нотатками",
+    "sneakAttack": "Прихована атака — вміння на влучання з ефектом dealDamage",
+    "cunningStrike": "Підступний удар — лише пасивка",
+    "aimTrigger": "aim доступний лише для бонусної дії та дії",
+    "needValue": "Потрібен flat, percent або atLeast",
+    "atLeastScope": "atLeast — лише для характеристик і без flat/percent",
+    "needFlatOrPercent": "Потрібен flat або percent",
+    "emptyAction": "Порожня дія",
+    "needUnitOrGroup": "Потрібен unitId або group і tier",
+    "classRefOutside": "Посилання на таблицю класу — лише у вміннях класу",
+    "columnMissing": "Немає колонки «{key}» у таблиці класу",
+    "columnNotPool": "Колонка «{label}» не є пулом",
+    "attackNotFound": "Атаку не знайдено серед атак юніта",
+    "spellNotFound": "Заклинання не знайдено в бібліотеці"
+  }
+}

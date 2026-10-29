@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import { Pencil, Trash2, TrendingUp } from "lucide-react";
 
 import { HeroPortrait } from "@/components/character-profile/HeroPortrait";
@@ -24,6 +25,10 @@ interface DmCharacterCardProps {
 }
 
 export function DmCharacterCard({ character, campaignId, busy, maxLevel = 20, actions }: DmCharacterCardProps) {
+  const t = useTranslations("characters.card");
+
+  const tc = useTranslations("common.actions");
+
   const { data: rules } = useCampaignRules(campaignId);
 
   const classMode = useClassMode(campaignId);
@@ -51,30 +56,30 @@ export function DmCharacterCard({ character, campaignId, busy, maxLevel = 20, ac
             {character.subrace ? ` (${character.subrace})` : ""} · {character.class}
           </p>
           <div className="flex min-w-0 items-center gap-1.5">
-            <HudPill tone={isNpc ? "silver" : "gold"}>{isNpc ? "NPC герой" : "Гравець"}</HudPill>
-            {ooc?.inspiration && character.inspiration && <span title="Натхнення" className="text-hud-gold">✦</span>}
-            {levelReady && <HudPill tone="gold">Рівень доступний</HudPill>}
-            {!isNpc && <span className="truncate text-xs text-hud-muted">{character.user?.displayName || "Не призначено"}</span>}
+            <HudPill tone={isNpc ? "silver" : "gold"}>{isNpc ? t("npcHero") : t("player")}</HudPill>
+            {ooc?.inspiration && character.inspiration && <span title={t("inspiration")} className="text-hud-gold">✦</span>}
+            {levelReady && <HudPill tone="gold">{t("levelReady")}</HudPill>}
+            {!isNpc && <span className="truncate text-xs text-hud-muted">{character.user?.displayName || t("unassigned")}</span>}
           </div>
         </div>
         <ActionsMenu
-          label="Дії персонажа"
+          label={t("actions")}
           triggerClassName="h-8 w-8 shrink-0 rounded-full text-hud-gold hover:bg-transparent hover:text-hud-gold-strong"
           onTriggerClick={(e) => e.preventDefault()}
           actions={[
-            { label: "Редагувати", icon: Pencil, href: `/campaigns/${campaignId}/dm/characters/${character.id}` },
+            { label: tc("edit"), icon: Pencil, href: `/campaigns/${campaignId}/dm/characters/${character.id}` },
             ...(actions.onLevelUp
-              ? [{ label: "Підняти рівень", icon: TrendingUp, onSelect: actions.onLevelUp, disabled: busy }]
+              ? [{ label: t("levelUp"), icon: TrendingUp, onSelect: actions.onLevelUp, disabled: busy }]
               : []),
-            { label: "Видалити", icon: Trash2, onSelect: actions.onDelete, destructive: true, separatorBefore: true },
+            { label: tc("delete"), icon: Trash2, onSelect: actions.onDelete, destructive: true, separatorBefore: true },
           ]}
         />
       </div>
       <div className="flex gap-1.5">
-        <HudStatChip short="Рів" value={character.level} />
-        <HudStatChip short="HP" label="HP" value={ooc?.persistResources ? (character.resources?.dead ? "Загинув" : `${hp}/${maxHp}`) : maxHp} />
+        <HudStatChip short={t("statLevel")} value={character.level} />
+        <HudStatChip short="HP" label="HP" value={ooc?.persistResources ? (character.resources?.dead ? t("dead") : `${hp}/${maxHp}`) : maxHp} />
         <HudStatChip short="AC" value={character.armorClass} />
-        <HudStatChip short="Ініц" value={character.initiative} />
+        <HudStatChip short={t("statInitiative")} value={character.initiative} />
       </div>
     </HudCard>
   );

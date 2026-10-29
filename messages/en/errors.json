@@ -448,5 +448,13 @@
   "backgroundOriginFeatInvalid": "The background's origin feat must be an origin feat of this campaign",
   "backgroundSpellUnknown": "The background references an unknown spell",
   "artifactSetMembersInvalid": "All artifacts must belong to this campaign and exist in the database.",
-  "trackFileDeleteFailed": "Failed to delete the music file"
+  "trackFileDeleteFailed": "Failed to delete the music file",
+  "itemParameterRequired": "Select the item parameter",
+  "itemParameterInvalid": "Invalid item parameter",
+  "itemSpellRequired": "Select the item spell",
+  "itemSpellInvalid": "Invalid item spell",
+  "characterTokenInvalid": "Invalid token",
+  "characterGoalsInvalid": "Invalid goals",
+  "characterNotesInvalid": "Invalid notes",
+  "characterControllerInvalid": "Invalid user reference (controlledBy). Make sure the selected player exists in users and is a member of the campaign."
 }
