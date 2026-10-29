@@ -1,8 +1,11 @@
+import { useTranslations } from "next-intl";
+
 import { HUD_SURFACE } from "@/components/hud";
 import { Button } from "@/components/ui/button";
 import { ResponsiveDialog } from "@/components/ui/responsive-dialog";
+import { useTranslator } from "@/lib/i18n/use-translator";
 import type { NodeState, ProgressionNode } from "@/lib/utils/skills/progression";
-import { LEARN_BLOCK_TEXT } from "@/lib/utils/skills/progression";
+import { BRANCH_MIN_LEVEL } from "@/lib/utils/skills/progression";
 import { nodeLabel } from "@/lib/utils/skills/progression/labels";
 import type { CharacterProgressionDto } from "@/types/progression";
 
@@ -13,11 +16,15 @@ export function NodeSheet({ target, dto, actions }: {
   dto: CharacterProgressionDto;
   actions: { onClose: () => void; onLearn?: (nodeId: string) => void; onUnlearn?: (nodeId: string) => void; pending: boolean };
 }) {
+  const t = useTranslations("skillTree.node");
+
+  const tr = useTranslator("skillTree");
+
   if (!target) return null;
 
   const { node, state, reason } = target;
 
-  const { title, tag, skillName } = nodeLabel(node, dto);
+  const { title, tag, skillName } = nodeLabel(node, dto, tr);
 
   const skill = node.skillId ? dto.skills[node.skillId] : undefined;
 
@@ -25,9 +32,9 @@ export function NodeSheet({ target, dto, actions }: {
 
   const footer =
     state === "available" && onLearn ? (
-      <Button onClick={() => onLearn(node.nodeId)} disabled={actions.pending}>Вивчити</Button>
+      <Button onClick={() => onLearn(node.nodeId)} disabled={actions.pending}>{t("learn")}</Button>
     ) : state === "learned" && onUnlearn ? (
-      <Button variant="outline" onClick={() => onUnlearn(node.nodeId)} disabled={actions.pending}>Розвчити</Button>
+      <Button variant="outline" onClick={() => onUnlearn(node.nodeId)} disabled={actions.pending}>{t("unlearn")}</Button>
     ) : undefined;
 
   return (
@@ -38,9 +45,9 @@ export function NodeSheet({ target, dto, actions }: {
           {skill.description && <p className="whitespace-pre-line">{skill.description}</p>}
         </div>
       ) : (
-        !skillName && (node.kind === "branchLevel" || node.kind === "racial") && <p className="text-sm italic">Майстер ще не призначив скіл цьому рівню</p>
+        !skillName && (node.kind === "branchLevel" || node.kind === "racial") && <p className="text-sm italic">{t("unassigned")}</p>
       )}
-      {state === "locked" && reason && <p className="mt-3 text-sm text-hud-danger">{LEARN_BLOCK_TEXT[reason]}</p>}
+      {state === "locked" && reason && <p className="mt-3 text-sm text-hud-danger">{tr(`reasons.${reason}`, { level: BRANCH_MIN_LEVEL.expert })}</p>}
     </ResponsiveDialog>
   );
 }

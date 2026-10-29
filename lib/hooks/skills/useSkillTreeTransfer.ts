@@ -7,6 +7,8 @@ import { useSaveSkillTree, useSkillTrees } from "./useSkillTrees";
 import { useConfirm, useNotify } from "@/lib/hooks/common";
 import { useRaces } from "@/lib/hooks/races";
 import { useSpellGroups } from "@/lib/hooks/spells";
+import { translateIssue } from "@/lib/i18n/translate-issue";
+import { useTranslator } from "@/lib/i18n/use-translator";
 import { downloadText } from "@/lib/utils/common/download-text";
 import type { RawTree } from "@/lib/utils/skills/progression";
 import { exportSkillTrees, isTreeImportFailure, planSkillTreeImport, readSkillTreeFiles, type SkillTreeFile, type TreeImportFailure, type TreeImportPlan } from "@/lib/utils/skills/tree-transfer";
@@ -23,6 +25,8 @@ export function useSkillTreeTransfer(campaignId: string) {
   const save = useSaveSkillTree(campaignId);
 
   const spellGroups = useSpellGroups(campaignId);
+
+  const t = useTranslator();
 
   const notify = useNotify();
 
@@ -46,7 +50,7 @@ export function useSkillTreeTransfer(campaignId: string) {
     try {
       files = readSkillTreeFiles(await file.text());
     } catch (e) {
-      await notify(e instanceof Error ? e.message : "Не вдалося прочитати файл");
+      await notify(e instanceof Error ? translateIssue(t, { message: e.message }) : t("skillTree.transfer.readFailed"));
 
       return;
     }
@@ -61,9 +65,9 @@ export function useSkillTreeTransfer(campaignId: string) {
 
     if (overwritten.length > 0) {
       const ok = await confirm({
-        title: "Замінити наявні дерева?",
-        description: `Дерева рас буде перезаписано: ${overwritten.join(", ")}. Це не можна скасувати.`,
-        confirmLabel: "Замінити",
+        title: t("skillTree.transfer.overwrite.title"),
+        description: t("skillTree.transfer.overwrite.description", { list: overwritten.join(", ") }),
+        confirmLabel: t("skillTree.transfer.overwrite.confirm"),
         destructive: true,
       });
 
@@ -72,21 +76,21 @@ export function useSkillTreeTransfer(campaignId: string) {
 
     for (const plan of plans) {
       if (isTreeImportFailure(plan)) {
-        failed.push(`${plan.race}: ${plan.error}`);
+        failed.push(`${plan.race}: ${translateIssue(t, plan.error)}`);
         continue;
       }
 
-      failed.push(...(plan.warnings ?? []).map((w) => `${plan.race}: ${w}`));
+      failed.push(...(plan.warnings ?? []).map((w) => `${plan.race}: ${translateIssue(t, w)}`));
 
       try {
         await save.mutateAsync({ treeId: plan.treeId, race: plan.race, skills: plan.skills as unknown as RawTree });
         saved.push(plan.race);
       } catch (e) {
-        failed.push(`${plan.race}: ${e instanceof Error ? e.message : "помилка збереження"}`);
+        failed.push(`${plan.race}: ${e instanceof Error ? e.message : t("skillTree.transfer.saveFailed")}`);
       }
     }
 
-    await notify([saved.length > 0 ? `Збережено дерева: ${saved.join(", ")}` : "Жодного дерева не збережено", ...failed].join("; "));
+    await notify([saved.length > 0 ? t("skillTree.transfer.saved", { list: saved.join(", ") }) : t("skillTree.transfer.noneSaved"), ...failed].join("; "));
   }
 
   return { ready: !!data, busy: save.isPending, actions: { exportAll, importFile } };

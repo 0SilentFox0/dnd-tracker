@@ -42,7 +42,7 @@ describe("useSkillTreeTransfer", () => {
 
     expect(save).toHaveBeenCalledTimes(1);
     expect(save).toHaveBeenCalledWith({ treeId: "new", race: "Ельфи", skills: { mainSkills: [{ id: "M1" }], ultimateSkill: { id: "S1" } } });
-    expect(notify).toHaveBeenCalledWith("Збережено дерева: Ельфи; Гноми: Раси «Гноми» немає в кампанії");
+    expect(notify).toHaveBeenCalledWith('skillTree.transfer.saved {"list":"Ельфи"}; Гноми: skillTree.transfer.raceMissing {"race":"Гноми"}');
   });
 
   it("наявне дерево раси оновлюється за його id", async () => {
@@ -82,7 +82,7 @@ describe("useSkillTreeTransfer", () => {
     await act(() => result.current.actions.importFile(fileOf({ race: "Ельфи" })));
 
     expect(save).not.toHaveBeenCalled();
-    expect(notify).toHaveBeenCalledWith("Файл не схожий на експорт дерев скілів");
+    expect(notify).toHaveBeenCalledWith("skillTree.transfer.notTreeFile");
   });
 
   it("експорт усіх дерев з назвами", () => {

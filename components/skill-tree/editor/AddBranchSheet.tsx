@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useTranslations } from "next-intl";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -9,6 +10,8 @@ export function AddBranchSheet({ open, branches, actions }: {
   branches: Array<{ id: string; name: string; color: string }>;
   actions: { onClose: () => void; onAdd: (id: string) => void; onCreate: (input: { name: string; color: string }) => Promise<boolean> };
 }) {
+  const t = useTranslations("skillTree.addBranch");
+
   const [name, setName] = useState("");
 
   const [color, setColor] = useState("#8a6414");
@@ -20,8 +23,8 @@ export function AddBranchSheet({ open, branches, actions }: {
       hud
       open={open}
       onOpenChange={(o) => !o && actions.onClose()}
-      title="Додати гілку"
-      footer={<Button form="new-branch" type="submit" disabled={!name.trim() || creating}>Створити нову</Button>}
+      title={t("title")}
+      footer={<Button form="new-branch" type="submit" disabled={!name.trim() || creating}>{t("create")}</Button>}
     >
       <div className="flex flex-col gap-1">
         {branches.map((b) => (
@@ -48,8 +51,8 @@ export function AddBranchSheet({ open, branches, actions }: {
           }
         }}
       >
-        <Input placeholder="Назва нової гілки" value={name} onChange={(e) => setName(e.target.value)} />
-        <input type="color" aria-label="Колір" value={color} onChange={(e) => setColor(e.target.value)} />
+        <Input placeholder={t("namePlaceholder")} value={name} onChange={(e) => setName(e.target.value)} />
+        <input type="color" aria-label={t("color")} value={color} onChange={(e) => setColor(e.target.value)} />
       </form>
     </ResponsiveDialog>
   );

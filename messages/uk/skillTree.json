@@ -1,1 +1,163 @@
-{}
+{
+  "tiers": {
+    "basic": "Основи",
+    "advanced": "Просунутий",
+    "expert": "Експерт"
+  },
+  "circles": {
+    "outer": "зовнішнє коло",
+    "middle": "середнє коло",
+    "inner": "внутрішнє коло"
+  },
+  "circleShort": {
+    "outer": "З",
+    "middle": "С",
+    "inner": "В"
+  },
+  "cells": {
+    "ultimate": "Ультимейт",
+    "racial": "Раса · {tier}",
+    "level": "{branch} · {tier}",
+    "slot": "{branch} · {circle}{n}",
+    "column": "{branch} · {column}"
+  },
+  "editor": {
+    "title": "Дерево прокачки",
+    "addRace": "Додайте расу, щоб налаштувати дерево",
+    "unsaved": "Незбережені зміни",
+    "branch": "Гілка",
+    "racial": "Раса",
+    "racialLevels": "рівень 5 / 10 / 15",
+    "ultimate": "Ультимейт",
+    "ultimateHint": "після 3 внутрішніх",
+    "addBranch": "+ Додати гілку",
+    "moveUp": "{name} вище",
+    "moveDown": "{name} нижче",
+    "removeBranch": "Прибрати гілку {name}",
+    "columns": {
+      "outer": "Зовнішнє {n}",
+      "middle": "Середнє {n}",
+      "inner": "Внутрішнє"
+    },
+    "removeConfirm": {
+      "title": "Прибрати гілку «{name}»?",
+      "description": "Вивчені вузли цієї гілки в персонажів перестануть діяти.",
+      "confirm": "Прибрати"
+    },
+    "switchRace": {
+      "title": "Перейти до іншої раси?",
+      "description": "Незбережені зміни дерева буде втрачено.",
+      "confirm": "Перейти"
+    }
+  },
+  "addBranch": {
+    "title": "Додати гілку",
+    "create": "Створити нову",
+    "namePlaceholder": "Назва нової гілки",
+    "color": "Колір"
+  },
+  "picker": {
+    "place": "Поставити",
+    "search": "Пошук…",
+    "all": "усі скіли",
+    "listLabel": "Скіли бібліотеки",
+    "usedAt": "вже в {where}"
+  },
+  "treeErrors": {
+    "duplicateSkill": "Цей скіл уже стоїть в іншому місці дерева",
+    "unknownBranch": "Гілки немає серед основних навичок кампанії",
+    "unknownSkill": "Скіла немає в бібліотеці кампанії",
+    "duplicateBranch": "Гілка додана двічі"
+  },
+  "reasons": {
+    "noPoints": "Немає вільних очок — підніміть рівень",
+    "alreadyLearned": "Уже вивчено",
+    "notInTree": "Цього вміння немає в дереві",
+    "branchOrder": "Спершу вивчіть попередній рівень",
+    "outerLimit": "Зовнішніх умінь у гілці не більше, ніж її рівнів — підвищте рівень гілки",
+    "needOuter": "Потрібне хоча б одне вміння зовнішнього кола цієї гілки",
+    "needMiddleAndExpert": "Потрібні вміння середнього кола й рівень Експерт цієї гілки",
+    "racialLevel": "Доступно з вищого рівня персонажа",
+    "expertLevel": "Експертом гілки можна стати з {level} рівня персонажа",
+    "needInner": "Потрібні 3 вміння внутрішнього кола",
+    "notLearned": "Це вміння не вивчене",
+    "hasDependents": "Від цього вміння залежать інші вивчені — спершу зніміть їх"
+  },
+  "placement": {
+    "branchLevel": "Рівень гілки",
+    "outer": "Зовнішнє коло",
+    "middle": "Середнє коло",
+    "inner": "Внутрішнє коло",
+    "racial": "Расове",
+    "ultimate": "Ультимейт",
+    "unplaced": "Без місця в дереві"
+  },
+  "progression": {
+    "title": "Прокачка · рівень {level}",
+    "points": "{count, plural, one {# вільне очко} few {# вільні очки} many {# вільних очок} other {# вільних очок}}",
+    "changed": "Прогрес змінився — оновлено",
+    "noTree": "Майстер ще не налаштував дерево для раси {race}",
+    "branches": "Гілки",
+    "orphans": "Застарілі вузли: {count} · Прибрати",
+    "reset": "Скинути дерево",
+    "resetConfirm": {
+      "title": "Скинути дерево прокачки?",
+      "description": "Усі вивчені вміння персонажа буде знято.",
+      "confirm": "Скинути"
+    },
+    "newBranches": "Нові гілки",
+    "newBranch": "Нова гілка — одна з {count} доступних"
+  },
+  "offers": {
+    "heading": "Вивчити (1 очко)",
+    "listLabel": "Вивчити",
+    "more": "Ще {count} {count, plural, one {варіант} few {варіанти} many {варіантів} other {варіантів}}"
+  },
+  "row": {
+    "racial": "Раса",
+    "racialGroup": "Раса · {race}",
+    "racialLevel": "рівень {level}+",
+    "branchLevelAria": "Рівень гілки: {branch} · {tier}",
+    "unknownSkill": "Невідомий скіл",
+    "emptySlot": "Порожній слот"
+  },
+  "slot": {
+    "learn": "Вивчити: {label}",
+    "locked": "Закрито: {label}"
+  },
+  "node": {
+    "learn": "Вивчити",
+    "unlearn": "Розвчити",
+    "unassigned": "Майстер ще не призначив скіл цьому рівню",
+    "tagBranchUp": "Підвищення гілки",
+    "tagRacial": "Расове · {tier}",
+    "tagSkill": "Скіл · {circle}",
+    "branchTier": "{branch} → {tier}"
+  },
+  "levelUp": {
+    "dialog": "Новий рівень",
+    "title": "НОВИЙ РІВЕНЬ",
+    "canLearn": "Можна вивчити нове вміння",
+    "cta": "До прокачки",
+    "dismiss": "торкніться, щоб закрити"
+  },
+  "transfer": {
+    "fileLabel": "Файл дерев скілів",
+    "import": "Імпорт JSON",
+    "export": "Експорт JSON",
+    "invalidJson": "Некоректний JSON",
+    "notTreeFile": "Файл не схожий на експорт дерев скілів",
+    "readFailed": "Не вдалося прочитати файл",
+    "raceMissing": "Раси «{race}» немає в кампанії",
+    "missing": "Не знайдено в кампанії: {list}",
+    "spellGroupDropped": "Школу магії не знайдено в кампанії, прибрано: {list}",
+    "overwrite": {
+      "title": "Замінити наявні дерева?",
+      "description": "Дерева рас буде перезаписано: {list}. Це не можна скасувати.",
+      "confirm": "Замінити"
+    },
+    "saveFailed": "помилка збереження",
+    "saved": "Збережено дерева: {list}",
+    "noneSaved": "Жодного дерева не збережено"
+  }
+}

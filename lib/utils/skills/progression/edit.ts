@@ -2,7 +2,7 @@ import { realSkillId } from "./ids";
 import type { RawBranch, RawSlot, RawTree } from "./tree-json";
 import { CIRCLE_KEY } from "./tree-json";
 import type { BranchLevel, Circle } from "./types";
-import { BRANCH_LEVELS, CIRCLE_SIZE, CIRCLES, RACIAL_BRANCH_ID } from "./types";
+import { BRANCH_LEVELS, CIRCLE_SIZE, CIRCLES, RACIAL_BRANCH_ID, RACIAL_BRANCH_NAME } from "./types";
 
 export type CellRef =
   | { kind: "level"; branchId: string; level: BranchLevel }
@@ -56,7 +56,7 @@ function withSlot(branch: RawBranch, circle: Circle, index: number, skill: Skill
 }
 
 const ensureRacial = (raw: RawTree): RawTree =>
-  findBranch(raw, RACIAL_BRANCH_ID) ? raw : { ...raw, mainSkills: [...raw.mainSkills, { id: RACIAL_BRANCH_ID, name: "Раса", color: "gainsboro", levelSkillIds: {}, levels: {} }] };
+  findBranch(raw, RACIAL_BRANCH_ID) ? raw : { ...raw, mainSkills: [...raw.mainSkills, { id: RACIAL_BRANCH_ID, name: RACIAL_BRANCH_NAME, color: "gainsboro", levelSkillIds: {}, levels: {} }] };
 
 export function setCellSkill(raw: RawTree, ref: CellRef, skill: SkillPick): RawTree {
   if (ref.kind === "ultimate") return { ...raw, ultimateSkill: skill ? { id: skill.id, name: skill.name, ...(skill.icon && { icon: skill.icon }) } : null };
