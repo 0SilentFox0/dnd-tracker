@@ -12,6 +12,7 @@ import type { Effect } from "@/lib/utils/abilities/schema";
 import { applyDamageConsequences } from "@/lib/utils/battle/damage/consequences";
 import { clearDeathSaves, isDying } from "@/lib/utils/battle/death-saves";
 import { hasImmunity } from "@/lib/utils/battle/resistance";
+import type { BattleParticipant } from "@/types/battle";
 
 type Of<K extends Effect["kind"]> = Extract<Effect, { kind: K }>;
 
@@ -94,6 +95,9 @@ export function applyHeal(input: EffectApplyInput<Of<"heal">>): EffectApplyResul
   return { participants: ps, messages };
 }
 
+const linkedConditionId = (target: BattleParticipant, abilityKey: string, ownerId: string) =>
+  target.battleData.activeEffects.find((e) => e.type === "condition" && e.abilityKey?.startsWith(`${abilityKey}#`) && e.source?.participantId === ownerId)?.id;
+
 export function applyDot(input: EffectApplyInput<Of<"dot">>): EffectApplyResult {
   const { ability, effect, ctx } = input;
 
@@ -121,6 +125,10 @@ export function applyDot(input: EffectApplyInput<Of<"dot">>): EffectApplyResult 
 
     if (dmg <= 0) continue;
 
+    const linkedTo = effect.linkedToCondition ? linkedConditionId(t, ability.key, input.ownerId) : undefined;
+
+    if (effect.linkedToCondition && !linkedTo) continue;
+
     ps = replaceParticipant(
       ps,
       upsertTimedEffect(
@@ -130,6 +138,7 @@ export function applyDot(input: EffectApplyInput<Of<"dot">>): EffectApplyResult 
           source: effectSource(findParticipant(input.participants, input.ownerId), ability),
           name: ability.name,
           type: "debuff",
+          linkedTo,
           rounds: effect.duration.rounds,
           stackable: ability.stackable === true,
           maxStacks: ability.maxStacks,
@@ -193,6 +202,6 @@ export const describeDealDamage = (e: Of<"dealDamage">) => `шкода ${amountL
 
 export const describeHeal = (e: Of<"heal">) => `${e.revive ? "воскресіння" : "лікування"} ${amountLabel(e.amount)}`;
 
-export const describeDot = (e: Of<"dot">) => `${damageTypeLabel(e.damageType)} ${amountLabel(e.damagePerRound)}/раунд × ${e.duration?.rounds ?? "?"} р.`;
+export const describeDot = (e: Of<"dot">) => `${damageTypeLabel(e.damageType)} ${amountLabel(e.damagePerRound)}/раунд × ${e.duration?.rounds ?? "?"} р.${e.linkedToCondition ? ", поки діє стан" : ""}`;
 
 export const describeHot = (e: Of<"hot">) => `лікування ${amountLabel(e.healPerRound)}/раунд × ${e.duration?.rounds ?? "?"} р.`;

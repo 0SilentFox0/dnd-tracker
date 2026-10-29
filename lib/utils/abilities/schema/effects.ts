@@ -128,6 +128,7 @@ const FlagSchema = z.discriminatedUnion("flag", [
   z.object({ ...flagBase, flag: z.literal("noNegativeMorale") }),
   z.object({ ...flagBase, flag: z.literal("ignoreMorale") }),
   z.object({ ...flagBase, flag: z.literal("minMorale"), value: z.number().int().min(-3).max(3) }),
+  z.object({ ...flagBase, flag: z.literal("damageThreshold"), value: z.number().int().min(1).max(100) }),
   z.object({ ...flagBase, flag: z.literal("extraSummons"), count: z.number().int().min(1).max(5), spellIds: z.array(z.string().min(1)).min(1).optional() }),
   z.object({ ...flagBase, flag: z.literal("piercingShot") }),
   z.object({ ...flagBase, flag: z.literal("fireWave"), percent: z.number().int().min(1).max(100), size: z.number().int().min(5).max(120) }),
@@ -189,6 +190,7 @@ const DotSchema = z.object({
   damagePerRound: AmountSchema,
   damageType: z.string().min(1),
   duration: DurationSchema,
+  linkedToCondition: z.literal(true).optional(),
   ...target,
 });
 
@@ -217,6 +219,7 @@ const ApplyConditionSchema = z.object({
   percent: z.number().int().min(1).max(100).optional(),
   breakOnDamage: z.boolean().optional(),
   onlyIfAffected: z.boolean().optional(),
+  escapeDc: z.literal(true).optional(),
   ...target,
 });
 

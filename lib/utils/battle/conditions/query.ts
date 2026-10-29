@@ -55,11 +55,17 @@ export function syncExhaustion(p: BattleParticipant): BattleParticipant {
 }
 
 export function removeEffects(p: BattleParticipant, pred: (e: ActiveEffect) => boolean): { participant: BattleParticipant; removed: ActiveEffect[] } {
-  const removed = p.battleData.activeEffects.filter(pred);
+  const direct = p.battleData.activeEffects.filter(pred);
 
-  if (!removed.length) return { participant: p, removed };
+  if (!direct.length) return { participant: p, removed: direct };
 
-  const stripped = withActiveEffects(p, (list) => list.filter((e) => !pred(e)));
+  const ids = new Set(direct.map((e) => e.id));
+
+  const gone = (e: ActiveEffect) => pred(e) || (!!e.linkedTo && ids.has(e.linkedTo));
+
+  const removed = p.battleData.activeEffects.filter(gone);
+
+  const stripped = withActiveEffects(p, (list) => list.filter((e) => !gone(e)));
 
   return { participant: removed.some((e) => carries(e, "exhaustion")) ? syncExhaustion(restoreExhaustionHp(stripped, removed)) : stripped, removed };
 }

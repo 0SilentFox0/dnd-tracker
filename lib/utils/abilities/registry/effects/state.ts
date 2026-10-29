@@ -3,7 +3,7 @@ import type { EffectApplyInput, EffectApplyResult } from "./types";
 
 import { EffectMarker } from "@/lib/constants/battle";
 import { findFlags } from "@/lib/utils/abilities/engine/core/collect-modifiers";
-import { findParticipant, participantNames, updateParticipant } from "@/lib/utils/abilities/engine/core/participants";
+import { findParticipant, participantNames, updateParticipant, withActiveEffects } from "@/lib/utils/abilities/engine/core/participants";
 import { restoreCharm } from "@/lib/utils/abilities/engine/effects/charm";
 import { countMarks, GUARD_KEY, markKey } from "@/lib/utils/abilities/engine/effects/marks";
 import { clampMorale, moraleCapOf } from "@/lib/utils/abilities/engine/effects/morale";
@@ -14,6 +14,7 @@ import { helpEffect } from "@/lib/utils/battle/actions/effects";
 import { applyCondition5e, type ConditionKey, saveEndsFor } from "@/lib/utils/battle/conditions/apply";
 import { removeEffects } from "@/lib/utils/battle/conditions/query";
 import { grantExtraActions } from "@/lib/utils/battle/participant/helpers";
+import { spellSaveDc } from "@/lib/utils/battle/spell/power";
 import { signed } from "@/lib/utils/common/format";
 import { pluralUk } from "@/lib/utils/common/plural";
 import { DEFAULT_RULES } from "@/lib/utils/rules";
@@ -89,10 +90,15 @@ function applyCondition5eToTargets(input: EffectApplyInput<Of<"applyCondition">>
 
     ps = result.participants;
     messages.push(...result.messages);
+
+    if (effect.escapeDc && owner && !result.blocked) ps = updateParticipant(ps, id, (p) => withEscapeDc(p, `${ability.key}#${input.effectIndex}@${input.ownerId}`, spellSaveDc(owner, undefined, (ctx.rules ?? DEFAULT_RULES).formulas.saveDcBase)));
   }
 
   return { participants: ps, messages };
 }
+
+const withEscapeDc = (p: BattleParticipant, timedKey: string, escapeDc: number): BattleParticipant =>
+  withActiveEffects(p, (list) => list.map((e) => (e.abilityKey === timedKey ? { ...e, escapeDc } : e)));
 
 export function applyCondition(input: EffectApplyInput<Of<"applyCondition">>): EffectApplyResult {
   const { ability, effect, ctx } = input;

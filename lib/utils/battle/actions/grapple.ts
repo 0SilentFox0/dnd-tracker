@@ -52,16 +52,20 @@ export function contest(input: { attacker: BattleParticipant; target: BattlePart
   return { success: mine.total > theirs.total, message: `🎲 ${mine.total} проти ${theirs.total}`, participants };
 }
 
-export function escapeContest(input: { escaper: BattleParticipant; grappler: BattleParticipant } & RollInput): { success: boolean; message: string } {
-  const { escaper, grappler, participants, rules, rng } = input;
+function escapeAgainstDc(input: { escaper: BattleParticipant; dc: number } & RollInput): { success: boolean; message: string } {
+  const { escaper, dc, participants, rules, rng } = input;
 
   const mine = rollCheck({ actor: escaper, subject: { skill: bestSkill(escaper, participants, rules) }, participants, rules, rng });
 
-  if (rules.actions.variant === "2024") {
-    const dc = grappleDc(grappler, rules);
+  return { success: mine.total >= dc, message: `🎲 ${mine.total} проти СК ${dc}` };
+}
 
-    return { success: mine.total >= dc, message: `🎲 ${mine.total} проти СК ${dc}` };
-  }
+export function escapeContest(input: { escaper: BattleParticipant; grappler: BattleParticipant } & RollInput): { success: boolean; message: string } {
+  const { escaper, grappler, participants, rules, rng } = input;
+
+  if (rules.actions.variant === "2024") return escapeAgainstDc({ escaper, dc: grappleDc(grappler, rules), participants, rules, rng });
+
+  const mine = rollCheck({ actor: escaper, subject: { skill: bestSkill(escaper, participants, rules) }, participants, rules, rng });
 
   const theirs = rollCheck({ actor: grappler, subject: { skill: "athletics" }, participants, rules, rng });
 
@@ -160,7 +164,9 @@ export function runEscape(input: Omit<GrappleActionInput, "targetId">): GrappleA
 
   const grappler = grapplerId ? findParticipant(participants, grapplerId) : undefined;
 
-  const check = grappler ? escapeContest({ escaper: actor, grappler, participants, rules, rng: input.rng }) : { success: true, message: "" };
+  const spellDc = actor.battleData.activeEffects.find((e) => e.escapeDc && e.type === "condition" && e.effects[0]?.type === "grappled" && (!grapplerId || e.source?.participantId === grapplerId))?.escapeDc;
+
+  const check = spellDc !== undefined ? escapeAgainstDc({ escaper: actor, dc: spellDc, participants, rules, rng: input.rng }) : grappler ? escapeContest({ escaper: actor, grappler, participants, rules, rng: input.rng }) : { success: true, message: "" };
 
   const tail = check.message ? ` ${check.message}` : "";
 

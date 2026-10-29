@@ -13,7 +13,7 @@ import { getEffectiveArmorClass } from "@/lib/utils/battle/participant/helpers";
 import { evasionFactor, hasEvasion } from "@/lib/utils/battle/saves/evasion";
 import { resolveSave } from "@/lib/utils/battle/saves/legendary";
 import { rollD20WithMode } from "@/lib/utils/battle/saves/roll-d20";
-import { rollSave } from "@/lib/utils/battle/saves/roll-save";
+import { bestSaveAbility, rollSave } from "@/lib/utils/battle/saves/roll-save";
 import type { Outcome, SpellCastState } from "@/lib/utils/battle/spell/cast/state";
 import { spellAttackBonus } from "@/lib/utils/battle/spell/power";
 import { participantImmuneToSpell } from "@/lib/utils/battle/spell/spell-immunity";
@@ -140,7 +140,9 @@ export function resolveOutcome(state: SpellCastState, id: string, withSave: bool
   let factor = 1;
 
   if (withSave && def.resolution.kind === "save") {
-    const { ability: saveAbility, onSuccess } = def.resolution;
+    const { ability: baseAbility, orAbility, onSuccess } = def.resolution;
+
+    const saveAbility = orAbility ? bestSaveAbility(target, [baseAbility, orAbility], flow.ps, flow.ctx.rules) : baseAbility;
 
     const dc = state.saveDc;
 

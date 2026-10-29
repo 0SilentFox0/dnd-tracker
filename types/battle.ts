@@ -76,6 +76,10 @@ export interface ActiveEffect {
   zone?: { ownerId: string; key: string };
   /** стан закінчується, коли власник проходить рятівний кидок наприкінці свого ходу */
   saveEnds?: { ability: AbilityKey; dc: number };
+  /** СК «Вирватися» для схоплення від заклинання (замість змагання з Атлетикою схоплювача) */
+  escapeDc?: number;
+  /** ефект знімається разом з ефектом цього id на тому ж власнику */
+  linkedTo?: string;
   /** ефект, що тримається поки кастер концентрується на закляттi castId */
   concentrationOf?: { casterId: string; castId: string };
   /** заряди додаткової шкоди від заклинання (hitRider); на нуль ефект знімається */

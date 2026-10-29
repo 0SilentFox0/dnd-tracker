@@ -161,6 +161,12 @@ export const FLAG_REGISTRY: { [K in FlagKey]: FlagDefinition<K> } = {
     defaults: { value: 1 },
     describe: (e) => `мораль не нижче ${signed(e.value)}`,
   },
+  damageThreshold: {
+    label: "Поріг шкоди",
+    fields: [{ name: "value", label: "Шкода менша за поріг (1–100) стає 0", input: "number" }],
+    defaults: { value: 10 },
+    describe: (e) => `поріг шкоди ${e.value}: менша шкода ігнорується`,
+  },
   extraSummons: {
     label: "Додаткові прикликані істоти",
     fields: [

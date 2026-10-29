@@ -60,7 +60,7 @@ export const SpellTargetingSchema = z.discriminatedUnion("kind", [
 
 export const SpellResolutionSchema = z.discriminatedUnion("kind", [
   z.object({ kind: z.literal("auto") }),
-  z.object({ kind: z.literal("save"), ability: z.enum(ABILITY_KEYS), onSuccess: z.enum(["half", "none"]) }),
+  z.object({ kind: z.literal("save"), ability: z.enum(ABILITY_KEYS), orAbility: z.enum(ABILITY_KEYS).optional(), onSuccess: z.enum(["half", "none"]) }),
   z.object({ kind: z.literal("attack") }),
 ]);
 

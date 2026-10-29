@@ -76,7 +76,7 @@ export const EFFECT_REGISTRY: { [K in EffectKind]: EffectDefinition<K> } = {
   },
   dealDamage: { kind: "dealDamage", label: "Завдати шкоди", static: false, fields: [AMOUNT, { name: "damageType", label: "Тип", input: "text", optional: true }, { name: "falloff", label: "% шкоди по цілях по черзі (100, 50, 25…)", input: "numberList", optional: true }, { name: "byDistance", label: "Кубики за відстанню (футів:кубики, лише в заклинаннях)", input: "distanceDice", optional: true }, TARGET_FIELD], describe: describeDealDamage, apply: applyDealDamage },
   heal: { kind: "heal", label: "Лікування", static: false, fields: [AMOUNT, { name: "revive", label: "Воскрешає", input: "toggle", optional: true }, TARGET_FIELD], describe: describeHeal, apply: applyHeal },
-  dot: { kind: "dot", label: "Шкода щораунду (DOT)", static: false, fields: [{ ...AMOUNT, name: "damagePerRound", label: "Шкода/раунд (число, кубики, формула)" }, { name: "damageType", label: "Тип", input: "text" }, TARGET_FIELD, REQUIRED_DURATION], describe: describeDot, apply: applyDot },
+  dot: { kind: "dot", label: "Шкода щораунду (DOT)", static: false, fields: [{ ...AMOUNT, name: "damagePerRound", label: "Шкода/раунд (число, кубики, формула)" }, { name: "damageType", label: "Тип", input: "text" }, { name: "linkedToCondition", label: "Зникає разом зі станом цього заклинання", input: "toggle", optional: true }, TARGET_FIELD, REQUIRED_DURATION], describe: describeDot, apply: applyDot },
   hot: { kind: "hot", label: "Лікування щораунду (HOT)", static: false, fields: [{ ...AMOUNT, name: "healPerRound", label: "Лікування/раунд (число, кубики, формула)" }, TARGET_FIELD, REQUIRED_DURATION], describe: describeHot, apply: applyHot },
   berserk: { kind: "berserk", label: "Шал", static: false, fields: [{ name: "damageBonusPercent", label: "Бонус шкоди, %", input: "number" }, TARGET_FIELD, REQUIRED_DURATION], describe: describeBerserk, apply: applyBerserk },
   charm: { kind: "charm", label: "Перехід на бік заклинателя", static: false, fields: [TARGET_FIELD, REQUIRED_DURATION], describe: describeCharm, apply: applyCharm },
@@ -95,12 +95,13 @@ export const EFFECT_REGISTRY: { [K in EffectKind]: EffectDefinition<K> } = {
       { name: "saveEnds", label: "Рятівний кидок наприкінці ходу", input: "saveEnds", optional: true, visibleWhen: (v) => (CONDITION_5E_KEYS as readonly string[]).includes(String(v.condition)) },
       { name: "percent", label: "Шанс, % (для втрати дії)", input: "number", optional: true, visibleWhen: (v) => v.condition === "skip_action" },
       { name: "breakOnDamage", label: "Знімається при отриманні шкоди", input: "toggle", optional: true },
+      { name: "escapeDc", label: "«Вирватися» проти СК заклинання (для схоплення)", input: "toggle", optional: true, visibleWhen: (v) => v.condition === "grappled" },
       { name: "onlyIfAffected", label: "Лише якщо хоч одну ціль заклинання уражено (для себе)", input: "toggle", optional: true },
       TARGET_FIELD,
       REQUIRED_DURATION,
     ],
     describe: (e) =>
-      `${conditionLabel(e.condition)}${e.condition === "skip_action" && e.percent ? ` ${e.percent}%` : ""}${e.levels ? ` ×${e.levels}` : ""} × ${e.duration?.rounds ?? "?"} р.${e.breakOnDamage ? ", до шкоди" : ""}${e.saveEnds ? `, рятівний кидок ${ABILITY_LABELS[e.saveEnds.ability]}` : ""}`,
+      `${conditionLabel(e.condition)}${e.condition === "skip_action" && e.percent ? ` ${e.percent}%` : ""}${e.levels ? ` ×${e.levels}` : ""} × ${e.duration?.rounds ?? "?"} р.${e.breakOnDamage ? ", до шкоди" : ""}${e.saveEnds ? `, рятівний кидок ${ABILITY_LABELS[e.saveEnds.ability]}` : ""}${e.escapeDc ? ", вирватися проти СК" : ""}`,
     apply: applyCondition,
   },
   grantAction: { kind: "grantAction", label: "Дати дію", static: false, fields: [
