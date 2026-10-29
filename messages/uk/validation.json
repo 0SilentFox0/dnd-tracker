@@ -14,5 +14,10 @@
   "lairRepeat": "Не можна повторити цю дію лігва в сусідніх раундах",
   "trackFileInvalid": "Потрібен файл {formats} до {maxMb} МБ",
   "trackTitleTooLong": "Група й назва разом — до {max} символів",
-  "trackDurationInvalid": "Ціле число секунд від 1 до 86400"
+  "trackDurationInvalid": "Ціле число секунд від 1 до 86400",
+  "hexColor": "Колір — у форматі #RRGGBB",
+  "image": {
+    "tooLarge": "Картинка завелика для обробки в браузері",
+    "compressFailed": "Не вдалося стиснути картинку"
+  }
 }

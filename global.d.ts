@@ -1,11 +1,20 @@
 import type abilities from "./messages/uk/abilities.json";
 import type abilityRegistry from "./messages/uk/abilityRegistry.json";
+import type abilityText from "./messages/uk/abilityText.json";
 import type acquaintances from "./messages/uk/acquaintances.json";
 import type ai from "./messages/uk/ai.json";
 import type artifacts from "./messages/uk/artifacts.json";
 import type assistant from "./messages/uk/assistant.json";
 import type auth from "./messages/uk/auth.json";
 import type backgrounds from "./messages/uk/backgrounds.json";
+import type battle from "./messages/uk/battle.json";
+import type battleActions from "./messages/uk/battleActions.json";
+import type battleCommon from "./messages/uk/battleCommon.json";
+import type battleDm from "./messages/uk/battleDm.json";
+import type battleLog from "./messages/uk/battleLog.json";
+import type battleSetup from "./messages/uk/battleSetup.json";
+import type battleTerms from "./messages/uk/battleTerms.json";
+import type battleWizards from "./messages/uk/battleWizards.json";
 import type campaigns from "./messages/uk/campaigns.json";
 import type characterProfile from "./messages/uk/characterProfile.json";
 import type characters from "./messages/uk/characters.json";
@@ -81,6 +90,15 @@ declare module "next-intl" {
       gameTerms: typeof gameTerms;
       assistant: typeof assistant;
       compendiumReport: typeof compendiumReport;
+      abilityText: typeof abilityText;
+      battleTerms: typeof battleTerms;
+      battleCommon: typeof battleCommon;
+      battle: typeof battle;
+      battleWizards: typeof battleWizards;
+      battleDm: typeof battleDm;
+      battleSetup: typeof battleSetup;
+      battleLog: typeof battleLog;
+      battleActions: typeof battleActions;
     };
   }
 }

@@ -1,3 +1,4 @@
+import { BATTLE_SNAPSHOTS_KEPT_AFTER_COMPLETE } from "./battle";
 import { MAX_TRACK_MB, MAX_TRACKS_PER_CAMPAIGN, TRACK_FORMATS_LABEL, TRACK_TITLE_MAX } from "./music";
 import { MAX_DECKS_PER_CAMPAIGN, MAX_SLIDE_MB, MAX_SLIDES_PER_DECK } from "./show";
 
@@ -444,6 +445,30 @@ export const API_ERRORS = {
   COMPENDIUM_FORBIDDEN: "compendium.errors.forbidden",
   COMPENDIUM_IMPORT_FAILED: "compendium.errors.importFailed",
   IMAGE_UPLOAD_FAILED: "common.errors.imageUploadFailed",
+  BATTLE_CASTER_MISSING: "errors.battleCasterMissing",
+  BATTLE_SPELL_FORBIDDEN: "errors.battleSpellForbidden",
+  BATTLE_CASTER_DOWN: "errors.battleCasterDown",
+  BATTLE_ACT_OWNER_ONLY: "errors.battleActOwnerOnly",
+  BATTLE_ACT_CURRENT_TURN_ONLY: "errors.battleActCurrentTurnOnly",
+  BATTLE_PARTICIPANT_DOWN_CANNOT_ACT: "errors.battleParticipantDownCannotAct",
+  BATTLE_PARTICIPANT_CANNOT_ACT: "errors.battleParticipantCannotAct",
+  BATTLE_ROLLBACK_EXPIRED: "errors.battleRollbackExpired",
+  BATTLE_TERRAIN_REJECTED: "errors.battleTerrainRejected",
+  BATTLE_BARRIER_ROUNDS: "errors.battleBarrierRounds",
+  BATTLE_ATTACK_ROLL_REQUIRED: "errors.battleAttackRollRequired",
+  BATTLE_ATTACK_TARGET_REQUIRED: "errors.battleAttackTargetRequired",
+  IMAGE_FORMATS: "errors.imageFormats",
+  IMAGE_STORAGE_NOT_CONFIGURED: "errors.storageNotConfigured",
+  IMAGE_NAME_INVALID: "errors.imageNameInvalid",
+  IMAGE_DATA_TOO_LARGE: "errors.imageDataTooLarge",
+  IMAGE_DATA_URL_INVALID: "errors.imageDataUrlInvalid",
+  IMAGE_EMPTY: "errors.imageEmpty",
+  IMAGE_FILE_TOO_LARGE: "errors.imageFileTooLarge",
+  IMAGE_FETCH_FAILED: "errors.imageFetchFailed",
+  IMAGE_URL_NOT_IMAGE: "errors.imageUrlNotImage",
+  IMAGE_URL_TOO_LONG: "errors.imageUrlTooLong",
+  MEDIA_CLEANUP_FAILED: "errors.mediaCleanupFailed",
+  TEMPLATE_LEAK: "errors.templateLeak",
 } as const;
 
 export type ApiErrorKey = (typeof API_ERRORS)[keyof typeof API_ERRORS];
@@ -459,4 +484,5 @@ export const API_ERROR_PARAMS: Partial<Record<ApiErrorKey, ErrorParams>> = {
   [API_ERRORS.DECK_SLIDES_LIMIT]: { max: MAX_SLIDES_PER_DECK },
   [API_ERRORS.DECK_LIMIT]: { max: MAX_DECKS_PER_CAMPAIGN },
   [API_ERRORS.SLIDE_FILE_INVALID]: { maxMb: MAX_SLIDE_MB },
+  [API_ERRORS.BATTLE_ROLLBACK_EXPIRED]: { kept: BATTLE_SNAPSHOTS_KEPT_AFTER_COMPLETE },
 };

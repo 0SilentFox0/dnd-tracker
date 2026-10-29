@@ -3,7 +3,7 @@ import { join } from "node:path";
 import { describe, expect, it } from "vitest";
 
 import { NAMESPACES, SERVER_NAMESPACES } from "../config";
-import { CAMPAIGN_NAMESPACES } from "../scopes";
+import { BATTLE_NAMESPACES, CAMPAIGN_NAMESPACES } from "../scopes";
 
 const ROOT = process.cwd();
 
@@ -25,6 +25,14 @@ describe("server namespaces", () => {
 
   it("are not part of the campaign scope", () => {
     expect(CAMPAIGN_NAMESPACES.filter((ns) => (SERVER_NAMESPACES as readonly string[]).includes(ns))).toEqual([]);
+  });
+
+  it("are not part of the battle scope", () => {
+    expect(BATTLE_NAMESPACES.filter((ns) => (SERVER_NAMESPACES as readonly string[]).includes(ns))).toEqual([]);
+  });
+
+  it("battle and campaign scopes do not overlap", () => {
+    expect(BATTLE_NAMESPACES.filter((ns) => (CAMPAIGN_NAMESPACES as readonly string[]).includes(ns))).toEqual([]);
   });
 
   it("are not loaded by any layout", () => {

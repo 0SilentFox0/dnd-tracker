@@ -40,7 +40,7 @@ describe("cyrillic ratchet", () => {
   });
 
   it("ignores directories not yet migrated", async () => {
-    expect(await cyrillicErrors("components/battle/x.tsx", jsx)).toHaveLength(0);
+    expect(await cyrillicErrors("scripts/x.tsx", jsx)).toHaveLength(0);
   });
 
   it("ignores __tests__ in migrated directories", async () => {
