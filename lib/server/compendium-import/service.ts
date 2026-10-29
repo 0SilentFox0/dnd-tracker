@@ -126,11 +126,11 @@ function reportOf(plan: ImportPlan, root: JsonRecord, sources: JsonRecord[], emb
 
   const allIssues = [...unique.values()];
 
-  if (hasCharacters === false) allIssues.push(issue("CHARACTERS_REQUIRED", "characters", "warning", "Створіть персонажів у наповненій кампанії"));
+  if (hasCharacters === false) allIssues.push(issue("CHARACTERS_REQUIRED", "characters", "warning"));
 
   const classesMissing = !!classesMode && (!classesMode.enabled || !classesMode.exists) && plan.writes.some((w) => !w.nested && CLASS_DEPENDENT_KINDS.has(w.kind));
 
-  if (classesMissing) allIssues.push(issue("CLASSES_MODE_REQUIRED", "rules.classes", "warning", "Увімкніть режим класів і додайте базові класи (залежність від SRD), інакше раси, передісторії й риси не збираються на листі героя"));
+  if (classesMissing) allIssues.push(issue("CLASSES_MODE_REQUIRED", "rules.classes", "warning"));
 
   const issueCounts: Record<string, number> = Object.create(null);
 

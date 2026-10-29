@@ -39,8 +39,7 @@ describe("source aware atomic import plan", () => {
 
     const missing = buildImportPlan(adaptCompendium({ background: root.background }), { campaignId: "c", existing: [] });
 
-    expect(missing.errors[0].action).toContain("«Gift»");
-    expect(missing.errors[0].action).toContain("«Past»");
+    expect(missing.errors[0].params).toMatchObject({ name: "Gift", owner: expect.stringContaining("Past") });
   });
 
   it("records explicit bindings for reuse and rejects bindings of the wrong resource kind", () => {

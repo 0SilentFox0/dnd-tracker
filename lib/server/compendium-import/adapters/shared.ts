@@ -1,3 +1,4 @@
+/* eslint-disable no-restricted-syntax -- derived content written to the DB stays Ukrainian (spec part5, decision 5) */
 import { renderEntries } from "../entries";
 import { stableJson } from "../identity";
 import type { JsonRecord } from "../parse";
@@ -61,7 +62,7 @@ export function skills(raw: unknown, ctx: AdapterContext): { fixed: string[]; ch
       const id = skillName(key);
 
       if (id) fixed.push(id);
-      else ctx.issues.push(issue("MANUAL_CUSTOM_SKILL", `${ctx.path}.skillProficiencies[${i}].${key}`, "warning", "Ведіть нестандартну навичку вручну"));
+      else ctx.issues.push(issue("MANUAL_CUSTOM_SKILL", `${ctx.path}.skillProficiencies[${i}].${key}`, "warning"));
     }
 
     const choose = object(row.choose);

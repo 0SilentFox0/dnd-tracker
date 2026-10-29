@@ -1,3 +1,4 @@
+/* eslint-disable no-restricted-syntax -- derived content written to the DB stays Ukrainian (spec part5, decision 5) */
 import { array, effectiveEdition, object, str, unsupported } from "./adapters/shared";
 import { renderEntries } from "./entries";
 import { canonicalKey, nestedId } from "./identity";
@@ -103,7 +104,7 @@ function resolveOptional({ context, ownerPath, featureContext }: FeatureScope, v
   const candidates = array(root.optionalfeature).map(object).filter((r) => normalized(str(r.name)) === normalized(name) && normalized(str(r.source)) === normalized(source ?? ""));
 
   if (candidates.length !== 1) {
-    issues.push(issue("OPTIONAL_FEATURE_REF", ownerPath, "error", "Додайте визначення опційної особливості"));
+    issues.push(issue("OPTIONAL_FEATURE_REF", ownerPath, "error"));
 
     return;
   }
@@ -132,7 +133,7 @@ function collectChoices(scope: FeatureScope, entries: unknown, parts: string[]):
         const options = children.flatMap((child) => resolveOptional(scope, child) ?? []);
 
         if (options.length === children.length) choices.push({ id: nestedId(`${ownerPath}:${JSON.stringify(parts)}:${choices.length}`), label: "Особливості на вибір", kind: "option", count: o.count, options });
-      } else context.issues.push(issue("MANUAL_OPTIONAL_PROGRESSION", ownerPath, "warning", "Налаштуйте неоднозначний вибір особливостей вручну"));
+      } else context.issues.push(issue("MANUAL_OPTIONAL_PROGRESSION", ownerPath, "warning", { variant: "ambiguous" }));
 
       return;
     }
@@ -184,7 +185,7 @@ function resolveFeature(context: FeatureResolutionContext, kind: Kind, ownerPath
   const { root, editionFallback, issues, embedded } = context;
 
   embedded[kind] = (embedded[kind] ?? 0) + 1;
-  issues.push(issue("MANUAL_CLASS_FEATURE", ownerPath, "warning", "Особливість перенесено як опис; застосовуйте її правила вручну"));
+  issues.push(issue("MANUAL_CLASS_FEATURE", ownerPath, "warning"));
 
   const rendered = renderEntries(inlineFeatureRefs(context, row.entries, effectiveEdition(row.edition, editionFallback)), `${kind}.${i}`);
 
@@ -216,7 +217,7 @@ export function resolveCompendiumFeatures(raw: unknown, kind: Kind, ownerPath: s
     const candidates = findFeatureRows(context.root, kind, parts, edition);
 
     if (candidates.length !== 1) {
-      context.issues.push(issue("FEATURE_REF_UNRESOLVED", `${ownerPath}[${i}]`, "error", "Додайте точне визначення feature або виключіть залежний клас/підклас"));
+      context.issues.push(issue("FEATURE_REF_UNRESOLVED", `${ownerPath}[${i}]`, "error"));
       continue;
     }
 
@@ -269,12 +270,12 @@ export function resolveOptionalProgression(raw: unknown, ownerPath: string, cont
     const levels = progressionLevels(entry.progression);
 
     if (rows.length === 0 || levels.length === 0 || rows.length > CHOICE_LIMITS.options) {
-      context.issues.push(issue("MANUAL_OPTIONAL_PROGRESSION", at, "warning", "Налаштуйте вибір опційних особливостей вручну"));
+      context.issues.push(issue("MANUAL_OPTIONAL_PROGRESSION", at, "warning"));
 
       continue;
     }
 
-    context.issues.push(issue("MANUAL_OPTIONAL_FEATURE", at, "warning", "Опційні особливості перенесено як вибір з описом; застосовуйте їхні правила вручну"));
+    context.issues.push(issue("MANUAL_OPTIONAL_FEATURE", at, "warning"));
 
     const options = rows.map((r) => optionFromRow(context, featureContext, r));
 

@@ -90,7 +90,7 @@ describe.skipIf(!localDb)("Task21 synthetic campaign integration", () => {
     expect(report.countsByCategory.book).toMatchObject({ mapped: 1, skipped: 0 });
     expect(report.countsByCategory.bookData).toMatchObject({ mapped: 1, skipped: 0 });
     expect(report.countsByCategory.foundryFeat).toMatchObject({ mapped: 0, skipped: 1 });
-    expect(report.nextActions.every(a => a.action.length > 0)).toBe(true);
+    expect(report.nextActions.every(a => a.action === undefined)).toBe(true);
     expect(report.nextActions.map(a => a.code)).toEqual(expect.arrayContaining(["MANUAL_PREREQUISITE", "MANUAL_CLASS_FEATURE", "UNSUPPORTED_CATEGORY", "CHARACTERS_REQUIRED"]));
 
     const cls = await prisma.gameClass.findFirstOrThrow({ where: { campaignId } });

@@ -1,24 +1,15 @@
+/* eslint-disable no-restricted-syntax -- derived content written to the DB stays Ukrainian (spec part5, decision 5) */
 import { array, str } from "./shared";
 import type { SpellCast } from "./spell-cast";
 import { createsPlainObject, isOutOfCombatBuff, type NarrativeReason, withoutObjectConditions, withoutRestOrTravel } from "./spell-narrative";
 
-import { ABILITY_KEYS, ABILITY_LABELS, type AbilityKey } from "@/lib/constants/abilities";
+import { ABILITY_KEYS } from "@/lib/constants/abilities";
+import type { ErrorParams } from "@/lib/constants/api-errors";
 import { type AnyConditionKey, CONDITION_5E_KEYS } from "@/lib/utils/abilities/schema/kinds";
 import { ADDS_MOD, durationRounds, spellEffects, type SpellFacts, spellKind, spellRange, spellResolution, spellSide, spellTargeting, spellUpcast, validDice } from "@/lib/utils/spells/derive/mechanics";
 import { numberWord } from "@/lib/utils/spells/derive/text";
 
 export type SpellBlocker = "SUMMON" | "BUFF_OR_TRANSFORM" | "WEAPON" | "VARIABLE_DAMAGE" | "SELF_DAMAGE" | "ZONE_OR_TRIGGER" | "UNSUPPORTED_CONDITION" | "UNMODELED_EFFECT";
-
-export const BLOCKER_ACTIONS: Record<SpellBlocker, string> = {
-  SUMMON: "Заклинання створює істоту чи об'єкт: налаштуйте виклик юніта або застосовуйте вручну",
-  BUFF_OR_TRANSFORM: "Заклинання перетворює істоту або дає тривалі бонуси чи імунітети: рушій не моделює, налаштуйте вручну",
-  WEAPON: "Заклинання змінює або створює зброю чи боєприпаси: рушій цього не моделює, застосовуйте вручну",
-  VARIABLE_DAMAGE: "Шкода залежить від відстані чи кількості кроків: одна формула не підходить, налаштуйте вручну",
-  SELF_DAMAGE: "Заклинання завдає шкоди кастеру: рушій не моделює, налаштуйте вручну",
-  ZONE_OR_TRIGGER: "Заклинання діє протягом тривалості (зона, аура, тригер на ході чи реакцію): рушій не моделює, налаштуйте вручну",
-  UNSUPPORTED_CONDITION: "Заклинання накладає стан, якого немає серед станів 5e рушія: налаштуйте вручну",
-  UNMODELED_EFFECT: "Ефект не зводиться до шкоди, лікування чи стану з 5e: налаштуйте вручну",
-};
 
 export interface DerivedSpell {
   fields: Record<string, unknown>;
@@ -27,7 +18,7 @@ export interface DerivedSpell {
   riders: string[];
 }
 
-export type SpellDerivation = { native: DerivedSpell } | { blocker: SpellBlocker; detail?: string };
+export type SpellDerivation = { native: DerivedSpell } | { blocker: SpellBlocker; detail?: ErrorParams };
 
 const SIGNAL_TEXT = /\bhit points\b|\bspeed\b[^.]{0,30}\b(?:reduced|increases?|decreases?)\b|\b(?:reduces?|increases?)\b[^.]{0,30}\bspeed\b|\bArmor Class\b|\badvantage\b|\bdisadvantage\b|\bspell attack\b|\bsaving throw\b/i;
 
@@ -158,7 +149,7 @@ export function deriveSpell(row: Record<string, unknown>, text: string, higher: 
 
   if (!signals) return narrative("noCombatNumbers");
 
-  if (unknownConditions.length > 0) return { blocker: "UNSUPPORTED_CONDITION", detail: `невідомий стан «${unknownConditions[0]}»` };
+  if (unknownConditions.length > 0) return { blocker: "UNSUPPORTED_CONDITION", detail: { condition: unknownConditions[0] } };
 
   if (SELF_DAMAGE.test(text)) return { blocker: "SELF_DAMAGE" };
 
@@ -205,9 +196,7 @@ export function deriveSpell(row: Record<string, unknown>, text: string, higher: 
   const kind = spellKind(facts);
 
   if (kind === "none") {
-    const parts = [ability && `рятівний кидок ${ABILITY_LABELS[ability as AbilityKey] ?? ability}`, spellAttack && "атака заклинанням", damageTypes.length > 0 && "шкода без однієї формули"].filter(Boolean);
-
-    return { blocker: "UNMODELED_EFFECT", detail: parts.join(", ") || undefined };
+    return { blocker: "UNMODELED_EFFECT", detail: { save: ability ?? "none", attack: spellAttack ? "yes" : "no", damage: damageTypes.length > 0 ? "yes" : "no" } };
   }
 
   const side = spellSide(facts, kind);

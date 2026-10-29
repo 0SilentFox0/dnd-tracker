@@ -6,6 +6,7 @@ const mocks = vi.hoisted(() => ({ actor: vi.fn(), preview: vi.fn(), confirm: vi.
 vi.mock("@/lib/utils/api/actor", () => ({ resolveActor: mocks.actor }));
 vi.mock("../presentation", () => ({ previewPresentation: () => ({ graph: [], rulesDiff: {} }), importTargetOptions: vi.fn() }));
 vi.mock("../repository", () => ({ prismaImportRepository: { authorize: mocks.authorize } }));
+vi.mock("@/lib/i18n/request-locale", () => ({ getRequestLocale: async () => "uk" }));
 vi.mock("../service", () => ({ previewImport: mocks.preview, confirmImport: mocks.confirm }));
 vi.mock("@/lib/db", () => ({ prisma: { compendiumImportRun: { findMany: mocks.runs }, compendiumEntry: { findMany: mocks.entry } } }));
 vi.mock("@/lib/utils/api/rate-limit", () => ({ checkRateLimit: mocks.rate, rateLimitResponse: () => NextResponse.json({}, { status: 429 }) }));
@@ -21,7 +22,7 @@ describe("compendium HTTP boundary", () => {
   it("rejects foreign origin before planning", async () => { expect((await compendiumRoute("preview")(req({}, "https://evil.test"), ctx)).status).toBe(403); expect(mocks.preview).not.toHaveBeenCalled(); });
   it("rejects token actors including DM tokens", async () => { mocks.actor.mockResolvedValue({ isDM: true, via: "token" }); expect((await compendiumRoute("preview")(req({}), ctx)).status).toBe(403); });
   it("preserves auth failures for reads", async () => { mocks.actor.mockResolvedValue(NextResponse.json({}, { status: 401 })); expect((await compendiumRoute("reports")(new Request("http://localhost/api"), ctx)).status).toBe(401); expect(mocks.runs).not.toHaveBeenCalled(); });
-  it("previews with the existing service and never confirms", async () => { mocks.preview.mockResolvedValue({ token: "t", report: {} });
+  it("previews with the existing service and never confirms", async () => { mocks.preview.mockResolvedValue({ token: "t", report: { rows: [], nextActions: [] } });
 
  const response = await compendiumRoute("preview")(req({ input: { json: "{}" } }), ctx);
 
@@ -61,7 +62,7 @@ it.each([0, 1])("bounds actual streamed UTF8 bytes without content-length (over:
 
   const request = new Request("http://localhost/api", { method: "POST", headers: { origin: "http://localhost" }, body: stream, duplex: "half" } as RequestInit);
 
-  mocks.preview.mockResolvedValue({ token: "t", report: {} });
+  mocks.preview.mockResolvedValue({ token: "t", report: { rows: [], nextActions: [] } });
 
   const response = await compendiumRoute("preview")(request, ctx);
 
@@ -92,7 +93,7 @@ it("scopes source notes to the authorized campaign and exact native target", asy
 });
 
 it("accepts the browser host when Next normalizes the internal request URL", async () => {
-  mocks.preview.mockResolvedValue({ token: "t", report: {} });
+  mocks.preview.mockResolvedValue({ token: "t", report: { rows: [], nextActions: [] } });
 
   const request = req({ input: { json: "{}" } }, "http://127.0.0.1:3133");
 

@@ -4,13 +4,17 @@ import { z } from "zod";
 import { COMPENDIUM_LIMITS, CompendiumError } from "./parse";
 import { importTargetOptions, previewPresentation } from "./presentation";
 import { prismaImportRepository } from "./repository";
-import { confirmImport, previewImport } from "./service";
+import { type CompendiumReport, confirmImport, previewImport } from "./service";
+import { type ImportIssue, translateCompendiumIssue, translateCompendiumReport } from "./types";
 
 import { prisma } from "@/lib/db";
+import { getRequestLocale } from "@/lib/i18n/request-locale";
+import { getTranslator } from "@/lib/i18n/translator";
 import { resolveActor } from "@/lib/utils/api/actor";
 import { PRIVATE_NO_STORE_HEADERS } from "@/lib/utils/api/cache-headers";
 import { checkRateLimit, rateLimitResponse } from "@/lib/utils/api/rate-limit";
 import { isSameOriginRequest } from "@/lib/utils/api/same-origin";
+import { isRecord } from "@/lib/utils/common/is-record";
 
 const json = (body: unknown, status = 200) => NextResponse.json(body, { status, headers: PRIVATE_NO_STORE_HEADERS });
 
@@ -82,6 +86,8 @@ export function compendiumRoute(mode: "preview" | "confirm" | "reports" | "entri
 
       if (mode === "options") return json(await importTargetOptions(actor));
 
+      const t = await getTranslator(await getRequestLocale(), "compendiumReport");
+
       const url = new URL(req.url);
 
       const offset = Math.min(100_000, Math.max(0, Number(url.searchParams.get("offset")) || 0));
@@ -91,7 +97,7 @@ export function compendiumRoute(mode: "preview" | "confirm" | "reports" | "entri
 
         const runs = await prisma.compendiumImportRun.findMany({ where: { campaignId: id, ...(runId ? { id: runId } : {}) }, orderBy: [{ createdAt: "desc" }, { id: "desc" }], skip: Math.floor(offset), take: 21, select: { id: true, createdAt: true, report: true } });
 
-        return json({ runs: runs.slice(0, 20).map(run => runId ? run : { id: run.id, createdAt: run.createdAt }), hasMore: runs.length > 20 });
+        return json({ runs: runs.slice(0, 20).map(run => runId ? { ...run, report: translateCompendiumReport(t, run.report as unknown as CompendiumReport) } : { id: run.id, createdAt: run.createdAt }), hasMore: runs.length > 20 });
       }
 
       if (mode === "entries") {
@@ -101,7 +107,7 @@ export function compendiumRoute(mode: "preview" | "confirm" | "reports" | "entri
 
         const entries = await prisma.compendiumEntry.findMany({ where: { campaignId: id, kind, localId: targetId }, orderBy: { canonicalKey: "asc" }, skip: Math.floor(offset), take: 51, select: { canonicalKey: true, originalName: true, edition: true, sourceJson: true, attribution: true, notes: true, issues: true, locator: true } });
 
-        return json({ entries: entries.slice(0, 50), hasMore: entries.length > 50 });
+        return json({ entries: entries.slice(0, 50).map(entry => ({ ...entry, issues: Array.isArray(entry.issues) ? entry.issues.map(item => isRecord(item) ? translateCompendiumIssue(t, item as unknown as ImportIssue) : item) : entry.issues })), hasMore: entries.length > 50 });
       }
 
       const secret = process.env.COMPENDIUM_PREVIEW_SECRET ?? "";
@@ -116,12 +122,12 @@ export function compendiumRoute(mode: "preview" | "confirm" | "reports" | "entri
       if (mode === "preview") {
         const preview = await previewImport(actor, input, secret, prismaImportRepository);
 
-        return json({ ...preview, ...previewPresentation(input, preview.report.nextActions) });
+        return json({ ...preview, report: translateCompendiumReport(t, preview.report), ...previewPresentation(input, preview.report.nextActions) });
       }
 
       if (!body.rightsConfirmed || !body.token || !body.idempotencyKey) return json({ code: "CONFIRM_REQUIRED" }, 422);
 
-      return json(await confirmImport(actor, input, body.token, body.idempotencyKey, secret, prismaImportRepository));
+      return json(translateCompendiumReport(t, await confirmImport(actor, input, body.token, body.idempotencyKey, secret, prismaImportRepository)));
     } catch (error) {
       if (error instanceof CompendiumError) return json({ code: error.code }, statusOf(error.code));
 

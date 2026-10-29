@@ -46,7 +46,7 @@ export function adaptTopLevel(state: AdaptState) {
     if (kind === "_meta" || !isEnabled(state, kind)) continue;
 
     if (!adapters[kind] && !nestedKinds.has(kind)) {
-      state.issues.push(issue("UNSUPPORTED_CATEGORY", kind, "warning", "Перенесіть потрібні матеріали вручну"));
+      state.issues.push(issue("UNSUPPORTED_CATEGORY", kind, "warning"));
       continue;
     }
 

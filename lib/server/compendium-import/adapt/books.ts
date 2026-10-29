@@ -13,7 +13,7 @@ export function adaptBooks(state: AdaptState) {
       const data = array(root[`${kind}Data`]).map(object).filter((d) => d.id === manifest.id && (!d.source || d.source === manifest.source));
 
       if (data.length !== 1) {
-        issues.push(issue("CORPUS_DATA_MISSING", `${kind}[${index}]`, "warning", "Додайте відповідні дані глав або матеріали вручну"));
+        issues.push(issue("CORPUS_DATA_MISSING", `${kind}[${index}]`, "warning"));
 
         return;
       }

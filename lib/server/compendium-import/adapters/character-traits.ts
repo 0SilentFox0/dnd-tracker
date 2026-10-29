@@ -1,3 +1,4 @@
+/* eslint-disable no-restricted-syntax -- derived content written to the DB stays Ukrainian (spec part5, decision 5) */
 import { nestedId, stableJson } from "../identity";
 import { type AdapterContext, type CompendiumRef, issue } from "../types";
 import { ABILITIES, array, num, object, str, uidRef } from "./shared";
@@ -81,7 +82,7 @@ function speedTraits(speedRaw: unknown, ctx: AdapterContext): { text: string; ab
     }
   }
 
-  if (other.length > 0) ctx.issues.push(issue("MANUAL_RACE_MOVEMENT", `${ctx.path}.speed`, "warning", `Рушій моделює лише ходьбу: рух (${other.join(", ")}) застосовуйте за описом`));
+  if (other.length > 0) ctx.issues.push(issue("MANUAL_RACE_MOVEMENT", `${ctx.path}.speed`, "warning", { movement: other.join(", ") }));
 
   return { text: parts.join(", "), abilities };
 }
@@ -122,7 +123,7 @@ export function raceTraits(row: Record<string, unknown>, ctx: AdapterContext): T
 
     if (resist.effects.length > 0) abilities.push(passive("race-resist", "Опір шкоді", resist.effects));
 
-    if (!resist.complete) ctx.issues.push(issue("MANUAL_RACE_RESIST", `${ctx.path}.resist`, "warning", "Опір шкоді з вибором або складною умовою рушій не моделює: застосовуйте за описом"));
+    if (!resist.complete) ctx.issues.push(issue("MANUAL_RACE_RESIST", `${ctx.path}.resist`, "warning"));
   }
 
   return { head, abilities };
@@ -195,7 +196,7 @@ export function featPrerequisite(raw: unknown, ctx: AdapterContext): { level?: n
 
   if (alternatives.length > 1) {
     manualText.push(...alternatives.map((a) => stableJson(a)));
-    ctx.issues.push(issue("MANUAL_PREREQUISITE", `${ctx.path}.prerequisite`, "warning", "Вимоги до риси мають кілька альтернатив: ДМ перевіряє їх вручну"));
+    ctx.issues.push(issue("MANUAL_PREREQUISITE", `${ctx.path}.prerequisite`, "warning", { variant: "alternatives" }));
 
     return { manualText };
   }
@@ -224,7 +225,7 @@ export function featPrerequisite(raw: unknown, ctx: AdapterContext): { level?: n
 
   if (bits.length > 0) out.text = bits.join(", ");
 
-  if (manualText.length > 0) ctx.issues.push(issue("MANUAL_PREREQUISITE", `${ctx.path}.prerequisite`, "warning", "ДМ: перевірте вимоги до вибору риси"));
+  if (manualText.length > 0) ctx.issues.push(issue("MANUAL_PREREQUISITE", `${ctx.path}.prerequisite`, "warning"));
 
   return out;
 }
