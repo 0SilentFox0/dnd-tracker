@@ -2,7 +2,6 @@ import { describe, expect, it, vi } from "vitest";
 
 vi.mock("@/lib/db", () => ({ prisma: {} }));
 
-import { textMatching } from "@/lib/i18n/test/text";
 import { findCompletedSets, findSetProgress } from "@/lib/utils/battle/artifact-sets/apply-completed-sets";
 
 const equipped = [
@@ -56,7 +55,7 @@ describe("findSetProgress", () => {
 
   it("have/total/complete по кожному сету з ефектами; сет без умінь і без setBonus пропускається", () => {
     expect(findSetProgress(worn, maps as never)).toEqual([
-      { setId: "s1", name: "Мисливець", have: 2, total: 3, complete: false, effects: [textMatching(/шкода \(ближня\) \+10%/)] },
+      { setId: "s1", name: "Мисливець", have: 2, total: 3, complete: false, effects: [expect.objectContaining({ then: [[expect.objectContaining({ key: "summary.effects.damageBonus" })]] })] },
       { setId: "s3", name: "Старий", have: 1, total: 1, complete: true, effects: expect.any(Array) },
     ]);
   });

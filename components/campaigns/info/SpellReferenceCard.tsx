@@ -3,6 +3,7 @@
 import { useTranslations } from "next-intl";
 import { Loader2, Sparkles } from "lucide-react";
 
+import { useAbilityText } from "@/components/abilities/use-ability-text";
 import { EntityIcon } from "@/components/common/EntityIcon";
 import { SpellBattlePreview } from "@/components/spells/preview/SpellBattlePreview";
 import {
@@ -45,6 +46,8 @@ export function SpellReferenceCard({
 
   const translate = useTranslator();
 
+  const effects = useAbilityText().lines(spell.effects);
+
   const shortSummary = getShortSpellSummary(spell, translate);
 
   return (
@@ -85,8 +88,8 @@ export function SpellReferenceCard({
             <div>
               <Label className="hud-sc text-xs text-hud-gold">{t("effects")}</Label>
               <ul className="list-disc list-inside text-sm mt-0.5 space-y-0.5">
-                {spell.effects.map((e, i) => (
-                  <li key={i}>{text(e)}</li>
+                {effects.map((e, i) => (
+                  <li key={i}>{e}</li>
                 ))}
               </ul>
             </div>

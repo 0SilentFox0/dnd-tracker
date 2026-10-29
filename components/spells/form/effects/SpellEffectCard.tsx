@@ -9,12 +9,12 @@ import type { SpellOnlyEditorProps } from "./spell-only-types";
 import { useFieldErrors } from "@/components/abilities/editor-context";
 import { EffectCard } from "@/components/abilities/EffectCard";
 import { FieldErrors } from "@/components/abilities/FieldErrors";
+import { useAbilityText } from "@/components/abilities/use-ability-text";
 import { Button } from "@/components/ui/button";
 import { SelectField } from "@/components/ui/select-field";
 import { useText } from "@/lib/i18n/use-text";
 import { useTranslator } from "@/lib/i18n/use-translator";
 import { allowedEffectKinds, newEffect } from "@/lib/utils/abilities/editor";
-import { describeEffect } from "@/lib/utils/abilities/registry/effects";
 import type { Effect, EffectKind } from "@/lib/utils/abilities/schema";
 import { isSpellOnlyKind, newSpellOnlyEffect, SPELL_EFFECT_TRIGGER, SPELL_ONLY_LABEL_KEYS,type SpellOnlyKind } from "@/lib/utils/spells/editor/spell-only";
 import type { SpellEffect } from "@/lib/utils/spells/model/schema";
@@ -30,7 +30,7 @@ export function SpellEffectCard({ effect, path, actions }: SpellEffectCardProps)
 
   const tr = useTranslator("abilityRegistry");
 
-  const text = useText();
+  const text = useAbilityText();
 
   const errors = useFieldErrors(path);
 
@@ -73,7 +73,7 @@ export function SpellEffectCard({ effect, path, actions }: SpellEffectCardProps)
       </div>
       <p className="text-xs text-primary">
         <span aria-hidden>= </span>
-        <span>{text(describeEffect(effect))}</span>
+        <span>{text.effect(effect)}</span>
       </p>
     </div>
   );

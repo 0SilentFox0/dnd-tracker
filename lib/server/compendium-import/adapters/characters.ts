@@ -1,6 +1,9 @@
 import { stableJson } from "../identity";
 import { type Adapter, issue } from "../types";
-import { equipmentText, featPrerequisite, featSpells, proficiencyText, raceTraits, resistFlags } from "./character-traits";
+import { equipmentText } from "./equipment";
+import { featPrerequisite } from "./feat-prerequisites";
+import { featSpells } from "./feat-spells";
+import { proficiencyText, raceTraits, resistFlags } from "./race-traits";
 import { ABILITIES, abilityChoices, array, description, num, object, skillName, skills, str, uidRef, unsupported } from "./shared";
 
 export const background: Adapter = (row, ctx) => {

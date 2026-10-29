@@ -1,9 +1,14 @@
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 
 import { SCENARIO_ACTIONS } from "@/lib/server/assistant/actions/scenario";
 import { confirmationFor } from "@/lib/server/assistant/policy";
-import { scenarioFingerprint,transformScenarioContent } from "@/lib/server/scenario/action-service";
+import { runScenarioOperation, scenarioFingerprint, transformScenarioContent } from "@/lib/server/scenario/action-service";
+import { sessionDmActor } from "@/lib/utils/api/actor";
 import type { ScenarioContent } from "@/types/scenario";
+
+vi.mock("server-only", () => ({}));
+vi.mock("@/lib/db", () => ({ prisma: { scenarioPage: { findFirst: vi.fn(async () => null) }, scenarioPageVersion: { findMany: vi.fn() } } }));
+vi.mock("@/lib/server/content/write", () => ({ withCampaignContentWrite: async (_id: string, cb: () => unknown) => cb() }));
 
 const content: ScenarioContent = { legend: [], sections: [{ id: "s", title: "Сцена", played: false, rows: [{ id: "r", story: { type: "doc", content: [{ type: "paragraph", content: [{ type: "text", text: "Історія", marks: [{ type: "bold" }] }] }] }, notes: { type: "doc", content: [{ type: "paragraph", content: [{ type: "text", text: "Секрет" }] }] }, battleId: "battle", slide: { deckId: "deck", slideId: "slide" } }] }, { id: "s2", title: "Друга", played: false, rows: [] }] };
 
@@ -34,6 +39,17 @@ describe("scenario actions", () => {
     const next = transformScenarioContent(content, "section.delete", { sectionId: "s2" });
 
     expect(next.sections[0].rows[0]).toEqual(content.sections[0].rows[0]);
+  });
+});
+
+describe("scenario versions and move inputs", () => {
+  it("versions of a missing page answer 404, not a TypeError", async () => {
+    await expect(runScenarioOperation(sessionDmActor("c", "u"), "versions", { id: "nope" }, undefined, "uk")).rejects.toMatchObject({ status: 404 });
+  });
+
+  it("a move without a valid direction is a 400", () => {
+    expect(() => transformScenarioContent(content, "section.move", { sectionId: "s" })).toThrowError(expect.objectContaining({ status: 400 }));
+    expect(() => transformScenarioContent(content, "row.move", { sectionId: "s", rowId: "r", direction: 2 as never })).toThrowError(expect.objectContaining({ status: 400 }));
   });
 });
 

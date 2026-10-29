@@ -1,6 +1,5 @@
 "use client";
 
-import { type FormEvent, useState } from "react";
 import { useTranslations } from "next-intl";
 
 import { Button } from "@/components/ui/button";
@@ -19,8 +18,7 @@ import {
 } from "@/components/ui/select";
 import { ParticipantSide, ParticipantSourceType, type ParticipantSourceTypeValue } from "@/lib/constants/battle";
 import { clampUnitQuantity, UNIT_QUANTITY as QUANTITY } from "@/lib/constants/battle-units";
-import { useCharacters } from "@/lib/hooks/characters";
-import { useUnitPicker } from "@/lib/hooks/units";
+import { useAddParticipantForm } from "@/lib/hooks/battle";
 import type { AddParticipantData } from "@/types/battle";
 
 const FORM_ID = "add-participant-form";
@@ -49,64 +47,9 @@ export function AddParticipantDialog({
 
   const tActions = useTranslations("common.actions");
 
-  const [type, setType] = useState<ParticipantSourceTypeValue>(ParticipantSourceType.CHARACTER);
-
-  const [side, setSide] = useState<ParticipantSide>(ParticipantSide.ALLY);
-
-  const [characterId, setCharacterId] = useState("");
-
-  const [quantity, setQuantity] = useState<number>(QUANTITY.min);
-
-  const [reserved, setReserved] = useState(false);
-
-  const { data: characters = [] } = useCharacters(campaignId, { compact: true, enabled: open });
-
-  const picker = useUnitPicker(campaignId, open);
+  const { form: { type, side, characterId, quantity, reserved }, set, characters, picker, submit: { placing, canSubmit, handleSubmit } } = useAddParticipantForm({ campaignId, open, onOpenChange, onAdd, onPlace, isError });
 
   const { unitId } = picker;
-
-  const placing = Boolean(onPlace) && type === ParticipantSourceType.UNIT && !reserved;
-
-  const [submitted, setSubmitted] = useState(false);
-
-  const [wasOpen, setWasOpen] = useState(open);
-
-  // the parent closes the dialog in onSuccess: only then reset the input
-  if (open !== wasOpen) {
-    setWasOpen(open);
-
-    if (!open && submitted) {
-      setSubmitted(false);
-      setCharacterId("");
-      picker.reset();
-      setQuantity(QUANTITY.min);
-      setReserved(false);
-    }
-  }
-
-  // error: the dialog stays open, Cancel must not wipe the input
-  if (isError && submitted) setSubmitted(false);
-
-  const handleSubmit = (e: FormEvent) => {
-    e.preventDefault();
-
-    if (type === ParticipantSourceType.CHARACTER && characterId) {
-      setSubmitted(true);
-      onAdd({ sourceId: characterId, type: ParticipantSourceType.CHARACTER, side, reserved });
-    } else if (type === ParticipantSourceType.UNIT && unitId) {
-      const data = { sourceId: unitId, type: ParticipantSourceType.UNIT, side, quantity: quantity || QUANTITY.min, reserved };
-
-      setSubmitted(true);
-
-      if (placing && onPlace) {
-        onPlace(data);
-        onOpenChange(false);
-      } else onAdd(data);
-    }
-  };
-
-  const canSubmit =
-    type === ParticipantSourceType.CHARACTER ? Boolean(characterId) : Boolean(unitId);
 
   return (
     <ResponsiveDialog
@@ -128,7 +71,7 @@ export function AddParticipantDialog({
           <Label>{t("side")}</Label>
           <Select
             value={side}
-            onValueChange={(v) => setSide(v as ParticipantSide)}
+            onValueChange={(v) => set.side(v as ParticipantSide)}
           >
             <SelectTrigger className="w-full">
               <SelectValue />
@@ -143,7 +86,7 @@ export function AddParticipantDialog({
           <Label>{t("type")}</Label>
           <Select
             value={type}
-            onValueChange={(v) => setType(v as ParticipantSourceTypeValue)}
+            onValueChange={(v) => set.type(v as ParticipantSourceTypeValue)}
           >
             <SelectTrigger className="w-full">
               <SelectValue />
@@ -157,7 +100,7 @@ export function AddParticipantDialog({
         {type === ParticipantSourceType.CHARACTER && (
           <div className="space-y-2">
             <Label>{t("hero")}</Label>
-            <Select value={characterId} onValueChange={setCharacterId}>
+            <Select value={characterId} onValueChange={set.characterId}>
               <SelectTrigger className="w-full">
                 <SelectValue placeholder={t("pickHero")} />
               </SelectTrigger>
@@ -215,13 +158,13 @@ export function AddParticipantDialog({
                 min={QUANTITY.min}
                 max={QUANTITY.max}
                 value={quantity}
-                onChange={(e) => setQuantity(clampUnitQuantity(Number(e.target.value), QUANTITY))}
+                onChange={(e) => set.quantity(clampUnitQuantity(Number(e.target.value), QUANTITY))}
               />
             </div>
           </>
         )}
         <label className="flex items-center gap-2 text-sm">
-          <Checkbox checked={reserved} onCheckedChange={(v) => setReserved(v === true)} />
+          <Checkbox checked={reserved} onCheckedChange={(v) => set.reserved(v === true)} />
           {t("reserve")}
         </label>
       </form>

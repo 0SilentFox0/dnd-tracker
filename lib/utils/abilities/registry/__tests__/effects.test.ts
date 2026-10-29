@@ -2,9 +2,15 @@ import { describe, expect, it } from "vitest";
 
 import { ParticipantSide } from "@/lib/constants/battle";
 import { textOf } from "@/lib/i18n/test/text";
+import { enT, ukT } from "@/lib/utils/abilities/__tests__/describe-fixtures";
 import { makeParticipant, resolved, seq } from "@/lib/utils/abilities/__tests__/fixtures";
-import { applyEffect, describeEffect, FLAG_FIELDS } from "@/lib/utils/abilities/registry/effects";
+import { applyEffect, describeEffect as describeEffectSegments, FLAG_FIELDS } from "@/lib/utils/abilities/registry/effects";
 import type { Effect } from "@/lib/utils/abilities/schema";
+import { renderSegments } from "@/lib/utils/abilities/segments";
+
+const t = await ukT();
+
+const describeEffect = (e: Parameters<typeof describeEffectSegments>[0]) => renderSegments(t, describeEffectSegments(e)).join(" · ");
 
 function run(effect: Effect, targetIds: string[], ps = [makeParticipant({ id: "o" }), makeParticipant({ id: "t", side: ParticipantSide.ENEMY })]) {
   const ability = resolved({ trigger: { event: "hit", role: "attacker" }, effects: [effect] });
@@ -79,23 +85,23 @@ describe("effects", () => {
   });
 
   it("describe", () => {
-    expect(textOf(describeEffect({ kind: "damageBonus", filter: { kind: "melee" }, percent: 10 }))).toBe("шкода (ближня) +10%");
-    expect(textOf(describeEffect({ kind: "dot", damagePerRound: "1d4", damageType: "bleed", duration: { rounds: 3 } }))).toBe("Кровотеча 1d4/раунд × 3 р.");
+    expect(describeEffect({ kind: "damageBonus", filter: { kind: "melee" }, percent: 10 })).toBe("шкода (ближня) +10%");
+    expect(describeEffect({ kind: "dot", damagePerRound: "1d4", damageType: "bleed", duration: { rounds: 3 } })).toBe("Кровотеча 1d4/раунд × 3 р.");
   });
 });
 
 describe("counterAttack у редакторі", () => {
   it("на вибір лише ближня і дальня; опис згадує дальні", () => {
     expect(FLAG_FIELDS.counterAttack[0].options?.map((o) => o.value)).toEqual(["melee", "ranged"]);
-    expect(textOf(describeEffect({ kind: "flag", flag: "counterAttack", attackKinds: ["ranged"], bonusPercent: 20 }))).toBe("відсіч (і на дальні) +20%");
-    expect(textOf(describeEffect({ kind: "flag", flag: "counterAttack", attackKinds: ["melee"], bonusPercent: 15 }))).toBe("відсіч +15%");
+    expect(describeEffect({ kind: "flag", flag: "counterAttack", attackKinds: ["ranged"], bonusPercent: 20 })).toBe("відсіч (і на дальні) +20%");
+    expect(describeEffect({ kind: "flag", flag: "counterAttack", attackKinds: ["melee"], bonusPercent: 15 })).toBe("відсіч +15%");
   });
 });
 
 describe("прапорці моралі", () => {
   it("мітки й описи", () => {
-    expect(textOf(describeEffect({ kind: "flag", flag: "noNegativeMorale" }))).toBe("від'ємна мораль = 0");
-    expect(textOf(describeEffect({ kind: "flag", flag: "ignoreMorale" }))).toBe("мораль не діє");
+    expect(describeEffect({ kind: "flag", flag: "noNegativeMorale" })).toBe("від'ємна мораль = 0");
+    expect(describeEffect({ kind: "flag", flag: "ignoreMorale" })).toBe("мораль не діє");
     expect(FLAG_FIELDS.noNegativeMorale).toEqual([]);
     expect(FLAG_FIELDS.ignoreMorale).toEqual([]);
   });
@@ -127,5 +133,25 @@ describe("randomOf", () => {
 
     expect(run({ kind: "restoreSpellSlot", count: 1 }, ["o"], [p]).participants[0].spellcasting.spellSlots["1"].current).toBe(2);
     expect(run({ kind: "drainSpellSlot", count: 1 }, ["o"], [{ ...p, spellcasting: { ...p.spellcasting, spellSlots: { ...p.spellcasting.spellSlots, pact: { level: 5, max: 2, current: 1 } } } }]).participants[0].spellcasting.spellSlots.pact.current).toBe(0);
+  });
+});
+
+describe("describeEffect: unknown kind and randomOf", () => {
+  const unknown = { kind: "xyz" } as unknown as Effect;
+
+  const random: Effect = { kind: "randomOf", options: [{ kind: "heal", amount: 3 }, { kind: "dealDamage", amount: 4 }] };
+
+  it("unknown kind renders in uk and en", async () => {
+    expect(describeEffect(unknown)).toBe("невідомий ефект (xyz)");
+    expect(renderSegments(await enT(), describeEffectSegments(unknown)).join(" · ")).toBe("unknown effect (xyz)");
+  });
+
+  it("randomOf renders options in uk and en without Cyrillic", async () => {
+    expect(describeEffect(random)).toBe("одне з: лікування 3 / шкода 4");
+
+    const en = renderSegments(await enT(), describeEffectSegments(random)).join(" · ");
+
+    expect(en).toMatch(/^one of: /);
+    expect(en).not.toMatch(/[А-Яа-яІіЇїЄєҐґ]/);
   });
 });

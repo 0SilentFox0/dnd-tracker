@@ -1,4 +1,3 @@
-import { flag } from "../text";
 import type { EffectApplyInput, EffectApplyResult } from "./types";
 
 import { CombatStatus, ParticipantSourceType } from "@/lib/constants/battle";
@@ -6,6 +5,7 @@ import { textRef } from "@/lib/i18n/text-ref";
 import { applyBakedAuras } from "@/lib/utils/abilities/build/bake";
 import { findParticipant, participantNames, updateParticipant } from "@/lib/utils/abilities/engine/core/participants";
 import type { Effect } from "@/lib/utils/abilities/schema";
+import { seg, type Segment } from "@/lib/utils/abilities/segments";
 import type { LogLine } from "@/types/text";
 
 type Of<K extends Effect["kind"]> = Extract<Effect, { kind: K }>;
@@ -20,7 +20,9 @@ export function applySummon(input: EffectApplyInput<Of<"summon">>): EffectApplyR
   return { participants: input.participants, messages: [], summons: [{ ownerId, group: effect.group, tier: effect.tier, unitId: effect.unitId, count: effect.count ?? 1, casterLevel, spellId }] };
 }
 
-export const describeSummon = (e: Of<"summon">) => textRef("abilityText.effects.summon", { unit: flag(e.unitId), count: e.count ?? 1, group: e.group ?? "", tier: e.tier ?? "" });
+export const describeSummon = (e: Of<"summon">): Segment[] => [
+  e.unitId ? seg("summary.effects.summonUnit", { count: e.count ?? 1 }) : seg("summary.effects.summonGroup", { count: e.count ?? 1, group: e.group ?? "", tier: e.tier ?? "" }),
+];
 
 export function applyRaiseDead(input: EffectApplyInput<Of<"raiseDead">>): EffectApplyResult {
   const { effect, ability, ownerId } = input;
@@ -62,4 +64,4 @@ export function applyRaiseDead(input: EffectApplyInput<Of<"raiseDead">>): Effect
   return { participants: ps, messages };
 }
 
-export const describeRaiseDead = (e: Of<"raiseDead">) => textRef("abilityText.effects.raiseDead", { percent: e.hpPercent });
+export const describeRaiseDead = (e: Of<"raiseDead">): Segment[] => [seg("summary.effects.raiseDead", { percent: e.hpPercent })];

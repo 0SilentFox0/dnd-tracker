@@ -21,9 +21,9 @@ import { AbilityEditorProvider } from "@/components/abilities/editor-context";
 import { UnitPickerField } from "@/components/abilities/fields/UnitPickerField";
 import { useUnits } from "@/lib/hooks/units";
 import { EFFECT_REGISTRY } from "@/lib/utils/abilities/registry/effects";
-import type { FieldMeta } from "@/lib/utils/abilities/registry/fields";
+import type { LocalizedFieldMeta } from "@/lib/utils/abilities/registry/fields";
 
-const meta: FieldMeta = { name: "unitId", label: "Юніт", input: "unit", optional: true };
+const meta: LocalizedFieldMeta = { name: "unitId", label: "Юніт", input: "unit", optional: true };
 
 describe("UnitPickerField", () => {
   afterEach(cleanup);

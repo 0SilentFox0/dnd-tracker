@@ -9,10 +9,11 @@ import { MonsterStatblock } from "@/components/common/MonsterStatblock";
 import { useBattleSceneData, useFxImpacts, useHitFx } from "@/lib/hooks/battle";
 import { lineKey } from "@/lib/i18n/text-ref";
 import { useText } from "@/lib/i18n/use-text";
+import { useTranslator } from "@/lib/i18n/use-translator";
 import { cn } from "@/lib/utils";
 import { getEffectiveArmorClass } from "@/lib/utils/battle/participant/helpers";
-import { canSeeExactStats, effectLines, effectTitle, formatKnownArmorClass, resolveKnownArmorClass, resolveObservedTraits } from "@/lib/utils/battle/view";
-import type { BattleParticipant } from "@/types/battle";
+import { canSeeExactStats, effectLines, effectTitle, formatKnownArmorClass, resolveKnownArmorClass, resolveObservedTraits, statblockOf } from "@/lib/utils/battle/view";
+import type { ActiveEffect, BattleParticipant } from "@/types/battle";
 
 function Section({ title, children }: { title: string; children: ReactNode }) {
   return (
@@ -32,6 +33,27 @@ export function ParticipantDetails({ participant }: ParticipantDetailsProps) {
   return <ParticipantDetailsBody key={participant.basicInfo.id} participant={participant} />;
 }
 
+function EffectRow({ effect: e }: { effect: ActiveEffect }) {
+  const t = useTranslations("battle.details");
+
+  const text = useText();
+
+  const abilityT = useTranslator("abilityRegistry");
+
+  return (
+    <div className="flex gap-3 border-b border-white/[.08] py-2.5">
+      <span className={e.type === "buff" ? "text-[#cdb87e]" : "text-hud-danger"}>
+        <EffectIcon effect={e} size={36} />
+      </span>
+      <div className="min-w-0 flex-1">
+        <div className="flex justify-between text-[15px] font-medium text-[var(--ink)]"><span>{text(effectTitle(e))}</span><span className="text-[13px] font-normal text-[var(--hud-muted)]">{e.zone ? t("zone") : e.permanent ? t("permanent") : t("rounds", { count: e.duration })}</span></div>
+        {effectLines(e, abilityT).map(text).map((line) => <p key={line} className="mt-0.5 text-[13px] leading-[18px] text-[#a89c88]">{line}</p>)}
+        {e.source && <p className="text-[13px] leading-[18px] text-[#a89c88]">{t("from", { source: e.source.abilityName ? `${e.source.abilityName} (${e.source.name})` : e.source.name })}</p>}
+      </div>
+    </div>
+  );
+}
+
 function ParticipantDetailsBody({ participant: live }: ParticipantDetailsProps) {
   const t = useTranslations("battle.details");
 
@@ -44,6 +66,8 @@ function ParticipantDetailsBody({ participant: live }: ParticipantDetailsProps) 
   const { change, shown: participant, shakeRef } = useHitFx<HTMLDivElement>(live, impactFor(live.basicInfo.id));
 
   const exact = canSeeExactStats(participant, viewer);
+
+  const statblock = exact ? statblockOf(participant) : null;
 
   const log = battle.battleLog ?? [];
 
@@ -65,7 +89,7 @@ function ParticipantDetailsBody({ participant: live }: ParticipantDetailsProps) 
         </div>
       </div>
       <HealthBar participant={participant} exact={exact} className="mt-3" />
-      {exact && (participant.abilities.creatureType || participant.battleData.senses || participant.battleData.movement || participant.battleData.languages || participant.battleData.telepathy !== undefined) && <Section title={t("statblock")}><MonsterStatblock block={{ creatureType: participant.abilities.creatureType, senses: participant.battleData.senses, movement: participant.battleData.movement, languages: participant.battleData.languages, telepathy: participant.battleData.telepathy }} /></Section>}
+      {statblock && <Section title={t("statblock")}><MonsterStatblock block={statblock} /></Section>}
       <Section title={t("armor")}>
         <div className="flex min-h-10 items-center justify-between border-b border-white/[.08]">
           <span>{exact ? t("ac") : t("acBetween")}</span>
@@ -79,18 +103,7 @@ function ParticipantDetailsBody({ participant: live }: ParticipantDetailsProps) 
       </Section>
       <Section title={t("effects")}>
         {effects.length === 0 && <div className="py-2 text-sm text-[var(--hud-muted)]">{t("none")}</div>}
-        {effects.map((e) => (
-          <div key={e.id} className="flex gap-3 border-b border-white/[.08] py-2.5">
-            <span className={e.type === "buff" ? "text-[#cdb87e]" : "text-hud-danger"}>
-              <EffectIcon effect={e} size={36} />
-            </span>
-            <div className="min-w-0 flex-1">
-              <div className="flex justify-between text-[15px] font-medium text-[var(--ink)]"><span>{text(effectTitle(e))}</span><span className="text-[13px] font-normal text-[var(--hud-muted)]">{e.zone ? t("zone") : e.permanent ? t("permanent") : t("rounds", { count: e.duration })}</span></div>
-              {effectLines(e).map(text).map((line) => <p key={line} className="mt-0.5 text-[13px] leading-[18px] text-[#a89c88]">{line}</p>)}
-              {e.source && <p className="text-[13px] leading-[18px] text-[#a89c88]">{t("from", { source: e.source.abilityName ? `${e.source.abilityName} (${e.source.name})` : e.source.name })}</p>}
-            </div>
-          </div>
-        ))}
+        {effects.map((e) => <EffectRow key={e.id} effect={e} />)}
       </Section>
       {traits.length > 0 && (
         <Section title={t("observed")}>

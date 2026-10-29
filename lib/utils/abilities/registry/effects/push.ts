@@ -4,6 +4,7 @@ import { CELL_FEET } from "@/lib/constants/battle";
 import { textRef } from "@/lib/i18n/text-ref";
 import { findParticipant, isActive, replaceParticipant } from "@/lib/utils/abilities/engine/core/participants";
 import type { Effect } from "@/lib/utils/abilities/schema";
+import { seg, type Segment } from "@/lib/utils/abilities/segments";
 import { hazardHit, hazardUnder } from "@/lib/utils/battle/grid/hazard";
 import { isOnMap } from "@/lib/utils/battle/grid/occupancy";
 import { pushAway } from "@/lib/utils/battle/grid/push";
@@ -11,7 +12,7 @@ import type { LogLine } from "@/types/text";
 
 type PushEffect = Extract<Effect, { kind: "push" }>;
 
-export const describePush = (e: PushEffect) => textRef("abilityText.effects.push", { feet: e.feet });
+export const describePush = (e: PushEffect): Segment[] => [seg("summary.effects.push", { feet: e.feet })];
 
 export function applyPush(input: EffectApplyInput<PushEffect>): EffectApplyResult {
   const { ability, effect, ctx } = input;

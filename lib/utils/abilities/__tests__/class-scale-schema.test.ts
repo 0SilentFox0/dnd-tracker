@@ -1,11 +1,12 @@
 import { describe, expect, it } from "vitest";
 
-import { textOf } from "@/lib/i18n/test/text";
+import { ukT } from "@/lib/utils/abilities/__tests__/describe-fixtures";
 import { makeParticipant, resolved } from "@/lib/utils/abilities/__tests__/fixtures";
 import { resolveAmount, resolveFlat } from "@/lib/utils/abilities/engine/core/amount";
 import { battleLimit, restUses, withinCountLimits } from "@/lib/utils/abilities/engine/core/usage";
-import { amountLabel, flatLabel, limitsLabel } from "@/lib/utils/abilities/registry/labels";
+import { amountSegment, flatSegment, limitsSegments } from "@/lib/utils/abilities/registry/labels";
 import { AbilitySchema, AmountSchema, FlatSchema, LimitsSchema } from "@/lib/utils/abilities/schema";
+import { renderSegment, renderSegments } from "@/lib/utils/abilities/segments";
 
 describe("scale refs in the schema", () => {
   it("Flat, Amount and perRest.uses accept { scale }; uses also { formula }", () => {
@@ -40,11 +41,15 @@ describe("unresolved refs in the engine", () => {
     expect(withinCountLimits(owner, resolved({ trigger: { event: "bonusAction" }, limits: { perRest: { rest: "long", uses: { scale: "rages" } } }, effects: [{ kind: "note", text: "x" }] }))).toBe(false);
   });
 
-  it("labels show the column key", () => {
-    expect(flatLabel({ scale: "rage-damage" })).toBe("+[rage-damage]");
-    expect(amountLabel({ scale: "sneak-attack" })).toBe("[sneak-attack]");
-    expect(limitsLabel({ perRest: { rest: "long", uses: { scale: "rages" } } }).map((l) => textOf(l))).toEqual(["[rages] разів за довгий відпочинок"]);
-    expect(limitsLabel({ perRest: { rest: "long", uses: { formula: "max(1, cha_mod)" } } }).map((l) => textOf(l))).toEqual(["(max(1, cha_mod)) разів за довгий відпочинок"]);
-    expect(limitsLabel({ pool: { key: "focus-points", cost: 3 } }).map((l) => textOf(l))).toEqual(["пул «focus-points»: 3"]);
+  it("labels show the column key", async () => {
+    const t = await ukT();
+
+    const r = (seg: Parameters<typeof renderSegment>[1]) => renderSegment(t, seg);
+
+    expect(r(flatSegment({ scale: "rage-damage" }))).toBe("+[rage-damage]");
+    expect(r(amountSegment({ scale: "sneak-attack" }))).toBe("[sneak-attack]");
+    expect(renderSegments(t, limitsSegments({ perRest: { rest: "long", uses: { scale: "rages" } } }))).toEqual(["[rages] разів за довгий відпочинок"]);
+    expect(renderSegments(t, limitsSegments({ perRest: { rest: "long", uses: { formula: "max(1, cha_mod)" } } }))).toEqual(["(max(1, cha_mod)) разів за довгий відпочинок"]);
+    expect(renderSegments(t, limitsSegments({ pool: { key: "focus-points", cost: 3 } }))).toEqual(["пул «focus-points»: 3"]);
   });
 });

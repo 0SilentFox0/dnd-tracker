@@ -3,9 +3,10 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { vi } from "vitest";
 
 import { MazeToolStateContext, useMazeToolStateValue } from "../modes/maze/useMazeToolState";
-import { BattleSceneContext, BattleSceneDataContext, type BattleSceneValue, type ResultFx } from "../useBattleScene";
+import { BattleSceneContext, BattleSceneDataContext } from "../useBattleScene";
 
 import { AttackType, ParticipantSide } from "@/lib/constants/battle";
+import type { BattleSceneValue } from "@/lib/hooks/battle/types";
 import { ConfirmContext } from "@/lib/hooks/common";
 import { IntlWrapper } from "@/lib/i18n/test/intl-wrapper";
 import { createMockParticipant } from "@/lib/utils/battle/__tests__/fixtures/mock-participant";
@@ -15,6 +16,7 @@ import { DEFAULT_RULES } from "@/lib/utils/rules";
 import type { ResolvedAbility } from "@/types/abilities";
 import type { BattleScene } from "@/types/api";
 import type { BattleAction, BattleParticipant } from "@/types/battle";
+import type { ResultFx } from "@/types/battle-scene";
 
 export interface FakeSceneOptions {
   locale?: "uk" | "en";

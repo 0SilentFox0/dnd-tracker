@@ -20,6 +20,7 @@ export const num = (v: unknown): number | undefined => typeof v === "number" && 
 export const ABILITIES: Readonly<Record<string, string>> = { str: "strength", dex: "dexterity", con: "constitution", int: "intelligence", wis: "wisdom", cha: "charisma" };
 export const SAVE_HALF = /\bhalf as much damage\b/i;
 export const SKILLS = Object.fromEntries(DND_SKILLS.map((s) => [s.toLowerCase(), s]));
+export const titled = (v: string): string => v.split("|")[0].replace(/([a-z])([A-Z])/g, "$1 $2").trim();
 export const skillName = (s: string): string | undefined => SKILLS[s.replace(/\s/g, "").toLowerCase()];
 
 export function description(row: JsonRecord, ctx: AdapterContext): string {

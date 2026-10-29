@@ -2,7 +2,7 @@
 
 import { memo } from "react";
 
-import { tokenBoxStyle } from "./token-box";
+import { type MapPlacement, tokenBoxStyle } from "./token-box";
 
 import { StatusAuras } from "@/components/battle/fx/auras/StatusAuras";
 import { HitFrame } from "@/components/battle/fx/PortraitFx";
@@ -19,9 +19,7 @@ const PORTRAIT_SHARE = 0.7;
 
 export interface MapTokenProps {
   participant: BattleParticipant;
-  box: { cx: number; cy: number; size: number };
-  mapSize: { width: number; height: number };
-  pxPerUnit: number;
+  placement: MapPlacement;
   selected?: boolean;
   current?: boolean;
   passThrough?: boolean;
@@ -34,8 +32,10 @@ export interface MapTokenProps {
   onHover?: (id: string | null) => void;
 }
 
-function MapTokenImpl({ participant: live, box, mapSize, pxPerUnit, selected, current, passThrough, impact = null, effects = NO_EFFECTS, dormant, onClick, onHover }: MapTokenProps) {
+function MapTokenImpl({ participant: live, placement, selected, current, passThrough, impact = null, effects = NO_EFFECTS, dormant, onClick, onHover }: MapTokenProps) {
   const { change, shown: participant, shakeRef } = useHitFx<HTMLButtonElement>(live, impact);
+
+  const { box, mapSize, pxPerUnit } = placement;
 
   const { id, name } = participant.basicInfo;
 

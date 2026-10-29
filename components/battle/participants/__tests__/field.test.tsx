@@ -12,7 +12,8 @@ import { ParticipantList } from "@/components/battle/participants/ParticipantLis
 import { ParticipantRow } from "@/components/battle/participants/ParticipantRow";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { ParticipantSide } from "@/lib/constants/battle";
-import { BattleSceneContext, BattleSceneDataContext, type BattleSceneValue } from "@/lib/hooks/battle";
+import { BattleSceneContext, BattleSceneDataContext } from "@/lib/hooks/battle";
+import type { BattleSceneValue } from "@/lib/hooks/battle/types";
 import { render } from "@/lib/i18n/test/render-uk";
 import { createMockParticipant } from "@/lib/utils/battle/__tests__/fixtures/mock-participant";
 import type { FxImpact } from "@/lib/utils/battle/fx";

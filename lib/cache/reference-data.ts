@@ -36,7 +36,7 @@ export async function getCachedUnits(campaignId: string) {
       prisma.unit
         .findMany({ where: { campaignId }, orderBy: UNIT_LIST_ORDER })
         .then((units) => units.map(toUnit)),
-    [cacheTags.units(campaignId)],
+    ["units-v2", cacheTags.units(campaignId)],
     {
       tags: [cacheTags.units(campaignId)],
       revalidate: REFERENCE_REVALIDATE_SECONDS,

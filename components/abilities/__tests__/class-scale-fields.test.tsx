@@ -6,7 +6,7 @@ import { afterEach, describe, expect, it } from "vitest";
 import { AbilityEditorProvider } from "@/components/abilities/editor-context";
 import { AmountField } from "@/components/abilities/fields/AmountField";
 import { FlatField } from "@/components/abilities/fields/FlatField";
-import type { FieldMeta } from "@/lib/utils/abilities/registry/fields";
+import type { LocalizedFieldMeta } from "@/lib/utils/abilities/registry/fields";
 import type { ClassColumn } from "@/types/classes";
 
 const values = Array(20).fill("2");
@@ -16,7 +16,7 @@ const columns: ClassColumn[] = [
   { key: "rage-damage", label: "Rage Damage", values },
 ];
 
-const meta = { name: "flat", label: "Значення", input: "flat" } as FieldMeta;
+const meta = { name: "flat", label: "Значення", input: "flat" } as LocalizedFieldMeta;
 
 function Harness({ kind, initial, withColumns = true }: { kind: "flat" | "amount"; initial: unknown; withColumns?: boolean }) {
   const [v, setV] = useState<unknown>(initial);

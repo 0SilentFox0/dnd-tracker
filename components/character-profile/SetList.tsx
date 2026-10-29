@@ -2,14 +2,16 @@
 
 import { useTranslations } from "next-intl";
 
-import { useText } from "@/lib/i18n/use-text";
+import { useAbilityText } from "@/components/abilities/use-ability-text";
 import { cn } from "@/lib/utils";
 import type { SetProgress } from "@/types/characters";
 
 export function SetList({ sets }: { sets: SetProgress[] }) {
   const t = useTranslations("characterProfile.sets");
 
-  const text = useText();
+  const abilityText = useAbilityText();
+
+  const effectsOf = (s: SetProgress) => abilityText.flowsText(s.effects);
 
   if (sets.length === 0) return null;
 
@@ -20,7 +22,7 @@ export function SetList({ sets }: { sets: SetProgress[] }) {
           <span className={cn("block text-sm", s.complete ? "text-hud-gold-strong" : "text-hud-ink")}>
             ✦ {t("name", { name: s.name, have: s.have, total: s.total })}
           </span>
-          <span className="block text-xs text-hud-muted">{s.complete ? s.effects.map(text).join(" · ") : t("withFull", { effects: s.effects.map(text).join(" · ") || "—" })}</span>
+          <span className="block text-xs text-hud-muted">{s.complete ? effectsOf(s) : t("withFull", { effects: effectsOf(s) || "—" })}</span>
         </li>
       ))}
     </ul>

@@ -2,7 +2,7 @@ import type { LogLine } from "@/types/text";
 
 /** Events written before the structured log: segments joined by " | ", the first one is the headline. */
 export function legacyLines(resultText: string): string[] {
-  // eslint-disable-next-line no-restricted-syntax -- legacy log rows
+   
   return resultText.split(" | ").map((s) => s.trim()).filter(Boolean);
 }
 
@@ -10,7 +10,7 @@ export function legacyLines(resultText: string): string[] {
 export function splitLegacyTriggers(lines: readonly LogLine[]): { headline: LogLine; lines: LogLine[]; isTrigger: boolean } {
   const [first = "", ...rest] = lines;
 
-  // eslint-disable-next-line no-restricted-syntax -- legacy log rows
+   
   const triggers = typeof first === "string" ? /^(Тригери [^:]+):\s*(.+)$/.exec(first) : null;
 
   if (!triggers) return { headline: first, lines: rest, isTrigger: false };

@@ -1,4 +1,4 @@
-import { resistFlags } from "./character-traits";
+import { resistFlags } from "./race-traits";
 import { num } from "./shared";
 
 import type { Translator } from "@/lib/i18n/translator";

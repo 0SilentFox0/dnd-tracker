@@ -1,7 +1,7 @@
 import { z } from "zod";
 
 import { AbilityTargetSchema, AmountSchema, DurationSchema, FlatSchema, FormulaSchema } from "./common";
-import { ATTACK_KINDS, CONDITION_5E_KEYS, CONDITION_KEYS, CUSTOM_CONDITION_KEY_RE, type CustomConditionKey, DAMAGE_FILTER_KINDS, DICE_RE, STAT_KEYS, type StatKey } from "./kinds";
+import { ATTACK_KINDS, CONDITION_5E_KEYS, CONDITION_KEYS, CUSTOM_CONDITION_KEY_RE, type CustomConditionKey, DAMAGE_FILTER_KINDS, DICE_RE, MANEUVERS, STAT_KEYS, type StatKey } from "./kinds";
 
 import { ABILITY_KEYS } from "@/lib/constants/abilities";
 import { PROFICIENCY_KINDS } from "@/lib/constants/artifacts";
@@ -264,8 +264,6 @@ const PushSchema = z.object({ kind: z.literal("push"), feet: z.number().int().mi
 const CopySpellBuffsSchema = z.object({ kind: z.literal("copySpellBuffs"), ...target });
 
 const MarkSchema = z.object({ kind: z.literal("mark"), markId: z.string().min(1), duration: DurationSchema, ...target });
-
-export const MANEUVERS = ["dive", "squall", "fireBurst"] as const;
 
 export type Maneuver = (typeof MANEUVERS)[number];
 

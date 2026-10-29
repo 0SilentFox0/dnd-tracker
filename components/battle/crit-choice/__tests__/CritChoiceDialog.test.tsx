@@ -6,7 +6,8 @@ import { CritChoiceDialog } from "../CritChoiceDialog";
 import { CritChoiceWaitingBanner } from "../CritChoiceWaitingBanner";
 
 import type { useCritChoiceDialog } from "@/lib/hooks/battle";
-import { BattleSceneContext, type BattleSceneValue } from "@/lib/hooks/battle";
+import { BattleSceneContext } from "@/lib/hooks/battle";
+import type { BattleSceneValue } from "@/lib/hooks/battle/types";
 import { renderWithConfirm } from "@/lib/i18n/test/render-uk";
 import { critEffectsFor } from "@/lib/utils/battle/crit-choice/catalog";
 

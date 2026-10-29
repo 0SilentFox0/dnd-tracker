@@ -1,18 +1,18 @@
 import { DURATION_FIELD, type FieldMeta, TARGET_FIELD } from "../fields";
-import { DAMAGE_FILTER_LABELS, flatLabel, STAT_LABELS } from "../labels";
-import { flag } from "../text";
+import { damageFilterSegment, flatSegment, percentSegment, statSegment } from "../labels";
 import { immuneTo } from "./state";
 import type { EffectApplyInput, EffectApplyResult } from "./types";
 
 import { ABILITY_KEYS } from "@/lib/constants/abilities";
 import { AttackType } from "@/lib/constants/battle";
-import { joinLines, lineKey, textRef } from "@/lib/i18n/text-ref";
+import { lineKey, textRef } from "@/lib/i18n/text-ref";
 import { findParticipant, participantNames, updateParticipant } from "@/lib/utils/abilities/engine/core/participants";
 import { abilityNature } from "@/lib/utils/abilities/engine/effects/effect-nature";
 import { applySpellTimedEffect } from "@/lib/utils/abilities/engine/effects/opposing-spells";
 import { effectSource } from "@/lib/utils/abilities/engine/effects/timed-effects";
 import type { Effect, Flat, StaticEffect } from "@/lib/utils/abilities/schema";
-import { signed } from "@/lib/utils/common/format";
+import { DAMAGE_FILTER_KINDS,STAT_KEYS } from "@/lib/utils/abilities/schema/kinds";
+import { seg, type Segment } from "@/lib/utils/abilities/segments";
 import type { LogLine } from "@/types/text";
 
 function stripTiming(effect: StaticEffect): StaticEffect {
@@ -21,7 +21,7 @@ function stripTiming(effect: StaticEffect): StaticEffect {
   return rest as StaticEffect;
 }
 
-export function applyStatic(input: EffectApplyInput<StaticEffect>, describe: (e: Effect) => LogLine): EffectApplyResult {
+export function applyStatic(input: EffectApplyInput<StaticEffect>, describe: (e: Effect) => string): EffectApplyResult {
   const { effect, ability, targetIds, ctx } = input;
 
   const stripped = stripTiming(effect);
@@ -95,7 +95,7 @@ const VALUE_FIELDS: readonly FieldMeta[] = [
 ];
 
 export const modifyStatFields: readonly FieldMeta[] = [
-  { name: "stat", input: "select", options: Object.keys(STAT_LABELS).map((value) => ({ value })) },
+  { name: "stat", input: "select", options: STAT_KEYS.map((value) => ({ value })) },
   ...VALUE_FIELDS,
   { name: "atLeast", input: "number", optional: true, visibleWhen: (e) => [...ABILITY_KEYS, "armor", "speed"].includes(String(e.stat)) },
   { name: "attackKind", input: "select", optional: true, options: [{ value: AttackType.MELEE }, { value: AttackType.RANGED }], visibleWhen: (e) => e.stat === "attackBonus" },
@@ -106,7 +106,7 @@ export const modifyStatFields: readonly FieldMeta[] = [
 ];
 
 export const damageBonusFields: readonly FieldMeta[] = [
-  { name: "filter.kind", input: "select", options: Object.keys(DAMAGE_FILTER_LABELS).map((value) => ({ value })) },
+  { name: "filter.kind", input: "select", options: DAMAGE_FILTER_KINDS.map((value) => ({ value })) },
   { name: "filter.school", input: "text", optional: true },
   ...VALUE_FIELDS,
   { name: "perMark", input: "text", optional: true },
@@ -114,23 +114,26 @@ export const damageBonusFields: readonly FieldMeta[] = [
   DURATION_FIELD,
 ];
 
-const percentLabel = (p: Flat) => (typeof p === "number" ? `${signed(p)}%` : "formula" in p ? `(${p.formula})%` : `[${p.scale}]%`);
+function valueSegment(e: { flat?: Flat | { spellRoll: number }; percent?: Flat }): Segment {
+  const items = [e.flat !== undefined ? flatSegment(e.flat) : null, e.percent !== undefined ? percentSegment(e.percent) : null].filter((x): x is Segment => !!x);
 
-function valueLabel(e: { flat?: Flat | { spellRoll: number }; percent?: Flat }): LogLine {
-  const parts = [e.flat !== undefined ? flatLabel(e.flat) : null, e.percent !== undefined ? percentLabel(e.percent) : null].filter((p): p is LogLine => p !== null && p !== "");
-
-  return joinLines(parts, " ");
+  return seg("summary.text", { value: { join: " ", items } });
 }
 
-export function describeModifyStat(e: Extract<Effect, { kind: "modifyStat" }>): LogLine {
-  return textRef("abilityText.effects.modifyStat", {
-    mode: e.atLeast !== undefined ? "atLeast" : e.spellLevels ? "levels" : "plain",
-    stat: STAT_LABELS[e.stat],
-    value: e.atLeast ?? valueLabel(e),
-    list: e.spellLevels?.join(", ") ?? "",
-  });
+export function describeModifyStat(e: Extract<Effect, { kind: "modifyStat" }>): Segment[] {
+  if (e.atLeast !== undefined) return [seg("summary.effects.statAtLeast", { stat: statSegment(e.stat), n: e.atLeast })];
+
+  return [seg("summary.effects.stat", { stat: statSegment(e.stat), hasLevels: e.spellLevels ? "yes" : "no", ...(e.spellLevels && { levels: e.spellLevels.join(", ") }), value: valueSegment(e) })];
 }
 
-export function describeDamageBonus(e: Extract<Effect, { kind: "damageBonus" }>): LogLine {
-  return textRef("abilityText.effects.damageBonus", { kind: DAMAGE_FILTER_LABELS[e.filter.kind], school: flag(e.filter.school), value: valueLabel(e), mark: flag(e.perMark), perMark: e.perMark ?? "" });
+export function describeDamageBonus(e: Extract<Effect, { kind: "damageBonus" }>): Segment[] {
+  return [
+    seg("summary.effects.damageBonus", {
+      filter: damageFilterSegment(e.filter.kind),
+      hasSchool: e.filter.school ? "yes" : "no",
+      value: valueSegment(e),
+      hasMark: e.perMark ? "yes" : "no",
+      ...(e.perMark && { mark: e.perMark }),
+    }),
+  ];
 }

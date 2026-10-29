@@ -14,7 +14,8 @@ vi.mock("@/lib/hooks/battle/useFxImpacts", () => ({
 import { ParticipantDetails } from "@/components/battle/participants/ParticipantDetails";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { ParticipantSide } from "@/lib/constants/battle";
-import { BattleSceneDataContext, type BattleSceneValue } from "@/lib/hooks/battle";
+import { BattleSceneDataContext } from "@/lib/hooks/battle";
+import type { BattleSceneValue } from "@/lib/hooks/battle/types";
 import { render } from "@/lib/i18n/test/render-uk";
 import { createMockParticipant } from "@/lib/utils/battle/__tests__/fixtures/mock-participant";
 import { buildDisplayEffects } from "@/lib/utils/battle/view";

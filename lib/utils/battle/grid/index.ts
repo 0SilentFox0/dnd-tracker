@@ -4,6 +4,8 @@ export * from "./geometry";
 export * from "./hazard";
 export * from "./layout";
 export * from "./line-of-fire";
+export * from "./map-click";
+export * from "./map-compose";
 export * from "./map-editor";
 export * from "./map-scene";
 export * from "./map-view";

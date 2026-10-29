@@ -3,11 +3,12 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { cleanup, screen } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
-import { WorldEditorContext, type WorldEditorCtx } from "../editor/WorldEditorContext";
+import { WorldEditorContext } from "../editor/WorldEditorContext";
 import { WorldMarkerPanel } from "../editor/WorldMarkerPanel";
 import { WorldToolHint } from "../editor/WorldToolbar";
 
 import { ConfirmProvider } from "@/components/ui/confirm-dialog";
+import type { WorldEditorCtx } from "@/lib/hooks/world";
 import { renderWithIntl } from "@/lib/i18n/test/render-with-intl";
 import type { WorldMarker } from "@/types/world";
 

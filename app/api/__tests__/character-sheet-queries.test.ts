@@ -33,7 +33,6 @@ vi.mock("@/lib/db", () => {
   return { prisma: new Proxy({}, { get: (_t, name: string) => model(name) }) };
 });
 
-import { textMatching } from "@/lib/i18n/test/text";
 import { buildSheetFor, loadSheetCharacter } from "@/lib/server/characters/core/sheet-handler";
 
 const rage = { id: "r", name: "Лють", trigger: { event: "passive" }, effects: [{ kind: "damageBonus", filter: { kind: "melee" }, percent: 10 }] };
@@ -101,7 +100,7 @@ describe("лист персонажа: запити до БД", () => {
 
     const sheet = await buildSheetFor(character as never, { isDM: false, isOwner: true }, { maxLevel: 20, rules: DEFAULT_RULES });
 
-    expect(sheet.items.sets).toEqual([{ setId: "s1", name: "Мисливець", have: 1, total: 1, complete: true, effects: [textMatching(/шкода \(ближня\) \+10%/)] }]);
+    expect(sheet.items.sets).toEqual([{ setId: "s1", name: "Мисливець", have: 1, total: 1, complete: true, effects: [expect.objectContaining({ then: [[expect.objectContaining({ key: "summary.effects.damageBonus" })]] })] }]);
     expect(db.calls["artifactSet.findMany"]).toBeUndefined();
     expect(db.calls["artifact.findMany"]).toBe(1);
   });

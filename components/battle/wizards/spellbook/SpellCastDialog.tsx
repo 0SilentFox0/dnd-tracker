@@ -7,11 +7,11 @@ import { SaveRolls } from "./SaveRolls";
 import { SlotSelect } from "./SlotSelect";
 import { SpellSummary } from "./SpellSummary";
 
+import { useAbilityText } from "@/components/abilities/use-ability-text";
 import { AiRollButton, DamageDice } from "@/components/battle/hud/DiceInput";
 import { HUD_SURFACE } from "@/components/hud";
 import { ResponsiveDialog } from "@/components/ui/responsive-dialog";
 import type { useSpellBook } from "@/lib/hooks/battle";
-import { useText } from "@/lib/i18n/use-text";
 import { cn } from "@/lib/utils";
 import { canGoBack, optionMissing, rollsComplete } from "@/lib/utils/battle/flows";
 
@@ -101,7 +101,7 @@ function RollsStep({ book }: { book: Book }) {
 function OptionPicker({ book }: { book: Book }) {
   const tw = useTranslations("battleWizards.spell.cast");
 
-  const text = useText();
+  const text = useAbilityText();
 
   const { state, actions } = book;
 
@@ -110,10 +110,10 @@ function OptionPicker({ book }: { book: Book }) {
   return (
     <fieldset className="mt-3 space-y-1 text-sm">
       <legend className="hud-sc mb-1 font-bold">{tw("pickOption")}</legend>
-      {state.pick.options.map((label, i) => (
+      {text.lines(state.pick.options).map((label, i) => (
         <label key={i} className="flex items-start gap-2">
           <input type="radio" name="spell-option" checked={state.optionIndex === i} onChange={() => actions.setOption(i)} className="mt-1" />
-          {text(label)}
+          {label}
         </label>
       ))}
     </fieldset>

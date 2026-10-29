@@ -1,63 +1,76 @@
-import { refMap } from "./text";
-
-import { textRef } from "@/lib/i18n/text-ref";
-import type { Amount, AnyConditionKey, CustomConditionKey, Flat, Limits } from "@/lib/utils/abilities/schema";
-import { ABILITY_TARGETS, CONDITION_5E_KEYS, CONDITION_KEYS, DAMAGE_FILTER_KINDS, isCustomConditionKey, STAT_KEYS } from "@/lib/utils/abilities/schema/kinds";
+import { DAMAGE_ELEMENT_OPTIONS } from "@/lib/constants/damage";
+import type { AbilityTarget, Amount, AnyConditionKey, Condition5eKey, CustomConditionKey, DamageFilterKind, Flat, Limits, StatKey } from "@/lib/utils/abilities/schema";
+import { ABILITY_TARGETS, CONDITION_KEYS, isCustomConditionKey } from "@/lib/utils/abilities/schema/kinds";
+import { seg,type Segment } from "@/lib/utils/abilities/segments";
+import { CONDITION_5E_REGISTRY } from "@/lib/utils/battle/conditions/registry";
 import { signed } from "@/lib/utils/common/format";
-import type { LogLine, TextArg } from "@/types/text";
 
-export const STAT_LABELS = refMap("abilityRegistry.stats", STAT_KEYS);
+export const CONDITION_KEYS_ALL: readonly AnyConditionKey[] = [...CONDITION_KEYS, ...(Object.keys(CONDITION_5E_REGISTRY) as Condition5eKey[])];
 
-export const DAMAGE_FILTER_LABELS = refMap("abilityRegistry.damageFilters", DAMAGE_FILTER_KINDS);
+export const TARGET_KEYS: readonly AbilityTarget[] = ABILITY_TARGETS;
 
-export function flatLabel(flat: Flat | { spellRoll: number }): LogLine {
-  if (typeof flat === "number") return signed(flat);
+export const damageTypeSegment = (type: string): Segment => (DAMAGE_ELEMENT_OPTIONS.some((o) => o.value === type) ? seg(`damageTypes.${type}`) : seg("summary.text", { value: type }));
 
-  if ("spellRoll" in flat) return flat.spellRoll === 100 ? textRef("abilityText.amount.flatRoll") : flat.spellRoll === -100 ? textRef("abilityText.amount.flatRollNeg") : textRef("abilityText.amount.flatRollPercent", { value: signed(flat.spellRoll) });
+export const statSegment = (k: StatKey): Segment => seg(`stats.${k}`);
 
-  return "formula" in flat ? `+(${flat.formula})` : `+[${flat.scale}]`;
+export const targetSegment = (k: AbilityTarget): Segment => seg(`targets.${k}`);
+
+export const damageFilterSegment = (k: DamageFilterKind): Segment => seg(`damageFilters.${k}`);
+
+export const conditionKeySegment = (k: AnyConditionKey | CustomConditionKey): Segment => (isCustomConditionKey(k) ? seg("summary.text", { value: k.slice("custom:".length) }) : seg(`options.condition.${k}`));
+
+export function flatSegment(flat: Flat | { spellRoll: number }): Segment {
+  if (typeof flat === "number") return seg("summary.flat.number", { value: signed(flat) });
+
+  if ("spellRoll" in flat) return flat.spellRoll === 100 ? seg("summary.flat.spellRollFull") : flat.spellRoll === -100 ? seg("summary.flat.spellRollNegFull") : seg("summary.flat.spellRollPct", { value: signed(flat.spellRoll) });
+
+  return "formula" in flat ? seg("summary.flat.formula", { formula: flat.formula }) : seg("summary.flat.scale", { scale: flat.scale });
 }
 
-export function amountLabel(amount: Amount): TextArg {
-  if (typeof amount === "number" || typeof amount === "string") return String(amount);
+export function amountSegment(amount: Amount): Segment {
+  if (typeof amount === "number" || typeof amount === "string") return seg("summary.amount.value", { value: amount });
 
-  if ("scale" in amount) return `[${amount.scale}]`;
+  if ("scale" in amount) return seg("summary.amount.scale", { scale: amount.scale });
 
-  if ("formula" in amount) return `(${amount.formula})`;
+  if ("formula" in amount) return seg("summary.amount.formula", { formula: amount.formula });
 
   if ("spellRoll" in amount) {
-    if (typeof amount.spellRoll !== "number") return textRef("abilityText.amount.spellRollFormula", { formula: amount.spellRoll.formula });
+    if (typeof amount.spellRoll !== "number") return seg("summary.amount.spellRollFormula", { formula: amount.spellRoll.formula });
 
-    return amount.spellRoll === 100 ? textRef("abilityText.amount.spellRoll") : textRef("abilityText.amount.spellRollPercent", { value: amount.spellRoll });
+    return amount.spellRoll === 100 ? seg("summary.amount.spellRollFull") : seg("summary.amount.spellRollPct", { value: amount.spellRoll });
   }
 
-  if (amount.percentOf === "ownerAttack") return textRef("abilityText.amount.ownerAttack", { value: amount.value });
+  if (amount.percentOf === "ownerAttack") return seg("summary.amount.percentOwnerAttack", { value: amount.value });
 
-  return textRef(amount.percentOf === "eventDamage" ? "abilityText.amount.eventDamage" : "abilityText.amount.maxHp", { value: amount.value });
+  return seg(amount.percentOf === "eventDamage" ? "summary.amount.percentOfEventDamage" : "summary.amount.percentOfMaxHp", { value: amount.value });
 }
 
-export const TARGET_LABELS = refMap("abilityRegistry.targets", ABILITY_TARGETS);
+function perRestSegment(r: NonNullable<Limits["perRest"]>): Segment {
+  const rest = seg(r.rest === "short" ? "summary.limits.restShort" : "summary.limits.restLong");
 
-export const CONDITION_LABELS = refMap("abilityRegistry.options.condition", [...CONDITION_KEYS, ...CONDITION_5E_KEYS]);
+  if (typeof r.uses === "number") return seg("summary.limits.perRestN", { n: r.uses, rest });
 
-export const conditionLabel = (key: AnyConditionKey | CustomConditionKey): TextArg => (isCustomConditionKey(key) ? key.slice("custom:".length) : CONDITION_LABELS[key]);
+  return seg("summary.limits.perRestExpr", { expr: "formula" in r.uses ? `(${r.uses.formula})` : `[${r.uses.scale}]`, rest });
+}
 
-const usesLabel = (uses: NonNullable<Limits["perRest"]>["uses"]) => (typeof uses === "number" ? uses : "formula" in uses ? `(${uses.formula})` : `[${uses.scale}]`);
-
-export function limitsLabel(l: Limits | undefined): LogLine[] {
+export function limitsSegments(l: Limits | undefined): Segment[] {
   if (!l) return [];
 
-  const lines: (LogLine | null)[] = [
-    l.perBattle ? textRef("abilityText.limits.perBattle", { count: l.perBattle }) : null,
-    l.perRest ? textRef(typeof l.perRest.uses === "number" ? "abilityText.limits.perRest" : "abilityText.limits.perRestFormula", { uses: usesLabel(l.perRest.uses), rest: l.perRest.rest }) : null,
-    l.perRound ? textRef("abilityText.limits.perRound", { count: l.perRound }) : null,
-    l.perTurn ? textRef("abilityText.limits.perTurn", { count: l.perTurn }) : null,
-    l.cooldownRounds ? textRef("abilityText.limits.cooldown", { count: l.cooldownRounds }) : null,
-    l.chance ? `${l.chance}%` : null,
-    l.lair ? textRef("abilityText.limits.lair") : null,
-    l.legendaryCost ? textRef("abilityText.limits.legendaryCost", { cost: l.legendaryCost }) : null,
-    l.pool ? textRef("abilityText.limits.pool", { key: l.pool.key, cost: l.pool.cost }) : null,
-  ];
+  return [
+    l.perBattle ? seg("summary.limits.perBattle", { n: l.perBattle }) : null,
+    l.perRest ? perRestSegment(l.perRest) : null,
+    l.perRound ? seg("summary.limits.perRound", { n: l.perRound }) : null,
+    l.perTurn ? seg("summary.limits.perTurn", { n: l.perTurn }) : null,
+    l.cooldownRounds ? seg("summary.limits.cooldown", { n: l.cooldownRounds }) : null,
+    l.chance ? seg("summary.limits.chance", { n: l.chance }) : null,
+    l.lair ? seg("summary.limits.lair") : null,
+    l.legendaryCost ? seg("summary.limits.legendary", { n: l.legendaryCost }) : null,
+    l.pool ? seg("summary.limits.pool", { key: l.pool.key, cost: l.pool.cost }) : null,
+  ].filter((x): x is Segment => !!x);
+}
 
-  return lines.filter((x): x is LogLine => x !== null);
+export function percentSegment(p: Flat): Segment {
+  if (typeof p === "number") return seg("summary.percent.number", { value: signed(p) });
+
+  return "formula" in p ? seg("summary.percent.formula", { formula: p.formula }) : seg("summary.percent.scale", { scale: p.scale });
 }

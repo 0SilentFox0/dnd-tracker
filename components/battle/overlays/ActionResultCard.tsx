@@ -7,9 +7,10 @@ import { X } from "lucide-react";
 import { useInCornerStack } from "@/components/battle/scene/CornerStack";
 import { useMapStripSlot, useNoticeStack } from "@/components/battle/scene/MapStrip";
 import { HUD_SURFACE } from "@/components/hud";
-import { type ActionResultFx, useActionResult } from "@/lib/hooks/battle";
+import { useActionResult } from "@/lib/hooks/battle";
 import { useText } from "@/lib/i18n/use-text";
 import { cn } from "@/lib/utils";
+import type { ActionResultFx } from "@/types/battle-scene";
 
 const TONE = { hit: "text-[#e9705a]", crit: "text-[#ffd36a]", miss: "text-[#8f8f96]" } as const;
 

@@ -3,7 +3,7 @@
 import { memo } from "react";
 import { useTranslations } from "next-intl";
 
-import { tokenBoxStyle } from "./token-box";
+import { type MapPlacement, tokenBoxStyle } from "./token-box";
 
 import { useDamageShake, useFxEnabled, useHitChange } from "@/lib/hooks/battle";
 import { useText } from "@/lib/i18n/use-text";
@@ -18,9 +18,7 @@ import type { LogLine } from "@/types/text";
 
 export interface MapTokenHudProps {
   participant: BattleParticipant;
-  box: { cx: number; cy: number; size: number };
-  mapSize: { width: number; height: number };
-  pxPerUnit: number;
+  placement: MapPlacement;
   exact: boolean;
   raised: boolean;
   impact?: FxImpact | null;
@@ -49,7 +47,9 @@ function hpView(participant: BattleParticipant, exact: boolean): { ratio: number
   return { ratio: healthSegments(state) / 4, text: HEALTH_LABEL[state] };
 }
 
-function MapTokenHudImpl({ participant: live, box, mapSize, pxPerUnit, exact, raised, impact = null, effects = NO_EFFECTS, onReturn }: MapTokenHudProps) {
+function MapTokenHudImpl({ participant: live, placement, exact, raised, impact = null, effects = NO_EFFECTS, onReturn }: MapTokenHudProps) {
+  const { box, mapSize, pxPerUnit } = placement;
+
   const t = useTranslations("battle.map");
 
   const fmt = useText();

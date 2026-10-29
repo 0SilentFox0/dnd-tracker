@@ -20,8 +20,9 @@ vi.mock("@/lib/hooks/spells", async (importOriginal) => ({
 import { ActionResultCard } from "@/components/battle/overlays/ActionResultCard";
 import { AttackWizard } from "@/components/battle/wizards/AttackWizard";
 import { SpellBook } from "@/components/battle/wizards/SpellBook";
-import { BattleSceneContext, type BattleSceneValue, useAttackWizard, useSpellBook } from "@/lib/hooks/battle";
+import { BattleSceneContext,  useAttackWizard, useSpellBook } from "@/lib/hooks/battle";
 import { fakeScene } from "@/lib/hooks/battle/__tests__/fake-scene";
+import type { BattleSceneValue } from "@/lib/hooks/battle/types";
 import { render } from "@/lib/i18n/test/render-uk";
 import type { BattleAction, BattleParticipant } from "@/types/battle";
 

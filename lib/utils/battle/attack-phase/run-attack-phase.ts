@@ -18,6 +18,7 @@ import type { CritPicker } from "@/lib/utils/battle/crit-choice/types";
 import { damageDiceSlots, heroAttackDamageParts } from "@/lib/utils/battle/damage/hero-damage";
 import { lineOfFire } from "@/lib/utils/battle/grid";
 import { withLines } from "@/lib/utils/battle/log/lines";
+import type { ProcessAttackResult } from "@/lib/utils/battle/types/attack-process";
 import type { CastableSpell } from "@/lib/utils/battle/types/spell-process";
 import { rollDie } from "@/lib/utils/common/dice";
 import { rngOf } from "@/lib/utils/common/rng";
@@ -48,9 +49,34 @@ export type AttackPhaseResult = {
   summons: SummonRequest[];
 };
 
+interface PhaseCtx {
+  input: AttackPhaseInput;
+  request: ReturnType<typeof validateAttackRequest>;
+  rng: Rng;
+  dice: ReturnType<typeof damageDiceCursor>;
+  expanded: boolean;
+  effectsBeforeVolley: ReturnType<typeof activeEffectIds>;
+}
+
+interface PhaseState {
+  order: BattleParticipant[];
+  attacker: BattleParticipant;
+  actions: BattleAction[];
+  summons: SummonRequest[];
+  heldBack: ActiveEffect[];
+}
+
+interface StrikeOpts {
+  serverRolled: boolean;
+  multiplier?: number;
+  cover: boolean;
+}
+
+const liveOf = (st: PhaseState, p: BattleParticipant) => findParticipant(st.order, p.basicInfo.id) ?? p;
+
 // Фаза атаки: валідація, processAttack на ціль, відповідний удар по основній цілі.
 export function runAttackPhase(input: AttackPhaseInput): AttackPhaseResult {
-  const { battle, data, battleId, userId, isDM } = input;
+  const { battle, data, isDM, userId } = input;
 
   const rng = rngOf(input);
 
@@ -66,150 +92,168 @@ export function runAttackPhase(input: AttackPhaseInput): AttackPhaseResult {
 
   const fractions = damageFractions(targets, attack, { volley, falloff });
 
-  let currentAttacker = { ...attacker };
-
-  let currentInitiativeOrder: BattleParticipant[] = initiativeOrder;
-
-  const allBattleActions: BattleAction[] = [];
-
-  const summons: SummonRequest[] = [];
-
   const damageFormula = (volley && (targets.length > 1 || expanded)) || chain ? heroAttackDamageParts(attacker, attack).formula : null;
 
-  const dice = damageDiceCursor(data.damageRolls, damageFormula, rng);
+  const ctx: PhaseCtx = { input, request, rng, dice: damageDiceCursor(data.damageRolls, damageFormula, rng), expanded, effectsBeforeVolley: activeEffectIds([attacker]) };
 
-  const effectsBeforeVolley = activeEffectIds([attacker]);
-
-  const heldBack: ActiveEffect[] = [];
+  const st: PhaseState = { order: initiativeOrder, attacker: { ...attacker }, actions: [], summons: [], heldBack: [] };
 
   const isRanged = attackKindOf(attack.type) === AttackType.RANGED;
-
-  const live = (p: BattleParticipant) => findParticipant(currentInitiativeOrder, p.basicInfo.id) ?? p;
-
-  const strikeAt = (target: BattleParticipant, i: number, opts: { serverRolled: boolean; multiplier?: number; cover: boolean }) => {
-    const chosenAt = expanded ? chosenTargets.findIndex((t) => t.basicInfo.id === target.basicInfo.id) : i;
-
-    const strike = (input.serverRolls || opts.serverRolled) ? { value: rollDie(20, rng), serverRolled: true } : strikeD20(data, request, { index: i, chosenAt, expanded }, rng);
-
-    const serverDamage = input.serverRolls ? damageDiceSlots(attacker, attack).map(sides => rollDie(sides, rng)) : null;
-
-    const strikeDice = serverDamage ? { rolls: serverDamage, serverRolled: serverDamage } : dice.next();
-
-    const second = (input.serverRolls || opts.serverRolled) ? undefined : (data.secondRolls?.[chosenAt] ?? data.advantageRoll ?? data.disadvantageRoll);
-
-    const victim = live(target);
-
-    const obstacle = opts.cover && lineOfFire(input.map, currentInitiativeOrder, currentAttacker, victim).blocked;
-
-    const attackResult = processAttack({
-      attacker: currentAttacker,
-      target: victim,
-      attack,
-      d20Roll: strike.value,
-      advantageRoll: second,
-      disadvantageRoll: second,
-      rollMode: data.rollMode,
-      inspiration: !!data.useInspiration && i === 0,
-      actionSpent: i > 0,
-      offHand: data.offHand,
-      damageRolls: strikeDice.rolls,
-      allParticipants: currentInitiativeOrder,
-      currentRound: battle.currentRound,
-      battleId,
-      damageMultiplier: opts.multiplier,
-      obstacle,
-      cunningStrike: i === 0 ? data.cunningStrike : undefined,
-      map: input.map,
-      rules: input.rules,
-      hitSpells: input.hitSpells,
-      rng,
-      crit: input.crit,
-      recordDice: true,
-      serverRolled: { d20: strike.serverRolled, ...(strikeDice.serverRolled && { damageFrom: strikeDice.rolls.length - strikeDice.serverRolled.length }) },
-    });
-
-    if (attackResult.success) dice.hit(critDoublesDice(input.rules, !!attackResult.attackRoll?.isCritical));
-
-    currentInitiativeOrder = mergeParticipants(currentInitiativeOrder, attackResult.allParticipantsUpdated ?? []);
-    currentAttacker = attackResult.attackerUpdated;
-    summons.push(...attackResult.summons);
-
-    if (strikeDice.serverRolled && attackResult.success) {
-      attackResult.battleAction = withLines(attackResult.battleAction, [textRef("battleLog.attack.serverDamageDice", { rolls: strikeDice.serverRolled.join(", ") })]);
-    }
-
-    allBattleActions.push(attackResult.battleAction);
-
-    const provoked = attackResult.criticalEffectApplied?.effect.type === "provoke_opportunity_attack";
-
-    if (i === 0 || provoked) {
-      const retaliation = resolveRetaliation({
-        participants: currentInitiativeOrder,
-        attackerId: attacker.basicInfo.id,
-        defenderId: target.basicInfo.id,
-        attack,
-        attackRoll: attackResult.attackRoll,
-        criticalEffect: attackResult.criticalEffectApplied,
-        provoked,
-        round: battle.currentRound,
-        battleId,
-        rng,
-        crit: input.crit,
-        map: input.map,
-        rules: input.rules,
-      });
-
-      if (retaliation) {
-        currentInitiativeOrder = mergeParticipants(currentInitiativeOrder, retaliation.participants);
-        currentAttacker = findParticipant(retaliation.participants, attacker.basicInfo.id) ?? currentAttacker;
-        allBattleActions.push(retaliation.battleAction);
-      }
-    }
-
-    const held = holdBackNewEffects(currentInitiativeOrder, currentAttacker, effectsBeforeVolley);
-
-    currentInitiativeOrder = held.order;
-    currentAttacker = held.attacker;
-    heldBack.push(...held.held);
-
-    return attackResult;
-  };
 
   let firstHit = false;
 
   for (let i = 0; i < targets.length; i++) {
     // пробивний летить крізь цілі: штраф лише на першу
-    const result = strikeAt(targets[i], i, { serverRolled: i >= serverRolledFrom, multiplier: targets.length > 1 ? fractions[i] : undefined, cover: isRanged && !(piercing && i > 0) });
+    const result = strikeAt(ctx, st, targets[i], i, { serverRolled: i >= serverRolledFrom, multiplier: targets.length > 1 ? fractions[i] : undefined, cover: isRanged && !(piercing && i > 0) });
 
     if (i === 0) firstHit = result.success;
 
-    if (!isActive(currentAttacker)) break;
+    if (!isActive(st.attacker)) break;
   }
 
-  if (chain && firstHit) {
-    const hit = new Set([targets[0].basicInfo.id]);
-
-    let from = live(targets[0]);
-
-    for (let jump = 1; jump <= chain.jumps && isActive(currentAttacker); jump++) {
-      const next = nextChainTarget({ map: input.map, order: currentInitiativeOrder, attacker: currentAttacker, attack, from, hit });
-
-      if (!next) break;
-
-      const result = strikeAt(next, jump, { serverRolled: true, multiplier: chain.percent ** jump, cover: false });
-
-      result.battleAction.actionDetails.chainFromId = from.basicInfo.id;
-      hit.add(next.basicInfo.id);
-
-      if (!result.success) break;
-
-      from = live(next);
-    }
-  }
+  if (chain && firstHit) runChain(ctx, st, targets[0], chain);
 
   return {
-    finalInitiativeOrder: restoreHeldBack(currentInitiativeOrder, attacker.basicInfo.id, heldBack),
-    allBattleActions,
-    summons,
+    finalInitiativeOrder: restoreHeldBack(st.order, attacker.basicInfo.id, st.heldBack),
+    allBattleActions: st.actions,
+    summons: st.summons,
   };
+}
+
+function runChain(ctx: PhaseCtx, st: PhaseState, first: BattleParticipant, chain: { jumps: number; percent: number }): void {
+  const { attack } = ctx.request;
+
+  const hit = new Set([first.basicInfo.id]);
+
+  let from = liveOf(st, first);
+
+  for (let jump = 1; jump <= chain.jumps && isActive(st.attacker); jump++) {
+    const next = nextChainTarget({ map: ctx.input.map, order: st.order, attacker: st.attacker, attack, from, hit });
+
+    if (!next) break;
+
+    const result = strikeAt(ctx, st, next, jump, { serverRolled: true, multiplier: chain.percent ** jump, cover: false });
+
+    result.battleAction.actionDetails.chainFromId = from.basicInfo.id;
+    hit.add(next.basicInfo.id);
+
+    if (!result.success) break;
+
+    from = liveOf(st, next);
+  }
+}
+
+function rollStrike(ctx: PhaseCtx, target: BattleParticipant, i: number, opts: StrikeOpts) {
+  const { input, request, rng } = ctx;
+
+  const { data } = input;
+
+  const { attacker, attack, chosenTargets } = request;
+
+  const chosenAt = ctx.expanded ? chosenTargets.findIndex((t) => t.basicInfo.id === target.basicInfo.id) : i;
+
+  const serverD20 = input.serverRolls || opts.serverRolled;
+
+  const strike = serverD20 ? { value: rollDie(20, rng), serverRolled: true } : strikeD20(data, request, { index: i, chosenAt, expanded: ctx.expanded }, rng);
+
+  const serverDamage = input.serverRolls ? damageDiceSlots(attacker, attack).map(sides => rollDie(sides, rng)) : null;
+
+  const strikeDice = serverDamage ? { rolls: serverDamage, serverRolled: serverDamage } : ctx.dice.next();
+
+  const second = serverD20 ? undefined : (data.secondRolls?.[chosenAt] ?? data.advantageRoll ?? data.disadvantageRoll);
+
+  return { strike, strikeDice, second };
+}
+
+function strikeAt(ctx: PhaseCtx, st: PhaseState, target: BattleParticipant, i: number, opts: StrikeOpts): ProcessAttackResult {
+  const { input, request, rng } = ctx;
+
+  const { data, battle, battleId } = input;
+
+  const { attack } = request;
+
+  const { strike, strikeDice, second } = rollStrike(ctx, target, i, opts);
+
+  const victim = liveOf(st, target);
+
+  const obstacle = opts.cover && lineOfFire(input.map, st.order, st.attacker, victim).blocked;
+
+  const attackResult = processAttack({
+    attacker: st.attacker,
+    target: victim,
+    attack,
+    d20Roll: strike.value,
+    advantageRoll: second,
+    disadvantageRoll: second,
+    rollMode: data.rollMode,
+    inspiration: !!data.useInspiration && i === 0,
+    actionSpent: i > 0,
+    offHand: data.offHand,
+    damageRolls: strikeDice.rolls,
+    allParticipants: st.order,
+    currentRound: battle.currentRound,
+    battleId,
+    damageMultiplier: opts.multiplier,
+    obstacle,
+    cunningStrike: i === 0 ? data.cunningStrike : undefined,
+    map: input.map,
+    rules: input.rules,
+    hitSpells: input.hitSpells,
+    rng,
+    crit: input.crit,
+    recordDice: true,
+    serverRolled: { d20: strike.serverRolled, ...(strikeDice.serverRolled && { damageFrom: strikeDice.rolls.length - strikeDice.serverRolled.length }) },
+  });
+
+  if (attackResult.success) ctx.dice.hit(critDoublesDice(input.rules, !!attackResult.attackRoll?.isCritical));
+
+  st.order = mergeParticipants(st.order, attackResult.allParticipantsUpdated ?? []);
+  st.attacker = attackResult.attackerUpdated;
+  st.summons.push(...attackResult.summons);
+
+  if (strikeDice.serverRolled && attackResult.success) {
+    attackResult.battleAction = withLines(attackResult.battleAction, [textRef("battleLog.attack.serverDamageDice", { rolls: strikeDice.serverRolled.join(", ") })]);
+  }
+
+  st.actions.push(attackResult.battleAction);
+
+  const provoked = attackResult.criticalEffectApplied?.effect.type === "provoke_opportunity_attack";
+
+  if (i === 0 || provoked) retaliate(ctx, st, target, attackResult, provoked);
+
+  const held = holdBackNewEffects(st.order, st.attacker, ctx.effectsBeforeVolley);
+
+  st.order = held.order;
+  st.attacker = held.attacker;
+  st.heldBack.push(...held.held);
+
+  return attackResult;
+}
+
+function retaliate(ctx: PhaseCtx, st: PhaseState, target: BattleParticipant, attackResult: ProcessAttackResult, provoked: boolean): void {
+  const { input, request, rng } = ctx;
+
+  const { attacker } = request;
+
+  const retaliation = resolveRetaliation({
+    participants: st.order,
+    attackerId: attacker.basicInfo.id,
+    defenderId: target.basicInfo.id,
+    attack: request.attack,
+    attackRoll: attackResult.attackRoll,
+    criticalEffect: attackResult.criticalEffectApplied,
+    provoked,
+    round: input.battle.currentRound,
+    battleId: input.battleId,
+    rng,
+    crit: input.crit,
+    map: input.map,
+    rules: input.rules,
+  });
+
+  if (!retaliation) return;
+
+  st.order = mergeParticipants(st.order, retaliation.participants);
+  st.attacker = findParticipant(retaliation.participants, attacker.basicInfo.id) ?? st.attacker;
+  st.actions.push(retaliation.battleAction);
 }

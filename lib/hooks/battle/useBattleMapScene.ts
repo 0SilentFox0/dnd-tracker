@@ -1,19 +1,22 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { useTranslations } from "next-intl";
 
-import { palettesToClose } from "./modes/palettes";
 import { type ModeTools, useModeTools } from "./modes/tools";
 import { useModeView } from "./modes/useModeView";
 import { useBattleScene } from "./useBattleScene";
+import { useExclusivePalettes } from "./useExclusivePalettes";
 import { useFxImpacts } from "./useFxImpacts";
+import { useMapCellActions } from "./useMapCellActions";
+import { useMapPlacing } from "./useMapPlacing";
 import { type MapTerrainTool, useMapTerrainTool } from "./useMapTerrainTool";
 import { type MapWeatherTool, useMapWeatherTool } from "./useMapWeatherTool";
 
 import { useText } from "@/lib/i18n/use-text";
-import { aimView, cellKey, checkReturnToStart, deriveMapScene, deriveTrajectory, type MapClick, type MapSceneActor, type MapSceneMode } from "@/lib/utils/battle/grid";
+import { aimView, checkReturnToStart, composeMapView, deriveMapScene, dispatchMapClick, type MapClick, mapClickHandlers, type MapSceneActor, type MapSceneMode } from "@/lib/utils/battle/grid";
 import { awaitsMoraleCheck } from "@/lib/utils/battle/morale/awaits-check";
+import { NO_ORDER } from "@/lib/utils/battle/view";
 import type { BattleMapActions, BattleMapConfig, BattleMapView, BattleParticipant, GridPoint } from "@/types/battle";
 
 export interface BattleMapScene {
@@ -27,16 +30,6 @@ export interface BattleMapScene {
   weatherTool: MapWeatherTool | null;
 }
 
-const NO_ORDER: BattleParticipant[] = [];
-
-type MapClickHandlers = { [K in MapClick["kind"]]: (click: Extract<MapClick, { kind: K }>) => void };
-
-function dispatchClick<K extends MapClick["kind"]>(handlers: MapClickHandlers, click: Extract<MapClick, { kind: K }>) {
-  (handlers[click.kind] as (c: typeof click) => void)(click);
-}
-
-const sameCell = (a: GridPoint | null, b: GridPoint | null) => a === b || (!!a && !!b && a.x === b.x && a.y === b.y);
-
 export function useBattleMapScene(): BattleMapScene | null {
   const t = useTranslations("battle.notify");
 
@@ -48,24 +41,7 @@ export function useBattleMapScene(): BattleMapScene | null {
 
   const [hoverCell, setHoverCell] = useState<GridPoint | null>(null);
 
-  const [placingOn, setPlacingOn] = useState(false);
-
-  const [placingId, setPlacingId] = useState<string | null>(null);
-
-  const stopPlacing = useCallback(() => {
-    setPlacingOn(false);
-    setPlacingId(null);
-  }, []);
-
-  const { mutateAsync: mapTerrain } = actions.mapTerrain;
-
-  const { show } = toast;
-
-  const onSkipped = useCallback((n: number) => show(t("skippedCells", { count: n })), [show, t]);
-
   const { isDM } = viewer;
-
-  const terrainTool = useMapTerrainTool({ isDM, mutate: mapTerrain, onSkipped, onActivate: stopPlacing });
 
   const map = battle.map ?? null;
 
@@ -73,7 +49,15 @@ export function useBattleMapScene(): BattleMapScene | null {
 
   const modeToolActive = !!modeTools?.toolActive;
 
-  const placing = placingOn && isDM && !modeToolActive;
+  const { placing, placingId, setPlacingOn, setPlacingId, stopPlacing } = useMapPlacing(isDM, modeToolActive);
+
+  const { mutateAsync: mapTerrain } = actions.mapTerrain;
+
+  const { show } = toast;
+
+  const onSkipped = useCallback((n: number) => show(t("skippedCells", { count: n })), [show, t]);
+
+  const terrainTool = useMapTerrainTool({ isDM, mutate: mapTerrain, onSkipped, onActivate: stopPlacing });
 
   const toolActive = terrainTool.active || modeToolActive;
 
@@ -121,41 +105,22 @@ export function useBattleMapScene(): BattleMapScene | null {
   const view = useMemo(() => {
     if (!scene || !map) return null;
 
-    // прев'ю під курсором замінює клікнутий шаблон, але не затемнення поза дальністю
-    const marks = hovered ? new Map([...[...(scene.view.marks ?? [])].filter(([, m]) => m === "out-of-range"), ...hovered.marks]) : scene.view.marks;
-
-    return {
-      ...scene.view,
-      ...hovered,
-      marks,
-      trajectory: deriveTrajectory({ map, participants: scene.participants, marks: scene.view.marks, current }, hoverCell),
-      ...(returnId && { returnId }),
-      ...(pendingStroke.size > 0 && { pendingStroke }),
-      impactFor,
-      effects,
-      round: currentRound,
-      mode: modeView,
-    };
+    return composeMapView({
+      scene,
+      map,
+      current,
+      hover: { cell: hoverCell, preview: hovered },
+      overlay: { returnId, pendingStroke, impactFor, effects, round: currentRound, mode: modeView },
+    });
   }, [scene, map, hovered, hoverCell, pendingStroke, current, returnId, impactFor, effects, currentRound, modeView]);
 
   const { mutate: move } = actions.move;
 
   const handle = useMemo(() => {
-    const handlers: MapClickHandlers = {
-      move: (c) => move({ participantId: c.participantId, to: c.to, ...(c.free && { free: true }) }),
-      attack: (c) => {
-        if (current) requestAttack({ targetId: c.targetId, ...(c.attackId && { attackId: c.attackId }), actorId: current.basicInfo.id, round: currentRound, turnIndex: currentTurnIndex });
-      },
-      reject: (c) => show(text(c.reason)),
-      select: (c) => select(c.id),
-      arm: (c) => setPlacingId(c.id),
-      aim: (c) => mapAim?.onAim(c.cell),
-      pick: (c) => mapPick?.onPick(c.id),
-      none: () => undefined,
-    };
+    const handlers = mapClickHandlers({ current, turn: { round: currentRound, index: currentTurnIndex }, aim: mapAim, pick: mapPick, move, requestAttack, show: (reason) => show(text(reason)), select, arm: setPlacingId });
 
-    return (click: MapClick) => dispatchClick(handlers, click);
-  }, [move, requestAttack, show, text, select, current, currentRound, currentTurnIndex, mapAim, mapPick]);
+    return (click: MapClick) => dispatchMapClick(handlers, click);
+  }, [move, requestAttack, show, text, select, setPlacingId, current, currentRound, currentTurnIndex, mapAim, mapPick]);
 
   const { commit } = terrainTool;
 
@@ -169,40 +134,7 @@ export function useBattleMapScene(): BattleMapScene | null {
 
   const closeModeTool = modeTools?.closeTool;
 
-  const latest = useRef({ scene, handle, anyPending, stroke: commit, returnToStart, modeToolActive, modeClick });
-
-  useEffect(() => {
-    latest.current = { scene, handle, anyPending, stroke: commit, returnToStart, modeToolActive, modeClick };
-  });
-
-  const mapActions = useMemo<BattleMapActions>(
-    () => ({
-      onCellClick: (p) => {
-        const l = latest.current;
-
-        if (l.anyPending) return;
-
-        if (l.modeToolActive) l.modeClick?.(p);
-        else if (l.scene) l.handle(l.scene.cellClick(p));
-      },
-      onCellHover: (p) =>
-        setHoverCell((prev) => {
-          const l = latest.current.scene;
-
-          const next = p && (l?.aiming || l?.view.marks?.get(cellKey(p)) === "target") ? p : null;
-
-          return sameCell(prev, next) ? prev : next;
-        }),
-      onStroke: (cells) => latest.current.stroke(cells),
-      onReturn: () => latest.current.returnToStart(),
-      onTokenClick: (id) => {
-        const l = latest.current;
-
-        if (l.scene) l.handle(l.scene.tokenClick(id));
-      },
-    }),
-    [],
-  );
+  const mapActions = useMapCellActions({ scene, handle, anyPending, setHoverCell, tools: { modeToolActive, modeClick, stroke: commit, returnToStart } });
 
   const { close: closeTerrain } = terrainTool;
 
@@ -211,43 +143,14 @@ export function useBattleMapScene(): BattleMapScene | null {
     setPlacingId(null);
     closeTerrain();
     closeModeTool?.();
-  }, [placing, closeTerrain, closeModeTool]);
-
-  useEffect(() => {
-    if (!placing) return;
-
-    const onKey = (e: KeyboardEvent) => {
-      if (e.key !== "Escape") return;
-
-      stopPlacing();
-    };
-
-    window.addEventListener("keydown", onKey);
-
-    return () => window.removeEventListener("keydown", onKey);
-  }, [placing, stopPlacing]);
+  }, [placing, setPlacingOn, setPlacingId, closeTerrain, closeModeTool]);
 
   const weatherTool = useMapWeatherTool({ isDM, current: map?.weather ?? null, mutation: actions.mapWeather });
 
-  const modePalette = !!modeTools?.paletteOpen;
-
-  const terrainPalette = terrainTool.active;
-
-  const weatherPalette = !!weatherTool?.active;
-
-  const closeWeather = weatherTool?.close;
-
-  const prevPalettes = useRef({ mode: modePalette, terrain: terrainPalette, weather: weatherPalette });
-
-  useEffect(() => {
-    const next = { mode: modePalette, terrain: terrainPalette, weather: weatherPalette };
-
-    const closers = { mode: closeModeTool, terrain: closeTerrain, weather: closeWeather };
-
-    for (const key of palettesToClose(prevPalettes.current, next)) closers[key]?.();
-
-    prevPalettes.current = next;
-  }, [modePalette, terrainPalette, weatherPalette, closeModeTool, closeTerrain, closeWeather]);
+  useExclusivePalettes(
+    { mode: !!modeTools?.paletteOpen, terrain: terrainTool.active, weather: !!weatherTool?.active },
+    { mode: closeModeTool, terrain: closeTerrain, weather: weatherTool?.close },
+  );
 
   const placement = useMemo(() => (isDM ? { active: placing, toggle: togglePlacing } : null), [isDM, placing, togglePlacing]);
 

@@ -1,6 +1,9 @@
 import { capitalizeLine, lineKey, textRef } from "@/lib/i18n/text-ref";
+import type { Translator } from "@/lib/i18n/translator";
 import { legacyActiveEffectModifiers } from "@/lib/utils/abilities/engine/effects/legacy-active-effects";
 import { describeEffect } from "@/lib/utils/abilities/registry/effects";
+import type { Effect } from "@/lib/utils/abilities/schema";
+import { joinSegments } from "@/lib/utils/abilities/segments";
 import type { ActiveEffect } from "@/types/battle";
 import type { LogLine } from "@/types/text";
 
@@ -10,17 +13,19 @@ const uniqueLines = (lines: LogLine[]): LogLine[] => lines.filter((line, i) => l
 export const effectTitle = (e: Pick<ActiveEffect, "name" | "label">): LogLine => e.label ?? e.name;
 
 /** Що саме робить ефект: опис або описи його модифікаторів (без повторів). */
-export function effectLines(e: ActiveEffect): LogLine[] {
+export function effectLines(e: ActiveEffect, t: Translator): LogLine[] {
   if (e.description) return [e.description];
 
   const guards = e.effects.filter((d) => d.type === "guard").map((d) => textRef("battle.view.effects.guard", { name: e.source?.name ?? textRef("battle.view.effects.guardian"), value: d.value ?? 0 }));
 
-  return uniqueLines([...(e.abilityEffects ?? legacyActiveEffectModifiers(e)).map((x) => capitalizeLine(describeEffect(x))), ...guards]);
+  const text = (x: Effect) => capitalizeLine(joinSegments(t, describeEffect(x)));
+
+  return uniqueLines([...(e.abilityEffects ?? legacyActiveEffectModifiers(e)).map(text), ...guards]);
 }
 
 /** Що робить активний ефект — для підказки на чипі: опис або описи його модифікаторів, DoT/HoT, залишок і джерело. */
-export function effectSummary(e: ActiveEffect): LogLine[] {
-  const what = effectLines(e);
+export function effectSummary(e: ActiveEffect, t: Translator): LogLine[] {
+  const what = effectLines(e, t);
 
   return [
     ...what,

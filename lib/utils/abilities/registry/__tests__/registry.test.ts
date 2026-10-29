@@ -7,18 +7,16 @@ import { EFFECT_REGISTRY } from "@/lib/utils/abilities/registry/effects";
 import { TRIGGER_REGISTRY, triggerMatches } from "@/lib/utils/abilities/registry/triggers";
 
 describe("registry contract", () => {
-  it("кожен ефект має label, fields, describe, apply", () => {
+  it("кожен ефект має fields, describe, apply", () => {
     for (const def of Object.values(EFFECT_REGISTRY)) {
-      expect(def.kind).toBeTruthy();
       expect(Array.isArray(def.fields), def.kind).toBe(true);
       expect(typeof def.describe, def.kind).toBe("function");
       expect(typeof def.apply, def.kind).toBe("function");
     }
   });
 
-  it("кожен тригер має label і matches", () => {
+  it("кожен тригер має matches", () => {
     for (const def of Object.values(TRIGGER_REGISTRY)) {
-      expect(def.event).toBeTruthy();
       expect(typeof def.matches).toBe("function");
     }
   });

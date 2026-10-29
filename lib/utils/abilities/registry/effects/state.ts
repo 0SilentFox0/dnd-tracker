@@ -1,17 +1,17 @@
-import { CONDITION_LABELS, conditionLabel } from "../labels";
-import { flag } from "../text";
 import type { EffectApplyInput, EffectApplyResult } from "./types";
 
 import { EffectMarker } from "@/lib/constants/battle";
-import { joinLines, textRef } from "@/lib/i18n/text-ref";
+import { textRef } from "@/lib/i18n/text-ref";
 import { findFlags } from "@/lib/utils/abilities/engine/core/collect-modifiers";
 import { findParticipant, participantNames, updateParticipant, withActiveEffects } from "@/lib/utils/abilities/engine/core/participants";
 import { restoreCharm } from "@/lib/utils/abilities/engine/effects/charm";
 import { countMarks, GUARD_KEY, markKey } from "@/lib/utils/abilities/engine/effects/marks";
 import { clampMorale, moraleCapOf } from "@/lib/utils/abilities/engine/effects/morale";
 import { effectSource, upsertTimedEffect } from "@/lib/utils/abilities/engine/effects/timed-effects";
+import { logText } from "@/lib/utils/abilities/log-text";
 import type { ConditionImmunityKey, Effect } from "@/lib/utils/abilities/schema";
 import { isCondition5eKey, isCustomConditionKey } from "@/lib/utils/abilities/schema/kinds";
+import { seg, type Segment } from "@/lib/utils/abilities/segments";
 import { helpEffect } from "@/lib/utils/battle/actions/effects";
 import { applyCondition5e, type ConditionKey, saveEndsFor } from "@/lib/utils/battle/conditions/apply";
 import { removeEffects } from "@/lib/utils/battle/conditions/query";
@@ -53,18 +53,18 @@ function each(
     touched.push(id);
   }
 
-  const messages: LogLine[] = touched.length ? [message(participantNames(ps, touched))] : [];
+  const messages = touched.length ? [message(participantNames(ps, touched))] : [];
 
   if (blocked.length) messages.push(textRef("abilityText.log.immune", { ability: input.ability.name, target: participantNames(ps, blocked) }));
 
   return { participants: ps, messages };
 }
 
+const flag = (value: unknown): string => String(!!value);
+
 export function immuneTo(ps: BattleParticipant[], id: string, key: ConditionImmunityKey): boolean {
   return findFlags(ps, id, "conditionImmunity").some((f) => f.conditions === "all" || f.conditions.includes(key));
 }
-
-export { CONDITION_LABELS, conditionLabel };
 
 function applyCondition5eToTargets(input: EffectApplyInput<Of<"applyCondition">>, key: ConditionKey): EffectApplyResult {
   const { ability, effect, ctx } = input;
@@ -129,7 +129,7 @@ export function applyCondition(input: EffectApplyInput<Of<"applyCondition">>): E
 
       return condition === EffectMarker.NO_REACTION ? { ...next, actionFlags: { ...next.actionFlags, hasUsedReaction: true } } : next;
     },
-    (names) => textRef("abilityText.log.condition", { ability: ability.name, target: names, condition: CONDITION_LABELS[condition], rounds: effect.duration.rounds }),
+    (names) => textRef("abilityText.log.condition", { ability: ability.name, target: names, condition: textRef(`abilityRegistry.options.condition.${condition}`), rounds: effect.duration.rounds }),
     (p) => immuneTo(input.participants, p.basicInfo.id, condition),
   );
 }
@@ -153,7 +153,7 @@ export function applyGrantAction(input: EffectApplyInput<Of<"grantAction">>): Ef
         },
       };
     },
-    (names) => textRef("abilityText.log.grantAction", { ability: ability.name, target: names, text: describeGrantAction(effect) }),
+    (names) => textRef("abilityText.log.grantAction", { ability: ability.name, target: names, text: logText(describeGrantAction(effect)) }),
   );
 }
 
@@ -262,15 +262,15 @@ export function applyCleanse(input: EffectApplyInput<Of<"cleanse">>): EffectAppl
   );
 }
 
-export function describeGrantAction(e: Of<"grantAction">): LogLine {
-  const parts: LogLine[] = [
-    ...(e.extraActions ? [textRef("abilityText.grant.extra", { count: e.extraActions })] : []),
-    ...(e.refreshAction ? [textRef("abilityText.grant.action")] : []),
-    ...(e.refreshBonusAction ? [textRef("abilityText.grant.bonusAction")] : []),
-    ...(e.refreshReaction ? [textRef("abilityText.grant.reaction")] : []),
-  ];
+export function describeGrantAction(e: Of<"grantAction">): Segment[] {
+  const parts = [
+    e.extraActions ? seg("summary.effects.grantExtra", { n: e.extraActions }) : null,
+    e.refreshAction ? seg("summary.effects.grantRefreshAction") : null,
+    e.refreshBonusAction ? seg("summary.effects.grantRefreshBonusAction") : null,
+    e.refreshReaction ? seg("summary.effects.grantRefreshReaction") : null,
+  ].filter((x): x is Segment => !!x);
 
-  return joinLines(parts, ", ");
+  return [seg("summary.effects.grantAction", { parts: { join: ", ", items: parts } })];
 }
 
 export function applyMark(input: EffectApplyInput<Of<"mark">>): EffectApplyResult {

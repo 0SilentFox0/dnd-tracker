@@ -1,4 +1,5 @@
 export { worldKeys } from "./keys";
+export type { WorldEditorCtx } from "./types";
 export { useHeroEyes } from "./useHeroEyes";
 export { useMapDrawing, type WorldTool } from "./useMapDrawing";
 export { useMapFields } from "./useMapFields";
@@ -11,6 +12,7 @@ export { useTravelLog } from "./useTravelLog";
 export { type TravelMoved, useTravelPanel } from "./useTravelPanel";
 export { useWorldDive } from "./useWorldDive";
 export { useWorldEditor } from "./useWorldEditor";
+export { useWorldEditorPage } from "./useWorldEditorPage";
 export { type RosterHero, useWorldHeroes } from "./useWorldHeroes";
 export { useWorldMap } from "./useWorldMap";
 export { useWorldMaps } from "./useWorldMaps";

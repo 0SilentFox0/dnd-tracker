@@ -1,5 +1,5 @@
-import { formatText } from "@/lib/i18n/text-ref";
 import type { Translator } from "@/lib/i18n/translator";
+import { abilityRegistryOf, flowSegments, linesText } from "@/lib/utils/abilities/segments";
 import type { ClassFeature, GameClassData } from "@/types/classes";
 import type { ArtifactForReference, ClassFeatureForReference, ClassForReference, ClassSummaryLine, SkillForReference, SpellForReference } from "@/types/info-reference";
 
@@ -68,7 +68,7 @@ export function formatMechanicsSkill(s: SkillForReference, t: Translator): strin
 
   if (s.mainSkillName) parts.push(t("dashboard.reference.mechanics.branch", { name: s.mainSkillName }));
 
-  if (s.abilitySummary.length > 0) parts.push(t("dashboard.reference.mechanics.abilities", { list: s.abilitySummary.map((line) => formatText(t, line)).join("; ") }));
+  if (s.abilitySummary.length > 0) parts.push(t("dashboard.reference.mechanics.abilities", { list: linesText(abilityRegistryOf(t), s.abilitySummary.map(flowSegments)).join("; ") }));
 
   if (s.grantedSpellName) parts.push(t("dashboard.reference.mechanics.grantedSpell", { name: s.grantedSpellName }));
 
@@ -106,14 +106,14 @@ export function spellSearchText(s: SpellForReference, t: Translator): string {
     s.groupName ?? "",
     s.type,
     formatMechanicsSpell(s, t),
-    (s.effects || []).map((line) => formatText(t, line)).join(" "),
+    linesText(abilityRegistryOf(t), s.effects || []).join(" "),
   ]
     .join(" ")
     .toLowerCase();
 }
 
 export function artifactSearchText(a: ArtifactForReference, t: Translator): string {
-  return [a.name, a.description, a.setName, a.holderName, ...a.effects.map((line) => formatText(t, line))].filter(Boolean).join(" ").toLowerCase();
+  return [a.name, a.description, a.setName, a.holderName, ...linesText(abilityRegistryOf(t), a.effects.map(flowSegments))].filter(Boolean).join(" ").toLowerCase();
 }
 
 export function matchSearch(text: string, query: string): boolean {

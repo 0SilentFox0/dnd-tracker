@@ -8,13 +8,13 @@ import { FieldRenderer } from "./fields/FieldRenderer";
 import { useAbilityEditor, useErrorsUnder } from "./editor-context";
 import { FieldErrors } from "./FieldErrors";
 import { NestedEffectsEditor } from "./NestedEffectsEditor";
+import { useAbilityText } from "./use-ability-text";
 
 import { Button } from "@/components/ui/button";
 import { SelectField } from "@/components/ui/select-field";
-import { useText } from "@/lib/i18n/use-text";
 import { useTranslator } from "@/lib/i18n/use-translator";
 import { allowedEffectKinds, changeEffectKind, getAtPath, newEffect, setAtPath } from "@/lib/utils/abilities/editor";
-import { describeEffect, EFFECT_REGISTRY } from "@/lib/utils/abilities/registry/effects";
+import { EFFECT_REGISTRY } from "@/lib/utils/abilities/registry/effects";
 import type { Effect, EffectKind, Trigger } from "@/lib/utils/abilities/schema";
 
 interface EffectCardProps {
@@ -31,13 +31,13 @@ interface EffectCardProps {
 export function EffectCard({ effect, trigger, path, actions, kinds, extraKinds = [] }: EffectCardProps) {
   const t = useTranslations("abilities.effect");
 
-  const text = useText();
-
   const tr = useTranslator("abilityRegistry");
 
   const def = EFFECT_REGISTRY[effect.kind as EffectKind];
 
   const errorsUnder = useErrorsUnder(path);
+
+  const text = useAbilityText();
 
   const kindErrors = useAbilityEditor().errorsByPath[`${path}.kind`] ?? [];
 
@@ -85,7 +85,7 @@ export function EffectCard({ effect, trigger, path, actions, kinds, extraKinds =
       <div className="grid grid-cols-6 items-end gap-2 [&>*]:min-w-0">{body}</div>
       <p className="text-xs text-primary">
         <span aria-hidden>= </span>
-        <span>{text(describeEffect(effect))}</span>
+        <span>{text.effect(effect)}</span>
       </p>
     </div>
   );

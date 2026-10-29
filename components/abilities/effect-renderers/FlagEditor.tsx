@@ -5,8 +5,8 @@ import { useTranslations } from "next-intl";
 import { FieldRenderer } from "@/components/abilities/fields/FieldRenderer";
 import { useTranslator } from "@/lib/i18n/use-translator";
 import { getAtPath, setAtPath } from "@/lib/utils/abilities/editor";
-import { FLAG_DEFAULTS, FLAG_FIELDS, FLAG_LABELS } from "@/lib/utils/abilities/registry/effects/flags";
-import { DURATION_FIELD, type FieldMeta, TARGET_FIELD } from "@/lib/utils/abilities/registry/fields";
+import { FLAG_DEFAULTS, FLAG_FIELDS, FLAG_KEYS } from "@/lib/utils/abilities/registry/effects/flags";
+import { DURATION_FIELD, type LocalizedFieldMeta, TARGET_FIELD } from "@/lib/utils/abilities/registry/fields";
 import type { Effect, FlagEffect, FlagKey } from "@/lib/utils/abilities/schema";
 
 export function FlagEditor({ effect, path, onChange }: { effect: FlagEffect; path: string; onChange: (e: Effect) => void }) {
@@ -14,9 +14,9 @@ export function FlagEditor({ effect, path, onChange }: { effect: FlagEffect; pat
 
   const tr = useTranslator("abilityRegistry");
 
-  const flagOptions = Object.keys(FLAG_LABELS).map((value) => ({ value, label: tr(`flags.${value}.label`) }));
+  const flagOptions = FLAG_KEYS.map((value) => ({ value, label: tr(`flags.${value}.label`) }));
 
-  const flagMeta: FieldMeta = { name: "flag", label: t("flag"), input: "select", options: flagOptions };
+  const flagMeta: LocalizedFieldMeta = { name: "flag", label: t("flag"), input: "select", options: flagOptions };
 
   const changeFlag = (flag: unknown) => {
     if (typeof flag !== "string" || flag === effect.flag) return;

@@ -10,7 +10,6 @@ vi.mock("@/lib/db", () => ({
 
 import { loadArtifactReference } from "@/lib/cache/artifact-reference";
 import { prisma } from "@/lib/db";
-import { textMatching } from "@/lib/i18n/test/text";
 
 const ability = { id: "a", name: "Сила", trigger: { event: "passive" }, effects: [{ kind: "damageBonus", filter: { kind: "melee" }, percent: 10 }] };
 
@@ -32,7 +31,7 @@ describe("довідник артефактів", () => {
   it("показує, хто носить артефакт, і вільні як null", async () => {
     const { artifacts } = await loadArtifactReference("c");
 
-    expect(artifacts[0]).toMatchObject({ id: "a1", holderName: "Боромир", setName: "Набір", effects: [textMatching(/шкода \(ближня\) \+10%/)] });
+    expect(artifacts[0]).toMatchObject({ id: "a1", holderName: "Боромир", setName: "Набір", effects: [expect.objectContaining({ then: [[expect.objectContaining({ key: "summary.effects.damageBonus" })]] })] });
     expect(artifacts[1]).toMatchObject({ id: "a2", holderName: null, setName: null });
   });
 
@@ -40,6 +39,6 @@ describe("довідник артефактів", () => {
     const { sets } = await loadArtifactReference("c");
 
     expect(sets[0].artifactNames).toEqual(["Амулет", "Шолом"]);
-    expect(sets[0].bonuses).toEqual([textMatching(/шкода/)]);
+    expect(sets[0].bonuses).toEqual([expect.objectContaining({ then: [[expect.objectContaining({ key: "summary.effects.damageBonus" })]] })]);
   });
 });

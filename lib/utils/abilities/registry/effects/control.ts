@@ -1,4 +1,3 @@
-import { roundsOf } from "../text";
 import { immuneTo } from "./state";
 import type { EffectApplyInput, EffectApplyResult } from "./types";
 
@@ -7,6 +6,7 @@ import { textRef } from "@/lib/i18n/text-ref";
 import { findParticipant, isActive, replaceParticipant } from "@/lib/utils/abilities/engine/core/participants";
 import { effectSource, upsertTimedEffect } from "@/lib/utils/abilities/engine/effects/timed-effects";
 import type { Effect } from "@/lib/utils/abilities/schema";
+import { seg, type Segment } from "@/lib/utils/abilities/segments";
 import type { LogLine } from "@/types/text";
 
 type Of<K extends Effect["kind"]> = Extract<Effect, { kind: K }>;
@@ -107,6 +107,6 @@ export function applyCharm(input: EffectApplyInput<Of<"charm">>): EffectApplyRes
   return { participants: ps, messages };
 }
 
-export const describeBerserk = (e: Of<"berserk">) => textRef("abilityText.effects.berserk", { percent: e.damageBonusPercent, rounds: roundsOf(e) });
+export const describeBerserk = (e: Of<"berserk">): Segment[] => [seg("summary.effects.berserk", { percent: e.damageBonusPercent, rounds: e.duration?.rounds ?? "?" })];
 
-export const describeCharm = (e: Of<"charm">) => textRef("abilityText.effects.charm", { rounds: roundsOf(e) });
+export const describeCharm = (e: Of<"charm">): Segment[] => [seg("summary.effects.charm", { rounds: e.duration?.rounds ?? "?" })];

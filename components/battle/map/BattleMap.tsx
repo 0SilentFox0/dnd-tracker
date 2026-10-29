@@ -1,44 +1,18 @@
 "use client";
 
-import { memo, type PointerEvent, useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { useTranslations } from "next-intl";
-import { Flame } from "lucide-react";
+import { useEffect, useMemo, useRef, useState } from "react";
 
 import { WeatherLayer } from "./weather/WeatherLayer";
 import { ATTACK_CURSOR } from "./attack-cursors";
-import { MapBackground } from "./MapBackground";
-import { MapHitFloat } from "./MapHitFloat";
-import { MapToken } from "./MapToken";
-import { MapTokenHud } from "./MapTokenHud";
+import { MapStage } from "./MapStage";
 
 import "./battle-map.css";
 import { modeUiOf } from "@/components/battle/modes";
-import { type ModeTools } from "@/lib/hooks/battle";
-import { DRAG_THRESHOLD, useViewport } from "@/lib/hooks/common";
+import { type ModeTools, useScrollToCurrent, useStrokePaint } from "@/lib/hooks/battle";
+import { useViewport } from "@/lib/hooks/common";
 import { cn } from "@/lib/utils";
-import { isDormant, isEscaped } from "@/lib/utils/abilities/engine/core/participants";
-import {
-  blockedSet,
-  cellAtScreenPoint,
-  cellCenter,
-  cellDistance,
-  cellKey,
-  cellLine,
-  type CellMark,
-  cellPolygon,
-  centreCell,
-  fitMapView,
-  isDamagingCell,
-  isFallen,
-  isMoveMark,
-  mapSize,
-  MIN_TAP_CELL_PX,
-  parseCellKey,
-  playableBounds,
-  tokenBox,
-  UNIT,
-} from "@/lib/utils/battle/grid";
-import type { BattleMapActions, BattleMapConfig, BattleMapView, BattleParticipant, GridPoint, TerrainCell } from "@/types/battle";
+import { fitMapView, mapSize, MIN_TAP_CELL_PX, playableBounds, UNIT } from "@/lib/utils/battle/grid";
+import type { BattleMapActions, BattleMapConfig, BattleMapView, BattleParticipant } from "@/types/battle";
 
 export type { BattleMapActions, BattleMapView };
 
@@ -61,289 +35,9 @@ export interface BattleMapEditing {
   mode?: ModeTools | null;
 }
 
-const HATCH_ID = "battle-map-barrier-hatch";
+const NO_EDITING: BattleMapEditing = {};
 
-const DIFFICULT_HATCH_ID = "battle-map-difficult-hatch";
-
-const HAZARD_GRADIENT_ID = "battle-map-hazard-fire";
-
-// приглушено: яскрава заливка перекривала фон карти; від недосяжних клітинок відрізняє контур
-const ZONE = {
-  move: { fill: "rgba(90,210,80,.07)", stroke: "rgba(140,255,110,.6)", glow: "rgba(125,255,90,.12)" },
-  danger: { fill: "rgba(225,70,55,.09)", stroke: "rgba(255,100,85,.65)", glow: "rgba(255,90,74,.13)" },
-} as const;
-
-type MarkValue = CellMark | number | undefined;
-
-function zoneOf(mark: MarkValue) {
-  if (mark === "move-danger") return ZONE.danger;
-
-  return isMoveMark(mark) ? ZONE.move : null;
-}
-
-function markFill(mark: MarkValue): string {
-  const zone = zoneOf(mark);
-
-  if (zone) return zone.fill;
-
-  if (mark === "target") return "rgba(230,80,60,.35)";
-
-  if (mark === "pick") return "rgba(110,170,255,.3)";
-
-  if (mark === "picked") return "rgba(240,200,70,.5)";
-
-  if (mark === "out-of-range") return "rgba(0,0,0,.45)";
-
-  return mark === "invalid-target" ? "rgba(120,120,120,.25)" : "transparent";
-}
-
-type MapT = ReturnType<typeof useTranslations<"battle.map">>;
-
-function hazardTitle(t: MapT, cell: TerrainCell, round: number | undefined): string {
-  const label = cell.label ?? t("hazardDefault");
-
-  if (cell.untilRound === undefined) return label;
-
-  return round === undefined ? t("hazardUntilEnd", { label, round: cell.untilRound }) : t("hazardRoundsLeft", { label, rounds: Math.max(1, cell.untilRound - round + 1) });
-}
-
-function terrainTitle(t: MapT, cell: TerrainCell, round: number | undefined): string | null {
-  if (cell.kind === "barrier") return cell.untilRound !== undefined ? t("barrierUntil", { round: cell.untilRound }) : t("barrier");
-
-  if (cell.kind === "difficult") return cell.label ?? t("difficultDefault");
-
-  return cell.kind === "hazard" ? hazardTitle(t, cell, round) : null;
-}
-
-const TERRAIN_FILL = { wall: "rgba(0,0,0,.6)", barrier: "rgba(0,0,0,.75)", difficult: "transparent", hazard: `url(#${HAZARD_GRADIENT_ID})` } as const;
-
-const ZONE_FILL = "rgba(160,130,210,.16)";
-
-const FLAME = UNIT * 0.42;
-
-/** Жар і полум'я поверх небезпечних клітинок; на повернутій телефонній карті гліфи стоять прямо. */
-const HazardLayer = memo(function HazardLayer({ cells, rotated }: { cells: GridPoint[]; rotated: boolean }) {
-  if (cells.length === 0) return null;
-
-  return (
-    <g pointerEvents="none" data-hazard-layer="">
-      <g className="battle-map-ember">
-        {cells.map((p) => (
-          <polygon key={`e${cellKey(p)}`} points={cellPolygon(p)} fill="rgba(255,190,70,.3)" stroke="#ffc35a" strokeWidth={2} vectorEffect="non-scaling-stroke" />
-        ))}
-      </g>
-      <g className="battle-map-flame">
-        {cells.map((p) => {
-          const c = cellCenter(p);
-
-          return (
-            <g key={`f${cellKey(p)}`} data-hazard-flame={cellKey(p)} transform={rotated ? `rotate(-90 ${c.x} ${c.y})` : undefined}>
-              <Flame x={c.x - FLAME / 2} y={c.y - FLAME / 2} width={FLAME} height={FLAME} color="#ffe08a" fill="rgba(255,120,30,.85)" strokeWidth={1.6} />
-            </g>
-          );
-        })}
-      </g>
-    </g>
-  );
-});
-
-interface GridLayerProps {
-  map: BattleMapConfig;
-  marks: BattleMapView["marks"];
-  actions?: BattleMapActions;
-  wasDragged: () => boolean;
-  clickableBlocked?: boolean;
-  showBlocked?: boolean;
-  onStrokeStart?: (p: GridPoint, e: PointerEvent) => void;
-  scene: { round?: number; rotated: boolean };
-}
-
-const GridLayer = memo(function GridLayer({ map, marks, actions, wasDragged, clickableBlocked, showBlocked, onStrokeStart, scene }: GridLayerProps) {
-  const t = useTranslations("battle.map");
-
-  const cells = useMemo(() => {
-    const list: GridPoint[] = [];
-
-    for (let y = 0; y < map.rows; y++) for (let x = 0; x < map.cols; x++) list.push({ x, y });
-
-    return list;
-  }, [map.cols, map.rows]);
-
-  const blocked = useMemo(() => blockedSet({ blocked: map.blocked }), [map.blocked]);
-
-  const terrain = map.terrain;
-
-  const terrainCells = useMemo(
-    () => cells.flatMap((p) => (terrain?.[cellKey(p)] && !blocked.has(cellKey(p)) ? [{ p, cell: terrain[cellKey(p)] }] : [])),
-    [cells, terrain, blocked],
-  );
-
-  const hazardCells = useMemo(() => terrainCells.flatMap(({ p, cell }) => (isDamagingCell(cell) ? [p] : [])), [terrainCells]);
-
-  const zoneCells = cells.flatMap((p) => {
-    const zone = blocked.has(cellKey(p)) ? null : zoneOf(marks?.get(cellKey(p)));
-
-    return zone ? [{ p, zone }] : [];
-  });
-
-  return (
-    <>
-      <defs>
-        <pattern id={HATCH_ID} patternUnits="userSpaceOnUse" width={UNIT * 0.14} height={UNIT * 0.14} patternTransform="rotate(45)">
-          <line x1="0" y1="0" x2="0" y2={UNIT * 0.14} stroke="rgba(255,255,255,.28)" strokeWidth={UNIT * 0.03} />
-        </pattern>
-        <pattern id={DIFFICULT_HATCH_ID} patternUnits="userSpaceOnUse" width={UNIT * 0.2} height={UNIT * 0.2} patternTransform="rotate(-45)">
-          <line x1="0" y1="0" x2="0" y2={UNIT * 0.2} stroke="rgba(190,140,70,.7)" strokeWidth={UNIT * 0.035} />
-        </pattern>
-        <radialGradient id={HAZARD_GRADIENT_ID}>
-          <stop offset="0%" stopColor="#ffd36b" stopOpacity={0.75} />
-          <stop offset="55%" stopColor="#ff7a1a" stopOpacity={0.62} />
-          <stop offset="100%" stopColor="#b8200f" stopOpacity={0.7} />
-        </radialGradient>
-      </defs>
-      {terrainCells.map(({ p, cell }) => {
-        const hazard = isDamagingCell(cell);
-
-        return (
-          <g key={`t${cellKey(p)}`} data-terrain={cell.kind} data-hazard-timed={hazard && cell.untilRound !== undefined ? "" : undefined} pointerEvents="none">
-            <polygon points={cellPolygon(p)} fill={cell.kind === "hazard" && !hazard ? ZONE_FILL : TERRAIN_FILL[cell.kind]} stroke={hazard ? "#ff9a2a" : "none"} strokeOpacity={0.9} strokeWidth={1.5} vectorEffect="non-scaling-stroke" />
-            {cell.kind === "barrier" && <polygon points={cellPolygon(p)} fill={`url(#${HATCH_ID})`} stroke="none" />}
-            {(cell.kind === "difficult" || cell.difficult) && <polygon points={cellPolygon(p)} fill={`url(#${DIFFICULT_HATCH_ID})`} stroke="none" data-difficult="" />}
-            {cell.obscured && <polygon points={cellPolygon(p)} fill="rgba(210,215,225,.38)" stroke="none" data-obscured="" />}
-          </g>
-        );
-      })}
-      <HazardLayer cells={hazardCells} rotated={scene.rotated} />
-      {cells.map((p) => {
-        const key = cellKey(p);
-
-        if (blocked.has(key)) {
-          return (
-            <polygon
-              key={key}
-              data-fx-cell={key}
-              data-blocked=""
-              points={cellPolygon(p)}
-              fill={showBlocked ? "rgba(20,0,0,.6)" : "transparent"}
-              stroke="none"
-              pointerEvents={clickableBlocked ? "all" : "none"}
-              style={{ cursor: clickableBlocked ? "pointer" : undefined }}
-              onClick={clickableBlocked && !onStrokeStart ? () => !wasDragged() && actions?.onCellClick?.(p) : undefined}
-              onPointerDown={onStrokeStart ? (e) => onStrokeStart(p, e) : undefined}
-            />
-          );
-        }
-
-        const mark = marks?.get(key);
-
-        const cell = terrain?.[key];
-
-        const title = cell && terrainTitle(t, cell, scene.round);
-
-        const gridless = zoneOf(mark) !== null || cell?.kind === "wall" || cell?.kind === "barrier";
-
-        return (
-          <polygon
-            key={key}
-            data-fx-cell={key}
-            points={cellPolygon(p)}
-            fill={markFill(mark)}
-            stroke={gridless ? "none" : "rgba(255,255,255,1)"}
-            strokeOpacity={map.opacity}
-            strokeWidth={1.5}
-            vectorEffect="non-scaling-stroke"
-            style={{ cursor: onStrokeStart ? "crosshair" : actions?.onCellClick ? "pointer" : undefined }}
-            onClick={onStrokeStart ? undefined : () => !wasDragged() && actions?.onCellClick?.(p)}
-            onPointerDown={onStrokeStart ? (e) => onStrokeStart(p, e) : undefined}
-            onPointerEnter={onStrokeStart ? undefined : () => actions?.onCellHover?.(p)}
-          >
-            {title && <title>{title}</title>}
-          </polygon>
-        );
-      })}
-      <g pointerEvents="none">
-        {zoneCells.map(({ p, zone }) => (
-          <polygon key={`g${cellKey(p)}`} points={cellPolygon(p)} fill="none" stroke={zone.glow} strokeWidth={4} strokeLinejoin="round" vectorEffect="non-scaling-stroke" />
-        ))}
-        {zoneCells.map(({ p, zone }) => (
-          <polygon
-            key={`z${cellKey(p)}`}
-            data-fx-zone={zone === ZONE.danger ? "danger" : "move"}
-            points={cellPolygon(p)}
-            fill="none"
-            stroke={zone.stroke}
-            strokeWidth={1.5}
-            strokeLinejoin="round"
-            vectorEffect="non-scaling-stroke"
-          />
-        ))}
-      </g>
-    </>
-  );
-});
-
-const parseKey = (key: string): GridPoint => {
-  const [x, y] = key.split(":").map(Number);
-
-  return { x, y };
-};
-
-const StrokeLayer = memo(function StrokeLayer({ preview, pending }: { preview: ReadonlySet<string>; pending?: ReadonlySet<string> }) {
-  const sent = pending ? [...pending].filter((k) => !preview.has(k)) : [];
-
-  return (
-    <g pointerEvents="none">
-      {sent.map((k) => (
-        <polygon key={`p${k}`} data-stroke-pending={k} points={cellPolygon(parseKey(k))} fill="rgba(242,193,78,.22)" stroke="#f2c14e" strokeOpacity={0.6} strokeWidth={1.5} strokeDasharray="6 4" vectorEffect="non-scaling-stroke" />
-      ))}
-      {[...preview].map((k) => (
-        <polygon key={`s${k}`} data-stroke={k} points={cellPolygon(parseKey(k))} fill="rgba(242,193,78,.35)" stroke="#f2c14e" strokeWidth={2} vectorEffect="non-scaling-stroke" />
-      ))}
-    </g>
-  );
-});
-
-const PULSE_STEP_MS = 130;
-
-const pulseStep = (from: GridPoint | null | undefined, p: GridPoint) => (from ? cellDistance(from, p) : 0);
-
-/** Хвиля від центру (або вершини конуса/лінії) до країв: затримка анімації росте з відстанню клітинки. */
-const TemplateLayer = memo(function TemplateLayer({ marks, aim, pulseFrom }: Pick<BattleMapView, "marks" | "aim" | "pulseFrom">) {
-  const cells = marks ? [...marks].flatMap(([k, m]) => (m === "template" ? [k] : [])) : [];
-
-  if (cells.length === 0 && !aim) return null;
-
-  const pulse = (p: GridPoint) => {
-    const step = pulseStep(pulseFrom, p);
-
-    return { "data-pulse-step": step, className: "battle-map-pulse", style: { animationDelay: `${step * PULSE_STEP_MS}ms` } };
-  };
-
-  const wave = `${pulseFrom ? cellKey(pulseFrom) : ""}/${aim ? cellKey(aim) : ""}`;
-
-  // новий ключ при зміні точки перезапускає анімацію всіх клітинок разом, а не лише нових
-  return (
-    <g key={wave} data-template-layer={wave} pointerEvents="none">
-      {cells.map((k) => (
-        <polygon key={`tp${k}`} data-template-cell={k} {...pulse(parseKey(k))} points={cellPolygon(parseKey(k))} fill="rgba(168,120,255,.3)" stroke="#c4a6ff" strokeWidth={1.5} vectorEffect="non-scaling-stroke" />
-      ))}
-      {aim && <polygon data-template-aim={cellKey(aim)} {...pulse(aim)} points={cellPolygon(aim)} fill="rgba(200,176,255,.5)" stroke="#efe6ff" strokeWidth={3} vectorEffect="non-scaling-stroke" />}
-    </g>
-  );
-});
-
-const NO_CELLS: ReadonlySet<string> = new Set();
-
-interface Stroke {
-  pointerId: number;
-  x: number;
-  y: number;
-  moved: boolean;
-  last: GridPoint;
-  cells: Map<string, GridPoint>;
-}
-
-export function BattleMap({ map, participants, view, actions, className, editing = {}, phone = false }: BattleMapProps) {
+export function BattleMap({ map, participants, view, actions, className, editing = NO_EDITING, phone = false }: BattleMapProps) {
   const { clickableBlocked, showBlocked, strokeTool } = editing;
 
   const painting = Boolean(strokeTool && actions?.onStroke);
@@ -376,84 +70,7 @@ export function BattleMap({ map, participants, view, actions, className, editing
     return () => observer.disconnect();
   }, []);
 
-  const svgRef = useRef<SVGSVGElement>(null);
-
-  const strokeRef = useRef<Stroke | null>(null);
-
-  const [preview, setPreview] = useState<ReadonlySet<string>>(NO_CELLS);
-
-  const onStrokeStart = useCallback((p: GridPoint, e: PointerEvent) => {
-    if (!e.isPrimary || e.button !== 0) return;
-
-    strokeRef.current = { pointerId: e.pointerId, x: e.clientX, y: e.clientY, moved: false, last: p, cells: new Map([[cellKey(p), p]]) };
-    setPreview(new Set([cellKey(p)]));
-  }, []);
-
-  const onStroke = actions?.onStroke;
-
-  useEffect(() => {
-    if (!painting) return;
-
-    const drop = () => {
-      strokeRef.current = null;
-      setPreview(NO_CELLS);
-    };
-
-    const onMove = (e: globalThis.PointerEvent) => {
-      const s = strokeRef.current;
-
-      const svg = svgRef.current;
-
-      if (!s || !svg || e.pointerId !== s.pointerId) return;
-
-      // дрібне тремтіння клацання не має зачіпати сусідню клітинку
-      if (!s.moved && Math.hypot(e.clientX - s.x, e.clientY - s.y) <= DRAG_THRESHOLD) return;
-
-      s.moved = true;
-
-      const ctm = svg.getScreenCTM();
-
-      const cell = ctm && cellAtScreenPoint({ cols, rows }, ctm, e.clientX, e.clientY);
-
-      if (!cell || (cell.x === s.last.x && cell.y === s.last.y)) return;
-
-      for (const c of cellLine(s.last, cell)) s.cells.set(cellKey(c), c);
-
-      s.last = cell;
-      setPreview(new Set(s.cells.keys()));
-    };
-
-    // другий палець — це щипок, а не штрих
-    const onDown = (e: globalThis.PointerEvent) => {
-      if (strokeRef.current && e.pointerId !== strokeRef.current.pointerId) drop();
-    };
-
-    const onUp = (e: globalThis.PointerEvent) => {
-      const s = strokeRef.current;
-
-      if (!s || e.pointerId !== s.pointerId) return;
-
-      drop();
-      onStroke?.([...s.cells.values()]);
-    };
-
-    const onCancel = (e: globalThis.PointerEvent) => {
-      if (strokeRef.current?.pointerId === e.pointerId) drop();
-    };
-
-    window.addEventListener("pointermove", onMove);
-    window.addEventListener("pointerdown", onDown);
-    window.addEventListener("pointerup", onUp);
-    window.addEventListener("pointercancel", onCancel);
-
-    return () => {
-      window.removeEventListener("pointermove", onMove);
-      window.removeEventListener("pointerdown", onDown);
-      window.removeEventListener("pointerup", onUp);
-      window.removeEventListener("pointercancel", onCancel);
-      drop();
-    };
-  }, [painting, onStroke, cols, rows]);
+  const { svgRef, preview, onStrokeStart } = useStrokePaint({ painting, dims: { cols, rows }, onStroke: actions?.onStroke });
 
   const win = useMemo(() => (phone ? playableBounds(map) : { x: 0, y: 0, cols, rows }), [phone, map, cols, rows]);
 
@@ -469,72 +86,17 @@ export function BattleMap({ map, participants, view, actions, className, editing
 
   const pxPerUnit = (fit.rotated ? fit.height : fit.width) / (win.cols * UNIT);
 
-  const round = view?.round;
-
-  const gridScene = useMemo(() => ({ round, rotated: fit.rotated }), [round, fit.rotated]);
-
   const modeView = view?.mode;
-
-  // полеглі лишаються тут: жетон зникає лише в момент удару анімації, а число смертельного удару — після
-  const placed = useMemo(
-    () =>
-      participants
-        .filter((p) => !p.battleData.reserved)
-        .filter((p) => !modeView || (!isEscaped(p) && modeView.visibleIds.has(p.basicInfo.id)))
-        .flatMap((p) => {
-          const box = tokenBox(p);
-
-          return box ? [{ p, box }] : [];
-        }),
-    [participants, modeView],
-  );
-
-  const tokens = useMemo(() => placed.filter(({ p }) => !isFallen(p)), [placed]);
-
-  const onTokenClick = useCallback((id: string) => !wasDragged() && actions?.onTokenClick?.(id), [wasDragged, actions]);
-
-  const onCellHover = actions?.onCellHover;
-
-  // портрет перехоплює вказівник, тож клітинка під ним не отримує pointerenter
-  const onTokenHover = useCallback(
-    (id: string | null) => {
-      const token = id ? tokens.find((t) => t.p.basicInfo.id === id) : undefined;
-
-      onCellHover?.(token ? centreCell(token.p) : null);
-    },
-    [tokens, onCellHover],
-  );
-
-  const movingId = view?.currentId && view.marks && [...view.marks.values()].some((m) => isMoveMark(m)) ? view.currentId : null;
 
   const trajectory = view?.trajectory ?? null;
 
-  const from = trajectory?.kind === "ranged" ? tokens.find((t) => t.p.basicInfo.id === trajectory.fromId) : undefined;
+  useScrollToCurrent(outerRef, containerRef, view?.currentId ?? null, scrolls);
 
-  const end = trajectory?.kind === "ranged" ? cellCenter(trajectory.to) : null;
+  const layout = useMemo(() => ({ win, size, pxPerUnit, rotated: fit.rotated, phone }), [win, size, pxPerUnit, fit.rotated, phone]);
 
-  const currentId = view?.currentId ?? null;
+  const interaction = useMemo(() => ({ painting, preview, svgRef, onStrokeStart, wasDragged }), [painting, preview, svgRef, onStrokeStart, wasDragged]);
 
-  useEffect(() => {
-    const outer = outerRef.current;
-
-    if (!currentId || !outer || !scrolls) return;
-
-    const token = [...(containerRef.current?.querySelectorAll<HTMLElement>('[data-fx-anchor="map"]') ?? [])].find((el) => el.dataset.fxParticipant === currentId);
-
-    if (!token) return;
-
-    const t = token.getBoundingClientRect();
-
-    const o = outer.getBoundingClientRect();
-
-    const dy = t.top < o.top ? t.top - o.top : t.bottom > o.bottom ? t.bottom - o.bottom : 0;
-
-    const dx = t.left < o.left ? t.left - o.left : t.right > o.right ? t.right - o.right : 0;
-
-    if (dy !== 0 || dx !== 0) outer.scrollBy({ top: dy, left: dx, behavior: "smooth" });
-    // scrolls — щоб спрацювати й після першого виміру, коли вкладку відкрили посеред ходу
-  }, [currentId, containerRef, scrolls]);
+  const stageEditing = useMemo(() => ({ clickableBlocked, showBlocked, mode: modeTools }), [clickableBlocked, showBlocked, modeTools]);
 
   // свайп віддаємо браузеру лише для прокрутки; зум, щипок і штрих місцевості — наші
   const touch = scrolls && zoom === 1 && !painting ? cn(scrollsX && "touch-pan-x", scrollsY && "touch-pan-y") : "touch-none";
@@ -566,86 +128,7 @@ export function BattleMap({ map, participants, view, actions, className, editing
         className={cn("absolute left-0 top-0 origin-top-left", !fit.rotated && "inset-0")}
         style={fit.rotated ? { width: fit.height, height: fit.width, transform: `translateX(${fit.width}px) rotate(90deg)` } : undefined}
       >
-      <div
-        className="absolute"
-        style={{ left: -win.x * UNIT * pxPerUnit, top: -win.y * UNIT * pxPerUnit, width: size.width * pxPerUnit, height: size.height * pxPerUnit }}
-      >
-        <MapBackground map={map} cellPx={UNIT * pxPerUnit} phone={phone} />
-        <svg ref={svgRef} className="absolute inset-0 h-full w-full" viewBox={`0 0 ${size.width} ${size.height}`} preserveAspectRatio="none">
-          <GridLayer
-            map={map}
-            marks={view?.marks}
-            actions={actions}
-            wasDragged={wasDragged}
-            clickableBlocked={clickableBlocked}
-            showBlocked={showBlocked}
-            onStrokeStart={painting ? onStrokeStart : undefined}
-            scene={gridScene}
-          />
-          {ui?.MapLayers && <ui.MapLayers map={map} view={modeView ?? null} rotated={fit.rotated} editing={modeTools?.toolActive ? modeTools.raw : null} />}
-          <TemplateLayer marks={view?.marks} aim={view?.aim} pulseFrom={view?.pulseFrom} />
-          {painting && <StrokeLayer preview={preview} pending={view?.pendingStroke} />}
-          {from && end && (
-            <g pointerEvents="none">
-              <line data-map-attack-hint="ranged" x1={from.box.cx} y1={from.box.cy} x2={end.x} y2={end.y} stroke={trajectory?.cover ? "#e0603a" : "#f2c14e"} strokeWidth={4} strokeDasharray="12 10" vectorEffect="non-scaling-stroke" pointerEvents="none" />
-              <circle cx={end.x} cy={end.y} r={UNIT * 0.18} fill={trajectory?.cover ? "#e0603a" : "#f2c14e"} />
-              {trajectory?.cover?.map((key) => {
-                const c = cellCenter(parseCellKey(key));
-
-                return <rect key={key} x={c.x - UNIT / 2} y={c.y - UNIT / 2} width={UNIT} height={UNIT} fill="rgba(224,96,58,.3)" stroke="#e0603a" strokeWidth={2} vectorEffect="non-scaling-stroke" />;
-              })}
-              {trajectory?.cover && (
-                <text x={end.x} y={end.y - UNIT * 0.45} textAnchor="middle" fontSize={UNIT * 0.32} fontWeight={700} fill="#ffd2b8" stroke="#3a1a10" strokeWidth={3} paintOrder="stroke">
-                  🧱 ×0.5
-                </text>
-              )}
-            </g>
-          )}
-        </svg>
-        {/* у режимі місцевості токени притушені, щоб під ними було видно штрих і заливку */}
-        <div data-map-tokens className={cn(fit.rotated && "*:-rotate-90")} style={painting ? { opacity: 0.35 } : undefined}>
-        {placed.map(({ p, box }) => (
-          <MapToken
-            key={p.basicInfo.id}
-            participant={p}
-            box={box}
-            mapSize={size}
-            pxPerUnit={pxPerUnit}
-            selected={view?.selectedId === p.basicInfo.id}
-            current={view?.currentId === p.basicInfo.id}
-            onClick={onTokenClick}
-            onHover={painting || !onCellHover ? undefined : onTokenHover}
-            passThrough={painting || !!modeTools?.toolActive || movingId === p.basicInfo.id}
-            impact={view?.impactFor?.(p.basicInfo.id)}
-            effects={view?.effects?.get(p.basicInfo.id)}
-            dormant={!!modeView?.showDormant && isDormant(p)}
-          />
-        ))}
-        {placed.map(({ p, box }) => {
-          const id = p.basicInfo.id;
-
-          const hud = view?.hud?.get(id);
-
-          return (
-            <MapTokenHud
-              key={`hud:${id}`}
-              participant={p}
-              box={box}
-              mapSize={size}
-              pxPerUnit={pxPerUnit}
-              exact={hud?.exact ?? false}
-              raised={view?.selectedId === id || view?.currentId === id}
-              impact={view?.impactFor?.(id)}
-              effects={view?.effects?.get(id)}
-              onReturn={view?.returnId === id ? actions?.onReturn : undefined}
-            />
-          );
-        })}
-        {placed.map(({ p, box }) => (
-          <MapHitFloat key={`float:${p.basicInfo.id}`} participant={p} box={box} mapSize={size} pxPerUnit={pxPerUnit} impact={view?.impactFor?.(p.basicInfo.id)} />
-        ))}
-        </div>
-      </div>
+        <MapStage map={map} participants={participants} view={view} actions={actions} editing={stageEditing} layout={layout} interaction={interaction} />
       </div>
       </div>
       {ui?.MapOverlay && <ui.MapOverlay view={modeView ?? null} participants={participants} />}

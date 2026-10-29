@@ -1,7 +1,8 @@
 import { describe, expect, it } from "vitest";
 
 import { adaptCompendium } from "../adapt";
-import { equipmentText, proficiencyText } from "../adapters/character-traits";
+import { equipmentText } from "../adapters/equipment";
+import { proficiencyText } from "../adapters/race-traits";
 import { derivedTranslator } from "../derived-text";
 import { parseCompendium } from "../parse";
 

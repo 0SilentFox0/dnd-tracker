@@ -3,10 +3,11 @@ import { cleanup, fireEvent, screen } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
 import { WorldBreadcrumbs } from "../WorldBreadcrumbs";
-import { WorldEditorContext, type WorldEditorCtx } from "../WorldEditorContext";
+import { WorldEditorContext } from "../WorldEditorContext";
 
 import { HudPageHeader } from "@/components/hud/page";
 import { render } from "@/components/ui/__tests__/uk-intl";
+import type { WorldEditorCtx } from "@/lib/hooks/world";
 
 vi.unmock("next-intl");
 

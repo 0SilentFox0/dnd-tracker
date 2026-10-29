@@ -6,6 +6,19 @@ The most complex part of the app. Related: [balance.md](balance.md), [map-modes.
 
 Page `app/campaigns/[id]/battles/[battleId]/page.tsx` (server: `userId` from `getClaims`, the scene from `readBattleScene` — the same code as `GET /` — seeded into the query cache with `PrefetchedQuery`, so the first HTML has the battle and the client does not GET on mount) → `BattlePageClient` → `useBattleSceneValue` + `BattleSceneProvider` (`lib/hooks/battle`, read with `useBattleScene()`) → `BattleScreen` (`components/battle/scene`: mobile layout < 1024 px, desktop three columns ≥ 1024 px) → mutations: `useX = makeBattleHook(battleOps.x)` (`lib/hooks/battles`, through `useBattleAction`; per-operation defaults `invalidate`/`retryOnConflict`/`mapResponse` live in the registry) → `callBattleOp` over the `battleOps` registry (`lib/api/battle-ops.ts`; a new operation = one registry row + one hook line + its `BattleSceneActions` instance) → route in `app/api/campaigns/[id]/battles/[battleId]/<action>/route.ts`.
 
+## Читання сцени
+
+`readBattleScene` (`lib/server/battles/read-battle.ts`) — окремий read-path без фейкового `Request`: сесія → `loadBattle` → 404/403 → `readScenePreview` (`lib/utils/battle/pipeline/run-battle-mutation.ts`: ті самі нормалізації, що отримала б порожня мутація — порядок ходу, чистки, перемога, — без rate limit і запису) → повна сцена з останніми подіями й `knowledge`. Читання, як і раніше, іде через `deps.withWrite` (серіалізація із записами кампанії, помилка `CAMPAIGN_NOT_FOUND`). `readBattleVersion`/`readBattleEvents`/`readBattleSummary` діляться `authorize` і `BattleReadDeps`.
+
+## Клієнтська сцена
+
+- `useBattleScene` (`lib/hooks/battle`) складає значення сцени з `derive-scene` (`lib/utils/battle/view`, чиста похідна: черга, склад сторін, глядач) і `useBattleActions` (мутації з реєстру `battleOps`; з барелю не експортується). Типи: чисті (`ResultFx`, `StrikeFx`, `ActionResultFx`, `BattleLogState`, `BattleSceneTurn/Roster/Result`) — у `types/battle-scene.ts` без імпортів хуків; типи, що залежать від хуків (`BattleSceneValue/Data/Actions/Intents/Dialogs`) — у `lib/hooks/battle/types.ts`.
+- `BattleMap` (`components/battle/map`) — оболонка: `MapStage` (жести, масштаб, шари), `MapLayers` (сітка, токени, накладки), `RangedHint` (підказка дальнього пострілу), `useStrokePaint` (малювання місцевості, `lib/hooks/battle`). Вид карти складає `composeMapView` (`lib/utils/battle/grid/map-compose.ts`).
+
+## Дії асистента над боєм
+
+`lib/server/battles/action-service.ts` — таблиці замість ланцюжків `if`: `COMMAND_CHECKS` (передперевірки команд `attack`/`spell`; пошук лише через `Object.hasOwn`), `OPERATIONS` (`operations.ts`, доступ `BattleAccess.*`). Нова команда з передперевіркою = рядок у `COMMAND_CHECKS`.
+
 ## Mutation pipeline
 
 Every battle route is a Zod schema + `runBattleMutation` (`lib/server/battles/run-mutation.ts`, pure engine in `lib/utils/battle/pipeline/`) with a `<action>-mutation.ts` in `lib/server/battles/mutations/<action>/`. The pipeline:

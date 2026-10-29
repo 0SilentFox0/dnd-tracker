@@ -7,8 +7,9 @@ vi.mock("@/components/hud/fonts", () => ({ hudFontClassName: "" }));
 import { ActionResultCard } from "@/components/battle/overlays/ActionResultCard";
 import { CornerStack } from "@/components/battle/scene/CornerStack";
 import { MapStripSlotContext, NoticeStackContext } from "@/components/battle/scene/MapStrip";
-import { ACTION_RESULT_MS, type ActionResultFx } from "@/lib/hooks/battle";
+import { ACTION_RESULT_MS } from "@/lib/hooks/battle";
 import { fakeScene } from "@/lib/hooks/battle/__tests__/fake-scene";
+import type { ActionResultFx } from "@/types/battle-scene";
 
 
 vi.unmock("next-intl");

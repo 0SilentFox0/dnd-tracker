@@ -1,5 +1,4 @@
-import type { LogLine } from "@/types/text";
-
+import type { AbilityFlowSummary } from "@/lib/utils/abilities/segments";
 export interface ArtifactSetSummaryArtifact {
   id: string;
   name: string;
@@ -17,7 +16,7 @@ export interface ArtifactSetRow {
   icon?: string | null;
   createdAt: string;
   artifacts?: ArtifactSetSummaryArtifact[];
-  abilitySummary?: LogLine[];
+  abilitySummary?: AbilityFlowSummary[];
 }
 
 export interface ArtifactSetCardData {
@@ -26,5 +25,5 @@ export interface ArtifactSetCardData {
   icon: string | null;
   description: string | null;
   setBonus: unknown;
-  abilitySummary: LogLine[];
+  abilitySummary: AbilityFlowSummary[];
 }

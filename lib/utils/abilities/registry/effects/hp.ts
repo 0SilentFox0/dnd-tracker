@@ -1,5 +1,4 @@
-import { amountLabel } from "../labels";
-import { damageTypeArg, flag, roundsOf } from "../text";
+import { amountSegment, damageTypeSegment } from "../labels";
 import type { EffectApplyInput, EffectApplyResult } from "./types";
 
 import { CombatStatus } from "@/lib/constants/battle";
@@ -10,6 +9,7 @@ import { findParticipant, isActive, replaceParticipant } from "@/lib/utils/abili
 import { applyRawDamage } from "@/lib/utils/abilities/engine/effects/hp";
 import { effectSource, upsertTimedEffect } from "@/lib/utils/abilities/engine/effects/timed-effects";
 import type { Effect } from "@/lib/utils/abilities/schema";
+import { seg, type Segment } from "@/lib/utils/abilities/segments";
 import { applyDamageConsequences } from "@/lib/utils/battle/damage/consequences";
 import { clearDeathSaves, isDying } from "@/lib/utils/battle/death-saves";
 import { hasImmunity } from "@/lib/utils/battle/resistance";
@@ -201,16 +201,20 @@ export function applyHot(input: EffectApplyInput<Of<"hot">>): EffectApplyResult 
   return { participants: ps, messages };
 }
 
-export const describeDealDamage = (e: Of<"dealDamage">) =>
-  textRef("abilityText.effects.dealDamage", {
-    amount: amountLabel(e.amount),
-    hasType: flag(e.damageType),
-    type: e.damageType ? damageTypeArg(e.damageType) : "",
-    falloff: e.falloff ? ` (${e.falloff.join("% → ")}%)` : "",
-  });
+const rounds = (e: { duration?: { rounds: number } }) => e.duration?.rounds ?? "?";
 
-export const describeHeal = (e: Of<"heal">) => textRef("abilityText.effects.heal", { revive: flag(e.revive), amount: amountLabel(e.amount) });
+export const describeDealDamage = (e: Of<"dealDamage">): Segment[] => [
+  seg("summary.effects.dealDamage", {
+    amount: amountSegment(e.amount),
+    hasType: e.damageType ? "yes" : "no",
+    ...(e.damageType && { type: damageTypeSegment(e.damageType) }),
+    hasFalloff: e.falloff ? "yes" : "no",
+    ...(e.falloff && { falloff: e.falloff.join("% → ") }),
+  }),
+];
 
-export const describeDot = (e: Of<"dot">) => textRef("abilityText.effects.dot", { type: damageTypeArg(e.damageType), amount: amountLabel(e.damagePerRound), rounds: roundsOf(e), linked: flag(e.linkedToCondition) });
+export const describeHeal = (e: Of<"heal">): Segment[] => [seg("summary.effects.heal", { revive: e.revive ? "yes" : "no", amount: amountSegment(e.amount) })];
 
-export const describeHot = (e: Of<"hot">) => textRef("abilityText.effects.hot", { amount: amountLabel(e.healPerRound), rounds: roundsOf(e) });
+export const describeDot = (e: Of<"dot">): Segment[] => [seg("summary.effects.dot", { type: damageTypeSegment(e.damageType), amount: amountSegment(e.damagePerRound), rounds: rounds(e), linked: e.linkedToCondition ? "yes" : "no" })];
+
+export const describeHot = (e: Of<"hot">): Segment[] => [seg("summary.effects.hot", { amount: amountSegment(e.healPerRound), rounds: rounds(e) })];

@@ -2,17 +2,16 @@
 
 import { useTranslations } from "next-intl";
 
+import { useAbilityText } from "@/components/abilities/use-ability-text";
 import { TargetButton } from "@/components/battle/wizards/TargetButton";
 import type { AuraZoneStep } from "@/lib/hooks/battle";
-import { useText } from "@/lib/i18n/use-text";
-import { describeEffect } from "@/lib/utils/abilities/registry/effects";
 
 export function AuraZonePicker({ step }: { step: AuraZoneStep }) {
   const { aura, candidates, selected, toggle, confirm, pending } = step;
 
   const t = useTranslations("battleWizards");
 
-  const text = useText();
+  const abilityText = useAbilityText();
 
   const enemies = aura.target === "nearbyEnemies";
 
@@ -21,7 +20,7 @@ export function AuraZonePicker({ step }: { step: AuraZoneStep }) {
       <div>
         <div className="hud-sc text-lg font-bold">{t("aura.title", { name: aura.ability.name })}</div>
         <div className="text-xs text-[#a89c88]">
-          {t(enemies ? "aura.hintEnemies" : "aura.hintAllies", { effects: aura.effects.map((e) => text(describeEffect(e))).join(", ") })}
+          {t(enemies ? "aura.hintEnemies" : "aura.hintAllies", { effects: aura.effects.map(abilityText.effect).join(", ") })}
         </div>
       </div>
       <div className="grid gap-1.5">

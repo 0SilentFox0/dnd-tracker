@@ -1,12 +1,13 @@
 import { describe, expect, it } from "vitest";
 import type { z } from "zod";
 
-import { textOf } from "@/lib/i18n/test/text";
+import { ukT } from "@/lib/utils/abilities/__tests__/describe-fixtures";
 import { CONDITION_REGISTRY } from "@/lib/utils/abilities/registry/conditions";
-import { describeAbility, EFFECT_REGISTRY, FLAG_FIELDS } from "@/lib/utils/abilities/registry/effects";
-import { limitsLabel } from "@/lib/utils/abilities/registry/labels";
+import { describeAbilityText, EFFECT_REGISTRY, FLAG_FIELDS } from "@/lib/utils/abilities/registry/effects";
+import { limitsSegments } from "@/lib/utils/abilities/registry/labels";
 import { TRIGGER_REGISTRY } from "@/lib/utils/abilities/registry/triggers";
 import { ConditionSchema, EffectSchema, TriggerSchema } from "@/lib/utils/abilities/schema";
+import { renderSegments } from "@/lib/utils/abilities/segments";
 
 const keysOf = (s: z.ZodType) => Object.keys((s as unknown as { shape: Record<string, unknown> }).shape);
 
@@ -61,14 +62,18 @@ describe("fields contract", () => {
     }
   });
 
-  it("describeAbility", () => {
+  it("describeAbilityText", async () => {
+    const t = await ukT();
+
     expect(
-      textOf(describeAbility({ id: "a", name: "Кровотеча", trigger: { event: "hit", role: "attacker" }, limits: { perBattle: 1, chance: 30 }, effects: [{ kind: "dot", damagePerRound: "1d4", damageType: "bleed", duration: { rounds: 2 }, target: "eventTarget" }] })),
+      describeAbilityText({ id: "a", name: "Кровотеча", trigger: { event: "hit", role: "attacker" }, limits: { perBattle: 1, chance: 30 }, effects: [{ kind: "dot", damagePerRound: "1d4", damageType: "bleed", duration: { rounds: 2 }, target: "eventTarget" }] }, t),
     ).toBe("Влучання · 1 раз за бій · 30% · Кровотеча 1d4/раунд × 2 р.");
   });
 
-  it("ліміт за бій узгоджується з числом", () => {
-    expect(limitsLabel({ perBattle: 2 }).map((l) => textOf(l))).toEqual(["2 рази за бій"]);
-    expect(limitsLabel({ perBattle: 5 }).map((l) => textOf(l))).toEqual(["5 разів за бій"]);
+  it("ліміт за бій узгоджується з числом", async () => {
+    const t = await ukT();
+
+    expect(renderSegments(t, limitsSegments({ perBattle: 2 }))).toEqual(["2 рази за бій"]);
+    expect(renderSegments(t, limitsSegments({ perBattle: 5 }))).toEqual(["5 разів за бій"]);
   });
 });

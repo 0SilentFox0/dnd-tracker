@@ -12,7 +12,7 @@ import {
 import type { PuzzleControl } from "./usePuzzleControl";
 
 import { PUZZLE_KEEPALIVE_MS } from "@/lib/constants/show";
-import { clamp } from "@/lib/utils/common/clamp";
+import { dropAction } from "@/lib/utils/puzzle/drop-action";
 import { isHeldByOther } from "@/lib/utils/puzzle/hold";
 import type { PuzzleSpec, PuzzleState } from "@/types/show";
 
@@ -39,8 +39,6 @@ interface Origin {
 }
 
 const NON_PASSIVE: AddEventListenerOptions = { passive: false };
-
-const TAP_PX = 5;
 
 const LONG_PRESS_MS = 200;
 
@@ -217,50 +215,7 @@ export function usePuzzleDrag({
 
       const rect = boardRef.current?.getBoundingClientRect();
 
-      const inside =
-        !!rect &&
-        e.type !== "pointercancel" &&
-        rect.width > 0 &&
-        e.clientX >= rect.left &&
-        e.clientX <= rect.right &&
-        e.clientY >= rect.top &&
-        e.clientY <= rect.bottom;
-
-      const tap =
-        e.type === "pointerup" &&
-        cur.origin.board &&
-        Math.hypot(
-          e.clientX - cur.origin.clientX,
-          e.clientY - cur.origin.clientY,
-        ) <= TAP_PX;
-
-      await control.send(
-        tap && cur.origin.board
-          ? {
-              action: "puzzleDrop",
-              pieceId: cur.id,
-              x: cur.origin.board.x,
-              y: cur.origin.board.y,
-              rot: (cur.rot + 45) % 360,
-            }
-          : inside
-            ? {
-                action: "puzzleDrop",
-                pieceId: cur.id,
-                x: clamp(
-                  ((e.clientX - rect.left) / rect.width) * spec.imageWidth,
-                  0,
-                  spec.imageWidth,
-                ),
-                y: clamp(
-                  ((e.clientY - rect.top) / rect.height) * spec.imageHeight,
-                  0,
-                  spec.imageHeight,
-                ),
-                rot: cur.rot,
-              }
-            : { action: "puzzleReturn", pieceId: cur.id },
-      );
+      await control.send(dropAction(cur, { clientX: e.clientX, clientY: e.clientY, cancelled: e.type === "pointercancel" }, rect, { imageWidth: spec.imageWidth, imageHeight: spec.imageHeight }));
       setDrag(null);
     };
 

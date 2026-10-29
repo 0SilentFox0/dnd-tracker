@@ -22,7 +22,7 @@ const effect = (name: string, fxElement: string, extra: Partial<ActiveEffect> = 
 
 const hud = (over: { hp?: number; size?: number; exact?: boolean; effects?: ActiveEffect[]; px?: number; onReturn?: () => void } = {}) =>
   render(
-    <MapTokenHud participant={unit(over.hp ?? 30, over.size)} box={{ cx: 50, cy: 50, size: 100 * (over.size ?? 1) }} mapSize={{ width: 1000, height: 1000 }} pxPerUnit={over.px ?? 0.8} exact={over.exact ?? true} raised={false} effects={over.effects} onReturn={over.onReturn} />,
+    <MapTokenHud participant={unit(over.hp ?? 30, over.size)} placement={{ box: { cx: 50, cy: 50, size: 100 * (over.size ?? 1) }, mapSize: { width: 1000, height: 1000 }, pxPerUnit: over.px ?? 0.8 }} exact={over.exact ?? true} raised={false} effects={over.effects} onReturn={over.onReturn} />,
   );
 
 const q = (c: HTMLElement, sel: string) => c.querySelector<HTMLElement>(sel) as HTMLElement;

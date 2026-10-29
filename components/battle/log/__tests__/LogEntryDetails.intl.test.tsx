@@ -2,7 +2,6 @@
 import { cleanup } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
-import { AbilitySummary } from "@/components/abilities/AbilitySummary";
 import { LogEntryDetails } from "@/components/battle/log/LogEntryDetails";
 import { renderWithIntl } from "@/lib/i18n/test/render-with-intl";
 import { textRef } from "@/lib/i18n/text-ref";
@@ -43,13 +42,5 @@ describe("LogEntryDetails: структурований лог", () => {
     expect(container.textContent).toContain("Подвійний урон — Урон подвоюється (x2)");
     expect(container.textContent).toContain("Система");
     expect(container.textContent).not.toMatch(/battleTerms\.|battleCommon\./);
-  });
-});
-
-describe("AbilitySummary: рядки-ref", () => {
-  it("рендерить TextRef і звичайні рядки", async () => {
-    const { container } = await renderWithIntl(<AbilitySummary lines={[textRef("battleCommon.actors.system"), "legacy"]} />, { locale: "en", namespaces: NAMESPACES });
-
-    expect(container.textContent).toBe("Systemlegacy");
   });
 });

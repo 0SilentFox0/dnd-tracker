@@ -11,9 +11,9 @@ import type { CharacterLogKindValue } from "@/lib/constants/character-log";
 import { type CharacterTypeValue, type GoalAuthorValue, type GoalKind, type GoalStatus, type TOKEN_COLORS } from "@/lib/constants/characters";
 import type { HeroArchetypeKey } from "@/lib/constants/hero-archetypes";
 import type { DndSkill } from "@/lib/constants/skills";
+import type { AbilityFlowSummary } from "@/lib/utils/abilities/segments";
 import type { BackgroundSelection } from "@/types/backgrounds";
 import type { CharacterFeat, Picks, SheetChoices, TextRef } from "@/types/choices";
-import type { LogLine } from "@/types/text";
 
 export type { AbilityKey };
 
@@ -216,7 +216,7 @@ export interface SheetArtifact {
   slot: string;
   rarity: string | null;
   description: string | null;
-  effects: LogLine[];
+  effects: AbilityFlowSummary[];
   attunement?: "attuned" | "required";
   carried?: true;
 }
@@ -227,7 +227,7 @@ export interface SetProgress {
   have: number;
   total: number;
   complete: boolean;
-  effects: LogLine[];
+  effects: AbilityFlowSummary[];
 }
 
 export interface CharacterSheet {
