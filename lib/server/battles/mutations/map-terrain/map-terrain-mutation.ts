@@ -28,6 +28,8 @@ export type MapTerrainBody = z.infer<typeof mapTerrainSchema>;
 
 const REJECTED = "Клітинка зайнята або поза полем";
 
+const isSpellCell = (c: TerrainCell | undefined) => Boolean(c && (c.zoneId || c.obscured));
+
 function parseKey(key: string) {
   const [x, y] = key.split(":").map(Number);
 
@@ -46,7 +48,7 @@ export function mapTerrainMutation(ctx: BattleMutationContext, body: MapTerrainB
 
   const base = { participants: ctx.participants, pending: ctx.pending, events: [] };
 
-  if (!terrain) return { ...base, scene: { map: applyTerrain(map, cells, null) } };
+  if (!terrain) return { ...base, scene: { map: applyTerrain(map, cells.filter((k) => !isSpellCell(map.terrain?.[k])), null) } };
 
   const blocked = blockedSet(map);
 
@@ -69,5 +71,13 @@ export function mapTerrainMutation(ctx: BattleMutationContext, body: MapTerrainB
 
   const response: MapTerrainResponse = { skipped };
 
-  return { ...base, scene: { map: applyTerrain(map, kept, value) }, ...(skipped.length > 0 && { response: { ...response } }) };
+  let painted = map;
+
+  for (const k of kept) {
+    const old = map.terrain?.[k];
+
+    painted = applyTerrain(painted, [k], { ...value, ...(old?.zoneId && { zoneId: old.zoneId }), ...(old?.obscured && { obscured: true as const }) });
+  }
+
+  return { ...base, scene: { map: painted }, ...(skipped.length > 0 && { response: { ...response } }) };
 }

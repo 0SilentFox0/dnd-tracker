@@ -138,3 +138,20 @@ describe("map-terrain mutation", () => {
     expect(() => mapTerrainMutation(ctx({}, null), { cells: ["1:1"], terrain: { kind: "wall" } })).toThrow(expect.objectContaining({ code: "action_rejected" }));
   });
 });
+
+describe("map-terrain і клітинки зон заклинань", () => {
+  const zoneMap: BattleMapConfig = { ...map, terrain: { "2:2": { kind: "difficult", zoneId: "z1", obscured: true, difficult: true }, "3:3": { kind: "wall" } } };
+
+  it("пензель зберігає zoneId і obscured", () => {
+    const out = mapTerrainMutation(ctx({}, zoneMap), { cells: ["2:2"], terrain: { kind: "difficult" } });
+
+    expect(out.scene?.map?.terrain?.["2:2"]).toMatchObject({ kind: "difficult", zoneId: "z1", obscured: true });
+  });
+
+  it("стирання не чіпає клітинки зони, але стирає ручні", () => {
+    const out = mapTerrainMutation(ctx({}, zoneMap), { cells: ["2:2", "3:3"], terrain: null });
+
+    expect(out.scene?.map?.terrain?.["2:2"]).toMatchObject({ zoneId: "z1", obscured: true });
+    expect(out.scene?.map?.terrain?.["3:3"]).toBeUndefined();
+  });
+});
