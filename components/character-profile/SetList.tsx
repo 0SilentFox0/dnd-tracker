@@ -2,7 +2,7 @@
 
 import { useTranslations } from "next-intl";
 
-import { useAbilityText } from "@/components/abilities/use-ability-text";
+import { useAbilityText } from "@/components/abilities";
 import { cn } from "@/lib/utils";
 import type { SetProgress } from "@/types/characters";
 

@@ -40,7 +40,7 @@ const flagSeg = (key: FlagKey, params?: Record<string, SegmentParam>) => seg(`su
 
 const listParams = (group: string, a: readonly string[] | "all") => ({
   hasList: a === "all" ? "no" : "yes",
-  list: { join: ", ", items: a === "all" ? [] : a.map((k) => seg(`options.${group}.${k}`)) },
+  ...(a !== "all" && { list: { join: ", ", items: a.map((k) => seg(`options.${group}.${k}`)) } }),
 });
 
 export const FLAG_REGISTRY: { [K in FlagKey]: FlagDefinition<K> } = {
@@ -58,7 +58,7 @@ export const FLAG_REGISTRY: { [K in FlagKey]: FlagDefinition<K> } = {
     ],
     defaults: { attackKind: "all" },
     describe: (e) => [
-      flagSeg("advantage", { kind: e.attackKind, hasAbility: e.attackAbility ? "yes" : "no", ability: e.attackAbility ? seg(`options.attackAbility.${e.attackAbility}`) : "", consume: e.consumeOn ? "yes" : "no" }),
+      flagSeg("advantage", { kind: e.attackKind, hasAbility: e.attackAbility ? "yes" : "no", ...(e.attackAbility && { ability: seg(`options.attackAbility.${e.attackAbility}`) }), consume: e.consumeOn ? "yes" : "no" }),
     ],
   },
   disadvantage: plain("disadvantage"),
@@ -80,7 +80,7 @@ export const FLAG_REGISTRY: { [K in FlagKey]: FlagDefinition<K> } = {
         n: Math.abs(e.percent),
         kind: e.attackKind ?? "none",
         hasSchool: e.school ? "yes" : "no",
-        school: e.school ?? "",
+        ...(e.school && { school: e.school }),
       }),
     ],
   },

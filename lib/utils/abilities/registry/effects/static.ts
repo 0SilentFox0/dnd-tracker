@@ -121,7 +121,7 @@ function valueSegment(e: { flat?: Flat; percent?: Flat }): Segment {
 export function describeModifyStat(e: Extract<Effect, { kind: "modifyStat" }>): Segment[] {
   if (e.atLeast !== undefined) return [seg("summary.effects.statAtLeast", { stat: statSegment(e.stat), n: e.atLeast })];
 
-  return [seg("summary.effects.stat", { stat: statSegment(e.stat), hasLevels: e.spellLevels ? "yes" : "no", levels: e.spellLevels ? e.spellLevels.join(", ") : "", value: valueSegment(e) })];
+  return [seg("summary.effects.stat", { stat: statSegment(e.stat), hasLevels: e.spellLevels ? "yes" : "no", ...(e.spellLevels && { levels: e.spellLevels.join(", ") }), value: valueSegment(e) })];
 }
 
 export function describeDamageBonus(e: Extract<Effect, { kind: "damageBonus" }>): Segment[] {
@@ -131,7 +131,7 @@ export function describeDamageBonus(e: Extract<Effect, { kind: "damageBonus" }>)
       hasSchool: e.filter.school ? "yes" : "no",
       value: valueSegment(e),
       hasMark: e.perMark ? "yes" : "no",
-      mark: e.perMark ?? "",
+      ...(e.perMark && { mark: e.perMark }),
     }),
   ];
 }

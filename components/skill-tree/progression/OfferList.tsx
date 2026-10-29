@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useTranslations } from "next-intl";
 
-import { useAbilityText } from "@/components/abilities/use-ability-text";
+import { useAbilityText } from "@/components/abilities";
 import { OptimizedImage } from "@/components/common/OptimizedImage";
 import { Button } from "@/components/ui/button";
 import { useTranslator } from "@/lib/i18n/use-translator";

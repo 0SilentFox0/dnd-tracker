@@ -3,7 +3,7 @@
 import { useTranslations } from "next-intl";
 import { Loader2, Sparkles } from "lucide-react";
 
-import { useAbilityText } from "@/components/abilities/use-ability-text";
+import { useAbilityText } from "@/components/abilities";
 import { EntityIcon } from "@/components/common/EntityIcon";
 import { SpellBattlePreview } from "@/components/spells/preview/SpellBattlePreview";
 import {

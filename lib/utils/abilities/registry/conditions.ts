@@ -1,10 +1,11 @@
 import type { FieldMeta } from "./fields";
+import { CONDITION_KEYS_ALL, conditionKeySegment } from "./labels";
 
 import { AttackType } from "@/lib/constants/battle";
 import { eventActorId, eventAttackKind, eventTargetIds } from "@/lib/utils/abilities/engine/core/events";
 import { findParticipant, isActive } from "@/lib/utils/abilities/engine/core/participants";
 import { countMarks, markKey } from "@/lib/utils/abilities/engine/effects/marks";
-import type { Condition, ConditionSubject } from "@/lib/utils/abilities/schema";
+import type { AnyConditionKey, Condition, ConditionSubject } from "@/lib/utils/abilities/schema";
 import { seg, type Segment } from "@/lib/utils/abilities/segments";
 import { armorWornMatches } from "@/lib/utils/artifacts/worn-armor";
 import { isAdjacent } from "@/lib/utils/battle/grid/occupancy";
@@ -73,7 +74,7 @@ export function describeCondition(c: Condition): Segment[] {
     case "attackKind":
       return [seg("summary.conditions.attackKind", { kind: seg(`summary.conditions.attackKinds.${c.kind}`) })];
     case "targetHasCondition":
-      return [seg("summary.conditions.targetHasCondition", { condition: c.condition })];
+      return [seg("summary.conditions.targetHasCondition", { condition: (CONDITION_KEYS_ALL as readonly string[]).includes(c.condition) ? conditionKeySegment(c.condition as AnyConditionKey) : c.condition })];
     case "targetCreatureType":
       return [seg("summary.conditions.targetCreatureType", { types: listParam(c.types) })];
     case "targetRace":

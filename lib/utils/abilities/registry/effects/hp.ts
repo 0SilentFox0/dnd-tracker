@@ -198,7 +198,7 @@ export const describeDealDamage = (e: Of<"dealDamage">): Segment[] => [
     hasType: e.damageType ? "yes" : "no",
     ...(e.damageType && { type: damageTypeSegment(e.damageType) }),
     hasFalloff: e.falloff ? "yes" : "no",
-    falloff: e.falloff ? e.falloff.join("% → ") : "",
+    ...(e.falloff && { falloff: e.falloff.join("% → ") }),
   }),
 ];
 

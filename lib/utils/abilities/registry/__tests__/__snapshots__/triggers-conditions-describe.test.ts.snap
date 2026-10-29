@@ -16,7 +16,7 @@ exports[`describeCondition > pins uk text 1`] = `
   ],
   [
     "targetHasCondition",
-    "ціль має стан «stunned»",
+    "ціль має стан «приголомшений»",
   ],
   [
     "targetCreatureType",

@@ -1,6 +1,6 @@
 import { useTranslations } from "next-intl";
 
-import { useAbilityText } from "@/components/abilities/use-ability-text";
+import { useAbilityText } from "@/components/abilities";
 import { Button } from "@/components/ui/button";
 import { ArtifactSlot } from "@/lib/constants/artifacts";
 import type { InventoryModel, InventorySelection } from "@/lib/hooks/characters";

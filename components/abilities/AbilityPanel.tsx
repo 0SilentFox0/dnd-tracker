@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useRef } from "react";
+import { useEffect, useMemo, useRef } from "react";
 import { useTranslations } from "next-intl";
 import { X } from "lucide-react";
 
@@ -39,15 +39,27 @@ export function AbilityPanel({ ability, path, actions }: { ability: Ability; pat
 
   const timer = useRef<ReturnType<typeof setTimeout>>(undefined);
 
+  const lit = useRef<HTMLElement | null>(null);
+
+  const unlight = () => {
+    clearTimeout(timer.current);
+    lit.current?.classList.remove(...HIGHLIGHT);
+    lit.current = null;
+  };
+
+  useEffect(() => unlight, []);
+
   const focusSection = (part: FlowPart) => {
     const el = document.getElementById(sectionId(path, part));
 
     if (!el) return;
 
+    unlight();
     el.scrollIntoView({ behavior: "smooth", block: "nearest" });
+    el.focus({ preventScroll: true });
     el.classList.add(...HIGHLIGHT);
-    clearTimeout(timer.current);
-    timer.current = setTimeout(() => el.classList.remove(...HIGHLIGHT), HIGHLIGHT_MS);
+    lit.current = el;
+    timer.current = setTimeout(unlight, HIGHLIGHT_MS);
   };
 
   const section = { ability, path, onChange: actions.onChange };
@@ -68,7 +80,7 @@ export function AbilityPanel({ ability, path, actions }: { ability: Ability; pat
           <X className="h-4 w-4" />
         </Button>
       </div>
-      <AbilityFlow summary={summary} variant="editor" onChipClick={focusSection} />
+      <AbilityFlow summary={summary} variant="editor" onChipClick={focusSection} sectionId={(part) => sectionId(path, part)} />
       <div className="space-y-1">
         <Label htmlFor={`${path}.description`} className="text-xs text-muted-foreground">
           {t("description")}

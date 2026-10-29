@@ -14,9 +14,10 @@ interface AbilityFlowProps {
   summary: AbilityFlowSummary;
   variant: "editor" | "card";
   onChipClick?: (part: FlowPart) => void;
+  sectionId?: (part: FlowPart) => string;
 }
 
-export function AbilityFlow({ summary, variant, onChipClick }: AbilityFlowProps) {
+export function AbilityFlow({ summary, variant, onChipClick, sectionId }: AbilityFlowProps) {
   const t = useTranslations("abilities.flow");
 
   const text = useAbilityText();
@@ -34,7 +35,7 @@ export function AbilityFlow({ summary, variant, onChipClick }: AbilityFlowProps)
     );
 
     return onChipClick ? (
-      <button key={key} type="button" data-part={part} className={cn(className, "cursor-pointer hover:brightness-125")} onClick={() => onChipClick(part)}>
+      <button key={key} type="button" data-part={part} aria-controls={sectionId?.(part)} className={cn(className, "cursor-pointer hover:brightness-125")} onClick={() => onChipClick(part)}>
         {content}
       </button>
     ) : (
@@ -62,7 +63,7 @@ export function AbilityFlow({ summary, variant, onChipClick }: AbilityFlowProps)
     ...g.bodies.map((body, j) => chip(g.part, `${g.part}-${j}`, body)),
   ]);
 
-  return <div className="flex flex-wrap items-center gap-1">{nodes}</div>;
+  return <div className="flex flex-col items-start gap-1 sm:flex-row sm:flex-wrap sm:items-center">{nodes}</div>;
 }
 
 export function AbilityFlowList({ lines }: { lines: AbilityFlowSummary[] }) {
