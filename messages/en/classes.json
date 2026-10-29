@@ -59,12 +59,12 @@
     "count": "Spells in the list: {count}"
   },
   "columns": {
-    "hint": "20 comma-separated values (levels 1–20): “2”, “+2”, “1d6”, “D8”, “+10 ft.”; empty means none. A pool column is the maximum of points shared by the class features.",
+    "hint": "Values by level 1–20: “2”, “+2”, “1d6”, “D8”, “+10 ft.”; empty means none. A comma-separated list can be pasted into a cell. A pool column is the maximum of points shared by the class features.",
     "defaultLabel": "Column {n}",
     "remove": "Delete column {n}",
     "keyLabel": "Column {n} key",
     "nameLabel": "Column {n} name",
-    "valuesLabel": "Column {n} values",
+    "cellLabel": "Column {n}, level {level}",
     "poolLabel": "Column {n} pool",
     "restLabel": "Column {n} rest",
     "pool": "Pool",
@@ -76,6 +76,8 @@
     "level": "Level {level}",
     "removeLevel": "Delete level {level}",
     "choices": "Choices",
+    "levelsNav": "Class levels",
+    "hasErrors": "Has errors",
     "levelToAdd": "Level to add",
     "addLevel": "Add level"
   },

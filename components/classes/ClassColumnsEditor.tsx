@@ -7,8 +7,47 @@ import { HUD_SELECT_CLASS, HudSection } from "@/components/hud/form";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { MAX_CLASS_COLUMNS, MAX_CLASS_LEVEL } from "@/lib/constants/classes";
-import { parseColumnValuesText } from "@/lib/utils/characters/classes/columns";
 import type { ClassColumn } from "@/types/classes";
+
+const PASTE_SEPARATORS = /[,\t\n]/;
+
+function ColumnValuesGrid({ column, index, onChange }: { column: ClassColumn; index: number; onChange: (values: string[]) => void }) {
+  const t = useTranslations("classes");
+
+  const cells = Array.from({ length: MAX_CLASS_LEVEL }, (_, i) => column.values[i] ?? "");
+
+  const setCell = (level: number, text: string) => onChange(cells.map((v, j) => (j === level ? text : v)));
+
+  const paste = (level: number, text: string) => {
+    const pasted = text.split(PASTE_SEPARATORS).map((c) => c.trim());
+
+    onChange(cells.map((v, j) => (j >= level && j - level < pasted.length ? pasted[j - level] : v)));
+  };
+
+  return (
+    <div className="mt-2 grid grid-cols-5 gap-x-1.5 gap-y-2 sm:grid-cols-10">
+      {cells.map((value, level) => (
+        <label key={level} className="flex flex-col items-center gap-0.5">
+          <span className="text-[10px] text-hud-muted">{level + 1}</span>
+          <Input
+            aria-label={t("columns.cellLabel", { n: index + 1, level: level + 1 })}
+            className="h-8 px-1 text-center text-xs md:text-xs"
+            value={value}
+            onChange={(e) => setCell(level, e.target.value)}
+            onPaste={(e) => {
+              const text = e.clipboardData.getData("text");
+
+              if (!PASTE_SEPARATORS.test(text)) return;
+
+              e.preventDefault();
+              paste(level, text);
+            }}
+          />
+        </label>
+      ))}
+    </div>
+  );
+}
 
 export function ClassColumnsEditor({ value, onChange }: { value: ClassColumn[]; onChange: (next: ClassColumn[]) => void }) {
   const t = useTranslations("classes");
@@ -49,7 +88,7 @@ export function ClassColumnsEditor({ value, onChange }: { value: ClassColumn[]; 
             <Input aria-label={t("columns.keyLabel", { n: i + 1 })} value={c.key} onChange={(e) => patch(i, { key: e.target.value })} placeholder="sneak-attack" />
             <Input aria-label={t("columns.nameLabel", { n: i + 1 })} value={c.label} onChange={(e) => patch(i, { label: e.target.value })} placeholder="Sneak Attack" />
           </div>
-          <Input aria-label={t("columns.valuesLabel", { n: i + 1 })} className="mt-2" value={c.values.join(", ")} onChange={(e) => patch(i, { values: parseColumnValuesText(e.target.value) })} />
+          <ColumnValuesGrid column={c} index={i} onChange={(values) => patch(i, { values })} />
           <div className="mt-2 flex flex-wrap items-center gap-3 text-sm">
             <label className="flex items-center gap-2">
               <input type="checkbox" aria-label={t("columns.poolLabel", { n: i + 1 })} checked={!!c.pool} onChange={(e) => setPool(i, e.target.checked)} />
