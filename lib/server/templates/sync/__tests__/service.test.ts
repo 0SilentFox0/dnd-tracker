@@ -41,7 +41,9 @@ describe("source sync service", () => {
   it("apply блокує рядок кампанії до читання контексту, в одній транзакції", async () => {
     const order: string[] = [];
 
-    tx.$queryRaw.mockImplementation(async () => order.push("lock"));
+    tx.$queryRaw.mockImplementation(async () => { order.push("lock");
+
+ return [{ id: "t" }]; });
     vi.mocked(applySourceChanges).mockImplementation((async () => order.push("apply")) as never);
 
     await applySource(actor, { apply: [], ignore: [] });

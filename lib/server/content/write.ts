@@ -7,7 +7,9 @@ import "server-only";
 import { API_ERRORS } from "@/lib/constants/api-errors";
 import { prisma } from "@/lib/db";
 
-export async function withCampaignContentWrite<T>(campaignId: string, callback: (tx: Prisma.TransactionClient) => Promise<T>): Promise<T> {
+export interface ContentWriteOptions { lock?: "update" | "no-key-update"; timeout?: number; maxWait?: number }
+
+export async function withCampaignContentWrite<T>(campaignId: string, callback: (tx: Prisma.TransactionClient) => Promise<T>, options: ContentWriteOptions = {}): Promise<T> {
   const current = currentContentWrite();
 
   if (current) {
@@ -19,12 +21,14 @@ export async function withCampaignContentWrite<T>(campaignId: string, callback: 
   const afterCommit: ContentEffect[] = [];
 
   const result = await prisma.$transaction(async (tx) => {
-    const rows = await tx.$queryRaw<Array<{ id: string }>>`SELECT id FROM campaigns WHERE id = ${campaignId} FOR UPDATE`;
+    const rows = options.lock === "no-key-update"
+      ? await tx.$queryRaw<Array<{ id: string }>>`SELECT id FROM campaigns WHERE id = ${campaignId} FOR NO KEY UPDATE`
+      : await tx.$queryRaw<Array<{ id: string }>>`SELECT id FROM campaigns WHERE id = ${campaignId} FOR UPDATE`;
 
     if (rows.length !== 1) throw new ContentError(API_ERRORS.CAMPAIGN_NOT_FOUND, 404);
 
     return runContentWriteContext(campaignId, tx, () => callback(tx), afterCommit);
-  }, { timeout: 30_000, maxWait: 5_000 });
+  }, { timeout: options.timeout ?? 30_000, maxWait: options.maxWait ?? 5_000 });
 
   await runContentEffects(afterCommit);
 

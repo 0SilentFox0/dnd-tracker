@@ -13,6 +13,3 @@ export function createRng(seed: number) {
   };
 }
 
-export function hash01(n: number) {
-  return createRng(n)();
-}
