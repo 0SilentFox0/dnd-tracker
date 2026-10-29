@@ -74,3 +74,39 @@ describe("scenarioContentSchema — прив'язки рядка", () => {
     expect(scenarioContentSchema.safeParse(content({ slide: { deckId: "d1" } })).success).toBe(false);
   });
 });
+
+describe("image node", () => {
+  const withImage = (attrs: Record<string, unknown>) => {
+    const c = content(["s1"]);
+
+    c.sections[0].rows[0].notes = { type: "doc", content: [{ type: "image", attrs }] } as never;
+
+    return scenarioContentSchema.safeParse(c).success;
+  };
+
+  const mediaId = "a".repeat(24);
+
+  it("accepts mediaId without src and rejects a bad id or caption length", () => {
+    expect(withImage({ mediaId })).toBe(true);
+    expect(withImage({ mediaId: "xyz" })).toBe(false);
+    expect(withImage({ mediaId, caption: "x".repeat(301) })).toBe(false);
+  });
+
+  it("treats null src/alt/caption (tiptap getJSON) as absent", () => {
+    expect(withImage({ mediaId, src: null, alt: null, caption: null })).toBe(true);
+    expect(withImage({ mediaId, src: "https://evil.example/x.png", alt: null })).toBe(false);
+  });
+
+  it("rejects a foreign src host and accepts project storage", () => {
+    const base = process.env.NEXT_PUBLIC_SUPABASE_URL;
+
+    process.env.NEXT_PUBLIC_SUPABASE_URL = "https://proj.supabase.co";
+
+    try {
+      expect(withImage({ mediaId, src: "https://evil.test/a.png" })).toBe(false);
+      expect(withImage({ mediaId, src: "https://proj.supabase.co/storage/v1/object/public/compendium-media/c/a.webp" })).toBe(true);
+    } finally {
+      process.env.NEXT_PUBLIC_SUPABASE_URL = base;
+    }
+  });
+});

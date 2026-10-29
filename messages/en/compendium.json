@@ -107,7 +107,7 @@
     "title": "JSON compendium import",
     "subtitle": "One file → check → confirm. The campaign is not changed until you confirm.",
     "back": "Back to campaign",
-    "rights": "I have the right to use this file in this campaign",
+    "rights": "I have the right to use this file and its images in this campaign",
     "previewTtl": "The preview is valid for 15 minutes. A new check is required after the campaign or the selection changes.",
     "confirm": "Import",
     "saved": "Import saved: {runId}",
@@ -118,18 +118,56 @@
       "categories": "Categories",
       "check": "Check",
       "confirm": "Confirm"
+    },
+    "progress": {
+      "reading": "Reading the file…",
+      "previewing": "Checking the import…",
+      "confirming": "Applying changes…",
+      "media": "Saving images: {done} of {total}",
+      "opening": "Opening the report…"
+    },
+    "media": {
+      "title": "Images",
+      "summary": "Images: {count} will be saved after confirmation",
+      "saved": "Saved",
+      "failed": "Failed",
+      "skipped": "Skipped",
+      "queued": "Waiting",
+      "retry": "Retry failed",
+      "resume": "Continue",
+      "paused": "Saving images is paused. The rest is waiting to continue.",
+      "skippedTitle": "Skipped images",
+      "result": "{saved} saved, {failed} failed",
+      "reasons": {
+        "MEDIA_INVALID_URL": "Invalid link",
+        "MEDIA_HTTPS_ONLY": "Only https links are allowed",
+        "MEDIA_INTERNAL_PATH": "Internal file path without a URL",
+        "MEDIA_LIMIT": "Per-import image limit exceeded",
+        "MEDIA_EXTRA": "Extra image (not used)",
+        "MEDIA_NESTED": "Image inside a nested block is not transferred",
+        "MEDIA_PRIVATE_HOST": "Address is not allowed (private network)",
+        "MEDIA_DNS": "Could not resolve the server address",
+        "MEDIA_TIMEOUT": "The server did not respond in time",
+        "MEDIA_TOO_LARGE": "File is larger than 1 MB",
+        "MEDIA_REDIRECTS": "Too many redirects",
+        "MEDIA_HTTP_STATUS": "The server responded with {status}",
+        "MEDIA_BAD_FORMAT": "Unsupported format (PNG, JPEG, GIF or WebP required)",
+        "MEDIA_FETCH_FAILED": "Download failed",
+        "MEDIA_STORAGE_FAILED": "Could not save to storage",
+        "MEDIA_TARGET_CUSTOMIZED": "The image was already changed manually",
+        "MEDIA_TARGET_GONE": "The record or page was deleted"
+      }
     }
   },
   "file": {
     "intro": "One file → check → confirm. The campaign is not changed until you confirm. UTF-8 JSON up to 3 MiB; up to 2000 selected records per atomic import.",
     "csvHint": "CSV/TSV and plain table JSON are available through the “Import” button in the matching library.",
-    "label": "JSON compendium",
-    "busy": "Processing…"
+    "label": "JSON compendium"
   },
   "categoriesStep": {
     "title": "Categories · pick DM materials explicitly",
     "row": "{label} ({count})",
-    "unsupported": "not supported; skipped, images/Foundry are not loaded",
+    "unsupported": "not supported; skipped, Foundry data is not loaded",
     "chapters": "Choose DM material chapters",
     "chapterDefault": "Chapter {n}",
     "sources": "Sources and explicit source bindings",
@@ -143,7 +181,7 @@
     "all": "All",
     "none": "None",
     "recommended": "Recommended",
-    "skippedTechnical": "Skipped: {count} technical categories (images/Foundry are not loaded)",
+    "skippedTechnical": "Skipped: {count} technical categories (Foundry data is not loaded)",
     "summary": "Selected {categories} categories, ≈{records} records",
     "groups": {
       "rules": "Rules and conditions",
@@ -180,6 +218,7 @@
   "report": {
     "ariaLabel": "Import report",
     "canImport": "Ready to import",
+    "imported": "Imported",
     "blocked": "Import is blocked",
     "playReady": "Play readiness confirmed",
     "manualNeeded": "Manual steps are needed before play",
@@ -230,7 +269,7 @@
     "colMappedShort": "Map.",
     "colPartialShort": "Part.",
     "colSkippedShort": "Skip.",
-    "technical": "Technical categories ({count}): skipped, images/Foundry are not loaded",
+    "technical": "Technical categories ({count}): skipped, Foundry data is not loaded",
     "records": "Records",
     "noRows": "No records for this filter.",
     "showUnchanged": "{count} unchanged — show"
@@ -261,6 +300,7 @@
     "notesSizeEntry": "Entry: {entry} (limit 64 KB).",
     "requestSize": "The selected set is too large. Choose fewer categories or sections.",
     "forbidden": "Only the campaign DM has access, via a session.",
+    "runNotFound": "Import run not found.",
     "importFailed": "The import failed. No partial record was committed; try again with the same key.",
     "fileSize": "The file is too large: 3 MiB maximum. Choose a smaller file.",
     "parsingTimeout": "Parsing took too long. Choose a smaller file.",

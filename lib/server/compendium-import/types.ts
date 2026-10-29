@@ -1,3 +1,4 @@
+import type { MediaRef } from "./media/types";
 import type { Compendium, JsonRecord } from "./parse";
 
 import type { ErrorParams } from "@/lib/constants/api-errors";
@@ -24,10 +25,11 @@ export interface AdaptedEntry {
   issues: ImportIssue[];
   mergeParent?: CompendiumRef;
   attribution?: JsonRecord;
+  media?: MediaRef[];
 }
 export interface AdaptedCompendium { entries: AdaptedEntry[]; issues: ImportIssue[]; sources: JsonRecord[]; blocked?: Array<{ key?: string; path: string }>; embedded?: Record<string, number> }
 export interface AdaptOptions { locale?: Locale; excludedPaths?: readonly string[]; categories?: readonly string[]; sourceBindings?: Readonly<Record<string, string>> }
-export type Adapter = (row: JsonRecord, context: AdapterContext) => { kind: TargetKind; body: JsonRecord; refs?: CompendiumRef[]; notes?: string } | null;
+export type Adapter = (row: JsonRecord, context: AdapterContext) => { kind: TargetKind; body: JsonRecord; refs?: CompendiumRef[]; notes?: string; media?: MediaRef[] } | null;
 export interface AdapterContext {
   root: Compendium;
   inputKind: string;

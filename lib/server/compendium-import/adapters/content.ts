@@ -1,5 +1,6 @@
-import { renderEntries } from "../entries";
+import { renderEntries, renderEntryBlocks } from "../entries";
 import { nestedId, stableJson } from "../identity";
+import { mediaIdOf, type MediaRef } from "../media/types";
 import { type Adapter, type AdapterContext, issue } from "../types";
 import { customConditionKeys } from "./custom-conditions";
 import { EFFECT_FIELDS, itemEffects } from "./item-effects";
@@ -15,7 +16,7 @@ import type { Ability } from "@/lib/utils/abilities/schema";
 import { buildSearchText } from "@/lib/utils/scenario/search-text";
 import { castingFields, spellHead } from "@/lib/utils/spells/derive/mechanics";
 import { battleSpeed, coreTrait } from "@/lib/utils/units/monster-core-traits";
-import type { ScenarioContent } from "@/types/scenario";
+import type { RichNode, ScenarioContent } from "@/types/scenario";
 
 const SPELL_CONSUMED = ["level", "school", "classes", "time", "range", "components", "duration", "meta", "damageInflict", "savingThrow", "spellAttack", "scalingLevelDice", "conditionInflict", "damageImmune", "damageResist", "damageVulnerable", "conditionImmune", "abilityCheck", "areaTags", "miscTags"];
 
@@ -281,15 +282,38 @@ export const item: Adapter = (row, ctx) => {
 };
 
 export const materialPage: Adapter = (row, ctx) => {
-  const rendered = renderEntries(row.entries ?? row, ctx.path);
+  const rendered = renderEntryBlocks(row.entries ?? row, ctx.path);
 
   ctx.issues.push(...rendered.issues);
 
-  const text = rendered.text;
-
   const id = nestedId(ctx.key);
 
-  const content: ScenarioContent = { legend: [], sections: [{ id, title: str(row.name) || ctx.t("derived.material"), played: false, rows: [{ id: `${id}-row`, story: { type: "doc", content: [] }, notes: { type: "doc", content: text ? [{ type: "paragraph", content: [{ type: "text", text }] }] : [] } }] }] };
+  const nodes: RichNode[] = [];
 
-  return { kind: "scenarioPages", body: { kind: "note", status: "draft", characterId: null, title: row.name, content, searchText: buildSearchText(str(row.name), content), version: 0 }, notes: "" };
+  const media: MediaRef[] = [];
+
+  for (const block of rendered.blocks) {
+    if ("text" in block) {
+      nodes.push({ type: "paragraph", content: [{ type: "text", text: block.text }] });
+
+      continue;
+    }
+
+    const { url, alt, caption, path, skip } = block.image;
+
+    if (skip) {
+      media.push({ url, role: "inline", path, skip });
+
+      continue;
+    }
+
+    const mediaId = mediaIdOf(url);
+
+    nodes.push({ type: "image", attrs: { mediaId, ...(alt && { alt }), ...(caption && { caption }) } });
+    media.push({ url, role: "inline", path, mediaId, ...(alt && { alt }) });
+  }
+
+  const content: ScenarioContent = { legend: [], sections: [{ id, title: str(row.name) || ctx.t("derived.material"), played: false, rows: [{ id: `${id}-row`, story: { type: "doc", content: [] }, notes: { type: "doc", content: nodes } }] }] };
+
+  return { kind: "scenarioPages", body: { kind: "note", status: "draft", characterId: null, title: row.name, content, searchText: buildSearchText(str(row.name), content), version: 0 }, notes: "", ...(media.length > 0 && { media }) };
 };

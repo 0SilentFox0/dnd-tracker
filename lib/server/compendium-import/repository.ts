@@ -265,7 +265,7 @@ export const prismaImportRepository: ImportRepository = {
     return String(asRecord(result).id);
   },
   async saveEntry(actor, row) {
-    const data = { kind: row.kind, localId: row.localId, locator: jsonContentInput(row.nested ? row.body : []), edition: row.edition, sourceJson: row.source, originalName: row.name, attribution: jsonContentInput(row.attribution ?? {}), inputHash: digest(row.baseline ?? row.body), adapterVersion: ADAPTER_VERSION, baseline: jsonContentInput(row.baseline ?? row.body), notes: row.notes, issues: jsonContentInput(row.issues), bindings: jsonContentInput(row.resolvedBindings ?? {}) };
+    const data = { kind: row.kind, localId: row.localId, locator: jsonContentInput(row.nested ? row.body : []), edition: row.edition, sourceJson: row.source, originalName: row.name, attribution: jsonContentInput(row.media?.length ? { ...row.attribution, images: row.media.map(({ url, role, mediaId }) => ({ url, role, ...(mediaId && { mediaId }) })) } : row.attribution ?? {}), inputHash: digest(row.baseline ?? row.body), adapterVersion: ADAPTER_VERSION, baseline: jsonContentInput(row.baseline ?? row.body), notes: row.notes, issues: jsonContentInput(row.issues), bindings: jsonContentInput(row.resolvedBindings ?? {}) };
 
     await prisma.compendiumEntry.upsert({ where: { campaignId_canonicalKey: { campaignId: actor.campaignId, canonicalKey: row.key } }, create: { campaignId: actor.campaignId, canonicalKey: row.key, ...data }, update: data });
   },

@@ -81,6 +81,8 @@ function blockToMd(n: RichNode): string {
 
       return [head, `|${" --- |".repeat(cols)}`, ...(headerless ? rows : rows.slice(1))].join("\n");
     }
+    case "image":
+      return `{{image:${escapeText(String(n.attrs?.alt || n.attrs?.mediaId || ""))}}}`;
     default:
       return "";
   }

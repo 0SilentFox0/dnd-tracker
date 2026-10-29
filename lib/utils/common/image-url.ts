@@ -53,6 +53,21 @@ export function bucketObjectPath(src: string, bucket: string): string | null {
   }
 }
 
+/** Already on our project Storage (host of NEXT_PUBLIC_SUPABASE_URL). */
+export function isHostedOnProjectStorage(url: string): boolean {
+  const base = process.env.NEXT_PUBLIC_SUPABASE_URL;
+
+  const parsed = base ? parsePublicStorageUrl(url)?.url : undefined;
+
+  if (!base || !parsed) return false;
+
+  try {
+    return parsed.protocol === "https:" && parsed.host === new URL(base).host;
+  } catch {
+    return false;
+  }
+}
+
 export function isSupabaseStorageUrl(src: string): boolean {
   const url = parsePublicStorageUrl(src)?.url;
 

@@ -1,7 +1,7 @@
 import { COMPENDIUM_INFO_ISSUE_CODES, type JsonRecord } from "@/lib/constants/compendium-import";
 import type { Translator } from "@/lib/i18n/translator";
 import { isRecord } from "@/lib/utils/common/is-record";
-import type { ImportIssue } from "@/types/compendium-import";
+import type { ImportIssue, MediaProgress } from "@/types/compendium-import";
 
 const known = (t: Translator, group: string, id: string) => t.has(`${group}.${id}`) ? t(`${group}.${id}`) : undefined;
 
@@ -164,4 +164,23 @@ export function infoSummary(t: Translator, info: ImportIssue[]) {
   const media = info.filter((i) => i.code === "MEDIA_OR_FOUNDRY_SKIPPED").length;
 
   return [categories.length && t("info.unsupportedCategories", { categories: categories.join(", ") }), media && t("info.mediaSkipped", { count: media })].filter(Boolean).join(". ");
+}
+
+export const mediaReasonLabel = (t: Translator, reason: string, params?: { status?: number }) => t.has(`import.media.reasons.${reason}`) ? t(`import.media.reasons.${reason}`, { status: params?.status ?? "" }) : reason;
+
+type MediaFailure = MediaProgress["failures"][number];
+
+export function groupMediaFailures(failures: MediaFailure[]) {
+  const groups = new Map<string, { reason: string; params?: MediaFailure["params"]; items: MediaFailure[] }>();
+
+  for (const failure of failures) {
+    const key = `${failure.reason}:${failure.params?.status ?? ""}`;
+
+    const group = groups.get(key) ?? { reason: failure.reason, params: failure.params, items: [] };
+
+    group.items.push(failure);
+    groups.set(key, group);
+  }
+
+  return [...groups.entries()].map(([key, group]) => ({ key, ...group })).sort((a, b) => b.items.length - a.items.length);
 }

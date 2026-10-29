@@ -5,7 +5,7 @@ import { type AdaptedCompendium, type AdaptedEntry, type CompendiumRef, type Edi
 
 import { isRecord } from "@/lib/utils/common/is-record";
 
-export const ADAPTER_VERSION = "5etools-1";
+export const ADAPTER_VERSION = "5etools-2";
 export interface ExistingEntry { key: string; edition?: Edition; localId: string; body: JsonRecord; baseline: JsonRecord; missing?: boolean; kind?: AdaptedEntry["kind"] }
 export interface PlanContext { campaignId: string; allowMixedEdition?: boolean; existing: ExistingEntry[]; bindings?: Record<string, ExistingEntry>; overwriteKeys?: readonly string[]; excludedKeys?: readonly string[]; occupiedNames?: Record<string, Array<{ id: string; name: string }>>; settingsHash?: string }
 export interface PlannedWrite extends AdaptedEntry { provenance?: boolean; localId: string; operation: "create" | "update" | "unchanged"; nested?: boolean; baseline?: JsonRecord; resolvedBindings?: Record<string, { kind: AdaptedEntry["kind"]; id: string }> }
@@ -34,6 +34,22 @@ function managedProjection(local: unknown, baseline: unknown): unknown {
   return local;
 }
 
+const imageSrcs = (nodes: unknown[]) => new Map(nodes.flatMap((n) => (isRecord(n) && n.type === "image" && isRecord(n.attrs) && typeof n.attrs.mediaId === "string" && typeof n.attrs.src === "string" ? [[n.attrs.mediaId, n.attrs.src] as const] : [])));
+
+function keepImageSrc(local: unknown[], incoming: unknown[]): unknown[] {
+  const srcs = imageSrcs(local);
+
+  if (srcs.size === 0) return incoming;
+
+  return incoming.map((n) => {
+    if (!isRecord(n) || n.type !== "image" || !isRecord(n.attrs) || n.attrs.src !== undefined) return n;
+
+    const src = srcs.get(String(n.attrs.mediaId));
+
+    return src ? { ...n, attrs: { ...n.attrs, src } } : n;
+  });
+}
+
 function mergeValue(local: unknown, baseline: unknown, incoming: unknown): unknown {
   if (Array.isArray(incoming) && Array.isArray(local) && incoming.every((x) => isRecord(x) && typeof x.id === "string")) {
     const byId = new Map(local.map((x) => [isRecord(x) ? x.id : stableJson(x), x]));
@@ -42,6 +58,8 @@ function mergeValue(local: unknown, baseline: unknown, incoming: unknown): unkno
 
     return [...byId.values()];
   }
+
+  if (Array.isArray(incoming) && Array.isArray(local)) return keepImageSrc(local, incoming);
 
   if (isRecord(local) && isRecord(incoming)) return { ...local, ...Object.fromEntries(Object.entries(incoming).map(([k, v]) => [k, mergeValue(local[k], isRecord(baseline) ? baseline[k] : undefined, v)])) };
 

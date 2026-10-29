@@ -5,6 +5,8 @@ import { useTranslations } from "next-intl";
 import { CompendiumCategories } from "./CompendiumCategories";
 import { CompendiumDependencies } from "./CompendiumDependencies";
 import { CompendiumFileStep } from "./CompendiumFileStep";
+import { CompendiumMediaReport } from "./CompendiumMediaReport";
+import { CompendiumProgress } from "./CompendiumProgress";
 import { CompendiumReport, DEPENDENCIES_ANCHOR } from "./CompendiumReport";
 import { CompendiumRunsList } from "./CompendiumRunsList";
 import { CompendiumSteps } from "./CompendiumSteps";
@@ -21,9 +23,9 @@ export function CompendiumImport({ campaignId, initialFile }: { campaignId: stri
 
   const wizard = useCompendiumImport(campaignId, initialFile);
 
-  const { preview, input, result, rights, busy, root, options } = wizard.state;
+  const { preview, input, result, rights, busy, root, options, phase, media, mediaPaused } = wizard.state;
 
-  const { setRights, confirm, close, applyOptions } = wizard.actions;
+  const { setRights, confirm, close, applyOptions, media: mediaActions } = wizard.actions;
 
   return <HudPage>
     <HudPageHeader
@@ -32,6 +34,7 @@ export function CompendiumImport({ campaignId, initialFile }: { campaignId: stri
       actions={<Button variant="outline" asChild><Link href={`/campaigns/${campaignId}`}>{t("back")}</Link></Button>}
     />
     {!initialFile && <OnboardingHint id="dm.compendium-import" />}
+    <CompendiumProgress phase={phase} media={media} />
     <CompendiumSteps wizard={wizard} />
     <CompendiumFileStep wizard={wizard} />
     {root && <CompendiumCategories wizard={wizard} />}
@@ -46,7 +49,7 @@ export function CompendiumImport({ campaignId, initialFile }: { campaignId: stri
         <p className="text-xs text-hud-muted">{t("previewTtl")}</p>
       </HudPanel>
     </>}
-    {result && <HudPanel className="space-y-3"><p className="text-hud-good">{t("saved", { runId: result.runId ?? "" })}</p><CompendiumReport key={result.runId} campaignId={campaignId} report={result} committed /></HudPanel>}
+    {result && <HudPanel className="space-y-3"><p className="text-hud-good">{t("saved", { runId: result.runId ?? "" })}</p>{media && <CompendiumMediaReport media={media} running={phase === "media"} paused={mediaPaused} actions={mediaActions} />}<CompendiumReport key={result.runId} campaignId={campaignId} report={result} committed /></HudPanel>}
     <CompendiumRunsList campaignId={campaignId} wizard={wizard} />
     <ActionBar><Button variant="outline" disabled={busy && !!input} onClick={close}>{t("close")}</Button></ActionBar>
   </HudPage>;

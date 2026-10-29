@@ -1,0 +1,24 @@
+{
+  "_meta": { "sources": [{ "json": "MS", "full": "Media Sample" }], "edition": "one" },
+  "monster": [
+    { "name": "Token Beast", "source": "MS", "tokenHref": { "type": "external", "url": "https://img.test/token.png" }, "hasToken": true, "hasFluffImages": true },
+    { "name": "Fluff Beast", "source": "MS" },
+    { "name": "Internal Beast", "source": "MS", "tokenHref": { "type": "internal", "path": "bestiary/tokens/a.webp" } }
+  ],
+  "monsterFluff": [
+    { "name": "Token Beast", "source": "MS", "images": [{ "type": "image", "href": { "type": "external", "url": "https://img.test/fluff-a.png" } }] },
+    { "name": "Fluff Beast", "source": "MS", "images": [{ "type": "image", "href": { "type": "external", "url": "https://img.test/fluff-b.png" } }] }
+  ],
+  "spell": [
+    { "name": "Img Spell", "source": "MS", "level": 1, "foundryImg": "https://img.test/spell.webp" },
+    { "name": "Http Spell", "source": "MS", "level": 1, "foundryImg": "http://img.test/spell.webp" }
+  ],
+  "item": [
+    { "name": "Two Images", "source": "MS", "rarity": "rare", "fluff": { "images": [{ "type": "image", "href": { "type": "external", "url": "https://img.test/i1.png" } }, { "type": "image", "href": { "type": "external", "url": "https://img.test/i2.png" } }] } }
+  ],
+  "race": [{ "name": "Fluffy Race", "source": "MS" }],
+  "raceFluff": [{ "name": "Fluffy Race", "source": "MS", "images": [{ "type": "image", "href": { "type": "external", "url": "https://img.test/race.png" } }] }],
+  "subclass": [
+    { "name": "Nested Path", "source": "MS", "className": "Fighter", "classSource": "MS", "shortName": "NP", "fluff": { "images": [{ "type": "image", "href": { "type": "external", "url": "https://img.test/sub.png" } }] } }
+  ]
+}

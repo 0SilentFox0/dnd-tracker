@@ -25,7 +25,7 @@ export function docText(doc: RichDoc): string {
 }
 
 export function isDocEmpty(doc: RichDoc): boolean {
-  const hasAtom = (n: RichNode): boolean => n.type === "token" || n.type === "mention" || (n.content ?? []).some(hasAtom);
+  const hasAtom = (n: RichNode): boolean => n.type === "token" || n.type === "mention" || n.type === "image" || (n.content ?? []).some(hasAtom);
 
   return docText(doc) === "" && !doc.content.some(hasAtom);
 }

@@ -6,7 +6,7 @@ export const LEGEND_KINDS = ["read", "choice", "token", "artifact", "shadow", "c
 export const MENTION_TYPES = ["unit", "artifact", "character", "spell", "battle", "marker", "acquaintance"] as const;
 export const NODE_TYPES = [
   "doc", "paragraph", "text", "heading", "hardBreak", "bulletList", "orderedList", "listItem",
-  "readAloud", "say", "callout", "token", "mention", "table", "tableRow", "tableCell", "tableHeader",
+  "readAloud", "say", "callout", "token", "mention", "table", "tableRow", "tableCell", "tableHeader", "image",
 ] as const;
 export const MARK_TYPES = ["bold", "italic", "secret"] as const;
 

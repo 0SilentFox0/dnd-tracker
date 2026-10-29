@@ -342,6 +342,15 @@
           "i2": "MIXED_EDITION_CONFIRMATION_REQUIRED - a binding between classic and 5e 2024. Press \"Allow mixing classic / one and re-check\" in the report or tick the matching option in the categories."
         },
         "b2": "After a fix the check reruns automatically or with the \"Check JSON\" button."
+      },
+      "s6": {
+        "heading": "Images in the file",
+        "b0": "After you confirm, the import downloads the images the file links to and stores them in the campaign storage. The records are saved first; pictures arrive afterwards, so keep the page open until the progress bar finishes.",
+        "b1": {
+          "i0": "Only https links to png, jpeg, webp and gif up to 1 MB are taken, at most 1000 unique images per import. Pictures are recompressed to webp and scaled down.",
+          "i1": "Unit portraits and spell, item and artifact icons fill only empty fields; a field you already changed is left alone and reported as skipped. Book and adventure pictures become image blocks in scenario pages.",
+          "i2": "Failed downloads are grouped by reason in the report. Use \"Resume\" or \"Retry failed\" to try again; reopening the report later also works."
+        }
       }
     }
   }

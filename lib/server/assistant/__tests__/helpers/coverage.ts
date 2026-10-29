@@ -155,6 +155,7 @@ export const ASSISTANT_ROUTE_COVERAGE: readonly RouteCoverage[] = [
   { route: 'campaigns/[id]/classes', methods: ['GET', 'POST'], task: 5, adapter: 'content', state: "active" },
   { route: 'campaigns/[id]/compendium/confirm', methods: ['POST'], task: 13, adapter: 'handoffs', state: "handoff" },
   { route: 'campaigns/[id]/compendium/entries', methods: ['GET'], task: 13, adapter: 'handoffs', state: "handoff" },
+  { route: 'campaigns/[id]/compendium/media', methods: ['POST'], task: 13, adapter: 'handoffs', state: "handoff" },
   { route: 'campaigns/[id]/compendium/options', methods: ['GET'], task: 13, adapter: 'handoffs', state: "handoff" },
   { route: 'campaigns/[id]/compendium/preview', methods: ['POST'], task: 13, adapter: 'handoffs', state: "handoff" },
   { route: 'campaigns/[id]/compendium/reports', methods: ['GET'], task: 13, adapter: 'handoffs', state: "handoff" },

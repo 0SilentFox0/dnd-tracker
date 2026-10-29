@@ -20,6 +20,7 @@ export const HANDOFF_ACTION_COVERAGE = [
   ["GET", `${c}/characters/draft/portraits`, "handoff.player-draft"],
   ["POST", `${c}/characters/draft`, "handoff.player-draft"],
   ["POST", `${c}/compendium/confirm`, "handoff.compendium-confirm"],
+  ["POST", `${c}/compendium/media`, "handoff.compendium-confirm"],
   ["GET", `${c}/compendium/entries`, "compendium.entries"],
   ["GET", `${c}/compendium/options`, "compendium.options"],
   ["POST", `${c}/compendium/preview`, "handoff.compendium-preview"],

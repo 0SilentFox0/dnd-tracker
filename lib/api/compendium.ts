@@ -1,5 +1,5 @@
 import { campaignGet, campaignPost } from "@/lib/api/client";
-import type { CompendiumConfirmBody, CompendiumEntriesPage, CompendiumPreview, CompendiumReport, CompendiumRunsPage, CompendiumTargets, ImportInput } from "@/types/compendium-import";
+import type { CompendiumConfirmBody, CompendiumEntriesPage, CompendiumPreview, CompendiumReport, CompendiumRunsPage, CompendiumTargets, ImportInput, MediaProgress } from "@/types/compendium-import";
 
 const NO_STORE = { cache: "no-store" } as const;
 
@@ -8,6 +8,9 @@ export const previewCompendium = (campaignId: string, input: ImportInput, signal
 
 export const confirmCompendium = (campaignId: string, body: CompendiumConfirmBody, signal?: AbortSignal) =>
   campaignPost<CompendiumReport>(campaignId, "/compendium/confirm", body, { ...NO_STORE, signal });
+
+export const processCompendiumMedia = (campaignId: string, body: { runId: string; retryFailed?: boolean }, signal?: AbortSignal) =>
+  campaignPost<MediaProgress>(campaignId, "/compendium/media", body, { ...NO_STORE, signal });
 
 export const getCompendiumOptions = (campaignId: string, signal?: AbortSignal) =>
   campaignGet<CompendiumTargets>(campaignId, "/compendium/options", { ...NO_STORE, signal });

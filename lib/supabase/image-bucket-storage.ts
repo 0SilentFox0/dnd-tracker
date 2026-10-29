@@ -1,7 +1,7 @@
 import { API_ERRORS } from "@/lib/constants/api-errors";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { ensureBucket } from "@/lib/supabase/buckets";
-import { isHostedOnProjectStorage } from "@/lib/supabase/image-storage";
+import { isHostedOnProjectStorage } from "@/lib/utils/common/image-url";
 import { bucketObjectPath } from "@/lib/utils/common/image-url";
 import type { Result } from "@/types/common";
 import type { SlideUploadTicket } from "@/types/show";

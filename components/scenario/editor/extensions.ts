@@ -50,6 +50,26 @@ const Token = Node.create({
   renderHTML: ({ node }) => ["span", { class: node.attrs.color === "red" ? "r" : "g" }],
 });
 
+const ScenarioImage = Node.create({
+  name: "image",
+  group: "block",
+  atom: true,
+  draggable: true,
+  addAttributes: () => ({
+    mediaId: { default: null, parseHTML: (el: HTMLElement) => el.getAttribute("data-media-id") },
+    src: { default: null, parseHTML: (el: HTMLElement) => el.querySelector("img")?.getAttribute("src") ?? null },
+    alt: { default: null, parseHTML: (el: HTMLElement) => el.querySelector("img")?.getAttribute("alt") || null },
+    caption: { default: null, parseHTML: (el: HTMLElement) => el.querySelector("figcaption")?.textContent || null },
+  }),
+  parseHTML: () => [{ tag: "figure[data-media-id]" }],
+  renderHTML: ({ node }) => [
+    "figure",
+    { "data-media-id": node.attrs.mediaId, contenteditable: "false" },
+    node.attrs.src ? ["img", { src: node.attrs.src, alt: node.attrs.alt ?? "" }] : ["span", { class: "sb-empty" }, node.attrs.alt || node.attrs.mediaId],
+    ...(node.attrs.caption ? [["figcaption", node.attrs.caption]] : []),
+  ],
+});
+
 const ScenarioMention = Mention.extend({
   addAttributes() {
     return {
@@ -72,6 +92,7 @@ export function buildExtensions(searchMentions: (q: string) => Promise<MentionOp
     Say,
     Callout,
     Token,
+    ScenarioImage,
     ScenarioMention.configure({ HTMLAttributes: { class: "mention" }, suggestion: mentionSuggestion(searchMentions) }),
   ];
 }

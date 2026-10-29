@@ -20,8 +20,8 @@ vi.mock("@/lib/utils/api/rate-limit", () => ({ BATTLE_RATE_LIMITS: { show: {} },
 
 vi.mock("@/lib/supabase/admin", () => ({ createAdminClient: () => ({}) }));
 vi.mock("@/lib/supabase/scene-slide-storage", () => ({ ensureSlidesBucket: async () => ({ ok: true }), removeSlideFiles: () => { throw Error("UNEXPECTED_STORAGE_DELETE"); } }));
+vi.mock("@/lib/utils/common/image-url", async (original) => ({ ...await original<object>(), isHostedOnProjectStorage: (url: string) => url === "https://example.invalid/mirrored.webp" }));
 vi.mock("@/lib/supabase/image-storage", () => ({
-  isHostedOnProjectStorage: (url: string) => url === "https://example.invalid/mirrored.webp",
   resolveImageForPersistence: async () => {
     expect(currentContentWrite()).toBeUndefined();
     expect(await db.assistantReceipt.count({ where: { campaignId, status: "unknown" } })).toBeGreaterThan(0);

@@ -5,6 +5,10 @@
     "new": " · new",
     "open": "Open"
   },
+  "2026-10-29-compendium-images": {
+    "title": "Images in compendium import",
+    "body": "The compendium import now downloads images from the file (unit portraits, spell and item icons, book and adventure pictures) into our storage after you confirm, with a progress bar and a report of what was skipped. Failed images can be retried."
+  },
   "2026-10-29-compendium-import-guide": {
     "title": "Compendium import: steps, hint and help",
     "body": "The JSON compendium import screen now has a step indicator (file, categories, check, confirm), a hint and a help article about the report and why an import is blocked."
