@@ -40,6 +40,7 @@ import { createSpellMutation } from "@/lib/server/battles/mutations/spell/spell-
 import { createStartMutation } from "@/lib/server/battles/mutations/start/start-mutation";
 import { unitControlMutation, unitControlSchema } from "@/lib/server/battles/mutations/unit-control/unit-control-mutation";
 import { runBattleMutation } from "@/lib/server/battles/run-mutation";
+import { loadSpellsFromDb } from "@/lib/server/battles/spell/load-spells-db";
 import { collectModifiers, statWithModifiers } from "@/lib/utils/abilities/engine/core/collect-modifiers";
 import { pendingAreaAuras, zoneCandidates, zoneMembers } from "@/lib/utils/abilities/engine/effects/area-aura";
 import { applyBattleDelta } from "@/lib/utils/battle/client/apply-delta";
@@ -51,7 +52,6 @@ import { emptyMaze, MAZE_SCATTER_MIN_GAP, MAZE_STEPS_PER_TURN } from "@/lib/util
 import { MAZE_TEXTS } from "@/lib/utils/battle/modes/maze/texts";
 import { awaitsMoraleCheck } from "@/lib/utils/battle/morale/awaits-check";
 import { casterSpellDice } from "@/lib/utils/battle/spell/caster-dice";
-import { loadSpellsFromDb } from "@/lib/utils/battle/spell/load-spells-db";
 import { spellTargetingFor } from "@/lib/utils/battle/spell/spell-targeting";
 import { loadBattle, loadRecentEvents, saveBattle } from "@/lib/utils/battle/store";
 import { REJECT } from "@/lib/utils/battle/store/reject";

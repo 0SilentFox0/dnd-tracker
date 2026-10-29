@@ -1,8 +1,7 @@
 import { describe, expect, it } from "vitest";
 
-import { resolveCharacterSkillEntries } from "../extract-skills";
-
 import { RACES } from "@/data/library/races";
+import { resolveCharacterSkillEntries } from "@/lib/server/battles/participant/character-skill-entries";
 import { collectCharacterAbilities } from "@/lib/utils/abilities/build/collect";
 import { buildTreeJson, racialNodeId } from "@/lib/utils/skills/progression";
 

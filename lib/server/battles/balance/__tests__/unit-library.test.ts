@@ -8,8 +8,8 @@ const db = vi.hoisted(() => ({
 
 vi.mock("@/lib/db", () => ({ prisma: { unit: { findMany: db.unitFindMany }, spell: { findMany: db.spellFindMany }, race: { findMany: db.raceFindMany } } }));
 
-import { computeFairScaling } from "../fair";
-import { loadUnitLibraryStats } from "../unit-library";
+import { loadUnitLibraryStats } from "@/lib/server/battles/balance/unit-library";
+import { computeFairScaling } from "@/lib/utils/battle/balance/fair";
 
 const row = (id: string, level: number, maxHp: number, attacks: unknown, knownSpells: string[] = []) => ({
   id, name: id, maxHp, level, raceId: null, strength: 10, dexterity: 10, maxTargets: 1, attacks, knownSpells,

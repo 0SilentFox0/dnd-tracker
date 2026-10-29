@@ -1,6 +1,5 @@
-import type { CampaignSpellContext, CharacterFromPrisma } from "../types/participant";
-
 import { prisma } from "@/lib/db";
+import type { CampaignSpellContext, CharacterFromPrisma } from "@/lib/utils/battle/types/participant";
 import { logger } from "@/lib/utils/common/logger";
 import { type BranchLevel, normalizeTree, resolveLearned } from "@/lib/utils/skills/progression";
 import { learnedSpellIdsFromNodes, toSpellSkillInfo } from "@/lib/utils/spells";

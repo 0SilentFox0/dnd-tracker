@@ -1,7 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-import { resolveCharacterSkillEntries } from "../extract-skills";
-
+import { resolveCharacterSkillEntries } from "@/lib/server/battles/participant/character-skill-entries";
 import { buildTreeJson } from "@/lib/utils/skills/progression";
 
 vi.mock("@/lib/db", () => ({

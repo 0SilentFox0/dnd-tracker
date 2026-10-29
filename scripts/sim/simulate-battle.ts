@@ -28,6 +28,7 @@ import { createRollbackMutation, rollbackSchema } from "@/lib/server/battles/mut
 import { createSpellMutation } from "@/lib/server/battles/mutations/spell/spell-mutation";
 import { createStartMutation } from "@/lib/server/battles/mutations/start/start-mutation";
 import { runBattleMutation } from "@/lib/server/battles/run-mutation";
+import { loadSpellsFromDb } from "@/lib/server/battles/spell/load-spells-db";
 import { collectModifiers, statWithModifiers } from "@/lib/utils/abilities/engine/core/collect-modifiers";
 import { runAbilities } from "@/lib/utils/abilities/engine/core/run-abilities";
 import { countMarks } from "@/lib/utils/abilities/engine/effects/marks";
@@ -39,7 +40,6 @@ import { PUSHER_DELTA_LIMIT_BYTES } from "@/lib/utils/battle/pipeline/limits";
 import type { PipelineDeps, RunBattleMutationOptions } from "@/lib/utils/battle/pipeline/run-battle-mutation";
 import { applyResistance, hasImmunity } from "@/lib/utils/battle/resistance";
 import { casterSpellDice } from "@/lib/utils/battle/spell/caster-dice";
-import { loadSpellsFromDb } from "@/lib/utils/battle/spell/load-spells-db";
 import { loadBattle, loadRecentEvents, saveBattle } from "@/lib/utils/battle/store";
 import { PATCHABLE_PARTICIPANT_FIELDS } from "@/lib/utils/battle/store/participant-patch";
 import { stableStringify } from "@/lib/utils/battle/store/stable-json";

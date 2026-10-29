@@ -3,9 +3,9 @@ import type { z } from "zod";
 import type { balanceSchema } from "./balance-schema";
 import { loadCharacterBalanceStats } from "./character-stats";
 
+import { loadUnitLibraryStats } from "@/lib/server/battles/balance/unit-library";
 import type { UnitStats } from "@/lib/utils/battle/balance";
 import { buildPartyPower, computeFairScaling, heroMember, pickEnemyRoster, unitMember } from "@/lib/utils/battle/balance";
-import { loadUnitLibraryStats } from "@/lib/utils/battle/balance/unit-library";
 import { pickXpRoster, resolveXpDifficulty, type XpEdition } from "@/lib/utils/battle/balance/xp-budget";
 import type { Ruleset } from "@/lib/utils/rules";
 import type { AllyStats, SuggestedEnemy } from "@/types/battle-setup";

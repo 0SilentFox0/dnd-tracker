@@ -7,8 +7,7 @@ const mocks = vi.hoisted(() => ({
 vi.mock("@/lib/db", () => ({ prisma: { campaign: { findUnique: mocks.campaign }, artifact: { findMany: mocks.artifacts } } }));
 vi.mock("@/lib/cache/reference-data", () => ({ getCachedClasses: mocks.classes, getCachedFeats: mocks.feats, getCachedBackgrounds: mocks.backgrounds }));
 
-import { loadCharacterContext } from "../load-character-context";
-
+import { loadCharacterContext } from "@/lib/server/battles/participant/load-character-context";
 import type { CharacterFromPrisma } from "@/lib/utils/battle/types/participant";
 import { sorcerer } from "@/lib/utils/characters/choices/__tests__/fixtures";
 import { parseRules } from "@/lib/utils/rules/schema";

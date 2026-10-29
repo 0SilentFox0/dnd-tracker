@@ -66,13 +66,7 @@ const DB_IMPORT_PATH = {
   message: "lib/utils — чиста логіка без БД: завантаження в lib/server/<domain> (ratchet-список DB_IN_UTILS_EXEMPT лише скорочується).",
 };
 
-const DB_IN_UTILS_EXEMPT = [
-  "lib/utils/api/api-auth.ts",
-  "lib/utils/battle/participant/{from-character-spell-slots,load-race,load-character-context,extract-skills,from-character-learned-spells}.ts",
-  "lib/utils/battle/spell/load-spells-db.ts",
-  "lib/utils/battle/balance/unit-library.ts",
-  "lib/utils/battle/artifact-sets/load-maps.ts",
-];
+const DB_IN_UTILS_EXEMPT = ["lib/utils/api/api-auth.ts"];
 
 const I18N_EXEMPT = JSON.parse(readFileSync(new URL("./i18n-exempt.json", import.meta.url), "utf8"));
 

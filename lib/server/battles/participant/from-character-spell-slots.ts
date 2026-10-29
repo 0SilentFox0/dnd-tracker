@@ -1,6 +1,5 @@
-import type { CampaignSpellContext, CharacterFromPrisma } from "../types/participant";
-
 import { prisma } from "@/lib/db";
+import type { CampaignSpellContext, CharacterFromPrisma } from "@/lib/utils/battle/types/participant";
 import { classSpellSlots } from "@/lib/utils/spells/class-slots";
 import { calculateSpellSlotsForLevel } from "@/lib/utils/spells/spell-slots";
 import type { ResolvedClassEntry } from "@/types/classes";

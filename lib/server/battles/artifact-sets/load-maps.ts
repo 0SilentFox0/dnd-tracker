@@ -1,6 +1,5 @@
-import type { CampaignSpellContext } from "../types/participant";
-
 import { prisma } from "@/lib/db";
+import type { CampaignSpellContext } from "@/lib/utils/battle/types/participant";
 
 export type ArtifactSetBattleMaps = {
   artifactSetsById: NonNullable<CampaignSpellContext["artifactSetsById"]>;

@@ -1,7 +1,7 @@
 import { ParticipantSide, ParticipantSourceType } from "@/lib/constants/battle";
+import { loadUnitLibraryStats } from "@/lib/server/battles/balance/unit-library";
 import { buildPartyPower, computeFairScaling, heroMember, type Power, unitMember } from "@/lib/utils/battle/balance";
 import { heroPower } from "@/lib/utils/battle/balance/hero-power";
-import { loadUnitLibraryStats } from "@/lib/utils/battle/balance/unit-library";
 import type { CampaignSpellContext } from "@/lib/utils/battle/types/participant";
 import type { BattleParticipant } from "@/types/battle";
 

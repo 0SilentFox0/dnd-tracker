@@ -1,6 +1,6 @@
 import type { CampaignSpellContext } from "../types/participant";
-import { type ArtifactSetBattleMaps, loadArtifactSetBattleMaps } from "./load-maps";
 
+import { type ArtifactSetBattleMaps, loadArtifactSetBattleMaps } from "@/lib/server/battles/artifact-sets/load-maps";
 import type { ArtifactSetRowLike } from "@/lib/utils/abilities/build/collect";
 import { abilitySummary } from "@/lib/utils/abilities/summary";
 import { refArtifactIds } from "@/lib/utils/items/ref";

@@ -1,7 +1,6 @@
 import { describe, expect, it, vi } from "vitest";
 
-import { resolveLearnedSpellsAndMastery } from "../from-character-learned-spells";
-
+import { resolveLearnedSpellsAndMastery } from "@/lib/server/battles/participant/from-character-learned-spells";
 import { buildTreeJson } from "@/lib/utils/skills/progression";
 
 vi.mock("@/lib/db", () => ({ prisma: {} }));

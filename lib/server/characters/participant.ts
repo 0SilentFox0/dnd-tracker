@@ -1,7 +1,7 @@
 import { ParticipantSide } from "@/lib/constants/battle";
+import { type CharacterContext, loadCharacterContext } from "@/lib/server/battles/participant/load-character-context";
 import { applyBakedAuras } from "@/lib/utils/abilities/build/bake";
 import { createBattleParticipantFromCharacter } from "@/lib/utils/battle/participant";
-import { type CharacterContext, loadCharacterContext } from "@/lib/utils/battle/participant/load-character-context";
 import type { CharacterFromPrisma } from "@/lib/utils/battle/types/participant";
 import type { Ruleset } from "@/lib/utils/rules";
 import type { BattleParticipant } from "@/types/battle";

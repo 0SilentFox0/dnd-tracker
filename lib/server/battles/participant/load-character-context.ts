@@ -1,14 +1,13 @@
 import type { Prisma } from "@prisma/client";
 
-import type { CampaignSpellContext, CharacterFromPrisma } from "../types/participant";
-import { referencedSkillIds } from "./extract-skills";
-import { loadClassesById } from "./load-classes";
-import { loadFeatsById } from "./load-feats";
-
 import { prisma } from "@/lib/db";
 import { CharacterClassesSchema } from "@/lib/schemas/classes";
 import { loadBackground } from "@/lib/server/backgrounds/load";
 import { readChoiceList } from "@/lib/utils/abilities/read";
+import { referencedSkillIds } from "@/lib/utils/battle/participant/extract-skills";
+import { loadClassesById } from "@/lib/utils/battle/participant/load-classes";
+import { loadFeatsById } from "@/lib/utils/battle/participant/load-feats";
+import type { CampaignSpellContext, CharacterFromPrisma } from "@/lib/utils/battle/types/participant";
 import { choicesStateOf } from "@/lib/utils/characters/choices/picks";
 import { selectionNeedsFeats } from "@/lib/utils/characters/choices/selections";
 import { inventoryArtifactIds } from "@/lib/utils/items/resolve";

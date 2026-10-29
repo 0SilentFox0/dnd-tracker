@@ -23,11 +23,11 @@ import { nextTurnMutation } from "@/lib/server/battles/mutations/next-turn/next-
 import { createSpellMutation } from "@/lib/server/battles/mutations/spell/spell-mutation";
 import { createStartMutation } from "@/lib/server/battles/mutations/start/start-mutation";
 import { runBattleMutation } from "@/lib/server/battles/run-mutation";
+import { loadSpellsFromDb } from "@/lib/server/battles/spell/load-spells-db";
 import { createCampaignFromBundle } from "@/lib/server/campaigns/create-campaign";
 import { cellDistance, parseCellKey } from "@/lib/utils/battle/grid/geometry";
 import { baseMovement, reachable, remainingMovement } from "@/lib/utils/battle/grid/path";
 import { awaitsMoraleCheck } from "@/lib/utils/battle/morale/awaits-check";
-import { loadSpellsFromDb } from "@/lib/utils/battle/spell/load-spells-db";
 import { loadBattle, loadRecentEvents, saveBattle } from "@/lib/utils/battle/store";
 import { rollDiceList } from "@/lib/utils/common/dice";
 import { categoryInventory, projectInput } from "@/lib/utils/compendium-import/flow";

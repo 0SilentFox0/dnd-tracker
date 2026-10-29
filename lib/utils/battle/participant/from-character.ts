@@ -2,12 +2,8 @@ import type { CampaignSpellContext, CharacterFromPrisma } from "../types/partici
 import { buildCharacterSpellGrants } from "./character-spell-grants";
 import { type EquippedArtifactRow, loadConsumableEntries, loadEquippedArtifactRows, toEquippedArtifacts } from "./extract-artifacts";
 import { extractAttacksFromCharacter } from "./extract-attacks";
-import { resolveCharacterSkillEntries } from "./extract-skills";
-import { resolveLearnedSpellsAndMastery } from "./from-character-learned-spells";
-import { resolveSpellSlotsFromCharacter } from "./from-character-spell-slots";
 import { loadClassesById } from "./load-classes";
 import { loadFeatsById } from "./load-feats";
-import { loadRace } from "./load-race";
 
 import { ABILITY_KEYS, type AbilityKey } from "@/lib/constants/abilities";
 import { CombatStatus,ParticipantSide, ParticipantSourceType } from "@/lib/constants/battle";
@@ -16,6 +12,10 @@ import { heroArchetype } from "@/lib/constants/hero-archetypes";
 import { DND_SKILLS } from "@/lib/constants/skills";
 import { CharacterClassesSchema } from "@/lib/schemas/classes";
 import { loadBackground } from "@/lib/server/backgrounds/load";
+import { resolveCharacterSkillEntries } from "@/lib/server/battles/participant/character-skill-entries";
+import { resolveLearnedSpellsAndMastery } from "@/lib/server/battles/participant/from-character-learned-spells";
+import { resolveSpellSlotsFromCharacter } from "@/lib/server/battles/participant/from-character-spell-slots";
+import { loadRace } from "@/lib/server/battles/participant/load-race";
 import { bakePassives } from "@/lib/utils/abilities/build/bake";
 import { collectCharacterAbilities } from "@/lib/utils/abilities/build/collect";
 import { immunityAbilities } from "@/lib/utils/abilities/build/immunities";

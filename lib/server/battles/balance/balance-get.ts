@@ -1,7 +1,7 @@
 import { loadCharacterBalanceStats } from "./character-stats";
 
+import { loadUnitLibraryStats } from "@/lib/server/battles/balance/unit-library";
 import { heroMember } from "@/lib/utils/battle/balance";
-import { loadUnitLibraryStats } from "@/lib/utils/battle/balance/unit-library";
 import type { Ruleset } from "@/lib/utils/rules";
 import type { EntityStats, UnitEntityStats } from "@/types/battle-setup";
 

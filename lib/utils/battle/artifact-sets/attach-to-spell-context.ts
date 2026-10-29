@@ -1,5 +1,6 @@
 import type { CampaignSpellContext } from "../types/participant";
-import { loadArtifactSetBattleMaps } from "./load-maps";
+
+import { loadArtifactSetBattleMaps } from "@/lib/server/battles/artifact-sets/load-maps";
 
 export async function attachArtifactSetsToSpellContext(
   campaignId: string,
