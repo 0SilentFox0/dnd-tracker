@@ -3,9 +3,10 @@ import { describe, expect, it, vi } from "vitest";
 vi.mock("server-only", () => ({}));
 vi.mock("@/lib/db", () => ({ prisma: { $queryRaw: vi.fn() } }));
 
-import { findCustomConditionUsage, isConditionUsed } from "../condition-usage";
+import { findCustomConditionUsage } from "../condition-usage";
 
 import type { CustomConditionKey } from "@/lib/utils/abilities/schema/kinds";
+import { isConditionUsed } from "@/lib/utils/rules";
 
 const E: unknown[][] = [[], [], [], [], [], [], [], [], []];
 

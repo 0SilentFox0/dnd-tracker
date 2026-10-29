@@ -9,9 +9,8 @@ import { campaignKeys } from "./keys";
 import { ApiError } from "@/lib/api/client";
 import { getCustomConditionUsage, removeCustomConditions } from "@/lib/api/rules";
 import { useConfirm, useNotify } from "@/lib/hooks/common";
+import { isConditionUsed } from "@/lib/utils/rules";
 import type { ConditionUsage } from "@/types/campaigns";
-
-const isUsed = (u: ConditionUsage) => u.battles.length + u.spells.length + u.units.length > 0;
 
 export function useRemoveCustomCondition(campaignId: string) {
   const queryClient = useQueryClient();
@@ -35,7 +34,7 @@ export function useRemoveCustomCondition(campaignId: string) {
     try {
       const found = await fetchUsage(condition.key);
 
-      if (isUsed(found)) {
+      if (isConditionUsed(found)) {
         setUsage(found);
 
         return;

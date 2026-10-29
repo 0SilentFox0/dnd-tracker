@@ -74,5 +74,3 @@ export async function findCustomConditionUsage(campaignId: string, key: CustomCo
 
   return { battles: [...battles.values()], spells, units, skills, artifacts, artifactSets, races, feats, statusEffects };
 }
-
-export const isConditionUsed = (u: ConditionUsage) => Object.values(u).some((list) => list.length > 0);
