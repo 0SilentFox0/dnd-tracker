@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { useTranslations } from "next-intl";
 import { Map as MapIcon } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
@@ -10,6 +11,8 @@ interface WorldMapLinkProps {
 }
 
 export function WorldMapLink({ campaignId, variant, newTab }: WorldMapLinkProps) {
+  const t = useTranslations("world");
+
   const href = `/campaigns/${campaignId}/dm/world`;
 
   const target = newTab ? { target: "_blank", rel: "noopener" } : {};
@@ -17,7 +20,7 @@ export function WorldMapLink({ campaignId, variant, newTab }: WorldMapLinkProps)
   const content = (
     <>
       <MapIcon className="size-4" aria-hidden />
-      Карта світу
+      {t("mapLink")}
     </>
   );
 

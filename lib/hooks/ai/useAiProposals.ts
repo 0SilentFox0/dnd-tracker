@@ -1,10 +1,11 @@
 "use client";
 
 import { useCallback } from "react";
+import { useTranslations } from "next-intl";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
 import { aiKeys } from "./keys";
-import { flushAssistantBeforeApply, useAssistantEffects } from "./useAssistantEffects";
+import { AssistantUiError, flushAssistantBeforeApply, useAssistantEffects } from "./useAssistantEffects";
 
 import { applyAiProposal, getAiProposals, getAiProposalSummaries, rejectAiProposal } from "@/lib/api/ai";
 import { useOptionalNotify } from "@/lib/hooks/common";
@@ -20,6 +21,10 @@ export function useAiProposals(campaignId: string, pageId: string, { enabled = t
   const { consumeReceipt } = useAssistantEffects(campaignId);
 
   const notify = useOptionalNotify();
+
+  const t = useTranslations("ai");
+
+  const message = (e: Error) => (e instanceof AssistantUiError ? t(e.key) : e.message);
 
   const key = aiKeys.proposals(campaignId, pageId);
 
@@ -44,7 +49,7 @@ export function useAiProposals(campaignId: string, pageId: string, { enabled = t
     onSuccess: (result, id) => {
       if (!result) return;
 
-      void consumeReceipt({ id: `legacy:${id}`, status: "applied", effectsStatus: "complete", result: { data: null, affected: ["deck" in result ? { domain: "show", id: result.deck.id, name: "Показ" } : { domain: "scenario", id: result.id, name: "Сценарій" }], warnings: [] } });
+      void consumeReceipt({ id: `legacy:${id}`, status: "applied", effectsStatus: "complete", result: { data: null, affected: ["deck" in result ? { domain: "show", id: result.deck.id, name: "Show" } : { domain: "scenario", id: result.id, name: "Scenario" }], warnings: [] } });
 
       if ("deck" in result) {
         queryClient.invalidateQueries({ queryKey: showKeys.decks(campaignId) });
@@ -58,13 +63,13 @@ export function useAiProposals(campaignId: string, pageId: string, { enabled = t
       queryClient.setQueryData(scenarioKeys.page(campaignId, pageId), page);
       onApplied?.(page);
     },
-    onError: (e: Error) => notify(e.message),
+    onError: (e: Error) => notify(message(e)),
     onSettled: invalidate,
   });
 
   const rejectMutation = useMutation({
     mutationFn: (id: string) => rejectAiProposal(campaignId, id),
-    onError: (e: Error) => notify(e.message),
+    onError: (e: Error) => notify(message(e)),
     onSettled: invalidate,
   });
 

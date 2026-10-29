@@ -9,9 +9,11 @@ import "server-only";
 import { AI_BODY_LIMITS } from "@/lib/constants/ai";
 import { API_ERRORS, type ErrorParams } from "@/lib/constants/api-errors";
 import { prisma } from "@/lib/db";
+import { getRequestLocale } from "@/lib/i18n/request-locale";
 import { assistantPolicySchema } from "@/lib/schemas/assistant";
 import { ContentError } from "@/lib/server/content/errors";
 import { requireAuth, requireDM } from "@/lib/utils/api/api-auth";
+import { privateJson } from "@/lib/utils/api/api-response";
 import { PRIVATE_NO_STORE_HEADERS } from "@/lib/utils/api/cache-headers";
 import { parseBody } from "@/lib/utils/api/parse-body";
 import { checkRateLimit, rateLimitResponse } from "@/lib/utils/api/rate-limit";
@@ -20,8 +22,6 @@ import { apiErrorJson } from "@/lib/utils/api/translate-error";
 
 type RouteMode = "list" | "detail" | "receipt" | "confirm" | "reject" | "policy";
 type Context = { params: Promise<{ id: string; intentId?: string }> };
-
-const json = (body: unknown, status = 200) => NextResponse.json(body, { status, headers: PRIVATE_NO_STORE_HEADERS });
 
 const errorJson = (body: { error: string; code?: string; params?: ErrorParams }, status: number) => apiErrorJson(body, { status, headers: PRIVATE_NO_STORE_HEADERS });
 
@@ -34,14 +34,14 @@ export function assistantRoute(mode: RouteMode) {
     try {
       const { id: campaignId, intentId } = await context.params;
 
-      if (!campaignId || campaignId.length > 100 || (intentId && intentId.length > 100)) return json({ code: "INVALID_INPUT" }, 400);
+      if (!campaignId || campaignId.length > 100 || (intentId && intentId.length > 100)) return privateJson({ code: "INVALID_INPUT" }, 400);
 
       const mutation = mode === "confirm" || mode === "reject" || mode === "policy";
 
       // No cookie fallback or Bearer confirmation: this is the human UI boundary.
-      if (req.headers.has("authorization")) return json({ code: "SESSION_REQUIRED" }, 403);
+      if (req.headers.has("authorization")) return privateJson({ code: "SESSION_REQUIRED" }, 403);
 
-      if (mutation && !isSameOriginRequest(req)) return json({ code: "FORBIDDEN" }, 403);
+      if (mutation && !isSameOriginRequest(req)) return privateJson({ code: "FORBIDDEN" }, 403);
 
       let receiptRateChecked = false;
 
@@ -55,7 +55,7 @@ export function assistantRoute(mode: RouteMode) {
         if (!rate.allowed) return privateResponse(rateLimitResponse(rate));
 
         receiptRateChecked = true;
-        try { return json(await readDeletionReceipt(auth.userId, campaignId, intentId)); }
+        try { return privateJson(await readDeletionReceipt(auth.userId, campaignId, intentId)); }
         catch (error) { if (!(error instanceof ContentError) || error.status !== 404) throw error; }
       }
 
@@ -63,7 +63,7 @@ export function assistantRoute(mode: RouteMode) {
 
       if (access instanceof NextResponse) return privateResponse(access);
 
-      const caller = chatCaller(campaignId, access.userId, null);
+      const caller = chatCaller(campaignId, access.userId, null, await getRequestLocale());
 
       if (!receiptRateChecked) {
         const rate = await checkRateLimit({ userId: access.userId, scope: `assistant-${mode}`, battleId: campaignId, limit: mutation ? 20 : 120, windowSeconds: 60, memoryFallback: true });
@@ -78,7 +78,7 @@ export function assistantRoute(mode: RouteMode) {
 
         const limit = url.searchParams.has("limit") ? Number(url.searchParams.get("limit")) : undefined;
 
-        return json(await listIntents(caller, { cursor, limit, ...(url.searchParams.has("status") && { status: url.searchParams.get("status") as never }) }));
+        return privateJson(await listIntents(caller, { cursor, limit, ...(url.searchParams.has("status") && { status: url.searchParams.get("status") as never }) }));
       }
 
       if (mode === "policy") {
@@ -92,20 +92,20 @@ export function assistantRoute(mode: RouteMode) {
           ? await prisma.aiThread.updateMany({ where, data: { executionMode: body.executionMode } })
           : await prisma.apiToken.updateMany({ where: { ...where, revokedAt: null }, data: { executionMode: body.executionMode } });
 
-        if (result.count !== 1) return json({ code: "NOT_FOUND" }, 404);
+        if (result.count !== 1) return privateJson({ code: "NOT_FOUND" }, 404);
 
-        return json({ id: body.id, executionMode: body.executionMode });
+        return privateJson({ id: body.id, executionMode: body.executionMode });
       }
 
-      if (!intentId) return json({ code: "INVALID_INPUT" }, 400);
+      if (!intentId) return privateJson({ code: "INVALID_INPUT" }, 400);
 
-      if (mode === "detail") return json(await getIntent(caller, intentId));
+      if (mode === "detail") return privateJson(await getIntent(caller, intentId));
 
-      if (mode === "receipt") return json(await readReceipt(caller, intentId));
+      if (mode === "receipt") return privateJson(await readReceipt(caller, intentId));
 
-      if (mode === "confirm") return json(await confirmIntent(caller.actor, intentId));
+      if (mode === "confirm") return privateJson(await confirmIntent(caller.actor, intentId, caller.locale));
 
-      return json(await rejectIntent(caller, intentId));
+      return privateJson(await rejectIntent(caller, intentId));
     } catch (error) {
       if (error instanceof ContentError) return errorJson({ code: error.status === 409 ? "ASSISTANT_CONFLICT" : "ASSISTANT_UNAVAILABLE", error: error.message, params: error.params }, error.status);
 

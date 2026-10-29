@@ -7,7 +7,7 @@ vi.mock("@/lib/server/scenario/search", () => ({
   searchScenarioPages: vi.fn(async () => [{ pageId: "p1", pageTitle: "Монастир", sectionId: "s1", snippet: "…дзвони…" }]),
 }));
 
-const ctx = { campaignId: "camp1", userId: "dm", scopes: ["ai"] as const, threadId: null };
+const ctx = { campaignId: "camp1", userId: "dm", scopes: ["ai"] as const, threadId: null, locale: "uk" as const };
 
 const content = {
   legend: [{ kind: "read", label: "Читати" }],
@@ -38,8 +38,8 @@ describe("scenario read tools", () => {
 
     const out = String(await readScenarioPageTool.handler(ctx, { pageId: "p1" }));
 
-    expect(out).toContain("## Собор [s1] (зіграно)");
-    expect(out).toContain("### Рядок r1");
+    expect(out).toContain("## Собор [s1] (played)");
+    expect(out).toContain("### Row r1");
     expect(out).toContain("Дзвони|| таємниця||");
     expect(out).toContain("DC 12");
     expect(vi.mocked(prisma.scenarioPage.findFirst).mock.calls[0][0]).toMatchObject({ where: { id: "p1", campaignId: "camp1" } });

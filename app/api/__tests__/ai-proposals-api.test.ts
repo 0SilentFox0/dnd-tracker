@@ -7,6 +7,7 @@ import * as preloadedModule0 from "@/app/api/campaigns/[id]/ai/proposals/[propos
 import * as preloadedModule2 from "@/app/api/campaigns/[id]/ai/proposals/route";
 import { API_ERRORS } from "@/lib/constants/api-errors";
 import { prisma } from "@/lib/db";
+import { makeT } from "@/lib/i18n/test/mock-t";
 import * as apiAuth from "@/lib/utils/api/api-auth";
 import { resolveAiOps } from "@/lib/utils/scenario/ai-ops";
 
@@ -32,9 +33,9 @@ const content = { legend: [], sections: [{ id: "s1", title: "Собор", played
 const page = (over: Record<string, unknown> = {}) => ({ id: "p1", campaignId: "camp1", kind: "scene", arc: null, title: "Монастир", subtitle: null, status: "draft", sortOrder: 0, characterId: null, version: 3, updatedAt: new Date(), content, ...over });
 
 const ops = () => {
-  const r = resolveAiOps(content as never, [{ op: "replaceRow", sectionId: "s1", rowId: "r1", story: "Дзвони гудуть" }]);
+  const r = resolveAiOps(content as never, [{ op: "replaceRow", sectionId: "s1", rowId: "r1", story: "Дзвони гудуть" }], makeT("assistant"));
 
-  if (!r.ok) throw new Error(r.error);
+  if (!r.ok) throw new Error(r.error.message);
 
   return r.ops;
 };

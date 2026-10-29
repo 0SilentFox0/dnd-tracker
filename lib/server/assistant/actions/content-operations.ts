@@ -6,10 +6,13 @@ import { contentOperationState } from "./content-preview";
 import { contentSnapshot, jsonContent, snapshotHash } from "./content-snapshot";
 
 import "server-only";
-import { ReferenceKind } from "@/lib/cache/tags";
+import { ALL_REFERENCE_KINDS } from "@/lib/cache/tags";
 import { API_ERRORS } from "@/lib/constants/api-errors";
 import { prisma } from "@/lib/db";
+import type { Locale } from "@/lib/i18n/config";
+import { getTranslator } from "@/lib/i18n/translator";
 import { ContentError } from "@/lib/server/content/errors";
+import { translateImportReport } from "@/lib/server/content/import/translate-report";
 import { type ContentOperationId, contentOperationSchema, runContentOperation } from "@/lib/server/content/operation-service";
 import { CONTENT_OPERATIONS } from "@/lib/server/content/operations";
 import { withCampaignContentWrite } from "@/lib/server/content/write";
@@ -17,13 +20,14 @@ import { previewSourceSelection } from "@/lib/server/templates/sync/apply";
 import { pageSourceDiff } from "@/lib/server/templates/sync/page-diff";
 import type { Actor } from "@/lib/utils/api/actor";
 import type { SourceDiff } from "@/types/campaigns";
+import type { ImportReport } from "@/types/content-import";
 
 type Selection = { sourceId: string; items: Array<{ scope: string; key: string; name: string; status: string; before: unknown; after: unknown }>; autoAdded: unknown[]; credits: { before: string | null; after: string | null } };
 type Deps = {
   snapshot?: (actor: Actor) => Promise<unknown>;
   operationState?: (actor: Actor, state: unknown, operation: string, input: Record<string, unknown>) => Promise<unknown>;
   guard?: <T>(id: string, fn: () => Promise<T>) => Promise<T>;
-  invoke?: (id: ContentOperationId, actor: Actor, input: unknown) => Promise<unknown>;
+  invoke?: (id: ContentOperationId, actor: Actor, input: unknown, locale: Locale | null) => Promise<unknown>;
   sourcePreview?: (actor: Actor, input: unknown) => Promise<Selection>;
 };
 
@@ -58,7 +62,7 @@ export function createContentOperationActions(deps: Deps = {}): AssistantActionD
     if (operation.id === "campaign.export") {
       // One canonical id retains the existing content:read grant. The browser
       // downloads raw bundles; tool history must never contain source notes.
-      actions.push({ ...base, effect: "handoff", execute: async (caller) => ({ href: `/api/campaigns/${caller.actor.campaignId}/export`, reason: "Завантажте експорт кампанії у застосунку; його вміст не надсилається моделі." }) });
+      actions.push({ ...base, effect: "handoff", execute: async (caller) => ({ href: `/api/campaigns/${caller.actor.campaignId}/export`, reason: (await getTranslator(caller.locale, "assistant"))("handoffs.campaignExport") }) });
       continue;
     }
 
@@ -66,7 +70,7 @@ export function createContentOperationActions(deps: Deps = {}): AssistantActionD
       actions.push({ ...base, effect: "read", execute: async (caller, raw) => {
         const input = raw as Record<string, unknown>;
 
-        const data = await invoke(operation.id, caller.actor, input);
+        const data = await invoke(operation.id, caller.actor, input, caller.locale);
 
         return { data: jsonContent(operation.id === "source.diff" ? pageSourceDiff(data as SourceDiff, Number(input.offset), Number(input.limit)) : data), affected: [], warnings: [] };
       } });
@@ -75,11 +79,15 @@ export function createContentOperationActions(deps: Deps = {}): AssistantActionD
 
     actions.push({ ...base, effect: "write", confirmation: operation.need.sessionOnly || ["spell-groups.remove-all-spells", "skill-trees.save"].includes(operation.id) ? "always" : "standard",
       prepare: async (caller, raw) => guard(caller.actor.campaignId, async (): Promise<ActionPreview> => {
+        const t = await getTranslator(caller.locale, "assistant");
+
+        const label = t(`operations.${operation.id}`);
+
         const input = raw as Record<string, unknown>;
 
         const body = (input as Record<string, unknown>).body;
 
-        const target: TargetRef = { domain: "content", id: caller.actor.campaignId, name: operation.summary };
+        const target: TargetRef = { domain: "content", id: caller.actor.campaignId, name: label };
 
         const state = await snapshot(caller.actor);
 
@@ -87,13 +95,13 @@ export function createContentOperationActions(deps: Deps = {}): AssistantActionD
 
         let targets = [target];
 
-        const projected = operationPreview(operation.id, input, await loadState(caller.actor, state, operation.id, input));
+        const projected = operationPreview(operation.id, input, t, await loadState(caller.actor, state, operation.id, input));
 
         if (projected?.targets.length) targets = projected.targets;
 
         let changes = projected?.changes ?? [{ target, path: "$operation", before: jsonContent(state), after: jsonContent(input) }];
 
-        let effects: EffectDescription[] = [{ kind: "update", targets, description: operation.summary }];
+        let effects: EffectDescription[] = [{ kind: "update", targets, description: label }];
 
         let selection: Selection | null = null;
 
@@ -104,9 +112,9 @@ export function createContentOperationActions(deps: Deps = {}): AssistantActionD
           changes.push({ target, path: "credits", before: selection.credits.before, after: selection.credits.after });
           effects = selection.items.map((item, i) => ({ kind: item.status === "deletedInSource" ? "delete" : item.scope === "skillTrees" ? "erase-progress" : "update", targets: [targets[i]], description: item.name }));
 
-          if (!effects.length) effects = [{ kind: "update", targets: [target], description: "Позначки і attribution джерела" }];
+          if (!effects.length) effects = [{ kind: "update", targets: [target], description: t("effects.sourceMarks") }];
 
-          warnings.push("Залежності додаються автоматично; attribution оновлюється також для ignore. Матеріали ДМ ScenarioPage не синхронізуються.");
+          warnings.push(t("warnings.sourceApply"));
         } else if (operation.id === "content.import") {
           const parsed = CONTENT_OPERATIONS["content.import"].body.parse(body);
 
@@ -118,35 +126,38 @@ export function createContentOperationActions(deps: Deps = {}): AssistantActionD
             if (handoff) throw new ContentError(handoff, 422, [{ code: "UI_HANDOFF", path: [] }]);
           }
 
-          const report = await invoke("content.import", caller.actor, { ...input, body: { ...parsed, dryRun: true } });
+          const report = await invoke("content.import", caller.actor, { ...input, body: { ...parsed, dryRun: true } }, null) as ImportReport;
 
-          changes.push({ target, path: "$dryRun", before: null, after: jsonContent(report) });
-          warnings.push("Імпорт може виконатися частково: помилки й пропуски повертаються для кожного рядка.", "additionalSpells, спорядження та золото налаштовуються вручну.");
+          const shown = translateImportReport(await getTranslator(caller.locale), report);
 
-          // The report is a guard too: the same rows and resolved references
-          // must validate identically at confirmation.
-          return { summary: operation.summary, targets, changes, warnings, effects, preconditions: { snapshot: snapshotHash(state), input: jsonContent(input), report: jsonContent(report) } };
+          changes.push({ target, path: "$dryRun", before: null, after: jsonContent(shown) });
+          warnings.push(t("warnings.importPartial"), t("warnings.manualSetup"));
+
+          // The report is a guard too, kept untranslated so the digest is locale-independent.
+          return { summary: label, targets, changes, warnings, effects, preconditions: { snapshot: snapshotHash(state), input: jsonContent(input), report: jsonContent(report) } };
         } else if (operation.id === "spells.delete-by-level" || operation.id === "spell-groups.remove-all-spells") {
-          effects = [{ kind: "delete", targets, description: operation.summary }];
+          effects = [{ kind: "delete", targets, description: label }];
         } else if (operation.id === "skill-trees.save") {
-          effects = [{ kind: "erase-progress", targets, description: "Заміна дерева зі збереженням чинного перенесення прогресу" }];
+          effects = [{ kind: "erase-progress", targets, description: t("effects.skillTreeReplace") }];
         }
 
-        return { summary: operation.summary, targets, changes, warnings, effects, preconditions: { snapshot: snapshotHash(state), input: jsonContent(input), selection: jsonContent(selection) } };
+        return { summary: label, targets, changes, warnings, effects, preconditions: { snapshot: snapshotHash(state), input: jsonContent(input), selection: jsonContent(selection) } };
       }),
-      execute: async (ctx, input) => withContentEffects(ctx, Object.values(ReferenceKind), async () => {
-        const data = await invoke(operation.id, ctx.caller.actor, input);
+      execute: async (ctx, input) => withContentEffects(ctx, ALL_REFERENCE_KINDS, async () => {
+        const data = await invoke(operation.id, ctx.caller.actor, input, ctx.caller.locale);
 
         const report = data as { counts?: { error: number } };
 
-        return { data: jsonContent(data), affected: [{ domain: "content", id: ctx.caller.actor.campaignId, name: operation.summary }], warnings: operation.id === "content.import" && report?.counts?.error ? ["Імпорт виконано частково; перевірте помилки рядків у звіті."] : [] };
+        const t = await getTranslator(ctx.caller.locale, "assistant");
+
+        return { data: jsonContent(data), affected: [{ domain: "content", id: ctx.caller.actor.campaignId, name: t(`operations.${operation.id}`) }], warnings: operation.id === "content.import" && report?.counts?.error ? [t("warnings.importPartialDone")] : [] };
       }),
     });
   }
-  actions.push({ id: "content.import-preview", title: "Перевірити імпорт", description: "DryRun без запису й intent", input: contentOperationSchema("content.import"), need: CONTENT_OPERATIONS["content.import"].need, effect: "read", execute: async (caller, raw) => {
+  actions.push({ id: "content.import-preview", title: "Check import", description: "Dry run without writing or an intent", input: contentOperationSchema("content.import"), need: CONTENT_OPERATIONS["content.import"].need, effect: "read", execute: async (caller, raw) => {
     const input = contentOperationSchema("content.import").parse(raw);
 
-    return { data: jsonContent(await invoke("content.import", caller.actor, { ...input, body: { ...CONTENT_OPERATIONS["content.import"].body.parse(input.body), dryRun: true } })), affected: [], warnings: [] };
+    return { data: jsonContent(await invoke("content.import", caller.actor, { ...input, body: { ...CONTENT_OPERATIONS["content.import"].body.parse(input.body), dryRun: true } }, caller.locale)), affected: [], warnings: [] };
   } });
 
   return actions;

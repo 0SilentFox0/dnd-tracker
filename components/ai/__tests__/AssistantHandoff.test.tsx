@@ -9,12 +9,12 @@ afterEach(cleanup);
 describe("protected workflow handoff", () => {
   it("renders a safe navigation step without claiming a completed mutation", () => {
     render(<AssistantHandoff handoff={{ href: "/campaigns/c/dm/compendium", reason: "Виберіть файл і підтвердіть права у застосунку." }} />);
-    expect(screen.getByRole("link", { name: "Відкрити у застосунку" }).getAttribute("href")).toBe("/campaigns/c/dm/compendium");
+    expect(screen.getByRole("link", { name: "ai.handoff.open" }).getAttribute("href")).toBe("/campaigns/c/dm/compendium");
     expect(screen.queryByText("Виконано")).toBeNull();
   });
   it.each(["/campaigns/c/dm/battles", "/campaigns/c/dm/battles/battle-1"])("renders the battle map editor handoff %s", href => {
     render(<AssistantHandoff handoff={{ href, reason: "Додайте зображення у редакторі карти." }} />);
-    expect(screen.getByRole("link", { name: "Відкрити у застосунку" }).getAttribute("href")).toBe(href);
+    expect(screen.getByRole("link", { name: "ai.handoff.open" }).getAttribute("href")).toBe(href);
     expect(screen.queryByRole("alert")).toBeNull();
   });
   it("rejects external, query-bearing and protocol-relative links", () => {
@@ -31,7 +31,7 @@ describe("protected workflow handoff", () => {
 
     const { rerender } = render(<AssistantHandoff handoff={{ href: "/campaigns/c/dm/compendium", reason: "Виберіть примітки" }} notes={[{ canonicalKey: "one", title: "Обране джерело" }, { canonicalKey: "two", title: "Інше джерело" }]} onSelectNotes={selected} />);
 
-    const submit = screen.getByRole("button", { name: "Використати вибрані примітки для AI" }) as HTMLButtonElement;
+    const submit = screen.getByRole("button", { name: "ai.handoff.useNotes" }) as HTMLButtonElement;
 
     expect(submit.disabled).toBe(true); expect(selected).not.toHaveBeenCalled();
     fireEvent.click(screen.getByRole("checkbox", { name: "Обране джерело" }));

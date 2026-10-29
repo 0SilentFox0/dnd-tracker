@@ -9,21 +9,10 @@ import { noteInclude as include, toNote } from "@/lib/server/world/note-store";
 import { activePlayerHeroes } from "@/lib/server/world/travel-store";
 import { readViewerScope } from "@/lib/server/world/view-handlers";
 import { publishWorldChanged } from "@/lib/server/world/world-events";
-import { type CampaignAccessResult, requireCampaignAccess } from "@/lib/utils/api/api-auth";
 import { errorResponse } from "@/lib/utils/api/api-response";
-import { handleApiError } from "@/lib/utils/api/error-handler";
+import { withAccess } from "@/lib/utils/api/as-dm";
 import { parseBody } from "@/lib/utils/api/parse-body";
 import { visibleMarkerIds } from "@/lib/utils/world/player-view";
-
-async function withAccess(campaignId: string, action: string, run: (access: CampaignAccessResult) => Promise<NextResponse>) {
-  try {
-    const access = await requireCampaignAccess(campaignId);
-
-    return access instanceof NextResponse ? access : await run(access);
-  } catch (error) {
-    return handleApiError(error, { action });
-  }
-}
 
 const forbidden = () => errorResponse(API_ERRORS.WORLD_NOTE_FORBIDDEN, 403);
 

@@ -11,7 +11,7 @@ import type { AssistantCaller } from "@/lib/server/assistant/types";
 import type { AnyContentResource } from "@/lib/server/content/define-resource";
 import { CONTENT_RESOURCES } from "@/lib/server/content/resources";
 
-const caller: AssistantCaller = { actor: { campaignId: "campaign", userId: "dm", isDM: true, via: "session", scopes: null }, channel: "chat", tokenId: null, threadId: "thread" };
+const caller: AssistantCaller = { actor: { campaignId: "campaign", userId: "dm", isDM: true, via: "session", scopes: null }, channel: "chat", tokenId: null, threadId: "thread", locale: "uk" as const };
 
 function fixture() {
   const { db, state } = executorDatabase();
@@ -95,7 +95,7 @@ describe("content action review policy", () => {
     rows.push({ id: "u", campaignId: "campaign", name: "Юніт" });
     db.apiToken.findUnique = vi.fn(async () => ({ id: "token", userId: "dm", campaignId: "campaign", scopes: ["content:write"], revokedAt: null, executionMode: "auto" })) as never;
 
-    const tokenCaller: AssistantCaller = { ...caller, actor: { ...caller.actor, via: "token", scopes: ["content:write"] }, channel: "mcp", tokenId: "token", threadId: null };
+    const tokenCaller: AssistantCaller = { ...caller, actor: { ...caller.actor, via: "token", scopes: ["content:write"] }, channel: "mcp", tokenId: "token", threadId: null, locale: "uk" as const };
 
     const pending = await executor.dispatchAction(tokenCaller, { actionId: "content.units.delete-all", requestId: "delete", input: {} });
 

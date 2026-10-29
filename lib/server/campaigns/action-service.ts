@@ -5,12 +5,11 @@ import { CAMPAIGN_INCLUDE, CAMPAIGN_OMIT, createCampaignForUser, createCampaignF
 import "server-only";
 import { saveAiSettings } from "@/lib/ai/settings";
 import { invalidateCampaignLists } from "@/lib/cache/campaign-list";
-import { invalidateReference, ReferenceKind } from "@/lib/cache/tags";
+import { invalidateAllReference } from "@/lib/cache/tags";
 import { API_ERRORS } from "@/lib/constants/api-errors";
 import { CampaignKind, CampaignRole, CampaignVisibility } from "@/lib/constants/campaigns";
 import { prisma } from "@/lib/db";
-import { DEFAULT_LOCALE } from "@/lib/i18n/config";
-import { getRequestLocale } from "@/lib/i18n/request-locale";
+import { DEFAULT_LOCALE, type Locale } from "@/lib/i18n/config";
 import { getTranslator } from "@/lib/i18n/translator";
 import { checklistProgress, checklistState } from "@/lib/onboarding/progress";
 import { stepText } from "@/lib/onboarding/step-text";
@@ -18,6 +17,7 @@ import { aiSettingsSchema } from "@/lib/schemas/ai";
 import { createCampaignSchema, updateCampaignSchema } from "@/lib/schemas/campaigns";
 import { saveAsTemplateSchema } from "@/lib/schemas/templates";
 import { actionResult, requestDigest } from "@/lib/server/assistant/json";
+import { resultLabel } from "@/lib/server/assistant/result-labels";
 import type { ActionResult } from "@/lib/server/assistant/types";
 import { assertCan } from "@/lib/server/content/access";
 import { ContentError, parseInput } from "@/lib/server/content/errors";
@@ -28,6 +28,7 @@ import { type Bundle,BUNDLE_FORMAT_VERSION } from "@/lib/server/templates/bundle
 import { exportCampaign } from "@/lib/server/templates/export-campaign";
 import { listTemplates } from "@/lib/server/templates/list-templates";
 import type { Actor } from "@/lib/utils/api/actor";
+import { windowOf } from "@/lib/utils/api/page-of";
 import { isPlatformAdmin } from "@/lib/utils/api/platform-admin";
 
 export const campaignWindowSchema = z.object({ offset: z.number().int().min(0).default(0), limit: z.number().int().min(1).max(50).default(20) });
@@ -35,14 +36,13 @@ export const campaignWindowSchema = z.object({ offset: z.number().int().min(0).d
 function windowItems(items: unknown[], raw: unknown) {
   const { offset, limit } = parseInput(campaignWindowSchema, raw);
 
-  return { offset, items: items.slice(offset, offset + limit), total: items.length, nextOffset: offset + limit < items.length ? offset + limit : null };
+  return windowOf(items, offset, limit);
 }
 
 export async function loadCampaignMembers(campaignId: string) {
   return prisma.campaignMember.findMany({ where: { campaignId }, select: { id: true, userId: true, role: true, user: { select: { id: true, displayName: true, email: true } } }, orderBy: { joinedAt: "asc" } });
 }
 export const CAMPAIGN_SETTINGS_SELECT = { id: true, name: true, description: true, kind: true, visibility: true, maxLevel: true, allowPlayerEdit: true, critChoiceByDm: true, acquaintancesEnabled: true, status: true, friendlyFire: true, xpMultiplier: true, credits: true, updatedAt: true } as const;
-export const campaignResult = actionResult("campaign", "Кампанія");
 
 function safeSettings(row: Record<string, unknown>) {
   return Object.fromEntries(Object.keys(CAMPAIGN_SETTINGS_SELECT).map(key => [key, row[key]]));
@@ -166,7 +166,7 @@ export async function deleteCampaign(actor: Actor) {
     await prisma.campaign.delete({ where: { id: actor.campaignId } });
     afterContentCommit(async () => {
       await invalidateCampaignLists(members.map(m => m.userId));
-      invalidateReference(Object.values(ReferenceKind), actor.campaignId);
+      invalidateAllReference(actor.campaignId);
     });
 
     return { success: true };
@@ -187,7 +187,9 @@ export async function saveCampaignAsTemplate(actor: Actor, raw: unknown, prepare
     return created;
   });
 }
-export async function runCampaignOperation(actor: Actor, operation: string, input: Record<string, unknown>, expected?: string): Promise<ActionResult> {
+export async function runCampaignOperation(actor: Actor, operation: string, input: Record<string, unknown>, expected?: string, locale: Locale = DEFAULT_LOCALE): Promise<ActionResult> {
+  const campaignResult = actionResult("campaign", resultLabel(locale, "campaign"));
+
   const read = ["status", "instructions", "members", "templates", "export", "onboarding"].includes(operation);
 
   const sessionOnly = ["create", "clone", "delete", "template.save", "template.update"].includes(operation);
@@ -205,7 +207,7 @@ export async function runCampaignOperation(actor: Actor, operation: string, inpu
 
     const progress = checklistProgress(facts, actor.campaignId);
 
-    const t = await getTranslator(await getRequestLocale().catch(() => DEFAULT_LOCALE), "onboarding");
+    const t = await getTranslator(locale, "onboarding");
 
     const steps = progress.steps.map((s) => ({ ...s, ...stepText(t, facts.role, s) }));
 
@@ -224,7 +226,7 @@ export async function runCampaignOperation(actor: Actor, operation: string, inpu
     if (operation === "members") return campaignResult(windowItems((await loadCampaignMembers(actor.campaignId)).map(row => ({ id: row.id, userId: row.userId, role: row.role, displayName: row.user.displayName })), input), actor.campaignId);
 
     if (operation === "export") {
-      return campaignResult({ href: `/api/campaigns/${actor.campaignId}/export`, formatVersion: BUNDLE_FORMAT_VERSION, description: "Завантаження поточної кампанії у застосунку" }, actor.campaignId);
+      return campaignResult({ href: `/api/campaigns/${actor.campaignId}/export`, formatVersion: BUNDLE_FORMAT_VERSION, description: "Download the current campaign in the app" }, actor.campaignId);
     }
 
     if (operation === "settings" || operation === "template.update") {

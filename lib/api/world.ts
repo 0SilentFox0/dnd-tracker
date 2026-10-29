@@ -42,14 +42,14 @@ export const updateWorldMarker = (campaignId: string, markerId: string, data: Up
 export const deleteWorldMarker = (campaignId: string, markerId: string) => campaignDelete<{ ok: true }>(campaignId, `/world/markers/${markerId}`);
 
 /** Файл іде з браузера прямо в Storage: тіло запиту до Vercel обмежене 4,5 МБ. */
-export async function uploadWorldMapImage(campaignId: string, blob: Blob): Promise<string> {
+export async function uploadWorldMapImage(campaignId: string, blob: Blob, uploadFailed: (message: string) => string): Promise<string> {
   const request: WorldUploadRequest = { size: blob.size, contentType: blob.type as WorldUploadRequest["contentType"] };
 
   const ticket = await campaignPost<SlideUploadTicket>(campaignId, "/world/upload-url", request);
 
   const { error } = await createClient().storage.from(ticket.bucket).uploadToSignedUrl(ticket.path, ticket.token, blob, { contentType: ticket.contentType, cacheControl: YEAR_CACHE_SECONDS });
 
-  if (error) throw new Error(`Не вдалося завантажити картинку: ${error.message}`);
+  if (error) throw new Error(uploadFailed(error.message));
 
   return ticket.publicUrl;
 }

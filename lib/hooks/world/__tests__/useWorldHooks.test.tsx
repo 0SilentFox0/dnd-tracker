@@ -104,7 +104,7 @@ describe("useWorldTravel", () => {
 
     await act(async () => void (await result.current.travel.mutateOk({ mapId: "m1", characterIds: ["h"], to: { x: 0, y: 0 }, rest: "none" })));
 
-    expect(notifyMock).toHaveBeenCalledWith("Не вдалося перемістити героїв");
+    expect(notifyMock).toHaveBeenCalledWith("world.travel.errors.travel");
   });
 });
 

@@ -113,7 +113,7 @@ export function NewCharacterForm({ campaignId: id, characterType }: { campaignId
         actions={
           <>
             <Button type="submit" disabled={isLoading || membersLoading}>
-              {isLoading ? t("form.submitting") : t("form.submit")}
+              {isLoading ? tc("actions.creating") : t("form.submit")}
             </Button>
             <Button type="button" variant="outline" asChild>
               <Link href={`/campaigns/${id}/dm/characters`}>{tc("actions.cancel")}</Link>

@@ -23,7 +23,7 @@ describe("nested spell names in race choices", () => {
     const report = await importContent(actor, "races", { rows: [{ name: "Elf", choices: JSON.stringify(choices) }], mode: "create", dryRun: true }, { resource: () => resource, loadNames: async (_c, k) => (k === "spells" ? spells : []) });
 
     expect(report.results[0].status).toBe("error");
-    expect(report.results[0].issues).toEqual([{ field: "choices", level: "error", message: "Вибори (JSON): не знайдено «Nope» (Заклинання)" }]);
+    expect(report.results[0].issues).toEqual([{ field: "choices", level: "error", message: "contentImport.issues.refNotFound", params: { field: "contentImport.fields.races.choices", value: "Nope", kind: "contentImport.kinds.spells" } }]);
   });
 
   it("export writes names back", () => {

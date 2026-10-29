@@ -39,7 +39,7 @@ it.skipIf(!isLocalDevDatabaseEnv())("confirms a persisted pre-extraction content
 
       evidence.spellId = spell.id;
 
-      const caller: AssistantCaller = { actor: { campaignId: fixture.campaignId, userId: fixture.userId, isDM: true, via: "session", scopes: null }, channel: "chat", tokenId: null, threadId: fixture.threadId };
+      const caller: AssistantCaller = { actor: { campaignId: fixture.campaignId, userId: fixture.userId, isDM: true, via: "session", scopes: null }, channel: "chat", tokenId: null, threadId: fixture.threadId, locale: "uk" as const };
 
       const executor = createAssistantExecutor({ db, catalog: createActionCatalog(CONTENT_ACTIONS), effects: {} });
 

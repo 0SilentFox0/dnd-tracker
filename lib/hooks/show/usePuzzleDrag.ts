@@ -12,6 +12,7 @@ import {
 import type { PuzzleControl } from "./usePuzzleControl";
 
 import { PUZZLE_KEEPALIVE_MS } from "@/lib/constants/show";
+import { clamp } from "@/lib/utils/common/clamp";
 import { isHeldByOther } from "@/lib/utils/puzzle/hold";
 import type { PuzzleSpec, PuzzleState } from "@/types/show";
 
@@ -54,7 +55,6 @@ interface Args {
   boardRef: RefObject<HTMLElement | null>;
 }
 
-const clamp = (v: number, max: number) => Math.min(max, Math.max(0, v));
 
 export function usePuzzleDrag({
   puzzle,
@@ -249,10 +249,12 @@ export function usePuzzleDrag({
                 pieceId: cur.id,
                 x: clamp(
                   ((e.clientX - rect.left) / rect.width) * spec.imageWidth,
+                  0,
                   spec.imageWidth,
                 ),
                 y: clamp(
                   ((e.clientY - rect.top) / rect.height) * spec.imageHeight,
+                  0,
                   spec.imageHeight,
                 ),
                 rot: cur.rot,

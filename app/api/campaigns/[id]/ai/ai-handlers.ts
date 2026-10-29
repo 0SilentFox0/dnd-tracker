@@ -14,6 +14,7 @@ import { createThread, deleteThread, listThreads, loadMessages, loadThread, patc
 import { AI_BODY_LIMITS, AI_LIMITS, AI_PROPOSAL_STATUSES, AI_RATE_LIMITS, isKnownImageModel, isKnownModel } from "@/lib/constants/ai";
 import { API_ERRORS } from "@/lib/constants/api-errors";
 import { prisma } from "@/lib/db";
+import { getRequestLocale } from "@/lib/i18n/request-locale";
 import { aiSettingsSchema, assistantRequestIdSchema, chatRequestSchema, createThreadSchema, discardGeneratedImageSchema, generateSlideImageSchema, patchThreadSchema } from "@/lib/schemas/ai";
 import { chatCaller } from "@/lib/server/assistant/caller";
 import { cancelAssistantRun } from "@/lib/server/assistant/runs";
@@ -53,7 +54,7 @@ export const listProposalsHandler = (req: Request, campaignId: string) =>
 
 export const applyProposalHandler = (campaignId: string, proposalId: string) =>
   guarded("apply ai proposal", () => requireDM(campaignId), async (access) => {
-    const result = await applyProposal(campaignId, access.userId, proposalId);
+    const result = await applyProposal(campaignId, access.userId, proposalId, undefined, await getRequestLocale());
 
     return result.ok ? NextResponse.json("deck" in result ? { deck: result.deck } : result.page) : errorResponse(result.error, result.status);
   });
@@ -175,7 +176,7 @@ export const discardGeneratedImageHandler = (req: Request, campaignId: string) =
 
 export const recoverChatHandler = (campaignId: string, threadId: string, requestId?: string, statusOnly = false) =>
   guarded("recover ai chat", () => requireDM(campaignId), async access => runResponse(async () => {
-    const caller = chatCaller(campaignId, access.userId, threadId);
+    const caller = chatCaller(campaignId, access.userId, threadId, await getRequestLocale());
 
     return NextResponse.json(await recoveredState(caller, threadId, requestId, undefined, { statusOnly }));
   }));
@@ -185,7 +186,7 @@ export const cancelChatHandler = (req: Request, campaignId: string, threadId: st
 
     if (!id.success) return errorResponse(API_ERRORS.INVALID_REQUEST_ID, 400);
 
-    const caller = chatCaller(campaignId, access.userId, threadId);
+    const caller = chatCaller(campaignId, access.userId, threadId, await getRequestLocale());
 
     return NextResponse.json(await recoveredState(caller, threadId, id.data, await cancelAssistantRun(caller, id.data)));
   }));

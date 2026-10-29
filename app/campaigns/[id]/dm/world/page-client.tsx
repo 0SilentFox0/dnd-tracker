@@ -2,6 +2,7 @@
 
 import { useCallback, useMemo, useState } from "react";
 import { usePathname, useRouter } from "next/navigation";
+import { useTranslations } from "next-intl";
 import { Map as MapIcon } from "lucide-react";
 
 import { EmptyState, QueryState } from "@/components/common/states";
@@ -38,6 +39,8 @@ const MAP_HEIGHT = "h-[calc(100dvh-var(--app-header-h,89px)-9rem)] lg:h-auto lg:
 
 export function WorldEditorPageClient({ campaignId, campaignName, mapId, initialSelectedId }: { campaignId: string; campaignName: string; mapId: string | null; initialSelectedId?: string }) {
   const router = useRouter();
+
+  const t = useTranslations("world");
 
   const pathname = usePathname();
 
@@ -84,7 +87,7 @@ export function WorldEditorPageClient({ campaignId, campaignName, mapId, initial
   const { reset: resetTarget } = moveTarget;
 
   const drawing = useMapDrawing({
-    onPoint: (p) => void createMarker({ kind: "point", x: p.x, y: p.y, name: "Нова точка", icon: "landmark" }),
+    onPoint: (p) => void createMarker({ kind: "point", x: p.x, y: p.y, name: t("defaults.point"), icon: "landmark" }),
     onZone: (polygon: Polygon) => {
       if (redrawId) {
         void editor.marker.update.mutateOk({ id: redrawId, data: { polygon } });
@@ -96,7 +99,7 @@ export function WorldEditorPageClient({ campaignId, campaignName, mapId, initial
 
       const c = polygonCentroid(polygon);
 
-      void createMarker({ kind: "zone", x: c.x, y: c.y, polygon, name: "Нова зона" });
+      void createMarker({ kind: "zone", x: c.x, y: c.y, polygon, name: t("defaults.zone") });
     },
     onEntry: (p: MapPoint) => {
       if (mapId) void editor.map.update.mutateOk({ id: mapId, data: { entryX: p.x, entryY: p.y } });
@@ -151,12 +154,12 @@ export function WorldEditorPageClient({ campaignId, campaignName, mapId, initial
 
   const emptyView = (
     <>
-      <HudPageHeader title="Карта світу" subtitle={campaignName} />
+      <HudPageHeader title={t("title")} subtitle={campaignName} />
       <EmptyState
         icon={MapIcon}
-        title="Завантажте карту континенту"
-        description="З неї почнеться подорож: на ній ставляться міста, зони й входи у вкладені карти."
-        action={<Button onClick={() => setCreating(true)}>Завантажити карту</Button>}
+        title={t("editor.emptyTitle")}
+        description={t("editor.emptyDescription")}
+        action={<Button onClick={() => setCreating(true)}>{t("editor.upload")}</Button>}
       />
     </>
   );
@@ -181,7 +184,7 @@ export function WorldEditorPageClient({ campaignId, campaignName, mapId, initial
                   return (
                     <>
                       <HudPageHeader
-                        title="Карта світу"
+                        title={t("title")}
                         subtitle={<WorldBreadcrumbs mapId={d.map.id} />}
                         actions={<span className="hidden text-sm text-hud-muted md:inline">{campaignName}</span>}
                         className="max-md:p-2 max-md:[&_h1]:sr-only"
@@ -206,7 +209,7 @@ export function WorldEditorPageClient({ campaignId, campaignName, mapId, initial
                                       heroes={p.heroes}
                                       fog={p.fog}
                                       compact={!isDesktop}
-                                      hint={<p role="status" className="pointer-events-none rounded-md border border-[var(--gold)]/60 bg-black/80 px-3 py-1.5 text-xs text-hud-ink">Вигляд гравця</p>}
+                                      hint={<p role="status" className="pointer-events-none rounded-md border border-[var(--gold)]/60 bg-black/80 px-3 py-1.5 text-xs text-hud-ink">{t("eyes.player")}</p>}
                                     />
                                   );
                                 }}
@@ -263,7 +266,7 @@ export function WorldEditorPageClient({ campaignId, campaignName, mapId, initial
                             if (!open) closePanel();
                           }}
                           title={marker?.name ?? d.map.name}
-                          description={marker ? "Параметри маркера" : "Параметри карти"}
+                          description={marker ? t("editor.markerParams") : t("editor.mapParams")}
                         >
                           {panel}
                         </ResponsiveDialog>

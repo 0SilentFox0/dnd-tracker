@@ -69,7 +69,7 @@ export function addEntry(state: AdaptState, kind: string, row: JsonRecord, path:
 
   if (!source || !name.trim()) {
     state.blocked.push({ path });
-    issues.push(issue(!source ? "SOURCE_REQUIRED" : "NAME_REQUIRED", path, "error", "Задайте явне джерело та назву запису"));
+    issues.push(issue(!source ? "SOURCE_REQUIRED" : "NAME_REQUIRED", path, "error"));
 
     return;
   }
@@ -79,7 +79,7 @@ export function addEntry(state: AdaptState, kind: string, row: JsonRecord, path:
   const key = canonicalKey(kind, name, source, edition, parent);
 
   if (state.seen.has(key)) {
-    issues.push(issue("DUPLICATE_IDENTITY", path, "error", "Усуньте дубль ідентичності"));
+    issues.push(issue("DUPLICATE_IDENTITY", path, "error"));
 
     return;
   }
@@ -88,16 +88,16 @@ export function addEntry(state: AdaptState, kind: string, row: JsonRecord, path:
 
   if (row._copy !== undefined || row.inherits !== undefined) {
     state.blocked.push({ key, path });
-    issues.push(issue("UNSUPPORTED_COPY", path, "error", "Розгорніть copy/inherits у вихідному файлі або виключіть запис"));
+    issues.push(issue("UNSUPPORTED_COPY", path, "error"));
 
     return;
   }
 
   const local = [] as AdaptedEntry["issues"];
 
-  if (!state.sourceIds.has(normalized(source))) local.push(issue("SOURCE_METADATA_MISSING", path, "warning", "Додайте атрибуцію джерела, якщо вона відома"));
+  if (!state.sourceIds.has(normalized(source))) local.push(issue("SOURCE_METADATA_MISSING", path, "warning"));
 
-  if (edition === "unknown") local.push(issue("EDITION_UNKNOWN", path, "warning", "Перевірте редакцію правил"));
+  if (edition === "unknown") local.push(issue("EDITION_UNKNOWN", path, "warning"));
 
   const ctx: AdapterContext = { root, inputKind: kind, path, source, edition, key, issues: local };
 
@@ -105,7 +105,7 @@ export function addEntry(state: AdaptState, kind: string, row: JsonRecord, path:
 
   if (!result) return;
 
-  if (byteLength(result.notes ?? "") > 64 * 1024) local.push(issue("NOTES_SIZE", path, "error", `Скоротіть опис або виключіть запис «${name.slice(0, 80)}»: нотатки ${Math.round(byteLength(result.notes ?? "") / 1024)} КБ, ліміт 64 КБ`));
+  if (byteLength(result.notes ?? "") > 64 * 1024) local.push(issue("NOTES_SIZE", path, "error", { name: name.slice(0, 80), kb: Math.round(byteLength(result.notes ?? "") / 1024) }));
 
   const attribution = Object.fromEntries(["page", "additionalSources", "otherSources", "referenceSources"].filter((k) => row[k] !== undefined).map((k) => [k, row[k]]));
 

@@ -16,8 +16,6 @@ export const len = (a: Vec3) => Math.hypot(a[0], a[1], a[2]);
 
 export const norm = (a: Vec3): Vec3 => scale(a, 1 / (len(a) || 1));
 
-export const QUAT_ID: Quat = [0, 0, 0, 1];
-
 export function qAxisAngle(axis: Vec3, angle: number): Quat {
   const s = Math.sin(angle / 2);
 

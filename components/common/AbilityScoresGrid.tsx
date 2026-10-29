@@ -17,7 +17,7 @@ interface AbilityScoresGridProps {
 }
 
 export function AbilityScoresGrid({ data, set, showModifier = false }: AbilityScoresGridProps) {
-  const t = useTranslations("common.abilities");
+  const t = useTranslations("gameTerms.abilities");
 
   return (
     <div className="grid w-full grid-cols-3 items-end gap-2 sm:grid-cols-6">

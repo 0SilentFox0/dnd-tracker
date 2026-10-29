@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useTranslations } from "next-intl";
 
 import { CharacterSelect } from "./CharacterSelect";
 
@@ -9,7 +10,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { ResponsiveDialog } from "@/components/ui/responsive-dialog";
 import { SelectField } from "@/components/ui/select-field";
-import { PAGE_KIND_LABELS, PAGE_KINDS } from "@/lib/constants/scenario";
+import { PAGE_KINDS } from "@/lib/constants/scenario";
 import type { CreateScenarioPageData, ScenarioPageKind } from "@/types/scenario";
 
 type Props = {
@@ -20,9 +21,13 @@ type Props = {
   onSubmit: (data: CreateScenarioPageData) => void;
 };
 
-const KIND_OPTIONS = PAGE_KINDS.map((k) => ({ value: k, label: PAGE_KIND_LABELS[k] }));
-
 export function CreateScenarioPageDialog({ open, onOpenChange, campaignId, pending, onSubmit }: Props) {
+  const t = useTranslations("scenario.create");
+
+  const tKinds = useTranslations("scenario.pageKinds");
+
+  const kindOptions = PAGE_KINDS.map((k) => ({ value: k, label: tKinds(k) }));
+
   const [kind, setKind] = useState<ScenarioPageKind>("scene");
 
   const [title, setTitle] = useState("");
@@ -36,10 +41,10 @@ export function CreateScenarioPageDialog({ open, onOpenChange, campaignId, pendi
       hud
       open={open}
       onOpenChange={onOpenChange}
-      title="Нова сторінка"
+      title={t("title")}
       footer={
         <Button type="submit" form="scenario-create-form" disabled={pending || !title.trim()}>
-          Створити
+          {t("submit")}
         </Button>
       }
     >
@@ -52,22 +57,22 @@ export function CreateScenarioPageDialog({ open, onOpenChange, campaignId, pendi
         }}
       >
         <div className="space-y-1.5">
-          <Label htmlFor="scenario-kind">Тип</Label>
-          <SelectField id="scenario-kind" value={kind} onValueChange={(v) => setKind(v as ScenarioPageKind)} options={KIND_OPTIONS} />
+          <Label htmlFor="scenario-kind">{t("kind")}</Label>
+          <SelectField id="scenario-kind" value={kind} onValueChange={(v) => setKind(v as ScenarioPageKind)} options={kindOptions} />
         </div>
         <div className="space-y-1.5">
-          <Label htmlFor="scenario-title">Назва *</Label>
+          <Label htmlFor="scenario-title">{t("name")}</Label>
           <Input id="scenario-title" required value={title} onChange={(e) => setTitle(e.target.value)} maxLength={200} />
         </div>
         {kind === "scene" && (
           <div className="space-y-1.5">
-            <Label htmlFor="scenario-arc">Арка</Label>
-            <Input id="scenario-arc" value={arc} onChange={(e) => setArc(e.target.value)} placeholder="Арка перша: Ізабель і Годрик" maxLength={120} />
+            <Label htmlFor="scenario-arc">{t("arc")}</Label>
+            <Input id="scenario-arc" value={arc} onChange={(e) => setArc(e.target.value)} placeholder={t("arcPlaceholder")} maxLength={120} />
           </div>
         )}
         {kind === "hero" && (
           <div className="space-y-1.5">
-            <Label htmlFor="scenario-character">Персонаж</Label>
+            <Label htmlFor="scenario-character">{t("character")}</Label>
             <CharacterSelect campaignId={campaignId} id="scenario-character" value={characterId} onValueChange={setCharacterId} enabled={open} />
           </div>
         )}

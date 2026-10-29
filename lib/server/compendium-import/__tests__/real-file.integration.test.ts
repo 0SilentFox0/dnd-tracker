@@ -4,6 +4,8 @@ import { randomUUID } from "node:crypto";
 import { readFileSync } from "node:fs";
 import { afterAll, beforeAll, describe, expect, it, vi } from "vitest";
 
+import { attackBodySchema, castSpellSchema,moveSchema } from "@/lib/schemas/battles";
+
 vi.mock("next/cache", async (original) => ({ ...(await original<object>()), unstable_cache: <T,>(fn: T) => fn, revalidateTag: vi.fn() }));
 vi.mock("@/lib/cache/tags", async (original) => ({ ...(await original<object>()), invalidateReference: vi.fn() }));
 
@@ -14,11 +16,10 @@ import { confirmImport, previewImport } from "../service";
 import { BATTLE_LOG_RECENT_EVENTS, ParticipantSourceType } from "@/lib/constants/battle";
 import { prisma } from "@/lib/db";
 import { moraleCheckSchema } from "@/lib/schemas";
-import { attackBodySchema, createAttackMutation } from "@/lib/server/battles/mutations/attack/attack-mutation";
+import { createAttackMutation } from "@/lib/server/battles/mutations/attack/attack-mutation";
 import { moraleCheckMutation } from "@/lib/server/battles/mutations/morale-check/morale-check-mutation";
-import { moveMutation, moveSchema } from "@/lib/server/battles/mutations/move/move-mutation";
+import { moveMutation } from "@/lib/server/battles/mutations/move/move-mutation";
 import { nextTurnMutation } from "@/lib/server/battles/mutations/next-turn/next-turn-mutation";
-import { spellSchema } from "@/lib/server/battles/mutations/spell/cast-spell-schema";
 import { createSpellMutation } from "@/lib/server/battles/mutations/spell/spell-mutation";
 import { createStartMutation } from "@/lib/server/battles/mutations/start/start-mutation";
 import { runBattleMutation } from "@/lib/server/battles/run-mutation";
@@ -65,7 +66,7 @@ describe.skipIf(!FILE)("real file import", () => {
 
     const unresolved = bare.report.rows.flatMap((r) => r.issues.filter((i) => i.code === "UNRESOLVED_REF"));
 
-    console.info("auto-bind: unresolved refs", unresolved.length, "in rows", bare.report.rows.filter((r) => r.issues.some((i) => i.code === "UNRESOLVED_REF")).length, [...new Set(unresolved.map((i) => i.action.match(/«[^»]+»/)?.[0]))].join(", "));
+    console.info("auto-bind: unresolved refs", unresolved.length, "in rows", bare.report.rows.filter((r) => r.issues.some((i) => i.code === "UNRESOLVED_REF")).length, [...new Set(unresolved.map((i) => i.params?.name))].join(", "));
 
     const { graph } = previewPresentation(base);
 
@@ -73,7 +74,7 @@ describe.skipIf(!FILE)("real file import", () => {
 
     const bindings: NonNullable<typeof base.bindings> = {};
 
-    for (const ref of graph.flatMap((r) => r.refs).filter((r) => r.kind === "spell" && !own.has(r.key) && unresolved.some((i) => i.action.includes(`«${r.name}»`)))) {
+    for (const ref of graph.flatMap((r) => r.refs).filter((r) => r.kind === "spell" && !own.has(r.key) && unresolved.some((i) => i.params?.name === r.name))) {
       bindings[ref.key] = bindings[ref.key] ?? { kind: "spells" as const, id: (await prisma.spell.create({ data: { campaignId, name: ref.name, executionMode: "manual", type: "damage", damageType: "none" } })).id };
     }
 
@@ -81,7 +82,7 @@ describe.skipIf(!FILE)("real file import", () => {
 
     const p = await previewImport(actor(), input, secret, prismaImportRepository);
 
-    console.info(JSON.stringify({ ready: p.report.readyToImport, counts: p.report.counts, next: p.report.nextActions.filter((a) => !/^MANUAL_/.test(a.code)).slice(0, 15).map((a) => `${a.code}: ${a.action}`) }, null, 1));
+    console.info(JSON.stringify({ ready: p.report.readyToImport, counts: p.report.counts, next: p.report.nextActions.filter((a) => !/^MANUAL_/.test(a.code)).slice(0, 15).map((a) => `${a.code}: ${JSON.stringify(a.params ?? {})}`) }, null, 1));
 
     const issueCodes = p.report.rows.flatMap((r) => r.issues.map((i) => i.code));
 
@@ -297,7 +298,7 @@ describe.skipIf(!FILE)("real file import", () => {
       return { status: res.status, body: await res.json() };
     };
 
-    const CAST = { access: "member", requireStatus: "active", blockedByMode: true, schema: spellSchema, mutate: createSpellMutation({ ...summonDeps, loadSpell: (id) => prisma.spell.findUnique({ where: { id } }) }, { serverRolls: true }) };
+    const CAST = { access: "member", requireStatus: "active", blockedByMode: true, schema: castSpellSchema, mutate: createSpellMutation({ ...summonDeps, loadSpell: (id) => prisma.spell.findUnique({ where: { id } }) }, { serverRolls: true }) };
 
     const mechanic = (s: (typeof spells)[number]) => {
       const r = (s.resolution as any)?.kind ?? "auto";

@@ -28,7 +28,7 @@ describe("common components use translation keys", () => {
     expect(screen.getByText("common.import.title")).toBeTruthy();
     expect(screen.getByText("common.import.description")).toBeTruthy();
     expect(screen.getByText("common.import.fileLabel")).toBeTruthy();
-    expect(screen.getByText("common.import.cancel")).toBeTruthy();
+    expect(screen.getByText("common.actions.cancel")).toBeTruthy();
     expect(screen.getByText("common.import.submit")).toBeTruthy();
   });
 
@@ -44,21 +44,21 @@ describe("common components use translation keys", () => {
 
     expect(screen.getByText("common.renameGroup.title")).toBeTruthy();
     expect(screen.getByText(/common\.renameGroup\.description/)).toBeTruthy();
-    expect(screen.getByText("common.renameGroup.save")).toBeTruthy();
+    expect(screen.getByText("common.actions.save")).toBeTruthy();
     expect(screen.getByPlaceholderText("common.renameGroup.placeholder")).toBeTruthy();
   });
 
   it("AbbreviationsInfoDialog", () => {
     render(<AbbreviationsInfoDialog />);
 
-    expect(screen.getByText("common.abbreviations.srOnly")).toBeTruthy();
+    expect(screen.getByText("gameTerms.abbreviations.srOnly")).toBeTruthy();
   });
 
   it("WeaponTraitsField", () => {
     render(<WeaponTraitsField idPrefix="w" value={{ traits: ["versatile"] }} onChange={vi.fn()} />);
 
-    expect(screen.getByText("common.weaponTraits.label")).toBeTruthy();
-    expect(screen.getByText("common.weaponTraits.versatileDice")).toBeTruthy();
+    expect(screen.getByText("gameTerms.weaponTraits.label")).toBeTruthy();
+    expect(screen.getByText("gameTerms.weaponTraits.versatileDice")).toBeTruthy();
   });
 
   it("ColorField and ColorSwatch", () => {
@@ -76,10 +76,10 @@ describe("common components use translation keys", () => {
   it("MonsterStatblock labels", () => {
     render(<MonsterStatblock block={{ languages: "x", telepathy: 30, movement: { hover: true, fly: 30 }, senses: { passivePerception: 12 } } as never} />);
 
-    expect(screen.getByText(/common\.monster\.languages/)).toBeTruthy();
-    expect(screen.getByText(/common\.monster\.telepathy/)).toBeTruthy();
-    expect(screen.getByText(/common\.monster\.passivePerception/)).toBeTruthy();
-    expect(screen.getByText(/common\.monster\.hover/)).toBeTruthy();
+    expect(screen.getByText(/gameTerms\.monster\.languages/)).toBeTruthy();
+    expect(screen.getByText(/gameTerms\.monster\.telepathy/)).toBeTruthy();
+    expect(screen.getByText(/gameTerms\.monster\.passivePerception/)).toBeTruthy();
+    expect(screen.getByText(/gameTerms\.monster\.hover/)).toBeTruthy();
   });
 
   it("SearchEmptyState and SearchInput", () => {

@@ -2,6 +2,7 @@ import { API_ERRORS } from "@/lib/constants/api-errors";
 import { cooldownLeft, poolLeft, withinCountLimits } from "@/lib/utils/abilities/engine/core/usage";
 import { lairAbilities, lairBlocker } from "@/lib/utils/battle/actions/lair";
 import { legendaryAbilities, legendaryBlocker, legendaryCostOf } from "@/lib/utils/battle/actions/legendary-options";
+import { currentOf } from "@/lib/utils/battle/common/control";
 import type { BattleMutationContext } from "@/lib/utils/battle/pipeline/run-battle-mutation";
 import { isGrantLive } from "@/lib/utils/battle/spell/inline-grant";
 import { BattleRuleError } from "@/lib/utils/battle/store";
@@ -16,7 +17,7 @@ export function resolveSpellSource(ctx: BattleMutationContext, caster: BattlePar
   if (data.legendaryKey) {
     if (!legendaryAbility) throw new BattleRuleError("action_rejected", API_ERRORS.BATTLE_NO_SUCH_LEGENDARY_SPELL);
 
-    const blocker = legendaryAbility.limits?.lair ? lairBlocker(caster, ctx.scene.round, legendaryAbility.key) : legendaryBlocker(caster, ctx.participants[ctx.scene.turnIndex], legendaryCostOf(legendaryAbility));
+    const blocker = legendaryAbility.limits?.lair ? lairBlocker(caster, ctx.scene.round, legendaryAbility.key) : legendaryBlocker(caster, currentOf(ctx), legendaryCostOf(legendaryAbility));
 
     if (blocker) throw new BattleRuleError("action_rejected", blocker);
 

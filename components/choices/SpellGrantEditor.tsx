@@ -13,7 +13,7 @@ import type { SpellGrantPolicy } from "@/types/choices";
 export function SpellGrantEditor({ value, onChange }: { value?: SpellGrantPolicy; onChange: (next: SpellGrantPolicy | undefined) => void }) {
   const t = useTranslations("choices");
 
-  const tc = useTranslator("common");
+  const tg = useTranslator("gameTerms");
 
   const set = (patch: Partial<SpellGrantPolicy>) => value && onChange({ ...value, ...patch });
 
@@ -24,7 +24,7 @@ export function SpellGrantEditor({ value, onChange }: { value?: SpellGrantPolicy
       <label className="flex items-center gap-2 text-xs"><input type="checkbox" checked={value.uses === "proficiency"} onChange={(e) => set({ uses: e.target.checked ? "proficiency" : 1 })} />{t("grant.proficiency")}</label>
       <label className="text-xs">{t("grant.rest")}<select aria-label={t("grant.restAria")} className={HUD_SELECT_CLASS} value={value.rest} onChange={(e) => set({ rest: e.target.value as "short" | "long" })}><option value="long">{t("grant.restLong")}</option><option value="short">{t("grant.restShort")}</option></select></label>
       <label className="text-xs">{t("grant.circle")}<Input aria-label={t("grant.circleAria")} type="number" min={0} max={MAX_SPELL_LEVEL} value={value.castLevel ?? ""} onChange={(e) => set({ castLevel: e.target.value === "" ? undefined : Number(e.target.value) })} /></label>
-      <label className="text-xs">{t("grant.ability")}<select aria-label={t("grant.abilityAria")} className={HUD_SELECT_CLASS} value={value.dcAbility ?? ""} onChange={(e) => set({ dcAbility: (e.target.value || undefined) as AbilityKey | undefined })}><option value="">{t("grant.abilityDefault")}</option>{ABILITY_KEYS.map((key) => <option key={key} value={key}>{tc(`abilities.${key}.label`)}</option>)}</select></label>
+      <label className="text-xs">{t("grant.ability")}<select aria-label={t("grant.abilityAria")} className={HUD_SELECT_CLASS} value={value.dcAbility ?? ""} onChange={(e) => set({ dcAbility: (e.target.value || undefined) as AbilityKey | undefined })}><option value="">{t("grant.abilityDefault")}</option>{ABILITY_KEYS.map((key) => <option key={key} value={key}>{tg(`abilities.${key}.label`)}</option>)}</select></label>
       <label className="flex items-center gap-2 text-xs"><input type="checkbox" checked={value.via === "slotOrGrant"} onChange={(e) => set({ via: e.target.checked ? "slotOrGrant" : "grant" })} />{t("grant.viaSlots")}</label>
       <label className="text-xs sm:col-span-2">{t("grant.sharedPool")}<Input aria-label={t("grant.sharedPoolAria")} value={value.sharedPool ?? ""} onChange={(e) => set({ sharedPool: e.target.value || undefined })} /></label>
     </div>}

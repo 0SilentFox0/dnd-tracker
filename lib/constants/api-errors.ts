@@ -105,6 +105,7 @@ export const API_ERRORS = {
   CANNOT_REMOVE_DM: "errors.cannotRemoveDm",
   UNKNOWN_OWNER_KIND: "errors.unknownOwnerKind",
   MISSING_PUSHER_PARAMS: "errors.missingPusherParams",
+  CRON_NOT_CONFIGURED: "errors.cronNotConfigured",
   ARTIFACT_SLOT_EMPTY: "errors.artifactSlotEmpty",
   ARTIFACT_TRANSFER_SELF: "errors.artifactTransferSelf",
   ARTIFACT_UNKNOWN_SLOT: "errors.artifactUnknownSlot",
@@ -323,6 +324,7 @@ export const API_ERRORS = {
   BATTLE_MORALE_EXTRA_TURN: "errors.battleMoraleExtraTurn",
   BATTLE_MOVE_OWN_TURN: "errors.battleMoveOwnTurn",
   BATTLE_NOT_FOUND: "errors.battleNotFound",
+  BATTLE_NOT_YOUR_TURN: "errors.battleNotYourTurn",
   BATTLE_NOT_PARTICIPANT_TURN: "errors.battleNotParticipantTurn",
   BATTLE_NO_CONTROLLABLE_UNITS: "errors.battleNoControllableUnits",
   BATTLE_NO_FREE_SLOT: "errors.battleNoFreeSlot",
@@ -442,6 +444,13 @@ export const API_ERRORS = {
   BATTLE_SPELL_TARGET_FILTER: "errors.battleSpellTargetFilter",
   BATTLE_SPELL_NO_OBJECT_NEAR: "errors.battleSpellNoObjectNear",
   BATTLE_CASTER_PACIFIED: "errors.battleCasterPacified",
+  COMPENDIUM_PREVIEW_SECRET_REQUIRED: "compendium.errors.previewSecretRequired",
+  COMPENDIUM_PREVIEW_STALE: "compendium.errors.previewStale",
+  COMPENDIUM_PREVIEW_INVALID: "compendium.errors.previewInvalid",
+  COMPENDIUM_REQUEST_SIZE: "compendium.errors.requestSize",
+  COMPENDIUM_FORBIDDEN: "compendium.errors.forbidden",
+  COMPENDIUM_IMPORT_FAILED: "compendium.errors.importFailed",
+  IMAGE_UPLOAD_FAILED: "common.errors.imageUploadFailed",
 } as const;
 
 export type ApiErrorKey = (typeof API_ERRORS)[keyof typeof API_ERRORS];

@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
+import { useTranslations } from "next-intl";
 import { hashKey, useQueryClient } from "@tanstack/react-query";
 
 import { scenarioKeys } from "./keys";
@@ -22,6 +23,14 @@ export function useScenarioDraft(campaignId: string, page: ScenarioPage) {
   const queryClient = useQueryClient();
 
   const notify = useOptionalNotify();
+
+  const t = useTranslations("scenario.draft");
+
+  const tRef = useRef(t);
+
+  useEffect(() => {
+    tRef.current = t;
+  });
 
   const [content, setLocal] = useState(page.content);
 
@@ -61,11 +70,11 @@ export function useScenarioDraft(campaignId: string, page: ScenarioPage) {
         // stop saving until reload: every further PUT would 409 and pop another dialog
         r.conflict = true;
         setState("conflict");
-        notify("Сторінку змінено в іншій вкладці. Ваші правки лишились тут — перезавантажте сторінку, щоб побачити нову версію.");
+        notify(tRef.current("conflict"));
       } else {
         const rejected = e instanceof ApiError && (e.status === 400 || e.status === 413);
 
-        setError(rejected ? { message: e.message, retryable: false } : { message: "Не збережено", retryable: true });
+        setError(rejected ? { message: e.message, retryable: false } : { message: tRef.current("notSaved"), retryable: true });
         setState("error");
       }
     }
@@ -120,7 +129,7 @@ export function useScenarioDraft(campaignId: string, page: ScenarioPage) {
     let fresh: ScenarioPage;
 
     try { fresh = await getScenarioPage(campaignId, page.id); }
-    catch { setError({ message: "Не вдалося завантажити свіжу версію. Локальні правки лишаються у редакторі.", retryable: false });
+    catch { setError({ message: tRef.current("reloadFailed"), retryable: false });
 
  return; }
 
@@ -133,7 +142,7 @@ export function useScenarioDraft(campaignId: string, page: ScenarioPage) {
 
   const hasUnsavedChanges = useCallback(() => ref.current.dirty || !!ref.current.inFlight || ref.current.conflict, []);
 
-  const retainLocal = useCallback(() => { setError({ message: "Локальна чернетка лишається у відкритому редакторі. Автозбереження зупинено до явного перезавантаження.", retryable: false }); }, []);
+  const retainLocal = useCallback(() => { setError({ message: tRef.current("localKept"), retryable: false }); }, []);
 
   useEffect(() => registerAssistantBeforeApply({ campaignId, domain: "scenario", id: page.id }, flush), [campaignId, page.id, flush]);
   useEffect(() => {

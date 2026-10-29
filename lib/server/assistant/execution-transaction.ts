@@ -14,6 +14,7 @@ import { isApiTokenScope } from "@/lib/constants/ai";
 import { API_ERRORS } from "@/lib/constants/api-errors";
 import { ASSISTANT_LIMITS } from "@/lib/constants/assistant";
 import { actionPreviewSchema, actionResultSchema } from "@/lib/schemas/assistant";
+import { lockCampaignRow } from "@/lib/server/campaigns/lock";
 import { ContentError, parseInput } from "@/lib/server/content/errors";
 import { runContentWriteContext } from "@/lib/server/content/write-context";
 
@@ -41,7 +42,7 @@ export async function executeIntentTransaction(deps: ExecutorDeps, caller: Assis
       return { kind: "receipt", receipt: previous };
     }
 
-    await tx.$queryRaw`SELECT id FROM campaigns WHERE id = ${caller.actor.campaignId} FOR UPDATE`;
+    await lockCampaignRow(tx, caller.actor.campaignId);
     await tx.$queryRaw`SELECT id FROM assistant_intents WHERE id = ${intentId} FOR UPDATE`;
 
     const row = await tx.assistantIntent.findFirst({ where });
@@ -78,7 +79,7 @@ export async function executeIntentTransaction(deps: ExecutorDeps, caller: Assis
 
       if (!original || original.revokedAt || original.userId !== row.userId || original.campaignId !== row.campaignId) throw forbidden();
 
-      await authorizeAssistant({ actor: { ...caller.actor, via: "token", scopes: original.scopes.filter(isApiTokenScope) }, channel: "mcp", tokenId: row.originTokenId, threadId: null }, action.need, "prepare", tx);
+      await authorizeAssistant({ actor: { ...caller.actor, via: "token", scopes: original.scopes.filter(isApiTokenScope) }, channel: "mcp", tokenId: row.originTokenId, threadId: null, locale: caller.locale }, action.need, "prepare", tx);
     }
 
     // All content writes in this scope reuse the same transaction/connection.

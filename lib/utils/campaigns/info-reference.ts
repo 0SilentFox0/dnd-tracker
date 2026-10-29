@@ -44,11 +44,11 @@ export function toClassForReference(c: GameClassData): ClassForReference {
 export function classSummaryText(t: Translator, line: ClassSummaryLine): string {
   const params: Record<string, string | number> = { ...line.params };
 
-  if (line.key === "savingThrows") params.list = String(params.list).split(",").map((id) => t(`common.abilities.${id}.label`)).join(", ");
+  if (line.key === "savingThrows") params.list = String(params.list).split(",").map((id) => t(`gameTerms.abilities.${id}.label`)).join(", ");
 
   if (params.caster) params.caster = t(`classes.casters.${params.caster}`);
 
-  if (params.ability) params.ability = t(`common.abilities.${params.ability}.label`);
+  if (params.ability) params.ability = t(`gameTerms.abilities.${params.ability}.label`);
 
   return t(`dashboard.reference.summary.${line.key}`, params);
 }
@@ -75,7 +75,7 @@ export function formatMechanicsSkill(s: SkillForReference, t: Translator): strin
 }
 
 export function formatMechanicsSpell(s: SpellForReference, t: Translator): string {
-  const parts: string[] = [t("dashboard.reference.mechanics.spell", { level: t(`common.spellLevels.${s.level}`), type: s.type })];
+  const parts: string[] = [t("dashboard.reference.mechanics.spell", { level: t(`gameTerms.spellLevels.${s.level}`), type: s.type })];
 
   if (s.dice > 0) parts.push(t("dashboard.reference.mechanics.dice", { count: s.dice }));
 

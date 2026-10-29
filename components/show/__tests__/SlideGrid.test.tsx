@@ -21,15 +21,15 @@ describe("SlideGrid", () => {
 
     expect(screen.getByText("1")).toBeTruthy();
     expect(screen.getByText("Таверна")).toBeTruthy();
-    expect(screen.getAllByLabelText("Є трек")).toHaveLength(1);
+    expect(screen.getAllByLabelText("show.grid.hasTrack")).toHaveLength(1);
 
-    expect((screen.getAllByRole("button", { name: "Посунути вліво" })[0] as HTMLButtonElement).disabled).toBe(true);
-    expect((screen.getAllByRole("button", { name: "Посунути вправо" })[1] as HTMLButtonElement).disabled).toBe(true);
+    expect((screen.getAllByRole("button", { name: "show.grid.moveLeft" })[0] as HTMLButtonElement).disabled).toBe(true);
+    expect((screen.getAllByRole("button", { name: "show.grid.moveRight" })[1] as HTMLButtonElement).disabled).toBe(true);
 
-    fireEvent.click(screen.getAllByRole("button", { name: "Посунути вправо" })[0]);
+    fireEvent.click(screen.getAllByRole("button", { name: "show.grid.moveRight" })[0]);
     expect(dispatch).toHaveBeenCalledWith({ type: "move", id: "slide-0001", dir: 1 });
 
-    fireEvent.click(screen.getAllByRole("button", { name: "Видалити слайд" })[1]);
+    fireEvent.click(screen.getAllByRole("button", { name: "show.grid.remove" })[1]);
     expect(dispatch).toHaveBeenCalledWith({ type: "remove", id: "slide-0002" });
   });
 
@@ -38,7 +38,7 @@ describe("SlideGrid", () => {
 
     render(<SlideGrid slides={slides} actions={{ dispatch: vi.fn(), edit }} />);
 
-    fireEvent.click(screen.getByRole("button", { name: "Слайд 2" }));
+    fireEvent.click(screen.getByRole("button", { name: 'show.slide {"index":2}' }));
     expect(edit).toHaveBeenCalledWith("slide-0002");
   });
 });

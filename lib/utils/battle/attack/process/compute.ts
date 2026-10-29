@@ -97,7 +97,7 @@ export function computeHitDamage(params: ComputeHitDamageParams): ComputeHitDama
     if (criticalEffectApplied.effect.target === "target") {
       updatedTarget = applyCriticalEffect(updatedTarget, criticalEffectApplied, currentRound, { offTurn: params.offTurn });
     } else if (criticalEffectApplied.effect.target === "self") {
-      updatedAttacker = applyCriticalEffect(updatedAttacker, criticalEffectApplied, currentRound, { offTurn: params.offTurn });
+      updatedAttacker = applyCriticalEffect(updatedAttacker, criticalEffectApplied, currentRound, { offTurn: params.offTurn, source: target.basicInfo.id });
     }
   }
 

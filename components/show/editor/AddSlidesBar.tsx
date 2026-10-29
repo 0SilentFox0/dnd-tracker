@@ -1,6 +1,7 @@
 "use client";
 
 import { useRef, useState } from "react";
+import { useTranslations } from "next-intl";
 import { ImagePlus, Puzzle, Sparkles } from "lucide-react";
 
 import { GenerateSlideDialog } from "./GenerateSlideDialog";
@@ -13,6 +14,10 @@ import { type useDeckEditor, useGenerateSlide } from "@/lib/hooks/show";
 import { isHttpUrl } from "@/lib/utils/common/image-url";
 
 export function AddSlidesBar({ campaignId, upload, count }: { campaignId: string; upload: ReturnType<typeof useDeckEditor>["upload"]; count: number }) {
+  const t = useTranslations("show");
+
+  const tc = useTranslations("common");
+
   const notify = useNotify();
 
   const { providers } = useGenerateSlide(campaignId);
@@ -45,7 +50,7 @@ export function AddSlidesBar({ campaignId, upload, count }: { campaignId: string
 
             const files = picked.slice(0, Math.max(MAX_SLIDES_PER_DECK - count, 0));
 
-            if (files.length < picked.length) void notify(`Додано ${files.length} з ${picked.length}: у наборі максимум ${MAX_SLIDES_PER_DECK} слайдів`);
+            if (files.length < picked.length) void notify(t("addSlides.partial", { added: files.length, picked: picked.length, max: MAX_SLIDES_PER_DECK }));
 
             if (files.length) void upload.addFiles(files);
           }}
@@ -60,18 +65,18 @@ export function AddSlidesBar({ campaignId, upload, count }: { campaignId: string
 
             e.target.value = "";
 
-            if (file) upload.addPuzzle(file).catch(() => void notify(`${file.name}: не вдалося додати пазл`));
+            if (file) upload.addPuzzle(file).catch(() => void notify(t("puzzle.addFailed", { name: file.name })));
           }}
         />
         <Button type="button" variant="outline" disabled={disabled} onClick={() => fileInput.current?.click()} className="flex items-center gap-2">
           <ImagePlus className="size-4" />
-          Додати картинки
+          {t("addSlides.images")}
         </Button>
         <Button type="button" variant="outline" disabled={disabled} onClick={() => puzzleInput.current?.click()} className="flex items-center gap-2">
           <Puzzle className="size-4" />
-          Додати пазл
+          {t("addSlides.puzzle")}
         </Button>
-        <Input aria-label="Посилання на картинку" placeholder="Посилання на картинку" value={url} disabled={disabled} onChange={(e) => setUrl(e.target.value)} className="sm:flex-1" />
+        <Input aria-label={t("addSlides.urlLabel")} placeholder={t("addSlides.urlLabel")} value={url} disabled={disabled} onChange={(e) => setUrl(e.target.value)} className="sm:flex-1" />
         <Button
           type="button"
           variant="outline"
@@ -81,20 +86,20 @@ export function AddSlidesBar({ campaignId, upload, count }: { campaignId: string
             setUrl("");
           }}
         >
-          Додати
+          {tc("actions.add")}
         </Button>
         {providers.length > 0 && (
           <Button type="button" variant="outline" disabled={disabled} onClick={() => setGenerating(true)} className="flex items-center gap-2">
             <Sparkles className="size-4" />
-            Згенерувати
+            {t("addSlides.generate")}
           </Button>
         )}
       </div>
       <GenerateSlideDialog campaignId={campaignId} open={generating} onOpenChange={setGenerating} onAdd={upload.addUrl} />
-      {full && <p className="text-xs text-hud-muted">Максимум {MAX_SLIDES_PER_DECK} слайдів</p>}
+      {full && <p className="text-xs text-hud-muted">{t("addSlides.max", { max: MAX_SLIDES_PER_DECK })}</p>}
       {upload.progress && (
         <p className="text-xs text-hud-muted">
-          Завантаження {upload.progress.done} з {upload.progress.total}
+          {t("addSlides.progress", { done: upload.progress.done, total: upload.progress.total })}
         </p>
       )}
     </div>

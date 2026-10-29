@@ -1,9 +1,14 @@
+import { createTranslator } from "use-intl/core";
 import { describe, expect, it } from "vitest";
 
 import { allKinds, chapterBlocks, estimateRecords, groupInventory, NOTES_LIMIT_BYTES, recommendedKinds } from "../categories";
 import { compendiumErrorMessage } from "../flow";
 
 import { ApiError } from "@/lib/api/client";
+import type { Translator } from "@/lib/i18n/translator";
+import ukCompendium from "@/messages/uk/compendium.json";
+
+const t = createTranslator({ locale: "uk", messages: { compendium: ukCompendium }, namespace: "compendium" }) as unknown as Translator;
 
 const big = { name: "Велика", entries: ["x".repeat(NOTES_LIMIT_BYTES + 10)] };
 
@@ -50,6 +55,6 @@ describe("compendium category groups", () => {
   });
 
   it("NOTES_SIZE error shows the record and size", () => {
-    expect(compendiumErrorMessage(new ApiError("x", 422, "/preview", { code: "NOTES_SIZE", details: "feat.3: 70 КБ" }), "f")).toContain("feat.3: 70 КБ");
+    expect(compendiumErrorMessage(t, new ApiError("x", 422, "/preview", { code: "NOTES_SIZE", details: "feat.3: 70 KiB" }), "previewFailed")).toContain("feat.3: 70 KiB");
   });
 });

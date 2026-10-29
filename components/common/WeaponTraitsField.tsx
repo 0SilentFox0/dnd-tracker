@@ -16,7 +16,7 @@ interface WeaponTraitsFieldProps<T extends TraitsValue> {
 }
 
 export function WeaponTraitsField<T extends TraitsValue>({ idPrefix, value, onChange }: WeaponTraitsFieldProps<T>) {
-  const t = useTranslations("common.weaponTraits");
+  const t = useTranslations("gameTerms.weaponTraits");
 
   const traits = value.traits ?? [];
 

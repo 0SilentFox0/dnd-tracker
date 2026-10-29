@@ -18,15 +18,19 @@ vi.mock("@/lib/supabase/world-map-storage", () => ({
   removeWorldMapFiles: vi.fn(async () => undefined),
   createWorldMapUploadTicket: vi.fn(),
 }));
-vi.mock("@/lib/db", () => ({
-  prisma: {
+vi.mock("@/lib/db", () => {
+  const prisma: Record<string, unknown> = {
+    $executeRaw: vi.fn(async () => 1),
+    $transaction: async (fn: (tx: unknown) => unknown) => fn(prisma),
     worldMap: { findMany: vi.fn(async () => []), findUnique: vi.fn(), findFirst: vi.fn(), count: vi.fn(async () => 0), create: vi.fn(), update: vi.fn(), delete: vi.fn() },
     worldPosition: { findMany: vi.fn(async () => []) },
     worldNote: { findMany: vi.fn() },
     campaignShow: { findUnique: vi.fn(async () => null), updateMany: vi.fn(async () => ({ count: 1 })) },
     worldMarker: { findUnique: vi.fn(), findMany: vi.fn(async () => []), aggregate: vi.fn(async () => ({ _count: 0, _max: { sortOrder: null } })), create: vi.fn(), update: vi.fn(), delete: vi.fn() },
-  },
-}));
+  };
+
+  return { prisma };
+});
 
 const dm = { userId: "dm", isDM: true, campaign: { id: "c1", maxLevel: 20, members: [] } } as never;
 
@@ -124,7 +128,7 @@ describe("world API", () => {
   it("карта іншої кампанії — 403, неіснуюча — 404", async () => {
     const mi = await mapById();
 
-    vi.mocked(prisma.worldMap.findUnique).mockResolvedValueOnce(mapRow({ campaignId: "other" }) as never);
+    vi.mocked(prisma.worldMap.findUnique).mockResolvedValueOnce(mapRow({ campaignId: "other", markers: [] }) as never);
     expect((await mi.GET(json("GET"), ctx({ mapId: "m1" }))).status).toBe(403);
 
     vi.mocked(prisma.worldMap.findUnique).mockResolvedValueOnce(null);

@@ -15,12 +15,11 @@ import { columnRefIssues } from "@/lib/utils/abilities/class-columns";
 import { choiceColumnIssues } from "@/lib/utils/characters/choices/columns";
 import { choiceSpellIds } from "@/lib/utils/characters/choices/read";
 import { toGameClassData } from "@/lib/utils/characters/classes/row";
+import { toInputJson } from "@/lib/utils/common/json";
 import type { ClassFeature, Subclass } from "@/types/classes";
 
 type CreateInput = z.infer<typeof createClassSchema>;
 type UpdateInput = z.infer<typeof updateClassSchema>;
-
-const json = (v: unknown) => v as Prisma.InputJsonValue;
 
 const spellRefs = (features: readonly ClassFeature[], subclasses: readonly Subclass[]) =>
   [...features, ...subclasses.flatMap(s => s.features)].flatMap(f => choiceSpellIds(f.choices) ?? []);
@@ -34,12 +33,12 @@ function updateData(data: UpdateInput): Prisma.GameClassUncheckedUpdateInput {
 
   return {
     ...rest,
-    ...(savingThrows && { savingThrows: json(savingThrows) }),
-    ...(proficiencies && { proficiencies: json(proficiencies) }),
-    ...(skillChoices && { skillChoices: json(skillChoices) }),
-    ...(features && { features: json(features) }),
-    ...(subclasses && { subclasses: json(subclasses) }),
-    ...(columns && { columns: json(columns) }),
+    ...(savingThrows && { savingThrows: toInputJson(savingThrows) }),
+    ...(proficiencies && { proficiencies: toInputJson(proficiencies) }),
+    ...(skillChoices && { skillChoices: toInputJson(skillChoices) }),
+    ...(features && { features: toInputJson(features) }),
+    ...(subclasses && { subclasses: toInputJson(subclasses) }),
+    ...(columns && { columns: toInputJson(columns) }),
   };
 }
 
@@ -47,8 +46,8 @@ export const classesResource = defineResource<ClassRow, CreateInput, UpdateInput
   kind: "classes",
   listFields: ["color", "caster", "hitDie"],
   idParam: "classId",
-  label: "Класи",
-  description: "Класи 5e: кістка хітів, рятівні кидки, тип заклинача, вміння за рівнями, підкласи, таблиця класу (columns: 20 клітинок; pool — спільний пул).",
+  label: "Classes",
+  description: "5e classes: hit die, saving throws, caster type, features by level, subclasses, class table (columns: 20 cells; pool — shared pool).",
   path: "/classes",
   schemas: { create: createClassSchema, update: updateClassSchema },
   errors: [409],
@@ -69,15 +68,15 @@ export const classesResource = defineResource<ClassRow, CreateInput, UpdateInput
         icon: data.icon ?? null,
         color: data.color ?? null,
         hitDie: data.hitDie,
-        savingThrows: json(data.savingThrows),
-        proficiencies: json(data.proficiencies),
-        skillChoices: json(data.skillChoices),
+        savingThrows: toInputJson(data.savingThrows),
+        proficiencies: toInputJson(data.proficiencies),
+        skillChoices: toInputJson(data.skillChoices),
         caster: data.caster,
         spellcastingAbility: data.spellcastingAbility,
-        features: json(data.features),
+        features: toInputJson(data.features),
         subclassLevel: data.subclassLevel,
-        subclasses: json(data.subclasses),
-        columns: json(data.columns),
+        subclasses: toInputJson(data.subclasses),
+        columns: toInputJson(data.columns),
         ...(data.spellList !== undefined && { spellList: data.spellList }),
       },
     });

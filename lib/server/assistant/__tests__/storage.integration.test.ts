@@ -29,7 +29,7 @@ let ready = false;
 
 const actor = () => ({ campaignId, userId, isDM: true, via: "session", scopes: null } as const);
 
-const caller = (): AssistantCaller => ({ actor: actor(), channel: "chat", tokenId: null, threadId });
+const caller = (): AssistantCaller => ({ actor: actor(), channel: "chat", tokenId: null, threadId, locale: "uk" as const });
 
 const request = () => ({ actionId: "campaign.test-update", requestId: randomUUID(), input: {} });
 

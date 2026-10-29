@@ -4,10 +4,10 @@ import { describe, expect, it, vi } from "vitest";
 import { goblin, hero, participant } from "./fixtures";
 
 import { AttackType, ParticipantSide } from "@/lib/constants/battle";
-import { attackBodySchema, attackMutation } from "@/lib/server/battles/mutations/attack/attack-mutation";
+import { attackBodySchema, castSpellSchema } from "@/lib/schemas/battles";
+import { attackMutation } from "@/lib/server/battles/mutations/attack/attack-mutation";
 import { nextTurnMutation } from "@/lib/server/battles/mutations/next-turn/next-turn-mutation";
 import { createRollbackMutation, rollbackSchema } from "@/lib/server/battles/mutations/rollback/rollback-mutation";
-import { spellSchema } from "@/lib/server/battles/mutations/spell/cast-spell-schema";
 import { createSpellMutation } from "@/lib/server/battles/mutations/spell/spell-mutation";
 import { runBattleMutation } from "@/lib/server/battles/run-mutation";
 import { applyBattleDelta } from "@/lib/utils/battle/client/apply-delta";
@@ -240,7 +240,7 @@ describe("інваріант: GET(до) + дельта = GET(після)", () =>
     const mutate = createSpellMutation({ loadSpell: vi.fn(async () => spell), loadPool: async () => ({ units: [], races: [] }) });
 
     await expectDeltaMatchesGet(memoryBattle({ participants: [caster, sturdyGoblin, orc] }), (b) =>
-      b.act(PLAYER, { access: BattleAccess.MEMBER, schema: spellSchema, mutate }, { casterId: "hero", spellId: "s1", targetIds: ["gob"], diceRolls: [5] }),
+      b.act(PLAYER, { access: BattleAccess.MEMBER, schema: castSpellSchema, mutate }, { casterId: "hero", spellId: "s1", targetIds: ["gob"], diceRolls: [5] }),
     );
   });
 

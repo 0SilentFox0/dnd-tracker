@@ -38,11 +38,11 @@ describe("формули в CSV", () => {
 
     const skills = IMPORT_SPECS.skills.fields;
 
-    const csv = toCsv(skills.map((f) => f.label), [recordToCells(IMPORT_SPECS.skills, { name: "Бонус", description: "+1 до КД" }, () => undefined)]);
+    const csv = toCsv(skills.map((f) => f.key), [recordToCells(IMPORT_SPECS.skills, { name: "Бонус", description: "+1 до КД" }, () => undefined)]);
 
     const [row] = parseTable(csv).rows;
 
-    const header = field(skills, "description").label;
+    const header = "description";
 
     expect(coerceRecord({ description: row[header] }, skills).value.description).toBe("+1 до КД");
     expect(parseFieldValue(field(units, "cr"), "0,25")).toEqual({ value: 0.25 });
@@ -68,8 +68,7 @@ describe("м'які значення необов'язкових полів", ()
     expect(value).toEqual({ name: "Вогонь" });
     expect(issues).toHaveLength(2);
     expect(issues.every((i) => i.level === "warning")).toBe(true);
-    expect(issues[0].message).toContain("Колонка «Вартість»");
-    expect(issues[0].message).toContain("1 minute");
+    expect(issues[0]).toMatchObject({ message: "contentImport.issues.columnSkipped", params: { field: "contentImport.fields.spells.cost", got: "1 minute" } });
   });
 
   it("обов'язкове поле лишається помилкою", () => {

@@ -41,7 +41,7 @@ function Card({ role, checked, disabled, onClick, title, note }: { role: "checkb
 export function ChoicePicker({ choice, value, onChange, ctx, error }: ChoicePickerProps) {
   const t = useTranslations("choices");
 
-  const tc = useTranslator("common");
+  const tg = useTranslator("gameTerms");
 
   const target = resolveChoiceCount(choice, ctx.level, ctx.columns);
 
@@ -71,7 +71,7 @@ export function ChoicePicker({ choice, value, onChange, ctx, error }: ChoicePick
       {(choice.kind === "skill" || choice.kind === "expertise") && (
         <div className="flex flex-wrap gap-2">
           {(choice.skills?.length ? choice.skills : DND_SKILLS).map((s) => (
-            <Card key={s} role="checkbox" checked={ids.includes(s)} disabled={choice.kind === "expertise" && !ctx.proficient.has(s)} onClick={() => toggle(s)} title={tc(`dndSkills.${s}`)} />
+            <Card key={s} role="checkbox" checked={ids.includes(s)} disabled={choice.kind === "expertise" && !ctx.proficient.has(s)} onClick={() => toggle(s)} title={tg(`dndSkills.${s}`)} />
           ))}
         </div>
       )}
@@ -153,7 +153,7 @@ function FeatList({ choice, value, ctx, actions }: { choice: Choice; value: Choi
 
 function AbilityPoints({ choice, value, onChange, scores, after: scoreAfter }: { choice: Choice; value: ChoicePick[]; onChange: (next: ChoicePick[]) => void; scores: Record<AbilityKey, number>; after?: Record<AbilityKey, number> }) {
 
-  const tc = useTranslator("common");
+  const tg = useTranslator("gameTerms");
 
   const points = choice.points ?? 1;
 
@@ -170,11 +170,11 @@ function AbilityPoints({ choice, value, onChange, scores, after: scoreAfter }: {
 
         return (
           <div key={a} className="flex items-center gap-2 text-sm">
-            <span className="w-28">{tc(`abilities.${a}.label`)}</span>
-            <button type="button" aria-label={`−1 ${tc(`abilities.${a}.label`)}`} disabled={added === 0} onClick={() => onChange(value.filter((p, i) => !(p.id === a && i === value.map((x) => x.id).lastIndexOf(a))))} className="rounded border border-hud-line/50 px-2 disabled:opacity-40">
+            <span className="w-28">{tg(`abilities.${a}.label`)}</span>
+            <button type="button" aria-label={`−1 ${tg(`abilities.${a}.label`)}`} disabled={added === 0} onClick={() => onChange(value.filter((p, i) => !(p.id === a && i === value.map((x) => x.id).lastIndexOf(a))))} className="rounded border border-hud-line/50 px-2 disabled:opacity-40">
               −
             </button>
-            <button type="button" aria-label={`+1 ${tc(`abilities.${a}.label`)}`} disabled={value.length >= points || after + 1 > max || (choice.maxPerAbility !== undefined && added >= choice.maxPerAbility)} onClick={() => onChange([...value, { id: a }])} className="rounded border border-hud-line/50 px-2 disabled:opacity-40">
+            <button type="button" aria-label={`+1 ${tg(`abilities.${a}.label`)}`} disabled={value.length >= points || after + 1 > max || (choice.maxPerAbility !== undefined && added >= choice.maxPerAbility)} onClick={() => onChange([...value, { id: a }])} className="rounded border border-hud-line/50 px-2 disabled:opacity-40">
               +
             </button>
             {after !== scores[a] && <span className="text-xs text-hud-muted">{`${scores[a]} → ${after}`}</span>}
@@ -188,7 +188,7 @@ function AbilityPoints({ choice, value, onChange, scores, after: scoreAfter }: {
 function SpellList({ choice, ids, ctx, onToggle }: { choice: Choice; ids: string[]; ctx: PickerContext; onToggle: (id: string) => void }) {
   const t = useTranslations("choices");
 
-  const tc = useTranslator("common");
+  const tg = useTranslator("gameTerms");
 
   const rule = choice.spells;
 
@@ -201,7 +201,7 @@ function SpellList({ choice, ids, ctx, onToggle }: { choice: Choice; ids: string
   return (
     <div className="grid max-h-72 gap-1 overflow-y-auto sm:grid-cols-2">
       {shown.map((s) => (
-        <Card key={s.id} role="checkbox" checked={ids.includes(s.id)} onClick={() => onToggle(s.id)} title={s.name} note={tc(`spellLevels.${s.level}`)} />
+        <Card key={s.id} role="checkbox" checked={ids.includes(s.id)} onClick={() => onToggle(s.id)} title={s.name} note={tg(`spellLevels.${s.level}`)} />
       ))}
       {shown.length === 0 && <p className="text-xs text-hud-muted">{t("picker.noSpells", { lists: rule.lists.join(", ") || "—" })}</p>}
     </div>

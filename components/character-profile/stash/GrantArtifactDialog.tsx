@@ -62,7 +62,7 @@ export function GrantArtifactDialog({ open, onOpenChange }: GrantArtifactDialogP
       footer={
         form.detail && !form.isLoading ? (
           <>
-            <Button type="button" variant="ghost" onClick={actions.back}>{t("inventory.grant.back")}</Button>
+            <Button type="button" variant="ghost" onClick={actions.back}>{t("common.actions.back")}</Button>
             <Button type="button" disabled={!form.canGrant} onClick={actions.submit}>{t("inventory.grant.submit")}</Button>
           </>
         ) : undefined

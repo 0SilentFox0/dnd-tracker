@@ -13,6 +13,7 @@ import { assistantCatalog } from "@/lib/server/assistant/catalog";
 import { dispatchAction } from "@/lib/server/assistant/execute";
 import { ContentError } from "@/lib/server/content/errors";
 import { inputJsonSchema } from "@/lib/server/content/json-schema";
+import { windowOf } from "@/lib/utils/api/page-of";
 
 export const assistantScopes = API_TOKEN_SCOPES.filter(scope => scope !== "ai");
 
@@ -23,7 +24,7 @@ const page = { path: z.array(z.string().max(200)).max(30).default([]), offset: z
 const request = z.strictObject({ actionId, input: z.unknown() });
 
 export const assistantCapabilitiesTool = defineTool({
-  name: "assistant_capabilities", scopes: assistantScopes, title: "Можливості асистента", description: "Єдиний каталог доступних дій кампанії з типом результату та вимогами перегляду.",
+  name: "assistant_capabilities", scopes: assistantScopes, title: "Assistant capabilities", description: "Single catalog of the campaign actions available, with result type and review requirements.",
   input: z.strictObject({ offset: page.offset, limit: page.limit }),
   handler: async (ctx, { offset, limit }) => {
     const caller = callerOf(ctx);
@@ -32,15 +33,15 @@ export const assistantCapabilitiesTool = defineTool({
 
     const actions = assistantCatalog.listActions(caller.actor);
 
-    const selected = actions.slice(offset, offset + limit);
+    const { items: selected, ...window } = windowOf(actions, offset, limit);
 
     for (const action of selected) await authorizeAssistant(caller, action.need, "prepare");
 
-    return { items: selected.map(({ id, title, effect, need }) => ({ id, title, effect, sessionOnly: !!need.sessionOnly })), total: actions.length, nextOffset: offset + selected.length < actions.length ? offset + selected.length : null };
+    return { items: selected.map(({ id, title, effect, need }) => ({ id, title, effect, sessionOnly: !!need.sessionOnly })), total: window.total, nextOffset: window.nextOffset };
   },
 });
 export const assistantSchemaTool = defineTool({
-  name: "assistant_schema", scopes: assistantScopes, title: "Схема дії", description: "Схема входу канонічної дії; великі схеми читаються сторінками за path/offset.",
+  name: "assistant_schema", scopes: assistantScopes, title: "Action schema", description: "Input schema of a canonical action; large schemas are read in pages via path/offset.",
   input: z.strictObject({ actionId, ...page }),
   handler: async (ctx, input) => {
     const caller = callerOf(ctx);
@@ -53,7 +54,7 @@ export const assistantSchemaTool = defineTool({
   },
 });
 export const assistantReadTool = defineTool({
-  name: "assistant_read", scopes: assistantScopes, title: "Читання кампанії", description: "Виконує лише read або UI handoff; запис через цей інструмент заборонений. Дані мають пагінацію.",
+  name: "assistant_read", scopes: assistantScopes, title: "Read campaign", description: "Runs read or UI handoff only; writing through this tool is forbidden. Data is paginated.",
   input: request.extend(page),
   handler: async (ctx, input) => {
     const caller = callerOf(ctx);
@@ -68,7 +69,7 @@ export const assistantReadTool = defineTool({
   },
 });
 export const assistantActionTool = defineTool({
-  name: "assistant_action", scopes: assistantScopes, title: "Підготувати дію", description: "Виклик єдиного dispatcher з review/auto policy. Pending і handoff не означають виконану зміну; підтвердження лише людиною у UI.",
+  name: "assistant_action", scopes: assistantScopes, title: "Prepare action", description: "Calls the single dispatcher with review/auto policy. Pending and handoff do not mean the change was made; confirmation is by a human in the UI only.",
   input: request,
   handler: (ctx, input) => dispatchAction(callerOf(ctx), { ...input, requestId: toolRequestId(ctx) }, ctx.abortSignal),
 });

@@ -1,3 +1,4 @@
+/* eslint-disable no-restricted-syntax -- derived content written to the DB stays Ukrainian (spec part5, decision 5) */
 import type { SpellRecognizer } from "./index";
 
 import { durationRounds, spellRange } from "@/lib/utils/spells/derive/mechanics";

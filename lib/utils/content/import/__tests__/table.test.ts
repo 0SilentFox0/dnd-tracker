@@ -39,12 +39,13 @@ describe("parseTable: CSV", () => {
   });
 
   it("порожні й повторені заголовки отримують унікальні імена", () => {
-    expect(parseTable("Назва;Назва;\nА;Б;В").headers).toEqual(["Назва", "Назва (2)", "Колонка 3"]);
+    expect(parseTable("Назва;Назва;\nА;Б;В").headers).toEqual(["Назва", "Назва (2)", "Column 3"]);
+    expect(parseTable("Назва;\nА;Б", "", { blankHeader: (n) => `Колонка ${n}` }).headers).toEqual(["Назва", "Колонка 2"]);
   });
 
   it("порожній файл і лише заголовок — ImportFileError", () => {
     expect(() => parseTable("")).toThrow(ImportFileError);
-    expect(() => parseTable("Назва;ХП\n")).toThrow("У файлі немає рядків з даними");
+    expect(() => parseTable("Назва;ХП\n")).toThrow("contentImport.file.noRows");
   });
 
   it("units-all.csv: 104 рядки по 18 колонок, ; у лапках лишається в клітинці", () => {
@@ -72,7 +73,7 @@ describe("parseTable: JSON", () => {
 
   it("некоректний JSON і масив не-об'єктів — ImportFileError", () => {
     expect(() => parseTable("[1,2]", "a.json")).toThrow(ImportFileError);
-    expect(() => parseTable("{oops", "a.json")).toThrow("Некоректний JSON");
+    expect(() => parseTable("{oops", "a.json")).toThrow("contentImport.file.badJson");
   });
 });
 

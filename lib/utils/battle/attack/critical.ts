@@ -19,7 +19,16 @@ type EffectSpec = {
 
 const SKIP_ACTION_CERTAIN = 100;
 
-let effectSeq = 0;
+/** Derived from state, not clock/counter: a crit-choice re-run must produce the same id. */
+function freeEffectId(p: BattleParticipant, prefix: string) {
+  const taken = new Set((p.battleData.activeEffects ?? []).map(e => e.id));
+
+  let n = 0;
+
+  while (taken.has(`${prefix}-${n}`)) n++;
+
+  return `${prefix}-${n}`;
+}
 
 const DISADVANTAGE: StaticEffect = { kind: "flag", flag: "disadvantage" };
 
@@ -85,7 +94,7 @@ export function applyCriticalEffect(
   participant: BattleParticipant,
   effect: CriticalEffect,
   currentRound: number,
-  opts: { offTurn?: boolean } = {},
+  opts: { offTurn?: boolean; source?: string } = {},
 ): BattleParticipant {
   const updated = { ...participant };
 
@@ -113,7 +122,7 @@ export function applyCriticalEffect(
       activeEffects: addActiveEffect(
         base,
         {
-          id: `critical-${spec.idPart}-${Date.now()}-${effectSeq++}`,
+          id: freeEffectId(base, `critical-${spec.idPart}-${currentRound}${opts.source ? `-${opts.source}` : ""}`),
           name: effect.name,
           type: spec.type,
           description: effect.description,

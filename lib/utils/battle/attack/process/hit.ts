@@ -65,13 +65,13 @@ export function resolveHit(p: ResolveHitParams): { hitDamage: ComputeHitDamageRe
 
   const targetBefore = getP(flow, targetId);
 
-  put(flow, applyDamageToTarget(targetBefore, guarded.targetDamage).updatedTarget);
+  put(flow, applyDamageToTarget(targetBefore, guarded.targetDamage));
   applyFlowDamage(flow, targetBefore, guarded.targetDamage, p.attackRoll.isCritical);
 
   if (guarded.guardianId) {
     const guardian = getP(flow, guarded.guardianId);
 
-    put(flow, applyDamageToTarget(guardian, guarded.guardianDamage).updatedTarget);
+    put(flow, applyDamageToTarget(guardian, guarded.guardianDamage));
     applyFlowDamage(flow, guardian, guarded.guardianDamage, p.attackRoll.isCritical);
     flow.messages.push(`🛡 ${guardian.basicInfo.name} приймає ${guarded.guardianDamage} шкоди — захищає: ${getP(flow, targetId).basicInfo.name}`);
     settleDowned(flow, guarded.guardianId, attackerId);

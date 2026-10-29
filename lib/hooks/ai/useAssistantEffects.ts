@@ -52,6 +52,12 @@ export function registerAssistantBeforeApply(target: EditorTarget, flush: Flush)
   return () => { editors.delete(key); };
 }
 
+export class AssistantUiError extends Error {
+  constructor(public readonly key: "context.flushFailed" | "context.refreshFailed") {
+    super(key);
+  }
+}
+
 export async function flushAssistantBeforeApply(campaignId: string): Promise<void> {
   // Every open campaign editor must be saved, including a command whose cascade
   // reaches it indirectly. The server remains responsible for the actual targets.
@@ -62,7 +68,7 @@ export async function flushAssistantBeforeApply(campaignId: string): Promise<voi
 
     try { saved = await flush(); } catch { /* Fail closed; never expose editor internals. */ }
 
-    if (!saved) throw new Error("Не вдалося зберегти відкритий редактор. Зміни не застосовано.");
+    if (!saved) throw new AssistantUiError("context.flushFailed");
   }
 }
 
@@ -91,7 +97,7 @@ export function useAssistantEffects(campaignId: string) {
       await invalidateAffected(client, campaignId, [...new Set(refs.map(r => r.domain))]);
 
       if (refs.some(r => ["battles", "show", "campaign"].includes(r.domain))) await client.invalidateQueries({ queryKey: battleKeys.active() });
-    } catch { receipts.delete(receipt.id); throw new Error("Не вдалося оновити дані. Відновіть стан."); }
+    } catch { receipts.delete(receipt.id); throw new AssistantUiError("context.refreshFailed"); }
   }, [campaignId, client]);
 
   return { consumeReceipt };

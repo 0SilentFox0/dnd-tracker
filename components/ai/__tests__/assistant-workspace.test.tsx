@@ -31,8 +31,8 @@ function mount(keys=false, legacyRecords: unknown[] = [{id:"old1",summary:"Пр�
 }
 
 it("threadWithoutScenarioPage",async()=>{
- mount(true); await screen.findByRole("button",{name:"Новий тред"});
- fireEvent.click(screen.getByRole("button",{name:"Новий тред"}));
+ mount(true); await screen.findByRole("button",{name:"ai.thread.new"});
+ fireEvent.click(screen.getByRole("button",{name:"ai.thread.new"}));
  await waitFor(()=>expect(ai.createAiThread).toHaveBeenCalledWith("c1",expect.objectContaining({scenarioPageId:null})));
 });
 it("mcpPendingVisibleOnce",async()=>{ mount();await screen.findByRole("button",{name:/Правка MCP/});expect(screen.getAllByRole("button",{name:/Правка MCP/})).toHaveLength(1);expect(api.confirmAssistantIntent).not.toHaveBeenCalled(); });
@@ -40,7 +40,7 @@ it("noKeyCanReview",async()=>{
  mount(); fireEvent.click(await screen.findByRole("button",{name:/Правка MCP/}));
  await waitFor(()=>expect(api.getAssistantIntent).toHaveBeenCalledWith("c1","i1"));
  expect(api.confirmAssistantIntent).not.toHaveBeenCalled(); expect(ai.createAiThread).not.toHaveBeenCalled();
- fireEvent.click(await screen.findByRole("button",{name:"Застосувати"}));
+ fireEvent.click(await screen.findByRole("button",{name:"ai.intent.confirm"}));
  await waitFor(()=>expect(api.confirmAssistantIntent).toHaveBeenCalledWith("c1","i1"));
  expect(ai.createAiThread).not.toHaveBeenCalled();
 });
@@ -55,10 +55,10 @@ it("legacyLinkedOutsideQueuePageIsNotDuplicated",async()=>{
 
 it("campaignFocusCanBeSelectedAndClearedWithoutModelCall",async()=>{
  mount();await screen.findByRole("button",{name:/Правка MCP/});
- fireEvent.change(screen.getByLabelText("Тип фокусу"),{target:{value:"character"}});
- fireEvent.change(screen.getByLabelText("ID фокусу"),{target:{value:"hero1"}});
- fireEvent.click(screen.getByRole("button",{name:"Обрати фокус"}));
- expect(screen.getByText(/Фокус: герой hero1/)).toBeTruthy();
- fireEvent.click(screen.getByRole("button",{name:"Очистити фокус"}));
- expect(screen.queryByText(/Фокус: герой hero1/)).toBeNull();expect(api.confirmAssistantIntent).not.toHaveBeenCalled();
+ fireEvent.change(screen.getByLabelText("ai.workspace.focusKind"),{target:{value:"character"}});
+ fireEvent.change(screen.getByLabelText("ai.workspace.focusId"),{target:{value:"hero1"}});
+ fireEvent.click(screen.getByRole("button",{name:"ai.workspace.pick"}));
+ expect(screen.getByText(/ai\.focus\.character.*hero1/)).toBeTruthy();
+ fireEvent.click(screen.getByRole("button",{name:"ai.workspace.clear"}));
+ expect(screen.queryByText(/ai\.focus\.character.*hero1/)).toBeNull();expect(api.confirmAssistantIntent).not.toHaveBeenCalled();
 });

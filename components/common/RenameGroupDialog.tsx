@@ -22,6 +22,8 @@ interface RenameGroupDialogProps {
 export function RenameGroupDialog({ groupName, dialog, rename }: RenameGroupDialogProps) {
   const t = useTranslations("common.renameGroup");
 
+  const tc = useTranslations("common.actions");
+
   const { value, onChange, onConfirm, onCancel, isPending } = rename;
 
   return (
@@ -34,10 +36,10 @@ export function RenameGroupDialog({ groupName, dialog, rename }: RenameGroupDial
       footer={
         <>
           <Button variant="outline" onClick={onCancel} disabled={isPending}>
-            {t("cancel")}
+            {tc("cancel")}
           </Button>
           <Button onClick={onConfirm} disabled={isPending}>
-            {t("save")}
+            {tc("save")}
           </Button>
         </>
       }

@@ -4,17 +4,17 @@ import { categoryInventory, MATERIAL_KINDS } from "@/lib/utils/compendium-import
 export const NOTES_LIMIT_BYTES = 64 * 1024;
 
 export const CATEGORY_GROUPS = [
-  { id: "rules", title: "Правила й стани", kinds: ["condition"] },
-  { id: "spells", title: "Заклинання", kinds: ["spell"] },
-  { id: "characters", title: "Класи та персонажі", kinds: ["class", "classFeature", "subclass", "subclassFeature", "optionalfeature", "background", "race", "subrace", "feat", "reward", "skill", "language"] },
-  { id: "items", title: "Предмети", kinds: ["item", "baseitem", "itemProperty", "itemType"] },
-  { id: "bestiary", title: "Бестіарій", kinds: ["monster", "table"] },
-  { id: "dm", title: "Матеріали ДМ", kinds: ["book", "bookData", "adventure", "adventureData"] },
+  { id: "rules", kinds: ["condition"] },
+  { id: "spells", kinds: ["spell"] },
+  { id: "characters", kinds: ["class", "classFeature", "subclass", "subclassFeature", "optionalfeature", "background", "race", "subrace", "feat", "reward", "skill", "language"] },
+  { id: "items", kinds: ["item", "baseitem", "itemProperty", "itemType"] },
+  { id: "bestiary", kinds: ["monster", "table"] },
+  { id: "dm", kinds: ["book", "bookData", "adventure", "adventureData"] },
 ] as const;
 
 export type CategoryRow = ReturnType<typeof categoryInventory>[number];
 
-export type CategoryGroup = { id: string; title: string; rows: CategoryRow[] };
+export type CategoryGroup = { id: string; rows: CategoryRow[] };
 
 export function groupInventory(root: JsonRecord): { groups: CategoryGroup[]; skipped: CategoryRow[] } {
   const rows = categoryInventory(root);
@@ -23,11 +23,11 @@ export function groupInventory(root: JsonRecord): { groups: CategoryGroup[]; ski
 
   const grouped = new Set<string>(CATEGORY_GROUPS.flatMap((g) => g.kinds));
 
-  const groups = CATEGORY_GROUPS.map((g) => ({ id: g.id, title: g.title, rows: supported.filter((row) => (g.kinds as readonly string[]).includes(row.kind)) }));
+  const groups = CATEGORY_GROUPS.map((g) => ({ id: g.id, rows: supported.filter((row) => (g.kinds as readonly string[]).includes(row.kind)) }));
 
   const other = supported.filter((row) => !grouped.has(row.kind));
 
-  return { groups: [...groups, ...(other.length ? [{ id: "other", title: "Інше", rows: other }] : [])].filter((g) => g.rows.length > 0), skipped: rows.filter((row) => !row.supported) };
+  return { groups: [...groups, ...(other.length ? [{ id: "other", rows: other }] : [])].filter((g) => g.rows.length > 0), skipped: rows.filter((row) => !row.supported) };
 }
 
 export const recommendedKinds = (root: JsonRecord) => categoryInventory(root).filter((row) => row.supported && !MATERIAL_KINDS.has(row.kind)).map((row) => row.kind);
@@ -36,7 +36,7 @@ export const allKinds = (root: JsonRecord) => categoryInventory(root).filter((ro
 
 type Book = { id?: string; name?: string; data?: Array<{ name?: string }> };
 
-export type ChapterBlock = { kind: string; index: number; title: string; chapters: { path: string; name: string; bytes: number; oversized: boolean }[] };
+export type ChapterBlock = { kind: string; index: number; title: string; chapters: { path: string; name?: string; n: number; bytes: number; oversized: boolean }[] };
 
 export function chapterBlocks(root: JsonRecord, kinds: string[]): ChapterBlock[] {
   return kinds.filter((kind) => (COMPENDIUM_CHAPTER_KINDS as readonly string[]).includes(kind) && Array.isArray(root[kind])).flatMap((kind) =>
@@ -47,7 +47,7 @@ export function chapterBlocks(root: JsonRecord, kinds: string[]): ChapterBlock[]
       chapters: (book.data ?? []).map((chapter, i) => {
         const bytes = byteLength(JSON.stringify(chapter));
 
-        return { path: `${kind}[${index}].data[${i}]`, name: chapter.name ?? `Розділ ${i + 1}`, bytes, oversized: bytes > NOTES_LIMIT_BYTES };
+        return { path: `${kind}[${index}].data[${i}]`, name: chapter.name, n: i + 1, bytes, oversized: bytes > NOTES_LIMIT_BYTES };
       }),
     })),
   );

@@ -11,13 +11,13 @@ describe("AbilityScoresGrid", () => {
   afterEach(cleanup);
 
   it("підписує характеристики так само, як решта застосунку", async () => {
-    await renderWithIntl(<AbilityScoresGrid data={{}} set={() => {}} />);
+    await renderWithIntl(<AbilityScoresGrid data={{}} set={() => {}} />, { namespaces: ["common", "gameTerms"] });
 
     expect(screen.getByLabelText("Статура")).toBeInTheDocument();
   });
 
   it("labels abilities in English", async () => {
-    await renderWithIntl(<AbilityScoresGrid data={{}} set={() => {}} />, { locale: "en" });
+    await renderWithIntl(<AbilityScoresGrid data={{}} set={() => {}} />, { locale: "en", namespaces: ["common", "gameTerms"] });
 
     expect(screen.getByLabelText("Constitution")).toBeInTheDocument();
   });
@@ -25,7 +25,7 @@ describe("AbilityScoresGrid", () => {
   it("стерте поле не стрибає на 10 під час введення, а на blur повертає останнє значення", async () => {
     const set = vi.fn();
 
-    await renderWithIntl(<AbilityScoresGrid data={{ strength: 14 }} set={set} showModifier />);
+    await renderWithIntl(<AbilityScoresGrid data={{ strength: 14 }} set={set} showModifier />, { namespaces: ["common", "gameTerms"] });
 
     const input = screen.getByLabelText(/Сила/) as HTMLInputElement;
 

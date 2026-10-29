@@ -1,0 +1,154 @@
+{
+  "abilities": {
+    "strength": {
+      "label": "Strength",
+      "short": "STR"
+    },
+    "dexterity": {
+      "label": "Dexterity",
+      "short": "DEX"
+    },
+    "constitution": {
+      "label": "Constitution",
+      "short": "CON"
+    },
+    "intelligence": {
+      "label": "Intelligence",
+      "short": "INT"
+    },
+    "wisdom": {
+      "label": "Wisdom",
+      "short": "WIS"
+    },
+    "charisma": {
+      "label": "Charisma",
+      "short": "CHA"
+    }
+  },
+  "stats": {
+    "hitPoints": "Hit points",
+    "speed": "Speed",
+    "armorClass": "Armor class",
+    "initiative": "Initiative",
+    "spellSaveDC": "Spell save DC",
+    "spellAttackBonus": "Spell attack bonus",
+    "spellSlots": "Spell slots",
+    "moral": "Morale"
+  },
+  "spellLevels": {
+    "0": "Cantrip",
+    "1": "1st level",
+    "2": "2nd level",
+    "3": "3rd level",
+    "4": "4th level",
+    "5": "5th level",
+    "6": "6th level",
+    "7": "7th level",
+    "8": "8th level",
+    "9": "9th level"
+  },
+  "dndSkills": {
+    "acrobatics": "Acrobatics",
+    "animalHandling": "Animal Handling",
+    "arcana": "Arcana",
+    "athletics": "Athletics",
+    "deception": "Deception",
+    "history": "History",
+    "insight": "Insight",
+    "intimidation": "Intimidation",
+    "investigation": "Investigation",
+    "medicine": "Medicine",
+    "nature": "Nature",
+    "perception": "Perception",
+    "performance": "Performance",
+    "persuasion": "Persuasion",
+    "religion": "Religion",
+    "sleightOfHand": "Sleight of Hand",
+    "stealth": "Stealth",
+    "survival": "Survival"
+  },
+  "ungrouped": {
+    "spellGroup": "No group",
+    "mainSkill": "No main skill",
+    "race": "No race",
+    "artifactSet": "No set",
+    "branch": "No branch"
+  },
+  "damageTypes": {
+    "fire": "Fire",
+    "cold": "Cold",
+    "lightning": "Lightning",
+    "acid": "Acid",
+    "poison": "Poison",
+    "necrotic": "Necrotic",
+    "radiant": "Radiant",
+    "thunder": "Thunder",
+    "psychic": "Psychic",
+    "force": "Force",
+    "bludgeoning": "Bludgeoning",
+    "piercing": "Piercing",
+    "slashing": "Slashing",
+    "bleed": "Bleed"
+  },
+  "monster": {
+    "distance": "{label} {value} ft",
+    "passivePerception": "Passive Perception {value}",
+    "fly": "Fly",
+    "swim": "Swim",
+    "climb": "Climb",
+    "burrow": "Burrow",
+    "hover": "Hover",
+    "languages": "Languages: {value}",
+    "telepathy": "Telepathy {value} ft",
+    "senses": {
+      "darkvision": "Darkvision",
+      "blindsight": "Blindsight",
+      "tremorsense": "Tremorsense",
+      "truesight": "Truesight"
+    },
+    "sizes": {
+      "tiny": "Tiny",
+      "small": "Small",
+      "medium": "Medium",
+      "large": "Large",
+      "huge": "Huge",
+      "gargantuan": "Gargantuan"
+    }
+  },
+  "weaponTraits": {
+    "label": "Weapon properties",
+    "versatileDice": "Two-handed die",
+    "traits": {
+      "light": "Light",
+      "finesse": "Finesse",
+      "twoHanded": "Two-handed",
+      "versatile": "Versatile",
+      "reach": "Reach",
+      "thrown": "Thrown",
+      "ammunition": "Ammunition"
+    }
+  },
+  "creatureTypes": {
+    "aberration": "Aberrations",
+    "beast": "Beasts",
+    "celestial": "Celestials",
+    "construct": "Constructs",
+    "dragon": "Dragons",
+    "elemental": "Elementals",
+    "fey": "Fey",
+    "fiend": "Fiends",
+    "giant": "Giants",
+    "humanoid": "Humanoids",
+    "monstrosity": "Monstrosities",
+    "ooze": "Oozes",
+    "plant": "Plants",
+    "undead": "Undead"
+  },
+  "abbreviations": {
+    "title": "Abbreviations reference",
+    "srOnly": "Abbreviations information",
+    "description": "What the ability and stat abbreviations mean",
+    "main": "Core abilities:",
+    "other": "Other stats:"
+  }
+}

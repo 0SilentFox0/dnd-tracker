@@ -1,24 +1,23 @@
-import { abilitiesField, nameField, textField } from "./common";
+import { abilitiesField, defineSpec, type FieldDef, nameField, textField } from "./common";
 
-import type { ImportField, ImportRecord, ImportSpec } from "@/types/content-import";
+import type { ImportRecord } from "@/types/content-import";
 
-const fields: ImportField[] = [
-  nameField(["Стійкість", "Майстер меча"]),
-  textField("description", "Опис", ["description"], ["+1 до КД", "Додаткова атака мечем"]),
-  textField("icon", "Іконка", ["icon"]),
-  textField("image", "Зображення", ["image"]),
-  { key: "mainSkillId", label: "Основний скіл", aliases: ["гілка", "main skill"], type: "ref", ref: "main-skills", examples: ["", ""] },
-  { key: "spellId", label: "Заклинання", aliases: ["spell"], type: "ref", ref: "spells", examples: ["", ""] },
-  { key: "spellGroupId", label: "Школа магії", aliases: ["школа", "spell group"], type: "ref", ref: "spell-groups", examples: ["", ""] },
-  { key: "grantedSpellId", label: "Дає заклинання", aliases: ["granted spell"], type: "ref", ref: "spells", examples: ["", ""] },
-  abilitiesField(["Стійкість: +1 до КД", ""]),
+const fields: FieldDef[] = [
+  nameField(),
+  textField("description"),
+  textField("icon"),
+  textField("image"),
+  { key: "mainSkillId", type: "ref", ref: "main-skills" },
+  { key: "spellId", type: "ref", ref: "spells" },
+  { key: "spellGroupId", type: "ref", ref: "spell-groups" },
+  { key: "grantedSpellId", type: "ref", ref: "spells" },
+  abilitiesField(),
 ];
 
 const pick = (record: ImportRecord, keys: readonly string[]): ImportRecord => Object.fromEntries(keys.filter((k) => record[k] !== undefined).map((k) => [k, record[k]]));
 
-export const SKILLS_IMPORT: ImportSpec = {
+export const SKILLS_IMPORT = defineSpec({
   kind: "skills",
-  label: "Скіли",
   fields,
   toBody: (record, op) => {
     const groups = {
@@ -33,4 +32,4 @@ export const SKILLS_IMPORT: ImportSpec = {
 
     return body;
   },
-};
+});

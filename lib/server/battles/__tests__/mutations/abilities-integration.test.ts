@@ -3,7 +3,8 @@ import { describe, expect, it } from "vitest";
 import { context, participant } from "./fixtures";
 
 import { AttackType, ParticipantSide } from "@/lib/constants/battle";
-import { attackBodySchema, attackMutation } from "@/lib/server/battles/mutations/attack/attack-mutation";
+import { attackBodySchema } from "@/lib/schemas/battles";
+import { attackMutation } from "@/lib/server/battles/mutations/attack/attack-mutation";
 import { bonusActionMutation } from "@/lib/server/battles/mutations/bonus-action/bonus-action-mutation";
 import { nextTurnMutation } from "@/lib/server/battles/mutations/next-turn/next-turn-mutation";
 import { resolved, seq } from "@/lib/utils/abilities/__tests__/fixtures";

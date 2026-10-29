@@ -5,13 +5,13 @@ import { applyMapping, autoMap, coerceRecord, duplicateTargets, missingRequired,
 import type { ImportField, ImportSpec } from "@/types/content-import";
 
 const FIELDS: ImportField[] = [
-  { key: "name", label: "Назва", aliases: ["name"], type: "string", required: true, examples: ["", ""] },
-  { key: "maxHp", label: "ХП", aliases: ["hp", "хіти"], type: "int", examples: ["", ""] },
-  { key: "abilities", label: "Навички/Здібності", aliases: ["особливості"], type: "abilitiesText", examples: ["", ""] },
-  { key: "raceId", label: "Раса", aliases: ["група"], type: "ref", ref: "races", examples: ["", ""] },
+  { key: "name", labelKey: "contentImport.fields.units.name", aliases: ["назва", "name"], type: "string", required: true },
+  { key: "maxHp", labelKey: "contentImport.fields.units.maxHp", aliases: ["хп", "hp", "хіти"], type: "int" },
+  { key: "abilities", labelKey: "contentImport.fields.units.abilities", aliases: ["навички/здібності", "особливості"], type: "abilitiesText" },
+  { key: "raceId", labelKey: "contentImport.fields.units.raceId", aliases: ["раса", "група"], type: "ref", ref: "races" },
 ];
 
-const SPEC: ImportSpec = { kind: "units", label: "Юніти", fields: FIELDS };
+const SPEC: ImportSpec = { kind: "units", fields: FIELDS };
 
 describe("autoMap", () => {
   it("ключ, підпис і синоніми без регістру й пробілів; невідомі — null", () => {
@@ -32,7 +32,7 @@ describe("applyMapping", () => {
     const { value, issues } = applyMapping(row, autoMap(Object.keys(row), FIELDS), FIELDS);
 
     expect(value).toEqual({ maxHp: "7" });
-    expect(issues).toEqual([{ field: "maxHp", level: "warning", message: "Кілька колонок для «ХП» — взято першу непорожню" }]);
+    expect(issues).toEqual([{ field: "maxHp", level: "warning", message: "contentImport.issues.duplicateColumns", params: { field: "contentImport.fields.units.maxHp" } }]);
   });
 
   it("колонка з null у мапінгу ігнорується", () => {
@@ -45,8 +45,9 @@ describe("coerceRecord / transformRow", () => {
     const { value, issues } = coerceRecord({ name: " Біс ", maxHp: "18 (4к6)", extra: 1, raceId: "Гноми" }, FIELDS);
 
     expect(value).toEqual({ name: "Біс", maxHp: 18, raceId: "Гноми" });
-    expect(issues).toEqual([{ field: "extra", level: "warning", message: "Невідоме поле «extra» — пропущено" }]);
-    expect(coerceRecord({ maxHp: "багато" }, FIELDS).issues[0]).toMatchObject({ field: "maxHp", level: "warning" });
+    expect(issues).toEqual([{ field: "extra", level: "warning", message: "contentImport.issues.unknownField", params: { field: "extra" } }]);
+    expect(coerceRecord({ maxHp: "багато" }, FIELDS).issues[0]).toEqual({ field: "maxHp", level: "warning", message: "contentImport.issues.columnSkipped", params: { got: "багато", field: "contentImport.fields.units.maxHp", detail: "contentImport.details.integerExpectedGot", value: "багато" } });
+    expect(coerceRecord({ name: "" }, FIELDS).issues).toEqual([]);
   });
 
   it("ідемпотентна: повторне перетворення не змінює значення", () => {
@@ -70,7 +71,7 @@ describe("recordToCells / missingRequired / nameKey", () => {
 });
 
 describe("дублікати колонок", () => {
-  const LIST: ImportField[] = [...FIELDS, { key: "immunities", label: "Імунітети", aliases: ["imm"], type: "list", examples: ["", ""] }];
+  const LIST: ImportField[] = [...FIELDS, { key: "immunities", labelKey: "contentImport.fields.units.immunities", aliases: ["імунітети", "imm"], type: "list" }];
 
   it("list-колонки з'єднуються, список розбирається", () => {
     const { value } = transformRow({ Імунітети: "fire", imm: "cold" }, { Імунітети: "immunities", imm: "immunities" }, LIST);

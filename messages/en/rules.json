@@ -3,8 +3,6 @@
     "title": "Campaign rules"
   },
   "form": {
-    "cancel": "Cancel",
-    "save": "Save",
     "hint": "Changes apply to new battles; a battle already in progress uses the rules fixed at its start",
     "saveFailed": "Could not save the rules"
   },

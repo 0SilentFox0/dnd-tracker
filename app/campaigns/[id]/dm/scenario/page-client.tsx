@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { useTranslations } from "next-intl";
 import { Plus } from "lucide-react";
 
 import { EmptyState, QueryState } from "@/components/common/states";
@@ -11,6 +12,8 @@ import { Button } from "@/components/ui/button";
 import { useScenarioPageActions, useScenarioPages } from "@/lib/hooks/scenario";
 
 export function ScenarioIndexPageClient({ campaignId, campaignName }: { campaignId: string; campaignName: string }) {
+  const t = useTranslations("scenario.indexPage");
+
   const router = useRouter();
 
   const pages = useScenarioPages(campaignId);
@@ -23,16 +26,16 @@ export function ScenarioIndexPageClient({ campaignId, campaignName }: { campaign
     <ScenarioBook>
       <div className="sb-index">
         <h1>{campaignName}</h1>
-        <p className="lead">Книга майстра: сцени для ведення, кожна на окремій сторінці.</p>
+        <p className="lead">{t("lead")}</p>
         <OnboardingHint id="dm.scenario" className="my-3 text-left" />
         <div className="sb-tools">
           <ScenarioSearch campaignId={campaignId} />
           <Button onClick={() => setCreating(true)} className="gap-2">
             <Plus className="size-4" />
-            Нова сторінка
+            {t("newPage")}
           </Button>
         </div>
-        <QueryState query={pages} empty={<EmptyState title="Сценарій порожній" description="Створіть першу сцену або імпортуйте наявні." />}>
+        <QueryState query={pages} empty={<EmptyState title={t("emptyTitle")} description={t("emptyDescription")} />}>
           {(list) => <ScenarioIndex campaignId={campaignId} pages={list} onMove={(id, dir, siblings) => void actions.move(id, dir, siblings).catch(() => {})} />}
         </QueryState>
       </div>

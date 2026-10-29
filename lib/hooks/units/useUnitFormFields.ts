@@ -6,6 +6,7 @@ import { useAbilityValidity } from "@/lib/hooks/abilities";
 import { useCampaignRules } from "@/lib/hooks/campaigns";
 import { useRaces } from "@/lib/hooks/races";
 import { useSpells } from "@/lib/hooks/spells";
+import { byName } from "@/lib/utils/common/text";
 import type { Unit } from "@/types/units";
 
 export function useUnitFormFields(campaignId: string, initial: () => Partial<Unit>) {
@@ -23,7 +24,7 @@ export function useUnitFormFields(campaignId: string, initial: () => Partial<Uni
 
   const abilities = useAbilityValidity();
 
-  const races = useMemo(() => [...(rawRaces ?? [])].sort((a, b) => a.name.localeCompare(b.name, "uk")), [rawRaces]);
+  const races = useMemo(() => [...(rawRaces ?? [])].sort(byName), [rawRaces]);
 
   const race = races.find((r) => r.id === formData.raceId) ?? null;
 

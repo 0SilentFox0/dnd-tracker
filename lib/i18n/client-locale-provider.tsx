@@ -4,9 +4,10 @@ import { useSyncExternalStore } from "react";
 import { NextIntlClientProvider } from "next-intl";
 
 import { readLocaleCookie } from "./client-cookie";
-import { APP_TIME_ZONE, DEFAULT_LOCALE, type Locale,LOCALE_CHANGE_EVENT } from "./config";
+import { DEFAULT_LOCALE, type Locale,LOCALE_CHANGE_EVENT } from "./config";
 import { HtmlLang } from "./html-lang";
 import { resolveLocale } from "./resolve-locale";
+import { useBrowserTimeZone, useSyncTimeZoneCookie } from "./use-time-zone-cookie";
 
 type Messages = Record<string, unknown>;
 
@@ -24,8 +25,12 @@ function readLocale(): Locale {
 export function ClientLocaleProvider({ messages, children }: { messages: Record<Locale, Messages>; children: React.ReactNode }) {
   const locale = useSyncExternalStore(subscribe, readLocale, () => DEFAULT_LOCALE);
 
+  const timeZone = useBrowserTimeZone();
+
+  useSyncTimeZoneCookie();
+
   return (
-    <NextIntlClientProvider locale={locale} messages={messages[locale]} timeZone={APP_TIME_ZONE}>
+    <NextIntlClientProvider locale={locale} messages={messages[locale]} timeZone={timeZone}>
       <HtmlLang locale={locale} />
       {children}
     </NextIntlClientProvider>

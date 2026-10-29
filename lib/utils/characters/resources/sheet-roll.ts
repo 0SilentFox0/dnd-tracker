@@ -6,9 +6,9 @@ import type { BattleParticipant } from "@/types/battle";
 import type { SheetRollResult, SheetRollSubject } from "@/types/characters";
 
 function sheetRollLabel(subject: SheetRollSubject, t: Translator): string {
-  if ("skill" in subject) return t(`common.dndSkills.${subject.skill}`);
+  if ("skill" in subject) return t(`gameTerms.dndSkills.${subject.skill}`);
 
-  const ability = t(`common.abilities.${subject.ability}.label`);
+  const ability = t(`gameTerms.abilities.${subject.ability}.label`);
 
   return t(subject.kind === "save" ? "rest.rollLabel.save" : "rest.rollLabel.check", { ability });
 }

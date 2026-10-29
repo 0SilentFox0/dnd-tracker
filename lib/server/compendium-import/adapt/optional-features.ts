@@ -10,6 +10,6 @@ export function adaptOptionalFeatures(state: AdaptState) {
     const key = canonicalKey("optionalfeature", str(row.name), str(row.source), effectiveEdition(row.edition, state.meta.edition));
 
     if (!state.usedOptionals.has(key))
-      state.issues.push(issue("OPTIONAL_FEATURE_WITHOUT_OWNER", `optionalfeature[${i}]`, "warning", "Прив'яжіть особливість до вибору класу або використовуйте її опис вручну"));
+      state.issues.push(issue("OPTIONAL_FEATURE_WITHOUT_OWNER", `optionalfeature[${i}]`, "warning"));
   });
 }

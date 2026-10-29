@@ -1,11 +1,14 @@
 import "server-only";
 import { ArtifactSlot } from "@/lib/constants/artifacts";
 import { prisma } from "@/lib/db";
+import type { Locale } from "@/lib/i18n/config";
+import { getTranslator } from "@/lib/i18n/translator";
 import { assertCan } from "@/lib/server/content/access";
 import { loadNames } from "@/lib/server/content/import/names";
 import { artifactAbilities, artifactSetAbilities, featAbilities, raceAbilities, skillAbilities, unitAbilities } from "@/lib/utils/abilities/read";
 import type { Actor } from "@/lib/utils/api/actor";
 import { NEED } from "@/lib/utils/api/need";
+import { localeOrRequest } from "@/lib/utils/api/translate-error";
 import { armorStatsFromRow } from "@/lib/utils/artifacts/armor-stats";
 import { isWeaponSlot, weaponStatsFromRow } from "@/lib/utils/artifacts/weapon-stats";
 import { IMPORT_SPECS } from "@/lib/utils/content/import/fields";
@@ -19,6 +22,7 @@ import type { ImportKind, ImportRecord } from "@/types/content-import";
 export type ExportDeps = {
   loadRecords(campaignId: string, kind: ImportKind): Promise<ImportRecord[]>;
   loadNames(campaignId: string, kind: ImportKind): Promise<IdName[]>;
+  locale?: Locale;
 };
 
 const query = (campaignId: string) => ({ where: { campaignId }, orderBy: [{ createdAt: "asc" as const }, { id: "asc" as const }] });
@@ -47,10 +51,14 @@ export const EXPORT_LOADERS: Record<ImportKind, (campaignId: string) => Promise<
     ),
 };
 
-const DEFAULT_DEPS: ExportDeps = { loadRecords: (c, k) => EXPORT_LOADERS[k](c), loadNames };
+export const DEFAULT_DEPS: ExportDeps = { loadRecords: (c, k) => EXPORT_LOADERS[k](c), loadNames };
 
 export async function exportCsv(actor: Actor, kind: ImportKind, deps: ExportDeps = DEFAULT_DEPS): Promise<string> {
   assertCan(actor, NEED.read("dm"));
+
+  const locale = await localeOrRequest(deps.locale);
+
+  const t = await getTranslator(locale);
 
   const spec = IMPORT_SPECS[kind];
 
@@ -62,5 +70,5 @@ export async function exportCsv(actor: Actor, kind: ImportKind, deps: ExportDeps
 
   const nameOf = (k: ImportKind, id: string) => names.get(k)?.get(id);
 
-  return toCsv(spec.fields.map((f) => f.label), records.map((r) => recordToCells(spec, r, nameOf)));
+  return toCsv(spec.fields.map((f) => t(f.labelKey)), records.map((r) => recordToCells(spec, r, nameOf, locale)));
 }

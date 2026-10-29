@@ -3,7 +3,8 @@ import { describe, expect, it, vi } from "vitest";
 import { context, goblin, hero, participant } from "./fixtures";
 
 import { API_ERRORS } from "@/lib/constants/api-errors";
-import { mazeMarkMutation, mazeMarkSchema } from "@/lib/server/battles/mutations/maze-mark/maze-mark-mutation";
+import { mazeMarkSchema } from "@/lib/schemas/battles";
+import { mazeMarkMutation } from "@/lib/server/battles/mutations/maze-mark/maze-mark-mutation";
 import { runBattleMutation } from "@/lib/server/battles/run-mutation";
 import { markColor } from "@/lib/utils/battle/modes/maze";
 import { at, mazeMap, withMap } from "@/lib/utils/battle/modes/maze/__tests__/fixtures";

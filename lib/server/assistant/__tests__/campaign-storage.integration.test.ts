@@ -52,7 +52,7 @@ const ownedIds = new Set<string>();
 
 const actor = () => ({ campaignId, userId, isDM: true, via: "session", scopes: null } as const);
 
-const caller = (): AssistantCaller => ({ actor: actor(), channel: "chat", threadId, tokenId: null });
+const caller = (): AssistantCaller => ({ actor: actor(), channel: "chat", threadId, tokenId: null, locale: "uk" as const });
 
 const executor = () => createAssistantExecutor({ db, catalog: createActionCatalog(CAMPAIGN_ACTIONS) });
 
@@ -105,7 +105,7 @@ describe.skipIf(!isLocalDevDatabaseEnv())("campaign lifecycle real constructor, 
   it("cloneDoesNotGrantTokenNewScope and inviteNeverInToolOutput", async () => {
     const token = await db.apiToken.create({ data: { campaignId, userId, name: marker, prefix: "synthetic", tokenHash: randomUUID(), scopes: ["campaign:write", "campaign:read"] } });
 
-    const tokenCaller: AssistantCaller = { actor: { ...actor(), via: "token", scopes: ["campaign:write", "campaign:read"] }, channel: "mcp", threadId: null, tokenId: token.id };
+    const tokenCaller: AssistantCaller = { actor: { ...actor(), via: "token", scopes: ["campaign:write", "campaign:read"] }, channel: "mcp", threadId: null, tokenId: token.id, locale: "uk" as const };
 
     const prepared = await executor().dispatchAction(tokenCaller, { actionId: "campaign.clone", requestId: randomUUID(), input: { name: marker } });
 

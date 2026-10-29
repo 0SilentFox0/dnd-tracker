@@ -28,6 +28,8 @@ export function GoalList() {
 
   const t = useTranslations("characterProfile.goals");
 
+  const tc = useTranslations("common.actions");
+
   const { save, isPending } = useCharacterGoals(campaignId, characterId);
 
   const confirm = useConfirm();
@@ -59,7 +61,7 @@ export function GoalList() {
   };
 
   const remove = async (g: CharacterGoal) => {
-    if (await confirm({ title: t("deleteConfirm", { name: goalName(g) }), confirmLabel: t("delete") })) await send(all.filter((x) => x.id !== g.id));
+    if (await confirm({ title: t("deleteConfirm", { name: goalName(g) }), confirmLabel: tc("delete") })) await send(all.filter((x) => x.id !== g.id));
   };
 
   return (
@@ -122,7 +124,7 @@ export function GoalList() {
           <Button type="button" className="h-11" aria-label={t("save")} disabled={isPending || !draft.text.trim()} onClick={() => void commit()}>
             <Check className="size-4" />
           </Button>
-          <Button type="button" variant="ghost" className="h-11" aria-label={t("cancel")} onClick={() => setDraft(null)}>
+          <Button type="button" variant="ghost" className="h-11" aria-label={tc("cancel")} onClick={() => setDraft(null)}>
             <X className="size-4" />
           </Button>
         </div>

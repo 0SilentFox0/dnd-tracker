@@ -16,7 +16,7 @@ describe("ClassBasicsTab in en", () => {
   it("renders English labels, caster types and skills", async () => {
     const data = makeClass({ caster: "half", skillChoices: { count: 2, from: ["stealth"] } });
 
-    await renderWithIntl(<ClassBasicsTab form={{ data, set: () => {} }} />, { locale: "en", namespaces: ["common", "classes"] });
+    await renderWithIntl(<ClassBasicsTab form={{ data, set: () => {} }} />, { locale: "en", namespaces: ["common", "gameTerms", "classes"] });
 
     expect(screen.getByText("Class name *")).toBeInTheDocument();
     expect(screen.getByText("Class icon")).toBeInTheDocument();

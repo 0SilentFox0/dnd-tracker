@@ -1,7 +1,7 @@
 // @vitest-environment happy-dom
 import { beforeEach, describe, expect, it } from "vitest";
 
-import { aiSample, loadStoredMapping, mergeReports, readImportFile, reportToCsv, saveStoredMapping, statusLabel } from "../wizard";
+import { aiSample, loadStoredMapping, mergeReports, readImportFile, reportToCsv, saveStoredMapping, statusKey } from "../wizard";
 
 import { IMPORT_SPECS, parseTable } from "@/lib/utils/content/import";
 import type { ImportReport, ParsedTable } from "@/types/content-import";
@@ -18,8 +18,8 @@ describe("wizard utils", () => {
   beforeEach(() => window.localStorage.clear());
 
   it("readImportFile: XLSX — підказка зберегти як CSV; інші розширення — відмова; CSV читається", async () => {
-    await expect(readImportFile(new File(["x"], "a.xlsx"))).rejects.toThrow("CSV (UTF-8)");
-    await expect(readImportFile(new File(["x"], "a.pdf"))).rejects.toThrow("CSV, TSV і JSON");
+    await expect(readImportFile(new File(["x"], "a.xlsx"))).rejects.toThrow("contentImport.file.xlsxUnsupported");
+    await expect(readImportFile(new File(["x"], "a.pdf"))).rejects.toThrow("contentImport.file.unsupportedType");
     expect(await readImportFile(new File(["Назва\nА"], "a.CSV"))).toBe("Назва\nА");
   });
 
@@ -34,7 +34,7 @@ describe("wizard utils", () => {
   });
 
   it("reportToCsv: лише рядки з помилками з вихідними клітинками", () => {
-    const csv = reportToCsv(TABLE, report([{ row: 1, status: "created", issues: [] }, { row: 2, status: "error", issues: [{ field: "maxHp", level: "error", message: "ХП: Очікується ціле число" }] }]));
+    const csv = reportToCsv(TABLE, report([{ row: 1, status: "created", issues: [] }, { row: 2, status: "error", issues: [{ field: "maxHp", level: "error", message: "ХП: Очікується ціле число" }] }]), { statusHeader: "Статус", errorsHeader: "Помилки", status: (s) => (s === "error" ? "Помилка" : s) });
 
     expect(parseTable(csv).rows).toEqual([{ Назва: "Вовк", ХП: "багато", Статус: "Помилка", Помилки: "ХП: Очікується ціле число" }]);
   });
@@ -62,8 +62,8 @@ describe("wizard utils", () => {
     expect(loadStoredMapping("units", ["A"], IMPORT_SPECS.units.fields)).toEqual({ A: null });
   });
 
-  it("statusLabel", () => {
-    expect(statusLabel("created", true)).toBe("Буде створено");
-    expect(statusLabel("updated", false)).toBe("Оновлено");
+  it("statusKey", () => {
+    expect(statusKey("created", true)).toBe("contentImport.status.created.planned");
+    expect(statusKey("updated", false)).toBe("contentImport.status.updated.done");
   });
 });

@@ -47,7 +47,7 @@ export function adaptTopLevel(state: AdaptState) {
     if (kind === "_meta" || !isEnabled(state, kind)) continue;
 
     if (!adapters[kind] && !nestedKinds.has(kind)) {
-      state.issues.push(issue("UNSUPPORTED_CATEGORY", kind, "warning", "Перенесіть потрібні матеріали вручну"));
+      state.issues.push(issue("UNSUPPORTED_CATEGORY", kind, "warning"));
       continue;
     }
 
@@ -63,7 +63,7 @@ export function adaptTopLevel(state: AdaptState) {
   }
 
   if (isEnabled(state, "condition"))
-    for (const d of deriveCustomConditions(state.root)) if (!d.recognized) state.issues.push(issue("MANUAL_CONDITION_TEXT", `condition[${d.index}]`, "warning", "Текст стану не зведено до маркерів рушія: стан додається з описом, налаштуйте дію вручну"));
+    for (const d of deriveCustomConditions(state.root)) if (!d.recognized) state.issues.push(issue("MANUAL_CONDITION_TEXT", `condition[${d.index}]`, "warning"));
 
   for (const entry of state.entries.filter((e) => e.inputKind === "class")) {
     const row = state.sourceRows.get(entry.key);

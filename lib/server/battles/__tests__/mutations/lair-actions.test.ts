@@ -4,9 +4,9 @@ import { context, hero, participant } from "./fixtures";
 
 import { API_ERRORS } from "@/lib/constants/api-errors";
 import { ParticipantSide } from "@/lib/constants/battle";
+import { patchParticipantSchema } from "@/lib/schemas/battles";
 import { legendaryMutation } from "@/lib/server/battles/mutations/core-action/legendary-mutation";
 import { patchParticipantMutation } from "@/lib/server/battles/mutations/participants/patch-participant-mutation";
-import { patchParticipantSchema } from "@/lib/server/battles/mutations/participants/patch-participant-schema";
 import { resolved } from "@/lib/utils/abilities/__tests__/fixtures";
 import { legendaryActionSchema } from "@/lib/utils/battle/actions/schema";
 import { resolveSave } from "@/lib/utils/battle/saves/legendary";

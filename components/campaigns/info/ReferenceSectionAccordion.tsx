@@ -13,6 +13,7 @@ import { SpellReferenceCard } from "./SpellReferenceCard";
 import { HudPanel } from "@/components/hud/page";
 import { Accordion } from "@/components/ui/accordion";
 import { groupDisplayName, UNGROUPED_KEY } from "@/lib/constants/ungrouped";
+import { groupBy } from "@/lib/utils/common/collections";
 import type { ArtifactForReference, ArtifactSetForReference, ClassForReference, SkillForReference, SpellForReference } from "@/types/info-reference";
 
 interface ReferenceSectionAccordionProps {
@@ -31,54 +32,15 @@ interface ReferenceSectionAccordionProps {
 export function ReferenceSectionAccordion({ campaignId, isDM, shown, items }: ReferenceSectionAccordionProps) {
   const t = useTranslations("dashboard.reference.sections");
 
-  const tu = useTranslations("common.ungrouped");
+  const tu = useTranslations("gameTerms.ungrouped");
 
   const { skills: filteredSkills, spells: filteredSpells, artifacts: filteredArtifacts, artifactSets, classes: filteredClasses } = items;
 
-  const skillsByMain = useMemo(() => {
-    const map = new Map<string, SkillForReference[]>();
+  const skillsByMain = useMemo(() => groupBy(filteredSkills, (s) => s.mainSkillName ?? UNGROUPED_KEY), [filteredSkills]);
 
-    for (const s of filteredSkills) {
-      const key = s.mainSkillName ?? UNGROUPED_KEY;
+  const spellsByGroup = useMemo(() => groupBy(filteredSpells, (s) => s.groupName ?? UNGROUPED_KEY), [filteredSpells]);
 
-      const list = map.get(key) ?? [];
-
-      list.push(s);
-      map.set(key, list);
-    }
-
-    return map;
-  }, [filteredSkills]);
-
-  const spellsByGroup = useMemo(() => {
-    const map = new Map<string, SpellForReference[]>();
-
-    for (const s of filteredSpells) {
-      const key = s.groupName ?? UNGROUPED_KEY;
-
-      const list = map.get(key) ?? [];
-
-      list.push(s);
-      map.set(key, list);
-    }
-
-    return map;
-  }, [filteredSpells]);
-
-  const artifactsBySet = useMemo(() => {
-    const map = new Map<string, ArtifactForReference[]>();
-
-    for (const a of filteredArtifacts) {
-      const key = a.setName ?? UNGROUPED_KEY;
-
-      const list = map.get(key) ?? [];
-
-      list.push(a);
-      map.set(key, list);
-    }
-
-    return map;
-  }, [filteredArtifacts]);
+  const artifactsBySet = useMemo(() => groupBy(filteredArtifacts, (a) => a.setName ?? UNGROUPED_KEY), [filteredArtifacts]);
 
   const { skills: skillsVisible, spells: spellsVisible, artifacts: artifactsVisible, classes: classesVisible } = shown;
 

@@ -77,7 +77,7 @@ describe("assistant human-only API", () => {
     const result = await assistantRoute("confirm")(req("POST", { userId: "another-dm" }), ctx());
 
     expect(result.status).toBe(200);
-    expect(mocks.confirm).toHaveBeenCalledWith({ campaignId: "campaign", userId: "dm", isDM: true, via: "session", scopes: null }, "intent");
+    expect(mocks.confirm).toHaveBeenCalledWith({ campaignId: "campaign", userId: "dm", isDM: true, via: "session", scopes: null }, "intent", "uk");
   });
 
   it("foreign author/expired intent errors preserve 404/409 without leaking payload", async () => {

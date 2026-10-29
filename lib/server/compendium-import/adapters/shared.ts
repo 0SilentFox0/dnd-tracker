@@ -1,10 +1,11 @@
+/* eslint-disable no-restricted-syntax -- derived content written to the DB stays Ukrainian (spec part5, decision 5) */
 import { renderEntries } from "../entries";
 import { stableJson } from "../identity";
 import type { JsonRecord } from "../parse";
 import { type AdapterContext, type CompendiumRef, type Edition, issue } from "../types";
 
 import { DND_SKILLS } from "@/lib/constants/skills";
-import { isRecord } from "@/lib/utils/common/is-record";
+import { asRecord } from "@/lib/utils/common/json";
 
 export const effectiveEdition = (value: unknown, fallback: unknown): Edition =>
   value === "classic" || value === "one"
@@ -13,7 +14,7 @@ export const effectiveEdition = (value: unknown, fallback: unknown): Edition =>
     ? fallback
     : "unknown";
 
-export const object = (v: unknown): JsonRecord => isRecord(v) ? v : {};
+export const object = asRecord;
 export const array = (v: unknown): unknown[] => Array.isArray(v) ? v : [];
 export const str = (v: unknown): string => typeof v === "string" ? v : "";
 export const num = (v: unknown): number | undefined => typeof v === "number" && Number.isFinite(v) ? v : undefined;
@@ -61,7 +62,7 @@ export function skills(raw: unknown, ctx: AdapterContext): { fixed: string[]; ch
       const id = skillName(key);
 
       if (id) fixed.push(id);
-      else ctx.issues.push(issue("MANUAL_CUSTOM_SKILL", `${ctx.path}.skillProficiencies[${i}].${key}`, "warning", "Ведіть нестандартну навичку вручну"));
+      else ctx.issues.push(issue("MANUAL_CUSTOM_SKILL", `${ctx.path}.skillProficiencies[${i}].${key}`, "warning"));
     }
 
     const choose = object(row.choose);

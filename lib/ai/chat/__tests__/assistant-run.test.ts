@@ -4,7 +4,7 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 import { createAssistantRunStore, createRunSignal, toolRequestKey } from "@/lib/server/assistant/runs";
 import type { AssistantCaller } from "@/lib/server/assistant/types";
 
-const caller: AssistantCaller = { actor: { campaignId: "c", userId: "u", via: "session", scopes: null, isDM: true }, channel: "chat", tokenId: null, threadId: "t" };
+const caller: AssistantCaller = { actor: { campaignId: "c", userId: "u", via: "session", scopes: null, isDM: true }, channel: "chat", tokenId: null, threadId: "t", locale: "uk" as const };
 
 vi.mock("@/lib/server/assistant/authorize", () => ({ revalidateAssistantCaller: vi.fn(async () => caller.actor) }));
 vi.mock("@/lib/server/assistant/execute", () => ({ createAssistantExecutor: () => ({ reconcileEffects: vi.fn() }) }));

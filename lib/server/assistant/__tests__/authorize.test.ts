@@ -6,7 +6,7 @@ import type { AssistantCaller } from "@/lib/server/assistant/types";
 
 vi.mock("@/lib/db", () => ({ prisma: { campaignMember: { findMany: vi.fn() }, apiToken: { findUnique: vi.fn() } } }));
 
-const caller: AssistantCaller = { actor: { campaignId: "campaign", userId: "dm", isDM: true, via: "token", scopes: ["characters:write"] }, channel: "mcp", tokenId: "token", threadId: null };
+const caller: AssistantCaller = { actor: { campaignId: "campaign", userId: "dm", isDM: true, via: "token", scopes: ["characters:write"] }, channel: "mcp", tokenId: "token", threadId: null, locale: "uk" as const };
 
 const need = { access: "dm", scope: "characters:write" } as const;
 
@@ -21,7 +21,7 @@ describe("assistant authorization uses current membership and token grants", () 
 
   it("accepts an active DM token and a real DM session", async () => {
     await expect(authorizeAssistant(caller, need)).resolves.toBeUndefined();
-    await expect(authorizeAssistant({ ...caller, actor: { ...caller.actor, via: "session", scopes: null }, channel: "chat", tokenId: null }, need)).resolves.toBeUndefined();
+    await expect(authorizeAssistant({ ...caller, actor: { ...caller.actor, via: "session", scopes: null }, channel: "chat", tokenId: null, locale: "uk" as const }, need)).resolves.toBeUndefined();
   });
 
   it("rejects lost DM membership despite a stale isDM assertion", async () => {

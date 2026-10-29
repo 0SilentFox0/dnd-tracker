@@ -8,7 +8,7 @@ import type { AssistantCaller } from "@/lib/server/assistant/types";
 
 vi.mock("@/lib/server/assistant/execute", () => ({ dispatchAction: vi.fn(async () => ({ kind: "result", result: { data: {}, affected: [], warnings: [] } })) }));
 
-const caller: AssistantCaller = { actor: { campaignId: "c", userId: "u", isDM: true, via: "session", scopes: null }, channel: "chat", threadId: "t", tokenId: null, runId: "cm123456789012345678901234" };
+const caller: AssistantCaller = { actor: { campaignId: "c", userId: "u", isDM: true, via: "session", scopes: null }, channel: "chat", threadId: "t", tokenId: null, runId: "cm123456789012345678901234", locale: "uk" as const };
 
 describe("trusted SDK tool request keys", () => {
   it.each([
@@ -18,7 +18,7 @@ describe("trusted SDK tool request keys", () => {
   ])("%s reuses SDK toolCallId under the server run, with a schema-valid key", async (name, input) => {
     vi.mocked(dispatchAction).mockClear();
 
-    const tools = toAiSdkTools({ caller, campaignId: "c", userId: "u", threadId: "t", scopes: API_TOKEN_SCOPES });
+    const tools = toAiSdkTools({ caller, campaignId: "c", userId: "u", threadId: "t", scopes: API_TOKEN_SCOPES, locale: "uk" as const });
 
     const execute = tools[String(name)].execute;
 

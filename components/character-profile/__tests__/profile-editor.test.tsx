@@ -34,10 +34,10 @@ describe("редактор ДМа", () => {
 
     const { rerender } = render(<PrimaryAbilityPicker value={null} onChange={onChange} />);
 
-    fireEvent.click(screen.getByRole("checkbox", { name: 'characters.stats.primary.aria {"ability":"common.abilities.dexterity.label"}' }));
+    fireEvent.click(screen.getByRole("checkbox", { name: 'characters.stats.primary.aria {"ability":"gameTerms.abilities.dexterity.label"}' }));
     expect(onChange).toHaveBeenLastCalledWith("dexterity");
     rerender(<PrimaryAbilityPicker value="dexterity" onChange={onChange} />);
-    fireEvent.click(screen.getByRole("checkbox", { name: 'characters.stats.primary.aria {"ability":"common.abilities.dexterity.label"}' }));
+    fireEvent.click(screen.getByRole("checkbox", { name: 'characters.stats.primary.aria {"ability":"gameTerms.abilities.dexterity.label"}' }));
     expect(onChange).toHaveBeenLastCalledWith(null);
   });
 });

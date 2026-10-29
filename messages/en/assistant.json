@@ -1,0 +1,134 @@
+{
+  "results": {
+    "campaign": "Campaign",
+    "characters": "Characters",
+    "character": "Character",
+    "scenario": "Scenario",
+    "show": "Show",
+    "newPage": "New page",
+    "rules": "Rules"
+  },
+  "summary": {
+    "campaign": "Campaign: {operation}",
+    "characters": "Characters: {operation}",
+    "scenario": "Scenario: {operation}",
+    "show": "Show: {operation}",
+    "deleteAllPlayers": "Delete all characters of the \"Player\" type",
+    "cleared": "Proposal content cleared",
+    "content": "{label}: {verb}"
+  },
+  "warnings": {
+    "campaignDelete": "The campaign and all dependent records will be deleted.",
+    "characterManual": "Background equipment and gold stay manual; additionalSpells is not supported.",
+    "serverRoll": "The server rolls the dice once during execution; the result is not known yet.",
+    "contentCascades": "The current cascades and reference rules will apply. A change in dependencies cancels the proposal.",
+    "sourceApply": "Dependencies are added automatically; attribution is updated for ignore too. The DM's ScenarioPage materials are not synced.",
+    "importPartial": "The import may complete partially: errors and skips are returned for each row.",
+    "manualSetup": "additionalSpells, equipment and gold are set up manually.",
+    "importPartialDone": "The import completed partially; check the row errors in the report."
+  },
+  "effects": {
+    "sourceMarks": "Source marks and attribution",
+    "skillTreeReplace": "Tree replacement, keeping the current progress carry-over"
+  },
+  "handoffs": {
+    "compendium-read": "View the permitted reports and import options through your own session in the app.",
+    "credentials": "Add or change the provider key in the AI settings.",
+    "tokens": "Manage API tokens and their permissions in the app.",
+    "invite": "Review the campaign invitation and pass it to the person yourself.",
+    "campaign-import": "Choose a local file in the campaign creation form.",
+    "campaign-join": "Enter the invitation code in the campaign join dialog.",
+    "content-import": "Choose a file, check the mapping and confirm the import in the existing editor.",
+    "ai-map": "Pick the data and run AI mapping in the import dialog.",
+    "slide-upload": "Choose an image in the slide deck editor.",
+    "track-upload": "Choose an audio file in the music library.",
+    "player-draft": "The player's draft and AI features are available only in the player's own flow.",
+    "compendium-preview": "Choose a local JSON file, check the preview and confirm your rights to the materials in the app.",
+    "compendium-confirm": "Open the current preview, check the selection and confirm your import rights in the app.",
+    "source-notes": "The DM must explicitly pick the source notes before they are passed to AI. Notes are never passed automatically.",
+    "campaignExport": "Download the campaign export in the app; its content is not sent to the model.",
+    "contentMedia": "Add the icon or file in the existing editor, then repeat the change of the other fields without media."
+  },
+  "media": {
+    "icon": "Add the icon in the existing content editor",
+    "trackFile": "Upload the file in the music library"
+  },
+  "operations": {
+    "rules": {
+      "get": "Campaign rules",
+      "update": "Update rules",
+      "condition-usage": "Where a custom condition is used"
+    },
+    "campaign": {
+      "export": "Export bundle"
+    },
+    "source": {
+      "diff": "Source changes",
+      "apply": "Apply source changes"
+    },
+    "skill-trees": {
+      "list": "Skill trees",
+      "save": "Save skill tree"
+    },
+    "skills": {
+      "duplicate": "Duplicate skill"
+    },
+    "spells": {
+      "remove-from-group": "Remove spell from group",
+      "delete-by-level": "Delete spells of a level"
+    },
+    "spell-groups": {
+      "remove-all-spells": "Clear school"
+    },
+    "units": {
+      "import": "Import units"
+    },
+    "content": {
+      "import": "Import content",
+      "import-example": "Import CSV example",
+      "export": "Export CSV"
+    },
+    "tracks": {
+      "reorder": "Track order"
+    },
+    "abilities": {
+      "sources": "Ability owners",
+      "get": "Owner abilities"
+    }
+  },
+  "contentKinds": {
+    "spells": "Spells",
+    "skills": "Skills",
+    "backgrounds": "Backgrounds",
+    "artifacts": "Artifacts",
+    "classes": "Classes",
+    "artifact-sets": "Artifact sets",
+    "main-skills": "Main skills",
+    "feats": "Feats",
+    "spell-groups": "Schools of magic",
+    "tracks": "Battle music",
+    "races": "Races",
+    "units": "Units"
+  },
+  "defaults": {
+    "copyOf": "{name} (copy)",
+    "skillCopy": "Skill (copy)",
+    "firstChapter": "Story",
+    "firstSection": "Section 1"
+  },
+  "blocks": {
+    "callout": "{count, plural, one {# callout} other {# callouts}}",
+    "readAloud": "{count, plural, one {# read-aloud block} other {# read-aloud blocks}}",
+    "say": "{count, plural, one {# line of dialogue} other {# lines of dialogue}}",
+    "table": "{count, plural, one {# table} other {# tables}}",
+    "token": "{count, plural, one {# token} other {# tokens}}",
+    "mention": "{count, plural, one {# mention} other {# mentions}}",
+    "secret": "{count, plural, one {# secret} other {# secrets}}"
+  },
+  "scenarioOps": {
+    "sectionMissing": "Section {id} is not on the page",
+    "rowMissing": "Row {id} is not in the section \"{section}\"",
+    "lossyRow": "Row {id} contains markup that AI cannot reproduce without loss (nested lists or complex tables) — edit it manually",
+    "removal": "The edit removes from row {id}: {lost}. replaceRow replaces the whole field — carry these blocks into the new text unchanged, or pass allowRemoval: true only if the DM explicitly asked to remove them."
+  }
+}

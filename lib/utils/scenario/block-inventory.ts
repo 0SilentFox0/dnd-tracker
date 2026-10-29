@@ -1,4 +1,3 @@
-import { pluralUk } from "@/lib/utils/common/plural";
 import type { RichDoc, RichNode } from "@/types/scenario";
 
 export type BlockKind = "callout" | "readAloud" | "say" | "table" | "token" | "mention" | "secret";
@@ -6,16 +5,6 @@ export type BlockKind = "callout" | "readAloud" | "say" | "table" | "token" | "m
 export type BlockInventory = Record<BlockKind, number>;
 
 const NODE_KINDS = ["callout", "readAloud", "say", "table", "token", "mention"] as const;
-
-const LABELS: Record<BlockKind, [string, string, string]> = {
-  callout: ["виноску", "виноски", "виносок"],
-  readAloud: ["блок «читати вголос»", "блоки «читати вголос»", "блоків «читати вголос»"],
-  say: ["репліку", "репліки", "реплік"],
-  table: ["таблицю", "таблиці", "таблиць"],
-  token: ["токен", "токени", "токенів"],
-  mention: ["згадку", "згадки", "згадок"],
-  secret: ["секрет", "секрети", "секретів"],
-};
 
 const empty = (): BlockInventory => ({ callout: 0, readAloud: 0, say: 0, table: 0, token: 0, mention: 0, secret: 0 });
 
@@ -50,6 +39,6 @@ export function lostBlocks(before: RichDoc, after: RichDoc): Partial<Record<Bloc
   return lost;
 }
 
-export function describeLost(lost: Partial<Record<BlockKind, number>>): string {
-  return (Object.keys(lost) as BlockKind[]).map((k) => `${lost[k]} ${pluralUk(lost[k] as number, LABELS[k])}`).join(", ");
+export function describeLost(lost: Partial<Record<BlockKind, number>>, label: (kind: BlockKind, count: number) => string): string {
+  return (Object.keys(lost) as BlockKind[]).map((k) => label(k, lost[k] as number)).join(", ");
 }

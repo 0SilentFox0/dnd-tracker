@@ -4,30 +4,24 @@ import type { AttackKind } from "@/lib/utils/abilities/schema";
 import { applyResistance } from "@/lib/utils/battle/resistance";
 import type { BattleParticipant } from "@/types/battle";
 
-export interface ApplyDamageToTargetResult {
-  updatedTarget: BattleParticipant;
-}
-
 /** Фізичний + додатковий урон: спершу tempHp, далі HP і статус. Виживання вирішують уміння (lethalDamage). */
-export function applyDamageToTarget(target: BattleParticipant, totalFinalDamage: number): ApplyDamageToTargetResult {
+export function applyDamageToTarget(target: BattleParticipant, totalFinalDamage: number): BattleParticipant {
   const fromTemp = Math.min(target.combatStats.tempHp, Math.max(0, totalFinalDamage));
 
   const currentHp = Math.max(BATTLE_CONSTANTS.MIN_DAMAGE, target.combatStats.currentHp - (totalFinalDamage - fromTemp));
 
-  return {
-    updatedTarget: dropBreakOnDamage(
-      {
-        ...target,
-        combatStats: {
-          ...target.combatStats,
-          tempHp: target.combatStats.tempHp - fromTemp,
-          currentHp,
-          status: currentHp <= 0 ? (currentHp < 0 ? CombatStatus.DEAD : CombatStatus.UNCONSCIOUS) : target.combatStats.status,
-        },
+  return dropBreakOnDamage(
+    {
+      ...target,
+      combatStats: {
+        ...target.combatStats,
+        tempHp: target.combatStats.tempHp - fromTemp,
+        currentHp,
+        status: currentHp <= 0 ? CombatStatus.UNCONSCIOUS : target.combatStats.status,
       },
-      totalFinalDamage,
-    ),
-  };
+    },
+    totalFinalDamage,
+  );
 }
 
 export interface ApplyResistanceForAdditionalResult {

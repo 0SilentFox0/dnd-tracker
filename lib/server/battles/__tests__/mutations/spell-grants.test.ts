@@ -4,7 +4,7 @@ import { describe, expect, it } from "vitest";
 import { context, goblin, participant } from "./fixtures";
 
 import { API_ERRORS } from "@/lib/constants/api-errors";
-import { spellSchema } from "@/lib/server/battles/mutations/spell/cast-spell-schema";
+import { castSpellSchema } from "@/lib/schemas/battles";
 import { createSpellMutation } from "@/lib/server/battles/mutations/spell/spell-mutation";
 import { runBattleMutation } from "@/lib/server/battles/run-mutation";
 import type { BattleParticipant, SpellGrant } from "@/types/battle";
@@ -281,7 +281,7 @@ describe("monster spell grants", () => {
     const ctx = context({ participants: [monster(grant), goblin] });
 
     const response = await runBattleMutation(new Request("http://test/spell", { method: "POST", body: JSON.stringify({ casterId: "hero", spellId: row.id, targetIds: ["gob"], diceRolls: [4], ...data }) }), {
-      params: { id: "c1", battleId: "b1" }, access: "member", schema: spellSchema,
+      params: { id: "c1", battleId: "b1" }, access: "member", schema: castSpellSchema,
       mutate: createSpellMutation({ loadSpell: async () => row, loadPool: async () => ({ units: [], races: [] }) }),
     }, {
       getUserId: async () => "user-1",

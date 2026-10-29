@@ -1,6 +1,7 @@
 "use client";
 
 import { useMemo } from "react";
+import { useTranslations } from "next-intl";
 import { useMutation, useQueries, useQueryClient } from "@tanstack/react-query";
 
 import { startBattle } from "@/lib/api/battles";
@@ -33,6 +34,8 @@ export function useScenarioPlay(campaignId: string, content: ScenarioContent, en
   const queryClient = useQueryClient();
 
   const notify = useNotify();
+
+  const t = useTranslations("scenario.play");
 
   usePusherShowSync(campaignId, enabled);
 
@@ -85,7 +88,7 @@ export function useScenarioPlay(campaignId: string, content: ScenarioContent, en
       void queryClient.invalidateQueries({ queryKey: battleKeys.briefs(campaignId) });
       void queryClient.invalidateQueries({ queryKey: battleKeys.active() });
     },
-    onError: (error) => void notify(errorMessage(error, "Не вдалося почати бій")),
+    onError: (error) => void notify(errorMessage(error, t("battleFailed"))),
   });
 
   return {

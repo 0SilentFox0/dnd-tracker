@@ -2,6 +2,7 @@ import { Prisma } from "@prisma/client";
 import { z } from "zod";
 
 import { CompendiumError } from "./parse";
+import { TARGET_KINDS } from "./types";
 
 import { scenarioContentSchema } from "@/lib/schemas/scenario";
 import { jsonContentInput } from "@/lib/server/assistant/json";
@@ -10,7 +11,7 @@ import { remapIds } from "@/lib/server/templates/remap-ids";
 
 const object = z.record(z.string(), z.unknown());
 
-const kind = z.enum(["units", "spells", "spell-groups", "artifacts", "races", "classes", "feats", "backgrounds", "scenarioPages"]);
+const kind = z.enum(TARGET_KINDS);
 
 const entry = z.object({ canonicalKey: z.string().max(4000), kind, localId: z.string().min(1).max(100), locator: z.unknown(), edition: z.string().max(20), sourceJson: z.string().max(200), originalName: z.string().max(1000), inputHash: z.string().max(100), adapterVersion: z.string().max(100), baseline: object, notes: z.string().max(64 * 1024), issues: z.array(object).max(10_000), bindings: z.unknown(), attribution: object.default({}) });
 
@@ -40,6 +41,8 @@ export async function importCompendiumSection(db: CompendiumBundleDb, section: C
   const next = remapCompendiumSection(section, idMap);
 
   for (const source of next.sources) await db.compendiumSource.upsert({ where: { campaignId_sourceJson: { campaignId, sourceJson: source.sourceJson } }, create: { campaignId, sourceJson: source.sourceJson, metadata: jsonContentInput(source.metadata) }, update: { metadata: jsonContentInput(source.metadata) } });
-  for (const page of next.pages) await db.scenarioPage.create({ data: { id: page.id, campaignId, kind: "note", status: "draft", title: page.title, content: jsonContentInput(page.content), searchText: page.title } });
-  for (const row of next.entries) await db.compendiumEntry.create({ data: { ...row, id: newContentId(), campaignId, locator: jsonContentInput(row.locator), baseline: jsonContentInput(row.baseline), issues: jsonContentInput(row.issues), bindings: jsonContentInput(row.bindings), attribution: jsonContentInput(row.attribution) } });
+
+  if (next.pages.length) await db.scenarioPage.createMany({ data: next.pages.map((page) => ({ id: page.id, campaignId, kind: "note", status: "draft", title: page.title, content: jsonContentInput(page.content), searchText: page.title })) });
+
+  if (next.entries.length) await db.compendiumEntry.createMany({ data: next.entries.map((row) => ({ ...row, id: newContentId(), campaignId, locator: jsonContentInput(row.locator), baseline: jsonContentInput(row.baseline), issues: jsonContentInput(row.issues), bindings: jsonContentInput(row.bindings), attribution: jsonContentInput(row.attribution) })) });
 }

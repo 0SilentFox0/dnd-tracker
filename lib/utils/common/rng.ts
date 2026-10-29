@@ -18,3 +18,5 @@ export function mulberry32(seed: number): Rng {
 export function seedFrom(rng: Rng): number {
   return Math.floor(rng() * 4294967296) >>> 0;
 }
+
+export const rngOf = (source: { rng?: Rng } | null | undefined): Rng => source?.rng ?? Math.random;

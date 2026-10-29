@@ -4,6 +4,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { NumberInput } from "@/components/ui/number-input";
 import { SelectField } from "@/components/ui/select-field";
+import { clamp } from "@/lib/utils/common/clamp";
 import type { Race } from "@/types/races";
 import type { Unit } from "@/types/units";
 
@@ -20,7 +21,6 @@ const NUMBER_FIELDS: Array<{ key: NumericKey; required?: boolean; min?: number; 
   { key: "maxTargets", min: 1 },
 ];
 
-const clamp = (value: number | undefined, min = -Infinity, max = Infinity) => (value === undefined ? value : Math.min(max, Math.max(min, value)));
 
 const GRID_SIZES = ["1", "2", "3"] as const;
 
@@ -33,7 +33,7 @@ interface UnitBasicInfoProps {
 export function UnitBasicInfo({ formData, races, onChange }: UnitBasicInfoProps) {
   const t = useTranslations("units.basic");
 
-  const tCommon = useTranslations("common");
+  const tg = useTranslations("gameTerms");
 
   return (
     <div className="grid gap-4 md:grid-cols-2">
@@ -51,7 +51,7 @@ export function UnitBasicInfo({ formData, races, onChange }: UnitBasicInfoProps)
           placeholder={t("racePlaceholder")}
           options={races.map((r) => ({ value: r.id, label: r.name }))}
           allowNone
-          noneLabel={tCommon("ungrouped.race")}
+          noneLabel={tg("ungrouped.race")}
         />
       </div>
 
@@ -65,7 +65,7 @@ export function UnitBasicInfo({ formData, races, onChange }: UnitBasicInfoProps)
             <NumberInput
               id={field.key}
               value={formData[field.key]}
-              onChange={(value) => onChange({ [field.key]: clamp(value, field.min, field.max) } as Partial<Unit>)}
+              onChange={(value) => onChange({ [field.key]: value === undefined ? value : clamp(value, field.min ?? -Infinity, field.max ?? Infinity) } as Partial<Unit>)}
               required={field.required}
               min={field.min}
               max={field.max}

@@ -62,7 +62,7 @@ export async function composeImagePrompt(campaignId: string, prompt: string, use
 
   const style = instructions?.trim().slice(0, AI_IMAGE_STYLE_MAX);
 
-  return style ? `${prompt}\n\nСтиль кампанії: ${style}` : prompt;
+  return style ? `${prompt}\n\nCampaign style: ${style}` : prompt;
 }
 
 async function renderImage(input: RenderInput): Promise<Buffer> {

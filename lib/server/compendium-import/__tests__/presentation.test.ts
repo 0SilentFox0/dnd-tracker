@@ -32,5 +32,5 @@ it("renders imported HTML and unsafe source URLs as inert report text", () => {
 it("redacts credential-bearing URLs at the existing tool projection boundary", () => {
   const output = publicToolData({ sources: ["https://example.test/?token=private", "https://user:private@example.test/file", "https://example.test/storage/v1/object/sign/file", "https://example.test/public"] });
 
-  expect(output).toEqual({ sources: ["[приховане посилання]", "[приховане посилання]", "[приховане посилання]", "https://example.test/public"] });
+  expect(output).toEqual({ sources: ["[hidden link]", "[hidden link]", "[hidden link]", "https://example.test/public"] });
 });

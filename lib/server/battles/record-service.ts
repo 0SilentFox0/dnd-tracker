@@ -71,7 +71,7 @@ export async function writeBattleRecord(campaignId: string, userId: string, oper
   const input = parseInput(recordSchemas[operation] as z.ZodType, raw);
 
   if (operation === "create") {
-    const data = createBattleSchema.parse(input);
+    const data = input as z.infer<typeof createBattleSchema>;
 
     const map = preparedMap ? data.map : await mapForWrite(data.map, campaignId);
 
@@ -79,9 +79,9 @@ export async function writeBattleRecord(campaignId: string, userId: string, oper
   }
 
   if (operation === "clear-history" || operation === "delete") {
-    const rows = operation === "delete" ? [await battleRecord(campaignId, requireBattleId(battleId))] : await prisma.battleScene.findMany({ where: { campaignId } });
+    const rows = operation === "delete" ? [await battleRecord(campaignId, requireBattleId(battleId))] : await prisma.battleScene.findMany({ where: { campaignId }, select: { id: true } });
 
-    const result = await prisma.battleScene.deleteMany({ where: { campaignId, ...(operation === "delete" && { id: battleId }) } });
+    const result = await prisma.battleScene.deleteMany({ where: { campaignId, id: { in: rows.map(row => row.id) } } });
 
     for (const row of rows) {
       if (execution) execution.afterCommit({ key: `${execution.intentId}:battle-delete:${row.id}`, kind: "invalidate", payload: { campaignId, battleId: row.id, battleLeftActive: true } });
@@ -98,7 +98,7 @@ export async function writeBattleRecord(campaignId: string, userId: string, oper
   if (!row) throw new ContentError(API_ERRORS.NOT_FOUND, 404);
 
   if (operation === "patch") {
-    const { map: rawMap, ...rest } = patchBattleSchema.parse(input);
+    const { map: rawMap, ...rest } = input as z.infer<typeof patchBattleSchema>;
 
     const map = preparedMap ? rawMap : await mapForWrite(rawMap, campaignId, row.map);
 
@@ -111,7 +111,7 @@ export async function writeBattleRecord(campaignId: string, userId: string, oper
 
   if (!rate.allowed) throw new BattleAudioRateLimitError(rate);
 
-  const cmd = battleAudioCommandSchema.parse(input);
+  const cmd = input as z.infer<typeof battleAudioCommandSchema>;
 
   const prev = row.audio as BattleAudioState | null;
 

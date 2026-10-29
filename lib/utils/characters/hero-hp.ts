@@ -24,5 +24,5 @@ export function characterBaseHp(
 
   const hero = heroBaseHp(c, opts.formula);
 
-  return { total: hero.total, breakdown: hero.breakdown.map((label) => ({ label })) };
+  return { total: hero.total, breakdown: hero.breakdown.map((line) => ({ label: line.message, params: line.params })) };
 }

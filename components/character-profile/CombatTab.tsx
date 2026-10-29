@@ -38,7 +38,7 @@ export function CombatTab() {
 
   const t = useTranslations("characterProfile.combat");
 
-  const tc = useTranslations("common");
+  const tg = useTranslations("gameTerms");
 
   const { data: rules } = useCampaignRules(campaignId);
 
@@ -65,7 +65,7 @@ export function CombatTab() {
           {sheet.abilities.map((a) => (
             <div key={a.key} className={cn("min-w-0 rounded-lg border bg-hud-field py-1 text-center", a.isPrimary ? "border-hud-gold shadow-[inset_0_0_0_1px_var(--color-hud-gold)]" : "border-hud-line")}>
               <small className="block text-[10px] text-hud-muted">
-                {tc(`abilities.${a.key}.short`)}
+                {tg(`abilities.${a.key}.short`)}
                 {a.isPrimary ? " ★" : ""}
               </small>
               <b className="block text-[17px] leading-5">{a.score}</b>
@@ -104,9 +104,9 @@ export function CombatTab() {
       </HudSection>
       <HudSection title={t("defense")}>
         <Row label="AC" value={String(sheet.armorClass.total)} lines={sheet.armorClass.lines} />
-        <Row label={tc("stats.initiative")} value={String(sheet.initiative)} />
-        <Row label={tc("stats.speed")} value={String(sheet.speed)} />
-        {rules?.morale.enabled !== false && <Row label={tc("stats.moral")} value={signed(sheet.morale)} />}
+        <Row label={tg("stats.initiative")} value={String(sheet.initiative)} />
+        <Row label={tg("stats.speed")} value={String(sheet.speed)} />
+        {rules?.morale.enabled !== false && <Row label={tg("stats.moral")} value={signed(sheet.morale)} />}
         <Row label={t("targets")} value={sheet.targets.min === sheet.targets.max ? String(sheet.targets.max) : `${sheet.targets.min}–${sheet.targets.max}`} />
         {sheet.immunities.length > 0 && <Row label={t("immunities")} value={sheet.immunities.join(", ")} />}
       </HudSection>
@@ -115,11 +115,11 @@ export function CombatTab() {
           {sheet.saves.map((s) => (
             <li key={s.key} className="border-b border-[#2a2218] py-1">
               {rollable(
-                { label: t("saveRoll", { ability: tc(`abilities.${s.ability}.label`) }), subject: { kind: "save", ability: s.ability } },
+                { label: t("saveRoll", { ability: tg(`abilities.${s.ability}.label`) }), subject: { kind: "save", ability: s.ability } },
                 <>
                   <span className="min-w-0 truncate">
                     {s.proficient ? (s.expertise ? "●● " : "● ") : ""}
-                    {tc(`abilities.${s.ability}.label`)}
+                    {tg(`abilities.${s.ability}.label`)}
                     {s.expertise && <span className="ml-1 text-xs text-hud-muted">×2</span>}
                   </span>
                   <span className="tabular-nums">{signed(s.bonus)}</span>
@@ -134,11 +134,11 @@ export function CombatTab() {
           {sheet.skills.map((s) => (
             <li key={s.key} className="border-b border-[#2a2218] py-1">
               {rollable(
-                { label: tc(`dndSkills.${s.key as DndSkill}`), subject: { kind: "check", skill: s.key as DndSkill } },
+                { label: tg(`dndSkills.${s.key as DndSkill}`), subject: { kind: "check", skill: s.key as DndSkill } },
                 <>
                   <span className="min-w-0 truncate">
                     {s.proficient ? "● " : ""}
-                    {tc(`dndSkills.${s.key as DndSkill}`)}
+                    {tg(`dndSkills.${s.key as DndSkill}`)}
                   </span>
                   <span className="tabular-nums">{signed(s.bonus)}</span>
                 </>,

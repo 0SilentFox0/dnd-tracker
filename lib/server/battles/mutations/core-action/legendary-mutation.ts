@@ -10,18 +10,20 @@ import { lairAbilities, lairBlocker, spendLair } from "@/lib/utils/battle/action
 import { legendaryAttack } from "@/lib/utils/battle/actions/legendary";
 import { legendaryAbilities, legendaryBlocker, legendaryCostOf, spendLegendary } from "@/lib/utils/battle/actions/legendary-options";
 import type { LegendaryActionBody } from "@/lib/utils/battle/actions/schema";
+import { currentOf } from "@/lib/utils/battle/common/control";
 import { abilityRunContext } from "@/lib/utils/battle/pipeline/ability-use";
 import type { BattleMutationContext, MutationResult } from "@/lib/utils/battle/pipeline/run-battle-mutation";
 import { BattleAccessError, battleActionToEvent, BattleRuleError, systemEvent } from "@/lib/utils/battle/store";
 import { applyAbilitySummons, type SummonDeps } from "@/lib/utils/battle/summon/ability-summons";
 import { assertAbilityTargets } from "@/lib/utils/battle/validation/ability-targets";
 import { abilityOnMap } from "@/lib/utils/battle/view";
+import { rngOf } from "@/lib/utils/common/rng";
 import type { BattleParticipant } from "@/types/battle";
 
 const defaultDeps: SpellMutationDeps = { loadPool: getCachedSummonPool, loadSpell: (id) => prisma.spell.findUnique({ where: { id } }) };
 
 function assertLegendaryAllowed(ctx: BattleMutationContext, actor: BattleParticipant, cost: number): void {
-  const blocker = legendaryBlocker(actor, ctx.participants[ctx.scene.turnIndex], cost);
+  const blocker = legendaryBlocker(actor, currentOf(ctx), cost);
 
   if (blocker) throw new BattleRuleError("action_rejected", blocker);
 }
@@ -45,7 +47,7 @@ export function createLegendaryMutation(deps: SummonDeps & Partial<Pick<SpellMut
     if (option.kind === "attack") {
       assertLegendaryAllowed(ctx, actor, 1);
 
-      const out = legendaryAttack({ participants: ctx.participants, actorId: id, attackIndex: option.attackIndex, targetId: option.targetId, map: ctx.meta.map, rules: ctx.meta.rules, round, rng: ctx.rng ?? Math.random, battleId: ctx.scene.id });
+      const out = legendaryAttack({ participants: ctx.participants, actorId: id, attackIndex: option.attackIndex, targetId: option.targetId, map: ctx.meta.map, rules: ctx.meta.rules, round, rng: rngOf(ctx), battleId: ctx.scene.id });
 
       const participants = updateParticipant(out.participants, id, (p) => spendLegendary(p, 1));
 
@@ -93,7 +95,7 @@ export function createLegendaryMutation(deps: SummonDeps & Partial<Pick<SpellMut
 
       if (option.targetIds?.length !== 1) throw new BattleRuleError("invalid_target", API_ERRORS.BATTLE_LEGENDARY_ONE_TARGET);
 
-      const out = legendaryAttack({ participants: ctx.participants, actorId: id, attackIndex, targetId: option.targetIds[0], map: ctx.meta.map, rules: ctx.meta.rules, round, rng: ctx.rng ?? Math.random, battleId: ctx.scene.id });
+      const out = legendaryAttack({ participants: ctx.participants, actorId: id, attackIndex, targetId: option.targetIds[0], map: ctx.meta.map, rules: ctx.meta.rules, round, rng: rngOf(ctx), battleId: ctx.scene.id });
 
       const participants = updateParticipant(out.participants, id, (p) => spend(recordUse(p, ability.key, round, ability.limits?.pool)));
 
@@ -104,7 +106,7 @@ export function createLegendaryMutation(deps: SummonDeps & Partial<Pick<SpellMut
 
     const run = runAbilities(ctx.participants, { type: "action", actorId: id, abilityKey: ability.key, targetIds }, abilityRunContext(ctx));
 
-    const summoned = await applyAbilitySummons(run.summons, run.participants, { campaignId: ctx.scene.campaignId, battleId: ctx.scene.id, rng: ctx.rng ?? Math.random, rules: ctx.meta.rules, deps });
+    const summoned = await applyAbilitySummons(run.summons, run.participants, { campaignId: ctx.scene.campaignId, battleId: ctx.scene.id, rng: rngOf(ctx), rules: ctx.meta.rules, deps });
 
     const participants = updateParticipant(summoned.order, id, spend);
 

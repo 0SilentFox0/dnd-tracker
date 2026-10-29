@@ -2,7 +2,8 @@ import { describe, expect, it } from "vitest";
 
 import { API_ERRORS } from "@/lib/constants/api-errors";
 import { AttackType, ParticipantSide } from "@/lib/constants/battle";
-import { attackBodySchema, attackMutation } from "@/lib/server/battles/mutations/attack/attack-mutation";
+import { attackBodySchema } from "@/lib/schemas/battles";
+import { attackMutation } from "@/lib/server/battles/mutations/attack/attack-mutation";
 import { createMockParticipant } from "@/lib/utils/battle/__tests__/fixtures/mock-participant";
 import type { BattleMutationContext } from "@/lib/utils/battle/pipeline/run-battle-mutation";
 import type { BattleAttack, BattleParticipant } from "@/types/battle";

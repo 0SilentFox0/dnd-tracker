@@ -21,7 +21,7 @@ export const OWNED_SELECT = { id: true, campaignId: true, version: true, title: 
 
 export const OWNED_WITH_CONTENT_SELECT = { ...SUMMARY_SELECT, campaignId: true, content: true } as const;
 
-export function parseContent(json: unknown): ScenarioContent | null {
+function parseContent(json: unknown): ScenarioContent | null {
   const parsed = scenarioContentSchema.safeParse(json);
 
   return parsed.success ? parsed.data : null;

@@ -18,6 +18,7 @@ import { damageDiceSlots, heroAttackDamageParts } from "@/lib/utils/battle/damag
 import { lineOfFire } from "@/lib/utils/battle/grid";
 import type { CastableSpell } from "@/lib/utils/battle/types/spell-process";
 import { rollDie } from "@/lib/utils/common/dice";
+import { rngOf } from "@/lib/utils/common/rng";
 import type { Ruleset } from "@/lib/utils/rules";
 import type { ActiveEffect, BattleAction, BattleMapConfig, BattleParticipant } from "@/types/battle";
 
@@ -49,7 +50,7 @@ export type AttackPhaseResult = {
 export function runAttackPhase(input: AttackPhaseInput): AttackPhaseResult {
   const { battle, data, battleId, userId, isDM } = input;
 
-  const rng = input.rng ?? Math.random;
+  const rng = rngOf(input);
 
   const initiativeOrder = battle.initiativeOrder;
 

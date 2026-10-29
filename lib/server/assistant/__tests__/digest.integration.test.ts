@@ -116,7 +116,7 @@ describe.skipIf(!isLocalDevDatabaseEnv())("precondition digests against the loca
 
     const deck = await db.slideDeck.create({ data: { campaignId, title: "Deck 2" } });
 
-    const preview = await prepareShowAction({ actor: actor(), channel: "chat", threadId: null, tokenId: null }, "decks.get", { deckId: deck.id });
+    const preview = await prepareShowAction({ actor: actor(), channel: "chat", threadId: null, tokenId: null, locale: "uk" as const }, "decks.get", { deckId: deck.id });
 
     await bindDeckRecord(campaignId, deck.id, deck.updatedAt, page.id);
     await expect(runShowOperation(actor(), "decks.get", { deckId: deck.id }, preview.preconditions as never)).rejects.toBeInstanceOf(ContentError);
@@ -191,7 +191,7 @@ describe.skipIf(!isLocalDevDatabaseEnv())("precondition digests against the loca
     const preview = await db.$transaction(async tx => {
       const { runContentWriteContext } = await import("@/lib/server/content/write-context");
 
-      return runContentWriteContext(campaignId, tx as Prisma.TransactionClient, () => prepareBattleAction({ actor: actor(), channel: "chat", threadId: null, tokenId: null }, "create", { body: { name: "B", participants: [{ id: unit.id, type: "unit", side: "enemy" }, { id: unit.id, type: "unit", side: "enemy" }] } }));
+      return runContentWriteContext(campaignId, tx as Prisma.TransactionClient, () => prepareBattleAction({ actor: actor(), channel: "chat", threadId: null, tokenId: null, locale: "uk" as const }, "create", { body: { name: "B", participants: [{ id: unit.id, type: "unit", side: "enemy" }, { id: unit.id, type: "unit", side: "enemy" }] } }));
     });
 
     expect(preview.preconditions).toMatchObject({ version: 0 });

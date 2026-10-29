@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useReducer, useState } from "react";
+import { useTranslations } from "next-intl";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 
 import { showKeys } from "./keys";
@@ -22,6 +23,8 @@ const draftOf = (deck: SlideDeck): DeckDraft => ({ title: deck.title, slides: de
 const isConflict = (e: unknown) => e instanceof ApiError && e.status === 409;
 
 export function useDeckEditor(campaignId: string, deck: SlideDeck) {
+  const t = useTranslations("show");
+
   const queryClient = useQueryClient();
 
   const notify = useNotify();
@@ -79,7 +82,7 @@ export function useDeckEditor(campaignId: string, deck: SlideDeck) {
   const addUrl = useCallback((url: string) => dispatch({ type: "add", slides: [{ id: newSlideId(), imageUrl: url.trim() }] }), []);
 
   const fail = (e: unknown) => {
-    void notify(errorMessage(e, "Не вдалося зберегти набір"));
+    void notify(errorMessage(e, t("errors.save")));
 
     return false;
   };
@@ -93,9 +96,9 @@ export function useDeckEditor(campaignId: string, deck: SlideDeck) {
       return true;
     }
 
-    if (!(await confirm({ title: "Набір змінено в іншому місці. Зберегти ваші зміни поверх?", confirmLabel: "Зберегти поверх", cancelLabel: "Відкинути мої зміни" }))) {
+    if (!(await confirm({ title: t("conflict.title"), confirmLabel: t("conflict.confirm"), cancelLabel: t("conflict.cancel") }))) {
       adopt(fresh);
-      void notify("Ваші зміни відкинуто — відкрито версію з іншого місця");
+      void notify(t("conflict.discarded"));
 
       return false;
     }

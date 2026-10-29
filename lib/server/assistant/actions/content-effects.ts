@@ -4,7 +4,7 @@ import type { EffectHandlers } from "../effects";
 import type { ActionExecutionContext } from "../types";
 
 import "server-only";
-import { invalidateReference, ReferenceKind, type ReferenceKindValue } from "@/lib/cache/tags";
+import { ALL_REFERENCE_KINDS, invalidateReference, type ReferenceKindValue } from "@/lib/cache/tags";
 import { API_ERRORS } from "@/lib/constants/api-errors";
 import { ContentError } from "@/lib/server/content/errors";
 import { currentContentWrite } from "@/lib/server/content/write-context";
@@ -12,7 +12,7 @@ import { removeTrackFile, trackObjectPath, trackPathOwnedBy } from "@/lib/supaba
 
 export const CONTENT_EFFECT_HANDLERS: EffectHandlers = {
   invalidate: async (payload) => {
-    const { campaignId, kinds } = z.object({ campaignId: z.string().min(1), kinds: z.array(z.enum(Object.values(ReferenceKind))) }).parse(payload);
+    const { campaignId, kinds } = z.object({ campaignId: z.string().min(1), kinds: z.array(z.enum(ALL_REFERENCE_KINDS)) }).parse(payload);
 
     invalidateReference(kinds, campaignId);
   },

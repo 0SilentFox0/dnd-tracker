@@ -26,9 +26,9 @@ it("backgroundGearGoldUntouched", async () => {
 
   if (!action || action.effect !== "write") throw Error("action");
 
-  const preview = await action.prepare({ actor, channel: "chat", threadId: null, tokenId: null }, { characterId: "hero", raceChoices: {} });
+  const preview = await action.prepare({ actor, channel: "chat", threadId: null, tokenId: null, locale: "uk" as const }, { characterId: "hero", raceChoices: {} });
 
-  expect(h.character.update).not.toHaveBeenCalled(); expect(JSON.stringify(preview)).toContain("Життєпис"); expect(h.characterInventory.findMany).not.toHaveBeenCalled(); expect(preview.warnings.join(" ")).toMatch(/вручну/);
+  expect(h.character.update).not.toHaveBeenCalled(); expect(JSON.stringify(preview)).toContain("Життєпис"); expect(h.characterInventory.findMany).not.toHaveBeenCalled(); expect(preview.warnings.join(" ")).toContain("assistant.warnings.characterManual");
 });
 it("additionalSpellsStillUnsupported", () => {
   const action = CHARACTER_PROGRESSION_ACTIONS.find(a => a.id === "characters.choices");
@@ -40,7 +40,7 @@ it("resetProgressAlwaysHuman", async () => {
 
   if (!action || action.effect !== "write") throw Error("action");
 
-  const preview = await action.prepare({ actor, channel: "chat", threadId: null, tokenId: null }, { characterId: "hero" });
+  const preview = await action.prepare({ actor, channel: "chat", threadId: null, tokenId: null, locale: "uk" as const }, { characterId: "hero" });
 
   expect(confirmationFor(action, "auto", preview)).toBe("human");
 });

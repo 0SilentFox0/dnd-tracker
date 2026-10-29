@@ -2,6 +2,9 @@ import { z } from "zod";
 
 import { HAZARD_DICE_PATTERN, MAZE_DIFFICULTIES, MAZE_LIMITS, MAZE_MARK_SYMBOLS, ParticipantSide, ParticipantSourceType } from "@/lib/constants/battle";
 import { WEATHER_KINDS } from "@/lib/constants/battle-weather";
+import { DAMAGE_ELEMENT_OPTIONS } from "@/lib/constants/damage";
+import { hexColorSchema } from "@/lib/schemas/common";
+import { CUNNING_STRIKE_EFFECTS } from "@/lib/utils/abilities/schema";
 import { hasPlayableArea } from "@/lib/utils/battle/grid/map-editor";
 import { ZoneTriggerSchema } from "@/lib/utils/spells/model/schema";
 
@@ -30,7 +33,7 @@ export const mazeSchema = z.object({
       cellKeySchema,
       z.object({
         symbol: mazeMarkSymbolSchema,
-        color: z.string().regex(/^#[0-9a-f]{6}$/),
+        color: hexColorSchema(),
         by: z.string().max(64),
       }),
     )
@@ -140,3 +143,106 @@ export const critChoiceSchema = z.union([
 export type CritChoiceBody = z.infer<typeof critChoiceSchema>;
 
 export type MoraleCheckInput = z.infer<typeof moraleCheckSchema>;
+
+export const attackBodySchema = z
+  .object({
+    attackerId: z.string(),
+    targetId: z.string().optional(),
+    targetIds: z.array(z.string()).optional(),
+    attackId: z.string().optional(),
+    d20Roll: z.number().min(1).max(20).optional(),
+    attackRoll: z.number().min(1).max(20).optional(),
+    attackRolls: z.array(z.number().min(1).max(20)).optional(),
+    /** другий d20 на ціль у порядку attackRolls; сервер сам вирішує перевагу/недолік */
+    secondRolls: z.array(z.number().min(1).max(20).nullable()).optional(),
+    advantageRoll: z.number().min(1).max(20).optional(),
+    disadvantageRoll: z.number().min(1).max(20).optional(),
+    /** вибір гравця; сервер застосовує, лише коли навички не задають режим */
+    rollMode: z.enum(["normal", "advantage", "disadvantage"]).optional(),
+    damageRolls: z.array(z.number()).default([]),
+    offHand: z.boolean().optional(),
+    useInspiration: z.boolean().optional(),
+    /** Підступний удар (Rogue): ефекти замість кубиків Прихованої атаки */
+    cunningStrike: z.array(z.enum(CUNNING_STRIKE_EFFECTS)).min(1).max(3).optional(),
+    endTurn: z.boolean().default(false),
+  })
+  .refine(
+    (d) => d.d20Roll !== undefined || d.attackRoll !== undefined || (Array.isArray(d.attackRolls) && d.attackRolls.length > 0),
+    { message: "d20Roll, attackRoll або attackRolls обов'язковий", path: ["d20Roll"] },
+  )
+  .refine((d) => d.targetId !== undefined || (d.targetIds !== undefined && d.targetIds.length > 0), {
+    message: "Потрібно вказати хоча б одну ціль",
+    path: ["targetIds"],
+  });
+
+export const auraZoneSchema = z.object({
+  participantId: z.string(),
+  auraId: z.string(),
+  targetIds: z.array(z.string()).max(50),
+});
+
+export const moveSchema = z.object({
+  participantId: z.string(),
+  to: mapCellSchema,
+  free: z.boolean().optional(),
+  returnToStart: z.literal(true).optional(),
+});
+
+const HAZARD_DAMAGE_TYPES = DAMAGE_ELEMENT_OPTIONS.map((o) => o.value) as [string, ...string[]];
+
+export const mapTerrainSchema = z.object({
+  cells: z.array(z.string().regex(/^\d+:\d+$/)).min(1).max(400),
+  terrain: z
+    .object({
+      kind: z.enum(["wall", "barrier", "hazard", "difficult"]),
+      label: z.string().max(60).optional(),
+      rounds: z.number().int().min(1).max(20).optional(),
+      damage: z.object({ dice: z.string().regex(HAZARD_DICE_PATTERN), type: z.enum(HAZARD_DAMAGE_TYPES) }).optional(),
+    })
+    .refine((t) => t.kind !== "barrier" || t.rounds !== undefined, { message: "Барʼєру потрібна тривалість у раундах", path: ["rounds"] })
+    .nullable(),
+});
+
+export const mapWeatherSchema = z.object({ weather: weatherKindSchema.nullable() });
+
+export const castSpellSchema = z.object({
+  casterId: z.string(),
+  legendaryKey: z.string().min(1).optional(),
+  spellId: z.string(),
+  grantKey: z.string().min(1).max(300).optional(),
+  castLevel: z.number().int().min(0).max(9).optional(),
+  targetIds: z.array(z.string()).default([]),
+  /** точка шаблону на карті */
+  targetCell: mapCellSchema.optional(),
+  diceRolls: z.array(z.number()).default([]),
+  saveRolls: z.array(z.object({ participantId: z.string(), roll: z.number().int().min(1).max(20) })).optional(),
+  attackRolls: z.array(z.object({ participantId: z.string(), roll: z.number().int().min(1).max(20) })).optional(),
+  preview: z.boolean().optional(),
+  castingRounds: z.number().int().min(1).max(144000).optional(),
+  cancelCasting: z.boolean().optional(),
+  free: z.boolean().optional(),
+  optionIndex: z.number().int().min(0).max(6).optional(),
+  inputCount: z.number().int().min(0).max(40).optional(),
+  slotKey: z.string().regex(/^([1-9]|pact)$/).optional(),
+});
+
+export type SpellRequestData = z.infer<typeof castSpellSchema>;
+
+export const abilityActionSchema = z.object({
+  participantId: z.string(),
+  abilityKey: z.string(),
+  targetParticipantIds: z.array(z.string()).optional(),
+  targetCell: mapCellSchema.optional(),
+});
+
+export const bonusActionSchema = abilityActionSchema.extend({ targetParticipantId: z.string().optional() });
+
+export const patchParticipantSchema = z
+  .object({
+    lairActive: z.boolean().optional(),
+    currentHp: z.number().int().min(0).optional(),
+    removeFromBattle: z.boolean().optional(),
+    kill: z.boolean().optional(),
+    revive: z.boolean().optional(),
+  })
+  .refine((d) => Object.keys(d).length > 0, { message: "At least one field is required" });

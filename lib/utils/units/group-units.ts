@@ -1,5 +1,6 @@
 import { UNGROUPED_KEY, UNGROUPED_LABELS } from "@/lib/constants/ungrouped";
 import { groupBy } from "@/lib/utils/common/collections";
+import { byName } from "@/lib/utils/common/text";
 import { matchesQuery } from "@/lib/utils/common/text-search";
 import type { Race } from "@/types/races";
 import type { Unit } from "@/types/units";
@@ -29,8 +30,6 @@ export interface UnitRaceChip {
   color: string | null;
   count: number;
 }
-
-const byName = (a: { name: string }, b: { name: string }) => a.name.localeCompare(b.name, "uk");
 
 function toTiers(units: Unit[]): UnitTier[] {
   return [...groupBy(units, (unit) => unit.level).entries()].sort(([a], [b]) => a - b).map(([level, list]) => ({ level, units: list.sort(byName) }));

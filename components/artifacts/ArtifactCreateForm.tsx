@@ -20,6 +20,8 @@ export function ArtifactCreateForm({
 }: ArtifactCreateFormProps) {
   const t = useTranslations("artifacts.form");
 
+  const tc = useTranslations("common.actions");
+
   const router = useRouter();
 
   const create = useCreateArtifact(campaignId);
@@ -33,7 +35,7 @@ export function ArtifactCreateForm({
         title: t("createTitle"),
         description: t("createDescription"),
         submit: t("createSubmit"),
-        saving: t("createSaving"),
+        saving: tc("creating"),
         iconHint: t("createIconHint", { bucket: "artifact-icons" }),
       }}
       cancelHref={`/campaigns/${campaignId}/dm/artifacts`}

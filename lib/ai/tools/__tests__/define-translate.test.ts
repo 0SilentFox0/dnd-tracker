@@ -7,7 +7,7 @@ import { ContentError } from "@/lib/server/content/errors";
 
 vi.mock("server-only", () => ({}));
 
-const ctx = { campaignId: "c", userId: "u", scopes: [], threadId: null } as never;
+const ctx = { campaignId: "c", userId: "u", scopes: [], threadId: null, locale: "uk" as const } as never;
 
 const failing = (error: unknown) => defineTool({ name: "x", scopes: [], title: "x", description: "x", input: z.object({ n: z.number() }), handler: async () => { throw error; } });
 
@@ -26,6 +26,6 @@ describe("runToolResult translation", () => {
   it("translates zod issue messages", async () => {
     const result = await runToolResult(failing(new Error("unused")), ctx, { n: "x" });
 
-    expect(result).toMatchObject({ kind: "error", error: { code: "INVALID_INPUT", message: "Некоректні параметри" } });
+    expect(result).toMatchObject({ kind: "error", error: { code: "INVALID_INPUT", message: "Invalid input" } });
   });
 });

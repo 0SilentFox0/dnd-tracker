@@ -1,11 +1,13 @@
 // @vitest-environment happy-dom
-import { cleanup, render } from "@testing-library/react";
+import { cleanup } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
 import { CompendiumDependencies } from "../CompendiumDependencies";
 
 import type { CompendiumImportController } from "@/lib/hooks/compendium-import";
+import { renderWithIntl } from "@/lib/i18n/test/render-with-intl";
 
+vi.unmock("next-intl");
 afterEach(cleanup);
 
 const wizard = (refs: Array<Record<string, unknown>>, status = "create", extra: Array<Record<string, unknown>> = []) => ({
@@ -14,8 +16,8 @@ const wizard = (refs: Array<Record<string, unknown>>, status = "create", extra: 
 }) as unknown as CompendiumImportController;
 
 describe("CompendiumDependencies", () => {
-  it("skips an empty source segment and prompts only for unresolved refs", () => {
-    const { container } = render(<CompendiumDependencies wizard={wizard([{ key: "a", kind: "spell", name: "Fog Cloud", source: "", edition: "classic", unresolved: false }, { key: "b", kind: "spell", name: "Mist", source: "SRD", edition: "one", unresolved: true }])} />);
+  it("skips an empty source segment and prompts only for unresolved refs", async () => {
+    const { container } = await renderWithIntl(<CompendiumDependencies wizard={wizard([{ key: "a", kind: "spell", name: "Fog Cloud", source: "", edition: "classic", unresolved: false }, { key: "b", kind: "spell", name: "Mist", source: "SRD", edition: "one", unresolved: true }])} />, { locale: "uk", namespaces: ["common", "validation", "compendium"] });
 
     const text = container.textContent ?? "";
 
@@ -26,16 +28,16 @@ describe("CompendiumDependencies", () => {
     expect(text.match(/Оберіть запис кампанії/g)).toHaveLength(1);
   });
 
-  it("hides unchanged rows without unresolved refs and never prints the no-dependencies notice", () => {
-    const { container } = render(<CompendiumDependencies wizard={wizard([], "unchanged")} />);
+  it("hides unchanged rows without unresolved refs and never prints the no-dependencies notice", async () => {
+    const { container } = await renderWithIntl(<CompendiumDependencies wizard={wizard([], "unchanged")} />, { locale: "uk", namespaces: ["common", "validation", "compendium"] });
 
     expect(container.textContent).not.toContain("Механічних залежностей немає");
     expect(container.textContent).not.toContain("Fog");
     expect(container.textContent).toContain("1 без змін і залежностей — показати");
   });
 
-  it("keeps unchanged rows with an unresolved ref and offers overwrite/exclude inside details", () => {
-    const { container } = render(<CompendiumDependencies wizard={wizard([{ key: "b", kind: "spell", name: "Mist", source: "SRD", edition: "one", unresolved: true }], "unchanged")} />);
+  it("keeps unchanged rows with an unresolved ref and offers overwrite/exclude inside details", async () => {
+    const { container } = await renderWithIntl(<CompendiumDependencies wizard={wizard([{ key: "b", kind: "spell", name: "Mist", source: "SRD", edition: "one", unresolved: true }], "unchanged")} />, { locale: "uk", namespaces: ["common", "validation", "compendium"] });
 
     expect(container.textContent).toContain("Fog");
     expect(container.querySelector("details details input[type=checkbox]")).not.toBeNull();

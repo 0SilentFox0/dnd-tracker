@@ -1,4 +1,5 @@
-import { nestedId, stableJson } from "../identity";
+/* eslint-disable no-restricted-syntax -- derived content written to the DB stays Ukrainian (spec part5, decision 5) */
+import { stableJson } from "../identity";
 import { type Adapter, issue } from "../types";
 import { equipmentText, featPrerequisite, featSpells, proficiencyText, raceTraits, resistFlags } from "./character-traits";
 import { ABILITIES, abilityChoices, array, description, num, object, skillName, skills, str, uidRef, unsupported } from "./shared";
@@ -14,7 +15,7 @@ export const background: Adapter = (row, ctx) => {
 
   const toolText = proficiencyText(row.toolProficiencies);
 
-  if (toolText.choice) ctx.issues.push(issue("MANUAL_TOOL_CHOICE", `${ctx.path}.toolProficiencies`, "warning", "Рушій не має вибору інструментів: виберіть їх вручну (вказано в описі)"));
+  if (toolText.choice) ctx.issues.push(issue("MANUAL_TOOL_CHOICE", `${ctx.path}.toolProficiencies`, "warning"));
 
   const languages = proficiencyText(row.languageProficiencies).text;
 
@@ -22,13 +23,13 @@ export const background: Adapter = (row, ctx) => {
 
   const choices = [...abilityChoices(row.ability, ctx), ...skill.choices];
 
-  if (row.startingEquipment !== undefined) ctx.issues.push(issue("MANUAL_EQUIPMENT", `${ctx.path}.startingEquipment`, "warning", "ДМ: видайте спорядження та гроші вручну після створення персонажів"));
+  if (row.startingEquipment !== undefined) ctx.issues.push(issue("MANUAL_EQUIPMENT", `${ctx.path}.startingEquipment`, "warning"));
 
   const featRefs = array(row.feats).flatMap((v) => Object.entries(object(v)).filter(([, enabled]) => enabled === true).map(([k]) => k));
 
   const refs = featRefs.length === 1 ? [uidRef(featRefs[0], "feat", ["originFeatId"], ctx)] : [];
 
-  if (row.feats !== undefined && featRefs.length !== 1) ctx.issues.push(issue("BACKGROUND_FEAT_CHOICE", `${ctx.path}.feats`, "error", "Оберіть конкретну рису походження або виключіть передісторію"));
+  if (row.feats !== undefined && featRefs.length !== 1) ctx.issues.push(issue("BACKGROUND_FEAT_CHOICE", `${ctx.path}.feats`, "error"));
 
   const notes = [unsupported(row, ["ability", "feats", "skillProficiencies", "startingEquipment", "toolProficiencies", "languageProficiencies"], ctx), toolText.choice ? `toolProficiencies: ${stableJson(row.toolProficiencies)}` : "", customSkills ? `skillProficiencies: ${stableJson(row.skillProficiencies)}` : ""].filter(Boolean).join("\n");
 
@@ -54,11 +55,11 @@ export const feat: Adapter = (row, ctx) => {
 
   const spells = featSpells(row.additionalSpells, ctx, baseChoices.length);
 
-  if (spells.manual.length > 0) ctx.issues.push(issue("MANUAL_FEAT_SPELLS", `${ctx.path}.additionalSpells`, "warning", "Частину заклинань риси (без обмежень, розширений список, фільтр школи) рушій не моделює: застосовуйте за описом"));
+  if (spells.manual.length > 0) ctx.issues.push(issue("MANUAL_FEAT_SPELLS", `${ctx.path}.additionalSpells`, "warning"));
 
   const resist = row.resist !== undefined ? resistFlags(row.resist) : undefined;
 
-  if (resist && !resist.complete) ctx.issues.push(issue("MANUAL_FEAT_RESIST", `${ctx.path}.resist`, "warning", "Опір шкоді з вибором або складною умовою рушій не моделює: застосовуйте за описом"));
+  if (resist && !resist.complete) ctx.issues.push(issue("MANUAL_FEAT_RESIST", `${ctx.path}.resist`, "warning"));
 
   const abilities = resist && resist.effects.length > 0 ? [{ id: "resist", name: "Опір шкоді", trigger: { event: "passive" }, effects: resist.effects }] : [];
 
@@ -82,11 +83,11 @@ export const gameClass: Adapter = (row, ctx) => {
 
   const caster = row.casterProgression === undefined ? "none" : casterTypes[str(row.casterProgression)];
 
-  if (!caster) ctx.issues.push(issue("UNKNOWN_CASTER", `${ctx.path}.casterProgression`, "error", "Укажіть тип заклинача"));
+  if (!caster) ctx.issues.push(issue("UNKNOWN_CASTER", `${ctx.path}.casterProgression`, "error"));
 
   const hd = num(object(row.hd).faces);
 
-  if (![6, 8, 10, 12].includes(hd ?? 0)) ctx.issues.push(issue("CLASS_HIT_DIE", `${ctx.path}.hd`, "error", "Укажіть кістку хітів класу"));
+  if (![6, 8, 10, 12].includes(hd ?? 0)) ctx.issues.push(issue("CLASS_HIT_DIE", `${ctx.path}.hd`, "error"));
 
   const prof = object(row.startingProficiencies);
 
@@ -98,5 +99,3 @@ export const gameClass: Adapter = (row, ctx) => {
 
   return { kind: "classes", body: { name: row.name, hitDie: hd, caster: caster ?? "none", savingThrows: array(row.proficiency).map((s) => ABILITIES[str(s)]).filter(Boolean), proficiencies: fields, spellcastingAbility: ABILITIES[str(row.spellcastingAbility)] ?? null, skillChoices: { count: num(choose.count) ?? 0, from: array(choose.from).map((s) => skillName(str(s))).filter(Boolean) }, features: [], subclasses: [], subclassLevel: null }, notes: unsupported(row, ["hd", "proficiency", "casterProgression", "spellcastingAbility", "startingProficiencies", "classFeatures", "optionalfeatureProgression"], ctx) };
 };
-
-export const featureDescription = (row: Record<string, unknown>, key: string) => ({ id: nestedId(key), name: str(row.name), description: str(row.description), abilities: [] });

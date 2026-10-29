@@ -24,39 +24,39 @@ vi.mock("@/lib/db", () => ({ prisma: {
   $queryRaw: async () => f.reports.map(({ report, ...row }) => ({ ...row, counts: (report as Record<string, unknown>).counts, readyToImport: (report as Record<string, unknown>).readyToImport, readyToPlay: (report as Record<string, unknown>).readyToPlay })),
 } }));
 
-const caller: AssistantCaller = { actor: { campaignId: "campaign", userId: "dm", isDM: true, via: "session", scopes: null }, channel: "chat", threadId: null, tokenId: null };
+const caller: AssistantCaller = { actor: { campaignId: "campaign", userId: "dm", isDM: true, via: "session", scopes: null }, channel: "chat", threadId: null, tokenId: null, locale: "uk" as const };
 
-const token: AssistantCaller = { actor: { ...caller.actor, via: "token", scopes: ["content:write"] }, channel: "mcp", threadId: null, tokenId: "token" };
+const token: AssistantCaller = { actor: { ...caller.actor, via: "token", scopes: ["content:write"] }, channel: "mcp", threadId: null, tokenId: "token", locale: "uk" as const };
 
 beforeEach(() => { f.allowed = true; f.member = true; f.entryQueries = []; f.reports = []; f.entries = []; });
 
 describe("T13 protected handoffs", () => {
   it.each([
-    ["credentials", {}, "/settings/ai", "Додайте або змініть ключ провайдера у налаштуваннях AI."],
-    ["tokens", {}, "/campaigns/campaign/dm/ai", "Керуйте API-токенами та їхніми правами у застосунку."],
-    ["invite", {}, "/campaigns/campaign#invite", "Перегляньте запрошення у кампанії та передайте його людині самостійно."],
-    ["campaign-import", {}, "/campaigns/new", "Виберіть локальний файл у формі створення кампанії."],
-    ["campaign-join", {}, "/campaigns", "Введіть код запрошення у діалозі входу в кампанію."],
-    ["content-import", { kind: "spells" }, "/campaigns/campaign/dm/spells", "Виберіть файл, перевірте мапінг і підтвердіть імпорт у чинному редакторі."],
-    ["ai-map", { kind: "tracks" }, "/campaigns/campaign/dm/music", "Оберіть дані та запустіть AI-мапінг у діалозі імпорту."],
-    ["slide-upload", {}, "/campaigns/campaign/dm/show", "Виберіть зображення у редакторі набору слайдів."],
-    ["slide-upload", { deckId: "foreign-deck" }, "/campaigns/campaign/dm/show/foreign-deck", "Виберіть зображення у редакторі набору слайдів."],
-    ["track-upload", {}, "/campaigns/campaign/dm/music", "Виберіть аудіофайл у бібліотеці музики."],
-    ["player-draft", {}, "/campaigns/campaign/character/draft", "Чернетка та AI-функції гравця доступні лише у власному флоу гравця."],
-    ["compendium-read", {}, "/campaigns/campaign/dm/compendium", "Перегляньте дозволені звіти та варіанти імпорту через власну сесію у застосунку."],
-    ["compendium-preview", {}, "/campaigns/campaign/dm/compendium", "Виберіть локальний JSON, перевірте preview і підтвердіть права на матеріали у застосунку."],
-    ["compendium-confirm", {}, "/campaigns/campaign/dm/compendium", "Відкрийте чинний preview, перевірте вибір і підтвердіть права на імпорт у застосунку."],
-    ["source-notes", {}, "/campaigns/campaign/dm/compendium", "ДМ має явно вибрати примітки джерела перед передачею AI. Автоматично примітки не передаються."],
-  ])("preserves %s navigation and its review reason", (kind, target, href, reason) => {
-    expect(buildAssistantHandoff(caller.actor, kind as string, target)).toEqual({ href, reason });
+    ["credentials", {}, "/settings/ai", "assistant.handoffs.credentials"],
+    ["tokens", {}, "/campaigns/campaign/dm/ai", "assistant.handoffs.tokens"],
+    ["invite", {}, "/campaigns/campaign#invite", "assistant.handoffs.invite"],
+    ["campaign-import", {}, "/campaigns/new", "assistant.handoffs.campaign-import"],
+    ["campaign-join", {}, "/campaigns", "assistant.handoffs.campaign-join"],
+    ["content-import", { kind: "spells" }, "/campaigns/campaign/dm/spells", "assistant.handoffs.content-import"],
+    ["ai-map", { kind: "tracks" }, "/campaigns/campaign/dm/music", "assistant.handoffs.ai-map"],
+    ["slide-upload", {}, "/campaigns/campaign/dm/show", "assistant.handoffs.slide-upload"],
+    ["slide-upload", { deckId: "foreign-deck" }, "/campaigns/campaign/dm/show/foreign-deck", "assistant.handoffs.slide-upload"],
+    ["track-upload", {}, "/campaigns/campaign/dm/music", "assistant.handoffs.track-upload"],
+    ["player-draft", {}, "/campaigns/campaign/character/draft", "assistant.handoffs.player-draft"],
+    ["compendium-read", {}, "/campaigns/campaign/dm/compendium", "assistant.handoffs.compendium-read"],
+    ["compendium-preview", {}, "/campaigns/campaign/dm/compendium", "assistant.handoffs.compendium-preview"],
+    ["compendium-confirm", {}, "/campaigns/campaign/dm/compendium", "assistant.handoffs.compendium-confirm"],
+    ["source-notes", {}, "/campaigns/campaign/dm/compendium", "assistant.handoffs.source-notes"],
+  ])("preserves %s navigation and its review reason", async (kind, target, href, reason) => {
+    expect(await buildAssistantHandoff(caller.actor, kind as string, target)).toEqual({ href, reason });
   });
-  it.each(["%2fescape", "deck%3fsecret", "deck/confirm", "../foreign", "https://evil.test"])("rejects encoded or unsafe deck and campaign identifiers: %s", id => {
-    expect(() => buildAssistantHandoff(caller.actor, "slide-upload", { deckId: id })).toThrow();
-    expect(() => buildAssistantHandoff({ ...caller.actor, campaignId: id }, "invite")).toThrow();
+  it.each(["%2fescape", "deck%3fsecret", "deck/confirm", "../foreign", "https://evil.test"])("rejects encoded or unsafe deck and campaign identifiers: %s", async id => {
+    await expect(buildAssistantHandoff(caller.actor, "slide-upload", { deckId: id })).rejects.toThrow();
+    await expect(buildAssistantHandoff({ ...caller.actor, campaignId: id }, "invite")).rejects.toThrow();
   });
-  it("rejects unknown kinds and non-DM actors with existing statuses", () => {
-    expect(() => buildAssistantHandoff(caller.actor, "unknown")).toThrow(expect.objectContaining({ status: 400 }));
-    expect(() => buildAssistantHandoff({ ...caller.actor, isDM: false }, "invite")).toThrow(expect.objectContaining({ status: 403 }));
+  it("rejects unknown kinds and non-DM actors with existing statuses", async () => {
+    await expect(buildAssistantHandoff(caller.actor, "unknown")).rejects.toMatchObject({ status: 400 });
+    await expect(buildAssistantHandoff({ ...caller.actor, isDM: false }, "invite")).rejects.toMatchObject({ status: 403 });
   });
   it("compendiumConfirmStillRequiresSessionPreviewRights", async () => {
     const a = HANDOFF_ACTIONS.find(a => a.id === "handoff.compendium-confirm");
@@ -66,11 +66,11 @@ describe("T13 protected handoffs", () => {
     await expect(readCompendiumSummary(token.actor, "reports", {})).rejects.toMatchObject({ status: 403 });
     expect(f.entryQueries).toHaveLength(0);
   });
-  it("tokenAndInviteSecretNeverInOutputs", () => {
-    const output = ["credentials", "tokens", "invite"].map(k => buildAssistantHandoff(caller.actor, k));
+  it("tokenAndInviteSecretNeverInOutputs", async () => {
+    const output = await Promise.all(["credentials", "tokens", "invite"].map(k => buildAssistantHandoff(caller.actor, k)));
 
     expect(output.map(x => x.href)).toEqual(["/settings/ai", "/campaigns/campaign/dm/ai", "/campaigns/campaign#invite"]);
-    for (const k of ["credentials", "tokens", "invite"]) expect(() => buildAssistantHandoff(caller.actor, k, { token: "SECRET", inviteCode: "SECRET" })).toThrow();
+    for (const k of ["credentials", "tokens", "invite"]) await expect(buildAssistantHandoff(caller.actor, k, { token: "SECRET", inviteCode: "SECRET" })).rejects.toThrow();
     expect(JSON.stringify(output)).not.toContain("SECRET");
   });
   it("signedUploadTicketNeverEntersHistory", async () => {
@@ -84,10 +84,10 @@ describe("T13 protected handoffs", () => {
     expect(JSON.stringify(output)).not.toMatch(/token|signed|publicUrl|SECRET/i);
     expect(state.receipts.size).toBe(0); expect(state.intents.size).toBe(0);
   });
-  it("externalHrefAndPayloadRejected", () => {
-    for (const target of [{ href: "https://evil.test" }, { raw: { spell: [] } }, { deckId: "//evil.test" }, { deckId: "deck?token=SECRET" }]) expect(() => buildAssistantHandoff(caller.actor, "slide-upload", target)).toThrow();
-    expect(() => buildAssistantHandoff(caller.actor, "https://evil.test")).toThrow();
-    expect(() => buildAssistantHandoff({ ...caller.actor, campaignId: "../escape" }, "invite")).toThrow();
+  it("externalHrefAndPayloadRejected", async () => {
+    for (const target of [{ href: "https://evil.test" }, { raw: { spell: [] } }, { deckId: "//evil.test" }, { deckId: "deck?token=SECRET" }]) await expect(buildAssistantHandoff(caller.actor, "slide-upload", target)).rejects.toThrow();
+    await expect(buildAssistantHandoff(caller.actor, "https://evil.test")).rejects.toThrow();
+    await expect(buildAssistantHandoff({ ...caller.actor, campaignId: "../escape" }, "invite")).rejects.toThrow();
   });
   it.each([[], ["one", "one"], Array.from({ length: 6 }, (_, i) => `key-${i}`)].map(selectedKeys => ({ selectedKeys })))("rejects invalid note selections before a read: $selectedKeys", async ({ selectedKeys }) => {
     await expect(readCompendiumSummary(caller.actor, "notes", { selectedKeys })).rejects.toMatchObject({ status: 400 });
@@ -107,13 +107,13 @@ describe("T13 protected handoffs", () => {
       expect(entry.originalName).toHaveLength(200);
       expect(entry.edition).toHaveLength(20);
       expect(entry.notes).toHaveLength(3000);
-      expect(entry.notes).toContain("[Приховано]");
+      expect(entry.notes).toContain("[redacted]");
     }
     expect(JSON.stringify(result)).not.toMatch(/SECRET|PRIVATE_TOKEN|sk-abcdefghijkl/);
   });
   it("keeps structured notes in the application instead of returning raw JSON", async () => {
     f.entries = [{ canonicalKey: "one", originalName: "Name", edition: "one", notes: '  {"private":"RAW_SECRET"}' }];
-    expect(await readCompendiumSummary(caller.actor, "notes", { selectedKeys: ["one"] })).toMatchObject({ data: { entries: [{ notes: "Структуровані примітки перегляньте у застосунку." }] } });
+    expect(await readCompendiumSummary(caller.actor, "notes", { selectedKeys: ["one"] })).toMatchObject({ data: { entries: [{ notes: "Structured notes: view them in the app." }] } });
   });
   it.each([-1, 100001])("rejects out-of-bounds pagination offset %s", async offset => {
     await expect(readCompendiumSummary(caller.actor, "note-options", { offset })).rejects.toMatchObject({ status: 400 });
@@ -140,11 +140,11 @@ describe("T13 protected handoffs", () => {
     expect(f.entryQueries[0]).toMatchObject({ where: { campaignId: "campaign", canonicalKey: { in: ["selected"] } }, take: 5 });
     expect(JSON.stringify(result)).not.toMatch(/SECRET|RAW_SECRET|attribution|sourceJson/);
   });
-  it("draftAiRemainsSeparate", () => {
+  it("draftAiRemainsSeparate", async () => {
     const draft = HANDOFF_ACTIONS.find(a => a.id === "handoff.player-draft");
 
     expect(draft?.effect).toBe("handoff");
-    expect(buildAssistantHandoff(caller.actor, "player-draft")).toMatchObject({ href: "/campaigns/campaign/character/draft", reason: expect.stringContaining("гравця") });
+    expect(await buildAssistantHandoff(caller.actor, "player-draft")).toMatchObject({ href: "/campaigns/campaign/character/draft", reason: "assistant.handoffs.player-draft" });
     expect(HANDOFF_ACTIONS.some(a => a.effect === "write" || a.effect === "paid")).toBe(false);
   });
   it("session-only report token returns handoff without manufacturing a session actor", async () => {

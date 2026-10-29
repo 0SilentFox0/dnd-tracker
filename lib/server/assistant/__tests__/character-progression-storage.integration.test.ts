@@ -59,7 +59,7 @@ const ownedIds = new Set<string>();
 
 const actor = () => ({ campaignId, userId, isDM: true, via: "session", scopes: null } as const);
 
-const caller = (): AssistantCaller => ({ actor: actor(), channel: "chat", threadId, tokenId: null });
+const caller = (): AssistantCaller => ({ actor: actor(), channel: "chat", threadId, tokenId: null, locale: "uk" as const });
 
 const executor = () => createAssistantExecutor({ db, catalog: createActionCatalog([...CHARACTER_ACTIONS, ...CHARACTER_PROGRESSION_ACTIONS]) });
 

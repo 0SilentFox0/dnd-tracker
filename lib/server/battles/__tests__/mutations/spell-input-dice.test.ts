@@ -4,7 +4,7 @@ import { describe, expect, it, vi } from "vitest";
 import { context, goblin, participant } from "./fixtures";
 
 import { API_ERRORS } from "@/lib/constants/api-errors";
-import { spellSchema } from "@/lib/server/battles/mutations/spell/cast-spell-schema";
+import { castSpellSchema as spellSchema } from "@/lib/schemas/battles";
 import { createSpellMutation } from "@/lib/server/battles/mutations/spell/spell-mutation";
 import type { BattleParticipant } from "@/types/battle";
 

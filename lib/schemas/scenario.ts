@@ -1,6 +1,7 @@
 import { z } from "zod";
 
 import { CALLOUT_KINDS, LEGEND_KINDS, MARK_TYPES, NODE_TYPES, PAGE_KINDS, PAGE_STATUSES, SCENARIO_MAX_LEGEND, SECTION_ICON_KEYS } from "@/lib/constants/scenario";
+import { hexColorSchema } from "@/lib/schemas/common";
 import type { RichNode, ScenarioContent } from "@/types/scenario";
 
 const attrsSchema = z.record(z.string(), z.unknown());
@@ -53,10 +54,10 @@ const unique = (ids: string[]) => new Set(ids).size === ids.length;
 
 export const scenarioContentSchema: z.ZodType<ScenarioContent> = z
   .object({
-    legend: z.array(z.object({ kind: z.enum(LEGEND_KINDS), label: z.string().max(80), color: z.string().regex(/^#[0-9a-f]{6}$/i).optional() })).max(SCENARIO_MAX_LEGEND),
+    legend: z.array(z.object({ kind: z.enum(LEGEND_KINDS), label: z.string().max(80), color: hexColorSchema().optional() })).max(SCENARIO_MAX_LEGEND),
     sections: z.array(sectionSchema).max(200),
   })
-  .refine((c) => unique(c.sections.map((s) => s.id)) && unique(c.sections.flatMap((s) => s.rows.map((r) => r.id))), { message: "Дубльовані id розділів або рядків" });
+  .refine((c) => unique(c.sections.map((s) => s.id)) && unique(c.sections.flatMap((s) => s.rows.map((r) => r.id))), { message: "scenario.validation.duplicateIds" });
 
 const optionalText = (max: number) => z.string().trim().max(max).nullish();
 
@@ -77,7 +78,7 @@ export const saveScenarioContentSchema = z.object({ expectedVersion: z.number().
 
 export const scenarioSectionPatchSchema = z
   .object({ played: z.boolean().optional(), revealed: z.boolean().optional() })
-  .refine((b) => b.played !== undefined || b.revealed !== undefined, { message: "Порожня зміна" });
+  .refine((b) => b.played !== undefined || b.revealed !== undefined, { message: "scenario.validation.emptyChange" });
 
 export const restoreScenarioVersionSchema = z.object({ versionId: z.string().min(1) });
 

@@ -7,7 +7,6 @@ import type { BattleMutationContext, MutationResult } from "@/lib/utils/battle/p
 import { rejectAction } from "@/lib/utils/battle/store";
 import type { MazeActionData } from "@/types/api";
 
-export { mazeActionSchema };
 
 export function mazeMutation(ctx: BattleMutationContext, body: MazeActionData): MutationResult {
   const map = ctx.meta.map;

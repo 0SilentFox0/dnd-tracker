@@ -67,6 +67,7 @@ vi.mock("@/lib/db", async () => {
   return { prisma: contentDatabaseDouble({
     apiToken: { create: vi.fn(), findMany: vi.fn(), findUnique: vi.fn(), update: vi.fn(), updateMany: vi.fn() },
     campaignMember: { findMany: vi.fn() },
+    user: { findUnique: vi.fn(async () => ({ locale: "uk" as const })) },
     assistantReceipt: { findFirst: vi.fn(async () => null) },
     assistantIntent: { upsert: vi.fn(async ({ create }) => ({ id: "intent", ...create, createdAt: new Date(), expiresAt: new Date(Date.now() + 900000) })) },
   }) };
@@ -196,7 +197,16 @@ describe("API tokens + MCP", () => {
 
     const { verifyApiToken } = await import("@/lib/ai/api-tokens");
 
-    expect(await verifyApiToken("dndt_abc")).toEqual({ id: "k1", campaignId: "camp1", userId: "dm", scopes: ["content:write"] });
+    expect(await verifyApiToken("dndt_abc")).toEqual({ id: "k1", campaignId: "camp1", userId: "dm", scopes: ["content:write"], locale: "uk" as const });
+  });
+
+  it("verifyApiToken: мова власника без профілю — en", async () => {
+    vi.mocked(prisma.apiToken.findUnique).mockResolvedValue({ id: "k1", campaignId: "camp1", userId: "dm", revokedAt: null, lastUsedAt: new Date(), scopes: ["content:write"] } as never);
+    vi.mocked(prisma.user.findUnique).mockResolvedValueOnce({ locale: null } as never);
+
+    const { verifyApiToken } = await import("@/lib/ai/api-tokens");
+
+    expect(await verifyApiToken("dndt_abc")).toMatchObject({ locale: "en" });
   });
 
   it("токен без права ai на MCP — 200, ai-інструментів немає", async () => {

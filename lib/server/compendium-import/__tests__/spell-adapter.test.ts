@@ -151,7 +151,7 @@ describe("native spell mechanics", () => {
       const { spell } = adapt({ level: 2, duration: [{ type: "timed", duration: { type: "hour", amount: 1 } }], entries: ["You and up to three other willing creatures within range form a bond. For the duration, each target's speed increases by 5 feet, and whenever an affected creature ends its turn, other targets can use their reaction to move up to half their speed."], entriesHigherLevel: [{ type: "entries", entries: ["When you cast this spell using a spell slot of 3rd level or higher, you can target one additional creature for each slot level above 2nd."] }] });
 
       expect(spell.body).toMatchObject({ executionMode: "native", targeting: { kind: "area", side: "ally", maxTargets: 4 }, upcastTargets: 1, spellEffects: [{ kind: "modifyStat", stat: "speed", flat: 5, duration: { rounds: 99 } }] });
-      expect(spell.issues.find((i) => i.code === "SPELL_RIDER_MANUAL")?.action).toContain("рух за реакцією");
+      expect(spell.issues.find((i) => i.code === "SPELL_RIDER_MANUAL")?.params?.riders).toContain("рух за реакцією");
     });
 
     it("does not read one option of a choice as the whole effect", () => {
@@ -181,11 +181,12 @@ describe("native spell mechanics", () => {
 
     expect(spell.body).toMatchObject({ executionMode: "manual", dice: 0, spellEffects: [] });
     expect(codes(spell)).toEqual([`MANUAL_SPELL_${reason}`]);
-    expect(spell.issues.find((i) => i.code.startsWith("MANUAL_SPELL"))?.action).toMatch(/[А-Яа-я]/);
   });
 
-  it("labels the blocker detail in Ukrainian, not raw source values", () => {
-    expect(adapt({ entries: ["The target must succeed on a Strength saving throw or obey you."], savingThrow: ["strength"] }).spell.issues.find((i) => i.code.startsWith("MANUAL_SPELL"))?.action).not.toMatch(/strength/);
-    expect(adapt({ entries: ["The target must make a Wisdom saving throw or be {@condition pacified|Book}."], savingThrow: ["wisdom"] }).spell.issues.find((i) => i.code.startsWith("MANUAL_SPELL"))?.action).toContain("невідомий стан «pacified»");
+  it("reports the blocker detail as params, not raw source text", () => {
+    const find = (row: Parameters<typeof adapt>[0]) => adapt(row).spell.issues.find((i) => i.code.startsWith("MANUAL_SPELL"));
+
+    expect(find({ entries: ["The target must succeed on a Strength saving throw or obey you."], savingThrow: ["strength"] })?.params).toMatchObject({ save: "strength" });
+    expect(find({ entries: ["The target must make a Wisdom saving throw or be {@condition pacified|Book}."], savingThrow: ["wisdom"] })?.params).toEqual({ condition: "pacified" });
   });
 });

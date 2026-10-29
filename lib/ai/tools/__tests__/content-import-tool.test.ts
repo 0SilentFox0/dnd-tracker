@@ -7,7 +7,7 @@ vi.mock("@/lib/server/assistant/execute", () => ({ dispatchAction: dispatch, rej
 import { contentImportTool } from "../content";
 import { type AiToolContext,runTool } from "../define";
 
-const ctx: AiToolContext = { campaignId: "c", userId: "dm", scopes: ["content:write"], threadId: null, caller: { actor: { campaignId: "c", userId: "dm", isDM: true, via: "session", scopes: null }, tokenId: null, channel: "chat", threadId: null } };
+const ctx: AiToolContext = { campaignId: "c", userId: "dm", scopes: ["content:write"], threadId: null, caller: { actor: { campaignId: "c", userId: "dm", isDM: true, via: "session", scopes: null }, tokenId: null, channel: "chat", threadId: null, locale: "uk" as const }, locale: "uk" as const };
 
 beforeEach(() => dispatch.mockReset());
 it.each([[true, "content.import-preview"], [false, "content.import"]] as const)("dryRun %s selects the canonical guarded operation", async (dryRun, actionId) => {

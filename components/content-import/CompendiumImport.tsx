@@ -1,5 +1,6 @@
 "use client";
 import Link from "next/link";
+import { useTranslations } from "next-intl";
 
 import { CompendiumCategories } from "./CompendiumCategories";
 import { CompendiumDependencies } from "./CompendiumDependencies";
@@ -14,6 +15,8 @@ import { Button } from "@/components/ui/button";
 import { useCompendiumImport } from "@/lib/hooks/compendium-import";
 
 export function CompendiumImport({ campaignId, initialFile }: { campaignId: string; initialFile?: File }) {
+  const t = useTranslations("compendium.import");
+
   const wizard = useCompendiumImport(campaignId, initialFile);
 
   const { preview, input, result, rights, busy, root, options } = wizard.state;
@@ -22,9 +25,9 @@ export function CompendiumImport({ campaignId, initialFile }: { campaignId: stri
 
   return <HudPage>
     <HudPageHeader
-      title="Імпорт JSON-компендіуму"
-      subtitle="Один файл → перевірка → підтвердження. До підтвердження кампанія не змінюється."
-      actions={<Button variant="outline" asChild><Link href={`/campaigns/${campaignId}`}>До кампанії</Link></Button>}
+      title={t("title")}
+      subtitle={t("subtitle")}
+      actions={<Button variant="outline" asChild><Link href={`/campaigns/${campaignId}`}>{t("back")}</Link></Button>}
     />
     <CompendiumFileStep wizard={wizard} />
     {root && <CompendiumCategories wizard={wizard} />}
@@ -33,14 +36,14 @@ export function CompendiumImport({ campaignId, initialFile }: { campaignId: stri
       <HudPanel className="space-y-3"><span id={DEPENDENCIES_ANCHOR} /><CompendiumDependencies key={preview.token} wizard={wizard} /></HudPanel>
       <HudPanel className="space-y-3">
         <div className="flex flex-wrap items-center justify-between gap-3">
-          <label className="flex min-w-0 items-start gap-2 text-sm"><input className="mt-0.5 h-4 w-4 shrink-0 accent-hud-gold" type="checkbox" checked={rights} disabled={busy} onChange={e => setRights(e.target.checked)} /> Маю право використати цей файл у цій кампанії</label>
-          <Button disabled={busy || !rights || !preview.report.readyToImport} onClick={() => void confirm()}>Імпортувати</Button>
+          <label className="flex min-w-0 items-start gap-2 text-sm"><input className="mt-0.5 h-4 w-4 shrink-0 accent-hud-gold" type="checkbox" checked={rights} disabled={busy} onChange={e => setRights(e.target.checked)} /> {t("rights")}</label>
+          <Button disabled={busy || !rights || !preview.report.readyToImport} onClick={() => void confirm()}>{t("confirm")}</Button>
         </div>
-        <p className="text-xs text-hud-muted">Перевірка чинна 15 хв; після змін кампанії чи вибору потрібна нова.</p>
+        <p className="text-xs text-hud-muted">{t("previewTtl")}</p>
       </HudPanel>
     </>}
-    {result && <HudPanel className="space-y-3"><p className="text-hud-good">Імпорт збережено: {result.runId}</p><CompendiumReport key={result.runId} campaignId={campaignId} report={result} committed /></HudPanel>}
+    {result && <HudPanel className="space-y-3"><p className="text-hud-good">{t("saved", { runId: result.runId ?? "" })}</p><CompendiumReport key={result.runId} campaignId={campaignId} report={result} committed /></HudPanel>}
     <CompendiumRunsList campaignId={campaignId} wizard={wizard} />
-    <ActionBar><Button variant="outline" disabled={busy && !!input} onClick={close}>Очистити файл і закрити майстер</Button></ActionBar>
+    <ActionBar><Button variant="outline" disabled={busy && !!input} onClick={close}>{t("close")}</Button></ActionBar>
   </HudPage>;
 }

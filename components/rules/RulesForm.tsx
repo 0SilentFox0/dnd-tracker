@@ -48,6 +48,8 @@ const SECTIONS = {
 export function RulesForm({ campaignId }: { campaignId: string }) {
   const t = useTranslator("rules");
 
+  const tc = useTranslator("common");
+
   const { form, save, reset, isSaving, isDirty, isLoading } = useRulesForm(campaignId);
 
   if (isLoading) return <LoadingState />;
@@ -72,10 +74,10 @@ export function RulesForm({ campaignId }: { campaignId: string }) {
         actions={
           <>
             <Button type="button" variant="outline" disabled={!isDirty || isSaving} onClick={reset}>
-              {t("form.cancel")}
+              {tc("actions.cancel")}
             </Button>
             <Button type="submit" disabled={!isDirty || isSaving}>
-              {t("form.save")}
+              {tc("actions.save")}
             </Button>
           </>
         }

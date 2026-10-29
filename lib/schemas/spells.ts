@@ -3,6 +3,7 @@ import { z } from "zod";
 import { SPELL_GROUP_ICON_KEYS } from "@/lib/constants/spell-groups";
 import { SPELL_NAME_MAX } from "@/lib/constants/spells";
 import { SpellListsSchema } from "@/lib/schemas/choices";
+import { hexColorSchema } from "@/lib/schemas/common";
 import { SpellFxSchema } from "@/lib/utils/battle/fx/spell-fx-schema";
 import { RaceModifierSchema, SpellCastingTimeSchema, SpellCostSchema, SpellDiceSchema, SpellDieSidesSchema, SpellEffectSchema, SpellResolutionSchema, SpellTargetingSchema } from "@/lib/utils/spells/model/schema";
 
@@ -68,13 +69,13 @@ export type UpdateSpellInput = z.infer<typeof updateSpellSchema>;
 
 export const createSpellGroupSchema = z.object({
   name: z.string().min(1).max(SPELL_NAME_MAX),
-  color: z.string().regex(/^#[0-9a-f]{6}$/i).nullable().optional(),
+  color: hexColorSchema().nullable().optional(),
   icon: z.enum(SPELL_GROUP_ICON_KEYS).nullable().optional(),
 });
 
 export const updateSpellGroupSchema = z.object({
   name: z.string().min(1).max(SPELL_NAME_MAX).optional(),
-  color: z.string().regex(/^#[0-9a-f]{6}$/i).nullable().optional(),
+  color: hexColorSchema().nullable().optional(),
   icon: z.enum(SPELL_GROUP_ICON_KEYS).nullable().optional(),
 });
 

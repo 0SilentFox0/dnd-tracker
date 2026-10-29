@@ -6,7 +6,7 @@ import {loadThread} from '@/lib/ai/threads';
 import {assistantContextRoute} from '@/lib/server/assistant/context-http';
 import {requireDM} from '@/lib/utils/api/api-auth';
 vi.mock('@/lib/utils/api/rate-limit',()=>({checkRateLimit:vi.fn(async()=>({allowed:true})),rateLimitResponse:vi.fn()}));
-vi.mock('@/lib/ai/context/prompt',()=>({buildInstructions:vi.fn(async(args)=>{ args.onDisclosure?.({labels:['Система'],characters:100,truncated:false,focusAvailable:true,sourceNoteCount:args.sourceNoteSelection?.selectedKeys.length??0});
+vi.mock('@/lib/ai/context/prompt',()=>({buildInstructions:vi.fn(async(args)=>{ args.onDisclosure?.({blocks:['system'],characters:100,truncated:false,focusAvailable:true,sourceNoteCount:args.sourceNoteSelection?.selectedKeys.length??0});
 
 return 'PRIVATE PROMPT'; })}));
 vi.mock('@/lib/ai/threads',()=>({loadThread:vi.fn(async()=>({id:'t1',mode:'scenario',scenarioPageId:null,provider:'anthropic',model:'actual-model'}))}));

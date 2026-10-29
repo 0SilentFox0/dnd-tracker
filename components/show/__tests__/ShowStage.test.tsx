@@ -22,7 +22,7 @@ describe("ShowStage", () => {
   it("показ не йде — очікування", () => {
     render(<ShowStage campaignId="c1" show={show({ deckId: null, slide: null, nextImageUrl: null })} />);
 
-    expect(screen.getByText("ДМ ще не почав показ")).toBeTruthy();
+    expect(screen.getByText("show.waiting.notStarted")).toBeTruthy();
   });
 
   it("заглушка ввімкнена — картинка заглушки замість слайда, наступна все одно вантажиться", () => {
@@ -39,12 +39,12 @@ describe("ShowStage", () => {
     render(<ShowStage campaignId="c1" show={show({ deckId: null, slide: null, nextImageUrl: null, cover: { deckId: "d2", slide: { id: "slide-0009", imageUrl: "https://x.supabase.co/cover.webp", title: "Скоро" } } })} />);
 
     expect(screen.getByText("Скоро")).toBeTruthy();
-    expect(screen.queryByText("ДМ ще не почав показ")).toBeNull();
+    expect(screen.queryByText("show.waiting.notStarted")).toBeNull();
   });
 
   it("заглушка без картинки — стандартний екран перерви", () => {
     render(<ShowStage campaignId="c1" show={show({ curtain: true })} />);
 
-    expect(screen.getByText("Перерва — скоро продовжимо")).toBeTruthy();
+    expect(screen.getByText("show.waiting.paused")).toBeTruthy();
   });
 });

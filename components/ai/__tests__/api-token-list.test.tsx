@@ -17,16 +17,16 @@ describe("ApiTokenList", () => {
     renderWithConfirm(<ApiTokenList tokens={[token]} scopes={API_TOKEN_SCOPES} actions={{ onCreate, onRevoke: vi.fn() }} />);
 
     expect(screen.getByText(/dndt_ab12…/)).toBeTruthy();
-    expect(screen.getByText(/ще не використовувався/)).toBeTruthy();
+    expect(screen.getByText(/ai\.tokens\.neverUsed/)).toBeTruthy();
 
-    fireEvent.click(screen.getByRole("button", { name: "Створити токен" }));
-    fireEvent.change(screen.getByLabelText("Назва"), { target: { value: "Cursor" } });
-    fireEvent.click(screen.getByRole("button", { name: "Створити" }));
+    fireEvent.click(screen.getByRole("button", { name: "ai.tokens.create" }));
+    fireEvent.change(screen.getByLabelText("ai.tokens.dialog.name"), { target: { value: "Cursor" } });
+    fireEvent.click(screen.getByRole("button", { name: "common.actions.create" }));
 
     await waitFor(() => expect(screen.getByText("dndt_SECRETVALUE")).toBeTruthy());
-    expect(screen.getByRole("button", { name: "Скопіювати" })).toBeTruthy();
+    expect(screen.getByRole("button", { name: "ai.tokens.dialog.copy" })).toBeTruthy();
 
-    fireEvent.click(screen.getByRole("button", { name: "Готово" }));
+    fireEvent.click(screen.getByRole("button", { name: "ai.tokens.dialog.done" }));
     await waitFor(() => expect(screen.queryByText("dndt_SECRETVALUE")).toBeNull());
   });
 
@@ -35,22 +35,22 @@ describe("ApiTokenList", () => {
 
     renderWithConfirm(<ApiTokenList tokens={[token]} scopes={API_TOKEN_SCOPES} actions={{ onCreate, onRevoke: vi.fn() }} />);
 
-    expect(screen.getByText("AI-асистент (MCP)")).toBeTruthy();
+    expect(screen.getByText("ai.tokenScopes.ai")).toBeTruthy();
 
-    fireEvent.click(screen.getByRole("button", { name: "Створити токен" }));
-    fireEvent.change(screen.getByLabelText("Назва"), { target: { value: "Cursor" } });
-    fireEvent.click(screen.getByRole("checkbox", { name: "AI-асистент (MCP)" }));
-    expect((screen.getByRole("button", { name: "Створити" }) as HTMLButtonElement).disabled).toBe(true);
+    fireEvent.click(screen.getByRole("button", { name: "ai.tokens.create" }));
+    fireEvent.change(screen.getByLabelText("ai.tokens.dialog.name"), { target: { value: "Cursor" } });
+    fireEvent.click(screen.getByRole("checkbox", { name: "ai.tokenScopes.ai" }));
+    expect((screen.getByRole("button", { name: "common.actions.create" }) as HTMLButtonElement).disabled).toBe(true);
 
-    fireEvent.click(screen.getByRole("checkbox", { name: "Запис контенту" }));
-    fireEvent.click(screen.getByRole("button", { name: "Створити" }));
+    fireEvent.click(screen.getByRole("checkbox", { name: "ai.tokenScopes.contentWrite" }));
+    fireEvent.click(screen.getByRole("button", { name: "common.actions.create" }));
 
     await waitFor(() => expect(onCreate).toHaveBeenCalledWith({ name: "Cursor", scopes: ["content:write"] }));
   });
 
   it("на шаблоні лише права на контент", () => {
     renderWithConfirm(<ApiTokenList tokens={[]} scopes={["content:read", "content:write"]} actions={{ onCreate: vi.fn(), onRevoke: vi.fn() }} />);
-    fireEvent.click(screen.getByRole("button", { name: "Створити токен" }));
-    expect(screen.queryByRole("checkbox", { name: "AI-асистент (MCP)" })).toBeNull();
+    fireEvent.click(screen.getByRole("button", { name: "ai.tokens.create" }));
+    expect(screen.queryByRole("checkbox", { name: "ai.tokenScopes.ai" })).toBeNull();
   });
 });

@@ -35,7 +35,7 @@ export function SkillChoiceFields({ choice, onPatch }: KindFieldsProps) {
         {DND_SKILLS.map((s) => (
           <label key={s} className="flex items-center gap-1">
             <Checkbox checked={choice.skills?.includes(s) ?? false} onCheckedChange={() => onPatch({ skills: toggleItem(choice.skills, s) })} />
-            {t(`common.dndSkills.${s}`)}
+            {t(`gameTerms.dndSkills.${s}`)}
           </label>
         ))}
       </div>
@@ -46,7 +46,7 @@ export function SkillChoiceFields({ choice, onPatch }: KindFieldsProps) {
 export function AbilityScoreChoiceFields({ choice, onPatch }: KindFieldsProps) {
   const t = useTranslations("choices");
 
-  const tc = useTranslator("common");
+  const tg = useTranslator("gameTerms");
 
   return (
     <>
@@ -58,7 +58,7 @@ export function AbilityScoreChoiceFields({ choice, onPatch }: KindFieldsProps) {
         {ABILITY_KEYS.map((a) => (
           <label key={a} className="flex items-center gap-1">
             <Checkbox checked={choice.abilities?.includes(a) ?? false} onCheckedChange={() => onPatch({ abilities: toggleItem(choice.abilities, a) })} />
-            {tc(`abilities.${a}.label`)}
+            {tg(`abilities.${a}.label`)}
           </label>
         ))}
         <label className="flex items-center gap-2">

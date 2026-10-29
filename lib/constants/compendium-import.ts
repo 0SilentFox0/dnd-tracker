@@ -11,14 +11,18 @@ export const byteLength = (text: string) => encoder.encode(text).byteLength;
 
 export const COMPENDIUM_PAGE_SIZES = { graph: 30, reportRows: 50, reportActions: 50, runs: 20, notes: 50 } as const;
 
-export const COMPENDIUM_ERROR_TEXT: Record<string, string> = {
-  PREVIEW_SECRET_REQUIRED: "Імпорт недоступний: на сервері не задано COMPENDIUM_PREVIEW_SECRET (випадковий рядок, щонайменше 32 символи). Додайте його в змінні середовища (.env.local або Vercel) і перезапустіть сервер.",
-  PREVIEW_STALE: "Кампанія або термін preview змінилися. Повторіть перевірку.",
-  PREVIEW_INVALID: "Підпис preview недійсний. Повторіть перевірку.",
-  NOTES_SIZE: "Нотатки запису завеликі. Скоротіть опис або зніміть цей розділ/запис з вибору.",
-  REQUEST_SIZE: "Вибраний набір завеликий. Виберіть менше категорій або розділів.",
-  FORBIDDEN: "Доступ має лише ДМ кампанії через сесію.",
-  IMPORT_FAILED: "Не вдалося виконати імпорт. Жоден частковий запис не підтверджено; спробуйте повторити з тим самим ключем.",
+export const COMPENDIUM_ERROR_KEYS: Record<string, string> = {
+  PREVIEW_SECRET_REQUIRED: "errors.previewSecretRequired",
+  PREVIEW_STALE: "errors.previewStale",
+  PREVIEW_INVALID: "errors.previewInvalid",
+  NOTES_SIZE: "errors.notesSize",
+  REQUEST_SIZE: "errors.requestSize",
+  FORBIDDEN: "errors.forbidden",
+  IMPORT_FAILED: "errors.importFailed",
+  FILE_SIZE: "errors.fileSize",
+  PARSING_TIMEOUT: "errors.parsingTimeout",
+  INVALID_JSON: "errors.invalidJson",
+  RECORD_SIZE: "errors.recordSize",
 };
 
 export const COMPENDIUM_REF_KINDS: Record<string, string> = { spell: "spells", feat: "feats", class: "classes", race: "races", monster: "units", background: "backgrounds", item: "artifacts", spellSchool: "spell-groups" };

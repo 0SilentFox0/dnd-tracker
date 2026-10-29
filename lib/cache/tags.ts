@@ -13,6 +13,8 @@ export const ReferenceKind = {
 
 export type ReferenceKindValue = (typeof ReferenceKind)[keyof typeof ReferenceKind];
 
+export const ALL_REFERENCE_KINDS = Object.values(ReferenceKind);
+
 const TAG_PREFIX: Record<ReferenceKindValue, string> = {
   spells: "spells",
   mainSkills: "main-skills",
@@ -45,3 +47,5 @@ export function invalidateReference(
     revalidateTag(cacheTags[kind](campaignId), { expire: 0 });
   }
 }
+
+export const invalidateAllReference = (campaignId: string): void => invalidateReference(ALL_REFERENCE_KINDS, campaignId);

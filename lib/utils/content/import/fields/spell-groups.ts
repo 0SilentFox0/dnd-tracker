@@ -1,14 +1,11 @@
-import { nameField, textField } from "./common";
+import { defineSpec, nameField, textField } from "./common";
 
 import { SPELL_GROUP_ICON_KEYS } from "@/lib/constants/spell-groups";
-import type { ImportSpec } from "@/types/content-import";
-
-export const SPELL_GROUPS_IMPORT: ImportSpec = {
+export const SPELL_GROUPS_IMPORT = defineSpec({
   kind: "spell-groups",
-  label: "Школи магії",
   fields: [
-    nameField(["Магія Хаосу", "Магія Світла"]),
-    textField("color", "Колір", ["color"], ["#e25822", "#f5d76e"]),
-    { key: "icon", label: "Іконка", aliases: ["icon"], type: "enum", enumValues: SPELL_GROUP_ICON_KEYS, examples: ["flame", "sun"] },
+    nameField(),
+    textField("color"),
+    { key: "icon", type: "enum", enumValues: SPELL_GROUP_ICON_KEYS },
   ],
-};
+});

@@ -1,5 +1,7 @@
 "use client";
 
+import { useTranslations } from "next-intl";
+
 import { AiProviderCard } from "@/components/ai";
 import { ErrorState, QueryState } from "@/components/common/states";
 import { HudPage, HudPageHeader } from "@/components/hud/page";
@@ -8,15 +10,19 @@ import { useAiCredentials } from "@/lib/hooks/ai";
 import { useConfirm } from "@/lib/hooks/common";
 
 export function AiSettingsClient({ configured }: { configured: boolean }) {
+  const t = useTranslations("ai");
+
+  const tc = useTranslations("common");
+
   const ai = useAiCredentials();
 
   const confirm = useConfirm();
 
-  if (!configured) return <ErrorState error="AI-асистент не налаштований на сервері" />;
+  if (!configured) return <ErrorState error={new Error(t("settings.notConfigured"))} />;
 
   return (
     <HudPage>
-      <HudPageHeader title="AI-ключі" subtitle="Ключ зберігається зашифрованим і ніколи не показується повністю. Оплата — напряму з вашого рахунку провайдера." />
+      <HudPageHeader title={t("settings.title")} subtitle={t("settings.subtitle")} />
       <QueryState query={ai.query}>
         {(credentials) => (
           <div className="grid gap-4 md:grid-cols-3">
@@ -30,7 +36,7 @@ export function AiSettingsClient({ configured }: { configured: boolean }) {
                   onSave: (apiKey, defaultModel) => void ai.save({ provider, apiKey, defaultModel }),
                   onModel: (defaultModel) => void ai.patch({ provider, defaultModel }),
                   onDelete: async () => {
-                    const ok = await confirm({ title: "Видалити ключ?", description: "AI-чати цього провайдера перестануть працювати.", confirmLabel: "Видалити", destructive: true });
+                    const ok = await confirm({ title: t("settings.deleteKey.title"), description: t("settings.deleteKey.description"), confirmLabel: tc("actions.delete"), destructive: true });
 
                     if (ok) void ai.remove(provider);
                   },

@@ -26,16 +26,16 @@ describe("AiComposer", () => {
     const onStop = vi.fn();
 
     render(<AiComposer mode="live" busy focusLabel={null} actions={{ onSend: vi.fn(), onStop, onClearFocus: vi.fn() }} />);
-    fireEvent.click(screen.getByRole("button", { name: "Стоп" }));
+    fireEvent.click(screen.getByRole("button", { name: "ai.composer.stop" }));
     expect(onStop).toHaveBeenCalled();
-    expect(screen.queryByRole("button", { name: "Надіслати" })).toBeNull();
+    expect(screen.queryByRole("button", { name: "ai.composer.send" })).toBeNull();
   });
 
   it("live: швидкий чип відправляє одразу", () => {
     const onSend = vi.fn();
 
     render(<AiComposer mode="live" busy={false} focusLabel={null} actions={{ onSend, onStop: vi.fn(), onClearFocus: vi.fn() }} />);
-    fireEvent.click(screen.getByRole("button", { name: "Яке DC?" }));
-    expect(onSend).toHaveBeenCalledWith("Яке DC?");
+    fireEvent.click(screen.getByRole("button", { name: "ai.composer.quickPrompts.dc" }));
+    expect(onSend).toHaveBeenCalledWith("ai.composer.quickPrompts.dc");
   });
 });

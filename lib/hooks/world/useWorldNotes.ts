@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import { useQueryClient } from "@tanstack/react-query";
 
 import { worldKeys } from "./keys";
@@ -12,6 +13,8 @@ type Snapshot = [readonly unknown[], WorldView | WorldMapDetail | undefined][];
 
 export function useWorldNotes(campaignId: string, mapId: string | null) {
   const queryClient = useQueryClient();
+
+  const t = useTranslations("world.errors");
 
   const viewFilter = { queryKey: worldKeys.viewAll(campaignId) };
 
@@ -38,7 +41,7 @@ export function useWorldNotes(campaignId: string, mapId: string | null) {
   const create = useCrudMutation({
     mutationFn: (data: CreateWorldNoteData) => createWorldNote(campaignId, data),
     invalidateKeys,
-    errorText: "Не вдалося зберегти нотатку",
+    errorText: t("saveNote"),
   });
 
   const update = useCrudMutation({
@@ -52,7 +55,7 @@ export function useWorldNotes(campaignId: string, mapId: string | null) {
     },
     onError: restore,
     invalidateKeys,
-    errorText: "Не вдалося зберегти нотатку",
+    errorText: t("saveNote"),
   });
 
   const remove = useCrudMutation({
@@ -66,7 +69,7 @@ export function useWorldNotes(campaignId: string, mapId: string | null) {
     },
     onError: restore,
     invalidateKeys,
-    errorText: "Не вдалося видалити нотатку",
+    errorText: t("deleteNote"),
   });
 
   return { create, update, remove };

@@ -67,6 +67,6 @@ describe("useBattle — опитування без Pusher", () => {
   });
 
   it("з Pusher не опитується навіть у prepared", async () => {
-    expect(await intervalFor("prepared", { pauseRefetchWhenPusherConnected: true })).toBe(false);
+    expect(await intervalFor("prepared", { pausePolling: true })).toBe(false);
   });
 });

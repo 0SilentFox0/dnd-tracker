@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef } from "react";
+import { useTranslations } from "next-intl";
 
 import { AcquaintanceNoteEditor } from "./AcquaintanceNoteEditor";
 
@@ -16,6 +17,8 @@ interface Flags {
 }
 
 export function AcquaintanceCard({ campaignId, item, flags }: { campaignId: string; item: AcquaintanceView; flags: Flags }) {
+  const t = useTranslations("acquaintances");
+
   const ref = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -33,7 +36,7 @@ export function AcquaintanceCard({ campaignId, item, flags }: { campaignId: stri
           <EntityIcon src={item.avatarUrl} name={item.name} size={48} className="size-12 rounded-lg" />
           <h2 className="hud-sc min-w-0 flex-1 truncate text-lg text-hud-ink">{item.name}</h2>
           {flags.isNew && <NewPill />}
-          {item.hidden && <HudPill tone="muted">Приховано</HudPill>}
+          {item.hidden && <HudPill tone="muted">{t("card.hidden")}</HudPill>}
         </div>
         {item.description && <p className="whitespace-pre-wrap text-sm">{item.description}</p>}
         {item.entries.length > 0 && (
@@ -41,7 +44,7 @@ export function AcquaintanceCard({ campaignId, item, flags }: { campaignId: stri
             {item.entries.map((e) => (
               <li key={e.id} className={e.hidden ? "opacity-60" : undefined}>
                 {e.text}
-                {e.hidden && <span className="text-xs text-hud-muted"> · приховано</span>}
+                {e.hidden && <span className="text-xs text-hud-muted"> · {t("card.entryHidden")}</span>}
               </li>
             ))}
           </ul>

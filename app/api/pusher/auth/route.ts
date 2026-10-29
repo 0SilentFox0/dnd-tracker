@@ -7,6 +7,7 @@ import { getSessionUserId } from "@/lib/auth";
 import { API_ERRORS } from "@/lib/constants/api-errors";
 import { pusherServer } from "@/lib/pusher/server";
 import { errorResponse } from "@/lib/utils/api/api-response";
+import { handleApiError } from "@/lib/utils/api/error-handler";
 
 /** Subscription is allowed only to the user's own channel or to a battle channel of a campaign they belong to. */
 export async function POST(request: Request) {
@@ -29,13 +30,11 @@ export async function POST(request: Request) {
 
     const authResponse = pusherServer.authorizeChannel(socket_id, channel_name, {
       user_id: userId,
-      user_info: { name: userId },
+      user_info: {},
     });
 
     return NextResponse.json(authResponse);
   } catch (error) {
-    console.error("Error authenticating Pusher:", error);
-
-    return errorResponse(API_ERRORS.INTERNAL, 500);
+    return handleApiError(error, { action: "authenticate pusher" });
   }
 }

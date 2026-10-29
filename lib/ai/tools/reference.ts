@@ -38,7 +38,7 @@ async function findEntry(campaignId: string, kind: Kind, id: string): Promise<En
 export const searchReferenceTool = defineTool({
   name: "search_reference",
   scopes: ["ai"],
-  title: "Пошук у довіднику",
+  title: "Reference search",
   description: "Search the campaign reference by name: units, spells, races, skills, artifacts. Returns id and name; use read_reference for details.",
   input: z.object({ kind: kindSchema, query: z.string().trim().min(1).max(60) }),
   handler: async (ctx, { kind, query }) => {
@@ -54,7 +54,7 @@ export const searchReferenceTool = defineTool({
 export const readReferenceTool = defineTool({
   name: "read_reference",
   scopes: ["ai"],
-  title: "Запис довідника",
+  title: "Reference entry",
   description: "Full reference entry (unit stats and abilities, spell effects, race traits, skill or artifact description) by kind and id.",
   input: z.object({ kind: kindSchema, id: z.string().min(1) }),
   handler: async (ctx, { kind, id }) => {

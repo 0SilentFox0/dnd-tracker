@@ -1,3 +1,4 @@
+/* eslint-disable no-restricted-syntax -- derived content written to the DB stays Ukrainian (spec part5, decision 5) */
 import { renderEntries } from "../entries";
 import { nestedId, stableJson } from "../identity";
 import { type Adapter, issue } from "../types";
@@ -7,7 +8,7 @@ import { type MonsterStats, parseAttack, parseMultiattack, plainName } from "./m
 import { CastingBuilder, defenseAbilities, legendaryAbilities, legendaryResistances, saveProficiencies } from "./monster-traits";
 import { ABILITIES, array, description, num, object, str, unsupported } from "./shared";
 import { spellCast } from "./spell-cast";
-import { BLOCKER_ACTIONS, deriveSpell } from "./spell-derive";
+import { deriveSpell } from "./spell-derive";
 
 import type { AbilityKey } from "@/lib/constants/abilities";
 import { schoolByCode } from "@/lib/constants/spell-groups";
@@ -36,9 +37,9 @@ export const spell: Adapter = (row, ctx) => {
 
   const mechanics = "native" in derived ? { executionMode: "native", ...derived.native.fields } : MANUAL_SPELL_BODY;
 
-  if ("blocker" in derived) ctx.issues.push(issue(`MANUAL_SPELL_${derived.blocker}`, ctx.path, "warning", `${BLOCKER_ACTIONS[derived.blocker]}${derived.detail ? ` (${derived.detail})` : ""}`));
-  else if (derived.native.narrative) ctx.issues.push(issue("SPELL_NARRATIVE_ONLY", ctx.path, "warning", "Заклинання без бойової механіки: каст лише витрачає ресурси, ефект описує ДМ"));
-  else if (derived.native.riders.length > 0) ctx.issues.push(issue("SPELL_RIDER_MANUAL", ctx.path, "warning", `Додаткові ефекти не автоматизовано (${derived.native.riders.join(", ")}): див. опис`));
+  if ("blocker" in derived) ctx.issues.push(issue(`MANUAL_SPELL_${derived.blocker}`, ctx.path, "warning", derived.detail));
+  else if (derived.native.narrative) ctx.issues.push(issue("SPELL_NARRATIVE_ONLY", ctx.path, "warning"));
+  else if (derived.native.riders.length > 0) ctx.issues.push(issue("SPELL_RIDER_MANUAL", ctx.path, "warning", { riders: derived.native.riders.join(", ") }));
 
   return { kind: "spells", refs: "native" in derived ? (derived.native.refs ?? []).map((r) => ({ ...r, edition: ctx.edition })) : [], body: { name: row.name, level: row.level, description: [head, description(row, ctx)].filter(Boolean).join("\n\n"), ...mechanics, ...castingFields(cast.castingKey, cast.trigger), concentration: cast.concentration, lists }, notes: unsupported(row, SPELL_CONSUMED, ctx) };
 };
@@ -60,12 +61,12 @@ export const monster: Adapter = (row, ctx) => {
 
   const hp = parsedHp !== undefined && parsedHp >= 1 ? parsedHp : undefined;
 
-  if (hp === undefined && typeof hpRow.special === "string") ctx.issues.push(issue("MANUAL_MONSTER_HP", `${ctx.path}.hp`, "warning", `HP «${hpRow.special}» не розпізнано: встановлено 1, задайте значення вручну`));
-  else if (ac === undefined || hp === undefined) ctx.issues.push(issue("REQUIRED_MONSTER_STATS", ctx.path, "error", "Укажіть числові HP та AC або виключіть монстра"));
+  if (hp === undefined && typeof hpRow.special === "string") ctx.issues.push(issue("MANUAL_MONSTER_HP", `${ctx.path}.hp`, "warning", { value: hpRow.special }));
+  else if (ac === undefined || hp === undefined) ctx.issues.push(issue("REQUIRED_MONSTER_STATS", ctx.path, "error"));
 
   const scores = Object.fromEntries(Object.entries(ABILITIES).map(([short, long]) => [long, num(row[short])]));
 
-  if (Object.values(scores).some((v) => v === undefined)) ctx.issues.push(issue("MONSTER_ABILITY_REQUIRED", ctx.path, "error", "Укажіть усі шість характеристик"));
+  if (Object.values(scores).some((v) => v === undefined)) ctx.issues.push(issue("MONSTER_ABILITY_REQUIRED", ctx.path, "error"));
 
   const rawCr = str(row.cr) || str(object(row.cr).cr);
 
@@ -83,7 +84,7 @@ export const monster: Adapter = (row, ctx) => {
 
   const casting = new CastingBuilder(ctx.edition);
 
-  const manual = (field: string, index: number, name: string) => ctx.issues.push(issue("MANUAL_MONSTER_ACTION", `${ctx.path}.${field}[${index}]`, "warning", `Дію «${name}» не автоматизовано: використайте текст або налаштуйте механіку вручну`));
+  const manual = (field: string, index: number, name: string) => ctx.issues.push(issue("MANUAL_MONSTER_ACTION", `${ctx.path}.${field}[${index}]`, "warning", { variant: "action", name }));
 
   const unhandled: Record<string, unknown[]> = {};
 
@@ -135,7 +136,7 @@ export const monster: Adapter = (row, ctx) => {
           multiattack = multi.count;
           keep(field, item);
 
-          if (multi.complex) ctx.issues.push(issue("MANUAL_MULTIATTACK_DETAIL", `${ctx.path}.action[${index}]`, "warning", "Рушій зберігає лише кількість атак за дію; склад і альтернативи Multiattack лишилися в тексті"));
+          if (multi.complex) ctx.issues.push(issue("MANUAL_MULTIATTACK_DETAIL", `${ctx.path}.action[${index}]`, "warning"));
 
           continue;
         }
@@ -145,9 +146,9 @@ export const monster: Adapter = (row, ctx) => {
         if (parsed) {
           attacks.push(parsed.row);
 
-          if (parsed.rider) ctx.issues.push(issue("MANUAL_ATTACK_RIDER", `${ctx.path}.action[${index}]`, "warning", `Додатковий ефект атаки «${name}» (збереження, стан тощо) збережено текстом у властивостях атаки`));
+          if (parsed.rider) ctx.issues.push(issue("MANUAL_ATTACK_RIDER", `${ctx.path}.action[${index}]`, "warning", { name }));
 
-          if (parsed.mixedDamage) ctx.issues.push(issue("MONSTER_ATTACK_MIXED_DAMAGE", `${ctx.path}.action[${index}]`, "warning", `Атака «${name}» має кілька типів шкоди: сумарні кістки застосовано до першого типу`));
+          if (parsed.mixedDamage) ctx.issues.push(issue("MONSTER_ATTACK_MIXED_DAMAGE", `${ctx.path}.action[${index}]`, "warning", { name }));
 
           continue;
         }
@@ -167,21 +168,21 @@ export const monster: Adapter = (row, ctx) => {
 
   abilities.push(...defenses.abilities);
 
-  for (const text of defenses.unresolved) ctx.issues.push(issue("MANUAL_MONSTER_DEFENSE", `${ctx.path}.defenses`, "warning", `Захист «${text}» не автоматизовано: налаштуйте вручну`));
+  for (const text of defenses.unresolved) ctx.issues.push(issue("MANUAL_MONSTER_DEFENSE", `${ctx.path}.defenses`, "warning", { text }));
 
-  if (defenses.nonMagicalApprox) ctx.issues.push(issue("MONSTER_NONMAGICAL_APPROX", `${ctx.path}.defenses`, "warning", "Рушій не розрізняє магічну й немагічну зброю: опір/імунітет «від немагічних атак» застосовано до всієї фізичної шкоди"));
+  if (defenses.nonMagicalApprox) ctx.issues.push(issue("MONSTER_NONMAGICAL_APPROX", `${ctx.path}.defenses`, "warning"));
 
   const legendary = legendaryAbilities(row.legendary, attacks.map((a) => String(a.name)));
 
   abilities.push(...legendary.abilities);
 
-  for (const name of legendary.manual) ctx.issues.push(issue("MANUAL_MONSTER_ACTION", `${ctx.path}.legendary`, "warning", `Легендарну дію «${name}» збережено як нотатку: автоматично виконується лише атака`));
+  for (const name of legendary.manual) ctx.issues.push(issue("MANUAL_MONSTER_ACTION", `${ctx.path}.legendary`, "warning", { variant: "legendary", name }));
 
   const built = casting.build();
 
-  if (built?.approximate) ctx.issues.push(issue("MONSTER_SPELL_SLOTS_APPROX", `${ctx.path}.spellcasting`, "warning", "Слоти заклинань монстра не моделюються: ліміт слотів застосовано до кожного заклинання окремо"));
+  if (built?.approximate) ctx.issues.push(issue("MONSTER_SPELL_SLOTS_APPROX", `${ctx.path}.spellcasting`, "warning"));
 
-  for (const key of built?.unresolved ?? []) ctx.issues.push(issue("MANUAL_MONSTER_ACTION", `${ctx.path}.${key}`, "warning", "Це обмеження заклинань не автоматизовано"));
+  for (const key of built?.unresolved ?? []) ctx.issues.push(issue("MANUAL_MONSTER_ACTION", `${ctx.path}.${key}`, "warning", { variant: "spells" }));
 
   const statblock = { ...(type && { creatureType: type }), ...(sizes[str(array(row.size)[0])] && { size: sizes[str(array(row.size)[0])] }), ...(Array.isArray(row.languages) && { languages: row.languages.map(str).join(", ") }), ...(resistances?.lair !== undefined && { lairResistances: resistances.lair }), movement: { ...Object.fromEntries(["fly", "swim", "climb", "burrow"].filter((k) => (speeds[k] ?? 0) >= 5).map((k) => [k, speeds[k]])), ...(movement.canHover === true && { hover: true }) } };
 
@@ -248,7 +249,7 @@ export const item: Adapter = (row, ctx) => {
 
   const manual = [...new Set([...effects.manual, ...Object.keys(row).filter((f) => OTHER_EFFECT_FIELDS.test(f) && !EFFECT_FIELDS.includes(f as never))])];
 
-  for (const field of manual) ctx.issues.push(issue("MANUAL_ITEM_EFFECT", `${ctx.path}.${field}`, "warning", "Ефект предмета рушій не моделює: застосовуйте за описом"));
+  for (const field of manual) ctx.issues.push(issue("MANUAL_ITEM_EFFECT", `${ctx.path}.${field}`, "warning"));
 
   const notes = [unsupported(row, ["type", "rarity", "dmg1", "dmg2", "dmgType", "ac", "reqAttune", "miscTags", "wondrous", ...EFFECT_FIELDS, ...Object.keys(row).filter((f) => OTHER_EFFECT_FIELDS.test(f))], ctx), ...manual.map((f) => `${f}: ${stableJson(row[f])}`)].filter(Boolean).join("\n");
 

@@ -8,7 +8,7 @@ import type { BattleAudioTrack, CampaignTrack, TrackKind } from "@/types/audio";
 
 export const TRACK_ORDER = [{ sortOrder: "asc" as const }, { createdAt: "asc" as const }];
 
-export const toBattleAudioTrack = (row: Pick<TrackRow, "title" | "kind" | "url" | "youtubeId" | "durationSec">): BattleAudioTrack => ({
+const toBattleAudioTrack = (row: Pick<TrackRow, "title" | "kind" | "url" | "youtubeId" | "durationSec">): BattleAudioTrack => ({
   title: row.title,
   kind: row.kind as TrackKind,
   url: row.url,

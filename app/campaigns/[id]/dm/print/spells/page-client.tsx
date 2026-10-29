@@ -33,7 +33,7 @@ export function PrintSpellsPageClient({
 }: PrintSpellsPageClientProps) {
   const t = useTranslations("spells.print");
 
-  const tc = useTranslator("common");
+  const tg = useTranslator("gameTerms");
 
   const groupedSpells = useMemo(() => {
     const map = groupSpellsByGroupAndLevel(initialSpells);
@@ -82,7 +82,7 @@ export function PrintSpellsPageClient({
           return (
             <section key={groupName} className="print-section mb-8">
               <div className="flex items-baseline gap-3 py-3 border-b mb-4">
-                <h2 className="text-xl font-semibold">{groupDisplayName(groupName, tc("ungrouped.spellGroup"))}</h2>
+                <h2 className="text-xl font-semibold">{groupDisplayName(groupName, tg("ungrouped.spellGroup"))}</h2>
                 <span className="text-sm text-muted-foreground">
                   {t("count", { count: totalSpells })}
                 </span>
@@ -91,7 +91,7 @@ export function PrintSpellsPageClient({
               {levels.map(([levelLabel, levelSpells]) => (
                 <div key={levelLabel} className="mb-6">
                   <h3 className="text-base font-semibold mb-2 uppercase tracking-wide text-muted-foreground">
-                    {tc(`spellLevels.${levelSpells[0]?.level ?? 0}`)}
+                    {tg(`spellLevels.${levelSpells[0]?.level ?? 0}`)}
                     <span className="ml-2 text-xs font-normal">
                       ({levelSpells.length})
                     </span>

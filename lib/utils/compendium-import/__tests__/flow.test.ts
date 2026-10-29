@@ -1,8 +1,11 @@
+import { createTranslator } from "use-intl/core";
 import { describe, expect, it } from "vitest";
 
 import { categoryInventory, compendiumErrorMessage, destination, excludeBlocked, projectInput } from "../flow";
 
 import { ApiError } from "@/lib/api/client";
+import type { Translator } from "@/lib/i18n/translator";
+import ukCompendium from "@/messages/uk/compendium.json";
 
 describe("campaign compendium flow", () => {
   const root = { _meta: { sources: [{ json: "synthetic", full: "Synthetic" }] }, spell: [{ name: "Light", source: "synthetic" }], background: [], feat: [], bookData: [{ id: "notes", data: [] }], monsterFluff: [{ name: "excluded" }], foundrySpell: [{}] };
@@ -37,6 +40,8 @@ it("projects only selected chapters while retaining book identity", () => {
   expect(JSON.parse(projectInput(root, ["bookData"], {}, ["bookData[0].data[1]"]).json)).toEqual({ bookData: [{ id: "b", data: [{ name: "one" }] }] });
 });
 
+const t = createTranslator({ locale: "uk", messages: { compendium: ukCompendium }, namespace: "compendium" }) as unknown as Translator;
+
 describe("projectInput record size", () => {
   const big = { name: "x", entries: Array.from({ length: 4 }, () => "x".repeat(100_000)) };
 
@@ -48,9 +53,19 @@ describe("projectInput record size", () => {
     expect(() => projectInput({ monster: [big] }, ["monster"])).toThrow("RECORD_SIZE: monster");
   });
   it("tells the DM that a missing preview secret makes import unavailable", () => {
-    const message = compendiumErrorMessage(new ApiError("x", 503, "/preview", { code: "PREVIEW_SECRET_REQUIRED" }), "fallback");
+    const message = compendiumErrorMessage(t, new ApiError("x", 503, "/preview", { code: "PREVIEW_SECRET_REQUIRED" }), "errors.readFailed");
 
     expect(message).toContain("COMPENDIUM_PREVIEW_SECRET");
     expect(message).toContain("Імпорт недоступний");
+  });
+});
+
+describe("compendiumErrorMessage keys", () => {
+  it("maps worker and size errors and falls back to the key", () => {
+    expect(compendiumErrorMessage(t, new Error("FILE_SIZE"), "errors.readFailed")).toContain("3 MiB");
+    expect(compendiumErrorMessage(t, new Error("RECORD_SIZE: monster"), "errors.readFailed")).toContain("Юніти");
+    expect(compendiumErrorMessage(t, new Error("INVALID_TEXT: $@1"), "errors.readFailed")).toBe("INVALID_TEXT: $@1");
+    expect(compendiumErrorMessage(t, "x", "errors.previewFailed")).toBe("Помилка preview");
+    expect(compendiumErrorMessage(t, new ApiError("x", 500, "/p", { code: "WEIRD" }), "errors.previewFailed")).toContain("WEIRD");
   });
 });

@@ -53,8 +53,8 @@ describe("generateSlideImage", () => {
     await generateSlideImage(input);
     await generateSlideImage({ ...input, useCampaignStyle: true });
 
-    expect(JSON.stringify(calls[0].prompt)).not.toContain("Стиль кампанії");
-    expect(JSON.stringify(calls[1].prompt)).toContain("Стиль кампанії: Темне фентезі");
+    expect(JSON.stringify(calls[0].prompt)).not.toContain("Campaign style");
+    expect(JSON.stringify(calls[1].prompt)).toContain("Campaign style: Темне фентезі");
     expect(calls[0].size).toBe("1536x1024");
   });
 
@@ -176,7 +176,7 @@ describe("generateAvatarImage", () => {
     const meta = await sharp(buffer).metadata();
 
     expect(calls[0].aspectRatio).toBe("1:1");
-    expect(JSON.stringify(calls[0].prompt)).toContain("Стиль кампанії: Темне фентезі");
+    expect(JSON.stringify(calls[0].prompt)).toContain("Campaign style: Темне фентезі");
     expect(meta.format).toBe("webp");
     expect(Math.max(meta.width ?? 0, meta.height ?? 0)).toBe(512);
     expect(url).toContain(path);

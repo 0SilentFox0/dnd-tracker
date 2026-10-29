@@ -28,7 +28,7 @@ afterEach(() => {
   vi.clearAllMocks();
 });
 
-const type = (value: string) => act(() => void fireEvent.change(screen.getByLabelText("Пошук знайомства"), { target: { value } }));
+const type = (value: string) => act(() => void fireEvent.change(screen.getByLabelText("acquaintances.page.search"), { target: { value } }));
 
 describe("AcquaintancesPageClient", () => {
   it("filters cards by name", async () => {
@@ -64,7 +64,7 @@ describe("AcquaintancesPageClient", () => {
 
     render(<AcquaintancesPageClient campaignId="c1" isDM focusId={undefined} />);
 
-    expect(screen.getByText(/Гравці ще не бачать цей розділ/)).toBeTruthy();
+    expect(screen.getByText(/acquaintances.page.hiddenFromPlayers/)).toBeTruthy();
   });
 
   it("scrolls the focused card into view", () => {

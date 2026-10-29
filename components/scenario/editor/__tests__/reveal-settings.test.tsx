@@ -1,6 +1,8 @@
 // @vitest-environment happy-dom
-import { cleanup, fireEvent, render, screen } from "@testing-library/react";
+import { cleanup, fireEvent, screen } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
+
+vi.unmock("next-intl");
 
 vi.mock("@/lib/hooks/scenario", () => ({
   useScenarioPages: () => ({ data: [{ id: "sc1", kind: "scene", title: "Монастир" }, { id: "sc2", kind: "scene", title: "Ліс" }] }),
@@ -20,6 +22,7 @@ vi.mock("@/components/ui/select-field", () => ({
 }));
 
 import { RevealSettings } from "@/components/scenario/editor/RevealSettings";
+import { render } from "@/components/ui/__tests__/uk-intl";
 
 afterEach(cleanup);
 

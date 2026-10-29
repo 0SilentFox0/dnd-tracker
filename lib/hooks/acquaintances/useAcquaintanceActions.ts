@@ -1,5 +1,7 @@
 "use client";
 
+import { useTranslations } from "next-intl";
+
 import { acquaintanceKeys } from "./keys";
 
 import {
@@ -14,34 +16,36 @@ import { useCrudMutation } from "@/lib/hooks/common";
 import type { CreateAcquaintanceData, CreateAcquaintanceEntryData, UpdateAcquaintanceData, UpdateAcquaintanceEntryData } from "@/types/acquaintances";
 
 export function useAcquaintanceActions(campaignId: string) {
+  const t = useTranslations("acquaintances");
+
   const invalidateKeys = [acquaintanceKeys.list(campaignId)];
 
-  const create = useCrudMutation({ mutationFn: (data: CreateAcquaintanceData) => createAcquaintance(campaignId, data), invalidateKeys, errorText: "Не вдалося створити знайомство" });
+  const create = useCrudMutation({ mutationFn: (data: CreateAcquaintanceData) => createAcquaintance(campaignId, data), invalidateKeys, errorText: t("notify.createFailed") });
 
   const update = useCrudMutation({
     mutationFn: ({ id, data }: { id: string; data: UpdateAcquaintanceData }) => updateAcquaintance(campaignId, id, data),
     invalidateKeys,
-    errorText: "Не вдалося зберегти знайомство",
+    errorText: t("notify.saveFailed"),
   });
 
-  const remove = useCrudMutation({ mutationFn: (id: string) => deleteAcquaintance(campaignId, id), invalidateKeys, errorText: "Не вдалося видалити знайомство" });
+  const remove = useCrudMutation({ mutationFn: (id: string) => deleteAcquaintance(campaignId, id), invalidateKeys, errorText: t("notify.removeFailed") });
 
   const addEntry = useCrudMutation({
     mutationFn: ({ id, data }: { id: string; data: CreateAcquaintanceEntryData }) => createAcquaintanceEntry(campaignId, id, data),
     invalidateKeys,
-    errorText: "Не вдалося додати запис",
+    errorText: t("notify.entryAddFailed"),
   });
 
   const updateEntry = useCrudMutation({
     mutationFn: ({ id, entryId, data }: { id: string; entryId: string; data: UpdateAcquaintanceEntryData }) => updateAcquaintanceEntry(campaignId, id, entryId, data),
     invalidateKeys,
-    errorText: "Не вдалося зберегти запис",
+    errorText: t("notify.entrySaveFailed"),
   });
 
   const removeEntry = useCrudMutation({
     mutationFn: ({ id, entryId }: { id: string; entryId: string }) => deleteAcquaintanceEntry(campaignId, id, entryId),
     invalidateKeys,
-    errorText: "Не вдалося видалити запис",
+    errorText: t("notify.entryRemoveFailed"),
   });
 
   return { create, update, remove, addEntry, updateEntry, removeEntry };

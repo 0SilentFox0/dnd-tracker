@@ -1,0 +1,281 @@
+{
+  "columnN": "Колонка {n}",
+  "transfer": {
+    "import": "Імпорт",
+    "exportCsv": "Експорт CSV",
+    "compendium": "JSON-компендіум і звіти"
+  },
+  "kinds": {
+    "units": "Юніти",
+    "spells": "Заклинання",
+    "skills": "Скіли",
+    "main-skills": "Основні скіли",
+    "spell-groups": "Школи магії",
+    "races": "Раси",
+    "classes": "Класи",
+    "feats": "Риси",
+    "backgrounds": "Передісторії",
+    "artifacts": "Артефакти",
+    "artifact-sets": "Сети артефактів"
+  },
+  "fields": {
+    "units": {
+      "name": "Назва",
+      "level": "Рівень",
+      "raceId": "Раса",
+      "avatar": "Аватар",
+      "initiative": "Ініціатива",
+      "armorClass": "КД",
+      "maxHp": "ХП",
+      "speed": "Швидкість",
+      "strength": "СИЛ",
+      "dexterity": "ЛОВ",
+      "constitution": "ТІЛ",
+      "intelligence": "ІНТ",
+      "wisdom": "МДР",
+      "charisma": "ХАР",
+      "attacks": "Атаки",
+      "abilities": "Навички/Здібності",
+      "immunities": "Імунітети",
+      "knownSpells": "Заклинання",
+      "statblock": "Статблок (JSON)",
+      "spellcasting": "Заклинання монстра (JSON)",
+      "proficiencyBonus": "Майстерність",
+      "gridSize": "Розмір на мапі",
+      "morale": "Мораль",
+      "minTargets": "Мін. цілей",
+      "maxTargets": "Макс. цілей",
+      "cr": "CR",
+      "xp": "XP",
+      "multiattack": "Мультиатака",
+      "legendaryActions": "Легендарні дії",
+      "legendaryResistances": "Легендарний опір",
+      "saveProficiencies": "Рятівні кидки"
+    },
+    "spells": {
+      "name": "Назва",
+      "level": "Коло",
+      "groupId": "Школа",
+      "description": "Опис",
+      "appearanceDescription": "Опис вигляду",
+      "icon": "Іконка",
+      "cost": "Вартість",
+      "casting": "Час накладання (JSON)",
+      "dice": "Кістки",
+      "dieSides": "Грань кубика",
+      "concentration": "Концентрація",
+      "stackable": "Стакається",
+      "maxStacks": "Макс. стаків",
+      "upcastDice": "Кістки за коло",
+      "upcastTargets": "Цілі за коло",
+      "addAbilityMod": "Додавати модифікатор",
+      "fixedDice": "Фіксовані кубики",
+      "damageBonus": "Бонус шкоди",
+      "targeting": "Ціль (JSON)",
+      "resolution": "Кидок (JSON)",
+      "spellEffects": "Ефекти (JSON)",
+      "raceModifiers": "Модифікатори рас (JSON)",
+      "fx": "Візуальний ефект (JSON)",
+      "lists": "Списки"
+    },
+    "skills": {
+      "name": "Назва",
+      "description": "Опис",
+      "icon": "Іконка",
+      "image": "Зображення",
+      "mainSkillId": "Основний скіл",
+      "spellId": "Заклинання",
+      "spellGroupId": "Школа магії",
+      "grantedSpellId": "Дає заклинання",
+      "abilities": "Здібності"
+    },
+    "main-skills": {
+      "name": "Назва",
+      "color": "Колір",
+      "icon": "Іконка",
+      "isEnableInSkillTree": "У дереві скілів",
+      "spellGroupId": "Школа магії",
+      "role": "Роль"
+    },
+    "spell-groups": {
+      "name": "Назва",
+      "color": "Колір",
+      "icon": "Іконка"
+    },
+    "races": {
+      "name": "Назва",
+      "icon": "Іконка",
+      "color": "Колір",
+      "availableSkills": "Доступні основні скіли",
+      "disabledSkills": "Заборонені скіли",
+      "passiveAbility": "Пасивна здібність (JSON)",
+      "spellSlotProgression": "Слоти заклинань (JSON)",
+      "choices": "Вибори (JSON)",
+      "abilities": "Здібності"
+    },
+    "classes": {
+      "name": "Назва",
+      "icon": "Іконка",
+      "color": "Колір",
+      "hitDie": "Кістка хітів",
+      "savingThrows": "Рятівні кидки",
+      "proficiencies": "Майстерності (JSON)",
+      "skillChoices": "Вибір навичок (JSON)",
+      "caster": "Тип заклинача",
+      "spellcastingAbility": "Характеристика заклинань",
+      "features": "Вміння за рівнями (JSON)",
+      "subclassLevel": "Рівень підкласу",
+      "subclasses": "Підкласи (JSON)",
+      "columns": "Таблиця класу (JSON)",
+      "spellList": "Список заклинань"
+    },
+    "feats": {
+      "name": "Назва",
+      "icon": "Іконка",
+      "type": "Тип",
+      "prerequisite": "Передумови (JSON)",
+      "repeatable": "Повторювана",
+      "description": "Опис",
+      "abilities": "Здібності",
+      "choices": "Вибори (JSON)"
+    },
+    "backgrounds": {
+      "name": "Назва",
+      "icon": "Іконка",
+      "description": "Опис",
+      "choices": "Вибори (JSON)",
+      "originFeatId": "Риса походження",
+      "skillProficiencies": "Навички (JSON)",
+      "toolProficiencies": "Інструменти (JSON)",
+      "equipmentText": "Спорядження (видає ДМ)"
+    },
+    "artifacts": {
+      "name": "Назва",
+      "description": "Опис",
+      "rarity": "Рідкість",
+      "slot": "Слот",
+      "setId": "Сет",
+      "icon": "Іконка",
+      "weapon": "Зброя (JSON)",
+      "armor": "Броня (JSON)",
+      "item": "Предмет 5e (JSON)",
+      "abilities": "Здібності"
+    },
+    "artifact-sets": {
+      "name": "Назва",
+      "description": "Опис",
+      "setBonus": "Бонус сету (JSON)",
+      "abilities": "Здібності",
+      "artifactIds": "Артефакти",
+      "icon": "Іконка"
+    }
+  },
+  "status": {
+    "created": {
+      "done": "Створено",
+      "planned": "Буде створено"
+    },
+    "updated": {
+      "done": "Оновлено",
+      "planned": "Буде оновлено"
+    },
+    "skipped": {
+      "done": "Пропущено",
+      "planned": "Буде пропущено"
+    },
+    "error": {
+      "done": "Помилка",
+      "planned": "Помилка"
+    }
+  },
+  "modes": {
+    "create": "Лише нові (дубль назви — помилка)",
+    "update": "Оновити за назвою, нові — створити",
+    "skip": "Пропустити наявні"
+  },
+  "wizard": {
+    "title": "Імпорт: {kind}",
+    "compendiumTitle": "Імпорт JSON-компендіуму",
+    "steps": {
+      "file": "Крок 1 з 4 · файл",
+      "columns": "Крок 2 з 4 · колонки",
+      "preview": "Крок 3 з 4 · перевірка",
+      "result": "Крок 4 з 4 · підсумок"
+    },
+    "checking": "Перевірка…",
+    "check": "Перевірити",
+    "importing": "Імпорт… {done}/{total}",
+    "importCount": "Імпортувати {count}"
+  },
+  "file": {
+    "label": "Файл CSV, TSV або JSON",
+    "aggregateHint": "Багатокатегорійний JSON автоматично відкриє кампанійний майстер без колонок та AI.",
+    "spreadsheetHint": "Excel чи Google Таблиці: «Файл → Зберегти як → CSV (UTF-8)». Роздільник (кома, крапка з комою, табуляція) визначається сам.",
+    "example": "Завантажити приклад CSV",
+    "empty": "Файл порожній",
+    "csvUnreadable": "Не вдалося прочитати CSV: {reason}",
+    "badJson": "Некоректний JSON",
+    "jsonShape": "JSON має бути масивом об'єктів або одним об'єктом",
+    "noRows": "У файлі немає рядків з даними",
+    "xlsxUnsupported": "XLSX не підтримується — збережіть таблицю як CSV (UTF-8) і завантажте його",
+    "unsupportedType": "Підтримуються файли CSV, TSV і JSON"
+  },
+  "columns": {
+    "summary": "Файл «{name}» · рядків: {rows}. Оберіть поле для кожної колонки.",
+    "missing": "Не зіставлено обов'язкові поля: {fields}",
+    "duplicates": "Кілька колонок → одне поле, використано першу: {fields}",
+    "aiBusy": "AI думає…",
+    "aiSuggest": "Підказати AI",
+    "fieldFor": "Поле для «{header}»",
+    "skip": "— пропустити —"
+  },
+  "preview": {
+    "mode": "Режим",
+    "row": "Рядок",
+    "name": "Назва",
+    "status": "Статус",
+    "errors": "Помилки",
+    "shown": "Показано перші {shown} з {total}"
+  },
+  "errorReport": {
+    "download": "Завантажити звіт помилок CSV",
+    "status": "Статус",
+    "errors": "Помилки"
+  },
+  "actions": {
+    "done": "Готово"
+  },
+  "errors": {
+    "readFailed": "Не вдалося прочитати файл",
+    "previewFailed": "Перевірка не вдалася",
+    "importInterrupted": "{reason}. Записано частин: {done} з {total}",
+    "importFailed": "Імпорт перервано",
+    "aiFailed": "AI не зміг підказати мапінг"
+  },
+  "details": {
+    "integerExpected": "Очікується ціле число",
+    "integerExpectedGot": "Очікується ціле число, отримано «{got}»",
+    "numberExpected": "Очікується число",
+    "numberExpectedGot": "Очікується число, отримано «{got}»",
+    "booleanExpected": "Очікується так/ні, отримано «{got}»",
+    "enumUnknown": "Невідоме значення «{got}»; можливі: {options}{optionsEn, select, other {}}",
+    "listUnknown": "Невідомі значення: {got}; можливі: {options}{optionsEn, select, other {}}",
+    "diceCount": "Очікується ціла кількість кісток",
+    "diceExpected": "Очікуються кістки на кшталт «2d6+1», отримано «{got}»",
+    "crExpected": "CR: 0, 1/8, 1/4, 1/2 або ціле 1–30, отримано «{got}»",
+    "jsonInvalid": "Некоректний JSON у клітинці",
+    "attackUnparsed": "Не розпізнано атаку: «{attacks}»"
+  },
+  "issues": {
+    "fieldInvalid": "{field}: {detail}",
+    "columnSkipped": "Колонка «{field}»: {detail} — значення «{value}» пропущено",
+    "columnWarning": "Колонка «{field}»: {detail}",
+    "duplicateColumns": "Кілька колонок для «{field}» — взято першу непорожню",
+    "unknownField": "Невідоме поле «{field}» — пропущено",
+    "refNotFound": "{field}: не знайдено «{value}» ({kind})",
+    "noName": "Немає назви",
+    "duplicateName": "Назва повторюється у файлі",
+    "alreadyExists": "«{name}» вже є в кампанії",
+    "multipleMatches": "Кілька записів «{name}» — оновлено перший"
+  }
+}

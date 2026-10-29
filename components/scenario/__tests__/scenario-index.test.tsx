@@ -1,11 +1,14 @@
 // @vitest-environment happy-dom
-import { cleanup, fireEvent, render, screen } from "@testing-library/react";
+import { cleanup, fireEvent, screen } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
 import { ScenarioIndex } from "@/components/scenario";
+import { render } from "@/components/ui/__tests__/uk-intl";
 import type { ScenarioPageSummary } from "@/types/scenario";
 
 afterEach(cleanup);
+
+vi.unmock("next-intl");
 
 const page = (over: Partial<ScenarioPageSummary>): ScenarioPageSummary => ({ id: "x", kind: "scene", arc: "Арка перша", title: "x", subtitle: null, status: "draft", sortOrder: 0, characterId: null, version: 0, updatedAt: "", ...over });
 

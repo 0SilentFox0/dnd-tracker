@@ -1,12 +1,14 @@
 import { z } from "zod";
 
+import { jsonContent } from "../json";
 import type { AssistantActionDef } from "../types";
 import { LEGACY_PROPOSAL_ACTION } from "./legacy-proposal";
 import { SCENARIO_EDIT_ACTION } from "./scenario-edit";
 
+import { getTranslator } from "@/lib/i18n/translator";
 import { createScenarioPageSchema, scenarioContentSchema, updateScenarioMetaSchema } from "@/lib/schemas/scenario";
 import { withCampaignContentWrite } from "@/lib/server/content/write";
-import { runScenarioOperation, scenarioFingerprint, scenarioResult,scenarioState } from "@/lib/server/scenario/action-service";
+import { runScenarioOperation, scenarioFingerprint, scenarioState } from "@/lib/server/scenario/action-service";
 
 const id = z.string().min(1).max(40);
 
@@ -25,9 +27,9 @@ const definitions = {
 export const SCENARIO_ACTIONS: readonly AssistantActionDef[] = [LEGACY_PROPOSAL_ACTION, SCENARIO_EDIT_ACTION, ...Object.entries(definitions).map(([operation, input]): AssistantActionDef => {
   const read = ["list", "get", "search", "mentions", "versions"].includes(operation);
 
-  const base = { id: `scenario.${operation}`, title: `Сценарій: ${operation}`, description: "Поточна кампанія, версії та rich content", input, need: { access: "dm" as const, scope: read ? "scenario:read" as const : "scenario:write" as const } };
+  const base = { id: `scenario.${operation}`, title: `Scenario: ${operation}`, description: "The current campaign scenario: pages, versions and rich content", input, need: { access: "dm" as const, scope: read ? "scenario:read" as const : "scenario:write" as const } };
 
-  if (read) return { ...base, effect: "read", execute: (caller, value) => runScenarioOperation(caller.actor, operation, value as Record<string, unknown>) };
+  if (read) return { ...base, effect: "read", execute: (caller, value) => runScenarioOperation(caller.actor, operation, value as Record<string, unknown>, undefined, caller.locale) };
 
   return { ...base, effect: "write", confirmation: ["save", "restore", "delete", "section.delete", "row.delete"].includes(operation) ? "always" : "standard",
     prepare: (caller, raw) => withCampaignContentWrite(caller.actor.campaignId, async () => {
@@ -35,10 +37,12 @@ export const SCENARIO_ACTIONS: readonly AssistantActionDef[] = [LEGACY_PROPOSAL_
 
       const state = await scenarioState(caller.actor, value.id as string | undefined);
 
-      const target = { domain: "scenario", id: String(value.id ?? "new"), name: state.page?.title ?? "Нова сторінка" };
+      const t = await getTranslator(caller.locale, "assistant");
 
-      return { summary: `Сценарій: ${operation}`, targets: [target], changes: [{ target, path: operation, before: scenarioResult(state.page ?? null).data, after: scenarioResult(value).data }], warnings: [], effects: [{ kind: operation.includes("delete") ? "delete" : operation === "section.patch" && value.played === false ? "erase-progress" : operation === "create" ? "create" : "update", targets: [target], description: operation }], preconditions: { fingerprint: scenarioFingerprint(state) } };
+      const target = { domain: "scenario", id: String(value.id ?? "new"), name: state.page?.title ?? t("results.newPage") };
+
+      return { summary: t("summary.scenario", { operation }), targets: [target], changes: [{ target, path: operation, before: jsonContent(state.page ?? null), after: jsonContent(value) }], warnings: [], effects: [{ kind: operation.includes("delete") ? "delete" : operation === "section.patch" && value.played === false ? "erase-progress" : operation === "create" ? "create" : "update", targets: [target], description: operation }], preconditions: { fingerprint: scenarioFingerprint(state) } };
     }),
-    execute: (ctx, value) => runScenarioOperation(ctx.caller.actor, operation, value as Record<string, unknown>, (ctx.expected as { fingerprint: string }).fingerprint),
+    execute: (ctx, value) => runScenarioOperation(ctx.caller.actor, operation, value as Record<string, unknown>, (ctx.expected as { fingerprint: string }).fingerprint, ctx.caller.locale),
   };
 })];

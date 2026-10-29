@@ -90,8 +90,8 @@ describe("monster attack parsing (B1/B2)", () => {
 
     const manual = entry.issues.filter((i) => i.code === "MANUAL_MONSTER_ACTION");
 
-    expect(manual.map((i) => i.action).join()).toContain("Odd Gaze");
-    expect(manual.map((i) => i.action).join()).toContain("Bite");
+    expect(manual.map((i) => i.params?.name).join()).toContain("Odd Gaze");
+    expect(manual.map((i) => i.params?.name).join()).toContain("Bite");
     expect(entry.notes).toContain("Odd Gaze");
   });
 
@@ -145,7 +145,7 @@ describe("monster defenses and resources (B3)", () => {
 
     expect(entry.body).toMatchObject({ legendaryActions: 3, legendaryResistances: 3, statblock: { lairResistances: 4 } });
     expect(entry.body.abilities).toEqual(expect.arrayContaining([expect.objectContaining({ name: "Claw", perform: { kind: "attack", attack: "Claw" }, limits: { legendaryCost: 1 } }), expect.objectContaining({ name: "Roar", limits: { legendaryCost: 2 } })]));
-    expect(entry.issues.filter((i) => i.code === "MANUAL_MONSTER_ACTION").map((i) => i.action).join()).toContain("Roar");
+    expect(entry.issues.filter((i) => i.code === "MANUAL_MONSTER_ACTION").map((i) => i.params?.name).join()).toContain("Roar");
     expect(createUnitSchema.safeParse(entry.body).success).toBe(true);
   });
 

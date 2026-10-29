@@ -1,6 +1,7 @@
 import { z } from "zod";
 
 import { SKILL_NAME_MAX } from "@/lib/constants/skills";
+import { urlField } from "@/lib/schemas/common";
 import { AbilitiesSchema } from "@/lib/utils/abilities/schema";
 
 export const createSkillSchema = z.object({
@@ -9,7 +10,7 @@ export const createSkillSchema = z.object({
     description: z.string().optional(),
     icon: z.preprocess(
       (val) => (val === "" ? null : val),
-      z.string().url().nullable().optional(),
+      urlField().nullable().optional(),
     ),
   }),
   spellData: z.object({
@@ -31,7 +32,7 @@ export const updateSkillSchema = z.object({
       description: z.string().optional(),
       icon: z.preprocess(
         (val) => (val === "" ? null : val),
-        z.string().url().nullable().optional(),
+        urlField().nullable().optional(),
       ),
     })
     .optional(),

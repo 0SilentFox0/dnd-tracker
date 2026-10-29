@@ -8,6 +8,7 @@ const ROOTS = ["lib/utils", "lib/constants", "lib/hooks", "components", "app", "
 
 const ALLOWED_FILES: Record<string, string> = {
   "components/battle/fx/labels.ts": "UI labels of built-in FX archetypes/elements/auras, keyed by FX kind (names coincide with library content)",
+  "lib/constants/import-aliases.ts": "CSV import header aliases and example cells (user-facing sample data, not engine rules)",
   "lib/hooks/battle/mock-participants.ts": "dev-only mock participants for the FX/map playground",
 };
 

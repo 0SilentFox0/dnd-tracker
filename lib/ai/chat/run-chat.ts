@@ -12,12 +12,14 @@ import { toAiSdkTools } from "@/lib/ai/tools";
 import { publicToolData } from "@/lib/ai/tools/projection";
 import { AI_LIMITS, API_TOKEN_SCOPES } from "@/lib/constants/ai";
 import { API_ERRORS } from "@/lib/constants/api-errors";
+import { getRequestLocale } from "@/lib/i18n/request-locale";
+import { getTranslator } from "@/lib/i18n/translator";
 import { chatCaller } from "@/lib/server/assistant/caller";
 import { beginAssistantRun, createRunSignal, finishAssistantRun, isAssistantRunCancelled, recordAssistantRunUsage, RUN_GRACE_MS } from "@/lib/server/assistant/runs";
 import { ContentError } from "@/lib/server/content/errors";
 import { errorResponse } from "@/lib/utils/api/api-response";
 import { PRIVATE_NO_STORE_HEADERS } from "@/lib/utils/api/cache-headers";
-import { requestTranslator, translateErrorBody } from "@/lib/utils/api/translate-error";
+import { translateErrorBody } from "@/lib/utils/api/translate-error";
 import type { AiFocus, AiMessageMetadata, AssistantSessionContext } from "@/types/ai";
 
 type RunChatArgs = { campaignId: string; userId: string; threadId: string; requestId: string; text: string; focus?: AiFocus; sessionContext?: AssistantSessionContext; abortSignal?: AbortSignal };
@@ -27,9 +29,9 @@ export async function runChat({ campaignId, userId, threadId, requestId, text, f
 
   if (!thread) return errorResponse(API_ERRORS.AI_THREAD_NOT_FOUND, 404);
 
-  const t = await requestTranslator();
+  const caller = chatCaller(campaignId, userId, threadId, await getRequestLocale());
 
-  const caller = chatCaller(campaignId, userId, threadId);
+  const t = await getTranslator(caller.locale);
 
   let claim;
 
@@ -89,7 +91,7 @@ export async function runChat({ campaignId, userId, threadId, requestId, text, f
       model = createModel(thread.provider, apiKey, thread.model);
     }
 
-    const tools = toAiSdkTools({ campaignId, userId, scopes: API_TOKEN_SCOPES, threadId, abortSignal: toolSignal, caller });
+    const tools = toAiSdkTools({ campaignId, userId, scopes: API_TOKEN_SCOPES, threadId, abortSignal: toolSignal, caller, locale: caller.locale });
 
     const [stored, instructions] = await Promise.all([
       loadMessages(threadId, AI_LIMITS.historyMessages),

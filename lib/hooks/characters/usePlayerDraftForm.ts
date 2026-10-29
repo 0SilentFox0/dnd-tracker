@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
-import { useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
 import { characterKeys } from "./keys";
@@ -14,6 +14,7 @@ import { HERO_ARCHETYPE_KEYS } from "@/lib/constants/hero-archetypes";
 import { useClassMode } from "@/lib/hooks/classes";
 import { useOptionalNotify } from "@/lib/hooks/common";
 import { useRaces } from "@/lib/hooks/races";
+import type { Locale } from "@/lib/i18n/config";
 import { draftChoicesState, stateDraftChoices } from "@/lib/utils/characters/choices/picks";
 import { prunePicks } from "@/lib/utils/characters/choices/prune";
 import type { ChoiceRefs } from "@/lib/utils/characters/choices/walk";
@@ -55,6 +56,8 @@ export interface PlayerDraftFormOptions {
 }
 
 export function usePlayerDraftForm({ campaignId, characterId, initial }: PlayerDraftFormOptions) {
+  const locale = useLocale() as Locale;
+
   const t = useTranslations("characters.draft");
 
   const tArchetype = useTranslations("characters.archetypes");
@@ -97,7 +100,10 @@ export function usePlayerDraftForm({ campaignId, characterId, initial }: PlayerD
 
   const scoreSteps = (scores: AbilityScores): Array<RollStep<RollKey>> => ABILITY_KEYS.map((key) => ({ key, pool: () => pick(Math.random, STANDARD_ARRAY), final: scores[key] }));
 
-  const nameStep = (name: string, race: string): RollStep<RollKey> => ({ key: "name", pool: () => generateName(race, Math.random), final: name });
+  const nameStep = useCallback(
+    (name: string, race: string): RollStep<RollKey> => ({ key: "name", pool: () => generateName(race, Math.random, locale), final: name }),
+    [locale],
+  );
 
   const backgroundStep = (background: string): RollStep<RollKey> => ({ key: "background", pool: () => "", final: background });
 
@@ -112,7 +118,7 @@ export function usePlayerDraftForm({ campaignId, characterId, initial }: PlayerD
   const all = useCallback(() => {
     const seed = seedNow();
 
-    const g = generateCharacter({ races: raceNames, seed, classes: classBased ? classMode.classes : undefined });
+    const g = generateCharacter({ races: raceNames, seed, classes: classBased ? classMode.classes : undefined, locale });
 
     const pool = portraitPool(g.race);
 
@@ -155,15 +161,15 @@ export function usePlayerDraftForm({ campaignId, characterId, initial }: PlayerD
       ...scoreSteps(g.scores),
       backgroundStep(g.background),
     ]);
-  }, [raceNames, raceStep, start, portraitPool, queryClient, campaignId, classBased, classMode.classes, tArchetype]);
+  }, [raceNames, raceStep, start, portraitPool, queryClient, campaignId, classBased, classMode.classes, tArchetype, nameStep, locale]);
 
   const name = useCallback(() => {
-    const next = generateName(values.race, Math.random);
+    const next = generateName(values.race, Math.random, locale);
 
     setValues((prev) => ({ ...prev, name: next }));
 
     start([nameStep(next, values.race)]);
-  }, [start, values.race]);
+  }, [start, values.race, locale, nameStep]);
 
   const scores = useCallback(() => {
     const cls = classBased ? classMode.classes.find((c) => c.id === values.classId) : undefined;
@@ -188,12 +194,12 @@ export function usePlayerDraftForm({ campaignId, characterId, initial }: PlayerD
   );
 
   const backstory = useCallback(() => {
-    const next = generateLocalBackstory({ name: values.name || t("defaultHeroName"), raceName: values.race, archetype: values.archetype }, Math.random);
+    const next = generateLocalBackstory({ name: values.name || t("defaultHeroName"), raceName: values.race, archetype: values.archetype }, Math.random, locale);
 
     setValues((prev) => ({ ...prev, ...next }));
 
     start([backgroundStep(next.background)]);
-  }, [start, values.archetype, values.name, values.race, t]);
+  }, [start, values.archetype, values.name, values.race, t, locale]);
 
   const portrait = useCallback(() => {
     const pool = portraitPool(values.race);

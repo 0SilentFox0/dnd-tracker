@@ -42,6 +42,6 @@ describe("ArtifactSetCard", () => {
     expect(screen.getByText("Шолом зорі")).toBeInTheDocument();
     expect(screen.getByText('artifacts.sets.card.parts {"count":1}')).toBeInTheDocument();
     expect(screen.queryByRole("combobox")).toBeNull();
-    expect(screen.getByRole("link", { name: "artifacts.sets.card.edit" }).getAttribute("href")).toBe("/campaigns/c1/dm/artifact-sets/s1");
+    expect(screen.getByRole("link", { name: "common.actions.edit" }).getAttribute("href")).toBe("/campaigns/c1/dm/artifact-sets/s1");
   });
 });

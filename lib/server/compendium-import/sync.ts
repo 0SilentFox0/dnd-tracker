@@ -12,15 +12,16 @@ export async function syncCompendiumProvenance(db: Pick<CompendiumBundleDb, "com
 
   const section = remapCompendiumSection({ ...source, entries: selected, pages: [] }, idMap);
 
-  for (const row of section.entries) {
-    const current = await db.compendiumEntry.findUnique({ where: { campaignId_canonicalKey: { campaignId, canonicalKey: row.canonicalKey } }, select: { localId: true } });
+  const current = new Map((await db.compendiumEntry.findMany({ where: { campaignId, canonicalKey: { in: section.entries.map((r) => r.canonicalKey) } }, select: { canonicalKey: true, localId: true } })).map((r) => [r.canonicalKey, r.localId]));
 
-    if (current && current.localId !== row.localId) throw new CompendiumError("PROVENANCE_CONFLICT", row.canonicalKey);
-  }
-  for (const row of section.entries) {
-    const data = { ...row, locator: jsonContentInput(row.locator), baseline: jsonContentInput(row.baseline), issues: jsonContentInput(row.issues), bindings: jsonContentInput(row.bindings), attribution: jsonContentInput(row.attribution) };
+  for (const row of section.entries) if (current.has(row.canonicalKey) && current.get(row.canonicalKey) !== row.localId) throw new CompendiumError("PROVENANCE_CONFLICT", row.canonicalKey);
 
-    await db.compendiumEntry.upsert({ where: { campaignId_canonicalKey: { campaignId, canonicalKey: row.canonicalKey } }, create: { campaignId, ...data }, update: data });
-  }
+  const data = section.entries.map((row) => ({ ...row, locator: jsonContentInput(row.locator), baseline: jsonContentInput(row.baseline), issues: jsonContentInput(row.issues), bindings: jsonContentInput(row.bindings), attribution: jsonContentInput(row.attribution) }));
+
+  const fresh = data.filter((row) => !current.has(row.canonicalKey));
+
+  if (fresh.length) await db.compendiumEntry.createMany({ data: fresh.map((row) => ({ campaignId, ...row })) });
+
+  for (const row of data.filter((r) => current.has(r.canonicalKey))) await db.compendiumEntry.update({ where: { campaignId_canonicalKey: { campaignId, canonicalKey: row.canonicalKey } }, data: row });
   for (const source of section.sources.filter((s) => selected.some((e) => e.sourceJson.toLowerCase() === s.sourceJson.toLowerCase()))) await db.compendiumSource.upsert({ where: { campaignId_sourceJson: { campaignId, sourceJson: source.sourceJson } }, create: { campaignId, sourceJson: source.sourceJson, metadata: jsonContentInput(source.metadata) }, update: { metadata: jsonContentInput(source.metadata) } });
 }

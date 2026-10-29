@@ -19,7 +19,7 @@ describe("ChoiceListEditor (en)", () => {
   afterEach(cleanup);
 
   it("renders English text without raw keys", async () => {
-    const { container } = await renderWithIntl(<ChoiceListEditor campaignId="c1" owner="class" value={choices} onChange={vi.fn()} />, { locale: "en", namespaces: ["common", "validation", "feats", "choices"] });
+    const { container } = await renderWithIntl(<ChoiceListEditor campaignId="c1" owner="class" value={choices} onChange={vi.fn()} />, { locale: "en", namespaces: ["common", "gameTerms", "validation", "feats", "choices"] });
 
     expect(screen.getByRole("button", { name: "Add choice" })).toBeInTheDocument();
     expect(screen.getAllByLabelText("Choice kind")).toHaveLength(2);

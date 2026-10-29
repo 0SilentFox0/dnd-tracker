@@ -9,7 +9,8 @@ const commits = vi.hoisted(() => ({ list: 0, rows: new Map<string, number>() }))
 vi.mock("@/components/hud/fonts", () => ({ hudFontClassName: "" }));
 vi.mock("@/lib/hooks/common/useMediaQuery", () => ({ useMediaQuery: () => false }));
 vi.mock("@/lib/hooks/battle/usePusherBattleSync", () => ({ usePusherBattleSync: () => ({ connectionState: "connected" }) }));
-vi.mock("@/lib/api/battles", async (orig) => ({ ...(await orig<typeof import("@/lib/api/battles")>()), attack: vi.fn(), getBattle: vi.fn() }));
+vi.mock("@/lib/api/battles", async (orig) => ({ ...(await orig<typeof import("@/lib/api/battles")>()), getBattle: vi.fn() }));
+vi.mock("@/lib/api/client", async (orig) => ({ ...(await orig<typeof import("@/lib/api/client")>()), campaignPost: vi.fn() }));
 
 // обгортка рахує коміти, зберігаючи memo оригіналу
 function counted<P extends object>(original: FunctionComponent<P> | MemoExoticComponent<FunctionComponent<P>>, onCommit: (props: P) => void) {
@@ -44,7 +45,7 @@ vi.mock("@/components/battle/participants/ParticipantRow", async (orig) => {
 
 import { BattleSceneProvider } from "@/components/battle/scene/BattleSceneProvider";
 import { BattleScreen } from "@/components/battle/scene/BattleScreen";
-import { attack } from "@/lib/api/battles";
+import { campaignPost } from "@/lib/api/client";
 import { ParticipantSide } from "@/lib/constants/battle";
 import { type BattleSceneValue, useBattleScene, useBattleSceneValue } from "@/lib/hooks/battle";
 import { battleQueryKey } from "@/lib/hooks/battles";
@@ -127,7 +128,7 @@ describe("рендери на атаку", () => {
   it("список учасників і рядки комітяться щонайбільше двічі, незачеплені рядки — жодного разу", async () => {
     let respond: (value: { delta: ClientBattleDelta }) => void = () => {};
 
-    vi.mocked(attack).mockImplementation(() => new Promise((resolve) => (respond = resolve)));
+    vi.mocked(campaignPost).mockImplementation(() => new Promise((resolve) => (respond = resolve)));
 
     const client = new QueryClient({ defaultOptions: { queries: { retry: false } } });
 

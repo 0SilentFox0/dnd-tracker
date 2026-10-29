@@ -50,7 +50,7 @@ let targetId: string;
 
 const actor = () => ({ campaignId, userId, isDM: true, via: "session", scopes: null } as const);
 
-const caller = (): AssistantCaller => ({ actor: actor(), channel: "chat", threadId: null, tokenId: null });
+const caller = (): AssistantCaller => ({ actor: actor(), channel: "chat", threadId: null, tokenId: null, locale: "uk" as const });
 
 describe.skipIf(!isLocalDevDatabaseEnv())("T13 authorized bounded reads on real constructor", () => {
   beforeAll(async () => {

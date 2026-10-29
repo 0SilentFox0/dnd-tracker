@@ -41,7 +41,7 @@ export function MagicTab() {
           <span>
             {t("attack")} <b className="text-lg text-hud-ink">{signed(sheet.magic.attackBonus)}</b>
           </span>
-          <span>{tr(`common.abilities.${sheet.magic.ability}.label`)}</span>
+          <span>{tr(`gameTerms.abilities.${sheet.magic.ability}.label`)}</span>
         </div>
       )}
       {sheet.pact && (

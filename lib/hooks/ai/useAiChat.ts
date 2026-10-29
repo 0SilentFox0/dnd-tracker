@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useTranslations } from "next-intl";
 import { useChat } from "@ai-sdk/react";
 import type { UIMessage } from "ai";
 
@@ -21,13 +22,17 @@ interface Params {
 }
 
 export function useAiChat({ campaignId, thread, initialMessages, getFocus, getSessionContext, onReceipt, onFinish }: Params) {
+  const t = useTranslations("ai");
+
   const focusRef = useRef(getFocus);
 
   const contextRef = useRef(getSessionContext);
 
   const receiptRef = useRef(onReceipt);
 
-  useEffect(()=>{ contextRef.current=getSessionContext;receiptRef.current=onReceipt; },[getSessionContext,onReceipt]);
+  const tRef = useRef(t);
+
+  useEffect(()=>{ contextRef.current=getSessionContext;receiptRef.current=onReceipt;tRef.current=t; },[getSessionContext,onReceipt,t]);
 
   const activeRequest = useRef<string | null>(null);
 
@@ -100,13 +105,13 @@ export function useAiChat({ campaignId, thread, initialMessages, getFocus, getSe
  return; }
 
       // Receipts remain visible even if Stop happened after a committed tool call.
-      const receipts: UIMessage[] = state.receipts.map(r => ({ id: `receipt-${r.id}`, role: "assistant", parts: [{ type: "text", text: `Квитанція ${r.id}: ${r.status === "applied" ? "дію виконано" : r.status === "unknown" ? "результат перевіряється" : "стан дії: " + r.status}.` }] }));
+      const receipts: UIMessage[] = state.receipts.map(r => ({ id: `receipt-${r.id}`, role: "assistant", parts: [{ type: "text", text: tRef.current("chat.receipt", { id: r.id, status: r.status }) }] }));
 
-      const pending: UIMessage[] = (state.intents ?? []).map(i => ({ id: `intent-${i.id}`, role: "assistant", parts: [{ type: "text", text: `${i.status === "pending" ? "Потрібне підтвердження" : "Результат перевіряється"}: ${i.summary}. [Переглянути дію](/campaigns/${campaignId}/dm/assistant?intent=${i.id})` }] }));
+      const pending: UIMessage[] = (state.intents ?? []).map(i => ({ id: `intent-${i.id}`, role: "assistant", parts: [{ type: "text", text: tRef.current("chat.intentLine", { status: i.status, summary: i.summary, href: `/campaigns/${campaignId}/dm/assistant?intent=${i.id}` }) }] }));
 
       setMessages([...((state.messages ?? []) as unknown as UIMessage[]), ...receipts, ...pending]);
       setRecoveryError(undefined);
-    } catch { setRecoveryError(new Error("Не вдалося відновити стан чату. Спробуйте ще раз.")); }
+    } catch { setRecoveryError(new Error(tRef.current("chat.recoverFailed"))); }
   }, [campaignId, thread.id, setMessages]);
 
   useEffect(() => {
@@ -145,7 +150,7 @@ export function useAiChat({ campaignId, thread, initialMessages, getFocus, getSe
   const send = async (text: string) => {
     if (sending.current) return;
 
-    if (leaseRef.current>Date.now()||uncertainRef.current) { setRecoveryError(new Error("Попередній запит ще має захисний інтервал або невідомий результат. Відновіть стан і дочекайтеся завершення."));
+    if (leaseRef.current>Date.now()||uncertainRef.current) { setRecoveryError(new Error(t("chat.leaseBlocked")));
 
 return; }
 
@@ -174,7 +179,7 @@ return; }
 
     if (requestId) {
       try { await cancelAiRun(campaignId, thread.id, requestId); }
-      catch { setRecoveryError(new Error("Не вдалося підтвердити зупинку. Перевірте стан чату.")); }
+      catch { setRecoveryError(new Error(t("chat.stopFailed"))); }
     }
 
     await recover();

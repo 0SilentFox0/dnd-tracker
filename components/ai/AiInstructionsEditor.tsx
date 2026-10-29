@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useTranslations } from "next-intl";
 
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
@@ -13,6 +14,10 @@ interface AiInstructionsEditorProps {
 }
 
 export function AiInstructionsEditor({ value, onSave, pending = false }: AiInstructionsEditorProps) {
+  const t = useTranslations("ai");
+
+  const tc = useTranslations("common");
+
   const [draft, setDraft] = useState(value);
 
   const [saved, setSaved] = useState(value);
@@ -28,22 +33,22 @@ export function AiInstructionsEditor({ value, onSave, pending = false }: AiInstr
   return (
     <div className="space-y-2">
       <label htmlFor="ai-instructions" className="text-sm text-hud-muted">
-        Постійні інструкції
+        {t("instructions.label")}
       </label>
       <Textarea
         id="ai-instructions"
         value={draft}
         onChange={(e) => setDraft(e.target.value)}
         rows={6}
-        placeholder="Похмуре темне фентезі в дусі Heroes V. Відповідай коротко, без сучасного сленгу. NPC говорять архаїчно…"
+        placeholder={t("instructions.placeholder")}
       />
-      <p className="text-xs text-hud-muted">Додаються до кожного запиту асистента в обох режимах.</p>
+      <p className="text-xs text-hud-muted">{t("instructions.hint")}</p>
       <div className="flex items-center justify-between gap-3">
         <span data-testid="ai-instructions-counter" className={over ? "text-sm text-red-500" : "text-sm text-hud-muted"}>
           {draft.length} / {AI_LIMITS.instructionsChars}
         </span>
         <Button onClick={() => void save()} disabled={!changed || over || pending}>
-          Зберегти
+          {tc("actions.save")}
         </Button>
       </div>
     </div>

@@ -3,7 +3,7 @@ import { z } from "zod";
 import { updateInventorySchema } from "./operations/inventory-update";
 import { CHARACTER_OPERATIONS } from "./operations/registry";
 import { transferSchema } from "./operations/transfer";
-import { characterIdSchema, characterResult } from "./action-service";
+import { characterIdSchema } from "./action-service";
 import { LevelUpBodySchema } from "./class-level-up";
 import { characterIds, withCharacterOperation } from "./operation-context";
 import { actorDmAccess, runCharacterOperation as runOperationCore } from "./operation-runner";
@@ -12,9 +12,11 @@ import { characterReferenceHash } from "./reference-state";
 import "server-only";
 import { API_ERRORS } from "@/lib/constants/api-errors";
 import { prisma } from "@/lib/db";
+import { DEFAULT_LOCALE, type Locale } from "@/lib/i18n/config";
 import { ChoicesBodySchema } from "@/lib/schemas/choices";
 import { arcaneRecoverySchema, experienceSchema, hitDieSchema, inspirationSchema, resourcesEditSchema, restSchema, sheetRollSchema } from "@/lib/schemas/out-of-combat";
-import { requestDigest } from "@/lib/server/assistant/json";
+import { actionResult, requestDigest } from "@/lib/server/assistant/json";
+import { resultLabel } from "@/lib/server/assistant/result-labels";
 import type { ActionResult } from "@/lib/server/assistant/types";
 import { stashActionSchema } from "@/lib/server/characters/core/stash-schema";
 import { assertCan } from "@/lib/server/content/access";
@@ -67,7 +69,7 @@ async function progressionFingerprint(actor: Actor, input: Record<string, unknow
   return { characters, campaign, refsHash };
 }
 
-export async function runCharacterProgression(actor: Actor, operation: string, raw: Record<string, unknown>, expected?: string): Promise<ActionResult> {
+export async function runCharacterProgression(actor: Actor, operation: string, raw: Record<string, unknown>, expected?: string, locale: Locale = DEFAULT_LOCALE): Promise<ActionResult> {
   const schema = PROGRESSION_INPUTS[operation as keyof typeof PROGRESSION_INPUTS];
 
   if (!schema) throw new ContentError(API_ERRORS.ASSISTANT_UNKNOWN_OPERATION, 400);
@@ -99,19 +101,19 @@ export async function runCharacterProgression(actor: Actor, operation: string, r
 
     if (!core) throw new ContentError(API_ERRORS.ASSISTANT_UNKNOWN_OPERATION, 400);
 
-    return finishProgression(await runOperationCore(core, { campaignId: actor.campaignId, characterId, actor, access }, parseInput(core.schema, body)), actor, input, characterId);
+    return finishProgression(await runOperationCore(core, { campaignId: actor.campaignId, characterId, actor, access }, parseInput(core.schema, body)), actor, input, characterId, locale);
   });
 }
 
-function finishProgression(data: unknown, actor: Actor, input: Record<string, unknown>, characterId: string): ActionResult {
+function finishProgression(data: unknown, actor: Actor, input: Record<string, unknown>, characterId: string, locale: Locale): ActionResult {
   if (data && typeof data === "object" && "notes" in data && (data as { controlledBy?: unknown }).controlledBy !== actor.userId) delete (data as { notes?: unknown }).notes;
 
-  const result = characterResult(data, characterId || actor.campaignId);
+  const result = actionResult("characters", resultLabel(locale, "characters"))(data, characterId || actor.campaignId);
 
   // Multi-character actions report every affected hero for cache invalidation.
-  if (Array.isArray(input.characterIds)) result.affected = (input.characterIds as string[]).map(id => ({ domain: "characters", id, name: "Персонаж" }));
+  if (Array.isArray(input.characterIds)) result.affected = (input.characterIds as string[]).map(id => ({ domain: "characters", id, name: resultLabel(locale, "character") }));
 
-  if (input.toCharacterId) result.affected.push({ domain: "characters", id: String(input.toCharacterId), name: "Персонаж" });
+  if (input.toCharacterId) result.affected.push({ domain: "characters", id: String(input.toCharacterId), name: resultLabel(locale, "character") });
 
   return result;
 }

@@ -10,9 +10,6 @@
     "log": "Журнал",
     "things": "Речі"
   },
-  "actions": {
-    "edit": "Редагувати"
-  },
   "hero": {
     "level": "{level} рів.",
     "hpCurrent": "HP {current} / {max}",
@@ -82,7 +79,6 @@
     },
     "labelField": "Підпис жетона",
     "deleteConfirm": "Видалити жетон «{label}»?",
-    "delete": "Видалити",
     "title": "ЖЕТОНИ",
     "add": "+ Жетон",
     "counters": {
@@ -95,7 +91,6 @@
   },
   "goals": {
     "deleteConfirm": "Видалити ціль «{name}»?",
-    "delete": "Видалити",
     "title": "ЦІЛІ",
     "empty": "Цілей поки немає.",
     "statusLabel": "Статус «{name}»: {status}",
@@ -115,7 +110,6 @@
     "namePlaceholder": "Назва (необов'язково)",
     "textField": "Текст цілі",
     "save": "Зберегти ціль",
-    "cancel": "Скасувати",
     "add": "Додати ціль",
     "saveFailed": "Не вдалося зберегти цілі"
   },
@@ -124,8 +118,6 @@
     "edit": "Редагувати нотатки",
     "empty": "Нотаток поки немає.",
     "field": "Нотатки",
-    "save": "Зберегти",
-    "cancel": "Скасувати",
     "saveFailed": "Не вдалося зберегти нотатки"
   },
   "biography": {
@@ -172,7 +164,6 @@
   },
   "classLevelUp": {
     "title": "Підвищити рівень",
-    "cancel": "Скасувати",
     "later": "Обрати пізніше",
     "confirm": "Підвищити",
     "classNotFound": "Клас не знайдено",
@@ -194,9 +185,7 @@
     "spellAbility": "Характеристика заклинань",
     "none": "Немає",
     "spellAbilityHint": "Від неї СЛ і атака заклинанням у профілі.",
-    "cancel": "Скасувати",
-    "saving": "Збереження…",
-    "save": "Зберегти"
+    "saving": "Збереження…"
   },
   "sheet": {
     "lines": {
@@ -224,6 +213,10 @@
       "classLevel": "{name} {level}",
       "origin": "Походження",
       "dm": "ДМ"
+    },
+    "heroHp": {
+      "formula": "{archetype, select, warrior {Воїн} paladin {Паладин} ranger {Лучник} rogue {Розбійник} mage {Маг} other {Універсал}}: {baseLevels} × {hpPerLevel} + рівень × ({hpPerLevel} + мод. ВИТ {conMod} × {conCoefficient})",
+      "total": "= {base} + {level} × {perLevel} = {total}"
     }
   }
 }

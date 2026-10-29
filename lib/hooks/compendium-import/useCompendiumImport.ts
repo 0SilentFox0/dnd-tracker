@@ -6,6 +6,7 @@ import { compendiumKeys } from "./keys";
 
 import { confirmCompendium, getCompendiumOptions, getCompendiumRunReport, previewCompendium } from "@/lib/api/compendium";
 import type { JsonRecord } from "@/lib/constants/compendium-import";
+import { useTranslator } from "@/lib/i18n/use-translator";
 import { readCompendiumFile } from "@/lib/utils/compendium-import/file";
 import { categoryInventory, compendiumErrorMessage, excludeAllBlocked, projectInput } from "@/lib/utils/compendium-import/flow";
 import type { CompendiumOptions, CompendiumPreview, CompendiumReport, CompendiumRun, CompendiumTargets, ImportInput } from "@/types/compendium-import";
@@ -15,13 +16,15 @@ const NO_TARGETS: CompendiumTargets = { local: [], templates: [] };
 export function useCompendiumImport(campaignId: string, initialFile?: File) {
   const queryClient = useQueryClient();
 
+  const t = useTranslator("compendium");
+
   const [root, setRoot] = useState<JsonRecord | null>(null), [categories, setCategories] = useState<string[]>([]), [excludedChapters, setExcludedChapters] = useState<string[]>([]);
 
   const [options, setOptions] = useState<CompendiumOptions>({});
 
   const [preview, setPreview] = useState<CompendiumPreview | null>(null), [input, setInput] = useState<ImportInput | null>(null), [result, setResult] = useState<CompendiumReport | null>(null);
 
-  const [rights, setRights] = useState(false), [reading, setReading] = useState(false), [error, setError] = useState("");
+  const [rights, setRights] = useState(false), [reading, setReading] = useState(false), [failure, setFailure] = useState<{ error?: unknown; key: string } | null>(null);
 
   const key = useRef(""), controller = useRef<AbortController | null>(null);
 
@@ -54,14 +57,14 @@ export function useCompendiumImport(campaignId: string, initialFile?: File) {
   const selectFile = useCallback(async (file: File) => {
     const abort = startRequest();
 
-    setReading(true); setError(""); setRoot(null); invalidate(); setOptions({}); setExcludedChapters([]);
+    setReading(true); setFailure(null); setRoot(null); invalidate(); setOptions({}); setExcludedChapters([]);
     try {
       const parsed = await readCompendiumFile(file, abort.signal);
 
       if (abort.signal.aborted) return;
 
       setRoot(parsed); setCategories(categoryInventory(parsed).filter(row => row.selected).map(row => row.kind));
-    } catch (e) { if (!abort.signal.aborted) setError(e instanceof Error ? e.message : "Не вдалося прочитати JSON"); }
+    } catch (e) { if (!abort.signal.aborted) setFailure({ error: e, key: "errors.readFailed" }); }
     finally { if (!abort.signal.aborted) setReading(false); }
   }, [invalidate]);
 
@@ -70,7 +73,7 @@ export function useCompendiumImport(campaignId: string, initialFile?: File) {
   async function runPreview(nextOptions = options) {
     if (!root) return;
 
-    setError(""); invalidate();
+    setFailure(null); invalidate();
 
     const abort = startRequest();
 
@@ -82,13 +85,13 @@ export function useCompendiumImport(campaignId: string, initialFile?: File) {
       if (abort.signal.aborted) return;
 
       setPreview(data); setInput(next); key.current = crypto.randomUUID();
-    } catch (e) { if (!abort.signal.aborted) setError(compendiumErrorMessage(e, "Помилка preview")); }
+    } catch (e) { if (!abort.signal.aborted) setFailure({ error: e, key: "errors.previewFailed" }); }
   }
 
   async function confirm() {
     if (!preview || !input || !rights || busy) return;
 
-    setError("");
+    setFailure(null);
 
     const abort = startRequest();
 
@@ -99,7 +102,7 @@ export function useCompendiumImport(campaignId: string, initialFile?: File) {
 
       setResult(report); setPreview(null); setInput(null); setRoot(null); setOptions({});
       void queryClient.invalidateQueries({ queryKey: compendiumKeys.all(campaignId) });
-    } catch (e) { if (!abort.signal.aborted) setError(compendiumErrorMessage(e, "Помилка confirm")); }
+    } catch (e) { if (!abort.signal.aborted) setFailure({ error: e, key: "errors.confirmFailed" }); }
   }
 
   function applyExclusion(next: CompendiumOptions) {
@@ -124,19 +127,19 @@ export function useCompendiumImport(campaignId: string, initialFile?: File) {
 
     if (run.report) return setResult(run.report);
 
-    setError("");
+    setFailure(null);
     try {
       const data = await openRunMutation.mutateAsync(run.id);
 
-      if (data.runs[0]) setResult(data.runs[0].report); else setError("Звіт більше недоступний");
-    } catch { setError("Не вдалося завантажити звіт"); }
+      if (data.runs[0]) setResult(data.runs[0].report); else setFailure({ key: "errors.reportUnavailable" });
+    } catch { setFailure({ key: "errors.reportLoadFailed" }); }
   };
 
   const close = () => { controller.current?.abort(); setReading(false); setRoot(null); setCategories([]); setOptions({}); invalidate(); };
 
   const targets = targetsQuery.data ?? NO_TARGETS;
 
-  const shownError = error || (targetsQuery.isError && preview ? "Не вдалося завантажити варіанти залежностей; повторіть preview" : "");
+  const shownError = failure ? compendiumErrorMessage(t, failure.error, failure.key) : targetsQuery.isError && preview ? t("errors.optionsLoadFailed") : "";
 
   return {
     state: { root, categories, excludedChapters, options, preview, input, result, rights, targets, busy, error: shownError },

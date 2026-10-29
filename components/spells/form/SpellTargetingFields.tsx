@@ -140,7 +140,7 @@ export function SpellTargetingFields({ value, onChange, classesEnabled = false, 
         <>
           <div>
             <Label htmlFor={id("save-ability")}>{tp("saveAbility")}</Label>
-            <SelectField id={id("save-ability")} value={resolution.ability} onValueChange={(ability) => onChange({ ...value, resolution: { ...resolution, ability: ability as AbilityKey } })} placeholder={tp("saveAbility")} options={SAVE_ABILITY_KEYS.map((k) => ({ value: k, label: t(`common.abilities.${k}.label`) }))} />
+            <SelectField id={id("save-ability")} value={resolution.ability} onValueChange={(ability) => onChange({ ...value, resolution: { ...resolution, ability: ability as AbilityKey } })} placeholder={tp("saveAbility")} options={SAVE_ABILITY_KEYS.map((k) => ({ value: k, label: t(`gameTerms.abilities.${k}.label`) }))} />
           </div>
           <div>
             <Label htmlFor={id("save-on-success")}>{tp("onSuccess")}</Label>

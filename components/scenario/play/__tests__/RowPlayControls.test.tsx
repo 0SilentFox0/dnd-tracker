@@ -1,10 +1,13 @@
 // @vitest-environment happy-dom
-import { cleanup, fireEvent, render, screen } from "@testing-library/react";
+import { cleanup, fireEvent, screen } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import { RowPlayControls } from "../RowPlayControls";
 
+import { render } from "@/components/ui/__tests__/uk-intl";
 import type { ScenarioPlay } from "@/lib/hooks/scenario";
+
+vi.unmock("next-intl");
 
 const world = vi.hoisted(() => ({ map: { data: undefined as unknown, isError: false, isLoading: false } }));
 

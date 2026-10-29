@@ -1,12 +1,15 @@
 // @vitest-environment happy-dom
 import type { ReactNode } from "react";
-import { cleanup, fireEvent, render, screen } from "@testing-library/react";
+import { cleanup, fireEvent, screen } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
 import { WorldEditorContext, type WorldEditorCtx } from "../WorldEditorContext";
 import { WorldToolbar, WorldToolHint } from "../WorldToolbar";
 
+import { render } from "@/components/ui/__tests__/uk-intl";
 import type { useMapDrawing } from "@/lib/hooks/world";
+
+vi.unmock("next-intl");
 
 afterEach(cleanup);
 

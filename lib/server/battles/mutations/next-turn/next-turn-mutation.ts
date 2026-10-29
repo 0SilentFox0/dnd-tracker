@@ -1,10 +1,11 @@
+import { currentOf } from "@/lib/utils/battle/common/control";
 import { modeAutoSkipText } from "@/lib/utils/battle/modes/server";
 import type { BattleMutationContext, MutationResult } from "@/lib/utils/battle/pipeline/run-battle-mutation";
 import { actorEvent, battleActionToEvent } from "@/lib/utils/battle/store";
 import { advanceTurn, assertMoraleResolved } from "@/lib/utils/battle/turn";
 
 export function nextTurnMutation(ctx: BattleMutationContext): MutationResult {
-  const ended = ctx.participants[ctx.scene.turnIndex];
+  const ended = currentOf(ctx);
 
   const skipText = modeAutoSkipText(ctx.meta.map);
 

@@ -17,7 +17,7 @@ const intOr = (v: string, fallback: number) => {
 export function CharacterCombatParams({ campaignId, combatStats: { data, set }, classArmor }: { campaignId: string; combatStats: CharacterFormBindings["combatStats"]; classArmor?: SheetTotal | null }) {
   const t = useTranslations("characters.stats");
 
-  const tc = useTranslations("common.stats");
+  const tc = useTranslations("gameTerms.stats");
 
   const tr = useTranslator();
 

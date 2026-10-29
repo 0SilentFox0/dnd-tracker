@@ -4,7 +4,7 @@ import type { ApiErrorBody } from "./api-response";
 
 import "server-only";
 import { API_ERROR_PARAMS, type ApiErrorKey, type ErrorParams } from "@/lib/constants/api-errors";
-import { DEFAULT_LOCALE } from "@/lib/i18n/config";
+import { DEFAULT_LOCALE, type Locale } from "@/lib/i18n/config";
 import { getRequestLocale } from "@/lib/i18n/request-locale";
 import { translateIssue } from "@/lib/i18n/translate-issue";
 import { getTranslator, type Translator } from "@/lib/i18n/translator";
@@ -70,8 +70,10 @@ export function translateErrorBody(t: Translator, body: ApiErrorSource): ApiErro
   return { error: t(body.error, params), errorKey: body.error, ...issues };
 }
 
+export const localeOrRequest = async (explicit?: Locale | null): Promise<Locale> => explicit ?? await getRequestLocale().catch(() => DEFAULT_LOCALE);
+
 export async function requestTranslator(): Promise<Translator> {
-  return getTranslator(await getRequestLocale().catch(() => DEFAULT_LOCALE));
+  return getTranslator(await localeOrRequest());
 }
 
 async function translateInRequest(body: ApiErrorSource): Promise<ApiErrorBody> {

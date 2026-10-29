@@ -1,3 +1,4 @@
+/* eslint-disable no-restricted-syntax -- derived content written to the DB stays Ukrainian (spec part5, decision 5) */
 import type { SpellRecognizer } from "./index";
 
 import type { NonRandomEffect } from "@/lib/utils/abilities/schema";

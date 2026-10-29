@@ -1,9 +1,13 @@
 // @vitest-environment happy-dom
-import { cleanup, render, screen } from "@testing-library/react";
+import { cleanup, screen } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import { BattlePickerDialog } from "../BattlePickerDialog";
 import { SlidePickerDialog } from "../SlidePickerDialog";
+
+import { render } from "@/components/ui/__tests__/uk-intl";
+
+vi.unmock("next-intl");
 
 const decks = vi.hoisted(() => ({ list: { data: undefined as unknown, isLoading: false }, one: { data: undefined as unknown, isLoading: false } }));
 

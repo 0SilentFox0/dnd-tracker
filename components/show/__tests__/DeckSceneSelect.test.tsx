@@ -17,9 +17,9 @@ describe("DeckSceneSelect", () => {
   it("лише сцени; вибір і скидання", () => {
     render(<DeckSceneSelect campaignId="c" deck={{ id: "d1", title: "Ліс", scenarioPageId: null, slides: [], updatedAt: "" }} />);
 
-    const select = screen.getByLabelText("Сцена") as HTMLSelectElement;
+    const select = screen.getByLabelText("show.sceneSelect.label") as HTMLSelectElement;
 
-    expect([...select.options].map((o) => o.textContent)).toEqual(["Без сцени", "Монастир"]);
+    expect([...select.options].map((o) => o.textContent)).toEqual(["show.sceneSelect.none", "Монастир"]);
 
     fireEvent.change(select, { target: { value: "p1" } });
     expect(set).toHaveBeenCalledWith("p1");

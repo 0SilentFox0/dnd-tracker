@@ -2,6 +2,7 @@ import { z } from "zod";
 
 import { API_ERRORS } from "@/lib/constants/api-errors";
 import { ARTIFACT_RARITY_VALUES, ARTIFACT_SLOT_VALUES, ArtifactSlot, PROPERTY_SLOTS } from "@/lib/constants/artifacts";
+import { urlField } from "@/lib/schemas/common";
 import { AbilitiesSchema } from "@/lib/utils/abilities/schema";
 import { ArmorStatsSchema } from "@/lib/utils/artifacts/armor-stats";
 import { WeaponStatsSchema } from "@/lib/utils/artifacts/weapon-stats";
@@ -31,7 +32,7 @@ export const createArtifactSchema = z
     setId: z.string().optional(),
     icon: z.preprocess(
       (val) => (val === "" ? null : val),
-      z.string().url().nullable().optional(),
+      urlField().nullable().optional(),
     ),
   })
   .refine((d) => d.armor == null || d.slot === ArtifactSlot.ARMOR, armorSlotOnly)
@@ -51,7 +52,7 @@ export const patchArtifactSchema = z
     setId: z.string().nullable().optional(),
     icon: z.preprocess(
       (val) => (val === "" ? null : val),
-      z.string().url().nullable().optional(),
+      urlField().nullable().optional(),
     ),
   })
   .refine((d) => d.armor == null || d.slot === undefined || d.slot === ArtifactSlot.ARMOR, armorSlotOnly)

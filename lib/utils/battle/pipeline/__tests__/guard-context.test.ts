@@ -3,6 +3,7 @@ import { describe, expect, it, vi } from "vitest";
 import { createMockParticipant } from "@/lib/utils/battle/__tests__/fixtures/mock-participant";
 import { BattleAccess, guardBattleContext } from "@/lib/utils/battle/pipeline/run-battle-mutation";
 import type { LoadedBattle } from "@/lib/utils/battle/store";
+import { BattleConflictError } from "@/lib/utils/battle/store/errors";
 import * as victory from "@/lib/utils/battle/turn/victory";
 import { DEFAULT_RULES } from "@/lib/utils/rules";
 
@@ -28,5 +29,11 @@ describe("guardBattleContext", () => {
     expect(result).toMatchObject({ isDryRun: false, awaiting: null, ctx: { userId: "u1" } });
 
     spy.mockRestore();
+  });
+
+  it("застаріла версія дає 409 раніше за перевірку статусу", () => {
+    const options = { params: { id: "c1", battleId: "b1" }, access: BattleAccess.MEMBER, requireStatus: "completed" as never, mutate: () => ({ participants: [], pending: [], events: [] }) };
+
+    expect(() => guardBattleContext("u1", loaded, {}, 2, options)).toThrow(BattleConflictError);
   });
 });

@@ -44,7 +44,7 @@ export function buildDependencyClosure(templates: TemplateSnapshot[], choices: D
 
       const refs: CompendiumRef[] = [];
 
-      const entry: AdaptedEntry = { key, inputKind: `template:${row.kind}`, kind: row.kind, name: String(body.name), source, edition: template!.edition, body, refs, notes: "", issues: [issue("TEMPLATE_DEPENDENCY", key, "warning", "Додано базовий запис із явно обраного шаблону")] };
+      const entry: AdaptedEntry = { key, inputKind: `template:${row.kind}`, kind: row.kind, name: String(body.name), source, edition: template!.edition, body, refs, notes: "", issues: [issue("TEMPLATE_DEPENDENCY", key, "warning")] };
 
       entries.set(key, entry);
 

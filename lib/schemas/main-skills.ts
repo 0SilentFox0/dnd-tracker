@@ -1,9 +1,10 @@
 import { z } from "zod";
 
 import { MAIN_SKILL_NAME_MAX, MAIN_SKILL_ROLES } from "@/lib/constants/main-skills";
+import { urlField } from "@/lib/schemas/common";
 
 const iconField = z
-  .union([z.string().url(), z.literal(""), z.null()])
+  .union([urlField(), z.literal(""), z.null()])
   .optional()
   .nullable()
   .transform((val) => (val === "" ? null : val));

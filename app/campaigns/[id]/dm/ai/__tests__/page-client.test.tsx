@@ -4,7 +4,10 @@ import { describe, expect, it, vi } from "vitest";
 
 import { DmAiPageClient } from "../page-client";
 
-import { renderWithConfirm } from "@/components/ui/__tests__/render-with-confirm";
+import { ConfirmProvider } from "@/components/ui/confirm-dialog";
+import { renderWithIntl } from "@/lib/i18n/test/render-with-intl";
+
+vi.unmock("next-intl");
 
 vi.mock("@/lib/hooks/ai", () => ({
   useAiSettings: () => ({ data: undefined, isLoading: false }),
@@ -12,14 +15,15 @@ vi.mock("@/lib/hooks/ai", () => ({
 }));
 
 describe("DmAiPageClient REST API panel", () => {
-  it("шаблон: є посилання на openapi.json і приклад curl з campaignId", () => {
-    renderWithConfirm(<DmAiPageClient campaignId="c1" isTemplate />);
+  it("template: openapi.json link and a curl example with campaignId, no raw keys", async () => {
+    await renderWithIntl(<ConfirmProvider><DmAiPageClient campaignId="c1" isTemplate /></ConfirmProvider>, { locale: "en", namespaces: ["common", "validation", "ai"] });
 
     expect(screen.getByRole("link", { name: /openapi\.json/ })).toHaveAttribute("href", "/api/openapi.json");
 
     const curl = screen.getByText(/^curl/).textContent;
 
     expect(curl).toContain("/api/campaigns/c1/units");
-    expect(curl).toContain("Authorization: Bearer");
+    expect(curl).toContain("Authorization: Bearer <token>");
+    expect(screen.getByText("Tokens for accessing the template content through the API.")).toBeInTheDocument();
   });
 });

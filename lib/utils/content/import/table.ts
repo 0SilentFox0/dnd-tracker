@@ -4,10 +4,22 @@ import { guardFormula, isEmptyValue } from "./values";
 
 import { byteLength, COMPENDIUM_KINDS } from "@/lib/constants/compendium-import";
 import { isRecord } from "@/lib/utils/common/is-record";
-import type { ParsedTable } from "@/types/content-import";
+import type { ImportMessage, ParsedTable } from "@/types/content-import";
 
-export class ImportFileError extends Error {}
-export class AggregateImportFileError extends ImportFileError { constructor() { super("JSON_COMPENDIUM: відкрийте кампанійний імпорт JSON-компендіуму"); } }
+export class ImportFileError extends Error {
+  readonly params?: ImportMessage["params"];
+
+  constructor(message: string, params?: ImportMessage["params"]) {
+    super(message);
+    this.params = params;
+  }
+}
+
+export class AggregateImportFileError extends ImportFileError { constructor() { super("JSON_COMPENDIUM: open the campaign JSON compendium import"); } }
+
+export interface ParseTableOptions {
+  blankHeader?: (n: number) => string;
+}
 
 const DELIMITERS = [";", "\t", ","] as const;
 
@@ -42,11 +54,11 @@ export function detectDelimiter(firstLine: string): string {
 // the old unit import dropped one pair of quotes around a whole cell ("""text""" from spreadsheet exports)
 const unwrapQuotes = (v: string) => (v.length >= 2 && v.startsWith('"') && v.endsWith('"') ? v.slice(1, -1) : v);
 
-function uniqueHeaders(raw: readonly string[]): string[] {
+function uniqueHeaders(raw: readonly string[], blankHeader: (n: number) => string): string[] {
   const seen = new Map<string, number>();
 
   return raw.map((h, i) => {
-    const base = h.trim() || `Колонка ${i + 1}`;
+    const base = h.trim() || blankHeader(i + 1);
 
     const n = (seen.get(base) ?? 0) + 1;
 
@@ -56,7 +68,7 @@ function uniqueHeaders(raw: readonly string[]): string[] {
   });
 }
 
-function parseCsv(text: string): ParsedTable {
+function parseCsv(text: string, blankHeader: (n: number) => string): ParsedTable {
   const sep = /^sep=(.)[ \t]*\r?\n/i.exec(text.replace(BOM, ""));
 
   const body = text.replace(BOM, "").replace(/^sep=.[ \t]*\r?\n/i, "");
@@ -68,14 +80,14 @@ function parseCsv(text: string): ParsedTable {
   try {
     records = parse(body, { delimiter, relax_column_count: true, relax_quotes: true, skip_empty_lines: true, trim: true }) as string[][];
   } catch (error) {
-    throw new ImportFileError(`Не вдалося прочитати CSV: ${error instanceof Error ? error.message : "помилка формату"}`);
+    throw new ImportFileError("contentImport.file.csvUnreadable", { reason: error instanceof Error ? error.message : "format error" });
   }
 
   const [head, ...data] = records;
 
-  if (!head) throw new ImportFileError("Файл порожній");
+  if (!head) throw new ImportFileError("contentImport.file.empty");
 
-  const headers = uniqueHeaders(head);
+  const headers = uniqueHeaders(head, blankHeader);
 
   const rows = data.filter((cells) => cells.some((c) => !isEmptyValue(c))).map((cells) => Object.fromEntries(headers.map((h, i) => [h, unwrapQuotes(cells[i] ?? "")])));
 
@@ -88,14 +100,14 @@ function parseJsonTable(text: string): ParsedTable {
   try {
     data = JSON.parse(text.replace(BOM, ""));
   } catch {
-    throw new ImportFileError("Некоректний JSON");
+    throw new ImportFileError("contentImport.file.badJson");
   }
 
   if (isRecord(data) && ("_meta" in data || COMPENDIUM_KINDS.some(kind => Array.isArray(data[kind])))) throw new AggregateImportFileError();
 
   const list = Array.isArray(data) ? data : [data];
 
-  if (!list.every(isRecord)) throw new ImportFileError("JSON має бути масивом об'єктів або одним об'єктом");
+  if (!list.every(isRecord)) throw new ImportFileError("contentImport.file.jsonShape");
 
   const headers = new Set<string>();
 
@@ -104,14 +116,14 @@ function parseJsonTable(text: string): ParsedTable {
   return { format: "json", headers: [...headers], rows: list };
 }
 
-export function parseTable(text: string, fileName = ""): ParsedTable {
+export function parseTable(text: string, fileName = "", { blankHeader = (n) => `Column ${n}` }: ParseTableOptions = {}): ParsedTable {
   const start = text.replace(BOM, "").trimStart();
 
-  if (start === "") throw new ImportFileError("Файл порожній");
+  if (start === "") throw new ImportFileError("contentImport.file.empty");
 
-  const table = /\.json$/i.test(fileName) || start.startsWith("[") || start.startsWith("{") ? parseJsonTable(text) : parseCsv(text);
+  const table = /\.json$/i.test(fileName) || start.startsWith("[") || start.startsWith("{") ? parseJsonTable(text) : parseCsv(text, blankHeader);
 
-  if (table.rows.length === 0) throw new ImportFileError("У файлі немає рядків з даними");
+  if (table.rows.length === 0) throw new ImportFileError("contentImport.file.noRows");
 
   return table;
 }

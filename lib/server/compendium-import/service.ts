@@ -6,7 +6,7 @@ import { adaptCompendium } from "./adapt";
 import { digest } from "./identity";
 import { byteLength, COMPENDIUM_LIMITS, CompendiumError, type JsonRecord, parseCompendium } from "./parse";
 import { ADAPTER_VERSION, buildImportPlan, type ImportPlan, type PlanContext, type PlannedWrite } from "./plan";
-import { type AdaptedEntry, type AdaptOptions, type ImportIssue, issue,type TargetKind } from "./types";
+import { type AdaptedEntry, type AdaptOptions, type ImportIssue, issue, TARGET_KINDS, type TargetKind } from "./types";
 
 import { COMPENDIUM_INFO_ISSUE_CODES } from "@/lib/constants/compendium-import";
 import { remapIds } from "@/lib/server/templates/remap-ids";
@@ -17,7 +17,7 @@ import { RulesetPatchSchema } from "@/lib/utils/rules/schema";
 export interface DependencyChoice { refKey: string; templateId: string; kind: TargetKind; localId: string; edition: "classic" | "one" | "unknown" }
 export interface ImportInput extends AdaptOptions { json: string; bindings?: Record<string, { kind: TargetKind; id: string }>; overwriteKeys?: string[]; excludedKeys?: string[]; dependencies?: DependencyChoice[]; allowMixedEdition?: boolean; rulesPatch?: JsonRecord }
 
-const targetKind = z.enum(["units", "spells", "spell-groups", "artifacts", "races", "classes", "feats", "backgrounds", "scenarioPages"]);
+const targetKind = z.enum(TARGET_KINDS);
 
 const safeKey = z.string().max(2000).refine((s) => !["__proto__", "constructor", "prototype"].includes(s));
 
@@ -135,11 +135,11 @@ function reportOf(plan: ImportPlan, root: JsonRecord, sources: JsonRecord[], emb
 
   const allIssues = [...unique.values()];
 
-  if (hasCharacters === false) allIssues.push(issue("CHARACTERS_REQUIRED", "characters", "warning", "Створіть персонажів у наповненій кампанії"));
+  if (hasCharacters === false) allIssues.push(issue("CHARACTERS_REQUIRED", "characters", "warning"));
 
   const classesMissing = !!classesMode && (!classesMode.enabled || !classesMode.exists) && plan.writes.some((w) => !w.nested && CLASS_DEPENDENT_KINDS.has(w.kind));
 
-  if (classesMissing) allIssues.push(issue("CLASSES_MODE_REQUIRED", "rules.classes", "warning", "Увімкніть режим класів і додайте базові класи (залежність від SRD), інакше раси, передісторії й риси не збираються на листі героя"));
+  if (classesMissing) allIssues.push(issue("CLASSES_MODE_REQUIRED", "rules.classes", "warning"));
 
   const issueCounts: Record<string, number> = Object.create(null);
 

@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useTranslations } from "next-intl";
 
 import { HudCard } from "@/components/hud/page";
 import { Button } from "@/components/ui/button";
@@ -23,6 +24,10 @@ interface AiProviderCardProps {
 }
 
 export function AiProviderCard({ provider, credential, actions, pending }: AiProviderCardProps) {
+  const t = useTranslations("ai");
+
+  const tc = useTranslations("common");
+
   const [apiKey, setApiKey] = useState("");
 
   const keyId = `ai-key-${provider}`;
@@ -37,13 +42,13 @@ export function AiProviderCard({ provider, credential, actions, pending }: AiPro
       {credential && <p className="text-sm text-hud-muted">…{credential.last4}</p>}
       <div className="space-y-1">
         <label htmlFor={keyId} className="text-sm text-hud-muted">
-          Ключ API
+          {t("provider.apiKey")}
         </label>
-        <Input id={keyId} type="password" autoComplete="off" value={apiKey} onChange={(e) => setApiKey(e.target.value)} placeholder={credential ? "Новий ключ, щоб замінити" : "Вставте ключ"} />
+        <Input id={keyId} type="password" autoComplete="off" value={apiKey} onChange={(e) => setApiKey(e.target.value)} placeholder={credential ? t("provider.replacePlaceholder") : t("provider.pastePlaceholder")} />
       </div>
       <div className="space-y-1">
         <label htmlFor={modelId} className="text-sm text-hud-muted">
-          Модель за замовчуванням
+          {t("provider.defaultModel")}
         </label>
         <SelectField
           id={modelId}
@@ -51,7 +56,7 @@ export function AiProviderCard({ provider, credential, actions, pending }: AiPro
           onValueChange={(v) => actions.onModel(v || null)}
           options={AI_MODELS[provider].map((m) => ({ value: m.id, label: m.label }))}
           allowNone
-          noneLabel="Автоматично"
+          noneLabel={t("provider.automatic")}
           disabled={!credential || pending}
         />
       </div>
@@ -63,11 +68,11 @@ export function AiProviderCard({ provider, credential, actions, pending }: AiPro
             setApiKey("");
           }}
         >
-          Перевірити і зберегти
+          {t("provider.verifyAndSave")}
         </Button>
         {credential && (
           <Button variant="ghost" disabled={pending} onClick={actions.onDelete}>
-            Видалити
+            {tc("actions.delete")}
           </Button>
         )}
       </div>

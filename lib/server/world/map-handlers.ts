@@ -91,15 +91,13 @@ export function createWorldMapHandler(req: Request, campaignId: string) {
 
 export function getWorldMapHandler(campaignId: string, mapId: string) {
   return withDM(campaignId, "get world map", async (access) => {
-    const owned = await ownedMap(campaignId, mapId);
+    const detail = await loadOwned(readWorldMapDetail(mapId), campaignId, API_ERRORS.WORLD_MAP_NOT_FOUND);
 
-    if (owned instanceof NextResponse) return owned;
+    if (detail instanceof NextResponse) return detail;
 
-    const detail = await readWorldMapDetail(mapId);
+    const [heroes, notes] = await Promise.all([listHeroesOnMap(campaignId, mapId), listPublicMapNotes(mapId, access.userId)]);
 
-    if (!detail) return errorResponse(API_ERRORS.WORLD_MAP_NOT_FOUND, 404);
-
-    return NextResponse.json({ map: detail.map, markers: detail.markers, heroes: await listHeroesOnMap(campaignId, mapId), notes: await listPublicMapNotes(mapId, access.userId) });
+    return NextResponse.json({ map: detail.map, markers: detail.markers, heroes, notes });
   });
 }
 

@@ -6,11 +6,12 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { contentImportKeys, importInvalidateKeys } from "./keys";
 
 import { contentExampleUrl, getImportAiAvailability, importContentRows, suggestImportMapping } from "@/lib/api/content-import";
+import { useTranslator } from "@/lib/i18n/use-translator";
 import { downloadText } from "@/lib/utils/common/download-text";
 import { errorMessage } from "@/lib/utils/common/error-message";
 import { applyMapping, autoMap, chunkRows, IMPORT_LIMITS, IMPORT_SPECS, ImportFileError, missingRequired, parseTable } from "@/lib/utils/content/import";
 import { AggregateImportFileError } from "@/lib/utils/content/import/table";
-import { aiSample, loadStoredMapping, mergeReports, readImportFile, reportToCsv, saveStoredMapping } from "@/lib/utils/content/import/wizard";
+import { aiSample, loadStoredMapping, mergeReports, readImportFile, reportToCsv, saveStoredMapping, statusKey } from "@/lib/utils/content/import/wizard";
 import type { ImportKind, ImportMapping, ImportMode, ImportRecord, ImportReport, ParsedTable } from "@/types/content-import";
 
 export type ImportStep = "file" | "columns" | "preview" | "result";
@@ -18,6 +19,8 @@ export type ImportStep = "file" | "columns" | "preview" | "result";
 type Part = { offset: number; report: ImportReport };
 
 export function useContentImport(campaignId: string, kind: ImportKind) {
+  const t = useTranslator();
+
   const spec = IMPORT_SPECS[kind];
 
   const [aggregateFile, setAggregateFile] = useState<File | null>(null);
@@ -64,7 +67,7 @@ export function useContentImport(campaignId: string, kind: ImportKind) {
     setError(null);
 
     try {
-      const table = parseTable(await readImportFile(next), next.name);
+      const table = parseTable(await readImportFile(next), next.name, { blankHeader: (n) => t("contentImport.columnN", { n }) });
 
       setFile({ name: next.name, table });
       setMapping({ ...autoMap(table.headers, spec.fields), ...loadStoredMapping(kind, table.headers, spec.fields) });
@@ -77,7 +80,7 @@ export function useContentImport(campaignId: string, kind: ImportKind) {
 
  return; }
 
-      setError(e instanceof ImportFileError ? e.message : errorMessage(e, "Не вдалося прочитати файл"));
+      setError(e instanceof ImportFileError ? t(e.message, e.params) : errorMessage(e, t("contentImport.errors.readFailed")));
     }
   }
 
@@ -99,7 +102,7 @@ export function useContentImport(campaignId: string, kind: ImportKind) {
       setPreview(mergeReports(parts, true));
       setStep("preview");
     } catch (e) {
-      setError(errorMessage(e, "Перевірка не вдалася"));
+      setError(errorMessage(e, t("contentImport.errors.previewFailed")));
     } finally {
       setBusy(false);
     }
@@ -121,7 +124,7 @@ export function useContentImport(campaignId: string, kind: ImportKind) {
     try {
       await postChunks(chunks, { mode, dryRun: false }, parts, (done) => setProgress({ done, total: chunks.length }));
     } catch (e) {
-      setError(`${errorMessage(e, "Імпорт перервано")}. Записано частин: ${parts.length} з ${chunks.length}`);
+      setError(t("contentImport.errors.importInterrupted", { reason: errorMessage(e, t("contentImport.errors.importFailed")), done: parts.length, total: chunks.length }));
     }
 
     const merged = mergeReports(parts, false);
@@ -148,7 +151,7 @@ export function useContentImport(campaignId: string, kind: ImportKind) {
       setMapping((current) => ({ ...current, ...Object.fromEntries(Object.entries(res.mapping).filter(([header, key]) => key !== null && Object.hasOwn(current, header))) }));
       setAiNotes(res.notes);
     } catch (e) {
-      setError(errorMessage(e, "AI не зміг підказати мапінг"));
+      setError(errorMessage(e, t("contentImport.errors.aiFailed")));
     } finally {
       setAiBusy(false);
     }
@@ -171,7 +174,7 @@ export function useContentImport(campaignId: string, kind: ImportKind) {
   function downloadErrors() {
     const report = result ?? preview;
 
-    if (file.table && report) downloadText(`${kind}-errors.csv`, reportToCsv(file.table, report), "text/csv");
+    if (file.table && report) downloadText(`${kind}-errors.csv`, reportToCsv(file.table, report, { statusHeader: t("contentImport.errorReport.status"), errorsHeader: t("contentImport.errorReport.errors"), status: (s, dry) => t(statusKey(s, dry)) }), "text/csv");
   }
 
   return {

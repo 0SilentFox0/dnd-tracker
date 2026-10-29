@@ -1,6 +1,7 @@
 "use client";
 
 import { type Dispatch, useState } from "react";
+import { useTranslations } from "next-intl";
 
 import { PuzzlePreview } from "./PuzzlePreview";
 import { TrackPicker } from "./TrackPicker";
@@ -21,13 +22,13 @@ interface SlideDialogProps {
   actions: { dispatch: Dispatch<DeckDraftAction>; close(): void };
 }
 
-const CUTS: { cut: PuzzleCut; label: string }[] = [
-  { cut: "classic", label: "Класична" },
-  { cut: "organic", label: "Органічна" },
-  { cut: "straight", label: "Прямі зрізи" },
-];
+const CUTS: PuzzleCut[] = ["classic", "organic", "straight"];
 
 function SlideForm({ campaignId, slide, actions }: { campaignId: string; slide: Slide; actions: SlideDialogProps["actions"] }) {
+  const t = useTranslations("show");
+
+  const tc = useTranslations("common");
+
   const [title, setTitle] = useState(slide.title ?? "");
 
   const [caption, setCaption] = useState(slide.caption ?? "");
@@ -47,20 +48,20 @@ function SlideForm({ campaignId, slide, actions }: { campaignId: string; slide: 
         <>
           <PuzzlePreview spec={puzzle} imageUrl={slide.imageUrl} />
           <div className="flex flex-wrap items-center gap-2">
-            {CUTS.map(({ cut, label }) => (
+            {CUTS.map((cut) => (
               <Button key={cut} type="button" size="sm" variant={puzzle.cut === cut ? "default" : "outline"} aria-pressed={puzzle.cut === cut} onClick={() => setPuzzle({ ...puzzle, cut })}>
-                {label}
+                {t(`slideDialog.cuts.${cut}`)}
               </Button>
             ))}
             <Button type="button" size="sm" variant="outline" onClick={() => setPuzzle({ ...puzzle, seed: randomPuzzleSeed() })}>
-              Перемішати
+              {t("slideDialog.shuffle")}
             </Button>
           </div>
           <label className="flex items-center gap-3 text-sm text-hud-bone">
-            Шматочків: {puzzle.count}
+            {t("slideDialog.pieces", { count: puzzle.count })}
             <input
               type="range"
-              aria-label="Кількість шматочків"
+              aria-label={t("slideDialog.piecesLabel")}
               min={PUZZLE_MIN_PIECES}
               max={PUZZLE_MAX_PIECES}
               value={puzzle.count}
@@ -74,9 +75,9 @@ function SlideForm({ campaignId, slide, actions }: { campaignId: string; slide: 
           <OptimizedImage src={slide.imageUrl} alt="" width={640} height={360} className="size-full object-contain" />
         </div>
       )}
-      <Input aria-label="Заголовок" placeholder="Заголовок" maxLength={SLIDE_TITLE_MAX} value={title} onChange={(e) => setTitle(e.target.value)} />
+      <Input aria-label={t("slideDialog.title")} placeholder={t("slideDialog.title")} maxLength={SLIDE_TITLE_MAX} value={title} onChange={(e) => setTitle(e.target.value)} />
       <div>
-        <Textarea aria-label="Підпис" placeholder="Підпис" maxLength={SLIDE_CAPTION_MAX} value={caption} onChange={(e) => setCaption(e.target.value)} />
+        <Textarea aria-label={t("slideDialog.caption")} placeholder={t("slideDialog.caption")} maxLength={SLIDE_CAPTION_MAX} value={caption} onChange={(e) => setCaption(e.target.value)} />
         <p className="mt-1 text-right text-xs text-hud-muted">
           {caption.length}/{SLIDE_CAPTION_MAX}
         </p>
@@ -84,10 +85,10 @@ function SlideForm({ campaignId, slide, actions }: { campaignId: string; slide: 
       <TrackPicker campaignId={campaignId} value={trackId} onChange={setTrackId} />
       <div className="flex gap-2">
         <Button type="button" variant="outline" onClick={actions.close}>
-          Скасувати
+          {tc("actions.cancel")}
         </Button>
         <Button type="button" onClick={done}>
-          Готово
+          {t("slideDialog.done")}
         </Button>
       </div>
     </div>
@@ -95,8 +96,10 @@ function SlideForm({ campaignId, slide, actions }: { campaignId: string; slide: 
 }
 
 export function SlideDialog({ campaignId, slide, actions }: SlideDialogProps) {
+  const t = useTranslations("show");
+
   return (
-    <ResponsiveDialog hud open={slide !== null} onOpenChange={(open) => !open && actions.close()} title={slide ? `Слайд ${slide.index + 1}` : "Слайд"}>
+    <ResponsiveDialog hud open={slide !== null} onOpenChange={(open) => !open && actions.close()} title={slide ? t("slide", { index: slide.index + 1 }) : t("slideBare")}>
       {slide && <SlideForm key={slide.slide.id} campaignId={campaignId} slide={slide.slide} actions={actions} />}
     </ResponsiveDialog>
   );

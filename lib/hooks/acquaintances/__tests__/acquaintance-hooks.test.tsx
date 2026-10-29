@@ -157,6 +157,6 @@ describe("useAcquaintanceNote", () => {
       await result.current.save("текст");
     });
 
-    expect(notify).toHaveBeenCalledWith("Не вдалося зберегти нотатку");
+    expect(notify).toHaveBeenCalledWith("acquaintances.notify.noteSaveFailed");
   });
 });

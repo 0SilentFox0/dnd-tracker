@@ -1,19 +1,16 @@
-import { abilitiesField, jsonField, nameField, textField } from "./common";
+import { abilitiesField, defineSpec, jsonField, nameField, textField } from "./common";
 
-import type { ImportSpec } from "@/types/content-import";
-
-export const RACES_IMPORT: ImportSpec = {
+export const RACES_IMPORT = defineSpec({
   kind: "races",
-  label: "Раси",
   fields: [
-    nameField(["Ельфи", "Гноми"]),
-    textField("icon", "Іконка", ["icon"]),
-    textField("color", "Колір", ["color"], ["#2e8b57", "#b8860b"]),
-    { key: "availableSkills", label: "Доступні основні скіли", aliases: ["available skills", "основні скіли"], type: "refList", ref: "main-skills", examples: ["", ""] },
-    { key: "disabledSkills", label: "Заборонені скіли", aliases: ["disabled skills"], type: "refList", ref: "skills", examples: ["", ""] },
-    jsonField("passiveAbility", "Пасивна здібність (JSON)", ["passive ability"], ['{"name":"Лісова стежка","description":"Швидкість +10 у лісі"}', ""]),
-    jsonField("spellSlotProgression", "Слоти заклинань (JSON)", ["слоти"], ['[{"level":1,"slots":2}]', ""]),
-    { ...jsonField("choices", "Вибори (JSON)", ["choices", "вибори", "лінії", "lineages"], ["[]", ""]), nestedRef: { kind: "spells", key: "spellId" } },
+    nameField(),
+    textField("icon"),
+    textField("color"),
+    { key: "availableSkills", type: "refList", ref: "main-skills" },
+    { key: "disabledSkills", type: "refList", ref: "skills" },
+    jsonField("passiveAbility"),
+    jsonField("spellSlotProgression"),
+    { ...jsonField("choices"), nestedRef: { kind: "spells", key: "spellId" } },
     abilitiesField(),
   ],
-};
+});

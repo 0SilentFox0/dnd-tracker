@@ -61,7 +61,7 @@ function reconcile(body: JsonRecord, existing: ExistingEntry | undefined, entry:
     const changed = stableJson(managedProjection(local, baseline)) !== stableJson(baseline);
 
     if (changed && !overwrite && stableJson(local) !== stableJson(incoming)) {
-      entry.issues.push(issue("LOCAL_CONFLICT", `${entry.key}.${field}`, "warning", "Залишено локальну зміну; оберіть перезапис у preview за потреби"));
+      entry.issues.push(issue("LOCAL_CONFLICT", `${entry.key}.${field}`, "warning"));
       result[field] = local;
     } else result[field] = mergeValue(local, baseline, incoming);
   }
@@ -89,8 +89,6 @@ export const refKey = (ref: CompendiumRef) => canonicalKey(ref.kind, ref.name, r
 
 const REF_KINDS: Record<string, AdaptedEntry["kind"]> = { feat: "feats", spell: "spells", class: "classes", race: "races", background: "backgrounds", monster: "units", item: "artifacts", spellSchool: "spell-groups" };
 
-const REF_KIND_LABELS: Record<string, string> = { spell: "заклинання", feat: "риса", class: "клас", race: "раса", background: "передісторія", monster: "юніт", item: "предмет", spellSchool: "школа магії" };
-
 export const expectedKind = (ref: CompendiumRef): AdaptedEntry["kind"] | undefined => REF_KINDS[ref.kind] ?? (ref.kind.startsWith("template:") ? ref.kind.slice(9) as AdaptedEntry["kind"] : undefined);
 
 function plannedResolved(ps: PlanState, key: string): Resolved | undefined {
@@ -112,15 +110,15 @@ function resolveRef(ps: PlanState, ref: CompendiumRef, owner: AdaptedEntry): Res
 
   if (bound && !bound.missing) {
     if (bound.edition && bound.edition !== "unknown" && ref.edition !== "unknown" && bound.edition !== ref.edition && !context.allowMixedEdition) {
-      errors.push(issue("MIXED_EDITION_CONFIRMATION_REQUIRED", owner.key, "error", "Підтвердьте змішування редакцій для явного зіставлення"));
+      errors.push(issue("MIXED_EDITION_CONFIRMATION_REQUIRED", owner.key, "error"));
 
       return;
     }
 
-    if (bound.edition && bound.edition !== "unknown" && ref.edition !== "unknown" && bound.edition !== ref.edition) owner.issues.push(issue("MIXED_EDITION_WARNING", owner.key, "warning", `Залежність із редакції ${bound.edition} під контентом ${ref.edition}: правила не конвертуються, перевірте результат`));
+    if (bound.edition && bound.edition !== "unknown" && ref.edition !== "unknown" && bound.edition !== ref.edition) owner.issues.push(issue("MIXED_EDITION_WARNING", owner.key, "warning", { variant: "dependency", edition: bound.edition, content: ref.edition }));
 
     if (bound.kind && expectedKind(ref) && bound.kind !== expectedKind(ref)) {
-      errors.push(issue("BINDING_WRONG_KIND", owner.key, "error", "Зіставте з записом правильного виду"));
+      errors.push(issue("BINDING_WRONG_KIND", owner.key, "error"));
 
       return;
     }
@@ -135,13 +133,13 @@ function resolveRef(ps: PlanState, ref: CompendiumRef, owner: AdaptedEntry): Res
   const own = candidates.find((e) => sameSource(e.source, ref.source) && sameEdition(e.edition, ref.edition)) ?? candidates[0];
 
   if (own) {
-    if (!sameEdition(own.edition, ref.edition)) owner.issues.push(issue("MIXED_EDITION_WARNING", owner.key, "warning", `Посилання «${ref.name}» (${ref.edition}) зіставлено із записом файлу з редакції ${own.edition}: перевірте результат`));
-    else if (!sameSource(own.source, ref.source)) owner.issues.push(issue("SOURCE_MISMATCH_WARNING", owner.key, "warning", `Посилання «${ref.name}|${ref.source}» зіставлено із записом файлу з іншого джерела (${own.source}): перевірте, що це той самий запис`));
+    if (!sameEdition(own.edition, ref.edition)) owner.issues.push(issue("MIXED_EDITION_WARNING", owner.key, "warning", { variant: "reference", name: ref.name, edition: ref.edition, own: own.edition }));
+    else if (!sameSource(own.source, ref.source)) owner.issues.push(issue("SOURCE_MISMATCH_WARNING", owner.key, "warning", { name: ref.name, source: ref.source, own: own.source }));
 
     return plannedResolved(ps, own.key);
   }
 
-  const error = issue("UNRESOLVED_REF", `${owner.key}.${ref.path.join(".")}`, "error", `Не знайдено «${ref.name}» (${REF_KIND_LABELS[ref.kind] ?? ref.kind}), потрібне для «${owner.name}». Додайте залежність, виберіть зіставлення або виключіть залежний запис`);
+  const error = issue("UNRESOLVED_REF", `${owner.key}.${ref.path.join(".")}`, "error", { name: ref.name, kind: ref.kind, owner: owner.name });
 
   owner.issues.push(error);
   errors.push(error);
@@ -160,7 +158,7 @@ function bindRefs(ps: PlanState, entry: AdaptedEntry, body: JsonRecord, resolved
     if (kind) resolvedBindings[refKey(ref)] = { kind, id: target.localId };
 
     if (ref.path[0] === "originFeatId" && target.body.type !== "origin") {
-      const err = issue("BACKGROUND_FEAT_INVALID", entry.key, "error", "Зіставте з рисою типу origin");
+      const err = issue("BACKGROUND_FEAT_INVALID", entry.key, "error");
 
       ps.errors.push(err);
       entry.issues.push(err);
@@ -227,7 +225,7 @@ function validateStandalone(ps: PlanState, entry: AdaptedEntry, body: JsonRecord
 
   if (parsed?.success) return { body: parsed.data as JsonRecord, sourceBody: schema!.parse({ ...sourceBody, name: (parsed.data as JsonRecord).name }) as JsonRecord };
 
-  for (const err of parsed && !parsed.success ? parsed.error.issues : [{ path: [] }]) ps.errors.push(issue("DOMAIN_SCHEMA", `${entry.key}.${err.path.join(".")}`, "error", "Виправте поле за схемою ресурсу або виключіть запис"));
+  for (const err of parsed && !parsed.success ? parsed.error.issues : [{ path: [] }]) ps.errors.push(issue("DOMAIN_SCHEMA", `${entry.key}.${err.path.join(".")}`, "error"));
 
   return { body, sourceBody };
 }
@@ -236,7 +234,7 @@ function visitEntry(ps: PlanState, key: string) {
   if (ps.states.get(key) === "done") return;
 
   if (ps.states.get(key) === "visiting") {
-    ps.errors.push(issue("CYCLIC_REF", key, "error", "Усуньте циклічні механічні посилання"));
+    ps.errors.push(issue("CYCLIC_REF", key, "error"));
 
     return;
   }
@@ -306,7 +304,7 @@ function resolveSubclassLevel(ps: PlanState, row: PlannedWrite) {
     row.body.subclassLevel = levels[0];
 
     if (row.baseline) row.baseline.subclassLevel = levels[0];
-  } else ps.errors.push(issue("SUBCLASS_LEVEL_REQUIRED", row.key, "error", "Задайте однозначний рівень отримання підкласу"));
+  } else ps.errors.push(issue("SUBCLASS_LEVEL_REQUIRED", row.key, "error"));
 }
 
 /** Nested assembly may have changed parent bodies: validate the final bodies again. */
@@ -323,7 +321,7 @@ function revalidateWrites(ps: PlanState) {
 
     if (previous && !previous.missing) row.operation = stableJson(managedProjection(previous.body, row.body)) === stableJson(row.body) ? "unchanged" : "update";
 
-    if (!validated?.success) ps.errors.push(issue("DOMAIN_SCHEMA", row.key, "error", "Перевірте результат поєднання вкладених записів"));
+    if (!validated?.success) ps.errors.push(issue("DOMAIN_SCHEMA", row.key, "error", { variant: "combined" }));
   }
 }
 

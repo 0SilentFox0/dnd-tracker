@@ -8,7 +8,7 @@ import { createAssistantExecutor } from "@/lib/server/assistant/execute";
 import type { ActionExecutionContext, ActionPreview, AssistantCaller, AssistantWriteAction } from "@/lib/server/assistant/types";
 import { afterContentCommit } from "@/lib/server/content/write-context";
 
-const caller: AssistantCaller = { actor: { campaignId: "campaign", userId: "dm", isDM: true, via: "session", scopes: null }, channel: "chat", tokenId: null, threadId: "thread" };
+const caller: AssistantCaller = { actor: { campaignId: "campaign", userId: "dm", isDM: true, via: "session", scopes: null }, channel: "chat", tokenId: null, threadId: "thread", locale: "uk" as const };
 
 const request = { actionId: "characters.update", requestId: "request", input: {} };
 
@@ -75,7 +75,7 @@ describe("confirmed assistant execution", () => {
   it("lost DM and revoked originating token reject confirmation", async () => {
     const { executor, state } = fixture();
 
-    const tokenCaller: AssistantCaller = { ...caller, actor: { ...caller.actor, via: "token", scopes: ["characters:write"] }, channel: "mcp", tokenId: "token", threadId: null };
+    const tokenCaller: AssistantCaller = { ...caller, actor: { ...caller.actor, via: "token", scopes: ["characters:write"] }, channel: "mcp", tokenId: "token", threadId: null, locale: "uk" as const };
 
     const prepared = await executor.dispatchAction(tokenCaller, request);
 

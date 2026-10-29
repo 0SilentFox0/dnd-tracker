@@ -27,7 +27,7 @@ export function useSpellLabels() {
     (res: SpellResolution): string => {
       if (res.kind !== "save") return t(`spells.inline.resolution.${res.kind}`);
 
-      return t("spells.inline.resolution.save", { ability: t(`common.abilities.${res.ability}.label`), onSuccess: t(`spells.inline.saveOnSuccess.${res.onSuccess}`) });
+      return t("spells.inline.resolution.save", { ability: t(`gameTerms.abilities.${res.ability}.label`), onSuccess: t(`spells.inline.saveOnSuccess.${res.onSuccess}`) });
     },
     [t],
   );

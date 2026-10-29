@@ -10,6 +10,7 @@ vi.mock("@/lib/server/content/resources", () => ({ CONTENT_RESOURCES: {} }));
 import type { ZodType } from "zod";
 
 import { API_ERRORS } from "@/lib/constants/api-errors";
+import { exampleOf } from "@/lib/constants/import-aliases";
 import { createArtifactSchema, createArtifactSetSchema, createBackgroundSchema, createClassSchema, createFeatSchema, createMainSkillSchema, createRaceSchema, createSkillSchema, createSpellGroupSchema, createSpellSchema } from "@/lib/schemas";
 import { createUnitSchema, updateUnitSchema } from "@/lib/schemas/units";
 import { type AnyContentResource, defineResource } from "@/lib/server/content/define-resource";
@@ -68,7 +69,7 @@ describe("importContent", () => {
     expect(create).toHaveBeenCalledTimes(1);
     expect(create.mock.calls[0][1]).toMatchObject({ name: "Біс", maxHp: 18, level: 1 });
     expect(report.results.map((r) => r.status)).toEqual(["created", "error"]);
-    expect(report.results[1].issues[0].message).toBe("«вовк» вже є в кампанії");
+    expect(report.results[1].issues[0]).toMatchObject({ message: "contentImport.issues.alreadyExists", params: { name: "вовк" } });
     expect(report.counts).toEqual({ created: 1, updated: 0, skipped: 0, error: 1 });
     expect(invalidateReference).toHaveBeenCalledWith(["units"], "c1");
   });
@@ -88,7 +89,7 @@ describe("importContent", () => {
     const report = await run([{ name: "Вовк" }], "update");
 
     expect(find).toHaveBeenCalledWith(actor, "u1", "write");
-    expect(report.results[0].issues).toEqual([{ level: "warning", message: "Кілька записів «Вовк» — оновлено перший" }]);
+    expect(report.results[0].issues).toEqual([{ level: "warning", message: "contentImport.issues.multipleMatches", params: { name: "Вовк" } }]);
   });
 
   it("skip: наявні пропускаються без запису", async () => {
@@ -114,8 +115,8 @@ describe("importContent", () => {
 
     expect(report.results[0].status).toBe("created");
     expect(report.results[0].issues).toEqual([
-      { field: "raceId", level: "warning", message: "Раса: не знайдено «Ельфи» (Раси)" },
-      { field: "knownSpells", level: "warning", message: "Заклинання: не знайдено «Лід» (Заклинання)" },
+      { field: "raceId", level: "warning", message: "contentImport.issues.refNotFound", params: { field: "contentImport.fields.units.raceId", value: "Ельфи", kind: "contentImport.kinds.races" } },
+      { field: "knownSpells", level: "warning", message: "contentImport.issues.refNotFound", params: { field: "contentImport.fields.units.knownSpells", value: "Лід", kind: "contentImport.kinds.spells" } },
     ]);
     expect(create.mock.calls[0][1]).toMatchObject({ raceId: null, knownSpells: ["s1"] });
   });
@@ -142,7 +143,7 @@ describe("importContent", () => {
       const report = await run([{ name: "Г", raceId: "Ельфи" }]);
 
       expect(report.results[0].status).toBe("error");
-      expect(report.results[0].issues).toEqual([{ field: "raceId", level: "error", message: "Раса: не знайдено «Ельфи» (Раси)" }]);
+      expect(report.results[0].issues).toEqual([{ field: "raceId", level: "error", message: "contentImport.issues.refNotFound", params: { field: "contentImport.fields.units.raceId", value: "Ельфи", kind: "contentImport.kinds.races" } }]);
       expect(create).not.toHaveBeenCalled();
     } finally {
       delete field.required;
@@ -155,7 +156,7 @@ describe("importContent", () => {
     expect(report.results.map((r) => r.status)).toEqual(["created", "error", "created", "error"]);
     expect(report.results[0].issues[0]).toMatchObject({ field: "maxHp", level: "warning" });
     expect(report.results[1].issues[0]).toMatchObject({ field: "level", level: "error" });
-    expect(report.results[3].issues).toEqual([{ field: "name", level: "error", message: "Немає назви" }]);
+    expect(report.results[3].issues).toEqual([{ field: "name", level: "error", message: "contentImport.issues.noName" }]);
     expect(create).toHaveBeenCalledTimes(2);
   });
 
@@ -224,7 +225,7 @@ const CREATE: Record<ImportKind, ZodType> = {
 
 describe("importContent: кожен вид", () => {
   it.each(IMPORT_KINDS)("%s: перший рядок прикладу (сирі клітинки під ключами полів) проходить серверний шлях", async (kind) => {
-    const row = Object.fromEntries(IMPORT_SPECS[kind].fields.map((f) => [f.key, f.examples[0]]));
+    const row = Object.fromEntries(IMPORT_SPECS[kind].fields.map((f) => [f.key, exampleOf("uk", kind, f.key)[0]]));
 
     const kindResource: AnyContentResource = { ...resource, schemas: { create: CREATE[kind], update: CREATE[kind] } };
 

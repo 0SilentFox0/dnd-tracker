@@ -29,7 +29,7 @@ export function useAssistantIntents(campaignId: string, filters: IntentFilters &
 
  const applyLegacy = useMutation({mutationFn:async(id:string)=>{ await flushAssistantBeforeApply(campaignId);
 
-return applyAiProposal(campaignId,id); },onSuccess:async(result, id)=>{ await consumeReceipt({id:`legacy:${id}`,status:"applied",effectsStatus:"complete",result:{data:null,affected:["deck" in result?{domain:"show",id:result.deck.id,name:"Показ"}:{domain:"scenario",id:result.id,name:"Сценарій"}],warnings:[]}}); },onSettled:refresh});
+return applyAiProposal(campaignId,id); },onSuccess:async(result, id)=>{ await consumeReceipt({id:`legacy:${id}`,status:"applied",effectsStatus:"complete",result:{data:null,affected:["deck" in result?{domain:"show",id:result.deck.id,name:"Show"}:{domain:"scenario",id:result.id,name:"Scenario"}],warnings:[]}}); },onSettled:refresh});
 
  const rejectLegacy = useMutation({mutationFn:(id:string)=>rejectAiProposal(campaignId,id),onSettled:refresh});
 

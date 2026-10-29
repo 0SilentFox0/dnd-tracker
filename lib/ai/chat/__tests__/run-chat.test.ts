@@ -12,10 +12,10 @@ vi.mock("@/lib/ai/credentials", () => {
 });
 vi.mock("@/lib/ai/context/prompt", () => ({ buildInstructions: vi.fn(async () => "ІНСТРУКЦІЇ") }));
 vi.mock("@/lib/ai/tools", () => ({ toAiSdkTools: vi.fn(() => ({})) }));
-vi.mock("@/lib/utils/api/translate-error", async (importOriginal) => {
-  const actual = await importOriginal<typeof import("@/lib/utils/api/translate-error")>();
+vi.mock("@/lib/i18n/translator", async () => {
+  const { makeT } = await import("@/lib/i18n/test/mock-t");
 
-  return { ...actual, requestTranslator: vi.fn(actual.requestTranslator) };
+  return { getTranslator: vi.fn(async (_locale: string, namespace?: string) => makeT(namespace)) };
 });
 
 vi.mock("@/lib/server/assistant/runs", async () => ({
@@ -106,7 +106,7 @@ describe("runChat", () => {
     } });
 
     await (await runChat(args, { model })).text();
-    expect(prompt).toContain("приховане посилання");
+    expect(prompt).toContain("hidden link");
     expect(prompt).not.toContain("PRIVATE_SIGNATURE");
     expect(history[0].parts[0].output.image).toContain("PRIVATE_SIGNATURE");
   });
@@ -120,7 +120,7 @@ describe("runChat", () => {
 
     const { toAiSdkTools } = await import("@/lib/ai/tools");
 
-    expect(toAiSdkTools).toHaveBeenCalledWith(expect.objectContaining({ caller: { actor: { campaignId: "camp1", userId: "dm", isDM: true, via: "session", scopes: null }, channel: "chat", threadId: "t1", tokenId: null, runId: "run1" } }));
+    expect(toAiSdkTools).toHaveBeenCalledWith(expect.objectContaining({ caller: { actor: { campaignId: "camp1", userId: "dm", isDM: true, via: "session", scopes: null }, channel: "chat", threadId: "t1", tokenId: null, runId: "run1", locale: "uk" as const } }));
 
     const { buildInstructions } = await import("@/lib/ai/context/prompt");
 
@@ -214,11 +214,11 @@ describe("runChat", () => {
   it("метадані з помилкою провайдера зберігають результат перекладу, не ключ", async () => {
     const { APICallError } = await import("ai");
 
-    const { requestTranslator } = await import("@/lib/utils/api/translate-error");
+    const { getTranslator } = await import("@/lib/i18n/translator");
 
     const { appendMessage } = await import("@/lib/ai/threads");
 
-    vi.mocked(requestTranslator).mockResolvedValueOnce(Object.assign((key: string) => `T(${key})`, { has: () => true, raw: () => ({}) }));
+    vi.mocked(getTranslator).mockResolvedValueOnce(Object.assign((key: string) => `T(${key})`, { has: () => true, raw: () => ({}) }));
 
     const failing = new MockLanguageModelV4({ doStream: async () => { throw new APICallError({ message: "bad", url: "u", requestBodyValues: {}, statusCode: 401, isRetryable: false }); } });
 

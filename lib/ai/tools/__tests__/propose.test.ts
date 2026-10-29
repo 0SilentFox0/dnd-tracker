@@ -7,7 +7,7 @@ vi.mock("@/lib/server/assistant/execute", () => ({ dispatchAction: dispatch, rej
 import { type AiToolContext,runTool } from "../define";
 import { proposeScenarioEditTool } from "../propose";
 
-const ctx: AiToolContext = { campaignId: "c", userId: "dm", scopes: ["scenario:write"], threadId: "t", caller: { actor: { campaignId: "c", userId: "dm", isDM: true, via: "session", scopes: null }, tokenId: null, channel: "chat", threadId: "t" } };
+const ctx: AiToolContext = { campaignId: "c", userId: "dm", scopes: ["scenario:write"], threadId: "t", caller: { actor: { campaignId: "c", userId: "dm", isDM: true, via: "session", scopes: null }, tokenId: null, channel: "chat", threadId: "t", locale: "uk" as const }, locale: "uk" as const };
 
 beforeEach(() => dispatch.mockReset());
 it("stages a canonical review rather than independently writing an applicable proposal", async () => {

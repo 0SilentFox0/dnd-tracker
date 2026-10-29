@@ -1,11 +1,14 @@
 // @vitest-environment happy-dom
-import { cleanup, fireEvent, render, screen } from "@testing-library/react";
+import { cleanup, fireEvent, screen } from "@testing-library/react";
 import { History } from "lucide-react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
 import { ScenarioBar } from "@/components/scenario";
+import { render } from "@/components/ui/__tests__/uk-intl";
 
 afterEach(cleanup);
+
+vi.unmock("next-intl");
 
 describe("ScenarioBar", () => {
   it("назва, перемикач нотаток, дії, «☰ Розділи» лише коли передано toc", () => {

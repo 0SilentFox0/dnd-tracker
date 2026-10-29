@@ -1,6 +1,8 @@
 import { describe, expect, it } from "vitest";
 import type { ZodType } from "zod";
 
+import { exampleOf } from "@/lib/constants/import-aliases";
+import type { Locale } from "@/lib/i18n/config";
 import { createArtifactSchema, createArtifactSetSchema, createBackgroundSchema, createClassSchema, createFeatSchema, createMainSkillSchema, createRaceSchema, createSkillSchema, createSpellGroupSchema, createSpellSchema, createUnitSchema } from "@/lib/schemas";
 import { autoMap, IMPORT_KINDS, IMPORT_SPECS, normalizeHeader, transformRow } from "@/lib/utils/content/import";
 import type { ImportKind } from "@/types/content-import";
@@ -19,7 +21,7 @@ const CREATE: Record<ImportKind, ZodType> = {
   "artifact-sets": createArtifactSetSchema,
 };
 
-const exampleRow = (kind: ImportKind, i: 0 | 1) => Object.fromEntries(IMPORT_SPECS[kind].fields.map((f) => [f.label, f.examples[i]]));
+const exampleRow = (kind: ImportKind, i: 0 | 1, locale: Locale) => Object.fromEntries(IMPORT_SPECS[kind].fields.map((f) => [f.key, exampleOf(locale, kind, f.key)[i]]));
 
 describe("IMPORT_SPECS", () => {
   it("є специфікація для кожного виду імпорту", () => expect(Object.keys(IMPORT_SPECS).sort()).toEqual([...IMPORT_KINDS].sort()));
@@ -31,11 +33,11 @@ describe("IMPORT_SPECS", () => {
     expect(fields.find((f) => f.key === "name")?.required).toBe(true);
   });
 
-  it.each(IMPORT_KINDS)("%s: ключ, підпис і синоніми не перетинаються між полями", (kind) => {
+  it.each(IMPORT_KINDS)("%s: ключ і синоніми не перетинаються між полями", (kind) => {
     const owner = new Map<string, string>();
 
     for (const f of IMPORT_SPECS[kind].fields) {
-      for (const alias of [f.key, f.label, ...f.aliases]) {
+      for (const alias of [f.key, ...f.aliases]) {
         const k = normalizeHeader(alias);
 
         expect(owner.get(k) ?? f.key, `${kind}: «${alias}»`).toBe(f.key);
@@ -48,11 +50,11 @@ describe("IMPORT_SPECS", () => {
     for (const f of IMPORT_SPECS[kind].fields) if (f.type === "ref" || f.type === "refList") expect(IMPORT_KINDS).toContain(f.ref);
   });
 
-  it.each(IMPORT_KINDS)("%s: обидва рядки прикладу проходять схему створення", (kind) => {
+  it.each(IMPORT_KINDS.flatMap((kind) => (["uk", "en"] as const).map((locale) => [kind, locale] as const)))("%s (%s): обидва рядки прикладу проходять схему створення", (kind, locale) => {
     const spec = IMPORT_SPECS[kind];
 
     for (const i of [0, 1] as const) {
-      const row = exampleRow(kind, i);
+      const row = exampleRow(kind, i, locale);
 
       const { value, issues } = transformRow(row, autoMap(Object.keys(row), spec.fields), spec.fields);
 

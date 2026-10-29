@@ -1,0 +1,151 @@
+{
+  "slide": "Slide {index}",
+  "slideBare": "Slide",
+  "startShow": "Start show",
+  "waiting": {
+    "notStarted": "The DM hasn't started the show yet",
+    "paused": "Break — back shortly"
+  },
+  "battleCall": {
+    "go": "To battle!"
+  },
+  "fullscreen": {
+    "enter": "Fullscreen",
+    "exit": "Exit fullscreen"
+  },
+  "transport": {
+    "prev": "Previous slide (←)",
+    "next": "Next slide (→)",
+    "curtain": "Cover",
+    "curtainTitle": "Cover instead of the slide (B)",
+    "end": "End show",
+    "endConfirm": {
+      "title": "End the show?",
+      "description": "Players will see the cover or a waiting screen, the music will stop.",
+      "confirm": "End"
+    }
+  },
+  "deckStrip": {
+    "thisScene": "This scene",
+    "otherDecks": "Other decks",
+    "deck": "Deck",
+    "chooseDeck": "Choose a deck",
+    "cover": "Cover",
+    "coverTitle": "Cover: {title}",
+    "untitledLower": "untitled",
+    "untitled": "Untitled",
+    "clearCover": "Remove cover",
+    "slideTitled": "Slide {index}: {title}",
+    "hasTrack": "Slide with a track",
+    "isCover": "This is the cover",
+    "makeCover": "Make this the cover"
+  },
+  "puzzle": {
+    "resetConfirm": {
+      "title": "Reset the puzzle?",
+      "description": "All pieces will return to the sidebar.",
+      "confirm": "Reset"
+    },
+    "releaseAll": "Release all",
+    "reset": "Reset",
+    "rotateLeft": "Rotate counterclockwise",
+    "rotateRight": "Rotate clockwise",
+    "preview": "Puzzle cut",
+    "player": "Player",
+    "addFailed": "{name}: could not add the puzzle"
+  },
+  "grid": {
+    "puzzle": "Puzzle",
+    "hasTrack": "Has a track",
+    "moveLeft": "Move left",
+    "moveRight": "Move right",
+    "remove": "Delete slide"
+  },
+  "addSlides": {
+    "partial": "Added {added} of {picked}: a deck holds at most {max} slides",
+    "images": "Add images",
+    "puzzle": "Add puzzle",
+    "urlLabel": "Image link",
+    "generate": "Generate",
+    "max": "Maximum {max} slides",
+    "progress": "Uploading {done} of {total}"
+  },
+  "generate": {
+    "title": "Generate an image",
+    "again": "Again",
+    "addSlide": "Add slide",
+    "prompt": "Image description",
+    "campaignStyle": "Add the campaign style",
+    "aspect": "Aspect ratio",
+    "provider": "Provider",
+    "model": "Model",
+    "pending": "Generating… this can take up to a minute",
+    "resultAlt": "Generated image"
+  },
+  "newDeck": {
+    "title": "New deck",
+    "name": "Name"
+  },
+  "deckCard": {
+    "confirmTitle": "Delete the deck “{title}”?",
+    "confirmDescription": "The images will be erased.",
+    "slides": "{count, plural, one {# slide} other {# slides}}",
+    "scene": "Scene: {scene}"
+  },
+  "slideDialog": {
+    "cuts": {
+      "classic": "Classic",
+      "organic": "Organic",
+      "straight": "Straight cuts"
+    },
+    "shuffle": "Shuffle",
+    "pieces": "Pieces: {count}",
+    "piecesLabel": "Number of pieces",
+    "title": "Title",
+    "caption": "Caption",
+    "done": "Done"
+  },
+  "trackPicker": {
+    "search": "Search tracks",
+    "none": "No track"
+  },
+  "sceneSelect": {
+    "label": "Scene",
+    "none": "No scene"
+  },
+  "deckEditor": {
+    "title": "Slide deck",
+    "back": "← Back to decks",
+    "nameRequired": "Enter a deck name",
+    "nameLabel": "Deck name",
+    "emptyTitle": "No slides yet",
+    "emptyDescription": "Add images — files or links"
+  },
+  "decksPage": {
+    "title": "Scene show",
+    "count": "{count, plural, one {# deck} other {# decks}}",
+    "openShow": "Open the show",
+    "emptyTitle": "No decks yet",
+    "emptyDescription": "Create a slide deck from images and music and show it to the players."
+  },
+  "conflict": {
+    "title": "The deck was changed elsewhere. Save your changes on top?",
+    "confirm": "Save on top",
+    "cancel": "Discard my changes",
+    "discarded": "Your changes were discarded — the version from elsewhere is open"
+  },
+  "errors": {
+    "control": "Could not control the show",
+    "puzzle": "Could not perform the puzzle action",
+    "action": "Could not perform the action",
+    "bindScene": "Could not attach the deck to the scene",
+    "save": "Could not save the deck",
+    "uploadFile": "{name}: {message}",
+    "uploadUnknown": "error"
+  },
+  "validation": {
+    "httpUrl": "An http(s) link is required",
+    "puzzleParams": "A puzzle and its parameters go together",
+    "duplicateSlideId": "Duplicate slide id"
+  }
+}

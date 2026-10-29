@@ -28,10 +28,10 @@ describe("/api/locale", () => {
   it("PUT із сесією зберігає locale у БД", async () => {
     vi.mocked(getSessionUserId).mockResolvedValue("u1");
 
-    const res = await PUT(put({ locale: "uk" }));
+    const res = await PUT(put({ locale: "uk" as const }));
 
     expect(res.status).toBe(200);
-    expect(prisma.user.updateMany).toHaveBeenCalledWith({ where: { id: "u1" }, data: { locale: "uk" } });
+    expect(prisma.user.updateMany).toHaveBeenCalledWith({ where: { id: "u1" }, data: { locale: "uk" as const } });
   });
 
   it("PUT з невалідним locale — 400", async () => {

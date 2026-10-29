@@ -34,7 +34,7 @@ export function handleMiss(params: HandleMissParams): Omit<ProcessAttackResult, 
   if (guaranteedDamage > 0) {
     actualGuaranteedDamage = applyResistance(target, guaranteedDamage, attack.damageType ?? "physical", { participants: flow.ps, attackKind: attackKindOf(attack.type) }).finalDamage;
 
-    put(flow, applyDamageToTarget(target, actualGuaranteedDamage).updatedTarget);
+    put(flow, applyDamageToTarget(target, actualGuaranteedDamage));
     applyFlowDamage(flow, target, actualGuaranteedDamage);
     settleDowned(flow, targetId, attackerId);
   }

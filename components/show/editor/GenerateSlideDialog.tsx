@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useTranslations } from "next-intl";
 
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -13,6 +14,10 @@ import { useGenerateSlide } from "@/lib/hooks/show";
 const FORM_ID = "generate-slide-form";
 
 export function GenerateSlideDialog({ campaignId, open, onOpenChange, onAdd }: { campaignId: string; open: boolean; onOpenChange(open: boolean): void; onAdd(url: string): void }) {
+  const t = useTranslations("show");
+
+  const tc = useTranslations("common");
+
   const gen = useGenerateSlide(campaignId);
 
   const [prompt, setPrompt] = useState("");
@@ -56,16 +61,16 @@ export function GenerateSlideDialog({ campaignId, open, onOpenChange, onAdd }: {
       hud
       open={open}
       onOpenChange={close}
-      title="Згенерувати зображення"
+      title={t("generate.title")}
       footer={
         <>
           <Button type="button" variant="outline" onClick={() => close(false)}>
-            Скасувати
+            {tc("actions.cancel")}
           </Button>
           {result ? (
             <>
               <Button type="button" variant="outline" disabled={gen.pending} onClick={() => void run()}>
-                Ще раз
+                {t("generate.again")}
               </Button>
               <Button
                 type="button"
@@ -75,12 +80,12 @@ export function GenerateSlideDialog({ campaignId, open, onOpenChange, onAdd }: {
                   close(false, true);
                 }}
               >
-                Додати слайд
+                {t("generate.addSlide")}
               </Button>
             </>
           ) : (
             <Button type="submit" form={FORM_ID} disabled={!prompt.trim() || gen.pending || !option}>
-              Згенерувати
+              {t("addSlides.generate")}
             </Button>
           )}
         </>
@@ -94,35 +99,35 @@ export function GenerateSlideDialog({ campaignId, open, onOpenChange, onAdd }: {
           void run();
         }}
       >
-        <Textarea aria-label="Опис зображення" placeholder="Опис зображення" rows={4} maxLength={AI_IMAGE_PROMPT_MAX} value={prompt} disabled={gen.pending} onChange={(e) => setPrompt(e.target.value)} />
+        <Textarea aria-label={t("generate.prompt")} placeholder={t("generate.prompt")} rows={4} maxLength={AI_IMAGE_PROMPT_MAX} value={prompt} disabled={gen.pending} onChange={(e) => setPrompt(e.target.value)} />
         <label className="flex items-center gap-2 text-sm">
           <Checkbox checked={useCampaignStyle} disabled={gen.pending} onCheckedChange={(v) => setStyle(v === true)} />
-          Додати стиль кампанії
+          {t("generate.campaignStyle")}
         </label>
         <div className="grid gap-2 sm:grid-cols-3">
           <SelectField
-            aria-label="Співвідношення сторін"
+            aria-label={t("generate.aspect")}
             value={aspect}
             onValueChange={(v) => setAspect(v as AiImageAspect)}
             options={AI_IMAGE_ASPECTS.map((a) => ({ value: a, label: a }))}
             disabled={gen.pending}
           />
           <SelectField
-            aria-label="Провайдер"
+            aria-label={t("generate.provider")}
             value={option?.provider ?? ""}
             onValueChange={(v) => setChosen({ provider: v as AiProvider })}
             options={gen.providers.map((p) => ({ value: p.provider, label: AI_PROVIDER_LABELS[p.provider] }))}
             disabled={gen.pending}
           />
           <SelectField
-            aria-label="Модель"
+            aria-label={t("generate.model")}
             value={model?.id ?? ""}
             onValueChange={(v) => setChosen({ provider: option?.provider, model: v })}
             options={(option?.models ?? []).map((m) => ({ value: m.id, label: m.label }))}
             disabled={gen.pending}
           />
         </div>
-        {gen.pending && <p className="text-sm text-hud-muted">Генерую… це може тривати до хвилини</p>}
+        {gen.pending && <p className="text-sm text-hud-muted">{t("generate.pending")}</p>}
         {gen.error && !gen.pending && (
           <p role="alert" className="text-sm text-destructive">
             {gen.error}
@@ -130,7 +135,7 @@ export function GenerateSlideDialog({ campaignId, open, onOpenChange, onAdd }: {
         )}
         {result && !gen.pending && (
           // eslint-disable-next-line @next/next/no-img-element
-          <img src={result} alt="Згенероване зображення" className="max-h-80 w-full rounded-md object-contain" />
+          <img src={result} alt={t("generate.resultAlt")} className="max-h-80 w-full rounded-md object-contain" />
         )}
       </form>
     </ResponsiveDialog>

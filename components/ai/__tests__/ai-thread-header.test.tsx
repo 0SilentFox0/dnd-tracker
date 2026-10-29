@@ -25,9 +25,9 @@ describe("AiThreadHeader", () => {
 
     render(<AiThreadHeader threads={[thread]} thread={thread} providers={["anthropic", "openai"]} actions={{ onSelect: vi.fn(), onCreate: vi.fn(), onChangeModel, onClose: vi.fn() }} />);
 
-    fireEvent.change(screen.getByLabelText("Провайдер"), { target: { value: "openai" } });
+    fireEvent.change(screen.getByLabelText("ai.thread.provider"), { target: { value: "openai" } });
 
     expect(onChangeModel).toHaveBeenCalledWith("openai");
-    expect(screen.getByText(/↑12/)).toBeTruthy();
+    expect(screen.getByText(/"input":12/)).toBeTruthy();
   });
 });

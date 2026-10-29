@@ -1,11 +1,11 @@
 import "server-only";
-import { invalidateReference, ReferenceKind } from "@/lib/cache/tags";
+import { invalidateAllReference } from "@/lib/cache/tags";
 import { prisma } from "@/lib/db";
 import type { SourceSyncApplyInput } from "@/lib/schemas/source-sync";
 import { assertCan } from "@/lib/server/content/access";
 import { CONTENT_OPERATIONS } from "@/lib/server/content/operations";
 import { withCampaignContentWrite } from "@/lib/server/content/write";
-import { afterContentCommit, currentContentWrite, runContentWriteContext } from "@/lib/server/content/write-context";
+import { afterContentCommit } from "@/lib/server/content/write-context";
 import { applySourceChanges } from "@/lib/server/templates/sync/apply";
 import { loadSyncContext } from "@/lib/server/templates/sync/context";
 import { buildDiff } from "@/lib/server/templates/sync/diff";
@@ -23,25 +23,10 @@ export async function getSourceDiff(actor: Actor, scope?: SourceSyncScope): Prom
 export async function applySource(actor: Actor, body: SourceSyncApplyInput): Promise<SourceApplyResult> {
   assertCan(actor, CONTENT_OPERATIONS["source.apply"].need);
 
-  if (currentContentWrite()) {
-    const result = await withCampaignContentWrite(actor.campaignId, (tx) => applySourceChanges(tx, actor.campaignId, body, actor));
+  // NO KEY UPDATE serialises applies without blocking inserts that reference the campaign
+  const result = await withCampaignContentWrite(actor.campaignId, tx => applySourceChanges(tx, actor.campaignId, body, actor), { lock: "no-key-update", ...APPLY_TX_OPTIONS });
 
-    afterContentCommit(() => invalidateReference(Object.values(ReferenceKind), actor.campaignId));
-
-    return result;
-  }
-
-  const result = await prisma.$transaction(
-    async (tx) => {
-      // NO KEY UPDATE serialises applies without blocking inserts that reference the campaign
-      await tx.$queryRaw`SELECT id FROM campaigns WHERE id = ${actor.campaignId} FOR NO KEY UPDATE`;
-
-      return runContentWriteContext(actor.campaignId, tx, () => applySourceChanges(tx, actor.campaignId, body, actor));
-    },
-    APPLY_TX_OPTIONS,
-  );
-
-  invalidateReference(Object.values(ReferenceKind), actor.campaignId);
+  afterContentCommit(() => invalidateAllReference(actor.campaignId));
 
   return result;
 }

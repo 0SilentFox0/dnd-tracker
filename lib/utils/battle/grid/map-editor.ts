@@ -1,6 +1,7 @@
 import { cellKey, inBounds, isPlayable, marginCells, type Margins } from "./geometry";
 import { applyTerrain, replaceTerrain } from "./terrain";
 
+import { clamp } from "@/lib/utils/common/clamp";
 import type { BattleMapConfig, GridPoint, TerrainCell } from "@/types/battle";
 
 const NO_MARGINS: Margins = { top: 0, right: 0, bottom: 0, left: 0 };
@@ -97,7 +98,6 @@ export const MIN_PLAYABLE = 2;
 
 const OPPOSITE: Record<keyof Margins, keyof Margins> = { top: "bottom", bottom: "top", left: "right", right: "left" };
 
-export const clamp = (n: number, min: number, max: number) => Math.max(min, Math.min(max, n));
 
 export function marginLimit(map: Pick<BattleMapConfig, "cols" | "rows">, margins: Margins, key: keyof Margins): number {
   const span = key === "top" || key === "bottom" ? map.rows : map.cols;

@@ -1,6 +1,7 @@
 "use client";
 
 import { type ReactNode, useCallback, useEffect, useRef, useState } from "react";
+import { useTranslations } from "next-intl";
 import type { Editor } from "@tiptap/core";
 
 import { type AcquaintanceDialogTarget, acquaintanceTargetFor, acquaintanceToolEnabled } from "./acquaintance-target";
@@ -27,6 +28,10 @@ type ActiveCell = { rowId: string; sectionId: string; column: CellColumn } | nul
 type AcquaintanceSession = { target: AcquaintanceDialogTarget; range: { from: number; to: number } };
 
 export function ScenarioEditor({ campaignId, page, onExit, toolbarActions, onDraftReady, toc }: { campaignId: string; page: ScenarioPage; onExit: () => void; toolbarActions?: ReactNode; onDraftReady?: (draft: { flush: () => Promise<boolean>; hasUnsavedChanges?: () => boolean }) => void; toc: TocControl }) {
+  const t = useTranslations("scenario.editor");
+
+  const tActions = useTranslations("common.actions");
+
   const draft = useScenarioDraft(campaignId, page);
 
   useEffect(() => {
@@ -56,13 +61,13 @@ export function ScenarioEditor({ campaignId, page, onExit, toolbarActions, onDra
   useCssVarHeight(toolbarRef, "--sb-toolbar-h");
 
   const removeWithConfirm = async (title: string, apply: () => void) => {
-    if (await confirm({ title: `Видалити ${title}?`, description: "Зміну можна відкотити через «Версії».", confirmLabel: "Видалити" })) apply();
+    if (await confirm({ title, description: t("removeHint"), confirmLabel: tActions("delete") })) apply();
   };
 
   const setReveal = (sectionId: string, rule: RevealRule) => draft.setContent((c) => updateSection(c, sectionId, { reveal: rule }));
 
   const finish = async () => {
-    if ((await draft.flush()) || (await confirm({ title: "Є незбережені зміни. Вийти без збереження?", confirmLabel: "Вийти" }))) onExit();
+    if ((await draft.flush()) || (await confirm({ title: t("unsavedExit"), confirmLabel: t("exit") }))) onExit();
   };
 
   const openAcquaintance = async () => {
@@ -101,10 +106,10 @@ export function ScenarioEditor({ campaignId, page, onExit, toolbarActions, onDra
         <div className="sb-toolbar" style={{ borderTop: 0 }}>
           <SaveStatus state={draft.state} error={draft.error} onRetry={() => void draft.flush()} onReload={() => void draft.reload()} onRetain={draft.retainLocal} />
           <button type="button" className="toggle" onClick={() => setPropsOpen(true)}>
-            Властивості
+            {t("properties")}
           </button>
           <button type="button" className="toggle" onClick={() => void finish()}>
-            Готово
+            {t("done")}
           </button>
           {toolbarActions}
         </div>
@@ -126,7 +131,7 @@ export function ScenarioEditor({ campaignId, page, onExit, toolbarActions, onDra
                   onIcon: (icon) => draft.setContent((c) => updateSection(c, s.id, { icon })),
                   onMarker: (marker) => draft.setContent((c) => setSectionMarker(c, s.id, marker)),
                   onMove: (dir) => draft.setContent((c) => moveSection(c, s.id, dir)),
-                  onRemove: () => void removeWithConfirm(`розділ «${s.title}»`, () => draft.setContent((c) => removeSection(c, s.id))),
+                  onRemove: () => void removeWithConfirm(t("removeSection", { title: s.title }), () => draft.setContent((c) => removeSection(c, s.id))),
                 }}
               />
               {isHero && (
@@ -156,9 +161,9 @@ export function ScenarioEditor({ campaignId, page, onExit, toolbarActions, onDra
                       />
                       <div className="sb-row-order">
                         <OrderButtons
-                          labels={{ up: "Рядок вгору", down: "Рядок вниз", remove: "Видалити рядок" }}
+                          labels={{ up: t("rowUp"), down: t("rowDown"), remove: t("rowRemove") }}
                           onMove={(dir) => draft.setContent((c) => moveRow(c, s.id, r.id, dir))}
-                          onRemove={() => void removeWithConfirm("рядок", () => draft.setContent((c) => removeRow(c, s.id, r.id)))}
+                          onRemove={() => void removeWithConfirm(t("removeRow"), () => draft.setContent((c) => removeRow(c, s.id, r.id)))}
                         />
                       </div>
                     </div>
@@ -166,12 +171,12 @@ export function ScenarioEditor({ campaignId, page, onExit, toolbarActions, onDra
                 </div>
               ))}
               <button type="button" className="toggle sans" style={{ marginTop: 12 }} onClick={() => draft.setContent((c) => addRow(c, s.id))}>
-                Додати рядок
+                {t("addRow")}
               </button>
             </section>
           ))}
-          <button type="button" className="toggle sans" style={{ marginTop: 40 }} onClick={() => draft.setContent((c) => addSection(c, isHero ? "Нова глава" : "Новий розділ"))}>
-            Додати розділ
+          <button type="button" className="toggle sans" style={{ marginTop: 40 }} onClick={() => draft.setContent((c) => addSection(c, isHero ? t("newChapter") : t("newSection")))}>
+            {t("addSection")}
           </button>
         </main>
       </ScenarioLayout>
