@@ -3,8 +3,8 @@ import { describe, expect, it } from "vitest";
 
 import { context, goblin, participant } from "./fixtures";
 
+import { castSpellSchema } from "@/lib/schemas/battles";
 import { createLegendaryMutation } from "@/lib/server/battles/mutations/core-action/legendary-mutation";
-import { spellSchema } from "@/lib/server/battles/mutations/spell/cast-spell-schema";
 import { createSpellMutation } from "@/lib/server/battles/mutations/spell/spell-mutation";
 import { resolved } from "@/lib/utils/abilities/__tests__/fixtures";
 import type { BattleParticipant } from "@/types/battle";
@@ -21,7 +21,7 @@ const caster = (): BattleParticipant => {
   return { ...p, spellcasting: { spellSlots: {}, knownSpells: [], grants: [{ spellId: row.id, legendaryOnly: true, pool, castLevel: 3, dc: 25 }] }, actionFlags: { ...p.actionFlags, hasUsedAction: true }, battleData: { ...p.battleData, legendary: { actions: 3, actionsLeft: 3, resistLeft: 0 }, resolvedAbilities: [ability], pools: { [pool]: { label: row.id, max: 1, rest: null } } } };
 };
 
-const cast = (p = caster(), extra = {}, isDM = true, turnIndex = 0) => createSpellMutation({ loadSpell: async () => row, loadPool: async () => ({ units: [], races: [] }) })(context({ participants: [goblin, p], isDM, userId: "dm", scene: { ...context().scene, turnIndex }, rng: () => 0.5 }), spellSchema.parse({ casterId: "dragon", spellId: row.id, legendaryKey: ability.key, targetIds: ["gob"], diceRolls: [4], ...extra }));
+const cast = (p = caster(), extra = {}, isDM = true, turnIndex = 0) => createSpellMutation({ loadSpell: async () => row, loadPool: async () => ({ units: [], races: [] }) })(context({ participants: [goblin, p], isDM, userId: "dm", scene: { ...context().scene, turnIndex }, rng: () => 0.5 }), castSpellSchema.parse({ casterId: "dragon", spellId: row.id, legendaryKey: ability.key, targetIds: ["gob"], diceRolls: [4], ...extra }));
 
 const actor = (out: { participants: BattleParticipant[] }) => out.participants.find((p) => p.basicInfo.id === "dragon") ?? (() => { throw new Error("dragon missing"); })();
 

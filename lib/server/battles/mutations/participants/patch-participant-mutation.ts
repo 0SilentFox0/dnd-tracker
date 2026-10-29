@@ -1,5 +1,3 @@
-import type { PatchParticipantData } from "./patch-participant-schema";
-
 import { API_ERRORS } from "@/lib/constants/api-errors";
 import { CombatStatus } from "@/lib/constants/battle";
 import { findParticipant } from "@/lib/utils/abilities/engine/core/participants";
@@ -12,6 +10,7 @@ import type { BattleMutationContext, MutationResult } from "@/lib/utils/battle/p
 import { BattleAccessError, battleActionToEvent, BattleRuleError, dmEvent, systemEvent } from "@/lib/utils/battle/store";
 import { advanceAfterRemoval } from "@/lib/utils/battle/turn";
 import { rngOf } from "@/lib/utils/common/rng";
+import type { PatchParticipantData } from "@/types/api";
 import type { BattleParticipant } from "@/types/battle";
 
 export function patchParticipantMutation(

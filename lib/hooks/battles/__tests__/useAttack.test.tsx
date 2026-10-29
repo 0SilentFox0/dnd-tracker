@@ -4,9 +4,9 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { act, renderHook } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 
-vi.mock("@/lib/api/battles", async (orig) => ({ ...(await orig<typeof import("@/lib/api/battles")>()), attack: vi.fn() }));
+vi.mock("@/lib/api/client", async (orig) => ({ ...(await orig<typeof import("@/lib/api/client")>()), campaignPost: vi.fn() }));
 
-import { attack } from "@/lib/api/battles";
+import { campaignPost } from "@/lib/api/client";
 import { useAttack } from "@/lib/hooks/battles";
 import type { ClientBattleDelta } from "@/types/api";
 import type { BattleAction } from "@/types/battle";
@@ -19,7 +19,7 @@ describe("useAttack", () => {
 
     const delta = { battleId: "b1", version: 6, scene: { status: "active", round: 1, turnIndex: 0, pendingMoraleCheck: null, pendingCritChoice: null }, upserted: [], removed: [], log } as ClientBattleDelta;
 
-    vi.mocked(attack).mockResolvedValue({ delta });
+    vi.mocked(campaignPost).mockResolvedValue({ delta });
 
     const qc = new QueryClient();
 

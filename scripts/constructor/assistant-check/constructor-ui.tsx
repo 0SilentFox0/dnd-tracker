@@ -5,7 +5,7 @@ import { AttackWizard } from "@/components/battle/wizards/AttackWizard";
 import { ClassForm } from "@/components/classes/ClassForm";
 import { RulesForm } from "@/components/rules/RulesForm";
 import { ConfirmProvider } from "@/components/ui/confirm-dialog";
-import { attack } from "@/lib/api/battles";
+import { battleOps, callBattleOp } from "@/lib/api/battle-ops";
 import { useAttackWizard } from "@/lib/hooks/battle/useAttackWizard";
 import { BattleSceneContext, BattleSceneDataContext, type BattleSceneValue } from "@/lib/hooks/battle/useBattleScene";
 import { useSpellMapTargeting } from "@/lib/hooks/battle/useSpellMapTargeting";
@@ -39,7 +39,7 @@ const attackScene = {
   viewer: { userId: "synthetic", isDM: true, canSeeEnemyHp: true },
   readBattle: () => attackBattle,
   result: { show: () => undefined },
-  actions: { attack: { mutateAsync: (body: AttackData) => attack("synthetic", "battle", { ...body, expectedVersion: 1 }) } },
+  actions: { attack: { mutateAsync: (body: AttackData) => callBattleOp(battleOps.attack, "synthetic", "battle", { ...body, expectedVersion: 1 }) } },
 } as unknown as BattleSceneValue;
 
 function AttackSelection() {

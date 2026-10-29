@@ -20,20 +20,19 @@ import { BATTLE_LOG_RECENT_EVENTS, ParticipantSourceType } from "@/lib/constants
 import { CONTROLLED_BY_DM } from "@/lib/constants/characters";
 import { prisma } from "@/lib/db";
 import { moraleCheckSchema } from "@/lib/schemas";
-import { abilityActionSchema, createAbilityActionMutation } from "@/lib/server/battles/mutations/ability-action/ability-action-mutation";
-import { attackBodySchema, createAttackMutation } from "@/lib/server/battles/mutations/attack/attack-mutation";
-import { auraZoneMutation, auraZoneSchema } from "@/lib/server/battles/mutations/aura-zone/aura-zone-mutation";
-import { bonusActionSchema, createBonusActionMutation } from "@/lib/server/battles/mutations/bonus-action/bonus-action-mutation";
-import { mapTerrainMutation, mapTerrainSchema } from "@/lib/server/battles/mutations/map-terrain/map-terrain-mutation";
-import { mazeActionSchema, mazeMutation } from "@/lib/server/battles/mutations/maze/maze-mutation";
-import { mazeMarkMutation, mazeMarkSchema } from "@/lib/server/battles/mutations/maze-mark/maze-mark-mutation";
+import { abilityActionSchema, attackBodySchema, auraZoneSchema, bonusActionSchema, castSpellSchema,mapTerrainSchema, mazeActionSchema, mazeMarkSchema, moveSchema, patchParticipantSchema } from "@/lib/schemas/battles";
+import { createAbilityActionMutation } from "@/lib/server/battles/mutations/ability-action/ability-action-mutation";
+import { createAttackMutation } from "@/lib/server/battles/mutations/attack/attack-mutation";
+import { auraZoneMutation } from "@/lib/server/battles/mutations/aura-zone/aura-zone-mutation";
+import { createBonusActionMutation } from "@/lib/server/battles/mutations/bonus-action/bonus-action-mutation";
+import { mapTerrainMutation } from "@/lib/server/battles/mutations/map-terrain/map-terrain-mutation";
+import { mazeMutation } from "@/lib/server/battles/mutations/maze/maze-mutation";
+import { mazeMarkMutation } from "@/lib/server/battles/mutations/maze-mark/maze-mark-mutation";
 import { moraleCheckMutation } from "@/lib/server/battles/mutations/morale-check/morale-check-mutation";
-import { moveMutation, moveSchema } from "@/lib/server/battles/mutations/move/move-mutation";
+import { moveMutation } from "@/lib/server/battles/mutations/move/move-mutation";
 import { nextTurnMutation } from "@/lib/server/battles/mutations/next-turn/next-turn-mutation";
 import { patchParticipantMutation } from "@/lib/server/battles/mutations/participants/patch-participant-mutation";
-import { patchParticipantSchema } from "@/lib/server/battles/mutations/participants/patch-participant-schema";
 import { revealParticipantMutation, revealParticipantSchema } from "@/lib/server/battles/mutations/reveal-participant/reveal-participant-mutation";
-import { spellSchema } from "@/lib/server/battles/mutations/spell/cast-spell-schema";
 import { createSpellMutation } from "@/lib/server/battles/mutations/spell/spell-mutation";
 import { createStartMutation } from "@/lib/server/battles/mutations/start/start-mutation";
 import { unitControlMutation, unitControlSchema } from "@/lib/server/battles/mutations/unit-control/unit-control-mutation";
@@ -282,7 +281,7 @@ const BONUS = { access: "member", requireStatus: "active", blockedByMode: true, 
 
 const ABILITY = { access: "member", requireStatus: "active", blockedByMode: true, schema: abilityActionSchema, mutate: createAbilityActionMutation(summonDeps) };
 
-const SPELL = { access: "member", requireStatus: "active", blockedByMode: true, schema: spellSchema, dryRun: (b: any) => b.preview === true, mutate: createSpellMutation({ loadSpell: (id: string) => prisma.spell.findUnique({ where: { id } }), ...summonDeps } as any) };
+const SPELL = { access: "member", requireStatus: "active", blockedByMode: true, schema: castSpellSchema, dryRun: (b: any) => b.preview === true, mutate: createSpellMutation({ loadSpell: (id: string) => prisma.spell.findUnique({ where: { id } }), ...summonDeps } as any) };
 
 const UNIT_CONTROL = { access: "dm", requireStatus: "active", schema: unitControlSchema, mutate: unitControlMutation };
 

@@ -10,7 +10,6 @@ import { BattleAccessError, rejectAction } from "@/lib/utils/battle/store";
 import { assertCanAct } from "@/lib/utils/battle/turn";
 import type { MazeMarkData } from "@/types/api";
 
-export { mazeMarkSchema };
 
 export type MazeMarkBody = MazeMarkData;
 
