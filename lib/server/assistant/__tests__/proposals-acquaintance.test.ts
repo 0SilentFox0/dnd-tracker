@@ -3,6 +3,7 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import { API_ERRORS } from "@/lib/constants/api-errors";
 import { makeT } from "@/lib/i18n/test/mock-t";
 import { resolveAiOps } from "@/lib/utils/scenario/ai-ops";
+import type { RichDoc, RichNode } from "@/types/scenario";
 
 const tx = vi.hoisted(() => ({
   $queryRaw: vi.fn(async () => [{ id: "camp" }]),
@@ -78,6 +79,48 @@ describe("applyProposal with createAcquaintance", () => {
     expect(res).toEqual({ ok: false, status: 404, error: API_ERRORS.ACQUAINTANCE_NOT_FOUND });
     expect(tx.acquaintance.count).toHaveBeenCalledWith({ where: { campaignId: "camp", id: { in: ["foreign"] } } });
     expect(tx.scenarioPage.updateMany).not.toHaveBeenCalled();
+  });
+
+  const chip = (id: string): RichNode => ({ type: "mention", attrs: { id, label: "Беатріс", type: "acquaintance" } });
+
+  const chipDoc = (id: string): RichDoc => ({ type: "doc", content: [{ type: "paragraph", content: [chip(id)] }] });
+
+  const withOps = (ops: unknown[]) => tx.aiProposal.findFirst.mockResolvedValue({ id: "pr", pageId: "p", status: "pending", ops });
+
+  it("a chip already in the row (acquaintance since deleted) is not re-validated", async () => {
+    tx.scenarioPage.findFirst.mockResolvedValue({ id: "p", title: "T", version: 3, content: { legend: [], sections: [{ id: "s", title: "S", played: false, rows: [{ id: "r", story: chipDoc("gone"), notes: doc("") }] }] } });
+    withOps([{ op: "replaceRow", sectionId: "s", rowId: "r", story: { type: "doc", content: [{ type: "paragraph", content: [chip("gone"), { type: "text", text: " ще" }] }] }, before: { story: chipDoc("gone"), notes: doc("") } }]);
+    tx.acquaintance.count.mockResolvedValue(0);
+
+    expect((await run()).ok).toBe(true);
+    expect(tx.acquaintance.count).not.toHaveBeenCalled();
+  });
+
+  it("insertRow and addSection with a foreign chip -> not found", async () => {
+    tx.acquaintance.count.mockResolvedValue(0);
+
+    withOps([{ op: "insertRow", sectionId: "s", afterRowId: null, row: { id: "n", story: chipDoc("foreign"), notes: doc("") } }]);
+    expect(await run()).toEqual({ ok: false, status: 404, error: API_ERRORS.ACQUAINTANCE_NOT_FOUND });
+
+    withOps([{ op: "addSection", afterSectionId: null, section: { id: "n", title: "N", played: false, rows: [{ id: "nr", story: doc(""), notes: chipDoc("foreign") }] } }]);
+    expect(await run()).toEqual({ ok: false, status: 404, error: API_ERRORS.ACQUAINTANCE_NOT_FOUND });
+    expect(tx.scenarioPage.updateMany).not.toHaveBeenCalled();
+  });
+
+  it("an unresolved @ref placeholder rejects the proposal instead of leaving it pending", async () => {
+    withOps([{ op: "replaceRow", sectionId: "s", rowId: "r", story: chipDoc("@ref:zz"), before: { story: doc("Беатріс тут"), notes: doc("") } }]);
+
+    expect(await run()).toEqual({ ok: false, status: 400, error: API_ERRORS.AI_PROPOSAL_INVALID });
+    expect(tx.aiProposal.update).toHaveBeenCalledWith({ where: { id: "pr" }, data: { status: "rejected" } });
+    expect(tx.aiProposal.updateMany).not.toHaveBeenLastCalledWith({ where: { id: "pr" }, data: { status: "pending" } });
+  });
+
+  it("source section of a new acquaintance is the section of its own chip", async () => {
+    tx.scenarioPage.findFirst.mockResolvedValue({ id: "p", title: "T", version: 3, content: { legend: [], sections: [{ id: "a", title: "A", played: false, rows: [{ id: "x", story: doc("нічого"), notes: doc("") }] }, ...content().sections] } });
+
+    await run();
+
+    expect(tx.acquaintance.create.mock.calls[0][0].data).toMatchObject({ sourceSectionId: "s" });
   });
 
   it("acquaintances disabled -> error key, nothing created or written, claim handed back", async () => {

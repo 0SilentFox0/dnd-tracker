@@ -23,7 +23,7 @@ import { pruneVersions, snapshotIfDue } from "@/lib/server/scenario/versions";
 import { toSlideDeck } from "@/lib/server/show/deck-store";
 import { requestDigest } from "@/lib/utils/battle/store/stable-json";
 import { applyAiOps } from "@/lib/utils/scenario/ai-ops";
-import { acquaintanceMentionIds, hasRefPlaceholder, substituteRefs } from "@/lib/utils/scenario/ai-refs";
+import { acquaintanceMentionIds, hasRefPlaceholder, sectionOfMention, substituteRefs } from "@/lib/utils/scenario/ai-refs";
 import type { AddSlideAiOp, AiProposal, AiProposalOp, AiProposalStatus, ScenarioAiOp } from "@/types/ai";
 import type { ScenarioPage } from "@/types/scenario";
 import type { SlideDeck } from "@/types/show";
@@ -81,19 +81,36 @@ export async function applyProposal(campaignId: string, userId: string, proposal
 
     const result = await applyClaimed(tx, campaignId, userId, proposal, locale);
 
-    if (!result.ok && !KEEPS_STATUS.has(result.error)) await tx.aiProposal.updateMany({ where: { id: proposalId }, data: { status: "pending" } });
+    if (result.ok) {
+      await reconcileLegacyProposal(tx, campaignId, proposalId, "applied", scenarioResult("page" in result ? { page: result.page } : { deck: result.deck }, undefined, locale), executingIntentId);
 
-    if (result.ok) await reconcileLegacyProposal(tx, campaignId, proposalId, "applied", scenarioResult("page" in result ? { page: result.page } : { deck: result.deck }, undefined, locale), executingIntentId);
-    else if (KEEPS_STATUS.has(result.error)) await reconcileLegacyProposal(tx, campaignId, proposalId, "stale");
+      return result;
+    }
+
+    if ("settled" in result) {
+      await reconcileLegacyProposal(tx, campaignId, proposalId, result.settled);
+
+      const { settled: _settled, ...failure } = result;
+
+      return failure;
+    }
+
+    await tx.aiProposal.updateMany({ where: { id: proposalId }, data: { status: "pending" } });
 
     return result;
   });
 }
 
-// these outcomes persist their own status (stale); any other failure hands the claim back
-const KEEPS_STATUS = new Set<string>([API_ERRORS.AI_PROPOSAL_STALE, API_ERRORS.AI_PROPOSAL_STALE_DECK]);
+// a failure with `settled` has already persisted its terminal status; any other failure hands the claim back
+type Settled = Extract<ApplyResult, { ok: false }> & { settled: "stale" | "rejected" };
 
-async function applyClaimed(tx: Tx, campaignId: string, userId: string, proposal: Row, locale: Locale): Promise<ApplyResult> {
+async function settle(tx: Tx, proposalId: string, settled: Settled["settled"], status: Settled["status"], error: string): Promise<Settled> {
+  await tx.aiProposal.update({ where: { id: proposalId }, data: { status: settled } });
+
+  return { ok: false, status, error, settled };
+}
+
+async function applyClaimed(tx: Tx, campaignId: string, userId: string, proposal: Row, locale: Locale): Promise<ApplyResult | Settled> {
   const proposalId = proposal.id;
 
   const ops = proposal.ops as unknown as AiProposalOp[];
@@ -120,11 +137,7 @@ async function applyClaimed(tx: Tx, campaignId: string, userId: string, proposal
 
   let applied = applyAiOps(content, scenarioOps);
 
-  if (!applied.ok) {
-    await tx.aiProposal.update({ where: { id: proposalId }, data: { status: "stale" } });
-
-    return { ok: false, status: 409, error: API_ERRORS.AI_PROPOSAL_STALE };
-  }
+  if (!applied.ok) return settle(tx, proposalId, "stale", 409, API_ERRORS.AI_PROPOSAL_STALE);
 
   const ids = new Map<string, string>();
 
@@ -149,7 +162,7 @@ async function applyClaimed(tx: Tx, campaignId: string, userId: string, proposal
 
   const finalOps = newcomers.length > 0 ? substituteRefs(scenarioOps, ids) : scenarioOps;
 
-  if (hasRefPlaceholder(finalOps)) return { ok: false, status: 400, error: API_ERRORS.AI_PROPOSAL_INVALID };
+  if (hasRefPlaceholder(finalOps)) return settle(tx, proposalId, "rejected", 400, API_ERRORS.AI_PROPOSAL_INVALID);
 
   const foreign = acquaintanceMentionIds(finalOps).filter((id) => !created.some((c) => c.id === id));
 
@@ -157,11 +170,15 @@ async function applyClaimed(tx: Tx, campaignId: string, userId: string, proposal
 
   if (newcomers.length > 0) applied = applyAiOps(content, finalOps);
 
-  if (!applied.ok) return { ok: false, status: 409, error: API_ERRORS.AI_PROPOSAL_STALE };
+  if (!applied.ok) return settle(tx, proposalId, "stale", 409, API_ERRORS.AI_PROPOSAL_STALE);
 
   if (!scenarioContentSchema.safeParse(applied.content).success) return { ok: false, status: 400, error: API_ERRORS.AI_PROPOSAL_INVALID };
 
   if (Buffer.byteLength(JSON.stringify(applied.content)) > SCENARIO_MAX_CONTENT_BYTES) return { ok: false, status: 413, error: API_ERRORS.SCENARIO_TOO_LARGE };
+
+  const sources = new Map(created.map((n) => [n.id, sectionOfMention(finalOps, n.id) ?? applied.content.sections[0]?.id]));
+
+  if ([...sources.values()].some((v) => !v)) return { ok: false, status: 400, error: API_ERRORS.AI_PROPOSAL_INVALID };
 
   await snapshotIfDue(tx, page.id, userId, { force: true });
   await pruneVersions(tx, page.id);
@@ -170,9 +187,7 @@ async function applyClaimed(tx: Tx, campaignId: string, userId: string, proposal
 
   if (count === 0) return { ok: false, status: 409, error: API_ERRORS.SCENARIO_CONFLICT };
 
-  const sourceSectionId = scenarioOps.find((o) => o.op === "replaceRow")?.sectionId ?? applied.content.sections[0]?.id;
-
-  for (const n of created) await createAcquaintance(tx, campaignId, { id: n.id, kind: "micro", name: n.name, description: n.description, sourcePageId: page.id, sourceSectionId: sourceSectionId ?? "" });
+  for (const n of created) await createAcquaintance(tx, campaignId, { id: n.id, kind: "micro", name: n.name, description: n.description, sourcePageId: page.id, sourceSectionId: sources.get(n.id) as string });
 
   await tx.aiProposal.update({ where: { id: proposalId }, data: { status: "applied", appliedVersion: page.version + 1 } });
 
@@ -181,12 +196,8 @@ async function applyClaimed(tx: Tx, campaignId: string, userId: string, proposal
 
 type Tx = Prisma.TransactionClient;
 
-async function applySlideOps(tx: Tx, campaignId: string, proposal: Pick<Row, "id" | "pageId">, ops: AddSlideAiOp[], locale: Locale): Promise<ApplyResult> {
-  const stale = async (): Promise<ApplyResult> => {
-    await tx.aiProposal.update({ where: { id: proposal.id }, data: { status: "stale" } });
-
-    return { ok: false, status: 409, error: API_ERRORS.AI_PROPOSAL_STALE_DECK };
-  };
+async function applySlideOps(tx: Tx, campaignId: string, proposal: Pick<Row, "id" | "pageId">, ops: AddSlideAiOp[], locale: Locale): Promise<ApplyResult | Settled> {
+  const stale = () => settle(tx, proposal.id, "stale", 409, API_ERRORS.AI_PROPOSAL_STALE_DECK);
 
   const slides = ops.map((o) => o.slide);
 

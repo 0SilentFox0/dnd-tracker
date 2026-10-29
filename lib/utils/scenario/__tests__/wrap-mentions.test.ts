@@ -39,10 +39,16 @@ describe("wrapMentions", () => {
     expect(doc.content[0].content?.[0].marks).toEqual([{ type: "secret" }]);
   });
 
-  it("skips link and code marks", () => {
-    const { count } = wrapMentions(p(text("Беатріс", [{ type: "link" as never }]), text("Беатріс", [{ type: "code" as never }])), ["Беатріс"], target);
+  it("does not wrap mid-word across adjacent text nodes", () => {
+    const { count } = wrapMentions(p(text("Супер", [{ type: "bold" }]), text("Беатріс"), text("ка", [{ type: "italic" }])), ["Беатріс"], target);
 
     expect(count).toBe(0);
+  });
+
+  it("wraps at a node edge when the neighbour is not a word character", () => {
+    const { count } = wrapMentions(p(text("Хто: ", [{ type: "bold" }]), text("Беатріс"), text(", привіт", [{ type: "italic" }])), ["Беатріс"], target);
+
+    expect(count).toBe(1);
   });
 
   it("prefers the longest form and walks nested nodes", () => {

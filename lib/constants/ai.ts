@@ -85,6 +85,7 @@ export const AI_LIMITS = {
   cancelPollMs: 2500,
   slimOutputChars: 2000,
   toolResultChars: 25_000,
+  toolResultJsonChars: 20_000,
   keptReadingChars: 60_000,
   contextChars: 40_000,
   maxSteps: 8,

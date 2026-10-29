@@ -1,6 +1,7 @@
 import type { AssistantWriteAction } from "../types";
 
 import { API_ERRORS } from "@/lib/constants/api-errors";
+import { prisma } from "@/lib/db";
 import { getTranslator } from "@/lib/i18n/translator";
 import { proposeScenarioEditSchema } from "@/lib/schemas/ai";
 import { applyProposal,createProposal } from "@/lib/server/assistant/proposals";
@@ -23,6 +24,8 @@ export const SCENARIO_EDIT_ACTION: AssistantWriteAction = {
     const page = state.page;
 
     if (!page) throw new ContentError(API_ERRORS.SCENARIO_PAGE_NOT_FOUND, 404);
+
+    if (input.ops.some((o) => o.op === "createAcquaintance") && !(await prisma.campaign.findUnique({ where: { id: caller.actor.campaignId }, select: { acquaintancesEnabled: true } }))?.acquaintancesEnabled) throw new ContentError(API_ERRORS.ACQUAINTANCES_DISABLED, 403);
 
     const resolved = resolveAiOps(readContentStrict(page.content), input.ops, await getTranslator(caller.locale, "assistant"));
 

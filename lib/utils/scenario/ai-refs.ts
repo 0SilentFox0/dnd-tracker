@@ -40,16 +40,46 @@ const collectIds = (nodes: RichNode[], out: Set<string>) => {
   }
 };
 
+const opDocs = (op: ScenarioAiOp): { after: RichDoc; before?: RichDoc }[] => {
+  if (op.op === "replaceRow") return [...(op.story ? [{ after: op.story, before: op.before.story }] : []), ...(op.notes ? [{ after: op.notes, before: op.before.notes }] : [])];
+
+  if (op.op === "insertRow") return [{ after: op.row.story }, { after: op.row.notes }];
+
+  if (op.op === "addSection") return op.section.rows.flatMap((r) => [{ after: r.story }, { after: r.notes }]);
+
+  return [];
+};
+
+const idsOf = (doc?: RichDoc) => {
+  const out = new Set<string>();
+
+  if (doc) collectIds(doc.content, out);
+
+  return out;
+};
+
+/** Chips introduced by the ops: present in the new content, absent from the replaced one. */
 export function acquaintanceMentionIds(ops: ScenarioAiOp[]): string[] {
   const out = new Set<string>();
 
-  for (const op of ops) {
-    if (op.op !== "replaceRow") continue;
+  for (const op of ops)
+    for (const { after, before } of opDocs(op)) {
+      const old = idsOf(before);
 
-    if (op.story) collectIds(op.story.content, out);
-
-    if (op.notes) collectIds(op.notes.content, out);
-  }
+      for (const id of idsOf(after)) if (!old.has(id)) out.add(id);
+    }
 
   return [...out];
+}
+
+export function sectionOfMention(ops: ScenarioAiOp[], id: string): string | undefined {
+  for (const op of ops) {
+    if (!opDocs(op).some(({ after }) => idsOf(after).has(id))) continue;
+
+    if (op.op === "addSection") return op.section.id;
+
+    if (op.op === "replaceRow" || op.op === "insertRow") return op.sectionId;
+  }
+
+  return undefined;
 }

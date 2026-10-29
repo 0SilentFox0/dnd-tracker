@@ -10,10 +10,24 @@ import { listPages, readContent } from "@/lib/server/scenario/page-store";
 import { searchScenarioPages } from "@/lib/server/scenario/search";
 import { findMentions } from "@/lib/utils/scenario/mentions";
 import { chunkContentMarkdown, contentToMarkdown, outlineContent, sectionToMarkdown } from "@/lib/utils/scenario/read-chunks";
+import type { ScenarioContent } from "@/types/scenario";
 
 export { contentToMarkdown, sectionToMarkdown };
 
 const MENTION_PAGE_SIZE = 100;
+
+// boundedOutput projects any result whose JSON exceeds ~22k, which would cut the trailer / hits, so budget the JSON form
+function chunkWithinJson(title: string, content: ScenarioContent, opts: { sectionId?: string; offset?: number }) {
+  let limit = AI_LIMITS.toolResultJsonChars - 200;
+
+  for (;;) {
+    const { text } = chunkContentMarkdown(title, content, { ...opts, limit });
+
+    if (JSON.stringify(text).length <= AI_LIMITS.toolResultJsonChars || limit <= 1) return text;
+
+    limit = Math.max(1, Math.floor(limit * 0.9));
+  }
+}
 
 export async function loadPageForAi(campaignId: string, pageId: string) {
   const page = await prisma.scenarioPage.findFirst({ where: { id: pageId, campaignId }, select: { id: true, title: true, kind: true, content: true } });
@@ -37,12 +51,12 @@ export const readScenarioPageTool = defineTool({
   scopes: ["ai"],
   title: "Read scenario page",
   description:
-    "Read a scenario page as the scenario markdown dialect: sections with [sectionId], rows with ids, story and DM notes. ||text|| is a DM-only secret. Pass sectionId to read one section. Long pages come in chunks: the last line [next offset N of TOTAL] gives the offset for the next call; [row split] marks one oversize row cut in the middle.",
+    "Read a scenario page as the scenario markdown dialect: sections with [sectionId], rows with ids, story and DM notes. ||text|| is a DM-only secret. Pass sectionId to read one section. An offset belongs to the same sectionId scope as the call that returned it: pass offset only with that same sectionId (or none); outline offsets are page-wide, so use them without sectionId. Long pages come in chunks: the last line [next offset N of TOTAL] gives the offset for the next call; [row split] marks one oversize row cut in the middle.",
   input: z.object({ pageId: z.string().min(1), sectionId: z.string().min(1).optional(), offset: z.number().int().min(0).optional() }),
   handler: async (ctx, { pageId, sectionId, offset }) => {
     const page = await loadPageForAi(ctx.campaignId, pageId);
 
-    return chunkContentMarkdown(page.title, page.content, { sectionId, offset, limit: AI_LIMITS.toolResultChars - 2000 }).text;
+    return chunkWithinJson(page.title, page.content, { sectionId, offset });
   },
 });
 
@@ -65,7 +79,7 @@ export const findScenarioMentionsTool = defineTool({
   scopes: ["ai"],
   title: "Find scenario mentions",
   description:
-    "Find every occurrence of a name in scenario story and DM notes, in any grammatical form (matched by word stem). Returns hits {pageId, sectionId, rowId, field, snippet, forms, inMention} (inMention = already a mention chip) and the distinct forms found. Paginated: up to 100 hits per call; pass the returned nextOffset as offset for the next call until it is null. Searches the whole campaign unless pageId/sectionId is given.",
+    "Find every occurrence of a name in scenario story and DM notes, in any grammatical form (matched by word stem). Returns hits {pageId, sectionId, rowId, field, snippet, forms, inMention} (inMention = already a mention chip) and the distinct forms found. Paginated: up to 100 hits per call (fewer when they are large); pass the returned nextOffset as offset for the next call until it is null. Searches the whole campaign unless pageId/sectionId is given.",
   input: z.object({ query: z.string().trim().min(2).max(100), pageId: z.string().min(1).optional(), sectionId: z.string().min(1).optional(), offset: z.number().int().min(0).optional() }),
   handler: async (ctx, { query, pageId, sectionId, offset = 0 }) => {
     const pages = pageId
@@ -74,11 +88,25 @@ export const findScenarioMentionsTool = defineTool({
 
     const all = pages.flatMap((p) => findMentions(p.content, query, { sectionId }).map((h) => ({ pageId: p.id, pageTitle: p.title, ...h })));
 
-    const hits = all.slice(offset, offset + MENTION_PAGE_SIZE);
+    const forms = [...new Set(all.flatMap((h) => h.forms))];
+
+    const candidates = all.slice(offset, offset + MENTION_PAGE_SIZE);
+
+    let size = JSON.stringify({ total: all.length, offset, nextOffset: all.length, forms, hits: [] }).length;
+
+    const hits: typeof candidates = [];
+
+    for (const hit of candidates) {
+      size += JSON.stringify(hit).length + 1;
+
+      if (hits.length && size > AI_LIMITS.toolResultJsonChars) break;
+
+      hits.push(hit);
+    }
 
     const next = offset + hits.length;
 
-    return { total: all.length, offset, nextOffset: next < all.length ? next : null, forms: [...new Set(all.flatMap((h) => h.forms))], hits };
+    return { total: all.length, offset, nextOffset: next < all.length ? next : null, forms, hits };
   },
 });
 
