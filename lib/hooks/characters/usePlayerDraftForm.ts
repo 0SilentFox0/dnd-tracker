@@ -1,18 +1,19 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useLocale, useTranslations } from "next-intl";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 
+import { avatarStep, backgroundStep, EMPTY_DRAFT, type RollKey, scoresOf, scoreSteps, standardScores } from "./draft-form-helpers";
 import { characterKeys } from "./keys";
+import { useDraftAi } from "./useDraftAi";
 import { draftPortraitsQuery, useDraftPortraits } from "./useDraftPortraits";
 import { type RollStep, useRollReveal } from "./useRollReveal";
 
-import { createDraft, generateBackstory, generateDraftAvatar, getBackstoryAvailability, updateDraft } from "@/lib/api/characters";
+import { createDraft, updateDraft } from "@/lib/api/characters";
 import { ABILITY_KEYS, type AbilityKey } from "@/lib/constants/abilities";
 import { ALIGNMENTS } from "@/lib/constants/alignment";
 import { HERO_ARCHETYPE_KEYS } from "@/lib/constants/hero-archetypes";
 import { useClassMode } from "@/lib/hooks/classes";
-import { useOptionalNotify } from "@/lib/hooks/common";
 import { useRaces } from "@/lib/hooks/races";
 import type { Locale } from "@/lib/i18n/config";
 import { draftChoicesState, stateDraftChoices } from "@/lib/utils/characters/choices/picks";
@@ -21,7 +22,6 @@ import type { ChoiceRefs } from "@/lib/utils/characters/choices/walk";
 import { classModeOf } from "@/lib/utils/characters/classes";
 import {
   type AbilityMethod,
-  type AbilityScores,
   ARCHETYPE_CLASS,
   ARCHETYPE_PRIMARY,
   assignByPriority,
@@ -33,21 +33,14 @@ import {
   generateName,
   pick,
   pointBuySpent,
-  STANDARD_ARRAY,
   validateAbilityScores,
 } from "@/lib/utils/characters/generate";
 import type { DraftInput } from "@/types/characters";
 import type { ChoicesState } from "@/types/choices";
 
-export type RollKey = "race" | "avatar" | "archetype" | "class" | "alignment" | "name" | "background" | AbilityKey;
-
-const standardScores = (): AbilityScores => Object.fromEntries(ABILITY_KEYS.map((k, i) => [k, STANDARD_ARRAY[i]])) as AbilityScores;
-
-const EMPTY_DRAFT: DraftInput = { name: "", race: "", class: ARCHETYPE_CLASS.warrior, archetype: "warrior", method: "standard", ...standardScores(), goals: [] };
+export type { RollKey };
 
 const seedNow = () => Date.now();
-
-const scoresOf = (v: DraftInput): AbilityScores => Object.fromEntries(ABILITY_KEYS.map((k) => [k, v[k]])) as AbilityScores;
 
 export interface PlayerDraftFormOptions {
   campaignId: string;
@@ -63,8 +56,6 @@ export function usePlayerDraftForm({ campaignId, characterId, initial }: PlayerD
   const tArchetype = useTranslations("characters.archetypes");
 
   const router = useRouter();
-
-  const notify = useOptionalNotify();
 
   const queryClient = useQueryClient();
 
@@ -98,22 +89,16 @@ export function usePlayerDraftForm({ campaignId, characterId, initial }: PlayerD
 
   const raceStep = useCallback((race: string): RollStep<RollKey> => ({ key: "race", pool: () => (raceNames.length ? pick(Math.random, raceNames) : race), final: race }), [raceNames]);
 
-  const scoreSteps = (scores: AbilityScores): Array<RollStep<RollKey>> => ABILITY_KEYS.map((key) => ({ key, pool: () => pick(Math.random, STANDARD_ARRAY), final: scores[key] }));
-
   const nameStep = useCallback(
     (name: string, race: string): RollStep<RollKey> => ({ key: "name", pool: () => generateName(race, Math.random, locale), final: name }),
     [locale],
   );
-
-  const backgroundStep = (background: string): RollStep<RollKey> => ({ key: "background", pool: () => "", final: background });
 
   const portraitPools = useDraftPortraits(campaignId);
 
   const portraitPool = useCallback((race: string) => queryClient.getQueryData<Record<string, string[]>>(characterKeys.draftPortraits(campaignId))?.[race] ?? [], [queryClient, campaignId]);
 
   const canReroll = (portraitPools.data?.[values.race]?.length ?? 0) > 0;
-
-  const avatarStep = (url: string, pool: string[]): RollStep<RollKey> => ({ key: "avatar", pool: () => pick(Math.random, pool), final: url });
 
   const all = useCallback(() => {
     const seed = seedNow();
@@ -214,22 +199,7 @@ export function usePlayerDraftForm({ campaignId, characterId, initial }: PlayerD
     start([avatarStep(next, pool)]);
   }, [portraitPool, start, values.race, values.avatar]);
 
-  const availability = useQuery({ queryKey: characterKeys.backstoryAvailability(campaignId), queryFn: () => getBackstoryAvailability(campaignId), staleTime: 5 * 60_000 });
-
-  const aiMutation = useMutation({
-    mutationFn: () => generateBackstory(campaignId, { name: values.name, race: values.race, archetype: values.archetype, class: values.class, background: values.background || undefined }),
-    onError: (error) => notify(error.message || t("backstoryFailed")),
-    onSuccess: (res) => {
-      setValues((prev) => ({ ...prev, background: res.background, goals: res.goals }));
-      start([backgroundStep(res.background)]);
-    },
-  });
-
-  const avatarMutation = useMutation({
-    mutationFn: () => generateDraftAvatar(campaignId, { name: values.name, race: values.race, archetype: values.archetype, class: values.class }),
-    onError: (error) => notify(error.message || t("avatarFailed")),
-    onSuccess: (res) => setValues((prev) => ({ ...prev, avatar: res.url })),
-  });
+  const ai = useDraftAi({ campaignId, values, setValues, start });
 
   const submitMutation = useMutation({
     mutationFn: (refs?: ChoiceRefs) => {
@@ -282,12 +252,7 @@ export function usePlayerDraftForm({ campaignId, characterId, initial }: PlayerD
       enabled: classBased,
     },
     generate: { all, name, scores, backstory, portrait, canPortrait: canReroll },
-    ai: {
-      available: availability.data?.available === true,
-      run: () => aiMutation.mutate(),
-      isPending: aiMutation.isPending,
-      avatar: { available: availability.data?.image === true, run: () => avatarMutation.mutate(), isPending: avatarMutation.isPending },
-    },
+    ai,
     submit: { run, isPending: submitMutation.isPending, error: validationError ?? (submitMutation.error instanceof Error ? submitMutation.error.message : null) },
     scoreStatus,
     reveal,
