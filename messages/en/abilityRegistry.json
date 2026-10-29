@@ -289,25 +289,32 @@
   },
   "triggers": {
     "passive": {
-      "label": "Passive (always)"
+      "label": "Passive (always)",
+      "hint": "Always on, no event needed. Example: +2 AC."
     },
     "battleStart": {
-      "label": "Battle start"
+      "label": "Battle start",
+      "hint": "Fires once when the battle starts. Example: temporary HP at the start."
     },
     "roundStart": {
-      "label": "Round start"
+      "label": "Round start",
+      "hint": "Fires at the start of every round. Example: a 5e lair action — pair it with the “Uses per round” limit = 1."
     },
     "roundEnd": {
-      "label": "Round end"
+      "label": "Round end",
+      "hint": "Fires at the end of every round. Example: regeneration at round end."
     },
     "turnStart": {
-      "label": "My turn start"
+      "label": "My turn start",
+      "hint": "Fires at the start of your turn. Example: heal at the start of the turn."
     },
     "turnEnd": {
-      "label": "My turn end"
+      "label": "My turn end",
+      "hint": "Fires at the end of your turn. Example: remove an effect at the end of the turn."
     },
     "attack": {
-      "label": "Attack"
+      "label": "Attack",
+      "hint": "Fires before or after an attack involving you. Example: before you are attacked — a to-hit penalty."
     },
     "hit": {
       "label": "Hit",
@@ -315,16 +322,19 @@
         "whose": {
           "ally": "another ally's"
         }
-      }
+      },
+      "hint": "Fires when an attack hits. Example: extra damage on hit."
     },
     "kill": {
       "label": "Death",
       "fields": {
         "role": "Who"
-      }
+      },
+      "hint": "Fires when someone dies. Example: a bonus when you kill an enemy."
     },
     "lethalDamage": {
-      "label": "Lethal damage"
+      "label": "Lethal damage",
+      "hint": "Fires when you take lethal damage. Example: stay at 1 HP."
     },
     "spellCast": {
       "label": "Spell",
@@ -337,19 +347,23 @@
         "role": {
           "target": "I am the target"
         }
-      }
+      },
+      "hint": "Fires before or after a spell. Example: a bonus after you cast a spell."
     },
     "moraleCheck": {
       "label": "Morale check",
       "fields": {
         "whose": "Whose"
-      }
+      },
+      "hint": "Fires after a morale check. Example: a bonus after an ally fails morale."
     },
     "action": {
-      "label": "Action (button)"
+      "label": "Action (button)",
+      "hint": "A main-action button the player presses. Example: a special attack."
     },
     "bonusAction": {
-      "label": "Bonus action (button)"
+      "label": "Bonus action (button)",
+      "hint": "A bonus-action button the player presses. Example: a dash."
     }
   },
   "conditionTypes": {
@@ -946,5 +960,13 @@
     "piercing": "Piercing",
     "slashing": "Slashing",
     "bleed": "Bleeding"
+  },
+  "triggerGroups": {
+    "always": "Always",
+    "boundaries": "Start and end",
+    "myTurn": "My turn",
+    "incoming": "Attacks on me",
+    "outgoing": "My actions",
+    "other": "Other"
   }
 }

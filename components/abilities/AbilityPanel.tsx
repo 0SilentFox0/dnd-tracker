@@ -1,5 +1,6 @@
 "use client";
 
+import { useMemo, useRef } from "react";
 import { useTranslations } from "next-intl";
 import { X } from "lucide-react";
 
@@ -7,16 +8,18 @@ import { ConditionSection } from "./sections/ConditionSection";
 import { EffectsSection } from "./sections/EffectsSection";
 import { LimitsSection } from "./sections/LimitsSection";
 import { PerformSection } from "./sections/PerformSection";
+import { sectionId } from "./sections/SectionShell";
 import { TriggerSection } from "./sections/TriggerSection";
+import { AbilityFlow, type FlowPart } from "./AbilityFlow";
 import { useErrorsUnder } from "./editor-context";
 import { FieldErrors } from "./FieldErrors";
-import { useAbilityText } from "./use-ability-text";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import type { Ability } from "@/lib/utils/abilities/schema";
+import { summarizeAbility } from "@/lib/utils/abilities/summary";
 
 export interface AbilitySectionProps {
   ability: Ability;
@@ -24,10 +27,27 @@ export interface AbilitySectionProps {
   onChange: (next: Ability) => void;
 }
 
+const HIGHLIGHT = ["bg-hud-gold/15", "transition-colors"];
+
+const HIGHLIGHT_MS = 1200;
+
 export function AbilityPanel({ ability, path, actions }: { ability: Ability; path: string; actions: { onChange: (a: Ability) => void; onRemove: () => void } }) {
   const t = useTranslations("abilities.panel");
 
-  const text = useAbilityText();
+  const summary = useMemo(() => summarizeAbility(ability), [ability]);
+
+  const timer = useRef<ReturnType<typeof setTimeout>>(undefined);
+
+  const focusSection = (part: FlowPart) => {
+    const el = document.getElementById(sectionId(path, part));
+
+    if (!el) return;
+
+    el.scrollIntoView({ behavior: "smooth", block: "nearest" });
+    el.classList.add(...HIGHLIGHT);
+    clearTimeout(timer.current);
+    timer.current = setTimeout(() => el.classList.remove(...HIGHLIGHT), HIGHLIGHT_MS);
+  };
 
   const section = { ability, path, onChange: actions.onChange };
 
@@ -47,7 +67,7 @@ export function AbilityPanel({ ability, path, actions }: { ability: Ability; pat
           <X className="h-4 w-4" />
         </Button>
       </div>
-      <p className="text-xs text-[#b8ab95]">{text.ability(ability)}</p>
+      <AbilityFlow summary={summary} variant="editor" onChipClick={focusSection} />
       <div className="space-y-1">
         <Label htmlFor={`${path}.description`} className="text-xs text-muted-foreground">
           {t("description")}

@@ -6,13 +6,14 @@ import type { AbilitySectionProps } from "../AbilityPanel";
 import { useFieldErrors } from "../editor-context";
 import { FieldErrors } from "../FieldErrors";
 import { FieldRenderer } from "../fields/FieldRenderer";
+import { SectionShell } from "./SectionShell";
 import { SectionTitle } from "./SectionTitle";
 
 import { Label } from "@/components/ui/label";
 import { SelectField } from "@/components/ui/select-field";
 import { useTranslator } from "@/lib/i18n/use-translator";
 import { changeTriggerEvent, getAtPath, setAtPath } from "@/lib/utils/abilities/editor";
-import { TRIGGER_REGISTRY } from "@/lib/utils/abilities/registry/triggers";
+import { TRIGGER_GROUPS, TRIGGER_REGISTRY } from "@/lib/utils/abilities/registry/triggers";
 import type { Trigger, TriggerEvent } from "@/lib/utils/abilities/schema";
 
 export function TriggerSection({ ability, path, onChange }: AbilitySectionProps) {
@@ -20,14 +21,19 @@ export function TriggerSection({ ability, path, onChange }: AbilitySectionProps)
 
   const tr = useTranslator("abilityRegistry");
 
-  const eventOptions = Object.keys(TRIGGER_REGISTRY).map((value) => ({ value, label: tr(`triggers.${value}.label`) }));
+  const groups = TRIGGER_GROUPS.map((group) => ({
+    label: tr(`triggerGroups.${group}`),
+    options: Object.values(TRIGGER_REGISTRY)
+      .filter((def) => def.group === group)
+      .map((def) => ({ value: def.event, label: tr(`triggers.${def.event}.label`) })),
+  })).filter((g) => g.options.length);
 
   const fields = TRIGGER_REGISTRY[ability.trigger.event].fields;
 
   const errors = useFieldErrors(`${path}.trigger`);
 
   return (
-    <div className="space-y-2">
+    <SectionShell path={path} part="when">
       <SectionTitle>{t("title")}</SectionTitle>
       <div className="space-y-1">
         <Label htmlFor={`${path}.trigger.event`} className="text-xs text-muted-foreground">
@@ -36,11 +42,11 @@ export function TriggerSection({ ability, path, onChange }: AbilitySectionProps)
         <SelectField
           id={`${path}.trigger.event`}
           value={ability.trigger.event}
-          options={eventOptions}
+          groups={groups}
           onValueChange={(event) => onChange(changeTriggerEvent(ability, event as TriggerEvent))}
         />
       </div>
-      {ability.trigger.event === "roundStart" && <p className="text-xs text-muted-foreground">{t("roundStartHint")}</p>}
+      <p className="text-xs text-muted-foreground">{tr(`triggers.${ability.trigger.event}.hint`)}</p>
       <div className="grid grid-cols-6 items-end gap-2 [&>*]:min-w-0">
         {fields.map((f) => (
           <FieldRenderer
@@ -54,6 +60,6 @@ export function TriggerSection({ ability, path, onChange }: AbilitySectionProps)
         ))}
       </div>
       <FieldErrors errors={errors} />
-    </div>
+    </SectionShell>
   );
 }

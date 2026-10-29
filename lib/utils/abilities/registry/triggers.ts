@@ -14,8 +14,13 @@ type Matcher<E extends TriggerEvent> = (
   ps: BattleParticipant[],
 ) => boolean;
 
+export type TriggerGroup = "always" | "boundaries" | "myTurn" | "incoming" | "outgoing" | "other";
+
+export const TRIGGER_GROUPS: readonly TriggerGroup[] = ["always", "boundaries", "myTurn", "incoming", "outgoing", "other"];
+
 interface TriggerDefinition<E extends TriggerEvent> {
   event: E;
+  group: TriggerGroup;
   fields: readonly FieldMeta[];
   matches: Matcher<E>;
   describe?: (trigger: Extract<Trigger, { event: E }>) => Segment[];
@@ -32,18 +37,20 @@ const id = (p: BattleParticipant) => p.basicInfo.id;
 const sameSide = (a: BattleParticipant | undefined, b: BattleParticipant) => !!a && a.basicInfo.side === b.basicInfo.side;
 
 export const TRIGGER_REGISTRY: { [E in TriggerEvent]: TriggerDefinition<E> } = {
-  passive: { event: "passive", fields: [], matches: () => false },
+  passive: { event: "passive", group: "always", fields: [], matches: () => false },
   battleStart: {
     event: "battleStart",
+    group: "boundaries",
     fields: [],
     matches: (_t, e, o) => e.type === "battleStart" && (!e.newcomerIds || e.newcomerIds.includes(id(o))),
   },
-  roundStart: { event: "roundStart", fields: [], matches: (_t, e) => e.type === "roundStart" },
-  roundEnd: { event: "roundEnd", fields: [], matches: (_t, e) => e.type === "roundEnd" },
-  turnStart: { event: "turnStart", fields: [], matches: (_t, e, o) => e.type === "turnStart" && e.actorId === id(o) },
-  turnEnd: { event: "turnEnd", fields: [], matches: (_t, e, o) => e.type === "turnEnd" && e.actorId === id(o) },
+  roundStart: { event: "roundStart", group: "boundaries", fields: [], matches: (_t, e) => e.type === "roundStart" },
+  roundEnd: { event: "roundEnd", group: "boundaries", fields: [], matches: (_t, e) => e.type === "roundEnd" },
+  turnStart: { event: "turnStart", group: "myTurn", fields: [], matches: (_t, e, o) => e.type === "turnStart" && e.actorId === id(o) },
+  turnEnd: { event: "turnEnd", group: "myTurn", fields: [], matches: (_t, e, o) => e.type === "turnEnd" && e.actorId === id(o) },
   attack: {
     event: "attack",
+    group: "incoming",
     fields: [PHASE, ATTACK_ROLE, ATTACK_KIND],
     matches: (t, e, o) =>
       e.type === "attack" &&
@@ -53,6 +60,7 @@ export const TRIGGER_REGISTRY: { [E in TriggerEvent]: TriggerDefinition<E> } = {
   },
   hit: {
     event: "hit",
+    group: "outgoing",
     fields: [
       ATTACK_ROLE,
       { name: "whose", input: "select", optional: true, options: [{ value: "self" }, { value: "ally" }] },
@@ -73,6 +81,7 @@ export const TRIGGER_REGISTRY: { [E in TriggerEvent]: TriggerDefinition<E> } = {
   },
   kill: {
     event: "kill",
+    group: "outgoing",
     fields: [{ name: "role", input: "select", options: [{ value: "killer" }, { value: "killerSide" }, { value: "victimSide" }] }],
     matches: (t, e, o, ps) => {
       if (e.type !== "kill") return false;
@@ -91,9 +100,10 @@ export const TRIGGER_REGISTRY: { [E in TriggerEvent]: TriggerDefinition<E> } = {
       return e.targetId !== id(o) && sameSide(victim, o);
     },
   },
-  lethalDamage: { event: "lethalDamage", fields: [], matches: (_t, e, o) => e.type === "lethalDamage" && e.targetId === id(o) },
+  lethalDamage: { event: "lethalDamage", group: "incoming", fields: [], matches: (_t, e, o) => e.type === "lethalDamage" && e.targetId === id(o) },
   spellCast: {
     event: "spellCast",
+    group: "outgoing",
     fields: [
       PHASE,
       { name: "role", input: "select", options: [{ value: "caster" }, { value: "target" }] },
@@ -117,6 +127,7 @@ export const TRIGGER_REGISTRY: { [E in TriggerEvent]: TriggerDefinition<E> } = {
   },
   moraleCheck: {
     event: "moraleCheck",
+    group: "other",
     fields: [
       { name: "result", input: "select", options: [{ value: "success" }, { value: "fail" }, { value: "any" }] },
       { name: "whose", input: "select", options: [{ value: "self" }, { value: "ally" }] },
@@ -127,8 +138,8 @@ export const TRIGGER_REGISTRY: { [E in TriggerEvent]: TriggerDefinition<E> } = {
       return t.whose === "self" ? e.actorId === id(o) : e.actorId !== id(o) && sameSide(findParticipant(ps, e.actorId), o);
     },
   },
-  action: { event: "action", fields: [], matches: (_t, e, o) => e.type === "action" && e.actorId === id(o) },
-  bonusAction: { event: "bonusAction", fields: [], matches: (_t, e, o) => e.type === "bonusAction" && e.actorId === id(o) },
+  action: { event: "action", group: "myTurn", fields: [], matches: (_t, e, o) => e.type === "action" && e.actorId === id(o) },
+  bonusAction: { event: "bonusAction", group: "myTurn", fields: [], matches: (_t, e, o) => e.type === "bonusAction" && e.actorId === id(o) },
 };
 
 function spellTargetMatches(whose: "self" | "ally" | undefined, targetIds: string[], owner: BattleParticipant, ps: BattleParticipant[]): boolean {

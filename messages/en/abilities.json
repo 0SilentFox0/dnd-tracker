@@ -63,8 +63,7 @@
   },
   "trigger": {
     "title": "When",
-    "event": "Event",
-    "roundStartHint": "5e lair action: “Round start” + the “Uses per round” limit = 1."
+    "event": "Event"
   },
   "perform": {
     "title": "Performs",

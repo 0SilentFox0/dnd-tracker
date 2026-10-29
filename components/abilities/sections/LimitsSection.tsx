@@ -7,6 +7,7 @@ import { useAbilityEditor } from "../editor-context";
 import { FieldRenderer } from "../fields/FieldRenderer";
 import { FlatField } from "../fields/FlatField";
 import { ScaleColumnSelect } from "../fields/ScaleColumnSelect";
+import { SectionShell } from "./SectionShell";
 import { SectionTitle } from "./SectionTitle";
 
 import { Checkbox } from "@/components/ui/checkbox";
@@ -32,10 +33,10 @@ export function LimitsSection({ ability, path, onChange }: AbilitySectionProps) 
 
   if (ability.trigger.event === "passive") {
     return (
-      <div className="space-y-1">
+      <SectionShell path={path} part="limits" className="space-y-1">
         <SectionTitle>{t("title")}</SectionTitle>
         <p className="text-xs text-muted-foreground">{t("passive")}</p>
-      </div>
+      </SectionShell>
     );
   }
 
@@ -74,7 +75,7 @@ export function LimitsSection({ ability, path, onChange }: AbilitySectionProps) 
   };
 
   return (
-    <div className="space-y-2">
+    <SectionShell path={path} part="limits">
       <SectionTitle>{t("title")}</SectionTitle>
       <div className="grid grid-cols-6 items-end gap-2 [&>*]:min-w-0">
         {limitFields.map((f) => (
@@ -123,6 +124,6 @@ export function LimitsSection({ ability, path, onChange }: AbilitySectionProps) 
           <FieldRenderer meta={{ name: "legendaryCost", label: t("legendaryCost"), input: "number", optional: true }} path={`${path}.limits.legendaryCost`} value={ability.limits?.legendaryCost} onChange={(v) => set("legendaryCost", v)} />
         )}
       </div>
-    </div>
+    </SectionShell>
   );
 }
