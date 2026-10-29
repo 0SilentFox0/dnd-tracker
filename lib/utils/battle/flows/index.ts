@@ -8,4 +8,5 @@ export * from "./spell-flow";
 export * from "./spell-flow-types";
 export * from "./spell-grants";
 export * from "./spell-pick";
+export * from "./spell-source";
 export * from "./turn-flow";

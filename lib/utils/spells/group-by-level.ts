@@ -10,3 +10,6 @@ export function groupSpellsByLevel(spells: BookSpell[]): Record<number, BookSpel
 
   return map;
 }
+
+export const levelsWithSpells = (byLevel: Record<number, BookSpell[]>) =>
+  Object.keys(byLevel).map(Number).filter((l) => byLevel[l].length > 0);
