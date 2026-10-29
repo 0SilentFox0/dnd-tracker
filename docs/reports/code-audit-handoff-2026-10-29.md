@@ -38,7 +38,7 @@ H і I закрито, див. STATUS. Не підтвердилось і про
 
 ### Інше з відкритого
 
-- **B7–B10** (egress/БД): `content.*.list` без `take/skip`, `loadCampaignState` експортує весь bundle для хешу, безлімітні `findMany` у `content/operation-service.ts` і rest/experience handler-ах, `ensureBucket` на кожну генерацію.
+- **B7–B10** (крок 9, `refactor/audit-egress`, не запушено): перевірено читанням коду 2026-10-29, більшість знахідок застаріла. B7 — списки йдуть через `getCached*`, `take/skip` обійшов би кеш (не робити); B9 — rest/xp обмежені `.max(50)`; B10 — `ensureBucket` уже кешується в `ensured` Set. Зроблено: `tracks.reorder` у `$transaction` (раніше часткове збереження порядку при збої), `AI_LIMITS.imageGenerationMs`. Відкладено: B8 (`loadCampaignState` робить повний `exportCampaign` для хешу на clone/template.save; потрібен DB-хеш за кількома таблицями, не гарячий шлях). Кроки 7–8 змерджено в локальний main (`71483939d`, не запушено).
 - **C27–C31** (DM-каркаси UI): разом із CRUD-фабрикою constructor stage 2, не раніше.
 - **F i18n-хвіст:** у межах i18n part 6 (battle UI + abilities/crit effects).
 - Відомі баги до рефактору, не виправлені: `useAttackWizard` memo `steps` не залежить від `scene.battle.rules` (прев'ю шкоди може застаріти при зміні правил відкритого підсумку).

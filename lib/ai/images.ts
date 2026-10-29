@@ -6,7 +6,7 @@ import { AiKeyUnreadableError, loadApiKey } from "@/lib/ai/credentials";
 import { aiErrorMessage } from "@/lib/ai/errors";
 import { createImageModel } from "@/lib/ai/providers";
 import { getAiSettings } from "@/lib/ai/settings";
-import { AI_IMAGE_STYLE_MAX, type AiImageAspect, type AiProvider } from "@/lib/constants/ai";
+import { AI_IMAGE_STYLE_MAX, AI_LIMITS, type AiImageAspect, type AiProvider } from "@/lib/constants/ai";
 import { API_ERRORS } from "@/lib/constants/api-errors";
 import { SCENE_SLIDES_BUCKET, SLIDE_MAX_EDGE_PX } from "@/lib/constants/show";
 import { YEAR_CACHE_SECONDS } from "@/lib/constants/storage";
@@ -89,7 +89,7 @@ async function renderImage(input: RenderInput): Promise<Buffer> {
       n: 1,
       maxRetries: 0, // An unknown paid outcome must never cause a second provider request.
       ...(input.provider === "openai" ? { size: OPENAI_SIZES[input.aspect] as `${number}x${number}` } : { aspectRatio: input.aspect }),
-      abortSignal: AbortSignal.any([AbortSignal.timeout(110_000), ...(input.abortSignal ? [input.abortSignal] : [])]),
+      abortSignal: AbortSignal.any([AbortSignal.timeout(AI_LIMITS.imageGenerationMs), ...(input.abortSignal ? [input.abortSignal] : [])]),
     });
 
     bytes = image.uint8Array;

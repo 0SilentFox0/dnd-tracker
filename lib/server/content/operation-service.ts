@@ -193,7 +193,7 @@ export async function runContentOperation(operationId: ContentOperationId, actor
 
         if (ids.length !== known.size || new Set(ids).size !== ids.length || !ids.every((trackId) => known.has(trackId))) throw new ContentError(API_ERRORS.TRACK_ORDER_MISMATCH, 400);
 
-        for (const [sortOrder, trackId] of ids.entries()) await prisma.campaignTrack.update({ where: { id: trackId }, data: { sortOrder } });
+        await prisma.$transaction(ids.map((trackId, sortOrder) => prisma.campaignTrack.update({ where: { id: trackId }, data: { sortOrder } })));
 
         return listTracks(actor.campaignId);
       }

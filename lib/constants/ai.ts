@@ -81,6 +81,7 @@ export const AI_LIMITS = {
   historyMessages: 30,
   fullToolResultsInLast: 6,
   requestDeadlineMs: 270_000,
+  imageGenerationMs: 110_000,
   cancelPollMs: 2500,
   slimOutputChars: 2000,
   toolResultChars: 25_000,
