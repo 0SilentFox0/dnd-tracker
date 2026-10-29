@@ -19,7 +19,7 @@ describe("LimitsSection (en)", () => {
       <AbilityEditorProvider value={{ campaignId: "c", errorsByPath: {}, itemCharges: true }}>
         <LimitsSection ability={ability} path="0" onChange={vi.fn()} />
       </AbilityEditorProvider>,
-      { locale: "en", namespaces: ["common", "validation", "abilities"] },
+      { locale: "en", namespaces: ["common", "validation", "abilities", "abilityRegistry"] },
     );
 
     expect(screen.getByText("Uses per battle")).toBeInTheDocument();

@@ -10,6 +10,7 @@ import { FieldErrors } from "./FieldErrors";
 
 import { Button } from "@/components/ui/button";
 import { SelectField } from "@/components/ui/select-field";
+import { useTranslator } from "@/lib/i18n/use-translator";
 import { allowedEffectKinds, changeEffectKind, getAtPath, newEffect, setAtPath } from "@/lib/utils/abilities/editor";
 import { describeEffect, EFFECT_REGISTRY } from "@/lib/utils/abilities/registry/effects";
 import type { Effect, EffectKind, Trigger } from "@/lib/utils/abilities/schema";
@@ -25,6 +26,8 @@ interface EffectCardProps {
 
 export function EffectCard({ effect, trigger, path, actions, kinds }: EffectCardProps) {
   const t = useTranslations("abilities.effect");
+
+  const tr = useTranslator("abilityRegistry");
 
   const def = EFFECT_REGISTRY[effect.kind as EffectKind];
 
@@ -47,7 +50,7 @@ export function EffectCard({ effect, trigger, path, actions, kinds }: EffectCard
     );
   }
 
-  const options = (kinds ?? allowedEffectKinds(trigger)).map((k) => ({ value: k, label: EFFECT_REGISTRY[k].label }));
+  const options = (kinds ?? allowedEffectKinds(trigger)).map((k) => ({ value: k, label: tr(`effects.${k}.label`) }));
 
   const set = (name: string, v: unknown) => actions.onChange(setAtPath(effect, name, v));
 
@@ -59,7 +62,7 @@ export function EffectCard({ effect, trigger, path, actions, kinds }: EffectCard
     ) : (
       def.fields
         .filter((f) => !f.visibleWhen || f.visibleWhen(effect as Record<string, unknown>))
-        .map((f) => <FieldRenderer key={f.name} meta={f} path={`${path}.${f.name}`} value={getAtPath(effect, f.name)} onChange={(v) => set(f.name, v)} />)
+        .map((f) => <FieldRenderer key={f.name} meta={f} owner={`effects.${effect.kind}`} path={`${path}.${f.name}`} value={getAtPath(effect, f.name)} onChange={(v) => set(f.name, v)} />)
     );
 
   return (

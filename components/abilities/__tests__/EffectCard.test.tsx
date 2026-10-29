@@ -22,14 +22,14 @@ describe("EffectCard", () => {
   it("показує поля з реєстру і підсумок", () => {
     renderCard({ kind: "dot", damagePerRound: "1d4", damageType: "bleed", duration: { rounds: 2 }, target: "eventTarget" });
 
-    expect(screen.getByLabelText("Шкода/раунд (число, кубики, формула)")).toHaveValue("1d4");
+    expect(screen.getByLabelText("abilityRegistry.effects.dot.fields.damagePerRound")).toHaveValue("1d4");
     expect(screen.getByText("Кровотеча 1d4/раунд × 2 р.")).toBeInTheDocument();
   });
 
   it("зміна поля → onChange з оновленим ефектом", () => {
     const onChange = renderCard({ kind: "modifyStat", stat: "armor", flat: 1, duration: { rounds: 1 } });
 
-    fireEvent.change(screen.getByLabelText("Число / формула"), { target: { value: "3" } });
+    fireEvent.change(screen.getByLabelText("abilityRegistry.effects.modifyStat.fields.flat"), { target: { value: "3" } });
 
     expect(onChange).toHaveBeenCalledWith({ kind: "modifyStat", stat: "armor", flat: 3, duration: { rounds: 1 } });
   });
@@ -37,7 +37,7 @@ describe("EffectCard", () => {
   it("поле, приховане visibleWhen, не показується", () => {
     renderCard({ kind: "modifyStat", stat: "armor", flat: 1, duration: { rounds: 1 } });
 
-    expect(screen.queryByLabelText("Рівні слотів")).toBeNull();
+    expect(screen.queryByLabelText("abilityRegistry.effects.modifyStat.fields.spellLevels")).toBeNull();
   });
 
   it("помилка біля поля", () => {

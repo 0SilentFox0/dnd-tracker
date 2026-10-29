@@ -10,14 +10,17 @@ import { SectionTitle } from "./SectionTitle";
 
 import { Label } from "@/components/ui/label";
 import { SelectField } from "@/components/ui/select-field";
+import { useTranslator } from "@/lib/i18n/use-translator";
 import { changeTriggerEvent, getAtPath, setAtPath } from "@/lib/utils/abilities/editor";
 import { TRIGGER_REGISTRY } from "@/lib/utils/abilities/registry/triggers";
 import type { Trigger, TriggerEvent } from "@/lib/utils/abilities/schema";
 
-const EVENT_OPTIONS = Object.values(TRIGGER_REGISTRY).map((d) => ({ value: d.event, label: d.label }));
-
 export function TriggerSection({ ability, path, onChange }: AbilitySectionProps) {
   const t = useTranslations("abilities.trigger");
+
+  const tr = useTranslator("abilityRegistry");
+
+  const eventOptions = Object.keys(TRIGGER_REGISTRY).map((value) => ({ value, label: tr(`triggers.${value}.label`) }));
 
   const fields = TRIGGER_REGISTRY[ability.trigger.event].fields;
 
@@ -33,7 +36,7 @@ export function TriggerSection({ ability, path, onChange }: AbilitySectionProps)
         <SelectField
           id={`${path}.trigger.event`}
           value={ability.trigger.event}
-          options={EVENT_OPTIONS}
+          options={eventOptions}
           onValueChange={(event) => onChange(changeTriggerEvent(ability, event as TriggerEvent))}
         />
       </div>
@@ -43,6 +46,7 @@ export function TriggerSection({ ability, path, onChange }: AbilitySectionProps)
           <FieldRenderer
             key={f.name}
             meta={f}
+            owner={`triggers.${ability.trigger.event}`}
             path={`${path}.trigger.${f.name}`}
             value={getAtPath(ability.trigger, f.name)}
             onChange={(v) => onChange({ ...ability, trigger: setAtPath(ability.trigger, f.name, v) as Trigger })}

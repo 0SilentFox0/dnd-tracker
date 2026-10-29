@@ -9,7 +9,7 @@ describe("templates", () => {
     expect(ABILITY_TEMPLATES.map((t) => t.id)).toEqual(["stats", "damage", "onHit", "resistance", "aura", "survive", "bonusAction", "spellSlots", "custom"]);
 
     for (const t of ABILITY_TEMPLATES) {
-      const a = { id: "a1", ...t.build() };
+      const a = { id: "a1", ...t.build({ name: "n", note: "t" }) };
 
       expect(AbilitySchema.safeParse(a).success, t.id).toBe(true);
       expect(describeAbility(a).length).toBeGreaterThan(0);

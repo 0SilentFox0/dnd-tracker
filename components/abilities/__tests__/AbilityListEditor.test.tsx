@@ -35,7 +35,7 @@ describe("AbilityListEditor", () => {
     render(<Harness />);
 
     fireEvent.click(screen.getByRole("button", { name: "abilities.chips.add" }));
-    fireEvent.click(screen.getByText("Бонус шкоди"));
+    fireEvent.click(screen.getByText("abilityRegistry.templates.damage.label"));
 
     expect(json()).toHaveLength(1);
     expect(screen.getAllByText(/шкода \(ближня\) \+10%/).length).toBeGreaterThan(0);
@@ -48,7 +48,7 @@ describe("AbilityListEditor", () => {
 
     fireEvent.click(screen.getByRole("tab", { name: /Кровотеча/ }));
     fireEvent.pointerDown(screen.getByLabelText("abilities.trigger.event"), { button: 0, ctrlKey: false, pointerType: "mouse" });
-    fireEvent.click(await screen.findByRole("option", { name: "Пасивно (завжди)" }));
+    fireEvent.click(await screen.findByRole("option", { name: "abilityRegistry.triggers.passive.label" }));
 
     await waitFor(() => expect(onValid).toHaveBeenLastCalledWith(false, expect.any(Number)));
     expect(onValid.mock.lastCall?.[1]).toBeGreaterThan(0);
@@ -87,7 +87,7 @@ describe("AbilityListEditor", () => {
     render(<Harness initial={[{ id: "a1", name: "Лють", trigger: { event: "passive" }, effects: [{ kind: "note", text: "x" }] }]} />);
 
     fireEvent.click(screen.getByRole("button", { name: "abilities.chips.add" }));
-    fireEvent.click(screen.getByText("Бонус шкоди"));
+    fireEvent.click(screen.getByText("abilityRegistry.templates.damage.label"));
 
     const tabs = screen.getAllByRole("tab");
 
