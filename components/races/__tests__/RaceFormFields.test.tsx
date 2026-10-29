@@ -27,8 +27,8 @@ describe("RaceFormFields", () => {
   it("редактор вмінь додає вміння з шаблону", () => {
     renderWithConfirm(<Harness />);
 
-    expect(screen.getByText(/Вміння · 0/)).toBeInTheDocument();
-    fireEvent.click(screen.getByRole("button", { name: "+ Вміння" }));
+    expect(screen.getByText(/abilities.editor.title/)).toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: "abilities.chips.add" }));
     fireEvent.click(screen.getByText("Опір / імунітет"));
 
     expect(screen.getByTestId("n").textContent).toBe("1");

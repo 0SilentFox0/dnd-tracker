@@ -7,8 +7,11 @@ import { HudForm, HudFormPage } from "@/components/hud/form";
 import { Button } from "@/components/ui/button";
 import { unitFormTabs } from "@/components/units/form/UnitFormFields";
 import { useUnitCreateForm } from "@/lib/hooks/units";
+import { useTranslator } from "@/lib/i18n/use-translator";
 
 export function UnitCreateForm({ campaignId: id }: { campaignId: string }) {
+  const ta = useTranslator("abilities");
+
   const editor = useUnitCreateForm(id);
 
   return (
@@ -28,7 +31,7 @@ export function UnitCreateForm({ campaignId: id }: { campaignId: string }) {
               </p>
             )}
             <Button type="submit" disabled={editor.status.isSaving || !editor.abilities.valid}>
-              {editor.status.isSaving ? "Створення..." : withAbilityErrors("Створити юніта", editor.abilities.errors)}
+              {editor.status.isSaving ? "Створення..." : withAbilityErrors("Створити юніта", editor.abilities.errors, ta)}
             </Button>
           </>
         }

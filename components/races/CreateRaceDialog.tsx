@@ -9,6 +9,7 @@ import { withAbilityErrors } from "@/components/abilities";
 import { Button } from "@/components/ui/button";
 import { ResponsiveDialog } from "@/components/ui/responsive-dialog";
 import { DEFAULT_SPELL_SLOT_PROGRESSION } from "@/lib/constants/spells";
+import { useTranslator } from "@/lib/i18n/use-translator";
 import { errorMessage } from "@/lib/utils/common/error-message";
 import type { RaceFormData } from "@/types/races";
 
@@ -42,6 +43,8 @@ export function CreateRaceDialog({
   status,
 }: CreateRaceDialogProps) {
   const t = useTranslations("races");
+
+  const ta = useTranslator("abilities");
 
   const tc = useTranslations("common");
 
@@ -78,7 +81,7 @@ export function CreateRaceDialog({
             {tc("actions.cancel")}
           </Button>
           <Button type="submit" form="create-race-form" disabled={!abilitiesValid || status?.isPending}>
-            {status?.isPending ? tc("actions.creating") : withAbilityErrors(t("create.submit"), abilityErrors)}
+            {status?.isPending ? tc("actions.creating") : withAbilityErrors(t("create.submit"), abilityErrors, ta)}
           </Button>
         </>
       }

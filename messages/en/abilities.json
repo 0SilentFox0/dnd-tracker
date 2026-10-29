@@ -1,1 +1,148 @@
-{}
+{
+  "save": {
+    "labelWithErrors": "{label} (ability errors: {count})",
+    "errors": "Ability errors: {list}"
+  },
+  "editor": {
+    "title": "Abilities · {count}",
+    "errorsCount": "errors: {count}",
+    "storedInvalid": "Saved abilities contain invalid data — check before saving:",
+    "empty": "No abilities yet"
+  },
+  "panel": {
+    "name": "Name",
+    "delete": "Delete ability {name}",
+    "description": "Description (optional)"
+  },
+  "chips": {
+    "aria": "Abilities",
+    "noName": "Untitled",
+    "hasErrors": "has errors",
+    "add": "+ Ability"
+  },
+  "templates": {
+    "copyTitle": "Copy abilities from…",
+    "addTitle": "Add ability",
+    "copyFrom": "Copy from…"
+  },
+  "copy": {
+    "search": "Search…",
+    "loading": "Loading…",
+    "loadFailed": "Could not load the abilities of “{name}”. Try again.",
+    "kinds": {
+      "skill": "Skills",
+      "race": "Races",
+      "artifact": "Artifacts",
+      "artifactSet": "Sets",
+      "unit": "Units",
+      "class": "Classes",
+      "feat": "Feats"
+    }
+  },
+  "effect": {
+    "unknown": "Unknown effect",
+    "minOptions": "At least 2 options are required",
+    "delete": "Delete effect",
+    "options": "Options (one is picked at random)",
+    "addOption": "+ option"
+  },
+  "effects": {
+    "title": "What it does",
+    "add": "+ effect"
+  },
+  "condition": {
+    "title": "Condition",
+    "add": "+ condition",
+    "delete": "Delete condition"
+  },
+  "trigger": {
+    "title": "When",
+    "event": "Event",
+    "roundStartHint": "5e lair action: “Round start” + the “Uses per round” limit = 1."
+  },
+  "perform": {
+    "title": "Performs",
+    "kindAria": "Performs",
+    "effects": "Ability effects",
+    "attack": "An attack",
+    "spell": "A spell",
+    "attackAria": "Ability attack",
+    "spellAria": "Ability spell",
+    "pickAttack": "Pick an attack",
+    "pickSpell": "Pick a spell"
+  },
+  "limits": {
+    "title": "Limits",
+    "passive": "A passive is always active — limits do not apply.",
+    "perBattle": "Uses per battle",
+    "perRound": "Uses per round",
+    "perTurn": "Uses per turn",
+    "cooldownRounds": "Cooldown (rounds)",
+    "chance": "Chance, %",
+    "rest": "Rest",
+    "restShort": "Short",
+    "restLong": "Long",
+    "restUses": "Uses per rest",
+    "uses": "Uses",
+    "pool": "Pool (column, cost)",
+    "poolCost": "Pool cost",
+    "itemCharges": "Spends item charges",
+    "chargesPerUse": "Charges per use",
+    "lair": "Lair action",
+    "stackable": "Effects stack",
+    "maxStacks": "Max stacks",
+    "maxTargets": "Max targets",
+    "legendaryCost": "Legendary action (cost 1–3)"
+  },
+  "fields": {
+    "modes": {
+      "number": "number",
+      "dice": "dice",
+      "formula": "formula",
+      "scale": "from class table",
+      "spellRoll": "% of spell roll",
+      "eventDamage": "% of damage",
+      "maxHp": "% of max HP",
+      "ownerAttack": "% of my attack damage"
+    },
+    "classRefOutside": "A class table reference is allowed only in class abilities",
+    "variables": "Variables: {list}",
+    "classColumn": "Class table column",
+    "unitsLoading": "Loading units...",
+    "unitsEmpty": "No units in the campaign",
+    "pickUnit": "Pick a unit",
+    "flag": "Flag"
+  },
+  "validation": {
+    "passiveEffectKinds": "A passive allows only modifyStat, damageBonus, flag, note",
+    "passiveNoDuration": "A passive is always active — no duration",
+    "passiveTarget": "Passive target: self, allAllies, allEnemies, nearbyAllies or nearbyEnemies",
+    "bakedStatArea": "{stat} does not work through an aura area",
+    "bakedStatCondition": "{stat} is applied when the participant is built — a condition is impossible",
+    "areaOnlyPassive": "Area (nearby) is for passives only",
+    "statPassiveOnly": "{stat} can be changed only by a passive",
+    "maneuverTrigger": "A maneuver is available only for a bonus action and an action",
+    "summonTrigger": "Summoning is available only for a bonus action, an action and a kill",
+    "moraleNeedsDuration": "Temporary morale needs a duration",
+    "durationRequired": "A duration is required (without it — only in the before phase)",
+    "passiveNoLimits": "A passive has no limits",
+    "maxStacksNeedsStackable": "maxStacks only makes sense with stackable",
+    "maxTargetsTrigger": "maxTargets is available only for a bonus action and an action",
+    "legendaryAction": "A legendary action is only for an action ability without a cell aim",
+    "lairAction": "A lair action is only for an action ability without a legendary cost and aim",
+    "perform": "Performing an attack or a spell is only for a legendary or lair action with note effects",
+    "sneakAttack": "Sneak attack is a hit ability with a dealDamage effect",
+    "cunningStrike": "Cunning strike is passive only",
+    "aimTrigger": "aim is available only for a bonus action and an action",
+    "needValue": "flat, percent or atLeast is required",
+    "atLeastScope": "atLeast is only for ability scores and without flat/percent",
+    "needFlatOrPercent": "flat or percent is required",
+    "emptyAction": "Empty action",
+    "needUnitOrGroup": "unitId or group and tier is required",
+    "classRefOutside": "A class table reference is allowed only in class abilities",
+    "columnMissing": "There is no column “{key}” in the class table",
+    "columnNotPool": "Column “{label}” is not a pool",
+    "attackNotFound": "The attack was not found among the unit's attacks",
+    "spellNotFound": "The spell was not found in the library"
+  }
+}

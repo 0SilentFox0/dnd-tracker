@@ -37,7 +37,7 @@ describe.each(["flat", "amount"] as const)("%s: class table mode", (kind) => {
   it("shows the column picker for a scale value and switches the column", () => {
     render(<Harness kind={kind} initial={{ scale: "rages" }} />);
 
-    const select = screen.getByLabelText("Колонка таблиці класу") as HTMLSelectElement;
+    const select = screen.getByLabelText("abilities.fields.classColumn") as HTMLSelectElement;
 
     expect(select.value).toBe("rages");
 
@@ -49,7 +49,7 @@ describe.each(["flat", "amount"] as const)("%s: class table mode", (kind) => {
   it("outside a class form a scale value is shown read-only with a hint", () => {
     render(<Harness kind={kind} initial={{ scale: "rages" }} withColumns={false} />);
 
-    expect(screen.queryByLabelText("Колонка таблиці класу")).toBeNull();
-    expect(screen.getByText("Посилання на таблицю класу — лише у вміннях класу")).toBeTruthy();
+    expect(screen.queryByLabelText("abilities.fields.classColumn")).toBeNull();
+    expect(screen.getByText("abilities.fields.classRefOutside")).toBeTruthy();
   });
 });

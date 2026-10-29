@@ -88,7 +88,7 @@ describe("ArtifactForm", () => {
       </QueryClientProvider>,
     );
 
-    const button = await screen.findByRole("button", { name: /Створити \(помилок у вміннях: \d+\)/ });
+    const button = await screen.findByRole("button", { name: /abilities\.save\.labelWithErrors .*"label":"Створити"/ });
 
     expect(button).toBeDisabled();
   });

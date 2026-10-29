@@ -11,6 +11,7 @@ import { SkillMainSkillSection } from "@/components/skills/form/main-skill";
 import { SkillSpellSection } from "@/components/skills/form/spell";
 import { Button } from "@/components/ui/button";
 import { useSkillForm } from "@/lib/hooks/skills";
+import { useTranslator } from "@/lib/i18n/use-translator";
 import type { IdName } from "@/types/common";
 import type { MainSkill } from "@/types/main-skills";
 import type { Skill } from "@/types/skills";
@@ -24,6 +25,8 @@ interface SkillCreateFormProps {
 
 export function SkillCreateForm({ campaignId, spells, initialMainSkills, initialData }: SkillCreateFormProps) {
   const t = useTranslations();
+
+  const ta = useTranslator("abilities");
 
   const { form, mainSkills, abilities, status, actions } = useSkillForm(campaignId, { initialData, initialMainSkills });
 
@@ -81,7 +84,7 @@ export function SkillCreateForm({ campaignId, spells, initialMainSkills, initial
                 ? isEdit
                   ? t("common.actions.saving")
                   : t("common.actions.creating")
-                : withAbilityErrors(isEdit ? t("skills.form.submitEdit") : t("skills.form.submitCreate"), abilities.errors)}
+                : withAbilityErrors(isEdit ? t("skills.form.submitEdit") : t("skills.form.submitCreate"), abilities.errors, ta)}
             </Button>
           </>
         }

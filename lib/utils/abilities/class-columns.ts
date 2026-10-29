@@ -1,3 +1,4 @@
+import type { ErrorParams } from "@/lib/constants/api-errors";
 import type { Ability, Effect } from "@/lib/utils/abilities/schema";
 import { columnValueAt } from "@/lib/utils/characters/classes/columns";
 import { classPoolKey } from "@/lib/utils/items/pools";
@@ -16,7 +17,7 @@ export const FLAT_KEYS = ["flat", "percent"] as const;
 
 export const AMOUNT_KEYS = ["amount", "damagePerRound", "healPerRound"] as const;
 
-export const CLASS_REF_OUTSIDE = "Посилання на таблицю класу — лише у вміннях класу";
+export const CLASS_REF_OUTSIDE = "abilities.validation.classRefOutside";
 
 export const isScaleRef = (v: unknown): v is { scale: string } => !!v && typeof v === "object" && typeof (v as { scale?: unknown }).scale === "string";
 
@@ -44,7 +45,7 @@ export function abilityColumnRefs(a: Ability): ColumnRef[] {
   return refs;
 }
 
-export function columnRefIssues(abilities: readonly Ability[], columns: readonly ClassColumn[] | null): { path: Path; message: string }[] {
+export function columnRefIssues(abilities: readonly Ability[], columns: readonly ClassColumn[] | null): { path: Path; message: string; params?: ErrorParams }[] {
   return abilities.flatMap((a, i) =>
     abilityColumnRefs(a).flatMap((ref) => {
       const path = [i, ...ref.path];
@@ -53,9 +54,9 @@ export function columnRefIssues(abilities: readonly Ability[], columns: readonly
 
       const column = columns.find((c) => c.key === ref.key);
 
-      if (!column) return [{ path, message: `Немає колонки «${ref.key}» у таблиці класу` }];
+      if (!column) return [{ path, message: "abilities.validation.columnMissing", params: { key: ref.key } }];
 
-      return ref.kind === "pool" && !column.pool ? [{ path, message: `Колонка «${column.label}» не є пулом` }] : [];
+      return ref.kind === "pool" && !column.pool ? [{ path, message: "abilities.validation.columnNotPool", params: { label: column.label } }] : [];
     }),
   );
 }

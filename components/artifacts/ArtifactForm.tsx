@@ -24,6 +24,7 @@ import {
 } from "@/lib/constants/artifacts";
 import { useArtifactForm } from "@/lib/hooks/artifacts";
 import { useCampaignRules } from "@/lib/hooks/campaigns";
+import { useTranslator } from "@/lib/i18n/use-translator";
 import type { ConversionIssue } from "@/lib/utils/abilities/schema";
 import type { Ability } from "@/lib/utils/abilities/schema";
 import type { ArmorStats } from "@/lib/utils/artifacts/armor-stats";
@@ -61,6 +62,8 @@ export interface ArtifactFormProps {
 
 export function ArtifactForm({ campaignId, artifactSets, initial, mode, labels, actions, cancelHref }: ArtifactFormProps) {
   const t = useTranslations();
+
+  const ta = useTranslator("abilities");
 
   const router = useRouter();
 
@@ -216,7 +219,7 @@ export function ArtifactForm({ campaignId, artifactSets, initial, mode, labels, 
               {t("common.actions.cancel")}
             </Button>
             <Button type="submit" disabled={editor.status.isBusy || !editor.abilities.valid}>
-              {editor.status.isSaving ? labels.saving : withAbilityErrors(labels.submit, editor.abilities.errors)}
+              {editor.status.isSaving ? labels.saving : withAbilityErrors(labels.submit, editor.abilities.errors, ta)}
             </Button>
           </>
         }

@@ -1,5 +1,7 @@
 "use client";
 
+import { useTranslations } from "next-intl";
+
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import type { Ability } from "@/lib/utils/abilities/schema";
@@ -17,8 +19,10 @@ interface AbilityChipsProps {
 }
 
 export function AbilityChips({ abilities, selectedId, invalidIds, onSelect, onAdd }: AbilityChipsProps) {
+  const t = useTranslations("abilities.chips");
+
   return (
-    <div className="hud-scroll-x -mx-1 flex gap-1.5 overflow-x-auto px-1 py-1" role="tablist" aria-label="Вміння">
+    <div className="hud-scroll-x -mx-1 flex gap-1.5 overflow-x-auto px-1 py-1" role="tablist" aria-label={t("aria")}>
       {abilities.map((a) => {
         const on = a.id === selectedId;
 
@@ -34,8 +38,8 @@ export function AbilityChips({ abilities, selectedId, invalidIds, onSelect, onAd
               on && "text-[#ffd9a8] shadow-[inset_0_0_0_1px_var(--color-hud-gold-strong),0_0_8px_rgba(230,194,90,.3)]",
             )}
           >
-            <span className="max-w-[10rem] truncate">{a.name || "Без назви"}</span>
-            {invalidIds.has(a.id) && <span data-invalid-dot aria-label="є помилки" className="ml-1.5 h-1.5 w-1.5 rounded-full bg-hud-danger" />}
+            <span className="max-w-[10rem] truncate">{a.name || t("noName")}</span>
+            {invalidIds.has(a.id) && <span data-invalid-dot aria-label={t("hasErrors")} className="ml-1.5 h-1.5 w-1.5 rounded-full bg-hud-danger" />}
           </button>
         );
       })}
@@ -45,7 +49,7 @@ export function AbilityChips({ abilities, selectedId, invalidIds, onSelect, onAd
         onClick={onAdd}
         className="h-8 shrink-0 rounded-full px-3 text-[13px] text-[#ffd9a8] shadow-[inset_0_0_0_1px_var(--color-hud-gold-strong)] hover:bg-transparent hover:text-[#ffd9a8]"
       >
-        + Вміння
+        {t("add")}
       </Button>
     </div>
   );

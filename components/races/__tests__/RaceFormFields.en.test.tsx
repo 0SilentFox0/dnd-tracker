@@ -17,7 +17,7 @@ describe("RaceFormFields (en)", () => {
       <ConfirmProvider><QueryClientProvider client={new QueryClient()}>
         <RaceFormFields campaignId="c1" form={{ data: { name: "Elf", icon: "", availableSkills: [], disabledSkills: [], abilities: [] }, set: vi.fn() }} compact />
       </QueryClientProvider></ConfirmProvider>,
-      { locale: "en", namespaces: ["common", "validation", "races", "choices"] },
+      { locale: "en", namespaces: ["common", "validation", "races", "choices", "abilities"] },
     );
 
     expect(screen.getByText("Race name *")).toBeInTheDocument();

@@ -49,18 +49,18 @@ describe("EffectCard", () => {
   it("невідомий вид — картка лише для читання", () => {
     renderCard({ kind: "teleport", range: 5 } as unknown as Effect);
 
-    expect(screen.getByText("Невідомий ефект")).toBeInTheDocument();
+    expect(screen.getByText("abilities.effect.unknown")).toBeInTheDocument();
   });
 
   it("випадковий ефект з 2 варіантами: ✕ варіанта неактивний і пояснює чому", () => {
     renderCard({ kind: "randomOf", options: [{ kind: "heal", amount: 1 }, { kind: "heal", amount: 2 }] } as Effect);
 
-    const removes = screen.getAllByRole("button", { name: "Видалити ефект" }).slice(1);
+    const removes = screen.getAllByRole("button", { name: "abilities.effect.delete" }).slice(1);
 
     expect(removes).toHaveLength(2);
     for (const b of removes) {
       expect(b).toBeDisabled();
-      expect(b).toHaveAttribute("title", "Потрібно щонайменше 2 варіанти");
+      expect(b).toHaveAttribute("title", "abilities.effect.minOptions");
     }
   });
 });

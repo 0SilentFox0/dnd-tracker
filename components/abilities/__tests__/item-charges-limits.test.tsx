@@ -19,7 +19,7 @@ describe("LimitsSection: item charges", () => {
       </AbilityEditorProvider>,
     );
 
-    fireEvent.click(screen.getByRole("checkbox", { name: "Витрачає заряди предмета" }));
+    fireEvent.click(screen.getByRole("checkbox", { name: "abilities.limits.itemCharges" }));
 
     expect(onChange).toHaveBeenLastCalledWith({ ...ability, limits: { pool: { key: "charges", cost: 1 } } });
   });
@@ -31,6 +31,6 @@ describe("LimitsSection: item charges", () => {
       </AbilityEditorProvider>,
     );
 
-    expect(screen.queryByRole("checkbox", { name: "Витрачає заряди предмета" })).toBeNull();
+    expect(screen.queryByRole("checkbox", { name: "abilities.limits.itemCharges" })).toBeNull();
   });
 });

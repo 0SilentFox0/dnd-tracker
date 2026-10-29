@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useTranslations } from "next-intl";
 
 import type { FieldProps } from "./FieldRenderer";
 import { ScaleColumnSelect } from "./ScaleColumnSelect";
@@ -8,22 +9,13 @@ import { ScaleColumnSelect } from "./ScaleColumnSelect";
 import { useAbilityEditor } from "@/components/abilities/editor-context";
 import { Input } from "@/components/ui/input";
 import { SelectField } from "@/components/ui/select-field";
-import { CLASS_REF_OUTSIDE } from "@/lib/utils/abilities/class-columns";
 import { FORMULA_VARIABLES } from "@/lib/utils/abilities/engine/core/amount";
 import type { Amount } from "@/lib/utils/abilities/schema";
 import { DICE_RE } from "@/lib/utils/abilities/schema/kinds";
 
 type Mode = "number" | "dice" | "formula" | "scale" | "spellRoll" | "eventDamage" | "maxHp" | "ownerAttack";
 
-const BASE_MODES = [
-  { value: "number", label: "число" },
-  { value: "dice", label: "кубики" },
-  { value: "formula", label: "формула" },
-  { value: "spellRoll", label: "% кидка заклинання" },
-  { value: "eventDamage", label: "% від шкоди" },
-  { value: "maxHp", label: "% від макс. HP" },
-  { value: "ownerAttack", label: "% шкоди моєї атаки" },
-];
+const BASE_MODES = ["number", "dice", "formula", "spellRoll", "eventDamage", "maxHp", "ownerAttack"] as const satisfies readonly Mode[];
 
 function modeOf(v: Amount | undefined): Mode {
   if (typeof v === "string") return "dice";
@@ -70,6 +62,8 @@ function build(mode: Mode, text: string, firstColumn: string): Amount | undefine
 }
 
 export function AmountField({ id, value, onChange }: FieldProps<Amount | undefined>) {
+  const t = useTranslations("abilities.fields");
+
   const columns = useAbilityEditor().classColumns;
 
   const mode = modeOf(value);
@@ -78,7 +72,7 @@ export function AmountField({ id, value, onChange }: FieldProps<Amount | undefin
 
   const first = columns?.[0]?.key ?? "";
 
-  const modes = columns ? [...BASE_MODES.slice(0, 3), { value: "scale", label: "з таблиці класу" }, ...BASE_MODES.slice(3)] : BASE_MODES;
+  const modes = (columns ? [...BASE_MODES.slice(0, 3), "scale" as const, ...BASE_MODES.slice(3)] : [...BASE_MODES]).map((value) => ({ value, label: t(`modes.${value}`) }));
 
   const emit = (next: Amount | undefined | null) => {
     if (next !== null) onChange(next);
@@ -87,7 +81,7 @@ export function AmountField({ id, value, onChange }: FieldProps<Amount | undefin
   if (mode === "scale" && !columns) {
     return (
       <p className="text-xs text-muted-foreground">
-        <span>{CLASS_REF_OUTSIDE}</span> <code>[{textOf(value)}]</code>
+        <span>{t("classRefOutside")}</span> <code>[{textOf(value)}]</code>
       </p>
     );
   }
@@ -115,7 +109,7 @@ export function AmountField({ id, value, onChange }: FieldProps<Amount | undefin
           />
         )}
       </div>
-      {mode === "formula" && <p className="text-xs text-muted-foreground">Змінні: {FORMULA_VARIABLES.join(", ")}</p>}
+      {mode === "formula" && <p className="text-xs text-muted-foreground">{t("variables", { list: FORMULA_VARIABLES.join(", ") })}</p>}
     </div>
   );
 }

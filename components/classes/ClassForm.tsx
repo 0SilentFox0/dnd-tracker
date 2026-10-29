@@ -14,6 +14,7 @@ import { HudForm, HudFormPage, type HudTab } from "@/components/hud/form";
 import { Button } from "@/components/ui/button";
 import { useClassForm } from "@/lib/hooks/classes";
 import { useErrorTotals } from "@/lib/hooks/common";
+import { useTranslator } from "@/lib/i18n/use-translator";
 import { buildClassProgression } from "@/lib/utils/characters/classes";
 import type { GameClassData } from "@/types/classes";
 
@@ -21,6 +22,8 @@ type ClassFormTabId = "map" | "basics" | "table" | "features" | "subclasses";
 
 export function ClassForm({ campaignId, gameClass }: { campaignId: string; gameClass: GameClassData }) {
   const t = useTranslations();
+
+  const ta = useTranslator("abilities");
 
   const { id, ...initial } = gameClass;
 
@@ -87,7 +90,7 @@ export function ClassForm({ campaignId, gameClass }: { campaignId: string; gameC
               {t("common.actions.cancel")}
             </Button>
             <Button type="submit" disabled={editor.status.isSaving || !editor.abilities.valid}>
-              {editor.status.isSaving ? t("common.actions.saving") : withAbilityErrors(t("common.actions.save"), editor.abilities.errors)}
+              {editor.status.isSaving ? t("common.actions.saving") : withAbilityErrors(t("common.actions.save"), editor.abilities.errors, ta)}
             </Button>
           </>
         }

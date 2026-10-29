@@ -8,6 +8,7 @@ import { useDeleteArtifactSet, useSaveArtifactSet } from "./useArtifactSets";
 import { abilitySaveError, useAbilityValidity } from "@/lib/hooks/abilities";
 import { useArtifactsList } from "@/lib/hooks/artifacts";
 import { useConfirm, useNavigateFresh } from "@/lib/hooks/common";
+import { useTranslator } from "@/lib/i18n/use-translator";
 import type { Ability } from "@/lib/utils/abilities/schema";
 import { filterArtifactsSelectableForSet } from "@/lib/utils/artifacts/artifact-set-form";
 
@@ -22,6 +23,8 @@ export interface ArtifactSetFormInitial {
 
 export function useArtifactSetForm({ campaignId, setId, initial }: { campaignId: string; setId?: string; initial: ArtifactSetFormInitial }) {
   const t = useTranslations();
+
+  const ta = useTranslator("abilities");
 
   const confirm = useConfirm();
 
@@ -89,7 +92,7 @@ export function useArtifactSetForm({ campaignId, setId, initial }: { campaignId:
       });
       navigateFresh(listHref);
     } catch (err) {
-      setError(abilitySaveError(err, t("common.form.saveFailed")));
+      setError(abilitySaveError(err, t("common.form.saveFailed"), ta));
     }
   };
 

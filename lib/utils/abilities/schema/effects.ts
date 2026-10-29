@@ -40,9 +40,9 @@ const ModifyStatSchema = z
     until: z.literal("turnEnd").optional(),
     ...timed,
   })
-  .refine((e) => hasValue(e) || e.atLeast !== undefined, { message: "Потрібен flat, percent або atLeast" })
+  .refine((e) => hasValue(e) || e.atLeast !== undefined, { message: "abilities.validation.needValue" })
   .refine((e) => e.atLeast === undefined || ((ABILITY_KEYS as readonly string[]).includes(e.stat) && e.flat === undefined && e.percent === undefined), {
-    message: "atLeast — лише для характеристик і без flat/percent",
+    message: "abilities.validation.atLeastScope",
     path: ["atLeast"],
   });
 
@@ -55,7 +55,7 @@ const DamageBonusSchema = z
     perMark: z.string().min(1).optional(),
     ...timed,
   })
-  .refine(hasValue, { message: "Потрібен flat або percent" });
+  .refine(hasValue, { message: "abilities.validation.needFlatOrPercent" });
 
 const flagBase = { kind: z.literal("flag"), ...timed };
 
@@ -154,7 +154,7 @@ const GrantActionSchema = z
     ...target,
   })
   .refine((e) => e.extraActions || e.refreshAction || e.refreshBonusAction || e.refreshReaction, {
-    message: "Порожня дія",
+    message: "abilities.validation.emptyAction",
   });
 
 const DealDamageSchema = z.object({
@@ -226,7 +226,7 @@ const SummonSchema = z
     unitId: z.string().min(1).optional(),
     count: z.number().int().min(1).max(10).optional(),
   })
-  .refine((e) => !!e.unitId || (!!e.group && e.tier !== undefined), { message: "Потрібен unitId або group і tier" });
+  .refine((e) => !!e.unitId || (!!e.group && e.tier !== undefined), { message: "abilities.validation.needUnitOrGroup" });
 
 const RaiseDeadSchema = z.object({ kind: z.literal("raiseDead"), hpPercent: z.number().int().min(1).max(100), ...target });
 

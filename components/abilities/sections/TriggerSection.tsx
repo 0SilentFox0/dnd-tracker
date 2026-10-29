@@ -1,7 +1,10 @@
 "use client";
 
+import { useTranslations } from "next-intl";
+
 import type { AbilitySectionProps } from "../AbilityPanel";
 import { useFieldErrors } from "../editor-context";
+import { FieldErrors } from "../FieldErrors";
 import { FieldRenderer } from "../fields/FieldRenderer";
 import { SectionTitle } from "./SectionTitle";
 
@@ -14,16 +17,18 @@ import type { Trigger, TriggerEvent } from "@/lib/utils/abilities/schema";
 const EVENT_OPTIONS = Object.values(TRIGGER_REGISTRY).map((d) => ({ value: d.event, label: d.label }));
 
 export function TriggerSection({ ability, path, onChange }: AbilitySectionProps) {
+  const t = useTranslations("abilities.trigger");
+
   const fields = TRIGGER_REGISTRY[ability.trigger.event].fields;
 
   const errors = useFieldErrors(`${path}.trigger`);
 
   return (
     <div className="space-y-2">
-      <SectionTitle>Коли</SectionTitle>
+      <SectionTitle>{t("title")}</SectionTitle>
       <div className="space-y-1">
         <Label htmlFor={`${path}.trigger.event`} className="text-xs text-muted-foreground">
-          Подія
+          {t("event")}
         </Label>
         <SelectField
           id={`${path}.trigger.event`}
@@ -32,7 +37,7 @@ export function TriggerSection({ ability, path, onChange }: AbilitySectionProps)
           onValueChange={(event) => onChange(changeTriggerEvent(ability, event as TriggerEvent))}
         />
       </div>
-      {ability.trigger.event === "roundStart" && <p className="text-xs text-muted-foreground">Дія лігва 5e: «Початок раунду» + ліміт «Разів за раунд» = 1.</p>}
+      {ability.trigger.event === "roundStart" && <p className="text-xs text-muted-foreground">{t("roundStartHint")}</p>}
       <div className="grid grid-cols-6 items-end gap-2 [&>*]:min-w-0">
         {fields.map((f) => (
           <FieldRenderer
@@ -44,11 +49,7 @@ export function TriggerSection({ ability, path, onChange }: AbilitySectionProps)
           />
         ))}
       </div>
-      {errors.map((e) => (
-        <p key={e} className="text-xs text-destructive">
-          {e}
-        </p>
-      ))}
+      <FieldErrors errors={errors} />
     </div>
   );
 }

@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
+import { useTranslations } from "next-intl";
 
 import { AbilityChips, pickAfterRemove } from "./AbilityChips";
 import { AbilityPanel } from "./AbilityPanel";
@@ -25,6 +26,8 @@ interface AbilityListEditorProps {
 }
 
 export function AbilityListEditor({ campaignId, value, onChange, issues = [], onValidityChange, classColumns, itemCharges, performChoices }: AbilityListEditorProps) {
+  const t = useTranslations("abilities.editor");
+
   const [pickerOpen, setPickerOpen] = useState(false);
 
   const [selectedId, setSelectedId] = useState<string | null>(value[0]?.id ?? null);
@@ -70,14 +73,14 @@ export function AbilityListEditor({ campaignId, value, onChange, issues = [], on
       <HudSection
         title={
           <>
-            Вміння · {value.length}
-            {errorCount > 0 && <span className="ml-2 text-hud-danger">помилок: {errorCount}</span>}
+            {t("title", { count: value.length })}
+            {errorCount > 0 && <span className="ml-2 text-hud-danger">{t("errorsCount", { count: errorCount })}</span>}
           </>
         }
       >
         {issues.length > 0 && (
           <div className="mb-2 rounded-md border border-[#c9a04a]/50 bg-[#c9a04a]/10 p-2 text-xs text-hud-ink">
-            <p className="font-medium">Збережені вміння мають невалідні дані — перевірте перед збереженням:</p>
+            <p className="font-medium">{t("storedInvalid")}</p>
             <ul className="list-disc pl-4">
               {issues.map((i, idx) => (
                 <li key={`${idx}-${i.message}`}>{i.message}</li>
@@ -94,7 +97,7 @@ export function AbilityListEditor({ campaignId, value, onChange, issues = [], on
             actions={{ onChange: (next) => onChange(value.map((a, i) => (i === index ? next : a))), onRemove: remove }}
           />
         ) : (
-          <p className="py-2 text-sm text-hud-muted">Вмінь ще немає</p>
+          <p className="py-2 text-sm text-hud-muted">{t("empty")}</p>
         )}
       </HudSection>
       <AbilityTemplatePicker open={pickerOpen} onOpenChange={setPickerOpen} onPick={add} />

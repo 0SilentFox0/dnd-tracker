@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import { X } from "lucide-react";
 
 import { FieldRenderer } from "./fields/FieldRenderer";
@@ -49,6 +50,8 @@ function defaultFor(type: Condition["type"]): Condition {
 }
 
 export function ConditionEditor({ condition, path, actions }: { condition: Condition; path: string; actions: { onChange: (c: Condition) => void; onRemove: () => void } }) {
+  const t = useTranslations("abilities.condition");
+
   const isGroup = condition.type === "all" || condition.type === "any";
 
   return (
@@ -57,7 +60,7 @@ export function ConditionEditor({ condition, path, actions }: { condition: Condi
         <div className="flex-1">
           <SelectField value={condition.type} options={TYPE_OPTIONS} onValueChange={(t) => actions.onChange(defaultFor(t as Condition["type"]))} />
         </div>
-        <Button type="button" size="icon" variant="ghost" aria-label="Видалити умову" onClick={actions.onRemove}>
+        <Button type="button" size="icon" variant="ghost" aria-label={t("delete")} onClick={actions.onRemove}>
           <X className="h-4 w-4" />
         </Button>
       </div>
@@ -84,7 +87,7 @@ export function ConditionEditor({ condition, path, actions }: { condition: Condi
             />
           ))}
           <Button type="button" size="sm" variant="outline" onClick={() => actions.onChange({ ...condition, conditions: [...condition.conditions, DEFAULT_CONDITION] })}>
-            + умова
+            {t("add")}
           </Button>
         </div>
       ) : (
