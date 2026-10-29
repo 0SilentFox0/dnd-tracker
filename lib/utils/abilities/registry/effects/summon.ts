@@ -4,6 +4,7 @@ import { CombatStatus, ParticipantSourceType } from "@/lib/constants/battle";
 import { applyBakedAuras } from "@/lib/utils/abilities/build/bake";
 import { findParticipant, participantNames, updateParticipant } from "@/lib/utils/abilities/engine/core/participants";
 import type { Effect } from "@/lib/utils/abilities/schema";
+import { seg, type Segment } from "@/lib/utils/abilities/segments";
 
 type Of<K extends Effect["kind"]> = Extract<Effect, { kind: K }>;
 
@@ -17,7 +18,9 @@ export function applySummon(input: EffectApplyInput<Of<"summon">>): EffectApplyR
   return { participants: input.participants, messages: [], summons: [{ ownerId, group: effect.group, tier: effect.tier, unitId: effect.unitId, count: effect.count ?? 1, casterLevel, spellId }] };
 }
 
-export const describeSummon = (e: Of<"summon">) => (e.unitId ? `прикликати ${e.count ?? 1}× обраного юніта` : `прикликати ${e.count ?? 1}× юніта «${e.group}», Tier ${e.tier}`);
+export const describeSummon = (e: Of<"summon">): Segment[] => [
+  e.unitId ? seg("summary.effects.summonUnit", { count: e.count ?? 1 }) : seg("summary.effects.summonGroup", { count: e.count ?? 1, group: e.group ?? "", tier: e.tier ?? "" }),
+];
 
 export function applyRaiseDead(input: EffectApplyInput<Of<"raiseDead">>): EffectApplyResult {
   const { effect, ability, ownerId } = input;
@@ -59,4 +62,4 @@ export function applyRaiseDead(input: EffectApplyInput<Of<"raiseDead">>): Effect
   return { participants: ps, messages };
 }
 
-export const describeRaiseDead = (e: Of<"raiseDead">) => `підняти мертвих юнітів на ${e.hpPercent}% HP`;
+export const describeRaiseDead = (e: Of<"raiseDead">): Segment[] => [seg("summary.effects.raiseDead", { percent: e.hpPercent })];

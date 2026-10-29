@@ -1,10 +1,11 @@
 import { AttackType } from "@/lib/constants/battle";
+import type { AbilityFlowSummary } from "@/lib/utils/abilities/segments";
 import type { RawTree } from "@/lib/utils/skills/progression";
 
 export interface ProgressionSkillDto {
   name: string;
   icon: string | null;
-  summary: string[];
+  summary: AbilityFlowSummary[];
   description: string;
   spellGroupId: string | null;
   grantedSpellId: string | null;

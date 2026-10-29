@@ -1,8 +1,10 @@
 import { describe, expect, it } from "vitest";
 
+import { ukT } from "@/lib/utils/abilities/__tests__/describe-fixtures";
 import { makeParticipant, resolved } from "@/lib/utils/abilities/__tests__/fixtures";
-import { limitsLabel } from "@/lib/utils/abilities/registry/labels";
+import { limitsSegments } from "@/lib/utils/abilities/registry/labels";
 import { AbilitySchema } from "@/lib/utils/abilities/schema";
+import { renderSegments } from "@/lib/utils/abilities/segments";
 import { abilityOptions } from "@/lib/utils/battle/view";
 
 const wing = { id: "wing", name: "Удар крилами", trigger: { event: "action" }, limits: { legendaryCost: 2 }, effects: [{ kind: "changeMorale", delta: 1 }] };
@@ -15,8 +17,8 @@ describe("limits.legendaryCost", () => {
     expect(AbilitySchema.safeParse({ ...wing, aim: { kind: "cell", range: 30 } }).success).toBe(false);
   });
 
-  it("підпис ліміту", () => {
-    expect(limitsLabel({ legendaryCost: 2 })).toEqual(["легендарна дія (2)"]);
+  it("підпис ліміту", async () => {
+    expect(renderSegments(await ukT(), limitsSegments({ legendaryCost: 2 }))).toEqual(["легендарна дія (2)"]);
   });
 
   it("у звичайному ході легендарне вміння приховане", () => {

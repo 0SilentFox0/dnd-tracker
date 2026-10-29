@@ -1,9 +1,15 @@
 import { describe, expect, it } from "vitest";
 
 import { ParticipantSide } from "@/lib/constants/battle";
+import { enT, ukT } from "@/lib/utils/abilities/__tests__/describe-fixtures";
 import { makeParticipant, resolved, seq } from "@/lib/utils/abilities/__tests__/fixtures";
-import { applyEffect, describeEffect, FLAG_FIELDS } from "@/lib/utils/abilities/registry/effects";
+import { applyEffect, describeEffect as describeEffectSegments, FLAG_FIELDS } from "@/lib/utils/abilities/registry/effects";
 import type { Effect } from "@/lib/utils/abilities/schema";
+import { renderSegments } from "@/lib/utils/abilities/segments";
+
+const t = await ukT();
+
+const describeEffect = (e: Parameters<typeof describeEffectSegments>[0]) => renderSegments(t, describeEffectSegments(e)).join(" · ");
 
 function run(effect: Effect, targetIds: string[], ps = [makeParticipant({ id: "o" }), makeParticipant({ id: "t", side: ParticipantSide.ENEMY })]) {
   const ability = resolved({ trigger: { event: "hit", role: "attacker" }, effects: [effect] });
@@ -126,5 +132,25 @@ describe("randomOf", () => {
 
     expect(run({ kind: "restoreSpellSlot", count: 1 }, ["o"], [p]).participants[0].spellcasting.spellSlots["1"].current).toBe(2);
     expect(run({ kind: "drainSpellSlot", count: 1 }, ["o"], [{ ...p, spellcasting: { ...p.spellcasting, spellSlots: { ...p.spellcasting.spellSlots, pact: { level: 5, max: 2, current: 1 } } } }]).participants[0].spellcasting.spellSlots.pact.current).toBe(0);
+  });
+});
+
+describe("describeEffect: unknown kind and randomOf", () => {
+  const unknown = { kind: "xyz" } as unknown as Effect;
+
+  const random: Effect = { kind: "randomOf", options: [{ kind: "heal", amount: 3 }, { kind: "dealDamage", amount: 4 }] };
+
+  it("unknown kind renders in uk and en", async () => {
+    expect(describeEffect(unknown)).toBe("невідомий ефект (xyz)");
+    expect(renderSegments(await enT(), describeEffectSegments(unknown)).join(" · ")).toBe("unknown effect (xyz)");
+  });
+
+  it("randomOf renders options in uk and en without Cyrillic", async () => {
+    expect(describeEffect(random)).toBe("одне з: лікування 3 / шкода 4");
+
+    const en = renderSegments(await enT(), describeEffectSegments(random)).join(" · ");
+
+    expect(en).toMatch(/^one of: /);
+    expect(en).not.toMatch(/[А-Яа-яІіЇїЄєҐґ]/);
   });
 });

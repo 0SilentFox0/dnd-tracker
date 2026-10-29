@@ -6,6 +6,7 @@ import { SaveRolls } from "./SaveRolls";
 import { SlotSelect } from "./SlotSelect";
 import { SpellSummary } from "./SpellSummary";
 
+import { useAbilityText } from "@/components/abilities/use-ability-text";
 import { AiRollButton, DamageDice } from "@/components/battle/hud/DiceInput";
 import { HUD_SURFACE } from "@/components/hud";
 import { ResponsiveDialog } from "@/components/ui/responsive-dialog";
@@ -93,12 +94,14 @@ function RollsStep({ book }: { book: Book }) {
 function OptionPicker({ book }: { book: Book }) {
   const { state, actions } = book;
 
+  const text = useAbilityText();
+
   if (!state.pick?.options) return null;
 
   return (
     <fieldset className="mt-3 space-y-1 text-sm">
       <legend className="hud-sc mb-1 font-bold">Оберіть варіант</legend>
-      {state.pick.options.map((label, i) => (
+      {text.lines(state.pick.options).map((label, i) => (
         <label key={i} className="flex items-start gap-2">
           <input type="radio" name="spell-option" checked={state.optionIndex === i} onChange={() => actions.setOption(i)} className="mt-1" />
           {label}

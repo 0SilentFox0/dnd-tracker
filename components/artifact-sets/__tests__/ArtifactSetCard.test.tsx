@@ -5,12 +5,15 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 
 import { ArtifactSetCard } from "@/components/artifact-sets/ArtifactSetCard";
 import { renderWithConfirm } from "@/components/ui/__tests__/render-with-confirm";
+import type { AbilityFlowSummary } from "@/lib/utils/abilities/segments";
 
 vi.mock("next/navigation", () => ({ useRouter: () => ({ push: vi.fn(), refresh: vi.fn() }) }));
 
 afterEach(cleanup);
 
-const set = { id: "s1", name: "Драконяча луска", icon: null, description: null, setBonus: { name: "Кров дракона" }, abilitySummary: ["Пасивно · AC +1"] };
+const line = (value: string): AbilityFlowSummary => ({ when: [{ key: "summary.text", params: { value } }], if: [], then: [], limits: [] });
+
+const set = { id: "s1", name: "Драконяча луска", icon: null, description: null, setBonus: { name: "Кров дракона" }, abilitySummary: [line("AC +1")] };
 
 const artifact = { id: "a1", name: "Шолом зорі", slot: "head", rarity: null, icon: null, description: null, abilitySummary: [], artifactSet: { name: set.name } };
 

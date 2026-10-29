@@ -1,3 +1,4 @@
+import type { AbilityFlowSummary } from "@/lib/utils/abilities/segments";
 export interface ArtifactSetSummaryArtifact {
   id: string;
   name: string;
@@ -15,7 +16,7 @@ export interface ArtifactSetRow {
   icon?: string | null;
   createdAt: string;
   artifacts?: ArtifactSetSummaryArtifact[];
-  abilitySummary?: string[];
+  abilitySummary?: AbilityFlowSummary[];
 }
 
 export interface ArtifactSetCardData {
@@ -24,5 +25,5 @@ export interface ArtifactSetCardData {
   icon: string | null;
   description: string | null;
   setBonus: unknown;
-  abilitySummary: string[];
+  abilitySummary: AbilityFlowSummary[];
 }

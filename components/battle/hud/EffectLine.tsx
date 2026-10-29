@@ -3,6 +3,7 @@ import { useState } from "react";
 import { EffectIcon } from "./EffectIcon";
 
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
+import { useTranslator } from "@/lib/i18n/use-translator";
 import { cn } from "@/lib/utils";
 import { effectSummary } from "@/lib/utils/battle/view";
 import type { ActiveEffect } from "@/types/battle";
@@ -10,7 +11,9 @@ import type { ActiveEffect } from "@/types/battle";
 const tone = (e: ActiveEffect) => (e.type === "buff" ? "text-[#cdb87e]" : "text-hud-danger");
 
 function EffectChip({ effect }: { effect: ActiveEffect }) {
-  const summary = effectSummary(effect);
+  const t = useTranslator("abilityRegistry");
+
+  const summary = effectSummary(effect, t);
 
   return (
     <Tooltip>

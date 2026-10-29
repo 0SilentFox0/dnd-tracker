@@ -1,5 +1,6 @@
 import { useTranslations } from "next-intl";
 
+import { useAbilityText } from "@/components/abilities/use-ability-text";
 import { HUD_SURFACE } from "@/components/hud";
 import { Button } from "@/components/ui/button";
 import { ResponsiveDialog } from "@/components/ui/responsive-dialog";
@@ -19,6 +20,8 @@ export function NodeSheet({ target, dto, actions }: {
   const t = useTranslations("skillTree.node");
 
   const tr = useTranslator("skillTree");
+
+  const abilityText = useAbilityText();
 
   if (!target) return null;
 
@@ -41,7 +44,7 @@ export function NodeSheet({ target, dto, actions }: {
     <ResponsiveDialog open onOpenChange={(open) => !open && actions.onClose()} title={title} description={tag} footer={footer} className={HUD_SURFACE}>
       {skill ? (
         <div className="space-y-2 text-sm">
-          {skill.summary.length > 0 && <p className="text-hud-gold">{skill.summary.join(" · ")}</p>}
+          {skill.summary.length > 0 && <p className="text-hud-gold">{abilityText.flowsText(skill.summary)}</p>}
           {skill.description && <p className="whitespace-pre-line">{skill.description}</p>}
         </div>
       ) : (

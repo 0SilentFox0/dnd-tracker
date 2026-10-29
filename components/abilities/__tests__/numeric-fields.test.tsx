@@ -6,9 +6,9 @@ import { afterEach, describe, expect, it } from "vitest";
 import { AmountField } from "@/components/abilities/fields/AmountField";
 import { FlatField } from "@/components/abilities/fields/FlatField";
 import { NumberListField } from "@/components/abilities/fields/NumberListField";
-import type { FieldMeta } from "@/lib/utils/abilities/registry/fields";
+import type { LocalizedFieldMeta } from "@/lib/utils/abilities/registry/fields";
 
-const meta = { name: "flat", label: "Значення", input: "flat" } as FieldMeta;
+const meta = { name: "flat", label: "Значення", input: "flat" } as LocalizedFieldMeta;
 
 function Harness({ kind }: { kind: "flat" | "amount" }) {
   const [v, setV] = useState<unknown>(undefined);

@@ -6,6 +6,7 @@ import { HitFrame } from "@/components/battle/fx/PortraitFx";
 import { EffectIcon, HealthBar, HealthLabel, hitFlashClass, HitFloat, ZoomablePortrait } from "@/components/battle/hud";
 import { MonsterStatblock } from "@/components/common/MonsterStatblock";
 import { useBattleSceneData, useFxImpacts, useHitFx } from "@/lib/hooks/battle";
+import { useTranslator } from "@/lib/i18n/use-translator";
 import { cn } from "@/lib/utils";
 import { getEffectiveArmorClass } from "@/lib/utils/battle/participant/helpers";
 import { canSeeExactStats, effectLines, formatKnownArmorClass, resolveKnownArmorClass, resolveObservedTraits, statblockOf } from "@/lib/utils/battle/view";
@@ -21,6 +22,8 @@ function Section({ title, children }: { title: string; children: ReactNode }) {
 }
 
 function EffectRow({ effect: e }: { effect: ActiveEffect }) {
+  const abilityT = useTranslator("abilityRegistry");
+
   return (
     <div className="flex gap-3 border-b border-white/[.08] py-2.5">
       <span className={e.type === "buff" ? "text-[#cdb87e]" : "text-hud-danger"}>
@@ -31,7 +34,7 @@ function EffectRow({ effect: e }: { effect: ActiveEffect }) {
           <span>{e.name}</span>
           <span className="text-[13px] font-normal text-[var(--hud-muted)]">{e.zone ? "зона" : e.permanent ? "постійно" : `${e.duration} р.`}</span>
         </div>
-        {effectLines(e).map((line) => <p key={line} className="mt-0.5 text-[13px] leading-[18px] text-[#a89c88]">{line}</p>)}
+        {effectLines(e, abilityT).map((line) => <p key={line} className="mt-0.5 text-[13px] leading-[18px] text-[#a89c88]">{line}</p>)}
         {e.source && <p className="text-[13px] leading-[18px] text-[#a89c88]">Від: {e.source.abilityName ? `${e.source.abilityName} (${e.source.name})` : e.source.name}</p>}
       </div>
     </div>

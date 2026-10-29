@@ -3,6 +3,7 @@ import type { OwnerKind } from "@/lib/utils/abilities/read";
 import type { Ability, StaticEffect } from "@/lib/utils/abilities/schema";
 import type { GridPoint } from "@/types/battle";
 
+export type { AbilityFlowSummary, Segment } from "@/lib/utils/abilities/segments";
 export type { Ability, StaticEffect };
 
 export interface AbilitySource {

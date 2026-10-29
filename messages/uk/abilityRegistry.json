@@ -302,30 +302,40 @@
       }
     },
     "damageThreshold": {
-      "label": "Поріг шкоди"
+      "label": "Поріг шкоди",
+      "fields": {
+        "value": "Шкода менша за поріг (1–100) стає 0"
+      }
     }
   },
   "triggers": {
     "passive": {
-      "label": "Пасивно (завжди)"
+      "label": "Пасивно (завжди)",
+      "hint": "Діє постійно, без події. Приклад: +2 до КЗ."
     },
     "battleStart": {
-      "label": "Початок бою"
+      "label": "Початок бою",
+      "hint": "Спрацьовує один раз на початку бою. Приклад: тимчасові HP на старті."
     },
     "roundStart": {
-      "label": "Початок раунду"
+      "label": "Початок раунду",
+      "hint": "Спрацьовує на початку кожного раунду. Приклад: дія лігва 5e — разом з лімітом «Разів за раунд» = 1."
     },
     "roundEnd": {
-      "label": "Кінець раунду"
+      "label": "Кінець раунду",
+      "hint": "Спрацьовує наприкінці кожного раунду. Приклад: регенерація наприкінці раунду."
     },
     "turnStart": {
-      "label": "Початок мого ходу"
+      "label": "Початок мого ходу",
+      "hint": "Спрацьовує на початку вашого ходу. Приклад: лікування на початку ходу."
     },
     "turnEnd": {
-      "label": "Кінець мого ходу"
+      "label": "Кінець мого ходу",
+      "hint": "Спрацьовує наприкінці вашого ходу. Приклад: зняти ефект наприкінці ходу."
     },
     "attack": {
-      "label": "Атака"
+      "label": "Атака",
+      "hint": "Спрацьовує до або після атаки за участі вас. Приклад: перед атакою по вас — штраф до влучання."
     },
     "hit": {
       "label": "Влучання",
@@ -333,16 +343,19 @@
         "whose": {
           "ally": "іншого союзника"
         }
-      }
+      },
+      "hint": "Спрацьовує, коли атака влучила. Приклад: додаткова шкода при влученні."
     },
     "kill": {
       "label": "Смерть",
       "fields": {
         "role": "Хто"
-      }
+      },
+      "hint": "Спрацьовує, коли хтось гине. Приклад: бонус, коли ви вбиваєте ворога."
     },
     "lethalDamage": {
-      "label": "Летальна шкода"
+      "label": "Летальна шкода",
+      "hint": "Спрацьовує, коли вам завдано смертельної шкоди. Приклад: лишитися з 1 HP."
     },
     "spellCast": {
       "label": "Заклинання",
@@ -355,19 +368,23 @@
         "role": {
           "target": "ціль — я"
         }
-      }
+      },
+      "hint": "Спрацьовує до або після заклинання. Приклад: бонус після того, як ви наклали закляття."
     },
     "moraleCheck": {
       "label": "Перевірка моралі",
       "fields": {
         "whose": "Чия"
-      }
+      },
+      "hint": "Спрацьовує після перевірки моралі. Приклад: бонус після провалу моралі союзника."
     },
     "action": {
-      "label": "Основна дія (кнопка)"
+      "label": "Основна дія (кнопка)",
+      "hint": "Кнопка основної дії, яку гравець натискає сам. Приклад: особлива атака."
     },
     "bonusAction": {
-      "label": "Бонусна дія (кнопка)"
+      "label": "Бонусна дія (кнопка)",
+      "hint": "Кнопка бонусної дії, яку гравець натискає сам. Приклад: ривок."
     }
   },
   "conditionTypes": {
@@ -789,5 +806,243 @@
       "defaultName": "Нове вміння",
       "note": "Опишіть вміння"
     }
+  },
+  "summary": {
+    "amount": {
+      "value": "{value}",
+      "scale": "[{scale}]",
+      "formula": "({formula})",
+      "spellRollFormula": "({formula})% кидка заклинання",
+      "spellRollFull": "кидок заклинання",
+      "spellRollPct": "{value}% кидка заклинання",
+      "percentOwnerAttack": "{value} % шкоди першої атаки",
+      "percentOfEventDamage": "{value}% від завданої шкоди",
+      "percentOfMaxHp": "{value}% від макс. HP"
+    },
+    "flat": {
+      "number": "{value}",
+      "formula": "+({formula})",
+      "scale": "+[{scale}]",
+      "spellRollFull": "+кидок",
+      "spellRollNegFull": "−кидок",
+      "spellRollPct": "{value}% кидка"
+    },
+    "limits": {
+      "perBattle": "{n, plural, one {# раз} few {# рази} many {# разів} other {# разів}} за бій",
+      "perRestN": "{n, plural, one {# раз} few {# рази} many {# разів} other {# разів}} за {rest}",
+      "perRestExpr": "{expr} разів за {rest}",
+      "restShort": "короткий відпочинок",
+      "restLong": "довгий відпочинок",
+      "perRound": "{n}/раунд",
+      "perTurn": "{n}/хід",
+      "cooldown": "перезарядка {n} р.",
+      "chance": "{n}%",
+      "lair": "дія лігва",
+      "legendary": "легендарна дія ({n})",
+      "pool": "пул «{key}»: {cost}"
+    },
+    "text": "{value}",
+    "percent": {
+      "number": "{value}%",
+      "formula": "({formula})%",
+      "scale": "[{scale}]%"
+    },
+    "effects": {
+      "dealDamage": "шкода {amount}{hasType, select, yes { {type}} other {}}{hasFalloff, select, yes { ({falloff}%)} other {}}",
+      "heal": "{revive, select, yes {воскресіння} other {лікування}} {amount}",
+      "dot": "{type} {amount}/раунд × {rounds} р.{linked, select, yes {, поки діє стан} other {}}",
+      "hot": "лікування {amount}/раунд × {rounds} р.",
+      "berserk": "шал: автоатака випадкової істоти, +{percent}% шкоди × {rounds} р.",
+      "charm": "перехід на бік заклинателя × {rounds} р.",
+      "maneuver": "{name}: {percent} % шкоди атаки",
+      "summonUnit": "прикликати {count}× обраного юніта",
+      "summonGroup": "прикликати {count}× юніта «{group}», Tier {tier}",
+      "raiseDead": "підняти мертвих юнітів на {percent}% HP",
+      "statAtLeast": "{stat} не менше {n}",
+      "stat": "{stat}{hasLevels, select, yes { (рівні {levels})} other {}} {value}",
+      "damageBonus": "шкода ({filter}{hasSchool, select, yes {, школа} other {}}) {value}{hasMark, select, yes { за мітку «{mark}»} other {}}",
+      "grantAction": "{parts}",
+      "grantExtra": "+{n} дія",
+      "grantRefreshAction": "оновлює дію",
+      "grantRefreshBonusAction": "оновлює бонусну дію",
+      "grantRefreshReaction": "оновлює реакцію",
+      "note": "{text}",
+      "noteDm": "✋ {text}",
+      "applyCondition": "{condition}{hasPercent, select, yes { {percent}%} other {}}{hasLevels, select, yes { ×{levels}} other {}} × {rounds} р.{breakOnDamage, select, yes {, до шкоди} other {}}{hasSave, select, yes {, рятівний кидок {ability}} other {}}{hasEscape, select, yes {, вирватися проти СК} other {}}",
+      "restoreSpellSlotLevels": "відновлює слоти до {level}-го кола за бюджетом кіл на короткому відпочинку",
+      "restoreSpellSlot": "+{count} слот",
+      "drainSpellSlot": "−{count} слот заклинань",
+      "changeMorale": "мораль {delta}",
+      "mark": "мітка × {rounds} р.",
+      "copySpellBuffs": "копіює бафи закляття, накладені на союзника",
+      "guard": "захист: {percent}% шкоди від атак × {rounds} р.",
+      "cleanse": "{includeConditions, select, yes {зняття дебафів і станів} other {зняття дебафів}}",
+      "randomOf": "одне з: {options}",
+      "help": "перевага союзнику на наступну атаку",
+      "push": "відштовхнути на {feet} фт від кастера"
+    },
+    "flags": {
+      "sense": "{sense} {range} фт",
+      "advantage": "перевага на {kind, select, all {атаки} melee {ближні атаки} other {дальні атаки}}{hasAbility, select, yes { ({ability})} other {}}{consume, select, yes {, до першої атаки} other {}}",
+      "disadvantage": "недолік на атаки",
+      "disadvantageForAttackers": "недолік для атакувальників",
+      "advantageForAttackers": "атакуючі цю ціль мають перевагу",
+      "guaranteedHit": "гарантоване влучання",
+      "resistance": "{mode, select, immune {імунітет: {type}} vuln {вразливість {type} {n}%} other {опір {type} {n}%}}{kind, select, ranged { (дальні атаки)} melee { (ближні атаки)} other {}}{hasSchool, select, yes { (заклинання школи {school})} other {}}",
+      "spellAbsorb": "лікується на {percent}% шкоди від заклинань школи {school}",
+      "castSpellOnHit": "влучання накладає випадкове закляття (із {count})",
+      "spellImmunity": "{hasIds, select, yes {імунітет до заклинань ({count})} other {імунітет до всіх заклинань}}",
+      "spellTargeting": "{scope, select, school {закляття школи {school}} ids {закляття ({count})} other {закляття}} — {mode, select, all {на всіх} other {по області (до {max} цілей)}}",
+      "counterAttack": "відсіч{ranged, select, yes { (і на дальні)} other {}} +{percent}%",
+      "attackHitsAllEnemies": "кожна атака б'є всіх ворогів",
+      "seeEnemyHp": "бачить HP ворогів",
+      "multiTargetFalloff": "додаткові цілі дальньої атаки отримують {percent}% шкоди",
+      "chainShot": "після влучання постріл перескакує на найближчого ворога ({jumps}×), кожен стрибок — {percent}% шкоди попереднього",
+      "lifesteal": "атаки лікують на {percent}% завданої шкоди",
+      "moraleChance": "шанс додаткового ходу від моралі +{percent}%",
+      "noRetaliation": "атаки без відсічі",
+      "strikeAndReturn": "після атаки повертається на стартову клітинку",
+      "unlimitedRetaliation": "відповідає на кожну атаку",
+      "extraRetaliations": "+{count} відсіч за раунд",
+      "noNegativeMorale": "від'ємна мораль = 0",
+      "ignoreMorale": "мораль не діє",
+      "minMorale": "мораль не нижче {value}",
+      "extraSummons": "прикликання{hasIds, select, yes { заклять ({ids})} other {}} дають +{count} істот",
+      "piercingShot": "дальня атака влучає в усіх ворогів на лінії за ціллю",
+      "fireWave": "влучання обпікає ворогів позаду цілі (конус {size} фт): {percent}% шкоди вогнем",
+      "banishSummons": "прикликані ворогом істоти втрачають {percent}% HP",
+      "saveAdvantage": "перевага на рятівні кидки{hasList, select, yes { ({list})} other {}}{vsSpells, select, yes { проти заклинань} other {}}",
+      "saveDisadvantage": "недолік на рятівні кидки{hasList, select, yes { ({list})} other {}}",
+      "autoFailSave": "автопровал рятівних кидків{hasList, select, yes { ({list})} other {}}",
+      "saveProficiency": "майстерність в рятівних кидках{hasList, select, yes { ({list})} other {}}",
+      "checkAdvantage": "перевага на перевірки{hasList, select, yes { ({list})} other {}}",
+      "checkDisadvantage": "недолік на перевірки{hasList, select, yes { ({list})} other {}}",
+      "skillProficiency": "майстерність у навичках{hasList, select, yes { ({list})} other {}}",
+      "skillExpertise": "експертиза в навичках{hasList, select, yes { ({list})} other {}} (подвійна майстерність)",
+      "proficiency": "володіння ({list})",
+      "autoCritAdjacent": "ближні атаки з 5 фт по цілі — критичні",
+      "twoWeaponFighting": "модифікатор до шкоди другої руки",
+      "critImmunity": "критичне влучання по власнику стає звичайним",
+      "cunningAction": "Ривок, Відхід і Сховатися бонусною дією",
+      "evasion": "рятівний кидок Спритності з половиною шкоди: успіх — 0, провал — половина",
+      "proneDefense": "ближні атаки по цілі з перевагою, дальні — з недоліком",
+      "conditionImmunity": "{all, select, yes {імунітет до контролю} other {імунітет: {list}}}",
+      "cond": {
+        "fear": "страх",
+        "berserk": "шал",
+        "charm": "чарування"
+      },
+      "damageThreshold": "поріг шкоди {value}: менша шкода ігнорується"
+    },
+    "unknownEffect": "невідомий ефект ({kind})",
+    "triggers": {
+      "otherAlly": "іншого союзника",
+      "spellCount": "закляття: {n}",
+      "school": "школа {school}",
+      "spellLevels": "рівні {levels}"
+    },
+    "conditions": {
+      "hpBelow": "HP ≤ {percent}% ({who})",
+      "hpAbove": "HP ≥ {percent}% ({who})",
+      "attackKind": "тип атаки: {kind}",
+      "attackKinds": {
+        "melee": "ближня",
+        "ranged": "дальня",
+        "magic": "магія"
+      },
+      "targetHasCondition": "ціль має стан «{condition}»",
+      "targetCreatureType": "тип істоти цілі: {types}",
+      "targetRace": "раса цілі: {races}",
+      "targetDead": "ціль мертва",
+      "actorIsEnemy": "виконавець події — ворог",
+      "hasMark": "мітка «{markId}»{bySelf, select, yes { (лише моя)} other {}}: {who}",
+      "armorWorn": "броня на мені: {categories}{shield, select, with { (зі щитом)} without { (без щита)} other {}}",
+      "armorKinds": {
+        "none": "без броні",
+        "light": "легка",
+        "medium": "середня",
+        "heavy": "важка"
+      },
+      "attackRollMode": "кидок атаки: {mode}",
+      "rollModes": {
+        "advantage": "перевага",
+        "disadvantage": "недолік",
+        "normal": "звичайний"
+      },
+      "allyAdjacent": "союзник поруч із ціллю",
+      "notMoved": "не рухався цього ходу",
+      "withThisItem": "атака цим предметом",
+      "not": "НЕ ({condition})",
+      "all": "усі: ({items})",
+      "any": "будь-яка з: ({items})",
+      "who": {
+        "self": "я",
+        "eventTarget": "ціль події",
+        "eventActor": "виконавець події",
+        "anyAlly": "будь-який союзник",
+        "anyEnemy": "будь-який ворог"
+      }
+    },
+    "spellOnly": {
+      "inputDice": "кубики з введення (до {max}): {label}",
+      "cost": {
+        "action": "дія",
+        "bonusAction": "бонусна дія",
+        "reaction": "реакція"
+      },
+      "grantCast": "підкаст «{label}» ({cost}{hasUses, select, yes {, ×{uses}} other {}}) на {rounds} р.",
+      "attack": {
+        "any": "будь-яку",
+        "melee": "ближню",
+        "ranged": "дальню"
+      },
+      "hitRider": "заряди ×{charges}: +{dice} {type} на {attack} атаку{consumeOnMiss, select, yes { (і промах)} other {}}{hasSave, select, yes {, СК {ability}: {onFail}} other {}}",
+      "side": {
+        "enemies": "вороги",
+        "allies": "союзники",
+        "all": "усі"
+      },
+      "anchoredZone": "аура {radius} фт на цілі ({side}{excludeBearer, select, yes {, крім носія} other {}}) на {rounds} р.{hasEnter, select, yes {; вхід: {enter}} other {}}{hasTurnStart, select, yes {; початок ходу: {turnStart}} other {}}{endsOutside, select, yes {; закінчується, якщо хід починається поза аурою} other {}}",
+      "item": "предмет",
+      "hp": "{hp} HP",
+      "acSpellDc": "= СК",
+      "summonInline": "викликає {count}× «{name}» ({hp}, КЗ {ac}) на {rounds} р.{hasUpcast, select, yes {; +1 за кожні {upcastEvery} кола слота} other {}}{hasAura, select, yes {; аура {auraRadius} фт{auraAttack, select, yes { (атака заклинанням)} other {}}} other {}}",
+      "transform": "перетворює ціль на форму юніта на {rounds} р.; на 0 HP форми — відкат, надлишок шкоди переходить на звичайну форму",
+      "moveSelf": "кастер переміщується до цілі",
+      "terrain": {
+        "wall": "стіна",
+        "difficult": "складна місцевість"
+      },
+      "shape": {
+        "line": "лінія до цілі",
+        "cell": "клітинки області"
+      },
+      "createTerrain": "{terrain}: {shape} (до {cells}) на {rounds} р.",
+      "chooseOne": "на вибір: {options}"
+    }
+  },
+  "damageTypes": {
+    "fire": "Вогонь",
+    "cold": "Лід",
+    "lightning": "Блискавка",
+    "acid": "Кислота",
+    "poison": "Отрута",
+    "necrotic": "Некротична",
+    "radiant": "Світло",
+    "thunder": "Грім",
+    "psychic": "Психічна",
+    "force": "Сила",
+    "bludgeoning": "Дробляча",
+    "piercing": "Колюча",
+    "slashing": "Рубляча",
+    "bleed": "Кровотеча"
+  },
+  "triggerGroups": {
+    "always": "Завжди",
+    "boundaries": "Початок і кінець",
+    "myTurn": "Мій хід",
+    "incoming": "Мене атакують",
+    "outgoing": "Мої дії",
+    "other": "Інше"
   }
 }

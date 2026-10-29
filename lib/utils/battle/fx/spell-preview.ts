@@ -10,6 +10,7 @@ import type { FxAuraKind, FxSpec } from "./types";
 import type { LibrarySpell } from "@/data/library/types";
 import { CombatStatus, ParticipantSide } from "@/lib/constants/battle";
 import { describeEffect } from "@/lib/utils/abilities/registry/effects";
+import { type Segment, uniqueLines } from "@/lib/utils/abilities/segments";
 import { castSpell } from "@/lib/utils/battle/spell";
 import type { CastableSpell } from "@/lib/utils/battle/types/spell-process";
 import { targetingLabel } from "@/lib/utils/spells/model/labels";
@@ -41,7 +42,7 @@ export interface SpellFxPreview extends SpellFxResult {
   school: string;
   level: number;
   description: string;
-  effects: string[];
+  effects: Segment[][];
   targeting: string;
 }
 
@@ -166,7 +167,7 @@ export function previewSpellFx(spell: LibrarySpell, fx?: SpellFx | null): SpellF
     school: spell.school,
     level: spell.level,
     description: spell.description ?? "",
-    effects: [...new Set(castable.definition.effects.map(describeEffect))],
+    effects: uniqueLines(castable.definition.effects.map(describeEffect)),
     targeting: targetingLabel(castable.definition.targeting),
     ...previewCastFx(castable),
   };
