@@ -9,9 +9,9 @@ const level = z.string().regex(/^([1-9]|1\d|20)$/);
 
 const DiceTable = z.record(level, z.string().regex(/^\d+d\d+([+-]\d+d\d+)*$/));
 
-const INITIATIVE_ORDER_MESSAGE = "Мінімум ініціативи більший за максимум";
+const INITIATIVE_ORDER_MESSAGE = "rules.validation.initiativeOrder";
 
-const CRITICALS_ORDER_MESSAGE = "Фумбл має бути нижчим за крит";
+const CRITICALS_ORDER_MESSAGE = "rules.validation.criticalsOrder";
 
 const sectionSchemas = {
   morale: z.strictObject({ enabled: z.boolean(), cap: z.number().int().min(1).max(10) }),

@@ -81,8 +81,8 @@ describe("rules: сумісність збережених даних і patch",
     expect(merged.ok).toBe(false);
 
     if (!merged.ok) expect(merged.issues).toEqual([
-      { code: "custom", message: "Мінімум ініціативи більший за максимум", path: ["initiative"] },
-      { code: "custom", message: "Фумбл має бути нижчим за крит", path: ["criticals"] },
+      { code: "custom", message: "rules.validation.initiativeOrder", path: ["initiative"] },
+      { code: "custom", message: "rules.validation.criticalsOrder", path: ["criticals"] },
     ]);
 
     expect(current.initiative.heroMin).toBe(10);
