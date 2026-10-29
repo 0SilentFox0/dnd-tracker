@@ -30,12 +30,22 @@ function leadingKey(text: string): { key: unknown[]; rest: string } | undefined 
   }
 }
 
-function keyLabel(key: unknown[]) {
+function keyParts(key: unknown[]) {
   const [, kind, source, , name, parent] = key;
 
-  const owner = Array.isArray(parent) && parent.length ? ` (${parent.join(", ")})` : "";
+  return { kind: kindLabel(String(kind)), name: String(name), owner: Array.isArray(parent) && parent.length ? ` (${parent.join(", ")})` : "", source: source ? String(source) : "" };
+}
 
-  return `${kindLabel(String(kind))} «${String(name)}»${owner}${source ? ` · ${String(source)}` : ""}`;
+function keyLabel(key: unknown[]) {
+  const { kind, name, owner, source } = keyParts(key);
+
+  return `${kind} «${name}»${owner}${source ? ` · ${source}` : ""}`;
+}
+
+export function entryParts(key: string) {
+  const parsed = leadingKey(key);
+
+  return parsed ? keyParts(parsed.key) : { kind: "", name: key, owner: "", source: "" };
 }
 
 export function entryLabel(key: string) {
@@ -103,7 +113,18 @@ const ISSUE_CODE_LABELS: Record<string, string> = {
   UNSUPPORTED_COPY: "Непідтримувані копії записів",
   UNSUPPORTED_FEAT_CATEGORY: "Непідтримувана категорія рис",
   NOTES_SIZE: "Примітки завеликі",
+  MIXED_EDITION_CONFIRMATION_REQUIRED: "Потрібне підтвердження змішування редакцій",
 };
+
+type CategoryCount = { present: number; mapped: number; partial: number; skipped: number };
+
+export function splitCategories(counts: Record<string, CategoryCount>) {
+  const entries = Object.entries(counts).filter(([, count]) => count.present > 0);
+
+  const technical = (count: CategoryCount) => count.mapped === 0 && count.partial === 0 && count.skipped >= count.present;
+
+  return { main: entries.filter(([, count]) => !technical(count)), technical: entries.filter(([, count]) => technical(count)) };
+}
 
 export const issueCodeLabel = (code: string) => ISSUE_CODE_LABELS[code] ?? code;
 
@@ -128,7 +149,7 @@ type ReportRow = { status: string; issues: ImportIssue[] };
 
 export const rowActionCount = (row: ReportRow) => splitInfoIssues(row.issues).actions.length;
 
-export const REPORT_ROW_FILTERS = { changed: (row: ReportRow) => row.status !== "unchanged" || rowActionCount(row) > 0, manual: (row: ReportRow) => rowActionCount(row) > 0, all: () => true } as const;
+export const REPORT_ROW_FILTERS = { changed: (row: ReportRow) => row.status !== "unchanged", manual: (row: ReportRow) => rowActionCount(row) > 0, all: () => true } as const;
 
 export function sourceLabel(source: unknown) {
   if (!isRecord(source)) return String(source);

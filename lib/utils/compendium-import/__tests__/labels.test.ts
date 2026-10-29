@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { describeRulesPatch, entryLabel, groupIssues, infoSummary, issueCodeLabel, metaSummary, readablePath, REPORT_ROW_FILTERS, splitInfoIssues, summaryLines } from "../labels";
+import { describeRulesPatch, entryLabel, entryParts, groupIssues, infoSummary, issueCodeLabel, metaSummary, readablePath, REPORT_ROW_FILTERS, splitCategories, splitInfoIssues, summaryLines } from "../labels";
 
 const key = JSON.stringify([1, "feat", "obojimatallgrass", "classic", "cloud hopper", []]);
 
@@ -48,11 +48,19 @@ describe("report grouping", () => {
     expect(issueCodeLabel("SOMETHING_NEW")).toBe("SOMETHING_NEW");
   });
 
-  it("treats rows with manual actions as changed but not info-only rows", () => {
+  it("keeps unchanged rows with manual actions out of the changed filter", () => {
     const info = { code: "MEDIA_OR_FOUNDRY_SKIPPED", severity: "warning" as const, path: "p", action: "a" };
 
-    expect(REPORT_ROW_FILTERS.changed({ status: "unchanged", issues: [info] })).toBe(false);
+    expect(REPORT_ROW_FILTERS.changed({ status: "unchanged", issues: [{ ...info, code: "MANUAL" }] })).toBe(false);
     expect(REPORT_ROW_FILTERS.changed({ status: "update", issues: [] })).toBe(true);
     expect(REPORT_ROW_FILTERS.manual({ status: "unchanged", issues: [{ ...info, code: "MANUAL" }] })).toBe(true);
+  });
+
+  it("splits technical categories and entry parts", () => {
+    const { main, technical } = splitCategories({ feat: { present: 2, mapped: 1, partial: 0, skipped: 1 }, foundryFeat: { present: 3, mapped: 0, partial: 0, skipped: 3 }, spell: { present: 0, mapped: 0, partial: 0, skipped: 0 } });
+
+    expect(main.map(([kind]) => kind)).toEqual(["feat"]);
+    expect(technical.map(([kind]) => kind)).toEqual(["foundryFeat"]);
+    expect(entryParts(key)).toEqual({ kind: "Риса", name: "cloud hopper", owner: "", source: "obojimatallgrass" });
   });
 });
