@@ -8,7 +8,7 @@ import { castSpell } from "@/lib/utils/battle/spell";
 import { applyTransforms } from "@/lib/utils/battle/transform/apply-transforms";
 import { revertExpiredTransforms } from "@/lib/utils/battle/transform/revert";
 import type { CastableSpell } from "@/lib/utils/battle/types/spell-process";
-import { DEFAULT_RULES } from "@/lib/utils/rules";
+import { DEFAULT_RULES, type Ruleset } from "@/lib/utils/rules";
 import { SpellDefinitionSchema, type SpellEffect } from "@/lib/utils/spells/model/schema";
 import type { BattleParticipant } from "@/types/battle";
 
@@ -232,7 +232,7 @@ describe("transform: шкода заклинанням", () => {
     definition: { dice: 2, cost: "action", concentration: false, targeting: { kind: "enemy", range: 30 }, resolution: { kind: "auto" }, effects: [{ kind: "dealDamage", amount: { spellRoll: 100 }, damageType: "force" }], raceModifiers: [] },
   });
 
-  const hitForm = async (ruleset: typeof rules) => {
+  const hitForm = async (ruleset: Ruleset) => {
     const { orc } = await transformed();
 
     const c = mage();
