@@ -11,7 +11,7 @@ const tx = vi.hoisted(() => ({
   aiProposal: { findFirst: vi.fn(), update: vi.fn(), updateMany: vi.fn(async () => ({ count: 1 })) },
   scenarioPage: { findFirst: vi.fn(), updateMany: vi.fn(async () => ({ count: 1 })) },
   campaign: { findUnique: vi.fn(async () => ({ acquaintancesEnabled: true })) },
-  acquaintance: { count: vi.fn(async () => 1), findFirst: vi.fn(async () => null), create: vi.fn(async ({ data }: { data: { id: string } }) => data) },
+  acquaintance: { count: vi.fn(async () => 1), findMany: vi.fn(async () => []), create: vi.fn(async ({ data }: { data: { id: string } }) => data) },
 }));
 
 vi.mock("@/lib/db", () => ({ prisma: { $transaction: (fn: (t: typeof tx) => unknown) => fn(tx) } }));
@@ -35,7 +35,7 @@ describe("applyProposal with createAcquaintance", () => {
   beforeEach(() => {
     vi.clearAllMocks();
     tx.campaign.findUnique.mockResolvedValue({ acquaintancesEnabled: true });
-    tx.acquaintance.findFirst.mockResolvedValue(null);
+    tx.acquaintance.findMany.mockResolvedValue([]);
     tx.acquaintance.count.mockResolvedValue(1);
     tx.scenarioPage.updateMany.mockResolvedValue({ count: 1 });
     tx.aiProposal.findFirst.mockResolvedValue({ id: "pr", pageId: "p", status: "pending", ops: proposalOps() });
@@ -58,7 +58,7 @@ describe("applyProposal with createAcquaintance", () => {
   });
 
   it("same name (case-insensitive) reuses the existing acquaintance", async () => {
-    tx.acquaintance.findFirst.mockResolvedValue({ id: "existing", name: "беатріс" } as never);
+    tx.acquaintance.findMany.mockResolvedValue([{ id: "existing", name: "беатріс" }] as never);
 
     await run();
 

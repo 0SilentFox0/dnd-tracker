@@ -18,8 +18,25 @@ export interface CreateAcquaintanceInput {
 export const findAcquaintanceByCharacter = (tx: Prisma.TransactionClient, campaignId: string, characterId: string) =>
   tx.acquaintance.findFirst({ where: { campaignId, characterId }, include: ACQUAINTANCE_INCLUDE });
 
-export const findAcquaintanceByName = (tx: Prisma.TransactionClient, campaignId: string, name: string) =>
-  tx.acquaintance.findFirst({ where: { campaignId, name: { equals: name.trim(), mode: "insensitive" } }, include: ACQUAINTANCE_INCLUDE, orderBy: { createdAt: "asc" } });
+export async function findAcquaintancesByNames(tx: Prisma.TransactionClient, campaignId: string, names: string[]) {
+  const found = new Map<string, string>();
+
+  if (names.length === 0) return found;
+
+  const rows = await tx.acquaintance.findMany({
+    where: { campaignId, OR: names.map((name) => ({ name: { equals: name.trim(), mode: "insensitive" as const } })) },
+    select: { id: true, name: true },
+    orderBy: { createdAt: "asc" },
+  });
+
+  for (const r of rows) {
+    const key = r.name.trim().toLowerCase();
+
+    if (!found.has(key)) found.set(key, r.id);
+  }
+
+  return found;
+}
 
 export const createAcquaintance = (tx: Prisma.TransactionClient, campaignId: string, input: CreateAcquaintanceInput) =>
   tx.acquaintance.create({

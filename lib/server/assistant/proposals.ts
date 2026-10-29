@@ -12,7 +12,7 @@ import { DEFAULT_LOCALE, type Locale } from "@/lib/i18n/config";
 import { getTranslator } from "@/lib/i18n/translator";
 import { scenarioContentSchema } from "@/lib/schemas/scenario";
 import { slidesSchema } from "@/lib/schemas/show";
-import { createAcquaintance, findAcquaintanceByName } from "@/lib/server/acquaintances/service";
+import { createAcquaintance, findAcquaintancesByNames } from "@/lib/server/acquaintances/service";
 import { chatCaller } from "@/lib/server/assistant/caller";
 import { legacyPreview, reconcileLegacyProposal } from "@/lib/server/assistant/legacy-proposals";
 import { withCampaignContentWrite } from "@/lib/server/content/write";
@@ -141,16 +141,14 @@ async function applyClaimed(tx: Tx, campaignId: string, userId: string, proposal
 
   const ids = new Map<string, string>();
 
-  const byName = new Map<string, string>();
+  const byName = await findAcquaintancesByNames(tx, campaignId, newcomers.map((n) => n.name));
 
   const created: { id: string; name: string; description: string }[] = [];
 
   for (const n of newcomers) {
     const key = n.name.trim().toLowerCase();
 
-    const seen = byName.get(key);
-
-    const existing = seen ?? (await findAcquaintanceByName(tx, campaignId, n.name))?.id;
+    const existing = byName.get(key);
 
     const id = existing ?? randomUUID();
 
