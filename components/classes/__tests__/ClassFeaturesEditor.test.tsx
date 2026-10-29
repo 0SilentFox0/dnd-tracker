@@ -39,7 +39,10 @@ describe("ClassFeaturesEditor", () => {
     fireEvent.change(screen.getByLabelText("classes.features.levelToAdd"), { target: { value: "4" } });
     fireEvent.click(screen.getByRole("button", { name: "classes.features.addLevel" }));
 
-    expect(headings()).toEqual([2, 4, 9].map((level) => `classes.features.level {"level":${level}}`));
+    const chips = Array.from(screen.getByRole("navigation", { name: "classes.features.levelsNav" }).querySelectorAll("button")).map((b) => b.textContent);
+
+    expect(chips).toEqual(["2", "4", "9"]);
+    expect(headings()).toEqual(['classes.features.level {"level":4}']);
   });
 
   it("видаляє рівень", () => {
