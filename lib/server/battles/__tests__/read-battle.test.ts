@@ -2,8 +2,8 @@ import { describe, expect, it, vi } from "vitest";
 
 import { readBattleScene } from "@/lib/server/battles/read-battle";
 import { createMockParticipant } from "@/lib/utils/battle/__tests__/fixtures/mock-participant";
-import { readScenePreview } from "@/lib/utils/battle/pipeline/run-battle-mutation";
 import type { PipelineDeps } from "@/lib/utils/battle/pipeline/run-battle-mutation";
+import { readScenePreview } from "@/lib/utils/battle/pipeline/run-battle-mutation";
 import type { LoadedBattle } from "@/lib/utils/battle/store";
 import { DEFAULT_RULES } from "@/lib/utils/rules";
 
@@ -59,7 +59,9 @@ describe("readBattleScene", () => {
 
   it("answers the scene without saving or publishing", async () => {
     const d = deps();
+
     const res = await readBattleScene(params, d);
+
     const body = await res.json();
 
     expect(res.status).toBe(200);
@@ -73,6 +75,7 @@ describe("readBattleScene", () => {
 
   it("runs the read inside the campaign write lock and passes its errors through", async () => {
     const withWrite = vi.fn(async (_id: string, cb: () => Promise<unknown>) => cb()) as unknown as PipelineDeps["withWrite"];
+
     const res = await readBattleScene(params, deps({ withWrite }));
 
     expect(res.status).toBe(200);
@@ -81,7 +84,9 @@ describe("readBattleScene", () => {
 
   it("maps a lock failure to its status", async () => {
     const { ContentError } = await import("@/lib/server/content/errors");
+
     const withWrite = (async () => { throw new ContentError("campaign_not_found", 404); }) as PipelineDeps["withWrite"];
+
     const res = await readBattleScene(params, deps({ withWrite }));
 
     expect(res.status).toBe(404);
@@ -91,6 +96,7 @@ describe("readBattleScene", () => {
 describe("readScenePreview", () => {
   it("builds the full scene with recent events and no mutation", async () => {
     const loadRecentEvents = vi.fn(async () => []);
+
     const preview = await readScenePreview("u-player", loaded(), { includeRecentEvents: 5 }, { loadRecentEvents });
 
     expect(loadRecentEvents).toHaveBeenCalledWith("b1", 5);

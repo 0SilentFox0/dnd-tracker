@@ -4,8 +4,8 @@ import { composeMapView } from "../map-compose";
 import type { MapScene } from "../map-scene";
 
 import { ParticipantSide } from "@/lib/constants/battle";
-import { createMockParticipant } from "@/lib/utils/battle/__tests__/fixtures/mock-participant";
 import { AttackType } from "@/lib/constants/battle";
+import { createMockParticipant } from "@/lib/utils/battle/__tests__/fixtures/mock-participant";
 import type { BattleAttack, BattleMapConfig, BattleMapMark, BattleParticipant, GridPoint } from "@/types/battle";
 
 const map: BattleMapConfig = { cols: 10, rows: 5, background: null, opacity: 0.3 };
