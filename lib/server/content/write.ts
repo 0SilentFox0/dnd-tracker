@@ -6,6 +6,7 @@ import { type ContentEffect, currentContentWrite, runContentEffects, runContentW
 import "server-only";
 import { API_ERRORS } from "@/lib/constants/api-errors";
 import { prisma } from "@/lib/db";
+import { lockCampaignRow } from "@/lib/server/campaigns/lock";
 
 export interface ContentWriteOptions { lock?: "update" | "no-key-update"; timeout?: number; maxWait?: number }
 
@@ -21,9 +22,7 @@ export async function withCampaignContentWrite<T>(campaignId: string, callback: 
   const afterCommit: ContentEffect[] = [];
 
   const result = await prisma.$transaction(async (tx) => {
-    const rows = options.lock === "no-key-update"
-      ? await tx.$queryRaw<Array<{ id: string }>>`SELECT id FROM campaigns WHERE id = ${campaignId} FOR NO KEY UPDATE`
-      : await tx.$queryRaw<Array<{ id: string }>>`SELECT id FROM campaigns WHERE id = ${campaignId} FOR UPDATE`;
+    const rows = await lockCampaignRow(tx, campaignId, options.lock);
 
     if (rows.length !== 1) throw new ContentError(API_ERRORS.CAMPAIGN_NOT_FOUND, 404);
 

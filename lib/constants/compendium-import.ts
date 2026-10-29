@@ -15,6 +15,7 @@ export const COMPENDIUM_ERROR_KEYS: Record<string, string> = {
   PREVIEW_SECRET_REQUIRED: "errors.previewSecretRequired",
   PREVIEW_STALE: "errors.previewStale",
   PREVIEW_INVALID: "errors.previewInvalid",
+  NOTES_SIZE: "errors.notesSize",
   REQUEST_SIZE: "errors.requestSize",
   FORBIDDEN: "errors.forbidden",
   IMPORT_FAILED: "errors.importFailed",
@@ -56,7 +57,6 @@ export const COMPENDIUM_ERROR_KEYS: Record<string, string> = {
   PROVENANCE_TARGET: "errors.provenanceTarget",
   CREDITS_SIZE: "errors.creditsSize",
   IDENTITY_SIZE: "errors.identitySize",
-  NOTES_SIZE: "errors.notesSize",
 };
 
 export const COMPENDIUM_REF_KINDS: Record<string, string> = { spell: "spells", feat: "feats", class: "classes", race: "races", monster: "units", background: "backgrounds", item: "artifacts", spellSchool: "spell-groups" };

@@ -1,4 +1,5 @@
 import { AttackType, CELL_FEET } from "@/lib/constants/battle";
+import { textRef } from "@/lib/i18n/text-ref";
 import { collectModifiers, statWithModifiers } from "@/lib/utils/abilities/engine/core/collect-modifiers";
 import { findParticipant, isActive, withSelf } from "@/lib/utils/abilities/engine/core/participants";
 import { runAbilities } from "@/lib/utils/abilities/engine/core/run-abilities";
@@ -10,6 +11,7 @@ import { attackKindOf } from "@/lib/utils/battle/common/attack-kind";
 import { rangeDisadvantageReasons } from "@/lib/utils/battle/grid/attack-reach";
 import { footprintDistance } from "@/lib/utils/battle/grid/geometry";
 import { cellsOf, isAdjacent, isOnMap } from "@/lib/utils/battle/grid/occupancy";
+import { isObscured } from "@/lib/utils/battle/grid/terrain";
 import { uniqueLines } from "@/lib/utils/battle/log/lines";
 import { ARMOR_PENALTY_LABEL, armorPenalty, armorPenaltyAffects, isWeaponProficient } from "@/lib/utils/battle/proficiency";
 import type { BattleAttack, BattleMapConfig, BattleParticipant } from "@/types/battle";
@@ -38,6 +40,10 @@ export type RollMode = "advantage" | "disadvantage" | "normal";
 export type RollModeReasons = { advantage: LogLine[]; disadvantage: LogLine[] };
 
 type SourceOpts = { extra?: StaticEffect[]; targetId?: string; targetExtra?: StaticEffect[]; map?: BattleMapConfig | null; inspiration?: boolean };
+
+const OBSCURED_ATTACKER_LABEL = textRef("battleLog.rollMode.obscuredAttacker");
+
+const OBSCURED_TARGET_LABEL = textRef("battleLog.rollMode.obscuredTarget");
 
 const labels = (entries: { label: LogLine }[]) => entries.map((e) => e.label);
 
@@ -76,10 +82,15 @@ export function rollModeReasons(attacker: BattleParticipant, attack: BattleAttac
     .filter((e) => e.source && e.effects.some((m) => m.type === "frightened") && ps.some((p) => p.basicInfo.id === e.source?.participantId && isActive(p)))
     .map((e) => e.name);
 
+  const attackerBlind = isObscured(opts.map, attacker) && !attackerSees;
+
+  const targetBlind = !!target && isObscured(opts.map, target) && !targetSees;
+
   const advantage = [
     ...labels(flagEntries(id, "advantage", opts.extra).filter((e) => !(targetSees && e.condition === "invisible") && e.flag?.flag === "advantage" && (e.flag.attackKind === "all" || e.flag.attackKind === kind) && (!e.flag.attackAbility || e.flag.attackAbility === attackAbilityFor(attacker, attack)))),
     ...(opts.targetId ? labels(flagEntries(opts.targetId, "advantageForAttackers", opts.targetExtra)) : []),
     ...(adjacent ? proneDefense : []),
+    ...(targetBlind ? [OBSCURED_TARGET_LABEL] : []),
     ...(opts.inspiration ? [INSPIRATION_LABEL] : []),
   ];
 
@@ -88,6 +99,7 @@ export function rollModeReasons(attacker: BattleParticipant, attack: BattleAttac
     ...(opts.targetId ? labels(flagEntries(opts.targetId, "disadvantageForAttackers", opts.targetExtra).filter((e) => !(attackerSees && e.condition === "invisible"))) : []),
     ...(adjacent ? [] : proneDefense),
     ...frightenedLabels,
+    ...(attackerBlind ? [OBSCURED_ATTACKER_LABEL] : []),
     ...(armorPenalty(attacker) && armorPenaltyAffects(attackAbilityFor(attacker, attack)) ? [ARMOR_PENALTY_LABEL] : []),
     ...(target ? rangeDisadvantageReasons(opts.map, ps, attacker, attack, target) : []),
   ];

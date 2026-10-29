@@ -17,7 +17,7 @@ import type { StaticEffect } from "@/lib/utils/abilities/schema";
 import { attackAbilityFor, attackDamageModifier } from "@/lib/utils/battle/attack/ability";
 import { critNameRef } from "@/lib/utils/battle/attack/critical";
 import { attackKindOf } from "@/lib/utils/battle/common/attack-kind";
-import { findEffectMarker } from "@/lib/utils/battle/participant/state";
+import { dealsNoDamage, findEffectMarker } from "@/lib/utils/battle/participant/state";
 import { maxOf, parseDice, parseDiceLenient, rollGroups } from "@/lib/utils/common/dice";
 import type { BattleParticipant, DamageStep } from "@/types/battle";
 import type { BattleAttack } from "@/types/battle";
@@ -200,7 +200,11 @@ export function computeHitDamage(params: ComputeHitDamageParams): ComputeHitDama
 
   const unhalvedDamage = resistanceResult.finalDamage + totalAdditionalDamage;
 
-  const totalFinalDamage = params.obstacle ? applyObstacle(unhalvedDamage) : unhalvedDamage;
+  const pacified = dealsNoDamage(attacker);
+
+  const totalFinalDamage = pacified ? 0 : params.obstacle ? applyObstacle(unhalvedDamage) : unhalvedDamage;
+
+  if (pacified) damageCalculation.breakdown.push({ label: textRef("battleLog.damage.rows.pacified"), tone: "note" });
 
   if (dmgMult !== 1) damageSteps.push({ label: textRef("battleLog.damage.steps.share"), side: "attacker", kind: "multiplier", value: dmgMult, after: physicalDamageForTarget });
 

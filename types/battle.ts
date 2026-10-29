@@ -6,8 +6,10 @@ import type { CriticalEffect } from "@/lib/constants/critical-effects";
 import type { RulesEdition } from "@/lib/constants/rules";
 import type { DndSkill } from "@/lib/constants/skills";
 import type { WeaponTrait } from "@/lib/constants/weapon-traits";
+import type { NonRandomEffect } from "@/lib/utils/abilities/schema";
 import type { FxAuraKind, FxImpact, SpellFx } from "@/lib/utils/battle/fx";
 import type { ModeView } from "@/lib/utils/battle/modes/types";
+import type { InlineCast, SpellCost, ZoneTrigger } from "@/lib/utils/spells/model/schema";
 import type { StoredSpellSlots } from "@/lib/utils/spells/slot-keys";
 import type { AbilityKey, SetProgress } from "@/types/characters";
 import { SkillLevel } from "@/types/skill-tree";
@@ -20,6 +22,16 @@ export { SkillLevel };
 /**
  * Типи для активних ефектів
  */
+export interface HitRiderState {
+  attackKind: "melee" | "ranged" | "any";
+  extraDice: string;
+  damageType: string;
+  chargesLeft: number;
+  casterId: string;
+  consumeOnMiss?: boolean;
+  save?: { ability: AbilityKey; dc: number; onFail: NonRandomEffect[] };
+}
+
 export interface ActiveEffect {
   id: string;
   name: string;
@@ -41,6 +53,8 @@ export interface ActiveEffect {
   }>;
   dotDamage?: {
     damagePerRound: number;
+    /** Кубики, що кидаються щоразу на початку ходу; damagePerRound — перший кидок для показу. */
+    dice?: string;
     damageType: string;
     fromSpell?: boolean;
   };
@@ -67,10 +81,20 @@ export interface ActiveEffect {
   zone?: { ownerId: string; key: string };
   /** стан закінчується, коли власник проходить рятівний кидок наприкінці свого ходу */
   saveEnds?: { ability: AbilityKey; dc: number };
+  /** СК «Вирватися» для схоплення від заклинання (замість змагання з Атлетикою схоплювача) */
+  escapeDc?: number;
+  /** ефект знімається разом з ефектом цього id на тому ж власнику */
+  linkedTo?: string;
   /** ефект, що тримається поки кастер концентрується на закляттi castId */
   concentrationOf?: { casterId: string; castId: string };
+  /** заряди додаткової шкоди від заклинання (hitRider); на нуль ефект знімається */
+  hitRider?: HitRiderState;
+  /** аура на носії (заклинання anchoredZone): тригери для істот у радіусі */
+  anchoredZone?: AnchoredZoneState;
+  /** ефект накладений аурою: зникає, коли ефект-аура з цим id зникає (може бути на іншому учаснику) */
+  anchorOf?: string;
   /** маркер концентрації на самому кастері */
-  concentration?: { castId: string; spellName: string };
+  concentration?: { castId: string; spellName: string; /** є ефекти заклинання з concentrationOf: без живих концентрація знімається */ tracksEffects?: true };
   /** скільки HP зняло виснаження з maxHp (повертається при зніманні) */
   exhaustionHpHalved?: number;
   /** варіант правил виснаження на момент накладання (для перерахунку за сумарним рівнем) */
@@ -152,6 +176,7 @@ export interface BattleParticipantBasicInfo {
  */
 export interface BattleParticipantAbilities {
   creatureType?: string;
+  cr?: number;
   damageModel?: "5e";
   level: number;
   initiative: number; // поточна ініціатива (з урахуванням бонусів)
@@ -207,6 +232,11 @@ export interface SpellGrant {
   attackBonus?: number;
   upcast?: { maxLevel: number; extraCost: number };
   legendaryOnly?: true;
+  /** Власне визначення підкасту (grantCast): плитка замість бібліотечного заклинання. */
+  inline?: InlineCast;
+  expiresRound?: number;
+  concentrationOf?: { casterId: string; castId: string };
+  castCost?: SpellCost;
 }
 
 export interface GridPoint {
@@ -264,6 +294,8 @@ export interface BattleMapConfig {
   blocked?: string[];
   /** Місцевість за ключем "x:y" */
   terrain?: Record<string, TerrainCell>;
+  /** Тригери зон заклинань за TerrainCell.zoneId; клієнту не потрібні, лише серверу */
+  spellZones?: Record<string, SpellZoneRuntime>;
   /** Ширина фону в клітинках (з повзунка «Розмір клітинки»); без неї фон вписується в cols×rows */
   backgroundCols?: number;
   /** Зсув сітки відносно фону, частки клітинки 0 ≤ v < 1 */
@@ -273,7 +305,44 @@ export interface BattleMapConfig {
   weather?: WeatherKind | null;
 }
 
-export type TerrainKind = "wall" | "barrier" | "hazard";
+/** difficult — лише пензель ДМ (прохідна складна місцевість); зони заклинань ставлять прапорці на hazard */
+export type TerrainKind = "wall" | "barrier" | "hazard" | "difficult";
+
+export interface AnchoredZoneState {
+  casterId: string;
+  spellId: string;
+  spellName: string;
+  dc: number;
+  radiusFeet: number;
+  side: "enemies" | "allies" | "all";
+  excludeBearer?: boolean;
+  onEnter?: ZoneTrigger;
+  onTurnStart?: ZoneTrigger;
+  endsWhenStartOutside?: boolean;
+  attackBonus?: number;
+}
+
+export interface PendingHit {
+  id: string;
+  targetId: string;
+  atRound: number;
+  amount: number;
+  damageType: string;
+  spellName: string;
+  school: string | null;
+}
+
+export interface SpellZoneRuntime {
+  casterId: string;
+  spellId: string;
+  spellName: string;
+  dc: number;
+  side: "enemies" | "all";
+  centre?: GridPoint;
+  triggers: { onEnter?: ZoneTrigger; onTurnStart?: ZoneTrigger; onExit?: ZoneTrigger };
+  untilRound: number;
+  concentrationOf?: { casterId: string; castId: string };
+}
 
 /** type — тип шкоди (fire, cold…) */
 export interface TerrainDamage {
@@ -282,6 +351,8 @@ export interface TerrainDamage {
   type: string;
   /** Небезпека від заклинання: імунітет і опори до заклинань діють, як при касті */
   spellId?: string;
+  /** Кастер зони: зі станом «не завдає шкоди» зона шкоди не заподіює */
+  casterId?: string;
   /** Небезпека тримається, поки кастер концентрується на закляттi castId */
   concentrationOf?: { casterId: string; castId: string };
 }
@@ -292,6 +363,12 @@ export interface TerrainCell {
   /** Барʼєр або небезпека діє до кінця цього раунду */
   untilRound?: number;
   damage?: TerrainDamage;
+  /** Вхід у клітинку коштує подвійний рух */
+  difficult?: true;
+  /** Сильно заслонена: хто в ній або дивиться в неї, не бачить */
+  obscured?: true;
+  /** Зона заклинання, якій належить клітинка */
+  zoneId?: string;
 }
 
 /** зміни місцевості в дельті: однакові значення згруповані, щоб підпис не повторювався на кожній клітинці */
@@ -395,6 +472,30 @@ export interface AbilityPool {
   recharge?: 4 | 5 | 6;
 }
 
+/** Звичайна форма цілі, поки на ній чужа форма заклинання: відновлюється при відкаті */
+export interface TransformState {
+  unitId: string;
+  castId: string;
+  expiresRound?: number;
+  concentrationOf?: { casterId: string; castId: string };
+  saved: {
+    maxHp: number;
+    currentHp: number;
+    tempHp: number;
+    armorClass: number;
+    speed: number;
+    gridSize?: number;
+    status: CombatStatusType;
+    strength: number;
+    dexterity: number;
+    constitution: number;
+    modifiers: { strength: number; dexterity: number; constitution: number };
+    attacks: BattleAttack[];
+    movement?: BattleParticipantBattleData["movement"];
+    creatureType?: string;
+  };
+}
+
 export interface BattleParticipantBattleData {
   pendingCast?: { spellId: string; spellName: string; remainingRounds: number; totalRounds: number; lastRound: number; grantKey?: string; slotKey?: string; castLevel?: number };
   attacks: BattleAttack[];
@@ -412,6 +513,12 @@ export interface BattleParticipantBattleData {
   attackedWithLight?: boolean;
   /** Хто прикликав або підняв учасника здібністю */
   summonedBy?: string;
+  /** Предмет заклинання: не ціль, не ходить, не рахується в перемозі; зникає за expiresRound чи з концентрацією */
+  object?: { spellId: string; expiresRound?: number; concentrationOf?: { casterId: string; castId: string } };
+  /** Цільова форма заклинання перетворення; немає — своя форма */
+  transform?: TransformState;
+  /** Предмет зник (а не загинув) */
+  dismissed?: boolean;
   /** Учасник зараз робить додатковий хід від моралі (наприкінці раунду) */
   extraTurnActive?: boolean;
   /** Учасник у резерві бою: ще не на полі, бачить лише ДМ */
@@ -453,6 +560,10 @@ export interface BattleParticipantBattleData {
   retaliationsUsed?: number;
   /** Раунд, у якому учасник востаннє отримав шкоду від небезпечної клітинки */
   hazardHitRound?: number;
+  /** Відкладені удари заклинань кастера: число вже кинуте, прибувають на початку його ходу в раунді atRound */
+  pendingHits?: PendingHit[];
+  /** Раунд останнього входу/виходу зони заклинання за ключем "zoneId:in|out": раз на зону за раунд */
+  zoneHits?: Record<string, number>;
   /** Масштаб шкоди ворога-юніта для рівного бою (старт бою); немає = ×1 */
   damageMultiplier?: number;
   /** Масштаб HP ворога-юніта для рівного бою; лише для показу ДМу */

@@ -9,3 +9,7 @@ Engine hooks include `lineBlocked({ config, map, line })` — a mode wall on a r
 ## Maze
 
 The first mode: pure geometry/vision/generator, server wake-up in `afterMutation`, hiding client-side in `modes/maze/view.ts`; the server sends the full scene.
+
+## Spell terrain (P4)
+
+Difficult terrain, `obscured` cells, spell walls and `spellZones` are core: they live in `map.terrain` / `map.spellZones` and are read by `grid/*` and `spell/zone-*`. Map modes neither import nor change them; the maze never fires zone triggers.

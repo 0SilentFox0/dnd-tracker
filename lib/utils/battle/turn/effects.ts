@@ -1,12 +1,14 @@
 import { textRef } from "@/lib/i18n/text-ref";
 import { effectName } from "@/lib/utils/battle/common/terms";
 import { applyResistance } from "@/lib/utils/battle/resistance";
+import { rollDice } from "@/lib/utils/common/dice";
 import { ActiveEffect, BattleParticipant } from "@/types/battle";
 import type { LogLine } from "@/types/text";
 
 export function applyDOTEffects(
   participant: BattleParticipant,
   participants: BattleParticipant[] = [participant],
+  rng: () => number = Math.random,
 ): { newHp: number; damageMessages: LogLine[] } {
   let currentHp = participant.combatStats.currentHp;
 
@@ -14,7 +16,9 @@ export function applyDOTEffects(
 
   for (const effect of participant.battleData.activeEffects) {
     if (effect.dotDamage) {
-      const { damagePerRound, damageType, fromSpell } = effect.dotDamage;
+      const { dice, damageType, fromSpell } = effect.dotDamage;
+
+      const damagePerRound = dice ? rollDice(dice, rng) : effect.dotDamage.damagePerRound;
 
       const { finalDamage } = applyResistance(participant, damagePerRound, damageType, { participants, fromSpell });
 

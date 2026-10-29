@@ -5,7 +5,8 @@ import { afterAll, beforeAll, describe, expect, it, vi } from "vitest";
 
 import { AttackType, ParticipantSide } from "@/lib/constants/battle";
 import { prisma } from "@/lib/db";
-import { attackBodySchema, attackMutation } from "@/lib/server/battles/mutations/attack/attack-mutation";
+import { attackBodySchema } from "@/lib/schemas/battles";
+import { attackMutation } from "@/lib/server/battles/mutations/attack/attack-mutation";
 import { nextTurnMutation } from "@/lib/server/battles/mutations/next-turn/next-turn-mutation";
 import { createRollbackMutation, rollbackSchema } from "@/lib/server/battles/mutations/rollback/rollback-mutation";
 import { runBattleMutation } from "@/lib/server/battles/run-mutation";

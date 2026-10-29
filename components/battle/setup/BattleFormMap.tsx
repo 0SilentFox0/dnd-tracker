@@ -18,8 +18,9 @@ import { DAMAGE_ELEMENT_OPTIONS } from "@/lib/constants/damage";
 import type { BattleMapEditor } from "@/lib/hooks/battles";
 import { useText } from "@/lib/i18n/use-text";
 import { cn } from "@/lib/utils";
-import { clamp, isPreviewSafeBackground, marginLimit, type Margins, MAX_CELL_PX, MAX_GRID_OFFSET, MAX_MARGIN, MAX_SIDE, MIN_CELL_PX, MIN_PLAYABLE, MIN_SIDE, type SetupTool } from "@/lib/utils/battle/grid";
+import { isPreviewSafeBackground, marginLimit, type Margins, MAX_CELL_PX, MAX_GRID_OFFSET, MAX_MARGIN, MAX_SIDE, MIN_CELL_PX, MIN_PLAYABLE, MIN_SIDE, type SetupTool } from "@/lib/utils/battle/grid";
 import type { MapModeKey } from "@/lib/utils/battle/modes";
+import { clamp } from "@/lib/utils/common/clamp";
 
 const MARGIN_KEYS: (keyof Margins)[] = ["top", "right", "bottom", "left"];
 

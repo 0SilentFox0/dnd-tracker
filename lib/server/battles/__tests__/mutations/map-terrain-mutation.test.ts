@@ -3,7 +3,8 @@ import { describe, expect, it } from "vitest";
 import { context, goblin, hero } from "./fixtures";
 
 import { CombatStatus } from "@/lib/constants/battle";
-import { mapTerrainMutation, mapTerrainSchema } from "@/lib/server/battles/mutations/map-terrain/map-terrain-mutation";
+import { mapTerrainSchema } from "@/lib/schemas/battles";
+import { mapTerrainMutation } from "@/lib/server/battles/mutations/map-terrain/map-terrain-mutation";
 import { REJECT } from "@/lib/utils/battle/store/reject";
 import type { BattleMapConfig, BattleParticipant, GridPoint } from "@/types/battle";
 
@@ -137,5 +138,40 @@ describe("map-terrain mutation", () => {
 
   it("бій без карти — відмова", () => {
     expect(() => mapTerrainMutation(ctx({}, null), { cells: ["1:1"], terrain: { kind: "wall" } })).toThrow(expect.objectContaining({ code: "action_rejected" }));
+  });
+});
+
+describe("map-terrain і клітинки зон заклинань", () => {
+  const zoneMap: BattleMapConfig = { ...map, terrain: { "2:2": { kind: "difficult", zoneId: "z1", obscured: true, difficult: true }, "3:3": { kind: "wall" } } };
+
+  it("пензель зберігає zoneId і obscured", () => {
+    const out = mapTerrainMutation(ctx({}, zoneMap), { cells: ["2:2"], terrain: { kind: "difficult" } });
+
+    expect(out.scene?.map?.terrain?.["2:2"]).toMatchObject({ kind: "difficult", zoneId: "z1", obscured: true });
+  });
+
+  it("стирання не чіпає клітинки зони, але стирає ручні", () => {
+    const out = mapTerrainMutation(ctx({}, zoneMap), { cells: ["2:2", "3:3"], terrain: null });
+
+    expect(out.scene?.map?.terrain?.["2:2"]).toMatchObject({ zoneId: "z1", obscured: true });
+    expect(out.scene?.map?.terrain?.["3:3"]).toBeUndefined();
+  });
+  it("«стерти зону» прибирає всі клітинки зони, запис spellZones і не чіпає інші", () => {
+    const zone = { kind: "hazard" as const, zoneId: "z1", damage: { dice: "1d6", type: "fire" } };
+
+    const m: BattleMapConfig = {
+      ...map,
+      terrain: { "2:2": zone, "2:3": zone, "3:3": { kind: "wall" }, "6:1": { kind: "difficult", zoneId: "z2" } },
+      spellZones: { z1: {}, z2: {} } as unknown as BattleMapConfig["spellZones"],
+    };
+
+    const out = mapTerrainMutation(ctx({}, m), { cells: ["2:2"], eraseZone: true, terrain: null });
+
+    expect(Object.keys(out.scene?.map?.terrain ?? {}).sort()).toEqual(["3:3", "6:1"]);
+    expect(Object.keys(out.scene?.map?.spellZones ?? {})).toEqual(["z2"]);
+
+    const noZone = mapTerrainMutation(ctx({}, m), { cells: ["3:3"], eraseZone: true, terrain: null });
+
+    expect(noZone.scene?.map?.terrain).toEqual(m.terrain);
   });
 });

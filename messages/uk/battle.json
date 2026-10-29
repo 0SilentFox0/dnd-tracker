@@ -100,7 +100,9 @@
         "wall": "Непрохідне",
         "barrier": "Барʼєр",
         "hazard": "Небезпека",
-        "erase": "Стерти"
+        "erase": "Стерти",
+        "difficult": "Складна",
+        "erase-zone": "Стерти зону"
       },
       "rounds": "Раундів",
       "hazardLabel": "Підпис небезпеки",
@@ -108,7 +110,8 @@
       "damageDice": "Шкода (кубики)",
       "noDamage": "без шкоди",
       "type": "Тип"
-    }
+    },
+    "difficultDefault": "Складна місцевість"
   },
   "result": {
     "title": {

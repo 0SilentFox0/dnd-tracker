@@ -14,6 +14,7 @@ import { DEFAULT_RULES, type Ruleset, type RulesetPatch } from "@/lib/utils/rule
 export const HERO_LEVELS = Array.from({ length: MAX_CLASS_LEVEL }, (_, i) => i + 1);
 
 export interface RulesFormState {
+  campaignId: string;
   data: Ruleset;
   set: <K extends keyof Ruleset>(key: K, value: Ruleset[K]) => void;
 }
@@ -44,11 +45,14 @@ export function useRulesForm(campaignId: string) {
 
   const server = query.data ?? DEFAULT_RULES;
 
-  const data: Ruleset = { ...server, ...changes };
+  const merged: Ruleset = { ...server, ...changes };
+
+  const data: Ruleset = { ...merged, conditions: { ...merged.conditions, custom: server.conditions.custom } };
 
   const dirtyKeys = (Object.keys(changes) as (keyof Ruleset)[]).filter((key) => !same(changes[key], server[key]));
 
   const form: RulesFormState = {
+    campaignId,
     data,
     set: (key, value) => setChanges((prev) => ({ ...prev, [key]: value })),
   };
@@ -56,7 +60,15 @@ export function useRulesForm(campaignId: string) {
   const save = async () => {
     if (dirtyKeys.length === 0) return true;
 
-    const patch = Object.fromEntries(dirtyKeys.map((key) => [key, key === "heroScaling" ? withFilledDice(data.heroScaling) : data[key]])) as RulesetPatch;
+    const patchValue = (key: keyof Ruleset) => {
+      if (key === "heroScaling") return withFilledDice(data.heroScaling);
+
+      if (key === "conditions") return { enabled: data.conditions.enabled, exhaustion: data.conditions.exhaustion };
+
+      return data[key];
+    };
+
+    const patch = Object.fromEntries(dirtyKeys.map((key) => [key, patchValue(key)])) as RulesetPatch;
 
     try {
       await update.mutateAsync(patch);

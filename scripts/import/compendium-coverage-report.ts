@@ -159,8 +159,10 @@ async function main() {
 
     const narrative = confirmed.rows.filter((r) => r.kind === "spells" && r.issues.some((i) => i.code === "SPELL_NARRATIVE_ONLY")).length;
 
+    const withRiders = confirmed.rows.filter((r) => r.kind === "spells" && r.issues.some((i) => i.code === "SPELL_RIDER_MANUAL")).length;
+
     section("5. Заклинання", [
-      `у файлі ${countOf("spell")}, імпортовано ${spells.length}: native ${native.length} (${pct(native.length, spells.length)}; з них наративних ${narrative}, механічних ${native.length - narrative}), manual ${spells.length - native.length}`,
+      `у файлі ${countOf("spell")}, імпортовано ${spells.length}: native ${native.length} (${pct(native.length, spells.length)}; з них наративних ${narrative}, механічних ${native.length - narrative} (M+R з додатковими ефектами в описі ${withRiders}, чисті M ${native.length - narrative - withRiders})), manual ${spells.length - native.length}`,
       `причини: ${codes(["spells"])}`,
       `заглушки SRD-заклинань для посилань: ${stubs.length ? stubs.join(", ") : "0"}`,
     ]);

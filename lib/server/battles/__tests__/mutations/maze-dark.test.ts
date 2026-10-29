@@ -6,10 +6,9 @@ import { context, goblin, hero } from "./fixtures";
 
 import { API_ERRORS } from "@/lib/constants/api-errors";
 import { textOf } from "@/lib/i18n/test/text";
-import { attackBodySchema } from "@/lib/server/battles/mutations/attack/attack-mutation";
+import { attackBodySchema, castSpellSchema } from "@/lib/schemas/battles";
 import { moveMutation } from "@/lib/server/battles/mutations/move/move-mutation";
 import { nextTurnMutation } from "@/lib/server/battles/mutations/next-turn/next-turn-mutation";
-import { spellSchema } from "@/lib/server/battles/mutations/spell/cast-spell-schema";
 import { getBattleOperation } from "@/lib/server/battles/operations";
 import { runBattleMutation } from "@/lib/server/battles/run-mutation";
 import { eventTextOf } from "@/lib/utils/battle/log/__tests__/event-text";
@@ -50,7 +49,7 @@ const spellBody = { casterId: "hero", spellId: "s1", targetIds: ["gob"] };
 
 describe("темрява в лабіринті", () => {
   it("attack і spell з blockedByMode → 422 «Темрява — ніхто не може діяти», мутація не викликається", async () => {
-    for (const [schema, body] of [[attackBodySchema, attackBody], [spellSchema, spellBody]] as const) {
+    for (const [schema, body] of [[attackBodySchema, attackBody], [castSpellSchema, spellBody]] as const) {
       const mutate = vi.fn();
 
       const out = await call(ctx(mapOf()), { access: BattleAccess.MEMBER, blockedByMode: true, schema, mutate }, body);

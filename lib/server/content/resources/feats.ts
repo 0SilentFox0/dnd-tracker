@@ -1,4 +1,4 @@
-import type { Feat as FeatRow, Prisma } from "@prisma/client";
+import type { Feat as FeatRow } from "@prisma/client";
 import type { z } from "zod";
 
 import "server-only";
@@ -15,13 +15,12 @@ import { featAsiUsedByBackground, featInUse } from "@/lib/server/feats/feat-usag
 import { abilitiesJson } from "@/lib/utils/abilities/read";
 import { backgroundAsiRules } from "@/lib/utils/backgrounds/asi";
 import { choiceSpellIds, readChoices } from "@/lib/utils/characters/choices/read";
+import { toInputJson } from "@/lib/utils/common/json";
 import { toFeatData } from "@/lib/utils/feats/row";
 
 type CreateInput = z.infer<typeof createFeatSchema>;
 
 type UpdateInput = z.infer<typeof updateFeatSchema>;
-
-const json = (v: unknown) => v as Prisma.InputJsonValue;
 
 async function assertNameFree(campaignId: string, name: string, exceptId?: string) {
   if (await featNameTaken(campaignId, name, exceptId)) throw new ContentError(API_ERRORS.FEAT_NAME_TAKEN, 409, undefined, { name });
@@ -52,11 +51,11 @@ export const featsResource = defineResource<FeatRow, CreateInput, UpdateInput>({
         name: data.name,
         icon: data.icon ?? null,
         type: data.type,
-        prerequisite: json(data.prerequisite),
+        prerequisite: toInputJson(data.prerequisite),
         repeatable: data.repeatable,
         description: data.description ?? null,
         abilities: abilitiesJson(data.abilities),
-        choices: json(data.choices),
+        choices: toInputJson(data.choices),
       },
     });
   },
@@ -73,7 +72,7 @@ export const featsResource = defineResource<FeatRow, CreateInput, UpdateInput>({
 
     return prisma.feat.update({
       where: { id: existing.id },
-      data: { ...rest, ...(prerequisite && { prerequisite: json(prerequisite) }), ...(abilities && { abilities: abilitiesJson(abilities) }), ...(choices && { choices: json(choices) }) },
+      data: { ...rest, ...(prerequisite && { prerequisite: toInputJson(prerequisite) }), ...(abilities && { abilities: abilitiesJson(abilities) }), ...(choices && { choices: toInputJson(choices) }) },
     });
   },
   async remove(actor, existing) {

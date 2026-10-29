@@ -90,7 +90,8 @@
       "stunned": "приголомшений",
       "unconscious": "непритомний",
       "exhaustion": "виснаження"
-    }
+    },
+    "undefinedCustom": "{source}: стан не визначено в правилах кампанії"
   },
   "legendary": {
     "badgeActions": "Леґ. дії {left}/{max}",

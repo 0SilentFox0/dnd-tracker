@@ -8,6 +8,7 @@ import { checkBonus, rollCheck } from "@/lib/utils/battle/checks";
 import { applyCondition5e, conditionSourceIds, hasCondition, PERMANENT_ROUNDS, removeEffects } from "@/lib/utils/battle/conditions";
 import { GRAPPLE_KEY_PREFIX, grappledBy, grappleKey, releaseGrapples } from "@/lib/utils/battle/conditions/grapple-links";
 import { canStand, isAdjacent } from "@/lib/utils/battle/grid/occupancy";
+import { awayStep } from "@/lib/utils/battle/grid/push";
 import { resolveSave, rollSave } from "@/lib/utils/battle/saves";
 import { getSpellSaveDC } from "@/lib/utils/common/calculations";
 import type { Ruleset } from "@/lib/utils/rules";
@@ -54,16 +55,20 @@ export function contest(input: { attacker: BattleParticipant; target: BattlePart
   return { success: mine.total > theirs.total, message: textRef("battleActions.grapple.contestRoll", { mine: mine.total, theirs: theirs.total }), participants };
 }
 
-export function escapeContest(input: { escaper: BattleParticipant; grappler: BattleParticipant } & RollInput): { success: boolean; message: LogLine } {
-  const { escaper, grappler, participants, rules, rng } = input;
+function escapeAgainstDc(input: { escaper: BattleParticipant; dc: number } & RollInput): { success: boolean; message: LogLine } {
+  const { escaper, dc, participants, rules, rng } = input;
 
   const mine = rollCheck({ actor: escaper, subject: { skill: bestSkill(escaper, participants, rules) }, participants, rules, rng });
 
-  if (rules.actions.variant === "2024") {
-    const dc = grappleDc(grappler, rules);
+  return { success: mine.total >= dc, message: textRef("battleActions.grapple.contestDc", { mine: mine.total, dc }) };
+}
 
-    return { success: mine.total >= dc, message: textRef("battleActions.grapple.contestDc", { mine: mine.total, dc }) };
-  }
+export function escapeContest(input: { escaper: BattleParticipant; grappler: BattleParticipant } & RollInput): { success: boolean; message: LogLine } {
+  const { escaper, grappler, participants, rules, rng } = input;
+
+  if (rules.actions.variant === "2024") return escapeAgainstDc({ escaper, dc: grappleDc(grappler, rules), participants, rules, rng });
+
+  const mine = rollCheck({ actor: escaper, subject: { skill: bestSkill(escaper, participants, rules) }, participants, rules, rng });
 
   const theirs = rollCheck({ actor: grappler, subject: { skill: "athletics" }, participants, rules, rng });
 
@@ -136,7 +141,7 @@ export function runShove(input: GrappleActionInput & { mode: "prone" | "push" })
 
   const at = target.battleData.position;
 
-  const dest = mode === "push" && from && at ? { x: at.x + Math.sign(at.x - from.x), y: at.y + Math.sign(at.y - from.y) } : null;
+  const dest = mode === "push" && from && at ? awayStep(from, at) : null;
 
   if (dest && map && canStand(map, participants, target, dest)) {
     messages.push(textRef("battleActions.grapple.pushed", { target: target.basicInfo.name }));
@@ -162,7 +167,9 @@ export function runEscape(input: Omit<GrappleActionInput, "targetId">): GrappleA
 
   const grappler = grapplerId ? findParticipant(participants, grapplerId) : undefined;
 
-  const check = grappler ? escapeContest({ escaper: actor, grappler, participants, rules, rng: input.rng }) : { success: true, message: "" as LogLine };
+  const spellDc = actor.battleData.activeEffects.find((e) => e.escapeDc && e.type === "condition" && e.effects[0]?.type === "grappled" && (!grapplerId || e.source?.participantId === grapplerId))?.escapeDc;
+
+  const check = spellDc !== undefined ? escapeAgainstDc({ escaper: actor, dc: spellDc, participants, rules, rng: input.rng }) : grappler ? escapeContest({ escaper: actor, grappler, participants, rules, rng: input.rng }) : { success: true, message: "" as LogLine };
 
   const tail = check.message ? joinLines([" ", check.message]) : "";
 

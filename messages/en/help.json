@@ -302,5 +302,47 @@
         "b0": "Removing the chip from the text does not delete the acquaintance. It can only be deleted explicitly, in the acquaintance dialog, after confirmation."
       }
     }
+  },
+  "compendium-import": {
+    "title": "Compendium import",
+    "summary": "How to upload a JSON compendium, read the report and what to do when the import is blocked.",
+    "sections": {
+      "s0": {
+        "heading": "What it is",
+        "b0": "A compendium is a single JSON file with spells, units, races, classes, items, books and so on. The import moves it into the campaign in one atomic step: everything selected, or nothing. Up to 3 MiB and 2000 selected entries at a time."
+      },
+      "s1": {
+        "heading": "Four steps",
+        "b0": {
+          "i0": "File - pick the JSON. Nothing is saved.",
+          "i1": "Categories - tick what to import; DM materials (books, adventures) are chosen chapter by chapter. Edition and sources are shown here too.",
+          "i2": "Check - the server builds a report; the campaign is still unchanged. The result is valid for 15 minutes, and any change to the selection or the campaign needs a new check.",
+          "i3": "Confirm - tick that you have the right to use this file and press \"Import\"."
+        }
+      },
+      "s2": {
+        "heading": "What to choose",
+        "b0": "\"Recommended\" selects the categories the engine understands. Technical categories (images, Foundry) are skipped and not uploaded. If you take only a part, keep the dependencies: spells, feats or classes that other entries refer to must be in the file, the campaign or the SRD."
+      },
+      "s3": {
+        "heading": "Reading the report",
+        "b0": "At the top is \"Ready to import\" or \"Import blocked\" plus counters: created, updated, unchanged, errors. Below are coverage by category (mapped, partial, skipped) and the \"What next\" block with blockers and manual checks.",
+        "b1": "A manual action means the entry is imported but the engine does not model part of its rules (unit actions, item effects, background equipment and money): set it up in the editor or apply it from the description. It does not block the import."
+      },
+      "s4": {
+        "heading": "Classic and 5e 2024 together",
+        "b0": "Editions are not mixed by default. When a dependency or binding comes from another edition the report warns, and when an explicit binding is needed it blocks the import. Rules are not converted between editions: check the result yourself."
+      },
+      "s5": {
+        "heading": "Why the import is blocked",
+        "b0": "The \"Import\" button stays disabled while the report has blocking errors. The three most common:",
+        "b1": {
+          "i0": "NOTES_SIZE - one entry's notes exceed 64 KB. Shorten the description in the file, untick the matching chapter in \"DM materials\" or exclude the entry.",
+          "i1": "UNRESOLVED_REF - an entry needs a dependency (spell, feat, class, race...) that was not found. Add it to the file, bind it to a campaign or SRD record in the dependencies block, or exclude the dependent entry (there is an \"Exclude blocked and dependent records and check the rest\" button).",
+          "i2": "MIXED_EDITION_CONFIRMATION_REQUIRED - a binding between classic and 5e 2024. Press \"Allow mixing classic / one and re-check\" in the report or tick the matching option in the categories."
+        },
+        "b2": "After a fix the check reruns automatically or with the \"Check JSON\" button."
+      }
+    }
   }
 }

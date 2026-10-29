@@ -5,7 +5,8 @@ import { context, goblin, hero, participant } from "./fixtures";
 
 import { API_ERRORS } from "@/lib/constants/api-errors";
 import { AttackType, ParticipantSide, ParticipantSourceType } from "@/lib/constants/battle";
-import { attackBodySchema, attackMutation } from "@/lib/server/battles/mutations/attack/attack-mutation";
+import { attackBodySchema, castSpellSchema } from "@/lib/schemas/battles";
+import { attackMutation } from "@/lib/server/battles/mutations/attack/attack-mutation";
 import { createSpellMutation, type SpellMutationDeps } from "@/lib/server/battles/mutations/spell/spell-mutation";
 import { resolved } from "@/lib/utils/abilities/__tests__/fixtures";
 import { diffTerrain } from "@/lib/utils/battle/grid/terrain";
@@ -168,9 +169,7 @@ describe("spell mutation", () => {
     });
 
     it("нецілий кидок відхиляє схема", async () => {
-      const { spellSchema } = await import("@/lib/server/battles/mutations/spell/cast-spell-schema");
-
-      expect(spellSchema.safeParse(saveBody(10.5)).success).toBe(false);
+      expect(castSpellSchema.safeParse(saveBody(10.5)).success).toBe(false);
     });
   });
 
@@ -460,7 +459,7 @@ describe("spell mutation", () => {
       const terrain = out.scene?.map?.terrain ?? {};
 
       expect(Object.keys(terrain).sort()).toEqual(["2:3", "2:4", "2:5", "2:6", "2:7", "2:8"]);
-      expect(terrain["2:5"]).toEqual({ kind: "hazard", label: "Вогняна стіна", untilRound: 4, damage: { amount: 4, type: "fire", spellId: "s1" } });
+      expect(terrain["2:5"]).toEqual({ kind: "hazard", label: "Вогняна стіна", untilRound: 4, damage: { amount: 4, type: "fire", spellId: "s1", casterId: "hero" } });
       expect(out.events).toHaveLength(1);
       expect(diffTerrain(map.terrain, out.scene?.map?.terrain)?.set?.[0].keys).toHaveLength(6);
     });

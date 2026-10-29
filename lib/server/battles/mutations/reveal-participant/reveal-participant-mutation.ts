@@ -9,6 +9,7 @@ import { dropBattleFlag, isReserved } from "@/lib/utils/battle/participant/reser
 import type { BattleMutationContext, MutationResult } from "@/lib/utils/battle/pipeline/run-battle-mutation";
 import { BattleAccessError, dmEvent } from "@/lib/utils/battle/store";
 import { calculateInitiative } from "@/lib/utils/battle/turn/initiative";
+import { rngOf } from "@/lib/utils/common/rng";
 import type { BattleParticipant } from "@/types/battle";
 
 export const revealParticipantSchema = z.object({ participantIds: z.array(z.string()).min(1) });
@@ -47,7 +48,7 @@ export function revealParticipantMutation(ctx: BattleMutationContext, body: Reve
 
   const ids = new Set(revealed.map((p) => p.basicInfo.id));
 
-  const joined = runAbilities(applyBakedAuras(order, ids), { type: "battleStart", newcomerIds: [...ids] }, { round: ctx.scene.round, rng: ctx.rng ?? Math.random, map: ctx.meta.map, rules: ctx.meta.rules });
+  const joined = runAbilities(applyBakedAuras(order, ids), { type: "battleStart", newcomerIds: [...ids] }, { round: ctx.scene.round, rng: rngOf(ctx), map: ctx.meta.map, rules: ctx.meta.rules });
 
   const participants = joined.participants.map((p) => (ids.has(p.basicInfo.id) ? { ...p, abilities: { ...p.abilities, initiative: calculateInitiative(p, joined.participants) } } : p));
 

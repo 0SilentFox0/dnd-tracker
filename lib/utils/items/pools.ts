@@ -29,6 +29,10 @@ export const spellGrantFields = (spell: SpellGrantFields): Partial<SpellGrantFie
   ...(spell.upcast && { upcast: spell.upcast }),
 });
 
+export const castPoolKey = (castId: string, effectIndex: number) => `pool:cast:${castId}:${effectIndex}`;
+
+export const isCastPool = (key: string) => key.startsWith("pool:cast:");
+
 export const consumablePoolKey = (itemId: string) => `${CONSUMABLE_POOL_PREFIX}${itemId}`;
 
 export const isConsumablePool = (key: string) => key.startsWith(CONSUMABLE_POOL_PREFIX);

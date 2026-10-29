@@ -1,4 +1,5 @@
 import type { SkillRadius, SpellChain } from "@/lib/utils/battle/spell/spell-targeting";
+import type { SpellTargetFilter } from "@/lib/utils/spells/model/schema";
 import type { GridPoint, SpellTemplate } from "@/types/battle";
 import type { LogLine } from "@/types/text";
 
@@ -20,6 +21,15 @@ export interface SpellPick {
   skillRadius?: SkillRadius;
   /** ланцюг на карті: гравець обирає першу ціль, решту рахує спільний spellChain */
   chain?: SpellChain;
+  /** обмеження цілей (тип, CR, політ) разом із колом, від якого рахується CR */
+  filter?: SpellTargetFilter;
+  castLevel?: number;
+  /** підписи варіантів chooseOne; гравець обирає один перед кастом */
+  options?: LogLine[];
+  /** кількість кубиків вводить кастер (напр. висота падіння); diceSlots відповідають поточному вводу */
+  inputDice?: { label: string; max: number; sides: number };
+  /** плитка inline-гранту: на сервер йде справжній spellId і ключ гранту */
+  inline?: { spellId: string; grantKey: string };
   needsSaves: boolean;
   needsAttackRolls?: boolean;
   diceSlots: number[];
@@ -45,6 +55,8 @@ export interface SpellFlowState {
   slotKey?: string;
   grantKey?: string;
   castLevel?: number;
+  optionIndex?: number;
+  inputCount?: number;
   damage: (number | undefined)[];
   error?: LogLine;
   /** сервер зупинив каст: ДМ обирає ефект крита */
@@ -59,6 +71,8 @@ export type SpellFlowAction =
   | { type: "SET_SLOT"; slotKey: string; pick: SpellPick }
   | { type: "SET_GRANT"; grantKey: string; pick: SpellPick; castLevel?: number }
   | { type: "SET_CAST_LEVEL"; castLevel: number; pick: SpellPick }
+  | { type: "SET_OPTION"; index: number }
+  | { type: "SET_INPUT"; count: number }
   | { type: "SET_ATTACK"; id: string; value: number | undefined }
   | { type: "TO_TARGETS" }
   | { type: "TOGGLE_TARGET"; id: string }

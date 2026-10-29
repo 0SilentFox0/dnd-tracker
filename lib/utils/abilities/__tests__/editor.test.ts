@@ -71,6 +71,13 @@ describe("editor helpers", () => {
     expect(setAtPath(o, "percent", undefined)).toEqual({ filter: { kind: "melee" } });
   });
 
+  it("setAtPath прибирає порожній вкладений об'єкт після очищення останнього поля", () => {
+    const o = { kind: "dealDamage", delayIfBeyond: { feet: 30 } };
+
+    expect(setAtPath(o, "delayIfBeyond.feet", undefined)).toEqual({ kind: "dealDamage" });
+    expect(setAtPath({ ...o, delayIfBeyond: { feet: 30, perRoundFeet: 10 } }, "delayIfBeyond.feet", undefined)).toEqual({ kind: "dealDamage", delayIfBeyond: { perRoundFeet: 10 } });
+  });
+
   it("validateAbilities — шляхи помилок", () => {
     const r = validateAbilities([{ id: "a1", name: "Нове вміння", trigger: { event: "passive" }, effects: [{ kind: "modifyStat", stat: "armor", flat: 1 }] }, { id: "x", name: "Б", trigger: { event: "passive" }, effects: [{ kind: "heal", amount: 5 }] }]);
 
@@ -102,5 +109,12 @@ describe("editor helpers", () => {
     expect(passive).not.toHaveProperty("stackable");
     expect(passive).not.toHaveProperty("maxStacks");
     expect(AbilitySchema.safeParse(passive).success).toBe(true);
+  });
+
+  it("setAtPath: очищення останнього вкладеного поля прибирає порожній об'єкт-предок", () => {
+    const e = { kind: "dealDamage", delayIfBeyond: { feet: 30 } };
+
+    expect(setAtPath(e, "delayIfBeyond.feet", undefined)).toEqual({ kind: "dealDamage" });
+    expect(setAtPath({ ...e, delayIfBeyond: { feet: 30, perRoundFeet: 10 } }, "delayIfBeyond.feet", undefined)).toEqual({ kind: "dealDamage", delayIfBeyond: { perRoundFeet: 10 } });
   });
 });

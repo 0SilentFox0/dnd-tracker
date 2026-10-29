@@ -11,6 +11,7 @@ export type FieldInput =
   | "strings"
   | "toggle"
   | "numberList"
+  | "distanceDice"
   | "spells"
   | "unit"
   | "saveEnds";

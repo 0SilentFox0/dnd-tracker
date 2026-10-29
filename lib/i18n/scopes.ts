@@ -20,6 +20,7 @@ export const CAMPAIGN_NAMESPACES = [
   "rest",
   "spells",
   "spellEditor",
+  "editors",
   "units",
   "abilities",
   "abilityRegistry",

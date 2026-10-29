@@ -6,3 +6,9 @@ export function pageOf<T>(rows: T[], offset: number, limit: number): Page<T> {
 
   return { items: rows.slice(0, limit), hasMore, nextOffset: hasMore ? offset + limit : null };
 }
+
+export function windowOf<T>(all: readonly T[], offset: number, limit: number): { offset: number; total: number; items: T[]; nextOffset: number | null } {
+  const { items, nextOffset } = pageOf(all.slice(offset, offset + limit + 1), offset, limit);
+
+  return { offset, total: all.length, items, nextOffset };
+}

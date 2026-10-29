@@ -9,13 +9,13 @@ import {
   type SpellDefinition,
   SpellDiceSchema,
   SpellDieSidesSchema,
+  type SpellEffect,
+  SpellEffectSchema,
   type SpellResolution,
   SpellResolutionSchema,
   type SpellTargeting,
   SpellTargetingSchema,
 } from "./schema";
-
-import { type Effect, EffectSchema } from "@/lib/utils/abilities/schema";
 
 type SpellRulesRow = {
   id: string;
@@ -82,7 +82,7 @@ export const spellCost = (row: SpellRulesRow): SpellCost => readOne(SpellCostSch
 
 export const spellDiceCount = (row: SpellRulesRow): number => readOne(SpellDiceSchema, row.dice, 0, "dice", row.id);
 
-export const spellEffects = (row: SpellRulesRow): Effect[] => readList<Effect>(EffectSchema, row.spellEffects, "effects", row.id);
+export const spellEffects = (row: SpellRulesRow): SpellEffect[] => readList<SpellEffect>(SpellEffectSchema, row.spellEffects, "effects", row.id);
 
 export const spellRaceModifiers = (row: SpellRulesRow): RaceModifier[] => readList<RaceModifier>(RaceModifierSchema, row.raceModifiers, "raceModifiers", row.id);
 

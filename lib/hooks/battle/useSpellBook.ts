@@ -24,6 +24,8 @@ import {
   grantLabel as grantLabelOf,
   grantsFor,
   initialSpellFlow,
+  inlineGrantLabel,
+  inlineGrantOf,
   selectedGrantOf,
   slotOptions,
   sourceOptions as sourceOptionsOf,
@@ -44,8 +46,9 @@ import {
 } from "@/lib/utils/battle/flows";
 import { isOnMap } from "@/lib/utils/battle/grid";
 import { modeSightedTargets } from "@/lib/utils/battle/modes/engine";
-import { spellFormulaLabel } from "@/lib/utils/battle/spell/caster-dice";
+import { spellEffectsFormula, spellFormulaLabel } from "@/lib/utils/battle/spell/caster-dice";
 import { skillAllTargets, spellChain } from "@/lib/utils/battle/spell/spell-targeting";
+import { matchesTargetFilter } from "@/lib/utils/battle/spell/target-filter";
 import { slotLevels } from "@/lib/utils/battle/view";
 import { cryptoRandom, rollDie } from "@/lib/utils/common/dice";
 import { groupSpellsByLevel } from "@/lib/utils/spells/group-by-level";
@@ -117,7 +120,9 @@ export function useSpellBook(caster: BattleParticipant | null, options: { reacti
 
   const targets = useMemo(() => spellTargetCandidates(order, caster, pickSide).filter(visible), [order, caster, pickSide, visible]);
 
-  const inRange = (t: BattleParticipant) => spellTargetInRange(map, caster, t, flow.pick?.range);
+  const filteredOut = (t: BattleParticipant) => !matchesTargetFilter(t, flow.pick?.filter, { spellLevel: flow.pick?.level ?? 0, castLevel: flow.pick?.castLevel });
+
+  const inRange = (t: BattleParticipant) => spellTargetInRange(map, caster, t, flow.pick?.range) && !filteredOut(t);
 
   const aimPick = flow.pick?.targetMode === "template" ? flow.pick : undefined;
 
@@ -136,7 +141,7 @@ export function useSpellBook(caster: BattleParticipant | null, options: { reacti
   const mapCandidates = useMemo(() => targets.filter(isOnMap), [targets]);
 
   const hover = useSpellMapTargeting(flow, dispatch, {
-    caster, order, map, active: mapTargeting, candidates: mapCandidates, inRange, setMapAim: scene.intents.setMapAim, setMapPick: scene.intents.setMapPick,
+    caster, order, map, active: mapTargeting, candidates: mapCandidates, inRange, filteredOut, setMapAim: scene.intents.setMapAim, setMapPick: scene.intents.setMapPick,
   });
 
   const aimPreviewAt = (cell: GridPoint) => ({ targets: touchedAt(cell).filter(visible).map((p) => ({ participant: p, ally: p.basicInfo.side === caster?.basicInfo.side })) });
@@ -169,10 +174,21 @@ export function useSpellBook(caster: BattleParticipant | null, options: { reacti
     return slotOptions(caster, s.level).find((o) => o.key === flow.slotKey)?.castLevel;
   };
 
-  const formulaOf = (s: BookSpell): string =>
-    caster ? text(spellFormulaLabel(caster, { dice: spellDefinition(s).dice, groupId: s.spellGroup?.id ?? null, level: s.level, dieSides: s.dieSides, upcastDice: s.upcastDice, fixedDice: s.fixedDice }, castLevelOf(s))) : "";
+  const formulaOf = (s: BookSpell): string => {
+    if (!caster) return "";
+
+    const def = spellDefinition(s);
+
+    if (flow.pick?.spellId === s.id && flow.pick.inputDice) return text(textRef("battleActions.spell.formula", { count: flow.pick.diceSlots.length, sides: flow.pick.inputDice.sides }));
+
+    if (def.dice === 0) return text(spellEffectsFormula(s.spellEffects ?? []));
+
+    return text(spellFormulaLabel(caster, { dice: def.dice, groupId: s.spellGroup?.id ?? null, level: s.level, dieSides: s.dieSides, upcastDice: s.upcastDice, fixedDice: s.fixedDice }, castLevelOf(s)));
+  };
 
   const grantsOf = (s: BookSpell) => grantsFor(caster, s.id);
+
+  const labelOf = (s: BookSpell) => (s.grantKey ? inlineGrantLabel(caster, inlineGrantOf(caster, s)) : grantLabelOf(caster, s.id));
 
   const grantOf = (s: BookSpell) => selectedGrantOf(grantsOf(s), flow);
 
@@ -231,20 +247,20 @@ export function useSpellBook(caster: BattleParticipant | null, options: { reacti
   const firstUsable = (who: BattleParticipant) => slotLevels(who).find((l) => l.current > 0)?.level ?? 0;
 
   const view = {
-    spells, byLevel, selected, targets, saveTargets, hover, aimPreviewAt, mapTargeting, chain: chain.filter(visible), inRange, formulaOf, wideningOf, definitionOf: spellDefinition, slots: caster ? slotLevels(caster) : [],
+    spells, byLevel, selected, targets, saveTargets, hover, aimPreviewAt, mapTargeting, chain: chain.filter(visible), inRange, filteredOut, formulaOf, wideningOf, definitionOf: spellDefinition, slots: caster ? slotLevels(caster) : [],
     universalSlot,
     free,
     timing: selected?.casting,
     pendingCast: caster?.battleData.pendingCast,
     canFastForward: scene.viewer.isDM,
-    grantLabel: (s: BookSpell) => grantLabelOf(caster, s.id),
+    grantLabel: labelOf,
     sourceOptions,
     sourceValue: flow.grantKey ? `grant:${flow.grantKey}` : flow.slotKey ? `slot:${flow.slotKey}` : "",
     castLevelOptions,
     castLevelValue: flow.castLevel ?? selectedGrant?.castLevel,
     slotLeft: (level: number) => spellSlotsLeft(caster, level, bypassCost || spells.some((s) => s.level === level && !!grantOf(s))),
     slotCostLabel: (s: BookSpell) => {
-      const parts = [special ? textRef("battleWizards.flow.cost.special") : undefined, grantLabelOf(caster, s.id)].filter((p): p is LogLine => p !== undefined && p !== "");
+      const parts = [special ? textRef("battleWizards.flow.cost.special") : undefined, labelOf(s)].filter((p): p is LogLine => p !== undefined && p !== "");
 
       return parts.length > 0 ? joinLines(parts, " · ") : spellSlotCostLabel(s, { free, universal: universalSlot, chosen: slotChoices.find((o) => o.key === state.slotKey)?.label });
     },
@@ -252,7 +268,7 @@ export function useSpellBook(caster: BattleParticipant | null, options: { reacti
     noSlot: (s: BookSpell) => !canSlot(s) && spellBlockedBySlots(caster, s.level, bypassCost),
     attackTargets: state.pick?.needsAttackRolls ? targets.filter((t) => state.targetIds.includes(t.basicInfo.id)) : [],
     costUsed: (s: BookSpell) => costBlocked({
-      caster, spell: s, definitionCost: spellDefinition(s).cost, grants: grantsOf(s), grant: grantOf(s), slotKey: state.slotKey, free, bypassCost, special: !!special, isDM: scene.viewer.isDM,
+      caster, spell: s, definitionCost: spellDefinition(s).cost, grants: s.grantKey ? [inlineGrantOf(caster, s)].filter((g) => !!g) : grantsOf(s), grant: s.grantKey ? inlineGrantOf(caster, s) : grantOf(s), slotKey: state.slotKey, free, bypassCost, special: !!special, isDM: scene.viewer.isDM,
       isMyTurn: scene.battle.initiativeOrder[scene.battle.currentTurnIndex]?.basicInfo.id === caster?.basicInfo.id, reactionBlocked: !!caster && !!reactionBlocker(caster),
     }),
   };
@@ -292,6 +308,8 @@ export function useSpellBook(caster: BattleParticipant | null, options: { reacti
     setCastLevel: (castLevel: number) => {
       if (selected && selectedGrant) dispatch({ type: "SET_CAST_LEVEL", castLevel, pick: buildSpellPick(order, caster, selected, map, { castLevel }) });
     },
+    setOption: (index: number) => dispatch({ type: "SET_OPTION", index }),
+    setInputCount: (count: number) => dispatch({ type: "SET_INPUT", count }),
     setAttack: (id: string, v: number | undefined) => dispatch({ type: "SET_ATTACK", id, value: v }),
     prepareCast: async (cancel = false) => {
       if (!caster || !selected) return;

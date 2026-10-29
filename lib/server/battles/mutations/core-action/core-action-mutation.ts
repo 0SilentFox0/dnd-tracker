@@ -1,12 +1,13 @@
 import { API_ERRORS } from "@/lib/constants/api-errors";
 import { runCoreAction } from "@/lib/utils/battle/actions/run";
 import type { CoreActionBody } from "@/lib/utils/battle/actions/schema";
-import { requireActor } from "@/lib/utils/battle/common/control";
+import { currentOf, requireActor } from "@/lib/utils/battle/common/control";
 import { lineText } from "@/lib/utils/battle/log/lines";
 import type { BattleMutationContext, MutationResult } from "@/lib/utils/battle/pipeline/run-battle-mutation";
 import { battleActionToEvent, BattleRuleError, systemEvent } from "@/lib/utils/battle/store";
 import { REJECT } from "@/lib/utils/battle/store/reject";
 import { assertCanAct } from "@/lib/utils/battle/turn";
+import { rngOf } from "@/lib/utils/common/rng";
 
 function guard(ctx: BattleMutationContext, body: CoreActionBody): void {
   const offTurn = body.action === "readiedAttack";
@@ -20,7 +21,7 @@ function guard(ctx: BattleMutationContext, body: CoreActionBody): void {
 
   if (offTurn) return;
 
-  if (ctx.participants[ctx.scene.turnIndex]?.basicInfo.id !== actor.basicInfo.id) throw new BattleRuleError("action_rejected", API_ERRORS.BATTLE_NOT_PARTICIPANT_TURN);
+  if (currentOf(ctx)?.basicInfo.id !== actor.basicInfo.id) throw new BattleRuleError("action_rejected", API_ERRORS.BATTLE_NOT_PARTICIPANT_TURN);
 
   assertCanAct(ctx, actor.basicInfo.id);
 }
@@ -36,7 +37,7 @@ export function coreActionMutation(ctx: BattleMutationContext, body: CoreActionB
     map: ctx.meta.map,
     rules: ctx.meta.rules,
     round: ctx.scene.round,
-    rng: ctx.rng ?? Math.random,
+    rng: rngOf(ctx),
     battleId: ctx.scene.id,
   });
 

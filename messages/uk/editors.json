@@ -1,0 +1,173 @@
+{
+  "spellEffects": {
+    "kinds": {
+      "chooseOne": "На вибір кастера",
+      "inputDice": "Кубики з введення",
+      "grantCast": "Тимчасовий підкаст",
+      "hitRider": "Заряди додаткової шкоди",
+      "moveSelf": "Кастер переміщується до цілі",
+      "createTerrain": "Стіна / складна місцевість",
+      "anchoredZone": "Аура на цілі",
+      "summonInline": "Виклик з мапи заклинання",
+      "transform": "Перетворення"
+    },
+    "fields": {
+      "inputDice": {
+        "label": "Підпис поля",
+        "max": "Макс. кубиків"
+      },
+      "createTerrain": {
+        "terrain": "Вид",
+        "shape": "Форма",
+        "cells": "Клітинок",
+        "rounds": "Раундів"
+      },
+      "transform": {
+        "unitId": "Юніт-форма",
+        "duration": "Тривалість (раунди)"
+      },
+      "hitRider": {
+        "attackKind": "Вид атаки",
+        "extraDice": "Додаткові кубики",
+        "damageType": "Тип шкоди",
+        "charges": "Заряди",
+        "duration": "Тривалість (раунди)",
+        "target": "Носій",
+        "consumeOnMiss": "Заряд витрачається й на промах",
+        "expireAtTurnEnd": "Згасає в кінці ходу",
+        "save": "Рятівний кидок цілі",
+        "onFail": "Ефекти при провалі"
+      },
+      "grantCast": {
+        "label": "Назва підкасту",
+        "cost": "Вартість",
+        "uses": "Використань",
+        "duration": "Тривалість (раунди)",
+        "target": "Носій",
+        "castHeading": "Підкаст",
+        "cast": {
+          "dice": "Кубики",
+          "dieSides": "Грані кубика",
+          "damageBonus": "Бонус шкоди",
+          "addAbilityMod": "Додати модифікатор характеристики",
+          "anchorMarkId": "Ідентифікатор мітки",
+          "perObjectFeet": "Футів на об'єкт",
+          "auto": {
+            "on": "Авто-спрацювання"
+          }
+        },
+        "castEffects": "Ефекти підкасту",
+        "advanced": "Додатково"
+      },
+      "anchoredZone": {
+        "radiusFeet": "Радіус (футів)",
+        "side": "Кого зачіпає",
+        "duration": "Тривалість (раунди)",
+        "excludeBearer": "Крім носія",
+        "endsWhenStartOutside": "Закінчується, якщо хід починається поза аурою",
+        "onEnter": "Тригер входу",
+        "onTurnStart": "Тригер початку ходу"
+      },
+      "summonInline": {
+        "name": "Назва",
+        "size": "Розмір",
+        "ac": "КЗ",
+        "acSpellDc": "= СК заклинання",
+        "hp": "HP",
+        "hpItem": "Предмет (без HP)",
+        "count": "Кількість",
+        "upcastEvery": "+1 за кожні N рівнів",
+        "duration": "Тривалість (раунди)",
+        "attacks": "Атаки (до 2)",
+        "addAttack": "+ атака",
+        "removeAttack": "Прибрати атаку",
+        "auraToggle": "Аура навколо",
+        "attack": {
+          "name": "Назва",
+          "attackBonus": "Бонус",
+          "damageDice": "Кубики",
+          "damageType": "Тип шкоди",
+          "range": "Дальність"
+        },
+        "aura": {
+          "radiusFeet": "Радіус (фути)",
+          "side": "Діє на",
+          "onEnter": "Тригер входу",
+          "onTurnStart": "Тригер початку ходу"
+        }
+      }
+    },
+    "options": {
+      "terrain": {
+        "wall": "Стіна",
+        "difficult": "Складна місцевість"
+      },
+      "shape": {
+        "cell": "Клітинки області",
+        "line": "Лінія до цілі"
+      },
+      "attackKind": {
+        "melee": "Ближня",
+        "ranged": "Дальня",
+        "any": "Будь-яка"
+      },
+      "target": {
+        "self": "Я",
+        "eventTarget": "Ціль події"
+      },
+      "cost": {
+        "action": "Дія",
+        "bonusAction": "Бонусна дія",
+        "reaction": "Реакція"
+      },
+      "side": {
+        "enemies": "Вороги",
+        "allies": "Союзники",
+        "all": "Усі"
+      },
+      "cast": {
+        "auto": {
+          "on": {
+            "attackAgainstMarked": "Атака по позначеному",
+            "damageToMarked": "Шкода позначеному"
+          }
+        }
+      },
+      "size": {
+        "tiny": "Крихітний",
+        "small": "Малий",
+        "medium": "Середній",
+        "large": "Великий"
+      },
+      "aura": {
+        "side": {
+          "enemies": "Вороги",
+          "allies": "Союзники",
+          "all": "Усі"
+        }
+      }
+    },
+    "hints": {
+      "chooseOne": "Кастер обирає один із варіантів під час касту.",
+      "moveSelf": "Кастер переміщується в найближчу вільну клітинку біля першої цілі без атак при відході.",
+      "revertAtZero": "На 0 HP форми — відкат; надлишок шкоди переходить на звичайну форму."
+    },
+    "delete": "Видалити ефект",
+    "nested": {
+      "chooseOneHeading": "Кастер обирає один із варіантів під час касту.",
+      "chooseOneAdd": "+ варіант"
+    },
+    "zone": {
+      "check": "Перевірка",
+      "checks": {
+        "none": "Без перевірки",
+        "save": "Рятівний кидок",
+        "attack": "Атака заклинанням"
+      },
+      "ability": "Характеристика",
+      "pull": "Тягне до центру",
+      "effects": "Ефекти",
+      "addEffect": "+ ефект"
+    }
+  }
+}

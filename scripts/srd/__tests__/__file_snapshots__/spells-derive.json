@@ -1,0 +1,402 @@
+[
+  {
+    "slug": "srd-2024_bless",
+    "targeting": {
+      "kind": "area",
+      "side": "ally",
+      "maxTargets": 3,
+      "range": 30
+    },
+    "resolution": {
+      "kind": "auto"
+    },
+    "dice": 0,
+    "dieSides": null,
+    "upcastDice": null,
+    "upcastTargets": 1,
+    "addAbilityMod": null,
+    "spellEffects": [
+      {
+        "kind": "modifyStat",
+        "stat": "attackBonus",
+        "flat": 2,
+        "duration": {
+          "rounds": 10
+        }
+      },
+      {
+        "kind": "modifyStat",
+        "stat": "savingThrow",
+        "flat": 2,
+        "duration": {
+          "rounds": 10
+        }
+      }
+    ]
+  },
+  {
+    "slug": "srd-2024_cure-wounds",
+    "targeting": {
+      "kind": "ally",
+      "range": 5
+    },
+    "resolution": {
+      "kind": "auto"
+    },
+    "dice": 2,
+    "dieSides": 8,
+    "upcastDice": 2,
+    "upcastTargets": null,
+    "addAbilityMod": true,
+    "spellEffects": [
+      {
+        "kind": "heal",
+        "amount": {
+          "spellRoll": 100
+        }
+      }
+    ]
+  },
+  {
+    "slug": "srd-2024_dimension-door",
+    "targeting": {
+      "kind": "self"
+    },
+    "resolution": {
+      "kind": "auto"
+    },
+    "dice": 0,
+    "dieSides": null,
+    "upcastDice": null,
+    "upcastTargets": null,
+    "addAbilityMod": null,
+    "spellEffects": []
+  },
+  {
+    "slug": "srd-2024_fire-bolt",
+    "targeting": {
+      "kind": "enemy",
+      "range": 120
+    },
+    "resolution": {
+      "kind": "attack"
+    },
+    "dice": 1,
+    "dieSides": 10,
+    "upcastDice": null,
+    "upcastTargets": null,
+    "addAbilityMod": null,
+    "spellEffects": [
+      {
+        "kind": "dealDamage",
+        "amount": {
+          "spellRoll": 100
+        },
+        "damageType": "fire"
+      }
+    ]
+  },
+  {
+    "slug": "srd-2024_fireball",
+    "targeting": {
+      "kind": "template",
+      "shape": "circle",
+      "size": 20,
+      "side": "enemy",
+      "maxTargets": 20,
+      "exact": true,
+      "range": 150
+    },
+    "resolution": {
+      "kind": "save",
+      "ability": "dexterity",
+      "onSuccess": "half"
+    },
+    "dice": 8,
+    "dieSides": 6,
+    "upcastDice": 1,
+    "upcastTargets": null,
+    "addAbilityMod": null,
+    "spellEffects": [
+      {
+        "kind": "dealDamage",
+        "amount": {
+          "spellRoll": 100
+        },
+        "damageType": "fire"
+      }
+    ]
+  },
+  {
+    "slug": "srd-2024_hex",
+    "targeting": {
+      "kind": "enemy",
+      "range": 90
+    },
+    "resolution": {
+      "kind": "auto"
+    },
+    "dice": 0,
+    "dieSides": null,
+    "upcastDice": null,
+    "upcastTargets": null,
+    "addAbilityMod": null,
+    "spellEffects": [
+      {
+        "kind": "flag",
+        "flag": "checkDisadvantage",
+        "skills": "all",
+        "duration": {
+          "rounds": 99
+        }
+      },
+      {
+        "kind": "mark",
+        "markId": "hex",
+        "duration": {
+          "rounds": 99
+        }
+      }
+    ]
+  },
+  {
+    "slug": "srd-2024_hold-person",
+    "targeting": {
+      "kind": "enemy",
+      "range": 60
+    },
+    "resolution": {
+      "kind": "save",
+      "ability": "wisdom",
+      "onSuccess": "none"
+    },
+    "dice": 0,
+    "dieSides": null,
+    "upcastDice": null,
+    "upcastTargets": 1,
+    "addAbilityMod": null,
+    "spellEffects": [
+      {
+        "kind": "applyCondition",
+        "condition": "paralyzed",
+        "duration": {
+          "rounds": 10
+        },
+        "saveEnds": {
+          "ability": "wisdom"
+        }
+      }
+    ]
+  },
+  {
+    "slug": "srd-2024_lightning-bolt",
+    "targeting": {
+      "kind": "template",
+      "shape": "line",
+      "size": 100,
+      "side": "enemy",
+      "maxTargets": 20
+    },
+    "resolution": {
+      "kind": "save",
+      "ability": "dexterity",
+      "onSuccess": "half"
+    },
+    "dice": 8,
+    "dieSides": 6,
+    "upcastDice": 1,
+    "upcastTargets": null,
+    "addAbilityMod": null,
+    "spellEffects": [
+      {
+        "kind": "dealDamage",
+        "amount": {
+          "spellRoll": 100
+        },
+        "damageType": "lightning"
+      }
+    ]
+  },
+  {
+    "slug": "srd-2024_magic-missile",
+    "targeting": {
+      "kind": "area",
+      "side": "enemy",
+      "maxTargets": 3,
+      "range": 120
+    },
+    "resolution": {
+      "kind": "auto"
+    },
+    "dice": 1,
+    "dieSides": 4,
+    "upcastDice": null,
+    "upcastTargets": 1,
+    "addAbilityMod": null,
+    "spellEffects": [
+      {
+        "kind": "dealDamage",
+        "amount": {
+          "spellRoll": 100
+        },
+        "damageType": "force"
+      }
+    ]
+  },
+  {
+    "slug": "srd-2024_mass-cure-wounds",
+    "targeting": {
+      "kind": "template",
+      "shape": "circle",
+      "size": 30,
+      "side": "ally",
+      "maxTargets": 6,
+      "exact": true,
+      "range": 60
+    },
+    "resolution": {
+      "kind": "auto"
+    },
+    "dice": 5,
+    "dieSides": 8,
+    "upcastDice": 1,
+    "upcastTargets": null,
+    "addAbilityMod": true,
+    "spellEffects": [
+      {
+        "kind": "heal",
+        "amount": {
+          "spellRoll": 100
+        }
+      }
+    ]
+  },
+  {
+    "slug": "srd-2024_sacred-flame",
+    "targeting": {
+      "kind": "enemy",
+      "range": 60
+    },
+    "resolution": {
+      "kind": "save",
+      "ability": "dexterity",
+      "onSuccess": "none"
+    },
+    "dice": 1,
+    "dieSides": 8,
+    "upcastDice": null,
+    "upcastTargets": null,
+    "addAbilityMod": null,
+    "spellEffects": [
+      {
+        "kind": "dealDamage",
+        "amount": {
+          "spellRoll": 100
+        },
+        "damageType": "radiant"
+      }
+    ]
+  },
+  {
+    "slug": "srd-2024_shield",
+    "targeting": {
+      "kind": "self"
+    },
+    "resolution": {
+      "kind": "auto"
+    },
+    "dice": 0,
+    "dieSides": null,
+    "upcastDice": null,
+    "upcastTargets": null,
+    "addAbilityMod": null,
+    "spellEffects": [
+      {
+        "kind": "modifyStat",
+        "stat": "armor",
+        "flat": 5,
+        "duration": {
+          "rounds": 1
+        }
+      }
+    ]
+  },
+  {
+    "slug": "srd-2024_spirit-guardians",
+    "targeting": {
+      "kind": "template",
+      "shape": "emanation",
+      "size": 15,
+      "side": "enemy",
+      "maxTargets": 20
+    },
+    "resolution": {
+      "kind": "save",
+      "ability": "wisdom",
+      "onSuccess": "half"
+    },
+    "dice": 3,
+    "dieSides": 8,
+    "upcastDice": 1,
+    "upcastTargets": null,
+    "addAbilityMod": null,
+    "spellEffects": [
+      {
+        "kind": "dealDamage",
+        "amount": {
+          "spellRoll": 100
+        },
+        "damageType": "radiant"
+      }
+    ]
+  },
+  {
+    "slug": "srd-2024_teleport",
+    "targeting": {
+      "kind": "ally",
+      "range": 10
+    },
+    "resolution": {
+      "kind": "auto"
+    },
+    "dice": 0,
+    "dieSides": null,
+    "upcastDice": null,
+    "upcastTargets": null,
+    "addAbilityMod": null,
+    "spellEffects": []
+  },
+  {
+    "slug": "srd-2024_web",
+    "targeting": {
+      "kind": "template",
+      "shape": "cube",
+      "size": 20,
+      "side": "enemy",
+      "maxTargets": 20,
+      "range": 60
+    },
+    "resolution": {
+      "kind": "save",
+      "ability": "dexterity",
+      "onSuccess": "none"
+    },
+    "dice": 0,
+    "dieSides": null,
+    "upcastDice": null,
+    "upcastTargets": null,
+    "addAbilityMod": null,
+    "spellEffects": [
+      {
+        "kind": "applyCondition",
+        "condition": "restrained",
+        "duration": {
+          "rounds": 10
+        },
+        "saveEnds": {
+          "ability": "strength"
+        }
+      }
+    ]
+  }
+]

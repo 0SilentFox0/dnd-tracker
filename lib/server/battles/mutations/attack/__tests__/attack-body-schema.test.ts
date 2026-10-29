@@ -1,6 +1,6 @@
 import { describe, expect, it, vi } from "vitest";
 
-import { attackBodySchema } from "../attack-mutation";
+import { attackBodySchema } from "@/lib/schemas/battles";
 
 vi.mock("server-only", () => ({}));
 

@@ -11,8 +11,9 @@ import { AiRollButton, DamageDice } from "@/components/battle/hud/DiceInput";
 import { HUD_SURFACE } from "@/components/hud";
 import { ResponsiveDialog } from "@/components/ui/responsive-dialog";
 import type { useSpellBook } from "@/lib/hooks/battle";
+import { useText } from "@/lib/i18n/use-text";
 import { cn } from "@/lib/utils";
-import { canGoBack, rollsComplete } from "@/lib/utils/battle/flows";
+import { canGoBack, optionMissing, rollsComplete } from "@/lib/utils/battle/flows";
 
 type Book = ReturnType<typeof useSpellBook>;
 
@@ -52,7 +53,7 @@ function TargetsStep({ book }: { book: Book }) {
               selected={state.targetIds.includes(t.basicInfo.id)}
               disabled={!reachable}
               onClick={() => actions.toggleTarget(t.basicInfo.id)}
-              trailing={!reachable && <span className="ml-auto text-sm italic">{tw("outOfRange")}</span>}
+              trailing={!reachable && <span className="ml-auto text-sm italic">{view.filteredOut(t) ? tw("notSuitable") : tw("outOfRange")}</span>}
             />
           );
         })}
@@ -76,6 +77,12 @@ function RollsStep({ book }: { book: Book }) {
       <SaveRolls targets={view.saveTargets} saves={state.saves} onChange={actions.setSave} />
       <SaveRolls targets={view.attackTargets} saves={state.attacks} onChange={actions.setAttack} title={tw("attackRoll")} />
       {view.attackTargets.length > 0 && <p className="mt-1 text-xs italic text-[var(--hud-muted)]">{tw("serverD20")}</p>}
+      {state.pick?.inputDice && (
+        <label className="mt-3 flex items-center justify-between gap-3 text-sm">
+          <span className="hud-sc font-bold">{state.pick.inputDice.label}</span>
+          <input type="number" inputMode="numeric" min={1} max={state.pick.inputDice.max} value={state.inputCount ?? 1} onChange={(e) => actions.setInputCount(Number(e.target.value))} className="w-20 rounded border border-white/25 bg-transparent px-2 py-1 text-right" />
+        </label>
+      )}
       {state.pick && state.pick.diceSlots.length > 0 && (
         <>
           <div className="hud-sc mt-4 text-lg font-bold">{tw("dice")}{selected ? ` · ${view.formulaOf(selected)}` : ""}</div>
@@ -91,6 +98,28 @@ function RollsStep({ book }: { book: Book }) {
   );
 }
 
+function OptionPicker({ book }: { book: Book }) {
+  const tw = useTranslations("battleWizards.spell.cast");
+
+  const text = useText();
+
+  const { state, actions } = book;
+
+  if (!state.pick?.options) return null;
+
+  return (
+    <fieldset className="mt-3 space-y-1 text-sm">
+      <legend className="hud-sc mb-1 font-bold">{tw("pickOption")}</legend>
+      {state.pick.options.map((label, i) => (
+        <label key={i} className="flex items-start gap-2">
+          <input type="radio" name="spell-option" checked={state.optionIndex === i} onChange={() => actions.setOption(i)} className="mt-1" />
+          {text(label)}
+        </label>
+      ))}
+    </fieldset>
+  );
+}
+
 function SummaryStep({ book }: { book: Book }) {
   const tw = useTranslations("battleWizards.spell.cast");
 
@@ -103,7 +132,8 @@ function SummaryStep({ book }: { book: Book }) {
   return (
     <>
       {selected && <SpellSummary spell={selected} state={state} targets={view.targets} formula={view.formulaOf(selected)} targeting={view.definitionOf(selected).targeting} slotCost={view.slotCostLabel(selected)} />}
-      <button type="button" disabled={submitting} onClick={actions.submit} className={cn(primary, "mt-3 w-full")}>
+      <OptionPicker book={book} />
+      <button type="button" disabled={submitting || optionMissing(state)} onClick={actions.submit} className={cn(primary, "mt-3 w-full")}>
         {submitting ? <Loader2 className="size-5 animate-spin" /> : <><Sparkles className="size-5" />{tw("apply")}</>}
       </button>
       <BackCancel book={book} disabled={submitting} />

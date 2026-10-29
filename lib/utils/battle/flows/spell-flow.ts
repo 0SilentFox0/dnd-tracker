@@ -1,4 +1,5 @@
 import type { SpellFlowAction, SpellFlowState, SpellPick } from "./spell-flow-types";
+import { withInputCount } from "./spell-pick";
 
 import type { SpellCastData } from "@/types/api";
 
@@ -11,6 +12,8 @@ export const initialSpellFlow: SpellFlowState = { step: "closed", level: 0, targ
 const selfCentered = (p: SpellPick | undefined) => p?.template?.shape === "emanation";
 
 const needsRolls = (p: SpellPick) => p.needsSaves || !!p.needsAttackRolls || p.diceSlots.length > 0;
+
+export const optionMissing = (s: SpellFlowState): boolean => !!s.pick?.options && s.optionIndex === undefined;
 
 export function rollsComplete(s: SpellFlowState): boolean {
   if (!s.pick) return false;
@@ -38,7 +41,11 @@ export const canGoBack = (s: SpellFlowState): boolean => previousStep(s) !== nul
 const firstLevelWithSpells = (current: number, levels: number[]): number =>
   levels.length === 0 || levels.includes(current) ? current : Math.min(...levels);
 
-function reconcileSpellPick(s: SpellFlowState, pick: SpellPick, patch: Partial<SpellFlowState>): SpellFlowState {
+function reconcileSpellPick(s: SpellFlowState, incoming: SpellPick, patch: Partial<SpellFlowState>): SpellFlowState {
+  const count = patch.inputCount ?? s.inputCount;
+
+  const pick = count ? withInputCount(incoming, count) : incoming;
+
   const sameDice = s.pick?.diceSlots.length === pick.diceSlots.length && s.pick.diceSlots.every((d, i) => d === pick.diceSlots[i]);
 
   const targetIds = pick.maxTargets === undefined ? s.targetIds : s.targetIds.slice(0, pick.maxTargets);
@@ -63,13 +70,17 @@ export function spellFlow(s: SpellFlowState, a: SpellFlowAction): SpellFlowState
       return { ...initialSpellFlow, step: "book", casterId: s.casterId, level: a.level, levelPinned: true };
     case "PICK":
 
-      return { ...s, step: "spell", pick: a.pick, slotKey: a.slotKey, grantKey: a.grantKey, castLevel: a.castLevel, targetIds: [], aim: undefined, saves: {}, attacks: {}, damage: a.pick.diceSlots.map(() => undefined), error: undefined };
+      return { ...s, step: "spell", pick: a.pick, slotKey: a.slotKey, grantKey: a.grantKey, castLevel: a.castLevel, optionIndex: undefined, inputCount: a.pick.inputDice ? 1 : undefined, targetIds: [], aim: undefined, saves: {}, attacks: {}, damage: a.pick.diceSlots.map(() => undefined), error: undefined };
     case "SET_SLOT":
       return reconcileSpellPick(s, a.pick, { slotKey: a.slotKey, grantKey: undefined, castLevel: undefined });
     case "SET_GRANT":
       return reconcileSpellPick(s, a.pick, { grantKey: a.grantKey, castLevel: a.castLevel, slotKey: undefined });
     case "SET_CAST_LEVEL":
       return reconcileSpellPick(s, a.pick, { castLevel: a.castLevel });
+    case "SET_OPTION":
+      return s.pick?.options && a.index >= 0 && a.index < s.pick.options.length ? { ...s, optionIndex: a.index } : s;
+    case "SET_INPUT":
+      return s.pick?.inputDice ? reconcileSpellPick(s, s.pick, { inputCount: withInputCount(s.pick, a.count).diceSlots.length }) : s;
     case "SET_ATTACK": {
       const { [a.id]: _cleared, ...rest } = s.attacks;
 
@@ -175,14 +186,16 @@ export function spellPayload(s: SpellFlowState): SpellCastData {
 
   return {
     casterId: s.casterId as string,
-    spellId: s.pick?.spellId as string,
+    spellId: (s.pick?.inline?.spellId ?? s.pick?.spellId) as string,
     targetIds: s.pick?.targetMode === "none" ? [] : s.pick?.chain ? s.targetIds.slice(0, 1) : s.targetIds,
     ...(s.pick?.targetMode === "template" && !selfCentered(s.pick) && s.aim && { targetCell: s.aim }),
     diceRolls: s.damage.filter((v): v is number => typeof v === "number"),
     ...(saves.length > 0 && { saveRolls: saves }),
     ...(attacks.length > 0 && { attackRolls: attacks }),
     ...(s.slotKey && { slotKey: s.slotKey }),
-    ...(s.grantKey && { grantKey: s.grantKey }),
+    ...((s.pick?.inline?.grantKey ?? s.grantKey) && { grantKey: s.pick?.inline?.grantKey ?? s.grantKey }),
     ...(s.castLevel !== undefined && { castLevel: s.castLevel }),
+    ...(s.pick?.inputDice && s.inputCount !== undefined && { inputCount: s.inputCount }),
+    ...(s.pick?.options && s.optionIndex !== undefined && { optionIndex: s.optionIndex }),
   };
 }

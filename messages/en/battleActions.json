@@ -90,7 +90,8 @@
       "stunned": "stunned",
       "unconscious": "unconscious",
       "exhaustion": "exhaustion"
-    }
+    },
+    "undefinedCustom": "{source}: the condition is not defined in the campaign rules"
   },
   "legendary": {
     "badgeActions": "Leg. actions {left}/{max}",

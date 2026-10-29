@@ -1,9 +1,9 @@
 import { API_ERRORS } from "@/lib/constants/api-errors";
 import { textRef } from "@/lib/i18n/text-ref";
 import type { CritChoiceBody } from "@/lib/schemas";
+import type { SpellRequestData } from "@/lib/schemas/battles";
 import type { AttackBody } from "@/lib/server/battles/mutations/attack/attack-mutation";
 import { createAttackMutation } from "@/lib/server/battles/mutations/attack/attack-mutation";
-import type { SpellRequestData } from "@/lib/server/battles/mutations/spell/cast-spell-schema";
 import { createSpellMutation } from "@/lib/server/battles/mutations/spell/spell-mutation";
 import { enabledCritEffects } from "@/lib/utils/battle/crit-choice/catalog";
 import type { CritResume } from "@/lib/utils/battle/crit-choice/types";

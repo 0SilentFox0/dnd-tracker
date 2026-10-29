@@ -3,6 +3,7 @@ import { textRef } from "@/lib/i18n/text-ref";
 import { findParticipant, replaceParticipant } from "@/lib/utils/abilities/engine/core/participants";
 import { concentrationBroken, concentrationCheck, dropConcentration, hasConcentration } from "@/lib/utils/battle/concentration";
 import { clearDeathSaves, deathSaveDamage, startDying } from "@/lib/utils/battle/death-saves";
+import { revertOnZero } from "@/lib/utils/battle/transform/revert";
 import type { Ruleset } from "@/lib/utils/rules";
 import type { BattleParticipant } from "@/types/battle";
 import type { LogLine } from "@/types/text";
@@ -80,6 +81,16 @@ function concentrationFallout(input: DamageConsequencesInput, participant: Battl
 }
 
 export function applyDamageConsequences(input: DamageConsequencesInput): DamageConsequencesResult {
+  const reverted = revertOnZero(input.before, input.after, input.amount);
+
+  if (reverted) {
+    const note = textRef("battleLog.transform.formLost", { name: input.after.basicInfo.name, hasOverflow: String(reverted.overflow > 0), overflow: reverted.overflow });
+
+    const inner = applyDamageConsequences({ ...input, before: reverted.before, after: reverted.after, amount: reverted.overflow, participants: replaceParticipant(input.participants, reverted.after) });
+
+    return { ...inner, messages: [note, ...inner.messages] };
+  }
+
   const { after, rules, participants } = input;
 
   if (!rules) return { participant: after, participants, messages: [] };

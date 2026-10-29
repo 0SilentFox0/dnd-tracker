@@ -12,7 +12,7 @@ import {
   WORLD_NAME_MAX,
   WORLD_NOTE_MAX,
 } from "@/lib/constants/world";
-import { hexColorSchema } from "@/lib/schemas/common";
+import { hexColorSchema, urlField } from "@/lib/schemas/common";
 
 const coord = z.number().min(0, "world.validation.coordinateOutOfBounds").max(1, "world.validation.coordinateOutOfBounds");
 
@@ -28,7 +28,7 @@ const hexColor = hexColorSchema("world.validation.color");
 
 const nameSchema = z.string().trim().min(1, "world.validation.nameRequired").max(WORLD_NAME_MAX, "world.validation.nameMax");
 
-const imageUrl = z.string().url("world.validation.urlInvalid").max(1000);
+const imageUrl = urlField(1000, "world.validation.urlInvalid");
 
 const edge = z.number().int().min(1).max(WORLD_MAP_MAX_EDGE_PX);
 
@@ -99,7 +99,7 @@ export const worldUploadRequestSchema = z.object({
   contentType: z.enum(WORLD_MAP_UPLOAD_TYPES),
 });
 
-export const worldDiscardUploadSchema = z.object({ imageUrl: z.string().url().max(2048) });
+export const worldDiscardUploadSchema = z.object({ imageUrl: urlField(2048) });
 
 const restSchema = z.enum(["none", "short", "long"]);
 

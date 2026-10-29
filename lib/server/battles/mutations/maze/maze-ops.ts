@@ -23,6 +23,7 @@ import {
 import { MAZE_TEXTS } from "@/lib/utils/battle/modes/maze/texts";
 import type { BattleMutationContext, MutationResult } from "@/lib/utils/battle/pipeline/run-battle-mutation";
 import { dmEvent, type NewBattleEvent, rejectAction } from "@/lib/utils/battle/store";
+import { rngOf } from "@/lib/utils/common/rng";
 import type { MazeActionData } from "@/types/api";
 import type { BattleMapConfig, BattleParticipant, GridPoint, MazeConfig } from "@/types/battle";
 import type { LogLine } from "@/types/text";
@@ -75,7 +76,7 @@ function edited(ctx: BattleMutationContext, map: BattleMapConfig, maze: MazeConf
   return { participants: ctx.participants, pending: ctx.pending, scene: { map: { ...map, maze } }, events: [] };
 }
 
-const seedOf = (ctx: BattleMutationContext) => seedFrom(ctx.rng ?? Math.random);
+const seedOf = (ctx: BattleMutationContext) => seedFrom(rngOf(ctx));
 
 function assertReachable(ctx: BattleMutationContext, grid: MazeGrid) {
   if (!allReachExit(grid, positionsOf(ctx.participants))) rejectAction(MAZE_TEXTS.walledIn);

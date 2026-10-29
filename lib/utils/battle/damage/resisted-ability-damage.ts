@@ -3,6 +3,7 @@ import type { Downed } from "@/lib/utils/abilities/engine/core/types";
 import { applyRawDamage } from "@/lib/utils/abilities/engine/effects/hp";
 import { applyDamageConsequences } from "@/lib/utils/battle/damage/consequences";
 import { applyResistance } from "@/lib/utils/battle/resistance";
+import { rngOf } from "@/lib/utils/common/rng";
 import type { Ruleset } from "@/lib/utils/rules";
 import type { BattleParticipant } from "@/types/battle";
 import type { LogLine } from "@/types/text";
@@ -41,7 +42,7 @@ export function dealResistedDamage(
 
   const after = replaceParticipant(ps, hurt);
 
-  const c = applyDamageConsequences({ before: target, after: hurt, amount: finalDamage, rules: opts.rules, rng: opts.rng ?? Math.random, participants: after });
+  const c = applyDamageConsequences({ before: target, after: hurt, amount: finalDamage, rules: opts.rules, rng: rngOf(opts), participants: after });
 
   return { participants: c.participants, dealt: finalDamage, downed: isActive(target) && !isActive(c.participant), messages: c.messages };
 }

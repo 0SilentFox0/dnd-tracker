@@ -1,6 +1,12 @@
 import type { WhatsNewEntry } from "@/lib/onboarding/types";
 
 export const WHATS_NEW: WhatsNewEntry[] = [
+  { id: "2026-10-29-compendium-import-guide", date: "2026-10-29", audience: "dm", href: "/help/compendium-import" },
+  { id: "2026-10-29-spell-editor-forms", date: "2026-10-29", audience: "dm" },
+  { id: "2026-10-29-spell-attack-crits", date: "2026-10-29", audience: "dm" },
+  { id: "2026-10-29-summons-and-transform", date: "2026-10-29", audience: "all" },
+  { id: "2026-10-29-spell-zones", date: "2026-10-29", audience: "all" },
+  { id: "2026-10-29-temporary-spell-actions", date: "2026-10-29", audience: "all" },
   { id: "2026-10-28-acquaintances", date: "2026-10-28", audience: "all", href: "/help/player-acquaintances" },
   { id: "2026-10-28-notifications", date: "2026-10-28", audience: "player" },
   { id: "2026-10-28-arcane-recovery", date: "2026-10-28", audience: "all" },
@@ -14,6 +20,8 @@ export const WHATS_NEW: WhatsNewEntry[] = [
   { id: "2026-10-28-puzzle", date: "2026-10-28", audience: "all" },
   { id: "2026-10-28-world-map", date: "2026-10-28", audience: "all", href: "/help/player-world-map" },
   { id: "2026-10-28-crit-choice", date: "2026-10-28", audience: "dm" },
+  { id: "2026-10-28-book-conditions", date: "2026-10-28", audience: "dm" },
+  { id: "2026-10-28-spell-options", date: "2026-10-28", audience: "all" },
   { id: "2026-10-27-dashboard", date: "2026-10-27", audience: "all" },
   { id: "2026-10-27-inventory", date: "2026-10-27", audience: "all" },
   { id: "2026-10-27-search", date: "2026-10-27", audience: "dm" },

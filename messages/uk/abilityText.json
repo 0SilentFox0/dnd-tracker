@@ -6,7 +6,10 @@
     "spellRollPercent": "{value}% кидка заклинання",
     "ownerAttack": "{value} % шкоди першої атаки",
     "eventDamage": "{value}% від завданої шкоди",
-    "maxHp": "{value}% від макс. HP"
+    "maxHp": "{value}% від макс. HP",
+    "flatRoll": "+кидок",
+    "flatRollNeg": "−кидок",
+    "flatRollPercent": "{value}% кидка"
   },
   "attackKind": {
     "all": "атаки",
@@ -24,11 +27,11 @@
     "damageBonus": "шкода ({kind}{school, select, true {, школа} other {}}) {value}{mark, select, true { за мітку «{perMark}»} other {}}",
     "dealDamage": "шкода {amount}{hasType, select, true { {type}} other {}}{falloff}",
     "heal": "{revive, select, true {воскресіння} other {лікування}} {amount}",
-    "dot": "{type} {amount}/раунд × {rounds} р.",
+    "dot": "{type} {amount}/раунд × {rounds} р.{linked, select, true {, поки діє стан} other {}}",
     "hot": "лікування {amount}/раунд × {rounds} р.",
     "berserk": "шал: автоатака випадкової істоти, +{percent}% шкоди × {rounds} р.",
     "charm": "перехід на бік заклинателя × {rounds} р.",
-    "applyCondition": "{condition}{percent}{levels} × {rounds} р.{breakOnDamage, select, true {, до шкоди} other {}}{hasSave, select, true {, рятівний кидок {ability}} other {}}",
+    "applyCondition": "{condition}{percent}{levels} × {rounds} р.{breakOnDamage, select, true {, до шкоди} other {}}{hasSave, select, true {, рятівний кидок {ability}} other {}}{escapeDc, select, true {, вирватися проти СК} other {}}",
     "restoreSpellSlotLevels": "відновлює слоти до {level}-го кола за бюджетом кіл на короткому відпочинку",
     "restoreSpellSlot": "+{count} слот",
     "drainSpellSlot": "−{count} слот заклинань",
@@ -40,7 +43,18 @@
     "raiseDead": "підняти мертвих юнітів на {percent}% HP",
     "cleanse": "{conditions, select, true {зняття дебафів і станів} other {зняття дебафів}}",
     "maneuver": "{maneuver}: {percent} % шкоди атаки",
-    "randomOf": "одне з: {options}"
+    "randomOf": "одне з: {options}",
+    "inputDice": "кубики з введення (до {max}): {label}",
+    "grantCast": "підкаст «{label}» ({cost, select, action {дія} bonusAction {бонусна дія} other {реакція}}{hasUses, select, true {, ×{uses}} other {}}) на {rounds} р.",
+    "hitRider": "заряди ×{charges}: +{dice} {damageType} на {attackKind, select, any {будь-яку} melee {ближню} other {дальню}} атаку{consumeOnMiss, select, true { (і промах)} other {}}{hasSave, select, true {, СК {ability}: {onFail}} other {}}",
+    "anchoredZone": "аура {radius} фт на цілі ({side, select, enemies {вороги} allies {союзники} other {усі}}{excludeBearer, select, true {, крім носія} other {}}) на {rounds} р.{hasEnter, select, true {; вхід: {enter}} other {}}{hasTurnStart, select, true {; початок ходу: {turnStart}} other {}}{endsOutside, select, true {; закінчується, якщо хід починається поза аурою} other {}}",
+    "summonInline": "викликає {count}× «{name}» ({isObject, select, true {предмет} other {{hp} HP}}, КЗ {acIsSpellDc, select, true {= СК} other {{ac}}}) на {rounds} р.{hasUpcast, select, true {; +1 за кожні {upcastEvery} кола слота} other {}}{hasAura, select, true {; аура {auraRadius} фт{auraAttack, select, true { (атака заклинанням)} other {}}} other {}}",
+    "transform": "перетворює ціль на форму юніта на {rounds} р.; на 0 HP форми — відкат, надлишок шкоди переходить на звичайну форму",
+    "moveSelf": "кастер переміщується до цілі",
+    "createTerrain": "{terrain, select, wall {стіна} other {складна місцевість}}: {shape, select, line {лінія до цілі} other {клітинки області}} (до {cells}) на {rounds} р.",
+    "chooseOne": "на вибір: {options}",
+    "push": "відштовхнути на {feet} фт від кастера",
+    "help": "перевага союзнику на наступну атаку"
   },
   "grant": {
     "extra": "+{count} дія",
@@ -93,7 +107,8 @@
     "cunningAction": "Ривок, Відхід і Сховатися бонусною дією",
     "evasion": "рятівний кидок Спритності з половиною шкоди: успіх — 0, провал — половина",
     "proneDefense": "ближні атаки по цілі з перевагою, дальні — з недоліком",
-    "conditionImmunity": "{all, select, true {імунітет до контролю} other {імунітет: {list}}}"
+    "conditionImmunity": "{all, select, true {імунітет до контролю} other {імунітет: {list}}}",
+    "damageThreshold": "поріг шкоди {value}: менша шкода ігнорується"
   },
   "triggers": {
     "hitAlly": "іншого союзника",
@@ -137,6 +152,10 @@
     "chanceMissed": "🎲 {ability}: не спрацювало (шанс {chance} %)",
     "chanceSuffix": " (шанс {chance} %)",
     "raisedDead": "💀 {ability}: {target} повстали ({percent}% HP)",
-    "raiseRefused": "⛔ {ability}: {target} — не можна підняти"
+    "raiseRefused": "⛔ {ability}: {target} — не можна підняти",
+    "pushNoMap": "↔️ {ability}: відштовхування — без мапи не застосовано",
+    "pushNowhere": "↔️ {target}: відштовхнути нікуди",
+    "pushed": "↔️ {ability}: {target} відштовхнуто на {feet} фт",
+    "help": "🤝 {ability}: {target} має перевагу на наступну атаку"
   }
 }

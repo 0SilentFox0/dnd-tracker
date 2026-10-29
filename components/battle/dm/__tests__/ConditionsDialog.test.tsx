@@ -71,4 +71,19 @@ describe("ConditionsDialog", () => {
 
     expect(screen.getByText("Поточні стани")).toBeTruthy();
   });
+
+  it("custom-стани кампанії показуються й накладаються за ключем", () => {
+    const onSubmit = vi.fn();
+
+    const custom = [{ key: "custom:pacified", name: "Умиротворений", description: "Не воює", markers: [] as never[] }];
+
+    render(<ConditionsDialog participant={hero} custom={custom} onClose={vi.fn()} onSubmit={onSubmit} />);
+
+    expect(screen.getAllByRole("radio")).toHaveLength(CONDITION_5E_KEYS.length + 1);
+
+    fireEvent.click(screen.getByText("Умиротворений"));
+    fireEvent.click(screen.getByRole("button", { name: "Накласти" }));
+
+    expect(onSubmit).toHaveBeenCalledWith({ action: "apply", participantId: "hero", condition: "custom:pacified", rounds: undefined });
+  });
 });

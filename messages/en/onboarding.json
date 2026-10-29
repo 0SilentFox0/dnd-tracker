@@ -116,6 +116,10 @@
       "world": {
         "title": "World map",
         "body": "Draw a continent map, place locations and zones, and move heroes between maps. The map can be shown to players through \"Show\" - everyone sees only their own fog."
+      },
+      "compendium-import": {
+        "title": "Compendium import: four steps",
+        "body": "File, categories, check, confirm. The campaign is not changed until you confirm; the report shows blockers and manual actions."
       }
     },
     "player": {

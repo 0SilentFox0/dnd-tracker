@@ -67,7 +67,7 @@ export function renderEntries(value: unknown, path = "entries"): { text: string;
 
   const rendered = walk(value, path);
 
-  if (byteLength(rendered) > 64 * 1024) throw new CompendiumError("NOTES_SIZE", path);
+  if (byteLength(rendered) > 64 * 1024) throw new CompendiumError("NOTES_SIZE", path, `${path}: ${Math.round(byteLength(rendered) / 1024)} KiB`);
 
   return { text: rendered, issues };
 }

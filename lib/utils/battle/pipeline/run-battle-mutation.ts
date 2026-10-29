@@ -11,13 +11,16 @@ import type { Rng } from "@/lib/utils/abilities/engine/core/types";
 import { syncMapAuras } from "@/lib/utils/abilities/engine/effects/map-auras";
 import type { BATTLE_RATE_LIMITS, RateLimitResult } from "@/lib/utils/api/rate-limit";
 import { releaseInvalidGrapples } from "@/lib/utils/battle/actions/grapple";
-import { controls } from "@/lib/utils/battle/common/control";
+import { controls, currentOf } from "@/lib/utils/battle/common/control";
+import { dropOrphanedConcentration } from "@/lib/utils/battle/concentration";
 import { placeParticipants } from "@/lib/utils/battle/grid/placement";
 import { placeRevived } from "@/lib/utils/battle/grid/revive-placement";
 import { lineText } from "@/lib/utils/battle/log/lines";
 import { modeBlockedText, withModeAfterMutation } from "@/lib/utils/battle/modes/server";
 import { clearFallenEffects } from "@/lib/utils/battle/participant/fallen";
 import { reserveOf } from "@/lib/utils/battle/participant/reserve";
+import { sweepOrphanedAnchored } from "@/lib/utils/battle/spell/anchored-zone";
+import { sweepDeadZones } from "@/lib/utils/battle/spell/zone-triggers";
 import type {
   BattleDelta,
   BattleMeta,
@@ -34,6 +37,8 @@ import {
   systemEvent,
 } from "@/lib/utils/battle/store";
 import { REJECT } from "@/lib/utils/battle/store/reject";
+import { dismissExpiredSummons } from "@/lib/utils/battle/summon/dismiss";
+import { revertExpiredTransforms } from "@/lib/utils/battle/transform/revert";
 import { checkVictoryConditions, completeBattle } from "@/lib/utils/battle/turn/victory";
 import type { BattleKnowledge } from "@/lib/utils/battle/view/knowledge";
 import { alwaysSeesEnemyStats } from "@/lib/utils/battle/view/visibility";
@@ -97,7 +102,7 @@ export function assertAccess(access: BattleAccess, ctx: BattleMutationContext): 
 
   if (access === BattleAccess.DM) throw new BattleAccessError(403, API_ERRORS.DM_ONLY);
 
-  if (!controls(ctx, ctx.participants[ctx.scene.turnIndex])) {
+  if (!controls(ctx, currentOf(ctx))) {
     throw new BattleRuleError("not_your_turn", API_ERRORS.BATTLE_NOT_YOUR_TURN);
   }
 }
@@ -124,6 +129,14 @@ function withVictory(scene: BattleSceneState, result: MutationResult, rules: Rul
 }
 
 function withPlacement(map: BattleMapConfig | null, scene: { status: BattleStatus; round: number; participants: BattleParticipant[] }, result: MutationResult, place: boolean): MutationResult {
+  const dismissed = dismissExpiredSummons(result.participants, result.scene?.round ?? scene.round);
+
+  if (dismissed.participants !== result.participants) result = { ...result, participants: dismissed.participants, events: [...result.events, systemEvent(result.scene?.round ?? scene.round, lineText(dismissed.messages, "; "))] };
+
+  const reverted = revertExpiredTransforms(result.participants, result.scene?.round ?? scene.round);
+
+  if (reverted.participants !== result.participants) result = { ...result, participants: reverted.participants, events: [...result.events, systemEvent(result.scene?.round ?? scene.round, lineText(reverted.messages, "; "))] };
+
   const cleared = clearFallenEffects(result.participants);
 
   if (cleared !== result.participants) result = { ...result, participants: cleared };
@@ -131,6 +144,14 @@ function withPlacement(map: BattleMapConfig | null, scene: { status: BattleStatu
   const released = releaseInvalidGrapples(result.participants, map);
 
   if (released.participants !== result.participants) result = { ...result, participants: released.participants, events: [...result.events, systemEvent(result.scene?.round ?? scene.round, lineText(released.messages, "; "))] };
+
+  const swept = sweepOrphanedAnchored(result.participants);
+
+  if (swept !== result.participants) result = { ...result, participants: swept };
+
+  const orphaned = dropOrphanedConcentration(result.participants, map, result.scene?.round ?? scene.round);
+
+  if (orphaned.participants !== result.participants) result = { ...result, participants: orphaned.participants, events: [...result.events, systemEvent(result.scene?.round ?? scene.round, lineText(orphaned.messages, "; "))] };
 
   if (!map || (result.scene?.status ?? scene.status) !== BattleStatus.ACTIVE) return result;
 
@@ -191,9 +212,15 @@ export async function runGuardedBattleOperationCore<TBody>(
 
   const mutated = guardTurnOrder(loaded.scene, loaded.participants, await options.mutate(ctx, body), options.operation);
 
-  const map = mutated.scene?.map !== undefined ? mutated.scene.map : loaded.meta.map;
+  const mutatedMap = mutated.scene?.map !== undefined ? mutated.scene.map : loaded.meta.map;
 
-  const placed = withPlacement(map, { status: loaded.scene.status, round: loaded.scene.round, participants: loaded.participants }, mutated, !isDryRun);
+  const unswept = withPlacement(mutatedMap, { status: loaded.scene.status, round: loaded.scene.round, participants: loaded.participants }, mutated, !isDryRun);
+
+  const swept = sweepDeadZones(mutatedMap, unswept.participants);
+
+  const map = swept ?? mutatedMap;
+
+  const placed = swept ? { ...unswept, scene: { ...unswept.scene, map: swept } } : unswept;
 
   const result = withVictory(loaded.scene, isDryRun ? placed : withModeAfterMutation(map, loaded.scene, placed), loaded.meta.rules);
 

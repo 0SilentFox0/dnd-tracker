@@ -1,3 +1,4 @@
+import { byName } from "@/lib/utils/common/text";
 import type { BookSpell } from "@/types/spells";
 
 export function groupSpellsByLevel(spells: BookSpell[]): Record<number, BookSpell[]> {
@@ -5,7 +6,7 @@ export function groupSpellsByLevel(spells: BookSpell[]): Record<number, BookSpel
 
   for (const s of spells) (map[s.level] ??= []).push(s);
 
-  for (const list of Object.values(map)) list.sort((a, b) => a.name.localeCompare(b.name, "uk"));
+  for (const list of Object.values(map)) list.sort(byName);
 
   return map;
 }

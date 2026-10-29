@@ -94,4 +94,20 @@ describe("CompendiumImport", () => {
   fireEvent.click(await screen.findByRole("button", { name: "Перевірити JSON" }));
   expect((await screen.findByRole("alert")).textContent).toBe("Кампанія або термін preview змінилися. Повторіть перевірку.");
  });
+ it("groups categories, offers Усе/Нічого/Рекомендоване and shows the selection summary", async () => {
+  vi.stubGlobal("fetch", vi.fn(async () => new Response(JSON.stringify({ runs: [], hasMore: false }))));
+  await render(<CompendiumImport campaignId="c" />);
+  fireEvent.change(screen.getByLabelText("JSON-компендіум"), { target: { files: [new File(["{}"], "synthetic.json")] } });
+  await screen.findByLabelText("Заклинання (1)");
+  expect(screen.getByTestId("import-summary").textContent).toBe("Обрано 2 категорій, ≈1 записів");
+  fireEvent.click(screen.getByRole("button", { name: "Нічого" }));
+  expect(screen.getByTestId("import-summary").textContent).toBe("Обрано 0 категорій, ≈0 записів");
+  expect((screen.getByRole("button", { name: "Перевірити JSON" }) as HTMLButtonElement).disabled).toBe(true);
+  fireEvent.click(screen.getByRole("button", { name: "Усе" }));
+  expect((screen.getByLabelText("Сторінки книг (1)") as HTMLInputElement).checked).toBe(true);
+  fireEvent.click(screen.getByRole("button", { name: "Рекомендоване" }));
+  expect((screen.getByLabelText("Сторінки книг (1)") as HTMLInputElement).checked).toBe(false);
+  expect(screen.getByText("Класи та персонажі")).toBeTruthy();
+  expect(screen.getByText("Матеріали ДМ")).toBeTruthy();
+ });
 });

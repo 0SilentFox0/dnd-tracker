@@ -4,8 +4,9 @@ import { CombatStatus, ParticipantSide, ParticipantSourceType } from "@/lib/cons
 import { textOf } from "@/lib/i18n/test/text";
 import { makeEffect, makeParticipant, seq } from "@/lib/utils/abilities/__tests__/fixtures";
 import type { Effect } from "@/lib/utils/abilities/schema";
-import { beginConcentration, concentrationCheck, dropConcentration, isZoneConcentrationLive } from "@/lib/utils/battle/concentration";
+import { beginConcentration, concentrationCheck, dropConcentration, dropOrphanedConcentration, isZoneConcentrationLive, uniqueCastId } from "@/lib/utils/battle/concentration";
 import { applyCondition5e } from "@/lib/utils/battle/conditions";
+import { removeEffects } from "@/lib/utils/battle/conditions/query";
 import { applyDamageConsequences } from "@/lib/utils/battle/damage/consequences";
 import { DEATH_SAVES_TIMED_KEY } from "@/lib/utils/battle/death-saves";
 import { hazardHit, hazardUnder } from "@/lib/utils/battle/grid";
@@ -59,6 +60,76 @@ describe("каст із концентрацією", () => {
     expect(marker?.duration).toBe(3);
     expect(effectsOf(r.allParticipantsUpdated, "e1")[0].concentrationOf?.castId).toBe(marker?.concentration?.castId);
     expect(effectsOf(r.allParticipantsUpdated, "e2")[0].concentrationOf?.castId).toBe(marker?.concentration?.castId);
+  });
+
+  it("концентрація знімається, коли в заклинання не лишилось живих ефектів", () => {
+    const r = cast(spellOf(true), [caster(), foe("e1"), foe("e2")], rulesOn());
+
+    const stripped = (ids: string[]) => r.allParticipantsUpdated.map((p) => (ids.includes(p.basicInfo.id) ? removeEffects(p, (e) => !e.concentration).participant : p));
+
+    const one = dropOrphanedConcentration(stripped(["e1"]));
+
+    expect(one.messages).toEqual([]);
+    expect(effectsOf(one.participants, "c").some((e) => e.concentration)).toBe(true);
+
+    const none = dropOrphanedConcentration(stripped(["e1", "e2"]));
+
+    expect(textOf(none.messages[0])).toContain("втрачає концентрацію");
+    expect(effectsOf(none.participants, "c")).toEqual([]);
+  });
+
+  describe("інші носії концентрації тримають її", () => {
+    const bare = () => cast(spellOf(true), [caster(), foe("e1"), foe("e2")], rulesOn()).allParticipantsUpdated.map((p) => removeEffects(p, (e) => !e.concentration).participant);
+
+    const tagOf = (ps: BattleParticipant[]) => ({ casterId: "c", castId: effectsOf(ps, "c").find((e) => e.concentration)?.concentration?.castId as string });
+
+    const survives = (ps: BattleParticipant[], map?: BattleMapConfig) => effectsOf(dropOrphanedConcentration(ps, map, 1).participants, "c").some((e) => e.concentration);
+
+    const onE1 = (ps: BattleParticipant[], patch: (p: BattleParticipant) => BattleParticipant) => ps.map((p) => (p.basicInfo.id === "e1" ? patch(p) : p));
+
+    it("без носіїв знімається", () => {
+      expect(survives(bare())).toBe(false);
+    });
+
+    it("зона мапи", () => {
+      const ps = bare();
+
+      const map = { spellZones: { z: { casterId: "c", spellId: "sp", spellName: "x", dc: 10, side: "enemies", triggers: {}, untilRound: 5, concentrationOf: tagOf(ps) } } } as unknown as BattleMapConfig;
+
+      expect(survives(ps, map)).toBe(true);
+    });
+
+    it("небезпечна клітинка", () => {
+      const ps = bare();
+
+      const map = { terrain: { "1:1": { kind: "hazard", damage: { type: "fire", amount: 1, concentrationOf: tagOf(ps) } } } } as unknown as BattleMapConfig;
+
+      expect(survives(ps, map)).toBe(true);
+    });
+
+    it("предмет: активний тримає, знищений ні", () => {
+      const ps = bare();
+
+      const obj = (status: BattleParticipant["combatStats"]["status"]) => onE1(ps, (p) => ({ ...p, combatStats: { ...p.combatStats, status }, battleData: { ...p.battleData, object: { spellId: "sp", concentrationOf: tagOf(ps) } } }));
+
+      expect(survives(obj(CombatStatus.ACTIVE))).toBe(true);
+      expect(survives(obj(CombatStatus.DEAD))).toBe(false);
+    });
+
+    it("грант тримає, поки не спливе", () => {
+      const ps = bare();
+
+      const grant = (expiresRound: number) => onE1(ps, (p) => ({ ...p, spellcasting: { ...p.spellcasting, grants: [{ spellId: "sp", key: "k", cost: 0, expiresRound, concentrationOf: tagOf(ps) }] } }));
+
+      expect(survives(grant(3))).toBe(true);
+      expect(survives(grant(0))).toBe(false);
+    });
+  });
+
+  it("заклинання без тегованих ефектів (зона) не знімається", () => {
+    const r = cast(spellOf(true, [{ kind: "note", text: "x" } as Effect]), [caster(), foe("e1"), foe("e2")], rulesOn());
+
+    expect(dropOrphanedConcentration(r.allParticipantsUpdated).messages).toEqual([]);
   });
 
   it("без правила або без прапорця заклинання нічого не змінює", () => {
@@ -244,5 +315,41 @@ describe("review fixes", () => {
     expect(r.participants.find((p) => p.basicInfo.id === "c")?.combatStats.status).toBe(CombatStatus.DEAD);
     expect(effectsOf(r.participants, "c").some((e) => e.concentration)).toBe(false);
     expect(effectsOf(r.participants, "e1")).toEqual([]);
+  });
+});
+
+describe("uniqueCastId", () => {
+  const base = "c:sp@1#";
+
+  it("вільний id — #0", () => {
+    expect(uniqueCastId([caster()], null, "c", "sp", 1)).toBe(`${base}0`);
+  });
+
+  it("зайняті ефектом, грантом, предметом чи зоною — наступний seq", () => {
+    const c = caster();
+
+    const withEffect = [{ ...c, battleData: { ...c.battleData, activeEffects: [makeEffect("x", { concentrationOf: { casterId: "c", castId: `${base}0` } })] } }];
+
+    expect(uniqueCastId(withEffect, null, "c", "sp", 1)).toBe(`${base}1`);
+
+    const withGrant = [{ ...c, spellcasting: { ...c.spellcasting, grants: [{ spellId: "sp", key: `cast:${base}0:0`, cost: 0 }] } }];
+
+    expect(uniqueCastId(withGrant, null, "c", "sp", 1)).toBe(`${base}1`);
+
+    const withObject = [c, makeParticipant({ id: `inline:${base}0:1` }), makeParticipant({ id: `inline:${base}1:1` })];
+
+    expect(uniqueCastId(withObject, null, "c", "sp", 1)).toBe(`${base}2`);
+
+    const map = { spellZones: { [`${base}0@1`]: {} } } as unknown as BattleMapConfig;
+
+    expect(uniqueCastId([c], map, "c", "sp", 1)).toBe(`${base}1`);
+  });
+
+  it("інший раунд чи заклинання не заважає", () => {
+    const c = caster();
+
+    const ps = [{ ...c, battleData: { ...c.battleData, activeEffects: [makeEffect("x", { concentrationOf: { casterId: "c", castId: "c:sp@2#0" } })] } }];
+
+    expect(uniqueCastId(ps, null, "c", "sp", 1)).toBe(`${base}0`);
   });
 });

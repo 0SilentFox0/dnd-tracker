@@ -1,8 +1,8 @@
 import { refMap } from "./text";
 
 import { textRef } from "@/lib/i18n/text-ref";
-import type { Amount, Flat, Limits } from "@/lib/utils/abilities/schema";
-import { ABILITY_TARGETS, CONDITION_5E_KEYS, CONDITION_KEYS, DAMAGE_FILTER_KINDS, STAT_KEYS } from "@/lib/utils/abilities/schema/kinds";
+import type { Amount, AnyConditionKey, CustomConditionKey, Flat, Limits } from "@/lib/utils/abilities/schema";
+import { ABILITY_TARGETS, CONDITION_5E_KEYS, CONDITION_KEYS, DAMAGE_FILTER_KINDS, isCustomConditionKey, STAT_KEYS } from "@/lib/utils/abilities/schema/kinds";
 import { signed } from "@/lib/utils/common/format";
 import type { LogLine, TextArg } from "@/types/text";
 
@@ -10,8 +10,10 @@ export const STAT_LABELS = refMap("abilityRegistry.stats", STAT_KEYS);
 
 export const DAMAGE_FILTER_LABELS = refMap("abilityRegistry.damageFilters", DAMAGE_FILTER_KINDS);
 
-export function flatLabel(flat: Flat): string {
+export function flatLabel(flat: Flat | { spellRoll: number }): LogLine {
   if (typeof flat === "number") return signed(flat);
+
+  if ("spellRoll" in flat) return flat.spellRoll === 100 ? textRef("abilityText.amount.flatRoll") : flat.spellRoll === -100 ? textRef("abilityText.amount.flatRollNeg") : textRef("abilityText.amount.flatRollPercent", { value: signed(flat.spellRoll) });
 
   return "formula" in flat ? `+(${flat.formula})` : `+[${flat.scale}]`;
 }
@@ -37,6 +39,8 @@ export function amountLabel(amount: Amount): TextArg {
 export const TARGET_LABELS = refMap("abilityRegistry.targets", ABILITY_TARGETS);
 
 export const CONDITION_LABELS = refMap("abilityRegistry.options.condition", [...CONDITION_KEYS, ...CONDITION_5E_KEYS]);
+
+export const conditionLabel = (key: AnyConditionKey | CustomConditionKey): TextArg => (isCustomConditionKey(key) ? key.slice("custom:".length) : CONDITION_LABELS[key]);
 
 const usesLabel = (uses: NonNullable<Limits["perRest"]>["uses"]) => (typeof uses === "number" ? uses : "formula" in uses ? `(${uses.formula})` : `[${uses.scale}]`);
 

@@ -7,6 +7,7 @@ import type { Rng } from "@/lib/utils/abilities/engine/core/types";
 import { applyRawDamage } from "@/lib/utils/abilities/engine/effects/hp";
 import { isZoneConcentrationLive } from "@/lib/utils/battle/concentration";
 import { applyDamageConsequences } from "@/lib/utils/battle/damage/consequences";
+import { dealsNoDamage } from "@/lib/utils/battle/participant/state";
 import { applyResistance } from "@/lib/utils/battle/resistance";
 import { participantImmuneToSpell } from "@/lib/utils/battle/spell/spell-immunity";
 import { diceAverage, rollDice } from "@/lib/utils/common/dice";
@@ -70,6 +71,18 @@ export function hazardHit(
   if (!isZoneConcentrationLive(participants, hazard.concentrationOf)) return null;
 
   if (hazard.spellId && participantImmuneToSpell(p, hazard.spellId, participants)) return null;
+
+  const owner = hazard.casterId ? participants.find((q) => q.basicInfo.id === hazard.casterId) : undefined;
+
+  if (owner && dealsNoDamage(owner)) {
+    return {
+      participant: { ...p, battleData: { ...p.battleData, hazardHitRound: round } },
+      participants,
+      message: textRef("battleLog.hazard.harmless", { name: p.basicInfo.name, label: hazardLabel(cell.label) }),
+      damage: 0,
+      consequences: [],
+    };
+  }
 
   const raw = hazard.dice ? rollDice(hazard.dice, rng) : (hazard.amount ?? 0);
 

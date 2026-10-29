@@ -3,7 +3,8 @@ import { describe, expect, it, vi } from "vitest";
 import { context, goblin, hero } from "./fixtures";
 
 import { AttackType } from "@/lib/constants/battle";
-import { attackBodySchema, attackMutation } from "@/lib/server/battles/mutations/attack/attack-mutation";
+import { attackBodySchema } from "@/lib/schemas/battles";
+import { attackMutation } from "@/lib/server/battles/mutations/attack/attack-mutation";
 import { nextTurnMutation } from "@/lib/server/battles/mutations/next-turn/next-turn-mutation";
 import { runBattleMutation } from "@/lib/server/battles/run-mutation";
 import type { PipelineDeps, RunBattleMutationOptions } from "@/lib/utils/battle/pipeline/run-battle-mutation";

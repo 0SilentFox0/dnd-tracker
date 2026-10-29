@@ -94,7 +94,7 @@ export function SpellDetail({ spell, formula, children }: { spell: BookSpell; fo
   const labels = useSpellLabels();
 
   const rows = [
-    [t("power"), formula ?? (spell.dice ? t("baseDice", { dice: spell.dice }) : "—")],
+    ...(formula === "" ? [] : [[t("power"), formula ?? (spell.dice ? t("baseDice", { dice: spell.dice }) : "—")]]),
     [t("target"), spell.targeting ? labels.targeting(spell.targeting) : "—"],
     [t("check"), spell.resolution ? labels.resolution(spell.resolution) : labels.resolution({ kind: "auto" })],
     [t("cost"), labels.cost(spell.cost ?? "action")],

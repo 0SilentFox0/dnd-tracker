@@ -3,8 +3,9 @@ import { EffectMarker } from "@/lib/constants/battle";
 import { type RulesEdition } from "@/lib/constants/rules";
 import { dynamicTextRef } from "@/lib/i18n/text-ref";
 import type { StaticEffect } from "@/lib/utils/abilities/schema";
-import { type Condition5eKey } from "@/lib/utils/abilities/schema/kinds";
+import { type Condition5eKey, type CustomConditionKey } from "@/lib/utils/abilities/schema/kinds";
 import type { LabeledEffectInput } from "@/lib/utils/battle/actions/effects";
+import type { Ruleset } from "@/lib/utils/rules";
 import type { ActiveEffect } from "@/types/battle";
 
 export { CONDITION_5E_KEYS, type Condition5eKey } from "@/lib/utils/abilities/schema/kinds";
@@ -201,5 +202,27 @@ export function conditionEffectInput(key: Condition5eKey, opts: ConditionEffectO
     permanent: opts.permanent,
     saveEnds: opts.saveEnds,
     exhaustionVariant: isExhaustion ? opts.exhaustion : undefined,
+  };
+}
+
+export type CustomConditionDef = NonNullable<Ruleset["conditions"]["custom"]>[number];
+
+export function customConditionDef(key: CustomConditionKey, rules?: Ruleset): CustomConditionDef | undefined {
+  return rules?.conditions.custom?.find((c) => c.key === key);
+}
+
+export function customConditionInput(def: CustomConditionDef, opts: ConditionEffectOptions): LabeledEffectInput {
+  return {
+    timedKey: opts.timedKey,
+    source: opts.source,
+    name: def.name,
+    label: def.name,
+    type: "condition",
+    rounds: opts.rounds,
+    stackable: false,
+    effects: [def.key, ...def.markers].map((type) => ({ type, value: type === EffectMarker.SKIP_ACTION ? 100 : 1 })),
+    abilityEffects: def.abilityEffects?.length ? def.abilityEffects : undefined,
+    permanent: opts.permanent,
+    saveEnds: opts.saveEnds,
   };
 }

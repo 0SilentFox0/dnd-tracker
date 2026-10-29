@@ -24,7 +24,7 @@ export function effectSummary(e: ActiveEffect): LogLine[] {
 
   return [
     ...what,
-    ...(e.dotDamage ? [textRef("battle.view.effects.dot", { damage: e.dotDamage.damagePerRound, type: e.dotDamage.damageType })] : []),
+    ...(e.dotDamage ? [textRef("battle.view.effects.dot", { damage: e.dotDamage.dice ?? e.dotDamage.damagePerRound, type: e.dotDamage.damageType })] : []),
     ...(e.hotHeal ? [textRef("battle.view.effects.hot", { heal: e.hotHeal.healPerRound })] : []),
     e.zone ? textRef("battle.view.effects.zone", { name: e.source?.name ?? textRef("battle.view.effects.owner") }) : e.permanent ? textRef("battle.view.effects.permanent") : textRef("battle.view.effects.roundsLeft", { count: e.duration }),
     ...(e.source ? [textRef("battle.view.effects.from", { source: e.source.abilityName ? `${e.source.abilityName} (${e.source.name})` : e.source.name })] : []),

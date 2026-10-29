@@ -88,6 +88,8 @@
   "invalidQuery": "Некоректні параметри запиту",
   "initiativeOutOfRange": "Ініціатива героя виходить за межі, дозволені правилами кампанії",
   "invalidRules": "Некоректні правила кампанії",
+  "rulesCustomConditionInUse": "Стан «{name}» використовується — спершу приберіть його з боїв і заклинань",
+  "rulesCustomConditionNotFound": "Власний стан не знайдено",
   "invalidSkillTree": "Невалідне дерево скілів",
   "skillTreeProgressChanged": "Прогрес персонажів змінився під час збереження, спробуйте ще раз",
   "invalidJson": "Некоректний JSON у тілі запиту",
@@ -482,5 +484,10 @@
   "imageUrlNotImage": "URL не вказує на зображення",
   "imageUrlTooLong": "Посилання занадто довге (макс. {max} символів)",
   "mediaCleanupFailed": "Не вдалося очистити медіа",
-  "templateLeak": "Шаблон містить id вихідної кампанії: {ids}"
+  "templateLeak": "Шаблон містить id вихідної кампанії: {ids}",
+  "battleSpellOptionRequired": "Оберіть один із варіантів заклинання",
+  "battleSpellInputRequired": "Вкажіть значення для кубиків заклинання",
+  "battleSpellTargetFilter": "Ціль не підходить під обмеження заклинання (тип істоти, небезпека чи політ)",
+  "battleSpellNoObjectNear": "Поруч із ціллю немає ваших викликаних предметів цього заклинання",
+  "battleCasterPacified": "{state}: не може завдавати шкоди й накладати ворожі закляття"
 }

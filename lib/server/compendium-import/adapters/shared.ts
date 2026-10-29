@@ -4,7 +4,7 @@ import type { JsonRecord } from "../parse";
 import { type AdapterContext, type CompendiumRef, type Edition, issue } from "../types";
 
 import { DND_SKILLS } from "@/lib/constants/skills";
-import { isRecord } from "@/lib/utils/common/is-record";
+import { asRecord } from "@/lib/utils/common/json";
 
 export const effectiveEdition = (value: unknown, fallback: unknown): Edition =>
   value === "classic" || value === "one"
@@ -13,11 +13,12 @@ export const effectiveEdition = (value: unknown, fallback: unknown): Edition =>
     ? fallback
     : "unknown";
 
-export const object = (v: unknown): JsonRecord => isRecord(v) ? v : {};
+export const object = asRecord;
 export const array = (v: unknown): unknown[] => Array.isArray(v) ? v : [];
 export const str = (v: unknown): string => typeof v === "string" ? v : "";
 export const num = (v: unknown): number | undefined => typeof v === "number" && Number.isFinite(v) ? v : undefined;
 export const ABILITIES: Readonly<Record<string, string>> = { str: "strength", dex: "dexterity", con: "constitution", int: "intelligence", wis: "wisdom", cha: "charisma" };
+export const SAVE_HALF = /\bhalf as much damage\b/i;
 export const SKILLS = Object.fromEntries(DND_SKILLS.map((s) => [s.toLowerCase(), s]));
 export const skillName = (s: string): string | undefined => SKILLS[s.replace(/\s/g, "").toLowerCase()];
 

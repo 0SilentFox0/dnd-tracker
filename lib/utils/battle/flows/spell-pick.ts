@@ -1,6 +1,7 @@
 import type { SpellFlowState, SpellPick, SpellWidening } from "./spell-flow-types";
 
 import { textRef } from "@/lib/i18n/text-ref";
+import { describeEffect } from "@/lib/utils/abilities/registry/effects";
 import { isFiveE } from "@/lib/utils/battle/attack/ability";
 import { isDying } from "@/lib/utils/battle/death-saves";
 import { footprintDistance } from "@/lib/utils/battle/grid/geometry";
@@ -8,8 +9,10 @@ import { cellsOf, isOnMap } from "@/lib/utils/battle/grid/occupancy";
 import { areaRadiusCells, feetToCells, templateArea } from "@/lib/utils/battle/grid/template";
 import { modeTargetHiddenText } from "@/lib/utils/battle/modes/engine";
 import { isUp } from "@/lib/utils/battle/participant/state";
+import { inputDiceOf } from "@/lib/utils/battle/spell/cast/state";
 import { casterSpellDice, upcastSteps } from "@/lib/utils/battle/spell/caster-dice";
 import { type AimScene, SKILL_AREA_TEMPLATE, type SkillRadius, skillRadiusArea, type SpellChain, spellTargetingFor, spellWideningOf } from "@/lib/utils/battle/spell/spell-targeting";
+import { matchesTargetFilter } from "@/lib/utils/battle/spell/target-filter";
 import type { BattleMapConfig, BattleParticipant, GridPoint } from "@/types/battle";
 import type { BookSpell } from "@/types/spells";
 
@@ -69,6 +72,10 @@ export function buildSpellPick(order: BattleParticipant[], caster: BattlePartici
 
   const dice = caster ? casterSpellDice(caster, { dice: def.dice, groupId: s.spellGroup?.id ?? null, level: s.level, dieSides: s.dieSides, upcastDice: s.upcastDice, fixedDice: s.fixedDice }, opts.castLevel) : { count: def.dice, sides: 6 };
 
+  const choose = s.spellEffects?.find((e) => e.kind === "chooseOne");
+
+  const input = inputDiceOf(s.spellEffects ?? []);
+
   return {
     spellId: s.id,
     level: s.level,
@@ -80,17 +87,33 @@ export function buildSpellPick(order: BattleParticipant[], caster: BattlePartici
     ...(skillRadius && { skillRadius }),
     ...(chain && { chain }),
     ...(range !== undefined && { range }),
+    ...("filter" in targeting && targeting.filter && { filter: targeting.filter, ...(opts.castLevel !== undefined && { castLevel: opts.castLevel }) }),
+    ...(choose && { options: choose.options.map(describeEffect) }),
     needsSaves: def.resolution.kind === "save" && !auto,
     ...(def.resolution.kind === "attack" && !auto && { needsAttackRolls: true }),
-    diceSlots: Array.from({ length: dice.count }, () => dice.sides),
+    ...(input && { inputDice: { ...input, sides: dice.sides } }),
+    ...(s.grantKey && s.hostSpellId && { inline: { spellId: s.hostSpellId, grantKey: s.grantKey } }),
+    diceSlots: Array.from({ length: input ? 1 : dice.count }, () => dice.sides),
   };
+}
+
+export function withInputCount(pick: SpellPick, count: number): SpellPick {
+  const { inputDice } = pick;
+
+  if (!inputDice) return pick;
+
+  const n = Math.max(1, Math.min(inputDice.max, Math.floor(count) || 1));
+
+  return { ...pick, diceSlots: Array.from({ length: n }, () => inputDice.sides) };
 }
 
 /** Кого зачіпає наведення в точці: та сама функція, що й на сервері. */
 export function spellAimTargets(scene: AimScene, pick: SpellPick, aim: GridPoint): BattleParticipant[] {
   if (pick.skillRadius) return skillRadiusArea(scene, pick.skillRadius, aim).targets;
 
-  return pick.template ? templateArea(scene.map, scene.participants, scene.caster, pick.template, aim).targets : [];
+  const targets = pick.template ? templateArea(scene.map, scene.participants, scene.caster, pick.template, aim).targets : [];
+
+  return targets.filter((p) => matchesTargetFilter(p, pick.filter, { spellLevel: pick.level, castLevel: pick.castLevel }));
 }
 
 export function spellTargetCandidates(order: BattleParticipant[], caster: BattleParticipant | null, side: SpellPick["targetSide"]): BattleParticipant[] {

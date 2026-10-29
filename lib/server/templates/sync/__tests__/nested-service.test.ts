@@ -8,7 +8,7 @@ vi.mock("@/lib/db", async () => {
 
 const invalidate = vi.hoisted(() => vi.fn());
 
-vi.mock("@/lib/cache/tags", () => ({ ReferenceKind: { UNITS: "units" }, invalidateReference: invalidate }));
+vi.mock("@/lib/cache/tags", () => ({ invalidateAllReference: invalidate }));
 
 import { clone, createFakeSyncDb } from "./fake-sync-db";
 import { id } from "./helpers";
@@ -35,7 +35,7 @@ describe("source sync under assistant transaction", () => {
     expect(f.campaign(actor.campaignId).credits).toBe("Attribution");
     expect(invalidate).not.toHaveBeenCalled();
     for (const callback of callbacks) callback();
-    expect(invalidate).toHaveBeenCalledWith(["units"], actor.campaignId);
+    expect(invalidate).toHaveBeenCalledWith(actor.campaignId);
   });
 
   it("rejects cross-campaign nesting before touching the source", async () => {

@@ -1,7 +1,8 @@
-import { z } from "zod";
+import type { z } from "zod";
 
 import { API_ERRORS } from "@/lib/constants/api-errors";
 import { textRef } from "@/lib/i18n/text-ref";
+import { auraZoneSchema } from "@/lib/schemas/battles";
 import { participantNames } from "@/lib/utils/abilities/engine/core/participants";
 import { applyAuraZone, areaAuras, zoneCandidates } from "@/lib/utils/abilities/engine/effects/area-aura";
 import { requireActor } from "@/lib/utils/battle/common/control";
@@ -11,11 +12,6 @@ import { BattleRuleError } from "@/lib/utils/battle/store";
 import { REJECT } from "@/lib/utils/battle/store/reject";
 import { assertCanAct } from "@/lib/utils/battle/turn";
 
-export const auraZoneSchema = z.object({
-  participantId: z.string(),
-  auraId: z.string(),
-  targetIds: z.array(z.string()).max(50),
-});
 
 export type AuraZoneBody = z.infer<typeof auraZoneSchema>;
 

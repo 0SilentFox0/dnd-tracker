@@ -34,3 +34,7 @@ export function findEffectMarker(p: BattleParticipant, type: string): { effect: 
 export function hasEffectMarker(p: BattleParticipant, type: EffectMarker | AnyConditionKey): boolean {
   return findEffectMarker(p, type) !== undefined;
 }
+
+export function dealsNoDamage(p: BattleParticipant): boolean {
+  return hasEffectMarker(p, "no_damage_dealt");
+}

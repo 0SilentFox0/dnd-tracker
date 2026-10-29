@@ -3,8 +3,9 @@ import { describe, expect, it, vi } from "vitest";
 import { goblin, hero } from "./fixtures";
 
 import { textOf } from "@/lib/i18n/test/text";
-import { mazeActionSchema, mazeMutation } from "@/lib/server/battles/mutations/maze/maze-mutation";
-import { moveMutation, moveSchema } from "@/lib/server/battles/mutations/move/move-mutation";
+import { mazeActionSchema, moveSchema } from "@/lib/schemas/battles";
+import { mazeMutation } from "@/lib/server/battles/mutations/maze/maze-mutation";
+import { moveMutation } from "@/lib/server/battles/mutations/move/move-mutation";
 import { createRollbackMutation, rollbackSchema } from "@/lib/server/battles/mutations/rollback/rollback-mutation";
 import { runBattleMutation } from "@/lib/server/battles/run-mutation";
 import { applyBattleDelta } from "@/lib/utils/battle/client/apply-delta";

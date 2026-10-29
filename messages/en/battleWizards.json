@@ -90,7 +90,9 @@
       "serverD20": "An empty d20 will be rolled by the server.",
       "dice": "Dice",
       "nextSummary": "Next · summary",
-      "apply": "Apply"
+      "apply": "Apply",
+      "notSuitable": "Not suitable",
+      "pickOption": "Choose an option"
     },
     "saveRoll": "Saving throw",
     "book": {
@@ -153,7 +155,11 @@
       "withUsage": "{label} · {left}/{max}",
       "unlimited": "{label} · unlimited",
       "castLevel": "Level {level}",
-      "castLevelCost": "Level {level} · {cost} charges"
+      "castLevelCost": "Level {level} · {cost} charges",
+      "inline": "{label}: {usage}{expires}",
+      "inlineDefault": "Recast",
+      "noLimit": "no limit",
+      "until": " · until rd. {round}"
     },
     "widening": {
       "allEnemy": "all enemies",

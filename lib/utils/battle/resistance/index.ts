@@ -79,12 +79,28 @@ export function getCombinedResistancePercent(target: BattleParticipant, damageTy
  * @param damageType - тип урону
  * @returns результат з фінальним уроном та breakdown
  */
-export function applyResistance(
-  target: BattleParticipant,
-  damage: number,
-  damageType: string,
-  opts?: ResistanceOptions,
-): ResistanceResult {
+export function applyResistance(target: BattleParticipant, damage: number, damageType: string, opts?: ResistanceOptions): ResistanceResult {
+  const result = applyPercentResistance(target, damage, damageType, opts);
+
+  const threshold = damageThreshold(target, opts);
+
+  if (threshold === 0 || result.finalDamage <= 0 || result.finalDamage >= threshold) return result;
+
+  return {
+    ...result,
+    finalDamage: 0,
+    breakdown: [...result.breakdown, textRef("battleLog.resistance.threshold", { damage: result.finalDamage, threshold })],
+    steps: [...result.steps, { label: textRef("battleLog.resistance.thresholdStep", { threshold }), side: "target", kind: "immunity", value: -100, after: 0 }],
+  };
+}
+
+function damageThreshold(target: BattleParticipant, opts: ResistanceOptions = {}): number {
+  const { entries } = collectModifiers(withSelf(opts.participants ?? [], target), target.basicInfo.id, { flag: "damageThreshold" }, opts.extra);
+
+  return Math.max(0, ...entries.map((e) => (e.flag?.flag === "damageThreshold" ? e.flag.value : 0)));
+}
+
+function applyPercentResistance(target: BattleParticipant, damage: number, damageType: string, opts?: ResistanceOptions): ResistanceResult {
   const breakdown: LogLine[] = [];
 
   let finalDamage = damage;

@@ -10,7 +10,7 @@ import { DAMAGE_ELEMENT_OPTIONS } from "@/lib/constants/damage";
 import { type MapTerrainTool, MAX_BARRIER_ROUNDS, type TerrainBrush } from "@/lib/hooks/battle";
 import { cn } from "@/lib/utils";
 
-const BRUSHES: TerrainBrush[] = ["wall", "barrier", "hazard", "erase"];
+const BRUSHES: TerrainBrush[] = ["wall", "barrier", "hazard", "difficult", "erase", "erase-zone"];
 
 export function MapTerrainToolbar({ tool }: { tool: MapTerrainTool }) {
   const t = useTranslations("battle.map.terrain");

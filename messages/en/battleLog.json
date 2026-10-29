@@ -16,7 +16,8 @@
       "abilityHit": "{name}: +{amount}",
       "abilityTotal": "Abilities: +{total}",
       "spellMod": "{label} mod",
-      "spellBonus": "Spell bonus"
+      "spellBonus": "Spell bonus",
+      "pacified": "🕊 condition: deals no damage = 0"
     },
     "steps": {
       "dice": "Dice",
@@ -55,7 +56,9 @@
     "targetResist": "{target}: {source} = {percent}% resistance",
     "targetTotal": "Total damage ({target}): {incoming} {sign} {percent}% = {final}",
     "targetTotalPlain": "Total damage ({target}): {final}",
-    "immunityNote": "⛔ {target}: {label}"
+    "immunityNote": "⛔ {target}: {label}",
+    "threshold": "{damage} < damage threshold {threshold} → 0 damage",
+    "thresholdStep": "Damage threshold {threshold}"
   },
   "details": {
     "damage": "Damage: {rows}",
@@ -124,7 +127,9 @@
     "inspiration": "Inspiration",
     "armorPenalty": "Armor without proficiency",
     "farRange": "Long range",
-    "enemyNear": "Enemy nearby"
+    "enemyNear": "Enemy nearby",
+    "obscuredAttacker": "Cannot see the target (obscured)",
+    "obscuredTarget": "The target cannot see the attacker (obscured)"
   },
   "cunning": {
     "label": "Cunning Strike ({effect})",
@@ -156,7 +161,8 @@
   },
   "hazard": {
     "defaultLabel": "Hazardous area",
-    "hit": "{name}: {damage} {type} damage from “{label}”"
+    "hit": "{name}: {damage} {type} damage from “{label}”",
+    "harmless": "{name}: “{label}” deals no damage (the caster's condition)"
   },
   "berserk": {
     "prefix": "🤬 Berserk: ",
@@ -202,7 +208,8 @@
     "reasons": {
       "newSpell": "a new spell",
       "castCancelled": "casting cancelled",
-      "castSkipped": "the casting action was skipped"
+      "castSkipped": "the casting action was skipped",
+      "effectsEnded": "the spell effects ended"
     },
     "effect": "Concentration: {spell}",
     "check": "🎲 {name}: concentration — CON saving throw {total} vs DC {dc}",
@@ -219,7 +226,9 @@
     "banish": "🚫 Banishment: {name} −{percent}% HP ({hp}/{max})",
     "unitNotFound": "the chosen unit was not found",
     "noGroup": "no unit in group {group} Tier {tier}",
-    "summoned": "🌀 summoned: {names}"
+    "summoned": "🌀 summoned: {names}",
+    "appears": "🌿 appears: {names}",
+    "vanishes": "🌿 {name} vanishes"
   },
   "maneuver": {
     "damage": "💥 {ability}: {target} −{dealt} HP{note}",
@@ -326,5 +335,33 @@
     "participantInactive": "The participant cannot act (unconscious or dead)",
     "unitNotAssignable": "A player cannot control this unit",
     "playerNotInBattle": "The player is not in the battle"
+  },
+  "spellFx": {
+    "riderSave": "🎲 {target}: {rider} — {ability} save {total} vs DC {dc}: {success, select, true {success} other {failure}}",
+    "riderMissSpent": "✨ {rider}: a charge was spent on the miss",
+    "riderCharges": "✨ {holder}: {ability} — {charges} {charges, plural, one {charge} other {charges}} (+{dice} {type})",
+    "anchoredEnds": "✨ {target}: “{spell}” ends (the turn started outside the aura)",
+    "anchoredAura": "✨ {holder}: “{ability}” — {radius} ft aura",
+    "autoReaction": "⚡ {holder}: reaction “{spell}” → {attacker}",
+    "delayed": "⏳ {target}: “{spell}” arrives in round {round} ({feet} ft)",
+    "pacified": "🕊 {caster}: deals no damage ({spell})",
+    "noMapRange": "📏 {spell}: no map — the nearest range",
+    "distanceDice": "📏 {target}: distance {feet} ft → {dice}",
+    "grantCast": "✨ {holder}: “{label}” — recast for {rounds} rd.",
+    "moveSelfNoMap": "🌀 {mover}: moves to {target} (no map)",
+    "moveSelfNoCell": "🌀 {mover}: no free cell next to {target}",
+    "moveSelf": "🌀 {mover}: moves to {target}",
+    "pendingMiss": "💨 “{spell}”: the target is unavailable, the strike dissipates",
+    "pendingHit": "💥 “{spell}” hits: {target} −{damage} HP",
+    "zoneSave": "🎲 {target}: “{spell}” — {ability} save {total} vs DC {dc}: {success, select, true {success} other {failure}}",
+    "zoneAttack": "🎯 {target}: “{spell}” — attack {roll}+{bonus}={total} vs AC {ac}: {hit, select, true {hit} other {miss}}",
+    "zonePull": "🌀 {name}: “{spell}” pulls back to the centre"
+  },
+  "transform": {
+    "targetMissing": "the transformation target was not found",
+    "formMissing": "the transformation form was not found",
+    "applied": "🐾 {name} transforms: {unit} ({hp} HP, AC {ac})",
+    "reverted": "🐾 {name} returns to the normal form",
+    "formLost": "🐾 {name}: the form is lost{hasOverflow, select, true {, {overflow} damage carries over to the normal form} other {}}"
   }
 }

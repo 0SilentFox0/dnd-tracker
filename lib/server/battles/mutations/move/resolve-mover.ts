@@ -1,6 +1,6 @@
 import { API_ERRORS } from "@/lib/constants/api-errors";
 import { findParticipant, isActive, isEscaped } from "@/lib/utils/abilities/engine/core/participants";
-import { canActNow } from "@/lib/utils/battle/common/control";
+import { canActNow, currentOf } from "@/lib/utils/battle/common/control";
 import type { BattleMutationContext } from "@/lib/utils/battle/pipeline/run-battle-mutation";
 import { BattleAccessError, BattleRuleError } from "@/lib/utils/battle/store";
 import type { BattleParticipant } from "@/types/battle";
@@ -24,7 +24,7 @@ export function resolveMover(ctx: BattleMutationContext, participantId: string, 
 
   if (mover.battleData.airborne) throw new BattleRuleError("action_rejected", API_ERRORS.BATTLE_PARTICIPANT_AIRBORNE);
 
-  const current = ctx.participants[ctx.scene.turnIndex];
+  const current = currentOf(ctx);
 
   const ownTurn = current?.basicInfo.id === mover.basicInfo.id;
 

@@ -7,6 +7,7 @@ import { attackReachError } from "@/lib/utils/battle/grid";
 import type { BattleMutationContext, RunBattleMutationOptions } from "@/lib/utils/battle/pipeline/run-battle-mutation";
 import { ruleErrorOf } from "@/lib/utils/battle/store/errors";
 import { rollDie } from "@/lib/utils/common/dice";
+import { rngOf } from "@/lib/utils/common/rng";
 
 const rollKeys = new Set(["d10Roll", "d20Roll", "attackRoll", "attackRolls", "secondRolls", "advantageRoll", "disadvantageRoll", "damageRolls", "diceRolls", "saveRolls", "roll", "rolls"]);
 
@@ -36,7 +37,7 @@ export function withServerBattleDice(operation: string, definition: RunBattleMut
 
   if (operation === "attack") return { ...definition, mutate: createAttackMutation(undefined, { serverRolls: true }) as RunBattleMutationOptions<unknown>["mutate"] };
 
-  if (operation === "morale-check") return { ...definition, mutate: (ctx, raw) => definition.mutate(ctx, { ...(raw as Record<string, unknown>), d10Roll: rollDie(10, ctx.rng ?? Math.random) }) };
+  if (operation === "morale-check") return { ...definition, mutate: (ctx, raw) => definition.mutate(ctx, { ...(raw as Record<string, unknown>), d10Roll: rollDie(10, rngOf(ctx)) }) };
 
   return definition;
 }

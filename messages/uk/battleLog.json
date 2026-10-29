@@ -16,7 +16,8 @@
       "abilityHit": "{name}: +{amount}",
       "abilityTotal": "Вміння: +{total}",
       "spellMod": "Мод. {label}",
-      "spellBonus": "Бонус заклинання"
+      "spellBonus": "Бонус заклинання",
+      "pacified": "🕊 стан: не завдає шкоди = 0"
     },
     "steps": {
       "dice": "Кубики",
@@ -55,7 +56,9 @@
     "targetResist": "{target}: {source} = {percent}% резисту",
     "targetTotal": "Сумарна шкода ({target}): {incoming} {sign} {percent}% = {final}",
     "targetTotalPlain": "Сумарна шкода ({target}): {final}",
-    "immunityNote": "⛔ {target}: {label}"
+    "immunityNote": "⛔ {target}: {label}",
+    "threshold": "{damage} < поріг шкоди {threshold} → 0 урону",
+    "thresholdStep": "Поріг шкоди {threshold}"
   },
   "details": {
     "damage": "Урон: {rows}",
@@ -124,7 +127,9 @@
     "inspiration": "Натхнення",
     "armorPenalty": "Броня без володіння",
     "farRange": "Далека дистанція",
-    "enemyNear": "Ворог поруч"
+    "enemyNear": "Ворог поруч",
+    "obscuredAttacker": "Не бачить ціль (заслонено)",
+    "obscuredTarget": "Ціль не бачить нападника (заслонено)"
   },
   "cunning": {
     "label": "Підступний удар ({effect})",
@@ -156,7 +161,8 @@
   },
   "hazard": {
     "defaultLabel": "Небезпечна зона",
-    "hit": "{name}: {damage} {type} шкоди від «{label}»"
+    "hit": "{name}: {damage} {type} шкоди від «{label}»",
+    "harmless": "{name}: «{label}» не завдає шкоди (стан кастера)"
   },
   "berserk": {
     "prefix": "🤬 Шал: ",
@@ -202,7 +208,8 @@
     "reasons": {
       "newSpell": "нове заклинання",
       "castCancelled": "накладання скасовано",
-      "castSkipped": "пропущено дію накладання"
+      "castSkipped": "пропущено дію накладання",
+      "effectsEnded": "ефекти заклинання завершилися"
     },
     "effect": "Концентрація: {spell}",
     "check": "🎲 {name}: концентрація — рятівний кидок ВИТ {total} проти СК {dc}",
@@ -219,7 +226,9 @@
     "banish": "🚫 Вигнання: {name} −{percent}% HP ({hp}/{max})",
     "unitNotFound": "обраного юніта не знайдено",
     "noGroup": "немає юніта групи {group} Tier {tier}",
-    "summoned": "🌀 прикликано: {names}"
+    "summoned": "🌀 прикликано: {names}",
+    "appears": "🌿 з'являється: {names}",
+    "vanishes": "🌿 {name} зникає"
   },
   "maneuver": {
     "damage": "💥 {ability}: {target} −{dealt} HP{note}",
@@ -326,5 +335,33 @@
     "participantInactive": "Учасник не може діяти (непритомний або мертвий)",
     "unitNotAssignable": "Цим юнітом не можна керувати гравцю",
     "playerNotInBattle": "Гравець не бере участі в бою"
+  },
+  "spellFx": {
+    "riderSave": "🎲 {target}: {rider} — рятівний {ability} {total} проти СК {dc}: {success, select, true {успіх} other {провал}}",
+    "riderMissSpent": "✨ {rider}: заряд витрачено на промах",
+    "riderCharges": "✨ {holder}: {ability} — {charges} {charges, plural, one {заряд} few {заряди} many {зарядів} other {заряду}} (+{dice} {type})",
+    "anchoredEnds": "✨ {target}: «{spell}» закінчується (початок ходу поза аурою)",
+    "anchoredAura": "✨ {holder}: «{ability}» — аура {radius} фт",
+    "autoReaction": "⚡ {holder}: реакція «{spell}» → {attacker}",
+    "delayed": "⏳ {target}: «{spell}» прибуде в раунді {round} ({feet} фт)",
+    "pacified": "🕊 {caster}: не завдає шкоди ({spell})",
+    "noMapRange": "📏 {spell}: без мапи — найближчий діапазон",
+    "distanceDice": "📏 {target}: дистанція {feet} фт → {dice}",
+    "grantCast": "✨ {holder}: «{label}» — підкаст на {rounds} р.",
+    "moveSelfNoMap": "🌀 {mover}: переміщується до {target} (без мапи)",
+    "moveSelfNoCell": "🌀 {mover}: немає вільної клітинки біля {target}",
+    "moveSelf": "🌀 {mover}: переміщується до {target}",
+    "pendingMiss": "💨 «{spell}»: ціль недоступна, удар розсіявся",
+    "pendingHit": "💥 «{spell}» влучає: {target} −{damage} HP",
+    "zoneSave": "🎲 {target}: «{spell}» — рятівний {ability} {total} проти СК {dc}: {success, select, true {успіх} other {провал}}",
+    "zoneAttack": "🎯 {target}: «{spell}» — атака {roll}+{bonus}={total} проти КЗ {ac}: {hit, select, true {влучання} other {промах}}",
+    "zonePull": "🌀 {name}: «{spell}» тягне назад до центру"
+  },
+  "transform": {
+    "targetMissing": "ціль перетворення не знайдено",
+    "formMissing": "форму перетворення не знайдено",
+    "applied": "🐾 {name} перетворюється: {unit} ({hp} HP, КЗ {ac})",
+    "reverted": "🐾 {name} повертає звичайну форму",
+    "formLost": "🐾 {name}: форма втрачена{hasOverflow, select, true {, {overflow} шкоди переходить на звичайну форму} other {}}"
   }
 }

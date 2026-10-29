@@ -6,7 +6,10 @@
     "spellRollPercent": "{value}% of the spell roll",
     "ownerAttack": "{value}% of the first attack's damage",
     "eventDamage": "{value}% of the damage dealt",
-    "maxHp": "{value}% of max HP"
+    "maxHp": "{value}% of max HP",
+    "flatRoll": "+roll",
+    "flatRollNeg": "−roll",
+    "flatRollPercent": "{value}% of the roll"
   },
   "attackKind": {
     "all": "attacks",
@@ -24,11 +27,11 @@
     "damageBonus": "damage ({kind}{school, select, true {, school} other {}}) {value}{mark, select, true { per mark «{perMark}»} other {}}",
     "dealDamage": "damage {amount}{hasType, select, true { {type}} other {}}{falloff}",
     "heal": "{revive, select, true {resurrection} other {healing}} {amount}",
-    "dot": "{type} {amount}/round × {rounds} rd.",
+    "dot": "{type} {amount}/round × {rounds} rd.{linked, select, true {, while the condition lasts} other {}}",
     "hot": "healing {amount}/round × {rounds} rd.",
     "berserk": "berserk: auto-attacks a random creature, +{percent}% damage × {rounds} rd.",
     "charm": "switches to the caster's side × {rounds} rd.",
-    "applyCondition": "{condition}{percent}{levels} × {rounds} rd.{breakOnDamage, select, true {, until damaged} other {}}{hasSave, select, true {, saving throw {ability}} other {}}",
+    "applyCondition": "{condition}{percent}{levels} × {rounds} rd.{breakOnDamage, select, true {, until damaged} other {}}{hasSave, select, true {, saving throw {ability}} other {}}{escapeDc, select, true {, escape against the DC} other {}}",
     "restoreSpellSlotLevels": "restores spell slots up to level {level} by circle budget on a short rest",
     "restoreSpellSlot": "+{count} slot",
     "drainSpellSlot": "−{count} spell slot",
@@ -40,7 +43,18 @@
     "raiseDead": "raise dead units at {percent}% HP",
     "cleanse": "{conditions, select, true {removes debuffs and conditions} other {removes debuffs}}",
     "maneuver": "{maneuver}: {percent}% of attack damage",
-    "randomOf": "one of: {options}"
+    "randomOf": "one of: {options}",
+    "inputDice": "dice from input (up to {max}): {label}",
+    "grantCast": "recast «{label}» ({cost, select, action {action} bonusAction {bonus action} other {reaction}}{hasUses, select, true {, ×{uses}} other {}}) for {rounds} rd.",
+    "hitRider": "charges ×{charges}: +{dice} {damageType} on {attackKind, select, any {any} melee {a melee} other {a ranged}} attack{consumeOnMiss, select, true { (and a miss)} other {}}{hasSave, select, true {, save {ability}: {onFail}} other {}}",
+    "anchoredZone": "{radius} ft aura on the target ({side, select, enemies {enemies} allies {allies} other {everyone}}{excludeBearer, select, true {, except the bearer} other {}}) for {rounds} rd.{hasEnter, select, true {; on enter: {enter}} other {}}{hasTurnStart, select, true {; turn start: {turnStart}} other {}}{endsOutside, select, true {; ends if the turn starts outside the aura} other {}}",
+    "summonInline": "summons {count}× «{name}» ({isObject, select, true {object} other {{hp} HP}}, AC {acIsSpellDc, select, true {= DC} other {{ac}}}) for {rounds} rd.{hasUpcast, select, true {; +1 per {upcastEvery} slot levels} other {}}{hasAura, select, true {; {auraRadius} ft aura{auraAttack, select, true { (spell attack)} other {}}} other {}}",
+    "transform": "turns the target into a unit form for {rounds} rd.; at 0 HP of the form it reverts and excess damage carries over to the normal form",
+    "moveSelf": "the caster moves to the target",
+    "createTerrain": "{terrain, select, wall {wall} other {difficult terrain}}: {shape, select, line {line to the target} other {area cells}} (up to {cells}) for {rounds} rd.",
+    "chooseOne": "choose one: {options}",
+    "push": "push {feet} ft away from the caster",
+    "help": "an ally has advantage on the next attack"
   },
   "grant": {
     "extra": "+{count} action",
@@ -93,7 +107,8 @@
     "cunningAction": "Dash, Disengage and Hide as a bonus action",
     "evasion": "Dexterity saving throw with half damage: success — 0, failure — half",
     "proneDefense": "melee attacks against the target have advantage, ranged ones have disadvantage",
-    "conditionImmunity": "{all, select, true {immunity to control} other {immunity: {list}}}"
+    "conditionImmunity": "{all, select, true {immunity to control} other {immunity: {list}}}",
+    "damageThreshold": "damage threshold {value}: smaller damage is ignored"
   },
   "triggers": {
     "hitAlly": "another ally",
@@ -137,6 +152,10 @@
     "chanceMissed": "🎲 {ability}: did not trigger ({chance}% chance)",
     "chanceSuffix": " ({chance}% chance)",
     "raisedDead": "💀 {ability}: {target} rise again ({percent}% HP)",
-    "raiseRefused": "⛔ {ability}: {target} — cannot be raised"
+    "raiseRefused": "⛔ {ability}: {target} — cannot be raised",
+    "pushNoMap": "↔️ {ability}: push not applied — there is no map",
+    "pushNowhere": "↔️ {target}: nowhere to be pushed",
+    "pushed": "↔️ {ability}: {target} pushed {feet} ft",
+    "help": "🤝 {ability}: {target} has advantage on the next attack"
   }
 }

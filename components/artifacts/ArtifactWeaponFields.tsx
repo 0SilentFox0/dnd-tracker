@@ -10,6 +10,7 @@ import { NumberInput } from "@/components/ui/number-input";
 import { SelectField } from "@/components/ui/select-field";
 import { AttackType } from "@/lib/constants/battle";
 import type { WeaponStats } from "@/lib/utils/artifacts/weapon-stats";
+import { clamp } from "@/lib/utils/common/clamp";
 import { patchDefined } from "@/lib/utils/common/patch-defined";
 
 type NumberKey = "attackBonus" | "damageBonus" | "minTargets" | "maxTargets";
@@ -34,7 +35,6 @@ const TEXT_FIELDS: Array<{ key: TextKey; placeholder?: string }> = [
 
 const NUMBER_FIELDS: Array<{ key: NumberKey }> = [{ key: "attackBonus" }, { key: "damageBonus" }, { key: "minTargets" }, { key: "maxTargets" }];
 
-const clamp = (v: number, { min, max }: { min: number; max: number }) => Math.min(max, Math.max(min, v));
 
 export function ArtifactWeaponFields({ value, onChange, bonusOnly = false }: { value: WeaponStats; onChange: (next: WeaponStats) => void; bonusOnly?: boolean }) {
   const t = useTranslations("artifacts.weapon");
@@ -57,7 +57,7 @@ export function ArtifactWeaponFields({ value, onChange, bonusOnly = false }: { v
           <Label htmlFor={`weapon-${f.key}`} className="text-xs leading-tight text-muted-foreground">
             {t(f.key)}
           </Label>
-          <NumberInput id={`weapon-${f.key}`} value={value[f.key]} onChange={(v) => set(f.key, v === undefined ? v : clamp(v, NUMBER_RANGE[f.key]))} />
+          <NumberInput id={`weapon-${f.key}`} value={value[f.key]} onChange={(v) => set(f.key, v === undefined ? v : clamp(v, NUMBER_RANGE[f.key].min, NUMBER_RANGE[f.key].max))} />
         </div>
       ))}
     </div>

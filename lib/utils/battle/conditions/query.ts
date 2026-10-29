@@ -2,7 +2,7 @@ import { exhaustionEffects } from "./registry";
 
 import { DEFAULT_RULES_EDITION } from "@/lib/constants/rules";
 import { findParticipant, replaceParticipant, withActiveEffects } from "@/lib/utils/abilities/engine/core/participants";
-import { type Condition5eKey, isCondition5eKey } from "@/lib/utils/abilities/schema/kinds";
+import { type Condition5eKey, type CustomConditionKey, isCondition5eKey, isCustomConditionKey } from "@/lib/utils/abilities/schema/kinds";
 import { hasEffectMarker } from "@/lib/utils/battle/participant/state";
 import type { ActiveEffect, BattleParticipant } from "@/types/battle";
 
@@ -55,27 +55,33 @@ export function syncExhaustion(p: BattleParticipant): BattleParticipant {
 }
 
 export function removeEffects(p: BattleParticipant, pred: (e: ActiveEffect) => boolean): { participant: BattleParticipant; removed: ActiveEffect[] } {
-  const removed = p.battleData.activeEffects.filter(pred);
+  const direct = p.battleData.activeEffects.filter(pred);
 
-  if (!removed.length) return { participant: p, removed };
+  if (!direct.length) return { participant: p, removed: direct };
 
-  const stripped = withActiveEffects(p, (list) => list.filter((e) => !pred(e)));
+  const ids = new Set(direct.map((e) => e.id));
+
+  const gone = (e: ActiveEffect) => pred(e) || (!!e.linkedTo && ids.has(e.linkedTo));
+
+  const removed = p.battleData.activeEffects.filter(gone);
+
+  const stripped = withActiveEffects(p, (list) => list.filter((e) => !gone(e)));
 
   return { participant: removed.some((e) => carries(e, "exhaustion")) ? syncExhaustion(restoreExhaustionHp(stripped, removed)) : stripped, removed };
 }
 
-const isCondition5eEffect = (e: ActiveEffect) => e.type === "condition" && isCondition5eKey(e.effects[0]?.type);
+const isCondition5eEffect = (e: ActiveEffect) => e.type === "condition" && (isCondition5eKey(e.effects[0]?.type) || isCustomConditionKey(e.effects[0]?.type));
 
 /** Ефекти-стани 5e: перший маркер ефекту — власний ключ стану (решта — наслідки через implies). */
-export function conditionEffects(p: BattleParticipant): { key: Condition5eKey; effect: ActiveEffect }[] {
-  return p.battleData.activeEffects.flatMap((effect) => (isCondition5eEffect(effect) ? [{ key: effect.effects[0].type as Condition5eKey, effect }] : []));
+export function conditionEffects(p: BattleParticipant): { key: Condition5eKey | CustomConditionKey; effect: ActiveEffect }[] {
+  return p.battleData.activeEffects.flatMap((effect) => (isCondition5eEffect(effect) ? [{ key: effect.effects[0].type as Condition5eKey | CustomConditionKey, effect }] : []));
 }
 
 export function hasAnyCondition5e(p: BattleParticipant): boolean {
   return p.battleData.activeEffects.some(isCondition5eEffect);
 }
 
-export function removeCondition5e(ps: BattleParticipant[], id: string, key: Condition5eKey): { participants: BattleParticipant[]; removed: ActiveEffect[] } {
+export function removeCondition5e(ps: BattleParticipant[], id: string, key: Condition5eKey | CustomConditionKey): { participants: BattleParticipant[]; removed: ActiveEffect[] } {
   const target = findParticipant(ps, id);
 
   if (!target) return { participants: ps, removed: [] };

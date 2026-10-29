@@ -46,6 +46,8 @@ const EFFECT_DEFAULTS: { [K in EffectKind]: WithoutKind<Extract<Effect, { kind: 
   guard: { percent: 50, duration: { rounds: 2 }, target: "eventTarget" },
   mark: { markId: "mark", duration: { rounds: 2 }, target: "eventTarget" },
   maneuver: { maneuver: "fireBurst", percentOfAttack: 50 },
+  help: { target: "eventTarget" },
+  push: { feet: 10, from: "caster", target: "eventTarget" },
   randomOf: { options: [{ kind: "heal", amount: "1d4" }, { kind: "changeMorale", delta: 1 }] },
 };
 
@@ -135,7 +137,10 @@ export function setAtPath<T>(obj: T, path: string, value: unknown): T {
     if (value === undefined) delete copy[head];
     else copy[head] = value;
   } else {
-    copy[head] = setAtPath(copy[head], tail.join("."), value);
+    const child = setAtPath(copy[head], tail.join("."), value);
+
+    if (value === undefined && child && typeof child === "object" && !Array.isArray(child) && Object.keys(child).length === 0) delete copy[head];
+    else copy[head] = child;
   }
 
   return copy as T;
@@ -156,6 +161,10 @@ export function validateAbilities(list: unknown[], opts: { classColumns?: readon
     if (!one.success) return;
 
     const perform = one.data.perform;
+
+    one.data.effects.forEach((e, ei) => {
+      if (e.kind === "damageBonus" && typeof e.flat === "object" && "spellRoll" in e.flat) push([i, "effects", ei, "flat"], "abilities.validation.spellRollOnlyInSpell");
+    });
 
     if (perform?.kind === "attack" && opts.attacks && !opts.attacks.some((a) => a.name.toLocaleLowerCase() === perform.attack.toLocaleLowerCase())) push([i, "perform", "attack"], "abilities.validation.attackNotFound");
 

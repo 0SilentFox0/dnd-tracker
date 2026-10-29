@@ -5,7 +5,7 @@ export { byteLength, COMPENDIUM_KINDS, COMPENDIUM_LIMITS, type JsonRecord };
 export type Compendium = Record<string, unknown>;
 
 export class CompendiumError extends Error {
-  constructor(public code: string, public path = "$") {
+  constructor(public code: string, public path = "$", public details?: string) {
     super(`${code}: ${path}`);
   }
 }

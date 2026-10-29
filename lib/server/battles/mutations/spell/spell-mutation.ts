@@ -1,11 +1,10 @@
 import type { Spell } from "@prisma/client";
 
-import type { SpellRequestData } from "./cast-spell-schema";
-
 import { getCachedSummonPool } from "@/lib/cache/reference-data";
 import { API_ERRORS } from "@/lib/constants/api-errors";
 import { prisma } from "@/lib/db";
 import { textRef } from "@/lib/i18n/text-ref";
+import type { SpellRequestData } from "@/lib/schemas/battles";
 import { findParticipant, updateParticipant } from "@/lib/utils/abilities/engine/core/participants";
 import { replaceParticipant } from "@/lib/utils/abilities/engine/core/participants";
 import { recordUse } from "@/lib/utils/abilities/engine/core/usage";
@@ -24,22 +23,27 @@ import { hasEffectMarker } from "@/lib/utils/battle/participant/state";
 import type { BattleMutationContext, MutationResult } from "@/lib/utils/battle/pipeline/run-battle-mutation";
 import { armorPenalty } from "@/lib/utils/battle/proficiency";
 import { castSpell } from "@/lib/utils/battle/spell";
-import { flatEffects, isDamageEffect } from "@/lib/utils/battle/spell/cast/state";
+import { flatEffects, inputDiceOf, isDamageEffect, optionInRange } from "@/lib/utils/battle/spell/cast/state";
 import { casterSpellDice } from "@/lib/utils/battle/spell/caster-dice";
+import { peekInlineGrant, withInlineDefinition } from "@/lib/utils/battle/spell/inline-grant";
 import { prepareLongCast } from "@/lib/utils/battle/spell/long-cast";
+import { spellSaveDc } from "@/lib/utils/battle/spell/power";
 import { resolveSpellSource } from "@/lib/utils/battle/spell/resolve-source";
 import { splitSaveRolls } from "@/lib/utils/battle/spell/save-rolls";
 import { resolveChosenSlot, spellNeedsSlot, spellSlotKey } from "@/lib/utils/battle/spell/slot";
-import { resolveSpellTargets } from "@/lib/utils/battle/spell/spell-targeting";
+import { pacifiedBlock, resolveSpellTargets } from "@/lib/utils/battle/spell/spell-targeting";
 import { toCastableSpell } from "@/lib/utils/battle/spell/to-castable";
-import { spellZoneHazard } from "@/lib/utils/battle/spell/zone-hazard";
+import { spellTerrainEffects, spellZoneHazard } from "@/lib/utils/battle/spell/zone-hazard";
 import { systemEvent } from "@/lib/utils/battle/store";
 import { BattleAccessError, battleActionToEvent, BattleRuleError, ruleErrorOf } from "@/lib/utils/battle/store";
 import { REJECT } from "@/lib/utils/battle/store/reject";
 import { applyAbilitySummons, type SummonDeps } from "@/lib/utils/battle/summon/ability-summons";
+import { objectsNear } from "@/lib/utils/battle/summon/objects-near";
+import { applyTransforms } from "@/lib/utils/battle/transform/apply-transforms";
 import { assertCanAct } from "@/lib/utils/battle/turn";
 import { assertSpellRolls } from "@/lib/utils/battle/validation/dice-checks";
 import { rollDiceList } from "@/lib/utils/common/dice";
+import { rngOf } from "@/lib/utils/common/rng";
 
 const healsByDefinition = (effects: Parameters<typeof flatEffects>[0]) => {
   const flat = flatEffects(effects);
@@ -64,11 +68,17 @@ export function createSpellMutation(deps: SpellMutationDeps = defaultDeps, optio
 
     if (!spellRow || spellRow.campaignId !== ctx.scene.campaignId) throw new BattleAccessError(404, API_ERRORS.BATTLE_SPELL_NOT_FOUND);
 
-    const spell = toCastableSpell(spellRow);
+    const inlineGrant = peekInlineGrant(order, data.casterId, data);
+
+    const base = toCastableSpell(spellRow);
+
+    const spell = inlineGrant ? withInlineDefinition(base, inlineGrant) : base;
 
     const { definition } = spell;
 
     if (definition.executionMode === "manual" && !data.cancelCasting) throw new BattleRuleError("action_rejected", API_ERRORS.BATTLE_SPELL_CONFIGURE_OR_MANUAL);
+
+    if (!data.cancelCasting && !optionInRange(definition.effects, data.optionIndex)) throw new BattleRuleError("action_rejected", API_ERRORS.BATTLE_SPELL_OPTION_REQUIRED);
 
     if (data.legendaryKey && !ctx.isDM) throw new BattleAccessError(403, API_ERRORS.BATTLE_LEGENDARY_DM_ONLY);
 
@@ -128,6 +138,10 @@ export function createSpellMutation(deps: SpellMutationDeps = defaultDeps, optio
       order = replaceParticipant(prepared.participants, caster);
     } else if (data.castingRounds !== undefined) throw new BattleRuleError("action_rejected", API_ERRORS.BATTLE_TIME_ONLY_DURATION_CAST);
 
+    const pacified = pacifiedBlock(order, caster, definition.targeting, data.targetIds);
+
+    if (pacified) throw new BattleRuleError("action_rejected", API_ERRORS.BATTLE_CASTER_PACIFIED, pacified);
+
     const resolution = resolveSpellTargets(order, caster, spell, definition.targeting, data.targetIds, {
       map: ctx.meta.map,
       targetCell: data.targetCell,
@@ -137,13 +151,33 @@ export function createSpellMutation(deps: SpellMutationDeps = defaultDeps, optio
 
     if (!resolution.ok) throw ruleErrorOf("invalid_target", resolution.error);
 
+    if (definition.perObjectFeet && !data.preview) {
+      const reach = definition.perObjectFeet;
+
+      const orphan = resolution.targetIds.some((id) => { const t = findParticipant(order, id);
+
+ return !t || objectsNear(order, caster.basicInfo.id, spell.id, t, reach).length === 0; });
+
+      if (orphan) throw new BattleRuleError("invalid_target", API_ERRORS.BATTLE_SPELL_NO_OBJECT_NEAR);
+    }
+
+    const pacifiedHit = pacifiedBlock(order, caster, { kind: "self" }, resolution.targetIds);
+
+    if (pacifiedHit) throw new BattleRuleError("action_rejected", API_ERRORS.BATTLE_CASTER_PACIFIED, pacifiedHit);
+
     if (legendaryAbility?.condition && !evaluateCondition(legendaryAbility.condition, { owner: caster, event: { type: "action", actorId: caster.basicInfo.id, abilityKey: legendaryAbility.key, targetIds: resolution.targetIds }, participants: order, sourceId: legendaryAbility.source.id })) throw new BattleRuleError("action_rejected", API_ERRORS.BATTLE_ABILITY_CONDITION_UNMET);
 
-    const expected = casterSpellDice(caster, { dice: definition.dice, groupId: spell.groupId, level: spell.level, dieSides: definition.dieSides, upcastDice: definition.upcastDice, fixedDice: definition.fixedDice }, castLevel);
+    const inputDice = inputDiceOf(definition.effects);
+
+    if (inputDice && data.inputCount === undefined && !data.preview) throw new BattleRuleError("action_rejected", API_ERRORS.BATTLE_SPELL_INPUT_REQUIRED);
+
+    const sized = casterSpellDice(caster, { dice: definition.dice, groupId: spell.groupId, level: spell.level, dieSides: definition.dieSides, upcastDice: definition.upcastDice, fixedDice: definition.fixedDice }, castLevel);
+
+    const expected = inputDice ? { ...sized, count: Math.min(data.inputCount ?? 1, inputDice.max) } : sized;
 
     // прев'ю без кидків: сервер кидає сам, щоб показати орієнтовний результат
 
-    const diceRolls = (data.preview || options.serverRolls) && data.diceRolls.length === 0 ? rollDiceList(`${expected.count}d${expected.sides}`, ctx.rng ?? Math.random) : data.diceRolls;
+    const diceRolls = (data.preview || options.serverRolls) && data.diceRolls.length === 0 ? rollDiceList(`${expected.count}d${expected.sides}`, rngOf(ctx)) : data.diceRolls;
 
     assertSpellRolls(expected, diceRolls);
 
@@ -171,6 +205,7 @@ export function createSpellMutation(deps: SpellMutationDeps = defaultDeps, optio
           isLegendaryCast: !!legendaryAbility,
           grant,
           castLevel,
+          optionIndex: data.optionIndex,
           ...(chosen?.ok && { slotKey: data.slotKey }),
           rng,
           crit,
@@ -206,7 +241,12 @@ export function createSpellMutation(deps: SpellMutationDeps = defaultDeps, optio
           };
         }
 
-        const summoned = await applyAbilitySummons(result.summons, result.allParticipantsUpdated, { campaignId: ctx.scene.campaignId, battleId: ctx.scene.id, rng, rules: ctx.meta.rules, deps });
+        const summoned = await applyAbilitySummons(result.summons.map((r) => (r.inline && resolution.centre ? { ...r, atCell: resolution.centre } : r)), result.allParticipantsUpdated, { campaignId: ctx.scene.campaignId, battleId: ctx.scene.id, rng, rules: ctx.meta.rules, deps, map: ctx.meta.map, round: ctx.scene.round });
+
+        const transformed = await applyTransforms(summoned.order, result.transforms ?? [], { campaignId: ctx.scene.campaignId, battleId: ctx.scene.id, rules: ctx.meta.rules, deps, round: ctx.scene.round });
+
+        summoned.order = transformed.order;
+        summoned.messages.push(...transformed.messages);
 
         if (legendaryAbility) summoned.order = updateParticipant(summoned.order, caster.basicInfo.id, (p) => {
           const used = recordUse(p, legendaryAbility.key, ctx.scene.round, legendaryAbility.limits?.pool);
@@ -218,9 +258,15 @@ export function createSpellMutation(deps: SpellMutationDeps = defaultDeps, optio
 
         const action = withLines(result.battleAction, summoned.messages);
 
-        const hazard = spellZoneHazard({ map: ctx.meta.map, spell, cells: resolution.cells, round: ctx.scene.round, spellDamage: result.spellDamage, concentrationOf: result.concentration });
+        const dc = grant?.dc ?? spellSaveDc(caster, grant?.dcAbility, ctx.meta.rules.formulas.saveDcBase);
 
-        return { participants: summoned.order, pending: ctx.pending, events: [battleActionToEvent(action)], ...(hazard && { scene: { map: hazard } }) };
+        const zoneMap = spellZoneHazard({ map: ctx.meta.map, spell, cells: resolution.cells, round: ctx.scene.round, spellDamage: result.spellDamage, concentrationOf: result.concentration, casterId: caster.basicInfo.id, dc, centre: resolution.centre, castKey: result.concentration?.castId });
+
+        const terrainMap = spellTerrainEffects({ map: zoneMap ?? ctx.meta.map, effects: definition.effects.filter((e) => e.kind === "createTerrain"), spell, caster, participants: summoned.order, targetIds: resolution.targetIds, cells: resolution.cells, round: ctx.scene.round, concentrationOf: result.concentration, dc });
+
+        const map = terrainMap ?? zoneMap;
+
+        return { participants: summoned.order, pending: ctx.pending, events: [battleActionToEvent(action)], ...(map && { scene: { map } }) };
       },
     });
   };

@@ -41,7 +41,9 @@ export const isEscaped = (p: BattleParticipant): boolean => !!p.battleData.escap
 
 export const inPlay = (p: BattleParticipant): boolean => isActive(p) && !isDormant(p) && !isEscaped(p);
 
-export const sitsOutTurn = (p: BattleParticipant, round: number): boolean => isDormant(p) || isEscaped(p) || (p.battleData.mazeWakeRound ?? 0) > round;
+export const isObject = (p: BattleParticipant): boolean => !!p.battleData.object;
+
+export const sitsOutTurn = (p: BattleParticipant, round: number): boolean => isDormant(p) || isEscaped(p) || isObject(p) || (p.battleData.mazeWakeRound ?? 0) > round;
 
 export const takesTurn = (p: BattleParticipant, round: number): boolean => isActive(p) && !sitsOutTurn(p, round);
 
@@ -53,13 +55,13 @@ export function idleTurnIndex(order: BattleParticipant[]): number {
 }
 
 export function isTargetable(p: BattleParticipant): boolean {
-  return isActive(p) && !isAirborne(p) && !isEscaped(p);
+  return isActive(p) && !isAirborne(p) && !isEscaped(p) && !isObject(p);
 }
 
 export const isDying = (p: BattleParticipant): boolean => p.combatStats.status === CombatStatus.UNCONSCIOUS && !!p.battleData.deathSaves;
 
 /** Ціль атаки: як isTargetable, але героя, що вмирає за 5e, теж можна бити (кожне влучання — провал кидка смерті). */
-export const isAttackable = (p: BattleParticipant): boolean => (isActive(p) || isDying(p)) && !isAirborne(p) && !isEscaped(p);
+export const isAttackable = (p: BattleParticipant): boolean => (isActive(p) || isDying(p)) && !isAirborne(p) && !isEscaped(p) && !isObject(p);
 
 export function resolvedAbilitiesOf(p: BattleParticipant): ResolvedAbility[] {
   return p.battleData.resolvedAbilities ?? [];

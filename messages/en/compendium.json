@@ -73,7 +73,8 @@
   "statuses": {
     "create": "create",
     "update": "update",
-    "unchanged": "unchanged"
+    "unchanged": "unchanged",
+    "error": "error"
   },
   "coverage": {
     "native": "structured",
@@ -89,7 +90,8 @@
     "none": "none",
     "enableClasses": "enable 5e classes mode",
     "disableClasses": "disable 5e classes mode",
-    "otherSections": "other rule sections: {count}"
+    "otherSections": "other rule sections: {count}",
+    "customConditions": "custom conditions from the book: {count}"
   },
   "summary": {
     "choices": "Choices: {count}",
@@ -109,7 +111,14 @@
     "previewTtl": "The preview is valid for 15 minutes. A new check is required after the campaign or the selection changes.",
     "confirm": "Import",
     "saved": "Import saved: {runId}",
-    "close": "Clear the file and close the wizard"
+    "close": "Clear the file and close the wizard",
+    "steps": {
+      "label": "Import steps",
+      "file": "File",
+      "categories": "Categories",
+      "check": "Check",
+      "confirm": "Confirm"
+    }
   },
   "file": {
     "intro": "One file → check → confirm. The campaign is not changed until you confirm. UTF-8 JSON up to 3 MiB; up to 2000 selected records per atomic import.",
@@ -130,7 +139,21 @@
     "mixedEdition": "Allow explicit classic / one mixing (no rules conversion)",
     "enableClasses": "Enable 5e classes in the campaign rules",
     "rulesChanges": "Rule changes: {summary}. Other settings are in the rules editor.",
-    "preview": "Check JSON"
+    "preview": "Check JSON",
+    "all": "All",
+    "none": "None",
+    "recommended": "Recommended",
+    "skippedTechnical": "Skipped: {count} technical categories (images/Foundry are not loaded)",
+    "summary": "Selected {categories} categories, ≈{records} records",
+    "groups": {
+      "rules": "Rules and conditions",
+      "spells": "Spells",
+      "characters": "Classes and characters",
+      "items": "Items",
+      "bestiary": "Bestiary",
+      "dm": "DM materials",
+      "other": "Other"
+    }
   },
   "dependencies": {
     "title": "References, dependencies and conflicts",
@@ -145,7 +168,14 @@
     "exclude": "Exclude the record",
     "excludeBlocked": "Exclude blocked and dependent records and check the rest",
     "prev": "Previous dependencies",
-    "next": "Next dependencies"
+    "next": "Next dependencies",
+    "titleCount": "References, dependencies and conflicts ({shown})",
+    "titleCountOf": "References, dependencies and conflicts ({shown} of {total})",
+    "needsBinding": "binding required",
+    "noRefs": "no dependencies",
+    "more": "More",
+    "onlyActionable": "Only entries with actions",
+    "showHidden": "{count} unchanged and dependency-free — show"
   },
   "report": {
     "ariaLabel": "Import report",
@@ -180,11 +210,35 @@
     "backstories": "Backgrounds: ASI, skills, tools and the origin feat go through the existing Choice/Picks. Give heroes gear and money manually.",
     "createCharacters": "Create characters / give gear and money",
     "dmMaterials": "DM materials are updated through a JSON import or manually; source sync does not update them.",
-    "download": "Download the JSON report"
+    "download": "Download the JSON report",
+    "tileCreated": "Created",
+    "tileUpdated": "Updated",
+    "tileUnchanged": "Unchanged",
+    "tileErrors": "Errors",
+    "groupRecords": "{count, plural, one {# record} other {# records}}",
+    "removeChapter": "Deselect the chapter in “DM materials”.",
+    "allowMixed": "Allow mixing classic / one and re-check",
+    "goToBinding": "Go to binding",
+    "showMore": "Show more ({count})",
+    "manualActionsCount": "manual actions: {count}",
+    "filterChanged": "Changed",
+    "filterManual": "With manual actions",
+    "filterAll": "All",
+    "filterLabel": "Record filter",
+    "blockersTitle": "Blockers ({count})",
+    "coverage": "Coverage by category",
+    "colMappedShort": "Map.",
+    "colPartialShort": "Part.",
+    "colSkippedShort": "Skip.",
+    "technical": "Technical categories ({count}): skipped, images/Foundry are not loaded",
+    "records": "Records",
+    "noRows": "No records for this filter.",
+    "showUnchanged": "{count} unchanged — show"
   },
   "rulesOffer": {
     "text": "Races, backgrounds and feats from the file are not assembled on the hero sheet while 5e classes mode is off in the campaign or there are no base classes.",
-    "apply": "Apply with the import: {summary} (and re-run the check)"
+    "apply": "Apply with the import: {summary} (and re-run the check)",
+    "conditions": "The file defines custom conditions: without them, spells that apply them will do nothing in battle."
   },
   "runs": {
     "title": "Saved reports",
@@ -203,6 +257,8 @@
     "previewSecretRequired": "Import is unavailable: COMPENDIUM_PREVIEW_SECRET is not set on the server (a random string of at least 32 characters). Add it to the environment variables (.env.local or Vercel) and restart the server.",
     "previewStale": "The campaign or the preview expiry has changed. Run the check again.",
     "previewInvalid": "The preview signature is invalid. Run the check again.",
+    "notesSize": "The entry notes are too large. Shorten the description or deselect this section/entry.",
+    "notesSizeEntry": "Entry: {entry} (limit 64 KB).",
     "requestSize": "The selected set is too large. Choose fewer categories or sections.",
     "forbidden": "Only the campaign DM has access, via a session.",
     "importFailed": "The import failed. No partial record was committed; try again with the same key.",
@@ -253,5 +309,60 @@
     "creditsSize": "The attribution is too large; choose fewer sources",
     "identitySize": "A record identifier is too large",
     "notesSize": "A record's notes are too large"
+  },
+  "issueTitles": {
+    "MANUAL": "Configure manually",
+    "MANUAL_SPELL": "Configure spell mechanics manually",
+    "MANUAL_EQUIPMENT": "Hand out equipment manually",
+    "MANUAL_FEAT": "Configure feat mechanics manually",
+    "MANUAL_FEAT_SPELLS": "Set feat spells manually",
+    "MANUAL_FEAT_RESIST": "Set feat resistances manually",
+    "MANUAL_CLASS_FEATURE": "Configure class features manually",
+    "MANUAL_PREREQUISITE": "Check prerequisites manually",
+    "MANUAL_OPTIONAL_PROGRESSION": "Set optional feature progression manually",
+    "MANUAL_OPTIONAL_FEATURE": "Configure optional features manually",
+    "MANUAL_MONSTER_ACTION": "Configure unit actions manually",
+    "MANUAL_MONSTER_HP": "Check unit hit points manually",
+    "MANUAL_MONSTER_DEFENSE": "Check unit defenses manually",
+    "MANUAL_MULTIATTACK_DETAIL": "Refine unit multiattacks manually",
+    "MANUAL_ITEM_EFFECT": "Configure item effects manually",
+    "MANUAL_TOOL_CHOICE": "Set tool choices manually",
+    "MANUAL_CUSTOM_SKILL": "Add custom skills manually",
+    "MANUAL_CONDITION_TEXT": "Describe conditions manually",
+    "MANUAL_ATTACK_RIDER": "Set additional attack effects manually",
+    "MANUAL_ABILITY_RULE": "Set ability rules manually",
+    "MANUAL_ABILITY_VARIANTS": "Choose ability variants manually",
+    "MANUAL_RACE_MOVEMENT": "Configure race movement manually",
+    "MANUAL_RACE_RESIST": "Set race resistances manually",
+    "MANUAL_RACE_SPELLS": "Set race spells manually",
+    "MANUAL_SPELL_ZONE_OR_TRIGGER": "Configure spell zones and triggers manually",
+    "MANUAL_SPELL_UNSUPPORTED_CONDITION": "Replace unsupported spell conditions manually",
+    "SPELL_NARRATIVE_ONLY": "Spell without combat mechanics (the DM describes the effect)",
+    "SPELL_RIDER_MANUAL": "Additional spell effects are not automated",
+    "CHARACTERS_REQUIRED": "Create characters first",
+    "CLASSES_MODE_REQUIRED": "Enable 5e classes mode",
+    "UNRESOLVED_REF": "Unresolved dependencies",
+    "FEATURE_REF_UNRESOLVED": "Unresolved feature references",
+    "BACKGROUND_FEAT_INVALID": "Invalid background feat",
+    "BACKGROUND_FEAT_CHOICE": "Background feat — choose manually",
+    "CLASS_HIT_DIE": "Check the class hit die",
+    "UNSUPPORTED_FIELD": "Unsupported fields",
+    "UNSUPPORTED_ENTRY": "Unsupported entries",
+    "UNSUPPORTED_CONDITION": "Unsupported conditions",
+    "UNSUPPORTED_TAG": "Unsupported tags",
+    "UNSUPPORTED_COPY": "Unsupported entry copies",
+    "UNSUPPORTED_FEAT_CATEGORY": "Unsupported feat category",
+    "NOTES_SIZE": "Notes are too large",
+    "MIXED_EDITION_CONFIRMATION_REQUIRED": "Edition mixing confirmation required"
+  },
+  "materials": {
+    "summary": "{title} · selected {chosen} of {total}",
+    "all": "All",
+    "none": "None",
+    "oversized": "too large (≈{kb} KB, notes limit {limit} KB): may fail to import"
+  },
+  "advanced": {
+    "title": "Advanced",
+    "active": "● enabled"
   }
 }

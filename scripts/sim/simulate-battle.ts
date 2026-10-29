@@ -16,16 +16,15 @@ import { BATTLE_LOG_RECENT_EVENTS, ParticipantSide, ParticipantSourceType } from
 import { CampaignRole } from "@/lib/constants/campaigns";
 import { prisma } from "@/lib/db";
 import { moraleCheckSchema } from "@/lib/schemas";
+import { abilityActionSchema, attackBodySchema, bonusActionSchema, castSpellSchema,patchParticipantSchema } from "@/lib/schemas/battles";
 import { postBalanceResponse } from "@/lib/server/battles/balance/balance-post";
-import { abilityActionSchema, createAbilityActionMutation } from "@/lib/server/battles/mutations/ability-action/ability-action-mutation";
-import { attackBodySchema, createAttackMutation } from "@/lib/server/battles/mutations/attack/attack-mutation";
-import { bonusActionSchema, createBonusActionMutation } from "@/lib/server/battles/mutations/bonus-action/bonus-action-mutation";
+import { createAbilityActionMutation } from "@/lib/server/battles/mutations/ability-action/ability-action-mutation";
+import { createAttackMutation } from "@/lib/server/battles/mutations/attack/attack-mutation";
+import { createBonusActionMutation } from "@/lib/server/battles/mutations/bonus-action/bonus-action-mutation";
 import { moraleCheckMutation } from "@/lib/server/battles/mutations/morale-check/morale-check-mutation";
 import { nextTurnMutation } from "@/lib/server/battles/mutations/next-turn/next-turn-mutation";
 import { patchParticipantMutation } from "@/lib/server/battles/mutations/participants/patch-participant-mutation";
-import { patchParticipantSchema } from "@/lib/server/battles/mutations/participants/patch-participant-schema";
 import { createRollbackMutation, rollbackSchema } from "@/lib/server/battles/mutations/rollback/rollback-mutation";
-import { spellSchema } from "@/lib/server/battles/mutations/spell/cast-spell-schema";
 import { createSpellMutation } from "@/lib/server/battles/mutations/spell/spell-mutation";
 import { createStartMutation } from "@/lib/server/battles/mutations/start/start-mutation";
 import { runBattleMutation } from "@/lib/server/battles/run-mutation";
@@ -296,7 +295,7 @@ const BONUS = { access: "member" as const, requireStatus: "active" as const, sch
 
 const ABILITY = { access: "member" as const, requireStatus: "active" as const, schema: abilityActionSchema, mutate: createAbilityActionMutation(summonDeps) };
 
-const SPELL = { access: "member" as const, requireStatus: "active" as const, schema: spellSchema, dryRun: (b: { preview?: boolean }) => b.preview === true, mutate: createSpellMutation({ loadSpell: (id) => prisma.spell.findUnique({ where: { id } }), ...summonDeps }) };
+const SPELL = { access: "member" as const, requireStatus: "active" as const, schema: castSpellSchema, dryRun: (b: { preview?: boolean }) => b.preview === true, mutate: createSpellMutation({ loadSpell: (id) => prisma.spell.findUnique({ where: { id } }), ...summonDeps }) };
 
 const ROLLBACK = { access: "dm" as const, schema: rollbackSchema, mutate: createRollbackMutation() };
 

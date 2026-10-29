@@ -90,7 +90,9 @@
       "serverD20": "Порожній d20 кине сервер.",
       "dice": "Кубики",
       "nextSummary": "Далі · підсумок",
-      "apply": "Застосувати"
+      "apply": "Застосувати",
+      "notSuitable": "Не підходить",
+      "pickOption": "Оберіть варіант"
     },
     "saveRoll": "Рятівний кидок",
     "book": {
@@ -153,7 +155,11 @@
       "withUsage": "{label} · {left}/{max}",
       "unlimited": "{label} · без ліміту",
       "castLevel": "Коло {level}",
-      "castLevelCost": "Коло {level} · {cost} заряди"
+      "castLevelCost": "Коло {level} · {cost} заряди",
+      "inline": "{label}: {usage}{expires}",
+      "inlineDefault": "Підкаст",
+      "noLimit": "без ліміту",
+      "until": " · до р. {round}"
     },
     "widening": {
       "allEnemy": "усі вороги",

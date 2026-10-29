@@ -15,6 +15,7 @@ import { RUN_GRACE_MS } from "@/lib/constants/assistant";
 import { prisma } from "@/lib/db";
 import { assistantRequestIdSchema } from "@/lib/schemas/ai";
 import { actionResultSchema } from "@/lib/schemas/assistant";
+import { lockCampaignRow } from "@/lib/server/campaigns/lock";
 import { ContentError } from "@/lib/server/content/errors";
 import type { AiFocus, AiUsage } from "@/types/ai";
 
@@ -77,7 +78,7 @@ export function createAssistantRunStore(options: { db?: PrismaClient; now?: () =
 
     return db.$transaction(async tx => {
       await own(caller, tx);
-      await tx.$queryRaw`SELECT id FROM campaigns WHERE id = ${caller.actor.campaignId} FOR UPDATE`;
+      await lockCampaignRow(tx, caller.actor.campaignId);
       await tx.$queryRaw`SELECT id FROM ai_threads WHERE id = ${caller.threadId} FOR UPDATE`;
 
       const existing = await tx.assistantRun.findUnique({ where: { threadId_requestId: { threadId: threadId, requestId } } });

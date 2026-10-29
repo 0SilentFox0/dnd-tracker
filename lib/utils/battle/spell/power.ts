@@ -9,14 +9,23 @@ import { getSpellSaveDC } from "@/lib/utils/common/calculations";
 import { signed } from "@/lib/utils/common/format";
 import type { BattleParticipant, DamageRow } from "@/types/battle";
 
+const ABILITY_LABELS = { strength: "STR", dexterity: "DEX", constitution: "CON", intelligence: "INT", wisdom: "WIS", charisma: "CHA" } as const;
+
 function spellcastingModifier(p: BattleParticipant): { mod: number; label: string } {
   const ability = p.spellcasting?.spellcastingAbility;
 
   if (!ability) return { mod: 0, label: "" };
 
-  const labels = { strength: "STR", dexterity: "DEX", constitution: "CON", intelligence: "INT", wisdom: "WIS", charisma: "CHA" } as const;
+  return { mod: p.abilities.modifiers[ability], label: ABILITY_LABELS[ability] };
+}
 
-  return { mod: p.abilities.modifiers[ability], label: labels[ability] };
+/** Предмет-зброя із заклинання: мод. від характеристики кастера, а без неї — від кращої з STR/DEX власника. */
+function weaponModifier(p: BattleParticipant): { mod: number; label: string } {
+  if (p.spellcasting?.spellcastingAbility) return spellcastingModifier(p);
+
+  const { strength, dexterity } = p.abilities.modifiers;
+
+  return strength >= dexterity ? { mod: strength, label: ABILITY_LABELS.strength } : { mod: dexterity, label: ABILITY_LABELS.dexterity };
 }
 
 export function spellSaveDc(caster: BattleParticipant, ability: keyof BattleParticipant["abilities"]["modifiers"] | undefined, saveDcBase: number): number {
@@ -27,7 +36,9 @@ export function spellSaveDc(caster: BattleParticipant, ability: keyof BattlePart
   return ability ? computed : (caster.spellcasting.spellSaveDC ?? computed);
 }
 
-export function spellAttackBonus(caster: BattleParticipant): number {
+export function spellAttackBonus(caster: BattleParticipant, weapon = false): number {
+  if (weapon && !caster.spellcasting.spellcastingAbility) return caster.abilities.proficiencyBonus + weaponModifier(caster).mod;
+
   return caster.spellcasting.spellAttackBonus ?? caster.abilities.proficiencyBonus + spellcastingModifier(caster).mod;
 }
 
@@ -66,7 +77,7 @@ export function computeSpellPower(input: {
     if (e.percent) breakdown.push(stepRow(e.label, `+${e.percent}% (${signed(Math.floor((sum * e.percent) / 100))})`));
   }
 
-  const abilityMod = isFiveE(caster) && input.addAbilityMod ? spellcastingModifier(caster) : null;
+  const abilityMod = isFiveE(caster) && input.addAbilityMod ? weaponModifier(caster) : null;
 
   if (abilityMod) breakdown.push(stepRow(textRef("battleLog.damage.rows.spellMod", { label: abilityMod.label }), signed(abilityMod.mod)));
 

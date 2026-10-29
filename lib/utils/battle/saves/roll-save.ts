@@ -54,6 +54,15 @@ function proficiencyBonus(target: BattleParticipant, ability: AbilityKey, entrie
   return byRules || byFlag ? target.abilities.proficiencyBonus : 0;
 }
 
+/** Краща з двох характеристик за бонусом кидка (при рівності — перша). */
+export function bestSaveAbility(target: BattleParticipant, [first, second]: [AbilityKey, AbilityKey], participants: BattleParticipant[], rules?: Ruleset): AbilityKey {
+  const entries = saveFlagEntries(withSelf(participants, target), target.basicInfo.id);
+
+  const bonus = (a: AbilityKey) => target.abilities.modifiers[a] + proficiencyBonus(target, a, entries, rules);
+
+  return bonus(second) > bonus(first) ? second : first;
+}
+
 export function rollSave(input: {
   target: BattleParticipant;
   ability: AbilityKey;

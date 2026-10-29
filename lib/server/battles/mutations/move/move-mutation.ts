@@ -1,11 +1,11 @@
-import { z } from "zod";
+import type { z } from "zod";
 
 import { mazeMove } from "./maze-move";
 import { resolveMover } from "./resolve-mover";
 
 import { API_ERRORS } from "@/lib/constants/api-errors";
 import { DEFAULT_HAZARD_LABEL } from "@/lib/constants/battle";
-import { mapCellSchema } from "@/lib/schemas/battles";
+import { moveSchema } from "@/lib/schemas/battles";
 import { findParticipant, isActive, replaceParticipant } from "@/lib/utils/abilities/engine/core/participants";
 import { resolveDowned } from "@/lib/utils/abilities/engine/core/run-abilities";
 import { releaseInvalidGrapples } from "@/lib/utils/battle/actions/grapple";
@@ -14,18 +14,15 @@ import { canStand, cellKey, checkReturnToStart, frightenedBlocksMove, hazardHit,
 import { lineText, logFields } from "@/lib/utils/battle/log/lines";
 import { activeMapMode, type MapModeKey } from "@/lib/utils/battle/modes";
 import type { BattleMutationContext, MutationResult } from "@/lib/utils/battle/pipeline/run-battle-mutation";
+import { hasAnchors } from "@/lib/utils/battle/spell/anchored-zone";
+import { zoneMove } from "@/lib/utils/battle/spell/zone-triggers";
 import { BattleRuleError, type NewBattleEvent, systemEvent } from "@/lib/utils/battle/store";
 import { ruleErrorOf } from "@/lib/utils/battle/store/errors";
 import { assertCanAct } from "@/lib/utils/battle/turn";
+import { rngOf } from "@/lib/utils/common/rng";
 import type { BattleMapConfig, BattleParticipant, GridPoint, TerrainCell } from "@/types/battle";
 import type { LogLine } from "@/types/text";
 
-export const moveSchema = z.object({
-  participantId: z.string(),
-  to: mapCellSchema,
-  free: z.boolean().optional(),
-  returnToStart: z.literal(true).optional(),
-});
 
 export type MoveBody = z.infer<typeof moveSchema>;
 
@@ -80,14 +77,18 @@ export function moveMutation(ctx: BattleMutationContext, data: MoveBody): Mutati
 
     const hazard = isActive(moved) ? hazardOnMove(map, participants, mover, data.to, cost) : null;
 
-    return finishMove(ctx, { participants: replaceParticipant(participants, moved), moved, hazard, messages: [], events: [] });
+    return finishMove(ctx, { participants: replaceParticipant(participants, moved), moved, hazard, messages: [], events: [], trail: { from: mover.battleData.position, path: pathFrom(search, mover, data.to) ?? [] } });
   }
 
-  const out = resolveMovement5e({ map, participants, mover, to: data.to, path: pathFrom(search, mover, data.to), budget, cost, round: ctx.scene.round, battleId: ctx.scene.id, rules, rng: ctx.rng ?? Math.random });
+  const out = resolveMovement5e({ map, participants, mover, to: data.to, path: pathFrom(search, mover, data.to), budget, cost, round: ctx.scene.round, battleId: ctx.scene.id, rules, rng: rngOf(ctx) });
 
   const hazard = isActive(out.moved) ? hazardOnMove(map, participants, mover, out.destination, out.spent) : null;
 
-  return finishMove(ctx, { participants: out.participants, moved: out.moved, hazard, messages: out.messages, events: out.events });
+  const full = pathFrom(search, mover, data.to) ?? [];
+
+  const stopAt = full.findIndex((c) => cellKey(c) === cellKey(out.destination));
+
+  return finishMove(ctx, { participants: out.participants, moved: out.moved, hazard, messages: out.messages, events: out.events, trail: { from: mover.battleData.position, path: stopAt >= 0 ? full.slice(0, stopAt + 1) : full } });
 }
 
 interface MoveOutcome {
@@ -96,18 +97,28 @@ interface MoveOutcome {
   hazard: TerrainCell | null;
   messages: LogLine[];
   events: NewBattleEvent[];
+  /** шлях пройдено вільно від from; лише тоді спрацьовують зони заклинань */
+  trail?: { from: GridPoint | undefined; path: GridPoint[] };
 }
 
-function finishMove(ctx: BattleMutationContext, { participants, moved, hazard, messages, events: attackEvents }: MoveOutcome): MutationResult {
+function finishMove(ctx: BattleMutationContext, { participants, moved, hazard, messages, events: attackEvents, trail }: MoveOutcome): MutationResult {
   const events = [...(messages.length ? [systemEvent(ctx.scene.round, lineText(messages, "; "))] : []), ...attackEvents];
 
-  const hit = hazard && hazardHit(moved, hazard, ctx.scene.round, participants, ctx.rng ?? Math.random, ctx.meta.rules);
+  const hit = hazard && hazardHit(moved, hazard, ctx.scene.round, participants, rngOf(ctx), ctx.meta.rules);
 
-  if (!hazard || !hit) return { participants, pending: ctx.pending, events };
+  const hazardHitResult = hazard && hit ? resolveHazardHit(ctx, participants, moved, hazard, hit) : null;
 
-  const resolved = resolveHazardHit(ctx, participants, moved, hazard, hit);
+  const resolved = { participants: hazardHitResult?.participants ?? participants, events: [...events, ...(hazardHitResult?.events ?? [])] };
 
-  return { ...resolved, events: [...events, ...resolved.events], pending: ctx.pending };
+  const after = findParticipant(resolved.participants, moved.basicInfo.id);
+
+  const map = ctx.meta.map;
+
+  if (!trail?.from || !map || !(map.spellZones || hasAnchors(resolved.participants)) || !after || !isActive(after)) return { ...resolved, pending: ctx.pending };
+
+  const zones = zoneMove({ map, participants: resolved.participants, moved: after, from: trail.from, path: trail.path, round: ctx.scene.round, rng: ctx.rng ?? Math.random, rules: ctx.meta.rules });
+
+  return { participants: zones.participants, events: [...resolved.events, ...(zones.messages.length ? [systemEvent(ctx.scene.round, lineText(zones.messages, "; "))] : [])], pending: ctx.pending };
 }
 
 function returnToStart(ctx: BattleMutationContext, participants: BattleParticipant[], mover: BattleParticipant, ownTurn: boolean): MutationResult {
@@ -136,7 +147,7 @@ function resolveHazardHit(
   const messages = [hit.message, ...hit.consequences];
 
   if (!isActive(hit.participant)) {
-    const downed = resolveDowned(next, { victimId: id, actorId: null }, { round: ctx.scene.round, rng: ctx.rng ?? Math.random, rules: ctx.meta.rules });
+    const downed = resolveDowned(next, { victimId: id, actorId: null }, { round: ctx.scene.round, rng: rngOf(ctx), rules: ctx.meta.rules });
 
     next = downed.participants;
     messages.push(...downed.messages);

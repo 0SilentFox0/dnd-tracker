@@ -175,6 +175,11 @@ export const FLAG_REGISTRY: { [K in FlagKey]: FlagDefinition<K> } = {
     defaults: { value: 1 },
     describe: (e) => textRef("abilityText.flags.minMorale", { value: signed(e.value) }),
   },
+  damageThreshold: {
+    fields: [{ name: "value", input: "number" }],
+    defaults: { value: 10 },
+    describe: (e) => textRef("abilityText.flags.damageThreshold", { value: e.value }),
+  },
   extraSummons: {
     fields: [
       { name: "count", input: "number" },

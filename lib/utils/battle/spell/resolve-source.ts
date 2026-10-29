@@ -2,7 +2,9 @@ import { API_ERRORS } from "@/lib/constants/api-errors";
 import { cooldownLeft, poolLeft, withinCountLimits } from "@/lib/utils/abilities/engine/core/usage";
 import { lairAbilities, lairBlocker } from "@/lib/utils/battle/actions/lair";
 import { legendaryAbilities, legendaryBlocker, legendaryCostOf } from "@/lib/utils/battle/actions/legendary-options";
+import { currentOf } from "@/lib/utils/battle/common/control";
 import type { BattleMutationContext } from "@/lib/utils/battle/pipeline/run-battle-mutation";
+import { isGrantLive } from "@/lib/utils/battle/spell/inline-grant";
 import { BattleRuleError, ruleErrorOf } from "@/lib/utils/battle/store";
 import type { CastableSpell } from "@/lib/utils/battle/types/spell-process";
 import type { BattleParticipant } from "@/types/battle";
@@ -15,7 +17,7 @@ export function resolveSpellSource(ctx: BattleMutationContext, caster: BattlePar
   if (data.legendaryKey) {
     if (!legendaryAbility) throw new BattleRuleError("action_rejected", API_ERRORS.BATTLE_NO_SUCH_LEGENDARY_SPELL);
 
-    const blocker = legendaryAbility.limits?.lair ? lairBlocker(caster, ctx.scene.round, legendaryAbility.key) : legendaryBlocker(caster, ctx.participants[ctx.scene.turnIndex], legendaryCostOf(legendaryAbility));
+    const blocker = legendaryAbility.limits?.lair ? lairBlocker(caster, ctx.scene.round, legendaryAbility.key) : legendaryBlocker(caster, currentOf(ctx), legendaryCostOf(legendaryAbility));
 
     if (blocker) throw ruleErrorOf("action_rejected", blocker);
 
@@ -30,11 +32,13 @@ export function resolveSpellSource(ctx: BattleMutationContext, caster: BattlePar
 
   const free = ctx.isDM && data.free === true;
 
-  const spellGrants = free ? [] : (caster.spellcasting.grants ?? []).filter((g) => g.spellId === data.spellId);
+  const ownGrants = free ? [] : (caster.spellcasting.grants ?? []).filter((g) => g.spellId === data.spellId);
 
-  let grant = data.grantKey ? spellGrants.find((g) => g.key === data.grantKey) : undefined;
+  const spellGrants = ownGrants.filter((g) => !g.inline);
 
-  if (data.grantKey && !grant) throw new BattleRuleError("action_rejected", API_ERRORS.BATTLE_SPELL_SOURCE_UNAVAILABLE);
+  let grant = data.grantKey ? ownGrants.find((g) => g.key === data.grantKey) : undefined;
+
+  if (data.grantKey && (!grant || !isGrantLive(grant, ctx.scene.round, ctx.participants))) throw new BattleRuleError("action_rejected", API_ERRORS.BATTLE_SPELL_SOURCE_UNAVAILABLE);
 
   if (!data.grantKey && data.slotKey) {
     if (!caster.spellcasting.slotSpells?.includes(data.spellId) && !spellGrants.some((g) => g.via === "slotOrGrant") && spellGrants.length > 0) throw new BattleRuleError("action_rejected", API_ERRORS.GRANT_NO_SLOT);

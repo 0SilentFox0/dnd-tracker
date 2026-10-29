@@ -4,7 +4,9 @@ import { describe, expect, it, vi } from "vitest";
 import { context, goblin as baseGoblin, participant } from "./fixtures";
 
 import { AttackType } from "@/lib/constants/battle";
-import { attackBodySchema, createAttackMutation } from "@/lib/server/battles/mutations/attack/attack-mutation";
+import { CRITICAL_SUCCESS_EFFECTS } from "@/lib/constants/critical-effects";
+import { attackBodySchema } from "@/lib/schemas/battles";
+import { createAttackMutation } from "@/lib/server/battles/mutations/attack/attack-mutation";
 import { createCritChoiceMutation } from "@/lib/server/battles/mutations/crit-choice/crit-choice-mutation";
 import { createSpellMutation } from "@/lib/server/battles/mutations/spell/spell-mutation";
 import { createMockParticipant } from "@/lib/utils/battle/__tests__/fixtures/mock-participant";
@@ -182,3 +184,44 @@ describe("заклинання: вибір крита ДМ-ом", () => {
   });
 });
 
+
+describe("заклинання-атака: вибір крита ДМ-ом", () => {
+  const bolt = createSpellMutation({
+    loadPool: async () => ({ units: [], races: [] }),
+    loadSpell: vi.fn(async () => ({
+      id: "s1", campaignId: "c1", name: "Промінь", level: 1, groupId: null, icon: null, dice: 1, cost: "action", targeting: { kind: "enemy" },
+      resolution: { kind: "attack" },
+      spellEffects: [{ kind: "dealDamage", amount: { spellRoll: 100 }, damageType: "fire" }], raceModifiers: [],
+    }) as unknown as Spell),
+  });
+
+  const critChoice = createCritChoiceMutation({ attack, spell: bolt });
+
+  const dm = () => on({ isDM: true, userId: "dm" });
+
+  const data = { casterId: "hero", spellId: "s1", targetIds: ["gob"], diceRolls: [4], attackRolls: [{ participantId: "gob", roll: 20 }] };
+
+  it("нат. 20 при увімкненому прапорі: pending, учасники й версія без змін, тригер attack", async () => {
+    const c = dm();
+
+    const out = await bolt(c, data as never);
+
+    expect(out.participants).toBe(c.participants);
+    expect(out.events).toEqual([]);
+    expect(out.response).toEqual({ pendingCritChoice: true });
+    expect(out.scene?.pendingCritChoice).toMatchObject({ action: "spell", triggers: [expect.objectContaining({ source: "attack", kind: "success", key: "attack:hero:gob:0" })] });
+  });
+
+  it("вибраний double_damage застосовано, pending очищено", async () => {
+    const c = dm();
+
+    const pending = (await bolt(c, data as never)).scene?.pendingCritChoice;
+
+    const plain = await bolt({ ...c, meta: { ...c.meta, critChoiceByDm: false, rules: { ...c.meta.rules, criticals: { ...c.meta.rules.criticals, effects: false } } } }, data as never);
+
+    const out = await critChoice({ ...c, scene: { ...c.scene, pendingCritChoice: pending! } }, { choices: { "attack:hero:gob:0": CRITICAL_SUCCESS_EFFECTS.find((e) => e.effect.type === "double_damage")!.id } });
+
+    expect(out.scene?.pendingCritChoice).toBeNull();
+    expect(100 - (hpOf(out) as number)).toBe(2 * (100 - (hpOf(plain) as number)));
+  });
+});

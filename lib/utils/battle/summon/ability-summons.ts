@@ -4,11 +4,12 @@ import { findParticipant, isActive, withSelf } from "@/lib/utils/abilities/engin
 import type { SummonRequest } from "@/lib/utils/abilities/engine/core/types";
 import { createBattleParticipantFromUnit } from "@/lib/utils/battle/participant";
 import { appendToInitiativeEnd, nextInstanceNumber } from "@/lib/utils/battle/summon/append-summoned-unit";
+import { buildInlineSummon } from "@/lib/utils/battle/summon/inline-summon";
 import type { UnitFromPrisma } from "@/lib/utils/battle/types/participant";
 import { pickOne } from "@/lib/utils/common/dice";
 import type { Ruleset } from "@/lib/utils/rules";
 import { scaleSummon } from "@/lib/utils/units/level-scaling";
-import type { BattleParticipant } from "@/types/battle";
+import type { BattleMapConfig, BattleParticipant } from "@/types/battle";
 import type { RaceRow } from "@/types/races";
 import type { LogLine } from "@/types/text";
 
@@ -48,11 +49,11 @@ function banish(order: BattleParticipant[], summoned: BattleParticipant): { part
 export async function applyAbilitySummons(
   requests: SummonRequest[],
   order: BattleParticipant[],
-  opts: { campaignId: string; battleId: string; rng: () => number; rules?: Ruleset; deps: SummonDeps },
+  opts: { campaignId: string; battleId: string; rng: () => number; rules?: Ruleset; deps: SummonDeps; map?: BattleMapConfig | null; round?: number },
 ): Promise<{ order: BattleParticipant[]; messages: LogLine[] }> {
   if (requests.length === 0) return { order, messages: [] };
 
-  const pool = await opts.deps.loadPool(opts.campaignId);
+  const pool = requests.some((r) => !r.inline) ? await opts.deps.loadPool(opts.campaignId) : { units: [], races: [] };
 
   const racesById = Object.fromEntries(pool.races.map((r) => [r.id, r]));
 
@@ -62,6 +63,23 @@ export async function applyAbilitySummons(
 
   for (const req of requests) {
     const owner = findParticipant(next, req.ownerId);
+
+    if (req.inline && owner) {
+      const names: string[] = [];
+
+      for (let i = 1; i <= req.count; i++) {
+        const built = await buildInlineSummon({ req: { ...req, inline: req.inline }, owner, order: next, number: i, opts });
+
+        const { finalOrder, added } = appendToInitiativeEnd(next, built);
+
+        next = finalOrder;
+        names.push(added.basicInfo.name);
+      }
+
+      messages.push(textRef("battleLog.summon.appears", { names: names.join(", ") }));
+
+      continue;
+    }
 
     const group = (req.group ?? "").trim().toLowerCase();
 

@@ -1,6 +1,7 @@
 import { type AbilityKey } from "@/lib/constants/abilities";
 import { proficiencyForChallenge } from "@/lib/constants/challenge";
 import { getAbilityModifier } from "@/lib/utils/common/calculations";
+import { clamp } from "@/lib/utils/common/clamp";
 
 const NUMBER_WORDS: Record<string, number> = { one: 1, two: 2, three: 3, four: 4, five: 5, six: 6, seven: 7, eight: 8, nine: 9, ten: 10 };
 
@@ -8,7 +9,6 @@ const MULTI_COUNT = /\b(one|two|three|four|five|six|seven|eight|nine|ten)\s(?:[^
 
 const MULTI_ALT = /,?\s+or (?:it|he|she|the \w+) makes\b/i;
 
-const clamp = (n: number, min: number, max: number) => Math.min(max, Math.max(min, n));
 
 export function multiattackCount(desc: string): number {
   const first = (desc.split(/\.\s/)[0] ?? "").split(MULTI_ALT)[0];

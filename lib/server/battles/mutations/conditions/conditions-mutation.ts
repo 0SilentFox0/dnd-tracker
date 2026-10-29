@@ -5,21 +5,24 @@ import { API_ERRORS } from "@/lib/constants/api-errors";
 import { CONDITION_LIMITS } from "@/lib/constants/battle";
 import { textRef } from "@/lib/i18n/text-ref";
 import { findParticipant } from "@/lib/utils/abilities/engine/core/participants";
+import { CustomConditionKeySchema } from "@/lib/utils/abilities/schema";
 import { applyCondition5e, CONDITION_5E_KEYS, MAX_EXHAUSTION, PERMANENT_ROUNDS, removeCondition5e } from "@/lib/utils/battle/conditions";
 import { lineText } from "@/lib/utils/battle/log/lines";
 import type { BattleMutationContext, MutationResult } from "@/lib/utils/battle/pipeline/run-battle-mutation";
 import { BattleRuleError, dmEvent } from "@/lib/utils/battle/store";
 
+const ConditionKeySchema = z.union([z.enum(CONDITION_5E_KEYS), CustomConditionKeySchema]);
+
 export const battleConditionsSchema = z.discriminatedUnion("action", [
   z.object({
     action: z.literal("apply"),
     participantId: z.string().min(1),
-    condition: z.enum(CONDITION_5E_KEYS),
+    condition: ConditionKeySchema,
     rounds: z.number().int().min(1).max(CONDITION_LIMITS.rounds).optional(),
     levels: z.number().int().min(1).max(MAX_EXHAUSTION).optional(),
     saveEnds: z.object({ ability: z.enum(ABILITY_KEYS), dc: z.number().int().min(1).max(CONDITION_LIMITS.dc) }).optional(),
   }),
-  z.object({ action: z.literal("remove"), participantId: z.string().min(1), condition: z.enum(CONDITION_5E_KEYS) }),
+  z.object({ action: z.literal("remove"), participantId: z.string().min(1), condition: ConditionKeySchema }),
 ]);
 
 export type BattleConditionsBody = z.infer<typeof battleConditionsSchema>;

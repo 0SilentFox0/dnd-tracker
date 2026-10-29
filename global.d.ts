@@ -25,6 +25,7 @@ import type compendium from "./messages/uk/compendium.json";
 import type compendiumReport from "./messages/uk/compendiumReport.json";
 import type contentImport from "./messages/uk/contentImport.json";
 import type dashboard from "./messages/uk/dashboard.json";
+import type editors from "./messages/uk/editors.json";
 import type errors from "./messages/uk/errors.json";
 import type feats from "./messages/uk/feats.json";
 import type gameTerms from "./messages/uk/gameTerms.json";
@@ -75,6 +76,7 @@ declare module "next-intl" {
       rest: typeof rest;
       spells: typeof spells;
       spellEditor: typeof spellEditor;
+      editors: typeof editors;
       units: typeof units;
       abilities: typeof abilities;
       abilityRegistry: typeof abilityRegistry;

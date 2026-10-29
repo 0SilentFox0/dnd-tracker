@@ -10,6 +10,10 @@ import { DEFAULT_RULES } from "@/lib/utils/rules";
 
 const mutateAsync = vi.fn().mockResolvedValue(DEFAULT_RULES);
 
+vi.mock("@/lib/hooks/campaigns/useRemoveCustomCondition", () => ({ useRemoveCustomCondition: () => ({ remove: vi.fn(), isPending: false, usage: null, closeUsage: vi.fn() }) }));
+
+vi.mock("@/lib/hooks/campaigns/useRemoveCustomCondition", () => ({ useRemoveCustomCondition: () => ({ remove: vi.fn(), isPending: false, usage: null, closeUsage: vi.fn() }) }));
+
 vi.mock("@/lib/hooks/campaigns/useCampaignRules", () => ({
   useCampaignRules: () => ({ data: DEFAULT_RULES, isLoading: false }),
   useUpdateCampaignRules: () => ({ mutateAsync, isPending: false }),

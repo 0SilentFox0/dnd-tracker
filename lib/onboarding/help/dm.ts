@@ -72,6 +72,18 @@ export const DM_ARTICLES: HelpArticleDef[] = [
     ],
   },
   {
+    slug: "compendium-import",
+    audience: "dm",
+    sections: [
+      { blocks: [{ kind: "p" }] },
+      { blocks: [{ kind: "list", count: 4 }] },
+      { blocks: [{ kind: "p" }] },
+      { blocks: [{ kind: "p" }, { kind: "p" }] },
+      { blocks: [{ kind: "p" }] },
+      { blocks: [{ kind: "p" }, { kind: "list", count: 3 }, { kind: "p" }] },
+    ],
+  },
+  {
     slug: "dm-acquaintances",
     audience: "dm",
     sections: [

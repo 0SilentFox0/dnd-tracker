@@ -187,6 +187,7 @@ export async function createBattleParticipantFromUnit(
       moraleCap: moraleCapFromRules(rules),
       ...(monster && { damageModel: "5e" as const }),
       ...(statblock.creatureType && { creatureType: statblock.creatureType }),
+      ...(monster && { cr: unit.cr }),
       ...(saveProficiencies.length > 0 && { saveProficiencies }),
     },
     combatStats: {

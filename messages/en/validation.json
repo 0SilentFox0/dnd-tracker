@@ -19,5 +19,8 @@
   "image": {
     "tooLarge": "The image is too large to process in the browser",
     "compressFailed": "Could not compress the image"
-  }
+  },
+  "spellDelayPair": "Fill in both fields or neither",
+  "rulesCustomConflict": "The same condition cannot be added and removed at once",
+  "tooManySpellZones": "Too many spell zones"
 }

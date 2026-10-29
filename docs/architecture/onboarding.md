@@ -9,6 +9,7 @@
 - `checklists.ts` — кроки ДМ (`DM_STEPS`: 6 обов'язкових + optional) і гравця (`PLAYER_STEPS`); кожен крок має `isDone(facts)`. `StepStatus` несе `id` і необов'язковий `variant` `{ name, params }` (напр. `pending` + `{count}`), а не готові тексти; `step-text.ts` (`stepText(t, role, step)`) дає `checklist.<role>.<id>.title|description[Variant]` для клієнта й MCP.
 - `progress.ts` — `checklistProgress`, `checklistState` (`open` → `collapsed` на 7 днів після першого «все виконано» → `hidden`; збережена дата завершення фіксує результат, регрес фактів чекліст не розгортає), `unseenWhatsNew`/`visibleWhatsNew`, `isHintHidden`.
 - `hints.ts` (`HINTS`), `whats-new.ts` (`WHATS_NEW`, новіші першими), `help/` (`HELP_ARTICLES` — скелет статей без текстів: `slug`, секції, форма блоків; текст `help.<slug>.title|summary|sections.s<i>.heading|b<j>`, список — об'єкт `i0..iN`; тест скелет↔JSON ловить розбіжність).
+- Імпорт компендіуму: підказка `dm.compendium-import`, стаття `/help/compendium-import`, запис «Що нового» `2026-10-29-compendium-import-guide`; на сторінці імпорту кроки показує `StepIndicator` (`components/common`).
 - `flag-keys.ts` — ключі прапорців і `FLAG_KEY_RE`.
 
 ## Правило: прогрес = факти, у БД лише прапорці

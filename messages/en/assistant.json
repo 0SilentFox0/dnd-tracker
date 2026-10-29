@@ -64,7 +64,8 @@
   "operations": {
     "rules": {
       "get": "Campaign rules",
-      "update": "Update rules"
+      "update": "Update rules",
+      "condition-usage": "Where a custom condition is used"
     },
     "campaign": {
       "export": "Export bundle"

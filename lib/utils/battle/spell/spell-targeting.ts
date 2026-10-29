@@ -13,7 +13,9 @@ import { cellsOf, isOnMap } from "@/lib/utils/battle/grid/occupancy";
 import { aimInRange, feetToCells, templateAimAllowed, templateArea, templateCentre } from "@/lib/utils/battle/grid/template";
 import { modeAimHiddenText, modeSightedTargets, modeTargetHiddenText } from "@/lib/utils/battle/modes/engine";
 import { isReserved } from "@/lib/utils/battle/participant/reserve";
+import { findEffectMarker } from "@/lib/utils/battle/participant/state";
 import { upcastSteps } from "@/lib/utils/battle/spell/caster-dice";
+import { matchesTargetFilter } from "@/lib/utils/battle/spell/target-filter";
 import type { SpellTargeting as SpellTargetingDef } from "@/lib/utils/spells/model/schema";
 import type { BattleMapConfig, BattleParticipant, GridPoint, SpellTemplate } from "@/types/battle";
 import type { LogLine } from "@/types/text";
@@ -134,13 +136,20 @@ const fail = (error: LogLine): SpellTargetResolution => ({ ok: false, error });
 
 type TemplateTargeting = Extract<SpellTargetingDef, { kind: "template" }>;
 
-function resolveTemplate(ps: BattleParticipant[], caster: BattleParticipant, targeting: TemplateTargeting, map: BattleMapConfig, aim: GridPoint | undefined): SpellTargetResolution {
+interface FilterLevel {
+  spellLevel: number;
+  castLevel?: number;
+}
+
+function resolveTemplate(ps: BattleParticipant[], caster: BattleParticipant, targeting: TemplateTargeting, map: BattleMapConfig, aim: GridPoint | undefined, level: FilterLevel): SpellTargetResolution {
+  const passing = (targets: BattleParticipant[]) => targets.filter((p) => matchesTargetFilter(p, targeting.filter, level)).map((p) => p.basicInfo.id);
+
   if (targeting.shape === "emanation") {
     const centre = cellsOf(caster)[0];
 
     const { cells, targets } = templateArea(map, ps, caster, targeting, centre);
 
-    return { ok: true, targetIds: targets.map((p) => p.basicInfo.id), cells, centre };
+    return { ok: true, targetIds: passing(targets), cells, centre };
   }
 
   if (!aim) return fail(textRef("battleActions.spell.target.pickPoint"));
@@ -161,7 +170,7 @@ function resolveTemplate(ps: BattleParticipant[], caster: BattleParticipant, tar
 
   // промах повз усіх — теж каст: слот і дія витрачаються, FX летить у точку
 
-  return { ok: true, targetIds: targets.map((p) => p.basicInfo.id), cells, centre: templateCentre(targeting, aim, cells) };
+  return { ok: true, targetIds: passing(targets), cells, centre: templateCentre(targeting, aim, cells) };
 }
 
 function resolveSkillRadius(scene: AimScene, radius: SkillRadius, aim: { cell?: GridPoint; range?: number }): SpellTargetResolution {
@@ -200,7 +209,7 @@ function resolveRaw(
 
   const map = mapCtx?.map && isOnMap(caster) ? mapCtx.map : null;
 
-  if (map && targeting.kind === "template") return resolveTemplate(ps, caster, targeting, map, mapCtx?.targetCell);
+  if (map && targeting.kind === "template") return resolveTemplate(ps, caster, targeting, map, mapCtx?.targetCell, { spellLevel: spell.level, castLevel: mapCtx?.castLevel });
 
   if (targeting.kind === "ally" || targeting.kind === "enemy") {
     const skill = spellTargetingFor(ps, caster.basicInfo.id, spell);
@@ -271,6 +280,8 @@ function resolveRaw(
         return fail(textRef(wanted === "ally" ? "battleActions.spell.target.mustBeAlly" : "battleActions.spell.target.mustBeEnemy"));
       }
 
+      if (picked.some((p) => !matchesTargetFilter(p, targeting.filter, { spellLevel: spell.level, castLevel: mapCtx?.castLevel }))) return fail(API_ERRORS.BATTLE_SPELL_TARGET_FILTER);
+
       if (map && targeting.kind === "area" && targeting.chain) {
         if (picked.length !== 1) return fail(textRef("battleActions.spell.target.pickChainFirst"));
 
@@ -297,6 +308,21 @@ function hostile(targeting: SpellTargetingDef): boolean {
   if (targeting.kind === "area" || targeting.kind === "template") return targeting.side === "enemy";
 
   return HOSTILE_KINDS.has(targeting.kind);
+}
+
+/** Кастер зі станом «без ворожих заклинань»: ворожий шаблон або будь-яка ціль-ворог. */
+export function pacifiedBlock(ps: BattleParticipant[], caster: BattleParticipant, targeting: SpellTargetingDef, targetIds: string[]): { state: string } | null {
+  const marker = findEffectMarker(caster, "no_hostile_spells");
+
+  if (!marker) return null;
+
+  const hitsEnemy = targetIds.some((id) => {
+    const t = ps.find((p) => p.basicInfo.id === id);
+
+    return !!t && t.basicInfo.side !== caster.basicInfo.side;
+  });
+
+  return hostile(targeting) || hitsEnemy ? { state: marker.effect.name } : null;
 }
 
 export function resolveSpellTargets(

@@ -13,6 +13,7 @@ import { assistantCatalog } from "@/lib/server/assistant/catalog";
 import { dispatchAction } from "@/lib/server/assistant/execute";
 import { ContentError } from "@/lib/server/content/errors";
 import { inputJsonSchema } from "@/lib/server/content/json-schema";
+import { windowOf } from "@/lib/utils/api/page-of";
 
 export const assistantScopes = API_TOKEN_SCOPES.filter(scope => scope !== "ai");
 
@@ -32,11 +33,11 @@ export const assistantCapabilitiesTool = defineTool({
 
     const actions = assistantCatalog.listActions(caller.actor);
 
-    const selected = actions.slice(offset, offset + limit);
+    const { items: selected, ...window } = windowOf(actions, offset, limit);
 
     for (const action of selected) await authorizeAssistant(caller, action.need, "prepare");
 
-    return { items: selected.map(({ id, title, effect, need }) => ({ id, title, effect, sessionOnly: !!need.sessionOnly })), total: actions.length, nextOffset: offset + selected.length < actions.length ? offset + selected.length : null };
+    return { items: selected.map(({ id, title, effect, need }) => ({ id, title, effect, sessionOnly: !!need.sessionOnly })), total: window.total, nextOffset: window.nextOffset };
   },
 });
 export const assistantSchemaTool = defineTool({

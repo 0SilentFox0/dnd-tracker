@@ -100,7 +100,9 @@
         "wall": "Impassable",
         "barrier": "Barrier",
         "hazard": "Hazard",
-        "erase": "Erase"
+        "erase": "Erase",
+        "difficult": "Difficult",
+        "erase-zone": "Erase zone"
       },
       "rounds": "Rounds",
       "hazardLabel": "Hazard label",
@@ -108,7 +110,8 @@
       "damageDice": "Damage (dice)",
       "noDamage": "no damage",
       "type": "Type"
-    }
+    },
+    "difficultDefault": "Difficult terrain"
   },
   "result": {
     "title": {

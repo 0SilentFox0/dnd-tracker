@@ -5,12 +5,14 @@ import { useTranslations } from "next-intl";
 import { CompendiumCategories } from "./CompendiumCategories";
 import { CompendiumDependencies } from "./CompendiumDependencies";
 import { CompendiumFileStep } from "./CompendiumFileStep";
-import { CompendiumReport } from "./CompendiumReport";
+import { CompendiumReport, DEPENDENCIES_ANCHOR } from "./CompendiumReport";
 import { CompendiumRunsList } from "./CompendiumRunsList";
+import { CompendiumSteps } from "./CompendiumSteps";
 import { RulesPatchOffer } from "./RulesPatchOffer";
 
 import { ActionBar } from "@/components/common/ActionBar";
 import { HudPage, HudPageHeader, HudPanel } from "@/components/hud/page";
+import { OnboardingHint } from "@/components/onboarding/OnboardingHint";
 import { Button } from "@/components/ui/button";
 import { useCompendiumImport } from "@/lib/hooks/compendium-import";
 
@@ -19,9 +21,9 @@ export function CompendiumImport({ campaignId, initialFile }: { campaignId: stri
 
   const wizard = useCompendiumImport(campaignId, initialFile);
 
-  const { preview, input, result, rights, busy, root } = wizard.state;
+  const { preview, input, result, rights, busy, root, options } = wizard.state;
 
-  const { setRights, confirm, close } = wizard.actions;
+  const { setRights, confirm, close, applyOptions } = wizard.actions;
 
   return <HudPage>
     <HudPageHeader
@@ -29,15 +31,19 @@ export function CompendiumImport({ campaignId, initialFile }: { campaignId: stri
       subtitle={t("subtitle")}
       actions={<Button variant="outline" asChild><Link href={`/campaigns/${campaignId}`}>{t("back")}</Link></Button>}
     />
+    {!initialFile && <OnboardingHint id="dm.compendium-import" />}
+    <CompendiumSteps wizard={wizard} />
     <CompendiumFileStep wizard={wizard} />
     {root && <CompendiumCategories wizard={wizard} />}
     {preview && <>
-      <HudPanel className="space-y-3"><RulesPatchOffer wizard={wizard} /><CompendiumReport campaignId={campaignId} report={preview.report} /></HudPanel>
-      <HudPanel className="space-y-3"><CompendiumDependencies key={preview.token} wizard={wizard} /></HudPanel>
+      <HudPanel className="space-y-3"><RulesPatchOffer wizard={wizard} /><CompendiumReport campaignId={campaignId} report={preview.report} blockerActions={{ busy, allowMixedEdition: options.allowMixedEdition ? undefined : () => applyOptions({ ...options, allowMixedEdition: true }) }} /></HudPanel>
+      <HudPanel className="space-y-3"><span id={DEPENDENCIES_ANCHOR} /><CompendiumDependencies key={preview.token} wizard={wizard} /></HudPanel>
       <HudPanel className="space-y-3">
-        <label className="flex items-start gap-2 text-sm"><input className="mt-0.5 h-4 w-4 shrink-0 accent-hud-gold" type="checkbox" checked={rights} disabled={busy} onChange={e => setRights(e.target.checked)} /> {t("rights")}</label>
-        <p className="text-sm text-hud-muted">{t("previewTtl")}</p>
-        <ActionBar><Button disabled={busy || !rights || !preview.report.readyToImport} onClick={() => void confirm()}>{t("confirm")}</Button></ActionBar>
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <label className="flex min-w-0 items-start gap-2 text-sm"><input className="mt-0.5 h-4 w-4 shrink-0 accent-hud-gold" type="checkbox" checked={rights} disabled={busy} onChange={e => setRights(e.target.checked)} /> {t("rights")}</label>
+          <Button disabled={busy || !rights || !preview.report.readyToImport} onClick={() => void confirm()}>{t("confirm")}</Button>
+        </div>
+        <p className="text-xs text-hud-muted">{t("previewTtl")}</p>
       </HudPanel>
     </>}
     {result && <HudPanel className="space-y-3"><p className="text-hud-good">{t("saved", { runId: result.runId ?? "" })}</p><CompendiumReport key={result.runId} campaignId={campaignId} report={result} committed /></HudPanel>}

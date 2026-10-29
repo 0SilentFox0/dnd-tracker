@@ -1,5 +1,5 @@
 import { DURATION_FIELD, type FieldMeta, TARGET_FIELD } from "../fields";
-import { CONDITION_LABELS, limitsLabel } from "../labels";
+import { CONDITION_LABELS, conditionLabel, limitsLabel } from "../labels";
 import { abilityArg, flag, roundsOf } from "../text";
 import { describeTrigger } from "../triggers";
 import { applyBerserk, applyCharm, describeBerserk, describeCharm } from "./control";
@@ -7,6 +7,7 @@ import { applyCopySpellBuffs } from "./copy-buffs";
 import { describeFlag, FLAG_FIELDS, FLAG_LABELS } from "./flags";
 import { applyDealDamage, applyDot, applyHeal, applyHot, describeDealDamage, describeDot, describeHeal, describeHot } from "./hp";
 import { applyManeuver, describeManeuver, MANEUVERS } from "./maneuver";
+import { applyPush, describePush } from "./push";
 import {
   applyChangeMorale,
   applyCleanse,
@@ -14,6 +15,7 @@ import {
   applyDrainSpellSlot,
   applyGrantAction,
   applyGuard,
+  applyHelp,
   applyMark,
   applyRestoreSpellSlot,
   describeGrantAction,
@@ -34,6 +36,7 @@ import type { Ability, Effect, EffectKind } from "@/lib/utils/abilities/schema";
 import { CONDITION_5E_KEYS } from "@/lib/utils/abilities/schema/kinds";
 import { pickOne } from "@/lib/utils/common/dice";
 import { signed } from "@/lib/utils/common/format";
+import type { SpellEffect } from "@/lib/utils/spells/model/schema";
 import type { LogLine } from "@/types/text";
 
 export type { EffectApplyInput, EffectApplyResult };
@@ -70,9 +73,9 @@ export const EFFECT_REGISTRY: { [K in EffectKind]: EffectDefinition<K> } = {
     describe: (e) => (/\bDM\b/.test(e.text) ? `✋ ${e.text}` : e.text),
     apply: (i) => ({ participants: i.participants, messages: [`📜 ${i.ability.name}: ${i.effect.text}`] }),
   },
-  dealDamage: { kind: "dealDamage", static: false, fields: [AMOUNT, { name: "damageType", input: "text", optional: true }, { name: "falloff", input: "numberList", optional: true }, TARGET_FIELD], describe: describeDealDamage, apply: applyDealDamage },
+  dealDamage: { kind: "dealDamage", static: false, fields: [AMOUNT, { name: "damageType", input: "text", optional: true }, { name: "falloff", input: "numberList", optional: true }, { name: "byDistance", input: "distanceDice", optional: true }, { name: "delayIfBeyond.feet", input: "number", optional: true }, { name: "delayIfBeyond.perRoundFeet", input: "number", optional: true }, TARGET_FIELD], describe: describeDealDamage, apply: applyDealDamage },
   heal: { kind: "heal", static: false, fields: [AMOUNT, { name: "revive", input: "toggle", optional: true }, TARGET_FIELD], describe: describeHeal, apply: applyHeal },
-  dot: { kind: "dot", static: false, fields: [{ ...AMOUNT, name: "damagePerRound" }, { name: "damageType", input: "text" }, TARGET_FIELD, REQUIRED_DURATION], describe: describeDot, apply: applyDot },
+  dot: { kind: "dot", static: false, fields: [{ ...AMOUNT, name: "damagePerRound" }, { name: "damageType", input: "text" }, { name: "linkedToCondition", input: "toggle", optional: true }, TARGET_FIELD, REQUIRED_DURATION], describe: describeDot, apply: applyDot },
   hot: { kind: "hot", static: false, fields: [{ ...AMOUNT, name: "healPerRound" }, TARGET_FIELD, REQUIRED_DURATION], describe: describeHot, apply: applyHot },
   berserk: { kind: "berserk", static: false, fields: [{ name: "damageBonusPercent", input: "number" }, TARGET_FIELD, REQUIRED_DURATION], describe: describeBerserk, apply: applyBerserk },
   charm: { kind: "charm", static: false, fields: [TARGET_FIELD, REQUIRED_DURATION], describe: describeCharm, apply: applyCharm },
@@ -89,18 +92,21 @@ export const EFFECT_REGISTRY: { [K in EffectKind]: EffectDefinition<K> } = {
       { name: "saveEnds", input: "saveEnds", optional: true, visibleWhen: (v) => (CONDITION_5E_KEYS as readonly string[]).includes(String(v.condition)) },
       { name: "percent", input: "number", optional: true, visibleWhen: (v) => v.condition === "skip_action" },
       { name: "breakOnDamage", input: "toggle", optional: true },
+      { name: "escapeDc", input: "toggle", optional: true, visibleWhen: (v) => v.condition === "grappled" },
+      { name: "onlyIfAffected", input: "toggle", optional: true },
       TARGET_FIELD,
       REQUIRED_DURATION,
     ],
     describe: (e) =>
       textRef("abilityText.effects.applyCondition", {
-        condition: CONDITION_LABELS[e.condition],
+        condition: conditionLabel(e.condition),
         percent: e.condition === "skip_action" && e.percent ? ` ${e.percent}%` : "",
         levels: e.levels ? ` ×${e.levels}` : "",
         rounds: roundsOf(e),
         breakOnDamage: flag(e.breakOnDamage),
         hasSave: flag(e.saveEnds),
         ability: e.saveEnds ? abilityArg(e.saveEnds.ability) : "",
+        escapeDc: flag(e.escapeDc),
       }),
     apply: applyCondition,
   },
@@ -143,6 +149,8 @@ export const EFFECT_REGISTRY: { [K in EffectKind]: EffectDefinition<K> } = {
     describe: describeManeuver,
     apply: applyManeuver,
   },
+  help: { kind: "help", static: false, fields: [TARGET_FIELD], describe: () => textRef("abilityText.effects.help"), apply: applyHelp },
+  push: { kind: "push", static: false, fields: [{ name: "feet", input: "number" }, { name: "from", input: "select", options: [{ value: "caster" }] }, TARGET_FIELD], describe: describePush, apply: applyPush },
   randomOf: {
     kind: "randomOf",
     static: false,
@@ -164,7 +172,63 @@ export function applyEffect(input: EffectApplyInput): EffectApplyResult {
   return def.apply(input as never);
 }
 
-export function describeEffect(effect: Effect): LogLine {
+export function describeEffect(effect: Effect | SpellEffect): LogLine {
+  if (effect.kind === "inputDice") return textRef("abilityText.effects.inputDice", { max: effect.max, label: effect.label });
+
+  if (effect.kind === "grantCast") return textRef("abilityText.effects.grantCast", { label: effect.label, cost: effect.cost, hasUses: flag(effect.uses), uses: effect.uses ?? 0, rounds: effect.duration.rounds });
+
+  if (effect.kind === "hitRider") {
+    return textRef("abilityText.effects.hitRider", {
+      charges: effect.charges,
+      dice: effect.extraDice,
+      damageType: effect.damageType,
+      attackKind: effect.attackKind,
+      consumeOnMiss: flag(effect.consumeOnMiss),
+      hasSave: flag(effect.save),
+      ability: effect.save?.ability ?? "",
+      onFail: effect.save ? joinLines(effect.save.onFail.map(describeEffect), ", ") : "",
+    });
+  }
+
+  if (effect.kind === "anchoredZone") {
+    return textRef("abilityText.effects.anchoredZone", {
+      radius: effect.radiusFeet,
+      side: effect.side,
+      excludeBearer: flag(effect.excludeBearer),
+      rounds: effect.duration.rounds,
+      hasEnter: flag(effect.onEnter),
+      enter: effect.onEnter ? joinLines(effect.onEnter.effects.map(describeEffect), ", ") : "",
+      hasTurnStart: flag(effect.onTurnStart),
+      turnStart: effect.onTurnStart ? joinLines(effect.onTurnStart.effects.map(describeEffect), ", ") : "",
+      endsOutside: flag(effect.endsWhenStartOutside),
+    });
+  }
+
+  if (effect.kind === "summonInline") {
+    return textRef("abilityText.effects.summonInline", {
+      count: effect.count,
+      name: effect.name,
+      isObject: flag(effect.hp === null),
+      hp: effect.hp ?? 0,
+      ac: effect.ac === "spellDc" ? "" : effect.ac,
+      acIsSpellDc: flag(effect.ac === "spellDc"),
+      rounds: effect.duration.rounds,
+      hasUpcast: flag(effect.upcastEvery),
+      upcastEvery: effect.upcastEvery ?? 0,
+      hasAura: flag(effect.aura),
+      auraRadius: effect.aura?.radiusFeet ?? 0,
+      auraAttack: flag(effect.aura?.onEnter?.attack || effect.aura?.onTurnStart?.attack),
+    });
+  }
+
+  if (effect.kind === "transform") return textRef("abilityText.effects.transform", { rounds: effect.duration.rounds });
+
+  if (effect.kind === "moveSelf") return textRef("abilityText.effects.moveSelf");
+
+  if (effect.kind === "createTerrain") return textRef("abilityText.effects.createTerrain", { terrain: effect.terrain, shape: effect.shape, cells: effect.cells, rounds: effect.rounds });
+
+  if (effect.kind === "chooseOne") return textRef("abilityText.effects.chooseOne", { options: joinLines(effect.options.map(describeEffect), " / ") });
+
   const def = EFFECT_REGISTRY[effect.kind] as EffectDefinition<EffectKind> | undefined;
 
   return def ? def.describe(effect as never) : textRef("abilityText.effects.unknown", { kind: String(effect.kind) });
