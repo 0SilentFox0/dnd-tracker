@@ -1,10 +1,14 @@
 import { isChallengeRating } from "@/lib/constants/challenge";
+import { BOOLEAN_WORDS, FALSE_WORDS, TRUE_WORDS } from "@/lib/constants/import-aliases";
+import { DEFAULT_LOCALE, type Locale } from "@/lib/i18n/config";
 import { normalizeDiceText } from "@/lib/utils/common/dice";
 import { specialAbilitiesToAbilities } from "@/lib/utils/units/special-abilities";
 import { parseAttacksDetailed, parseSpecialAbilities } from "@/lib/utils/units/unit-parsing";
-import type { ImportField, ImportKind } from "@/types/content-import";
+import type { ImportField, ImportKind, ImportMessage } from "@/types/content-import";
 
-export type ParsedValue = { value?: unknown; issue?: string; warning?: string };
+export type ParsedValue = { value?: unknown; issue?: ImportMessage; warning?: ImportMessage };
+
+const detail = (key: string, params?: ImportMessage["params"]): ImportMessage => ({ message: `contentImport.details.${key}`, ...(params && { params }) });
 
 export const isEmptyValue = (v: unknown) => v === undefined || v === null || (typeof v === "string" && v.trim() === "");
 
@@ -20,12 +24,8 @@ export const guardFormula = (v: string) => ((FORMULA_START.test(v) && !PLAIN_NUM
 
 const unguardFormula = (v: string) => (/^'+[=+\-@\t\r]/.test(v) ? v.slice(1) : v);
 
-const TRUE = new Set(["так", "true", "1", "+", "yes", "y", "да", "✓", "x"]);
-
-const FALSE = new Set(["ні", "false", "0", "-", "no", "n", "нет"]);
-
 function parseInteger(field: ImportField, raw: unknown): ParsedValue {
-  if (typeof raw === "number") return Number.isFinite(raw) ? { value: Math.trunc(raw) } : { issue: "Очікується ціле число" };
+  if (typeof raw === "number") return Number.isFinite(raw) ? { value: Math.trunc(raw) } : { issue: detail("integerExpected") };
 
   const s = String(raw);
 
@@ -35,17 +35,17 @@ function parseInteger(field: ImportField, raw: unknown): ParsedValue {
 
   const m = /[+-]?\d+/.exec(s);
 
-  return m ? { value: parseInt(m[0], 10) } : { issue: `Очікується ціле число, отримано «${s}»` };
+  return m ? { value: parseInt(m[0], 10) } : { issue: detail("integerExpectedGot", { got: s }) };
 }
 
 function parseDecimal(raw: unknown): ParsedValue {
-  if (typeof raw === "number") return Number.isFinite(raw) ? { value: raw } : { issue: "Очікується число" };
+  if (typeof raw === "number") return Number.isFinite(raw) ? { value: raw } : { issue: detail("numberExpected") };
 
   const s = String(raw);
 
   const m = /[+-]?\d+(\.\d+)?/.exec(s.replace(",", "."));
 
-  return m ? { value: parseFloat(m[0]) } : { issue: `Очікується число, отримано «${s}»` };
+  return m ? { value: parseFloat(m[0]) } : { issue: detail("numberExpectedGot", { got: s }) };
 }
 
 function parseBoolean(raw: unknown): ParsedValue {
@@ -53,11 +53,11 @@ function parseBoolean(raw: unknown): ParsedValue {
 
   const s = normalizeHeader(String(raw));
 
-  if (TRUE.has(s)) return { value: true };
+  if (TRUE_WORDS.has(s)) return { value: true };
 
-  if (FALSE.has(s)) return { value: false };
+  if (FALSE_WORDS.has(s)) return { value: false };
 
-  return { issue: `Очікується так/ні, отримано «${String(raw)}»` };
+  return { issue: detail("booleanExpected", { got: String(raw) }) };
 }
 
 function matchEnum(field: ImportField, raw: string): string | null {
@@ -75,7 +75,7 @@ const enumHint = (field: ImportField) => (field.enumValues ?? []).map((v) => fie
 function parseEnum(field: ImportField, raw: unknown): ParsedValue {
   const value = matchEnum(field, String(raw));
 
-  return value ? { value } : { issue: `Невідоме значення «${String(raw)}»; можливі: ${enumHint(field)}` };
+  return value ? { value } : { issue: detail("enumUnknown", { got: String(raw), options: enumHint(field) }) };
 }
 
 export function splitList(s: string): string[] {
@@ -102,19 +102,19 @@ function parseList(field: ImportField, raw: unknown): ParsedValue {
     else bad.push(item);
   }
 
-  return bad.length > 0 ? { issue: `Невідомі значення: ${bad.join(", ")}; можливі: ${enumHint(field)}` } : { value: out };
+  return bad.length > 0 ? { issue: detail("listUnknown", { got: bad.join(", "), options: enumHint(field) }) } : { value: out };
 }
 
 const DICE = /^\d*d\d+([+-]\d+)?$/;
 
 function parseDice(raw: unknown): ParsedValue {
-  if (typeof raw === "number") return Number.isInteger(raw) && raw >= 0 ? { value: raw } : { issue: "Очікується ціла кількість кісток" };
+  if (typeof raw === "number") return Number.isInteger(raw) && raw >= 0 ? { value: raw } : { issue: detail("diceCount") };
 
   const s = normalizeDiceText(String(raw));
 
   if (/^\d+$/.test(s)) return { value: Number(s) };
 
-  return DICE.test(s) ? { value: s } : { issue: `Очікуються кістки на кшталт «2d6+1», отримано «${String(raw)}»` };
+  return DICE.test(s) ? { value: s } : { issue: detail("diceExpected", { got: String(raw) }) };
 }
 
 function parseCr(raw: unknown): ParsedValue {
@@ -127,7 +127,7 @@ function parseCr(raw: unknown): ParsedValue {
     n = !m ? NaN : m[2] ? Number(m[1]) / Number(m[2]) : Number(m[0].replace(/^\s*cr\s*/i, "").replace(",", "."));
   }
 
-  return Number.isFinite(n) && isChallengeRating(n) ? { value: n } : { issue: `CR: 0, 1/8, 1/4, 1/2 або ціле 1–30, отримано «${String(raw)}»` };
+  return Number.isFinite(n) && isChallengeRating(n) ? { value: n } : { issue: detail("crExpected", { got: String(raw) }) };
 }
 
 function parseJsonCell(raw: unknown): ParsedValue {
@@ -136,14 +136,14 @@ function parseJsonCell(raw: unknown): ParsedValue {
   try {
     return { value: JSON.parse(raw) };
   } catch {
-    return { issue: "Некоректний JSON у клітинці" };
+    return { issue: detail("jsonInvalid") };
   }
 }
 
 function parseAttackText(raw: string): ParsedValue {
   const { attacks, unparsed } = parseAttacksDetailed(raw);
 
-  return unparsed.length > 0 ? { value: attacks, warning: `Не розпізнано атаку: ${unparsed.map((u) => `«${u.slice(0, 40)}»`).join(", ")}` } : { value: attacks };
+  return unparsed.length > 0 ? { value: attacks, warning: detail("attackUnparsed", { attacks: unparsed.map((u) => u.slice(0, 40)).join(" | ") }) } : { value: attacks };
 }
 
 const looksJson = (s: string) => /^\s*[[{]/.test(s);
@@ -191,7 +191,7 @@ function namesInside(value: unknown, nested: NonNullable<ImportField["nestedRef"
   return Object.fromEntries(Object.entries(value).map(([k, v]) => [k, k === nested.key && typeof v === "string" ? (nameOf(nested.kind, v) ?? v) : namesInside(v, nested, nameOf)]));
 }
 
-export function formatFieldValue(field: ImportField, value: unknown, nameOf: (kind: ImportKind, id: string) => string | undefined): string {
+export function formatFieldValue(field: ImportField, value: unknown, nameOf: (kind: ImportKind, id: string) => string | undefined, locale: Locale = DEFAULT_LOCALE): string {
   if (value === undefined || value === null) return "";
 
   const nameFor = (id: unknown) => (field.ref && nameOf(field.ref, String(id))) || String(id);
@@ -204,7 +204,7 @@ export function formatFieldValue(field: ImportField, value: unknown, nameOf: (ki
     case "list":
       return Array.isArray(value) ? joinList(value.map(String)) : String(value);
     case "bool":
-      return value ? "так" : "ні";
+      return value ? BOOLEAN_WORDS[locale].yes : BOOLEAN_WORDS[locale].no;
     case "cr":
       return String(value);
     case "abilitiesText":

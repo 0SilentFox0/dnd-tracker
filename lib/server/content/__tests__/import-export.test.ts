@@ -3,7 +3,9 @@ import { describe, expect, it, vi } from "vitest";
 vi.mock("server-only", () => ({}));
 vi.mock("@/lib/db", () => ({ prisma: {} }));
 vi.mock("@/lib/utils/api/actor", () => ({ resolveActor: vi.fn() }));
+vi.mock("@/lib/i18n/translator", async () => vi.importActual("@/lib/i18n/translator"));
 
+import { getTranslator } from "@/lib/i18n/translator";
 import { exampleCsv } from "@/lib/server/content/import/example";
 import { exportCsv } from "@/lib/server/content/import/export";
 import { buildOpenApi } from "@/lib/server/content/openapi";
@@ -29,21 +31,34 @@ const readBack = (csv: string, kind: ImportKind) => {
   return { table, mapping, rows: table.rows.map((row) => transformRow(row, mapping, IMPORT_SPECS[kind].fields)) };
 };
 
+const t = await getTranslator("uk");
+
 describe("exampleCsv", () => {
   it("заголовки — підписи полів, посилання — назва першого запису кампанії; читається без помилок", async () => {
-    const csv = await exampleCsv(actor, "units", { loadNames });
+    const csv = await exampleCsv(actor, "units", { loadNames, locale: "uk" });
 
     const { table, mapping, rows } = readBack(csv, "units");
 
-    expect(table.headers).toEqual(IMPORT_SPECS.units.fields.map((f) => f.label));
+    expect(table.headers).toEqual(IMPORT_SPECS.units.fields.map((f) => t(f.labelKey)));
     expect(Object.values(mapping).every(Boolean)).toBe(true);
     expect(rows.map((r) => r.value.raceId)).toEqual(["Гноми", "Гноми"]);
     expect(rows.map((r) => r.value.name)).toEqual(["Гоблін-лучник", "Вовк"]);
     expect(rows.flatMap((r) => r.issues)).toEqual([]);
   });
 
+  it("англійський шаблон: заголовки й приклади англійською, читається без помилок", async () => {
+    const csv = await exampleCsv(actor, "units", { loadNames, locale: "en" });
+
+    const { table, mapping, rows } = readBack(csv, "units");
+
+    expect(table.headers[0]).toBe("Name");
+    expect(Object.values(mapping).every(Boolean)).toBe(true);
+    expect(rows.map((r) => r.value.name)).toEqual(["Goblin Archer", "Wolf"]);
+    expect(rows.flatMap((r) => r.issues)).toEqual([]);
+  });
+
   it("гравець — 403", async () => {
-    await expect(exampleCsv({ ...actor, isDM: false }, "units", { loadNames })).rejects.toMatchObject({ status: 403 });
+    await expect(exampleCsv({ ...actor, isDM: false }, "units", { loadNames, locale: "uk" })).rejects.toMatchObject({ status: 403 });
   });
 });
 
@@ -55,7 +70,7 @@ describe("exportCsv", () => {
 
     const record = { id: "u1", campaignId: "c1", name: "Вогняний, лютий", level: 3, raceId: "r1", knownSpells: ["s1", "s2"], cr: 0.25, xp: null, avatar: null, abilities, attacks, saveProficiencies: ["dexterity"] };
 
-    const csv = await exportCsv(actor, "units", { loadRecords: async () => [record], loadNames });
+    const csv = await exportCsv(actor, "units", { loadRecords: async () => [record], loadNames, locale: "uk" });
 
     const { mapping, rows } = readBack(csv, "units");
 
@@ -65,7 +80,7 @@ describe("exportCsv", () => {
   });
 
   it("заклинання: кістки й грань окремими колонками повертаються числами", async () => {
-    const csv = await exportCsv(actor, "spells", { loadRecords: async () => [{ name: "Куля", level: 3, dice: 8, dieSides: 6, cost: "action", concentration: false, targeting: { kind: "enemy" } }], loadNames });
+    const csv = await exportCsv(actor, "spells", { loadRecords: async () => [{ name: "Куля", level: 3, dice: 8, dieSides: 6, cost: "action", concentration: false, targeting: { kind: "enemy" } }], loadNames, locale: "uk" });
 
     expect(readBack(csv, "spells").rows[0].value).toEqual({ name: "Куля", level: 3, dice: 8, dieSides: 6, cost: "action", concentration: false, targeting: { kind: "enemy" } });
   });
@@ -73,7 +88,7 @@ describe("exportCsv", () => {
   it("артефакт: параметри касту предмета зберігаються в JSON колонці", async () => {
     const item = { charges: { max: 5, rest: "long" }, spells: [{ spellId: "s1", cost: 1, castLevel: 1, upcast: { maxLevel: 3, extraCost: 1 } }] };
 
-    const csv = await exportCsv(actor, "artifacts", { loadRecords: async () => [{ id: "wand", name: "Жезл", slot: "item", item }], loadNames });
+    const csv = await exportCsv(actor, "artifacts", { loadRecords: async () => [{ id: "wand", name: "Жезл", slot: "item", item }], loadNames, locale: "uk" });
 
     const { rows } = readBack(csv, "artifacts");
 
@@ -95,6 +110,6 @@ describe("OpenAPI", () => {
     expect(op("content.import")?.requestBody).toBeDefined();
     expect(op("content.export")?.responses["200"]).toEqual({ $ref: "#/components/responses/CsvOk" });
     expect(op("content.import-example")?.["x-scopes"]).toEqual(["content:read"]);
-    expect(doc.components.responses.CsvOk).toEqual({ description: "Успіх", content: { "text/csv": { schema: { type: "string" } } } });
+    expect(doc.components.responses.CsvOk).toEqual({ description: "Success", content: { "text/csv": { schema: { type: "string" } } } });
   });
 });

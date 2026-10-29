@@ -72,7 +72,7 @@ describe("useContentImport", () => {
     await act(() => result.current.actions.selectFile(new File(["x"], "u.xlsx")));
 
     expect(result.current.step).toBe("file");
-    expect(result.current.status.error).toContain("CSV (UTF-8)");
+    expect(result.current.status.error).toBe("contentImport.file.xlsxUnsupported");
   });
 
   it("перевірка шле сирі клітинки з dryRun і відкриває перегляд; зміна режиму перевіряє знову", async () => {
@@ -120,7 +120,7 @@ describe("useContentImport", () => {
     expect(vi.mocked(api.importContentRows).mock.calls.map((c) => c[2].rows.length)).toEqual([100, 50]);
     expect(result.current.step).toBe("result");
     expect(result.current.result?.counts.created).toBe(100);
-    expect(result.current.status.error).toBe("Мережа недоступна. Записано частин: 1 з 2");
+    expect(result.current.status.error).toBe('contentImport.errors.importInterrupted {"reason":"Мережа недоступна","done":1,"total":2}');
     expect(result.current.status.busy).toBe(false);
     expect(invalidate).toHaveBeenCalledWith({ queryKey: ["units", "c1"] });
   });

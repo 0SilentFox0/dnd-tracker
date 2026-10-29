@@ -57,4 +57,20 @@ describe("translateImportReport", () => {
     expect(messages).toContain("focus");
     expect(messages).not.toContain("{key}");
   });
+
+  it("перекладає ключі підписів і вкладені деталі імпорту CSV за локаллю", async () => {
+    const issues: ImportReport["results"][number]["issues"] = [
+      { field: "maxHp", level: "warning" as const, message: "contentImport.issues.columnSkipped", params: { got: "багато", field: "contentImport.fields.units.maxHp", detail: "contentImport.details.integerExpectedGot", value: "багато" } },
+      { field: "raceId", level: "error" as const, message: "contentImport.issues.refNotFound", params: { field: "contentImport.fields.units.raceId", value: "Ельфи", kind: "contentImport.kinds.races" } },
+    ];
+
+    expect(translateImportReport(await getTranslator("en"), report(issues)).results[0].issues.map((i) => i.message)).toEqual([
+      "Column “HP”: An integer is expected, got “багато” — the value “багато” was skipped",
+      "Race: “Ельфи” not found (Races)",
+    ]);
+    expect(translateImportReport(await getTranslator("uk"), report(issues)).results[0].issues.map((i) => i.message)).toEqual([
+      "Колонка «ХП»: Очікується ціле число, отримано «багато» — значення «багато» пропущено",
+      "Раса: не знайдено «Ельфи» (Раси)",
+    ]);
+  });
 });

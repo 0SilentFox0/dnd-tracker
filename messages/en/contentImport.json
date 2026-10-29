@@ -1,1 +1,283 @@
-{}
+{
+  "columnN": "Column {n}",
+  "transfer": {
+    "import": "Import",
+    "exportCsv": "Export CSV",
+    "compendium": "JSON compendium and reports"
+  },
+  "kinds": {
+    "units": "Units",
+    "spells": "Spells",
+    "skills": "Skills",
+    "main-skills": "Main skills",
+    "spell-groups": "Spell schools",
+    "races": "Races",
+    "classes": "Classes",
+    "feats": "Feats",
+    "backgrounds": "Backgrounds",
+    "artifacts": "Artifacts",
+    "artifact-sets": "Artifact sets"
+  },
+  "fields": {
+    "units": {
+      "name": "Name",
+      "level": "Level",
+      "raceId": "Race",
+      "avatar": "Avatar",
+      "initiative": "Initiative",
+      "armorClass": "AC",
+      "maxHp": "HP",
+      "speed": "Speed",
+      "strength": "STR",
+      "dexterity": "DEX",
+      "constitution": "CON",
+      "intelligence": "INT",
+      "wisdom": "WIS",
+      "charisma": "CHA",
+      "attacks": "Attacks",
+      "abilities": "Traits/Abilities",
+      "immunities": "Immunities",
+      "knownSpells": "Spells",
+      "statblock": "Statblock (JSON)",
+      "spellcasting": "Monster spellcasting (JSON)",
+      "proficiencyBonus": "Proficiency",
+      "gridSize": "Map size",
+      "morale": "Morale",
+      "minTargets": "Min targets",
+      "maxTargets": "Max targets",
+      "cr": "CR",
+      "xp": "XP",
+      "multiattack": "Multiattack",
+      "legendaryActions": "Legendary actions",
+      "legendaryResistances": "Legendary resistance",
+      "saveProficiencies": "Saving throws"
+    },
+    "spells": {
+      "name": "Name",
+      "level": "Level",
+      "groupId": "School",
+      "description": "Description",
+      "appearanceDescription": "Appearance description",
+      "icon": "Icon",
+      "cost": "Cost",
+      "casting": "Casting time (JSON)",
+      "dice": "Dice",
+      "dieSides": "Die sides",
+      "concentration": "Concentration",
+      "stackable": "Stackable",
+      "maxStacks": "Max stacks",
+      "upcastDice": "Upcast dice",
+      "upcastTargets": "Upcast targets",
+      "addAbilityMod": "Add ability modifier",
+      "fixedDice": "Fixed dice",
+      "damageBonus": "Damage bonus",
+      "targeting": "Target (JSON)",
+      "resolution": "Roll (JSON)",
+      "spellEffects": "Effects (JSON)",
+      "raceModifiers": "Race modifiers (JSON)",
+      "fx": "Visual effect (JSON)",
+      "lists": "Lists"
+    },
+    "skills": {
+      "name": "Name",
+      "description": "Description",
+      "icon": "Icon",
+      "image": "Image",
+      "mainSkillId": "Main skill",
+      "spellId": "Spell",
+      "spellGroupId": "Spell school",
+      "grantedSpellId": "Grants spell",
+      "abilities": "Abilities"
+    },
+    "main-skills": {
+      "name": "Name",
+      "color": "Color",
+      "icon": "Icon",
+      "isEnableInSkillTree": "In skill tree",
+      "spellGroupId": "Spell school",
+      "role": "Role"
+    },
+    "spell-groups": {
+      "name": "Name",
+      "color": "Color",
+      "icon": "Icon"
+    },
+    "races": {
+      "name": "Name",
+      "icon": "Icon",
+      "color": "Color",
+      "availableSkills": "Available main skills",
+      "disabledSkills": "Disabled skills",
+      "passiveAbility": "Passive ability (JSON)",
+      "spellSlotProgression": "Spell slots (JSON)",
+      "choices": "Choices (JSON)",
+      "abilities": "Abilities"
+    },
+    "classes": {
+      "name": "Name",
+      "icon": "Icon",
+      "color": "Color",
+      "hitDie": "Hit die",
+      "savingThrows": "Saving throws",
+      "proficiencies": "Proficiencies (JSON)",
+      "skillChoices": "Skill choices (JSON)",
+      "caster": "Caster type",
+      "spellcastingAbility": "Spellcasting ability",
+      "features": "Features by level (JSON)",
+      "subclassLevel": "Subclass level",
+      "subclasses": "Subclasses (JSON)",
+      "columns": "Class table (JSON)",
+      "spellList": "Spell list"
+    },
+    "feats": {
+      "name": "Name",
+      "icon": "Icon",
+      "type": "Type",
+      "prerequisite": "Prerequisites (JSON)",
+      "repeatable": "Repeatable",
+      "description": "Description",
+      "abilities": "Abilities",
+      "choices": "Choices (JSON)"
+    },
+    "backgrounds": {
+      "name": "Name",
+      "icon": "Icon",
+      "description": "Description",
+      "choices": "Choices (JSON)",
+      "originFeatId": "Origin feat",
+      "skillProficiencies": "Skills (JSON)",
+      "toolProficiencies": "Tools (JSON)",
+      "equipmentText": "Equipment (given by the DM)"
+    },
+    "artifacts": {
+      "name": "Name",
+      "description": "Description",
+      "rarity": "Rarity",
+      "slot": "Slot",
+      "setId": "Set",
+      "icon": "Icon",
+      "weapon": "Weapon (JSON)",
+      "armor": "Armor (JSON)",
+      "item": "Item 5e (JSON)",
+      "abilities": "Abilities"
+    },
+    "artifact-sets": {
+      "name": "Name",
+      "description": "Description",
+      "setBonus": "Set bonus (JSON)",
+      "abilities": "Abilities",
+      "artifactIds": "Artifacts",
+      "icon": "Icon"
+    }
+  },
+  "status": {
+    "created": {
+      "done": "Created",
+      "planned": "Will be created"
+    },
+    "updated": {
+      "done": "Updated",
+      "planned": "Will be updated"
+    },
+    "skipped": {
+      "done": "Skipped",
+      "planned": "Will be skipped"
+    },
+    "error": {
+      "done": "Error",
+      "planned": "Error"
+    }
+  },
+  "modes": {
+    "create": "New only (a duplicate name is an error)",
+    "update": "Update by name, create new ones",
+    "skip": "Skip existing"
+  },
+  "wizard": {
+    "title": "Import: {kind}",
+    "compendiumTitle": "JSON compendium import",
+    "steps": {
+      "file": "Step 1 of 4 · file",
+      "columns": "Step 2 of 4 · columns",
+      "preview": "Step 3 of 4 · check",
+      "result": "Step 4 of 4 · summary"
+    },
+    "checking": "Checking…",
+    "check": "Check",
+    "importing": "Importing… {done}/{total}",
+    "importCount": "Import {count}"
+  },
+  "file": {
+    "label": "CSV, TSV or JSON file",
+    "aggregateHint": "A multi-category JSON automatically opens the campaign wizard, without columns or AI.",
+    "spreadsheetHint": "Excel or Google Sheets: “File → Save as → CSV (UTF-8)”. The delimiter (comma, semicolon, tab) is detected automatically.",
+    "example": "Download an example CSV",
+    "empty": "The file is empty",
+    "csvUnreadable": "Could not read the CSV: {reason}",
+    "badJson": "Invalid JSON",
+    "jsonShape": "The JSON must be an array of objects or a single object",
+    "noRows": "The file has no data rows",
+    "xlsxUnsupported": "XLSX is not supported — save the table as CSV (UTF-8) and upload that",
+    "unsupportedType": "CSV, TSV and JSON files are supported"
+  },
+  "columns": {
+    "summary": "File “{name}” · rows: {rows}. Pick a field for each column.",
+    "missing": "Required fields are not mapped: {fields}",
+    "duplicates": "Several columns → one field, the first one is used: {fields}",
+    "aiBusy": "AI is thinking…",
+    "aiSuggest": "Suggest with AI",
+    "fieldFor": "Field for “{header}”",
+    "skip": "— skip —"
+  },
+  "preview": {
+    "mode": "Mode",
+    "row": "Row",
+    "name": "Name",
+    "status": "Status",
+    "errors": "Errors",
+    "shown": "Showing the first {shown} of {total}"
+  },
+  "errorReport": {
+    "download": "Download the CSV error report",
+    "status": "Status",
+    "errors": "Errors"
+  },
+  "actions": {
+    "cancel": "Cancel",
+    "back": "Back",
+    "done": "Done"
+  },
+  "errors": {
+    "readFailed": "Could not read the file",
+    "previewFailed": "The check failed",
+    "importInterrupted": "{reason}. Parts written: {done} of {total}",
+    "importFailed": "The import was interrupted",
+    "aiFailed": "AI could not suggest a mapping"
+  },
+  "details": {
+    "integerExpected": "An integer is expected",
+    "integerExpectedGot": "An integer is expected, got “{got}”",
+    "numberExpected": "A number is expected",
+    "numberExpectedGot": "A number is expected, got “{got}”",
+    "booleanExpected": "Yes/no is expected, got “{got}”",
+    "enumUnknown": "Unknown value “{got}”; allowed: {options}",
+    "listUnknown": "Unknown values: {got}; allowed: {options}",
+    "diceCount": "A whole number of dice is expected",
+    "diceExpected": "Dice like “2d6+1” are expected, got “{got}”",
+    "crExpected": "CR: 0, 1/8, 1/4, 1/2 or an integer 1–30, got “{got}”",
+    "jsonInvalid": "Invalid JSON in the cell",
+    "attackUnparsed": "Attack not recognized: “{attacks}”"
+  },
+  "issues": {
+    "fieldInvalid": "{field}: {detail}",
+    "columnSkipped": "Column “{field}”: {detail} — the value “{value}” was skipped",
+    "columnWarning": "Column “{field}”: {detail}",
+    "duplicateColumns": "Several columns for “{field}” — the first non-empty one is used",
+    "unknownField": "Unknown field “{field}” — skipped",
+    "refNotFound": "{field}: “{value}” not found ({kind})",
+    "noName": "The name is missing",
+    "duplicateName": "The name is repeated in the file",
+    "alreadyExists": "“{name}” already exists in the campaign",
+    "multipleMatches": "Several records named “{name}” — the first one was updated"
+  }
+}

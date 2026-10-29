@@ -1,6 +1,7 @@
 import { formatFieldValue, isEmptyValue, normalizeHeader, parseFieldValue } from "./values";
 
-import type { ImportField, ImportIssue, ImportKind, ImportMapping, ImportRecord, ImportSpec } from "@/types/content-import";
+import { DEFAULT_LOCALE, type Locale } from "@/lib/i18n/config";
+import type { ImportField, ImportIssue, ImportKind, ImportMapping, ImportMessage, ImportRecord, ImportSpec } from "@/types/content-import";
 
 type Converted = { value: ImportRecord; issues: ImportIssue[] };
 
@@ -20,7 +21,7 @@ export function autoMap(headers: readonly string[], fields: readonly ImportField
   const index = new Map<string, string>();
 
   for (const field of fields) {
-    for (const alias of [field.key, field.label, ...field.aliases]) {
+    for (const alias of [field.key, ...field.aliases]) {
       const key = normalizeHeader(alias);
 
       if (!index.has(key)) index.set(key, field.key);
@@ -49,7 +50,7 @@ export function applyMapping(row: Record<string, unknown>, mapping: ImportMappin
     if (prev === undefined) value[field.key] = cell;
     else if (field.type === "abilitiesText" && typeof prev === "string" && typeof cell === "string") value[field.key] = `${prev}. ${cell}`;
     else if ((field.type === "list" || field.type === "refList") && typeof prev === "string" && typeof cell === "string") value[field.key] = `${prev}|${cell}`;
-    else issues.push({ field: field.key, level: "warning", message: `Кілька колонок для «${field.label}» — взято першу непорожню` });
+    else issues.push({ field: field.key, level: "warning", message: "contentImport.issues.duplicateColumns", params: { field: field.labelKey } });
   }
 
   return { value, issues };
@@ -66,17 +67,19 @@ export function coerceRecord(record: ImportRecord, fields: readonly ImportField[
     const field = byKey.get(key);
 
     if (!field) {
-      issues.push({ field: key, level: "warning", message: `Невідоме поле «${key}» — пропущено` });
+      issues.push({ field: key, level: "warning", message: "contentImport.issues.unknownField", params: { field: key } });
       continue;
     }
 
     const parsed = parseFieldValue(field, raw);
 
-    if (parsed.issue && field.required) issues.push({ field: key, level: "error", message: `${field.label}: ${parsed.issue}` });
-    else if (parsed.issue) issues.push({ field: key, level: "warning", message: `Колонка «${field.label}»: ${parsed.issue} — значення «${String(raw).slice(0, 40)}» пропущено` });
+    const nested = (m: ImportMessage) => ({ ...m.params, field: field.labelKey, detail: m.message });
+
+    if (parsed.issue && field.required) issues.push({ field: key, level: "error", message: "contentImport.issues.fieldInvalid", params: nested(parsed.issue) });
+    else if (parsed.issue) issues.push({ field: key, level: "warning", message: "contentImport.issues.columnSkipped", params: { ...nested(parsed.issue), value: String(raw).slice(0, 40) } });
     else if (parsed.value !== undefined) value[key] = parsed.value;
 
-    if (parsed.warning) issues.push({ field: key, level: "warning", message: `Колонка «${field.label}»: ${parsed.warning}` });
+    if (parsed.warning) issues.push({ field: key, level: "warning", message: "contentImport.issues.columnWarning", params: nested(parsed.warning) });
   }
 
   return { value, issues };
@@ -90,8 +93,8 @@ export function transformRow(row: Record<string, unknown>, mapping: ImportMappin
   return { value: coerced.value, issues: [...mapped.issues, ...coerced.issues] };
 }
 
-export function recordToCells(spec: ImportSpec, record: ImportRecord, nameOf: (kind: ImportKind, id: string) => string | undefined): string[] {
-  return spec.fields.map((f) => formatFieldValue(f, record[f.key], nameOf));
+export function recordToCells(spec: ImportSpec, record: ImportRecord, nameOf: (kind: ImportKind, id: string) => string | undefined, locale: Locale = DEFAULT_LOCALE): string[] {
+  return spec.fields.map((f) => formatFieldValue(f, record[f.key], nameOf, locale));
 }
 
 export function missingRequired(fields: readonly ImportField[], mapping: ImportMapping): ImportField[] {

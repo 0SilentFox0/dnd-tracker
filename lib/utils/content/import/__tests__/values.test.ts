@@ -4,7 +4,7 @@ import { formatFieldValue, joinList, normalizeHeader, parseFieldValue, splitList
 
 import type { ImportField } from "@/types/content-import";
 
-const f = (type: ImportField["type"], extra: Partial<ImportField> = {}): ImportField => ({ key: "k", label: "Поле", aliases: [], type, examples: ["", ""], ...extra });
+const f = (type: ImportField["type"], extra: Partial<ImportField> = {}): ImportField => ({ key: "k", labelKey: "contentImport.fields.units.k", aliases: [], type, ...extra });
 
 const ENUM = f("enum", { enumValues: ["action", "bonusAction"], enumLabels: { action: ["Дія"], bonusAction: ["Бонусна дія"] } });
 
@@ -24,7 +24,7 @@ describe("parseFieldValue", () => {
     expect(parseFieldValue(f("int"), "Walk=30")).toEqual({ value: 30 });
     expect(parseFieldValue(f("int"), -2)).toEqual({ value: -2 });
     expect(parseFieldValue(f("int"), 7.9)).toEqual({ value: 7 });
-    expect(parseFieldValue(f("int"), "багато").issue).toContain("Очікується ціле число");
+    expect(parseFieldValue(f("int"), "багато").issue).toEqual({ message: "contentImport.details.integerExpectedGot", params: { got: "багато" } });
   });
 
   it("number — кома як крапка", () => {
@@ -35,13 +35,13 @@ describe("parseFieldValue", () => {
     expect(parseFieldValue(f("bool"), "Так")).toEqual({ value: true });
     expect(parseFieldValue(f("bool"), "no")).toEqual({ value: false });
     expect(parseFieldValue(f("bool"), true)).toEqual({ value: true });
-    expect(parseFieldValue(f("bool"), "можливо").issue).toContain("так/ні");
+    expect(parseFieldValue(f("bool"), "можливо").issue).toEqual({ message: "contentImport.details.booleanExpected", params: { got: "можливо" } });
   });
 
   it("enum — значення або підпис без регістру; невідоме — помилка з переліком підписів", () => {
     expect(parseFieldValue(ENUM, "бонусна ДІЯ")).toEqual({ value: "bonusAction" });
     expect(parseFieldValue(ENUM, "action")).toEqual({ value: "action" });
-    expect(parseFieldValue(ENUM, "реакція").issue).toBe("Невідоме значення «реакція»; можливі: Дія, Бонусна дія");
+    expect(parseFieldValue(ENUM, "реакція").issue).toEqual({ message: "contentImport.details.enumUnknown", params: { got: "реакція", options: "Дія, Бонусна дія" } });
   });
 
   it("list — роздільники | ; , і масив; enum-список перевіряє кожен елемент", () => {
@@ -50,7 +50,7 @@ describe("parseFieldValue", () => {
     expect(parseFieldValue(f("refList"), "a, b")).toEqual({ value: ["a", "b"] });
     expect(parseFieldValue(f("list"), [" a ", ""])).toEqual({ value: ["a"] });
     expect(parseFieldValue({ ...ENUM, type: "list" }, "Дія, bonusAction")).toEqual({ value: ["action", "bonusAction"] });
-    expect(parseFieldValue({ ...ENUM, type: "list" }, "Дія, політ").issue).toContain("Невідомі значення: політ");
+    expect(parseFieldValue({ ...ENUM, type: "list" }, "Дія, політ").issue).toEqual({ message: "contentImport.details.listUnknown", params: { got: "політ", options: "Дія, Бонусна дія" } });
   });
 
   it("dice — к/k/пробіли, ціле → число", () => {
@@ -58,7 +58,7 @@ describe("parseFieldValue", () => {
     expect(parseFieldValue(f("dice"), "8D6")).toEqual({ value: "8d6" });
     expect(parseFieldValue(f("dice"), "3")).toEqual({ value: 3 });
     expect(parseFieldValue(f("dice"), 4)).toEqual({ value: 4 });
-    expect(parseFieldValue(f("dice"), "2d8 + STR").issue).toContain("2d6+1");
+    expect(parseFieldValue(f("dice"), "2d8 + STR").issue?.message).toBe("contentImport.details.diceExpected");
   });
 
   it("cr — дроби, кома, ціле; не з таблиці — помилка", () => {
@@ -66,13 +66,13 @@ describe("parseFieldValue", () => {
     expect(parseFieldValue(f("cr"), "0,5")).toEqual({ value: 0.5 });
     expect(parseFieldValue(f("cr"), "5")).toEqual({ value: 5 });
     expect(parseFieldValue(f("cr"), 0.25)).toEqual({ value: 0.25 });
-    expect(parseFieldValue(f("cr"), "1/3").issue).toContain("CR");
+    expect(parseFieldValue(f("cr"), "1/3").issue?.message).toBe("contentImport.details.crExpected");
   });
 
   it("json — рядок парситься, об'єкт проходить, зламаний — помилка", () => {
     expect(parseFieldValue(f("json"), '{"kind":"auto"}')).toEqual({ value: { kind: "auto" } });
     expect(parseFieldValue(f("json"), { kind: "auto" })).toEqual({ value: { kind: "auto" } });
-    expect(parseFieldValue(f("json"), "{kind").issue).toBe("Некоректний JSON у клітинці");
+    expect(parseFieldValue(f("json"), "{kind").issue).toEqual({ message: "contentImport.details.jsonInvalid" });
   });
 
   it("attacks — текстова мова юнітів або JSON", () => {
@@ -104,6 +104,7 @@ describe("formatFieldValue ↔ parseFieldValue", () => {
   it("cr, bool, json і порожні значення", () => {
     expect(formatFieldValue(f("cr"), 0.25, names)).toBe("0.25");
     expect(formatFieldValue(f("bool"), false, names)).toBe("ні");
+    expect(formatFieldValue(f("bool"), true, names, "en")).toBe("yes");
     expect(formatFieldValue(f("json"), { kind: "auto" }, names)).toBe('{"kind":"auto"}');
     expect(formatFieldValue(f("abilitiesText"), [], names)).toBe("");
     expect(formatFieldValue(f("int"), null, names)).toBe("");
@@ -139,6 +140,6 @@ describe("attacks — формат Name_dice", () => {
     const r = parseFieldValue(f("attacks"), "Bite_1d6|щось дивне");
 
     expect((r.value as unknown[]).length).toBe(1);
-    expect(r.warning).toBe("Не розпізнано атаку: «щось дивне»");
+    expect(r.warning).toEqual({ message: "contentImport.details.attackUnparsed", params: { attacks: "щось дивне" } });
   });
 });

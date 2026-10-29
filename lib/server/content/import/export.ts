@@ -1,6 +1,9 @@
 import "server-only";
 import { ArtifactSlot } from "@/lib/constants/artifacts";
 import { prisma } from "@/lib/db";
+import { DEFAULT_LOCALE, type Locale } from "@/lib/i18n/config";
+import { getRequestLocale } from "@/lib/i18n/request-locale";
+import { getTranslator } from "@/lib/i18n/translator";
 import { assertCan } from "@/lib/server/content/access";
 import { loadNames } from "@/lib/server/content/import/names";
 import { artifactAbilities, artifactSetAbilities, featAbilities, raceAbilities, skillAbilities, unitAbilities } from "@/lib/utils/abilities/read";
@@ -19,6 +22,7 @@ import type { ImportKind, ImportRecord } from "@/types/content-import";
 export type ExportDeps = {
   loadRecords(campaignId: string, kind: ImportKind): Promise<ImportRecord[]>;
   loadNames(campaignId: string, kind: ImportKind): Promise<IdName[]>;
+  locale?: Locale;
 };
 
 const query = (campaignId: string) => ({ where: { campaignId }, orderBy: [{ createdAt: "asc" as const }, { id: "asc" as const }] });
@@ -52,6 +56,10 @@ const DEFAULT_DEPS: ExportDeps = { loadRecords: (c, k) => EXPORT_LOADERS[k](c), 
 export async function exportCsv(actor: Actor, kind: ImportKind, deps: ExportDeps = DEFAULT_DEPS): Promise<string> {
   assertCan(actor, NEED.read("dm"));
 
+  const locale = deps.locale ?? (await getRequestLocale().catch(() => DEFAULT_LOCALE));
+
+  const t = await getTranslator(locale);
+
   const spec = IMPORT_SPECS[kind];
 
   const refKinds = refKindsOf(spec);
@@ -62,5 +70,5 @@ export async function exportCsv(actor: Actor, kind: ImportKind, deps: ExportDeps
 
   const nameOf = (k: ImportKind, id: string) => names.get(k)?.get(id);
 
-  return toCsv(spec.fields.map((f) => f.label), records.map((r) => recordToCells(spec, r, nameOf)));
+  return toCsv(spec.fields.map((f) => t(f.labelKey)), records.map((r) => recordToCells(spec, r, nameOf, locale)));
 }
