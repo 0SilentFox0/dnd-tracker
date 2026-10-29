@@ -18,7 +18,7 @@ const includeDetail = {
   },
 } as const;
 
-export function setBonusToPrismaInput(
+function setBonusToPrismaInput(
   value: unknown | undefined | null,
 ): Prisma.InputJsonValue | typeof Prisma.JsonNull {
   if (value === undefined) return Prisma.JsonNull;

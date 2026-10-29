@@ -104,8 +104,6 @@ export type ActionScope = Exclude<ApiTokenScope, "ai">;
 
 export const CONTENT_SCOPES = ["content:read", "content:write"] as const satisfies readonly ContentScope[];
 
-export const CHAT_SCOPES: readonly ApiTokenScope[] = ["ai"];
-
 export const isApiTokenScope = (s: string): s is ApiTokenScope => (API_TOKEN_SCOPES as readonly string[]).includes(s);
 
 type ScopeKey<S extends string> = S extends `${infer A}:${infer B}` ? `${A}${Capitalize<B>}` : S;

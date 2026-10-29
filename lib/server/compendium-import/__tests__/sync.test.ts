@@ -9,42 +9,51 @@ describe("provenance accompanying native source sync", () => {
   const section = { formatVersion: 1 as const, sources: [], pages: [], entries: [{ canonicalKey: "external-key", kind: "feats" as const, localId: "source-row", edition: "one", sourceJson: "S", originalName: "Gift", adapterVersion: "1", inputHash: "h", baseline: { name: "Gift" }, notes: "Note", locator: [], issues: [], bindings: {}, attribution: {} }] };
 
   it("uses mapped local ID and preserves canonical identity", async () => {
-    const upsert = vi.fn();
+    const createMany = vi.fn();
 
-    const db = { compendiumEntry: { findUnique: async () => null, upsert }, compendiumSource: { upsert: vi.fn() } };
+    const db = { compendiumEntry: { findMany: async () => [], createMany, update: vi.fn() }, compendiumSource: { upsert: vi.fn() } };
 
     await syncCompendiumProvenance(db as never, section, "target", new Map([["source-row", "local-row"]]), new Set(["source-row"]));
-    expect(upsert).toHaveBeenCalledWith(expect.objectContaining({ create: expect.objectContaining({ campaignId: "target", localId: "local-row", canonicalKey: "external-key" }) }));
+    expect(createMany).toHaveBeenCalledWith({ data: [expect.objectContaining({ campaignId: "target", localId: "local-row", canonicalKey: "external-key" })] });
+  });
+
+  it("updates an existing row of the same identity instead of creating it", async () => {
+    const db = { compendiumEntry: { findMany: async () => [{ canonicalKey: "external-key", localId: "local-row" }], createMany: vi.fn(), update: vi.fn() }, compendiumSource: { upsert: vi.fn() } };
+
+    await syncCompendiumProvenance(db as never, section, "target", new Map([["source-row", "local-row"]]), new Set(["source-row"]));
+    expect(db.compendiumEntry.createMany).not.toHaveBeenCalled();
+    expect(db.compendiumEntry.update).toHaveBeenCalledTimes(1);
   });
 
   it("blocks binding the same external identity to another native row", async () => {
-    const db = { compendiumEntry: { findUnique: async () => ({ localId: "other-row" }), upsert: vi.fn() }, compendiumSource: { upsert: vi.fn() } };
+    const db = { compendiumEntry: { findMany: async () => [{ canonicalKey: "external-key", localId: "other-row" }], createMany: vi.fn(), update: vi.fn() }, compendiumSource: { upsert: vi.fn() } };
 
     await expect(syncCompendiumProvenance(db as never, section, "target", new Map([["source-row", "local-row"]]), new Set(["source-row"]))).rejects.toThrow(/PROVENANCE_CONFLICT/);
-    expect(db.compendiumEntry.upsert).not.toHaveBeenCalled();
+    expect(db.compendiumEntry.createMany).not.toHaveBeenCalled();
+    expect(db.compendiumEntry.update).not.toHaveBeenCalled();
   });
 
   it("does not sync ScenarioPage entries, notes or unrelated source metadata", async () => {
-    const upsert = vi.fn();
+    const createMany = vi.fn();
 
     const sourceUpsert = vi.fn();
 
-    const db = { compendiumEntry: { findUnique: async () => null, upsert }, compendiumSource: { upsert: sourceUpsert } };
+    const db = { compendiumEntry: { findMany: async () => [], createMany, update: vi.fn() }, compendiumSource: { upsert: sourceUpsert } };
 
     await syncCompendiumProvenance(db as never, { ...section, entries: [{ ...section.entries[0], kind: "scenarioPages", notes: "Synthetic DM-only note" }], pages: [], sources: [{ sourceJson: "S", metadata: {} }] }, "target", new Map([["source-row", "local-row"]]), new Set(["source-row"]));
-    expect(upsert).not.toHaveBeenCalled();
+    expect(createMany).not.toHaveBeenCalled();
     expect(sourceUpsert).not.toHaveBeenCalled();
   });
 
   it("checks all selected provenance conflicts before the first upsert", async () => {
-    const upsert = vi.fn();
+    const createMany = vi.fn();
 
     const sourceUpsert = vi.fn();
 
-    const db = { compendiumEntry: { findUnique: vi.fn().mockResolvedValueOnce(null).mockResolvedValueOnce({ localId: "foreign-local" }), upsert }, compendiumSource: { upsert: sourceUpsert } };
+    const db = { compendiumEntry: { findMany: async () => [{ canonicalKey: "second-key", localId: "foreign-local" }], createMany, update: vi.fn() }, compendiumSource: { upsert: sourceUpsert } };
 
     await expect(syncCompendiumProvenance(db as never, { ...section, entries: [...section.entries, { ...section.entries[0], canonicalKey: "second-key", localId: "second-source" }] }, "target", new Map([["source-row", "local-row"], ["second-source", "second-local"]]), new Set(["source-row", "second-source"]))).rejects.toMatchObject({ code: "PROVENANCE_CONFLICT" });
-    expect(upsert).not.toHaveBeenCalled();
+    expect(createMany).not.toHaveBeenCalled();
     expect(sourceUpsert).not.toHaveBeenCalled();
   });
 });

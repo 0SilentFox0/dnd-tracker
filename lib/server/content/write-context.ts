@@ -1,12 +1,14 @@
 import { AsyncLocalStorage } from "node:async_hooks";
 
-export interface ContentWriteContext { campaignId: string; db: object; afterCommit: Array<() => void>; onTrackFileRemoved?: (url: string) => void }
+export type ContentEffect = () => void | Promise<void>;
+
+export interface ContentWriteContext { campaignId: string; db: object; afterCommit: ContentEffect[]; onTrackFileRemoved?: (url: string) => void }
 
 const context = new AsyncLocalStorage<ContentWriteContext>();
 
 export const currentContentWrite = () => context.getStore();
 
-export function runContentWriteContext<T>(campaignId: string, db: object, callback: () => Promise<T>, afterCommit: Array<() => void> = []): Promise<T> {
+export function runContentWriteContext<T>(campaignId: string, db: object, callback: () => Promise<T>, afterCommit: ContentEffect[] = []): Promise<T> {
   return context.run({ campaignId, db, afterCommit }, callback);
 }
 
@@ -27,9 +29,15 @@ export function createScopedDatabase<T extends object>(base: T): T {
   });
 }
 
-export function afterContentCommit(effect: () => void) {
+export async function runContentEffects(effects: ContentEffect[]) {
+  const results = await Promise.allSettled(effects.map(async effect => effect()));
+
+  for (const r of results) if (r.status === "rejected") console.error("[content] after-commit effect failed", r.reason);
+}
+
+export function afterContentCommit(effect: ContentEffect) {
   const current = context.getStore();
 
   if (current) current.afterCommit.push(effect);
-  else effect();
+  else void runContentEffects([effect]);
 }

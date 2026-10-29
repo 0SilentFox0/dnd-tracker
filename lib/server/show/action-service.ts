@@ -121,11 +121,20 @@ export async function runShowOperation(actor: Actor, operation: string, input: S
 
     const result = (data: unknown): ActionResult => ({ data: safeMedia(data), affected, warnings: [] });
 
+    const schedulePublish = (next: ShowState) => {
+      if (ctx) ctx.afterCommit({ kind: "publish", key: "show", payload: jsonContent({ campaignId, show: next }) });
+      else afterContentCommit(() => publishShow(campaignId, next));
+    };
+
+    const scheduleCleanup = (effect: { kind: "media-cleanup"; key: string; payload: JsonValue }) => {
+      if (ctx) ctx.afterCommit(effect);
+      else afterContentCommit(async () => (await import("./media-effects")).runShowMediaCleanup(effect.payload));
+    };
+
     const emit = async (next: ShowState) => {
       if (!(await writeShowState(campaignId, snapshot.show, next))) throw new ContentError(API_ERRORS.SHOW_CONFLICT, 409);
 
-      if (ctx) ctx.afterCommit({ kind: "publish", key: "show", payload: jsonContent({ campaignId, show: next }) });
-      else afterContentCommit(() => { void publishShow(campaignId, next); });
+      schedulePublish(next);
     };
 
     if (operation === "get") return result({ show: snapshot.show });
@@ -143,8 +152,7 @@ export async function runShowOperation(actor: Actor, operation: string, input: S
     if (operation === "discard") {
       const effect = { kind: "media-cleanup" as const, key: "show.discard", payload: { campaignId, urls: [String(body.url)] } };
 
-      if (ctx) ctx.afterCommit(effect);
-      else afterContentCommit(() => { void import("./media-effects").then(m => m.runShowMediaCleanup(effect.payload)); });
+      scheduleCleanup(effect);
 
       return result({ scheduled: true });
     }
@@ -157,8 +165,7 @@ export async function runShowOperation(actor: Actor, operation: string, input: S
       const next = await applyAndWriteShowCommand(campaignId, snapshot.show, body as ShowCommand);
 
       if (next !== snapshot.show) {
-        if (ctx) ctx.afterCommit({ kind: "publish", key: "show", payload: jsonContent({ campaignId, show: next }) });
-        else afterContentCommit(() => { void publishShow(campaignId, next); });
+        schedulePublish(next);
       }
 
       return result({ show: next });
@@ -228,8 +235,7 @@ export async function runShowOperation(actor: Actor, operation: string, input: S
 
       const payload = { campaignId, urls };
 
-      if (ctx) ctx.afterCommit({ kind: "media-cleanup", key: "show.removed", payload });
-      else afterContentCommit(() => { void import("./media-effects").then(m => m.runShowMediaCleanup(payload)); });
+      scheduleCleanup({ kind: "media-cleanup", key: "show.removed", payload });
     }
   };
 

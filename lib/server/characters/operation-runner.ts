@@ -39,7 +39,7 @@ export const campaignGate = async (ctx: CharacterOpCtx) => ctx.access ?? operati
 
 export const tokenGate = async (ctx: CharacterOpCtx) => ctx.access ?? operationAccess(ctx.campaignId, true, ctx.actor);
 
-export const memberGate = async (ctx: CharacterOpCtx) => ctx.access ?? operationAccess(ctx.campaignId, false, ctx.actor);
+const memberGate = async (ctx: CharacterOpCtx) => ctx.access ?? operationAccess(ctx.campaignId, false, ctx.actor);
 
 export type CampaignScope = { access: CampaignAccessResult; campaignId: string; characterId: string };
 

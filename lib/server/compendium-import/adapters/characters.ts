@@ -1,5 +1,5 @@
 /* eslint-disable no-restricted-syntax -- derived content written to the DB stays Ukrainian (spec part5, decision 5) */
-import { nestedId, stableJson } from "../identity";
+import { stableJson } from "../identity";
 import { type Adapter, issue } from "../types";
 import { equipmentText, featPrerequisite, featSpells, proficiencyText, raceTraits, resistFlags } from "./character-traits";
 import { ABILITIES, abilityChoices, array, description, num, object, skillName, skills, str, uidRef, unsupported } from "./shared";
@@ -99,5 +99,3 @@ export const gameClass: Adapter = (row, ctx) => {
 
   return { kind: "classes", body: { name: row.name, hitDie: hd, caster: caster ?? "none", savingThrows: array(row.proficiency).map((s) => ABILITIES[str(s)]).filter(Boolean), proficiencies: fields, spellcastingAbility: ABILITIES[str(row.spellcastingAbility)] ?? null, skillChoices: { count: num(choose.count) ?? 0, from: array(choose.from).map((s) => skillName(str(s))).filter(Boolean) }, features: [], subclasses: [], subclassLevel: null }, notes: unsupported(row, ["hd", "proficiency", "casterProgression", "spellcastingAbility", "startingProficiencies", "classFeatures", "optionalfeatureProgression"], ctx) };
 };
-
-export const featureDescription = (row: Record<string, unknown>, key: string) => ({ id: nestedId(key), name: str(row.name), description: str(row.description), abilities: [] });

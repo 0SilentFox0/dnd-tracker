@@ -28,7 +28,7 @@ describe("mazeSchema", () => {
   it("rejects a bad mark colour or symbol", () => {
     const mark = (m: object) => ({ ...valid, marks: { "2:2": { ...valid.marks["2:2"], ...m } } });
 
-    expect(mazeSchema.safeParse(mark({ color: "#ABCDEF" })).success).toBe(false);
+    expect(mazeSchema.safeParse(mark({ color: "#GGGGGG" })).success).toBe(false);
     expect(mazeSchema.safeParse(mark({ color: "red" })).success).toBe(false);
     expect(mazeSchema.safeParse(mark({ symbol: "heart" })).success).toBe(false);
     expect(mazeSchema.safeParse(mark({ by: "x".repeat(65) })).success).toBe(false);

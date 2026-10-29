@@ -45,8 +45,6 @@ export const FOV = 40;
 
 export const FADE_MS = 250;
 
-export const POP_MS = 1200;
-
 export const DIM_NUMBERS = 0.82;
 
 export interface Rig {

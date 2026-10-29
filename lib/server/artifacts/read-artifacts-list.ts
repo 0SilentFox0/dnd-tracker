@@ -16,7 +16,7 @@ function itemKindBadge(row: { modifiers?: unknown }) {
 export async function readArtifactsList(campaignId: string) {
   const rows = await prisma.artifact.findMany({
     where: { campaignId },
-    include: { artifactSet: true },
+    include: { artifactSet: { select: { id: true, name: true } } },
     orderBy: { createdAt: "desc" },
   });
 

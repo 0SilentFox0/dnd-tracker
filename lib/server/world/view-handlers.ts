@@ -16,7 +16,7 @@ const viewQuery = worldViewQuerySchema.partial({ mapId: true });
 export async function readViewerScope(campaignId: string, heroIds: string[]) {
   const [allMaps, positionRows, revealRows] = await Promise.all([
     listWorldMaps(campaignId),
-    prisma.worldPosition.findMany({ where: { campaignId } }),
+    prisma.worldPosition.findMany({ where: { campaignId }, select: { characterId: true, mapId: true, x: true, y: true } }),
     heroIds.length > 0 ? prisma.worldReveal.findMany({ where: { characterId: { in: heroIds } }, select: { mapId: true, characterId: true, shape: true } }) : [],
   ]);
 

@@ -10,7 +10,6 @@ export function mazeGridOf(map: BattleMapConfig | null | undefined): MazeGrid | 
   return map?.maze ? { cols: map.cols, rows: map.rows, maze: map.maze } : null;
 }
 
-export const isMazeDark = (map: BattleMapConfig | null | undefined): boolean => !!map?.maze?.dark;
 
 const EMPTY_SET: ReadonlySet<string> = new Set();
 

@@ -12,6 +12,7 @@ import {
   WORLD_NAME_MAX,
   WORLD_NOTE_MAX,
 } from "@/lib/constants/world";
+import { hexColorSchema } from "@/lib/schemas/common";
 
 const coord = z.number().min(0, "world.validation.coordinateOutOfBounds").max(1, "world.validation.coordinateOutOfBounds");
 
@@ -23,7 +24,7 @@ const polygonSchema = z
     if (new Set(poly.map(([x, y]) => `${x},${y}`)).size < 3) ctx.addIssue({ code: "custom", message: "world.validation.polygonDistinct" });
   });
 
-const hexColor = z.string().regex(/^#[0-9a-fA-F]{6}$/, "world.validation.color");
+const hexColor = hexColorSchema("world.validation.color");
 
 const nameSchema = z.string().trim().min(1, "world.validation.nameRequired").max(WORLD_NAME_MAX, "world.validation.nameMax");
 
