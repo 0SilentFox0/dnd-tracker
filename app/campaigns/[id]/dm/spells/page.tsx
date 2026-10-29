@@ -1,9 +1,9 @@
 import { DMSpellsPageClient } from "./page-client";
 
-import { readSpells } from "@/app/api/campaigns/[id]/spells/read-spells";
 import { spellKeys } from "@/lib/hooks/spells/keys";
 import { PrefetchedQuery } from "@/lib/providers/prefetched-query";
 import { requireCampaignDM } from "@/lib/server/campaigns/access";
+import { readSpells } from "@/lib/server/spells/read-spells";
 import { readOkJson } from "@/lib/utils/api/read-json";
 import type { Spell } from "@/types/spells";
 

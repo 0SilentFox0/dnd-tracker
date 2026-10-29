@@ -37,10 +37,8 @@ const APP_IMPORT_PATTERN = {
 
 const APP_API_IMPORT_PATTERN = {
   group: ["@/app/api", "@/app/api/*"],
-  message: "Сторінки й компоненти не імпортують із app/api: винесіть код у lib/server/<domain> (ratchet-список APP_API_IMPORT_EXEMPT лише скорочується).",
+  message: "Сторінки й компоненти не імпортують із app/api: винесіть код у lib/server/<domain>.",
 };
-
-const APP_API_IMPORT_EXEMPT = ["app/campaigns/[[]id]/dm/{artifacts,artifact-sets,spells,skills,races}/page.tsx"];
 
 const AI_IN_ASSISTANT_PATTERN = {
   group: ["@/lib/ai/chat", "@/lib/ai/chat/*", "@/lib/ai/tools", "@/lib/ai/tools/*", "@/lib/ai/context", "@/lib/ai/context/*", "@/lib/ai/context-http", "@/lib/ai/recovered-state", "@/lib/ai/proposals"],
@@ -229,25 +227,13 @@ const eslintConfig = defineConfig([
   },
   {
     files: ["app/**/*.{ts,tsx}", "components/**/*.{ts,tsx}"],
-    ignores: ["app/api/**", "components/ui/**", "**/__tests__/**", ...APP_API_IMPORT_EXEMPT],
+    ignores: ["app/api/**", "components/ui/**", "**/__tests__/**"],
     rules: {
       "no-restricted-imports": [
         "error",
         {
           paths: RESTRICTED_PATHS,
           patterns: [API_IMPORT_PATTERN, APP_API_IMPORT_PATTERN, MODE_IMPORT_PATTERN, THREE_IMPORT_PATTERN],
-        },
-      ],
-    },
-  },
-  {
-    files: APP_API_IMPORT_EXEMPT,
-    rules: {
-      "no-restricted-imports": [
-        "error",
-        {
-          paths: RESTRICTED_PATHS,
-          patterns: [API_IMPORT_PATTERN, MODE_IMPORT_PATTERN, THREE_IMPORT_PATTERN],
         },
       ],
     },

@@ -1,9 +1,9 @@
 import { DMRacesPageClient } from "./page-client";
 
-import { readRaces } from "@/app/api/campaigns/[id]/races/read-races";
 import { raceKeys } from "@/lib/hooks/races/keys";
 import { PrefetchedQuery } from "@/lib/providers/prefetched-query";
 import { requireCampaignDM } from "@/lib/server/campaigns/access";
+import { readRaces } from "@/lib/server/races/read-races";
 import { readOkJson } from "@/lib/utils/api/read-json";
 import type { Race } from "@/types/races";
 

@@ -1,9 +1,9 @@
 import { DMSkillsPageClient } from "./page-client";
 
-import { readSkills } from "@/app/api/campaigns/[id]/skills/read-skills";
 import { skillKeys } from "@/lib/hooks/skills/keys";
 import { PrefetchedQuery } from "@/lib/providers/prefetched-query";
 import { requireCampaignDM } from "@/lib/server/campaigns/access";
+import { readSkills } from "@/lib/server/skills/read-skills";
 import { readOkJson } from "@/lib/utils/api/read-json";
 import type { Skill } from "@/types/skills";
 
