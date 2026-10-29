@@ -6,7 +6,7 @@ import { API_ERRORS } from "@/lib/constants/api-errors";
 import { prisma } from "@/lib/db";
 import { listTracks } from "@/lib/server/audio/track-store";
 import { assertCampaignRefs } from "@/lib/server/campaigns/campaign-refs";
-import { readCampaignRules, updateCampaignRules } from "@/lib/server/campaigns/rules";
+import { readCampaignRules, readCustomConditionUsage, updateCampaignRules } from "@/lib/server/campaigns/rules";
 import { assertCan } from "@/lib/server/content/access";
 import { ContentError, parseInput } from "@/lib/server/content/errors";
 import { exampleCsv } from "@/lib/server/content/import/example";
@@ -30,7 +30,7 @@ export type ContentOperationId = keyof typeof CONTENT_OPERATIONS;
 const id = z.string().min(1).max(200);
 
 const paths: Partial<Record<ContentOperationId, Record<string, z.ZodType>>> = {
-  "skill-trees.save": { treeId: id.optional() }, "skills.duplicate": { skillId: id },
+  "rules.condition-usage": { slug: id }, "skill-trees.save": { treeId: id.optional() }, "skills.duplicate": { skillId: id },
   "spells.remove-from-group": { spellId: id }, "spell-groups.remove-all-spells": { groupId: id },
   "abilities.get": { kind: z.enum(Object.values(OwnerKind)), ownerId: id },
   "content.import": { kind: z.enum(IMPORT_KINDS) }, "content.export": { kind: z.enum(IMPORT_KINDS) }, "content.import-example": { kind: z.enum(IMPORT_KINDS) },
@@ -92,6 +92,7 @@ export async function runContentOperation(operationId: ContentOperationId, actor
     switch (operationId) {
       case "rules.get": return readCampaignRules(actor);
       case "rules.update": return updateCampaignRules(actor, bodyOf("rules.update", body));
+      case "rules.condition-usage": return readCustomConditionUsage(actor, param("slug"));
       case "campaign.export": return exportCampaign(prisma, actor.campaignId);
       case "source.diff": return getSourceDiff(actor, CONTENT_OPERATIONS["source.diff"].query.parse(input.query ?? {}).scope);
       case "source.apply": return applySource(actor, bodyOf("source.apply", body));

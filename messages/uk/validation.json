@@ -15,5 +15,6 @@
   "trackFileInvalid": "Потрібен файл {formats} до {maxMb} МБ",
   "trackTitleTooLong": "Група й назва разом — до {max} символів",
   "trackDurationInvalid": "Ціле число секунд від 1 до 86400",
-  "spellDelayPair": "Заповніть обидва поля або жодного"
+  "spellDelayPair": "Заповніть обидва поля або жодного",
+  "rulesCustomConflict": "Один і той самий стан не можна додати й видалити разом"
 }

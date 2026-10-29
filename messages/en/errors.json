@@ -88,6 +88,8 @@
   "invalidQuery": "Invalid query parameters",
   "initiativeOutOfRange": "Hero initiative is outside the range allowed by the campaign rules",
   "invalidRules": "Invalid campaign rules",
+  "rulesCustomConditionInUse": "The condition “{name}” is in use — remove it from battles and spells first",
+  "rulesCustomConditionNotFound": "Custom condition not found",
   "invalidSkillTree": "Invalid skill tree",
   "skillTreeProgressChanged": "Character progress changed while saving, try again",
   "invalidJson": "Invalid JSON in the request body",

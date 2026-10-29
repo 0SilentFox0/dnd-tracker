@@ -88,6 +88,8 @@
   "invalidQuery": "Некоректні параметри запиту",
   "initiativeOutOfRange": "Ініціатива героя виходить за межі, дозволені правилами кампанії",
   "invalidRules": "Некоректні правила кампанії",
+  "rulesCustomConditionInUse": "Стан «{name}» використовується — спершу приберіть його з боїв і заклинань",
+  "rulesCustomConditionNotFound": "Власний стан не знайдено",
   "invalidSkillTree": "Невалідне дерево скілів",
   "skillTreeProgressChanged": "Прогрес персонажів змінився під час збереження, спробуйте ще раз",
   "invalidJson": "Некоректний JSON у тілі запиту",

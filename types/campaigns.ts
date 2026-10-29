@@ -148,3 +148,9 @@ export interface PlayerDashboardData {
   activeBattle: { battleId: string; hp: HeroHpValue } | null;
   hasWorld: boolean;
 }
+
+export interface ConditionUsage {
+  battles: { id: string; name: string; status: string; participants: string[] }[];
+  spells: { id: string; name: string }[];
+  units: { id: string; name: string }[];
+}

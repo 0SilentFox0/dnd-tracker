@@ -15,5 +15,6 @@
   "trackFileInvalid": "A {formats} file up to {maxMb} MB is required",
   "trackTitleTooLong": "Group and title together — up to {max} characters",
   "trackDurationInvalid": "A whole number of seconds from 1 to 86400",
-  "spellDelayPair": "Fill in both fields or neither"
+  "spellDelayPair": "Fill in both fields or neither",
+  "rulesCustomConflict": "The same condition cannot be added and removed at once"
 }

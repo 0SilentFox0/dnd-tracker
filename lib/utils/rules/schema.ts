@@ -203,15 +203,26 @@ export const RulesetPatchSchema = z
     outOfCombat: patchSection("outOfCombat").optional(),
     encounters: patchSection("encounters").optional(),
     items: patchSection("items").optional(),
+    removeCustomConditions: z.array(z.string().regex(CUSTOM_CONDITION_KEY_RE)).min(1).max(50).optional(),
   })
   .refine((p) => !p.initiative || initiativeOrdered(p.initiative), { message: INITIATIVE_ORDER_MESSAGE, path: ["initiative"] });
 
 export type MergeRulesResult = { ok: true; rules: Ruleset } | { ok: false; issues: z.core.$ZodIssue[] };
 
-export function mergeRules(current: Ruleset, patch: Record<string, Record<string, unknown> | undefined>): MergeRulesResult {
-  const next = Object.fromEntries((Object.keys(current) as (keyof Ruleset)[]).map((k) => [k, { ...current[k], ...(patch[k] ?? {}) }]));
+type MergePatch = Record<string, Record<string, unknown> | string[] | undefined> & { removeCustomConditions?: string[] };
 
-  const patchedCustom = patch.conditions?.custom;
+export function mergeRules(current: Ruleset, patch: MergePatch): MergeRulesResult {
+  const removed = new Set(patch.removeCustomConditions ?? []);
+
+  const sections = patch as Record<string, Record<string, unknown> | undefined>;
+
+  const conflict = (Array.isArray(sections.conditions?.custom) ? (sections.conditions.custom as unknown[]) : []).find((c) => isRecord(c) && removed.has(String(c.key)));
+
+  if (conflict) return { ok: false, issues: [{ code: "custom", message: "validation.rulesCustomConflict", path: ["removeCustomConditions"], input: patch.removeCustomConditions }] };
+
+  const next = Object.fromEntries((Object.keys(current) as (keyof Ruleset)[]).map((k) => [k, { ...current[k], ...(sections[k] ?? {}) }]));
+
+  const patchedCustom = sections.conditions?.custom;
 
   if (Array.isArray(patchedCustom)) {
     const keyOf = (c: unknown) => (isRecord(c) ? c.key : undefined);
@@ -220,6 +231,8 @@ export function mergeRules(current: Ruleset, patch: Record<string, Record<string
 
     next.conditions = { ...next.conditions, custom: [...(current.conditions.custom ?? []).filter((c) => !incoming.has(c.key)), ...patchedCustom] };
   }
+
+  if (removed.size) next.conditions = { ...next.conditions, custom: ((next.conditions as Ruleset["conditions"]).custom ?? []).filter((c) => !removed.has(c.key)) };
 
   const parsed = RulesetSchema.safeParse(next);
 

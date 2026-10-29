@@ -58,6 +58,8 @@ export const API_ERRORS = {
   INVALID_QUERY: "errors.invalidQuery",
   INITIATIVE_OUT_OF_RANGE: "errors.initiativeOutOfRange",
   INVALID_RULES: "errors.invalidRules",
+  RULES_CUSTOM_CONDITION_IN_USE: "errors.rulesCustomConditionInUse",
+  RULES_CUSTOM_CONDITION_NOT_FOUND: "errors.rulesCustomConditionNotFound",
   INVALID_SKILL_TREE: "errors.invalidSkillTree",
   SKILL_TREE_PROGRESS_CHANGED: "errors.skillTreeProgressChanged",
   INVALID_JSON: "errors.invalidJson",
