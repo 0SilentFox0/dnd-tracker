@@ -5,3 +5,9 @@ export const tokenBoxStyle = (box: { cx: number; cy: number; size: number }, map
   width: `${(box.size / mapSize.width) * 100}%`,
   height: `${(box.size / mapSize.height) * 100}%`,
 });
+
+export interface MapPlacement {
+  box: { cx: number; cy: number; size: number };
+  mapSize: { width: number; height: number };
+  pxPerUnit: number;
+}

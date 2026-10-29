@@ -37,7 +37,9 @@ export { MAP_TAB, type MobileBattleTab, useMobileBattleTabs } from "./useMobileB
 export { type ParticipantClickInput, useParticipantClick } from "./useParticipantClick";
 export { ParticipantFacesContext, useParticipantFace, useParticipantFacesValue } from "./useParticipantFace";
 export { usePlayerTurn } from "./usePlayerTurn";
+export { useScrollToCurrent } from "./useScrollToCurrent";
 export { useSelectedParticipant } from "./useSelectedParticipant";
 export { useBonusSpells, useReactionSpells, useSpellBook, useSpellBookPrefetch } from "./useSpellBook";
 export { type FxRunner, useSpellFxPlayback } from "./useSpellFxPlayback";
+export { useStrokePaint } from "./useStrokePaint";
 export { type UnitControlRow, useUnitControlPanel } from "./useUnitControlPanel";

@@ -2,7 +2,7 @@
 
 import { memo } from "react";
 
-import { tokenBoxStyle } from "./token-box";
+import { type MapPlacement, tokenBoxStyle } from "./token-box";
 
 import { HitFloat } from "@/components/battle/hud";
 import { useHitChange } from "@/lib/hooks/battle";
@@ -13,15 +13,15 @@ import type { BattleParticipant } from "@/types/battle";
 
 interface MapHitFloatProps {
   participant: BattleParticipant;
-  box: { cx: number; cy: number; size: number };
-  mapSize: { width: number; height: number };
-  pxPerUnit: number;
+  placement: MapPlacement;
   impact?: FxImpact | null;
 }
 
 
 /** «−N/+N» над жетоном; окремо від HUD, бо смертельний удар прибирає жетон із карти. */
-function MapHitFloatImpl({ participant, box, mapSize, pxPerUnit, impact = null }: MapHitFloatProps) {
+function MapHitFloatImpl({ participant, placement, impact = null }: MapHitFloatProps) {
+  const { box, mapSize, pxPerUnit } = placement;
+
   const { change } = useHitChange(participant, impact);
 
   if (!change) return null;
