@@ -37,6 +37,8 @@ function NewWorldMapDialogForm({ open, onOpenChange, parentMarker }: Props) {
 
   const t = useTranslations("world");
 
+  const tc = useTranslations("common.actions");
+
   const [name, setName] = useState(parentMarker?.name ?? "");
 
   const [file, setFile] = useState<File | null>(null);
@@ -83,10 +85,10 @@ function NewWorldMapDialogForm({ open, onOpenChange, parentMarker }: Props) {
       footer={
         <>
           <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
-            {t("newMap.cancel")}
+            {tc("cancel")}
           </Button>
           <Button type="submit" form={FORM_ID} disabled={!file || !name.trim() || busy}>
-            {busy ? t("newMap.uploading") : t("newMap.create")}
+            {busy ? t("newMap.uploading") : tc("create")}
           </Button>
         </>
       }

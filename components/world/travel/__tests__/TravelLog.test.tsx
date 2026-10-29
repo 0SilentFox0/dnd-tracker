@@ -5,7 +5,7 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 
 import { TravelLog } from "../TravelLog";
 
-import { render } from "@/components/world/__tests__/uk-intl";
+import { render } from "@/components/ui/__tests__/uk-intl";
 import * as api from "@/lib/api/world";
 import type { TravelKind, WorldTravelEntry } from "@/types/world";
 

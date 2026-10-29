@@ -6,7 +6,7 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 import { WorldEditorContext, type WorldEditorCtx } from "../WorldEditorContext";
 import { WorldToolbar, WorldToolHint } from "../WorldToolbar";
 
-import { render } from "@/components/world/__tests__/uk-intl";
+import { render } from "@/components/ui/__tests__/uk-intl";
 import type { useMapDrawing } from "@/lib/hooks/world";
 
 vi.unmock("next-intl");

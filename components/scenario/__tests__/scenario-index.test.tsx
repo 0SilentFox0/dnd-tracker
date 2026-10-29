@@ -3,7 +3,7 @@ import { cleanup, fireEvent, screen } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
 import { ScenarioIndex } from "@/components/scenario";
-import { render } from "@/components/scenario/__tests__/uk-intl";
+import { render } from "@/components/ui/__tests__/uk-intl";
 import type { ScenarioPageSummary } from "@/types/scenario";
 
 afterEach(cleanup);

@@ -6,7 +6,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { WorldEditorContext, type WorldEditorCtx } from "../WorldEditorContext";
 import { WorldMarkerPanel } from "../WorldMarkerPanel";
 
-import { renderWithConfirm } from "@/components/world/__tests__/uk-intl";
+import { renderWithConfirm } from "@/components/ui/__tests__/uk-intl";
 import type { WorldMarker } from "@/types/world";
 
 vi.unmock("next-intl");

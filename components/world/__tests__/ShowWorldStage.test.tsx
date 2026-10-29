@@ -4,7 +4,7 @@ import { cleanup, screen, waitFor } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import { ShowStage } from "@/components/show/stage/ShowStage";
-import { render } from "@/components/world/__tests__/uk-intl";
+import { render } from "@/components/ui/__tests__/uk-intl";
 import { getWorldMap, getWorldView } from "@/lib/api/world";
 import type { ShowState } from "@/types/show";
 import type { WorldMap, WorldMarker, WorldView } from "@/types/world";

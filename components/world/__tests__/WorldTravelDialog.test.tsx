@@ -5,7 +5,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import { WorldTravelDialog } from "../show/WorldTravelDialog";
 
-import { render } from "@/components/world/__tests__/uk-intl";
+import { render } from "@/components/ui/__tests__/uk-intl";
 import * as api from "@/lib/api/world";
 import type { WorldMapSummary, WorldMarker } from "@/types/world";
 

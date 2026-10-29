@@ -4,7 +4,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import { RowPlayControls } from "../RowPlayControls";
 
-import { render } from "@/components/scenario/__tests__/uk-intl";
+import { render } from "@/components/ui/__tests__/uk-intl";
 import type { ScenarioPlay } from "@/lib/hooks/scenario";
 
 vi.unmock("next-intl");

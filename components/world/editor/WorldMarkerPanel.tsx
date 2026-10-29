@@ -34,6 +34,8 @@ function MarkerForm({ marker }: { marker: WorldMarker }) {
 
   const t = useTranslations("world");
 
+  const tc = useTranslations("common.actions");
+
   const [creating, setCreating] = useState(false);
 
   const { name, setName, commitName, note, setNote, commitNote, color, pickColor, save, remove } = useMarkerFields({ marker, editor, select });
@@ -111,7 +113,7 @@ function MarkerForm({ marker }: { marker: WorldMarker }) {
           </Button>
         )}
       </HudSection>
-      <QuietDeleteButton label={t("editor.delete")} onClick={() => void remove()} />
+      <QuietDeleteButton label={tc("delete")} onClick={() => void remove()} />
       <NewWorldMapDialog open={creating} onOpenChange={setCreating} parentMarker={{ id: marker.id, name: marker.name }} />
     </div>
   );

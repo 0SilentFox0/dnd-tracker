@@ -2,8 +2,8 @@
 import { cleanup, fireEvent, screen } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
-import { render } from "@/components/scenario/__tests__/uk-intl";
 import { RowBindings } from "@/components/scenario/editor/RowBindings";
+import { render } from "@/components/ui/__tests__/uk-intl";
 
 vi.unmock("next-intl");
 

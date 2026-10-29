@@ -5,7 +5,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import { ShowWorldControls } from "../show/ShowWorldControls";
 
-import { render } from "@/components/world/__tests__/uk-intl";
+import { render } from "@/components/ui/__tests__/uk-intl";
 import { getWorldMap, getWorldMaps } from "@/lib/api/world";
 import type { ShowControl } from "@/lib/hooks/show";
 import type { ShowState } from "@/types/show";

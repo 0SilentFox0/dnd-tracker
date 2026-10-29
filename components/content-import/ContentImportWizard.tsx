@@ -23,6 +23,8 @@ interface ContentImportWizardProps {
 export function ContentImportWizard({ campaignId, kind, open, onOpenChange }: ContentImportWizardProps) {
   const t = useTranslations("contentImport");
 
+  const tc = useTranslations("common.actions");
+
   const wizard = useContentImport(campaignId, kind);
 
   const { busy, progress, error } = wizard.status;
@@ -38,13 +40,13 @@ export function ContentImportWizard({ campaignId, kind, open, onOpenChange }: Co
   const footer = {
     file: (
       <Button variant="outline" onClick={() => close(false)}>
-        {t("actions.cancel")}
+        {tc("cancel")}
       </Button>
     ),
     columns: (
       <>
         <Button variant="outline" onClick={wizard.actions.back} disabled={busy}>
-          {t("actions.back")}
+          {tc("back")}
         </Button>
         <Button onClick={() => void wizard.actions.runPreview()} disabled={busy || wizard.mapping.missing.length > 0}>
           {busy ? t("wizard.checking") : t("wizard.check")}
@@ -54,7 +56,7 @@ export function ContentImportWizard({ campaignId, kind, open, onOpenChange }: Co
     preview: (
       <>
         <Button variant="outline" onClick={wizard.actions.back} disabled={busy}>
-          {t("actions.back")}
+          {tc("back")}
         </Button>
         <Button onClick={() => void wizard.actions.runImport()} disabled={busy || planned === 0}>
           {progress ? t("wizard.importing", { done: progress.done, total: progress.total }) : t("wizard.importCount", { count: planned })}

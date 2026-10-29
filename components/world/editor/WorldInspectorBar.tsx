@@ -101,6 +101,8 @@ function MarkerStrip({ marker, onClose }: { marker: WorldMarker; onClose(): void
 
   const t = useTranslations("world");
 
+  const tc = useTranslations("common.actions");
+
   const [creating, setCreating] = useState(false);
 
   const [iconOpen, setIconOpen] = useState(false);
@@ -197,7 +199,7 @@ function MarkerStrip({ marker, onClose }: { marker: WorldMarker; onClose(): void
         </PopoverContent>
       </Popover>
       <span className="ml-auto flex shrink-0 items-center gap-2">
-        <DeleteButton label={t("editor.delete")} onClick={() => void remove()} />
+        <DeleteButton label={tc("delete")} onClick={() => void remove()} />
         <CloseButton onClose={onClose} />
       </span>
       <NewWorldMapDialog open={creating} onOpenChange={setCreating} parentMarker={{ id: marker.id, name: marker.name }} />

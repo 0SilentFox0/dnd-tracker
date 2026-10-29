@@ -6,7 +6,7 @@ import { WorldBreadcrumbs } from "../WorldBreadcrumbs";
 import { WorldEditorContext, type WorldEditorCtx } from "../WorldEditorContext";
 
 import { HudPageHeader } from "@/components/hud/page";
-import { render } from "@/components/world/__tests__/uk-intl";
+import { render } from "@/components/ui/__tests__/uk-intl";
 
 vi.unmock("next-intl");
 

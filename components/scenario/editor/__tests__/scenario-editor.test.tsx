@@ -19,8 +19,8 @@ vi.mock("@/lib/hooks/show", () => ({ useDeck: () => ({ data: undefined }), useDe
 vi.mock("@/lib/hooks/battles", () => ({ useBattleBriefs: () => ({ data: [] }) }));
 vi.mock("@/components/scenario/editor/RichTextEditor", () => ({ RichTextEditor: ({ label }: { label: string }) => <div data-testid="tiptap">{label}</div> }));
 
-import { renderWithConfirm } from "@/components/scenario/__tests__/uk-intl";
 import ScenarioEditor from "@/components/scenario/editor";
+import { renderWithConfirm } from "@/components/ui/__tests__/uk-intl";
 import type { ScenarioContent, ScenarioPage } from "@/types/scenario";
 
 afterEach(() => {

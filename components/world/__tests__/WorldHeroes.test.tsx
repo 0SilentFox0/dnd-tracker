@@ -4,7 +4,7 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 
 import { WorldHeroes } from "../WorldHeroes";
 
-import { render } from "@/components/world/__tests__/uk-intl";
+import { render } from "@/components/ui/__tests__/uk-intl";
 import type { WorldHero } from "@/types/world";
 
 vi.unmock("next-intl");

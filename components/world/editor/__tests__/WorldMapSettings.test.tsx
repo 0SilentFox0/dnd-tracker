@@ -5,7 +5,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { WorldEditorContext, type WorldEditorCtx } from "../WorldEditorContext";
 import { WorldMapSettings } from "../WorldMapSettings";
 
-import { renderWithConfirm } from "@/components/world/__tests__/uk-intl";
+import { renderWithConfirm } from "@/components/ui/__tests__/uk-intl";
 
 vi.unmock("next-intl");
 

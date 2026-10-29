@@ -243,8 +243,6 @@
     "errors": "Errors"
   },
   "actions": {
-    "cancel": "Cancel",
-    "back": "Back",
     "done": "Done"
   },
   "errors": {

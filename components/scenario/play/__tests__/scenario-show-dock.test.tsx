@@ -5,7 +5,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import { ScenarioShowDock } from "../ScenarioShowDock";
 
-import { IntlWrapper, render } from "@/components/scenario/__tests__/uk-intl";
+import { IntlWrapper, render } from "@/components/ui/__tests__/uk-intl";
 import type { ScenarioPlay } from "@/lib/hooks/scenario";
 import type { ScenarioContent } from "@/types/scenario";
 import type { ShowState } from "@/types/show";

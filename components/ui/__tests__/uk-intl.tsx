@@ -5,10 +5,13 @@ import { render as rtlRender, type RenderOptions } from "@testing-library/react"
 import { ConfirmProvider } from "@/components/ui/confirm-dialog";
 import common from "@/messages/uk/common.json";
 import dashboard from "@/messages/uk/dashboard.json";
+import onboarding from "@/messages/uk/onboarding.json";
 import scenario from "@/messages/uk/scenario.json";
+import show from "@/messages/uk/show.json";
 import validation from "@/messages/uk/validation.json";
+import world from "@/messages/uk/world.json";
 
-const messages = { common, dashboard, scenario, validation };
+const messages = { common, dashboard, onboarding, scenario, show, validation, world };
 
 export const IntlWrapper = ({ children }: { children: ReactNode }) => (
   <NextIntlClientProvider locale="uk" messages={messages} timeZone="Europe/Kyiv">

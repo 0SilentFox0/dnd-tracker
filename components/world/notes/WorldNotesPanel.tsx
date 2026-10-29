@@ -22,6 +22,8 @@ export interface WorldNotesPanelProps {
 export function WorldNotesPanel({ campaignId, mapId, marker, notes, heroes, isDM = false }: WorldNotesPanelProps) {
   const t = useTranslations("world.notes");
 
+  const tc = useTranslations("common.actions");
+
   const panel = useNotesPanel({ campaignId, mapId, markerId: marker.id, notes, heroes, isDM });
 
   return (
@@ -48,10 +50,10 @@ export function WorldNotesPanel({ campaignId, mapId, marker, notes, heroes, isDM
                 <Textarea aria-label={t("text")} value={panel.editing.text} maxLength={WORLD_NOTE_MAX} onChange={(e) => panel.setEditText(e.target.value)} />
                 <div className="flex gap-2">
                   <Button type="button" size="sm" onClick={() => void panel.saveEdit()}>
-                    {t("save")}
+                    {tc("save")}
                   </Button>
                   <Button type="button" size="sm" variant="outline" onClick={panel.cancelEdit}>
-                    {t("cancel")}
+                    {tc("cancel")}
                   </Button>
                 </div>
               </div>
@@ -99,7 +101,7 @@ export function WorldNotesPanel({ campaignId, mapId, marker, notes, heroes, isDM
           ) : null}
           <span className={panel.remaining < 0 ? "text-xs text-destructive" : "text-xs text-hud-muted"}>{panel.remaining}</span>
           <Button type="submit" size="sm" className="ml-auto" disabled={!panel.canSubmit}>
-            {t("add")}
+            {tc("add")}
           </Button>
         </div>
       </form>

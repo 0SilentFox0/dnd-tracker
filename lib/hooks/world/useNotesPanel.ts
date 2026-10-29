@@ -28,6 +28,8 @@ export function useNotesPanel({ campaignId, mapId, markerId, notes, heroes, isDM
 
   const t = useTranslations("world.notes");
 
+  const tc = useTranslations("common.actions");
+
   const [tab, setTab] = useState<NotesTab>("public");
 
   const activeTab: NotesTab = isDM ? "public" : tab;
@@ -57,7 +59,7 @@ export function useNotesPanel({ campaignId, mapId, markerId, notes, heroes, isDM
   };
 
   const removeNote = async (id: string) => {
-    if (await confirm({ title: t("deleteTitle"), confirmLabel: t("deleteConfirm"), destructive: true })) await remove.mutateOk(id);
+    if (await confirm({ title: t("deleteTitle"), confirmLabel: tc("delete"), destructive: true })) await remove.mutateOk(id);
   };
 
   return {

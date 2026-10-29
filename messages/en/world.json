@@ -43,7 +43,6 @@
     "image": "Image",
     "replaceImage": "Replace image",
     "deleteMap": "Delete map",
-    "delete": "Delete",
     "inspector": "Inspector",
     "inspectorEmpty": "Select a point or zone on the map — its settings will appear here.",
     "closePanel": "Close panel",
@@ -95,9 +94,7 @@
     "title": "New map",
     "descriptionMarker": "Nested map for “{name}”: it opens when the heroes enter this place.",
     "description": "A name and an image for the map. Markers, zones and nested maps are added in the editor.",
-    "cancel": "Cancel",
     "uploading": "Uploading…",
-    "create": "Create",
     "image": "Image"
   },
   "dropzone": {
@@ -114,14 +111,12 @@
   },
   "removeMap": {
     "title": "Delete the map “{name}”?",
-    "description": "{nested, plural, =0 {The map's markers and image will be deleted.} one {# nested map will be deleted with it, along with its markers and images.} other {# nested maps will be deleted with it, along with their markers and images.}}",
-    "confirm": "Delete"
+    "description": "{nested, plural, =0 {The map's markers and image will be deleted.} one {# nested map will be deleted with it, along with its markers and images.} other {# nested maps will be deleted with it, along with their markers and images.}}"
   },
   "removeMarker": {
     "title": "Delete “{name}”?",
     "descriptionPlain": "The marker will be deleted.",
-    "descriptionChild": "The linked map and all nested maps, with their markers and images, will be deleted together with the marker.",
-    "confirm": "Delete"
+    "descriptionChild": "The linked map and all nested maps, with their markers and images, will be deleted together with the marker."
   },
   "notes": {
     "tabs": "Notes",
@@ -129,17 +124,13 @@
     "mine": "Mine",
     "empty": "No notes yet.",
     "text": "Note text",
-    "save": "Save",
-    "cancel": "Cancel",
     "edit": "Edit note",
     "delete": "Delete note",
     "new": "New note",
     "everyone": "All players can see it",
     "onlyYou": "Only for you",
     "asHero": "As hero",
-    "add": "Add",
-    "deleteTitle": "Delete the note?",
-    "deleteConfirm": "Delete"
+    "deleteTitle": "Delete the note?"
   },
   "travel": {
     "kinds": {

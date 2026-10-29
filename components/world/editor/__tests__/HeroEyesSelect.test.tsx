@@ -6,7 +6,7 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 
 import { HeroEyesSelect } from "../HeroEyesSelect";
 
-import { render } from "@/components/world/__tests__/uk-intl";
+import { render } from "@/components/ui/__tests__/uk-intl";
 import * as api from "@/lib/api/world";
 import { useHeroEyes } from "@/lib/hooks/world";
 

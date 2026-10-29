@@ -28,9 +28,9 @@ vi.mock("@/components/scenario/CharacterSelect", () => ({
   ),
 }));
 
-import { renderWithConfirm } from "@/components/scenario/__tests__/uk-intl";
 import { acquaintanceTargetFor, acquaintanceToolEnabled } from "@/components/scenario/editor/acquaintance-target";
 import { AcquaintanceDialog } from "@/components/scenario/editor/AcquaintanceDialog";
+import { renderWithConfirm } from "@/components/ui/__tests__/uk-intl";
 import type { AcquaintanceView } from "@/types/acquaintances";
 
 Object.assign(Element.prototype, { hasPointerCapture: () => false, releasePointerCapture: () => {}, setPointerCapture: () => {}, scrollIntoView: () => {} });

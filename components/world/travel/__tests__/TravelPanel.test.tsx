@@ -5,7 +5,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import { TravelPanel, type TravelPanelProps } from "../TravelPanel";
 
-import { render } from "@/components/world/__tests__/uk-intl";
+import { render } from "@/components/ui/__tests__/uk-intl";
 import * as rulesApi from "@/lib/api/rules";
 import * as api from "@/lib/api/world";
 import { DEFAULT_RULES } from "@/lib/utils/rules";

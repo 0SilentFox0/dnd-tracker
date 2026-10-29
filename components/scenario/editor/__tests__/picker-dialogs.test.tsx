@@ -5,7 +5,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { BattlePickerDialog } from "../BattlePickerDialog";
 import { SlidePickerDialog } from "../SlidePickerDialog";
 
-import { render } from "@/components/scenario/__tests__/uk-intl";
+import { render } from "@/components/ui/__tests__/uk-intl";
 
 vi.unmock("next-intl");
 

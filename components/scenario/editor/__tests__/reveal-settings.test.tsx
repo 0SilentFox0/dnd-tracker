@@ -21,8 +21,8 @@ vi.mock("@/components/ui/select-field", () => ({
   ),
 }));
 
-import { render } from "@/components/scenario/__tests__/uk-intl";
 import { RevealSettings } from "@/components/scenario/editor/RevealSettings";
+import { render } from "@/components/ui/__tests__/uk-intl";
 
 afterEach(cleanup);
 

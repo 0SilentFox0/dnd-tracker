@@ -23,18 +23,20 @@ export function useRemoveMarker({ marker, editor, select, hotkey = false }: Opti
 
   const t = useTranslations("world.removeMarker");
 
+  const tc = useTranslations("common.actions");
+
   const remove = useCallback(async () => {
     if (!marker) return;
 
     const ok = await confirm({
       title: t("title", { name: marker.name }),
       description: marker.childMapId ? t("descriptionChild") : t("descriptionPlain"),
-      confirmLabel: t("confirm"),
+      confirmLabel: tc("delete"),
       destructive: true,
     });
 
     if (ok && (await editor.marker.remove.mutateOk(marker.id))) select(null);
-  }, [marker, confirm, editor, select, t]);
+  }, [marker, confirm, editor, select, t, tc]);
 
   useEffect(() => {
     if (!hotkey || !marker) return;

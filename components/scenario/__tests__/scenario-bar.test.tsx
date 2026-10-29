@@ -4,7 +4,7 @@ import { History } from "lucide-react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
 import { ScenarioBar } from "@/components/scenario";
-import { render } from "@/components/scenario/__tests__/uk-intl";
+import { render } from "@/components/ui/__tests__/uk-intl";
 
 afterEach(cleanup);
 

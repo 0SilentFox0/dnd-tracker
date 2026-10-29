@@ -29,6 +29,8 @@ export function useMapFields({ campaignId, detail, maps, editor, openMap }: Opti
 
   const t = useTranslations("world");
 
+  const tc = useTranslations("common.actions");
+
   const notify = useNotify();
 
   const { upload, discard } = useWorldMapUpload(campaignId);
@@ -93,7 +95,7 @@ export function useMapFields({ campaignId, detail, maps, editor, openMap }: Opti
     const ok = await confirm({
       title: t("removeMap.title", { name: map.name }),
       description: t("removeMap.description", { nested }),
-      confirmLabel: t("removeMap.confirm"),
+      confirmLabel: tc("delete"),
       destructive: true,
     });
 
