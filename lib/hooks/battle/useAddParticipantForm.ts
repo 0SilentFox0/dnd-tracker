@@ -77,5 +77,11 @@ export function useAddParticipantForm({ campaignId, open, onOpenChange, onAdd, o
   const canSubmit =
     type === ParticipantSourceType.CHARACTER ? Boolean(characterId) : Boolean(unitId);
 
-  return { type, setType, side, setSide, characterId, setCharacterId, quantity, setQuantity, reserved, setReserved, characters, picker, placing, canSubmit, handleSubmit };
+  return {
+    form: { type, side, characterId, quantity, reserved },
+    set: { type: setType, side: setSide, characterId: setCharacterId, quantity: setQuantity, reserved: setReserved },
+    characters,
+    picker,
+    submit: { placing, canSubmit, handleSubmit },
+  };
 }

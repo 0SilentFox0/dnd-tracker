@@ -140,23 +140,10 @@ export function useWorldEditorPage({ campaignId, mapId, initialSelectedId }: Opt
 
   return {
     ctx,
-    maps,
-    detail,
-    roster,
-    eyes,
-    drawing,
-    moveTarget,
-    editor,
-    selectedId,
-    select,
-    tool,
-    setTool,
-    creating,
-    setCreating,
-    settingsOpen,
-    setSettingsOpen,
-    closePanel,
-    openMap,
-    changeEyes,
+    data: { maps, detail, roster },
+    tools: { eyes, drawing, moveTarget, editor },
+    selected: { id: selectedId, select, close: closePanel },
+    dialogs: { create: { open: creating, set: setCreating }, settings: { open: settingsOpen, set: setSettingsOpen } },
+    actions: { openMap, changeEyes },
   };
 }

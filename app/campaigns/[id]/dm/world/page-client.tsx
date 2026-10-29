@@ -36,9 +36,16 @@ export function WorldEditorPageClient({ campaignId, campaignName, mapId, initial
 
   const isDesktop = useMediaQuery(DESKTOP_QUERY);
 
-  const page = useWorldEditorPage({ campaignId, mapId, initialSelectedId });
+  const {
+    ctx,
+    data: { maps, detail, roster },
+    tools: { eyes, drawing, moveTarget, editor },
+    selected: { id: selectedId, select, close: closePanel },
+    dialogs: { create: creating, settings },
+    actions: { openMap, changeEyes },
+  } = useWorldEditorPage({ campaignId, mapId, initialSelectedId });
 
-  const { ctx, maps, detail, roster, eyes, drawing, moveTarget, editor, selectedId, select, tool, setTool, creating, setCreating, settingsOpen, setSettingsOpen, closePanel, openMap, changeEyes } = page;
+  const { tool, setTool } = drawing;
 
   const emptyView = (
     <>
@@ -47,7 +54,7 @@ export function WorldEditorPageClient({ campaignId, campaignName, mapId, initial
         icon={MapIcon}
         title={t("editor.emptyTitle")}
         description={t("editor.emptyDescription")}
-        action={<Button onClick={() => setCreating(true)}>{t("editor.upload")}</Button>}
+        action={<Button onClick={() => creating.set(true)}>{t("editor.upload")}</Button>}
       />
     </>
   );
@@ -65,7 +72,7 @@ export function WorldEditorPageClient({ campaignId, campaignName, mapId, initial
 
                   const panel = marker ? <WorldMarkerPanel /> : <WorldMapSettings key={d.map.id} />;
 
-                  const panelOpen = tool === "select" && (!!marker || settingsOpen);
+                  const panelOpen = tool === "select" && (!!marker || settings.open);
 
                   const sheetOpen = !isDesktop && panelOpen;
 
@@ -79,7 +86,7 @@ export function WorldEditorPageClient({ campaignId, campaignName, mapId, initial
                       />
                       <div className={FRAME_HEIGHT}>
                         <div className="mb-2 shrink-0">
-                          <WorldToolbar drawing={drawing} readOnly={!!eyes.asHeroId} onSettings={() => setSettingsOpen(true)} inspector={isDesktop ? <WorldInspectorBar open={panelOpen} onClose={closePanel} /> : undefined}>
+                          <WorldToolbar drawing={drawing} readOnly={!!eyes.asHeroId} onSettings={() => settings.set(true)} inspector={isDesktop ? <WorldInspectorBar open={panelOpen} onClose={closePanel} /> : undefined}>
                             <HeroEyesSelect heroes={roster.heroes} value={eyes.asHeroId} onChange={changeEyes} />
                           </WorldToolbar>
                         </div>
@@ -168,7 +175,7 @@ export function WorldEditorPageClient({ campaignId, campaignName, mapId, initial
             )
           }
         </QueryState>
-        <NewWorldMapDialog open={creating} onOpenChange={setCreating} />
+        <NewWorldMapDialog open={creating.open} onOpenChange={creating.set} />
       </HudPage>
     </WorldEditorContext.Provider>
   );

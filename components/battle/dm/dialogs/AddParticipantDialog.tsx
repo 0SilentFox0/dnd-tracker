@@ -41,7 +41,7 @@ export function AddParticipantDialog({
   isError,
   onPlace,
 }: AddParticipantDialogProps) {
-  const { type, setType, side, setSide, characterId, setCharacterId, quantity, setQuantity, reserved, setReserved, characters, picker, placing, canSubmit, handleSubmit } = useAddParticipantForm({ campaignId, open, onOpenChange, onAdd, onPlace, isError });
+  const { form: { type, side, characterId, quantity, reserved }, set, characters, picker, submit: { placing, canSubmit, handleSubmit } } = useAddParticipantForm({ campaignId, open, onOpenChange, onAdd, onPlace, isError });
 
   const { unitId } = picker;
 
@@ -65,7 +65,7 @@ export function AddParticipantDialog({
           <Label>Сторона</Label>
           <Select
             value={side}
-            onValueChange={(v) => setSide(v as ParticipantSide)}
+            onValueChange={(v) => set.side(v as ParticipantSide)}
           >
             <SelectTrigger className="w-full">
               <SelectValue />
@@ -80,7 +80,7 @@ export function AddParticipantDialog({
           <Label>Тип</Label>
           <Select
             value={type}
-            onValueChange={(v) => setType(v as ParticipantSourceTypeValue)}
+            onValueChange={(v) => set.type(v as ParticipantSourceTypeValue)}
           >
             <SelectTrigger className="w-full">
               <SelectValue />
@@ -94,7 +94,7 @@ export function AddParticipantDialog({
         {type === ParticipantSourceType.CHARACTER && (
           <div className="space-y-2">
             <Label>Герой</Label>
-            <Select value={characterId} onValueChange={setCharacterId}>
+            <Select value={characterId} onValueChange={set.characterId}>
               <SelectTrigger className="w-full">
                 <SelectValue placeholder="Оберіть героя" />
               </SelectTrigger>
@@ -152,13 +152,13 @@ export function AddParticipantDialog({
                 min={QUANTITY.min}
                 max={QUANTITY.max}
                 value={quantity}
-                onChange={(e) => setQuantity(clampUnitQuantity(Number(e.target.value), QUANTITY))}
+                onChange={(e) => set.quantity(clampUnitQuantity(Number(e.target.value), QUANTITY))}
               />
             </div>
           </>
         )}
         <label className="flex items-center gap-2 text-sm">
-          <Checkbox checked={reserved} onCheckedChange={(v) => setReserved(v === true)} />
+          <Checkbox checked={reserved} onCheckedChange={(v) => set.reserved(v === true)} />
           У резерв — з&apos;явиться, коли ДМ введе в бій
         </label>
       </form>
