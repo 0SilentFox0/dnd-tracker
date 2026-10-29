@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { z } from "zod";
 
 import { COMPENDIUM_LIMITS, CompendiumError } from "./parse";
-import { importTargetOptions, previewPresentation } from "./presentation";
+import { importTargetOptions, mediaPresentation, previewPresentation } from "./presentation";
 import { prismaImportRepository } from "./repository";
 import { type CompendiumReport, confirmImport, previewImport } from "./service";
 import { type ImportIssue, translateCompendiumIssue, translateCompendiumReport } from "./types";
@@ -95,7 +95,7 @@ export function compendiumRoute(mode: "preview" | "confirm" | "reports" | "entri
 
         const runs = await prisma.compendiumImportRun.findMany({ where: { campaignId: id, ...(runId ? { id: runId } : {}) }, orderBy: [{ createdAt: "desc" }, { id: "desc" }], skip: Math.floor(offset), take: 21, select: { id: true, createdAt: true, report: true } });
 
-        return privateJson({ runs: runs.slice(0, 20).map(run => runId ? { ...run, report: translateCompendiumReport(t, run.report as unknown as CompendiumReport) } : { id: run.id, createdAt: run.createdAt }), hasMore: runs.length > 20 });
+        return privateJson({ runs: runs.slice(0, 20).map(run => runId ? { ...run, report: mediaPresentation(translateCompendiumReport(t, run.report as unknown as CompendiumReport)) } : { id: run.id, createdAt: run.createdAt }), hasMore: runs.length > 20 });
       }
 
       if (mode === "entries") {
@@ -125,7 +125,7 @@ export function compendiumRoute(mode: "preview" | "confirm" | "reports" | "entri
 
       if (!body.rightsConfirmed || !body.token || !body.idempotencyKey) return privateJson({ code: "CONFIRM_REQUIRED" }, 422);
 
-      return privateJson(translateCompendiumReport(t, await confirmImport(actor, input, body.token, body.idempotencyKey, secret, prismaImportRepository)));
+      return privateJson(mediaPresentation(translateCompendiumReport(t, await confirmImport(actor, input, body.token, body.idempotencyKey, secret, prismaImportRepository))));
     } catch (error) {
       if (error instanceof CompendiumError) return privateJson({ code: error.code, ...(error.code === "NOTES_SIZE" && error.details && { details: error.details }) }, statusOf(error.code));
 

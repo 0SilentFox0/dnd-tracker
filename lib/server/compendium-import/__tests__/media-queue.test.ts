@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { buildMediaQueue, summarizeQueue } from "../media/queue";
+import { buildMediaQueue, mediaProgress, summarizeQueue } from "../media/queue";
 import type { MediaRef } from "../media/types";
 
 const write = (localId: string, media: MediaRef[], kind = "units" as const) => ({ kind, localId, media });
@@ -40,5 +40,28 @@ describe("buildMediaQueue", () => {
     const state = buildMediaQueue([write("a", [ref("", "avatar", { skip: "MEDIA_INVALID_URL" }), ref("https://x.test/e.png", "icon", { skip: "MEDIA_EXTRA" }), ref("https://x.test/ok.png")])]);
 
     expect(summarizeQueue(state)).toEqual({ queued: 1, skipped: { MEDIA_INVALID_URL: 1, MEDIA_EXTRA: 1 } });
+  });
+});
+
+describe("mediaProgress", () => {
+  it("counts items by status and exposes host/file for failures only", () => {
+    const state = buildMediaQueue([write("a", [ref("https://x.test/p/1.png")]), write("b", [ref("https://y.test/2.png")]), write("c", [ref("https://z.test/3.png")]), write("d", [ref("http://bad", "avatar", { skip: "MEDIA_HTTPS_ONLY" })])]);
+
+    state.items[0].status = "saved";
+    Object.assign(state.items[1], { status: "failed", reason: "MEDIA_HTTP_STATUS", params: { status: 503 }, retryable: true });
+
+    const progress = mediaProgress("run", state);
+
+    expect(progress).toMatchObject({ runId: "run", total: 3, saved: 1, failed: 1, pending: 1, skipped: 1, retryable: 1 });
+    expect(progress.failures).toEqual([{ id: state.items[1].id, host: "y.test", file: "2.png", reason: "MEDIA_HTTP_STATUS", params: { status: 503 } }]);
+    expect(JSON.stringify(progress)).not.toContain("https://");
+  });
+
+  it("caps shown failures at 100", () => {
+    const state = buildMediaQueue(Array.from({ length: 150 }, (_, i) => write(`w${i}`, [ref(`https://x.test/${i}.png`)])));
+
+    for (const item of state.items) Object.assign(item, { status: "failed", reason: "MEDIA_FETCH_FAILED" });
+    expect(mediaProgress("r", state)).toMatchObject({ failed: 150, failures: expect.any(Array) });
+    expect(mediaProgress("r", state).failures).toHaveLength(100);
   });
 });

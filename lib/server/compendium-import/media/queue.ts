@@ -47,3 +47,39 @@ export function buildMediaQueue(writes: QueueWrite[], limit: number = MEDIA_LIMI
 }
 
 export const summarizeQueue = (state: MediaQueueState): MediaPlanSummary => ({ queued: state.items.length, skipped: state.skipped });
+
+export interface MediaProgress {
+  runId: string;
+  total: number;
+  saved: number;
+  failed: number;
+  skipped: number;
+  pending: number;
+  retryable: number;
+  failures: Array<{ id: string; host: string; file: string; reason: MediaReason; params?: { status?: number } }>;
+}
+
+const hostAndFile = (url: string) => {
+  try {
+    const parsed = new URL(url);
+
+    return { host: parsed.hostname, file: parsed.pathname.split("/").filter(Boolean).pop() ?? "" };
+  } catch {
+    return { host: "", file: "" };
+  }
+};
+
+export function mediaProgress(runId: string, state: MediaQueueState): MediaProgress {
+  const failed = state.items.filter((i) => i.status === "failed");
+
+  return {
+    runId,
+    total: state.items.length,
+    saved: state.items.filter((i) => i.status === "saved").length,
+    failed: failed.length,
+    skipped: Object.values(state.skipped).reduce((a, b) => a + (b ?? 0), 0),
+    pending: state.items.filter((i) => i.status === "pending").length,
+    retryable: failed.filter((i) => i.retryable).length,
+    failures: failed.slice(0, MEDIA_LIMITS.failuresShown).map((i) => ({ id: i.id, ...hostAndFile(i.url), reason: i.reason ?? "MEDIA_FETCH_FAILED", ...(i.params && { params: i.params }) })),
+  };
+}

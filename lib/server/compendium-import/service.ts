@@ -289,6 +289,10 @@ export async function confirmImport(actor: Actor, input: ImportInput, token: str
 
     const report = remapIds(reportOf(plan, root, sources, embedded, hasCharacters, classesMode, customRules), idMap);
 
+    const queue = buildMediaQueue(applied.map((r) => ({ ...r, localId: idMap.get(r.localId) ?? r.localId })));
+
+    report.media = { ...queue, queued: queue.items.length };
+
     await tx.saveRun(actor, idempotencyKey, requestHash, report);
 
     return report;

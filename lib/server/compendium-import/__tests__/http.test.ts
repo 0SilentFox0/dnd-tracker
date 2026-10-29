@@ -4,7 +4,7 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 const mocks = vi.hoisted(() => ({ actor: vi.fn(), preview: vi.fn(), confirm: vi.fn(), authorize: vi.fn(), runs: vi.fn(), entry: vi.fn(), rate: vi.fn() }));
 
 vi.mock("@/lib/utils/api/actor", () => ({ resolveActor: mocks.actor }));
-vi.mock("../presentation", () => ({ previewPresentation: () => ({ graph: [], rulesDiff: {} }), importTargetOptions: vi.fn() }));
+vi.mock("../presentation", () => ({ previewPresentation: () => ({ graph: [], rulesDiff: {} }), importTargetOptions: vi.fn(), mediaPresentation: (r: unknown) => r }));
 vi.mock("../repository", () => ({ prismaImportRepository: { authorize: mocks.authorize } }));
 vi.mock("@/lib/i18n/request-locale", () => ({ getRequestLocale: async () => "uk" }));
 vi.mock("../service", () => ({ previewImport: mocks.preview, confirmImport: mocks.confirm }));

@@ -1,8 +1,9 @@
+import { mediaProgress } from "./media/queue";
 import { adaptCompendium } from "./adapt";
 import { canonicalKey } from "./identity";
 import { parseCompendium } from "./parse";
 import { kindTable, prismaImportRepository } from "./repository";
-import type { ImportInput } from "./service";
+import type { CompendiumReport, ImportInput } from "./service";
 
 import { CampaignKind, CampaignVisibility, SRD_TEMPLATE_NAME } from "@/lib/constants/campaigns";
 import { prisma } from "@/lib/db";
@@ -36,4 +37,13 @@ export async function importTargetOptions(actor: Actor) {
   const templates = await prisma.campaign.findMany({ where: { kind: CampaignKind.TEMPLATE, visibility: CampaignVisibility.OFFICIAL, name: SRD_TEMPLATE_NAME }, select: { id: true, name: true } });
 
   return { local: await targets(actor.campaignId), templates: await Promise.all(templates.map(async template => ({ ...template, edition: "one" as const, rows: await targets(template.id) }))) };
+}
+
+/** Replaces the stored queue (items with URLs) with counters for API responses. */
+export function mediaPresentation<R extends Pick<CompendiumReport, "media" | "runId">>(report: R) {
+  const { items } = report.media ?? {};
+
+  if (!items || !report.runId) return report;
+
+  return { ...report, media: mediaProgress(report.runId, { version: 1, items, skipped: report.media?.skipped ?? {} }) };
 }
