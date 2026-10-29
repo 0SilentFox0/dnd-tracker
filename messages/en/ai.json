@@ -131,6 +131,7 @@
     "newRow": "New row",
     "newSection": "New section “{title}”",
     "newAcquaintance": "New micro NPC: {name}",
+    "changedRows": "{count, plural, one {# row will be changed} other {# rows will be changed}}",
     "target": "Target: page {pageId}. Applied only after human confirmation.",
     "stale": "The fragment changed after the proposal",
     "status": {

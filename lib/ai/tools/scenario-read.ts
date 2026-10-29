@@ -65,7 +65,7 @@ export const findScenarioMentionsTool = defineTool({
   scopes: ["ai"],
   title: "Find scenario mentions",
   description:
-    "Find every occurrence of a name in scenario story and DM notes, in any grammatical form (matched by word stem). Returns hits {pageId, sectionId, rowId, field, snippet, forms, inMention} (inMention = already a mention chip) and the distinct forms found. Paginated by offset, up to 100 hits per call. Searches the whole campaign unless pageId/sectionId is given.",
+    "Find every occurrence of a name in scenario story and DM notes, in any grammatical form (matched by word stem). Returns hits {pageId, sectionId, rowId, field, snippet, forms, inMention} (inMention = already a mention chip) and the distinct forms found. Paginated: up to 100 hits per call; pass the returned nextOffset as offset for the next call until it is null. Searches the whole campaign unless pageId/sectionId is given.",
   input: z.object({ query: z.string().trim().min(2).max(100), pageId: z.string().min(1).optional(), sectionId: z.string().min(1).optional(), offset: z.number().int().min(0).optional() }),
   handler: async (ctx, { query, pageId, sectionId, offset = 0 }) => {
     const pages = pageId
