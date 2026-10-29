@@ -105,7 +105,7 @@ export function addEntry(state: AdaptState, kind: string, row: JsonRecord, path:
 
   if (!result) return;
 
-  if (byteLength(result.notes ?? "") > 64 * 1024) local.push(issue("NOTES_SIZE", path, "error", "Скоротіть опис або виключіть запис"));
+  if (byteLength(result.notes ?? "") > 64 * 1024) local.push(issue("NOTES_SIZE", path, "error", `Скоротіть опис або виключіть запис «${name.slice(0, 80)}»: нотатки ${Math.round(byteLength(result.notes ?? "") / 1024)} КБ, ліміт 64 КБ`));
 
   const attribution = Object.fromEntries(["page", "additionalSources", "otherSources", "referenceSources"].filter((k) => row[k] !== undefined).map((k) => [k, row[k]]));
 

@@ -66,9 +66,11 @@ export function excludeAllBlocked(options: CompendiumOptions, graph: CompendiumG
   return { ...options, excludedKeys: [...new Set([...(options.excludedKeys ?? []), ...blockedClosure(graph, issues)])], excludedPaths: [...new Set([...(options.excludedPaths ?? []), ...excludeBlocked(issues)])] };
 }
 export function compendiumErrorMessage(error: unknown, fallback: string) {
-  const code = error instanceof ApiError ? (error.body as { code?: unknown } | null)?.code : undefined;
+  const body = error instanceof ApiError ? (error.body as { code?: unknown; details?: unknown } | null) : null;
 
-  if (typeof code === "string") return COMPENDIUM_ERROR_TEXT[code] ?? `${code}: перевірте вибір і повторіть preview`;
+  const code = body?.code;
+
+  if (typeof code === "string") return `${COMPENDIUM_ERROR_TEXT[code] ?? `${code}: перевірте вибір і повторіть preview`}${code === "NOTES_SIZE" && typeof body?.details === "string" ? ` Запис: ${body.details} (ліміт 64 КБ).` : ""}`;
 
   if (error instanceof ApiError) return "HTTP_ERROR: перевірте вибір і повторіть preview";
 
