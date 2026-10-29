@@ -30,6 +30,22 @@ function assertLegendaryAllowed(ctx: BattleMutationContext, actor: BattlePartici
 
 const counter = (p: BattleParticipant) => `${p.battleData.legendary?.actionsLeft ?? 0}/${p.battleData.legendary?.actions ?? 0}`;
 
+type Option = LegendaryActionBody["option"];
+
+type AbilityOption = Exclude<Option, { kind: "attack" }>;
+
+type Ability = ReturnType<typeof legendaryAbilities>[number];
+
+interface AbilityRun {
+  ctx: BattleMutationContext;
+  actor: BattleParticipant;
+  option: AbilityOption;
+  ability: Ability;
+  lair: boolean;
+  spend: (p: BattleParticipant) => BattleParticipant;
+  deps: SummonDeps & Partial<Pick<SpellMutationDeps, "loadSpell">>;
+}
+
 export function createLegendaryMutation(deps: SummonDeps & Partial<Pick<SpellMutationDeps, "loadSpell">> = defaultDeps) {
   return async (ctx: BattleMutationContext, body: LegendaryActionBody): Promise<MutationResult> => {
     if (!ctx.isDM) throw new BattleAccessError(403, API_ERRORS.BATTLE_LEGENDARY_DM_ONLY);
@@ -38,95 +54,121 @@ export function createLegendaryMutation(deps: SummonDeps & Partial<Pick<SpellMut
 
     if (!actor) throw new BattleAccessError(404, API_ERRORS.BATTLE_PARTICIPANT_NOT_IN_BATTLE);
 
-    const { id, name } = actor.basicInfo;
-
-    const { round } = ctx.scene;
-
     const { option } = body;
 
-    if (option.kind === "attack") {
-      assertLegendaryAllowed(ctx, actor, 1);
+    if (option.kind === "attack") return runBasicAttack(ctx, actor, option);
 
-      const out = legendaryAttack({ participants: ctx.participants, actorId: id, attackIndex: option.attackIndex, targetId: option.targetId, map: ctx.meta.map, rules: ctx.meta.rules, round, rng: rngOf(ctx), battleId: ctx.scene.id });
+    return runAbilityOption(ctx, actor, option, deps);
+  };
+}
 
-      const participants = updateParticipant(out.participants, id, (p) => spendLegendary(p, 1));
+function runBasicAttack(ctx: BattleMutationContext, actor: BattleParticipant, option: Extract<Option, { kind: "attack" }>): MutationResult {
+  const { id, name } = actor.basicInfo;
 
-      const after = findParticipant(participants, id) ?? actor;
+  const { round } = ctx.scene;
 
-      return { participants, pending: ctx.pending, events: [systemEvent(round, `👑 ${name}: легендарна дія — ${out.attackName} (${counter(after)})`), battleActionToEvent(out.action)] };
-    }
+  assertLegendaryAllowed(ctx, actor, 1);
 
-    const lair = option.kind === "lair";
+  const out = legendaryAttack({ participants: ctx.participants, actorId: id, attackIndex: option.attackIndex, targetId: option.targetId, map: ctx.meta.map, rules: ctx.meta.rules, round, rng: rngOf(ctx), battleId: ctx.scene.id });
 
-    const ability = (lair ? lairAbilities(actor) : legendaryAbilities(actor)).find((a) => a.key === option.abilityKey);
+  const participants = updateParticipant(out.participants, id, (p) => spendLegendary(p, 1));
 
-    if (!ability) throw new BattleRuleError("action_rejected", API_ERRORS.BATTLE_NO_SUCH_LEGENDARY);
+  const after = findParticipant(participants, id) ?? actor;
 
-    const cost = legendaryCostOf(ability);
+  return { participants, pending: ctx.pending, events: [systemEvent(round, `👑 ${name}: легендарна дія — ${out.attackName} (${counter(after)})`), battleActionToEvent(out.action)] };
+}
 
-    if (lair) {
-      const blocker = lairBlocker(actor, round, ability.key);
+async function runAbilityOption(ctx: BattleMutationContext, actor: BattleParticipant, option: AbilityOption, deps: AbilityRun["deps"]): Promise<MutationResult> {
+  const { id } = actor.basicInfo;
 
-      if (blocker) throw new BattleRuleError("action_rejected", blocker);
-    } else assertLegendaryAllowed(ctx, actor, cost);
+  const { round } = ctx.scene;
 
-    const spend = (p: BattleParticipant) => lair ? spendLair(p, round, ability.key) : spendLegendary(p, cost);
+  const lair = option.kind === "lair";
 
-    if (!withinCountLimits(actor, ability)) throw new BattleRuleError("ability_limit", API_ERRORS.BATTLE_USES_EXHAUSTED);
+  const ability = (lair ? lairAbilities(actor) : legendaryAbilities(actor)).find((a) => a.key === option.abilityKey);
 
-    const wait = cooldownLeft(actor, ability, round);
+  if (!ability) throw new BattleRuleError("action_rejected", API_ERRORS.BATTLE_NO_SUCH_LEGENDARY);
 
-    if (wait > 0) throw new BattleRuleError("ability_limit", API_ERRORS.ABILITY_COOLDOWN, { rounds: wait });
+  const cost = legendaryCostOf(ability);
 
-    if (ability.condition && !evaluateCondition(ability.condition, { owner: actor, event: { type: "action", actorId: id, abilityKey: ability.key, targetIds: option.targetIds ?? [] }, participants: ctx.participants, sourceId: ability.source.id })) throw new BattleRuleError("action_rejected", API_ERRORS.BATTLE_ABILITY_CONDITION_UNMET);
+  if (lair) {
+    const blocker = lairBlocker(actor, round, ability.key);
 
-    if (ability.perform?.kind === "spell") {
-      if (!lair) throw new BattleRuleError("action_rejected", API_ERRORS.BATTLE_LEGENDARY_VIA_SPELL_DIALOG);
+    if (blocker) throw new BattleRuleError("action_rejected", blocker);
+  } else assertLegendaryAllowed(ctx, actor, cost);
 
-      return createSpellMutation({ ...defaultDeps, ...deps }, { serverRolls: true })(ctx, { casterId: id, spellId: ability.perform.spellId, legendaryKey: ability.key, targetIds: option.targetIds ?? [], diceRolls: [] });
-    }
+  const spend = (p: BattleParticipant) => lair ? spendLair(p, round, ability.key) : spendLegendary(p, cost);
 
-    if (ability.perform?.kind === "attack") {
-      const attackName = ability.perform.attack;
+  if (!withinCountLimits(actor, ability)) throw new BattleRuleError("ability_limit", API_ERRORS.BATTLE_USES_EXHAUSTED);
 
-      const attackIndex = actor.battleData.attacks.findIndex((a) => a.name.toLocaleLowerCase() === attackName.toLocaleLowerCase());
+  const wait = cooldownLeft(actor, ability, round);
 
-      if (attackIndex < 0) throw new BattleRuleError("action_rejected", API_ERRORS.BATTLE_LEGENDARY_ATTACK_NOT_FOUND);
+  if (wait > 0) throw new BattleRuleError("ability_limit", API_ERRORS.ABILITY_COOLDOWN, { rounds: wait });
 
-      if (option.targetIds?.length !== 1) throw new BattleRuleError("invalid_target", API_ERRORS.BATTLE_LEGENDARY_ONE_TARGET);
+  if (ability.condition && !evaluateCondition(ability.condition, { owner: actor, event: { type: "action", actorId: id, abilityKey: ability.key, targetIds: option.targetIds ?? [] }, participants: ctx.participants, sourceId: ability.source.id })) throw new BattleRuleError("action_rejected", API_ERRORS.BATTLE_ABILITY_CONDITION_UNMET);
 
-      const out = legendaryAttack({ participants: ctx.participants, actorId: id, attackIndex, targetId: option.targetIds[0], map: ctx.meta.map, rules: ctx.meta.rules, round, rng: rngOf(ctx), battleId: ctx.scene.id });
+  const run: AbilityRun = { ctx, actor, option, ability, lair, spend, deps };
 
-      const participants = updateParticipant(out.participants, id, (p) => spend(recordUse(p, ability.key, round, ability.limits?.pool)));
+  if (ability.perform?.kind === "spell") return performSpell(run, ability.perform.spellId);
 
-      return { participants, pending: ctx.pending, events: [systemEvent(round, `${lair ? "🏰" : "👑"} ${name}: ${lair ? "дія лігва" : "легендарна дія"} — ${ability.name} → ${out.attackName}`), battleActionToEvent(out.action)] };
-    }
+  if (ability.perform?.kind === "attack") return performAttack(run, ability.perform.attack);
 
-    const targetIds = assertAbilityTargets(ability, ctx.participants, option.targetIds ?? [], { owner: actor, onMap: abilityOnMap(ctx.meta.map, actor) });
+  return performAbility(run);
+}
 
-    const run = runAbilities(ctx.participants, { type: "action", actorId: id, abilityKey: ability.key, targetIds }, abilityRunContext(ctx));
+function performSpell({ ctx, actor, option, ability, lair, deps }: AbilityRun, spellId: string): Promise<MutationResult> {
+  if (!lair) throw new BattleRuleError("action_rejected", API_ERRORS.BATTLE_LEGENDARY_VIA_SPELL_DIALOG);
 
-    const summoned = await applyAbilitySummons(run.summons, run.participants, { campaignId: ctx.scene.campaignId, battleId: ctx.scene.id, rng: rngOf(ctx), rules: ctx.meta.rules, deps });
+  return createSpellMutation({ ...defaultDeps, ...deps }, { serverRolls: true })(ctx, { casterId: actor.basicInfo.id, spellId, legendaryKey: ability.key, targetIds: option.targetIds ?? [], diceRolls: [] });
+}
 
-    const participants = updateParticipant(summoned.order, id, spend);
+function performAttack({ ctx, actor, option, ability, lair, spend }: AbilityRun, attackName: string): MutationResult {
+  const { id, name } = actor.basicInfo;
 
-    const after = findParticipant(participants, id) ?? actor;
+  const { round } = ctx.scene;
 
-    const text = run.fired.length ? [...run.messages, ...summoned.messages].join(" | ") : `${ability.name}: не спрацювало`;
+  const attackIndex = actor.battleData.attacks.findIndex((a) => a.name.toLocaleLowerCase() === attackName.toLocaleLowerCase());
 
-    return {
-      participants,
-      pending: ctx.pending,
-      events: [
-        {
-          type: "ability",
-          round,
-          actorId: id,
-          resultText: `${lair ? "🏰" : "👑"} ${name}: ${lair ? "дія лігва" : "легендарна дія"} «${ability.name}» (${counter(after)}) — ${text}`,
-          details: { actorName: name, actorSide: actor.basicInfo.side, actionDetails: { abilityKey: ability.key, skillName: ability.name } },
-        },
-      ],
-    };
+  if (attackIndex < 0) throw new BattleRuleError("action_rejected", API_ERRORS.BATTLE_LEGENDARY_ATTACK_NOT_FOUND);
+
+  if (option.targetIds?.length !== 1) throw new BattleRuleError("invalid_target", API_ERRORS.BATTLE_LEGENDARY_ONE_TARGET);
+
+  const out = legendaryAttack({ participants: ctx.participants, actorId: id, attackIndex, targetId: option.targetIds[0], map: ctx.meta.map, rules: ctx.meta.rules, round, rng: rngOf(ctx), battleId: ctx.scene.id });
+
+  const participants = updateParticipant(out.participants, id, (p) => spend(recordUse(p, ability.key, round, ability.limits?.pool)));
+
+  return { participants, pending: ctx.pending, events: [systemEvent(round, `${lair ? "🏰" : "👑"} ${name}: ${lair ? "дія лігва" : "легендарна дія"} — ${ability.name} → ${out.attackName}`), battleActionToEvent(out.action)] };
+}
+
+async function performAbility({ ctx, actor, option, ability, lair, spend, deps }: AbilityRun): Promise<MutationResult> {
+  const { id, name } = actor.basicInfo;
+
+  const { round } = ctx.scene;
+
+  const targetIds = assertAbilityTargets(ability, ctx.participants, option.targetIds ?? [], { owner: actor, onMap: abilityOnMap(ctx.meta.map, actor) });
+
+  const run = runAbilities(ctx.participants, { type: "action", actorId: id, abilityKey: ability.key, targetIds }, abilityRunContext(ctx));
+
+  const summoned = await applyAbilitySummons(run.summons, run.participants, { campaignId: ctx.scene.campaignId, battleId: ctx.scene.id, rng: rngOf(ctx), rules: ctx.meta.rules, deps });
+
+  const participants = updateParticipant(summoned.order, id, spend);
+
+  const after = findParticipant(participants, id) ?? actor;
+
+  const text = run.fired.length ? [...run.messages, ...summoned.messages].join(" | ") : `${ability.name}: не спрацювало`;
+
+  return {
+    participants,
+    pending: ctx.pending,
+    events: [
+      {
+        type: "ability",
+        round,
+        actorId: id,
+        resultText: `${lair ? "🏰" : "👑"} ${name}: ${lair ? "дія лігва" : "легендарна дія"} «${ability.name}» (${counter(after)}) — ${text}`,
+        details: { actorName: name, actorSide: actor.basicInfo.side, actionDetails: { abilityKey: ability.key, skillName: ability.name } },
+      },
+    ],
   };
 }
 
