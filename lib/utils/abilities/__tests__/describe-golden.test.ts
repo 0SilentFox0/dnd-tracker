@@ -33,8 +33,10 @@ describe("describe golden (uk)", () => {
     }
   });
 
-  it("describeTrigger", () => {
-    expect(ABILITY_FIXTURES.filter((a) => a.id.startsWith("trigger-")).map((a) => [a.id, describeTrigger(a.trigger)])).toMatchSnapshot();
+  it("describeTrigger", async () => {
+    const t = await ukT();
+
+    expect(ABILITY_FIXTURES.filter((a) => a.id.startsWith("trigger-")).map((a) => [a.id, renderSegments(t, describeTrigger(a.trigger))])).toMatchSnapshot();
   });
 
   it("limitsLabel", () => {

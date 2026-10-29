@@ -5,6 +5,7 @@ import { eventActorId, eventAttackKind, eventTargetIds } from "@/lib/utils/abili
 import { findParticipant, isActive } from "@/lib/utils/abilities/engine/core/participants";
 import { countMarks, markKey } from "@/lib/utils/abilities/engine/effects/marks";
 import type { Condition, ConditionSubject } from "@/lib/utils/abilities/schema";
+import { seg, type Segment } from "@/lib/utils/abilities/segments";
 import { armorWornMatches } from "@/lib/utils/artifacts/worn-armor";
 import { isAdjacent } from "@/lib/utils/battle/grid/occupancy";
 import { findEffectMarker } from "@/lib/utils/battle/participant/state";
@@ -63,6 +64,44 @@ export const CONDITION_REGISTRY: Record<Condition["type"], { label: string; fiel
   all: { label: "Усі умови", fields: [{ name: "conditions", label: "Умови", input: "effects" }] },
   any: { label: "Будь-яка умова", fields: [{ name: "conditions", label: "Умови", input: "effects" }] },
 };
+
+const listParam = (items: readonly string[]) => items.join(", ");
+
+export function describeCondition(c: Condition): Segment[] {
+  const who = (w: ConditionSubject) => seg(`summary.conditions.who.${w}`);
+
+  switch (c.type) {
+    case "hpBelow":
+    case "hpAbove":
+      return [seg(`summary.conditions.${c.type}`, { who: who(c.who), percent: c.percent })];
+    case "attackKind":
+      return [seg("summary.conditions.attackKind", { kind: seg(`summary.conditions.attackKinds.${c.kind}`) })];
+    case "targetHasCondition":
+      return [seg("summary.conditions.targetHasCondition", { condition: c.condition })];
+    case "targetCreatureType":
+      return [seg("summary.conditions.targetCreatureType", { types: listParam(c.types) })];
+    case "targetRace":
+      return [seg("summary.conditions.targetRace", { races: listParam(c.races) })];
+    case "hasMark":
+      return [seg("summary.conditions.hasMark", { who: who(c.who), markId: c.markId, bySelf: c.bySelf ? "yes" : "no" })];
+    case "armorWorn":
+      return [
+        seg("summary.conditions.armorWorn", {
+          categories: { join: ", ", items: c.categories.map((k) => seg(`summary.conditions.armorKinds.${k}`)) },
+          shield: c.shield ?? "any",
+        }),
+      ];
+    case "attackRollMode":
+      return [seg("summary.conditions.attackRollMode", { mode: seg(`summary.conditions.rollModes.${c.mode}`) })];
+    case "not":
+      return [seg("summary.conditions.not", { condition: describeCondition(c.condition) })];
+    case "all":
+    case "any":
+      return [seg(`summary.conditions.${c.type}`, { items: c.conditions.flatMap(describeCondition) })];
+    default:
+      return [seg(`summary.conditions.${c.type}`)];
+  }
+}
 
 function subjects(who: ConditionSubject, ctx: ConditionContext): BattleParticipant[] {
   const { owner, event, participants: ps } = ctx;

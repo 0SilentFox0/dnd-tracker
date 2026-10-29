@@ -881,7 +881,55 @@
         "charm": "charm"
       }
     },
-    "unknownEffect": "unknown effect ({kind})"
+    "unknownEffect": "unknown effect ({kind})",
+    "triggers": {
+      "otherAlly": "another ally",
+      "spellCount": "spells: {n}",
+      "school": "school {school}",
+      "spellLevels": "levels {levels}"
+    },
+    "conditions": {
+      "hpBelow": "HP ≤ {percent}% ({who})",
+      "hpAbove": "HP ≥ {percent}% ({who})",
+      "attackKind": "attack type: {kind}",
+      "attackKinds": {
+        "melee": "melee",
+        "ranged": "ranged",
+        "magic": "magic"
+      },
+      "targetHasCondition": "target has condition \"{condition}\"",
+      "targetCreatureType": "target creature type: {types}",
+      "targetRace": "target race: {races}",
+      "targetDead": "target is dead",
+      "actorIsEnemy": "event actor is an enemy",
+      "hasMark": "mark \"{markId}\"{bySelf, select, yes { (mine only)} other {}}: {who}",
+      "armorWorn": "armor worn: {categories}{shield, select, with { (with shield)} without { (no shield)} other {}}",
+      "armorKinds": {
+        "none": "no armor",
+        "light": "light",
+        "medium": "medium",
+        "heavy": "heavy"
+      },
+      "attackRollMode": "attack roll: {mode}",
+      "rollModes": {
+        "advantage": "advantage",
+        "disadvantage": "disadvantage",
+        "normal": "normal"
+      },
+      "allyAdjacent": "ally next to the target",
+      "notMoved": "has not moved this turn",
+      "withThisItem": "attack with this item",
+      "not": "NOT ({condition})",
+      "all": "all of: ({items})",
+      "any": "any of: ({items})",
+      "who": {
+        "self": "me",
+        "eventTarget": "event target",
+        "eventActor": "event actor",
+        "anyAlly": "any ally",
+        "anyEnemy": "any enemy"
+      }
+    }
   },
   "damageTypes": {
     "fire": "Fire",

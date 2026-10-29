@@ -185,9 +185,8 @@ const describeEffectText = (effect: Effect) => logText(describeEffect(effect));
 
 export { FLAG_FIELDS, FLAG_LABELS };
 
-// trigger text stays a string until Task 6
 export function describeAbilitySegments(a: Ability): Segment[] {
-  return [...describeTrigger(a.trigger).map((value) => seg("summary.text", { value })), ...limitsSegments(a.limits), ...a.effects.flatMap(describeEffect)];
+  return [...describeTrigger(a.trigger), ...limitsSegments(a.limits), ...a.effects.flatMap(describeEffect)];
 }
 
 export function describeAbilityText(a: Ability, t: Translator): string {

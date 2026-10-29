@@ -881,7 +881,55 @@
         "charm": "чарування"
       }
     },
-    "unknownEffect": "невідомий ефект ({kind})"
+    "unknownEffect": "невідомий ефект ({kind})",
+    "triggers": {
+      "otherAlly": "іншого союзника",
+      "spellCount": "закляття: {n}",
+      "school": "школа {school}",
+      "spellLevels": "рівні {levels}"
+    },
+    "conditions": {
+      "hpBelow": "HP ≤ {percent}% ({who})",
+      "hpAbove": "HP ≥ {percent}% ({who})",
+      "attackKind": "тип атаки: {kind}",
+      "attackKinds": {
+        "melee": "ближня",
+        "ranged": "дальня",
+        "magic": "магія"
+      },
+      "targetHasCondition": "ціль має стан «{condition}»",
+      "targetCreatureType": "тип істоти цілі: {types}",
+      "targetRace": "раса цілі: {races}",
+      "targetDead": "ціль мертва",
+      "actorIsEnemy": "виконавець події — ворог",
+      "hasMark": "мітка «{markId}»{bySelf, select, yes { (лише моя)} other {}}: {who}",
+      "armorWorn": "броня на мені: {categories}{shield, select, with { (зі щитом)} without { (без щита)} other {}}",
+      "armorKinds": {
+        "none": "без броні",
+        "light": "легка",
+        "medium": "середня",
+        "heavy": "важка"
+      },
+      "attackRollMode": "кидок атаки: {mode}",
+      "rollModes": {
+        "advantage": "перевага",
+        "disadvantage": "недолік",
+        "normal": "звичайний"
+      },
+      "allyAdjacent": "союзник поруч із ціллю",
+      "notMoved": "не рухався цього ходу",
+      "withThisItem": "атака цим предметом",
+      "not": "НЕ ({condition})",
+      "all": "усі: ({items})",
+      "any": "будь-яка з: ({items})",
+      "who": {
+        "self": "я",
+        "eventTarget": "ціль події",
+        "eventActor": "виконавець події",
+        "anyAlly": "будь-який союзник",
+        "anyEnemy": "будь-який ворог"
+      }
+    }
   },
   "damageTypes": {
     "fire": "Вогонь",

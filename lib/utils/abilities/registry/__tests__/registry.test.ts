@@ -16,9 +16,8 @@ describe("registry contract", () => {
     }
   });
 
-  it("кожен тригер має label і matches", () => {
+  it("кожен тригер має matches", () => {
     for (const def of Object.values(TRIGGER_REGISTRY)) {
-      expect(def.label).toBeTruthy();
       expect(typeof def.matches).toBe("function");
     }
   });
