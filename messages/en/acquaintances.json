@@ -1,1 +1,26 @@
-{}
+{
+  "page": {
+    "title": "Acquaintances",
+    "subtitle": "NPCs the heroes have met",
+    "empty": "No acquaintances yet",
+    "search": "Search acquaintances",
+    "hiddenFromPlayers": "Players can't see this section yet — enable it in the campaign settings."
+  },
+  "card": {
+    "hidden": "Hidden",
+    "entryHidden": "hidden"
+  },
+  "note": {
+    "label": "My note",
+    "placeholder": "Your note: both you and the DM can see it"
+  },
+  "notify": {
+    "createFailed": "Could not create the acquaintance",
+    "saveFailed": "Could not save the acquaintance",
+    "removeFailed": "Could not delete the acquaintance",
+    "entryAddFailed": "Could not add the entry",
+    "entrySaveFailed": "Could not save the entry",
+    "entryRemoveFailed": "Could not delete the entry",
+    "noteSaveFailed": "Could not save the note"
+  }
+}

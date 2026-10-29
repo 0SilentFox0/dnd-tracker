@@ -1,5 +1,7 @@
 "use client";
 
+import { useTranslations } from "next-intl";
+
 import { AcquaintanceCard } from "@/components/acquaintances/AcquaintanceCard";
 import { SearchEmptyState } from "@/components/common/SearchEmptyState";
 import { SearchInput } from "@/components/common/SearchInput";
@@ -13,13 +15,15 @@ import type { AcquaintanceView } from "@/types/acquaintances";
 const fieldsOf = (a: AcquaintanceView) => [a.name, a.description];
 
 function Grid({ campaignId, items, isDM, focusId, fresh }: { campaignId: string; items: AcquaintanceView[]; isDM: boolean; focusId?: string; fresh: ReadonlySet<string> }) {
+  const t = useTranslations("acquaintances");
+
   const search = useSearch(items, fieldsOf);
 
-  if (!items.length) return <EmptyState title="Знайомств поки немає" />;
+  if (!items.length) return <EmptyState title={t("page.empty")} />;
 
   return (
     <div className="space-y-3">
-      <SearchInput value={search.query.value} onChange={search.query.set} label="Пошук знайомства" />
+      <SearchInput value={search.query.value} onChange={search.query.set} label={t("page.search")} />
       {search.items.length === 0 ? (
         <SearchEmptyState query={search.query.value} onClear={() => search.query.set("")} />
       ) : (
@@ -34,14 +38,16 @@ function Grid({ campaignId, items, isDM, focusId, fresh }: { campaignId: string;
 }
 
 export function AcquaintancesPageClient({ campaignId, isDM, focusId }: { campaignId: string; isDM: boolean; focusId?: string }) {
+  const t = useTranslations("acquaintances");
+
   const query = useAcquaintances(campaignId);
 
   const fresh = useSeenOnOpen(campaignId, { types: ["acquaintance"], enabled: !isDM });
 
   return (
     <HudPage>
-      <HudPageHeader title="Знайомства" subtitle="NPC, яких зустріли герої" />
-      {isDM && query.data && !query.data.enabled && <HudPanel>Гравці ще не бачать цей розділ — увімкни в налаштуваннях кампанії.</HudPanel>}
+      <HudPageHeader title={t("page.title")} subtitle={t("page.subtitle")} />
+      {isDM && query.data && !query.data.enabled && <HudPanel>{t("page.hiddenFromPlayers")}</HudPanel>}
       <QueryState query={query}>{(data) => <Grid campaignId={campaignId} items={data.items} isDM={isDM} focusId={focusId} fresh={fresh} />}</QueryState>
     </HudPage>
   );

@@ -23,16 +23,16 @@ describe("SlideDialog: пазл", () => {
   it("показує прев'ю нарізки", () => {
     open();
 
-    expect(screen.getByLabelText("Нарізка пазла")).toBeTruthy();
+    expect(screen.getByLabelText("show.puzzle.preview")).toBeTruthy();
   });
 
   it("cut, count і «Перемішати» потрапляють у update", () => {
     const dispatch = open();
 
-    fireEvent.click(screen.getByRole("button", { name: "Органічна" }));
-    fireEvent.change(screen.getByLabelText("Кількість шматочків"), { target: { value: "40" } });
-    fireEvent.click(screen.getByRole("button", { name: "Перемішати" }));
-    fireEvent.click(screen.getByRole("button", { name: "Готово" }));
+    fireEvent.click(screen.getByRole("button", { name: "show.slideDialog.cuts.organic" }));
+    fireEvent.change(screen.getByLabelText("show.slideDialog.piecesLabel"), { target: { value: "40" } });
+    fireEvent.click(screen.getByRole("button", { name: "show.slideDialog.shuffle" }));
+    fireEvent.click(screen.getByRole("button", { name: "show.slideDialog.done" }));
 
     const { puzzle } = dispatch.mock.calls[0][0].patch;
 

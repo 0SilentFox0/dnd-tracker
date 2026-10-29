@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
 import { showKeys } from "./keys";
@@ -32,13 +33,15 @@ export function useDeck(campaignId: string, deckId: string | null, options: { in
 }
 
 export function useDeckMutations(campaignId: string) {
+  const t = useTranslations("show");
+
   const queryClient = useQueryClient();
 
   const notify = useNotify();
 
   const invalidate = () => queryClient.invalidateQueries({ queryKey: showKeys.decks(campaignId) });
 
-  const onError = (error: unknown) => void notify(errorMessage(error, "Не вдалося виконати дію"));
+  const onError = (error: unknown) => void notify(errorMessage(error, t("errors.action")));
 
   const create = useMutation({ mutationFn: (title: string) => createDeck(campaignId, { title }), onSuccess: invalidate, onError });
 
@@ -52,6 +55,8 @@ export function useDeckMutations(campaignId: string) {
 }
 
 export function useDeckScene(campaignId: string, deckId: string) {
+  const t = useTranslations("show");
+
   const queryClient = useQueryClient();
 
   const notify = useNotify();
@@ -62,7 +67,7 @@ export function useDeckScene(campaignId: string, deckId: string) {
       queryClient.setQueryData(showKeys.deck(campaignId, deckId), deck);
       void queryClient.invalidateQueries({ queryKey: showKeys.decks(campaignId) });
     },
-    onError: (error) => void notify(errorMessage(error, "Не вдалося прив'язати набір до сцени")),
+    onError: (error) => void notify(errorMessage(error, t("errors.bindScene"))),
   });
 
   return { set: (scenarioPageId: string | null) => mutateAsync(scenarioPageId).then(() => undefined, () => undefined), pending: isPending };

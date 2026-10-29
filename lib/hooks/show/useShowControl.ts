@@ -1,6 +1,7 @@
 "use client";
 
 import { useMemo } from "react";
+import { useTranslations } from "next-intl";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 
 import { showKeys } from "./keys";
@@ -18,6 +19,8 @@ export interface ShowControl {
 }
 
 export function useShowControl(campaignId: string, onFailure: (message: string) => void): ShowControl {
+  const t = useTranslations("show");
+
   const queryClient = useQueryClient();
 
   const { mutateAsync, isPending } = useMutation({
@@ -30,7 +33,7 @@ export function useShowControl(campaignId: string, onFailure: (message: string) 
     onError: (error) => {
       if (error instanceof ApiError && error.status === 409) void queryClient.invalidateQueries({ queryKey: showKeys.state(campaignId) });
 
-      onFailure(errorMessage(error, "Не вдалося керувати показом"));
+      onFailure(errorMessage(error, t("errors.control")));
     },
   });
 

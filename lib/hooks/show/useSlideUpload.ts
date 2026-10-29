@@ -1,8 +1,10 @@
 "use client";
 
 import { useCallback, useState } from "react";
+import { useTranslations } from "next-intl";
 
 import { uploadSlideImage } from "@/lib/api/decks";
+import { API_ERRORS } from "@/lib/constants/api-errors";
 import { SLIDE_MAX_EDGE_PX } from "@/lib/constants/show";
 import { resizeImageToBlob } from "@/lib/utils/common/image-resize";
 import { newSlideId } from "@/lib/utils/show/deck-draft";
@@ -11,6 +13,8 @@ import type { Slide } from "@/types/show";
 const PARALLEL = 3;
 
 export function useSlideUpload(campaignId: string, onError: (message: string) => void) {
+  const t = useTranslations();
+
   const [progress, setProgress] = useState<{ done: number; total: number } | null>(null);
 
   const upload = useCallback(
@@ -28,9 +32,9 @@ export function useSlideUpload(campaignId: string, onError: (message: string) =>
           const i = next++;
 
           try {
-            slides[i] = { id: newSlideId(), imageUrl: await uploadSlideImage(campaignId, await resizeImageToBlob(files[i], SLIDE_MAX_EDGE_PX)) };
+            slides[i] = { id: newSlideId(), imageUrl: await uploadSlideImage(campaignId, await resizeImageToBlob(files[i], SLIDE_MAX_EDGE_PX), (message) => t(API_ERRORS.IMAGE_UPLOAD_FAILED, { message })) };
           } catch (e) {
-            onError(`${files[i].name}: ${e instanceof Error ? e.message : "помилка"}`);
+            onError(t("show.errors.uploadFile", { name: files[i].name, message: e instanceof Error ? e.message : t("show.errors.uploadUnknown") }));
           }
 
           done += 1;
@@ -44,7 +48,7 @@ export function useSlideUpload(campaignId: string, onError: (message: string) =>
 
       return slides.filter((s): s is Slide => s !== null);
     },
-    [campaignId, onError],
+    [campaignId, onError, t],
   );
 
   return { upload, progress };

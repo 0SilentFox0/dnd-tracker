@@ -1,6 +1,7 @@
 "use client";
 
 import { type ReactNode, useState } from "react";
+import { useTranslations } from "next-intl";
 
 import { Input } from "@/components/ui/input";
 import { useTracks } from "@/lib/hooks/music";
@@ -16,6 +17,8 @@ function Row({ selected, onClick, children }: { selected: boolean; onClick(): vo
 }
 
 export function TrackPicker({ campaignId, value, onChange }: { campaignId: string; value: string | undefined; onChange(trackId: string | undefined): void }) {
+  const t = useTranslations("show");
+
   const { data: tracks = [] } = useTracks(campaignId);
 
   const [query, setQuery] = useState("");
@@ -24,10 +27,10 @@ export function TrackPicker({ campaignId, value, onChange }: { campaignId: strin
 
   return (
     <div className="space-y-2">
-      <Input aria-label="Пошук треку" placeholder="Пошук треку" value={query} onChange={(e) => setQuery(e.target.value)} />
+      <Input aria-label={t("trackPicker.search")} placeholder={t("trackPicker.search")} value={query} onChange={(e) => setQuery(e.target.value)} />
       <div className="max-h-56 overflow-y-auto rounded border border-hud-rule p-1">
         <Row selected={value === undefined} onClick={() => onChange(undefined)}>
-          Без треку
+          {t("trackPicker.none")}
         </Row>
         {groups.map((group) => (
           <div key={group.name}>

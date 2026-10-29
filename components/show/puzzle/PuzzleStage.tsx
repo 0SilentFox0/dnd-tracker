@@ -1,6 +1,7 @@
 "use client";
 
 import { useMemo, useRef } from "react";
+import { useTranslations } from "next-intl";
 
 import { PuzzleBoard } from "./PuzzleBoard";
 import { PuzzleHand } from "./PuzzleHand";
@@ -23,6 +24,8 @@ interface Props {
 }
 
 export function PuzzleStage({ campaignId, isDM, userId, spec, imageUrl, puzzle }: Props) {
+  const t = useTranslations("show");
+
   const notify = useNotify();
 
   const confirm = useConfirm();
@@ -46,7 +49,7 @@ export function PuzzleStage({ campaignId, isDM, userId, spec, imageUrl, puzzle }
   const held = pieces.find((p) => p.id === drag?.id);
 
   const reset = async () => {
-    if (await confirm({ title: "Скинути пазл?", description: "Усі шматочки повернуться в сайдбар.", confirmLabel: "Скинути", destructive: true })) void control.send({ action: "puzzleReset" });
+    if (await confirm({ title: t("puzzle.resetConfirm.title"), description: t("puzzle.resetConfirm.description"), confirmLabel: t("puzzle.resetConfirm.confirm"), destructive: true })) void control.send({ action: "puzzleReset" });
   };
 
   return (
@@ -61,10 +64,10 @@ export function PuzzleStage({ campaignId, isDM, userId, spec, imageUrl, puzzle }
         {isDM && (
           <div className="absolute right-2 top-2 z-20 flex gap-2">
             <Button size="sm" variant="secondary" onClick={() => void control.send({ action: "puzzleRelease" })}>
-              Відпустити всі
+              {t("puzzle.releaseAll")}
             </Button>
             <Button size="sm" variant="destructive" onClick={() => void reset()}>
-              Скинути
+              {t("puzzle.reset")}
             </Button>
           </div>
         )}
