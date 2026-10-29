@@ -5,7 +5,8 @@ import { Award, Plus } from "lucide-react";
 
 import { BackgroundCard } from "@/components/backgrounds/BackgroundCard";
 import { CreateBackgroundDialog } from "@/components/backgrounds/CreateBackgroundDialog";
-import { EmptyState, LoadingState } from "@/components/common/states";
+import { DmCardGrid, DmListBody } from "@/components/common/DmListBody";
+import { EmptyState } from "@/components/common/states";
 import { ContentTransferButtons } from "@/components/content-import/ContentTransferButtons";
 import { HudPage, HudPageHeader } from "@/components/hud/page";
 import { Button } from "@/components/ui/button";
@@ -33,17 +34,18 @@ export function DMBackgroundsPageClient({ campaignId }: { campaignId: string }) 
           </>
         }
       />
-      {list.isLoading ? (
-        <LoadingState rows={6} label={t("page.loading")} />
-      ) : backgrounds.length === 0 ? (
-        <EmptyState icon={Award} title={t("page.emptyTitle")} description={t("page.emptyDescription")} />
-      ) : (
-        <div className="grid gap-3 md:grid-cols-2 lg:grid-cols-3">
+      <DmListBody
+        isLoading={list.isLoading}
+        isEmpty={backgrounds.length === 0}
+        loadingLabel={t("page.loading")}
+        empty={<EmptyState icon={Award} title={t("page.emptyTitle")} description={t("page.emptyDescription")} />}
+      >
+        <DmCardGrid>
           {backgrounds.map((background) => (
             <BackgroundCard key={background.id} background={background} campaignId={campaignId} onDelete={list.remove} />
           ))}
-        </div>
-      )}
+        </DmCardGrid>
+      </DmListBody>
       <CreateBackgroundDialog open={list.createDialog.open} onOpenChange={list.createDialog.setOpen} onCreateBackground={list.create} />
     </HudPage>
   );

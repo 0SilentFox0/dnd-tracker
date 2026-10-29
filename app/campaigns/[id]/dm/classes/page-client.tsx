@@ -5,7 +5,8 @@ import { GraduationCap, Plus } from "lucide-react";
 
 import { ClassCard } from "@/components/classes/ClassCard";
 import { CreateClassDialog } from "@/components/classes/CreateClassDialog";
-import { EmptyState, LoadingState } from "@/components/common/states";
+import { DmCardGrid, DmListBody } from "@/components/common/DmListBody";
+import { EmptyState } from "@/components/common/states";
 import { ContentTransferButtons } from "@/components/content-import/ContentTransferButtons";
 import { HudPage, HudPageHeader } from "@/components/hud/page";
 import { Button } from "@/components/ui/button";
@@ -34,17 +35,18 @@ export function DMClassesPageClient({ campaignId }: { campaignId: string }) {
         }
       />
 
-      {list.isLoading && classes.length === 0 ? (
-        <LoadingState rows={6} label={t("page.loading")} />
-      ) : classes.length === 0 ? (
-        <EmptyState icon={GraduationCap} title={t("page.emptyTitle")} description={t("page.emptyDescription")} />
-      ) : (
-        <div className="grid gap-3 md:grid-cols-2 lg:grid-cols-3">
+      <DmListBody
+        isLoading={list.isLoading}
+        isEmpty={classes.length === 0}
+        loadingLabel={t("page.loading")}
+        empty={<EmptyState icon={GraduationCap} title={t("page.emptyTitle")} description={t("page.emptyDescription")} />}
+      >
+        <DmCardGrid>
           {classes.map((gameClass) => (
             <ClassCard key={gameClass.id} gameClass={gameClass} campaignId={campaignId} onDelete={list.actions.deleteClass} />
           ))}
-        </div>
-      )}
+        </DmCardGrid>
+      </DmListBody>
 
       <CreateClassDialog open={list.createDialog.open} onOpenChange={list.createDialog.setOpen} onCreateClass={list.actions.createClass} />
     </HudPage>
