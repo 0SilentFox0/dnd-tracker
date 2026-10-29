@@ -32,7 +32,7 @@ export function description(row: JsonRecord, ctx: AdapterContext): string {
 }
 
 export function unsupported(row: JsonRecord, handled: readonly string[], ctx: AdapterContext): string {
-  const common = new Set(["name", "source", "page", "edition", "additionalSources", "otherSources", "referenceSources", "alias", "entries", "entriesHigherLevel", ...handled]);
+  const common = new Set(["name", "source", "page", "edition", "additionalSources", "otherSources", "referenceSources", "alias", "entries", "entriesHigherLevel", "fluff", "foundryImg", "tokenHref", "hasFluffImages", "hasToken", "hasFluff", ...handled]);
 
   const notes: string[] = [];
 
