@@ -1,5 +1,6 @@
 import { readSpellDefinition } from "./read";
 
+import type { ErrorParams } from "@/lib/constants/api-errors";
 import { createSpellSchema } from "@/lib/schemas/spells";
 import { parseSpellFx } from "@/lib/utils/battle/fx/spell-fx-schema";
 import type { Spell, SpellFormData } from "@/types/spells";
@@ -61,44 +62,23 @@ export function spellToForm(spell: Spell): SpellFormData {
   };
 }
 
-const PATH_LABELS: Record<string, string> = {
-  name: "Назва",
-  level: "Рівень",
-  groupId: "Школа",
-  icon: "Іконка",
-  description: "Опис",
-  appearanceDescription: "Вигляд",
-  cost: "Вартість",
-  dice: "Базові кубики",
-  targeting: "Цілі",
-  "targeting.range": "Дальність",
-  "targeting.size": "Розмір",
-  "targeting.maxTargets": "Макс. цілей",
-  "targeting.side": "Сторона",
-  "targeting.shape": "Форма",
-  "targeting.zone": "Небезпека",
-  "targeting.zone.rounds": "Раундів небезпеки",
-  resolution: "Перевірка",
-  spellEffects: "Ефекти",
-  raceModifiers: "Модифікатори рас",
-  stackable: "Накопичення",
-  maxStacks: "Макс. накопичень",
-  dieSides: "Грані кубика",
-  upcastDice: "Кубики за коло",
-  upcastTargets: "Цілі за коло",
-  fx: "Анімація",
-};
+const KNOWN_PATHS = new Set([
+  "name", "level", "groupId", "icon", "description", "appearanceDescription", "cost", "dice", "targeting",
+  "targeting.range", "targeting.size", "targeting.maxTargets", "targeting.side", "targeting.shape", "targeting.zone",
+  "targeting.zone.rounds", "resolution", "spellEffects", "raceModifiers", "stackable", "maxStacks", "dieSides",
+  "upcastDice", "upcastTargets", "fx",
+]);
 
-function issueLabel(path: PropertyKey[]): string {
+const camelPath = (keys: string[]) => keys.map((k, i) => (i ? k[0].toUpperCase() + k.slice(1) : k)).join("");
+
+function issueFieldKey(path: PropertyKey[]): string {
   const keys = path.filter((p) => typeof p !== "number").map(String);
 
   for (let n = keys.length; n > 0; n--) {
-    const label = PATH_LABELS[keys.slice(0, n).join(".")];
-
-    if (label) return label;
+    if (KNOWN_PATHS.has(keys.slice(0, n).join("."))) return `spellEditor.fields.${camelPath(keys.slice(0, n))}`;
   }
 
-  return "Заклинання";
+  return "spellEditor.fields.spell";
 }
 
 function payloadInput(form: SpellFormData) {
@@ -109,9 +89,15 @@ export function formToPayload(form: SpellFormData) {
   return createSpellSchema.parse(payloadInput(form));
 }
 
-/** Перший зрозумілий опис помилки для DM або null, якщо форма пройде серверну схему. */
-export function spellFormError(form: SpellFormData): string | null {
-  if (!form.name.trim()) return "Вкажіть назву заклинання";
+export interface SpellFormIssue {
+  fieldKey: string | null;
+  message: string;
+  params?: ErrorParams;
+}
+
+/** First problem the server schema would reject, or null; `fieldKey`/`message` are translation keys. */
+export function spellFormIssue(form: SpellFormData): SpellFormIssue | null {
+  if (!form.name.trim()) return { fieldKey: null, message: "spellEditor.validation.nameRequired" };
 
   const parsed = createSpellSchema.safeParse(payloadInput(form));
 
@@ -119,5 +105,5 @@ export function spellFormError(form: SpellFormData): string | null {
 
   const issue = parsed.error.issues[0];
 
-  return `${issueLabel(issue.path)}: ${issue.message}`;
+  return { fieldKey: issueFieldKey(issue.path), message: issue.message, params: (issue as { params?: ErrorParams }).params };
 }

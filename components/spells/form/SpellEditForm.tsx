@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { useTranslations } from "next-intl";
 
 import { LoadingState } from "@/components/common/states";
 import { HudFormPage } from "@/components/hud/form";
@@ -14,16 +15,21 @@ import {
   useSpell,
   useSpellFormSync,
   useSpellGroups,
+  useSpellIssueText,
   useUpdateSpell,
 } from "@/lib/hooks/spells";
-import { formToPayload, spellFormError, spellToForm } from "@/lib/utils/spells/model/form";
+import { formToPayload, spellFormIssue, spellToForm } from "@/lib/utils/spells/model/form";
 
 export function SpellEditForm({ campaignId: id, spellId }: { campaignId: string; spellId: string }) {
+  const t = useTranslations();
+
   const confirm = useConfirm();
 
   const notify = useNotify();
 
   const router = useRouter();
+
+  const issueText = useSpellIssueText();
 
   const [formData, setFormData] = useState<SpellFormData>(getDefaultSpellFormData);
 
@@ -40,10 +46,10 @@ export function SpellEditForm({ campaignId: id, spellId }: { campaignId: string;
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    const problem = spellFormError(formData);
+    const problem = spellFormIssue(formData);
 
     if (problem) {
-      void notify(problem);
+      void notify(issueText(problem));
 
       return;
     }
@@ -55,7 +61,7 @@ export function SpellEditForm({ campaignId: id, spellId }: { campaignId: string;
   };
 
   const handleDelete = async () => {
-    if (!(await confirm({ title: "Ви впевнені, що хочете видалити це заклинання?", confirmLabel: "Видалити", destructive: true }))) {
+    if (!(await confirm({ title: t("spellEditor.page.deleteConfirm"), confirmLabel: t("common.actions.delete"), destructive: true }))) {
       return;
     }
 
@@ -71,16 +77,16 @@ export function SpellEditForm({ campaignId: id, spellId }: { campaignId: string;
 
   if (fetching) {
     return (
-      <HudFormPage title="Редагувати заклинання">
+      <HudFormPage title={t("spellEditor.page.editTitle")}>
         <div className="px-4 py-3">
-          <LoadingState rows={6} label="Завантаження..." />
+          <LoadingState rows={6} label={t("spellEditor.page.loading")} />
         </div>
       </HudFormPage>
     );
   }
 
   return (
-    <HudFormPage title={`Редагувати заклинання: ${formData.name ?? ""}`} aside="Оновіть інформацію про заклинання">
+    <HudFormPage title={t("spellEditor.page.editTitleNamed", { name: formData.name ?? "" })} aside={t("spellEditor.page.editAside")}>
       <SpellFormBody
         campaignId={id}
         form={{ data: formData, set: setFormData }}
@@ -88,7 +94,7 @@ export function SpellEditForm({ campaignId: id, spellId }: { campaignId: string;
         submit={{
           onSubmit: handleSubmit,
           isPending: updateSpellMutation.isPending,
-          label: "Зберегти зміни",
+          label: t("spellEditor.page.editSubmit"),
           error:
             (updateSpellMutation.error as Error)?.message ||
             (deleteSpellMutation.error as Error)?.message ||

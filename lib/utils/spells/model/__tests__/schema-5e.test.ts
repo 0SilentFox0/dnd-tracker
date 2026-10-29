@@ -27,6 +27,6 @@ describe("SpellDefinitionSchema 5e", () => {
     const r = SpellDefinitionSchema.safeParse({ ...base, targeting: { kind: "self" }, resolution: { kind: "attack" } });
 
     expect(r.success).toBe(false);
-    expect(r.error?.issues[0].message).toBe("Атака заклинанням — лише для цілі-ворога або області");
+    expect(r.error?.issues[0].message).toBe("spellEditor.validation.attackTargets");
   });
 });

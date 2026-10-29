@@ -1,6 +1,7 @@
 export { ALL_SCHOOLS, useSchoolFilter } from "./useSchoolFilter";
 export { useSpellFormSync } from "./useSpellFormSync";
 export { useSpellGroupActions } from "./useSpellGroupActions";
+export { useSpellIssueText } from "./useSpellIssueText";
 export { useSpellLabels } from "./useSpellLabels";
 export { useSpellRefs } from "./useSpellRefs";
 export {

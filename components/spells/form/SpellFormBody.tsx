@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { useTranslations } from "next-intl";
 
 import type { SpellFormData } from "./spell-form-defaults";
 import { SPELL_FORM_TAB, type SpellFormTabId } from "./spell-form-tabs";
@@ -33,6 +34,8 @@ export function SpellFormBody({
   submit,
   remove,
 }: SpellFormBodyProps) {
+  const t = useTranslations();
+
   const { data: formData, set: setFormData } = form;
 
   const classesEnabled = !!useCampaignRules(campaignId).data?.classes.enabled;
@@ -40,17 +43,17 @@ export function SpellFormBody({
   const tabs: HudTab<SpellFormTabId>[] = [
     {
       id: SPELL_FORM_TAB.basic,
-      label: "Основне",
+      label: t("spellEditor.tabs.basic"),
       content: <SpellFormBasicFields formData={formData} setFormData={setFormData} spellGroups={spellGroups} />,
     },
     {
       id: SPELL_FORM_TAB.roll,
-      label: "Сила",
+      label: t("spellEditor.tabs.power"),
       content: <SpellFormPowerFields formData={formData} setFormData={setFormData} classesEnabled={classesEnabled} />,
     },
     {
       id: SPELL_FORM_TAB.effects,
-      label: "Ефекти",
+      label: t("spellEditor.tabs.effects"),
       content: (
         <div className="space-y-4">
           <SpellFormEffects campaignId={campaignId} formData={formData} setFormData={setFormData} />
@@ -61,8 +64,8 @@ export function SpellFormBody({
 
   return (
     <>
-      {formData.executionMode === "manual" && <p role="status">Ручне заклинання: використовуйте опис. Автоматичний каст заблокований до налаштування механіки.</p>}
-      <label className="block my-3"><input type="checkbox" checked={formData.executionMode !== "manual"} onChange={e => setFormData({ ...formData, executionMode: e.target.checked ? "native" : "manual" })} /> Механіку перевірено: дозволити автоматичне застосування після збереження</label>
+      {formData.executionMode === "manual" && <p role="status">{t("spellEditor.body.manualNotice")}</p>}
+      <label className="block my-3"><input type="checkbox" checked={formData.executionMode !== "manual"} onChange={e => setFormData({ ...formData, executionMode: e.target.checked ? "native" : "manual" })} /> {t("spellEditor.body.verified")}</label>
       <HudForm
         id="spell-form"
         onSubmit={submit.onSubmit}
@@ -71,15 +74,15 @@ export function SpellFormBody({
         actions={
           <>
             <Button type="submit" disabled={submit.isPending}>
-              {submit.isPending ? "Збереження..." : submit.label}
+              {submit.isPending ? t("common.actions.saving") : submit.label}
             </Button>
             {remove && (
               <Button type="button" variant="destructive" onClick={remove.onDelete} disabled={remove.isDeleting}>
-                {remove.isDeleting ? "Видалення..." : "Видалити"}
+                {remove.isDeleting ? t("spellEditor.page.deleting") : t("common.actions.delete")}
               </Button>
             )}
             <Button type="button" variant="outline" asChild>
-              <Link href={`/campaigns/${campaignId}/dm/spells`}>Скасувати</Link>
+              <Link href={`/campaigns/${campaignId}/dm/spells`}>{t("common.actions.cancel")}</Link>
             </Button>
           </>
         }

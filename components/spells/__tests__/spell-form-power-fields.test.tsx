@@ -18,9 +18,9 @@ describe("SpellFormPowerFields: ланцюг", () => {
     const setFormData = vi.fn();
 
     render(<SpellFormPowerFields formData={form({ kind: "enemy" })} setFormData={setFormData} classesEnabled />);
-    fireEvent.click(screen.getByLabelText("Фіксовані кубики"));
+    fireEvent.click(screen.getByLabelText("spellEditor.power.fixedDice"));
     expect(setFormData).toHaveBeenLastCalledWith(expect.objectContaining({ fixedDice: true }));
-    fireEvent.change(screen.getByLabelText("Добавка до шкоди / лікування"), { target: { value: "7" } });
+    fireEvent.change(screen.getByLabelText("spellEditor.power.damageBonus"), { target: { value: "7" } });
     expect(setFormData).toHaveBeenLastCalledWith(expect.objectContaining({ damageBonus: 7 }));
   });
 
@@ -29,23 +29,23 @@ describe("SpellFormPowerFields: ланцюг", () => {
 
     const { rerender } = render(<SpellFormPowerFields formData={form({ kind: "template", shape: "circle", size: 20, side: "enemy", maxTargets: 3 })} setFormData={setFormData} classesEnabled />);
 
-    fireEvent.click(screen.getByLabelText("Точна площа 5e"));
+    fireEvent.click(screen.getByLabelText("spellEditor.power.exact"));
     expect(setFormData.mock.calls.at(-1)?.[0].targeting.exact).toBe(true);
     rerender(<SpellFormPowerFields formData={form({ kind: "template", shape: "emanation", size: 20, side: "enemy", maxTargets: 3 })} setFormData={setFormData} classesEnabled />);
-    expect(screen.queryByLabelText("Точна площа 5e")).toBeNull();
-    expect(screen.queryByLabelText("Дальність, фути")).toBeNull();
+    expect(screen.queryByLabelText("spellEditor.power.exact")).toBeNull();
+    expect(screen.queryByLabelText("spellEditor.power.range")).toBeNull();
   });
   it("перемикач «Ланцюг» вмикає й вимикає chain для area", () => {
     const setFormData = vi.fn();
 
     const { rerender } = render(<SpellFormPowerFields formData={form({ kind: "area", side: "enemy", maxTargets: 4 })} setFormData={setFormData} />);
 
-    fireEvent.click(screen.getByLabelText("Ланцюг: наступна найближча ціль"));
+    fireEvent.click(screen.getByLabelText("spellEditor.power.chain"));
 
     expect(setFormData).toHaveBeenLastCalledWith(expect.objectContaining({ targeting: { kind: "area", side: "enemy", maxTargets: 4, chain: true } }));
 
     rerender(<SpellFormPowerFields formData={form({ kind: "area", side: "enemy", maxTargets: 4, chain: true })} setFormData={setFormData} />);
-    fireEvent.click(screen.getByLabelText("Ланцюг: наступна найближча ціль"));
+    fireEvent.click(screen.getByLabelText("spellEditor.power.chain"));
 
     expect(setFormData.mock.calls.at(-1)?.[0].targeting.chain).toBeUndefined();
   });
@@ -53,7 +53,7 @@ describe("SpellFormPowerFields: ланцюг", () => {
   it("для інших цілей перемикача немає", () => {
     render(<SpellFormPowerFields formData={form({ kind: "enemy" })} setFormData={vi.fn()} />);
 
-    expect(screen.queryByLabelText("Ланцюг: наступна найближча ціль")).toBeNull();
+    expect(screen.queryByLabelText("spellEditor.power.chain")).toBeNull();
   });
 });
 
@@ -61,7 +61,7 @@ it("clears a stored damage bonus through the serialized editor payload", () => {
   const setFormData = vi.fn();
 
   render(<SpellFormPowerFields formData={{ ...form({ kind: "enemy" }), damageBonus: 5 }} setFormData={setFormData} classesEnabled />);
-  fireEvent.change(screen.getByLabelText("Добавка до шкоди / лікування"), { target: { value: "" } });
+  fireEvent.change(screen.getByLabelText("spellEditor.power.damageBonus"), { target: { value: "" } });
 
   const payload = JSON.parse(JSON.stringify(formToPayload(setFormData.mock.calls.at(-1)?.[0])));
 
