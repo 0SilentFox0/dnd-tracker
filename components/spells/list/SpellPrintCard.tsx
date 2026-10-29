@@ -6,7 +6,7 @@ import { SpellIcon } from "@/components/spells/SpellIcon";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { spellLevelRoman } from "@/lib/constants/spells";
-import { useSpellLabels } from "@/lib/hooks/spells";
+import { useSpellMechanics } from "@/lib/hooks/spells/useSpellMechanics";
 import { useTranslator } from "@/lib/i18n/use-translator";
 import { getSpellGroupIcon } from "@/lib/utils/spells/spell-icons";
 import type { Spell } from "@/types/spells";
@@ -14,7 +14,7 @@ import type { Spell } from "@/types/spells";
 export function SpellPrintCard({ spell }: { spell: Spell }) {
   const tc = useTranslator("common");
 
-  const labels = useSpellLabels();
+  const mechanics = useSpellMechanics();
 
   const SpellGroupIcon = getSpellGroupIcon(spell.spellGroup);
 
@@ -42,7 +42,7 @@ export function SpellPrintCard({ spell }: { spell: Spell }) {
             <span className="hidden sm:inline">{spell.spellGroup?.name || tc("ungrouped.spellGroup")}</span>
             <span className="sm:hidden truncate max-w-[60px]">{spell.spellGroup?.name?.[0] || "-"}</span>
           </Badge>
-          {labels.mechanics(spell).map((label) => (
+          {mechanics(spell).map((label) => (
             <Badge key={label} variant="outline" className="text-xs">
               {label}
             </Badge>

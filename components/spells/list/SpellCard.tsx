@@ -16,7 +16,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { useSpellLabels } from "@/lib/hooks/spells";
+import { useSpellMechanics } from "@/lib/hooks/spells/useSpellMechanics";
 import { useTranslator } from "@/lib/i18n/use-translator";
 import { getSpellGroupIcon } from "@/lib/utils/spells/spell-icons";
 import type { Spell, SpellGroup } from "@/types/spells";
@@ -40,7 +40,7 @@ export function SpellCard({ spell, campaignId, spellGroups, onRemoveFromGroup, o
 
   const tc = useTranslator("common");
 
-  const labels = useSpellLabels();
+  const mechanics = useSpellMechanics();
 
   const [copied, setCopied] = useState(false);
 
@@ -68,7 +68,7 @@ export function SpellCard({ spell, campaignId, spellGroups, onRemoveFromGroup, o
           <div className="mt-1 flex flex-wrap gap-1">
             <HudPill icon={<Sparkles className="size-3" />}>{tc(`spellLevels.${spell.level}`)}</HudPill>
             {groupName === "Monster Actions" && <HudPill>Monster Actions</HudPill>}
-            {labels.mechanics(spell).map((label) => (
+            {mechanics(spell).map((label) => (
               <HudPill key={label}>{label}</HudPill>
             ))}
           </div>

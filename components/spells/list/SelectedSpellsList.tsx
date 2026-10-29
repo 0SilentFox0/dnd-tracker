@@ -7,7 +7,7 @@ import { HudCard } from "@/components/hud/page";
 import { SpellIcon } from "@/components/spells/SpellIcon";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { useSpellLabels } from "@/lib/hooks/spells";
+import { useSpellMechanics } from "@/lib/hooks/spells/useSpellMechanics";
 import { useTranslator } from "@/lib/i18n/use-translator";
 import type { Spell } from "@/types/spells";
 
@@ -24,7 +24,7 @@ export function SelectedSpellsList({
 
   const tc = useTranslator("common");
 
-  const labels = useSpellLabels();
+  const mechanics = useSpellMechanics();
 
   if (selectedSpells.length === 0) {
     return (
@@ -66,7 +66,7 @@ export function SelectedSpellsList({
                     <Badge variant="secondary" className="text-xs">
                       {tc(`spellLevels.${spell.level}`)}
                     </Badge>
-                    {labels.mechanics(spell).map((label) => (
+                    {mechanics(spell).map((label) => (
                       <Badge key={label} variant="outline" className="text-xs">
                         {label}
                       </Badge>

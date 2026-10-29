@@ -3,9 +3,7 @@
 import { useCallback, useMemo } from "react";
 
 import { useTranslator } from "@/lib/i18n/use-translator";
-import { readSpellDefinition } from "@/lib/utils/spells/model/read";
 import type { SpellCost, SpellResolution, SpellTargeting } from "@/lib/utils/spells/model/schema";
-import type { Spell } from "@/types/spells";
 
 export function useSpellLabels() {
   const t = useTranslator();
@@ -36,19 +34,5 @@ export function useSpellLabels() {
 
   const cost = useCallback((c: SpellCost): string => t(`spells.inline.cost.${c}`), [t]);
 
-  const mechanics = useCallback(
-    (spell: Spell): string[] => {
-      const def = readSpellDefinition({ id: spell.id, dice: spell.dice, cost: spell.cost, targeting: spell.targeting, resolution: spell.resolution, spellEffects: spell.spellEffects, raceModifiers: spell.raceModifiers });
-
-      return [
-        targeting(def.targeting),
-        def.dice > 0 ? t("spells.mechanics.dice", { dice: def.dice }) : t("spells.mechanics.noDice"),
-        ...(def.resolution.kind === "save" ? [resolution(def.resolution)] : []),
-        ...(def.cost === "bonusAction" ? [cost(def.cost)] : []),
-      ];
-    },
-    [t, targeting, resolution, cost],
-  );
-
-  return useMemo(() => ({ targeting, resolution, cost, mechanics }), [targeting, resolution, cost, mechanics]);
+  return useMemo(() => ({ targeting, resolution, cost }), [targeting, resolution, cost]);
 }
