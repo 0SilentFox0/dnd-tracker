@@ -34,7 +34,7 @@ export const mazeSchema = z.object({
         by: z.string().max(64),
       }),
     )
-    .refine((m) => Object.keys(m).length <= 3600, "Забагато позначок"),
+    .refine((m) => Object.keys(m).length <= 3600, "battleSetup.validation.tooManyMarks"),
   dark: z.boolean(),
   moved: z.boolean().optional(),
 });
@@ -68,7 +68,7 @@ export const battleMapSchema = z.object({
   background: z
     .string()
     .max(7_000_000)
-    .refine((v) => MAP_BACKGROUND_PATTERN.test(v), "Фон: потрібне посилання https, файл або вбудований фон")
+    .refine((v) => MAP_BACKGROUND_PATTERN.test(v), "battleSetup.validation.background")
     .nullable(),
   opacity: z.number().min(0).max(1),
   blocked: z.array(z.string().regex(/^\d+:\d+$/)).max(3600).optional(),
@@ -82,15 +82,15 @@ export const battleMapSchema = z.object({
         damage: z
           .object({ dice: z.string().regex(HAZARD_DICE_PATTERN).optional(), amount: z.number().int().min(0).max(1000).optional(), type: z.string().min(1).max(30), spellId: z.string().max(64).optional() })
           .optional(),
-      }).refine((c) => c.kind !== "barrier" || c.untilRound !== undefined, "Барʼєру потрібен строк"),
+      }).refine((c) => c.kind !== "barrier" || c.untilRound !== undefined, "battleSetup.validation.barrierNeedsDuration"),
     )
-    .refine((t) => Object.keys(t).length <= 3600, "Забагато клітинок місцевості")
+    .refine((t) => Object.keys(t).length <= 3600, "battleSetup.validation.tooManyTerrainCells")
     .optional(),
   backgroundCols: z.number().positive().max(200).optional(),
   gridOffset: z.object({ x: z.number().min(0).lt(1), y: z.number().min(0).lt(1) }).optional(),
   maze: mazeSchema.nullable().optional(),
   weather: weatherKindSchema.nullable().optional(),
-}).refine((m) => hasPlayableArea(m), { message: "Ігрова зона карти замала: потрібно щонайменше 2×2 вільні клітинки", path: ["blocked"] });
+}).refine((m) => hasPlayableArea(m), { message: "battleSetup.validation.playableAreaTooSmall", path: ["blocked"] });
 
 export const createBattleSchema = z.object({
   name: z.string().min(1).max(100),

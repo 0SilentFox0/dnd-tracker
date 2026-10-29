@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { useTranslations } from "next-intl";
 import { Swords } from "lucide-react";
 
 import { BattleListCard } from "@/components/battle/list/BattleListCard";
@@ -15,6 +16,8 @@ import { useBattleListSections } from "@/lib/hooks/battles";
 type Battle = Parameters<typeof BattleListCard>[0]["battle"] & { status: string };
 
 export function BattleSections({ battles, campaignId }: { battles: Battle[]; campaignId: string }) {
+  const t = useTranslations("battleSetup.list");
+
   const { search, sections } = useBattleListSections(battles);
 
   if (battles.length === 0) {
@@ -22,10 +25,10 @@ export function BattleSections({ battles, campaignId }: { battles: Battle[]; cam
       <EmptyState
         className="bg-hud-panel"
         icon={Swords}
-        title="Поки немає сцен боїв"
+        title={t("empty.title")}
         action={
           <Link href={`/campaigns/${campaignId}/dm/battles/new`}>
-            <Button>Створити першу сцену бою</Button>
+            <Button>{t("empty.create")}</Button>
           </Link>
         }
       />
@@ -34,7 +37,7 @@ export function BattleSections({ battles, campaignId }: { battles: Battle[]; cam
 
   return (
     <>
-      <SearchInput value={search.query.value} onChange={search.query.set} label="Пошук боїв" />
+      <SearchInput value={search.query.value} onChange={search.query.set} label={t("search")} />
       {sections.length === 0 && <SearchEmptyState query={search.query.value} onClear={() => search.query.set("")} />}
       {sections.map(({ kind, title, battles: list }) => (
         <HudPanel key={kind}>

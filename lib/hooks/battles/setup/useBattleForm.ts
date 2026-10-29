@@ -2,6 +2,7 @@
 
 import { useCallback } from "react";
 import { useRouter } from "next/navigation";
+import { useTranslations } from "next-intl";
 
 import { useCreateBattle, useDeleteBattle, useUpdateBattle } from "../useBattles";
 
@@ -17,6 +18,10 @@ interface UseBattleFormParams {
 }
 
 export function useBattleForm({ campaignId, battleId, formData, participants, map }: UseBattleFormParams) {
+  const t = useTranslations("battleSetup.form");
+
+  const tActions = useTranslations("common.actions");
+
   const notify = useNotify();
 
   const confirm = useConfirm();
@@ -38,7 +43,7 @@ export function useBattleForm({ campaignId, battleId, formData, participants, ma
       e.preventDefault();
 
       if (participants.length === 0) {
-        void notify("Оберіть хоча б одного учасника");
+        void notify(t("notify.noParticipants"));
 
         return;
       }
@@ -48,7 +53,7 @@ export function useBattleForm({ campaignId, battleId, formData, participants, ma
       if (battleId) {
         update.mutate(body, {
           onSuccess: () => navigateFresh(listHref),
-          onError: (error) => void notify(error instanceof Error ? error.message : "Помилка при оновленні бою"),
+          onError: (error) => void notify(error instanceof Error ? error.message : t("notify.updateFailed")),
         });
 
         return;
@@ -56,22 +61,22 @@ export function useBattleForm({ campaignId, battleId, formData, participants, ma
 
       create.mutate(body, {
         onSuccess: (battle) => router.push(`${listHref}/${battle.id}`),
-        onError: (error) => void notify(error instanceof Error ? error.message : "Помилка при створенні бою"),
+        onError: (error) => void notify(error instanceof Error ? error.message : t("notify.createFailed")),
       });
     },
-    [battleId, formData.name, formData.description, participants, map, router, navigateFresh, notify, create, update, listHref],
+    [battleId, formData.name, formData.description, participants, map, router, navigateFresh, notify, create, update, listHref, t],
   );
 
   const handleDelete = useCallback(async () => {
     if (!battleId) return;
 
-    if (!(await confirm({ title: "Ви впевнені, що хочете видалити цю сцену бою?", confirmLabel: "Видалити", destructive: true }))) return;
+    if (!(await confirm({ title: t("confirmDelete"), confirmLabel: tActions("delete"), destructive: true }))) return;
 
     remove.mutate(battleId, {
       onSuccess: () => navigateFresh(listHref),
-      onError: () => void notify("Помилка при видаленні бою"),
+      onError: () => void notify(t("notify.deleteFailed")),
     });
-  }, [battleId, confirm, remove, navigateFresh, listHref, notify]);
+  }, [battleId, confirm, remove, navigateFresh, listHref, notify, t, tActions]);
 
   return {
     status: { isSaving: battleId ? update.isPending : create.isPending, isDeleting: remove.isPending },

@@ -40,28 +40,28 @@ function Harness() {
 
 afterEach(cleanup);
 
-const drawingHidden = () => (screen.getByText("Малювання клітинок").parentElement as HTMLElement).hidden;
+const drawingHidden = () => (screen.getByText("battleSetup.map.drawing").parentElement as HTMLElement).hidden;
 
 describe("перемикач «Лабіринт»", () => {
   it("без карти перемикача немає", () => {
     render(<Harness />);
 
-    expect(screen.queryByRole("switch", { name: "Лабіринт" })).toBeNull();
+    expect(screen.queryByRole("switch", { name: "battleDm.maze.title" })).toBeNull();
   });
 
   it("вмикання дає map.maze = emptyMaze() і ховає палітру місцевості", () => {
     render(<Harness />);
 
-    fireEvent.click(screen.getByRole("switch", { name: "Бій на карті" }));
+    fireEvent.click(screen.getByRole("switch", { name: "battleSetup.map.enabled" }));
 
-    expect(screen.getByText("Малювання клітинок")).toBeTruthy();
+    expect(screen.getByText("battleSetup.map.drawing")).toBeTruthy();
 
-    fireEvent.click(screen.getByRole("switch", { name: "Лабіринт" }));
+    fireEvent.click(screen.getByRole("switch", { name: "battleDm.maze.title" }));
 
     expect(seen.editor.state.value?.maze).toEqual(emptyMaze());
     expect(drawingHidden()).toBe(true);
 
-    fireEvent.click(screen.getByRole("switch", { name: "Лабіринт" }));
+    fireEvent.click(screen.getByRole("switch", { name: "battleDm.maze.title" }));
 
     expect(seen.editor.state.value?.maze).toBeNull();
     expect(drawingHidden()).toBe(false);

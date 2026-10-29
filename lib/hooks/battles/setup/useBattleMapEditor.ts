@@ -4,6 +4,7 @@ import { useCallback, useState } from "react";
 
 import { DEFAULT_BATTLE_MAP, DEFAULT_HAZARD_DAMAGE_TYPE, DEFAULT_HAZARD_DICE, DEFAULT_HAZARD_LABEL, DEFAULT_MAP_BACKGROUND } from "@/lib/constants/battle";
 import { useImageSize } from "@/lib/hooks/common";
+import { textRef } from "@/lib/i18n/text-ref";
 import {
   applyMargins,
   clampMargins,
@@ -20,6 +21,7 @@ import {
 } from "@/lib/utils/battle/grid";
 import { MAP_MODE_REGISTRY, type MapModeDefinition, type MapModeKey } from "@/lib/utils/battle/modes";
 import type { BattleMapConfig, GridPoint } from "@/types/battle";
+import type { LogLine } from "@/types/text";
 
 const MODE_KEYS = Object.keys(MAP_MODE_REGISTRY) as MapModeKey[];
 
@@ -27,7 +29,7 @@ const modeOf = (key: MapModeKey) => MAP_MODE_REGISTRY[key] as MapModeDefinition<
 
 const NO_MARGINS: Margins = { top: 0, right: 0, bottom: 0, left: 0 };
 
-/** Пензель небезпеки; порожні кубики — небезпека без шкоди */
+/** Hazard brush; empty dice means a hazard without damage */
 export interface HazardBrush {
   label: string;
   dice: string;
@@ -36,7 +38,7 @@ export interface HazardBrush {
 
 const DEFAULT_BRUSH: HazardBrush = { label: DEFAULT_HAZARD_LABEL, dice: DEFAULT_HAZARD_DICE, damageType: DEFAULT_HAZARD_DAMAGE_TYPE };
 
-export const NO_PLAYABLE_NOTICE = "Має лишитися хоча б одна вільна ділянка 2×2";
+export const NO_PLAYABLE_NOTICE = textRef("battleSetup.map.noPlayable");
 
 export function useBattleMapEditor(initial: BattleMapConfig | null | undefined) {
   const [enabled, setEnabledState] = useState(Boolean(initial));
@@ -51,7 +53,7 @@ export function useBattleMapEditor(initial: BattleMapConfig | null | undefined) 
 
   const setBrush = useCallback((patch: Partial<HazardBrush>) => setBrushState((b) => ({ ...b, ...patch })), []);
 
-  const [notice, setNotice] = useState<string | null>(null);
+  const [notice, setNotice] = useState<LogLine | null>(null);
 
   const setEnabled = useCallback((value: boolean) => {
     setEnabledState(value);

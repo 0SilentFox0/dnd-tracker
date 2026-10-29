@@ -15,10 +15,10 @@ describe("BattleListCard", () => {
     const { container } = render(<BattleListCard battle={battle} campaignId="c1" kind="active" />);
 
     expect((container.firstElementChild as HTMLElement).dataset.tone).toBe("active");
-    expect(screen.getByText("Активний")).toBeTruthy();
-    expect(screen.getByText("Раунд:")).toBeTruthy();
+    expect(screen.getByText("battleSetup.list.status.active")).toBeTruthy();
+    expect(screen.getByText("battleSetup.list.card.round")).toBeTruthy();
     expect(screen.getByText("На тракті")).toBeTruthy();
-    expect(hrefOf("Перейти до бою")).toBe("/campaigns/c1/battles/b1");
+    expect(hrefOf("battleSetup.list.card.play")).toBe("/campaigns/c1/battles/b1");
     expect(screen.getAllByRole("link")).toHaveLength(1);
     expect(screen.queryAllByRole("button")).toHaveLength(0);
   });
@@ -26,19 +26,19 @@ describe("BattleListCard", () => {
   it("prepared: учасники, редагування й запуск", () => {
     render(<BattleListCard battle={battle} campaignId="c1" kind="prepared" />);
 
-    expect(screen.getByText("Підготовлено")).toBeTruthy();
+    expect(screen.getByText("battleSetup.list.status.prepared")).toBeTruthy();
     expect(screen.getByText("2")).toBeTruthy();
-    expect(screen.queryByText("Раунд:")).toBeNull();
-    expect(hrefOf("Редагувати")).toBe("/campaigns/c1/dm/battles/b1");
-    expect(hrefOf("Запустити")).toBe("/campaigns/c1/battles/b1");
+    expect(screen.queryByText("battleSetup.list.card.round")).toBeNull();
+    expect(hrefOf("battleSetup.list.card.edit")).toBe("/campaigns/c1/dm/battles/b1");
+    expect(hrefOf("battleSetup.list.card.start")).toBe("/campaigns/c1/battles/b1");
   });
 
   it("completed: приглушена картка лише з переглядом", () => {
     const { container } = render(<BattleListCard battle={battle} campaignId="c1" kind="completed" />);
 
     expect((container.firstElementChild as HTMLElement).dataset.tone).toBe("muted");
-    expect(screen.getByText("Завершено")).toBeTruthy();
-    expect(hrefOf("Переглянути")).toBe("/campaigns/c1/dm/battles/b1");
+    expect(screen.getByText("battleSetup.list.status.completed")).toBeTruthy();
+    expect(hrefOf("battleSetup.list.card.view")).toBe("/campaigns/c1/dm/battles/b1");
     expect(screen.getAllByRole("link")).toHaveLength(1);
   });
 });

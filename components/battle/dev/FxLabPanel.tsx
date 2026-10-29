@@ -14,10 +14,10 @@ interface LabUnit {
 }
 
 const UNITS: LabUnit[] = [
-  { id: "a1", name: "Воїн", side: "ally" },
-  { id: "a2", name: "Чарівниця", side: "ally" },
-  { id: "e1", name: "Огр", side: "enemy" },
-  { id: "e2", name: "Лич", side: "enemy" },
+  { id: "a1", name: "Warrior", side: "ally" },
+  { id: "a2", name: "Sorceress", side: "ally" },
+  { id: "e1", name: "Ogre", side: "enemy" },
+  { id: "e2", name: "Lich", side: "enemy" },
 ];
 
 interface Props {
@@ -80,9 +80,9 @@ export function FxLabPanel({ archetype, element, critical, hit, playToken }: Pro
 
       await playFx(layer, spec, arena, Infinity);
       window.clearTimeout(hitTimer.current);
-      setStatus(`завершено за ${Math.round(performance.now() - started)} мс (удар: ${ARCHETYPE_FX[archetype].impactMs} мс)`);
+      setStatus(`done in ${Math.round(performance.now() - started)} ms (impact: ${ARCHETYPE_FX[archetype].impactMs} ms)`);
     } catch (e) {
-      setStatus(`Помилка: ${e instanceof Error ? e.message : String(e)}`);
+      setStatus(`Error: ${e instanceof Error ? e.message : String(e)}`);
     } finally {
       busy.current = false;
     }

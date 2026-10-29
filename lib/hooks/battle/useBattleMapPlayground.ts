@@ -18,9 +18,9 @@ const DEMO_TERRAIN: NonNullable<BattleMapConfig["terrain"]> = {
   "9:5": { kind: "wall" },
   "6:7": { kind: "barrier", untilRound: 3 },
   "7:7": { kind: "barrier", untilRound: 3 },
-  "12:8": { kind: "hazard", label: "Вогняна стіна" },
-  "13:8": { kind: "hazard", label: "Вогняна стіна" },
-  "12:9": { kind: "hazard", label: "Вогняна стіна" },
+  "12:8": { kind: "hazard", label: "Fire wall" },
+  "13:8": { kind: "hazard", label: "Fire wall" },
+  "12:9": { kind: "hazard", label: "Fire wall" },
 };
 
 const LOG_LIMIT = 6;
@@ -104,12 +104,12 @@ export function useBattleMapPlayground() {
       const key = cellKey(p);
 
       if (mode === "template") {
-        if (!aimView({ map, participants }, mapAim, p)) return pushLog("Поза дальністю");
+        if (!aimView({ map, participants }, mapAim, p)) return pushLog("Out of range");
 
         const hit = templateArea(map, participants, active, DEMO_TEMPLATE, p).targets;
 
         setAim(p);
-        pushLog(`Шаблон у ${key}: ${hit.map((q) => q.basicInfo.name).join(", ") || "нікого"}`);
+        pushLog(`Template at ${key}: ${hit.map((q) => q.basicInfo.name).join(", ") || "nobody"}`);
 
         return;
       }
@@ -124,7 +124,7 @@ export function useBattleMapPlayground() {
             q.basicInfo.id === activeId ? { ...q, battleData: { ...q.battleData, position: p, movementUsed: (q.battleData.movementUsed ?? 0) + cost } } : q,
           ),
         );
-        pushLog(`${active.basicInfo.name} йде (${cost} кл.)`);
+        pushLog(`${active.basicInfo.name} moves (${cost} cells)`);
 
         return;
       }
@@ -144,7 +144,7 @@ export function useBattleMapPlayground() {
           return { ...q, combatStats: { ...q.combatStats, currentHp, status: currentHp <= 0 ? CombatStatus.DEAD : q.combatStats.status } };
         }),
       );
-      pushLog(`${active.basicInfo.name} б'є ${target.basicInfo.name}: -${DEMO_DAMAGE}`);
+      pushLog(`${active.basicInfo.name} hits ${target.basicInfo.name}: -${DEMO_DAMAGE}`);
     },
     [mode, marks, costs, activeId, active, participants, pushLog, map, mapAim],
   );
@@ -160,7 +160,7 @@ export function useBattleMapPlayground() {
 
     setActiveId(next.basicInfo.id);
     setParticipants((prev) => prev.map((p) => (p.basicInfo.id === next.basicInfo.id ? { ...p, battleData: { ...p.battleData, movementUsed: 0 } } : p)));
-    pushLog(`Хід: ${next.basicInfo.name}`);
+    pushLog(`Turn: ${next.basicInfo.name}`);
   }, [participants, activeId, pushLog]);
 
   const reset = useCallback(() => {

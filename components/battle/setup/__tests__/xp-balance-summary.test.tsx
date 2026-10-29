@@ -15,10 +15,10 @@ describe("XpBalanceSummary", () => {
 
     render(<XpBalanceSummary xp={xp} units={units} />);
 
-    expect(screen.getByTestId("xp-difficulty").textContent).toBe("Складність: Складна");
-    expect(screen.getByText("XP ворогів 900 × 1.5 = 1350")).toBeTruthy();
-    expect(screen.getByText("Смертельна 1600")).toBeTruthy();
-    expect(screen.getByTestId("xp-missing-cr").textContent).toBe("Немає CR, не враховано: Гоблін");
+    expect(screen.getByTestId("xp-difficulty").textContent).toBe('battleSetup.xp.difficulty {"label":"battleTerms.encounterDifficulty.hard"}');
+    expect(screen.getByText('battleSetup.xp.enemyXpScaled {"xp":"900","multiplier":"1.5","adjusted":"1350"}')).toBeTruthy();
+    expect(screen.getByText("battleTerms.encounterDifficulty.deadly 1600")).toBeTruthy();
+    expect(screen.getByTestId("xp-missing-cr").textContent).toBe('battleSetup.xp.missingCr {"names":"Гоблін"}');
   });
 
   it("2024 без множника; порожній склад — підказка", () => {
@@ -26,10 +26,10 @@ describe("XpBalanceSummary", () => {
 
     const { rerender } = render(<XpBalanceSummary xp={xp} units={units} />);
 
-    expect(screen.getByText("XP ворогів 900")).toBeTruthy();
+    expect(screen.getByText('battleSetup.xp.enemyXp {"xp":"900"}')).toBeTruthy();
 
     rerender(<XpBalanceSummary xp={null} units={units} />);
 
-    expect(screen.getByText(/Додайте героїв/)).toBeTruthy();
+    expect(screen.getByText("battleSetup.xp.empty")).toBeTruthy();
   });
 });

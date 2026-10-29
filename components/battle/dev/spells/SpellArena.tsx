@@ -25,11 +25,11 @@ function revealBelowHeader(el: HTMLElement) {
 export function SpellArena({ ref }: { ref?: Ref<SpellArenaHandle> }) {
   const [spell, setSpell] = useState<SpellFxPreview | null>(null);
 
-  const [status, setStatus] = useState("Натисніть ▶ на картці закляття.");
+  const [status, setStatus] = useState("Press ▶ on a spell card.");
 
   const runner = useMemo<FxRunner>(
     () => ({
-      play: (layer, spec, root) => playFx(layer, spec, root, Infinity).catch((e: unknown) => setStatus(`Помилка: ${e instanceof Error ? e.message : String(e)}`)),
+      play: (layer, spec, root) => playFx(layer, spec, root, Infinity).catch((e: unknown) => setStatus(`Error: ${e instanceof Error ? e.message : String(e)}`)),
       cancel: cancelLayer,
     }),
     [],
@@ -57,7 +57,7 @@ export function SpellArena({ ref }: { ref?: Ref<SpellArenaHandle> }) {
     replay();
 
     if (!next.spec) {
-      setStatus(`${next.name}: анімації немає${next.error ? ` (${next.error})` : ""}`);
+      setStatus(`${next.name}: no animation${next.error ? ` (${next.error})` : ""}`);
 
       return;
     }
@@ -79,7 +79,7 @@ export function SpellArena({ ref }: { ref?: Ref<SpellArenaHandle> }) {
   );
 
   return (
-    <section aria-label="Арена" className="rounded-xl border border-hud-rule bg-[rgba(17,14,11,.92)] p-3">
+    <section aria-label="Arena" className="rounded-xl border border-hud-rule bg-[rgba(17,14,11,.92)] p-3">
       <div ref={arenaRef} className="relative grid grid-cols-2 gap-x-6 py-3 sm:gap-x-10">
         {column("ally")}
         {column("enemy")}

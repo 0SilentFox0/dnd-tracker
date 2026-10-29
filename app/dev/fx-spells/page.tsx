@@ -7,7 +7,7 @@ import { iconPublicUrl } from "@/data/skill-icons";
 import { libraryPreviewSpell, previewSpellFx } from "@/lib/utils/battle/fx/spell-preview";
 import { SPELL_FX_BY_NAME } from "@/scripts/constructor/backfill/spell-fx-by-name";
 
-export const metadata = { title: "Заклинання та ефекти" };
+export const metadata = { title: "Spells and effects" };
 
 export default function FxSpellsPage() {
   if (process.env.NODE_ENV !== "development") notFound();

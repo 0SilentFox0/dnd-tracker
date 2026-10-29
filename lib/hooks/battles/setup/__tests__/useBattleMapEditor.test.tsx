@@ -94,7 +94,7 @@ describe("useBattleMapEditor", () => {
     act(() => result.current.actions.setTool("blocked"));
     act(() => result.current.actions.onStroke([{ x: 1, y: 2 }]));
     expect(result.current.state.map.blocked).toHaveLength(9);
-    expect(result.current.state.notice).toBe("Має лишитися хоча б одна вільна ділянка 2×2");
+    expect(result.current.state.notice).toBe(NO_PLAYABLE_NOTICE);
     act(() => result.current.actions.setTool("erase"));
     act(() => result.current.actions.onStroke([{ x: 2, y: 2 }]));
     expect(result.current.state.map.blocked).toHaveLength(8);

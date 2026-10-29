@@ -22,9 +22,9 @@ describe("AutopickCard: XP", () => {
 
     render(<AutopickCard hasAllies races={[]} balance={suggestions(true, setDifficulty)} />);
 
-    expect(screen.getByRole("button", { name: "Середня" }).getAttribute("aria-pressed")).toBe("true");
+    expect(screen.getByRole("button", { name: "battleTerms.encounterDifficulty.medium" }).getAttribute("aria-pressed")).toBe("true");
 
-    fireEvent.click(screen.getByRole("button", { name: "Смертельна" }));
+    fireEvent.click(screen.getByRole("button", { name: "battleTerms.encounterDifficulty.deadly" }));
 
     expect(setDifficulty).toHaveBeenCalledWith("deadly");
     expect(screen.getByText(/XP 50/)).toBeTruthy();
@@ -33,6 +33,6 @@ describe("AutopickCard: XP", () => {
   it("режим fair — без чипів", () => {
     render(<AutopickCard hasAllies races={[]} balance={suggestions(false)} />);
 
-    expect(screen.queryByRole("button", { name: "Середня" })).toBeNull();
+    expect(screen.queryByRole("button", { name: "battleTerms.encounterDifficulty.medium" })).toBeNull();
   });
 });

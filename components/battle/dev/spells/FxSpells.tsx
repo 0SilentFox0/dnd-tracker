@@ -31,7 +31,7 @@ export function FxSpells({ spells }: { spells: SpellCardData[] }) {
 
   const groups = bySchool(spells);
 
-  const tabs = [{ key: ALL, label: "Усі" }, ...groups.map((g) => ({ key: g.school, label: g.school }))];
+  const tabs = [{ key: ALL, label: "All" }, ...groups.map((g) => ({ key: g.school, label: g.school }))];
 
   const [picked, setPicked] = useState<SpellCardData | null>(null);
 
@@ -46,15 +46,15 @@ export function FxSpells({ spells }: { spells: SpellCardData[] }) {
     <div className="battle-hud min-h-dvh">
       <HudPage className="max-w-screen-xl">
         <HudPageHeader
-          title="Заклинання та ефекти"
-          subtitle={`Усі ${spells.length} заклинань бібліотеки: що вони роблять і які анімацію, рамку та аури показує бій.`}
+          title="Spells and effects"
+          subtitle={`All ${spells.length} library spells: what they do and which animation, frame and auras the battle shows.`}
           actions={
             <Link href="/dev/fx-lab" className="flex h-9 items-center rounded-full px-4 text-sm text-hud-bone shadow-[inset_0_0_0_1px_var(--color-hud-gold)]">
-              Лабораторія анімацій
+              Animation lab
             </Link>
           }
         >
-          <HudChipTabs ariaLabel="Школа" items={tabs.map((t) => ({ ...t, active: t.key === school, onSelect: () => setSchool(t.key) }))} />
+          <HudChipTabs ariaLabel="School" items={tabs.map((t) => ({ ...t, active: t.key === school, onSelect: () => setSchool(t.key) }))} />
         </HudPageHeader>
         <SpellLegend />
         <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_420px] lg:items-start">
@@ -62,11 +62,11 @@ export function FxSpells({ spells }: { spells: SpellCardData[] }) {
             <SpellArena ref={arena} />
             {picked && (
               <div data-testid="fx-spells-book" className="hud-book mt-3 rounded-xl bg-[#e9dec5] p-4 text-[#2a2018]">
-                <p className="text-[13px] italic text-[#7a6650]">Так закляття виглядає в книзі магій і довіднику</p>
+                <p className="text-[13px] italic text-[#7a6650]">This is how the spell looks in the spellbook and the reference</p>
                 <p className="hud-sc text-lg font-bold">{picked.name}</p>
                 <label className="mt-1 flex items-center gap-2 text-[13px]">
                   <input type="checkbox" checked={bookLook} onChange={(e) => setBookLook(e.target.checked)} />
-                  Вигляд у книзі
+                  Spellbook look
                 </label>
                 <SpellBattlePreview key={`${picked.key}-${bookLook}`} spell={picked.previewSpell} variant={bookLook ? "book" : "hud"} className="mt-3" />
               </div>

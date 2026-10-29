@@ -1,15 +1,15 @@
 const ROWS: [string, string][] = [
-  ["Анімація", "архетип, який бій програє для цього закляття (від заклинателя до цілей)."],
-  ["Стихія", "палітра анімації та рамки; кольорова крапка — основний колір."],
-  ["Рамка влучання", "рамка навколо рядка цілі, коли змінюється її HP; «—» — закляття не змінює HP."],
-  ["Аура", "аура навколо портрета цілі від накладених ефектів; «—» — ефектів з аурою немає."],
+  ["Animation", "the archetype the battle plays for this spell (from the caster to the targets)."],
+  ["Element", "palette of the animation and the frame; the colored dot is the main color."],
+  ["Hit frame", "the frame around the target row when its HP changes; \"—\" means the spell does not change HP."],
+  ["Aura", "the aura around the target portrait from applied effects; \"—\" means no effect has an aura."],
 ];
 
 export function SpellLegend() {
   return (
-    <section aria-label="Легенда" className="rounded-xl border border-hud-rule bg-[rgba(17,14,11,.82)] p-3 text-xs text-hud-muted">
+    <section aria-label="Legend" className="rounded-xl border border-hud-rule bg-[rgba(17,14,11,.82)] p-3 text-xs text-hud-muted">
       <p className="mb-2 text-hud-bone">
-        Кожне закляття кастується через рушій бою на тестовій арені (усі рятівні кидки провалені, кубики — четвірки), тож відображення збігається з тим, що побачать гравці. ▶ програє анімацію, рамки й аури на арені.
+        Every spell is cast through the battle engine on a test arena (all saving throws fail, dice roll fours), so the display matches what players will see. ▶ plays the animation, frames and auras on the arena.
       </p>
       <dl className="grid gap-x-4 gap-y-1 sm:grid-cols-2">
         {ROWS.map(([term, text]) => (

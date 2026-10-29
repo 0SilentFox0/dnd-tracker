@@ -53,18 +53,18 @@ describe("BattleSetupForm", () => {
   it("create mode: empty form, autopick card, create button", async () => {
     renderForm(<BattleSetupForm campaignId="c1" />);
 
-    expect(((await screen.findByLabelText("Назва битви *")) as HTMLInputElement).value).toBe("");
-    expect(screen.getByRole("heading", { name: "Створити сцену бою" })).toBeTruthy();
-    expect(screen.getByText("Підбір ворогів")).toBeTruthy();
-    expect(screen.queryByRole("button", { name: "Видалити" })).toBeNull();
-    expect(screen.getByRole("button", { name: "Створити сцену бою" })).toBeTruthy();
+    expect(((await screen.findByLabelText("battleSetup.basic.name")) as HTMLInputElement).value).toBe("");
+    expect(screen.getByRole("heading", { name: "battleSetup.form.title.create" })).toBeTruthy();
+    expect(screen.getByText("battleSetup.autopick.title")).toBeTruthy();
+    expect(screen.queryByRole("button", { name: "common.actions.delete" })).toBeNull();
+    expect(screen.getByRole("button", { name: "battleSetup.form.title.create" })).toBeTruthy();
   });
 
   it("create mode: submitting without participants does not call the API", async () => {
     renderForm(<BattleSetupForm campaignId="c1" />);
 
-    await screen.findByText("Підбір ворогів");
-    fireEvent.change(screen.getByLabelText("Назва битви *"), { target: { value: "Нова" } });
+    await screen.findByText("battleSetup.autopick.title");
+    fireEvent.change(screen.getByLabelText("battleSetup.basic.name"), { target: { value: "Нова" } });
     fireEvent.submit(document.getElementById("battle-form") as HTMLFormElement);
 
     expect(api.createBattle).not.toHaveBeenCalled();
@@ -73,39 +73,39 @@ describe("BattleSetupForm", () => {
   it("edit mode: seeds from the battle once and keeps edits when it refetches", async () => {
     renderForm(<BattleSetupForm campaignId="c1" battleId="b1" />);
 
-    const name = (await screen.findByLabelText("Назва битви *")) as HTMLInputElement;
+    const name = (await screen.findByLabelText("battleSetup.basic.name")) as HTMLInputElement;
 
     expect(name.value).toBe("Засідка");
-    expect((screen.getByLabelText("Опис") as HTMLTextAreaElement).value).toBe("Ніч");
-    expect(screen.getByRole("tab", { name: /Склад · 1/ })).toBeTruthy();
-    expect(screen.queryByText("Підбір ворогів")).toBeNull();
+    expect((screen.getByLabelText("battleSetup.basic.description") as HTMLTextAreaElement).value).toBe("Ніч");
+    expect(screen.getByRole("tab", { name: /battleSetup\.form\.tabs\.roster/ })).toBeTruthy();
+    expect(screen.queryByText("battleSetup.autopick.title")).toBeNull();
 
     fireEvent.change(name, { target: { value: "Нова" } });
     client.setQueryData(battleQueryKey("c1", "b1"), { ...battle, name: "Серверна", updatedAt: "2026-10-05T12:00:00Z" });
     await waitFor(() => expect(client.getQueryData<{ updatedAt?: string }>(battleQueryKey("c1", "b1"))?.updatedAt).toBeDefined());
 
-    expect((screen.getByLabelText("Назва битви *") as HTMLInputElement).value).toBe("Нова");
+    expect((screen.getByLabelText("battleSetup.basic.name") as HTMLInputElement).value).toBe("Нова");
   });
 
   it("edit mode: does not poll the prepared battle and shows the delete button", async () => {
     renderForm(<BattleSetupForm campaignId="c1" battleId="b1" />);
 
-    await screen.findByLabelText("Назва битви *");
+    await screen.findByLabelText("battleSetup.basic.name");
 
     const query = client.getQueryCache().find({ queryKey: battleQueryKey("c1", "b1") });
 
     const interval = query?.observers[0]?.options.refetchInterval;
 
     expect(typeof interval === "function" ? interval(query as never) : interval).toBe(false);
-    expect(screen.getByRole("button", { name: "Видалити" })).toBeTruthy();
-    expect(screen.getByRole("button", { name: "Зберегти зміни" })).toBeTruthy();
+    expect(screen.getByRole("button", { name: "common.actions.delete" })).toBeTruthy();
+    expect(screen.getByRole("button", { name: "battleSetup.form.saveChanges" })).toBeTruthy();
   });
 
   it("edit mode: saves the seeded participants", async () => {
     api.updateBattle.mockResolvedValue(battle);
     renderForm(<BattleSetupForm campaignId="c1" battleId="b1" />);
 
-    await screen.findByLabelText("Назва битви *");
+    await screen.findByLabelText("battleSetup.basic.name");
     fireEvent.submit(document.getElementById("battle-edit-form") as HTMLFormElement);
 
     await waitFor(() => expect(api.updateBattle).toHaveBeenCalled());

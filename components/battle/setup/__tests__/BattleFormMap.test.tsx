@@ -63,7 +63,7 @@ const release = () => fireEvent.pointerUp(window, { pointerId: 1 });
 
 const blocked = (c: HTMLElement) => c.querySelectorAll("polygon[data-blocked]");
 
-const enable = () => fireEvent.click(screen.getByRole("switch", { name: "Бій на карті" }));
+const enable = () => fireEvent.click(screen.getByRole("switch", { name: "battleSetup.map.enabled" }));
 
 const typeIn = (label: string, value: string) => {
   const input = screen.getByLabelText(label);
@@ -88,7 +88,7 @@ describe("BattleFormMap", () => {
     enable();
     expect(container.querySelectorAll("polygon")).toHaveLength(240);
 
-    typeIn("Зверху", "2");
+    typeIn("battleSetup.map.margins.top", "2");
     expect(blocked(container)).toHaveLength(40);
     expect(blocked(container)[0].getAttribute("stroke")).toBe("none");
   });
@@ -102,13 +102,13 @@ describe("BattleFormMap", () => {
     release();
     expect(blocked(container)).toHaveLength(0);
 
-    fireEvent.click(screen.getByRole("button", { name: "Неігрова" }));
+    fireEvent.click(screen.getByRole("button", { name: "battleSetup.map.tools.blocked" }));
     press(container, "3:3");
     dragTo("4:3");
     release();
     expect(blocked(container)).toHaveLength(2);
 
-    fireEvent.click(screen.getByRole("button", { name: "Стерти" }));
+    fireEvent.click(screen.getByRole("button", { name: "battleSetup.map.tools.erase" }));
     press(container, "3:3");
     release();
     expect(blocked(container)).toHaveLength(1);
@@ -118,18 +118,18 @@ describe("BattleFormMap", () => {
     const { container } = render(<Harness />);
 
     enable();
-    expect(screen.queryByRole("button", { name: "Барʼєр" })).toBeNull();
+    expect(screen.queryByRole("button", { name: /barrier/i })).toBeNull();
 
-    fireEvent.click(screen.getByRole("button", { name: "Непрохідне" }));
+    fireEvent.click(screen.getByRole("button", { name: "battleSetup.map.tools.wall" }));
     press(container, "1:1");
     release();
 
-    fireEvent.click(screen.getByRole("button", { name: "Небезпека" }));
-    fireEvent.change(screen.getByLabelText("Підпис небезпеки"), { target: { value: "Лава" } });
+    fireEvent.click(screen.getByRole("button", { name: "battleSetup.map.tools.hazard" }));
+    fireEvent.change(screen.getByLabelText("battleSetup.map.hazardLabel"), { target: { value: "Лава" } });
     press(container, "2:1");
     release();
 
-    fireEvent.change(screen.getByLabelText("Шкода (кубики)"), { target: { value: "" } });
+    fireEvent.change(screen.getByLabelText("battleSetup.map.hazardDice"), { target: { value: "" } });
     press(container, "3:1");
     release();
 
@@ -142,16 +142,16 @@ describe("BattleFormMap", () => {
     expect(container.querySelector('[data-terrain="hazard"]')).not.toBeNull();
   });
 
-  it("margins keep a 2x2 playable area; Однакові copies the first within limits", () => {
+  it("margins keep a 2x2 playable area; equal copies the first within limits", () => {
     render(<Harness />);
     enable();
-    typeIn("Зверху", "99");
+    typeIn("battleSetup.map.margins.top", "99");
     expect(seen.editor.state.margins.top).toBe(10);
 
-    typeIn("Знизу", "5");
+    typeIn("battleSetup.map.margins.bottom", "5");
     expect(seen.editor.state.margins.bottom).toBe(0);
 
-    fireEvent.click(screen.getByRole("button", { name: "Однакові" }));
+    fireEvent.click(screen.getByRole("button", { name: "battleSetup.map.margins.equal" }));
     expect(seen.editor.state.margins).toEqual({ top: 5, right: 5, bottom: 5, left: 5 });
   });
 
@@ -159,7 +159,7 @@ describe("BattleFormMap", () => {
     render(<Harness />);
     enable();
 
-    const cols = screen.getByLabelText("Колонки") as HTMLInputElement;
+    const cols = screen.getByLabelText("battleSetup.map.cols") as HTMLInputElement;
 
     fireEvent.change(cols, { target: { value: "" } });
     expect(cols.value).toBe("");
@@ -186,25 +186,25 @@ describe("BattleFormMap", () => {
     render(<Harness />);
     enable();
 
-    const slider = screen.getByLabelText(/Розмір клітинки/) as HTMLInputElement;
+    const slider = screen.getByLabelText(/battleSetup\.map\.cellSize/) as HTMLInputElement;
 
     expect(slider.value).toBe("100");
 
     fireEvent.change(slider, { target: { value: "50" } });
     expect(seen.editor.state.map).toMatchObject({ cols: 40, rows: 24, backgroundCols: 39.6 });
-    expect(screen.getByLabelText(/Розмір клітинки/).closest("div")?.textContent).toContain("50 px · 40 × 24");
+    expect(screen.getByLabelText(/battleSetup\.map\.cellSize/).closest("div")?.textContent).toContain('"size":"50 px","cols":40,"rows":24');
 
-    typeIn("Колонки", "20");
+    typeIn("battleSetup.map.cols", "20");
     expect(seen.editor.state.map.backgroundCols).toBeUndefined();
-    expect((screen.getByLabelText(/Розмір клітинки/) as HTMLInputElement).value).toBe("99");
+    expect((screen.getByLabelText(/battleSetup\.map\.cellSize/) as HTMLInputElement).value).toBe("99");
   });
 
   it("«Зсув сітки»: зберігається частками клітинки, фон зсувається на −зсув клітинки", () => {
     const { container } = render(<Harness />);
 
     enable();
-    fireEvent.change(screen.getByLabelText(/Зсув сітки X/), { target: { value: "0.5" } });
-    fireEvent.change(screen.getByLabelText(/Зсув сітки Y/), { target: { value: "0.25" } });
+    fireEvent.change(screen.getByLabelText(/battleSetup\.map\.offsetX/), { target: { value: "0.5" } });
+    fireEvent.change(screen.getByLabelText(/battleSetup\.map\.offsetY/), { target: { value: "0.25" } });
     expect(seen.editor.state.map.gridOffset).toEqual({ x: 0.5, y: 0.25 });
 
     const box = container.querySelector("[data-map-background] > div") as HTMLElement;
@@ -221,7 +221,7 @@ describe("BattleFormMap", () => {
   it("default background button resets to null", () => {
     render(<Harness />);
     enable();
-    fireEvent.click(screen.getByRole("button", { name: "Стандартний фон" }));
+    fireEvent.click(screen.getByRole("button", { name: "battleSetup.map.defaultBackground" }));
     expect(seen.editor.state.map.background).toBeNull();
   });
 
@@ -243,7 +243,7 @@ describe("BattleFormMap", () => {
     const { container } = render(<Harness />);
 
     enable();
-    typeIn("Зверху", "1");
+    typeIn("battleSetup.map.margins.top", "1");
     expect(blocked(container)[0].getAttribute("fill")).not.toBe("transparent");
   });
 });

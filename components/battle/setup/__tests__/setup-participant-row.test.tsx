@@ -19,32 +19,32 @@ describe("SetupParticipantRow: резерв", () => {
   it("око відправляє у резерв усю кількість", () => {
     const actions = renderRow(0, 4);
 
-    fireEvent.click(screen.getByTitle(/У резерв/));
+    fireEvent.click(screen.getByTitle("battleSetup.participant.reserve"));
     expect(actions.onReserveChange).toHaveBeenCalledWith(4);
   });
 
   it("герой без кількості — резерв 1", () => {
     const actions = renderRow(0);
 
-    fireEvent.click(screen.getByTitle(/У резерв/));
+    fireEvent.click(screen.getByTitle("battleSetup.participant.reserve"));
     expect(actions.onReserveChange).toHaveBeenCalledWith(1);
   });
 
   it("повторне натискання прибирає з резерву", () => {
     const actions = renderRow(2, 4);
 
-    fireEvent.click(screen.getByTitle("Прибрати з резерву"));
+    fireEvent.click(screen.getByTitle("battleSetup.participant.unreserve"));
     expect(actions.onReserveChange).toHaveBeenCalledWith(0);
   });
 
   it("лічильник резерву змінює кількість на 1 і видимий лише для груп", () => {
     const actions = renderRow(2, 4);
 
-    fireEvent.click(screen.getByLabelText("Більше в резерві"));
-    fireEvent.click(screen.getByLabelText("Менше в резерві"));
+    fireEvent.click(screen.getByLabelText("battleSetup.participant.reserveMore"));
+    fireEvent.click(screen.getByLabelText("battleSetup.participant.reserveLess"));
     expect(actions.onReserveChange.mock.calls).toEqual([[3], [1]]);
     cleanup();
     renderRow(1);
-    expect(screen.queryByLabelText("Більше в резерві")).toBeNull();
+    expect(screen.queryByLabelText("battleSetup.participant.reserveMore")).toBeNull();
   });
 });
