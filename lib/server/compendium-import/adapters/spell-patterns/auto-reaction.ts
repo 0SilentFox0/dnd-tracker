@@ -1,4 +1,5 @@
 /* eslint-disable no-restricted-syntax -- derived content written to the DB stays Ukrainian (spec part5, decision 5) */
+import { SAVE_HALF } from "../shared";
 import type { SpellRecognizer } from "./index";
 
 import { durationRounds, spellRange } from "@/lib/utils/spells/derive/mechanics";
@@ -11,8 +12,6 @@ const DAMAGED = /\b(?:if|when) the target takes damage from a hostile creature[^
 const WITHIN = /\bwithin (\d+) feet of the target\b/i;
 
 const DAMAGE = /(\d+)d(4|6|8|10|12|20)\s+([a-z]+) damage/i;
-
-const HALF = /\bhalf as much damage\b/i;
 
 export const MARK_ID = "reactionAnchor";
 
@@ -37,7 +36,7 @@ export const autoReactionSpell: SpellRecognizer = ({ text, cast, ability }) => {
 
   const inline: InlineCast = {
     targeting: { kind: "enemy", range: Math.min(600, Math.max(5, Number(reach ?? 60))) },
-    resolution: !attacked ? { kind: "attack" } : ability ? { kind: "save", ability, onSuccess: HALF.test(text) ? "half" : "none" } : { kind: "auto" },
+    resolution: !attacked ? { kind: "attack" } : ability ? { kind: "save", ability, onSuccess: SAVE_HALF.test(text) ? "half" : "none" } : { kind: "auto" },
     dice: Number(dmg[1]),
     dieSides: Number(dmg[2]) as InlineCast["dieSides"],
     effects: [{ kind: "dealDamage", amount: { spellRoll: 100 }, damageType: dmg[3].toLowerCase() }],

@@ -1,5 +1,5 @@
 /* eslint-disable no-restricted-syntax -- derived content written to the DB stays Ukrainian (spec part5, decision 5) */
-import { array } from "../shared";
+import { array, SAVE_HALF } from "../shared";
 import type { SpellRecognizer } from "./index";
 
 import type { AbilityKey } from "@/lib/constants/abilities";
@@ -13,8 +13,6 @@ const UPCAST = /\bdamage increases by (\d+)d\d+ for each (?:spell )?slot level a
 const FALL_DICE = /\b(\d+)d(\d+)\b[^.]*?\bfor (?:every|each) 10 feet\b/i;
 
 const FALL_MAX = /\bmaximum of (\d+)d\d+/i;
-
-const SAVE_HALF = /\bhalf as much damage\b/i;
 
 const damageTypeOf = (types: string[]) => types[0] ?? "magic";
 
