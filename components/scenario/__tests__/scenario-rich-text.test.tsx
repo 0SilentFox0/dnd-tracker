@@ -41,6 +41,14 @@ describe("ScenarioRichText", () => {
     expect(container.innerHTML).not.toContain("onclick");
   });
 
+  it("згадка знайомства веде на таб знайомств з ?focus", () => {
+    const acq = { type: "doc", content: [{ type: "paragraph", content: [{ type: "mention", attrs: { type: "acquaintance", id: "a1", label: "Ярема" } }] }] };
+
+    render(<ScenarioRichText doc={acq as never} campaignId="c" linkMentions />);
+
+    expect(screen.getByRole("link", { name: /Ярема/ }).getAttribute("href")).toBe("/campaigns/c/acquaintances?focus=a1");
+  });
+
   it("без linkMentions згадка — простий текст", () => {
     render(<ScenarioRichText doc={doc} campaignId="c" />);
     expect(screen.queryByRole("link")).toBeNull();

@@ -3,6 +3,7 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import { patchCharacter } from "@/app/api/campaigns/[id]/characters/[characterId]/patch-character";
 import { createCharacter } from "@/app/api/campaigns/[id]/characters/create-character";
+import { API_ERRORS } from "@/lib/constants/api-errors";
 import { prisma } from "@/lib/db";
 import * as apiAuth from "@/lib/utils/api/api-auth";
 import { parseRules } from "@/lib/utils/rules/schema";
@@ -49,7 +50,7 @@ describe("ініціатива героя за правилами кампані
     const res = await create(18);
 
     expect(res.status).toBe(400);
-    expect((await res.json()).error).toContain("10–16");
+    expect(await res.json()).toMatchObject({ errorKey: API_ERRORS.INITIATIVE_OUT_OF_RANGE_DETAIL, error: expect.stringContaining('"min":10,"max":16') });
     expect(prisma.character.create).not.toHaveBeenCalled();
   });
 

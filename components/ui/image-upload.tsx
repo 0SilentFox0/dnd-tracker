@@ -1,6 +1,7 @@
 "use client";
 
 import { useRef } from "react";
+import { useTranslations } from "next-intl";
 
 import { IconUrlField } from "@/components/common/IconUrlField";
 import { Button } from "@/components/ui/button";
@@ -22,7 +23,9 @@ export interface ImageUploadProps {
   maxSide?: number;
 }
 
-export function ImageUpload({ value, onChange, label = "Картинка", fallbackText = "?", allowFile = true, maxSide }: ImageUploadProps) {
+export function ImageUpload({ value, onChange, label, fallbackText = "?", allowFile = true, maxSide }: ImageUploadProps) {
+  const t = useTranslations("common");
+
   const notify = useNotify();
 
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -35,14 +38,14 @@ export function ImageUpload({ value, onChange, label = "Картинка", fallb
     const limit = maxSide ? MAX_RESIZABLE_SIZE_BYTES : MAX_SIZE_BYTES;
 
     if (file.size > limit) {
-      void notify(`Файл завеликий. Максимум ${limit / 1024 / 1024} МБ.`);
+      void notify(t("ui.imageTooLarge", { mb: limit / 1024 / 1024 }));
       e.target.value = "";
 
       return;
     }
 
     if (maxSide) {
-      resizeImageToDataUrl(file, maxSide).then(onChange, () => void notify("Не вдалося обробити зображення"));
+      resizeImageToDataUrl(file, maxSide).then(onChange, () => void notify(t("ui.imageProcessFailed")));
     } else {
       const reader = new FileReader();
 
@@ -55,15 +58,15 @@ export function ImageUpload({ value, onChange, label = "Картинка", fallb
 
   return (
     <div className="space-y-2">
-      <IconUrlField label={label} value={value} onChange={onChange} fallbackText={fallbackText} />
+      <IconUrlField label={label ?? t("ui.imageLabel")} value={value} onChange={onChange} fallbackText={fallbackText} />
       {allowFile && (
         <div className="flex flex-wrap items-center gap-2">
-          <span className="text-sm text-muted-foreground">або</span>
+          <span className="text-sm text-muted-foreground">{t("ui.or")}</span>
           <input ref={fileInputRef} type="file" accept={ACCEPT} className="hidden" onChange={handleFileChange} />
           <Button type="button" variant="outline" size="sm" onClick={() => fileInputRef.current?.click()}>
-            Завантажити з комп&apos;ютера
+            {t("ui.uploadFromComputer")}
           </Button>
-          {value.startsWith("data:") && <span className="text-xs text-muted-foreground">(завантажено з файлу)</span>}
+          {value.startsWith("data:") && <span className="text-xs text-muted-foreground">{t("ui.fromFile")}</span>}
         </div>
       )}
     </div>

@@ -1,5 +1,7 @@
 "use client";
 
+import { useTranslations } from "next-intl";
+
 import { ChoicesEditor } from "./ChoicesEditor";
 
 import { LoadingState } from "@/components/common/states";
@@ -16,6 +18,8 @@ interface CharacterChoicesTabProps {
 }
 
 export function CharacterChoicesTab({ campaignId, form: { data, set }, classesEnabled }: CharacterChoicesTabProps) {
+  const t = useTranslations("choices");
+
   const refs = useChoiceRefs(campaignId, data.basicInfo.race);
 
   const classes = (data.basicInfo.classes ?? []).filter((e) => e.classId);
@@ -24,7 +28,7 @@ export function CharacterChoicesTab({ campaignId, form: { data, set }, classesEn
 
   const scores = Object.fromEntries(ABILITY_KEYS.map((k) => [k, data.abilityScores[k]])) as Record<AbilityKey, number>;
 
-  if (!refs.ready) return <LoadingState rows={3} label="Завантаження виборів…" />;
+  if (!refs.ready) return <LoadingState rows={3} label={t("editor.loading")} />;
 
   return (
     <ChoicesEditor

@@ -132,6 +132,8 @@ export const reviewCharacter = (campaignId: string, characterId: string, body: R
 
 export const postRest = (campaignId: string, body: RestBody) => campaignPost<{ characters: { id: string; resources: CharacterResources }[] }>(campaignId, "/rest", body);
 
+export const postArcaneRecovery = (campaignId: string, characterId: string, picks: Record<string, number>) => campaignPost<{ resources: CharacterResources }>(campaignId, `/characters/${characterId}/arcane-recovery`, { picks });
+
 export const postHitDie = (campaignId: string, characterId: string, classId: string) => campaignPost<HitDieResult>(campaignId, `/characters/${characterId}/hit-dice`, { classId });
 
 export const postSheetRoll = (campaignId: string, characterId: string, body: SheetRollBody) => campaignPost<SheetRollResult>(campaignId, `/characters/${characterId}/roll`, body);

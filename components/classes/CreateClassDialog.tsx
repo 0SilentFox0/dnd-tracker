@@ -1,11 +1,8 @@
 "use client";
 
-import { useState } from "react";
+import { useTranslations } from "next-intl";
 
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { ResponsiveDialog } from "@/components/ui/responsive-dialog";
+import { NameOnlyCreateDialog } from "@/components/common/NameOnlyCreateDialog";
 import type { ClassFormData } from "@/types/classes";
 
 interface CreateClassDialogProps {
@@ -30,37 +27,9 @@ const emptyClass = (name: string): ClassFormData => ({
 });
 
 export function CreateClassDialog({ open, onOpenChange, onCreateClass }: CreateClassDialogProps) {
-  const [name, setName] = useState("");
+  const t = useTranslations("classes.create");
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
+  const texts = { title: t("title"), description: t("description"), name: t("nameLabel"), namePlaceholder: t("namePlaceholder"), submit: t("submit") };
 
-    onCreateClass(emptyClass(name.trim()));
-    setName("");
-  };
-
-  return (
-    <ResponsiveDialog
-      open={open}
-      onOpenChange={onOpenChange}
-      title="Новий клас"
-      description="Решту налаштувань можна заповнити після створення"
-      hud
-      footer={
-        <>
-          <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
-            Скасувати
-          </Button>
-          <Button type="submit" form="create-class-form" disabled={!name.trim()}>
-            Створити клас
-          </Button>
-        </>
-      }
-    >
-      <form id="create-class-form" onSubmit={handleSubmit} className="space-y-2">
-        <Label htmlFor="new-class-name">Назва класу *</Label>
-        <Input id="new-class-name" value={name} onChange={(e) => setName(e.target.value)} required placeholder="Наприклад: Воїн, Чарівник" />
-      </form>
-    </ResponsiveDialog>
-  );
+  return <NameOnlyCreateDialog open={open} onOpenChange={onOpenChange} formId="create-class-form" texts={texts} onSubmit={(name) => onCreateClass(emptyClass(name))} />;
 }

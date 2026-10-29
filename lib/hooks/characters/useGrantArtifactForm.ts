@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useTranslations } from "next-intl";
 
 import { useFreeArtifacts, useStashAction } from "./useStash";
 
@@ -23,6 +24,8 @@ interface GrantBody {
 export const clampGrantQuantity = (raw: string) => Math.min(MAX_QTY, Math.max(MIN_QTY, Math.trunc(Number(raw)) || 1));
 
 export function useGrantArtifactForm({ campaignId, characterId, open, onOpenChange }: { campaignId: string; characterId: string; open: boolean; onOpenChange: (open: boolean) => void }) {
+  const t = useTranslations("inventory.errors");
+
   const action = useStashAction(campaignId, characterId);
 
   const free = useFreeArtifacts(campaignId, characterId, open);
@@ -61,7 +64,7 @@ export function useGrantArtifactForm({ campaignId, characterId, open, onOpenChan
   const grant = (body: GrantBody) =>
     action.mutateAsync({ action: "grant", ...body }).then(
       () => close(false),
-      (e: Error) => notify(e.message || "Не вдалося видати артефакт"),
+      (e: Error) => notify(e.message || t("grantFailed")),
     );
 
   const property = picked?.property;

@@ -1,0 +1,162 @@
+{
+  "page": {
+    "title": "Campaign rules"
+  },
+  "form": {
+    "cancel": "Cancel",
+    "save": "Save",
+    "hint": "Changes apply to new battles; a battle already in progress uses the rules fixed at its start",
+    "saveFailed": "Could not save the rules"
+  },
+  "diceTable": {
+    "reset": "Reset to defaults",
+    "levelLabel": "{title}, level {level}"
+  },
+  "validation": {
+    "initiativeOrder": "Minimum initiative is greater than the maximum",
+    "criticalsOrder": "Fumble must be lower than crit"
+  },
+  "sections": {
+    "morale": {
+      "enabled": "Enabled",
+      "cap": "Cap ±N"
+    },
+    "criticals": {
+      "critOn": "Crit on (d20 ≥)",
+      "fumbleOn": "Fumble on (d20 ≤)",
+      "fumbleOnHint": "0 — no fumble",
+      "effects": "Critical effect tables",
+      "effectsHint": "Doubling damage on a crit is a table effect (“{name}”). If you turn off the tables or this effect, a crit is only marked, with no extra damage.",
+      "doubleDice": "Double dice on a crit",
+      "doubleDiceHint": "A crit doubles the damage dice (weapon, spell attack); modifiers are not doubled.",
+      "successTitle": "Crit effects",
+      "failTitle": "Fumble effects"
+    },
+    "formulas": {
+      "saveDcBase": "DC base",
+      "proficiencyBase": "Proficiency at level 1",
+      "proficiencyEvery": "+1 every N levels",
+      "preview": "Level 5: proficiency {proficiency}, DC = base + {proficiency} + mod"
+    },
+    "heroScaling": {
+      "hpBaseLevels": "Base HP levels",
+      "hpConCoefficient": "CON coefficient",
+      "melee": "Melee attack",
+      "ranged": "Ranged attack"
+    },
+    "initiative": {
+      "mode": "Mode",
+      "modeStatic": "Static (from the sheet / unit)",
+      "modeRoll": "d20 + Dexterity modifier at battle start",
+      "min": "Minimum",
+      "max": "Maximum"
+    },
+    "defaultAttacks": {
+      "melee": "Melee attack",
+      "ranged": "Ranged attack"
+    },
+    "saves": {
+      "proficiency": "Proficiency in saving throws"
+    },
+    "deathSaves": {
+      "enabled": "Enabled",
+      "unitsDieAtZero": "Units at 0 HP die"
+    },
+    "concentration": {
+      "enabled": "Concentration enabled",
+      "dcCap": "DC cap 30 (2024)"
+    },
+    "conditions": {
+      "enabled": "Enabled",
+      "exhaustion": "Exhaustion by 2024 rules (otherwise 2014)",
+      "custom": "Campaign custom conditions"
+    },
+    "actions": {
+      "enabled": "5e actions enabled",
+      "opportunityAttacks": "Opportunity attacks",
+      "retaliation": "Retaliation (HOMM)",
+      "variant": "2024 rules (otherwise 2014)"
+    },
+    "classes": {
+      "enabled": "Enable 5e classes"
+    },
+    "outOfCombat": {
+      "persistResources": "Heroes' resources persist between battles",
+      "xp": "Experience by the 5e table (otherwise — milestones)",
+      "inspiration": "Inspiration",
+      "longRestHitDice": "2024 rules: a long rest restores all hit dice (otherwise half)"
+    },
+    "encounters": {
+      "balance": "Balance by the 5e XP budget (otherwise — HOMM fair fight)",
+      "edition": "Difficulty thresholds by DMG 2024 (otherwise 2014)",
+      "autoXp": "Auto XP after victory",
+      "autoXpHint": "Works only together with “Experience by the 5e table” on the “Out of combat” tab."
+    },
+    "items": {
+      "enabled": "5e items: attunement, wearing from the stash, consumables in battle",
+      "attunementLimit": "Attunement limit"
+    }
+  },
+  "mechanics": {
+    "morale": {
+      "label": "Morale",
+      "description": "A d10 check at the start of a turn: positive morale gives a chance of an extra turn, negative makes the unit skip. The cap is the maximum value of ±N."
+    },
+    "criticals": {
+      "label": "Critical hits",
+      "description": "The crit and fumble thresholds on d20 and the critical effect tables."
+    },
+    "formulas": {
+      "label": "Formulas",
+      "description": "Save DC = base + proficiency + modifier; the proficiency bonus grows with the hero's level."
+    },
+    "heroScaling": {
+      "label": "Hero power",
+      "description": "Hero damage dice by level and the HP formula."
+    },
+    "initiative": {
+      "label": "Initiative",
+      "description": "The allowed range of a hero's static initiative and the mode: static or d20 + Dexterity."
+    },
+    "defaultAttacks": {
+      "label": "Default attacks",
+      "description": "Names of the attacks a hero gets without a weapon."
+    },
+    "saves": {
+      "label": "Saving throws",
+      "description": "Proficiency in a hero's saving throws (from the character sheet). Advantage, disadvantage and auto-fail always come from conditions and abilities."
+    },
+    "deathSaves": {
+      "label": "Death saves",
+      "description": "A hero at 0 HP rolls d20 on their turn: 3 successes — stable, 3 failures — death, a 20 — 1 HP. Units at 0 HP die."
+    },
+    "concentration": {
+      "label": "Concentration",
+      "description": "Concentration spells: one per caster; damage requires a Constitution saving throw DC max(10, ½ damage)."
+    },
+    "actions": {
+      "label": "5e actions",
+      "description": "Dash, Disengage, Dodge, Help, Hide, Ready, Stand up, Grapple, Shove; opportunity attacks; HOMM \"retaliation\" (the target's automatic reply, off in 5e). The 2014/2024 variant sets the Grapple and Shove formula."
+    },
+    "classes": {
+      "label": "Classes",
+      "description": "A character's class and subclass as campaign content: hit die, saving throws, caster type, features by level; multiclassing. HP is the average of the hit dice, slots follow the 5e multiclass table and pact. A character without classes is calculated as before."
+    },
+    "conditions": {
+      "label": "5e conditions",
+      "description": "The 5e condition menu for the DM in battle and the 5e condition group in the ability editor; the 2014 or 2024 exhaustion table."
+    },
+    "outOfCombat": {
+      "label": "Out of combat",
+      "description": "Heroes' resources between battles (HP, slots, pact, per-rest charges, exhaustion), short and long rest, hit dice, experience by the 5e table, inspiration. Off — every battle starts with full resources."
+    },
+    "encounters": {
+      "label": "Encounters",
+      "description": "Battle balance: the HOMM \"fair fight\" (enemy HP and damage scaling) or the 5e XP budget by unit CR (DMG 2014 or 2024 thresholds, no scaling). Auto XP: after a victory the defeated enemies' XP is split equally among the heroes (requires \"Experience by the 5e table\")."
+    },
+    "items": {
+      "label": "Items",
+      "description": "5e magic items: attunement (at most N items), \"Artifact\" and \"Ring\" slot items work straight from the stash, consumables (potions, ammo) are used in battle and spent afterwards. Properties, non-unique gear and charges are content properties and do not depend on this switch."
+    }
+  }
+}

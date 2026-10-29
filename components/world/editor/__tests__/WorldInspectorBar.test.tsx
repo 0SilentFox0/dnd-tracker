@@ -145,7 +145,7 @@ describe("WorldInspectorBar", () => {
     fireEvent.click(screen.getByRole("button", { name: /^Видалити$/ }));
     expect(await screen.findByText(/вкладені карти/)).toBeTruthy();
 
-    fireEvent.click(screen.getByRole("button", { name: "Скасувати" }));
+    fireEvent.click(screen.getByRole("button", { name: "common.actions.cancel" }));
     await waitFor(() => expect(screen.queryByText(/вкладені карти/)).toBeNull());
 
     expect(remove).not.toHaveBeenCalled();

@@ -1,0 +1,184 @@
+{
+  "page": {
+    "title": "NPC Юніти",
+    "subtitle": "Управління мобами та юнітами · Всього: {count}",
+    "addRace": "+ Раса",
+    "create": "+ Створити юніта",
+    "loading": "Завантаження юнітів…",
+    "emptyTitle": "Ще немає юнітів",
+    "emptyDescription": "Створіть першого юніта або імпортуйте їх з файлу.",
+    "nothingFound": "Нічого не знайдено"
+  },
+  "deleteAll": {
+    "noun": "юніти",
+    "label": "Видалити всі юніти",
+    "description": "Ви впевнені, що хочете видалити всі юніти з кампанії? Ця дія незворотна. Буде видалено {count, plural, one {# юніт} few {# юніти} many {# юнітів} other {# юніта}}."
+  },
+  "toolbar": {
+    "search": "Пошук юнітів",
+    "hideEmpty": "Сховати пусті групи",
+    "showEmpty": "Показати пусті групи",
+    "raceFilter": "Фільтр за расою"
+  },
+  "group": {
+    "total": "{count, plural, one {# юніт} few {# юніти} many {# юнітів} other {# юніта}}",
+    "dropHint": "Перетягніть сюди юніта, щоб призначити расу",
+    "tier": "Рівень {level} ({count, plural, one {# юніт} few {# юніти} many {# юнітів} other {# юніта}})"
+  },
+  "card": {
+    "dragTitle": "Перетягніть на расу або рівень",
+    "levelHp": "Рівень {level} • HP {hp}",
+    "damage": " • Урон ~{average} ",
+    "abilities": "Вміння:",
+    "immunities": "Імунітети:",
+    "spells": "Заклинання:",
+    "spellCount": "{count, plural, one {# заклинання} few {# заклинання} many {# заклинань} other {# заклинання}}",
+    "deleteLabel": "Видалити юніт {name}",
+    "deleteTitle": "Видалити юніт «{name}»?"
+  },
+  "quickStats": {
+    "ac": "Броня (AC)",
+    "dice": "Кубики шкоди",
+    "diceNamed": "Кубики ({name})",
+    "diceHint": "Enter, ✓ або втрата фокусу",
+    "noAttacks": "Немає атак — кубики в повному редакторі"
+  },
+  "form": {
+    "newTitle": "Новий юніт",
+    "newAside": "Заповніть характеристики, расу й атаки",
+    "editTitle": "Редагувати юніта: {name}",
+    "editAside": "Оновіть інформацію про юніта",
+    "loading": "Завантаження юніта…",
+    "error": "Помилка",
+    "submitCreate": "Створити юніта",
+    "submitSave": "Зберегти зміни",
+    "deleteConfirm": "Ви впевнені, що хочете видалити цього юніта?",
+    "tabs": {
+      "attacks": "Атаки",
+      "magic": "Магія",
+      "spells": "Заклинання",
+      "statblock": "Статблок"
+    }
+  },
+  "basic": {
+    "name": "Назва юніта",
+    "race": "Раса",
+    "racePlaceholder": "Виберіть расу",
+    "avatar": "Аватар (посилання на картинку)",
+    "abilityScores": "Характеристики",
+    "gridSize": "Розмір на сітці",
+    "gridSizes": {
+      "1": "1×1 — звичайна",
+      "2": "2×2 — велика",
+      "3": "3×3 — величезна"
+    },
+    "fields": {
+      "level": "Рівень",
+      "armorClass": "Клас броні (AC)",
+      "maxHp": "Максимальне HP",
+      "speed": "Швидкість",
+      "initiative": "Ініціатива",
+      "proficiencyBonus": "Бонус майстерності",
+      "minTargets": "Мін. цілей",
+      "maxTargets": "Макс. цілей"
+    }
+  },
+  "fiveE": {
+    "cr": "Небезпека (CR)",
+    "noCr": "Без CR (HOMM)",
+    "xp": "XP",
+    "saves": "Майстерність рятівних кидків",
+    "counts": {
+      "multiattack": "Атак за дію «Атака»",
+      "legendaryActions": "Легендарних дій за раунд",
+      "legendaryResistances": "Легендарного опору за бій"
+    }
+  },
+  "attacks": {
+    "title": "Атаки (шкода)",
+    "add": "+ Додати атаку",
+    "empty": "Немає доданих атак. Натисніть «Додати атаку» щоб вказати урон (назва, кубики шкоди, тип шкоди тощо).",
+    "heading": "Атака #{number}",
+    "name": "Назва",
+    "namePlaceholder": "Наприклад: Удар мечем",
+    "kind": "Вид атаки",
+    "kindPlaceholder": "Виберіть вид",
+    "kinds": {
+      "melee": "Ближня (melee)",
+      "ranged": "Дальня (ranged)"
+    },
+    "dice": "Кубики шкоди",
+    "damageType": "Тип шкоди",
+    "damageTypePlaceholder": "Виберіть тип",
+    "range": "Дальність (опц.)",
+    "rangePlaceholder": "5 фт, 30/120 фт",
+    "properties": "Примітка (опц.)",
+    "propertiesPlaceholder": "магічна, срібна",
+    "target": "Ціль (Target/AOE)",
+    "targets": {
+      "target": "Одна ціль",
+      "aoe": "AOE (область)"
+    },
+    "bonus": "Бонус до атаки",
+    "guaranteed": "Гарантована шкода (опц.)",
+    "guaranteedPlaceholder": "0 — навіть при промаху",
+    "maxTargets": "Макс. цілей",
+    "distribution": "Розподіл шкоди (%) — окремо на ціль",
+    "targetN": "Ціль {number}",
+    "distributionHint": "Кожна ціль: 0–100%. Сума може перевищувати 100%."
+  },
+  "immunities": {
+    "title": "Імунітети",
+    "add": "+ Додати імунітет",
+    "prompt": "Введіть назву імунітету:",
+    "own": "Імунітети юніта:",
+    "all": "Всі імунітети:",
+    "empty": "Немає доданих імунітетів. Натисніть «Додати імунітет» щоб додати новий."
+  },
+  "knownSpells": {
+    "title": "Заклинання",
+    "add": "Додати заклинання",
+    "levelSuffix": " ({level} рівень)",
+    "known": "Відомі заклинання:",
+    "empty": "Немає доданих заклинань. Виберіть заклинання зі списку вище.",
+    "none": "Немає доступних заклинань у кампанії. Створіть заклинання в розділі «Заклинання»."
+  },
+  "spellcasting": {
+    "ability": "Характеристика блоку",
+    "bestMental": "Найкраща ментальна",
+    "dc": "СК блоку",
+    "attackBonus": "Бонус атаки блоку",
+    "addSpell": "Додати заклинання монстра",
+    "unknownSpell": "Невідоме заклинання ({id})",
+    "removeLabel": "Видалити {name}",
+    "usage": "Використання",
+    "limits": {
+      "will": "За бажанням",
+      "battle": "N за бій",
+      "recharge": "Перезарядка"
+    },
+    "usesPerBattle": "{name}: використань за бій",
+    "recharge": "Перезарядка",
+    "castLevel": "{name}: коло касту",
+    "grantDc": "{name}: СК",
+    "grantAttack": "{name}: бонус атаки",
+    "legendaryOnly": "Лише легендарна дія / дія лігва",
+    "hint": "Додаткові відомі заклинання нижче доступні за бажанням. Порожні СК, коло й бонус використовують значення блоку."
+  },
+  "statblock": {
+    "creatureType": "Тип істоти",
+    "size": "Розмір",
+    "alignment": "Світогляд",
+    "feet": "{label}, фт",
+    "passivePerception": "Пасивна Уважність",
+    "languages": "Мови",
+    "telepathy": "Телепатія, фт",
+    "lairResistances": "Легендарний опір у лігві"
+  },
+  "validation": {
+    "avatarUrl": "Аватар — посилання на зображення (http(s):// або /)",
+    "challengeRating": "CR: 0, 1/8, 1/4, 1/2 або ціле 1–30",
+    "rechargeNeedsPerBattle": "Recharge потребує perBattle: 1",
+    "duplicateSpell": "Заклинання повторюється у грантах"
+  }
+}

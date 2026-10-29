@@ -4,6 +4,14 @@ import type { DndSkill } from "@/lib/constants/skills";
 import type { Ability } from "@/types/abilities";
 import type { CharacterClassEntry } from "@/types/classes";
 
+export type TextParams = Record<string, string | number>;
+
+/** A translation key with params, or plain content text (shown as is). */
+export interface TextRef {
+  message: string;
+  params?: TextParams;
+}
+
 export type ChoiceKind = (typeof CHOICE_KINDS)[number];
 
 export type FeatType = (typeof FEAT_TYPES)[number];
@@ -139,6 +147,7 @@ export interface ChoiceIssue {
   path: string;
   code: ChoiceErrorCode;
   message: string;
+  params?: { detail: string };
 }
 
 export interface ChoicesBody {
@@ -151,13 +160,13 @@ export interface ChoicesBody {
 }
 
 export interface SheetChoices {
-  background?: { id: string; name: string; equipmentText: string | null; picks: string[] };
+  background?: { id: string; name: string; equipmentText: string | null; picks: TextRef[] };
   pending: number;
   /** ДМ, або власник при allowPlayerEdit і не на розгляді */
   canEdit?: boolean;
   lineage: string | null;
-  feats: Array<{ key: string; id: string; name: string; type: FeatType; from: string; picks: string[] }>;
+  feats: Array<{ key: string; id: string; name: string; type: FeatType; from: TextRef; picks: TextRef[] }>;
   options: Array<{ owner: string; label: string; names: string[] }>;
-  spellSources: Record<string, string>;
+  spellSources: Record<string, TextRef>;
   expertise: DndSkill[];
 }

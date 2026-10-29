@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { useTranslations } from "next-intl";
 import { Skull } from "lucide-react";
 
 import { DeleteAllButton } from "@/components/common/DeleteAllButton";
@@ -21,28 +22,30 @@ interface DMUnitsPageClientProps {
 }
 
 export function DMUnitsPageClient({ campaignId, initialUnits }: DMUnitsPageClientProps) {
+  const t = useTranslations("units");
+
   const list = useUnitsList(campaignId, initialUnits);
 
   return (
     <HudPage>
       <HudPageHeader
-        title="NPC Юніти"
-        subtitle={`Управління мобами та юнітами · Всього: ${list.units.length}`}
+        title={t("page.title")}
+        subtitle={t("page.subtitle", { count: list.units.length })}
         actions={
           <>
             <ContentTransferButtons campaignId={campaignId} kind="units" />
             <Button variant="outline" className="whitespace-nowrap text-xs sm:text-sm" asChild>
-              <Link href={`/campaigns/${campaignId}/dm/races`}>+ Раса</Link>
+              <Link href={`/campaigns/${campaignId}/dm/races`}>{t("page.addRace")}</Link>
             </Button>
             <Button className="whitespace-nowrap text-xs sm:text-sm" asChild>
-              <Link href={`/campaigns/${campaignId}/dm/units/new`}>+ Створити юніта</Link>
+              <Link href={`/campaigns/${campaignId}/dm/units/new`}>{t("page.create")}</Link>
             </Button>
             <DeleteAllButton
               count={list.units.length}
-              nouns={["юніт", "юніти", "юнітів"]}
+              noun={t("deleteAll.noun")}
               confirm={{
-                label: "Видалити всі юніти",
-                description: `Ви впевнені, що хочете видалити всі юніти з кампанії? Ця дія незворотна. Буде видалено ${list.units.length} юнітів.`,
+                label: t("deleteAll.label"),
+                description: t("deleteAll.description", { count: list.units.length }),
               }}
               actions={{ onConfirm: list.actions.removeAll }}
             />
@@ -63,11 +66,11 @@ export function DMUnitsPageClient({ campaignId, initialUnits }: DMUnitsPageClien
       <OnboardingHint id="dm.units" />
 
       {list.isLoading && list.units.length === 0 ? (
-        <LoadingState rows={6} label="Завантаження юнітів…" />
+        <LoadingState rows={6} label={t("page.loading")} />
       ) : list.units.length === 0 ? (
-        <EmptyState icon={Skull} title="Ще немає юнітів" description="Створіть першого юніта або імпортуйте їх з файлу." />
+        <EmptyState icon={Skull} title={t("page.emptyTitle")} description={t("page.emptyDescription")} />
       ) : list.view.groups.length === 0 ? (
-        <p className="text-sm text-hud-muted">Нічого не знайдено</p>
+        <p className="text-sm text-hud-muted">{t("page.nothingFound")}</p>
       ) : (
         <Accordion type="multiple" value={list.view.open} onValueChange={list.view.setOpen} className="space-y-2">
           {list.view.groups.map((group) => (

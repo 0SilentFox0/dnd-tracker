@@ -1,3 +1,4 @@
+import type { ErrorParams } from "@/lib/constants/api-errors";
 import { isRecord } from "@/lib/utils/common/is-record";
 import { nameKey } from "@/lib/utils/content/import/mapping";
 import type { IdName } from "@/types/common";
@@ -13,9 +14,11 @@ export interface SkillTreeFile {
   names: Record<string, { name: string; kind: RefKind }>;
 }
 
-export type TreeImportPlan = { race: string; treeId: string; skills: Record<string, unknown>; warnings?: string[] };
+export type TransferMessage = { message: string; params?: ErrorParams };
 
-export type TreeImportFailure = { race: string; error: string };
+export type TreeImportPlan = { race: string; treeId: string; skills: Record<string, unknown>; warnings?: TransferMessage[] };
+
+export type TreeImportFailure = { race: string; error: TransferMessage };
 
 export const isTreeImportFailure = (p: TreeImportPlan | TreeImportFailure): p is TreeImportFailure => "error" in p;
 
@@ -67,12 +70,12 @@ export function readSkillTreeFiles(text: string): SkillTreeFile[] {
   try {
     data = JSON.parse(text);
   } catch {
-    throw new Error("Некоректний JSON");
+    throw new Error("skillTree.transfer.invalidJson");
   }
 
   const list = Array.isArray(data) ? data : [data];
 
-  if (list.length === 0 || !list.every(isTreeFile)) throw new Error("Файл не схожий на експорт дерев скілів");
+  if (list.length === 0 || !list.every(isTreeFile)) throw new Error("skillTree.transfer.notTreeFile");
 
   return list;
 }
@@ -83,7 +86,7 @@ export function planSkillTreeImport(
 ): TreeImportPlan | TreeImportFailure {
   const race = ctx.races.find((r) => nameKey(r.name) === nameKey(file.race));
 
-  if (!race) return { race: file.race, error: `Раси «${file.race}» немає в кампанії` };
+  if (!race) return { race: file.race, error: { message: "skillTree.transfer.raceMissing", params: { race: file.race } } };
 
   const spellGroups = ctx.spellGroups ?? [];
 
@@ -112,7 +115,7 @@ export function planSkillTreeImport(
     else missing.push(ref.name);
   }
 
-  if (missing.length > 0) return { race: race.name, error: `Не знайдено в кампанії: ${missing.join(", ")}` };
+  if (missing.length > 0) return { race: race.name, error: { message: "skillTree.transfer.missing", params: { list: missing.join(", ") } } };
 
   const localGroups = new Set(spellGroups.map((g) => g.id));
 
@@ -140,7 +143,7 @@ export function planSkillTreeImport(
 
   const existing = ctx.trees.find((t) => nameKey(t.race) === nameKey(race.name));
 
-  const warnings = dropped.size > 0 ? [`Школу магії не знайдено в кампанії, прибрано: ${[...dropped].join(", ")}`] : undefined;
+  const warnings = dropped.size > 0 ? [{ message: "skillTree.transfer.spellGroupDropped", params: { list: [...dropped].join(", ") } }] : undefined;
 
   return { race: race.name, treeId: existing?.id ?? "new", skills, ...(warnings && { warnings }) };
 }

@@ -19,13 +19,13 @@ describe("RulesForm", () => {
   it("disabling morale locks the cap and saves only the morale section", async () => {
     renderWithConfirm(<RulesForm campaignId="c1" />);
 
-    expect(screen.getByLabelText("Межа ±N")).not.toBeDisabled();
+    expect(screen.getByLabelText("rules.sections.morale.cap")).not.toBeDisabled();
 
-    fireEvent.click(screen.getByRole("switch", { name: "Увімкнена" }));
+    fireEvent.click(screen.getByRole("switch", { name: "rules.sections.morale.enabled" }));
 
-    expect(screen.getByLabelText("Межа ±N")).toBeDisabled();
+    expect(screen.getByLabelText("rules.sections.morale.cap")).toBeDisabled();
 
-    fireEvent.click(screen.getByRole("button", { name: "Зберегти" }));
+    fireEvent.click(screen.getByRole("button", { name: "rules.form.save" }));
 
     await vi.waitFor(() => expect(mutateAsync).toHaveBeenCalledWith({ morale: { enabled: false, cap: 3 } }));
   });

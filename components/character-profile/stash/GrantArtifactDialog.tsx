@@ -9,8 +9,9 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { ResponsiveDialog } from "@/components/ui/responsive-dialog";
-import { artifactRarityLabel, artifactSlotLabel, ITEM_LIMITS } from "@/lib/constants/artifacts";
+import { ITEM_LIMITS } from "@/lib/constants/artifacts";
 import { useGrantArtifactForm } from "@/lib/hooks/characters";
+import { useTranslator } from "@/lib/i18n/use-translator";
 import { composedName } from "@/lib/utils/items/compose";
 import type { FreeArtifact } from "@/types/inventory";
 
@@ -40,27 +41,29 @@ function ArtifactRow({ a, subtitle, disabled, onClick }: { a: FreeArtifact; subt
 export function GrantArtifactDialog({ open, onOpenChange }: GrantArtifactDialogProps) {
   const { campaignId, characterId } = useProfile();
 
+  const t = useTranslator();
+
   const form = useGrantArtifactForm({ campaignId, characterId, open, onOpenChange });
 
   const { picked, artifacts, selectedBase, actions, fields } = form;
 
   const property = picked?.property;
 
-  const kindLabel = (a: FreeArtifact) => (a.property ? "властивість" : a.consumable ? "витратний" : a.gear ? "спорядження" : null);
+  const kindLabel = (a: FreeArtifact) => (a.property ? t("inventory.grant.kind.property") : a.consumable ? t("inventory.grant.kind.consumable") : a.gear ? t("inventory.grant.kind.gear") : null);
 
-  const subtitle = (a: FreeArtifact) => [artifactSlotLabel(a.slot), kindLabel(a)].filter(Boolean).join(" · ");
+  const subtitle = (a: FreeArtifact) => [t(`artifacts.slots.${a.slot}`), kindLabel(a)].filter(Boolean).join(" · ");
 
   return (
     <ResponsiveDialog
       hud
       open={open}
       onOpenChange={actions.close}
-      title={picked?.property ? `База для «${picked.name}»` : "Видати артефакт"}
+      title={picked?.property ? t("inventory.grant.baseTitle", { name: picked.name }) : t("inventory.grant.title")}
       footer={
         form.detail && !form.isLoading ? (
           <>
-            <Button type="button" variant="ghost" onClick={actions.back}>Назад</Button>
-            <Button type="button" disabled={!form.canGrant} onClick={actions.submit}>Видати</Button>
+            <Button type="button" variant="ghost" onClick={actions.back}>{t("inventory.grant.back")}</Button>
+            <Button type="button" disabled={!form.canGrant} onClick={actions.submit}>{t("inventory.grant.submit")}</Button>
           </>
         ) : undefined
       }
@@ -70,35 +73,35 @@ export function GrantArtifactDialog({ open, onOpenChange }: GrantArtifactDialogP
       ) : picked && form.detail ? (
         <div className="space-y-2">
           {property && <>
-            <Label htmlFor="grant-base-search" className="sr-only">Пошук бази</Label>
-            <Input id="grant-base-search" placeholder="Пошук бази" value={fields.query} onChange={(e) => actions.setQuery(e.target.value)} />
-            {form.bases.length === 0 ? <EmptyState title="Немає підхожих вільних баз" /> : <ul>
-              {form.bases.map((b) => <ArtifactRow key={b.id} a={b} subtitle={`${composedName(b, picked, property.nameTemplate)} · ${artifactRarityLabel(picked.rarity ?? "")}`} disabled={form.isPending} onClick={() => actions.setBaseId(b.id)} />)}
+            <Label htmlFor="grant-base-search" className="sr-only">{t("inventory.grant.baseSearch")}</Label>
+            <Input id="grant-base-search" placeholder={t("inventory.grant.baseSearch")} value={fields.query} onChange={(e) => actions.setQuery(e.target.value)} />
+            {form.bases.length === 0 ? <EmptyState title={t("inventory.grant.noBases")} /> : <ul>
+              {form.bases.map((b) => <ArtifactRow key={b.id} a={b} subtitle={`${composedName(b, picked, property.nameTemplate)} · ${picked.rarity ? t(`artifacts.rarity.${picked.rarity}`) : ""}`} disabled={form.isPending} onClick={() => actions.setBaseId(b.id)} />)}
             </ul>}
           </>}
           <p className="text-sm text-hud-ink">{property && selectedBase ? composedName(selectedBase, picked, property.nameTemplate) : picked.name}</p>
           {form.parameterRequired && <>
-            <Label htmlFor="grant-parameter">Параметр предмета</Label>
+            <Label htmlFor="grant-parameter">{t("inventory.grant.parameter")}</Label>
             <select id="grant-parameter" className={`${HUD_SELECT_CLASS} w-full`} value={fields.parameter} onChange={(e) => actions.setParameter(e.target.value)}>
-              <option value="">Оберіть параметр</option>
+              <option value="">{t("inventory.grant.chooseParameter")}</option>
               {form.parameterOptions.map((option) => <option key={option.key} value={option.key}>{option.label}</option>)}
             </select>
           </>}
           {picked.consumable && <>
             {form.spellOptions.length > 0 && <>
-              <Label htmlFor="grant-spell">Заклинання сувою</Label>
+              <Label htmlFor="grant-spell">{t("inventory.grant.spell")}</Label>
               <select id="grant-spell" className={`${HUD_SELECT_CLASS} w-full`} value={fields.spellId} onChange={(e) => actions.setSpellId(e.target.value)}>
-                <option value="">Оберіть заклинання</option>
-                {form.spellOptions.map((spell) => <option key={spell.spellId} value={spell.spellId}>{spell.label}{spell.castLevel !== undefined ? ` · коло ${spell.castLevel}` : ""}</option>)}
+                <option value="">{t("inventory.grant.chooseSpell")}</option>
+                {form.spellOptions.map((spell) => <option key={spell.spellId} value={spell.spellId}>{spell.castLevel !== undefined ? t("inventory.grant.spellOption", { label: spell.label, level: spell.castLevel }) : spell.label}</option>)}
               </select>
-              <p className="text-xs text-hud-muted">Каст автоматизовано; право читати сувій визначає ДМ.</p>
+              <p className="text-xs text-hud-muted">{t("inventory.grant.spellNote")}</p>
             </>}
-            <Label htmlFor="grant-quantity">Кількість</Label>
+            <Label htmlFor="grant-quantity">{t("inventory.grant.quantity")}</Label>
             <Input id="grant-quantity" type="number" min={MIN_QTY} max={MAX_QTY} value={fields.quantity} onChange={(e) => actions.setQuantity(e.target.value)} />
           </>}
         </div>
       ) : artifacts.length === 0 ? (
-        <EmptyState title="Немає вільних артефактів" />
+        <EmptyState title={t("inventory.grant.noArtifacts")} />
       ) : (
         <ul>
           {artifacts.map((a) => (

@@ -1,12 +1,15 @@
 "use client";
 
 import { useRef } from "react";
+import { useTranslations } from "next-intl";
 import { Download, Upload } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { useSkillTreeTransfer } from "@/lib/hooks/skills";
 
 export function SkillTreeTransferButtons({ campaignId }: { campaignId: string }) {
+  const t = useTranslations("skillTree.transfer");
+
   const transfer = useSkillTreeTransfer(campaignId);
 
   const input = useRef<HTMLInputElement>(null);
@@ -18,7 +21,7 @@ export function SkillTreeTransferButtons({ campaignId }: { campaignId: string })
         type="file"
         accept=".json"
         className="hidden"
-        aria-label="Файл дерев скілів"
+        aria-label={t("fileLabel")}
         onChange={(e) => {
           const file = e.target.files?.[0];
 
@@ -29,11 +32,11 @@ export function SkillTreeTransferButtons({ campaignId }: { campaignId: string })
       />
       <Button variant="outline" size="sm" disabled={!transfer.ready || transfer.busy} onClick={() => input.current?.click()}>
         <Upload className="h-4 w-4" />
-        Імпорт JSON
+        {t("import")}
       </Button>
       <Button variant="outline" size="sm" disabled={!transfer.ready} onClick={transfer.actions.exportAll}>
         <Download className="h-4 w-4" />
-        Експорт JSON
+        {t("export")}
       </Button>
     </div>
   );

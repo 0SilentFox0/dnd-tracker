@@ -1,10 +1,12 @@
 "use client";
 
+import { useTranslations } from "next-intl";
+
 import { OptionButton } from "@/components/hud/OptionButton";
-import { ABILITY_KEYS, ABILITY_LABELS, ABILITY_SCORE_CAP, type AbilityKey } from "@/lib/constants/abilities";
-import { FEAT_TYPE_LABELS } from "@/lib/constants/choices";
-import { DND_SKILL_META, DND_SKILLS, type DndSkill } from "@/lib/constants/skills";
-import { spellLevelName } from "@/lib/constants/spells";
+import { ABILITY_KEYS, ABILITY_SCORE_CAP, type AbilityKey } from "@/lib/constants/abilities";
+import { DND_SKILLS, type DndSkill } from "@/lib/constants/skills";
+import { useTranslator } from "@/lib/i18n/use-translator";
+import { MULTICLASS_SKILLS_ID } from "@/lib/utils/characters/choices/class-choices";
 import { resolveChoiceCount } from "@/lib/utils/characters/choices/count";
 import { featPrerequisiteMet } from "@/lib/utils/characters/choices/validate";
 import type { Choice, ChoicePick, FeatData, Picks, SpellRef } from "@/types/choices";
@@ -37,6 +39,10 @@ function Card({ role, checked, disabled, onClick, title, note }: { role: "checkb
 }
 
 export function ChoicePicker({ choice, value, onChange, ctx, error }: ChoicePickerProps) {
+  const t = useTranslations("choices");
+
+  const tc = useTranslator("common");
+
   const target = resolveChoiceCount(choice, ctx.level, ctx.columns);
 
   const ids = value.map((p) => p.id);
@@ -51,7 +57,7 @@ export function ChoicePicker({ choice, value, onChange, ctx, error }: ChoicePick
 
   const header = (
     <div className="flex items-baseline justify-between gap-2">
-      <span className="hud-sc text-sm text-hud-ink">{choice.label}</span>
+      <span className="hud-sc text-sm text-hud-ink">{choice.id === MULTICLASS_SKILLS_ID ? t("picker.multiclassSkills") : choice.label}</span>
       <span className="text-xs text-hud-muted">{`${value.length} / ${target}`}</span>
     </div>
   );
@@ -65,13 +71,13 @@ export function ChoicePicker({ choice, value, onChange, ctx, error }: ChoicePick
       {(choice.kind === "skill" || choice.kind === "expertise") && (
         <div className="flex flex-wrap gap-2">
           {(choice.skills?.length ? choice.skills : DND_SKILLS).map((s) => (
-            <Card key={s} role="checkbox" checked={ids.includes(s)} disabled={choice.kind === "expertise" && !ctx.proficient.has(s)} onClick={() => toggle(s)} title={DND_SKILL_META[s].label} />
+            <Card key={s} role="checkbox" checked={ids.includes(s)} disabled={choice.kind === "expertise" && !ctx.proficient.has(s)} onClick={() => toggle(s)} title={tc(`dndSkills.${s}`)} />
           ))}
         </div>
       )}
       {choice.kind === "abilityScore" && <AbilityPoints choice={choice} value={value} onChange={onChange} scores={ctx.scores} after={ctx.scoreAfter} />}
       {choice.kind === "spell" && <SpellList choice={choice} ids={ids} ctx={ctx} onToggle={toggle} />}
-      {value.some((p) => !isKnown(choice, p, ctx)) && <p className="text-xs text-hud-danger">Вибір не знайдено — буде прибрано при збереженні</p>}
+      {value.some((p) => !isKnown(choice, p, ctx)) && <p className="text-xs text-hud-danger">{t("picker.notFound")}</p>}
       {error && (
         <p role="alert" className="text-xs text-hud-danger">
           {error}
@@ -92,6 +98,8 @@ function isKnown(choice: Choice, p: ChoicePick, ctx: PickerContext) {
 }
 
 function OptionCards({ choice, ids, level, onToggle }: { choice: Choice; ids: string[]; level: number; onToggle: (id: string) => void }) {
+  const t = useTranslations("choices");
+
   const names = new Map((choice.options ?? []).map((o) => [o.id, o.name]));
 
   return (
@@ -99,7 +107,7 @@ function OptionCards({ choice, ids, level, onToggle }: { choice: Choice; ids: st
       {(choice.options ?? []).map((o) => {
         const missing = (o.requires ?? []).filter((r) => !ids.includes(r));
 
-        const reason = o.minLevel && o.minLevel > level ? `З рівня ${o.minLevel}` : missing.length > 0 ? `Потребує: ${missing.map((r) => names.get(r) ?? r).join(", ")}` : undefined;
+        const reason = o.minLevel && o.minLevel > level ? t("picker.fromLevel", { level: o.minLevel }) : missing.length > 0 ? t("picker.requires", { list: missing.map((r) => names.get(r) ?? r).join(", ") }) : undefined;
 
         return <Card key={o.id} role="checkbox" checked={ids.includes(o.id)} disabled={!!reason && !ids.includes(o.id)} onClick={() => onToggle(o.id)} title={o.name} note={reason ?? o.description?.slice(0, 160)} />;
       })}
@@ -108,6 +116,10 @@ function OptionCards({ choice, ids, level, onToggle }: { choice: Choice; ids: st
 }
 
 function FeatList({ choice, value, ctx, actions }: { choice: Choice; value: ChoicePick[]; ctx: PickerContext; actions: { onToggle: (id: string) => void; onChange: (next: ChoicePick[]) => void } }) {
+  const t = useTranslations("choices");
+
+  const tf = useTranslator("feats");
+
   const feats = ctx.feats.filter((f) => (choice.featTypes ?? []).includes(f.type));
 
   const setNested = (id: string, picks: Picks) => actions.onChange(value.map((p) => (p.id === id ? { ...p, picks } : p)));
@@ -124,7 +136,7 @@ function FeatList({ choice, value, ctx, actions }: { choice: Choice; value: Choi
 
         return (
           <div key={f.id} className="space-y-2">
-            <Card role="radio" checked={!!picked} disabled={!met && !picked} onClick={() => actions.onToggle(f.id)} title={f.name} note={`${FEAT_TYPE_LABELS[f.type]}${f.prerequisite.level ? ` · рівень ${f.prerequisite.level}+` : ""}${met ? "" : " · передумови не виконано"}`} />
+            <Card role="radio" checked={!!picked} disabled={!met && !picked} onClick={() => actions.onToggle(f.id)} title={f.name} note={[tf(`types.${f.type}`), f.prerequisite.level ? t("picker.featLevel", { level: f.prerequisite.level }) : "", met ? "" : t("picker.featUnmet")].filter(Boolean).join(" · ")} />
             {picked && f.choices.length > 0 && (
               <div className="ml-4 space-y-3 border-l border-hud-line/40 pl-3">
                 {f.choices.map((c) => (
@@ -140,6 +152,9 @@ function FeatList({ choice, value, ctx, actions }: { choice: Choice; value: Choi
 }
 
 function AbilityPoints({ choice, value, onChange, scores, after: scoreAfter }: { choice: Choice; value: ChoicePick[]; onChange: (next: ChoicePick[]) => void; scores: Record<AbilityKey, number>; after?: Record<AbilityKey, number> }) {
+
+  const tc = useTranslator("common");
+
   const points = choice.points ?? 1;
 
   const max = choice.max ?? ABILITY_SCORE_CAP;
@@ -155,11 +170,11 @@ function AbilityPoints({ choice, value, onChange, scores, after: scoreAfter }: {
 
         return (
           <div key={a} className="flex items-center gap-2 text-sm">
-            <span className="w-28">{ABILITY_LABELS[a]}</span>
-            <button type="button" aria-label={`−1 ${ABILITY_LABELS[a]}`} disabled={added === 0} onClick={() => onChange(value.filter((p, i) => !(p.id === a && i === value.map((x) => x.id).lastIndexOf(a))))} className="rounded border border-hud-line/50 px-2 disabled:opacity-40">
+            <span className="w-28">{tc(`abilities.${a}.label`)}</span>
+            <button type="button" aria-label={`−1 ${tc(`abilities.${a}.label`)}`} disabled={added === 0} onClick={() => onChange(value.filter((p, i) => !(p.id === a && i === value.map((x) => x.id).lastIndexOf(a))))} className="rounded border border-hud-line/50 px-2 disabled:opacity-40">
               −
             </button>
-            <button type="button" aria-label={`+1 ${ABILITY_LABELS[a]}`} disabled={value.length >= points || after + 1 > max || (choice.maxPerAbility !== undefined && added >= choice.maxPerAbility)} onClick={() => onChange([...value, { id: a }])} className="rounded border border-hud-line/50 px-2 disabled:opacity-40">
+            <button type="button" aria-label={`+1 ${tc(`abilities.${a}.label`)}`} disabled={value.length >= points || after + 1 > max || (choice.maxPerAbility !== undefined && added >= choice.maxPerAbility)} onClick={() => onChange([...value, { id: a }])} className="rounded border border-hud-line/50 px-2 disabled:opacity-40">
               +
             </button>
             {after !== scores[a] && <span className="text-xs text-hud-muted">{`${scores[a]} → ${after}`}</span>}
@@ -171,6 +186,10 @@ function AbilityPoints({ choice, value, onChange, scores, after: scoreAfter }: {
 }
 
 function SpellList({ choice, ids, ctx, onToggle }: { choice: Choice; ids: string[]; ctx: PickerContext; onToggle: (id: string) => void }) {
+  const t = useTranslations("choices");
+
+  const tc = useTranslator("common");
+
   const rule = choice.spells;
 
   if (!rule) return null;
@@ -182,9 +201,9 @@ function SpellList({ choice, ids, ctx, onToggle }: { choice: Choice; ids: string
   return (
     <div className="grid max-h-72 gap-1 overflow-y-auto sm:grid-cols-2">
       {shown.map((s) => (
-        <Card key={s.id} role="checkbox" checked={ids.includes(s.id)} onClick={() => onToggle(s.id)} title={s.name} note={spellLevelName(s.level)} />
+        <Card key={s.id} role="checkbox" checked={ids.includes(s.id)} onClick={() => onToggle(s.id)} title={s.name} note={tc(`spellLevels.${s.level}`)} />
       ))}
-      {shown.length === 0 && <p className="text-xs text-hud-muted">У списках {rule.lists.join(", ") || "—"} немає заклинань потрібних кіл</p>}
+      {shown.length === 0 && <p className="text-xs text-hud-muted">{t("picker.noSpells", { lists: rule.lists.join(", ") || "—" })}</p>}
     </div>
   );
 }

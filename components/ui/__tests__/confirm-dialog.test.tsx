@@ -6,7 +6,6 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { mockMatchMedia } from "./match-media";
 
 import { ConfirmProvider } from "@/components/ui/confirm-dialog";
-import { NOTICE_TITLE } from "@/lib/constants/ui";
 import { type ConfirmFn, useConfirm, useNotify } from "@/lib/hooks/common";
 
 const holder: { confirm?: ConfirmFn } = {};
@@ -33,7 +32,7 @@ describe("useConfirm", () => {
   beforeEach(() => mockMatchMedia(false));
   afterEach(cleanup);
 
-  it("«Видалити» → true, «Скасувати» → false", async () => {
+  it("confirm → true, cancel → false", async () => {
     mount();
 
     let p!: Promise<boolean>;
@@ -47,7 +46,7 @@ describe("useConfirm", () => {
     act(() => {
       p = confirm({ title: "Ще раз?" });
     });
-    fireEvent.click(await screen.findByRole("button", { name: "Скасувати" }));
+    fireEvent.click(await screen.findByRole("button", { name: "common.actions.cancel" }));
     await expect(p).resolves.toBe(false);
   });
 
@@ -116,7 +115,7 @@ describe("useConfirm", () => {
     expect(() => render(<Grab />)).toThrow(/ConfirmProvider/);
   });
 
-  it("useNotify: одна кнопка «Зрозуміло», без «Скасувати»", async () => {
+  it("useNotify: одна кнопка gotIt, без cancel", async () => {
     let notify!: (message: string) => Promise<void>;
 
     function GrabNotify() {
@@ -137,14 +136,14 @@ describe("useConfirm", () => {
       p = notify("Оберіть хоча б одного учасника");
     });
     expect(await screen.findByText("Оберіть хоча б одного учасника")).toBeInTheDocument();
-    expect(screen.getByRole("heading", { name: NOTICE_TITLE })).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "common.notify.title" })).toBeInTheDocument();
 
     const describedBy = screen.getByRole("alertdialog").getAttribute("aria-describedby");
 
     expect(describedBy).toBeTruthy();
     expect(document.getElementById(describedBy ?? "")).toHaveTextContent("Оберіть хоча б одного учасника");
-    expect(screen.queryByRole("button", { name: "Скасувати" })).toBeNull();
-    fireEvent.click(screen.getByRole("button", { name: "Зрозуміло" }));
+    expect(screen.queryByRole("button", { name: "common.actions.cancel" })).toBeNull();
+    fireEvent.click(screen.getByRole("button", { name: "common.notify.gotIt" }));
     await expect(p).resolves.toBeUndefined();
   });
 
@@ -164,7 +163,7 @@ describe("useConfirm", () => {
 
     expect(sheet).toHaveAttribute("data-state", "closed");
     expect(sheet).toHaveTextContent("Видалити юніта?");
-    expect(sheet).not.toHaveTextContent("Скасувати");
+    expect(sheet).not.toHaveTextContent("common.actions.cancel");
   });
 
   it.each([false, true])("confirm без опису не дає попередження про aria-describedby (mobile=%s)", async (mobile) => {

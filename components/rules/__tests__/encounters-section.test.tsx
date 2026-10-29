@@ -17,7 +17,7 @@ describe("EncountersSection", () => {
 
     render(<EncountersSection form={form} />);
 
-    fireEvent.click(screen.getByRole("switch", { name: "Баланс за бюджетом XP 5e (інакше — рівний бій HOMM)" }));
+    fireEvent.click(screen.getByRole("switch", { name: "rules.sections.encounters.balance" }));
 
     expect(form.set).toHaveBeenCalledWith("encounters", { balance: "xp", edition: "2014", autoXp: false });
   });
@@ -25,6 +25,6 @@ describe("EncountersSection", () => {
   it("авто-досвід без досвіду 5e показує підказку", () => {
     render(<EncountersSection form={formOf({ ...DEFAULT_RULES, encounters: { ...DEFAULT_RULES.encounters, autoXp: true } })} />);
 
-    expect(screen.getByText(/Діє лише разом із «Досвід за таблицею 5e»/)).toBeTruthy();
+    expect(screen.getByText("rules.sections.encounters.autoXpHint")).toBeTruthy();
   });
 });

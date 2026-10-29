@@ -1,5 +1,7 @@
 "use client";
 
+import { useTranslations } from "next-intl";
+
 import { HUD_SURFACE } from "@/components/hud";
 import { SpellBookPages, SpellDetail } from "@/components/spells/book/SpellBookPages";
 import { ResponsiveDialog } from "@/components/ui/responsive-dialog";
@@ -9,6 +11,8 @@ import { cn } from "@/lib/utils";
 import type { BookSpell } from "@/types/spells";
 
 export function ProfileSpellBook({ spells, slots, open, onOpenChange }: { spells: BookSpell[]; slots: { level: number; count: number }[]; open: boolean; onOpenChange: (open: boolean) => void }) {
+  const t = useTranslations("characterProfile.spellBook");
+
   const book = useSpellBrowser(spells, slots);
 
   const wide = useMediaQuery(DESKTOP_QUERY);
@@ -19,7 +23,7 @@ export function ProfileSpellBook({ spells, slots, open, onOpenChange }: { spells
     <ResponsiveDialog
       open={open}
       onOpenChange={onOpenChange}
-      title={showDetail && !wide ? "← До списку" : "Книга заклинань"}
+      title={showDetail && !wide ? t("toList") : t("title")}
       size="lg"
       className={cn(HUD_SURFACE, "max-w-[980px] border-none bg-[#3a2016] p-2.5 text-[#2a2018] shadow-[0_30px_80px_rgba(0,0,0,.9),inset_0_0_0_2px_#2a160f]")}
     >
@@ -32,7 +36,7 @@ export function ProfileSpellBook({ spells, slots, open, onOpenChange }: { spells
       />
       {showDetail && !wide && (
         <button type="button" onClick={book.back} className="hud-sc mt-2 h-10 w-full text-sm text-hud-bone">
-          ← Назад
+          {t("back")}
         </button>
       )}
     </ResponsiveDialog>

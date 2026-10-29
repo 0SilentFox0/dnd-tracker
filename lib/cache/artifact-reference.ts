@@ -1,4 +1,3 @@
-import { artifactSlotLabel } from "@/lib/constants/artifacts";
 import { prisma } from "@/lib/db";
 import { abilitySummary } from "@/lib/utils/abilities/summary";
 import { isUniqueRow } from "@/lib/utils/items/item-row";
@@ -62,7 +61,6 @@ export async function loadArtifactReference(campaignId: string): Promise<Artifac
       icon: a.icon,
       rarity: a.rarity,
       slot: a.slot,
-      slotLabel: artifactSlotLabel(a.slot),
       description: a.description,
       effects: abilitySummary("artifact", a),
       setName: a.artifactSet?.name ?? null,

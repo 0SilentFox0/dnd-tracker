@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useTranslations } from "next-intl";
 
 import { CharacterPickList } from "./CharacterPickList";
 
@@ -21,6 +22,8 @@ interface ExperienceDialogProps {
 }
 
 export function ExperienceDialog({ campaignId, characters, open, onOpenChange }: ExperienceDialogProps) {
+  const t = useTranslations("rest.xpDialog");
+
   const award = useAwardXp(campaignId);
 
   const checked = useCheckedIds(characters);
@@ -45,21 +48,21 @@ export function ExperienceDialog({ campaignId, characters, open, onOpenChange }:
       hud
       open={open}
       onOpenChange={onOpenChange}
-      title="Досвід"
+      title={t("title")}
       footer={
         <Button type="button" disabled={!valid || award.isPending} onClick={submit}>
-          Нарахувати
+          {t("submit")}
         </Button>
       }
     >
       <div className="space-y-3">
         <div>
-          <Label htmlFor="xp-amount">Сума (від’ємна — виправлення)</Label>
+          <Label htmlFor="xp-amount">{t("amount")}</Label>
           <Input id="xp-amount" inputMode="numeric" value={amount} onChange={(e) => setAmount(e.target.value)} />
         </div>
-        <SwitchField id="xp-split" label="Поділити між обраними" checked={split} onCheckedChange={setSplit} />
+        <SwitchField id="xp-split" label={t("split")} checked={split} onCheckedChange={setSplit} />
         <div>
-          <Label htmlFor="xp-note">Примітка</Label>
+          <Label htmlFor="xp-note">{t("note")}</Label>
           <Input id="xp-note" maxLength={200} value={note} onChange={(e) => setNote(e.target.value)} />
         </div>
         <CharacterPickList characters={characters} checked={checked} suffix={(c) => ` · ${c.experience ?? 0}`} />

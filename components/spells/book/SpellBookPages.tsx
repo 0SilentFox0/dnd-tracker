@@ -1,6 +1,7 @@
 "use client";
 
 import type { ReactNode } from "react";
+import { useLocale, useTranslations } from "next-intl";
 
 import { LevelBookmarks } from "@/components/spells/book/LevelBookmarks";
 import { SchoolHeading } from "@/components/spells/book/SchoolHeading";
@@ -8,10 +9,10 @@ import { SchoolTabs } from "@/components/spells/book/SchoolTabs";
 import { SpellRow } from "@/components/spells/book/SpellRow";
 import { SpellBattlePreview } from "@/components/spells/preview/SpellBattlePreview";
 import { SpellIcon } from "@/components/spells/SpellIcon";
-import { spellLevelName, spellSchoolColor } from "@/lib/constants/spells";
-import { useSchoolFilter } from "@/lib/hooks/spells";
+import { spellSchoolColor } from "@/lib/constants/spells";
+import { useSchoolFilter, useSpellLabels } from "@/lib/hooks/spells";
+import { useTranslator } from "@/lib/i18n/use-translator";
 import { cn } from "@/lib/utils";
-import { costLabel, resolutionLabel, targetingLabel } from "@/lib/utils/spells/model/labels";
 import type { BookSpell } from "@/types/spells";
 
 const PAPER = "hud-book relative bg-[#e9dec5] text-[#2a2018] shadow-[inset_14px_0_18px_-10px_rgba(60,40,20,.55)]";
@@ -25,6 +26,10 @@ export interface SpellBookPagesProps {
 }
 
 export function SpellBookPages({ byLevel, page, pick, layout, detail }: SpellBookPagesProps) {
+  const t = useTranslations("spells.book");
+
+  const tc = useTranslator("common");
+
   const { level, slotOf, onLevel } = page;
 
   const { pickedId, onPick, formulaOf, badgeOf } = pick;
@@ -40,12 +45,12 @@ export function SpellBookPages({ byLevel, page, pick, layout, detail }: SpellBoo
         {(wide || !showDetail) && (
           <div className="px-5 pb-12 pt-4">
             {filter.schools.length > 1 && <SchoolTabs schools={filter.schools} active={filter.school} countOf={filter.countOf} onPick={filter.setSchool} />}
-            <div className="text-[13px] italic text-[#7a6650]">Книга заклинань</div>
+            <div className="text-[13px] italic text-[#7a6650]">{t("title")}</div>
             <div className="hud-sc flex items-center gap-3 text-2xl font-bold leading-8">
-              {spellLevelName(level)}
+              {tc(`spellLevels.${level}`)}
             </div>
             <div className="my-1 h-px bg-[#2a2018]/35" />
-            {filter.shown.length === 0 && <p className="py-6 text-center italic text-[#7a6650]">{filter.isAll ? "На цьому колі заклинань немає" : "На цьому колі заклинань цієї школи немає"}</p>}
+            {filter.shown.length === 0 && <p className="py-6 text-center italic text-[#7a6650]">{filter.isAll ? t("emptyLevel") : t("emptyLevelSchool")}</p>}
             {filter.shown.map((g) => (
               <section key={g.name} className="mt-3 first:mt-1">
                 {filter.isAll && <SchoolHeading school={g} />}
@@ -58,7 +63,7 @@ export function SpellBookPages({ byLevel, page, pick, layout, detail }: SpellBoo
         )}
         {wide ? (
           <div className="sticky top-0 flex min-h-[70dvh] flex-col self-start">
-            {detail ?? <div className="flex flex-1 items-center justify-center italic text-[#7a6650]">Оберіть заклинання</div>}
+            {detail ?? <div className="flex flex-1 items-center justify-center italic text-[#7a6650]">{t("pick")}</div>}
           </div>
         ) : (
           showDetail && detail
@@ -69,15 +74,32 @@ export function SpellBookPages({ byLevel, page, pick, layout, detail }: SpellBoo
 }
 
 export function EmptySpellBook({ text }: { text: string }) {
+  const t = useTranslations("spells.book");
+
   return (
     <div className={cn(PAPER, "flex min-h-56 flex-col items-center justify-center gap-2 px-6 py-10 text-center")}>
-      <div className="text-[13px] italic text-[#7a6650]">Книга заклинань</div>
+      <div className="text-[13px] italic text-[#7a6650]">{t("title")}</div>
       <p className="hud-sc text-lg leading-6">{text}</p>
     </div>
   );
 }
 
 export function SpellDetail({ spell, formula, children }: { spell: BookSpell; formula?: string; children?: ReactNode }) {
+  const t = useTranslations("spells.book");
+
+  const tc = useTranslator("common");
+
+  const locale = useLocale();
+
+  const labels = useSpellLabels();
+
+  const rows = [
+    ...(formula === "" ? [] : [[t("power"), formula ?? (spell.dice ? t("baseDice", { dice: spell.dice }) : "—")]]),
+    [t("target"), spell.targeting ? labels.targeting(spell.targeting) : "—"],
+    [t("check"), spell.resolution ? labels.resolution(spell.resolution) : labels.resolution({ kind: "auto" })],
+    [t("cost"), labels.cost(spell.cost ?? "action")],
+  ];
+
   return (
     <>
       <div className="flex items-center gap-4">
@@ -86,17 +108,17 @@ export function SpellDetail({ spell, formula, children }: { spell: BookSpell; fo
         </span>
         <div>
           <div className="hud-sc text-[26px] font-bold leading-[30px]">{spell.name}</div>
-          <div className="text-sm italic text-[#7a6650]">{spell.spellGroup?.name ?? "Без школи"} · {spellLevelName(spell.level).toLowerCase()}</div>
+          <div className="text-sm italic text-[#7a6650]">{t("schoolAndLevel", { school: spell.spellGroup?.name ?? t("noSchool"), level: tc(`spellLevels.${spell.level}`).toLocaleLowerCase(locale) })}</div>
         </div>
       </div>
-      {spell.executionMode === "manual" && <p role="status">Ручне заклинання: читайте опис і узгодьте застосування з ДМ. Автоматичне застосування недоступне до налаштування механіки.</p>}
+      {spell.executionMode === "manual" && <p role="status">{t("manual")}</p>}
       {spell.description && (
         <p className="mt-4 border-l-4 pl-4 text-[19px] font-medium italic leading-7 text-[#3b2716]" style={{ borderColor: spellSchoolColor(spell.spellGroup) }}>
           {spell.description}
         </p>
       )}
       {spell.executionMode !== "manual" && <div className="mt-4 grid grid-cols-2 border-t border-[#2a2018]/25">
-        {[...(formula === "" ? [] : [["Сила", formula ?? (spell.dice ? `${spell.dice} баз. кубиків` : "—")]]), ["Ціль", spell.targeting ? targetingLabel(spell.targeting) : "—"], ["Перевірка", spell.resolution ? resolutionLabel(spell.resolution) : "автоматично"], ["Вартість", costLabel(spell.cost ?? "action")]].map(([a, b]) => (
+        {rows.map(([a, b]) => (
           <div key={a} className="flex h-12 flex-col justify-center border-b border-[#2a2018]/15 odd:border-r odd:pr-3 even:pl-3">
             <span className="text-xs italic text-[#7a6650]">{a}</span>
             <span className="text-base">{b}</span>

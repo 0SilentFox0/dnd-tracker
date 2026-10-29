@@ -1,3 +1,4 @@
+import type { ErrorParams } from "@/lib/constants/api-errors";
 import type { SpellFx } from "@/lib/utils/battle/fx/spells";
 import type { SpellRules } from "@/types/spells";
 
@@ -42,7 +43,6 @@ export interface ArtifactForReference {
   icon: string | null;
   rarity: string | null;
   slot: string;
-  slotLabel: string;
   description: string | null;
   effects: string[];
   setName: string | null;
@@ -59,7 +59,28 @@ export interface ArtifactSetForReference {
   artifactNames: string[];
 }
 
-export type SectionTab = "all" | "skills" | "spells" | "artifacts";
+export interface ClassFeatureForReference {
+  level: number;
+  name: string | null;
+  description: string | null;
+}
+
+export interface ClassSummaryLine {
+  key: string;
+  params?: ErrorParams;
+}
+
+export interface ClassForReference {
+  id: string;
+  name: string;
+  icon: string | null;
+  color: string | null;
+  summary: ClassSummaryLine[];
+  features: ClassFeatureForReference[];
+  subclasses: { id: string; name: string; features: ClassFeatureForReference[] }[];
+}
+
+export type SectionTab = "all" | "skills" | "spells" | "artifacts" | "classes";
 
 export interface FilterField<T, O = T[]> {
   value: T | null;
@@ -72,8 +93,9 @@ export interface ReferenceFilters {
   section: { value: SectionTab; set: (value: SectionTab) => void };
   panel: { open: boolean; setOpen: (value: boolean | ((prev: boolean) => boolean)) => void };
   hasActive: boolean;
+  classMode: boolean;
   clearAll: () => void;
-  visible: { skills: boolean; spells: boolean; artifacts: boolean };
+  visible: { skills: boolean; spells: boolean; artifacts: boolean; classes: boolean };
   skill: { mainSkill: FilterField<string> };
   spell: {
     level: FilterField<number>;

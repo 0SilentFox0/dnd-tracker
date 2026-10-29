@@ -10,6 +10,8 @@ import { useTracks } from "./useTracks";
 import { createTrack, deleteTrack, reorderTracks, updateTrack, uploadTrackFile } from "@/lib/api/tracks";
 import { TRACK_TITLE_MAX } from "@/lib/constants/music";
 import { useConfirm, useCrudMutation, useNotify } from "@/lib/hooks/common";
+import { translateIssue } from "@/lib/i18n/translate-issue";
+import { useTranslator } from "@/lib/i18n/use-translator";
 import { moveTrackInGroup } from "@/lib/utils/audio/order";
 import { readAudioDuration } from "@/lib/utils/audio/read-duration";
 import { errorMessage } from "@/lib/utils/common/error-message";
@@ -27,13 +29,10 @@ export interface MusicLibrary {
   move(id: string, dir: -1 | 1): void;
 }
 
-const stripExtension = (name: string) => name.replace(/\.[^.]+$/, "").slice(0, TRACK_TITLE_MAX) || "Трек";
+const stripExtension = (name: string, fallback: string) => name.replace(/\.[^.]+$/, "").slice(0, TRACK_TITLE_MAX) || fallback;
 
 // у стані бою лише знімок треку: YouTube грає далі, а файл зі сховища зникає одразу
-const DELETE_NOTE: Record<CampaignTrack["kind"], string> = {
-  file: "Трек зникне з бібліотеки, а файл — зі сховища. Якщо він зараз грає в бою, музика зупиниться для всіх.",
-  youtube: "Трек зникне з бібліотеки.",
-};
+const DELETE_NOTE_KEYS = { file: "music.library.deleteNote.file", youtube: "music.library.deleteNote.youtube" } as const;
 
 export function useMusicLibrary(campaignId: string, initial: CampaignTrack[]): MusicLibrary {
   const queryClient = useQueryClient();
@@ -42,14 +41,16 @@ export function useMusicLibrary(campaignId: string, initial: CampaignTrack[]): M
 
   const notify = useNotify();
 
+  const t = useTranslator();
+
   const { data: tracks = initial, isLoading } = useTracks(campaignId, { initial });
 
-  const onError = useCallback((e: unknown) => void notify(errorMessage(e, "Не вдалося зберегти")), [notify]);
+  const onError = useCallback((e: unknown) => void notify(translateIssue(t, { message: errorMessage(e, "music.library.saveFailed") })), [notify, t]);
 
   const invalidateKeys = [trackKeys.list(campaignId)];
 
   const { mutateAsync: uploadAsync, isPending: isUploading } = useCrudMutation({
-    mutationFn: async (file: File) => uploadTrackFile(campaignId, file, { title: stripExtension(file.name), durationSec: await readAudioDuration(file) }),
+    mutationFn: async (file: File) => uploadTrackFile(campaignId, file, { title: stripExtension(file.name, t("music.library.defaultTitle")), durationSec: await readAudioDuration(file) }),
     invalidateKeys,
     onError,
   });
@@ -79,11 +80,11 @@ export function useMusicLibrary(campaignId: string, initial: CampaignTrack[]): M
 
   const remove = useCallback(
     async (track: CampaignTrack) => {
-      if (await confirm({ title: `Видалити «${track.title}»?`, description: DELETE_NOTE[track.kind], confirmLabel: "Видалити", destructive: true })) {
+      if (await confirm({ title: t("music.library.deleteTitle", { title: track.title }), description: t(DELETE_NOTE_KEYS[track.kind]), confirmLabel: t("common.actions.delete"), destructive: true })) {
         deleteMutate(track.id);
       }
     },
-    [confirm, deleteMutate],
+    [confirm, deleteMutate, t],
   );
 
   const move = useCallback((id: string, dir: -1 | 1) => {

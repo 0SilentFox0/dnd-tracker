@@ -1,9 +1,13 @@
+import type { ErrorParams } from "@/lib/constants/api-errors";
+import { issueParams } from "@/lib/i18n/translate-issue";
 import { columnRefIssues } from "@/lib/utils/abilities/class-columns";
 import { EFFECT_REGISTRY } from "@/lib/utils/abilities/registry/effects";
 import { AbilitiesSchema, type Ability, AbilitySchema, type Effect, type EffectKind, isActionScopedTrigger, isStaticEffect, type Trigger, type TriggerEvent } from "@/lib/utils/abilities/schema";
 import { PASSIVE_TARGETS } from "@/lib/utils/abilities/schema/kinds";
 import { ITEM_CHARGES_KEY } from "@/lib/utils/items/pools";
 import type { ClassColumn } from "@/types/classes";
+
+export type AbilityError = string | { message: string; params?: ErrorParams };
 
 const STATIC_KINDS: EffectKind[] = ["modifyStat", "damageBonus", "flag", "note"];
 
@@ -21,6 +25,7 @@ const EFFECT_DEFAULTS: { [K in EffectKind]: WithoutKind<Extract<Effect, { kind: 
   modifyStat: { stat: "armor", flat: 1 },
   damageBonus: { filter: { kind: "all" }, percent: 10 },
   flag: { flag: "advantage", attackKind: "all" },
+  // eslint-disable-next-line no-restricted-syntax -- default note text is stored in the ability
   note: { text: "Опис" },
   grantAction: { refreshAction: true },
   dealDamage: { amount: "1d6", target: "eventTarget" },
@@ -31,6 +36,7 @@ const EFFECT_DEFAULTS: { [K in EffectKind]: WithoutKind<Extract<Effect, { kind: 
   charm: { duration: { rounds: 1 }, target: "eventTarget" },
   applyCondition: { condition: "no_reaction", duration: { rounds: 1 }, target: "eventTarget" },
   restoreSpellSlot: { count: 1 },
+  restoreSpellSlotLevels: { budget: { formula: "ceil(class_level / 2)" }, maxSlotLevel: 5 },
   drainSpellSlot: { count: 1, target: "eventTarget" },
   changeMorale: { delta: 1 },
   cleanse: {},
@@ -137,14 +143,14 @@ export function setAtPath<T>(obj: T, path: string, value: unknown): T {
   return copy as T;
 }
 
-export function validateAbilities(list: unknown[], opts: { classColumns?: readonly ClassColumn[]; itemCharges?: boolean; attacks?: readonly { name: string }[]; spellIds?: readonly string[] } = {}): { ok: boolean; errorsByPath: Record<string, string[]> } {
-  const errorsByPath: Record<string, string[]> = {};
+export function validateAbilities(list: unknown[], opts: { classColumns?: readonly ClassColumn[]; itemCharges?: boolean; attacks?: readonly { name: string }[]; spellIds?: readonly string[] } = {}): { ok: boolean; errorsByPath: Record<string, AbilityError[]> } {
+  const errorsByPath: Record<string, AbilityError[]> = {};
 
-  const push = (path: PropertyKey[], message: string) => (errorsByPath[path.map(String).join(".")] ??= []).push(message);
+  const push = (path: PropertyKey[], message: string, params?: ErrorParams) => (errorsByPath[path.map(String).join(".")] ??= []).push(params ? { message, params } : message);
 
   const r = AbilitiesSchema.safeParse(list);
 
-  if (!r.success) for (const issue of r.error.issues) push(issue.path, issue.message);
+  if (!r.success) for (const issue of r.error.issues) push(issue.path, issue.message, issueParams(issue as { message: string; params?: ErrorParams }));
 
   list.forEach((raw, i) => {
     const one = AbilitySchema.safeParse(raw);
@@ -154,16 +160,16 @@ export function validateAbilities(list: unknown[], opts: { classColumns?: readon
     const perform = one.data.perform;
 
     one.data.effects.forEach((e, ei) => {
-      if (e.kind === "damageBonus" && typeof e.flat === "object" && "spellRoll" in e.flat) push([i, "effects", ei, "flat"], "Кидок заклинання доступний лише в ефектах заклинання");
+      if (e.kind === "damageBonus" && typeof e.flat === "object" && "spellRoll" in e.flat) push([i, "effects", ei, "flat"], "abilities.validation.spellRollOnlyInSpell");
     });
 
-    if (perform?.kind === "attack" && opts.attacks && !opts.attacks.some((a) => a.name.toLocaleLowerCase() === perform.attack.toLocaleLowerCase())) push([i, "perform", "attack"], "Атаку не знайдено серед атак юніта");
+    if (perform?.kind === "attack" && opts.attacks && !opts.attacks.some((a) => a.name.toLocaleLowerCase() === perform.attack.toLocaleLowerCase())) push([i, "perform", "attack"], "abilities.validation.attackNotFound");
 
-    if (perform?.kind === "spell" && opts.spellIds && !opts.spellIds.includes(perform.spellId)) push([i, "perform", "spellId"], "Заклинання не знайдено в бібліотеці");
+    if (perform?.kind === "spell" && opts.spellIds && !opts.spellIds.includes(perform.spellId)) push([i, "perform", "spellId"], "abilities.validation.spellNotFound");
 
     const checked = opts.itemCharges && one.data.limits?.pool?.key === ITEM_CHARGES_KEY ? { ...one.data, limits: { ...one.data.limits, pool: undefined } } : one.data;
 
-    for (const issue of columnRefIssues([checked], opts.classColumns ?? null)) push([i, ...issue.path.slice(1)], issue.message);
+    for (const issue of columnRefIssues([checked], opts.classColumns ?? null)) push([i, ...issue.path.slice(1)], issue.message, issue.params);
   });
 
   return { ok: Object.keys(errorsByPath).length === 0, errorsByPath };

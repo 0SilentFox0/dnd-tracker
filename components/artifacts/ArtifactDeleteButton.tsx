@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import { Trash2 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
@@ -18,14 +19,16 @@ export function ArtifactDeleteButton({
   artifactId,
   className,
 }: ArtifactDeleteButtonProps) {
+  const t = useTranslations();
+
   const confirm = useConfirm();
 
   const remove = useDeleteArtifact(campaignId);
 
   const handleDelete = () =>
     confirm({
-      title: "Ви впевнені, що хочете видалити цей артефакт?",
-      confirmLabel: "Видалити",
+      title: t("artifacts.list.confirmDelete"),
+      confirmLabel: t("common.actions.delete"),
       destructive: true,
       onConfirm: () => remove.mutateAsync(artifactId),
     });
@@ -37,7 +40,7 @@ export function ArtifactDeleteButton({
       onClick={() => void handleDelete()}
       disabled={remove.isPending}
       className={cn("text-destructive hover:text-destructive hover:bg-destructive/10 shrink-0", className)}
-      title="Видалити артефакт"
+      title={t("artifacts.card.deleteTitle")}
     >
       <Trash2 className="size-3.5" />
     </Button>

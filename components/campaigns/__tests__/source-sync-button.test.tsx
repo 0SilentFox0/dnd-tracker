@@ -23,16 +23,16 @@ describe("SourceSyncButton", () => {
   it("текст залежить від isTemplate", () => {
     const { unmount } = render(<SourceSyncButton campaignId="c1" isTemplate={false} />);
 
-    expect(screen.getByRole("button", { name: "Оновлення з шаблону" })).toBeTruthy();
+    expect(screen.getByRole("button", { name: "campaigns.sourceSync.title.fromTemplate" })).toBeTruthy();
     unmount();
     render(<SourceSyncButton campaignId="c1" isTemplate />);
-    expect(screen.getByRole("button", { name: "Оновлення з джерела" })).toBeTruthy();
+    expect(screen.getByRole("button", { name: "campaigns.sourceSync.title.fromSource" })).toBeTruthy();
   });
 
   it("клік відкриває діалог", () => {
     render(<SourceSyncButton campaignId="c1" isTemplate={false} />);
     expect(dialog.mock.calls.at(-1)?.[0].open).toBe(false);
-    fireEvent.click(screen.getByRole("button", { name: "Оновлення з шаблону" }));
+    fireEvent.click(screen.getByRole("button", { name: "campaigns.sourceSync.title.fromTemplate" }));
     expect(dialog.mock.calls.at(-1)?.[0]).toMatchObject({ open: true, campaignId: "c1", isTemplate: false });
   });
 });

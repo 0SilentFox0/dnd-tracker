@@ -14,19 +14,19 @@ describe("редактор ДМа", () => {
 
     render(<BiographyEditor value="мати загинула тут" onChange={onChange} />);
 
-    const area = screen.getByRole("textbox", { name: "Біографія" }) as HTMLTextAreaElement;
+    const area = screen.getByRole("textbox", { name: "characterProfile.biography.field" }) as HTMLTextAreaElement;
 
     area.setSelectionRange(0, 13);
-    fireEvent.click(screen.getByRole("button", { name: "Маркер" }));
+    fireEvent.click(screen.getByRole("button", { name: "characterProfile.biography.marker" }));
     expect(onChange).toHaveBeenCalledWith("==мати загинула== тут");
   });
 
   it("«+ рівень» немає на maxLevel і є нижче", () => {
     const { rerender } = render(<LevelUpAction level={20} maxLevel={20} onLevelUp={vi.fn()} />);
 
-    expect(screen.queryByRole("button", { name: "+ рівень" })).toBeNull();
+    expect(screen.queryByRole("button", { name: "characterProfile.levelUp.action" })).toBeNull();
     rerender(<LevelUpAction level={19} maxLevel={20} onLevelUp={vi.fn()} />);
-    expect(screen.getByRole("button", { name: "+ рівень" })).toBeTruthy();
+    expect(screen.getByRole("button", { name: "characterProfile.levelUp.action" })).toBeTruthy();
   });
 
   it("основна характеристика — одна; повторний клік знімає", () => {
@@ -34,10 +34,10 @@ describe("редактор ДМа", () => {
 
     const { rerender } = render(<PrimaryAbilityPicker value={null} onChange={onChange} />);
 
-    fireEvent.click(screen.getByRole("checkbox", { name: "Спритність — основна" }));
+    fireEvent.click(screen.getByRole("checkbox", { name: 'characters.stats.primary.aria {"ability":"common.abilities.dexterity.label"}' }));
     expect(onChange).toHaveBeenLastCalledWith("dexterity");
     rerender(<PrimaryAbilityPicker value="dexterity" onChange={onChange} />);
-    fireEvent.click(screen.getByRole("checkbox", { name: "Спритність — основна" }));
+    fireEvent.click(screen.getByRole("checkbox", { name: 'characters.stats.primary.aria {"ability":"common.abilities.dexterity.label"}' }));
     expect(onChange).toHaveBeenLastCalledWith(null);
   });
 });

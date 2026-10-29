@@ -5,6 +5,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import * as preloadedModule1 from "@/app/api/campaigns/[id]/ai/ai-handlers";
 import * as preloadedModule0 from "@/app/api/campaigns/[id]/ai/proposals/[proposalId]/apply/route";
 import * as preloadedModule2 from "@/app/api/campaigns/[id]/ai/proposals/route";
+import { API_ERRORS } from "@/lib/constants/api-errors";
 import { prisma } from "@/lib/db";
 import * as apiAuth from "@/lib/utils/api/api-auth";
 import { resolveAiOps } from "@/lib/utils/scenario/ai-ops";
@@ -111,7 +112,7 @@ describe("AI proposals API", () => {
     const res = await apply();
 
     expect(res.status).toBe(409);
-    expect((await res.json()).error).toBe("Пропозицію вже застосовано або відхилено");
+    expect((await res.json()).error).toBe(API_ERRORS.AI_PROPOSAL_DONE);
     expect(prisma.scenarioPage.updateMany).not.toHaveBeenCalled();
   });
 

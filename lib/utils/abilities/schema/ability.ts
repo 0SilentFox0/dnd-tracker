@@ -4,9 +4,11 @@ import { FormulaSchema, ScaleSchema } from "./common";
 import { ConditionSchema } from "./conditions";
 import { type Effect, EffectSchema, isBakedStat, isStaticEffect, TIMED_STATS } from "./effects";
 import { isAreaTarget, PASSIVE_TARGETS } from "./kinds";
+import { AbilityParamsSchema } from "./params";
 import { isStaticCondition } from "./static-condition";
 import { isActionScopedTrigger, type Trigger, TriggerSchema } from "./triggers";
 
+import type { ErrorParams } from "@/lib/constants/api-errors";
 import { CLASS_COLUMN_KEY_RE } from "@/lib/constants/classes";
 
 export const LimitsSchema = z.object({
@@ -21,53 +23,55 @@ export const LimitsSchema = z.object({
   pool: z.object({ key: z.string().regex(CLASS_COLUMN_KEY_RE).max(40), cost: z.number().int().min(1).max(20) }).optional(),
 });
 
-function effectIssues(effect: Effect, trigger: Trigger, hasCondition: boolean): string[] {
-  const issues: string[] = [];
+type EffectIssue = { message: string; params?: ErrorParams };
+
+function effectIssues(effect: Effect, trigger: Trigger, hasCondition: boolean): EffectIssue[] {
+  const issues: EffectIssue[] = [];
 
   if (trigger.event === "passive") {
-    if (effect.kind !== "note" && !isStaticEffect(effect)) {
-      issues.push("Пасивка допускає лише modifyStat, damageBonus, flag, note");
+    if (effect.kind !== "note" && effect.kind !== "restoreSpellSlotLevels" && !isStaticEffect(effect)) {
+      issues.push({ message: "abilities.validation.passiveEffectKinds" });
     }
 
-    if ("duration" in effect && effect.duration) issues.push("Пасивка діє постійно — без duration");
+    if ("duration" in effect && effect.duration) issues.push({ message: "abilities.validation.passiveNoDuration" });
 
     if ("target" in effect && effect.target && !PASSIVE_TARGETS.has(effect.target)) {
-      issues.push("Ціль пасивки: self, allAllies, allEnemies, nearbyAllies або nearbyEnemies");
+      issues.push({ message: "abilities.validation.passiveTarget" });
     }
 
     if (effect.kind === "modifyStat" && isBakedStat(effect.stat) && effect.stat !== "morale" && isAreaTarget(effect.target)) {
-      issues.push(`${effect.stat} не діє через зону аури`);
+      issues.push({ message: "abilities.validation.bakedStatArea", params: { stat: effect.stat } });
     }
 
     if (effect.kind === "modifyStat" && isBakedStat(effect.stat) && hasCondition) {
-      issues.push(`${effect.stat} застосовується при побудові учасника — умова неможлива`);
+      issues.push({ message: "abilities.validation.bakedStatCondition", params: { stat: effect.stat } });
     }
 
     return issues;
   }
 
   if ("target" in effect && isAreaTarget(effect.target)) {
-    issues.push("Зона (поруч) — лише для пасивних");
+    issues.push({ message: "abilities.validation.areaOnlyPassive" });
   }
 
   if (effect.kind === "modifyStat" && !(TIMED_STATS as readonly string[]).includes(effect.stat)) {
-    issues.push(`${effect.stat} змінюється лише пасивкою`);
+    issues.push({ message: "abilities.validation.statPassiveOnly", params: { stat: effect.stat } });
   }
 
   if (effect.kind === "maneuver" && trigger.event !== "bonusAction" && trigger.event !== "action") {
-    issues.push("Маневр доступний лише для бонусної дії та дії");
+    issues.push({ message: "abilities.validation.maneuverTrigger" });
   }
 
   if (effect.kind === "summon" && trigger.event !== "bonusAction" && trigger.event !== "action" && trigger.event !== "kill") {
-    issues.push("Прикликання доступне лише для бонусної дії, дії та вбивства");
+    issues.push({ message: "abilities.validation.summonTrigger" });
   }
 
   if (effect.kind === "modifyStat" && effect.stat === "morale" && !effect.duration) {
-    issues.push("Тимчасова мораль потребує duration");
+    issues.push({ message: "abilities.validation.moraleNeedsDuration" });
   }
 
   if (isStaticEffect(effect) && !effect.duration && !isActionScopedTrigger(trigger)) {
-    issues.push("Потрібна duration (без неї — лише у фазі before)");
+    issues.push({ message: "abilities.validation.durationRequired" });
   }
 
   if (effect.kind === "randomOf") {
@@ -90,44 +94,53 @@ export const AbilitySchema = z
     stackable: z.boolean().optional(),
     maxStacks: z.number().int().min(1).optional(),
     maxTargets: z.number().int().min(1).optional(),
+    params: AbilityParamsSchema.optional(),
     aim: z.object({ kind: z.enum(["cell", "direction"]), range: z.number().int().min(5) }).optional(),
   })
   .superRefine((a, ctx) => {
     if (a.trigger.event === "passive" && a.limits) {
-      ctx.addIssue({ code: "custom", path: ["limits"], message: "Пасивка без лімітів" });
+      ctx.addIssue({ code: "custom", path: ["limits"], message: "abilities.validation.passiveNoLimits" });
     }
 
     if (a.maxStacks !== undefined && !a.stackable) {
-      ctx.addIssue({ code: "custom", path: ["maxStacks"], message: "maxStacks має сенс лише зі stackable" });
+      ctx.addIssue({ code: "custom", path: ["maxStacks"], message: "abilities.validation.maxStacksNeedsStackable" });
     }
 
     if (a.maxTargets !== undefined && a.trigger.event !== "bonusAction" && a.trigger.event !== "action") {
-      ctx.addIssue({ code: "custom", path: ["maxTargets"], message: "maxTargets доступний лише для бонусної дії та дії" });
+      ctx.addIssue({ code: "custom", path: ["maxTargets"], message: "abilities.validation.maxTargetsTrigger" });
     }
 
     if (a.limits?.legendaryCost !== undefined && (a.trigger.event !== "action" || a.aim)) {
-      ctx.addIssue({ code: "custom", path: ["limits", "legendaryCost"], message: "Легендарна дія — лише для вміння-дії без прицілу на клітинку" });
+      ctx.addIssue({ code: "custom", path: ["limits", "legendaryCost"], message: "abilities.validation.legendaryAction" });
     }
 
     if (a.limits?.lair && (a.trigger.event !== "action" || a.limits.legendaryCost !== undefined || a.aim)) {
-      ctx.addIssue({ code: "custom", path: ["limits", "lair"], message: "Дія лігва — лише вміння-дія без легендарної вартості й прицілу" });
+      ctx.addIssue({ code: "custom", path: ["limits", "lair"], message: "abilities.validation.lairAction" });
     }
 
     if (a.perform && (!a.limits?.legendaryCost && !a.limits?.lair || a.effects.some((e) => e.kind !== "note"))) {
-      ctx.addIssue({ code: "custom", path: ["perform"], message: "Виконання атаки чи заклинання — лише легендарна дія або дія лігва з ефектами-нотатками" });
+      ctx.addIssue({ code: "custom", path: ["perform"], message: "abilities.validation.perform" });
+    }
+
+    if (a.params?.sneakAttack && (a.trigger.event !== "hit" || !a.effects.some((e) => e.kind === "dealDamage"))) {
+      ctx.addIssue({ code: "custom", path: ["params", "sneakAttack"], message: "abilities.validation.sneakAttack" });
+    }
+
+    if (a.params?.cunningStrike && a.trigger.event !== "passive") {
+      ctx.addIssue({ code: "custom", path: ["params", "cunningStrike"], message: "abilities.validation.cunningStrike" });
     }
 
     if (a.aim && a.trigger.event !== "bonusAction" && a.trigger.event !== "action") {
-      ctx.addIssue({ code: "custom", path: ["aim"], message: "aim доступний лише для бонусної дії та дії" });
+      ctx.addIssue({ code: "custom", path: ["aim"], message: "abilities.validation.aimTrigger" });
     }
 
     a.effects.forEach((effect, i) => {
-      for (const message of effectIssues(effect, a.trigger, a.condition !== undefined && !isStaticCondition(a.condition))) {
-        ctx.addIssue({ code: "custom", path: ["effects", i], message });
+      for (const issue of effectIssues(effect, a.trigger, a.condition !== undefined && !isStaticCondition(a.condition))) {
+        ctx.addIssue({ code: "custom", path: ["effects", i], ...issue });
       }
     });
   })
-  .describe("Здібність: тригер (коли), умова (якщо), ефекти (що), ліміти. Пасивки — лише статичні ефекти без тривалості.");
+  .describe("Ability: trigger (when), condition (if), effects (what), limits. Passives allow only static effects without duration.");
 
 export const AbilitiesSchema = z.array(AbilitySchema);
 

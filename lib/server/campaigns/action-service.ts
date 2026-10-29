@@ -9,7 +9,11 @@ import { invalidateReference, ReferenceKind } from "@/lib/cache/tags";
 import { API_ERRORS } from "@/lib/constants/api-errors";
 import { CampaignKind, CampaignRole, CampaignVisibility } from "@/lib/constants/campaigns";
 import { prisma } from "@/lib/db";
+import { DEFAULT_LOCALE } from "@/lib/i18n/config";
+import { getRequestLocale } from "@/lib/i18n/request-locale";
+import { getTranslator } from "@/lib/i18n/translator";
 import { checklistProgress, checklistState } from "@/lib/onboarding/progress";
+import { stepText } from "@/lib/onboarding/step-text";
 import { aiSettingsSchema } from "@/lib/schemas/ai";
 import { createCampaignSchema, updateCampaignSchema } from "@/lib/schemas/campaigns";
 import { saveAsTemplateSchema } from "@/lib/schemas/templates";
@@ -37,7 +41,7 @@ function windowItems(items: unknown[], raw: unknown) {
 export async function loadCampaignMembers(campaignId: string) {
   return prisma.campaignMember.findMany({ where: { campaignId }, select: { id: true, userId: true, role: true, user: { select: { id: true, displayName: true, email: true } } }, orderBy: { joinedAt: "asc" } });
 }
-export const CAMPAIGN_SETTINGS_SELECT = { id: true, name: true, description: true, kind: true, visibility: true, maxLevel: true, allowPlayerEdit: true, critChoiceByDm: true, status: true, friendlyFire: true, xpMultiplier: true, credits: true, updatedAt: true } as const;
+export const CAMPAIGN_SETTINGS_SELECT = { id: true, name: true, description: true, kind: true, visibility: true, maxLevel: true, allowPlayerEdit: true, critChoiceByDm: true, acquaintancesEnabled: true, status: true, friendlyFire: true, xpMultiplier: true, credits: true, updatedAt: true } as const;
 export const campaignResult = actionResult("campaign", "Кампанія");
 
 function safeSettings(row: Record<string, unknown>) {
@@ -201,7 +205,11 @@ export async function runCampaignOperation(actor: Actor, operation: string, inpu
 
     const progress = checklistProgress(facts, actor.campaignId);
 
-    return campaignResult({ role: facts.role, state: checklistState(checklistFlag ?? undefined, progress.allRequiredDone, new Date()), steps: progress.steps, requiredDone: progress.requiredDone, requiredTotal: progress.requiredTotal }, actor.campaignId);
+    const t = await getTranslator(await getRequestLocale().catch(() => DEFAULT_LOCALE), "onboarding");
+
+    const steps = progress.steps.map((s) => ({ ...s, ...stepText(t, facts.role, s) }));
+
+    return campaignResult({ role: facts.role, state: checklistState(checklistFlag ?? undefined, progress.allRequiredDone, new Date()), steps, requiredDone: progress.requiredDone, requiredTotal: progress.requiredTotal }, actor.campaignId);
   }
 
   return withCampaignContentWrite(actor.campaignId, async () => {

@@ -88,7 +88,7 @@ describe("ConfirmProvider", () => {
       answer = got.confirm?.({ title: "Завершити хід?", signal: controller.signal }) ?? answer;
     });
 
-    act(() => screen.getByRole("button", { name: "Скасувати" }).click());
+    act(() => screen.getByRole("button", { name: "common.actions.cancel" }).click());
 
     await expect(answer).resolves.toBe(false);
     expect(remove).toHaveBeenCalledWith("abort", expect.any(Function));

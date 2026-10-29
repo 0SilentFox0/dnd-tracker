@@ -1,22 +1,31 @@
 // @vitest-environment happy-dom
-import { cleanup, fireEvent, render, screen } from "@testing-library/react";
+import { cleanup, fireEvent, screen } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
 import { AbilityScoresGrid } from "@/components/common/AbilityScoresGrid";
+import { renderWithIntl } from "@/lib/i18n/test/render-with-intl";
+
+vi.unmock("next-intl");
 
 describe("AbilityScoresGrid", () => {
   afterEach(cleanup);
 
-  it("підписує характеристики так само, як решта застосунку", () => {
-    render(<AbilityScoresGrid data={{}} set={() => {}} />);
+  it("підписує характеристики так само, як решта застосунку", async () => {
+    await renderWithIntl(<AbilityScoresGrid data={{}} set={() => {}} />);
 
     expect(screen.getByLabelText("Статура")).toBeInTheDocument();
   });
 
-  it("стерте поле не стрибає на 10 під час введення, а на blur повертає останнє значення", () => {
+  it("labels abilities in English", async () => {
+    await renderWithIntl(<AbilityScoresGrid data={{}} set={() => {}} />, { locale: "en" });
+
+    expect(screen.getByLabelText("Constitution")).toBeInTheDocument();
+  });
+
+  it("стерте поле не стрибає на 10 під час введення, а на blur повертає останнє значення", async () => {
     const set = vi.fn();
 
-    render(<AbilityScoresGrid data={{ strength: 14 }} set={set} showModifier />);
+    await renderWithIntl(<AbilityScoresGrid data={{ strength: 14 }} set={set} showModifier />);
 
     const input = screen.getByLabelText(/Сила/) as HTMLInputElement;
 

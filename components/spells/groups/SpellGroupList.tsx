@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useTranslations } from "next-intl";
 
 import { SpellGroupDialog } from "./SpellGroupDialog";
 
@@ -13,6 +14,8 @@ import { getSpellGroupIcon } from "@/lib/utils/spells/spell-icons";
 import type { SpellGroup } from "@/types/spells";
 
 export function SpellGroupList({ campaignId }: { campaignId: string }) {
+  const t = useTranslations("common.actions");
+
   const query = useSpellGroups(campaignId);
 
   const [editing, setEditing] = useState<SpellGroup | null>(null);
@@ -32,7 +35,7 @@ export function SpellGroupList({ campaignId }: { campaignId: string }) {
                     <Icon className="h-5 w-5 shrink-0" />
                     <span className="min-w-0 flex-1 truncate">{group.name}</span>
                     <Button size="sm" variant="outline" onClick={() => setEditing(group)}>
-                      Редагувати
+                      {t("edit")}
                     </Button>
                   </div>
                 </HudCard>

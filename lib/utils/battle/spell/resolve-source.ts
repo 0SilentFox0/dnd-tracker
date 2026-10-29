@@ -1,4 +1,4 @@
-import { abilityCooldownMessage, API_ERRORS } from "@/lib/constants/api-errors";
+import { API_ERRORS } from "@/lib/constants/api-errors";
 import { cooldownLeft, poolLeft, withinCountLimits } from "@/lib/utils/abilities/engine/core/usage";
 import { lairAbilities, lairBlocker } from "@/lib/utils/battle/actions/lair";
 import { legendaryAbilities, legendaryBlocker, legendaryCostOf } from "@/lib/utils/battle/actions/legendary-options";
@@ -24,7 +24,7 @@ export function resolveSpellSource(ctx: BattleMutationContext, caster: BattlePar
 
     const wait = cooldownLeft(caster, legendaryAbility, ctx.scene.round);
 
-    if (wait > 0) throw new BattleRuleError("ability_limit", abilityCooldownMessage(wait));
+    if (wait > 0) throw new BattleRuleError("ability_limit", API_ERRORS.ABILITY_COOLDOWN, { rounds: wait });
   }
 
   // вільний каст DM (швидкі дії): будь-яке закляття без слота; хід героя під керуванням DM — за правилами героя

@@ -2,6 +2,7 @@
 
 import { memo } from "react";
 import Link from "next/link";
+import { useTranslations } from "next-intl";
 import { GripVertical, X } from "lucide-react";
 
 import { UnitQuickStatsEditor } from "./UnitQuickStatsEditor";
@@ -15,7 +16,6 @@ import { Button } from "@/components/ui/button";
 import { AttackType } from "@/lib/constants/battle";
 import { challengeLabel } from "@/lib/constants/challenge";
 import { useConfirm } from "@/lib/hooks/common";
-import { pluralUk } from "@/lib/utils/common/plural";
 import { getUnitImmunities } from "@/lib/utils/races/race-effects";
 import { unitDamageSummary } from "@/lib/utils/units/damage-summary";
 import { UNIT_DRAG_TYPE, unitDragPayload } from "@/lib/utils/units/drag";
@@ -38,6 +38,10 @@ interface UnitCardProps {
 }
 
 export const UnitCard = memo(function UnitCard({ unit, campaignId, onDelete }: UnitCardProps) {
+  const t = useTranslations("units.card");
+
+  const tActions = useTranslations("common.actions");
+
   const confirm = useConfirm();
 
   const handleDragStart = (e: React.DragEvent) => {
@@ -66,7 +70,7 @@ export const UnitCard = memo(function UnitCard({ unit, campaignId, onDelete }: U
         draggable
         onDragStart={handleDragStart}
         className="absolute left-1 top-2 cursor-grab active:cursor-grabbing text-muted-foreground hover:text-foreground touch-none"
-        title="Перетягніть на расу або рівень"
+        title={t("dragTitle")}
       >
         <GripVertical className="h-4 w-4" />
       </div>
@@ -84,10 +88,10 @@ export const UnitCard = memo(function UnitCard({ unit, campaignId, onDelete }: U
             </h3>
             <div className="text-sm text-muted-foreground space-y-1">
               <div>
-                Рівень {unit.level} • HP {unit.maxHp}
+                {t("levelHp", { level: unit.level, hp: unit.maxHp })}
                 {damage && (
                   <>
-                    {` • Урон ~${damage.average} `}
+                    {t("damage", { average: damage.average })}
                     <span className="whitespace-nowrap text-xs">({damage.formula})</span>
                   </>
                 )}
@@ -104,7 +108,7 @@ export const UnitCard = memo(function UnitCard({ unit, campaignId, onDelete }: U
 
         {abilitySummary.length > 0 && (
           <div className="space-y-1 mt-4">
-            <div className="text-xs font-semibold">Вміння:</div>
+            <div className="text-xs font-semibold">{t("abilities")}</div>
             <div className="text-muted-foreground">
               <AbilitySummary lines={abilitySummary} />
             </div>
@@ -113,7 +117,7 @@ export const UnitCard = memo(function UnitCard({ unit, campaignId, onDelete }: U
 
         {allImmunities.length > 0 && (
           <div className="space-y-1">
-            <div className="text-xs font-semibold">Імунітети:</div>
+            <div className="text-xs font-semibold">{t("immunities")}</div>
             <div className="flex flex-wrap gap-1">
               {allImmunities.slice(0, 3).map((immunity, idx) => (
                 <Badge key={idx} variant="outline" className="text-xs">
@@ -131,9 +135,9 @@ export const UnitCard = memo(function UnitCard({ unit, campaignId, onDelete }: U
 
         {unit.knownSpells && unit.knownSpells.length > 0 && (
           <div className="space-y-1">
-            <div className="text-xs font-semibold">Заклинання:</div>
+            <div className="text-xs font-semibold">{t("spells")}</div>
             <div className="text-xs text-muted-foreground">
-              {unit.knownSpells.length} {pluralUk(unit.knownSpells.length, ["заклинання", "заклинання", "заклинань"])}
+              {t("spellCount", { count: unit.knownSpells.length })}
             </div>
           </div>
         )}
@@ -145,15 +149,15 @@ export const UnitCard = memo(function UnitCard({ unit, campaignId, onDelete }: U
           className="flex-1"
         >
           <Button variant="outline" size="sm" className="w-full">
-            Редагувати
+            {tActions("edit")}
           </Button>
         </Link>
         <Button
           variant="destructive"
           size="sm"
-          aria-label={`Видалити юніт ${unit.name}`}
+          aria-label={t("deleteLabel", { name: unit.name })}
           onClick={async () => {
-            if ((await confirm({ title: `Видалити юніт «${unit.name}»?`, confirmLabel: "Видалити", destructive: true }))) onDelete(unit.id);
+            if ((await confirm({ title: t("deleteTitle", { name: unit.name }), confirmLabel: tActions("delete"), destructive: true }))) onDelete(unit.id);
           }}
         >
           <X className="h-4 w-4" />

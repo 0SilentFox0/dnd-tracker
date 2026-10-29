@@ -1,5 +1,7 @@
 "use client";
 
+import { useTranslations } from "next-intl";
+
 import { LevelUpChoicesStep } from "./LevelUpChoicesStep";
 
 import { FormAlert } from "@/components/common/states";
@@ -18,9 +20,11 @@ interface ClassLevelUpDialogProps {
 }
 
 export function ClassLevelUpDialog({ open, onOpenChange, character, onLeveled }: ClassLevelUpDialogProps) {
+  const t = useTranslations("characterProfile.classLevelUp");
+
   const form = useClassLevelUpForm({ open, character, onLeveled, onClose: () => onOpenChange(false) });
 
-  const { byId, available, selection, cls, stepDefs, raisedEntry, nextRow, gained, picksCount, nextLevel, canSubmit, actions } = form;
+  const { byId, available, selection, cls, stepDefs, multiclass, raisedEntry, nextRow, gained, picksCount, nextLevel, canSubmit, actions } = form;
 
   const { choice } = selection;
 
@@ -36,19 +40,19 @@ export function ClassLevelUpDialog({ open, onOpenChange, character, onLeveled }:
       hud
       open={open}
       onOpenChange={onOpenChange}
-      title="Підвищити рівень"
+      title={t("title")}
       footer={
         <>
           <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
-            Скасувати
+            {t("cancel")}
           </Button>
           {stepDefs.length > 0 && (
             <Button type="button" variant="outline" disabled={!canSubmit} onClick={() => void actions.send(false)}>
-              Обрати пізніше
+              {t("later")}
             </Button>
           )}
           <Button type="submit" form="class-level-up-form" disabled={!canSubmit}>
-            Підвищити
+            {t("confirm")}
           </Button>
         </>
       }
@@ -58,45 +62,45 @@ export function ClassLevelUpDialog({ open, onOpenChange, character, onLeveled }:
           {entries.map((entry) => (
             <label key={entry.classId} className="flex items-center gap-2 text-sm">
               <input type="radio" name="class-pick" checked={choice === entry.classId} onChange={() => actions.pickClass(entry.classId)} />
-              {byId[entry.classId] ? `${byId[entry.classId].name} ${entry.level} → ${entry.level + 1}` : "Клас не знайдено"}
+              {byId[entry.classId] ? `${byId[entry.classId].name} ${entry.level} → ${entry.level + 1}` : t("classNotFound")}
             </label>
           ))}
           {available.length > 0 && (
             <label className="flex items-center gap-2 text-sm">
               <input type="radio" name="class-pick" checked={choice === NEW_CLASS} onChange={() => actions.pickClass(NEW_CLASS)} />
-              Новий клас
+              {t("newClass")}
             </label>
           )}
         </fieldset>
         {choice === NEW_CLASS && (
           <SelectField
-            aria-label="Новий клас"
+            aria-label={t("newClass")}
             value={selection.newClassId}
             onValueChange={actions.pickNewClass}
-            placeholder="Оберіть клас"
+            placeholder={t("pickClass")}
             options={available.map((c) => ({ value: c.id, label: c.name }))}
             triggerClassName="w-full"
           />
         )}
         {form.needsSubclass && (
           <SelectField
-            aria-label="Підклас"
+            aria-label={t("subclass")}
             value={selection.subclassId}
             onValueChange={actions.pickSubclass}
-            placeholder="Оберіть підклас"
+            placeholder={t("pickSubclass")}
             options={cls?.subclasses.map((s) => ({ value: s.id, label: s.name }))}
             required
             triggerClassName="w-full"
           />
         )}
         {nextRow && (gained.length > 0 || picksCount > 0) && (
-          <section aria-label="Що дає рівень" className="space-y-1 rounded-md border border-hud-rule p-2 text-sm">
-            <h4 className="font-semibold">Що дає рівень {nextLevel}</h4>
+          <section aria-label={t("gainsLabel")} className="space-y-1 rounded-md border border-hud-rule p-2 text-sm">
+            <h4 className="font-semibold">{t("gains", { level: nextLevel })}</h4>
             {gained.length > 0 && <p>{gained.map((item) => item.name).join(", ")}</p>}
-            {picksCount > 0 && <p className="text-hud-muted">Виборів: {picksCount}</p>}
+            {picksCount > 0 && <p className="text-hud-muted">{t("picks", { count: picksCount })}</p>}
           </section>
         )}
-        {stepDefs.length > 0 && character.hero && raisedEntry && <LevelUpChoicesStep campaignId={character.campaignId} hero={character.hero} entry={raisedEntry} value={selection.picks} onChange={actions.setPicks} />}
+        {stepDefs.length > 0 && character.hero && raisedEntry && <LevelUpChoicesStep campaignId={character.campaignId} hero={character.hero} entry={raisedEntry} multiclass={multiclass} value={selection.picks} onChange={actions.setPicks} />}
         {form.error && <FormAlert>{form.error}</FormAlert>}
       </form>
     </ResponsiveDialog>

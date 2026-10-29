@@ -1,12 +1,14 @@
 "use client";
 
 import { useMemo, useState } from "react";
+import { useTranslations } from "next-intl";
 
 import { useDeleteArtifactSet, useSaveArtifactSet } from "./useArtifactSets";
 
 import { abilitySaveError, useAbilityValidity } from "@/lib/hooks/abilities";
 import { useArtifactsList } from "@/lib/hooks/artifacts";
 import { useConfirm, useNavigateFresh } from "@/lib/hooks/common";
+import { useTranslator } from "@/lib/i18n/use-translator";
 import type { Ability } from "@/lib/utils/abilities/schema";
 import { filterArtifactsSelectableForSet } from "@/lib/utils/artifacts/artifact-set-form";
 
@@ -20,6 +22,10 @@ export interface ArtifactSetFormInitial {
 }
 
 export function useArtifactSetForm({ campaignId, setId, initial }: { campaignId: string; setId?: string; initial: ArtifactSetFormInitial }) {
+  const t = useTranslations();
+
+  const ta = useTranslator("abilities");
+
   const confirm = useConfirm();
 
   const navigateFresh = useNavigateFresh();
@@ -68,7 +74,7 @@ export function useArtifactSetForm({ campaignId, setId, initial }: { campaignId:
     if (!abilities.valid) return;
 
     if (!fields.name.trim()) {
-      setError("Вкажіть назву сету");
+      setError(t("artifacts.sets.form.nameRequired"));
 
       return;
     }
@@ -86,7 +92,7 @@ export function useArtifactSetForm({ campaignId, setId, initial }: { campaignId:
       });
       navigateFresh(listHref);
     } catch (err) {
-      setError(abilitySaveError(err, "Помилка збереження"));
+      setError(abilitySaveError(err, t("common.form.saveFailed"), ta));
     }
   };
 
@@ -94,8 +100,8 @@ export function useArtifactSetForm({ campaignId, setId, initial }: { campaignId:
     if (!setId) return;
 
     const ok = await confirm({
-      title: "Видалити сет? Артефакти залишаться в кампанії, поле «Сет» у них буде очищено.",
-      confirmLabel: "Видалити",
+      title: t("artifacts.sets.list.confirmDelete"),
+      confirmLabel: t("common.actions.delete"),
       destructive: true,
       onConfirm: () => del.mutateAsync(setId),
     });

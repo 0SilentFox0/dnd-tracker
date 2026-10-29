@@ -20,9 +20,6 @@ import { classSkillIssues, skillIdsInPicks } from "@/lib/utils/characters/choice
 import { hasPicks } from "@/lib/utils/characters/choices/read";
 import type { CharacterClassEntry, GameClassData } from "@/types/classes";
 
-const INVALID_OWNER_REFERENCE =
-  "Невірне посилання на користувача (controlledBy). Переконайтесь, що обраний гравець існує в users і є учасником кампанії.";
-
 async function assertClassSkills({ campaignId, data, entries, byId }: { campaignId: string; data: CreateCharacterInput; entries: CharacterClassEntry[]; byId: Record<string, GameClassData> | undefined }) {
   const cls = entries[0] && byId?.[entries[0].classId];
 
@@ -40,7 +37,7 @@ async function assertClassSkills({ campaignId, data, entries, byId }: { campaign
 async function createCharacterCore({ access, campaignId }: CampaignScope, data: CreateCharacterInput) {
   const { heroMin, heroMax } = access.campaign.rules.initiative;
 
-  if (data.initiative < heroMin || data.initiative > heroMax) throw new ContentError(`${API_ERRORS.INITIATIVE_OUT_OF_RANGE} (${heroMin}–${heroMax})`, 400);
+  if (data.initiative < heroMin || data.initiative > heroMax) throw new ContentError(API_ERRORS.INITIATIVE_OUT_OF_RANGE_DETAIL, 400, undefined, { min: heroMin, max: heroMax });
 
   const { campaign } = access;
 
@@ -52,7 +49,7 @@ async function createCharacterCore({ access, campaignId }: CampaignScope, data: 
     spellcastingAbility: data.spellcastingAbility ?? null,
   });
 
-  if (!applied.ok) throw new ContentError(applied.error, applied.status);
+  if (!applied.ok) throw new ContentError(applied.error, applied.status, undefined, applied.params);
 
   const fromClasses = applied.data;
 
@@ -141,7 +138,7 @@ async function createCharacterCore({ access, campaignId }: CampaignScope, data: 
     return character;
   } catch (error) {
     if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === "P2003") {
-      throw new ContentError(INVALID_OWNER_REFERENCE, 400);
+      throw new ContentError(API_ERRORS.CHARACTER_CONTROLLER_INVALID, 400);
     }
 
     throw error;

@@ -13,7 +13,7 @@ export enum ArtifactRarity {
   LEGENDARY = "legendary",
 }
 
-export const ARTIFACT_RARITY_VALUES: readonly [string, ...string[]] = [
+export const ARTIFACT_RARITY_VALUES: readonly [ArtifactRarity, ...ArtifactRarity[]] = [
   ArtifactRarity.COMMON,
   ArtifactRarity.UNCOMMON,
   ArtifactRarity.RARE,
@@ -32,7 +32,6 @@ export const ARTIFACT_RARITY_OPTIONS: ReadonlyArray<{
   { value: ArtifactRarity.LEGENDARY, label: "Легендарний" },
 ];
 
-export const artifactRarityLabel = (rarity: string): string => ARTIFACT_RARITY_OPTIONS.find((o) => o.value === rarity)?.label ?? rarity;
 
 export const ARTIFACT_RARITY_COLOR: Partial<Record<string, string>> = {
   [ArtifactRarity.UNCOMMON]: "border-[#7cbf5a]",
@@ -56,7 +55,7 @@ export enum ArtifactSlot {
   ITEM = "item",
 }
 
-export const ARTIFACT_SLOT_VALUES: readonly [string, ...string[]] = [
+export const ARTIFACT_SLOT_VALUES: readonly [ArtifactSlot, ...ArtifactSlot[]] = [
   ArtifactSlot.WEAPON,
   ArtifactSlot.RANGE_WEAPON,
   ArtifactSlot.SHIELD,
@@ -85,28 +84,19 @@ export const ARTIFACT_SLOT_OPTIONS: ReadonlyArray<{
   { value: ArtifactSlot.ITEM, label: "Артефакт" },
 ];
 
-export const artifactSlotLabel = (slot: string): string => ARTIFACT_SLOT_OPTIONS.find((o) => o.value === slot)?.label ?? slot;
 
 // ─── Сітка 3×3 слотів на персонажі (ключ у equipped + тип артефакта) ───────
 
 export const ARTIFACT_GRID_9 = [
-  { key: "ring1" as const, label: "Перстень", slotType: ArtifactSlot.RING },
-  { key: "helmet" as const, label: "Шолом", slotType: ArtifactSlot.HELMET },
-  {
-    key: "necklace" as const,
-    label: "Намисто",
-    slotType: ArtifactSlot.AMULET,
-  },
-  {
-    key: "range_weapon" as const,
-    label: "Дальнобійна",
-    slotType: ArtifactSlot.RANGE_WEAPON,
-  },
-  { key: "armor" as const, label: "Броня", slotType: ArtifactSlot.ARMOR },
-  { key: "shield" as const, label: "Щит", slotType: ArtifactSlot.SHIELD },
-  { key: "weapon" as const, label: "Зброя", slotType: ArtifactSlot.WEAPON },
-  { key: "boots" as const, label: "Черевики", slotType: ArtifactSlot.BOOTS },
-  { key: "cape" as const, label: "Плащ", slotType: ArtifactSlot.CLOAK },
+  { key: "ring1" as const, slotType: ArtifactSlot.RING },
+  { key: "helmet" as const, slotType: ArtifactSlot.HELMET },
+  { key: "necklace" as const, slotType: ArtifactSlot.AMULET },
+  { key: "range_weapon" as const, slotType: ArtifactSlot.RANGE_WEAPON },
+  { key: "armor" as const, slotType: ArtifactSlot.ARMOR },
+  { key: "shield" as const, slotType: ArtifactSlot.SHIELD },
+  { key: "weapon" as const, slotType: ArtifactSlot.WEAPON },
+  { key: "boots" as const, slotType: ArtifactSlot.BOOTS },
+  { key: "cape" as const, slotType: ArtifactSlot.CLOAK },
 ] as const;
 
 export type ArtifactGridSlotKey = (typeof ARTIFACT_GRID_9)[number]["key"];
@@ -124,6 +114,7 @@ export enum ArtifactModifierType {
   TRAITS = "traits",
   VERSATILE_DICE = "versatileDice",
   DAMAGE_BONUS = "damageBonus",
+  WEAPON_CATEGORY = "weaponCategory",
 }
 
 // окремо від ArtifactModifierType: weaponStatsFromRow бере лише свої типи
@@ -163,7 +154,15 @@ export const ITEM_LIMITS = {
 
 export const ITEM_KINDS = ["weapon", "armor", "shield"] as const;
 
+export const ITEM_REST_VALUES = ["long", "short", "none"] as const;
+
 export const ARMOR_CATEGORIES = ["light", "medium", "heavy"] as const;
+
+export const ARMOR_PROFICIENCY_KINDS = [...ARMOR_CATEGORIES, "shield"] as const;
+
+export const WEAPON_PROFICIENCY_KINDS = ["simple", "martial"] as const;
+
+export const PROFICIENCY_KINDS = [...ARMOR_PROFICIENCY_KINDS, ...WEAPON_PROFICIENCY_KINDS] as const;
 
 export const CARRIED_SLOTS: ReadonlySet<string> = new Set([ArtifactSlot.ITEM, ArtifactSlot.RING]);
 

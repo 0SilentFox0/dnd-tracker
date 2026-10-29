@@ -2,17 +2,16 @@ export type BranchLevel = "basic" | "advanced" | "expert";
 
 export const BRANCH_LEVELS: readonly BranchLevel[] = ["basic", "advanced", "expert"];
 
-export const BRANCH_LEVEL_LABEL: Record<BranchLevel, string> = { basic: "Основи", advanced: "Просунутий", expert: "Експерт" };
-
 export type Circle = "outer" | "middle" | "inner";
 
 export const CIRCLES: readonly Circle[] = ["outer", "middle", "inner"];
 
 export const CIRCLE_SIZE: Record<Circle, number> = { outer: 3, middle: 2, inner: 1 };
 
-export const CIRCLE_LABEL: Record<Circle, string> = { outer: "зовнішнє коло", middle: "середнє коло", inner: "внутрішнє коло" };
-
 export const RACIAL_BRANCH_ID = "racial";
+
+// eslint-disable-next-line no-restricted-syntax -- pseudo-branch name stored in the tree JSON
+export const RACIAL_BRANCH_NAME = "Раса";
 
 export const ULTIMATE_BRANCH_ID = "ultimate";
 

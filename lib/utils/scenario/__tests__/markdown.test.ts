@@ -50,6 +50,13 @@ describe("scenario markdown", () => {
     expect(docToMarkdown(doc(p(mention)))).toBe("[@Годрик](character:c1)");
   });
 
+  it("згадка знайомства: round-trip", () => {
+    const mention: RichNode = { type: "mention", attrs: { id: "a1", label: "Ярема", type: "acquaintance" } };
+
+    roundTrip(doc(p(t("Це "), mention)));
+    expect(docToMarkdown(doc(p(mention)))).toBe("[@Ярема](acquaintance:a1)");
+  });
+
   it("згадка місця: round-trip, невідомий тип лишається текстом", () => {
     const marker: RichNode = { type: "mention", attrs: { id: "m1", label: "Біла вежа", type: "marker" } };
 

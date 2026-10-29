@@ -42,11 +42,11 @@ describe("useCharacterForm", () => {
     const event = { preventDefault: vi.fn() } as unknown as React.FormEvent;
 
     await act(() => result.current.actions.handleSubmit(event));
-    expect(result.current.status.error).toBe("Оберіть расу");
+    expect(result.current.status.error).toBe("characters.form.validation.raceRequired");
 
     act(() => result.current.basicInfo.set("race", "Ельф"));
     await act(() => result.current.actions.handleSubmit(event));
-    expect(result.current.status.error).toBe("Вкажіть клас");
+    expect(result.current.status.error).toBe("characters.form.validation.classRequired");
     expect(onSubmit).not.toHaveBeenCalled();
   });
 });

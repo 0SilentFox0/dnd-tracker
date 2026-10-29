@@ -3,6 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { useTranslations } from "next-intl";
 
 import { TemplatePicker } from "@/components/campaigns/templates/TemplatePicker";
 import { HudForm, HudFormPage, HudSection } from "@/components/hud/form";
@@ -16,6 +17,10 @@ import { useNotify } from "@/lib/hooks/common";
 import { errorMessage } from "@/lib/utils/common/error-message";
 
 export function NewCampaignForm() {
+  const t = useTranslations("campaigns");
+
+  const tc = useTranslations("common");
+
   const notify = useNotify();
 
   const router = useRouter();
@@ -42,9 +47,9 @@ export function NewCampaignForm() {
       onSuccess: (campaign: { id: string; warnings?: string[] }) => {
         router.push(`/campaigns/${campaign.id}`);
 
-        if (campaign.warnings?.length) void notify(`Створено з попередженнями: ${campaign.warnings.length} посилань скинуто`);
+        if (campaign.warnings?.length) void notify(t("form.warnings", { count: campaign.warnings.length }));
       },
-      onError: (e: unknown) => void notify(errorMessage(e, "Помилка при створенні кампанії")),
+      onError: (e: unknown) => void notify(errorMessage(e, t("form.createFailed"))),
     };
 
     if (selection.file) {
@@ -57,52 +62,52 @@ export function NewCampaignForm() {
   };
 
   return (
-    <HudFormPage title="Створити нову кампанію" aside="Станьте Dungeon Master">
+    <HudFormPage title={t("form.title")} aside={t("form.aside")}>
       <HudForm
         id="campaign-form"
         onSubmit={handleSubmit}
         actions={
           <>
             <Button type="button" variant="outline" asChild>
-              <Link href="/campaigns">Скасувати</Link>
+              <Link href="/campaigns">{tc("actions.cancel")}</Link>
             </Button>
             <Button type="submit" disabled={loading || templatesLoading}>
-              {loading ? "Створення..." : "Створити кампанію"}
+              {loading ? tc("actions.creating") : t("form.submit")}
             </Button>
           </>
         }
       >
         <TemplatePicker value={selection} onChange={setSelection} />
-        <HudSection title="Кампанія">
+        <HudSection title={t("form.campaign")}>
           <div className="space-y-4">
             <LabeledInput
               id="name"
-              label="Назва кампанії"
+              label={t("form.name")}
               value={formData.name}
               onChange={(e) => setFormData({ ...formData, name: e.target.value })}
               required
               maxLength={100}
-              placeholder={templateName ?? "Назва вашої кампанії"}
+              placeholder={templateName ?? t("form.namePlaceholder")}
             />
             <div>
-              <Label htmlFor="description">Опис</Label>
+              <Label htmlFor="description">{t("form.description")}</Label>
               <Textarea
                 id="description"
                 value={formData.description}
                 onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                placeholder="Короткий опис кампанії (опціонально)"
+                placeholder={t("form.descriptionPlaceholder")}
                 rows={3}
               />
             </div>
           </div>
         </HudSection>
         {!selection.file && (
-        <HudSection title="Правила">
+        <HudSection title={t("form.rules")}>
           <div className="space-y-4">
             <div className="grid grid-cols-3 items-end gap-2 sm:grid-cols-4">
               <LabeledInput
                 id="maxLevel"
-                label="Максимальний рівень"
+                label={t("form.maxLevel")}
                 labelClassName="text-xs leading-tight"
                 type="number"
                 min="1"
@@ -113,7 +118,7 @@ export function NewCampaignForm() {
             </div>
             <div className="flex items-center space-x-2">
               <Checkbox id="allowPlayerEdit" checked={settings.allowPlayerEdit ?? true} onCheckedChange={(v) => setSettings({ ...settings, allowPlayerEdit: v === true })} />
-              <Label htmlFor="allowPlayerEdit">Дозволити гравцям редагувати своїх персонажів</Label>
+              <Label htmlFor="allowPlayerEdit">{t("form.allowPlayerEdit")}</Label>
             </div>
           </div>
         </HudSection>

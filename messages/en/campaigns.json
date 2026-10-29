@@ -1,0 +1,196 @@
+{
+  "page": {
+    "title": "My Campaigns",
+    "new": "+ New Campaign",
+    "templates": "My templates",
+    "dbError": {
+      "title": "Database connection error",
+      "message": "Cannot connect to the database. Check DATABASE_URL in the .env file.",
+      "fixTitle": "How to fix:",
+      "steps": {
+        "dashboard": "Open Supabase Dashboard → Settings → Database",
+        "pooling": "Copy the Connection Pooling URI (port 6543)",
+        "env": "Update DATABASE_URL in the .env file",
+        "restart": "Restart the dev server"
+      }
+    },
+    "empty": {
+      "title": "You have no campaigns yet",
+      "action": "Create your first campaign"
+    }
+  },
+  "card": {
+    "level": "Level: up to {level}",
+    "players": "Players: {count}",
+    "inviteCode": "Invite code:"
+  },
+  "roles": {
+    "dm": "DM",
+    "player": "Player"
+  },
+  "join": {
+    "trigger": "Join a campaign",
+    "title": "Join a campaign",
+    "description": "Enter the invite code your campaign DM gave you",
+    "codeLabel": "Invite code",
+    "codePlaceholder": "Enter the invite code",
+    "codeRequired": "Enter the invite code",
+    "submit": "Join",
+    "joining": "Joining...",
+    "done": "Done!",
+    "success": "Joined! Redirecting..."
+  },
+  "form": {
+    "title": "Create a new campaign",
+    "aside": "Become the Dungeon Master",
+    "submit": "Create campaign",
+    "campaign": "Campaign",
+    "name": "Campaign name",
+    "namePlaceholder": "Your campaign name",
+    "description": "Description",
+    "descriptionPlaceholder": "A short campaign description (optional)",
+    "rules": "Rules",
+    "maxLevel": "Maximum level",
+    "allowPlayerEdit": "Let players edit their own characters",
+    "createFailed": "Failed to create the campaign",
+    "warnings": "Created with warnings: {count} references were reset"
+  },
+  "settings": {
+    "open": "Edit settings",
+    "copyCode": "Copy code",
+    "title": "Campaign settings",
+    "description": "Update the campaign's main parameters",
+    "campaign": "Campaign",
+    "name": "Name",
+    "descriptionLabel": "Description",
+    "rules": "Rules",
+    "maxLevel": "Max level",
+    "allowPlayerEdit": "Let players edit their own characters",
+    "critChoiceByDm": "DM picks crit/fumble effects",
+    "critChoiceHint": "Off — the effect is random",
+    "acquaintances": "Acquaintances available to players",
+    "active": "Campaign is active",
+    "templates": "Templates",
+    "saveAsTemplate": "Save as template",
+    "export": "Export to JSON",
+    "credits": "Sources and licenses",
+    "danger": "Danger zone",
+    "delete": "Delete campaign",
+    "deleting": "Deleting...",
+    "deleteFailed": "Failed to delete",
+    "defaultTemplateName": "{name} (template)",
+    "confirmDelete": {
+      "title": "Delete the campaign “{name}”?",
+      "description": "All characters, battles, units and the campaign library will be deleted permanently."
+    }
+  },
+  "members": {
+    "remove": "Remove",
+    "removing": "Removing...",
+    "confirmRemove": "Are you sure you want to remove this member from the campaign?"
+  },
+  "saveAsTemplate": {
+    "title": "Save as template",
+    "description": "The campaign library (without heroes and battles) becomes a template for new campaigns",
+    "name": "Name",
+    "descriptionLabel": "Description",
+    "submit": "Create template",
+    "created": "Template created.",
+    "open": "Open",
+    "failed": "Failed to save the template"
+  },
+  "templatePicker": {
+    "section": "Template",
+    "ariaLabel": "Template",
+    "intro": "A template is a ready-made campaign base: a set of rules and content (races, classes, units, spells, artifacts, skills, music) copied into your campaign. You can then change it however you like. “No template” gives an empty library.",
+    "official": "Official",
+    "mine": "Mine",
+    "other": "Other",
+    "file": "File: {name}",
+    "importFile": "Import from file",
+    "none": "No template",
+    "pickAnother": "Choose another file",
+    "importDescription": "Choose a JSON exported from a campaign",
+    "entities": "{count, plural, one {# entity} other {# entities}}",
+    "counts": {
+      "races": "{count, plural, one {# race} other {# races}}",
+      "units": "{count, plural, one {# unit} other {# units}}",
+      "spells": "{count, plural, one {# spell} other {# spells}}"
+    }
+  },
+  "sourceSync": {
+    "title": {
+      "fromSource": "Update from source",
+      "fromTemplate": "Update from template"
+    },
+    "scope": {
+      "rules": "Rules",
+      "settings": "Settings",
+      "spellGroups": "Schools of magic",
+      "races": "Races",
+      "classes": "Classes",
+      "feats": "Feats",
+      "backgrounds": "Backgrounds",
+      "units": "Units",
+      "spells": "Spells",
+      "mainSkills": "Main skills",
+      "skills": "Skills",
+      "skillTrees": "Skill trees",
+      "artifactSets": "Artifact sets",
+      "artifacts": "Artifacts",
+      "tracks": "Music"
+    },
+    "status": {
+      "new": "New",
+      "updated": "Updated",
+      "conflict": "Conflict",
+      "deletedInSource": "Deleted in source",
+      "deletedLocally": "Deleted by you",
+      "deletedInTemplate": "Deleted in template"
+    },
+    "details": {
+      "changed": "Changed: {fields}",
+      "conflict": "You changed this record too — checking it replaces your version with the source version",
+      "usage": "In use: {usage}",
+      "deletedLocally": "You deleted this record; checking it restores it"
+    },
+    "usage": {
+      "characters": "{count, plural, one {# character} other {# characters}}",
+      "records": "{count, plural, one {# record} other {# records}}"
+    },
+    "groupTitle": "{label} ({count})",
+    "selectAll": "Select all",
+    "deselectAll": "Deselect all",
+    "description": {
+      "fallback": "Changes in the source",
+      "source": "Source: “{name}”",
+      "synced": "Source: “{name}” · last synced {date}"
+    },
+    "where": {
+      "source": "the source",
+      "template": "the template"
+    },
+    "confirmDelete": {
+      "title": "{count, plural, one {Delete # record that is} other {Delete # records that are}} missing from {where}?",
+      "usage": "In use: {usage}."
+    },
+    "confirmIgnore": {
+      "title": "{count, plural, one {Hide # change?} other {Hide # changes?}}",
+      "description": "They will reappear only when the source changes these records.",
+      "confirm": "Hide"
+    },
+    "applied": "Applied: {applied}{hasAdded, select, true {, automatically added: {added}} other {}}{hasWarnings, select, true {. {warnings}} other {}}",
+    "ignored": "Hidden: {count}",
+    "empty": {
+      "title": "Everything is in sync",
+      "description": "The source has no changes you don't already have"
+    },
+    "close": "Close",
+    "ignore": "Ignore selected",
+    "apply": "Apply ({count})",
+    "alsoAdded": "Also to be added: {names}",
+    "stale": "The source changed — the list was refreshed and the selection reset to default.",
+    "failed": "Sync failed",
+    "settingsName": "Campaign settings"
+  }
+}

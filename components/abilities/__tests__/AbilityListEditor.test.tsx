@@ -34,8 +34,8 @@ describe("AbilityListEditor", () => {
   it("додати з шаблону → рядок з описом", () => {
     render(<Harness />);
 
-    fireEvent.click(screen.getByRole("button", { name: "+ Вміння" }));
-    fireEvent.click(screen.getByText("Бонус шкоди"));
+    fireEvent.click(screen.getByRole("button", { name: "abilities.chips.add" }));
+    fireEvent.click(screen.getByText("abilityRegistry.templates.damage.label"));
 
     expect(json()).toHaveLength(1);
     expect(screen.getAllByText(/шкода \(ближня\) \+10%/).length).toBeGreaterThan(0);
@@ -47,18 +47,18 @@ describe("AbilityListEditor", () => {
     render(<Harness initial={[{ id: "a1", name: "Кровотеча", trigger: { event: "hit", role: "attacker" }, effects: [{ kind: "dot", damagePerRound: "1d4", damageType: "bleed", duration: { rounds: 2 }, target: "eventTarget" }] }]} onValid={onValid} />);
 
     fireEvent.click(screen.getByRole("tab", { name: /Кровотеча/ }));
-    fireEvent.pointerDown(screen.getByLabelText("Подія"), { button: 0, ctrlKey: false, pointerType: "mouse" });
-    fireEvent.click(await screen.findByRole("option", { name: "Пасивно (завжди)" }));
+    fireEvent.pointerDown(screen.getByLabelText("abilities.trigger.event"), { button: 0, ctrlKey: false, pointerType: "mouse" });
+    fireEvent.click(await screen.findByRole("option", { name: "abilityRegistry.triggers.passive.label" }));
 
     await waitFor(() => expect(onValid).toHaveBeenLastCalledWith(false, expect.any(Number)));
     expect(onValid.mock.lastCall?.[1]).toBeGreaterThan(0);
-    expect(screen.getAllByText(/Пасивка допускає/).length).toBeGreaterThan(0);
+    expect(screen.getAllByText(/abilities.validation.passiveEffectKinds/).length).toBeGreaterThan(0);
   });
 
   it("видалення вміння", () => {
     render(<Harness initial={[{ id: "a1", name: "Лють", trigger: { event: "passive" }, effects: [{ kind: "note", text: "x" }] }]} />);
 
-    fireEvent.click(screen.getByRole("button", { name: "Видалити вміння Лють" }));
+    fireEvent.click(screen.getByRole("button", { name: 'abilities.panel.delete {"name":"Лють"}' }));
 
     expect(json()).toEqual([]);
   });
@@ -66,7 +66,7 @@ describe("AbilityListEditor", () => {
   it("плашка невалідних збережених даних", () => {
     render(<Harness issues={[{ severity: "loss", message: "Частина збережених вмінь має невалідні дані" }]} />);
 
-    expect(screen.getByText(/Збережені вміння мають невалідні дані/)).toBeInTheDocument();
+    expect(screen.getByText(/abilities.editor.storedInvalid/)).toBeInTheDocument();
     expect(screen.queryByText(/Перенесено зі старого формату/)).not.toBeInTheDocument();
   });
 
@@ -74,8 +74,8 @@ describe("AbilityListEditor", () => {
     render(<Harness />);
 
     for (let i = 0; i < 2; i++) {
-      fireEvent.click(screen.getByRole("button", { name: "+ Вміння" }));
-      fireEvent.click(screen.getByText("Скопіювати з…"));
+      fireEvent.click(screen.getByRole("button", { name: "abilities.chips.add" }));
+      fireEvent.click(screen.getByText("abilities.templates.copyFrom"));
       fireEvent.click(await within(screen.getByRole("dialog")).findByRole("button", { name: "Лють" }));
       await waitFor(() => expect(json()).toHaveLength(i + 1));
     }
@@ -86,8 +86,8 @@ describe("AbilityListEditor", () => {
   it("додане з шаблону вміння вибране", () => {
     render(<Harness initial={[{ id: "a1", name: "Лють", trigger: { event: "passive" }, effects: [{ kind: "note", text: "x" }] }]} />);
 
-    fireEvent.click(screen.getByRole("button", { name: "+ Вміння" }));
-    fireEvent.click(screen.getByText("Бонус шкоди"));
+    fireEvent.click(screen.getByRole("button", { name: "abilities.chips.add" }));
+    fireEvent.click(screen.getByText("abilityRegistry.templates.damage.label"));
 
     const tabs = screen.getAllByRole("tab");
 
@@ -101,7 +101,7 @@ describe("AbilityListEditor", () => {
     render(<Harness initial={[note("a", "Перше"), note("b", "Друге"), note("c", "Трете")]} />);
 
     fireEvent.click(screen.getByRole("tab", { name: /Друге/ }));
-    fireEvent.click(screen.getByRole("button", { name: "Видалити вміння Друге" }));
+    fireEvent.click(screen.getByRole("button", { name: 'abilities.panel.delete {"name":"Друге"}' }));
 
     expect(json().map((a) => a.id)).toEqual(["a", "c"]);
     expect(screen.getByRole("tab", { name: /Трете/ }).getAttribute("aria-selected")).toBe("true");
@@ -110,7 +110,7 @@ describe("AbilityListEditor", () => {
   it("порожній список: підказка", () => {
     render(<Harness />);
 
-    expect(screen.getByText("Вмінь ще немає")).toBeInTheDocument();
+    expect(screen.getByText("abilities.editor.empty")).toBeInTheDocument();
   });
 
   it("зламаний ефект: картка «Невідомий ефект» з помилкою, зберегти не можна", async () => {
@@ -121,7 +121,7 @@ describe("AbilityListEditor", () => {
     render(<Harness initial={[broken]} onValid={onValid} />);
     fireEvent.click(screen.getByRole("tab", { name: /Зламане/ }));
 
-    expect(screen.getByText("Невідомий ефект")).toBeInTheDocument();
+    expect(screen.getByText("abilities.effect.unknown")).toBeInTheDocument();
     expect(screen.getByTestId("effect-errors-0.effects.0")).toBeInTheDocument();
     await waitFor(() => expect(onValid).toHaveBeenLastCalledWith(false, expect.any(Number)));
   });
@@ -129,7 +129,7 @@ describe("AbilityListEditor", () => {
   it("порожня назва — помилка біля поля назви", () => {
     render(<Harness initial={[{ id: "a1", name: "Х", trigger: { event: "passive" }, effects: [{ kind: "note", text: "x" }] }]} />);
     fireEvent.click(screen.getByRole("tab", { name: /Х/ }));
-    fireEvent.change(screen.getByLabelText("Назва"), { target: { value: "" } });
+    fireEvent.change(screen.getByLabelText("abilities.panel.name"), { target: { value: "" } });
 
     expect(screen.getByTestId("field-errors-0.name")).toBeInTheDocument();
   });
@@ -140,10 +140,10 @@ describe("AbilityListEditor", () => {
 
   it("chooses an attack reference and lair limit", () => {
     render(<Harness initial={[{ id: "a", name: "Pounce", trigger: { event: "action" }, limits: { legendaryCost: 1 }, effects: [{ kind: "note", text: "Move" }] }]} />);
-    fireEvent.change(screen.getByLabelText("Виконує"), { target: { value: "attack" } });
-    fireEvent.change(screen.getByLabelText("Атака вміння"), { target: { value: "Rend" } });
+    fireEvent.change(screen.getByLabelText("abilities.perform.kindAria"), { target: { value: "attack" } });
+    fireEvent.change(screen.getByLabelText("abilities.perform.attackAria"), { target: { value: "Rend" } });
     expect(json()[0].perform).toEqual({ kind: "attack", attack: "Rend" });
-    fireEvent.click(screen.getByLabelText("Дія лігва"));
+    fireEvent.click(screen.getByLabelText("abilities.limits.lair"));
     expect(json()[0].limits).toMatchObject({ lair: true });
     expect(json()[0].limits?.legendaryCost).toBeUndefined();
   });

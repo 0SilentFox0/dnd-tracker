@@ -4,5 +4,15 @@
   "maxLength": "At most {maximum, plural, one {# character} other {# characters}}",
   "email": "Invalid email address",
   "invalid": "Invalid value",
-  "passwordMismatch": "Passwords do not match"
+  "passwordMismatch": "Passwords do not match",
+  "min": "At least {minimum}",
+  "max": "At most {maximum}",
+  "itemConsumableConflict": "A consumable item cannot be a property and does not recharge",
+  "youtubeUrlInvalid": "Could not recognize the YouTube link",
+  "lairNotActive": "The participant is not in the lair now",
+  "lairUsed": "The lair action has already been used this round",
+  "lairRepeat": "This lair action cannot be repeated in consecutive rounds",
+  "trackFileInvalid": "A {formats} file up to {maxMb} MB is required",
+  "trackTitleTooLong": "Group and title together — up to {max} characters",
+  "trackDurationInvalid": "A whole number of seconds from 1 to 86400"
 }

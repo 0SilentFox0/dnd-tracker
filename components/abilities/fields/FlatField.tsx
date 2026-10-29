@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useTranslations } from "next-intl";
 
 import type { FieldProps } from "./FieldRenderer";
 import { ScaleColumnSelect } from "./ScaleColumnSelect";
@@ -8,7 +9,6 @@ import { ScaleColumnSelect } from "./ScaleColumnSelect";
 import { useAbilityEditor } from "@/components/abilities/editor-context";
 import { Input } from "@/components/ui/input";
 import { SelectField } from "@/components/ui/select-field";
-import { CLASS_REF_OUTSIDE } from "@/lib/utils/abilities/class-columns";
 import { FORMULA_VARIABLES } from "@/lib/utils/abilities/engine/core/amount";
 import type { Flat } from "@/lib/utils/abilities/schema";
 
@@ -17,6 +17,8 @@ type Mode = "number" | "formula" | "scale";
 const modeOf = (v: Flat | undefined): Mode => (typeof v === "object" && v !== null ? ("formula" in v ? "formula" : "scale") : "number");
 
 export function FlatField({ id, value, onChange }: FieldProps<Flat | undefined>) {
+  const t = useTranslations("abilities.fields");
+
   const columns = useAbilityEditor().classColumns;
 
   const mode = modeOf(value);
@@ -24,9 +26,9 @@ export function FlatField({ id, value, onChange }: FieldProps<Flat | undefined>)
   const [draft, setDraft] = useState<string | null>(null);
 
   const modes = [
-    { value: "number", label: "число" },
-    { value: "formula", label: "формула" },
-    ...(columns ? [{ value: "scale", label: "з таблиці класу" }] : []),
+    { value: "number", label: t("modes.number") },
+    { value: "formula", label: t("modes.formula") },
+    ...(columns ? [{ value: "scale", label: t("modes.scale") }] : []),
   ];
 
   const text = draft ?? (value === undefined ? "" : typeof value === "object" ? ("formula" in value ? value.formula : value.scale) : String(value));
@@ -47,7 +49,7 @@ export function FlatField({ id, value, onChange }: FieldProps<Flat | undefined>)
   if (mode === "scale" && !columns) {
     return (
       <p className="text-xs text-muted-foreground">
-        <span>{CLASS_REF_OUTSIDE}</span> <code>[{text}]</code>
+        <span>{t("classRefOutside")}</span> <code>[{text}]</code>
       </p>
     );
   }
@@ -75,7 +77,7 @@ export function FlatField({ id, value, onChange }: FieldProps<Flat | undefined>)
           />
         )}
       </div>
-      {mode === "formula" && <p className="text-xs text-muted-foreground">Змінні: {FORMULA_VARIABLES.join(", ")}</p>}
+      {mode === "formula" && <p className="text-xs text-muted-foreground">{t("variables", { list: FORMULA_VARIABLES.join(", ") })}</p>}
     </div>
   );
 }

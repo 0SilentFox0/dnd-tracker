@@ -6,7 +6,7 @@ import { hasPicks } from "@/lib/utils/characters/choices/read";
 import { forEachChoiceOwner } from "@/lib/utils/characters/choices/walk";
 import type { Ability, AbilitySource } from "@/types/abilities";
 import type { BackgroundData } from "@/types/backgrounds";
-import type { CharacterFeat, Choice, ChoiceOption, ChoiceOwner, ChoicePick, ChoiceRace, ChoicesState, FeatData, Picks, SelectedSpellGrant, SpellGrantPolicy } from "@/types/choices";
+import type { CharacterFeat, Choice, ChoiceOption, ChoiceOwner, ChoicePick, ChoiceRace, ChoicesState, FeatData, Picks, SelectedSpellGrant, SpellGrantPolicy, TextRef } from "@/types/choices";
 import type { ResolvedClassEntry } from "@/types/classes";
 
 export interface ChoiceGroup {
@@ -17,14 +17,14 @@ export interface ChoiceGroup {
 
 export interface ChoiceSelections {
   tools?: string[];
-  background?: { id: string; name: string; equipmentText: string | null; picks: string[] };
+  background?: { id: string; name: string; equipmentText: string | null; picks: TextRef[] };
   groups: ChoiceGroup[];
   skills: DndSkill[];
   expertise: DndSkill[];
-  spells: Array<{ spellId: string; label: string }>;
+  spells: Array<{ spellId: string; label: string; source: TextRef }>;
   spellGrants: SelectedSpellGrant[];
   slotSpells: string[];
-  feats: Array<{ key: string; feat: FeatData; picks: Picks; from: string }>;
+  feats: Array<{ key: string; feat: FeatData; picks: Picks; from: TextRef }>;
   options: Array<{ owner: string; label: string; names: string[] }>;
   lineage: string | null;
 }
@@ -45,13 +45,30 @@ interface OwnerCtx {
   owner: ChoiceOwner;
   level: number;
   name: string;
-  from: (choice: Choice) => string;
+  from: (choice: Choice) => TextRef;
   sourceFor: (choice: Choice, option: ChoiceOption) => AbilitySource;
-  spellLabel: string;
+  spellOrigin: SpellOrigin;
   scale?: ScaleContext;
   path: string;
   sourceKey: string;
 }
+
+interface SpellOrigin {
+  label: string;
+  source: TextRef;
+}
+
+// grant labels are battle data and stay Ukrainian; the sheet shows the structured `source`
+/* eslint-disable no-restricted-syntax -- data convention */
+const SPELL_ORIGIN_LABELS = { lineage: "Лінія", feat: "Риса", race: "Раса", background: "Передісторія", class: "Клас" } as const;
+/* eslint-enable no-restricted-syntax */
+
+const spellOrigin = (kind: keyof typeof SPELL_ORIGIN_LABELS, name: string): SpellOrigin => ({
+  label: `${SPELL_ORIGIN_LABELS[kind]}: ${name}`,
+  source: { message: `characterProfile.sheet.spellOrigin.${kind}`, params: { name } },
+});
+
+const fromKey = (id: string, params?: TextRef["params"]): TextRef => ({ message: `characterProfile.sheet.from.${id}`, ...(params && { params }) });
 
 const uniqueBy = <T>(list: T[], key: (item: T) => string): T[] => {
   const seen = new Set<string>();
@@ -102,9 +119,11 @@ export function choiceSelections(input: SelectionInput): ChoiceSelections {
       for (const s of o.spells ?? []) {
         if (s.level > input.level) continue;
 
-        const label = choice.lineage ? `Лінія: ${o.name}` : `${ctx.name}: ${o.name}`;
+        const origin: SpellOrigin = choice.lineage ? spellOrigin("lineage", o.name) : { label: `${ctx.name}: ${o.name}`, source: { message: `${ctx.name}: ${o.name}` } };
 
-        out.spells.push({ spellId: s.spellId, label });
+        const { label } = origin;
+
+        out.spells.push({ spellId: s.spellId, label, source: origin.source });
 
         if (!s.grant || s.grant.via === "slotOrGrant") out.slotSpells.push(s.spellId);
 
@@ -113,14 +132,14 @@ export function choiceSelections(input: SelectionInput): ChoiceSelections {
     }
   };
 
-  const addFeat = (feat: FeatData, picks: Picks, from: string, key: string, sourceKey = `feat:${feat.id}`) => {
+  const addFeat = (feat: FeatData, picks: Picks, from: TextRef, key: string, sourceKey = `feat:${feat.id}`) => {
     const source: AbilitySource = { type: "feat", id: feat.id, name: feat.name, icon: feat.icon };
 
     out.feats.push({ key, feat, picks, from });
 
     if (feat.abilities.length > 0) out.groups.push({ source, abilities: prefixed(feat.abilities, key) });
 
-    take(feat.choices, picks, { owner: "feat", level: input.level, name: feat.name, from: () => feat.name, sourceFor: (_c, o) => ({ ...source, name: `${feat.name}: ${o.name}` }), spellLabel: `Риса: ${feat.name}`, path: key, sourceKey });
+    take(feat.choices, picks, { owner: "feat", level: input.level, name: feat.name, from: () => ({ message: feat.name }), sourceFor: (_c, o) => ({ ...source, name: `${feat.name}: ${o.name}` }), spellOrigin: spellOrigin("feat", feat.name), path: key, sourceKey });
   };
 
   function take(defs: readonly Choice[], picks: Picks, ctx: OwnerCtx) {
@@ -146,13 +165,13 @@ export function choiceSelections(input: SelectionInput): ChoiceSelections {
       if (choice.kind === "skill" || choice.kind === "expertise") out[choice.kind === "skill" ? "skills" : "expertise"].push(...list.map((p) => p.id).filter(isDndSkill));
 
       if (choice.kind === "spell") {
-        const selected = list.map((p) => ({ spellId: p.id, label: ctx.spellLabel }));
+        const selected = list.map((p) => ({ spellId: p.id, label: ctx.spellOrigin.label, source: ctx.spellOrigin.source }));
 
         out.spells.push(...selected);
 
         if (!choice.grant || choice.grant.via === "slotOrGrant") out.slotSpells.push(...selected.map((s) => s.spellId));
 
-        if (choice.grant) out.spellGrants.push(...selected.map((s) => ({ ...s, sourceKey: grantKey(ctx.sourceKey, choice.id, undefined, s.spellId), grantPolicy: choice.grant as SpellGrantPolicy })));
+        if (choice.grant) out.spellGrants.push(...selected.map((s) => ({ spellId: s.spellId, label: s.label, sourceKey: grantKey(ctx.sourceKey, choice.id, undefined, s.spellId), grantPolicy: choice.grant as SpellGrantPolicy })));
       }
     }
   }
@@ -172,16 +191,16 @@ export function choiceSelections(input: SelectionInput): ChoiceSelections {
     if (owner.kind === "race") {
       const { race } = owner;
 
-      take(defs, picks, { owner: "race", level, name: race.name, from: () => race.name, sourceFor: (_c, o) => ({ type: "race", id: race.id, name: `${race.name}: ${o.name}` }), spellLabel: `Раса: ${race.name}`, path: "race", sourceKey: `race:${race.id}` });
+      take(defs, picks, { owner: "race", level, name: race.name, from: () => ({ message: race.name }), sourceFor: (_c, o) => ({ type: "race", id: race.id, name: `${race.name}: ${o.name}` }), spellOrigin: spellOrigin("race", race.name), path: "race", sourceKey: `race:${race.id}` });
     } else if (owner.kind === "background") {
       const bg = owner.background;
 
       out.skills.push(...bg.skillProficiencies);
       out.tools = [...bg.toolProficiencies];
       out.background = { id: bg.id, name: bg.name, equipmentText: bg.equipmentText, picks: describeFeatPicks(bg, picks) };
-      take(defs, picks, { owner: "background", level, name: bg.name, from: () => `Передісторія: ${bg.name}`, sourceFor: (_c, o) => ({ type: "character", id: bg.id, name: `${bg.name}: ${o.name}` }), spellLabel: `Передісторія: ${bg.name}`, path: `background:${bg.id}`, sourceKey: `background:${bg.id}` });
+      take(defs, picks, { owner: "background", level, name: bg.name, from: () => fromKey("background", { name: bg.name }), sourceFor: (_c, o) => ({ type: "character", id: bg.id, name: `${bg.name}: ${o.name}` }), spellOrigin: spellOrigin("background", bg.name), path: `background:${bg.id}`, sourceKey: `background:${bg.id}` });
     } else if (owner.kind === "backgroundFeat") {
-      addFeat(owner.feat, picks, `Передісторія: ${owner.background.name}`, legacyPath, legacyPath);
+      addFeat(owner.feat, picks, fromKey("background", { name: owner.background.name }), legacyPath, legacyPath);
     } else if (owner.kind === "class") {
       const { cls, entry } = owner;
 
@@ -189,15 +208,15 @@ export function choiceSelections(input: SelectionInput): ChoiceSelections {
         owner: "class",
         level,
         name: cls.name,
-        from: (choice) => `${cls.name} ${choice.level}`,
+        from: (choice) => fromKey("classLevel", { name: cls.name, level: choice.level }),
         sourceFor: (choice, o) => ({ type: "class", id: cls.id, name: `${cls.name}: ${choice.label} — ${o.name}`, icon: cls.icon }),
-        spellLabel: `Клас: ${cls.name}`,
+        spellOrigin: spellOrigin("class", cls.name),
         scale: { classId: cls.id, level: entry.level, columns: cls.columns ?? [] },
         path: legacyPath,
         sourceKey: legacyPath,
       });
     } else {
-      addFeat(owner.feat, picks, owner.entry.source === "origin" ? "Походження" : "ДМ", legacyPath);
+      addFeat(owner.feat, picks, fromKey(owner.entry.source === "origin" ? "origin" : "dm"), legacyPath);
     }
   }, { level: input.level, classMode: true });
 
@@ -209,6 +228,7 @@ export function choiceSelections(input: SelectionInput): ChoiceSelections {
 
   out.spellGrants = uniqueBy(out.spellGrants, (x) => x.sourceKey);
 
+  /* eslint-disable no-restricted-syntax -- ability sources are battle data */
   const synthetic: AbilitySource = { type: "character", id: "choices", name: "Вибори" };
 
   if (out.skills.length > 0) {
@@ -218,6 +238,7 @@ export function choiceSelections(input: SelectionInput): ChoiceSelections {
   if (out.expertise.length > 0) {
     out.groups.push({ source: synthetic, abilities: [{ id: "choice-expertise", name: "Експертиза з виборів", trigger: { event: "passive" }, effects: [{ kind: "flag", flag: "skillExpertise", skills: out.expertise }] }] });
   }
+  /* eslint-enable no-restricted-syntax */
 
   return out;
 }

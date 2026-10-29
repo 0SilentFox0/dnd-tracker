@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import { X } from "lucide-react";
 
 import { FlagEditor } from "./effect-renderers/FlagEditor";
@@ -9,6 +10,7 @@ import { FieldErrors } from "./FieldErrors";
 
 import { Button } from "@/components/ui/button";
 import { SelectField } from "@/components/ui/select-field";
+import { useTranslator } from "@/lib/i18n/use-translator";
 import { allowedEffectKinds, changeEffectKind, getAtPath, newEffect, setAtPath } from "@/lib/utils/abilities/editor";
 import { describeEffect, EFFECT_REGISTRY } from "@/lib/utils/abilities/registry/effects";
 import type { Effect, EffectKind, Trigger } from "@/lib/utils/abilities/schema";
@@ -23,6 +25,10 @@ interface EffectCardProps {
 }
 
 export function EffectCard({ effect, trigger, path, actions, kinds }: EffectCardProps) {
+  const t = useTranslations("abilities.effect");
+
+  const tr = useTranslator("abilityRegistry");
+
   const def = EFFECT_REGISTRY[effect.kind as EffectKind];
 
   const errorsUnder = useErrorsUnder(path);
@@ -33,8 +39,8 @@ export function EffectCard({ effect, trigger, path, actions, kinds }: EffectCard
     return (
       <div className="rounded-md border border-dashed p-2 text-xs">
         <div className="flex items-center justify-between font-medium">
-          Невідомий ефект
-          <Button type="button" size="icon" variant="ghost" onClick={actions.onRemove} disabled={!actions.onRemove} title={actions.onRemove ? undefined : "Потрібно щонайменше 2 варіанти"} aria-label="Видалити ефект">
+          {t("unknown")}
+          <Button type="button" size="icon" variant="ghost" onClick={actions.onRemove} disabled={!actions.onRemove} title={actions.onRemove ? undefined : t("minOptions")} aria-label={t("delete")}>
             <X className="h-4 w-4" />
           </Button>
         </div>
@@ -44,7 +50,7 @@ export function EffectCard({ effect, trigger, path, actions, kinds }: EffectCard
     );
   }
 
-  const options = (kinds ?? allowedEffectKinds(trigger)).map((k) => ({ value: k, label: EFFECT_REGISTRY[k].label }));
+  const options = (kinds ?? allowedEffectKinds(trigger)).map((k) => ({ value: k, label: tr(`effects.${k}.label`) }));
 
   const set = (name: string, v: unknown) => actions.onChange(setAtPath(effect, name, v));
 
@@ -56,7 +62,7 @@ export function EffectCard({ effect, trigger, path, actions, kinds }: EffectCard
     ) : (
       def.fields
         .filter((f) => !f.visibleWhen || f.visibleWhen(effect as Record<string, unknown>))
-        .map((f) => <FieldRenderer key={f.name} meta={f} path={`${path}.${f.name}`} value={getAtPath(effect, f.name)} onChange={(v) => set(f.name, v)} />)
+        .map((f) => <FieldRenderer key={f.name} meta={f} owner={`effects.${effect.kind}`} path={`${path}.${f.name}`} value={getAtPath(effect, f.name)} onChange={(v) => set(f.name, v)} />)
     );
 
   return (
@@ -65,7 +71,7 @@ export function EffectCard({ effect, trigger, path, actions, kinds }: EffectCard
         <div className="flex-1">
           <SelectField value={effect.kind} options={options} onValueChange={(k) => actions.onChange(changeEffectKind(effect, k as EffectKind, trigger))} />
         </div>
-        <Button type="button" size="icon" variant="ghost" onClick={actions.onRemove} disabled={!actions.onRemove} title={actions.onRemove ? undefined : "Потрібно щонайменше 2 варіанти"} aria-label="Видалити ефект">
+        <Button type="button" size="icon" variant="ghost" onClick={actions.onRemove} disabled={!actions.onRemove} title={actions.onRemove ? undefined : t("minOptions")} aria-label={t("delete")}>
           <X className="h-4 w-4" />
         </Button>
       </div>
@@ -82,13 +88,15 @@ export function EffectCard({ effect, trigger, path, actions, kinds }: EffectCard
 type RandomOf = Extract<Effect, { kind: "randomOf" }>;
 
 function RandomOfEditor({ effect, trigger, path, onChange }: { effect: RandomOf; trigger: Trigger; path: string; onChange: (e: Effect) => void }) {
+  const t = useTranslations("abilities.effect");
+
   const kinds = allowedEffectKinds(trigger).filter((k) => k !== "randomOf");
 
   const setOptions = (options: RandomOf["options"]) => onChange({ ...effect, options });
 
   return (
     <div className="col-span-6 space-y-2">
-      <p className="text-xs text-muted-foreground">Варіанти (обирається один випадково)</p>
+      <p className="text-xs text-muted-foreground">{t("options")}</p>
       {effect.options.map((option, i) => (
         <EffectCard
           key={i}
@@ -103,7 +111,7 @@ function RandomOfEditor({ effect, trigger, path, onChange }: { effect: RandomOf;
         />
       ))}
       <Button type="button" size="sm" variant="outline" onClick={() => setOptions([...effect.options, newEffect("heal", trigger) as RandomOf["options"][number]])}>
-        + варіант
+        {t("addOption")}
       </Button>
     </div>
   );

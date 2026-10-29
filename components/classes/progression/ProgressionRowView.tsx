@@ -1,5 +1,7 @@
 "use client";
 
+import { useTranslations } from "next-intl";
+
 import { cn } from "@/lib/utils";
 import type { ProgressionItem, ProgressionPick, ProgressionRow } from "@/types/classes";
 
@@ -38,6 +40,8 @@ export function Items({ items, accent }: { items: ProgressionItem[]; accent?: st
 }
 
 export function Picks({ row, actions }: { row: ProgressionRow; actions?: ProgressionActions }) {
+  const t = useTranslations("classes.progression");
+
   if (row.picks.length === 0) return <span className="text-hud-muted">-</span>;
 
   return (
@@ -49,11 +53,11 @@ export function Picks({ row, actions }: { row: ProgressionRow; actions?: Progres
 
         const open = pick.status === "open";
 
-        const text = isSubclass && open ? "Оберіть підклас" : pick.label;
+        const text = isSubclass ? t(open ? "chooseSubclass" : "subclass") : pick.label;
 
         const badge = (
           <span className={cn("rounded-full px-2 py-0.5 text-xs", open ? "bg-hud-gold-strong/20 text-hud-gold-strong" : "text-hud-muted")}>
-            {open ? "вибір" : pick.status === "done" ? "готово" : pick.status === "locked" ? "закрито" : ""} {text}
+            {open ? t("statusOpen") : pick.status === "done" ? t("statusDone") : pick.status === "locked" ? t("statusLocked") : ""} {text}
             {pick.required > 1 ? ` (${pick.done ?? 0}/${pick.required})` : ""}
           </span>
         );

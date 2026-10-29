@@ -1,0 +1,53 @@
+{
+  "types": {
+    "origin": "Origin",
+    "general": "General",
+    "fightingStyle": "Fighting Style",
+    "epicBoon": "Epic Boon"
+  },
+  "page": {
+    "title": "Feats",
+    "subtitle": "{count, plural, one {# feat} other {# feats}}",
+    "create": "New feat",
+    "filterAll": "All",
+    "filterLabel": "Feat type",
+    "loading": "Loading feats…",
+    "emptyTitle": "No feats yet",
+    "emptyDescription": "Create the first feat or import them from a file."
+  },
+  "card": {
+    "level": "Level {level}+",
+    "repeatable": "Repeatable",
+    "choices": "{count, plural, one {# choice} other {# choices}}"
+  },
+  "create": {
+    "title": "New feat",
+    "description": "Type, prerequisites, abilities and choices — after creation",
+    "submit": "Create feat",
+    "name": "Feat name *",
+    "namePlaceholder": "E.g. Alert"
+  },
+  "form": {
+    "editTitle": "Edit feat",
+    "editAside": "Type, prerequisites, abilities and nested choices",
+    "name": "Feat name *",
+    "icon": "Feat icon",
+    "type": "Feat type",
+    "prerequisites": "Prerequisites",
+    "minLevel": "Minimum level",
+    "scoreMin": "Any of the abilities at least",
+    "scoreMinAria": "Minimum ability score",
+    "prereqText": "Other prerequisites (text)",
+    "prereqTextPlaceholder": "E.g. Spellcasting Feature",
+    "repeatable": "Repeatable",
+    "description": "Description"
+  },
+  "list": {
+    "confirmDelete": "Delete this feat?",
+    "deleteError": "Could not delete the feat",
+    "createError": "Could not create the feat"
+  },
+  "validation": {
+    "iconUrl": "Feat icon must be an image link"
+  }
+}

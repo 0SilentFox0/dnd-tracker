@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useTranslations } from "next-intl";
 import { Music, Plus } from "lucide-react";
 
 import { EmptyState, LoadingState } from "@/components/common/states";
@@ -16,6 +17,8 @@ import { listGroupPrefixes } from "@/lib/utils/audio/playlist-groups";
 import type { CampaignTrack } from "@/types/audio";
 
 export function DMMusicPageClient({ campaignId, initialTracks }: { campaignId: string; initialTracks: CampaignTrack[] }) {
+  const t = useTranslations("music");
+
   const library = useMusicLibrary(campaignId, initialTracks);
 
   const [youtubeOpen, setYoutubeOpen] = useState(false);
@@ -27,8 +30,8 @@ export function DMMusicPageClient({ campaignId, initialTracks }: { campaignId: s
   return (
     <HudPage>
       <HudPageHeader
-        title="Музика"
-        subtitle={`${library.tracks.length} з ${MAX_TRACKS_PER_CAMPAIGN} треків · ${TRACK_FORMATS_LABEL} до ${MAX_TRACK_MB} МБ`}
+        title={t("page.title")}
+        subtitle={t("page.subtitle", { count: library.tracks.length, max: MAX_TRACKS_PER_CAMPAIGN, formats: TRACK_FORMATS_LABEL, mb: MAX_TRACK_MB })}
         actions={
           <>
             <UploadTrackButton onFile={(file) => void library.upload(file)} pending={library.isBusy || full} />
@@ -40,9 +43,9 @@ export function DMMusicPageClient({ campaignId, initialTracks }: { campaignId: s
         }
       />
       {library.isLoading && library.tracks.length === 0 ? (
-        <LoadingState rows={4} label="Завантаження треків…" />
+        <LoadingState rows={4} label={t("page.loading")} />
       ) : library.tracks.length === 0 ? (
-        <EmptyState icon={Music} title="Ще немає треків" description={`Завантажте ${TRACK_FORMATS_LABEL} або додайте посилання YouTube — ДМ вмикає їх у бою.`} />
+        <EmptyState icon={Music} title={t("page.emptyTitle")} description={t("page.emptyDescription", { formats: TRACK_FORMATS_LABEL })} />
       ) : (
         <TrackGroups tracks={library.tracks} busy={library.isBusy} actions={{ onRename: library.rename, onEdit: setEditing, onDelete: (t) => void library.remove(t), onMove: library.move }} />
       )}

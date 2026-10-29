@@ -3,7 +3,7 @@
 import type { ReactNode } from "react";
 import type { Editor } from "@tiptap/core";
 import { useEditorState } from "@tiptap/react";
-import { AtSign, Bold, Heading3, Italic, List, Megaphone, MessageSquareQuote, Redo2, Table, Undo2, VenetianMask } from "lucide-react";
+import { AtSign, Bold, Contact, Heading3, Italic, List, Megaphone, MessageSquareQuote, Redo2, Table, Undo2, VenetianMask } from "lucide-react";
 
 import { CALLOUT_KINDS, CALLOUT_LABELS } from "@/lib/constants/scenario";
 import type { CalloutKind } from "@/types/scenario";
@@ -16,7 +16,7 @@ function Tool({ label, active = false, disabled = false, onClick, children }: { 
   );
 }
 
-export function ScenarioToolbar({ editor }: { editor: Editor | null }) {
+export function ScenarioToolbar({ editor, onAcquaintance }: { editor: Editor | null; onAcquaintance?: () => void }) {
   const state = useEditorState({
     editor,
     selector: ({ editor: e }) =>
@@ -24,6 +24,7 @@ export function ScenarioToolbar({ editor }: { editor: Editor | null }) {
         bold: e.isActive("bold"),
         italic: e.isActive("italic"),
         secret: e.isActive("secret"),
+        acquaintance: e.isActive("mention", { type: "acquaintance" }),
         h3: e.isActive("heading", { level: 3 }),
         list: e.isActive("bulletList"),
         read: e.isActive("readAloud"),
@@ -77,6 +78,7 @@ export function ScenarioToolbar({ editor }: { editor: Editor | null }) {
       <Tool label="Зелений жетон" disabled={off} onClick={() => run((e) => e.chain().focus().insertContent({ type: "token", attrs: { color: "green" } }).run())}><span className="g" /></Tool>
       <Tool label="Червоний жетон" disabled={off} onClick={() => run((e) => e.chain().focus().insertContent({ type: "token", attrs: { color: "red" } }).run())}><span className="r" /></Tool>
       <Tool label="Секрет (не бачить гравець)" active={state?.secret} disabled={off} onClick={() => run((e) => e.chain().focus().toggleMark("secret").run())}><VenetianMask className="size-4" /></Tool>
+      <Tool label="Знайомство" active={state?.acquaintance} disabled={off || !onAcquaintance} onClick={() => onAcquaintance?.()}><Contact className="size-4" /></Tool>
       <Tool label="Таблиця" disabled={off} onClick={() => run((e) => e.chain().focus().insertTable({ rows: 3, cols: 2, withHeaderRow: false }).run())}><Table className="size-4" /></Tool>
       <Tool label="Посилання на сутність (@)" disabled={off} onClick={() => run((e) => e.chain().focus().insertContent("@").run())}><AtSign className="size-4" /></Tool>
       <Tool label="Скасувати" disabled={off || !state?.canUndo} onClick={() => run((e) => e.chain().focus().undo().run())}><Undo2 className="size-4" /></Tool>

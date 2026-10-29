@@ -1,5 +1,7 @@
 "use client";
 
+import { useTranslations } from "next-intl";
+
 import { SKILL_FORM_TAB, type SkillFormTabId } from "./skill-form-tabs";
 
 import { AbilityListEditor, withAbilityErrors } from "@/components/abilities";
@@ -9,6 +11,7 @@ import { SkillMainSkillSection } from "@/components/skills/form/main-skill";
 import { SkillSpellSection } from "@/components/skills/form/spell";
 import { Button } from "@/components/ui/button";
 import { useSkillForm } from "@/lib/hooks/skills";
+import { useTranslator } from "@/lib/i18n/use-translator";
 import type { IdName } from "@/types/common";
 import type { MainSkill } from "@/types/main-skills";
 import type { Skill } from "@/types/skills";
@@ -21,6 +24,10 @@ interface SkillCreateFormProps {
 }
 
 export function SkillCreateForm({ campaignId, spells, initialMainSkills, initialData }: SkillCreateFormProps) {
+  const t = useTranslations();
+
+  const ta = useTranslator("abilities");
+
   const { form, mainSkills, abilities, status, actions } = useSkillForm(campaignId, { initialData, initialMainSkills });
 
   const { isSaving, error, isEdit } = status;
@@ -28,7 +35,7 @@ export function SkillCreateForm({ campaignId, spells, initialMainSkills, initial
   const tabs: HudTab<SkillFormTabId>[] = [
     {
       id: SKILL_FORM_TAB.basic,
-      label: "Основне",
+      label: t("common.tabs.basic"),
       content: (
         <div className="space-y-5">
           <SkillBasicInfo form={form} />
@@ -38,12 +45,12 @@ export function SkillCreateForm({ campaignId, spells, initialMainSkills, initial
     },
     {
       id: SKILL_FORM_TAB.spell,
-      label: "Заклинання",
+      label: t("skills.form.tabs.spell"),
       content: <SkillSpellSection form={form} spells={spells} />,
     },
     {
       id: SKILL_FORM_TAB.abilities,
-      label: "Вміння",
+      label: t("common.tabs.abilities"),
       invalid: !abilities.valid,
       content: (
         <AbilityListEditor
@@ -59,8 +66,8 @@ export function SkillCreateForm({ campaignId, spells, initialMainSkills, initial
 
   return (
     <HudFormPage
-      title={isEdit ? "Редагувати скіл" : "Створити скіл"}
-      aside={isEdit ? "Оновіть інформацію про скіл" : "Додайте новий скіл з його характеристиками та ефектами"}
+      title={isEdit ? t("skills.form.editTitle") : t("skills.form.createTitle")}
+      aside={isEdit ? t("skills.form.editAside") : t("skills.form.createAside")}
     >
       <HudForm
         id="skill-form"
@@ -70,14 +77,14 @@ export function SkillCreateForm({ campaignId, spells, initialMainSkills, initial
         actions={
           <>
             <Button type="button" variant="outline" onClick={actions.cancel} disabled={isSaving}>
-              Скасувати
+              {t("common.actions.cancel")}
             </Button>
             <Button type="submit" disabled={isSaving || !abilities.valid}>
               {isSaving
                 ? isEdit
-                  ? "Збереження..."
-                  : "Створення..."
-                : withAbilityErrors(isEdit ? "Зберегти зміни" : "Створити скіл", abilities.errors)}
+                  ? t("common.actions.saving")
+                  : t("common.actions.creating")
+                : withAbilityErrors(isEdit ? t("skills.form.submitEdit") : t("skills.form.submitCreate"), abilities.errors, ta)}
             </Button>
           </>
         }

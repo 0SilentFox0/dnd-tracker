@@ -1,5 +1,7 @@
 "use client";
 
+import { useTranslations } from "next-intl";
+
 import { useCharacterEditor } from "./useCharacterEditor";
 import { useDeleteCharacter, useLevelUpCharacter } from "./useCharacters";
 
@@ -9,6 +11,10 @@ import { mergeLevelUpIntoForm } from "@/lib/utils/characters/character-form";
 import type { Character } from "@/types/characters";
 
 export function useDmCharacterEditor({ campaignId, characterId, onSaved }: { campaignId: string; characterId: string; onSaved: () => void }) {
+  const t = useTranslations("characters.editor");
+
+  const tc = useTranslations("common.actions");
+
   const confirm = useConfirm();
 
   const notify = useNotify();
@@ -25,9 +31,9 @@ export function useDmCharacterEditor({ campaignId, characterId, onSaved }: { cam
 
   const remove = () =>
     confirm({
-      title: `Видалити персонажа: ${editor.form.basicInfo.data.name}?`,
-      description: "Персонаж, його інвентар і прогрес зникнуть назавжди.",
-      confirmLabel: "Видалити",
+      title: t("deleteTitle", { name: editor.form.basicInfo.data.name }),
+      description: t("deleteDescription"),
+      confirmLabel: tc("delete"),
       onConfirm: () => deleteMutation.mutateAsync(characterId),
     });
 
@@ -37,8 +43,8 @@ export function useDmCharacterEditor({ campaignId, characterId, onSaved }: { cam
     let details: { abilityIncreased?: string | null } | undefined;
 
     const ok = await confirm({
-      title: `Підняти рівень: ${name}? (Рівень ${level} → ${level + 1})`,
-      confirmLabel: "Підняти",
+      title: t("levelUpTitle", { name, from: level, to: level + 1 }),
+      confirmLabel: t("levelUpConfirm"),
       onConfirm: async () => {
         const updated = await levelUpMutation.mutateAsync(characterId);
 
@@ -48,7 +54,7 @@ export function useDmCharacterEditor({ campaignId, characterId, onSaved }: { cam
     });
 
     if (ok && details) {
-      void notify(`Рівень піднято! ${details.abilityIncreased ? `${details.abilityIncreased}: +1. ` : "Усі характеристики на максимумі. "}Магічні слоти оновлено.`);
+      void notify(details.abilityIncreased ? t("levelUpDoneIncreased", { ability: details.abilityIncreased }) : t("levelUpDoneMaxed"));
     }
   };
 

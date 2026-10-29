@@ -1,12 +1,14 @@
 "use client";
 
+import { useTranslations } from "next-intl";
+
 import {
   DropdownMenuCheckboxItem,
   DropdownMenuContent,
   DropdownMenuLabel,
   DropdownMenuSeparator,
 } from "@/components/ui/dropdown-menu";
-import { groupDisplayName, UNGROUPED_LABELS } from "@/lib/constants/ungrouped";
+import { groupDisplayName } from "@/lib/constants/ungrouped";
 import { getSpellGroupIcon } from "@/lib/utils/spells/spell-icons";
 import type { Spell } from "@/types/spells";
 
@@ -23,6 +25,10 @@ export function SpellDropdownContent({
   isLoading,
   onToggleSpell,
 }: SpellDropdownContentProps) {
+  const t = useTranslations("spells.dropdown");
+
+  const tc = useTranslations("common.ungrouped");
+
   if (isLoading) {
     return (
       <DropdownMenuContent
@@ -30,7 +36,7 @@ export function SpellDropdownContent({
         align="start"
         sideOffset={4}
       >
-        <DropdownMenuLabel>Завантаження заклинань...</DropdownMenuLabel>
+        <DropdownMenuLabel>{t("loading")}</DropdownMenuLabel>
       </DropdownMenuContent>
     );
   }
@@ -43,7 +49,7 @@ export function SpellDropdownContent({
         sideOffset={4}
       >
         <DropdownMenuLabel>
-          Заклинання не знайдено. Додайте заклинання в бібліотеку кампанії.
+          {t("empty")}
         </DropdownMenuLabel>
       </DropdownMenuContent>
     );
@@ -56,7 +62,7 @@ export function SpellDropdownContent({
       sideOffset={4}
     >
       {groupedSpells.map(([groupName, groupSpells]) => {
-        const displayName = groupDisplayName(groupName, UNGROUPED_LABELS.spellGroup);
+        const displayName = groupDisplayName(groupName, tc("spellGroup"));
 
         const GroupIcon = getSpellGroupIcon(groupSpells[0]?.spellGroup);
 

@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-import { ArtifactModifierType } from "@/lib/constants/artifacts";
+import { ArtifactModifierType, WEAPON_PROFICIENCY_KINDS } from "@/lib/constants/artifacts";
 import { AttackType } from "@/lib/constants/battle";
 import { parseWeaponTraits, WEAPON_TRAITS } from "@/lib/constants/weapon-traits";
 
@@ -18,11 +18,12 @@ export const WeaponStatsSchema = z.object({
   maxTargets: z.number().int().min(1).max(20).optional(),
   traits: z.array(z.enum(WEAPON_TRAITS)).max(7).optional(),
   versatileDice: z.string().trim().max(30).optional(),
+  weaponCategory: z.enum(WEAPON_PROFICIENCY_KINDS).optional(),
 });
 
 export type WeaponStats = z.infer<typeof WeaponStatsSchema>;
 
-const STRING_FIELDS = ["damageDice", "damageType", "attackType", "range", "properties", "versatileDice"] as const;
+const STRING_FIELDS = ["damageDice", "damageType", "attackType", "range", "properties", "versatileDice", "weaponCategory"] as const;
 
 const NUMBER_FIELDS = ["minTargets", "maxTargets", "damageBonus"] as const;
 

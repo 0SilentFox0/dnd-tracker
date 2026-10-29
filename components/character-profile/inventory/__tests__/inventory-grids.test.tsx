@@ -13,7 +13,7 @@ import type { SheetArtifact } from "@/types/characters";
 const armor = { id: "a1", name: "Кольчуга ельфів", icon: null, slot: "armor", rarity: "rare", description: null, effects: [] } as unknown as SheetArtifact;
 
 const makeInv = (over: Partial<InventoryModel> = {}, cells: BackpackCell[] = []): InventoryModel => ({
-  equipment: ARTIFACT_GRID_9.map((c) => ({ key: c.key, label: c.label, slotType: c.slotType, artifact: c.key === "armor" ? armor : null })),
+  equipment: ARTIFACT_GRID_9.map((c) => ({ key: c.key, slotType: c.slotType, artifact: c.key === "armor" ? armor : null })),
   backpack: { cells, query: {} as never },
   purse: { gp: 5, sp: 0, cp: 3 },
   access: { canAct: true, isDM: false, pending: false },
@@ -26,6 +26,10 @@ const makeInv = (over: Partial<InventoryModel> = {}, cells: BackpackCell[] = [])
   ...over,
 });
 
+const empty = (slot: string) => `inventory.grid.empty ${JSON.stringify({ slot: `inventory.grid.slots.${slot}` })}`;
+
+const filled = (slot: string, name: string) => `inventory.grid.filled ${JSON.stringify({ slot: `inventory.grid.slots.${slot}`, name })}`;
+
 const ring = { id: "r1", name: "Перстень сили", icon: null, rarity: "epic", slot: "ring", description: null };
 
 describe("EquipmentGrid", () => {
@@ -37,23 +41,23 @@ describe("EquipmentGrid", () => {
     const buttons = screen.getAllByRole("button");
 
     expect(buttons).toHaveLength(9);
-    expect(buttons[1].getAttribute("aria-label")).toBe("Шолом, порожньо");
+    expect(buttons[1].getAttribute("aria-label")).toBe(empty("helmet"));
     expect(buttons[1].querySelector("svg")).toBeTruthy();
-    expect(screen.getByLabelText("Броня: Кольчуга ельфів").getAttribute("title")).toBe("Кольчуга ельфів · Рідкісний");
+    expect(screen.getByLabelText(filled("armor", "Кольчуга ельфів")).getAttribute("title")).toBe("Кольчуга ельфів · artifacts.rarity.rare");
   });
 
   it("підсвічує сумісний слот під час drag з рюкзака", () => {
     render(<EquipmentGrid inv={makeInv({ drag: { value: { from: "backpack", artifactId: "r1", slotType: "ring" }, set: vi.fn() } })} />);
 
-    expect(screen.getByLabelText("Перстень, порожньо").getAttribute("data-drop")).toBe("accept");
-    expect(screen.getByLabelText("Шолом, порожньо").getAttribute("data-drop")).toBe("dim");
+    expect(screen.getByLabelText(empty("ring1")).getAttribute("data-drop")).toBe("accept");
+    expect(screen.getByLabelText(empty("helmet")).getAttribute("data-drop")).toBe("dim");
   });
 
   it("drop на слот викликає actions.drop", () => {
     const inv = makeInv();
 
     render(<EquipmentGrid inv={inv} />);
-    fireEvent.drop(screen.getByLabelText("Перстень, порожньо"));
+    fireEvent.drop(screen.getByLabelText(empty("ring1")));
 
     expect(inv.actions.drop).toHaveBeenCalledWith({ kind: "slot", slot: "ring1" });
   });
@@ -62,7 +66,7 @@ describe("EquipmentGrid", () => {
     const inv = makeInv();
 
     render(<EquipmentGrid inv={inv} />);
-    fireEvent.dragStart(screen.getByLabelText("Броня: Кольчуга ельфів"));
+    fireEvent.dragStart(screen.getByLabelText(filled("armor", "Кольчуга ельфів")));
 
     expect(inv.drag.set).toHaveBeenCalledWith({ from: "slot", slot: "armor" });
   });
@@ -72,7 +76,7 @@ describe("EquipmentGrid", () => {
 
     render(<EquipmentGrid inv={inv} />);
 
-    const cell = screen.getByLabelText("Броня: Кольчуга ельфів");
+    const cell = screen.getByLabelText(filled("armor", "Кольчуга ельфів"));
 
     expect(cell.getAttribute("draggable")).toBe("false");
     fireEvent.dragStart(cell);
@@ -108,12 +112,12 @@ describe("BackpackGrid", () => {
 
     const { unmount } = render(<BackpackGrid inv={makeInv({}, [...cells, { kind: "add", key: "add" }])} onAdd={onAdd} />);
 
-    fireEvent.click(screen.getByLabelText("Додати"));
+    fireEvent.click(screen.getByLabelText("inventory.grid.add"));
     expect(onAdd).toHaveBeenCalled();
     unmount();
 
     render(<BackpackGrid inv={makeInv({}, cells)} onAdd={onAdd} />);
-    expect(screen.queryByLabelText("Додати")).toBeNull();
+    expect(screen.queryByLabelText("inventory.grid.add")).toBeNull();
   });
 
   it("drop на рюкзак викликає actions.drop", () => {
@@ -141,17 +145,34 @@ describe("PurseBar", () => {
   it("гравець: витратити/отримати без «Задати суму»", () => {
     render(<PurseBar purse={purse} access={{ canAct: true, isDM: false, pending: false }} onMode={vi.fn()} />);
 
-    expect(screen.getByLabelText("Витратити")).toBeTruthy();
-    expect(screen.getByLabelText("Отримати")).toBeTruthy();
-    expect(screen.queryByLabelText("Задати суму")).toBeNull();
+    expect(screen.getByLabelText("inventory.purse.spend")).toBeTruthy();
+    expect(screen.getByLabelText("inventory.purse.gain")).toBeTruthy();
+    expect(screen.queryByLabelText("inventory.purse.set")).toBeNull();
   });
 
   it("DM: усі три, set → onMode", () => {
     const onMode = vi.fn();
 
     render(<PurseBar purse={purse} access={{ canAct: true, isDM: true, pending: false }} onMode={onMode} />);
-    fireEvent.click(screen.getByLabelText("Задати суму"));
+    fireEvent.click(screen.getByLabelText("inventory.purse.set"));
 
     expect(onMode).toHaveBeenCalledWith("set");
+  });
+});
+
+describe("BackpackGrid new pills", () => {
+  afterEach(cleanup);
+
+  it("marks only the cells whose artifact id is in newIds", () => {
+    const cells: BackpackCell[] = [
+      { kind: "artifact", key: "k1", artifact: { id: "a1", name: "Перстень", icon: null, rarity: "epic", slot: "ring" } } as never,
+      { kind: "artifact", key: "k2", artifact: { id: "a2", name: "Плащ", icon: null, rarity: "rare", slot: "cloak" } } as never,
+    ];
+
+    render(<BackpackGrid inv={makeInv({}, cells)} onAdd={vi.fn()} newIds={new Set(["a1"])} />);
+
+    expect(screen.getAllByText("common.notifications.new")).toHaveLength(1);
+    expect(screen.getByRole("button", { name: "Перстень" }).textContent).toContain("common.notifications.new");
+    expect(screen.getByRole("button", { name: "Плащ" }).textContent).not.toContain("common.notifications.new");
   });
 });

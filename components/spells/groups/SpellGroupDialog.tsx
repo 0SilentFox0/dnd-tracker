@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useTranslations } from "next-intl";
 
 import { ColorField } from "@/components/common/ColorField";
 import { Button } from "@/components/ui/button";
@@ -21,6 +22,10 @@ interface SpellGroupDialogProps {
 }
 
 export function SpellGroupDialog({ campaignId, group, onOpenChange }: SpellGroupDialogProps) {
+  const t = useTranslations("spells.groupDialog");
+
+  const ta = useTranslations("common.actions");
+
   const notify = useNotify();
 
   const update = useUpdateSpellGroup(campaignId);
@@ -39,7 +44,7 @@ export function SpellGroupDialog({ campaignId, group, onOpenChange }: SpellGroup
       onOpenChange(false);
     } catch (error) {
       console.error("Error updating spell group:", error);
-      void notify(error instanceof Error ? error.message : "Помилка при збереженні школи магії");
+      void notify(error instanceof Error ? error.message : t("saveFailed"));
     }
   };
 
@@ -47,27 +52,27 @@ export function SpellGroupDialog({ campaignId, group, onOpenChange }: SpellGroup
     <ResponsiveDialog
       open
       onOpenChange={onOpenChange}
-      title="Школа магії"
-      description="Колір та іконка школи"
+      title={t("title")}
+      description={t("description")}
       size="sm"
       hud
       footer={
         <>
           <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
-            Скасувати
+            {ta("cancel")}
           </Button>
           <Button type="submit" form="spell-group-form" disabled={update.isPending || !name.trim()}>
-            {update.isPending ? "Збереження..." : "Зберегти"}
+            {update.isPending ? ta("saving") : ta("save")}
           </Button>
         </>
       }
     >
       <form id="spell-group-form" onSubmit={submit} className="space-y-4">
-        <FormField label="Назва" htmlFor="spell-group-name" required>
+        <FormField label={t("name")} htmlFor="spell-group-name" required>
           <Input id="spell-group-name" value={name} onChange={(e) => setName(e.target.value)} required />
         </FormField>
-        <ColorField id="spell-group-color" label="Колір" value={color} onChange={setColor} />
-        <FormField label="Іконка" htmlFor="spell-group-icon">
+        <ColorField id="spell-group-color" label={t("color")} value={color} onChange={setColor} />
+        <FormField label={t("icon")} htmlFor="spell-group-icon">
           <div className="flex gap-2">
             {SPELL_GROUP_ICON_KEYS.map((key) => {
               const Icon = getSpellGroupIcon({ icon: key });

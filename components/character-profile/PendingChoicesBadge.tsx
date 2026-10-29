@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import dynamic from "next/dynamic";
+import { useTranslations } from "next-intl";
 
 import { useProfile } from "./ProfileContext";
 
@@ -13,6 +14,8 @@ const ChoicesDialog = dynamic(() => import("./ChoicesDialog"), { ssr: false });
 export function PendingChoicesBadge() {
   const { campaignId, characterId, sheet } = useProfile();
 
+  const t = useTranslations("characterProfile.choices");
+
   const [open, setOpen] = useState(false);
 
   const pending = sheet.choices?.pending ?? 0;
@@ -21,10 +24,10 @@ export function PendingChoicesBadge() {
 
   return (
     <span className="inline-flex items-center gap-2">
-      <HudPill tone="accent">{`Невибрані вибори: ${pending}`}</HudPill>
+      <HudPill tone="accent">{t("pending", { pending })}</HudPill>
       {sheet.choices?.canEdit && (
         <Button type="button" size="sm" variant="outline" onClick={() => setOpen(true)}>
-          Обрати
+          {t("pick")}
         </Button>
       )}
       <ChoicesDialog open={open} onOpenChange={setOpen} campaignId={campaignId} characterId={characterId} />

@@ -11,9 +11,9 @@ const level = z.string().regex(/^([1-9]|1\d|20)$/);
 
 const DiceTable = z.record(level, z.string().regex(/^\d+d\d+([+-]\d+d\d+)*$/));
 
-const INITIATIVE_ORDER_MESSAGE = "Мінімум ініціативи більший за максимум";
+const INITIATIVE_ORDER_MESSAGE = "rules.validation.initiativeOrder";
 
-const CRITICALS_ORDER_MESSAGE = "Фумбл має бути нижчим за крит";
+const CRITICALS_ORDER_MESSAGE = "rules.validation.criticalsOrder";
 
 const CustomConditionSchema = z.object({
   key: z.string().regex(CUSTOM_CONDITION_KEY_RE),
@@ -47,6 +47,7 @@ const sectionSchemas = {
   initiative: z.strictObject({
     heroMin: z.number().int().min(0).max(50),
     heroMax: z.number().int().min(0).max(50),
+    mode: z.enum(["roll", "static"]),
   }),
   defaultAttacks: z.strictObject({
     meleeName: z.string().trim().min(1).max(60),

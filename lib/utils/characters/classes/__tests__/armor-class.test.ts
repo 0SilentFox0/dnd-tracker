@@ -43,8 +43,8 @@ describe("classArmorBase", () => {
     expect(classArmorBase(hero({ dex: 3 })).base).toBe(13);
     expect(classArmorBase(hero({ dex: -1 })).base).toBe(9);
     expect(classArmorBase(hero({ dex: 3 })).lines).toEqual([
-      { label: "Без броні", value: "10", source: "base" },
-      { label: "Спритність", value: "+3", source: "ability" },
+      { label: "characterProfile.sheet.lines.noArmor", value: "10", source: "base" },
+      { label: "common.abilities.dexterity.label", value: "+3", source: "ability" },
     ]);
   });
 
@@ -59,7 +59,7 @@ describe("classArmorBase", () => {
   it("lines name the armor and the capped Dex", () => {
     expect(classArmorBase(hero({ dex: 4, items: [armorItem("Breastplate", { category: "medium", base: 14 })] })).lines).toEqual([
       { label: "Breastplate", value: "14", source: "artifact" },
-      { label: "Спритність (межа 2)", value: "+2", source: "ability" },
+      { label: "characterProfile.sheet.lines.dexterityCapped", params: { cap: 2 }, value: "+2", source: "ability" },
     ]);
     expect(classArmorBase(hero({ dex: 4, items: [armorItem("Chain Mail", CHAIN)] })).lines).toEqual([{ label: "Chain Mail", value: "16", source: "artifact" }]);
   });

@@ -8,6 +8,8 @@ import { readSrdData } from "../srd/lib/data-files";
 import { assertAttachAllowed, ASSET_BUCKET, ICON_FIELD, IMAGE_TYPES, isAttachKind, matchAssets, objectPath, srdSlugNames } from "./attach-lib";
 
 import { prisma } from "@/lib/db";
+import { translateIssue } from "@/lib/i18n/translate-issue";
+import { getTranslator } from "@/lib/i18n/translator";
 import { importContent, OFFLINE_IMPORT_DEPS } from "@/lib/server/content/import/import-content";
 import { loadNames } from "@/lib/server/content/import/names";
 import { createAdminClient } from "@/lib/supabase/admin";
@@ -71,7 +73,9 @@ async function main() {
 
   console.info(`${kind}: файлів ${files.length}, прив'язано ${report?.counts.updated ?? 0}, помилок ${report?.counts.error ?? 0}`);
 
-  for (const r of report?.results.filter((x) => x.status === "error") ?? []) console.warn(`  помилка: ${r.name}: ${r.issues.map((i) => i.message).join("; ")}`);
+  const t = await getTranslator("uk");
+
+  for (const r of report?.results.filter((x) => x.status === "error") ?? []) console.warn(`  помилка: ${r.name}: ${r.issues.map((i) => translateIssue(t, i)).join("; ")}`);
 
   for (const e of uploadErrors) console.warn(`  не завантажено: ${e}`);
 

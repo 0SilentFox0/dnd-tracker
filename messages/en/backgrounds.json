@@ -1,0 +1,43 @@
+{
+  "page": {
+    "title": "Backgrounds",
+    "subtitle": "{count} in the campaign",
+    "create": "New background",
+    "loading": "Loading backgrounds…",
+    "emptyTitle": "No backgrounds yet",
+    "emptyDescription": "Create a background or import it from a file.",
+    "classesOnly": "Backgrounds are available in 5e classes mode."
+  },
+  "card": {
+    "choices": "{count, plural, one {# choice} other {# choices}}"
+  },
+  "create": {
+    "title": "New background",
+    "description": "Skills, tools and choices — after creation",
+    "submit": "Create background",
+    "name": "Background name *",
+    "namePlaceholder": "E.g. Sage"
+  },
+  "form": {
+    "editTitle": "Edit background",
+    "editAside": "Abilities, skills, tools and the origin feat",
+    "name": "Background name *",
+    "icon": "Background icon",
+    "description": "Description",
+    "skills": "Skill proficiencies",
+    "tools": "Tool proficiencies (one per line)",
+    "origin": "Origin feat",
+    "noOrigin": "No feat",
+    "equipment": "Starting equipment and money",
+    "equipmentNote": "The DM hands out equipment and money manually. This text does not change the character's inventory.",
+    "saveError": "Could not save the background"
+  },
+  "list": {
+    "confirmDelete": "Delete the background?",
+    "deleteError": "Could not save the background",
+    "createError": "Could not save the background"
+  },
+  "validation": {
+    "iconUrl": "Icon must be a link"
+  }
+}

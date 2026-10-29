@@ -75,3 +75,10 @@ describe("feat schemas", () => {
     expect(updateFeatSchema.parse({ repeatable: true })).toEqual({ repeatable: true });
   });
 });
+
+describe("validation messages are catalog keys", () => {
+  it("option choice without options", () => {
+    expect(ChoiceSchema.safeParse({ id: "a", label: "A", kind: "option" }).error?.issues[0].message).toBe("choices.validation.optionsRequired");
+    expect(ChoicesBodySchema.safeParse({}).error?.issues[0].message).toBe("choices.validation.nothingToSave");
+  });
+});

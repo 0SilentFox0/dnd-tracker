@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useTranslations } from "next-intl";
 
 import { useProfile } from "../ProfileContext";
 import { SetList } from "../SetList";
@@ -20,12 +21,17 @@ import { HudPanel } from "@/components/hud/page";
 import { Button } from "@/components/ui/button";
 import { ResponsiveDialog } from "@/components/ui/responsive-dialog";
 import { useInventory } from "@/lib/hooks/characters";
+import { useSeenOnOpen } from "@/lib/hooks/notifications";
 import type { SpecialItem } from "@/types/inventory";
 
 export function InventoryTab() {
   const { campaignId, characterId, sheet } = useProfile();
 
+  const t = useTranslations("inventory.tab");
+
   const inv = useInventory(campaignId, characterId, sheet);
+
+  const newIds = useSeenOnOpen(campaignId, { types: ["item"], enabled: sheet.viewer.isOwner && !sheet.viewer.isDM });
 
   const [transfer, setTransfer] = useState<TransferTarget | null>(null);
 
@@ -60,18 +66,18 @@ export function InventoryTab() {
     <div className="space-y-4">
       <div className="gap-4 lg:grid lg:grid-cols-[auto_1fr]">
         <div className="space-y-3">
-          {sheet.items.attunement && <p className="text-xs text-hud-muted">{`Налаштування ${sheet.items.attunement.used}/${sheet.items.attunement.limit}`}</p>}
+          {sheet.items.attunement && <p className="text-xs text-hud-muted">{t("attunement", { used: sheet.items.attunement.used, limit: sheet.items.attunement.limit })}</p>}
           <EquipmentGrid inv={inv} />
           {inv.access.pending ? (
-            <EmptyState title="Підсумок з'явиться після схвалення персонажа" />
+            <EmptyState title={t("pending")} />
           ) : (
             inv.backpack && (
               <QueryState query={inv.backpack.query}>
                 {(view) => (
                   <>
                     <PurseBar purse={view.purse} access={inv.access} onMode={setMoney} />
-                    <BackpackGrid inv={inv} onAdd={onAdd} />
-                    <p className="text-xs text-hud-muted">Зміни під час бою діють з наступного бою.</p>
+                    <BackpackGrid inv={inv} onAdd={onAdd} newIds={newIds} />
+                    <p className="text-xs text-hud-muted">{t("combatNote")}</p>
                   </>
                 )}
               </QueryState>
@@ -88,7 +94,7 @@ export function InventoryTab() {
       {!inv.access.pending && (
         <div className="space-y-2">
           <Button variant="outline" size="sm" aria-expanded={logOpen} onClick={() => setLogOpen((o) => !o)}>
-            Журнал {logOpen ? "▾" : "▸"}
+            {t("log")} {logOpen ? "▾" : "▸"}
           </Button>
           {logOpen && <InventoryLogPanel />}
         </div>

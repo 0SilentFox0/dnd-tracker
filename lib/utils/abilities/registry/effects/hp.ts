@@ -13,6 +13,7 @@ import { applyDamageConsequences } from "@/lib/utils/battle/damage/consequences"
 import { clearDeathSaves, isDying } from "@/lib/utils/battle/death-saves";
 import { hasImmunity } from "@/lib/utils/battle/resistance";
 import type { BattleParticipant } from "@/types/battle";
+import { forgoDice } from "@/lib/utils/common/dice";
 
 type Of<K extends Effect["kind"]> = Extract<Effect, { kind: K }>;
 
@@ -34,7 +35,9 @@ export function applyDealDamage(input: EffectApplyInput<Of<"dealDamage">>): Effe
 
     if (!t || !isActive(t)) continue;
 
-    const rolled = resolveAmount(effect.amount, { owner, target: t, eventDamage: eventDamage(input.event), spellRoll: eventSpellRoll(input.event), rng: ctx.rng, participants: input.participants });
+    const forgone = ability.params?.sneakAttack && input.event.type === "hit" ? input.event.cunningDice ?? 0 : 0;
+
+    const rolled = resolveAmount(forgoDice(effect.amount, forgone), { owner, target: t, eventDamage: eventDamage(input.event), spellRoll: eventSpellRoll(input.event), rng: ctx.rng, participants: input.participants });
 
     const amount = effect.falloff ? Math.floor((rolled * effect.falloff[Math.min(index, effect.falloff.length - 1)]) / 100) : rolled;
 

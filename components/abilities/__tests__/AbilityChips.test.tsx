@@ -29,7 +29,7 @@ describe("AbilityChips", () => {
     expect(screen.getByRole("tab", { name: /Кровотеча/ }).querySelector("[data-invalid-dot]")).not.toBeNull();
     fireEvent.click(screen.getByRole("tab", { name: /Кровотеча/ }));
     expect(onSelect).toHaveBeenCalledWith("b");
-    fireEvent.click(screen.getByRole("button", { name: "+ Вміння" }));
+    fireEvent.click(screen.getByRole("button", { name: "abilities.chips.add" }));
     expect(onAdd).toHaveBeenCalled();
   });
 });

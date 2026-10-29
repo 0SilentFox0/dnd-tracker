@@ -74,7 +74,7 @@ export const SpellTargetingSchema = z.discriminatedUnion("kind", [
     hollow: z.boolean().optional(),
     exact: z.boolean().optional(),
     filter: filterField,
-  }).refine((t) => t.exact === undefined || t.shape === "circle", { message: "Точна площа доступна лише для кола", path: ["exact"] }),
+  }).refine((t) => t.exact === undefined || t.shape === "circle", { message: "spellEditor.validation.exactCircleOnly", path: ["exact"] }),
   z.object({ kind: z.literal("allAllies") }),
   z.object({ kind: z.literal("allEnemies") }),
   z.object({ kind: z.literal("everyone") }),
@@ -102,7 +102,7 @@ const InputDiceSchema = z.object({ kind: z.literal("inputDice"), label: z.string
 
 const attackNeedsEnemy = (d: { resolution: { kind: string }; targeting: { kind: string } }) => d.resolution.kind !== "attack" || d.targeting.kind === "enemy" || d.targeting.kind === "area";
 
-const ATTACK_TARGET_ISSUE = { message: "Атака заклинанням — лише для цілі-ворога або області", path: ["resolution"] };
+const ATTACK_TARGET_ISSUE = { message: "spellEditor.validation.attackTargets", path: ["resolution"] };
 
 /** Вкладене визначення підкасту: `grantCast` у ньому неможливий, бо NonRandomEffect його не містить. */
 export const InlineCastSchema = z.object({

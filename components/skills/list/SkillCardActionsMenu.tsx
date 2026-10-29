@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import { Check, Copy, MoreVertical, Tag, Trash2 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
@@ -25,6 +26,8 @@ interface SkillCardActionsMenuProps {
 }
 
 export function SkillCardActionsMenu({ currentMainSkillId, mainSkills, actions }: SkillCardActionsMenuProps) {
+  const t = useTranslations();
+
   const { onSelectMainSkill, onDuplicate, onDelete } = actions;
 
   if (!onDelete && !onDuplicate && mainSkills.length === 0) {
@@ -39,7 +42,7 @@ export function SkillCardActionsMenu({ currentMainSkillId, mainSkills, actions }
           variant="ghost"
           size="icon"
           className="h-8 w-8 shrink-0 text-muted-foreground hover:text-foreground"
-          aria-label="Меню дій"
+          aria-label={t("skills.card.menu")}
         >
           <MoreVertical className="h-4 w-4" />
         </Button>
@@ -49,7 +52,7 @@ export function SkillCardActionsMenu({ currentMainSkillId, mainSkills, actions }
           <DropdownMenuSub>
             <DropdownMenuSubTrigger>
               <Tag className="h-4 w-4" />
-              Обрати основний навик
+              {t("skills.card.chooseMainSkill")}
             </DropdownMenuSubTrigger>
             <DropdownMenuSubContent>
               <DropdownMenuItem
@@ -60,7 +63,7 @@ export function SkillCardActionsMenu({ currentMainSkillId, mainSkills, actions }
                     <Check className="h-4 w-4" />
                   ) : null}
                 </span>
-                Без основного навику
+                {t("skills.card.noMainSkill")}
               </DropdownMenuItem>
               {mainSkills
                 .filter(
@@ -90,13 +93,13 @@ export function SkillCardActionsMenu({ currentMainSkillId, mainSkills, actions }
         {onDuplicate && (
           <DropdownMenuItem onClick={onDuplicate}>
             <Copy className="h-4 w-4" />
-            Копіювати
+            {t("skills.card.copy")}
           </DropdownMenuItem>
         )}
         {onDelete && (
           <DropdownMenuItem variant="destructive" onClick={onDelete}>
             <Trash2 className="h-4 w-4" />
-            Видалити
+            {t("common.actions.delete")}
           </DropdownMenuItem>
         )}
       </DropdownMenuContent>

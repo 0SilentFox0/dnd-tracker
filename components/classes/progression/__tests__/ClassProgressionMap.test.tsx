@@ -38,7 +38,7 @@ describe("ClassProgressionMap", () => {
 
     render(<ClassProgressionMap progression={sheet()} mode="sheet" actions={{ onPick, onChooseSubclass }} />);
     fireEvent.click(screen.getAllByRole("button", { name: /ASI/ })[0]);
-    fireEvent.click(screen.getAllByRole("button", { name: /Оберіть підклас/ })[0]);
+    fireEvent.click(screen.getAllByRole("button", { name: /classes.progression.chooseSubclass/ })[0]);
 
     expect(onPick).toHaveBeenCalledWith(expect.objectContaining({ key: "asi4" }), 4);
     expect(onChooseSubclass).toHaveBeenCalledTimes(1);
@@ -47,7 +47,7 @@ describe("ClassProgressionMap", () => {
   it("dm mode without actions: nothing clickable breaks", () => {
     render(<ClassProgressionMap progression={buildClassProgression(cls)} mode="dm" />);
 
-    expect(screen.queryAllByRole("button", { name: /Оберіть підклас/ })).toEqual([]);
+    expect(screen.queryAllByRole("button", { name: /classes.progression.chooseSubclass/ })).toEqual([]);
     expect(screen.getAllByRole("row")).toHaveLength(21);
   });
 
@@ -75,7 +75,7 @@ describe("ClassProgressionMap", () => {
     const { unmount } = render(<ClassProgressionMap progression={none} mode="dm" />);
 
     expect(screen.getAllByRole("columnheader")).toHaveLength(3);
-    expect(screen.queryByRole("navigation", { name: "Підклас" })).toBeNull();
+    expect(screen.queryByRole("navigation", { name: "classes.progression.subclass" })).toBeNull();
     unmount();
 
     render(<ClassProgressionMap progression={sheet()} mode="sheet" />);

@@ -37,8 +37,8 @@ describe("classColumnIssues", () => {
     const focus: ClassColumn = { key: "focus-points", label: "Focus Points", values: levels((l) => (l === 1 ? "" : String(l))), pool: { rest: "short" } };
 
     expect(classColumnIssues([rages, focus])).toEqual([]);
-    expect(classColumnIssues([rages, { ...rages }])).toEqual([{ path: [1, "key"], message: "Ключ колонки «rages» повторюється" }]);
-    expect(classColumnIssues([{ ...focus, values: levels(() => "D6") }])[0]).toEqual({ path: [0, "values", 0], message: "Пул «Focus Points»: рівень 1 — не число" });
+    expect(classColumnIssues([rages, { ...rages }])).toEqual([{ path: [1, "key"], message: "classes.validation.columnKeyRepeated", params: { key: "rages" } }]);
+    expect(classColumnIssues([{ ...focus, values: levels(() => "D6") }])[0]).toEqual({ path: [0, "values", 0], message: "classes.validation.poolNotNumber", params: { label: "Focus Points", level: 1 } });
   });
 });
 

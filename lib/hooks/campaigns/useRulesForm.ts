@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useTranslations } from "next-intl";
 
 import { useCampaignRules, useUpdateCampaignRules } from "./useCampaignRules";
 
@@ -37,6 +38,8 @@ export function useRulesForm(campaignId: string) {
 
   const notify = useNotify();
 
+  const t = useTranslations("rules");
+
   const [changes, setChanges] = useState<Partial<Ruleset>>({});
 
   const server = query.data ?? DEFAULT_RULES;
@@ -61,7 +64,7 @@ export function useRulesForm(campaignId: string) {
 
       return true;
     } catch (error) {
-      await notify(error instanceof Error ? error.message : "Не вдалося зберегти правила");
+      await notify(error instanceof Error ? error.message : t("form.saveFailed"));
 
       return false;
     }

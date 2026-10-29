@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import { useInfiniteQuery } from "@tanstack/react-query";
 
 import { characterKeys } from "./keys";
@@ -14,11 +15,15 @@ const partyKeys = (c: string) => [characterKeys.sheet(c), characterKeys.lists(c)
 const heroKeys = (c: string, id: string) => [characterKeys.sheet(c, id), characterKeys.lists(c), characterKeys.log(c, id)];
 
 export function useRest(campaignId: string) {
-  return useCrudMutation({ mutationFn: (body: RestBody) => postRest(campaignId, body), invalidateKeys: partyKeys(campaignId), errorText: "Не вдалося провести відпочинок" });
+  const t = useTranslations("rest.errors");
+
+  return useCrudMutation({ mutationFn: (body: RestBody) => postRest(campaignId, body), invalidateKeys: partyKeys(campaignId), errorText: t("restFailed") });
 }
 
 export function useAwardXp(campaignId: string) {
-  return useCrudMutation({ mutationFn: (body: AwardXpBody) => postExperience(campaignId, body), invalidateKeys: partyKeys(campaignId), errorText: "Не вдалося нарахувати досвід" });
+  const t = useTranslations("rest.errors");
+
+  return useCrudMutation({ mutationFn: (body: AwardXpBody) => postExperience(campaignId, body), invalidateKeys: partyKeys(campaignId), errorText: t("xpFailed") });
 }
 
 export function useSpendHitDie(campaignId: string, characterId: string) {
@@ -33,11 +38,15 @@ export function useSheetRoll(campaignId: string, characterId: string) {
 }
 
 export function useInspiration(campaignId: string, characterId: string) {
-  return useCrudMutation({ mutationFn: (value: boolean) => postInspiration(campaignId, characterId, value), invalidateKeys: heroKeys(campaignId, characterId), errorText: "Не вдалося змінити натхнення" });
+  const t = useTranslations("rest.errors");
+
+  return useCrudMutation({ mutationFn: (value: boolean) => postInspiration(campaignId, characterId, value), invalidateKeys: heroKeys(campaignId, characterId), errorText: t("inspirationFailed") });
 }
 
 export function useEditResources(campaignId: string, characterId: string) {
-  return useCrudMutation({ mutationFn: (body: ResourcesEditBody) => patchResources(campaignId, characterId, body), invalidateKeys: heroKeys(campaignId, characterId), errorText: "Не вдалося змінити ресурси" });
+  const t = useTranslations("rest.errors");
+
+  return useCrudMutation({ mutationFn: (body: ResourcesEditBody) => patchResources(campaignId, characterId, body), invalidateKeys: heroKeys(campaignId, characterId), errorText: t("resourcesFailed") });
 }
 
 export function useCharacterLog(campaignId: string, characterId: string, enabled = true) {

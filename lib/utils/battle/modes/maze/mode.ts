@@ -12,6 +12,7 @@ import { startMaze } from "./start";
 import { MAZE_TEXTS } from "./texts";
 import { mazeFxVisible, mazeLogVisible } from "./view";
 
+import { API_ERRORS } from "@/lib/constants/api-errors";
 import { ParticipantSide } from "@/lib/constants/battle";
 import { inPlay } from "@/lib/utils/abilities/engine/core/participants";
 import { BattleRuleError } from "@/lib/utils/battle/store/errors";
@@ -28,7 +29,7 @@ export const mazeMode: MapModeDefinition<MazeConfig> = {
   server: {
     onStart: ({ map, order }) => startMaze(map, order),
     afterMutation: ({ map, scene, result }) => withMazeAwareness(map, scene, result),
-    blockedText: (maze) => (maze.dark ? MAZE_TEXTS.dark : null),
+    blockedText: (maze) => (maze.dark ? API_ERRORS.MAZE_DARK : null),
     autoSkipText: (maze) => (maze.dark ? MAZE_TEXTS.darkSkip : null),
     placeAll: ({ map, config, participants }) => placeMazeParticipants({ ...map, maze: config }, participants),
     placeOne: ({ map, config, participants, mover, to }) => {

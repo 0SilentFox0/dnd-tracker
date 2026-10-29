@@ -12,7 +12,7 @@ describe("UnitFiveEFields", () => {
 
     render(<UnitFiveEFields formData={{ cr: 5, saveProficiencies: ["wisdom"] }} onChange={onChange} />);
 
-    fireEvent.click(screen.getByRole("checkbox", { name: "Спритність" }));
+    fireEvent.click(screen.getByRole("checkbox", { name: "common.abilities.dexterity.label" }));
 
     expect(onChange).toHaveBeenCalledWith({ saveProficiencies: ["dexterity", "wisdom"] });
   });
@@ -36,7 +36,7 @@ describe("UnitFiveEFields", () => {
 
     render(<UnitFiveEFields formData={{ cr: 1, multiattack: 2 }} onChange={onChange} />);
 
-    fireEvent.change(screen.getByLabelText("Атак за дію «Атака»"), { target: { value: "0" } });
+    fireEvent.change(screen.getByLabelText("units.fiveE.counts.multiattack"), { target: { value: "0" } });
 
     expect(onChange).toHaveBeenLastCalledWith({ multiattack: 1 });
   });

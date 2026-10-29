@@ -22,6 +22,7 @@ import { LoadingState } from "@/components/common/states";
 import { HudForm, type HudTab } from "@/components/hud/form";
 import { Button } from "@/components/ui/button";
 import { useRulesForm } from "@/lib/hooks/campaigns";
+import { useTranslator } from "@/lib/i18n/use-translator";
 import { MECHANIC_REGISTRY, type Ruleset } from "@/lib/utils/rules";
 
 const FORM_ID = "campaign-rules-form";
@@ -45,6 +46,8 @@ const SECTIONS = {
 } satisfies Record<keyof Ruleset, unknown>;
 
 export function RulesForm({ campaignId }: { campaignId: string }) {
+  const t = useTranslator("rules");
+
   const { form, save, reset, isSaving, isDirty, isLoading } = useRulesForm(campaignId);
 
   if (isLoading) return <LoadingState />;
@@ -52,7 +55,7 @@ export function RulesForm({ campaignId }: { campaignId: string }) {
   const tabs: HudTab<keyof Ruleset>[] = (Object.keys(MECHANIC_REGISTRY) as (keyof Ruleset)[]).map((key) => {
     const Section = SECTIONS[key];
 
-    return { id: key, label: MECHANIC_REGISTRY[key].label, content: <Section form={form} /> };
+    return { id: key, label: t(`mechanics.${key}.label`), content: <Section form={form} /> };
   });
 
   const onSubmit = (e: FormEvent<HTMLFormElement>) => {
@@ -69,15 +72,15 @@ export function RulesForm({ campaignId }: { campaignId: string }) {
         actions={
           <>
             <Button type="button" variant="outline" disabled={!isDirty || isSaving} onClick={reset}>
-              Скасувати
+              {t("form.cancel")}
             </Button>
             <Button type="submit" disabled={!isDirty || isSaving}>
-              Зберегти
+              {t("form.save")}
             </Button>
           </>
         }
       />
-      <p className="px-4 pb-4 text-xs text-hud-muted">Зміни діють для нових боїв; бій, що вже йде, використовує правила, зафіксовані на його старті</p>
+      <p className="px-4 pb-4 text-xs text-hud-muted">{t("form.hint")}</p>
     </>
   );
 }

@@ -1,6 +1,9 @@
+import { useTranslations } from "next-intl";
+
 import { Button } from "@/components/ui/button";
-import { artifactRarityLabel, ArtifactSlot, artifactSlotLabel } from "@/lib/constants/artifacts";
+import { ArtifactSlot } from "@/lib/constants/artifacts";
 import type { InventoryModel, InventorySelection } from "@/lib/hooks/characters";
+import { useTranslator } from "@/lib/i18n/use-translator";
 import type { SpecialItem } from "@/types/inventory";
 
 export type TransferTarget = { artifact: { id: string; name: string; slot: string }; source: { slot: string } | { artifactId: string } };
@@ -13,7 +16,9 @@ interface ItemDetailsProps {
 export const selectionTitle = (s: InventorySelection): string => (s.kind === "item" ? s.item.name : s.artifact.name);
 
 export function ItemBody({ selection, withTitle = true }: { selection: InventorySelection | null; withTitle?: boolean }) {
-  if (!selection) return <p className="text-sm text-hud-muted">Вибери предмет, щоб побачити деталі</p>;
+  const t = useTranslator();
+
+  if (!selection) return <p className="text-sm text-hud-muted">{t("inventory.details.empty")}</p>;
 
   if (selection.kind === "item") {
     const { item } = selection;
@@ -22,8 +27,8 @@ export function ItemBody({ selection, withTitle = true }: { selection: Inventory
       <div className="space-y-1.5">
         {withTitle && <h3 className="hud-sc text-lg text-hud-ink">{item.name}</h3>}
         <p className="text-xs text-hud-muted">
-          Кількість: {item.quantity}
-          {item.consumable && " · одноразова"}
+          {t("inventory.details.quantity", { count: item.quantity })}
+          {item.consumable && ` · ${t("inventory.details.consumable")}`}
         </p>
         {item.description && <p className="whitespace-pre-line break-words text-sm text-hud-ink">{item.description}</p>}
       </div>
@@ -32,16 +37,16 @@ export function ItemBody({ selection, withTitle = true }: { selection: Inventory
 
   const { artifact } = selection;
 
-  const flags = [artifact.carried && "Носиться", artifact.attunement === "attuned" && "Налаштовано", artifact.attunement === "required" && "Не діє без налаштування", "charges" in artifact && artifact.charges && `Заряди ${artifact.charges.left}/${artifact.charges.max}`].filter(Boolean);
+  const flags = [artifact.carried && t("inventory.details.carried"), artifact.attunement === "attuned" && t("inventory.details.attuned"), artifact.attunement === "required" && t("inventory.details.attunementRequired"), "charges" in artifact && artifact.charges && t("inventory.details.charges", { left: artifact.charges.left, max: artifact.charges.max })].filter(Boolean);
 
-  const slot = selection.kind === "equipped" ? selection.label : artifactSlotLabel(artifact.slot);
+  const slot = selection.kind === "equipped" ? t(`inventory.grid.slots.${selection.slot}`) : t(`artifacts.slots.${artifact.slot}`);
 
   const effects = selection.kind === "equipped" ? selection.artifact.effects : [];
 
   return (
     <div className="space-y-1.5">
       {withTitle && <h3 className="hud-sc text-lg text-hud-ink">{artifact.name}</h3>}
-      <p className="text-xs text-hud-muted">{[artifact.rarity ? artifactRarityLabel(artifact.rarity) : null, slot].filter(Boolean).join(" · ")}</p>
+      <p className="text-xs text-hud-muted">{[artifact.rarity ? t(`artifacts.rarity.${artifact.rarity}`) : null, slot].filter(Boolean).join(" · ")}</p>
       {flags.length > 0 && (
         <p className="flex flex-wrap gap-x-2 text-xs text-hud-muted">
           {flags.map((f) => (
@@ -62,6 +67,8 @@ export function ItemBody({ selection, withTitle = true }: { selection: Inventory
 }
 
 export function ItemActions({ inv, on }: ItemDetailsProps) {
+  const t = useTranslations("inventory.actions");
+
   const { value } = inv.selection;
 
   if (!value || !inv.access.canAct) return null;
@@ -73,29 +80,29 @@ export function ItemActions({ inv, on }: ItemDetailsProps) {
   );
 
   const attuneButtons = (a: { id: string; attunement?: "attuned" | "required" }) => [
-    a.attunement === "required" && btn("Налаштувати", () => void inv.actions.attune(a.id, true)),
-    a.attunement === "attuned" && btn("Зняти налаштування", () => void inv.actions.attune(a.id, false)),
+    a.attunement === "required" && btn(t("attune"), () => void inv.actions.attune(a.id, true)),
+    a.attunement === "attuned" && btn(t("unattune"), () => void inv.actions.attune(a.id, false)),
   ];
 
   const buttons =
     value.kind === "backpack"
       ? [
-          value.artifact.slot !== ArtifactSlot.ITEM && btn("Вдягнути", () => void inv.actions.equip(value.artifact.id)),
-          inv.rules.offHand && value.artifact.light && btn("У другу руку", () => void inv.actions.equip(value.artifact.id, "shield")),
+          value.artifact.slot !== ArtifactSlot.ITEM && btn(t("equip"), () => void inv.actions.equip(value.artifact.id)),
+          inv.rules.offHand && value.artifact.light && btn(t("offHand"), () => void inv.actions.equip(value.artifact.id, "shield")),
           ...attuneButtons(value.artifact),
-          btn("Передати", () => on.transfer({ artifact: value.artifact, source: { artifactId: value.artifact.id } })),
-          inv.access.isDM && btn("Забрати", () => inv.actions.revoke(value.artifact)),
+          btn(t("transfer"), () => on.transfer({ artifact: value.artifact, source: { artifactId: value.artifact.id } })),
+          inv.access.isDM && btn(t("revoke"), () => inv.actions.revoke(value.artifact)),
         ]
       : value.kind === "equipped"
         ? [
-            !value.artifact.carried && btn("Зняти", () => void inv.actions.unequip(value.slot)),
+            !value.artifact.carried && btn(t("unequip"), () => void inv.actions.unequip(value.slot)),
             ...attuneButtons(value.artifact),
-            btn("Передати", () => on.transfer({ artifact: value.artifact, source: value.artifact.carried ? { artifactId: value.artifact.id } : { slot: value.slot } })),
+            btn(t("transfer"), () => on.transfer({ artifact: value.artifact, source: value.artifact.carried ? { artifactId: value.artifact.id } : { slot: value.slot } })),
           ]
         : [
-            value.item.consumable && btn("Використати", () => void inv.actions.use(value.item.id)),
-            btn("Редагувати", () => on.edit(value.item)),
-            btn("Видалити", () => inv.actions.remove(value.item)),
+            value.item.consumable && btn(t("use"), () => void inv.actions.use(value.item.id)),
+            btn(t("edit"), () => on.edit(value.item)),
+            btn(t("remove"), () => inv.actions.remove(value.item)),
           ];
 
   return <div className="flex flex-wrap gap-2">{buttons}</div>;

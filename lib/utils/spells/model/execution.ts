@@ -3,6 +3,6 @@ export function assertManualActivation(current: string | null | undefined, updat
   if (current !== "manual" || update.executionMode !== "native") return;
 
   for (const field of ["cost", "dice", "targeting", "resolution", "spellEffects"]) {
-    if (update[field] === undefined) throw new Error("Для автоматичного застосування явно налаштуйте всю механіку заклинання");
+    if (update[field] === undefined) throw new Error("Automatic activation requires the full spell mechanics to be set explicitly");
   }
 }

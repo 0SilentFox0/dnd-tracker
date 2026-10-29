@@ -19,7 +19,7 @@ describe("SignInScreen in English", () => {
       <ConfirmProvider>
         <SignInScreen />
       </ConfirmProvider>,
-      { locale: "en" },
+      { locale: "en", namespaces: ["common", "validation", "auth"] },
     );
 
     expect(await screen.findByRole("button", { name: "Sign in" })).toBeTruthy();

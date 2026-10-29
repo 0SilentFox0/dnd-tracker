@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useTranslations } from "next-intl";
 
 import { ExperienceDialog } from "./ExperienceDialog";
 import { RestDialog } from "./RestDialog";
@@ -11,6 +12,8 @@ import { useRest } from "@/lib/hooks/characters";
 import type { CharacterListItem } from "@/types/characters";
 
 export function PartyRestActions({ campaignId, characters }: { campaignId: string; characters: CharacterListItem[] }) {
+  const t = useTranslations("rest.party");
+
   const { data: rules } = useCampaignRules(campaignId);
 
   const rest = useRest(campaignId);
@@ -27,17 +30,17 @@ export function PartyRestActions({ campaignId, characters }: { campaignId: strin
     <>
       {ooc.persistResources && (
         <Button type="button" variant="outline" onClick={() => setOpen("rest")}>
-          Відпочинок
+          {t("rest")}
         </Button>
       )}
       {ooc.persistResources && resting.length > 0 && (
         <Button type="button" variant="outline" disabled={rest.isPending} onClick={() => void rest.mutateOk({ kind: "close", characterIds: resting })}>
-          Завершити відпочинок
+          {t("closeRest")}
         </Button>
       )}
       {ooc.xp && (
         <Button type="button" variant="outline" onClick={() => setOpen("xp")}>
-          Досвід
+          {t("xp")}
         </Button>
       )}
       {open === "rest" && <RestDialog campaignId={campaignId} characters={characters} open onOpenChange={(o) => !o && setOpen(null)} />}

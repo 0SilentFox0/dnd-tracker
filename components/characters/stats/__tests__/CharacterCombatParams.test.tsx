@@ -14,13 +14,13 @@ describe("CharacterCombatParams AC in class mode", () => {
   it("plain input outside class mode", () => {
     render(<CharacterCombatParams campaignId="c" combatStats={combatStats} />);
 
-    expect((screen.getByLabelText("Клас Броні (AC)") as HTMLInputElement).value).toBe("12");
+    expect((screen.getByLabelText("characters.stats.armorClass") as HTMLInputElement).value).toBe("12");
   });
 
   it("read-only value and breakdown in class mode", () => {
     render(<CharacterCombatParams campaignId="c" combatStats={combatStats} classArmor={{ total: 16, lines: [{ label: "Chain Mail", value: "16", source: "artifact" }] }} />);
 
-    expect(screen.queryByLabelText("Клас Броні (AC)")).toBeNull();
+    expect(screen.queryByLabelText("characters.stats.armorClass")).toBeNull();
     expect(screen.getByText("16")).toBeTruthy();
     expect(screen.getByText("Chain Mail 16")).toBeTruthy();
   });
@@ -28,6 +28,6 @@ describe("CharacterCombatParams AC in class mode", () => {
   it("new class-mode hero: computed automatically", () => {
     render(<CharacterCombatParams campaignId="c" combatStats={combatStats} classArmor={null} />);
 
-    expect(screen.getByText("КЗ рахується з броні й Спритності")).toBeTruthy();
+    expect(screen.getByText("characters.stats.classArmorHint")).toBeTruthy();
   });
 });

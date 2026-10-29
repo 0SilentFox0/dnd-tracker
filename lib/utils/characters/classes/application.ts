@@ -1,5 +1,5 @@
 import { SPELLCASTING_ABILITIES, type SpellcastingAbility } from "@/lib/constants/abilities";
-import { API_ERRORS, maxLevelMessage, subclassTooEarlyMessage } from "@/lib/constants/api-errors";
+import { API_ERRORS, type ErrorParams } from "@/lib/constants/api-errors";
 import { classesLabel, classSpellcastingAbility, classTotalLevel, subclassesLabel } from "@/lib/utils/characters/classes/derive";
 import type { Ruleset } from "@/lib/utils/rules/schema";
 import { classSpellSlots, resolveClassEntries } from "@/lib/utils/spells/class-slots";
@@ -15,22 +15,22 @@ export interface ClassesApplied {
   spellcastingAbility?: SpellcastingAbility;
 }
 
-export type ClassesApplyResult = { ok: true; data: ClassesApplied | null; classesById?: Record<string, GameClassData> } | { ok: false; status: 422; error: string };
+export type ClassesApplyResult = { ok: true; data: ClassesApplied | null; classesById?: Record<string, GameClassData> } | { ok: false; status: 422; error: string; params?: ErrorParams };
 
-export function validateClassEntries(entries: CharacterClassEntry[], classesById: Record<string, GameClassData>, maxLevel: number): string | null {
+export function validateClassEntries(entries: CharacterClassEntry[], classesById: Record<string, GameClassData>, maxLevel: number): { error: string; params?: ErrorParams } | null {
   for (const entry of entries) {
     const cls = classesById[entry.classId];
 
-    if (!cls) return API_ERRORS.CLASS_NOT_FOUND;
+    if (!cls) return { error: API_ERRORS.CLASS_NOT_FOUND };
 
     if (entry.subclassId) {
-      if (!cls.subclasses.some((s) => s.id === entry.subclassId)) return API_ERRORS.SUBCLASS_NOT_FOUND;
+      if (!cls.subclasses.some((s) => s.id === entry.subclassId)) return { error: API_ERRORS.SUBCLASS_NOT_FOUND };
 
-      if (cls.subclassLevel === null || entry.level < cls.subclassLevel) return subclassTooEarlyMessage(cls.subclassLevel ?? 1);
+      if (cls.subclassLevel === null || entry.level < cls.subclassLevel) return { error: API_ERRORS.SUBCLASS_TOO_EARLY, params: { level: cls.subclassLevel ?? 1 } };
     }
   }
 
-  return classTotalLevel(entries) > maxLevel ? maxLevelMessage(maxLevel) : null;
+  return classTotalLevel(entries) > maxLevel ? { error: API_ERRORS.MAX_LEVEL_EXCEEDED, params: { max: maxLevel } } : null;
 }
 
 export interface ClassApplicationInput {
@@ -45,9 +45,9 @@ export function deriveClassApplication({ rules, maxLevel, entries, spellcastingA
 
   if (!rules.classes.enabled) return { ok: false, status: 422, error: API_ERRORS.CLASSES_DISABLED };
 
-  const error = validateClassEntries(entries, byId, maxLevel);
+  const invalid = validateClassEntries(entries, byId, maxLevel);
 
-  if (error) return { ok: false, status: 422, error };
+  if (invalid) return { ok: false, status: 422, ...invalid };
 
   const resolved = resolveClassEntries(entries, byId);
 

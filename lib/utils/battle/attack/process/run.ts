@@ -208,6 +208,7 @@ export function processAttack(params: ProcessAttackParams): ProcessAttackResult 
     bonusPercent: params.bonusPercent,
     bonusLabel: params.bonusLabel,
     obstacle: params.obstacle,
+    cunningStrike: params.cunningStrike,
     hitSpells: params.hitSpells,
     battleId,
   });

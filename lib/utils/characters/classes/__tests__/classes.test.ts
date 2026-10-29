@@ -29,6 +29,16 @@ describe("class derived stats", () => {
   it("hp: multiclass — only the first class gets max die", () =>
     expect(classHp([e(cls({ hitDie: 10 }), 1), e(cls({ hitDie: 6 }), 2)], 10)).toBe(10 + 4 + 4));
 
+  it("hp: multiclassing into a new class adds that class's average die, not the first class's", () => {
+    const wizard = cls({ id: "wizard", hitDie: 6 });
+
+    const fighter = cls({ id: "fighter", hitDie: 10 });
+
+    const before = classHp([e(wizard, 3)], 14);
+
+    expect(classHp([e(wizard, 3), e(fighter, 1)], 14)).toBe(before + (10 / 2 + 1 + 2));
+  });
+
   it("hp: at least 1 per level", () => expect(classHp([e(cls({ hitDie: 6 }), 3)], 1)).toBe(3));
 
   it("hp: unknown class contributes nothing", () => expect(classHp([{ classId: "x", level: 4, class: null, subclass: null }], 10)).toBe(0));

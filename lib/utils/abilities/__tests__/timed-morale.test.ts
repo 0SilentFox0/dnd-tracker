@@ -18,7 +18,7 @@ describe("timed morale", () => {
     const bad = AbilitySchema.safeParse({ ...base, effects: [{ kind: "modifyStat", stat: "morale", flat: 1 }] });
 
     expect(bad.success).toBe(false);
-    expect(JSON.stringify(bad.error?.issues)).toContain("Тимчасова мораль потребує duration");
+    expect(JSON.stringify(bad.error?.issues)).toContain("abilities.validation.moraleNeedsDuration");
   });
 
   it("negative timed morale respects fear immunity", () => {

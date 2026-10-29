@@ -14,6 +14,10 @@ describe("translateIssue", () => {
     expect(translateIssue(makeT("validation"), { message: "minLength", minimum: 8 })).toBe('validation.minLength {"minimum":8}');
   });
 
+  it("issue.params passes values to a key", () => {
+    expect(translateIssue(makeT("validation"), { message: "minLength", params: { name: "x" } })).toBe('validation.minLength {"name":"x"}');
+  });
+
   it("returns a legacy raw string as is when t.has is false", () => {
     const t = Object.assign(makeT(), { has: () => false });
 

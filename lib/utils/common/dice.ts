@@ -148,3 +148,17 @@ export function cryptoRandom(): number {
 export function pickOne<T>(list: readonly T[], rng: () => number = Math.random): T {
   return list[Math.min(list.length - 1, Math.floor(rng() * list.length))];
 }
+
+/** Прибирає `n` кубиків із першої групи формули «NdM…». */
+export function forgoDice<T>(amount: T, n: number): T | 0 {
+  if (n <= 0 || typeof amount !== "string") return amount;
+
+  const m = /^(\d+)d(\d+)(.*)$/.exec(amount.trim());
+
+  if (!m) return amount;
+
+  const left = Number(m[1]) - n;
+
+  return left <= 0 ? 0 : (`${left}d${m[2]}${m[3]}` as T);
+}
+

@@ -1,3 +1,4 @@
+import { useTranslations } from "next-intl";
 import { useQuery } from "@tanstack/react-query";
 
 import { backgroundKeys } from "./keys";
@@ -23,7 +24,9 @@ export function useCreateBackground(campaignId: string) {
 }
 
 export function useUpdateBackground(campaignId: string) {
-  return useCrudMutation({ mutationFn: ({ backgroundId, data }: { backgroundId: string; data: Partial<BackgroundFormData> }) => updateBackground(campaignId, backgroundId, data), invalidateKeys: backgroundDependentKeys(campaignId), errorText: "Не вдалося зберегти передісторію" });
+  const t = useTranslations("backgrounds");
+
+  return useCrudMutation({ mutationFn: ({ backgroundId, data }: { backgroundId: string; data: Partial<BackgroundFormData> }) => updateBackground(campaignId, backgroundId, data), invalidateKeys: backgroundDependentKeys(campaignId), errorText: t("form.saveError") });
 }
 
 export function useDeleteBackground(campaignId: string) {

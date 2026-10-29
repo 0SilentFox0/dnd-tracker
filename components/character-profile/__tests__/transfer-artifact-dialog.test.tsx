@@ -40,7 +40,7 @@ describe("TransferArtifactDialog", () => {
     expect(screen.getByText("Боромир")).toBeTruthy();
     expect(screen.getByText("Гімлі")).toBeTruthy();
     expect(screen.queryByText("Ліра")).toBeNull();
-    expect(screen.getAllByText("у підсумок")).toHaveLength(2);
+    expect(screen.getAllByText("characterProfile.transfer.toStash")).toHaveLength(2);
   });
 
   it("клік і підтвердження викликає передачу", async () => {
@@ -49,7 +49,7 @@ describe("TransferArtifactDialog", () => {
     renderIt();
 
     fireEvent.click(screen.getByText("Боромир"));
-    fireEvent.click(await screen.findByRole("button", { name: "Передати" }));
+    fireEvent.click(await screen.findByRole("button", { name: "characterProfile.transfer.give" }));
 
     await waitFor(() => expect(mocks.mutateAsync).toHaveBeenCalledWith({ slot: "helmet", toCharacterId: "b" }));
   });
@@ -58,6 +58,6 @@ describe("TransferArtifactDialog", () => {
     mocks.roster.data = [hero("a", "Ліра")];
     renderIt();
 
-    expect(screen.getByText("Немає інших героїв у кампанії")).toBeTruthy();
+    expect(screen.getByText("characterProfile.transfer.noHeroes")).toBeTruthy();
   });
 });

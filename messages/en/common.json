@@ -17,5 +17,355 @@
     "ooze": "Oozes",
     "plant": "Plants",
     "undead": "Undead"
+  },
+  "confirm": {
+    "confirm": "Confirm",
+    "failed": "Could not complete the action",
+    "unsavedTitle": "You have unsaved changes. Leave without saving?",
+    "leave": "Leave"
+  },
+  "notify": {
+    "title": "Notice",
+    "gotIt": "Got it"
+  },
+  "ui": {
+    "close": "Close",
+    "imageLabel": "Image",
+    "imageTooLarge": "File is too large. Maximum {mb} MB.",
+    "imageProcessFailed": "Could not process the image",
+    "or": "or",
+    "uploadFromComputer": "Upload from computer",
+    "fromFile": "(uploaded from file)",
+    "commaPlaceholder": "Comma-separated",
+    "selectPlaceholder": "Select an option",
+    "noneLabel": "None",
+    "target": "Target",
+    "hasErrors": "has errors"
+  },
+  "import": {
+    "unsupportedType": "Only CSV and JSON files are supported",
+    "pickFile": "Choose a file to import",
+    "noParsers": "No parsing functions provided",
+    "csvUnsupported": "CSV parsing is not supported",
+    "jsonUnsupported": "JSON parsing is not supported",
+    "unsupportedFormat": "Unsupported file format",
+    "failed": "Import failed",
+    "triggerLabel": "Import",
+    "title": "Import",
+    "description": "Upload a CSV or JSON file for bulk import",
+    "fileLabel": "File",
+    "result": "Imported {imported} of {total} records",
+    "skipped": ", skipped {skipped}",
+    "cancel": "Cancel",
+    "submit": "Import",
+    "submitting": "Importing..."
+  },
+  "notFound": {
+    "title": "Page not found",
+    "home": "Home"
+  },
+  "loading": {
+    "battle": "Loading battle…",
+    "form": "Loading form…",
+    "character": "Loading character…",
+    "generic": "Loading…"
+  },
+  "joinErrors": {
+    "campaignNotFound": "Campaign not found. Check the invite code.",
+    "alreadyMember": "You are already a member of this campaign.",
+    "campaignNotActive": "The campaign is not active.",
+    "failed": "Failed to join the campaign"
+  },
+  "renameGroup": {
+    "title": "Rename group",
+    "description": "Enter a new name for the group “{name}”",
+    "cancel": "Cancel",
+    "save": "Save",
+    "label": "Group name",
+    "placeholder": "Group name"
+  },
+  "abbreviations": {
+    "title": "Abbreviations reference",
+    "srOnly": "Abbreviations information",
+    "description": "What the ability and stat abbreviations mean",
+    "main": "Core abilities:",
+    "other": "Other stats:"
+  },
+  "weaponTraits": {
+    "label": "Weapon properties",
+    "versatileDice": "Two-handed die",
+    "traits": {
+      "light": "Light",
+      "finesse": "Finesse",
+      "twoHanded": "Two-handed",
+      "versatile": "Versatile",
+      "reach": "Reach",
+      "thrown": "Thrown",
+      "ammunition": "Ammunition"
+    }
+  },
+  "color": {
+    "format": "Format #RRGGBB",
+    "pick": "Pick a color"
+  },
+  "monster": {
+    "distance": "{label} {value} ft",
+    "passivePerception": "Passive Perception {value}",
+    "fly": "Fly",
+    "swim": "Swim",
+    "climb": "Climb",
+    "burrow": "Burrow",
+    "hover": "Hover",
+    "languages": "Languages: {value}",
+    "telepathy": "Telepathy {value} ft",
+    "senses": {
+      "darkvision": "Darkvision",
+      "blindsight": "Blindsight",
+      "tremorsense": "Tremorsense",
+      "truesight": "Truesight"
+    },
+    "sizes": {
+      "tiny": "Tiny",
+      "small": "Small",
+      "medium": "Medium",
+      "large": "Large",
+      "huge": "Huge",
+      "gargantuan": "Gargantuan"
+    }
+  },
+  "search": {
+    "noResults": "Nothing found for “{query}”",
+    "clear": "Clear search",
+    "placeholder": "Search by name"
+  },
+  "iconUrl": {
+    "invalid": "Enter a link starting with https:// or http://"
+  },
+  "dice": {
+    "open": "Roll dice",
+    "dialog": "Dice roll",
+    "count": "Count",
+    "fewer": "Fewer dice",
+    "more": "More dice",
+    "roll": "Roll {count}d{sides}"
+  },
+  "deleteAll": {
+    "label": "Delete all",
+    "title": "Delete all {noun}?"
+  },
+  "states": {
+    "error": "Something went wrong",
+    "retry": "Try again",
+    "loading": "Loading…"
+  },
+  "header": {
+    "home": "Home",
+    "campaignMenu": "Campaign menu",
+    "campaignOverview": "Campaign overview",
+    "npcHeroes": "NPC Heroes",
+    "myCharacter": "My character",
+    "profile": "Profile",
+    "help": "Help",
+    "password": "Password",
+    "aiKeys": "AI keys",
+    "switchAccount": "Switch account",
+    "signOut": "Sign out",
+    "watchShow": "Show",
+    "watchShowAria": "Watch the show"
+  },
+  "breadcrumbs": {
+    "label": "Breadcrumb",
+    "details": "Details",
+    "segments": {
+      "campaigns": "Campaigns",
+      "dm": "DM",
+      "character": "Character",
+      "inventory": "Inventory",
+      "new": "Create",
+      "edit": "Edit",
+      "sets": "Sets",
+      "groups": "Groups",
+      "main-skills": "Main skills",
+      "info": "Reference",
+      "print": "Print",
+      "world": "World map",
+      "show": "Show",
+      "scenario": "Scenario"
+    },
+    "ids": {
+      "campaigns": "Campaign",
+      "battles": "Battle",
+      "characters": "Character",
+      "units": "Unit",
+      "spells": "Spell",
+      "artifacts": "Artifact",
+      "sets": "Set"
+    }
+  },
+  "notifications": {
+    "new": "new",
+    "newCount": "new: {count}",
+    "open": "Open",
+    "region": "Notifications",
+    "level": "New level",
+    "item": "New item",
+    "spell": "New spell",
+    "acquaintance": "New acquaintance"
+  },
+  "actions": {
+    "save": "Save",
+    "saving": "Saving...",
+    "create": "Create",
+    "creating": "Creating...",
+    "edit": "Edit",
+    "delete": "Delete",
+    "cancel": "Cancel",
+    "add": "Add",
+    "remove": "Remove",
+    "back": "Back"
+  },
+  "form": {
+    "nameRequired": "Enter a name",
+    "createFailed": "Failed to create",
+    "updateFailed": "Failed to update",
+    "saveFailed": "Failed to save"
+  },
+  "dndSkills": {
+    "acrobatics": "Acrobatics",
+    "animalHandling": "Animal Handling",
+    "arcana": "Arcana",
+    "athletics": "Athletics",
+    "deception": "Deception",
+    "history": "History",
+    "insight": "Insight",
+    "intimidation": "Intimidation",
+    "investigation": "Investigation",
+    "medicine": "Medicine",
+    "nature": "Nature",
+    "perception": "Perception",
+    "performance": "Performance",
+    "persuasion": "Persuasion",
+    "religion": "Religion",
+    "sleightOfHand": "Sleight of Hand",
+    "stealth": "Stealth",
+    "survival": "Survival"
+  },
+  "abilities": {
+    "strength": {
+      "label": "Strength",
+      "short": "STR"
+    },
+    "dexterity": {
+      "label": "Dexterity",
+      "short": "DEX"
+    },
+    "constitution": {
+      "label": "Constitution",
+      "short": "CON"
+    },
+    "intelligence": {
+      "label": "Intelligence",
+      "short": "INT"
+    },
+    "wisdom": {
+      "label": "Wisdom",
+      "short": "WIS"
+    },
+    "charisma": {
+      "label": "Charisma",
+      "short": "CHA"
+    }
+  },
+  "stats": {
+    "hitPoints": "Hit points",
+    "speed": "Speed",
+    "armorClass": "Armor class",
+    "initiative": "Initiative",
+    "spellSaveDC": "Spell save DC",
+    "spellAttackBonus": "Spell attack bonus",
+    "spellSlots": "Spell slots",
+    "moral": "Morale"
+  },
+  "spellLevels": {
+    "0": "Cantrip",
+    "1": "1st level",
+    "2": "2nd level",
+    "3": "3rd level",
+    "4": "4th level",
+    "5": "5th level",
+    "6": "6th level",
+    "7": "7th level",
+    "8": "8th level",
+    "9": "9th level"
+  },
+  "ungrouped": {
+    "spellGroup": "No group",
+    "mainSkill": "No main skill",
+    "race": "No race",
+    "artifactSet": "No set",
+    "branch": "No branch"
+  },
+  "damageTypes": {
+    "fire": "Fire",
+    "cold": "Cold",
+    "lightning": "Lightning",
+    "acid": "Acid",
+    "poison": "Poison",
+    "necrotic": "Necrotic",
+    "radiant": "Radiant",
+    "thunder": "Thunder",
+    "psychic": "Psychic",
+    "force": "Force",
+    "bludgeoning": "Bludgeoning",
+    "piercing": "Piercing",
+    "slashing": "Slashing",
+    "bleed": "Bleed"
+  },
+  "dmSections": {
+    "scenario": "Scenario",
+    "characters": "Characters",
+    "units": "Units",
+    "spells": "Spells",
+    "artifacts": "Artifacts",
+    "skills": "Skills",
+    "skill-trees": "Skill trees",
+    "races": "Races",
+    "classes": "Classes",
+    "backgrounds": "Backgrounds",
+    "feats": "Feats",
+    "battles": "Battles",
+    "music": "Music",
+    "show": "Show",
+    "spell-groups": "Schools of magic",
+    "rules": "Rules",
+    "artifact-sets": "Artifact sets",
+    "assistant": "Assistant",
+    "ai": "AI and API"
+  },
+  "dmMenu": {
+    "scenario": "Scenario",
+    "characters": "Characters",
+    "units": "NPC Units",
+    "spells": "Spells",
+    "artifacts": "Artifacts",
+    "skills": "Skill Library",
+    "skill-trees": "Skill Trees",
+    "races": "Playable Races",
+    "classes": "Classes",
+    "backgrounds": "Backgrounds",
+    "feats": "Feats",
+    "battles": "Battle Scenes",
+    "music": "Battle Music",
+    "show": "Scene Show",
+    "spell-groups": "Schools of magic",
+    "rules": "Rules",
+    "artifact-sets": "Artifact sets",
+    "assistant": "Assistant",
+    "ai": "AI and API"
+  },
+  "tabs": {
+    "basic": "Basics",
+    "abilities": "Abilities",
+    "choices": "Choices"
   }
 }

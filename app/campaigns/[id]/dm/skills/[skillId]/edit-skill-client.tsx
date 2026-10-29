@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { useTranslations } from "next-intl";
 
 import { ErrorState, LoadingState, QueryState } from "@/components/common/states";
 import { HudFormPage } from "@/components/hud/form";
@@ -18,15 +19,17 @@ interface EditSkillClientProps {
 }
 
 export function EditSkillClient({ campaignId, skillId, spells, initialMainSkills }: EditSkillClientProps) {
+  const t = useTranslations("skills.form");
+
   const query = useSkill(campaignId, skillId);
 
   if (query.isError) {
     return (
-      <HudFormPage title="Редагувати скіл">
+      <HudFormPage title={t("editTitle")}>
         <ErrorState error={query.error} onRetry={() => void query.refetch()} />
         <div className="p-4">
           <Button variant="outline" asChild>
-            <Link href={`/campaigns/${campaignId}/dm/skills`}>Назад до бібліотеки скілів</Link>
+            <Link href={`/campaigns/${campaignId}/dm/skills`}>{t("backToLibrary")}</Link>
           </Button>
         </div>
       </HudFormPage>
@@ -37,8 +40,8 @@ export function EditSkillClient({ campaignId, skillId, spells, initialMainSkills
     <QueryState
       query={query}
       loading={
-        <HudFormPage title="Редагувати скіл">
-          <LoadingState rows={6} label="Завантаження скіла…" />
+        <HudFormPage title={t("editTitle")}>
+          <LoadingState rows={6} label={t("loading")} />
         </HudFormPage>
       }
     >

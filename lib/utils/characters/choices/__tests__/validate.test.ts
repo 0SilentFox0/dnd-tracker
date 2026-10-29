@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 
 import { featsById, scores, sorcerer, spellsById } from "./fixtures";
 
+import { API_ERRORS } from "@/lib/constants/api-errors";
 import type { DndSkill } from "@/lib/constants/skills";
 import { classChoiceDefs } from "@/lib/utils/characters/choices/class-choices";
 import { resolveChoiceCount } from "@/lib/utils/characters/choices/count";
@@ -90,6 +91,6 @@ describe("validatePicks", () => {
     const [issue] = validatePicks(defs, { metamagic: [{ id: "nope" }] }, ctx(2), "classes.cls-sorc");
 
     expect(issue).toMatchObject({ path: "classes.cls-sorc.metamagic", code: "CHOICE_UNKNOWN" });
-    expect(issue.message).toContain("Вибір не знайдено");
+    expect(issue.message).toContain(API_ERRORS.CHOICE_UNKNOWN);
   });
 });

@@ -43,6 +43,10 @@ export function applyStatic(input: EffectApplyInput<StaticEffect>, describe: (e:
 
   const fearBlocked = effect.kind === "modifyStat" && effect.stat === "morale" && typeof effect.flat === "number" && effect.flat < 0;
 
+  const consumeOn = effect.kind === "flag" && effect.flag === "advantage" ? effect.consumeOn : undefined;
+
+  const until = (effect.kind === "flag" && effect.flag === "advantage") || effect.kind === "modifyStat" ? effect.until : undefined;
+
   const nature = abilityNature(ability.effects);
 
   const blocked = fearBlocked ? targetIds.filter((id) => immuneTo(input.participants, id, "fear")) : [];
@@ -61,6 +65,8 @@ export function applyStatic(input: EffectApplyInput<StaticEffect>, describe: (e:
           stackable: ability.stackable === true,
           maxStacks: ability.maxStacks,
           abilityEffects: [stripped],
+          ...(consumeOn && { consumeOn }),
+          ...(until && { until }),
         },
         ctx.round,
       );
@@ -93,6 +99,7 @@ export const modifyStatFields: readonly FieldMeta[] = [
   { name: "spellLevels", label: "Рівні слотів", input: "numberList", visibleWhen: (e) => e.stat === "spellSlots" },
   TARGET_FIELD,
   DURATION_FIELD,
+  { name: "until", label: "Зникає в кінці мого ходу", input: "select", optional: true, options: [{ value: "turnEnd", label: "так" }] },
 ];
 
 export const damageBonusFields: readonly FieldMeta[] = [

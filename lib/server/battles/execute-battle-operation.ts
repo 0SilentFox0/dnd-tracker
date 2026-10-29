@@ -69,7 +69,7 @@ export async function executeBattleOperation(
     const outcome = await runGuardedBattleOperationCore(actor.userId, schemaDiceInput(command.operation, input, !!command.serverDice), command.expectedVersion, options, deps).catch((error: unknown) => {
       if (error instanceof BattleConflictError) throw Object.assign(new ContentError(error.message, 409), { code: "conflict", currentVersion: error.currentVersion });
 
-      if (error instanceof BattleRuleError) throw Object.assign(new ContentError(error.message, 422), { code: error.code });
+      if (error instanceof BattleRuleError) throw Object.assign(new ContentError(error.message, 422, undefined, error.params), { code: error.code });
 
       if (error instanceof BattleOperationError) throw new ContentError(error.message, error.status);
 

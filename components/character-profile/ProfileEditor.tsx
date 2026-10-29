@@ -2,6 +2,7 @@
 
 import { useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
+import { useTranslations } from "next-intl";
 
 import { BasicEditTab } from "./BasicEditTab";
 import { BiographyEditor } from "./BiographyEditor";
@@ -36,6 +37,10 @@ export function ProfileEditor({ onDone }: { onDone: () => void }) {
 
   const router = useRouter();
 
+  const t = useTranslations("characterProfile");
+
+  const tc = useTranslations("common.tabs");
+
   const editor = useDmCharacterEditor({ campaignId, characterId, onSaved: onDone });
 
   const [tab, setTab] = useState<ProfileTabId>("basic");
@@ -56,7 +61,7 @@ export function ProfileEditor({ onDone }: { onDone: () => void }) {
     return map;
   }, [roster.data, characterId]);
 
-  if (!editor.ready) return <LoadingState rows={6} label="Завантаження редактора…" />;
+  if (!editor.ready) return <LoadingState rows={6} label={t("editor.loading")} />;
 
   const { form, equipped, setEquipped, artifacts } = editor;
 
@@ -91,10 +96,10 @@ export function ProfileEditor({ onDone }: { onDone: () => void }) {
         value={tab}
         onValueChange={setTab}
         tabs={[
-          { id: "basic", label: "Основне", content: <BasicEditTab editor={editor} onDeleted={() => router.push(`/campaigns/${campaignId}/dm/characters`)} /> },
+          { id: "basic", label: tc("basic"), content: <BasicEditTab editor={editor} onDeleted={() => router.push(`/campaigns/${campaignId}/dm/characters`)} /> },
           {
             id: "combat",
-            label: "Бій",
+            label: t("tabs.combat"),
             content: (
               <div className="space-y-6">
                 <CharacterAbilityScores abilityScores={abilityScores} withPrimary />
@@ -105,7 +110,7 @@ export function ProfileEditor({ onDone }: { onDone: () => void }) {
           },
           {
             id: "skills",
-            label: "Вміння",
+            label: t("tabs.skills"),
             content: (
               <div className="space-y-4">
                 <CharacterAbilitiesSection campaignId={campaignId} abilities={abilities} />
@@ -117,7 +122,7 @@ export function ProfileEditor({ onDone }: { onDone: () => void }) {
             ? [
                 {
                   id: "choices" as const,
-                  label: "Вибори",
+                  label: tc("choices"),
                   content: (
                     <CharacterChoicesPanel
                       campaignId={campaignId}
@@ -132,20 +137,20 @@ export function ProfileEditor({ onDone }: { onDone: () => void }) {
             : []),
           {
             id: "magic",
-            label: "Магія",
+            label: t("tabs.magic"),
             content: (
               <div className="space-y-4">
                 <div className="space-y-2">
-                  <Label htmlFor="spellcastingAbility">Характеристика заклинань</Label>
+                  <Label htmlFor="spellcastingAbility">{t("editor.spellAbility")}</Label>
                   <SelectField
                     id="spellcastingAbility"
                     value={spellcasting.data.spellcastingAbility ?? ""}
                     onValueChange={(v) => spellcasting.set("spellcastingAbility", toSpellcastingAbility(v))}
                     options={SPELL_ABILITY_OPTIONS}
                     allowNone
-                    noneLabel="Немає"
+                    noneLabel={t("editor.none")}
                   />
-                  <p className="text-xs text-muted-foreground">Від неї СЛ і атака заклинанням у профілі.</p>
+                  <p className="text-xs text-muted-foreground">{t("editor.spellAbilityHint")}</p>
                 </div>
                 <MagicTab />
               </div>
@@ -153,7 +158,7 @@ export function ProfileEditor({ onDone }: { onDone: () => void }) {
           },
           {
             id: "items",
-            label: "Речі",
+            label: t("tabs.things"),
             content: (
               <div className="space-y-4">
                 <CharacterArtifactsSection
@@ -165,7 +170,7 @@ export function ProfileEditor({ onDone }: { onDone: () => void }) {
                   onEquippedChange={setEquipped}
                 />
                 {sheet.items.sets.length > 0 && (
-                  <HudSection title="СЕТИ">
+                  <HudSection title={t("sets.title")}>
                     <SetList sets={sheet.items.sets} />
                   </HudSection>
                 )}
@@ -174,7 +179,7 @@ export function ProfileEditor({ onDone }: { onDone: () => void }) {
           },
           {
             id: "story",
-            label: "Історія",
+            label: t("tabs.story"),
             content: (
               <div className="space-y-6">
                 <GoalList />
@@ -186,10 +191,10 @@ export function ProfileEditor({ onDone }: { onDone: () => void }) {
       />
       <ActionBar className="bg-[#110e0b]/95 px-4">
         <Button type="button" variant="outline" onClick={onDone}>
-          Скасувати
+          {t("editor.cancel")}
         </Button>
         <Button type="submit" form="profile-edit" disabled={form.status.isLoading || editor.options.membersLoading}>
-          {form.status.isLoading ? "Збереження…" : "Зберегти"}
+          {form.status.isLoading ? t("editor.saving") : t("editor.save")}
         </Button>
       </ActionBar>
     </form>

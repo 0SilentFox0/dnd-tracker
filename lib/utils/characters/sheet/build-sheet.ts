@@ -13,6 +13,7 @@ import type { ChoiceSelections } from "@/lib/utils/characters/choices/selections
 import { buildClassProgression, hitDiceLabel } from "@/lib/utils/characters/classes";
 import { classTableLines } from "@/lib/utils/characters/classes/columns";
 import { characterBaseHp } from "@/lib/utils/characters/hero-hp";
+import { sheetLineKey } from "@/lib/utils/characters/sheet/line-key";
 import { buildRestBlock } from "@/lib/utils/characters/sheet/rest-block";
 import { getAbilityModifier } from "@/lib/utils/common/calculations";
 import { signed } from "@/lib/utils/common/format";
@@ -130,7 +131,7 @@ export function buildCharacterSheet(input: SheetInput): CharacterSheet {
     proficiency: prof,
     hp: {
       total: p.combatStats.maxHp,
-      lines: [...hp.breakdown.map((b) => ({ label: b, value: "", source: "level" as const })), ...(hpBonus ? [{ label: "Бонуси", value: signed(hpBonus) }] : [])],
+      lines: [...hp.breakdown.map((b) => ({ ...b, value: "", source: "level" as const })), ...(hpBonus ? [{ label: sheetLineKey("bonuses"), value: signed(hpBonus) }] : [])],
     },
     armorClass: armorTotal(p),
     initiative: calculateInitiative(p),
@@ -145,7 +146,7 @@ export function buildCharacterSheet(input: SheetInput): CharacterSheet {
     saves: ABILITY_KEYS.map((key) => ({ key, label: abilityLabel(key), ability: key, proficient: isSaveProficient(key), bonus: checkBonus(scores[key], isSaveProficient(key), prof) })),
     skills,
     passives: { perception: passive("perception"), investigation: passive("investigation"), insight: passive("insight") },
-    magic: c.spellcastingAbility && spellSaveDC != null && spellAttackBonus != null ? { ability: abilityLabel(c.spellcastingAbility as AbilityKey), saveDC: spellSaveDC, attackBonus: spellAttackBonus } : null,
+    magic: c.spellcastingAbility && spellSaveDC != null && spellAttackBonus != null ? { ability: c.spellcastingAbility as AbilityKey, saveDC: spellSaveDC, attackBonus: spellAttackBonus } : null,
     hitDice: classEntries ? hitDiceLabel(classEntries) : null,
     ...(classEntries && { classTable: classTableLines(classEntries), classProgression: classEntries.flatMap((e) => (e.class ? [buildClassProgression(e.class, e)] : [])) }),
     pact: pactSlot(p),
@@ -166,7 +167,7 @@ export function buildCharacterSheet(input: SheetInput): CharacterSheet {
         lineage: input.choices.selections.lineage,
         feats: input.choices.selections.feats.map((f) => ({ key: f.key, id: f.feat.id, name: f.feat.name, type: f.feat.type, from: f.from, picks: describeFeatPicks(f.feat, f.picks) })),
         options: input.choices.selections.options,
-        spellSources: Object.fromEntries(input.choices.selections.spells.map((sp) => [sp.spellId, sp.label])),
+        spellSources: Object.fromEntries(input.choices.selections.spells.map((sp) => [sp.spellId, sp.source])),
         expertise: input.choices.selections.expertise,
       },
     }),

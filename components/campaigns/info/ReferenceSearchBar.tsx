@@ -1,11 +1,13 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import {
   BookOpen,
   ChevronDown,
   ChevronUp,
   Filter,
   Gem,
+  GraduationCap,
   Search,
   Sparkles,
   X,
@@ -17,7 +19,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { SelectField } from "@/components/ui/select-field";
-import { artifactRarityLabel } from "@/lib/constants/artifacts";
+import { useTranslator } from "@/lib/i18n/use-translator";
 import { cn } from "@/lib/utils";
 import type { ReferenceFilters, SectionTab } from "@/types/info-reference";
 
@@ -26,14 +28,19 @@ interface ReferenceSearchBarProps {
 }
 
 interface FilterSelectProps {
-  label: string;
-  allLabel: string;
+  name: "mainSkill" | "spellLevel" | "spellGroup" | "spellType" | "rarity" | "slot" | "artifactSet";
   value: string | null;
   onChange: (v: string | null) => void;
   options: { value: string; label: string }[];
 }
 
-function FilterSelect({ label, allLabel, value, onChange, options }: FilterSelectProps) {
+function FilterSelect({ name, value, onChange, options }: FilterSelectProps) {
+  const t = useTranslations("dashboard.reference.filters");
+
+  const label = t(`${name}.label`);
+
+  const allLabel = t(`${name}.all`);
+
   if (options.length === 0) return null;
 
   return (
@@ -59,8 +66,7 @@ const asOptions = (values: (string | number)[]) =>
 function SkillFilters({ filter }: { filter: ReferenceFilters["skill"] }) {
   return (
     <FilterSelect
-      label="Гілка скілу"
-      allLabel="Усі гілки"
+      name="mainSkill"
       value={filter.mainSkill.value}
       onChange={filter.mainSkill.set}
       options={asOptions(filter.mainSkill.options)}
@@ -74,22 +80,19 @@ function SpellFilters({ filter }: { filter: ReferenceFilters["spell"] }) {
   return (
     <>
       <FilterSelect
-        label="Рівень заклинання"
-        allLabel="Будь-який"
+        name="spellLevel"
         value={level.value != null ? String(level.value) : null}
         onChange={(v) => level.set(v == null ? null : Number(v))}
         options={asOptions(level.options)}
       />
       <FilterSelect
-        label="Група заклинань"
-        allLabel="Усі групи"
+        name="spellGroup"
         value={group.value}
         onChange={group.set}
         options={asOptions(group.options)}
       />
       <FilterSelect
-        label="Тип заклинання"
-        allLabel="Усі типи"
+        name="spellType"
         value={type.value}
         onChange={type.set}
         options={asOptions(type.options)}
@@ -99,27 +102,26 @@ function SpellFilters({ filter }: { filter: ReferenceFilters["spell"] }) {
 }
 
 function ArtifactFilters({ filter }: { filter: ReferenceFilters["artifact"] }) {
+  const t = useTranslator("artifacts");
+
   const { rarity, slot, artifactSet } = filter;
 
   return (
     <>
       <FilterSelect
-        label="Рідкість артефакту"
-        allLabel="Будь-яка"
+        name="rarity"
         value={rarity.value}
         onChange={rarity.set}
-        options={rarity.options.map((r) => ({ value: r, label: artifactRarityLabel(r) }))}
+        options={rarity.options.map((r) => ({ value: r, label: t(`rarity.${r}`) }))}
       />
       <FilterSelect
-        label="Слот артефакту"
-        allLabel="Усі слоти"
+        name="slot"
         value={slot.value}
         onChange={slot.set}
         options={slot.options}
       />
       <FilterSelect
-        label="Сет артефакту"
-        allLabel="Усі сети"
+        name="artifactSet"
         value={artifactSet.value}
         onChange={artifactSet.set}
         options={asOptions(artifactSet.options)}
@@ -130,17 +132,19 @@ function ArtifactFilters({ filter }: { filter: ReferenceFilters["artifact"] }) {
 
 const SECTION_TABS: {
   value: SectionTab;
-  label: string;
   icon: typeof BookOpen;
 }[] = [
-  { value: "all", label: "Усі", icon: BookOpen },
-  { value: "skills", label: "Скіли", icon: Sparkles },
-  { value: "spells", label: "Заклинання", icon: Sparkles },
-  { value: "artifacts", label: "Артефакти", icon: Gem },
+  { value: "all", icon: BookOpen },
+  { value: "skills", icon: Sparkles },
+  { value: "classes", icon: GraduationCap },
+  { value: "spells", icon: Sparkles },
+  { value: "artifacts", icon: Gem },
 ];
 
 export function ReferenceSearchBar({ filters }: ReferenceSearchBarProps) {
-  const { search, section, panel, hasActive, clearAll, visible } = filters;
+  const t = useTranslations("dashboard.reference");
+
+  const { search, section, panel, hasActive, clearAll, visible, classMode } = filters;
 
   return (
     <HudPanel as="div" className="sticky top-0 z-10 bg-[rgba(17,14,11,.97)]">
@@ -149,18 +153,18 @@ export function ReferenceSearchBar({ filters }: ReferenceSearchBarProps) {
           <Search className="pointer-events-none absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-hud-muted" />
           <Input
             type="search"
-            placeholder="Пошук за назвою, описом, механікою..."
+            placeholder={t("search.placeholder")}
             value={search.value}
             onChange={(e) => search.set(e.target.value)}
             className="pl-9 min-h-11 md:min-h-10"
-            aria-label="Пошук по скілах, заклинаннях та артефактах"
+            aria-label={classMode ? t("search.ariaClasses") : t("search.ariaSkills")}
           />
           {search.value && (
             <button
               type="button"
               onClick={() => search.set("")}
               className="absolute top-1/2 right-3 -translate-y-1/2 rounded p-1 text-hud-muted hover:text-hud-ink"
-              aria-label="Очистити пошук"
+              aria-label={t("search.clear")}
             >
               <X className="h-4 w-4" />
             </button>
@@ -168,13 +172,13 @@ export function ReferenceSearchBar({ filters }: ReferenceSearchBarProps) {
         </div>
 
         <HudChipTabs
-          ariaLabel="Розділ довідника"
-          items={SECTION_TABS.map(({ value, label, icon: Icon }) => ({
+          ariaLabel={t("tabs.label")}
+          items={SECTION_TABS.filter(({ value }) => (value === "skills" ? !classMode : value !== "classes" || classMode)).map(({ value, icon: Icon }) => ({
             key: value,
             label: (
               <span className="inline-flex items-center gap-1.5">
                 <Icon className="h-4 w-4 shrink-0" />
-                {label}
+                {t(`tabs.${value}`)}
               </span>
             ),
             active: section.value === value,
@@ -189,10 +193,10 @@ export function ReferenceSearchBar({ filters }: ReferenceSearchBarProps) {
             className="inline-flex min-h-11 touch-manipulation items-center gap-2 rounded-full px-3 py-2 text-sm text-hud-gold shadow-[inset_0_0_0_1px_var(--color-hud-line)] hover:shadow-[inset_0_0_0_1px_var(--color-hud-gold)] md:hidden"
           >
             <Filter className="h-4 w-4" />
-            Фільтри
+            {t("search.filters")}
             {hasActive && (
               <Badge variant="secondary" className="text-xs">
-                увімкнено
+                {t("search.filtersActive")}
               </Badge>
             )}
             {panel.open ? (
@@ -210,7 +214,7 @@ export function ReferenceSearchBar({ filters }: ReferenceSearchBarProps) {
               className="text-hud-muted hover:text-hud-ink"
             >
               <X className="h-4 w-4 mr-1" />
-              Скинути фільтри
+              {t("search.reset")}
             </Button>
           )}
         </div>

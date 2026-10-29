@@ -8,7 +8,7 @@ import { MAX_SPELL_LEVEL } from "@/lib/constants/spells";
 import { AbilitiesSchema } from "@/lib/utils/abilities/schema";
 import type { Choice, ChoiceOwner } from "@/types/choices";
 
-const choiceId = z.string().regex(CHOICE_ID_RE, "Id — малі латинські літери, цифри й дефіс");
+const choiceId = z.string().regex(CHOICE_ID_RE, "choices.validation.idFormat");
 
 const description = z.string().max(CHOICE_LIMITS.description).optional();
 
@@ -43,19 +43,19 @@ function kindIssues(c: Choice, ctx: z.RefinementCtx) {
     if (!ok) ctx.addIssue({ code: "custom", path, message });
   };
 
-  need(c.kind !== "option" || (c.options?.length ?? 0) > 0, ["options"], "Додайте хоча б одну опцію");
-  need(c.kind !== "feat" || (c.featTypes?.length ?? 0) > 0, ["featTypes"], "Оберіть типи рис");
-  need(c.kind !== "abilityScore" || !!c.points, ["points"], "Вкажіть, скільки разів +1");
-  need(c.kind !== "spell" || !!c.spells, ["spells"], "Вкажіть списки й кола");
-  need(!c.spells || c.spells.maxLevel === "slots" || c.spells.maxLevel >= c.spells.minLevel, ["spells", "maxLevel"], "Найвище коло менше за найнижче");
-  need(c.maxPerAbility === undefined || c.kind === "abilityScore", ["maxPerAbility"], "Обмеження характеристики — лише для abilityScore");
-  need(!c.grant || c.kind === "spell", ["grant"], "Безкоштовний каст можна задати лише вибору заклинань");
+  need(c.kind !== "option" || (c.options?.length ?? 0) > 0, ["options"], "choices.validation.optionsRequired");
+  need(c.kind !== "feat" || (c.featTypes?.length ?? 0) > 0, ["featTypes"], "choices.validation.featTypesRequired");
+  need(c.kind !== "abilityScore" || !!c.points, ["points"], "choices.validation.pointsRequired");
+  need(c.kind !== "spell" || !!c.spells, ["spells"], "choices.validation.spellsRequired");
+  need(!c.spells || c.spells.maxLevel === "slots" || c.spells.maxLevel >= c.spells.minLevel, ["spells", "maxLevel"], "choices.validation.levelRange");
+  need(c.maxPerAbility === undefined || c.kind === "abilityScore", ["maxPerAbility"], "choices.validation.maxPerAbilityOnly");
+  need(!c.grant || c.kind === "spell", ["grant"], "choices.validation.grantSpellOnly");
 
   const ids = (c.options ?? []).map((o) => o.id);
 
-  need(new Set(ids).size === ids.length, ["options"], "Id опцій повторюються");
+  need(new Set(ids).size === ids.length, ["options"], "choices.validation.optionIdsRepeated");
 
-  (c.options ?? []).forEach((o, i) => need((o.requires ?? []).every((r) => r !== o.id && ids.includes(r)), ["options", i, "requires"], "Вимога посилається на невідому опцію"));
+  (c.options ?? []).forEach((o, i) => need((o.requires ?? []).every((r) => r !== o.id && ids.includes(r)), ["options", i, "requires"], "choices.validation.unknownRequirement"));
 }
 
 export const ChoiceSchema = z
@@ -85,16 +85,16 @@ function ownerIssues(owner: ChoiceOwner) {
   return (list: Choice[], ctx: z.RefinementCtx) => {
     const ids = list.map((c) => c.id);
 
-    if (new Set(ids).size !== ids.length) ctx.addIssue({ code: "custom", path: [], message: "Id виборів повторюються" });
+    if (new Set(ids).size !== ids.length) ctx.addIssue({ code: "custom", path: [], message: "choices.validation.choiceIdsRepeated" });
 
-    if (owner !== "race" && list.some((c) => c.lineage)) ctx.addIssue({ code: "custom", path: [], message: "Лінія — лише у вибору раси" });
+    if (owner !== "race" && list.some((c) => c.lineage)) ctx.addIssue({ code: "custom", path: [], message: "choices.validation.lineageRaceOnly" });
 
-    if (owner === "race" && list.filter((c) => c.lineage).length > 1) ctx.addIssue({ code: "custom", path: [], message: "Раса має не більше однієї лінії" });
+    if (owner === "race" && list.filter((c) => c.lineage).length > 1) ctx.addIssue({ code: "custom", path: [], message: "choices.validation.singleLineage" });
 
     list.forEach((c, i) => {
-      if (owner !== "class" && typeof c.count !== "number") ctx.addIssue({ code: "custom", path: [i, "count"], message: "Кількість «з таблиці класу» — лише у класі" });
+      if (owner !== "class" && typeof c.count !== "number") ctx.addIssue({ code: "custom", path: [i, "count"], message: "choices.validation.tableCountClassOnly" });
 
-      if (owner === "feat" && c.kind === "feat") ctx.addIssue({ code: "custom", path: [i, "kind"], message: "Риса не може містити вибір риси" });
+      if (owner === "feat" && c.kind === "feat") ctx.addIssue({ code: "custom", path: [i, "kind"], message: "choices.validation.featInFeat" });
     });
   };
 }
@@ -125,7 +125,7 @@ export const BackgroundSelectionFields = {
 
 export const ChoicesBodySchema = z
   .object({ ...BackgroundSelectionFields, raceChoices: PicksSchema.optional(), feats: CharacterFeatsSchema.optional(), classChoices: z.record(z.string().min(1).max(100), PicksSchema).optional() })
-  .refine((b) => b.backgroundId !== undefined || b.backgroundChoices !== undefined || b.backgroundFeatPicks !== undefined || b.raceChoices !== undefined || b.feats !== undefined || b.classChoices !== undefined, { message: "Немає виборів для збереження" });
+  .refine((b) => b.backgroundId !== undefined || b.backgroundChoices !== undefined || b.backgroundFeatPicks !== undefined || b.raceChoices !== undefined || b.feats !== undefined || b.classChoices !== undefined, { message: "choices.validation.nothingToSave" });
 
 export const DraftChoicesSchema = z.object({ ...BackgroundSelectionFields, raceChoices: PicksSchema.optional(), feats: CharacterFeatsSchema.optional(), classChoices: PicksSchema.optional() });
 

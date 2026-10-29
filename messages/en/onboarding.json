@@ -1,0 +1,160 @@
+{
+  "checklist": {
+    "dm": {
+      "races": {
+        "title": "Create a race",
+        "description": "A race sets heroes' base stats, available skills and the progression tree."
+      },
+      "units": {
+        "title": "Add enemy units",
+        "description": "Units are mobs and squads for battles. Create them by hand or import from JSON."
+      },
+      "players": {
+        "title": "Invite players",
+        "description": "Send players the invite code from the \"Campaign settings\" block below."
+      },
+      "characters": {
+        "title": "Approve or create a hero",
+        "description": "Players create hero drafts and you approve them, or you create a hero yourself.",
+        "descriptionPending": "Drafts waiting for your approval: {count}."
+      },
+      "battle-prepare": {
+        "title": "Prepare a battle",
+        "description": "Build a battle scene: sides, units, map. Balance tells you whether the fight is fair."
+      },
+      "battle-run": {
+        "title": "Run your first battle",
+        "description": "Start a battle and a battle button appears in the players' header."
+      },
+      "scenario": {
+        "title": "Write a scenario",
+        "description": "Scenes, DM notes and hero bios in a single manuscript."
+      },
+      "show": {
+        "title": "Prepare a scene show",
+        "description": "Slides with music that players see on their own screens."
+      },
+      "music": {
+        "title": "Add battle music",
+        "description": "A track library for the in-battle player."
+      },
+      "ai": {
+        "title": "Connect the AI assistant",
+        "description": "Your own Claude, OpenAI or Gemini key: a co-author for your scenario and a helper during play."
+      }
+    },
+    "player": {
+      "character": {
+        "title": "Create a hero",
+        "description": "Create a hero draft: race, name, portrait. The DM will approve it.",
+        "descriptionPending": "Your draft is waiting for DM approval. As soon as they accept it, the hero will appear here."
+      },
+      "sheet": {
+        "title": "Explore the hero sheet",
+        "description": "Stats, skills, spells, artifacts and progression."
+      },
+      "battle": {
+        "title": "Join a battle",
+        "description": "The DM will start a battle and a battle button will appear in the header."
+      },
+      "show": {
+        "title": "Scene show",
+        "description": "When the DM shows a scene, it opens in the \"Show\" section."
+      }
+    }
+  },
+  "hints": {
+    "dm": {
+      "races": {
+        "title": "Races are the foundation of heroes",
+        "body": "A race sets base stats, a passive ability and the set of available skills. Without a race, a player cannot create a hero."
+      },
+      "skill-trees": {
+        "title": "Progression trees",
+        "body": "A tree is tied to a race and determines which skills a hero unlocks with levels. Create skills in the library first, then lay them out on the tree."
+      },
+      "skills": {
+        "title": "Skill library",
+        "body": "A skill is a set of effects (bonuses, triggers, reactions) that the battle engine applies automatically. One skill can be used in several trees."
+      },
+      "units": {
+        "title": "Units",
+        "body": "Mobs and squads for battles. A unit's level and tier affect battle balance; whole sets are easy to import from JSON."
+      },
+      "class-map": {
+        "title": "Class map",
+        "body": "The \"Map\" tab shows what a class gives at each level: abilities, subclass, choices and numbers. Clicking a level takes you to the tab where you can change it; subclasses are added in the \"Subclasses\" tab."
+      },
+      "spells": {
+        "title": "Spells",
+        "body": "The campaign's spell database. Heroes get spells through skills and levels; in battle they are cast from the spellbook or straight from the map."
+      },
+      "artifacts": {
+        "title": "Artifacts",
+        "body": "Items with bonuses; several artifacts from the same set grant an extra effect. An artifact is unique: one hero holds it, and it can be passed to another."
+      },
+      "battles": {
+        "title": "Battle scenes",
+        "body": "Prepare a battle in advance: sides, participants, map, music. During the session a prepared battle starts with one click."
+      },
+      "battle-setup": {
+        "title": "Balance and reserve",
+        "body": "Balance fits the enemies' strength to the player party; there is no separate difficulty level. Participants can be kept in reserve and brought into the battle later."
+      },
+      "battle-scene": {
+        "title": "Running a battle",
+        "body": "You see the whole map and all sides. You take the units' turns yourself, players act from their phones; the server calculates rolls and damage."
+      },
+      "scenario": {
+        "title": "Scenario",
+        "body": "The campaign manuscript: scenes, DM notes, bios. A scenario row can be linked to a show slide or a battle and launched right from the text."
+      },
+      "show": {
+        "title": "Scene show",
+        "body": "Slide sets with music. When you switch a slide, it opens in sync on the players' screens."
+      },
+      "world": {
+        "title": "World map",
+        "body": "Draw a continent map, place locations and zones, and move heroes between maps. The map can be shown to players through \"Show\" - everyone sees only their own fog."
+      }
+    },
+    "player": {
+      "world": {
+        "title": "World map",
+        "body": "Here you can see your heroes and discovered locations. Tap a location to read its notes, either shared with the party or your own private ones."
+      },
+      "character": {
+        "title": "Your hero sheet",
+        "body": "The \"Combat\", \"Abilities\", \"Magic\", \"Inventory\" and \"History\" tabs hold everything about your hero. New levels and progression appear here after battles."
+      },
+      "draft": {
+        "title": "Hero draft",
+        "body": "Pick a race, name, stats and portrait; everything can be generated. The draft goes to the DM for approval, and they may send it back with a comment."
+      },
+      "battle": {
+        "title": "Battle from your phone",
+        "body": "When your turn comes, choose an action: move, attack, spell. The server calculates rolls and damage; you end your turn with the end turn button."
+      }
+    }
+  },
+  "ui": {
+    "howTo": "How does it work?",
+    "go": "Go",
+    "hide": "Hide",
+    "moreFeatures": "More features",
+    "firstStepsTitle": "First steps",
+    "firstStepsDone": "First steps completed ✓",
+    "help": "Help",
+    "learnMore": "Learn more",
+    "closeHint": "Dismiss hint",
+    "showHintsAgain": "Show hints again",
+    "hideAllHints": "Hide all hints",
+    "restoreChecklists": "Restore first-steps checklists",
+    "helpTitle": "Help",
+    "helpSubtitle": "How to run your first game and what the app can do",
+    "forDm": "For DMs",
+    "forPlayers": "For players",
+    "hintsHeading": "Hints",
+    "allHelp": "All help"
+  }
+}

@@ -1,5 +1,5 @@
 import type { BranchLevel, Circle } from "./types";
-import { RACIAL_BRANCH_ID } from "./types";
+import { RACIAL_BRANCH_ID, RACIAL_BRANCH_NAME } from "./types";
 
 export interface RawSlot { id: string; name?: string; description?: string; icon?: string }
 
@@ -70,7 +70,7 @@ export function buildTreeJson(input: BuildTreeInput): RawTree {
     },
   }));
 
-  branches.push({ id: RACIAL_BRANCH_ID, name: "Раса", color: "gainsboro", levelSkillIds: { ...input.racial }, levels: {} });
+  branches.push({ id: RACIAL_BRANCH_ID, name: RACIAL_BRANCH_NAME, color: "gainsboro", levelSkillIds: { ...input.racial }, levels: {} });
 
   return {
     ...(input.id && { id: input.id }),

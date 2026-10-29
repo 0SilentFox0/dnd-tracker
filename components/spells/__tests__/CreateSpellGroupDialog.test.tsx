@@ -37,7 +37,7 @@ describe("CreateSpellGroupDialog", () => {
   it("рендерить тригер відкриття діалогу", () => {
     render(<CreateSpellGroupDialog campaignId="camp-1" />);
     expect(
-      screen.getByRole("button", { name: /Створити групу заклинань/i }),
+      screen.getByRole("button", { name: "spells.createGroup.trigger" }),
     ).toBeInTheDocument();
   });
 
@@ -45,30 +45,30 @@ describe("CreateSpellGroupDialog", () => {
     render(<CreateSpellGroupDialog campaignId="camp-1" />);
 
     const trigger = screen.getByRole("button", {
-      name: /Створити групу заклинань/i,
+      name: "spells.createGroup.trigger",
     });
 
     fireEvent.click(trigger);
     expect(
-      screen.getByRole("heading", { name: /Створити нову групу заклинань/i }),
+      screen.getByRole("heading", { name: "spells.createGroup.title" }),
     ).toBeInTheDocument();
-    expect(screen.getByLabelText(/Назва групи/)).toBeInTheDocument();
+    expect(screen.getByLabelText("spells.createGroup.name")).toBeInTheDocument();
     expect(
-      screen.getByRole("button", { name: /Створити групу/i }),
+      screen.getByRole("button", { name: "spells.createGroup.submit" }),
     ).toBeInTheDocument();
   });
 
-  it("має поле вводу назви групи та кнопку Скасувати", () => {
+  it("має поле вводу назви групи та кнопку скасування", () => {
     render(<CreateSpellGroupDialog campaignId="camp-1" />);
     fireEvent.click(
-      screen.getByRole("button", { name: /Створити групу заклинань/i }),
+      screen.getByRole("button", { name: "spells.createGroup.trigger" }),
     );
 
-    const input = screen.getByPlaceholderText("Назва групи");
+    const input = screen.getByPlaceholderText("spells.createGroup.placeholder");
 
     expect(input).toBeInTheDocument();
     expect(
-      screen.getByRole("button", { name: /Скасувати/i }),
+      screen.getByRole("button", { name: "common.actions.cancel" }),
     ).toBeInTheDocument();
   });
 
@@ -79,14 +79,14 @@ describe("CreateSpellGroupDialog", () => {
       <CreateSpellGroupDialog campaignId="camp-1" onGroupCreated={onGroupCreated} />,
     );
     fireEvent.click(
-      screen.getByRole("button", { name: /Створити групу заклинань/i }),
+      screen.getByRole("button", { name: "spells.createGroup.trigger" }),
     );
 
-    const input = screen.getByPlaceholderText("Назва групи");
+    const input = screen.getByPlaceholderText("spells.createGroup.placeholder");
 
     fireEvent.change(input, { target: { value: "Нова група" } });
     fireEvent.click(
-      screen.getByRole("button", { name: /Створити групу/i }),
+      screen.getByRole("button", { name: "spells.createGroup.submit" }),
     );
 
     await vi.waitFor(() => {
@@ -98,11 +98,11 @@ describe("CreateSpellGroupDialog", () => {
     const invalidate = vi.spyOn(queryClient, "invalidateQueries");
 
     render(<CreateSpellGroupDialog campaignId="camp-1" />);
-    fireEvent.click(screen.getByRole("button", { name: /Створити групу заклинань/i }));
-    fireEvent.change(screen.getByPlaceholderText("Назва групи"), {
+    fireEvent.click(screen.getByRole("button", { name: "spells.createGroup.trigger" }));
+    fireEvent.change(screen.getByPlaceholderText("spells.createGroup.placeholder"), {
       target: { value: "Нова група" },
     });
-    fireEvent.click(screen.getByRole("button", { name: /Створити групу/i }));
+    fireEvent.click(screen.getByRole("button", { name: "spells.createGroup.submit" }));
 
     await vi.waitFor(() => {
       expect(invalidate).toHaveBeenCalledWith({ queryKey: ["spell-groups", "camp-1"] });

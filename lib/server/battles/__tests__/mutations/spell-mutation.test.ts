@@ -314,7 +314,7 @@ describe("spell mutation", () => {
       battleData: { ...caster.battleData, equippedArtifacts: [plate as never] },
     };
 
-    await expect(mutation()(context({ participants: [armored, goblin] }), body() as never)).rejects.toMatchObject({ code: "action_rejected", message: expect.stringContaining("без володіння") });
+    await expect(mutation()(context({ participants: [armored, goblin] }), body() as never)).rejects.toMatchObject({ code: "action_rejected", message: API_ERRORS.BATTLE_CASTER_ARMOR_NOT_PROFICIENT });
   });
 
   it("неправильна ціль — invalid_target", async () => {

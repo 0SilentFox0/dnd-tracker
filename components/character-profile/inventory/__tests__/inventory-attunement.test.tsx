@@ -13,6 +13,7 @@ import type { StashArtifact } from "@/types/inventory";
 
 const mocks = vi.hoisted(() => ({ mutateAsync: vi.fn(), useStash: vi.fn(), classes: false }));
 
+vi.mock("@/lib/hooks/notifications", () => ({ useSeenOnOpen: () => new Set<string>(), useNotifications: () => ({ data: undefined }) }));
 vi.mock("@/lib/hooks/campaigns", () => ({ useCampaignRules: () => ({ data: { classes: { enabled: mocks.classes } } }) }));
 
 vi.mock("@/lib/hooks/characters/useStash", async (orig) => ({
@@ -62,10 +63,10 @@ describe("InventoryTab: attunement, charges, off hand", () => {
     setStash([]);
     renderTab();
 
-    expect(screen.getByText("Налаштування 1/3")).toBeTruthy();
+    expect(screen.getByText('inventory.tab.attunement {"used":1,"limit":3}')).toBeTruthy();
 
-    fireEvent.click(screen.getByRole("button", { name: "Зброя: Flame Tongue Longsword" }));
-    fireEvent.click(screen.getByRole("button", { name: "Налаштувати" }));
+    fireEvent.click(screen.getByRole("button", { name: 'inventory.grid.filled {"slot":"inventory.grid.slots.weapon","name":"Flame Tongue Longsword"}' }));
+    fireEvent.click(screen.getByRole("button", { name: "inventory.actions.attune" }));
     await waitFor(() => expect(mocks.mutateAsync).toHaveBeenCalledWith({ action: "attune", ref: "ls+ft" }));
   });
 
@@ -77,9 +78,9 @@ describe("InventoryTab: attunement, charges, off hand", () => {
 
     fireEvent.click(screen.getByLabelText(/Ring of Protection/));
 
-    expect(screen.getByText("Носиться")).toBeTruthy();
-    expect(screen.queryByRole("button", { name: "Зняти" })).toBeNull();
-    expect(screen.getByRole("button", { name: "Зняти налаштування" })).toBeTruthy();
+    expect(screen.getByText("inventory.details.carried")).toBeTruthy();
+    expect(screen.queryByRole("button", { name: "inventory.actions.unequip" })).toBeNull();
+    expect(screen.getByRole("button", { name: "inventory.actions.unattune" })).toBeTruthy();
   });
 
   it("backpack badges and attune actions", async () => {
@@ -88,9 +89,9 @@ describe("InventoryTab: attunement, charges, off hand", () => {
 
     fireEvent.click(screen.getByLabelText("ring"));
 
-    for (const t of ["Носиться", "Не діє без налаштування", "Заряди 2/3"]) expect(screen.getByText(t)).toBeTruthy();
+    for (const t of ["inventory.details.carried", "inventory.details.attunementRequired", 'inventory.details.charges {"left":2,"max":3}']) expect(screen.getByText(t)).toBeTruthy();
 
-    fireEvent.click(screen.getByRole("button", { name: "Налаштувати" }));
+    fireEvent.click(screen.getByRole("button", { name: "inventory.actions.attune" }));
     await waitFor(() => expect(mocks.mutateAsync).toHaveBeenCalledWith({ action: "attune", ref: "ring" }));
   });
 
@@ -99,13 +100,13 @@ describe("InventoryTab: attunement, charges, off hand", () => {
     renderTab();
     fireEvent.click(screen.getByLabelText("dagger"));
 
-    expect(screen.queryByRole("button", { name: "У другу руку" })).toBeNull();
+    expect(screen.queryByRole("button", { name: "inventory.actions.offHand" })).toBeNull();
 
     cleanup();
     mocks.classes = true;
     renderTab();
     fireEvent.click(screen.getByLabelText("dagger"));
-    fireEvent.click(screen.getByRole("button", { name: "У другу руку" }));
+    fireEvent.click(screen.getByRole("button", { name: "inventory.actions.offHand" }));
     await waitFor(() => expect(mocks.mutateAsync).toHaveBeenCalledWith({ action: "equip", artifactId: "dagger", slot: "shield" }));
   });
 });

@@ -1,3 +1,5 @@
+import { useTranslations } from "next-intl";
+
 import { NumberField } from "../NumberField";
 import { RulesSection } from "../RulesSection";
 
@@ -46,6 +48,8 @@ function EffectList({ title, prefix, effects, disabled, locked, onChange }: Effe
 }
 
 export function CriticalsSection({ form }: { form: RulesFormState }) {
+  const t = useTranslations("rules");
+
   const c = form.data.criticals;
 
   const set = (patch: Partial<Criticals>) => form.set("criticals", { ...c, ...patch });
@@ -54,18 +58,18 @@ export function CriticalsSection({ form }: { form: RulesFormState }) {
     <>
       <RulesSection mechanic="criticals">
         <div className="grid gap-3 sm:grid-cols-2">
-          <NumberField label="Крит на (d20 ≥)" value={c.critOn} range={[2, 20]} onCommit={(critOn) => set({ critOn })} />
-          <NumberField label="Провал на (d20 ≤)" value={c.fumbleOn} range={[0, 5]} description="0 — без провалу" onCommit={(fumbleOn) => set({ fumbleOn })} />
+          <NumberField label={t("sections.criticals.critOn")} value={c.critOn} range={[2, 20]} onCommit={(critOn) => set({ critOn })} />
+          <NumberField label={t("sections.criticals.fumbleOn")} value={c.fumbleOn} range={[0, 5]} description={t("sections.criticals.fumbleOnHint")} onCommit={(fumbleOn) => set({ fumbleOn })} />
         </div>
-        <SwitchField id="rules-crit-effects" label="Таблиці критичних ефектів" checked={c.effects} onCheckedChange={(effects) => set({ effects })} className="mt-3" />
+        <SwitchField id="rules-crit-effects" label={t("sections.criticals.effects")} checked={c.effects} onCheckedChange={(effects) => set({ effects })} className="mt-3" />
         <p className="mt-2 text-xs text-hud-muted">
-          Подвоєння шкоди при криті — це ефект таблиці (“{DOUBLE_DAMAGE_NAME}”). Якщо вимкнути таблиці або цей ефект, крит лише позначається, без додаткової шкоди.
+          {t("sections.criticals.effectsHint", { name: DOUBLE_DAMAGE_NAME ?? "" })}
         </p>
-        <SwitchField id="rules-crit-double-dice" label="Подвоєння кубиків на криті" checked={c.doubleDice} onCheckedChange={(doubleDice) => set({ doubleDice })} className="mt-3" />
-        <p className="mt-2 text-xs text-hud-muted">Крит подвоює кубики шкоди (зброя, атака заклинанням); модифікатори не подвоюються.</p>
+        <SwitchField id="rules-crit-double-dice" label={t("sections.criticals.doubleDice")} checked={c.doubleDice} onCheckedChange={(doubleDice) => set({ doubleDice })} className="mt-3" />
+        <p className="mt-2 text-xs text-hud-muted">{t("sections.criticals.doubleDiceHint")}</p>
       </RulesSection>
-      <EffectList title="Ефекти криту" prefix="rules-crit-success" effects={CRITICAL_SUCCESS_EFFECTS} disabled={c.disabledSuccess} locked={!c.effects} onChange={(disabledSuccess) => set({ disabledSuccess })} />
-      <EffectList title="Ефекти провалу" prefix="rules-crit-fail" effects={CRITICAL_FAIL_EFFECTS} disabled={c.disabledFail} locked={!c.effects} onChange={(disabledFail) => set({ disabledFail })} />
+      <EffectList title={t("sections.criticals.successTitle")} prefix="rules-crit-success" effects={CRITICAL_SUCCESS_EFFECTS} disabled={c.disabledSuccess} locked={!c.effects} onChange={(disabledSuccess) => set({ disabledSuccess })} />
+      <EffectList title={t("sections.criticals.failTitle")} prefix="rules-crit-fail" effects={CRITICAL_FAIL_EFFECTS} disabled={c.disabledFail} locked={!c.effects} onChange={(disabledFail) => set({ disabledFail })} />
     </>
   );
 }

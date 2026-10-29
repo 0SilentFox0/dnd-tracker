@@ -3,6 +3,8 @@ import { notFound } from "next/navigation";
 
 import { HudPage, HudPageHeader, HudPanel } from "@/components/hud/page";
 import { HelpArticleView } from "@/components/onboarding/HelpArticleView";
+import { getRequestLocale } from "@/lib/i18n/request-locale";
+import { getTranslator } from "@/lib/i18n/translator";
 import { getHelpArticle, HELP_ARTICLES } from "@/lib/onboarding/help";
 
 export function generateStaticParams() {
@@ -16,19 +18,23 @@ export default async function HelpArticlePage({ params }: { params: Promise<{ sl
 
   if (!article) notFound();
 
+  const locale = await getRequestLocale();
+
+  const [t, ui] = await Promise.all([getTranslator(locale, "help"), getTranslator(locale, "onboarding")]);
+
   return (
     <HudPage>
       <HudPageHeader
-        title={article.title}
-        subtitle={article.summary}
+        title={t(`${article.slug}.title`)}
+        subtitle={t(`${article.slug}.summary`)}
         actions={
           <Link href="/help" className="self-center text-sm text-hud-gold hover:underline">
-            Уся довідка
+            {ui("ui.allHelp")}
           </Link>
         }
       />
       <HudPanel>
-        <HelpArticleView article={article} />
+        <HelpArticleView article={article} t={t} />
       </HudPanel>
     </HudPage>
   );

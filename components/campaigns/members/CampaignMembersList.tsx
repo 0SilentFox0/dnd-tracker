@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import { X } from "lucide-react";
 
 import { HudPill } from "@/components/hud/page";
@@ -20,14 +21,16 @@ export function CampaignMembersList({
   members,
   isDM,
 }: CampaignMembersListProps) {
+  const t = useTranslations("campaigns");
+
   const confirm = useConfirm();
 
   const removeMember = useRemoveCampaignMember(campaignId);
 
   const handleRemoveMember = (memberId: string) =>
     confirm({
-      title: "Ви впевнені, що хочете виключити цього учасника з кампанії?",
-      confirmLabel: "Виключити",
+      title: t("members.confirmRemove"),
+      confirmLabel: t("members.remove"),
       destructive: true,
       onConfirm: () => removeMember.mutateAsync(memberId),
     });
@@ -43,7 +46,7 @@ export function CampaignMembersList({
         >
           <div className="flex items-center gap-2">
             <span className="text-hud-bone">{member.user.displayName}</span>
-            <HudPill tone={member.role === CampaignRole.DM ? "gold" : "bone"}>{member.role === CampaignRole.DM ? "DM" : "Player"}</HudPill>
+            <HudPill tone={member.role === CampaignRole.DM ? "gold" : "bone"}>{member.role === CampaignRole.DM ? t("roles.dm") : t("roles.player")}</HudPill>
           </div>
           {isDM && member.role === CampaignRole.PLAYER && (
             <Button
@@ -53,11 +56,11 @@ export function CampaignMembersList({
               disabled={removingMemberId === member.id}
             >
               {removingMemberId === member.id ? (
-                "Видалення..."
+                t("members.removing")
               ) : (
                 <>
                   <X className="h-4 w-4 mr-1" />
-                  Виключити
+                  {t("members.remove")}
                 </>
               )}
             </Button>

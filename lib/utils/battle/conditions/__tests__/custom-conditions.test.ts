@@ -101,7 +101,7 @@ describe("pacified: заклинання", () => {
     expect(pacifiedBlock(ps, caster, { kind: "enemy" }, [])).toBeTruthy();
     expect(pacifiedBlock(ps, caster, { kind: "ally" }, ["e"])).toBeTruthy();
     expect(pacifiedBlock(ps, caster, { kind: "ally" }, ["a"])).toBeNull();
-    expect(pacifiedBlock(ps, caster, { kind: "enemy" }, [])).toBe("Умиротворений: не може завдавати шкоди й накладати ворожі закляття");
+    expect(pacifiedBlock(ps, caster, { kind: "enemy" }, [])).toEqual({ state: "Умиротворений" });
   });
 
   it("без стану — не блокує", () => {

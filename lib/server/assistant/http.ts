@@ -7,7 +7,7 @@ import { readDeletionReceipt, readReceipt } from "./receipts";
 
 import "server-only";
 import { AI_BODY_LIMITS } from "@/lib/constants/ai";
-import { API_ERRORS } from "@/lib/constants/api-errors";
+import { API_ERRORS, type ErrorParams } from "@/lib/constants/api-errors";
 import { prisma } from "@/lib/db";
 import { assistantPolicySchema } from "@/lib/schemas/assistant";
 import { ContentError } from "@/lib/server/content/errors";
@@ -16,11 +16,14 @@ import { PRIVATE_NO_STORE_HEADERS } from "@/lib/utils/api/cache-headers";
 import { parseBody } from "@/lib/utils/api/parse-body";
 import { checkRateLimit, rateLimitResponse } from "@/lib/utils/api/rate-limit";
 import { isSameOriginRequest } from "@/lib/utils/api/same-origin";
+import { apiErrorJson } from "@/lib/utils/api/translate-error";
 
 type RouteMode = "list" | "detail" | "receipt" | "confirm" | "reject" | "policy";
 type Context = { params: Promise<{ id: string; intentId?: string }> };
 
 const json = (body: unknown, status = 200) => NextResponse.json(body, { status, headers: PRIVATE_NO_STORE_HEADERS });
+
+const errorJson = (body: { error: string; code?: string; params?: ErrorParams }, status: number) => apiErrorJson(body, { status, headers: PRIVATE_NO_STORE_HEADERS });
 
 const privateResponse = (response: Response) => { response.headers.set("cache-control", "private, no-store");
 
@@ -104,10 +107,10 @@ export function assistantRoute(mode: RouteMode) {
 
       return json(await rejectIntent(caller, intentId));
     } catch (error) {
-      if (error instanceof ContentError) return json({ code: error.status === 409 ? "ASSISTANT_CONFLICT" : "ASSISTANT_UNAVAILABLE", error: error.message }, error.status);
+      if (error instanceof ContentError) return errorJson({ code: error.status === 409 ? "ASSISTANT_CONFLICT" : "ASSISTANT_UNAVAILABLE", error: error.message, params: error.params }, error.status);
 
       // Do not log unknown DB/provider exceptions or return their raw payload.
-      return json({ code: "ASSISTANT_FAILED", error: API_ERRORS.ASSISTANT_RUN_FAILED }, 500);
+      return errorJson({ code: "ASSISTANT_FAILED", error: API_ERRORS.ASSISTANT_RUN_FAILED }, 500);
     }
   };
 }

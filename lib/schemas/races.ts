@@ -35,12 +35,12 @@ const spellSlotProgressionSchema = z
 
 const raceIconSchema = z.preprocess(
   (v) => (v === "" ? null : v),
-  z.string().max(2000).refine((v) => !v.startsWith("data:"), "Іконка раси — лише посилання на зображення").nullable().optional(),
+  z.string().max(2000).refine((v) => !v.startsWith("data:"), "races.validation.iconUrl").nullable().optional(),
 );
 
 const raceColorSchema = z.preprocess(
   (v) => (v === "" ? null : v),
-  z.string().regex(/^#[0-9a-fA-F]{6}$/, "Колір раси — у форматі #RRGGBB").nullable().optional(),
+  z.string().regex(/^#[0-9a-fA-F]{6}$/, "races.validation.color").nullable().optional(),
 );
 
 export const createRaceSchema = z.object({
@@ -50,8 +50,8 @@ export const createRaceSchema = z.object({
   availableSkills: z.array(z.string()).default([]),
   disabledSkills: z.array(z.string()).default([]),
   passiveAbility: passiveAbilitySchema,
-  abilities: AbilitiesSchema.describe("Здібності раси").optional(),
-  choices: RaceChoicesSchema.describe("Вибори раси: лінія (lineage), навички, риси, опції; spellId опції — id заклинання").optional(),
+  abilities: AbilitiesSchema.describe("Race abilities").optional(),
+  choices: RaceChoicesSchema.describe("Race choices: lineage, skills, feats, options; an option spellId is a spell id").optional(),
   spellSlotProgression: spellSlotProgressionSchema,
 });
 
@@ -62,8 +62,8 @@ export const updateRaceSchema = z.object({
   availableSkills: z.array(z.string()).optional(),
   disabledSkills: z.array(z.string()).optional(),
   passiveAbility: passiveAbilitySchema,
-  abilities: AbilitiesSchema.describe("Здібності раси").optional(),
-  choices: RaceChoicesSchema.describe("Вибори раси: лінія (lineage), навички, риси, опції; spellId опції — id заклинання").optional(),
+  abilities: AbilitiesSchema.describe("Race abilities").optional(),
+  choices: RaceChoicesSchema.describe("Race choices: lineage, skills, feats, options; an option spellId is a spell id").optional(),
   spellSlotProgression: spellSlotProgressionSchema,
 });
 

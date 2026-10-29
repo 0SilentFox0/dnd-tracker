@@ -273,7 +273,7 @@ describe("POST /api/campaigns/[id]/battles — map background", () => {
     const res = await post("data:image/webp;base64,AAAA");
 
     expect(await getResponseStatus(res)).toBe(400);
-    expect(await getResponseJson(res)).toEqual({ error: "Файл завеликий" });
+    expect(await getResponseJson(res)).toMatchObject({ error: "Файл завеликий" });
     expect(prisma.battleScene.create).not.toHaveBeenCalled();
   });
 
@@ -346,7 +346,7 @@ describe("PATCH /api/campaigns/[id]/battles/[battleId] — map", () => {
     const res = await patch({ cols: 10, rows: 10, opacity: 1, background: "data:image/webp;base64,AAAA" });
 
     expect(await getResponseStatus(res)).toBe(400);
-    expect(await getResponseJson(res)).toEqual({ error: "Файл завеликий" });
+    expect(await getResponseJson(res)).toMatchObject({ error: "Файл завеликий" });
     expect(prisma.battleScene.update).not.toHaveBeenCalled();
   });
 

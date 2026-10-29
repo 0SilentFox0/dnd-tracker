@@ -5,6 +5,7 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 
 import { sheetFixture, withSheet } from "./sheet-fixture";
 
+vi.mock("@/lib/hooks/notifications", () => ({ useSeenOnOpen: () => new Set<string>(), useNotifications: () => ({ data: undefined }) }));
 vi.mock("@/components/hud/fonts", () => ({ hudFontClassName: "", HUD_SURFACE: "hud-surface" }));
 vi.mock("@/lib/hooks/characters/useStash", async (orig) => ({
   ...(await orig<object>()),
@@ -37,26 +38,26 @@ describe("таби профілю", () => {
     mockMatchMedia(false);
     inProfile(<MagicTab />);
 
-    expect(screen.getByLabelText("I коло: 4 слоти")).toHaveTextContent("I · 4");
-    fireEvent.click(screen.getByRole("button", { name: "Книга заклинань" }));
-    expect(screen.getByRole("dialog")).toHaveAccessibleName("Книга заклинань");
+    expect(screen.getByLabelText('characterProfile.magic.slotsTotal {"level":"I","count":4}')).toHaveTextContent("I · 4");
+    fireEvent.click(screen.getByRole("button", { name: "characterProfile.magic.book" }));
+    expect(screen.getByRole("dialog")).toHaveAccessibleName("characterProfile.spellBook.title");
     expect(screen.getByText("Мітка мисливця")).toBeTruthy();
   });
 
   it("Магія без заклинань — порожня книга з написом, без кнопки книги", () => {
     inProfile(<MagicTab />, withSheet({ magic: null, slots: [], spells: [] }));
 
-    expect(screen.getByText("Поки що Герой більше довіряє своєму мечу і луку")).toBeTruthy();
+    expect(screen.getByText("characterProfile.magic.emptyBook")).toBeTruthy();
     expect(screen.queryByText("Магії поки немає")).toBeNull();
-    expect(screen.queryByRole("button", { name: "Книга заклинань" })).toBeNull();
+    expect(screen.queryByRole("button", { name: "characterProfile.magic.book" })).toBeNull();
   });
 
   it("Магія без заклинань, але зі слотами — слоти над порожньою книгою", () => {
     inProfile(<MagicTab />, withSheet({ spells: [] }));
 
-    const slot = screen.getByLabelText("I коло: 4 слоти");
+    const slot = screen.getByLabelText('characterProfile.magic.slotsTotal {"level":"I","count":4}');
 
-    const book = screen.getByText("Поки що Герой більше довіряє своєму мечу і луку");
+    const book = screen.getByText("characterProfile.magic.emptyBook");
 
     expect(slot.compareDocumentPosition(book) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
   });
@@ -65,7 +66,7 @@ describe("таби профілю", () => {
     mockMatchMedia(true);
     inProfile(<InventoryTab />);
 
-    fireEvent.click(screen.getByRole("button", { name: "Броня: Кольчуга ельфів" }));
+    fireEvent.click(screen.getByRole("button", { name: 'inventory.grid.filled {"slot":"inventory.grid.slots.armor","name":"Кольчуга ельфів"}' }));
     expect(screen.getByRole("dialog")).toHaveAccessibleName("Кольчуга ельфів");
     expect(screen.getByText("AC +2")).toBeTruthy();
     expect(screen.getByText("Легка і тиха.")).toBeTruthy();
@@ -90,7 +91,7 @@ describe("таби профілю", () => {
     const twin = { ...sheetFixture.items.artifacts[0], effects: ["AC +1", "AC +1"] };
 
     inProfile(<InventoryTab />, withSheet({ items: { ...sheetFixture.items, grid: { armor: twin }, artifacts: [twin] } }));
-    fireEvent.click(screen.getByRole("button", { name: "Броня: Кольчуга ельфів" }));
+    fireEvent.click(screen.getByRole("button", { name: 'inventory.grid.filled {"slot":"inventory.grid.slots.armor","name":"Кольчуга ельфів"}' }));
     expect(screen.getAllByRole("listitem").filter((li) => li.textContent === "AC +1")).toHaveLength(2);
   });
 });

@@ -137,7 +137,7 @@ export function createSpellMutation(deps: SpellMutationDeps = defaultDeps, optio
 
     const pacified = pacifiedBlock(order, caster, definition.targeting, data.targetIds);
 
-    if (pacified) throw new BattleRuleError("action_rejected", pacified);
+    if (pacified) throw new BattleRuleError("action_rejected", API_ERRORS.BATTLE_CASTER_PACIFIED, pacified);
 
     const resolution = resolveSpellTargets(order, caster, spell, definition.targeting, data.targetIds, {
       map: ctx.meta.map,
@@ -160,7 +160,7 @@ export function createSpellMutation(deps: SpellMutationDeps = defaultDeps, optio
 
     const pacifiedHit = pacifiedBlock(order, caster, { kind: "self" }, resolution.targetIds);
 
-    if (pacifiedHit) throw new BattleRuleError("action_rejected", pacifiedHit);
+    if (pacifiedHit) throw new BattleRuleError("action_rejected", API_ERRORS.BATTLE_CASTER_PACIFIED, pacifiedHit);
 
     if (legendaryAbility?.condition && !evaluateCondition(legendaryAbility.condition, { owner: caster, event: { type: "action", actorId: caster.basicInfo.id, abilityKey: legendaryAbility.key, targetIds: resolution.targetIds }, participants: order, sourceId: legendaryAbility.source.id })) throw new BattleRuleError("action_rejected", API_ERRORS.BATTLE_ABILITY_CONDITION_UNMET);
 

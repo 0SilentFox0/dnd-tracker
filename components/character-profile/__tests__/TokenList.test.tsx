@@ -35,8 +35,8 @@ describe("Жетони", () => {
   it("показує лічильники й підписи", () => {
     render(false);
 
-    expect(screen.getByLabelText("Червоні жетони").textContent).toBe("2");
-    expect(screen.getByLabelText("Зелені жетони").textContent).toBe("1");
+    expect(screen.getByLabelText("characterProfile.tokens.counters.red").textContent).toBe("2");
+    expect(screen.getByLabelText("characterProfile.tokens.counters.green").textContent).toBe("1");
     expect(screen.getByText("Образив НПС")).toBeTruthy();
     expect(screen.getByText("Врятував віз")).toBeTruthy();
   });
@@ -44,20 +44,20 @@ describe("Жетони", () => {
   it("гравець не бачить керування", () => {
     render(false);
 
-    expect(screen.queryByRole("button", { name: "+ Жетон" })).toBeNull();
-    expect(screen.queryByRole("button", { name: "Видалити жетон" })).toBeNull();
+    expect(screen.queryByRole("button", { name: "characterProfile.tokens.add" })).toBeNull();
+    expect(screen.queryByRole("button", { name: "characterProfile.tokens.deleteLabel" })).toBeNull();
   });
 
   it("ДМ бачить керування", () => {
     render(true);
 
-    expect(screen.getByRole("button", { name: "+ Жетон" })).toBeTruthy();
-    expect(screen.getAllByRole("button", { name: "Видалити жетон" })).toHaveLength(3);
+    expect(screen.getByRole("button", { name: "characterProfile.tokens.add" })).toBeTruthy();
+    expect(screen.getAllByRole("button", { name: "characterProfile.tokens.deleteLabel" })).toHaveLength(3);
   });
 
   it("порожній список", () => {
     render(false, []);
 
-    expect(screen.getByText("Жетонів ще немає")).toBeTruthy();
+    expect(screen.getByText("characterProfile.tokens.empty")).toBeTruthy();
   });
 });

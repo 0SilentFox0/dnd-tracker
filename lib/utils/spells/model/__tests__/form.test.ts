@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 
-import { spellLevelOptions } from "@/components/spells/form/spell-form-defaults";
-import { defaultSpellForm, formToPayload, spellFormError, spellToForm } from "@/lib/utils/spells/model/form";
+import { SPELL_LEVELS } from "@/components/spells/form/spell-form-defaults";
+import { defaultSpellForm, formToPayload, spellFormIssue, spellToForm } from "@/lib/utils/spells/model/form";
 import type { Spell } from "@/types/spells";
 
 const row: Spell = {
@@ -53,25 +53,22 @@ describe("форма заклинання", () => {
 
   it("порожня форма: за замовчуванням ворог, auto, без ефектів; потрібна назва", () => {
     expect(defaultSpellForm()).toMatchObject({ targeting: { kind: "enemy" }, resolution: { kind: "auto" }, spellEffects: [], dice: 0 });
-    expect(spellFormError(defaultSpellForm())).toBe("Вкажіть назву заклинання");
-    expect(spellFormError({ ...defaultSpellForm(), name: "Іскра" })).toBeNull();
+    expect(spellFormIssue(defaultSpellForm())).toEqual({ fieldKey: null, message: "spellEditor.validation.nameRequired" });
+    expect(spellFormIssue({ ...defaultSpellForm(), name: "Іскра" })).toBeNull();
   });
 
   it("помилку дає невалідний ефект", () => {
     const form = { ...defaultSpellForm(), name: "Іскра", spellEffects: [{ kind: "teleport" } as never] };
 
-    expect(spellFormError(form)).toContain("Ефекти");
+    expect(spellFormIssue(form)?.fieldKey).toBe("spellEditor.fields.spellEffects");
   });
 
-  it("spellFormError ловить усе, що відхилить схема, з назвою поля", () => {
+  it("spellFormIssue ловить усе, що відхилить схема, з назвою поля", () => {
     const base = { ...defaultSpellForm(), name: "Іскра" };
 
-    const message = spellFormError({ ...base, targeting: { kind: "enemy", range: 1 } as never });
-
-    expect(message).toMatch(/^Дальність: /);
-    expect(message).not.toContain("targeting");
-    expect(spellFormError({ ...base, name: "а".repeat(101) })).toMatch(/^Назва: /);
-    expect(spellFormError({ ...base, stackable: true, maxStacks: 99 })).toMatch(/^Макс\. накопичень: /);
+    expect(spellFormIssue({ ...base, targeting: { kind: "enemy", range: 1 } as never })?.fieldKey).toBe("spellEditor.fields.targetingRange");
+    expect(spellFormIssue({ ...base, name: "а".repeat(101) })?.fieldKey).toBe("spellEditor.fields.name");
+    expect(spellFormIssue({ ...base, stackable: true, maxStacks: 99 })?.fieldKey).toBe("spellEditor.fields.maxStacks");
     expect(() => formToPayload({ ...base, targeting: { kind: "enemy", range: 1 } as never })).toThrow();
   });
 
@@ -83,7 +80,7 @@ describe("форма заклинання", () => {
 
   it("рівні 0–9 доступні для нового заклинання", () => {
     expect(formToPayload(spellToForm({ ...row, level: 0 })).level).toBe(0);
-    expect(spellLevelOptions().map((o) => o.value)).toEqual(["0", "1", "2", "3", "4", "5", "6", "7", "8", "9"]);
+    expect(SPELL_LEVELS).toEqual([0, 1, 2, 3, 4, 5, 6, 7, 8, 9]);
   });
 });
 it("keeps manual execution mode until DM explicitly configures mechanics", () => {

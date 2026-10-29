@@ -4,5 +4,15 @@
   "maxLength": "Щонайбільше {maximum, plural, one {# символ} few {# символи} many {# символів} other {# символу}}",
   "email": "Некоректна адреса електронної пошти",
   "invalid": "Некоректне значення",
-  "passwordMismatch": "Паролі не збігаються"
+  "passwordMismatch": "Паролі не збігаються",
+  "min": "Не менше {minimum}",
+  "max": "Не більше {maximum}",
+  "itemConsumableConflict": "Витратний предмет не може бути властивістю і не відновлює заряди",
+  "youtubeUrlInvalid": "Не вдалося розпізнати посилання YouTube",
+  "lairNotActive": "Учасник зараз не в лігві",
+  "lairUsed": "Дію лігва вже використано в цьому раунді",
+  "lairRepeat": "Не можна повторити цю дію лігва в сусідніх раундах",
+  "trackFileInvalid": "Потрібен файл {formats} до {maxMb} МБ",
+  "trackTitleTooLong": "Група й назва разом — до {max} символів",
+  "trackDurationInvalid": "Ціле число секунд від 1 до 86400"
 }

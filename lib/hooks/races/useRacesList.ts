@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useTranslations } from "next-intl";
 
 import { useCreateRace, useDeleteRace, useRaces } from "./useRaces";
 
@@ -10,6 +11,10 @@ import type { Race, RaceFormData } from "@/types/races";
 const raceFields = (race: Race) => [race.name];
 
 export function useRacesList(campaignId: string) {
+  const t = useTranslations("races");
+
+  const tc = useTranslations("common");
+
   const confirm = useConfirm();
 
   const { data: allRaces = [], isLoading } = useRaces(campaignId);
@@ -23,7 +28,7 @@ export function useRacesList(campaignId: string) {
   const [createOpen, setCreateOpen] = useState(false);
 
   const deleteRace = async (raceId: string) => {
-    if (await confirm({ title: "Ви впевнені, що хочете видалити цю расу?", confirmLabel: "Видалити", destructive: true })) {
+    if (await confirm({ title: t("list.confirmDelete"), confirmLabel: tc("actions.delete"), destructive: true })) {
       remove.mutate(raceId);
     }
   };

@@ -16,7 +16,9 @@ import { UnitPickerField } from "./UnitPickerField";
 
 import { useErrorsUnder } from "@/components/abilities/editor-context";
 import { FieldErrors } from "@/components/abilities/FieldErrors";
+import { localizeField } from "@/components/abilities/fields/registry-labels";
 import { Label } from "@/components/ui/label";
+import { useTranslator } from "@/lib/i18n/use-translator";
 import type { FieldMeta } from "@/lib/utils/abilities/registry/fields";
 import { TARGET_LABELS } from "@/lib/utils/abilities/registry/labels";
 
@@ -27,10 +29,23 @@ export interface FieldProps<V = unknown> {
   meta: FieldMeta;
 }
 
-const TARGET_OPTIONS = Object.entries(TARGET_LABELS).map(([value, label]) => ({ value, label }));
+interface FieldRendererProps {
+  meta: FieldMeta;
+  value: unknown;
+  onChange: (v: unknown) => void;
+  path: string;
+  /** Registry key of the effect/flag/trigger/condition the field belongs to; omitted when `meta` is already translated. */
+  owner?: string;
+}
 
-export function FieldRenderer({ meta, value, onChange, path }: { meta: FieldMeta; value: unknown; onChange: (v: unknown) => void; path: string }) {
+export function FieldRenderer({ meta: rawMeta, value, onChange, path, owner }: FieldRendererProps) {
+  const tr = useTranslator("abilityRegistry");
+
   const errors = useErrorsUnder(path);
+
+  const meta = owner ? localizeField(tr, owner, rawMeta) : rawMeta;
+
+  const targetOptions = Object.keys(TARGET_LABELS).map((value) => ({ value, label: tr(`targets.${value}`) }));
 
   const props = { id: path, value: value as never, onChange, meta };
 
@@ -44,7 +59,7 @@ export function FieldRenderer({ meta, value, onChange, path }: { meta: FieldMeta
       case "select":
         return <SelectInput {...props} />;
       case "target":
-        return <SelectInput {...props} meta={{ ...meta, options: TARGET_OPTIONS, optional: true }} />;
+        return <SelectInput {...props} meta={{ ...meta, options: targetOptions, optional: true }} />;
       case "multiselect":
         return <MultiSelectField {...props} />;
       case "toggle":

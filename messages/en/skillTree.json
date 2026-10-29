@@ -1,0 +1,163 @@
+{
+  "tiers": {
+    "basic": "Basics",
+    "advanced": "Advanced",
+    "expert": "Expert"
+  },
+  "circles": {
+    "outer": "outer circle",
+    "middle": "middle circle",
+    "inner": "inner circle"
+  },
+  "circleShort": {
+    "outer": "O",
+    "middle": "M",
+    "inner": "I"
+  },
+  "cells": {
+    "ultimate": "Ultimate",
+    "racial": "Racial · {tier}",
+    "level": "{branch} · {tier}",
+    "slot": "{branch} · {circle}{n}",
+    "column": "{branch} · {column}"
+  },
+  "editor": {
+    "title": "Progression tree",
+    "addRace": "Add a race to set up the tree",
+    "unsaved": "Unsaved changes",
+    "branch": "Branch",
+    "racial": "Racial",
+    "racialLevels": "level 5 / 10 / 15",
+    "ultimate": "Ultimate",
+    "ultimateHint": "after 3 inner skills",
+    "addBranch": "+ Add branch",
+    "moveUp": "{name} up",
+    "moveDown": "{name} down",
+    "removeBranch": "Remove branch {name}",
+    "columns": {
+      "outer": "Outer {n}",
+      "middle": "Middle {n}",
+      "inner": "Inner"
+    },
+    "removeConfirm": {
+      "title": "Remove branch \"{name}\"?",
+      "description": "Nodes of this branch that characters have learned will stop working.",
+      "confirm": "Remove"
+    },
+    "switchRace": {
+      "title": "Switch to another race?",
+      "description": "Unsaved tree changes will be lost.",
+      "confirm": "Switch"
+    }
+  },
+  "addBranch": {
+    "title": "Add branch",
+    "create": "Create new",
+    "namePlaceholder": "New branch name",
+    "color": "Color"
+  },
+  "picker": {
+    "place": "Place",
+    "search": "Search…",
+    "all": "all skills",
+    "listLabel": "Library skills",
+    "usedAt": "already in {where}"
+  },
+  "treeErrors": {
+    "duplicateSkill": "This skill is already placed elsewhere in the tree: {label}",
+    "unknownBranch": "This branch is not among the campaign's main skills: {label}",
+    "unknownSkill": "This skill is not in the campaign library: {label}",
+    "duplicateBranch": "The branch was added twice: {label}"
+  },
+  "reasons": {
+    "noPoints": "No free points — level up",
+    "alreadyLearned": "Already learned",
+    "notInTree": "This skill is not in the tree",
+    "branchOrder": "Learn the previous tier first",
+    "outerLimit": "A branch can have no more outer skills than it has tiers — raise the branch tier",
+    "needOuter": "Requires at least one outer-circle skill of this branch",
+    "needMiddleAndExpert": "Requires middle-circle skills and the Expert tier of this branch",
+    "racialLevel": "Available at a higher character level",
+    "expertLevel": "A branch can reach Expert from character level {level}",
+    "needInner": "Requires 3 inner-circle skills",
+    "notLearned": "This skill is not learned",
+    "hasDependents": "Other learned skills depend on this one — unlearn them first"
+  },
+  "placement": {
+    "branchLevel": "Branch tier · {tier, select, basic {Basics} advanced {Advanced} other {Expert}}",
+    "outer": "Outer circle",
+    "middle": "Middle circle",
+    "inner": "Inner circle",
+    "racial": "Racial · {tier, select, basic {Basics} advanced {Advanced} other {Expert}}",
+    "ultimate": "Ultimate",
+    "unplaced": "Not placed in a tree"
+  },
+  "progression": {
+    "title": "Progression · level {level}",
+    "points": "{count, plural, one {# free point} other {# free points}}",
+    "changed": "Progress changed — refreshed",
+    "noTree": "The DM has not set up a tree for the {race} race yet",
+    "branches": "Branches",
+    "orphans": "Stale nodes: {count} · Remove",
+    "reset": "Reset tree",
+    "resetConfirm": {
+      "title": "Reset the progression tree?",
+      "description": "All of the character's learned skills will be removed.",
+      "confirm": "Reset"
+    },
+    "newBranches": "New branches",
+    "newBranch": "New branch — one of {count} available"
+  },
+  "offers": {
+    "heading": "Learn (1 point)",
+    "listLabel": "Learn",
+    "more": "{count} more {count, plural, one {option} other {options}}"
+  },
+  "row": {
+    "racial": "Racial",
+    "racialGroup": "Racial · {race}",
+    "racialLevel": "level {level}+",
+    "branchLevelAria": "Branch tier: {branch} · {tier}",
+    "unknownSkill": "Unknown skill",
+    "emptySlot": "Empty slot"
+  },
+  "slot": {
+    "learn": "Learn: {label}",
+    "locked": "Locked: {label}"
+  },
+  "node": {
+    "learn": "Learn",
+    "unlearn": "Unlearn",
+    "unassigned": "The DM has not assigned a skill to this tier yet",
+    "tagBranchUp": "Branch tier up",
+    "tagRacial": "Racial · {tier}",
+    "tagSkill": "Skill · {circle}",
+    "branchTier": "{branch} → {tier}"
+  },
+  "levelUp": {
+    "dialog": "New level",
+    "title": "NEW LEVEL",
+    "canLearn": "You can learn a new skill",
+    "cta": "To progression",
+    "dismiss": "tap to close"
+  },
+  "transfer": {
+    "fileLabel": "Skill trees file",
+    "import": "Import JSON",
+    "export": "Export JSON",
+    "invalidJson": "Invalid JSON",
+    "notTreeFile": "The file does not look like a skill tree export",
+    "readFailed": "Could not read the file",
+    "raceMissing": "Race \"{race}\" is not in the campaign",
+    "missing": "Not found in the campaign: {list}",
+    "spellGroupDropped": "Spell school not found in the campaign, removed: {list}",
+    "overwrite": {
+      "title": "Replace existing trees?",
+      "description": "Race trees will be overwritten: {list}. This cannot be undone.",
+      "confirm": "Replace"
+    },
+    "saveFailed": "save failed",
+    "saved": "Trees saved: {list}",
+    "noneSaved": "No trees were saved"
+  }
+}

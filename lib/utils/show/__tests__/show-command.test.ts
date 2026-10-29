@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 
 import { applyShowCommand, refreshShowSlide, type ShowDeck, showNeedsLibrary, targetSlideTrack, withoutBattle } from "../show-command";
 
+import { API_ERRORS } from "@/lib/constants/api-errors";
 import type { AudioLibraryEntry } from "@/lib/utils/audio/audio-command";
 import type { BattleAudioState } from "@/types/audio";
 import type { ShowState, Slide } from "@/types/show";
@@ -97,11 +98,11 @@ describe("applyShowCommand", () => {
   });
 
   it("помилки: немає набору, порожній набір, невідомий слайд, next без показу", () => {
-    expect(applyShowCommand(null, { action: "open", deckId: "d1" }, { ...ctx, deck: null })).toEqual({ ok: false, message: "Набір слайдів не знайдено" });
-    expect(applyShowCommand(null, { action: "open", deckId: "d1" }, { ...ctx, deck: { ...deck, slides: [] } })).toEqual({ ok: false, message: "У наборі немає слайдів" });
-    expect(applyShowCommand(null, { action: "open", deckId: "d1", slideId: "slide-nope" }, ctx)).toEqual({ ok: false, message: "Слайд не знайдено" });
-    expect(applyShowCommand(null, { action: "next" }, ctx)).toEqual({ ok: false, message: "Показ не запущено" });
-    expect(applyShowCommand(showing(0), { action: "next" }, { ...ctx, deck: null })).toEqual({ ok: false, message: "Набір слайдів не знайдено" });
+    expect(applyShowCommand(null, { action: "open", deckId: "d1" }, { ...ctx, deck: null })).toEqual({ ok: false, message: API_ERRORS.DECK_NOT_FOUND });
+    expect(applyShowCommand(null, { action: "open", deckId: "d1" }, { ...ctx, deck: { ...deck, slides: [] } })).toEqual({ ok: false, message: API_ERRORS.SHOW_DECK_EMPTY });
+    expect(applyShowCommand(null, { action: "open", deckId: "d1", slideId: "slide-nope" }, ctx)).toEqual({ ok: false, message: API_ERRORS.SLIDE_NOT_FOUND });
+    expect(applyShowCommand(null, { action: "next" }, ctx)).toEqual({ ok: false, message: API_ERRORS.SHOW_NOT_RUNNING });
+    expect(applyShowCommand(showing(0), { action: "next" }, { ...ctx, deck: null })).toEqual({ ok: false, message: API_ERRORS.DECK_NOT_FOUND });
   });
 
   it("end: очищає показ, зупиняє музику, seq і audio.seq ростуть; повторний open після end має більший seq", () => {
@@ -123,7 +124,7 @@ describe("applyShowCommand", () => {
     const next = ok(applyShowCommand(null, { action: "audio", command: { action: "play", trackId: "t1" } }, ctx));
 
     expect(next).toMatchObject({ deckId: null, slide: null, seq: 1, audio: { trackId: "t1", playing: true } });
-    expect(applyShowCommand(null, { action: "audio", command: { action: "pause" } }, ctx)).toEqual({ ok: false, message: "Немає обраного треку" });
+    expect(applyShowCommand(null, { action: "audio", command: { action: "pause" } }, ctx)).toEqual({ ok: false, message: API_ERRORS.BATTLE_AUDIO_NO_TRACK });
   });
 });
 
@@ -209,7 +210,7 @@ describe("команда battle", () => {
 
   it("бій не active — помилка", () => {
     for (const status of ["prepared", "completed"]) {
-      expect(applyShowCommand(null, { action: "battle", battleId: "b1" }, { ...ctx, battle: battle(status) })).toEqual({ ok: false, message: "Бій ще не почався або вже завершений" });
+      expect(applyShowCommand(null, { action: "battle", battleId: "b1" }, { ...ctx, battle: battle(status) })).toEqual({ ok: false, message: API_ERRORS.SHOW_BATTLE_NOT_ACTIVE });
     }
   });
 

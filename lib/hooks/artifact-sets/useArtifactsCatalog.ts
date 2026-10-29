@@ -4,7 +4,7 @@ import { useMemo } from "react";
 
 import { useArtifactSetsList } from "./useArtifactSets";
 
-import { ARTIFACT_SLOT_OPTIONS } from "@/lib/constants/artifacts";
+import { ARTIFACT_SLOT_VALUES } from "@/lib/constants/artifacts";
 import { useArtifactsList } from "@/lib/hooks/artifacts";
 import { useSearch } from "@/lib/hooks/common";
 import { matchesQuery } from "@/lib/utils/common/text-search";
@@ -63,7 +63,7 @@ export function useArtifactsCatalog(campaignId: string) {
 
     const ungrouped = cards.filter((_, i) => !shown[i].setId);
 
-    const bySlot = ARTIFACT_SLOT_OPTIONS.map(({ value, label }) => ({ slot: value, label, artifacts: ungrouped.filter((a) => a.slot === value) })).filter((g) => g.artifacts.length > 0);
+    const bySlot = ARTIFACT_SLOT_VALUES.map((slot) => ({ slot, artifacts: ungrouped.filter((a) => a.slot === slot) })).filter((g) => g.artifacts.length > 0);
 
     return { sets: bySet, bySlot };
   }, [shown, sets, isActive, query]);

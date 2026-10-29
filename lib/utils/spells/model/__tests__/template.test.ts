@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { formToPayload, spellFormError, spellToForm } from "@/lib/utils/spells/model/form";
+import { formToPayload, spellFormIssue, spellToForm } from "@/lib/utils/spells/model/form";
 import { targetingLabel } from "@/lib/utils/spells/model/labels";
 import { SpellTargetingSchema } from "@/lib/utils/spells/model/schema";
 import type { Spell } from "@/types/spells";
@@ -45,11 +45,11 @@ describe("шаблон, дальність і зона заклинання", ()
 
     expect(form.targeting).toEqual(template);
     expect(formToPayload(form).targeting).toEqual(template);
-    expect(spellFormError(form)).toBeNull();
+    expect(spellFormIssue(form)).toBeNull();
   });
 
   it("форма з некоректним розміром має помилку", () => {
-    expect(spellFormError({ ...spellToForm(row), targeting: { ...template, size: 0 } })).not.toBeNull();
+    expect(spellFormIssue({ ...spellToForm(row), targeting: { ...template, size: 0 } })).not.toBeNull();
   });
 
   it("exact is accepted only for circles", () => {

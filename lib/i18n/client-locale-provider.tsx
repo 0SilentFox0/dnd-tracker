@@ -4,7 +4,7 @@ import { useSyncExternalStore } from "react";
 import { NextIntlClientProvider } from "next-intl";
 
 import { readLocaleCookie } from "./client-cookie";
-import { DEFAULT_LOCALE, type Locale,LOCALE_CHANGE_EVENT } from "./config";
+import { APP_TIME_ZONE, DEFAULT_LOCALE, type Locale,LOCALE_CHANGE_EVENT } from "./config";
 import { HtmlLang } from "./html-lang";
 import { resolveLocale } from "./resolve-locale";
 
@@ -25,7 +25,7 @@ export function ClientLocaleProvider({ messages, children }: { messages: Record<
   const locale = useSyncExternalStore(subscribe, readLocale, () => DEFAULT_LOCALE);
 
   return (
-    <NextIntlClientProvider locale={locale} messages={messages[locale]}>
+    <NextIntlClientProvider locale={locale} messages={messages[locale]} timeZone={APP_TIME_ZONE}>
       <HtmlLang locale={locale} />
       {children}
     </NextIntlClientProvider>

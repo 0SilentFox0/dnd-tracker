@@ -3,6 +3,7 @@ import { findParticipant, isActive, updateParticipant } from "@/lib/utils/abilit
 import { runAbilities } from "@/lib/utils/abilities/engine/core/run-abilities";
 import type { AbilityRunContext } from "@/lib/utils/abilities/engine/core/types";
 import { cooldownLeft, poolAffordable, withinCountLimits } from "@/lib/utils/abilities/engine/core/usage";
+import { conditionRequiresStill, evaluateCondition } from "@/lib/utils/abilities/registry/conditions";
 import { canActNow } from "@/lib/utils/battle/common/control";
 import { applyMainActionUsed } from "@/lib/utils/battle/participant";
 import type { BattleMutationContext, MutationResult } from "@/lib/utils/battle/pipeline/run-battle-mutation";
@@ -38,7 +39,7 @@ export const abilityRunContext = (ctx: BattleMutationContext): AbilityRunContext
 export async function runAbilityUse(ctx: BattleMutationContext, req: AbilityUseRequest, trigger: AbilityUseTrigger, deps: SummonDeps): Promise<MutationResult> {
   const participant = findParticipant(ctx.participants, req.participantId);
 
-  if (!participant) throw new BattleAccessError(404, "Учасника немає в бою");
+  if (!participant) throw new BattleAccessError(404, API_ERRORS.BATTLE_PARTICIPANT_NOT_IN_BATTLE);
 
   if (!canActNow(ctx, participant, ctx.participants[ctx.scene.turnIndex])) throw new BattleAccessError(403, API_ERRORS.FORBIDDEN);
 
@@ -65,6 +66,8 @@ export async function runAbilityUse(ctx: BattleMutationContext, req: AbilityUseR
   const wait = cooldownLeft(participant, ability, ctx.scene.round);
 
   if (wait > 0) throw new BattleRuleError("ability_limit", `Перезарядка: ще ${wait} р.`);
+
+  if (ability.condition && conditionRequiresStill(ability.condition) && !evaluateCondition(ability.condition, { owner: participant, event: null, participants: ctx.participants })) throw new BattleRuleError("action_rejected", API_ERRORS.BATTLE_ABILITY_CONDITION_UNMET);
 
   const targetCell = assertAbilityAim(ability, ctx.meta.map, participant, req.targetCell);
 

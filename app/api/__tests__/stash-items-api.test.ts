@@ -9,6 +9,7 @@ import { weaponStatsColumns } from "@/lib/utils/artifacts/weapon-stats";
 import { type ItemStats,itemStatsColumns } from "@/lib/utils/items/item-stats";
 import { parseRules } from "@/lib/utils/rules/schema";
 
+vi.mock("@/lib/server/notifications/notify", () => ({ notifyCharacterOwners: vi.fn().mockResolvedValue(0) }));
 vi.mock("@/lib/utils/api/api-auth", () => ({ requireCampaignAccess: vi.fn(), requireDM: vi.fn() }));
 vi.mock("@/lib/server/characters/battle-lock", () => ({ rejectIfInActiveBattle: vi.fn(async () => null) }));
 

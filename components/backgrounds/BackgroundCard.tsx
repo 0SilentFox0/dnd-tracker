@@ -1,15 +1,19 @@
 "use client";
 
 import Link from "next/link";
+import { useTranslations } from "next-intl";
 import { Edit, Trash2 } from "lucide-react";
 
 import { ActionsMenu } from "@/components/common/ActionsMenu";
 import { HudCard } from "@/components/hud/page";
 import { Badge } from "@/components/ui/badge";
-import { pluralUk } from "@/lib/utils/common/plural";
 import type { BackgroundData } from "@/types/backgrounds";
 
 export function BackgroundCard({ background, campaignId, onDelete }: { background: BackgroundData; campaignId: string; onDelete: (backgroundId: string) => void }) {
+  const t = useTranslations("backgrounds");
+
+  const tc = useTranslations("common");
+
   const href = `/campaigns/${campaignId}/dm/backgrounds/${background.id}`;
 
   const choices = background.choices.length;
@@ -24,13 +28,13 @@ export function BackgroundCard({ background, campaignId, onDelete }: { backgroun
           triggerSize="sm"
           triggerClassName="h-8 w-8 p-0"
           actions={[
-            { label: "Редагувати", icon: Edit, href },
-            { label: "Видалити", icon: Trash2, onSelect: () => onDelete(background.id), destructive: true },
+            { label: tc("actions.edit"), icon: Edit, href },
+            { label: tc("actions.delete"), icon: Trash2, onSelect: () => onDelete(background.id), destructive: true },
           ]}
         />
       </div>
       <Link href={href} className="flex flex-wrap gap-2">
-        {choices > 0 && <Badge variant="outline">{`${choices} ${pluralUk(choices, ["вибір", "вибори", "виборів"])}`}</Badge>}
+        {choices > 0 && <Badge variant="outline">{t("card.choices", { count: choices })}</Badge>}
       </Link>
     </HudCard>
   );

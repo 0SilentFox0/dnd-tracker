@@ -1,8 +1,10 @@
 import { API_ERRORS } from "@/lib/constants/api-errors";
 import { AttackType } from "@/lib/constants/battle";
 import { findParticipant, isAirborne } from "@/lib/utils/abilities/engine/core/participants";
+import type { CunningStrikeEffect } from "@/lib/utils/abilities/schema";
 import { hasTrait, isFiveE } from "@/lib/utils/battle/attack/ability";
 import { canAttackFromPool } from "@/lib/utils/battle/attack/attacks-left";
+import { cunningStrikeCost, cunningStrikeOffer } from "@/lib/utils/battle/attack/cunning-strike";
 import { getDisabledAttackKinds } from "@/lib/utils/battle/attack/disabled-attacks";
 import { attackKindOf } from "@/lib/utils/battle/common/attack-kind";
 import { type ActorScope, requireActor } from "@/lib/utils/battle/common/control";
@@ -27,6 +29,7 @@ export interface AttackRequest {
   damageRolls: number[];
   offHand?: boolean;
   useInspiration?: boolean;
+  cunningStrike?: CunningStrikeEffect[];
 }
 
 export function requestedTargetIds(data: Pick<AttackRequest, "targetId" | "targetIds">): string[] {
@@ -123,6 +126,12 @@ export function validateAttackRequest(scope: ActorScope, data: AttackRequest): V
   else if (attack.hand === "off") throw new BattleRuleError("action_rejected", API_ERRORS.OFF_HAND_NEEDS_ATTACK);
 
   assertAttackAllowed(attacker, attack, chosenTargets);
+
+  if (data.cunningStrike?.length) {
+    const cost = cunningStrikeCost(cunningStrikeOffer(attacker, 0), data.cunningStrike);
+
+    if (typeof cost === "string") throw new BattleRuleError("action_rejected", cost);
+  }
 
   return { attacker, attack, targetIds, chosenTargets, singleRoll, usePerTargetRolls };
 }

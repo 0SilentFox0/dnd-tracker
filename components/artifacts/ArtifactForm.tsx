@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { useTranslations } from "next-intl";
 
 import { ARTIFACT_FORM_TAB, type ArtifactFormTabId } from "./artifact-form-tabs";
 import { ArtifactArmorFields } from "./ArtifactArmorFields";
@@ -17,12 +18,13 @@ import { LabeledInput } from "@/components/ui/labeled-input";
 import { SelectField } from "@/components/ui/select-field";
 import { Textarea } from "@/components/ui/textarea";
 import {
-  ARTIFACT_RARITY_OPTIONS,
-  ARTIFACT_SLOT_OPTIONS,
+  ARTIFACT_RARITY_VALUES,
+  ARTIFACT_SLOT_VALUES,
   ArtifactSlot,
 } from "@/lib/constants/artifacts";
 import { useArtifactForm } from "@/lib/hooks/artifacts";
 import { useCampaignRules } from "@/lib/hooks/campaigns";
+import { useTranslator } from "@/lib/i18n/use-translator";
 import type { ConversionIssue } from "@/lib/utils/abilities/schema";
 import type { Ability } from "@/lib/utils/abilities/schema";
 import type { ArmorStats } from "@/lib/utils/artifacts/armor-stats";
@@ -59,6 +61,10 @@ export interface ArtifactFormProps {
 }
 
 export function ArtifactForm({ campaignId, artifactSets, initial, mode, labels, actions, cancelHref }: ArtifactFormProps) {
+  const t = useTranslations();
+
+  const ta = useTranslator("abilities");
+
   const router = useRouter();
 
   const editor = useArtifactForm({ initial, mode, ...actions });
@@ -86,74 +92,74 @@ export function ArtifactForm({ campaignId, artifactSets, initial, mode, labels, 
   const tabs: HudTab<ArtifactFormTabId>[] = [
     {
       id: ARTIFACT_FORM_TAB.basic,
-      label: "Основне",
+      label: t("common.tabs.basic"),
       content: (
         <div className="space-y-5">
           <div className="grid gap-4 md:grid-cols-2">
             <LabeledInput
               id="artifact-name"
-              label="Назва"
+              label={t("artifacts.form.name")}
               value={data.name}
               onChange={(e) => set("name", e.target.value)}
-              placeholder="Наприклад: Кільце Сар Ісси"
+              placeholder={t("artifacts.form.namePlaceholder")}
               required
             />
             <div className="space-y-2">
-              <Label htmlFor="artifact-rarity">Рідкість</Label>
+              <Label htmlFor="artifact-rarity">{t("artifacts.form.rarity")}</Label>
               <SelectField
                 id="artifact-rarity"
                 value={data.rarity}
                 onValueChange={(v) => set("rarity", v)}
-                placeholder="Виберіть рідкість"
-                options={ARTIFACT_RARITY_OPTIONS.map((opt) => ({
-                  value: opt.value,
-                  label: opt.label,
+                placeholder={t("artifacts.form.rarityPlaceholder")}
+                options={ARTIFACT_RARITY_VALUES.map((value) => ({
+                  value,
+                  label: t(`artifacts.rarity.${value}`),
                 }))}
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="artifact-slot">Слот</Label>
+              <Label htmlFor="artifact-slot">{t("artifacts.form.slot")}</Label>
               <SelectField
                 id="artifact-slot"
                 value={data.slot}
                 onValueChange={(v) => set("slot", v)}
-                placeholder="Виберіть слот"
-                options={ARTIFACT_SLOT_OPTIONS.map((opt) => ({
-                  value: opt.value,
-                  label: opt.label,
+                placeholder={t("artifacts.form.slotPlaceholder")}
+                options={ARTIFACT_SLOT_VALUES.map((value) => ({
+                  value,
+                  label: t(`artifacts.slots.${value}`),
                 }))}
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="artifact-set">Сет</Label>
+              <Label htmlFor="artifact-set">{t("artifacts.form.set")}</Label>
               <SelectField
                 id="artifact-set"
                 value={data.setId || ""}
                 onValueChange={(value) => set("setId", value || null)}
-                placeholder="Без сету"
+                placeholder={t("artifacts.form.noSet")}
                 options={artifactSets.map((set) => ({
                   value: set.id,
                   label: set.name,
                 }))}
                 allowNone
-                noneLabel="Без сету"
+                noneLabel={t("artifacts.form.noSet")}
               />
             </div>
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="artifact-description">Опис</Label>
+            <Label htmlFor="artifact-description">{t("artifacts.form.description")}</Label>
             <Textarea
               id="artifact-description"
               value={data.description}
               onChange={(e) => set("description", e.target.value)}
-              placeholder="Короткий опис артефакту"
+              placeholder={t("artifacts.form.descriptionPlaceholder")}
               rows={3}
             />
           </div>
 
           <div className="space-y-2">
-            <IconUrlField id="artifact-icon" label="Іконка (URL з інтернету)" value={data.icon} onChange={(v) => set("icon", v)} fallbackText={data.name} />
+            <IconUrlField id="artifact-icon" label={t("artifacts.form.icon")} value={data.icon} onChange={(v) => set("icon", v)} fallbackText={data.name} />
             <p className="text-xs text-muted-foreground">{labels.iconHint}</p>
           </div>
         </div>
@@ -163,22 +169,22 @@ export function ArtifactForm({ campaignId, artifactSets, initial, mode, labels, 
       ? [
           {
             id: ARTIFACT_FORM_TAB.weapon,
-            label: "Зброя",
+            label: t("artifacts.form.tabs.weapon"),
             content: <ArtifactWeaponFields value={data.weapon} onChange={(w) => set("weapon", w)} bonusOnly={!!data.item?.property} />,
           },
         ]
       : []),
     ...(hasArmor
-      ? [{ id: ARTIFACT_FORM_TAB.armor, label: "Броня", content: <ArtifactArmorFields value={data.armor ?? null} onChange={(a) => set("armor", a)} /> }]
+      ? [{ id: ARTIFACT_FORM_TAB.armor, label: t("artifacts.form.tabs.armor"), content: <ArtifactArmorFields value={data.armor ?? null} onChange={(a) => set("armor", a)} /> }]
       : []),
     {
       id: ARTIFACT_FORM_TAB.item,
-      label: "Предмет",
+      label: t("artifacts.form.tabs.item"),
       content: <ArtifactItemFields campaignId={campaignId} name={data.name} slot={data.slot} value={data.item} onChange={(item) => set("item", item)} itemsEnabled={itemsEnabled} />,
     },
     {
       id: ARTIFACT_FORM_TAB.abilities,
-      label: "Вміння",
+      label: t("common.tabs.abilities"),
       invalid: editor.abilities.errors > 0 || initial.abilityIssues.length > 0,
       content: (
         <AbilityListEditor
@@ -206,14 +212,14 @@ export function ArtifactForm({ campaignId, artifactSets, initial, mode, labels, 
           <>
             {actions.onDelete && (
               <Button type="button" variant="destructive" onClick={() => void editor.actions.remove()} disabled={editor.status.isBusy}>
-                Видалити
+                {t("common.actions.delete")}
               </Button>
             )}
             <Button type="button" variant="outline" onClick={() => router.push(cancelHref)} disabled={editor.status.isBusy}>
-              Скасувати
+              {t("common.actions.cancel")}
             </Button>
             <Button type="submit" disabled={editor.status.isBusy || !editor.abilities.valid}>
-              {editor.status.isSaving ? labels.saving : withAbilityErrors(labels.submit, editor.abilities.errors)}
+              {editor.status.isSaving ? labels.saving : withAbilityErrors(labels.submit, editor.abilities.errors, ta)}
             </Button>
           </>
         }

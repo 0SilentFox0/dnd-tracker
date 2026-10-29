@@ -1,6 +1,7 @@
 import type { ZodType } from "zod";
 
 import "server-only";
+import { API_ERRORS } from "@/lib/constants/api-errors";
 import { saveSkillTreeSchema } from "@/lib/schemas/skills";
 import type { AnyContentResource } from "@/lib/server/content/define-resource";
 import { ContentError } from "@/lib/server/content/errors";
@@ -88,7 +89,7 @@ function compute(input: { kind: SchemaTarget; op?: "create" | "update"; effectKi
     if (input.effectKind === undefined) return build("Ability", EFFECT_STOPS);
 
     if (!EFFECT_KINDS.includes(input.effectKind)) {
-      throw new ContentError(`Невідомий вид ефекту «${input.effectKind}». Допустимі: ${EFFECT_KINDS.join(", ")}`, 400);
+      throw new ContentError(API_ERRORS.ASSISTANT_EFFECT_KIND_UNKNOWN, 400, undefined, { kind: input.effectKind, kinds: EFFECT_KINDS.join(", ") });
     }
 
     return build(`Effect.${input.effectKind}`, {});

@@ -1,4 +1,5 @@
 import { type CharacterOperation } from "../operation-runner";
+import { arcaneRecoveryOperation } from "./arcane-recovery";
 import { choicesOperation } from "./choices";
 import { createOperation } from "./create";
 import { deleteOperation } from "./delete";
@@ -47,6 +48,7 @@ export const CHARACTER_OPERATIONS: Record<string, CharacterOperation> = {
   "stash.apply": erased(stashUpdateOperation),
   transfer: erased(transferOperation),
   "hit-dice": erased(hitDiceOperation),
+  "arcane-recovery": erased(arcaneRecoveryOperation),
   inspiration: erased(inspirationOperation),
   rest: erased(restOperation),
   experience: erased(experienceOperation),

@@ -11,7 +11,7 @@ interface EquipSlotChange {
 export function useEquipArtifact(campaignId: string, characterId?: string) {
   return useCrudMutation({
     mutationFn: (equipSlot: EquipSlotChange) => {
-      if (!characterId) throw new Error("Немає персонажа");
+      if (!characterId) throw new Error("Character is required");
 
       return updateInventory(campaignId, characterId, { equipSlot });
     },

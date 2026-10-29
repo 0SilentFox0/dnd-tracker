@@ -23,7 +23,7 @@ describe("ResponsiveDialog", () => {
     render(<ResponsiveDialog {...base}>вміст</ResponsiveDialog>);
 
     expect(screen.getByRole("dialog")).toHaveAccessibleName("Додати вміння");
-    expect(screen.getByRole("button", { name: "Закрити" })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "common.ui.close" })).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "Зберегти" })).toBeInTheDocument();
     expect(document.querySelector("[data-slot=sheet]")).toBeNull();
   });

@@ -19,6 +19,6 @@ describe("SkillBasicInfo", () => {
     render(<SkillBasicInfo form={{ data, set: vi.fn() }} />);
     expect(screen.getByDisplayValue("Назва скіла")).toBeInTheDocument();
     expect(screen.getByDisplayValue("Опис")).toBeInTheDocument();
-    expect(screen.getByLabelText(/іконка/i)).toBeInTheDocument();
+    expect(screen.getByLabelText("skills.form.basic.icon")).toBeInTheDocument();
   });
 });

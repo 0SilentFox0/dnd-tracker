@@ -8,7 +8,8 @@ import { castHitSpell } from "./hit-spell";
 
 import { findFlags } from "@/lib/utils/abilities/engine/core/collect-modifiers";
 import { isActive } from "@/lib/utils/abilities/engine/core/participants";
-import type { StaticEffect } from "@/lib/utils/abilities/schema";
+import type { CunningStrikeEffect, StaticEffect } from "@/lib/utils/abilities/schema";
+import { applyCunningStrikeEffects, cunningStrikeCost, cunningStrikeOffer } from "@/lib/utils/battle/attack/cunning-strike";
 import { eventRollMode } from "@/lib/utils/battle/attack/roll";
 import { attackSourceOf } from "@/lib/utils/battle/attack/source";
 import { type ActionFlow, applyFlowDamage, fire, getP, put, settleDowned } from "@/lib/utils/battle/common/action-flow";
@@ -34,6 +35,7 @@ export interface ResolveHitParams {
   obstacle?: boolean;
   hitSpells?: ReadonlyMap<string, CastableSpell>;
   battleId: string;
+  cunningStrike?: CunningStrikeEffect[];
 }
 
 export function resolveHit(p: ResolveHitParams): { hitDamage: ComputeHitDamageResult; vampirismHeal: number } {
@@ -81,7 +83,13 @@ export function resolveHit(p: ResolveHitParams): { hitDamage: ComputeHitDamageRe
 
   const messagesBeforeHit = flow.messages.length;
 
-  fire(flow, {
+  const offer = p.cunningStrike?.length ? cunningStrikeOffer(getP(flow, attackerId), p.currentRound) : null;
+
+  const cunningCost = p.cunningStrike?.length ? cunningStrikeCost(offer, p.cunningStrike) : 0;
+
+  const forgo = typeof cunningCost === "number" ? cunningCost : 0;
+
+  const { fired } = fire(flow, {
     type: "hit",
     actorId: attackerId,
     targetId,
@@ -89,9 +97,15 @@ export function resolveHit(p: ResolveHitParams): { hitDamage: ComputeHitDamageRe
     ...attackSourceOf(attack),
     damage: Math.min(hitDamage.resistanceResult.finalDamage, hitDamage.totalFinalDamage),
     ...eventRollMode(p.attackRoll),
+    ...(forgo > 0 && { cunningDice: forgo }),
   });
 
   applyHitRiders(flow, { attackerId, targetId, attack, crit: p.attackRoll.isCritical });
+
+  if (p.cunningStrike?.length && offer && forgo > 0 && fired.includes(offer.sneakKey)) {
+    applyCunningStrikeEffects(flow, attackerId, targetId, p.cunningStrike);
+    settleDowned(flow, targetId, attackerId);
+  }
 
   const abilityDamage = Math.max(0, hpBeforeHit - getP(flow, targetId).combatStats.currentHp);
 

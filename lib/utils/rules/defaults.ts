@@ -5,7 +5,8 @@ export const DEFAULT_RULES: Ruleset = {
   criticals: { critOn: 20, fumbleOn: 1, effects: true, doubleDice: false, disabledSuccess: [], disabledFail: [] },
   formulas: { saveDcBase: 8, proficiencyBase: 2, proficiencyEvery: 4 },
   heroScaling: { meleeDiceByLevel: null, rangedDiceByLevel: null, hpBaseLevels: 3, hpConCoefficient: 1.5 },
-  initiative: { heroMin: 10, heroMax: 16 },
+  initiative: { heroMin: 10, heroMax: 16, mode: "static" },
+  // eslint-disable-next-line no-restricted-syntax -- default attack names stored in campaign rules
   defaultAttacks: { meleeName: "Звичайний удар", rangedName: "Звичайний постріл" },
   saves: { proficiency: false },
   deathSaves: { enabled: false, unitsDieAtZero: true },

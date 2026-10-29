@@ -24,11 +24,11 @@ describe("OnboardingHint", () => {
     vi.mocked(api.getOnboardingFlags).mockResolvedValue({ flags: {}, audiences: ["dm"] });
     renderIt();
 
-    expect(await screen.findByText(HINTS["dm.races"].title)).toBeTruthy();
-    expect(screen.getByRole("link", { name: "Детальніше" }).getAttribute("href")).toBe(`/help/${HINTS["dm.races"].helpSlug}`);
-    fireEvent.click(screen.getByRole("button", { name: "Закрити підказку" }));
+    expect(await screen.findByText("onboarding.hints.dm.races.title")).toBeTruthy();
+    expect(screen.getByRole("link", { name: "onboarding.ui.learnMore" }).getAttribute("href")).toBe(`/help/${HINTS["dm.races"].helpSlug}`);
+    fireEvent.click(screen.getByRole("button", { name: "onboarding.ui.closeHint" }));
 
-    await waitFor(() => expect(screen.queryByText(HINTS["dm.races"].title)).toBeNull());
+    await waitFor(() => expect(screen.queryByText("onboarding.hints.dm.races.title")).toBeNull());
   });
 
   it("у серверному HTML підказки немає, навіть коли прапорці вже в кеші клієнта", () => {

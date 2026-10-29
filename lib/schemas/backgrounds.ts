@@ -5,7 +5,7 @@ import { choicesSchemaFor } from "@/lib/schemas/choices";
 
 const fields = {
   name: z.string().trim().min(1).max(100),
-  icon: z.string().max(2000).refine((v) => !v.startsWith("data:"), "Іконка — лише посилання").nullable(),
+  icon: z.string().max(2000).refine((v) => !v.startsWith("data:"), "backgrounds.validation.iconUrl").nullable(),
   description: z.string().max(8000).nullable(),
   choices: choicesSchemaFor("background"),
   skillProficiencies: z.array(z.enum(DND_SKILLS)).max(DND_SKILLS.length),

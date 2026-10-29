@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import { Plus, Trash2 } from "lucide-react";
 
 import { OptionSpellsEditor } from "./OptionSpellsEditor";
@@ -27,6 +28,8 @@ interface ChoiceOptionsEditorProps {
 }
 
 export function ChoiceOptionsEditor({ campaignId, owner, value, onChange, classColumns, errors }: ChoiceOptionsEditorProps) {
+  const t = useTranslations("choices");
+
   const { keys, removeAt } = useRowKeys(value.length);
 
   const set = (i: number, patch: Partial<ChoiceOption>) => onChange(value.map((o, k) => (k === i ? { ...o, ...patch } : o)));
@@ -48,18 +51,18 @@ export function ChoiceOptionsEditor({ campaignId, owner, value, onChange, classC
           <fieldset key={keys[i]} className="space-y-2 rounded-md border border-hud-line/40 p-3">
             <div className="flex items-end gap-2">
               <div className="flex-1 space-y-1">
-                <Label htmlFor={`${optionKey}-name`}>Назва опції</Label>
+                <Label htmlFor={`${optionKey}-name`}>{t("options.name")}</Label>
                 <Input id={`${optionKey}-name`} value={option.name} onChange={(e) => rename(i, e.target.value)} />
               </div>
               <div className="w-40 space-y-1">
-                <Label htmlFor={`${optionKey}-id`}>Id</Label>
+                <Label htmlFor={`${optionKey}-id`}>{t("options.id")}</Label>
                 <Input id={`${optionKey}-id`} value={option.id} onChange={(e) => set(i, { id: e.target.value })} />
               </div>
               <Button
                 type="button"
                 variant="ghost"
                 size="sm"
-                aria-label={`Видалити опцію ${option.name}`}
+                aria-label={t("options.remove", { name: option.name })}
                 onClick={() => {
                   errors.drop(optionKey);
                   removeAt(i);
@@ -69,11 +72,11 @@ export function ChoiceOptionsEditor({ campaignId, owner, value, onChange, classC
                 <Trash2 className="h-4 w-4" />
               </Button>
             </div>
-            <Textarea aria-label="Опис опції" rows={2} value={option.description ?? ""} onChange={(e) => set(i, { description: e.target.value || undefined })} />
+            <Textarea aria-label={t("options.description")} rows={2} value={option.description ?? ""} onChange={(e) => set(i, { description: e.target.value || undefined })} />
             <div className="flex flex-wrap items-center gap-3 text-sm">
               <label className="flex items-center gap-2">
-                Мін. рівень
-                <Input type="number" min={1} max={MAX_CLASS_LEVEL} className="w-20" aria-label="Мінімальний рівень опції" value={option.minLevel ?? ""} onChange={(e) => set(i, { minLevel: e.target.value ? Number(e.target.value) : undefined })} />
+                {t("options.minLevel")}
+                <Input type="number" min={1} max={MAX_CLASS_LEVEL} className="w-20" aria-label={t("options.minLevelAria")} value={option.minLevel ?? ""} onChange={(e) => set(i, { minLevel: e.target.value ? Number(e.target.value) : undefined })} />
               </label>
               {value
                 .filter((o) => o.id !== option.id)
@@ -87,7 +90,7 @@ export function ChoiceOptionsEditor({ campaignId, owner, value, onChange, classC
                         set(i, { requires: next.length > 0 ? next : undefined });
                       }}
                     />
-                    потребує «{o.name}»
+                    {t("options.requires", { name: o.name })}
                   </label>
                 ))}
             </div>
@@ -98,7 +101,7 @@ export function ChoiceOptionsEditor({ campaignId, owner, value, onChange, classC
       })}
       <Button type="button" variant="outline" size="sm" onClick={() => onChange([...value, { id: choiceSlug("option", value.map((o) => o.id)), name: "", abilities: [] }])}>
         <Plus className="h-4 w-4" />
-        Додати опцію
+        {t("options.add")}
       </Button>
     </div>
   );

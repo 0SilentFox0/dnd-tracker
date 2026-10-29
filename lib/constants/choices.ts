@@ -2,15 +2,6 @@ export const CHOICE_KINDS = ["option", "feat", "skill", "expertise", "abilitySco
 
 export const FEAT_TYPES = ["origin", "general", "fightingStyle", "epicBoon"] as const;
 
-export const CHOICE_KIND_LABELS: Record<(typeof CHOICE_KINDS)[number], string> = {
-  option: "Опції",
-  feat: "Риса",
-  skill: "Навички",
-  expertise: "Експертиза",
-  abilityScore: "Покращення характеристик",
-  spell: "Заклинання",
-};
-
 export const FEAT_TYPE_LABELS: Record<(typeof FEAT_TYPES)[number], string> = {
   origin: "Походження",
   general: "Загальна",

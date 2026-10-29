@@ -1,16 +1,5 @@
 import { z } from "zod";
-import uk from "zod/v4/locales/uk.js";
 
-const base = uk().localeError;
+import { zodErrorMap } from "@/lib/i18n/zod-errors";
 
-z.config({
-  localeError: (issue) => {
-    if (issue.origin === "string" && issue.code === "too_small") {
-      return Number(issue.minimum) <= 1 ? "Обов'язкове поле" : `Щонайменше ${issue.minimum} символів`;
-    }
-
-    if (issue.origin === "string" && issue.code === "too_big") return `Не більше ${issue.maximum} символів`;
-
-    return base(issue);
-  },
-});
+z.config({ customError: zodErrorMap });

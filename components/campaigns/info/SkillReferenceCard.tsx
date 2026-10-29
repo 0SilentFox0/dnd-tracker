@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import { Loader2, Sparkles } from "lucide-react";
 
 import { EntityIcon } from "@/components/common/EntityIcon";
@@ -12,6 +13,7 @@ import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { useUpdateSkillAppearance } from "@/lib/hooks/skills";
+import { useTranslator } from "@/lib/i18n/use-translator";
 import {
   formatMechanicsSkill,
   getShortSkillSummary,
@@ -35,7 +37,11 @@ export function SkillReferenceCard({
     skill.appearanceDescription ?? "",
   );
 
-  const shortSummary = getShortSkillSummary(skill);
+  const t = useTranslations("dashboard.reference.card");
+
+  const translate = useTranslator();
+
+  const shortSummary = getShortSkillSummary(skill, translate);
 
   return (
     <AccordionItem
@@ -68,27 +74,27 @@ export function SkillReferenceCard({
           {skill.description && (
             <div>
               <Label className="hud-sc text-xs text-hud-gold">
-                Опис / механіка
+                {t("skillDescription")}
               </Label>
               <p className="text-sm mt-0.5">{skill.description}</p>
             </div>
           )}
           <div>
             <Label className="hud-sc text-xs text-hud-gold">
-              Як діє (бонуси, ефекти, тригери)
+              {t("skillHow")}
             </Label>
-            <p className="text-sm mt-0.5">{formatMechanicsSkill(skill)}</p>
+            <p className="text-sm mt-0.5">{formatMechanicsSkill(skill, translate)}</p>
           </div>
           <div>
             <Label className="hud-sc text-xs text-hud-gold">
-              Опис вигляду (як виглядає в грі)
+              {t("appearanceSkill")}
             </Label>
             {isDM ? (
               <div className="mt-1 space-y-2">
                 <Textarea
                   value={appearance}
                   onChange={(e) => setAppearance(e.target.value)}
-                  placeholder="Наприклад: яскрава вогняна сфера, що летить до цілі..."
+                  placeholder={t("appearancePlaceholderSkill")}
                   rows={3}
                   className="text-sm min-h-[80px]"
                 />
@@ -101,7 +107,7 @@ export function SkillReferenceCard({
                   {saving ? (
                     <Loader2 className="h-4 w-4 animate-spin" />
                   ) : (
-                    "Зберегти опис вигляду"
+                    t("saveAppearance")
                   )}
                 </Button>
               </div>

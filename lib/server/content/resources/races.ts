@@ -4,7 +4,7 @@ import type { z } from "zod";
 import "server-only";
 import { getCachedRaces } from "@/lib/cache/reference-data";
 import { ReferenceKind } from "@/lib/cache/tags";
-import { API_ERRORS, raceNameTakenMessage } from "@/lib/constants/api-errors";
+import { API_ERRORS } from "@/lib/constants/api-errors";
 import { raceColorAt } from "@/lib/constants/race-colors";
 import { prisma } from "@/lib/db";
 import { createRaceSchema, updateRaceSchema } from "@/lib/schemas";
@@ -17,7 +17,7 @@ import { abilitiesJson, withAbilityIssues } from "@/lib/utils/abilities/read";
 import { choiceSpellIds, readChoices } from "@/lib/utils/characters/choices/read";
 
 async function assertNameFree(campaignId: string, name: string, exceptId?: string) {
-  if (await raceNameTaken(campaignId, name, exceptId)) throw new ContentError(raceNameTakenMessage(name), 409);
+  if (await raceNameTaken(campaignId, name, exceptId)) throw new ContentError(API_ERRORS.RACE_NAME_TAKEN, 409, undefined, { name });
 }
 
 export const racesResource = defineResource<RaceRow, z.infer<typeof createRaceSchema>, z.infer<typeof updateRaceSchema>>({

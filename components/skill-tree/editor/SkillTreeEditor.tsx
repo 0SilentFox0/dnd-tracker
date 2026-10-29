@@ -1,6 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
+import { useTranslations } from "next-intl";
 
 import { AddBranchSheet } from "./AddBranchSheet";
 import { EditorTable } from "./EditorTable";
@@ -15,20 +16,28 @@ import { SelectItem } from "@/components/ui/select";
 import { SelectField } from "@/components/ui/select-field";
 import { useConfirm } from "@/lib/hooks/common";
 import { useSkillTreeEditor } from "@/lib/hooks/skills";
+import type { Translator } from "@/lib/i18n/translator";
+import { useTranslator } from "@/lib/i18n/use-translator";
 import type { CellRef } from "@/lib/utils/skills/progression";
-import { BRANCH_LEVEL_LABEL, cellSkillId, TREE_ERROR_TEXT } from "@/lib/utils/skills/progression";
+import { cellSkillId } from "@/lib/utils/skills/progression";
 
-const refLabel = (ref: CellRef, branchName: (id: string) => string) => {
+const refLabel = (ref: CellRef, branchName: (id: string) => string, t: Translator) => {
   switch (ref.kind) {
-    case "ultimate": return "Ультимейт";
-    case "racial": return `Раса · ${BRANCH_LEVEL_LABEL[ref.level]}`;
-    case "level": return `${branchName(ref.branchId)} · ${BRANCH_LEVEL_LABEL[ref.level]}`;
-    case "slot": return `${branchName(ref.branchId)} · ${ref.circle === "outer" ? "З" : ref.circle === "middle" ? "С" : "В"}${ref.index + 1}`;
+    case "ultimate": return t("cells.ultimate");
+    case "racial": return t("cells.racial", { tier: t(`tiers.${ref.level}`) });
+    case "level": return t("cells.level", { branch: branchName(ref.branchId), tier: t(`tiers.${ref.level}`) });
+    case "slot": return t("cells.slot", { branch: branchName(ref.branchId), circle: t(`circleShort.${ref.circle}`), n: ref.index + 1 });
   }
 };
 
 export function SkillTreeEditor({ campaignId }: { campaignId: string }) {
   const { state, view, actions } = useSkillTreeEditor(campaignId);
+
+  const t = useTranslations("skillTree");
+
+  const tr = useTranslator("skillTree");
+
+  const tc = useTranslations("common.actions");
 
   const confirm = useConfirm();
 
@@ -44,25 +53,25 @@ export function SkillTreeEditor({ campaignId }: { campaignId: string }) {
 
   if (state.isLoading) return <LoadingState />;
 
-  if (!raw || !tree) return <EmptyState title="Додайте расу, щоб налаштувати дерево" />;
+  if (!raw || !tree) return <EmptyState title={t("editor.addRace")} />;
 
   const branchName = (id: string) => tree.branches.find((b) => b.id === id)?.name ?? id;
 
   return (
     <div className={`${HUD_SURFACE} skill-tree-editor rounded-xl p-4`}>
       <div className="mb-3 flex flex-wrap items-center gap-3">
-        <span className="hud-sc text-xl text-hud-ink">Дерево прокачки</span>
+        <span className="hud-sc text-xl text-hud-ink">{t("editor.title")}</span>
         <SelectField value={state.race ?? ""} onValueChange={(v) => void actions.setRace(v)} triggerClassName="w-40">
           {state.races.map((r) => <SelectItem key={r.id} value={r.name}>{r.name}</SelectItem>)}
         </SelectField>
-        {state.dirty && <span className="text-xs italic text-hud-gold">Незбережені зміни</span>}
+        {state.dirty && <span className="text-xs italic text-hud-gold">{t("editor.unsaved")}</span>}
         <span className="flex-1" />
-        <Button variant="outline" onClick={actions.cancel} disabled={!state.dirty}>Скасувати</Button>
-        <Button onClick={() => void actions.save()} disabled={!state.dirty || state.isSaving || view.errors.length > 0}>Зберегти</Button>
+        <Button variant="outline" onClick={actions.cancel} disabled={!state.dirty}>{tc("cancel")}</Button>
+        <Button onClick={() => void actions.save()} disabled={!state.dirty || state.isSaving || view.errors.length > 0}>{tc("save")}</Button>
       </div>
       {view.errors.length > 0 && (
         <ul className="mb-3 text-sm text-hud-danger">
-          {view.errors.map((e) => <li key={`${e.code}:${e.ref}`}>{TREE_ERROR_TEXT[e.code]}: {e.label ?? skillsById.get(e.ref)?.name ?? e.ref}</li>)}
+          {view.errors.map((e) => <li key={`${e.code}:${e.ref}`}>{t(`treeErrors.${e.code}`, { label: e.label ?? skillsById.get(e.ref)?.name ?? e.ref })}</li>)}
         </ul>
       )}
       <EditorTable
@@ -74,7 +83,7 @@ export function SkillTreeEditor({ campaignId }: { campaignId: string }) {
           onCell: (ref, label) => setPicking({ ref, label }),
           onMove: actions.moveBranch,
           onRemove: async (branchId, name) => {
-            if (await confirm({ title: `Прибрати гілку «${name}»?`, description: "Вивчені вузли цієї гілки в персонажів перестануть діяти.", confirmLabel: "Прибрати", destructive: true })) actions.removeBranch(branchId);
+            if (await confirm({ title: t("editor.removeConfirm.title", { name }), description: t("editor.removeConfirm.description"), confirmLabel: t("editor.removeConfirm.confirm"), destructive: true })) actions.removeBranch(branchId);
           },
           onAddBranch: () => setAdding(true),
         }}
@@ -87,7 +96,7 @@ export function SkillTreeEditor({ campaignId }: { campaignId: string }) {
         usedAt={(id) => {
           const at = view.locations.get(id)?.[0];
 
-          return at ? refLabel(at, branchName) : null;
+          return at ? refLabel(at, branchName, tr) : null;
         }}
         onPick={(skillId) => {
           if (picking) actions.setCell(picking.ref, skillId);

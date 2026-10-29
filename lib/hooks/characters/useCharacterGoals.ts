@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import { useQueryClient } from "@tanstack/react-query";
 
 import { characterKeys } from "./keys";
@@ -11,13 +12,15 @@ import type { GoalInput } from "@/lib/schemas/character-goals";
 import type { CharacterGoal, CharacterSheet } from "@/types/characters";
 
 export function useCharacterGoals(campaignId: string, characterId: string) {
+  const t = useTranslations("characterProfile.goals");
+
   const queryClient = useQueryClient();
 
   const key = characterKeys.sheet(campaignId, characterId);
 
   const mutation = useCrudMutation({
     mutationFn: ({ goals, seen }: { goals: GoalInput[]; seen?: string[] }) => putCharacterGoals(campaignId, characterId, goals, seen),
-    errorText: "Не вдалося зберегти цілі",
+    errorText: t("saveFailed"),
     onMutate: async ({ goals }) => {
       await queryClient.cancelQueries({ queryKey: key });
 

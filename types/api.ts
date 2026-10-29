@@ -5,6 +5,7 @@ import type { GroupedSkillPayload } from "./hooks";
 import { BattleStatus, type CombatStatusType, type ParticipantSourceTypeValue } from "@/lib/constants/battle";
 import { type CampaignRoleValue } from "@/lib/constants/campaigns";
 import type { mazeActionSchema, mazeMarkSchema } from "@/lib/schemas/battles";
+import type { CunningStrikeEffect } from "@/lib/utils/abilities/schema";
 import type { PendingCritChoice } from "@/lib/utils/battle/crit-choice/types";
 import type { Ruleset } from "@/lib/utils/rules";
 import type { BattleAudioState } from "@/types/audio";
@@ -164,6 +165,8 @@ export interface AttackData {
   attackId?: string;
   offHand?: boolean;
   useInspiration?: boolean;
+  /** Підступний удар (Rogue): ефекти замість кубиків Прихованої атаки */
+  cunningStrike?: CunningStrikeEffect[];
 }
 
 export interface MoraleCheckData {

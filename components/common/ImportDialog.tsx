@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useTranslations } from "next-intl";
 import { AlertCircle, CheckCircle2,FileText, Upload } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
@@ -21,15 +22,17 @@ interface ImportDialogProps {
 }
 
 export function ImportDialog({
-  triggerLabel = "Імпортувати",
-  title = "Імпорт",
-  description = "Завантажте CSV або JSON файл для масового імпорту",
+  triggerLabel,
+  title,
+  description,
   importHook,
   accept = ".csv,.json",
   hideTrigger = false,
   onOpenChange,
   open,
 }: ImportDialogProps) {
+  const t = useTranslations("common.import");
+
   const { file, status, actions } = importHook;
 
   const { error, success, isLoading } = status;
@@ -64,19 +67,19 @@ export function ImportDialog({
       {!hideTrigger && (
         <Button onClick={() => handleDialogOpenChange(true)} variant="outline">
           <Upload className="h-4 w-4 mr-2" />
-          {triggerLabel}
+          {triggerLabel ?? t("triggerLabel")}
         </Button>
       )}
     <ResponsiveDialog
       hud
       open={isOpen}
       onOpenChange={handleDialogOpenChange}
-      title={title}
-      description={description}
+      title={title ?? t("title")}
+      description={description ?? t("description")}
     >
         <div className="space-y-4">
           <div className="space-y-2">
-            <Label htmlFor="file-upload">Файл</Label>
+            <Label htmlFor="file-upload">{t("fileLabel")}</Label>
             <div className="flex items-center gap-2">
               <Input
                 id="file-upload"
@@ -107,8 +110,8 @@ export function ImportDialog({
               <div className="flex items-center gap-2 p-3 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-md text-sm text-green-700 dark:text-green-400">
                 <CheckCircle2 className="h-4 w-4 shrink-0" />
                 <span>
-                  Успішно імпортовано {success.imported} з {success.total} записів
-                  {success.skipped ? `, пропущено ${success.skipped}` : ""}
+                  {t("result", { imported: success.imported, total: success.total })}
+                  {success.skipped ? t("skipped", { skipped: success.skipped }) : ""}
                 </span>
               </div>
               {success.warnings?.map((warning) => (
@@ -126,10 +129,10 @@ export function ImportDialog({
               onClick={() => handleDialogOpenChange(false)}
               disabled={isLoading}
             >
-              Скасувати
+              {t("cancel")}
             </Button>
             <Button onClick={handleImportClick} disabled={isLoading || !file}>
-              {isLoading ? "Імпорт..." : "Імпортувати"}
+              {isLoading ? t("submitting") : t("submit")}
             </Button>
           </div>
         </div>

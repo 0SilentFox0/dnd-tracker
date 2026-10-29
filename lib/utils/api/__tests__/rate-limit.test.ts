@@ -2,6 +2,8 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import { checkRateLimit, rateLimitResponse } from "../rate-limit";
 
+import { API_ERRORS } from "@/lib/constants/api-errors";
+
 const limitMock = vi.fn();
 
 vi.mock("@upstash/ratelimit", () => {
@@ -166,7 +168,8 @@ describe("rateLimitResponse", () => {
 
     const body = await res.json();
 
-    expect(body.error).toBe("Забагато запитів, спробуйте трохи згодом");
+    expect(body.error).toBe(API_ERRORS.TOO_MANY_REQUESTS);
+    expect(body.errorKey).toBe(API_ERRORS.TOO_MANY_REQUESTS);
     expect(body.retryAfterSeconds).toBe(7);
   });
 });

@@ -5,7 +5,7 @@ import type { z } from "zod";
 import { requireCharacterRecord } from "../access";
 import { characterHandler, defineCharacterOperation, errorStatusMessage, gateOptions, orThrow } from "../operation-runner";
 
-import { API_ERRORS, maxLevelMessage } from "@/lib/constants/api-errors";
+import { API_ERRORS } from "@/lib/constants/api-errors";
 import { CharacterStatus } from "@/lib/constants/characters";
 import { prisma } from "@/lib/db";
 import { applyClasses } from "@/lib/server/characters/apply-classes";
@@ -17,6 +17,7 @@ import { resolveCharacterOwner } from "@/lib/server/characters/core/resolve-char
 import { updateCharacterSchema } from "@/lib/server/characters/core/update-character-schema";
 import { lockCharacters } from "@/lib/server/characters/lock";
 import { ContentError } from "@/lib/server/content/errors";
+import { notifyCharacterOwners } from "@/lib/server/notifications/notify";
 import { PUBLIC_USER_SELECT } from "@/lib/server/users/db-user";
 import { resolveAvatarForPersistence } from "@/lib/supabase/avatar-storage";
 import type { Actor } from "@/lib/utils/api/actor";
@@ -25,6 +26,7 @@ import { mergeBackground } from "@/lib/utils/backgrounds/selection";
 import { choicesStateOf } from "@/lib/utils/characters/choices/picks";
 import { keepStoredPicks } from "@/lib/utils/characters/choices/picks";
 import { seenLevelOnLevelChange } from "@/lib/utils/characters/seen-level";
+import { levelNotificationEvents, spellNotificationEvents } from "@/lib/utils/notifications/events";
 import type { SpellSlots } from "@/lib/utils/spells/spell-slots";
 import type { SpellSlotProgression } from "@/types/races";
 
@@ -40,7 +42,7 @@ async function patchCore({ access, character }: Gate, parsed: z.infer<typeof upd
   if (parsed.initiative !== undefined) {
     const { heroMin, heroMax } = campaign.rules.initiative;
 
-    if (parsed.initiative < heroMin || parsed.initiative > heroMax) throw new ContentError(`${API_ERRORS.INITIATIVE_OUT_OF_RANGE} (${heroMin}–${heroMax})`, 400);
+    if (parsed.initiative < heroMin || parsed.initiative > heroMax) throw new ContentError(API_ERRORS.INITIATIVE_OUT_OF_RANGE_DETAIL, 400, undefined, { min: heroMin, max: heroMax });
   }
 
   const data = isDM
@@ -71,7 +73,7 @@ async function patchCore({ access, character }: Gate, parsed: z.infer<typeof upd
       })
     : null;
 
-  if (applied && !applied.ok) throw new ContentError(applied.error, applied.status);
+  if (applied && !applied.ok) throw new ContentError(applied.error, applied.status, undefined, applied.params);
 
   const fromClasses = applied?.data ?? null;
 
@@ -84,7 +86,7 @@ async function patchCore({ access, character }: Gate, parsed: z.infer<typeof upd
   const finalLevel = fromClasses?.level ?? resolveFinalLevel(character, data);
 
   if (finalLevel > character.level && finalLevel > campaign.maxLevel) {
-    throw new ContentError(maxLevelMessage(campaign.maxLevel), 422);
+    throw new ContentError(API_ERRORS.MAX_LEVEL_EXCEEDED, 422, undefined, { max: campaign.maxLevel });
   }
 
   const needsRace = !fromClasses && (finalLevel !== character.level || clearingClasses);
@@ -161,6 +163,15 @@ async function patchCore({ access, character }: Gate, parsed: z.infer<typeof upd
         return writeUpdate(tx, classes, resolved?.ok ? resolved.fields : undefined);
       })
     : await writeUpdate(prisma, classesInput);
+
+  await notifyCharacterOwners({
+    campaignId,
+    actorUserId: userId,
+    events: [
+      ...levelNotificationEvents(characterId, character.level, updatedCharacter.level),
+      ...spellNotificationEvents(characterId, character.knownSpells, data.knownSpells),
+    ],
+  });
 
   return updatedCharacter;
 }

@@ -73,7 +73,7 @@ describe("source-sync API", () => {
     const res = await post({ apply: [REF] });
 
     expect(res.status).toBe(409);
-    expect(await res.json()).toEqual({ error: "Джерело змінилося" });
+    expect(await res.json()).toMatchObject({ error: "Джерело змінилося" });
   });
 
   it("токен без content:write на POST: 403", async () => {

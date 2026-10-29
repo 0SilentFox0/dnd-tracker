@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { isChapterOpen, openChapters, playedLookup, revealTargets } from "@/lib/utils/scenario/reveal";
+import { isChapterOpen, newlyPlayedSections, openChapters, playedLookup, revealTargets } from "@/lib/utils/scenario/reveal";
 import type { ScenarioContent } from "@/types/scenario";
 
 const p = (text: string, secret = false) => ({ type: "doc" as const, content: [{ type: "paragraph" as const, content: [{ type: "text" as const, text, ...(secret && { marks: [{ type: "secret" as const }] }) }] }] });
@@ -45,5 +45,23 @@ describe("reveal", () => {
 
     expect(json).toContain("Відкрито");
     expect(json).not.toMatch(/deck-secret|slide-secret|battle-secret|slide|battleId/);
+  });
+});
+
+describe("newlyPlayedSections", () => {
+  const sec = (id: string, played: boolean) => ({ id, title: id, played, rows: [] });
+
+  const content = (...sections: ReturnType<typeof sec>[]): ScenarioContent => ({ legend: [], sections });
+
+  it("returns sections that went from not played to played", () => {
+    expect(newlyPlayedSections(content(sec("a", false), sec("b", true)), content(sec("a", true), sec("b", true)))).toEqual(["a"]);
+  });
+
+  it("ignores played to not played and unchanged sections", () => {
+    expect(newlyPlayedSections(content(sec("a", true), sec("b", false)), content(sec("a", false), sec("b", false)))).toEqual([]);
+  });
+
+  it("treats a new section as played only when it is created played", () => {
+    expect(newlyPlayedSections(content(), content(sec("n1", false), sec("n2", true)))).toEqual(["n2"]);
   });
 });

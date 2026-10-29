@@ -9,7 +9,7 @@ const card = (id: string, name: string): TemplateCard => ({ id, name, descriptio
 
 vi.mock("@/components/ui/select-field", () => ({
   SelectField: ({ value, onValueChange, groups }: { value: string; onValueChange: (v: string) => void; groups: { label: string; options: { value: string; label: string }[] }[] }) => (
-    <select aria-label="Шаблон" value={value} onChange={(e) => onValueChange(e.target.value)}>
+    <select aria-label="campaigns.templatePicker.ariaLabel" value={value} onChange={(e) => onValueChange(e.target.value)}>
       {groups.flatMap((g) => g.options).map((o) => (
         <option key={o.value} value={o.value}>{o.label}</option>
       ))}
@@ -36,8 +36,8 @@ describe("TemplatePicker", () => {
   it("пояснює, що таке шаблон, і показує лічильники обраного", () => {
     render(<TemplatePicker value={{ templateId: "o1" }} onChange={vi.fn()} />);
 
-    expect(screen.getByText(/Шаблон — готова основа кампанії/)).toBeTruthy();
-    expect(screen.getByText("2 раси · 5 юнітів · 1 заклинання")).toBeTruthy();
+    expect(screen.getByText("campaigns.templatePicker.intro")).toBeTruthy();
+    expect(screen.getByText('campaigns.templatePicker.counts.races {"count":2} · campaigns.templatePicker.counts.units {"count":5} · campaigns.templatePicker.counts.spells {"count":1}')).toBeTruthy();
     expect(screen.getByRole("option", { name: "Мій шаблон" })).toBeTruthy();
   });
 
@@ -45,9 +45,9 @@ describe("TemplatePicker", () => {
     const onChange = vi.fn();
 
     render(<TemplatePicker value={{ templateId: "o1" }} onChange={onChange} />);
-    fireEvent.change(screen.getByLabelText("Шаблон"), { target: { value: "o2" } });
+    fireEvent.change(screen.getByLabelText("campaigns.templatePicker.ariaLabel"), { target: { value: "o2" } });
     expect(onChange).toHaveBeenLastCalledWith({ templateId: "o2" });
-    fireEvent.change(screen.getByLabelText("Шаблон"), { target: { value: "__none" } });
+    fireEvent.change(screen.getByLabelText("campaigns.templatePicker.ariaLabel"), { target: { value: "__none" } });
     expect(onChange).toHaveBeenLastCalledWith({ templateId: null });
   });
 
@@ -55,8 +55,8 @@ describe("TemplatePicker", () => {
     const onChange = vi.fn();
 
     render(<TemplatePicker value={{ templateId: "o1" }} onChange={onChange} />);
-    fireEvent.change(screen.getByLabelText("Шаблон"), { target: { value: "__file" } });
-    fireEvent.click(await screen.findByRole("button", { name: "Імпортувати" }));
+    fireEvent.change(screen.getByLabelText("campaigns.templatePicker.ariaLabel"), { target: { value: "__file" } });
+    fireEvent.click(await screen.findByRole("button", { name: "common.import.submit" }));
     await waitFor(() => expect(onChange).toHaveBeenCalledWith({ file: { name: "c.json", bundle: {}, entities: 3 } }));
   });
 });

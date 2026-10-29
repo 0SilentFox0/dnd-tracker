@@ -3,6 +3,7 @@ import type { TrackKind } from "@/types/audio";
 
 export const TRACK_GROUP_SEPARATOR = " - ";
 
+// eslint-disable-next-line no-restricted-syntax -- track-title convention stored in DB
 export const OTHER_TRACK_GROUP = "Інше";
 
 export interface PlaylistFilter {
@@ -17,6 +18,7 @@ export interface TrackGroup<T> {
   tracks: T[];
 }
 
+// eslint-disable-next-line no-restricted-syntax -- track-title convention stored in DB
 export const BATTLE_TRACK_GROUP = "Битва";
 
 const BATTLE_TITLE = /^Битва(\s|$)/u;
@@ -39,6 +41,18 @@ export function trackGroupName(title: string): string {
 
   return group || OTHER_TRACK_GROUP;
 }
+
+export function trackGroupLabelKey(name: string): "music.groups.other" | "music.groups.battle" | null {
+  if (name === OTHER_TRACK_GROUP) return "music.groups.other";
+
+  return name === BATTLE_TRACK_GROUP ? "music.groups.battle" : null;
+}
+
+export const trackGroupLabel = (t: (key: "music.groups.other" | "music.groups.battle") => string, name: string): string => {
+  const key = trackGroupLabelKey(name);
+
+  return key ? t(key) : name;
+};
 
 /** Назва без префікса групи; у групі «Битва» префікс — раса, тож назва лишається повною */
 export function trackLabelInGroup(title: string): string {

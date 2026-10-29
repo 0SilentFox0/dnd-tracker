@@ -1,6 +1,6 @@
 import { NextIntlClientProvider } from "next-intl";
 
-import type { Namespace } from "./config";
+import { APP_TIME_ZONE, type Namespace } from "./config";
 import { HtmlLang } from "./html-lang";
 import { loadMessages } from "./messages";
 import { getRequestLocale } from "./request-locale";
@@ -11,7 +11,7 @@ export async function LocaleScope({ namespaces, children }: { namespaces: readon
   const messages = await loadMessages(locale, namespaces);
 
   return (
-    <NextIntlClientProvider locale={locale} messages={messages}>
+    <NextIntlClientProvider locale={locale} messages={messages} timeZone={APP_TIME_ZONE}>
       <HtmlLang locale={locale} lock />
       {children}
     </NextIntlClientProvider>

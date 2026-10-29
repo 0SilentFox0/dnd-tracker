@@ -2,12 +2,14 @@
 
 import { type FormEvent, useCallback, useState } from "react";
 import { useRouter } from "next/navigation";
+import { useTranslations } from "next-intl";
 
 import { useMainSkills } from "./useMainSkills";
 import { useCreateSkill, useUpdateSkill } from "./useSkills";
 
 import { abilitySaveError, useAbilityValidity } from "@/lib/hooks/abilities";
 import { useNavigateFresh } from "@/lib/hooks/common";
+import { useTranslator } from "@/lib/i18n/use-translator";
 import { initialSkillFormValues } from "@/lib/utils/skills/form/normalize";
 import { buildSkillFormPayload } from "@/lib/utils/skills/form/payload";
 import type { MainSkill } from "@/types/main-skills";
@@ -17,6 +19,10 @@ export function useSkillForm(
   campaignId: string,
   { initialData, initialMainSkills }: { initialData?: Skill; initialMainSkills?: MainSkill[] } = {},
 ) {
+  const t = useTranslations("common.form");
+
+  const ta = useTranslator("abilities");
+
   const router = useRouter();
 
   const navigateFresh = useNavigateFresh();
@@ -43,7 +49,7 @@ export function useSkillForm(
     event.preventDefault();
 
     if (!values.name.trim()) {
-      setError("Вкажіть назву");
+      setError(t("nameRequired"));
 
       return;
     }
@@ -60,7 +66,7 @@ export function useSkillForm(
 
       navigateFresh(listHref);
     } catch (err) {
-      setError(abilitySaveError(err, initialData ? "Помилка оновлення" : "Помилка створення"));
+      setError(abilitySaveError(err, initialData ? t("updateFailed") : t("createFailed"), ta));
     }
   };
 

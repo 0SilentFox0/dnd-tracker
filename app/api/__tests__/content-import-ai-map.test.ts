@@ -53,7 +53,7 @@ describe("AI-мапінг імпорту", () => {
     const res = await post(BODY);
 
     expect(res.status).toBe(409);
-    expect(await getResponseJson(res)).toEqual({ error: API_ERRORS.IMPORT_AI_NO_KEY });
+    expect(await getResponseJson(res)).toMatchObject({ error: API_ERRORS.IMPORT_AI_NO_KEY });
     expect(generateObject).not.toHaveBeenCalled();
   });
 

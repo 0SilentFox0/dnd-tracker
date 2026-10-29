@@ -13,6 +13,8 @@ const things = vi.hoisted(() => new Map<string, Record<string, unknown>>());
 vi.mock("@/lib/server/content/resources", async () => {
   const { z } = await import("zod");
 
+  const { API_ERRORS } = await import("@/lib/constants/api-errors");
+
   const { defineResource } = await import("@/lib/server/content/define-resource");
 
   const unit = defineResource<Record<string, unknown>, { name: string }, { name?: string }>({
@@ -25,7 +27,7 @@ vi.mock("@/lib/server/content/resources", async () => {
     schemas: { create: z.object({ name: z.string().min(2) }), update: z.object({ name: z.string().min(2).optional() }) },
     access: { list: "member", item: "member" },
     invalidates: [],
-    notFound: "Юніта не знайдено",
+    notFound: API_ERRORS.BATTLE_UNIT_NOT_FOUND,
     list: async () => [...things.values()],
     find: async (actor, id) => {
       const row = things.get(id);

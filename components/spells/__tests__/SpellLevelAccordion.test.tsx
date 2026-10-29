@@ -29,15 +29,15 @@ const renderIt = () =>
 describe("SpellLevelAccordion delete level", () => {
   it("deletes after confirm", async () => {
     renderIt();
-    fireEvent.click(screen.getByTitle("Видалити всі заклинання рівня"));
-    fireEvent.click(within(await screen.findByRole("alertdialog")).getByRole("button", { name: "Видалити" }));
+    fireEvent.click(screen.getByTitle("spells.list.deleteLevel.tooltip"));
+    fireEvent.click(within(await screen.findByRole("alertdialog")).getByRole("button", { name: "common.actions.delete" }));
     await waitFor(() => expect(mutateAsync).toHaveBeenCalledWith(3));
   });
 
   it("does nothing on cancel", async () => {
     renderIt();
-    fireEvent.click(screen.getByTitle("Видалити всі заклинання рівня"));
-    fireEvent.click(within(await screen.findByRole("alertdialog")).getByRole("button", { name: "Скасувати" }));
+    fireEvent.click(screen.getByTitle("spells.list.deleteLevel.tooltip"));
+    fireEvent.click(within(await screen.findByRole("alertdialog")).getByRole("button", { name: "common.actions.cancel" }));
     await waitFor(() => expect(screen.queryByRole("alertdialog")).toBeNull());
     expect(mutateAsync).not.toHaveBeenCalled();
   });

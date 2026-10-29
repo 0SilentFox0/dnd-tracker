@@ -34,9 +34,9 @@ const selections: ChoiceSelections = {
   groups: [],
   skills: ["perception"],
   expertise: ["stealth"],
-  spells: [{ spellId: "sp1", label: "Лінія: Wood Elf" }],
+  spells: [{ spellId: "sp1", label: "Лінія: Wood Elf", source: { message: "characterProfile.sheet.spellOrigin.lineage", params: { name: "Wood Elf" } } }],
   spellGrants: [], slotSpells: [],
-  feats: [{ key: "class:r.asi.0", feat: asi, picks: { asi: [{ id: "dexterity" }, { id: "dexterity" }] }, from: "Rogue 4" }],
+  feats: [{ key: "class:r.asi.0", feat: asi, picks: { asi: [{ id: "dexterity" }, { id: "dexterity" }] }, from: { message: "characterProfile.sheet.from.classLevel", params: { name: "Rogue", level: 4 } } }],
   options: [{ owner: "Rogue", label: "Expertise", names: ["Stealth"] }],
   lineage: "Wood Elf",
 };
@@ -59,9 +59,9 @@ describe("sheet with choices", () => {
     expect(s.choices).toEqual({
       pending: 2,
       lineage: "Wood Elf",
-      feats: [{ key: "class:r.asi.0", id: "f-asi", name: "Ability Score Improvement", type: "general", from: "Rogue 4", picks: ["+2 СПР"] }],
+      feats: [{ key: "class:r.asi.0", id: "f-asi", name: "Ability Score Improvement", type: "general", from: { message: "characterProfile.sheet.from.classLevel", params: { name: "Rogue", level: 4 } }, picks: [{ message: "characterProfile.sheet.abilityPick", params: { n: 2, ability: "dexterity" } }] }],
       options: [{ owner: "Rogue", label: "Expertise", names: ["Stealth"] }],
-      spellSources: { sp1: "Лінія: Wood Elf" },
+      spellSources: { sp1: { message: "characterProfile.sheet.spellOrigin.lineage", params: { name: "Wood Elf" } } },
       expertise: ["stealth"],
     });
   });

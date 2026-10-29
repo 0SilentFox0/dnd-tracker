@@ -1,7 +1,11 @@
+import { useTranslations } from "next-intl";
+
 import { EntityIcon } from "@/components/common/EntityIcon";
 import type { RacePassiveAbility } from "@/types/races";
 
 function Described({ title, icon, description, appearance }: { title: string; icon?: string | null; description?: string; appearance?: string }) {
+  const t = useTranslations("races");
+
   return (
     <div className="space-y-1 rounded-md bg-hud-field px-2.5 py-2">
       <div className="flex items-center gap-2">
@@ -10,13 +14,13 @@ function Described({ title, icon, description, appearance }: { title: string; ic
       </div>
       {description && (
         <p className="text-sm text-muted-foreground">
-          <span className="font-medium text-hud-bone">Що робить: </span>
+          <span className="font-medium text-hud-bone">{t("passive.whatItDoes")}</span>{" "}
           {description}
         </p>
       )}
       {appearance && (
         <p className="text-sm italic text-muted-foreground">
-          <span className="font-medium not-italic text-hud-bone">Як це виглядає: </span>
+          <span className="font-medium not-italic text-hud-bone">{t("passive.appearance")}</span>{" "}
           {appearance}
         </p>
       )}
@@ -25,10 +29,12 @@ function Described({ title, icon, description, appearance }: { title: string; ic
 }
 
 export function RacePassiveBlock({ passive }: { passive: RacePassiveAbility }) {
+  const t = useTranslations("races");
+
   return (
     <div className="space-y-2">
-      <p className="text-sm font-medium">Вроджена пасивка:</p>
-      <Described title={passive.name ?? "Пасивна здібність"} icon={passive.icon} description={passive.description} appearance={passive.appearanceDescription} />
+      <p className="text-sm font-medium">{t("passive.title")}</p>
+      <Described title={passive.name ?? t("passive.defaultName")} icon={passive.icon} description={passive.description} appearance={passive.appearanceDescription} />
     </div>
   );
 }

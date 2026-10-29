@@ -3,7 +3,7 @@ import type { Prisma } from "@prisma/client";
 import "server-only";
 import { invalidateReference, type ReferenceKindValue } from "@/lib/cache/tags";
 import { AI_LIMITS } from "@/lib/constants/ai";
-import { API_ERRORS } from "@/lib/constants/api-errors";
+import { API_ERRORS, type ErrorParams } from "@/lib/constants/api-errors";
 import type { ContentImportInput } from "@/lib/schemas/content-import";
 import { assertCan } from "@/lib/server/content/access";
 import type { AnyContentResource } from "@/lib/server/content/define-resource";
@@ -41,7 +41,7 @@ function indexNames(rows: IdName[]): NameIndex {
   return { byName, ids: new Set(rows.map((r) => r.id)) };
 }
 
-const err = (message: string, field?: string): ImportIssue => ({ ...(field && { field }), level: "error", message });
+const err = (message: string, field?: string, extra?: Partial<ImportIssue>): ImportIssue => ({ ...(field && { field }), level: "error", message, ...extra });
 
 const hasError = (issues: ImportIssue[]) => issues.some((i) => i.level === "error");
 
@@ -114,8 +114,18 @@ function resolveNestedRefs(record: ImportRecord, fields: readonly ImportField[],
   }
 }
 
-function zodIssues(error: { issues: Array<{ path: PropertyKey[]; message: string }> }): ImportIssue[] {
-  return error.issues.map((i) => err(i.message, i.path.map(String).join(".") || undefined));
+type ZodLikeIssue = { path: PropertyKey[]; message: string; minimum?: unknown; maximum?: unknown; params?: unknown };
+
+const bound = (v: unknown) => (typeof v === "number" || typeof v === "bigint" ? Number(v) : undefined);
+
+function zodIssues(error: { issues: ZodLikeIssue[] }): ImportIssue[] {
+  return error.issues.map((i) => {
+    const minimum = bound(i.minimum);
+
+    const maximum = bound(i.maximum);
+
+    return err(i.message, i.path.map(String).join(".") || undefined, { ...(minimum !== undefined && { minimum }), ...(maximum !== undefined && { maximum }), ...(isRecord(i.params) && { params: i.params as ErrorParams }) });
+  });
 }
 
 type PlanCtx = { spec: ImportSpec; resource: AnyContentResource; mode: ImportMode; existing: NameIndex; refs: Map<ImportKind, NameIndex>; seen: Set<string> };
@@ -165,11 +175,11 @@ function planRow(raw: Record<string, unknown>, row: number, ctx: PlanCtx): Plan 
 function contentErrorIssues(error: ContentError): ImportIssue[] {
   const extra = Array.isArray(error.issues)
     ? error.issues.map((i) =>
-        isRecord(i) && typeof i.message === "string" ? err(i.message, Array.isArray(i.path) ? i.path.map(String).join(".") || undefined : undefined) : err(typeof i === "string" ? i : JSON.stringify(i)),
+        isRecord(i) && typeof i.message === "string" ? err(i.message, Array.isArray(i.path) ? i.path.map(String).join(".") || undefined : undefined, { ...(bound(i.minimum) !== undefined && { minimum: bound(i.minimum) }), ...(bound(i.maximum) !== undefined && { maximum: bound(i.maximum) }), ...(isRecord(i.params) && { params: i.params as ErrorParams }) }) : err(typeof i === "string" ? i : JSON.stringify(i)),
       )
     : [];
 
-  return [err(error.message), ...extra];
+  return [err(error.message, undefined, error.params && { params: error.params }), ...extra];
 }
 
 async function writePlan(resource: AnyContentResource, actor: Actor, plan: Plan) {

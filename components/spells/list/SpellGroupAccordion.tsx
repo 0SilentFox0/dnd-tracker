@@ -1,12 +1,13 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import { Edit, X } from "lucide-react";
 
 import { GroupAccordionItem } from "@/components/common/GroupAccordionItem";
 import { RenameGroupDialog } from "@/components/common/RenameGroupDialog";
 import { type SpellGroupItemActions, SpellLevelAccordion } from "@/components/spells/list/SpellLevelAccordion";
 import { Accordion } from "@/components/ui/accordion";
-import { groupDisplayName, isUngroupedKey, UNGROUPED_LABELS } from "@/lib/constants/ungrouped";
+import { groupDisplayName, isUngroupedKey } from "@/lib/constants/ungrouped";
 import { useSpellGroupActions } from "@/lib/hooks/spells";
 import { getSpellGroupIcon } from "@/lib/utils/spells/spell-icons";
 import { calculateTotalSpellsInGroup } from "@/lib/utils/spells/spells";
@@ -27,13 +28,17 @@ export function SpellGroupAccordion({
   spellGroups,
   spellActions,
 }: SpellGroupAccordionProps) {
+  const t = useTranslations("spells");
+
+  const tc = useTranslations("common.ungrouped");
+
   const group = spellGroups.find((g) => g.name === groupName);
 
   const groupId = group?.id;
 
   const isUngrouped = isUngroupedKey(groupName);
 
-  const displayName = groupDisplayName(groupName, UNGROUPED_LABELS.spellGroup);
+  const displayName = groupDisplayName(groupName, tc("spellGroup"));
 
   const totalSpells = calculateTotalSpellsInGroup(levels);
 
@@ -48,8 +53,8 @@ export function SpellGroupAccordion({
   const menuActions =
     !isUngrouped && groupId
       ? [
-          { label: "Перейменувати групу", icon: Edit, onSelect: actions.handlers.openRenameDialog },
-          { label: "Видалити всі заклинання з групи", icon: X, onSelect: () => void actions.handlers.confirmRemoveAll() },
+          { label: t("groupActions.rename"), icon: Edit, onSelect: actions.handlers.openRenameDialog },
+          { label: t("groupActions.removeAll"), icon: X, onSelect: () => void actions.handlers.confirmRemoveAll() },
         ]
       : undefined;
 
@@ -58,7 +63,7 @@ export function SpellGroupAccordion({
       <GroupAccordionItem
         value={groupName}
         title={displayName}
-        countLabel={`${totalSpells} заклинань`}
+        countLabel={t("list.count", { count: totalSpells })}
         icon={GroupIcon}
         menuActions={menuActions}
       >

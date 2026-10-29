@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useTranslations } from "next-intl";
 
 import { RACE_FORM_TAB, type RaceFormTabId } from "./race-form-tabs";
 import { RaceEditFormSpellSlots } from "./RaceEditFormSpellSlots";
@@ -33,6 +34,10 @@ export function RaceFormFields({
   abilityIssues,
   onAbilitiesValidityChange,
 }: RaceFormFieldsProps) {
+  const t = useTranslations("races");
+
+  const tc = useTranslations("common");
+
   const [tab, setTab] = useState<RaceFormTabId>(RACE_FORM_TAB.basic);
 
   const [abilityErrors, setAbilityErrors] = useState(0);
@@ -49,11 +54,11 @@ export function RaceFormFields({
   const tabs: HudTab<RaceFormTabId>[] = [
     {
       id: RACE_FORM_TAB.basic,
-      label: "Основне",
+      label: tc("tabs.basic"),
       content: (
         <div className="space-y-4">
           <div className="space-y-2">
-            <Label htmlFor="name">Назва раси {compact ? "*" : ""}</Label>
+            <Label htmlFor="name">{compact ? t("form.nameRequired") : t("form.name")}</Label>
             <Input
               id="name"
               value={formData.name}
@@ -61,22 +66,22 @@ export function RaceFormFields({
                 setFormData((prev) => ({ ...prev, name: e.target.value }))
               }
               required
-              placeholder={compact ? "Наприклад: Люди, Ельфи, Демони" : undefined}
+              placeholder={compact ? t("form.namePlaceholder") : undefined}
             />
           </div>
 
-          <ImageUpload value={formData.icon ?? ""} onChange={(v) => setFormData((prev) => ({ ...prev, icon: v }))} label="Іконка раси" fallbackText={formData.name} allowFile={false} />
+          <ImageUpload value={formData.icon ?? ""} onChange={(v) => setFormData((prev) => ({ ...prev, icon: v }))} label={t("form.icon")} fallbackText={formData.name} allowFile={false} />
 
           <ColorField
             id="race-color"
-            label="Колір раси"
+            label={t("form.color")}
             value={formData.color ?? ""}
             onChange={(color) => setFormData((prev) => ({ ...prev, color }))}
-            description="Смуга й чіп раси у списку юнітів; порожньо — колір із палітри"
+            description={t("form.colorDescription")}
           />
 
           <div className="space-y-2">
-            <Label htmlFor="passiveDescription">Опис пасивної здібності</Label>
+            <Label htmlFor="passiveDescription">{t("form.passiveDescription")}</Label>
             <Textarea
               id="passiveDescription"
               value={formData.passiveAbility?.description || ""}
@@ -91,7 +96,7 @@ export function RaceFormFields({
                   },
                 }))
               }
-              placeholder="Наприклад: Імунітет до вогню, Мораль завжди >= 0"
+              placeholder={t("form.passivePlaceholder")}
               rows={3}
             />
           </div>
@@ -100,12 +105,12 @@ export function RaceFormFields({
     },
     {
       id: RACE_FORM_TAB.stats,
-      label: "Характеристики",
+      label: t("form.tabs.stats"),
       content: (
         <div className="space-y-4">
-          <HudSection title="Модифікатори характеристик" className="space-y-2">
+          <HudSection title={t("form.statModifiersTitle")} className="space-y-2">
             <p className="text-xs text-muted-foreground">
-              Виберіть ефекти для кожної характеристики
+              {t("form.statModifiersHint")}
             </p>
             <RaceEditFormStatModifiers
               formData={formData}
@@ -113,10 +118,9 @@ export function RaceFormFields({
             />
           </HudSection>
 
-          <HudSection title="Прокачка магічних слотів" className="space-y-2">
+          <HudSection title={t("form.slotsTitle")} className="space-y-2">
             <p className="text-xs text-muted-foreground">
-              Вкажіть максимальну кількість магічних слотів для кожного рівня
-              магії при прокачці рівня персонажа
+              {t("form.slotsHint")}
             </p>
             <RaceEditFormSpellSlots
               formData={formData}
@@ -128,7 +132,7 @@ export function RaceFormFields({
     },
     {
       id: RACE_FORM_TAB.abilities,
-      label: "Вміння",
+      label: tc("tabs.abilities"),
       invalid: (abilityIssues?.length ?? 0) > 0 || abilityErrors > 0,
       content: (
         <AbilityListEditor
@@ -145,7 +149,7 @@ export function RaceFormFields({
       : [
           {
             id: RACE_FORM_TAB.choices,
-            label: "Вибори й лінії",
+            label: t("form.tabs.choices"),
             invalid: choiceErrors > 0,
             content: (
               <ChoiceListEditor

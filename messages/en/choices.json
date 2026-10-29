@@ -1,0 +1,118 @@
+{
+  "kinds": {
+    "option": "Options",
+    "feat": "Feat",
+    "skill": "Skills",
+    "expertise": "Expertise",
+    "abilityScore": "Ability score improvement",
+    "spell": "Spell"
+  },
+  "list": {
+    "add": "Add choice",
+    "newChoice": "New choice",
+    "count": "Count",
+    "scale": "Count from class table",
+    "scaleNumber": "— number —",
+    "lineage": "Lineage (option name → subrace)",
+    "description": "Choice description"
+  },
+  "header": {
+    "name": "Choice name",
+    "id": "Choice id",
+    "kind": "Choice kind",
+    "level": "Choice level",
+    "remove": "Delete choice {label}"
+  },
+  "fields": {
+    "skillsAny": "Empty — any skill",
+    "skillsAnyExpertise": "Empty — any proficient skill",
+    "maxPerAbility": "At most +1 per ability",
+    "maxPerAbilityAria": "Limit per ability",
+    "points": "+1 times",
+    "pointsAria": "How many times +1",
+    "cap": "Cap",
+    "capAria": "Ability cap",
+    "lists": "Lists",
+    "listsAria": "Spell lists",
+    "minCircle": "From circle",
+    "minCircleAria": "Lowest circle",
+    "maxCircle": "To circle",
+    "maxCircleAria": "Highest circle",
+    "slotsMax": "Highest circle of class slots",
+    "embeddedOptions": "Built-in options instead of a feat (e.g. Blessed Warrior)"
+  },
+  "options": {
+    "name": "Option name",
+    "id": "Id",
+    "remove": "Delete option {name}",
+    "description": "Option description",
+    "minLevel": "Min. level",
+    "minLevelAria": "Option minimum level",
+    "requires": "requires “{name}”",
+    "add": "Add option"
+  },
+  "optionSpells": {
+    "level": "Total level",
+    "spell": "Spell",
+    "missing": "Spell not found",
+    "remove": "Remove spell",
+    "add": "Add spell"
+  },
+  "grant": {
+    "freeCast": "Free cast",
+    "uses": "Uses",
+    "usesAria": "Grant uses",
+    "proficiency": "By proficiency",
+    "rest": "Rest",
+    "restAria": "Grant rest",
+    "restLong": "Long",
+    "restShort": "Short or long",
+    "circle": "Circle",
+    "circleAria": "Grant circle",
+    "ability": "Ability",
+    "abilityAria": "Grant ability",
+    "abilityDefault": "Hero's primary ability",
+    "viaSlots": "Can also use slots",
+    "sharedPool": "Shared pool (same key for action variants)",
+    "sharedPoolAria": "Grant shared pool"
+  },
+  "picker": {
+    "multiclassSkills": "Multiclass skills",
+    "notFound": "Choice not found — it will be removed on save",
+    "fromLevel": "From level {level}",
+    "requires": "Requires: {list}",
+    "featLevel": "level {level}+",
+    "featUnmet": "prerequisites not met",
+    "noSpells": "No spells of the required circles in lists {lists}"
+  },
+  "editor": {
+    "loading": "Loading choices…",
+    "save": "Save choices",
+    "background": "Background",
+    "noBackground": "No background",
+    "backgroundHint": "Changing it replaces the background bonuses. The DM hands out gear and money manually.",
+    "originFirst": "First remove the free origin feat.",
+    "replaceOrigin": "Replace with the background feat",
+    "backgroundFeat": "Feat: {name}",
+    "race": "Race: {name}",
+    "originFeat": "Origin feat"
+  },
+  "validation": {
+    "idFormat": "Id — lowercase Latin letters, digits and hyphens",
+    "optionsRequired": "Add at least one option",
+    "featTypesRequired": "Choose feat types",
+    "pointsRequired": "Specify how many times +1",
+    "spellsRequired": "Specify lists and circles",
+    "levelRange": "Highest circle is lower than the lowest",
+    "maxPerAbilityOnly": "Ability limit is only for abilityScore",
+    "grantSpellOnly": "Free cast can only be set on a spell choice",
+    "optionIdsRepeated": "Option ids repeat",
+    "unknownRequirement": "Requirement refers to an unknown option",
+    "choiceIdsRepeated": "Choice ids repeat",
+    "lineageRaceOnly": "Lineage is only for a race choice",
+    "singleLineage": "A race has at most one lineage",
+    "tableCountClassOnly": "Count “from class table” is only for a class",
+    "featInFeat": "A feat cannot contain a feat choice",
+    "nothingToSave": "No choices to save"
+  }
+}

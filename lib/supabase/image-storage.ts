@@ -1,3 +1,4 @@
+import { API_ERRORS } from "@/lib/constants/api-errors";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { ensureBucket } from "@/lib/supabase/buckets";
 import { safeFetchBuffer, SafeFetchError, sniffImageMime } from "@/lib/utils/api/safe-fetch";
@@ -125,7 +126,7 @@ export async function mirrorImageUrl(sourceUrl: string, target: StoredImage): Pr
       headers: { "User-Agent": "Mozilla/5.0 (compatible; DnD-Combat-Tracker/1.0)" },
     });
   } catch (e) {
-    return { ok: false, message: e instanceof SafeFetchError ? e.message : "Не вдалося завантажити зображення" };
+    return { ok: false, message: e instanceof SafeFetchError ? e.message : API_ERRORS.SAFE_FETCH_FAILED };
   }
 
   if (fetched.status < 200 || fetched.status >= 300) {

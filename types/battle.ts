@@ -178,6 +178,7 @@ export interface BattleParticipantAbilities {
   level: number;
   initiative: number; // поточна ініціатива (з урахуванням бонусів)
   baseInitiative: number; // базова ініціатива (без тимчасових бонусів)
+  initiativeBonus?: number; // запечені пасивні бонуси ініціативи (у `roll` додаються до d20 + DEX)
   strength: number;
   dexterity: number;
   constitution: number;

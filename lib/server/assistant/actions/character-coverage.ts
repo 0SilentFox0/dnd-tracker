@@ -17,7 +17,7 @@ export const CHARACTER_ACTION_COVERAGE = [
   ["GET", `${hero}/stash`, "stash", "stash-api"], ["POST", `${hero}/stash`, "stash.apply", "stash-api"],
   ["POST", `${hero}/artifacts/transfer`, "transfer", "character-progression-storage.integration"],
   ["GET", `${hero}/stash/log`, "stash.log", "stash-api"], ["GET", `${hero}/stash/free-artifacts`, "stash.free-artifacts", "stash-api"],
-  ["POST", `${hero}/hit-dice`, "hit-dice", "hit-dice"], ["POST", `${hero}/inspiration`, "inspiration", "inspiration"],
+  ["POST", `${hero}/hit-dice`, "hit-dice", "hit-dice"], ["POST", `${hero}/arcane-recovery`, "arcane-recovery", "arcane-recovery"], ["POST", `${hero}/inspiration`, "inspiration", "inspiration"],
   ["POST", `${hero}/roll`, "roll", "character-progression-storage.integration"], ["GET", `${hero}/sheet`, "sheet", "character-sheet-api"],
   ["GET", `${hero}/log`, "log", "log"], ["GET", `${hero}/progression`, "progression", "progression-api"],
   ["POST", `${hero}/progression/learn`, "progression.learn", "progression-actions-api"],

@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useTranslations } from "next-intl";
 
 import { useDeleteMainSkill, useMainSkills } from "./useMainSkills";
 
@@ -10,6 +11,8 @@ import type { MainSkill } from "@/types/main-skills";
 const mainSkillFields = (mainSkill: MainSkill) => [mainSkill.name];
 
 export function useMainSkillsList(campaignId: string, initialMainSkills: MainSkill[]) {
+  const t = useTranslations();
+
   const confirm = useConfirm();
 
   const [createOpen, setCreateOpen] = useState(false);
@@ -22,8 +25,8 @@ export function useMainSkillsList(campaignId: string, initialMainSkills: MainSki
 
   const remove = async (mainSkillId: string) => {
     const ok = await confirm({
-      title: "Ви впевнені, що хочете видалити цей основний навик? Це також видалить всі скіли, пов'язані з ним.",
-      confirmLabel: "Видалити",
+      title: t("skills.mainSkills.list.deleteConfirm"),
+      confirmLabel: t("common.actions.delete"),
       destructive: true,
     });
 

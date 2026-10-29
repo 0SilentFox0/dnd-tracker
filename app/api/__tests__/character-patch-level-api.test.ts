@@ -3,8 +3,10 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import { RACES } from "@/data/library/races";
 import { prisma } from "@/lib/db";
+import { notifyCharacterOwners } from "@/lib/server/notifications/notify";
 import * as apiAuth from "@/lib/utils/api/api-auth";
 
+vi.mock("@/lib/server/notifications/notify", () => ({ notifyCharacterOwners: vi.fn().mockResolvedValue(0) }));
 vi.mock("@/lib/utils/api/api-auth", () => ({
   requireAuth: vi.fn(),
   requireCampaignAccess: vi.fn(),
@@ -58,6 +60,31 @@ describe("PATCH персонажа: рівень і слоти", () => {
     expect(written()).toMatchObject({ level: 3, name: "Нове" });
     expect(written().spellSlots).toBeUndefined();
     expect(prisma.race.findFirst).not.toHaveBeenCalled();
+  });
+
+  it("ДМ підвищує рівень — сповіщення про рівень", async () => {
+    vi.mocked(apiAuth.requireCampaignAccess).mockResolvedValue(access("dm"));
+
+    await patch({ level: 5 });
+
+    expect(notifyCharacterOwners).toHaveBeenCalledWith({ campaignId: "camp", actorUserId: "dm", events: [{ characterId: "ch", type: "level", refId: "ch:5" }] });
+  });
+
+  it("ДМ додає заклинання — сповіщення лише про нове", async () => {
+    vi.mocked(apiAuth.requireCampaignAccess).mockResolvedValue(access("dm"));
+    vi.mocked(prisma.character.findUnique).mockResolvedValue({ ...CHARACTER, knownSpells: ["s1"] } as never);
+
+    await patch({ knownSpells: ["s1", "s2"] });
+
+    expect(notifyCharacterOwners).toHaveBeenCalledWith({ campaignId: "camp", actorUserId: "dm", events: [{ characterId: "ch", type: "spell", refId: "s2" }] });
+  });
+
+  it("гравець правит свого героя — виклик без подій і з його userId", async () => {
+    vi.mocked(apiAuth.requireCampaignAccess).mockResolvedValue(access("player"));
+
+    await patch({ name: "Нове" });
+
+    expect(notifyCharacterOwners).toHaveBeenCalledWith({ campaignId: "camp", actorUserId: "owner", events: [] });
   });
 
   it("ДМ: рівень понад maxLevel — 422 без запису", async () => {

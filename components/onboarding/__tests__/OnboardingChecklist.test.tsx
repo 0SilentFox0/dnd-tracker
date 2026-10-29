@@ -8,7 +8,7 @@ import * as api from "@/lib/api/onboarding";
 
 vi.mock("@/lib/api/onboarding", async () => (await import("@/components/onboarding/__tests__/onboarding-test-utils")).onboardingApiMock());
 
-const step = (id: string, done: boolean, optional = false) => ({ id, title: `Крок ${id}`, description: "опис", href: `/campaigns/c/${id}`, helpSlug: "dm-quickstart", optional, informational: false, done });
+const step = (id: string, done: boolean, optional = false) => ({ id, variant: undefined, href: `/campaigns/c/${id}`, helpSlug: "dm-quickstart", optional, informational: false, done });
 
 const renderIt = () => render(<OnboardingChecklist campaignId="c" />, { wrapper: createWrapper() });
 
@@ -25,26 +25,26 @@ describe("OnboardingChecklist", () => {
     renderIt();
 
     expect(await screen.findByText("1/2")).toBeTruthy();
-    expect(screen.getByText("Крок b")).toBeTruthy();
-    expect(screen.getByText("Більше можливостей")).toBeTruthy();
-    expect(screen.getAllByRole("link", { name: "Як це?" })[0].getAttribute("href")).toBe("/help/dm-quickstart");
-    expect(screen.getAllByRole("link", { name: "Перейти" })[0].getAttribute("href")).toBe("/campaigns/c/b");
+    expect(screen.getByText("onboarding.checklist.dm.b.title")).toBeTruthy();
+    expect(screen.getByText("onboarding.ui.moreFeatures")).toBeTruthy();
+    expect(screen.getAllByRole("link", { name: "onboarding.ui.howTo" })[0].getAttribute("href")).toBe("/help/dm-quickstart");
+    expect(screen.getAllByRole("link", { name: "onboarding.ui.go" })[0].getAttribute("href")).toBe("/campaigns/c/b");
   });
 
   it("крок без href — без «Перейти»", async () => {
     vi.mocked(api.getCampaignOnboarding).mockResolvedValue({ role: "player", state: "open", steps: [{ ...step("battle", false), href: undefined }], requiredDone: 0, requiredTotal: 1 });
     renderIt();
 
-    expect(await screen.findByText("Крок battle")).toBeTruthy();
-    expect(screen.queryByRole("link", { name: "Перейти" })).toBeNull();
+    expect(await screen.findByText("onboarding.checklist.player.battle.title")).toBeTruthy();
+    expect(screen.queryByRole("link", { name: "onboarding.ui.go" })).toBeNull();
   });
 
   it("collapsed — один рядок", async () => {
     vi.mocked(api.getCampaignOnboarding).mockResolvedValue({ role: "dm", state: "collapsed", steps: [step("a", true)], requiredDone: 1, requiredTotal: 1 });
     renderIt();
 
-    expect(await screen.findByText(/Перші кроки пройдено/)).toBeTruthy();
-    expect(screen.queryByText("Крок a")).toBeNull();
+    expect(await screen.findByText("onboarding.ui.firstStepsDone")).toBeTruthy();
+    expect(screen.queryByText("onboarding.checklist.dm.a.title")).toBeNull();
   });
 
   it("«Сховати» прибирає панель", async () => {
@@ -52,7 +52,7 @@ describe("OnboardingChecklist", () => {
 
     const { container } = renderIt();
 
-    fireEvent.click(await screen.findByRole("button", { name: "Сховати" }));
+    fireEvent.click(await screen.findByRole("button", { name: "onboarding.ui.hide" }));
 
     await waitFor(() => expect(container.textContent).toBe(""));
   });

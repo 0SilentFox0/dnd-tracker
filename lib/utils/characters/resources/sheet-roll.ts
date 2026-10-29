@@ -1,19 +1,20 @@
-import { ABILITY_LABELS } from "@/lib/constants/abilities";
-import { DND_SKILL_META } from "@/lib/constants/skills";
+import type { Translator } from "@/lib/i18n/translator";
 import { rollCheck } from "@/lib/utils/battle/checks/roll-check";
 import { rollSave } from "@/lib/utils/battle/saves/roll-save";
 import type { Ruleset } from "@/lib/utils/rules";
 import type { BattleParticipant } from "@/types/battle";
 import type { SheetRollResult, SheetRollSubject } from "@/types/characters";
 
-export function sheetRollLabel(subject: SheetRollSubject): string {
-  if (subject.kind === "save") return `Рятівний кидок: ${ABILITY_LABELS[subject.ability]}`;
+function sheetRollLabel(subject: SheetRollSubject, t: Translator): string {
+  if ("skill" in subject) return t(`common.dndSkills.${subject.skill}`);
 
-  return "skill" in subject ? DND_SKILL_META[subject.skill].label : `Перевірка: ${ABILITY_LABELS[subject.ability]}`;
+  const ability = t(`common.abilities.${subject.ability}.label`);
+
+  return t(subject.kind === "save" ? "rest.rollLabel.save" : "rest.rollLabel.check", { ability });
 }
 
-export function rollFromSheet(p: BattleParticipant, subject: SheetRollSubject, opts: { rules: Ruleset; rng: () => number; inspiration: boolean }): SheetRollResult {
-  const base = { label: sheetRollLabel(subject), inspirationUsed: opts.inspiration };
+export function rollFromSheet(p: BattleParticipant, subject: SheetRollSubject, opts: { rules: Ruleset; rng: () => number; inspiration: boolean; t: Translator }): SheetRollResult {
+  const base = { label: sheetRollLabel(subject, opts.t), inspirationUsed: opts.inspiration };
 
   const shared = { participants: [p], rules: opts.rules, rng: opts.rng, advantage: opts.inspiration };
 

@@ -16,6 +16,9 @@ const h = vi.hoisted(() => ({
   create: vi.fn(), template: vi.fn(), export: vi.fn(async () => ({ settings: {}, formatVersion: 1 })),
 }));
 
+vi.mock("@/lib/server/onboarding/facts", () => ({ readOnboardingSnapshot: vi.fn(async () => ({ facts: { role: "dm", dm: { races: 0, units: 0, players: 0, activePlayerCharacters: 0, pendingDrafts: 2, battles: 0, battlesStarted: 0, scenarioPages: 0, decks: 0, tracks: 0, aiKeys: 0 } }, checklistFlag: null })) }));
+vi.mock("@/lib/i18n/request-locale", () => ({ getRequestLocale: vi.fn(async () => "en") }));
+vi.mock("@/lib/i18n/translator", () => ({ getTranslator: vi.fn(async () => (key: string) => `T:${key}`) }));
 vi.mock("@/lib/db", () => ({ prisma: { ...h, $transaction: (fn: (db: typeof h) => unknown) => fn(h) } }));
 vi.mock("@/lib/cache/campaign-list", () => ({ invalidateCampaignLists: vi.fn() }));
 vi.mock("@/lib/cache/tags", () => ({ invalidateReference: vi.fn(), ReferenceKind: { RACES: "races" } }));
@@ -62,6 +65,13 @@ describe("campaign action guards", () => {
     expect(h.campaign.update).toHaveBeenCalledWith(expect.objectContaining({ data: { aiInstructions: "Нова" } }));
     expect(h.aiThread.update).not.toHaveBeenCalled();
     expect(h.apiToken.update).not.toHaveBeenCalled();
+  });
+  it("onboarding steps carry translated text and the variant", async () => {
+    const result = await runCampaignOperation(actor, "onboarding", {});
+
+    const step = (result.data as { steps: { id: string; title: string; description: string; variant?: { name: string } }[] }).steps.find(s => s.id === "characters");
+
+    expect(step).toMatchObject({ title: "T:checklist.dm.characters.title", description: "T:checklist.dm.characters.descriptionPending", variant: { name: "pending" } });
   });
   it("members are bounded and omit private account fields", async () => {
     h.campaignMember.findMany.mockResolvedValue(Array.from({ length: 4 }, (_, i) => ({ id: `m${i}`, userId: `u${i}`, role: "player", user: { displayName: `Гравець ${i}`, email: "PRIVATE_EMAIL" } })) as never);

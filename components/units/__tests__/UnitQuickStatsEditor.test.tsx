@@ -28,19 +28,19 @@ describe("UnitQuickStatsEditor", () => {
   it("bad AC reverts to the saved value without saving", async () => {
     renderIt();
 
-    const ac = screen.getByLabelText("Броня (AC)") as HTMLInputElement;
+    const ac = screen.getByLabelText("units.quickStats.ac") as HTMLInputElement;
 
     fireEvent.change(ac, { target: { value: "" } });
     fireEvent.blur(ac);
 
-    await waitFor(() => expect((screen.getByLabelText("Броня (AC)") as HTMLInputElement).value).toBe("14"));
+    await waitFor(() => expect((screen.getByLabelText("units.quickStats.ac") as HTMLInputElement).value).toBe("14"));
     expect(updateUnit).not.toHaveBeenCalled();
   });
 
   it("Enter on a new initiative saves it", async () => {
     renderIt();
 
-    const init = screen.getByLabelText(/Ініціатива/) as HTMLInputElement;
+    const init = screen.getByLabelText("common.stats.initiative") as HTMLInputElement;
 
     fireEvent.change(init, { target: { value: "5" } });
     fireEvent.keyDown(init, { key: "Enter" });

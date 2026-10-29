@@ -1,5 +1,5 @@
 import { DEFAULT_AREA_TARGETS } from "@/lib/constants/abilities";
-import { API_ERRORS, casterPacifiedMessage } from "@/lib/constants/api-errors";
+import { API_ERRORS } from "@/lib/constants/api-errors";
 import { SKILL_AREA_RADIUS_FEET } from "@/lib/constants/battle";
 import { collectModifiers } from "@/lib/utils/abilities/engine/core/collect-modifiers";
 import { findParticipant, isActive, isAirborne, isTargetable } from "@/lib/utils/abilities/engine/core/participants";
@@ -309,7 +309,7 @@ function hostile(targeting: SpellTargetingDef): boolean {
 }
 
 /** Кастер зі станом «без ворожих заклинань»: ворожий шаблон або будь-яка ціль-ворог. */
-export function pacifiedBlock(ps: BattleParticipant[], caster: BattleParticipant, targeting: SpellTargetingDef, targetIds: string[]): string | null {
+export function pacifiedBlock(ps: BattleParticipant[], caster: BattleParticipant, targeting: SpellTargetingDef, targetIds: string[]): { state: string } | null {
   const marker = findEffectMarker(caster, "no_hostile_spells");
 
   if (!marker) return null;
@@ -320,7 +320,7 @@ export function pacifiedBlock(ps: BattleParticipant[], caster: BattleParticipant
     return !!t && t.basicInfo.side !== caster.basicInfo.side;
   });
 
-  return hostile(targeting) || hitsEnemy ? casterPacifiedMessage(marker.effect.name) : null;
+  return hostile(targeting) || hitsEnemy ? { state: marker.effect.name } : null;
 }
 
 export function resolveSpellTargets(

@@ -32,7 +32,7 @@ describe("AbilityCopySourcePicker", () => {
 
     fireEvent.click(await screen.findByRole("button", { name: "Лють" }));
 
-    expect(await screen.findByText("Не вдалося завантажити вміння «Лють». Спробуйте ще раз.")).toBeInTheDocument();
+    expect(await screen.findByText('abilities.copy.loadFailed {"name":"Лють"}')).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "Лють" })).not.toBeDisabled();
     expect(onPick).not.toHaveBeenCalled();
   });

@@ -16,7 +16,7 @@ const h = vi.hoisted(() => ({ roll: { mutateAsync: vi.fn(async () => ({ label: "
 vi.mock("@/lib/hooks/characters", async (orig) => ({ ...(await orig<object>()), useSheetRoll: () => h.roll }));
 vi.mock("@/components/battle/fx/dice/DiceStage", () => ({ DiceStage: () => null }));
 
-const rest: SheetRest = { persist: false, hp: null, dead: false, exhaustion: 0, shortRestOpen: false, hitDice: [], charges: [], inspiration: true, xp: null };
+const rest: SheetRest = { persist: false, hp: null, dead: false, exhaustion: 0, shortRestOpen: false, hitDice: [], charges: [], arcaneRecovery: null, inspiration: true, xp: null };
 
 describe("SheetRollDialog", () => {
   afterEach(cleanup);
@@ -29,8 +29,8 @@ describe("SheetRollDialog", () => {
       </ProfileProvider>,
     );
 
-    fireEvent.click(screen.getByRole("switch", { name: "Натхнення" }));
-    fireEvent.click(screen.getByRole("button", { name: "Кинути" }));
+    fireEvent.click(screen.getByRole("switch", { name: "rest.sheetRoll.inspirationAria" }));
+    fireEvent.click(screen.getByRole("button", { name: "rest.sheetRoll.roll" }));
 
     await waitFor(() => expect(screen.getByText("26")).toBeTruthy());
     expect(h.roll.mutateAsync).toHaveBeenCalledWith({ kind: "check", skill: "stealth", useInspiration: true });
@@ -45,10 +45,10 @@ describe("SheetRollDialog", () => {
       </ProfileProvider>,
     );
 
-    fireEvent.click(screen.getByRole("switch", { name: "Натхнення" }));
-    fireEvent.click(screen.getByRole("button", { name: "Кинути" }));
+    fireEvent.click(screen.getByRole("switch", { name: "rest.sheetRoll.inspirationAria" }));
+    fireEvent.click(screen.getByRole("button", { name: "rest.sheetRoll.roll" }));
     await waitFor(() => expect(screen.getByText("26")).toBeTruthy());
-    fireEvent.click(screen.getByRole("button", { name: "Кинути" }));
+    fireEvent.click(screen.getByRole("button", { name: "rest.sheetRoll.roll" }));
 
     await waitFor(() => expect(h.roll.mutateAsync).toHaveBeenCalledTimes(2));
     expect(h.roll.mutateAsync).toHaveBeenLastCalledWith({ kind: "check", skill: "stealth" });

@@ -1,3 +1,4 @@
+import { useTranslations } from "next-intl";
 import { Gem } from "lucide-react";
 
 import { EntityIcon } from "@/components/common/EntityIcon";
@@ -10,6 +11,8 @@ import { Label } from "@/components/ui/label";
 import type { ArtifactSetForReference } from "@/types/info-reference";
 
 export function ArtifactSetReferenceCard({ set }: { set: ArtifactSetForReference }) {
+  const t = useTranslations("dashboard.reference.card");
+
   return (
     <AccordionItem
       value={set.id}
@@ -24,7 +27,7 @@ export function ArtifactSetReferenceCard({ set }: { set: ArtifactSetForReference
             </span>
             {set.artifactNames.length > 0 && (
               <p className="mt-1.5 line-clamp-2 text-xs text-hud-muted">
-                Предмети: {set.artifactNames.join(", ")}
+                {t("setItems", { names: set.artifactNames.join(", ") })}
               </p>
             )}
           </div>
@@ -34,13 +37,13 @@ export function ArtifactSetReferenceCard({ set }: { set: ArtifactSetForReference
         <div className="space-y-3 border-t border-hud-line px-3 pt-2 pb-3 text-hud-bone">
           {set.description && (
             <div>
-              <Label className="hud-sc text-xs text-hud-gold">Опис</Label>
+              <Label className="hud-sc text-xs text-hud-gold">{t("description")}</Label>
               <p className="text-sm mt-0.5">{set.description}</p>
             </div>
           )}
           {set.bonuses.length > 0 && (
             <div>
-              <Label className="hud-sc text-xs text-hud-gold">Бонуси сету</Label>
+              <Label className="hud-sc text-xs text-hud-gold">{t("setBonuses")}</Label>
               <ul className="list-disc list-inside text-sm mt-0.5 space-y-0.5">
                 {set.bonuses.map((b, i) => (
                   <li key={i}>{b}</li>

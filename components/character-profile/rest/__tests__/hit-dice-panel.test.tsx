@@ -16,7 +16,7 @@ vi.mock("@/lib/hooks/characters", async (orig) => ({ ...(await orig<object>()), 
 
 const rest = (over: Partial<SheetRest> = {}): SheetRest => ({
   persist: true, hp: { current: 10, max: 30, temp: 0 }, dead: false, exhaustion: 0, shortRestOpen: true,
-  hitDice: [{ classId: "fig", name: "Воїн", die: 10, total: 3, spent: 1 }], charges: [], inspiration: null, xp: null, ...over,
+  hitDice: [{ classId: "fig", name: "Воїн", die: 10, total: 3, spent: 1 }], charges: [], arcaneRecovery: null, inspiration: null, xp: null, ...over,
 });
 
 const show = (r: SheetRest, viewer: CharacterSheet["viewer"] = { isDM: false, isOwner: true }) =>
@@ -32,24 +32,24 @@ describe("HitDicePanel", () => {
   it("spend button in the short rest window", () => {
     show(rest());
 
-    expect(screen.getByText(/витрачено 1 \/ 3/)).toBeTruthy();
+    expect(screen.getByText(/"spent":1,"total":3/)).toBeTruthy();
 
-    fireEvent.click(screen.getByRole("button", { name: "Витратити" }));
+    fireEvent.click(screen.getByRole("button", { name: "rest.hitDice.spend" }));
 
     expect(h.spend.mutateAsync).toHaveBeenCalledWith("fig");
   });
 
   it("no button outside the window, when all spent, or for a stranger", () => {
     show(rest({ shortRestOpen: false }));
-    expect(screen.queryByRole("button", { name: "Витратити" })).toBeNull();
+    expect(screen.queryByRole("button", { name: "rest.hitDice.spend" })).toBeNull();
     cleanup();
 
     show(rest({ hitDice: [{ classId: "fig", name: "Воїн", die: 10, total: 3, spent: 3 }] }));
-    expect(screen.queryByRole("button", { name: "Витратити" })).toBeNull();
+    expect(screen.queryByRole("button", { name: "rest.hitDice.spend" })).toBeNull();
     cleanup();
 
     show(rest(), { isDM: false, isOwner: false });
-    expect(screen.queryByRole("button", { name: "Витратити" })).toBeNull();
+    expect(screen.queryByRole("button", { name: "rest.hitDice.spend" })).toBeNull();
   });
 
   it("renders nothing without persisted resources", () => {

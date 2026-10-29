@@ -1,6 +1,6 @@
 import type { Ability } from "@/lib/utils/abilities/schema";
 
-export type AbilityCore = Pick<Ability, "trigger" | "effects"> & Partial<Pick<Ability, "limits" | "condition" | "perform">>;
+export type AbilityCore = Pick<Ability, "trigger" | "effects"> & Partial<Pick<Ability, "limits" | "condition" | "perform" | "params">>;
 
 export const noteAbility = (id: string, name: string, description: string): Ability => ({ id, name, description, trigger: { event: "passive" }, effects: [{ kind: "note", text: name }] });
 

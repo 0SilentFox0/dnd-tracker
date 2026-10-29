@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import * as apiTokens from "@/lib/ai/api-tokens";
+import { API_ERRORS } from "@/lib/constants/api-errors";
 import { prisma } from "@/lib/db";
 import * as storage from "@/lib/supabase/battle-music-storage";
 import * as apiAuth from "@/lib/utils/api/api-auth";
@@ -92,7 +93,7 @@ describe("tracks API", () => {
     expect((await POST(req("POST", { kind: "file", path: PATH.replace("camp1", "camp2"), title: "x" }), params())).status).toBe(400);
     expect(storage.verifyUploadedTrack).not.toHaveBeenCalled();
 
-    vi.mocked(storage.verifyUploadedTrack).mockResolvedValue({ ok: false, message: "Потрібен файл MP3 або M4A до 10 МБ" });
+    vi.mocked(storage.verifyUploadedTrack).mockResolvedValue({ ok: false, message: API_ERRORS.TRACK_FILE_INVALID });
     expect((await POST(req("POST", { kind: "file", path: PATH, title: "x" }), params())).status).toBe(400);
     expect(prisma.campaignTrack.create).not.toHaveBeenCalled();
   });
@@ -105,7 +106,7 @@ describe("tracks API", () => {
     const res = await POST(req("POST", { kind: "file", path: PATH, title: "x" }), params());
 
     expect(res.status).toBe(400);
-    expect(await res.json()).toEqual({ error: "Цей файл уже є в бібліотеці" });
+    expect(await res.json()).toMatchObject({ error: API_ERRORS.TRACK_DUPLICATE });
     expect(prisma.campaignTrack.findFirst).toHaveBeenCalledWith({ where: { campaignId: "camp1", url: "https://s/battle-music/x.mp3" }, select: { id: true } });
     expect(prisma.campaignTrack.create).not.toHaveBeenCalled();
   });
@@ -135,7 +136,7 @@ describe("tracks API", () => {
     const created = await POST(req("POST", { kind: "youtube", url: "https://youtu.be/dQw4w9WgXcQ" }), params());
 
     expect(created.status).toBe(400);
-    expect(await created.json()).toEqual({ error: "У бібліотеці вже 200 треків — видаліть зайві" });
+    expect(await created.json()).toMatchObject({ errorKey: API_ERRORS.TRACK_LIMIT });
     expect((await ticket(req("POST", { name: "a.mp3", size: 100, contentType: "audio/mpeg" }), params())).status).toBe(400);
     expect(storage.createTrackUploadTicket).not.toHaveBeenCalled();
   });

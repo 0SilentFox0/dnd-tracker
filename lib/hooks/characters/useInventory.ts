@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useMemo, useState } from "react";
+import { useTranslations } from "next-intl";
 import type { UseQueryResult } from "@tanstack/react-query";
 
 import { useStash, useStashAction } from "./useStash";
@@ -16,13 +17,12 @@ import type { Purse, SpecialItem, StashArtifact, StashView } from "@/types/inven
 export type SelectionKey = { kind: "artifact" | "item"; id: string };
 
 export type InventorySelection =
-  | { kind: "equipped"; slot: ArtifactGridSlotKey; label: string; artifact: SheetArtifact }
+  | { kind: "equipped"; slot: ArtifactGridSlotKey; artifact: SheetArtifact }
   | { kind: "backpack"; artifact: StashArtifact }
   | { kind: "item"; item: SpecialItem };
 
 export interface EquipmentCell {
   key: ArtifactGridSlotKey;
-  label: string;
   slotType: ArtifactSlot;
   artifact: SheetArtifact | null;
 }
@@ -61,7 +61,7 @@ function resolveSelection(key: SelectionKey | null, equipment: EquipmentCell[], 
 
   const equipped = equipment.find((cell) => cell.artifact?.id === key.id);
 
-  if (equipped?.artifact) return { kind: "equipped", slot: equipped.key, label: equipped.label, artifact: equipped.artifact };
+  if (equipped?.artifact) return { kind: "equipped", slot: equipped.key, artifact: equipped.artifact };
 
   for (const cell of cells) {
     if (cell.kind === "artifact" && cell.artifact.id === key.id) return { kind: "backpack", artifact: cell.artifact };
@@ -71,6 +71,8 @@ function resolveSelection(key: SelectionKey | null, equipment: EquipmentCell[], 
 }
 
 export function useInventory(campaignId: string, characterId: string, sheet: CharacterSheet): InventoryModel {
+  const t = useTranslations("inventory");
+
   const { isDM, isOwner } = sheet.viewer;
 
   const pending = sheet.review.pending;
@@ -98,7 +100,7 @@ export function useInventory(campaignId: string, characterId: string, sheet: Cha
   const view = query.data;
 
   const equipment = useMemo<EquipmentCell[]>(
-    () => ARTIFACT_GRID_9.map((cell) => ({ key: cell.key, label: cell.label, slotType: cell.slotType, artifact: sheet.items.grid[cell.key] ?? null })),
+    () => ARTIFACT_GRID_9.map((cell) => ({ key: cell.key, slotType: cell.slotType, artifact: sheet.items.grid[cell.key] ?? null })),
     [sheet.items.grid],
   );
 
@@ -118,10 +120,10 @@ export function useInventory(campaignId: string, characterId: string, sheet: Cha
 
         if (clearSelection) setSelectedKey(null);
       } catch (e) {
-        void notify(e instanceof Error && e.message ? e.message : "Не вдалося виконати дію");
+        void notify(e instanceof Error && e.message ? e.message : t("errors.actionFailed"));
       }
     },
-    [canAct, mutateAsync, notify],
+    [canAct, mutateAsync, notify, t],
   );
 
   const drop = useCallback(
@@ -163,8 +165,8 @@ export function useInventory(campaignId: string, characterId: string, sheet: Cha
       unequip: (slot) => run({ action: "stash", slot }, true),
       drop,
       use: (itemId) => run({ action: "useItem", itemId }, false),
-      revoke: (artifact) => ask(`Забрати «${artifact.name}»?`, "Забрати", { action: "revoke", artifactId: artifact.id }),
-      remove: (item) => ask(`Викинути «${item.name}»?`, "Викинути", { action: "removeItem", itemId: item.id }),
+      revoke: (artifact) => ask(t("confirm.revokeTitle", { name: artifact.name }), t("confirm.revoke"), { action: "revoke", artifactId: artifact.id }),
+      remove: (item) => ask(t("confirm.removeTitle", { name: item.name }), t("confirm.remove"), { action: "removeItem", itemId: item.id }),
     },
     isPending,
   };

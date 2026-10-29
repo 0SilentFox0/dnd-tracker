@@ -1,5 +1,6 @@
 import { API_ERRORS } from "@/lib/constants/api-errors";
 import { BATTLE_MUSIC_BUCKET, MAX_TRACK_BYTES, TRACK_CONTENT_TYPES, TRACK_EXTENSIONS, TRACK_FORMATS,type TrackFormat } from "@/lib/constants/music";
+import { ContentError } from "@/lib/server/content/errors";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { ensureBucket } from "@/lib/supabase/buckets";
 import { bucketObjectPath } from "@/lib/utils/common/image-url";
@@ -68,7 +69,7 @@ export async function removeTrackFile(url: string, options: { strict?: boolean }
     const { error } = await createAdminClient().storage.from(BATTLE_MUSIC_BUCKET).remove([path]);
 
     if (error) {
-      if (options.strict) throw new Error("Не вдалося видалити файл музики");
+      if (options.strict) throw new ContentError(API_ERRORS.TRACK_FILE_DELETE_FAILED, 502);
 
       console.warn("[battle-music] remove failed", path, error.message);
     }

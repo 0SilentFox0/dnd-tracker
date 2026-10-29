@@ -1,6 +1,7 @@
+import { useTranslations } from "next-intl";
+
 import { HudSection } from "@/components/hud/form";
-import { CORE_ABILITY_SCORES } from "@/lib/constants/abilities";
-import { DND_SAVING_THROWS, DND_SKILL_META, DND_SKILLS } from "@/lib/constants/skills";
+import { DND_SAVING_THROWS, DND_SKILLS } from "@/lib/constants/skills";
 import type { CharacterFormBindings } from "@/lib/utils/characters/form/bindings";
 
 interface CharacterSkillsSectionProps {
@@ -10,11 +11,15 @@ interface CharacterSkillsSectionProps {
 export function CharacterSkillsSection({
   skills: skillsGroup,
 }: CharacterSkillsSectionProps) {
+  const t = useTranslations("characters.form.sections");
+
+  const tc = useTranslations("common");
+
   const { data: { savingThrows, skills }, handlers } = skillsGroup;
   
   return (
     <div className="w-full">
-      <HudSection title="Рятівні кидки">
+      <HudSection title={t("savingThrows")}>
         <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
           {DND_SAVING_THROWS.map((ability) => (
             <label key={ability} className="flex h-11 items-center space-x-2 cursor-pointer">
@@ -24,13 +29,13 @@ export function CharacterSkillsSection({
                 onChange={() => handlers.toggleSavingThrow(ability)}
                 className="rounded"
               />
-              <span className="text-sm">{CORE_ABILITY_SCORES.find((a) => a.key === ability)?.label ?? ability}</span>
+              <span className="text-sm">{tc(`abilities.${ability}.label`)}</span>
             </label>
           ))}
         </div>
       </HudSection>
 
-      <HudSection title="Навички">
+      <HudSection title={t("skills")}>
         <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
           {DND_SKILLS.map((skill) => (
             <label key={skill} className="flex h-11 items-center space-x-2 cursor-pointer">
@@ -40,7 +45,7 @@ export function CharacterSkillsSection({
                 onChange={() => handlers.toggleSkill(skill)}
                 className="rounded"
               />
-              <span className="text-sm">{DND_SKILL_META[skill].label}</span>
+              <span className="text-sm">{tc(`dndSkills.${skill}`)}</span>
             </label>
           ))}
         </div>

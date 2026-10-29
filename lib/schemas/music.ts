@@ -28,7 +28,7 @@ export const createTrackSchema = z.discriminatedUnion("kind", [
 
 export const updateTrackSchema = z
   .object({ title: trackTitleSchema.optional(), url: youtubeUrlSchema.optional(), durationSec: trackDurationSchema.nullable().optional() })
-  .refine((v) => Object.values(v).some((x) => x !== undefined), "Немає що змінювати");
+  .refine((v) => Object.values(v).some((x) => x !== undefined), "music.validation.nothingToChange");
 
 export const reorderTracksSchema = z.object({ ids: z.array(z.string().min(1).max(64)).min(1).max(MAX_TRACKS_PER_CAMPAIGN) });
 

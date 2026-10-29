@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useTranslations } from "next-intl";
 
 import { useProfile } from "../ProfileContext";
 
@@ -18,6 +19,10 @@ const FORM_ID = "resources-edit-form";
 
 export function ResourcesDialog({ rest, open, onOpenChange }: { rest: SheetRest; open: boolean; onOpenChange: (open: boolean) => void }) {
   const { campaignId, characterId } = useProfile();
+
+  const t = useTranslations("rest.resources");
+
+  const tc = useTranslations("common.actions");
 
   const edit = useEditResources(campaignId, characterId);
 
@@ -42,7 +47,7 @@ export function ResourcesDialog({ rest, open, onOpenChange }: { rest: SheetRest;
   const save = () => filled && send({ hp: Number(hp), tempHp: Number(temp), exhaustion: Number(exhaustion), ...(Object.keys(changedCharges).length > 0 && { charges: changedCharges }) });
 
   const toggleDead = async () => {
-    if (rest.dead || (await confirm({ title: "Позначити героя загиблим?", confirmLabel: "Позначити", destructive: true }))) send({ dead: !rest.dead });
+    if (rest.dead || (await confirm({ title: t("deadConfirmTitle"), confirmLabel: t("deadConfirm"), destructive: true }))) send({ dead: !rest.dead });
   };
 
   return (
@@ -50,38 +55,38 @@ export function ResourcesDialog({ rest, open, onOpenChange }: { rest: SheetRest;
       hud
       open={open}
       onOpenChange={onOpenChange}
-      title="Ресурси героя"
+      title={t("title")}
       footer={
         <>
           <Button type="button" variant="outline" disabled={edit.isPending} onClick={() => send({ reset: true })}>
-            Повністю відновити
+            {t("restore")}
           </Button>
           <Button type="button" variant="outline" disabled={edit.isPending} onClick={() => void toggleDead()}>
-            {rest.dead ? "Воскресити" : "Позначити загиблим"}
+            {rest.dead ? t("revive") : t("markDead")}
           </Button>
           <Button type="submit" form={FORM_ID} disabled={edit.isPending || !filled}>
-            Зберегти
+            {tc("save")}
           </Button>
         </>
       }
     >
       <form id={FORM_ID} className="grid grid-cols-3 gap-3" onSubmit={(e) => { e.preventDefault(); save(); }}>
         <div>
-          <Label htmlFor="res-hp">HP (макс. {rest.hp?.max ?? "—"})</Label>
+          <Label htmlFor="res-hp">{t("hp", { max: rest.hp?.max ?? "—" })}</Label>
           <Input id="res-hp" type="number" min={0} value={hp} onChange={(e) => setHp(e.target.value)} />
         </div>
         <div>
-          <Label htmlFor="res-temp">Тимч. HP</Label>
+          <Label htmlFor="res-temp">{t("tempHp")}</Label>
           <Input id="res-temp" type="number" min={0} value={temp} onChange={(e) => setTemp(e.target.value)} />
         </div>
         <div>
-          <Label htmlFor="res-exh">Виснаження</Label>
+          <Label htmlFor="res-exh">{t("exhaustion")}</Label>
           <Input id="res-exh" type="number" min={0} max={MAX_EXHAUSTION} value={exhaustion} onChange={(e) => setExhaustion(e.target.value)} />
         </div>
         {itemCharges.map((c) => (
           <div key={c.key} className="col-span-3 grid grid-cols-[1fr_6rem] items-center gap-2">
-            <Label htmlFor={`res-charge-${c.key}`}>{c.name} (з {c.uses})</Label>
-            <Input id={`res-charge-${c.key}`} aria-label={`${c.name}: витрачено`} type="number" min={0} max={c.uses} value={spent[c.key] ?? ""} onChange={(e) => setSpent((s) => ({ ...s, [c.key]: e.target.value }))} />
+            <Label htmlFor={`res-charge-${c.key}`}>{t("charge", { name: c.name, uses: c.uses })}</Label>
+            <Input id={`res-charge-${c.key}`} aria-label={t("chargeSpent", { name: c.name })} type="number" min={0} max={c.uses} value={spent[c.key] ?? ""} onChange={(e) => setSpent((s) => ({ ...s, [c.key]: e.target.value }))} />
           </div>
         ))}
       </form>

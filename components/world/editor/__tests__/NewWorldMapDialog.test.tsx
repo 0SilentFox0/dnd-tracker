@@ -6,6 +6,7 @@ import { NewWorldMapDialog } from "../NewWorldMapDialog";
 import { WorldEditorContext, type WorldEditorCtx } from "../WorldEditorContext";
 
 import { renderWithConfirm } from "@/components/ui/__tests__/render-with-confirm";
+import { API_ERRORS } from "@/lib/constants/api-errors";
 
 const upload = vi.fn();
 
@@ -80,14 +81,14 @@ describe("NewWorldMapDialog", () => {
   });
 
   it("shows WORLD_ROOT_EXISTS (409) in the name field", async () => {
-    create.mockRejectedValue(new Error("Коренева карта вже є"));
+    create.mockRejectedValue(new Error(API_ERRORS.WORLD_ROOT_EXISTS));
 
     renderDialog();
     fireEvent.change(screen.getByLabelText(/Назва/), { target: { value: "Світ" } });
     pickFile();
     submit();
 
-    expect(await screen.findByText("Коренева карта вже є")).toBeTruthy();
+    expect(await screen.findByText(API_ERRORS.WORLD_ROOT_EXISTS)).toBeTruthy();
   });
 
   it("blocks submit until a file is chosen", () => {

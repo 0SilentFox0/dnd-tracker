@@ -1,6 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
+import { useTranslations } from "next-intl";
 
 import { useCreateMainSkill, useMainSkills } from "./useMainSkills";
 import { useSkills } from "./useSkills";
@@ -14,6 +15,8 @@ import * as edit from "@/lib/utils/skills/progression";
 import type { Skill } from "@/types/skills";
 
 export function useSkillTreeEditor(campaignId: string) {
+  const t = useTranslations("skillTree");
+
   const notify = useNotify();
 
   const confirm = useConfirm();
@@ -92,7 +95,7 @@ export function useSkillTreeEditor(campaignId: string) {
   const setRaceSafely = async (next: string) => {
     if (next === activeRace) return;
 
-    if (dirty && !(await confirm({ title: "Перейти до іншої раси?", description: "Незбережені зміни дерева буде втрачено.", confirmLabel: "Перейти", destructive: true }))) return;
+    if (dirty && !(await confirm({ title: t("editor.switchRace.title"), description: t("editor.switchRace.description"), confirmLabel: t("editor.switchRace.confirm"), destructive: true }))) return;
 
     setRace(next);
     setDraft(null);

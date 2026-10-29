@@ -25,6 +25,6 @@ describe("characterBaseHp", () => {
     const hp = characterBaseHp(c, { entries });
 
     expect(hp.total).toBe(12 + 8 + 8);
-    expect(hp.breakdown).toEqual(["Кістки хітів: 3d10"]);
+    expect(hp.breakdown).toEqual([{ label: "characterProfile.sheet.lines.hitDice", params: { dice: "3d10" } }]);
   });
 });

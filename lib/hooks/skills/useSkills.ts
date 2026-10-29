@@ -1,3 +1,4 @@
+import { useTranslations } from "next-intl";
 import { useQuery } from "@tanstack/react-query";
 
 import { skillKeys } from "./keys";
@@ -56,10 +57,12 @@ export function useDeleteSkill(campaignId: string) {
 
 /** Копія з новим id, назва + " (копія)" */
 export function useDuplicateSkill(campaignId: string) {
+  const t = useTranslations("skills.list");
+
   return useCrudMutation({
     mutationFn: (skillId: string) => duplicateSkill(campaignId, skillId),
     invalidateKeys: [skillKeys.list(campaignId)],
-    errorText: "Не вдалося дублювати скіл. Спробуйте ще раз.",
+    errorText: t("duplicateFailed"),
   });
 }
 

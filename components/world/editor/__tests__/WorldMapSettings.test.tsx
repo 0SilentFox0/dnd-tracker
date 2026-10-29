@@ -59,7 +59,7 @@ describe("WorldMapSettings", () => {
     fireEvent.click(screen.getByRole("button", { name: /Видалити карту/ }));
 
     await screen.findByText(/1 вкладених/);
-    fireEvent.click(screen.getByRole("button", { name: "Скасувати" }));
+    fireEvent.click(screen.getByRole("button", { name: "common.actions.cancel" }));
 
     await waitFor(() => expect(screen.queryByText(/1 вкладених/)).toBeNull());
     expect(remove).not.toHaveBeenCalled();

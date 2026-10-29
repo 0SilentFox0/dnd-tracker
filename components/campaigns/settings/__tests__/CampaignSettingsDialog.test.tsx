@@ -13,7 +13,7 @@ vi.mock("@/lib/api/campaigns", () => ({ deleteCampaign: vi.fn(async () => ({ suc
 
 Object.assign(Element.prototype, { hasPointerCapture: () => false, releasePointerCapture: () => {}, setPointerCapture: () => {}, scrollIntoView: () => {} });
 
-const campaign: CampaignSettings = { name: "Зоря", description: null, maxLevel: 20, allowPlayerEdit: true, critChoiceByDm: false, status: "active" };
+const campaign: CampaignSettings = { name: "Зоря", description: null, maxLevel: 20, allowPlayerEdit: true, critChoiceByDm: false, acquaintancesEnabled: false, status: "active" };
 
 const baseMeta: CampaignSettingsMeta = { createdFromId: null, isTemplate: false };
 
@@ -36,20 +36,20 @@ describe("CampaignSettingsDialog: видалення", () => {
 
   it("показує небезпечну зону; після підтвердження видаляє кампанію", async () => {
     renderDialog();
-    expect(screen.getByText("Небезпечна зона")).toBeInTheDocument();
-    fireEvent.click(screen.getByRole("button", { name: "Видалити кампанію" }));
-    expect(await screen.findByText("Видалити кампанію «Зоря»?")).toBeInTheDocument();
+    expect(screen.getByText("campaigns.settings.danger")).toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: "campaigns.settings.delete" }));
+    expect(await screen.findByText('campaigns.settings.confirmDelete.title {"name":"Зоря"}')).toBeInTheDocument();
     expect(deleteCampaign).not.toHaveBeenCalled();
-    fireEvent.click(screen.getByRole("button", { name: "Видалити" }));
+    fireEvent.click(screen.getByRole("button", { name: "common.actions.delete" }));
     await waitFor(() => expect(deleteCampaign).toHaveBeenCalledWith("c1"));
   });
 
   it("скасування підтвердження не видаляє", async () => {
     renderDialog();
-    fireEvent.click(screen.getByRole("button", { name: "Видалити кампанію" }));
-    await screen.findByText("Видалити кампанію «Зоря»?");
-    fireEvent.click(screen.getAllByRole("button", { name: "Скасувати" }).pop() as HTMLElement);
-    await waitFor(() => expect(screen.queryByText("Видалити кампанію «Зоря»?")).not.toBeInTheDocument());
+    fireEvent.click(screen.getByRole("button", { name: "campaigns.settings.delete" }));
+    await screen.findByText('campaigns.settings.confirmDelete.title {"name":"Зоря"}');
+    fireEvent.click(screen.getAllByRole("button", { name: "common.actions.cancel" }).pop() as HTMLElement);
+    await waitFor(() => expect(screen.queryByText('campaigns.settings.confirmDelete.title {"name":"Зоря"}')).not.toBeInTheDocument());
     expect(deleteCampaign).not.toHaveBeenCalled();
   });
 });
@@ -59,19 +59,19 @@ describe("CampaignSettingsDialog: оновлення з шаблону", () => {
 
   it("без createdFromId кнопки немає", () => {
     renderDialog();
-    expect(screen.queryByRole("button", { name: "Оновлення з шаблону" })).toBeNull();
+    expect(screen.queryByRole("button", { name: "campaigns.sourceSync.title.fromTemplate" })).toBeNull();
   });
 
   it("з createdFromId кнопка відкриває діалог синхронізації", () => {
     renderDialog({ createdFromId: "t1" });
     expect(screen.queryByText("sync-dialog-open")).toBeNull();
-    fireEvent.click(screen.getByRole("button", { name: "Оновлення з шаблону" }));
+    fireEvent.click(screen.getByRole("button", { name: "campaigns.sourceSync.title.fromTemplate" }));
     expect(screen.getByText("sync-dialog-open")).toBeTruthy();
   });
 
   it("збереження не шле createdFromId та isTemplate", async () => {
     renderDialog({ createdFromId: "t1", isTemplate: true });
-    fireEvent.click(screen.getByRole("button", { name: "Зберегти" }));
+    fireEvent.click(screen.getByRole("button", { name: "common.actions.save" }));
     await waitFor(() => expect(updateCampaign).toHaveBeenCalled());
 
     const body = vi.mocked(updateCampaign).mock.calls[0][1] as Record<string, unknown>;
@@ -89,13 +89,13 @@ describe("CampaignSettingsDialog: джерела й ліцензії", () => {
 
   it("показує credits лише для читання, коли вони є", () => {
     renderDialog({ credits: "SRD 5.2 by Wizards of the Coast LLC" });
-    expect(screen.getByText("Джерела й ліцензії")).toBeInTheDocument();
+    expect(screen.getByText("campaigns.settings.credits")).toBeInTheDocument();
     expect(screen.getByText("SRD 5.2 by Wizards of the Coast LLC")).toBeInTheDocument();
   });
 
   it("без credits розділу немає", () => {
     renderDialog();
-    expect(screen.queryByText("Джерела й ліцензії")).toBeNull();
+    expect(screen.queryByText("campaigns.settings.credits")).toBeNull();
   });
 });
 
@@ -104,7 +104,27 @@ describe("CampaignSettingsDialog: ефекти крита", () => {
 
   it("показує чекбокс вибору ефектів ДМом", () => {
     renderDialog();
-    expect(screen.getByLabelText("ДМ обирає ефекти крита/провалу")).not.toBeChecked();
-    expect(screen.getByText("Вимкнено — ефект випадковий")).toBeInTheDocument();
+    expect(screen.getByLabelText("campaigns.settings.critChoiceByDm")).not.toBeChecked();
+    expect(screen.getByText("campaigns.settings.critChoiceHint")).toBeInTheDocument();
+  });
+});
+
+describe("CampaignSettingsDialog: знайомства", () => {
+  afterEach(() => {
+    cleanup();
+    vi.clearAllMocks();
+  });
+
+  it("перемикач знайомств іде в payload збереження", async () => {
+    renderDialog();
+
+    const toggle = screen.getByLabelText("campaigns.settings.acquaintances");
+
+    expect(toggle).toHaveAttribute("data-state", "unchecked");
+
+    fireEvent.click(toggle);
+    fireEvent.click(screen.getByRole("button", { name: "common.actions.save" }));
+
+    await waitFor(() => expect(updateCampaign).toHaveBeenCalledWith("c1", expect.objectContaining({ acquaintancesEnabled: true })));
   });
 });

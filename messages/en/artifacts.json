@@ -1,0 +1,212 @@
+{
+  "rarity": {
+    "common": "Common",
+    "uncommon": "Uncommon",
+    "rare": "Rare",
+    "epic": "Epic",
+    "legendary": "Legendary"
+  },
+  "slots": {
+    "weapon": "Weapon",
+    "range_weapon": "Ranged weapon",
+    "shield": "Shield",
+    "cloak": "Cloak",
+    "ring": "Ring",
+    "helmet": "Helmet",
+    "amulet": "Amulet",
+    "armor": "Armor",
+    "boots": "Boots",
+    "item": "Artifact"
+  },
+  "page": {
+    "title": "Artifacts",
+    "subtitle": "Manage artifacts and sets",
+    "setsLink": "Artifact sets",
+    "create": "+ Create artifact",
+    "loading": "Loading artifacts…",
+    "emptyTitle": "No artifacts yet",
+    "createFirst": "Create the first artifact",
+    "searchLabel": "Search artifacts",
+    "searchPlaceholder": "Search by name or set",
+    "setsSection": "Artifact sets",
+    "ungroupedSection": "Artifacts without a set"
+  },
+  "card": {
+    "slotChangeFailed": "Failed to change the slot",
+    "slotPlaceholder": "Slot",
+    "edit": "Edit",
+    "kindProperty": "Property",
+    "kindGear": "Gear",
+    "set": "Set: {name}",
+    "deleteTitle": "Delete artifact"
+  },
+  "list": {
+    "confirmDelete": "Are you sure you want to delete this artifact?",
+    "deleteAllNoun": "artifacts",
+    "deleteAllTitle": "Delete all artifacts?",
+    "deleteAllDescription": "All artifacts of the campaign ({count}) will be deleted. Artifact sets will stay but become empty. This cannot be undone."
+  },
+  "form": {
+    "createTitle": "Create artifact",
+    "createDescription": "Artifact bonuses and effects are defined by abilities",
+    "createSubmit": "Create artifact",
+    "createSaving": "Creating...",
+    "createIconHint": "On save the external link is copied to Supabase Storage (bucket {bucket}); the database keeps a public URL from your project.",
+    "editTitle": "Edit artifact",
+    "editDescription": "Changes are saved when you press the button",
+    "editSubmit": "Save",
+    "editSaving": "Saving...",
+    "editIconHint": "On save a new external link is uploaded to the {bucket} bucket. A URL already on Supabase stays unchanged.",
+    "tabs": {
+      "weapon": "Weapon",
+      "armor": "Armor",
+      "item": "Item"
+    },
+    "name": "Name",
+    "namePlaceholder": "For example: Ring of Sar Issa",
+    "rarity": "Rarity",
+    "rarityPlaceholder": "Choose rarity",
+    "slot": "Slot",
+    "slotPlaceholder": "Choose slot",
+    "set": "Set",
+    "noSet": "No set",
+    "description": "Description",
+    "descriptionPlaceholder": "Short artifact description",
+    "icon": "Icon (URL from the internet)"
+  },
+  "weapon": {
+    "title": "Weapon",
+    "bonusTitle": "Property bonuses",
+    "damageDice": "Damage dice",
+    "damageType": "Damage type",
+    "range": "Range",
+    "properties": "Note",
+    "propertiesPlaceholder": "magical, silvered…",
+    "attackBonus": "Attack bonus",
+    "damageBonus": "+N damage",
+    "minTargets": "Min. targets",
+    "maxTargets": "Max. targets",
+    "attackType": "Attack type",
+    "attackAuto": "Auto",
+    "melee": "Melee",
+    "ranged": "Ranged"
+  },
+  "armor": {
+    "title": "Armor",
+    "hint": "A class hero's AC is computed from the armor base and Dexterity.",
+    "add": "Add armor model",
+    "category": "Armor category",
+    "base": "AC base",
+    "dexCap": "Dexterity cap",
+    "strength": "Strength requirement",
+    "stealth": "Stealth disadvantage",
+    "remove": "Remove armor model",
+    "categories": {
+      "light": "Light",
+      "medium": "Medium",
+      "heavy": "Heavy"
+    }
+  },
+  "item": {
+    "title": "Item",
+    "gear": "Ordinary gear (non-unique)",
+    "property": "Property (granted together with a base)",
+    "appliesTo": "Applies to",
+    "attackType": "Attack type",
+    "attackAny": "any",
+    "attackMelee": "melee",
+    "attackRanged": "ranged",
+    "bases": "Only these bases (empty means all suitable)",
+    "nameTemplate": "Name template ({token} is the base name)",
+    "preview": "Preview: {name}",
+    "attunement": "Requires attunement",
+    "charges": "Charges",
+    "recharge": "Recharge",
+    "consumable": "Consumable (granted by quantity)",
+    "kinds": {
+      "weapon": "Weapon",
+      "armor": "Armor",
+      "shield": "Shield"
+    },
+    "rest": {
+      "long": "Long rest",
+      "short": "Short rest",
+      "none": "Do not recharge"
+    }
+  },
+  "casting": {
+    "parameter": "Parameter on grant",
+    "parameterAria": "Item parameter kind",
+    "noParameter": "No parameter",
+    "damageType": "Damage type",
+    "creatureType": "Creature type",
+    "spellAria": "Item spell",
+    "spellMissing": "Spell not found",
+    "cost": "Cost",
+    "castLevel": "Level",
+    "dc": "DC",
+    "attackBonus": "Attack bonus",
+    "numberAria": "Item {label}",
+    "upcast": "Allow upcasting",
+    "maxLevel": "Maximum level",
+    "maxLevelAria": "Item maximum level",
+    "extraCost": "Cost of each extra level",
+    "removeSpell": "Remove item spell",
+    "addSpell": "Add item spell",
+    "scrollNote": "The DM decides who may read the scroll. Casting and spending are automated."
+  },
+  "sets": {
+    "page": {
+      "title": "Artifact sets",
+      "subtitle": "Groups of artifacts with a bonus for the full set (in battle)",
+      "new": "+ New set",
+      "toArtifacts": "To artifacts",
+      "emptyTitle": "No sets yet",
+      "emptyDescription": "A set gives a bonus when a character wears all of its artifacts.",
+      "createFirst": "Create the first set",
+      "searchLabel": "Search sets"
+    },
+    "new": {
+      "title": "New artifact set",
+      "aside": "Set the full-set bonus and pick the member artifacts."
+    },
+    "edit": {
+      "title": "Edit set"
+    },
+    "card": {
+      "iconAlt": "Icon of set “{name}”",
+      "bonus": "Set effect",
+      "inSet": "{count, plural, one {# artifact} other {# artifacts}} in the set",
+      "edit": "Edit",
+      "editSet": "Edit set",
+      "parts": "Parts: {count}"
+    },
+    "form": {
+      "tabs": {
+        "members": "Artifacts"
+      },
+      "name": "Set name *",
+      "namePlaceholder": "For example, Dragon's Legacy",
+      "nameRequired": "Enter the set name",
+      "description": "Description (for reference)",
+      "descriptionPlaceholder": "Briefly what the set is for",
+      "icon": "Battle icon",
+      "iconHint": "Shown next to the portrait in battle when the set is complete. An uploaded file is stored in the campaign storage (like artifact icons); the database keeps a link.",
+      "bonusName": "Bonus name",
+      "bonusNamePlaceholder": "For example, Dragon's Blood",
+      "bonusDescription": "Bonus description",
+      "delete": "Delete set",
+      "saving": "Saving…",
+      "saveChanges": "Save changes",
+      "create": "Create set"
+    },
+    "members": {
+      "title": "Artifacts in the set",
+      "hint": "The bonus applies only if the character has equipped all artifacts chosen here. Only artifacts without another set or already in this set are available.",
+      "empty": "No artifacts available. Create artifacts in the “Artifacts” section."
+    },
+    "list": {
+      "confirmDelete": "Delete the set? The artifacts stay in the campaign, their “Set” field will be cleared."
+    }
+  }
+}

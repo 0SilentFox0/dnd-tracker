@@ -24,7 +24,7 @@ describe("DmCharacterCard: out of combat", () => {
     show();
 
     expect(screen.queryByText("✦")).toBeNull();
-    expect(screen.queryByText("Рівень доступний")).toBeNull();
+    expect(screen.queryByText("characters.card.levelReady")).toBeNull();
   });
 
   it("all toggles on: current HP, inspiration, level-up badge", () => {
@@ -33,6 +33,6 @@ describe("DmCharacterCard: out of combat", () => {
 
     expect(screen.getByLabelText("HP").textContent).toContain("3");
     expect(screen.getByText("✦")).toBeTruthy();
-    expect(screen.getByText("Рівень доступний")).toBeTruthy();
+    expect(screen.getByText("characters.card.levelReady")).toBeTruthy();
   });
 });
