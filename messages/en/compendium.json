@@ -1,0 +1,10 @@
+{
+  "errors": {
+    "previewSecretRequired": "Import is unavailable: COMPENDIUM_PREVIEW_SECRET is not set on the server (a random string of at least 32 characters). Add it to the environment variables (.env.local or Vercel) and restart the server.",
+    "previewStale": "The campaign or the preview expiry has changed. Run the check again.",
+    "previewInvalid": "The preview signature is invalid. Run the check again.",
+    "requestSize": "The selected set is too large. Choose fewer categories or sections.",
+    "forbidden": "Only the campaign DM has access, via a session.",
+    "importFailed": "The import failed. No partial record was committed; try again with the same key."
+  }
+}

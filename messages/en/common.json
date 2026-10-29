@@ -367,5 +367,8 @@
     "basic": "Basics",
     "abilities": "Abilities",
     "choices": "Choices"
+  },
+  "errors": {
+    "imageUploadFailed": "Failed to upload the image: {message}"
   }
 }

@@ -1,3 +1,13 @@
+import type scenario from "./messages/uk/scenario.json";
+import type show from "./messages/uk/show.json";
+import type acquaintances from "./messages/uk/acquaintances.json";
+import type world from "./messages/uk/world.json";
+import type ai from "./messages/uk/ai.json";
+import type compendium from "./messages/uk/compendium.json";
+import type contentImport from "./messages/uk/contentImport.json";
+import type gameTerms from "./messages/uk/gameTerms.json";
+import type assistant from "./messages/uk/assistant.json";
+import type compendiumReport from "./messages/uk/compendiumReport.json";
 import type abilities from "./messages/uk/abilities.json";
 import type abilityRegistry from "./messages/uk/abilityRegistry.json";
 import type artifacts from "./messages/uk/artifacts.json";
@@ -61,6 +71,16 @@ declare module "next-intl" {
       abilityRegistry: typeof abilityRegistry;
       rules: typeof rules;
       skillTree: typeof skillTree;
+      scenario: typeof scenario;
+      show: typeof show;
+      acquaintances: typeof acquaintances;
+      world: typeof world;
+      ai: typeof ai;
+      compendium: typeof compendium;
+      contentImport: typeof contentImport;
+      gameTerms: typeof gameTerms;
+      assistant: typeof assistant;
+      compendiumReport: typeof compendiumReport;
     };
   }
 }

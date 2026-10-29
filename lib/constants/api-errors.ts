@@ -435,6 +435,13 @@ export const API_ERRORS = {
   CHARACTER_GOALS_INVALID: "errors.characterGoalsInvalid",
   CHARACTER_NOTES_INVALID: "errors.characterNotesInvalid",
   CHARACTER_CONTROLLER_INVALID: "errors.characterControllerInvalid",
+  COMPENDIUM_PREVIEW_SECRET_REQUIRED: "compendium.errors.previewSecretRequired",
+  COMPENDIUM_PREVIEW_STALE: "compendium.errors.previewStale",
+  COMPENDIUM_PREVIEW_INVALID: "compendium.errors.previewInvalid",
+  COMPENDIUM_REQUEST_SIZE: "compendium.errors.requestSize",
+  COMPENDIUM_FORBIDDEN: "compendium.errors.forbidden",
+  COMPENDIUM_IMPORT_FAILED: "compendium.errors.importFailed",
+  IMAGE_UPLOAD_FAILED: "common.errors.imageUploadFailed",
 } as const;
 
 export type ApiErrorKey = (typeof API_ERRORS)[keyof typeof API_ERRORS];

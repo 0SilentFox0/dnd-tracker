@@ -367,5 +367,8 @@
     "basic": "Основне",
     "abilities": "Вміння",
     "choices": "Вибори"
+  },
+  "errors": {
+    "imageUploadFailed": "Не вдалося завантажити картинку: {message}"
   }
 }
