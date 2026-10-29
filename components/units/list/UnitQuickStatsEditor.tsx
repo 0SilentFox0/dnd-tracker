@@ -1,6 +1,7 @@
 "use client";
 
 import type { ReactNode } from "react";
+import { useTranslations } from "next-intl";
 import { Check } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
@@ -33,6 +34,8 @@ function QuickStatInput({
   numeric?: boolean;
   inputProps?: React.ComponentProps<typeof Input>;
 }) {
+  const tActions = useTranslations("common.actions");
+
   const commitFromInput = () => field.commit((document.getElementById(field.id) as HTMLInputElement | null)?.value ?? "");
 
   return (
@@ -61,7 +64,7 @@ function QuickStatInput({
           type="button"
           variant="ghost"
           size="icon"
-          aria-label="Зберегти"
+          aria-label={tActions("save")}
           className="size-7 shrink-0 text-hud-gold hover:text-hud-gold-strong"
           disabled={disabled}
           onClick={(e) => {
@@ -82,6 +85,10 @@ export function UnitQuickStatsEditor({
   primaryAttackIndex,
   primaryAttackName,
 }: UnitQuickStatsEditorProps) {
+  const t = useTranslations("units.quickStats");
+
+  const tStats = useTranslations("common.stats");
+
   const { field, isBusy } = useUnitQuickStats(unit, campaignId, primaryAttackIndex);
 
   const attacks = Array.isArray(unit.attacks) ? unit.attacks : [];
@@ -90,17 +97,17 @@ export function UnitQuickStatsEditor({
 
   return (
     <div className="grid grid-cols-[1fr_1fr_1.4fr] gap-2" onClick={(e) => e.stopPropagation()}>
-      <QuickStatInput field={field("ac")} label="Броня (AC)" disabled={isBusy} numeric inputProps={{ min: 0 }} />
-      <QuickStatInput field={field("init")} label="Ініціатива" disabled={isBusy} numeric />
+      <QuickStatInput field={field("ac")} label={t("ac")} disabled={isBusy} numeric inputProps={{ min: 0 }} />
+      <QuickStatInput field={field("init")} label={tStats("initiative")} disabled={isBusy} numeric />
       {hasPrimaryAttack ? (
         <QuickStatInput
           field={field("dice")}
-          label={attacks.length > 1 && primaryAttackName ? `Кубики (${primaryAttackName})` : "Кубики шкоди"}
+          label={attacks.length > 1 && primaryAttackName ? t("diceNamed", { name: primaryAttackName }) : t("dice")}
           disabled={isBusy}
-          inputProps={{ placeholder: "2d6+3", title: "Enter, ✓ або втрата фокусу" }}
+          inputProps={{ placeholder: "2d6+3", title: t("diceHint") }}
         />
       ) : (
-        <p className="self-end text-[11px] leading-tight text-hud-muted">Немає атак — кубики в повному редакторі</p>
+        <p className="self-end text-[11px] leading-tight text-hud-muted">{t("noAttacks")}</p>
       )}
     </div>
   );

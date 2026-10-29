@@ -34,6 +34,7 @@ export function multiattackAbilities(unit: { id: string; name: string; multiatta
   if (extra < 1) return [];
 
   return resolveAbilities({ type: "unit", id: unit.id, name: unit.name }, [
+    // eslint-disable-next-line no-restricted-syntax -- default ability name stored as data (read by the battle log)
     { id: "multiattack", name: `Мультиатака ×${extra + 1}`, trigger: { event: "passive" }, effects: [{ kind: "modifyStat", stat: "attacksPerAction", flat: extra }] },
   ]);
 }

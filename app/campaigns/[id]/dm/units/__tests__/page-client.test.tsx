@@ -41,7 +41,7 @@ describe("DM units list", () => {
   it("порожній список — EmptyState із заголовком", () => {
     renderPage([]);
 
-    expect(screen.getByText("Ще немає юнітів")).toBeInTheDocument();
+    expect(screen.getByText("units.page.emptyTitle")).toBeInTheDocument();
   });
 
   it("раси згорнуті за замовчуванням, «Без раси» — остання", async () => {
@@ -60,7 +60,7 @@ describe("DM units list", () => {
     renderPage([goblin, wolf]);
     await screen.findByText("Гобліни");
 
-    fireEvent.change(screen.getByLabelText("Пошук юнітів"), { target: { value: "вовк" } });
+    fireEvent.change(screen.getByLabelText("units.toolbar.search"), { target: { value: "вовк" } });
 
     expect(await screen.findByText("Вовк")).toBeInTheDocument();
     expect(screen.queryByText("Гобліни")).toBeNull();

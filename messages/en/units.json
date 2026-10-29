@@ -1,1 +1,184 @@
-{}
+{
+  "page": {
+    "title": "NPC units",
+    "subtitle": "Manage mobs and units · Total: {count}",
+    "addRace": "+ Race",
+    "create": "+ Create unit",
+    "loading": "Loading units…",
+    "emptyTitle": "No units yet",
+    "emptyDescription": "Create your first unit or import them from a file.",
+    "nothingFound": "Nothing found"
+  },
+  "deleteAll": {
+    "noun": "units",
+    "label": "Delete all units",
+    "description": "Are you sure you want to delete all units from the campaign? This cannot be undone. {count, plural, one {# unit} other {# units}} will be deleted."
+  },
+  "toolbar": {
+    "search": "Search units",
+    "hideEmpty": "Hide empty groups",
+    "showEmpty": "Show empty groups",
+    "raceFilter": "Filter by race"
+  },
+  "group": {
+    "total": "{count, plural, one {# unit} other {# units}}",
+    "dropHint": "Drag a unit here to assign the race",
+    "tier": "Level {level} ({count, plural, one {# unit} other {# units}})"
+  },
+  "card": {
+    "dragTitle": "Drag onto a race or level",
+    "levelHp": "Level {level} • HP {hp}",
+    "damage": " • Damage ~{average} ",
+    "abilities": "Abilities:",
+    "immunities": "Immunities:",
+    "spells": "Spells:",
+    "spellCount": "{count, plural, one {# spell} other {# spells}}",
+    "deleteLabel": "Delete unit {name}",
+    "deleteTitle": "Delete unit “{name}”?"
+  },
+  "quickStats": {
+    "ac": "Armor (AC)",
+    "dice": "Damage dice",
+    "diceNamed": "Dice ({name})",
+    "diceHint": "Enter, ✓ or blur",
+    "noAttacks": "No attacks — dice are in the full editor"
+  },
+  "form": {
+    "newTitle": "New unit",
+    "newAside": "Fill in stats, race and attacks",
+    "editTitle": "Edit unit: {name}",
+    "editAside": "Update the unit's information",
+    "loading": "Loading unit…",
+    "error": "Error",
+    "submitCreate": "Create unit",
+    "submitSave": "Save changes",
+    "deleteConfirm": "Are you sure you want to delete this unit?",
+    "tabs": {
+      "attacks": "Attacks",
+      "magic": "Magic",
+      "spells": "Spells",
+      "statblock": "Stat block"
+    }
+  },
+  "basic": {
+    "name": "Unit name",
+    "race": "Race",
+    "racePlaceholder": "Select a race",
+    "avatar": "Avatar (image link)",
+    "abilityScores": "Ability scores",
+    "gridSize": "Grid size",
+    "gridSizes": {
+      "1": "1×1 — normal",
+      "2": "2×2 — large",
+      "3": "3×3 — huge"
+    },
+    "fields": {
+      "level": "Level",
+      "armorClass": "Armor class (AC)",
+      "maxHp": "Maximum HP",
+      "speed": "Speed",
+      "initiative": "Initiative",
+      "proficiencyBonus": "Proficiency bonus",
+      "minTargets": "Min. targets",
+      "maxTargets": "Max. targets"
+    }
+  },
+  "fiveE": {
+    "cr": "Challenge (CR)",
+    "noCr": "No CR (HOMM)",
+    "xp": "XP",
+    "saves": "Saving throw proficiency",
+    "counts": {
+      "multiattack": "Attacks per Attack action",
+      "legendaryActions": "Legendary actions per round",
+      "legendaryResistances": "Legendary resistances per battle"
+    }
+  },
+  "attacks": {
+    "title": "Attacks (damage)",
+    "add": "+ Add attack",
+    "empty": "No attacks added. Click “Add attack” to set damage (name, damage dice, damage type, etc.).",
+    "heading": "Attack #{number}",
+    "name": "Name",
+    "namePlaceholder": "For example: Sword strike",
+    "kind": "Attack kind",
+    "kindPlaceholder": "Select a kind",
+    "kinds": {
+      "melee": "Melee",
+      "ranged": "Ranged"
+    },
+    "dice": "Damage dice",
+    "damageType": "Damage type",
+    "damageTypePlaceholder": "Select a type",
+    "range": "Range (opt.)",
+    "rangePlaceholder": "5 ft, 30/120 ft",
+    "properties": "Note (opt.)",
+    "propertiesPlaceholder": "magical, silvered",
+    "target": "Target (Target/AOE)",
+    "targets": {
+      "target": "Single target",
+      "aoe": "AOE (area)"
+    },
+    "bonus": "Attack bonus",
+    "guaranteed": "Guaranteed damage (opt.)",
+    "guaranteedPlaceholder": "0 — even on a miss",
+    "maxTargets": "Max. targets",
+    "distribution": "Damage distribution (%) — per target",
+    "targetN": "Target {number}",
+    "distributionHint": "Each target: 0–100%. The total may exceed 100%."
+  },
+  "immunities": {
+    "title": "Immunities",
+    "add": "+ Add immunity",
+    "prompt": "Enter the immunity name:",
+    "own": "Unit immunities:",
+    "all": "All immunities:",
+    "empty": "No immunities added. Click “Add immunity” to add one."
+  },
+  "knownSpells": {
+    "title": "Spells",
+    "add": "Add a spell",
+    "levelSuffix": " (level {level})",
+    "known": "Known spells:",
+    "empty": "No spells added. Pick a spell from the list above.",
+    "none": "No spells available in the campaign. Create spells in the “Spells” section."
+  },
+  "spellcasting": {
+    "ability": "Block ability",
+    "bestMental": "Best mental",
+    "dc": "Block DC",
+    "attackBonus": "Block attack bonus",
+    "addSpell": "Add a monster spell",
+    "unknownSpell": "Unknown spell ({id})",
+    "removeLabel": "Remove {name}",
+    "usage": "Usage",
+    "limits": {
+      "will": "At will",
+      "battle": "N per battle",
+      "recharge": "Recharge"
+    },
+    "usesPerBattle": "{name}: uses per battle",
+    "recharge": "Recharge",
+    "castLevel": "{name}: cast level",
+    "grantDc": "{name}: DC",
+    "grantAttack": "{name}: attack bonus",
+    "legendaryOnly": "Legendary / lair action only",
+    "hint": "Additional known spells below are available at will. Empty DC, level and bonus use the block values."
+  },
+  "statblock": {
+    "creatureType": "Creature type",
+    "size": "Size",
+    "alignment": "Alignment",
+    "feet": "{label}, ft",
+    "passivePerception": "Passive Perception",
+    "languages": "Languages",
+    "telepathy": "Telepathy, ft",
+    "lairResistances": "Legendary resistance in lair"
+  },
+  "validation": {
+    "avatarUrl": "Avatar must be an image link (http(s):// or /)",
+    "challengeRating": "CR: 0, 1/8, 1/4, 1/2 or an integer 1–30",
+    "rechargeNeedsPerBattle": "Recharge requires perBattle: 1",
+    "duplicateSpell": "A spell is repeated among the grants"
+  }
+}

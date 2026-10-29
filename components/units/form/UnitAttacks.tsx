@@ -1,5 +1,7 @@
 "use client";
 
+import { useTranslations } from "next-intl";
+
 import { HudSection } from "@/components/hud/form";
 import { Button } from "@/components/ui/button";
 import { UnitAttack as UnitAttackEditor } from "@/components/units/form/UnitAttack";
@@ -18,6 +20,8 @@ const defaultAttack: UnitAttack = {
 };
 
 export function UnitAttacks({ formData, onChange }: UnitAttacksProps) {
+  const t = useTranslations("units.attacks");
+
   const attacks: UnitAttack[] = Array.isArray(formData.attacks)
     ? formData.attacks
     : [];
@@ -46,11 +50,11 @@ export function UnitAttacks({ formData, onChange }: UnitAttacksProps) {
 
   return (
     <HudSection
-      title="Атаки (шкода)"
+      title={t("title")}
       className="space-y-4"
       action={
         <Button type="button" variant="outline" size="sm" onClick={handleAdd}>
-          + Додати атаку
+          {t("add")}
         </Button>
       }
     >
@@ -68,7 +72,7 @@ export function UnitAttacks({ formData, onChange }: UnitAttacksProps) {
         </div>
       ) : (
         <p className="text-sm text-muted-foreground py-4">
-          Немає доданих атак. Натисніть &quot;Додати атаку&quot; щоб вказати урон (назва, кубики шкоди, тип шкоди тощо).
+          {t("empty")}
         </p>
       )}
     </HudSection>

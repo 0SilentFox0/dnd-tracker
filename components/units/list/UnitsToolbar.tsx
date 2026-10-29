@@ -1,5 +1,7 @@
 "use client";
 
+import { useTranslations } from "next-intl";
+
 import { SearchInput } from "@/components/common/SearchInput";
 import { HudChipTabs } from "@/components/hud/page";
 import { Button } from "@/components/ui/button";
@@ -15,18 +17,20 @@ interface UnitsToolbarProps {
 }
 
 export function UnitsToolbar({ query, onSearch, chips, selected, onToggle, hideEmpty }: UnitsToolbarProps) {
+  const t = useTranslations("units.toolbar");
+
   return (
     <div className="space-y-2">
       <div className="flex items-center gap-2">
         <div className="min-w-0 flex-1">
-          <SearchInput value={query} onChange={onSearch} label="Пошук юнітів" />
+          <SearchInput value={query} onChange={onSearch} label={t("search")} />
         </div>
         <Button type="button" variant={hideEmpty.value ? "default" : "outline"} className="whitespace-nowrap text-xs sm:text-sm" aria-pressed={hideEmpty.value} onClick={hideEmpty.onToggle}>
-          {hideEmpty.value ? "Показати пусті групи" : "Сховати пусті групи"}
+          {hideEmpty.value ? t("showEmpty") : t("hideEmpty")}
         </Button>
       </div>
       <HudChipTabs
-        ariaLabel="Фільтр за расою"
+        ariaLabel={t("raceFilter")}
         items={chips.map((chip) => ({
           key: chip.key,
           active: selected.includes(chip.key),
