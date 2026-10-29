@@ -2,7 +2,7 @@ import type { z } from "zod";
 
 import { API_ERRORS } from "@/lib/constants/api-errors";
 import { mapTerrainSchema } from "@/lib/schemas/battles";
-import { applyTerrain, blockedSet, cellKey, inBounds, occupiedBy } from "@/lib/utils/battle/grid";
+import { applyTerrain, blockedSet, cellKey, inBounds, occupiedBy, removeSpellZones } from "@/lib/utils/battle/grid";
 import type { BattleMutationContext, MutationResult } from "@/lib/utils/battle/pipeline/run-battle-mutation";
 import { BattleRuleError } from "@/lib/utils/battle/store";
 import type { MapTerrainResponse } from "@/types/api";
@@ -32,6 +32,8 @@ export function mapTerrainMutation(ctx: BattleMutationContext, body: MapTerrainB
   const { terrain } = body;
 
   const base = { participants: ctx.participants, pending: ctx.pending, events: [] };
+
+  if (!terrain && body.eraseZone) return { ...base, scene: { map: removeSpellZones(map, cells) } };
 
   if (!terrain) return { ...base, scene: { map: applyTerrain(map, cells.filter((k) => !isSpellCell(map.terrain?.[k])), null) } };
 

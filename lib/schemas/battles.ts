@@ -195,6 +195,8 @@ const HAZARD_DAMAGE_TYPES = DAMAGE_ELEMENT_OPTIONS.map((o) => o.value) as [strin
 
 export const mapTerrainSchema = z.object({
   cells: z.array(z.string().regex(/^\d+:\d+$/)).min(1).max(400),
+  /** з terrain: null — стерти цілі зони заклинань, до яких належать клітинки */
+  eraseZone: z.literal(true).optional(),
   terrain: z
     .object({
       kind: z.enum(["wall", "barrier", "hazard", "difficult"]),

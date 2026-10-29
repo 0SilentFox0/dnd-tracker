@@ -14,6 +14,7 @@ const BRUSHES: { value: TerrainBrush; label: string }[] = [
   { value: "hazard", label: "Небезпека" },
   { value: "difficult", label: "Складна" },
   { value: "erase", label: "Стерти" },
+  { value: "erase-zone", label: "Стерти зону" },
 ];
 
 const DAMAGE_OPTIONS = DAMAGE_ELEMENT_OPTIONS.map(({ value, label }) => ({ value, label }));

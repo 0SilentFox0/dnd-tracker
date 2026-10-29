@@ -155,4 +155,22 @@ describe("map-terrain і клітинки зон заклинань", () => {
     expect(out.scene?.map?.terrain?.["2:2"]).toMatchObject({ zoneId: "z1", obscured: true });
     expect(out.scene?.map?.terrain?.["3:3"]).toBeUndefined();
   });
+  it("«стерти зону» прибирає всі клітинки зони, запис spellZones і не чіпає інші", () => {
+    const zone = { kind: "hazard" as const, zoneId: "z1", damage: { dice: "1d6", type: "fire" } };
+
+    const m: BattleMapConfig = {
+      ...map,
+      terrain: { "2:2": zone, "2:3": zone, "3:3": { kind: "wall" }, "6:1": { kind: "difficult", zoneId: "z2" } },
+      spellZones: { z1: {}, z2: {} } as unknown as BattleMapConfig["spellZones"],
+    };
+
+    const out = mapTerrainMutation(ctx({}, m), { cells: ["2:2"], eraseZone: true, terrain: null });
+
+    expect(Object.keys(out.scene?.map?.terrain ?? {}).sort()).toEqual(["3:3", "6:1"]);
+    expect(Object.keys(out.scene?.map?.spellZones ?? {})).toEqual(["z2"]);
+
+    const noZone = mapTerrainMutation(ctx({}, m), { cells: ["3:3"], eraseZone: true, terrain: null });
+
+    expect(noZone.scene?.map?.terrain).toEqual(m.terrain);
+  });
 });

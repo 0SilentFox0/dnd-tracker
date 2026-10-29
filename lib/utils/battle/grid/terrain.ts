@@ -103,6 +103,16 @@ export function applyTerrain(map: BattleMapConfig, cells: string[], value: Terra
   return replaceTerrain(map, terrain);
 }
 
+export function removeSpellZones(map: BattleMapConfig, cells: string[]): BattleMapConfig {
+  const terrain = map.terrain ?? {};
+
+  const ids = new Set(cells.flatMap((k) => (terrain[k]?.zoneId ? [terrain[k].zoneId] : [])));
+
+  if (ids.size === 0) return map;
+
+  return replaceTerrain(map, Object.fromEntries(Object.entries(terrain).filter(([, c]) => !c.zoneId || !ids.has(c.zoneId))));
+}
+
 const terrainId = (c: TerrainCell) => `${c.kind}|${c.label ?? ""}|${c.untilRound ?? ""}|${c.damage ? JSON.stringify(c.damage) : ""}|${c.difficult ? 1 : 0}${c.obscured ? 1 : 0}|${c.zoneId ?? ""}`;
 
 export function diffTerrain(before: BattleMapConfig["terrain"], after: BattleMapConfig["terrain"]): TerrainDiff | null {
