@@ -108,7 +108,7 @@ it.each(["HTTPS", "hTtPs"])("redacts signed URLs with %s scheme before tool outp
 
   const text = await runTool(tool("assistant_read"), session, { actionId: "show.get", input: {} });
 
-  expect(JSON.parse(text)).toMatchObject({ kind: "result", data: { result: { data: { image: "[приховане посилання]" } } } });
+  expect(JSON.parse(text)).toMatchObject({ kind: "result", data: { result: { data: { image: "[hidden link]" } } } });
   expect(text).not.toContain("PRIVATE_SIGNATURE");
 
   const { fitContext } = await import("@/lib/ai/context/budget");

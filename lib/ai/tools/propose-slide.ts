@@ -22,7 +22,7 @@ const proposeSlideSchema = z.object({
 export const proposeSceneSlideTool = defineTool({
   name: "propose_scene_slide",
   scopes: ["show:write"],
-  title: "Згенерувати картинку для сцени",
+  title: "Generate a scene image",
   description:
     "Generate an image for a scene and propose adding it as a slide to that scene's show deck; the DM previews it and applies or rejects it. Describe the visual concretely in the prompt (setting, light, mood, characters). Generation costs money on the DM's own key — call only when the DM asks for an image. deckId is optional: by default the scene's first deck is used (or a new one is created on apply).",
   input: proposeSlideSchema,

@@ -26,6 +26,6 @@ describe("runToolResult translation", () => {
   it("translates zod issue messages", async () => {
     const result = await runToolResult(failing(new Error("unused")), ctx, { n: "x" });
 
-    expect(result).toMatchObject({ kind: "error", error: { code: "INVALID_INPUT", message: "Некоректні параметри" } });
+    expect(result).toMatchObject({ kind: "error", error: { code: "INVALID_INPUT", message: "Invalid input" } });
   });
 });

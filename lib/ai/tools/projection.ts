@@ -10,7 +10,7 @@ export function publicToolData(value: unknown): unknown {
 
       const sensitive = [...url.searchParams.keys()].some(key => /token|signature|credential|secret|api[-_]?key/i.test(key));
 
-      return sensitive || url.username || url.password || url.pathname.includes("/object/sign/") ? "[приховане посилання]" : candidate;
+      return sensitive || url.username || url.password || url.pathname.includes("/object/sign/") ? "[hidden link]" : candidate;
     } catch { return candidate; }
   });
 

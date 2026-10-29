@@ -28,13 +28,21 @@ describe("buildInstructions", () => {
     const out = await buildInstructions({ caller, campaignId: "camp1", mode: "live", pageId: "p1" });
 
     expect(out).toContain("Асхан");
-    expect(out).toContain("українською");
-    expect(out).toMatch(/1–5 речень/);
+    expect(out).toContain("Reply in Ukrainian.");
+    expect(out).toMatch(/1–5 sentences/);
     expect(out).toContain("Годрик");
     expect(out).toContain("Слайд: Собор");
     expect(out).toContain("поточний текст");
     expect(out).toContain("Розділ s1");
     expect(out).not.toContain("зіграний текст");
+  });
+
+  it.each([["uk", "Reply in Ukrainian."], ["en", "Reply in English."]] as const)("reply language follows the caller locale (%s)", async (locale, expected) => {
+    const { buildInstructions } = await import("@/lib/ai/context/prompt");
+
+    const out = await buildInstructions({ caller: { ...caller, locale }, campaignId: "camp1", mode: "live", pageId: null });
+
+    expect(out).toContain(expected);
   });
 
   it("scenario: вся сторінка + focus", async () => {
@@ -45,7 +53,7 @@ describe("buildInstructions", () => {
     expect(out).toContain("зіграний текст");
     expect(out).toContain("майбутній текст");
     expect(out).toContain("propose_scenario_edit");
-    expect(out).toMatch(/Фокус ДМ:[\s\S]*s3/);
+    expect(out).toMatch(/DM focus:[\s\S]*s3/);
   });
 
   it("бюджет: довга сторінка обрізається до contextChars", async () => {
@@ -58,7 +66,7 @@ describe("buildInstructions", () => {
     const out = await buildInstructions({ caller, campaignId: "camp1", mode: "scenario", pageId: "p1" });
 
     expect(out.length).toBeLessThanOrEqual(AI_LIMITS.contextChars);
-    expect(out).toContain("[обрізано]");
+    expect(out).toContain("[truncated]");
   });
 
   it("без сторінки — тільки роль, режим, партія", async () => {
@@ -80,9 +88,9 @@ describe("buildInstructions", () => {
 
       const out = await buildInstructions({ caller, campaignId: "camp1", mode, pageId: null });
 
-      expect(out).toContain("Постійні інструкції ДМ для цієї кампанії");
-      expect(out.indexOf("Говори архаїчно")).toBeGreaterThan(out.indexOf("Відповідай українською"));
-      expect(out.indexOf("Говори архаїчно")).toBeLessThan(out.indexOf("Режим:"));
+      expect(out).toContain("Standing DM instructions for this campaign");
+      expect(out.indexOf("Говори архаїчно")).toBeGreaterThan(out.indexOf("Reply in Ukrainian."));
+      expect(out.indexOf("Говори архаїчно")).toBeLessThan(out.indexOf("Mode:"));
     });
 
     it("не обрізаються разом зі сценою", async () => {
@@ -96,7 +104,7 @@ describe("buildInstructions", () => {
       const out = await buildInstructions({ caller, campaignId: "camp1", mode: "scenario", pageId: "p1" });
 
       expect(out).toContain(text);
-      expect(out).toContain("[обрізано]");
+      expect(out).toContain("[truncated]");
     });
 
     it.each([null, "   "])("порожні (%j) — блоку немає", async (value) => {

@@ -38,8 +38,8 @@ describe("scenario read tools", () => {
 
     const out = String(await readScenarioPageTool.handler(ctx, { pageId: "p1" }));
 
-    expect(out).toContain("## Собор [s1] (зіграно)");
-    expect(out).toContain("### Рядок r1");
+    expect(out).toContain("## Собор [s1] (played)");
+    expect(out).toContain("### Row r1");
     expect(out).toContain("Дзвони|| таємниця||");
     expect(out).toContain("DC 12");
     expect(vi.mocked(prisma.scenarioPage.findFirst).mock.calls[0][0]).toMatchObject({ where: { id: "p1", campaignId: "camp1" } });

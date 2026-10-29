@@ -17,6 +17,12 @@ describe("AI tool registry", () => {
     AI_TOOLS.forEach((t) => expect(t.description.length).toBeGreaterThan(20));
   });
 
+  it("title and description are English (no Cyrillic)", async () => {
+    const { AI_TOOLS } = preloadedModule0;
+
+    AI_TOOLS.forEach((t) => expect(`${t.title} ${t.description}`).not.toMatch(/\p{Script=Cyrillic}/u));
+  });
+
   it("кожен інструмент має scopes; наявні — ai", async () => {
     const { AI_TOOLS, toolsFor } = preloadedModule0;
 
@@ -63,7 +69,7 @@ describe("AI tool registry", () => {
     });
 
     expect(await runTool(failing, { campaignId: "c", userId: "u", scopes: ["ai"] as const, threadId: null, locale: "uk" as const }, {})).toContain('"message":"нема"');
-    expect(clip("a".repeat(30_000))).toMatch(/…\[обрізано\]$/);
+    expect(clip("a".repeat(30_000))).toMatch(/…\[truncated\]$/);
   });
 
   it("runTool: невідома помилка → загальний текст для будь-якого інструмента", async () => {

@@ -33,7 +33,7 @@ export function fitContext(blocks: readonly ContextBlock[], budget: number, incl
 
     const total = entries ? entries.length : (value as string).length;
 
-    const page = (count: number) => `${block.label}:\n${JSON.stringify({ truncated: true, notice: "[обрізано] Повні дані читайте інструментом за потреби.", ...(entries ? { items: entries.slice(0, count) } : { text: (value as string).slice(0, count) }), total, nextOffset: count })}`;
+    const page = (count: number) => `${block.label}:\n${JSON.stringify({ truncated: true, notice: "[truncated] Read the full data with a tool if needed.", ...(entries ? { items: entries.slice(0, count) } : { text: (value as string).slice(0, count) }), total, nextOffset: count })}`;
 
     let low = 0;
 

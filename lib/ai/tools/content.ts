@@ -16,9 +16,9 @@ const DEFAULT_LIMIT = 20;
 
 export const contentKindsTool = defineTool({
   name: "content_kinds",
-  title: "Види контенту кампанії",
+  title: "Campaign content kinds",
   description:
-    "Перелік видів контенту, якими можна керувати (юніти, раси, заклинання, скіли, артефакти…): назва, опис, поля у списку й доступні операції. Додатково: abilities (здібності), rules (правила кампанії), skill-tree (дерево скілів раси). Почни звідси.",
+    "List of content kinds you can manage (units, races, spells, skills, artifacts…): name, description, list fields and available operations. Also: abilities, rules (campaign rules), skill-tree (race skill tree). Start here.",
   scopes: ["content:read"],
   input: z.object({}),
   handler: aliasHandler("content_kinds"),
@@ -26,9 +26,9 @@ export const contentKindsTool = defineTool({
 
 export const contentSchemaTool = defineTool({
   name: "content_schema",
-  title: "JSON-схема контенту",
+  title: "Content JSON schema",
   description:
-    'JSON-схема тіла create/update для виду контенту (або "abilities", "rules", "skill-tree"). Виклич перед content_create/content_update. Для здібностей: kind "abilities", а схему конкретного ефекту — з effectKind.',
+    'JSON schema of the create/update body for a content kind (or "abilities", "rules", "skill-tree"). Call before content_create/content_update. For abilities: kind "abilities", and the schema of a specific effect comes from effectKind.',
   scopes: ["content:read"],
   input: z.object({ kind: z.enum(SCHEMA_TARGETS), op: z.enum(["create", "update"]).optional(), effectKind: z.string().optional() }),
   handler: aliasHandler("content_schema"),
@@ -36,9 +36,9 @@ export const contentSchemaTool = defineTool({
 
 export const contentListTool = defineTool({
   name: "content_list",
-  title: "Список контенту",
+  title: "Content list",
   description:
-    "Сторінка записів виду контенту: { total, offset, items: [{ id, name, …короткі поля }] }. Повні дані запису — content_get. Фільтр query залежить від виду (наприклад skills: { mainSkillId }). Більше 50 записів — користуйся offset.",
+    "A page of records of a content kind: { total, offset, items: [{ id, name, …short fields }] }. Full record data: content_get. The query filter depends on the kind (e.g. skills: { mainSkillId }). For more than 50 records use offset.",
   scopes: ["content:read"],
   input: z.object({
     kind: kindSchema,
@@ -51,8 +51,8 @@ export const contentListTool = defineTool({
 
 export const contentGetTool = defineTool({
   name: "content_get",
-  title: "Запис контенту",
-  description: "Повний запис за id (id бери з content_list).",
+  title: "Content record",
+  description: "Full record by id (take the id from content_list).",
   scopes: ["content:read"],
   input: z.object({ kind: kindSchema, id: z.string().min(1) }),
   handler: aliasHandler("content_get"),
@@ -60,9 +60,9 @@ export const contentGetTool = defineTool({
 
 export const contentCreateTool = defineTool({
   name: "content_create",
-  title: "Створити запис контенту",
+  title: "Create content record",
   description:
-    'Створює запис. Спершу візьми схему через content_schema(kind, "create"). Посилання (raceId, groupId, knownSpells…) — id цієї ж кампанії з content_list. Помилки валідації повертаються зі шляхами полів — виправ і повтори.',
+    'Creates a record. First get the schema via content_schema(kind, "create"). References (raceId, groupId, knownSpells…) are ids from this same campaign taken from content_list. Validation errors come back with field paths — fix and retry.',
   scopes: ["content:write"],
   input: z.object({ kind: kindSchema, data: z.record(z.string(), z.unknown()) }),
   handler: aliasHandler("content_create"),
@@ -70,8 +70,8 @@ export const contentCreateTool = defineTool({
 
 export const contentUpdateTool = defineTool({
   name: "content_update",
-  title: "Змінити запис контенту",
-  description: 'Оновлює запис частковим патчем: передавай лише змінені поля. Схема — content_schema(kind, "update"). Id бери з content_list.',
+  title: "Update content record",
+  description: 'Updates a record with a partial patch: pass only changed fields. Schema: content_schema(kind, "update"). Take the id from content_list.',
   scopes: ["content:write"],
   input: z.object({ kind: kindSchema, id: z.string().min(1), patch: z.record(z.string(), z.unknown()) }),
   handler: aliasHandler("content_update"),
@@ -79,8 +79,8 @@ export const contentUpdateTool = defineTool({
 
 export const contentDeleteTool = defineTool({
   name: "content_delete",
-  title: "Видалити запис контенту",
-  description: "Видаляє один запис за id. Незворотно; масового видалення немає. Перед видаленням переконайся, що це саме той запис (content_get).",
+  title: "Delete content record",
+  description: "Deletes one record by id. Irreversible; there is no bulk delete. Before deleting make sure it is the right record (content_get).",
   scopes: ["content:write"],
   input: z.object({ kind: kindSchema, id: z.string().min(1) }),
   handler: aliasHandler("content_delete"),
@@ -88,8 +88,8 @@ export const contentDeleteTool = defineTool({
 
 export const getRulesTool = defineTool({
   name: "get_rules",
-  title: "Правила кампанії",
-  description: "Повний набір правил кампанії (ruleset) зі значеннями за замовчуванням. Схема — content_schema(kind: \"rules\").",
+  title: "Campaign rules",
+  description: "Full set of campaign rules (ruleset) with default values. Schema: content_schema(kind: \"rules\").",
   scopes: ["content:read"],
   input: z.object({}),
   handler: aliasHandler("get_rules"),
@@ -97,8 +97,8 @@ export const getRulesTool = defineTool({
 
 export const updateRulesTool = defineTool({
   name: "update_rules",
-  title: "Змінити правила кампанії",
-  description: "Частковий патч правил: не вказані поля лишаються як були. Схема патча — content_schema(kind: \"rules\"). Повертає правила після зміни.",
+  title: "Update campaign rules",
+  description: "Partial rules patch: fields not given stay as they were. Patch schema: content_schema(kind: \"rules\"). Returns the rules after the change.",
   scopes: ["content:write"],
   input: z.object({ patch: z.record(z.string(), z.unknown()) }),
   handler: aliasHandler("update_rules"),
@@ -106,8 +106,8 @@ export const updateRulesTool = defineTool({
 
 export const getSkillTreeTool = defineTool({
   name: "get_skill_tree",
-  title: "Дерево скілів раси",
-  description: "Дерево скілів раси за її назвою (race): { id, race, skills }. Посилається на id головних скілів і скілів з бібліотеки. Схема — content_schema(kind: \"skill-tree\").",
+  title: "Race skill tree",
+  description: "Skill tree of a race by its name (race): { id, race, skills }. References ids of main skills and library skills. Schema: content_schema(kind: \"skill-tree\").",
   scopes: ["content:read"],
   input: z.object({ race: z.string().min(1) }),
   handler: aliasHandler("get_skill_tree"),
@@ -115,9 +115,9 @@ export const getSkillTreeTool = defineTool({
 
 export const saveSkillTreeTool = defineTool({
   name: "save_skill_tree",
-  title: "Зберегти дерево скілів раси",
+  title: "Save race skill tree",
   description:
-    'Зберігає дерево скілів раси цілком (створює, якщо ще немає): { race, skills: { mainSkills, ultimateSkill } }. Існуюче дерево замінюється — спершу get_skill_tree. Схема — content_schema(kind: "skill-tree"); id головних скілів і скілів — з content_list. Помилки дерева повертаються списком.',
+    'Saves a race skill tree as a whole (creates it if missing): { race, skills: { mainSkills, ultimateSkill } }. An existing tree is replaced — call get_skill_tree first. Schema: content_schema(kind: "skill-tree"); ids of main skills and skills come from content_list. Tree errors are returned as a list.',
   scopes: ["content:write"],
   input: saveSkillTreeSchema,
   handler: aliasHandler("save_skill_tree"),
@@ -125,9 +125,9 @@ export const saveSkillTreeTool = defineTool({
 
 export const sourceDiffTool = defineTool({
   name: "source_diff",
-  title: "Зміни в джерелі кампанії",
+  title: "Campaign source changes",
   description:
-    "Що змінилося в шаблоні (або кампанії), з якого створено цю кампанію: items зі scope (таблиця, rules або settings), key, name, status (new | updated | conflict | deletedInSource | deletedLocally), changedFields, sourceHash, requires. Для застосування передай scope, key, sourceHash і status у source_apply. Сторінками: scope звужує, offset/limit (за замовчуванням 20, до 50) гортають; total — усього пунктів, counts — за scope, nextOffset — з чого продовжити (null — кінець).",
+    "What changed in the template (or campaign) this campaign was created from: items with scope (table, rules or settings), key, name, status (new | updated | conflict | deletedInSource | deletedLocally), changedFields, sourceHash, requires. To apply, pass scope, key, sourceHash and status to source_apply. Paged: scope narrows, offset/limit (default 20, up to 50) page through; total is the number of items, counts is per scope, nextOffset is where to continue (null = end).",
   scopes: ["content:read"],
   input: z.object({
     scope: z.enum(SYNC_SCOPES).optional(),
@@ -139,9 +139,9 @@ export const sourceDiffTool = defineTool({
 
 export const sourceApplyTool = defineTool({
   name: "source_apply",
-  title: "Застосувати зміни джерела",
+  title: "Apply source changes",
   description:
-    "apply — пункти з source_diff, які взяти з джерела (залежності додаються самі, див. autoAdded); ignore — сховати пункти до наступної зміни джерела. Конфлікт у apply = взяти версію джерела замість своєї. Помилка «Джерело змінилося» — повтори source_diff.",
+    "apply — items from source_diff to take from the source (dependencies are added automatically, see autoAdded); ignore — hide items until the source changes again. A conflict in apply means taking the source version instead of your own. On a source-changed error, repeat source_diff.",
   scopes: ["content:write"],
   input: sourceSyncApplySchema,
   handler: aliasHandler("source_apply"),
@@ -149,9 +149,9 @@ export const sourceApplyTool = defineTool({
 
 export const contentImportTool = defineTool({
   name: "content_import",
-  title: "Імпорт контенту",
+  title: "Import content",
   description:
-    "Масове створення/оновлення записів одного виду (до 500 рядків за виклик) — для перенесення кампанії з іншого сервісу. rows — об'єкти з полями як у тілі create (content_schema), але посилання на інші записи можна давати назвами, а числа/списки — текстом, як у CSV; у skills поля плоскі: name, description, icon, image, mainSkillId, spellId, spellGroupId, grantedSpellId, abilities. mode: create (дубль назви — помилка рядка) | update (за назвою: оновити, інакше створити) | skip (наявні пропустити). Спершу виклич з dryRun: true — перевірка без запису. Відповідь: counts і до 50 рядків з помилками/попередженнями (omitted — скільки ще).",
+    "Bulk create/update of records of one kind (up to 500 rows per call) — for moving a campaign from another service. rows are objects with the fields of the create body (content_schema), but references to other records may be given by name, and numbers/lists as text, like in CSV; for skills the fields are flat: name, description, icon, image, mainSkillId, spellId, spellGroupId, grantedSpellId, abilities. mode: create (duplicate name is a row error) | update (by name: update, otherwise create) | skip (skip existing). First call with dryRun: true — validation without writing. Response: counts and up to 50 rows with errors/warnings (omitted — how many more).",
   scopes: ["content:write"],
   input: z.object({
     kind: z.enum(IMPORT_KINDS),

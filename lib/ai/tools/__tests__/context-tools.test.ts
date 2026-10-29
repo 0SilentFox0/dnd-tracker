@@ -46,7 +46,7 @@ describe("context tools", () => {
 
     const { getShowStateTool } = await import("@/lib/ai/tools/show");
 
-    expect(await getShowStateTool.handler(ctx, {})).toBe("Показ зараз не запущено");
+    expect(await getShowStateTool.handler(ctx, {})).toBe("No show is running right now");
   });
 
   it("get_battle_state: без активного бою — повідомлення", async () => {

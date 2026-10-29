@@ -8,10 +8,11 @@ import { AI_LIMITS, type ApiTokenScope } from "@/lib/constants/ai";
 import { API_ERRORS, type ErrorParams } from "@/lib/constants/api-errors";
 import type { Locale } from "@/lib/i18n/config";
 import { translateIssue } from "@/lib/i18n/translate-issue";
+import { getTranslator } from "@/lib/i18n/translator";
 import { authorizeLegacyAssistantRead } from "@/lib/server/assistant/authorize";
 import type { AssistantCaller } from "@/lib/server/assistant/types";
 import { ContentError } from "@/lib/server/content/errors";
-import { requestTranslator, translateErrorBody } from "@/lib/utils/api/translate-error";
+import { translateErrorBody } from "@/lib/utils/api/translate-error";
 
 export type AiToolContext = { caller?: AssistantCaller; toolCallId?: string; campaignId: string; userId: string; scopes: readonly ApiTokenScope[]; threadId: string | null; locale: Locale; abortSignal?: AbortSignal; usage?: { images: number } };
 
@@ -42,7 +43,7 @@ export function defineTool<S extends z.ZodType>(
 export type ToolResult = { version: 2; kind: "result"; data: unknown } | { version: 2; kind: "error"; error: { code: string; status: number; message: string; issues?: unknown } };
 
 export function clip(value: unknown): string {
-  if (typeof value === "string") return value.length > AI_LIMITS.toolResultChars ? `${value.slice(0, AI_LIMITS.toolResultChars - 20)}…[обрізано]` : value;
+  if (typeof value === "string") return value.length > AI_LIMITS.toolResultChars ? `${value.slice(0, AI_LIMITS.toolResultChars - 20)}…[truncated]` : value;
 
   const text = JSON.stringify(value);
 
@@ -69,8 +70,8 @@ function boundedOutput(value: unknown): unknown {
   return project(value);
 }
 
-async function translatedIssues(issues: ReadonlyArray<{ path: PropertyKey[]; code: string; message: string; minimum?: unknown; maximum?: unknown; params?: ErrorParams }>) {
-  const t = await requestTranslator();
+async function translatedIssues(locale: Locale, issues: ReadonlyArray<{ path: PropertyKey[]; code: string; message: string; minimum?: unknown; maximum?: unknown; params?: ErrorParams }>) {
+  const t = await getTranslator(locale);
 
   return issues.map((issue) => ({ path: issue.path, code: issue.code, message: translateIssue(t, issue) }));
 }
@@ -87,17 +88,17 @@ export async function runToolResult(def: AiToolDef, ctx: AiToolContext, rawInput
 
     return { version: 2, kind: "result", data: boundedOutput(publicToolData(await def.handler(ctx, def.input.parse(rawInput)))) };
   } catch (error) {
-    if (error instanceof z.ZodError) return { version: 2, kind: "error", error: { code: "INVALID_INPUT", status: 400, message: "Некоректні параметри", issues: formatIssues(await translatedIssues(error.issues)).slice(0, 20).map(s => s.slice(0, 200)) } };
+    if (error instanceof z.ZodError) return { version: 2, kind: "error", error: { code: "INVALID_INPUT", status: 400, message: "Invalid input", issues: formatIssues(await translatedIssues(ctx.locale, error.issues)).slice(0, 20).map(s => s.slice(0, 200)) } };
 
     if (error instanceof ContentError || error instanceof AiToolError) {
-      const t = await requestTranslator();
+      const t = await getTranslator(ctx.locale);
 
-      return { version: 2, kind: "error", error: { code: "ASSISTANT_UNAVAILABLE", status: error instanceof ContentError ? error.status : 422, message: translateErrorBody(t, { error: error.message, params: error.params }).error.slice(0, 500), ...(error instanceof ContentError && Array.isArray(error.issues) ? { issues: formatIssues(await translatedIssues(error.issues)).slice(0, 20).map(s => s.slice(0, 200)) } : {}) } };
+      return { version: 2, kind: "error", error: { code: "ASSISTANT_UNAVAILABLE", status: error instanceof ContentError ? error.status : 422, message: translateErrorBody(t, { error: error.message, params: error.params }).error.slice(0, 500), ...(error instanceof ContentError && Array.isArray(error.issues) ? { issues: formatIssues(await translatedIssues(ctx.locale, error.issues)).slice(0, 20).map(s => s.slice(0, 200)) } : {}) } };
     }
 
     console.error(`tool ${def.name} failed`);
 
-    return { version: 2, kind: "error", error: { code: "ASSISTANT_FAILED", status: 500, message: "Внутрішня помилка сервера. Спробуй ще раз пізніше." } };
+    return { version: 2, kind: "error", error: { code: "ASSISTANT_FAILED", status: 500, message: "Internal server error. Try again later." } };
   }
 }
 
