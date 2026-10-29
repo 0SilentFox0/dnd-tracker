@@ -11,7 +11,7 @@ import type { Rng } from "@/lib/utils/abilities/engine/core/types";
 import { syncMapAuras } from "@/lib/utils/abilities/engine/effects/map-auras";
 import type { BATTLE_RATE_LIMITS, RateLimitResult } from "@/lib/utils/api/rate-limit";
 import { releaseInvalidGrapples } from "@/lib/utils/battle/actions/grapple";
-import { controls } from "@/lib/utils/battle/common/control";
+import { controls, currentOf } from "@/lib/utils/battle/common/control";
 import { placeParticipants } from "@/lib/utils/battle/grid/placement";
 import { placeRevived } from "@/lib/utils/battle/grid/revive-placement";
 import { modeBlockedText, withModeAfterMutation } from "@/lib/utils/battle/modes/server";
@@ -95,7 +95,7 @@ export function assertAccess(access: BattleAccess, ctx: BattleMutationContext): 
 
   if (access === BattleAccess.DM) throw new BattleAccessError(403, API_ERRORS.DM_ONLY);
 
-  if (!controls(ctx, ctx.participants[ctx.scene.turnIndex])) {
+  if (!controls(ctx, currentOf(ctx))) {
     throw new BattleRuleError("not_your_turn", API_ERRORS.BATTLE_NOT_YOUR_TURN);
   }
 }

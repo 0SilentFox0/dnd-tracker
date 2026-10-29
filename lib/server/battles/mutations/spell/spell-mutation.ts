@@ -37,6 +37,7 @@ import { applyAbilitySummons, type SummonDeps } from "@/lib/utils/battle/summon/
 import { assertCanAct } from "@/lib/utils/battle/turn";
 import { assertSpellRolls } from "@/lib/utils/battle/validation/dice-checks";
 import { rollDiceList } from "@/lib/utils/common/dice";
+import { rngOf } from "@/lib/utils/common/rng";
 
 const healsByDefinition = (effects: Parameters<typeof flatEffects>[0]) => {
   const flat = flatEffects(effects);
@@ -140,7 +141,7 @@ export function createSpellMutation(deps: SpellMutationDeps = defaultDeps, optio
 
     // прев'ю без кидків: сервер кидає сам, щоб показати орієнтовний результат
 
-    const diceRolls = (data.preview || options.serverRolls) && data.diceRolls.length === 0 ? rollDiceList(`${expected.count}d${expected.sides}`, ctx.rng ?? Math.random) : data.diceRolls;
+    const diceRolls = (data.preview || options.serverRolls) && data.diceRolls.length === 0 ? rollDiceList(`${expected.count}d${expected.sides}`, rngOf(ctx)) : data.diceRolls;
 
     assertSpellRolls(expected, diceRolls);
 

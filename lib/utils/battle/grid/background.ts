@@ -1,5 +1,6 @@
-import { clamp, MAX_SIDE, MIN_SIDE } from "./map-editor";
+import { MAX_SIDE, MIN_SIDE } from "./map-editor";
 
+import { clamp } from "@/lib/utils/common/clamp";
 import type { BattleMapConfig } from "@/types/battle";
 
 export interface ImageSize {

@@ -2,6 +2,7 @@ import type { MazeEnv } from "./maze-ops";
 
 import { CombatStatus, ParticipantSide } from "@/lib/constants/battle";
 import { isEscaped } from "@/lib/utils/abilities/engine/core/participants";
+import { currentOf } from "@/lib/utils/battle/common/control";
 import { cellKey } from "@/lib/utils/battle/grid/geometry";
 import { heroTunnel, isPlaced, mazeAwareness, nearestFree } from "@/lib/utils/battle/modes/maze";
 import { MAZE_TEXTS } from "@/lib/utils/battle/modes/maze/texts";
@@ -27,7 +28,7 @@ function intoReserve(p: BattleParticipant): BattleParticipant {
 }
 
 function turnAfter(ctx: BattleMutationContext, remaining: BattleParticipant[], pending: BattleParticipant[], map: BattleMapConfig) {
-  const current = ctx.participants[ctx.scene.turnIndex];
+  const current = currentOf(ctx);
 
   const kept = current ? remaining.findIndex((p) => p.basicInfo.id === current.basicInfo.id) : -1;
 

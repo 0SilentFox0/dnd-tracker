@@ -22,6 +22,8 @@ export interface ActorScope extends BattleActor {
   scene: { turnIndex: number };
 }
 
+export const currentOf = (scope: Pick<ActorScope, "participants" | "scene">): BattleParticipant | undefined => scope.participants[scope.scene.turnIndex];
+
 export interface ActorGuardTexts {
   missing: string;
   forbidden: string;
@@ -34,7 +36,7 @@ export function requireActor(ctx: ActorScope, id: string, texts: ActorGuardTexts
 
   if (!actor) throw new BattleAccessError(404, texts.missing);
 
-  if (!(texts.anyTurn ? controls(ctx, actor) : canActNow(ctx, actor, ctx.participants[ctx.scene.turnIndex]))) throw new BattleAccessError(403, texts.forbidden);
+  if (!(texts.anyTurn ? controls(ctx, actor) : canActNow(ctx, actor, currentOf(ctx)))) throw new BattleAccessError(403, texts.forbidden);
 
   if (texts.inactive && !isActive(actor)) throw new BattleRuleError(texts.inactive.code, texts.inactive.message);
 

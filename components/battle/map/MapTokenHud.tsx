@@ -10,6 +10,7 @@ import { type FxImpact, hudMotifsOf } from "@/lib/utils/battle/fx";
 import { isFallen, sizeOf } from "@/lib/utils/battle/grid";
 import { isDown } from "@/lib/utils/battle/participant/state";
 import { HEALTH_LABEL, healthSegments, healthState, hpRatio, hpTone, NO_EFFECTS } from "@/lib/utils/battle/view";
+import { clamp } from "@/lib/utils/common/clamp";
 import type { ActiveEffect, BattleParticipant } from "@/types/battle";
 
 export interface MapTokenHudProps {
@@ -30,7 +31,6 @@ const HUD_MAX_SHARE = 0.42;
 // рамка 1px + відступи плашки
 const PLAQUE_CHROME = { text: 6, bar: 4 };
 
-const clamp = (min: number, value: number, max: number) => Math.min(max, Math.max(min, value));
 
 function hpView(participant: BattleParticipant, exact: boolean) {
   const { currentHp, maxHp } = participant.combatStats;
@@ -63,13 +63,13 @@ function MapTokenHudImpl({ participant: live, box, mapSize, pxPerUnit, exact, ra
 
   const small = sizeOf(participant) === 1;
 
-  const hpFont = clamp(7, boxPx * (small ? 0.12 : 0.06), small ? 11 : 13);
+  const hpFont = clamp(boxPx * (small ? 0.12 : 0.06), 7, small ? 11 : 13);
 
-  const nameFont = small ? clamp(6, boxPx * 0.1, 9) : clamp(7, boxPx * 0.075, 14);
+  const nameFont = small ? clamp(boxPx * 0.1, 6, 9) : clamp(boxPx * 0.075, 7, 14);
 
   const textBarPx = Math.round(hpFont * 1.45);
 
-  const thinBarPx = clamp(4, Math.round(boxPx * 0.08), 8);
+  const thinBarPx = clamp(Math.round(boxPx * 0.08), 4, 8);
 
   const fits = (px: number) => px <= boxPx * HUD_MAX_SHARE;
 

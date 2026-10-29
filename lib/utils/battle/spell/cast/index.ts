@@ -11,6 +11,7 @@ import { abilityOf, actionOf, isPerTarget, type SpellCastState, targetOf } from 
 import { computeSpellPower, spellSaveDc } from "@/lib/utils/battle/spell/power";
 import { spellNeedsSlot, spellSlotKey } from "@/lib/utils/battle/spell/slot";
 import type { CastSpellParams, CastSpellResult } from "@/lib/utils/battle/types/spell-process";
+import { rngOf } from "@/lib/utils/common/rng";
 import { DEFAULT_RULES } from "@/lib/utils/rules";
 import type { AbilityEvent } from "@/types/abilities";
 
@@ -27,7 +28,7 @@ export function castSpell(params: CastSpellParams): CastSpellResult {
     return { success: false, casterUpdated: caster, allParticipantsUpdated: allParticipants, battleAction: actionOf(caster, spell, [], battleId, currentRound, message), summons: [], messages: [message] };
   }
 
-  const rng = params.rng ?? Math.random;
+  const rng = rngOf(params);
 
   const casterId = caster.basicInfo.id;
 
