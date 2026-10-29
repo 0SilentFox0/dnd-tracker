@@ -5,7 +5,7 @@ import type { OnboardingFlags, OnboardingRole } from "@/lib/onboarding/types";
 import { WHATS_NEW } from "@/lib/onboarding/whats-new";
 import type { OnboardingFlagsResponse, ResetScope } from "@/types/onboarding";
 
-export async function readFlagMap(userId: string): Promise<OnboardingFlags> {
+async function readFlagMap(userId: string): Promise<OnboardingFlags> {
   const rows = await prisma.userOnboardingFlag.findMany({ where: { userId }, select: { key: true, value: true } });
 
   return Object.fromEntries(rows.map((r) => [r.key, r.value]));

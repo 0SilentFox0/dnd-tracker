@@ -3,7 +3,9 @@ export const WORLD_MAP_MAX_EDGE_PX = 6000;
 
 // iOS Safari caps a canvas around 16.7 Mpx
 export const WORLD_MAP_MAX_PIXELS = 16_000_000;
-export const MAX_WORLD_MAP_MB = 20;
+
+const MAX_WORLD_MAP_MB = 20;
+
 export const MAX_WORLD_MAP_BYTES = MAX_WORLD_MAP_MB * 1024 * 1024;
 export const WORLD_MAP_UPLOAD_TYPES = ["image/webp", "image/jpeg"] as const;
 export const WORLD_MAP_FORMATS = { "image/webp": "webp", "image/jpeg": "jpg" } as const;

@@ -13,7 +13,7 @@ export type ArtifactEffectAudience =
   | typeof ARTIFACT_EFFECT_ALL_ALLIES
   | typeof ARTIFACT_EFFECT_ALL_ENEMIES;
 
-export function isArtifactEffectAudience(
+function isArtifactEffectAudience(
   v: string | undefined | null,
 ): v is ArtifactEffectAudience {
   return (

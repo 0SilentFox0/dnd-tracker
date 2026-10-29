@@ -12,6 +12,7 @@ import {
   WORLD_NAME_MAX,
   WORLD_NOTE_MAX,
 } from "@/lib/constants/world";
+import { hexColorSchema } from "@/lib/schemas/common";
 
 const coord = z.number().min(0, "Координата поза межами карти").max(1, "Координата поза межами карти");
 
@@ -23,7 +24,7 @@ const polygonSchema = z
     if (new Set(poly.map(([x, y]) => `${x},${y}`)).size < 3) ctx.addIssue({ code: "custom", message: "Зона має мати щонайменше 3 різні вершини" });
   });
 
-const hexColor = z.string().regex(/^#[0-9a-fA-F]{6}$/, "Колір має бути у форматі #rrggbb");
+const hexColor = hexColorSchema("Колір має бути у форматі #rrggbb");
 
 const nameSchema = z.string().trim().min(1, "Вкажіть назву").max(WORLD_NAME_MAX, `Назва — до ${WORLD_NAME_MAX} символів`);
 

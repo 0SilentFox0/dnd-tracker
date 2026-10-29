@@ -2,6 +2,7 @@ import { z } from "zod";
 
 import { HAZARD_DICE_PATTERN, MAZE_DIFFICULTIES, MAZE_LIMITS, MAZE_MARK_SYMBOLS, ParticipantSide, ParticipantSourceType } from "@/lib/constants/battle";
 import { WEATHER_KINDS } from "@/lib/constants/battle-weather";
+import { hexColorSchema } from "@/lib/schemas/common";
 import { hasPlayableArea } from "@/lib/utils/battle/grid/map-editor";
 
 const MAP_BACKGROUND_PATTERN = /^(https:\/\/\S+|data:image\/(png|jpeg|webp);base64,[A-Za-z0-9+/=]+|\/battle-maps\/[\w.-]+\.(webp|jpg|png))$/;
@@ -29,7 +30,7 @@ export const mazeSchema = z.object({
       cellKeySchema,
       z.object({
         symbol: mazeMarkSymbolSchema,
-        color: z.string().regex(/^#[0-9a-f]{6}$/),
+        color: hexColorSchema(),
         by: z.string().max(64),
       }),
     )

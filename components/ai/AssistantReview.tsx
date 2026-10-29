@@ -9,43 +9,160 @@ import { Button } from "@/components/ui/button";
 import { ASSISTANT_PAGE_SIZES } from "@/lib/constants/ai";
 import { useAssistantIntents } from "@/lib/hooks/ai/useAssistantIntents";
 
-export function AssistantReview({campaignId,initialIntentId}:{campaignId:string;initialIntentId?:string}) {
- const [intentId,setIntentId]=useState(initialIntentId);
+type Queue = ReturnType<typeof useAssistantIntents>;
+type Proposal = NonNullable<Queue["legacy"]["data"]>[number];
 
- const [cursors,setCursors]=useState<(string|undefined)[]>([undefined]);
+interface QueuePaneProps {
+  queue: Queue;
+  intentId?: string;
+  hasPrevious: boolean;
+  legacyItems: Proposal[];
+  actions: { onSelect: (id: string) => void; onSelectLegacy: (id: string) => void; onNext: () => void; onPrevious: () => void };
+}
 
- const [refinement,setRefinement]=useState("");
+function AssistantQueuePane({ queue, intentId, hasPrevious, legacyItems, actions }: QueuePaneProps) {
+  return (
+    <div>
+      <AssistantQueue
+        items={queue.items}
+        selectedId={intentId}
+        onSelect={actions.onSelect}
+        onNext={queue.nextCursor ? actions.onNext : undefined}
+        onPrevious={hasPrevious ? actions.onPrevious : undefined}
+      />
+      {legacyItems.map((p) => (
+        <Button key={p.id} variant="outline" className="mt-2 h-auto w-full whitespace-normal" onClick={() => actions.onSelectLegacy(p.id)}>
+          {p.summary} · Сценарій
+        </Button>
+      ))}
+      {(queue.query.isError || queue.legacy.isError) && <p role="alert">Не вдалося завантажити чергу</p>}
+    </div>
+  );
+}
 
- const [legacyId,setLegacyId]=useState<string>();
+function DetailStatus({ queue, intentId }: { queue: Queue; intentId?: string }) {
+  return (
+    <>
+      {queue.detail.isLoading && intentId && <p role="status">Завантаження пропозиції…</p>}
+      {queue.detail.isError && intentId && queue.receipt.data?.status !== "applied" && <p role="alert">Пропозиція недоступна або її вміст очищено</p>}
+    </>
+  );
+}
 
- const [legacyBusy,setLegacyBusy]=useState(false);
+function ReviewMessages({ queue, error, refinement }: { queue: Queue; error: string; refinement: string }) {
+  return (
+    <>
+      {(error || queue.error) && <p role="alert">{error || "Не вдалося виконати дію"}</p>}
+      {queue.receipt.isError && <p role="alert">Не вдалося прочитати квитанцію. Відновіть стан.</p>}
+      {refinement && <p role="status">{refinement}</p>}
+    </>
+  );
+}
 
- const [error,setError]=useState("");
+export function AssistantReview({ campaignId, initialIntentId }: { campaignId: string; initialIntentId?: string }) {
+  const [intentId, setIntentId] = useState(initialIntentId);
 
- const queue=useAssistantIntents(campaignId,{cursor:cursors.at(-1),limit:ASSISTANT_PAGE_SIZES.queue,intentId});
+  const [cursors, setCursors] = useState<(string | undefined)[]>([undefined]);
 
- const legacy=queue.legacy;
+  const [refinement, setRefinement] = useState("");
 
- const linked=new Set(queue.items.map(i=>i.legacyProposalId).filter(Boolean));
+  const [legacyId, setLegacyId] = useState<string>();
 
- const legacyItems=(legacy.data??[]).filter(p=>!p.assistantIntentId && !linked.has(p.id));
+  const [legacyBusy, setLegacyBusy] = useState(false);
 
- const proposal=legacyItems.find(p=>p.id===legacyId);
+  const [error, setError] = useState("");
 
- const run=async(action:()=>Promise<unknown>)=>{ setError("");try { await action(); } catch { setError("Не вдалося виконати дію. Відновіть стан і перевірте пропозицію."); } };
+  const queue = useAssistantIntents(campaignId, { cursor: cursors.at(-1), limit: ASSISTANT_PAGE_SIZES.queue, intentId });
 
- const detail=queue.detail.data;
+  const legacy = queue.legacy;
 
- const review=<div className="grid min-h-0 min-w-0 gap-4 overflow-y-auto lg:grid-cols-[minmax(220px,1fr)_minmax(0,2fr)]">
- <div><AssistantQueue items={queue.items} selectedId={intentId} onSelect={id=>{ setIntentId(id);setLegacyId(undefined); }} onNext={queue.nextCursor?()=>setCursors(c=>[...c,queue.nextCursor??undefined]):undefined} onPrevious={cursors.length>1?()=>setCursors(c=>c.slice(0,-1)):undefined} />
- {legacyItems.map(p=><Button key={p.id} variant="outline" className="mt-2 h-auto w-full whitespace-normal" onClick={()=>{ setLegacyId(p.id);setIntentId(undefined); }}>{p.summary} · Сценарій</Button>)}
- {(queue.query.isError||legacy.isError)&&<p role="alert">Не вдалося завантажити чергу</p>}</div>
- <div className="min-w-0">{queue.detail.isLoading&&intentId&&<p role="status">Завантаження пропозиції…</p>}{queue.detail.isError&&intentId&&queue.receipt.data?.status!=="applied"&&<p role="alert">Пропозиція недоступна або її вміст очищено</p>}
- {detail&&!(queue.receipt.data&&"deleted" in queue.receipt.data)&&<AssistantIntentCard key={detail.id} intent={detail} receipt={queue.receipt.data} busy={queue.busy} onConfirm={()=>void run(()=>queue.confirm(detail.id))} onReject={()=>void run(()=>queue.reject(detail.id))} onRefine={()=>setRefinement(`Уточніть запит для пропозиції «${detail.summary}». Надішліть новий запит у чаті; це не застосовує змін.`)} />}
- {queue.receipt.data&&"deleted" in queue.receipt.data&&<p role="status">Кампанію видалено. Квитанція {queue.receipt.data.id}</p>}
- {proposal&&<AiProposalCard campaignId={campaignId} proposal={proposal} busy={legacyBusy} actions={{onApply:()=>void run(async()=>{ setLegacyBusy(true);try { await queue.applyLegacy(proposal.id);await legacy.refetch();await queue.refresh(); } finally { setLegacyBusy(false); } }),onReject:()=>void run(async()=>{ await queue.rejectLegacy(proposal.id);await legacy.refetch();await queue.refresh(); }),onRedo:()=>setRefinement("Уточніть запит у чаті та створіть нову пропозицію.")}} />}
- {(error||queue.error)&&<p role="alert">{error||"Не вдалося виконати дію"}</p>}{queue.receipt.isError&&<p role="alert">Не вдалося прочитати квитанцію. Відновіть стан.</p>}{refinement&&<p role="status">{refinement}</p>}
- <Button variant="outline" onClick={()=>void queue.refresh()}>Відновити чергу</Button></div></div>;
+  const linked = new Set(queue.items.map((i) => i.legacyProposalId).filter(Boolean));
 
- return review;
+  const legacyItems = (legacy.data ?? []).filter((p) => !p.assistantIntentId && !linked.has(p.id));
+
+  const proposal = legacyItems.find((p) => p.id === legacyId);
+
+  const run = async (action: () => Promise<unknown>) => {
+    setError("");
+
+    try {
+      await action();
+    } catch {
+      setError("Не вдалося виконати дію. Відновіть стан і перевірте пропозицію.");
+    }
+  };
+
+  const detail = queue.detail.data;
+
+  const deletedReceipt = queue.receipt.data && "deleted" in queue.receipt.data ? queue.receipt.data : undefined;
+
+  return (
+    <div className="grid min-h-0 min-w-0 gap-4 overflow-y-auto lg:grid-cols-[minmax(220px,1fr)_minmax(0,2fr)]">
+      <AssistantQueuePane
+        queue={queue}
+        intentId={intentId}
+        hasPrevious={cursors.length > 1}
+        legacyItems={legacyItems}
+        actions={{
+          onSelect: (id) => {
+            setIntentId(id);
+            setLegacyId(undefined);
+          },
+          onSelectLegacy: (id) => {
+            setLegacyId(id);
+            setIntentId(undefined);
+          },
+          onNext: () => setCursors((c) => [...c, queue.nextCursor ?? undefined]),
+          onPrevious: () => setCursors((c) => c.slice(0, -1)),
+        }}
+      />
+      <div className="min-w-0">
+        <DetailStatus queue={queue} intentId={intentId} />
+        {detail && !deletedReceipt && (
+          <AssistantIntentCard
+            key={detail.id}
+            intent={detail}
+            receipt={queue.receipt.data}
+            busy={queue.busy}
+            onConfirm={() => void run(() => queue.confirm(detail.id))}
+            onReject={() => void run(() => queue.reject(detail.id))}
+            onRefine={() => setRefinement(`Уточніть запит для пропозиції «${detail.summary}». Надішліть новий запит у чаті; це не застосовує змін.`)}
+          />
+        )}
+        {deletedReceipt && <p role="status">Кампанію видалено. Квитанція {deletedReceipt.id}</p>}
+        {proposal && (
+          <AiProposalCard
+            campaignId={campaignId}
+            proposal={proposal}
+            busy={legacyBusy}
+            actions={{
+              onApply: () =>
+                void run(async () => {
+                  setLegacyBusy(true);
+
+                  try {
+                    await queue.applyLegacy(proposal.id);
+                    await legacy.refetch();
+                    await queue.refresh();
+                  } finally {
+                    setLegacyBusy(false);
+                  }
+                }),
+              onReject: () =>
+                void run(async () => {
+                  await queue.rejectLegacy(proposal.id);
+                  await legacy.refetch();
+                  await queue.refresh();
+                }),
+              onRedo: () => setRefinement("Уточніть запит у чаті та створіть нову пропозицію."),
+            }}
+          />
+        )}
+        <ReviewMessages queue={queue} error={error} refinement={refinement} />
+        <Button variant="outline" onClick={() => void queue.refresh()}>
+          Відновити чергу
+        </Button>
+      </div>
+    </div>
+  );
 }

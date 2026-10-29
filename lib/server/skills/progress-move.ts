@@ -39,7 +39,7 @@ async function moveOne(tx: ProgressDb, id: string, read: unknown, from: string, 
   throw new ContentError(API_ERRORS.SKILL_TREE_PROGRESS_CHANGED, 409);
 }
 
-export function movedProgress(progress: unknown, from: string, to: string): Prisma.InputJsonValue | null {
+function movedProgress(progress: unknown, from: string, to: string): Prisma.InputJsonValue | null {
   if (!progress || typeof progress !== "object") return null;
 
   const current = progress as Record<string, unknown>;

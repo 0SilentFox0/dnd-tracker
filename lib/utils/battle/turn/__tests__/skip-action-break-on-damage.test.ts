@@ -65,12 +65,12 @@ describe("breakOnDamage", () => {
   });
 
   it("знімається шкодою від атаки і від ефекту", () => {
-    expect(applyDamageToTarget(blind(), 3).updatedTarget.battleData.activeEffects).toHaveLength(0);
+    expect(applyDamageToTarget(blind(), 3).battleData.activeEffects).toHaveLength(0);
     expect(applyRawDamage(blind(), 3).battleData.activeEffects).toHaveLength(0);
   });
 
   it("нульова шкода не знімає", () => {
-    expect(applyDamageToTarget(blind(), 0).updatedTarget.battleData.activeEffects).toHaveLength(1);
+    expect(applyDamageToTarget(blind(), 0).battleData.activeEffects).toHaveLength(1);
   });
 
   it("Сліпота ендиться після тіку отрути на початку ходу", () => {

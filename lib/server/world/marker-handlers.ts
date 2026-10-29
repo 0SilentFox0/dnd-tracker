@@ -4,6 +4,8 @@ import { API_ERRORS } from "@/lib/constants/api-errors";
 import { DEFAULT_ZONE_COLOR, MAX_MARKERS_PER_MAP } from "@/lib/constants/world";
 import { prisma } from "@/lib/db";
 import { createWorldMarkerSchema, updateWorldMarkerSchema } from "@/lib/schemas/world";
+import { ContentError } from "@/lib/server/content/errors";
+import { lockWorldMap } from "@/lib/server/world/lock";
 import { clearShowAfterDelete, deleteSubtreeWithFiles, ownedMap, ownedMarker, subtreeTargets } from "@/lib/server/world/map-handlers";
 import { toWorldMarker } from "@/lib/server/world/map-store";
 import { publishWorldChanged } from "@/lib/server/world/world-events";
@@ -22,26 +24,30 @@ export function createWorldMarkerHandler(req: Request, campaignId: string) {
 
     if (map instanceof NextResponse) return map;
 
-    const { _count, _max } = await prisma.worldMarker.aggregate({ where: { mapId: body.mapId }, _count: true, _max: { sortOrder: true } });
-
-    if (_count >= MAX_MARKERS_PER_MAP) return errorResponse(API_ERRORS.WORLD_MARKERS_LIMIT, 409);
-
     const zone = body.kind === "zone" && body.polygon ? body.polygon : null;
 
     const { x, y } = zone ? polygonCentroid(zone) : body;
 
-    const created = await prisma.worldMarker.create({
-      data: {
-        mapId: body.mapId,
-        kind: body.kind,
-        x,
-        y,
-        polygon: body.polygon ?? undefined,
-        name: body.name,
-        icon: body.icon ?? null,
-        color: body.color ?? (zone ? DEFAULT_ZONE_COLOR : null),
-        sortOrder: (_max.sortOrder ?? -1) + 1,
-      },
+    const created = await prisma.$transaction(async (tx) => {
+      await lockWorldMap(tx, body.mapId);
+
+      const { _count, _max } = await tx.worldMarker.aggregate({ where: { mapId: body.mapId }, _count: true, _max: { sortOrder: true } });
+
+      if (_count >= MAX_MARKERS_PER_MAP) throw new ContentError(API_ERRORS.WORLD_MARKERS_LIMIT, 409);
+
+      return tx.worldMarker.create({
+        data: {
+          mapId: body.mapId,
+          kind: body.kind,
+          x,
+          y,
+          polygon: body.polygon ?? undefined,
+          name: body.name,
+          icon: body.icon ?? null,
+          color: body.color ?? (zone ? DEFAULT_ZONE_COLOR : null),
+          sortOrder: (_max.sortOrder ?? -1) + 1,
+        },
+      });
     });
 
     publishWorldChanged(campaignId, body.mapId);
