@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import type { Prisma } from "@prisma/client";
 
 import { API_ERRORS } from "@/lib/constants/api-errors";
 import { DEFAULT_ZONE_COLOR, MAX_MARKERS_PER_MAP } from "@/lib/constants/world";
@@ -66,17 +67,19 @@ export function updateWorldMarkerHandler(req: Request, campaignId: string, marke
 
     if (body instanceof NextResponse) return body;
 
-    const data: Record<string, unknown> = { ...body };
+    const { x, y, polygon, ...rest } = body;
+
+    const data: Prisma.WorldMarkerUpdateInput = { ...rest };
 
     if (owned.kind === "zone") {
-      if (body.polygon === null) return errorResponse(API_ERRORS.WORLD_POLYGON_INVALID, 400);
+      if (polygon === null) return errorResponse(API_ERRORS.WORLD_POLYGON_INVALID, 400);
 
-      delete data.x;
-      delete data.y;
-
-      if (body.polygon) Object.assign(data, polygonCentroid(body.polygon));
-    } else if (body.polygon !== undefined) {
+      if (polygon) Object.assign(data, { polygon }, polygonCentroid(polygon));
+    } else if (polygon !== undefined) {
       return errorResponse(API_ERRORS.WORLD_POLYGON_INVALID, 400);
+    } else {
+      data.x = x;
+      data.y = y;
     }
 
     const updated = await prisma.worldMarker.update({ where: { id: markerId }, data, include: { childMap: { select: { id: true } } } });

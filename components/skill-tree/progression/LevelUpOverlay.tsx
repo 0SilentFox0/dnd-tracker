@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect, useRef } from "react";
 import { createPortal } from "react-dom";
 import { useTranslations } from "next-intl";
 
@@ -13,6 +14,24 @@ export function LevelUpOverlay({ campaignId, characterId, name }: { campaignId: 
 
   const { celebration, dismiss } = useLevelUpCelebration(campaignId, characterId);
 
+  const ctaRef = useRef<HTMLButtonElement>(null);
+
+  const open = !!celebration;
+
+  useEffect(() => {
+    if (open) ctaRef.current?.focus();
+  }, [open]);
+
+  useEffect(() => {
+    if (!open) return;
+
+    const onKey = (e: KeyboardEvent) => e.key === "Escape" && dismiss();
+
+    document.addEventListener("keydown", onKey);
+
+    return () => document.removeEventListener("keydown", onKey);
+  }, [open, dismiss]);
+
   if (!celebration || typeof document === "undefined") return null;
 
   const toPanel = () => {
@@ -21,7 +40,7 @@ export function LevelUpOverlay({ campaignId, characterId, name }: { campaignId: 
   };
 
   return createPortal(
-    <div role="dialog" aria-label={t("levelUp.dialog")} onClick={dismiss} className={`${HUD_SURFACE} level-up fixed inset-0 z-[100] flex flex-col items-center justify-center`}>
+    <div role="dialog" aria-modal="true" aria-label={t("levelUp.dialog")} onClick={dismiss} className={`${HUD_SURFACE} level-up fixed inset-0 z-[100] flex flex-col items-center justify-center`}>
       <div className="lu-title hud-sc">{t("levelUp.title")}</div>
       <div className="lu-name">{name}</div>
       <div className="lu-num">
@@ -37,7 +56,7 @@ export function LevelUpOverlay({ campaignId, characterId, name }: { campaignId: 
           <p>{t("levelUp.canLearn")}</p>
         </div>
       )}
-      <Button type="button" variant="ghost" className="lu-cta hud-sc metal-gold metal-fill h-auto whitespace-normal rounded-none p-0 font-normal hover:bg-transparent dark:hover:bg-transparent" onClick={(e) => { e.stopPropagation(); toPanel(); }}>{t("levelUp.cta")}</Button>
+      <Button ref={ctaRef} type="button" variant="ghost" className="lu-cta hud-sc metal-gold metal-fill h-auto whitespace-normal rounded-none p-0 font-normal hover:bg-transparent dark:hover:bg-transparent" onClick={(e) => { e.stopPropagation(); toPanel(); }}>{t("levelUp.cta")}</Button>
       <div className="lu-skip">{t("levelUp.dismiss")}</div>
     </div>,
     document.body,

@@ -33,7 +33,13 @@ export function ScenarioCell({ campaignId, rowId, column, doc, active, searchMen
   }
 
   return (
-    <div className="sb-cell" role="button" tabIndex={0} onClick={handlers.onActivate} onKeyDown={(e) => e.key === "Enter" && handlers.onActivate()}>
+    <div className="sb-cell" role="button" tabIndex={0} onClick={handlers.onActivate} onKeyDown={(e) => {
+      if (e.key !== "Enter" && e.key !== " ") return;
+
+      e.preventDefault();
+
+      handlers.onActivate();
+    }}>
       {isDocEmpty(doc) ? <p className="sb-empty">{column === "story" ? t("storyEmpty") : t("notes")}</p> : <ScenarioRichText doc={doc} campaignId={campaignId} />}
     </div>
   );

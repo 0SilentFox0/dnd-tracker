@@ -1,6 +1,6 @@
 # Аудит якості коду: передача наступної сесії
 
-Звіт: [code-audit-2026-10-29.md](code-audit-2026-10-29.md). Рядок прогресу: `docs/STATUS.md` → «Аудит якості коду 2026-10-29». Кроки 1–4 і 6 змерджено в `main`; крок 7 — на гілці `refactor/audit-layers` (не змерджено, не запушено); крок 5 (DM-каркаси C27–C31) чекає на constructor stage 2.
+Звіт: [code-audit-2026-10-29.md](code-audit-2026-10-29.md). Рядок прогресу: `docs/STATUS.md` → «Аудит якості коду 2026-10-29». Кроки 1–4 і 6 змерджено в `main`; кроки 7–8 — на гілках `refactor/audit-layers` → `refactor/audit-polish` (стек, не змерджено, не запушено); крок 5 (DM-каркаси C27–C31) чекає на constructor stage 2.
 
 ## Готово
 
@@ -26,15 +26,15 @@
 
 ## Наступні кроки
 
-Порядок за звітом: крок 8 (I і H), потім B7–B10 за потреби. Крок 8 починати від `refactor/audit-layers`, якщо вона ще не в `main`.
+Далі: B7–B10, потім залишок кроку 6 (`loadContext`/`writeTables` розблоковано: obojima змерджено). Merge: audit-layers → audit-polish fast-forward.
 
 ### Крок 7 виконано (гілка `refactor/audit-layers`)
 
 Лишилось з E (свідомо): ratchet `DB_IN_UTILS_EXEMPT` (9 файлів `lib/utils` з `@/lib/db`, зокрема participant-кластер і `api-auth.ts`) і `APP_API_IMPORT_EXEMPT` (5 CRUD-сторінок `read-*`, до constructor stage 2); списки лише скорочуються. Перед merge: повний `test:run` і repo-wide lint.
 
-### Крок 8. Дрібне (розділ I) і a11y (розділ H)
+### Крок 8 виконано (гілка `refactor/audit-polish`, не змерджена, не запушена)
 
-Списки у звіті, розділи H та I. Особливо: `BattleFxLayer.tsx:25` `setTimeout` без скасування; зайвий `"use client"` (перевіряти по одному); `marker-handlers.ts:61` → `Prisma.WorldMarkerUpdateInput`; catch без логування (`ai/tools/define.ts:97`, `assistant/execution-effects.ts:36,53`, логувати лише `error.name`); a11y `ScenarioCell`, `SlotPicker`, `LevelUpOverlay`, `MapToken`, `BattleResultScreen`; порожні стани помилок → `QueryState`.
+H і I закрито, див. STATUS. Не підтвердилось і пропущено: `BattleFxLayer` setTimeout, a11y `MapToken`, зайвий `"use client"`. Лишились дрібні з I: магічні числа карти → `map/constants.ts`, `document.title` у двох місцях, рядки >200 символів.
 
 ### Інше з відкритого
 

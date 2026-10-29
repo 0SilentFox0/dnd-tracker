@@ -22,5 +22,5 @@ export function useScenarioVersions(campaignId: string, pageId: string, enabled:
     onSuccess: (page) => queryClient.setQueryData(scenarioKeys.page(campaignId, pageId), page),
   });
 
-  return { versions: query.data ?? [], isLoading: query.isLoading, restore: async (id: string) => void (await restore.mutateAsync(id)), isRestoring: restore.isPending };
+  return { versions: query.data ?? [], isLoading: query.isLoading, loadError: query.isError ? query.error : null, reload: () => void query.refetch(), restore: async (id: string) => void (await restore.mutateAsync(id)), isRestoring: restore.isPending };
 }

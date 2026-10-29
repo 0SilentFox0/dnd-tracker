@@ -21,7 +21,9 @@ export function useSkillTreeEditor(campaignId: string) {
 
   const confirm = useConfirm();
 
-  const { data: races = [], isPending: racesPending } = useRaces(campaignId);
+  const racesQuery = useRaces(campaignId);
+
+  const { data: races = [], isPending: racesPending } = racesQuery;
 
   const { data: mainSkills = [] } = useMainSkills(campaignId);
 
@@ -106,6 +108,8 @@ export function useSkillTreeEditor(campaignId: string) {
       races: races.map((r) => ({ id: r.id, name: r.name })),
       race: activeRace,
       isLoading: racesPending || trees.isPending,
+      loadError: racesQuery.isError ? racesQuery.error : trees.isError ? trees.error : null,
+      retryLoad: () => void Promise.all([racesQuery.isError && racesQuery.refetch(), trees.isError && trees.refetch()]),
       dirty,
       isSaving: saveTree.isPending,
     },

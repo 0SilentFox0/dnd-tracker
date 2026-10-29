@@ -6,7 +6,7 @@ import { ChevronLeft, MapPin } from "lucide-react";
 
 import { SearchEmptyState } from "@/components/common/SearchEmptyState";
 import { SearchInput } from "@/components/common/SearchInput";
-import { EmptyState, LoadingState } from "@/components/common/states";
+import { EmptyState, ErrorState, LoadingState } from "@/components/common/states";
 import { Button } from "@/components/ui/button";
 import { ResponsiveDialog } from "@/components/ui/responsive-dialog";
 import { WorldMapLink } from "@/components/world/WorldMapLink";
@@ -49,11 +49,13 @@ function treeOrder(maps: WorldMapSummary[]): WorldMapSummary[] {
 function MarkerList({ campaignId, mapId, onPick }: { campaignId: string; mapId: string; onPick(markerId: string): void }) {
   const t = useTranslations("scenario.markerPicker");
 
-  const { data, isLoading } = useWorldMap(campaignId, mapId);
+  const { data, isLoading, isError, error, refetch } = useWorldMap(campaignId, mapId);
 
   const search = useSearch(data?.markers ?? [], markerFields);
 
   if (isLoading) return <LoadingState />;
+
+  if (isError) return <ErrorState error={error} onRetry={() => void refetch()} />;
 
   if (!data?.markers.length) return <EmptyState icon={MapPin} title={t("noMarkers")} />;
 
@@ -78,7 +80,7 @@ export function MarkerPickerDialog({ campaignId, open, onOpenChange, onPick }: P
 
   const isWide = useMediaQuery(DESKTOP_QUERY);
 
-  const { data: maps = [], isLoading } = useWorldMaps(campaignId);
+  const { data: maps = [], isLoading, isError, error, refetch } = useWorldMaps(campaignId);
 
   const [mapId, setMapId] = useState<string | null>(null);
 
@@ -104,6 +106,7 @@ export function MarkerPickerDialog({ campaignId, open, onOpenChange, onPick }: P
   let body;
 
   if (isLoading) body = <LoadingState />;
+  else if (isError) body = <ErrorState error={error} onRetry={() => void refetch()} />;
   else if (maps.length === 0) body = <EmptyState icon={MapPin} title={t("noMaps")} action={<WorldMapLink campaignId={campaignId} variant="button" newTab />} />;
   else if (isWide)
     body = (

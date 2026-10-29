@@ -18,7 +18,7 @@ import { MoraleSection } from "./sections/MoraleSection";
 import { OutOfCombatSection } from "./sections/OutOfCombatSection";
 import { SavesSection } from "./sections/SavesSection";
 
-import { LoadingState } from "@/components/common/states";
+import { ErrorState, LoadingState } from "@/components/common/states";
 import { HudForm, type HudTab } from "@/components/hud/form";
 import { Button } from "@/components/ui/button";
 import { useRulesForm } from "@/lib/hooks/campaigns";
@@ -50,7 +50,9 @@ export function RulesForm({ campaignId }: { campaignId: string }) {
 
   const tc = useTranslator("common");
 
-  const { form, save, reset, isSaving, isDirty, isLoading } = useRulesForm(campaignId);
+  const { form, save, reset, isSaving, isDirty, isLoading, loadError, reload } = useRulesForm(campaignId);
+
+  if (loadError) return <ErrorState error={loadError} onRetry={reload} />;
 
   if (isLoading) return <LoadingState />;
 

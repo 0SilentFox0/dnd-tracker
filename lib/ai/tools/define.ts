@@ -97,7 +97,7 @@ export async function runToolResult(def: AiToolDef, ctx: AiToolContext, rawInput
       return { version: 2, kind: "error", error: { code: "ASSISTANT_UNAVAILABLE", status: error instanceof ContentError ? error.status : 422, message: translateErrorBody(t, { error: error.message, params: error.params }).error.slice(0, 500), ...(error instanceof ContentError && Array.isArray(error.issues) ? { issues: formatIssues(await translatedIssues(ctx.locale, error.issues)).slice(0, 20).map(s => s.slice(0, 200)) } : {}) } };
     }
 
-    console.error(`tool ${def.name} failed`);
+    console.error(`tool ${def.name} failed${error instanceof Error ? `: ${error.name}` : ""}`);
 
     return { version: 2, kind: "error", error: { code: "ASSISTANT_FAILED", status: 500, message: "Internal server error. Try again later." } };
   }

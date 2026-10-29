@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useTranslations } from "next-intl";
 
+import { ErrorState } from "@/components/common/states";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useAbilitySources, useCopyOwnerAbilities } from "@/lib/hooks/abilities";
@@ -15,7 +16,7 @@ const SOURCE_KINDS = ["skill", "race", "artifact", "artifactSet", "unit", "class
 export function AbilityCopySourcePicker({ campaignId, onPick }: { campaignId: string; onPick: (abilities: Ability[]) => void }) {
   const t = useTranslations("abilities.copy");
 
-  const { data, isLoading } = useAbilitySources(campaignId, true);
+  const { data, isLoading, isError, error: loadError, refetch } = useAbilitySources(campaignId, true);
 
   const [query, setQuery] = useState("");
 
@@ -31,6 +32,7 @@ export function AbilityCopySourcePicker({ campaignId, onPick }: { campaignId: st
     <div className="space-y-2">
       <Input placeholder={t("search")} value={query} onChange={(e) => setQuery(e.target.value)} />
       {isLoading && <p className="text-xs text-muted-foreground">{t("loading")}</p>}
+      {isError && <ErrorState error={loadError} onRetry={() => void refetch()} />}
       {error && <p className="text-xs text-destructive">{error}</p>}
       <div className="max-h-[50dvh] space-y-3 overflow-y-auto">
         {SOURCE_KINDS.map((kind) => {

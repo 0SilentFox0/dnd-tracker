@@ -2,6 +2,7 @@
 
 import { useFormatter, useTranslations } from "next-intl";
 
+import { ErrorState } from "@/components/common/states";
 import { Button } from "@/components/ui/button";
 import { ResponsiveDialog } from "@/components/ui/responsive-dialog";
 import { useConfirm } from "@/lib/hooks/common";
@@ -16,7 +17,7 @@ export function VersionsDialog({ campaignId, pageId, open, onOpenChange, onResto
 
   const format = useFormatter();
 
-  const { versions, isLoading, restore, isRestoring } = useScenarioVersions(campaignId, pageId, open);
+  const { versions, isLoading, loadError, reload, restore, isRestoring } = useScenarioVersions(campaignId, pageId, open);
 
   const confirm = useConfirm();
 
@@ -31,7 +32,8 @@ export function VersionsDialog({ campaignId, pageId, open, onOpenChange, onResto
   return (
     <ResponsiveDialog hud open={open} onOpenChange={onOpenChange} title={t("title")}>
       {isLoading && <p className="text-sm text-hud-muted">{tStates("loading")}</p>}
-      {!isLoading && versions.length === 0 && <p className="text-sm text-hud-muted">{t("empty")}</p>}
+      {loadError ? <ErrorState error={loadError} onRetry={reload} /> : null}
+      {!isLoading && !loadError && versions.length === 0 && <p className="text-sm text-hud-muted">{t("empty")}</p>}
       <ul className="space-y-2">
         {versions.map((v) => (
           <li key={v.id} className="flex items-center justify-between gap-3">

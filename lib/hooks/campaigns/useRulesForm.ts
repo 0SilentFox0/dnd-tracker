@@ -88,6 +88,8 @@ export function useRulesForm(campaignId: string) {
     isSaving: update.isPending,
     isDirty: dirtyKeys.length > 0,
     isLoading: query.isLoading,
+    loadError: query.isError ? query.error : null,
+    reload: () => void query.refetch(),
     reset: () => setChanges({}),
   };
 }

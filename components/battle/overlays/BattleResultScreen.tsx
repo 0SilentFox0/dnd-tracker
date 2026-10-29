@@ -34,9 +34,9 @@ function HeroCard({ hero }: { hero: BattleSummaryHero }) {
       </div>
       <dl className="mt-2 grid grid-cols-4 gap-2 text-center">
         {STATS.map((key) => (
-          <div key={key}>
-            <dd className="hud-sc text-[20px] font-bold text-[var(--ink)]">{hero[key]}</dd>
+          <div key={key} className="flex flex-col-reverse">
             <dt className="text-[11px] text-[var(--hud-muted)]">{t(`stats.${key}`)}</dt>
+            <dd className="hud-sc text-[20px] font-bold text-[var(--ink)]">{hero[key]}</dd>
           </div>
         ))}
       </dl>

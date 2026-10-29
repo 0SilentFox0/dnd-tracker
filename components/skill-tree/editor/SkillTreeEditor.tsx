@@ -9,7 +9,7 @@ import { SlotPicker } from "./SlotPicker";
 
 import "@/components/hud/hud.css";
 import "./editor.css";
-import { EmptyState, LoadingState } from "@/components/common/states";
+import { EmptyState, ErrorState, LoadingState } from "@/components/common/states";
 import { HUD_SURFACE } from "@/components/hud";
 import { Button } from "@/components/ui/button";
 import { SelectItem } from "@/components/ui/select";
@@ -50,6 +50,8 @@ export function SkillTreeEditor({ campaignId }: { campaignId: string }) {
   const errorIds = useMemo(() => new Set(view.errors.map((e) => e.ref)), [view.errors]);
 
   const { raw, tree } = view;
+
+  if (state.loadError) return <ErrorState error={state.loadError} onRetry={state.retryLoad} />;
 
   if (state.isLoading) return <LoadingState />;
 

@@ -64,8 +64,16 @@ export function SlotPicker({ target, current, skills, usedAt, onPick, onClose }:
         {list.map((s) => {
           const used = s.id !== current ? usedAt(s.id) : null;
 
+          const select = () => !used && setSelected(s.id);
+
           return (
-            <li key={s.id} role="option" aria-selected={selected === s.id} aria-disabled={used ? "true" : "false"} onClick={() => !used && setSelected(s.id)} className={`picker-item ${selected === s.id ? "on" : ""} ${used ? "used" : ""}`}>
+            <li key={s.id} role="option" aria-selected={selected === s.id} aria-disabled={used ? "true" : "false"} tabIndex={used ? -1 : 0} onClick={select} onKeyDown={(e) => {
+              if (e.key !== "Enter" && e.key !== " ") return;
+
+              e.preventDefault();
+
+              select();
+            }} className={`picker-item ${selected === s.id ? "on" : ""} ${used ? "used" : ""}`}>
               <span className="font-medium">{s.name}</span>
               {s.summary.length > 0 && <span className="block text-xs opacity-70">{abilityText.flowsText(s.summary)}</span>}
               {used && <span className="text-[11px] text-[#b07842]">{t("usedAt", { where: used })}</span>}
