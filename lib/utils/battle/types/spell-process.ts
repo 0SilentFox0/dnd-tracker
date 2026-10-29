@@ -1,6 +1,7 @@
 import type { SummonRequest } from "@/lib/utils/abilities/engine/core/types";
 import type { CritPicker } from "@/lib/utils/battle/crit-choice/types";
 import type { SpellFx } from "@/lib/utils/battle/fx/spells";
+import type { TransformRequest } from "@/lib/utils/battle/transform/types";
 import type { Ruleset } from "@/lib/utils/rules";
 import type { SpellDice } from "@/lib/utils/spells/model/dice";
 import type { SpellDefinition } from "@/lib/utils/spells/model/schema";
@@ -46,6 +47,8 @@ export interface CastSpellResult {
   allParticipantsUpdated: BattleParticipant[];
   battleAction: BattleAction;
   summons: SummonRequest[];
+  /** перетворення цілей: застосовуються асинхронно (потрібен юніт кампанії) */
+  transforms?: TransformRequest[];
   messages: string[];
   /** кидок шкоди заклинання до опорів — для небезпеки, яку лишає zone */
   spellDamage?: TerrainDamage;

@@ -468,6 +468,30 @@ export interface AbilityPool {
   recharge?: 4 | 5 | 6;
 }
 
+/** Звичайна форма цілі, поки на ній чужа форма заклинання: відновлюється при відкаті */
+export interface TransformState {
+  unitId: string;
+  castId: string;
+  expiresRound?: number;
+  concentrationOf?: { casterId: string; castId: string };
+  saved: {
+    maxHp: number;
+    currentHp: number;
+    tempHp: number;
+    armorClass: number;
+    speed: number;
+    gridSize?: number;
+    status: CombatStatusType;
+    strength: number;
+    dexterity: number;
+    constitution: number;
+    modifiers: { strength: number; dexterity: number; constitution: number };
+    attacks: BattleAttack[];
+    movement?: BattleParticipantBattleData["movement"];
+    creatureType?: string;
+  };
+}
+
 export interface BattleParticipantBattleData {
   pendingCast?: { spellId: string; spellName: string; remainingRounds: number; totalRounds: number; lastRound: number; grantKey?: string; slotKey?: string; castLevel?: number };
   attacks: BattleAttack[];
@@ -487,6 +511,8 @@ export interface BattleParticipantBattleData {
   summonedBy?: string;
   /** Предмет заклинання: не ціль, не ходить, не рахується в перемозі; зникає за expiresRound чи з концентрацією */
   object?: { spellId: string; expiresRound?: number; concentrationOf?: { casterId: string; castId: string } };
+  /** Цільова форма заклинання перетворення; немає — своя форма */
+  transform?: TransformState;
   /** Предмет зник (а не загинув) */
   dismissed?: boolean;
   /** Учасник зараз робить додатковий хід від моралі (наприкінці раунду) */

@@ -173,6 +173,8 @@ export function describeEffect(effect: Effect | SpellEffect): string {
 
   if (effect.kind === "summonInline") return `викликає ${effect.count}× «${effect.name}» (${effect.hp === null ? "предмет" : `${effect.hp} HP`}, КЗ ${effect.ac === "spellDc" ? "= СК" : effect.ac}) на ${effect.duration.rounds} р.${effect.upcastEvery ? `; +1 за кожні ${effect.upcastEvery} кола слота` : ""}${effect.aura ? `; аура ${effect.aura.radiusFeet} фт${effect.aura.onEnter?.attack || effect.aura.onTurnStart?.attack ? " (атака заклинанням)" : ""}` : ""}`;
 
+  if (effect.kind === "transform") return `перетворює ціль на форму юніта на ${effect.duration.rounds} р.; на 0 HP форми — відкат, надлишок шкоди переходить на звичайну форму`;
+
   if (effect.kind === "moveSelf") return "кастер переміщується до цілі";
 
   if (effect.kind === "createTerrain") return `${effect.terrain === "wall" ? "стіна" : "складна місцевість"}: ${effect.shape === "line" ? "лінія до цілі" : "клітинки області"} (до ${effect.cells}) на ${effect.rounds} р.`;

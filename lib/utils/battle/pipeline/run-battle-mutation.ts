@@ -37,6 +37,7 @@ import {
   systemEvent,
 } from "@/lib/utils/battle/store";
 import { dismissExpiredSummons } from "@/lib/utils/battle/summon/dismiss";
+import { revertExpiredTransforms } from "@/lib/utils/battle/transform/revert";
 import { checkVictoryConditions, completeBattle } from "@/lib/utils/battle/turn/victory";
 import type { BattleKnowledge } from "@/lib/utils/battle/view/knowledge";
 import { alwaysSeesEnemyStats } from "@/lib/utils/battle/view/visibility";
@@ -144,6 +145,10 @@ function withPlacement(map: BattleMapConfig | null, scene: { status: BattleStatu
   const dismissed = dismissExpiredSummons(result.participants, result.scene?.round ?? scene.round);
 
   if (dismissed.participants !== result.participants) result = { ...result, participants: dismissed.participants, events: [...result.events, systemEvent(result.scene?.round ?? scene.round, dismissed.messages.join("; "))] };
+
+  const reverted = revertExpiredTransforms(result.participants, result.scene?.round ?? scene.round);
+
+  if (reverted.participants !== result.participants) result = { ...result, participants: reverted.participants, events: [...result.events, systemEvent(result.scene?.round ?? scene.round, reverted.messages.join("; "))] };
 
   const cleared = clearFallenEffects(result.participants);
 

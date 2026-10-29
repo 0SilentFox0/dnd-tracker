@@ -158,6 +158,7 @@ export function finishSpellAction(state: SpellCastState, { before, targetsBefore
     allParticipantsUpdated: mergeParticipants(allParticipants, flow.ps),
     battleAction: action,
     summons: [...state.summons, ...flow.summons],
+    ...(state.transforms.length > 0 && { transforms: state.transforms }),
     messages: flow.messages,
     ...(spellDamage && { spellDamage }),
   };

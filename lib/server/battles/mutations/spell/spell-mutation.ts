@@ -37,6 +37,7 @@ import { systemEvent } from "@/lib/utils/battle/store";
 import { BattleAccessError, battleActionToEvent, BattleRuleError } from "@/lib/utils/battle/store";
 import { applyAbilitySummons, type SummonDeps } from "@/lib/utils/battle/summon/ability-summons";
 import { objectsNear } from "@/lib/utils/battle/summon/objects-near";
+import { applyTransforms } from "@/lib/utils/battle/transform/apply-transforms";
 import { assertCanAct } from "@/lib/utils/battle/turn";
 import { assertSpellRolls } from "@/lib/utils/battle/validation/dice-checks";
 import { rollDiceList } from "@/lib/utils/common/dice";
@@ -238,6 +239,11 @@ export function createSpellMutation(deps: SpellMutationDeps = defaultDeps, optio
         }
 
         const summoned = await applyAbilitySummons(result.summons.map((r) => (r.inline && resolution.centre ? { ...r, atCell: resolution.centre } : r)), result.allParticipantsUpdated, { campaignId: ctx.scene.campaignId, battleId: ctx.scene.id, rng, rules: ctx.meta.rules, deps, map: ctx.meta.map, round: ctx.scene.round });
+
+        const transformed = await applyTransforms(summoned.order, result.transforms ?? [], { campaignId: ctx.scene.campaignId, battleId: ctx.scene.id, rules: ctx.meta.rules, deps, round: ctx.scene.round });
+
+        summoned.order = transformed.order;
+        summoned.messages.push(...transformed.messages);
 
         if (legendaryAbility) summoned.order = updateParticipant(summoned.order, caster.basicInfo.id, (p) => {
           const used = recordUse(p, legendaryAbility.key, ctx.scene.round, legendaryAbility.limits?.pool);

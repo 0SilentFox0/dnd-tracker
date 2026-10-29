@@ -193,7 +193,15 @@ const SummonInlineSchema = z.object({
   duration: DurationSchema,
 });
 
-const SPELL_ONLY_EFFECTS = [ChooseOneSchema, InputDiceSchema, GrantCastSchema, HitRiderSchema, MoveSelfSchema, CreateTerrainSchema, AnchoredZoneSchema, SummonInlineSchema] as const;
+/** Ціль набуває форми юніта кампанії (HP, КЗ, фізичні характеристики, атаки, швидкість); на 0 HP форми — відкат, надлишок шкоди йде в звичайну форму. */
+const TransformSchema = z.object({
+  kind: z.literal("transform"),
+  unitId: z.string().trim().min(1).max(64),
+  revertAtZero: z.literal(true),
+  duration: DurationSchema,
+});
+
+const SPELL_ONLY_EFFECTS = [ChooseOneSchema, InputDiceSchema, GrantCastSchema, HitRiderSchema, MoveSelfSchema, CreateTerrainSchema, AnchoredZoneSchema, SummonInlineSchema, TransformSchema] as const;
 
 export const SpellEffectSchema = z.discriminatedUnion("kind", [...BASE_EFFECTS, RandomOfSchema, ...SPELL_ONLY_EFFECTS]);
 
@@ -204,6 +212,8 @@ export type GrantCastEffect = z.infer<typeof GrantCastSchema>;
 export type AnchoredZoneEffect = z.infer<typeof AnchoredZoneSchema>;
 
 export type SummonInlineEffect = z.infer<typeof SummonInlineSchema>;
+
+export type TransformEffect = z.infer<typeof TransformSchema>;
 
 export type CreateTerrainEffect = z.infer<typeof CreateTerrainSchema>;
 
