@@ -1,24 +1,11 @@
+import { anchorMove, anchorTurnStart } from "./anchored-zone";
+import { type Fired, fireTrigger, type TriggerKind, type ZoneCtx } from "./zone-fire";
+
 import { findParticipant, isActive, replaceParticipant } from "@/lib/utils/abilities/engine/core/participants";
-import { resolveDowned } from "@/lib/utils/abilities/engine/core/run-abilities";
-import type { Rng } from "@/lib/utils/abilities/engine/core/types";
-import { applyEffect } from "@/lib/utils/abilities/registry/effects";
 import { isZoneConcentrationLive } from "@/lib/utils/battle/concentration";
 import { canStand, cellDistance, cellKey, footprint, movementBudget, parseCellKey, sizeOf } from "@/lib/utils/battle/grid";
 import { replaceTerrain } from "@/lib/utils/battle/grid/terrain";
-import { rollSave } from "@/lib/utils/battle/saves/roll-save";
-import type { Ruleset } from "@/lib/utils/rules";
-import type { ZoneTrigger } from "@/lib/utils/spells/model/schema";
-import type { ResolvedAbility } from "@/types/abilities";
-import type { BattleMapConfig, BattleParticipant, GridPoint, SpellZoneRuntime } from "@/types/battle";
-
-type TriggerKind = "onEnter" | "onTurnStart" | "onExit";
-
-interface ZoneCtx {
-  map: BattleMapConfig;
-  round: number;
-  rng: Rng;
-  rules?: Ruleset;
-}
+import type { BattleMapConfig, BattleParticipant, GridPoint } from "@/types/battle";
 
 export function zonesAt(map: BattleMapConfig | null | undefined, p: BattleParticipant, at?: GridPoint): Set<string> {
   const anchor = at ?? p.battleData.position;
@@ -45,73 +32,20 @@ export function sweepDeadZones(map: BattleMapConfig | null | undefined, particip
   return replaceTerrain(map, Object.fromEntries(Object.entries(map.terrain ?? {}).filter(([, c]) => !c.zoneId || !dead.has(c.zoneId))));
 }
 
-const zoneAbility = (id: string, zone: SpellZoneRuntime): ResolvedAbility =>
-  ({ id: `zone-${id}`, name: zone.spellName, trigger: { event: "spellCast", phase: "after", role: "caster" }, effects: [], stackable: false, key: `spell:${zone.spellId}`, source: { type: "skill", id: zone.spellId, name: zone.spellName } }) as ResolvedAbility;
-
-const hitKey = (zoneId: string, kind: TriggerKind) => `${zoneId}:${kind === "onExit" ? "out" : "in"}`;
-
-interface Fired {
-  participants: BattleParticipant[];
-  messages: string[];
-  failed: boolean;
-}
-
 function fire(ps: BattleParticipant[], zoneId: string, kind: TriggerKind, targetId: string, ctx: ZoneCtx): Fired {
   const zone = ctx.map.spellZones?.[zoneId];
 
-  const trigger: ZoneTrigger | undefined = zone?.triggers[kind];
+  if (!zone) return { participants: ps, messages: [], failed: false };
 
-  const target = findParticipant(ps, targetId);
+  const { casterId, spellId, spellName, dc, side, concentrationOf } = zone;
 
-  const owner = zone && findParticipant(ps, zone.casterId);
-
-  const none: Fired = { participants: ps, messages: [], failed: false };
-
-  if (!zone || !trigger || !target || !owner || !isActive(target) || !isZoneConcentrationLive(ps, zone.concentrationOf)) return none;
-
-  if (zone.side === "enemies" && target.basicInfo.side === owner.basicInfo.side) return none;
-
-  const once = kind !== "onTurnStart";
-
-  const key = hitKey(zoneId, kind);
-
-  if (once && target.battleData.zoneHits?.[key] === ctx.round) return none;
-
-  let next = once ? replaceParticipant(ps, { ...target, battleData: { ...target.battleData, zoneHits: { ...Object.fromEntries(Object.entries(target.battleData.zoneHits ?? {}).filter(([, r]) => r >= ctx.round - 1)), [key]: ctx.round } } }) : ps;
-
-  const messages: string[] = [];
-
-  if (trigger.save) {
-    const res = rollSave({ target: findParticipant(next, targetId) ?? target, ability: trigger.save.ability, dc: zone.dc, participants: next, rules: ctx.rules, rng: ctx.rng, vsSpell: true });
-
-    messages.push(`🎲 ${target.basicInfo.name}: «${zone.spellName}» — рятівний ${trigger.save.ability.toUpperCase()} ${res.total} проти СК ${zone.dc}: ${res.success ? "успіх" : "провал"}`);
-
-    if (res.success) return { participants: next, messages, failed: false };
-  }
-
-  const event = { type: "spellCast" as const, phase: "after" as const, actorId: zone.casterId, targetIds: [targetId] };
-
-  trigger.effects.forEach((effect, i) => {
-    const r = applyEffect({ participants: next, ability: zoneAbility(zoneId, zone), effectIndex: 200 + i, ownerId: zone.casterId, effect, targetIds: [targetId], event, ctx: { round: ctx.round, rng: ctx.rng, map: ctx.map, rules: ctx.rules } });
-
-    next = r.participants;
-    messages.push(...r.messages);
-
-    for (const downed of r.downed ?? []) {
-      const d = resolveDowned(next, downed, { round: ctx.round, rng: ctx.rng, rules: ctx.rules });
-
-      next = d.participants;
-      messages.push(...d.messages);
-    }
-  });
-
-  return { participants: next, messages, failed: true };
+  return fireTrigger(ps, { casterId, spellId, spellName, dc, side, concentrationOf, hitKey: zoneId }, zone.triggers[kind], kind, targetId, ctx);
 }
 
 export function zoneTurnStart(map: BattleMapConfig | null | undefined, ps: BattleParticipant[], targetId: string, ctx: Omit<ZoneCtx, "map">): { participants: BattleParticipant[]; messages: string[] } {
   const target = findParticipant(ps, targetId);
 
-  if (!map?.spellZones || !target) return { participants: ps, messages: [] };
+  if (!map || !target) return { participants: ps, messages: [] };
 
   let next = ps;
 
@@ -124,7 +58,9 @@ export function zoneTurnStart(map: BattleMapConfig | null | undefined, ps: Battl
     messages.push(...fired.messages);
   }
 
-  return { participants: next, messages };
+  const anchored = anchorTurnStart(next, targetId, { ...ctx, map });
+
+  return { participants: anchored.participants, messages: [...messages, ...anchored.messages] };
 }
 
 function pullTarget(map: BattleMapConfig, ps: BattleParticipant[], mover: BattleParticipant, zoneId: string, centre: GridPoint | undefined, fallback: GridPoint): GridPoint {
@@ -145,6 +81,18 @@ export interface ZoneMoveResult {
 
 /** Тригери зон на шляху: вхід, вихід (невдалий кидок із pull зупиняє мувера біля центру). `path` — клітинки після старту. */
 export function zoneMove(args: { map: BattleMapConfig; participants: BattleParticipant[]; moved: BattleParticipant; from: GridPoint; path: GridPoint[] } & Omit<ZoneCtx, "map">): ZoneMoveResult {
+  const zones = spellZonesMove(args);
+
+  const end = zones.moved.battleData.position;
+
+  const walked = end ? args.path.slice(0, args.path.findIndex((c) => c.x === end.x && c.y === end.y) + 1) : [];
+
+  const anchored = anchorMove({ participants: zones.participants, moved: zones.moved, from: args.from, path: walked, ctx: { map: args.map, round: args.round, rng: args.rng, rules: args.rules } });
+
+  return { participants: anchored.participants, moved: findParticipant(anchored.participants, args.moved.basicInfo.id) ?? zones.moved, messages: [...zones.messages, ...anchored.messages] };
+}
+
+function spellZonesMove(args: Parameters<typeof zoneMove>[0]): ZoneMoveResult {
   const { map, from, path, ...ctx } = args;
 
   let ps = args.participants;
@@ -153,9 +101,9 @@ export function zoneMove(args: { map: BattleMapConfig; participants: BattleParti
 
   const messages: string[] = [];
 
-  if (!map.spellZones) return { participants: ps, moved, messages };
-
   const id = moved.basicInfo.id;
+
+  if (!map.spellZones) return { participants: ps, moved, messages };
 
   const at = (p: GridPoint) => zonesAt(map, moved, p);
 

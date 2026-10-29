@@ -4,7 +4,7 @@ import type { ActionFlow } from "@/lib/utils/battle/common/action-flow";
 import { newBattleAction } from "@/lib/utils/battle/common/new-action";
 import type { SpellPower } from "@/lib/utils/battle/spell/power";
 import type { CastableSpell } from "@/lib/utils/battle/types/spell-process";
-import type { GrantCastEffect, HitRiderEffect, SpellDefinition, SpellEffect } from "@/lib/utils/spells/model/schema";
+import type { AnchoredZoneEffect, GrantCastEffect, HitRiderEffect, SpellDefinition, SpellEffect } from "@/lib/utils/spells/model/schema";
 import type { ResolvedAbility } from "@/types/abilities";
 import type { BattleAction, BattleParticipant, DamageStep, SpellGrant } from "@/types/battle";
 
@@ -82,13 +82,15 @@ export const isPerTarget = (e: Effect) => !NO_TARGET_KINDS.has(e.kind) && (targe
 /** Цільові ефекти, що читають шкоду касту: виконуються після нецільових. */
 export const readsEventDamage = (e: Effect) => (e.kind === "heal" || e.kind === "dealDamage") && typeof e.amount === "object" && "percentOf" in e.amount && e.amount.percentOf === "eventDamage";
 
-export const SPELL_ONLY_KINDS = new Set<string>(["inputDice", "grantCast", "hitRider", "moveSelf", "createTerrain"]);
+export const SPELL_ONLY_KINDS = new Set<string>(["inputDice", "grantCast", "hitRider", "moveSelf", "createTerrain", "anchoredZone"]);
 
 export const flatEffects = (effects: Array<Effect | SpellEffect>): Effect[] => effects.flatMap((e) => (e.kind === "randomOf" || e.kind === "chooseOne" ? e.options : SPELL_ONLY_KINDS.has(e.kind) ? [] : [e as Effect]));
 
 export const grantCastsOf = (effects: SpellEffect[]): Array<{ effect: GrantCastEffect; index: number }> => effects.flatMap((effect, index) => (effect.kind === "grantCast" ? [{ effect, index }] : []));
 
 export const hitRidersOf = (effects: SpellEffect[]): Array<{ effect: HitRiderEffect; index: number }> => effects.flatMap((effect, index) => (effect.kind === "hitRider" ? [{ effect, index }] : []));
+
+export const anchoredZonesOf = (effects: SpellEffect[]): Array<{ effect: AnchoredZoneEffect; index: number }> => effects.flatMap((effect, index) => (effect.kind === "anchoredZone" ? [{ effect, index }] : []));
 
 export const hasMoveSelf = (effects: SpellEffect[]) => effects.some((e) => e.kind === "moveSelf");
 

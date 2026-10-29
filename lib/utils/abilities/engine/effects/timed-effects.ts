@@ -24,6 +24,7 @@ export interface TimedEffectInput {
   concentrationOf?: ActiveEffect["concentrationOf"];
   concentration?: ActiveEffect["concentration"];
   hitRider?: ActiveEffect["hitRider"];
+  anchoredZone?: ActiveEffect["anchoredZone"];
   exhaustionVariant?: ActiveEffect["exhaustionVariant"];
 }
 
@@ -66,6 +67,7 @@ export function upsertTimedEffect(p: BattleParticipant, input: TimedEffectInput,
     ...(input.concentrationOf && { concentrationOf: input.concentrationOf }),
     ...(input.concentration && { concentration: input.concentration }),
     ...(input.hitRider && { hitRider: input.hitRider }),
+    ...(input.anchoredZone && { anchoredZone: input.anchoredZone }),
     ...(input.exhaustionVariant && { exhaustionVariant: input.exhaustionVariant }),
   };
 

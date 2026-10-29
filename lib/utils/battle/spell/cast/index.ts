@@ -5,6 +5,7 @@ import { type ActionFlow, fire, getP } from "@/lib/utils/battle/common/action-fl
 import { beginConcentration, castIdFor, tagConcentration } from "@/lib/utils/battle/concentration";
 import { removeEffects } from "@/lib/utils/battle/conditions/query";
 import { runAutoReactions } from "@/lib/utils/battle/spell/auto-reaction";
+import { applyAnchoredZones } from "@/lib/utils/battle/spell/cast/anchored-zone";
 import { applyTo } from "@/lib/utils/battle/spell/cast/effects";
 import { finishSpellAction, spendCastCost } from "@/lib/utils/battle/spell/cast/finish";
 import { applyGrantCasts } from "@/lib/utils/battle/spell/cast/grant-cast";
@@ -143,6 +144,8 @@ export function castSpell(params: CastSpellParams): CastSpellResult {
   }
 
   applyHitRiders({ flow, effects: source.definition.effects, casterId, targetIds, ability: state.ability, saveDc: state.saveDc, round: currentRound });
+
+  applyAnchoredZones({ flow, effects: source.definition.effects, casterId, targetIds, ability: state.ability, spellId: spell.id, saveDc: state.saveDc, round: currentRound });
 
   if (hasMoveSelf(source.definition.effects) && targetIds[0]) {
     const moved = moveAdjacent(flow.ctx.map, flow.ps, casterId, targetIds[0]);

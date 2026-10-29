@@ -86,6 +86,10 @@ export interface ActiveEffect {
   concentrationOf?: { casterId: string; castId: string };
   /** заряди додаткової шкоди від заклинання (hitRider); на нуль ефект знімається */
   hitRider?: HitRiderState;
+  /** аура на носії (заклинання anchoredZone): тригери для істот у радіусі */
+  anchoredZone?: AnchoredZoneState;
+  /** ефект накладений аурою: зникає, коли ефект-аура з цим id зникає (може бути на іншому учаснику) */
+  anchorOf?: string;
   /** маркер концентрації на самому кастері */
   concentration?: { castId: string; spellName: string; /** є ефекти заклинання з concentrationOf: без живих концентрація знімається */ tracksEffects?: true };
   /** скільки HP зняло виснаження з maxHp (повертається при зніманні) */
@@ -299,6 +303,19 @@ export interface BattleMapConfig {
 
 /** difficult — лише пензель ДМ (прохідна складна місцевість); зони заклинань ставлять прапорці на hazard */
 export type TerrainKind = "wall" | "barrier" | "hazard" | "difficult";
+
+export interface AnchoredZoneState {
+  casterId: string;
+  spellId: string;
+  spellName: string;
+  dc: number;
+  radiusFeet: number;
+  side: "enemies" | "allies" | "all";
+  excludeBearer?: boolean;
+  onEnter?: ZoneTrigger;
+  onTurnStart?: ZoneTrigger;
+  endsWhenStartOutside?: boolean;
+}
 
 export interface SpellZoneRuntime {
   casterId: string;

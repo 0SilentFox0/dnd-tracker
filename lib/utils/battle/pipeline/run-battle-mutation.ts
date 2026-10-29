@@ -19,6 +19,7 @@ import { placeRevived } from "@/lib/utils/battle/grid/revive-placement";
 import { modeBlockedText, withModeAfterMutation } from "@/lib/utils/battle/modes/server";
 import { clearFallenEffects } from "@/lib/utils/battle/participant/fallen";
 import { reserveOf } from "@/lib/utils/battle/participant/reserve";
+import { sweepOrphanedAnchored } from "@/lib/utils/battle/spell/anchored-zone";
 import { sweepDeadZones } from "@/lib/utils/battle/spell/zone-triggers";
 import type {
   BattleDelta,
@@ -146,6 +147,10 @@ function withPlacement(map: BattleMapConfig | null, scene: { status: BattleStatu
   const released = releaseInvalidGrapples(result.participants, map);
 
   if (released.participants !== result.participants) result = { ...result, participants: released.participants, events: [...result.events, systemEvent(result.scene?.round ?? scene.round, released.messages.join("; "))] };
+
+  const swept = sweepOrphanedAnchored(result.participants);
+
+  if (swept !== result.participants) result = { ...result, participants: swept };
 
   const orphaned = dropOrphanedConcentration(result.participants);
 

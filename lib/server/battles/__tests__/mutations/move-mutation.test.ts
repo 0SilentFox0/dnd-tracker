@@ -338,3 +338,22 @@ describe("зони заклинань", () => {
   });
 });
 
+
+describe("аура на учаснику", () => {
+  const anchored = (): BattleParticipant => ({
+    ...at(goblin, { x: 9, y: 4 }),
+    battleData: {
+      ...goblin.battleData,
+      position: { x: 9, y: 4 },
+      activeEffects: [{ id: "a1", name: "Аура", type: "buff", duration: 5, appliedAt: { round: 1, timestamp: new Date(0) }, effects: [], anchoredZone: { casterId: goblin.basicInfo.id, spellId: "s", spellName: "Аура", dc: 99, radiusFeet: 10, side: "all", onEnter: { effects: [{ kind: "dealDamage", amount: 4, damageType: "psychic", target: "eventTarget" }] } } }],
+    },
+  });
+
+  it("рух героя в радіус носія без spellZones спрацьовує вхід", () => {
+    const base = ctx({ participants: [at(hero, { x: 4, y: 4 }), anchored()] });
+
+    const out = moveMutation({ ...base, rng: () => 0 }, { participantId: "hero", to: { x: 7, y: 4 } });
+
+    expect(out.participants[0].combatStats.currentHp).toBe(hero.combatStats.currentHp - 4);
+  });
+});

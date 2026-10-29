@@ -155,13 +155,27 @@ const CreateTerrainSchema = z.object({
   rounds: z.number().int().min(1).max(100),
 });
 
-const SPELL_ONLY_EFFECTS = [ChooseOneSchema, InputDiceSchema, GrantCastSchema, HitRiderSchema, MoveSelfSchema, CreateTerrainSchema] as const;
+/** Аура на цілі заклинання: істоти в радіусі за тригером (вхід / початок ходу) отримують ефекти; усе зникає разом з аурою. */
+export const AnchoredZoneSchema = z.object({
+  kind: z.literal("anchoredZone"),
+  radiusFeet: z.number().int().min(5).max(60),
+  side: z.enum(["enemies", "allies", "all"]),
+  excludeBearer: z.boolean().optional(),
+  onEnter: ZoneTriggerSchema.optional(),
+  onTurnStart: ZoneTriggerSchema.optional(),
+  endsWhenStartOutside: z.boolean().optional(),
+  duration: DurationSchema,
+});
+
+const SPELL_ONLY_EFFECTS = [ChooseOneSchema, InputDiceSchema, GrantCastSchema, HitRiderSchema, MoveSelfSchema, CreateTerrainSchema, AnchoredZoneSchema] as const;
 
 export const SpellEffectSchema = z.discriminatedUnion("kind", [...BASE_EFFECTS, RandomOfSchema, ...SPELL_ONLY_EFFECTS]);
 
 export type SpellEffect = z.infer<typeof SpellEffectSchema>;
 
 export type GrantCastEffect = z.infer<typeof GrantCastSchema>;
+
+export type AnchoredZoneEffect = z.infer<typeof AnchoredZoneSchema>;
 
 export type CreateTerrainEffect = z.infer<typeof CreateTerrainSchema>;
 

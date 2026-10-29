@@ -169,6 +169,8 @@ export function describeEffect(effect: Effect | SpellEffect): string {
 
   if (effect.kind === "hitRider") return `заряди ×${effect.charges}: +${effect.extraDice} ${effect.damageType} на ${effect.attackKind === "any" ? "будь-яку" : effect.attackKind === "melee" ? "ближню" : "дальню"} атаку${effect.consumeOnMiss ? " (і промах)" : ""}${effect.save ? `, СК ${effect.save.ability}: ${effect.save.onFail.map(describeEffect).join(", ")}` : ""}`;
 
+  if (effect.kind === "anchoredZone") return `аура ${effect.radiusFeet} фт на цілі (${effect.side === "enemies" ? "вороги" : effect.side === "allies" ? "союзники" : "усі"}${effect.excludeBearer ? ", крім носія" : ""}) на ${effect.duration.rounds} р.${effect.onEnter ? `; вхід: ${effect.onEnter.effects.map(describeEffect).join(", ")}` : ""}${effect.onTurnStart ? `; початок ходу: ${effect.onTurnStart.effects.map(describeEffect).join(", ")}` : ""}${effect.endsWhenStartOutside ? "; закінчується, якщо хід починається поза аурою" : ""}`;
+
   if (effect.kind === "moveSelf") return "кастер переміщується до цілі";
 
   if (effect.kind === "createTerrain") return `${effect.terrain === "wall" ? "стіна" : "складна місцевість"}: ${effect.shape === "line" ? "лінія до цілі" : "клітинки області"} (до ${effect.cells}) на ${effect.rounds} р.`;

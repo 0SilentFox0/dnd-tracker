@@ -13,6 +13,7 @@ import { resolveMovement5e } from "@/lib/utils/battle/actions/movement";
 import { canStand, cellKey, checkReturnToStart, frightenedBlocksMove, hazardHit, hazardOnMove, moveBudget, pathFrom, placeParticipants, searchPaths } from "@/lib/utils/battle/grid";
 import { activeMapMode, type MapModeKey } from "@/lib/utils/battle/modes";
 import type { BattleMutationContext, MutationResult } from "@/lib/utils/battle/pipeline/run-battle-mutation";
+import { hasAnchors } from "@/lib/utils/battle/spell/anchored-zone";
 import { zoneMove } from "@/lib/utils/battle/spell/zone-triggers";
 import { BattleRuleError, type NewBattleEvent, systemEvent } from "@/lib/utils/battle/store";
 import { assertCanAct } from "@/lib/utils/battle/turn";
@@ -115,7 +116,7 @@ function finishMove(ctx: BattleMutationContext, { participants, moved, hazard, m
 
   const map = ctx.meta.map;
 
-  if (!trail?.from || !map?.spellZones || !after || !isActive(after)) return { ...resolved, pending: ctx.pending };
+  if (!trail?.from || !map || !(map.spellZones || hasAnchors(resolved.participants)) || !after || !isActive(after)) return { ...resolved, pending: ctx.pending };
 
   const zones = zoneMove({ map, participants: resolved.participants, moved: after, from: trail.from, path: trail.path, round: ctx.scene.round, rng: ctx.rng ?? Math.random, rules: ctx.meta.rules });
 

@@ -281,3 +281,26 @@ describe("зона заклинання на початку ходу", () => {
     expect(out.damageMessages.join(" ")).toContain("Спори");
   });
 });
+
+describe("аура на учаснику на початку ходу", () => {
+  it("onTurnStart аури б'є істоту в радіусі навіть без spellZones", () => {
+    const base = createMockParticipant();
+
+    const bearer = createMockParticipant({
+      basicInfo: { ...base.basicInfo, id: "king", side: ParticipantSide.ENEMY },
+      battleData: {
+        ...base.battleData,
+        position: { x: 3, y: 1 },
+        activeEffects: [{ id: "a1", name: "Аура", type: "buff", duration: 5, appliedAt: { round: 1, timestamp: new Date(0) }, effects: [], anchoredZone: { casterId: "king", spellId: "s", spellName: "Аура", dc: 10, radiusFeet: 10, side: "all", excludeBearer: true, onTurnStart: { effects: [{ kind: "dealDamage", amount: 4, damageType: "psychic", target: "eventTarget" }] } } }],
+      },
+    });
+
+    const p = createMockParticipant({ battleData: { ...base.battleData, position: { x: 1, y: 1 } } });
+
+    const map: BattleMapConfig = { cols: 10, rows: 10, background: null, opacity: 0.3 };
+
+    const out = processStartOfTurn(p, 2, [p, bearer], () => 0, map);
+
+    expect(out.participant.combatStats.currentHp).toBe(16);
+  });
+});
