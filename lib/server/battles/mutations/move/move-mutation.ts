@@ -1,11 +1,11 @@
-import { z } from "zod";
+import type { z } from "zod";
 
 import { mazeMove } from "./maze-move";
 import { resolveMover } from "./resolve-mover";
 
 import { API_ERRORS } from "@/lib/constants/api-errors";
 import { DEFAULT_HAZARD_LABEL } from "@/lib/constants/battle";
-import { mapCellSchema } from "@/lib/schemas/battles";
+import { moveSchema } from "@/lib/schemas/battles";
 import { findParticipant, isActive, replaceParticipant } from "@/lib/utils/abilities/engine/core/participants";
 import { resolveDowned } from "@/lib/utils/abilities/engine/core/run-abilities";
 import { releaseInvalidGrapples } from "@/lib/utils/battle/actions/grapple";
@@ -18,12 +18,7 @@ import { assertCanAct } from "@/lib/utils/battle/turn";
 import { rngOf } from "@/lib/utils/common/rng";
 import type { BattleMapConfig, BattleParticipant, GridPoint, TerrainCell } from "@/types/battle";
 
-export const moveSchema = z.object({
-  participantId: z.string(),
-  to: mapCellSchema,
-  free: z.boolean().optional(),
-  returnToStart: z.literal(true).optional(),
-});
+export { moveSchema };
 
 export type MoveBody = z.infer<typeof moveSchema>;
 

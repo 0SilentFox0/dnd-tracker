@@ -2,14 +2,26 @@ import type { z } from "zod";
 
 import type { GroupedSkillPayload } from "./hooks";
 
-import { BattleStatus, type CombatStatusType, type ParticipantSourceTypeValue } from "@/lib/constants/battle";
+import { BattleStatus, type CombatStatusType } from "@/lib/constants/battle";
 import { type CampaignRoleValue } from "@/lib/constants/campaigns";
-import type { mazeActionSchema, mazeMarkSchema } from "@/lib/schemas/battles";
-import type { CunningStrikeEffect } from "@/lib/utils/abilities/schema";
+import type {
+  abilityActionSchema,
+  attackBodySchema,
+  auraZoneSchema,
+  bonusActionSchema,
+  critChoiceSchema,
+  mapTerrainSchema,
+  mapWeatherSchema,
+  mazeActionSchema,
+  mazeMarkSchema,
+  moraleCheckSchema,
+  moveSchema,
+  spellSchema,
+} from "@/lib/schemas/battles";
 import type { PendingCritChoice } from "@/lib/utils/battle/crit-choice/types";
 import type { Ruleset } from "@/lib/utils/rules";
 import type { BattleAudioState } from "@/types/audio";
-import type { BattleMapConfig, GridPoint, MazeConfig, TerrainDiff, TerrainKind, WeatherKind } from "@/types/battle";
+import type { BattleMapConfig, MazeConfig, TerrainDiff } from "@/types/battle";
 
 // Skills API
 export type SkillPayload = GroupedSkillPayload;
@@ -146,63 +158,19 @@ export interface BattleMutationResponse<R = Record<string, unknown>> {
   response?: R;
 }
 
-export interface AttackData {
-  attackerId: string;
-  attackerType?: ParticipantSourceTypeValue;
-  targetId?: string;
-  targetIds?: string[];
-  targetType?: ParticipantSourceTypeValue;
-  attackRoll?: number;
-  /** Один кидок на ціль (multi-target); якщо передано, використовується замість attackRoll */
-  attackRolls?: number[];
-  /** Другий d20 на ціль (multi-target), у тому ж порядку, що й attackRolls; сервер сам вирішує перевагу/недолік */
-  secondRolls?: (number | null)[];
-  advantageRoll?: number;
-  disadvantageRoll?: number;
-  /** Вибір гравця «Перевага/Недолік»; сервер застосовує, лише коли навички не задають режим */
-  rollMode?: "normal" | "advantage" | "disadvantage";
-  damageRolls: number[];
-  attackId?: string;
-  offHand?: boolean;
-  useInspiration?: boolean;
-  /** Підступний удар (Rogue): ефекти замість кубиків Прихованої атаки */
-  cunningStrike?: CunningStrikeEffect[];
-}
+export type AttackData = z.input<typeof attackBodySchema>;
 
-export interface MoraleCheckData {
-  participantId: string;
-  d10Roll: number;
-}
+export type MoraleCheckData = z.infer<typeof moraleCheckSchema>;
 
-export type CritChoiceData = { choices: Record<string, number | "random"> } | { cancel: true };
+export type CritChoiceData = z.infer<typeof critChoiceSchema>;
 
-export interface BonusActionData {
-  participantId: string;
-  abilityKey: string;
-  targetCell?: GridPoint;
-  targetParticipantId?: string;
-  targetParticipantIds?: string[];
-}
+export type BonusActionData = z.infer<typeof bonusActionSchema>;
 
-export interface AuraZoneData {
-  participantId: string;
-  auraId: string;
-  targetIds: string[];
-}
+export type AuraZoneData = z.infer<typeof auraZoneSchema>;
 
-export interface MoveParticipantData {
-  participantId: string;
-  to: GridPoint;
-  free?: boolean;
-  returnToStart?: true;
-}
+export type MoveParticipantData = z.infer<typeof moveSchema>;
 
-export interface MapTerrainData {
-  /** ключі "x:y" */
-  cells: string[];
-  /** null — стерти */
-  terrain: { kind: TerrainKind; label?: string; rounds?: number; damage?: { dice: string; type: string } } | null;
-}
+export type MapTerrainData = z.infer<typeof mapTerrainSchema>;
 
 export interface MapTerrainResponse {
   /** зайняті або поза полем клітинки, які сервер пропустив */
@@ -213,35 +181,11 @@ export type MazeActionData = z.infer<typeof mazeActionSchema>;
 
 export type MazeMarkData = z.infer<typeof mazeMarkSchema>;
 
-export interface MapWeatherData {
-  /** null — ясно */
-  weather: WeatherKind | null;
-}
+export type MapWeatherData = z.infer<typeof mapWeatherSchema>;
 
-export interface AbilityActionData {
-  participantId: string;
-  abilityKey: string;
-  targetCell?: GridPoint;
-  targetParticipantIds?: string[];
-}
+export type AbilityActionData = z.infer<typeof abilityActionSchema>;
 
-export interface SpellCastData {
-  legendaryKey?: string;
-  casterId: string;
-  spellId: string;
-  grantKey?: string;
-  castingRounds?: number;
-  cancelCasting?: boolean;
-  castLevel?: number;
-  targetIds: string[];
-  /** точка шаблону на карті */
-  targetCell?: GridPoint;
-  diceRolls: number[];
-  saveRolls?: Array<{ participantId: string; roll: number }>;
-  attackRolls?: Array<{ participantId: string; roll: number }>;
-  free?: boolean;
-  slotKey?: string;
-}
+export type SpellCastData = z.input<typeof spellSchema>;
 
 // Skill Trees API
 

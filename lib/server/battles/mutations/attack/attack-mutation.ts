@@ -1,11 +1,11 @@
 import type { Spell } from "@prisma/client";
-import { z } from "zod";
+import type { z } from "zod";
 
 import { getCachedSpells, getCachedSummonPool } from "@/lib/cache/reference-data";
 import { API_ERRORS } from "@/lib/constants/api-errors";
+import { attackBodySchema } from "@/lib/schemas/battles";
 import { findFlags } from "@/lib/utils/abilities/engine/core/collect-modifiers";
 import { findParticipant, withSelf } from "@/lib/utils/abilities/engine/core/participants";
-import { CUNNING_STRIKE_EFFECTS } from "@/lib/utils/abilities/schema";
 import { canUseInspiration, spendInspiration } from "@/lib/utils/battle/attack/inspiration";
 import { findAttack, requestedTargetIds } from "@/lib/utils/battle/attack-phase/request";
 import { runAttackPhase } from "@/lib/utils/battle/attack-phase/run-attack-phase";
@@ -21,33 +21,7 @@ import { advanceTurn, assertCanAct } from "@/lib/utils/battle/turn";
 import type { CastableSpell } from "@/lib/utils/battle/types/spell-process";
 import { assertAttackRolls } from "@/lib/utils/battle/validation/dice-checks";
 
-export const attackBodySchema = z
-  .object({
-    attackerId: z.string(),
-    targetId: z.string().optional(),
-    targetIds: z.array(z.string()).optional(),
-    attackId: z.string().optional(),
-    d20Roll: z.number().min(1).max(20).optional(),
-    attackRoll: z.number().min(1).max(20).optional(),
-    attackRolls: z.array(z.number().min(1).max(20)).optional(),
-    secondRolls: z.array(z.number().min(1).max(20).nullable()).optional(),
-    advantageRoll: z.number().min(1).max(20).optional(),
-    disadvantageRoll: z.number().min(1).max(20).optional(),
-    rollMode: z.enum(["normal", "advantage", "disadvantage"]).optional(),
-    damageRolls: z.array(z.number()).default([]),
-    offHand: z.boolean().optional(),
-    useInspiration: z.boolean().optional(),
-    cunningStrike: z.array(z.enum(CUNNING_STRIKE_EFFECTS)).min(1).max(3).optional(),
-    endTurn: z.boolean().default(false),
-  })
-  .refine(
-    (d) => d.d20Roll !== undefined || d.attackRoll !== undefined || (Array.isArray(d.attackRolls) && d.attackRolls.length > 0),
-    { message: "d20Roll, attackRoll або attackRolls обов'язковий", path: ["d20Roll"] },
-  )
-  .refine((d) => d.targetId !== undefined || (d.targetIds !== undefined && d.targetIds.length > 0), {
-    message: "Потрібно вказати хоча б одну ціль",
-    path: ["targetIds"],
-  });
+export { attackBodySchema };
 
 export type AttackBody = z.infer<typeof attackBodySchema>;
 
