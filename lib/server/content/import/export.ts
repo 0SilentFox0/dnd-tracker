@@ -1,14 +1,14 @@
 import "server-only";
 import { ArtifactSlot } from "@/lib/constants/artifacts";
 import { prisma } from "@/lib/db";
-import { DEFAULT_LOCALE, type Locale } from "@/lib/i18n/config";
-import { getRequestLocale } from "@/lib/i18n/request-locale";
+import type { Locale } from "@/lib/i18n/config";
 import { getTranslator } from "@/lib/i18n/translator";
 import { assertCan } from "@/lib/server/content/access";
 import { loadNames } from "@/lib/server/content/import/names";
 import { artifactAbilities, artifactSetAbilities, featAbilities, raceAbilities, skillAbilities, unitAbilities } from "@/lib/utils/abilities/read";
 import type { Actor } from "@/lib/utils/api/actor";
 import { NEED } from "@/lib/utils/api/need";
+import { localeOrRequest } from "@/lib/utils/api/translate-error";
 import { armorStatsFromRow } from "@/lib/utils/artifacts/armor-stats";
 import { isWeaponSlot, weaponStatsFromRow } from "@/lib/utils/artifacts/weapon-stats";
 import { IMPORT_SPECS } from "@/lib/utils/content/import/fields";
@@ -56,7 +56,7 @@ export const DEFAULT_DEPS: ExportDeps = { loadRecords: (c, k) => EXPORT_LOADERS[
 export async function exportCsv(actor: Actor, kind: ImportKind, deps: ExportDeps = DEFAULT_DEPS): Promise<string> {
   assertCan(actor, NEED.read("dm"));
 
-  const locale = deps.locale ?? (await getRequestLocale().catch(() => DEFAULT_LOCALE));
+  const locale = await localeOrRequest(deps.locale);
 
   const t = await getTranslator(locale);
 

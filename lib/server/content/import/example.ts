@@ -1,12 +1,12 @@
 import "server-only";
 import { exampleOf } from "@/lib/constants/import-aliases";
-import { DEFAULT_LOCALE, type Locale } from "@/lib/i18n/config";
-import { getRequestLocale } from "@/lib/i18n/request-locale";
+import type { Locale } from "@/lib/i18n/config";
 import { getTranslator } from "@/lib/i18n/translator";
 import { assertCan } from "@/lib/server/content/access";
 import { loadNames } from "@/lib/server/content/import/names";
 import type { Actor } from "@/lib/utils/api/actor";
 import { NEED } from "@/lib/utils/api/need";
+import { localeOrRequest } from "@/lib/utils/api/translate-error";
 import { IMPORT_SPECS } from "@/lib/utils/content/import/fields";
 import { refKindsOf } from "@/lib/utils/content/import/kinds";
 import { toCsv } from "@/lib/utils/content/import/table";
@@ -18,7 +18,7 @@ type ExampleDeps = { loadNames(campaignId: string, kind: ImportKind): Promise<Id
 export async function exampleCsv(actor: Actor, kind: ImportKind, deps: ExampleDeps = { loadNames }): Promise<string> {
   assertCan(actor, NEED.read("dm"));
 
-  const locale = deps.locale ?? (await getRequestLocale().catch(() => DEFAULT_LOCALE));
+  const locale = await localeOrRequest(deps.locale);
 
   const t = await getTranslator(locale);
 

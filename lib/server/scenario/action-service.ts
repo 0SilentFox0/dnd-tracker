@@ -9,7 +9,6 @@ import { API_ERRORS } from "@/lib/constants/api-errors";
 import { SCENARIO_MAX_CONTENT_BYTES, SCENARIO_MAX_VERSIONS } from "@/lib/constants/scenario";
 import { prisma } from "@/lib/db";
 import { DEFAULT_LOCALE, type Locale } from "@/lib/i18n/config";
-import { getRequestLocale } from "@/lib/i18n/request-locale";
 import { getTranslator } from "@/lib/i18n/translator";
 import { createScenarioPageSchema, scenarioContentSchema, scenarioSectionPatchSchema, updateScenarioMetaSchema } from "@/lib/schemas/scenario";
 import { notifyRevealForContentChange } from "@/lib/server/acquaintances/reveal";
@@ -22,6 +21,7 @@ import { ContentError, parseInput } from "@/lib/server/content/errors";
 import { withCampaignContentWrite } from "@/lib/server/content/write";
 import { afterContentCommit } from "@/lib/server/content/write-context";
 import type { Actor } from "@/lib/utils/api/actor";
+import { localeOrRequest } from "@/lib/utils/api/translate-error";
 import { buildDefaultLegend } from "@/lib/utils/scenario/default-legend";
 import { moveRow, moveSection, newSection, removeRow, removeSection, updateSection } from "@/lib/utils/scenario/structure";
 import type { ScenarioContent } from "@/types/scenario";
@@ -120,7 +120,7 @@ export async function saveScenarioContent(actor: Actor, id: string, raw: unknown
   return withCampaignContentWrite(actor.campaignId, () => writeScenarioContent(actor, id, raw, expectedVersion, force));
 }
 export async function runScenarioOperation(actor: Actor, operation: string, input: Record<string, unknown>, expected?: string, explicitLocale?: Locale): Promise<ActionResult> {
-  const locale = explicitLocale ?? await getRequestLocale().catch(() => DEFAULT_LOCALE);
+  const locale = await localeOrRequest(explicitLocale);
 
   const result = (data: unknown, id?: string) => scenarioResult(data, id, locale);
 
