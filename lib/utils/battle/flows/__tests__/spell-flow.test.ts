@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 
 import { ParticipantSide } from "@/lib/constants/battle";
+import { textOf } from "@/lib/i18n/test/text";
 import { makeEffect, makeParticipant, resolved } from "@/lib/utils/abilities/__tests__/fixtures";
 import type { Effect } from "@/lib/utils/abilities/schema";
 import { buildSpellPick, canGoBack, initialSpellFlow, rollsComplete, spellAimTargets, spellFlow, type SpellFlowAction, type SpellFlowState, spellPayload, type SpellPick,spellSaveTargets, spellSlotCostLabel, spellSlotsLeft, spellTargetCandidates, spellTargetInRange, spellTargetSide, withAllTargets, withChainTargets, withLiveAimTargets } from "@/lib/utils/battle/flows";
@@ -201,9 +202,10 @@ describe("цілі й слоти закляття", () => {
   it("підпис вартості слота", () => {
     const s = spell({ kind: "enemy" });
 
-    expect(spellSlotCostLabel(s, { free: true, universal: false })).toMatch(/Вільний каст/);
-    expect(spellSlotCostLabel(s, { free: false, universal: true })).toMatch(/універсальний/);
-    expect(spellSlotCostLabel(s, { free: false, universal: false })).toBe("Витратить слот I кола.");
+    expect(textOf(spellSlotCostLabel(s, { free: true, universal: false })!)).toMatch(/Вільний каст/);
+    expect(textOf(spellSlotCostLabel(s, { free: true, universal: false })!, "en")).toMatch(/Free DM cast/);
+    expect(textOf(spellSlotCostLabel(s, { free: false, universal: true })!)).toMatch(/універсальний/);
+    expect(textOf(spellSlotCostLabel(s, { free: false, universal: false })!)).toBe("Витратить слот I кола.");
     expect(spellSlotCostLabel({ ...s, level: 0 }, { free: false, universal: false })).toBeNull();
   });
 });

@@ -5,6 +5,7 @@ import { describe, expect, it, vi } from "vitest";
 import { fakeScene } from "./fake-scene";
 
 import { useSpellBook } from "@/lib/hooks/battle/useSpellBook";
+import { textOf } from "@/lib/i18n/test/text";
 import type { BookSpell } from "@/types/spells";
 
 const spell = { id: "aura", name: "Аура", level: 0, dice: 1, dieSides: 6, targeting: { kind: "template", shape: "emanation", size: 5, side: "enemy", maxTargets: 10 }, resolution: { kind: "save", ability: "wisdom", onSuccess: "half" } } as BookSpell;
@@ -26,8 +27,11 @@ describe("monster spell book", () => {
     act(() => result.current.actions.open());
     expect(result.current.view.spells.map((s) => s.id)).toContain(spell.id);
     expect(result.current.view.noSlot({ ...spell, level: 3 })).toBe(false);
-    expect(result.current.view.slotCostLabel(spell)).toContain("0/1");
-    expect(result.current.view.slotCostLabel(spell)).toContain("5–6");
+
+    const label = textOf(result.current.view.slotCostLabel(spell)!);
+
+    expect(label).toContain("0/1");
+    expect(label).toContain("5–6");
     expect(result.current.view.costUsed(spell)).toBe(true);
     act(() => result.current.actions.pick({ ...spell, level: 3 }));
     expect(result.current.state.slotKey).toBeUndefined();
@@ -40,7 +44,7 @@ describe("monster spell book", () => {
 
     const { result } = renderHook(() => useSpellBook(caster), { wrapper });
 
-    expect(result.current.view.slotCostLabel(spell)).toContain("Лише легендарна");
+    expect(textOf(result.current.view.slotCostLabel(spell)!)).toContain("Лише легендарна");
     expect(result.current.view.costUsed(spell)).toBe(true);
   });
   it("shows live emanation targets and saves without aiming, and submits no targetCell", async () => {

@@ -5,6 +5,8 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 
 vi.mock("@/components/hud/fonts", () => ({ hudFontClassName: "" }));
 
+vi.mock("next-intl", async () => (await import("./uk-intl")).catalogIntl());
+
 import { AttackWizard } from "@/components/battle/wizards/AttackWizard";
 import { AttackType } from "@/lib/constants/battle";
 import { useAttackWizard } from "@/lib/hooks/battle";

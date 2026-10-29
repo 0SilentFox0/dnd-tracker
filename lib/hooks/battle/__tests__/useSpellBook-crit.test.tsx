@@ -15,6 +15,7 @@ vi.mock("@/lib/hooks/spells", async (importOriginal) => ({
 import { useSpellBook } from "../useSpellBook";
 import { fakeScene } from "./fake-scene";
 
+import { textOf } from "@/lib/i18n/test/text";
 import type { BattleAction } from "@/types/battle";
 
 describe("useSpellBook: пауза на вибір крита ДМ", () => {
@@ -71,7 +72,8 @@ describe("useSpellBook: пауза на вибір крита ДМ", () => {
     scene.battle.pendingCritChoice = null;
     hook.rerender();
 
-    await waitFor(() => expect(hook.result.current.state).toMatchObject({ waitingCrit: false, step: "summary", error: "Дію скасовано ДМом" }));
+    await waitFor(() => expect(hook.result.current.state).toMatchObject({ waitingCrit: false, step: "summary", error: { message: "battleWizards.critCancelled" } }));
+    expect(textOf(hook.result.current.state.error!)).toBe("Дію скасовано ДМом");
     expect(scene.showResult).not.toHaveBeenCalled();
   });
 });

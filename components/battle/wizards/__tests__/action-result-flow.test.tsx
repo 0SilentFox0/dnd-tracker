@@ -5,6 +5,8 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 
 vi.mock("@/components/hud/fonts", () => ({ hudFontClassName: "" }));
 
+vi.mock("next-intl", async () => (await import("./uk-intl")).catalogIntl());
+
 const lib = vi.hoisted(() => ({
   spells: [{ id: "ray", name: "Палаючий промінь", level: 1, dice: 1, cost: "action", targeting: { kind: "enemy" }, resolution: { kind: "auto" } }],
 }));

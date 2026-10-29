@@ -5,10 +5,13 @@ import { useEffect, useEffectEvent, useMemo, useReducer, useState } from "react"
 import { useModeView } from "./modes/useModeView";
 import { useBattleScene } from "./useBattleScene";
 import { useBattleSpellLibrary } from "./useBattleSpellLibrary";
-import { CRIT_CANCELLED, useCritPause } from "./useCritPause";
+import { useCritPause } from "./useCritPause";
 import { useSpellMapTargeting } from "./useSpellMapTargeting";
 
 export { useBonusSpells, useReactionSpells,useSpellBookPrefetch } from "./useBattleSpellLibrary";
+import { useTranslations } from "next-intl";
+
+import { joinLines, textRef } from "@/lib/i18n/text-ref";
 import { reactionBlocker } from "@/lib/utils/battle/actions/reaction";
 import {
   buildSpellPick,
@@ -47,6 +50,7 @@ import { cryptoRandom, rollDie } from "@/lib/utils/common/dice";
 import { groupSpellsByLevel } from "@/lib/utils/spells/group-by-level";
 import type { BattleParticipant, GridPoint } from "@/types/battle";
 import type { BookSpell } from "@/types/spells";
+import type { LogLine } from "@/types/text";
 
 export type { BookSpell };
 
@@ -68,6 +72,8 @@ const levelsWithSpells = (byLevel: Record<number, BookSpell[]>) =>
 
 export function useSpellBook(caster: BattleParticipant | null, options: { reactionsOnly?: boolean; allSpells?: boolean; onDone?: () => void; legendary?: { abilityKey: string; spellId: string } } = {}) {
   const scene = useBattleScene();
+
+  const t = useTranslations("battleWizards");
 
   const [finishLong, setFinishLong] = useState(false);
 
@@ -179,7 +185,7 @@ export function useSpellBook(caster: BattleParticipant | null, options: { reacti
 
   const finish = (changes: { participantId: string; participantName: string; change: number }[]) => {
     dispatch({ type: "SUCCESS" });
-    scene.result.show({ kind: "spell", spellName: selected?.name ?? "Заклинання", changes: hpTotals(changes), targetCount: state.targetIds.length });
+    scene.result.show({ kind: "spell", spellName: selected?.name ?? t("spell.fallbackName"), changes: hpTotals(changes), targetCount: state.targetIds.length });
     options.onDone?.();
   };
 
@@ -191,7 +197,7 @@ export function useSpellBook(caster: BattleParticipant | null, options: { reacti
 
       finish(log.filter((e) => !seen.has(e.actionIndex) && e.actorId === caster?.basicInfo.id).flatMap((e) => e.hpChanges ?? []));
     },
-    onCancelled: () => dispatch({ type: "FAIL", error: CRIT_CANCELLED }),
+    onCancelled: () => dispatch({ type: "FAIL", error: textRef("battleWizards.critCancelled") }),
   });
 
   const send = useEffectEvent(async () => {
@@ -211,7 +217,7 @@ export function useSpellBook(caster: BattleParticipant | null, options: { reacti
 
       finish(res?.hpChanges ?? []);
     } catch (e) {
-      dispatch({ type: "FAIL", error: e instanceof Error ? e.message : "Не вдалося застосувати заклинання" });
+      dispatch({ type: "FAIL", error: e instanceof Error ? e.message : textRef("battleWizards.spell.failed") });
     }
   });
 
@@ -234,7 +240,11 @@ export function useSpellBook(caster: BattleParticipant | null, options: { reacti
     castLevelOptions,
     castLevelValue: flow.castLevel ?? selectedGrant?.castLevel,
     slotLeft: (level: number) => spellSlotsLeft(caster, level, bypassCost || spells.some((s) => s.level === level && !!grantOf(s))),
-    slotCostLabel: (s: BookSpell) => [special ? "Легендарна дія / дія лігва" : undefined, grantLabelOf(caster, s.id)].filter(Boolean).join(" · ") || spellSlotCostLabel(s, { free, universal: universalSlot, chosen: slotChoices.find((o) => o.key === state.slotKey)?.label }),
+    slotCostLabel: (s: BookSpell) => {
+      const parts = [special ? textRef("battleWizards.flow.cost.special") : undefined, grantLabelOf(caster, s.id)].filter((p): p is LogLine => p !== undefined && p !== "");
+
+      return parts.length > 0 ? joinLines(parts, " · ") : spellSlotCostLabel(s, { free, universal: universalSlot, chosen: slotChoices.find((o) => o.key === state.slotKey)?.label });
+    },
     slot: { options: slotChoices, value: state.slotKey },
     noSlot: (s: BookSpell) => !canSlot(s) && spellBlockedBySlots(caster, s.level, bypassCost),
     attackTargets: state.pick?.needsAttackRolls ? targets.filter((t) => state.targetIds.includes(t.basicInfo.id)) : [],
@@ -287,7 +297,7 @@ export function useSpellBook(caster: BattleParticipant | null, options: { reacti
         await scene.actions.castSpell.mutateAsync({ ...spellPayload(state), spellId: cancel ? caster.battleData.pendingCast?.spellId ?? selected.id : selected.id, targetIds: [], diceRolls: [], ...(cancel && { cancelCasting: true }) });
         dispatch({ type: "CLOSE" });
         options.onDone?.();
-      } catch (e) { dispatch({ type: "FAIL", error: e instanceof Error ? e.message : "Не вдалося продовжити накладання" }); }
+      } catch (e) { dispatch({ type: "FAIL", error: e instanceof Error ? e.message : textRef("battleWizards.spell.continueFailed") }); }
     },
     completeLong: () => { setFinishLong(true); dispatch({ type: "TO_TARGETS" }); },
     toTargets: () => { setFinishLong(false); dispatch({ type: "TO_TARGETS" }); },

@@ -1,1 +1,172 @@
-{}
+{
+  "critCancelled": "Дію скасовано ДМом",
+  "attack": {
+    "failed": "Не вдалося виконати атаку",
+    "title": "Атака",
+    "titleOffHand": "Друга рука · {name}",
+    "titleCounter": "Атака {n}/{m} · {name}",
+    "steps": {
+      "weapon": "Зброя",
+      "target": "Ціль",
+      "roll": "Кидок",
+      "damage": "Шкода",
+      "summary": "Підсумок"
+    },
+    "kinds": {
+      "melee": "Ближня атака",
+      "ranged": "Дальня атака"
+    },
+    "nearTarget": "ціль поруч",
+    "changeWeapon": "Змінити зброю",
+    "weapon": {
+      "melee": "ближній",
+      "ranged": "дальній",
+      "toHit": "{kind} · {bonus} до влучання"
+    },
+    "target": {
+      "cover": "Між стрільцем і ціллю є перешкода",
+      "allEnemies": "Усі вороги",
+      "next": "Далі · кидок"
+    },
+    "roll": {
+      "title": "Кидок атаки · d20",
+      "strike": "Удар {n} з {total} · {name}",
+      "cover": "🧱 Перешкода на лінії · шкода ×0.5",
+      "inspiration": "Натхнення",
+      "inspirationNote": "✦ Натхнення — перевага на цей кидок",
+      "diceHint": "Спершу перший кубик, потім другий",
+      "rollModes": {
+        "normal": "Звичайний",
+        "advantage": "Перевага",
+        "disadvantage": "Недолік"
+      }
+    },
+    "damage": {
+      "title": "Шкода",
+      "crit": "критичне",
+      "next": "Далі · підсумок"
+    },
+    "summary": {
+      "unknownDefense": "Захист і опори цілі",
+      "unknown": "невідомо",
+      "estimate": "Орієнтовно",
+      "cunning": "Підступний удар · замість кубиків Прихованої атаки ({dice}d6)",
+      "submit": "Атакувати"
+    }
+  },
+  "spell": {
+    "failed": "Не вдалося застосувати заклинання",
+    "continueFailed": "Не вдалося продовжити накладання",
+    "fallbackName": "Заклинання",
+    "aim": {
+      "ariaLabel": "Наведення заклинання",
+      "template": "Оберіть точку на карті",
+      "chain": "Оберіть першу ціль на карті",
+      "multi": "Оберіть цілі на карті · {count}",
+      "multiMax": "Оберіть цілі на карті · {count}/{max}",
+      "single": "Оберіть ціль на карті",
+      "next": "Далі · кидки",
+      "hit": "Зачеплені",
+      "hitNone": "Нікого не зачеплено",
+      "ally": "⚠ союзник",
+      "chosen": "Обрані цілі"
+    },
+    "summary": {
+      "targets": "Цілі: {targets}",
+      "dice": "Кубики: {dice} = {sum} ({formula})",
+      "note": "Остаточний результат порахує бій з урахуванням захисту цілей."
+    },
+    "source": {
+      "label": "Джерело каста",
+      "pick": "Оберіть джерело",
+      "level": "Рівень каста"
+    },
+    "slot": "Слот",
+    "cast": {
+      "outOfRange": "Поза дальністю",
+      "chain": "Ланцюг: {chain}",
+      "next": "Далі · кидки",
+      "attackRoll": "Кидок атаки",
+      "serverD20": "Порожній d20 кине сервер.",
+      "dice": "Кубики",
+      "nextSummary": "Далі · підсумок",
+      "apply": "Застосувати"
+    },
+    "saveRoll": "Рятівний кидок",
+    "book": {
+      "title": "Книга заклинань",
+      "toList": "До списку",
+      "reaction": "Реакція: {trigger}",
+      "castingRounds": "{rounds} раундів накладання · потрібні дія й концентрація кожного ходу",
+      "startCasting": "Почати накладання",
+      "continueCasting": "Продовжити накладання",
+      "fastForward": "ДМ: зарахувати решту часу й завершити",
+      "cancelCasting": "Перервати накладання",
+      "targets": {
+        "next": "Далі",
+        "template": "Навести на карті",
+        "pick": "Обрати цілі"
+      }
+    }
+  },
+  "bonus": {
+    "title": "Бонусна дія",
+    "ability": "Вміння",
+    "target": "{name} · ціль",
+    "offHand": "Атака другою рукою",
+    "cooldown": "ще {rounds} р.",
+    "confirm": "Підтвердити · {picked}/{max}"
+  },
+  "aura": {
+    "title": "Зона аури · {name}",
+    "hintEnemies": "Які вороги поруч? {effects} — до вашого наступного ходу.",
+    "hintAllies": "Які союзники поруч? {effects} — до вашого наступного ходу.",
+    "confirm": "Підтвердити зону · {count}"
+  },
+  "abilityAim": {
+    "ariaLabel": "Наведення вміння",
+    "hint": "Оберіть клітинку на карті"
+  },
+  "flow": {
+    "slot": {
+      "pact": "Пакт · коло {level}",
+      "circle": "Коло {level}"
+    },
+    "cost": {
+      "free": "Вільний каст DM — слот не витрачається.",
+      "chosen": "Витратить слот: {slot}.",
+      "universal": "Витратить універсальний слот.",
+      "level": "Витратить слот {level} кола.",
+      "special": "Легендарна дія / дія лігва"
+    },
+    "pool": {
+      "recharge": "{left}/{max} · ⟳ {recharge}–6",
+      "rest": "{left}/{max} за відпочинок"
+    },
+    "grant": {
+      "line": "{label}: {usage}",
+      "lineLegendary": "{label}: Лише легендарна / лігво · {usage}",
+      "defaultLabel": "Грант",
+      "optional": "За бажанням",
+      "freeCast": "Безкоштовний каст",
+      "slotOption": "Слот {slot}",
+      "withUsage": "{label} · {left}/{max}",
+      "unlimited": "{label} · без ліміту",
+      "castLevel": "Коло {level}",
+      "castLevelCost": "Коло {level} · {cost} заряди"
+    },
+    "widening": {
+      "allEnemy": "усі вороги",
+      "allAlly": "усі союзники",
+      "maxTargets": "до {max} цілей",
+      "defaultSource": "Вміння",
+      "note": "{source}: {badge}",
+      "noteArea": "{source}: {badge} (на карті — зона {side}×{side})"
+    },
+    "forced": {
+      "advantage": "Перевага: {reasons}",
+      "disadvantage": "Недолік: {reasons}",
+      "cancelled": "Перевага ({advantage}) і недолік ({disadvantage}) скасовуються"
+    }
+  }
+}

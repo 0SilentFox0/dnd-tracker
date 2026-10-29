@@ -214,7 +214,7 @@ describe("useAttackWizard", () => {
     scene.battle.pendingCritChoice = null;
     hook.rerender();
 
-    await waitFor(() => expect(hook.result.current.state).toMatchObject({ waitingCrit: false, error: "Дію скасовано ДМом" }));
+    await waitFor(() => expect(hook.result.current.state).toMatchObject({ waitingCrit: false, error: { message: "battleWizards.critCancelled" } }));
     expect(scene.showResult).not.toHaveBeenCalled();
     expect(hook.result.current.state.step).not.toBe("result");
   });

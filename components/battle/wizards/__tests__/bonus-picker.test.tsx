@@ -4,6 +4,8 @@ import { describe, expect, it, vi } from "vitest";
 
 vi.mock("@/components/hud/fonts", () => ({ hudFontClassName: "" }));
 
+vi.mock("next-intl", async () => (await import("./uk-intl")).catalogIntl());
+
 import { BonusActionPicker } from "@/components/battle/wizards/BonusActionPicker";
 import { fakeScene } from "@/lib/hooks/battle/__tests__/fake-scene";
 import { testMap } from "@/lib/utils/battle/__tests__/fixtures/placed";

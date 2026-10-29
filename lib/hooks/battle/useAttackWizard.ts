@@ -4,9 +4,10 @@ import { useEffect, useEffectEvent, useMemo, useReducer } from "react";
 
 import { useModeView } from "./modes/useModeView";
 import { useBattleScene } from "./useBattleScene";
-import { CRIT_CANCELLED, useCritPause } from "./useCritPause";
+import { useCritPause } from "./useCritPause";
 
 import { AttackType } from "@/lib/constants/battle";
+import { textRef } from "@/lib/i18n/text-ref";
 import { findFlags } from "@/lib/utils/abilities/engine/core/collect-modifiers";
 import { isAirborne, isDying, withSelf } from "@/lib/utils/abilities/engine/core/participants";
 import type { CunningStrikeEffect } from "@/lib/utils/abilities/schema";
@@ -209,7 +210,7 @@ export function useAttackWizard(attacker: BattleParticipant | null, onDone?: () 
     try {
       finish(attackerId, seen);
     } catch (e) {
-      dispatch({ type: "FAIL", error: e instanceof Error ? e.message : "Не вдалося виконати атаку" });
+      dispatch({ type: "FAIL", error: e instanceof Error ? e.message : textRef("battleWizards.attack.failed") });
     }
   };
 
@@ -217,7 +218,7 @@ export function useAttackWizard(attacker: BattleParticipant | null, onDone?: () 
     waiting: state.waitingCrit,
     actorId: attacker?.basicInfo.id,
     onResolved: (seen) => attacker && settle(attacker.basicInfo.id, seen),
-    onCancelled: () => dispatch({ type: "FAIL", error: CRIT_CANCELLED }),
+    onCancelled: () => dispatch({ type: "FAIL", error: textRef("battleWizards.critCancelled") }),
   });
 
   const send = useEffectEvent(async () => {
@@ -230,7 +231,7 @@ export function useAttackWizard(attacker: BattleParticipant | null, onDone?: () 
     try {
       res = await scene.actions.attack.mutateAsync(attackPayload(state, attacker.basicInfo.id));
     } catch (e) {
-      dispatch({ type: "FAIL", error: e instanceof Error ? e.message : "Не вдалося виконати атаку" });
+      dispatch({ type: "FAIL", error: e instanceof Error ? e.message : textRef("battleWizards.attack.failed") });
 
       return;
     }

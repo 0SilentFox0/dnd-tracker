@@ -1,17 +1,19 @@
 import type { SlotOption } from "./spell-flow-types";
 
+import { joinLines, textRef } from "@/lib/i18n/text-ref";
 import { poolLeft } from "@/lib/utils/abilities/engine/core/usage";
 import type { BattleParticipant, SpellGrant } from "@/types/battle";
+import type { LogLine } from "@/types/text";
 
 export interface SourceOption {
   value: string;
-  label: string;
+  label: LogLine;
   disabled: boolean;
 }
 
 export interface CastLevelOption {
   value: number;
-  label: string;
+  label: LogLine;
   disabled: boolean;
 }
 
@@ -37,33 +39,45 @@ export function defaultGrant(grants: SpellGrant[], opts: { hasSlotChoices: boole
   return grant && (!opts.hasSlotChoices || grant.via !== "slotOrGrant" || opts.spellLevel === 0) ? grant : undefined;
 }
 
-export function poolUsage(caster: BattleParticipant, poolKey: string | undefined): { left: number; max: number; label: string } | undefined {
+export function poolUsage(caster: BattleParticipant, poolKey: string | undefined): { left: number; max: number; label: LogLine } | undefined {
   const pool = poolKey ? caster.battleData.pools?.[poolKey] : undefined;
 
   if (!poolKey || !pool) return undefined;
 
   const left = poolLeft(caster, poolKey) ?? 0;
 
-  return { left, max: pool.max, label: `${left}/${pool.max}${pool.recharge ? ` · ⟳ ${pool.recharge}–6` : " за відпочинок"}` };
+  return { left, max: pool.max, label: pool.recharge ? textRef("battleWizards.flow.pool.recharge", { left, max: pool.max, recharge: pool.recharge }) : textRef("battleWizards.flow.pool.rest", { left, max: pool.max }) };
 }
 
-export function grantLabel(caster: BattleParticipant | null, spellId: string): string | undefined {
+export function grantLabel(caster: BattleParticipant | null, spellId: string): LogLine | undefined {
   const grants = grantsFor(caster, spellId);
 
   if (grants.length === 0 || !caster) return undefined;
 
-  return grants.map((grant) => `${grant.label ?? "Грант"}: ${grant.legendaryOnly ? "Лише легендарна / лігво · " : ""}${poolUsage(caster, grant.pool)?.label ?? "За бажанням"}`).join(" · ");
+  return joinLines(
+    grants.map((grant) => textRef(grant.legendaryOnly ? "battleWizards.flow.grant.lineLegendary" : "battleWizards.flow.grant.line", {
+      label: grant.label ?? textRef("battleWizards.flow.grant.defaultLabel"),
+      usage: poolUsage(caster, grant.pool)?.label ?? textRef("battleWizards.flow.grant.optional"),
+    })),
+    " · ",
+  );
+}
+
+function itemLabel(grant: SpellGrant, usage: { left: number; max: number } | undefined): LogLine {
+  const label = grant.label ?? textRef("battleWizards.flow.grant.freeCast");
+
+  return usage ? textRef("battleWizards.flow.grant.withUsage", { label, left: usage.left, max: usage.max }) : textRef("battleWizards.flow.grant.unlimited", { label });
 }
 
 export function sourceOptions(caster: BattleParticipant | null, grants: SpellGrant[], slotChoices: Pick<SlotOption, "key" | "label">[]): SourceOption[] {
   if (grants.length === 0) return [];
 
   return [
-    ...slotChoices.map((slot) => ({ value: `slot:${slot.key}`, label: `Слот ${slot.label}`, disabled: false })),
+    ...slotChoices.map((slot) => ({ value: `slot:${slot.key}`, label: textRef("battleWizards.flow.grant.slotOption", { slot: slot.label }), disabled: false })),
     ...grants.map((grant) => {
       const usage = caster ? poolUsage(caster, grant.pool) : undefined;
 
-      return { value: `grant:${grant.key ?? grant.spellId}`, label: `${grant.label ?? "Безкоштовний каст"}${usage ? ` · ${usage.left}/${usage.max}` : " · без ліміту"}`, disabled: !!usage && usage.left < (grant.cost ?? 1) };
+      return { value: `grant:${grant.key ?? grant.spellId}`, label: itemLabel(grant, usage), disabled: !!usage && usage.left < (grant.cost ?? 1) };
     }),
   ];
 }
@@ -78,7 +92,7 @@ export function castLevelOptions(caster: BattleParticipant | null, grant: SpellG
 
     const left = grant.pool && caster ? poolLeft(caster, grant.pool) ?? 0 : Infinity;
 
-    return { value: base + i, label: `Коло ${base + i}${i ? ` · ${cost} заряди` : ""}`, disabled: left < cost };
+    return { value: base + i, label: i ? textRef("battleWizards.flow.grant.castLevelCost", { level: base + i, cost }) : textRef("battleWizards.flow.grant.castLevel", { level: base + i }), disabled: left < cost };
   });
 }
 
