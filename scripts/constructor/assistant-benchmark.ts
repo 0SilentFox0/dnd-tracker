@@ -181,7 +181,7 @@ async function main() {
 
     const report = {
       target, connectionLimit: 1, marker, head: execFileSync("git", ["rev-parse", "HEAD"], { encoding: "utf8" }).trim(),
-      productionBlobs: Object.fromEntries(["lib/server/assistant/actions/content-dependencies.ts", "lib/server/assistant/actions/content-snapshot.ts", "lib/server/assistant/json.ts"].map(file => [file, execFileSync("git", ["hash-object", file], { encoding: "utf8" }).trim()])),
+      productionBlobs: Object.fromEntries(["lib/server/assistant/actions/content-dependencies.ts", "lib/server/assistant/actions/content-snapshot.ts", "lib/server/assistant/json.ts", "lib/utils/common/json.ts", "lib/utils/battle/store/stable-json.ts"].map(file => [file, execFileSync("git", ["hash-object", file], { encoding: "utf8" }).trim()])),
       dirtyPaths: execFileSync("git", ["status", "--short"], { encoding: "utf8" }).trim().split("\n").filter(Boolean),
       versions: { node: process.version, prisma: Prisma.prismaVersion.client, pnpm: execFileSync("pnpm", ["--version"], { encoding: "utf8" }).trim(), postgres: postgres[0].version },
       fixtures: FIXTURE_SIZES, source: { spells: 1, artifacts: 0, characters: 0 }, fixtureClock: FIXTURE_CLOCK.toISOString(), warmups: 5, iterations: 30,
