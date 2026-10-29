@@ -24,3 +24,8 @@ describe("spell effect editor T6.3 labels", () => {
   expectLabelKeys("editors", "spellEffects.options", ["attackKind.melee", "attackKind.ranged", "attackKind.any", "target.self", "target.eventTarget", "cost.action", "cost.bonusAction", "cost.reaction", "side.enemies", "side.allies", "side.all", "cast.auto.on.attackAgainstMarked", "cast.auto.on.damageToMarked"]);
   expectLabelKeys("editors", "spellEffects.zone", ["check", "ability", "pull", "effects", "addEffect", "checks.none", "checks.save", "checks.attack"]);
 });
+
+describe("spell effect editor T6.4 labels", () => {
+  expectLabelKeys("editors", "spellEffects.fields.summonInline", ["name", "size", "ac", "acSpellDc", "hp", "hpItem", "count", "upcastEvery", "duration", "attacks", "addAttack", "removeAttack", "auraToggle", "attack.name", "attack.attackBonus", "attack.damageDice", "attack.damageType", "attack.range", "aura.radiusFeet", "aura.side", "aura.onEnter", "aura.onTurnStart"]);
+  expectLabelKeys("editors", "spellEffects.options", ["size.tiny", "size.small", "size.medium", "size.large", "aura.side.enemies", "aura.side.allies", "aura.side.all"]);
+});

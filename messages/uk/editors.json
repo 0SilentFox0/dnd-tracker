@@ -67,6 +67,34 @@
         "endsWhenStartOutside": "Закінчується, якщо хід починається поза аурою",
         "onEnter": "Тригер входу",
         "onTurnStart": "Тригер початку ходу"
+      },
+      "summonInline": {
+        "name": "Назва",
+        "size": "Розмір",
+        "ac": "КЗ",
+        "acSpellDc": "= СК заклинання",
+        "hp": "HP",
+        "hpItem": "Предмет (без HP)",
+        "count": "Кількість",
+        "upcastEvery": "+1 за кожні N рівнів",
+        "duration": "Тривалість (раунди)",
+        "attacks": "Атаки (до 2)",
+        "addAttack": "+ атака",
+        "removeAttack": "Прибрати атаку",
+        "auraToggle": "Аура навколо",
+        "attack": {
+          "name": "Назва",
+          "attackBonus": "Бонус",
+          "damageDice": "Кубики",
+          "damageType": "Тип шкоди",
+          "range": "Дальність"
+        },
+        "aura": {
+          "radiusFeet": "Радіус (фути)",
+          "side": "Діє на",
+          "onEnter": "Тригер входу",
+          "onTurnStart": "Тригер початку ходу"
+        }
       }
     },
     "options": {
@@ -103,6 +131,19 @@
             "attackAgainstMarked": "Атака по позначеному",
             "damageToMarked": "Шкода позначеному"
           }
+        }
+      },
+      "size": {
+        "tiny": "Крихітний",
+        "small": "Малий",
+        "medium": "Середній",
+        "large": "Великий"
+      },
+      "aura": {
+        "side": {
+          "enemies": "Вороги",
+          "allies": "Союзники",
+          "all": "Усі"
         }
       }
     },

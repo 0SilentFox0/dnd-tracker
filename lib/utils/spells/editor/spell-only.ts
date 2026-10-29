@@ -27,7 +27,7 @@ const DEFAULTS: { [K in SpellOnlyKind]: Omit<SpellOnlyEffect<K>, "kind"> } = {
   },
   hitRider: { attackKind: "any", extraDice: "1d6", damageType: "fire", charges: 1, duration: { rounds: 10 } },
   anchoredZone: { radiusFeet: 10, side: "enemies", duration: { rounds: 10 }, onEnter: { effects: [{ kind: "dealDamage", amount: { spellRoll: 100 } }] } },
-  summonInline: { name: DEFAULT_TEXT, size: "small", ac: 10, hp: 10, count: 1, duration: { rounds: 1 } },
+  summonInline: { name: DEFAULT_TEXT, size: "small", ac: "spellDc", hp: null, count: 1, duration: { rounds: 10 } },
 };
 
 export function newSpellOnlyEffect(kind: SpellOnlyKind): SpellEffect {
