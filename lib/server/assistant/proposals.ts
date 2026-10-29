@@ -23,7 +23,7 @@ import { pruneVersions, snapshotIfDue } from "@/lib/server/scenario/versions";
 import { toSlideDeck } from "@/lib/server/show/deck-store";
 import { requestDigest } from "@/lib/utils/battle/store/stable-json";
 import { applyAiOps } from "@/lib/utils/scenario/ai-ops";
-import { hasRefPlaceholder, substituteRefs } from "@/lib/utils/scenario/ai-refs";
+import { acquaintanceMentionIds, hasRefPlaceholder, substituteRefs } from "@/lib/utils/scenario/ai-refs";
 import type { AddSlideAiOp, AiProposal, AiProposalOp, AiProposalStatus, ScenarioAiOp } from "@/types/ai";
 import type { ScenarioPage } from "@/types/scenario";
 import type { SlideDeck } from "@/types/show";
@@ -150,6 +150,10 @@ async function applyClaimed(tx: Tx, campaignId: string, userId: string, proposal
   const finalOps = newcomers.length > 0 ? substituteRefs(scenarioOps, ids) : scenarioOps;
 
   if (hasRefPlaceholder(finalOps)) return { ok: false, status: 400, error: API_ERRORS.AI_PROPOSAL_INVALID };
+
+  const foreign = acquaintanceMentionIds(finalOps).filter((id) => !created.some((c) => c.id === id));
+
+  if (foreign.length > 0 && (await tx.acquaintance.count({ where: { campaignId, id: { in: foreign } } })) !== foreign.length) return { ok: false, status: 404, error: API_ERRORS.ACQUAINTANCE_NOT_FOUND };
 
   if (newcomers.length > 0) applied = applyAiOps(content, finalOps);
 

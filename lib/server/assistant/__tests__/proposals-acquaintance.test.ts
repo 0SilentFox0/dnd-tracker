@@ -10,7 +10,7 @@ const tx = vi.hoisted(() => ({
   aiProposal: { findFirst: vi.fn(), update: vi.fn(), updateMany: vi.fn(async () => ({ count: 1 })) },
   scenarioPage: { findFirst: vi.fn(), updateMany: vi.fn(async () => ({ count: 1 })) },
   campaign: { findUnique: vi.fn(async () => ({ acquaintancesEnabled: true })) },
-  acquaintance: { findFirst: vi.fn(async () => null), create: vi.fn(async ({ data }: { data: { id: string } }) => data) },
+  acquaintance: { count: vi.fn(async () => 1), findFirst: vi.fn(async () => null), create: vi.fn(async ({ data }: { data: { id: string } }) => data) },
 }));
 
 vi.mock("@/lib/db", () => ({ prisma: { $transaction: (fn: (t: typeof tx) => unknown) => fn(tx) } }));
@@ -35,6 +35,7 @@ describe("applyProposal with createAcquaintance", () => {
     vi.clearAllMocks();
     tx.campaign.findUnique.mockResolvedValue({ acquaintancesEnabled: true });
     tx.acquaintance.findFirst.mockResolvedValue(null);
+    tx.acquaintance.count.mockResolvedValue(1);
     tx.scenarioPage.updateMany.mockResolvedValue({ count: 1 });
     tx.aiProposal.findFirst.mockResolvedValue({ id: "pr", pageId: "p", status: "pending", ops: proposalOps() });
     tx.scenarioPage.findFirst.mockResolvedValue({ id: "p", title: "T", version: 3, content: content() });
@@ -62,6 +63,21 @@ describe("applyProposal with createAcquaintance", () => {
 
     expect(tx.acquaintance.create).not.toHaveBeenCalled();
     expect(JSON.stringify(tx.scenarioPage.updateMany.mock.calls[0])).toContain("existing");
+  });
+
+  it("linkMentions with an existing id from another campaign -> not found, nothing written", async () => {
+    const r = resolveAiOps(content() as never, [{ op: "linkMentions", acquaintance: { id: "foreign" }, forms: ["Беатріс"] }], makeT("assistant"));
+
+    if (!r.ok) throw new Error("fixture");
+
+    tx.aiProposal.findFirst.mockResolvedValue({ id: "pr", pageId: "p", status: "pending", ops: r.ops });
+    tx.acquaintance.count.mockResolvedValue(0);
+
+    const res = await run();
+
+    expect(res).toEqual({ ok: false, status: 404, error: API_ERRORS.ACQUAINTANCE_NOT_FOUND });
+    expect(tx.acquaintance.count).toHaveBeenCalledWith({ where: { campaignId: "camp", id: { in: ["foreign"] } } });
+    expect(tx.scenarioPage.updateMany).not.toHaveBeenCalled();
   });
 
   it("acquaintances disabled -> error key, nothing created or written, claim handed back", async () => {

@@ -31,3 +31,25 @@ export function hasRefPlaceholder(ops: ScenarioAiOp[]): boolean {
 
   return found;
 }
+
+const collectIds = (nodes: RichNode[], out: Set<string>) => {
+  for (const n of nodes) {
+    if (n.type === "mention" && n.attrs?.type === "acquaintance" && typeof n.attrs.id === "string") out.add(n.attrs.id);
+
+    if (n.content) collectIds(n.content, out);
+  }
+};
+
+export function acquaintanceMentionIds(ops: ScenarioAiOp[]): string[] {
+  const out = new Set<string>();
+
+  for (const op of ops) {
+    if (op.op !== "replaceRow") continue;
+
+    if (op.story) collectIds(op.story.content, out);
+
+    if (op.notes) collectIds(op.notes.content, out);
+  }
+
+  return [...out];
+}
