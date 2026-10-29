@@ -73,3 +73,28 @@ describe("armoredForm", () => {
     expect(JSON.stringify(d)).not.toContain('"native"');
   });
 });
+
+describe("recognizers against the book wording", () => {
+  it("a paw that attempts to grapple, with no save in the data, becomes a Str-or-Dex save with escape DC and linked DoT", () => {
+    const d = spellRow(["You summon a paw that grasps at a creature within range. The paw attempts to grapple the target, using your spellcasting ability modifier. If you lose the contest, the paw disappears.", "While {@condition grappled} by the paw, a target takes {@damage 1d8} necrotic damage at the start of each of its turns. The target can use its action to attempt to escape the grapple as normal."], { ...conc, damageInflict: ["necrotic"] });
+
+    expect(d).toMatchObject({ native: { fields: { resolution: { kind: "save", ability: "strength", orAbility: "dexterity" }, spellEffects: [{ condition: "grappled", escapeDc: true }, { linkedToCondition: true }] } } });
+  });
+
+  it("an armoured shell: AC becomes N if not higher, blindsight, threshold and a spell-attack claw, swim speed stays a rider", () => {
+    const d = spellRow(["You create a shell around you. For the duration, your Armor Class becomes 20 (if it wasn't already higher), you gain a swimming speed of 40 feet, and you gain {@sense blindsight} out to a range of 30 feet. In addition, you can use your bonus action to make a melee weapon attack using your claws. This attack uses your spell attack bonus and deals {@damage 1d10} bludgeoning damage on a hit.", "The shell has a damage threshold of 15 hit points."], { range: { type: "point", distance: { type: "self" } }, duration: [{ type: "timed", duration: { type: "minute", amount: 1 }, concentration: true }], damageInflict: ["bludgeoning"] });
+
+    expect(d).toMatchObject({
+      native: {
+        riders: ["swimming speed"],
+        fields: { spellEffects: [{ kind: "modifyStat", stat: "armor", atLeast: 20 }, { flag: "sense", sense: "blindsight", range: 30 }, { flag: "damageThreshold", value: 15 }, { kind: "grantCast", cost: "bonusAction", cast: { targeting: { range: 5 }, dice: 1, dieSides: 10 } }] },
+      },
+    });
+  });
+
+  it("an armour-class formula is not an 'at least' floor", () => {
+    const d = spellRow(["Your Armor Class becomes 13 + your Dexterity modifier while you wear no armor."], { range: { type: "point", distance: { type: "self" } } });
+
+    expect(JSON.stringify(d)).not.toContain("atLeast");
+  });
+});

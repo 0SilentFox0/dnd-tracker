@@ -42,3 +42,8 @@ Class/feat джерела копіювання підтримуються нас
 
 - **`applyCondition.condition`** — 5e-ключ, маркер із `CONDITION_KEYS` або власний `custom:<slug>` (`CUSTOM_CONDITION_KEY_RE`, `isCustomConditionKey`); визначення живе в `rules.conditions.custom`, розібрані правила спільні (`parseRulesCached`) — не мутувати. `abilityEffects` власного стану — `StaticEffectSchema` (`modifyStat`/`damageBonus`/`flag`). `AnyConditionKey` не розширено: `conditionImmunity` і умови вмінь власних ключів не бачать.
 - Маркери `no_hostile_spells` і `no_damage_dealt` читаються через `hasEffectMarker` (це не модифікатори, `collectModifiers` їх не повертає); докладно — [battle.md](battle.md).
+
+## Spell engine coverage (P3)
+
+- **`flag damageThreshold`** (`value` 1..100) читає `applyResistance`; **`applyCondition.escapeDc`** і **`dot.linkedToCondition`** (`ActiveEffect.linkedTo`) — схоплення заклинанням, `removeEffects` знімає прив'язаний DoT каскадом; спел-only ефекти `grantCast`, `hitRider`, `moveSelf` (`SPELL_ONLY_KINDS`, поза `AbilityListEditor`-формою — показуються як невідомий ефект).
+

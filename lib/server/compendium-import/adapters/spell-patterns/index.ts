@@ -1,8 +1,9 @@
 import type { SpellCast } from "../spell-cast";
 import type { SpellDerivation } from "../spell-derive";
+import { autoReactionSpell } from "./auto-reaction";
 import { chooseOneSpell, helpAlly, reduceDamageRoll } from "./choice-help";
 import { byDistanceDamage, fallingDamage } from "./distance";
-import { grantSpellAttack } from "./grant-cast";
+import { grantSpellAttack, grantWeaponObject } from "./grant-cast";
 import { armoredForm, grapplingDot } from "./held-form";
 import { hitRiderSpell, moveSelfSpell } from "./hit-rider";
 import { selfDamageTransfer } from "./self-damage-transfer";
@@ -23,7 +24,7 @@ export interface SpellPatternInput {
 export type SpellRecognizer = (i: SpellPatternInput) => SpellDerivation | null;
 
 // narrow patterns first
-export const SPELL_RECOGNIZERS: SpellRecognizer[] = [selfDamageTransfer, byDistanceDamage, fallingDamage, grapplingDot, armoredForm, grantSpellAttack, hitRiderSpell, moveSelfSpell, controlAnimal, speedAtLeast, chooseOneSpell, reduceDamageRoll, helpAlly];
+export const SPELL_RECOGNIZERS: SpellRecognizer[] = [selfDamageTransfer, byDistanceDamage, fallingDamage, grapplingDot, armoredForm, autoReactionSpell, grantSpellAttack, grantWeaponObject, hitRiderSpell, moveSelfSpell, controlAnimal, speedAtLeast, chooseOneSpell, reduceDamageRoll, helpAlly];
 
 export function recognizeSpell(input: SpellPatternInput): SpellDerivation | null {
   for (const recognize of SPELL_RECOGNIZERS) {

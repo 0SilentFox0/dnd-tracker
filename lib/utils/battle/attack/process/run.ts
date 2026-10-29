@@ -19,6 +19,8 @@ import { attackKindOf } from "@/lib/utils/battle/common/attack-kind";
 import { damageDiceSlots, heroAttackDamageParts } from "@/lib/utils/battle/damage/hero-damage";
 import { attackDiceRolls } from "@/lib/utils/battle/dice-record";
 import { getEffectiveArmorClass } from "@/lib/utils/battle/participant";
+import { castSpell } from "@/lib/utils/battle/spell";
+import { runAutoReactions } from "@/lib/utils/battle/spell/auto-reaction";
 import type { ProcessAttackParams, ProcessAttackResult } from "@/lib/utils/battle/types/attack-process";
 import type { BattleAction } from "@/types/battle";
 
@@ -159,7 +161,11 @@ export function processAttack(params: ProcessAttackParams): ProcessAttackResult 
 
   if (!isHit) spendRidersOnMiss(flow, { attackerId, attack });
 
+  const reactToAttack = () => runAutoReactions(flow, { attackerId, targetId, damaged: getP(flow, targetId).combatStats.currentHp < target.combatStats.currentHp }, castSpell);
+
   if (attackRoll.isCriticalFail && attackRoll.criticalEffect) {
+    reactToAttack();
+
     const r = handleCriticalFail(branch);
 
     withRollDetails(r.battleAction);
@@ -169,6 +175,8 @@ export function processAttack(params: ProcessAttackParams): ProcessAttackResult 
   }
 
   if (!isHit) {
+    reactToAttack();
+
     const r = handleMiss(branch);
 
     withRollDetails(r.battleAction);
@@ -203,6 +211,8 @@ export function processAttack(params: ProcessAttackParams): ProcessAttackResult 
     hitSpells: params.hitSpells,
     battleId,
   });
+
+  reactToAttack();
 
   if (params.obstacle) flow.messages.unshift(`🧱 перешкода: шкода ×0.5 → ${hitDamage.totalFinalDamage}`);
 

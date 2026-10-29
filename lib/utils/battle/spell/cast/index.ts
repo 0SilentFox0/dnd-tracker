@@ -4,6 +4,7 @@ import { HIDDEN_MARKER } from "@/lib/utils/battle/actions/effects";
 import { type ActionFlow, fire, getP } from "@/lib/utils/battle/common/action-flow";
 import { beginConcentration, castIdFor, tagConcentration } from "@/lib/utils/battle/concentration";
 import { removeEffects } from "@/lib/utils/battle/conditions/query";
+import { runAutoReactions } from "@/lib/utils/battle/spell/auto-reaction";
 import { applyTo } from "@/lib/utils/battle/spell/cast/effects";
 import { finishSpellAction, spendCastCost } from "@/lib/utils/battle/spell/cast/finish";
 import { applyGrantCasts } from "@/lib/utils/battle/spell/cast/grant-cast";
@@ -149,6 +150,10 @@ export function castSpell(params: CastSpellParams): CastSpellResult {
     flow.ps = moved.participants;
 
     if (moved.message) flow.messages.push(moved.message);
+  }
+
+  if (def.resolution.kind === "attack" && !params.grant?.inline?.auto) {
+    for (const id of targetIds) runAutoReactions(flow, { attackerId: casterId, targetId: id, damaged: (findParticipant(flow.ps, id)?.combatStats.currentHp ?? 0) < (findParticipant(before, id)?.combatStats.currentHp ?? 0) }, castSpell);
   }
 
   if (tag) flow.ps = tagConcentration(psBeforeEffects, flow.ps, tag, state.ability.key);

@@ -92,7 +92,7 @@ export const InlineCastSchema = z.object({
   damageBonus: z.number().int().min(-20).max(40).optional(),
   effects: z.array(NonRandomEffectSchema).min(1).max(6),
   anchorMarkId: z.string().min(1).max(40).optional(),
-  auto: z.object({ on: z.literal("attackAgainstMarked") }).optional(),
+  auto: z.object({ on: z.enum(["attackAgainstMarked", "damageToMarked"]) }).optional(),
 }).refine(attackNeedsEnemy, ATTACK_TARGET_ISSUE);
 
 export const GRANT_CAST_COSTS = ["action", "bonusAction", "reaction"] as const;

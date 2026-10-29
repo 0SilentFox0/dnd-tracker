@@ -49,4 +49,16 @@ describe("moveSelfSpell", () => {
 
     expect(JSON.stringify(d)).not.toContain("moveSelf");
   });
+
+  it("a wind that carries you to a creature plus a single extra-damage melee hit before the end of the turn", () => {
+    const d = spellRow(["A wind lifts you up and carries you to a creature you can see within range. The next time you hit a creature with a melee weapon attack before the end of the turn, the attack deals an extra {@damage 2d6} slashing damage."], { range: { type: "point", distance: { type: "feet", amount: 60 } }, damageInflict: ["slashing"] });
+
+    expect(d).toMatchObject({ native: { fields: { targeting: { kind: "enemy", range: 60 }, spellEffects: [{ kind: "moveSelf" }, { kind: "hitRider", attackKind: "melee", extraDice: "2d6", charges: 1, expireAtTurnEnd: true }] } } });
+  });
+
+  it("touched ammunition gives one charge per piece, push from the cap and charges spent on a miss", () => {
+    const d = spellRow(["You touch one to three pieces of ammunition and imbue them with magic.", "When a creature is hit with a ranged weapon attack using the ammunition, it takes an extra {@damage 1d6} poison damage and must make a Dexterity saving throw. On a failed save, the creature is pushed back a number of feet equal to the damage taken to a maximum of 15 feet. Whether the attack hits or misses, the spell then ends on that piece of ammunition."], { duration: [{ type: "timed", duration: { type: "hour", amount: 1 } }], savingThrow: ["dexterity"], damageInflict: ["poison"] });
+
+    expect(d).toMatchObject({ native: { fields: { targeting: { kind: "self" }, spellEffects: [{ kind: "hitRider", attackKind: "ranged", extraDice: "1d6", damageType: "poison", charges: 3, consumeOnMiss: true, save: { ability: "dexterity", onFail: [{ kind: "push", feet: 15 }] } }] } } });
+  });
 });
