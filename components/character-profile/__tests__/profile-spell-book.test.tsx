@@ -26,9 +26,9 @@ describe("ProfileSpellBook", () => {
     mockMatchMedia(true);
     render(<Harness />);
 
-    expect(screen.getByRole("button", { name: /I коло, слотів 4/ })).toBeTruthy();
+    expect(screen.getByRole("button", { name: /spells.book.bookmark.*"level":"I".*"slots":4/ })).toBeTruthy();
     fireEvent.click(screen.getByText("Мітка мисливця"));
-    expect(screen.getByText("Вартість")).toBeTruthy();
+    expect(screen.getByText("spells.book.cost")).toBeTruthy();
     expect(screen.queryByRole("button", { name: /Обрати цілі/ })).toBeNull();
   });
 

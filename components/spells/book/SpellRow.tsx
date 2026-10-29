@@ -1,7 +1,9 @@
+import { useTranslations } from "next-intl";
+
 import { SpellIcon } from "@/components/spells/SpellIcon";
 import { spellSchoolColor } from "@/lib/constants/spells";
+import { useSpellLabels } from "@/lib/hooks/spells";
 import { cn } from "@/lib/utils";
-import { targetingLabel } from "@/lib/utils/spells/model/labels";
 import type { BookSpell } from "@/types/spells";
 
 const SIZES = {
@@ -16,11 +18,15 @@ interface SpellRowExtras {
 }
 
 export function SpellRow({ spell, school, wide, picked, extras = {}, onPick }: { spell: BookSpell; school: { name: string; color?: string | null }; wide: boolean; picked: boolean; extras?: SpellRowExtras; onPick: (spell: BookSpell) => void }) {
+  const t = useTranslations("spells.book");
+
+  const labels = useSpellLabels();
+
   const { formula, badge } = extras;
 
   const size = wide ? SIZES.wide : SIZES.narrow;
 
-  const hints = [spell.resolution?.kind === "save" && "рятівний кидок", spell.targeting && targetingLabel(spell.targeting), spell.cost === "bonusAction" && "бонусна дія"].filter(Boolean).join(" · ");
+  const hints = [spell.resolution?.kind === "save" && t("hintSave"), spell.targeting && labels.targeting(spell.targeting), spell.cost === "bonusAction" && labels.cost("bonusAction")].filter(Boolean).join(" · ");
 
   return (
     <button type="button" onClick={() => onPick(spell)} className={cn("flex w-full items-center gap-3 border-b border-[#2a2018]/15 text-left", size.row, picked && "-mx-3 w-[calc(100%+1.5rem)] bg-[#9c2a1d]/10 px-3 shadow-[inset_3px_0_0_#9c2a1d]")}>

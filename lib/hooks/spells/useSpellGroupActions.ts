@@ -1,4 +1,5 @@
 import { useCallback, useState } from "react";
+import { useTranslations } from "next-intl";
 
 import {
   useRemoveAllSpellsFromGroup,
@@ -13,14 +14,13 @@ interface UseSpellGroupActionsProps {
   groupId?: string;
 }
 
-/**
- * Хук для управління діями з групами заклинань
- */
 export function useSpellGroupActions({
   campaignId,
   groupName,
   groupId,
 }: UseSpellGroupActionsProps) {
+  const t = useTranslations("spells.groupActions");
+
   const [renameDialogOpen, setRenameDialogOpen] = useState(false);
 
   const [newGroupName, setNewGroupName] = useState(groupName);
@@ -52,14 +52,14 @@ export function useSpellGroupActions({
     () =>
       groupId
         ? confirm({
-            title: "Видалити всі заклинання з групи?",
-            description: `Ви впевнені, що хочете видалити всі заклинання з групи "${groupName}"? Заклинання не будуть видалені, але вони втратять зв'язок з цією групою.`,
-            confirmLabel: "Видалити всі з групи",
+            title: t("removeAllTitle"),
+            description: t("removeAllDescription", { group: groupName }),
+            confirmLabel: t("removeAllConfirm"),
             destructive: true,
             onConfirm: () => removeAllSpellsMutation.mutateAsync(groupId),
           })
         : Promise.resolve(false),
-    [confirm, groupId, groupName, removeAllSpellsMutation],
+    [confirm, groupId, groupName, removeAllSpellsMutation, t],
   );
 
   const openRenameDialog = useCallback(() => {

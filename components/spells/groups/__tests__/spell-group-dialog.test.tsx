@@ -18,8 +18,8 @@ describe("SpellGroupDialog", () => {
     renderWithConfirm(<SpellGroupDialog campaignId="c1" group={{ id: "g1", name: "Місяць", color: null, icon: null }} onOpenChange={vi.fn()} />);
 
     fireEvent.click(screen.getByRole("button", { name: "moon" }));
-    fireEvent.change(screen.getByLabelText("Колір"), { target: { value: "#123456" } });
-    fireEvent.click(screen.getByRole("button", { name: "Зберегти" }));
+    fireEvent.change(screen.getByLabelText("spells.groupDialog.color"), { target: { value: "#123456" } });
+    fireEvent.click(screen.getByRole("button", { name: "common.actions.save" }));
 
     await vi.waitFor(() => expect(mutateAsync).toHaveBeenCalledWith({ groupId: "g1", name: "Місяць", color: "#123456", icon: "moon" }));
   });

@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import { useTranslations } from "next-intl";
 import { Copy, Move, Pencil, Sparkles, X } from "lucide-react";
 
 import { SpellPrintCard } from "./SpellPrintCard";
@@ -15,9 +16,8 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { spellLevelName } from "@/lib/constants/spells";
-import { UNGROUPED_LABELS } from "@/lib/constants/ungrouped";
-import { spellMechanicsLabels } from "@/lib/utils/spells/model/summary";
+import { useSpellLabels } from "@/lib/hooks/spells";
+import { useTranslator } from "@/lib/i18n/use-translator";
 import { getSpellGroupIcon } from "@/lib/utils/spells/spell-icons";
 import type { Spell, SpellGroup } from "@/types/spells";
 
@@ -34,11 +34,19 @@ interface SpellCardProps {
 const ICON_BTN = "size-7 shrink-0 text-hud-muted hover:text-hud-ink";
 
 export function SpellCard({ spell, campaignId, spellGroups, onRemoveFromGroup, onMoveToGroup, printMode = false }: SpellCardProps) {
+  const t = useTranslations("spells.card");
+
+  const ta = useTranslations("common.actions");
+
+  const tc = useTranslator("common");
+
+  const labels = useSpellLabels();
+
   const [copied, setCopied] = useState(false);
 
   if (printMode) return <SpellPrintCard spell={spell} />;
 
-  const groupName = spell.spellGroup?.name || UNGROUPED_LABELS.spellGroup;
+  const groupName = spell.spellGroup?.name || tc("ungrouped.spellGroup");
 
   const GroupIcon = getSpellGroupIcon(spell.spellGroup);
 
@@ -58,32 +66,32 @@ export function SpellCard({ spell, campaignId, spellGroups, onRemoveFromGroup, o
         <div className="min-w-0 flex-1">
           <h3 className="hud-sc truncate text-[15px] text-hud-ink">{spell.name}</h3>
           <div className="mt-1 flex flex-wrap gap-1">
-            <HudPill icon={<Sparkles className="size-3" />}>{spellLevelName(spell.level)}</HudPill>
+            <HudPill icon={<Sparkles className="size-3" />}>{tc(`spellLevels.${spell.level}`)}</HudPill>
             {groupName === "Monster Actions" && <HudPill>Monster Actions</HudPill>}
-            {spellMechanicsLabels(spell).map((label) => (
+            {labels.mechanics(spell).map((label) => (
               <HudPill key={label}>{label}</HudPill>
             ))}
           </div>
         </div>
         <div className="-mr-1 -mt-1 flex shrink-0">
           <Button variant="ghost" size="icon" className={ICON_BTN} asChild>
-            <Link href={`/campaigns/${campaignId}/dm/spells/${spell.id}`} aria-label="Редагувати" title="Редагувати">
+            <Link href={`/campaigns/${campaignId}/dm/spells/${spell.id}`} aria-label={ta("edit")} title={ta("edit")}>
               <Pencil className="size-3.5" />
             </Link>
           </Button>
           {spell.spellGroup && (
-            <Button variant="ghost" size="icon" className={ICON_BTN} onClick={() => onRemoveFromGroup(spell.id)} aria-label="Видалити з групи" title="Видалити з групи">
+            <Button variant="ghost" size="icon" className={ICON_BTN} onClick={() => onRemoveFromGroup(spell.id)} aria-label={t("removeFromGroup")} title={t("removeFromGroup")}>
               <X className="size-3.5" />
             </Button>
           )}
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button variant="ghost" size="icon" className={ICON_BTN} aria-label="Перемістити в групу" title="Перемістити в групу">
+              <Button variant="ghost" size="icon" className={ICON_BTN} aria-label={t("moveToGroup")} title={t("moveToGroup")}>
                 <Move className="size-3.5" />
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
-              <DropdownMenuItem onClick={() => onMoveToGroup(spell.id, null)}>Без групи</DropdownMenuItem>
+              <DropdownMenuItem onClick={() => onMoveToGroup(spell.id, null)}>{tc("ungrouped.spellGroup")}</DropdownMenuItem>
               {spellGroups.map((group) => (
                 <DropdownMenuItem key={group.id} onClick={() => onMoveToGroup(spell.id, group.id)}>
                   {group.name}
@@ -101,9 +109,9 @@ export function SpellCard({ spell, campaignId, spellGroups, onRemoveFromGroup, o
         <span className="truncate">{groupName}</span>
         {/* Тимчасово: ID заклинання та копіювання */}
         <code className="ml-auto max-w-[45%] truncate font-mono text-[10px]" title={spell.id}>
-          {copied ? "Скопійовано" : spell.id}
+          {copied ? t("copied") : spell.id}
         </code>
-        <Button variant="ghost" size="icon" className="size-6 shrink-0 text-hud-muted" onClick={handleCopyId} aria-label={copied ? "Скопійовано" : "Копіювати ID"} title={copied ? "Скопійовано" : "Копіювати ID"}>
+        <Button variant="ghost" size="icon" className="size-6 shrink-0 text-hud-muted" onClick={handleCopyId} aria-label={copied ? t("copied") : t("copyId")} title={copied ? t("copied") : t("copyId")}>
           <Copy className="size-3" />
         </Button>
       </div>

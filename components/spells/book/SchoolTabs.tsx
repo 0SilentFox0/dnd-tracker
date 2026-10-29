@@ -1,12 +1,17 @@
+import { useTranslations } from "next-intl";
+
 import { spellSchoolColor } from "@/lib/constants/spells";
 import { ALL_SCHOOLS } from "@/lib/hooks/spells";
 import { cn } from "@/lib/utils";
+import { NO_SCHOOL } from "@/lib/utils/spells/group-by-school";
 
 export function SchoolTabs({ schools, active, countOf, onPick }: { schools: { name: string; color?: string | null }[]; active: string; countOf: (name: string) => number; onPick: (name: string) => void }) {
-  const tabs = [{ name: ALL_SCHOOLS, label: "Усі", color: "#2a2018" }, ...schools.map((school) => ({ name: school.name, label: school.name, color: spellSchoolColor(school) }))];
+  const t = useTranslations("spells.book");
+
+  const tabs = [{ name: ALL_SCHOOLS, label: t("allSchools"), color: "#2a2018" }, ...schools.map((school) => ({ name: school.name, label: school.name === NO_SCHOOL ? t("noSchool") : school.name, color: spellSchoolColor(school) }))];
 
   return (
-    <div role="group" aria-label="Школи магії" className="sticky top-0 z-10 -mx-5 -mt-4 mb-2 flex flex-wrap items-start gap-1.5 bg-[#e9dec5] px-5 pb-1">
+    <div role="group" aria-label={t("schoolsAria")} className="sticky top-0 z-10 -mx-5 -mt-4 mb-2 flex flex-wrap items-start gap-1.5 bg-[#e9dec5] px-5 pb-1">
       {tabs.map((t) => {
         const count = t.name === ALL_SCHOOLS ? undefined : countOf(t.name);
 

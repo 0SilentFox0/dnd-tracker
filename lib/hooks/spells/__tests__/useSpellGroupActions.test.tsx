@@ -32,7 +32,7 @@ describe("useSpellGroupActions.confirmRemoveAll", () => {
     const dialog = await screen.findByRole("alertdialog");
 
     expect(dialog).toHaveTextContent("Вогонь");
-    fireEvent.click(within(dialog).getByRole("button", { name: "Видалити всі з групи" }));
+    fireEvent.click(within(dialog).getByRole("button", { name: "spells.groupActions.removeAllConfirm" }));
     await expect(done).resolves.toBe(true);
     expect(removeAllSpellsFromGroup).toHaveBeenCalledWith("c1", "g1");
   });

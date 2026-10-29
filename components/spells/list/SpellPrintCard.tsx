@@ -1,15 +1,21 @@
+"use client";
+
 import { Sparkles } from "lucide-react";
 
 import { SpellIcon } from "@/components/spells/SpellIcon";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { spellLevelName, spellLevelRoman } from "@/lib/constants/spells";
-import { UNGROUPED_LABELS } from "@/lib/constants/ungrouped";
-import { spellMechanicsLabels } from "@/lib/utils/spells/model/summary";
+import { spellLevelRoman } from "@/lib/constants/spells";
+import { useSpellLabels } from "@/lib/hooks/spells";
+import { useTranslator } from "@/lib/i18n/use-translator";
 import { getSpellGroupIcon } from "@/lib/utils/spells/spell-icons";
 import type { Spell } from "@/types/spells";
 
 export function SpellPrintCard({ spell }: { spell: Spell }) {
+  const tc = useTranslator("common");
+
+  const labels = useSpellLabels();
+
   const SpellGroupIcon = getSpellGroupIcon(spell.spellGroup);
 
   return (
@@ -24,7 +30,7 @@ export function SpellPrintCard({ spell }: { spell: Spell }) {
               <CardTitle className="text-sm sm:text-base truncate flex-1 min-w-0">{spell.name}</CardTitle>
               <Badge variant={spell.level === 0 ? "secondary" : "default"} className="flex items-center gap-1 shrink-0 text-xs">
                 <Sparkles className="h-3 w-3" />
-                <span className="hidden sm:inline">{spellLevelName(spell.level)}</span>
+                <span className="hidden sm:inline">{tc(`spellLevels.${spell.level}`)}</span>
                 <span className="sm:hidden">{spellLevelRoman(spell.level)}</span>
               </Badge>
             </div>
@@ -33,10 +39,10 @@ export function SpellPrintCard({ spell }: { spell: Spell }) {
         <CardDescription className="flex flex-wrap gap-1 sm:gap-2 mt-2">
           <Badge variant="outline" className="flex items-center gap-1 text-xs">
             <SpellGroupIcon className="h-3 w-3" />
-            <span className="hidden sm:inline">{spell.spellGroup?.name || UNGROUPED_LABELS.spellGroup}</span>
+            <span className="hidden sm:inline">{spell.spellGroup?.name || tc("ungrouped.spellGroup")}</span>
             <span className="sm:hidden truncate max-w-[60px]">{spell.spellGroup?.name?.[0] || "-"}</span>
           </Badge>
-          {spellMechanicsLabels(spell).map((label) => (
+          {labels.mechanics(spell).map((label) => (
             <Badge key={label} variant="outline" className="text-xs">
               {label}
             </Badge>

@@ -15,7 +15,7 @@ describe("SpellCard icon buttons", () => {
   it("мають aria-label, а не лише title", () => {
     render(<SpellCard spell={spell} campaignId="c1" spellGroups={[]} onRemoveFromGroup={vi.fn()} onMoveToGroup={vi.fn()} />);
 
-    for (const label of ["Видалити з групи", "Перемістити в групу", "Копіювати ID"]) {
+    for (const label of ["spells.card.removeFromGroup", "spells.card.moveToGroup", "spells.card.copyId"]) {
       const button = screen.getByTitle(label);
 
       expect(button).toHaveAttribute("aria-label", label);

@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { useTranslations } from "next-intl";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -19,6 +20,10 @@ export function CreateSpellGroupDialog({
   campaignId,
   onGroupCreated,
 }: CreateSpellGroupDialogProps) {
+  const t = useTranslations("spells.createGroup");
+
+  const ta = useTranslations("common.actions");
+
   const router = useRouter();
 
   const createGroup = useCreateSpellGroup(campaignId);
@@ -42,30 +47,30 @@ export function CreateSpellGroupDialog({
         router.refresh();
         onGroupCreated?.(group.id);
       },
-      onError: (err) => setError(err instanceof Error ? err.message : "Помилка створення групи"),
+      onError: (err) => setError(err instanceof Error ? err.message : t("failed")),
     });
   };
 
   return (
     <>
       <Button onClick={() => setOpen(true)} variant="outline" className="whitespace-nowrap">
-          + Створити групу заклинань
+          {t("trigger")}
         </Button>
     <ResponsiveDialog
       hud
       open={open}
       onOpenChange={setOpen}
-      title="Створити нову групу заклинань"
-      description="Групи заклинань дозволяють організувати заклинання та скіли"
+      title={t("title")}
+      description={t("description")}
     >
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="space-y-2">
-            <Label htmlFor="group-name">Назва групи *</Label>
+            <Label htmlFor="group-name">{t("name")}</Label>
             <Input
               id="group-name"
               value={name}
               onChange={(e) => setName(e.target.value)}
-              placeholder="Назва групи"
+              placeholder={t("placeholder")}
               required
               maxLength={SPELL_NAME_MAX}
             />
@@ -88,10 +93,10 @@ export function CreateSpellGroupDialog({
               }}
               disabled={createGroup.isPending}
             >
-              Скасувати
+              {ta("cancel")}
             </Button>
             <Button type="submit" disabled={createGroup.isPending || !name.trim()}>
-              {createGroup.isPending ? "Створення..." : "Створити групу"}
+              {createGroup.isPending ? ta("creating") : t("submit")}
             </Button>
           </div>
         </form>

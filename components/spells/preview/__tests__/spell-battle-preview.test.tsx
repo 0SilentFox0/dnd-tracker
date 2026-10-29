@@ -42,10 +42,10 @@ describe("SpellBattlePreviewPanel", () => {
     render(<SpellBattlePreviewPanel spell={plague} />);
 
     expect(screen.queryByTestId("spell-preview-arena")).toBeNull();
-    expect(screen.getByText("Чума")).toBeTruthy();
-    expect(screen.getByText("Отрута")).toBeTruthy();
-    expect(screen.getByText("Мор")).toBeTruthy();
-    expect(screen.queryByRole("button", { name: /Показати ще раз/ })).toBeNull();
+    expect(screen.getByText("spells.fx.archetypes.pestilence")).toBeTruthy();
+    expect(screen.getByText("spells.fx.elements.poison")).toBeTruthy();
+    expect(screen.getByText("spells.fx.auras.plague")).toBeTruthy();
+    expect(screen.queryByRole("button", { name: /spells.fx.replay/ })).toBeNull();
     expect(playFx).not.toHaveBeenCalled();
   });
 
@@ -60,7 +60,7 @@ describe("SpellBattlePreviewPanel", () => {
     expect(playFx).toHaveBeenCalledTimes(1);
     expect(screen.getByTestId("aura").dataset.kinds).toBe("plague");
 
-    fireEvent.click(screen.getByRole("button", { name: /Показати ще раз/ }));
+    fireEvent.click(screen.getByRole("button", { name: /spells.fx.replay/ }));
     await act(async () => {});
     expect(playFx).toHaveBeenCalledTimes(2);
   });

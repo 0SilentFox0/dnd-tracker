@@ -33,8 +33,8 @@ const spellFields = {
   addAbilityMod: z.boolean().nullable(),
   fixedDice: z.boolean().nullable(),
   damageBonus: z.number().int().min(-20).max(40).nullable(),
-  fx: SpellFxSchema.describe("Візуальний ефект заклинання на мапі бою").nullable().optional(),
-  lists: SpellListsSchema.describe("Теги списків заклинань класів (Wizard, Cleric…)"),
+  fx: SpellFxSchema.describe("Visual effect of the spell on the battle map").nullable().optional(),
+  lists: SpellListsSchema.describe("Class spell-list tags (Wizard, Cleric…)"),
 };
 
 export const createSpellSchema = z.object({
