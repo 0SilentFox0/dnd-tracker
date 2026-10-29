@@ -1,5 +1,7 @@
 "use client";
 
+import { useTranslations } from "next-intl";
+
 import { SideDot } from "@/components/battle/hud";
 import { Button } from "@/components/ui/button";
 import { ResponsiveDialog } from "@/components/ui/responsive-dialog";
@@ -20,6 +22,8 @@ export function DmCasterPickerDialog({
   participants,
   onSelectCaster,
 }: DmCasterPickerDialogProps) {
+  const t = useTranslations("battleDm.casterPicker");
+
   const activeParticipants = participants.filter(
     isActive,
   );
@@ -30,14 +34,14 @@ export function DmCasterPickerDialog({
       onOpenChange={onOpenChange}
       size="md"
       hud
-      title="Накласти заклинання"
-      description="Оберіть учасника, від імені якого буде накладено заклинання"
+      title={t("title")}
+      description={t("description")}
       className="max-w-sm"
     >
       <div className="space-y-2 pt-2">
         {activeParticipants.length === 0 ? (
           <p className="text-muted-foreground text-sm">
-            Немає активних учасників
+            {t("empty")}
           </p>
         ) : (
           activeParticipants.map((p) => (
@@ -54,7 +58,7 @@ export function DmCasterPickerDialog({
               <span className="font-medium">{p.basicInfo.name}</span>
               {p.basicInfo.side && (
                 <span className="text-muted-foreground text-xs">
-                  {p.basicInfo.side === ParticipantSide.ALLY ? "союзник" : "ворог"}
+                  {p.basicInfo.side === ParticipantSide.ALLY ? t("ally") : t("enemy")}
                 </span>
               )}
             </Button>

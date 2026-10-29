@@ -1,5 +1,5 @@
 // @vitest-environment happy-dom
-import { cleanup, render } from "@testing-library/react";
+import { cleanup } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
 import { enemy, hero, mazeMap, RO, viewOf } from "./maze-fixtures";
@@ -8,7 +8,10 @@ import { BattleMap } from "@/components/battle/map";
 import { MazeViewProvider } from "@/components/battle/modes/maze/MazeViewProvider";
 import { InitiativeTrack } from "@/components/battle/participants/InitiativeTrack";
 import { fakeScene } from "@/lib/hooks/battle/__tests__/fake-scene";
+import { render } from "@/lib/i18n/test/render-uk";
 import { cellPolygon } from "@/lib/utils/battle/grid";
+
+vi.unmock("next-intl");
 
 afterEach(() => {
   cleanup();

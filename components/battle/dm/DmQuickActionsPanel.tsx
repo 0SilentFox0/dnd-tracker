@@ -1,6 +1,7 @@
 "use client";
 
 import { type ReactNode, useState } from "react";
+import { useTranslations } from "next-intl";
 import { ChevronLeft, ChevronsDown, ChevronsUp, Dices, type LucideIcon, RefreshCw, ScrollText, Sparkles, Trophy, UserPlus } from "lucide-react";
 
 import { ConditionsDialog } from "./ConditionsDialog";
@@ -57,11 +58,13 @@ function PanelSection({ title, className, children }: { title: string; className
 export interface DmQuickActionsPanelProps {
   dialogs: BattlePageDialogs;
   onOpenCastSpell: () => void;
-  /** Керований режим (мобільний): панель відкривається ззовні, бічної вкладки немає */
+  /** Controlled mode (mobile): the panel is opened from outside, no side tab */
   panel?: { open: boolean; onOpenChange: (open: boolean) => void };
 }
 
 export function DmQuickActionsPanel({ dialogs, onOpenCastSpell, panel }: DmQuickActionsPanelProps) {
+  const t = useTranslations("battleDm");
+
   const { battle, viewer, dmControl, actions } = useBattleScene();
 
   const [ownOpen, setOwnOpen] = useState(false);
@@ -93,7 +96,7 @@ export function DmQuickActionsPanel({ dialogs, onOpenCastSpell, panel }: DmQuick
           "transition-all duration-200",
           open && "pointer-events-none opacity-0",
         )}
-        aria-label="Відкрити швидкі дії DM"
+        aria-label={t("panel.open")}
       >
         <ChevronLeft className="size-6" />
       </button>}
@@ -111,51 +114,51 @@ export function DmQuickActionsPanel({ dialogs, onOpenCastSpell, panel }: DmQuick
       >
         <div className="flex h-12 shrink-0 items-center justify-between gap-2 border-b border-hud-rule px-4">
           <span className="hud-sc text-[15px] font-bold tracking-[.1em] text-[var(--gold)]">
-            Швидкі дії DM
+            {t("panel.title")}
           </span>
           <button
             type="button"
             className="flex size-8 items-center justify-center text-[var(--hud-muted)] hover:text-[var(--ink)]"
             onClick={closePanel}
-            aria-label="Закрити"
+            aria-label={t("panel.close")}
           >
             <ChevronLeft className="size-5 rotate-180" />
           </button>
         </div>
 
         <div className="flex-1 space-y-2 overflow-y-auto p-4">
-          <QuickAction icon={ScrollText} label={dialogs.log.open ? "Лог битви відкрито нижче" : "Відкрити лог битви"} onClick={dialogs.log.show} />
+          <QuickAction icon={ScrollText} label={dialogs.log.open ? t("panel.logOpen") : t("panel.openLog")} onClick={dialogs.log.show} />
 
           {dialogs.log.open && <DmBattleLog onClose={() => dialogs.log.setOpen(false)} />}
 
-          <QuickAction icon={UserPlus} label="Додати героя / юніта" onClick={dialogs.addParticipant.show} closeAfter={closePanel} />
+          <QuickAction icon={UserPlus} label={t("panel.addParticipant")} onClick={dialogs.addParticipant.show} closeAfter={closePanel} />
 
-          <QuickAction icon={Sparkles} tone="text-[#8fd0e8]" label="Накласти заклинання" onClick={onOpenCastSpell} closeAfter={closePanel} />
+          <QuickAction icon={Sparkles} tone="text-[#8fd0e8]" label={t("panel.castSpell")} onClick={onOpenCastSpell} closeAfter={closePanel} />
 
           {isActive && (
-            <QuickAction icon={RefreshCw} label="Оновити з бібліотеки" disabled={refreshSources.isPending} onClick={refreshSources.run} />
+            <QuickAction icon={RefreshCw} label={t("panel.refreshSources")} disabled={refreshSources.isPending} onClick={refreshSources.run} />
           )}
 
           {isActive && (
             <QuickAction
               icon={Dices}
-              label="Роздати юнітів випадково"
+              label={t("panel.randomUnits")}
               disabled={!randomUnits.can || randomUnits.isPending}
-              title="Вільні союзні юніти (під ДМ) розподіляються між гравцями"
+              title={t("panel.randomUnitsHint")}
               onClick={randomUnits.run}
             />
           )}
 
           {canScale && (
-            <PanelSection title="Ворожі юніти (лише цей бій)" className="grid grid-cols-2 gap-2 pt-2">
-              <QuickAction icon={ChevronsUp} tone="text-hud-danger" label="Підсилити" title="HP і шкода ×1.1, стакається" onClick={() => actions.scaleUnits.mutate({ direction: "buff" })} />
-              <QuickAction icon={ChevronsDown} tone="text-hud-good" label="Послабити" title="HP і шкода ÷1.1, стакається" onClick={() => actions.scaleUnits.mutate({ direction: "debuff" })} />
+            <PanelSection title={t("panel.enemyUnits")} className="grid grid-cols-2 gap-2 pt-2">
+              <QuickAction icon={ChevronsUp} tone="text-hud-danger" label={t("panel.buff")} title={t("panel.buffHint")} onClick={() => actions.scaleUnits.mutate({ direction: "buff" })} />
+              <QuickAction icon={ChevronsDown} tone="text-hud-good" label={t("panel.debuff")} title={t("panel.debuffHint")} onClick={() => actions.scaleUnits.mutate({ direction: "debuff" })} />
             </PanelSection>
           )}
 
-          <PanelSection title="Учасники бою">
+          <PanelSection title={t("panel.participants")}>
             {participants.length === 0 ? (
-              <p className="py-2 text-sm italic text-[var(--hud-muted)]">Нікого на полі</p>
+              <p className="py-2 text-sm italic text-[var(--hud-muted)]">{t("panel.nobody")}</p>
             ) : (
               participants.map((p) => <DmParticipantRow key={p.basicInfo.id} participant={p} controlled={dmControl.id === p.basicInfo.id} actions={row} />)
             )}
@@ -171,7 +174,7 @@ export function DmQuickActionsPanel({ dialogs, onOpenCastSpell, panel }: DmQuick
               }}
             >
               <Trophy className="size-4" />
-              Завершити бій
+              {t("completeBattle")}
             </button>
           )}
         </div>
@@ -184,7 +187,7 @@ export function DmQuickActionsPanel({ dialogs, onOpenCastSpell, panel }: DmQuick
         <button
           type="button"
           className="fixed inset-0 z-30 bg-black/50 backdrop-blur-[1px]"
-          aria-label="Закрити"
+          aria-label={t("panel.close")}
           onClick={closePanel}
         />
       )}

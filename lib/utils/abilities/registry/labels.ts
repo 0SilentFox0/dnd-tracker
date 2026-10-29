@@ -1,8 +1,8 @@
 import { refMap } from "./text";
 
 import { textRef } from "@/lib/i18n/text-ref";
-import type { Amount } from "@/lib/utils/abilities/schema";
-import { ABILITY_TARGETS, CONDITION_5E_KEYS, CONDITION_KEYS, DAMAGE_FILTER_KINDS, type Flat, type Limits, STAT_KEYS } from "@/lib/utils/abilities/schema";
+import type { Amount, Flat, Limits } from "@/lib/utils/abilities/schema";
+import { ABILITY_TARGETS, CONDITION_5E_KEYS, CONDITION_KEYS, DAMAGE_FILTER_KINDS, STAT_KEYS } from "@/lib/utils/abilities/schema/kinds";
 import { signed } from "@/lib/utils/common/format";
 import type { LogLine, TextArg } from "@/types/text";
 

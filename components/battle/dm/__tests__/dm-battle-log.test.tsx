@@ -3,10 +3,12 @@ import { cleanup, screen } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
 import { DmBattleLog } from "@/components/battle/dm/DmBattleLog";
-import { renderWithConfirm } from "@/components/ui/__tests__/render-with-confirm";
 import { BATTLE_SNAPSHOTS_KEPT_AFTER_COMPLETE } from "@/lib/constants/battle";
+import { renderWithConfirm } from "@/lib/i18n/test/render-uk";
 import type { BattleScene } from "@/types/api";
 import type { BattleAction } from "@/types/battle";
+
+vi.unmock("next-intl");
 
 const scene = vi.hoisted(() => ({ battle: null as unknown }));
 

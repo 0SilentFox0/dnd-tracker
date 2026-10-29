@@ -6,8 +6,7 @@ import { useBattleScene } from "./useBattleScene";
 import { useSendCoreAction } from "./useCoreActions";
 
 import { useSpellsByIds } from "@/lib/hooks/spells";
-import { formatText } from "@/lib/i18n/text-ref";
-import { useTranslator } from "@/lib/i18n/use-translator";
+import { textRef } from "@/lib/i18n/text-ref";
 import { isAttackable } from "@/lib/utils/abilities/engine/core/participants";
 import { cooldownLeft, withinCountLimits } from "@/lib/utils/abilities/engine/core/usage";
 import { lairAbilities, lairBlocker } from "@/lib/utils/battle/actions/lair";
@@ -42,8 +41,6 @@ export function useLegendaryAction(participant: BattleParticipant) {
 
   const spells = useSpellsByIds(campaignId, spellIds);
 
-  const t = useTranslator();
-
   const choices = useMemo<LegendaryChoice[]>(() => {
     const field = (order ?? []).filter((p) => !p.battleData.reserved);
 
@@ -64,13 +61,13 @@ export function useLegendaryAction(participant: BattleParticipant) {
 
       const label = perform ? `${a.name} → ${perform.kind === "attack" ? perform.attack : spells.data?.find((s) => s.id === perform.spellId)?.name ?? perform.spellId}` : a.name;
 
-      const blocked = (a.limits?.lair ? lairBlocker(participant, battle.currentRound, a.key) : legendaryBlocker(participant, current, cost)) ?? (!withinCountLimits(participant, a) ? "Ліміт використань вичерпано" : cooldownLeft(participant, a, battle.currentRound) > 0 ? `Перезарядка: ще ${cooldownLeft(participant, a, battle.currentRound)} р.` : perform?.kind === "attack" && !attack ? "Атаку вміння не знайдено" : null);
+      const blocked = (a.limits?.lair ? lairBlocker(participant, battle.currentRound, a.key) : legendaryBlocker(participant, current, cost)) ?? (!withinCountLimits(participant, a) ? textRef("battleDm.legendary.limitReached") : cooldownLeft(participant, a, battle.currentRound) > 0 ? textRef("battleDm.legendary.cooldown", { rounds: cooldownLeft(participant, a, battle.currentRound) }) : perform?.kind === "attack" && !attack ? textRef("battleDm.legendary.attackMissing") : null);
 
       return { id: `ability:${a.key}`, kind: a.limits?.lair ? "lair" : "ability", label, cost, abilityKey: a.key, ...(perform?.kind === "spell" && { spellId: perform.spellId }), needsTarget: perform?.kind === "spell" ? false : perform?.kind === "attack" ? true : needsBonusTarget(a), maxTargets: perform?.kind === "attack" ? 1 : abilityMaxTargets(a), candidates: perform?.kind === "attack" ? enemies.filter(isAttackable) : bonusTargetCandidates(a, allies, enemies, participant), blocked };
     });
 
-    return [...attacks, ...abilities].map((c) => (c.blocked ? { ...c, blocked: formatText(t, c.blocked) } : c));
-  }, [order, participant, current, spells.data, battle.currentRound, t]);
+    return [...attacks, ...abilities];
+  }, [order, participant, current, spells.data, battle.currentRound]);
 
   const { send, isPending } = useSendCoreAction();
 

@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import { Crown, Heart, LogIn, ShieldAlert, Skull, Trash2 } from "lucide-react";
 
 import { SideDot } from "@/components/battle/hud";
@@ -14,12 +15,12 @@ import { hasLegendaryActions, legendaryBadge } from "@/lib/utils/battle/actions/
 import { mult } from "@/lib/utils/common/format";
 import type { BattleParticipant } from "@/types/battle";
 
-function scaleLabel({ battleData }: BattleParticipant): string | null {
+function scaleLabel({ battleData }: BattleParticipant, t: ReturnType<typeof useTranslations<"battleDm.row">>): string | null {
   const parts = [battleData.hpMultiplier, battleData.damageMultiplier].map((m) => (m !== undefined && m !== 1 ? m : null));
 
   if (parts[0] === null && parts[1] === null) return null;
 
-  return [parts[0] !== null && `${mult(parts[0])} HP`, parts[1] !== null && `${mult(parts[1])} шкода`].filter(Boolean).join(" · ");
+  return [parts[0] !== null && t("scaleHp", { value: mult(parts[0]) }), parts[1] !== null && t("scaleDamage", { value: mult(parts[1]) })].filter(Boolean).join(" · ");
 }
 
 const ICON = "flex size-8 items-center justify-center border border-transparent bg-black/40 transition-colors";
@@ -33,11 +34,15 @@ interface DmParticipantRowProps {
 export function DmParticipantRow({ participant, controlled, actions }: DmParticipantRowProps) {
   const { onChangeHp, onTakeControl, onRemove, onKill, onConditions, onLegendary, onToggleLair, conditionsEnabled, onDone, unitControl } = actions;
 
+  const t = useTranslations("battleDm.row");
+
+  const tCommon = useTranslations("common.actions");
+
   const confirm = useConfirm();
 
   const close = () => onDone?.();
 
-  const label = scaleLabel(participant);
+  const label = scaleLabel(participant, t);
 
   const canKill = onKill && participant.basicInfo.sourceType === ParticipantSourceType.UNIT && participant.combatStats.status !== CombatStatus.DEAD;
 
@@ -51,6 +56,8 @@ export function DmParticipantRow({ participant, controlled, actions }: DmPartici
 
   const canConditions = onConditions && conditionsEnabled;
 
+  const legendaryLabel = t("legendary", { left: legendary?.actionsLeft ?? 0, max: legendary?.actions ?? 0 });
+
   return (
     <div className={cn("flex min-h-10 items-center gap-2 border-b border-white/[.08] py-1", controlled && "bg-[var(--gold)]/[.08]")}>
       <SideDot side={participant.basicInfo.side} />
@@ -60,7 +67,7 @@ export function DmParticipantRow({ participant, controlled, actions }: DmPartici
         {badge && <div className="truncate text-xs text-[var(--hud-muted)]" data-testid="legendary-badge">{text(badge)}</div>}
         {unitControl?.isAssignable(participant) && (
           <label className="flex items-center gap-1.5 pt-1 text-xs text-[var(--hud-muted)]">
-            Керує:
+            {t("controls")}
             <SelectField value={unitControl.valueOf(participant)} options={unitControl.options} onValueChange={(v) => unitControl.assign(participant, v)} triggerClassName="h-7 text-xs" />
           </label>
         )}
@@ -69,7 +76,7 @@ export function DmParticipantRow({ participant, controlled, actions }: DmPartici
         <button
           type="button"
           className={cn(ICON, "text-hud-good hover:border-hud-good/40")}
-          title="Змінити HP"
+          title={t("changeHp")}
           onClick={() => {
             onChangeHp(participant);
             close();
@@ -80,7 +87,7 @@ export function DmParticipantRow({ participant, controlled, actions }: DmPartici
         <button
           type="button"
           className={cn(ICON, "text-[var(--gold)] hover:border-[var(--gold)]/40", controlled && "border-[var(--gold)]/60")}
-          title={controlled ? "Відпустити керування" : "Взяти керування"}
+          title={controlled ? t("releaseControl") : t("takeControl")}
           onClick={() => {
             onTakeControl(controlled ? null : participant);
             close();
@@ -88,14 +95,14 @@ export function DmParticipantRow({ participant, controlled, actions }: DmPartici
         >
           <LogIn className="size-3.5" />
         </button>
-        {hasLair && onToggleLair && <button type="button" className={cn(ICON, participant.battleData.lair?.active && "text-hud-gold-bright")} aria-label={participant.battleData.lair?.active ? "Вимкнути лігво" : "Увімкнути лігво"} title={participant.battleData.lair?.active ? "У лігві" : "Поза лігвом"} aria-pressed={!!participant.battleData.lair?.active} onClick={() => onToggleLair(participant)}>🏰</button>}
+        {hasLair && onToggleLair && <button type="button" className={cn(ICON, participant.battleData.lair?.active && "text-hud-gold-bright")} aria-label={participant.battleData.lair?.active ? t("lairOff") : t("lairOn")} title={participant.battleData.lair?.active ? t("inLair") : t("outLair")} aria-pressed={!!participant.battleData.lair?.active} onClick={() => onToggleLair(participant)}>🏰</button>}
         {(legendary || hasLair && onLegendary) && (
-          <button type="button" className={cn(ICON, "text-[var(--gold)] hover:border-[var(--gold)]/40")} title={`Легендарна дія (${legendary?.actionsLeft ?? 0}/${legendary?.actions ?? 0})`} aria-label={`Легендарна дія (${legendary?.actionsLeft ?? 0}/${legendary?.actions ?? 0})`} onClick={() => onLegendary?.(participant)}>
+          <button type="button" className={cn(ICON, "text-[var(--gold)] hover:border-[var(--gold)]/40")} title={legendaryLabel} aria-label={legendaryLabel} onClick={() => onLegendary?.(participant)}>
             <Crown className="size-3.5" />
           </button>
         )}
         {canConditions && (
-          <button type="button" className={cn(ICON, "text-[#8fd0e8] hover:border-[#8fd0e8]/40")} title="Стани" onClick={() => onConditions(participant)}>
+          <button type="button" className={cn(ICON, "text-[#8fd0e8] hover:border-[#8fd0e8]/40")} title={t("conditions")} onClick={() => onConditions(participant)}>
             <ShieldAlert className="size-3.5" />
           </button>
         )}
@@ -103,9 +110,9 @@ export function DmParticipantRow({ participant, controlled, actions }: DmPartici
           <button
             type="button"
             className={cn(ICON, "text-hud-danger hover:border-hud-danger/40")}
-            title="Вбити"
+            title={t("kill")}
             onClick={async () => {
-              if (await confirm({ title: "Вбити " + participant.basicInfo.name + "?", confirmLabel: "Вбити", destructive: true })) {
+              if (await confirm({ title: t("killConfirm", { name: participant.basicInfo.name }), confirmLabel: t("kill"), destructive: true })) {
                 onKill(participant);
                 close();
               }
@@ -117,9 +124,9 @@ export function DmParticipantRow({ participant, controlled, actions }: DmPartici
         <button
           type="button"
           className={cn(ICON, "text-hud-danger hover:border-hud-danger/40")}
-          title="Видалити з бою"
+          title={t("remove")}
           onClick={async () => {
-            if (await confirm({ title: "Видалити " + participant.basicInfo.name + " з бою?", confirmLabel: "Видалити", destructive: true })) {
+            if (await confirm({ title: t("removeConfirm", { name: participant.basicInfo.name }), confirmLabel: tCommon("delete"), destructive: true })) {
               onRemove(participant);
               close();
             }

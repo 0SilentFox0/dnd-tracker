@@ -1,12 +1,15 @@
 // @vitest-environment happy-dom
-import { cleanup, fireEvent, render, screen } from "@testing-library/react";
+import { cleanup, fireEvent, screen } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
 vi.mock("@/components/hud/fonts", () => ({ hudFontClassName: "", HUD_SURFACE: "hud-surface" }));
 
 import { ConditionsDialog } from "@/components/battle/dm/ConditionsDialog";
+import { render } from "@/lib/i18n/test/render-uk";
 import { hero } from "@/lib/server/battles/__tests__/mutations/fixtures";
 import { applyCondition5e,CONDITION_5E_KEYS } from "@/lib/utils/battle/conditions";
+
+vi.unmock("next-intl");
 
 afterEach(cleanup);
 

@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useMemo } from "react";
+import { useTranslations } from "next-intl";
 
 import { type MazeEdgeStroke, useMazeEdgeStroke } from "./useMazeEdgeStroke";
 import { IDLE_MAZE_TOOL, type MazeGenerateInput, type MazeTool, useMazeToolState } from "./useMazeToolState";
@@ -61,6 +62,8 @@ export function useMazeTools(): MazeTools | null {
 
   const notify = useNotify();
 
+  const t = useTranslations();
+
   const maze: MazeConfig | null = battle.map?.maze ?? null;
 
   const grid = useMemo(() => ({ cols: battle.map?.cols ?? 0, rows: battle.map?.rows ?? 0 }), [battle.map?.cols, battle.map?.rows]);
@@ -86,7 +89,7 @@ export function useMazeTools(): MazeTools | null {
         walls: () => undefined,
         exit: () => {
           if (!isEdgeCell(grid, p)) {
-            void notify(MAZE_TEXTS.exitOnEdge);
+            void notify(t(MAZE_TEXTS.exitOnEdge));
 
             return;
           }
@@ -127,7 +130,7 @@ export function useMazeTools(): MazeTools | null {
 
       handlers[state.tool]();
     },
-    [maze, grid, state, notify, send, setTool, patch, addParticipant],
+    [maze, grid, state, notify, t, send, setTool, patch, addParticipant],
   );
 
   const generate = useCallback(

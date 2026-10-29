@@ -1,6 +1,6 @@
 // @vitest-environment happy-dom
 import { type ReactNode, useContext } from "react";
-import { cleanup, render, renderHook, screen } from "@testing-library/react";
+import { cleanup, renderHook, screen } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
 import { MazeViewProvider } from "../MazeViewProvider";
@@ -11,7 +11,9 @@ import { BattleSceneContext, BattleSceneDataContext, ModeViewContext, useModeVie
 import { fakeScene } from "@/lib/hooks/battle/__tests__/fake-scene";
 import { useAttackWizard } from "@/lib/hooks/battle/useAttackWizard";
 import { useBattleSceneData } from "@/lib/hooks/battle/useBattleScene";
+import { render } from "@/lib/i18n/test/render-uk";
 import { testMap } from "@/lib/utils/battle/__tests__/fixtures/placed";
+import { MAZE_UNKNOWN_NAME } from "@/lib/utils/battle/modes/maze";
 import { mazeMap } from "@/lib/utils/battle/modes/maze/__tests__/fixtures";
 import type { BattleAction } from "@/types/battle";
 
@@ -50,7 +52,7 @@ describe("маска лабіринту для гравця під MazeViewProvi
 
     expect(result.current.roster.enemies).toEqual([]);
     expect(result.current.roster.allies.map((p) => p.basicInfo.id)).toEqual(["me"]);
-    expect(result.current.turn.current?.basicInfo.name).toBe("невідомий");
+    expect(result.current.turn.current?.basicInfo.name).toBe(MAZE_UNKNOWN_NAME);
     expect(result.current.battle.battleLog.map((e) => e.targets.map((t) => t.participantId).join())).toEqual(["", "me"]);
   });
 
