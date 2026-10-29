@@ -1,3 +1,4 @@
+/* eslint-disable no-restricted-syntax -- className is written to the DB (content in the author's locale); name: TODO(i18n-part6 task 11) */
 export const HERO_ARCHETYPE_KEYS = ["warrior", "paladin", "ranger", "rogue", "mage"] as const;
 
 export type HeroArchetypeKey = (typeof HERO_ARCHETYPE_KEYS)[number];
@@ -25,8 +26,3 @@ const ARCHETYPES: Record<HeroArchetypeKey, HeroArchetype> = {
 export function heroArchetype(key: string | null | undefined): HeroArchetype {
   return (HERO_ARCHETYPE_KEYS as readonly string[]).includes(key ?? "") ? ARCHETYPES[key as HeroArchetypeKey] : UNIVERSAL;
 }
-
-export const HERO_ARCHETYPE_OPTIONS: { value: string; label: string }[] = [
-  { value: "", label: UNIVERSAL.name },
-  ...HERO_ARCHETYPE_KEYS.map((k) => ({ value: k, label: ARCHETYPES[k].name })),
-];

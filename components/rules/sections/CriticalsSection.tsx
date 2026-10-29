@@ -13,18 +13,21 @@ import { toggleItem } from "@/lib/utils/common/collections";
 
 type Criticals = RulesFormState["data"]["criticals"];
 
-const DOUBLE_DAMAGE_NAME = CRITICAL_SUCCESS_EFFECTS.find((e) => e.effect.type === "double_damage")?.name;
+const DOUBLE_DAMAGE_ID = CRITICAL_SUCCESS_EFFECTS.find((e) => e.effect.type === "double_damage")?.id;
 
 interface EffectListProps {
   title: string;
   prefix: string;
+  kind: "success" | "fail";
   effects: CriticalEffect[];
   disabled: string[];
   locked: boolean;
   onChange: (disabled: string[]) => void;
 }
 
-function EffectList({ title, prefix, effects, disabled, locked, onChange }: EffectListProps) {
+function EffectList({ title, prefix, kind, effects, disabled, locked, onChange }: EffectListProps) {
+  const tTerms = useTranslations("battleTerms");
+
   const toggle = (id: string) => onChange(toggleItem(disabled, id));
 
   return (
@@ -38,7 +41,7 @@ function EffectList({ title, prefix, effects, disabled, locked, onChange }: Effe
           return (
             <div key={id} className="flex items-center gap-2">
               <Checkbox id={htmlId} checked={!disabled.includes(id)} disabled={locked} onCheckedChange={() => toggle(id)} />
-              <Label htmlFor={htmlId}>{effect.name}</Label>
+              <Label htmlFor={htmlId}>{tTerms(`crits.attack.${kind}.${effect.id}.name`)}</Label>
             </div>
           );
         })}
@@ -49,6 +52,8 @@ function EffectList({ title, prefix, effects, disabled, locked, onChange }: Effe
 
 export function CriticalsSection({ form }: { form: RulesFormState }) {
   const t = useTranslations("rules");
+
+  const tTerms = useTranslations("battleTerms");
 
   const c = form.data.criticals;
 
@@ -63,13 +68,13 @@ export function CriticalsSection({ form }: { form: RulesFormState }) {
         </div>
         <SwitchField id="rules-crit-effects" label={t("sections.criticals.effects")} checked={c.effects} onCheckedChange={(effects) => set({ effects })} className="mt-3" />
         <p className="mt-2 text-xs text-hud-muted">
-          {t("sections.criticals.effectsHint", { name: DOUBLE_DAMAGE_NAME ?? "" })}
+          {t("sections.criticals.effectsHint", { name: DOUBLE_DAMAGE_ID === undefined ? "" : tTerms(`crits.attack.success.${DOUBLE_DAMAGE_ID}.name`) })}
         </p>
         <SwitchField id="rules-crit-double-dice" label={t("sections.criticals.doubleDice")} checked={c.doubleDice} onCheckedChange={(doubleDice) => set({ doubleDice })} className="mt-3" />
         <p className="mt-2 text-xs text-hud-muted">{t("sections.criticals.doubleDiceHint")}</p>
       </RulesSection>
-      <EffectList title={t("sections.criticals.successTitle")} prefix="rules-crit-success" effects={CRITICAL_SUCCESS_EFFECTS} disabled={c.disabledSuccess} locked={!c.effects} onChange={(disabledSuccess) => set({ disabledSuccess })} />
-      <EffectList title={t("sections.criticals.failTitle")} prefix="rules-crit-fail" effects={CRITICAL_FAIL_EFFECTS} disabled={c.disabledFail} locked={!c.effects} onChange={(disabledFail) => set({ disabledFail })} />
+      <EffectList title={t("sections.criticals.successTitle")} prefix="rules-crit-success" kind="success" effects={CRITICAL_SUCCESS_EFFECTS} disabled={c.disabledSuccess} locked={!c.effects} onChange={(disabledSuccess) => set({ disabledSuccess })} />
+      <EffectList title={t("sections.criticals.failTitle")} prefix="rules-crit-fail" kind="fail" effects={CRITICAL_FAIL_EFFECTS} disabled={c.disabledFail} locked={!c.effects} onChange={(disabledFail) => set({ disabledFail })} />
     </>
   );
 }

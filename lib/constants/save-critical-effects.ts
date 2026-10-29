@@ -1,3 +1,4 @@
+/* eslint-disable no-restricted-syntax -- TODO(i18n-part6 task 11): uk labels stay until their consumers in tasks 2-9 read keys */
 import type { CriticalEffect } from "@/lib/constants/critical-effects";
 
 /** Нат. 20 на рятівному кидку цілі; `{attacker}` — кастер, `{target}` — ціль, що кидала. */
@@ -11,6 +12,7 @@ export const SAVE_SUCCESS_EFFECTS: CriticalEffect[] = [
       "{target} пірнає під хвилю магії — заклинання {attacker} не лишає й подряпини.",
       "{target} вислизає з-під удару так легко, ніби {attacker} цілив у тінь.",
     ],
+    flavorCount: 2,
     effect: { type: "negate_damage", target: "target" },
   },
   {
@@ -22,6 +24,7 @@ export const SAVE_SUCCESS_EFFECTS: CriticalEffect[] = [
       "{target} ловить ритм чарів {attacker} — наступний удар буде влучнішим.",
       "Магія {attacker} ковзає повз, а {target} уже примічає слабке місце ворога.",
     ],
+    flavorCount: 2,
     effect: { type: "advantage_next_attack", duration: 2, target: "target" },
   },
   {
@@ -33,6 +36,7 @@ export const SAVE_SUCCESS_EFFECTS: CriticalEffect[] = [
       "{target} розвіює чари {attacker} і вже готує контратаку, поки той не опам'ятався!",
       "Заклинання {attacker} розсипається іскрами — {target} збирається з силами для контратаки.",
     ],
+    flavorCount: 2,
     effect: { type: "extra_action", target: "target" },
   },
   {
@@ -44,6 +48,7 @@ export const SAVE_SUCCESS_EFFECTS: CriticalEffect[] = [
       "Магія {attacker} загартовує {target}: шкіра твердне, як камінь.",
       "{target} відбиває чари {attacker} і відчуває, як силует вкриває невидимий щит.",
     ],
+    flavorCount: 2,
     effect: { type: "ac_buff", value: 2, duration: 1, target: "target" },
   },
   {
@@ -55,6 +60,7 @@ export const SAVE_SUCCESS_EFFECTS: CriticalEffect[] = [
       "{target} струшує чари {attacker}, мов краплі дощу — жодна хвороба не чіпляється.",
       "Розум {target} чистий, мов джерело: накладання {attacker} розсіюється без сліду.",
     ],
+    flavorCount: 2,
     effect: { type: "negate_effects", target: "target" },
   },
   {
@@ -66,6 +72,7 @@ export const SAVE_SUCCESS_EFFECTS: CriticalEffect[] = [
       "{target} пережив чари {attacker} і відчуває несподіваний приплив сил.",
       "Удар магії {attacker} лише розганяє кров {target} — час ніби уповільнюється.",
     ],
+    flavorCount: 2,
     effect: { type: "extra_action", target: "target" },
   },
 ];
@@ -81,6 +88,7 @@ export const SAVE_FAIL_EFFECTS: CriticalEffect[] = [
       "{target} підставляється під самісіньке вістря чарів {attacker} — біль подвійний!",
       "Магія {attacker} вдаряє в {target} з подвоєною силою.",
     ],
+    flavorCount: 2,
     effect: { type: "double_damage", value: 2, target: "target" },
   },
   {
@@ -92,6 +100,7 @@ export const SAVE_FAIL_EFFECTS: CriticalEffect[] = [
       "Хвиля чарів {attacker} збиває {target} з ніг.",
       "{target} втрачає рівновагу під натиском магії {attacker} і падає ниць.",
     ],
+    flavorCount: 2,
     effect: { type: "prone", duration: 2, target: "target" },
   },
   {
@@ -103,6 +112,7 @@ export const SAVE_FAIL_EFFECTS: CriticalEffect[] = [
       "Чари {attacker} затуманюють погляд {target} — наступний удар піде наосліп.",
       "{target} спантеличений магією {attacker}: рука тремтить, ціль пливе перед очима.",
     ],
+    flavorCount: 2,
     effect: { type: "disadvantage_next_attack", duration: 2, target: "target" },
   },
   {
@@ -114,6 +124,7 @@ export const SAVE_FAIL_EFFECTS: CriticalEffect[] = [
       "Магія {attacker} розхитує оборону {target} — у броні з'являється щілина.",
       "{target} розкривається під чарами {attacker}: захист ледь тримається.",
     ],
+    flavorCount: 2,
     effect: { type: "ac_debuff", value: -2, duration: 1, target: "target" },
   },
   {
@@ -125,6 +136,7 @@ export const SAVE_FAIL_EFFECTS: CriticalEffect[] = [
       "{target} заціпеніває від чарів {attacker} і не встигає відреагувати.",
       "Магія {attacker} оглушує {target} — відповісти на удар не вийде.",
     ],
+    flavorCount: 2,
     effect: { type: "lose_reaction", duration: 1, target: "target" },
   },
   {
@@ -136,6 +148,7 @@ export const SAVE_FAIL_EFFECTS: CriticalEffect[] = [
       "Заклинання {attacker} виснажує {target} — на дрібні маневри сил немає.",
       "{target} хапається за голову: чари {attacker} вибили з пам'яті всі хитрощі.",
     ],
+    flavorCount: 2,
     effect: { type: "block_bonus_action", duration: 1, target: "target" },
   },
 ];

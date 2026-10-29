@@ -1,3 +1,4 @@
+/* eslint-disable no-restricted-syntax -- TODO(i18n-part6 task 11): uk labels stay until their consumers in tasks 2-9 read keys */
 export const ABILITY_KEYS = ["strength", "dexterity", "constitution", "intelligence", "wisdom", "charisma"] as const;
 
 export const ABILITY_SCORE_CAP = 20;

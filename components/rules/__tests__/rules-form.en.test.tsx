@@ -25,7 +25,7 @@ describe("RulesForm (en)", () => {
       <ConfirmProvider>
         <RulesForm campaignId="c1" />
       </ConfirmProvider>,
-      { locale: "en", namespaces: ["common", "validation", "rules"] },
+      { locale: "en", namespaces: ["common", "validation", "rules", "battleTerms"] },
     );
 
     expect(screen.getByLabelText("Cap ±N")).toBeTruthy();

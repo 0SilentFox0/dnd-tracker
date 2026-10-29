@@ -1,3 +1,4 @@
+/* eslint-disable no-restricted-syntax -- data: uk labels matched when importing content */
 export const MAIN_SKILL_ROLES = ["attack", "ranged", "defense", "magic", "leadership", "race", "ultimate", "personal"] as const;
 
 export type MainSkillRole = (typeof MAIN_SKILL_ROLES)[number];

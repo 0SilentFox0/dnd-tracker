@@ -1,3 +1,4 @@
+/* eslint-disable no-restricted-syntax -- TODO(i18n-part6 task 11): uk labels stay until their consumers in tasks 2-9 read keys */
 import type { BattleMapConfig } from "@/types/battle";
 
 export const CONDITION_LIMITS = { rounds: 99, dc: 40 } as const;
@@ -41,8 +42,6 @@ export const BattleStatus = {
 } as const;
 
 export type BattleStatus = (typeof BattleStatus)[keyof typeof BattleStatus];
-
-export const BATTLE_STATUS_LABEL: Record<BattleStatus, string> = { [BattleStatus.PREPARED]: "підготовлений", [BattleStatus.ACTIVE]: "йде", [BattleStatus.COMPLETED]: "завершений" };
 
 export const DM_ACTOR = { actorId: "dm", actorName: "DM", actorSide: ParticipantSide.ALLY } as const;
 

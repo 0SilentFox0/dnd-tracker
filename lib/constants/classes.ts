@@ -1,3 +1,4 @@
+/* eslint-disable no-restricted-syntax -- data: uk labels matched when importing content */
 import type { HitDie } from "@/types/classes";
 
 export const HIT_DICE: readonly HitDie[] = [6, 8, 10, 12];
