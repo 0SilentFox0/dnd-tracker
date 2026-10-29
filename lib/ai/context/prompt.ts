@@ -17,7 +17,7 @@ import type { AssistantCaller } from "@/lib/server/assistant/types";
 import { ContentError } from "@/lib/server/content/errors";
 import { parseRules } from "@/lib/utils/rules/schema";
 import { pickLiveSection } from "@/lib/utils/scenario/structure";
-import type { AiFocus, AssistantContextDisclosure } from "@/types/ai";
+import type { AiFocus, AssistantContextDisclosure, ContextBlockId } from "@/types/ai";
 import type { ScenarioContent } from "@/types/scenario";
 
 const MODE_RULES: Record<AiThreadMode, string> = {
@@ -78,7 +78,7 @@ export async function buildInstructions({ campaignId, mode, pageId, focus, calle
     { id: "system", label: "System", text: role, required: true },
     { id: "campaignName", label: "Campaign name (data)", value: campaign.name, required: true },
     { id: "policy", label: "Current server execution policy", value: { executionMode: policy.executionMode, humanConfirmation: "server-only", paid: "always-human" }, required: true },
-    ...(standing ? [{ id: "standing", label: "Standing DM instructions for this campaign (style; server policy takes priority)", text: standing, required: true }] : []),
+    ...(standing ? [{ id: "standing" as const, label: "Standing DM instructions for this campaign (style; server policy takes priority)", text: standing, required: true }] : []),
     { id: "mode", label: "Mode", text: MODE_RULES[mode], required: true },
     { id: "capabilities", label: "Capabilities", text: "Single catalog: assistant_capabilities / assistant_schema; assistant_read for reading, assistant_action for preview/review/auto per server policy, assistant_status for status. Do not bypass unavailable actions with legacy aliases.", required: true },
     { id: "domains", label: "Available catalog domains", value: domains, required: true },
@@ -100,9 +100,9 @@ export async function buildInstructions({ campaignId, mode, pageId, focus, calle
     ...fixed,
     { id: "campaign", label: "Campaign (data)", maxChars: 3000, value: { name: campaign.name, description: campaign.description } },
     { id: "party", label: "Party (first 20; the rest via get_party)", maxChars: 4000, value: { items: party.map(({ id, name, level, class: cls, race, armorClass }) => ({ id, name, level, class: cls, race, armorClass })), truncated: party.length === 20, nextOffset: party.length === 20 ? 20 : null } },
-    ...(mode === "live" ? [{ id: "rules", label: "Current rules snapshot (data; full rules via tool)", maxChars: 6000, value: parseRules(focused?.kind === "battle" && focused.battle.status !== BattleStatus.PREPARED ? focused.battle.rules ?? {} : campaign.rules) }] : []),
-    ...(show ? [{ id: "show", label: "Show (data)", maxChars: 1500, text: show }] : []),
-    ...(notes ? [{ id: "notes", label: "Explicitly selected source notes (data)", maxChars: 16500, value: notes.data }] : []),
+    ...(mode === "live" ? [{ id: "rules" as const, label: "Current rules snapshot (data; full rules via tool)", maxChars: 6000, value: parseRules(focused?.kind === "battle" && focused.battle.status !== BattleStatus.PREPARED ? focused.battle.rules ?? {} : campaign.rules) }] : []),
+    ...(show ? [{ id: "show" as const, label: "Show (data)", maxChars: 1500, text: show }] : []),
+    ...(notes ? [{ id: "notes" as const, label: "Explicitly selected source notes (data)", maxChars: 16500, value: notes.data }] : []),
   ];
 
   if (focused?.kind === "unavailable") blocks.push({ id: "focusUnavailable", label: "Focus", text: "Focus unavailable: the entity was deleted or does not belong to an accessible campaign. Choose another focus.", required: true });
@@ -114,7 +114,7 @@ export async function buildInstructions({ campaignId, mode, pageId, focus, calle
     blocks.push({ id: "focusPage", label: `DM focus: page ${page.id}${selected.sectionId ? `, section ${selected.sectionId}` : ""}${selected.rowIds?.length ? `, rows ${selected.rowIds.join(", ")}` : ""} (data)`, text: mode === "live" ? liveScene(page.title, content) : contentToMarkdown(page.title, content) });
   } else if (focused) blocks.push({ id: "focus", label: "DM focus (data)", value: focused.kind === "battle" ? { kind: "battle", battle: { id: focused.battle.id, name: focused.battle.name, status: focused.battle.status, currentRound: focused.battle.currentRound, currentTurnIndex: focused.battle.currentTurnIndex, version: focused.battle.version } } : focused });
 
-  let blockIds: string[] = [];
+  let blockIds: ContextBlockId[] = [];
 
   const fitted = fitContext(blocks, AI_LIMITS.contextChars, blockIds);
 

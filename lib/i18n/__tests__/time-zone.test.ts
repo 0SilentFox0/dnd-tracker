@@ -34,6 +34,12 @@ describe("time zone", () => {
     expect(await getRequestTimeZone()).toBe("America/New_York");
   });
 
+  it("falls back to the app zone for a malformed percent-encoding", async () => {
+    cookieValue.current = "%";
+
+    expect(await getRequestTimeZone()).toBe(APP_TIME_ZONE);
+  });
+
   it("falls back to the app zone for an invalid or missing cookie", async () => {
     cookieValue.current = "garbage";
 

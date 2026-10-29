@@ -9,5 +9,9 @@ export async function getRequestTimeZone(): Promise<string> {
 
   const raw = cookieStore.get(TZ_COOKIE)?.value;
 
-  return resolveTimeZone(raw && decodeURIComponent(raw));
+  try {
+    return resolveTimeZone(raw && decodeURIComponent(raw));
+  } catch {
+    return resolveTimeZone(undefined);
+  }
 }

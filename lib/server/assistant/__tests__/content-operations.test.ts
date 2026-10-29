@@ -85,13 +85,13 @@ describe("shared CONTENT_OPERATIONS adapters", () => {
   it("import preconditions are identical for preparers in different locales", async () => {
     const { actions } = fixture();
 
-    const action = actions.find((a) => a.id === "content.import");
+    const action = actions.find((a) => a.id === "content.import") as Extract<(typeof actions)[number], { prepare: unknown }>;
 
     const input = { kind: "units", body: { rows: [{ name: "Гоблін" }] } };
 
-    const uk = await action?.prepare(caller, input as never);
+    const uk = await action.prepare(caller, input as never);
 
-    const en = await action?.prepare({ ...caller, locale: "en" }, input as never);
+    const en = await action.prepare({ ...caller, locale: "en" }, input as never);
 
     expect(uk?.preconditions).toEqual(en?.preconditions);
   });

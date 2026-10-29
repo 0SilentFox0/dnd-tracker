@@ -70,12 +70,22 @@ function matchEnum(field: ImportField, raw: string): string | null {
   return null;
 }
 
-const enumHint = (field: ImportField) => (field.enumValues ?? []).map((v) => field.enumLabels?.[v]?.[0] ?? v).join(", ");
+const LATIN_ONLY = /^[\x20-\x7e]+$/;
+
+// the message of each locale picks its own param: `options` (first accepted label) or `optionsEn` (first Latin label, else the value)
+const enumHint = (field: ImportField) => {
+  const values = field.enumValues ?? [];
+
+  return {
+    options: values.map((v) => field.enumLabels?.[v]?.[0] ?? v).join(", "),
+    optionsEn: values.map((v) => field.enumLabels?.[v]?.find((l) => LATIN_ONLY.test(l)) ?? v).join(", "),
+  };
+};
 
 function parseEnum(field: ImportField, raw: unknown): ParsedValue {
   const value = matchEnum(field, String(raw));
 
-  return value ? { value } : { issue: detail("enumUnknown", { got: String(raw), options: enumHint(field) }) };
+  return value ? { value } : { issue: detail("enumUnknown", { got: String(raw), ...enumHint(field) }) };
 }
 
 export function splitList(s: string): string[] {
@@ -102,7 +112,7 @@ function parseList(field: ImportField, raw: unknown): ParsedValue {
     else bad.push(item);
   }
 
-  return bad.length > 0 ? { issue: detail("listUnknown", { got: bad.join(", "), options: enumHint(field) }) } : { value: out };
+  return bad.length > 0 ? { issue: detail("listUnknown", { got: bad.join(", "), ...enumHint(field) }) } : { value: out };
 }
 
 const DICE = /^\d*d\d+([+-]\d+)?$/;

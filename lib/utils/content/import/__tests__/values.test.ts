@@ -41,7 +41,7 @@ describe("parseFieldValue", () => {
   it("enum — значення або підпис без регістру; невідоме — помилка з переліком підписів", () => {
     expect(parseFieldValue(ENUM, "бонусна ДІЯ")).toEqual({ value: "bonusAction" });
     expect(parseFieldValue(ENUM, "action")).toEqual({ value: "action" });
-    expect(parseFieldValue(ENUM, "реакція").issue).toEqual({ message: "contentImport.details.enumUnknown", params: { got: "реакція", options: "Дія, Бонусна дія" } });
+    expect(parseFieldValue(ENUM, "реакція").issue).toEqual({ message: "contentImport.details.enumUnknown", params: { got: "реакція", options: "Дія, Бонусна дія", optionsEn: "action, bonusAction" } });
   });
 
   it("list — роздільники | ; , і масив; enum-список перевіряє кожен елемент", () => {
@@ -50,7 +50,7 @@ describe("parseFieldValue", () => {
     expect(parseFieldValue(f("refList"), "a, b")).toEqual({ value: ["a", "b"] });
     expect(parseFieldValue(f("list"), [" a ", ""])).toEqual({ value: ["a"] });
     expect(parseFieldValue({ ...ENUM, type: "list" }, "Дія, bonusAction")).toEqual({ value: ["action", "bonusAction"] });
-    expect(parseFieldValue({ ...ENUM, type: "list" }, "Дія, політ").issue).toEqual({ message: "contentImport.details.listUnknown", params: { got: "політ", options: "Дія, Бонусна дія" } });
+    expect(parseFieldValue({ ...ENUM, type: "list" }, "Дія, політ").issue).toEqual({ message: "contentImport.details.listUnknown", params: { got: "політ", options: "Дія, Бонусна дія", optionsEn: "action, bonusAction" } });
   });
 
   it("dice — к/k/пробіли, ціле → число", () => {

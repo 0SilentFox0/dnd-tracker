@@ -108,8 +108,8 @@ export async function runContentOperation(operationId: ContentOperationId, actor
 
         return locale ? translateImportReport(await getTranslator(locale), report) : translatedImport(report);
       }
-      case "content.import-example": return exampleCsv(actor, kindOf(input.kind), { loadNames, locale });
-      case "content.export": return exportCsv(actor, kindOf(input.kind), { ...EXPORT_DEFAULT_DEPS, locale });
+      case "content.import-example": return exampleCsv(actor, kindOf(input.kind), { loadNames, locale: locale ?? undefined });
+      case "content.export": return exportCsv(actor, kindOf(input.kind), { ...EXPORT_DEFAULT_DEPS, locale: locale ?? undefined });
       case "abilities.sources": {
         const where = { campaignId: actor.campaignId }, select = { id: true, name: true } as const;
 

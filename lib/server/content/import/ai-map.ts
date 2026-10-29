@@ -9,6 +9,7 @@ import { API_ERRORS } from "@/lib/constants/api-errors";
 import type { Locale } from "@/lib/i18n/config";
 import { languageName } from "@/lib/i18n/language-name";
 import { getRequestLocale } from "@/lib/i18n/request-locale";
+import { getTranslator, type Translator } from "@/lib/i18n/translator";
 import type { AiMapRequest } from "@/lib/schemas/content-import";
 import type { Actor } from "@/lib/utils/api/actor";
 import { errorResponse } from "@/lib/utils/api/api-response";
@@ -37,14 +38,14 @@ export function sanitizeAiMapping(raw: z.infer<typeof aiMapResultSchema>, header
   return { mapping, notes: raw.notes };
 }
 
-const fieldLine = (f: ImportField) =>
-  `- ${f.key} (also known as: ${f.aliases.slice(0, 4).join(", ") || "-"}); type ${f.type}${f.enumValues ? ` (values: ${f.enumValues.join(" | ")})` : ""}${f.ref ? ` (record name of kind: ${f.ref})` : ""}${f.required ? "; required" : ""}`;
+const fieldLine = (f: ImportField, t: Translator) =>
+  `- ${f.key} (${t(f.labelKey)}; also known as: ${f.aliases.slice(0, 4).join(", ") || "-"}); type ${f.type}${f.enumValues ? ` (values: ${f.enumValues.join(" | ")})` : ""}${f.ref ? ` (record name of kind: ${f.ref})` : ""}${f.required ? "; required" : ""}`;
 
-export function aiMapPrompt(spec: ImportSpec, headers: readonly string[], sample: ReadonlyArray<Record<string, string>>, locale: Locale): string {
+export function aiMapPrompt(spec: ImportSpec, headers: readonly string[], sample: ReadonlyArray<Record<string, string>>, locale: Locale, t: Translator): string {
   return [
     `You map the columns of a user's table to the import fields of the "${spec.kind}" content kind of a D&D campaign tracker.`,
     "Fields (key; known column names; type):",
-    ...spec.fields.map(fieldLine),
+    ...spec.fields.map((f) => fieldLine(f, t)),
     `File columns: ${JSON.stringify(headers)}`,
     `First rows (cells truncated): ${JSON.stringify(sample)}`,
     "For every column return { header, field }: field is the key of a field, or null when the column fits no field. One field gets at most one column, except abilities (several text columns of abilities).",
@@ -67,8 +68,10 @@ export async function aiMapResponse(actor: Actor, kind: ImportKind, body: AiMapR
 
   const spec = IMPORT_SPECS[kind];
 
+  const locale = await getRequestLocale();
+
   try {
-    const { object } = await generateObject({ model, schema: aiMapResultSchema, prompt: aiMapPrompt(spec, body.headers, body.sample, await getRequestLocale()) });
+    const { object } = await generateObject({ model, schema: aiMapResultSchema, prompt: aiMapPrompt(spec, body.headers, body.sample, locale, await getTranslator(locale)) });
 
     return NextResponse.json(sanitizeAiMapping(object, body.headers, spec.fields));
   } catch (error) {
