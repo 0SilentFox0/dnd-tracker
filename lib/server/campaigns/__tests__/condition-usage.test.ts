@@ -7,6 +7,8 @@ import { findCustomConditionUsage, isConditionUsed } from "../condition-usage";
 
 import type { CustomConditionKey } from "@/lib/utils/abilities/schema/kinds";
 
+const E: unknown[][] = [[], [], [], [], [], [], [], [], []];
+
 const KEY = "custom:paci" as CustomConditionKey;
 
 function fakeDb(results: unknown[][]) {
@@ -31,6 +33,12 @@ describe("findCustomConditionUsage", () => {
       ],
       [{ id: "s1", name: "Заспокоєння" }],
       [],
+      [],
+      [],
+      [],
+      [],
+      [],
+      [],
     ]);
 
     const usage = await findCustomConditionUsage("c1", KEY, db);
@@ -44,7 +52,7 @@ describe("findCustomConditionUsage", () => {
   });
 
   it("searches the quoted key so custom:paci does not match custom:pacified", async () => {
-    const { db, calls } = fakeDb([[], [], []]);
+    const { db, calls } = fakeDb(E);
 
     await findCustomConditionUsage("c1", KEY, db);
 
@@ -53,7 +61,7 @@ describe("findCustomConditionUsage", () => {
   });
 
   it("queries only prepared and active battles", async () => {
-    const { db, calls } = fakeDb([[], [], []]);
+    const { db, calls } = fakeDb(E);
 
     await findCustomConditionUsage("c1", KEY, db);
 
@@ -61,8 +69,36 @@ describe("findCustomConditionUsage", () => {
   });
 
   it("is unused when all lists are empty", async () => {
-    const { db } = fakeDb([[], [], []]);
+    const { db } = fakeDb(E);
 
     expect(isConditionUsed(await findCustomConditionUsage("c1", KEY, db))).toBe(false);
+  });
+
+  it.each([
+    ["skills", 3],
+    ["artifacts", 4],
+    ["artifactSets", 5],
+    ["races", 6],
+    ["feats", 7],
+    ["statusEffects", 8],
+  ] as const)("reports %s that reference the condition", async (field, index) => {
+    const results = E.map(() => [] as unknown[]);
+
+    results[index] = [{ id: "x1", name: "Знайдено" }];
+
+    const usage = await findCustomConditionUsage("c1", KEY, fakeDb(results).db);
+
+    expect(usage[field]).toEqual([{ id: "x1", name: "Знайдено" }]);
+    expect(isConditionUsed(usage)).toBe(true);
+  });
+
+  it("queries each new table", async () => {
+    const { db, calls } = fakeDb(E);
+
+    await findCustomConditionUsage("c1", KEY, db);
+
+    const tables = ["skills", "artifacts", "artifact_sets", "races", "feats", "status_effects"];
+
+    tables.forEach((table, i) => expect((calls[3 + i][0] as string[]).join("?")).toContain(`FROM ${table}`));
   });
 });

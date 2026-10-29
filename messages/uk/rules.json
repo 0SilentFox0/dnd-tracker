@@ -167,6 +167,12 @@
     "usageBattles": "Бої",
     "usageSpells": "Заклинання",
     "usageUnits": "Юніти",
+    "usageSkills": "Вміння",
+    "usageArtifacts": "Артефакти",
+    "usageArtifactSets": "Набори артефактів",
+    "usageRaces": "Раси",
+    "usageFeats": "Риси",
+    "usageStatusEffects": "Ефекти станів",
     "statusActive": "триває",
     "statusPrepared": "підготовлений",
     "close": "Закрити"

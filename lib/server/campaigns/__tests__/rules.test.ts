@@ -32,7 +32,7 @@ const dm: Actor = { campaignId: "c1", userId: "u1", isDM: true, via: "session", 
 
 const player: Actor = { ...dm, isDM: false };
 
-const EMPTY = { battles: [], spells: [], units: [] };
+const EMPTY = { battles: [], spells: [], units: [], skills: [], artifacts: [], artifactSets: [], races: [], feats: [], statusEffects: [] };
 
 const status = async (p: Promise<unknown>) => {
   try {

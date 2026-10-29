@@ -50,7 +50,7 @@ describe("ConditionsSection", () => {
   });
 
   it("діалог показує бої й заклинання з посиланнями", async () => {
-    hookState.usage = { battles: [{ id: "b1", name: "Бій", status: "active", participants: ["Орк"] }], spells: [{ id: "s1", name: "Pacify" }], units: [] };
+    hookState.usage = { battles: [{ id: "b1", name: "Бій", status: "active", participants: ["Орк"] }], spells: [{ id: "s1", name: "Pacify" }], units: [], skills: [{ id: "k1", name: "Calm" }], artifacts: [], artifactSets: [], races: [], feats: [], statusEffects: [{ id: "e1", name: "Daze" }] };
 
     render(<ConditionsSection form={formOf(withCustom)} />);
 
@@ -58,5 +58,7 @@ describe("ConditionsSection", () => {
 
     expect(screen.getByText("Бій").closest("a")?.getAttribute("href")).toBe("/campaigns/c1/battles/b1");
     expect(screen.getByText("Pacify").closest("a")?.getAttribute("href")).toBe("/campaigns/c1/dm/spells/s1");
+    expect(screen.getByText("Calm").closest("a")?.getAttribute("href")).toBe("/campaigns/c1/dm/skills/k1");
+    expect(screen.getByText("Daze").closest("a")).toBeNull();
   });
 });

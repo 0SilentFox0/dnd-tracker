@@ -11,6 +11,17 @@ import { SwitchField } from "@/components/ui/switch-field";
 import { type RulesFormState, useRemoveCustomCondition } from "@/lib/hooks/campaigns";
 import { CONDITION_LABELS } from "@/lib/utils/abilities/registry/labels";
 
+const NAMED_CATEGORIES = [
+  { key: "spells", label: "usageSpells", path: "spells" },
+  { key: "units", label: "usageUnits", path: "units" },
+  { key: "skills", label: "usageSkills", path: "skills" },
+  { key: "artifacts", label: "usageArtifacts", path: "artifacts" },
+  { key: "artifactSets", label: "usageArtifactSets", path: "artifact-sets" },
+  { key: "races", label: "usageRaces", path: "races" },
+  { key: "feats", label: "usageFeats", path: "feats" },
+  { key: "statusEffects", label: "usageStatusEffects", path: null },
+] as const;
+
 export function ConditionsSection({ form }: { form: RulesFormState }) {
   const t = useTranslations("rules");
 
@@ -83,33 +94,25 @@ export function ConditionsSection({ form }: { form: RulesFormState }) {
                 </ul>
               </section>
             )}
-            {usage.spells.length > 0 && (
-              <section>
-                <h4 className="font-semibold">{tc("usageSpells")}</h4>
-                <ul className="list-disc pl-5">
-                  {usage.spells.map((sp) => (
-                    <li key={sp.id}>
-                      <Link className="underline" href={`${base}/dm/spells/${sp.id}`}>
-                        {sp.name}
-                      </Link>
-                    </li>
-                  ))}
-                </ul>
-              </section>
-            )}
-            {usage.units.length > 0 && (
-              <section>
-                <h4 className="font-semibold">{tc("usageUnits")}</h4>
-                <ul className="list-disc pl-5">
-                  {usage.units.map((u) => (
-                    <li key={u.id}>
-                      <Link className="underline" href={`${base}/dm/units/${u.id}`}>
-                        {u.name}
-                      </Link>
-                    </li>
-                  ))}
-                </ul>
-              </section>
+            {NAMED_CATEGORIES.map(({ key, label, path }) =>
+              usage[key].length > 0 ? (
+                <section key={key}>
+                  <h4 className="font-semibold">{tc(label)}</h4>
+                  <ul className="list-disc pl-5">
+                    {usage[key].map((item) => (
+                      <li key={item.id}>
+                        {path ? (
+                          <Link className="underline" href={`${base}/dm/${path}/${item.id}`}>
+                            {item.name}
+                          </Link>
+                        ) : (
+                          item.name
+                        )}
+                      </li>
+                    ))}
+                  </ul>
+                </section>
+              ) : null,
             )}
           </div>
         )}

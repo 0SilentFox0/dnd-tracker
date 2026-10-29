@@ -15,9 +15,9 @@ const confirm = vi.fn();
 
 vi.mock("@/lib/hooks/common", () => ({ useConfirm: () => confirm, useNotify: () => vi.fn() }));
 
-const EMPTY = { battles: [], spells: [], units: [] };
+const EMPTY = { battles: [], spells: [], units: [], skills: [], artifacts: [], artifactSets: [], races: [], feats: [], statusEffects: [] };
 
-const USED = { battles: [], spells: [{ id: "s1", name: "Pacify" }], units: [] };
+const USED = { ...EMPTY, spells: [{ id: "s1", name: "Pacify" }] };
 
 const condition = { key: "custom:x", name: "X" };
 

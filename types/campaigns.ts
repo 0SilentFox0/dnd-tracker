@@ -153,4 +153,10 @@ export interface ConditionUsage {
   battles: { id: string; name: string; status: string; participants: string[] }[];
   spells: { id: string; name: string }[];
   units: { id: string; name: string }[];
+  skills: { id: string; name: string }[];
+  artifacts: { id: string; name: string }[];
+  artifactSets: { id: string; name: string }[];
+  races: { id: string; name: string }[];
+  feats: { id: string; name: string }[];
+  statusEffects: { id: string; name: string }[];
 }

@@ -167,6 +167,12 @@
     "usageBattles": "Battles",
     "usageSpells": "Spells",
     "usageUnits": "Units",
+    "usageSkills": "Skills",
+    "usageArtifacts": "Artifacts",
+    "usageArtifactSets": "Artifact sets",
+    "usageRaces": "Races",
+    "usageFeats": "Feats",
+    "usageStatusEffects": "Status effects",
     "statusActive": "active",
     "statusPrepared": "prepared",
     "close": "Close"

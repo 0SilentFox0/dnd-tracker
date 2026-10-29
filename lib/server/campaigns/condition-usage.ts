@@ -22,7 +22,7 @@ interface NamedRow {
 export async function findCustomConditionUsage(campaignId: string, key: CustomConditionKey, db: Db = prisma): Promise<ConditionUsage> {
   const pattern = `%"${key}"%`;
 
-  const [battleRows, spells, units] = await Promise.all([
+  const [battleRows, spells, units, skills, artifacts, artifactSets, races, feats, statusEffects] = await Promise.all([
     db.$queryRaw<BattleRow[]>`
       SELECT bs.id, bs.name, bs.status, bp.snapshot->'basicInfo'->>'name' AS participant
       FROM battle_participants bp JOIN battle_scenes bs ON bs.id = bp."battleId"
@@ -36,6 +36,30 @@ export async function findCustomConditionUsage(campaignId: string, key: CustomCo
       SELECT id, name FROM units
       WHERE "campaignId" = ${campaignId} AND abilities::text LIKE ${pattern}
       ORDER BY name`,
+    db.$queryRaw<NamedRow[]>`
+      SELECT id, name FROM skills
+      WHERE "campaignId" = ${campaignId} AND abilities::text LIKE ${pattern}
+      ORDER BY name`,
+    db.$queryRaw<NamedRow[]>`
+      SELECT id, name FROM artifacts
+      WHERE "campaignId" = ${campaignId} AND (abilities::text LIKE ${pattern} OR modifiers::text LIKE ${pattern})
+      ORDER BY name`,
+    db.$queryRaw<NamedRow[]>`
+      SELECT id, name FROM artifact_sets
+      WHERE "campaignId" = ${campaignId} AND (abilities::text LIKE ${pattern} OR "setBonus"::text LIKE ${pattern})
+      ORDER BY name`,
+    db.$queryRaw<NamedRow[]>`
+      SELECT id, name FROM races
+      WHERE "campaignId" = ${campaignId} AND (abilities::text LIKE ${pattern} OR choices::text LIKE ${pattern} OR "passiveAbility"::text LIKE ${pattern})
+      ORDER BY name`,
+    db.$queryRaw<NamedRow[]>`
+      SELECT id, name FROM feats
+      WHERE "campaignId" = ${campaignId} AND (abilities::text LIKE ${pattern} OR choices::text LIKE ${pattern})
+      ORDER BY name`,
+    db.$queryRaw<NamedRow[]>`
+      SELECT id, name FROM status_effects
+      WHERE effects::text LIKE ${pattern}
+      ORDER BY name`,
   ]);
 
   const battles = new Map<string, ConditionUsage["battles"][number]>();
@@ -48,7 +72,7 @@ export async function findCustomConditionUsage(campaignId: string, key: CustomCo
     battles.set(row.id, entry);
   }
 
-  return { battles: [...battles.values()], spells, units };
+  return { battles: [...battles.values()], spells, units, skills, artifacts, artifactSets, races, feats, statusEffects };
 }
 
-export const isConditionUsed = (u: ConditionUsage) => u.battles.length + u.spells.length + u.units.length > 0;
+export const isConditionUsed = (u: ConditionUsage) => Object.values(u).some((list) => list.length > 0);
