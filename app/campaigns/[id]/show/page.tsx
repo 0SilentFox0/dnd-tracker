@@ -1,9 +1,9 @@
 import { ShowPageClient } from "./page-client";
 
-import { readShow } from "@/app/api/campaigns/[id]/show/show-handler";
 import { showKeys } from "@/lib/hooks/show/keys";
 import { PrefetchedQuery } from "@/lib/providers/prefetched-query";
 import { requireCampaignMember } from "@/lib/server/campaigns/access";
+import { readShow } from "@/lib/server/show/read-show";
 import { readOkJson } from "@/lib/utils/api/read-json";
 import type { ShowResponse, ShowSnapshot } from "@/types/show";
 

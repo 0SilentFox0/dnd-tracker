@@ -1,4 +1,6 @@
-import { createScenarioHandler, listScenarioHandler } from "./scenario-handlers";
+import { createScenarioHandler } from "./scenario-handlers";
+
+import { listScenarioHandler } from "@/lib/server/scenario/read-scenario";
 
 type Params = { params: Promise<{ id: string }> };
 

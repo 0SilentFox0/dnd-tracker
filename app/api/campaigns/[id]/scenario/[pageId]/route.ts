@@ -1,4 +1,6 @@
-import { deleteScenarioPageHandler, getScenarioPageHandler, saveScenarioContentHandler, updateScenarioMetaHandler } from "./page-handlers";
+import { deleteScenarioPageHandler, saveScenarioContentHandler, updateScenarioMetaHandler } from "./page-handlers";
+
+import { getScenarioPageHandler } from "@/lib/server/scenario/read-scenario";
 
 type Params = { params: Promise<{ id: string; pageId: string }> };
 

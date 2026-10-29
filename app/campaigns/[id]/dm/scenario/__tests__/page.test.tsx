@@ -8,8 +8,7 @@ import { PrefetchedQuery } from "@/lib/providers/prefetched-query";
 const mocks = vi.hoisted(() => ({ listScenarioHandler: vi.fn(), getScenarioPageHandler: vi.fn(), loadPlayedSections: vi.fn(), notFound: vi.fn(() => { throw new Error("NEXT_NOT_FOUND"); }) }));
 
 vi.mock("next/navigation", () => ({ notFound: mocks.notFound }));
-vi.mock("@/app/api/campaigns/[id]/scenario/scenario-handlers", () => ({ listScenarioHandler: mocks.listScenarioHandler }));
-vi.mock("@/app/api/campaigns/[id]/scenario/[pageId]/page-handlers", () => ({ getScenarioPageHandler: mocks.getScenarioPageHandler }));
+vi.mock("@/lib/server/scenario/read-scenario", () => ({ listScenarioHandler: mocks.listScenarioHandler, getScenarioPageHandler: mocks.getScenarioPageHandler }));
 vi.mock("@/lib/server/campaigns/access", () => ({ requireCampaignDM: vi.fn(async () => ({ campaign: { name: "Кампанія" } })) }));
 vi.mock("@/lib/ai/crypto", () => ({ isAiConfigured: () => true }));
 vi.mock("@/lib/server/scenario/page-store", () => ({ loadPlayedSections: mocks.loadPlayedSections }));

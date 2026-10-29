@@ -1,9 +1,9 @@
 import { ScenarioIndexPageClient } from "./page-client";
 
-import { listScenarioHandler } from "@/app/api/campaigns/[id]/scenario/scenario-handlers";
 import { scenarioKeys } from "@/lib/hooks/scenario/keys";
 import { PrefetchedQuery } from "@/lib/providers/prefetched-query";
 import { requireCampaignDM } from "@/lib/server/campaigns/access";
+import { listScenarioHandler } from "@/lib/server/scenario/read-scenario";
 import { readOkJson } from "@/lib/utils/api/read-json";
 import type { ScenarioPageSummary } from "@/types/scenario";
 

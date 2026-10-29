@@ -1,4 +1,6 @@
-import { commandShow, readShow } from "./show-handler";
+import { commandShow } from "./show-handler";
+
+import { readShow } from "@/lib/server/show/read-show";
 
 type Params = { params: Promise<{ id: string }> };
 

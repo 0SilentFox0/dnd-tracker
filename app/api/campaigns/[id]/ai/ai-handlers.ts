@@ -7,7 +7,7 @@ import { isAiConfigured } from "@/lib/ai/crypto";
 import { discardGeneratedImage } from "@/lib/ai/generated-images";
 import { guarded } from "@/lib/ai/guarded";
 import { AiImageError, generateSlideImage } from "@/lib/ai/images";
-import { applyProposal, listProposals, listProposalSummaries, rejectProposal } from "@/lib/ai/proposals";
+import { applyProposal, listProposals, listProposalSummaries, rejectProposal } from "@/lib/server/assistant/proposals";
 import { recoveredState } from "@/lib/ai/recovered-state";
 import { getAiSettings, saveAiSettings } from "@/lib/ai/settings";
 import { createThread, deleteThread, listThreads, loadMessages, loadThread, patchThread, resolveDefaultModel } from "@/lib/ai/threads";

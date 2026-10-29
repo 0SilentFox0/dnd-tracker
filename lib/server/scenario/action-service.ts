@@ -13,7 +13,8 @@ import { getTranslator } from "@/lib/i18n/translator";
 import { createScenarioPageSchema, scenarioContentSchema, scenarioSectionPatchSchema, updateScenarioMetaSchema } from "@/lib/schemas/scenario";
 import { notifyRevealForContentChange } from "@/lib/server/acquaintances/reveal";
 import { stampDigest } from "@/lib/server/assistant/digest";
-import { actionResult, requestDigest } from "@/lib/server/assistant/json";
+import { actionResult } from "@/lib/server/assistant/json";
+import { requestDigest } from "@/lib/utils/battle/store/stable-json";
 import { resultLabel } from "@/lib/server/assistant/result-labels";
 import type { ActionResult } from "@/lib/server/assistant/types";
 import { assertCan } from "@/lib/server/content/access";
@@ -162,7 +163,7 @@ async function createPage({ actor, input, locale, result }: Omit<ScenarioRun, "p
 }
 
 async function deletePage({ actor, page, id, result }: ScenarioRun): Promise<ActionResult> {
-  const { pendingSlideUrls, discardSlideFiles } = await import("@/lib/ai/proposal-media");
+  const { pendingSlideUrls, discardSlideFiles } = await import("@/lib/server/assistant/proposal-media");
 
   const orphanUrls = await pendingSlideUrls(actor.campaignId, page.id);
 

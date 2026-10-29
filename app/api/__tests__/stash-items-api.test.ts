@@ -3,7 +3,8 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import { API_ERRORS } from "@/lib/constants/api-errors";
 import { prisma } from "@/lib/db";
-import { rejectIfInActiveBattle } from "@/lib/server/characters/battle-lock";
+import { assertNotInActiveBattle } from "@/lib/server/characters/battle-lock";
+import { ContentError } from "@/lib/server/content/errors";
 import * as apiAuth from "@/lib/utils/api/api-auth";
 import { weaponStatsColumns } from "@/lib/utils/artifacts/weapon-stats";
 import { type ItemStats,itemStatsColumns } from "@/lib/utils/items/item-stats";
@@ -11,7 +12,7 @@ import { parseRules } from "@/lib/utils/rules/schema";
 
 vi.mock("@/lib/server/notifications/notify", () => ({ notifyCharacterOwners: vi.fn().mockResolvedValue(0) }));
 vi.mock("@/lib/utils/api/api-auth", () => ({ requireCampaignAccess: vi.fn(), requireDM: vi.fn() }));
-vi.mock("@/lib/server/characters/battle-lock", () => ({ rejectIfInActiveBattle: vi.fn(async () => null) }));
+vi.mock("@/lib/server/characters/battle-lock", () => ({ assertNotInActiveBattle: vi.fn(async () => undefined) }));
 
 const tx = vi.hoisted(() => ({
   $executeRaw: vi.fn(),
@@ -112,7 +113,7 @@ describe("stash API: magic items", () => {
     expect(full.status).toBe(409);
     expect((await full.json()).error).toBe(API_ERRORS.ATTUNEMENT_LIMIT);
 
-    vi.mocked(rejectIfInActiveBattle).mockResolvedValueOnce(NextResponse.json({ error: API_ERRORS.CHARACTER_IN_BATTLE }, { status: 409 }));
+    vi.mocked(assertNotInActiveBattle).mockRejectedValueOnce(new ContentError(API_ERRORS.CHARACTER_IN_BATTLE, 409));
     vi.mocked(apiAuth.requireCampaignAccess).mockResolvedValue(access());
 
     expect((await post({ action: "attune", ref: "ring" })).status).toBe(409);
