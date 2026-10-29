@@ -46,36 +46,31 @@ export function extractAttacksFromCharacter(
   return [...weapons, ...defaultAttacks(names, !!opts.fiveE).filter((d) => !weapons.some((w) => w.type === d.type))];
 }
 
+type Equipped = Record<string, string | Record<string, unknown>>;
+
+type ItemRow = NonNullable<ReturnType<typeof resolveItemRow>>;
+
+type ItemsOpt = { enabled: boolean; attuned: readonly string[] };
+
+const SLOT_KEYS = ["mainHand", "offHand", "weapon", "weapon1", "weapon2", "range_weapon"] as const;
+
+const WEAPON_SLOTS = ["weapon", "mainHand", "offHand", "range_weapon"];
+
 function extractWeaponAttacks(
   character: CharacterFromPrisma,
   rowsById: Record<string, Prisma.ArtifactGetPayload<object>>,
   fiveE: boolean,
-  items?: { enabled: boolean; attuned: readonly string[] },
+  items?: ItemsOpt,
 ): ExtractedAttack[] {
   const attacks: ExtractedAttack[] = [];
 
-  if (!character.inventory) {
-    return attacks;
-  }
+  if (!character.inventory) return attacks;
 
-  const equipped =
-    (character.inventory.equipped as Record<
-      string,
-      string | Record<string, unknown>
-    >) || {};
-
-  const slotKeys = [
-    "mainHand",
-    "offHand",
-    "weapon",
-    "weapon1",
-    "weapon2",
-    "range_weapon",
-  ] as const;
+  const equipped = (character.inventory.equipped as Equipped) || {};
 
   const entries: Array<{ ref: string; offHand: boolean }> = [];
 
-  for (const key of slotKeys) {
+  for (const key of SLOT_KEYS) {
     const val = equipped[key];
 
     if (!val) continue;
@@ -83,32 +78,7 @@ function extractWeaponAttacks(
     if (typeof val === "string") {
       entries.push({ ref: val, offHand: false });
     } else if (typeof val === "object" && val !== null && "damageDice" in val) {
-      const inv = val as {
-        id?: string;
-        name?: string;
-        attackBonus?: number;
-        damageDice?: string;
-        damageType?: string;
-        weaponType?: string;
-        range?: string;
-      };
-
-      const isRanged =
-        inv.weaponType?.toLowerCase() === AttackType.RANGED ||
-        key === "range_weapon" ||
-        (typeof inv.range === "string" &&
-          inv.range.trim() !== "" &&
-          inv.range !== "5 ft");
-
-      attacks.push({
-        id: inv.id ?? `inline-${key}`,
-        name: (inv.name as string) ?? "Зброя",
-        type: (isRanged ? AttackType.RANGED : AttackType.MELEE) as ExtractedAttack["type"],
-        attackBonus: typeof inv.attackBonus === "number" ? inv.attackBonus : 0,
-        damageDice: (inv.damageDice as string) ?? "1d6",
-        damageType: (inv.damageType as string) ?? "bludgeoning",
-        range: typeof inv.range === "string" ? inv.range : undefined,
-      });
+      attacks.push(inlineAttack(key, val));
     }
   }
 
@@ -116,106 +86,101 @@ function extractWeaponAttacks(
 
   if (shieldRef) entries.push({ ref: shieldRef, offHand: true });
 
-  if (entries.length === 0) {
-    return attacks;
-  }
-
   const shieldCellEmpty = !equipped.shield;
 
-  for (const { ref, offHand: isOffHand } of entries) {
+  for (const { ref, offHand } of entries) {
     const weapon = resolveItemRow(ref, rowsById, { itemsEnabled: !!items?.enabled, attuned: items?.attuned ?? [] });
 
     if (!weapon) continue;
 
-    if (isOffHand && weapon.slot !== "weapon") continue;
+    if (offHand ? weapon.slot !== "weapon" : !WEAPON_SLOTS.includes(weapon.slot as string)) continue;
 
-    if (
-      !isOffHand &&
-      weapon.slot !== "weapon" &&
-      weapon.slot !== "mainHand" &&
-      weapon.slot !== "offHand" &&
-      weapon.slot !== "range_weapon"
-    ) {
-      continue;
-    }
-
-    const modifiers = (weapon.modifiers as ArtifactModifier[]) || [];
-
-    const bonuses = (weapon.bonuses as Record<string, number>) || {};
-
-    const attackBonus = bonuses.attackBonus || bonuses.attack || 0;
-
-    const damageDice =
-      getOptionalModifierValue(modifiers, ArtifactModifierType.DAMAGE_DICE) ??
-      "1d6";
-
-    const damageType = getModifierValue(
-      modifiers,
-      ArtifactModifierType.DAMAGE_TYPE,
-      DEFAULT_ARTIFACT_MODIFIERS.DAMAGE_TYPE,
-    );
-
-    let attackType = getModifierValue(
-      modifiers,
-      ArtifactModifierType.ATTACK_TYPE,
-      AttackType.MELEE,
-    );
-
-    const rangeVal = getOptionalModifierValue(
-      modifiers,
-      ArtifactModifierType.RANGE,
-    );
-
-    if (
-      attackType !== AttackType.RANGED &&
-      (attackType?.toLowerCase() === AttackType.RANGED ||
-        weapon.slot === "range_weapon" ||
-        (rangeVal && rangeVal.trim() !== "" && rangeVal !== "5 ft"))
-    ) {
-      attackType = AttackType.RANGED;
-    }
-
-    const traits = fiveE ? parseWeaponTraits(getOptionalModifierValue(modifiers, ArtifactModifierType.TRAITS)) : [];
-
-    const versatileDice = fiveE ? getOptionalModifierValue(modifiers, ArtifactModifierType.VERSATILE_DICE) : undefined;
-
-    const thrownMelee = traits.includes("thrown");
-
-    const useVersatile = fiveE && !isOffHand && traits.includes("versatile") && !!versatileDice && shieldCellEmpty;
-
-    const damageBonus = Number(getOptionalModifierValue(modifiers, ArtifactModifierType.DAMAGE_BONUS) ?? 0) || 0;
-
-    const category = weaponCategoryOf(modifiers, weapon.description);
-
-    attacks.push({
-      id: isOffHand ? `${ref}:off` : ref,
-      name: weapon.name,
-      type: (attackType === AttackType.RANGED && !thrownMelee
-        ? AttackType.RANGED
-        : AttackType.MELEE) as ExtractedAttack["type"],
-      attackBonus,
-      damageDice: useVersatile ? versatileDice : damageDice,
-      damageType,
-      range: rangeVal,
-      properties: getOptionalModifierValue(
-        modifiers,
-        ArtifactModifierType.PROPERTIES,
-      ),
-      minTargets:
-        parseInt(
-          getModifierValue(modifiers, ArtifactModifierType.MIN_TARGETS, "0"),
-        ) || undefined,
-      maxTargets:
-        parseInt(
-          getModifierValue(modifiers, ArtifactModifierType.MAX_TARGETS, "0"),
-        ) || undefined,
-      ...(traits.length > 0 && { traits }),
-      ...(versatileDice && { versatileDice }),
-      ...(isOffHand && { hand: "off" as const }),
-      ...(damageBonus !== 0 && { damageBonus }),
-      ...(fiveE && category && { weaponCategory: category }),
-    });
+    attacks.push(attackFromItem(weapon, { ref, offHand, fiveE, shieldCellEmpty }));
   }
 
   return attacks;
+}
+
+function inlineAttack(key: string, val: Record<string, unknown>): ExtractedAttack {
+  const inv = val as {
+    id?: string;
+    name?: string;
+    attackBonus?: number;
+    damageDice?: string;
+    damageType?: string;
+    weaponType?: string;
+    range?: string;
+  };
+
+  const isRanged =
+    inv.weaponType?.toLowerCase() === AttackType.RANGED ||
+    key === "range_weapon" ||
+    (typeof inv.range === "string" && inv.range.trim() !== "" && inv.range !== "5 ft");
+
+  return {
+    id: inv.id ?? `inline-${key}`,
+    name: (inv.name as string) ?? "Зброя",
+    type: (isRanged ? AttackType.RANGED : AttackType.MELEE) as ExtractedAttack["type"],
+    attackBonus: typeof inv.attackBonus === "number" ? inv.attackBonus : 0,
+    damageDice: (inv.damageDice as string) ?? "1d6",
+    damageType: (inv.damageType as string) ?? "bludgeoning",
+    range: typeof inv.range === "string" ? inv.range : undefined,
+  };
+}
+
+function attackFromItem(weapon: ItemRow, ctx: { ref: string; offHand: boolean; fiveE: boolean; shieldCellEmpty: boolean }): ExtractedAttack {
+  const { ref, offHand, fiveE } = ctx;
+
+  const modifiers = (weapon.modifiers as ArtifactModifier[]) || [];
+
+  const bonuses = (weapon.bonuses as Record<string, number>) || {};
+
+  const attackBonus = bonuses.attackBonus || bonuses.attack || 0;
+
+  const damageDice = getOptionalModifierValue(modifiers, ArtifactModifierType.DAMAGE_DICE) ?? "1d6";
+
+  const damageType = getModifierValue(modifiers, ArtifactModifierType.DAMAGE_TYPE, DEFAULT_ARTIFACT_MODIFIERS.DAMAGE_TYPE);
+
+  let attackType = getModifierValue(modifiers, ArtifactModifierType.ATTACK_TYPE, AttackType.MELEE);
+
+  const rangeVal = getOptionalModifierValue(modifiers, ArtifactModifierType.RANGE);
+
+  if (
+    attackType !== AttackType.RANGED &&
+    (attackType?.toLowerCase() === AttackType.RANGED ||
+      weapon.slot === "range_weapon" ||
+      (rangeVal && rangeVal.trim() !== "" && rangeVal !== "5 ft"))
+  ) {
+    attackType = AttackType.RANGED;
+  }
+
+  const traits = fiveE ? parseWeaponTraits(getOptionalModifierValue(modifiers, ArtifactModifierType.TRAITS)) : [];
+
+  const versatileDice = fiveE ? getOptionalModifierValue(modifiers, ArtifactModifierType.VERSATILE_DICE) : undefined;
+
+  const thrownMelee = traits.includes("thrown");
+
+  const useVersatile = fiveE && !offHand && traits.includes("versatile") && !!versatileDice && ctx.shieldCellEmpty;
+
+  const damageBonus = Number(getOptionalModifierValue(modifiers, ArtifactModifierType.DAMAGE_BONUS) ?? 0) || 0;
+
+  const category = weaponCategoryOf(modifiers, weapon.description);
+
+  return {
+    id: offHand ? `${ref}:off` : ref,
+    name: weapon.name,
+    type: (attackType === AttackType.RANGED && !thrownMelee ? AttackType.RANGED : AttackType.MELEE) as ExtractedAttack["type"],
+    attackBonus,
+    damageDice: useVersatile ? versatileDice : damageDice,
+    damageType,
+    range: rangeVal,
+    properties: getOptionalModifierValue(modifiers, ArtifactModifierType.PROPERTIES),
+    minTargets: parseInt(getModifierValue(modifiers, ArtifactModifierType.MIN_TARGETS, "0")) || undefined,
+    maxTargets: parseInt(getModifierValue(modifiers, ArtifactModifierType.MAX_TARGETS, "0")) || undefined,
+    ...(traits.length > 0 && { traits }),
+    ...(versatileDice && { versatileDice }),
+    ...(offHand && { hand: "off" as const }),
+    ...(damageBonus !== 0 && { damageBonus }),
+    ...(fiveE && category && { weaponCategory: category }),
+  };
 }
