@@ -2,12 +2,16 @@ import { NextResponse } from "next/server";
 import { z } from "zod";
 
 import { COMPENDIUM_LIMITS, CompendiumError } from "./parse";
+import { fetchImportImage } from "./media/fetch-image";
+import { prismaMediaRepository } from "./media/repository";
+import { processMediaBatch } from "./media/service";
 import { importTargetOptions, mediaPresentation, previewPresentation } from "./presentation";
 import { prismaImportRepository } from "./repository";
 import { type CompendiumReport, confirmImport, previewImport } from "./service";
 import { type ImportIssue, translateCompendiumIssue, translateCompendiumReport } from "./types";
 
 import { prisma } from "@/lib/db";
+import { storeCompendiumImage } from "@/lib/supabase/compendium-media-storage";
 import { getRequestLocale } from "@/lib/i18n/request-locale";
 import { getTranslator } from "@/lib/i18n/translator";
 import { resolveActor } from "@/lib/utils/api/actor";
@@ -18,8 +22,12 @@ import { isRecord } from "@/lib/utils/common/is-record";
 
 const envelope = z.strictObject({ input: z.unknown(), token: z.string().max(4096).optional(), idempotencyKey: z.string().max(100).optional(), rightsConfirmed: z.boolean().optional() });
 
-async function boundedBody(req: Request) {
-  if (Number(req.headers.get("content-length")) > COMPENDIUM_LIMITS.requestBytes) throw new CompendiumError("REQUEST_SIZE");
+const mediaEnvelope = z.strictObject({ runId: z.string().min(1).max(100), retryFailed: z.boolean().optional() });
+
+const MEDIA_BODY_BYTES = 4096;
+
+async function boundedBody<S extends z.ZodType = typeof envelope>(req: Request, schema: S = envelope as unknown as S, limit: number = COMPENDIUM_LIMITS.requestBytes): Promise<z.infer<S>> {
+  if (Number(req.headers.get("content-length")) > limit) throw new CompendiumError("REQUEST_SIZE");
 
   const reader = req.body?.getReader();
 
@@ -37,13 +45,13 @@ async function boundedBody(req: Request) {
 
       bytes += value.byteLength;
 
-      if (bytes > COMPENDIUM_LIMITS.requestBytes) { await reader.cancel(); throw new CompendiumError("REQUEST_SIZE"); }
+      if (bytes > limit) { await reader.cancel(); throw new CompendiumError("REQUEST_SIZE"); }
 
       body += decoder.decode(value, { stream: true });
     }
     body += decoder.decode();
 
-    return envelope.parse(JSON.parse(body));
+    return schema.parse(JSON.parse(body));
   } catch (error) {
     if (error instanceof CompendiumError) throw error;
 
@@ -54,6 +62,8 @@ async function boundedBody(req: Request) {
 function statusOf(code: string) {
   if (code === "FORBIDDEN") return 403;
 
+  if (code === "RUN_NOT_FOUND") return 404;
+
   if (/PREVIEW_|IDEMPOTENCY_CONFLICT/.test(code)) return code === "PREVIEW_SECRET_REQUIRED" ? 503 : 409;
 
   if (/SIZE|LIMIT|DEPTH|NODES|TIMEOUT/.test(code)) return 413;
@@ -61,12 +71,12 @@ function statusOf(code: string) {
   return 422;
 }
 
-export function compendiumRoute(mode: "preview" | "confirm" | "reports" | "entries" | "options") {
+export function compendiumRoute(mode: "preview" | "confirm" | "media" | "reports" | "entries" | "options") {
   return async (req: Request, ctx: { params: Promise<{ id: string }> }) => {
     try {
       const { id } = await ctx.params;
 
-      const mutation = mode === "preview" || mode === "confirm";
+      const mutation = mode === "preview" || mode === "confirm" || mode === "media";
 
       if (mutation && !isSameOriginRequest(req)) return privateJson({ code: "FORBIDDEN" }, 403);
 
@@ -78,7 +88,7 @@ export function compendiumRoute(mode: "preview" | "confirm" | "reports" | "entri
 
       await prismaImportRepository.authorize(actor);
 
-      const rate = await checkRateLimit({ userId: actor.userId, scope: `compendium-${mode}`, battleId: id, limit: mutation ? 20 : 120, windowSeconds: 60, memoryFallback: true });
+      const rate = await checkRateLimit({ userId: actor.userId, scope: `compendium-${mode}`, battleId: id, limit: mode === "media" ? 60 : mutation ? 20 : 120, windowSeconds: 60, memoryFallback: true });
 
       if (!rate.allowed) return rateLimitResponse(rate);
 
@@ -106,6 +116,18 @@ export function compendiumRoute(mode: "preview" | "confirm" | "reports" | "entri
         const entries = await prisma.compendiumEntry.findMany({ where: { campaignId: id, kind, localId: targetId }, orderBy: { canonicalKey: "asc" }, skip: Math.floor(offset), take: 51, select: { canonicalKey: true, originalName: true, edition: true, sourceJson: true, attribution: true, notes: true, issues: true, locator: true } });
 
         return privateJson({ entries: entries.slice(0, 50).map(entry => ({ ...entry, issues: Array.isArray(entry.issues) ? entry.issues.map(item => isRecord(item) ? translateCompendiumIssue(t, item as unknown as ImportIssue) : item) : entry.issues })), hasMore: entries.length > 50 });
+      }
+
+      if (mode === "media") {
+        const body = await boundedBody(req, mediaEnvelope, MEDIA_BODY_BYTES);
+
+        try {
+          return privateJson(await processMediaBatch(actor, body.runId, { repository: prismaMediaRepository, fetchImage: fetchImportImage, store: storeCompendiumImage }, { retryFailed: body.retryFailed }));
+        } catch (error) {
+          if (error instanceof CompendiumError && error.code === "FORBIDDEN") return privateJson({ code: "RUN_NOT_FOUND" }, 404);
+
+          throw error;
+        }
       }
 
       const secret = process.env.COMPENDIUM_PREVIEW_SECRET ?? "";

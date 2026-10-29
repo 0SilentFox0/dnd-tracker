@@ -18,6 +18,7 @@ export const COMPENDIUM_ERROR_KEYS: Record<string, string> = {
   NOTES_SIZE: "errors.notesSize",
   REQUEST_SIZE: "errors.requestSize",
   FORBIDDEN: "errors.forbidden",
+  RUN_NOT_FOUND: "errors.runNotFound",
   IMPORT_FAILED: "errors.importFailed",
   FILE_SIZE: "errors.fileSize",
   PARSING_TIMEOUT: "errors.parsingTimeout",
