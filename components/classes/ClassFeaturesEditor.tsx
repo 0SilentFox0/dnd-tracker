@@ -6,6 +6,7 @@ import { Plus, Trash2 } from "lucide-react";
 import { AbilityListEditor } from "@/components/abilities";
 import { ChoiceListEditor } from "@/components/choices/ChoiceListEditor";
 import { HUD_SELECT_CLASS, HudSection } from "@/components/hud/form";
+import { HudChipTabs } from "@/components/hud/page";
 import { Button } from "@/components/ui/button";
 import { MAX_CLASS_LEVEL } from "@/lib/constants/classes";
 import { useErrorTotals } from "@/lib/hooks/common";
@@ -30,20 +31,35 @@ export function ClassFeaturesEditor({ campaignId, value, onChange, onValidityCha
 
   const [picked, setPicked] = useState<number | null>(null);
 
+  const [active, setActive] = useState<number | null>(null);
+
+  const [levelErrors, setLevelErrors] = useState<Record<string, number>>({});
+
   const next = picked !== null && free.includes(picked) ? picked : (free[0] ?? null);
 
   const sorted = [...value].sort((a, b) => a.level - b.level);
+
+  const current = active !== null && used.has(active) ? active : (sorted[0]?.level ?? null);
+
+  const reportLevel = (key: string, count: number) => {
+    report(key, count);
+    setLevelErrors((p) => (p[key] === count ? p : { ...p, [key]: count }));
+  };
+
+  const hasErrors = (level: number) => (levelErrors[String(level)] ?? 0) + (levelErrors[`choices-${level}`] ?? 0) > 0;
 
   const add = () => {
     if (next === null) return;
 
     onChange([...value, { level: next, abilities: [] }].sort((a, b) => a.level - b.level));
+    setActive(next);
     setPicked(null);
   };
 
   const remove = (level: number) => {
     drop(String(level));
     drop(`choices-${level}`);
+    setLevelErrors(({ [String(level)]: _a, [`choices-${level}`]: _b, ...rest }) => rest);
     onChange(value.filter((f) => f.level !== level));
   };
 
@@ -54,9 +70,26 @@ export function ClassFeaturesEditor({ campaignId, value, onChange, onValidityCha
 
   return (
     <div className="space-y-4">
+      {sorted.length > 0 && (
+        <HudChipTabs
+          ariaLabel="Рівні класу"
+          items={sorted.map((f) => ({
+            key: String(f.level),
+            active: f.level === current,
+            onSelect: () => setActive(f.level),
+            label: (
+              <span className="flex items-center gap-1.5">
+                {f.level}
+                {hasErrors(f.level) && <span role="img" aria-label="Є помилки" className="size-1.5 rounded-full bg-hud-bad" />}
+              </span>
+            ),
+          }))}
+        />
+      )}
+
       {sorted.map((feature) => (
+        <div key={feature.level} hidden={feature.level !== current}>
         <HudSection
-          key={feature.level}
           title={`Рівень ${feature.level}`}
           action={
             <Button type="button" variant="ghost" size="sm" aria-label={`Видалити рівень ${feature.level}`} onClick={() => remove(feature.level)}>
@@ -68,14 +101,15 @@ export function ClassFeaturesEditor({ campaignId, value, onChange, onValidityCha
             campaignId={campaignId}
             value={feature.abilities}
             onChange={(abilities) => setAbilities(feature.level, abilities)}
-            onValidityChange={(_, n) => report(String(feature.level), n)}
+            onValidityChange={(_, n) => reportLevel(String(feature.level), n)}
             classColumns={classColumns}
           />
           <div className="mt-3 space-y-2">
             <p className="hud-sc text-xs text-hud-muted">Вибори</p>
-            <ChoiceListEditor campaignId={campaignId} owner="class" value={feature.choices ?? []} onChange={(choices) => setChoices(feature.level, choices)} classColumns={classColumns} onValidityChange={(_, n) => report(`choices-${feature.level}`, n)} />
+            <ChoiceListEditor campaignId={campaignId} owner="class" value={feature.choices ?? []} onChange={(choices) => setChoices(feature.level, choices)} classColumns={classColumns} onValidityChange={(_, n) => reportLevel(`choices-${feature.level}`, n)} />
           </div>
         </HudSection>
+        </div>
       ))}
 
       {free.length > 0 && (

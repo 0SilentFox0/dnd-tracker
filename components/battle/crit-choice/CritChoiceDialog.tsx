@@ -58,7 +58,7 @@ function CritChoiceForm({ dialog: { rows, submit, cancel, isSubmitting } }: { di
             </legend>
             {options.map((o) => (
               <label key={o.id} className="flex cursor-pointer items-start gap-2 rounded px-2 py-1 text-sm hover:bg-white/5">
-                <input type="radio" name={trigger.key} className="mt-1" checked={choices[trigger.key] === o.id} onChange={() => setChoices({ ...choices, [trigger.key]: o.id })} />
+                <input type="radio" name={trigger.key} className="mt-0.5" checked={choices[trigger.key] === o.id} onChange={() => setChoices({ ...choices, [trigger.key]: o.id })} />
                 <span>
                   <b>{o.name}</b>
                   <span className="block text-[var(--hud-muted)]">{o.description}</span>

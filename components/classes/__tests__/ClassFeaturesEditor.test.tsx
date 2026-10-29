@@ -39,7 +39,8 @@ describe("ClassFeaturesEditor", () => {
     fireEvent.change(screen.getByLabelText("Рівень для додавання"), { target: { value: "4" } });
     fireEvent.click(screen.getByRole("button", { name: "Додати рівень" }));
 
-    expect(headings()).toEqual(["Рівень 2", "Рівень 4", "Рівень 9"]);
+    expect(Array.from(screen.getByRole("navigation", { name: "Рівні класу" }).querySelectorAll("button")).map((b) => b.textContent)).toEqual(["2", "4", "9"]);
+    expect(headings()).toEqual(["Рівень 4"]);
   });
 
   it("видаляє рівень", () => {

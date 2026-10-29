@@ -62,7 +62,7 @@ export function SpellFormBody({
   return (
     <>
       {formData.executionMode === "manual" && <p role="status">Ручне заклинання: використовуйте опис. Автоматичний каст заблокований до налаштування механіки.</p>}
-      <label className="block my-3"><input type="checkbox" checked={formData.executionMode !== "manual"} onChange={e => setFormData({ ...formData, executionMode: e.target.checked ? "native" : "manual" })} /> Механіку перевірено: дозволити автоматичне застосування після збереження</label>
+      <label className="my-3 flex items-center gap-2"><input type="checkbox" checked={formData.executionMode !== "manual"} onChange={e => setFormData({ ...formData, executionMode: e.target.checked ? "native" : "manual" })} /> Механіку перевірено: дозволити автоматичне застосування після збереження</label>
       <HudForm
         id="spell-form"
         onSubmit={submit.onSubmit}
