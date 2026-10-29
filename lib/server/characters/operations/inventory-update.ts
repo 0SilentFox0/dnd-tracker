@@ -55,7 +55,9 @@ function planEquipSlot(current: CurrentInventory, equipSlot: NonNullable<Input["
   return { displaced, nextEquipped: buildEquipped(equippedNow, equipSlot.slot, equipSlot.artifactId) };
 }
 
-async function checkOffHand(tx: Tx, campaignId: string, nextEquipped: EquippedItems | undefined, current: CurrentInventory) {
+async function checkOffHand(tx: Tx, scope: { campaignId: string; rules: ReturnType<typeof parseRules> }, nextEquipped: EquippedItems | undefined, current: CurrentInventory) {
+  const { campaignId, rules } = scope;
+
   const shieldId = nextEquipped?.shield;
 
   if (typeof shieldId !== "string" || !shieldId || shieldId === (current?.equipped as EquippedItems | undefined)?.shield) return;
@@ -63,9 +65,7 @@ async function checkOffHand(tx: Tx, campaignId: string, nextEquipped: EquippedIt
   const shieldArtifact = await tx.artifact.findFirst({ where: { id: parseItemRef(shieldId)?.baseId ?? shieldId, campaignId }, select: { slot: true, bonuses: true, modifiers: true } });
 
   if (shieldArtifact && shieldArtifact.slot !== ArtifactSlot.SHIELD) {
-    const campaign = await tx.campaign.findUnique({ where: { id: campaignId }, select: { rules: true } });
-
-    if (!canEquipOffHand(shieldArtifact, parseRules(campaign?.rules).classes.enabled)) throw new ContentError(API_ERRORS.OFF_HAND_EQUIP, 422);
+    if (!canEquipOffHand(shieldArtifact, rules.classes.enabled)) throw new ContentError(API_ERRORS.OFF_HAND_EQUIP, 422);
   }
 }
 
@@ -137,6 +137,8 @@ async function updateInventoryCore({ access, character }: Gate, data: Input) {
     throw new ContentError(API_ERRORS.ARTIFACT_UNKNOWN_SLOT, 400);
   }
 
+  const rules = parseRules(access.campaign?.rules);
+
   return prisma.$transaction(async (tx) => {
     await lockCampaignArtifacts(tx, campaignId);
 
@@ -148,9 +150,9 @@ async function updateInventoryCore({ access, character }: Gate, data: Input) {
 
     if (data.equipSlot) ({ nextEquipped, displaced } = planEquipSlot(current, data.equipSlot));
 
-    await checkOffHand(tx, campaignId, nextEquipped, current);
+    await checkOffHand(tx, { campaignId, rules }, nextEquipped, current);
 
-    if (nextEquipped) await checkEquippedConflicts(tx, { campaignId, characterId, rules: parseRules(access.campaign?.rules) }, nextEquipped, data.equipSlot);
+    if (nextEquipped) await checkEquippedConflicts(tx, { campaignId, characterId, rules }, nextEquipped, data.equipSlot);
 
     const scalars = inventoryScalars(data, current, nextEquipped, displaced);
 

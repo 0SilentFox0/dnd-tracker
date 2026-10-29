@@ -1,6 +1,6 @@
 "use client";
 
-import { type PointerEvent, type RefObject, useCallback, useEffect, useMemo, useRef } from "react";
+import { memo, type PointerEvent, type RefObject, useCallback, useEffect, useMemo, useRef } from "react";
 
 import { MapBackground } from "./MapBackground";
 import { MapHitFloat } from "./MapHitFloat";
@@ -50,7 +50,7 @@ interface MapStageProps {
 }
 
 /** Шар карти в пікселях: фон, SVG-сітка й шари, жетони з HUD і числами ударів. */
-export function MapStage({ map, participants, view, actions, editing, layout, interaction }: MapStageProps) {
+function MapStageImpl({ map, participants, view, actions, editing, layout, interaction }: MapStageProps) {
   const { win, size, pxPerUnit, rotated, phone } = layout;
 
   const { painting, preview, svgRef, onStrokeStart, wasDragged } = interaction;
@@ -168,3 +168,5 @@ export function MapStage({ map, participants, view, actions, editing, layout, in
     </div>
   );
 }
+
+export const MapStage = memo(MapStageImpl);

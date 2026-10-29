@@ -19,11 +19,13 @@ export function deriveScene(battle: BattleScene, userId: string | null, dmContro
 
   const awaiting = battle.status === BattleStatus.ACTIVE ? checkVictoryConditions(order, reserveAll).awaiting : null;
 
-  const { current, isMyTurn, myParticipants, hero } = deriveTurn(battle, userId, isDM, dmControlledId, awaiting !== null);
+  const queue = turnQueue(order, battle.currentTurnIndex, battle.currentRound);
+
+  const { current, isMyTurn, myParticipants, hero } = deriveTurn(battle, userId, isDM, dmControlledId, awaiting !== null, queue);
 
   return {
     viewer: { userId, isDM, canSeeEnemyHp: canSeeEnemyHp(hero, order) },
-    turn: { current, isMyTurn, queue: turnQueue(order, battle.currentTurnIndex, battle.currentRound) },
+    turn: { current, isMyTurn, queue },
     roster: {
       allies: order.filter((p) => p.basicInfo.side === ParticipantSide.ALLY),
       enemies: order.filter((p) => p.basicInfo.side === ParticipantSide.ENEMY),
@@ -35,7 +37,7 @@ export function deriveScene(battle: BattleScene, userId: string | null, dmContro
   };
 }
 
-export function deriveTurn(battle: BattleScene, userId: string | null, isDM: boolean, dmControlledId: string | null, awaiting = false) {
+export function deriveTurn(battle: BattleScene, userId: string | null, isDM: boolean, dmControlledId: string | null, awaiting = false, queue?: QueueEntry[]) {
   const order = battle.initiativeOrder ?? [];
 
   const current = order[battle.currentTurnIndex] ?? null;
@@ -52,7 +54,7 @@ export function deriveTurn(battle: BattleScene, userId: string | null, isDM: boo
 
   const mine = new Set(myParticipants.map((p) => p.basicInfo.id));
 
-  const nextMine = turnQueue(order, battle.currentTurnIndex, battle.currentRound ?? 1).find(
+  const nextMine = (queue ?? turnQueue(order, battle.currentTurnIndex, battle.currentRound ?? 1)).find(
     (e): e is Extract<QueueEntry, { participant: BattleParticipant }> => e.kind !== "round" && !e.down && mine.has(e.participant.basicInfo.id),
   )?.participant;
 
