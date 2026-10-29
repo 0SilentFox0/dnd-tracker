@@ -16,9 +16,9 @@ describe("choiceSelections", () => {
 
     expect(s.lineage).toBe("Wood Elf");
     expect(s.groups[0]).toMatchObject({ source: { type: "race", id: "race-elf", name: "Elf: Wood Elf" }, abilities: [{ id: "race.elven-lineage.wood-elf.speed" }] });
-    expect(s.spells).toEqual([{ spellId: "sp-druidcraft", label: "Лінія: Wood Elf" }, { spellId: "sp-longstrider", label: "Лінія: Wood Elf" }]);
+    expect(s.spells).toEqual([{ spellId: "sp-druidcraft", label: "Лінія: Wood Elf", source: { message: "characterProfile.sheet.spellOrigin.lineage", params: { name: "Wood Elf" } } }, { spellId: "sp-longstrider", label: "Лінія: Wood Elf", source: { message: "characterProfile.sheet.spellOrigin.lineage", params: { name: "Wood Elf" } } }]);
     expect(s.skills).toEqual(["perception"]);
-    expect(run({ race: elf, raceChoices: { "elven-lineage": [{ id: "wood-elf" }] }, level: 1 }).spells).toEqual([{ spellId: "sp-druidcraft", label: "Лінія: Wood Elf" }]);
+    expect(run({ race: elf, raceChoices: { "elven-lineage": [{ id: "wood-elf" }] }, level: 1 }).spells).toEqual([{ spellId: "sp-druidcraft", label: "Лінія: Wood Elf", source: { message: "characterProfile.sheet.spellOrigin.lineage", params: { name: "Wood Elf" } } }]);
   });
 
   it("class options carry the class scale; picks of closed choices do nothing", () => {
@@ -36,15 +36,15 @@ describe("choiceSelections", () => {
       level: 4,
     });
 
-    expect(s.feats.map((f) => [f.feat.name, f.from])).toEqual([["Grappler", "Sorcerer 4"], ["Magic Initiate", "Походження"], ["Alert", "ДМ"]]);
+    expect(s.feats.map((f) => [f.feat.name, f.from])).toEqual([["Grappler", { message: "characterProfile.sheet.from.classLevel", params: { name: "Sorcerer", level: 4 } }], ["Magic Initiate", { message: "characterProfile.sheet.from.origin" }], ["Alert", { message: "characterProfile.sheet.from.dm" }]]);
     expect(s.groups.filter((g) => g.source.type === "feat").map((g) => g.source.name)).toEqual(["Grappler", "Alert"]);
-    expect(s.spells).toEqual([{ spellId: "sp-guidance", label: "Риса: Magic Initiate" }]);
+    expect(s.spells).toEqual([{ spellId: "sp-guidance", label: "Риса: Magic Initiate", source: { message: "characterProfile.sheet.spellOrigin.feat", params: { name: "Magic Initiate" } } }]);
   });
 
   it("class spell picks and expertise become synthetic flags", () => {
     const s = run({ classes: [entry(sorcerer, 1, { cantrips: [{ id: "sp-firebolt" }] }), entry(rogue, 1, { "expertise-1": [{ id: "stealth" }] })] });
 
-    expect(s.spells).toEqual([{ spellId: "sp-firebolt", label: "Клас: Sorcerer" }]);
+    expect(s.spells).toEqual([{ spellId: "sp-firebolt", label: "Клас: Sorcerer", source: { message: "characterProfile.sheet.spellOrigin.class", params: { name: "Sorcerer" } } }]);
     expect(s.expertise).toEqual(["stealth"]);
     expect(s.groups.at(-1)).toMatchObject({ source: { type: "character", id: "choices" }, abilities: [{ id: "choice-expertise", effects: [{ kind: "flag", flag: "skillExpertise", skills: ["stealth"] }] }] });
   });

@@ -3,6 +3,8 @@
 import { useTranslations } from "next-intl";
 
 import { HudPanel } from "@/components/hud/page";
+import { translateIssue } from "@/lib/i18n/translate-issue";
+import { useTranslator } from "@/lib/i18n/use-translator";
 import type { SheetTotal } from "@/types/characters";
 
 interface CharacterHpPreviewProps {
@@ -11,6 +13,8 @@ interface CharacterHpPreviewProps {
 
 export function CharacterHpPreview({ hp }: CharacterHpPreviewProps) {
   const t = useTranslations("characters.stats.hp");
+
+  const tr = useTranslator();
 
   return (
     <HudPanel as="div" className="space-y-3">
@@ -26,9 +30,11 @@ export function CharacterHpPreview({ hp }: CharacterHpPreviewProps) {
         <p className="text-2xl font-semibold tabular-nums">{hp.total}</p>
         {hp.lines.length > 0 && (
           <ul className="list-inside list-disc space-y-1 text-sm text-muted-foreground">
-            {hp.lines.map((line, i) => (
-              <li key={i}>{line.value ? `${line.label} ${line.value}` : line.label}</li>
-            ))}
+            {hp.lines.map((line, i) => {
+              const label = translateIssue(tr, { message: line.label, params: line.params });
+
+              return <li key={i}>{line.value ? `${label} ${line.value}` : label}</li>;
+            })}
           </ul>
         )}
       </div>

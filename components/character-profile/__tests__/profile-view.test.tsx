@@ -50,18 +50,18 @@ describe("CharacterProfile — перегляд", () => {
     renderWithConfirm(<CharacterProfile campaignId="c" characterId="ch" canEdit={false} />);
 
     expect(screen.getByRole("heading", { name: "Ліра" })).toBeTruthy();
-    expect(screen.getByText("HP 300")).toBeTruthy();
+    expect(screen.getByText('characterProfile.hero.hpTotal {"total":300}')).toBeTruthy();
     expect(screen.getByLabelText("AC")).toHaveTextContent("17");
-    expect(screen.getByLabelText("Влучання")).toHaveTextContent("+13");
-    expect(screen.getByLabelText("Майстерність")).toHaveTextContent("+9");
-    expect(screen.getByLabelText("Ініціатива")).toHaveTextContent("4");
-    expect(screen.getByLabelText("Ініціатива")).not.toHaveTextContent("+4");
+    expect(screen.getByLabelText("characterProfile.hero.toHit")).toHaveTextContent("+13");
+    expect(screen.getByLabelText("characterProfile.hero.proficiency")).toHaveTextContent("+9");
+    expect(screen.getByLabelText("common.stats.initiative")).toHaveTextContent("4");
+    expect(screen.getByLabelText("common.stats.initiative")).not.toHaveTextContent("+4");
   });
 
   it("бойова вкладка: ініціатива без знака", () => {
     renderWithConfirm(<CharacterProfile campaignId="c" characterId="ch" canEdit={false} initialTab="combat" />);
 
-    expect(screen.getByText("Ініціатива").parentElement).toHaveTextContent(/^Ініціатива4$/);
+    expect(screen.getByText("common.stats.initiative").parentElement).toHaveTextContent(/^common\.stats\.initiative4$/);
   });
 
   it("таба з URL; перемикання пише ?tab= без запиту на сервер", () => {
@@ -69,10 +69,10 @@ describe("CharacterProfile — перегляд", () => {
 
     const replaceState = vi.spyOn(window.history, "replaceState");
 
-    expect(screen.getByRole("tab", { name: "Магія" })).toHaveAttribute("data-state", "active");
-    fireEvent.mouseDown(screen.getByRole("tab", { name: "Інвентар" }));
+    expect(screen.getByRole("tab", { name: "characterProfile.tabs.magic" })).toHaveAttribute("data-state", "active");
+    fireEvent.mouseDown(screen.getByRole("tab", { name: "characterProfile.tabs.items" }));
     expect(replaceState).toHaveBeenCalledWith(null, "", expect.stringMatching(/\?tab=items$/));
-    expect(screen.getByRole("tab", { name: "Інвентар" })).toHaveAttribute("data-state", "active");
+    expect(screen.getByRole("tab", { name: "characterProfile.tabs.items" })).toHaveAttribute("data-state", "active");
     expect(h.replace).not.toHaveBeenCalled();
   });
 
@@ -85,18 +85,18 @@ describe("CharacterProfile — перегляд", () => {
 
     const { rerender } = render(ui("combat"));
 
-    expect(screen.getByRole("tab", { name: "Бій" })).toHaveAttribute("data-state", "active");
+    expect(screen.getByRole("tab", { name: "characterProfile.tabs.combat" })).toHaveAttribute("data-state", "active");
 
     rerender(ui("items"));
 
-    expect(screen.getByRole("tab", { name: "Інвентар" })).toHaveAttribute("data-state", "active");
+    expect(screen.getByRole("tab", { name: "characterProfile.tabs.items" })).toHaveAttribute("data-state", "active");
   });
 
   it("старе ?tab=stash відкриває «Інвентар»; вкладки «Підсумок» немає", () => {
     renderWithConfirm(<CharacterProfile campaignId="c" characterId="ch" canEdit={false} initialTab="stash" />);
 
-    expect(screen.getByRole("tab", { name: "Інвентар" })).toHaveAttribute("data-state", "active");
-    expect(screen.queryByRole("tab", { name: "Підсумок" })).toBeNull();
+    expect(screen.getByRole("tab", { name: "characterProfile.tabs.items" })).toHaveAttribute("data-state", "active");
+    expect(screen.queryByRole("tab", { name: "characterProfile.tabs.stash" })).toBeNull();
   });
 
   it("атака: влучання і середня шкода, розкладка за тапом", () => {
@@ -115,24 +115,24 @@ describe("CharacterProfile — перегляд", () => {
     h.sheetQuery.data = withSheet({ attacks: [], bestToHit: null });
     renderWithConfirm(<CharacterProfile campaignId="c" characterId="ch" canEdit={false} />);
 
-    expect(screen.getByText("Немає зброї — атак поки немає")).toBeTruthy();
-    expect(screen.getByLabelText("Влучання")).toHaveTextContent("—");
+    expect(screen.getByText("characterProfile.combat.noAttacks")).toBeTruthy();
+    expect(screen.getByLabelText("characterProfile.hero.toHit")).toHaveTextContent("—");
   });
 
   it("гравець не бачить «Редагувати», ДМ бачить", () => {
     const { unmount } = renderWithConfirm(<CharacterProfile campaignId="c" characterId="ch" canEdit={false} />);
 
-    expect(screen.queryByRole("button", { name: "Редагувати" })).toBeNull();
+    expect(screen.queryByRole("button", { name: "characterProfile.actions.edit" })).toBeNull();
     unmount();
     h.sheetQuery.data = withSheet({ viewer: { isDM: true, isOwner: false } });
     renderWithConfirm(<CharacterProfile campaignId="c" characterId="ch" canEdit />);
-    expect(screen.getByRole("button", { name: "Редагувати" })).toBeTruthy();
+    expect(screen.getByRole("button", { name: "characterProfile.actions.edit" })).toBeTruthy();
   });
 
   it("гравець, що відкрив сторінку ДМа для свого персонажа, не бачить «Редагувати»", () => {
     renderWithConfirm(<CharacterProfile campaignId="c" characterId="ch" canEdit />);
 
-    expect(screen.queryByRole("button", { name: "Редагувати" })).toBeNull();
+    expect(screen.queryByRole("button", { name: "characterProfile.actions.edit" })).toBeNull();
   });
 });
 
@@ -147,23 +147,23 @@ describe("CharacterProfile — редагування ДМа", () => {
     renderWithConfirm(<CharacterProfile campaignId="c" characterId="ch" canEdit />);
 
     expect(h.editorMounts).toBe(0);
-    fireEvent.click(screen.getByRole("button", { name: "Редагувати" }));
-    expect(await screen.findByRole("tab", { name: "Основне" })).toHaveAttribute("data-state", "active");
+    fireEvent.click(screen.getByRole("button", { name: "characterProfile.actions.edit" }));
+    expect(await screen.findByRole("tab", { name: "common.tabs.basic" })).toHaveAttribute("data-state", "active");
     expect(h.editorMounts).toBeGreaterThan(0);
-    expect(screen.getByRole("button", { name: "Зберегти" })).toBeTruthy();
-    fireEvent.click(screen.getByRole("button", { name: "Скасувати" }));
-    expect(screen.getByRole("button", { name: "Редагувати" })).toBeTruthy();
+    expect(screen.getByRole("button", { name: "characterProfile.editor.save" })).toBeTruthy();
+    fireEvent.click(screen.getByRole("button", { name: "characterProfile.editor.cancel" }));
+    expect(screen.getByRole("button", { name: "characterProfile.actions.edit" })).toBeTruthy();
   });
 
   it("«Магія» в редакторі показує книгу заклинань з листа", async () => {
     mockMatchMedia(false);
     renderWithConfirm(<CharacterProfile campaignId="c" characterId="ch" canEdit />);
 
-    fireEvent.click(screen.getByRole("button", { name: "Редагувати" }));
-    fireEvent.mouseDown(await screen.findByRole("tab", { name: "Магія" }));
-    fireEvent.click(screen.getByRole("button", { name: "Книга заклинань" }));
+    fireEvent.click(screen.getByRole("button", { name: "characterProfile.actions.edit" }));
+    fireEvent.mouseDown(await screen.findByRole("tab", { name: "characterProfile.tabs.magic" }));
+    fireEvent.click(screen.getByRole("button", { name: "characterProfile.magic.book" }));
 
-    expect(screen.getByRole("dialog")).toHaveAccessibleName("Книга заклинань");
+    expect(screen.getByRole("dialog")).toHaveAccessibleName("characterProfile.spellBook.title");
     expect(screen.getByText("Мітка мисливця")).toBeTruthy();
   });
 });

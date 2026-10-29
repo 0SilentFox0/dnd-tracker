@@ -42,7 +42,13 @@ exports[`choice owner walk characterization > backgroundFeat > selections 1`] = 
       "id": "bg",
       "name": "Sage",
       "picks": [
-        "+2 СИЛ",
+        {
+          "message": "characterProfile.sheet.abilityPick",
+          "params": {
+            "ability": "strength",
+            "n": 2,
+          },
+        },
       ],
     },
     "expertise": [],
@@ -76,7 +82,12 @@ exports[`choice owner walk characterization > backgroundFeat > selections 1`] = 
           "repeatable": true,
           "type": "origin",
         },
-        "from": "Передісторія: Sage",
+        "from": {
+          "message": "characterProfile.sheet.from.background",
+          "params": {
+            "name": "Sage",
+          },
+        },
         "key": "background:bg:feat:f-mi",
         "picks": {
           "cantrips": [
@@ -118,7 +129,9 @@ exports[`choice owner walk characterization > backgroundFeat > selections 1`] = 
           "repeatable": false,
           "type": "origin",
         },
-        "from": "ДМ",
+        "from": {
+          "message": "characterProfile.sheet.from.dm",
+        },
         "key": "feat:0",
         "picks": {},
       },
@@ -189,10 +202,22 @@ exports[`choice owner walk characterization > backgroundFeat > selections 1`] = 
     "spells": [
       {
         "label": "Риса: Magic Initiate",
+        "source": {
+          "message": "characterProfile.sheet.spellOrigin.feat",
+          "params": {
+            "name": "Magic Initiate",
+          },
+        },
         "spellId": "sp-guidance",
       },
       {
         "label": "Риса: Magic Initiate",
+        "source": {
+          "message": "characterProfile.sheet.spellOrigin.feat",
+          "params": {
+            "name": "Magic Initiate",
+          },
+        },
         "spellId": "sp-deleted",
       },
     ],
@@ -553,7 +578,13 @@ exports[`choice owner walk characterization > featChain > selections 1`] = `
           "repeatable": false,
           "type": "general",
         },
-        "from": "Sorcerer 4",
+        "from": {
+          "message": "characterProfile.sheet.from.classLevel",
+          "params": {
+            "level": 4,
+            "name": "Sorcerer",
+          },
+        },
         "key": "class:cls-sorc.ability-score-improvement-4.0",
         "picks": {
           "grappler-asi": [
@@ -592,7 +623,9 @@ exports[`choice owner walk characterization > featChain > selections 1`] = `
           "repeatable": true,
           "type": "origin",
         },
-        "from": "Походження",
+        "from": {
+          "message": "characterProfile.sheet.from.origin",
+        },
         "key": "feat:0",
         "picks": {
           "cantrips": [
@@ -638,6 +671,12 @@ exports[`choice owner walk characterization > featChain > selections 1`] = `
     "spells": [
       {
         "label": "Риса: Magic Initiate",
+        "source": {
+          "message": "characterProfile.sheet.spellOrigin.feat",
+          "params": {
+            "name": "Magic Initiate",
+          },
+        },
         "spellId": "sp-guidance",
       },
     ],
@@ -1199,6 +1238,12 @@ exports[`choice owner walk characterization > multiclass > selections 1`] = `
     "spells": [
       {
         "label": "Клас: Sorcerer",
+        "source": {
+          "message": "characterProfile.sheet.spellOrigin.class",
+          "params": {
+            "name": "Sorcerer",
+          },
+        },
         "spellId": "sp-firebolt",
       },
     ],
@@ -1645,10 +1690,22 @@ exports[`choice owner walk characterization > raceSubrace > selections 1`] = `
     "spells": [
       {
         "label": "Лінія: Wood Elf",
+        "source": {
+          "message": "characterProfile.sheet.spellOrigin.lineage",
+          "params": {
+            "name": "Wood Elf",
+          },
+        },
         "spellId": "sp-druidcraft",
       },
       {
         "label": "Лінія: Wood Elf",
+        "source": {
+          "message": "characterProfile.sheet.spellOrigin.lineage",
+          "params": {
+            "name": "Wood Elf",
+          },
+        },
         "spellId": "sp-longstrider",
       },
     ],

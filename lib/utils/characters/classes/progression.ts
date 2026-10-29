@@ -67,7 +67,7 @@ export function buildClassProgression(cls: GameClassData, entry?: CharacterClass
   if (cls.subclassLevel !== null && cls.subclasses.length > 0) {
     const done = entry?.subclassId && cls.subclasses.some((s) => s.id === entry.subclassId) ? 1 : 0;
 
-    rowAt(cls.subclassLevel).picks.push({ key: "subclass", kind: "subclass", label: "Підклас", required: 1, done: entry ? done : null, status: statusOf(cls.subclassLevel, 1, done) });
+    rowAt(cls.subclassLevel).picks.push({ key: "subclass", kind: "subclass", label: "classes.progression.subclass", required: 1, done: entry ? done : null, status: statusOf(cls.subclassLevel, 1, done) });
   }
 
   return {

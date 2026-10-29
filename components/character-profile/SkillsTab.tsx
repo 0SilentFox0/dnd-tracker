@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import dynamic from "next/dynamic";
+import { useTranslations } from "next-intl";
 
 import { ChargesList } from "./rest/ChargesList";
 import { FeatsBlock } from "./FeatsBlock";
@@ -16,6 +17,8 @@ const ChoicesDialog = dynamic(() => import("./ChoicesDialog"), { ssr: false });
 
 export function SkillsTab({ manage = false }: { manage?: boolean }) {
   const { campaignId, characterId, sheet } = useProfile();
+
+  const t = useTranslations("characterProfile.skills");
 
   const personal = sheet.personalSkill;
 
@@ -39,7 +42,7 @@ export function SkillsTab({ manage = false }: { manage?: boolean }) {
         <section className="mb-3 flex gap-3 rounded-[10px] border border-hud-gold/40 bg-hud-field p-3">
           <EntityIcon src={sheet.identity.avatar || personal.icon} name={personal.name} alt={sheet.identity.name} size={48} className="hud-sc size-12 rounded-md border border-hud-line bg-[#2a2016] text-inherit" />
           <div className="min-w-0">
-            <p className="text-[11px] uppercase text-hud-gold">Персональне вміння</p>
+            <p className="text-[11px] uppercase text-hud-gold">{t("personal")}</p>
             <h3 className="hud-sc text-base text-hud-ink">{personal.name}</h3>
             {personal.description && <p className="mt-1 text-[13px] leading-snug text-[#b8ab95]">{personal.description}</p>}
           </div>

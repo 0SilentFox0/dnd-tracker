@@ -3,6 +3,8 @@ import { useTranslations } from "next-intl";
 import { LabeledInput } from "@/components/ui/labeled-input";
 import { clampHeroInitiative } from "@/lib/constants/characters";
 import { useCampaignRules } from "@/lib/hooks/campaigns";
+import { translateIssue } from "@/lib/i18n/translate-issue";
+import { useTranslator } from "@/lib/i18n/use-translator";
 import type { CharacterFormBindings } from "@/lib/utils/characters/form/bindings";
 import type { SheetTotal } from "@/types/characters";
 
@@ -16,6 +18,8 @@ export function CharacterCombatParams({ campaignId, combatStats: { data, set }, 
   const t = useTranslations("characters.stats");
 
   const tc = useTranslations("common.stats");
+
+  const tr = useTranslator();
 
   const { data: rules } = useCampaignRules(campaignId);
 
@@ -39,7 +43,7 @@ export function CharacterCombatParams({ campaignId, combatStats: { data, set }, 
               <p className="text-lg font-bold">{classArmor.total}</p>
               <ul className="text-xs text-hud-muted">
                 {classArmor.lines.map((l) => (
-                  <li key={`${l.label}-${l.value}`}>{`${l.label} ${l.value}`}</li>
+                  <li key={`${l.label}-${l.value}`}>{`${translateIssue(tr, { message: l.label, params: l.params })} ${l.value}`}</li>
                 ))}
               </ul>
             </>

@@ -38,26 +38,26 @@ describe("таби профілю", () => {
     mockMatchMedia(false);
     inProfile(<MagicTab />);
 
-    expect(screen.getByLabelText("I коло: 4 слоти")).toHaveTextContent("I · 4");
-    fireEvent.click(screen.getByRole("button", { name: "Книга заклинань" }));
-    expect(screen.getByRole("dialog")).toHaveAccessibleName("Книга заклинань");
+    expect(screen.getByLabelText('characterProfile.magic.slotsTotal {"level":"I","count":4}')).toHaveTextContent("I · 4");
+    fireEvent.click(screen.getByRole("button", { name: "characterProfile.magic.book" }));
+    expect(screen.getByRole("dialog")).toHaveAccessibleName("characterProfile.spellBook.title");
     expect(screen.getByText("Мітка мисливця")).toBeTruthy();
   });
 
   it("Магія без заклинань — порожня книга з написом, без кнопки книги", () => {
     inProfile(<MagicTab />, withSheet({ magic: null, slots: [], spells: [] }));
 
-    expect(screen.getByText("Поки що Герой більше довіряє своєму мечу і луку")).toBeTruthy();
+    expect(screen.getByText("characterProfile.magic.emptyBook")).toBeTruthy();
     expect(screen.queryByText("Магії поки немає")).toBeNull();
-    expect(screen.queryByRole("button", { name: "Книга заклинань" })).toBeNull();
+    expect(screen.queryByRole("button", { name: "characterProfile.magic.book" })).toBeNull();
   });
 
   it("Магія без заклинань, але зі слотами — слоти над порожньою книгою", () => {
     inProfile(<MagicTab />, withSheet({ spells: [] }));
 
-    const slot = screen.getByLabelText("I коло: 4 слоти");
+    const slot = screen.getByLabelText('characterProfile.magic.slotsTotal {"level":"I","count":4}');
 
-    const book = screen.getByText("Поки що Герой більше довіряє своєму мечу і луку");
+    const book = screen.getByText("characterProfile.magic.emptyBook");
 
     expect(slot.compareDocumentPosition(book) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
   });

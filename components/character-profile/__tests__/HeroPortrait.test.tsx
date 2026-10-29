@@ -9,7 +9,7 @@ describe("HeroPortrait", () => {
 
   it("фото з кнопкою перегляду", () => {
     render(<HeroPortrait src="https://x.supabase.co/storage/v1/object/public/avatars/c/a.webp" name="Арвен" />);
-    expect(screen.getByRole("button", { name: "Відкрити фото" })).toBeTruthy();
+    expect(screen.getByRole("button", { name: "characterProfile.portrait.open" })).toBeTruthy();
     expect(screen.getByAltText("Арвен")).toBeTruthy();
   });
 
@@ -27,8 +27,8 @@ describe("HeroPortrait", () => {
   it("без фото підказка «Додати фото» лише тому, хто може редагувати", () => {
     const { rerender } = render(<HeroPortrait src={null} name="Арвен" />);
 
-    expect(screen.queryByText("Додати фото")).toBeNull();
+    expect(screen.queryByText("characterProfile.portrait.add")).toBeNull();
     rerender(<HeroPortrait src={null} name="Арвен" canEdit />);
-    expect(screen.getByText("Додати фото")).toBeTruthy();
+    expect(screen.getByText("characterProfile.portrait.add")).toBeTruthy();
   });
 });

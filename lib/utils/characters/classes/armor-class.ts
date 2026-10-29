@@ -2,6 +2,7 @@ import { ParticipantSourceType } from "@/lib/constants/battle";
 import type { Effect } from "@/lib/utils/abilities/schema";
 import { armorDexCap } from "@/lib/utils/artifacts/armor-row";
 import { wornArmor } from "@/lib/utils/artifacts/worn-armor";
+import { sheetLineKey } from "@/lib/utils/characters/sheet/line-key";
 import { signed } from "@/lib/utils/common/format";
 import type { ResolvedAbility } from "@/types/abilities";
 import type { BattleParticipant } from "@/types/battle";
@@ -18,7 +19,7 @@ export function classArmorBase(p: BattleParticipant): { base: number; lines: She
 
   const worn = wornArmor(p);
 
-  if (!worn) return { base: 10 + dex, lines: [{ label: "Без броні", value: "10", source: "base" }, { label: "Спритність", value: signed(dex), source: "ability" }] };
+  if (!worn) return { base: 10 + dex, lines: [{ label: sheetLineKey("noArmor"), value: "10", source: "base" }, { label: "common.abilities.dexterity.label", value: signed(dex), source: "ability" }] };
 
   const cap = armorDexCap(worn.stats);
 
@@ -28,7 +29,7 @@ export function classArmorBase(p: BattleParticipant): { base: number; lines: She
     base: worn.stats.base + dexPart,
     lines: [
       { label: worn.artifact.name, value: String(worn.stats.base), source: "artifact" },
-      ...(cap === 0 ? [] : [{ label: cap === null ? "Спритність" : `Спритність (межа ${cap})`, value: signed(dexPart), source: "ability" as const }]),
+      ...(cap === 0 ? [] : [{ label: cap === null ? "common.abilities.dexterity.label" : sheetLineKey("dexterityCapped"), ...(cap !== null && { params: { cap } }), value: signed(dexPart), source: "ability" as const }]),
     ],
   };
 }
@@ -52,6 +53,7 @@ export function armorPenalties(p: BattleParticipant): ResolvedAbility | null {
 
   const { artifactId, name } = worn.artifact;
 
+  // eslint-disable-next-line no-restricted-syntax -- ability description is battle data
   const description = [stealthDisadvantage ? "Перешкода на Скритність" : null, slowed ? `Сила нижче ${strength}: швидкість −${ARMOR_STRENGTH_SPEED_PENALTY}` : null].filter(Boolean).join("; ");
 
   return { id: PENALTY_ID, name, description, trigger: { event: "passive" }, effects, source: { type: "artifact", id: artifactId, name }, key: `artifact:${artifactId}:${PENALTY_ID}` };

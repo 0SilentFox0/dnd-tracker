@@ -61,22 +61,22 @@ describe("ClassLevelUpDialog", () => {
   it("підсумок рівня: назви фіч і кількість виборів, порожній рівень без блоку", () => {
     renderDialog(4);
 
-    expect(screen.getByText("Що дає рівень 5")).toBeTruthy();
+    expect(screen.getByText('characterProfile.classLevelUp.gains {"level":5}')).toBeTruthy();
     expect(screen.getByText("Extra Attack")).toBeTruthy();
     cleanup();
     renderDialog(5);
 
-    expect(screen.queryByText(/Що дає рівень/)).toBeNull();
+    expect(screen.queryByText(/characterProfile\.classLevelUp\.gains /)).toBeNull();
   });
 
   it("підклас обов'язковий, коли новий рівень досягає subclassLevel", async () => {
     renderDialog(2);
 
     expect(screen.getByText("Воїн 2 → 3")).toBeTruthy();
-    expect(screen.getByRole("combobox", { name: "Підклас" })).toBeTruthy();
+    expect(screen.getByRole("combobox", { name: "characterProfile.classLevelUp.subclass" })).toBeTruthy();
     fireEvent.submit(document.getElementById("class-level-up-form") as HTMLFormElement);
     expect(submit).not.toHaveBeenCalled();
-    fireEvent.change(screen.getByRole("combobox", { name: "Підклас" }), { target: { value: "champion" } });
+    fireEvent.change(screen.getByRole("combobox", { name: "characterProfile.classLevelUp.subclass" }), { target: { value: "champion" } });
     fireEvent.submit(document.getElementById("class-level-up-form") as HTMLFormElement);
     await waitFor(() => expect(submit).toHaveBeenCalledWith({ classId: "fighter", subclassId: "champion" }));
   });
@@ -84,7 +84,7 @@ describe("ClassLevelUpDialog", () => {
   it("без підкласу до subclassLevel викликає мутацію з classId", async () => {
     renderDialog(1);
 
-    expect(screen.queryByRole("combobox", { name: "Підклас" })).toBeNull();
+    expect(screen.queryByRole("combobox", { name: "characterProfile.classLevelUp.subclass" })).toBeNull();
     fireEvent.submit(document.getElementById("class-level-up-form") as HTMLFormElement);
     await waitFor(() => expect(submit).toHaveBeenCalledWith({ classId: "fighter" }));
   });
@@ -102,6 +102,6 @@ describe("ClassLevelUpDialog", () => {
     classes = [{ ...fighter, columns: [col], features: [{ level: 5, abilities: [], choices: [{ id: "prep", label: "Prepared", level: 5, count: { scale: "prep" }, kind: "spell" }] }] } as GameClassData];
     renderDialog(4, {}, true);
 
-    expect(screen.getByText("Виборів: 1")).toBeTruthy();
+    expect(screen.getByText('characterProfile.classLevelUp.picks {"count":1}')).toBeTruthy();
   });
 });

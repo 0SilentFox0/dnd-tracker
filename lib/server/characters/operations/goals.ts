@@ -13,7 +13,7 @@ export const goalsOperation = defineCharacterOperation({
   name: "goals",
   action: "update character goals",
   schema: putGoalsSchema,
-  parseMessage: "Некоректні цілі",
+  parseMessage: API_ERRORS.CHARACTER_GOALS_INVALID,
   gate: ctx => requireCharacterSelect(ctx.campaignId, ctx.characterId, { id: true, campaignId: true, controlledBy: true, goals: true }, { ...gateOptions(ctx), notFound: API_ERRORS.NOT_FOUND, foreign404: true }),
   run: async ({ access, character }, parsed) => {
     const current = parseGoals(character.goals);

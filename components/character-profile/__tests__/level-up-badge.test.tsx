@@ -16,7 +16,7 @@ describe("LevelUpBadge", () => {
 
     expect(screen.getByText("LVL UP +2")).toBeTruthy();
 
-    fireEvent.click(screen.getByRole("button", { name: "Вільні очки навичок: 2" }));
+    fireEvent.click(screen.getByRole("button", { name: 'characterProfile.levelUp.freePoints {"free":2}' }));
 
     expect(onOpen).toHaveBeenCalledTimes(1);
   });

@@ -39,16 +39,16 @@ describe("Історія", () => {
   it("гравець бачить бейдж «від гравця», редагує лише свої цілі", () => {
     inProfile(sheetFixture);
 
-    expect(screen.getByText("від гравця")).toBeTruthy();
-    expect(screen.getAllByRole("button", { name: /Редагувати ціль/ })).toHaveLength(1);
+    expect(screen.getByText("characterProfile.goals.fromPlayer")).toBeTruthy();
+    expect(screen.getAllByRole("button", { name: /characterProfile\.goals\.editLabel/ })).toHaveLength(1);
   });
 
   it("гравець додає ціль — шле свої цілі + нову, без цілей ДМа", async () => {
     inProfile(sheetFixture);
 
-    fireEvent.click(screen.getByRole("button", { name: "Додати ціль" }));
-    fireEvent.change(screen.getByRole("textbox", { name: "Текст цілі" }), { target: { value: "Купити коня" } });
-    fireEvent.click(screen.getByRole("button", { name: "Зберегти ціль" }));
+    fireEvent.click(screen.getByRole("button", { name: "characterProfile.goals.add" }));
+    fireEvent.change(screen.getByRole("textbox", { name: "characterProfile.goals.textField" }), { target: { value: "Купити коня" } });
+    fireEvent.click(screen.getByRole("button", { name: "characterProfile.goals.save" }));
 
     await waitFor(() => expect(save).toHaveBeenCalled());
 
@@ -60,7 +60,7 @@ describe("Історія", () => {
   it("ДМ міняє статус цілі тапом", async () => {
     inProfile(withSheet({ viewer: { isDM: true, isOwner: false } }));
 
-    fireEvent.click(screen.getByRole("button", { name: "Статус «Знайти брата»: активна" }));
+    fireEvent.click(screen.getByRole("button", { name: 'characterProfile.goals.statusLabel {"name":"Знайти брата","status":"characterProfile.goals.status.active"}' }));
 
     await waitFor(() => expect(save).toHaveBeenCalled());
     expect(save.mock.calls[0][0][0]).toMatchObject({ id: "d1", status: "done" });
@@ -70,7 +70,7 @@ describe("Історія", () => {
   it("порожня біографія — підказка", () => {
     inProfile(withSheet({ story: { biography: null, notes: null, goals: [], tokens: [], chapters: [] } }));
 
-    expect(screen.getByText("Біографію ще не написано")).toBeTruthy();
+    expect(screen.getByText("characterProfile.story.noBiography")).toBeTruthy();
   });
 
   it("Enter у полі цілі зберігає ціль і не відправляє зовнішню форму", async () => {
@@ -84,9 +84,9 @@ describe("Історія", () => {
       </form>,
     );
 
-    fireEvent.click(screen.getByRole("button", { name: "Додати ціль" }));
+    fireEvent.click(screen.getByRole("button", { name: "characterProfile.goals.add" }));
 
-    const input = screen.getByRole("textbox", { name: "Текст цілі" });
+    const input = screen.getByRole("textbox", { name: "characterProfile.goals.textField" });
 
     fireEvent.change(input, { target: { value: "Знайти карту" } });
     fireEvent.keyDown(input, { key: "Enter" });
@@ -105,7 +105,7 @@ describe("Історія", () => {
 
   it("без глав — блок не рендериться", () => {
     inProfile(sheetFixture);
-    expect(screen.queryByText(/глави історії/i)).toBeNull();
+    expect(screen.queryByText("characterProfile.story.chapters")).toBeNull();
   });
 
   it("власник бачить нотатки і зберігає правку", async () => {
@@ -113,9 +113,9 @@ describe("Історія", () => {
 
     expect(screen.getByText("Купити мотузку")).toBeTruthy();
 
-    fireEvent.click(screen.getByRole("button", { name: "Редагувати нотатки" }));
-    fireEvent.change(screen.getByRole("textbox", { name: "Нотатки" }), { target: { value: "Нове" } });
-    fireEvent.click(screen.getByRole("button", { name: "Зберегти" }));
+    fireEvent.click(screen.getByRole("button", { name: "characterProfile.notes.edit" }));
+    fireEvent.change(screen.getByRole("textbox", { name: "characterProfile.notes.field" }), { target: { value: "Нове" } });
+    fireEvent.click(screen.getByRole("button", { name: "characterProfile.notes.save" }));
 
     await waitFor(() => expect(saveNotes).toHaveBeenCalledWith("Нове"));
   });
@@ -123,6 +123,6 @@ describe("Історія", () => {
   it("не власник не бачить блок нотаток", () => {
     inProfile(withSheet({ viewer: { isDM: true, isOwner: false } }));
 
-    expect(screen.queryByText("НОТАТКИ")).toBeNull();
+    expect(screen.queryByText("characterProfile.notes.title")).toBeNull();
   });
 });

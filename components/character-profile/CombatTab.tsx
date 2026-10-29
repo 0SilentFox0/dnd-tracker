@@ -1,6 +1,7 @@
 "use client";
 
 import { type ReactNode, useState } from "react";
+import { useTranslations } from "next-intl";
 import { Crosshair, Swords } from "lucide-react";
 
 import { SheetRollDialog, type SheetRollRequest } from "./rest/SheetRollDialog";
@@ -9,7 +10,6 @@ import { useProfile } from "./ProfileContext";
 
 import { EmptyState } from "@/components/common/states";
 import { HudSection } from "@/components/hud/form";
-import { ABILITY_SHORT_LABELS } from "@/lib/constants/abilities";
 import { AttackType } from "@/lib/constants/battle";
 import type { DndSkill } from "@/lib/constants/skills";
 import { useCampaignRules } from "@/lib/hooks/campaigns";
@@ -36,6 +36,10 @@ function Row({ label, value, lines }: { label: string; value: string; lines?: Sh
 export function CombatTab() {
   const { campaignId, sheet } = useProfile();
 
+  const t = useTranslations("characterProfile.combat");
+
+  const tc = useTranslations("common");
+
   const { data: rules } = useCampaignRules(campaignId);
 
   const [openAttack, setOpenAttack] = useState<string | null>(null);
@@ -46,8 +50,8 @@ export function CombatTab() {
 
   const rollable = (request: SheetRollRequest, children: ReactNode) =>
     canRoll ? (
-      <button type="button" title="Кинути" onClick={() => setRollRequest(request)} className="flex w-full justify-between gap-2 text-left">
-        <span className="sr-only">Кинути: </span>
+      <button type="button" title={t("roll")} onClick={() => setRollRequest(request)} className="flex w-full justify-between gap-2 text-left">
+        <span className="sr-only">{t("roll")}: </span>
         {children}
       </button>
     ) : (
@@ -56,12 +60,12 @@ export function CombatTab() {
 
   return (
     <>
-      <HudSection title="ХАРАКТЕРИСТИКИ">
+      <HudSection title={t("abilities")}>
         <div className="grid grid-cols-6 gap-1">
           {sheet.abilities.map((a) => (
             <div key={a.key} className={cn("min-w-0 rounded-lg border bg-hud-field py-1 text-center", a.isPrimary ? "border-hud-gold shadow-[inset_0_0_0_1px_var(--color-hud-gold)]" : "border-hud-line")}>
               <small className="block text-[10px] text-hud-muted">
-                {ABILITY_SHORT_LABELS[a.key]}
+                {tc(`abilities.${a.key}.short`)}
                 {a.isPrimary ? " ★" : ""}
               </small>
               <b className="block text-[17px] leading-5">{a.score}</b>
@@ -69,11 +73,11 @@ export function CombatTab() {
             </div>
           ))}
         </div>
-        {sheet.primaryAbility && <p className="mt-1.5 text-xs text-hud-muted">★ основна характеристика: від неї влучання і шкода всіх атак</p>}
+        {sheet.primaryAbility && <p className="mt-1.5 text-xs text-hud-muted">{t("primaryHint")}</p>}
       </HudSection>
-      <HudSection title="АТАКИ">
+      <HudSection title={t("attacks")}>
         {sheet.attacks.length === 0 ? (
-          <EmptyState title="Немає зброї — атак поки немає" className="border-hud-rule py-6 text-hud-muted" />
+          <EmptyState title={t("noAttacks")} className="border-hud-rule py-6 text-hud-muted" />
         ) : (
           sheet.attacks.map((a) => (
             <div key={a.id} className="mb-1.5 rounded-[10px] border border-hud-line bg-hud-field px-2.5 py-2">
@@ -83,14 +87,14 @@ export function CombatTab() {
                   {a.name}
                 </span>
                 <span className="shrink-0 whitespace-nowrap text-sm text-hud-muted">
-                  <b className="text-lg text-hud-ink">{signed(a.toHit.total)}</b> влуч · <b className="text-lg text-hud-ink">≈{a.avgDamage.total}</b> шкода
+                  <b className="text-lg text-hud-ink">{signed(a.toHit.total)}</b> {t("hitShort")} · <b className="text-lg text-hud-ink">≈{a.avgDamage.total}</b> {t("damage")}
                 </span>
               </button>
               {openAttack === a.id && (
                 <>
-                  <p className="mt-2 text-[11px] uppercase text-hud-gold">Влучання</p>
+                  <p className="mt-2 text-[11px] uppercase text-hud-gold">{t("toHit")}</p>
                   <Breakdown lines={a.toHit.lines} />
-                  <p className="mt-2 text-[11px] uppercase text-hud-gold">Середня шкода</p>
+                  <p className="mt-2 text-[11px] uppercase text-hud-gold">{t("avgDamage")}</p>
                   <Breakdown lines={a.avgDamage.lines} />
                 </>
               )}
@@ -98,24 +102,24 @@ export function CombatTab() {
           ))
         )}
       </HudSection>
-      <HudSection title="ЗАХИСТ І ПАРАМЕТРИ">
+      <HudSection title={t("defense")}>
         <Row label="AC" value={String(sheet.armorClass.total)} lines={sheet.armorClass.lines} />
-        <Row label="Ініціатива" value={String(sheet.initiative)} />
-        <Row label="Швидкість" value={String(sheet.speed)} />
-        {rules?.morale.enabled !== false && <Row label="Мораль" value={signed(sheet.morale)} />}
-        <Row label="Цілей за атаку" value={sheet.targets.min === sheet.targets.max ? String(sheet.targets.max) : `${sheet.targets.min}–${sheet.targets.max}`} />
-        {sheet.immunities.length > 0 && <Row label="Імунітети" value={sheet.immunities.join(", ")} />}
+        <Row label={tc("stats.initiative")} value={String(sheet.initiative)} />
+        <Row label={tc("stats.speed")} value={String(sheet.speed)} />
+        {rules?.morale.enabled !== false && <Row label={tc("stats.moral")} value={signed(sheet.morale)} />}
+        <Row label={t("targets")} value={sheet.targets.min === sheet.targets.max ? String(sheet.targets.max) : `${sheet.targets.min}–${sheet.targets.max}`} />
+        {sheet.immunities.length > 0 && <Row label={t("immunities")} value={sheet.immunities.join(", ")} />}
       </HudSection>
-      <HudSection title="РЯТІВНІ КИДКИ">
+      <HudSection title={t("saves")}>
         <ul className="grid grid-cols-2 gap-x-4 text-sm">
           {sheet.saves.map((s) => (
             <li key={s.key} className="border-b border-[#2a2218] py-1">
               {rollable(
-                { label: `Рятівний кидок: ${s.label}`, subject: { kind: "save", ability: s.ability } },
+                { label: t("saveRoll", { ability: tc(`abilities.${s.ability}.label`) }), subject: { kind: "save", ability: s.ability } },
                 <>
                   <span className="min-w-0 truncate">
                     {s.proficient ? (s.expertise ? "●● " : "● ") : ""}
-                    {s.label}
+                    {tc(`abilities.${s.ability}.label`)}
                     {s.expertise && <span className="ml-1 text-xs text-hud-muted">×2</span>}
                   </span>
                   <span className="tabular-nums">{signed(s.bonus)}</span>
@@ -125,16 +129,16 @@ export function CombatTab() {
           ))}
         </ul>
       </HudSection>
-      <HudSection title="НАВИЧКИ">
+      <HudSection title={t("skills")}>
         <ul className="grid grid-cols-2 gap-x-4 text-sm">
           {sheet.skills.map((s) => (
             <li key={s.key} className="border-b border-[#2a2218] py-1">
               {rollable(
-                { label: s.label, subject: { kind: "check", skill: s.key as DndSkill } },
+                { label: tc(`dndSkills.${s.key as DndSkill}`), subject: { kind: "check", skill: s.key as DndSkill } },
                 <>
                   <span className="min-w-0 truncate">
                     {s.proficient ? "● " : ""}
-                    {s.label}
+                    {tc(`dndSkills.${s.key as DndSkill}`)}
                   </span>
                   <span className="tabular-nums">{signed(s.bonus)}</span>
                 </>,
@@ -143,11 +147,11 @@ export function CombatTab() {
           ))}
         </ul>
         <p className="mt-2 text-xs text-hud-muted">
-          Пасивні: сприйняття {sheet.passives.perception} · розслідування {sheet.passives.investigation} · проникливість {sheet.passives.insight}
+          {t("passives", sheet.passives)}
         </p>
         {(sheet.languages.length > 0 || sheet.proficiencies.length > 0) && (
           <p className="mt-1 text-xs text-hud-muted">
-            {[sheet.languages.length ? `Мови: ${sheet.languages.join(", ")}` : null, sheet.proficiencies.length ? `Володіння: ${sheet.proficiencies.join(", ")}` : null].filter(Boolean).join(" · ")}
+            {[sheet.languages.length ? t("languages", { list: sheet.languages.join(", ") }) : null, sheet.proficiencies.length ? t("proficiencies", { list: sheet.proficiencies.join(", ") }) : null].filter(Boolean).join(" · ")}
           </p>
         )}
       </HudSection>

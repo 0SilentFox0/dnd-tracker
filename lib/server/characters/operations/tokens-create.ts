@@ -11,7 +11,7 @@ export const tokensCreateOperation = defineCharacterOperation({
   name: "tokens-create",
   action: "create character token",
   schema: createTokenSchema,
-  parseMessage: "Некоректний жетон",
+  parseMessage: API_ERRORS.CHARACTER_TOKEN_INVALID,
   status: 201,
   gate: async ctx => {
     const access = await tokenGate(ctx);

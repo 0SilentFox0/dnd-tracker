@@ -1,1 +1,229 @@
-{}
+{
+  "tabs": {
+    "basic": "Основне",
+    "combat": "Бій",
+    "skills": "Вміння",
+    "choices": "Вибори",
+    "magic": "Магія",
+    "items": "Інвентар",
+    "story": "Історія",
+    "log": "Журнал",
+    "things": "Речі"
+  },
+  "actions": {
+    "edit": "Редагувати"
+  },
+  "hero": {
+    "level": "{level} рів.",
+    "hpCurrent": "HP {current} / {max}",
+    "hpTotal": "HP {total}",
+    "toHit": "Влучання",
+    "proficiency": "Майстерність",
+    "short": {
+      "initiative": "Ініц",
+      "speed": "Швидк",
+      "toHit": "Влуч",
+      "proficiency": "Майст"
+    }
+  },
+  "combat": {
+    "roll": "Кинути",
+    "abilities": "ХАРАКТЕРИСТИКИ",
+    "primaryHint": "★ основна характеристика: від неї влучання і шкода всіх атак",
+    "attacks": "АТАКИ",
+    "noAttacks": "Немає зброї — атак поки немає",
+    "hitShort": "влуч",
+    "damage": "шкода",
+    "toHit": "Влучання",
+    "avgDamage": "Середня шкода",
+    "defense": "ЗАХИСТ І ПАРАМЕТРИ",
+    "targets": "Цілей за атаку",
+    "immunities": "Імунітети",
+    "saves": "РЯТІВНІ КИДКИ",
+    "saveRoll": "Рятівний кидок: {ability}",
+    "skills": "НАВИЧКИ",
+    "passives": "Пасивні: сприйняття {perception} · розслідування {investigation} · проникливість {insight}",
+    "languages": "Мови: {list}",
+    "proficiencies": "Володіння: {list}"
+  },
+  "magic": {
+    "saveDC": "СЛ заклинань",
+    "attack": "Атака закл.",
+    "pact": "ПАКТ",
+    "pactSlots": "Слоти пакту: {current} з {max}, {level} коло",
+    "slots": "СЛОТИ",
+    "slotsLeft": "{level} коло: залишилось {current} з {count}",
+    "slotsTotal": "{level} коло: {count} {count, plural, one {слот} few {слоти} many {слотів} other {слотів}}",
+    "fromChoices": "ЗАКЛИНАННЯ З ВИБОРІВ",
+    "book": "Книга заклинань",
+    "emptyBook": "Поки що Герой більше довіряє своєму мечу і луку"
+  },
+  "skills": {
+    "personal": "Персональне вміння",
+    "race": "Раса: {race}"
+  },
+  "feats": {
+    "title": "Риси й вибори",
+    "background": "Передісторія: {name}",
+    "equipmentNote": "Спорядження й гроші видає ДМ вручну."
+  },
+  "sets": {
+    "title": "СЕТИ",
+    "name": "Сет «{name}» {have}/{total}",
+    "withFull": "З повним сетом: {effects}"
+  },
+  "tokens": {
+    "giveTitle": "Видати жетон",
+    "give": "Видати",
+    "colorLabel": "Колір жетона",
+    "colors": {
+      "red": "Червоний",
+      "green": "Зелений"
+    },
+    "labelField": "Підпис жетона",
+    "deleteConfirm": "Видалити жетон «{label}»?",
+    "delete": "Видалити",
+    "title": "ЖЕТОНИ",
+    "add": "+ Жетон",
+    "counters": {
+      "red": "Червоні жетони",
+      "green": "Зелені жетони"
+    },
+    "empty": "Жетонів ще немає",
+    "deleteLabel": "Видалити жетон",
+    "saveFailed": "Не вдалося зберегти жетон"
+  },
+  "goals": {
+    "deleteConfirm": "Видалити ціль «{name}»?",
+    "delete": "Видалити",
+    "title": "ЦІЛІ",
+    "empty": "Цілей поки немає.",
+    "statusLabel": "Статус «{name}»: {status}",
+    "status": {
+      "active": "активна",
+      "done": "виконана",
+      "failed": "провалена"
+    },
+    "main": "Головна мета",
+    "personal": "Особиста мета",
+    "inner": "Внутрішній конфлікт",
+    "secret": "Таємна мета",
+    "fromPlayer": "від гравця",
+    "editLabel": "Редагувати ціль {name}",
+    "deleteLabel": "Видалити ціль {name}",
+    "nameField": "Назва цілі",
+    "namePlaceholder": "Назва (необов'язково)",
+    "textField": "Текст цілі",
+    "save": "Зберегти ціль",
+    "cancel": "Скасувати",
+    "add": "Додати ціль",
+    "saveFailed": "Не вдалося зберегти цілі"
+  },
+  "notes": {
+    "title": "НОТАТКИ",
+    "edit": "Редагувати нотатки",
+    "empty": "Нотаток поки немає.",
+    "field": "Нотатки",
+    "save": "Зберегти",
+    "cancel": "Скасувати",
+    "saveFailed": "Не вдалося зберегти нотатки"
+  },
+  "biography": {
+    "title": "БІОГРАФІЯ",
+    "marker": "Маркер",
+    "field": "Біографія",
+    "hint": "Виділіть фрагмент і натисніть «Маркер» — гравець побачить його підсвіченим. Натискання всередині підсвіченого знімає виділення. Порожній рядок починає новий абзац."
+  },
+  "story": {
+    "chapters": "ГЛАВИ ІСТОРІЇ",
+    "biography": "БІОГРАФІЯ",
+    "noBiography": "Біографію ще не написано"
+  },
+  "levelUp": {
+    "action": "+ рівень",
+    "freePoints": "Вільні очки навичок: {free}",
+    "loadingChoices": "Завантаження виборів…",
+    "choices": "Вибори рівня"
+  },
+  "choices": {
+    "pending": "Невибрані вибори: {pending}",
+    "pick": "Обрати",
+    "title": "Вибори героя",
+    "loadingHero": "Завантаження героя…",
+    "saveFailed": "Не вдалося зберегти вибори"
+  },
+  "portrait": {
+    "add": "Додати фото",
+    "open": "Відкрити фото"
+  },
+  "spellBook": {
+    "toList": "← До списку",
+    "title": "Книга заклинань",
+    "back": "← Назад"
+  },
+  "transfer": {
+    "confirm": "Передати «{artifact}» герою {hero}?",
+    "give": "Передати",
+    "failed": "Не вдалося передати артефакт",
+    "titleFor": "Передати: {artifact}",
+    "loading": "Завантаження героїв…",
+    "noHeroes": "Немає інших героїв у кампанії",
+    "toStash": "у підсумок"
+  },
+  "classLevelUp": {
+    "title": "Підвищити рівень",
+    "cancel": "Скасувати",
+    "later": "Обрати пізніше",
+    "confirm": "Підвищити",
+    "classNotFound": "Клас не знайдено",
+    "newClass": "Новий клас",
+    "pickClass": "Оберіть клас",
+    "subclass": "Підклас",
+    "pickSubclass": "Оберіть підклас",
+    "gainsLabel": "Що дає рівень",
+    "gains": "Що дає рівень {level}",
+    "picks": "Виборів: {count}",
+    "failed": "Не вдалося підняти рівень."
+  },
+  "basic": {
+    "toClasses": "Перевести на класи",
+    "delete": "Видалити персонажа"
+  },
+  "editor": {
+    "loading": "Завантаження редактора…",
+    "spellAbility": "Характеристика заклинань",
+    "none": "Немає",
+    "spellAbilityHint": "Від неї СЛ і атака заклинанням у профілі.",
+    "cancel": "Скасувати",
+    "saving": "Збереження…",
+    "save": "Зберегти"
+  },
+  "sheet": {
+    "lines": {
+      "base": "База",
+      "proficiency": "Майстерність",
+      "weapon": "Зброя",
+      "weaponDice": "Зброя {dice}",
+      "levelDice": "Рівень + {dice}",
+      "dmMultiplier": "Коеф. ДМа",
+      "noArmor": "Без броні",
+      "dexterityCapped": "Спритність (межа {cap})",
+      "hitDice": "Кістки хітів: {dice}",
+      "bonuses": "Бонуси"
+    },
+    "abilityPick": "+{n} {ability, select, strength {СИЛ} dexterity {СПР} constitution {ТІЛ} intelligence {ІНТ} wisdom {МУД} charisma {ХАР} other {}}",
+    "spellOrigin": {
+      "lineage": "Лінія: {name}",
+      "feat": "Риса: {name}",
+      "race": "Раса: {name}",
+      "background": "Передісторія: {name}",
+      "class": "Клас: {name}"
+    },
+    "from": {
+      "background": "Передісторія: {name}",
+      "classLevel": "{name} {level}",
+      "origin": "Походження",
+      "dm": "ДМ"
+    }
+  }
+}

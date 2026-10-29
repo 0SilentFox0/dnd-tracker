@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useTranslations } from "next-intl";
 
 import { levelUpInvalidateKeys } from "./useCharacters";
 
@@ -17,6 +18,8 @@ const issuesOf = (e: unknown): ChoiceIssue[] => {
 };
 
 export function useCharacterChoices({ campaignId, characterId, onSaved }: { campaignId: string; characterId: string; onSaved?: (updated: Character) => void }) {
+  const t = useTranslations("characterProfile.choices");
+
   const [error, setError] = useState<string | null>(null);
 
   const [issues, setIssues] = useState<ChoiceIssue[]>([]);
@@ -36,7 +39,7 @@ export function useCharacterChoices({ campaignId, characterId, onSaved }: { camp
 
       return true;
     } catch (e) {
-      setError(e instanceof Error ? e.message : "Не вдалося зберегти вибори");
+      setError(e instanceof Error ? e.message : t("saveFailed"));
       setIssues(issuesOf(e));
 
       return false;
