@@ -16,6 +16,7 @@ import type {
   mazeMarkSchema,
   moraleCheckSchema,
   moveSchema,
+  patchParticipantSchema,
   spellSchema,
 } from "@/lib/schemas/battles";
 import type { PendingCritChoice } from "@/lib/utils/battle/crit-choice/types";
@@ -184,6 +185,8 @@ export type MazeMarkData = z.infer<typeof mazeMarkSchema>;
 export type MapWeatherData = z.infer<typeof mapWeatherSchema>;
 
 export type AbilityActionData = z.infer<typeof abilityActionSchema>;
+
+export type PatchParticipantData = z.infer<typeof patchParticipantSchema>;
 
 export type SpellCastData = z.input<typeof spellSchema>;
 

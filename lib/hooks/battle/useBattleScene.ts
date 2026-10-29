@@ -10,9 +10,11 @@ import { useDisplayEffectMap } from "./useDisplayEffectMap";
 import { useParticipantClick } from "./useParticipantClick";
 import { type PusherConnectionState, usePusherBattleSync } from "./usePusherBattleSync";
 
+import { battleOps } from "@/lib/api/battle-ops";
 import { BattleStatus,ParticipantSide } from "@/lib/constants/battle";
 import { CONTROLLED_BY_DM } from "@/lib/constants/characters";
 import {
+  type BattleOpMutation,
   battleQueryKey,
   useAbilityAction,
   useAddBattleParticipant,
@@ -99,33 +101,7 @@ export interface BattleSceneIntents {
   setAttackReady(heroId: string | null): void;
 }
 
-export interface BattleSceneActions {
-  nextTurn: ReturnType<typeof useNextTurn>;
-  attack: ReturnType<typeof useAttack>;
-  moraleCheck: ReturnType<typeof useMoraleCheck>;
-  critChoice: ReturnType<typeof useCritChoice>;
-  move: ReturnType<typeof useMoveParticipant>;
-  mapTerrain: ReturnType<typeof useMapTerrain>;
-  maze: ReturnType<typeof useMazeAction>;
-  mazeMark: ReturnType<typeof useMazeMark>;
-  mapWeather: ReturnType<typeof useMapWeather>;
-  bonusAction: ReturnType<typeof useBonusAction>;
-  abilityAction: ReturnType<typeof useAbilityAction>;
-  auraZone: ReturnType<typeof useAuraZone>;
-  castSpell: ReturnType<typeof useCastSpell>;
-  start: ReturnType<typeof useStartBattle>;
-  reset: ReturnType<typeof useResetBattle>;
-  complete: ReturnType<typeof useCompleteBattle>;
-  rollback: ReturnType<typeof useRollbackBattleAction>;
-  addParticipant: ReturnType<typeof useAddBattleParticipant>;
-  reveal: ReturnType<typeof useRevealBattleParticipants>;
-  conditions: ReturnType<typeof useBattleConditions>;
-  coreAction: ReturnType<typeof useBattleCoreAction>;
-  updateParticipant: ReturnType<typeof useUpdateBattleParticipant>;
-  scaleUnits: ReturnType<typeof useScaleBattleUnits>;
-  unitControl: ReturnType<typeof useUnitControl>;
-  refreshSources: ReturnType<typeof useRefreshBattleSources>;
-}
+export type BattleSceneActions = { [K in keyof typeof battleOps]: BattleOpMutation<K> };
 
 export interface BattleSceneTurn {
   current: BattleParticipant | null;
