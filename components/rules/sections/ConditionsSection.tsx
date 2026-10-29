@@ -1,13 +1,31 @@
+import { useState } from "react";
+import Link from "next/link";
 import { useTranslations } from "next-intl";
+import { Trash2 } from "lucide-react";
 
 import { RulesSection } from "../RulesSection";
 
+import { Button } from "@/components/ui/button";
+import { ResponsiveDialog } from "@/components/ui/responsive-dialog";
 import { SwitchField } from "@/components/ui/switch-field";
-import type { RulesFormState } from "@/lib/hooks/campaigns";
+import { type RulesFormState, useRemoveCustomCondition } from "@/lib/hooks/campaigns";
 import { CONDITION_LABELS } from "@/lib/utils/abilities/registry/labels";
 
 export function ConditionsSection({ form }: { form: RulesFormState }) {
   const t = useTranslations("rules");
+
+  const tc = useTranslations("rules.customConditions");
+
+  const { remove, isPending, usage, closeUsage } = useRemoveCustomCondition(form.campaignId);
+
+  const [target, setTarget] = useState("");
+
+  const base = `/campaigns/${form.campaignId}`;
+
+  const onRemove = (c: { key: string; name: string }) => {
+    setTarget(c.name);
+    void remove(c);
+  };
 
   const conditions = form.data.conditions;
 
@@ -23,7 +41,12 @@ export function ConditionsSection({ form }: { form: RulesFormState }) {
           <ul className="space-y-2">
             {custom.map((c) => (
               <li key={c.key} className="rounded border border-hud-line/50 p-2 text-sm">
-                <div className="font-medium">{c.name}</div>
+                <div className="flex items-center justify-between gap-2">
+                  <div className="font-medium">{c.name}</div>
+                  <Button type="button" variant="ghost" size="icon" disabled={isPending} aria-label={tc("removeAria", { name: c.name })} title={tc("remove")} data-testid={`remove-${c.key}`} onClick={() => onRemove(c)}>
+                    <Trash2 className="size-4" />
+                  </Button>
+                </div>
                 {c.description && <p className="text-hud-muted">{c.description}</p>}
                 {c.markers.length > 0 && <p className="text-xs text-hud-muted">{c.markers.map((m) => CONDITION_LABELS[m]).join(", ")}</p>}
               </li>
@@ -31,6 +54,66 @@ export function ConditionsSection({ form }: { form: RulesFormState }) {
           </ul>
         </div>
       )}
+      <ResponsiveDialog
+        hud
+        open={!!usage}
+        onOpenChange={(open) => !open && closeUsage()}
+        title={tc("usageTitle", { name: target })}
+        description={tc("usageHint")}
+        footer={
+          <Button type="button" onClick={closeUsage}>
+            {tc("close")}
+          </Button>
+        }
+      >
+        {usage && (
+          <div className="space-y-3 text-sm" data-testid="condition-usage">
+            {usage.battles.length > 0 && (
+              <section>
+                <h4 className="font-semibold">{tc("usageBattles")}</h4>
+                <ul className="list-disc pl-5">
+                  {usage.battles.map((b) => (
+                    <li key={b.id}>
+                      <Link className="underline" href={`${base}/battles/${b.id}`}>
+                        {b.name}
+                      </Link>{" "}
+                      ({b.status === "active" ? tc("statusActive") : tc("statusPrepared")}): {b.participants.join(", ")}
+                    </li>
+                  ))}
+                </ul>
+              </section>
+            )}
+            {usage.spells.length > 0 && (
+              <section>
+                <h4 className="font-semibold">{tc("usageSpells")}</h4>
+                <ul className="list-disc pl-5">
+                  {usage.spells.map((sp) => (
+                    <li key={sp.id}>
+                      <Link className="underline" href={`${base}/dm/spells/${sp.id}`}>
+                        {sp.name}
+                      </Link>
+                    </li>
+                  ))}
+                </ul>
+              </section>
+            )}
+            {usage.units.length > 0 && (
+              <section>
+                <h4 className="font-semibold">{tc("usageUnits")}</h4>
+                <ul className="list-disc pl-5">
+                  {usage.units.map((u) => (
+                    <li key={u.id}>
+                      <Link className="underline" href={`${base}/dm/units/${u.id}`}>
+                        {u.name}
+                      </Link>
+                    </li>
+                  ))}
+                </ul>
+              </section>
+            )}
+          </div>
+        )}
+      </ResponsiveDialog>
     </RulesSection>
   );
 }
