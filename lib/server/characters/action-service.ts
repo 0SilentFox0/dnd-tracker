@@ -14,7 +14,6 @@ import { putGoalsSchema } from "@/lib/schemas/character-goals";
 import { putNotesSchema } from "@/lib/schemas/character-notes";
 import { createTokenSchema } from "@/lib/schemas/character-tokens";
 import { actionResult } from "@/lib/server/assistant/json";
-import { requestDigest } from "@/lib/utils/battle/store/stable-json";
 import { resultLabel } from "@/lib/server/assistant/result-labels";
 import type { ActionResult } from "@/lib/server/assistant/types";
 import { createCharacterSchema } from "@/lib/server/characters/core/create-character-schema";
@@ -22,6 +21,7 @@ import { updateCharacterSchema } from "@/lib/server/characters/core/update-chara
 import { assertCan } from "@/lib/server/content/access";
 import { ContentError, parseInput } from "@/lib/server/content/errors";
 import type { Actor } from "@/lib/utils/api/actor";
+import { requestDigest } from "@/lib/utils/battle/store/stable-json";
 
 export const characterIdSchema = z.object({ characterId: z.string().min(1).max(100) });
 export const CHARACTER_INPUTS = {

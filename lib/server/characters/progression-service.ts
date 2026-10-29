@@ -16,13 +16,13 @@ import { DEFAULT_LOCALE, type Locale } from "@/lib/i18n/config";
 import { ChoicesBodySchema } from "@/lib/schemas/choices";
 import { arcaneRecoverySchema, experienceSchema, hitDieSchema, inspirationSchema, resourcesEditSchema, restSchema, sheetRollSchema } from "@/lib/schemas/out-of-combat";
 import { actionResult } from "@/lib/server/assistant/json";
-import { requestDigest } from "@/lib/utils/battle/store/stable-json";
 import { resultLabel } from "@/lib/server/assistant/result-labels";
 import type { ActionResult } from "@/lib/server/assistant/types";
 import { stashActionSchema } from "@/lib/server/characters/core/stash-schema";
 import { assertCan } from "@/lib/server/content/access";
 import { ContentError, parseInput } from "@/lib/server/content/errors";
 import type { Actor } from "@/lib/utils/api/actor";
+import { requestDigest } from "@/lib/utils/battle/store/stable-json";
 import { parseItemRef, refArtifactIds } from "@/lib/utils/items/ref";
 
 const withId = <T extends z.ZodRawShape>(schema: z.ZodObject<T>) => schema.extend(characterIdSchema.shape).strict();
