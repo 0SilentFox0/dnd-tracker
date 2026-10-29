@@ -1,6 +1,5 @@
 "use client";
 
-import { useEffect } from "react";
 import { useTranslations } from "next-intl";
 
 import "@/components/hud/hud.css";
@@ -8,7 +7,7 @@ import "@/components/battle/hud/battle-hud.css";
 import { BattleSceneProvider } from "@/components/battle/scene/BattleSceneProvider";
 import { BattleScreen } from "@/components/battle/scene/BattleScreen";
 import { ErrorState, LoadingState } from "@/components/common/states";
-import { useBattleSceneValue } from "@/lib/hooks/battle";
+import { useBattleSceneValue, useBattleTitle } from "@/lib/hooks/battle";
 
 export function BattlePageClient({ campaignId, battleId, userId }: { campaignId: string; battleId: string; userId: string | null }) {
   const t = useTranslations("battle.page");
@@ -19,9 +18,7 @@ export function BattlePageClient({ campaignId, battleId, userId }: { campaignId:
 
   const name = value?.battle.name;
 
-  useEffect(() => {
-    if (!myTurn && name) document.title = name;
-  }, [myTurn, name]);
+  useBattleTitle(name, myTurn);
 
   if (!value) {
     return (

@@ -87,7 +87,6 @@ export function useBattleSceneValue(campaignId: string, battleId: string, userId
   const onTurnStarted = useCallback(
     (name?: string) => {
       show(name ? t("yourTurnNamed", { name }) : t("yourTurn"));
-      document.title = t("yourTurnTitle");
       navigator.vibrate?.(200);
     },
     [show, t],

@@ -20,6 +20,7 @@ export {
   useBattleSceneDataValue,
   useBattleSceneValue,
 } from "./useBattleScene";
+export { useBattleTitle } from "./useBattleTitle";
 export { type BattleViewMode, useBattleViewMode } from "./useBattleViewMode";
 export { canReadiedAttack, type CoreActionChoice, useCoreActions, useReadiedAttack } from "./useCoreActions";
 export { type CritChoiceRow, useCritChoiceDialog } from "./useCritChoiceDialog";
