@@ -8,7 +8,7 @@
 
 **Tech Stack:** next-intl 4, Zod 4, Vitest 4, ESLint 9.
 
-**Spec:** `docs/superpowers/specs/2026-10-29-i18n-part4-design.md` (рішення 1–10 — джерело правди). Правила: `docs/architecture/i18n.md`; зразок виконання — `docs/archive/superpowers/plans/2026-10-28-i18n-part3-crud.md`.
+**Spec:** `docs/archive/superpowers/specs/2026-10-29-i18n-part4-design.md` (рішення 1–10 — джерело правди). Правила: `docs/architecture/i18n.md`; зразок виконання — `docs/archive/superpowers/plans/2026-10-28-i18n-part3-crud.md`.
 
 ## Global Constraints
 
