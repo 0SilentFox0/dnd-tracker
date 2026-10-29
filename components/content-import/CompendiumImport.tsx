@@ -32,9 +32,11 @@ export function CompendiumImport({ campaignId, initialFile }: { campaignId: stri
       <HudPanel className="space-y-3"><RulesPatchOffer wizard={wizard} /><CompendiumReport campaignId={campaignId} report={preview.report} /></HudPanel>
       <HudPanel className="space-y-3"><CompendiumDependencies key={preview.token} wizard={wizard} /></HudPanel>
       <HudPanel className="space-y-3">
-        <label className="flex items-start gap-2 text-sm"><input className="mt-0.5 h-4 w-4 shrink-0 accent-hud-gold" type="checkbox" checked={rights} disabled={busy} onChange={e => setRights(e.target.checked)} /> Маю право використати цей файл у цій кампанії</label>
-        <p className="text-sm text-hud-muted">Preview чинний 15 хвилин. Після змін кампанії або вибору потрібна нова перевірка.</p>
-        <ActionBar><Button disabled={busy || !rights || !preview.report.readyToImport} onClick={() => void confirm()}>Імпортувати</Button></ActionBar>
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <label className="flex min-w-0 items-start gap-2 text-sm"><input className="mt-0.5 h-4 w-4 shrink-0 accent-hud-gold" type="checkbox" checked={rights} disabled={busy} onChange={e => setRights(e.target.checked)} /> Маю право використати цей файл у цій кампанії</label>
+          <Button disabled={busy || !rights || !preview.report.readyToImport} onClick={() => void confirm()}>Імпортувати</Button>
+        </div>
+        <p className="text-xs text-hud-muted">Перевірка чинна 15 хв; після змін кампанії чи вибору потрібна нова.</p>
       </HudPanel>
     </>}
     {result && <HudPanel className="space-y-3"><p className="text-hud-good">Імпорт збережено: {result.runId}</p><CompendiumReport key={result.runId} campaignId={campaignId} report={result} committed /></HudPanel>}

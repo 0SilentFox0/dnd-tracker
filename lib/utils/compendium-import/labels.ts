@@ -56,7 +56,79 @@ export function readablePath(path: string) {
   return path;
 }
 
-export const statusLabel = (status: string) => status === "create" ? "створити" : status === "update" ? "оновити" : status === "unchanged" ? "без змін" : status;
+export const statusLabel = (status: string) => status === "create" ? "створити" : status === "update" ? "оновити" : status === "unchanged" ? "без змін" : status === "error" ? "помилка" : status;
+
+export const coverageLabel = (coverage: string) => coverage === "native" ? "структуровано" : coverage === "manual" ? "вручну" : "частково";
+
+const ISSUE_CODE_LABELS: Record<string, string> = {
+  MANUAL: "Налаштувати вручну",
+  MANUAL_SPELL: "Механіку заклинань налаштувати вручну",
+  MANUAL_EQUIPMENT: "Спорядження видати вручну",
+  MANUAL_FEAT: "Механіку рис налаштувати вручну",
+  MANUAL_FEAT_SPELLS: "Заклинання рис задати вручну",
+  MANUAL_FEAT_RESIST: "Стійкості рис задати вручну",
+  MANUAL_CLASS_FEATURE: "Вміння класів налаштувати вручну",
+  MANUAL_PREREQUISITE: "Вимоги перевірити вручну",
+  MANUAL_OPTIONAL_PROGRESSION: "Прогресію опційних вмінь задати вручну",
+  MANUAL_OPTIONAL_FEATURE: "Опційні вміння налаштувати вручну",
+  MANUAL_MONSTER_ACTION: "Дії юнітів налаштувати вручну",
+  MANUAL_MONSTER_HP: "Здоров'я юнітів перевірити вручну",
+  MANUAL_MONSTER_DEFENSE: "Захист юнітів перевірити вручну",
+  MANUAL_MULTIATTACK_DETAIL: "Мультиатаки юнітів уточнити вручну",
+  MANUAL_ITEM_EFFECT: "Ефекти предметів налаштувати вручну",
+  MANUAL_TOOL_CHOICE: "Вибір інструментів задати вручну",
+  MANUAL_CUSTOM_SKILL: "Власні навички додати вручну",
+  MANUAL_CONDITION_TEXT: "Стани описати вручну",
+  MANUAL_ATTACK_RIDER: "Додаткові ефекти атак задати вручну",
+  MANUAL_ABILITY_RULE: "Правила здібностей задати вручну",
+  MANUAL_ABILITY_VARIANTS: "Варіанти здібностей обрати вручну",
+  MANUAL_RACE_MOVEMENT: "Рух рас налаштувати вручну",
+  MANUAL_RACE_RESIST: "Стійкості рас задати вручну",
+  MANUAL_RACE_SPELLS: "Заклинання рас задати вручну",
+  MANUAL_SPELL_ZONE_OR_TRIGGER: "Зони й тригери заклинань налаштувати вручну",
+  MANUAL_SPELL_UNSUPPORTED_CONDITION: "Непідтримувані стани заклинань замінити вручну",
+  SPELL_NARRATIVE_ONLY: "Заклинання без бойової механіки (ефект описує ДМ)",
+  SPELL_RIDER_MANUAL: "Додаткові ефекти заклинань не автоматизовано",
+  CHARACTERS_REQUIRED: "Спершу створіть персонажів",
+  CLASSES_MODE_REQUIRED: "Увімкніть режим класів 5e",
+  UNRESOLVED_REF: "Незіставлені залежності",
+  FEATURE_REF_UNRESOLVED: "Незіставлені посилання на вміння",
+  BACKGROUND_FEAT_INVALID: "Некоректна риса передісторії",
+  BACKGROUND_FEAT_CHOICE: "Риса передісторії — вибір вручну",
+  CLASS_HIT_DIE: "Кістку здоров'я класу перевірити",
+  UNSUPPORTED_FIELD: "Непідтримувані поля",
+  UNSUPPORTED_ENTRY: "Непідтримувані записи",
+  UNSUPPORTED_CONDITION: "Непідтримувані умови",
+  UNSUPPORTED_TAG: "Непідтримувані теги",
+  UNSUPPORTED_COPY: "Непідтримувані копії записів",
+  UNSUPPORTED_FEAT_CATEGORY: "Непідтримувана категорія рис",
+  NOTES_SIZE: "Примітки завеликі",
+};
+
+export const issueCodeLabel = (code: string) => ISSUE_CODE_LABELS[code] ?? code;
+
+export type IssueGroup = { code: string; title: string; severity: ImportIssue["severity"]; action: string; items: Array<{ path: string; action?: string }> };
+
+export function groupIssues(issues: ImportIssue[]): IssueGroup[] {
+  const groups = new Map<string, IssueGroup>();
+
+  for (const issue of issues) {
+    const group = groups.get(issue.code) ?? { code: issue.code, title: issueCodeLabel(issue.code), severity: issue.severity, action: issue.action, items: [] };
+
+    if (issue.severity === "error") group.severity = "error";
+
+    group.items.push({ path: issue.path, ...(issue.action !== group.action && { action: issue.action }) });
+    groups.set(issue.code, group);
+  }
+
+  return [...groups.values()].sort((a, b) => Number(b.severity === "error") - Number(a.severity === "error") || b.items.length - a.items.length);
+}
+
+type ReportRow = { status: string; issues: ImportIssue[] };
+
+export const rowActionCount = (row: ReportRow) => splitInfoIssues(row.issues).actions.length;
+
+export const REPORT_ROW_FILTERS = { changed: (row: ReportRow) => row.status !== "unchanged" || rowActionCount(row) > 0, manual: (row: ReportRow) => rowActionCount(row) > 0, all: () => true } as const;
 
 export function sourceLabel(source: unknown) {
   if (!isRecord(source)) return String(source);

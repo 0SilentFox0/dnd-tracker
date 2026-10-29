@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { describeRulesPatch, entryLabel, infoSummary, metaSummary, readablePath, splitInfoIssues, summaryLines } from "../labels";
+import { describeRulesPatch, entryLabel, groupIssues, infoSummary, issueCodeLabel, metaSummary, readablePath, REPORT_ROW_FILTERS, splitInfoIssues, summaryLines } from "../labels";
 
 const key = JSON.stringify([1, "feat", "obojimatallgrass", "classic", "cloud hopper", []]);
 
@@ -33,5 +33,26 @@ describe("compendium labels", () => {
 
     expect(actions.map(i => i.code)).toEqual(["MANUAL_SPELL"]);
     expect(infoSummary(info)).toBe("Пропущено непідтримувані категорії: foundrySpell. Пропущено медіа/Foundry-полів: 1");
+  });
+});
+
+describe("report grouping", () => {
+  it("groups issues by code with a human title, errors first, and keeps differing actions per item", () => {
+    const issue = (code: string, path: string, action: string, severity: "warning" | "error" = "warning") => ({ code, path, action, severity });
+
+    const groups = groupIssues([issue("MANUAL_EQUIPMENT", "a", "X"), issue("MANUAL_EQUIPMENT", "b", "Y"), issue("MANUAL_EQUIPMENT", "c", "X"), issue("UNRESOLVED_REF", "d", "Z", "error")]);
+
+    expect(groups.map(g => g.code)).toEqual(["UNRESOLVED_REF", "MANUAL_EQUIPMENT"]);
+    expect(groups[1]).toMatchObject({ title: "Спорядження видати вручну", action: "X" });
+    expect(groups[1].items).toEqual([{ path: "a" }, { path: "b", action: "Y" }, { path: "c" }]);
+    expect(issueCodeLabel("SOMETHING_NEW")).toBe("SOMETHING_NEW");
+  });
+
+  it("treats rows with manual actions as changed but not info-only rows", () => {
+    const info = { code: "MEDIA_OR_FOUNDRY_SKIPPED", severity: "warning" as const, path: "p", action: "a" };
+
+    expect(REPORT_ROW_FILTERS.changed({ status: "unchanged", issues: [info] })).toBe(false);
+    expect(REPORT_ROW_FILTERS.changed({ status: "update", issues: [] })).toBe(true);
+    expect(REPORT_ROW_FILTERS.manual({ status: "unchanged", issues: [{ ...info, code: "MANUAL" }] })).toBe(true);
   });
 });
