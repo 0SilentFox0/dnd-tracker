@@ -1,7 +1,7 @@
 import { z } from "zod";
 
 import { AbilityTargetSchema, AmountSchema, DurationSchema, FlatSchema, FormulaSchema } from "./common";
-import { ATTACK_KINDS, CONDITION_5E_KEYS, CONDITION_KEYS, DAMAGE_FILTER_KINDS, STAT_KEYS } from "./kinds";
+import { ATTACK_KINDS, CONDITION_5E_KEYS, CONDITION_KEYS, DAMAGE_FILTER_KINDS, MANEUVERS, STAT_KEYS } from "./kinds";
 
 import { ABILITY_KEYS } from "@/lib/constants/abilities";
 import { PROFICIENCY_KINDS } from "@/lib/constants/artifacts";
@@ -233,8 +233,6 @@ const RaiseDeadSchema = z.object({ kind: z.literal("raiseDead"), hpPercent: z.nu
 const CopySpellBuffsSchema = z.object({ kind: z.literal("copySpellBuffs"), ...target });
 
 const MarkSchema = z.object({ kind: z.literal("mark"), markId: z.string().min(1), duration: DurationSchema, ...target });
-
-export const MANEUVERS = ["dive", "squall", "fireBurst"] as const;
 
 export type Maneuver = (typeof MANEUVERS)[number];
 

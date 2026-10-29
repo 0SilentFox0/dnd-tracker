@@ -7,6 +7,8 @@ import { DICE_PATTERN } from "@/lib/utils/common/dice";
 
 export const DICE_RE = DICE_PATTERN;
 
+export const MANEUVERS = ["dive", "squall", "fireBurst"] as const;
+
 export const ABILITY_TARGETS = ["self", "eventTarget", "eventActor", "otherEnemy", "allAllies", "allEnemies", "everyone", "nearbyAllies", "nearbyEnemies"] as const;
 
 /** Аури в області: без позицій на полі ціль обирає власник на початку свого ходу. */

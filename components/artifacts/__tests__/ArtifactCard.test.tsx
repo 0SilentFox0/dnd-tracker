@@ -14,6 +14,10 @@ Object.assign(Element.prototype, { hasPointerCapture: () => false, releasePointe
 
 const withQuery = (ui: React.ReactElement) => <QueryClientProvider client={new QueryClient()}>{ui}</QueryClientProvider>;
 
+const line = (value: string) => [{ key: "summary.text", params: { value } }];
+
+const shown = (value: string) => `abilityRegistry.summary.text {"value":"${value}"}`;
+
 describe("картки артефактів", () => {
   it("ArtifactCard без іконки — літера назви в повній і компактній картці", () => {
     const artifact = { id: "a1", name: "меч зорі", slot: "weapon", rarity: null, icon: null, description: null, abilitySummary: [] };
@@ -32,19 +36,19 @@ describe("картки артефактів", () => {
       withQuery(
         <ArtifactCard
           campaignId="c1"
-          artifact={{ id: "a1", name: "Меч", slot: "weapon", rarity: null, icon: null, description: null, abilitySummary: ["Пасивно · шкода (ближня) +2"] }}
+          artifact={{ id: "a1", name: "Меч", slot: "weapon", rarity: null, icon: null, description: null, abilitySummary: [line("шкода +2")] }}
         />,
       ),
     );
 
-    expect(screen.getByText("Пасивно · шкода (ближня) +2")).toBeInTheDocument();
+    expect(screen.getByText(shown("шкода +2"))).toBeInTheDocument();
   });
 
   it("ArtifactSetBonusDisplay показує назву бонусу й уміння сету", () => {
-    render(<ArtifactSetBonusDisplay setBonus={{ name: "Кров дракона" }} abilitySummary={["Пасивно · AC +1"]} />);
+    render(<ArtifactSetBonusDisplay setBonus={{ name: "Кров дракона" }} abilitySummary={[line("AC +1")]} />);
 
     expect(screen.getByText("Кров дракона")).toBeInTheDocument();
-    expect(screen.getByText("Пасивно · AC +1")).toBeInTheDocument();
+    expect(screen.getByText(shown("AC +1"))).toBeInTheDocument();
   });
 
   it("невдала зміна слоту повертає попередній слот і показує повідомлення", async () => {

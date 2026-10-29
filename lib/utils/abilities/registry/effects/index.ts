@@ -31,8 +31,7 @@ import type { Translator } from "@/lib/i18n/translator";
 import { resolveTargetIds } from "@/lib/utils/abilities/engine/core/targets";
 import { logText } from "@/lib/utils/abilities/log-text";
 import type { Ability, Effect, EffectKind } from "@/lib/utils/abilities/schema";
-import { MANEUVERS } from "@/lib/utils/abilities/schema/effects";
-import { CONDITION_5E_KEYS } from "@/lib/utils/abilities/schema/kinds";
+import { CONDITION_5E_KEYS, MANEUVERS } from "@/lib/utils/abilities/schema/kinds";
 import { renderSegments, seg, type Segment } from "@/lib/utils/abilities/segments";
 import { pickOne } from "@/lib/utils/common/dice";
 import { signed } from "@/lib/utils/common/format";
@@ -183,6 +182,3 @@ export function describeAbilitySegments(a: Ability): Segment[] {
 export function describeAbilityText(a: Ability, t: Translator): string {
   return renderSegments(t, describeAbilitySegments(a)).join(" · ");
 }
-
-// temporary string form for consumers not yet moved to describeAbilityText (Task 8)
-export const describeAbility = (a: Ability): string => logText(describeAbilitySegments(a));

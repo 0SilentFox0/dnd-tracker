@@ -68,7 +68,7 @@ describe("таби профілю", () => {
 
     fireEvent.click(screen.getByRole("button", { name: 'inventory.grid.filled {"slot":"inventory.grid.slots.armor","name":"Кольчуга ельфів"}' }));
     expect(screen.getByRole("dialog")).toHaveAccessibleName("Кольчуга ельфів");
-    expect(screen.getByText("AC +2")).toBeTruthy();
+    expect(screen.getByText('abilityRegistry.summary.text {"value":"AC +2"}')).toBeTruthy();
     expect(screen.getByText("Легка і тиха.")).toBeTruthy();
   });
 
@@ -88,10 +88,10 @@ describe("таби профілю", () => {
   it("Інвентар: однакові ефекти показуються обидва у панелі деталей", () => {
     mockMatchMedia(false);
 
-    const twin = { ...sheetFixture.items.artifacts[0], effects: ["AC +1", "AC +1"] };
+    const twin = { ...sheetFixture.items.artifacts[0], effects: [[{ key: "summary.text", params: { value: "AC +1" } }], [{ key: "summary.text", params: { value: "AC +1" } }]] };
 
     inProfile(<InventoryTab />, withSheet({ items: { ...sheetFixture.items, grid: { armor: twin }, artifacts: [twin] } }));
     fireEvent.click(screen.getByRole("button", { name: 'inventory.grid.filled {"slot":"inventory.grid.slots.armor","name":"Кольчуга ельфів"}' }));
-    expect(screen.getAllByRole("listitem").filter((li) => li.textContent === "AC +1")).toHaveLength(2);
+    expect(screen.getAllByRole("listitem").filter((li) => li.textContent === 'abilityRegistry.summary.text {"value":"AC +1"}')).toHaveLength(2);
   });
 });

@@ -30,3 +30,13 @@ export function renderSegment(t: Translator, s: Segment): string {
 export function renderSegments(t: Translator, list: readonly Segment[]): string[] {
   return list.map((s) => renderSegment(t, s));
 }
+
+export function uniqueLines(lines: Segment[][]): Segment[][] {
+  return [...new Map(lines.map((l) => [JSON.stringify(l), l])).values()];
+}
+
+export function linesText(t: Translator, lines: readonly (readonly Segment[])[], sep = " · "): string[] {
+  return lines.map((l) => renderSegments(t, l).join(sep));
+}
+
+export const abilityRegistryOf = (t: Translator): Translator => Object.assign((key: string, values?: Record<string, string | number>) => t(`abilityRegistry.${key}`, values), { has: (k: string) => t.has(`abilityRegistry.${k}`), raw: (k: string) => t.raw(`abilityRegistry.${k}`) });

@@ -1,11 +1,13 @@
 "use client";
 
+import { useAbilityText } from "@/components/abilities/use-ability-text";
 import { TargetButton } from "@/components/battle/wizards/TargetButton";
 import type { AuraZoneStep } from "@/lib/hooks/battle";
-import { describeEffect } from "@/lib/utils/abilities/registry/effects";
 
 export function AuraZonePicker({ step }: { step: AuraZoneStep }) {
   const { aura, candidates, selected, toggle, confirm, pending } = step;
+
+  const abilityText = useAbilityText();
 
   const enemies = aura.target === "nearbyEnemies";
 
@@ -14,7 +16,7 @@ export function AuraZonePicker({ step }: { step: AuraZoneStep }) {
       <div>
         <div className="hud-sc text-lg font-bold">Зона аури · {aura.ability.name}</div>
         <div className="text-xs text-[#a89c88]">
-          {enemies ? "Які вороги поруч?" : "Які союзники поруч?"} {aura.effects.map(describeEffect).join(", ")} — до вашого наступного ходу.
+          {enemies ? "Які вороги поруч?" : "Які союзники поруч?"} {aura.effects.map(abilityText.effect).join(", ")} — до вашого наступного ходу.
         </div>
       </div>
       <div className="grid gap-1.5">

@@ -1,4 +1,5 @@
 import type { ErrorParams } from "@/lib/constants/api-errors";
+import type { Segment } from "@/lib/utils/abilities/segments";
 import type { SpellFx } from "@/lib/utils/battle/fx/spells";
 import type { SpellRules } from "@/types/spells";
 
@@ -8,7 +9,7 @@ export interface SkillForReference {
   name: string;
   description: string | null;
   appearanceDescription: string | null;
-  abilitySummary: string[];
+  abilitySummary: Segment[][];
   mainSkillId: string | null;
   mainSkillName: string | null;
   mainSkillIcon: string | null;
@@ -28,8 +29,8 @@ export interface SpellForReference {
   resolution: string;
   dice: number;
   description: string | null;
-  /** описи ефектів із моделі вмінь, порахував сервер */
-  effects: string[];
+  /** описи ефектів із моделі вмінь як сегменти (мовонезалежні, рендер на клієнті) */
+  effects: Segment[][];
   appearanceDescription: string | null;
   groupName: string | null;
   icon: string | null;
@@ -44,7 +45,7 @@ export interface ArtifactForReference {
   rarity: string | null;
   slot: string;
   description: string | null;
-  effects: string[];
+  effects: Segment[][];
   setName: string | null;
   holderName: string | null;
   gear?: true;
@@ -55,7 +56,7 @@ export interface ArtifactSetForReference {
   name: string;
   icon: string | null;
   description: string | null;
-  bonuses: string[];
+  bonuses: Segment[][];
   artifactNames: string[];
 }
 

@@ -94,5 +94,5 @@ async function loadInfoReference(campaignId: string): Promise<InfoReference> {
 export function getCachedInfoReference(campaignId: string): Promise<InfoReference> {
   const tags = [cacheTags.skills(campaignId), cacheTags.mainSkills(campaignId), cacheTags.spells(campaignId)];
 
-  return unstable_cache(() => loadInfoReference(campaignId), ["info-reference-v3", campaignId], { tags, revalidate: REFERENCE_REVALIDATE_SECONDS })();
+  return unstable_cache(() => loadInfoReference(campaignId), ["info-reference-v4", campaignId], { tags, revalidate: REFERENCE_REVALIDATE_SECONDS })();
 }

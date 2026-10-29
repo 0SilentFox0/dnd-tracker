@@ -10,7 +10,9 @@ vi.mock("next/navigation", () => ({ useRouter: () => ({ push: vi.fn(), refresh: 
 
 afterEach(cleanup);
 
-const set = { id: "s1", name: "Драконяча луска", icon: null, description: null, setBonus: { name: "Кров дракона" }, abilitySummary: ["Пасивно · AC +1"] };
+const line = (value: string) => [{ key: "summary.text", params: { value } }];
+
+const set = { id: "s1", name: "Драконяча луска", icon: null, description: null, setBonus: { name: "Кров дракона" }, abilitySummary: [line("AC +1")] };
 
 const artifact = { id: "a1", name: "Шолом зорі", slot: "head", rarity: null, icon: null, description: null, abilitySummary: [], artifactSet: { name: set.name } };
 

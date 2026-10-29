@@ -1,9 +1,10 @@
-import { describeAbility } from "./registry/effects";
+import { describeAbilitySegments } from "./registry/effects";
 import { type OwnerKind, readAbilities } from "./read";
 import { AbilitySchema } from "./schema";
+import type { Segment } from "./segments";
 
-export function abilitySummary(kind: OwnerKind, row: { id: string; abilities?: unknown }): string[] {
-  return readAbilities(kind, row).abilities.filter((a) => AbilitySchema.safeParse(a).success).map(describeAbility);
+export function abilitySummary(kind: OwnerKind, row: { id: string; abilities?: unknown }): Segment[][] {
+  return readAbilities(kind, row).abilities.filter((a) => AbilitySchema.safeParse(a).success).map(describeAbilitySegments);
 }
 
 /** Replaces heavy ability/legacy columns of a list row with short summary lines. */

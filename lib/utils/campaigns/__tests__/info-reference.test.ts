@@ -2,25 +2,28 @@ import { describe, expect, it, vi } from "vitest";
 
 import { makeT } from "@/lib/i18n/test/mock-t";
 import type { Translator } from "@/lib/i18n/translator";
+import type { Segment } from "@/lib/utils/abilities/segments";
 import { classSearchText, classSummaryText, formatMechanicsSkill, formatMechanicsSpell, skillSearchText, toClassForReference } from "@/lib/utils/campaigns/info-reference";
 import type { GameClassData } from "@/types/classes";
 import type { SkillForReference } from "@/types/info-reference";
 
 const t = makeT();
 
-const skill = (abilitySummary: string[]): SkillForReference => ({
+const line = (value: string) => [{ key: "summary.text", params: { value } }];
+
+const skill = (abilitySummary: Segment[][]): SkillForReference => ({
   id: "s", name: "Лють", description: null, appearanceDescription: null, abilitySummary, mainSkillId: null, mainSkillName: "Бій", mainSkillIcon: null, mainSkillColor: null, grantedSpellName: null, icon: null, image: null,
 });
 
 describe("довідка скілів", () => {
   it("механіка скіла — з опису умінь", () => {
-    expect(formatMechanicsSkill(skill(["Пасивно · шкода (ближня) +10%"]), t)).toBe(
-      'dashboard.reference.mechanics.branch {"name":"Бій"}. dashboard.reference.mechanics.abilities {"list":"Пасивно · шкода (ближня) +10%"}',
+    expect(formatMechanicsSkill(skill([line("шкода ближня +10%")]), t)).toBe(
+      'dashboard.reference.mechanics.branch {"name":"Бій"}. dashboard.reference.mechanics.abilities {"list":"abilityRegistry.summary.text {\\"value\\":\\"шкода ближня +10%\\"}"}',
     );
   });
 
   it("пошук знаходить за текстом умінь", () => {
-    expect(skillSearchText(skill(["Пасивно · шкода (ближня) +10%"]), t)).toContain("ближня");
+    expect(skillSearchText(skill([line("шкода ближня +10%")]), t)).toContain("ближня");
   });
 });
 

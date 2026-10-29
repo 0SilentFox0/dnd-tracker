@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useTranslations } from "next-intl";
 
+import { useAbilityText } from "@/components/abilities/use-ability-text";
 import { OptimizedImage } from "@/components/common/OptimizedImage";
 import { Button } from "@/components/ui/button";
 import { useTranslator } from "@/lib/i18n/use-translator";
@@ -12,6 +13,8 @@ export function OfferList({ offers, dto, filter, onClearFilter, onSelect }: { of
   const t = useTranslations("skillTree.offers");
 
   const tr = useTranslator("skillTree");
+
+  const abilityText = useAbilityText();
 
   const [expanded, setExpanded] = useState(false);
 
@@ -44,7 +47,7 @@ export function OfferList({ offers, dto, filter, onClearFilter, onSelect }: { of
                 <span className="min-w-0 text-left">
                   <span className="hud-sc block text-base text-hud-ink">{title}</span>
                   <span className="block text-xs text-hud-gold">{tag}</span>
-                  {skill?.summary[0] && <span className="mt-1 block text-[13px] leading-snug text-[#b8ab95]">{skill.summary.join(" · ")}</span>}
+                  {skill?.summary[0] && <span className="mt-1 block text-[13px] leading-snug text-[#b8ab95]">{abilityText.lines(skill.summary).join(" · ")}</span>}
                 </span>
               </Button>
             </li>

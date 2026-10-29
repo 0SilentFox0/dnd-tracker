@@ -94,12 +94,12 @@ export function useInfoReferenceFilters(skills: SkillForReference[], spells: Spe
     () =>
       artifacts.filter(
         (a) =>
-          matchSearch(artifactSearchText(a), deferredSearch) &&
+          matchSearch(artifactSearchText(a, t), deferredSearch) &&
           (!values.artifactRarity || a.rarity === values.artifactRarity) &&
           (!values.artifactSlot || a.slot === values.artifactSlot) &&
           (!values.artifactSet || a.setName === values.artifactSet),
       ),
-    [artifacts, deferredSearch, values.artifactRarity, values.artifactSlot, values.artifactSet],
+    [artifacts, deferredSearch, values.artifactRarity, values.artifactSlot, values.artifactSet, t],
   );
 
   const filteredClasses = useMemo(() => (classes ?? []).filter((c) => matchSearch(classSearchText(c, t), deferredSearch)), [classes, deferredSearch, t]);

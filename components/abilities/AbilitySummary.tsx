@@ -1,8 +1,11 @@
-import { describeAbility } from "@/lib/utils/abilities/registry/effects";
-import type { Ability } from "@/lib/utils/abilities/schema";
+"use client";
 
-export function AbilitySummary({ abilities, lines }: { abilities?: Ability[]; lines?: string[] }) {
-  const items = lines ?? (abilities ?? []).map(describeAbility);
+import { useAbilityText } from "./use-ability-text";
+
+import type { Segment } from "@/lib/utils/abilities/segments";
+
+export function AbilitySummary({ lines }: { lines: Segment[][] }) {
+  const items = useAbilityText().lines(lines);
 
   if (!items.length) return <p className="text-xs text-muted-foreground">—</p>;
 

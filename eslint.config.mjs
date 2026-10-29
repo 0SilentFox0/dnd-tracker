@@ -53,6 +53,15 @@ const MODE_OWNED_FILES = [
 
 const I18N_MIGRATED = JSON.parse(readFileSync(new URL("./i18n-migrated.json", import.meta.url), "utf8"));
 
+// battle-log engine text, migrates with i18n part 6 (docs/superpowers/plans/2026-10-29-ability-flow-leftovers.md)
+const I18N_LEFTOVERS = [
+  "lib/utils/abilities/build/immunities.ts",
+  "lib/utils/abilities/engine/core/collect-modifiers.ts",
+  "lib/utils/abilities/engine/core/run-abilities.ts",
+  "lib/utils/abilities/read.ts",
+  "lib/utils/abilities/registry/effects/{control,copy-buffs,hp,state,static,summon}.ts",
+];
+
 const CYRILLIC_MESSAGE = "Текст — у messages/*.json через t()";
 
 const CYRILLIC_SELECTORS = ["Literal[value=/[\\u0400-\\u04FF]/]", "JSXText[value=/[\\u0400-\\u04FF]/]", "TemplateElement[value.raw=/[\\u0400-\\u04FF]/]"];
@@ -261,7 +270,7 @@ const eslintConfig = defineConfig([
   },
   {
     files: I18N_MIGRATED,
-    ignores: ["**/__tests__/**"],
+    ignores: ["**/__tests__/**", ...I18N_LEFTOVERS],
     rules: {
       "no-restricted-syntax": ["error", ...CYRILLIC_SELECTORS.map((selector) => ({ selector, message: CYRILLIC_MESSAGE }))],
     },
