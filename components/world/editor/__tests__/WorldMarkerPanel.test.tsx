@@ -3,10 +3,11 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { cleanup, fireEvent, screen, waitFor } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
-import { WorldEditorContext, type WorldEditorCtx } from "../WorldEditorContext";
+import { WorldEditorContext } from "../WorldEditorContext";
 import { WorldMarkerPanel } from "../WorldMarkerPanel";
 
 import { renderWithConfirm } from "@/components/ui/__tests__/uk-intl";
+import type { WorldEditorCtx } from "@/lib/hooks/world";
 import type { WorldMarker } from "@/types/world";
 
 vi.unmock("next-intl");

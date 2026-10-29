@@ -13,7 +13,7 @@ describe("buildToolContext locale", () => {
     const ctx = buildToolContext({ ...auth, locale: "en" }, reqWith({ cookie: "a=1; NEXT_LOCALE=uk", "accept-language": "en-US" }));
 
     expect(ctx.locale).toBe("uk");
-    expect(ctx.caller.locale).toBe("uk");
+    expect(ctx.caller?.locale).toBe("uk");
   });
 
   it("falls back to Accept-Language", () => {

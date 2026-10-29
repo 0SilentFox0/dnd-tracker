@@ -127,7 +127,7 @@ async function checkCommand(caller: AssistantCaller, operation: string, value: B
     if (typeof id === "string" && ![...ctx.participants, ...ctx.pending].some(p => p.basicInfo.id === id)) throw new ContentError(API_ERRORS.BATTLE_PARTICIPANT_NOT_IN_BATTLE, 404);
   }
 
-  await COMMAND_CHECKS[operation]?.(caller, ctx, parsed);
+  await (Object.hasOwn(COMMAND_CHECKS, operation) ? COMMAND_CHECKS[operation] : undefined)?.(caller, ctx, parsed);
 }
 
 async function checkParticipantSources(campaignId: string, operation: string, body: Body) {

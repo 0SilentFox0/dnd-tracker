@@ -5,7 +5,7 @@ import { obstacleStep } from "@/lib/utils/battle/damage/obstacle";
 import type { BattleScene } from "@/types/api";
 import type { BattleAttack, BattleParticipant, DamageStep } from "@/types/battle";
 
-export interface StrikeStepsInput {
+interface StrikeStepsInput {
   attacker: BattleParticipant;
   target: BattleParticipant;
   attack: BattleAttack;

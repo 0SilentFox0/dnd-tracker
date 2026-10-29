@@ -3,10 +3,11 @@ import type { ReactNode } from "react";
 import { cleanup, fireEvent, screen } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
-import { WorldEditorContext, type WorldEditorCtx } from "../WorldEditorContext";
+import { WorldEditorContext } from "../WorldEditorContext";
 import { WorldToolbar, WorldToolHint } from "../WorldToolbar";
 
 import { render } from "@/components/ui/__tests__/uk-intl";
+import type { WorldEditorCtx } from "@/lib/hooks/world";
 import type { useMapDrawing } from "@/lib/hooks/world";
 
 vi.unmock("next-intl");

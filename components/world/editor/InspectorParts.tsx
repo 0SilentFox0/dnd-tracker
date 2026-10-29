@@ -42,7 +42,6 @@ export function SwitchField({ label, title, checked, onChange }: { label: string
   );
 }
 
-
 export function NameInput({ value, onChange, onCommit }: { value: string; onChange(v: string): void; onCommit(): void }) {
   const t = useTranslations("world");
 

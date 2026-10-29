@@ -11,7 +11,7 @@ export interface ZoomBounds {
 
 export const INITIAL_VIEWPORT: Viewport = { zoom: 1, x: 0, y: 0 };
 
-export function clampZoom(z: number, { min, max }: ZoomBounds): number {
+function clampZoom(z: number, { min, max }: ZoomBounds): number {
   return Math.min(max, Math.max(min, z));
 }
 

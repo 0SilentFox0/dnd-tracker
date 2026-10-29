@@ -5,7 +5,7 @@ import type { BattleParticipant, GridPoint } from "@/types/battle";
 
 export type MapClickHandlers = { [K in MapClick["kind"]]: (click: Extract<MapClick, { kind: K }>) => void };
 
-export interface MapClickDeps {
+interface MapClickDeps {
   current: BattleParticipant | null;
   turn: { round: number; index: number };
   aim: MapAim | null;

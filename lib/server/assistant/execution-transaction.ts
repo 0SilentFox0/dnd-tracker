@@ -27,7 +27,7 @@ type Tx = Prisma.TransactionClient;
 
 type WriteAction = ReturnType<ExecutorDeps["catalog"]["getAction"]> & AssistantWriteAction;
 
-interface ExecScope { deps: ExecutorDeps; caller: AssistantCaller; tx: Tx; row: AssistantIntent; done: AssistantReceipt | null; action: WriteAction; human: boolean; signal?: AbortSignal }
+interface ExecScope { caller: AssistantCaller; tx: Tx; row: AssistantIntent; done: AssistantReceipt | null; action: WriteAction; human: boolean; signal?: AbortSignal }
 
 /** Locks the intent and decides whether it is already settled (receipt/conflict) or can run. */
 async function claimIntent(deps: ExecutorDeps, caller: AssistantCaller, tx: Tx, intentId: string): Promise<{ outcome: IntentTransactionOutcome } | { row: AssistantIntent; done: AssistantReceipt | null }> {
@@ -141,7 +141,7 @@ async function applyAction({ caller, tx, row, done, action }: ExecScope, input: 
 }
 
 async function executeInScope(scope: ExecScope): Promise<IntentTransactionOutcome> {
-  const { deps, caller, tx, row, done, action, human, signal } = scope;
+  const { caller, tx, row, done, action, human, signal } = scope;
 
   signal?.throwIfAborted();
 
@@ -190,6 +190,6 @@ export async function executeIntentTransaction(deps: ExecutorDeps, caller: Assis
     await authorizeExecution(tx, caller, row, action);
 
     // All content writes in this scope reuse the same transaction/connection.
-    return runContentWriteContext<IntentTransactionOutcome>(row.campaignId, tx, () => executeInScope({ deps, caller, tx, row, done, action, human, signal }), callbacks);
+    return runContentWriteContext<IntentTransactionOutcome>(row.campaignId, tx, () => executeInScope({ caller, tx, row, done, action, human, signal }), callbacks);
   }, { timeout: ASSISTANT_LIMITS.transactionTimeoutMs, maxWait: ASSISTANT_LIMITS.transactionMaxWaitMs });
 }

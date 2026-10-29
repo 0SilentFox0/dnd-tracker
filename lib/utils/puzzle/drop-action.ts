@@ -1,7 +1,7 @@
 import { clamp } from "@/lib/utils/common/clamp";
 import type { PuzzleCommand,PuzzleSpec } from "@/types/show";
 
-export const TAP_PX = 5;
+const TAP_PX = 5;
 
 interface Release {
   clientX: number;

@@ -1,4 +1,5 @@
 export { worldKeys } from "./keys";
+export type { WorldEditorCtx } from "./types";
 export { useHeroEyes } from "./useHeroEyes";
 export { useMapDrawing, type WorldTool } from "./useMapDrawing";
 export { useMapFields } from "./useMapFields";

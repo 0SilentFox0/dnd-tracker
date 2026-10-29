@@ -2,7 +2,7 @@ import { type aimView, deriveTrajectory, type MapScene } from "./map-scene";
 
 import type { BattleMapConfig, BattleMapView, BattleParticipant, GridPoint } from "@/types/battle";
 
-export interface ComposeMapViewInput {
+interface ComposeMapViewInput {
   scene: MapScene;
   map: BattleMapConfig;
   current: BattleParticipant | null;

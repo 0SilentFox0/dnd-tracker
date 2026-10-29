@@ -4,6 +4,7 @@ import { useCallback, useMemo, useState } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
 
+import type { WorldEditorCtx } from "./types";
 import { useHeroEyes } from "./useHeroEyes";
 import { useMapDrawing } from "./useMapDrawing";
 import { useMoveTarget } from "./useMoveTarget";
@@ -13,7 +14,6 @@ import { useWorldHeroes } from "./useWorldHeroes";
 import { useWorldMap } from "./useWorldMap";
 import { useWorldMaps } from "./useWorldMaps";
 
-import type { WorldEditorCtx } from "@/components/world/editor/WorldEditorContext";
 import { polygonCentroid } from "@/lib/utils/world/geometry";
 import type { CreateWorldMarkerData, MapPoint, Polygon, WorldMarker } from "@/types/world";
 

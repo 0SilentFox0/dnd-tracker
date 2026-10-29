@@ -97,7 +97,7 @@ export interface GridCellActions {
   wasDragged: () => boolean;
 }
 
-export interface GridScene {
+interface GridScene {
   round?: number;
   rotated: boolean;
   clickableBlocked?: boolean;

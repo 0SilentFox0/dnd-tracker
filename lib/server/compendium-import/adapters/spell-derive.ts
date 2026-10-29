@@ -167,9 +167,9 @@ function readSpellInput(row: Record<string, unknown>, text: string, higher: stri
 
   const unknownConditions = [...tags(raw, "condition"), ...strings(row.conditionInflict)].map((c) => c.toLowerCase()).filter((c) => !resolveCondition(c, customConditions));
 
-  const signals = damageTypes.length > 0 || ability !== null || spellAttack || strings(row.conditionInflict).length > 0 || [...RESIST_KEYS, "conditionImmune"].some((k) => array(row[k]).length > 0) || tags(raw, "damage").length > 0 || tags(raw, "condition").length > 0 || SIGNAL_TEXT.test(text);
+  const signals = damageTypes.length > 0 || ability !== null || spellAttack || strings(row.conditionInflict).length > 0 || hasAny(row, [...RESIST_KEYS, "conditionImmune"]) || tags(raw, "damage").length > 0 || tags(raw, "condition").length > 0 || SIGNAL_TEXT.test(text);
 
-  const rowCombat = damageTypes.length > 0 || spellAttack || strings(row.conditionInflict).length > 0 || [...RESIST_KEYS, "conditionImmune"].some((k) => array(row[k]).length > 0);
+  const rowCombat = damageTypes.length > 0 || spellAttack || strings(row.conditionInflict).length > 0 || hasAny(row, [...RESIST_KEYS, "conditionImmune"]);
 
   return { row, text, higher, cast, raw, misc: strings(row.miscTags), damageTypes, ability, spellAttack, moveTrigger, triggerText, unknownConditions, signals, rowCombat, customConditions };
 }
