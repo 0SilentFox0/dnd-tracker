@@ -4,6 +4,8 @@ import { memo, type PointerEvent, useMemo } from "react";
 import { useTranslations } from "next-intl";
 import { Flame } from "lucide-react";
 
+import { PULSE_STEP_MS } from "./constants";
+
 import { blockedSet, cellCenter, cellDistance, cellKey, type CellMark, cellPolygon, isDamagingCell, isMoveMark, parseCellKey, UNIT } from "@/lib/utils/battle/grid";
 import type { BattleMapActions, BattleMapConfig, BattleMapView, GridPoint, TerrainCell } from "@/types/battle";
 
@@ -256,8 +258,6 @@ export const StrokeLayer = memo(function StrokeLayer({ preview, pending }: { pre
     </g>
   );
 });
-
-const PULSE_STEP_MS = 130;
 
 const pulseStep = (from: GridPoint | null | undefined, p: GridPoint) => (from ? cellDistance(from, p) : 0);
 

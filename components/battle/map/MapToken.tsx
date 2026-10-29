@@ -2,6 +2,7 @@
 
 import { memo } from "react";
 
+import { PORTRAIT_SHARE } from "./constants";
 import { type MapPlacement, tokenBoxStyle } from "./token-box";
 
 import { StatusAuras } from "@/components/battle/fx/auras/StatusAuras";
@@ -14,8 +15,6 @@ import { isFallen } from "@/lib/utils/battle/grid";
 import { isDown } from "@/lib/utils/battle/participant/state";
 import { NO_EFFECTS } from "@/lib/utils/battle/view";
 import type { ActiveEffect, BattleParticipant } from "@/types/battle";
-
-const PORTRAIT_SHARE = 0.7;
 
 export interface MapTokenProps {
   participant: BattleParticipant;
