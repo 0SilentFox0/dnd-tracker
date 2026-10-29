@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect } from "react";
+import { useTranslations } from "next-intl";
 
 import type { useWorldEditor } from "./useWorldEditor";
 
@@ -20,18 +21,20 @@ interface Options {
 export function useRemoveMarker({ marker, editor, select, hotkey = false }: Options) {
   const confirm = useConfirm();
 
+  const t = useTranslations("world.removeMarker");
+
   const remove = useCallback(async () => {
     if (!marker) return;
 
     const ok = await confirm({
-      title: `Видалити «${marker.name}»?`,
-      description: marker.childMapId ? "Разом із маркером буде видалено прив'язану карту та всі вкладені карти з їхніми маркерами й картинками." : "Маркер буде видалено.",
-      confirmLabel: "Видалити",
+      title: t("title", { name: marker.name }),
+      description: marker.childMapId ? t("descriptionChild") : t("descriptionPlain"),
+      confirmLabel: t("confirm"),
       destructive: true,
     });
 
     if (ok && (await editor.marker.remove.mutateOk(marker.id))) select(null);
-  }, [marker, confirm, editor, select]);
+  }, [marker, confirm, editor, select, t]);
 
   useEffect(() => {
     if (!hotkey || !marker) return;

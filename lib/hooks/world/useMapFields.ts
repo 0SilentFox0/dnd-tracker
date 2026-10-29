@@ -1,6 +1,7 @@
 "use client";
 
 import { useRef, useState } from "react";
+import { useTranslations } from "next-intl";
 
 import type { useWorldEditor } from "./useWorldEditor";
 import { useWorldMapUpload } from "./useWorldMapUpload";
@@ -25,6 +26,8 @@ export function useMapFields({ campaignId, detail, maps, editor, openMap }: Opti
   const { map } = detail;
 
   const confirm = useConfirm();
+
+  const t = useTranslations("world");
 
   const notify = useNotify();
 
@@ -64,9 +67,9 @@ export function useMapFields({ campaignId, detail, maps, editor, openMap }: Opti
     bitmap?.close();
 
     const ok = await confirm({
-      title: "Замінити картинку?",
-      description: changed ? "Пропорції нової картинки відрізняються — маркери та зони можуть зсунутися." : "Маркери й зони залишаться на своїх місцях.",
-      confirmLabel: "Замінити",
+      title: t("replace.title"),
+      description: changed ? t("replace.aspectChanged") : t("replace.same"),
+      confirmLabel: t("replace.confirm"),
     });
 
     if (!ok) return;
@@ -76,7 +79,7 @@ export function useMapFields({ campaignId, detail, maps, editor, openMap }: Opti
     try {
       image = await upload(file);
     } catch (err) {
-      void notify(errorMessage(err, "Не вдалося завантажити картинку"));
+      void notify(errorMessage(err, t("errors.uploadFailed")));
 
       return;
     }
@@ -88,9 +91,9 @@ export function useMapFields({ campaignId, detail, maps, editor, openMap }: Opti
     const nested = subtreeMapIds(maps, map.id).length - 1;
 
     const ok = await confirm({
-      title: `Видалити карту «${map.name}»?`,
-      description: nested > 0 ? `Разом із нею буде видалено ${nested} вкладених карт, їхні маркери та картинки.` : "Маркери й картинка карти будуть видалені.",
-      confirmLabel: "Видалити",
+      title: t("removeMap.title", { name: map.name }),
+      description: t("removeMap.description", { nested }),
+      confirmLabel: t("removeMap.confirm"),
       destructive: true,
     });
 

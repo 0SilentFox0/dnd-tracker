@@ -1,6 +1,7 @@
 "use client";
 
 import { type DragEvent, useEffect, useRef, useState } from "react";
+import { useTranslations } from "next-intl";
 import { ImagePlus } from "lucide-react";
 
 import { WORLD_MAP_MAX_EDGE_PX } from "@/lib/constants/world";
@@ -11,6 +12,8 @@ const ACCEPT = "image/jpeg,image/png,image/webp";
 const isImage = (f: File) => ACCEPT.split(",").includes(f.type);
 
 export function MapFileDropzone({ file, onFile }: { file: File | null; onFile(f: File | null): void }) {
+  const t = useTranslations("world.dropzone");
+
   const [over, setOver] = useState(false);
 
   const [rejected, setRejected] = useState(false);
@@ -55,17 +58,17 @@ export function MapFileDropzone({ file, onFile }: { file: File | null; onFile(f:
           over ? "border-[var(--gold)] bg-white/5" : "border-hud-line bg-black/30",
         )}
       >
-        <input type="file" accept={ACCEPT} aria-label="Картинка карти" className="sr-only" onChange={(e) => accept(e.target.files?.[0])} />
+        <input type="file" accept={ACCEPT} aria-label={t("ariaLabel")} className="sr-only" onChange={(e) => accept(e.target.files?.[0])} />
         {file && preview ? (
           // eslint-disable-next-line @next/next/no-img-element
           <img src={preview} alt="" className="max-h-40 rounded object-contain" />
         ) : (
           <ImagePlus className="size-7 text-hud-gold" aria-hidden />
         )}
-        <span className="text-hud-ink">{file ? file.name : "Перетягніть картинку сюди або натисніть, щоб обрати"}</span>
-        <span className="text-xs">JPG, PNG або WebP, до ~{WORLD_MAP_MAX_EDGE_PX} px по довшій стороні</span>
+        <span className="text-hud-ink">{file ? file.name : t("prompt")}</span>
+        <span className="text-xs">{t("formats", { px: WORLD_MAP_MAX_EDGE_PX })}</span>
       </label>
-      {rejected ? <p className="text-xs text-destructive">Оберіть картинку у форматі JPG, PNG або WebP</p> : null}
+      {rejected ? <p className="text-xs text-destructive">{t("rejected")}</p> : null}
     </div>
   );
 }

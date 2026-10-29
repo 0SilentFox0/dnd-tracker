@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useTranslations } from "next-intl";
 
 import { EntityIcon } from "@/components/common/EntityIcon";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
@@ -14,6 +15,8 @@ interface HeroClusterProps {
 }
 
 export function HeroCluster({ cluster, zoom, onHeroClick }: HeroClusterProps) {
+  const t = useTranslations("world");
+
   const [open, setOpen] = useState(false);
 
   const [top, ...rest] = cluster.heroes;
@@ -49,7 +52,7 @@ export function HeroCluster({ cluster, zoom, onHeroClick }: HeroClusterProps) {
       <PopoverTrigger asChild>
         <button
           type="button"
-          aria-label={`${top.name} і ще ${rest.length}`}
+          aria-label={t("heroCluster", { name: top.name, count: rest.length })}
           data-own={top.own}
           data-cluster={cluster.heroes.length}
           className={cn("atlas-hero atlas-hero-cluster absolute", top.own && "atlas-hero-own")}

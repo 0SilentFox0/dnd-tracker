@@ -1,8 +1,12 @@
 // @vitest-environment happy-dom
-import { cleanup, render, screen } from "@testing-library/react";
-import { afterEach, describe, expect, it } from "vitest";
+import { cleanup, screen } from "@testing-library/react";
+import { afterEach, describe, expect, it, vi } from "vitest";
 
 import { WorldMapLink } from "../WorldMapLink";
+
+import { render } from "@/components/world/__tests__/uk-intl";
+
+vi.unmock("next-intl");
 
 afterEach(cleanup);
 

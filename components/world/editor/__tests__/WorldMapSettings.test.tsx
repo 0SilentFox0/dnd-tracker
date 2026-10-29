@@ -5,7 +5,9 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { WorldEditorContext, type WorldEditorCtx } from "../WorldEditorContext";
 import { WorldMapSettings } from "../WorldMapSettings";
 
-import { renderWithConfirm } from "@/components/ui/__tests__/render-with-confirm";
+import { renderWithConfirm } from "@/components/world/__tests__/uk-intl";
+
+vi.unmock("next-intl");
 
 vi.mock("@/lib/hooks/world/useWorldMapUpload", () => ({ useWorldMapUpload: () => ({ upload: vi.fn(), discard: vi.fn(), uploading: false }) }));
 
@@ -58,10 +60,10 @@ describe("WorldMapSettings", () => {
     renderSettings();
     fireEvent.click(screen.getByRole("button", { name: /Видалити карту/ }));
 
-    await screen.findByText(/1 вкладених/);
-    fireEvent.click(screen.getByRole("button", { name: "common.actions.cancel" }));
+    await screen.findByText(/1 вкладену карту/);
+    fireEvent.click(screen.getByRole("button", { name: "Скасувати" }));
 
-    await waitFor(() => expect(screen.queryByText(/1 вкладених/)).toBeNull());
+    await waitFor(() => expect(screen.queryByText(/1 вкладену карту/)).toBeNull());
     expect(remove).not.toHaveBeenCalled();
   });
 

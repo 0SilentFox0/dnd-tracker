@@ -1,13 +1,16 @@
 // @vitest-environment happy-dom
 import type { ReactNode } from "react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { act, cleanup, fireEvent, render, renderHook, screen, waitFor } from "@testing-library/react";
+import { act, cleanup, fireEvent, renderHook, screen, waitFor } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
 import { HeroEyesSelect } from "../HeroEyesSelect";
 
+import { render } from "@/components/world/__tests__/uk-intl";
 import * as api from "@/lib/api/world";
 import { useHeroEyes } from "@/lib/hooks/world";
+
+vi.unmock("next-intl");
 
 vi.mock("@/lib/api/world");
 

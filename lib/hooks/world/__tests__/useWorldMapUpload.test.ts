@@ -73,7 +73,7 @@ describe("useWorldMapUpload", () => {
 
     const { result } = renderHook(() => useWorldMapUpload("c1"));
 
-    await expect(result.current.upload(new File(["x"], "a.txt", { type: "text/plain" }))).rejects.toThrow("Оберіть картинку");
+    await expect(result.current.upload(new File(["x"], "a.txt", { type: "text/plain" }))).rejects.toThrow("world.errors.chooseImage");
     expect(uploadWorldMapImage).not.toHaveBeenCalled();
   });
 });

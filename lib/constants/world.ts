@@ -20,16 +20,9 @@ export const WORLD_MAX_ZOOM = 8;
 export const DEFAULT_ZONE_COLOR = "#d3b060";
 export const REVEAL_RADIUS_RANGE = { min: 0.01, max: 0.2 } as const;
 
-export const WORLD_MARKER_ICONS: Record<string, { label: string }> = {
-  castle: { label: "Замок" },
-  city: { label: "Місто" },
-  village: { label: "Село" },
-  dungeon: { label: "Підземелля" },
-  portal: { label: "Портал" },
-  camp: { label: "Табір" },
-  landmark: { label: "Визначне місце" },
-  battle: { label: "Битва" },
-};
+export const WORLD_MARKER_ICON_KEYS = ["castle", "city", "village", "dungeon", "portal", "camp", "landmark", "battle"] as const;
+
+export const WORLD_MARKER_ICONS = Object.fromEntries(WORLD_MARKER_ICON_KEYS.map((k) => [k, true])) as Record<string, true>;
 
 export const WORLD_LABEL_ZOOM = 2.5;
 export const WORLD_ZONE_LABEL_HIDE_ZOOM = 4;

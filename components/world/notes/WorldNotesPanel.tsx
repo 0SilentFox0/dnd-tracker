@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import { Pencil, Trash2 } from "lucide-react";
 
 import { HudChipTabs, HudPanel } from "@/components/hud/page";
@@ -19,6 +20,8 @@ export interface WorldNotesPanelProps {
 }
 
 export function WorldNotesPanel({ campaignId, mapId, marker, notes, heroes, isDM = false }: WorldNotesPanelProps) {
+  const t = useTranslations("world.notes");
+
   const panel = useNotesPanel({ campaignId, mapId, markerId: marker.id, notes, heroes, isDM });
 
   return (
@@ -27,28 +30,28 @@ export function WorldNotesPanel({ campaignId, mapId, marker, notes, heroes, isDM
 
       {isDM ? null : (
         <HudChipTabs
-          ariaLabel="Нотатки"
+          ariaLabel={t("tabs")}
           items={[
-            { key: "public", label: "Спільні", active: panel.tab === "public", onSelect: () => panel.setTab("public") },
-            { key: "private", label: "Мої", active: panel.tab === "private", onSelect: () => panel.setTab("private") },
+            { key: "public", label: t("shared"), active: panel.tab === "public", onSelect: () => panel.setTab("public") },
+            { key: "private", label: t("mine"), active: panel.tab === "private", onSelect: () => panel.setTab("private") },
           ]}
         />
       )}
 
-      {panel.shown.length === 0 ? <p className="text-xs text-hud-muted">Нотаток поки немає.</p> : null}
+      {panel.shown.length === 0 ? <p className="text-xs text-hud-muted">{t("empty")}</p> : null}
 
       <ul className="flex flex-col gap-2">
         {panel.shown.map((n) => (
           <li key={n.id} className="rounded-md border border-hud-rule bg-black/30 p-2 text-sm text-hud-ink">
             {panel.editing?.id === n.id ? (
               <div className="flex flex-col gap-2">
-                <Textarea aria-label="Текст нотатки" value={panel.editing.text} maxLength={WORLD_NOTE_MAX} onChange={(e) => panel.setEditText(e.target.value)} />
+                <Textarea aria-label={t("text")} value={panel.editing.text} maxLength={WORLD_NOTE_MAX} onChange={(e) => panel.setEditText(e.target.value)} />
                 <div className="flex gap-2">
                   <Button type="button" size="sm" onClick={() => void panel.saveEdit()}>
-                    Зберегти
+                    {t("save")}
                   </Button>
                   <Button type="button" size="sm" variant="outline" onClick={panel.cancelEdit}>
-                    Скасувати
+                    {t("cancel")}
                   </Button>
                 </div>
               </div>
@@ -59,12 +62,12 @@ export function WorldNotesPanel({ campaignId, mapId, marker, notes, heroes, isDM
                   <span>{n.authorName}</span>
                   <span className="flex gap-1">
                     {panel.canEdit(n) ? (
-                      <Button type="button" size="icon" variant="ghost" aria-label="Редагувати нотатку" onClick={() => panel.startEdit(n)}>
+                      <Button type="button" size="icon" variant="ghost" aria-label={t("edit")} onClick={() => panel.startEdit(n)}>
                         <Pencil className="size-4" />
                       </Button>
                     ) : null}
                     {panel.canRemove(n) ? (
-                      <Button type="button" size="icon" variant="ghost" aria-label="Видалити нотатку" onClick={() => void panel.removeNote(n.id)}>
+                      <Button type="button" size="icon" variant="ghost" aria-label={t("delete")} onClick={() => void panel.removeNote(n.id)}>
                         <Trash2 className="size-4" />
                       </Button>
                     ) : null}
@@ -83,10 +86,10 @@ export function WorldNotesPanel({ campaignId, mapId, marker, notes, heroes, isDM
           void panel.submit();
         }}
       >
-        <Textarea aria-label="Нова нотатка" value={panel.text} onChange={(e) => panel.setText(e.target.value)} placeholder={isDM ? "Бачать усі гравці" : panel.tab === "private" ? "Тільки для вас" : "Бачать усі гравці"} />
+        <Textarea aria-label={t("new")} value={panel.text} onChange={(e) => panel.setText(e.target.value)} placeholder={!isDM && panel.tab === "private" ? t("onlyYou") : t("everyone")} />
         <div className="flex flex-wrap items-center gap-2">
           {!isDM && heroes.length > 1 ? (
-            <select aria-label="Від імені героя" value={panel.characterId} onChange={(e) => panel.setCharacterId(e.target.value)} className="h-9 rounded-md border border-hud-rule bg-black/40 px-2 text-sm text-hud-ink">
+            <select aria-label={t("asHero")} value={panel.characterId} onChange={(e) => panel.setCharacterId(e.target.value)} className="h-9 rounded-md border border-hud-rule bg-black/40 px-2 text-sm text-hud-ink">
               {heroes.map((h) => (
                 <option key={h.id} value={h.id}>
                   {h.name}
@@ -96,7 +99,7 @@ export function WorldNotesPanel({ campaignId, mapId, marker, notes, heroes, isDM
           ) : null}
           <span className={panel.remaining < 0 ? "text-xs text-destructive" : "text-xs text-hud-muted"}>{panel.remaining}</span>
           <Button type="submit" size="sm" className="ml-auto" disabled={!panel.canSubmit}>
-            Додати
+            {t("add")}
           </Button>
         </div>
       </form>

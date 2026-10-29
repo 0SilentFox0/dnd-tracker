@@ -2,6 +2,7 @@
 
 import { type PointerEvent, type ReactNode, useEffect, useRef, useState } from "react";
 import Image from "next/image";
+import { useTranslations } from "next-intl";
 import { Minus, Plus, RotateCcw } from "lucide-react";
 
 import { WorldFog } from "./WorldFog";
@@ -41,6 +42,8 @@ export interface WorldMapViewProps {
 
 export function WorldMapView({ detail, selectedId, draft, tool = "select", handlers = {}, fog, heroes, focus, overlay, hint, compact = false, className }: WorldMapViewProps) {
   const { map, markers } = detail;
+
+  const t = useTranslations("world.zoom");
 
   const { ref: outerRef, size } = useElementSize<HTMLDivElement>();
 
@@ -147,13 +150,13 @@ export function WorldMapView({ detail, selectedId, draft, tool = "select", handl
       </div>
       {hint ? <div className="pointer-events-none absolute top-2 right-2 left-2 z-10 flex justify-center">{hint}</div> : null}
       <div className="absolute right-2 bottom-14 z-10 flex flex-col gap-1 max-lg:opacity-60 max-lg:focus-within:opacity-100 max-lg:active:opacity-100 lg:bottom-2">
-        <Button type="button" size="icon" variant="ghost" className="atlas-zoom" aria-label="Наблизити" onClick={() => zoomBy(ZOOM_STEP)}>
+        <Button type="button" size="icon" variant="ghost" className="atlas-zoom" aria-label={t("in")} onClick={() => zoomBy(ZOOM_STEP)}>
           <Plus className="size-4" />
         </Button>
-        <Button type="button" size="icon" variant="ghost" className="atlas-zoom" aria-label="Віддалити" onClick={() => zoomBy(1 / ZOOM_STEP)}>
+        <Button type="button" size="icon" variant="ghost" className="atlas-zoom" aria-label={t("out")} onClick={() => zoomBy(1 / ZOOM_STEP)}>
           <Minus className="size-4" />
         </Button>
-        <Button type="button" size="icon" variant="ghost" className="atlas-zoom" aria-label="Скинути масштаб" onClick={reset}>
+        <Button type="button" size="icon" variant="ghost" className="atlas-zoom" aria-label={t("reset")} onClick={reset}>
           <RotateCcw className="size-4" />
         </Button>
       </div>

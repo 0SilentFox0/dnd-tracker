@@ -1,11 +1,14 @@
 // @vitest-environment happy-dom
-import { cleanup, fireEvent, render, screen } from "@testing-library/react";
+import { cleanup, fireEvent, screen } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
 import { WorldBreadcrumbs } from "../WorldBreadcrumbs";
 import { WorldEditorContext, type WorldEditorCtx } from "../WorldEditorContext";
 
 import { HudPageHeader } from "@/components/hud/page";
+import { render } from "@/components/world/__tests__/uk-intl";
+
+vi.unmock("next-intl");
 
 afterEach(cleanup);
 

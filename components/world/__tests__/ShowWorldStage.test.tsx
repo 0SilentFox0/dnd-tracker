@@ -1,12 +1,15 @@
 // @vitest-environment happy-dom
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { cleanup, render, screen, waitFor } from "@testing-library/react";
+import { cleanup, screen, waitFor } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import { ShowStage } from "@/components/show/stage/ShowStage";
+import { render } from "@/components/world/__tests__/uk-intl";
 import { getWorldMap, getWorldView } from "@/lib/api/world";
 import type { ShowState } from "@/types/show";
 import type { WorldMap, WorldMarker, WorldView } from "@/types/world";
+
+vi.unmock("next-intl");
 
 vi.mock("@/lib/api/world", () => ({ getWorldView: vi.fn(), getWorldMap: vi.fn() }));
 // eslint-disable-next-line @next/next/no-img-element

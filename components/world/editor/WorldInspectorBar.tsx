@@ -1,6 +1,7 @@
 "use client";
 
 import { type CSSProperties, type ReactNode, useEffect, useRef, useState } from "react";
+import { useTranslations } from "next-intl";
 import { ChevronRight, Crosshair, ImageUp, Map as MapIcon, MapPinned, MessagesSquare, NotebookPen, PenLine, Trash2, X } from "lucide-react";
 
 import { DmMarkerNotes } from "./DmMarkerNotes";
@@ -32,6 +33,8 @@ const POPOVER = "border-hud-rule bg-[rgba(17,14,11,.99)]";
 export function WorldInspectorBar({ open, onClose }: { open: boolean; onClose(): void }) {
   const { detail, selectedId } = useWorldEditorContext();
 
+  const t = useTranslations("world.editor");
+
   useEffect(() => {
     if (!open) return;
 
@@ -52,13 +55,13 @@ export function WorldInspectorBar({ open, onClose }: { open: boolean; onClose():
 
   let content: ReactNode;
 
-  if (!open || !detail) content = <p className="px-1 text-xs text-hud-muted">Оберіть точку чи зону на карті — тут з&apos;являться її параметри.</p>;
+  if (!open || !detail) content = <p className="px-1 text-xs text-hud-muted">{t("inspectorEmpty")}</p>;
   else if (marker) content = <MarkerStrip key={marker.id} marker={marker} onClose={onClose} />;
   else content = <MapStrip key={detail.map.id} detail={detail} onClose={onClose} />;
 
   return (
     <HudPortalClassProvider value="hud-surface">
-      <div role="region" aria-label="Інспектор" className={cn(ROW, "border-t border-hud-rule", !open && "text-hud-muted")}>
+      <div role="region" aria-label={t("inspector")} className={cn(ROW, "border-t border-hud-rule", !open && "text-hud-muted")}>
         {content}
       </div>
     </HudPortalClassProvider>
@@ -66,8 +69,10 @@ export function WorldInspectorBar({ open, onClose }: { open: boolean; onClose():
 }
 
 function CloseButton({ onClose }: { onClose(): void }) {
+  const t = useTranslations("world.editor");
+
   return (
-    <button type="button" aria-label="Закрити панель" onClick={onClose} className="inline-flex size-8 shrink-0 items-center justify-center rounded-md border border-hud-rule text-hud-muted hover:bg-white/10 hover:text-hud-ink">
+    <button type="button" aria-label={t("closePanel")} onClick={onClose} className="inline-flex size-8 shrink-0 items-center justify-center rounded-md border border-hud-rule text-hud-muted hover:bg-white/10 hover:text-hud-ink">
       <X className="size-4" aria-hidden />
     </button>
   );
@@ -94,6 +99,8 @@ function SwitchField({ label, title, checked, onChange }: { label: string; title
 function MarkerStrip({ marker, onClose }: { marker: WorldMarker; onClose(): void }) {
   const { editor, select, openMap, redraw, redrawId } = useWorldEditorContext();
 
+  const t = useTranslations("world");
+
   const [creating, setCreating] = useState(false);
 
   const [iconOpen, setIconOpen] = useState(false);
@@ -110,10 +117,10 @@ function MarkerStrip({ marker, onClose }: { marker: WorldMarker; onClose(): void
         <span className={MEDALLION}>
           <Icon className="size-4 text-[#2a1d05]" aria-hidden />
         </span>
-        <span className="hud-sc hidden text-xs text-hud-muted xl:inline">{marker.kind === "zone" ? "Зона" : "Точка"}</span>
+        <span className="hud-sc hidden text-xs text-hud-muted xl:inline">{t(`shape.${marker.kind}`)}</span>
       </span>
       <Input
-        aria-label="Назва"
+        aria-label={t("name")}
         className="h-9 w-44 shrink-0"
         maxLength={WORLD_NAME_MAX}
         value={name}
@@ -126,19 +133,19 @@ function MarkerStrip({ marker, onClose }: { marker: WorldMarker; onClose(): void
       {marker.kind === "point" ? (
         <Popover open={iconOpen} onOpenChange={setIconOpen}>
           <PopoverTrigger asChild>
-            <button type="button" aria-label="Іконка" title="Іконка" className={CHIP}>
+            <button type="button" aria-label={t("editor.icon")} title={t("editor.icon")} className={CHIP}>
               <Icon className="size-4" aria-hidden />
-              Іконка
+              {t("editor.icon")}
             </button>
           </PopoverTrigger>
           <PopoverContent className={POPOVER}>
-            <div role="group" aria-label="Іконки" className="grid grid-cols-4 gap-1.5">
-              {ICON_OPTIONS.map(({ value, label, Icon: Option }) => (
+            <div role="group" aria-label={t("editor.icons")} className="grid grid-cols-4 gap-1.5">
+              {ICON_OPTIONS.map(({ value, Icon: Option }) => (
                 <button
                   key={value}
                   type="button"
-                  title={label}
-                  aria-label={label}
+                  title={t(`markerKinds.${value}`)}
+                  aria-label={t(`markerKinds.${value}`)}
                   aria-pressed={marker.icon === value}
                   onClick={() => {
                     void save({ icon: value });
@@ -154,35 +161,35 @@ function MarkerStrip({ marker, onClose }: { marker: WorldMarker; onClose(): void
         </Popover>
       ) : (
         <>
-          <ColorSwatch color={color} label="Колір зони" onChange={pickColor} />
-          <Button type="button" size="sm" variant={redrawing ? "default" : "outline"} onClick={() => redraw(redrawing ? null : marker.id)} className="h-9 shrink-0 gap-1.5" aria-label={redrawing ? "Малюйте нову зону…" : "Перемалювати контур"}>
+          <ColorSwatch color={color} label={t("editor.zoneColor")} onChange={pickColor} />
+          <Button type="button" size="sm" variant={redrawing ? "default" : "outline"} onClick={() => redraw(redrawing ? null : marker.id)} className="h-9 shrink-0 gap-1.5" aria-label={redrawing ? t("editor.drawNewZone") : t("editor.redrawOutline")}>
             <PenLine className="size-4" />
-            {redrawing ? "Малюйте…" : "Контур"}
+            {redrawing ? t("editor.drawing") : t("editor.outline")}
           </Button>
         </>
       )}
-      <SwitchField label="Відома локація" title="Гравці бачать її й без відкритого туману" checked={marker.alwaysVisible} onChange={(v) => void save({ alwaysVisible: v })} />
-      <Button type="button" size="sm" variant="outline" onClick={() => (marker.childMapId ? openMap(marker.childMapId) : setCreating(true))} className="h-9 shrink-0 gap-1.5" aria-label={marker.childMapId ? "Відкрити вкладену карту" : "Створити вкладену карту"}>
+      <SwitchField label={t("editor.knownLocation")} title={t("editor.knownLocationHint")} checked={marker.alwaysVisible} onChange={(v) => void save({ alwaysVisible: v })} />
+      <Button type="button" size="sm" variant="outline" onClick={() => (marker.childMapId ? openMap(marker.childMapId) : setCreating(true))} className="h-9 shrink-0 gap-1.5" aria-label={marker.childMapId ? t("editor.openChild") : t("editor.createChild")}>
         <MapPinned className="size-4" />
-        {marker.childMapId ? "Вкладена карта" : "Створити карту"}
+        {marker.childMapId ? t("editor.childMap") : t("editor.createMap")}
       </Button>
       <Popover onOpenChange={(o) => !o && commitNote()}>
         <PopoverTrigger asChild>
           <button type="button" className={CHIP}>
             <NotebookPen className="size-4" aria-hidden />
-            Нотатка
+            {t("editor.note")}
             {note.trim() ? <span aria-hidden className="size-1.5 rounded-full bg-[var(--gold)]" /> : null}
           </button>
         </PopoverTrigger>
         <PopoverContent className={cn(POPOVER, "w-72")}>
-          <Textarea aria-label="Нотатка ДМ" rows={5} value={note} maxLength={WORLD_DM_NOTE_MAX} onChange={(e) => setNote(e.target.value)} onBlur={commitNote} />
+          <Textarea aria-label={t("editor.dmNote")} rows={5} value={note} maxLength={WORLD_DM_NOTE_MAX} onChange={(e) => setNote(e.target.value)} onBlur={commitNote} />
         </PopoverContent>
       </Popover>
       <Popover>
         <PopoverTrigger asChild>
           <button type="button" className={CHIP}>
             <MessagesSquare className="size-4" aria-hidden />
-            Нотатки гравців
+            {t("editor.playerNotes")}
           </button>
         </PopoverTrigger>
         <PopoverContent className={cn(POPOVER, "max-h-96 w-80 overflow-y-auto")}>
@@ -190,7 +197,7 @@ function MarkerStrip({ marker, onClose }: { marker: WorldMarker; onClose(): void
         </PopoverContent>
       </Popover>
       <span className="ml-auto flex shrink-0 items-center gap-2">
-        <DeleteButton label="Видалити" onClick={() => void remove()} />
+        <DeleteButton label={t("editor.delete")} onClick={() => void remove()} />
         <CloseButton onClose={onClose} />
       </span>
       <NewWorldMapDialog open={creating} onOpenChange={setCreating} parentMarker={{ id: marker.id, name: marker.name }} />
@@ -200,6 +207,8 @@ function MarkerStrip({ marker, onClose }: { marker: WorldMarker; onClose(): void
 
 function MapStrip({ detail, onClose }: { detail: WorldMapDetail; onClose(): void }) {
   const { campaignId, maps, editor, openMap, tool, setTool } = useWorldEditorContext();
+
+  const t = useTranslations("world");
 
   const fileInput = useRef<HTMLInputElement>(null);
 
@@ -211,10 +220,10 @@ function MapStrip({ detail, onClose }: { detail: WorldMapDetail; onClose(): void
         <span className={MEDALLION}>
           <MapIcon className="size-4 text-[#2a1d05]" aria-hidden />
         </span>
-        <span className="hud-sc text-xs text-hud-muted">{map.parentMapId ? "Вкладена карта" : "Коренева карта"}</span>
+        <span className="hud-sc text-xs text-hud-muted">{map.parentMapId ? t("mapKind.nested") : t("mapKind.root")}</span>
       </span>
       <Input
-        aria-label="Назва"
+        aria-label={t("name")}
         className="h-9 w-44 shrink-0"
         maxLength={WORLD_NAME_MAX}
         value={name}
@@ -224,12 +233,12 @@ function MapStrip({ detail, onClose }: { detail: WorldMapDetail; onClose(): void
           if (e.key === "Enter") e.currentTarget.blur();
         }}
       />
-      <SwitchField label="Туман війни" title="Приховувати невідкриті ділянки" checked={map.fogEnabled} onChange={(v) => void save({ fogEnabled: v })} />
+      <SwitchField label={t("editor.fog")} title={t("editor.fogHide")} checked={map.fogEnabled} onChange={(v) => void save({ fogEnabled: v })} />
       <label className="flex shrink-0 items-center gap-2 text-sm">
-        Радіус
+        {t("editor.radius")}
         <input
           type="range"
-          aria-label="Радіус огляду"
+          aria-label={t("editor.radiusView")}
           className="hud-range w-32"
           style={{ "--fill": `${fill}%` } as CSSProperties}
           min={REVEAL_RADIUS_RANGE.min}
@@ -245,12 +254,12 @@ function MapStrip({ detail, onClose }: { detail: WorldMapDetail; onClose(): void
       </label>
       <Button type="button" size="sm" variant={tool === "entry" ? "default" : "outline"} onClick={() => setTool(tool === "entry" ? "select" : "entry")} className="h-9 gap-1.5">
         <Crosshair className="size-4" />
-        {tool === "entry" ? "Клікніть по карті…" : "Точка входу: задати на карті"}
+        {tool === "entry" ? t("editor.entryPlacing") : t("editor.entryOnMap")}
       </Button>
       <Popover>
         <PopoverTrigger asChild>
           <button type="button" className={CHIP}>
-            Вкладені карти · {children.length}
+            {t("editor.children", { count: children.length })}
           </button>
         </PopoverTrigger>
         <PopoverContent className={cn(POPOVER, "w-60")}>
@@ -266,13 +275,13 @@ function MapStrip({ detail, onClose }: { detail: WorldMapDetail; onClose(): void
               ))}
             </ul>
           ) : (
-            <p className="text-xs text-hud-muted">Оберіть маркер і створіть для нього вкладену карту.</p>
+            <p className="text-xs text-hud-muted">{t("editor.childrenEmpty")}</p>
           )}
         </PopoverContent>
       </Popover>
       <Button type="button" size="sm" variant="outline" title={`${map.width}×${map.height} px`} onClick={() => fileInput.current?.click()} className="h-9 gap-1.5">
         <ImageUp className="size-4" />
-        Замінити картинку
+        {t("editor.replaceImage")}
       </Button>
       <input
         ref={fileInput}
@@ -288,7 +297,7 @@ function MapStrip({ detail, onClose }: { detail: WorldMapDetail; onClose(): void
         }}
       />
       <span className="ml-auto flex shrink-0 items-center gap-2">
-        <DeleteButton label="Видалити карту" onClick={() => void remove()} />
+        <DeleteButton label={t("editor.deleteMap")} onClick={() => void remove()} />
         <CloseButton onClose={onClose} />
       </span>
     </>

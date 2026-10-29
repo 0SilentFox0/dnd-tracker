@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import { Map as MapIcon } from "lucide-react";
 
 import { EmptyState, QueryState } from "@/components/common/states";
@@ -21,6 +22,8 @@ const MAP_HEIGHT = "h-[calc(100dvh-var(--app-header-h,89px)-9rem)] min-h-[20rem]
 export function WorldPlayClient({ campaignId, campaignName, mapId }: { campaignId: string; campaignName: string; mapId: string | null }) {
   const play = useWorldPlay(campaignId, mapId);
 
+  const t = useTranslations("world");
+
   usePusherShowSync(campaignId, !!mapId);
 
   const isDesktop = useMediaQuery(DESKTOP_QUERY);
@@ -28,8 +31,8 @@ export function WorldPlayClient({ campaignId, campaignName, mapId }: { campaignI
   if (!mapId) {
     return (
       <HudPage>
-        <HudPageHeader title="Карта світу" subtitle={campaignName} />
-        <EmptyState icon={MapIcon} title="ДМ ще не підготував карту" description="Коли карта з'явиться, тут буде видно ваших героїв і відкриті місця." />
+        <HudPageHeader title={t("title")} subtitle={campaignName} />
+        <EmptyState icon={MapIcon} title={t("play.emptyTitle")} description={t("play.emptyDescription")} />
       </HudPage>
     );
   }
@@ -49,7 +52,7 @@ export function WorldPlayClient({ campaignId, campaignName, mapId }: { campaignI
 
           return (
             <>
-              <HudPageHeader title="Карта світу" subtitle={<WorldCrumbs maps={view.maps} mapId={view.map.id} onOpen={play.openMap} />} actions={<span className="hidden text-sm text-hud-muted md:inline">{campaignName}</span>} />
+              <HudPageHeader title={t("title")} subtitle={<WorldCrumbs maps={view.maps} mapId={view.map.id} onOpen={play.openMap} />} actions={<span className="hidden text-sm text-hud-muted md:inline">{campaignName}</span>} />
               <div className="grid gap-3 lg:grid-cols-[minmax(0,1fr)_20rem]">
                 <div className={MAP_HEIGHT}>
                   <WorldMapView
@@ -66,8 +69,8 @@ export function WorldPlayClient({ campaignId, campaignName, mapId }: { campaignI
                 <div className="flex flex-col gap-3 lg:max-h-[calc(100dvh-var(--app-header-h,89px)-9rem)] lg:overflow-y-auto">
                   {play.myHeroes.length > 0 ? (
                     <HudPanel as="div">
-                      <h2 className="mb-1 text-sm font-medium text-hud-ink">Мої герої</h2>
-                      <HudChipTabs ariaLabel="Мої герої" items={play.myHeroes.map((h) => ({ key: h.id, label: h.name, active: false, onSelect: () => play.focusHero(h) }))} />
+                      <h2 className="mb-1 text-sm font-medium text-hud-ink">{t("play.myHeroes")}</h2>
+                      <HudChipTabs ariaLabel={t("play.myHeroes")} items={play.myHeroes.map((h) => ({ key: h.id, label: h.name, active: false, onSelect: () => play.focusHero(h) }))} />
                     </HudPanel>
                   ) : null}
                   {marker ? (
@@ -75,18 +78,18 @@ export function WorldPlayClient({ campaignId, campaignName, mapId }: { campaignI
                       <WorldNotesPanel campaignId={campaignId} mapId={view.map.id} marker={marker} notes={view.notes} heroes={play.myHeroes} />
                       {childOpen && marker.childMapId ? (
                         <Button type="button" variant="outline" onClick={() => play.openMap(marker.childMapId as string)}>
-                          Відкрити карту
+                          {t("play.openMap")}
                         </Button>
                       ) : null}
                     </>
                   ) : (
                     <HudPanel as="div">
-                      <p className="text-sm text-hud-muted">Оберіть маркер на карті, щоб побачити й залишити нотатки.</p>
+                      <p className="text-sm text-hud-muted">{t("play.pickMarker")}</p>
                     </HudPanel>
                   )}
                   {places.length > 0 ? (
                     <HudPanel as="div">
-                      <h2 className="mb-1 text-sm font-medium text-hud-ink">Відкриті місця</h2>
+                      <h2 className="mb-1 text-sm font-medium text-hud-ink">{t("play.places")}</h2>
                       <ul className="flex flex-col gap-1">
                         {places.map((m) => (
                           <li key={m.id}>
@@ -99,7 +102,7 @@ export function WorldPlayClient({ campaignId, campaignName, mapId }: { campaignI
                     </HudPanel>
                   ) : null}
                   <HudPanel as="div">
-                    <h2 className="mb-1 text-sm font-medium text-hud-ink">Журнал</h2>
+                    <h2 className="mb-1 text-sm font-medium text-hud-ink">{t("travel.log")}</h2>
                     <TravelLog campaignId={campaignId} />
                   </HudPanel>
                 </div>

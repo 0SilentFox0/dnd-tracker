@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useTranslations } from "next-intl";
 
 import type { RosterHero } from "./useWorldHeroes";
 import { useWorldNotes } from "./useWorldNotes";
@@ -24,6 +25,8 @@ export function useNotesPanel({ campaignId, mapId, markerId, notes, heroes, isDM
   const { create, update, remove } = useWorldNotes(campaignId, mapId);
 
   const confirm = useConfirm();
+
+  const t = useTranslations("world.notes");
 
   const [tab, setTab] = useState<NotesTab>("public");
 
@@ -54,7 +57,7 @@ export function useNotesPanel({ campaignId, mapId, markerId, notes, heroes, isDM
   };
 
   const removeNote = async (id: string) => {
-    if (await confirm({ title: "Видалити нотатку?", confirmLabel: "Видалити", destructive: true })) await remove.mutateOk(id);
+    if (await confirm({ title: t("deleteTitle"), confirmLabel: t("deleteConfirm"), destructive: true })) await remove.mutateOk(id);
   };
 
   return {

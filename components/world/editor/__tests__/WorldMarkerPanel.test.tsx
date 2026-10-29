@@ -6,8 +6,10 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { WorldEditorContext, type WorldEditorCtx } from "../WorldEditorContext";
 import { WorldMarkerPanel } from "../WorldMarkerPanel";
 
-import { renderWithConfirm } from "@/components/ui/__tests__/render-with-confirm";
+import { renderWithConfirm } from "@/components/world/__tests__/uk-intl";
 import type { WorldMarker } from "@/types/world";
+
+vi.unmock("next-intl");
 
 const update = vi.fn();
 
@@ -70,7 +72,7 @@ describe("WorldMarkerPanel", () => {
 
     expect(await screen.findByText(/вкладені карти/)).toBeTruthy();
 
-    fireEvent.click(screen.getByRole("button", { name: "common.actions.cancel" }));
+    fireEvent.click(screen.getByRole("button", { name: "Скасувати" }));
     await waitFor(() => expect(screen.queryByText(/вкладені карти/)).toBeNull());
 
     expect(remove).not.toHaveBeenCalled();

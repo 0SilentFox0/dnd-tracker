@@ -1,1 +1,245 @@
-{}
+{
+  "title": "World map",
+  "name": "Name",
+  "mapKind": {
+    "root": "Root map",
+    "nested": "Nested map"
+  },
+  "shape": {
+    "point": "Point",
+    "zone": "Zone"
+  },
+  "markerKinds": {
+    "castle": "Castle",
+    "city": "City",
+    "village": "Village",
+    "dungeon": "Dungeon",
+    "portal": "Portal",
+    "camp": "Camp",
+    "landmark": "Landmark",
+    "battle": "Battle"
+  },
+  "defaults": {
+    "point": "New point",
+    "zone": "New zone"
+  },
+  "eyes": {
+    "label": "Through a hero's eyes",
+    "dm": "DM view",
+    "player": "Player view"
+  },
+  "editor": {
+    "basic": "Basics",
+    "fog": "Fog of war",
+    "fogHide": "Hide undiscovered areas",
+    "radius": "Radius",
+    "radiusView": "Sight radius",
+    "entry": "Entry point",
+    "entryPlacing": "Click on the map…",
+    "entrySet": "Set entry point",
+    "entryOnMap": "Entry point: set on the map",
+    "children": "Nested maps · {count}",
+    "childrenEmpty": "Select a marker and create a nested map for it.",
+    "image": "Image",
+    "replaceImage": "Replace image",
+    "deleteMap": "Delete map",
+    "delete": "Delete",
+    "inspector": "Inspector",
+    "inspectorEmpty": "Select a point or zone on the map — its settings will appear here.",
+    "closePanel": "Close panel",
+    "icon": "Icon",
+    "icons": "Icons",
+    "zoneColor": "Zone color",
+    "redrawZone": "Redraw zone",
+    "redrawOutline": "Redraw outline",
+    "drawNewZone": "Draw the new zone…",
+    "drawing": "Draw…",
+    "outline": "Outline",
+    "forDm": "For the DM",
+    "dmNote": "DM note",
+    "note": "Note",
+    "knownLocation": "Known location",
+    "knownLocationHint": "Players see it even without revealed fog",
+    "playerNotes": "Player notes",
+    "childMap": "Nested map",
+    "openChild": "Open nested map",
+    "createChild": "Create nested map",
+    "createMap": "Create map",
+    "markerSubtitle": "{shape} · {map}",
+    "markerParams": "Marker settings",
+    "mapParams": "Map settings",
+    "emptyTitle": "Upload a continent map",
+    "emptyDescription": "The journey starts here: cities, zones and entrances to nested maps are placed on it.",
+    "upload": "Upload map"
+  },
+  "toolbar": {
+    "group": "Tools",
+    "select": "Select",
+    "point": "Point",
+    "zone": "Zone",
+    "entry": "Entry point",
+    "move": "Heroes",
+    "closeZone": "Close zone",
+    "undoVertex": "Step back",
+    "toParent": "To parent map: {name}",
+    "settings": "Map settings"
+  },
+  "hint": {
+    "point": "<key>Click</key> the map to place a point · <key>Esc</key> to cancel",
+    "entry": "<key>Click</key> the map — heroes will appear here · <key>Esc</key> to cancel",
+    "move": "<key>Click</key> the map or a marker — it is the heroes' destination · <key>Esc</key> to exit",
+    "zone": "<key>Click</key> to add vertices{vertices, plural, =0 {} other { ({vertices})}} · <key>double-click</key> to close · <key>⌫</key> to step back · <key>Esc</key> to cancel"
+  },
+  "newMap": {
+    "titleMarker": "Map for the marker",
+    "title": "New map",
+    "descriptionMarker": "Nested map for “{name}”: it opens when the heroes enter this place.",
+    "description": "A name and an image for the map. Markers, zones and nested maps are added in the editor.",
+    "cancel": "Cancel",
+    "uploading": "Uploading…",
+    "create": "Create",
+    "image": "Image"
+  },
+  "dropzone": {
+    "ariaLabel": "Map image",
+    "prompt": "Drag an image here or click to choose",
+    "formats": "JPG, PNG or WebP, up to ~{px} px on the longer side",
+    "rejected": "Choose an image in JPG, PNG or WebP format"
+  },
+  "replace": {
+    "title": "Replace the image?",
+    "aspectChanged": "The new image has different proportions — markers and zones may shift.",
+    "same": "Markers and zones will stay where they are.",
+    "confirm": "Replace"
+  },
+  "removeMap": {
+    "title": "Delete the map “{name}”?",
+    "description": "{nested, plural, =0 {The map's markers and image will be deleted.} one {# nested map will be deleted with it, along with its markers and images.} other {# nested maps will be deleted with it, along with their markers and images.}}",
+    "confirm": "Delete"
+  },
+  "removeMarker": {
+    "title": "Delete “{name}”?",
+    "descriptionPlain": "The marker will be deleted.",
+    "descriptionChild": "The linked map and all nested maps, with their markers and images, will be deleted together with the marker.",
+    "confirm": "Delete"
+  },
+  "notes": {
+    "tabs": "Notes",
+    "shared": "Shared",
+    "mine": "Mine",
+    "empty": "No notes yet.",
+    "text": "Note text",
+    "save": "Save",
+    "cancel": "Cancel",
+    "edit": "Edit note",
+    "delete": "Delete note",
+    "new": "New note",
+    "everyone": "All players can see it",
+    "onlyYou": "Only for you",
+    "asHero": "As hero",
+    "add": "Add",
+    "deleteTitle": "Delete the note?",
+    "deleteConfirm": "Delete"
+  },
+  "travel": {
+    "kinds": {
+      "travel": "Travel",
+      "enter": "Entered",
+      "rest": "Rest",
+      "exit": "Left"
+    },
+    "rest": {
+      "none": "No rest",
+      "short": "Short",
+      "long": "Long"
+    },
+    "logRest": {
+      "short": "Short rest",
+      "long": "Long rest"
+    },
+    "heroes": "Heroes",
+    "all": "All",
+    "restTitle": "Rest",
+    "targetPicked": "Destination chosen on the map.",
+    "targetHint": "Click the map to choose a destination.",
+    "marker": "Marker: {name}.",
+    "move": "Move",
+    "pickTarget": "Pick destination",
+    "enter": "Enter",
+    "restNow": "Rest",
+    "exit": "Leave",
+    "restOff": "Resources between battles are disabled in the campaign rules.",
+    "log": "Log",
+    "logEmpty": "No journeys yet",
+    "pickedPoint": "Selected point",
+    "dialogTitle": "Hero travel",
+    "dialogDescription": "Choose heroes and a destination on the map, then move them",
+    "errors": {
+      "travel": "Could not move the heroes",
+      "enter": "Could not enter the map",
+      "exit": "Could not leave the map",
+      "rest": "Could not rest"
+    }
+  },
+  "play": {
+    "emptyTitle": "The DM hasn't prepared a map yet",
+    "emptyDescription": "When a map appears, you will see your heroes and discovered places here.",
+    "myHeroes": "My heroes",
+    "openMap": "Open map",
+    "pickMarker": "Select a marker on the map to see and leave notes.",
+    "places": "Discovered places",
+    "loadFailed": "Could not load the world map"
+  },
+  "show": {
+    "present": "Show the map to players",
+    "map": "Map",
+    "focus": "Focus on marker",
+    "noFocus": "No focus",
+    "toSlides": "Back to slides",
+    "toSlidesTitle": "Return to slides",
+    "travel": "Travel",
+    "travelTitle": "Move heroes on the map",
+    "missing": "Map unavailable",
+    "loading": "Loading the map…",
+    "dmNotice": "Players see the map with their own fog"
+  },
+  "crumbs": "Map path",
+  "zoom": {
+    "in": "Zoom in",
+    "out": "Zoom out",
+    "reset": "Reset zoom"
+  },
+  "heroCluster": "{name} and {count} more",
+  "mapLink": "World map",
+  "errors": {
+    "chooseImage": "Choose an image",
+    "uploadFailed": "Could not upload the image",
+    "createMap": "Could not create the map",
+    "saveMap": "Could not save the map",
+    "deleteMap": "Could not delete the map",
+    "createMarker": "Could not create the marker",
+    "saveMarker": "Could not save the marker",
+    "deleteMarker": "Could not delete the marker",
+    "saveNote": "Could not save the note",
+    "deleteNote": "Could not delete the note"
+  },
+  "validation": {
+    "coordinateOutOfBounds": "Coordinate is outside the map",
+    "polygonMin": "A zone needs at least 3 vertices",
+    "polygonMax": "Too many vertices (maximum {maximum})",
+    "polygonDistinct": "A zone needs at least 3 distinct vertices",
+    "color": "Color must be in #rrggbb format",
+    "nameRequired": "Enter a name",
+    "nameMax": "Name: up to {maximum} characters",
+    "urlInvalid": "Invalid link",
+    "nothingToUpdate": "No fields to update",
+    "zoneNeedsPolygon": "A zone needs an outline",
+    "pointNoPolygon": "A point has no outline",
+    "fileTooLarge": "The file is too large",
+    "heroesRequired": "Choose at least one hero",
+    "heroesMax": "Too many heroes (maximum {maximum})",
+    "heroesUnique": "Heroes must not repeat",
+    "noteEmpty": "The note is empty",
+    "noteMax": "Note: up to {maximum} characters"
+  }
+}

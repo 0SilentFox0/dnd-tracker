@@ -1,12 +1,15 @@
 // @vitest-environment happy-dom
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { cleanup, render, screen } from "@testing-library/react";
+import { cleanup, screen } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
 import { TravelLog } from "../TravelLog";
 
+import { render } from "@/components/world/__tests__/uk-intl";
 import * as api from "@/lib/api/world";
 import type { TravelKind, WorldTravelEntry } from "@/types/world";
+
+vi.unmock("next-intl");
 
 vi.mock("@/lib/api/world");
 

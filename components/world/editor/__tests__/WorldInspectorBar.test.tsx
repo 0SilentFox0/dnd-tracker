@@ -6,8 +6,10 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { WorldEditorContext, type WorldEditorCtx } from "../WorldEditorContext";
 import { WorldInspectorBar } from "../WorldInspectorBar";
 
-import { renderWithConfirm } from "@/components/ui/__tests__/render-with-confirm";
+import { renderWithConfirm } from "@/components/world/__tests__/uk-intl";
 import type { WorldMarker, WorldNote } from "@/types/world";
+
+vi.unmock("next-intl");
 
 vi.mock("@/lib/hooks/world/useWorldMapUpload", () => ({ useWorldMapUpload: () => ({ upload: vi.fn(), discard: vi.fn(), uploading: false }) }));
 
@@ -145,7 +147,7 @@ describe("WorldInspectorBar", () => {
     fireEvent.click(screen.getByRole("button", { name: /^Видалити$/ }));
     expect(await screen.findByText(/вкладені карти/)).toBeTruthy();
 
-    fireEvent.click(screen.getByRole("button", { name: "common.actions.cancel" }));
+    fireEvent.click(screen.getByRole("button", { name: "Скасувати" }));
     await waitFor(() => expect(screen.queryByText(/вкладені карти/)).toBeNull());
 
     expect(remove).not.toHaveBeenCalled();

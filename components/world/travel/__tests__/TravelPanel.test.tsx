@@ -1,14 +1,17 @@
 // @vitest-environment happy-dom
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { cleanup, fireEvent, render, screen, waitFor } from "@testing-library/react";
+import { cleanup, fireEvent, screen, waitFor } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import { TravelPanel, type TravelPanelProps } from "../TravelPanel";
 
+import { render } from "@/components/world/__tests__/uk-intl";
 import * as rulesApi from "@/lib/api/rules";
 import * as api from "@/lib/api/world";
 import { DEFAULT_RULES } from "@/lib/utils/rules";
 import type { WorldMarker } from "@/types/world";
+
+vi.unmock("next-intl");
 
 vi.mock("@/lib/api/world");
 vi.mock("@/lib/api/rules");

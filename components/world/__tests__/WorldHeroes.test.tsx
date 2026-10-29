@@ -1,10 +1,13 @@
 // @vitest-environment happy-dom
-import { cleanup, fireEvent, render, screen } from "@testing-library/react";
+import { cleanup, fireEvent, screen } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
 import { WorldHeroes } from "../WorldHeroes";
 
+import { render } from "@/components/world/__tests__/uk-intl";
 import type { WorldHero } from "@/types/world";
+
+vi.unmock("next-intl");
 
 // eslint-disable-next-line @next/next/no-img-element
 vi.mock("next/image", () => ({ default: (p: { alt: string }) => <img alt={p.alt} /> }));

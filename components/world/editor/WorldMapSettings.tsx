@@ -1,6 +1,7 @@
 "use client";
 
 import { type CSSProperties, useRef } from "react";
+import { useTranslations } from "next-intl";
 import { ChevronRight, Crosshair, ImageUp, Map as MapIcon } from "lucide-react";
 
 import { useWorldEditorContext } from "./WorldEditorContext";
@@ -25,25 +26,27 @@ export function WorldMapSettings() {
 function MapForm({ detail }: { detail: WorldMapDetail }) {
   const { campaignId, maps, editor, openMap, tool, setTool } = useWorldEditorContext();
 
+  const t = useTranslations("world");
+
   const fileInput = useRef<HTMLInputElement>(null);
 
   const { map, name, setName, commitName, radius, setRadius, commitRadius, fill, children, save, replaceImage, remove } = useMapFields({ campaignId, detail, maps, editor, openMap });
 
   return (
     <div>
-      <WorldPanelHeader badge={<MapIcon className="size-5 text-[#2a1d05]" aria-hidden />} title={map.name} subtitle={map.parentMapId ? "Вкладена карта" : "Коренева карта"} />
-      <HudSection title="Основне">
-        <LabeledInput label="Назва" maxLength={WORLD_NAME_MAX} value={name} onChange={(e) => setName(e.target.value)} onBlur={commitName} />
+      <WorldPanelHeader badge={<MapIcon className="size-5 text-[#2a1d05]" aria-hidden />} title={map.name} subtitle={map.parentMapId ? t("mapKind.nested") : t("mapKind.root")} />
+      <HudSection title={t("editor.basic")}>
+        <LabeledInput label={t("name")} maxLength={WORLD_NAME_MAX} value={name} onChange={(e) => setName(e.target.value)} onBlur={commitName} />
       </HudSection>
-      <HudSection title="Туман війни">
+      <HudSection title={t("editor.fog")}>
         <div className="space-y-2">
           <label className="flex items-center justify-between gap-3 text-sm">
-            Приховувати невідкриті ділянки
+            {t("editor.fogHide")}
             <Switch checked={map.fogEnabled} onCheckedChange={(v) => void save({ fogEnabled: v })} />
           </label>
           <label className="block space-y-1 text-sm">
             <span className="flex items-center justify-between">
-              Радіус огляду
+              {t("editor.radiusView")}
               <span className="font-mono text-hud-gold-bright">{Math.round(radius * 100)}%</span>
             </span>
             <input
@@ -62,13 +65,13 @@ function MapForm({ detail }: { detail: WorldMapDetail }) {
           </label>
         </div>
       </HudSection>
-      <HudSection title="Точка входу">
+      <HudSection title={t("editor.entry")}>
         <Button type="button" variant={tool === "entry" ? "default" : "outline"} onClick={() => setTool(tool === "entry" ? "select" : "entry")} className="w-full gap-2">
           <Crosshair className="size-4" />
-          {tool === "entry" ? "Клікніть по карті…" : "Поставити точку входу"}
+          {tool === "entry" ? t("editor.entryPlacing") : t("editor.entrySet")}
         </Button>
       </HudSection>
-      <HudSection title={`Вкладені карти · ${children.length}`}>
+      <HudSection title={t("editor.children", { count: children.length })}>
         {children.length ? (
           <ul className="space-y-1">
             {children.map((m) => (
@@ -81,16 +84,16 @@ function MapForm({ detail }: { detail: WorldMapDetail }) {
             ))}
           </ul>
         ) : (
-          <p className="text-xs text-hud-muted">Оберіть маркер і створіть для нього вкладену карту.</p>
+          <p className="text-xs text-hud-muted">{t("editor.childrenEmpty")}</p>
         )}
       </HudSection>
-      <HudSection title="Картинка">
+      <HudSection title={t("editor.image")}>
         <p className="mb-2 text-xs text-hud-muted">
           {map.width}×{map.height} px
         </p>
         <Button type="button" variant="outline" onClick={() => fileInput.current?.click()} className="w-full gap-2">
           <ImageUp className="size-4" />
-          Замінити картинку
+          {t("editor.replaceImage")}
         </Button>
         <input
           ref={fileInput}
@@ -106,7 +109,7 @@ function MapForm({ detail }: { detail: WorldMapDetail }) {
           }}
         />
       </HudSection>
-      <QuietDeleteButton label="Видалити карту" onClick={() => void remove()} />
+      <QuietDeleteButton label={t("editor.deleteMap")} onClick={() => void remove()} />
     </div>
   );
 }

@@ -5,8 +5,10 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { NewWorldMapDialog } from "../NewWorldMapDialog";
 import { WorldEditorContext, type WorldEditorCtx } from "../WorldEditorContext";
 
-import { renderWithConfirm } from "@/components/ui/__tests__/render-with-confirm";
+import { renderWithConfirm } from "@/components/world/__tests__/uk-intl";
 import { API_ERRORS } from "@/lib/constants/api-errors";
+
+vi.unmock("next-intl");
 
 const upload = vi.fn();
 

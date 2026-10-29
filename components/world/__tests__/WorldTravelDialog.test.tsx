@@ -1,12 +1,15 @@
 // @vitest-environment happy-dom
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { cleanup, fireEvent, render, screen, waitFor } from "@testing-library/react";
+import { cleanup, fireEvent, screen, waitFor } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import { WorldTravelDialog } from "../show/WorldTravelDialog";
 
+import { render } from "@/components/world/__tests__/uk-intl";
 import * as api from "@/lib/api/world";
 import type { WorldMapSummary, WorldMarker } from "@/types/world";
+
+vi.unmock("next-intl");
 
 vi.mock("@/lib/api/world");
 vi.mock("@/lib/hooks/world/useWorldHeroes", () => ({ useWorldHeroes: () => ({ heroes: [{ id: "h1", name: "Aria", avatar: null }], isPending: false }) }));

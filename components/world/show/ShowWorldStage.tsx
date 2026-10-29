@@ -1,6 +1,7 @@
 "use client";
 
 import type { CSSProperties } from "react";
+import { useTranslations } from "next-intl";
 
 import { ShowWaiting } from "@/components/show/stage/ShowWaiting";
 import { WorldMapView } from "@/components/world/WorldMapView";
@@ -11,6 +12,8 @@ import { cn } from "@/lib/utils";
 import type { ShowWorld } from "@/types/show";
 
 export function ShowWorldStage({ campaignId, world, isDM }: { campaignId: string; world: ShowWorld; isDM: boolean }) {
+  const t = useTranslations("world.show");
+
   const scene = useShowWorld(campaignId, world, isDM);
 
   const reduced = useReducedMotion();
@@ -24,7 +27,7 @@ export function ShowWorldStage({ campaignId, world, isDM }: { campaignId: string
   if (!shown || scene.status === "missing") {
     return (
       <div className="absolute inset-0 z-10 bg-black">
-        <ShowWaiting message={scene.status === "missing" ? "Карта недоступна" : "Завантажуємо карту…"} />
+        <ShowWaiting message={scene.status === "missing" ? t("missing") : t("loading")} />
       </div>
     );
   }
@@ -49,7 +52,7 @@ export function ShowWorldStage({ campaignId, world, isDM }: { campaignId: string
           className="rounded-none border-0"
         />
       </div>
-      {isDM && <p className="pointer-events-none absolute bottom-3 left-1/2 z-20 -translate-x-1/2 rounded bg-black/70 px-3 py-1 text-sm text-hud-bone">Гравці бачать карту зі своїм туманом</p>}
+      {isDM && <p className="pointer-events-none absolute bottom-3 left-1/2 z-20 -translate-x-1/2 rounded bg-black/70 px-3 py-1 text-sm text-hud-bone">{t("dmNotice")}</p>}
     </div>
   );
 }
