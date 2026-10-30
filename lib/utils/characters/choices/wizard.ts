@@ -1,3 +1,4 @@
+import { mergeBackground } from "@/lib/utils/backgrounds/selection";
 import { isChoiceOpen, resolveChoiceCount } from "@/lib/utils/characters/choices/count";
 import { resolvedPickCount } from "@/lib/utils/characters/choices/pending";
 import { type ChoiceOwnerRef, forEachChoiceOwner, type WalkRefs } from "@/lib/utils/characters/choices/walk";
@@ -7,7 +8,7 @@ export type StepSource = { owner: "race" | "background" | "backgroundFeat" | "cl
 
 export interface WizardStep {
   key: string;
-  kind: "choice" | "subclass";
+  kind: "choice" | "subclass" | "background";
   source: StepSource;
   /** state path of the owner (`raceChoices`, `classes.<id>`, `feats.<i>`) */
   path: string;
@@ -30,6 +31,10 @@ const ownerName = (owner: ChoiceOwnerRef): string => {
 
 export function wizardSteps(state: ChoicesState, refs: WalkRefs, hero: { level: number; classMode: boolean }, keep?: ReadonlySet<string>): WizardStep[] {
   const steps: WizardStep[] = [];
+
+  if (keep?.has("background") && hero.classMode && Object.keys(refs.backgroundsById ?? {}).length > 0) {
+    steps.push({ key: "background", kind: "background", source: { owner: "background", name: (state.backgroundId && refs.backgroundsById?.[state.backgroundId]?.name) || "" }, path: "backgroundId" });
+  }
 
   forEachChoiceOwner(state, refs, ({ owner, choiceOwner, defs, picks, level, columns, path }) => {
     const name = ownerName(owner);
@@ -96,3 +101,19 @@ export function withStepPicks(state: ChoicesState, step: WizardStep, list: Choic
 
 export const withStepSubclass = (state: ChoicesState, step: WizardStep, subclassId: string): ChoicesState =>
   step.kind === "subclass" ? { ...state, classes: state.classes.map((e) => (e.classId === step.classId ? { ...e, subclassId } : e)) } : state;
+
+export const withStepBackground = (saved: ChoicesState, draft: ChoicesState, id: string | null): ChoicesState => ({ ...draft, ...mergeBackground(saved, { backgroundId: id }) });
+
+export type BackgroundConflict = { kind: "freeOrigin" } | { kind: "duplicate"; name: string };
+
+export function backgroundConflict(data: ChoicesState, refs: Pick<WalkRefs, "backgroundsById" | "featsById">): BackgroundConflict | null {
+  const background = data.backgroundId ? refs.backgroundsById?.[data.backgroundId] : undefined;
+
+  if (!background) return null;
+
+  if (data.feats.some((f) => f.source === "origin")) return { kind: "freeOrigin" };
+
+  const feat = background.originFeatId ? refs.featsById[background.originFeatId] : undefined;
+
+  return feat && !feat.repeatable && data.feats.some((f) => f.id === feat.id) ? { kind: "duplicate", name: feat.name } : null;
+}

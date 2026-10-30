@@ -157,8 +157,23 @@ export interface ChoicesBody {
   classSubclasses?: Record<string, string>;
 }
 
+export interface SheetBackground {
+  id: string;
+  name: string;
+  icon: string | null;
+  equipmentText: string | null;
+  picks: TextRef[];
+  description: string | null;
+  skills: DndSkill[];
+  tools: string[];
+  originFeat: { id: string; name: string } | null;
+  open: number;
+  /** key of the first open wizard step of the background, if any */
+  openKey: string | null;
+}
+
 export interface SheetChoices {
-  background?: { id: string; name: string; equipmentText: string | null; picks: TextRef[] };
+  background?: SheetBackground;
   pending: number;
   /** ДМ, або власник при allowPlayerEdit і не на розгляді */
   canEdit?: boolean;

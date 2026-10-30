@@ -68,8 +68,9 @@ export function buildClassProgression(cls: GameClassData, entry?: CharacterClass
   return {
     classId: cls.id,
     className: cls.name,
+    icon: cls.icon,
     color: cls.color,
-    subclasses: cls.subclasses.map((s) => ({ id: s.id, name: s.name, chosen: entry?.subclassId === s.id })),
+    subclasses: cls.subclasses.map((s) => ({ id: s.id, name: s.name, icon: s.icon ?? null, chosen: entry?.subclassId === s.id })),
     subclassLevel: cls.subclassLevel,
     rows,
   };

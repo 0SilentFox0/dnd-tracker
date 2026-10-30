@@ -21,15 +21,10 @@ export function FeatsBlock() {
 
   const choices = sheet.choices;
 
-  if (!choices || (!choices.background && choices.feats.length === 0 && choices.options.length === 0)) return null;
+  if (!choices || (choices.feats.length === 0 && choices.options.length === 0)) return null;
 
   return (
     <HudSection title={t("title")}>
-      {choices.background && <div className="mb-3 space-y-2 text-sm">
-        <p className="text-hud-ink">{t("background", { name: choices.background.name })}</p>
-        {choices.background.picks.length > 0 && <p>{choices.background.picks.map(show).join(" · ")}</p>}
-        {choices.background.equipmentText && <p className="whitespace-pre-line text-hud-muted">{choices.background.equipmentText}<br />{t("equipmentNote")}</p>}
-      </div>}
       <ul className="space-y-2 text-sm">
         {choices.feats.map((f) => (
           <li key={f.key} className="flex flex-wrap items-baseline gap-2">

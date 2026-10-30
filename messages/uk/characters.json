@@ -75,7 +75,8 @@
       "add": "Додати клас",
       "totalLevel": "Загальний рівень: {level}",
       "hitDice": "Кістки хітів: {dice}",
-      "skillChoice": "Оберіть {count} навички з: {from}"
+      "skillChoice": "Оберіть {count} навички з: {from}",
+      "level": "Рівень"
     },
     "personalAbility": {
       "label": "Уміння (Персональні)",

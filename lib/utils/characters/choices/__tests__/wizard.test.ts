@@ -3,7 +3,7 @@ import { describe, expect, it } from "vitest";
 import { alert, featsById, refs, rogue, sorcerer } from "./fixtures";
 
 import type { ChoiceRefs } from "@/lib/utils/characters/choices/walk";
-import { picksAtStep, withStepPicks, withStepSubclass, type WizardStep, wizardSteps } from "@/lib/utils/characters/choices/wizard";
+import { backgroundConflict, picksAtStep, withStepBackground, withStepPicks, withStepSubclass, type WizardStep, wizardSteps } from "@/lib/utils/characters/choices/wizard";
 import type { BackgroundData } from "@/types/backgrounds";
 import type { ChoicesState } from "@/types/choices";
 
@@ -126,5 +126,76 @@ describe("withStepPicks", () => {
     withStepPicks(s, stepOf(s, "raceChoices.keen-senses"), list);
 
     expect(s.raceChoices).toEqual({});
+  });
+});
+
+describe("background step", () => {
+  const bg2: BackgroundData = { ...background, id: "bg2", name: "Soldier", choices: [] };
+
+  const r2: ChoiceRefs = { ...wrefs, backgroundsById: { bg: background, bg2 } };
+
+  const keep = new Set(["background"]);
+
+  it("appears first, only with keep", () => {
+    expect(keys(state(), hero, keep, r2)[0]).toBe("background");
+    expect(keys(state(), hero, undefined, r2)).not.toContain("background");
+  });
+
+  it("needs classMode and backgrounds", () => {
+    expect(keys(state(), { level: 1, classMode: false }, keep, r2)).not.toContain("background");
+    expect(keys(state(), hero, keep, refs)).not.toContain("background");
+  });
+
+  it("uses the current background name", () => {
+    expect(wizardSteps(state({ backgroundId: "bg" }), r2, hero, keep)[0]?.source.name).toBe("Sage");
+  });
+
+  it("withStepBackground resets picks on change, keeps on same id, null clears", () => {
+    const s = state({ backgroundId: "bg", backgroundChoices: { "bg-skill": [{ id: "x" }] }, backgroundFeatPicks: { a: [{ id: "y" }] } });
+
+    const changed = withStepBackground(s, s, "bg2");
+
+    expect(changed.backgroundId).toBe("bg2");
+    expect(changed.backgroundChoices).toEqual({});
+    expect(changed.backgroundFeatPicks).toEqual({});
+    expect(withStepBackground(s, s, "bg").backgroundChoices).toEqual(s.backgroundChoices);
+    expect(withStepBackground(s, s, null).backgroundId).toBeNull();
+    expect(withStepBackground(s, s, null).backgroundChoices).toEqual({});
+  });
+
+  it("switching away and back to the saved background restores its picks", () => {
+    const saved = state({ backgroundId: "bg", backgroundChoices: { "bg-skill": [{ id: "x" }] }, backgroundFeatPicks: { a: [{ id: "y" }] } });
+
+    const away = withStepBackground(saved, saved, "bg2");
+
+    const back = withStepBackground(saved, away, "bg");
+
+    expect(back.backgroundId).toBe("bg");
+    expect(back.backgroundChoices).toEqual(saved.backgroundChoices);
+    expect(back.backgroundFeatPicks).toEqual(saved.backgroundFeatPicks);
+  });
+
+  it("new background choices appear after replacement", () => {
+    const s = (() => { const cur = state({ backgroundId: "bg2" });
+
+ return withStepBackground(cur, cur, "bg"); })();
+
+    expect(keys(s, hero, keep, r2)).toContain("backgroundChoices.bg-skill");
+  });
+});
+
+describe("backgroundConflict", () => {
+  const withFeat = { ...background, originFeatId: "f-alert" };
+
+  const r = { backgroundsById: { bg: withFeat }, featsById: { "f-alert": { ...alert, repeatable: false } } };
+
+  it("none without a background or clashing feats", () => {
+    expect(backgroundConflict(state(), r)).toBeNull();
+    expect(backgroundConflict(state({ backgroundId: "bg" }), r)).toBeNull();
+  });
+
+  it("free origin feat and a duplicate of the background feat", () => {
+    expect(backgroundConflict(state({ backgroundId: "bg", feats: [{ id: "x", source: "origin" }] }), r)).toEqual({ kind: "freeOrigin" });
+    expect(backgroundConflict(state({ backgroundId: "bg", feats: [{ id: "f-alert", source: "dm" }] }), r)).toEqual({ kind: "duplicate", name: alert.name });
   });
 });

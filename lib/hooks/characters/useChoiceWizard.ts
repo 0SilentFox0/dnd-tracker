@@ -33,7 +33,9 @@ export function useChoiceWizard({ campaignId, characterId, initial, hero, refs, 
 
   const [saved, setSaved] = useState(initial);
 
-  const [initialSteps] = useState(() => wizardSteps(initial, refs, hero));
+  const [initialSteps] = useState(() => wizardSteps(initial, refs, hero, new Set(startAt ? [startAt] : [])));
+
+  const [missingStart] = useState(() => startAt === "background" && !initialSteps.some((s) => s.key === startAt));
 
   const [seen, setSeen] = useState(() => initialSteps.map((s) => s.key));
 
@@ -73,5 +75,5 @@ export function useChoiceWizard({ campaignId, characterId, initial, hero, refs, 
 
   const back = () => setIndex(Math.max(0, index - 1));
 
-  return { steps, index, step: steps[index] as WizardStep | undefined, state: { data, set }, saved, next, back, isPending: choices.isPending, error: choices.error, issues: choices.issues, done: steps.length === 0 };
+  return { steps, index, step: missingStart ? undefined : (steps[index] as WizardStep | undefined), state: { data, set }, saved, next, back, isPending: choices.isPending, error: choices.error, issues: choices.issues, done: steps.length === 0 };
 }

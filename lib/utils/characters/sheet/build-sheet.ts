@@ -32,7 +32,7 @@ export interface SheetInput {
   classes?: ResolvedClassEntry[];
   chapters?: StoryChapter[];
   attunement?: { used: number; limit: number } | null;
-  choices?: { selections: ChoiceSelections; pending: number; canEdit?: boolean };
+  choices?: { selections: ChoiceSelections; pending: number; canEdit?: boolean; backgroundOpen?: { count: number; key: string | null } };
   character: Record<AbilityKey, number> & {
     id: string;
     name: string;
@@ -163,7 +163,7 @@ export function buildCharacterSheet(input: SheetInput): CharacterSheet {
       choices: {
         pending: input.choices.pending,
         ...(input.choices.canEdit !== undefined && { canEdit: input.choices.canEdit }),
-        ...(input.choices.selections.background && { background: input.choices.selections.background }),
+        ...(input.choices.selections.background && { background: { ...input.choices.selections.background, open: input.choices.backgroundOpen?.count ?? 0, openKey: input.choices.backgroundOpen?.key ?? null } }),
         lineage: input.choices.selections.lineage,
         feats: input.choices.selections.feats.map((f) => ({ key: f.key, id: f.feat.id, name: f.feat.name, type: f.feat.type, from: f.from, picks: describeFeatPicks(f.feat, f.picks) })),
         options: input.choices.selections.options,

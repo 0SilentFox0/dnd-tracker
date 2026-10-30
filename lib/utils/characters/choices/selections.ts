@@ -7,7 +7,7 @@ import { hasPicks } from "@/lib/utils/characters/choices/read";
 import { forEachChoiceOwner } from "@/lib/utils/characters/choices/walk";
 import type { Ability, AbilitySource, DerivedAbility } from "@/types/abilities";
 import type { BackgroundData } from "@/types/backgrounds";
-import type { CharacterFeat, Choice, ChoiceOption, ChoiceOwner, ChoicePick, ChoiceRace, ChoicesState, FeatData, Picks, SelectedSpellGrant, SpellGrantPolicy, TextRef } from "@/types/choices";
+import type { CharacterFeat, Choice, ChoiceOption, ChoiceOwner, ChoicePick, ChoiceRace, ChoicesState, FeatData, Picks, SelectedSpellGrant, SheetBackground, SpellGrantPolicy, TextRef } from "@/types/choices";
 import type { ResolvedClassEntry } from "@/types/classes";
 import type { LogLine } from "@/types/text";
 
@@ -19,7 +19,7 @@ export interface ChoiceGroup {
 
 export interface ChoiceSelections {
   tools?: string[];
-  background?: { id: string; name: string; equipmentText: string | null; picks: TextRef[] };
+  background?: Omit<SheetBackground, "open" | "openKey">;
   groups: ChoiceGroup[];
   skills: DndSkill[];
   expertise: DndSkill[];
@@ -188,7 +188,10 @@ export function choiceSelections(input: SelectionInput): ChoiceSelections {
 
       out.skills.push(...bg.skillProficiencies);
       out.tools = [...bg.toolProficiencies];
-      out.background = { id: bg.id, name: bg.name, equipmentText: bg.equipmentText, picks: describeFeatPicks(bg, picks) };
+
+      const originFeat = bg.originFeatId ? input.featsById[bg.originFeatId] : undefined;
+
+      out.background = { id: bg.id, name: bg.name, icon: bg.icon, equipmentText: bg.equipmentText, picks: describeFeatPicks(bg, picks), description: bg.description, skills: [...bg.skillProficiencies], tools: [...bg.toolProficiencies], originFeat: originFeat ? { id: originFeat.id, name: originFeat.name } : null };
       take(defs, picks, { owner: "background", level, name: bg.name, from: () => fromKey("background", { name: bg.name }), sourceFor: (_c, o) => ({ type: "character", id: bg.id, name: `${bg.name}: ${o.name}` }), spellOrigin: spellOrigin("background", bg.name), path: `background:${bg.id}`, sourceKey: `background:${bg.id}` });
     } else if (owner.kind === "backgroundFeat") {
       addFeat(owner.feat, picks, fromKey("background", { name: owner.background.name }), legacyPath, legacyPath);

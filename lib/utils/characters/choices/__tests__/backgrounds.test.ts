@@ -91,3 +91,19 @@ it("copies pruned background picks back into authoring forms", () => {
   expect(pruned.choices.backgroundChoices).toEqual({});
   expect(pruned.choices.backgroundFeatPicks).toEqual({});
 });
+
+describe("background sheet data", () => {
+  it("exposes description, skills, tools and origin feat", () => {
+    const bg = { ...a, description: "Scholar" };
+
+    const result = choiceSelections({ race: null, raceChoices: {}, classes: [], feats: [], featsById: refs.featsById, level: 1, background: bg, backgroundChoices: {}, backgroundFeatPicks: {} });
+
+    expect(result.background).toMatchObject({ description: "Scholar", skills: ["arcana"], tools: ["Tools"], originFeat: { id: "f-alert", name: refs.featsById["f-alert"]?.name } });
+  });
+
+  it("originFeat is null when the feat is not loaded", () => {
+    const result = choiceSelections({ race: null, raceChoices: {}, classes: [], feats: [], featsById: {}, level: 1, background: a, backgroundChoices: {}, backgroundFeatPicks: {} });
+
+    expect(result.background?.originFeat).toBeNull();
+  });
+});

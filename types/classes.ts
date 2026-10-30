@@ -16,6 +16,7 @@ export interface ClassFeature {
 export interface Subclass {
   id: string;
   name: string;
+  icon?: string | null;
   features: ClassFeature[];
 }
 
@@ -98,8 +99,9 @@ export interface ProgressionRow {
 export interface ClassProgression {
   classId: string;
   className: string;
+  icon: string | null;
   color: string | null;
-  subclasses: { id: string; name: string; chosen: boolean }[];
+  subclasses: { id: string; name: string; icon: string | null; chosen: boolean }[];
   subclassLevel: number | null;
   rows: ProgressionRow[];
 }

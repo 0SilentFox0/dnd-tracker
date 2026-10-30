@@ -1,4 +1,8 @@
 {
+  "2026-10-30-character-path-background": {
+    "title": "Background on the Path",
+    "body": "The Path tab now has a Background section above the classes: its skills, tools, origin feat and equipment, plus a badge with the open choices. Whoever can edit the hero chooses or changes the background from there in the step-by-step wizard; changing it resets the previous background's choices and ability score bonuses, and the wizard warns about it."
+  },
   "2026-10-30-character-path-multiclass": {
     "title": "Path for several classes",
     "body": "On the Path of a hero with several classes the total level and the split by class are shown on top, and each class has its own collapsible section. The DM adds a new class with the \"+ New class\" button when editing a hero: classes whose requirements are not met show up right away with the reason, for example \"Intelligence: need 13, have 10\". The tab of a hero with a skill tree is now called \"Path\" too."

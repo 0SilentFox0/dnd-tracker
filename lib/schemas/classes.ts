@@ -26,6 +26,7 @@ const featureSchema = z.object({ level: z.number().int().min(1).max(MAX_CLASS_LE
 const subclassSchema = z.object({
   id: z.string().min(1).max(40),
   name: z.string().trim().min(1).max(100),
+  icon: classIconSchema,
   features: z.array(featureSchema).max(20).default([]),
 });
 

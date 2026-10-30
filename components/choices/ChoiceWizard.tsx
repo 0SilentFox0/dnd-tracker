@@ -3,13 +3,14 @@
 import { useMemo } from "react";
 import { useTranslations } from "next-intl";
 
+import { BackgroundPicker } from "./BackgroundPicker";
 import { ChoicePicker } from "./ChoicePicker";
 import { issueFor, pickerBase, pickerContextFor } from "./picker-context";
 import { SubclassCard } from "./SubclassCard";
 
 import { Button } from "@/components/ui/button";
 import { type ChoiceRefsView, useChoiceWizard } from "@/lib/hooks/characters";
-import { picksAtStep, withStepPicks, withStepSubclass, type WizardStep } from "@/lib/utils/characters/choices/wizard";
+import { backgroundConflict, picksAtStep, withStepBackground, withStepPicks, withStepSubclass, type WizardStep } from "@/lib/utils/characters/choices/wizard";
 import type { Character } from "@/types/characters";
 import type { ChoiceHero, ChoicesState } from "@/types/choices";
 
@@ -65,6 +66,10 @@ export function ChoiceWizard({ campaignId, characterId, initial, hero, refs, sta
 
   const sourceKey = step.source.owner === "class" && step.source.level !== undefined ? "classLevel" : step.source.owner;
 
+  const conflict = step.kind === "background" ? backgroundConflict(data, refs) : null;
+
+  const blocked = step.kind === "background" && (!data.backgroundId || !!conflict);
+
   const cls = step.classId ? refs.classesById[step.classId] : undefined;
 
   return (
@@ -77,11 +82,34 @@ export function ChoiceWizard({ campaignId, characterId, initial, hero, refs, sta
         </div>
         <div className="flex gap-2">
           <dt className="text-hud-muted">{t("wizard.givesLabel")}</dt>
-          <dd>{t(`wizard.gives.${step.choice?.kind ?? "subclass"}`)}</dd>
+          <dd>{t(`wizard.gives.${step.kind === "background" ? "background" : (step.choice?.kind ?? "subclass")}`)}</dd>
         </div>
       </dl>
       {step.choice?.kind === "feat" && <p className="text-xs text-hud-muted">{t(`wizard.featSource.${featSourceOf(step)}`, { name: step.source.name, class: step.source.name, level: step.source.level ?? 0 })}</p>}
-      {step.kind === "subclass" && cls ? (
+      {step.kind === "background" ? (
+        <div className="space-y-2">
+          <BackgroundPicker backgrounds={Object.values(refs.backgroundsById ?? {})} feats={refs.featsById} value={data.backgroundId ?? null} onChange={(id) => set(withStepBackground(wizard.saved, data, id))} />
+          {!data.backgroundId && <p className="text-sm text-hud-muted">{t("wizard.background.pickFirst")}</p>}
+          {conflict?.kind === "freeOrigin" && (
+            <p role="alert" className="text-sm text-hud-danger">
+              {t("editor.originFirst")}
+              <button type="button" className="ml-2 underline" onClick={() => set({ ...data, feats: data.feats.filter((f) => f.source !== "origin") })}>
+                {t("editor.replaceOrigin")}
+              </button>
+            </p>
+          )}
+          {conflict?.kind === "duplicate" && (
+            <p role="alert" className="text-sm text-hud-danger">
+              {t("wizard.background.featDuplicate", { name: conflict.name })}
+            </p>
+          )}
+          {wizard.saved.backgroundId && data.backgroundId !== wizard.saved.backgroundId && (
+            <p role="alert" className="text-sm text-hud-danger">
+              {t("wizard.background.resetWarning")}
+            </p>
+          )}
+        </div>
+      ) : step.kind === "subclass" && cls ? (
         <SubclassCard cls={cls} value={data.classes.find((e) => e.classId === step.classId)?.subclassId ?? undefined} locked={!!wizard.saved.classes.find((e) => e.classId === step.classId)?.subclassId} onChange={(id) => set(withStepSubclass(data, step, id))} />
       ) : (
         step.choice && (
@@ -104,7 +132,7 @@ export function ChoiceWizard({ campaignId, characterId, initial, hero, refs, sta
         <Button type="button" variant="outline" onClick={wizard.back} disabled={index === 0 || isPending}>
           {t("wizard.back")}
         </Button>
-        <Button type="button" onClick={() => void wizard.next()} disabled={isPending}>
+        <Button type="button" onClick={() => void wizard.next()} disabled={isPending || blocked}>
           {isPending ? tc("actions.saving") : last ? t("wizard.finish") : t("wizard.next")}
         </Button>
         <Button type="button" variant="ghost" onClick={onClose}>

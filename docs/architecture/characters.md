@@ -55,3 +55,8 @@
 - `ClassesHeader` (сума рівнів, розклад «Fighter 3 / Wizard 2», відкриті вибори, «+ Новий клас») і `ClassSection` (`<details>`: відкрита, якщо класів ≤ 2 або є відкриті вибори — `classSectionOpen`); `classLevels` у `classes/path.ts`. Шапка HoMM (`PointsHeader`) ділить клас рядка з `path/header.ts`.
 - `multiclassReasons` (`classes/multiclass.ts`) повертає `{ className, abilities, need, have }[]`; його ж використовує сервер (`multiclassBlockedBy`) і `useClassLevelUpForm` (`available: { cls, reasons }[]`, `startNew`). `ClassLevelUpDialog` показує недоступні класи `disabled` із причинами (`MulticlassReasons`), арбітр лишається сервер.
 - Кнопка «+ Новий клас» є лише в `ProfileEditor` (DM, редагування): `SkillsTab` отримує `classLevelUp` (тип `ClassLevelUpProps` з `LevelUpAction`)
+
+
+**Етап 4 — передісторія** (спек `docs/superpowers/specs/2026-10-30-character-path-stage4-design.md`). Міграцій і нових API нема.
+- Крок `background` у `wizardSteps` (`WizardStep.kind: "background"`, `path: "backgroundId"`) з'являється лише при явному `keep` (`startAt: "background"`), у `classMode` і коли в кампанії є передісторії; `withStepBackground` = `mergeBackground`, тож заміна скидає `backgroundChoices`/`backgroundFeatPicks`. `BackgroundPicker` — radio-картки `ChoiceCard`; `ChoiceWizard` попереджає при заміні вже збереженої.
+- `sheet.choices.background` (`SheetBackground`): опис, навички, інструменти, origin feat, `open` і `openKey` (перший відкритий крок власників `background`/`backgroundFeat`, `backgroundOpenCount` у `choices/pending.ts`). `BackgroundSection` над `ClassesHeader`: «Обрати/Змінити» (`openChoices("background")`) лише при `canEdit`; бейдж відкритих виборів веде на `openKey`. Блок передісторії з `FeatsBlock` прибрано.

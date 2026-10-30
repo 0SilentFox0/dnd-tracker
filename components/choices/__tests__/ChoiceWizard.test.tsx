@@ -124,6 +124,70 @@ describe("ChoiceWizard", () => {
   });
 });
 
+describe("background step", () => {
+  afterEach(cleanup);
+
+  beforeEach(() => mocks.save.mockReset().mockResolvedValue(true));
+
+  const sage = { id: "bg-sage", name: "Sage", icon: null, description: "Scholar", choices: [], skillProficiencies: [], toolProficiencies: ["Ink"], originFeatId: null, equipmentText: null };
+
+  const soldier = { ...sage, id: "bg-soldier", name: "Soldier", description: null };
+
+  const brefs = { ...wrefs, backgroundsById: { [sage.id]: sage, [soldier.id]: soldier } } as unknown as ChoiceRefsView;
+
+  const view = (backgroundId?: string) => render(<ChoiceWizard campaignId="c" characterId="h" initial={{ raceChoices: {}, feats: [], classes: [{ classId: fighter.id, level: 1 }], ...(backgroundId && { backgroundId }) }} hero={{ level: 1, scores, skills: {}, classMode: true }} refs={brefs} startAt="background" onClose={() => {}} />);
+
+  it("picking a card saves the new background id with Next, empty state needs no warning", async () => {
+    view();
+
+    expect(screen.queryByText("choices.wizard.background.resetWarning")).toBeNull();
+
+    fireEvent.click(screen.getByRole("radio", { name: /Sage/ }));
+    fireEvent.click(screen.getByRole("button", { name: "choices.wizard.next" }));
+
+    await waitFor(() => expect(mocks.save).toHaveBeenCalledTimes(1));
+    expect(mocks.save.mock.calls[0]![0].backgroundId).toBe("bg-sage");
+  });
+
+  it("warns only when replacing the saved background", () => {
+    view("bg-sage");
+
+    expect(screen.queryByText("choices.wizard.background.resetWarning")).toBeNull();
+
+    fireEvent.click(screen.getByRole("radio", { name: /Soldier/ }));
+
+    expect(screen.getByText("choices.wizard.background.resetWarning")).toBeTruthy();
+  });
+
+  it("Next is blocked until a background is chosen", () => {
+    view();
+
+    expect(screen.getByRole("button", { name: "choices.wizard.next" }).hasAttribute("disabled")).toBe(true);
+
+    fireEvent.click(screen.getByRole("radio", { name: /Sage/ }));
+
+    expect(screen.getByRole("button", { name: "choices.wizard.next" }).hasAttribute("disabled")).toBe(false);
+  });
+
+  it("a free origin feat conflicts with a background: hint, replace button, Next unblocked after replacing", () => {
+    render(<ChoiceWizard campaignId="c" characterId="h" initial={{ raceChoices: {}, feats: [{ id: "f-alert", source: "origin" }], classes: [{ classId: fighter.id, level: 1 }], backgroundId: sage.id }} hero={{ level: 1, scores, skills: {}, classMode: true }} refs={brefs} startAt="background" onClose={() => {}} />);
+
+    expect(screen.getByText(/choices.editor.originFirst/)).toBeTruthy();
+    expect(screen.getByRole("button", { name: "choices.wizard.next" }).hasAttribute("disabled")).toBe(true);
+
+    fireEvent.click(screen.getByRole("button", { name: "choices.editor.replaceOrigin" }));
+
+    expect(screen.queryByText(/choices.editor.originFirst/)).toBeNull();
+    expect(screen.getByRole("button", { name: "choices.wizard.next" }).hasAttribute("disabled")).toBe(false);
+  });
+
+  it("a card without description falls back to skills, tools and origin feat", () => {
+    view();
+
+    expect(screen.getAllByText(/Ink/).length).toBeGreaterThan(0);
+  });
+});
+
 describe("SubclassCard", () => {
   afterEach(cleanup);
 

@@ -61,9 +61,7 @@
     "race": "Race: {race}"
   },
   "feats": {
-    "title": "Feats and choices",
-    "background": "Background: {name}",
-    "equipmentNote": "The DM hands out equipment and money manually."
+    "title": "Feats and choices"
   },
   "sets": {
     "title": "SETS",
@@ -254,6 +252,15 @@
     "pickSubclass": "Choose a subclass",
     "subclassOptions": "Available subclasses",
     "subclassGain": "Level {level}: {names}",
-    "subclassDepends": "Depends on subclass"
+    "subclassDepends": "Depends on subclass",
+    "background": {
+      "title": "Background: {name}",
+      "none": "No background chosen",
+      "pick": "Choose",
+      "change": "Change",
+      "open": "{count} open choices",
+      "description": "Description",
+      "equipmentNote": "The DM hands out equipment and money manually."
+    }
   }
 }
