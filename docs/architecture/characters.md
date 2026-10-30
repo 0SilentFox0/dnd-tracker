@@ -49,3 +49,9 @@
 - Майстер зберігає на кожному «Далі» (`PUT /choices`); сервер валідує за **збереженими** балами, тож підвищення характеристики в ASI-кроці розблоковує feat'и вже на наступному кроці, а не в межах одного запиту. Невдале збереження нічого не змінює в чернетці.
 - `PUT /choices` приймає `classSubclasses` (`{ classId: subclassId }`): підклас пишеться в запис класу героя, а мітка підкласу синхронізується з ним.
 - `subclassPreview`/`hasSubclassOnly` (`lib/utils/characters/classes/path.ts`): «Шлях» показує «Які бувають» (підклас → рівні → вміння) і чіп «Залежить від підкласу» в майбутніх рядках. `CharacterPath.actions.onPick(pickKey)` передає ключ кроку з класом (`classes.<classId>.<choiceId>` або `subclass:<classId>`, як `WizardStep.key`) у `ChoicesDialog.startAt`, і майстер відкривається на цьому кроці. `SubclassCard` спільна для майстра й `ClassLevelUpDialog`.
+
+**Етап 3 — мультиклас і єдина вкладка** (спек `docs/archive/superpowers/specs/2026-10-30-character-path-stage3-design.md`). Нових колонок і міграцій нема.
+- Вкладка `skills` зветься «Шлях» для обох режимів (5e-класи й HoMM-дерево); режим визначає наявність `sheet.classProgression`. Змішаного героя немає.
+- `ClassesHeader` (сума рівнів, розклад «Fighter 3 / Wizard 2», відкриті вибори, «+ Новий клас») і `ClassSection` (`<details>`: відкрита, якщо класів ≤ 2 або є відкриті вибори — `classSectionOpen`); `classLevels` у `classes/path.ts`. Шапка HoMM (`PointsHeader`) ділить клас рядка з `path/header.ts`.
+- `multiclassReasons` (`classes/multiclass.ts`) повертає `{ className, abilities, need, have }[]`; його ж використовує сервер (`multiclassBlockedBy`) і `useClassLevelUpForm` (`available: { cls, reasons }[]`, `startNew`). `ClassLevelUpDialog` показує недоступні класи `disabled` із причинами (`MulticlassReasons`), арбітр лишається сервер.
+- Кнопка «+ Новий клас» є лише в `ProfileEditor` (DM, редагування): `SkillsTab` отримує `classLevelUp` (тип `ClassLevelUpProps` з `LevelUpAction`)
