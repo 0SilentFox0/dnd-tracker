@@ -23,7 +23,7 @@ model ScenarioPageIndex {
   campaignId String
   version    Int
   facts      Json
-  updatedAt  DateTime @updatedAt
+  updatedAt  DateTime @default(now())
   page       ScenarioPage @relation(fields: [pageId], references: [id], onDelete: Cascade)
   @@index([campaignId])
   @@map("scenario_page_index")
