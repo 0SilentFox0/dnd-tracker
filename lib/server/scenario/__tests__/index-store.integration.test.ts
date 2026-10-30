@@ -141,4 +141,13 @@ describe.skipIf(!localDb)("loadScenarioIndex", () => {
     expect(row?.version).toBe(5);
     expect(JSON.stringify(row?.facts)).toContain("newer");
   });
+
+  it("skips the write when the page was deleted mid-build", async () => {
+    const page = await createPage("Vanishing", content());
+
+    await prisma.scenarioPage.delete({ where: { id: page.id } });
+
+    await expect(upsertPageFacts(page.id, campaignId, 1, sentinel("ghost"))).resolves.toBeUndefined();
+    expect(await cachedRow(page.id)).toBeNull();
+  });
 });

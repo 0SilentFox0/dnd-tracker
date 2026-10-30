@@ -12,9 +12,9 @@ const BATCH = 20;
 type NameRow = { id: string; name: string };
 
 export async function upsertPageFacts(pageId: string, campaignId: string, version: number, facts: PageFacts) {
-  // an older build racing a newer one must not overwrite newer facts
+  // older builds must not overwrite newer facts; the page may be deleted mid-build, so insert only while it exists
   await prisma.$executeRaw`INSERT INTO scenario_page_index ("pageId", "campaignId", version, facts, "updatedAt")
-    VALUES (${pageId}, ${campaignId}, ${version}, ${JSON.stringify(facts)}::jsonb, now())
+    SELECT id, ${campaignId}::text, ${version}::int, ${JSON.stringify(facts)}::jsonb, now() FROM scenario_pages WHERE id = ${pageId}
     ON CONFLICT ("pageId") DO UPDATE SET version = EXCLUDED.version, facts = EXCLUDED.facts, "updatedAt" = now()
     WHERE scenario_page_index.version <= EXCLUDED.version`;
 }
@@ -101,7 +101,9 @@ export async function loadScenarioIndex(campaignId: string): Promise<ScenarioInd
 
   const facts = await loadFacts(campaignId, pages);
 
+  const present = pages.filter((page) => facts.has(page.id));
+
   const resolved = await resolveEntities(campaignId, facts);
 
-  return buildScenarioIndex({ pages, facts, resolved });
+  return buildScenarioIndex({ pages: present, facts, resolved });
 }
