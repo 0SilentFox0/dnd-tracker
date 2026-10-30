@@ -13,6 +13,7 @@ const list: OnboardingHintDef[] = [
   { id: "dm.battle-scene", audience: "dm", helpSlug: "dm-battle" },
   { id: "dm.scenario", audience: "dm", helpSlug: "dm-scenario-show" },
   { id: "dm.graph", audience: "dm", helpSlug: "dm-scenario-show" },
+  { id: "dm.summaries", audience: "dm", helpSlug: "dm-scenario-show" },
   { id: "dm.show", audience: "dm", helpSlug: "dm-scenario-show" },
   { id: "dm.world", audience: "dm", helpSlug: "dm-world-map" },
   { id: "dm.compendium-import", audience: "dm", helpSlug: "compendium-import" },

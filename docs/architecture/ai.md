@@ -163,3 +163,16 @@ DM-сторінка `/campaigns/[id]/dm/graph` — візуалізація `Sce
 - Хук `useScenarioGraph` (`lib/hooks/scenario`): фільтри, пошук, виділення; розкладка рахується лише при зміні моделі, не при виділенні/пошуку/перемикачі історії; режим фокусу (`set.ego`, «Лише сусіди», Esc виходить) перераховує розкладку під-графа; ліва панель-список (`GraphListPanel`, на мобільному діалог) шукає по всьому індексу, клік виділяє й центрує (приховану сутність додає в граф через `picked`); ребра за замовчуванням тонкі й прозорі, повні лише для виділеного/наведеного; пошук іде через `useDeferredValue`, перший збіг виділяється й центрується автоматично (`focus`), Escape скидає виділення будь-де.
 - UI `components/scenario/graph/` — власний SVG з pan/zoom (аватарки сутностей — `image` з resolve-кроку `index-store` у тих самих `findMany`: unit/character `avatar`, artifact/spell `icon`, acquaintance `avatarUrl`; в SVG через `getImageProps` 80px, фолбек на іконку типу) (криві ребра кольору типу сутності, сцени-картки зі статус-смужкою, легенда, інспектор — оверлей, що не зсуває полотно) (без React Flow: граф згадок не DAG), підвантажується через `next/dynamic` без SSR; `missing`-сутності пунктиром і без переходу, секретні ребра пунктиром із замком.
 - Тексти: namespace `scenarioGraph`; запис `2026-10-30-scenario-graph` у `whats-new`, хінт `dm.graph`, розділ `s3` у help-статті `dm-scenario-show`.
+
+## Конспекти сцен (етап 3b)
+
+Конспект сторінки сценарію, згенерований ШІ, лише для ДМ: `POST /api/campaigns/[id]/scenario/[pageId]/summary` (`{ force? }` → `GeneratedSummary`) і `GET /api/campaigns/[id]/scenario/summaries` (`{ available, summaries }`, `available` = у ДМ є ключ AI). Хуки `useScenarioSummaries` (staleTime 60 с) і `useGenerateScenarioSummary` (після успіху інвалідує лише `scenarioKeys.summaries`), панель `ScenarioSummaryPanel` — згорнутий блок на сторінці сцени і слот в інспекторі графа для вузлів-сцен.
+
+- Таблиця `scenario_page_summaries` (`pageId` PK, `campaignId`, `version`, `summary` JSON, `provider`, `model`, `inputTokens`, `outputTokens`), RLS увімкнено; запис через `summary-store` (`upsertSummary`, `loadSummaryRow`).
+- Модель — «розумна» модель ДМ (`pickDmSmartTextModel`, ключ ДМ кампанії, BYOK); ключ не залишає сервер.
+- Ідемпотентність за версією: якщо рядок має `version === page.version` і немає `force`, відповідь віддається з БД без виклику моделі й без rate limit. Гонки: новіша версія не перезаписується старішою.
+- `stale` не зберігається, а обчислюється в `GET`: `row.version < page.version`.
+- Вхід (`buildSummaryInput`, `lib/utils/scenario/summary/`) — текст сторінки з прихованим шаром (`||секрети||`, нотатки ДМ), бюджет `AI_LIMITS.summaryInputChars`, `truncated` у відповіді; секрети потрапляють у вхід, тому конспект лише для ДМ, а модель кладе їх окремо в `secrets`. `filterSummaryEntities` лишає в `entities` тільки ключі чіпів сторінки; у UI сирі ключі не показуються.
+- Схема виходу `pageSummarySchema` (`overview`, `events`, `secrets`, `entities`, `digest`) з лімітами `SUMMARY_LIMITS`.
+- `summariesDigest` (`lib/utils/scenario/summary/digest.ts`) — готовий експорт для етапу 3c: стислий зріз конспектів для контексту асистента; підключення в `fitContext` ще не зроблене.
+- Тексти: `scenario.summary.*`, запис `2026-10-30-scenario-summaries` у `whats-new`, хінт `dm.summaries`, розділ `s4` у help-статті `dm-scenario-show`.

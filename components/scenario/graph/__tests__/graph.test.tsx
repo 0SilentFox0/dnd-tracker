@@ -15,6 +15,7 @@ const refetch = vi.fn();
 
 vi.mock("next/navigation", () => ({ useRouter: () => ({ push }) }));
 vi.mock("@/lib/hooks/scenario/useScenarioIndex", () => ({ useScenarioIndex: () => ({ data: index, isLoading: false, isError, refetch }) }));
+vi.mock("@/components/scenario/ScenarioSummaryPanel", () => ({ ScenarioSummaryPanel: () => null }));
 
 const scene = (id: string, order: number) => ({ id, kind: "scene" as const, title: `Scene ${id}`, pageKind: "scene" as const, status: "draft" as const, order, sections: [] });
 

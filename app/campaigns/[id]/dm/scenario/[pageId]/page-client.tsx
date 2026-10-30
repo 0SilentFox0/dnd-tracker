@@ -10,7 +10,8 @@ import { AiPanel, AiProposalBadge, AiProposalCard } from "@/components/ai";
 import { AssistantReview } from "@/components/ai/AssistantReview";
 import type { ActionsMenuItem } from "@/components/common/ActionsMenu";
 import { LoadingState, QueryState } from "@/components/common/states";
-import { ScenarioBar, ScenarioBook, ScenarioLayout, ScenarioPageView, ScenarioToc, type TocControl, tocItems } from "@/components/scenario";
+import { OnboardingHint } from "@/components/onboarding/OnboardingHint";
+import { ScenarioBar, ScenarioBook, ScenarioLayout, ScenarioPageView, ScenarioSummaryPanel, ScenarioToc, type TocControl, tocItems } from "@/components/scenario";
 import { VersionsDialog } from "@/components/scenario/editor/VersionsDialog";
 import { ScenarioShowDock } from "@/components/scenario/play/ScenarioShowDock";
 import { WorldMapLink } from "@/components/world/WorldMapLink";
@@ -31,6 +32,22 @@ export function ScenarioPageClient({ campaignId, pageId, playedPages, aiEnabled 
   const query = useScenarioPage(campaignId, pageId);
 
   return <QueryState query={query}>{(page) => <ScenarioPageBody campaignId={campaignId} page={page} playedPages={playedPages} aiEnabled={aiEnabled} />}</QueryState>;
+}
+
+function SummarySection({ campaignId, pageId }: { campaignId: string; pageId: string }) {
+  const t = useTranslations("scenario.summary");
+
+  return (
+    <>
+      <OnboardingHint id="dm.summaries" className="mb-3 text-left" />
+      <details className="mb-4 rounded-lg border bg-card/75 p-3">
+        <summary className="cursor-pointer text-sm font-medium">{t("title")}</summary>
+        <div className="mt-3">
+          <ScenarioSummaryPanel campaignId={campaignId} pageId={pageId} />
+        </div>
+      </details>
+    </>
+  );
 }
 
 function ScenarioPageBody({ campaignId, page, playedPages, aiEnabled }: { campaignId: string; page: ScenarioPage; playedPages: PlayedPages; aiEnabled: boolean }) {
@@ -144,6 +161,7 @@ function ScenarioPageBody({ campaignId, page, playedPages, aiEnabled }: { campai
         <ScenarioLayout
           toc={<ScenarioToc items={tocItems(page.content.sections, page.kind === "hero", played)} {...toc} onPick={collapse.expand} />}
         >
+          {page.kind === "scene" && <SummarySection campaignId={campaignId} pageId={page.id} />}
           <ScenarioPageView
             page={page}
             campaignId={campaignId}

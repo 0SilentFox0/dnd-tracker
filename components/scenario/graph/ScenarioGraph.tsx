@@ -12,6 +12,7 @@ import { GraphToolbar } from "./GraphToolbar";
 import { ScenarioGraphView } from "./ScenarioGraphView";
 
 import { EmptyState, ErrorState, LoadingState } from "@/components/common/states";
+import { ScenarioSummaryPanel } from "@/components/scenario/ScenarioSummaryPanel";
 import { Button } from "@/components/ui/button";
 import { ResponsiveDialog } from "@/components/ui/responsive-dialog";
 import { DESKTOP_QUERY, useMediaQuery } from "@/lib/hooks/common";
@@ -19,6 +20,17 @@ import { useScenarioGraph } from "@/lib/hooks/scenario";
 import { graphNodeHref } from "@/lib/utils/scenario/graph/href";
 import { defaultFilters } from "@/lib/utils/scenario/graph/model";
 import type { GraphNode } from "@/lib/utils/scenario/graph/types";
+
+function SummarySlot({ campaignId, pageId }: { campaignId: string; pageId: string }) {
+  const t = useTranslations("scenario.summary");
+
+  return (
+    <div className="border-t pt-3">
+      <p className="mb-2 text-sm font-medium">{t("title")}</p>
+      <ScenarioSummaryPanel campaignId={campaignId} pageId={pageId} />
+    </div>
+  );
+}
 
 export function ScenarioGraph({ campaignId }: { campaignId: string }) {
   const t = useTranslations("scenarioGraph");
@@ -102,7 +114,7 @@ export function ScenarioGraph({ campaignId }: { campaignId: string }) {
 
   const detail = selection.detail;
 
-  const inspector = detail ? <GraphInspector detail={detail} canOpen={!!graphNodeHref(campaignId, detail.node)} onOpen={() => open(detail.node)} onSelect={set.focus} onClose={clear} focusMode={isEgo} onToggleFocus={() => set.ego(!isEgo)} /> : null;
+  const inspector = detail ? <GraphInspector detail={detail} canOpen={!!graphNodeHref(campaignId, detail.node)} onOpen={() => open(detail.node)} onSelect={set.focus} onClose={clear} focusMode={isEgo} onToggleFocus={() => set.ego(!isEgo)}>{detail.node.kind === "scene" ? <SummarySlot campaignId={campaignId} pageId={detail.node.refId} /> : null}</GraphInspector> : null;
 
   const listPanel = <GraphListPanel groups={state.list} selectedId={state.selectedId} query={state.query} onQuery={set.query} onPick={pick} />;
 

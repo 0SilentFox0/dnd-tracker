@@ -177,6 +177,7 @@ export const API_ERRORS = {
   AI_MODEL_FORBIDDEN: "errors.aiModelForbidden",
   AI_KEY_UNREADABLE: "errors.aiKeyUnreadable",
   AI_KEY_MISSING: "errors.aiKeyMissing",
+  AI_SUMMARY_EMPTY: "errors.aiSummaryEmpty",
   AI_RATE_LIMIT: "errors.aiRateLimit",
   AI_PROVIDER_DOWN: "errors.aiProviderDown",
   AI_MODEL_UNKNOWN: "errors.aiModelUnknown",

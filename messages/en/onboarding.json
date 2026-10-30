@@ -113,6 +113,10 @@
         "title": "Scenario graph",
         "body": "See the links between pages and the entities mentioned with @. Click a node to find where it is mentioned."
       },
+      "summaries": {
+        "title": "Scene summary",
+        "body": "Open \"Scene summary\" and press \"Generate\": the AI condenses the page into an overview, events and a hidden layer. Requires an AI key in settings."
+      },
       "show": {
         "title": "Scene show",
         "body": "Slide sets with music. When you switch a slide, it opens in sync on the players' screens."
