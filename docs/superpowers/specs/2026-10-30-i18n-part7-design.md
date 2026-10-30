@@ -133,7 +133,7 @@
 
 ### 4. Часовий пояс користувача (г)
 
-- **Схема.** `User.timeZone String?`, міграція `20261115000000_user_time_zone`: `ALTER TABLE "users" ADD COLUMN "time_zone" TEXT;`. Вона expand-only, нова таблиця не потрібна, тож RLS не стосується. `null` означає «Автоматично» (зона браузера).
+- **Схема.** `User.timeZone String?`, міграція `20261117000000_user_time_zone`: `ALTER TABLE "users" ADD COLUMN "time_zone" TEXT;`. Вона expand-only, нова таблиця не потрібна, тож RLS не стосується. `null` означає «Автоматично» (зона браузера).
 - **Сервер.** `getRequestTimeZone()`: профільна зона (якщо валідна) → cookie `TZ` → `"UTC"`.
   - Профіль читається через `getSessionUserId()` і `prisma.user.findUnique({ select: { timeZone: true } })` у React `cache()`, тож це один PK-запит на запит. Його ділять `request.ts` і `LocaleScope`.
   - Гість — без запиту.
