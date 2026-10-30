@@ -1850,16 +1850,44 @@
     "dice": 0,
     "concentration": true,
     "targeting": {
-      "kind": "template",
-      "shape": "emanation",
-      "size": 10,
-      "side": "ally",
-      "maxTargets": 20
+      "kind": "self"
     },
     "resolution": {
       "kind": "auto"
     },
-    "spellEffects": [],
+    "spellEffects": [
+      {
+        "kind": "anchoredZone",
+        "radiusFeet": 10,
+        "side": "all",
+        "onEnter": {
+          "effects": [
+            {
+              "kind": "applyCondition",
+              "condition": "disable_spell_casting",
+              "duration": {
+                "rounds": 1
+              }
+            }
+          ]
+        },
+        "onTurnStart": {
+          "effects": [
+            {
+              "kind": "applyCondition",
+              "condition": "disable_spell_casting",
+              "duration": {
+                "rounds": 1
+              }
+            }
+          ]
+        },
+        "endsWhenStartOutside": true,
+        "duration": {
+          "rounds": 99
+        }
+      }
+    ],
     "lists": [
       "Cleric",
       "Wizard"
@@ -3249,7 +3277,8 @@
     "lists": [
       "Sorcerer",
       "Wizard"
-    ]
+    ],
+    "upcastTargets": 1
   },
   {
     "slug": "srd-2024_charm-monster",
@@ -4657,10 +4686,17 @@
       "kind": "template",
       "shape": "circle",
       "size": 15,
-      "side": "ally",
+      "side": "enemy",
       "maxTargets": 20,
       "exact": true,
-      "range": 60
+      "range": 60,
+      "zone": {
+        "rounds": 10,
+        "terrain": [
+          "obscured"
+        ],
+        "side": "all"
+      }
     },
     "resolution": {
       "kind": "auto"
@@ -7183,10 +7219,17 @@
       "kind": "template",
       "shape": "circle",
       "size": 20,
-      "side": "ally",
+      "side": "enemy",
       "maxTargets": 20,
       "exact": true,
-      "range": 120
+      "range": 120,
+      "zone": {
+        "rounds": 10,
+        "terrain": [
+          "obscured"
+        ],
+        "side": "all"
+      }
     },
     "resolution": {
       "kind": "auto"
@@ -8341,12 +8384,24 @@
     "dice": 0,
     "concentration": true,
     "targeting": {
-      "kind": "self"
+      "kind": "template",
+      "shape": "line",
+      "size": 60,
+      "side": "enemy",
+      "maxTargets": 20
     },
     "resolution": {
-      "kind": "auto"
+      "kind": "save",
+      "ability": "strength",
+      "onSuccess": "none"
     },
-    "spellEffects": [],
+    "spellEffects": [
+      {
+        "kind": "push",
+        "feet": 15,
+        "from": "caster"
+      }
+    ],
     "lists": [
       "Druid",
       "Ranger",
@@ -14202,7 +14257,23 @@
       "side": "enemy",
       "maxTargets": 20,
       "exact": true,
-      "range": 150
+      "range": 150,
+      "zone": {
+        "rounds": 10,
+        "terrain": [
+          "difficult"
+        ],
+        "side": "enemies",
+        "onEnter": {
+          "effects": [
+            {
+              "kind": "dealDamage",
+              "amount": "2d4",
+              "damageType": "piercing"
+            }
+          ]
+        }
+      }
     },
     "resolution": {
       "kind": "auto"
@@ -15660,13 +15731,25 @@
     "dice": 0,
     "concentration": true,
     "targeting": {
-      "kind": "ally",
+      "kind": "template",
+      "shape": "line",
+      "size": 100,
+      "side": "enemy",
+      "maxTargets": 1,
       "range": 120
     },
     "resolution": {
       "kind": "auto"
     },
-    "spellEffects": [],
+    "spellEffects": [
+      {
+        "kind": "createTerrain",
+        "terrain": "wall",
+        "shape": "cell",
+        "cells": 20,
+        "rounds": 99
+      }
+    ],
     "lists": [
       "Wizard"
     ]

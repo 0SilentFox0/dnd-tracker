@@ -1,7 +1,7 @@
 import type { SpellRow } from "../lib/types";
 
 import type { Effect, NonRandomEffect } from "@/lib/utils/abilities/schema";
-import type { SpellEffect } from "@/lib/utils/spells/model/schema";
+import type { SpellEffect, SpellTargeting, SpellZone, ZoneTrigger } from "@/lib/utils/spells/model/schema";
 
 export type SpellOverride = Partial<Omit<SpellRow, "slug" | "name" | "level" | "groupId" | "description">>;
 
@@ -14,6 +14,10 @@ const resist = (damageType: string, percent = 50, n = 99): NonRandomEffect =>({ 
 const damageChoice = (types: string[]): SpellEffect => ({ kind: "chooseOne", options: types.map((damageType): NonRandomEffect => ({ kind: "dealDamage", amount: { spellRoll: 100 }, damageType })) });
 
 const smite = (extraDice: string, damageType: string): SpellEffect => ({ kind: "hitRider", attackKind: "melee", extraDice, damageType, charges: 1, duration: rounds(1), expireAtTurnEnd: true });
+
+const sphere = (radius: number, range: number, zone: SpellZone): SpellTargeting => ({ kind: "template", shape: "circle", size: radius, side: "enemy", maxTargets: 20, exact: true, range, zone });
+
+const noCasting: ZoneTrigger = { effects: [{ kind: "applyCondition", condition: "disable_spell_casting", duration: rounds(1) }] };
 
 // sides/targets of popular spells and timed buffs (flat approximations of 1d4 bonuses), checked by hand against SRD 5.2
 export const SPELL_OVERRIDES: Record<string, SpellOverride> = {
@@ -85,7 +89,6 @@ export const SPELL_OVERRIDES: Record<string, SpellOverride> = {
   },
   "srd-2024_dimension-door": { ...NO_DAMAGE, targeting: { kind: "self" }, resolution: { kind: "auto" } },
   "srd-2024_wish": { ...NO_DAMAGE, targeting: { kind: "self" }, resolution: { kind: "auto" } },
-  "srd-2024_spike-growth": { ...NO_DAMAGE },
   "srd-2024_longstrider": { targeting: { kind: "ally", range: 5 }, spellEffects: [{ kind: "modifyStat", stat: "speed", flat: 10, duration: rounds(99) }], upcastTargets: 1 },
   "srd-2024_blur": { targeting: { kind: "self" }, spellEffects: [{ kind: "flag", flag: "disadvantageForAttackers", duration: rounds(10) }] },
   "srd-2024_mirror-image": { targeting: { kind: "self" }, spellEffects: [{ kind: "flag", flag: "disadvantageForAttackers", duration: rounds(10) }] },
@@ -95,6 +98,7 @@ export const SPELL_OVERRIDES: Record<string, SpellOverride> = {
   "srd-2024_divine-favor": { targeting: { kind: "self" }, spellEffects: [{ kind: "damageBonus", filter: { kind: "physical" }, flat: 2, duration: rounds(10) }] },
   "srd-2024_spiritual-weapon": { addAbilityMod: true },
   "srd-2024_scorching-ray": { upcastTargets: 1 },
+  "srd-2024_chain-lightning": { upcastTargets: 1 },
 
   // Open5e rows of these spells carry another spell's numbers (Freedom of Movement has Freezing Sphere's 10d6 cold)
   "srd-2024_freedom-of-movement": {
@@ -190,4 +194,32 @@ export const SPELL_OVERRIDES: Record<string, SpellOverride> = {
   // the retaliation 2d8 is not expressible; only the chosen resistance is mechanized
   "srd-2024_fire-shield": { ...NO_DAMAGE, targeting: { kind: "self" }, resolution: { kind: "auto" }, spellEffects: [{ kind: "chooseOne", options: [resist("cold", 50, 99), resist("fire", 50, 99)] }] },
   "srd-2024_aura-of-life": { spellEffects: [resist("necrotic")] },
+
+  // zone effects last at most 10 rounds on the map; spikes hurt on entering the zone, not per 5 feet moved
+  "srd-2024_fog-cloud": { ...NO_DAMAGE, targeting: sphere(20, 120, { rounds: 10, terrain: ["obscured"], side: "all" }) },
+  "srd-2024_darkness": { ...NO_DAMAGE, targeting: sphere(15, 60, { rounds: 10, terrain: ["obscured"], side: "all" }) },
+  "srd-2024_spike-growth": {
+    ...NO_DAMAGE,
+    targeting: sphere(20, 150, { rounds: 10, terrain: ["difficult"], side: "enemies", onEnter: { effects: [{ kind: "dealDamage", amount: "2d4", damageType: "piercing" }] } }),
+  },
+  "srd-2024_gust-of-wind": {
+    ...NO_DAMAGE,
+    targeting: { kind: "template", shape: "line", size: 60, side: "enemy", maxTargets: 20 },
+    resolution: { kind: "save", ability: "strength", onSuccess: "none" },
+    spellEffects: [{ kind: "push", feet: 15, from: "caster" }],
+  },
+  // the panels become a 100-foot line of wall cells; its immunity to damage and dispel is not modelled
+  "srd-2024_wall-of-force": {
+    ...NO_DAMAGE,
+    targeting: { kind: "template", shape: "line", size: 100, side: "enemy", maxTargets: 1, range: 120 },
+    resolution: { kind: "auto" },
+    spellEffects: [{ kind: "createTerrain", terrain: "wall", shape: "cell", cells: 20, rounds: 99 }],
+  },
+  // everyone inside, the caster included, loses spellcasting; magic items and area suppression stay manual
+  "srd-2024_antimagic-field": {
+    ...NO_DAMAGE,
+    targeting: { kind: "self" },
+    resolution: { kind: "auto" },
+    spellEffects: [{ kind: "anchoredZone", radiusFeet: 10, side: "all", onEnter: noCasting, onTurnStart: noCasting, endsWhenStartOutside: true, duration: rounds(99) }],
+  },
 };
