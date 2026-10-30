@@ -84,7 +84,8 @@
     "featLevel": "level {level}+",
     "featUnmet": "prerequisites not met",
     "noSpells": "No spells of the required circles in lists {lists}",
-    "moreDetails": "More details"
+    "moreDetails": "More details",
+    "featTaken": "already taken"
   },
   "editor": {
     "loading": "Loading choices…",

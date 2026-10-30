@@ -24,6 +24,8 @@ export interface PickerContext {
   scores: Record<AbilityKey, number>;
   /** scores з урахуванням змін піків відносно збережених; без нього — scores + піки цього вибору */
   scoreAfter?: Record<AbilityKey, number>;
+  /** скільки разів кожну рису вже взято в усіх пікерах героя */
+  featCounts?: ReadonlyMap<string, number>;
 }
 
 interface ChoicePickerProps {
@@ -158,9 +160,11 @@ function FeatList({ choice, value, ctx, actions }: { choice: Choice; value: Choi
 
         const picked = value.find((p) => p.id === f.id);
 
+        const taken = !f.repeatable && !picked && (ctx.featCounts?.get(f.id) ?? 0) > 0;
+
         return (
           <div key={f.id} className="space-y-2">
-            <Card role="radio" checked={!!picked} disabled={!met && !picked} onClick={() => actions.onToggle(f.id)} title={f.name} note={[tf(`types.${f.type}`), f.prerequisite.level ? t("picker.featLevel", { level: f.prerequisite.level }) : "", met ? "" : t("picker.featUnmet")].filter(Boolean).join(" · ")} />
+            <Card role="radio" checked={!!picked} disabled={(!met && !picked) || taken} onClick={() => actions.onToggle(f.id)} title={f.name} note={[tf(`types.${f.type}`), f.prerequisite.level ? t("picker.featLevel", { level: f.prerequisite.level }) : "", met ? "" : t("picker.featUnmet"), taken ? t("picker.featTaken") : ""].filter(Boolean).join(" · ")} />
             {picked && f.choices.length > 0 && (
               <div className="ml-4 space-y-3 border-l border-hud-line/40 pl-3">
                 {f.choices.map((c) => (

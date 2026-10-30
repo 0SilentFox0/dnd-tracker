@@ -12,7 +12,7 @@ import { mergeBackground } from "@/lib/utils/backgrounds/selection";
 import { abilityPicksOf, abilityScoreDelta } from "@/lib/utils/characters/choices/ability";
 import { classChoiceDefs } from "@/lib/utils/characters/choices/class-choices";
 import { isChoiceOpen } from "@/lib/utils/characters/choices/count";
-import { skillFlags, skillPicksOf, visitPicks } from "@/lib/utils/characters/choices/walk";
+import { countFeats, skillFlags, skillPicksOf, visitPicks } from "@/lib/utils/characters/choices/walk";
 import { maxSlotLevelFor } from "@/lib/utils/spells/class-slots";
 import type { Choice, ChoiceIssue, ChoicePick, ChoicesState, Picks } from "@/types/choices";
 
@@ -47,6 +47,7 @@ export function ChoicesEditor({ state: { data, set }, refs, hero, issues, saved,
     proficient: new Set([...(data.backgroundId ? refs.backgroundsById?.[data.backgroundId]?.skillProficiencies ?? [] : []), ...skillFlags(hero.skills), ...skillPicksOf(visits, "skill")]),
     scores: hero.scores,
     scoreAfter,
+    featCounts: countFeats(visits, data, hero.classMode),
   };
 
   const pickers = (defs: readonly Choice[], picks: Picks, ctx: PickerContext, path: string, onPicks: (next: Picks) => void, filter: (c: Choice) => boolean) =>

@@ -84,7 +84,8 @@
     "featLevel": "рівень {level}+",
     "featUnmet": "передумови не виконано",
     "noSpells": "У списках {lists} немає заклинань потрібних кіл",
-    "moreDetails": "Докладніше"
+    "moreDetails": "Докладніше",
+    "featTaken": "вже взято"
   },
   "editor": {
     "loading": "Завантаження виборів…",

@@ -100,6 +100,23 @@ describe("ChoicePicker", () => {
     expect(screen.getByText("1 / 2")).toBeTruthy();
   });
 
+  it("feat: a non-repeatable feat already taken in another picker is blocked here, the one picked here stays", () => {
+    const choice: Choice = { id: "versatile", label: "Versatile", level: 1, count: 1, kind: "feat", featTypes: ["origin"] };
+
+    const taken = new Map([["f-alert", 1]]);
+
+    const { unmount } = render(<Harness choice={choice} context={ctx(1, { featCounts: taken })} />);
+
+    expect(screen.getByRole("radio", { name: /Alert/ })).toBeDisabled();
+    expect(screen.getByText(/choices.picker.featTaken/)).toBeTruthy();
+    expect(screen.getByRole("radio", { name: /Magic Initiate/ })).not.toBeDisabled();
+    unmount();
+
+    render(<Harness choice={choice} context={ctx(1, { featCounts: taken })} initial={[{ id: "f-alert" }]} />);
+
+    expect(screen.getByRole("radio", { name: /Alert/ })).not.toBeDisabled();
+  });
+
   it("feat: types filter, nested choices of the picked feat", () => {
     render(<Harness choice={choiceById("ability-score-improvement-4")} context={ctx(4)} />);
 
