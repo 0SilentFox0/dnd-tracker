@@ -1,0 +1,45 @@
+# SRD 5.2 template completeness (handoff)
+
+Audit 2026-10-30 of `data/templates/srd-5.2` against the source (open5e `e69ac13b`, cache `$TMPDIR/open5e-srd-2024-e69ac13b`). Structure is complete (12 classes, 12 subclasses, 9 species, 4 backgrounds, 19 feats, 339 player spells, spell lists match the source). The gaps are mechanics. Regenerate with `pnpm srd:build`; hand overrides live in `scripts/srd/overrides/`.
+
+Run in a fresh Sonnet session in a worktree (`superpowers:using-git-worktrees`). Reuse first: `lib/utils/spells/model/schema.ts`, `lib/utils/abilities/templates/catalog.ts` (recipes), existing effect kinds in `docs/architecture/abilities.md`.
+
+## Handoff (update after every step)
+
+Worktree `../dnd-tracker-srd`, branch `feat/srd-completeness` (from local main `1e2f0125f`), deps installed, nothing committed yet. Source cache: `/var/folders/5n/qz27kzds7f5c9q32gsdnmrb40000gn/T/open5e-srd-2024-e69ac13b` (build: `pnpm srd:build --source <that dir>`; a baseline rebuild only reorders `cost`/`casting` keys in `spells.json`).
+
+**Part 1 split (user decision 2026-10-30):** session `dnd-tracker-ee` (`feat/spell-ingredients`, worktree `../dnd-tracker-ingredients`) owns the engine/mechanics of ingredients (`ingredients`/`componentFlags` model, migration, campaign rule, cast check, form, 5etools adapter). This branch owns only data: SRD text parsing into `ingredients`/`componentFlags`, `spells.json` regeneration and the rules preset (`spellIngredients.enabled: true`) in `scripts/srd/`, **after** their merge to main (wait for their message), plus `ritual Boolean` (theirs excludes it; needs its own column + migration, parse from `Spell.json` `ritual`). Do not build `Spell.materials`.
+
+**Part 2 progress:** `scripts/srd/lib/types.ts` `SpellRow.spellEffects` widened to `SpellEffect[]`; first batch added in `scripts/srd/overrides/spells.ts` (helpers `damageChoice`, `smite`): Chromatic Orb, Sorcerous Burst, Divine Smite, Shining Smite, Power Word Heal, Regenerate, Fire Shield (resistance only), Aura of Life. Verified: tsc clean, `pnpm test:run scripts/srd` 186/186, spells with effects 331/498 (was 323). Committed as WIP. Next: buffs/control/summon batch, upcast fields, DM-resolved fixture.
+
+**Decided DM-resolved (no primitive):** Aid (max HP), False Life (temp HP grant), Death Ward (survive at 1 HP), Shillelagh, True Strike, Spare the Dying (stabilize), Goodberry, Sanctuary, Mass Heal (divided pool). Record these in the «Engine gaps» list at the end.
+
+## Part 1 — material components and ritual (structured)
+
+- Source `Spell.json` has `material_consumed` (57) and `ritual` (29); `material_cost` is always null, cost exists only in `material_specified` text («worth 300+ GP»). `scripts/srd/convert/spells.ts:16` keeps only the text; `scripts/srd/lib/open5e.ts:25` types the fields.
+- Add `Spell.materials Json?` `{ text, costGp?, consumed }` and `ritual Boolean` (expand-only migration with RLS irrelevant: column add). Parse `costGp` from the text (`/(\d[\d,]*)\+? ?GP/`, per-item «each», «for each corpse» stay in `text`).
+- Template bundle columns (`lib/server/templates/bundle.ts`, `bundle-columns` test), sync hash, content API/OpenAPI, spell form (read-only chip + editable cost/consumed), spell card shows «Матеріал: 300 зм, споживається».
+- Cast flow: if `consumed && costGp`, cast dialog shows the cost and deducts from the hero inventory/gold (`CharacterInventory`); DM can waive. Non-consumed costly focus = reminder only. Ritual: allow casting without a slot out of combat for prepared ritual casters (Wizard: spellbook).
+- Compendium import (`lib/server/compendium-import/adapters/spell-cast.ts`) fills the same fields.
+
+## Part 2 — spell effects (175/339 have none)
+
+Priority (combat-relevant, check each against the 2024 text):
+- Damage/heal: Chromatic Orb, Sorcerous Burst, Divine Smite, Shining Smite, Mass Heal, Power Word Heal, Regenerate, Aura of Life.
+- Buffs: Aid (max HP), False Life (temp HP), Death Ward, Fire Shield, Shillelagh, True Strike, Spare the Dying, Goodberry, Sanctuary.
+- Control/move/summon: Counterspell, Misty Step, Darkness, Fog Cloud, Confusion, Polymorph, Wall of Force, Antimagic Field, Time Stop, Animate Dead, Find Familiar, Summon Dragon, Conjure Minor Elementals, Spike Growth, Gust of Wind.
+- Upcast fields missing (text has Higher-Level Slot, no `upcastDice/upcastTargets`): Heal, Ice Knife, Chain Lightning, Magic Weapon, Hunter's Mark, Bestow Curse, Geas, Conjure Elemental, Dominate ×3, Mass Suggestion, Modify Memory, Hex (some are duration-only: leave).
+- Put per-spell data in `scripts/srd/overrides/spells.ts`; spells the engine truly can't express stay DM-resolved and are listed in a test fixture so the count is explicit. Update `coverage-4f5b.json` logic if relevant.
+
+## Part 3 — species/class/feat abilities that are `note` only (142/197 class, 20/25 species)
+
+Mechanize only what existing effect kinds express: Luck, Brave, Halfling Nimbleness, Adrenaline Rush, Fey Ancestry (save advantage vs charmed), Breath Weapon (per ancestry; `dealDamage` + save, prof-bonus uses), Relentless Endurance already done, Great Weapon Fighting, Savage Attacker, Grappler, Brutal Strike, Stunning Strike, Flurry of Blows/Step of the Wind, Turn Undead, Divine Smite as ability, Sear Undead, Frenzy, Divine Intervention (note ok). Overrides: `scripts/srd/overrides/{races,classes,feats,race-choices,class-choices}.ts`. Anything needing a new engine primitive: list it, do not build it here.
+
+## Part 4 — small gaps
+
+- Druid subclass «Circle of the Land Spells» is absent (land type choice → always-prepared spells; follow how `Life Domain Spells`/`Fiend Spells` are modelled).
+- Feat «Magic Initiate (Druid)» variant (Cleric/Wizard variants exist).
+
+## Order and checks
+
+Parts 1 → 2 → 3 → 4, one migration at most (Part 1). Per part: `pnpm srd:build --source <cache dir>`, `pnpm test:related` on touched files, tests `lib/server/templates/__tests__` and `scripts/srd/__tests__`; full suite + repo lint once at the end. Then `/simplify`, update `docs/architecture/abilities.md`, `docs/STATUS.md`, whats-new entry (user-facing: material costs), i18n keys in both locales. Migration reaches prod only from `main` builds.

@@ -7,7 +7,7 @@ import type { Ability, Effect } from "@/lib/utils/abilities/schema";
 import type { ArmorStats } from "@/lib/utils/artifacts/armor-stats";
 import type { WeaponStats } from "@/lib/utils/artifacts/weapon-stats";
 import type { ItemStats } from "@/lib/utils/items/item-stats";
-import type { SpellCastingTime, SpellCost, SpellResolution, SpellTargeting } from "@/lib/utils/spells/model/schema";
+import type { SpellCastingTime, SpellCost, SpellEffect, SpellResolution, SpellTargeting } from "@/lib/utils/spells/model/schema";
 import type { Choice, FeatPrerequisite, FeatType } from "@/types/choices";
 import type { ClassColumn } from "@/types/classes";
 import type { UnitSpellcasting, UnitStatblock } from "@/types/units";
@@ -36,7 +36,7 @@ export interface SpellRow {
   damageBonus?: number;
   targeting: SpellTargeting;
   resolution: SpellResolution;
-  spellEffects: Effect[];
+  spellEffects: SpellEffect[];
   lists: string[];
 }
 

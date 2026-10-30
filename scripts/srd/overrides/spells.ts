@@ -1,6 +1,7 @@
 import type { SpellRow } from "../lib/types";
 
-import type { Effect } from "@/lib/utils/abilities/schema";
+import type { Effect, NonRandomEffect } from "@/lib/utils/abilities/schema";
+import type { SpellEffect } from "@/lib/utils/spells/model/schema";
 
 export type SpellOverride = Partial<Omit<SpellRow, "slug" | "name" | "level" | "groupId" | "description">>;
 
@@ -8,7 +9,11 @@ const rounds = (n: number) => ({ rounds: n });
 
 const NO_DAMAGE: SpellOverride = { dice: 0, dieSides: undefined, upcastDice: undefined, spellEffects: [] };
 
-const resist = (damageType: string, percent = 50, n = 99): Effect => ({ kind: "flag", flag: "resistance", damageType, percent, duration: rounds(n) });
+const resist = (damageType: string, percent = 50, n = 99): NonRandomEffect =>({ kind: "flag", flag: "resistance", damageType, percent, duration: rounds(n) });
+
+const damageChoice = (types: string[]): SpellEffect => ({ kind: "chooseOne", options: types.map((damageType): NonRandomEffect => ({ kind: "dealDamage", amount: { spellRoll: 100 }, damageType })) });
+
+const smite = (extraDice: string, damageType: string): SpellEffect => ({ kind: "hitRider", attackKind: "melee", extraDice, damageType, charges: 1, duration: rounds(1), expireAtTurnEnd: true });
 
 // sides/targets of popular spells and timed buffs (flat approximations of 1d4 bonuses), checked by hand against SRD 5.2
 export const SPELL_OVERRIDES: Record<string, SpellOverride> = {
@@ -79,7 +84,6 @@ export const SPELL_OVERRIDES: Record<string, SpellOverride> = {
     spellEffects: [{ kind: "applyCondition", condition: "restrained", duration: rounds(10), saveEnds: { ability: "strength" } }],
   },
   "srd-2024_dimension-door": { ...NO_DAMAGE, targeting: { kind: "self" }, resolution: { kind: "auto" } },
-  "srd-2024_fire-shield": { ...NO_DAMAGE, targeting: { kind: "self" }, resolution: { kind: "auto" } },
   "srd-2024_wish": { ...NO_DAMAGE, targeting: { kind: "self" }, resolution: { kind: "auto" } },
   "srd-2024_spike-growth": { ...NO_DAMAGE },
   "srd-2024_longstrider": { targeting: { kind: "ally", range: 5 }, spellEffects: [{ kind: "modifyStat", stat: "speed", flat: 10, duration: rounds(99) }], upcastTargets: 1 },
@@ -174,4 +178,16 @@ export const SPELL_OVERRIDES: Record<string, SpellOverride> = {
     ],
   },
   "srd-2024_blink": { spellEffects: [{ kind: "flag", flag: "disadvantageForAttackers", duration: rounds(10) }] },
+
+  // the cast picks the damage type; orb leaps and the d8-explosion are left to the DM
+  "srd-2024_chromatic-orb": { dice: 3, dieSides: 8, upcastDice: 1, targeting: { kind: "enemy", range: 90 }, resolution: { kind: "attack" }, spellEffects: [damageChoice(["acid", "cold", "fire", "lightning", "poison", "thunder"])] },
+  "srd-2024_sorcerous-burst": { dice: 1, dieSides: 8, targeting: { kind: "enemy", range: 120 }, resolution: { kind: "attack" }, spellEffects: [damageChoice(["acid", "cold", "fire", "lightning", "poison", "psychic", "thunder"])] },
+  // cast right before the hit: the extra dice ride on the next melee hit of the turn (fiend/undead bonus die and upcast stay manual)
+  "srd-2024_divine-smite": { targeting: { kind: "self" }, resolution: { kind: "auto" }, spellEffects: [smite("2d8", "radiant")] },
+  "srd-2024_shining-smite": { targeting: { kind: "self" }, resolution: { kind: "auto" }, spellEffects: [smite("2d6", "radiant")] },
+  "srd-2024_power-word-heal": { spellEffects: [{ kind: "heal", amount: { percentOf: "maxHp", value: 100 } }, { kind: "cleanse", includeConditions: true }] },
+  "srd-2024_regenerate": { spellEffects: [{ kind: "heal", amount: "4d8" }, { kind: "heal", amount: 15 }, { kind: "hot", healPerRound: 1, duration: rounds(99) }] },
+  // the retaliation 2d8 is not expressible; only the chosen resistance is mechanized
+  "srd-2024_fire-shield": { ...NO_DAMAGE, targeting: { kind: "self" }, resolution: { kind: "auto" }, spellEffects: [{ kind: "chooseOne", options: [resist("cold", 50, 99), resist("fire", 50, 99)] }] },
+  "srd-2024_aura-of-life": { spellEffects: [resist("necrotic")] },
 };
