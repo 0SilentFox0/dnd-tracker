@@ -5,6 +5,7 @@ import { useTranslations } from "next-intl";
 
 import type { SpellFormData } from "./spell-form-defaults";
 import { SPELL_FORM_TAB, type SpellFormTabId } from "./spell-form-tabs";
+import { SpellComponentsFields } from "./SpellComponentsFields";
 import { SpellFormBasicFields } from "./SpellFormBasicFields";
 import { SpellFormEffects } from "./SpellFormEffects";
 import { SpellFormPowerFields } from "./SpellFormPowerFields";
@@ -44,7 +45,12 @@ export function SpellFormBody({
     {
       id: SPELL_FORM_TAB.basic,
       label: t("spellEditor.tabs.basic"),
-      content: <SpellFormBasicFields formData={formData} setFormData={setFormData} spellGroups={spellGroups} />,
+      content: (
+        <>
+          <SpellFormBasicFields formData={formData} setFormData={setFormData} spellGroups={spellGroups} />
+          <SpellComponentsFields formData={formData} setFormData={setFormData} />
+        </>
+      ),
     },
     {
       id: SPELL_FORM_TAB.roll,

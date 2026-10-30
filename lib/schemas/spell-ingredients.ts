@@ -18,6 +18,6 @@ export const SpellIngredientSchema: z.ZodType<SpellIngredient, unknown> = z.obje
 
 export const ComponentFlagsSchema: z.ZodType<ComponentFlags> = z.object({ v: z.boolean(), s: z.boolean(), m: z.boolean() });
 
-export const SpellIngredientsSchema = z.array(SpellIngredientSchema).max(SPELL_INGREDIENTS_MAX).refine((list) => new Set(list.map((i) => ingredientKey(i.name))).size === list.length, { message: "duplicate ingredient" });
+export const SpellIngredientsSchema = z.array(SpellIngredientSchema).max(SPELL_INGREDIENTS_MAX).refine((list) => new Set(list.map((i) => ingredientKey(i.name))).size === list.length, { message: "spells.ingredients.duplicate" });
 
 export const ingredientsRequireMaterial = (v: { ingredients?: unknown[]; componentFlags?: ComponentFlags | null }) => !v.ingredients?.length || v.componentFlags?.m === true;

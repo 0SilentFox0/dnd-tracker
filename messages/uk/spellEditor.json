@@ -128,7 +128,9 @@
     "dieSides": "Грані кубика",
     "upcastDice": "Кубики за коло",
     "upcastTargets": "Цілі за коло",
-    "fx": "Анімація"
+    "fx": "Анімація",
+    "ingredients": "Інгредієнти",
+    "componentFlags": "Компоненти"
   },
   "validation": {
     "nameRequired": "Вкажіть назву заклинання",

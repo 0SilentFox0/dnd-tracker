@@ -28,6 +28,8 @@ export function defaultSpellForm(): SpellFormData {
     upcastTargets: null,
     addAbilityMod: false,
     fx: {},
+    ingredients: [],
+    componentFlags: null,
   };
 }
 
@@ -62,6 +64,7 @@ export function spellToForm(spell: Spell): SpellFormData {
     ...(spell.lists?.length && { lists: spell.lists }),
     ...(spell.ingredients?.length && { ingredients: spell.ingredients }),
     ...(spell.componentFlags && { componentFlags: spell.componentFlags }),
+    ...(spell.components && { components: spell.components }),
   };
 }
 
@@ -69,7 +72,7 @@ const KNOWN_PATHS = new Set([
   "name", "level", "groupId", "icon", "description", "appearanceDescription", "cost", "dice", "targeting",
   "targeting.range", "targeting.size", "targeting.maxTargets", "targeting.side", "targeting.shape", "targeting.zone",
   "targeting.zone.rounds", "resolution", "spellEffects", "raceModifiers", "stackable", "maxStacks", "dieSides",
-  "upcastDice", "upcastTargets", "fx",
+  "upcastDice", "upcastTargets", "fx", "ingredients", "componentFlags",
 ]);
 
 const camelPath = (keys: string[]) => keys.map((k, i) => (i ? k[0].toUpperCase() + k.slice(1) : k)).join("");
@@ -85,7 +88,9 @@ function issueFieldKey(path: PropertyKey[]): string {
 }
 
 function payloadInput(form: SpellFormData) {
-  return { ...form, icon: form.icon || null, groupId: form.groupId || null, maxStacks: form.stackable ? form.maxStacks : null, fx: Object.values(form.fx).some(Boolean) ? form.fx : null, addAbilityMod: form.addAbilityMod || null, ...(form.lists && { lists: form.lists }) };
+  const { components: _legacy, ...rest } = form;
+
+  return { ...rest, ingredients: form.ingredients ?? [], componentFlags: form.componentFlags ?? null, icon: form.icon || null, groupId: form.groupId || null, maxStacks: form.stackable ? form.maxStacks : null, fx: Object.values(form.fx).some(Boolean) ? form.fx : null, addAbilityMod: form.addAbilityMod || null, ...(form.lists && { lists: form.lists }) };
 }
 
 export function formToPayload(form: SpellFormData) {

@@ -38,6 +38,7 @@ export interface Spell {
   lists?: string[];
   ingredients?: SpellIngredient[];
   componentFlags?: ComponentFlags | null;
+  components?: string | null;
 }
 
 export interface SpellGroup {
@@ -75,6 +76,7 @@ export interface SpellFormData {
   lists?: string[];
   ingredients?: SpellIngredient[];
   componentFlags?: ComponentFlags | null;
+  components?: string | null;
 }
 
 /** Columns `readSpellDefinition` needs to rebuild a spell for a dry-run cast (battle-effect preview). */

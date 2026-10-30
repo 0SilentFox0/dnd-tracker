@@ -40,7 +40,7 @@ const spellFields = {
   componentFlags: ComponentFlagsSchema.describe("V/S/M component flags").nullable(),
 };
 
-const ingredientsIssue = { message: "ingredients require the M component", path: ["componentFlags"] };
+const ingredientsIssue = { message: "spells.ingredients.needsMaterial", path: ["componentFlags"] };
 
 export const createSpellSchema = z.object({
   ...spellFields,
