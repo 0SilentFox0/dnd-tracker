@@ -1,3 +1,4 @@
+import type { SpellIngredient } from "@/lib/schemas/spell-ingredients";
 import type { SummonRequest } from "@/lib/utils/abilities/engine/core/types";
 import type { CritPicker } from "@/lib/utils/battle/crit-choice/types";
 import type { SpellFx } from "@/lib/utils/battle/fx/spells";
@@ -16,6 +17,7 @@ export interface CastableSpell {
   icon?: string | null;
   fx?: SpellFx | null;
   definition: SpellDefinition;
+  ingredients?: SpellIngredient[];
 }
 
 export interface CastSpellParams {

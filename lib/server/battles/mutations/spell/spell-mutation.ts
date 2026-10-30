@@ -25,6 +25,7 @@ import { armorPenalty } from "@/lib/utils/battle/proficiency";
 import { castSpell } from "@/lib/utils/battle/spell";
 import { flatEffects, inputDiceOf, isDamageEffect, optionInRange } from "@/lib/utils/battle/spell/cast/state";
 import { casterSpellDice } from "@/lib/utils/battle/spell/caster-dice";
+import { ingredientsGate, spendIngredients, spentSummary } from "@/lib/utils/battle/spell/ingredients";
 import { peekInlineGrant, withInlineDefinition } from "@/lib/utils/battle/spell/inline-grant";
 import { prepareLongCast } from "@/lib/utils/battle/spell/long-cast";
 import { spellSaveDc } from "@/lib/utils/battle/spell/power";
@@ -43,6 +44,7 @@ import { assertCanAct } from "@/lib/utils/battle/turn";
 import { assertSpellRolls } from "@/lib/utils/battle/validation/dice-checks";
 import { rollDiceList } from "@/lib/utils/common/dice";
 import { rngOf } from "@/lib/utils/common/rng";
+import type { IngredientPlan } from "@/lib/utils/spells/ingredients/plan";
 import type { BattleParticipant } from "@/types/battle";
 
 const healsByDefinition = (effects: Parameters<typeof flatEffects>[0]) => {
@@ -77,6 +79,7 @@ interface CastPlan {
   order: BattleParticipant[];
   source: SpellSource;
   chosen: ChosenSlot;
+  ingredients: IngredientPlan | null;
   castLevel: number | undefined;
   resolution: Resolution;
   expected: ReturnType<typeof casterSpellDice>;
@@ -130,6 +133,8 @@ export function createSpellMutation(deps: SpellMutationDeps = defaultDeps, optio
     if (chosen && !chosen.ok) throw ruleErrorOf("action_rejected", chosen.error);
 
     const castLevel = (grant ? data.castLevel : undefined) ?? grant?.castLevel ?? (chosen?.ok ? chosen.castLevel : undefined);
+
+    const ingredients = ingredientsGate(caster, spell, ctx.meta.rules, source);
 
     if (definition.cost === "long" && !free && !data.preview) {
       const long = beginLongCast(ctx, order, caster, spell, data, { grantKey: grant?.key, castLevel, hasGrant: !!grant });
@@ -187,7 +192,7 @@ export function createSpellMutation(deps: SpellMutationDeps = defaultDeps, optio
 
     const saves = splitSaveRolls(ctx, order, data.saveRolls);
 
-    const plan: CastPlan = { ctx, data, deps, spell, caster, order, source, chosen, castLevel, resolution, expected, diceRolls, saves };
+    const plan: CastPlan = { ctx, data, deps, spell, caster, order, source, chosen, ingredients, castLevel, resolution, expected, diceRolls, saves };
 
     return runWithCritChoice(ctx, {
       action: "spell",
@@ -327,6 +332,15 @@ async function finalizeCast(plan: CastPlan, result: ReturnType<typeof castSpell>
   });
 
   if (legendaryAbility) result.battleAction = withPrefix(result.battleAction, `${legendaryAbility.limits?.lair ? "🏰" : "👑"} ${legendaryAbility.name} — `);
+
+  const { ingredients } = plan;
+
+  const stock = caster.battleData.ingredientStock;
+
+  if (ingredients && stock) {
+    summoned.order = updateParticipant(summoned.order, caster.basicInfo.id, (p) => spendIngredients(p, ingredients));
+    summoned.messages.push(textRef("battleLog.spell.ingredientsSpent", { name: caster.basicInfo.name, list: spentSummary(stock, ingredients) }));
+  }
 
   const action = withLines(result.battleAction, summoned.messages);
 

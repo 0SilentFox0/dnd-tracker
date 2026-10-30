@@ -25,3 +25,7 @@ export function deriveComponentFlags(text: string | null | undefined): Component
 
   return { v: hasLetter(head, "V"), s: hasLetter(head, "S"), m: hasLetter(head, "M") };
 }
+
+export function formatMissing(missing: Array<{ name: string; qty: number; minGp?: number }>): string {
+  return missing.map((m) => `${m.name} ×${m.qty}${(m.minGp ?? 0) > 0 ? ` (${m.minGp} gp)` : ""}`).join(", ");
+}
