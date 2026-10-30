@@ -238,6 +238,8 @@
     "unlocksAt": "{label}: відкриється на {level}-му рівні",
     "details": "Докладніше про «{name}»",
     "spellNudge": "Оберіть заклинання: {count}",
-    "spellNudgeAction": "Обрати"
+    "spellNudgeAction": "Обрати",
+    "summary": "Рівень {level} · {cls}",
+    "summaryOpen": "Чекає вибору: {count}"
   }
 }

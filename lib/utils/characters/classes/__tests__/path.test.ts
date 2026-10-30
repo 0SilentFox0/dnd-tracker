@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 
 import { makeAbility, makeClass } from "./class-fixtures";
 
-import { chosenSubclassId, openSpellPicks, rowItems, splitPathRows } from "@/lib/utils/characters/classes/path";
+import { chosenSubclassId, openSpellPicks, pathSummary, rowItems, splitPathRows } from "@/lib/utils/characters/classes/path";
 import { buildClassProgression } from "@/lib/utils/characters/classes/progression";
 
 const cls = makeClass({
@@ -31,12 +31,21 @@ describe("splitPathRows", () => {
     expect(all).not.toContain(6);
   });
 
-  it("level 4: reached below, current and next as focus, rest as future", () => {
+  it("level 4: a reached row with an unchosen subclass stays in focus, the rest is reached or future", () => {
     const { reached, focus, future } = splitPathRows(buildClassProgression(cls, { classId: "fighter", level: 4 }));
 
-    expect(levels(reached)).toEqual([1, 3]);
-    expect(levels(focus)).toEqual([4, 5]);
+    expect(levels(reached)).toEqual([1]);
+    expect(levels(focus)).toEqual([3, 4, 5]);
     expect(levels(future)).toEqual([9]);
+  });
+
+  it("a reached row with an open pick is never hidden in the reached group", () => {
+    const early = makeClass({ id: "f", features: [{ level: 1, abilities: [makeAbility("a", "Order", "x")], choices: [{ id: "order", label: "Order", level: 1, count: 1, kind: "option" }] }, { level: 2, abilities: [makeAbility("b", "Spark", "y")] }] });
+
+    const { reached, focus } = splitPathRows(buildClassProgression(early, { classId: "f", level: 5 }));
+
+    expect(levels(focus)).toEqual([1]);
+    expect(levels(reached)).toEqual([2]);
   });
 
   it("level 20 has only the current level in focus", () => {
@@ -79,5 +88,12 @@ describe("openSpellPicks", () => {
   it("is zero for undefined or empty", () => {
     expect(openSpellPicks(undefined)).toBe(0);
     expect(openSpellPicks([])).toBe(0);
+  });
+});
+
+describe("pathSummary", () => {
+  it("gives the current level and how many picks wait", () => {
+    expect(pathSummary(buildClassProgression(cls, { classId: "fighter", level: 4 }))).toEqual({ level: 4, open: 2 });
+    expect(pathSummary(buildClassProgression(cls, { classId: "fighter", level: 4, subclassId: "champ", choices: { asi4: [{ id: "x" }] } }))).toEqual({ level: 4, open: 0 });
   });
 });

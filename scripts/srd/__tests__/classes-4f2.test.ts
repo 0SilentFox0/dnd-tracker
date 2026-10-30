@@ -130,7 +130,9 @@ describe("channel divinity split", () => {
     expect(spark).not.toEqual(turn);
     expect(spark).toMatch(/Roll 1d8/);
     expect(turn).toMatch(/Wisdom saving throw/);
-    expect(spark.length).toBeLessThan(700);
-    expect(turn.length).toBeLessThan(700);
+    expect(spark).toMatch(/regain one use on a Short Rest and all uses on a Long Rest/);
+    expect(turn).toMatch(/save DC = your spell save DC/);
+    expect(spark.length).toBeLessThan(900);
+    expect(turn.length).toBeLessThan(900);
   });
 });

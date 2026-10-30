@@ -238,6 +238,8 @@
     "unlocksAt": "{label}: unlocks at level {level}",
     "details": "More about “{name}”",
     "spellNudge": "Spells to choose: {count}",
-    "spellNudgeAction": "Choose"
+    "spellNudgeAction": "Choose",
+    "summary": "Level {level} · {cls}",
+    "summaryOpen": "To choose: {count}"
   }
 }

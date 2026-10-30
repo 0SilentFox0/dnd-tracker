@@ -68,3 +68,23 @@ describe("CharacterPath", () => {
     expect(container.innerHTML).not.toContain("truncate");
   });
 });
+
+describe("CharacterPath summary", () => {
+  afterEach(cleanup);
+
+  it("anchors on the current level and counts what waits for a choice", () => {
+    render(<CharacterPath progression={progression()} />);
+
+    expect(screen.getByText(/characterProfile\.path\.summary \{"level":4,"cls":"Fighter"\}/)).toBeTruthy();
+    expect(screen.getByText('characterProfile.path.summaryOpen {"count":1}')).toBeTruthy();
+  });
+
+  it("keeps an open pick from an earlier level visible, not folded into the reached group", () => {
+    const late = buildClassProgression(makeClass({ id: "f", features: [{ level: 1, abilities: [], choices: [{ id: "order", label: "Order", level: 1, count: 1, kind: "option" }] }] }), { classId: "f", level: 5 });
+
+    const { container } = render(<CharacterPath progression={late} actions={{ onPick: vi.fn() }} />);
+
+    expect(container.querySelector("details")).toBeNull();
+    expect(screen.getByRole("button", { name: /Order/ })).toBeTruthy();
+  });
+});

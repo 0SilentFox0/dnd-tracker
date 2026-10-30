@@ -18,8 +18,10 @@ export function splitPathRows(progression: ClassProgression): PathRows {
   for (const row of progression.rows) {
     if (rowItems(row, chosen).length === 0 && row.picks.length === 0) continue;
 
-    if (row.state === "reached") out.reached.push(row);
-    else if (row.state === "current" || row.state === "next") out.focus.push(row);
+    const waiting = row.picks.some((p) => p.status === "open");
+
+    if (row.state === "current" || row.state === "next" || (row.state === "reached" && waiting)) out.focus.push(row);
+    else if (row.state === "reached") out.reached.push(row);
     else if (row.state === "future") out.future.push(row);
   }
 
@@ -38,4 +40,12 @@ export function openSpellPicks(list: readonly ClassProgression[] | undefined): n
   }
 
   return missing;
+}
+
+export function pathSummary(progression: ClassProgression): { level: number | null; open: number } {
+  const level = progression.rows.find((r) => r.state === "current")?.level ?? null;
+
+  const open = progression.rows.reduce((sum, r) => sum + r.picks.filter((p) => p.status === "open").length, 0);
+
+  return { level, open };
 }
