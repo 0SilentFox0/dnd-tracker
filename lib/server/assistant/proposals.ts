@@ -135,13 +135,9 @@ async function applyClaimed(tx: Tx, campaignId: string, userId: string, proposal
 
   const content = readContentStrict(page.content);
 
-  let applied = applyAiOps(content, scenarioOps);
-
-  if (!applied.ok) return settle(tx, proposalId, "stale", 409, API_ERRORS.AI_PROPOSAL_STALE);
-
   const ids = new Map<string, string>();
 
-  const byName = await findAcquaintancesByNames(tx, campaignId, newcomers.map((n) => n.name));
+  const byName = newcomers.length > 0 ? await findAcquaintancesByNames(tx, campaignId, newcomers.map((n) => n.name)) : new Map<string, string>();
 
   const created: { id: string; name: string; description: string }[] = [];
 
@@ -160,15 +156,15 @@ async function applyClaimed(tx: Tx, campaignId: string, userId: string, proposal
 
   const finalOps = newcomers.length > 0 ? substituteRefs(scenarioOps, ids) : scenarioOps;
 
+  const applied = applyAiOps(content, finalOps);
+
+  if (!applied.ok) return settle(tx, proposalId, "stale", 409, API_ERRORS.AI_PROPOSAL_STALE);
+
   if (hasRefPlaceholder(finalOps)) return settle(tx, proposalId, "rejected", 400, API_ERRORS.AI_PROPOSAL_INVALID);
 
   const foreign = acquaintanceMentionIds(finalOps).filter((id) => !created.some((c) => c.id === id));
 
   if (foreign.length > 0 && (await tx.acquaintance.count({ where: { campaignId, id: { in: foreign } } })) !== foreign.length) return { ok: false, status: 404, error: API_ERRORS.ACQUAINTANCE_NOT_FOUND };
-
-  if (newcomers.length > 0) applied = applyAiOps(content, finalOps);
-
-  if (!applied.ok) return settle(tx, proposalId, "stale", 409, API_ERRORS.AI_PROPOSAL_STALE);
 
   if (!scenarioContentSchema.safeParse(applied.content).success) return { ok: false, status: 400, error: API_ERRORS.AI_PROPOSAL_INVALID };
 

@@ -2,9 +2,11 @@ import { PrismaClient } from "@prisma/client";
 import { randomUUID } from "node:crypto";
 import { afterAll, beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
 
+import { findScenarioMentionsTool } from "@/lib/ai/tools/scenario-read";
 import { API_ERRORS } from "@/lib/constants/api-errors";
 import { makeT } from "@/lib/i18n/test/mock-t";
 import { applyProposal } from "@/lib/server/assistant/proposals";
+import { contentWrite } from "@/lib/server/scenario/page-store";
 import { isLocalDevDatabaseEnv, singleConnectionDatabaseUrl } from "@/lib/server/test-support/local-db";
 import { resolveAiOps } from "@/lib/utils/scenario/ai-ops";
 
@@ -53,15 +55,32 @@ const doc = (text: string) => ({ type: "doc", content: [{ type: "paragraph", con
 
 const content = () => ({ legend: [], sections: [{ id: "s", title: "Бал", played: false, rows: [{ id: "r", story: doc("Беатріс танцює, дай Беатрісі ключ"), notes: doc("") }] }] });
 
-const proposalFor = async (pageId: string, name = "Беатріс") => {
-  const resolved = resolveAiOps(content() as never, [{ op: "createAcquaintance", ref: "b", name }, { op: "linkMentions", acquaintance: { ref: "b" }, forms: ["Беатріс", "Беатрісі"] }], makeT("assistant"));
+const twoRows = () => ({ legend: [], sections: [{ id: "s", title: "Бал", played: false, rows: [{ id: "r", story: doc("Беатріс танцює, дай Беатрісі ключ"), notes: doc("") }, { id: "r2", story: doc("Музика грає"), notes: doc("") }] }] });
+
+const proposalFor = async (pageId: string, name = "Беатріс", pageContent: () => unknown = content) => {
+  const resolved = resolveAiOps(pageContent() as never, [{ op: "createAcquaintance", ref: "b", name }, { op: "linkMentions", acquaintance: { ref: "b" }, forms: ["Беатріс", "Беатрісі"] }], makeT("assistant"));
 
   if (!resolved.ok) throw new Error("fixture");
 
   return db.aiProposal.create({ data: { campaignId, pageId, summary: "Беатріс", ops: resolved.ops as never } });
 };
 
-const newPage = () => db.scenarioPage.create({ data: { campaignId, title: marker, kind: "scene", content: content() } });
+const newPage = (pageContent: () => unknown = content, title = marker) => db.scenarioPage.create({ data: { campaignId, title, kind: "scene", ...contentWrite(title, pageContent() as never) } });
+
+const editRow = (pageId: string, rowId: string, text: string) =>
+  db.$transaction(async (tx) => {
+    const page = await tx.scenarioPage.findUniqueOrThrow({ where: { id: pageId } });
+
+    const next = structuredClone(page.content) as ReturnType<typeof content>;
+
+    const target = next.sections[0].rows.find((r) => r.id === rowId);
+
+    if (!target) throw new Error("fixture");
+
+    target.story = doc(text);
+
+    return tx.scenarioPage.update({ where: { id: pageId }, data: { ...contentWrite(page.title, next as never), version: { increment: 1 } } });
+  });
 
 describe.skipIf(!isLocalDevDatabaseEnv())("applyProposal createAcquaintance (local DB, connection_limit=1)", () => {
   beforeAll(async () => {
@@ -162,5 +181,57 @@ describe.skipIf(!isLocalDevDatabaseEnv())("applyProposal createAcquaintance (loc
     expect(await db.acquaintance.count({ where: { campaignId } })).toBe(0);
     expect((await db.scenarioPage.findUniqueOrThrow({ where: { id: page.id } })).version).toBe(page.version);
     expect((await db.aiProposal.findUniqueOrThrow({ where: { id: proposal.id } })).status).toBe("pending");
+  });
+
+  it("DM edit of an affected row -> stale: nothing created, page keeps the DM text, no @ref left", async () => {
+    const page = await newPage();
+
+    const proposal = await proposalFor(page.id);
+
+    const edited = await editRow(page.id, "r", "Беатріс пішла геть");
+
+    expect(await applyProposal(campaignId, userId, proposal.id)).toEqual({ ok: false, status: 409, error: API_ERRORS.AI_PROPOSAL_STALE });
+    expect((await db.aiProposal.findUniqueOrThrow({ where: { id: proposal.id } })).status).toBe("stale");
+    expect(await db.acquaintance.count({ where: { campaignId } })).toBe(0);
+
+    const stored = await db.scenarioPage.findUniqueOrThrow({ where: { id: page.id } });
+
+    expect(stored.version).toBe(edited.version);
+    expect(JSON.stringify(stored.content)).toContain("Беатріс пішла геть");
+    expect(JSON.stringify(stored.content)).not.toContain("@ref:");
+  });
+
+  it("DM edit of a row the ops do not touch -> apply still succeeds", async () => {
+    const page = await newPage(twoRows);
+
+    const proposal = await proposalFor(page.id, "Беатріс", twoRows);
+
+    await editRow(page.id, "r2", "Музика стихла");
+
+    expect((await applyProposal(campaignId, userId, proposal.id)).ok).toBe(true);
+    expect(await db.acquaintance.count({ where: { campaignId } })).toBe(1);
+    expect(JSON.stringify((await db.scenarioPage.findUniqueOrThrow({ where: { id: page.id } })).content)).toContain("Музика стихла");
+  });
+
+  it("find_scenario_mentions: the SQL prefilter keeps the matching page and drops the others", async () => {
+    const hit = await newPage(content, `${marker}-hit`);
+
+    const miss = await newPage(() => ({ legend: [], sections: [{ id: "s", title: "Тиша", played: false, rows: [{ id: "r", story: doc("Тут нікого немає"), notes: doc("") }] }] }), `${marker}-miss`);
+
+    const ctx = { campaignId, userId, scopes: ["ai"], threadId: null, locale: "uk" } as never;
+
+    const out = (await findScenarioMentionsTool.handler(ctx, { query: "Беатріс" })) as { hits: { pageId: string }[] };
+
+    const pages = new Set(out.hits.map((h) => h.pageId));
+
+    expect(pages.has(hit.id)).toBe(true);
+    expect(pages.has(miss.id)).toBe(false);
+
+    const { pageIdsMatching } = await import("@/lib/server/scenario/search");
+
+    const ids = await pageIdsMatching(campaignId, ["беатріс"]);
+
+    expect(ids).toContain(hit.id);
+    expect(ids).not.toContain(miss.id);
   });
 });
