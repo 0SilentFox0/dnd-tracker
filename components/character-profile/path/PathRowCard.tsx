@@ -17,7 +17,7 @@ interface PathRowCardProps {
   onDetail: (item: ProgressionItem) => void;
 }
 
-const STATE_TONE = { current: "gold", next: "accent", reached: "muted", future: "muted", template: "muted" } as const;
+const STATE_TONE = { current: "gold", next: "accent", reached: "muted", future: "muted", template: "muted", waiting: "accent" } as const;
 
 function PickLine({ pick, level, subclass, onPick }: { pick: ProgressionPick; level: number; subclass?: string; onPick?: () => void }) {
   const t = useTranslations("characterProfile.path");
@@ -44,11 +44,13 @@ function PickLine({ pick, level, subclass, onPick }: { pick: ProgressionPick; le
 export function PathRowCard({ row, progression, chosen, onPick, onDetail }: PathRowCardProps) {
   const t = useTranslations("characterProfile.path");
 
+  const stateKey = row.state === "reached" && row.picks.some((p) => p.status === "open") ? "waiting" : row.state;
+
   return (
     <section data-state={row.state} className={cn("rounded-lg border border-hud-rule p-3", row.state === "current" && "ring-1 ring-hud-gold-strong")}>
       <header className="mb-2 flex items-center justify-between gap-2">
         <h4 className="hud-sc text-sm text-hud-ink">{t("level", { level: row.level })}</h4>
-        <HudPill tone={STATE_TONE[row.state]}>{t(`state.${row.state}`)}</HudPill>
+        <HudPill tone={STATE_TONE[stateKey]}>{t(`state.${stateKey}`)}</HudPill>
       </header>
       <ul className="space-y-2">
         {rowItems(row, chosen).map((item) => (

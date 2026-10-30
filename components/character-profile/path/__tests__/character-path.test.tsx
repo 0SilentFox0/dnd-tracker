@@ -89,6 +89,19 @@ describe("CharacterPath summary", () => {
   });
 });
 
+describe("CharacterPath pending marker", () => {
+  afterEach(cleanup);
+
+  it("a reached level that still waits for a choice is not labelled as gained", () => {
+    const late = buildClassProgression(makeClass({ id: "f", features: [{ level: 1, abilities: [], choices: [{ id: "order", label: "Order", level: 1, count: 1, kind: "option" }] }] }), { classId: "f", level: 5 });
+
+    render(<CharacterPath progression={late} />);
+
+    expect(screen.getByText("characterProfile.path.state.waiting")).toBeTruthy();
+    expect(screen.queryByText("characterProfile.path.state.reached")).toBeNull();
+  });
+});
+
 describe("CharacterPath chosen subclass", () => {
   afterEach(cleanup);
 

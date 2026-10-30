@@ -227,7 +227,8 @@
       "next": "Next",
       "reached": "Gained",
       "future": "Later",
-      "template": ""
+      "template": "",
+      "waiting": "Waiting"
     },
     "reached": "Gained ({count})",
     "upcoming": "Later ({count})",

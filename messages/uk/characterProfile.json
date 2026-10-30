@@ -227,7 +227,8 @@
       "next": "Наступний",
       "reached": "Отримано",
       "future": "Далі",
-      "template": ""
+      "template": "",
+      "waiting": "Чекає вибору"
     },
     "reached": "Отримано ({count})",
     "upcoming": "Далі ({count})",
