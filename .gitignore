@@ -45,3 +45,4 @@ next-env.d.ts
 .env*.local
 .superpowers/
 .scenario-import/
+data/templates/srd-5.2/i18n/todo/

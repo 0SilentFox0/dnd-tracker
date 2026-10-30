@@ -1,0 +1,31 @@
+import { describe, expect, it } from "vitest";
+
+import { checkTranslation } from "../validate";
+
+const TABLE = "Table: Draconic Ancestors\n\n| Dragon | Damage Type |\n| --- | --- |\n| Black | Acid |";
+
+describe("checkTranslation", () => {
+  it("приймає коректний переклад", () => {
+    expect(checkTranslation("Deal 2d6 damage within 30 feet. **Bold**", "Завдай 2d6 шкоди в межах 30 футів. **Жирний**")).toEqual([]);
+    expect(checkTranslation(TABLE, "Table: Драконячі предки\n\n| Дракон | Тип шкоди |\n| --- | --- |\n| Чорний | Кислота |")).toEqual([]);
+  });
+
+  it("ловить зникле число і змінений кубик", () => {
+    expect(checkTranslation("Range 30 feet", "Дальність футів")).toContain("numbers");
+    expect(checkTranslation("Deal 2d6", "Завдай 2d8")).toEqual(expect.arrayContaining(["dice", "numbers"]));
+  });
+
+  it("ловить іншу кількість колонок і рядків таблиці", () => {
+    expect(checkTranslation(TABLE, "Table: X\n\n| Дракон |\n| --- |\n| Чорний |")).toContain("table-shape");
+    expect(checkTranslation(TABLE, "Table: X\n\n| Дракон | Тип шкоди |\n| --- | --- |")).toEqual(expect.arrayContaining(["table-shape", "lines"]));
+  });
+
+  it("ловить втрачений ** і порожній переклад", () => {
+    expect(checkTranslation("A **b** c", "А б в")).toContain("markup");
+    expect(checkTranslation("Alert", "  ")).toEqual(["empty"]);
+  });
+
+  it("ловить переклад префікса Table:", () => {
+    expect(checkTranslation("Table: X\n\n| a |", "Таблиця: X\n\n| а |")).toContain("table-prefix");
+  });
+});
