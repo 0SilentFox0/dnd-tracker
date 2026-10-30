@@ -169,6 +169,8 @@
     "confirm": "Підвищити",
     "classNotFound": "Клас не знайдено",
     "newClass": "Новий клас",
+    "blockedOption": "{name} (недоступний)",
+    "blockedHint": "Поки вимоги не виконані, додати цей клас не вдасться:",
     "pickClass": "Оберіть клас",
     "subclass": "Підклас",
     "pickSubclass": "Оберіть підклас",

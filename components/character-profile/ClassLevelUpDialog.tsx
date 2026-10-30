@@ -3,6 +3,7 @@
 import { useTranslations } from "next-intl";
 
 import { LevelUpChoicesStep } from "./LevelUpChoicesStep";
+import { MulticlassReasons } from "./MulticlassReasons";
 
 import { SubclassCard } from "@/components/choices/SubclassCard";
 import { FormAlert } from "@/components/common/states";
@@ -18,16 +19,17 @@ interface ClassLevelUpDialogProps {
   onOpenChange: (open: boolean) => void;
   character: LevelUpCharacter;
   onLeveled?: (updated: Character) => void;
+  startNew?: boolean;
 }
 
-export function ClassLevelUpDialog({ open, onOpenChange, character, onLeveled }: ClassLevelUpDialogProps) {
+export function ClassLevelUpDialog({ open, onOpenChange, character, onLeveled, startNew }: ClassLevelUpDialogProps) {
   const t = useTranslations("characterProfile.classLevelUp");
 
   const tc = useTranslations("common.actions");
 
-  const form = useClassLevelUpForm({ open, character, onLeveled, onClose: () => onOpenChange(false) });
+  const form = useClassLevelUpForm({ open, character, onLeveled, startNew, onClose: () => onOpenChange(false) });
 
-  const { byId, available, selection, cls, stepDefs, multiclass, raisedEntry, nextRow, gained, picksCount, nextLevel, canSubmit, actions } = form;
+  const { byId, available, selection, cls, reasons, stepDefs, multiclass, raisedEntry, nextRow, gained, picksCount, nextLevel, canSubmit, actions } = form;
 
   const { choice } = selection;
 
@@ -81,10 +83,11 @@ export function ClassLevelUpDialog({ open, onOpenChange, character, onLeveled }:
             value={selection.newClassId}
             onValueChange={actions.pickNewClass}
             placeholder={t("pickClass")}
-            options={available.map((c) => ({ value: c.id, label: c.name }))}
+            options={available.map(({ cls: c, reasons: r }) => ({ value: c.id, label: r.length > 0 ? t("blockedOption", { name: c.name }) : c.name, disabled: r.length > 0 }))}
             triggerClassName="w-full"
           />
         )}
+        {choice === NEW_CLASS && <MulticlassReasons reasons={reasons} />}
         {form.needsSubclass && cls && (
           <fieldset className="space-y-2" role="radiogroup" aria-label={t("subclass")}>
             <legend className="text-sm font-semibold">{t("pickSubclass")}</legend>

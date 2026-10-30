@@ -169,6 +169,8 @@
     "confirm": "Level up",
     "classNotFound": "Class not found",
     "newClass": "New class",
+    "blockedOption": "{name} (unavailable)",
+    "blockedHint": "Until the requirements are met this class can't be added:",
     "pickClass": "Pick a class",
     "subclass": "Subclass",
     "pickSubclass": "Pick a subclass",
