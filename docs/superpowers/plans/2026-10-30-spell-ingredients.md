@@ -182,7 +182,7 @@ export function spendCp(p: { gold: number; silver: number; copper: number }, cp:
 ### Task 11: Whats-new, i18n-перевірка, документація
 
 **Files:** `lib/onboarding/whats-new.ts` (`{ id: "2026-10-30-spell-ingredients", date: "2026-10-30", audience: "all" }` на початок списку; перед мерджем перевірити, чи main не додав записи — злити, а не перезаписати), `messages/{uk,en}/whatsNew.json` (`whatsNew.2026-10-30-spell-ingredients.{title,body}`), підказка біля перемикача в `/dm/rules`, `docs/architecture/battle.md` (розділ каст/пули: `ingredientStock`, перевірка, `persistIngredients`), `docs/architecture/abilities.md` (правило й поля Spell), `docs/architecture/i18n.md` лише якщо додано нові простори, `docs/STATUS.md`; `i18n-exempt.json` не чіпати.
-- [ ] `pnpm test:related lib/onboarding/whats-new.ts` + тест ключів i18n; commit `docs: spell ingredients (whats-new, architecture, status)`.
+- [x] `pnpm test:related lib/onboarding/whats-new.ts` + тест ключів i18n; commit `docs: spell ingredients (whats-new, architecture, status)`.
 
 ### Task 12: Живе підтвердження й кінець гілки
 
