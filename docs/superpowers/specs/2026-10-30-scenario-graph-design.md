@@ -22,15 +22,16 @@ DM-only сторінка `/campaigns/[id]/dm/graph`: граф «сцена ↔ �
 
 - **Бібліотека: `d3-force` (лише цей пакет) + власний SVG і pan/zoom.** Не React Flow: граф згадок не DAG, React Flow не має force-розкладки (потрібен dagre/elk), сотні DOM-вузлів повільні, бандл важчий. `d3-force` ~15 КБ, чиста функція з фіксованим seed тестується в `lib/utils`. Canvas не потрібен: SVG тримає ~500 вузлів, далі діє кап.
 - **Продуктивність.** Усі сцени + топ-`N` сутностей за `degree` (`GRAPH_ENTITY_CAP = 150`); решта через перемикач «показати всі» (попередження вище 400 вузлів). Сутності з `degree = 1` без пошуку/фільтра не малюються окремо, а згортаються в лічильник на сцені (`+3`); перемикач «показати листки» розгортає. Розкладка: один раз у `useMemo` за моделлю, синхронно, фіксовано 300 тіків (без rAF-анімації, `simulation.stop()`), seed детермінований (стабільні позиції між візитами).
-- **Хронологія.** Сцени мають слабку силу по X за `order` (`forceX`), тож лежать приблизно зліва направо; сутності притягуються до своїх сцен.
+- **Сторінки.** `index.scenes` містить сторінки всіх видів (`pageKind`: scene/hero/note). Малюємо всі: `scene` — прямокутник з номером, `hero`/`note` — менший прямокутник з іншою рамкою, фільтр «види сторінок» не потрібен (YAGNI).
+- **Хронологія.** Сторінки `pageKind = scene` мають слабку силу по X за `order` (`forceX`), тож лежать приблизно зліва направо; hero/note вільні; сутності притягуються до своїх сцен.
 - **Без SSR.** `ScenarioGraphView` підвантажується через `dynamic(..., { ssr: false })` зі скелетоном.
 - **Завантаження.** Клієнтський `useScenarioIndex`, без префетчу на сервері: першу збірку індексу не тягнемо в рендер сторінки. Гард `requireCampaignDM` у `page.tsx`.
 
 ## Модель і розкладка — `lib/utils/scenario/graph/`
 
 ```ts
-type GraphNode = { id: string; kind: "scene" | "entity"; type?: MentionType; label: string; degree: number; missing: boolean; status?: ScenarioPageStatus; order?: number; hidden: number /* згорнуті листки */ };
-type GraphEdge = { id: string; source: string; target: string; count: number; secret: boolean };
+type GraphNode = { id: string; kind: "scene" | "entity"; pageKind?: ScenarioPageKind; type?: MentionType; label: string; degree: number; missing: boolean; status?: ScenarioPageStatus; order?: number; hidden: number /* згорнуті листки */ };
+type GraphEdge = { id: string /* `${sceneId}>${type}:${entityId}` */; source: string; target: string; count: number; secret: boolean };
 type GraphFilters = { types: ReadonlySet<MentionType>; showAll: boolean; showLeaves: boolean; onlyMissing: boolean };
 type GraphModel = { nodes: GraphNode[]; edges: GraphEdge[]; truncated: number };
 type PositionedGraph = { nodes: (GraphNode & { x: number; y: number })[]; edges: GraphEdge[]; bounds: { w: number; h: number } };
@@ -57,9 +58,9 @@ type PositionedGraph = { nodes: (GraphNode & { x: number; y: number })[]; edges:
 
 ## Навігація, i18n, онбординг
 
-- `DM_DASHBOARD_SECTIONS` (+ `{ key: "graph", icon: Network, group: "game" }`), `DM_SECTIONS` (за потреби плитки), `SEGMENT_KEYS` += `graph`.
-- Тексти: нове простір імен `scenarioGraph` у `messages/{uk,en}/scenarioGraph.json` (підпис навігації/плитки — в існуючих ключах дашборду); без кирилиці в коді. Підписи типів сутностей беремо з наявних ключів `scenario` (mention types), не дублюємо.
-- `lib/onboarding/whats-new.ts`: `2026-10-30-scenario-graph` (audience `dm`, `href` на сторінку/help) + `whatsNew.<id>` в обох `whatsNew.json`; хінт `dm.graph` (`helpSlug: "dm-scenario-show"`); розділ у help-статті `dm-scenario-show` про граф (обидві мови).
+- Іконка `Network` (lucide). `DM_DASHBOARD_SECTIONS` += `{ key: "graph", href: dm("graph"), icon: Network, group: "game" }` (після `scenario`); `DM_SECTIONS` += `{ path: "graph", icon: Network, templateVisible: false, tile: "all" }` (як `scenario`); `SEGMENT_KEYS` += `graph`. Заголовок і опис плитки: `dashboard.sections.graph` у `messages/{uk,en}/dashboard.json` за зразком `scenario`; хлібна крихта — відповідний ключ у `Breadcrumbs`-повідомленнях.
+- Тексти: нове простір імен `scenarioGraph` у `messages/{uk,en}/scenarioGraph.json` (підпис навігації/плитки — в існуючих ключах дашборду); без кирилиці в коді. Підписи типів сутностей беремо з наявних `scenario.mentionTypes`, не дублюємо.
+- `lib/onboarding/whats-new.ts`: `2026-10-30-scenario-graph` (audience `dm`, `href` на сторінку/help) + `whatsNew.<id>` в обох `whatsNew.json`; хінт `dm.graph` (`helpSlug: "dm-scenario-show"`); новий розділ у статті `dm-scenario-show`: запис у `lib/onboarding/help/dm.ts` (`sections` += `{ blocks: [{ kind: "p" }, { kind: "list", count: 3 }] }`) і відповідні ключі в `messages/{uk,en}/help.json` (тести help звіряють структуру з текстами).
 
 ## Тести
 
