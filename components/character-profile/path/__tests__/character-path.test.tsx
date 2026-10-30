@@ -114,3 +114,19 @@ describe("CharacterPath chosen subclass", () => {
     expect(screen.getByText('characterProfile.path.done {"label":"Champion"}')).toBeTruthy();
   });
 });
+
+describe("CharacterPath what was chosen", () => {
+  afterEach(cleanup);
+
+  it("spells the choice out with names from the sheet and translated skills", () => {
+    const c = makeClass({ id: "f", features: [{ level: 1, abilities: [], choices: [{ id: "cantrips", label: "Cantrips", level: 1, count: 2, kind: "spell" }, { id: "skills", label: "Skills", level: 1, count: 1, kind: "skill" }] }] });
+
+    const p = buildClassProgression(c, { classId: "f", level: 2, choices: { cantrips: [{ id: "sp-1" }, { id: "sp-2" }], skills: [{ id: "insight" }] } });
+
+    render(<CharacterPath progression={p} names={{ "sp-1": "Guidance", "sp-2": "Light" }} />);
+    fireEvent.click(screen.getByText(/characterProfile\.path\.reached/));
+
+    expect(screen.getByText('characterProfile.path.doneWith {"label":"Cantrips","chosen":"Guidance, Light"}')).toBeTruthy();
+    expect(screen.getByText('characterProfile.path.doneWith {"label":"Skills","chosen":"gameTerms.dndSkills.insight"}')).toBeTruthy();
+  });
+});

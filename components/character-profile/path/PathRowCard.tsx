@@ -5,6 +5,7 @@ import { Info } from "lucide-react";
 
 import { EntityIcon } from "@/components/common/EntityIcon";
 import { HudPill } from "@/components/hud/page";
+import { DND_SKILLS, type DndSkill } from "@/lib/constants/skills";
 import { cn } from "@/lib/utils";
 import { rowItems } from "@/lib/utils/characters/classes";
 import type { ClassProgression, ProgressionItem, ProgressionPick, ProgressionRow } from "@/types/classes";
@@ -15,12 +16,15 @@ interface PathRowCardProps {
   chosen: string | null;
   onPick?: () => void;
   onDetail: (item: ProgressionItem) => void;
+  names?: Record<string, string>;
 }
 
 const STATE_TONE = { current: "gold", next: "accent", reached: "muted", future: "muted", template: "muted", waiting: "accent" } as const;
 
-function PickLine({ pick, level, subclass, onPick }: { pick: ProgressionPick; level: number; subclass?: string; onPick?: () => void }) {
+function PickLine({ pick, level, subclass, names, onPick }: { pick: ProgressionPick; level: number; subclass?: string; names?: Record<string, string>; onPick?: () => void }) {
   const t = useTranslations("characterProfile.path");
+
+  const tg = useTranslations("gameTerms");
 
   const tc = useTranslations("classes.progression");
 
@@ -30,7 +34,11 @@ function PickLine({ pick, level, subclass, onPick }: { pick: ProgressionPick; le
 
   if (pick.status === "locked") return <span className="text-sm text-hud-muted">{t("unlocksAt", { label: pick.label, level })}</span>;
 
-  if (pick.status === "done") return <span className="text-sm">{t("done", { label: pick.label })}</span>;
+  if (pick.status === "done") {
+    const chosen = (pick.chosen ?? []).map((id) => names?.[id] ?? ((DND_SKILLS as readonly string[]).includes(id) ? tg(`dndSkills.${id as DndSkill}`) : id)).join(", ");
+
+    return <span className="text-sm">{chosen ? t("doneWith", { label: pick.label, chosen }) : t("done", { label: pick.label })}</span>;
+  }
 
   if (!onPick) return <span className="text-sm text-hud-gold-strong">{t("pickOpen", values)}</span>;
 
@@ -41,7 +49,7 @@ function PickLine({ pick, level, subclass, onPick }: { pick: ProgressionPick; le
   );
 }
 
-export function PathRowCard({ row, progression, chosen, onPick, onDetail }: PathRowCardProps) {
+export function PathRowCard({ row, progression, chosen, onPick, onDetail, names }: PathRowCardProps) {
   const t = useTranslations("characterProfile.path");
 
   const stateKey = row.state === "reached" && row.picks.some((p) => p.status === "open") ? "waiting" : row.state;
@@ -71,7 +79,7 @@ export function PathRowCard({ row, progression, chosen, onPick, onDetail }: Path
         ))}
         {row.picks.map((pick, i) => (
           <li key={`${i}:${pick.key}`}>
-            <PickLine pick={pick} level={row.level} subclass={progression.subclasses.find((c) => c.chosen)?.name} onPick={onPick} />
+            <PickLine pick={pick} level={row.level} subclass={progression.subclasses.find((c) => c.chosen)?.name} names={names} onPick={onPick} />
           </li>
         ))}
       </ul>

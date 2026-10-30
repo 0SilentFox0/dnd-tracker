@@ -52,7 +52,9 @@ export function buildClassProgression(cls: GameClassData, entry?: CharacterClass
 
         const done = entry ? resolvedPickCount(choice, entry.choices?.[choice.id] ?? []) : null;
 
-        rowAt(choice.level).picks.push({ key: `${prefix}${choice.id}`, kind: choice.kind, label: choice.label, required, done, status: statusOf(choice.level, required, done ?? 0) });
+        const chosen = entry ? (entry.choices?.[choice.id] ?? []).map((p) => choice.options?.find((o) => o.id === p.id)?.name ?? p.id) : undefined;
+
+        rowAt(choice.level).picks.push({ key: `${prefix}${choice.id}`, kind: choice.kind, label: choice.label, required, done, status: statusOf(choice.level, required, done ?? 0), chosen });
       }
     }
   };

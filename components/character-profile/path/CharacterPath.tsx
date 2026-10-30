@@ -13,9 +13,10 @@ import type { ClassProgression, ProgressionItem, ProgressionRow } from "@/types/
 interface CharacterPathProps {
   progression: ClassProgression;
   actions?: { onPick: () => void };
+  names?: Record<string, string>;
 }
 
-export function CharacterPath({ progression, actions }: CharacterPathProps) {
+export function CharacterPath({ progression, actions, names }: CharacterPathProps) {
   const t = useTranslations("characterProfile.path");
 
   const { reached, focus, future } = splitPathRows(progression);
@@ -26,7 +27,7 @@ export function CharacterPath({ progression, actions }: CharacterPathProps) {
 
   const [detail, setDetail] = useState<ProgressionItem | null>(null);
 
-  const card = (row: ProgressionRow) => <PathRowCard key={row.level} row={row} progression={progression} chosen={chosen} onPick={actions?.onPick} onDetail={setDetail} />;
+  const card = (row: ProgressionRow) => <PathRowCard key={row.level} row={row} progression={progression} chosen={chosen} onPick={actions?.onPick} onDetail={setDetail} names={names} />;
 
   const group = (rows: ProgressionRow[], label: string) =>
     rows.length > 0 ? (

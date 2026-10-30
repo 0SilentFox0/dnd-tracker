@@ -241,6 +241,7 @@
     "spellNudge": "Spells to choose: {count}",
     "spellNudgeAction": "Choose",
     "summary": "Level {level} · {cls}",
-    "summaryOpen": "To choose: {count}"
+    "summaryOpen": "To choose: {count}",
+    "doneWith": "Chosen: {label} — {chosen}"
   }
 }

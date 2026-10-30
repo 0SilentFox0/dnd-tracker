@@ -83,6 +83,8 @@ export interface ProgressionPick {
   required: number;
   done: number | null;
   status: "open" | "done" | "locked" | "template";
+  /** що обрано: назви опцій, де клас їх знає, інакше id (заклинання, риси, навички) */
+  chosen?: string[];
 }
 
 export interface ProgressionRow {

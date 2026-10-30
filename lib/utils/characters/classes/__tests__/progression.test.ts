@@ -100,6 +100,20 @@ describe("buildClassProgression", () => {
     expect(p.rows[2].picks).toEqual([expect.objectContaining({ key: "subclass", status: "open", done: 0 })]);
   });
 
+  it("lists what was picked: option names where the class knows them, raw ids otherwise", () => {
+    const c = make({
+      features: [
+        { level: 1, abilities: [], choices: [choice({ id: "order", level: 1, kind: "option", options: [{ id: "prot", name: "Protector", abilities: [] }] }), choice({ id: "cantrips", level: 1, kind: "spell", count: 2 })] },
+      ],
+    });
+
+    const p = buildClassProgression(c, { classId: "fighter", level: 2, choices: { order: [{ id: "prot" }], cantrips: [{ id: "sp-1" }, { id: "sp-2" }] } });
+
+    expect(p.rows[0].picks.map((x) => x.chosen)).toEqual([["Protector"], ["sp-1", "sp-2"]]);
+    expect(buildClassProgression(c, { classId: "fighter", level: 2 }).rows[0].picks.map((x) => x.chosen)).toEqual([[], []]);
+    expect(buildClassProgression(c).rows[0].picks.map((x) => x.chosen)).toEqual([undefined, undefined]);
+  });
+
   it("cuts a long summary at a word boundary and marks it with an ellipsis", () => {
     const text = "alpha beta gamma ".repeat(20).trim();
 
