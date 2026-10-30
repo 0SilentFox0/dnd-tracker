@@ -3,7 +3,7 @@ import type { StoredPendingCritChoice } from "@/lib/utils/battle/crit-choice/typ
 import type { Ruleset } from "@/lib/utils/rules";
 import type { AbilityUsageCounter } from "@/types/abilities";
 import type { BattleAudioState } from "@/types/audio";
-import type { AirborneState, BattleMapConfig, BattleParticipant, BattlePreparationParticipant, Direction8, GridPoint, PendingHit } from "@/types/battle";
+import type { AirborneState, BattleMapConfig, BattleParticipant, BattlePreparationParticipant, Direction8, GridPoint, IngredientStock, PendingHit } from "@/types/battle";
 
 export interface BattleSceneState {
   id: string;
@@ -59,6 +59,7 @@ export interface ParticipantState {
   facing?: Direction8;
   escaped?: boolean;
   mazeWakeRound?: number;
+  ingredientStock?: IngredientStock;
   spellSlotsCurrent: Record<string, number>;
 }
 
