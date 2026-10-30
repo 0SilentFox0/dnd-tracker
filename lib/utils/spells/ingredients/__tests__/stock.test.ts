@@ -9,9 +9,12 @@ describe("purseToCp", () => {
 });
 
 describe("buildIngredientStock", () => {
-  it("is undefined without items and money", () => {
-    expect(buildIngredientStock({ items: [], gold: 0, silver: 0, copper: 0 })).toBeUndefined();
-    expect(buildIngredientStock({ items: null, gold: 0, silver: 0, copper: 0 })).toBeUndefined();
+  it("returns an empty stock without items and money, or without an inventory", () => {
+    const empty = { items: [], purseCp: 0, usedCp: 0 };
+
+    expect(buildIngredientStock({ items: [], gold: 0, silver: 0, copper: 0 })).toEqual(empty);
+    expect(buildIngredientStock({ items: null, gold: 0, silver: 0, copper: 0 })).toEqual(empty);
+    expect(buildIngredientStock(null)).toEqual(empty);
   });
 
   it("maps items by alias or name and starts unused", () => {

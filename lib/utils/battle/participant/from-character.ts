@@ -224,7 +224,7 @@ export async function createBattleParticipantFromCharacter(
     ...immunityAbilities(getCharacterImmunities(character), { type: "character", id: character.id }),
   ];
 
-  const ingredientStock = rules.spellIngredients.enabled && character.inventory ? buildIngredientStock(character.inventory) : undefined;
+  const ingredientStock = rules.spellIngredients.enabled ? buildIngredientStock(character.inventory) : undefined;
 
   const pools = { ...(resolvedClasses ? classPools(resolvedClasses) : {}), ...grantPools };
 

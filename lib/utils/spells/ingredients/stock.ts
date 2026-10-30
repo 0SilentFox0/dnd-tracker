@@ -6,12 +6,12 @@ import type { IngredientStock } from "@/types/battle";
 
 export const purseToCp = (p: { gold: number; silver: number; copper: number }) => p.gold * COIN_VALUE.gp + p.silver * COIN_VALUE.sp + p.copper * COIN_VALUE.cp;
 
-export function buildIngredientStock(inventory: { items: unknown; gold: number; silver: number; copper: number }): IngredientStock | undefined {
-  const items = normalizeItems(inventory.items).map((i) => ({ id: i.id, key: itemIngredientKey(i), name: i.name, worthGp: i.worthGp ?? 0, qty: i.quantity, used: 0 }));
+type StockSource = { items: unknown; gold: number; silver: number; copper: number };
 
-  const purseCp = purseToCp(inventory);
+export function buildIngredientStock(inventory: StockSource | null | undefined): IngredientStock {
+  const src = inventory ?? { items: [], gold: 0, silver: 0, copper: 0 };
 
-  if (!items.length && purseCp <= 0) return undefined;
+  const items = normalizeItems(src.items).map((i) => ({ id: i.id, key: itemIngredientKey(i), name: i.name, worthGp: i.worthGp ?? 0, qty: i.quantity, used: 0 }));
 
-  return { items, purseCp, usedCp: 0 };
+  return { items, purseCp: purseToCp(src), usedCp: 0 };
 }

@@ -14,13 +14,13 @@ const character = {
   inventory: { equipped: {}, stash: [], attuned: [], gold: 10, silver: 0, copper: 0, items: [{ id: "d1", name: "Diamond", quantity: 2, worthGp: 50 }] },
 };
 
-const build = (rules: object) => {
+const build = (rules: object, hero: object = character) => {
   const context = {
     skillTreeByRace: {}, mainSkills: [], spells: [], allSkills: [], racesByName: { "Людина": null }, campaign: { maxLevel: 20 },
     skillsById: {}, artifactsById: {}, artifactSetsById: {}, artifactSetMemberIds: {}, rules: parseRules(rules),
   } as never;
 
-  return createBattleParticipantFromCharacter(character as never, "b1", ParticipantSide.ALLY, undefined, context);
+  return createBattleParticipantFromCharacter(hero as never, "b1", ParticipantSide.ALLY, undefined, context);
 };
 
 describe("hero ingredient stock", () => {
@@ -29,6 +29,15 @@ describe("hero ingredient stock", () => {
 
     expect(on.battleData.ingredientStock).toEqual({ items: [{ id: "d1", key: "diamond", name: "Diamond", worthGp: 50, qty: 2, used: 0 }], purseCp: 1000, usedCp: 0 });
     expect((await build({})).battleData.ingredientStock).toBeUndefined();
+  });
+
+  it("gives a hero with no items and no money an empty stock, even without an inventory row", async () => {
+    const empty = { items: [], purseCp: 0, usedCp: 0 };
+
+    const rules = { spellIngredients: { enabled: true } };
+
+    expect((await build(rules, { ...character, inventory: { ...character.inventory, items: [], gold: 0 } })).battleData.ingredientStock).toEqual(empty);
+    expect((await build(rules, { ...character, inventory: null })).battleData.ingredientStock).toEqual(empty);
   });
 
   it("refreshFromSource keeps used and usedCp, takes fresh quantities", async () => {
