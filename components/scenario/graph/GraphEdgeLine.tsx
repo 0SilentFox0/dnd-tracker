@@ -41,23 +41,23 @@ function GraphEdgeLineImpl({ edge, from, to, color, sequence = false, dimmed, hi
     const { d } = curve({ x: from.x + half, y: from.y }, { x: to.x - half - 6, y: to.y }, -0.12);
 
     return (
-      <g data-edge-id={edge.id} data-sequence="true" data-dimmed={dimmed ? "true" : undefined} style={{ opacity: dimmed ? 0.1 : 0.7 }} pointerEvents="none">
+      <g data-edge-id={edge.id} data-sequence="true" data-dimmed={dimmed ? "true" : undefined} style={{ opacity: dimmed ? 0.12 : 0.8 }} pointerEvents="none">
         <path d={d} fill="none" stroke={color} strokeWidth={2.5} strokeLinecap="round" markerEnd={`url(#${SEQUENCE_MARKER_ID})`} />
       </g>
     );
   }
 
-  const width = Math.min(1.5 + (edge.count - 1) * 0.8, 4);
+  const width = Math.min(1 + (edge.count - 1) * 0.5, 2.5);
 
   const { d, x, y } = curve(from, to, 0.14);
 
   return (
-    <g data-edge-id={edge.id} data-dimmed={dimmed ? "true" : undefined} style={{ opacity: dimmed ? 0.08 : highlighted ? 0.95 : 0.5 }} pointerEvents="none">
-      <path d={d} fill="none" stroke={color} strokeWidth={highlighted ? width + 1 : width} strokeLinecap="round" strokeDasharray={edge.secret ? "6 4" : undefined} />
+    <g data-edge-id={edge.id} data-dimmed={dimmed ? "true" : undefined} style={{ opacity: dimmed ? 0.03 : highlighted ? 0.95 : 0.2 }} pointerEvents="none">
+      <path d={d} fill="none" stroke={color} strokeWidth={highlighted ? width + 1.2 : width} strokeLinecap="round" strokeDasharray={edge.secret ? "6 4" : undefined} />
       {edge.secret ? (
         <g data-secret="true" transform={`translate(${x - 8} ${y - 8})`}>
           <title>{secretLabel}</title>
-          <circle cx={8} cy={8} r={9} fill="var(--color-card)" stroke={color} />
+          <circle cx={8} cy={8} r={9} fill="var(--card)" stroke={color} />
           <Lock x={3.5} y={3.5} width={9} height={9} />
         </g>
       ) : null}

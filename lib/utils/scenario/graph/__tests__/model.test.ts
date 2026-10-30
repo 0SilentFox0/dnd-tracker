@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { buildGraphModel, defaultFilters, entityNodeId, neighbors, sceneNodeId, searchMatches } from "@/lib/utils/scenario/graph/model";
+import { buildGraphModel, defaultFilters, egoModel, entityNodeId, neighbors, sceneNodeId, searchMatches } from "@/lib/utils/scenario/graph/model";
 import type { IndexEdge, IndexEntityNode, IndexSceneNode, MentionType, ScenarioIndex } from "@/types/scenario";
 
 const scene = (id: string, order: number, title = id, pageKind: IndexSceneNode["pageKind"] = "scene"): IndexSceneNode => ({
@@ -120,6 +120,30 @@ describe("sequence edges", () => {
 
   it("skips scenes dropped by onlyMissing", () => {
     expect(buildGraphModel(index, { ...defaultFilters(), onlyMissing: true }).sequence).toEqual([]);
+  });
+});
+
+describe("egoModel", () => {
+  it("keeps the node, its neighbors and the edges among them", () => {
+    const m = buildGraphModel(index, defaultFilters());
+
+    const ego = egoModel(m, "unit:u1");
+
+    expect(ego.nodes.map((n) => n.id).sort()).toEqual(["scene:s1", "scene:s2", "unit:u1"]);
+    expect(ego.edges.map((e) => e.id).sort()).toEqual(["s1>unit:u1", "s2>unit:u1"]);
+    expect(ego.sequence).toEqual(m.sequence);
+  });
+
+  it("adds sequence neighbors for a scene", () => {
+    const m = buildGraphModel(index, defaultFilters());
+
+    expect(egoModel(m, "scene:s2").nodes.map((n) => n.id)).toContain("scene:s1");
+  });
+
+  it("returns the model unchanged for an unknown id", () => {
+    const m = buildGraphModel(index, defaultFilters());
+
+    expect(egoModel(m, "nope")).toBe(m);
   });
 });
 

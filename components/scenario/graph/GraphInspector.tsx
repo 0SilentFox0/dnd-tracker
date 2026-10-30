@@ -12,9 +12,11 @@ export interface GraphInspectorProps {
   onOpen: () => void;
   onSelect: (id: string) => void;
   onClose: () => void;
+  focusMode: boolean;
+  onToggleFocus: () => void;
 }
 
-export function GraphInspector({ detail, canOpen, onOpen, onSelect, onClose }: GraphInspectorProps) {
+export function GraphInspector({ detail, canOpen, onOpen, onSelect, onClose, focusMode, onToggleFocus }: GraphInspectorProps) {
   const t = useTranslations("scenarioGraph.inspector");
 
   const tPage = useTranslations("scenario.pageKinds");
@@ -36,6 +38,7 @@ export function GraphInspector({ detail, canOpen, onOpen, onSelect, onClose }: G
         <Button size="sm" disabled={!canOpen} onClick={onOpen}>{t("open")}</Button>
         <Button size="sm" variant="outline" onClick={onClose}>{t("close")}</Button>
       </div>
+      <Button size="sm" variant={focusMode ? "default" : "outline"} aria-pressed={focusMode} onClick={onToggleFocus}>{focusMode ? t("focusOff") : t("focusOn")}</Button>
       <div>
         <p className="mb-1 text-sm font-medium">{t("connections")}</p>
         {links.length === 0 ? <p className="text-sm text-muted-foreground">{t("noConnections")}</p> : null}

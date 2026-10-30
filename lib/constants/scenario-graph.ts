@@ -5,7 +5,6 @@ import type { MentionType } from "@/types/scenario";
 
 export const GRAPH_ENTITY_CAP = 150;
 export const GRAPH_WARN_NODES = 400;
-export const GRAPH_LABEL_MIN_DEGREE = 3;
 export const GRAPH_TICKS = 300;
 export const GRAPH_MIN_TICKS = 90;
 export const GRAPH_SCENE_W = 148;

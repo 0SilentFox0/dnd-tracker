@@ -39,18 +39,50 @@ describe("layoutGraph", () => {
   });
 
   it("orders scenes along x by order", () => {
-    const xs = layoutGraph(model).nodes.filter((n) => n.kind === "scene").sort((a, b) => (a.order ?? 0) - (b.order ?? 0)).map((n) => n.x);
+    const xs = layoutGraph(model, 1, "timeline").nodes.filter((n) => n.kind === "scene").sort((a, b) => (a.order ?? 0) - (b.order ?? 0)).map((n) => n.x);
 
     expect(xs).toEqual([...xs].sort((a, b) => a - b));
   });
 
   it("pins scenes on a timeline and keeps entities near their scenes", () => {
-    const g = layoutGraph(model);
+    const g = layoutGraph(model, 1, "timeline");
 
     const scenes = g.nodes.filter((n) => n.kind === "scene").sort((a, b) => (a.order ?? 0) - (b.order ?? 0));
 
     expect(scenes.map((n) => n.x)).toEqual([0, SCENE_STEP, SCENE_STEP * 2, SCENE_STEP * 3]);
     expect(g.nodes.filter((n) => n.kind === "entity").every((n) => n.x > -SCENE_STEP && n.x < SCENE_STEP * 4)).toBe(true);
+  });
+
+  it("free layout spreads scenes in 2D, deterministically", () => {
+    const g = layoutGraph(model);
+
+    const ys = g.nodes.filter((n) => n.kind === "scene").map((n) => n.y);
+
+    expect(Math.max(...ys) - Math.min(...ys)).toBeGreaterThan(150);
+    expect(coords(layoutGraph(model))).toEqual(coords(g));
+  });
+
+  it("free layout keeps non-overlapping nodes and pulls hubs toward the center", () => {
+    const hub = { ...entityNode(9), degree: 8 };
+
+    const leaf = { ...entityNode(8), degree: 1 };
+
+    const m: GraphModel = { ...model, nodes: [...model.nodes, hub, leaf], edges: [...model.edges, ...[1, 2, 3, 4].map((s) => link(s, 9)), link(1, 8)] };
+
+    const g = layoutGraph(m);
+
+    const dist = (id: string) => Math.hypot(...(() => { const n = g.nodes.find((x) => x.id === id)!;
+
+ return [n.x, n.y]; })() as [number, number]);
+
+    expect(dist("unit:e9")).toBeLessThan(dist("unit:e8"));
+
+    const ids = g.nodes.length;
+
+    const minGap = Math.min(...g.nodes.flatMap((a, i) => g.nodes.slice(i + 1).map((b) => Math.hypot(a.x - b.x, a.y - b.y))));
+
+    expect(ids).toBe(m.nodes.length);
+    expect(minGap).toBeGreaterThan(20);
   });
 
   it("gives different coordinates for a different seed", () => {

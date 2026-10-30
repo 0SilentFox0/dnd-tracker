@@ -11,6 +11,7 @@ import { GraphNodeShape } from "./GraphNodeShape";
 import { Button } from "@/components/ui/button";
 import { GRAPH_TYPE_STYLE } from "@/lib/constants/scenario-graph";
 import { DRAG_THRESHOLD } from "@/lib/hooks/common";
+import { pickLabels } from "@/lib/utils/scenario/graph/labels";
 import type { PositionedGraph, PositionedNode } from "@/lib/utils/scenario/graph/layout";
 
 interface Box {
@@ -26,20 +27,32 @@ const MIN_W = 120;
 
 const MAX_W = 20000;
 
+const MAX_FIT_W = 2400;
+
+const MIN_FIT_W = 1200;
+
 const FALLBACK_ASPECT = 4 / 3;
 
 const WHEEL_K = 0.0015;
 
-function fitBox(bounds: PositionedGraph["bounds"], aspect: number): Box {
+function fitBox(graph: PositionedGraph, aspect: number): Box {
+  const { bounds } = graph;
+
   const w0 = bounds.w + PAD * 2;
 
   const h0 = bounds.h + PAD * 2;
 
-  const w = Math.max(w0, h0 * aspect, MIN_W);
+  const full = Math.max(w0, h0 * aspect, MIN_FIT_W);
 
-  const h = w / aspect;
+  if (full <= MAX_FIT_W) return { x: bounds.minX + bounds.w / 2 - full / 2, y: bounds.minY + bounds.h / 2 - full / aspect / 2, w: full, h: full / aspect };
 
-  return { x: bounds.minX + bounds.w / 2 - w / 2, y: bounds.minY + bounds.h / 2 - h / 2, w, h };
+  const weight = graph.nodes.reduce((s, n) => s + 1 + n.degree, 0);
+
+  const cx = graph.nodes.reduce((s, n) => s + n.x * (1 + n.degree), 0) / weight;
+
+  const cy = graph.nodes.reduce((s, n) => s + n.y * (1 + n.degree), 0) / weight;
+
+  return { x: cx - MAX_FIT_W / 2, y: cy - MAX_FIT_W / aspect / 2, w: MAX_FIT_W, h: MAX_FIT_W / aspect };
 }
 
 function zoomBox(box: Box, factor: number, cx: number, cy: number): Box {
@@ -73,7 +86,7 @@ export function ScenarioGraphView({ graph, selection, selectedId, focus, showSeq
     return rect && rect.width > 0 && rect.height > 0 ? rect.width / rect.height : FALLBACK_ASPECT;
   }, []);
 
-  const [box, setBox] = useState<Box>(() => fitBox(graph.bounds, FALLBACK_ASPECT));
+  const [box, setBox] = useState<Box>(() => fitBox(graph, FALLBACK_ASPECT));
 
   const boxRef = useRef(box);
 
@@ -85,23 +98,49 @@ export function ScenarioGraphView({ graph, selection, selectedId, focus, showSeq
 
   const drag = useRef({ moved: 0, pinch: 0 });
 
-  const fit = useCallback(() => setBox(fitBox(graph.bounds, aspect())), [graph.bounds, aspect]);
+  const fit = useCallback(() => setBox(fitBox(graph, aspect())), [graph, aspect]);
 
   const [fittedTo, setFittedTo] = useState(graph.bounds);
 
   if (fittedTo !== graph.bounds) {
     setFittedTo(graph.bounds);
-    setBox(fitBox(graph.bounds, FALLBACK_ASPECT));
+    setBox(fitBox(graph, FALLBACK_ASPECT));
   }
+
+  const [hoverId, setHoverId] = useState<string | null>(null);
 
   const byId = useMemo(() => new Map(graph.nodes.map((n) => [n.id, n])), [graph.nodes]);
 
+  const hoverEdges = useMemo(() => {
+    if (!hoverId) return null;
+
+    const edges = new Set<string>();
+
+    const nodes = new Set([hoverId]);
+
+    for (const e of graph.edges) {
+      if (e.source !== hoverId && e.target !== hoverId) continue;
+
+      edges.add(e.id);
+      nodes.add(e.source);
+      nodes.add(e.target);
+    }
+
+    return { edges, nodes };
+  }, [hoverId, graph.edges]);
+
+  const labelled = useMemo(() => pickLabels(graph.nodes, new Set([...selection.nodes, ...matched])), [graph.nodes, selection.nodes, matched]);
+
+  const active = selectedId ? selection : (hoverEdges ?? { edges: new Set<string>(), nodes: new Set<string>() });
+
   const [seenFocus, setSeenFocus] = useState(focus);
 
-  if (focus !== seenFocus) {
+  const pending = focus !== seenFocus && focus ? byId.get(focus.id) : null;
+
+  if (focus !== seenFocus && (!focus || pending)) {
     setSeenFocus(focus);
 
-    const node = focus ? byId.get(focus.id) : null;
+    const node = pending;
 
     if (node) setBox((b) => ({ ...b, x: node.x - b.w / 2, y: node.y - b.h / 2 }));
   }
@@ -222,7 +261,7 @@ export function ScenarioGraphView({ graph, selection, selectedId, focus, showSeq
       >
         <defs>
           <pattern id="graph-dots" width={36} height={36} patternUnits="userSpaceOnUse">
-            <circle cx={2} cy={2} r={1.3} fill="var(--color-muted-foreground)" opacity={0.28} />
+            <circle cx={2} cy={2} r={1.3} fill="var(--muted-foreground)" opacity={0.28} />
           </pattern>
           <marker id={SEQUENCE_MARKER_ID} viewBox="0 0 10 10" refX={8} refY={5} markerWidth={18} markerHeight={18} markerUnits="userSpaceOnUse" orient="auto">
             <path d="M2 1.5 L8 5 L2 8.5" fill="none" stroke="var(--color-hud-gold-bright)" strokeWidth={1.8} strokeLinecap="round" strokeLinejoin="round" />
@@ -248,10 +287,10 @@ export function ScenarioGraphView({ graph, selection, selectedId, focus, showSeq
 
             if (!from || !to) return null;
 
-            return <GraphEdgeLine key={edge.id} edge={edge} from={from} to={to} color={to.type ? GRAPH_TYPE_STYLE[to.type].color : "currentColor"} dimmed={!!selectedId && !selection.edges.has(edge.id)} highlighted={selection.edges.has(edge.id)} secretLabel={t("graph.secretEdge")} />;
+            return <GraphEdgeLine key={edge.id} edge={edge} from={from} to={to} color={to.type ? GRAPH_TYPE_STYLE[to.type].color : "currentColor"} dimmed={!!selectedId && !selection.edges.has(edge.id)} highlighted={active.edges.has(edge.id)} secretLabel={t("graph.secretEdge")} />;
           })}
           {graph.nodes.map((node) => (
-            <GraphNodeShape key={node.id} node={node} selected={node.id === selectedId} dimmed={!!selectedId && !selection.nodes.has(node.id)} matched={matched.has(node.id)} onSelect={onSelect} onClear={onClear} onOpen={onOpen} />
+            <GraphNodeShape key={node.id} node={node} selected={node.id === selectedId} dimmed={!!selectedId && !selection.nodes.has(node.id)} matched={matched.has(node.id)} hovered={node.id === hoverId} labelled={labelled.has(node.id)} onHover={setHoverId} onSelect={onSelect} onClear={onClear} onOpen={onOpen} />
           ))}
         </g>
       </svg>

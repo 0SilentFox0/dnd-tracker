@@ -1,12 +1,13 @@
 "use client";
 
-import { useCallback, useEffect, useMemo } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { Network } from "lucide-react";
 
 import { GraphInspector } from "./GraphInspector";
+import { GraphListPanel } from "./GraphListPanel";
 import { GraphToolbar } from "./GraphToolbar";
 import { ScenarioGraphView } from "./ScenarioGraphView";
 
@@ -32,6 +33,23 @@ export function ScenarioGraph({ campaignId }: { campaignId: string }) {
 
   const select = set.selected;
 
+  const pickNode = set.pick;
+
+  const [listPref, setListPref] = useState<boolean | null>(null);
+
+  const listOpen = listPref ?? isDesktop;
+
+  const setListOpen = setListPref;
+
+  const pick = useCallback(
+    (id: string) => {
+      pickNode(id);
+
+      if (!isDesktop) setListPref(false);
+    },
+    [pickNode, isDesktop],
+  );
+
   const clear = useCallback(() => select(null), [select]);
 
   const open = useCallback(
@@ -45,15 +63,24 @@ export function ScenarioGraph({ campaignId }: { campaignId: string }) {
 
   const hasSelection = !!state.selectedId;
 
-  useEffect(() => {
-    if (!hasSelection) return;
+  const { isEgo } = state;
 
-    const onKey = (e: KeyboardEvent) => e.key === "Escape" && select(null);
+  const exitEgo = set.ego;
+
+  useEffect(() => {
+    if (!hasSelection && !isEgo) return;
+
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key !== "Escape") return;
+
+      if (isEgo) exitEgo(false);
+      else select(null);
+    };
 
     document.addEventListener("keydown", onKey);
 
     return () => document.removeEventListener("keydown", onKey);
-  }, [hasSelection, select]);
+  }, [hasSelection, isEgo, select, exitEgo]);
 
   if (state.isLoading) return <LoadingState />;
 
@@ -75,7 +102,9 @@ export function ScenarioGraph({ campaignId }: { campaignId: string }) {
 
   const detail = selection.detail;
 
-  const inspector = detail ? <GraphInspector detail={detail} canOpen={!!graphNodeHref(campaignId, detail.node)} onOpen={() => open(detail.node)} onSelect={set.focus} onClose={clear} /> : null;
+  const inspector = detail ? <GraphInspector detail={detail} canOpen={!!graphNodeHref(campaignId, detail.node)} onOpen={() => open(detail.node)} onSelect={set.focus} onClose={clear} focusMode={isEgo} onToggleFocus={() => set.ego(!isEgo)} /> : null;
+
+  const listPanel = <GraphListPanel groups={state.list} selectedId={state.selectedId} query={state.query} onQuery={set.query} onPick={pick} />;
 
   const body = () => {
     if (!graph || graph.nodes.length === 0) {
@@ -90,11 +119,15 @@ export function ScenarioGraph({ campaignId }: { campaignId: string }) {
       <GraphToolbar
         filters={state.filters}
         showSequence={state.showSequence}
+        timeline={state.layoutMode === "timeline"}
+        listOpen={listOpen}
         counts={counts?.byType ?? {}}
         query={state.query}
         matches={{ current: state.matches.length === 0 ? 0 : (state.matchIndex % state.matches.length) + 1, total: state.matches.length }}
         onFilters={set.filters}
         onShowSequence={set.sequence}
+        onTimeline={(on) => set.layout(on ? "timeline" : "free")}
+        onToggleList={() => setListOpen(!listOpen)}
         onQuery={set.query}
         onNextMatch={set.nextMatch}
       />
@@ -113,10 +146,18 @@ export function ScenarioGraph({ campaignId }: { campaignId: string }) {
           <Button asChild size="sm" variant="outline"><Link href={`/campaigns/${campaignId}/dm/scenario`}>{t("empty.noPagesAction")}</Link></Button>
         </div>
       ) : null}
-      <div className="relative min-h-0 flex-1">
+      <div className="flex min-h-0 flex-1 gap-3">
+        {listOpen && isDesktop ? <aside aria-label={t("list.title")} className="w-64 shrink-0 rounded-lg border bg-card/90 p-2">{listPanel}</aside> : null}
+        <div className="relative min-w-0 flex-1">
         {body()}
         {inspector && isDesktop ? <aside aria-label={t("inspector.title")} className="absolute inset-y-2 right-2 w-72 overflow-y-auto rounded-lg border bg-card/95 p-3 shadow-lg backdrop-blur-sm">{inspector}</aside> : null}
+        </div>
       </div>
+      {listOpen && !isDesktop ? (
+        <ResponsiveDialog open onOpenChange={(o) => !o && setListOpen(false)} title={t("list.title")}>
+          <div className="h-[60dvh]">{listPanel}</div>
+        </ResponsiveDialog>
+      ) : null}
       {inspector && !isDesktop ? (
         <ResponsiveDialog open onOpenChange={(o) => !o && clear()} title={t("inspector.title")}>
           {inspector}

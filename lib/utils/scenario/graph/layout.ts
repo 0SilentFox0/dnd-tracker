@@ -1,4 +1,4 @@
-import { forceCollide, forceLink, forceManyBody, forceSimulation, forceY, type SimulationLinkDatum, type SimulationNodeDatum } from "d3-force";
+import { forceCollide, forceLink, forceManyBody, forceSimulation, forceX, forceY, type SimulationLinkDatum, type SimulationNodeDatum } from "d3-force";
 
 import { GRAPH_MIN_TICKS, GRAPH_TICKS } from "@/lib/constants/scenario-graph";
 import type { GraphEdge, GraphModel, GraphNode } from "@/lib/utils/scenario/graph/types";
@@ -24,8 +24,7 @@ const GOLDEN_ANGLE = Math.PI * (3 - Math.sqrt(5));
 
 type SimNode = SimulationNodeDatum & GraphNode;
 
-export function layoutGraph(model: GraphModel, seed = 1): PositionedGraph {
-  if (model.nodes.length === 0) return { nodes: [], edges: model.edges, sequence: model.sequence, bounds: { minX: 0, minY: 0, w: 0, h: 0 } };
+function layoutTimeline(model: GraphModel, seed: number): PositionedGraph {
 
   const pageNodes = model.nodes.filter((n) => n.kind === "scene").sort((a, b) => (a.order ?? 0) - (b.order ?? 0));
 
@@ -80,10 +79,18 @@ export function layoutGraph(model: GraphModel, seed = 1): PositionedGraph {
     .force("collide", forceCollide<SimNode>((n) => (n.kind === "scene" ? 78 : 40)))
     .stop();
 
-  const ticks = Math.max(GRAPH_MIN_TICKS, Math.min(GRAPH_TICKS, Math.round((GRAPH_TICKS * 150) / model.nodes.length)));
+  for (let i = 0; i < ticksFor(model.nodes.length); i++) simulation.tick();
 
-  for (let i = 0; i < ticks; i++) simulation.tick();
+  return finish(model, sim);
+}
 
+export type GraphLayoutMode = "free" | "timeline";
+
+function ticksFor(count: number) {
+  return Math.max(GRAPH_MIN_TICKS, Math.min(GRAPH_TICKS, Math.round((GRAPH_TICKS * 150) / count)));
+}
+
+function finish(model: GraphModel, sim: SimNode[]): PositionedGraph {
   const nodes: PositionedNode[] = sim.map(({ x, y, vx: _vx, vy: _vy, fx: _fx, fy: _fy, index: _index, ...n }) => ({ ...n, x: x ?? 0, y: y ?? 0 }));
 
   const xs = nodes.map((n) => n.x);
@@ -95,4 +102,71 @@ export function layoutGraph(model: GraphModel, seed = 1): PositionedGraph {
   const minY = Math.min(...ys);
 
   return { nodes, edges: model.edges, sequence: model.sequence, bounds: { minX, minY, w: Math.max(...xs) - minX, h: Math.max(...ys) - minY } };
+}
+
+type SimLink = SimulationLinkDatum<SimNode> & { weak: boolean };
+
+function layoutFree(model: GraphModel, seed: number): PositionedGraph {
+  const scenes = model.nodes.filter((n) => n.kind === "scene").sort((a, b) => (a.order ?? 0) - (b.order ?? 0));
+
+  const home = new Map<string, { x: number; y: number }>();
+
+  scenes.forEach((n, rank) => {
+    const a = (rank + seed * 3) * GOLDEN_ANGLE;
+
+    const r = 190 * Math.sqrt(rank + 0.5);
+
+    home.set(n.id, { x: r * Math.cos(a), y: r * Math.sin(a) });
+  });
+
+  const anchors = new Map<string, { x: number; y: number }[]>();
+
+  for (const e of model.edges) {
+    const at = home.get(e.source);
+
+    if (at) anchors.set(e.target, [...(anchors.get(e.target) ?? []), at]);
+  }
+
+  const sim: SimNode[] = model.nodes.map((n, i) => {
+    const fixed = home.get(n.id);
+
+    if (fixed) return { ...n, ...fixed };
+
+    const near = anchors.get(n.id) ?? [{ x: 0, y: 0 }];
+
+    const cx = near.reduce((s, p) => s + p.x, 0) / near.length;
+
+    const cy = near.reduce((s, p) => s + p.y, 0) / near.length;
+
+    const a = (i + seed * 7) * GOLDEN_ANGLE;
+
+    const r = 110 + (i % 4) * 25;
+
+    return { ...n, x: cx + r * Math.cos(a), y: cy + r * Math.sin(a) };
+  });
+
+  const links: SimLink[] = [
+    ...model.edges.map((e) => ({ source: e.source, target: e.target, weak: false })),
+    ...model.sequence.map((e) => ({ source: e.source, target: e.target, weak: true })),
+  ];
+
+  const pull = (n: SimNode) => (n.kind === "scene" ? 0.05 : 0.025 + Math.min(n.degree, 8) * 0.03);
+
+  const simulation = forceSimulation(sim)
+    .force("link", forceLink<SimNode, SimLink>(links).id((n) => n.id).distance((l) => (l.weak ? 260 : 150)).strength((l) => (l.weak ? 0.1 : 0.35)))
+    .force("charge", forceManyBody<SimNode>().strength((n) => (n.kind === "scene" ? -700 : -260)))
+    .force("x", forceX<SimNode>(0).strength(pull))
+    .force("y", forceY<SimNode>(0).strength(pull))
+    .force("collide", forceCollide<SimNode>((n) => (n.kind === "scene" ? 86 : 34 + Math.min(n.degree, 8))))
+    .stop();
+
+  for (let i = 0; i < ticksFor(model.nodes.length); i++) simulation.tick();
+
+  return finish(model, sim);
+}
+
+export function layoutGraph(model: GraphModel, seed = 1, mode: GraphLayoutMode = "free"): PositionedGraph {
+  if (model.nodes.length === 0) return { nodes: [], edges: model.edges, sequence: model.sequence, bounds: { minX: 0, minY: 0, w: 0, h: 0 } };
+
+  return mode === "timeline" ? layoutTimeline(model, seed) : layoutFree(model, seed);
 }

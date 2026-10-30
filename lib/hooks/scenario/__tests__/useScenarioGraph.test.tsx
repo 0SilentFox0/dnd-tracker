@@ -160,6 +160,37 @@ describe("useScenarioGraph", () => {
     expect(result.current.state.graph).toBe(before);
   });
 
+  it("ego mode keeps the node and its neighbors, and exits cleanly", async () => {
+    vi.mocked(scenarioApi.getScenarioIndex).mockResolvedValue(index);
+
+    const { result } = setup();
+
+    await waitFor(() => expect(result.current.state.graph).not.toBeNull());
+    act(() => result.current.set.selected("scene:s1"));
+    act(() => result.current.set.ego(true));
+    expect(result.current.state.isEgo).toBe(true);
+    expect(result.current.state.graph?.nodes.map((n) => n.id).sort()).toEqual(["character:c1", "scene:s1", "scene:s2", "unit:u1"]);
+    act(() => result.current.set.ego(false));
+    expect(result.current.state.isEgo).toBe(false);
+    expect(result.current.state.graph?.nodes).toHaveLength(4);
+  });
+
+  it("picking a collapsed entity from the list adds it to the graph and focuses it", async () => {
+    vi.mocked(scenarioApi.getScenarioIndex).mockResolvedValue({
+      ...index,
+      entities: [...index.entities, entity("unit", "u9", "Тролль", ["s1"])],
+      edges: [...index.edges, edge("s1", "unit", "u9")],
+    });
+
+    const { result } = setup();
+
+    await waitFor(() => expect(result.current.state.graph).not.toBeNull());
+    expect(result.current.state.list.flatMap((g) => g.items).some((i) => i.id === "unit:u9")).toBe(true);
+    act(() => result.current.set.pick("unit:u9"));
+    expect(result.current.state.selectedId).toBe("unit:u9");
+    expect(result.current.state.focus?.id).toBe("unit:u9");
+  });
+
   it("finds a single-page entity by search with default filters", async () => {
     vi.mocked(scenarioApi.getScenarioIndex).mockResolvedValue({
       ...index,

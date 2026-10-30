@@ -17,6 +17,8 @@
   "inspector": {
     "close": "Close",
     "connections": "Connections",
+    "focusOff": "Show all",
+    "focusOn": "Show only neighbors",
     "missingHint": "This entity was deleted",
     "noConnections": "No visible connections",
     "open": "Open",
@@ -36,9 +38,19 @@
     "showAll": "Show all",
     "truncated": "Showing {shown} of {total} entities"
   },
+  "list": {
+    "title": "Nodes",
+    "search": "Filter the list",
+    "searchPlaceholder": "Find a page or entity",
+    "scenes": "Pages",
+    "empty": "Nothing found",
+    "missing": "Deleted",
+    "counts": "{degree} links, {mentions} mentions"
+  },
   "toolbar": {
     "filters": "Filters",
     "fit": "Fit to view",
+    "list": "List",
     "matches": "{current} of {total}",
     "onlyMissing": "Only deleted",
     "search": "Search the graph",
@@ -46,6 +58,7 @@
     "showAll": "Show all entities",
     "showLeaves": "Show single-link entities",
     "showSequence": "Show story order",
+    "timeline": "Timeline layout",
     "types": "Entity types",
     "zoomIn": "Zoom in",
     "zoomOut": "Zoom out"

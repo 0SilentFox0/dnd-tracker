@@ -177,6 +177,43 @@ describe("ScenarioGraph", () => {
     expect(node("unit:g")).not.toHaveClass("graph-node-selected");
   });
 
+  it("lists pages and entities, including collapsed ones, and selects on click", () => {
+    render(<ScenarioGraph campaignId="c" />);
+
+    const item = (id: string) => document.querySelector(`[data-list-id="${id}"]`) as HTMLElement;
+
+    expect(item("scene:a")).not.toBeNull();
+    expect(item("spell:s")).not.toBeNull();
+    expect(node("spell:s")).toBeNull();
+
+    fireEvent.click(item("spell:s"));
+
+    expect(node("spell:s")).toHaveClass("graph-node-selected");
+    expect(item("spell:s")).toHaveAttribute("aria-current", "true");
+  });
+
+  it("filters the list by type filters and by its search box", () => {
+    render(<ScenarioGraph campaignId="c" />);
+
+    fireEvent.change(screen.getByRole("textbox", { name: "scenarioGraph.list.search" }), { target: { value: "orb" } });
+
+    expect([...document.querySelectorAll("[data-list-id]")].map((e) => e.getAttribute("data-list-id"))).toEqual(["artifact:o"]);
+  });
+
+  it("shows only neighbors in focus mode and leaves it on Escape", () => {
+    render(<ScenarioGraph campaignId="c" />);
+
+    fireEvent.click(node("unit:g"));
+    fireEvent.click(screen.getByRole("button", { name: "scenarioGraph.inspector.focusOn" }));
+
+    expect(node("artifact:o")).toBeNull();
+    expect(node("scene:a")).not.toBeNull();
+
+    fireEvent.keyDown(document.body, { key: "Escape" });
+
+    expect(node("artifact:o")).not.toBeNull();
+  });
+
   it("selects on Space", () => {
     render(<ScenarioGraph campaignId="c" />);
 
@@ -190,8 +227,11 @@ describe("ScenarioGraph", () => {
     const before = document.querySelector("svg")?.getAttribute("viewBox");
 
     fireEvent.click(node("unit:g"));
-    expect(document.querySelector("aside")).not.toBeNull();
-    expect(document.querySelector("aside")?.className).toContain("absolute");
+
+    const inspector = document.querySelector('aside[aria-label="scenarioGraph.inspector.title"]');
+
+    expect(inspector).not.toBeNull();
+    expect(inspector?.className).toContain("absolute");
     expect(document.querySelector("svg")?.getAttribute("viewBox")).toBe(before);
   });
 

@@ -128,3 +128,21 @@ export function searchMatches(model: GraphModel, query: string): string[] {
 
   return model.nodes.filter((n) => matchesQuery([n.label], query)).map((n) => n.id);
 }
+
+export function egoModel(model: GraphModel, nodeId: string): GraphModel {
+  if (!model.nodes.some((n) => n.id === nodeId)) return model;
+
+  const keep = new Set(neighbors(model, nodeId).nodes);
+
+  for (const e of model.sequence) {
+    if (e.source === nodeId) keep.add(e.target);
+    else if (e.target === nodeId) keep.add(e.source);
+  }
+
+  return {
+    ...model,
+    nodes: model.nodes.filter((n) => keep.has(n.id)),
+    edges: model.edges.filter((e) => keep.has(e.source) && keep.has(e.target)),
+    sequence: model.sequence.filter((e) => keep.has(e.source) && keep.has(e.target)),
+  };
+}

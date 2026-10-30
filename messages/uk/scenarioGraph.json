@@ -17,6 +17,8 @@
   "inspector": {
     "close": "Закрити",
     "connections": "Зв'язки",
+    "focusOff": "Показати все",
+    "focusOn": "Лише сусіди",
     "missingHint": "Сутність видалена",
     "noConnections": "Немає видимих зв'язків",
     "open": "Відкрити",
@@ -36,9 +38,19 @@
     "showAll": "Показати всі",
     "truncated": "Показано {shown} із {total} сутностей"
   },
+  "list": {
+    "title": "Вузли",
+    "search": "Фільтр списку",
+    "searchPlaceholder": "Знайти сторінку чи сутність",
+    "scenes": "Сторінки",
+    "empty": "Нічого не знайдено",
+    "missing": "Видалено",
+    "counts": "Зв'язків: {degree}, згадок: {mentions}"
+  },
   "toolbar": {
     "filters": "Фільтри",
     "fit": "Вписати у вікно",
+    "list": "Список",
     "matches": "{current} з {total}",
     "onlyMissing": "Лише видалені",
     "search": "Пошук по графу",
@@ -46,6 +58,7 @@
     "showAll": "Показати всі сутності",
     "showLeaves": "Показати сутності з одним зв'язком",
     "showSequence": "Показувати порядок історії",
+    "timeline": "Розкладка по часу",
     "types": "Типи сутностей",
     "zoomIn": "Збільшити",
     "zoomOut": "Зменшити"
