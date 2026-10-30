@@ -159,7 +159,7 @@ export function inlineSpellTiles(caster: BattleParticipant | null, library: Book
       id: g.key,
       hostSpellId: g.spellId,
       grantKey: g.key,
-      name: g.label ?? host?.name ?? g.key,
+      name: g.label ?? host?.name ?? textRef("battleTerms.grant.unnamed"),
       level: 0,
       icon: host?.icon,
       spellGroup: host?.spellGroup,

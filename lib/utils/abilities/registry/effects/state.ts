@@ -8,10 +8,9 @@ import { restoreCharm } from "@/lib/utils/abilities/engine/effects/charm";
 import { countMarks, GUARD_KEY, markKey } from "@/lib/utils/abilities/engine/effects/marks";
 import { clampMorale, moraleCapOf } from "@/lib/utils/abilities/engine/effects/morale";
 import { effectSource, upsertTimedEffect } from "@/lib/utils/abilities/engine/effects/timed-effects";
-import { logText } from "@/lib/utils/abilities/log-text";
 import type { ConditionImmunityKey, Effect } from "@/lib/utils/abilities/schema";
 import { isCondition5eKey, isCustomConditionKey } from "@/lib/utils/abilities/schema/kinds";
-import { seg, type Segment } from "@/lib/utils/abilities/segments";
+import { seg, type Segment, segmentsLine } from "@/lib/utils/abilities/segments";
 import { helpEffect } from "@/lib/utils/battle/actions/effects";
 import { applyCondition5e, type ConditionKey, saveEndsFor } from "@/lib/utils/battle/conditions/apply";
 import { removeEffects } from "@/lib/utils/battle/conditions/query";
@@ -153,7 +152,7 @@ export function applyGrantAction(input: EffectApplyInput<Of<"grantAction">>): Ef
         },
       };
     },
-    (names) => textRef("abilityText.log.grantAction", { ability: ability.name, target: names, text: logText(describeGrantAction(effect)) }),
+    (names) => textRef("abilityText.log.grantAction", { ability: ability.name, target: names, text: segmentsLine(describeGrantAction(effect)) }),
   );
 }
 

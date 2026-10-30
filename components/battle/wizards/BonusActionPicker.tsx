@@ -14,6 +14,7 @@ import { ParticipantSide } from "@/lib/constants/battle";
 import { useAbilityPicker } from "@/lib/hooks/battle";
 import { useText } from "@/lib/i18n/use-text";
 import { cn } from "@/lib/utils";
+import { abilityLabel } from "@/lib/utils/abilities/build/resolve";
 import { canOffHandAttack } from "@/lib/utils/battle/attack/attacks-left";
 import type { BattleParticipant } from "@/types/battle";
 
@@ -36,8 +37,8 @@ export function BonusActionPicker({ participant, open, onOpenChange, onDone, tri
 
   return (
     <>
-      {mapAim.ability && <AbilityAimPanel name={mapAim.ability.name} onCancel={mapAim.cancel} />}
-      <ResponsiveDialog open={open} onOpenChange={changeOpen} title={ability ? t("bonus.target", { name: ability.name }) : trigger === "action" ? t("bonus.ability") : t("bonus.title")} className={cn(HUD_SURFACE, "border-white/25 bg-[#15110e]")}>
+      {mapAim.ability && <AbilityAimPanel name={text(abilityLabel(mapAim.ability))} onCancel={mapAim.cancel} />}
+      <ResponsiveDialog open={open} onOpenChange={changeOpen} title={ability ? t("bonus.target", { name: text(abilityLabel(ability)) }) : trigger === "action" ? t("bonus.ability") : t("bonus.title")} className={cn(HUD_SURFACE, "border-white/25 bg-[#15110e]")}>
         <div className="space-y-2">
           {!ability && trigger === "bonusAction" && onOffHand && canOffHandAttack(participant) && (
             <button type="button" disabled={isPending} onClick={() => { onOpenChange(false); onOffHand(); }} className="flex min-h-14 w-full items-center gap-3 border border-white/15 px-3 py-2.5 text-left disabled:opacity-50">
@@ -49,8 +50,8 @@ export function BonusActionPicker({ participant, open, onOpenChange, onDone, tri
             <button key={a.key} type="button" disabled={cooldownLeft > 0 || isPending} onClick={() => pick(a)} className="flex min-h-14 w-full items-center gap-3 border border-white/15 px-3 py-2.5 text-left disabled:opacity-50">
               {a.source.icon ? <OptimizedImage src={a.source.icon} alt="" width={40} height={40} className="size-10 rounded object-cover" /> : <Zap className="size-10 p-2 text-[var(--gold)]" />}
               <span className="min-w-0">
-                <span className="hud-sc block font-bold">{a.name}{cooldownLeft > 0 && <span className="ml-2 text-xs font-normal text-[#a89c88]">{t("bonus.cooldown", { rounds: cooldownLeft })}</span>}{pool && <span className="ml-2 text-xs font-normal text-[#a89c88]">{pool.label} {pool.left}/{pool.max} · −{pool.cost}</span>}</span>
-                <span className="line-clamp-2 block text-xs text-[#a89c88]">{a.description ?? a.effects.map(abilityText.effect).join(", ")}</span>
+                <span className="hud-sc block font-bold">{text(abilityLabel(a))}{cooldownLeft > 0 && <span className="ml-2 text-xs font-normal text-[#a89c88]">{t("bonus.cooldown", { rounds: cooldownLeft })}</span>}{pool && <span className="ml-2 text-xs font-normal text-[#a89c88]">{pool.label} {pool.left}/{pool.max} · −{pool.cost}</span>}</span>
+                <span className="line-clamp-2 block text-xs text-[#a89c88]">{a.details ? text(a.details) : (a.description ?? a.effects.map(abilityText.effect).join(", "))}</span>
               </span>
             </button>
           ))}

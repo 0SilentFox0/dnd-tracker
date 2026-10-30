@@ -221,7 +221,7 @@ export interface SpellGrant {
   spellId: string;
   /** стабільне джерело каста (відокремлено від spellId) */
   key?: string;
-  label?: string;
+  label?: LogLine;
   via?: "grant" | "slotOrGrant";
   pool?: string;
   cost?: number;

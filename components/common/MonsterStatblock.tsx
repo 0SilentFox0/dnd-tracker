@@ -1,12 +1,12 @@
 import { useTranslations } from "next-intl";
 
-import { MONSTER_SENSE_LABELS } from "@/lib/constants/monster";
+import { MONSTER_SENSE_KEYS } from "@/lib/constants/monster";
 import type { UnitStatblock } from "@/types/units";
 
 export function MonsterStatblock({ block }: { block: UnitStatblock }) {
   const t = useTranslations("gameTerms.monster");
 
-  const senses = (Object.keys(MONSTER_SENSE_LABELS) as Array<keyof typeof MONSTER_SENSE_LABELS>).flatMap((key) => {
+  const senses = MONSTER_SENSE_KEYS.flatMap((key) => {
     const value = block.senses?.[key];
 
     return value === undefined ? [] : [t("distance", { label: t(`senses.${key}`), value })];

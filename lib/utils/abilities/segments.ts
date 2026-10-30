@@ -1,4 +1,6 @@
+import { dynamicTextRef, joinLines } from "@/lib/i18n/text-ref";
 import type { Translator } from "@/lib/i18n/translator";
+import type { LogLine, TextArg } from "@/types/text";
 
 type SegmentTranslator = (key: string, values?: Record<string, string | number>) => string;
 
@@ -58,3 +60,18 @@ export const abilityRegistryOf =
   (t: Translator): SegmentTranslator =>
   (key, values) =>
     t(`abilityRegistry.${key}`, values);
+
+const argOf = (p: SegmentParam): TextArg => {
+  if (typeof p === "string" || typeof p === "number") return p;
+
+  if (Array.isArray(p)) return segmentsLine(p, ", ");
+
+  if (isSegment(p)) return segmentRef(p);
+
+  return segmentsLine(p.items, p.join);
+};
+
+const segmentRef = (s: Segment) => dynamicTextRef(`abilityRegistry.${s.key}`, s.params && Object.fromEntries(Object.entries(s.params).map(([k, v]) => [k, argOf(v)])));
+
+/** Battle-log counterpart of `joinSegments`: the translation happens at render time. */
+export const segmentsLine = (list: readonly Segment[], sep = " · "): LogLine => (list.length === 1 ? segmentRef(list[0] as Segment) : joinLines(list.map(segmentRef), sep));

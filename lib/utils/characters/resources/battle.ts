@@ -2,6 +2,7 @@ import { compactResources, currentHp, withHp } from "./hp";
 import { readResources } from "./schema";
 
 import { CombatStatus } from "@/lib/constants/battle";
+import { textRef } from "@/lib/i18n/text-ref";
 import { applyCondition5e, exhaustionLevel, PERMANENT_ROUNDS } from "@/lib/utils/battle/conditions";
 import { startDying } from "@/lib/utils/battle/death-saves";
 import { isCastPool, isConsumablePool } from "@/lib/utils/items/pools";
@@ -32,8 +33,7 @@ function withExhaustion(p: BattleParticipant, level: number, rules: Ruleset): Ba
     permanent: true,
     levels: level,
     source: undefined,
-    // eslint-disable-next-line no-restricted-syntax -- battle-condition source name is persisted data
-    sourceName: "Виснаження",
+    sourceName: textRef("abilityText.derived.exhaustion"),
     timedKey: REST_EXHAUSTION_KEY,
     round: 0,
     rules,

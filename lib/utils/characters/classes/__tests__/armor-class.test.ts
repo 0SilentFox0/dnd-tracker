@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 
+import { textOf } from "@/lib/i18n/test/text";
 import { type ArmorStats, armorStatsColumns } from "@/lib/utils/artifacts/armor-stats";
 import { weaponStatsColumns } from "@/lib/utils/artifacts/weapon-stats";
 import { hasShield, wornArmor, wornArmorCategory } from "@/lib/utils/artifacts/worn-armor";
@@ -71,6 +72,7 @@ describe("armorPenalties / applyClassArmor", () => {
 
     expect(p).toMatchObject({ id: "armor-penalties", name: "Chain Mail", trigger: { event: "passive" }, source: { type: "artifact", id: "Chain Mail", name: "Chain Mail" }, key: "artifact:Chain Mail:armor-penalties" });
     expect(p?.effects).toEqual([{ kind: "flag", flag: "checkDisadvantage", skills: ["stealth"] }, { kind: "modifyStat", stat: "speed", flat: -10 }]);
+    expect(textOf(p?.details as never, "en")).toBe("Stealth disadvantage; Strength below 13: speed −10");
     expect(armorPenalties(hero({ str: 13, items: [armorItem("Chain Mail", CHAIN)] }))?.effects).toEqual([{ kind: "flag", flag: "checkDisadvantage", skills: ["stealth"] }]);
     expect(armorPenalties(hero({ items: [armorItem("Leather Armor", { category: "light", base: 11 })] }))).toBeNull();
     expect(armorPenalties(hero())).toBeNull();

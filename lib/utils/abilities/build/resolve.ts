@@ -1,5 +1,5 @@
-import type { Ability } from "@/lib/utils/abilities/schema";
-import type { AbilitySource, ResolvedAbility } from "@/types/abilities";
+import type { AbilitySource, DerivedAbility, ResolvedAbility } from "@/types/abilities";
+import type { LogLine } from "@/types/text";
 
 const RANK: Record<string, number> = { basic: 1, advanced: 2, expert: 3 };
 
@@ -7,7 +7,9 @@ export function abilityKey(source: AbilitySource, abilityId: string): string {
   return `${source.type}:${source.id}:${abilityId}`;
 }
 
-export function resolveAbilities(source: AbilitySource, abilities: Ability[]): ResolvedAbility[] {
+export const abilityLabel = (a: Pick<DerivedAbility, "name" | "label">): LogLine => a.label ?? a.name;
+
+export function resolveAbilities(source: AbilitySource, abilities: DerivedAbility[]): ResolvedAbility[] {
   return abilities.map((a) => ({ ...a, source, key: abilityKey(source, a.id) }));
 }
 

@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 
+import { textOf } from "@/lib/i18n/test/text";
 import { makeParticipant } from "@/lib/utils/abilities/__tests__/fixtures";
 import { buildSpellPick, grantsFor, initialSpellFlow, inlineSpellTiles, spellFlow, spellPayload } from "@/lib/utils/battle/flows";
 import { isGrantLive } from "@/lib/utils/battle/spell/inline-grant";
@@ -23,6 +24,13 @@ describe("inline grant tiles", () => {
 
     expect(tile).toMatchObject({ id: grant.key, hostSpellId: "sprout", name: "Удар паростком", level: 0, cost: "bonusAction", dice: 1, dieSides: 8, icon: "i" });
     expect(inlineSpellTiles(caster, [host], () => false)).toEqual([]);
+  });
+
+  it("a tile without a label falls back to the host spell name, then to the unnamed key", () => {
+    const unlabeled = { ...caster, spellcasting: { ...caster.spellcasting, grants: [{ ...grant, label: undefined }] } };
+
+    expect(inlineSpellTiles(unlabeled, [host], () => true)[0]?.name).toBe("Паросток");
+    expect(textOf(inlineSpellTiles(unlabeled, [], () => true)[0]?.name as never, "en")).toBe("Unnamed spell");
   });
 
   it("inline grants are not offered as sources of the host spell", () => {

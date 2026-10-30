@@ -30,5 +30,18 @@
     "pushNowhere": "↔️ {target}: відштовхнути нікуди",
     "pushed": "↔️ {ability}: {target} відштовхнуто на {feet} фт",
     "help": "🤝 {ability}: {target} має перевагу на наступну атаку"
+  },
+  "derived": {
+    "multiattack": "Мультиатака ×{count}",
+    "exhaustion": "Виснаження",
+    "armor": {
+      "stealth": "Перешкода на Скритність",
+      "slowed": "Сила нижче {strength}: швидкість −{penalty}"
+    },
+    "choices": {
+      "source": "Вибори",
+      "skills": "Майстерність з виборів",
+      "expertise": "Експертиза з виборів"
+    }
   }
 }

@@ -2,6 +2,7 @@ import { AttackType } from "@/lib/constants/battle";
 import type { OwnerKind } from "@/lib/utils/abilities/read";
 import type { Ability, StaticEffect } from "@/lib/utils/abilities/schema";
 import type { GridPoint } from "@/types/battle";
+import type { LogLine } from "@/types/text";
 
 export type { AbilityFlowSummary, Segment } from "@/lib/utils/abilities/segments";
 export type { Ability, StaticEffect };
@@ -10,13 +11,18 @@ export interface AbilitySource {
   type: "skill" | "race" | "artifact" | "artifactSet" | "unit" | "character" | "class" | "feat";
   id: string;
   name: string;
+  /** Derived (non-authored) sources: `name` stays an id-like string, the label renders per locale. */
+  label?: LogLine;
   icon?: string | null;
   line?: { mainSkillId: string; level: string; levelNode?: boolean };
   /** персональне вміння героя (поза деревом) */
   personal?: boolean;
 }
 
-export type ResolvedAbility = Ability & { key: string; source: AbilitySource };
+/** Derived abilities keep `name` as a stable id-like string (hashes, comparisons) and carry a render-time `label`/`details`. */
+export type DerivedAbility = Ability & { label?: LogLine; details?: LogLine };
+
+export type ResolvedAbility = DerivedAbility & { key: string; source: AbilitySource };
 
 /** 5e legendary/lair action link; schema validation is server-side. */
 export type AbilityPerform = { kind: "attack"; attack: string } | { kind: "spell"; spellId: string };
