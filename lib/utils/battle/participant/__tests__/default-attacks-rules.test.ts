@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { extractAttacksFromCharacter } from "@/lib/utils/battle/participant/extract-attacks";
+import { extractAttacksFromCharacter, INLINE_WEAPON_FALLBACK_NAME } from "@/lib/utils/battle/participant/extract-attacks";
 import type { CharacterFromPrisma } from "@/lib/utils/battle/types/participant";
 import { parseRules } from "@/lib/utils/rules/schema";
 
@@ -19,5 +19,13 @@ describe("базові атаки героя з правил кампанії", 
     const attacks = await extractAttacksFromCharacter(hero, {});
 
     expect(attacks.map((a) => a.name)).toEqual(["Unarmed Strike", "Ranged Attack"]);
+  });
+
+  it("інлайн-зброя без назви не бере назву базового удару", () => {
+    const withInline = { campaignId: "c", inventory: { equipped: { weapon: { damageDice: "1d8" } } } } as unknown as CharacterFromPrisma;
+
+    const attacks = extractAttacksFromCharacter(withInline, {}, { meleeName: "Кулак", rangedName: "Камінь" });
+
+    expect(attacks[0].name).toBe(INLINE_WEAPON_FALLBACK_NAME);
   });
 });

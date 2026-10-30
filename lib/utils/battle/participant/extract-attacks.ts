@@ -41,7 +41,7 @@ export function extractAttacksFromCharacter(
   names: Ruleset["defaultAttacks"] = DEFAULT_RULES.defaultAttacks,
   opts: { fiveE?: boolean; items?: { enabled: boolean; attuned: readonly string[] } } = {},
 ): ExtractedAttack[] {
-  const weapons = extractWeaponAttacks(character, artifactsById, !!opts.fiveE, names, opts.items);
+  const weapons = extractWeaponAttacks(character, artifactsById, !!opts.fiveE, opts.items);
 
   return [...weapons, ...defaultAttacks(names, !!opts.fiveE).filter((d) => !weapons.some((w) => w.type === d.type))];
 }
@@ -60,7 +60,6 @@ function extractWeaponAttacks(
   character: CharacterFromPrisma,
   rowsById: Record<string, Prisma.ArtifactGetPayload<object>>,
   fiveE: boolean,
-  names: Ruleset["defaultAttacks"],
   items?: ItemsOpt,
 ): ExtractedAttack[] {
   const attacks: ExtractedAttack[] = [];
@@ -79,7 +78,7 @@ function extractWeaponAttacks(
     if (typeof val === "string") {
       entries.push({ ref: val, offHand: false });
     } else if (typeof val === "object" && val !== null && "damageDice" in val) {
-      attacks.push(inlineAttack(key, val, names));
+      attacks.push(inlineAttack(key, val));
     }
   }
 
@@ -102,7 +101,9 @@ function extractWeaponAttacks(
   return attacks;
 }
 
-function inlineAttack(key: string, val: Record<string, unknown>, names: Ruleset["defaultAttacks"]): ExtractedAttack {
+export const INLINE_WEAPON_FALLBACK_NAME = "Weapon";
+
+function inlineAttack(key: string, val: Record<string, unknown>): ExtractedAttack {
   const inv = val as {
     id?: string;
     name?: string;
@@ -120,7 +121,7 @@ function inlineAttack(key: string, val: Record<string, unknown>, names: Ruleset[
 
   return {
     id: inv.id ?? `inline-${key}`,
-    name: (inv.name as string) ?? (isRanged ? names.rangedName : names.meleeName),
+    name: (inv.name as string) ?? INLINE_WEAPON_FALLBACK_NAME,
     type: (isRanged ? AttackType.RANGED : AttackType.MELEE) as ExtractedAttack["type"],
     attackBonus: typeof inv.attackBonus === "number" ? inv.attackBonus : 0,
     damageDice: (inv.damageDice as string) ?? "1d6",
