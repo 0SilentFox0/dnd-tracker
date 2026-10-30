@@ -46,10 +46,10 @@ describe("CharacterProfile — перегляд", () => {
 
   afterEach(cleanup);
 
-  it("вкладка вмінь зветься «Шлях» лише для героя з класами", () => {
+  it("вкладка вмінь зветься «Шлях» і для героя з класами, і для героя з деревом", () => {
     renderWithConfirm(<CharacterProfile campaignId="c" characterId="ch" canEdit={false} />);
-    expect(screen.queryByRole("tab", { name: "characterProfile.tabs.path" })).toBeNull();
-    expect(screen.getByRole("tab", { name: "characterProfile.tabs.skills" })).toBeTruthy();
+    expect(screen.getByRole("tab", { name: "characterProfile.tabs.path" })).toBeTruthy();
+    expect(screen.queryByRole("tab", { name: "characterProfile.tabs.skills" })).toBeNull();
 
     cleanup();
     h.sheetQuery.data = { ...sheetFixture, classProgression: [{ classId: "f", className: "Fighter", color: null, subclasses: [], subclassLevel: null, rows: [] }] };

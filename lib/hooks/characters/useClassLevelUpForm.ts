@@ -8,6 +8,7 @@ import type { AbilityKey } from "@/lib/constants/abilities";
 import { useClasses } from "@/lib/hooks/classes";
 import { levelUpChoiceDefs } from "@/lib/utils/characters/choices/class-choices";
 import { buildClassProgression, classesById } from "@/lib/utils/characters/classes";
+import { type MulticlassReason, multiclassReasons } from "@/lib/utils/characters/classes/multiclass";
 import type { Character } from "@/types/characters";
 import type { Picks } from "@/types/choices";
 import type { CharacterClassEntry, GameClassData, ProgressionRow } from "@/types/classes";
@@ -24,22 +25,34 @@ interface UseClassLevelUpFormArgs {
   character: LevelUpCharacter;
   onLeveled?: (updated: Character) => void;
   onClose: () => void;
+  startNew?: boolean;
 }
 
 export const NEW_CLASS = "__new__";
 
 const NO_CLASSES: GameClassData[] = [];
 
-export function useClassLevelUpForm({ open, character, onLeveled, onClose }: UseClassLevelUpFormArgs) {
+export interface AvailableClass {
+  cls: GameClassData;
+  reasons: MulticlassReason[];
+}
+
+export function useClassLevelUpForm({ open, character, onLeveled, onClose, startNew }: UseClassLevelUpFormArgs) {
   const { entries } = character;
 
   const { data: classes = NO_CLASSES } = useClasses(character.campaignId, { enabled: open });
 
   const byId = useMemo(() => classesById(classes), [classes]);
 
-  const available = useMemo(() => classes.filter((c) => !entries.some((e) => e.classId === c.id)), [classes, entries]);
+  const scores = character.hero?.scores;
 
-  const [choice, setChoice] = useState(entries[0]?.classId ?? NEW_CLASS);
+  const available = useMemo<AvailableClass[]>(() => {
+    const owned = entries.flatMap((e) => byId[e.classId] ?? []);
+
+    return classes.filter((c) => !entries.some((e) => e.classId === c.id)).map((cls) => ({ cls, reasons: scores ? multiclassReasons(owned, cls, scores) : [] }));
+  }, [classes, entries, byId, scores]);
+
+  const [choice, setChoice] = useState(startNew ? NEW_CLASS : (entries[0]?.classId ?? NEW_CLASS));
 
   const [newClassId, setNewClassId] = useState("");
 

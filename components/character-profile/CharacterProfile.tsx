@@ -33,10 +33,10 @@ const ProfileEditor = dynamic(() => import("./ProfileEditor").then((m) => m.Prof
 
 const VIEW_TABS: ProfileTabId[] = ["combat", "skills", "magic", "items", "story", "log"];
 
-function viewTabs(withLog: boolean, t: (key: ProfileTabId | "path") => string, hasPath: boolean): ProfileTab[] {
+function viewTabs(withLog: boolean, t: (key: ProfileTabId | "path") => string): ProfileTab[] {
   const tabs: ProfileTab[] = [
     { id: "combat", label: t("combat"), content: <CombatTab /> },
-    { id: "skills", label: hasPath ? t("path") : t("skills"), content: <SkillsTab /> },
+    { id: "skills", label: t("path"), content: <SkillsTab /> },
     { id: "magic", label: t("magic"), content: <MagicTab /> },
     { id: "items", label: t("items"), content: <InventoryTab /> },
     { id: "story", label: t("story"), content: <StoryTab /> },
@@ -146,7 +146,7 @@ export function CharacterProfile({ campaignId, characterId, canEdit, initialTab 
                 {sheet.viewer.isOwner && !sheet.viewer.isDM && !sheet.review.pending && <PlayerSheetHint className="mx-3 my-2" />}
                 {sheet.review.pending && <DraftBanner campaignId={campaignId} note={sheet.review.note} isOwner={sheet.viewer.isOwner} />}
                 {sheet.review.pending && sheet.viewer.isDM && canEdit && <ReviewActions campaignId={campaignId} characterId={characterId} name={sheet.identity.name} />}
-                <ProfileTabs value={tab === "log" && !sheet.rest ? "combat" : tab} onValueChange={setTab} tabs={viewTabs(!!sheet.rest, (id) => t(`tabs.${id}`), !!sheet.classProgression?.length)} header={hero.past ? <CompactHero /> : null} />
+                <ProfileTabs value={tab === "log" && !sheet.rest ? "combat" : tab} onValueChange={setTab} tabs={viewTabs(!!sheet.rest, (id) => t(`tabs.${id}`))} header={hero.past ? <CompactHero /> : null} />
                 <LevelUpOverlay campaignId={campaignId} characterId={characterId} name={sheet.identity.name} />
               </>
             )}

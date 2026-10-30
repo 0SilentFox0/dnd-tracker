@@ -227,7 +227,7 @@
         "b0": "After approval \"My character\" shows the hero sheet with tabs:",
         "b1": {
           "i0": "\"Combat\" for stats, attacks, defense and saving throws.",
-          "i1": "\"Abilities\" for skills and the progression tree.",
+          "i1": "\"Path\" for levels, choices and the progression tree.",
           "i2": "\"Magic\" for the spellbook.",
           "i3": "\"Inventory\" for equipment, backpack, money and the log.",
           "i4": "\"History\" for the biography, goals and your personal notes (the DM can't see them)."

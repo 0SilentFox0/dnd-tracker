@@ -7,11 +7,11 @@ import { makeAbility, makeClass } from "@/lib/utils/characters/classes/__tests__
 import type { GameClassData } from "@/types/classes";
 
 vi.mock("@/components/ui/select-field", () => ({
-  SelectField: ({ "aria-label": label, value, onValueChange, options = [] }: { "aria-label"?: string; value: string; onValueChange: (v: string) => void; options?: { value: string; label: string }[] }) => (
+  SelectField: ({ "aria-label": label, value, onValueChange, options = [] }: { "aria-label"?: string; value: string; onValueChange: (v: string) => void; options?: { value: string; label: string; disabled?: boolean }[] }) => (
     <select aria-label={label} value={value} onChange={(e) => onValueChange(e.target.value)}>
       <option value="">—</option>
       {options.map((o) => (
-        <option key={o.value} value={o.value}>
+        <option key={o.value} value={o.value} disabled={o.disabled}>
           {o.label}
         </option>
       ))}
@@ -39,12 +39,13 @@ const fighter = makeClass({
   subclasses: [{ id: "champion", name: "Чемпіон", features: [] }],
 });
 
-const renderDialog = (level: number, entry: Record<string, unknown> = {}, hero = false) =>
+const renderDialog = (level: number, entry: Record<string, unknown> = {}, hero = false, extra: { startNew?: boolean; scores?: Record<string, number> } = {}) =>
   render(
     <ClassLevelUpDialog
       open
+      startNew={extra.startNew}
       onOpenChange={vi.fn()}
-      character={{ campaignId: "c1", id: "h1", entries: [{ classId: "fighter", level, ...entry }], ...(hero && { hero: { race: "human", level, scores: { strength: 10, dexterity: 10, constitution: 10, intelligence: 10, wisdom: 10, charisma: 10 }, skills: {} } }) }}
+      character={{ campaignId: "c1", id: "h1", entries: [{ classId: "fighter", level, ...entry }], ...(hero && { hero: { race: "human", level, scores: { strength: 10, dexterity: 10, constitution: 10, intelligence: 10, wisdom: 10, charisma: 10, ...extra.scores }, skills: {} } }) }}
     />,
   );
 
@@ -103,5 +104,51 @@ describe("ClassLevelUpDialog", () => {
     renderDialog(4, {}, true);
 
     expect(screen.getByText('characterProfile.classLevelUp.picks {"count":1}')).toBeTruthy();
+  });
+
+  describe("multiclass reasons", () => {
+    const wizard = makeClass({ id: "wizard", name: "Wizard", color: null });
+
+    const barbarian = makeClass({ id: "barbarian", name: "Barbarian", color: null });
+
+    beforeEach(() => {
+      classes = [{ ...fighter, name: "Fighter" }, wizard, barbarian];
+    });
+
+    const newClassSelect = () => screen.getByRole("combobox") as HTMLSelectElement;
+
+    it("startNew opens on the new-class choice", () => {
+      renderDialog(5, {}, true, { startNew: true, scores: { strength: 13 } });
+
+      expect(newClassSelect()).toBeTruthy();
+    });
+
+    it("an unmet requirement disables the class option, a met one stays enabled", () => {
+      renderDialog(5, {}, true, { startNew: true, scores: { strength: 13, intelligence: 10 } });
+
+      const options = Array.from(newClassSelect().options);
+
+      expect(options.find((o) => o.value === "wizard")?.disabled).toBe(true);
+      expect(options.find((o) => o.value === "barbarian")?.disabled).toBe(false);
+    });
+
+    it("without hero data nothing is disabled", () => {
+      renderDialog(5, {}, false, { startNew: true });
+
+      expect(Array.from(newClassSelect().options).some((o) => o.disabled)).toBe(false);
+    });
+
+    it("the reasons of every blocked class are visible without selecting anything", () => {
+      renderDialog(5, {}, true, { startNew: true, scores: { strength: 13, intelligence: 10 } });
+
+      expect(screen.getByRole("listitem").textContent).toMatch(/Wizard: choices\.requirement\.ability .*"need":13,"have":10/);
+    });
+
+    it("an existing class that no longer meets its requirement is named as the cause", () => {
+      classes = [{ ...fighter, name: "Wizard" }, makeClass({ id: "barbarian", name: "Barbarian", color: null })];
+      renderDialog(5, {}, true, { startNew: true, scores: { intelligence: 10, strength: 13 } });
+
+      expect(screen.getAllByRole("listitem").map((li) => li.textContent?.split(":")[0])).toEqual(["Wizard"]);
+    });
   });
 });

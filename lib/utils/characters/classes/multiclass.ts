@@ -23,15 +23,28 @@ const SRD_MULTICLASS: Record<string, Requirement> = {
 
 export const multiclassRequirement = (cls: Pick<GameClassData, "name">): Requirement | null => SRD_MULTICLASS[cls.name.trim().toLowerCase()] ?? null;
 
-const met = (req: Requirement, scores: Readonly<Record<AbilityKey, number>>) => req.every((group) => group.some((a) => scores[a] >= MULTICLASS_MIN_SCORE));
+export interface MulticlassReason {
+  className: string;
+  abilities: AbilityKey[];
+  need: number;
+  have: number;
+}
 
-/** Classes without a requirement entry (custom, HOMM) never block. */
-export function multiclassBlockedBy(current: readonly Pick<GameClassData, "name">[], next: Pick<GameClassData, "name">, scores: Readonly<Record<AbilityKey, number>>): string | null {
+type Scores = Readonly<Record<AbilityKey, number>>;
+
+export function multiclassReasons(current: readonly Pick<GameClassData, "name">[], next: Pick<GameClassData, "name">, scores: Scores): MulticlassReason[] {
+  const out: MulticlassReason[] = [];
+
   for (const cls of [...current, next]) {
-    const req = multiclassRequirement(cls);
+    for (const abilities of multiclassRequirement(cls) ?? []) {
+      const have = Math.max(...abilities.map((a) => scores[a]));
 
-    if (req && !met(req, scores)) return cls.name;
+      if (have < MULTICLASS_MIN_SCORE) out.push({ className: cls.name, abilities, need: MULTICLASS_MIN_SCORE, have });
+    }
   }
 
-  return null;
+  return out;
 }
+
+/** Classes without a requirement entry (custom, HOMM) never block. */
+export const multiclassBlockedBy = (current: readonly Pick<GameClassData, "name">[], next: Pick<GameClassData, "name">, scores: Scores): string | null => multiclassReasons(current, next, scores)[0]?.className ?? null;
