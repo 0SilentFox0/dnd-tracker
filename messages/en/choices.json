@@ -146,7 +146,8 @@
       "expertise": "Double proficiency in a skill you know",
       "spell": "Spells you can cast",
       "option": "An option with its own benefits",
-      "subclass": "A subclass: new features at later levels"
+      "subclass": "A subclass: new features at later levels",
+      "background": "A background: skills, tools and an origin feat"
     },
     "featSource": {
       "background": "Background feat: starting feat",
@@ -159,6 +160,15 @@
     "subclass": {
       "level": "Level {level}",
       "noDescription": "No description"
+    },
+    "background": {
+      "title": "Background",
+      "resetWarning": "Changing the background resets its choices and ability score bonuses.",
+      "noSkills": "none",
+      "skills": "Skills",
+      "tools": "Tools",
+      "originFeat": "Origin feat",
+      "equipment": "Equipment"
     }
   }
 }
