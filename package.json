@@ -21,6 +21,7 @@
     "upload-assets-to-supabase": "tsx scripts/assets/upload-assets-to-supabase.ts",
     "assets:attach": "tsx --env-file=.env.local --tsconfig tsconfig.scripts.json scripts/assets/attach-assets.ts",
     "assets:tokens-5e": "tsx --env-file=.env.local --tsconfig tsconfig.scripts.json scripts/assets/tokens-5e/upload-tokens-5e.ts",
+    "assets:identity-icons": "tsx --env-file=.env.local --tsconfig tsconfig.scripts.json scripts/assets/tokens-5e/upload-identity-icons.ts",
     "import-scenario": "tsx --tsconfig tsconfig.scripts.json scripts/import/scenario/import-scenario.ts",
     "compendium:coverage": "tsx --tsconfig tsconfig.scripts.json scripts/import/compendium-coverage-report.ts",
     "import-units": "tsx scripts/import/import-units.ts",
