@@ -176,7 +176,24 @@ Rule: every place that lists or picks a race, class, subclass, background or fea
 - [ ] **Step 4:** `pnpm test:related components/common/DmEntityCard.tsx components/classes components/races components/feats components/backgrounds components/character-profile/path components/choices` → PASS. Then a browser check of the four library pages and the class page with the local DB seeded (Task 8): live runs go to a Sonnet subagent, text/JS checks over screenshots.
 - [ ] **Step 5:** eslint touched files; commit `feat(ui): icons in race, class, subclass, background and feat libraries`.
 
-Editor note (deviation from spec, flag to the user): no URL field is added to `ClassFeaturesEditor` for ability icons; the editor must only preserve `icon` on save. Add a round-trip test in `components/classes/__tests__/ClassFeaturesEditor.test.tsx`: an ability with `icon` is submitted unchanged. If it fails, fix the editor state mapping.
+### Task 5b: icon field for class/subclass abilities in the editor
+
+The user requires a URL field for ability icons in the class editor (rules out the earlier "preserve only" reduction).
+
+**Files:**
+- Modify: `components/abilities/AbilityListEditor.tsx` and `components/abilities/AbilityPanel.tsx` (read both first): new optional prop `withIcon?: boolean`; when true, the ability header shows `ImageUpload` (`allowFile={false}`, same props as `components/classes/ClassBasicsTab.tsx:51`) bound to `ability.icon`; empty string clears to `null`/undefined
+- Modify: `components/classes/ClassFeaturesEditor.tsx` (pass `withIcon` to `AbilityListEditor`; subclass features go through the same editor, verify in `SubclassesEditor`)
+- Messages: label key in `messages/{en,uk}/classes.json` (e.g. `classes.features.abilityIcon`), kept Ukrainian only in the uk file
+- Test: `components/classes/__tests__/ClassFeaturesEditor.test.tsx` (extend), `components/abilities/__tests__/` (extend or create next to existing editor tests)
+
+**Interfaces:**
+- Consumes: `Ability.icon` (Task 1). Other editors (skills, races, artifacts, units) do not pass `withIcon` and are unchanged.
+
+- [ ] **Step 1: Failing tests:** with `withIcon`, the editor renders the icon input; typing a URL calls `onChange` with an ability whose `icon` is that URL; clearing gives no `icon` (or `null`); an ability that already has `icon` round-trips unchanged when another field is edited; without `withIcon` no icon input renders.
+- [ ] **Step 2:** run → FAIL.
+- [ ] **Step 3:** implement; keep the field out of the ability engine/validation flow other than the schema from Task 1 (a `data:` URL shows the existing field error through the `abilities.validation.iconLink` message).
+- [ ] **Step 4:** `pnpm test:related components/abilities components/classes` → PASS.
+- [ ] **Step 5:** eslint touched files; commit `feat(classes): icon field for class and subclass abilities`.
 
 ---
 
