@@ -51,7 +51,9 @@ function campaignData(input: CreateFromBundleInput): Prisma.CampaignCreateInput 
     ...(s.allowPlayerEdit !== undefined && { allowPlayerEdit: s.allowPlayerEdit }),
     ...(s.friendlyFire !== undefined && { friendlyFire: s.friendlyFire }),
     ...(input.critChoiceByDm !== undefined && { critChoiceByDm: input.critChoiceByDm }),
-    ...((input.bundle || input.defaultAttacks) && { rules: parseRules({ ...(input.defaultAttacks && { defaultAttacks: input.defaultAttacks }), ...(input.bundle?.rules as object | undefined) }) as Prisma.InputJsonObject }),
+    ...(input.bundle
+      ? { rules: parseRules({ ...(input.defaultAttacks && { defaultAttacks: input.defaultAttacks }), ...(input.bundle.rules as object | undefined) }) as Prisma.InputJsonObject }
+      : input.defaultAttacks && { rules: { defaultAttacks: input.defaultAttacks } }),
     ...(input.bundle?.credits !== undefined && { credits: input.bundle.credits }),
     members: { create: { userId: input.userId, role: CampaignRole.DM } },
   } as Prisma.CampaignUncheckedCreateInput;
