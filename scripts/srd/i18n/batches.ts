@@ -1,5 +1,6 @@
 import type { SrdKind } from "../lib/types";
 import { type CatalogEntry, type Translations } from "./catalog";
+import { normalizeCreatureHeader } from "./creature-header";
 import { buildNameMap, fixItalicNames } from "./names";
 import { type Glossary, normalizeSpellHeader } from "./spell-header";
 import { checkTranslation, type TranslationIssue } from "./validate";
@@ -57,7 +58,7 @@ export function mergeApplied(existing: Translations, lines: AppliedLine[], catal
   for (const line of lines) {
     const entry = byHash.get(line.h);
 
-    const t = entry ? normalizeSpellHeader(entry.en, fixItalicNames(entry.en, line.t, names), glossary) : line.t;
+    const t = entry ? normalizeCreatureHeader(entry.en, normalizeSpellHeader(entry.en, fixItalicNames(entry.en, line.t, names), glossary), glossary) : line.t;
 
     const issues = entry ? checkTranslation(entry.en, t) : (["unknown"] as Rejected["issues"]);
 
