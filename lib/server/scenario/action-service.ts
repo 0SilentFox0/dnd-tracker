@@ -2,6 +2,7 @@ import { characterInCampaign } from "./loaders";
 import { searchScenarioMentions } from "./mentions";
 import { contentWrite, listPages, OWNED_WITH_CONTENT_SELECT, readContent, readContentStrict, SUMMARY_SELECT, toPage, toSummary } from "./page-store";
 import { searchScenarioPages } from "./search";
+import { refreshSummaryFreshness } from "./summary-store";
 import { pruneVersions, snapshotIfDue } from "./versions";
 
 import "server-only";
@@ -127,6 +128,7 @@ async function writeScenarioContent(actor: Actor, id: string, raw: unknown, expe
   if (!changed.count) throw new ContentError(API_ERRORS.SCENARIO_CONFLICT, 409);
 
   await notifyRevealForContentChange(actor.campaignId, id, readContent(page.content), content);
+  await refreshSummaryFreshness(id, expectedVersion + 1, { title: page.title, kind: page.kind, arc: page.arc, content });
 
   return toPage({ ...page, content, version: expectedVersion + 1, updatedAt: new Date() });
 }

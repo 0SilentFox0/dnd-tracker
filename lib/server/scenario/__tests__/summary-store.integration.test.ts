@@ -11,11 +11,13 @@ const localDb = await vi.hoisted(async () => {
   return true;
 });
 
-import { loadSummaries, loadSummaryRow, upsertSummary } from "../summary-store";
+import { loadSummaries, loadSummaryRow, refreshSummaryFreshness, upsertSummary } from "../summary-store";
 
 import { prisma } from "@/lib/db";
 import type { PageSummary } from "@/lib/schemas/scenario-summary";
 import { createCampaignFromBundle } from "@/lib/server/campaigns/create-campaign";
+import { summaryInputHash } from "@/lib/utils/scenario/summary/hash";
+import type { ScenarioContent } from "@/types/scenario";
 
 const userId = randomUUID();
 
@@ -28,8 +30,10 @@ const summary = (overview: string): PageSummary => ({ overview, events: ["e"], s
 const createPage = (title: string, campaign = campaignId) =>
   prisma.scenarioPage.create({ data: { campaignId: campaign, kind: "scene", title, content: {}, version: 1 } });
 
-const save = (pageId: string, version: number, overview: string, campaign = campaignId) =>
-  upsertSummary({ pageId, campaignId: campaign, version, summary: summary(overview), provider: "test", model: "m", inputTokens: 1, outputTokens: 2 });
+const save = (pageId: string, version: number, overview: string, campaign = campaignId, inputHash = "h") =>
+  upsertSummary({ pageId, campaignId: campaign, version, summary: summary(overview), provider: "test", model: "m", inputTokens: 1, outputTokens: 2, inputHash });
+
+const inputPage = (title: string) => ({ title, kind: "scene", arc: null, content: { legend: [], sections: [] } as unknown as ScenarioContent });
 
 describe.skipIf(!localDb)("summary-store", () => {
   beforeAll(async () => {
@@ -126,5 +130,46 @@ describe.skipIf(!localDb)("summary-store", () => {
     expect(summaries[stale.id].stale).toBe(true);
     expect(summaries[bad.id]).toBeUndefined();
     expect(summaries[foreign.id]).toBeUndefined();
+  });
+
+  describe("refreshSummaryFreshness", () => {
+    const versionOf = async (pageId: string) => (await loadSummaryRow(pageId))?.version;
+
+    it("raises the version when the input hash matches", async () => {
+      const page = await createPage("Same");
+
+      await save(page.id, 1, "s", campaignId, summaryInputHash(inputPage("Same")));
+      await refreshSummaryFreshness(page.id, 2, inputPage("Same"));
+
+      expect(await versionOf(page.id)).toBe(2);
+    });
+
+    it("keeps the version when the input changed", async () => {
+      const page = await createPage("Changed");
+
+      await save(page.id, 1, "s", campaignId, summaryInputHash(inputPage("Changed")));
+      await refreshSummaryFreshness(page.id, 2, inputPage("Edited"));
+
+      expect(await versionOf(page.id)).toBe(1);
+    });
+
+    it("ignores rows without a hash", async () => {
+      const page = await createPage("Legacy");
+
+      await save(page.id, 1, "s");
+      await prisma.$executeRaw`UPDATE scenario_page_summaries SET "inputHash" = NULL WHERE "pageId" = ${page.id}`;
+      await refreshSummaryFreshness(page.id, 2, inputPage("Legacy"));
+
+      expect(await versionOf(page.id)).toBe(1);
+    });
+
+    it("never lowers the version", async () => {
+      const page = await createPage("Down");
+
+      await save(page.id, 5, "s", campaignId, summaryInputHash(inputPage("Down")));
+      await refreshSummaryFreshness(page.id, 3, inputPage("Down"));
+
+      expect(await versionOf(page.id)).toBe(5);
+    });
   });
 });

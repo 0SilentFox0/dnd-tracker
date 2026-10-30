@@ -7,11 +7,13 @@ import { prisma } from "@/lib/db";
 import { readCompendiumSummary } from "@/lib/server/assistant/actions/compendium-reads";
 import { revalidateAssistantCaller } from "@/lib/server/assistant/authorize";
 import type { AssistantCaller } from "@/lib/server/assistant/types";
+import { loadDigestItems } from "@/lib/server/scenario/summary-store";
 
 vi.mock("@/lib/db", () => ({ prisma: { campaign: { findUnique: vi.fn() }, scenarioPage: { findFirst: vi.fn() }, character: { findFirst: vi.fn() }, battleScene: { findFirst: vi.fn() }, aiThread: { findFirst: vi.fn() } } }));
 vi.mock("@/lib/server/assistant/authorize", () => ({ revalidateAssistantCaller: vi.fn(async (c: AssistantCaller) => c.actor) }));
 vi.mock("@/lib/server/assistant/catalog", () => ({ assistantCatalog: { listActions: () => [{ id: "campaign.read", effect: "read" }] } }));
 vi.mock("@/lib/server/assistant/actions/compendium-reads", () => ({ readCompendiumSummary: vi.fn(async () => ({ data: { entries: [{ notes: "Вибрані примітки" }] } })) }));
+vi.mock("@/lib/server/scenario/summary-store", () => ({ loadDigestItems: vi.fn(async () => []) }));
 vi.mock("@/lib/ai/tools/party", () => ({ partySummary: vi.fn(async () => []) }));
 vi.mock("@/lib/ai/tools/show", () => ({ showSummary: vi.fn(async () => null) }));
 
@@ -21,6 +23,7 @@ const args = { campaignId: "c", mode: "scenario" as const, pageId: null, caller 
 
 beforeEach(() => {
   vi.clearAllMocks();
+  vi.mocked(loadDigestItems).mockResolvedValue([]);
   vi.mocked(prisma.campaign.findUnique).mockResolvedValue({ name: "Кампанія", description: "Опис", aiInstructions: "Поважай стиль", rules: { morale: { enabled: true } } } as never);
   vi.mocked(prisma.aiThread.findFirst).mockResolvedValue({ executionMode: "review" } as never);
   vi.mocked(prisma.scenarioPage.findFirst).mockResolvedValue(null);
@@ -172,4 +175,76 @@ it("disclosureDescribesActuallyFittedBlocksWithoutReturningPrivateText", async (
  expect(disclosure.mock.calls[0][0]).toMatchObject({characters:text.length,focusAvailable:false,sourceNoteCount:0});
  expect(disclosure.mock.calls[0][0].blocks).toContain("campaign");
  expect(JSON.stringify(disclosure.mock.calls)).not.toContain("Поважай стиль");
+});
+
+const digestItem = { id: "pg1", title: "Zehir", sortOrder: 1, digest: "DIGEST_TEXT", stale: true };
+
+it("scenario mode appends digest last, after focusPage", async () => {
+  vi.mocked(loadDigestItems).mockResolvedValue([digestItem]);
+  vi.mocked(prisma.scenarioPage.findFirst).mockResolvedValue({ id: "f", title: "FocusTitle", content: { legend: [], sections: [] } } as never);
+
+  const disclosure = vi.fn();
+
+  const out = await buildInstructions({ ...args, focus: { pageId: "f" }, onDisclosure: disclosure });
+
+  expect(out).toContain("- Zehir [pg1]: DIGEST_TEXT (stale)");
+  expect(loadDigestItems).toHaveBeenCalledWith("c");
+
+  const ids = disclosure.mock.calls[0][0].blocks;
+
+  expect(ids.at(-1)).toBe("digest");
+  expect(ids.indexOf("focusPage")).toBeLessThan(ids.indexOf("digest"));
+});
+it("excludes the focused page from the digest", async () => {
+  vi.mocked(loadDigestItems).mockResolvedValue([digestItem, { ...digestItem, id: "f", title: "FocusTitle", digest: "FOCUS_DIGEST" }]);
+  vi.mocked(prisma.scenarioPage.findFirst).mockResolvedValue({ id: "f", title: "FocusTitle", content: { legend: [], sections: [] } } as never);
+
+  const out = await buildInstructions({ ...args, focus: { pageId: "f" } });
+
+  expect(out).toContain("DIGEST_TEXT");
+  expect(out).not.toContain("FOCUS_DIGEST");
+});
+it("live mode gets no digest and does not query it", async () => {
+  vi.mocked(loadDigestItems).mockResolvedValue([digestItem]);
+
+  const out = await buildInstructions({ ...args, mode: "live" });
+
+  expect(out).not.toContain("DIGEST_TEXT");
+  expect(loadDigestItems).not.toHaveBeenCalled();
+});
+it("no summaries means no digest block or header", async () => {
+  const disclosure = vi.fn();
+
+  const out = await buildInstructions({ ...args, onDisclosure: disclosure });
+
+  expect(out).not.toContain("Page summaries");
+  expect(disclosure.mock.calls[0][0].blocks).not.toContain("digest");
+});
+it("small budget shrinks digest first, keeping standing and focusPage whole", async () => {
+  vi.mocked(loadDigestItems).mockResolvedValue([{ ...digestItem, digest: "D".repeat(3000) }]);
+
+  const title = "X".repeat(37000);
+
+  vi.mocked(prisma.scenarioPage.findFirst).mockResolvedValue({ id: "f", title, content: { legend: [], sections: [] } } as never);
+
+  const disclosure = vi.fn();
+
+  const out = await buildInstructions({ ...args, focus: { pageId: "f" }, onDisclosure: disclosure });
+
+  expect(out.length).toBeLessThanOrEqual(40000);
+
+  const { blocks, truncated } = disclosure.mock.calls[0][0];
+
+  expect(blocks).toEqual(expect.arrayContaining(["standing", "focusPage"]));
+
+  expect(truncated).toBe(true);
+  expect(blocks).toContain("digest");
+  expect(out).toContain("[truncated]");
+  expect(out).toContain(title);
+  expect(out).not.toContain("D".repeat(3000));
+  expect(out).toContain("D".repeat(100));
+});
+it("token actor is rejected before the digest query", async () => {
+  await expect(buildInstructions({ ...args, caller: { ...caller, channel: "mcp", tokenId: "verified", actor: { ...caller.actor, via: "token", scopes: ["ai"] } } })).rejects.toMatchObject({ status: 403 });
+  expect(loadDigestItems).not.toHaveBeenCalled();
 });

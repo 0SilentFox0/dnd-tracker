@@ -218,7 +218,8 @@
       "focusUnavailable": "Focus",
       "focusPage": "DM focus: page (data)",
       "focus": "DM focus (data)",
-      "truncation": "Truncation"
+      "truncation": "Truncation",
+      "digest": "Page summaries (data)"
     },
     "flushFailed": "Failed to save the open editor. The changes were not applied.",
     "refreshFailed": "Failed to refresh the data after the receipt."
