@@ -11,6 +11,8 @@ const fields: FieldDef[] = [
   textField("icon"),
   { key: "cost", type: "enum", enumValues: SPELL_COSTS },
   jsonField("casting"),
+  jsonField("componentFlags"),
+  jsonField("ingredients"),
   { key: "dice", type: "dice" },
   { key: "dieSides", type: "int" },
   { key: "concentration", type: "bool" },

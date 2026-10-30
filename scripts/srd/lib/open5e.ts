@@ -24,6 +24,7 @@ export interface O5Spell {
   somatic: boolean;
   material: boolean;
   material_specified: string | null;
+  material_consumed?: boolean;
   target_count: number | null;
   saving_throw_ability: string | null;
   attack_roll: boolean;

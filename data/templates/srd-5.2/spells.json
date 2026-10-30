@@ -77,6 +77,19 @@
     "dieSides": 4,
     "concentration": false,
     "ritual": false,
+    "componentFlags": {
+      "v": true,
+      "s": true,
+      "m": true
+    },
+    "ingredients": [
+      {
+        "name": "powdered rhubarb leaf",
+        "qty": 1,
+        "consumed": false,
+        "focus": true
+      }
+    ],
     "upcastDice": 1,
     "targeting": {
       "kind": "enemy",
@@ -112,6 +125,12 @@
     "dieSides": 6,
     "concentration": false,
     "ritual": false,
+    "componentFlags": {
+      "v": true,
+      "s": true,
+      "m": false
+    },
+    "ingredients": [],
     "targeting": {
       "kind": "template",
       "shape": "circle",
@@ -842,6 +861,19 @@
     "dice": 0,
     "concentration": false,
     "ritual": false,
+    "componentFlags": {
+      "v": true,
+      "s": true,
+      "m": true
+    },
+    "ingredients": [
+      {
+        "name": "strip of white cloth",
+        "qty": 1,
+        "consumed": false,
+        "focus": true
+      }
+    ],
     "targeting": {
       "kind": "ally",
       "range": 30
@@ -911,6 +943,19 @@
     "dice": 0,
     "concentration": false,
     "ritual": true,
+    "componentFlags": {
+      "v": true,
+      "s": true,
+      "m": true
+    },
+    "ingredients": [
+      {
+        "name": "bell and silver wire",
+        "qty": 1,
+        "consumed": false,
+        "focus": true
+      }
+    ],
     "targeting": {
       "kind": "template",
       "shape": "cube",
@@ -941,6 +986,12 @@
     "dice": 0,
     "concentration": true,
     "ritual": false,
+    "componentFlags": {
+      "v": true,
+      "s": true,
+      "m": false
+    },
+    "ingredients": [],
     "targeting": {
       "kind": "self"
     },
@@ -1655,6 +1706,19 @@
     "dice": 0,
     "concentration": false,
     "ritual": false,
+    "componentFlags": {
+      "v": true,
+      "s": true,
+      "m": true
+    },
+    "ingredients": [
+      {
+        "name": "morsel of food",
+        "qty": 1,
+        "consumed": false,
+        "focus": true
+      }
+    ],
     "upcastTargets": 1,
     "targeting": {
       "kind": "enemy",
@@ -1693,6 +1757,19 @@
     "dice": 0,
     "concentration": false,
     "ritual": true,
+    "componentFlags": {
+      "v": true,
+      "s": true,
+      "m": true
+    },
+    "ingredients": [
+      {
+        "name": "morsel of food",
+        "qty": 1,
+        "consumed": false,
+        "focus": true
+      }
+    ],
     "targeting": {
       "kind": "enemy",
       "range": 30
@@ -1720,6 +1797,12 @@
     "dice": 0,
     "concentration": false,
     "ritual": false,
+    "componentFlags": {
+      "v": true,
+      "s": true,
+      "m": false
+    },
+    "ingredients": [],
     "targeting": {
       "kind": "ally",
       "range": 30
@@ -1746,6 +1829,19 @@
     "dice": 0,
     "concentration": false,
     "ritual": false,
+    "componentFlags": {
+      "v": true,
+      "s": true,
+      "m": true
+    },
+    "ingredients": [
+      {
+        "name": "drop of blood, a piece of flesh, and a pinch of bone dust",
+        "qty": 1,
+        "consumed": false,
+        "focus": true
+      }
+    ],
     "targeting": {
       "kind": "ally",
       "range": 10
@@ -1772,6 +1868,12 @@
     "dice": 0,
     "concentration": true,
     "ritual": false,
+    "componentFlags": {
+      "v": true,
+      "s": true,
+      "m": false
+    },
+    "ingredients": [],
     "targeting": {
       "kind": "ally",
       "range": 120
@@ -1833,6 +1935,12 @@
     "dice": 0,
     "concentration": true,
     "ritual": false,
+    "componentFlags": {
+      "v": true,
+      "s": true,
+      "m": false
+    },
+    "ingredients": [],
     "targeting": {
       "kind": "template",
       "shape": "emanation",
@@ -1861,6 +1969,19 @@
     "dice": 0,
     "concentration": true,
     "ritual": false,
+    "componentFlags": {
+      "v": true,
+      "s": true,
+      "m": true
+    },
+    "ingredients": [
+      {
+        "name": "iron filings",
+        "qty": 1,
+        "consumed": false,
+        "focus": true
+      }
+    ],
     "targeting": {
       "kind": "self"
     },
@@ -1919,6 +2040,19 @@
     "dice": 0,
     "concentration": false,
     "ritual": false,
+    "componentFlags": {
+      "v": true,
+      "s": true,
+      "m": true
+    },
+    "ingredients": [
+      {
+        "name": "mix of vinegar and honey",
+        "qty": 1,
+        "consumed": false,
+        "focus": true
+      }
+    ],
     "targeting": {
       "kind": "enemy",
       "range": 60
@@ -1956,6 +2090,19 @@
     "dice": 0,
     "concentration": true,
     "ritual": false,
+    "componentFlags": {
+      "v": true,
+      "s": true,
+      "m": true
+    },
+    "ingredients": [
+      {
+        "name": "bit of bat fur",
+        "qty": 1,
+        "consumed": false,
+        "focus": true
+      }
+    ],
     "targeting": {
       "kind": "ally",
       "range": 30
@@ -1981,6 +2128,19 @@
     "dice": 0,
     "concentration": true,
     "ritual": false,
+    "componentFlags": {
+      "v": true,
+      "s": true,
+      "m": true
+    },
+    "ingredients": [
+      {
+        "name": "eggshell and a glove",
+        "qty": 1,
+        "consumed": false,
+        "focus": true
+      }
+    ],
     "targeting": {
       "kind": "enemy",
       "range": 120
@@ -2007,6 +2167,20 @@
     "dice": 0,
     "concentration": false,
     "ritual": false,
+    "componentFlags": {
+      "v": true,
+      "s": true,
+      "m": true
+    },
+    "ingredients": [
+      {
+        "name": "gold dust",
+        "qty": 1,
+        "consumed": true,
+        "minGp": 25,
+        "focus": false
+      }
+    ],
     "targeting": {
       "kind": "ally",
       "range": 5
@@ -2033,6 +2207,20 @@
     "dieSides": 12,
     "concentration": true,
     "ritual": false,
+    "componentFlags": {
+      "v": true,
+      "s": true,
+      "m": true
+    },
+    "ingredients": [
+      {
+        "name": "miniature sword",
+        "qty": 1,
+        "consumed": true,
+        "minGp": 250,
+        "focus": false
+      }
+    ],
     "targeting": {
       "kind": "enemy",
       "range": 90
@@ -2067,6 +2255,19 @@
     "dice": 0,
     "concentration": false,
     "ritual": false,
+    "componentFlags": {
+      "v": true,
+      "s": true,
+      "m": true
+    },
+    "ingredients": [
+      {
+        "name": "small square of silk",
+        "qty": 1,
+        "consumed": false,
+        "focus": true
+      }
+    ],
     "targeting": {
       "kind": "ally",
       "range": 5
@@ -2093,6 +2294,12 @@
     "dice": 0,
     "concentration": false,
     "ritual": false,
+    "componentFlags": {
+      "v": true,
+      "s": true,
+      "m": true
+    },
+    "ingredients": [],
     "targeting": {
       "kind": "ally",
       "range": 10
@@ -2121,6 +2328,20 @@
     "dice": 0,
     "concentration": false,
     "ritual": true,
+    "componentFlags": {
+      "v": true,
+      "s": true,
+      "m": true
+    },
+    "ingredients": [
+      {
+        "name": "specially marked sticks, bones, cards, or other divinatory tokens",
+        "qty": 1,
+        "consumed": true,
+        "minGp": 25,
+        "focus": false
+      }
+    ],
     "targeting": {
       "kind": "self"
     },
@@ -2147,6 +2368,12 @@
     "dice": 0,
     "concentration": true,
     "ritual": false,
+    "componentFlags": {
+      "v": true,
+      "s": false,
+      "m": false
+    },
+    "ingredients": [],
     "targeting": {
       "kind": "template",
       "shape": "emanation",
@@ -2187,6 +2414,20 @@
     "dice": 0,
     "concentration": false,
     "ritual": false,
+    "componentFlags": {
+      "v": true,
+      "s": true,
+      "m": true
+    },
+    "ingredients": [
+      {
+        "name": "agate",
+        "qty": 1,
+        "consumed": true,
+        "minGp": 1000,
+        "focus": false
+      }
+    ],
     "targeting": {
       "kind": "ally",
       "range": 5
@@ -2213,6 +2454,19 @@
     "dice": 0,
     "concentration": true,
     "ritual": false,
+    "componentFlags": {
+      "v": true,
+      "s": true,
+      "m": true
+    },
+    "ingredients": [
+      {
+        "name": "drop of blood",
+        "qty": 1,
+        "consumed": false,
+        "focus": true
+      }
+    ],
     "upcastTargets": 1,
     "targeting": {
       "kind": "area",
@@ -2262,6 +2516,19 @@
     "dice": 0,
     "concentration": true,
     "ritual": false,
+    "componentFlags": {
+      "v": true,
+      "s": true,
+      "m": true
+    },
+    "ingredients": [
+      {
+        "name": "pentacle",
+        "qty": 1,
+        "consumed": false,
+        "focus": true
+      }
+    ],
     "upcastTargets": 1,
     "targeting": {
       "kind": "enemy",
@@ -2302,6 +2569,19 @@
     "dice": 0,
     "concentration": false,
     "ritual": false,
+    "componentFlags": {
+      "v": true,
+      "s": true,
+      "m": true
+    },
+    "ingredients": [
+      {
+        "name": "handful of bark",
+        "qty": 1,
+        "consumed": false,
+        "focus": true
+      }
+    ],
     "targeting": {
       "kind": "ally",
       "range": 5
@@ -2337,6 +2617,12 @@
     "dice": 0,
     "concentration": true,
     "ritual": false,
+    "componentFlags": {
+      "v": true,
+      "s": true,
+      "m": false
+    },
+    "ingredients": [],
     "targeting": {
       "kind": "area",
       "side": "ally",
@@ -2376,6 +2662,19 @@
     "dieSides": 12,
     "concentration": false,
     "ritual": false,
+    "componentFlags": {
+      "v": true,
+      "s": true,
+      "m": true
+    },
+    "ingredients": [
+      {
+        "name": "key ring with no keys",
+        "qty": 1,
+        "consumed": false,
+        "focus": true
+      }
+    ],
     "targeting": {
       "kind": "enemy",
       "range": 150
@@ -2525,6 +2824,12 @@
     "dieSides": 8,
     "concentration": true,
     "ritual": false,
+    "componentFlags": {
+      "v": true,
+      "s": true,
+      "m": false
+    },
+    "ingredients": [],
     "targeting": {
       "kind": "enemy",
       "range": 5
@@ -2597,6 +2902,19 @@
     "dieSides": 6,
     "concentration": true,
     "ritual": false,
+    "componentFlags": {
+      "v": true,
+      "s": true,
+      "m": true
+    },
+    "ingredients": [
+      {
+        "name": "tentacle",
+        "qty": 1,
+        "consumed": false,
+        "focus": true
+      }
+    ],
     "targeting": {
       "kind": "enemy",
       "range": 90
@@ -2633,6 +2951,12 @@
     "dieSides": 10,
     "concentration": true,
     "ritual": false,
+    "componentFlags": {
+      "v": true,
+      "s": true,
+      "m": false
+    },
+    "ingredients": [],
     "targeting": {
       "kind": "enemy",
       "range": 90
@@ -2668,6 +2992,20 @@
     "dice": 0,
     "concentration": true,
     "ritual": false,
+    "componentFlags": {
+      "v": true,
+      "s": true,
+      "m": true
+    },
+    "ingredients": [
+      {
+        "name": "Holy Symbol",
+        "qty": 1,
+        "consumed": true,
+        "minGp": 5,
+        "focus": false
+      }
+    ],
     "upcastTargets": 1,
     "targeting": {
       "kind": "area",
@@ -2715,6 +3053,12 @@
     "dieSides": 8,
     "concentration": false,
     "ritual": false,
+    "componentFlags": {
+      "v": true,
+      "s": true,
+      "m": false
+    },
+    "ingredients": [],
     "upcastDice": 1,
     "targeting": {
       "kind": "enemy",
@@ -2754,6 +3098,12 @@
     "dice": 0,
     "concentration": false,
     "ritual": false,
+    "componentFlags": {
+      "v": true,
+      "s": false,
+      "m": false
+    },
+    "ingredients": [],
     "upcastTargets": 1,
     "targeting": {
       "kind": "enemy",
@@ -2796,6 +3146,12 @@
     "dice": 0,
     "concentration": false,
     "ritual": false,
+    "componentFlags": {
+      "v": true,
+      "s": true,
+      "m": false
+    },
+    "ingredients": [],
     "targeting": {
       "kind": "self"
     },
@@ -2863,6 +3219,12 @@
     "dice": 0,
     "concentration": true,
     "ritual": false,
+    "componentFlags": {
+      "v": true,
+      "s": false,
+      "m": false
+    },
+    "ingredients": [],
     "targeting": {
       "kind": "self"
     },
@@ -3104,6 +3466,12 @@
     "dieSides": 6,
     "concentration": false,
     "ritual": false,
+    "componentFlags": {
+      "v": true,
+      "s": true,
+      "m": false
+    },
+    "ingredients": [],
     "upcastDice": 1,
     "targeting": {
       "kind": "template",
@@ -3145,6 +3513,12 @@
     "dieSides": 10,
     "concentration": true,
     "ritual": false,
+    "componentFlags": {
+      "v": true,
+      "s": true,
+      "m": false
+    },
+    "ingredients": [],
     "upcastDice": 1,
     "targeting": {
       "kind": "enemy",
@@ -3181,6 +3555,12 @@
     "dice": 0,
     "concentration": true,
     "ritual": false,
+    "componentFlags": {
+      "v": true,
+      "s": true,
+      "m": false
+    },
+    "ingredients": [],
     "targeting": {
       "kind": "template",
       "shape": "circle",
@@ -3293,6 +3673,19 @@
     "dieSides": 8,
     "concentration": false,
     "ritual": false,
+    "componentFlags": {
+      "v": true,
+      "s": true,
+      "m": true
+    },
+    "ingredients": [
+      {
+        "name": "three silver pins",
+        "qty": 1,
+        "consumed": false,
+        "focus": true
+      }
+    ],
     "targeting": {
       "kind": "area",
       "side": "enemy",
@@ -3332,6 +3725,12 @@
     "dice": 0,
     "concentration": false,
     "ritual": false,
+    "componentFlags": {
+      "v": true,
+      "s": true,
+      "m": false
+    },
+    "ingredients": [],
     "upcastTargets": 1,
     "targeting": {
       "kind": "enemy",
@@ -3372,6 +3771,12 @@
     "dice": 0,
     "concentration": false,
     "ritual": false,
+    "componentFlags": {
+      "v": true,
+      "s": true,
+      "m": false
+    },
+    "ingredients": [],
     "upcastTargets": 1,
     "targeting": {
       "kind": "enemy",
@@ -3413,6 +3818,12 @@
     "dieSides": 10,
     "concentration": false,
     "ritual": false,
+    "componentFlags": {
+      "v": true,
+      "s": true,
+      "m": false
+    },
+    "ingredients": [],
     "targeting": {
       "kind": "enemy",
       "range": 5
@@ -3482,6 +3893,20 @@
     "dice": 3,
     "concentration": false,
     "ritual": false,
+    "componentFlags": {
+      "v": true,
+      "s": true,
+      "m": true
+    },
+    "ingredients": [
+      {
+        "name": "diamond",
+        "qty": 1,
+        "consumed": true,
+        "minGp": 50,
+        "focus": false
+      }
+    ],
     "targeting": {
       "kind": "enemy",
       "range": 90
@@ -3592,6 +4017,20 @@
     "dieSides": 8,
     "concentration": false,
     "ritual": false,
+    "componentFlags": {
+      "v": true,
+      "s": true,
+      "m": true
+    },
+    "ingredients": [
+      {
+        "name": "powder of a crushed black pearl",
+        "qty": 1,
+        "consumed": true,
+        "minGp": 500,
+        "focus": false
+      }
+    ],
     "upcastDice": 2,
     "targeting": {
       "kind": "template",
@@ -3636,6 +4075,20 @@
     "dice": 0,
     "concentration": true,
     "ritual": false,
+    "componentFlags": {
+      "v": true,
+      "s": true,
+      "m": true
+    },
+    "ingredients": [
+      {
+        "name": "focus, either a jeweled horn for hearing or a glass eye for seeing",
+        "qty": 1,
+        "consumed": true,
+        "minGp": 100,
+        "focus": false
+      }
+    ],
     "targeting": {
       "kind": "ally",
       "range": 600
@@ -3698,6 +4151,12 @@
     "dice": 0,
     "concentration": false,
     "ritual": false,
+    "componentFlags": {
+      "v": true,
+      "s": true,
+      "m": true
+    },
+    "ingredients": [],
     "targeting": {
       "kind": "ally",
       "range": 5
@@ -3724,6 +4183,12 @@
     "dieSides": 8,
     "concentration": true,
     "ritual": false,
+    "componentFlags": {
+      "v": true,
+      "s": true,
+      "m": false
+    },
+    "ingredients": [],
     "upcastDice": 1,
     "targeting": {
       "kind": "template",
@@ -3766,6 +4231,19 @@
     "dice": 0,
     "concentration": false,
     "ritual": false,
+    "componentFlags": {
+      "v": true,
+      "s": true,
+      "m": true
+    },
+    "ingredients": [
+      {
+        "name": "pinch of colorful sand",
+        "qty": 1,
+        "consumed": false,
+        "focus": true
+      }
+    ],
     "targeting": {
       "kind": "template",
       "shape": "cone",
@@ -3806,6 +4284,12 @@
     "dice": 0,
     "concentration": false,
     "ritual": false,
+    "componentFlags": {
+      "v": true,
+      "s": false,
+      "m": false
+    },
+    "ingredients": [],
     "upcastTargets": 1,
     "targeting": {
       "kind": "enemy",
@@ -3845,6 +4329,19 @@
     "dice": 0,
     "concentration": false,
     "ritual": true,
+    "componentFlags": {
+      "v": true,
+      "s": true,
+      "m": true
+    },
+    "ingredients": [
+      {
+        "name": "incense",
+        "qty": 1,
+        "consumed": false,
+        "focus": true
+      }
+    ],
     "targeting": {
       "kind": "self"
     },
@@ -3870,6 +4367,12 @@
     "dice": 0,
     "concentration": false,
     "ritual": true,
+    "componentFlags": {
+      "v": true,
+      "s": true,
+      "m": false
+    },
+    "ingredients": [],
     "targeting": {
       "kind": "self"
     },
@@ -3895,6 +4398,19 @@
     "dice": 0,
     "concentration": false,
     "ritual": true,
+    "componentFlags": {
+      "v": true,
+      "s": true,
+      "m": true
+    },
+    "ingredients": [
+      {
+        "name": "pinch of soot and salt",
+        "qty": 1,
+        "consumed": false,
+        "focus": true
+      }
+    ],
     "targeting": {
       "kind": "self"
     },
@@ -3922,6 +4438,12 @@
     "dice": 0,
     "concentration": true,
     "ritual": false,
+    "componentFlags": {
+      "v": true,
+      "s": true,
+      "m": false
+    },
+    "ingredients": [],
     "targeting": {
       "kind": "enemy",
       "range": 30
@@ -3961,6 +4483,19 @@
     "dieSides": 8,
     "concentration": false,
     "ritual": false,
+    "componentFlags": {
+      "v": true,
+      "s": true,
+      "m": true
+    },
+    "ingredients": [
+      {
+        "name": "small crystal or glass cone",
+        "qty": 1,
+        "consumed": false,
+        "focus": true
+      }
+    ],
     "upcastDice": 1,
     "targeting": {
       "kind": "template",
@@ -4002,6 +4537,19 @@
     "dice": 0,
     "concentration": true,
     "ritual": false,
+    "componentFlags": {
+      "v": true,
+      "s": true,
+      "m": true
+    },
+    "ingredients": [
+      {
+        "name": "three nut shells",
+        "qty": 1,
+        "consumed": false,
+        "focus": true
+      }
+    ],
     "targeting": {
       "kind": "template",
       "shape": "circle",
@@ -4036,6 +4584,12 @@
     "dieSides": 10,
     "concentration": true,
     "ritual": false,
+    "componentFlags": {
+      "v": true,
+      "s": true,
+      "m": false
+    },
+    "ingredients": [],
     "upcastDice": 1,
     "targeting": {
       "kind": "enemy",
@@ -4074,6 +4628,12 @@
     "dieSides": 12,
     "concentration": true,
     "ritual": false,
+    "componentFlags": {
+      "v": true,
+      "s": true,
+      "m": false
+    },
+    "ingredients": [],
     "upcastDice": 1,
     "addAbilityMod": true,
     "targeting": {
@@ -4113,6 +4673,12 @@
     "dice": 0,
     "concentration": true,
     "ritual": false,
+    "componentFlags": {
+      "v": true,
+      "s": true,
+      "m": false
+    },
+    "ingredients": [],
     "targeting": {
       "kind": "enemy",
       "range": 60
@@ -4153,6 +4719,12 @@
     "dieSides": 12,
     "concentration": true,
     "ritual": false,
+    "componentFlags": {
+      "v": true,
+      "s": true,
+      "m": false
+    },
+    "ingredients": [],
     "upcastDice": 1,
     "targeting": {
       "kind": "enemy",
@@ -4187,6 +4759,12 @@
     "dice": 0,
     "concentration": true,
     "ritual": false,
+    "componentFlags": {
+      "v": true,
+      "s": true,
+      "m": false
+    },
+    "ingredients": [],
     "targeting": {
       "kind": "template",
       "shape": "emanation",
@@ -4217,6 +4795,12 @@
     "dieSides": 8,
     "concentration": true,
     "ritual": false,
+    "componentFlags": {
+      "v": true,
+      "s": true,
+      "m": false
+    },
+    "ingredients": [],
     "upcastDice": 1,
     "targeting": {
       "kind": "template",
@@ -4297,6 +4881,12 @@
     "dieSides": 6,
     "concentration": false,
     "ritual": true,
+    "componentFlags": {
+      "v": true,
+      "s": false,
+      "m": false
+    },
+    "ingredients": [],
     "targeting": {
       "kind": "self"
     },
@@ -4333,6 +4923,12 @@
     "dieSides": 8,
     "concentration": false,
     "ritual": false,
+    "componentFlags": {
+      "v": true,
+      "s": true,
+      "m": false
+    },
+    "ingredients": [],
     "targeting": {
       "kind": "enemy",
       "range": 5
@@ -4370,6 +4966,20 @@
     "dice": 0,
     "concentration": false,
     "ritual": false,
+    "componentFlags": {
+      "v": true,
+      "s": true,
+      "m": true
+    },
+    "ingredients": [
+      {
+        "name": "gem-encrusted statuette of yourself",
+        "qty": 1,
+        "consumed": true,
+        "minGp": 1500,
+        "focus": false
+      }
+    ],
     "targeting": {
       "kind": "self"
     },
@@ -4394,6 +5004,20 @@
     "dice": 0,
     "concentration": false,
     "ritual": false,
+    "componentFlags": {
+      "v": true,
+      "s": true,
+      "m": true
+    },
+    "ingredients": [
+      {
+        "name": "ruby dust",
+        "qty": 1,
+        "consumed": true,
+        "minGp": 50,
+        "focus": false
+      }
+    ],
     "targeting": {
       "kind": "ally",
       "range": 5
@@ -4421,6 +5045,19 @@
     "dice": 0,
     "concentration": true,
     "ritual": false,
+    "componentFlags": {
+      "v": true,
+      "s": true,
+      "m": true
+    },
+    "ingredients": [
+      {
+        "name": "mixture of water and dust",
+        "qty": 1,
+        "consumed": false,
+        "focus": true
+      }
+    ],
     "targeting": {
       "kind": "ally",
       "range": 300
@@ -4449,6 +5086,19 @@
     "dice": 0,
     "concentration": true,
     "ritual": false,
+    "componentFlags": {
+      "v": true,
+      "s": true,
+      "m": true
+    },
+    "ingredients": [
+      {
+        "name": "burning incense",
+        "qty": 1,
+        "consumed": false,
+        "focus": true
+      }
+    ],
     "targeting": {
       "kind": "self"
     },
@@ -4549,6 +5199,12 @@
     "dice": 0,
     "concentration": false,
     "ritual": false,
+    "componentFlags": {
+      "v": false,
+      "s": true,
+      "m": false
+    },
+    "ingredients": [],
     "targeting": {
       "kind": "enemy",
       "range": 60
@@ -4576,6 +5232,12 @@
     "dice": 0,
     "concentration": false,
     "ritual": false,
+    "componentFlags": {
+      "v": true,
+      "s": true,
+      "m": false
+    },
+    "ingredients": [],
     "targeting": {
       "kind": "ally",
       "range": 30
@@ -4602,6 +5264,19 @@
     "dice": 0,
     "concentration": false,
     "ritual": false,
+    "componentFlags": {
+      "v": true,
+      "s": true,
+      "m": true
+    },
+    "ingredients": [
+      {
+        "name": "mix of water and sand",
+        "qty": 1,
+        "consumed": false,
+        "focus": true
+      }
+    ],
     "targeting": {
       "kind": "template",
       "shape": "cube",
@@ -4633,6 +5308,19 @@
     "dice": 0,
     "concentration": false,
     "ritual": false,
+    "componentFlags": {
+      "v": true,
+      "s": true,
+      "m": true
+    },
+    "ingredients": [
+      {
+        "name": "one 150+ GP black onyx stone for each corpse",
+        "qty": 1,
+        "consumed": false,
+        "focus": true
+      }
+    ],
     "targeting": {
       "kind": "ally",
       "range": 10
@@ -4661,6 +5349,19 @@
     "dice": 0,
     "concentration": false,
     "ritual": false,
+    "componentFlags": {
+      "v": true,
+      "s": true,
+      "m": true
+    },
+    "ingredients": [
+      {
+        "name": "paintbrush",
+        "qty": 1,
+        "consumed": false,
+        "focus": true
+      }
+    ],
     "targeting": {
       "kind": "template",
       "shape": "cube",
@@ -4692,6 +5393,12 @@
     "dieSides": 8,
     "concentration": false,
     "ritual": false,
+    "componentFlags": {
+      "v": true,
+      "s": true,
+      "m": false
+    },
+    "ingredients": [],
     "upcastDice": 2,
     "addAbilityMod": true,
     "targeting": {
@@ -4730,6 +5437,19 @@
     "dice": 0,
     "concentration": true,
     "ritual": false,
+    "componentFlags": {
+      "v": true,
+      "s": true,
+      "m": true
+    },
+    "ingredients": [
+      {
+        "name": "bit of phosphorus",
+        "qty": 1,
+        "consumed": false,
+        "focus": true
+      }
+    ],
     "targeting": {
       "kind": "ally",
       "range": 120
@@ -4757,6 +5477,19 @@
     "dice": 0,
     "concentration": true,
     "ritual": false,
+    "componentFlags": {
+      "v": true,
+      "s": false,
+      "m": true
+    },
+    "ingredients": [
+      {
+        "name": "bat fur and a piece of coal",
+        "qty": 1,
+        "consumed": false,
+        "focus": true
+      }
+    ],
     "targeting": {
       "kind": "template",
       "shape": "circle",
@@ -4796,6 +5529,19 @@
     "dice": 0,
     "concentration": false,
     "ritual": false,
+    "componentFlags": {
+      "v": true,
+      "s": true,
+      "m": true
+    },
+    "ingredients": [
+      {
+        "name": "dried carrot",
+        "qty": 1,
+        "consumed": false,
+        "focus": true
+      }
+    ],
     "targeting": {
       "kind": "ally",
       "range": 5
@@ -4824,6 +5570,12 @@
     "dice": 0,
     "concentration": false,
     "ritual": false,
+    "componentFlags": {
+      "v": true,
+      "s": true,
+      "m": false
+    },
+    "ingredients": [],
     "targeting": {
       "kind": "template",
       "shape": "circle",
@@ -4858,6 +5610,12 @@
     "dice": 0,
     "concentration": false,
     "ritual": false,
+    "componentFlags": {
+      "v": true,
+      "s": true,
+      "m": false
+    },
+    "ingredients": [],
     "targeting": {
       "kind": "ally",
       "range": 5
@@ -4885,6 +5643,19 @@
     "dieSides": 6,
     "concentration": true,
     "ritual": false,
+    "componentFlags": {
+      "v": true,
+      "s": true,
+      "m": true
+    },
+    "ingredients": [
+      {
+        "name": "ball of bat guano and sulfur",
+        "qty": 1,
+        "consumed": false,
+        "focus": true
+      }
+    ],
     "upcastDice": 1,
     "targeting": {
       "kind": "template",
@@ -4927,6 +5698,12 @@
     "dice": 0,
     "concentration": false,
     "ritual": false,
+    "componentFlags": {
+      "v": false,
+      "s": true,
+      "m": false
+    },
+    "ingredients": [],
     "targeting": {
       "kind": "ally",
       "range": 60
@@ -4954,6 +5731,12 @@
     "dice": 0,
     "concentration": true,
     "ritual": false,
+    "componentFlags": {
+      "v": true,
+      "s": true,
+      "m": false
+    },
+    "ingredients": [],
     "targeting": {
       "kind": "self"
     },
@@ -4979,6 +5762,12 @@
     "dice": 0,
     "concentration": true,
     "ritual": true,
+    "componentFlags": {
+      "v": true,
+      "s": true,
+      "m": false
+    },
+    "ingredients": [],
     "targeting": {
       "kind": "self"
     },
@@ -5010,6 +5799,19 @@
     "dice": 0,
     "concentration": true,
     "ritual": true,
+    "componentFlags": {
+      "v": true,
+      "s": true,
+      "m": true
+    },
+    "ingredients": [
+      {
+        "name": "yew leaf",
+        "qty": 1,
+        "consumed": false,
+        "focus": true
+      }
+    ],
     "targeting": {
       "kind": "self"
     },
@@ -5037,6 +5839,19 @@
     "dice": 0,
     "concentration": true,
     "ritual": false,
+    "componentFlags": {
+      "v": true,
+      "s": true,
+      "m": true
+    },
+    "ingredients": [
+      {
+        "name": "1 Copper Piece",
+        "qty": 1,
+        "consumed": false,
+        "focus": true
+      }
+    ],
     "targeting": {
       "kind": "self"
     },
@@ -5063,6 +5878,12 @@
     "dice": 0,
     "concentration": false,
     "ritual": false,
+    "componentFlags": {
+      "v": true,
+      "s": false,
+      "m": false
+    },
+    "ingredients": [],
     "targeting": {
       "kind": "self"
     },
@@ -5090,6 +5911,12 @@
     "dice": 0,
     "concentration": false,
     "ritual": false,
+    "componentFlags": {
+      "v": true,
+      "s": true,
+      "m": false
+    },
+    "ingredients": [],
     "targeting": {
       "kind": "self"
     },
@@ -5117,6 +5944,19 @@
     "dieSides": 6,
     "concentration": false,
     "ritual": false,
+    "componentFlags": {
+      "v": true,
+      "s": true,
+      "m": true
+    },
+    "ingredients": [
+      {
+        "name": "lodestone and dust",
+        "qty": 1,
+        "consumed": false,
+        "focus": true
+      }
+    ],
     "upcastDice": 3,
     "targeting": {
       "kind": "enemy",
@@ -5154,6 +5994,19 @@
     "dice": 0,
     "concentration": true,
     "ritual": false,
+    "componentFlags": {
+      "v": true,
+      "s": true,
+      "m": true
+    },
+    "ingredients": [
+      {
+        "name": "powdered silver and iron",
+        "qty": 1,
+        "consumed": false,
+        "focus": true
+      }
+    ],
     "targeting": {
       "kind": "self"
     },
@@ -5179,6 +6032,12 @@
     "dice": 0,
     "concentration": false,
     "ritual": false,
+    "componentFlags": {
+      "v": true,
+      "s": true,
+      "m": false
+    },
+    "ingredients": [],
     "targeting": {
       "kind": "ally",
       "range": 120
@@ -5212,6 +6071,12 @@
     "dieSides": 6,
     "concentration": false,
     "ritual": false,
+    "componentFlags": {
+      "v": true,
+      "s": false,
+      "m": false
+    },
+    "ingredients": [],
     "upcastDice": 1,
     "targeting": {
       "kind": "enemy",
@@ -5248,6 +6113,20 @@
     "dice": 0,
     "concentration": false,
     "ritual": true,
+    "componentFlags": {
+      "v": true,
+      "s": true,
+      "m": true
+    },
+    "ingredients": [
+      {
+        "name": "incense",
+        "qty": 1,
+        "consumed": true,
+        "minGp": 25,
+        "focus": false
+      }
+    ],
     "targeting": {
       "kind": "self"
     },
@@ -5274,6 +6153,12 @@
     "dice": 0,
     "concentration": false,
     "ritual": false,
+    "componentFlags": {
+      "v": true,
+      "s": true,
+      "m": false
+    },
+    "ingredients": [],
     "targeting": {
       "kind": "self"
     },
@@ -5309,6 +6194,12 @@
     "dice": 0,
     "concentration": false,
     "ritual": false,
+    "componentFlags": {
+      "v": true,
+      "s": false,
+      "m": false
+    },
+    "ingredients": [],
     "targeting": {
       "kind": "self"
     },
@@ -5345,6 +6236,12 @@
     "dice": 0,
     "concentration": false,
     "ritual": false,
+    "componentFlags": {
+      "v": true,
+      "s": false,
+      "m": false
+    },
+    "ingredients": [],
     "targeting": {
       "kind": "enemy",
       "range": 30
@@ -5418,6 +6315,12 @@
     "dice": 0,
     "concentration": true,
     "ritual": false,
+    "componentFlags": {
+      "v": true,
+      "s": true,
+      "m": false
+    },
+    "ingredients": [],
     "targeting": {
       "kind": "enemy",
       "range": 60
@@ -5458,6 +6361,12 @@
     "dice": 0,
     "concentration": true,
     "ritual": false,
+    "componentFlags": {
+      "v": true,
+      "s": true,
+      "m": false
+    },
+    "ingredients": [],
     "targeting": {
       "kind": "enemy",
       "range": 60
@@ -5499,6 +6408,12 @@
     "dice": 0,
     "concentration": true,
     "ritual": false,
+    "componentFlags": {
+      "v": true,
+      "s": true,
+      "m": false
+    },
+    "ingredients": [],
     "targeting": {
       "kind": "enemy",
       "range": 60
@@ -5959,6 +6874,19 @@
     "dice": 0,
     "concentration": true,
     "ritual": false,
+    "componentFlags": {
+      "v": true,
+      "s": true,
+      "m": true
+    },
+    "ingredients": [
+      {
+        "name": "hot pepper",
+        "qty": 1,
+        "consumed": false,
+        "focus": true
+      }
+    ],
     "targeting": {
       "kind": "template",
       "shape": "cone",
@@ -5991,6 +6919,19 @@
     "dieSides": 6,
     "concentration": false,
     "ritual": false,
+    "componentFlags": {
+      "v": true,
+      "s": true,
+      "m": true
+    },
+    "ingredients": [
+      {
+        "name": "handful of sand",
+        "qty": 1,
+        "consumed": false,
+        "focus": true
+      }
+    ],
     "targeting": {
       "kind": "enemy",
       "range": 5
@@ -6061,6 +7002,12 @@
     "dice": 0,
     "concentration": false,
     "ritual": false,
+    "componentFlags": {
+      "v": true,
+      "s": true,
+      "m": false
+    },
+    "ingredients": [],
     "targeting": {
       "kind": "ally",
       "range": 30
@@ -6120,6 +7067,19 @@
     "dieSides": 6,
     "concentration": true,
     "ritual": false,
+    "componentFlags": {
+      "v": true,
+      "s": true,
+      "m": true
+    },
+    "ingredients": [
+      {
+        "name": "fractured rock",
+        "qty": 1,
+        "consumed": false,
+        "focus": true
+      }
+    ],
     "targeting": {
       "kind": "template",
       "shape": "circle",
@@ -6163,6 +7123,12 @@
     "dieSides": 10,
     "concentration": false,
     "ritual": false,
+    "componentFlags": {
+      "v": true,
+      "s": true,
+      "m": false
+    },
+    "ingredients": [],
     "targeting": {
       "kind": "enemy",
       "range": 120
@@ -6196,6 +7162,12 @@
     "dice": 0,
     "concentration": false,
     "ritual": false,
+    "componentFlags": {
+      "v": true,
+      "s": true,
+      "m": false
+    },
+    "ingredients": [],
     "targeting": {
       "kind": "ally",
       "range": 30
@@ -6255,6 +7227,19 @@
     "dice": 0,
     "concentration": true,
     "ritual": false,
+    "componentFlags": {
+      "v": true,
+      "s": true,
+      "m": true
+    },
+    "ingredients": [
+      {
+        "name": "fur or a feather",
+        "qty": 1,
+        "consumed": false,
+        "focus": true
+      }
+    ],
     "upcastTargets": 1,
     "targeting": {
       "kind": "ally",
@@ -6295,6 +7280,19 @@
     "dice": 0,
     "concentration": true,
     "ritual": false,
+    "componentFlags": {
+      "v": true,
+      "s": true,
+      "m": true
+    },
+    "ingredients": [
+      {
+        "name": "pinch of powdered iron",
+        "qty": 1,
+        "consumed": false,
+        "focus": true
+      }
+    ],
     "targeting": {
       "kind": "ally",
       "range": 30
@@ -6345,6 +7343,12 @@
     "dieSides": 6,
     "concentration": true,
     "ritual": false,
+    "componentFlags": {
+      "v": true,
+      "s": false,
+      "m": false
+    },
+    "ingredients": [],
     "upcastDice": 1,
     "targeting": {
       "kind": "enemy",
@@ -6381,6 +7385,12 @@
     "dice": 0,
     "concentration": true,
     "ritual": false,
+    "componentFlags": {
+      "v": true,
+      "s": true,
+      "m": false
+    },
+    "ingredients": [],
     "targeting": {
       "kind": "template",
       "shape": "cube",
@@ -6424,6 +7434,12 @@
     "dice": 0,
     "concentration": true,
     "ritual": false,
+    "componentFlags": {
+      "v": true,
+      "s": true,
+      "m": false
+    },
+    "ingredients": [],
     "targeting": {
       "kind": "enemy",
       "range": 60
@@ -6488,6 +7504,12 @@
     "dice": 0,
     "concentration": false,
     "ritual": false,
+    "componentFlags": {
+      "v": true,
+      "s": true,
+      "m": false
+    },
+    "ingredients": [],
     "targeting": {
       "kind": "self"
     },
@@ -6546,6 +7568,12 @@
     "dice": 0,
     "concentration": true,
     "ritual": false,
+    "componentFlags": {
+      "v": true,
+      "s": true,
+      "m": false
+    },
+    "ingredients": [],
     "targeting": {
       "kind": "self"
     },
@@ -6581,6 +7609,12 @@
     "dice": 0,
     "concentration": true,
     "ritual": false,
+    "componentFlags": {
+      "v": true,
+      "s": true,
+      "m": false
+    },
+    "ingredients": [],
     "targeting": {
       "kind": "enemy",
       "range": 60
@@ -6620,6 +7654,12 @@
     "dice": 0,
     "concentration": false,
     "ritual": false,
+    "componentFlags": {
+      "v": true,
+      "s": true,
+      "m": false
+    },
+    "ingredients": [],
     "targeting": {
       "kind": "template",
       "shape": "cube",
@@ -6649,6 +7689,12 @@
     "dice": 0,
     "concentration": true,
     "ritual": false,
+    "componentFlags": {
+      "v": true,
+      "s": false,
+      "m": false
+    },
+    "ingredients": [],
     "targeting": {
       "kind": "template",
       "shape": "cube",
@@ -6690,6 +7736,19 @@
     "dieSides": 8,
     "concentration": false,
     "ritual": false,
+    "componentFlags": {
+      "v": true,
+      "s": true,
+      "m": true
+    },
+    "ingredients": [
+      {
+        "name": "silver whistle",
+        "qty": 1,
+        "consumed": false,
+        "focus": true
+      }
+    ],
     "targeting": {
       "kind": "enemy",
       "range": 30
@@ -6725,6 +7784,19 @@
     "dice": 0,
     "concentration": false,
     "ritual": false,
+    "componentFlags": {
+      "v": true,
+      "s": true,
+      "m": true
+    },
+    "ingredients": [
+      {
+        "name": "drop of alcohol",
+        "qty": 1,
+        "consumed": false,
+        "focus": true
+      }
+    ],
     "targeting": {
       "kind": "self"
     },
@@ -6750,6 +7822,19 @@
     "dice": 0,
     "concentration": true,
     "ritual": false,
+    "componentFlags": {
+      "v": true,
+      "s": true,
+      "m": true
+    },
+    "ingredients": [
+      {
+        "name": "white feather",
+        "qty": 1,
+        "consumed": false,
+        "focus": true
+      }
+    ],
     "targeting": {
       "kind": "template",
       "shape": "cone",
@@ -6792,6 +7877,19 @@
     "dice": 0,
     "concentration": false,
     "ritual": false,
+    "componentFlags": {
+      "v": true,
+      "s": false,
+      "m": true
+    },
+    "ingredients": [
+      {
+        "name": "small feather or piece of down",
+        "qty": 1,
+        "consumed": false,
+        "focus": true
+      }
+    ],
     "targeting": {
       "kind": "ally",
       "range": 60
@@ -6820,6 +7918,20 @@
     "dice": 0,
     "concentration": false,
     "ritual": true,
+    "componentFlags": {
+      "v": true,
+      "s": true,
+      "m": true
+    },
+    "ingredients": [
+      {
+        "name": "burning incense",
+        "qty": 1,
+        "consumed": true,
+        "minGp": 10,
+        "focus": false
+      }
+    ],
     "targeting": {
       "kind": "ally",
       "range": 10
@@ -6845,6 +7957,12 @@
     "dice": 0,
     "concentration": false,
     "ritual": false,
+    "componentFlags": {
+      "v": true,
+      "s": true,
+      "m": false
+    },
+    "ingredients": [],
     "targeting": {
       "kind": "ally",
       "range": 30
@@ -6871,6 +7989,20 @@
     "dice": 0,
     "concentration": true,
     "ritual": false,
+    "componentFlags": {
+      "v": true,
+      "s": true,
+      "m": true
+    },
+    "ingredients": [
+      {
+        "name": "set of divination tools—such as cards or runes—",
+        "qty": 1,
+        "consumed": true,
+        "minGp": 100,
+        "focus": false
+      }
+    ],
     "targeting": {
       "kind": "self"
     },
@@ -6897,6 +8029,12 @@
     "dice": 0,
     "concentration": false,
     "ritual": false,
+    "componentFlags": {
+      "v": true,
+      "s": true,
+      "m": false
+    },
+    "ingredients": [],
     "targeting": {
       "kind": "ally",
       "range": 120
@@ -6925,6 +8063,12 @@
     "dieSides": 8,
     "concentration": false,
     "ritual": false,
+    "componentFlags": {
+      "v": true,
+      "s": true,
+      "m": false
+    },
+    "ingredients": [],
     "targeting": {
       "kind": "enemy",
       "range": 60
@@ -6963,6 +8107,12 @@
     "dieSides": 10,
     "concentration": false,
     "ritual": false,
+    "componentFlags": {
+      "v": true,
+      "s": true,
+      "m": false
+    },
+    "ingredients": [],
     "targeting": {
       "kind": "enemy",
       "range": 120
@@ -6997,6 +8147,19 @@
     "dice": 0,
     "concentration": false,
     "ritual": false,
+    "componentFlags": {
+      "v": true,
+      "s": true,
+      "m": true
+    },
+    "ingredients": [
+      {
+        "name": "bit of phosphorus or a firefly",
+        "qty": 1,
+        "consumed": false,
+        "focus": true
+      }
+    ],
     "targeting": {
       "kind": "self"
     },
@@ -7048,6 +8211,12 @@
     "dieSides": 10,
     "concentration": false,
     "ritual": false,
+    "componentFlags": {
+      "v": true,
+      "s": true,
+      "m": false
+    },
+    "ingredients": [],
     "targeting": {
       "kind": "template",
       "shape": "cube",
@@ -7090,6 +8259,19 @@
     "dieSides": 6,
     "concentration": false,
     "ritual": false,
+    "componentFlags": {
+      "v": true,
+      "s": true,
+      "m": true
+    },
+    "ingredients": [
+      {
+        "name": "ball of bat guano and sulfur",
+        "qty": 1,
+        "consumed": false,
+        "focus": true
+      }
+    ],
     "upcastDice": 1,
     "targeting": {
       "kind": "template",
@@ -7133,6 +8315,19 @@
     "dieSides": 6,
     "concentration": true,
     "ritual": false,
+    "componentFlags": {
+      "v": true,
+      "s": true,
+      "m": true
+    },
+    "ingredients": [
+      {
+        "name": "sumac leaf",
+        "qty": 1,
+        "consumed": false,
+        "focus": true
+      }
+    ],
     "upcastDice": 1,
     "targeting": {
       "kind": "enemy",
@@ -7169,6 +8364,19 @@
     "dieSides": 6,
     "concentration": false,
     "ritual": false,
+    "componentFlags": {
+      "v": true,
+      "s": true,
+      "m": true
+    },
+    "ingredients": [
+      {
+        "name": "pinch of sulfur",
+        "qty": 1,
+        "consumed": false,
+        "focus": true
+      }
+    ],
     "upcastDice": 1,
     "targeting": {
       "kind": "template",
@@ -7211,6 +8419,19 @@
     "dieSides": 6,
     "concentration": true,
     "ritual": false,
+    "componentFlags": {
+      "v": true,
+      "s": true,
+      "m": true
+    },
+    "ingredients": [
+      {
+        "name": "ball of wax",
+        "qty": 1,
+        "consumed": false,
+        "focus": true
+      }
+    ],
     "upcastDice": 1,
     "targeting": {
       "kind": "enemy",
@@ -7249,6 +8470,19 @@
     "dice": 0,
     "concentration": true,
     "ritual": false,
+    "componentFlags": {
+      "v": true,
+      "s": true,
+      "m": true
+    },
+    "ingredients": [
+      {
+        "name": "cockatrice feather",
+        "qty": 1,
+        "consumed": false,
+        "focus": true
+      }
+    ],
     "targeting": {
       "kind": "enemy",
       "range": 60
@@ -7286,6 +8520,19 @@
     "dice": 0,
     "concentration": false,
     "ritual": true,
+    "componentFlags": {
+      "v": true,
+      "s": true,
+      "m": true
+    },
+    "ingredients": [
+      {
+        "name": "drop of mercury",
+        "qty": 1,
+        "consumed": false,
+        "focus": true
+      }
+    ],
     "targeting": {
       "kind": "ally",
       "range": 30
@@ -7311,6 +8558,19 @@
     "dice": 0,
     "concentration": true,
     "ritual": false,
+    "componentFlags": {
+      "v": true,
+      "s": true,
+      "m": true
+    },
+    "ingredients": [
+      {
+        "name": "feather",
+        "qty": 1,
+        "consumed": false,
+        "focus": true
+      }
+    ],
     "upcastTargets": 1,
     "targeting": {
       "kind": "ally",
@@ -7348,6 +8608,12 @@
     "dice": 0,
     "concentration": true,
     "ritual": false,
+    "componentFlags": {
+      "v": true,
+      "s": true,
+      "m": false
+    },
+    "ingredients": [],
     "targeting": {
       "kind": "template",
       "shape": "circle",
@@ -7389,6 +8655,20 @@
     "dice": 0,
     "concentration": false,
     "ritual": true,
+    "componentFlags": {
+      "v": true,
+      "s": true,
+      "m": true
+    },
+    "ingredients": [
+      {
+        "name": "ruby dust",
+        "qty": 1,
+        "consumed": true,
+        "minGp": 1000,
+        "focus": false
+      }
+    ],
     "targeting": {
       "kind": "ally",
       "range": 5
@@ -7414,6 +8694,20 @@
     "dice": 0,
     "concentration": true,
     "ritual": false,
+    "componentFlags": {
+      "v": true,
+      "s": true,
+      "m": true
+    },
+    "ingredients": [
+      {
+        "name": "ruby dust",
+        "qty": 1,
+        "consumed": true,
+        "minGp": 1500,
+        "focus": false
+      }
+    ],
     "targeting": {
       "kind": "enemy",
       "range": 100
@@ -7442,6 +8736,19 @@
     "dice": 0,
     "concentration": false,
     "ritual": false,
+    "componentFlags": {
+      "v": true,
+      "s": true,
+      "m": true
+    },
+    "ingredients": [
+      {
+        "name": "hummingbird feather",
+        "qty": 1,
+        "consumed": false,
+        "focus": true
+      }
+    ],
     "targeting": {
       "kind": "ally",
       "range": 5
@@ -7494,6 +8801,19 @@
     "dice": 0,
     "concentration": false,
     "ritual": false,
+    "componentFlags": {
+      "v": true,
+      "s": true,
+      "m": true
+    },
+    "ingredients": [
+      {
+        "name": "leather strap",
+        "qty": 1,
+        "consumed": false,
+        "focus": true
+      }
+    ],
     "upcastTargets": 1,
     "targeting": {
       "kind": "ally",
@@ -7536,6 +8856,19 @@
     "dieSides": 6,
     "concentration": false,
     "ritual": false,
+    "componentFlags": {
+      "v": true,
+      "s": true,
+      "m": true
+    },
+    "ingredients": [
+      {
+        "name": "miniature crystal sphere",
+        "qty": 1,
+        "consumed": false,
+        "focus": true
+      }
+    ],
     "upcastDice": 1,
     "targeting": {
       "kind": "template",
@@ -7578,6 +8911,19 @@
     "dice": 0,
     "concentration": true,
     "ritual": false,
+    "componentFlags": {
+      "v": true,
+      "s": true,
+      "m": true
+    },
+    "ingredients": [
+      {
+        "name": "bit of gauze",
+        "qty": 1,
+        "consumed": false,
+        "focus": true
+      }
+    ],
     "upcastTargets": 1,
     "targeting": {
       "kind": "enemy",
@@ -7606,6 +8952,20 @@
     "dice": 0,
     "concentration": true,
     "ritual": false,
+    "componentFlags": {
+      "v": true,
+      "s": true,
+      "m": true
+    },
+    "ingredients": [
+      {
+        "name": "diamond",
+        "qty": 1,
+        "consumed": true,
+        "minGp": 5000,
+        "focus": false
+      }
+    ],
     "targeting": {
       "kind": "ally",
       "range": 60
@@ -7636,6 +8996,12 @@
     "dieSides": 10,
     "concentration": false,
     "ritual": false,
+    "componentFlags": {
+      "v": true,
+      "s": false,
+      "m": false
+    },
+    "ingredients": [],
     "targeting": {
       "kind": "enemy",
       "range": 60
@@ -7715,6 +9081,19 @@
     "dice": 0,
     "concentration": false,
     "ritual": true,
+    "componentFlags": {
+      "v": true,
+      "s": true,
+      "m": true
+    },
+    "ingredients": [
+      {
+        "name": "2 Copper Pieces",
+        "qty": 1,
+        "consumed": true,
+        "focus": false
+      }
+    ],
     "targeting": {
       "kind": "ally",
       "range": 5
@@ -7896,6 +9275,12 @@
     "dice": 0,
     "concentration": true,
     "ritual": false,
+    "componentFlags": {
+      "v": true,
+      "s": true,
+      "m": false
+    },
+    "ingredients": [],
     "targeting": {
       "kind": "ally",
       "range": 60
@@ -8065,6 +9450,12 @@
     "dice": 0,
     "concentration": false,
     "ritual": false,
+    "componentFlags": {
+      "v": true,
+      "s": false,
+      "m": false
+    },
+    "ingredients": [],
     "targeting": {
       "kind": "self"
     },
@@ -8090,6 +9481,19 @@
     "dice": 0,
     "concentration": true,
     "ritual": false,
+    "componentFlags": {
+      "v": true,
+      "s": true,
+      "m": true
+    },
+    "ingredients": [
+      {
+        "name": "glass bead",
+        "qty": 1,
+        "consumed": false,
+        "focus": true
+      }
+    ],
     "targeting": {
       "kind": "self"
     },
@@ -8116,6 +9520,20 @@
     "dice": 0,
     "concentration": false,
     "ritual": false,
+    "componentFlags": {
+      "v": true,
+      "s": true,
+      "m": true
+    },
+    "ingredients": [
+      {
+        "name": "powdered diamond",
+        "qty": 1,
+        "consumed": true,
+        "minGp": 200,
+        "focus": false
+      }
+    ],
     "targeting": {
       "kind": "template",
       "shape": "circle",
@@ -8182,6 +9600,19 @@
     "dice": 0,
     "concentration": false,
     "ritual": false,
+    "componentFlags": {
+      "v": true,
+      "s": true,
+      "m": true
+    },
+    "ingredients": [
+      {
+        "name": "sprig of mistletoe",
+        "qty": 1,
+        "consumed": false,
+        "focus": true
+      }
+    ],
     "targeting": {
       "kind": "self"
     },
@@ -8239,6 +9670,19 @@
     "dice": 0,
     "concentration": false,
     "ritual": false,
+    "componentFlags": {
+      "v": true,
+      "s": true,
+      "m": true
+    },
+    "ingredients": [
+      {
+        "name": "bit of pork rind or butter",
+        "qty": 1,
+        "consumed": false,
+        "focus": true
+      }
+    ],
     "targeting": {
       "kind": "enemy",
       "range": 60
@@ -8275,6 +9719,12 @@
     "dice": 0,
     "concentration": true,
     "ritual": false,
+    "componentFlags": {
+      "v": true,
+      "s": true,
+      "m": false
+    },
+    "ingredients": [],
     "targeting": {
       "kind": "ally",
       "range": 5
@@ -8310,6 +9760,20 @@
     "dice": 0,
     "concentration": false,
     "ritual": false,
+    "componentFlags": {
+      "v": true,
+      "s": true,
+      "m": true
+    },
+    "ingredients": [
+      {
+        "name": "diamond dust",
+        "qty": 1,
+        "consumed": true,
+        "minGp": 100,
+        "focus": false
+      }
+    ],
     "targeting": {
       "kind": "ally",
       "range": 5
@@ -8416,6 +9880,12 @@
     "dice": 0,
     "concentration": false,
     "ritual": false,
+    "componentFlags": {
+      "v": true,
+      "s": false,
+      "m": false
+    },
+    "ingredients": [],
     "targeting": {
       "kind": "enemy",
       "range": 30
@@ -8442,6 +9912,20 @@
     "dice": 0,
     "concentration": false,
     "ritual": false,
+    "componentFlags": {
+      "v": true,
+      "s": true,
+      "m": true
+    },
+    "ingredients": [
+      {
+        "name": "silver rod",
+        "qty": 1,
+        "consumed": true,
+        "minGp": 10,
+        "focus": false
+      }
+    ],
     "targeting": {
       "kind": "ally",
       "range": 5
@@ -8468,6 +9952,12 @@
     "dice": 0,
     "concentration": true,
     "ritual": false,
+    "componentFlags": {
+      "v": true,
+      "s": true,
+      "m": false
+    },
+    "ingredients": [],
     "targeting": {
       "kind": "ally",
       "range": 5
@@ -8504,6 +9994,12 @@
     "dieSides": 6,
     "concentration": false,
     "ritual": false,
+    "componentFlags": {
+      "v": true,
+      "s": true,
+      "m": false
+    },
+    "ingredients": [],
     "upcastDice": 1,
     "targeting": {
       "kind": "enemy",
@@ -8538,6 +10034,19 @@
     "dice": 0,
     "concentration": true,
     "ritual": false,
+    "componentFlags": {
+      "v": true,
+      "s": true,
+      "m": true
+    },
+    "ingredients": [
+      {
+        "name": "legume seed",
+        "qty": 1,
+        "consumed": false,
+        "focus": true
+      }
+    ],
     "targeting": {
       "kind": "template",
       "shape": "line",
@@ -8578,6 +10087,20 @@
     "dice": 0,
     "concentration": false,
     "ritual": false,
+    "componentFlags": {
+      "v": true,
+      "s": true,
+      "m": true
+    },
+    "ingredients": [
+      {
+        "name": "incense",
+        "qty": 1,
+        "consumed": true,
+        "minGp": 1000,
+        "focus": false
+      }
+    ],
     "targeting": {
       "kind": "ally",
       "range": 5
@@ -8604,6 +10127,19 @@
     "dice": 0,
     "concentration": false,
     "ritual": false,
+    "componentFlags": {
+      "v": true,
+      "s": true,
+      "m": true
+    },
+    "ingredients": [
+      {
+        "name": "mushroom",
+        "qty": 1,
+        "consumed": false,
+        "focus": true
+      }
+    ],
     "targeting": {
       "kind": "template",
       "shape": "cube",
@@ -8637,6 +10173,12 @@
     "dieSides": 6,
     "concentration": false,
     "ritual": false,
+    "componentFlags": {
+      "v": true,
+      "s": true,
+      "m": false
+    },
+    "ingredients": [],
     "targeting": {
       "kind": "enemy",
       "range": 60
@@ -8708,6 +10250,19 @@
     "dice": 0,
     "concentration": true,
     "ritual": false,
+    "componentFlags": {
+      "v": true,
+      "s": true,
+      "m": true
+    },
+    "ingredients": [
+      {
+        "name": "shaving of licorice root",
+        "qty": 1,
+        "consumed": false,
+        "focus": true
+      }
+    ],
     "targeting": {
       "kind": "ally",
       "range": 30
@@ -8761,6 +10316,12 @@
     "dice": 0,
     "concentration": false,
     "ritual": false,
+    "componentFlags": {
+      "v": true,
+      "s": true,
+      "m": false
+    },
+    "ingredients": [],
     "targeting": {
       "kind": "ally",
       "range": 60
@@ -8793,6 +10354,12 @@
     "dieSides": 4,
     "concentration": false,
     "ritual": false,
+    "componentFlags": {
+      "v": true,
+      "s": false,
+      "m": false
+    },
+    "ingredients": [],
     "upcastDice": 2,
     "addAbilityMod": true,
     "targeting": {
@@ -8830,6 +10397,19 @@
     "dieSides": 8,
     "concentration": true,
     "ritual": false,
+    "componentFlags": {
+      "v": true,
+      "s": true,
+      "m": true
+    },
+    "ingredients": [
+      {
+        "name": "piece of iron and a flame",
+        "qty": 1,
+        "consumed": false,
+        "focus": true
+      }
+    ],
     "upcastDice": 1,
     "targeting": {
       "kind": "enemy",
@@ -8903,6 +10483,12 @@
     "dieSides": 10,
     "concentration": false,
     "ritual": false,
+    "componentFlags": {
+      "v": true,
+      "s": true,
+      "m": false
+    },
+    "ingredients": [],
     "upcastDice": 1,
     "targeting": {
       "kind": "enemy",
@@ -8940,6 +10526,20 @@
     "dice": 0,
     "concentration": false,
     "ritual": false,
+    "componentFlags": {
+      "v": true,
+      "s": true,
+      "m": true
+    },
+    "ingredients": [
+      {
+        "name": "gem-encrusted bowl",
+        "qty": 1,
+        "consumed": true,
+        "minGp": 1000,
+        "focus": false
+      }
+    ],
     "targeting": {
       "kind": "template",
       "shape": "cube",
@@ -8971,6 +10571,12 @@
     "dice": 0,
     "concentration": true,
     "ritual": false,
+    "componentFlags": {
+      "v": true,
+      "s": true,
+      "m": false
+    },
+    "ingredients": [],
     "upcastTargets": 1,
     "targeting": {
       "kind": "ally",
@@ -9009,6 +10615,19 @@
     "dice": 0,
     "concentration": true,
     "ritual": false,
+    "componentFlags": {
+      "v": true,
+      "s": true,
+      "m": true
+    },
+    "ingredients": [
+      {
+        "name": "petrified eye of a newt",
+        "qty": 1,
+        "consumed": false,
+        "focus": true
+      }
+    ],
     "targeting": {
       "kind": "enemy",
       "range": 90
@@ -9050,6 +10669,19 @@
     "dice": 0,
     "concentration": true,
     "ritual": false,
+    "componentFlags": {
+      "v": true,
+      "s": true,
+      "m": true
+    },
+    "ingredients": [
+      {
+        "name": "tart and a feather",
+        "qty": 1,
+        "consumed": false,
+        "focus": true
+      }
+    ],
     "upcastTargets": 1,
     "targeting": {
       "kind": "enemy",
@@ -9101,6 +10733,19 @@
     "dice": 0,
     "concentration": true,
     "ritual": false,
+    "componentFlags": {
+      "v": true,
+      "s": true,
+      "m": true
+    },
+    "ingredients": [
+      {
+        "name": "straight piece of iron",
+        "qty": 1,
+        "consumed": false,
+        "focus": true
+      }
+    ],
     "upcastTargets": 1,
     "targeting": {
       "kind": "enemy",
@@ -9143,6 +10788,19 @@
     "dice": 0,
     "concentration": true,
     "ritual": false,
+    "componentFlags": {
+      "v": true,
+      "s": true,
+      "m": true
+    },
+    "ingredients": [
+      {
+        "name": "straight piece of iron",
+        "qty": 1,
+        "consumed": false,
+        "focus": true
+      }
+    ],
     "upcastTargets": 1,
     "targeting": {
       "kind": "enemy",
@@ -9187,6 +10845,20 @@
     "dice": 0,
     "concentration": true,
     "ritual": false,
+    "componentFlags": {
+      "v": true,
+      "s": true,
+      "m": true
+    },
+    "ingredients": [
+      {
+        "name": "reliquary",
+        "qty": 1,
+        "consumed": true,
+        "minGp": 1000,
+        "focus": false
+      }
+    ],
     "targeting": {
       "kind": "area",
       "side": "ally",
@@ -9262,6 +10934,12 @@
     "dice": 0,
     "concentration": true,
     "ritual": false,
+    "componentFlags": {
+      "v": true,
+      "s": false,
+      "m": false
+    },
+    "ingredients": [],
     "targeting": {
       "kind": "enemy",
       "range": 90
@@ -9295,6 +10973,19 @@
     "dice": 0,
     "concentration": true,
     "ritual": false,
+    "componentFlags": {
+      "v": false,
+      "s": true,
+      "m": true
+    },
+    "ingredients": [
+      {
+        "name": "pinch of confetti",
+        "qty": 1,
+        "consumed": false,
+        "focus": true
+      }
+    ],
     "targeting": {
       "kind": "template",
       "shape": "cube",
@@ -9338,6 +11029,19 @@
     "dieSides": 10,
     "concentration": false,
     "ritual": false,
+    "componentFlags": {
+      "v": false,
+      "s": true,
+      "m": true
+    },
+    "ingredients": [
+      {
+        "name": "drop of water or a piece of ice",
+        "qty": 1,
+        "consumed": false,
+        "focus": true
+      }
+    ],
     "targeting": {
       "kind": "enemy",
       "range": 60
@@ -9408,6 +11112,19 @@
     "dieSides": 10,
     "concentration": false,
     "ritual": false,
+    "componentFlags": {
+      "v": true,
+      "s": true,
+      "m": true
+    },
+    "ingredients": [
+      {
+        "name": "mitten",
+        "qty": 1,
+        "consumed": false,
+        "focus": true
+      }
+    ],
     "upcastDice": 1,
     "targeting": {
       "kind": "template",
@@ -9452,6 +11169,20 @@
     "dice": 0,
     "concentration": false,
     "ritual": true,
+    "componentFlags": {
+      "v": true,
+      "s": true,
+      "m": true
+    },
+    "ingredients": [
+      {
+        "name": "pearl",
+        "qty": 1,
+        "consumed": true,
+        "minGp": 100,
+        "focus": false
+      }
+    ],
     "targeting": {
       "kind": "ally",
       "range": 5
@@ -9479,6 +11210,20 @@
     "dice": 0,
     "concentration": false,
     "ritual": true,
+    "componentFlags": {
+      "v": false,
+      "s": true,
+      "m": true
+    },
+    "ingredients": [
+      {
+        "name": "ink",
+        "qty": 1,
+        "consumed": true,
+        "minGp": 10,
+        "focus": false
+      }
+    ],
     "targeting": {
       "kind": "ally",
       "range": 5
@@ -9507,6 +11252,20 @@
     "dice": 0,
     "concentration": false,
     "ritual": false,
+    "componentFlags": {
+      "v": true,
+      "s": true,
+      "m": true
+    },
+    "ingredients": [
+      {
+        "name": "statuette of the target",
+        "qty": 1,
+        "consumed": true,
+        "minGp": 5000,
+        "focus": false
+      }
+    ],
     "targeting": {
       "kind": "enemy",
       "range": 30
@@ -9544,6 +11303,12 @@
     "dieSides": 8,
     "concentration": true,
     "ritual": false,
+    "componentFlags": {
+      "v": true,
+      "s": true,
+      "m": false
+    },
+    "ingredients": [],
     "targeting": {
       "kind": "template",
       "shape": "circle",
@@ -9617,6 +11382,12 @@
     "dieSides": 10,
     "concentration": false,
     "ritual": false,
+    "componentFlags": {
+      "v": true,
+      "s": true,
+      "m": false
+    },
+    "ingredients": [],
     "upcastDice": 1,
     "targeting": {
       "kind": "enemy",
@@ -9654,6 +11425,19 @@
     "dieSides": 10,
     "concentration": true,
     "ritual": false,
+    "componentFlags": {
+      "v": true,
+      "s": true,
+      "m": true
+    },
+    "ingredients": [
+      {
+        "name": "locust",
+        "qty": 1,
+        "consumed": false,
+        "focus": true
+      }
+    ],
     "upcastDice": 1,
     "targeting": {
       "kind": "template",
@@ -9698,6 +11482,20 @@
     "dice": 0,
     "concentration": false,
     "ritual": true,
+    "componentFlags": {
+      "v": true,
+      "s": true,
+      "m": true
+    },
+    "ingredients": [
+      {
+        "name": "sapphire",
+        "qty": 1,
+        "consumed": true,
+        "minGp": 1000,
+        "focus": false
+      }
+    ],
     "targeting": {
       "kind": "ally",
       "range": 5
@@ -9723,6 +11521,19 @@
     "dice": 0,
     "concentration": true,
     "ritual": false,
+    "componentFlags": {
+      "v": true,
+      "s": true,
+      "m": true
+    },
+    "ingredients": [
+      {
+        "name": "eyelash in gum arabic",
+        "qty": 1,
+        "consumed": false,
+        "focus": true
+      }
+    ],
     "upcastTargets": 1,
     "targeting": {
       "kind": "ally",
@@ -9833,6 +11644,12 @@
     "dice": 0,
     "concentration": true,
     "ritual": false,
+    "componentFlags": {
+      "v": true,
+      "s": false,
+      "m": false
+    },
+    "ingredients": [],
     "targeting": {
       "kind": "enemy",
       "range": 30
@@ -9872,6 +11689,12 @@
     "dice": 0,
     "concentration": false,
     "ritual": false,
+    "componentFlags": {
+      "v": true,
+      "s": true,
+      "m": true
+    },
+    "ingredients": [],
     "upcastTargets": 1,
     "targeting": {
       "kind": "ally",
@@ -9901,6 +11724,12 @@
     "dice": 0,
     "concentration": false,
     "ritual": false,
+    "componentFlags": {
+      "v": true,
+      "s": false,
+      "m": false
+    },
+    "ingredients": [],
     "targeting": {
       "kind": "ally",
       "range": 60
@@ -10124,6 +11953,12 @@
     "dice": 0,
     "concentration": false,
     "ritual": false,
+    "componentFlags": {
+      "v": true,
+      "s": true,
+      "m": true
+    },
+    "ingredients": [],
     "targeting": {
       "kind": "self"
     },
@@ -10150,6 +11985,12 @@
     "dice": 0,
     "concentration": false,
     "ritual": false,
+    "componentFlags": {
+      "v": true,
+      "s": true,
+      "m": false
+    },
+    "ingredients": [],
     "targeting": {
       "kind": "ally",
       "range": 5
@@ -10184,6 +12025,19 @@
     "dice": 0,
     "concentration": true,
     "ritual": false,
+    "componentFlags": {
+      "v": true,
+      "s": true,
+      "m": true
+    },
+    "ingredients": [
+      {
+        "name": "metal spring",
+        "qty": 1,
+        "consumed": false,
+        "focus": true
+      }
+    ],
     "targeting": {
       "kind": "enemy",
       "range": 60
@@ -10244,6 +12098,19 @@
     "dice": 0,
     "concentration": false,
     "ritual": false,
+    "componentFlags": {
+      "v": true,
+      "s": false,
+      "m": true
+    },
+    "ingredients": [
+      {
+        "name": "firefly or phosphorescent moss",
+        "qty": 1,
+        "consumed": false,
+        "focus": true
+      }
+    ],
     "targeting": {
       "kind": "ally",
       "range": 5
@@ -10273,6 +12140,19 @@
     "dieSides": 6,
     "concentration": false,
     "ritual": false,
+    "componentFlags": {
+      "v": true,
+      "s": true,
+      "m": true
+    },
+    "ingredients": [
+      {
+        "name": "bit of fur and a crystal rod",
+        "qty": 1,
+        "consumed": false,
+        "focus": true
+      }
+    ],
     "upcastDice": 1,
     "targeting": {
       "kind": "template",
@@ -10343,6 +12223,19 @@
     "dice": 0,
     "concentration": false,
     "ritual": true,
+    "componentFlags": {
+      "v": true,
+      "s": true,
+      "m": true
+    },
+    "ingredients": [
+      {
+        "name": "fur from a bloodhound",
+        "qty": 1,
+        "consumed": false,
+        "focus": true
+      }
+    ],
     "targeting": {
       "kind": "self"
     },
@@ -10369,6 +12262,19 @@
     "dice": 0,
     "concentration": true,
     "ritual": false,
+    "componentFlags": {
+      "v": true,
+      "s": true,
+      "m": true
+    },
+    "ingredients": [
+      {
+        "name": "fur from a bloodhound",
+        "qty": 1,
+        "consumed": false,
+        "focus": true
+      }
+    ],
     "targeting": {
       "kind": "self"
     },
@@ -10398,6 +12304,19 @@
     "dice": 0,
     "concentration": true,
     "ritual": false,
+    "componentFlags": {
+      "v": true,
+      "s": true,
+      "m": true
+    },
+    "ingredients": [
+      {
+        "name": "forked twig",
+        "qty": 1,
+        "consumed": false,
+        "focus": true
+      }
+    ],
     "targeting": {
       "kind": "self"
     },
@@ -10427,6 +12346,19 @@
     "dice": 0,
     "concentration": false,
     "ritual": false,
+    "componentFlags": {
+      "v": true,
+      "s": true,
+      "m": true
+    },
+    "ingredients": [
+      {
+        "name": "pinch of dirt",
+        "qty": 1,
+        "consumed": false,
+        "focus": true
+      }
+    ],
     "upcastTargets": 1,
     "targeting": {
       "kind": "ally",
@@ -10465,6 +12397,19 @@
     "dice": 0,
     "concentration": false,
     "ritual": false,
+    "componentFlags": {
+      "v": true,
+      "s": true,
+      "m": true
+    },
+    "ingredients": [
+      {
+        "name": "piece of cured leather",
+        "qty": 1,
+        "consumed": false,
+        "focus": true
+      }
+    ],
     "targeting": {
       "kind": "ally",
       "range": 5
@@ -10500,6 +12445,12 @@
     "dice": 0,
     "concentration": false,
     "ritual": false,
+    "componentFlags": {
+      "v": true,
+      "s": true,
+      "m": false
+    },
+    "ingredients": [],
     "targeting": {
       "kind": "ally",
       "range": 30
@@ -10529,6 +12480,20 @@
     "dice": 0,
     "concentration": false,
     "ritual": false,
+    "componentFlags": {
+      "v": true,
+      "s": true,
+      "m": true
+    },
+    "ingredients": [
+      {
+        "name": "salt and powdered silver",
+        "qty": 1,
+        "consumed": true,
+        "minGp": 100,
+        "focus": false
+      }
+    ],
     "targeting": {
       "kind": "template",
       "shape": "circle",
@@ -10563,6 +12528,20 @@
     "dice": 0,
     "concentration": false,
     "ritual": false,
+    "componentFlags": {
+      "v": true,
+      "s": true,
+      "m": true
+    },
+    "ingredients": [
+      {
+        "name": "gem, crystal, or reliquary",
+        "qty": 1,
+        "consumed": true,
+        "minGp": 500,
+        "focus": false
+      }
+    ],
     "targeting": {
       "kind": "self"
     },
@@ -10587,6 +12566,12 @@
     "dice": 1,
     "concentration": false,
     "ritual": false,
+    "componentFlags": {
+      "v": true,
+      "s": true,
+      "m": false
+    },
+    "ingredients": [],
     "targeting": {
       "kind": "area",
       "side": "enemy",
@@ -10626,6 +12611,20 @@
     "dice": 0,
     "concentration": false,
     "ritual": true,
+    "componentFlags": {
+      "v": true,
+      "s": true,
+      "m": true
+    },
+    "ingredients": [
+      {
+        "name": "jade dust",
+        "qty": 1,
+        "consumed": true,
+        "minGp": 10,
+        "focus": false
+      }
+    ],
     "targeting": {
       "kind": "ally",
       "range": 30
@@ -10652,6 +12651,12 @@
     "dice": 0,
     "concentration": false,
     "ritual": false,
+    "componentFlags": {
+      "v": true,
+      "s": true,
+      "m": false
+    },
+    "ingredients": [],
     "targeting": {
       "kind": "ally",
       "range": 5
@@ -10724,6 +12729,20 @@
     "dice": 0,
     "concentration": false,
     "ritual": false,
+    "componentFlags": {
+      "v": true,
+      "s": true,
+      "m": true
+    },
+    "ingredients": [
+      {
+        "name": "miniature door",
+        "qty": 1,
+        "consumed": true,
+        "minGp": 15,
+        "focus": false
+      }
+    ],
     "targeting": {
       "kind": "template",
       "shape": "cube",
@@ -10754,6 +12773,19 @@
     "dice": 0,
     "concentration": true,
     "ritual": false,
+    "componentFlags": {
+      "v": true,
+      "s": true,
+      "m": true
+    },
+    "ingredients": [
+      {
+        "name": "bit of fleece",
+        "qty": 1,
+        "consumed": false,
+        "focus": true
+      }
+    ],
     "targeting": {
       "kind": "template",
       "shape": "cube",
@@ -10858,6 +12890,12 @@
     "dieSides": 8,
     "concentration": false,
     "ritual": false,
+    "componentFlags": {
+      "v": true,
+      "s": true,
+      "m": false
+    },
+    "ingredients": [],
     "upcastDice": 1,
     "addAbilityMod": true,
     "targeting": {
@@ -10899,6 +12937,12 @@
     "dice": 0,
     "concentration": false,
     "ritual": false,
+    "componentFlags": {
+      "v": true,
+      "s": true,
+      "m": false
+    },
+    "ingredients": [],
     "targeting": {
       "kind": "ally",
       "range": 60
@@ -10925,6 +12969,12 @@
     "dieSides": 4,
     "concentration": false,
     "ritual": false,
+    "componentFlags": {
+      "v": true,
+      "s": false,
+      "m": false
+    },
+    "ingredients": [],
     "upcastDice": 1,
     "addAbilityMod": true,
     "targeting": {
@@ -10960,6 +13010,19 @@
     "dice": 0,
     "concentration": false,
     "ritual": false,
+    "componentFlags": {
+      "v": true,
+      "s": false,
+      "m": true
+    },
+    "ingredients": [
+      {
+        "name": "snake's tongue",
+        "qty": 1,
+        "consumed": false,
+        "focus": true
+      }
+    ],
     "targeting": {
       "kind": "enemy",
       "range": 60
@@ -10997,6 +13060,12 @@
     "dice": 0,
     "concentration": true,
     "ritual": false,
+    "componentFlags": {
+      "v": true,
+      "s": true,
+      "m": false
+    },
+    "ingredients": [],
     "targeting": {
       "kind": "enemy",
       "range": 60
@@ -11030,6 +13099,12 @@
     "dice": 0,
     "concentration": false,
     "ritual": true,
+    "componentFlags": {
+      "v": true,
+      "s": true,
+      "m": false
+    },
+    "ingredients": [],
     "targeting": {
       "kind": "ally",
       "range": 5
@@ -11058,6 +13133,19 @@
     "dice": 0,
     "concentration": false,
     "ritual": false,
+    "componentFlags": {
+      "v": true,
+      "s": true,
+      "m": true
+    },
+    "ingredients": [
+      {
+        "name": "two lodestones",
+        "qty": 1,
+        "consumed": false,
+        "focus": true
+      }
+    ],
     "targeting": {
       "kind": "ally",
       "range": 5
@@ -11087,6 +13175,19 @@
     "dice": 0,
     "concentration": false,
     "ritual": false,
+    "componentFlags": {
+      "v": false,
+      "s": true,
+      "m": true
+    },
+    "ingredients": [
+      {
+        "name": "copper wire",
+        "qty": 1,
+        "consumed": false,
+        "focus": true
+      }
+    ],
     "targeting": {
       "kind": "ally",
       "range": 120
@@ -11116,6 +13217,12 @@
     "dieSides": 6,
     "concentration": false,
     "ritual": false,
+    "componentFlags": {
+      "v": true,
+      "s": true,
+      "m": false
+    },
+    "ingredients": [],
     "targeting": {
       "kind": "template",
       "shape": "circle",
@@ -11157,6 +13264,12 @@
     "dice": 0,
     "concentration": false,
     "ritual": false,
+    "componentFlags": {
+      "v": true,
+      "s": true,
+      "m": false
+    },
+    "ingredients": [],
     "targeting": {
       "kind": "ally",
       "range": 5
@@ -11195,6 +13308,12 @@
     "dieSides": 8,
     "concentration": true,
     "ritual": false,
+    "componentFlags": {
+      "v": false,
+      "s": true,
+      "m": false
+    },
+    "ingredients": [],
     "upcastDice": 1,
     "targeting": {
       "kind": "enemy",
@@ -11233,6 +13352,19 @@
     "dice": 0,
     "concentration": false,
     "ritual": false,
+    "componentFlags": {
+      "v": false,
+      "s": true,
+      "m": true
+    },
+    "ingredients": [
+      {
+        "name": "bit of fleece",
+        "qty": 1,
+        "consumed": false,
+        "focus": true
+      }
+    ],
     "targeting": {
       "kind": "ally",
       "range": 30
@@ -11262,6 +13394,12 @@
     "dice": 0,
     "concentration": false,
     "ritual": false,
+    "componentFlags": {
+      "v": true,
+      "s": true,
+      "m": false
+    },
+    "ingredients": [],
     "targeting": {
       "kind": "ally",
       "range": 5
@@ -11289,6 +13427,12 @@
     "dice": 0,
     "concentration": false,
     "ritual": false,
+    "componentFlags": {
+      "v": true,
+      "s": true,
+      "m": false
+    },
+    "ingredients": [],
     "targeting": {
       "kind": "self"
     },
@@ -11324,6 +13468,12 @@
     "dice": 0,
     "concentration": true,
     "ritual": false,
+    "componentFlags": {
+      "v": false,
+      "s": true,
+      "m": false
+    },
+    "ingredients": [],
     "targeting": {
       "kind": "self"
     },
@@ -11350,6 +13500,12 @@
     "dice": 0,
     "concentration": false,
     "ritual": false,
+    "componentFlags": {
+      "v": true,
+      "s": false,
+      "m": false
+    },
+    "ingredients": [],
     "targeting": {
       "kind": "self"
     },
@@ -11376,6 +13532,12 @@
     "dice": 0,
     "concentration": true,
     "ritual": false,
+    "componentFlags": {
+      "v": true,
+      "s": true,
+      "m": false
+    },
+    "ingredients": [],
     "targeting": {
       "kind": "enemy",
       "range": 30
@@ -11413,6 +13575,19 @@
     "dieSides": 10,
     "concentration": true,
     "ritual": false,
+    "componentFlags": {
+      "v": true,
+      "s": true,
+      "m": true
+    },
+    "ingredients": [
+      {
+        "name": "moonseed leaf",
+        "qty": 1,
+        "consumed": false,
+        "focus": true
+      }
+    ],
     "upcastDice": 1,
     "targeting": {
       "kind": "template",
@@ -11454,6 +13629,19 @@
     "dice": 0,
     "concentration": true,
     "ritual": false,
+    "componentFlags": {
+      "v": true,
+      "s": true,
+      "m": true
+    },
+    "ingredients": [
+      {
+        "name": "miniature shovel",
+        "qty": 1,
+        "consumed": false,
+        "focus": true
+      }
+    ],
     "targeting": {
       "kind": "ally",
       "range": 120
@@ -11591,6 +13779,20 @@
     "dice": 0,
     "concentration": false,
     "ritual": false,
+    "componentFlags": {
+      "v": true,
+      "s": true,
+      "m": true
+    },
+    "ingredients": [
+      {
+        "name": "pinch of diamond dust",
+        "qty": 1,
+        "consumed": true,
+        "minGp": 25,
+        "focus": false
+      }
+    ],
     "targeting": {
       "kind": "ally",
       "range": 5
@@ -11659,6 +13861,19 @@
     "dice": 0,
     "concentration": true,
     "ritual": false,
+    "componentFlags": {
+      "v": true,
+      "s": true,
+      "m": true
+    },
+    "ingredients": [
+      {
+        "name": "ashes from burned mistletoe",
+        "qty": 1,
+        "consumed": false,
+        "focus": true
+      }
+    ],
     "targeting": {
       "kind": "area",
       "side": "ally",
@@ -11698,6 +13913,19 @@
     "dice": 0,
     "concentration": false,
     "ritual": false,
+    "componentFlags": {
+      "v": true,
+      "s": true,
+      "m": true
+    },
+    "ingredients": [
+      {
+        "name": "pinch of sesame seeds",
+        "qty": 1,
+        "consumed": false,
+        "focus": true
+      }
+    ],
     "targeting": {
       "kind": "ally",
       "range": 30
@@ -11724,6 +13952,19 @@
     "dieSides": 8,
     "concentration": true,
     "ritual": false,
+    "componentFlags": {
+      "v": true,
+      "s": true,
+      "m": true
+    },
+    "ingredients": [
+      {
+        "name": "bit of fleece",
+        "qty": 1,
+        "consumed": false,
+        "focus": true
+      }
+    ],
     "targeting": {
       "kind": "template",
       "shape": "cube",
@@ -11766,6 +14007,12 @@
     "dieSides": 10,
     "concentration": true,
     "ritual": false,
+    "componentFlags": {
+      "v": true,
+      "s": true,
+      "m": false
+    },
+    "ingredients": [],
     "upcastDice": 1,
     "targeting": {
       "kind": "enemy",
@@ -11804,6 +14051,12 @@
     "dice": 0,
     "concentration": false,
     "ritual": true,
+    "componentFlags": {
+      "v": true,
+      "s": true,
+      "m": false
+    },
+    "ingredients": [],
     "targeting": {
       "kind": "ally",
       "range": 30
@@ -11890,6 +14143,12 @@
     "dice": 0,
     "concentration": false,
     "ritual": false,
+    "componentFlags": {
+      "v": true,
+      "s": true,
+      "m": false
+    },
+    "ingredients": [],
     "targeting": {
       "kind": "ally",
       "range": 60
@@ -11916,6 +14175,20 @@
     "dice": 0,
     "concentration": false,
     "ritual": false,
+    "componentFlags": {
+      "v": true,
+      "s": true,
+      "m": true
+    },
+    "ingredients": [
+      {
+        "name": "jewel",
+        "qty": 1,
+        "consumed": true,
+        "minGp": 1000,
+        "focus": false
+      }
+    ],
     "targeting": {
       "kind": "enemy",
       "range": 60
@@ -11945,6 +14218,20 @@
     "dice": 0,
     "concentration": false,
     "ritual": false,
+    "componentFlags": {
+      "v": true,
+      "s": true,
+      "m": true
+    },
+    "ingredients": [
+      {
+        "name": "forked, metal rod and attuned to a plane of existence",
+        "qty": 1,
+        "consumed": true,
+        "minGp": 250,
+        "focus": false
+      }
+    ],
     "targeting": {
       "kind": "ally",
       "range": 5
@@ -12011,6 +14298,12 @@
     "dice": 0,
     "concentration": false,
     "ritual": false,
+    "componentFlags": {
+      "v": true,
+      "s": true,
+      "m": false
+    },
+    "ingredients": [],
     "targeting": {
       "kind": "template",
       "shape": "circle",
@@ -12044,6 +14337,12 @@
     "dieSides": 12,
     "concentration": false,
     "ritual": false,
+    "componentFlags": {
+      "v": true,
+      "s": true,
+      "m": false
+    },
+    "ingredients": [],
     "targeting": {
       "kind": "enemy",
       "range": 30
@@ -12080,6 +14379,19 @@
     "dice": 0,
     "concentration": true,
     "ritual": false,
+    "componentFlags": {
+      "v": true,
+      "s": true,
+      "m": true
+    },
+    "ingredients": [
+      {
+        "name": "caterpillar cocoon",
+        "qty": 1,
+        "consumed": false,
+        "focus": true
+      }
+    ],
     "targeting": {
       "kind": "enemy",
       "range": 60
@@ -12108,6 +14420,12 @@
     "dice": 0,
     "concentration": false,
     "ritual": false,
+    "componentFlags": {
+      "v": true,
+      "s": false,
+      "m": false
+    },
+    "ingredients": [],
     "targeting": {
       "kind": "ally",
       "range": 60
@@ -12147,6 +14465,12 @@
     "dieSides": 12,
     "concentration": false,
     "ritual": false,
+    "componentFlags": {
+      "v": true,
+      "s": false,
+      "m": false
+    },
+    "ingredients": [],
     "targeting": {
       "kind": "enemy",
       "range": 60
@@ -12183,6 +14507,12 @@
     "dice": 0,
     "concentration": false,
     "ritual": false,
+    "componentFlags": {
+      "v": true,
+      "s": false,
+      "m": false
+    },
+    "ingredients": [],
     "targeting": {
       "kind": "enemy",
       "range": 60
@@ -12222,6 +14552,12 @@
     "dice": 2,
     "concentration": false,
     "ritual": false,
+    "componentFlags": {
+      "v": true,
+      "s": false,
+      "m": false
+    },
+    "ingredients": [],
     "targeting": {
       "kind": "area",
       "side": "ally",
@@ -12260,6 +14596,12 @@
     "dice": 0,
     "concentration": false,
     "ritual": false,
+    "componentFlags": {
+      "v": true,
+      "s": true,
+      "m": false
+    },
+    "ingredients": [],
     "targeting": {
       "kind": "ally",
       "range": 10
@@ -12289,6 +14631,12 @@
     "dieSides": 8,
     "concentration": false,
     "ritual": false,
+    "componentFlags": {
+      "v": true,
+      "s": true,
+      "m": false
+    },
+    "ingredients": [],
     "targeting": {
       "kind": "template",
       "shape": "cone",
@@ -12330,6 +14678,12 @@
     "dieSides": 6,
     "concentration": false,
     "ritual": false,
+    "componentFlags": {
+      "v": true,
+      "s": true,
+      "m": false
+    },
+    "ingredients": [],
     "targeting": {
       "kind": "enemy",
       "range": 60
@@ -12367,6 +14721,19 @@
     "dice": 0,
     "concentration": false,
     "ritual": false,
+    "componentFlags": {
+      "v": true,
+      "s": true,
+      "m": true
+    },
+    "ingredients": [
+      {
+        "name": "thin sheet of lead",
+        "qty": 1,
+        "consumed": false,
+        "focus": true
+      }
+    ],
     "targeting": {
       "kind": "template",
       "shape": "cube",
@@ -12397,6 +14764,12 @@
     "dieSides": 8,
     "concentration": false,
     "ritual": false,
+    "componentFlags": {
+      "v": true,
+      "s": true,
+      "m": false
+    },
+    "ingredients": [],
     "targeting": {
       "kind": "enemy",
       "range": 60
@@ -12430,6 +14803,20 @@
     "dice": 0,
     "concentration": false,
     "ritual": false,
+    "componentFlags": {
+      "v": true,
+      "s": true,
+      "m": true
+    },
+    "ingredients": [
+      {
+        "name": "jade dust",
+        "qty": 1,
+        "consumed": true,
+        "minGp": 25,
+        "focus": false
+      }
+    ],
     "targeting": {
       "kind": "template",
       "shape": "cube",
@@ -12460,6 +14847,20 @@
     "dice": 0,
     "concentration": true,
     "ritual": false,
+    "componentFlags": {
+      "v": true,
+      "s": true,
+      "m": true
+    },
+    "ingredients": [
+      {
+        "name": "statuette of yourself",
+        "qty": 1,
+        "consumed": true,
+        "minGp": 5,
+        "focus": false
+      }
+    ],
     "targeting": {
       "kind": "ally",
       "range": 600
@@ -12486,6 +14887,12 @@
     "dice": 0,
     "concentration": true,
     "ritual": false,
+    "componentFlags": {
+      "v": true,
+      "s": true,
+      "m": false
+    },
+    "ingredients": [],
     "targeting": {
       "kind": "ally",
       "range": 5
@@ -12525,6 +14932,20 @@
     "dice": 0,
     "concentration": true,
     "ritual": false,
+    "componentFlags": {
+      "v": true,
+      "s": true,
+      "m": true
+    },
+    "ingredients": [
+      {
+        "name": "flask of Holy Water",
+        "qty": 1,
+        "consumed": true,
+        "minGp": 25,
+        "focus": false
+      }
+    ],
     "targeting": {
       "kind": "ally",
       "range": 5
@@ -12562,6 +14983,12 @@
     "dice": 0,
     "concentration": false,
     "ritual": false,
+    "componentFlags": {
+      "v": true,
+      "s": true,
+      "m": false
+    },
+    "ingredients": [],
     "targeting": {
       "kind": "ally",
       "range": 5
@@ -12638,6 +15065,12 @@
     "dice": 0,
     "concentration": false,
     "ritual": true,
+    "componentFlags": {
+      "v": true,
+      "s": true,
+      "m": false
+    },
+    "ingredients": [],
     "targeting": {
       "kind": "template",
       "shape": "circle",
@@ -12741,6 +15174,20 @@
     "dice": 0,
     "concentration": false,
     "ritual": false,
+    "componentFlags": {
+      "v": true,
+      "s": true,
+      "m": true
+    },
+    "ingredients": [
+      {
+        "name": "diamond",
+        "qty": 1,
+        "consumed": true,
+        "minGp": 500,
+        "focus": false
+      }
+    ],
     "targeting": {
       "kind": "ally",
       "range": 5
@@ -12816,6 +15263,12 @@
     "dice": 0,
     "concentration": true,
     "ritual": false,
+    "componentFlags": {
+      "v": true,
+      "s": true,
+      "m": false
+    },
+    "ingredients": [],
     "targeting": {
       "kind": "enemy",
       "range": 60
@@ -12854,6 +15307,12 @@
     "dieSides": 8,
     "concentration": false,
     "ritual": false,
+    "componentFlags": {
+      "v": true,
+      "s": true,
+      "m": false
+    },
+    "ingredients": [],
     "targeting": {
       "kind": "enemy",
       "range": 60
@@ -12889,6 +15348,12 @@
     "dieSides": 8,
     "concentration": false,
     "ritual": false,
+    "componentFlags": {
+      "v": true,
+      "s": true,
+      "m": false
+    },
+    "ingredients": [],
     "upcastDice": 1,
     "targeting": {
       "kind": "enemy",
@@ -12959,6 +15424,19 @@
     "dice": 0,
     "concentration": false,
     "ritual": false,
+    "componentFlags": {
+      "v": true,
+      "s": true,
+      "m": true
+    },
+    "ingredients": [
+      {
+        "name": "prayer wheel",
+        "qty": 1,
+        "consumed": false,
+        "focus": true
+      }
+    ],
     "targeting": {
       "kind": "ally",
       "range": 5
@@ -13003,6 +15481,20 @@
     "dice": 0,
     "concentration": false,
     "ritual": false,
+    "componentFlags": {
+      "v": true,
+      "s": true,
+      "m": true
+    },
+    "ingredients": [
+      {
+        "name": "rare oils",
+        "qty": 1,
+        "consumed": true,
+        "minGp": 1000,
+        "focus": false
+      }
+    ],
     "targeting": {
       "kind": "ally",
       "range": 5
@@ -13065,6 +15557,12 @@
     "dice": 0,
     "concentration": false,
     "ritual": false,
+    "componentFlags": {
+      "v": true,
+      "s": true,
+      "m": false
+    },
+    "ingredients": [],
     "targeting": {
       "kind": "ally",
       "range": 5
@@ -13093,6 +15591,19 @@
     "dice": 0,
     "concentration": true,
     "ritual": false,
+    "componentFlags": {
+      "v": true,
+      "s": true,
+      "m": true
+    },
+    "ingredients": [
+      {
+        "name": "glass sphere",
+        "qty": 1,
+        "consumed": false,
+        "focus": true
+      }
+    ],
     "targeting": {
       "kind": "enemy",
       "range": 30
@@ -13118,6 +15629,12 @@
     "dice": 0,
     "concentration": true,
     "ritual": false,
+    "componentFlags": {
+      "v": true,
+      "s": true,
+      "m": false
+    },
+    "ingredients": [],
     "targeting": {
       "kind": "ally",
       "range": 5
@@ -13154,6 +15671,20 @@
     "dice": 0,
     "concentration": false,
     "ritual": false,
+    "componentFlags": {
+      "v": true,
+      "s": true,
+      "m": true
+    },
+    "ingredients": [
+      {
+        "name": "diamond",
+        "qty": 1,
+        "consumed": true,
+        "minGp": 1000,
+        "focus": false
+      }
+    ],
     "targeting": {
       "kind": "ally",
       "range": 5
@@ -13180,6 +15711,19 @@
     "dice": 0,
     "concentration": true,
     "ritual": false,
+    "componentFlags": {
+      "v": true,
+      "s": true,
+      "m": true
+    },
+    "ingredients": [
+      {
+        "name": "lodestone and iron filings",
+        "qty": 1,
+        "consumed": false,
+        "focus": true
+      }
+    ],
     "targeting": {
       "kind": "enemy",
       "range": 100
@@ -13207,6 +15751,20 @@
     "dice": 0,
     "concentration": false,
     "ritual": false,
+    "componentFlags": {
+      "v": true,
+      "s": true,
+      "m": true
+    },
+    "ingredients": [
+      {
+        "name": "diamond",
+        "qty": 1,
+        "consumed": true,
+        "minGp": 300,
+        "focus": false
+      }
+    ],
     "targeting": {
       "kind": "allyDead",
       "range": 5
@@ -13241,6 +15799,19 @@
     "dice": 0,
     "concentration": false,
     "ritual": false,
+    "componentFlags": {
+      "v": true,
+      "s": true,
+      "m": true
+    },
+    "ingredients": [
+      {
+        "name": "segment of rope",
+        "qty": 1,
+        "consumed": false,
+        "focus": true
+      }
+    ],
     "targeting": {
       "kind": "ally",
       "range": 5
@@ -13267,6 +15838,12 @@
     "dieSides": 8,
     "concentration": false,
     "ritual": false,
+    "componentFlags": {
+      "v": true,
+      "s": true,
+      "m": false
+    },
+    "ingredients": [],
     "targeting": {
       "kind": "enemy",
       "range": 60
@@ -13341,6 +15918,19 @@
     "dice": 0,
     "concentration": false,
     "ritual": false,
+    "componentFlags": {
+      "v": true,
+      "s": true,
+      "m": true
+    },
+    "ingredients": [
+      {
+        "name": "shard of glass from a mirror",
+        "qty": 1,
+        "consumed": false,
+        "focus": true
+      }
+    ],
     "targeting": {
       "kind": "enemy",
       "range": 30
@@ -13399,6 +15989,12 @@
     "dieSides": 6,
     "concentration": false,
     "ritual": false,
+    "componentFlags": {
+      "v": true,
+      "s": true,
+      "m": false
+    },
+    "ingredients": [],
     "targeting": {
       "kind": "area",
       "side": "enemy",
@@ -13437,6 +16033,20 @@
     "dice": 0,
     "concentration": true,
     "ritual": false,
+    "componentFlags": {
+      "v": true,
+      "s": true,
+      "m": true
+    },
+    "ingredients": [
+      {
+        "name": "focus, such as a crystal ball, mirror, or water-filled font",
+        "qty": 1,
+        "consumed": true,
+        "minGp": 1000,
+        "focus": false
+      }
+    ],
     "targeting": {
       "kind": "self"
     },
@@ -13466,6 +16076,12 @@
     "dieSides": 6,
     "concentration": false,
     "ritual": false,
+    "componentFlags": {
+      "v": true,
+      "s": false,
+      "m": false
+    },
+    "ingredients": [],
     "upcastDice": 1,
     "targeting": {
       "kind": "enemy",
@@ -13502,6 +16118,12 @@
     "dice": 0,
     "concentration": false,
     "ritual": false,
+    "componentFlags": {
+      "v": true,
+      "s": true,
+      "m": true
+    },
+    "ingredients": [],
     "targeting": {
       "kind": "ally",
       "range": 5
@@ -13527,6 +16149,19 @@
     "dice": 0,
     "concentration": false,
     "ritual": false,
+    "componentFlags": {
+      "v": true,
+      "s": true,
+      "m": true
+    },
+    "ingredients": [
+      {
+        "name": "pinch of talc",
+        "qty": 1,
+        "consumed": false,
+        "focus": true
+      }
+    ],
     "targeting": {
       "kind": "self"
     },
@@ -13553,6 +16188,12 @@
     "dice": 0,
     "concentration": false,
     "ritual": false,
+    "componentFlags": {
+      "v": true,
+      "s": true,
+      "m": false
+    },
+    "ingredients": [],
     "targeting": {
       "kind": "enemy",
       "range": 30
@@ -13580,6 +16221,19 @@
     "dice": 0,
     "concentration": false,
     "ritual": false,
+    "componentFlags": {
+      "v": true,
+      "s": true,
+      "m": true
+    },
+    "ingredients": [
+      {
+        "name": "copper wire",
+        "qty": 1,
+        "consumed": false,
+        "focus": true
+      }
+    ],
     "targeting": {
       "kind": "ally",
       "range": 5
@@ -13607,6 +16261,20 @@
     "dice": 0,
     "concentration": false,
     "ritual": false,
+    "componentFlags": {
+      "v": true,
+      "s": true,
+      "m": true
+    },
+    "ingredients": [
+      {
+        "name": "gem dust",
+        "qty": 1,
+        "consumed": true,
+        "minGp": 5000,
+        "focus": false
+      }
+    ],
     "targeting": {
       "kind": "ally",
       "range": 5
@@ -13662,6 +16330,20 @@
     "dice": 0,
     "concentration": true,
     "ritual": false,
+    "componentFlags": {
+      "v": true,
+      "s": true,
+      "m": true
+    },
+    "ingredients": [
+      {
+        "name": "jade circlet",
+        "qty": 1,
+        "consumed": true,
+        "minGp": 1500,
+        "focus": false
+      }
+    ],
     "targeting": {
       "kind": "self"
     },
@@ -13688,6 +16370,19 @@
     "dieSides": 8,
     "concentration": false,
     "ritual": false,
+    "componentFlags": {
+      "v": true,
+      "s": true,
+      "m": true
+    },
+    "ingredients": [
+      {
+        "name": "chip of mica",
+        "qty": 1,
+        "consumed": false,
+        "focus": true
+      }
+    ],
     "upcastDice": 1,
     "targeting": {
       "kind": "template",
@@ -13732,6 +16427,12 @@
     "dice": 0,
     "concentration": false,
     "ritual": false,
+    "componentFlags": {
+      "v": true,
+      "s": true,
+      "m": false
+    },
+    "ingredients": [],
     "targeting": {
       "kind": "self"
     },
@@ -13766,6 +16467,19 @@
     "dice": 0,
     "concentration": true,
     "ritual": false,
+    "componentFlags": {
+      "v": true,
+      "s": true,
+      "m": true
+    },
+    "ingredients": [
+      {
+        "name": "prayer scroll",
+        "qty": 1,
+        "consumed": false,
+        "focus": true
+      }
+    ],
     "targeting": {
       "kind": "ally",
       "range": 60
@@ -13801,6 +16515,19 @@
     "dice": 0,
     "concentration": false,
     "ritual": false,
+    "componentFlags": {
+      "v": true,
+      "s": true,
+      "m": true
+    },
+    "ingredients": [
+      {
+        "name": "mistletoe",
+        "qty": 1,
+        "consumed": false,
+        "focus": true
+      }
+    ],
     "targeting": {
       "kind": "self"
     },
@@ -13825,6 +16552,12 @@
     "dice": 0,
     "concentration": true,
     "ritual": false,
+    "componentFlags": {
+      "v": true,
+      "s": false,
+      "m": false
+    },
+    "ingredients": [],
     "targeting": {
       "kind": "self"
     },
@@ -13862,6 +16595,12 @@
     "dieSides": 8,
     "concentration": false,
     "ritual": false,
+    "componentFlags": {
+      "v": true,
+      "s": true,
+      "m": false
+    },
+    "ingredients": [],
     "targeting": {
       "kind": "enemy",
       "range": 5
@@ -13896,6 +16635,12 @@
     "dice": 0,
     "concentration": true,
     "ritual": true,
+    "componentFlags": {
+      "v": true,
+      "s": true,
+      "m": false
+    },
+    "ingredients": [],
     "targeting": {
       "kind": "template",
       "shape": "circle",
@@ -13928,6 +16673,19 @@
     "dice": 0,
     "concentration": true,
     "ritual": false,
+    "componentFlags": {
+      "v": true,
+      "s": true,
+      "m": true
+    },
+    "ingredients": [
+      {
+        "name": "bit of fleece",
+        "qty": 1,
+        "consumed": false,
+        "focus": true
+      }
+    ],
     "targeting": {
       "kind": "template",
       "shape": "cube",
@@ -13994,6 +16752,20 @@
     "dice": 0,
     "concentration": false,
     "ritual": false,
+    "componentFlags": {
+      "v": true,
+      "s": true,
+      "m": true
+    },
+    "ingredients": [
+      {
+        "name": "powdered ruby",
+        "qty": 1,
+        "consumed": true,
+        "minGp": 1500,
+        "focus": false
+      }
+    ],
     "targeting": {
       "kind": "ally",
       "range": 5
@@ -14019,6 +16791,19 @@
     "dice": 0,
     "concentration": true,
     "ritual": false,
+    "componentFlags": {
+      "v": true,
+      "s": true,
+      "m": true
+    },
+    "ingredients": [
+      {
+        "name": "pinch of sand or rose petals",
+        "qty": 1,
+        "consumed": false,
+        "focus": true
+      }
+    ],
     "targeting": {
       "kind": "template",
       "shape": "circle",
@@ -14064,6 +16849,19 @@
     "dice": 0,
     "concentration": true,
     "ritual": false,
+    "componentFlags": {
+      "v": true,
+      "s": true,
+      "m": true
+    },
+    "ingredients": [
+      {
+        "name": "miniature umbrella",
+        "qty": 1,
+        "consumed": false,
+        "focus": true
+      }
+    ],
     "targeting": {
       "kind": "template",
       "shape": "circle",
@@ -14106,6 +16904,19 @@
     "dice": 0,
     "concentration": true,
     "ritual": false,
+    "componentFlags": {
+      "v": true,
+      "s": true,
+      "m": true
+    },
+    "ingredients": [
+      {
+        "name": "drop of molasses",
+        "qty": 1,
+        "consumed": false,
+        "focus": true
+      }
+    ],
     "targeting": {
       "kind": "template",
       "shape": "cube",
@@ -14220,6 +17031,12 @@
     "dice": 1,
     "concentration": false,
     "ritual": false,
+    "componentFlags": {
+      "v": true,
+      "s": true,
+      "m": false
+    },
+    "ingredients": [],
     "targeting": {
       "kind": "enemy",
       "range": 120
@@ -14301,6 +17118,12 @@
     "dice": 0,
     "concentration": false,
     "ritual": false,
+    "componentFlags": {
+      "v": true,
+      "s": true,
+      "m": false
+    },
+    "ingredients": [],
     "targeting": {
       "kind": "ally",
       "range": 15
@@ -14327,6 +17150,12 @@
     "dice": 0,
     "concentration": false,
     "ritual": true,
+    "componentFlags": {
+      "v": true,
+      "s": true,
+      "m": false
+    },
+    "ingredients": [],
     "targeting": {
       "kind": "self"
     },
@@ -14354,6 +17183,19 @@
     "dice": 0,
     "concentration": false,
     "ritual": false,
+    "componentFlags": {
+      "v": true,
+      "s": true,
+      "m": true
+    },
+    "ingredients": [
+      {
+        "name": "burning incense",
+        "qty": 1,
+        "consumed": false,
+        "focus": true
+      }
+    ],
     "targeting": {
       "kind": "ally",
       "range": 10
@@ -14381,6 +17223,12 @@
     "dice": 0,
     "concentration": false,
     "ritual": false,
+    "componentFlags": {
+      "v": true,
+      "s": true,
+      "m": false
+    },
+    "ingredients": [],
     "targeting": {
       "kind": "template",
       "shape": "emanation",
@@ -14514,6 +17362,19 @@
     "dice": 0,
     "concentration": true,
     "ritual": false,
+    "componentFlags": {
+      "v": true,
+      "s": true,
+      "m": true
+    },
+    "ingredients": [
+      {
+        "name": "drop of bitumen and a spider",
+        "qty": 1,
+        "consumed": false,
+        "focus": true
+      }
+    ],
     "upcastTargets": 1,
     "targeting": {
       "kind": "ally",
@@ -14542,6 +17403,19 @@
     "dice": 0,
     "concentration": true,
     "ritual": false,
+    "componentFlags": {
+      "v": true,
+      "s": true,
+      "m": true
+    },
+    "ingredients": [
+      {
+        "name": "seven thorns",
+        "qty": 1,
+        "consumed": false,
+        "focus": true
+      }
+    ],
     "targeting": {
       "kind": "template",
       "shape": "circle",
@@ -14590,6 +17464,19 @@
     "dieSides": 8,
     "concentration": true,
     "ritual": false,
+    "componentFlags": {
+      "v": true,
+      "s": true,
+      "m": true
+    },
+    "ingredients": [
+      {
+        "name": "prayer scroll",
+        "qty": 1,
+        "consumed": false,
+        "focus": true
+      }
+    ],
     "upcastDice": 1,
     "targeting": {
       "kind": "template",
@@ -14630,6 +17517,12 @@
     "dieSides": 8,
     "concentration": true,
     "ritual": false,
+    "componentFlags": {
+      "v": true,
+      "s": true,
+      "m": false
+    },
+    "ingredients": [],
     "upcastDice": 1,
     "targeting": {
       "kind": "enemy",
@@ -14666,6 +17559,12 @@
     "dieSides": 8,
     "concentration": false,
     "ritual": false,
+    "componentFlags": {
+      "v": true,
+      "s": true,
+      "m": false
+    },
+    "ingredients": [],
     "targeting": {
       "kind": "enemy",
       "range": 60
@@ -14734,6 +17633,19 @@
     "dice": 0,
     "concentration": true,
     "ritual": false,
+    "componentFlags": {
+      "v": true,
+      "s": true,
+      "m": true
+    },
+    "ingredients": [
+      {
+        "name": "rotten egg",
+        "qty": 1,
+        "consumed": false,
+        "focus": true
+      }
+    ],
     "targeting": {
       "kind": "template",
       "shape": "circle",
@@ -14776,6 +17688,19 @@
     "dice": 0,
     "concentration": false,
     "ritual": false,
+    "componentFlags": {
+      "v": true,
+      "s": true,
+      "m": true
+    },
+    "ingredients": [
+      {
+        "name": "soft clay",
+        "qty": 1,
+        "consumed": false,
+        "focus": true
+      }
+    ],
     "targeting": {
       "kind": "ally",
       "range": 5
@@ -14803,6 +17728,20 @@
     "dice": 0,
     "concentration": true,
     "ritual": false,
+    "componentFlags": {
+      "v": true,
+      "s": true,
+      "m": true
+    },
+    "ingredients": [
+      {
+        "name": "diamond dust",
+        "qty": 1,
+        "consumed": true,
+        "minGp": 100,
+        "focus": false
+      }
+    ],
     "targeting": {
       "kind": "ally",
       "range": 5
@@ -14896,6 +17835,12 @@
     "dieSides": 6,
     "concentration": true,
     "ritual": false,
+    "componentFlags": {
+      "v": true,
+      "s": true,
+      "m": false
+    },
+    "ingredients": [],
     "targeting": {
       "kind": "enemy",
       "range": 600
@@ -14962,6 +17907,19 @@
     "dice": 0,
     "concentration": true,
     "ritual": false,
+    "componentFlags": {
+      "v": true,
+      "s": false,
+      "m": true
+    },
+    "ingredients": [
+      {
+        "name": "drop of honey",
+        "qty": 1,
+        "consumed": false,
+        "focus": true
+      }
+    ],
     "targeting": {
       "kind": "enemy",
       "range": 30
@@ -15000,6 +17958,20 @@
     "dice": 0,
     "concentration": true,
     "ritual": false,
+    "componentFlags": {
+      "v": true,
+      "s": true,
+      "m": true
+    },
+    "ingredients": [
+      {
+        "name": "object with the image of a dragon engraved on it",
+        "qty": 1,
+        "consumed": true,
+        "minGp": 500,
+        "focus": false
+      }
+    ],
     "targeting": {
       "kind": "ally",
       "range": 60
@@ -15026,6 +17998,19 @@
     "dieSides": 8,
     "concentration": true,
     "ritual": false,
+    "componentFlags": {
+      "v": true,
+      "s": true,
+      "m": true
+    },
+    "ingredients": [
+      {
+        "name": "magnifying glass",
+        "qty": 1,
+        "consumed": false,
+        "focus": true
+      }
+    ],
     "targeting": {
       "kind": "template",
       "shape": "line",
@@ -15068,6 +18053,19 @@
     "dieSides": 6,
     "concentration": false,
     "ritual": false,
+    "componentFlags": {
+      "v": true,
+      "s": true,
+      "m": true
+    },
+    "ingredients": [
+      {
+        "name": "piece of sunstone",
+        "qty": 1,
+        "consumed": false,
+        "focus": true
+      }
+    ],
     "targeting": {
       "kind": "template",
       "shape": "circle",
@@ -15142,6 +18140,20 @@
     "dice": 0,
     "concentration": false,
     "ritual": false,
+    "componentFlags": {
+      "v": true,
+      "s": true,
+      "m": true
+    },
+    "ingredients": [
+      {
+        "name": "powdered diamond",
+        "qty": 1,
+        "consumed": true,
+        "minGp": 1000,
+        "focus": false
+      }
+    ],
     "targeting": {
       "kind": "template",
       "shape": "circle",
@@ -15260,6 +18272,12 @@
     "dice": 0,
     "concentration": true,
     "ritual": false,
+    "componentFlags": {
+      "v": true,
+      "s": true,
+      "m": false
+    },
+    "ingredients": [],
     "targeting": {
       "kind": "enemy",
       "range": 60
@@ -15296,6 +18314,19 @@
     "dice": 0,
     "concentration": false,
     "ritual": true,
+    "componentFlags": {
+      "v": true,
+      "s": true,
+      "m": true
+    },
+    "ingredients": [
+      {
+        "name": "two eggs",
+        "qty": 1,
+        "consumed": false,
+        "focus": true
+      }
+    ],
     "targeting": {
       "kind": "ally",
       "range": 30
@@ -15322,6 +18353,12 @@
     "dice": 0,
     "concentration": false,
     "ritual": false,
+    "componentFlags": {
+      "v": true,
+      "s": false,
+      "m": false
+    },
+    "ingredients": [],
     "targeting": {
       "kind": "ally",
       "range": 10
@@ -15350,6 +18387,20 @@
     "dice": 0,
     "concentration": false,
     "ritual": false,
+    "componentFlags": {
+      "v": true,
+      "s": false,
+      "m": true
+    },
+    "ingredients": [
+      {
+        "name": "rare inks",
+        "qty": 1,
+        "consumed": true,
+        "minGp": 50,
+        "focus": false
+      }
+    ],
     "targeting": {
       "kind": "template",
       "shape": "circle",
@@ -15383,6 +18434,12 @@
     "dice": 0,
     "concentration": false,
     "ritual": false,
+    "componentFlags": {
+      "v": true,
+      "s": false,
+      "m": false
+    },
+    "ingredients": [],
     "targeting": {
       "kind": "ally",
       "range": 30
@@ -15409,6 +18466,12 @@
     "dieSides": 8,
     "concentration": false,
     "ritual": false,
+    "componentFlags": {
+      "v": true,
+      "s": true,
+      "m": false
+    },
+    "ingredients": [],
     "upcastDice": 1,
     "targeting": {
       "kind": "template",
@@ -15452,6 +18515,12 @@
     "dice": 0,
     "concentration": false,
     "ritual": false,
+    "componentFlags": {
+      "v": true,
+      "s": false,
+      "m": false
+    },
+    "ingredients": [],
     "targeting": {
       "kind": "self"
     },
@@ -15478,6 +18547,19 @@
     "dice": 0,
     "concentration": false,
     "ritual": true,
+    "componentFlags": {
+      "v": true,
+      "s": true,
+      "m": true
+    },
+    "ingredients": [
+      {
+        "name": "crystal bead",
+        "qty": 1,
+        "consumed": false,
+        "focus": true
+      }
+    ],
     "targeting": {
       "kind": "template",
       "shape": "emanation",
@@ -15507,6 +18589,19 @@
     "dice": 0,
     "concentration": false,
     "ritual": false,
+    "componentFlags": {
+      "v": true,
+      "s": false,
+      "m": true
+    },
+    "ingredients": [
+      {
+        "name": "miniature ziggurat",
+        "qty": 1,
+        "consumed": false,
+        "focus": true
+      }
+    ],
     "targeting": {
       "kind": "ally",
       "range": 5
@@ -15536,6 +18631,12 @@
     "dice": 0,
     "concentration": false,
     "ritual": false,
+    "componentFlags": {
+      "v": true,
+      "s": true,
+      "m": false
+    },
+    "ingredients": [],
     "targeting": {
       "kind": "ally",
       "range": 10
@@ -15561,6 +18662,12 @@
     "dice": 0,
     "concentration": true,
     "ritual": false,
+    "componentFlags": {
+      "v": true,
+      "s": true,
+      "m": false
+    },
+    "ingredients": [],
     "targeting": {
       "kind": "self"
     },
@@ -15586,6 +18693,19 @@
     "dice": 0,
     "concentration": true,
     "ritual": false,
+    "componentFlags": {
+      "v": true,
+      "s": true,
+      "m": true
+    },
+    "ingredients": [
+      {
+        "name": "drop of mercury, a dollop of gum arabic, and a wisp of smoke",
+        "qty": 1,
+        "consumed": false,
+        "focus": true
+      }
+    ],
     "targeting": {
       "kind": "enemy",
       "range": 30
@@ -15614,6 +18734,20 @@
     "dice": 0,
     "concentration": false,
     "ritual": false,
+    "componentFlags": {
+      "v": true,
+      "s": true,
+      "m": true
+    },
+    "ingredients": [
+      {
+        "name": "diamonds",
+        "qty": 1,
+        "consumed": true,
+        "minGp": 25000,
+        "focus": false
+      }
+    ],
     "targeting": {
       "kind": "ally",
       "range": 5
@@ -15640,6 +18774,20 @@
     "dice": 0,
     "concentration": false,
     "ritual": false,
+    "componentFlags": {
+      "v": true,
+      "s": true,
+      "m": true
+    },
+    "ingredients": [
+      {
+        "name": "mushroom powder",
+        "qty": 1,
+        "consumed": true,
+        "minGp": 25,
+        "focus": false
+      }
+    ],
     "targeting": {
       "kind": "ally",
       "range": 5
@@ -15669,6 +18817,19 @@
     "dice": 0,
     "concentration": false,
     "ritual": false,
+    "componentFlags": {
+      "v": false,
+      "s": true,
+      "m": true
+    },
+    "ingredients": [
+      {
+        "name": "weapon with",
+        "qty": 1,
+        "consumed": true,
+        "focus": false
+      }
+    ],
     "targeting": {
       "kind": "self"
     },
@@ -15698,6 +18859,12 @@
     "dieSides": 10,
     "concentration": true,
     "ritual": false,
+    "componentFlags": {
+      "v": true,
+      "s": true,
+      "m": false
+    },
+    "ingredients": [],
     "targeting": {
       "kind": "enemy",
       "range": 600
@@ -15733,6 +18900,19 @@
     "dice": 0,
     "concentration": false,
     "ritual": true,
+    "componentFlags": {
+      "v": true,
+      "s": true,
+      "m": true
+    },
+    "ingredients": [
+      {
+        "name": "bit of string and of wood",
+        "qty": 1,
+        "consumed": false,
+        "focus": true
+      }
+    ],
     "targeting": {
       "kind": "ally",
       "range": 60
@@ -15825,6 +19005,12 @@
     "dieSides": 6,
     "concentration": true,
     "ritual": false,
+    "componentFlags": {
+      "v": true,
+      "s": true,
+      "m": false
+    },
+    "ingredients": [],
     "upcastDice": 1,
     "targeting": {
       "kind": "enemy",
@@ -15862,6 +19048,12 @@
     "dieSides": 6,
     "concentration": false,
     "ritual": false,
+    "componentFlags": {
+      "v": true,
+      "s": false,
+      "m": false
+    },
+    "ingredients": [],
     "targeting": {
       "kind": "enemy",
       "range": 60
@@ -15898,6 +19090,19 @@
     "dieSides": 4,
     "concentration": false,
     "ritual": false,
+    "componentFlags": {
+      "v": true,
+      "s": true,
+      "m": true
+    },
+    "ingredients": [
+      {
+        "name": "drop of bile",
+        "qty": 1,
+        "consumed": false,
+        "focus": true
+      }
+    ],
     "upcastDice": 2,
     "targeting": {
       "kind": "template",
@@ -16018,6 +19223,19 @@
     "dieSides": 8,
     "concentration": true,
     "ritual": false,
+    "componentFlags": {
+      "v": true,
+      "s": true,
+      "m": true
+    },
+    "ingredients": [
+      {
+        "name": "piece of charcoal",
+        "qty": 1,
+        "consumed": false,
+        "focus": true
+      }
+    ],
     "upcastDice": 1,
     "targeting": {
       "kind": "enemy",
@@ -16056,6 +19274,19 @@
     "dice": 0,
     "concentration": true,
     "ritual": false,
+    "componentFlags": {
+      "v": true,
+      "s": true,
+      "m": true
+    },
+    "ingredients": [
+      {
+        "name": "shard of glass",
+        "qty": 1,
+        "consumed": false,
+        "focus": true
+      }
+    ],
     "targeting": {
       "kind": "template",
       "shape": "line",
@@ -16094,6 +19325,19 @@
     "dieSides": 6,
     "concentration": true,
     "ritual": false,
+    "componentFlags": {
+      "v": true,
+      "s": true,
+      "m": true
+    },
+    "ingredients": [
+      {
+        "name": "piece of quartz",
+        "qty": 1,
+        "consumed": false,
+        "focus": true
+      }
+    ],
     "upcastDice": 2,
     "targeting": {
       "kind": "enemy",
@@ -16130,6 +19374,19 @@
     "dice": 0,
     "concentration": true,
     "ritual": false,
+    "componentFlags": {
+      "v": true,
+      "s": true,
+      "m": true
+    },
+    "ingredients": [
+      {
+        "name": "cube of granite",
+        "qty": 1,
+        "consumed": false,
+        "focus": true
+      }
+    ],
     "targeting": {
       "kind": "enemy",
       "range": 120
@@ -16158,6 +19415,19 @@
     "dieSides": 8,
     "concentration": true,
     "ritual": false,
+    "componentFlags": {
+      "v": true,
+      "s": true,
+      "m": true
+    },
+    "ingredients": [
+      {
+        "name": "handful of thorns",
+        "qty": 1,
+        "consumed": false,
+        "focus": true
+      }
+    ],
     "upcastDice": 1,
     "targeting": {
       "kind": "enemy",
@@ -16194,6 +19464,20 @@
     "dice": 0,
     "concentration": false,
     "ritual": false,
+    "componentFlags": {
+      "v": true,
+      "s": true,
+      "m": true
+    },
+    "ingredients": [
+      {
+        "name": "pair of platinum rings each",
+        "qty": 1,
+        "consumed": true,
+        "minGp": 50,
+        "focus": false
+      }
+    ],
     "targeting": {
       "kind": "ally",
       "range": 5
@@ -16237,6 +19521,19 @@
     "dice": 0,
     "concentration": false,
     "ritual": true,
+    "componentFlags": {
+      "v": true,
+      "s": true,
+      "m": true
+    },
+    "ingredients": [
+      {
+        "name": "short reed",
+        "qty": 1,
+        "consumed": false,
+        "focus": true
+      }
+    ],
     "targeting": {
       "kind": "ally",
       "range": 30
@@ -16306,6 +19603,19 @@
     "dice": 0,
     "concentration": false,
     "ritual": true,
+    "componentFlags": {
+      "v": true,
+      "s": true,
+      "m": true
+    },
+    "ingredients": [
+      {
+        "name": "piece of cork",
+        "qty": 1,
+        "consumed": false,
+        "focus": true
+      }
+    ],
     "targeting": {
       "kind": "ally",
       "range": 30
@@ -16334,6 +19644,19 @@
     "dice": 0,
     "concentration": true,
     "ritual": false,
+    "componentFlags": {
+      "v": true,
+      "s": true,
+      "m": true
+    },
+    "ingredients": [
+      {
+        "name": "bit of spiderweb",
+        "qty": 1,
+        "consumed": false,
+        "focus": true
+      }
+    ],
     "targeting": {
       "kind": "template",
       "shape": "cube",
@@ -16378,6 +19701,12 @@
     "dieSides": 10,
     "concentration": true,
     "ritual": false,
+    "componentFlags": {
+      "v": true,
+      "s": true,
+      "m": false
+    },
+    "ingredients": [],
     "targeting": {
       "kind": "template",
       "shape": "circle",
@@ -16486,6 +19815,19 @@
     "dice": 0,
     "concentration": false,
     "ritual": false,
+    "componentFlags": {
+      "v": true,
+      "s": true,
+      "m": true
+    },
+    "ingredients": [
+      {
+        "name": "candle",
+        "qty": 1,
+        "consumed": false,
+        "focus": true
+      }
+    ],
     "targeting": {
       "kind": "ally",
       "range": 30
@@ -16512,6 +19854,19 @@
     "dieSides": 8,
     "concentration": true,
     "ritual": false,
+    "componentFlags": {
+      "v": true,
+      "s": true,
+      "m": true
+    },
+    "ingredients": [
+      {
+        "name": "fan and a feather",
+        "qty": 1,
+        "consumed": false,
+        "focus": true
+      }
+    ],
     "targeting": {
       "kind": "enemy",
       "range": 120
@@ -16582,6 +19937,12 @@
     "dice": 0,
     "concentration": false,
     "ritual": false,
+    "componentFlags": {
+      "v": true,
+      "s": false,
+      "m": false
+    },
+    "ingredients": [],
     "targeting": {
       "kind": "self"
     },
@@ -16607,6 +19968,12 @@
     "dice": 0,
     "concentration": false,
     "ritual": false,
+    "componentFlags": {
+      "v": true,
+      "s": false,
+      "m": false
+    },
+    "ingredients": [],
     "targeting": {
       "kind": "ally",
       "range": 5
@@ -17041,6 +20408,12 @@
     "dice": 0,
     "concentration": false,
     "ritual": false,
+    "componentFlags": {
+      "v": true,
+      "s": true,
+      "m": false
+    },
+    "ingredients": [],
     "targeting": {
       "kind": "template",
       "shape": "circle",

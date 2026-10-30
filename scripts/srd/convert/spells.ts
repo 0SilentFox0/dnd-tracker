@@ -4,6 +4,7 @@ import type { SpellRow } from "../lib/types";
 import { SPELL_OVERRIDES } from "../overrides/spells";
 import { schoolName } from "./spell-groups";
 
+import { parseMaterial } from "@/lib/server/compendium-import/adapters/spell-patterns/ingredients";
 import { groupBy } from "@/lib/utils/common/collections";
 import { capitalize } from "@/lib/utils/common/text";
 import { ADDS_MOD, castingFields, spellEffects, spellHead, spellKind, spellResolution, spellSide, spellTargeting, spellUpcast, validDice } from "@/lib/utils/spells/derive/mechanics";
@@ -11,6 +12,14 @@ import { ADDS_MOD, castingFields, spellEffects, spellHead, spellKind, spellResol
 export { durationRounds, spellKind, spellRange } from "@/lib/utils/spells/derive/mechanics";
 
 const CASTING_TIME: Record<string, string> = { action: "Action", "bonus-action": "Bonus Action", reaction: "Reaction", "1minute": "1 minute", "10minutes": "10 minutes", "1hour": "1 hour" };
+
+function materials(f: O5Spell): Pick<SpellRow, "componentFlags" | "ingredients"> {
+  const componentFlags = { v: f.verbal, s: f.somatic, m: f.material };
+
+  const parsed = f.material && f.material_specified ? parseMaterial({ text: f.material_specified, consume: f.material_consumed || undefined }) : null;
+
+  return { componentFlags, ingredients: parsed ?? [] };
+}
 
 function description(f: O5Spell): string {
   const components = [f.verbal && "V", f.somatic && "S", f.material && `M${f.material_specified ? ` (${f.material_specified})` : ""}`].filter(Boolean).join(", ");
@@ -44,6 +53,7 @@ export function convertSpell(row: Fixture<O5Spell>, options: Array<Fixture<O5Cas
     ...(dice && { dieSides: dice.sides as SpellRow["dieSides"] }),
     concentration: f.concentration,
     ritual: f.ritual,
+    ...materials(f),
     ...spellUpcast(f, kind, options.filter((o) => o.fields.type.startsWith("slot_level_")).map((o) => ({ level: Number(o.fields.type.slice("slot_level_".length)), dice: parseDiceExpr(o.fields.damage_roll) }))),
     ...(kind === "heal" && ADDS_MOD.test(f.desc) && { addAbilityMod: true }),
     targeting,

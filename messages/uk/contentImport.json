@@ -61,6 +61,8 @@
       "icon": "Іконка",
       "cost": "Вартість",
       "casting": "Час накладання (JSON)",
+      "componentFlags": "Прапорці компонентів (JSON)",
+      "ingredients": "Інгредієнти (JSON)",
       "dice": "Кістки",
       "dieSides": "Грань кубика",
       "concentration": "Концентрація",

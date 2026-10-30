@@ -61,6 +61,8 @@
       "icon": "Icon",
       "cost": "Cost",
       "casting": "Casting time (JSON)",
+      "componentFlags": "Component flags (JSON)",
+      "ingredients": "Ingredients (JSON)",
       "dice": "Dice",
       "dieSides": "Die sides",
       "concentration": "Concentration",

@@ -32,6 +32,17 @@ describe("SRD spell effect coverage", () => {
     expect(spell("fireball").ritual).toBeFalsy();
   });
 
+  it("material components: flags on every spell, parsed ingredients, explicit list of multi-cost spells left unparsed", () => {
+    const withIngredients = spells.filter((s) => (s.ingredients ?? []).length > 0);
+
+    const unparsed = spells.filter((s) => s.componentFlags?.m && (s.ingredients ?? []).length === 0).map((s) => s.slug.replace("srd-2024_", ""));
+
+    expect(spells.filter((s) => s.lists.length > 0).every((s) => s.componentFlags)).toBe(true);
+    expect(withIngredients).toHaveLength(184);
+    expect(unparsed.sort()).toEqual(["astral-projection", "clone", "jump", "legend-lore", "secret-chest"]);
+    expect(spell("revivify").ingredients).toEqual([{ name: "diamond", qty: 1, consumed: true, minGp: 300, focus: false }]);
+  });
+
   it("every override effect passes the spell schema", () => {
     const failed = spells.flatMap((s) => s.spellEffects.map((e) => ({ slug: s.slug, ok: SpellEffectSchema.safeParse(e).success }))).filter((r) => !r.ok);
 

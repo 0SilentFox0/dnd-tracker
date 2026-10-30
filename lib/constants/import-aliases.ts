@@ -57,6 +57,8 @@ export const FIELD_ALIASES: Record<ImportKind, PerField<readonly string[]>> = {
     icon: ICON,
     cost: ["вартість", "дія", "casting time", "час накладання"],
     casting: ["час накладання (json)", "casting", "casting time (json)"],
+    componentFlags: ["прапорці компонентів (json)", "component flags", "component flags (json)"],
+    ingredients: ["інгредієнти (json)", "ingredients", "ingredients (json)"],
     dice: ["кістки", "кубики", "damage", "шкода"],
     dieSides: ["грань кубика", "die", "грань", "die sides"],
     concentration: ["концентрація"],
