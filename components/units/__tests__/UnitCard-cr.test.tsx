@@ -29,7 +29,7 @@ describe("UnitCard: CR", () => {
 
   it("shows creature type, senses, movement and languages for a monster", () => {
     renderCard({ id: "dragon", name: "Дракон", level: 1, attacks: [], cr: 10, statblock: { creatureType: "dragon", senses: { blindsight: 60, passivePerception: 21 }, movement: { fly: 80, hover: true }, languages: "Draconic", telepathy: 120 } } as unknown as Unit);
-    expect(screen.getByText("dragon")).toBeTruthy();
+    expect(screen.getByText("Dragons")).toBeTruthy();
     expect(screen.getByText(/gameTerms\.monster\.distance.*senses\.blindsight.*60/)).toBeTruthy();
     expect(screen.getByText(/gameTerms\.monster\.distance.*"value":80/)).toBeTruthy();
     expect(screen.getByText(/Draconic/)).toBeTruthy();
