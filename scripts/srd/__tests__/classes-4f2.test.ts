@@ -120,3 +120,17 @@ describe("duplicate level rows", () => {
     expect(cls("Monk").columns.find((c) => c.key === "unarmored-movement")?.values[1]).toBe("+10 ft.");
   });
 });
+
+describe("channel divinity split", () => {
+  it("each split ability keeps its own description, not the whole feature text", () => {
+    const spark = ability("Cleric", "Divine Spark").description ?? "";
+
+    const turn = ability("Cleric", "Turn Undead").description ?? "";
+
+    expect(spark).not.toEqual(turn);
+    expect(spark).toMatch(/Roll 1d8/);
+    expect(turn).toMatch(/Wisdom saving throw/);
+    expect(spark.length).toBeLessThan(700);
+    expect(turn.length).toBeLessThan(700);
+  });
+});

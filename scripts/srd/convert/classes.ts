@@ -106,7 +106,7 @@ function featureAbilities(f: Fixture<O5Feature>, level: number): Ability[] {
 
   if (!core) return [noteAbility(`${tail}-${level}`, name, desc)];
 
-  if (Array.isArray(core)) return core.map(({ name: optionName, slug, ...rest }: FeatureOption) => coreAbility(`${tail}-${slug}-${level}`, optionName, desc, rest));
+  if (Array.isArray(core)) return core.map(({ name: optionName, slug, description, ...rest }: FeatureOption) => coreAbility(`${tail}-${slug}-${level}`, optionName, description ?? desc, rest));
 
   return [coreAbility(`${tail}-${level}`, name, desc, core)];
 }
