@@ -1,3 +1,4 @@
+import type { ComponentFlags, SpellIngredient } from "@/lib/schemas/spell-ingredients";
 import type { SpellFx } from "@/lib/utils/battle/fx/spells";
 import type { SpellEffect } from "@/lib/utils/spells/model/schema";
 import type { RaceModifier, SpellCastingTime, SpellCost, SpellDefinition, SpellResolution, SpellTargeting } from "@/lib/utils/spells/model/schema";
@@ -35,6 +36,8 @@ export interface Spell {
   spellGroup?: SpellGroupRef | null;
   fx?: unknown;
   lists?: string[];
+  ingredients?: SpellIngredient[];
+  componentFlags?: ComponentFlags | null;
 }
 
 export interface SpellGroup {
@@ -70,6 +73,8 @@ export interface SpellFormData {
   damageBonus?: number | null;
   fx: SpellFx;
   lists?: string[];
+  ingredients?: SpellIngredient[];
+  componentFlags?: ComponentFlags | null;
 }
 
 /** Columns `readSpellDefinition` needs to rebuild a spell for a dry-run cast (battle-effect preview). */

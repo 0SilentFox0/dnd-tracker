@@ -49,6 +49,8 @@ export const spellsResource = defineResource<SpellRow, CreateSpellInput, UpdateS
         appearanceDescription: data.appearanceDescription ?? null,
         fx: data.fx ?? undefined,
         ...(data.lists && { lists: data.lists }),
+        ingredients: toJsonInput(data.ingredients),
+        componentFlags: data.componentFlags ? toJsonInput(data.componentFlags) : undefined,
         // legacy NOT NULL columns until a later migration; the new model never reads them
         type: "target",
         damageType: "damage",
@@ -89,6 +91,8 @@ export const spellsResource = defineResource<SpellRow, CreateSpellInput, UpdateS
         damageBonus: data.damageBonus,
         fx: data.fx === null ? Prisma.DbNull : toJsonInput(data.fx),
         lists: data.lists,
+        ingredients: toJsonInput(data.ingredients),
+        componentFlags: data.componentFlags === null ? Prisma.DbNull : toJsonInput(data.componentFlags),
       },
       include: withGroup,
     });

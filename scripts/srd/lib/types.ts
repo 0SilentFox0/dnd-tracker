@@ -3,6 +3,7 @@ import type { ClassCaster } from "@/lib/constants/classes";
 import type { DndSkill } from "@/lib/constants/skills";
 import type { SpellGroupIconKey } from "@/lib/constants/spell-groups";
 import type { WeaponTrait } from "@/lib/constants/weapon-traits";
+import type { ComponentFlags, SpellIngredient } from "@/lib/schemas/spell-ingredients";
 import type { Ability, Effect } from "@/lib/utils/abilities/schema";
 import type { ArmorStats } from "@/lib/utils/artifacts/armor-stats";
 import type { WeaponStats } from "@/lib/utils/artifacts/weapon-stats";
@@ -38,6 +39,8 @@ export interface SpellRow {
   resolution: SpellResolution;
   spellEffects: Effect[];
   lists: string[];
+  ingredients?: SpellIngredient[];
+  componentFlags?: ComponentFlags;
 }
 
 export interface RaceRow { slug: string; name: string; passiveAbility: { name: string; description: string }; abilities: Ability[]; choices?: Choice[] }

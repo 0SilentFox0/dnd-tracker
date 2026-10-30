@@ -60,6 +60,8 @@ export function spellToForm(spell: Spell): SpellFormData {
     damageBonus: def.damageBonus,
     fx: parseSpellFx(spell.fx) ?? {},
     ...(spell.lists?.length && { lists: spell.lists }),
+    ...(spell.ingredients?.length && { ingredients: spell.ingredients }),
+    ...(spell.componentFlags && { componentFlags: spell.componentFlags }),
   };
 }
 
