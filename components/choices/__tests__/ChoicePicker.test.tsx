@@ -27,6 +27,25 @@ const choiceById = (id: string) => sorcerer.features.flatMap((f) => f.choices ??
 describe("ChoicePicker", () => {
   afterEach(cleanup);
 
+  it("long choice description: first paragraph visible, full text folded away", () => {
+    const rest = "Long rules text. ".repeat(100);
+
+    const { container } = render(<Harness choice={{ ...choiceById("metamagic"), description: `Pick two options.\n\n${rest}` }} context={ctx(2)} />);
+
+    const lead = screen.getByText("Pick two options.");
+
+    expect(lead.closest("details")).toBeNull();
+    expect(container.querySelector("details")?.textContent).toContain(rest.trim());
+    expect(screen.getByText("choices.picker.moreDetails")).toBeTruthy();
+  });
+
+  it("short choice description stays inline without a fold", () => {
+    const { container } = render(<Harness choice={{ ...choiceById("metamagic"), description: "Pick two options." }} context={ctx(2)} />);
+
+    expect(screen.getByText("Pick two options.")).toBeTruthy();
+    expect(container.querySelector("details")).toBeNull();
+  });
+
   it("options: counter, min level reason, requires reason", () => {
     render(<Harness choice={choiceById("metamagic")} context={ctx(2)} />);
 

@@ -65,7 +65,7 @@ export function ChoicePicker({ choice, value, onChange, ctx, error }: ChoicePick
   return (
     <div className="space-y-2">
       {header}
-      {choice.description && <p className="whitespace-pre-line text-xs text-hud-muted">{choice.description}</p>}
+      {choice.description && <ChoiceDescription text={choice.description} />}
       {choice.kind === "option" && <OptionCards choice={choice} ids={ids} level={ctx.level} onToggle={toggle} />}
       {choice.kind === "feat" && <FeatList choice={choice} value={value} ctx={ctx} actions={{ onToggle: toggle, onChange }} />}
       {(choice.kind === "skill" || choice.kind === "expertise") && (
@@ -83,6 +83,26 @@ export function ChoicePicker({ choice, value, onChange, ctx, error }: ChoicePick
           {error}
         </p>
       )}
+    </div>
+  );
+}
+
+const LEAD_MAX = 200;
+
+function ChoiceDescription({ text }: { text: string }) {
+  const t = useTranslations("choices");
+
+  if (text.length <= LEAD_MAX) return <p className="whitespace-pre-line text-xs text-hud-muted">{text}</p>;
+
+  const lead = text.split("\n\n")[0].trim();
+
+  return (
+    <div className="space-y-1 text-xs text-hud-muted">
+      <p>{lead.length > LEAD_MAX ? `${lead.slice(0, LEAD_MAX).trimEnd()}…` : lead}</p>
+      <details>
+        <summary className="cursor-pointer text-hud-gold">{t("picker.moreDetails")}</summary>
+        <p className="mt-1 whitespace-pre-line">{text}</p>
+      </details>
     </div>
   );
 }
