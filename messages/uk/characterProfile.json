@@ -262,7 +262,7 @@
       "description": "Опис",
       "skills": "Навички",
       "tools": "Інструменти",
-      "originFeat": "Origin-риса",
+      "originFeat": "Риса походження",
       "equipment": "Спорядження",
       "equipmentNote": "Спорядження й гроші видає ДМ вручну."
     }

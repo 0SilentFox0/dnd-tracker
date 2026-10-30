@@ -102,4 +102,4 @@ export function withStepPicks(state: ChoicesState, step: WizardStep, list: Choic
 export const withStepSubclass = (state: ChoicesState, step: WizardStep, subclassId: string): ChoicesState =>
   step.kind === "subclass" ? { ...state, classes: state.classes.map((e) => (e.classId === step.classId ? { ...e, subclassId } : e)) } : state;
 
-export const withStepBackground = (state: ChoicesState, id: string | null): ChoicesState => ({ ...state, ...mergeBackground(state, { backgroundId: id }) });
+export const withStepBackground = (saved: ChoicesState, draft: ChoicesState, id: string | null): ChoicesState => ({ ...draft, ...mergeBackground(saved, { backgroundId: id }) });

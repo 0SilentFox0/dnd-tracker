@@ -25,7 +25,7 @@ const isBackgroundVisit = (v: PickVisit): boolean => v.path.startsWith("backgrou
 export function backgroundOpenCount(visits: readonly PickVisit[], refs: Pick<ChoiceRefs, "featsById">): { count: number; key: string | null } {
   const own = visits.filter(isBackgroundVisit);
 
-  const key = own.find((v) => pendingCount([v], refs) > 0)?.path ?? null;
+  const key = own.find((v) => pendingCount([v], refs) > 0)?.path.split(".").slice(0, 2).join(".") ?? null;
 
   return { count: pendingCount(own, refs), key };
 }

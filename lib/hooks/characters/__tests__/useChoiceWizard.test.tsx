@@ -40,6 +40,20 @@ describe("useChoiceWizard", () => {
     expect(at.result.current.index).toBe(2);
   });
 
+  it("startAt background without any backgrounds in the campaign shows no step", () => {
+    const { result } = setup({ startAt: "background" });
+
+    expect(result.current.step).toBeUndefined();
+  });
+
+  it("startAt background opens the background step when backgrounds exist", () => {
+    const bg = { id: "bg", name: "Sage", icon: null, description: null, choices: [], skillProficiencies: [], toolProficiencies: [], originFeatId: null, equipmentText: null };
+
+    const { result } = setup({ startAt: "background", refs: { ...wrefs, backgroundsById: { bg } } });
+
+    expect(result.current.step?.key).toBe("background");
+  });
+
   it("startAt with a scoped key lands on that class's step in a multiclass hero", () => {
     const multi: ChoicesState = { raceChoices: {}, feats: [], classes: [{ classId: sorcerer.id, level: 3 }, { classId: rogue.id, level: 3 }] };
 

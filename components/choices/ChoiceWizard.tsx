@@ -84,7 +84,7 @@ export function ChoiceWizard({ campaignId, characterId, initial, hero, refs, sta
       {step.choice?.kind === "feat" && <p className="text-xs text-hud-muted">{t(`wizard.featSource.${featSourceOf(step)}`, { name: step.source.name, class: step.source.name, level: step.source.level ?? 0 })}</p>}
       {step.kind === "background" ? (
         <div className="space-y-2">
-          <BackgroundPicker backgrounds={Object.values(refs.backgroundsById ?? {})} feats={refs.featsById} value={data.backgroundId ?? null} onChange={(id) => set(withStepBackground(data, id))} />
+          <BackgroundPicker backgrounds={Object.values(refs.backgroundsById ?? {})} feats={refs.featsById} value={data.backgroundId ?? null} onChange={(id) => set(withStepBackground(wizard.saved, data, id))} />
           {wizard.saved.backgroundId && data.backgroundId !== wizard.saved.backgroundId && (
             <p role="alert" className="text-sm text-hud-danger">
               {t("wizard.background.resetWarning")}

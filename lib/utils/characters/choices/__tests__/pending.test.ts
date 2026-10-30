@@ -66,6 +66,12 @@ describe("backgroundOpenCount", () => {
     expect(open({ backgroundId: "bg", backgroundChoices: { "bg-skill": [{ id: "arcana" }, { id: "history" }] } })).toEqual({ count: 0, key: null });
   });
 
+  it("openKey of a nested pick is cut to its wizard step key", () => {
+    const visits = [{ choice: { id: "sub", label: "S", level: 1, count: 1, kind: "skill" as const }, picks: [], open: true, target: 1, path: "backgroundChoices.feat-pick.0.sub" }];
+
+    expect(backgroundOpenCount(visits, refs).key).toBe("backgroundChoices.feat-pick");
+  });
+
   it("counts missing picks and names the first open key, ignoring other owners", () => {
     expect(open({ backgroundId: "bg", backgroundChoices: { "bg-skill": [{ id: "arcana" }] }, ...sorc(1) })).toEqual({ count: 1, key: "backgroundChoices.bg-skill" });
   });

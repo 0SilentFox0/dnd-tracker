@@ -153,18 +153,32 @@ describe("background step", () => {
   it("withStepBackground resets picks on change, keeps on same id, null clears", () => {
     const s = state({ backgroundId: "bg", backgroundChoices: { "bg-skill": [{ id: "x" }] }, backgroundFeatPicks: { a: [{ id: "y" }] } });
 
-    const changed = withStepBackground(s, "bg2");
+    const changed = withStepBackground(s, s, "bg2");
 
     expect(changed.backgroundId).toBe("bg2");
     expect(changed.backgroundChoices).toEqual({});
     expect(changed.backgroundFeatPicks).toEqual({});
-    expect(withStepBackground(s, "bg").backgroundChoices).toEqual(s.backgroundChoices);
-    expect(withStepBackground(s, null).backgroundId).toBeNull();
-    expect(withStepBackground(s, null).backgroundChoices).toEqual({});
+    expect(withStepBackground(s, s, "bg").backgroundChoices).toEqual(s.backgroundChoices);
+    expect(withStepBackground(s, s, null).backgroundId).toBeNull();
+    expect(withStepBackground(s, s, null).backgroundChoices).toEqual({});
+  });
+
+  it("switching away and back to the saved background restores its picks", () => {
+    const saved = state({ backgroundId: "bg", backgroundChoices: { "bg-skill": [{ id: "x" }] }, backgroundFeatPicks: { a: [{ id: "y" }] } });
+
+    const away = withStepBackground(saved, saved, "bg2");
+
+    const back = withStepBackground(saved, away, "bg");
+
+    expect(back.backgroundId).toBe("bg");
+    expect(back.backgroundChoices).toEqual(saved.backgroundChoices);
+    expect(back.backgroundFeatPicks).toEqual(saved.backgroundFeatPicks);
   });
 
   it("new background choices appear after replacement", () => {
-    const s = withStepBackground(state({ backgroundId: "bg2" }), "bg");
+    const s = (() => { const cur = state({ backgroundId: "bg2" });
+
+ return withStepBackground(cur, cur, "bg"); })();
 
     expect(keys(s, hero, keep, r2)).toContain("backgroundChoices.bg-skill");
   });
