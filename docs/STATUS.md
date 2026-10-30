@@ -12,7 +12,7 @@ _Оновлено: 2026-10-30._
 
 ## У роботі
 
-**Переклад офіційних шаблонів (`feat/template-i18n`, не змерджено):** накладки мов на SRD 5.2 (`scripts/srd/i18n`, `pnpm srd:i18n`), `campaigns.locale/templateKey` (міграція `20261118000000_template_locale` їде з main), перемикач мови в виборі шаблону; `uk` фаза A готова, фаза B (описи units/artifacts/spells, ≈640 тис. симв.) відкрита. Після деплою на проді: `pnpm constructor:srd-template --locale uk --allow-remote`. Деталі — [content-api.md](architecture/content-api.md#мови-шаблону-srd-feattemplate-i18n).
+**Переклад офіційних шаблонів (`feat/template-i18n`, не змерджено):** накладки мов на SRD 5.2 (`scripts/srd/i18n`, `pnpm srd:i18n`), `campaigns.locale/templateKey` (міграція `20261118000000_template_locale` їде з main), перемикач мови в виборі шаблону; `uk` фази A і B готові (100%, фаза B — 1799 описів units/artifacts/spells; помилки узгодженості виправляють `apply`/`normalize`). Після деплою на проді: `pnpm constructor:srd-template --locale uk --allow-remote`. Деталі — [content-api.md](architecture/content-api.md#мови-шаблону-srd-feattemplate-i18n).
 
 **i18n-залишки (`feat/i18n-leftovers`, не змерджено):** збережені крити/стани пишуться як name-id + `label` TextRef, тож відкат прод-коду можливий лише на цей merge або новіший: старіший код покаже сирі id для нових ефектів. `scripts/db/rename-legacy-ai-threads.ts --apply` ще не запущено на проді (потрібен дозвіл користувача); після нього видалити `LEGACY_THREAD_TITLE` у `lib/constants/ai.ts` — це останній `eslint-disable` на кирилицю.
 
