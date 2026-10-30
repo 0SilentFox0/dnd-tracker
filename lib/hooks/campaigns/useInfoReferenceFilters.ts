@@ -2,6 +2,7 @@
 
 import { useDeferredValue, useMemo, useState } from "react";
 
+import type { Translator } from "@/lib/i18n/translator";
 import { useTranslator } from "@/lib/i18n/use-translator";
 import {
   artifactSearchText,
@@ -10,6 +11,7 @@ import {
   skillSearchText,
   spellSearchText,
 } from "@/lib/utils/campaigns/info-reference";
+import { spellLabelsOf } from "@/lib/utils/spells/model/labels";
 import type { ArtifactForReference, ClassForReference, ReferenceFilters, SectionTab, SkillForReference, SpellForReference } from "@/types/info-reference";
 
 interface FilterValues {
@@ -44,6 +46,14 @@ function uniqueSorted<T, V extends string | number>(items: T[], pick: (item: T) 
   return [...values].sort(compare);
 }
 
+function spellTypeOptions(spells: SpellForReference[], t: Translator) {
+  const labels = spellLabelsOf(t);
+
+  const byKey = new Map(spells.map((s) => [s.facetKey, labels.targeting(s.targeting)]));
+
+  return Array.from(byKey, ([value, label]) => ({ value, label })).sort((a, b) => a.label.localeCompare(b.label));
+}
+
 export function useInfoReferenceFilters(skills: SkillForReference[], spells: SpellForReference[], artifacts: ArtifactForReference[] = [], classes: ClassForReference[] | null = null) {
   const t = useTranslator();
 
@@ -66,7 +76,7 @@ export function useInfoReferenceFilters(skills: SkillForReference[], spells: Spe
       mainSkill: uniqueSorted(skills, (s) => s.mainSkillName),
       spellLevel: uniqueSorted(spells, (s) => s.level, (a, b) => a - b),
       spellGroup: uniqueSorted(spells, (s) => s.groupName),
-      spellType: uniqueSorted(spells, (s) => s.type),
+      spellType: spellTypeOptions(spells, t),
       artifactRarity: uniqueSorted(artifacts, (a) => a.rarity),
       artifactSlot: Array.from(slots, ([value, label]) => ({ value, label })).sort((a, b) => a.label.localeCompare(b.label)),
       artifactSet: uniqueSorted(artifacts, (a) => a.setName),
@@ -93,7 +103,7 @@ export function useInfoReferenceFilters(skills: SkillForReference[], spells: Spe
           matchSearch(spellTexts.get(s.id) ?? "", deferredSearch) &&
           (values.spellLevel == null || s.level === values.spellLevel) &&
           (!values.spellGroup || s.groupName === values.spellGroup) &&
-          (!values.spellType || s.type === values.spellType),
+          (!values.spellType || s.facetKey === values.spellType),
       ),
     [spells, spellTexts, deferredSearch, values.spellLevel, values.spellGroup, values.spellType],
   );

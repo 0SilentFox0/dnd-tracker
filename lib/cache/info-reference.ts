@@ -7,7 +7,7 @@ import { prisma } from "@/lib/db";
 import { describeEffect } from "@/lib/utils/abilities/registry/effects";
 import { abilitySummary } from "@/lib/utils/abilities/summary";
 import { parseSpellFx } from "@/lib/utils/battle/fx/spell-fx-schema";
-import { costLabel, resolutionLabel, targetingFacetLabel } from "@/lib/utils/spells/model/labels";
+import { targetingFacetKey } from "@/lib/utils/spells/model/labels";
 import { readSpellDefinition } from "@/lib/utils/spells/model/read";
 import { spellRules } from "@/lib/utils/spells/to-book-spell";
 import type { SkillForReference, SpellForReference } from "@/types/info-reference";
@@ -75,9 +75,10 @@ async function loadInfoReference(campaignId: string): Promise<InfoReference> {
         id: s.id,
         name: s.name,
         level: s.level,
-        type: targetingFacetLabel(def.targeting),
-        cost: costLabel(def.cost),
-        resolution: resolutionLabel(def.resolution),
+        targeting: def.targeting,
+        facetKey: targetingFacetKey(def.targeting),
+        cost: def.cost,
+        resolution: def.resolution,
         dice: def.dice,
         description: s.description,
         effects: def.effects.map(describeEffect),
@@ -94,5 +95,5 @@ async function loadInfoReference(campaignId: string): Promise<InfoReference> {
 export function getCachedInfoReference(campaignId: string): Promise<InfoReference> {
   const tags = [cacheTags.skills(campaignId), cacheTags.mainSkills(campaignId), cacheTags.spells(campaignId)];
 
-  return unstable_cache(() => loadInfoReference(campaignId), ["info-reference-v5", campaignId], { tags, revalidate: REFERENCE_REVALIDATE_SECONDS })();
+  return unstable_cache(() => loadInfoReference(campaignId), ["info-reference-v6", campaignId], { tags, revalidate: REFERENCE_REVALIDATE_SECONDS })();
 }

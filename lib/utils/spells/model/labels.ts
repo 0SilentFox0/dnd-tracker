@@ -1,20 +1,8 @@
-/* eslint-disable no-restricted-syntax -- uk facet strings of the cached info reference (stored as plain strings in the cache and used as filter values) */
 import type { SpellCost, SpellResolution, SpellTargeting } from "./schema";
 
-import { ABILITY_LABELS } from "@/lib/constants/abilities";
-import { SPELL_COST_LABELS, SPELL_SAVE_ON_SUCCESS_LABELS, SPELL_TARGETING_LABELS, TEMPLATE_SHAPE_LABELS } from "@/lib/constants/spells";
 import { dynamicTextRef, textRef } from "@/lib/i18n/text-ref";
+import type { Translator } from "@/lib/i18n/translator";
 import type { TextRef } from "@/types/text";
-
-const inline = (label: string) => label.replace(/^Один /, "").toLowerCase();
-
-export function targetingFacetLabel(t: SpellTargeting): string {
-  if (t.kind === "area") return `до ${t.maxTargets} ${t.side === "enemy" ? "ворогів" : "союзників"}`;
-
-  if (t.kind === "template") return `${t.hollow && t.shape === "circle" ? "Кільце" : TEMPLATE_SHAPE_LABELS[t.shape]} ${t.size} фт`;
-
-  return inline(SPELL_TARGETING_LABELS[t.kind]);
-}
 
 export function targetingLabel(t: SpellTargeting): TextRef {
   if (t.kind === "area") return textRef(t.side === "enemy" ? "spells.inline.area.enemy" : "spells.inline.area.ally", { count: t.maxTargets });
@@ -24,12 +12,28 @@ export function targetingLabel(t: SpellTargeting): TextRef {
   return dynamicTextRef(`spells.inline.targeting.${t.kind}`);
 }
 
-export function resolutionLabel(r: SpellResolution): string {
-  if (r.kind === "auto") return "автоматично";
+export function targetingFacetKey(t: SpellTargeting): string {
+  if (t.kind === "area") return `area:${t.side}:${t.maxTargets}`;
 
-  if (r.kind === "attack") return "атака заклинанням";
+  if (t.kind === "template") return `template:${t.hollow && t.shape === "circle" ? "ring" : t.shape}:${t.size}`;
 
-  return `рятівний кидок ${ABILITY_LABELS[r.ability]}${r.orAbility ? ` або ${ABILITY_LABELS[r.orAbility]}` : ""} (${inline(SPELL_SAVE_ON_SUCCESS_LABELS[r.onSuccess])})`;
+  return t.kind;
 }
 
-export const costLabel = (c: SpellCost): string => inline(SPELL_COST_LABELS[c]);
+export function spellLabelsOf(t: Translator) {
+  return {
+    targeting(target: SpellTargeting): string {
+      if (target.kind === "area") return t(`spells.inline.area.${target.side === "enemy" ? "enemy" : "ally"}`, { count: target.maxTargets });
+
+      if (target.kind === "template") return t("spells.inline.template", { shape: t(`spells.shapes.${target.hollow && target.shape === "circle" ? "ring" : target.shape}`), size: target.size });
+
+      return t(`spells.inline.targeting.${target.kind}`);
+    },
+    resolution(res: SpellResolution): string {
+      if (res.kind !== "save") return t(`spells.inline.resolution.${res.kind}`);
+
+      return t("spells.inline.resolution.save", { ability: t(`gameTerms.abilities.${res.ability}.label`), onSuccess: t(`spells.inline.saveOnSuccess.${res.onSuccess}`) });
+    },
+    cost: (c: SpellCost): string => t(`spells.inline.cost.${c}`),
+  };
+}

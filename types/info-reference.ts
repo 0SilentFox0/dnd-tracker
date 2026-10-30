@@ -1,6 +1,7 @@
 import type { ErrorParams } from "@/lib/constants/api-errors";
 import type { AbilityFlowSummary, Segment } from "@/lib/utils/abilities/segments";
 import type { SpellFx } from "@/lib/utils/battle/fx/spells";
+import type { SpellCost, SpellResolution, SpellTargeting } from "@/lib/utils/spells/model/schema";
 import type { SpellRules } from "@/types/spells";
 
 
@@ -23,10 +24,11 @@ export interface SpellForReference {
   id: string;
   name: string;
   level: number;
-  /** підпис цілей заклинання (фільтр у довіднику) */
-  type: string;
-  cost: string;
-  resolution: string;
+  targeting: SpellTargeting;
+  /** стабільний id цілей для фільтра довідника */
+  facetKey: string;
+  cost: SpellCost;
+  resolution: SpellResolution;
   dice: number;
   description: string | null;
   /** описи ефектів із моделі вмінь як сегменти (мовонезалежні, рендер на клієнті) */
@@ -101,7 +103,7 @@ export interface ReferenceFilters {
   spell: {
     level: FilterField<number>;
     group: FilterField<string>;
-    type: FilterField<string>;
+    type: FilterField<string, { value: string; label: string }[]>;
   };
   artifact: {
     rarity: FilterField<string>;

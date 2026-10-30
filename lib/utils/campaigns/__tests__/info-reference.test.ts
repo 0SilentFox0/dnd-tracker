@@ -52,6 +52,16 @@ describe("toClassForReference", () => {
     const c = toClassForReference(base as unknown as GameClassData);
 
     expect(c.summary.map((line) => classSummaryText(real, line))).toEqual(["Кістка здоров'я: к8", "Рятівні кидки: Мудрість", "Повний заклинач (Мудрість)", "Обладунки: Легкі", "Навички: 2 з Медицина"]);
-    expect(formatMechanicsSpell({ level: 3, type: "Ціль", dice: 2, resolution: "Спас", cost: "1 дія" } as never, real)).toBe("Третє коло, Ціль. Кубики: 2к. Перевірка: Спас. Вартість: 1 дія");
+    expect(formatMechanicsSpell({ level: 3, targeting: { kind: "enemy" }, dice: 2, resolution: { kind: "attack" }, cost: "action" } as never, real)).toBe("Третє коло, ворог. Кубики: 2к. Перевірка: атака заклинанням. Вартість: дія");
+  });
+
+  it("в en-каталозі фасети заклинання англійською", async () => {
+    const { getTranslator } = await vi.importActual<typeof import("@/lib/i18n/translator")>("@/lib/i18n/translator");
+
+    const en: Translator = await getTranslator("en");
+
+    const text = formatMechanicsSpell({ level: 1, targeting: { kind: "area", side: "enemy", maxTargets: 3 }, dice: 0, resolution: { kind: "attack" }, cost: "bonusAction" } as never, en);
+
+    expect(text).not.toMatch(/[А-Яа-яІіЇїЄє]/);
   });
 });

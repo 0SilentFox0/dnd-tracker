@@ -1,5 +1,6 @@
 import type { Translator } from "@/lib/i18n/translator";
 import { abilityRegistryOf, flowSegments, linesText } from "@/lib/utils/abilities/segments";
+import { spellLabelsOf } from "@/lib/utils/spells/model/labels";
 import type { ClassFeature, GameClassData } from "@/types/classes";
 import type { ArtifactForReference, ClassFeatureForReference, ClassForReference, ClassSummaryLine, SkillForReference, SpellForReference } from "@/types/info-reference";
 
@@ -76,11 +77,13 @@ export function formatMechanicsSkill(s: SkillForReference, t: Translator): strin
 }
 
 export function formatMechanicsSpell(s: SpellForReference, t: Translator): string {
-  const parts: string[] = [t("dashboard.reference.mechanics.spell", { level: t(`gameTerms.spellLevels.${s.level}`), type: s.type })];
+  const labels = spellLabelsOf(t);
+
+  const parts: string[] = [t("dashboard.reference.mechanics.spell", { level: t(`gameTerms.spellLevels.${s.level}`), type: labels.targeting(s.targeting) })];
 
   if (s.dice > 0) parts.push(t("dashboard.reference.mechanics.dice", { count: s.dice }));
 
-  parts.push(t("dashboard.reference.mechanics.resolution", { value: s.resolution }), t("dashboard.reference.mechanics.cost", { value: s.cost }));
+  parts.push(t("dashboard.reference.mechanics.resolution", { value: labels.resolution(s.resolution) }), t("dashboard.reference.mechanics.cost", { value: labels.cost(s.cost) }));
 
   return parts.join(". ");
 }
@@ -104,7 +107,6 @@ export function spellSearchText(s: SpellForReference, t: Translator): string {
     s.description ?? "",
     s.appearanceDescription ?? "",
     s.groupName ?? "",
-    s.type,
     formatMechanicsSpell(s, t),
     linesText(abilityRegistryOf(t), s.effects || []).join(" "),
   ]
