@@ -243,6 +243,10 @@
     "spellNudgeAction": "Choose",
     "summary": "Level {level} · {cls}",
     "summaryOpen": "To choose: {count}",
-    "doneWith": "Chosen: {label} — {chosen}"
+    "doneWith": "Chosen: {label} — {chosen}",
+    "pickSubclass": "Choose a subclass",
+    "subclassOptions": "Available subclasses",
+    "subclassGain": "Level {level}: {names}",
+    "subclassDepends": "Depends on subclass"
   }
 }

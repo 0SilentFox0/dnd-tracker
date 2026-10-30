@@ -43,6 +43,7 @@ describe("CharacterPath", () => {
 
     fireEvent.click(screen.getByRole("button", { name: /ASI/ }));
     expect(onPick).toHaveBeenCalledTimes(1);
+    expect(onPick).toHaveBeenCalledWith("asi4");
 
     rerender(<CharacterPath progression={progression()} />);
     expect(screen.queryByRole("button", { name: /ASI/ })).toBeNull();
@@ -128,5 +129,45 @@ describe("CharacterPath what was chosen", () => {
 
     expect(screen.getByText('characterProfile.path.doneWith {"label":"Cantrips","chosen":"Guidance, Light"}')).toBeTruthy();
     expect(screen.getByText('characterProfile.path.doneWith {"label":"Skills","chosen":"gameTerms.dndSkills.insight"}')).toBeTruthy();
+  });
+});
+
+describe("CharacterPath subclass", () => {
+  afterEach(cleanup);
+
+  const withSubclass = makeClass({
+    id: "f",
+    features: [],
+    subclassLevel: 3,
+    subclasses: [
+      { id: "champ", name: "Champion", features: [{ level: 3, abilities: [makeAbility("c3", "Improved Critical", "x")] }, { level: 7, abilities: [makeAbility("c7", "Remarkable Athlete", "x")] }] },
+      { id: "bm", name: "Battle Master", features: [{ level: 3, abilities: [makeAbility("b3", "Maneuvers", "x")] }] },
+    ],
+  });
+
+  it("open subclass pick is a button that starts the wizard at the subclass step", () => {
+    const onPick = vi.fn();
+
+    render(<CharacterPath progression={buildClassProgression(withSubclass, { classId: "f", level: 3 })} actions={{ onPick }} />);
+
+    fireEvent.click(screen.getByRole("button", { name: "characterProfile.path.pickSubclass" }));
+    expect(onPick).toHaveBeenCalledWith("subclass");
+  });
+
+  it("future subclass row lists the options by level and marks the row as subclass-dependent", () => {
+    const { container } = render(<CharacterPath progression={buildClassProgression(withSubclass, { classId: "f", level: 1 })} />);
+
+    const row = container.querySelector('details section[data-state="future"]') as HTMLElement;
+
+    expect(row.querySelector("details")).toHaveTextContent("characterProfile.path.subclassOptions");
+    expect(row).toHaveTextContent("Champion");
+    expect(row).toHaveTextContent('characterProfile.path.subclassGain {"level":7,"names":"Remarkable Athlete"}');
+    expect(screen.getAllByText("characterProfile.path.subclassDepends").length).toBeGreaterThan(0);
+  });
+
+  it("chosen subclass has no dependency chip", () => {
+    render(<CharacterPath progression={buildClassProgression(withSubclass, { classId: "f", level: 1, subclassId: "champ" })} />);
+
+    expect(screen.queryByText("characterProfile.path.subclassDepends")).toBeNull();
   });
 });

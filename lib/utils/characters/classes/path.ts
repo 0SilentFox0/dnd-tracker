@@ -10,6 +10,25 @@ export const chosenSubclassId = (progression: ClassProgression): string | null =
 
 export const rowItems = (row: ProgressionRow, chosen: string | null): ProgressionItem[] => [...row.base, ...(chosen ? (row.bySubclass[chosen] ?? []) : [])];
 
+export interface SubclassPreview {
+  id: string;
+  name: string;
+  gains: { level: number; names: string[] }[];
+}
+
+export const hasSubclassOnly = (row: ProgressionRow, chosen: string | null): boolean => !chosen && Object.values(row.bySubclass).some((items) => items.length > 0);
+
+export function subclassPreview(progression: ClassProgression): SubclassPreview[] {
+  return progression.subclasses.map(({ id, name }) => ({
+    id,
+    name,
+    gains: progression.rows
+      .map((row) => ({ level: row.level, names: (row.bySubclass[id] ?? []).map((item) => item.name) }))
+      .filter((g) => g.names.length > 0)
+      .sort((a, b) => a.level - b.level),
+  }));
+}
+
 export function splitPathRows(progression: ClassProgression): PathRows {
   const chosen = chosenSubclassId(progression);
 
