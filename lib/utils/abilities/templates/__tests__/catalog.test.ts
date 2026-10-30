@@ -27,4 +27,8 @@ describe("recipe catalog", () => {
   it("ABILITY_TEMPLATES are the ability-scope recipes", () => {
     expect(ABILITY_TEMPLATES).toEqual(RECIPES.filter((r) => r.scopes.includes("ability")));
   });
+
+  it("stats recipe leaves spell slots to their own recipe", () => {
+    expect(RECIPES.find((r) => r.id === "stats")?.params[0].options).not.toContain("spellSlots");
+  });
 });

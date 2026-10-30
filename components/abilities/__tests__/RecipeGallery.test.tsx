@@ -13,13 +13,15 @@ Object.assign(Element.prototype, { hasPointerCapture: () => false, releasePointe
 
 const label = (id: string) => `abilityRegistry.templates.${id}.label`;
 
-function renderGallery(props: { scope: "ability" | "spell"; onPick: (v: never) => void; onOpenChange?: (o: boolean) => void }) {
+function renderGallery(props: { scope: "ability" | "spell"; onPick: (v: never) => void; onOpenChange?: (o: boolean) => void; onOuterSubmit?: () => void }) {
   const view = (open: boolean) => (
+    <form onSubmit={props.onOuterSubmit}>
     <QueryClientProvider client={new QueryClient()}>
       <AbilityEditorProvider value={{ campaignId: "c1", errorsByPath: {} }}>
         <RecipeGallery open={open} onOpenChange={props.onOpenChange ?? (() => {})} {...(props as object as { scope: "ability"; onPick: () => void })} />
       </AbilityEditorProvider>
     </QueryClientProvider>
+    </form>
   );
 
   const r = render(view(true));
@@ -138,5 +140,73 @@ describe("RecipeGallery", () => {
     renderGallery({ scope: "ability", onPick: vi.fn() });
 
     expect(screen.getByText("abilities.templates.scratch")).toBeInTheDocument();
+  });
+
+  it("does not leak the recipe form submit to an enclosing form", () => {
+    const outer = vi.fn();
+
+    const onPick = vi.fn();
+
+    renderGallery({ scope: "ability", onPick, onOuterSubmit: outer });
+    fireEvent.click(screen.getByText(label("bonusAction")));
+    fireEvent.submit(screen.getByLabelText("abilityRegistry.templates.bonusAction.params.dice"));
+
+    expect(onPick).toHaveBeenCalledTimes(1);
+    expect(outer).not.toHaveBeenCalled();
+  });
+
+  it("does not leak the Create click submit to an enclosing form", () => {
+    const outer = vi.fn();
+
+    renderGallery({ scope: "ability", onPick: vi.fn(), onOuterSubmit: outer });
+    fireEvent.click(screen.getByText(label("bonusAction")));
+    fireEvent.click(screen.getByRole("button", { name: "abilities.templates.create" }));
+
+    expect(outer).not.toHaveBeenCalled();
+  });
+
+  it("shows non-dice build issues at form level and disables Create", () => {
+    renderGallery({ scope: "ability", onPick: vi.fn() });
+    fireEvent.click(screen.getByText(label("bonusAction")));
+    fireEvent.change(screen.getByLabelText("abilities.templates.nameLabel"), { target: { value: "" } });
+
+    expect(screen.getByRole("button", { name: "abilities.templates.create" })).toBeDisabled();
+    expect(screen.getByTestId("recipe-form-errors").textContent).not.toBe("");
+    expect(screen.queryByTestId("recipe-errors")).toBeNull();
+  });
+
+  it("clamps a number field on blur", () => {
+    renderGallery({ scope: "ability", onPick: vi.fn() });
+    fireEvent.click(screen.getByText(label(RECIPES.find((r) => r.scopes.includes("ability") && r.params.some((p) => p.key === "rounds"))?.id ?? "")));
+
+    const input = screen.getByLabelText(/params\.rounds$/);
+
+    fireEvent.change(input, { target: { value: "999" } });
+    expect(input).toHaveValue(999);
+    fireEvent.blur(input);
+    expect(input).toHaveValue(10);
+  });
+
+  it("Back resets edits when re-picking the same or another recipe", () => {
+    renderGallery({ scope: "ability", onPick: vi.fn() });
+    fireEvent.click(screen.getByText(label("bonusAction")));
+
+    const dice = () => screen.getByLabelText("abilityRegistry.templates.bonusAction.params.dice");
+
+    const initial = (dice() as HTMLInputElement).value;
+
+    fireEvent.change(dice(), { target: { value: "9d9" } });
+    fireEvent.click(screen.getByRole("button", { name: "abilities.templates.back" }));
+    fireEvent.click(screen.getByText(label("bonusAction")));
+
+    expect(dice()).toHaveValue(initial);
+
+    fireEvent.change(dice(), { target: { value: "9d9" } });
+    fireEvent.click(screen.getByRole("button", { name: "abilities.templates.back" }));
+    fireEvent.click(screen.getByText(label("stats")));
+    fireEvent.click(screen.getByRole("button", { name: "abilities.templates.back" }));
+    fireEvent.click(screen.getByText(label("bonusAction")));
+
+    expect(dice()).toHaveValue(initial);
   });
 });

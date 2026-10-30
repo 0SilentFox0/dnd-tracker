@@ -19,6 +19,8 @@ interface RecipeFormProps {
   name?: { value: string; onChange: (v: string) => void };
 }
 
+const DICE_ISSUE = "abilities.validation.diceFormat";
+
 const SET_FIELD: Record<string, string> = { stat: "stat", damageType: "damageType", filter: "filter.kind", condition: "condition" };
 
 export function RecipeForm({ recipe, values, onChange, issues, name }: RecipeFormProps) {
@@ -45,11 +47,22 @@ export function RecipeForm({ recipe, values, onChange, issues, name }: RecipeFor
 
     if (p.kind === "dice") return <Input id={id} value={value} onChange={(e) => onChange(p.key, e.target.value)} />;
 
-    return <Input id={id} type="number" inputMode="numeric" min={p.min} max={p.max} value={value} onChange={(e) => onChange(p.key, e.target.value)} />;
+    const clamp = () => {
+      const n = Number(value);
+
+      if (value !== "" && Number.isFinite(n)) onChange(p.key, Math.min(p.max ?? Infinity, Math.max(p.min ?? -Infinity, n)));
+    };
+
+    return <Input id={id} type="number" inputMode="numeric" min={p.min} max={p.max} value={value} onChange={(e) => onChange(p.key, e.target.value)} onBlur={clamp} />;
   };
+
+  const diceIssues = issues.filter((i) => i === DICE_ISSUE);
+
+  const otherIssues = issues.filter((i) => i !== DICE_ISSUE);
 
   return (
     <div className="space-y-3">
+      <FieldErrors errors={otherIssues} testId="recipe-form-errors" />
       {name && (
         <div className="space-y-1">
           <Label htmlFor="recipe-name">{t("nameLabel")}</Label>
@@ -60,7 +73,7 @@ export function RecipeForm({ recipe, values, onChange, issues, name }: RecipeFor
         <div key={p.key} className="space-y-1">
           <Label htmlFor={`recipe-${recipe.id}-${p.key}`}>{tr(`templates.${recipe.id}.params.${p.key}`)}</Label>
           {control(p)}
-          {p.kind === "dice" && <FieldErrors errors={issues} testId="recipe-errors" />}
+          {p.kind === "dice" && <FieldErrors errors={diceIssues} testId="recipe-errors" />}
         </div>
       ))}
     </div>

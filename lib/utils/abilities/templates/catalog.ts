@@ -50,7 +50,7 @@ export const RECIPES: readonly Recipe[] = [
     id: "stats",
     category: "support",
     scopes: ["ability"],
-    params: [{ key: "stat", kind: "stat", default: "armor", options: STAT_KEYS }, num("value", 1, 1, 10)],
+    params: [{ key: "stat", kind: "stat", default: "armor", options: STAT_KEYS.filter((k) => k !== "spellSlots") }, num("value", 1, 1, 10)],
     build: (v, ctx) => ability(PASSIVE, [fx("modifyStat", PASSIVE, { stat: v.stat, flat: v.value })])(v, ctx),
   },
   {

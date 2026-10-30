@@ -156,7 +156,7 @@ export function AbilityPanel({ ability, path, actions }: { ability: Ability; pat
       <TriggerSection {...section} state={stateOf("when")} />
       <ConditionSection {...section} state={stateOf("if")} />
       <LimitsSection {...section} state={stateOf("limits")} />
-      <PerformSection {...section} state={stateOf("then")} />
+      <PerformSection {...section} />
       <EffectsSection {...section} state={stateOf("then")} />
     </div>
   );

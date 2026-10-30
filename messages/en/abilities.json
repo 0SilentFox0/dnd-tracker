@@ -88,6 +88,7 @@
   },
   "limits": {
     "title": "Limits",
+    "add": "Add limits",
     "passive": "A passive is always active — limits do not apply.",
     "perBattle": "Uses per battle",
     "perRound": "Uses per round",

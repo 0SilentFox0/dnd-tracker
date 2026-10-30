@@ -15,9 +15,10 @@ interface AbilityFlowProps {
   variant: "editor" | "card";
   onChipClick?: (part: FlowPart) => void;
   sectionId?: (part: FlowPart) => string;
+  as?: "div" | "span";
 }
 
-export function AbilityFlow({ summary, variant, onChipClick, sectionId }: AbilityFlowProps) {
+export function AbilityFlow({ summary, variant, onChipClick, sectionId, as: Root = "div" }: AbilityFlowProps) {
   const t = useTranslations("abilities.flow");
 
   const text = useAbilityText();
@@ -63,7 +64,7 @@ export function AbilityFlow({ summary, variant, onChipClick, sectionId }: Abilit
     ...g.bodies.map((body, j) => chip(g.part, `${g.part}-${j}`, body)),
   ]);
 
-  return <div className="flex flex-col items-start gap-1 sm:flex-row sm:flex-wrap sm:items-center">{nodes}</div>;
+  return <Root className="flex flex-col items-start gap-1 sm:flex-row sm:flex-wrap sm:items-center">{nodes}</Root>;
 }
 
 export function AbilityFlowList({ lines }: { lines: AbilityFlowSummary[] }) {

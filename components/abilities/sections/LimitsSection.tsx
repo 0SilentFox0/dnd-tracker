@@ -73,7 +73,7 @@ export function LimitsSection({ ability, path, onChange, state }: AbilitySection
   };
 
   return (
-    <SectionShell path={path} part="limits" title={t("title")} {...state}>
+    <SectionShell path={path} part="limits" title={t("title")} {...state} onAdd={!state.open && !state.summary ? state.onToggle : undefined} addLabel={t("add")}>
       <div className="grid grid-cols-6 items-end gap-2 [&>*]:min-w-0">
         {limitFields.map((f) => (
           <FieldRenderer key={f.name} meta={f} path={`${path}.limits.${f.name}`} value={ability.limits?.[f.name as keyof Limits]} onChange={(v) => set(f.name as keyof Limits, v)} />

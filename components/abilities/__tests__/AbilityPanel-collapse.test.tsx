@@ -1,6 +1,6 @@
 // @vitest-environment happy-dom
 import { useState } from "react";
-import { act, cleanup, fireEvent, render, within } from "@testing-library/react";
+import { act, cleanup, fireEvent, render, screen, within } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
 import { AbilityPanel } from "../AbilityPanel";
@@ -106,5 +106,69 @@ describe("AbilityPanel collapsible sections", () => {
     render(<Harness initial={rich} />);
 
     expect(toggle("limits").textContent).toContain("abilities.limits.title");
+  });
+
+  it("shows an add button in an expanded empty condition body", () => {
+    render(<Harness initial={empty} />);
+    fireEvent.click(toggle("if"));
+
+    const body = document.getElementById("abilities.0-section-if-body") as HTMLElement;
+
+    fireEvent.click(within(body).getByRole("button", { name: "abilities.condition.add" }));
+
+    expect(toggle("if").getAttribute("aria-expanded")).toBe("true");
+    expect(within(document.getElementById("abilities.0-section-if-body") as HTMLElement).queryByRole("button", { name: "abilities.condition.add" })).toBeNull();
+  });
+
+  it("opens empty limits from the header plus, but only for non-passive abilities", () => {
+    const action: Ability = { ...empty, trigger: { event: "action" } };
+
+    const { unmount } = render(<Harness initial={action} />);
+
+    const shell = () => document.getElementById("abilities.0-section-limits") as HTMLElement;
+
+    expect(toggle("limits").getAttribute("aria-expanded")).toBe("false");
+    fireEvent.click(within(shell()).getByLabelText("abilities.limits.add"));
+    expect(toggle("limits").getAttribute("aria-expanded")).toBe("true");
+    expect(within(shell()).queryByLabelText("abilities.limits.add")).toBeNull();
+    unmount();
+
+    render(<Harness initial={empty} />);
+
+    expect(within(shell()).queryByLabelText("abilities.limits.add")).toBeNull();
+  });
+
+  it("keeps collapsed headers consistent when the trigger changes passive and back", async () => {
+    render(<Harness initial={rich} />);
+    fireEvent.click(toggle("if"));
+    fireEvent.click(toggle("limits"));
+
+    const shell = (part: string) => document.getElementById(`abilities.0-section-${part}`) as HTMLElement;
+
+    fireEvent.pointerDown(screen.getByLabelText("abilities.trigger.event"), { button: 0, ctrlKey: false, pointerType: "mouse" });
+    fireEvent.click(await screen.findByRole("option", { name: "abilityRegistry.triggers.passive.label" }));
+
+    expect(toggle("limits").getAttribute("aria-expanded")).toBe("false");
+    expect(toggle("limits").textContent).toContain("abilities.panel.emptySummary");
+    expect(within(shell("limits")).queryByLabelText("abilities.limits.add")).toBeNull();
+    expect(within(shell("if")).queryByLabelText("abilities.condition.add")).toBeNull();
+
+    fireEvent.pointerDown(screen.getByLabelText("abilities.trigger.event"), { button: 0, ctrlKey: false, pointerType: "mouse" });
+    fireEvent.click(await screen.findByRole("option", { name: "abilityRegistry.triggers.action.label" }));
+
+    expect(within(shell("limits")).getByLabelText("abilities.limits.add")).toBeInTheDocument();
+  });
+
+  it("scrolls a hand-added effect card into view", async () => {
+    const scroll = vi.fn();
+
+    Element.prototype.scrollIntoView = scroll;
+    render(<Harness initial={empty} />);
+    fireEvent.click(screen.getByRole("button", { name: "abilities.effects.add" }));
+
+    await act(() => new Promise((r) => requestAnimationFrame(() => r(null))));
+
+    expect(scroll).toHaveBeenCalled();
+    expect(scroll.mock.contexts.at(-1)).toBe(document.querySelectorAll("[data-effect-card]")[1]);
   });
 });

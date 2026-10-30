@@ -31,9 +31,9 @@ const ALL = "all";
 function Preview({ result }: { result: RecipeResult }) {
   const text = useAbilityText();
 
-  if ("ability" in result) return <AbilityFlow summary={summarizeAbility({ id: "", ...result.ability })} variant="card" />;
+  if ("ability" in result) return <AbilityFlow summary={summarizeAbility({ id: "", ...result.ability })} variant="card" as="span" />;
 
-  return <p className="text-xs text-hud-muted">{result.spell.map((e) => text.effect(e)).join(" · ")}</p>;
+  return <span className="text-xs font-normal text-hud-muted">{result.spell.map((e) => text.effect(e)).join(" · ")}</span>;
 }
 
 export function RecipeGallery(props: RecipeGalleryProps) {
@@ -100,6 +100,11 @@ export function RecipeGallery(props: RecipeGalleryProps) {
     if (built.ok) deliver(built.result);
   };
 
+  const back = () => {
+    form.reset();
+    setSelected(null);
+  };
+
   const submit = () => {
     if (form.built?.ok) deliver(form.built.result);
   };
@@ -112,7 +117,7 @@ export function RecipeGallery(props: RecipeGalleryProps) {
 
   const footer = selected ? (
     <>
-      <Button type="button" variant="outline" onClick={() => setSelected(null)}>
+      <Button type="button" variant="outline" onClick={back}>
         {t("back")}
       </Button>
       <Button type="submit" form="recipe-form" disabled={!form.built?.ok}>
@@ -135,6 +140,7 @@ export function RecipeGallery(props: RecipeGalleryProps) {
           className="space-y-3"
           onSubmit={(e) => {
             e.preventDefault();
+            e.stopPropagation();
             submit();
           }}
         >
@@ -157,7 +163,7 @@ export function RecipeGallery(props: RecipeGalleryProps) {
               const built = buildRecipe(r, {}, cardCtx(r));
 
               return (
-                <Button key={r.id} type="button" variant="outline" className="h-auto w-full flex-col items-start gap-1 py-2" onClick={() => choose(r)}>
+                <Button key={r.id} type="button" variant="outline" className="h-auto w-full flex-col items-start gap-1 whitespace-normal py-2 text-left" onClick={() => choose(r)}>
                   <span className="font-medium">{tr(`templates.${r.id}.label`)}</span>
                   <span className="text-xs font-normal text-muted-foreground">{tr(`templates.${r.id}.hint`)}</span>
                   {built.ok && <Preview result={built.result} />}
@@ -166,7 +172,7 @@ export function RecipeGallery(props: RecipeGalleryProps) {
             })}
             {scope === "ability" && (
               <>
-                <Button type="button" variant="outline" className="h-auto w-full flex-col items-start py-2" onClick={scratch}>
+                <Button type="button" variant="outline" className="h-auto w-full flex-col items-start whitespace-normal py-2 text-left" onClick={scratch}>
                   <span className="font-medium">{t("scratch")}</span>
                   <span className="text-xs font-normal text-muted-foreground">{t("scratchHint")}</span>
                 </Button>
