@@ -281,8 +281,6 @@
 @layer base {
   * {
     @apply border-border outline-ring/50;
-    scrollbar-width: thin;
-    scrollbar-color: rgb(230, 194, 90) transparent;
   }
   html {
     min-height: 100vh;
@@ -429,8 +427,11 @@
   }
 }
 
-@supports not (scrollbar-color: auto) {
-  :where(*)::-webkit-scrollbar { width: 8px; height: 8px; }
-  :where(*)::-webkit-scrollbar-track { background: transparent; }
-  :where(*)::-webkit-scrollbar-thumb { background: rgb(230, 194, 90); border-radius: 4px; }
+/* `thin` is the narrowest standard width, so Chromium/WebKit use ::-webkit-scrollbar (4px); the standard properties serve Firefox only */
+:where(*)::-webkit-scrollbar { width: 4px; height: 4px; }
+:where(*)::-webkit-scrollbar-track { background: transparent; }
+:where(*)::-webkit-scrollbar-thumb { background: rgb(230, 194, 90); border-radius: 2px; }
+
+@supports not selector(::-webkit-scrollbar) {
+  * { scrollbar-width: thin; scrollbar-color: rgb(230, 194, 90) transparent; }
 }
