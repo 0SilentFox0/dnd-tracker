@@ -52,7 +52,7 @@ export const spellsResource = defineResource<SpellRow, CreateSpellInput, UpdateS
         // legacy NOT NULL columns until a later migration; the new model never reads them
         type: "target",
         damageType: "damage",
-        ...spellDefinitionColumns({ dice: data.dice, cost: data.cost, casting: data.casting ?? undefined, targeting: data.targeting, resolution: data.resolution, effects: data.spellEffects, raceModifiers: data.raceModifiers, stackable: data.stackable, maxStacks: data.maxStacks ?? undefined, concentration: data.concentration, dieSides: data.dieSides ?? undefined, upcastDice: data.upcastDice ?? undefined, upcastTargets: data.upcastTargets ?? undefined, addAbilityMod: data.addAbilityMod ?? undefined, fixedDice: data.fixedDice ?? undefined, damageBonus: data.damageBonus ?? undefined }),
+        ...spellDefinitionColumns({ dice: data.dice, cost: data.cost, casting: data.casting ?? undefined, targeting: data.targeting, resolution: data.resolution, effects: data.spellEffects, raceModifiers: data.raceModifiers, stackable: data.stackable, maxStacks: data.maxStacks ?? undefined, concentration: data.concentration, ritual: data.ritual, dieSides: data.dieSides ?? undefined, upcastDice: data.upcastDice ?? undefined, upcastTargets: data.upcastTargets ?? undefined, addAbilityMod: data.addAbilityMod ?? undefined, fixedDice: data.fixedDice ?? undefined, damageBonus: data.damageBonus ?? undefined }),
       },
       include: withGroup,
     });
@@ -81,6 +81,7 @@ export const spellsResource = defineResource<SpellRow, CreateSpellInput, UpdateS
         stackable: data.stackable,
         maxStacks: data.stackable === false ? null : data.maxStacks,
         concentration: data.concentration,
+        ritual: data.ritual,
         dieSides: data.dieSides,
         upcastDice: data.upcastDice,
         upcastTargets: data.upcastTargets,

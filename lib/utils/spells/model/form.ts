@@ -23,6 +23,7 @@ export function defaultSpellForm(): SpellFormData {
     stackable: false,
     maxStacks: null,
     concentration: false,
+    ritual: false,
     dieSides: null,
     upcastDice: null,
     upcastTargets: null,
@@ -32,7 +33,7 @@ export function defaultSpellForm(): SpellFormData {
 }
 
 export function spellToForm(spell: Spell): SpellFormData {
-  const def = readSpellDefinition({ id: spell.id, dice: spell.dice, cost: spell.cost, casting: spell.casting, targeting: spell.targeting, resolution: spell.resolution, spellEffects: spell.spellEffects, raceModifiers: spell.raceModifiers, stackable: spell.stackable, maxStacks: spell.maxStacks, concentration: spell.concentration, dieSides: spell.dieSides, upcastDice: spell.upcastDice, upcastTargets: spell.upcastTargets, addAbilityMod: spell.addAbilityMod, fixedDice: spell.fixedDice, damageBonus: spell.damageBonus });
+  const def = readSpellDefinition({ id: spell.id, dice: spell.dice, cost: spell.cost, casting: spell.casting, targeting: spell.targeting, resolution: spell.resolution, spellEffects: spell.spellEffects, raceModifiers: spell.raceModifiers, stackable: spell.stackable, maxStacks: spell.maxStacks, concentration: spell.concentration, ritual: spell.ritual, dieSides: spell.dieSides, upcastDice: spell.upcastDice, upcastTargets: spell.upcastTargets, addAbilityMod: spell.addAbilityMod, fixedDice: spell.fixedDice, damageBonus: spell.damageBonus });
 
   return {
     executionMode: spell.executionMode,
@@ -52,6 +53,7 @@ export function spellToForm(spell: Spell): SpellFormData {
     stackable: def.stackable === true,
     maxStacks: def.maxStacks ?? null,
     concentration: def.concentration === true,
+    ritual: def.ritual === true,
     dieSides: def.dieSides ?? null,
     upcastDice: def.upcastDice ?? null,
     upcastTargets: def.upcastTargets ?? null,

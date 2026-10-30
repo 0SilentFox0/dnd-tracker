@@ -43,6 +43,7 @@ export function convertSpell(row: Fixture<O5Spell>, options: Array<Fixture<O5Cas
     dice: dice?.count ?? 0,
     ...(dice && { dieSides: dice.sides as SpellRow["dieSides"] }),
     concentration: f.concentration,
+    ritual: f.ritual,
     ...spellUpcast(f, kind, options.filter((o) => o.fields.type.startsWith("slot_level_")).map((o) => ({ level: Number(o.fields.type.slice("slot_level_".length)), dice: parseDiceExpr(o.fields.damage_roll) }))),
     ...(kind === "heal" && ADDS_MOD.test(f.desc) && { addAbilityMod: true }),
     targeting,

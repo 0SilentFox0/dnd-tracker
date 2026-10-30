@@ -86,6 +86,8 @@
     "concentrationTitle": "Concentration",
     "concentration": "Concentration",
     "concentrationHint": "Applies when concentration is enabled in the campaign rules.",
+    "ritual": "Ritual",
+    "ritualHint": "Marks the spell as castable as a ritual. Informational: casting without a slot is not automated yet.",
     "stackingTitle": "Stacking",
     "stackable": "Effects stack on repeated casts",
     "maxStacks": "Max stacks",

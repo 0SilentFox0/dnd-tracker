@@ -235,6 +235,7 @@ export const SpellDefinitionSchema = z.object({
   stackable: z.boolean().optional(),
   maxStacks: z.number().int().min(1).max(10).optional(),
   concentration: z.boolean().optional(),
+  ritual: z.boolean().optional(),
   dieSides: SpellDieSidesSchema.optional(),
   upcastDice: z.number().int().min(0).max(10).optional(),
   upcastTargets: z.number().int().min(0).max(10).optional(),

@@ -241,6 +241,7 @@ model Spell {
   components            String?
   duration              String?
   concentration         Boolean     @default(false)
+  ritual                Boolean     @default(false)
   savingThrow           Json?
   hitCheck              Json? // spell attack: { ability, dc } — заклинання застосовується якщо (кидок + мод. кастера) >= dc
   description           String?

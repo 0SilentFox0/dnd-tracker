@@ -14,6 +14,7 @@ const fields: FieldDef[] = [
   { key: "dice", type: "dice" },
   { key: "dieSides", type: "int" },
   { key: "concentration", type: "bool" },
+  { key: "ritual", type: "bool" },
   { key: "stackable", type: "bool" },
   { key: "maxStacks", type: "int" },
   { key: "upcastDice", type: "int" },

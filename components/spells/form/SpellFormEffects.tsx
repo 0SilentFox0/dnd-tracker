@@ -115,6 +115,13 @@ export function SpellFormEffects({ campaignId, formData, setFormData }: SpellFor
           </Label>
         </div>
         <p className="mt-1 text-xs text-muted-foreground">{t("concentrationHint")}</p>
+        <div className="mt-3 flex items-center gap-3">
+          <Checkbox id="spell-ritual" checked={!!formData.ritual} onCheckedChange={(checked) => setFormData({ ...formData, ritual: checked === true })} />
+          <Label htmlFor="spell-ritual" className="cursor-pointer font-medium">
+            {t("ritual")}
+          </Label>
+        </div>
+        <p className="mt-1 text-xs text-muted-foreground">{t("ritualHint")}</p>
       </HudSection>
 
       <HudSection title={t("stackingTitle")}>

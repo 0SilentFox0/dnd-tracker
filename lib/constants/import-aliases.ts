@@ -60,6 +60,7 @@ export const FIELD_ALIASES: Record<ImportKind, PerField<readonly string[]>> = {
     dice: ["кістки", "кубики", "damage", "шкода"],
     dieSides: ["грань кубика", "die", "грань", "die sides"],
     concentration: ["концентрація"],
+    ritual: ["ритуал", "ritual"],
     stackable: ["стакається"],
     maxStacks: ["макс. стаків", "max stacks"],
     upcastDice: ["кістки за коло", "upcast", "upcast dice"],

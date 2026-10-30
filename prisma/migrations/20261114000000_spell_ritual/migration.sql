@@ -1,0 +1,1 @@
+ALTER TABLE "spells" ADD COLUMN "ritual" BOOLEAN NOT NULL DEFAULT false;

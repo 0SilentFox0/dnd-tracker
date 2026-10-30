@@ -29,6 +29,7 @@ export interface SpellRow {
   dice: number;
   dieSides?: 4 | 6 | 8 | 10 | 12;
   concentration: boolean;
+  ritual?: boolean;
   upcastDice?: number;
   upcastTargets?: number;
   addAbilityMod?: boolean;

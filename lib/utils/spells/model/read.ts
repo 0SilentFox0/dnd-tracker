@@ -30,6 +30,7 @@ type SpellRulesRow = {
   stackable?: boolean | null;
   maxStacks?: number | null;
   concentration?: boolean | null;
+  ritual?: boolean | null;
   dieSides?: number | null;
   upcastDice?: number | null;
   upcastTargets?: number | null;
@@ -120,6 +121,7 @@ export function readSpellDefinition(row: SpellRulesRow): SpellDefinition {
     stackable: row.stackable === true,
     maxStacks: row.stackable === true ? readMaxStacks(row.maxStacks) : undefined,
     ...(row.concentration === true && { concentration: true }),
+    ...(row.ritual === true && { ritual: true }),
     ...readSpell5e(row),
   };
 }
@@ -137,6 +139,7 @@ export function spellDefinitionColumns(def: SpellDefinition) {
     stackable: def.stackable === true,
     maxStacks: def.stackable ? (def.maxStacks ?? null) : null,
     concentration: def.concentration === true,
+    ritual: def.ritual === true,
     dieSides: def.dieSides ?? null,
     upcastDice: def.upcastDice ?? null,
     upcastTargets: def.upcastTargets ?? null,

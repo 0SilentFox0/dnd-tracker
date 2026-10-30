@@ -26,6 +26,7 @@ export interface Spell {
   stackable?: boolean;
   maxStacks?: number | null;
   concentration?: boolean;
+  ritual?: boolean;
   dieSides?: number | null;
   upcastDice?: number | null;
   upcastTargets?: number | null;
@@ -62,6 +63,7 @@ export interface SpellFormData {
   stackable: boolean;
   maxStacks: number | null;
   concentration?: boolean;
+  ritual?: boolean;
   dieSides?: number | null;
   upcastDice?: number | null;
   upcastTargets?: number | null;
@@ -84,6 +86,7 @@ export interface SpellRules {
   stackable?: boolean;
   maxStacks?: number | null;
   concentration?: boolean;
+  ritual?: boolean;
   dieSides?: SpellDefinition["dieSides"];
   upcastDice?: number;
   upcastTargets?: number;

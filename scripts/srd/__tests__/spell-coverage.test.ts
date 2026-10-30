@@ -1,6 +1,5 @@
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
-
 import { describe, expect, it } from "vitest";
 
 import type { SpellRow } from "../lib/types";
@@ -23,6 +22,14 @@ describe("SRD spell effect coverage", () => {
     const bare = spells.filter((s) => s.spellEffects.length === 0).map((s) => s.slug.replace("srd-2024_", ""));
 
     expect(bare.sort()).toEqual([...dmResolved].sort());
+  });
+
+  it("ritual flag is set on the 29 SRD ritual spells only", () => {
+    const rituals = spells.filter((s) => s.ritual === true).map((s) => s.slug);
+
+    expect(rituals).toHaveLength(29);
+    expect(rituals).toContain("srd-2024_detect-magic");
+    expect(spell("fireball").ritual).toBeFalsy();
   });
 
   it("every override effect passes the spell schema", () => {
