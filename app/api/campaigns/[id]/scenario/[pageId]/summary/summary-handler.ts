@@ -78,11 +78,9 @@ export const generateSummaryHandler = (req: Request, campaignId: string, pageId:
 
     if (input.empty) return errorResponse(API_ERRORS.AI_SUMMARY_EMPTY, 400);
 
-    const choice = await pickDmSmartTextModel(campaignId);
+    const [choice, locale] = await Promise.all([pickDmSmartTextModel(campaignId), getRequestLocale()]);
 
     if (!choice) return errorResponse(API_ERRORS.AI_KEY_MISSING, 400);
-
-    const locale = await getRequestLocale();
 
     let result;
 

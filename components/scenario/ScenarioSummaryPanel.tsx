@@ -1,5 +1,6 @@
 "use client";
 
+import type { ReactNode } from "react";
 import { useTranslations } from "next-intl";
 import { Loader2, Lock } from "lucide-react";
 
@@ -7,6 +8,19 @@ import { ErrorState } from "@/components/common/states";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { useGenerateScenarioSummary, useScenarioSummaries } from "@/lib/hooks/scenario";
+
+function SummaryList({ title, items, icon }: { title: string; items: string[]; icon?: ReactNode }) {
+  if (items.length === 0) return null;
+
+  return (
+    <div>
+      <p className="mb-1 flex items-center gap-1 font-medium">{icon}{title}</p>
+      <ul className="list-disc pl-5">
+        {items.map((e, i) => <li key={`${i}-${e}`}>{e}</li>)}
+      </ul>
+    </div>
+  );
+}
 
 export function ScenarioSummaryPanel({ campaignId, pageId }: { campaignId: string; pageId: string }) {
   const t = useTranslations("scenario.summary");
@@ -35,22 +49,8 @@ export function ScenarioSummaryPanel({ campaignId, pageId }: { campaignId: strin
         <>
           {entry.stale ? <Badge variant="outline" className="self-start">{t("stale")}</Badge> : null}
           <p>{entry.summary.overview}</p>
-          {entry.summary.events.length > 0 ? (
-            <div>
-              <p className="mb-1 font-medium">{t("events")}</p>
-              <ul className="list-disc pl-5">
-                {entry.summary.events.map((e, i) => <li key={`${i}-${e}`}>{e}</li>)}
-              </ul>
-            </div>
-          ) : null}
-          {entry.summary.secrets.length > 0 ? (
-            <div>
-              <p className="mb-1 flex items-center gap-1 font-medium"><Lock className="size-3.5" aria-hidden />{t("secrets")}</p>
-              <ul className="list-disc pl-5">
-                {entry.summary.secrets.map((e, i) => <li key={`${i}-${e}`}>{e}</li>)}
-              </ul>
-            </div>
-          ) : null}
+          <SummaryList title={t("events")} items={entry.summary.events} />
+          <SummaryList title={t("secrets")} items={entry.summary.secrets} icon={<Lock className="size-3.5" aria-hidden />} />
         </>
       ) : (
         <p className="text-muted-foreground">{t("empty")}</p>
