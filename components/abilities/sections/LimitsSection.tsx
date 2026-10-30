@@ -8,7 +8,6 @@ import { FieldRenderer } from "../fields/FieldRenderer";
 import { FlatField } from "../fields/FlatField";
 import { ScaleColumnSelect } from "../fields/ScaleColumnSelect";
 import { SectionShell } from "./SectionShell";
-import { SectionTitle } from "./SectionTitle";
 
 import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
@@ -19,7 +18,7 @@ import { ITEM_CHARGES_KEY } from "@/lib/utils/items/pools";
 
 const LIMIT_FIELD_NAMES = ["perBattle", "perRound", "perTurn", "cooldownRounds", "chance"] as const;
 
-export function LimitsSection({ ability, path, onChange }: AbilitySectionProps) {
+export function LimitsSection({ ability, path, onChange, state }: AbilitySectionProps) {
   const t = useTranslations("abilities.limits");
 
   const { classColumns: columns, itemCharges } = useAbilityEditor();
@@ -33,8 +32,7 @@ export function LimitsSection({ ability, path, onChange }: AbilitySectionProps) 
 
   if (ability.trigger.event === "passive") {
     return (
-      <SectionShell path={path} part="limits" className="space-y-1">
-        <SectionTitle>{t("title")}</SectionTitle>
+      <SectionShell path={path} part="limits" title={t("title")} {...state} className="space-y-1">
         <p className="text-xs text-muted-foreground">{t("passive")}</p>
       </SectionShell>
     );
@@ -75,8 +73,7 @@ export function LimitsSection({ ability, path, onChange }: AbilitySectionProps) 
   };
 
   return (
-    <SectionShell path={path} part="limits">
-      <SectionTitle>{t("title")}</SectionTitle>
+    <SectionShell path={path} part="limits" title={t("title")} {...state}>
       <div className="grid grid-cols-6 items-end gap-2 [&>*]:min-w-0">
         {limitFields.map((f) => (
           <FieldRenderer key={f.name} meta={f} path={`${path}.limits.${f.name}`} value={ability.limits?.[f.name as keyof Limits]} onChange={(v) => set(f.name as keyof Limits, v)} />

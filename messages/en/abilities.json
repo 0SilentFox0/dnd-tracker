@@ -12,7 +12,10 @@
   "panel": {
     "name": "Name",
     "delete": "Delete ability {name}",
-    "description": "Description (optional)"
+    "description": "Description (optional)",
+    "expand": "Expand",
+    "collapse": "Collapse",
+    "emptySummary": "—"
   },
   "flow": {
     "when": "When",

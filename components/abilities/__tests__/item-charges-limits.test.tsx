@@ -15,7 +15,7 @@ describe("LimitsSection: item charges", () => {
 
     render(
       <AbilityEditorProvider value={{ campaignId: "c", errorsByPath: {}, itemCharges: true }}>
-        <LimitsSection ability={ability} path="0" onChange={onChange} />
+        <LimitsSection ability={ability} path="0" state={{ open: true, onToggle: vi.fn(), summary: null }} onChange={onChange} />
       </AbilityEditorProvider>,
     );
 
@@ -27,7 +27,7 @@ describe("LimitsSection: item charges", () => {
   it("without item charges the control is absent", () => {
     render(
       <AbilityEditorProvider value={{ campaignId: "c", errorsByPath: {} }}>
-        <LimitsSection ability={ability} path="0" onChange={vi.fn()} />
+        <LimitsSection ability={ability} path="0" state={{ open: true, onToggle: vi.fn(), summary: null }} onChange={vi.fn()} />
       </AbilityEditorProvider>,
     );
 

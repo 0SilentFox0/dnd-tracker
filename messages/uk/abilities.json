@@ -12,7 +12,10 @@
   "panel": {
     "name": "Назва",
     "delete": "Видалити вміння {name}",
-    "description": "Опис (необов'язково)"
+    "description": "Опис (необов'язково)",
+    "expand": "Розгорнути",
+    "collapse": "Згорнути",
+    "emptySummary": "—"
   },
   "flow": {
     "when": "Коли",

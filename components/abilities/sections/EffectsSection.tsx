@@ -7,13 +7,12 @@ import { useAbilityEditor } from "../editor-context";
 import { EffectCard } from "../EffectCard";
 import { FieldErrors } from "../FieldErrors";
 import { SectionShell } from "./SectionShell";
-import { SectionTitle } from "./SectionTitle";
 
 import { Button } from "@/components/ui/button";
 import { allowedEffectKinds, newEffect } from "@/lib/utils/abilities/editor";
 import type { Effect } from "@/lib/utils/abilities/schema";
 
-export function EffectsSection({ ability, path, onChange }: AbilitySectionProps) {
+export function EffectsSection({ ability, path, onChange, state }: AbilitySectionProps) {
   const t = useTranslations("abilities.effects");
 
   const { errorsByPath } = useAbilityEditor();
@@ -21,8 +20,7 @@ export function EffectsSection({ ability, path, onChange }: AbilitySectionProps)
   const setEffects = (effects: Effect[]) => onChange({ ...ability, effects });
 
   return (
-    <SectionShell path={path} part="then">
-      <SectionTitle>{t("title")}</SectionTitle>
+    <SectionShell path={path} part="then" title={t("title")} {...state}>
       <FieldErrors errors={errorsByPath[`${path}.effects`] ?? []} />
       {ability.effects.map((effect, i) => (
         <div key={i} className="space-y-1">

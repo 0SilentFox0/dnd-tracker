@@ -7,7 +7,6 @@ import { useFieldErrors } from "../editor-context";
 import { FieldErrors } from "../FieldErrors";
 import { FieldRenderer } from "../fields/FieldRenderer";
 import { SectionShell } from "./SectionShell";
-import { SectionTitle } from "./SectionTitle";
 
 import { Label } from "@/components/ui/label";
 import { SelectField } from "@/components/ui/select-field";
@@ -16,7 +15,7 @@ import { changeTriggerEvent, getAtPath, setAtPath } from "@/lib/utils/abilities/
 import { TRIGGER_GROUPS, TRIGGER_REGISTRY, TRIGGERS_BY_GROUP } from "@/lib/utils/abilities/registry/triggers";
 import type { Trigger, TriggerEvent } from "@/lib/utils/abilities/schema";
 
-export function TriggerSection({ ability, path, onChange }: AbilitySectionProps) {
+export function TriggerSection({ ability, path, onChange, state }: AbilitySectionProps) {
   const t = useTranslations("abilities.trigger");
 
   const tr = useTranslator("abilityRegistry");
@@ -31,8 +30,7 @@ export function TriggerSection({ ability, path, onChange }: AbilitySectionProps)
   const errors = useFieldErrors(`${path}.trigger`);
 
   return (
-    <SectionShell path={path} part="when">
-      <SectionTitle>{t("title")}</SectionTitle>
+    <SectionShell path={path} part="when" title={t("title")} {...state}>
       <div className="space-y-1">
         <Label htmlFor={`${path}.trigger.event`} className="text-xs text-muted-foreground">
           {t("event")}
