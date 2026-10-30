@@ -11,3 +11,5 @@ export const pageSummarySchema = z.object({
 });
 
 export type PageSummary = z.infer<typeof pageSummarySchema>;
+
+export const generateSummaryBodySchema = z.object({ force: z.boolean().optional() });
