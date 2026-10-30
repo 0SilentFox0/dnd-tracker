@@ -1,7 +1,7 @@
 // @vitest-environment happy-dom
 import type { ReactNode } from "react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { renderHook, waitFor } from "@testing-library/react";
+import { act, renderHook, waitFor } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 
 import { getTemplates } from "@/lib/api/templates";
@@ -40,5 +40,17 @@ describe("useTemplates", () => {
     await waitFor(() => expect(result.current.isLoading).toBe(false));
     expect(result.current.selection).toEqual({ templateId: null });
     expect(result.current.name).toBeUndefined();
+  });
+
+  it("якщо є офіційний порожній 5e — він вибраний за замовчуванням, явний вибір має пріоритет", async () => {
+    vi.mocked(getTemplates).mockResolvedValue({ ...list, official: [...list.official, { id: "e5", name: "5e (empty)", description: null, visibility: "official", counts: {} }] });
+
+    const { result } = renderHook(() => useTemplateSelection(), { wrapper: setup().wrapper });
+
+    await waitFor(() => expect(result.current.selection).toEqual({ templateId: "e5" }));
+    expect(result.current.name).toBe("5e (empty)");
+
+    act(() => result.current.setSelection({ templateId: null }));
+    expect(result.current.selection).toEqual({ templateId: null });
   });
 });
