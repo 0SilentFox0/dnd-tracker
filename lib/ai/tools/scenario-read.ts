@@ -69,7 +69,7 @@ export const readScenarioPageTool = defineTool({
   scopes: ["ai"],
   title: "Read scenario page",
   description:
-    "Read a scenario page as the scenario markdown dialect: sections with [sectionId], rows with ids, story and DM notes. ||text|| is a DM-only secret. Pass sectionId to read one section. An offset belongs to the same sectionId scope as the call that returned it: pass offset only with that same sectionId (or none); outline offsets are page-wide, so use them without sectionId. Long pages come in chunks: the last line [next offset N of TOTAL] gives the offset for the next call; [row split] marks one oversize row cut in the middle.",
+    "Read a scenario page as the scenario markdown dialect: sections with [sectionId], rows with ids, story and DM notes. ||text|| is a DM-only secret. Pass sectionId to read one section. Offsets are page-absolute (same as outline @N); with sectionId the read stops at the section end. Long pages come in chunks: the last line [next offset N of TOTAL] gives the offset for the next call; [row split] marks one oversize row cut in the middle.",
   input: z.object({ pageId: z.string().min(1), sectionId: z.string().min(1).optional(), offset: z.number().int().min(0).optional() }),
   handler: async (ctx, { pageId, sectionId, offset }) => {
     const page = await loadPageForAi(ctx.campaignId, pageId);

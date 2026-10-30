@@ -12,7 +12,7 @@ const content = (sections: { id: string; rows: ReturnType<typeof row>[] }[]): Sc
 const walk = (c: ScenarioContent, limit: number, sectionId?: string) => {
   const parts: string[] = [];
 
-  let offset: number | null = 0;
+  let offset: number | null | undefined;
 
   let guard = 0;
 
@@ -86,6 +86,54 @@ describe("chunkContentMarkdown", () => {
 
     expect(chunks.join("")).not.toContain("Розділ s1");
     expect(chunks.join("")).toContain("Row q0");
+  });
+
+  it("offset з outline (@N) читається з sectionId і без нього з того самого місця", () => {
+    const { markdown, sections } = buildLayout("T", big);
+
+    const start = sections[1].rows[1].start;
+
+    const withSection = chunkContentMarkdown("T", big, { sectionId: "s2", offset: start, limit: 10_000 }).text;
+
+    const without = chunkContentMarkdown("T", big, { offset: start, limit: 10_000 }).text;
+
+    expect(withSection.startsWith("### Row q1")).toBe(true);
+    expect(without.startsWith("### Row q1")).toBe(true);
+    expect(withSection).toBe(markdown.slice(start, sections[1].end));
+  });
+
+  it("порції секції зшиваються в markdown.slice(start, end) і не заходять у наступну секцію", () => {
+    const { markdown, sections } = buildLayout("T", big);
+
+    const chunks = walk(big, 250, "s2");
+
+    expect(chunks.length).toBeGreaterThan(2);
+    expect(chunks[chunks.length - 1]).not.toMatch(/\[next offset/);
+
+    const stitched = chunks.map((c, i) => (i < chunks.length - 1 ? c.replace(/\n\n\[next offset \d+ of \d+\]$/, "") : c));
+
+    expect(stitched.join("\n\n")).toBe(markdown.slice(sections[1].start, sections[1].end));
+  });
+
+  it("offset з іншого розділу — outside section, невідомий sectionId — not found", () => {
+    const { sections } = buildLayout("T", big);
+
+    const r = chunkContentMarkdown("T", big, { sectionId: "s2", offset: sections[0].rows[0].start, limit: 1000 });
+
+    expect(r.text).toContain("outside section s2");
+    expect(r.nextOffset).toBeNull();
+    expect(chunkContentMarkdown("T", big, { sectionId: "nope", limit: 1000 }).text).toContain("[section nope not found]");
+  });
+
+  it("nextOffset секції приймається наступним викликом з тим самим sectionId", () => {
+    const first = chunkContentMarkdown("T", big, { sectionId: "s1", limit: 300 });
+
+    expect(first.nextOffset).not.toBeNull();
+
+    const second = chunkContentMarkdown("T", big, { sectionId: "s1", offset: first.nextOffset as number, limit: 300 });
+
+    expect(second.text).not.toContain("outside section");
+    expect(second.text).toContain("Row r");
   });
 
   it("не розрізає сурогатну пару при row split", () => {
