@@ -65,7 +65,7 @@ export function SpellFormBody({
   return (
     <>
       {formData.executionMode === "manual" && <p role="status">{t("spellEditor.body.manualNotice")}</p>}
-      <label className="my-3 flex items-center gap-2"><input type="checkbox" checked={formData.executionMode !== "manual"} onChange={e => setFormData({ ...formData, executionMode: e.target.checked ? "native" : "manual" })} /> {t("spellEditor.body.verified")}</label>
+      <label className="mx-4 my-3 flex items-center gap-2"><input type="checkbox" checked={formData.executionMode !== "manual"} onChange={e => setFormData({ ...formData, executionMode: e.target.checked ? "native" : "manual" })} /> {t("spellEditor.body.verified")}</label>
       <HudForm
         id="spell-form"
         onSubmit={submit.onSubmit}

@@ -122,6 +122,8 @@
       "maxHp": "% of max HP",
       "ownerAttack": "% of my attack damage"
     },
+    "diceCount": "Dice count",
+    "diceSides": "Die type",
     "classRefOutside": "A class table reference is allowed only in class abilities",
     "variables": "Variables: {list}",
     "classColumn": "Class table column",
