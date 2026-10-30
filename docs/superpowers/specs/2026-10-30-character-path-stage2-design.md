@@ -16,12 +16,12 @@
 |---|---|
 | Передумови feat'а | `FeatData.prerequisite`, `featPrerequisiteMet` (`lib/utils/characters/choices/validate.ts`) |
 | Передумови опцій | `ChoiceOption.minLevel`/`requires`, `optionIssues` |
-| Обхід виборів героя | `visitPicks`, `classChoiceDefs`, `isChoiceOpen`, `countFeats` (`lib/utils/characters/choices/`) |
+| Обхід виборів героя | `forEachChoiceOwner` (дає власника: раса, передісторія, класи, риси) і `visitPicks` у `walk.ts`; `classChoiceDefs`, `isChoiceOpen`, `countFeats` |
 | Редактор і пікер | `ChoicesEditor` (проп `only`), `ChoicePicker`, `OptionButton`, `PickerContext.featCounts/scoreAfter` |
-| Збереження | `useCharacterChoices.save`, `choicesBodyOf`, `prunePicks`, `classes[].subclassId` у тілі виборів |
+| Збереження | `useCharacterChoices.save`, `choicesBodyOf`, `prunePicks`; сервер `saveCharacterChoices` (`lib/server/characters/core/choices-handler.ts`) |
 | Стрічка рівнів | `buildClassProgression`, `splitPathRows`, `rowItems`, `PathRowCard`, `CharacterPath` |
 | Рівень | `ClassLevelUpDialog`, `useClassLevelUpForm.needsSubclass` |
-| UI | `ResponsiveDialog`, `EntityIcon`, `HudPill`; `summarize` з `progression.ts` для рядка суті |
+| UI | `ResponsiveDialog`, `EntityIcon`, `HudPill`; `summarize` з `progression.ts` для рядка суті (зараз приватний: виноситься в `lib/utils/characters/classes/summary.ts` й імпортується обома) |
 
 Нове потрібне, бо: валідація знає лише «так/ні» (`CHOICE_*`, `FEAT_PREREQUISITE`), картки в пікері показують загальне «не виконано», а діалог виборів вивалює всі секції разом.
 
@@ -47,9 +47,9 @@ requirementsOf(source: FeatData | ChoiceOption, ctx): Requirement[]
 
 ### 2. Майстер виборів
 
-- `wizardSteps(state, refs, hero)` (чиста, `lib/utils/characters/choices/wizard.ts`) обходить ті ж вибори, що й `ChoicesEditor`, і повертає лише відкриті, по одному на крок: `{ key, source, kind, choice, summaryKey }`.
+- `wizardSteps(state, refs, hero)` (чиста, `lib/utils/characters/choices/wizard.ts`) будується на `forEachChoiceOwner` (власник дає «Звідки») і повертає лише відкриті вибори, по одному на крок: `{ key, source, kind, choice, summaryKey }`. Власного обходу не пише.
 - Крок = «Звідки» (Раса: …, Передісторія: …, Клас: … N-й рівень) + «Що дає» (одне речення за `kind`, ключ у `choices.json`) + один `ChoicePicker`.
-- Підклас: окремий крок, коли рівень досягнуто, а підкласу нема; пишеться в `classes[].subclassId` тим самим `save`.
+- Підклас: окремий крок, коли рівень ≥ `subclassLevel`, а підкласу нема; пишеться через розширений `PUT /choices` (розділ 6).
 - Хук `useChoiceWizard` (`lib/hooks/characters/`): поточний крок, «Назад/Далі», збереження на будь-якому кроці через наявний `useCharacterChoices.save`. Запису нового нема.
 - `ChoicesDialog` показує майстер; «Крок N з M». Скасування крок не губить: `prunePicks` як зараз.
 - Іменований старт: `ChoicesDialog` приймає `startAt?: string` (ключ вибору), `onPick` у «Шляху» передає `pick.key`.
@@ -72,6 +72,17 @@ requirementsOf(source: FeatData | ChoiceOption, ctx): Requirement[]
 - `ClassLevelUpDialog`: крок підкласу використовує ту саму картку підкласу.
 - Лічильник «доступно N з M рис» у стрічці **не** додаємо: треба тягнути каталог рис у `sheet` (egress).
 
+### 6. Серверна зміна: підклас у `PUT /choices`
+
+`ChoicesBody` зараз має лише `classChoices`; підклас пишуть тільки level-up (піднімає рівень) і редактор класів. Додаємо необов'язкове `classSubclasses?: Record<classId, subclassId>` (`lib/schemas/choices.ts`, `types/choices.ts`). У `saveCharacterChoices` після `withClassPicks` застосовується до `before.classes`:
+
+- підклас уже заданий і відрізняється: `SUBCLASS_ALREADY_SET` (422, наявний код);
+- підкласу нема в класі: `SUBCLASS_NOT_FOUND` (наявний у `application.ts`);
+- рівень запису < `subclassLevel`: помилка (нове `SUBCLASS_TOO_EARLY` у `api-errors.ts` і `messages`);
+- нічого не змінюється, коли поля нема. Міграцій нема. Лог `CHOICES_EDIT` уже пише `before/after`.
+
+План має підтвердити, що `resolveCharacterChoices` перераховує вибори підкласу (відкриваються `bySubclass`-вибори) після зміни `classes`.
+
 ## Поза межами
 
 Мультиклас і HoMM-дерево (етап 3); передісторія як майстер (етап 4); справжні іконки feature (`ProgressionItem.icon?` пізніше); нові колонки, міграції, API; зміна правил передумов; вимоги «потрібен слот N-го рівня» і «потрібен підклас X» для feat'ів (у `FeatData` цих даних нема).
@@ -80,6 +91,7 @@ requirementsOf(source: FeatData | ChoiceOption, ctx): Requirement[]
 
 - `requirementsOf`: рівень, найкраща зі здібностей, `scoreAfter`, `requires`, `manual`; `featPrerequisiteMet` дає ті самі відповіді, що й до змін (наявні тести без правок).
 - `wizardSteps`: порядок (раса, передісторія, класи), лише відкриті, підклас-крок лише коли рівень досягнуто, `startAt`.
+- `PUT /choices` з `classSubclasses`: успіх, `SUBCLASS_ALREADY_SET`, `SUBCLASS_NOT_FOUND`, `SUBCLASS_TOO_EARLY`, без поля поведінка не змінилась.
 - `useChoiceWizard` і `ChoicesDialog` (happy-dom): крок N з M, «Назад/Далі», збереження з будь-якого кроку, старт на заданому кроці.
 - Картка: дві групи, причина з числами, ✓ на виконаному, розблокування після підняття здібності в тому ж майстрі, «i» відкриває повний текст.
 - `subclassPreview` і «Шлях»: «Які бувають», чіп «Залежить від підкласу», `onPick` отримує ключ.
@@ -91,6 +103,7 @@ Subagent на Sonnet, кампанія TEST на локальній `prodcopy`: 
 
 ## Ризики
 
+- Після вибору підкласу з'являються нові відкриті вибори: майстер після `save` перезавантажує стан і додає кроки, а не закриває діалог.
 - `ChoicesEditor` лишається для level-up (`only`) і DM-форм: майстер лише в `ChoicesDialog`; спільна логіка в `wizardSteps`, щоб не розійшлися.
 - Кроки залежать від стану (вибір підкласу відкриває нові вибори): `wizardSteps` перераховується після кожної зміни, поточний крок утримується за `key`.
 
