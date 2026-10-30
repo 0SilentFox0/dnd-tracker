@@ -7,6 +7,7 @@ import { findParticipant, isActive, replaceParticipant, sitsOutTurn } from "@/li
 import { resolveDowned, runAbilities } from "@/lib/utils/abilities/engine/core/run-abilities";
 import type { Rng } from "@/lib/utils/abilities/engine/core/types";
 import { dropBreakOnDamage } from "@/lib/utils/abilities/engine/effects/hp";
+import { effectName } from "@/lib/utils/battle/common/terms";
 import { applyDamageConsequences } from "@/lib/utils/battle/damage/consequences";
 import { hazardHit, hazardLabel,hazardUnder } from "@/lib/utils/battle/grid/hazard";
 import { landDive } from "@/lib/utils/battle/maneuvers";
@@ -29,7 +30,7 @@ export interface StartOfTurnResult {
   /** повний список: вміння turnStart і смерть від DOT можуть змінити інших */
   participants: BattleParticipant[];
   damageMessages: LogLine[];
-  expiredEffects: string[];
+  expiredEffects: LogLine[];
   abilityMessages: LogLine[];
   rechargeMessages: LogLine[];
   statusChanged: boolean; // чи змінився статус (unconscious/dead)
@@ -75,7 +76,7 @@ interface StartOfTurnDamage {
   others: BattleParticipant[];
   damageMessages: LogLine[];
   healMessages: LogLine[];
-  expiredEffects: string[];
+  expiredEffects: LogLine[];
   hazard?: StartOfTurnHazard;
   killedByRules: boolean;
 }
@@ -97,7 +98,7 @@ function applyStartOfTurnDamage(
 
   const healMessages: LogLine[] = [];
 
-  let expiredEffects: string[] = [];
+  let expiredEffects: LogLine[] = [];
 
   let hazardResult: StartOfTurnHazard | undefined;
 
@@ -189,8 +190,8 @@ function applyStartOfTurnDamage(
 }
 
 // Скидаємо флаги дій; ефекти no_bonus_action / no_reaction блокують відповідні дії
-function resetTurnFlags(updated: BattleParticipant, original: BattleParticipant, allParticipants: BattleParticipant[], rng: Rng): { participant: BattleParticipant; skippedBy: { name: string; percent: number } | undefined } {
-  const skipChances = original.battleData.activeEffects.flatMap((e) => e.effects.filter((d) => d.type === EffectMarker.SKIP_ACTION).map((d) => ({ name: e.name, percent: d.value })));
+function resetTurnFlags(updated: BattleParticipant, original: BattleParticipant, allParticipants: BattleParticipant[], rng: Rng): { participant: BattleParticipant; skippedBy: { name: LogLine; percent: number } | undefined } {
+  const skipChances = original.battleData.activeEffects.flatMap((e) => e.effects.filter((d) => d.type === EffectMarker.SKIP_ACTION).map((d) => ({ name: effectName(e), percent: d.value })));
 
   const skippedBy = isActive(updated) ? skipChances.find((s) => rng() * 100 < s.percent) : undefined;
 

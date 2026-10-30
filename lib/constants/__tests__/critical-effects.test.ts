@@ -7,7 +7,6 @@ import {
 describe("critical effects", () => {
   it("replaces half damage with a slipping weapon", () => {
     expect(getCriticalEffect(5, "fail")).toMatchObject({
-      name: "Зброя вислизає",
       effect: { type: "weakened_next_hit" },
     });
   });

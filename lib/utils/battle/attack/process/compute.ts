@@ -17,6 +17,7 @@ import type { StaticEffect } from "@/lib/utils/abilities/schema";
 import { attackAbilityFor, attackDamageModifier } from "@/lib/utils/battle/attack/ability";
 import { critNameRef } from "@/lib/utils/battle/attack/critical";
 import { attackKindOf } from "@/lib/utils/battle/common/attack-kind";
+import { effectName } from "@/lib/utils/battle/common/terms";
 import { dealsNoDamage, findEffectMarker } from "@/lib/utils/battle/participant/state";
 import { maxOf, parseDice, parseDiceLenient, rollGroups } from "@/lib/utils/common/dice";
 import type { BattleAttack, BattleParticipant, DamageRow, DamageStep } from "@/types/battle";
@@ -210,7 +211,7 @@ function applyAttackerMultipliers(
 
   if (weakened) {
     state.damage = Math.floor(state.damage * weakened.value);
-    state.steps.push({ label: weakened.effect.name, side: "attacker", kind: "multiplier", value: weakened.value, after: state.damage });
+    state.steps.push({ label: effectName(weakened.effect), side: "attacker", kind: "multiplier", value: weakened.value, after: state.damage });
   }
 
   const heroDm = applyHeroDmDamageMultiplier(ctx.attacker, ctx.attack.type as AttackType, state.damage);

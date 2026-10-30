@@ -194,7 +194,7 @@ describe("resolveRetaliation", () => {
     it("нат.1 на відсічі: ефект падіння на захиснику і подія з критичним ефектом", () => {
       const r = retaliate(attacker(), defender(), { rng: seq(0, 0.5, 0.15) });
 
-      expect(find(r?.participants, "d")?.battleData.activeEffects.some((e) => e.name === "Падіння")).toBe(true);
+      expect(find(r?.participants, "d")?.battleData.activeEffects.some((e) => e.name === "crit.attack.fail.2")).toBe(true);
       expect(r?.battleAction.actionDetails.criticalEffect).toMatchObject({ id: 2, type: "fail" });
     });
 

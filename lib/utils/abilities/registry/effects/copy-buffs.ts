@@ -5,6 +5,7 @@ import { findParticipant, updateParticipant } from "@/lib/utils/abilities/engine
 import { applySpellTimedEffect } from "@/lib/utils/abilities/engine/effects/opposing-spells";
 import { effectSource } from "@/lib/utils/abilities/engine/effects/timed-effects";
 import type { Effect } from "@/lib/utils/abilities/schema";
+import { effectName } from "@/lib/utils/battle/common/terms";
 import type { ActiveEffect, BattleParticipant } from "@/types/battle";
 import type { LogLine } from "@/types/text";
 
@@ -39,7 +40,7 @@ export function applyCopySpellBuffs(input: EffectApplyInput<Extract<Effect, { ki
         ctx.round,
       );
 
-      messages.push(...removed.map((r) => textRef("abilityText.log.cancelsEffect", { ability: e.name, effect: r.name, target: p.basicInfo.name })), textRef("abilityText.log.gainsEffect", { target: p.basicInfo.name, effect: e.name, ability: ability.name }));
+      messages.push(...removed.map((r) => textRef("abilityText.log.cancelsEffect", { ability: e.name, effect: effectName(r), target: p.basicInfo.name })), textRef("abilityText.log.gainsEffect", { target: p.basicInfo.name, effect: e.name, ability: ability.name }));
 
       return participant;
     }, p),

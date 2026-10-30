@@ -8,6 +8,7 @@ import type { Effect } from "@/lib/utils/abilities/schema";
 import { exhaustionLevel, restoreExhaustionHp, syncExhaustion } from "@/lib/utils/battle/conditions";
 import { movementBudget } from "@/lib/utils/battle/grid/path";
 import { spellSaveDc } from "@/lib/utils/battle/spell/power";
+import { effectTitle } from "@/lib/utils/battle/view/effect-summary";
 import { DEFAULT_RULES } from "@/lib/utils/rules";
 import type { BattleParticipant } from "@/types/battle";
 
@@ -47,7 +48,8 @@ describe("applyCondition 5e", () => {
     const e = t.battleData.activeEffects[0];
 
     expect(e.type).toBe("condition");
-    expect(e.name).toBe("Приголомшений");
+    expect(e.name).toBe("stunned");
+    expect(textOf(effectTitle(e))).toBe("Приголомшений");
     expect(e.effects.map((m) => m.type)).toEqual(expect.arrayContaining(["stunned", "incapacitated", "no_reaction", "immobilized"]));
     expect(e.abilityEffects).toEqual(expect.arrayContaining([expect.objectContaining({ flag: "autoFailSave" })]));
     expect(t.actionFlags.hasUsedReaction).toBe(true);

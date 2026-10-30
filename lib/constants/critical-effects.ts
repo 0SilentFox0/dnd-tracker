@@ -1,4 +1,3 @@
-/* eslint-disable no-restricted-syntax -- name/description are copied into the stored activeEffects (uk data); the battle UI reads battleTerms.crits.* keys */
 export type CriticalEffectType =
   | "double_damage"
   | "max_damage"
@@ -26,8 +25,6 @@ export type CriticalEffectType =
 
 export interface CriticalEffect {
   id: number; // 1-10 для d10
-  name: string;
-  description: string;
   type: "success" | "fail";
   flavorCount: number;
   effect: {
@@ -44,8 +41,6 @@ export interface CriticalEffect {
 export const CRITICAL_SUCCESS_EFFECTS: CriticalEffect[] = [
   {
     id: 1,
-    name: "Подвійний урон",
-    description: "Урон подвоюється (x2)",
     type: "success",
     flavorCount: 3,
     effect: {
@@ -55,8 +50,6 @@ export const CRITICAL_SUCCESS_EFFECTS: CriticalEffect[] = [
   },
   {
     id: 2,
-    name: "Максимальний урон",
-    description: "Урон = максимальне значення кубиків",
     type: "success",
     flavorCount: 3,
     effect: {
@@ -65,8 +58,6 @@ export const CRITICAL_SUCCESS_EFFECTS: CriticalEffect[] = [
   },
   {
     id: 3,
-    name: "Advantage на наступну атаку",
-    description: "Наступна атака з Advantage",
     type: "success",
     flavorCount: 3,
     effect: {
@@ -77,8 +68,6 @@ export const CRITICAL_SUCCESS_EFFECTS: CriticalEffect[] = [
   },
   {
     id: 4,
-    name: "Ослаблення захисту",
-    description: "Ціль отримує −2 AC до початку її наступного ходу",
     type: "success",
     flavorCount: 3,
     effect: {
@@ -90,8 +79,6 @@ export const CRITICAL_SUCCESS_EFFECTS: CriticalEffect[] = [
   },
   {
     id: 5,
-    name: "Додатковий урон",
-    description: "Додатковий урон +1d6",
     type: "success",
     flavorCount: 3,
     effect: {
@@ -101,8 +88,6 @@ export const CRITICAL_SUCCESS_EFFECTS: CriticalEffect[] = [
   },
   {
     id: 6,
-    name: "Безкоштовна атака",
-    description: "Безкоштовна додаткова атака (1 раз)",
     type: "success",
     flavorCount: 3,
     effect: {
@@ -113,8 +98,6 @@ export const CRITICAL_SUCCESS_EFFECTS: CriticalEffect[] = [
   },
   {
     id: 7,
-    name: "Блокування бонусної дії",
-    description: "Ворог втрачає Bonus Action наступного ходу",
     type: "success",
     flavorCount: 3,
     effect: {
@@ -125,8 +108,6 @@ export const CRITICAL_SUCCESS_EFFECTS: CriticalEffect[] = [
   },
   {
     id: 8,
-    name: "Ігнорування реакцій",
-    description: "Атака ігнорує реакції цілі",
     type: "success",
     flavorCount: 3,
     effect: {
@@ -136,8 +117,6 @@ export const CRITICAL_SUCCESS_EFFECTS: CriticalEffect[] = [
   },
   {
     id: 9,
-    name: "Mark для Advantage",
-    description: "Наступна атака по цілі з Advantage",
     type: "success",
     flavorCount: 3,
     effect: {
@@ -148,8 +127,6 @@ export const CRITICAL_SUCCESS_EFFECTS: CriticalEffect[] = [
   },
   {
     id: 10,
-    name: "Комбо-удар",
-    description: "Ще одна атака з Disadvantage",
     type: "success",
     flavorCount: 3,
     effect: {
@@ -167,8 +144,6 @@ export const CRITICAL_SUCCESS_EFFECTS: CriticalEffect[] = [
 export const CRITICAL_FAIL_EFFECTS: CriticalEffect[] = [
   {
     id: 1,
-    name: "Простий промах",
-    description: "Промах без додаткових ефектів",
     type: "fail",
     flavorCount: 3,
     effect: {
@@ -177,8 +152,6 @@ export const CRITICAL_FAIL_EFFECTS: CriticalEffect[] = [
   },
   {
     id: 2,
-    name: "Падіння",
-    description: "Prone (лежачи)",
     type: "fail",
     flavorCount: 3,
     effect: {
@@ -189,8 +162,6 @@ export const CRITICAL_FAIL_EFFECTS: CriticalEffect[] = [
   },
   {
     id: 3,
-    name: "Disadvantage на наступну атаку",
-    description: "Disadvantage на наступну атаку",
     type: "fail",
     flavorCount: 3,
     effect: {
@@ -201,8 +172,6 @@ export const CRITICAL_FAIL_EFFECTS: CriticalEffect[] = [
   },
   {
     id: 4,
-    name: "Втрата бонусної дії",
-    description: "Втрата Bonus Action цього ходу",
     type: "fail",
     flavorCount: 3,
     effect: {
@@ -213,8 +182,6 @@ export const CRITICAL_FAIL_EFFECTS: CriticalEffect[] = [
   },
   {
     id: 5,
-    name: "Зброя вислизає",
-    description: "Наступне влучання завдає ×0.5 шкоди",
     type: "fail",
     flavorCount: 3,
     effect: {
@@ -226,8 +193,6 @@ export const CRITICAL_FAIL_EFFECTS: CriticalEffect[] = [
   },
   {
     id: 6,
-    name: "Ослаблення захисту",
-    description: "−2 AC до початку наступного ходу",
     type: "fail",
     flavorCount: 3,
     effect: {
@@ -239,8 +204,6 @@ export const CRITICAL_FAIL_EFFECTS: CriticalEffect[] = [
   },
   {
     id: 7,
-    name: "Провокація",
-    description: "Провокує Opportunity Attack",
     type: "fail",
     flavorCount: 3,
     effect: {
@@ -250,8 +213,6 @@ export const CRITICAL_FAIL_EFFECTS: CriticalEffect[] = [
   },
   {
     id: 8,
-    name: "Втрата реакції",
-    description: "Втрата реакції до наступного ходу",
     type: "fail",
     flavorCount: 3,
     effect: {
@@ -262,8 +223,6 @@ export const CRITICAL_FAIL_EFFECTS: CriticalEffect[] = [
   },
   {
     id: 9,
-    name: "Mark для ворога",
-    description: "Наступна атака по персонажу з Advantage",
     type: "fail",
     flavorCount: 3,
     effect: {
@@ -274,8 +233,6 @@ export const CRITICAL_FAIL_EFFECTS: CriticalEffect[] = [
   },
   {
     id: 10,
-    name: "Втрата дії",
-    description: "Втрата дії (Action)",
     type: "fail",
     flavorCount: 3,
     effect: {

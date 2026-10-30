@@ -39,7 +39,7 @@ export interface ActiveEffect {
   /** Engine-made effects: shown instead of `name` (translated per viewer) */
   label?: LogLine;
   type: "buff" | "debuff" | "condition";
-  description?: string;
+  description?: LogLine;
   icon?: string;
   duration: number; // кількість раундів що залишилось
   appliedAt: {
@@ -752,7 +752,7 @@ export interface BattleAction {
     // Для ефектів:
     appliedEffects?: Array<{
       id: string;
-      name: string;
+      name: LogLine;
       duration: number;
       type?: "buff" | "debuff" | "condition";
       targetId?: string;

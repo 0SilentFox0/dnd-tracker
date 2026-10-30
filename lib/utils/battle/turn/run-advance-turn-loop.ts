@@ -1,7 +1,7 @@
 import { berserkBonusOf, runBerserkTurn } from "./berserk";
 
 import { SYSTEM_ACTOR } from "@/lib/constants/battle";
-import { textRef } from "@/lib/i18n/text-ref";
+import { joinLines, lineKey, textRef } from "@/lib/i18n/text-ref";
 import { idleTurnIndex, isActive, sitsOutTurn, takesTurn } from "@/lib/utils/abilities/engine/core/participants";
 import { runAbilities } from "@/lib/utils/abilities/engine/core/run-abilities";
 import { rollDyingAt } from "@/lib/utils/battle/death-saves";
@@ -179,8 +179,8 @@ function startTurnEntries(st: LoopState, env: LoopEnv, turnResult: StartOfTurnRe
     st.log.push(
       entry("effects", {
         actionType: "ability",
-        actionDetails: { appliedEffects: turnResult.expiredEffects.map((name) => ({ id: name, name, duration: 0 })) },
-        ...logFields(textRef("battleLog.turn.effectsEndedCap", { names: turnResult.expiredEffects.join(", ") })),
+        actionDetails: { appliedEffects: turnResult.expiredEffects.map((name) => ({ id: lineKey(name), name, duration: 0 })) },
+        ...logFields(textRef("battleLog.turn.effectsEndedCap", { names: joinLines(turnResult.expiredEffects, ", ") })),
         hpChanges: [],
       }),
     );

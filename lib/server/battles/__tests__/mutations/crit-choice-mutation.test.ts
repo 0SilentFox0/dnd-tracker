@@ -4,6 +4,7 @@ import { context, goblin as baseGoblin, hero as baseHero } from "./fixtures";
 
 import { API_ERRORS } from "@/lib/constants/api-errors";
 import { AttackType, BattleStatus } from "@/lib/constants/battle";
+import { textOf } from "@/lib/i18n/test/text";
 import { critChoiceSchema } from "@/lib/schemas";
 import { attackBodySchema } from "@/lib/schemas/battles";
 import { createAttackMutation } from "@/lib/server/battles/mutations/attack/attack-mutation";
@@ -13,6 +14,7 @@ import { resetMutation } from "@/lib/server/battles/mutations/reset/reset-mutati
 import { createRollbackMutation } from "@/lib/server/battles/mutations/rollback/rollback-mutation";
 import { createSpellMutation } from "@/lib/server/battles/mutations/spell/spell-mutation";
 import { runBattleMutation } from "@/lib/server/battles/run-mutation";
+import { critNameRef } from "@/lib/utils/battle/attack/critical";
 import { critEffectsFor } from "@/lib/utils/battle/crit-choice/catalog";
 import type { StoredPendingCritChoice } from "@/lib/utils/battle/crit-choice/types";
 import { eventTextOf } from "@/lib/utils/battle/log/__tests__/event-text";
@@ -61,7 +63,7 @@ describe("crit-choice mutation", () => {
 
     expect(out.scene?.pendingCritChoice).toBeNull();
     expect(out.events).toHaveLength(1);
-    expect(eventTextOf(out.events[0])).toContain(effect.name);
+    expect(eventTextOf(out.events[0])).toContain(textOf(critNameRef(effect)));
   });
 
   it("«random» для всіх дорівнює resume без вибору за тим самим seed", async () => {
@@ -105,7 +107,7 @@ describe("crit-choice mutation", () => {
 
     const done = await critChoice(ctx, { choices: { [KEY]: "random" } });
 
-    expect(eventTextOf(done.events[0])).toContain(all[1].name);
+    expect(eventTextOf(done.events[0])).toContain(textOf(critNameRef(all[1])));
   });
 
   it("серверні кидки асистента: після вибору атака повторюється з serverRolls", async () => {

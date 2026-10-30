@@ -7,11 +7,10 @@ import { textOf } from "@/lib/i18n/test/text";
 import { dynamicTextRef } from "@/lib/i18n/text-ref";
 import { collectModifiers } from "@/lib/utils/abilities/engine/core/collect-modifiers";
 import { createMockParticipant } from "@/lib/utils/battle/__tests__/fixtures/mock-participant";
+import { effectTitle } from "@/lib/utils/battle/view/effect-summary";
 
 const crit = (type: CriticalEffectType, extra: Partial<CriticalEffect["effect"]> = {}): CriticalEffect => ({
   id: 1,
-  name: "Тест-ефект",
-  description: "опис",
   type: "success",
   flavorCount: 0,
   effect: { type, duration: 1, ...extra },
@@ -23,6 +22,27 @@ const apply = (type: CriticalEffectType, extra: Partial<CriticalEffect["effect"]
 const effectTypes = (p: ReturnType<typeof apply>) => p.battleData.activeEffects.flatMap((e) => e.effects.map((d) => d.type));
 
 describe("applyCriticalEffect", () => {
+  it("пише нейтральний name-id, label і опис як TextRef", () => {
+    const p = apply("ac_buff", { value: 2 });
+
+    expect(p.battleData.activeEffects[0]).toMatchObject({
+      name: "crit.attack.success.1",
+      label: { message: "battleTerms.crits.attack.success.1.name" },
+      description: { message: "battleTerms.crits.attack.success.1.description" },
+    });
+    expect(textOf(effectTitle(p.battleData.activeEffects[0]))).toBe(textOf(dynamicTextRef("battleTerms.crits.attack.success.1.name")));
+  });
+
+  it("table save ставить ключі таблиці рятівних", () => {
+    const p = applyCriticalEffect(createMockParticipant(), crit("ac_buff", { value: 2 }), 3, { table: "save" });
+
+    expect(p.battleData.activeEffects[0].name).toBe("crit.save.success.1");
+  });
+
+  it("старий збережений ефект з uk-рядками показується як є", () => {
+    expect(effectTitle({ name: "Подвійний урон" })).toBe("Подвійний урон");
+  });
+
   it("ac_buff: +2 до броні на раунд", () => {
     const p = apply("ac_buff", { value: 2 });
 
@@ -48,7 +68,7 @@ describe("applyCriticalEffect", () => {
 
     expect(collectModifiers([p], p.basicInfo.id, { stat: "armor" }).flat).toBe(-2);
     expect(collectModifiers([apply("ac_debuff", { value: -5 })], "p1", { stat: "armor" }).flat).toBe(-5);
-    expect(p.battleData.activeEffects[0]).toMatchObject({ name: "Тест-ефект", type: "debuff", duration: 1, appliedAt: { round: 3 } });
+    expect(p.battleData.activeEffects[0]).toMatchObject({ name: "crit.attack.success.1", type: "debuff", duration: 1, appliedAt: { round: 3 } });
   });
 
   it("advantage_next_attack: прапор advantage на всі атаки, бафф", () => {

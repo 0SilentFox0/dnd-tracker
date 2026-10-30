@@ -4,7 +4,7 @@ import { textOf } from "@/lib/i18n/test/text";
 import { goblin, hero } from "@/lib/server/battles/__tests__/mutations/fixtures";
 import { ukT } from "@/lib/utils/abilities/__tests__/describe-fixtures";
 import { applyCondition5e } from "@/lib/utils/battle/conditions";
-import { displayEffects, effectSummary } from "@/lib/utils/battle/view";
+import { displayEffects, effectSummary, effectTitle } from "@/lib/utils/battle/view";
 
 describe("показ станів 5e", () => {
   it("стан з назвою й тривалістю видно в списку ефектів, у т.ч. ворога", async () => {
@@ -12,7 +12,7 @@ describe("показ станів 5e", () => {
 
     const shown = displayEffects(ps[1], ps);
 
-    expect(shown.map((e) => e.name)).toEqual(["Повалений"]);
+    expect(shown.map((e) => textOf(effectTitle(e)))).toEqual(["Повалений"]);
     expect(effectSummary(shown[0], await ukT()).map((l) => textOf(l))).toContain("ще 3 раунди");
   });
 });

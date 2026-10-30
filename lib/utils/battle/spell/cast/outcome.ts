@@ -139,7 +139,7 @@ function applySaveCrit(state: SpellCastState, id: string, kind: CritKind): Criti
 
   flow.messages.push(textRef("battleLog.spell.saveCrit", { target: target.basicInfo.name, effect: critNameRef(effect, "save"), flavor }));
 
-  if (!NON_PARTICIPANT_EFFECTS.has(effect.effect.type)) put(flow, applyCriticalEffect(target, effect, flow.ctx.round));
+  if (!NON_PARTICIPANT_EFFECTS.has(effect.effect.type)) put(flow, applyCriticalEffect(target, effect, flow.ctx.round, { table: "save" }));
 
   return effect.effect;
 }
