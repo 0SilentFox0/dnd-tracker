@@ -7,8 +7,8 @@ import { AI_LIMITS } from "@/lib/constants/ai";
 import { API_ERRORS } from "@/lib/constants/api-errors";
 import { prisma } from "@/lib/db";
 import { listPages, readContent } from "@/lib/server/scenario/page-store";
-import { searchScenarioPages } from "@/lib/server/scenario/search";
-import { findMentions } from "@/lib/utils/scenario/mentions";
+import { pageIdsMatching, searchScenarioPages } from "@/lib/server/scenario/search";
+import { findMentions, mentionPrefixes } from "@/lib/utils/scenario/mentions";
 import { chunkContentMarkdown, contentToMarkdown, outlineContent, sectionToMarkdown } from "@/lib/utils/scenario/read-chunks";
 import type { ScenarioContent } from "@/types/scenario";
 
@@ -37,6 +37,22 @@ export async function loadPageForAi(campaignId: string, pageId: string) {
   if (!page) throw new AiToolError(API_ERRORS.SCENARIO_PAGE_NOT_IN_CAMPAIGN, { id: pageId });
 
   return { ...page, content: readContent(page.content) };
+}
+
+async function loadCandidatePages(campaignId: string, query: string) {
+  const ids = await pageIdsMatching(campaignId, mentionPrefixes(query));
+
+  if (!ids.length) return [];
+
+  const rows = await prisma.scenarioPage.findMany({ where: { id: { in: ids }, campaignId }, select: PAGE_SELECT });
+
+  const byId = new Map(rows.map((r) => [r.id, r]));
+
+  return ids.flatMap((id) => {
+    const row = byId.get(id);
+
+    return row ? [{ ...row, content: readContent(row.content) }] : [];
+  });
 }
 
 export const listScenarioPagesTool = defineTool({
@@ -81,12 +97,10 @@ export const findScenarioMentionsTool = defineTool({
   scopes: ["ai"],
   title: "Find scenario mentions",
   description:
-    "Find every occurrence of a name in scenario story and DM notes, in any grammatical form (matched by word stem). Returns hits {pageId, sectionId, rowId, field, snippet, forms, inMention} (inMention = already a mention chip) and the distinct forms found. Paginated: up to 100 hits per call (fewer when they are large); pass the returned nextOffset as offset for the next call until it is null. Searches the whole campaign unless pageId/sectionId is given.",
+    "Find every occurrence of a name in scenario story and DM notes, in any grammatical form (matched by word stem). `forms` keep the text's capitalisation. linkMentions matches a capitalised form only at a capital letter: for names that are also common words (Hope, Rose) pass only capitalised forms. Returns hits {pageId, sectionId, rowId, field, snippet, forms, inMention} (inMention = already a mention chip) and the distinct forms found. Paginated: up to 100 hits per call (fewer when they are large); pass the returned nextOffset as offset for the next call until it is null. Searches the whole campaign unless pageId/sectionId is given.",
   input: z.object({ query: z.string().trim().min(2).max(100), pageId: z.string().min(1).optional(), sectionId: z.string().min(1).optional(), offset: z.number().int().min(0).optional() }),
   handler: async (ctx, { query, pageId, sectionId, offset = 0 }) => {
-    const pages = pageId
-      ? [await loadPageForAi(ctx.campaignId, pageId)]
-      : (await prisma.scenarioPage.findMany({ where: { campaignId: ctx.campaignId }, select: PAGE_SELECT, orderBy: [{ sortOrder: "asc" }, { title: "asc" }] })).map((p) => ({ ...p, content: readContent(p.content) }));
+    const pages = pageId ? [await loadPageForAi(ctx.campaignId, pageId)] : await loadCandidatePages(ctx.campaignId, query);
 
     const all = pages.flatMap((p) => findMentions(p.content, query, { sectionId }).map((h) => ({ pageId: p.id, pageTitle: p.title, ...h })));
 

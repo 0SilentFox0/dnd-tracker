@@ -3,6 +3,7 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import { prisma } from "@/lib/db";
 
 vi.mock("@/lib/db", () => ({ prisma: { scenarioPage: { findMany: vi.fn(), findFirst: vi.fn() } } }));
+vi.mock("@/lib/server/scenario/search", () => ({ pageIdsMatching: vi.fn(async () => ["p1"]), searchScenarioPages: vi.fn() }));
 
 const ctx = { campaignId: "camp1", userId: "dm", scopes: ["ai"] as const, threadId: null, locale: "uk" as const };
 
