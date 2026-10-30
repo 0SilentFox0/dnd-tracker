@@ -195,6 +195,15 @@ it("scenario mode appends digest last, after focusPage", async () => {
   expect(ids.at(-1)).toBe("digest");
   expect(ids.indexOf("focusPage")).toBeLessThan(ids.indexOf("digest"));
 });
+it("excludes the focused page from the digest", async () => {
+  vi.mocked(loadDigestItems).mockResolvedValue([digestItem, { ...digestItem, id: "f", title: "FocusTitle", digest: "FOCUS_DIGEST" }]);
+  vi.mocked(prisma.scenarioPage.findFirst).mockResolvedValue({ id: "f", title: "FocusTitle", content: { legend: [], sections: [] } } as never);
+
+  const out = await buildInstructions({ ...args, focus: { pageId: "f" } });
+
+  expect(out).toContain("DIGEST_TEXT");
+  expect(out).not.toContain("FOCUS_DIGEST");
+});
 it("live mode gets no digest and does not query it", async () => {
   vi.mocked(loadDigestItems).mockResolvedValue([digestItem]);
 

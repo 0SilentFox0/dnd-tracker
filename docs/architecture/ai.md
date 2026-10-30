@@ -168,7 +168,7 @@ DM-сторінка `/campaigns/[id]/dm/graph` — візуалізація `Sce
 
 Конспект сторінки сценарію, згенерований ШІ, лише для ДМ: `POST /api/campaigns/[id]/scenario/[pageId]/summary` (`{ force? }` → `GeneratedSummary`) і `GET /api/campaigns/[id]/scenario/summaries` (`{ available, summaries }`, `available` = у ДМ є ключ AI). Хуки `useScenarioSummaries` (staleTime 60 с) і `useGenerateScenarioSummary` (після успіху інвалідує лише `scenarioKeys.summaries`), панель `ScenarioSummaryPanel` — згорнутий блок на сторінці сцени і слот в інспекторі графа для вузлів-сцен.
 
-- Таблиця `scenario_page_summaries` (`pageId` PK, `campaignId`, `version`, `summary` JSON, `provider`, `model`, `inputTokens`, `outputTokens`), RLS увімкнено; запис через `summary-store` (`upsertSummary`, `loadSummaryRow`).
+- Таблиця `scenario_page_summaries` (`pageId` PK, `campaignId`, `version`, `summary` JSON, `provider`, `model`, `inputTokens`, `outputTokens`, `inputHash`), RLS увімкнено; запис через `summary-store` (`upsertSummary`, `loadSummaryRow`, `refreshSummaryFreshness`). `inputHash` = sha256 від `buildSummaryInput` з нормалізованим `played` (`summaryInputHash`, `lib/utils/scenario/summary/hash.ts`); після запису сторінки (`section-handler`, `writeScenarioContent`) `refreshSummaryFreshness(pageId, newVersion, page)` піднімає `version` конспекту до нової версії сторінки, якщо хеш збігається (а `version < newVersion`), тож «Зіграно»/розкриття секції не робить конспект застарілим. Рядки без хеша (старі) не чіпаються; помилка кроку лише логується.
 - Модель — «розумна» модель ДМ (`pickDmSmartTextModel`, ключ ДМ кампанії, BYOK); ключ не залишає сервер.
 - Ідемпотентність за версією: якщо рядок має `version === page.version` і немає `force`, відповідь віддається з БД без виклику моделі й без rate limit. Гонки: новіша версія не перезаписується старішою.
 - `stale` не зберігається, а обчислюється в `GET`: `row.version < page.version`.
@@ -179,7 +179,7 @@ DM-сторінка `/campaigns/[id]/dm/graph` — візуалізація `Sce
 
 ### Digest конспектів (етап 3c)
 
-- Блок `digest` у `buildInstructions` лише в режимі `scenario` (у `live` його немає). Дані: `loadDigestItems(campaignId)` (`summary-store.ts`) — один `$queryRaw` по `scenario_page_summaries` JOIN `scenario_pages` (`title`, `sortOrder`, `summary->>'digest'`, `stale = s.version < p.version`); текст сторінок і решта JSON конспекту не читаються. Сторінки без конспекту (або з порожнім digest) мовчки пропускаються; без жодного digest блоку немає.
+- Блок `digest` у `buildInstructions` лише в режимі `scenario` (у `live` його немає). Дані: `loadDigestItems(campaignId)` (`summary-store.ts`) — один `$queryRaw` по `scenario_page_summaries` JOIN `scenario_pages` (`title`, `sortOrder`, `summary->>'digest'`, `stale = s.version < p.version`); текст сторінок і решта JSON конспекту не читаються. Сторінка фокусу (`focused.page.id`) з digest виключається (її текст уже в `focusPage`). Сторінки без конспекту (або з порожнім digest) мовчки пропускаються; без жодного digest блоку немає.
 - Бюджет `AI_LIMITS.digestChars` (4000). Блок стоїть останнім серед необов'язкових (після `focusPage`/`focus`), тож `fitContext` стискає його першим; постійні інструкції й текст фокусної сторінки не страждають.
 - Межа доступу: `buildInstructions` приймає лише сесію ДМа (403 для токенів і не-ДМ), digest не потрапляє у гравцеві AI-маршрути й MCP; `get_campaign_brief` не змінювався.
-- Відкрито: digest оновлюється лише перегенерацією конспекту (до того — позначка `(stale)`); у кампаніях із сотнями сторінок у 4 кБ лишаються перші за `sortOrder`.
+- Відкрито: у кампаніях із сотнями сторінок у 4 кБ лишаються перші за `sortOrder`.

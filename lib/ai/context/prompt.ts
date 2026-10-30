@@ -119,7 +119,7 @@ export async function buildInstructions({ campaignId, mode, pageId, focus, calle
     blocks.push({ id: "focusPage", label: `DM focus: page ${page.id}${selected.sectionId ? `, section ${selected.sectionId}` : ""}${selected.rowIds?.length ? `, rows ${selected.rowIds.join(", ")}` : ""} (data)`, text: mode === "live" ? liveScene(page.title, content) : contentToMarkdown(page.title, content) });
   } else if (focused) blocks.push({ id: "focus", label: "DM focus (data)", value: focused.kind === "battle" ? { kind: "battle", battle: { id: focused.battle.id, name: focused.battle.name, status: focused.battle.status, currentRound: focused.battle.currentRound, currentTurnIndex: focused.battle.currentTurnIndex, version: focused.battle.version } } : focused });
 
-  const digest = summariesDigest(digestItems, { maxChars: AI_LIMITS.digestChars });
+  const digest = summariesDigest(focused?.kind === "scenario" ? digestItems.filter((item) => item.id !== focused.page.id) : digestItems, { maxChars: AI_LIMITS.digestChars });
 
   if (digest) blocks.push({ id: "digest", label: DIGEST_LABEL, maxChars: AI_LIMITS.digestChars + DIGEST_LABEL.length + 2, text: digest });
 
