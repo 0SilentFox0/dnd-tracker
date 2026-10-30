@@ -1,11 +1,13 @@
 "use client";
 
+import { useState } from "react";
 import { useTranslations } from "next-intl";
 import { Plus } from "lucide-react";
 
 import { ChoiceHeaderRow } from "./ChoiceHeaderRow";
 import { AbilityScoreChoiceFields, OptionChoiceFields, SkillChoiceFields, SpellChoiceFields } from "./ChoiceKindFields";
 
+import { MarkdownLite } from "@/components/common/MarkdownLite";
 import { HUD_SELECT_CLASS } from "@/components/hud/form";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -16,6 +18,7 @@ import { ABILITY_SCORE_CAP } from "@/lib/constants/abilities";
 import { CHOICE_KINDS, CHOICE_LIMITS } from "@/lib/constants/choices";
 import { useErrorTotals, useRowKeys } from "@/lib/hooks/common";
 import { choiceSlug } from "@/lib/utils/characters/choices/slug";
+import { hasMarkdownTable } from "@/lib/utils/text/markdown-lite";
 import type { Choice, ChoiceKind, ChoiceOwner } from "@/types/choices";
 import type { ClassColumn } from "@/types/classes";
 
@@ -54,7 +57,12 @@ export function ChoiceListEditor({ campaignId, owner, value, onChange, classColu
     onChange(value.map((c, k) => (k === i ? { id, label, level, count, ...(description && { description }), ...(lineage && { lineage }), kind, ...KIND_DEFAULTS[kind] } : c)));
   };
 
-  const add = () => onChange([...value, { id: choiceSlug("choice", value.map((c) => c.id)), label: t("list.newChoice"), level: 1, count: 1, kind: "skill" }]);
+  const [fresh, setFresh] = useState<number | null>(null);
+
+  const add = () => {
+    setFresh(value.length);
+    onChange([...value, { id: choiceSlug("choice", value.map((c) => c.id)), label: t("list.newChoice"), level: 1, count: 1, kind: "skill" }]);
+  };
 
   const remove = (i: number) => {
     drop(`c${keys[i]}`);
@@ -68,7 +76,12 @@ export function ChoiceListEditor({ campaignId, owner, value, onChange, classColu
         const onPatch = (patch: Partial<Choice>) => update(i, patch);
 
         return (
-          <fieldset key={keys[i]} className="space-y-3 rounded-md border border-hud-line/60 p-3">
+          <details key={keys[i]} open={fresh === i || value.length === 1} className="group rounded-md border border-hud-line/60">
+            <summary className="flex cursor-pointer flex-wrap items-center gap-2 px-3 py-2 text-sm">
+              <span className="hud-sc">{choice.label || t("list.newChoice")}</span>
+              <span className="text-xs text-hud-muted">{[t(`kinds.${choice.kind}`), typeof choice.count === "number" ? `×${choice.count}` : null, choice.lineage ? t("list.lineageTag") : null].filter(Boolean).join(" · ")}</span>
+            </summary>
+            <div className="space-y-3 p-3 pt-1">
             <ChoiceHeaderRow index={i} choice={choice} owner={owner} kinds={kinds} actions={{ onPatch, onSwitchKind: (kind) => switchKind(i, kind), onRemove: () => remove(i) }} />
 
             <div className="flex flex-wrap items-end gap-3">
@@ -99,7 +112,17 @@ export function ChoiceListEditor({ campaignId, owner, value, onChange, classColu
               )}
             </div>
 
-            <Textarea aria-label={t("list.description")} rows={2} value={choice.description ?? ""} onChange={(e) => onPatch({ description: e.target.value || undefined })} />
+            <div className="space-y-1">
+              <Label htmlFor={`choice-${i}-description`}>{t("list.description")}</Label>
+              <Textarea id={`choice-${i}-description`} rows={3} value={choice.description ?? ""} onChange={(e) => onPatch({ description: e.target.value || undefined })} />
+              <p className="text-xs text-hud-muted">{t("list.descriptionHint")}</p>
+              {choice.description && hasMarkdownTable(choice.description) && (
+                <div className="rounded-md border border-hud-line/40 p-2">
+                  <p className="text-xs text-hud-muted">{t("list.preview")}</p>
+                  <MarkdownLite className="space-y-2 text-sm" text={choice.description} />
+                </div>
+              )}
+            </div>
 
             {(choice.kind === "skill" || choice.kind === "expertise") && <SkillChoiceFields choice={choice} onPatch={onPatch} />}
             {choice.kind === "abilityScore" && <AbilityScoreChoiceFields choice={choice} onPatch={onPatch} />}
@@ -107,7 +130,16 @@ export function ChoiceListEditor({ campaignId, owner, value, onChange, classColu
             {(choice.kind === "option" || choice.kind === "feat") && (
               <OptionChoiceFields choice={choice} owner={owner} campaignId={campaignId} classColumns={classColumns} onPatch={onPatch} errors={{ report, drop, prefix: `c${keys[i]}` }} />
             )}
-          </fieldset>
+            <details className="rounded-md border border-hud-line/30 px-3 py-2 text-sm">
+              <summary className="cursor-pointer text-hud-muted">{t("header.technical")}</summary>
+              <div className="mt-2 w-56 space-y-1">
+                <Label htmlFor={`choice-${i}-id`}>{t("header.id")}</Label>
+                <Input id={`choice-${i}-id`} value={choice.id} onChange={(e) => onPatch({ id: e.target.value })} />
+                <p className="text-xs text-hud-muted">{t("header.idHint")}</p>
+              </div>
+            </details>
+            </div>
+          </details>
         );
       })}
       <Button type="button" variant="outline" size="sm" onClick={add}>

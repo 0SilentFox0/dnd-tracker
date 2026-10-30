@@ -27,10 +27,6 @@ export function ChoiceHeaderRow({ index, choice, owner, kinds, actions }: Choice
         <Label htmlFor={`choice-${index}-label`}>{t("header.name")}</Label>
         <Input id={`choice-${index}-label`} value={choice.label} onChange={(e) => actions.onPatch({ label: e.target.value })} />
       </div>
-      <div className="w-40 space-y-1">
-        <Label htmlFor={`choice-${index}-id`}>{t("header.id")}</Label>
-        <Input id={`choice-${index}-id`} value={choice.id} onChange={(e) => actions.onPatch({ id: e.target.value })} />
-      </div>
       <div className="space-y-1">
         <Label htmlFor={`choice-${index}-kind`}>{t("header.kind")}</Label>
         <select id={`choice-${index}-kind`} className={HUD_SELECT_CLASS} value={choice.kind} onChange={(e) => actions.onSwitchKind(e.target.value as ChoiceKind)}>
@@ -40,6 +36,7 @@ export function ChoiceHeaderRow({ index, choice, owner, kinds, actions }: Choice
             </option>
           ))}
         </select>
+        <p className="max-w-56 text-xs text-hud-muted">{t(`kindHints.${choice.kind}`)}</p>
       </div>
       {owner !== "feat" && (
         <div className="w-24 space-y-1">

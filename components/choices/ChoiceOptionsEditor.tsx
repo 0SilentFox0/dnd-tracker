@@ -6,6 +6,7 @@ import { Plus, Trash2 } from "lucide-react";
 import { OptionSpellsEditor } from "./OptionSpellsEditor";
 
 import { AbilityListEditor } from "@/components/abilities";
+import { MarkdownLite } from "@/components/common/MarkdownLite";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
@@ -15,6 +16,7 @@ import { MAX_CLASS_LEVEL } from "@/lib/constants/classes";
 import { useRowKeys } from "@/lib/hooks/common";
 import { choiceSlug } from "@/lib/utils/characters/choices/slug";
 import { toggleItem } from "@/lib/utils/common/collections";
+import { hasMarkdownTable } from "@/lib/utils/text/markdown-lite";
 import type { ChoiceOption, ChoiceOwner } from "@/types/choices";
 import type { ClassColumn } from "@/types/classes";
 
@@ -48,15 +50,13 @@ export function ChoiceOptionsEditor({ campaignId, owner, value, onChange, classC
         const optionKey = `${errors.prefix}-o${keys[i]}`;
 
         return (
-          <fieldset key={keys[i]} className="space-y-2 rounded-md border border-hud-line/40 p-3">
+          <details key={keys[i]} open={!option.name} className="rounded-md border border-hud-line/40">
+            <summary className="cursor-pointer px-3 py-2 text-sm">{option.name || t("options.unnamed")}</summary>
+            <div className="space-y-2 p-3 pt-1">
             <div className="flex items-end gap-2">
               <div className="flex-1 space-y-1">
                 <Label htmlFor={`${optionKey}-name`}>{t("options.name")}</Label>
                 <Input id={`${optionKey}-name`} value={option.name} onChange={(e) => rename(i, e.target.value)} />
-              </div>
-              <div className="w-40 space-y-1">
-                <Label htmlFor={`${optionKey}-id`}>{t("options.id")}</Label>
-                <Input id={`${optionKey}-id`} value={option.id} onChange={(e) => set(i, { id: e.target.value })} />
               </div>
               <Button
                 type="button"
@@ -72,7 +72,11 @@ export function ChoiceOptionsEditor({ campaignId, owner, value, onChange, classC
                 <Trash2 className="h-4 w-4" />
               </Button>
             </div>
-            <Textarea aria-label={t("options.description")} rows={2} value={option.description ?? ""} onChange={(e) => set(i, { description: e.target.value || undefined })} />
+            <div className="space-y-1">
+              <Label htmlFor={`${optionKey}-description`}>{t("options.description")}</Label>
+              <Textarea id={`${optionKey}-description`} rows={2} value={option.description ?? ""} onChange={(e) => set(i, { description: e.target.value || undefined })} />
+              {option.description && hasMarkdownTable(option.description) && <MarkdownLite className="space-y-2 rounded-md border border-hud-line/40 p-2 text-sm" text={option.description} />}
+            </div>
             <div className="flex flex-wrap items-center gap-3 text-sm">
               <label className="flex items-center gap-2">
                 {t("options.minLevel")}
@@ -96,7 +100,16 @@ export function ChoiceOptionsEditor({ campaignId, owner, value, onChange, classC
             </div>
             <AbilityListEditor campaignId={campaignId} value={option.abilities} onChange={(abilities) => set(i, { abilities })} classColumns={owner === "class" ? classColumns : undefined} onValidityChange={(_, n) => errors.report(optionKey, n)} />
             {owner === "race" && <OptionSpellsEditor campaignId={campaignId} value={option.spells ?? []} onChange={(spells) => set(i, { spells: spells.length > 0 ? spells : undefined })} />}
-          </fieldset>
+            <details className="rounded-md border border-hud-line/30 px-3 py-2 text-sm">
+              <summary className="cursor-pointer text-hud-muted">{t("header.technical")}</summary>
+              <div className="mt-2 w-56 space-y-1">
+                <Label htmlFor={`${optionKey}-id`}>{t("options.id")}</Label>
+                <Input id={`${optionKey}-id`} value={option.id} onChange={(e) => set(i, { id: e.target.value })} />
+                <p className="text-xs text-hud-muted">{t("options.idHint")}</p>
+              </div>
+            </details>
+            </div>
+          </details>
         );
       })}
       <Button type="button" variant="outline" size="sm" onClick={() => onChange([...value, { id: choiceSlug("option", value.map((o) => o.id)), name: "", abilities: [] }])}>
