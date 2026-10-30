@@ -13,7 +13,7 @@ export function checkTranslation(en: string, tr: string): TranslationIssue[] {
 
   if (tokens(en, /\d+/g) !== tokens(tr, /\d+/g)) issues.push("numbers");
 
-  if (tokens(en, /\b\d*d\d+\b/g) !== tokens(tr, /\b\d*d\d+\b/g)) issues.push("dice");
+  if (tokens(en.toLowerCase(), /\b\d*d\d+/g) !== tokens(tr.toLowerCase(), /\b\d*d\d+/g)) issues.push("dice");
 
   if (count(en, /\*\*/g) !== count(tr, /\*\*/g) || count(en, /`/g) !== count(tr, /`/g)) issues.push("markup");
 

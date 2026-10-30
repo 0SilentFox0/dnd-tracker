@@ -1,0 +1,15 @@
+{
+  "Strength": "Сила", "Dexterity": "Спритність", "Constitution": "Статура", "Intelligence": "Інтелект", "Wisdom": "Мудрість", "Charisma": "Харизма",
+  "Saving Throw": "рятівний кидок", "Ability Check": "перевірка характеристики", "Attack Roll": "кидок атаки", "Armor Class": "Клас броні", "Hit Points": "хіти", "Temporary Hit Points": "тимчасові хіти",
+  "Hit Point Dice": "кістки хітів", "Proficiency Bonus": "бонус майстерності", "Proficiency": "майстерність", "Expertise": "компетентність", "Advantage": "перевага", "Disadvantage": "перешкода",
+  "Initiative": "ініціатива", "Speed": "швидкість", "Action": "дія", "Bonus Action": "бонусна дія", "Reaction": "реакція", "Opportunity Attack": "атака можливості", "Concentration": "концентрація",
+  "Short Rest": "короткий відпочинок", "Long Rest": "тривалий відпочинок", "Spell Slot": "комірка заклинань", "Cantrip": "замовляння", "Spell": "заклинання", "Ritual": "ритуал", "Spellcasting": "використання заклинань",
+  "Spell Save DC": "СЛ рятівного кидка заклинання", "DC": "СЛ", "Difficulty Class": "складність (СЛ)", "Challenge Rating": "рівень небезпеки (CR)", "Hit Die": "кістка хітів",
+  "Acid": "Кислота", "Bludgeoning": "Дробильна", "Cold": "Холод", "Fire": "Вогонь", "Force": "Силова", "Lightning": "Блискавка", "Necrotic": "Некротична", "Piercing": "Колюча", "Poison": "Отрута", "Psychic": "Психічна", "Radiant": "Променева", "Slashing": "Рубальна", "Thunder": "Грім",
+  "Blinded": "Осліплений", "Charmed": "Зачарований", "Deafened": "Оглушений", "Exhaustion": "Виснаження", "Frightened": "Наляканий", "Grappled": "Схоплений", "Incapacitated": "Недієздатний", "Invisible": "Невидимий", "Paralyzed": "Паралізований", "Petrified": "Скам'янілий", "Poisoned": "Отруєний", "Prone": "Лежачий", "Restrained": "Утримуваний", "Stunned": "Приголомшений", "Unconscious": "Непритомний",
+  "Abjuration": "Захист", "Conjuration": "Прикликання", "Divination": "Віщування", "Enchantment": "Зачарування", "Evocation": "Втілення", "Illusion": "Ілюзія", "Necromancy": "Некромантія", "Transmutation": "Перетворення",
+  "Barbarian": "Варвар", "Bard": "Бард", "Cleric": "Жрець", "Druid": "Друїд", "Fighter": "Воїн", "Monk": "Монах", "Paladin": "Паладин", "Ranger": "Слідопит", "Rogue": "Шахрай", "Sorcerer": "Чародій", "Warlock": "Чаклун", "Wizard": "Маг",
+  "Dragonborn": "Драконороджений", "Dwarf": "Дварф", "Elf": "Ельф", "Gnome": "Гном", "Goliath": "Голіаф", "Halfling": "Напіврослик", "Human": "Людина", "Orc": "Орк", "Tiefling": "Тифлінг",
+  "Background": "Передісторія", "Feat": "Риса", "Origin Feat": "Риса походження", "Subclass": "Підклас", "Class": "Клас", "Level": "Рівень", "Lineage": "Лінія", "Rage": "Лють", "Sneak Attack": "Прихована атака", "Wild Shape": "Дика форма", "Channel Divinity": "Божественний канал",
+  "Darkvision": "Темний зір", "Truesight": "Істинний зір", "Blindsight": "Сліпий зір", "Tremorsense": "Чуття вібрацій", "feet": "футів", "Table:": "Table:"
+}

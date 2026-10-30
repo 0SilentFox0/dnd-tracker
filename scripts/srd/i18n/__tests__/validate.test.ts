@@ -10,6 +10,11 @@ describe("checkTranslation", () => {
     expect(checkTranslation(TABLE, "Table: Драконячі предки\n\n| Дракон | Тип шкоди |\n| --- | --- |\n| Чорний | Кислота |")).toEqual([]);
   });
 
+  it("кубики порівнюються без урахування регістру", () => {
+    expect(checkTranslation("Roll a D20 and 2D6", "Кинь d20 і 2d6")).toEqual([]);
+    expect(checkTranslation("roll d6s", "кинь d6")).toEqual([]);
+  });
+
   it("ловить зникле число і змінений кубик", () => {
     expect(checkTranslation("Range 30 feet", "Дальність футів")).toContain("numbers");
     expect(checkTranslation("Deal 2d6", "Завдай 2d8")).toEqual(expect.arrayContaining(["dice", "numbers"]));
