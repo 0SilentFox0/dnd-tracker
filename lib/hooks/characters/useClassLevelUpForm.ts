@@ -66,8 +66,6 @@ export function useClassLevelUpForm({ open, character, onLeveled, onClose, start
 
   const cls = byId[classId];
 
-  const reasons = available.find((a) => a.cls.id === classId)?.reasons ?? [];
-
   const current = entries.find((e) => e.classId === classId);
 
   const nextLevel = (current?.level ?? 0) + 1;
@@ -123,7 +121,6 @@ export function useClassLevelUpForm({ open, character, onLeveled, onClose, start
     available,
     selection: { choice, newClassId, subclassId, picks },
     cls,
-    reasons,
     needsSubclass,
     stepDefs,
     multiclass,

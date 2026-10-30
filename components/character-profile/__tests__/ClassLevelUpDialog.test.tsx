@@ -138,11 +138,17 @@ describe("ClassLevelUpDialog", () => {
       expect(Array.from(newClassSelect().options).some((o) => o.disabled)).toBe(false);
     });
 
-    it("a blocked class picked programmatically shows the shortfall under the select", () => {
+    it("the reasons of every blocked class are visible without selecting anything", () => {
       renderDialog(5, {}, true, { startNew: true, scores: { strength: 13, intelligence: 10 } });
-      fireEvent.change(newClassSelect(), { target: { value: "wizard" } });
 
       expect(screen.getByRole("listitem").textContent).toMatch(/Wizard: choices\.requirement\.ability .*"need":13,"have":10/);
+    });
+
+    it("an existing class that no longer meets its requirement is named as the cause", () => {
+      classes = [{ ...fighter, name: "Wizard" }, makeClass({ id: "barbarian", name: "Barbarian", color: null })];
+      renderDialog(5, {}, true, { startNew: true, scores: { intelligence: 10, strength: 13 } });
+
+      expect(screen.getAllByRole("listitem").map((li) => li.textContent?.split(":")[0])).toEqual(["Wizard"]);
     });
   });
 });

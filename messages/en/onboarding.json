@@ -137,7 +137,7 @@
       },
       "character": {
         "title": "Your hero sheet",
-        "body": "The \"Combat\", \"Abilities\", \"Magic\", \"Inventory\" and \"History\" tabs hold everything about your hero. New levels and progression appear here after battles."
+        "body": "The \"Combat\", \"Path\", \"Magic\", \"Inventory\" and \"History\" tabs hold everything about your hero. New levels and progression appear here after battles."
       },
       "draft": {
         "title": "Hero draft",

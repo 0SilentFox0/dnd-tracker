@@ -170,7 +170,7 @@
     "classNotFound": "Клас не знайдено",
     "newClass": "Новий клас",
     "blockedOption": "{name} (недоступний)",
-    "blockedHint": "Поки вимоги не виконані, додати цей клас не вдасться:",
+    "blockedHint": "Ці класи поки недоступні:",
     "pickClass": "Оберіть клас",
     "subclass": "Підклас",
     "pickSubclass": "Оберіть підклас",

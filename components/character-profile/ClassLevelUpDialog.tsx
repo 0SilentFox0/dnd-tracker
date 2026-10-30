@@ -29,7 +29,7 @@ export function ClassLevelUpDialog({ open, onOpenChange, character, onLeveled, s
 
   const form = useClassLevelUpForm({ open, character, onLeveled, startNew, onClose: () => onOpenChange(false) });
 
-  const { byId, available, selection, cls, reasons, stepDefs, multiclass, raisedEntry, nextRow, gained, picksCount, nextLevel, canSubmit, actions } = form;
+  const { byId, available, selection, cls, stepDefs, multiclass, raisedEntry, nextRow, gained, picksCount, nextLevel, canSubmit, actions } = form;
 
   const { choice } = selection;
 
@@ -87,7 +87,7 @@ export function ClassLevelUpDialog({ open, onOpenChange, character, onLeveled, s
             triggerClassName="w-full"
           />
         )}
-        {choice === NEW_CLASS && <MulticlassReasons reasons={reasons} />}
+        {choice === NEW_CLASS && <MulticlassReasons reasons={available.flatMap((a) => a.reasons)} />}
         {form.needsSubclass && cls && (
           <fieldset className="space-y-2" role="radiogroup" aria-label={t("subclass")}>
             <legend className="text-sm font-semibold">{t("pickSubclass")}</legend>
