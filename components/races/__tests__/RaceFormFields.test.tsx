@@ -30,6 +30,7 @@ describe("RaceFormFields", () => {
     expect(screen.getByText(/abilities.editor.title/)).toBeInTheDocument();
     fireEvent.click(screen.getByRole("button", { name: "abilities.chips.add" }));
     fireEvent.click(screen.getByText("abilityRegistry.templates.resistance.label"));
+    fireEvent.click(screen.getByRole("button", { name: "abilities.templates.create" }));
 
     expect(screen.getByTestId("n").textContent).toBe("1");
   });

@@ -829,8 +829,6 @@
       }
     },
     "custom": {
-      "label": "Custom",
-      "hint": "empty ability",
       "defaultName": "New ability",
       "note": "Describe the ability"
     },

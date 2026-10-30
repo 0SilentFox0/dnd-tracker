@@ -5,8 +5,8 @@ import { useTranslations } from "next-intl";
 
 import { AbilityChips, pickAfterRemove } from "./AbilityChips";
 import { AbilityPanel } from "./AbilityPanel";
-import { AbilityTemplatePicker } from "./AbilityTemplatePicker";
 import { AbilityEditorProvider } from "./editor-context";
+import { RecipeGallery } from "./RecipeGallery";
 
 import { HudSection } from "@/components/hud/form";
 import { useText } from "@/lib/i18n/use-text";
@@ -103,7 +103,7 @@ export function AbilityListEditor({ campaignId, value, onChange, issues = [], on
           <p className="py-2 text-sm text-hud-muted">{t("empty")}</p>
         )}
       </HudSection>
-      <AbilityTemplatePicker open={pickerOpen} onOpenChange={setPickerOpen} onPick={add} />
+      <RecipeGallery open={pickerOpen} onOpenChange={setPickerOpen} scope="ability" onPick={add} />
     </AbilityEditorProvider>
   );
 }

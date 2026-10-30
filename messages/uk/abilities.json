@@ -30,6 +30,13 @@
     "add": "+ Вміння"
   },
   "templates": {
+    "scratch": "З нуля",
+    "scratchHint": "порожня пасивна здібність",
+    "allCategories": "Усі",
+    "create": "Створити",
+    "back": "Назад",
+    "previewTitle": "Попередній перегляд",
+    "nameLabel": "Назва",
     "copyTitle": "Скопіювати вміння з…",
     "addTitle": "Додати вміння",
     "copyFrom": "Скопіювати з…"

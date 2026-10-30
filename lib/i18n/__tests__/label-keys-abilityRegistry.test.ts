@@ -37,8 +37,6 @@ describe("ability registry labels have translations", () => {
 
   expectLabelKeys("abilityRegistry", "templates", [
     ...RECIPES.flatMap((r) => [`${r.id}.label`, `${r.id}.hint`, `${r.id}.defaultName`, ...r.params.map((p) => `${r.id}.params.${p.key}`)]),
-    `${FROM_SCRATCH_ID}.label`,
-    `${FROM_SCRATCH_ID}.hint`,
     `${FROM_SCRATCH_ID}.defaultName`,
     `${FROM_SCRATCH_ID}.note`,
     ...RECIPE_CATEGORIES.map((c) => `categories.${c}`),
