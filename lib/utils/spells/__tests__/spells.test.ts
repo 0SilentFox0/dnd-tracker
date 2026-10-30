@@ -2,7 +2,9 @@ import { describe, expect,it } from "vitest";
 
 import {
   calculateTotalSpellsInGroup,
+  convertGroupedSpellsToArray,
   groupSpellsByGroup,
+  groupSpellsByGroupAndLevel,
   sortSpellLevels,
 } from "../spells";
 
@@ -59,9 +61,9 @@ describe("spells", () => {
 
   describe("calculateTotalSpellsInGroup", () => {
     it("рахує суму заклинань по рівнях", () => {
-      const levels: [string, Spell[]][] = [
-        ["Перше коло", [makeSpell(), makeSpell()]],
-        ["Друге коло", [makeSpell()]],
+      const levels: [number, Spell[]][] = [
+        [1, [makeSpell(), makeSpell()]],
+        [2, [makeSpell()]],
       ];
 
       expect(calculateTotalSpellsInGroup(levels)).toBe(3);
@@ -69,27 +71,25 @@ describe("spells", () => {
   });
 
   describe("sortSpellLevels", () => {
-    it("ставить Cantrip першим", () => {
-      const levels: [string, Spell[]][] = [
-        ["Перше коло", []],
-        ["Замовляння", []],
-      ];
+    it("ставить Cantrip першим і сортує за зростанням", () => {
+      const levels: [number, Spell[]][] = [[3, []], [0, []], [10, []], [1, []]];
 
-      const sorted = sortSpellLevels(levels);
-
-      expect(sorted[0][0]).toBe("Замовляння");
+      expect(sortSpellLevels(levels).map(([l]) => l)).toEqual([0, 1, 3, 10]);
     });
+  });
 
-    it("сортує кола за зростанням", () => {
-      const levels: [string, Spell[]][] = [
-        ["Третє коло", []],
-        ["Перше коло", []],
-        ["Друге коло", []],
+  describe("groupSpellsByGroupAndLevel", () => {
+    it("групує за числовим рівнем незалежно від мови", () => {
+      const spells: Spell[] = [
+        makeSpell({ id: "a", name: "B", level: 2, spellGroup: { id: "g1", name: "Dark" } }),
+        makeSpell({ id: "b", name: "A", level: 0, spellGroup: { id: "g1", name: "Dark" } }),
+        makeSpell({ id: "c", name: "C", level: 2, spellGroup: { id: "g1", name: "Dark" } }),
       ];
 
-      const sorted = sortSpellLevels(levels);
+      const [[groupName, levels]] = convertGroupedSpellsToArray(groupSpellsByGroupAndLevel(spells));
 
-      expect(sorted.map(([l]) => l)).toEqual(["Перше коло", "Друге коло", "Третє коло"]);
+      expect(groupName).toBe("Dark");
+      expect(levels.map(([l, list]) => [l, list.map((s) => s.id)])).toEqual([[0, ["b"]], [2, ["a", "c"]]]);
     });
   });
 });

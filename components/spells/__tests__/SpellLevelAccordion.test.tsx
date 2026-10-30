@@ -22,7 +22,7 @@ const spells = [{ id: "s1", name: "Іскра", level: 3 }] as unknown as Spell[
 const renderIt = () =>
   renderWithConfirm(
     <Accordion type="multiple">
-      <SpellLevelAccordion levelName="Рівень 3" level={3} spells={spells} campaignId="c1" spellGroups={[]} actions={{ onRemoveFromGroup: vi.fn(), onMoveToGroup: vi.fn() }} />
+      <SpellLevelAccordion level={3} spells={spells} campaignId="c1" spellGroups={[]} actions={{ onRemoveFromGroup: vi.fn(), onMoveToGroup: vi.fn() }} />
     </Accordion>,
   );
 

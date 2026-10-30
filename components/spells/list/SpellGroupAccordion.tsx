@@ -15,7 +15,7 @@ import type { Spell, SpellGroup } from "@/types/spells";
 
 interface SpellGroupAccordionProps {
   groupName: string;
-  levels: [string, Spell[]][];
+  levels: [number, Spell[]][];
   campaignId: string;
   spellGroups: SpellGroup[];
   spellActions: SpellGroupItemActions;
@@ -69,16 +69,13 @@ export function SpellGroupAccordion({
       >
         <Accordion
           type="multiple"
-          defaultValue={levels.map(([levelName]) => levelName)}
+          defaultValue={levels.map(([level]) => String(level))}
           className="space-y-2"
         >
-          {levels.map(([levelName, levelSpells]) => {
-            const level = levelSpells[0]?.level ?? 0;
-
+          {levels.map(([level, levelSpells]) => {
             return (
               <SpellLevelAccordion
-                key={levelName}
-                levelName={levelName}
+                key={level}
                 level={level}
                 spells={levelSpells}
                 campaignId={campaignId}
