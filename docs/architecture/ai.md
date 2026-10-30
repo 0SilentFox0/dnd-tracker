@@ -153,4 +153,13 @@ UI cache identity — `lib/hooks/ai/keys.ts`, polling — `assistant-polling.ts`
 - Чисті функції: `extractPageFacts` (контент → посилання по розділах) і `buildScenarioIndex` (факти → граф) у `lib/utils/scenario/index/`.
 - Індексуються чіпи згадок (`unit`, `artifact`, `character`, `spell`, `battle`, `marker`, `acquaintance`), `battleId` і `marker` рядків та розділів; звичайний текст — ні. Чіп під марком `secret` (власним чи предка) дає `secret: true`, лише якщо всі входження в розділі секретні.
 - Назви сутностей резолвляться одним запитом на тип у межах кампанії; відсутня в БД сутність → `missing: true`, назва з чіпа.
-- Споживачі: етапи 3b/3c/4 епіку графа ([епік](../superpowers/specs/2026-10-30-scenario-graph-epic.md)).
+- Споживачі: граф (етап 4, нижче) і етапи 3b/3c епіку графа ([епік](../superpowers/specs/2026-10-30-scenario-graph-epic.md)).
+
+## Граф сценарію (етап 4)
+
+DM-сторінка `/campaigns/[id]/dm/graph` — візуалізація `ScenarioIndex`; нових API/таблиць немає, лише `useScenarioIndex` (staleTime 60 с, без полінгу й без префетчу).
+
+- Чисті функції `lib/utils/scenario/graph/`: `buildGraphModel` (фільтр типів, кап `GRAPH_ENTITY_CAP` за `degree`, листки `degree = 1` згортаються в `hidden`), `layoutGraph` (`d3-force`, детермінований seed, `GRAPH_TICKS` тіків, хронологія сцен по X за `order`), `neighbors`, `searchMatches`, `graphNodeHref` (сутність → `mentionHref`, сторінка → `/dm/scenario/{id}`). Константи — `lib/constants/scenario-graph.ts`.
+- Хук `useScenarioGraph` (`lib/hooks/scenario`): фільтри, пошук, виділення; розкладка рахується лише при зміні моделі, не при виділенні/пошуку.
+- UI `components/scenario/graph/` — власний SVG з pan/zoom (без React Flow: граф згадок не DAG), підвантажується через `next/dynamic` без SSR; `missing`-сутності пунктиром і без переходу, секретні ребра пунктиром із замком.
+- Тексти: namespace `scenarioGraph`; запис `2026-10-30-scenario-graph` у `whats-new`, хінт `dm.graph`, розділ `s3` у help-статті `dm-scenario-show`.
