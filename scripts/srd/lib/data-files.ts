@@ -1,9 +1,13 @@
 import * as fs from "fs";
 import * as path from "path";
 
+import { applyOverlay } from "../i18n/overlay";
+import { readTranslations } from "../i18n/store";
 import { SRD_CREDITS } from "./credits";
 import { OPEN5E_PATH, OPEN5E_REPO, OPEN5E_SHA, SRD_DATA_DIR } from "./source";
 import { SRD_KINDS, type SrdData, type SrdKind } from "./types";
+
+import { DEFAULT_TEMPLATE_LOCALE } from "@/lib/constants/campaigns";
 
 export interface SrdManifest {
   name: string;
@@ -37,7 +41,13 @@ export function writeSrdData(data: SrdData, dir: string, date: string): SrdManif
   return manifest;
 }
 
-export const readSrdData = (dir = SRD_DATA_DIR): SrdData => Object.fromEntries(SRD_KINDS.map((k) => [k, JSON.parse(fs.readFileSync(fileOf(dir, k), "utf8"))])) as SrdData;
+const readEnglish = (dir: string): SrdData => Object.fromEntries(SRD_KINDS.map((k) => [k, JSON.parse(fs.readFileSync(fileOf(dir, k), "utf8"))])) as SrdData;
+
+export const readSrdData = (dir = SRD_DATA_DIR, locale?: string): SrdData => {
+  const data = readEnglish(dir);
+
+  return locale && locale !== DEFAULT_TEMPLATE_LOCALE ? applyOverlay(data, readTranslations(locale, path.join(dir, "i18n"))) : data;
+};
 
 export const readSrdManifest = (dir = SRD_DATA_DIR): SrdManifest => JSON.parse(fs.readFileSync(fileOf(dir, "manifest"), "utf8")) as SrdManifest;
 

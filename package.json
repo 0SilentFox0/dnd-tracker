@@ -36,6 +36,7 @@
     "constructor:srd-template": "tsx --env-file=.env.local --tsconfig tsconfig.scripts.json scripts/srd/load-template.ts",
     "constructor:empty-5e-template": "tsx --env-file=.env.local --tsconfig tsconfig.scripts.json scripts/srd/empty-template.ts",
     "i18n:extract": "tsx scripts/i18n/extract-cyrillic.ts",
+    "srd:i18n": "tsx --tsconfig tsconfig.scripts.json scripts/srd/i18n/cli.ts",
     "srd:build": "tsx --tsconfig tsconfig.scripts.json scripts/srd/build.ts",
     "seed-library": "tsx --env-file=.env.local --tsconfig tsconfig.scripts.json scripts/seed/seed-library.ts",
     "seed-world-map": "tsx --env-file=.env.local --tsconfig tsconfig.scripts.json scripts/seed/seed-world-map.ts",

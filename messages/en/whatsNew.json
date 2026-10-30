@@ -1,4 +1,8 @@
 {
+  "2026-10-30-template-languages": {
+    "title": "Template languages",
+    "body": "When creating a campaign, an official template can now be picked in another language: a language switch appears under the template list. Existing campaigns are not changed."
+  },
   "2026-10-30-character-path-background": {
     "title": "Background on the Path",
     "body": "The Path tab now has a Background section above the classes: its skills, tools, origin feat and equipment, plus a badge with the open choices. Whoever can edit the hero chooses or changes the background from there in the step-by-step wizard; changing it resets the previous background's choices and ability score bonuses, and the wizard warns about it."

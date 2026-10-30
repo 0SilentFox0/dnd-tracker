@@ -21,6 +21,7 @@ import { contentWrite } from "@/lib/server/scenario/content-write";
 import { snapshotIfDue } from "@/lib/server/scenario/versions";
 import { BUNDLE_TABLES, delegateOf } from "@/lib/server/templates/bundle";
 import { newContentId } from "@/lib/server/templates/ids";
+import { templateLocaleWhere } from "@/lib/server/templates/locale-filter";
 import type { Actor } from "@/lib/utils/api/actor";
 import { armorStatsFromRow } from "@/lib/utils/artifacts/armor-stats";
 import { weaponStatsFromRow } from "@/lib/utils/artifacts/weapon-stats";
@@ -48,7 +49,7 @@ const tableOf = (key: string) => BUNDLE_TABLES.find((t) => t.key === key)!;
 type DomainRows = Map<TargetKind, Map<string, JsonRecord>>;
 
 async function addOfficialTemplateChoices(choices: DependencyChoice[], stillPending: Parameters<typeof matchTemplateRows>[0], allowMixedEdition: boolean | undefined) {
-  const official = await prisma.campaign.findMany({ where: { kind: CampaignKind.TEMPLATE, visibility: CampaignVisibility.OFFICIAL, name: SRD_TEMPLATE_NAME }, select: { id: true } });
+  const official = await prisma.campaign.findMany({ where: { kind: CampaignKind.TEMPLATE, visibility: CampaignVisibility.OFFICIAL, name: SRD_TEMPLATE_NAME, ...templateLocaleWhere() }, select: { id: true } });
 
   for (const template of official) {
     const names = await loadNames(template.id);
@@ -63,7 +64,7 @@ async function loadTemplateSnapshots(choices: DependencyChoice[]): Promise<Templ
   const templates: TemplateSnapshot[] = [];
 
   for (const templateId of new Set(choices.map((d) => d.templateId))) {
-    const template = await prisma.campaign.findFirst({ where: { id: templateId, kind: CampaignKind.TEMPLATE, visibility: CampaignVisibility.OFFICIAL, name: SRD_TEMPLATE_NAME }, select: { id: true } });
+    const template = await prisma.campaign.findFirst({ where: { id: templateId, kind: CampaignKind.TEMPLATE, visibility: CampaignVisibility.OFFICIAL, name: SRD_TEMPLATE_NAME, ...templateLocaleWhere() }, select: { id: true } });
 
     if (!template) throw new CompendiumError("DEPENDENCY_TEMPLATE_UNAVAILABLE");
 
