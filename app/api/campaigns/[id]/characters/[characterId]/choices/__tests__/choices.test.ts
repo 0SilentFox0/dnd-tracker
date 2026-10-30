@@ -23,7 +23,7 @@ vi.mock("@/lib/db", () => {
   return { prisma };
 });
 
-const row = { id: "ch", campaignId: "camp", controlledBy: "player", status: "active", race: "Elf", level: 4, skills: {}, raceChoices: {}, feats: [], classes: [{ classId: sorcerer.id, level: 4 }], ...scores };
+const row: Record<string, unknown> = { id: "ch", campaignId: "camp", controlledBy: "player", status: "active", race: "Elf", level: 4, skills: {}, raceChoices: {}, feats: [], classes: [{ classId: sorcerer.id, level: 4 }], ...scores };
 
 const gate = ({ isDM = true, allowPlayerEdit = true, character = row } = {}) => {
   vi.mocked(access.requireCharacterAccess).mockResolvedValue({
