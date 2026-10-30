@@ -42,7 +42,7 @@ export function PlayerDraftForm({ campaignId, characterId, initial }: PlayerDraf
 
   const { form, choices, generate, ai, submit, scoreStatus, reveal } = usePlayerDraftForm({ campaignId, characterId, initial });
 
-  const { values, set } = form;
+  const { values, set, setArchetype } = form;
 
   const refs = useChoiceRefs(campaignId, values.race);
 
@@ -136,7 +136,7 @@ export function PlayerDraftForm({ campaignId, characterId, initial }: PlayerDraf
                 ) : (
                   <>
                     <RollingField id="draft-archetype" label={t("archetype")} spinning={spinning("archetype")} settled={settled("archetype")} display={archetypeLabel(shown("archetype"))}>
-                      <SelectField id="draft-archetype" value={values.archetype} onValueChange={(v) => set("archetype", v as DraftInput["archetype"])} options={archetypes} triggerClassName="w-full" />
+                      <SelectField id="draft-archetype" value={values.archetype} onValueChange={(v) => setArchetype(v as DraftInput["archetype"])} options={archetypes} triggerClassName="w-full" />
                     </RollingField>
 
                     <RollingField id="draft-class" label={t("class")} spinning={spinning("class")} settled={settled("class")} display={shown("class")}>

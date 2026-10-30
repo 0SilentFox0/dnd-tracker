@@ -50,6 +50,7 @@ export function NewCharacterForm({ campaignId: id, characterType }: { campaignId
     actions: { handleSubmit, setFormData },
   } = useCharacterForm({
     type: characterType,
+    recommendScores: classMode.byId,
     onSubmit: async (data) => {
       await create.mutateAsync(refsRef.current?.ready ? pruneFormChoices(data, refsRef.current) : data);
       router.push(`/campaigns/${id}/dm/characters?type=${data.basicInfo.type}`);
