@@ -71,6 +71,7 @@ const sectionSchemas = {
     autoXp: z.boolean(),
   }),
   items: z.strictObject({ enabled: z.boolean(), attunementLimit: z.number().int().min(1).max(10) }),
+  spellIngredients: z.strictObject({ enabled: z.boolean(), autoPay: z.boolean() }),
 };
 
 // Виводимо тип до застосування defaults: DEFAULT_RULES типізований через Ruleset.
@@ -109,6 +110,7 @@ const sections = {
   outOfCombat: withDefaults(sectionSchemas.outOfCombat, DEFAULT_RULES.outOfCombat),
   encounters: withDefaults(sectionSchemas.encounters, DEFAULT_RULES.encounters),
   items: withDefaults(sectionSchemas.items, DEFAULT_RULES.items),
+  spellIngredients: withDefaults(sectionSchemas.spellIngredients, DEFAULT_RULES.spellIngredients),
 };
 
 type Sections = typeof sections;
@@ -140,6 +142,7 @@ export const RulesetSchema = z
     outOfCombat: sections.outOfCombat.prefault({}),
     encounters: sections.encounters.prefault({}),
     items: sections.items.prefault({}),
+    spellIngredients: sections.spellIngredients.prefault({}),
   })
   .refine((r) => initiativeOrdered(r.initiative), { message: INITIATIVE_ORDER_MESSAGE, path: ["initiative"] })
   .refine((r) => criticalsOrdered(r.criticals), { message: CRITICALS_ORDER_MESSAGE, path: ["criticals"] });
@@ -203,6 +206,7 @@ export const RulesetPatchSchema = z
     outOfCombat: patchSection("outOfCombat").optional(),
     encounters: patchSection("encounters").optional(),
     items: patchSection("items").optional(),
+    spellIngredients: patchSection("spellIngredients").optional(),
     removeCustomConditions: z.array(z.string().regex(CUSTOM_CONDITION_KEY_RE)).min(1).max(50).optional(),
   })
   .refine((p) => !p.initiative || initiativeOrdered(p.initiative), { message: INITIATIVE_ORDER_MESSAGE, path: ["initiative"] });

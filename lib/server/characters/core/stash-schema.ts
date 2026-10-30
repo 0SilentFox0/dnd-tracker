@@ -2,6 +2,7 @@ import { z } from "zod";
 
 import { ITEM_LIMITS } from "@/lib/constants/artifacts";
 import { COINS } from "@/lib/constants/inventory";
+import { INGREDIENT_SLUG_RE } from "@/lib/constants/spell-ingredients";
 import { ITEM_REF_RE } from "@/lib/utils/items/ref";
 
 const amount = z.number().int().min(1).max(1_000_000);
@@ -10,7 +11,7 @@ const coin = z.enum(COINS);
 
 const money = z.number().int().min(0).max(10_000_000);
 
-const item = { name: z.string().trim().min(1).max(ITEM_LIMITS.specialName), description: z.string().trim().max(ITEM_LIMITS.specialDescription).optional(), quantity: z.number().int().min(1).max(9999), consumable: z.boolean() };
+const item = { name: z.string().trim().min(1).max(ITEM_LIMITS.specialName), description: z.string().trim().max(ITEM_LIMITS.specialDescription).optional(), quantity: z.number().int().min(1).max(9999), consumable: z.boolean(), worthGp: z.number().min(0).max(1_000_000).optional(), ingredient: z.string().regex(INGREDIENT_SLUG_RE).optional() };
 
 const id = z.string().min(1).max(64);
 

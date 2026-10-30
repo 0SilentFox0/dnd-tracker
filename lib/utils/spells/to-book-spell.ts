@@ -1,3 +1,4 @@
+import { ComponentFlagsSchema, readStoredIngredients } from "@/lib/schemas/spell-ingredients";
 import { parseSpellFx } from "@/lib/utils/battle/fx/spell-fx-schema";
 import { readSpellDefinition } from "@/lib/utils/spells/model/read";
 import type { BookSpell, SpellDefinition, SpellGroupRef, SpellRules } from "@/types/spells";
@@ -26,6 +27,9 @@ interface BookSpellRow {
   fixedDice?: boolean | null;
   damageBonus?: number | null;
   fx?: unknown;
+  ingredients?: unknown;
+  componentFlags?: unknown;
+  components?: string | null;
 }
 
 /** Rules for the battle-effect preview; stacking only when on, so the common case adds no keys. */
@@ -53,5 +57,9 @@ export function toBookSpell(row: BookSpellRow): BookSpell {
 
   const parsedFx = parseSpellFx(fx);
 
-  return { id, name, level, description, appearanceDescription, icon, spellGroup, ...(parsedFx && { fx: parsedFx }), ...spellRules(readSpellDefinition(row)) };
+  const ingredients = readStoredIngredients(row.ingredients);
+
+  const componentFlags = ComponentFlagsSchema.safeParse(row.componentFlags).data;
+
+  return { id, name, level, description, appearanceDescription, icon, spellGroup, ...(parsedFx && { fx: parsedFx }), ...(ingredients?.length && { ingredients }), ...(componentFlags && { componentFlags }), ...(row.components && { components: row.components }), ...spellRules(readSpellDefinition(row)) };
 }

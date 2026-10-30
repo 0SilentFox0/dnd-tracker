@@ -28,7 +28,7 @@ it('autoSwitchDoesNotApplyOldPending',async()=>{
  expect(screen.getByText(/ai\.policy\.note/)).toBeTruthy();
 });
 it('dangerousAutoStillShowsConfirm',()=>{
- render(<AssistantIntentCard intent={{id:'i1',actionId:'campaign.delete',status:'pending',channel:'mcp',summary:'Видалення',expiresAt:'2099-01-01',targets:[{domain:'campaign',id:'c1',name:'Моя кампанія'}],preview:{summary:'Видалення',targets:[],changes:[],warnings:['Усі залежні записи буде видалено'],preconditions:null,effects:[{kind:'delete',targets:[{domain:'characters',id:'hero1',name:'Герой'}],description:'Каскадне видалення героя'}]}}} onConfirm={vi.fn()} onReject={vi.fn()} onRefine={vi.fn()}/>);
+ render(<AssistantIntentCard campaignId="c1" intent={{id:'i1',actionId:'campaign.delete',status:'pending',channel:'mcp',summary:'Видалення',expiresAt:'2099-01-01',targets:[{domain:'campaign',id:'c1',name:'Моя кампанія'}],preview:{summary:'Видалення',targets:[],changes:[],warnings:['Усі залежні записи буде видалено'],preconditions:null,effects:[{kind:'delete',targets:[{domain:'characters',id:'hero1',name:'Герой'}],description:'Каскадне видалення героя'}]}}} onConfirm={vi.fn()} onReject={vi.fn()} onRefine={vi.fn()}/>);
  expect(screen.getByRole('button',{name:'ai.intent.confirm'})).toBeTruthy();expect(screen.getByText(/Каскадне видалення героя/)).toBeTruthy();expect(screen.getByText(/hero1/)).toBeTruthy();
 });
 

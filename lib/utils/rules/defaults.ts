@@ -17,4 +17,5 @@ export const DEFAULT_RULES: Ruleset = {
   outOfCombat: { persistResources: false, longRestHitDice: "half", xp: false, inspiration: false },
   encounters: { balance: "fair", edition: "2014", autoXp: false },
   items: { enabled: false, attunementLimit: 3 },
+  spellIngredients: { enabled: false, autoPay: true },
 };

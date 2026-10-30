@@ -4,4 +4,5 @@ export const scenarioKeys = {
   versions: (campaignId: string, pageId: string) => ["scenario-versions", campaignId, pageId] as const,
   mentions: (campaignId: string, q: string) => ["scenario-mentions", campaignId, q] as const,
   search: (campaignId: string, q: string) => ["scenario-search", campaignId, q] as const,
+  index: (campaignId: string) => ["scenario-index", campaignId] as const,
 };

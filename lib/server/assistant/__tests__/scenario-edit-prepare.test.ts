@@ -38,4 +38,12 @@ describe("scenario.propose-edit prepare", () => {
 
     expect(db.campaign.findUnique).not.toHaveBeenCalled();
   });
+
+  it("preview carries only the resolved ops, not the page dump", async () => {
+    const preview = (await prepare([{ op: "renameSection", sectionId: "s", title: "Нова" }])) as { changes: { before: unknown; path: string }[] };
+
+    expect(preview.changes[0].before).toBeNull();
+    expect(preview.changes[0].path).toBe("ops");
+    expect(JSON.stringify(preview)).not.toContain('"sections"');
+  });
 });

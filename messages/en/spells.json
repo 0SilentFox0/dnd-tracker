@@ -289,5 +289,33 @@
       "e1": "Ogre",
       "e2": "Lich"
     }
+  },
+  "ingredients": {
+    "title": "Components",
+    "flags": {
+      "v": "V (verbal)",
+      "s": "S (somatic)",
+      "m": "M (material)"
+    },
+    "legacy": "Text from the source: {text}",
+    "name": "Ingredient",
+    "qty": "Quantity",
+    "minGp": "Min. value, gp",
+    "consumed": "Consumed",
+    "focus": "Replaced by a spellcasting focus",
+    "add": "Add ingredient",
+    "remove": "Remove",
+    "preset": "Add from preset",
+    "required": "Required: {list}",
+    "minGpShort": "≥{gp} gp",
+    "consumedShort": "consumed",
+    "duplicate": "An ingredient with this name already exists",
+    "needsMaterial": "Ingredients need the M component",
+    "presets": {
+      "gem": "Gem",
+      "powder": "Powder",
+      "holySymbol": "Holy symbol",
+      "focus": "Material focus"
+    }
   }
 }

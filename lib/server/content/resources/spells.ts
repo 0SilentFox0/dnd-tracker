@@ -12,6 +12,7 @@ import { defineResource } from "@/lib/server/content/define-resource";
 import { parseInput, toJsonInput } from "@/lib/server/content/errors";
 import { ContentError } from "@/lib/server/content/errors";
 import { loadBookSpellsByIds } from "@/lib/server/spells/book-spells-by-ids";
+import { resolveIngredientsUpdate } from "@/lib/server/spells/ingredients-update";
 import { assertManualActivation } from "@/lib/utils/spells/model/execution";
 import { spellDefinitionColumns } from "@/lib/utils/spells/model/read";
 
@@ -49,6 +50,8 @@ export const spellsResource = defineResource<SpellRow, CreateSpellInput, UpdateS
         appearanceDescription: data.appearanceDescription ?? null,
         fx: data.fx ?? undefined,
         ...(data.lists && { lists: data.lists }),
+        ingredients: toJsonInput(data.ingredients),
+        componentFlags: data.componentFlags ? toJsonInput(data.componentFlags) : undefined,
         // legacy NOT NULL columns until a later migration; the new model never reads them
         type: "target",
         damageType: "damage",
@@ -60,6 +63,8 @@ export const spellsResource = defineResource<SpellRow, CreateSpellInput, UpdateS
   update: async (actor, existing, data) => {
     try { assertManualActivation(existing.executionMode, data); } catch { throw new ContentError(API_ERRORS.ASSISTANT_SPELL_MECHANICS_REQUIRED, 422); }
     await assertCampaignRefs(actor.campaignId, { spellGroup: data.groupId });
+
+    const ingredients = resolveIngredientsUpdate(existing, data);
 
     return prisma.spell.update({
       where: { id: existing.id },
@@ -90,6 +95,8 @@ export const spellsResource = defineResource<SpellRow, CreateSpellInput, UpdateS
         damageBonus: data.damageBonus,
         fx: data.fx === null ? Prisma.DbNull : toJsonInput(data.fx),
         lists: data.lists,
+        ingredients: toJsonInput(ingredients),
+        componentFlags: data.componentFlags === null ? Prisma.DbNull : toJsonInput(data.componentFlags),
       },
       include: withGroup,
     });

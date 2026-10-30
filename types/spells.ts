@@ -1,4 +1,5 @@
 import type { SpellFx } from "@/lib/utils/battle/fx/spells";
+import type { ComponentFlags, SpellIngredient } from "@/lib/utils/spells/ingredients/types";
 import type { SpellEffect } from "@/lib/utils/spells/model/schema";
 import type { RaceModifier, SpellCastingTime, SpellCost, SpellDefinition, SpellResolution, SpellTargeting } from "@/lib/utils/spells/model/schema";
 import type { IdName } from "@/types/common";
@@ -36,6 +37,9 @@ export interface Spell {
   spellGroup?: SpellGroupRef | null;
   fx?: unknown;
   lists?: string[];
+  ingredients?: SpellIngredient[];
+  componentFlags?: ComponentFlags | null;
+  components?: string | null;
 }
 
 export interface SpellGroup {
@@ -72,6 +76,9 @@ export interface SpellFormData {
   damageBonus?: number | null;
   fx: SpellFx;
   lists?: string[];
+  ingredients?: SpellIngredient[];
+  componentFlags?: ComponentFlags | null;
+  components?: string | null;
 }
 
 /** Columns `readSpellDefinition` needs to rebuild a spell for a dry-run cast (battle-effect preview). */
@@ -107,4 +114,7 @@ export type BookSpell = SpellRules & {
   /** плитка живого inline-гранту (grantCast): id = ключ гранту, касту йде hostSpellId + grantKey */
   grantKey?: string;
   hostSpellId?: string;
+  ingredients?: SpellIngredient[];
+  componentFlags?: ComponentFlags | null;
+  components?: string | null;
 };

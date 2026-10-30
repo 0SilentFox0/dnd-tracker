@@ -273,6 +273,7 @@
   },
   "spell": {
     "castCancelled": "{name}: casting cancelled",
+    "ingredientsSpent": "🧪 {name}: ingredients spent — {list}",
     "serverSaves": "🎲 saving throws rolled by the server: {names}",
     "saveCrit": "🎯 {target}: {effect} — {flavor}"
   },

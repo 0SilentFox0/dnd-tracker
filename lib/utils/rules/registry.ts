@@ -19,4 +19,5 @@ export const MECHANIC_REGISTRY = {
   outOfCombat: { label: "Поза боєм" },
   encounters: { label: "Зустрічі" },
   items: { label: "Предмети" },
+  spellIngredients: { label: "Інгредієнти заклинань" },
 } satisfies Record<MechanicKey, { label: string }>;

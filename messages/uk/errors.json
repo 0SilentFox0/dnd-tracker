@@ -489,5 +489,6 @@
   "battleSpellInputRequired": "Вкажіть значення для кубиків заклинання",
   "battleSpellTargetFilter": "Ціль не підходить під обмеження заклинання (тип істоти, небезпека чи політ)",
   "battleSpellNoObjectNear": "Поруч із ціллю немає ваших викликаних предметів цього заклинання",
+  "battleSpellIngredientsMissing": "Бракує інгредієнтів заклинання: {list}",
   "battleCasterPacified": "{state}: не може завдавати шкоди й накладати ворожі закляття"
 }

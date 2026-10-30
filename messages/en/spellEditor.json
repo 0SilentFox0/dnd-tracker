@@ -130,7 +130,9 @@
     "dieSides": "Die size",
     "upcastDice": "Dice per circle",
     "upcastTargets": "Targets per circle",
-    "fx": "Animation"
+    "fx": "Animation",
+    "ingredients": "Ingredients",
+    "componentFlags": "Components"
   },
   "validation": {
     "nameRequired": "Enter a spell name",

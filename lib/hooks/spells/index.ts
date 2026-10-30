@@ -1,4 +1,6 @@
+export { useComponentsLine } from "./useComponentsLine";
 export { ALL_SCHOOLS, useSchoolFilter } from "./useSchoolFilter";
+export { useSpellComponents } from "./useSpellComponents";
 export { useSpellFormSync } from "./useSpellFormSync";
 export { useSpellGroupActions } from "./useSpellGroupActions";
 export { useSpellIssueText } from "./useSpellIssueText";

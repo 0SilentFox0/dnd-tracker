@@ -80,21 +80,29 @@ export type ChunkResult = { text: string; nextOffset: number | null; total: numb
 const isLowSurrogate = (code: number) => code >= 0xdc00 && code <= 0xdfff;
 
 export function chunkContentMarkdown(title: string, content: ScenarioContent, opts: { sectionId?: string; offset?: number; limit: number }): ChunkResult {
-  const { markdown, units } = buildLayout(title, content, opts.sectionId);
+  const { markdown, units, sections } = buildLayout(title, content);
 
-  const total = markdown.length;
+  const section = opts.sectionId ? sections.find((s) => s.id === opts.sectionId) : undefined;
 
-  const offset = Math.max(0, Math.floor(opts.offset ?? 0));
+  if (opts.sectionId && !section) return { text: `[section ${opts.sectionId} not found]`, nextOffset: null, total: markdown.length };
+
+  const scope = section ?? { start: 0, end: markdown.length };
+
+  const total = scope.end;
+
+  const offset = Math.max(0, Math.floor(opts.offset ?? scope.start));
+
+  if (section && (offset < scope.start || offset >= scope.end)) return { text: `[offset ${offset} is outside section ${section.id}: ${scope.start}..${scope.end}]`, nextOffset: null, total };
 
   if (offset >= total) return { text: `[offset ${offset} is past the end of the page, total ${total}]`, nextOffset: null, total };
 
   const limit = Math.max(1, opts.limit);
 
-  if (total - offset <= limit) return { text: markdown.slice(offset), nextOffset: null, total };
+  if (total - offset <= limit) return { text: markdown.slice(offset, total), nextOffset: null, total };
 
   let end = offset;
 
-  for (const u of units) if (u.end > offset && u.end - offset <= limit) end = Math.max(end, u.end);
+  for (const u of units) if (u.end <= total && u.end > offset && u.end - offset <= limit) end = Math.max(end, u.end);
 
   let split = false;
 

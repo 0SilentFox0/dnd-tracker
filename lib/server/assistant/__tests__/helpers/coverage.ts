@@ -190,6 +190,7 @@ export const ASSISTANT_ROUTE_COVERAGE: readonly RouteCoverage[] = [
   { route: 'campaigns/[id]/scenario/[pageId]/sections/[sectionId]', methods: ['PATCH'], task: 6, adapter: 'scenario + legacy proposals', state: "active" },
   { route: 'campaigns/[id]/scenario/[pageId]/versions', methods: ['GET', 'POST'], task: 6, adapter: 'scenario + legacy proposals', state: "active" },
   { route: 'campaigns/[id]/scenario/mentions', methods: ['GET'], task: 6, adapter: 'scenario + legacy proposals', state: "active" },
+  { route: 'campaigns/[id]/scenario/index', methods: ['GET'], task: 6, adapter: 'scenario + legacy proposals', state: "active" },
   { route: 'campaigns/[id]/scenario', methods: ['GET', 'POST'], task: 6, adapter: 'scenario + legacy proposals', state: "active" },
   { route: 'campaigns/[id]/scenario/search', methods: ['GET'], task: 6, adapter: 'scenario + legacy proposals', state: "active" },
   { route: 'campaigns/[id]/show/puzzle', methods: ['POST'], task: 0, adapter: 'show/puzzle, player route without assistant adapter', state: "planned" },

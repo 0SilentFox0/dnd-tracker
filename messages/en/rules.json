@@ -93,6 +93,10 @@
     "items": {
       "enabled": "5e items: attunement, wearing from the stash, consumables in battle",
       "attunementLimit": "Attunement limit"
+    },
+    "spellIngredients": {
+      "enabled": "Spell ingredients: check and spend material components when casting",
+      "autoPay": "Cover missing ingredients from the wallet"
     }
   },
   "mechanics": {
@@ -155,6 +159,10 @@
     "items": {
       "label": "Items",
       "description": "5e magic items: attunement (at most N items), \"Artifact\" and \"Ring\" slot items work straight from the stash, consumables (potions, ammo) are used in battle and spent afterwards. Properties, non-unique gear and charges are content properties and do not depend on this switch."
+    },
+    "spellIngredients": {
+      "label": "Spell ingredients",
+      "description": "Costly or consumed material components are checked when casting in battle and spent from the hero's inventory items; a shortfall can be covered with gold from the wallet. Non-consumed components only have to be in the inventory and are never spent. Spending is kept after the battle only with the \"persist resources\" out-of-combat rule on. Existing spells without ingredients are unchanged."
     }
   },
   "customConditions": {

@@ -17,6 +17,7 @@ import { ItemsSection } from "./sections/ItemsSection";
 import { MoraleSection } from "./sections/MoraleSection";
 import { OutOfCombatSection } from "./sections/OutOfCombatSection";
 import { SavesSection } from "./sections/SavesSection";
+import { SpellIngredientsSection } from "./sections/SpellIngredientsSection";
 
 import { ErrorState, LoadingState } from "@/components/common/states";
 import { HudForm, type HudTab } from "@/components/hud/form";
@@ -43,6 +44,7 @@ const SECTIONS = {
   outOfCombat: OutOfCombatSection,
   encounters: EncountersSection,
   items: ItemsSection,
+  spellIngredients: SpellIngredientsSection,
 } satisfies Record<keyof Ruleset, unknown>;
 
 export function RulesForm({ campaignId }: { campaignId: string }) {

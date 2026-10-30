@@ -5,9 +5,11 @@ import { CompendiumError } from "./parse";
 import { TARGET_KINDS } from "./types";
 
 import { scenarioContentSchema } from "@/lib/schemas/scenario";
+import { contentWrite } from "@/lib/server/scenario/content-write";
 import { newContentId } from "@/lib/server/templates/ids";
 import { remapIds } from "@/lib/server/templates/remap-ids";
 import { jsonContentInput } from "@/lib/utils/common/json";
+import type { ScenarioContent } from "@/types/scenario";
 
 const object = z.record(z.string(), z.unknown());
 
@@ -42,7 +44,7 @@ export async function importCompendiumSection(db: CompendiumBundleDb, section: C
 
   for (const source of next.sources) await db.compendiumSource.upsert({ where: { campaignId_sourceJson: { campaignId, sourceJson: source.sourceJson } }, create: { campaignId, sourceJson: source.sourceJson, metadata: jsonContentInput(source.metadata) }, update: { metadata: jsonContentInput(source.metadata) } });
 
-  if (next.pages.length) await db.scenarioPage.createMany({ data: next.pages.map((page) => ({ id: page.id, campaignId, kind: "note", status: "draft", title: page.title, content: jsonContentInput(page.content), searchText: page.title })) });
+  if (next.pages.length) await db.scenarioPage.createMany({ data: next.pages.map((page) => ({ id: page.id, campaignId, kind: "note", status: "draft", title: page.title, ...contentWrite(page.title, page.content as ScenarioContent) })) });
 
   if (next.entries.length) await db.compendiumEntry.createMany({ data: next.entries.map((row) => ({ ...row, id: newContentId(), campaignId, locator: jsonContentInput(row.locator), baseline: jsonContentInput(row.baseline), issues: jsonContentInput(row.issues), bindings: jsonContentInput(row.bindings), attribution: jsonContentInput(row.attribution) })) });
 }

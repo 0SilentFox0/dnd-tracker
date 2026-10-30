@@ -143,6 +143,23 @@ describe("applyProposal with createAcquaintance", () => {
     expect(tx.acquaintance.create).not.toHaveBeenCalled();
   });
 
+  it("a ref placeholder on a stale page is stale, not rejected", async () => {
+    tx.scenarioPage.findFirst.mockResolvedValue({ id: "p", title: "T", version: 4, content: { ...content(), sections: [{ ...content().sections[0], rows: [{ id: "r", story: doc("Змінено"), notes: doc("") }] }] } });
+    withOps([{ op: "replaceRow", sectionId: "s", rowId: "r", story: chipDoc("@ref:zz"), before: { story: doc("Беатріс тут"), notes: doc("") } }]);
+
+    expect(await run()).toEqual({ ok: false, status: 409, error: API_ERRORS.AI_PROPOSAL_STALE });
+    expect(tx.aiProposal.update).toHaveBeenCalledWith({ where: { id: "pr" }, data: { status: "stale" } });
+  });
+
+  it("a stale proposal with createAcquaintance creates no acquaintance and writes no page", async () => {
+    tx.scenarioPage.findFirst.mockResolvedValue({ id: "p", title: "T", version: 4, content: { ...content(), sections: [{ ...content().sections[0], rows: [{ id: "r", story: doc("Змінено"), notes: doc("") }] }] } });
+
+    expect((await run()).ok).toBe(false);
+    expect(tx.acquaintance.create).not.toHaveBeenCalled();
+    expect(tx.scenarioPage.updateMany).not.toHaveBeenCalled();
+    expect(tx.aiProposal.update).toHaveBeenCalledWith({ where: { id: "pr" }, data: { status: "stale" } });
+  });
+
   it("version conflict on the page write -> no acquaintance created", async () => {
     tx.scenarioPage.updateMany.mockResolvedValue({ count: 0 });
 

@@ -15,6 +15,16 @@ describe("sync hashes", () => {
     expect(rowHash({ ...row, sourceId: "x", campaignId: "y" }, spells)).toBe(rowHash(row, spells));
   });
 
+  it("rowHash reacts to ingredients and componentFlags", () => {
+    const row = { id: "c" + "a".repeat(24), name: "Revivify", ingredients: [], componentFlags: null };
+
+    const diamond = { name: "Diamond", qty: 1, minGp: 300, consumed: true, focus: false };
+
+    expect(spells.columns).toEqual(expect.arrayContaining(["ingredients", "componentFlags"]));
+    expect(rowHash({ ...row, ingredients: [diamond] }, spells)).not.toBe(rowHash(row, spells));
+    expect(rowHash({ ...row, componentFlags: { v: true, s: true, m: true } }, spells)).not.toBe(rowHash(row, spells));
+  });
+
   it("rulesHashes covers every mechanic and treats {} as defaults", () => {
     const h = rulesHashes({});
 

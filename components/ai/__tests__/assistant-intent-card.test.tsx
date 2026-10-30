@@ -12,7 +12,7 @@ export const intent: IntentDetail = { id: "i1", actionId: "scenario.update", cha
 it("previewAllChangesBeforeConfirm", () => {
  const confirm = vi.fn();
 
- render(<AssistantIntentCard intent={intent} onConfirm={confirm} onReject={vi.fn()} onRefine={vi.fn()} />);
+ render(<AssistantIntentCard campaignId="c1" intent={intent} onConfirm={confirm} onReject={vi.fn()} onRefine={vi.fn()} />);
  expect(confirm).not.toHaveBeenCalled();
  expect(screen.getByText('"Стало0"')).toBeTruthy();
  fireEvent.click(screen.getByRole("button", {name: "ai.intent.nextChanges"}));
@@ -21,14 +21,14 @@ it("previewAllChangesBeforeConfirm", () => {
  expect(screen.getByText('"Було0"')).toBeTruthy();
 });
 it("staleCannotApply", () => {
- render(<AssistantIntentCard intent={{...intent, status:"stale"}} onConfirm={vi.fn()} onReject={vi.fn()} onRefine={vi.fn()} />);
+ render(<AssistantIntentCard campaignId="c1" intent={{...intent, status:"stale"}} onConfirm={vi.fn()} onReject={vi.fn()} onRefine={vi.fn()} />);
  expect(screen.queryByRole("button", {name:"ai.intent.confirm"})).toBeNull();
  expect(screen.getByText(/ai\.intentStatus\.stale/)).toBeTruthy();
 });
 it("mobileKeyboardAndFocusAccessible", () => {
  const refine = vi.fn();
 
- render(<AssistantIntentCard intent={intent} onConfirm={vi.fn()} onReject={vi.fn()} onRefine={refine} />);
+ render(<AssistantIntentCard campaignId="c1" intent={intent} onConfirm={vi.fn()} onReject={vi.fn()} onRefine={refine} />);
 
  const button = screen.getByRole("button", {name:"ai.intent.refine"});
 
@@ -48,9 +48,29 @@ it("pendingAndHandoffAreNotExecution",()=>{
 
 it("expiryWhileOpenDisablesConfirm",()=>{
  vi.useFakeTimers();vi.setSystemTime(new Date("2026-10-26T00:00:00Z"));
- try { render(<AssistantIntentCard intent={{...intent,expiresAt:"2026-10-26T00:00:01Z"}} onConfirm={vi.fn()} onReject={vi.fn()} onRefine={vi.fn()} />);
+ try { render(<AssistantIntentCard campaignId="c1" intent={{...intent,expiresAt:"2026-10-26T00:00:01Z"}} onConfirm={vi.fn()} onReject={vi.fn()} onRefine={vi.fn()} />);
  expect(screen.getByRole("button",{name:"ai.intent.confirm"})).toBeTruthy();
  act(()=>vi.advanceTimersByTime(1500));
  expect(screen.queryByRole("button",{name:"ai.intent.confirm"})).toBeNull();
  } finally { vi.useRealTimers(); }
+});
+
+const rdoc = (...nodes: unknown[]) => ({ type: "doc", content: [{ type: "paragraph", content: nodes }] });
+
+const chipRow = (rowId: string) => ({ op: "replaceRow", sectionId: "s1", rowId, story: rdoc({ type: "mention", attrs: { id: "a1", label: "Бі", type: "acquaintance" } }), before: { story: rdoc({ type: "text", text: "Бі" }), notes: rdoc() } });
+
+it("scenarioOpsRenderAsList", () => {
+ const ops = [{ op: "createAcquaintance", ref: "b", name: "Бі", description: "" }, chipRow("r1"), chipRow("r2")];
+
+ const change = { target: { domain: "scenario", id: "p1", name: "Сцена" }, path: "ops", before: null, after: ops };
+
+ const { container } = render(<AssistantIntentCard campaignId="c1" intent={{ ...intent, actionId: "scenario.propose-edit", preview: { ...intent.preview, changes: [change] } } as never} onConfirm={vi.fn()} onReject={vi.fn()} onRefine={vi.fn()} />);
+
+ expect(screen.getByText(/ai\.proposal\.newAcquaintance/)).toBeTruthy();
+ expect(screen.getByText(/ai\.proposal\.changedRows/)).toBeTruthy();
+ expect(screen.getAllByText(/ai\.proposal\.chipsAdded/)).toHaveLength(2);
+ expect(container.querySelector("pre")).toBeNull();
+ expect(container.textContent).not.toContain('"op":');
+ expect(screen.getByRole("button", { name: "ai.intent.confirm" })).toBeTruthy();
+ expect(screen.getByRole("button", { name: "ai.intent.reject" })).toBeTruthy();
 });

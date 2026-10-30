@@ -273,6 +273,7 @@
   },
   "spell": {
     "castCancelled": "{name}: накладання скасовано",
+    "ingredientsSpent": "🧪 {name}: витрачено інгредієнти — {list}",
     "serverSaves": "🎲 рятівні кидки кинув сервер: {names}",
     "saveCrit": "🎯 {target}: {effect} — {flavor}"
   },

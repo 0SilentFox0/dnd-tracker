@@ -496,7 +496,23 @@ export interface TransformState {
   };
 }
 
+export interface IngredientStockItem {
+  id: string;
+  key: string;
+  name: string;
+  worthGp: number;
+  qty: number;
+  used: number;
+}
+
+export interface IngredientStock {
+  items: IngredientStockItem[];
+  purseCp: number;
+  usedCp: number;
+}
+
 export interface BattleParticipantBattleData {
+  ingredientStock?: IngredientStock;
   pendingCast?: { spellId: string; spellName: string; remainingRounds: number; totalRounds: number; lastRound: number; grantKey?: string; slotKey?: string; castLevel?: number };
   attacks: BattleAttack[];
   activeEffects: ActiveEffect[];

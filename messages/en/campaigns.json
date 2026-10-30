@@ -102,7 +102,7 @@
   "templatePicker": {
     "section": "Template",
     "ariaLabel": "Template",
-    "intro": "A template is a ready-made campaign base: a set of rules and content (races, classes, units, spells, artifacts, skills, music) copied into your campaign. You can then change it however you like. “No template” gives an empty library.",
+    "intro": "A template is a ready-made campaign base: a set of rules and content (races, classes, units, spells, artifacts, skills, music) copied into your campaign. You can then change it however you like. “5e (empty)” is D&D 5e rules with no content; “No template” is an empty library with the default tracker rules.",
     "official": "Official",
     "mine": "Mine",
     "other": "Other",

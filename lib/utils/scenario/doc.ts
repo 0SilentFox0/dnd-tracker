@@ -4,7 +4,7 @@ export const EMPTY_DOC: RichDoc = { type: "doc", content: [] };
 
 const LINE_BLOCKS = new Set(["paragraph", "heading", "say", "listItem", "tableCell", "tableHeader"]);
 
-const isSecret = (node: RichNode) => node.marks?.some((m) => m.type === "secret") ?? false;
+export const isSecret = (node: RichNode) => node.marks?.some((m) => m.type === "secret") ?? false;
 
 function nodeText(node: RichNode): string {
   if (node.type === "text") return node.text ?? "";

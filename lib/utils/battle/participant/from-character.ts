@@ -36,6 +36,7 @@ import { isRecord } from "@/lib/utils/common/is-record";
 import { attunedRefs } from "@/lib/utils/items/resolve";
 import { DEFAULT_RULES, heroDiceTable, heroHpFormula, moraleCapFromRules, proficiencyForLevel, type Ruleset } from "@/lib/utils/rules";
 import { resolveClassEntries } from "@/lib/utils/spells/class-slots";
+import { buildIngredientStock } from "@/lib/utils/spells/ingredients/stock";
 import type { BattleParticipant } from "@/types/battle";
 import type { ResolvedClassEntry } from "@/types/classes";
 
@@ -223,6 +224,8 @@ export async function createBattleParticipantFromCharacter(
     ...immunityAbilities(getCharacterImmunities(character), { type: "character", id: character.id }),
   ];
 
+  const ingredientStock = rules.spellIngredients.enabled && character.controlledBy && character.controlledBy !== CONTROLLED_BY_DM ? buildIngredientStock(character.inventory, { withPurse: rules.spellIngredients.autoPay }) : undefined;
+
   const pools = { ...(resolvedClasses ? classPools(resolvedClasses) : {}), ...grantPools };
 
   const participant: BattleParticipant = {
@@ -286,6 +289,7 @@ export async function createBattleParticipantFromCharacter(
       schoolMastery,
       abilityUsage: {},
       ...(Object.keys(pools).length > 0 && { pools }),
+      ...(ingredientStock && { ingredientStock }),
       pendingExtraActions: 0,
     },
     actionFlags: {

@@ -9,7 +9,7 @@ import { isComposedRef } from "@/lib/utils/items/ref";
 import { heldRefs, pruneAttuned } from "@/lib/utils/items/resolve";
 import type { Purse, SpecialItem, StashState } from "@/types/inventory";
 
-type ItemFields = { name: string; description?: string; quantity: number; consumable: boolean; parameter?: string; spellId?: string };
+type ItemFields = { name: string; description?: string; quantity: number; consumable: boolean; parameter?: string; spellId?: string; worthGp?: number; ingredient?: string };
 
 export type StashAction =
   | { action: "spend"; amount: number; coin: Coin; note: string }
@@ -65,13 +65,15 @@ const ok = (state: StashState, kind: InventoryLogKindValue, delta: Record<string
 
 const fail = (error: StashErrorCode): StashResult => ({ ok: false, error });
 
-const itemFields = ({ name, description, quantity, consumable, parameter, spellId }: ItemFields) => ({
+const itemFields = ({ name, description, quantity, consumable, parameter, spellId, worthGp, ingredient }: ItemFields) => ({
   name,
   ...(description ? { description } : {}),
   quantity,
   consumable,
   ...(parameter && { parameter }),
   ...(spellId && { spellId }),
+  ...(worthGp !== undefined && { worthGp }),
+  ...(ingredient && { ingredient }),
 });
 
 const named = (ref: string, name?: string) => (name && isComposedRef(ref) ? { artifactName: name } : {});
