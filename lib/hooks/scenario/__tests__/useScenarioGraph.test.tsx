@@ -143,4 +143,48 @@ describe("useScenarioGraph", () => {
     expect(result.current.state.selectedId).toBe("unit:u1");
     expect(result.current.state.matchIndex).toBe(0);
   });
+
+  it("finds a single-page entity by search with default filters", async () => {
+    vi.mocked(scenarioApi.getScenarioIndex).mockResolvedValue({
+      ...index,
+      entities: [...index.entities, entity("unit", "u9", "Тролль", ["s1"])],
+      edges: [...index.edges, edge("s1", "unit", "u9")],
+    });
+
+    const { result } = setup();
+
+    await waitFor(() => expect(result.current.state.graph).not.toBeNull());
+    expect(result.current.state.graph?.nodes.some((n) => n.id === "unit:u9")).toBe(false);
+    act(() => result.current.set.query("тролль"));
+    expect(result.current.state.matches).toEqual(["unit:u9"]);
+    act(() => result.current.set.nextMatch());
+    expect(result.current.state.selectedId).toBe("unit:u9");
+    act(() => result.current.set.query(""));
+    expect(result.current.state.graph?.nodes.some((n) => n.id === "unit:u9")).toBe(false);
+  });
+
+  it("drops a selection whose node left the graph", async () => {
+    vi.mocked(scenarioApi.getScenarioIndex).mockResolvedValue(index);
+
+    const { result } = setup();
+
+    await waitFor(() => expect(result.current.state.graph).not.toBeNull());
+    act(() => result.current.set.selected("unit:u1"));
+    expect(result.current.state.selectedId).toBe("unit:u1");
+    act(() => result.current.set.filters({ types: new Set(["character"]) }));
+    expect(result.current.state.selectedId).toBeNull();
+    expect(result.current.selection.detail).toBeNull();
+    expect(result.current.selection.nodes.size).toBe(0);
+  });
+
+  it("retry refetches the index", async () => {
+    vi.mocked(scenarioApi.getScenarioIndex).mockRejectedValue(new Error("boom"));
+
+    const { result } = setup();
+
+    await waitFor(() => expect(result.current.state.isError).toBe(true));
+    vi.mocked(scenarioApi.getScenarioIndex).mockResolvedValue(index);
+    act(() => result.current.set.retry());
+    await waitFor(() => expect(result.current.state.graph).not.toBeNull());
+  });
 });

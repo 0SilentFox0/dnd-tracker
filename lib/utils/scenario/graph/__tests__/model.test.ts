@@ -134,4 +134,30 @@ describe("searchMatches", () => {
   it("matches only the label", () => {
     expect(searchMatches(m, "unit")).toEqual([]);
   });
+
+  describe("forceInclude", () => {
+    it("shows a collapsed leaf, but not one of an unticked type", () => {
+      const force = new Set(["character:c1"]);
+
+      expect(ids(buildGraphModel(index, defaultFilters(), undefined, force))).toContain("character:c1");
+
+      const filters = { ...defaultFilters(), types: new Set<MentionType>(["unit"]) };
+
+      expect(ids(buildGraphModel(index, filters, undefined, force))).not.toContain("character:c1");
+    });
+
+    it("bypasses the cap", () => {
+      const m = buildGraphModel(index, defaultFilters(), 1, new Set(["marker:m1"]));
+
+      expect(ids(m).filter((n) => !n.startsWith("scene:"))).toEqual(["unit:u1", "marker:m1"]);
+      expect(m.truncated).toBe(2);
+    });
+  });
+
+  it("reports the entity total so shown = total - truncated", () => {
+    const m = buildGraphModel(index, defaultFilters(), 1);
+
+    expect(m.entityTotal).toBe(6);
+    expect(m.truncated).toBe(3);
+  });
 });

@@ -9,8 +9,12 @@ const push = vi.fn();
 
 let index: ScenarioIndex | undefined;
 
+let isError = false;
+
+const refetch = vi.fn();
+
 vi.mock("next/navigation", () => ({ useRouter: () => ({ push }) }));
-vi.mock("@/lib/hooks/scenario/useScenarioIndex", () => ({ useScenarioIndex: () => ({ data: index, isLoading: false, isError: false }) }));
+vi.mock("@/lib/hooks/scenario/useScenarioIndex", () => ({ useScenarioIndex: () => ({ data: index, isLoading: false, isError, refetch }) }));
 
 const scene = (id: string, order: number) => ({ id, kind: "scene" as const, title: `Scene ${id}`, pageKind: "scene" as const, status: "draft" as const, order, sections: [] });
 
@@ -35,7 +39,9 @@ const node = (id: string) => document.querySelector(`[data-node-id="${id}"]`) as
 describe("ScenarioGraph", () => {
   beforeEach(() => {
     index = FULL;
+    isError = false;
     push.mockClear();
+    refetch.mockClear();
   });
   afterEach(cleanup);
 
@@ -149,5 +155,107 @@ describe("ScenarioGraph", () => {
     fireEvent.keyDown(input, { key: "Enter" });
 
     expect(node("unit:g")).toHaveClass("graph-node-selected");
+  });
+
+  it("shows a visible broken marker on missing nodes only", () => {
+    render(<ScenarioGraph campaignId="c" />);
+
+    expect(node("artifact:o").querySelector("[data-broken-marker]")).not.toBeNull();
+    expect(node("unit:g").querySelector("[data-broken-marker]")).toBeNull();
+  });
+
+  it("gives the +N badge accessible text", () => {
+    render(<ScenarioGraph campaignId="c" />);
+
+    expect(node("scene:a").querySelector("g > g > title")?.textContent).toBe('scenarioGraph.graph.hidden {"count":1}');
+  });
+
+  it("retries after an error", () => {
+    isError = true;
+    render(<ScenarioGraph campaignId="c" />);
+
+    fireEvent.click(screen.getByRole("button", { name: "common.states.retry" }));
+
+    expect(refetch).toHaveBeenCalledTimes(1);
+  });
+
+  it("finds a collapsed single-page entity by search", () => {
+    render(<ScenarioGraph campaignId="c" />);
+
+    expect(node("spell:s")).toBeNull();
+
+    fireEvent.change(screen.getByRole("searchbox"), { target: { value: "spark" } });
+
+    expect(node("spell:s")).not.toBeNull();
+  });
+
+  describe("limits", () => {
+    const many = (n: number): ScenarioIndex => {
+      const entities = Array.from({ length: n }, (_, i) => ({ kind: "entity" as const, type: "unit" as const, id: `u${i}`, label: `Unit ${i}`, degree: 2, sceneIds: ["a", "b"], missing: false }));
+
+      return {
+        scenes: [scene("a", 0), scene("b", 1)],
+        entities,
+        edges: entities.flatMap((e) => ["a", "b"].map((sceneId) => ({ sceneId, entityType: "unit" as const, entityId: e.id, count: 1, sectionIds: [], secret: false }))),
+        counts: { scenes: 2, entities: n, edges: n * 2, byType: { unit: n }, missing: 0 },
+      };
+    };
+
+    it("shows the truncated banner and expands with show all", () => {
+      index = many(160);
+      render(<ScenarioGraph campaignId="c" />);
+
+      expect(screen.getByText(/scenarioGraph.limits.truncated \{"shown":150,"total":160\}/)).toBeInTheDocument();
+      expect(document.querySelectorAll("[data-node-id]")).toHaveLength(152);
+
+      fireEvent.click(screen.getByRole("button", { name: "scenarioGraph.limits.showAll" }));
+
+      expect(screen.queryByText(/scenarioGraph.limits.truncated/)).toBeNull();
+      expect(document.querySelectorAll("[data-node-id]")).toHaveLength(162);
+    });
+
+    it("warns when the graph is over the limit", () => {
+      index = many(405);
+      render(<ScenarioGraph campaignId="c" />);
+
+      expect(screen.queryByText("scenarioGraph.limits.overLimit")).toBeNull();
+
+      fireEvent.click(screen.getByRole("button", { name: "scenarioGraph.limits.showAll" }));
+
+      expect(screen.getByText("scenarioGraph.limits.overLimit")).toBeInTheDocument();
+    });
+  });
+
+  describe("pointer interaction", () => {
+    const svg = () => screen.getByRole("group", { name: "scenarioGraph.graph.label" });
+
+    const move = (el: Element, init: PointerEventInit) => fireEvent.pointerMove(el, { pointerId: 1, pointerType: "mouse", ...init });
+
+    it("a drag suppresses the click on a node", () => {
+      render(<ScenarioGraph campaignId="c" />);
+
+      fireEvent.pointerDown(svg(), { pointerId: 1, pointerType: "mouse", clientX: 10, clientY: 10, buttons: 1 });
+      move(svg(), { clientX: 60, clientY: 10, buttons: 1 });
+      fireEvent.pointerUp(svg(), { pointerId: 1, pointerType: "mouse" });
+      fireEvent.click(node("unit:g"));
+
+      expect(node("unit:g")).not.toHaveClass("graph-node-selected");
+
+      fireEvent.click(node("unit:g"));
+
+      expect(node("unit:g")).toHaveClass("graph-node-selected");
+    });
+
+    it("a mouse move without buttons does not pan", () => {
+      render(<ScenarioGraph campaignId="c" />);
+
+      const before = svg().getAttribute("viewBox");
+
+      fireEvent.pointerDown(svg(), { pointerId: 1, pointerType: "mouse", clientX: 10, clientY: 10, buttons: 1 });
+      move(svg(), { clientX: 200, clientY: 10, buttons: 0 });
+      move(svg(), { clientX: 300, clientY: 10, buttons: 0 });
+
+      expect(svg().getAttribute("viewBox")).toBe(before);
+    });
   });
 });

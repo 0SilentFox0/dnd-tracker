@@ -14,16 +14,26 @@ export const defaultFilters = (): GraphFilters => ({
   onlyMissing: false,
 });
 
-export function buildGraphModel(index: ScenarioIndex, filters: GraphFilters, cap = GRAPH_ENTITY_CAP): GraphModel {
+export function buildGraphModel(index: ScenarioIndex, filters: GraphFilters, cap = GRAPH_ENTITY_CAP, forceInclude: ReadonlySet<string> = new Set()): GraphModel {
   const candidates = index.entities.filter((e) => filters.types.has(e.type) && (!filters.onlyMissing || e.missing));
 
-  const isLeaf = (e: (typeof candidates)[number]) => e.degree === 1 && !e.missing && !filters.showLeaves;
+  const forced = (e: (typeof candidates)[number]) => forceInclude.has(entityNodeId(e.type, e.id));
+
+  const isLeaf = (e: (typeof candidates)[number]) => e.degree === 1 && !e.missing && !filters.showLeaves && !forced(e);
 
   const collapsed = candidates.filter(isLeaf);
 
   const rest = candidates.filter((e) => !isLeaf(e));
 
-  const kept = filters.showAll ? rest : rest.slice(0, cap);
+  let free = cap;
+
+  const kept = filters.showAll
+    ? rest
+    : rest.filter((e) => {
+        if (forced(e)) return true;
+
+        return free-- > 0;
+      });
 
   const truncated = rest.length - kept.length;
 
@@ -84,7 +94,7 @@ export function buildGraphModel(index: ScenarioIndex, filters: GraphFilters, cap
     hidden: 0,
   }));
 
-  return { nodes: [...sceneNodes, ...entityNodes], edges, truncated };
+  return { nodes: [...sceneNodes, ...entityNodes], edges, truncated, entityTotal: candidates.length };
 }
 
 export function neighbors(model: GraphModel, nodeId: string): { nodes: Set<string>; edges: Set<string> } {

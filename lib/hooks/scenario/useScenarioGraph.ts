@@ -5,14 +5,15 @@ import { useCallback, useMemo, useState } from "react";
 import { useScenarioIndex } from "./useScenarioIndex";
 
 import { GRAPH_WARN_NODES } from "@/lib/constants/scenario-graph";
+import { matchesQuery } from "@/lib/utils/common/text-search";
 import { layoutGraph } from "@/lib/utils/scenario/graph/layout";
-import { buildGraphModel, defaultFilters, neighbors, searchMatches } from "@/lib/utils/scenario/graph/model";
+import { buildGraphModel, defaultFilters, entityNodeId, neighbors, searchMatches } from "@/lib/utils/scenario/graph/model";
 import type { GraphDetail, GraphFilters } from "@/lib/utils/scenario/graph/types";
 
 const NO_SELECTION = { nodes: new Set<string>(), edges: new Set<string>() };
 
 export function useScenarioGraph(campaignId: string) {
-  const { data: index, isLoading, isError } = useScenarioIndex(campaignId);
+  const { data: index, isLoading, isError, refetch } = useScenarioIndex(campaignId);
 
   const [filters, setFilters] = useState<GraphFilters>(defaultFilters);
 
@@ -22,7 +23,18 @@ export function useScenarioGraph(campaignId: string) {
 
   const [selectedId, setSelectedId] = useState<string | null>(null);
 
-  const model = useMemo(() => (index ? buildGraphModel(index, filters) : null), [index, filters]);
+  const forcedKey = useMemo(() => {
+    if (!index || !query.trim()) return "";
+
+    return index.entities
+      .filter((e) => matchesQuery([e.label], query))
+      .map((e) => entityNodeId(e.type, e.id))
+      .join("\n");
+  }, [index, query]);
+
+  const forced = useMemo(() => new Set(forcedKey ? forcedKey.split("\n") : []), [forcedKey]);
+
+  const model = useMemo(() => (index ? buildGraphModel(index, filters, undefined, forced) : null), [index, filters, forced]);
 
   const graph = useMemo(() => (model ? layoutGraph(model) : null), [model]);
 
@@ -45,6 +57,8 @@ export function useScenarioGraph(campaignId: string) {
 
     return { ...hood, detail: { node, links } as GraphDetail | null };
   }, [model, graph, selectedId]);
+
+  const visibleSelectedId = selection.detail ? selectedId : null;
 
   const setQuery = useCallback((q: string) => {
     setQueryState(q);
@@ -72,14 +86,15 @@ export function useScenarioGraph(campaignId: string) {
       graph,
       filters,
       query,
-      selectedId,
+      selectedId: visibleSelectedId,
       matches,
       matchIndex,
       truncated: model?.truncated ?? 0,
+      entityTotal: model?.entityTotal ?? 0,
       overLimit: (model?.nodes.length ?? 0) > GRAPH_WARN_NODES,
       counts: index?.counts ?? null,
     },
-    set: { filters: patchFilters, query: setQuery, selected: setSelectedId, nextMatch },
+    set: { filters: patchFilters, query: setQuery, selected: setSelectedId, nextMatch, retry: () => void refetch() },
     selection,
   };
 }

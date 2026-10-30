@@ -144,10 +144,23 @@ export function ScenarioGraphView({ graph, selection, selectedId, matched, onSel
     drag.current = { moved: 0, pinch: 0 };
   };
 
+  const endPointer = (e: React.PointerEvent) => {
+    pointers.current.delete(e.pointerId);
+    drag.current.pinch = 0;
+
+    if (e.currentTarget.hasPointerCapture?.(e.pointerId)) e.currentTarget.releasePointerCapture?.(e.pointerId);
+  };
+
   const onPointerMove = (e: React.PointerEvent) => {
     const prev = pointers.current.get(e.pointerId);
 
     if (!prev) return;
+
+    if (e.pointerType === "mouse" && e.buttons === 0) {
+      endPointer(e);
+
+      return;
+    }
 
     const next = { x: e.clientX, y: e.clientY };
 
@@ -175,14 +188,12 @@ export function ScenarioGraphView({ graph, selection, selectedId, matched, onSel
 
     if (drag.current.moved <= DRAG_THRESHOLD) return;
 
+    // captured only once panning starts: capturing on down would retarget the node click
+    e.currentTarget.setPointerCapture?.(e.pointerId);
+
     const k = scale();
 
     setBox((b) => ({ ...b, x: b.x - dx * k, y: b.y - dy * k }));
-  };
-
-  const onPointerUp = (e: React.PointerEvent) => {
-    pointers.current.delete(e.pointerId);
-    drag.current.pinch = 0;
   };
 
   return (
@@ -195,8 +206,8 @@ export function ScenarioGraphView({ graph, selection, selectedId, matched, onSel
         className="size-full touch-none select-none text-foreground"
         onPointerDown={onPointerDown}
         onPointerMove={onPointerMove}
-        onPointerUp={onPointerUp}
-        onPointerCancel={onPointerUp}
+        onPointerUp={endPointer}
+        onPointerCancel={endPointer}
         onClickCapture={(e) => {
           if (drag.current.moved > DRAG_THRESHOLD) {
             e.stopPropagation();

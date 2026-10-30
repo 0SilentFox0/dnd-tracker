@@ -11,6 +11,7 @@
   "graph": {
     "label": "Scenario graph",
     "secretEdge": "Secret link",
+    "missing": "Broken link: entity deleted",
     "hidden": "{count} hidden entities"
   },
   "inspector": {

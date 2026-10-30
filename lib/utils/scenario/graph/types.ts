@@ -33,6 +33,7 @@ export interface GraphModel {
   nodes: GraphNode[];
   edges: GraphEdge[];
   truncated: number;
+  entityTotal: number;
 }
 
 export interface GraphDetail {

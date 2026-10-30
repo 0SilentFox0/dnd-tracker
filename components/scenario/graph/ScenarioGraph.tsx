@@ -45,7 +45,7 @@ export function ScenarioGraph({ campaignId }: { campaignId: string }) {
 
   if (state.isLoading) return <LoadingState />;
 
-  if (state.isError) return <ErrorState error={null} />;
+  if (state.isError) return <ErrorState error={null} onRetry={set.retry} />;
 
   if (state.isEmpty) {
     return (
@@ -60,8 +60,6 @@ export function ScenarioGraph({ campaignId }: { campaignId: string }) {
   const { graph, counts } = state;
 
   const detail = selection.detail;
-
-  const entityShown = graph?.nodes.filter((n) => n.kind === "entity").length ?? 0;
 
   const inspector = detail ? <GraphInspector detail={detail} canOpen={!!graphNodeHref(campaignId, detail.node)} onOpen={() => open(detail.node)} onSelect={set.selected} onClose={clear} /> : null;
 
@@ -88,7 +86,7 @@ export function ScenarioGraph({ campaignId }: { campaignId: string }) {
       />
       {state.truncated > 0 ? (
         <div role="status" className="flex items-center gap-3 rounded-md border px-3 py-1.5 text-sm">
-          <span>{t("limits.truncated", { shown: entityShown, total: entityShown + state.truncated })}</span>
+          <span>{t("limits.truncated", { shown: state.entityTotal - state.truncated, total: state.entityTotal })}</span>
           <Button size="sm" variant="outline" onClick={() => set.filters({ showAll: true })}>{t("limits.showAll")}</Button>
         </div>
       ) : null}

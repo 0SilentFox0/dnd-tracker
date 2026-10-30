@@ -1,6 +1,7 @@
 "use client";
 
 import { memo, useState } from "react";
+import { useTranslations } from "next-intl";
 
 import { GRAPH_LABEL_MIN_DEGREE, GRAPH_TYPE_STYLE } from "@/lib/constants/scenario-graph";
 import type { PositionedNode } from "@/lib/utils/scenario/graph/layout";
@@ -20,6 +21,8 @@ export interface GraphNodeShapeProps {
 }
 
 function GraphNodeShapeImpl({ node, selected, dimmed, matched, onSelect, onClear, onOpen }: GraphNodeShapeProps) {
+  const t = useTranslations("scenarioGraph.graph");
+
   const [hover, setHover] = useState(false);
 
   const isScene = node.kind === "scene";
@@ -43,7 +46,7 @@ function GraphNodeShapeImpl({ node, selected, dimmed, matched, onSelect, onClear
       transform={`translate(${node.x} ${node.y})`}
       tabIndex={0}
       role="button"
-      aria-label={node.label}
+      aria-label={node.missing ? `${node.label} (${t("missing")})` : node.hidden > 0 ? `${node.label} (${t("hidden", { count: node.hidden })})` : node.label}
       aria-pressed={selected}
       data-node-id={node.id}
       data-missing={node.missing ? "true" : undefined}
@@ -72,8 +75,16 @@ function GraphNodeShapeImpl({ node, selected, dimmed, matched, onSelect, onClear
       ) : null}
       {node.hidden > 0 ? (
         <g transform={`translate(${w / 2} -14)`} pointerEvents="none">
+          <title>{t("hidden", { count: node.hidden })}</title>
           <circle r={9} fill={accent} />
           <text textAnchor="middle" dy="0.35em" fontSize={9} fontWeight={700} fill="var(--color-background)">{`+${node.hidden}`}</text>
+        </g>
+      ) : null}
+      {node.missing ? (
+        <g transform="translate(10 -12)" pointerEvents="none" data-broken-marker="true">
+          <title>{t("missing")}</title>
+          <circle r={7} fill="var(--color-destructive)" />
+          <text textAnchor="middle" dy="0.35em" fontSize={10} fontWeight={700} fill="var(--color-background)">!</text>
         </g>
       ) : null}
       {showLabel ? (
