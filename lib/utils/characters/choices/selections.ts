@@ -188,6 +188,7 @@ export function choiceSelections(input: SelectionInput): ChoiceSelections {
 
       out.skills.push(...bg.skillProficiencies);
       out.tools = [...bg.toolProficiencies];
+
       const originFeat = bg.originFeatId ? input.featsById[bg.originFeatId] : undefined;
 
       out.background = { id: bg.id, name: bg.name, equipmentText: bg.equipmentText, picks: describeFeatPicks(bg, picks), description: bg.description, skills: [...bg.skillProficiencies], tools: [...bg.toolProficiencies], originFeat: originFeat ? { id: originFeat.id, name: originFeat.name } : null };

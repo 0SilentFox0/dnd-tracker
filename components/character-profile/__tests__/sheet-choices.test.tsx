@@ -66,11 +66,3 @@ describe("sheet choices UI", () => {
     expect(screen.queryByRole("button", { name: "characterProfile.choices.pick" })).toBeNull();
   });
 });
-
-it("shows background and manual equipment even without a feat", () => {
-  current.sheet = { ...sheetFixture, choices: { ...choices, feats: [], options: [], background: { id: "b", name: "Sage", picks: [{ message: "characterProfile.sheet.abilityPick", params: { n: 2, ability: "intelligence" } }], equipmentText: "Book or 50 GP" } } };
-  render(<FeatsBlock />);
-  expect(screen.getByText(/Sage/)).toBeTruthy();
-  expect(screen.getByText(/characterProfile\.sheet\.abilityPick/)).toBeTruthy();
-  expect(screen.getByText(/Book or 50 GP/)).toBeTruthy();
-});

@@ -3,7 +3,7 @@ import { describe, expect, it } from "vitest";
 import { alert, featsById, refs, rogue, sorcerer } from "./fixtures";
 
 import type { ChoiceRefs } from "@/lib/utils/characters/choices/walk";
-import { picksAtStep, withStepPicks, withStepBackground, withStepSubclass, type WizardStep, wizardSteps } from "@/lib/utils/characters/choices/wizard";
+import { picksAtStep, withStepBackground, withStepPicks, withStepSubclass, type WizardStep, wizardSteps } from "@/lib/utils/characters/choices/wizard";
 import type { BackgroundData } from "@/types/backgrounds";
 import type { ChoicesState } from "@/types/choices";
 

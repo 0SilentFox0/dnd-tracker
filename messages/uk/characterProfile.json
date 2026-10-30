@@ -61,9 +61,7 @@
     "race": "Раса: {race}"
   },
   "feats": {
-    "title": "Риси й вибори",
-    "background": "Передісторія: {name}",
-    "equipmentNote": "Спорядження й гроші видає ДМ вручну."
+    "title": "Риси й вибори"
   },
   "sets": {
     "title": "СЕТИ",
@@ -254,6 +252,19 @@
     "pickSubclass": "Обрати підклас",
     "subclassOptions": "Які бувають",
     "subclassGain": "Рівень {level}: {names}",
-    "subclassDepends": "Залежить від підкласу"
+    "subclassDepends": "Залежить від підкласу",
+    "background": {
+      "title": "Передісторія: {name}",
+      "none": "Передісторію не обрано",
+      "pick": "Обрати",
+      "change": "Змінити",
+      "open": "Відкритих виборів: {count}",
+      "description": "Опис",
+      "skills": "Навички",
+      "tools": "Інструменти",
+      "originFeat": "Origin-риса",
+      "equipment": "Спорядження",
+      "equipmentNote": "Спорядження й гроші видає ДМ вручну."
+    }
   }
 }

@@ -8,7 +8,7 @@ import { ChargesList } from "./rest/ChargesList";
 import { ClassLevelUpDialog } from "./ClassLevelUpDialog";
 import { FeatsBlock } from "./FeatsBlock";
 import type { ClassLevelUpProps } from "./LevelUpAction";
-import { CharacterPath, ClassesHeader, ClassSection, SpellPicksNudge } from "./path";
+import { BackgroundSection, CharacterPath, ClassesHeader, ClassSection, SpellPicksNudge } from "./path";
 import { useProfile } from "./ProfileContext";
 import { RacePassive } from "./RacePassive";
 
@@ -38,6 +38,7 @@ export function SkillsTab({ manage = false, classLevelUp }: { manage?: boolean; 
   return (
     <>
       <SpellPicksNudge onPick={actions && (() => openChoices())} />
+      {sheet.classProgression && sheet.classProgression.length > 0 ? <BackgroundSection background={sheet.choices?.background} canEdit={!!sheet.choices?.canEdit} onOpen={openChoices} /> : null}
       {sheet.classProgression && sheet.classProgression.length > 0 ? <ClassesHeader progressions={sheet.classProgression} maxLevel={sheet.maxLevel} onAddClass={classLevelUp ? () => setAddingClass(true) : undefined} /> : null}
       {sheet.classProgression?.map((progression) => (
         <ClassSection key={progression.classId} progression={progression} defaultOpen={classSectionOpen(sheet.classProgression ?? [], progression)}>
