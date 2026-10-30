@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { acquaintanceMentionIds, hasRefPlaceholder, refPlaceholder, substituteRefs } from "@/lib/utils/scenario/ai-refs";
+import { acquaintanceMentionIds, addedMentionCount, hasRefPlaceholder, refPlaceholder, substituteRefs } from "@/lib/utils/scenario/ai-refs";
 import type { ScenarioAiOp } from "@/types/ai";
 import type { RichDoc } from "@/types/scenario";
 
@@ -36,5 +36,44 @@ describe("acquaintanceMentionIds", () => {
     const row = { id: "r", story: d("a"), notes: d("b") };
 
     expect(acquaintanceMentionIds([{ op: "insertRow", sectionId: "s", afterRowId: null, row }, { op: "addSection", afterSectionId: null, section: { id: "n", title: "N", played: false, rows: [{ id: "q", story: d("c"), notes: d() }] } }]).sort()).toEqual(["a", "b", "c"]);
+  });
+});
+
+describe("addedMentionCount", () => {
+  const text = (t: string) => ({ type: "text", text: t });
+
+  const chip = (label: string) => ({ type: "mention", attrs: { id: label, label, type: "acquaintance" } });
+
+  const d = (...nodes: unknown[]) => ({ type: "doc", content: [{ type: "paragraph", content: nodes }] }) as never;
+
+  it("counts chips when the text is unchanged", () => {
+    expect(addedMentionCount(d(text("Бі і Бі")), d(chip("Бі"), text(" і "), chip("Бі")))).toBe(2);
+  });
+
+  it("returns null when the text changed", () => {
+    expect(addedMentionCount(d(text("Бі")), d(chip("Бі"), text("!")))).toBeNull();
+  });
+
+  it("returns null for an identical doc", () => {
+    expect(addedMentionCount(d(chip("Бі")), d(chip("Бі")))).toBeNull();
+  });
+
+  it("returns null when a secret mark is lost while a chip is added", () => {
+    const secret = [{ type: "secret" }];
+
+    expect(addedMentionCount(d({ ...text("Бі"), marks: secret }), d(chip("Бі"), text("")))).toBeNull();
+    expect(addedMentionCount(d({ ...text("Бі й Ян"), marks: secret }), d(chip("Бі"), text(" й Ян")))).toBeNull();
+  });
+
+  it("returns null when an image is dropped while a chip is added", () => {
+    const image = { type: "image", attrs: { src: "x" } };
+
+    expect(addedMentionCount(d(text("Бі "), image), d(chip("Бі"), text(" ")))).toBeNull();
+  });
+
+  it("keeps marks equal across a chip-only change", () => {
+    const secret = [{ type: "secret" }];
+
+    expect(addedMentionCount(d({ ...text("Бі й Ян"), marks: secret }), d({ ...chip("Бі"), marks: secret }, { ...text(" й Ян"), marks: secret }))).toBe(1);
   });
 });

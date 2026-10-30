@@ -232,6 +232,12 @@ describe("resolveAiOps linkMentions", () => {
     expect(r).toMatchObject({ ok: false, error: { message: "assistant.scenarioOps.noMentions" } });
   });
 
+  it("a capitalised form does not link a lowercase occurrence", () => {
+    const c: ScenarioContent = { legend: [], sections: [{ id: "s1", title: "Бал", played: false, rows: [{ id: "r1", story: doc("беатріс танцює"), notes: doc("") }] }] };
+
+    expect(resolveAiOps(c, [create, link({ forms: ["Беатріс"] })])).toMatchObject({ ok: false, error: { message: "assistant.scenarioOps.noMentions" } });
+  });
+
   it("already linked occurrences are skipped, so a second pass is noMentions", () => {
     const c = withName();
 

@@ -1,9 +1,12 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import { prisma } from "@/lib/db";
+import { pageIdsMatching } from "@/lib/server/scenario/search";
+import { mentionPrefixes } from "@/lib/utils/scenario/mentions";
 
 vi.mock("@/lib/db", () => ({ prisma: { scenarioPage: { findMany: vi.fn(), findFirst: vi.fn() } } }));
 vi.mock("@/lib/server/scenario/search", () => ({
+  pageIdsMatching: vi.fn(async () => ["p1"]),
   searchScenarioPages: vi.fn(async () => [{ pageId: "p1", pageTitle: "Монастир", sectionId: "s1", snippet: "…дзвони…" }]),
 }));
 
@@ -111,5 +114,40 @@ describe("scenario read tools", () => {
     expect(out.total).toBe(1);
     expect(out.nextOffset).toBeNull();
     expect(out.hits[0]).toMatchObject({ pageId: "p1", rowId: "r1" });
+  });
+
+  it("find_scenario_mentions without pageId reads only prefiltered pages, in prefilter order", async () => {
+    const { findScenarioMentionsTool } = await import("@/lib/ai/tools/scenario-read");
+
+    vi.mocked(pageIdsMatching).mockResolvedValueOnce(["p2", "p1"]);
+    vi.mocked(prisma.scenarioPage.findMany).mockResolvedValue([
+      { id: "p1", title: "A", kind: "scene", content },
+      { id: "p2", title: "B", kind: "scene", content },
+    ] as never);
+
+    const out = (await findScenarioMentionsTool.handler(ctx, { query: "дзвони" })) as { hits: { pageId: string }[] };
+
+    expect(pageIdsMatching).toHaveBeenCalledWith("camp1", mentionPrefixes("дзвони"));
+    expect(vi.mocked(prisma.scenarioPage.findMany).mock.calls[0][0]).toMatchObject({ where: { id: { in: ["p2", "p1"] } } });
+    expect(out.hits.map((h) => h.pageId)).toEqual(["p2", "p1"]);
+  });
+
+  it("find_scenario_mentions with no candidate pages skips findMany", async () => {
+    const { findScenarioMentionsTool } = await import("@/lib/ai/tools/scenario-read");
+
+    vi.mocked(pageIdsMatching).mockResolvedValueOnce([]);
+
+    expect(await findScenarioMentionsTool.handler(ctx, { query: "дзвони" })).toEqual({ total: 0, offset: 0, nextOffset: null, forms: [], hits: [] });
+    expect(prisma.scenarioPage.findMany).not.toHaveBeenCalled();
+  });
+
+  it("find_scenario_mentions with pageId uses loadPageForAi without the SQL prefilter", async () => {
+    const { findScenarioMentionsTool } = await import("@/lib/ai/tools/scenario-read");
+
+    const out = (await findScenarioMentionsTool.handler(ctx, { query: "дзвони", pageId: "p1" })) as { total: number };
+
+    expect(out.total).toBe(1);
+    expect(pageIdsMatching).not.toHaveBeenCalled();
+    expect(prisma.scenarioPage.findMany).not.toHaveBeenCalled();
   });
 });

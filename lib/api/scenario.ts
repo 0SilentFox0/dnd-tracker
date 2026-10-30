@@ -1,7 +1,7 @@
 import { campaignGet, campaignPatch, campaignPost, campaignPut, createCampaignCrudApi } from "./client";
 
 import type {
-  CreateScenarioPageData, MentionOption, SaveScenarioContentData, ScenarioPage, ScenarioPageSummary, ScenarioSearchHit,
+  CreateScenarioPageData, MentionOption, SaveScenarioContentData, ScenarioIndex, ScenarioPage, ScenarioPageSummary, ScenarioSearchHit,
   ScenarioSection, ScenarioSectionPatch, ScenarioVersionSummary, UpdateScenarioMetaData,
 } from "@/types/scenario";
 
@@ -26,3 +26,5 @@ export const restoreScenarioVersion = (campaignId: string, pageId: string, versi
 export const searchScenario = (campaignId: string, q: string) => campaignGet<ScenarioSearchHit[]>(campaignId, `/scenario/search?q=${encodeURIComponent(q)}`, { cache: "no-store" });
 
 export const searchMentions = (campaignId: string, q: string) => campaignGet<MentionOption[]>(campaignId, `/scenario/mentions?q=${encodeURIComponent(q)}`);
+
+export const getScenarioIndex = (campaignId: string) => campaignGet<ScenarioIndex>(campaignId, "/scenario/index", { cache: "no-store" });

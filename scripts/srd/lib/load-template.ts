@@ -16,15 +16,17 @@ export const SRD_TEMPLATE_DESCRIPTION = "System Reference Document 5.2 (CC-BY-4.
 export interface TemplateStore {
   findTemplate(): Promise<{ id: string; dmUserId: string } | null>;
   findOfficialOwner(): Promise<string | null>;
-  create(input: { userId: string; rules: Ruleset; credits: string }): Promise<{ id: string; dmUserId: string }>;
+  create(input: { userId: string; rules: Ruleset; credits: string; description: string }): Promise<{ id: string; dmUserId: string }>;
   update(id: string, data: { rules: Ruleset; credits: string; description: string }): Promise<void>;
 }
 
-export async function ensureSrdTemplate(store: TemplateStore, opts: { owner?: string; rules: Ruleset; credits: string }): Promise<{ id: string; dmUserId: string; created: boolean }> {
+export async function ensureSrdTemplate(store: TemplateStore, opts: { owner?: string; rules: Ruleset; credits: string; description?: string }): Promise<{ id: string; dmUserId: string; created: boolean }> {
+  const description = opts.description ?? SRD_TEMPLATE_DESCRIPTION;
+
   const existing = await store.findTemplate();
 
   if (existing) {
-    await store.update(existing.id, { rules: opts.rules, credits: opts.credits, description: SRD_TEMPLATE_DESCRIPTION });
+    await store.update(existing.id, { rules: opts.rules, credits: opts.credits, description });
 
     return { ...existing, created: false };
   }
@@ -33,7 +35,7 @@ export async function ensureSrdTemplate(store: TemplateStore, opts: { owner?: st
 
   if (!userId) throw new Error("Немає власника шаблону: передайте --owner <userId> (офіційних шаблонів ще немає)");
 
-  return { ...(await store.create({ userId, rules: opts.rules, credits: opts.credits })), created: true };
+  return { ...(await store.create({ userId, rules: opts.rules, credits: opts.credits, description })), created: true };
 }
 
 export type RunImport = (kind: SrdKind, rows: Record<string, unknown>[]) => Promise<ImportReport>;

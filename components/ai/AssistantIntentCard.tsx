@@ -1,10 +1,13 @@
 "use client";
 import { useFormatter, useTranslations } from "next-intl";
 
+import { ScenarioOpList } from "./ScenarioOpList";
+
 import { PagerNav } from "@/components/common/PagerNav";
 import { Button } from "@/components/ui/button";
 import { ASSISTANT_PAGE_SIZES } from "@/lib/constants/ai";
 import { useExpiry, usePager } from "@/lib/hooks/common";
+import type { ScenarioAiOp } from "@/types/ai";
 import type { AssistantReviewReceipt, IntentDetail } from "@/types/assistant";
 
 interface IntentCardProps {
@@ -14,11 +17,14 @@ interface IntentCardProps {
   onRefine: () => void;
   busy?: boolean;
   receipt?: AssistantReviewReceipt;
+  campaignId: string;
 }
 
 const json = (value: unknown) => JSON.stringify(value, null, 2);
 
-function ChangeDiff({ change }: { change: IntentDetail["preview"]["changes"][number] }) {
+type Change = IntentDetail["preview"]["changes"][number];
+
+function ChangeDiff({ change }: { change: Change }) {
   const t = useTranslations("ai");
 
   return (
@@ -53,7 +59,7 @@ function ReceiptView({ receipt }: { receipt: AssistantReviewReceipt }) {
   );
 }
 
-export function AssistantIntentCard({ intent, onConfirm, onReject, onRefine, busy = false, receipt }: IntentCardProps) {
+export function AssistantIntentCard({ intent, onConfirm, onReject, onRefine, busy = false, receipt, campaignId }: IntentCardProps) {
   const t = useTranslations("ai");
 
   const format = useFormatter();
@@ -64,7 +70,11 @@ export function AssistantIntentCard({ intent, onConfirm, onReject, onRefine, bus
 
   const changes = intent.preview.changes;
 
-  const pager = usePager(changes, ASSISTANT_PAGE_SIZES.changes);
+  const isOps = (change: Change) => intent.actionId === "scenario.propose-edit" && change.path === "ops" && Array.isArray(change.after);
+
+  const generic = changes.filter((c) => !isOps(c));
+
+  const pager = usePager(generic, ASSISTANT_PAGE_SIZES.changes);
 
   return (
     <section role="region" aria-label={intent.summary} className="min-w-0 space-y-3 rounded-lg border bg-card p-3 text-card-foreground">
@@ -98,7 +108,10 @@ export function AssistantIntentCard({ intent, onConfirm, onReject, onRefine, bus
           </ul>
         </div>
       ))}
-      <p>{t("intent.fullPreview", { count: changes.length, page: pager.page + 1, pages: pager.pageCount })}</p>
+      {changes.filter(isOps).map((change, i) => (
+        <ScenarioOpList key={i} ops={change.after as unknown as ScenarioAiOp[]} campaignId={campaignId} />
+      ))}
+      {generic.length > 0 && <p>{t("intent.fullPreview", { count: generic.length, page: pager.page + 1, pages: pager.pageCount })}</p>}
       {pager.pageItems.map((change, i) => (
         <ChangeDiff key={i} change={change} />
       ))}

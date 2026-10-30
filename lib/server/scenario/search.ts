@@ -39,3 +39,16 @@ export async function searchScenarioPages(campaignId: string, q: string): Promis
     return snippet ? [{ pageId: r.id, pageTitle: r.title, sectionId: r.sectionId, snippet }] : [];
   });
 }
+
+// pages whose searchText contains every prefix, so only candidate pages are read in full
+export async function pageIdsMatching(campaignId: string, prefixes: string[]): Promise<string[]> {
+  if (!prefixes.length) return [];
+
+  const rows = await prisma.$queryRaw<{ id: string }[]>`
+    SELECT id FROM scenario_pages
+    WHERE "campaignId" = ${campaignId}
+      AND NOT EXISTS (SELECT 1 FROM unnest(${prefixes}::text[]) p WHERE strpos(lower("searchText"), p) = 0)
+    ORDER BY "sortOrder" ASC, title ASC`;
+
+  return rows.map((r) => r.id);
+}

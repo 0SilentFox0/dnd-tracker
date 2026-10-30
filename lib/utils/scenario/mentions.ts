@@ -23,14 +23,56 @@ export function wordStem(word: string): string {
   return stem;
 }
 
+const POSSESSIVE = /(?:['’]s|['’])$/iu;
+
+const GZ = "[\\u0433\\u0437]";
+
+const KC = "[\\u043a\\u0446]";
+
+const XS = "[\\u0445\\u0441]";
+
+const ALTERNATION: [RegExp, string][] = [[/[гз]$/iu, GZ], [/[кц]$/iu, KC], [/[хс]$/iu, XS]];
+
+function queryTokens(query: string): string[] {
+  return query
+    .normalize("NFC")
+    .split(/\s+/u)
+    .map((t) => t.replace(POSSESSIVE, ""))
+    .filter(Boolean);
+}
+
+type TokenParts = { head: string; alt: string; literal: boolean };
+
+// the last stem letter alternates (г/з, к/ц, х/с) only when a case ending was actually dropped
+function tokenParts(token: string): TokenParts {
+  if (Array.from(token).length < MIN_STEM) return { head: token, alt: "", literal: true };
+
+  const stem = wordStem(token);
+
+  const last = Array.from(stem).pop() ?? "";
+
+  const alt = stem !== token ? ALTERNATION.find(([re]) => re.test(last))?.[1] : undefined;
+
+  return alt ? { head: Array.from(stem).slice(0, -1).join(""), alt, literal: false } : { head: stem, alt: "", literal: false };
+}
+
 export function buildMentionPattern(query: string): RegExp | null {
-  const tokens = query.trim().split(/\s+/u).filter(Boolean);
+  const tokens = queryTokens(query);
 
   if (!tokens.length) return null;
 
-  const parts = tokens.map((t) => (Array.from(t).length >= MIN_STEM ? `${escapeRe(wordStem(t))}\\p{L}{0,${MAX_ENDING}}` : escapeRe(t)));
+  const parts = tokens.map((t) => {
+    const { head, alt, literal } = tokenParts(t);
+
+    return literal ? escapeRe(head) : `${escapeRe(head)}${alt}\\p{L}{0,${MAX_ENDING}}`;
+  });
 
   return new RegExp(`(?<![\\p{L}\\p{N}_])(?:${parts.join("[\\s\\u00a0]+")})(?![\\p{L}\\p{N}_])`, "giu");
+}
+
+// lowercase literal prefix of each token; every match of buildMentionPattern contains all of them
+export function mentionPrefixes(query: string): string[] {
+  return queryTokens(query).map((t) => tokenParts(t).head.toLowerCase());
 }
 
 type Block = { text: string; mentionRanges: [number, number][] };
@@ -51,10 +93,10 @@ function collectBlocks(nodes: RichNode[], out: Block[]) {
     const mentionRanges: [number, number][] = [];
 
     for (const k of kids) {
-      if (k.type === "text") text += k.text ?? "";
+      if (k.type === "text") text += (k.text ?? "").normalize("NFC");
       else if (k.type === "hardBreak") text += "\n";
       else if (k.type === "mention") {
-        const label = String(k.attrs?.label ?? "");
+        const label = String(k.attrs?.label ?? "").normalize("NFC");
 
         mentionRanges.push([text.length, text.length + label.length]);
         text += label;

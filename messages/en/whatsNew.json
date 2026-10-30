@@ -3,6 +3,10 @@
     "title": "Spell ingredients",
     "body": "Spells can require material components: costly ones (with a gp value) or consumed ones. Battles check them on the hero and spend them on cast, and a shortage can be paid from the purse. The DM sets components in the spell form and turns the rule on in Rules; the cast dialog shows what is required and what is missing."
   },
+  "2026-10-30-empty-5e": {
+    "title": "Empty D&D 5e campaign",
+    "body": "In the new campaign wizard the \"5e (empty)\" template is selected by default: D&D 5e rules (classes with levels, saving throws, d20 initiative) with no ready-made content. You add classes, races, spells and monsters yourself. \"No template\" remains for campaigns with their own rules."
+  },
   "2026-10-30-ability-recipes": {
     "title": "Recipes and collapsible sections",
     "body": "Adding an ability or a spell effect now starts from a gallery of recipes: pick a ready-made effect (damage, healing, buff, condition and more), set its parameters and see a preview. Sections of the ability editor collapse and show a short summary, and so does the Effects section of the spell form."

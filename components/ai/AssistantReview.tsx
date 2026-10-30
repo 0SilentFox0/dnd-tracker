@@ -131,6 +131,7 @@ export function AssistantReview({ campaignId, initialIntentId }: { campaignId: s
           <AssistantIntentCard
             key={detail.id}
             intent={detail}
+            campaignId={campaignId}
             receipt={queue.receipt.data}
             busy={queue.busy}
             onConfirm={() => void run(() => queue.confirm(detail.id))}

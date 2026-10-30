@@ -1,37 +1,20 @@
 #!/usr/bin/env tsx
 // pnpm constructor:srd-template [--owner <userId>] [--allow-remote]
-import type { Prisma } from "@prisma/client";
-
 import { readIcons } from "../assets/tokens-5e/icons-file";
 import { assertSeedTarget } from "../seed/seed-library-lib";
 import { SRD_CREDITS } from "./lib/credits";
 import { readSrdData } from "./lib/data-files";
-import { ensureSrdTemplate, formatImportSummary, hasRowErrors, importSrdData, resolveSchoolRefs, SRD_TEMPLATE_DESCRIPTION, SRD_TEMPLATE_NAME, staleSpellColumns, type TemplateStore, withIcons } from "./lib/load-template";
+import { ensureSrdTemplate, formatImportSummary, hasRowErrors, importSrdData, resolveSchoolRefs, SRD_TEMPLATE_NAME, staleSpellColumns, withIcons } from "./lib/load-template";
 import { SRD_RULES } from "./lib/rules-preset";
+import { makeTemplateStore } from "./lib/template-store";
 
 import { REFERENCE_REVALIDATE_SECONDS } from "@/lib/cache/reference-data";
-import { CampaignKind, CampaignVisibility } from "@/lib/constants/campaigns";
 import { prisma } from "@/lib/db";
 import { getTranslator } from "@/lib/i18n/translator";
-import { createCampaignFromBundle } from "@/lib/server/campaigns/create-campaign";
 import { importContent, OFFLINE_IMPORT_DEPS } from "@/lib/server/content/import/import-content";
-import { emptyBundle } from "@/lib/server/templates/bundle";
 import type { Actor } from "@/lib/utils/api/actor";
 
-const official = { kind: CampaignKind.TEMPLATE, visibility: CampaignVisibility.OFFICIAL };
-
-const store: TemplateStore = {
-  findTemplate: () => prisma.campaign.findFirst({ where: { name: SRD_TEMPLATE_NAME, ...official }, select: { id: true, dmUserId: true } }),
-  findOfficialOwner: async () => (await prisma.campaign.findFirst({ where: official, orderBy: { createdAt: "asc" }, select: { dmUserId: true } }))?.dmUserId ?? null,
-  create: async ({ userId, rules, credits }) => {
-    const { campaign } = await createCampaignFromBundle({ userId, name: SRD_TEMPLATE_NAME, description: SRD_TEMPLATE_DESCRIPTION, bundle: { ...emptyBundle(), rules, credits }, ...official });
-
-    return { id: campaign.id, dmUserId: campaign.dmUserId };
-  },
-  update: async (id, { rules, credits, description }) => {
-    await prisma.campaign.update({ where: { id }, data: { rules: rules as Prisma.InputJsonObject, credits, description } });
-  },
-};
+const store = makeTemplateStore(SRD_TEMPLATE_NAME);
 
 async function main() {
   const args = process.argv.slice(2);

@@ -33,7 +33,7 @@ export const SCENARIO_EDIT_ACTION: AssistantWriteAction = {
 
     const target = { domain: "scenario", id: input.pageId, name: page.title };
 
-    return { summary: input.summary, targets: [target], changes: [{ target, path: "ops", before: jsonContent(state.page), after: jsonContent(resolved.ops) }], warnings: [], preconditions: { fingerprint: scenarioFingerprint(state) }, effects: [{ kind: "update", targets: [target], description: input.summary }] };
+    return { summary: input.summary, targets: [target], changes: [{ target, path: "ops", before: null, after: jsonContent(resolved.ops) }], warnings: [], preconditions: { fingerprint: scenarioFingerprint(state) }, effects: [{ kind: "update", targets: [target], description: input.summary }] };
   }),
   execute: async (ctx, raw) => {
     const input = proposeScenarioEditSchema.parse(raw);
