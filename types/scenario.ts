@@ -1,4 +1,5 @@
 import type { CALLOUT_KINDS, LEGEND_KINDS, MARK_TYPES, MENTION_TYPES, NODE_TYPES, PAGE_KINDS, PAGE_STATUSES, SECTION_ICON_KEYS } from "@/lib/constants/scenario";
+import type { PageSummary } from "@/lib/schemas/scenario-summary";
 
 export type ScenarioPageKind = (typeof PAGE_KINDS)[number];
 export type ScenarioPageStatus = (typeof PAGE_STATUSES)[number];
@@ -161,6 +162,7 @@ export interface IndexEntityNode {
   degree: number;
   sceneIds: string[];
   missing: boolean;
+  image?: string | null;
 }
 
 export interface IndexSceneNode {
@@ -187,4 +189,24 @@ export interface ScenarioIndex {
   entities: IndexEntityNode[];
   edges: IndexEdge[];
   counts: { scenes: number; entities: number; edges: number; byType: Partial<Record<MentionType, number>>; missing: number };
+}
+
+export interface ScenarioSummaryEntry {
+  summary: PageSummary;
+  version: number;
+  stale: boolean;
+  model: string;
+  createdAt: string;
+}
+
+export interface ScenarioSummaries {
+  available: boolean;
+  summaries: Record<string, ScenarioSummaryEntry>;
+}
+
+export interface GeneratedSummary {
+  summary: PageSummary;
+  version: number;
+  stale: false;
+  truncated: boolean;
 }

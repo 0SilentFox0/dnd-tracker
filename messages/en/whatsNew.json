@@ -3,6 +3,10 @@
     "title": "Time zone in your profile",
     "body": "Language and time settings now let you pick a time zone: dates and times are shown in it on any device. By default it follows your browser's zone."
   },
+  "2026-10-30-scenario-summaries": {
+    "title": "Scene summaries",
+    "body": "A summary now appears on the scene page and in the graph panel: an overview, key events and a hidden layer for the DM. The AI writes it with your key, only when you press the button; a summary is generated once per page version, Refresh on an up-to-date summary regenerates it and uses tokens, and after an edit an \"Outdated\" badge appears."
+  },
   "2026-10-30-srd-completeness": {
     "title": "More complete SRD 5.2 template",
     "body": "SRD 5.2 spells now carry material components with gp cost and consumption, and the ingredients rule is on. 29 rituals are flagged (the Ritual flag is also in the spell form; casting without a slot out of combat is not automated yet). Added species senses, Barbarian Frenzy, Circle of the Land Spells and Magic Initiate (Druid). Update your campaign from the template to get the changes."
@@ -160,5 +164,9 @@
   "2026-10-20-ai": {
     "title": "AI assistant",
     "body": "Connect your own Claude, OpenAI or Gemini key - the assistant suggests scenario edits and helps during play."
+  },
+  "2026-10-30-scenario-graph": {
+    "title": "Scenario graph",
+    "body": "The \"Graph\" section shows how scenario pages, units, artifacts, spells and heroes are connected by mentions. Click a node to see its connections and jump to the source; type filters keep a large plot readable."
   }
 }

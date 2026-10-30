@@ -48,6 +48,8 @@ export const DM_ARTICLES: HelpArticleDef[] = [
       { blocks: [{ kind: "p" }] },
       { blocks: [{ kind: "p" }] },
       { blocks: [{ kind: "p" }, { kind: "list", count: 3 }] },
+      { blocks: [{ kind: "p" }, { kind: "list", count: 3 }] },
+      { blocks: [{ kind: "p" }, { kind: "list", count: 3 }] },
     ],
   },
   {

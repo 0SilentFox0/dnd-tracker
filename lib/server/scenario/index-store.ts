@@ -9,7 +9,7 @@ import type { MentionType, PageFacts, ScenarioIndex } from "@/types/scenario";
 
 const BATCH = 20;
 
-type NameRow = { id: string; name: string };
+type NameRow = { id: string; name: string; image?: string | null };
 
 export async function upsertPageFacts(pageId: string, campaignId: string, version: number, facts: PageFacts) {
   // older builds must not overwrite newer facts; the page may be deleted mid-build, so insert only while it exists
@@ -53,7 +53,7 @@ async function loadFacts(campaignId: string, pages: { id: string; version: numbe
   return facts;
 }
 
-async function resolveEntities(campaignId: string, facts: Map<string, PageFacts>): Promise<Map<string, { label: string }>> {
+async function resolveEntities(campaignId: string, facts: Map<string, PageFacts>): Promise<Map<string, { label: string; image: string | null }>> {
   const ids = new Map<MentionType, Set<string>>();
 
   for (const page of facts.values()) {
@@ -69,17 +69,17 @@ async function resolveEntities(campaignId: string, facts: Map<string, PageFacts>
 
     switch (type) {
       case "unit":
-        return prisma.unit.findMany({ where, select });
+        return prisma.unit.findMany({ where, select: { ...select, avatar: true } }).then((rows) => rows.map((r) => ({ id: r.id, name: r.name, image: r.avatar })));
       case "artifact":
-        return prisma.artifact.findMany({ where, select });
+        return prisma.artifact.findMany({ where, select: { ...select, icon: true } }).then((rows) => rows.map((r) => ({ id: r.id, name: r.name, image: r.icon })));
       case "character":
-        return prisma.character.findMany({ where: { ...where, ...ACTIVE_CHARACTER }, select });
+        return prisma.character.findMany({ where: { ...where, ...ACTIVE_CHARACTER }, select: { ...select, avatar: true } }).then((rows) => rows.map((r) => ({ id: r.id, name: r.name, image: r.avatar })));
       case "spell":
-        return prisma.spell.findMany({ where, select });
+        return prisma.spell.findMany({ where, select: { ...select, icon: true } }).then((rows) => rows.map((r) => ({ id: r.id, name: r.name, image: r.icon })));
       case "battle":
         return prisma.battleScene.findMany({ where, select });
       case "acquaintance":
-        return prisma.acquaintance.findMany({ where, select });
+        return prisma.acquaintance.findMany({ where, select: { ...select, avatarUrl: true } }).then((rows) => rows.map((r) => ({ id: r.id, name: r.name, image: r.avatarUrl })));
       case "marker":
         return prisma.worldMarker.findMany({ where: { id: where.id, map: { campaignId } }, select });
     }
@@ -89,9 +89,9 @@ async function resolveEntities(campaignId: string, facts: Map<string, PageFacts>
 
   const groups = await Promise.all(types.map(find));
 
-  const resolved = new Map<string, { label: string }>();
+  const resolved = new Map<string, { label: string; image: string | null }>();
 
-  groups.forEach((rows, i) => rows.forEach((row) => resolved.set(entityKey(types[i], row.id), { label: row.name })));
+  groups.forEach((rows, i) => rows.forEach((row) => resolved.set(entityKey(types[i], row.id), { label: row.name, image: row.image ?? null })));
 
   return resolved;
 }

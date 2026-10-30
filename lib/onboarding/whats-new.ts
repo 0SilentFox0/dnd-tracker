@@ -5,8 +5,10 @@ export const WHATS_NEW_BUNDLED = 15;
 
 export const WHATS_NEW: WhatsNewEntry[] = [
   { id: "2026-10-30-time-zone", date: "2026-10-30", audience: "all", href: "/settings/preferences" },
+  { id: "2026-10-30-scenario-summaries", date: "2026-10-30", audience: "dm", href: "/help/dm-scenario-show" },
   { id: "2026-10-30-srd-completeness", date: "2026-10-30", audience: "dm" },
   { id: "2026-10-30-spell-ingredients", date: "2026-10-30", audience: "all" },
+  { id: "2026-10-30-scenario-graph", date: "2026-10-30", audience: "dm", href: "/help/dm-scenario-show" },
   { id: "2026-10-30-empty-5e", date: "2026-10-30", audience: "dm" },
   { id: "2026-10-30-ability-recipes", date: "2026-10-30", audience: "dm" },
   { id: "2026-10-30-ai-reading", date: "2026-10-30", audience: "dm", href: "/settings/ai" },

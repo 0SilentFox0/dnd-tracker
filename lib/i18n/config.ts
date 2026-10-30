@@ -12,7 +12,7 @@ export const LOCALE_CHANGE_EVENT = "locale-change";
 
 export const APP_TIME_ZONE = "UTC";
 
-export const NAMESPACES = ["common", "validation", "errors", "auth", "landing", "onboarding", "whatsNew", "help", "races", "skills", "classes", "feats", "backgrounds", "artifacts", "music", "choices", "campaigns", "dashboard", "characters", "characterProfile", "inventory", "rest", "spells", "spellEditor", "editors", "units", "abilities", "abilityRegistry", "rules", "skillTree", "scenario", "show", "acquaintances", "world", "ai", "compendium", "contentImport", "gameTerms", "assistant", "compendiumReport", "abilityText", "battleTerms", "battleCommon", "battle", "battleWizards", "battleDm", "battleSetup", "battleLog", "battleActions"] as const;
+export const NAMESPACES = ["common", "validation", "errors", "auth", "landing", "onboarding", "whatsNew", "help", "races", "skills", "classes", "feats", "backgrounds", "artifacts", "music", "choices", "campaigns", "dashboard", "characters", "characterProfile", "inventory", "rest", "spells", "spellEditor", "editors", "units", "abilities", "abilityRegistry", "rules", "skillTree", "scenario", "scenarioGraph", "show", "acquaintances", "world", "ai", "compendium", "contentImport", "gameTerms", "assistant", "compendiumReport", "abilityText", "battleTerms", "battleCommon", "battle", "battleWizards", "battleDm", "battleSetup", "battleLog", "battleActions"] as const;
 
 export const SERVER_NAMESPACES = ["errors", "assistant", "compendiumReport"] as const satisfies readonly (typeof NAMESPACES)[number][];
 

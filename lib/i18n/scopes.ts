@@ -29,6 +29,7 @@ export const CAMPAIGN_NAMESPACES = [
   "rules",
   "skillTree",
   "scenario",
+  "scenarioGraph",
   "show",
   "acquaintances",
   "world",

@@ -5,7 +5,7 @@ export const entityKey = (type: MentionType, id: string) => `${type}:${id}`;
 interface BuildInput {
   pages: ScenarioPageSummary[];
   facts: Map<string, PageFacts>;
-  resolved: Map<string, { label: string }>;
+  resolved: Map<string, { label: string; image?: string | null }>;
 }
 
 interface EntityAcc {
@@ -73,7 +73,7 @@ export function buildScenarioIndex({ pages, facts, resolved }: BuildInput): Scen
     .map(([key, entity]) => {
       const live = resolved.get(key);
 
-      return { kind: "entity" as const, type: entity.type, id: entity.id, label: live?.label ?? entity.label, degree: entity.sceneIds.length, sceneIds: entity.sceneIds, missing: !live };
+      return { kind: "entity" as const, type: entity.type, id: entity.id, label: live?.label ?? entity.label, degree: entity.sceneIds.length, sceneIds: entity.sceneIds, missing: !live, image: live?.image ?? null };
     })
     .sort((a, b) => b.degree - a.degree || a.label.localeCompare(b.label) || a.id.localeCompare(b.id));
 

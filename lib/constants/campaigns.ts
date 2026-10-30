@@ -1,4 +1,4 @@
-import { Award, BookOpen, Bot, Cpu, Gem, GitBranch, GraduationCap, Images, type LucideIcon, Music, Scale, ScrollText, Shield, Skull, Sparkles, Swords, Users, Wand2 } from "lucide-react";
+import { Award, BookOpen, Bot, Cpu, Gem, GitBranch, GraduationCap, Images, type LucideIcon, Music, Network, Scale, ScrollText, Shield, Skull, Sparkles, Swords, Users, Wand2 } from "lucide-react";
 
 export const CampaignRole = { DM: "dm", PLAYER: "player" } as const;
 
@@ -33,6 +33,7 @@ export interface DmSection {
 
 export const DM_SECTIONS: readonly DmSection[] = [
   { path: "scenario", icon: ScrollText, templateVisible: false, tile: "all" },
+  { path: "graph", icon: Network, templateVisible: false, tile: "all" },
   { path: "characters", icon: Users, templateVisible: false, tile: "all" },
   { path: "units", icon: Skull, templateVisible: true, tile: "all" },
   { path: "spells", icon: Sparkles, templateVisible: true, tile: "all" },

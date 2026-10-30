@@ -11,6 +11,11 @@
       "subtitle": "Scenes, GM notes and hero biographies",
       "keywords": "plot, notes, manuscript"
     },
+    "graph": {
+      "title": "Graph",
+      "subtitle": "Scenario links between pages, units, artifacts and heroes",
+      "keywords": "graph, links, mentions, map, web"
+    },
     "characters": {
       "title": "Characters",
       "subtitle": "Manage player characters",

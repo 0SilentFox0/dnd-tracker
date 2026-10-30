@@ -199,6 +199,7 @@
   "aiModelForbidden": "Your key has no access to this model — pick another model or check the provider plan",
   "aiKeyUnreadable": "The saved key cannot be read (the server secret changed) — save the key again in \"AI keys\"",
   "aiKeyMissing": "Add this provider's key in \"Settings → AI\"",
+  "aiSummaryEmpty": "The page is empty: nothing to summarize",
   "aiRateLimit": "Provider limit reached, try again in a minute",
   "aiProviderDown": "Provider unavailable, try again later",
   "aiModelUnknown": "Unknown model for this provider",

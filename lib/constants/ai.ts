@@ -74,6 +74,7 @@ export const AI_RATE_LIMITS = {
   chat: { limit: 20, windowSeconds: 60 },
   credentials: { limit: 10, windowSeconds: 60 },
   mcp: { limit: 120, windowSeconds: 60 },
+  summary: { limit: 10, windowSeconds: 600 },
 } as const;
 
 export const AI_LIMITS = {
@@ -88,11 +89,15 @@ export const AI_LIMITS = {
   toolResultJsonChars: 20_000,
   keptReadingChars: 60_000,
   contextChars: 40_000,
+  digestChars: 4000,
+  digestLeadChars: 90,
+  digestEntities: 12,
   maxSteps: 8,
   battleEvents: 10,
   searchHits: 20,
   threadTitleChars: 80,
   instructionsChars: 8000,
+  summaryInputChars: 30_000,
 } as const;
 
 export const AI_SCENARIO_READ_TOOLS = ["read_scenario_page", "outline_scenario_page", "find_scenario_mentions"] as const;

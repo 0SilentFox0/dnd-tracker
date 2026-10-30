@@ -82,7 +82,7 @@ describe.skipIf(!localDb)("loadScenarioIndex", () => {
 
     const byId = Object.fromEntries(index.entities.map((e) => [e.id, e]));
 
-    expect(byId[live.id]).toMatchObject({ label: "Live Npc", missing: false });
+    expect(byId[live.id]).toMatchObject({ label: "Live Npc", missing: false, image: null });
     expect(byId[gone.id]).toMatchObject({ label: "Old Label", missing: true });
   });
 

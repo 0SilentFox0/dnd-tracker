@@ -10,7 +10,7 @@ import { LANDING_PATHS } from "@/lib/constants/site";
 import type { Translator } from "@/lib/i18n/translator";
 import { useTranslator } from "@/lib/i18n/use-translator";
 
-const SEGMENT_KEYS = ["campaigns", "dm", "character", "inventory", "new", "edit", "sets", "groups", "main-skills", "info", "print", "world", "show", "scenario"] as const;
+const SEGMENT_KEYS = ["campaigns", "dm", "character", "inventory", "new", "edit", "sets", "groups", "main-skills", "info", "print", "world", "show", "scenario", "graph"] as const;
 
 const ID_KEYS = ["campaigns", "battles", "characters", "units", "spells", "artifacts", "sets"] as const;
 

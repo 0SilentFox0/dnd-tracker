@@ -18,6 +18,16 @@ export function buildSearchText(title: string, content: ScenarioContent): string
   return [oneLine(title), ...lines].join("\n").normalize("NFC");
 }
 
+export function sectionLead(line: string, title: string, max: number): string {
+  const t = oneLine(title).normalize("NFC");
+
+  const body = (line.startsWith(t) ? line.slice(t.length) : line).trim();
+
+  const chars = Array.from(body);
+
+  return chars.length > max ? `${chars.slice(0, max).join("").trimEnd()}…` : body;
+}
+
 export type SearchWindow = { win: string; at: number; cutBefore: boolean; needleLength: number };
 
 // `win` is a slice of one section line cut in SQL: `at` is the match offset inside it

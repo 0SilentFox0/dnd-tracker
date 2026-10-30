@@ -1,5 +1,5 @@
 import type { LucideIcon } from "lucide-react";
-import { Award, BookOpen, Contact, Gem, GitBranch, GraduationCap, Images, Map as MapIcon, Music, Scale, ScrollText, Shield, Skull, Sparkles, Swords, User, Users, Wand2 } from "lucide-react";
+import { Award, BookOpen, Contact, Gem, GitBranch, GraduationCap, Images, Map as MapIcon, Music, Network, Scale, ScrollText, Shield, Skull, Sparkles, Swords, User, Users, Wand2 } from "lucide-react";
 
 import { dmTilesFor } from "@/lib/constants/campaigns";
 
@@ -20,6 +20,7 @@ const acquaintances = (id: string) => `/campaigns/${id}/acquaintances`;
 
 export const DM_DASHBOARD_SECTIONS: DashboardSection[] = [
   { key: "scenario", href: dm("scenario"), icon: ScrollText, group: "game" },
+  { key: "graph", href: dm("graph"), icon: Network, group: "game" },
   { key: "battles", href: dm("battles"), icon: Swords, group: "game" },
   { key: "show", href: dm("show"), icon: Images, group: "game" },
   { key: "music", href: dm("music"), icon: Music, group: "game" },

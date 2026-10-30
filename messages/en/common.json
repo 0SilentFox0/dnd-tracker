@@ -129,7 +129,8 @@
       "print": "Print",
       "world": "World map",
       "show": "Show",
-      "scenario": "Scenario"
+      "scenario": "Scenario",
+      "graph": "Graph"
     },
     "ids": {
       "campaigns": "Campaign",
@@ -171,6 +172,7 @@
   },
   "dmSections": {
     "scenario": "Scenario",
+    "graph": "Graph",
     "characters": "Characters",
     "units": "Units",
     "spells": "Spells",
@@ -192,6 +194,7 @@
   },
   "dmMenu": {
     "scenario": "Scenario",
+    "graph": "Graph",
     "characters": "Characters",
     "units": "NPC Units",
     "spells": "Spells",
