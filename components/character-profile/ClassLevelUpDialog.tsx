@@ -77,7 +77,8 @@ export function ClassLevelUpDialog({ open, onOpenChange, character, onLeveled, s
             </label>
           )}
         </fieldset>
-        {choice === NEW_CLASS && (
+        {startNew && available.length === 0 && <p className="text-sm text-hud-muted">{t("noFreeClasses")}</p>}
+        {choice === NEW_CLASS && available.length > 0 && (
           <SelectField
             aria-label={t("newClass")}
             value={selection.newClassId}

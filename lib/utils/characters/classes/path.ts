@@ -84,7 +84,7 @@ export function pathSummary(progression: ClassProgression): { level: number | nu
   return { level, open };
 }
 
-export const classLevels = (list: readonly ClassProgression[]): { classId: string; className: string; level: number }[] =>
-  list.map((p) => ({ classId: p.classId, className: p.className, level: pathSummary(p).level ?? 0 }));
+export const classLevels = (list: readonly ClassProgression[]): { className: string; level: number }[] =>
+  list.map((p) => ({ className: p.className, level: pathSummary(p).level ?? 0 }));
 
 export const classSectionOpen = (list: readonly ClassProgression[], progression: ClassProgression): boolean => list.length <= 2 || pathSummary(progression).open > 0;

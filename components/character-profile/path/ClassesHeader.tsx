@@ -2,9 +2,8 @@
 
 import { useTranslations } from "next-intl";
 
-import { PATH_HEADER_CLASS } from "./header";
-
 import { HudPill } from "@/components/hud/page";
+import { PATH_HEADER_CLASS } from "@/components/hud/page/pathHeader";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { classLevels, pathSummary } from "@/lib/utils/characters/classes/path";

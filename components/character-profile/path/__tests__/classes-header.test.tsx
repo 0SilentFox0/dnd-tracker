@@ -60,6 +60,23 @@ describe("ClassSection", () => {
     expect(screen.getByText('characterProfile.path.sectionLevel {"level":4}')).toBeTruthy();
     rerender(<ClassSection progression={two[0]} defaultOpen={false}>x</ClassSection>);
 
-    expect(container.querySelector("details")?.open).toBe(false);
+    expect(container.querySelector("details")?.open).toBe(true);
+  });
+
+  it("starts closed, opens when defaultOpen turns on, and keeps the user's own toggle", () => {
+    const { container, rerender } = render(<ClassSection progression={two[0]} defaultOpen={false}>x</ClassSection>);
+
+    const details = container.querySelector("details") as HTMLDetailsElement;
+
+    expect(details.open).toBe(false);
+    rerender(<ClassSection progression={two[0]} defaultOpen>x</ClassSection>);
+
+    expect(details.open).toBe(true);
+
+    details.open = false;
+    fireEvent(details, new Event("toggle"));
+    rerender(<ClassSection progression={two[0]} defaultOpen>x</ClassSection>);
+
+    expect(details.open).toBe(false);
   });
 });

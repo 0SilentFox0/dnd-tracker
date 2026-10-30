@@ -137,7 +137,8 @@
       "backgroundFeat": "Риса передісторії: {name}",
       "class": "Клас: {name}",
       "classLevel": "Клас: {name}, рівень {level}",
-      "feat": "Риса: {name}"
+      "feat": "Риса: {name}",
+      "backgroundNone": "Передісторія: не обрано"
     },
     "gives": {
       "abilityScore": "Підвищує характеристики",

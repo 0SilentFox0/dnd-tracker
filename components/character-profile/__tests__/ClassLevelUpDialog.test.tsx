@@ -123,6 +123,14 @@ describe("ClassLevelUpDialog", () => {
       expect(newClassSelect()).toBeTruthy();
     });
 
+    it("startNew with no free classes shows a message instead of an empty select", () => {
+      classes = [fighter];
+      renderDialog(5, {}, true, { startNew: true });
+
+      expect(screen.getByText("characterProfile.classLevelUp.noFreeClasses")).toBeTruthy();
+      expect(screen.queryByRole("combobox")).toBeNull();
+    });
+
     it("an unmet requirement disables the class option, a met one stays enabled", () => {
       renderDialog(5, {}, true, { startNew: true, scores: { strength: 13, intelligence: 10 } });
 

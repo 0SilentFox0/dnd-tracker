@@ -1,6 +1,6 @@
 import { useTranslations } from "next-intl";
 
-import { PATH_HEADER_CLASS } from "@/components/character-profile/path/header";
+import { PATH_HEADER_CLASS } from "@/components/hud/page/pathHeader";
 
 export function PointsHeader({ level, spent, free }: { level: number; spent: number; free: number }) {
   const t = useTranslations("skillTree.progression");

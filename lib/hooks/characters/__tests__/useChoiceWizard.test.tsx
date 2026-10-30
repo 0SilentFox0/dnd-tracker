@@ -54,6 +54,23 @@ describe("useChoiceWizard", () => {
     expect(result.current.step?.key).toBe("background");
   });
 
+  it("steps of a newly chosen background follow the background step", async () => {
+    const mk = (id: string, choiceId: string) => ({ id, name: id, icon: null, description: null, choices: [{ id: choiceId, label: choiceId, level: 1, count: 1, kind: "skill" as const }], skillProficiencies: [], toolProficiencies: [], originFeatId: null, equipmentText: null });
+
+    const r = { ...wrefs, backgroundsById: { a: mk("a", "sk-a"), b: mk("b", "sk-b") } };
+
+    const { result } = setup({ startAt: "background", refs: r });
+
+    await act(async () => {
+      result.current.state.set({ ...result.current.state.data, backgroundId: "b", backgroundChoices: {}, backgroundFeatPicks: {} });
+    });
+
+    const keys = result.current.steps.map((s) => s.key);
+
+    expect(keys[0]).toBe("background");
+    expect(keys[1]).toBe("backgroundChoices.sk-b");
+  });
+
   it("startAt with a scoped key lands on that class's step in a multiclass hero", () => {
     const multi: ChoicesState = { raceChoices: {}, feats: [], classes: [{ classId: sorcerer.id, level: 3 }, { classId: rogue.id, level: 3 }] };
 

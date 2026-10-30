@@ -52,7 +52,15 @@ export function useChoiceWizard({ campaignId, characterId, initial, hero, refs, 
 
     const byKey = new Map(fresh.map((s) => [s.key, s]));
 
-    return [...seen.flatMap((k) => byKey.get(k) ?? []), ...fresh.filter((s) => !seenSet.has(s.key))];
+    const ordered = [...seen.flatMap((k) => byKey.get(k) ?? []), ...fresh.filter((s) => !seenSet.has(s.key))];
+
+    const own = (s: WizardStep) => s.path === "backgroundChoices" || s.path === "backgroundFeatPicks";
+
+    const at = ordered.findIndex((s) => s.kind === "background");
+
+    if (at < 0) return ordered;
+
+    return [...ordered.slice(0, at + 1), ...ordered.filter(own), ...ordered.slice(at + 1).filter((s) => !own(s))];
   }, [data, refs, level, classMode, seen]);
 
   const set = (next: ChoicesState) => {

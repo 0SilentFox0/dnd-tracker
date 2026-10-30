@@ -1,6 +1,6 @@
 "use client";
 
-import type { ReactNode } from "react";
+import { type ReactNode, useEffect, useState } from "react";
 import { useTranslations } from "next-intl";
 
 import { EntityIcon } from "@/components/common/EntityIcon";
@@ -16,6 +16,12 @@ interface ClassSectionProps {
 export function ClassSection({ progression, defaultOpen, children }: ClassSectionProps) {
   const t = useTranslations("characterProfile.path");
 
+  const [open, setOpen] = useState(defaultOpen);
+
+  useEffect(() => {
+    if (defaultOpen) setOpen(true);
+  }, [defaultOpen]);
+
   const { level } = pathSummary(progression);
 
   const chosen = chosenSubclassId(progression);
@@ -26,7 +32,7 @@ export function ClassSection({ progression, defaultOpen, children }: ClassSectio
 
   return (
     <section className="mb-3">
-      <details open={defaultOpen} className="space-y-2">
+      <details open={open} onToggle={(e) => setOpen(e.currentTarget.open)} className="space-y-2">
         <summary className="flex cursor-pointer flex-wrap items-baseline gap-2">
           <EntityIcon src={progression.icon} name={progression.className} className="size-6 text-xs" />
           <h3 className="inline">{progression.className}</h3>

@@ -137,7 +137,8 @@
       "backgroundFeat": "Background feat: {name}",
       "class": "Class: {name}",
       "classLevel": "Class: {name}, level {level}",
-      "feat": "Feat: {name}"
+      "feat": "Feat: {name}",
+      "backgroundNone": "Background: not chosen"
     },
     "gives": {
       "abilityScore": "Raises ability scores",

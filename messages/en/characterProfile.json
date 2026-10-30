@@ -175,7 +175,8 @@
     "gainsLabel": "What the level gives",
     "gains": "What level {level} gives",
     "picks": "Choices: {count}",
-    "failed": "Could not level up."
+    "failed": "Could not level up.",
+    "noFreeClasses": "No free classes left to add."
   },
   "basic": {
     "toClasses": "Switch to classes",

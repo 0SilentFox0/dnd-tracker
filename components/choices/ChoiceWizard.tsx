@@ -78,7 +78,7 @@ export function ChoiceWizard({ campaignId, characterId, initial, hero, refs, sta
       <dl className="space-y-1 text-sm">
         <div className="flex gap-2">
           <dt className="text-hud-muted">{t("wizard.sourceLabel")}</dt>
-          <dd>{t(`wizard.source.${sourceKey}`, { name: step.source.name, level: step.source.level ?? 0 })}</dd>
+          <dd>{sourceKey === "background" && !step.source.name ? t("wizard.source.backgroundNone") : t(`wizard.source.${sourceKey}`, { name: step.source.name, level: step.source.level ?? 0 })}</dd>
         </div>
         <div className="flex gap-2">
           <dt className="text-hud-muted">{t("wizard.givesLabel")}</dt>
