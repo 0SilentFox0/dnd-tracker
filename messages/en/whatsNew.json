@@ -1,4 +1,8 @@
 {
+  "2026-10-30-character-path-multiclass": {
+    "title": "Path for several classes",
+    "body": "On the Path of a hero with several classes the total level and the split by class are shown on top, and each class has its own collapsible section. The DM adds a new class with the \"+ New class\" button when editing a hero: classes whose requirements are not met show up right away with the reason, for example \"Intelligence: need 13, have 10\". The tab of a hero with a skill tree is now called \"Path\" too."
+  },
   "2026-10-30-character-path-choices": {
     "title": "Step-by-step choices and subclasses",
     "body": "Hero choices now open as a step-by-step wizard: each step shows where the choice comes from and what it gives. Options that are not available yet sit in a separate “Not available yet” group with the reason, for example “need 13, now 10”, and raising an ability in an earlier step unlocks them right away. The subclass is now picked from cards with a per-level breakdown, both on level-up and in the wizard, and on the Path you can preview which subclasses exist and open the wizard right at the needed step."

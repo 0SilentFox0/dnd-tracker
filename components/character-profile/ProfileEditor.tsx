@@ -115,7 +115,7 @@ export function ProfileEditor({ onDone }: { onDone: () => void }) {
           },
           {
             id: "skills",
-            label: sheet.classProgression?.length ? t("tabs.path") : t("tabs.skills"),
+            label: t("tabs.path"),
             content: (
               <div className="space-y-4">
                 <CharacterAbilitiesSection campaignId={campaignId} abilities={abilities} />
