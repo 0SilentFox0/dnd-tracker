@@ -51,6 +51,8 @@ model Campaign {
   createdFromId        String?
   aiInstructions       String?
   credits              String?
+  locale               String?
+  templateKey          String?
   artifactSets         ArtifactSet[]
   artifacts            Artifact[]
   battles              BattleScene[]

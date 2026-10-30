@@ -27,6 +27,8 @@ export interface TemplateCard {
   visibility: string;
   counts: Record<string, number>;
   credits?: string | null;
+  locale?: string | null;
+  templateKey?: string | null;
 }
 
 export interface TemplateList {

@@ -18,6 +18,8 @@ export type CampaignVisibility = (typeof CampaignVisibility)[keyof typeof Campai
 
 export const SRD_TEMPLATE_NAME = "5e SRD 5.2";
 
+export const DEFAULT_TEMPLATE_LOCALE = "en";
+
 export const EMPTY_5E_TEMPLATE_NAME = "5e (empty)";
 
 export interface DmSection {
