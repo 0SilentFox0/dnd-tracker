@@ -7,7 +7,7 @@ import { hasPicks } from "@/lib/utils/characters/choices/read";
 import { forEachChoiceOwner } from "@/lib/utils/characters/choices/walk";
 import type { Ability, AbilitySource, DerivedAbility } from "@/types/abilities";
 import type { BackgroundData } from "@/types/backgrounds";
-import type { CharacterFeat, Choice, ChoiceOption, ChoiceOwner, ChoicePick, ChoiceRace, ChoicesState, FeatData, Picks, SelectedSpellGrant, SpellGrantPolicy, TextRef } from "@/types/choices";
+import type { CharacterFeat, Choice, ChoiceOption, ChoiceOwner, ChoicePick, ChoiceRace, ChoicesState, FeatData, Picks, SelectedSpellGrant, SheetBackground, SpellGrantPolicy, TextRef } from "@/types/choices";
 import type { ResolvedClassEntry } from "@/types/classes";
 import type { LogLine } from "@/types/text";
 
