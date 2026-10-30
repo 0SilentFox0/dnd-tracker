@@ -56,17 +56,17 @@ rules.spellIngredients: { enabled: boolean (false); autoPay: boolean (true) }
 ```
 Піддеталі: `ingredients` — масив ≤ 8, унікальні `ingredientKey`; refine: непорожній масив вимагає `componentFlags?.m === true`. У `spellFields` `ingredients` optional з default `[]`, `componentFlags` nullable optional.
 
-- [ ] Тести схеми: валідний рядок; дубль ключа → помилка; M=false з інгредієнтами → помилка; `null`/`[]` проходить; `defaultFocus`; `ingredientKey("Diamond Dust")==="diamond-dust"`.
-- [ ] Реалізувати схеми й ключі; додати поля в Prisma, `pnpm exec prisma migrate dev --name spell_ingredients` на локальній БД (власна БД у Docker, порт 54322), перевірити SQL: лише `ALTER TABLE "spells" ADD COLUMN … ` ×2.
-- [ ] Правило: секція `spellIngredients` в `sectionSchemas`, `withDefaults`, `RulesetSchema.prefault`, patch-схемі, `DEFAULT_RULES`, `MECHANIC_REGISTRY` (`label: "Інгредієнти заклинань"`); ключі `rules.spellIngredients.*` у `messages/*/rules.json`; оновити тести rules, що перелічують секції (знайти `pnpm test:related lib/utils/rules/schema.ts`).
-- [ ] `pnpm test:related lib/utils/rules/schema.ts lib/schemas/spells.ts`; eslint змінених; commit `feat(spells): ingredient schema, migration, rules.spellIngredients`.
+- [x] Тести схеми: валідний рядок; дубль ключа → помилка; M=false з інгредієнтами → помилка; `null`/`[]` проходить; `defaultFocus`; `ingredientKey("Diamond Dust")==="diamond-dust"`.
+- [x] Реалізувати схеми й ключі; додати поля в Prisma, `pnpm exec prisma migrate dev --name spell_ingredients` на локальній БД (власна БД у Docker, порт 54322), перевірити SQL: лише `ALTER TABLE "spells" ADD COLUMN … ` ×2.
+- [x] Правило: секція `spellIngredients` в `sectionSchemas`, `withDefaults`, `RulesetSchema.prefault`, patch-схемі, `DEFAULT_RULES`, `MECHANIC_REGISTRY` (`label: "Інгредієнти заклинань"`); ключі `rules.spellIngredients.*` у `messages/*/rules.json`; оновити тести rules, що перелічують секції (знайти `pnpm test:related lib/utils/rules/schema.ts`).
+- [x] `pnpm test:related lib/utils/rules/schema.ts lib/schemas/spells.ts`; eslint змінених; commit `feat(spells): ingredient schema, migration, rules.spellIngredients`.
 
 ### Task 2: Поширення поля (content-api, sync, сторожі)
 
 **Files:** знайти всі місця, що перелічують поля заклинання: `grep -rn "raceModifiers" lib app scripts types --include='*.ts' -l | grep -v __tests__` (CRUD route/helpers, content-api схеми/ресурси, bundle/clone кампанії, sync-хеші `lib/server/…/source-sync`, assistant-інструменти, `toCastableSpell` не чіпати).
-- [ ] Для кожного місця, де заклинання копіюється/хешується/серіалізується поелементно, додати `ingredients` і `componentFlags` (туди ж, де `lists`/`raceModifiers`). Не додавати в `route.ts` логіку — лише в схеми/хелпери.
-- [ ] Тест: кругообіг bundle/clone зберігає поля; sync-хеш змінюється при зміні `ingredients`; OpenAPI/`toJsonSchemas` містить поле (наявні тести-сторожі мають пройти, оновити snapshot лише за потреби).
-- [ ] `pnpm test:changed`; commit `feat(spells): propagate ingredient fields through content API and sync`.
+- [x] Для кожного місця, де заклинання копіюється/хешується/серіалізується поелементно, додати `ingredients` і `componentFlags` (туди ж, де `lists`/`raceModifiers`). Не додавати в `route.ts` логіку — лише в схеми/хелпери.
+- [x] Тест: кругообіг bundle/clone зберігає поля; sync-хеш змінюється при зміні `ingredients`; OpenAPI/`toJsonSchemas` містить поле (наявні тести-сторожі мають пройти, оновити snapshot лише за потреби).
+- [x] `pnpm test:changed`; commit `feat(spells): propagate ingredient fields through content API and sync`.
 
 ### Task 3: Імпорт 5etools (SRD-дані — сесія feat/srd-completeness)
 
@@ -83,9 +83,9 @@ export function parseMaterialText(text: string): SpellIngredient[] | null; // "(
 ```
 Правила: `cost` 5etools у мідних → `minGp = cost/100`; `consume: true` → `consumed: true`; `"optional"` → `consumed: false`; без вартості й без витрати → `[{ name, qty:1, consumed:false, focus:true }]`; кілька предметів в одній дужці з кількома вартостями (Astral Projection) → `null`. `componentFlags` з `v/s/m`.
 
-- [ ] Тести з позитивним і негативним випадком на правило: «worth 50+ GP» → `minGp 50`; «worth 1,000+ GP, which the spell consumes» → `1000`, `consumed`; «a pinch of sand» → `focus: true`; Astral Projection → `null`; 5etools-об'єкт `{text, cost: 5000, consume: true}`.
-- [ ] Реалізація; адаптер пише `components` як і раніше (текст) + нові поля; SRD-дані (`scripts/srd/`, `spells.json`, пресет `rules-preset.ts` з `spellIngredients.enabled: true`) заповнює окрема сесія `feat/srd-completeness` після мерджу цієї схеми; `parseMaterialText` лишається експортованою чистою функцією, її вони можуть перевикористати.
-- [ ] Прогнати наявні тести імпорту й SRD-шаблону (`pnpm test:related lib/server/compendium-import/adapters/spell-cast.ts`); commit `feat(import): structured spell ingredients (5etools + SRD)`.
+- [x] Тести з позитивним і негативним випадком на правило: «worth 50+ GP» → `minGp 50`; «worth 1,000+ GP, which the spell consumes» → `1000`, `consumed`; «a pinch of sand» → `focus: true`; Astral Projection → `null`; 5etools-об'єкт `{text, cost: 5000, consume: true}`.
+- [x] Реалізація; адаптер пише `components` як і раніше (текст) + нові поля; SRD-дані (`scripts/srd/`, `spells.json`, пресет `rules-preset.ts` з `spellIngredients.enabled: true`) заповнює окрема сесія `feat/srd-completeness` після мерджу цієї схеми; `parseMaterialText` лишається експортованою чистою функцією, її вони можуть перевикористати.
+- [x] Прогнати наявні тести імпорту й SRD-шаблону (`pnpm test:related lib/server/compendium-import/adapters/spell-cast.ts`); commit `feat(import): structured spell ingredients (5etools + SRD)`.
 
 ### Task 4: Форма заклинання (батч 4–5 з Task 5)
 
@@ -96,8 +96,8 @@ export function parseMaterialText(text: string): SpellIngredient[] | null; // "(
 
 Поведінка: чекбокси V/S/M; при M — список `IngredientRow` (назва, к-сть, «мін. вартість, gp», «витрачається», «замінює фокус» — вмикається автоматично через `defaultFocus`, поки користувач не змінить вручну), кнопка «Додати», `SelectField` пресетів (камінь ≥N gp витрачається, порошок витрачається, святий символ 5 gp, звичайний M-фокус); превʼю одним рядком «Потрібно: …» (`useIngredientSummary`, чиста `summarizeIngredients(list)` у `lib/utils/spells/ingredients/summary.ts` — тест). Для заклинань із `componentFlags == null` показати похідне «V, S, M» зі старого рядка й дозволити ввімкнути структуру. Поля — `min-h-11`, картки в одну колонку; помилки через `FieldErrors`/`useSpellIssueText`.
 
-- [ ] Тести: додавання/видалення рядка, автозначення `focus`, дубль назви показує помилку, M вимкнено ховає список і очищає `ingredients`, збереження payload.
-- [ ] Реалізація; ключі `spells.ingredients.*` обох мов; `pnpm test:related components/spells/form/SpellFormBody.tsx`; commit `feat(spells): components and ingredients in spell form`.
+- [x] Тести: додавання/видалення рядка, автозначення `focus`, дубль назви показує помилку, M вимкнено ховає список і очищає `ingredients`, збереження payload.
+- [x] Реалізація; ключі `spells.ingredients.*` обох мов; `pnpm test:related components/spells/form/SpellFormBody.tsx`; commit `feat(spells): components and ingredients in spell form`.
 
 ## Частина B — інвентар, рушій, списання
 
