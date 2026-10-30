@@ -1,11 +1,3 @@
-export interface DigestItem {
-  id: string;
-  title: string;
-  sortOrder: number;
-  digest: string;
-  stale: boolean;
-}
-
 export function fitLines(lines: string[], maxChars: number): string {
   const out: string[] = [];
 
@@ -31,12 +23,4 @@ export function fitLines(lines: string[], maxChars: number): string {
   }
 
   return out.join("\n");
-}
-
-export function summariesDigest(items: DigestItem[], opts: { maxChars: number }): string {
-  const lines = [...items]
-    .sort((a, b) => a.sortOrder - b.sortOrder)
-    .map((item) => `- ${item.title} [${item.id}]: ${item.digest}${item.stale ? " (stale)" : ""}`);
-
-  return fitLines(lines, opts.maxChars);
 }

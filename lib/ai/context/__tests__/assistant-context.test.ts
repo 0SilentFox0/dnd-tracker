@@ -177,7 +177,7 @@ it("disclosureDescribesActuallyFittedBlocksWithoutReturningPrivateText", async (
  expect(JSON.stringify(disclosure.mock.calls)).not.toContain("Поважай стиль");
 });
 
-const digestItem = { id: "pg1", title: "Zehir", sortOrder: 1, digest: "DIGEST_TEXT", stale: true };
+const digestItem = { id: "pg1", title: "Zehir", arc: null, sortOrder: 1, llm: { digest: "DIGEST_TEXT", stale: true }, sections: [], entities: [] };
 
 it("scenario mode appends digest last, after focusPage", async () => {
   vi.mocked(loadDigestItems).mockResolvedValue([digestItem]);
@@ -196,7 +196,7 @@ it("scenario mode appends digest last, after focusPage", async () => {
   expect(ids.indexOf("focusPage")).toBeLessThan(ids.indexOf("digest"));
 });
 it("excludes the focused page from the digest", async () => {
-  vi.mocked(loadDigestItems).mockResolvedValue([digestItem, { ...digestItem, id: "f", title: "FocusTitle", digest: "FOCUS_DIGEST" }]);
+  vi.mocked(loadDigestItems).mockResolvedValue([digestItem, { ...digestItem, id: "f", title: "FocusTitle", llm: { digest: "FOCUS_DIGEST", stale: false } }]);
   vi.mocked(prisma.scenarioPage.findFirst).mockResolvedValue({ id: "f", title: "FocusTitle", content: { legend: [], sections: [] } } as never);
 
   const out = await buildInstructions({ ...args, focus: { pageId: "f" } });
@@ -212,16 +212,26 @@ it("live mode gets no digest and does not query it", async () => {
   expect(out).not.toContain("DIGEST_TEXT");
   expect(loadDigestItems).not.toHaveBeenCalled();
 });
-it("no summaries means no digest block or header", async () => {
+it("block is present without any LLM summary, built from index data", async () => {
+  vi.mocked(loadDigestItems).mockResolvedValue([{ ...digestItem, llm: null, arc: "Arc1", sections: [{ title: "Intro", played: true, lead: "Wolves howl" }], entities: ["Wolf"] }]);
+
   const disclosure = vi.fn();
 
   const out = await buildInstructions({ ...args, onDisclosure: disclosure });
 
-  expect(out).not.toContain("Page summaries");
+  expect(out).toContain("- Zehir [pg1] (Arc1): § Intro ✓ — Wolves howl; entities: Wolf");
+  expect(disclosure.mock.calls[0][0].blocks).toContain("digest");
+});
+it("no pages means no digest block or header", async () => {
+  const disclosure = vi.fn();
+
+  const out = await buildInstructions({ ...args, onDisclosure: disclosure });
+
+  expect(out).not.toContain("Campaign digest");
   expect(disclosure.mock.calls[0][0].blocks).not.toContain("digest");
 });
 it("small budget shrinks digest first, keeping standing and focusPage whole", async () => {
-  vi.mocked(loadDigestItems).mockResolvedValue([{ ...digestItem, digest: "D".repeat(3000) }]);
+  vi.mocked(loadDigestItems).mockResolvedValue([{ ...digestItem, llm: { digest: "D".repeat(3000), stale: false } }]);
 
   const title = "X".repeat(37000);
 
