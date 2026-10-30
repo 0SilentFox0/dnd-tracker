@@ -1,8 +1,8 @@
 import { SRD_KINDS, type SrdData, type SrdKind } from "../lib/types";
 import { classOf, hashText, isTranslatable, mapStrings, REF_KEYS, type Translations } from "./catalog";
 
-const translate = (tr: Translations, key: string, text: string) => {
-  const cls = classOf(key);
+const translate = (tr: Translations, key: string, text: string, parent = "") => {
+  const cls = classOf(key, parent);
 
   return cls && isTranslatable(text) ? (tr[hashText(cls, text)] ?? text) : text;
 };
@@ -38,10 +38,10 @@ export function applyOverlay(data: SrdData, tr: Translations): SrdData {
   const out = {} as Record<SrdKind, unknown>;
 
   for (const kind of SRD_KINDS) {
-    out[kind] = mapStrings(data[kind], (key, text) => {
+    out[kind] = mapStrings(data[kind], (key, text, parent) => {
       const refKind = REF_KEYS[key];
 
-      return refKind ? (maps[refKind].get(text) ?? text) : translate(tr, key, text);
+      return refKind ? (maps[refKind].get(text) ?? text) : translate(tr, key, text, parent);
     });
   }
 

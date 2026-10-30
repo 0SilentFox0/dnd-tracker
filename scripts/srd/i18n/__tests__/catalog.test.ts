@@ -19,6 +19,10 @@ describe("extractCatalog", () => {
     expect(entries.map((e) => e.en)).toEqual(["Fireball"]);
   });
 
+  it("не бере casting.text (ключ тривалості)", () => {
+    expect(extractCatalog(data({ spells: [{ slug: "s", name: "Fireball", casting: { text: "bonus-action" } }] })).map((e) => e.en)).toEqual(["Fireball"]);
+  });
+
   it("розрізняє клас name і description з однаковим текстом", () => {
     expect(hashText("n", "Light")).not.toBe(hashText("d", "Light"));
   });

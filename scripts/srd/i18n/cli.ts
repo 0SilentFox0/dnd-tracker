@@ -17,15 +17,18 @@ const todoDir = (locale: string) => path.join(I18N_DIR, "todo", locale);
 const jsonl = (rows: unknown[]) => `${rows.map((r) => JSON.stringify(r)).join("\n")}\n`;
 
 function extract(locale: string, args: string[]) {
-  const phase = (arg(args, "--phase") ?? "A") as Phase;
+  const phase = arg(args, "--phase") ?? "A";
+
+  if (phase !== "A" && phase !== "B") throw new Error(`--phase має бути A або B, отримано: ${phase}`);
 
   const maxChars = Number(arg(args, "--max-chars") ?? 22000);
 
-  const todo = missing(extractCatalog(readSrdData()), readTranslations(locale)).filter((e) => inPhase(e, phase));
+  const todo = missing(extractCatalog(readSrdData()), readTranslations(locale)).filter((e) => inPhase(e, phase as Phase));
 
   const dir = todoDir(locale);
 
-  fs.rmSync(dir, { recursive: true, force: true });
+  for (const f of fs.existsSync(dir) ? fs.readdirSync(dir) : []) if (/^\d+(\.out)?\.jsonl$/.test(f)) fs.rmSync(path.join(dir, f));
+
   fs.mkdirSync(dir, { recursive: true });
 
   const batches = planBatches(todo, maxChars);
@@ -35,8 +38,16 @@ function extract(locale: string, args: string[]) {
   console.info(`${locale} фаза ${phase}: ${todo.length} рядків, ${todo.reduce((n, e) => n + e.en.length, 0)} симв., ${batches.length} порцій → ${dir}`);
 }
 
+function parseLine(file: string, line: number, text: string): AppliedLine {
+  try {
+    return JSON.parse(text) as AppliedLine;
+  } catch {
+    throw new Error(`${file}:${line}: некоректний JSONL`);
+  }
+}
+
 function apply(locale: string, files: string[]) {
-  const lines: AppliedLine[] = files.flatMap((f) => fs.readFileSync(f, "utf8").split("\n").filter(Boolean).map((l) => JSON.parse(l) as AppliedLine));
+  const lines: AppliedLine[] = files.flatMap((f) => fs.readFileSync(f, "utf8").split("\n").filter(Boolean).map((l, i) => parseLine(f, i + 1, l)));
 
   const { merged, accepted, rejected } = mergeApplied(readTranslations(locale), lines, extractCatalog(readSrdData()));
 

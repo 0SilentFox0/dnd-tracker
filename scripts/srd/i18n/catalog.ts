@@ -29,16 +29,19 @@ export type Translations = Record<string, string>;
 
 export const hashText = (cls: TextClass, en: string) => createHash("sha1").update(`${cls}\0${en}`).digest("hex").slice(0, 10);
 
-export const classOf = (key: string): TextClass | null => (NAME_KEYS.includes(key) ? "n" : TEXT_KEYS.includes(key) ? "d" : null);
+// spells[].casting.text is a duration key ("bonus-action"), not prose
+const isKeyField = (key: string, parent: string) => parent === "casting" && key === "text";
+
+export const classOf = (key: string, parent = ""): TextClass | null => (isKeyField(key, parent) ? null : NAME_KEYS.includes(key) ? "n" : TEXT_KEYS.includes(key) ? "d" : null);
 
 export const isTranslatable = (en: string) => /[A-Za-z]{3}/.test(en);
 
-export function mapStrings(value: unknown, visit: (key: string, text: string) => string, key = ""): unknown {
-  if (typeof value === "string") return visit(key, value);
+export function mapStrings(value: unknown, visit: (key: string, text: string, parent: string) => string, key = "", parent = ""): unknown {
+  if (typeof value === "string") return visit(key, value, parent);
 
-  if (Array.isArray(value)) return value.map((v) => mapStrings(v, visit, key));
+  if (Array.isArray(value)) return value.map((v) => mapStrings(v, visit, key, parent));
 
-  if (value && typeof value === "object") return Object.fromEntries(Object.entries(value).map(([k, v]) => [k, mapStrings(v, visit, k)]));
+  if (value && typeof value === "object") return Object.fromEntries(Object.entries(value).map(([k, v]) => [k, mapStrings(v, visit, k, key)]));
 
   return value;
 }
@@ -47,8 +50,8 @@ export function extractCatalog(data: SrdData): CatalogEntry[] {
   const found = new Map<string, CatalogEntry>();
 
   for (const kind of SRD_KINDS) {
-    mapStrings(data[kind], (key, text) => {
-      const cls = classOf(key);
+    mapStrings(data[kind], (key, text, parent) => {
+      const cls = classOf(key, parent);
 
       if (cls && isTranslatable(text)) {
         const hash = hashText(cls, text);

@@ -25,6 +25,12 @@ describe("checkTranslation", () => {
     expect(checkTranslation(TABLE, "Table: X\n\n| Дракон | Тип шкоди |\n| --- | --- |")).toEqual(expect.arrayContaining(["table-shape", "lines"]));
   });
 
+  it("ловить зміну знака й втрачений одинарний *", () => {
+    expect(checkTranslation("Gain +5 to rolls", "Отримай -5 до кидків")).toContain("numbers");
+    expect(checkTranslation("Range 5-7 feet", "Дальність 5–7 футів")).toEqual([]);
+    expect(checkTranslation("cast *Fireball*", "створи Вогняну кулю")).toContain("markup");
+  });
+
   it("ловить втрачений ** і порожній переклад", () => {
     expect(checkTranslation("A **b** c", "А б в")).toContain("markup");
     expect(checkTranslation("Alert", "  ")).toEqual(["empty"]);

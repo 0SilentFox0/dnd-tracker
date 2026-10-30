@@ -11,11 +11,11 @@ export function checkTranslation(en: string, tr: string): TranslationIssue[] {
 
   const issues: TranslationIssue[] = [];
 
-  if (tokens(en, /\d+/g) !== tokens(tr, /\d+/g)) issues.push("numbers");
+  if (tokens(en, /(?:(?<!\w)[+\u2212-])?\d+/g) !== tokens(tr, /(?:(?<!\w)[+\u2212-])?\d+/g)) issues.push("numbers");
 
   if (tokens(en.toLowerCase(), /\b\d*d\d+/g) !== tokens(tr.toLowerCase(), /\b\d*d\d+/g)) issues.push("dice");
 
-  if (count(en, /\*\*/g) !== count(tr, /\*\*/g) || count(en, /`/g) !== count(tr, /`/g)) issues.push("markup");
+  if (count(en, /\*/g) !== count(tr, /\*/g) || count(en, /`/g) !== count(tr, /`/g)) issues.push("markup");
 
   if (count(en, /\n/g) !== count(tr, /\n/g)) issues.push("lines");
 
