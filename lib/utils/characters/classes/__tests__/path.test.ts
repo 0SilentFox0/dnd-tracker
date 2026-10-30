@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 
 import { makeAbility, makeClass } from "./class-fixtures";
 
-import { chosenSubclassId, hasSubclassOnly, openSpellPicks, pathSummary, rowItems, splitPathRows, subclassPreview } from "@/lib/utils/characters/classes/path";
+import { chosenSubclassId, classLevels, classSectionOpen, hasSubclassOnly, openSpellPicks, pathSummary, rowItems, splitPathRows, subclassPreview } from "@/lib/utils/characters/classes/path";
 import { buildClassProgression } from "@/lib/utils/characters/classes/progression";
 
 const cls = makeClass({
@@ -124,5 +124,28 @@ describe("hasSubclassOnly", () => {
     expect(hasSubclassOnly(row, null)).toBe(true);
     expect(hasSubclassOnly(row, "champ")).toBe(false);
     expect(hasSubclassOnly(buildClassProgression(cls, { classId: "fighter", level: 2 }).rows.find((r) => r.level === 5)!, null)).toBe(false);
+  });
+});
+
+describe("classLevels / classSectionOpen", () => {
+  const prog = (level: number) => buildClassProgression(cls, { classId: "fighter", level });
+
+  it("classLevels reads the current level of each class", () => {
+    expect(classLevels([prog(4), prog(2)]).map((c) => c.level)).toEqual([4, 2]);
+  });
+
+  it("classSectionOpen: one or two classes are always open", () => {
+    expect(classSectionOpen([prog(5)], prog(5))).toBe(true);
+    expect(classSectionOpen([prog(5), prog(5)], prog(5))).toBe(true);
+  });
+
+  it("classSectionOpen: with three classes only those with open picks stay open", () => {
+    const quiet = prog(9);
+
+    const waiting = prog(4);
+
+    expect(classSectionOpen([quiet, quiet, quiet], quiet)).toBe(pathSummary(quiet).open > 0);
+    expect(pathSummary(waiting).open).toBeGreaterThan(0);
+    expect(classSectionOpen([quiet, quiet, waiting], waiting)).toBe(true);
   });
 });
