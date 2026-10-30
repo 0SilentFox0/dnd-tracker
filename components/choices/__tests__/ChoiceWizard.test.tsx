@@ -97,7 +97,7 @@ describe("ChoiceWizard", () => {
   it("last step is Done and closes after saving", async () => {
     const onClose = vi.fn();
 
-    render(<Harness startAt="pick" onClose={onClose} />);
+    render(<Harness startAt="classes.cls-fighter.pick" onClose={onClose} />);
     fireEvent.click(screen.getByRole("button", { name: "choices.wizard.finish" }));
 
     await waitFor(() => expect(onClose).toHaveBeenCalledTimes(1));
@@ -114,7 +114,7 @@ describe("ChoiceWizard", () => {
   });
 
   it("subclass step picks a subclass and saves it with Next", async () => {
-    render(<ChoiceWizard campaignId="c" characterId="h" initial={{ raceChoices: {}, feats: [], classes: [{ classId: sorcerer.id, level: 3 }] }} hero={{ level: 3, scores, skills: {}, classMode: true }} refs={wrefs} startAt="subclass" onClose={() => {}} />);
+    render(<ChoiceWizard campaignId="c" characterId="h" initial={{ raceChoices: {}, feats: [], classes: [{ classId: sorcerer.id, level: 3 }] }} hero={{ level: 3, scores, skills: {}, classMode: true }} refs={wrefs} startAt={`subclass:${sorcerer.id}`} onClose={() => {}} />);
 
     fireEvent.click(screen.getByRole("radio", { name: /Draconic/ }));
     fireEvent.click(screen.getByRole("button", { name: "choices.wizard.next" }));

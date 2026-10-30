@@ -48,12 +48,16 @@ export async function saveCharacterChoices({ access, character }: CharacterGate,
 
       if (!subclassed) throw new ContentError(API_ERRORS.SUBCLASS_ALREADY_SET, 422);
 
-      const invalid = validateClassEntries(subclassed, refs.classesById, access.campaign.maxLevel);
+      const fresh = subclassed.filter((e, i) => e.subclassId && !classes[i].subclassId);
 
-      if (invalid) throw new ContentError(invalid.error, 422, undefined, invalid.params);
+      if (fresh.length > 0) {
+        const invalid = validateClassEntries(fresh, refs.classesById, Infinity);
 
-      classes = subclassed;
-      subclassLabel = subclassesLabel(resolveClassEntries(classes, refs.classesById));
+        if (invalid) throw new ContentError(invalid.error, 422, undefined, invalid.params);
+
+        classes = subclassed;
+        subclassLabel = subclassesLabel(resolveClassEntries(classes, refs.classesById));
+      }
     }
 
     const after = { ...mergeBackground(before, body), raceChoices: body.raceChoices ?? before.raceChoices, feats: body.feats ?? before.feats, classes };

@@ -12,7 +12,7 @@ import type { CharacterSheet } from "@/types/characters";
 const current = vi.hoisted(() => ({ sheet: null as unknown as CharacterSheet }));
 
 vi.mock("@/components/character-profile/ProfileContext", () => ({ useProfile: () => ({ campaignId: "c1", characterId: "h1", sheet: current.sheet, canEdit: true }) }));
-vi.mock("next/dynamic", () => ({ default: () => (props: { open: boolean }) => (props.open ? <div data-testid="choices-dialog" /> : null) }));
+vi.mock("next/dynamic", () => ({ default: () => (props: { open: boolean; startAt?: string }) => (props.open ? <div data-testid="choices-dialog" data-start={props.startAt} /> : null) }));
 
 const caster = makeClass({
   id: "cleric",
@@ -42,6 +42,20 @@ describe("SpellPicksNudge", () => {
 
     expect(screen.getByText('characterProfile.path.spellNudge {"count":2}')).toBeTruthy();
     fireEvent.click(screen.getByRole("button", { name: "characterProfile.path.spellNudgeAction" }));
+
+    expect(screen.getByTestId("choices-dialog")).toBeTruthy();
+  });
+
+  it("opens at the first open spell step and keeps the dialog after the picks are done", () => {
+    current.sheet = sheetWith(true);
+
+    const { rerender } = render(<SpellPicksNudge />);
+
+    fireEvent.click(screen.getByRole("button", { name: "characterProfile.path.spellNudgeAction" }));
+    expect(screen.getByTestId("choices-dialog").getAttribute("data-start")).toBe("classes.cleric.cantrips");
+
+    current.sheet = sheetWith(true, { cantrips: [{ id: "a" }, { id: "b" }] });
+    rerender(<SpellPicksNudge />);
 
     expect(screen.getByTestId("choices-dialog")).toBeTruthy();
   });

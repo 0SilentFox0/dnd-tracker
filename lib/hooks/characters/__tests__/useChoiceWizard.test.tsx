@@ -3,7 +3,7 @@ import { act, cleanup, renderHook, waitFor } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import { useChoiceWizard } from "@/lib/hooks/characters/useChoiceWizard";
-import { featsById, refs, scores, sorcerer } from "@/lib/utils/characters/choices/__tests__/fixtures";
+import { featsById, refs, rogue, scores, sorcerer } from "@/lib/utils/characters/choices/__tests__/fixtures";
 import type { ChoiceRefs } from "@/lib/utils/characters/choices/walk";
 import type { ChoicesState } from "@/types/choices";
 
@@ -30,20 +30,29 @@ describe("useChoiceWizard", () => {
 
   afterEach(cleanup);
 
-  it("startAt picks the step by choice id, default is the first", () => {
+  it("startAt picks the step by its key, default is the first", () => {
     const first = setup();
 
     expect(first.result.current.index).toBe(0);
 
-    const ids = first.result.current.steps.map((s) => s.choice?.id ?? s.kind);
-
-    const at = setup({ startAt: ids[2] });
+    const at = setup({ startAt: first.result.current.steps[2].key });
 
     expect(at.result.current.index).toBe(2);
   });
 
+  it("startAt with a scoped key lands on that class's step in a multiclass hero", () => {
+    const multi: ChoicesState = { raceChoices: {}, feats: [], classes: [{ classId: sorcerer.id, level: 3 }, { classId: rogue.id, level: 3 }] };
+
+    const all = setup({ initial: multi }).result.current.steps;
+
+    const key = `classes.${rogue.id}.expertise-1`;
+
+    expect(all.some((s) => s.key === key)).toBe(true);
+    expect(setup({ initial: multi, startAt: key }).result.current.step?.key).toBe(key);
+  });
+
   it("startAt subclass lands on the subclass step", () => {
-    const { result } = setup({ startAt: "subclass" });
+    const { result } = setup({ startAt: `subclass:${sorcerer.id}` });
 
     expect(result.current.step?.kind).toBe("subclass");
   });
@@ -73,7 +82,7 @@ describe("useChoiceWizard", () => {
   });
 
   it("picking a subclass adds new steps, keeps shown ones and does not reset the number", async () => {
-    const { result } = setup({ startAt: "subclass" });
+    const { result } = setup({ startAt: `subclass:${sorcerer.id}` });
 
     const before = result.current.steps.length;
 

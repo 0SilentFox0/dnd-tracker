@@ -23,7 +23,7 @@ interface ChoiceWizardOptions {
 }
 
 const startIndex = (steps: WizardStep[], startAt?: string) => {
-  const found = startAt ? steps.findIndex((s) => (startAt === "subclass" ? s.kind === "subclass" : s.choice?.id === startAt)) : -1;
+  const found = startAt ? steps.findIndex((s) => s.key === startAt) : -1;
 
   return Math.max(found, 0);
 };

@@ -1,5 +1,6 @@
 "use client";
 
+import { useMemo } from "react";
 import { useTranslations } from "next-intl";
 
 import { ChoiceWizard } from "@/components/choices/ChoiceWizard";
@@ -25,13 +26,26 @@ export default function ChoicesDialog({ open, onOpenChange, campaignId, characte
 
   const classesEnabled = !!useCampaignRules(campaignId).data?.classes.enabled;
 
-  const refs = useChoiceRefs(campaignId, character?.race ?? "");
+  const refs = useChoiceRefs(campaignId, character?.race ?? "", { enabled: open });
 
-  const state = character ? choicesStateOf(character) : null;
+  const state = useMemo(() => (character ? choicesStateOf(character) : null), [character]);
+
+  const hero = useMemo(
+    () =>
+      character && state
+        ? {
+            level: character.level,
+            scores: { strength: character.strength, dexterity: character.dexterity, constitution: character.constitution, intelligence: character.intelligence, wisdom: character.wisdom, charisma: character.charisma },
+            skills: character.skills,
+            classMode: classesEnabled && state.classes.length > 0,
+          }
+        : null,
+    [character, state, classesEnabled],
+  );
 
   return (
     <ResponsiveDialog hud open={open} onOpenChange={onOpenChange} title={t("title")} size="lg">
-      {!character || !state || !refs.ready ? (
+      {!hero || !state || !refs.ready ? (
         <LoadingState rows={3} label={t("loadingHero")} />
       ) : (
         <ChoiceWizard
@@ -40,12 +54,7 @@ export default function ChoicesDialog({ open, onOpenChange, campaignId, characte
           initial={state}
           refs={refs}
           startAt={startAt}
-          hero={{
-            level: character.level,
-            scores: { strength: character.strength, dexterity: character.dexterity, constitution: character.constitution, intelligence: character.intelligence, wisdom: character.wisdom, charisma: character.charisma },
-            skills: character.skills,
-            classMode: classesEnabled && state.classes.length > 0,
-          }}
+          hero={hero}
           onClose={() => onOpenChange(false)}
         />
       )}

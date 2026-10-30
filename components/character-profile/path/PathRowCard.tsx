@@ -8,7 +8,7 @@ import { EntityIcon } from "@/components/common/EntityIcon";
 import { HudPill } from "@/components/hud/page";
 import { DND_SKILLS, type DndSkill } from "@/lib/constants/skills";
 import { cn } from "@/lib/utils";
-import { hasSubclassOnly, rowItems, subclassPreview } from "@/lib/utils/characters/classes";
+import { hasSubclassOnly, pickStepKey, rowItems, subclassPreview } from "@/lib/utils/characters/classes";
 import type { ClassProgression, ProgressionItem, ProgressionPick, ProgressionRow } from "@/types/classes";
 
 interface PathRowCardProps {
@@ -58,7 +58,7 @@ function PickLine({ pick, level, progression, chosen, names, onPick }: { pick: P
   const subclass = progression.subclasses.find((c) => c.id === chosen)?.name;
 
   const pickButton = (label: string) => (
-    <button type="button" onClick={() => onPick?.(pick.key)} className="min-h-10 w-full rounded-md border border-hud-gold-strong/60 px-3 py-2 text-left text-sm text-hud-gold-strong">
+    <button type="button" onClick={() => onPick?.(pickStepKey(progression.classId, pick))} className="min-h-10 w-full rounded-md border border-hud-gold-strong/60 px-3 py-2 text-left text-sm text-hud-gold-strong">
       {label}
     </button>
   );

@@ -130,6 +130,15 @@ describe("PUT choices subclass", () => {
     expect(await issueOf(res)).toBe("errors.subclassAlreadySet");
   });
 
+  it("an existing subclass that is no longer known does not block other saves", async () => {
+    gate({ character: { ...row, classes: [{ classId: sorcerer.id, level: 4, subclassId: "gone" }] } });
+
+    const res = await put({ raceChoices: { "elven-lineage": [{ id: "wood-elf" }] }, classSubclasses: { [sorcerer.id]: "gone" } });
+
+    expect(res.status).toBe(200);
+    expect(vi.mocked(prisma.character.update).mock.calls[0][0].data).not.toHaveProperty("subclass");
+  });
+
   it("422 for an unknown subclass", async () => {
     gate();
 

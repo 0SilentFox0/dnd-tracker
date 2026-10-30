@@ -43,7 +43,7 @@ describe("CharacterPath", () => {
 
     fireEvent.click(screen.getByRole("button", { name: /ASI/ }));
     expect(onPick).toHaveBeenCalledTimes(1);
-    expect(onPick).toHaveBeenCalledWith("asi4");
+    expect(onPick).toHaveBeenCalledWith("classes.f.asi4");
 
     rerender(<CharacterPath progression={progression()} />);
     expect(screen.queryByRole("button", { name: /ASI/ })).toBeNull();
@@ -151,7 +151,7 @@ describe("CharacterPath subclass", () => {
     render(<CharacterPath progression={buildClassProgression(withSubclass, { classId: "f", level: 3 })} actions={{ onPick }} />);
 
     fireEvent.click(screen.getByRole("button", { name: "characterProfile.path.pickSubclass" }));
-    expect(onPick).toHaveBeenCalledWith("subclass");
+    expect(onPick).toHaveBeenCalledWith("subclass:f");
   });
 
   it("future subclass row lists the options by level and marks the row as subclass-dependent", () => {

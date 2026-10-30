@@ -127,7 +127,6 @@
     "next": "Next",
     "finish": "Done",
     "close": "Close",
-    "saving": "Saving…",
     "allChosen": "Everything is chosen",
     "allChosenHint": "No open choices left for this hero.",
     "sourceLabel": "From",
@@ -151,12 +150,13 @@
     },
     "featSource": {
       "background": "Background feat: starting feat",
-      "race": "Human Versatile: starting-level feat",
+      "race": "Race {name}: starting-level feat",
       "asi": "Ability Score Improvement, {class} {level}: a feat or +2",
+      "fightingStyle": "Fighting Style, {class}: a fighting style feat",
+      "epicBoon": "Epic Boon, {class} {level}: an epic boon feat",
       "other": "A feat"
     },
     "subclass": {
-      "title": "Choose a subclass",
       "level": "Level {level}",
       "noDescription": "No description"
     }

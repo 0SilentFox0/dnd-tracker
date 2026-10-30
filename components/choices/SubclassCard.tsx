@@ -9,10 +9,11 @@ import type { GameClassData, Subclass } from "@/types/classes";
 interface SubclassCardProps {
   cls: GameClassData;
   value?: string;
+  locked?: boolean;
   onChange: (id: string) => void;
 }
 
-export function SubclassCard({ cls, value, onChange }: SubclassCardProps) {
+export function SubclassCard({ cls, value, locked, onChange }: SubclassCardProps) {
   const t = useTranslations("choices");
 
   const levels = (s: Subclass) =>
@@ -26,7 +27,7 @@ export function SubclassCard({ cls, value, onChange }: SubclassCardProps) {
       {cls.subclasses.map((s) => {
         const first = s.features.find((f) => f.description)?.description;
 
-        return <ChoiceCard key={s.id} role="radio" checked={value === s.id} onClick={() => onChange(s.id)} title={s.name} name={s.name} summary={summarize(first)} description={() => levels(s)} />;
+        return <ChoiceCard key={s.id} role="radio" checked={value === s.id} disabled={locked && value !== s.id} onClick={() => onChange(s.id)} title={s.name} name={s.name} summary={summarize(first)} description={() => levels(s)} />;
       })}
     </div>
   );

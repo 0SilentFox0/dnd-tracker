@@ -24,9 +24,15 @@ interface ChoiceWizardProps {
   onClose: () => void;
 }
 
-const FEAT_SOURCE = { background: "background", backgroundFeat: "background", race: "race", class: "asi", feat: "other" } as const;
+const FEAT_SOURCE = { background: "background", backgroundFeat: "background", race: "race", feat: "other" } as const;
 
-const featSourceOf = ({ choice, source }: WizardStep) => (choice?.kind === "feat" ? FEAT_SOURCE[source.owner] : "other");
+const featSourceOf = ({ choice, source }: WizardStep) => {
+  if (source.owner !== "class") return FEAT_SOURCE[source.owner];
+
+  if (choice?.featTypes?.includes("fightingStyle")) return "fightingStyle";
+
+  return choice?.featTypes?.includes("epicBoon") ? "epicBoon" : "asi";
+};
 
 export function ChoiceWizard({ campaignId, characterId, initial, hero, refs, startAt, onSaved, onClose }: ChoiceWizardProps) {
   const t = useTranslations("choices");
@@ -74,9 +80,9 @@ export function ChoiceWizard({ campaignId, characterId, initial, hero, refs, sta
           <dd>{t(`wizard.gives.${step.choice?.kind ?? "subclass"}`)}</dd>
         </div>
       </dl>
-      {step.choice?.kind === "feat" && <p className="text-xs text-hud-muted">{t(`wizard.featSource.${featSourceOf(step)}`, { class: step.source.name, level: step.source.level ?? 0 })}</p>}
+      {step.choice?.kind === "feat" && <p className="text-xs text-hud-muted">{t(`wizard.featSource.${featSourceOf(step)}`, { name: step.source.name, class: step.source.name, level: step.source.level ?? 0 })}</p>}
       {step.kind === "subclass" && cls ? (
-        <SubclassCard cls={cls} value={data.classes.find((e) => e.classId === step.classId)?.subclassId ?? undefined} onChange={(id) => set(withStepSubclass(data, step, id))} />
+        <SubclassCard cls={cls} value={data.classes.find((e) => e.classId === step.classId)?.subclassId ?? undefined} locked={!!wizard.saved.classes.find((e) => e.classId === step.classId)?.subclassId} onChange={(id) => set(withStepSubclass(data, step, id))} />
       ) : (
         step.choice && (
           <ChoicePicker

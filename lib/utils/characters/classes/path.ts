@@ -1,4 +1,4 @@
-import type { ClassProgression, ProgressionItem, ProgressionRow } from "@/types/classes";
+import type { ClassProgression, ProgressionItem, ProgressionPick, ProgressionRow } from "@/types/classes";
 
 export interface PathRows {
   reached: ProgressionRow[];
@@ -45,6 +45,21 @@ export function splitPathRows(progression: ClassProgression): PathRows {
   }
 
   return out;
+}
+
+/** same format as `WizardStep.key` */
+export const pickStepKey = (classId: string, pick: Pick<ProgressionPick, "kind" | "key">): string => (pick.kind === "subclass" ? `subclass:${classId}` : `classes.${classId}.${pick.key}`);
+
+export function firstOpenSpellKey(list: readonly ClassProgression[] | undefined): string | undefined {
+  for (const progression of list ?? []) {
+    for (const row of progression.rows) {
+      const pick = row.picks.find((p) => p.kind === "spell" && p.status === "open");
+
+      if (pick) return pickStepKey(progression.classId, pick);
+    }
+  }
+
+  return undefined;
 }
 
 export function openSpellPicks(list: readonly ClassProgression[] | undefined): number {

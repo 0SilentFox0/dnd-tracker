@@ -124,7 +124,7 @@ export const BackgroundSelectionFields = {
 };
 
 export const ChoicesBodySchema = z
-  .object({ ...BackgroundSelectionFields, raceChoices: PicksSchema.optional(), feats: CharacterFeatsSchema.optional(), classChoices: z.record(z.string().min(1).max(100), PicksSchema).optional(), classSubclasses: z.record(z.string().min(1), z.string().min(1)).optional() })
+  .object({ ...BackgroundSelectionFields, raceChoices: PicksSchema.optional(), feats: CharacterFeatsSchema.optional(), classChoices: z.record(z.string().min(1).max(100), PicksSchema).optional(), classSubclasses: z.record(z.string().min(1).max(100), z.string().min(1).max(100)).optional() })
   .refine((b) => b.backgroundId !== undefined || b.backgroundChoices !== undefined || b.backgroundFeatPicks !== undefined || b.raceChoices !== undefined || b.feats !== undefined || b.classChoices !== undefined || b.classSubclasses !== undefined, { message: "choices.validation.nothingToSave" });
 
 export const DraftChoicesSchema = z.object({ ...BackgroundSelectionFields, raceChoices: PicksSchema.optional(), feats: CharacterFeatsSchema.optional(), classChoices: PicksSchema.optional() });
