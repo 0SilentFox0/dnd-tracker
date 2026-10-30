@@ -3,7 +3,8 @@ import { describe, expect, it } from "vitest";
 import { textOf } from "@/lib/i18n/test/text";
 import { dynamicTextRef, textRef } from "@/lib/i18n/text-ref";
 import { ukT } from "@/lib/utils/abilities/__tests__/describe-fixtures";
-import { critOutcome, effectLines, effectTitle, logEntryView, sanitizeLogEntry } from "@/lib/utils/battle/view";
+import { effectName } from "@/lib/utils/battle/common/terms";
+import { critOutcome, effectLines, logEntryView, sanitizeLogEntry } from "@/lib/utils/battle/view";
 import { getLogEntryDetailItems } from "@/lib/utils/battle/view/log-format";
 import type { ActiveEffect, BattleAction } from "@/types/battle";
 
@@ -84,9 +85,9 @@ describe("damageRows і приховані дані", () => {
 describe("ефекти рушія з label", () => {
   const effect = { id: "e", name: "Ухилення", label: textRef("battleCommon.actors.dm"), type: "buff", duration: 1, effects: [], description: "Опис" } as unknown as ActiveEffect;
 
-  it("effectTitle віддає label, а без нього — name", () => {
-    expect(effectTitle(effect)).toEqual(effect.label);
-    expect(effectTitle({ ...effect, label: undefined })).toBe("Ухилення");
+  it("effectName віддає label, а без нього — name", () => {
+    expect(effectName(effect)).toEqual(effect.label);
+    expect(effectName({ ...effect, label: undefined })).toBe("Ухилення");
   });
 
   it("effectLines без опису капіталізує описи й прибирає дублі", async () => {

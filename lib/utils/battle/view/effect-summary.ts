@@ -9,9 +9,6 @@ import type { LogLine } from "@/types/text";
 
 const uniqueLines = (lines: LogLine[]): LogLine[] => lines.filter((line, i) => lines.findIndex((other) => lineKey(other) === lineKey(line)) === i);
 
-/** Engine-made effects carry a translatable `label`; the rest show their content `name`. */
-export const effectTitle = (e: Pick<ActiveEffect, "name" | "label">): LogLine => e.label ?? e.name;
-
 /** Що саме робить ефект: опис або описи його модифікаторів (без повторів). */
 export function effectLines(e: ActiveEffect, t: Translator): LogLine[] {
   if (e.description) return [e.description];

@@ -11,8 +11,9 @@ import { lineKey } from "@/lib/i18n/text-ref";
 import { useText } from "@/lib/i18n/use-text";
 import { useTranslator } from "@/lib/i18n/use-translator";
 import { cn } from "@/lib/utils";
+import { effectName } from "@/lib/utils/battle/common/terms";
 import { getEffectiveArmorClass } from "@/lib/utils/battle/participant/helpers";
-import { canSeeExactStats, effectLines, effectTitle, formatKnownArmorClass, resolveKnownArmorClass, resolveObservedTraits, statblockOf } from "@/lib/utils/battle/view";
+import { canSeeExactStats, effectLines, formatKnownArmorClass, resolveKnownArmorClass, resolveObservedTraits, statblockOf } from "@/lib/utils/battle/view";
 import type { ActiveEffect, BattleParticipant } from "@/types/battle";
 
 function Section({ title, children }: { title: string; children: ReactNode }) {
@@ -46,7 +47,7 @@ function EffectRow({ effect: e }: { effect: ActiveEffect }) {
         <EffectIcon effect={e} size={36} />
       </span>
       <div className="min-w-0 flex-1">
-        <div className="flex justify-between text-[15px] font-medium text-[var(--ink)]"><span>{text(effectTitle(e))}</span><span className="text-[13px] font-normal text-[var(--hud-muted)]">{e.zone ? t("zone") : e.permanent ? t("permanent") : t("rounds", { count: e.duration })}</span></div>
+        <div className="flex justify-between text-[15px] font-medium text-[var(--ink)]"><span>{text(effectName(e))}</span><span className="text-[13px] font-normal text-[var(--hud-muted)]">{e.zone ? t("zone") : e.permanent ? t("permanent") : t("rounds", { count: e.duration })}</span></div>
         {effectLines(e, abilityT).map(text).map((line) => <p key={line} className="mt-0.5 text-[13px] leading-[18px] text-[#a89c88]">{line}</p>)}
         {e.source && <p className="text-[13px] leading-[18px] text-[#a89c88]">{t("from", { source: e.source.abilityName ? `${e.source.abilityName} (${e.source.name})` : e.source.name })}</p>}
       </div>

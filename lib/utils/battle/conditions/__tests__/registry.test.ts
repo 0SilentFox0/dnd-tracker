@@ -27,7 +27,7 @@ describe("CONDITION_5E_REGISTRY", () => {
     expect(types(expandCondition5e("unconscious", { exhaustion: "2014" }).markers)).toContain("prone");
   });
 
-  it("every condition has a label and description key in the catalog", () => {
+  it("every condition has a label key in the catalog", () => {
     for (const key of Object.keys(CONDITION_5E_REGISTRY)) {
       expect(textOf(dynamicTextRef(`battleCommon.conditions.${key}.label`))).not.toContain("battleCommon.");
     }

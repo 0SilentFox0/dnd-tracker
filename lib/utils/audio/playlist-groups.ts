@@ -4,7 +4,7 @@ import type { TrackKind } from "@/types/audio";
 
 export const TRACK_GROUP_SEPARATOR = " - ";
 
-export const OTHER_TRACK_GROUP = "\u0000other";
+export const OTHER_TRACK_GROUP = "__other";
 
 export interface PlaylistFilter {
   query: string;
@@ -18,7 +18,7 @@ export interface TrackGroup<T> {
   tracks: T[];
 }
 
-export const BATTLE_TRACK_GROUP = "\u0000battle";
+export const BATTLE_TRACK_GROUP = "__battle";
 
 const BATTLE_TITLE = new RegExp(`^${BATTLE_TITLE_KEYWORD}(\\s|$)`, "u");
 
@@ -27,7 +27,7 @@ const separatorAt = (title: string) => title.indexOf(TRACK_GROUP_SEPARATOR);
 const isBattleTitle = (title: string) => {
   const at = separatorAt(title);
 
-  return at > 0 && BATTLE_TITLE.test(title.slice(at + TRACK_GROUP_SEPARATOR.length).trim());
+  return at > 0 && (BATTLE_TITLE.test(title.slice(at + TRACK_GROUP_SEPARATOR.length).trim()) || title.slice(0, at).trim() === BATTLE_TITLE_KEYWORD);
 };
 
 /** Група — частина назви до « - » («Люди - Місто» → «Люди»); усі «<раса> - Битва N» — в одній групі «Битва» */

@@ -7,7 +7,7 @@ import { textOf } from "@/lib/i18n/test/text";
 import { dynamicTextRef } from "@/lib/i18n/text-ref";
 import { collectModifiers } from "@/lib/utils/abilities/engine/core/collect-modifiers";
 import { createMockParticipant } from "@/lib/utils/battle/__tests__/fixtures/mock-participant";
-import { effectTitle } from "@/lib/utils/battle/view/effect-summary";
+import { effectName } from "@/lib/utils/battle/common/terms";
 
 const crit = (type: CriticalEffectType, extra: Partial<CriticalEffect["effect"]> = {}): CriticalEffect => ({
   id: 1,
@@ -30,7 +30,7 @@ describe("applyCriticalEffect", () => {
       label: { message: "battleTerms.crits.attack.success.1.name" },
       description: { message: "battleTerms.crits.attack.success.1.description" },
     });
-    expect(textOf(effectTitle(p.battleData.activeEffects[0]))).toBe(textOf(dynamicTextRef("battleTerms.crits.attack.success.1.name")));
+    expect(textOf(effectName(p.battleData.activeEffects[0]))).toBe(textOf(dynamicTextRef("battleTerms.crits.attack.success.1.name")));
   });
 
   it("table save ставить ключі таблиці рятівних", () => {
@@ -40,7 +40,7 @@ describe("applyCriticalEffect", () => {
   });
 
   it("старий збережений ефект з uk-рядками показується як є", () => {
-    expect(effectTitle({ name: "Подвійний урон" })).toBe("Подвійний урон");
+    expect(effectName({ name: "Подвійний урон" })).toBe("Подвійний урон");
   });
 
   it("ac_buff: +2 до броні на раунд", () => {

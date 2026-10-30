@@ -7,4 +7,5 @@ export const abilityRef = (key: AbilityKey): TextRef => dynamicTextRef(`gameTerm
 
 export const abilityShortRef = (key: AbilityKey): TextRef => dynamicTextRef(`gameTerms.abilities.${key}.short`);
 
+/** Engine-made effects carry a translatable `label`; the rest show their content `name`. */
 export const effectName = (effect: Pick<ActiveEffect, "name" | "label">): LogLine => effect.label ?? effect.name;

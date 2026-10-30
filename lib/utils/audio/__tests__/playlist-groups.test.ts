@@ -17,6 +17,7 @@ describe("trackGroupName", () => {
   it("усі «<раса> - Битва N» — група «Битва»; «Битвище» і інші треки раси — ні", () => {
     expect(trackGroupName("Люди - Битва")).toBe(BATTLE_TRACK_GROUP);
     expect(trackGroupName("Ельфи - Битва 2")).toBe(BATTLE_TRACK_GROUP);
+    expect(trackGroupName("Битва - Фінал")).toBe(BATTLE_TRACK_GROUP);
     expect(trackGroupName("Нейтральні - Битва 3 (HoMM III)")).toBe(BATTLE_TRACK_GROUP);
     expect(trackGroupName("Люди - Битвище")).toBe("Люди");
     expect(trackGroupName("Люди - Облога після Битва")).toBe("Люди");
