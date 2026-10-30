@@ -23,3 +23,9 @@ export function writeTranslations(locale: string, tr: Translations, dir = I18N_D
 }
 
 export const listLocales = (dir = I18N_DIR): string[] => ["en", ...(fs.existsSync(dir) ? fs.readdirSync(dir).filter((f) => f.endsWith(".json")).map((f) => f.replace(/\.json$/, "")) : [])];
+
+export const readGlossary = (locale: string, dir = I18N_DIR): Record<string, string> => {
+  const file = path.join(dir, "glossary", `${locale}.json`);
+
+  return fs.existsSync(file) ? (JSON.parse(fs.readFileSync(file, "utf8")) as Record<string, string>) : {};
+};

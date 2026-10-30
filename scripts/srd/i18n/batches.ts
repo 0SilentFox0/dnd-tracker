@@ -1,6 +1,7 @@
 import type { SrdKind } from "../lib/types";
 import { type CatalogEntry, type Translations } from "./catalog";
 import { buildNameMap, fixItalicNames } from "./names";
+import { type Glossary, normalizeSpellHeader } from "./spell-header";
 import { checkTranslation, type TranslationIssue } from "./validate";
 
 export type Phase = "A" | "B";
@@ -42,7 +43,7 @@ export interface Rejected extends AppliedLine {
   issues: Array<TranslationIssue | "unknown">;
 }
 
-export function mergeApplied(existing: Translations, lines: AppliedLine[], catalog: CatalogEntry[]): { merged: Translations; accepted: number; rejected: Rejected[] } {
+export function mergeApplied(existing: Translations, lines: AppliedLine[], catalog: CatalogEntry[], glossary: Glossary = {}): { merged: Translations; accepted: number; rejected: Rejected[] } {
   const byHash = new Map(catalog.map((e) => [e.hash, e]));
 
   const merged = { ...existing };
@@ -56,7 +57,7 @@ export function mergeApplied(existing: Translations, lines: AppliedLine[], catal
   for (const line of lines) {
     const entry = byHash.get(line.h);
 
-    const t = entry ? fixItalicNames(entry.en, line.t, names) : line.t;
+    const t = entry ? normalizeSpellHeader(entry.en, fixItalicNames(entry.en, line.t, names), glossary) : line.t;
 
     const issues = entry ? checkTranslation(entry.en, t) : (["unknown"] as Rejected["issues"]);
 

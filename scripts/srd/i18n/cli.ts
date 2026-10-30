@@ -1,6 +1,7 @@
 #!/usr/bin/env tsx
 // pnpm srd:i18n extract <locale> [--phase A|B] [--max-chars 22000]
 // pnpm srd:i18n apply <locale> <file.jsonl ...>
+// pnpm srd:i18n normalize <locale>   (re-run name/header autofix over existing translations)
 // pnpm srd:i18n status <locale>
 import * as fs from "fs";
 import * as path from "path";
@@ -9,7 +10,7 @@ import { readSrdData } from "../lib/data-files";
 import { type AppliedLine, inPhase, mergeApplied, missing, type Phase, planBatches } from "./batches";
 import { extractCatalog } from "./catalog";
 import { buildNameMap, namesIn } from "./names";
-import { I18N_DIR, readTranslations, writeTranslations } from "./store";
+import { I18N_DIR, readGlossary, readTranslations, writeTranslations } from "./store";
 
 const arg = (args: string[], name: string) => (args.includes(name) ? args[args.indexOf(name) + 1] : undefined);
 
@@ -61,7 +62,7 @@ function parseLine(file: string, line: number, text: string): AppliedLine {
 function apply(locale: string, files: string[]) {
   const lines: AppliedLine[] = files.flatMap((f) => fs.readFileSync(f, "utf8").split("\n").filter(Boolean).map((l, i) => parseLine(f, i + 1, l)));
 
-  const { merged, accepted, rejected } = mergeApplied(readTranslations(locale), lines, extractCatalog(readSrdData()));
+  const { merged, accepted, rejected } = mergeApplied(readTranslations(locale), lines, extractCatalog(readSrdData()), readGlossary(locale));
 
   writeTranslations(locale, merged);
 
@@ -71,6 +72,20 @@ function apply(locale: string, files: string[]) {
   }
 
   console.info(`прийнято ${accepted}, відхилено ${rejected.length}${rejected.length ? ` (todo/${locale}/rejected.jsonl; повторити через extract)` : ""}`);
+}
+
+function normalize(locale: string) {
+  const tr = readTranslations(locale);
+
+  const catalog = extractCatalog(readSrdData());
+
+  const { merged } = mergeApplied(tr, catalog.filter((e) => tr[e.hash] !== undefined).map((e) => ({ h: e.hash, t: tr[e.hash] })), catalog, readGlossary(locale));
+
+  const changed = Object.keys(merged).filter((h) => merged[h] !== tr[h]).length;
+
+  writeTranslations(locale, { ...tr, ...merged });
+
+  console.info(`нормалізовано ${changed} рядків`);
 }
 
 function status(locale: string) {
@@ -105,5 +120,6 @@ if (!locale) throw new Error("Потрібна мова: pnpm srd:i18n <extract|
 
 if (command === "extract") extract(locale, rest);
 else if (command === "apply") apply(locale, rest);
+else if (command === "normalize") normalize(locale);
 else if (command === "status") status(locale);
 else throw new Error(`Невідома команда: ${command}`);
