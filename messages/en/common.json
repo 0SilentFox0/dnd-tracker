@@ -108,7 +108,9 @@
     "switchAccount": "Switch account",
     "signOut": "Sign out",
     "watchShow": "Show",
-    "watchShowAria": "Watch the show"
+    "watchShowAria": "Watch the show",
+    "joinBattle": "Join battle",
+    "joinBattleAria": "Join the battle"
   },
   "breadcrumbs": {
     "label": "Breadcrumb",
