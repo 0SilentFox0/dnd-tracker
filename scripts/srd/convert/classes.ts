@@ -11,6 +11,7 @@ import {
   EXTRA_COLUMNS,
   FEATURE_LEVELS,
   type FeatureOption,
+  KEEP_SPELL_LISTS,
   MULTICLASS_PROFICIENCIES,
   POOL_COLUMNS,
   SAVING_THROW_FIXES,
@@ -114,7 +115,7 @@ function featureGroups(data: Open5eData, ownerPk: string, levelsOf: Map<string, 
   const byLevel = new Map<number, Ability[]>();
 
   for (const f of data.features) {
-    if (f.fields.parent !== ownerPk || DROP_TYPES.has(f.fields.feature_type ?? "") || DROP_FEATURES.has(f.pk) || SPELL_LIST.test(f.pk)) continue;
+    if (f.fields.parent !== ownerPk || DROP_TYPES.has(f.fields.feature_type ?? "") || DROP_FEATURES.has(f.pk) || (SPELL_LIST.test(f.pk) && !KEEP_SPELL_LISTS.has(f.pk))) continue;
 
     let levels = levelsOf.get(f.pk) ?? (FEATURE_LEVELS[f.pk] !== undefined ? [FEATURE_LEVELS[f.pk]] : null);
 

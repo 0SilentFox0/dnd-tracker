@@ -203,6 +203,14 @@
                 "kind": "grantAction",
                 "refreshBonusAction": true,
                 "target": "self"
+              },
+              {
+                "kind": "mark",
+                "markId": "reckless",
+                "duration": {
+                  "rounds": 1
+                },
+                "target": "self"
               }
             ]
           }
@@ -595,12 +603,34 @@
                 "name": "Frenzy",
                 "description": "If you use Reckless Attack while your Rage is active, you deal extra damage to the first target you hit on your turn with a Strength-based attack. To determine the extra damage, roll a number of d6s equal to your Rage Damage bonus, and add them together. The damage has the same type as the weapon or Unarmed Strike used for the attack.",
                 "trigger": {
-                  "event": "passive"
+                  "event": "hit",
+                  "role": "attacker"
+                },
+                "condition": {
+                  "type": "all",
+                  "conditions": [
+                    {
+                      "type": "hasMark",
+                      "who": "self",
+                      "markId": "rage"
+                    },
+                    {
+                      "type": "hasMark",
+                      "who": "self",
+                      "markId": "reckless"
+                    }
+                  ]
+                },
+                "limits": {
+                  "perTurn": 1
                 },
                 "effects": [
                   {
-                    "kind": "note",
-                    "text": "Frenzy"
+                    "kind": "dealDamage",
+                    "amount": {
+                      "scale": "frenzy"
+                    },
+                    "target": "eventTarget"
                   }
                 ]
               }
@@ -680,6 +710,32 @@
       }
     ],
     "columns": [
+      {
+        "key": "frenzy",
+        "label": "Frenzy",
+        "values": [
+          "",
+          "",
+          "2d6",
+          "2d6",
+          "2d6",
+          "2d6",
+          "2d6",
+          "2d6",
+          "3d6",
+          "3d6",
+          "3d6",
+          "3d6",
+          "3d6",
+          "3d6",
+          "3d6",
+          "4d6",
+          "4d6",
+          "4d6",
+          "4d6",
+          "4d6"
+        ]
+      },
       {
         "key": "rage-damage",
         "label": "Rage Damage",
@@ -2460,6 +2516,20 @@
             "level": 3,
             "abilities": [
               {
+                "id": "spell-list-3",
+                "name": "Circle of the Land Spells",
+                "description": "Whenever you finish a Long Rest, choose one type of land: arid, polar, temperate, or tropical. Consult the table below that corresponds to the chosen type; you have the spells listed for your Druid level and lower prepared.\n\nTable: Arid Land\n\n|Druid Level|Circle Spells|\n|---|---|\n|3|Blur, Burning Hands, Fire Bolt|\n|5|Fireball|\n|7|Blight|\n|9|Wall of Stone|\n\nTable: Polar Land\n|Druid Level|Circle Spells|\n|---|---|\n|3|Fog Cloud, Hold Person, Ray of Frost|\n|5|Sleet Storm|\n|7|Ice Storm|\n|9|Cone of Cold|\n\nTable: Temperate Land\n|Druid Level|Circle Spells|\n|---|---|\n|3|Misty Step, Shocking Grasp, Sleep|\n|5|Lightning Bolt|\n|7|Freedom of Movement|\n|9|Tree Stride|\n\nTable: Tropical Land\n|Druid Level|Circle Spells|\n|---|---|\n|3|Acid Splash, Ray of Sickness, Web|\n|5|Stinking Cloud|\n|7|Polymorph|\n|9|Insect Plague|",
+                "trigger": {
+                  "event": "passive"
+                },
+                "effects": [
+                  {
+                    "kind": "note",
+                    "text": "Circle of the Land Spells"
+                  }
+                ]
+              },
+              {
                 "id": "lands-aid-3",
                 "name": "Land's Aid",
                 "description": "As a Magic action, you can expend a use of your Wild Shape and choose a point within 60 feet of yourself. Vitality-giving flowers and life-draining thorns appear for a moment in a 10-foot-radius Sphere centered on that point. Each creature of your choice in the Sphere must make a Constitution saving throw against your spell save DC, taking 2d6 Necrotic damage on a failed save or half as much damage on a successful one. One creature of your choice in that area regains 2d6 Hit Points.\n\nThe damage and healing increase by 1d6 when you reach Druid levels 10 (3d6) and 14 (4d6).",
@@ -3434,8 +3504,18 @@
             },
             "effects": [
               {
+                "kind": "modifyStat",
+                "stat": "speed",
+                "percent": 100,
+                "until": "turnEnd",
+                "duration": {
+                  "rounds": 1
+                },
+                "target": "self"
+              },
+              {
                 "kind": "note",
-                "text": "Step of the Wind"
+                "text": "Disengage"
               }
             ]
           },
@@ -5265,8 +5345,10 @@
             },
             "effects": [
               {
-                "kind": "note",
-                "text": "Feral Senses"
+                "kind": "flag",
+                "flag": "sense",
+                "sense": "blindsight",
+                "range": 30
               }
             ]
           }

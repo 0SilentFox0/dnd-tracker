@@ -14,11 +14,11 @@ const byKind = (kind: string) => classChoices.filter((c) => c.kind === kind);
 const SPELL_LIST_COUNTS: Record<string, number> = { Wizard: 218, Sorcerer: 140, Bard: 130, Druid: 124, Cleric: 109, Warlock: 72, Ranger: 48, Paladin: 38 };
 
 describe("SRD 5.2 data: 4f-4", () => {
-  it("19 feats: 6 origin, 2 general, 4 fighting styles, 7 epic boons; ASI, Skilled, Magic Initiate repeatable", () => {
+  it("20 feats: 7 origin, 2 general, 4 fighting styles, 7 epic boons; ASI, Skilled, Magic Initiate repeatable", () => {
     const count = (type: string) => data.feats.filter((f) => f.type === type).length;
 
-    expect([count("origin"), count("general"), count("fightingStyle"), count("epicBoon")]).toEqual([6, 2, 4, 7]);
-    expect(data.feats.filter((f) => f.repeatable).map((f) => f.name).sort()).toEqual(["Ability Score Improvement", "Magic Initiate", "Magic Initiate (Cleric)", "Magic Initiate (Wizard)", "Skilled"]);
+    expect([count("origin"), count("general"), count("fightingStyle"), count("epicBoon")]).toEqual([7, 2, 4, 7]);
+    expect(data.feats.filter((f) => f.repeatable).map((f) => f.name).sort()).toEqual(["Ability Score Improvement", "Magic Initiate", "Magic Initiate (Cleric)", "Magic Initiate (Druid)", "Magic Initiate (Wizard)", "Skilled"]);
   });
 
   it("race choices: 24 lineage options, 42 spell references including breath shapes, every spell name exists", () => {

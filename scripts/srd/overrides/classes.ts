@@ -83,6 +83,7 @@ export const CLASS_FEATURE_OVERRIDES: Record<string, AbilityCore | FeatureOption
       { kind: "flag", flag: "advantage", attackKind: "all", attackAbility: "strength", duration: { rounds: 1 }, target: "self" },
       { kind: "flag", flag: "advantageForAttackers", duration: { rounds: 1 }, target: "self" },
       { kind: "grantAction", refreshBonusAction: true, target: "self" },
+      { kind: "mark", markId: "reckless", duration: { rounds: 1 }, target: "self" },
     ],
   },
   "srd-2024_rogue_steady-aim": {
@@ -113,6 +114,12 @@ export const CLASS_FEATURE_OVERRIDES: Record<string, AbilityCore | FeatureOption
   },
   "srd-2024_barbarian_relentless-rage": { trigger: { event: "lethalDamage" }, condition: RAGING, limits: { perRest: { rest: "short", uses: 1 } }, effects: [{ kind: "heal", amount: { formula: "2 * class_level" }, revive: true, target: "self" }] },
   "srd-2024_path-of-the-berserker_mindless-rage": passive([{ kind: "flag", flag: "conditionImmunity", conditions: ["charmed", "frightened"] }], RAGING),
+  "srd-2024_path-of-the-berserker_frenzy": {
+    trigger: { event: "hit", role: "attacker" },
+    condition: { type: "all", conditions: [RAGING, { type: "hasMark", who: "self", markId: "reckless" }] },
+    limits: { perTurn: 1 },
+    effects: [{ kind: "dealDamage", amount: { scale: "frenzy" }, target: "eventTarget" }],
+  },
   "srd-2024_path-of-the-berserker_retaliation": passive([{ kind: "flag", flag: "counterAttack", attackKinds: ["melee"], bonusPercent: 0 }]),
   "srd-2024_bard_bardic-inspiration": { trigger: { event: "bonusAction" }, limits: { perRest: { rest: "long", uses: { formula: "max(1, cha_mod)" } } }, effects: [{ kind: "mark", markId: "bardic-inspiration", duration: { rounds: 99 }, target: "eventTarget" }] },
   "srd-2024_cleric_channel-divinity": [
@@ -151,7 +158,8 @@ export const CLASS_FEATURE_OVERRIDES: Record<string, AbilityCore | FeatureOption
       ],
     },
     { name: "Flurry of Blows", slug: "flurry-of-blows", trigger: { event: "bonusAction" }, limits: pool("focus-points"), effects: [note("Flurry of Blows")] },
-    { name: "Step of the Wind", slug: "step-of-the-wind", trigger: { event: "bonusAction" }, limits: pool("focus-points"), effects: [note("Step of the Wind")] },
+    // Disengage has no applyCondition key (only the internal marker): kept as a note
+    { name: "Step of the Wind", slug: "step-of-the-wind", trigger: { event: "bonusAction" }, limits: pool("focus-points"), effects: [{ kind: "modifyStat", stat: "speed", percent: 100, until: "turnEnd", duration: { rounds: 1 }, target: "self" }, note("Disengage")] },
   ],
   "srd-2024_monk_superior-defense": { trigger: { event: "bonusAction" }, limits: pool("focus-points", 3), effects: NON_FORCE.map(resist) },
   "srd-2024_monk_deflect-attacks": {
@@ -180,6 +188,7 @@ export const CLASS_FEATURE_OVERRIDES: Record<string, AbilityCore | FeatureOption
   },
   "srd-2024_monk_evasion": passive([{ kind: "flag", flag: "evasion" }]),
   "srd-2024_monk_disciplined-survivor": passive([{ kind: "flag", flag: "saveProficiency", abilities: ["strength", "dexterity", "constitution", "intelligence", "wisdom", "charisma"] }]),
+  "srd-2024_ranger_feral-senses": passive([{ kind: "flag", flag: "sense", sense: "blindsight", range: 30 }]),
   "srd-2024_ranger_roving": passive([{ kind: "modifyStat", stat: "speed", flat: 10 }]),
   "srd-2024_paladin_aura-of-courage": passive([{ kind: "flag", flag: "conditionImmunity", conditions: ["frightened"], target: "nearbyAllies" }]),
   "srd-2024_paladin_oath-of-devotion_aura-of-devotion": passive([{ kind: "flag", flag: "conditionImmunity", conditions: ["charmed"], target: "nearbyAllies" }]),
@@ -201,8 +210,12 @@ export const CLASS_FEATURE_OVERRIDES: Record<string, AbilityCore | FeatureOption
   "srd-2024_wizard_evoker_empowered-evocation": passive([{ kind: "damageBonus", filter: { kind: "magic", school: "Evocation" }, flat: { formula: "int_mod" } }]),
 };
 
+// class spell lists are dropped; this subclass one is a feature (a note, like Life Domain Spells)
+export const KEEP_SPELL_LISTS: ReadonlySet<string> = new Set(["srd-2024_druid_circle-of-the-land_spell-list"]);
+
 // Open5e has no level rows for these
 export const FEATURE_LEVELS: Record<string, number> = {
+  "srd-2024_druid_circle-of-the-land_spell-list": 3,
   "srd-2024_bard_bard-subclass": 3,
   "srd-2024_monk_deflect-attacks": 3,
   "srd-2024_sorcerer_metamagic-options": 2,
@@ -232,6 +245,7 @@ const levels = (f: (level: number) => string) => Array.from({ length: MAX_CLASS_
 
 // numbers from the SRD text that have no table column in Open5e
 export const EXTRA_COLUMNS: Record<string, ClassColumn[]> = {
+  "srd-2024_barbarian": [{ key: "frenzy", label: "Frenzy", values: levels((l) => (l >= 16 ? "4d6" : l >= 9 ? "3d6" : l >= 3 ? "2d6" : "")) }],
   "srd-2024_fighter": [{ key: "action-surge", label: "Action Surge", values: levels((l) => (l >= 17 ? "2" : l >= 2 ? "1" : "")) }],
   "srd-2024_cleric": [{ key: "divine-spark", label: "Divine Spark", values: levels((l) => (l >= 18 ? "4d8" : l >= 13 ? "3d8" : l >= 7 ? "2d8" : l >= 2 ? "1d8" : "")) }],
   "srd-2024_sorcerer": [{ key: "metamagic", label: "Metamagic", values: levels((l) => (l >= 17 ? "6" : l >= 10 ? "4" : l >= 2 ? "2" : "")) }],

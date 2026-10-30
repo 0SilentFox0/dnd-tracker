@@ -33,7 +33,7 @@ describe("pinned SRD backgrounds", () => {
   it("resolves specified Magic Initiate spell lists through origin feat variants", () => {
     const variants = backgroundFeatVariants(data, convertFeats(data));
 
-    expect(variants.map((f) => f.name)).toEqual(["Magic Initiate (Cleric)", "Magic Initiate (Wizard)"]);
+    expect(variants.map((f) => f.name)).toEqual(["Magic Initiate (Cleric)", "Magic Initiate (Druid)", "Magic Initiate (Wizard)"]);
     for (const f of variants) expect(f.choices.every((c) => c.spells?.lists.length === 1)).toBe(true);
 
     const all = [...convertFeats(data), ...variants];

@@ -30,8 +30,10 @@
         },
         "effects": [
           {
-            "kind": "note",
-            "text": "Darkvision"
+            "kind": "flag",
+            "flag": "sense",
+            "sense": "darkvision",
+            "range": 60
           }
         ]
       },
@@ -691,8 +693,10 @@
         },
         "effects": [
           {
-            "kind": "note",
-            "text": "Darkvision"
+            "kind": "flag",
+            "flag": "sense",
+            "sense": "darkvision",
+            "range": 120
           }
         ]
       },
@@ -734,12 +738,26 @@
         "name": "Stonecunning",
         "description": "As a Bonus Action, you gain Tremorsense with a range of 60 feet for 10 minutes. You must be on a stone surface or touching a stone surface to use this Tremorsense. The stone can be natural or worked.\n\nYou can use this Bonus Action a number of times equal to your Proficiency Bonus, and you regain all expended uses when you finish a Long Rest.",
         "trigger": {
-          "event": "passive"
+          "event": "bonusAction"
+        },
+        "limits": {
+          "perRest": {
+            "rest": "long",
+            "uses": {
+              "formula": "prof"
+            }
+          }
         },
         "effects": [
           {
-            "kind": "note",
-            "text": "Stonecunning"
+            "kind": "flag",
+            "flag": "sense",
+            "sense": "tremorsense",
+            "range": 60,
+            "duration": {
+              "rounds": 99
+            },
+            "target": "self"
           }
         ]
       }
@@ -762,8 +780,10 @@
         },
         "effects": [
           {
-            "kind": "note",
-            "text": "Darkvision"
+            "kind": "flag",
+            "flag": "sense",
+            "sense": "darkvision",
+            "range": 60
           }
         ]
       },
@@ -820,8 +840,10 @@
                 },
                 "effects": [
                   {
-                    "kind": "note",
-                    "text": "Darkvision 120 ft."
+                    "kind": "flag",
+                    "flag": "sense",
+                    "sense": "darkvision",
+                    "range": 120
                   }
                 ]
               }
@@ -967,8 +989,10 @@
         },
         "effects": [
           {
-            "kind": "note",
-            "text": "Darkvision"
+            "kind": "flag",
+            "flag": "sense",
+            "sense": "darkvision",
+            "range": 60
           }
         ]
       },
@@ -1416,12 +1440,30 @@
         "name": "Adrenaline Rush",
         "description": "You can take the Dash action as a Bonus Action. When you do so, you gain a number of Temporary Hit Points equal to your Proficiency Bonus.\n\nYou can use this trait a number of times equal to your Proficiency Bonus, and you regain all expended uses when you finish a Short or Long Rest.",
         "trigger": {
-          "event": "passive"
+          "event": "bonusAction"
+        },
+        "limits": {
+          "perRest": {
+            "rest": "short",
+            "uses": {
+              "formula": "prof"
+            }
+          }
         },
         "effects": [
           {
+            "kind": "modifyStat",
+            "stat": "speed",
+            "percent": 100,
+            "until": "turnEnd",
+            "duration": {
+              "rounds": 1
+            },
+            "target": "self"
+          },
+          {
             "kind": "note",
-            "text": "Adrenaline Rush"
+            "text": "Temporary Hit Points = Proficiency Bonus"
           }
         ]
       },
@@ -1434,8 +1476,10 @@
         },
         "effects": [
           {
-            "kind": "note",
-            "text": "Darkvision"
+            "kind": "flag",
+            "flag": "sense",
+            "sense": "darkvision",
+            "range": 120
           }
         ]
       },
@@ -1479,8 +1523,10 @@
         },
         "effects": [
           {
-            "kind": "note",
-            "text": "Darkvision"
+            "kind": "flag",
+            "flag": "sense",
+            "sense": "darkvision",
+            "range": 60
           }
         ]
       },

@@ -12,6 +12,9 @@ const asi = (points: number, max: number, abilities?: Choice["abilities"]): Choi
 
 const MI_LISTS = ["Cleric", "Druid", "Wizard"];
 
+// no SRD background grants these, but the feat text allows them
+export const EXTRA_MAGIC_INITIATE_LISTS = ["Druid"];
+
 const boon: FeatMechanics = { abilities: ["note"], choices: [asi(1, 30)] };
 
 export const FEAT_MECHANICS: Record<string, FeatMechanics> = {

@@ -1,6 +1,7 @@
 import type { Open5eData } from "../lib/open5e";
 import { bySlug } from "../lib/text";
 import type { BackgroundRow, FeatRow } from "../lib/types";
+import { EXTRA_MAGIC_INITIATE_LISTS } from "../overrides/feats";
 
 import { isAbilityKey } from "@/lib/constants/abilities";
 import { DND_SKILLS, type DndSkill } from "@/lib/constants/skills";
@@ -41,11 +42,13 @@ export function convertBackgrounds(data: Open5eData): BackgroundRow[] {
   }).sort(bySlug);
 }
 
-/** SRD fixes the list for these backgrounds; the ordinary feat remains selectable. */
+/** SRD fixes the list for these backgrounds (plus the Druid variant, which no background uses); the ordinary feat remains selectable. */
 export function backgroundFeatVariants(data: Open5eData, feats: readonly FeatRow[]): FeatRow[] {
   const names = [...new Set(data.backgroundBenefits.filter((b) => b.fields.type === "feat").map((b) => b.fields.desc))];
 
-  return names.filter((name) => /^Magic Initiate \((Cleric|Wizard)\)$/.test(name)).sort().map((name) => {
+  const variants = [...new Set([...names.filter((name) => /^Magic Initiate \((Cleric|Wizard)\)$/.test(name)), ...EXTRA_MAGIC_INITIATE_LISTS.map((list) => `Magic Initiate (${list})`)])];
+
+  return variants.sort().map((name) => {
     const base = feats.find((f) => f.name === "Magic Initiate");
 
     if (!base) throw new Error(`${name}: missing Magic Initiate`);

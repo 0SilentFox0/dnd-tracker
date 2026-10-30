@@ -24,10 +24,22 @@ describe("convertRaces", () => {
     expect(ability("Orc", "relentless-endurance")).toMatchObject({ trigger: { event: "lethalDamage" }, limits: { perRest: { rest: "long", uses: 1 } }, effects: [{ kind: "heal", amount: 1, revive: true }] });
   });
 
-  it("other traits are notes with the full SRD text", () => {
+  it("Darkvision becomes a sense flag; the text stays in the description", () => {
     const darkvision = ability("Elf", "darkvision")!;
 
-    expect(darkvision.effects).toEqual([{ kind: "note", text: "Darkvision" }]);
+    expect(darkvision.effects).toEqual([{ kind: "flag", flag: "sense", sense: "darkvision", range: 60 }]);
     expect(darkvision.description).toContain("Darkvision with a range of 60 feet");
+    expect(ability("Orc", "darkvision")!.effects).toEqual([{ kind: "flag", flag: "sense", sense: "darkvision", range: 120 }]);
+  });
+
+  it("Adrenaline Rush: bonus-action Dash scaled by proficiency", () => {
+    expect(ability("Orc", "adrenaline-rush")).toMatchObject({ trigger: { event: "bonusAction" }, limits: { perRest: { rest: "short", uses: { formula: "prof" } } } });
+  });
+
+  it("other traits are notes with the full SRD text", () => {
+    const trance = ability("Elf", "trance")!;
+
+    expect(trance.effects).toEqual([{ kind: "note", text: "Trance" }]);
+    expect(trance.description).toContain("You don't need to sleep");
   });
 });

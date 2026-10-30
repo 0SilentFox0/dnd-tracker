@@ -20,7 +20,7 @@ const scaled = (className: string, name: string, level: number) => applyClassSca
 
 describe("class columns", () => {
   it("keys from the slug tail, sorted; warlock slot columns and proficiency are not columns", () => {
-    expect(cls("Barbarian").columns.map((c) => c.key)).toEqual(["rage-damage", "rages", "weapon-mastery-count"]);
+    expect(cls("Barbarian").columns.map((c) => c.key)).toEqual(["frenzy", "rage-damage", "rages", "weapon-mastery-count"]);
     expect(cls("Rogue").columns.map((c) => c.key)).toEqual(["sneak-attack"]);
     expect(columnKey("srd-2024_rogue_sneak-attack-column-data", "srd-2024_rogue")).toBe("sneak-attack");
     expect(cls("Barbarian").columns.find((c) => c.key === "rages")?.values).toEqual(["2", "2", "3", "3", "3", "4", "4", "4", "4", "4", "4", "5", "5", "5", "5", "5", "6", "6", "6", "6"]);

@@ -29,7 +29,7 @@ const giantHit = (amount: string, damageType: string): AbilityCore => ({
 });
 
 export const OPTION_ABILITIES: Record<string, Array<{ id: string; name: string; core: AbilityCore }>> = {
-  "elf:drow": [{ id: "superior-darkvision", name: "Superior Darkvision", core: { trigger: { event: "passive" }, effects: [{ kind: "note", text: "Darkvision 120 ft." }] } }],
+  "elf:drow": [{ id: "superior-darkvision", name: "Superior Darkvision", core: { trigger: { event: "passive" }, effects: [{ kind: "flag", flag: "sense", sense: "darkvision", range: 120 }] } }],
   "elf:wood-elf": [{ id: "wood-elf-speed", name: "Wood Elf Speed", core: { trigger: { event: "passive" }, effects: [{ kind: "modifyStat", stat: "speed", flat: 5 }] } }],
   "goliath:fire-giant": [{ id: "fires-burn", name: "Fire's Burn", core: giantHit("1d10", "fire") }],
   "goliath:frost-giant": [{ id: "frosts-chill", name: "Frost's Chill", core: giantHit("1d6", "cold") }],
