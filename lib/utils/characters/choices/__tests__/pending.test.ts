@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 
 import { empty, refs, sorcerer } from "./fixtures";
 
-import { pendingCount } from "@/lib/utils/characters/choices/pending";
+import { backgroundOpenCount, pendingCount } from "@/lib/utils/characters/choices/pending";
 import { visitPicks } from "@/lib/utils/characters/choices/walk";
 import type { ChoicesState } from "@/types/choices";
 
@@ -53,5 +53,20 @@ describe("pendingCount: spell picks without an available slot level", () => {
 
   it("level 2 half caster has a slot, so prepared picks count again", () => {
     expect(count(2)).toBe(8);
+  });
+});
+
+describe("backgroundOpenCount", () => {
+  const bg = { id: "bg", name: "Sage", icon: null, description: null, choices: [{ id: "bg-skill", label: "Skill", level: 1, count: 2, kind: "skill" as const }], skillProficiencies: [], toolProficiencies: [], originFeatId: null, equipmentText: null };
+
+  const open = (state: Partial<ChoicesState>) => backgroundOpenCount(visitPicks({ ...empty, ...state }, { ...refs, backgroundsById: { bg } }, { level: 1, classMode: true }), refs);
+
+  it("0 when nothing is open or no background", () => {
+    expect(open({})).toEqual({ count: 0, key: null });
+    expect(open({ backgroundId: "bg", backgroundChoices: { "bg-skill": [{ id: "arcana" }, { id: "history" }] } })).toEqual({ count: 0, key: null });
+  });
+
+  it("counts missing picks and names the first open key, ignoring other owners", () => {
+    expect(open({ backgroundId: "bg", backgroundChoices: { "bg-skill": [{ id: "arcana" }] }, ...sorc(1) })).toEqual({ count: 1, key: "backgroundChoices.bg-skill" });
   });
 });

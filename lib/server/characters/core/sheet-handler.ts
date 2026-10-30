@@ -10,7 +10,7 @@ import { abilitySummary } from "@/lib/utils/abilities/summary";
 import { loadEquippedArtifactRows } from "@/lib/utils/battle/participant/extract-artifacts";
 import { loadFeatsById } from "@/lib/utils/battle/participant/load-feats";
 import { getCharacterImmunities } from "@/lib/utils/characters/character-race-effects";
-import { pendingCount } from "@/lib/utils/characters/choices/pending";
+import { backgroundOpenCount, pendingCount } from "@/lib/utils/characters/choices/pending";
 import { choicesStateOf } from "@/lib/utils/characters/choices/picks";
 import { choiceSelections, selectionNeedsFeats } from "@/lib/utils/characters/choices/selections";
 import { visitPicks } from "@/lib/utils/characters/choices/walk";
@@ -72,11 +72,14 @@ export async function buildSheetFor(character: SheetCharacter, viewer: Character
 
   const background = classMode ? await loadBackground(character.campaignId, state.backgroundId) : null;
 
+  const visits = choiceRace || classMode ? visitPicks(state, { backgroundsById: background ? { [background.id]: background } : {}, race: choiceRace, classesById: context.classesById ?? {}, featsById }, { level: character.level, classMode }) : [];
+
   const choices =
     choiceRace || classMode
       ? {
           selections: choiceSelections({ background, backgroundChoices: state.backgroundChoices, backgroundFeatPicks: state.backgroundFeatPicks, race: choiceRace, raceChoices: state.raceChoices, classes: classMode ? (classes ?? []) : [], feats: classMode ? state.feats : [], featsById, level: character.level }),
-          pending: pendingCount(visitPicks(state, { backgroundsById: background ? { [background.id]: background } : {}, race: choiceRace, classesById: context.classesById ?? {}, featsById }, { level: character.level, classMode }), { featsById }),
+          pending: pendingCount(visits, { featsById }),
+          backgroundOpen: backgroundOpenCount(visits, { featsById }),
         }
       : undefined;
 

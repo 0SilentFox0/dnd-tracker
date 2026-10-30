@@ -19,3 +19,13 @@ const unreachable = (v: PickVisit): boolean => {
 
 export const pendingCount = (visits: readonly PickVisit[], refs: Pick<ChoiceRefs, "featsById">): number =>
   visits.filter((v) => v.open && !unreachable(v)).reduce((sum, v) => sum + Math.max(0, v.target - resolved(v, refs)), 0);
+
+const isBackgroundVisit = (v: PickVisit): boolean => v.path.startsWith("backgroundChoices.") || v.path.startsWith("backgroundFeatPicks.");
+
+export function backgroundOpenCount(visits: readonly PickVisit[], refs: Pick<ChoiceRefs, "featsById">): { count: number; key: string | null } {
+  const own = visits.filter(isBackgroundVisit);
+
+  const key = own.find((v) => pendingCount([v], refs) > 0)?.path ?? null;
+
+  return { count: pendingCount(own, refs), key };
+}

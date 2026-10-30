@@ -38,9 +38,14 @@ exports[`choice owner walk characterization > backgroundFeat > selections 1`] = 
 {
   "selections": {
     "background": {
+      "description": null,
       "equipmentText": "Book",
       "id": "bg",
       "name": "Sage",
+      "originFeat": {
+        "id": "f-mi",
+        "name": "Magic Initiate",
+      },
       "picks": [
         {
           "message": "characterProfile.sheet.abilityPick",
@@ -49,6 +54,12 @@ exports[`choice owner walk characterization > backgroundFeat > selections 1`] = 
             "n": 2,
           },
         },
+      ],
+      "skills": [
+        "arcana",
+      ],
+      "tools": [
+        "Ink",
       ],
     },
     "expertise": [],
