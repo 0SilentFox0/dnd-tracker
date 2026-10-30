@@ -23,18 +23,30 @@ const DICE_ISSUE = "abilities.validation.diceFormat";
 
 const SET_FIELD: Record<string, string> = { stat: "stat", damageType: "damageType", filter: "filter.kind", condition: "condition" };
 
+export const recipeOptionKey = (p: ParamDef, value: string) => {
+  const field = SET_FIELD[p.key] ?? SET_FIELD[p.kind];
+
+  if (!field) return null;
+
+  return `${field === "damageType" ? "damageTypes" : optionSetKey(field)}.${value}`;
+};
+
 export function RecipeForm({ recipe, values, onChange, issues, name }: RecipeFormProps) {
   const t = useTranslations("abilities.templates");
 
   const tr = useTranslator("abilityRegistry");
 
   const optionLabel = (p: ParamDef, value: string) => {
-    const field = SET_FIELD[p.key] ?? SET_FIELD[p.kind];
+    const key = recipeOptionKey(p, value);
 
-    if (!field) return p.key === "delta" && Number(value) > 0 ? `+${value}` : value;
+    if (!key) return p.key === "delta" && Number(value) > 0 ? `+${value}` : value;
 
-    return tr(`${optionSetKey(field)}.${value}`);
+    return tr(key);
   };
+
+  const diceIssues = issues.filter((i) => i === DICE_ISSUE);
+
+  const diceErrorsId = `recipe-${recipe.id}-dice-errors`;
 
   const control = (p: ParamDef) => {
     const id = `recipe-${recipe.id}-${p.key}`;
@@ -45,7 +57,9 @@ export function RecipeForm({ recipe, values, onChange, issues, name }: RecipeFor
       return <SelectField id={id} value={value} onValueChange={(v) => onChange(p.key, v)} options={p.options.map((o) => ({ value: o, label: optionLabel(p, o) }))} />;
     }
 
-    if (p.kind === "dice") return <Input id={id} value={value} onChange={(e) => onChange(p.key, e.target.value)} />;
+    if (p.kind === "dice") return (
+        <Input id={id} value={value} onChange={(e) => onChange(p.key, e.target.value)} aria-invalid={diceIssues.length > 0 || undefined} aria-describedby={diceIssues.length > 0 ? diceErrorsId : undefined} />
+      );
 
     const clamp = () => {
       const n = Number(value);
@@ -55,8 +69,6 @@ export function RecipeForm({ recipe, values, onChange, issues, name }: RecipeFor
 
     return <Input id={id} type="number" inputMode="numeric" min={p.min} max={p.max} value={value} onChange={(e) => onChange(p.key, e.target.value)} onBlur={clamp} />;
   };
-
-  const diceIssues = issues.filter((i) => i === DICE_ISSUE);
 
   const otherIssues = issues.filter((i) => i !== DICE_ISSUE);
 
@@ -73,7 +85,7 @@ export function RecipeForm({ recipe, values, onChange, issues, name }: RecipeFor
         <div key={p.key} className="space-y-1">
           <Label htmlFor={`recipe-${recipe.id}-${p.key}`}>{tr(`templates.${recipe.id}.params.${p.key}`)}</Label>
           {control(p)}
-          {p.kind === "dice" && <FieldErrors errors={diceIssues} testId="recipe-errors" />}
+          {p.kind === "dice" && <FieldErrors errors={diceIssues} testId="recipe-errors" id={diceErrorsId} />}
         </div>
       ))}
     </div>

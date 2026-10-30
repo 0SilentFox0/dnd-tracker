@@ -39,6 +39,7 @@
     "nameLabel": "Name",
     "copyTitle": "Copy abilities from…",
     "addTitle": "Add ability",
+    "addSpellTitle": "Add spell effect",
     "copyFrom": "Copy from…"
   },
   "copy": {

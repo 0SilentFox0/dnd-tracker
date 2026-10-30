@@ -113,7 +113,7 @@ export function RecipeGallery(props: RecipeGalleryProps) {
 
   const categories = [ALL, ...RECIPE_CATEGORIES] as const;
 
-  const title = copying ? t("copyTitle") : selected ? tr(`templates.${selected.id}.label`) : t("addTitle");
+  const title = copying ? t("copyTitle") : selected ? tr(`templates.${selected.id}.label`) : t(scope === "spell" ? "addSpellTitle" : "addTitle");
 
   const footer = selected ? (
     <>
@@ -155,7 +155,7 @@ export function RecipeGallery(props: RecipeGalleryProps) {
       ) : (
         <div className="space-y-3">
           <HudChipTabs
-            ariaLabel={t("addTitle")}
+            ariaLabel={t(scope === "spell" ? "addSpellTitle" : "addTitle")}
             items={categories.map((c) => ({ key: c, label: c === ALL ? t("allCategories") : tr(`templates.categories.${c}`), active: category === c, onSelect: () => setCategory(c) }))}
           />
           <div className="space-y-2">
