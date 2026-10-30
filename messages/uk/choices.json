@@ -120,5 +120,45 @@
     "ability": "{abilities}: потрібно {need}, зараз {have}",
     "option": "спершу обери: {list}",
     "manual": "перевіряє ДМ: {text}"
+  },
+  "wizard": {
+    "step": "Крок {n} з {total}",
+    "back": "Назад",
+    "next": "Далі",
+    "finish": "Готово",
+    "close": "Закрити",
+    "saving": "Збереження…",
+    "allChosen": "Усе обрано",
+    "allChosenHint": "Відкритих виборів для цього героя не лишилось.",
+    "sourceLabel": "Звідки",
+    "givesLabel": "Що дає",
+    "source": {
+      "race": "Раса: {name}",
+      "background": "Передісторія: {name}",
+      "backgroundFeat": "Риса передісторії: {name}",
+      "class": "Клас: {name}",
+      "classLevel": "Клас: {name}, рівень {level}",
+      "feat": "Риса: {name}"
+    },
+    "gives": {
+      "abilityScore": "Підвищує характеристики",
+      "feat": "Риса з власними бонусами",
+      "skill": "Володіння навичкою",
+      "expertise": "Подвійне володіння навичкою, яку знаєш",
+      "spell": "Закляття, які можна наколдувати",
+      "option": "Варіант із власними перевагами",
+      "subclass": "Підклас: нові можливості на вищих рівнях"
+    },
+    "featSource": {
+      "background": "Риса передісторії: початкова",
+      "race": "Human Versatile: риса початкового рівня",
+      "asi": "Збільшення характеристик, {class} {level}: риса або +2",
+      "other": "Риса"
+    },
+    "subclass": {
+      "title": "Оберіть підклас",
+      "level": "Рівень {level}",
+      "noDescription": "Без опису"
+    }
   }
 }

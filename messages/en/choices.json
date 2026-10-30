@@ -120,5 +120,45 @@
     "ability": "{abilities}: need {need}, now {have}",
     "option": "pick first: {list}",
     "manual": "DM checks: {text}"
+  },
+  "wizard": {
+    "step": "Step {n} of {total}",
+    "back": "Back",
+    "next": "Next",
+    "finish": "Done",
+    "close": "Close",
+    "saving": "Saving…",
+    "allChosen": "Everything is chosen",
+    "allChosenHint": "No open choices left for this hero.",
+    "sourceLabel": "From",
+    "givesLabel": "What it gives",
+    "source": {
+      "race": "Race: {name}",
+      "background": "Background: {name}",
+      "backgroundFeat": "Background feat: {name}",
+      "class": "Class: {name}",
+      "classLevel": "Class: {name}, level {level}",
+      "feat": "Feat: {name}"
+    },
+    "gives": {
+      "abilityScore": "Raises ability scores",
+      "feat": "A feat with its own bonuses",
+      "skill": "Skill proficiency",
+      "expertise": "Double proficiency in a skill you know",
+      "spell": "Spells you can cast",
+      "option": "An option with its own benefits",
+      "subclass": "A subclass: new features at later levels"
+    },
+    "featSource": {
+      "background": "Background feat: starting feat",
+      "race": "Human Versatile: starting-level feat",
+      "asi": "Ability Score Improvement, {class} {level}: a feat or +2",
+      "other": "A feat"
+    },
+    "subclass": {
+      "title": "Choose a subclass",
+      "level": "Level {level}",
+      "noDescription": "No description"
+    }
   }
 }
