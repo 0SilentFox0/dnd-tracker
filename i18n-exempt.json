@@ -24,6 +24,10 @@
     "reason": "uk aliases matched when importing content"
   },
   {
+    "glob": "lib/constants/track-title-conventions.ts",
+    "reason": "track-title convention of the HoMM library stored in DB"
+  },
+  {
     "glob": "vitest-setup.ts",
     "reason": "test setup mocks with uk strings"
   },

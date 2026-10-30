@@ -82,8 +82,8 @@ describe("splitTrackTitle / joinTrackTitle", () => {
 
 describe("trackGroupLabelKey", () => {
   it("маркери «Інше» і «Битва» мають ключі, решта груп — ні", () => {
-    expect(trackGroupLabelKey("Інше")).toBe("music.groups.other");
-    expect(trackGroupLabelKey("Битва")).toBe("music.groups.battle");
+    expect(trackGroupLabelKey(OTHER_TRACK_GROUP)).toBe("music.groups.other");
+    expect(trackGroupLabelKey(BATTLE_TRACK_GROUP)).toBe("music.groups.battle");
     expect(trackGroupLabelKey("Люди")).toBeNull();
   });
 });
