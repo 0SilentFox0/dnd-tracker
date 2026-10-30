@@ -33,6 +33,8 @@ export function DmCharacterCard({ character, campaignId, busy, maxLevel = 20, ac
 
   const classMode = useClassMode(campaignId);
 
+  const classPick = classMode.enabled && !!character.classes?.length;
+
   const entries = classMode.enabled && character.classes?.length ? resolveClassEntries(character.classes, classMode.byId) : null;
 
   const ooc = rules?.outOfCombat;
@@ -68,7 +70,7 @@ export function DmCharacterCard({ character, campaignId, busy, maxLevel = 20, ac
           onTriggerClick={(e) => e.preventDefault()}
           actions={[
             { label: tc("edit"), icon: Pencil, href: `/campaigns/${campaignId}/dm/characters/${character.id}` },
-            ...(actions.onLevelUp
+            ...(actions.onLevelUp && !classPick
               ? [{ label: t("levelUp"), icon: TrendingUp, onSelect: actions.onLevelUp, disabled: busy }]
               : []),
             { label: tc("delete"), icon: Trash2, onSelect: actions.onDelete, destructive: true, separatorBefore: true },

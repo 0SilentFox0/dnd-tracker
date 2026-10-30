@@ -17,6 +17,15 @@ const issuesOf = (e: unknown): ChoiceIssue[] => {
   return Array.isArray(issues) ? (issues as ChoiceIssue[]) : [];
 };
 
+/** issues are already shown next to their pickers, so the banner carries only the headline, not the merged details */
+export const choiceSaveError = (e: unknown, fallback: string): string => {
+  if (!(e instanceof ApiError)) return e instanceof Error ? e.message : fallback;
+
+  const { error, issues } = (e.body ?? {}) as { error?: unknown; issues?: unknown };
+
+  return Array.isArray(issues) && issues.length > 0 && typeof error === "string" ? error : e.message;
+};
+
 export function useCharacterChoices({ campaignId, characterId, onSaved }: { campaignId: string; characterId: string; onSaved?: (updated: Character) => void }) {
   const t = useTranslations("characterProfile.choices");
 
@@ -39,7 +48,7 @@ export function useCharacterChoices({ campaignId, characterId, onSaved }: { camp
 
       return true;
     } catch (e) {
-      setError(e instanceof Error ? e.message : t("saveFailed"));
+      setError(choiceSaveError(e, t("saveFailed")));
       setIssues(issuesOf(e));
 
       return false;

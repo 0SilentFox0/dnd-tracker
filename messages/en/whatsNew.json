@@ -3,6 +3,10 @@
     "title": "Time zone in your profile",
     "body": "Language and time settings now let you pick a time zone: dates and times are shown in it on any device. By default it follows your browser's zone."
   },
+  "2026-10-30-character-path": {
+    "title": "Character path",
+    "body": "The tab of a hero with classes is now called “Path”: a level timeline shows what you already gained, what waits for a choice and when the next thing unlocks. Each feature shows where it came from (class and level), and the full text opens behind the “i” icon. If a caster has not chosen spells yet, a hint with a choose button appears at the top."
+  },
   "2026-10-30-scenario-summaries": {
     "title": "Scene summaries",
     "body": "A summary now appears on the scene page and in the graph panel: an overview, key events and a hidden layer for the DM. The AI writes it with your key, only when you press the button; a summary is generated once per page version, Refresh on an up-to-date summary regenerates it and uses tokens, and after an edit an \"Outdated\" badge appears."

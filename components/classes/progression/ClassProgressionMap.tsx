@@ -11,7 +11,6 @@ import type { ClassProgression } from "@/types/classes";
 
 interface Props {
   progression: ClassProgression;
-  mode: "dm" | "sheet";
   actions?: ProgressionActions;
 }
 
@@ -23,12 +22,10 @@ const open = (e: MouseEvent<HTMLElement>, fn: () => void) => {
 
 const CELL = "border-t border-hud-rule px-2 py-1.5 align-top";
 
-export function ClassProgressionMap({ progression, mode, actions }: Props) {
+export function ClassProgressionMap({ progression, actions }: Props) {
   const t = useTranslations("classes.progression");
 
   const { subclasses, rows, color } = progression;
-
-  const isTemplate = mode === "dm";
 
   const [picked, setPicked] = useState<string | null>(null);
 
@@ -42,7 +39,7 @@ export function ClassProgressionMap({ progression, mode, actions }: Props) {
             <th className="px-2 py-1">{t("level")}</th>
             <th className="px-2 py-1">{t("base")}</th>
             {subclasses.map((s) => (
-              <th key={s.id} className={cn("px-2 py-1", !isTemplate && !s.chosen && "opacity-50")} style={s.chosen && color ? { color } : undefined}>
+              <th key={s.id} className="px-2 py-1">
                 {s.name}
               </th>
             ))}
@@ -62,14 +59,14 @@ export function ClassProgressionMap({ progression, mode, actions }: Props) {
               {subclasses.map((s) => (
                 <td
                   key={s.id}
-                  className={cn(CELL, !isTemplate && !s.chosen && "opacity-50", actions?.onOpenLevel && "cursor-pointer")}
+                  className={cn(CELL, actions?.onOpenLevel && "cursor-pointer")}
                   onClick={(e) => open(e, () => actions?.onOpenLevel?.(row.level, "subclass"))}
                 >
                   <Items items={row.bySubclass[s.id] ?? []} />
                 </td>
               ))}
               <td className={CELL}>
-                <Picks row={row} actions={actions} />
+                <Picks row={row} />
               </td>
             </tr>
           ))}
@@ -101,7 +98,7 @@ export function ClassProgressionMap({ progression, mode, actions }: Props) {
                 <>
                   {row.base.length > 0 && <Items items={row.base} accent={color} />}
                   {sub.length > 0 && <Items items={sub} />}
-                  {row.picks.length > 0 && <Picks row={row} actions={actions} />}
+                  {row.picks.length > 0 && <Picks row={row} />}
                 </>
               )}
             </li>

@@ -11,7 +11,7 @@ const mocks = vi.hoisted(() => ({ rules: vi.fn(), classMode: vi.fn() }));
 vi.mock("@/lib/hooks/campaigns", () => ({ useCampaignRules: mocks.rules }));
 vi.mock("@/lib/hooks/classes", () => ({ useClassMode: mocks.classMode }));
 vi.mock("@/components/character-profile/HeroPortrait", () => ({ HeroPortrait: () => null }));
-vi.mock("@/components/common/ActionsMenu", () => ({ ActionsMenu: () => null }));
+vi.mock("@/components/common/ActionsMenu", () => ({ ActionsMenu: ({ actions }: { actions: { label: string }[] }) => <ul>{actions.map((a) => <li key={a.label}>{a.label}</li>)}</ul> }));
 
 const fighter = { id: "f", name: "Воїн", hitDie: 10, subclasses: [] } as unknown as GameClassData;
 
@@ -42,5 +42,26 @@ describe("DmCharacterCard HP", () => {
     renderCard({ ...character, classes: [{ classId: "f", level: 3 }] });
 
     expect(screen.queryByText("28")).toBeNull();
+  });
+});
+
+describe("DmCharacterCard level-up menu", () => {
+  beforeEach(() => mocks.rules.mockReturnValue({ data: undefined }));
+  afterEach(cleanup);
+
+  const withLevelUp = (c: CharacterListItem) => render(<DmCharacterCard character={c} campaignId="camp" busy={false} actions={{ onLevelUp: vi.fn(), onDelete: vi.fn() }} />);
+
+  it("offers a plain level-up when the hero has no classes", () => {
+    mocks.classMode.mockReturnValue({ enabled: false, byId: {}, isPending: false });
+    withLevelUp(character);
+
+    expect(screen.getByText("characters.card.levelUp")).toBeTruthy();
+  });
+
+  it("hides it for a hero with classes: the server needs a class pick, which only the profile dialog sends", () => {
+    mocks.classMode.mockReturnValue({ enabled: true, byId: { f: fighter }, isPending: false });
+    withLevelUp({ ...character, classes: [{ classId: "f", level: 3 }] } as unknown as CharacterListItem);
+
+    expect(screen.queryByText("characters.card.levelUp")).toBeNull();
   });
 });

@@ -8,7 +8,13 @@ const SUMMARY_MAX = 120;
 const summarize = (text?: string): string => {
   const line = (text ?? "").split("\n").map((l) => l.trim()).find(Boolean) ?? "";
 
-  return line.slice(0, SUMMARY_MAX);
+  if (line.length <= SUMMARY_MAX) return line;
+
+  const cut = line.slice(0, SUMMARY_MAX);
+
+  const space = cut.lastIndexOf(" ");
+
+  return `${(space > 0 ? cut.slice(0, space) : cut).trimEnd()}…`;
 };
 
 const itemsOf = (feature: ClassFeature): ProgressionItem[] =>
@@ -46,7 +52,9 @@ export function buildClassProgression(cls: GameClassData, entry?: CharacterClass
 
         const done = entry ? resolvedPickCount(choice, entry.choices?.[choice.id] ?? []) : null;
 
-        rowAt(choice.level).picks.push({ key: `${prefix}${choice.id}`, kind: choice.kind, label: choice.label, required, done, status: statusOf(choice.level, required, done ?? 0) });
+        const chosen = entry ? (entry.choices?.[choice.id] ?? []).map((p) => choice.options?.find((o) => o.id === p.id)?.name ?? p.id) : undefined;
+
+        rowAt(choice.level).picks.push({ key: `${prefix}${choice.id}`, kind: choice.kind, label: choice.label, required, done, status: statusOf(choice.level, required, done ?? 0), chosen });
       }
     }
   };

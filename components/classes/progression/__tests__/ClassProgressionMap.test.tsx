@@ -18,43 +18,29 @@ const cls = makeClass({
   ],
 });
 
-const sheet = () => buildClassProgression(cls, { classId: "f", level: 4 });
+const template = () => buildClassProgression(cls);
 
 describe("ClassProgressionMap", () => {
   afterEach(cleanup);
 
-  it("renders 20 rows plus header with state markers", () => {
-    const { container } = render(<ClassProgressionMap progression={sheet()} mode="sheet" />);
+  it("renders 20 template rows plus the header", () => {
+    const { container } = render(<ClassProgressionMap progression={template()} />);
 
     expect(screen.getAllByRole("row")).toHaveLength(21);
-    expect(container.querySelector('tr[data-state="current"]')).toHaveTextContent("4");
-    expect(container.querySelector('tr[data-state="next"]')).toHaveTextContent("5");
+    expect(container.querySelectorAll('tr[data-state="template"]')).toHaveLength(20);
   });
 
-  it("calls onPick for an open pick and onChooseSubclass for the subclass marker", () => {
-    const onPick = vi.fn();
+  it("lists picks as plain text, never as buttons", () => {
+    render(<ClassProgressionMap progression={template()} />);
 
-    const onChooseSubclass = vi.fn();
-
-    render(<ClassProgressionMap progression={sheet()} mode="sheet" actions={{ onPick, onChooseSubclass }} />);
-    fireEvent.click(screen.getAllByRole("button", { name: /ASI/ })[0]);
-    fireEvent.click(screen.getAllByRole("button", { name: /classes.progression.chooseSubclass/ })[0]);
-
-    expect(onPick).toHaveBeenCalledWith(expect.objectContaining({ key: "asi4" }), 4);
-    expect(onChooseSubclass).toHaveBeenCalledTimes(1);
-  });
-
-  it("dm mode without actions: nothing clickable breaks", () => {
-    render(<ClassProgressionMap progression={buildClassProgression(cls)} mode="dm" />);
-
-    expect(screen.queryAllByRole("button", { name: /classes.progression.chooseSubclass/ })).toEqual([]);
-    expect(screen.getAllByRole("row")).toHaveLength(21);
+    expect(screen.getAllByText(/ASI/).length).toBeGreaterThan(0);
+    expect(screen.queryAllByRole("button", { name: /ASI|classes.progression.subclass/ })).toEqual([]);
   });
 
   it("onOpenLevel fires from table cells and mobile rows, not from details clicks", () => {
     const onOpenLevel = vi.fn();
 
-    const { container } = render(<ClassProgressionMap progression={sheet()} mode="sheet" actions={{ onOpenLevel }} />);
+    const { container } = render(<ClassProgressionMap progression={template()} actions={{ onOpenLevel }} />);
 
     fireEvent.click(screen.getByTestId("base-4"));
     expect(onOpenLevel).toHaveBeenLastCalledWith(4, "base");
@@ -72,13 +58,13 @@ describe("ClassProgressionMap", () => {
   it("omits subclass columns when there are none and shows chips otherwise", () => {
     const none = buildClassProgression({ ...cls, subclasses: [], subclassLevel: null });
 
-    const { unmount } = render(<ClassProgressionMap progression={none} mode="dm" />);
+    const { unmount } = render(<ClassProgressionMap progression={none} />);
 
     expect(screen.getAllByRole("columnheader")).toHaveLength(3);
     expect(screen.queryByRole("navigation", { name: "classes.progression.subclass" })).toBeNull();
     unmount();
 
-    render(<ClassProgressionMap progression={sheet()} mode="sheet" />);
+    render(<ClassProgressionMap progression={template()} />);
 
     expect(screen.getByRole("button", { name: "Champion" })).toBeInTheDocument();
     expect(screen.getAllByRole("columnheader")).toHaveLength(5);

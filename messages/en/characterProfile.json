@@ -8,7 +8,8 @@
     "items": "Inventory",
     "story": "Story",
     "log": "Log",
-    "things": "Gear"
+    "things": "Gear",
+    "path": "Path"
   },
   "hero": {
     "level": "Lv {level}",
@@ -219,5 +220,29 @@
       "total": "= {base} + {level} × {perLevel} = {total}"
     }
   },
-  "battleXpNote": "Victory in battle"
+  "battleXpNote": "Victory in battle",
+  "path": {
+    "level": "Level {level}",
+    "state": {
+      "current": "Now",
+      "next": "Next",
+      "reached": "Gained",
+      "future": "Later",
+      "template": "",
+      "waiting": "Waiting"
+    },
+    "reached": "Gained ({count})",
+    "upcoming": "Later ({count})",
+    "from": "← {cls} {level}",
+    "pick": "Choose: {label} ({done}/{required})",
+    "pickOpen": "To choose: {label} ({done}/{required})",
+    "done": "Chosen: {label}",
+    "unlocksAt": "{label}: unlocks at level {level}",
+    "details": "More about “{name}”",
+    "spellNudge": "Spells to choose: {count}",
+    "spellNudgeAction": "Choose",
+    "summary": "Level {level} · {cls}",
+    "summaryOpen": "To choose: {count}",
+    "doneWith": "Chosen: {label} — {chosen}"
+  }
 }

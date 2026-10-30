@@ -27,6 +27,33 @@ const choiceById = (id: string) => sorcerer.features.flatMap((f) => f.choices ??
 describe("ChoicePicker", () => {
   afterEach(cleanup);
 
+  it("long choice description: first paragraph visible, full text folded away", () => {
+    const rest = "Long rules text. ".repeat(100);
+
+    const { container } = render(<Harness choice={{ ...choiceById("metamagic"), description: `Pick two options.\n\n${rest}` }} context={ctx(2)} />);
+
+    const lead = screen.getByText("Pick two options.");
+
+    expect(lead.closest("details")).toBeNull();
+    expect(container.querySelector("details")?.textContent).toContain(rest.trim());
+    expect(screen.getByText("choices.picker.moreDetails")).toBeTruthy();
+  });
+
+  it("fold holds only the rest of the text, and leading blank lines do not empty the lead", () => {
+    const { container } = render(<Harness choice={{ ...choiceById("metamagic"), description: `\n\nPick two options.\n\n${"Long rules text. ".repeat(40)}` }} context={ctx(2)} />);
+
+    expect(screen.getByText("Pick two options.")).toBeTruthy();
+    expect(container.querySelector("details")?.textContent).not.toContain("Pick two options.");
+    expect(container.querySelector("details")?.textContent).toContain("Long rules text.");
+  });
+
+  it("short choice description stays inline without a fold", () => {
+    const { container } = render(<Harness choice={{ ...choiceById("metamagic"), description: "Pick two options." }} context={ctx(2)} />);
+
+    expect(screen.getByText("Pick two options.")).toBeTruthy();
+    expect(container.querySelector("details")).toBeNull();
+  });
+
   it("options: counter, min level reason, requires reason", () => {
     render(<Harness choice={choiceById("metamagic")} context={ctx(2)} />);
 
@@ -71,6 +98,23 @@ describe("ChoicePicker", () => {
     fireEvent.click(screen.getByRole("checkbox", { name: /Magic Missile/ }));
 
     expect(screen.getByText("1 / 2")).toBeTruthy();
+  });
+
+  it("feat: a non-repeatable feat already taken in another picker is blocked here, the one picked here stays", () => {
+    const choice: Choice = { id: "versatile", label: "Versatile", level: 1, count: 1, kind: "feat", featTypes: ["origin"] };
+
+    const taken = new Map([["f-alert", 1]]);
+
+    const { unmount } = render(<Harness choice={choice} context={ctx(1, { featCounts: taken })} />);
+
+    expect(screen.getByRole("radio", { name: /Alert/ })).toBeDisabled();
+    expect(screen.getByText(/choices.picker.featTaken/)).toBeTruthy();
+    expect(screen.getByRole("radio", { name: /Magic Initiate/ })).not.toBeDisabled();
+    unmount();
+
+    render(<Harness choice={choice} context={ctx(1, { featCounts: taken })} initial={[{ id: "f-alert" }]} />);
+
+    expect(screen.getByRole("radio", { name: /Alert/ })).not.toBeDisabled();
   });
 
   it("feat: types filter, nested choices of the picked feat", () => {

@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useTranslations } from "next-intl";
 import { BookOpen } from "lucide-react";
 
+import { SpellPicksNudge } from "./path";
 import { useProfile } from "./ProfileContext";
 import { ProfileSpellBook } from "./ProfileSpellBook";
 
@@ -32,6 +33,7 @@ export function MagicTab() {
 
   return (
     <>
+      <SpellPicksNudge />
       {newSpells.size > 0 && <NewPill count={newSpells.size} className="mb-2" />}
       {sheet.magic && (
         <div className="mb-4 flex flex-wrap justify-between gap-2 text-sm text-hud-muted">

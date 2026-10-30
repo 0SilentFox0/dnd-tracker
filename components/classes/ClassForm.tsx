@@ -50,7 +50,7 @@ export function ClassForm({ campaignId, gameClass }: { campaignId: string; gameC
     {
       id: "map",
       label: t("classes.form.tabs.map"),
-      content: <ClassProgressionMap progression={progression} mode="dm" actions={{ onOpenLevel: (_, column) => setTab(column === "subclass" ? "subclasses" : "features") }} />,
+      content: <ClassProgressionMap progression={progression} actions={{ onOpenLevel: (_, column) => setTab(column === "subclass" ? "subclasses" : "features") }} />,
     },
     { id: "basics", label: t("common.tabs.basic"), content: <ClassBasicsTab form={editor.form} campaignId={campaignId} /> },
     { id: "table", label: t("classes.form.tabs.table"), content: <ClassColumnsEditor value={data.columns ?? []} onChange={(columns) => set((prev) => ({ ...prev, columns }))} /> },
