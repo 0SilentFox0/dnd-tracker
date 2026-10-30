@@ -25,7 +25,7 @@
 2. Feat з кількома вимогами, частково виконаними (рівень є, Сили нема): показані обидві, виконана з ✓, невиконана з числами; `manualText` не блокує, а показує «перевіряє ДМ».
 3. Вибір підкласу відкриває нові вибори: майстер після `save` додає кроки, не скидає номер кроку й не закривається; підклас, уже заданий, повторно (той самий) не дає помилки, інший дає `SUBCLASS_ALREADY_SET`.
 4. Нема відкритих виборів: майстер показує «Усе обрано», а не порожній крок «Крок 0 з 0»; без `canEdit`/з чернеткою кнопка вибору не показується (сервер і так 403).
-5. Помилка збереження на «Далі»: лишаємось на кроці, вибір не губиться, показано помилку; мобільний 390px без горизонтального скролу.
+5. «Далі» після кроку з `abilityScore`: піднятий бал не рахується двічі (збережений уже входить у `hero.scores`, `saved` оновлюється після кожного успішного `save`); помилка збереження лишає на кроці, вибір не губиться, показано помилку.
 
 ---
 
@@ -72,13 +72,14 @@ export const withClassSubclasses = (entries: CharacterClassEntry[], subclasses: 
 
 - [ ] **Step 1: Тести.** `withClassSubclasses`: ставить підклас, якщо порожній; той самий повторно — без змін і без конфлікту; інший — `conflict`; клас, якого нема в `entries`, ігнорується. `choicesBodyOf` додає `classSubclasses` лише для записів із `subclassId`. Route: успіх (підклас записано, відповідь `classes[].subclassId`), `SUBCLASS_ALREADY_SET` 422, `SUBCLASS_NOT_FOUND` 422, `SUBCLASS_TOO_EARLY` 422 з `params.level`, без поля — як раніше (наявні тести).
 - [ ] **Step 2:** запустити → FAIL.
-- [ ] **Step 3: Реалізація.** Схема: `classSubclasses: z.record(z.string().min(1), z.string().min(1)).optional()`. У `saveCharacterChoices` після `withClassPicks`: застосувати `withClassSubclasses`; при `conflict` `throw new ContentError(API_ERRORS.SUBCLASS_ALREADY_SET, 422)`; далі `validateClassEntries(next, refs.classesById, MAX_CLASS_LEVEL)` (з `application.ts`; помилка `{error, params}` → `ContentError(error, 422, undefined, params)`; рівень максимум узяти з того ж джерела, що в `apply-classes`/level-up). `refs.classesById` завантажується, бо classMode.
+- [ ] **Step 3: Реалізація.** Схема: `classSubclasses: z.record(z.string().min(1), z.string().min(1)).optional()`. У `saveCharacterChoices` після `withClassPicks`: застосувати `withClassSubclasses`; при `conflict` `throw new ContentError(API_ERRORS.SUBCLASS_ALREADY_SET, 422)`; далі `validateClassEntries(next, refs.classesById, MAX_CLASS_LEVEL)` (з `application.ts`; помилка `{error, params}` → `ContentError(error, 422, undefined, params)`; `maxLevel` = `access.campaign.maxLevel`, як у level-up). `refs.classesById` завантажується, бо classMode.
 - [ ] **Step 4:** тести → PASS; перевірити, що `resolveCharacterChoices` не відхиляє збережені вибори `bySubclass` нового підкласу (додати кейс у route-тест: після встановлення підкласу `PUT` із picks для його вибору проходить).
 - [ ] **Step 5:** eslint; коміт `feat(characters): choose a subclass through PUT /choices`.
 
 ### Task 3: `wizardSteps`, `withStepPicks`, винесений `summarize`
 
 **Files:**
+- Modify: `lib/utils/characters/choices/walk.ts` (експортувати тип `WalkRefs`)
 - Create: `lib/utils/characters/choices/wizard.ts`, `lib/utils/characters/classes/summary.ts`, тести `__tests__/wizard.test.ts`, `__tests__/summary.test.ts`
 - Modify: `lib/utils/characters/classes/progression.ts` (імпорт `summarize`), barrel `lib/utils/characters/classes/index.ts`
 
@@ -122,24 +123,28 @@ export function withStepSubclass(state: ChoicesState, step: WizardStep, subclass
 ### Task 5: Майстер: хук, компонент, `ChoicesDialog`
 
 **Files:**
-- Create: `lib/hooks/characters/useChoiceWizard.ts` (+ export у `index.ts`), `components/choices/ChoiceWizard.tsx`, `components/choices/SubclassCard.tsx`, тести (`lib/hooks/characters/__tests__/`, `components/choices/__tests__/`)
-- Modify: `components/character-profile/ChoicesDialog.tsx` (проп `startAt?: string`, рендер майстра замість `CharacterChoicesPanel`), `messages/{uk,en}/choices.json`
+- Create: `components/choices/picker-context.ts` (виноситься з `ChoicesEditor`), `lib/hooks/characters/useChoiceWizard.ts` (+ export у `index.ts`), `components/choices/ChoiceWizard.tsx`, `components/choices/SubclassCard.tsx`, тести (`lib/hooks/characters/__tests__/`, `components/choices/__tests__/`)
+- Modify: `components/choices/ChoicesEditor.tsx` (бере контекст із `picker-context.ts`, поведінка без змін), `components/character-profile/ChoicesDialog.tsx` (проп `startAt?: string`, рендер майстра замість `CharacterChoicesPanel`), `messages/{uk,en}/choices.json`
 
 **Interfaces:**
 - Consumes: `wizardSteps`, `picksAtStep`, `withStepPicks`, `withStepSubclass` (Task 3), `ChoiceCard`/`ChoicePicker` (Task 4), `classSubclasses` у `choicesBodyOf` (Task 2), `useChoiceRefs`, `useCharacterChoices`.
 - Produces:
 ```ts
+// чиста, з поточного `ChoicesEditor`: base-контекст (feats, spells, proficient, scores, scoreAfter, featCounts) і контекст кроку
+export function pickerBase(data: ChoicesState, refs: ChoiceRefsView, hero: { level: number; scores: Record<AbilityKey, number>; skills: unknown; classMode: boolean }, saved?: ChoicesState): Omit<PickerContext, "level" | "columns" | "maxSlotLevel">;
+export function pickerContextFor(base: ReturnType<typeof pickerBase>, step: WizardStep, data: ChoicesState, refs: ChoiceRefsView, heroLevel: number): PickerContext;   // клас: level запису, columns, maxSlotLevelFor; решта: level героя
+
 useChoiceWizard({ campaignId, characterId, initial: ChoicesState, hero, refs, startAt? }): {
   steps: WizardStep[]; index: number; step: WizardStep | undefined; state: { data: ChoicesState; set: (s: ChoicesState) => void };
   next: () => Promise<void>; back: () => void; isPending: boolean; error: string | null; issues: ChoiceIssue[]; done: boolean;
 }
 <SubclassCard cls={GameClassData} value?: string onChange={(id) => void} />   // картки підкласів: іконка-літера, назва, summarize, «i», «що дає за рівнями»
 ```
-- `steps` = `wizardSteps(data, refs, hero, seen)` де `seen` накопичує всі `key`, які були показані; `startAt` — `pick.key` зі «Шляху» (id вибору, для підкласу `"subclass"`); `index` ставиться на крок, де `step.choice?.id === startAt` або (`startAt === "subclass"` і `step.kind === "subclass"`), інакше 0. `next`: `save(choicesBodyOf(prunePicks(data, refs).state))`; успіх → оновлений герой (`onSaved`) і `hero.scores` оновлюються, крок +1, нові кроки (підклас) додаються до `steps`; помилка → лишаємось, `error`/`issues`. Останній крок «Далі» = «Готово» і закриває. `done` = `steps.length === 0`.
+- `steps` = `wizardSteps(data, refs, hero, seen)` де `seen` накопичує всі `key`, які були показані; `startAt` — `pick.key` зі «Шляху» (id вибору, для підкласу `"subclass"`); `index` ставиться на крок, де `step.choice?.id === startAt` або (`startAt === "subclass"` і `step.kind === "subclass"`), інакше 0. `next`: `save(choicesBodyOf(prunePicks(data, refs).state))` (`save` повертає `boolean`); успіх → `saved` = збережений стан (щоб `scoreAfter` не рахував ASI двічі),  оновлений герой (`onSaved`) і `hero.scores` оновлюються, крок +1, нові кроки (підклас) додаються до `steps`; помилка → лишаємось, `error`/`issues`. Останній крок «Далі» = «Готово» і закриває. `done` = `steps.length === 0`.
 - `ChoiceWizard`: «Крок N з M», `source` рядком «Звідки» (`choices.wizard.source.*`), «Що дає» за `kind` (`choices.wizard.gives.*`: `abilityScore`, `feat`, `skill`, `expertise`, `spell`, `option`, `subclass`), один `ChoicePicker` (або `SubclassCard`) із помилкою для `issues`, кнопки «Назад/Далі/Закрити», порожній стан «Усе обрано». Підписи списків рис: `choices.wizard.featSource.{background,race,asi,other}` («Риса передісторії: початкова», «Human Versatile: риса початкового рівня», «Збільшення характеристик, {class} {level}: риса або +2»).
 - `ChoicesDialog`: герой (`useCharacter`) після `save` оновлюється через наявний кеш-інвалід `useCharacterChoices`; майстер читає `scores` з нього.
 
-- [ ] **Step 1: Тести.** Хук: `startAt` ставить на потрібний крок; «Далі» викликає `save` один раз і переходить; помилка лишає на місці з `error`; після вибору підкласу з'являються нові кроки, номер поточного не скидається; `back` не зберігає. Компонент (happy-dom): «Крок 2 з 3»; порожній стан; підпис джерела; фіча з STR 13 розблоковується на наступному кроці після збереження ASI (мок `save` оновлює scores); `SubclassCard` обирає підклас і `onChange` отримує id; діалог відкривається на `startAt`.
+- [ ] **Step 1: Тести.** `pickerBase`/`pickerContextFor`: поведінка `ChoicesEditor` не змінилась (наявні тести `ChoicesEditor`/`CharacterChoicesPanel` PASS), `scoreAfter` = `scores` + дельта лише від незбережених піків. Хук: `startAt` ставить на потрібний крок; «Далі» викликає `save` один раз і переходить; помилка лишає на місці з `error`; після вибору підкласу з'являються нові кроки, номер поточного не скидається; `back` не зберігає. Компонент (happy-dom): «Крок 2 з 3»; порожній стан; підпис джерела; фіча з STR 13 розблоковується на наступному кроці після збереження ASI (мок `save` оновлює scores); `SubclassCard` обирає підклас і `onChange` отримує id; діалог відкривається на `startAt`.
 - [ ] **Step 2:** FAIL. **Step 3:** реалізація; `CharacterChoicesPanel`/`CharacterChoicesTab` не чіпати (DM-вкладка й форми). **Step 4:** `pnpm test:related components/choices components/character-profile/ChoicesDialog.tsx lib/hooks/characters` → PASS. **Step 5:** eslint; коміт `feat(choices): step-by-step choices wizard with subclass step`.
 
 ### Task 6: «Шлях»: старт із кроку, прев'ю підкласів, level-up
