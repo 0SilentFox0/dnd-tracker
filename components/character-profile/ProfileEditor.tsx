@@ -7,7 +7,7 @@ import { useTranslations } from "next-intl";
 import { BasicEditTab } from "./BasicEditTab";
 import { BiographyEditor } from "./BiographyEditor";
 import { GoalList } from "./GoalList";
-import { LevelUpAction } from "./LevelUpAction";
+import { type ClassLevelUpProps, LevelUpAction } from "./LevelUpAction";
 import { MagicTab } from "./MagicTab";
 import { useProfile } from "./ProfileContext";
 import { ProfileHero } from "./ProfileHero";
@@ -77,6 +77,11 @@ export function ProfileEditor({ onDone }: { onDone: () => void }) {
 
   const showChoices = heroClassMode || !!sheet.choices;
 
+  const classLevelUp: ClassLevelUpProps | undefined =
+    classesEnabled && (formData.basicInfo.classes ?? []).length > 0
+      ? { character: { campaignId, id: characterId, entries: formData.basicInfo.classes ?? [], hero: { race: formData.basicInfo.race, level: formData.basicInfo.level, scores: abilityScores.data, skills: skills.data.skills } }, onLeveled: editor.dmActions.applyClassLevelUp }
+      : undefined;
+
   return (
     <form id="profile-edit" className="hud-form" onSubmit={form.actions.handleSubmit}>
       <ProfileHero
@@ -85,11 +90,7 @@ export function ProfileEditor({ onDone }: { onDone: () => void }) {
             level={formData.basicInfo.level}
             maxLevel={sheet.maxLevel}
             onLevelUp={() => void editor.dmActions.levelUp()}
-            classLevelUp={
-              classesEnabled && (formData.basicInfo.classes ?? []).length > 0
-                ? { character: { campaignId, id: characterId, entries: formData.basicInfo.classes ?? [], hero: { race: formData.basicInfo.race, level: formData.basicInfo.level, scores: abilityScores.data, skills: skills.data.skills } }, onLeveled: editor.dmActions.applyClassLevelUp }
-                : undefined
-            }
+            classLevelUp={classLevelUp}
           />
         }
       />
@@ -118,7 +119,7 @@ export function ProfileEditor({ onDone }: { onDone: () => void }) {
             content: (
               <div className="space-y-4">
                 <CharacterAbilitiesSection campaignId={campaignId} abilities={abilities} />
-                <SkillsTab manage />
+                <SkillsTab manage classLevelUp={classLevelUp} />
               </div>
             ),
           },

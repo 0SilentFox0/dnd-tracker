@@ -6,11 +6,13 @@ import { ClassLevelUpDialog } from "./ClassLevelUpDialog";
 import { Button } from "@/components/ui/button";
 import type { Character } from "@/types/characters";
 
+export type ClassLevelUpProps = { character: ComponentProps<typeof ClassLevelUpDialog>["character"]; onLeveled: (updated: Character) => void };
+
 interface LevelUpActionProps {
   level: number;
   maxLevel: number;
   onLevelUp: () => void;
-  classLevelUp?: { character: ComponentProps<typeof ClassLevelUpDialog>["character"]; onLeveled: (updated: Character) => void };
+  classLevelUp?: ClassLevelUpProps;
 }
 
 export function LevelUpAction({ level, maxLevel, onLevelUp, classLevelUp }: LevelUpActionProps) {

@@ -5,17 +5,20 @@ import dynamic from "next/dynamic";
 import { useTranslations } from "next-intl";
 
 import { ChargesList } from "./rest/ChargesList";
+import { ClassLevelUpDialog } from "./ClassLevelUpDialog";
 import { FeatsBlock } from "./FeatsBlock";
-import { CharacterPath, SpellPicksNudge } from "./path";
+import type { ClassLevelUpProps } from "./LevelUpAction";
+import { CharacterPath, ClassesHeader, ClassSection, SpellPicksNudge } from "./path";
 import { useProfile } from "./ProfileContext";
 import { RacePassive } from "./RacePassive";
 
 import { EntityIcon } from "@/components/common/EntityIcon";
 import { ProgressionPanel } from "@/components/skill-tree/progression";
+import { classSectionOpen } from "@/lib/utils/characters/classes/path";
 
 const ChoicesDialog = dynamic(() => import("./ChoicesDialog"), { ssr: false });
 
-export function SkillsTab({ manage = false }: { manage?: boolean }) {
+export function SkillsTab({ manage = false, classLevelUp }: { manage?: boolean; classLevelUp?: ClassLevelUpProps }) {
   const { campaignId, characterId, sheet } = useProfile();
 
   const t = useTranslations("characterProfile.skills");
@@ -23,6 +26,8 @@ export function SkillsTab({ manage = false }: { manage?: boolean }) {
   const personal = sheet.personalSkill;
 
   const [choices, setChoices] = useState<{ startAt?: string } | null>(null);
+
+  const [addingClass, setAddingClass] = useState(false);
 
   const names = Object.fromEntries([...sheet.spells.map((sp) => [sp.id, sp.name]), ...(sheet.choices?.feats ?? []).map((f) => [f.id, f.name])]);
 
@@ -33,12 +38,13 @@ export function SkillsTab({ manage = false }: { manage?: boolean }) {
   return (
     <>
       <SpellPicksNudge onPick={actions && (() => openChoices())} />
+      {sheet.classProgression && sheet.classProgression.length > 0 ? <ClassesHeader progressions={sheet.classProgression} maxLevel={sheet.maxLevel} onAddClass={classLevelUp ? () => setAddingClass(true) : undefined} /> : null}
       {sheet.classProgression?.map((progression) => (
-        <section key={progression.classId} className="mb-3 space-y-2">
-          <h3>{progression.className}</h3>
+        <ClassSection key={progression.classId} progression={progression} defaultOpen={classSectionOpen(sheet.classProgression ?? [], progression)}>
           <CharacterPath progression={progression} actions={actions} names={names} />
-        </section>
+        </ClassSection>
       ))}
+      {classLevelUp && addingClass ? <ClassLevelUpDialog open onOpenChange={setAddingClass} startNew {...classLevelUp} /> : null}
       {choices ? <ChoicesDialog open onOpenChange={(o) => !o && setChoices(null)} campaignId={campaignId} characterId={characterId} startAt={choices.startAt} /> : null}
       <FeatsBlock />
       <RacePassive />
