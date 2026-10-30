@@ -1,3 +1,4 @@
+import { docText } from "@/lib/utils/scenario/doc";
 import type { ScenarioAiOp } from "@/types/ai";
 import type { RichDoc, RichNode } from "@/types/scenario";
 
@@ -82,4 +83,14 @@ export function sectionOfMention(ops: ScenarioAiOp[], id: string): string | unde
   }
 
   return undefined;
+}
+
+const countMentions = (nodes: RichNode[]): number => nodes.reduce((n, node) => n + (node.type === "mention" ? 1 : 0) + countMentions(node.content ?? []), 0);
+
+export function addedMentionCount(before: RichDoc, after: RichDoc): number | null {
+  if (docText(before) !== docText(after)) return null;
+
+  const added = countMentions(after.content) - countMentions(before.content);
+
+  return added > 0 ? added : null;
 }

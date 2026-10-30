@@ -132,6 +132,7 @@
     "newSection": "Новий розділ «{title}»",
     "newAcquaintance": "Новий мікро NPC: {name}",
     "changedRows": "{count, plural, one {# рядок буде змінено} few {# рядки буде змінено} many {# рядків буде змінено} other {# рядка буде змінено}}",
+    "chipsAdded": "{label}: {count, plural, one {+# чіп} few {+# чіпи} many {+# чіпів} other {+# чіпа}}",
     "target": "Ціль: сторінка {pageId}. Застосування лише після людського підтвердження.",
     "stale": "Фрагмент змінився після пропозиції",
     "status": {
