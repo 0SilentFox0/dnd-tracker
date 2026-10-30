@@ -18,6 +18,7 @@ import type { ClassColumn } from "@/types/classes";
 interface AbilityListEditorProps {
   classColumns?: readonly ClassColumn[];
   itemCharges?: boolean;
+  withIcon?: boolean;
   performChoices?: { attacks: readonly { name: string }[]; spells: readonly { id: string; name: string }[] };
   campaignId: string;
   value: Ability[];
@@ -26,7 +27,7 @@ interface AbilityListEditorProps {
   onValidityChange?: (ok: boolean, errorCount: number) => void;
 }
 
-export function AbilityListEditor({ campaignId, value, onChange, issues = [], onValidityChange, classColumns, itemCharges, performChoices }: AbilityListEditorProps) {
+export function AbilityListEditor({ campaignId, value, onChange, issues = [], onValidityChange, classColumns, itemCharges, performChoices, withIcon }: AbilityListEditorProps) {
   const t = useTranslations("abilities.editor");
 
   const text = useText();
@@ -97,6 +98,7 @@ export function AbilityListEditor({ campaignId, value, onChange, issues = [], on
             key={current.id}
             ability={current}
             path={String(index)}
+            withIcon={withIcon}
             actions={{ onChange: (next) => onChange(value.map((a, i) => (i === index ? next : a))), onRemove: remove }}
           />
         ) : (

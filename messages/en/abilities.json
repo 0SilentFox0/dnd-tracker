@@ -11,6 +11,7 @@
   },
   "panel": {
     "name": "Name",
+    "icon": "Icon",
     "delete": "Delete ability {name}",
     "description": "Description (optional)",
     "expand": "Expand",
