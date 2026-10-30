@@ -130,7 +130,6 @@ function OpView({ op, campaignId }: { op: Op; campaignId: string }) {
   );
 }
 
-
 export function ScenarioOpList({ ops, campaignId }: { ops: ScenarioAiOp[]; campaignId: string }) {
   const t = useTranslations("ai");
 
