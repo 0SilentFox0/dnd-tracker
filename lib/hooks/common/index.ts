@@ -28,6 +28,7 @@ export { useRowKeys } from "./useRowKeys";
 export { type SearchState, useSearch } from "./useSearch";
 export { useSetLocale } from "./useSetLocale";
 export { useSingleFlight } from "./useSingleFlight";
+export { useTimeZoneSetting } from "./useTimeZoneSetting";
 export { type Toast, useToasts } from "./useToasts";
 export { useUnsavedChangesGuard } from "./useUnsavedChangesGuard";
 export { DRAG_THRESHOLD, useViewport, type ViewportOptions } from "./useViewport";

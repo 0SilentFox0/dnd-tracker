@@ -4,7 +4,7 @@ import { Fragment, useRef } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useTranslations } from "next-intl";
-import { CircleHelp, Home, KeyRound, LogOut, Menu, Sparkles, User, UserRoundCog } from "lucide-react";
+import { CircleHelp, Globe, Home, KeyRound, LogOut, Menu, Sparkles, User, UserRoundCog } from "lucide-react";
 
 import { JoinBattleButton } from "@/components/campaigns/JoinBattleButton";
 import { WatchShowButton } from "@/components/campaigns/WatchShowButton";
@@ -158,6 +158,12 @@ export function Header() {
                 <Link href="/settings/password">
                   <KeyRound className="h-4 w-4 mr-2" />
                   {t("password")}
+                </Link>
+              </DropdownMenuItem>
+              <DropdownMenuItem asChild>
+                <Link href="/settings/preferences">
+                  <Globe className="h-4 w-4 mr-2" />
+                  {t("preferences")}
                 </Link>
               </DropdownMenuItem>
               <DropdownMenuItem asChild>

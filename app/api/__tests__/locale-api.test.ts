@@ -31,7 +31,7 @@ describe("/api/locale", () => {
     const res = await PUT(put({ locale: "uk" as const }));
 
     expect(res.status).toBe(200);
-    expect(prisma.user.updateMany).toHaveBeenCalledWith({ where: { id: "u1" }, data: { locale: "uk" as const } });
+    expect(prisma.user.updateMany).toHaveBeenCalledWith({ where: { id: "u1" }, data: { locale: "uk" as const, timeZone: undefined } });
   });
 
   it("PUT з невалідним locale — 400", async () => {
@@ -45,7 +45,7 @@ describe("/api/locale", () => {
 
     const res = await GET(get());
 
-    expect(await res.json()).toEqual({ locale: "en" });
+    expect(await res.json()).toEqual({ locale: "en", timeZone: null });
     expect(res.headers.get("set-cookie")).toContain("NEXT_LOCALE=en");
   });
 
@@ -55,7 +55,7 @@ describe("/api/locale", () => {
 
     const res = await GET(get());
 
-    expect(await res.json()).toEqual({ locale: null });
+    expect(await res.json()).toEqual({ locale: null, timeZone: null });
     expect(res.headers.get("set-cookie")).toBeNull();
   });
 
@@ -66,7 +66,7 @@ describe("/api/locale", () => {
     const res = await GET(get("NEXT_LOCALE=en"));
 
     expect(prisma.user.updateMany).toHaveBeenCalledWith({ where: { id: "u1", locale: null }, data: { locale: "en" } });
-    expect(await res.json()).toEqual({ locale: null });
+    expect(await res.json()).toEqual({ locale: null, timeZone: null });
   });
 
   it("PUT: secure cookie для https і x-forwarded-proto", async () => {
@@ -86,5 +86,43 @@ describe("/api/locale", () => {
 
     expect(res.headers.get("set-cookie")).toBeNull();
     expect(prisma.user.findUnique).not.toHaveBeenCalled();
+  });
+
+  it("GET повертає профільну timeZone", async () => {
+    vi.mocked(getSessionUserId).mockResolvedValue("u1");
+    vi.mocked(prisma.user.findUnique).mockResolvedValue({ locale: "en", timeZone: "Asia/Tokyo" } as never);
+
+    expect(await (await GET(get())).json()).toEqual({ locale: "en", timeZone: "Asia/Tokyo" });
+  });
+
+  it("PUT timeZone пише профіль і не чіпає cookie мови", async () => {
+    vi.mocked(getSessionUserId).mockResolvedValue("u1");
+
+    const res = await PUT(put({ timeZone: "Asia/Tokyo" }));
+
+    expect(res.status).toBe(200);
+    expect(prisma.user.updateMany).toHaveBeenCalledWith({ where: { id: "u1" }, data: { locale: undefined, timeZone: "Asia/Tokyo" } });
+    expect(res.headers.get("set-cookie")).toBeNull();
+  });
+
+  it("PUT timeZone null скидає профільну зону", async () => {
+    vi.mocked(getSessionUserId).mockResolvedValue("u1");
+
+    await PUT(put({ timeZone: null }));
+
+    expect(prisma.user.updateMany).toHaveBeenCalledWith({ where: { id: "u1" }, data: { locale: undefined, timeZone: null } });
+  });
+
+  it("PUT з невалідною зоною або порожнім тілом — 400", async () => {
+    const res = await PUT(put({ timeZone: "Not/AZone" }));
+
+    expect(res.status).toBe(400);
+    expect((await PUT(put({}))).status).toBe(400);
+    expect(prisma.user.updateMany).not.toHaveBeenCalled();
+  });
+
+  it("PUT timeZone для гостя — 200 без запису", async () => {
+    expect((await PUT(put({ timeZone: "Asia/Tokyo" }))).status).toBe(200);
+    expect(prisma.user.updateMany).not.toHaveBeenCalled();
   });
 });
