@@ -6,18 +6,17 @@ import { ChoicePicker, type PickerContext } from "./ChoicePicker";
 import { classPickerContext, issueFor, pickerBase } from "./picker-context";
 
 import { HUD_SELECT_CLASS, HudSection } from "@/components/hud/form";
-import type { AbilityKey } from "@/lib/constants/abilities";
 import type { ChoiceRefsView } from "@/lib/hooks/characters";
 import { useTranslator } from "@/lib/i18n/use-translator";
 import { mergeBackground } from "@/lib/utils/backgrounds/selection";
 import { classChoiceDefs } from "@/lib/utils/characters/choices/class-choices";
 import { isChoiceOpen } from "@/lib/utils/characters/choices/count";
-import type { Choice, ChoiceIssue, ChoicePick, ChoicesState, Picks } from "@/types/choices";
+import type { Choice, ChoiceHero, ChoiceIssue, ChoicePick, ChoicesState, Picks } from "@/types/choices";
 
 interface ChoicesEditorProps {
   state: { data: ChoicesState; set: (next: ChoicesState) => void };
   refs: ChoiceRefsView;
-  hero: { level: number; scores: Record<AbilityKey, number>; skills: unknown; classMode: boolean };
+  hero: ChoiceHero;
   issues?: ChoiceIssue[];
   /** збережені вибори, чий приріст уже входить у hero.scores */
   saved?: ChoicesState;

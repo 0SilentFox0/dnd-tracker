@@ -1,5 +1,6 @@
 "use client";
 
+import { useMemo } from "react";
 import { useTranslations } from "next-intl";
 import { Info } from "lucide-react";
 
@@ -24,11 +25,13 @@ const STATE_TONE = { current: "gold", next: "accent", reached: "muted", future: 
 function SubclassOptions({ progression }: { progression: ClassProgression }) {
   const t = useTranslations("characterProfile.path");
 
+  const preview = useMemo(() => subclassPreview(progression), [progression]);
+
   return (
     <details className="mt-1 text-xs text-hud-muted">
       <summary className="cursor-pointer">{t("subclassOptions")}</summary>
       <ul className="mt-1 space-y-1">
-        {subclassPreview(progression).map((sub) => (
+        {preview.map((sub) => (
           <li key={sub.id}>
             <span className="font-semibold text-hud-ink">{sub.name}</span>
             {sub.gains.map((g) => (
@@ -43,7 +46,7 @@ function SubclassOptions({ progression }: { progression: ClassProgression }) {
   );
 }
 
-function PickLine({ pick, level, progression, names, onPick }: { pick: ProgressionPick; level: number; progression: ClassProgression; names?: Record<string, string>; onPick?: (pickKey: string) => void }) {
+function PickLine({ pick, level, progression, chosen, names, onPick }: { pick: ProgressionPick; level: number; progression: ClassProgression; chosen: string | null; names?: Record<string, string>; onPick?: (pickKey: string) => void }) {
   const t = useTranslations("characterProfile.path");
 
   const tg = useTranslations("gameTerms");
@@ -52,7 +55,7 @@ function PickLine({ pick, level, progression, names, onPick }: { pick: Progressi
 
   const values = { label: pick.label, done: pick.done ?? 0, required: pick.required };
 
-  const subclass = progression.subclasses.find((c) => c.chosen)?.name;
+  const subclass = progression.subclasses.find((c) => c.id === chosen)?.name;
 
   const pickButton = (label: string) => (
     <button type="button" onClick={() => onPick?.(pick.key)} className="min-h-10 w-full rounded-md border border-hud-gold-strong/60 px-3 py-2 text-left text-sm text-hud-gold-strong">
@@ -117,7 +120,7 @@ export function PathRowCard({ row, progression, chosen, onPick, onDetail, names 
         ))}
         {row.picks.map((pick, i) => (
           <li key={`${i}:${pick.key}`}>
-            <PickLine pick={pick} level={row.level} progression={progression} names={names} onPick={onPick} />
+            <PickLine pick={pick} level={row.level} progression={progression} chosen={chosen} names={names} onPick={onPick} />
           </li>
         ))}
       </ul>

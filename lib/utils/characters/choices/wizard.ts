@@ -49,23 +49,25 @@ export function wizardSteps(state: ChoicesState, refs: WalkRefs, hero: { level: 
 
       const open = isChoiceOpen(choice, level, choiceOwner) && resolvedPickCount(choice, picks[choice.id] ?? [], refs.featsById) < resolveChoiceCount(choice, level, columns);
 
-      if (open || keep?.has(key)) steps.push({ key, kind: "choice", source: { owner: owner.kind, name, ...(owner.kind === "class" && { level: choice.level }) }, path, choice });
+      if (open || keep?.has(key)) steps.push({ key, kind: "choice", source: { owner: owner.kind, name, ...(owner.kind === "class" && { level: choice.level }) }, path, choice, ...(owner.kind === "class" && { classId: owner.entry.classId }) });
     }
   }, hero);
 
   return steps;
 }
 
-export const picksAtStep = (state: ChoicesState, step: WizardStep): ChoicePick[] => (step.choice ? (ownerPicks(state, step.path)[step.choice.id] ?? []) : []);
+export const picksAtStep = (state: ChoicesState, step: WizardStep): ChoicePick[] => (step.choice ? (ownerPicks(state, step)[step.choice.id] ?? []) : []);
 
-function ownerPicks(state: ChoicesState, path: string): Picks {
+function ownerPicks(state: ChoicesState, step: WizardStep): Picks {
+  const { path } = step;
+
   if (path === "raceChoices") return state.raceChoices;
 
   if (path === "backgroundChoices") return state.backgroundChoices ?? {};
 
   if (path === "backgroundFeatPicks") return state.backgroundFeatPicks ?? {};
 
-  if (path.startsWith("classes.")) return state.classes.find((e) => e.classId === path.slice("classes.".length))?.choices ?? {};
+  if (step.classId) return state.classes.find((e) => e.classId === step.classId)?.choices ?? {};
 
   return state.feats[Number(path.slice("feats.".length))]?.picks ?? {};
 }
@@ -85,11 +87,7 @@ export function withStepPicks(state: ChoicesState, step: WizardStep, list: Choic
 
   if (path === "backgroundFeatPicks") return { ...state, backgroundFeatPicks: write(state.backgroundFeatPicks ?? {}) };
 
-  if (path.startsWith("classes.")) {
-    const classId = path.slice("classes.".length);
-
-    return { ...state, classes: state.classes.map((e) => (e.classId === classId ? { ...e, choices: write(e.choices ?? {}) } : e)) };
-  }
+  if (step.classId) return { ...state, classes: state.classes.map((e) => (e.classId === step.classId ? { ...e, choices: write(e.choices ?? {}) } : e)) };
 
   const index = Number(path.slice("feats.".length));
 

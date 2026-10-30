@@ -6,17 +6,15 @@ import { abilityPicksOf, abilityScoreDelta } from "@/lib/utils/characters/choice
 import { countFeats, skillFlags, skillPicksOf, visitPicks } from "@/lib/utils/characters/choices/walk";
 import type { WizardStep } from "@/lib/utils/characters/choices/wizard";
 import { maxSlotLevelFor } from "@/lib/utils/spells/class-slots";
-import type { ChoiceIssue, ChoicesState } from "@/types/choices";
+import type { ChoiceHero, ChoiceIssue, ChoicesState } from "@/types/choices";
 import type { CharacterClassEntry, GameClassData } from "@/types/classes";
-
-type Hero = { level: number; scores: Record<AbilityKey, number>; skills: unknown; classMode: boolean };
 
 export const issueFor = (issues: ChoiceIssue[] | undefined, path: string) => issues?.find((i) => i.path === path || i.path.startsWith(`${path}.`))?.message;
 
 export type PickerBase = Omit<PickerContext, "level" | "columns" | "maxSlotLevel">;
 
 /** `saved` — вибори, чий приріст уже входить у hero.scores */
-export function pickerBase(data: ChoicesState, refs: ChoiceRefsView, hero: Hero, saved?: ChoicesState): PickerBase {
+export function pickerBase(data: ChoicesState, refs: ChoiceRefsView, hero: ChoiceHero, saved?: ChoicesState): PickerBase {
   const heroCtx = { level: hero.level, classMode: hero.classMode };
 
   const visits = visitPicks(data, refs, heroCtx);
@@ -42,7 +40,7 @@ export function classPickerContext(base: PickerBase, cls: GameClassData, entry: 
 }
 
 export function pickerContextFor(base: PickerBase, step: WizardStep, data: ChoicesState, refs: ChoiceRefsView, heroLevel: number): PickerContext {
-  const entry = step.path.startsWith("classes.") ? data.classes.find((e) => e.classId === step.classId || `classes.${e.classId}` === step.path) : undefined;
+  const entry = step.classId ? data.classes.find((e) => e.classId === step.classId) : undefined;
 
   const cls = entry && refs.classesById[entry.classId];
 

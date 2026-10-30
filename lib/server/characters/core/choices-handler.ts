@@ -46,13 +46,13 @@ export async function saveCharacterChoices({ access, character }: CharacterGate,
     if (body.classSubclasses) {
       const subclassed = withClassSubclasses(classes, body.classSubclasses);
 
-      if (subclassed.conflict) throw new ContentError(API_ERRORS.SUBCLASS_ALREADY_SET, 422);
+      if (!subclassed) throw new ContentError(API_ERRORS.SUBCLASS_ALREADY_SET, 422);
 
-      const invalid = validateClassEntries(subclassed.entries, refs.classesById, access.campaign.maxLevel);
+      const invalid = validateClassEntries(subclassed, refs.classesById, access.campaign.maxLevel);
 
       if (invalid) throw new ContentError(invalid.error, 422, undefined, invalid.params);
 
-      classes = subclassed.entries;
+      classes = subclassed;
       subclassLabel = subclassesLabel(resolveClassEntries(classes, refs.classesById));
     }
 

@@ -42,15 +42,15 @@ describe("subclass picks", () => {
   const entries = [{ classId: "c", level: 3 }, { classId: "d", level: 3, subclassId: "s1" }];
 
   it("sets an empty subclass, ignores unknown classes", () => {
-    expect(withClassSubclasses(entries, { c: "s9", zzz: "s2" })).toEqual({ entries: [{ classId: "c", level: 3, subclassId: "s9" }, entries[1]], conflict: null });
+    expect(withClassSubclasses(entries, { c: "s9", zzz: "s2" })).toEqual([{ classId: "c", level: 3, subclassId: "s9" }, entries[1]]);
   });
 
   it("the same subclass again is not a conflict", () => {
-    expect(withClassSubclasses(entries, { d: "s1" })).toEqual({ entries, conflict: null });
+    expect(withClassSubclasses(entries, { d: "s1" })).toEqual(entries);
   });
 
-  it("a different subclass is reported and left unchanged", () => {
-    expect(withClassSubclasses(entries, { d: "s2" })).toEqual({ entries, conflict: "d" });
+  it("a different subclass is a conflict", () => {
+    expect(withClassSubclasses(entries, { d: "s2" })).toBeNull();
   });
 
   it("choicesBodyOf lists subclasses only for entries that have one", () => {

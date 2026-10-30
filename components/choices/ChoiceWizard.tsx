@@ -1,5 +1,6 @@
 "use client";
 
+import { useMemo } from "react";
 import { useTranslations } from "next-intl";
 
 import { ChoicePicker } from "./ChoicePicker";
@@ -7,32 +8,25 @@ import { issueFor, pickerBase, pickerContextFor } from "./picker-context";
 import { SubclassCard } from "./SubclassCard";
 
 import { Button } from "@/components/ui/button";
-import type { AbilityKey } from "@/lib/constants/abilities";
 import { type ChoiceRefsView, useChoiceWizard } from "@/lib/hooks/characters";
 import { picksAtStep, withStepPicks, withStepSubclass, type WizardStep } from "@/lib/utils/characters/choices/wizard";
 import type { Character } from "@/types/characters";
-import type { ChoicesState } from "@/types/choices";
+import type { ChoiceHero, ChoicesState } from "@/types/choices";
 
 interface ChoiceWizardProps {
   campaignId: string;
   characterId: string;
   initial: ChoicesState;
-  hero: { level: number; scores: Record<AbilityKey, number>; skills: unknown; classMode: boolean };
+  hero: ChoiceHero;
   refs: ChoiceRefsView;
   startAt?: string;
   onSaved?: (updated: Character) => void;
   onClose: () => void;
 }
 
-const featSourceOf = ({ choice, source }: WizardStep): "background" | "race" | "asi" | "other" => {
-  if (choice?.kind !== "feat") return "other";
+const FEAT_SOURCE = { background: "background", backgroundFeat: "background", race: "race", class: "asi", feat: "other" } as const;
 
-  if (source.owner === "background" || source.owner === "backgroundFeat") return "background";
-
-  if (source.owner === "race") return "race";
-
-  return source.owner === "class" ? "asi" : "other";
-};
+const featSourceOf = ({ choice, source }: WizardStep) => (choice?.kind === "feat" ? FEAT_SOURCE[source.owner] : "other");
 
 export function ChoiceWizard({ campaignId, characterId, initial, hero, refs, startAt, onSaved, onClose }: ChoiceWizardProps) {
   const t = useTranslations("choices");
@@ -42,6 +36,10 @@ export function ChoiceWizard({ campaignId, characterId, initial, hero, refs, sta
   const wizard = useChoiceWizard({ campaignId, characterId, initial, hero, refs, startAt, onSaved, onFinish: onClose });
 
   const { step, steps, index, state, isPending, error, issues } = wizard;
+
+  const { level, scores, skills, classMode } = hero;
+
+  const base = useMemo(() => pickerBase(state.data, refs, { level, scores, skills, classMode }, wizard.saved), [state.data, refs, level, scores, skills, classMode, wizard.saved]);
 
   if (!step) {
     return (
@@ -86,7 +84,7 @@ export function ChoiceWizard({ campaignId, characterId, initial, hero, refs, sta
             choice={step.choice}
             value={picksAtStep(data, step)}
             onChange={(list) => set(withStepPicks(data, step, list))}
-            ctx={pickerContextFor(pickerBase(data, refs, hero, wizard.saved), step, data, refs, hero.level)}
+            ctx={pickerContextFor(base, step, data, refs, hero.level)}
             error={issueFor(issues, `${step.path}.${step.choice.id}`)}
           />
         )

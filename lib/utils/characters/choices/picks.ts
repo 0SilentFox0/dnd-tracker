@@ -37,24 +37,10 @@ export function keepStoredPicks(next: CharacterClassEntry[], stored: unknown): C
 export const withClassPicks = (entries: CharacterClassEntry[], classChoices: Record<string, Picks>): CharacterClassEntry[] =>
   entries.map((e) => (classChoices[e.classId] ? { ...e, choices: classChoices[e.classId] } : e));
 
-export function withClassSubclasses(entries: CharacterClassEntry[], subclasses: Record<string, string>): { entries: CharacterClassEntry[]; conflict: string | null } {
-  let conflict: string | null = null;
+export function withClassSubclasses(entries: CharacterClassEntry[], subclasses: Record<string, string>): CharacterClassEntry[] | null {
+  if (entries.some((e) => e.subclassId && subclasses[e.classId] && subclasses[e.classId] !== e.subclassId)) return null;
 
-  const next = entries.map((e) => {
-    const id = subclasses[e.classId];
-
-    if (!id || e.subclassId === id) return e;
-
-    if (e.subclassId) {
-      conflict ??= e.classId;
-
-      return e;
-    }
-
-    return { ...e, subclassId: id };
-  });
-
-  return { entries: next, conflict };
+  return entries.map((e) => (subclasses[e.classId] && !e.subclassId ? { ...e, subclassId: subclasses[e.classId] } : e));
 }
 
 export function lineageName(race: ChoiceRace | null, picks: Picks): string | null | undefined {

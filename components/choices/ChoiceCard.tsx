@@ -13,7 +13,7 @@ import type { Requirement } from "@/lib/utils/characters/choices/requirements";
 
 interface DetailsButtonProps {
   title: string;
-  text: string;
+  text: string | (() => string);
   className?: string;
 }
 
@@ -27,9 +27,11 @@ export function DetailsButton({ title, text, className }: DetailsButtonProps) {
       <button type="button" aria-label={t("picker.details")} onClick={(e) => { e.stopPropagation(); setOpen(true); }} className={cn("rounded p-1 text-hud-gold hover:bg-hud-line/20", className)}>
         <Info className="size-4" aria-hidden="true" />
       </button>
-      <ResponsiveDialog hud open={open} onOpenChange={setOpen} title={title}>
-        <p className="whitespace-pre-line text-sm">{text}</p>
-      </ResponsiveDialog>
+      {open && (
+        <ResponsiveDialog hud open onOpenChange={setOpen} title={title}>
+          <p className="whitespace-pre-line text-sm">{typeof text === "function" ? text() : text}</p>
+        </ResponsiveDialog>
+      )}
     </>
   );
 }
@@ -41,7 +43,7 @@ interface ChoiceCardProps {
   title: string;
   name: string;
   summary: string;
-  description?: string;
+  description?: string | (() => string);
   requirements?: Requirement[];
   requirementNames?: Record<string, string>;
   note?: string;
@@ -74,7 +76,7 @@ export function ChoiceCard({ role, checked, disabled, title, name, summary, desc
         }
       />
       {description && <DetailsButton title={name} text={description} className="absolute right-1 top-1" />}
-      <RequirementList items={requirements ?? []} names={requirementNames} />
+      <RequirementList items={requirements} names={requirementNames} />
     </div>
   );
 }

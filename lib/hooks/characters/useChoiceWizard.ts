@@ -1,22 +1,21 @@
 "use client";
 
-import { useState } from "react";
+import { useMemo, useState } from "react";
 
 import { useCharacterChoices } from "./useCharacterChoices";
 import type { ChoiceRefsView } from "./useChoiceRefs";
 
-import type { AbilityKey } from "@/lib/constants/abilities";
 import { choicesBodyOf } from "@/lib/utils/characters/choices/picks";
 import { prunePicks } from "@/lib/utils/characters/choices/prune";
 import { type WizardStep, wizardSteps } from "@/lib/utils/characters/choices/wizard";
 import type { Character } from "@/types/characters";
-import type { ChoicesState } from "@/types/choices";
+import type { ChoiceHero, ChoicesState } from "@/types/choices";
 
 interface ChoiceWizardOptions {
   campaignId: string;
   characterId: string;
   initial: ChoicesState;
-  hero: { level: number; scores: Record<AbilityKey, number>; skills: unknown; classMode: boolean };
+  hero: ChoiceHero;
   refs: ChoiceRefsView;
   startAt?: string;
   onSaved?: (updated: Character) => void;
@@ -34,17 +33,25 @@ export function useChoiceWizard({ campaignId, characterId, initial, hero, refs, 
 
   const [saved, setSaved] = useState(initial);
 
-  const [seen, setSeen] = useState(() => wizardSteps(initial, refs, hero).map((s) => s.key));
+  const [initialSteps] = useState(() => wizardSteps(initial, refs, hero));
 
-  const [index, setIndex] = useState(() => startIndex(wizardSteps(initial, refs, hero), startAt));
+  const [seen, setSeen] = useState(() => initialSteps.map((s) => s.key));
+
+  const [index, setIndex] = useState(() => startIndex(initialSteps, startAt));
 
   const choices = useCharacterChoices({ campaignId, characterId, onSaved });
 
-  const fresh = wizardSteps(data, refs, hero, new Set(seen));
+  const { level, classMode } = hero;
 
-  const byKey = new Map(fresh.map((s) => [s.key, s]));
+  const steps = useMemo(() => {
+    const seenSet = new Set(seen);
 
-  const steps = [...seen.flatMap((k) => byKey.get(k) ?? []), ...fresh.filter((s) => !seen.includes(s.key))];
+    const fresh = wizardSteps(data, refs, { level, classMode }, seenSet);
+
+    const byKey = new Map(fresh.map((s) => [s.key, s]));
+
+    return [...seen.flatMap((k) => byKey.get(k) ?? []), ...fresh.filter((s) => !seenSet.has(s.key))];
+  }, [data, refs, level, classMode, seen]);
 
   const set = (next: ChoicesState) => {
     setData(next);

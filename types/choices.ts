@@ -168,3 +168,10 @@ export interface SheetChoices {
   spellSources: Record<string, TextRef>;
   expertise: DndSkill[];
 }
+
+export interface ChoiceHero {
+  level: number;
+  scores: Record<AbilityKey, number>;
+  skills: unknown;
+  classMode: boolean;
+}

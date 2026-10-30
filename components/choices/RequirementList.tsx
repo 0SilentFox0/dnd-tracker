@@ -7,11 +7,11 @@ import { cn } from "@/lib/utils";
 import type { Requirement } from "@/lib/utils/characters/choices/requirements";
 
 interface RequirementListProps {
-  items: Requirement[];
+  items?: Requirement[];
   names?: Record<string, string>;
 }
 
-export function RequirementList({ items, names }: RequirementListProps) {
+export function RequirementList({ items = [], names }: RequirementListProps) {
   const t = useTranslations("choices");
 
   const tg = useTranslator("gameTerms");
