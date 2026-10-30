@@ -42,7 +42,7 @@ requirementsOf(source: FeatData | ChoiceOption, ctx): Requirement[]
 
 - `featPrerequisiteMet` = `requirementsOf(...).every(met)` (зараховуються `level` і `ability`; `manual`/`text` довідкові). Правило не змінюється: рівень ≥ level І будь-яка зі `scores.abilities` ≥ min.
 - `optionIssues` бере `minLevel`/`requires` звідти ж.
-- `ability.have` береться з `scoreAfter`, коли він є: підняв Силу в цьому ж майстрі, і картка одразу відкривається.
+- `have` береться зі **збережених** `scores` (`ctx.scores`), бо сервер (`planChoices`) валідує за ними; `scoreAfter` для `met` не використовується, інакше картка відкрилась би, а сервер відхилив. Піднятий бал враховується після збереження (див. «Далі» у розділі 2).
 - Переклад на межі UI: `choices.requirement.{level,ability,option,manual}` у `messages/{uk,en}/choices.json`. Чиста функція повертає структуру, не текст.
 
 ### 2. Майстер виборів
@@ -50,7 +50,7 @@ requirementsOf(source: FeatData | ChoiceOption, ctx): Requirement[]
 - `wizardSteps(state, refs, hero)` (чиста, `lib/utils/characters/choices/wizard.ts`) будується на `forEachChoiceOwner` (власник дає «Звідки») і повертає лише відкриті вибори, по одному на крок: `{ key, source, kind, choice, summaryKey }`. Власного обходу не пише.
 - Крок = «Звідки» (Раса: …, Передісторія: …, Клас: … N-й рівень) + «Що дає» (одне речення за `kind`, ключ у `choices.json`) + один `ChoicePicker`.
 - Підклас: окремий крок, коли рівень ≥ `subclassLevel`, а підкласу нема; пишеться через розширений `PUT /choices` (розділ 6).
-- Хук `useChoiceWizard` (`lib/hooks/characters/`): поточний крок, «Назад/Далі», збереження на будь-якому кроці через наявний `useCharacterChoices.save`. Запису нового нема.
+- Хук `useChoiceWizard` (`lib/hooks/characters/`): поточний крок, «Назад/Далі/Закрити». «Далі» **зберігає** поточний стан наявним `useCharacterChoices.save` і оновлює героя, тож бал, піднятий на цьому кроці, бачать вимоги наступного (підняв Силу, «Далі», і feat із Силою 13 відкрився). Помилка збереження лишає на кроці з повідомленням. «Закрити» не губить вже збережене. Запису нового нема.
 - `ChoicesDialog` показує майстер; «Крок N з M». Скасування крок не губить: `prunePicks` як зараз.
 - Іменований старт: `ChoicesDialog` приймає `startAt?: string` (ключ вибору), `onPick` у «Шляху» передає `pick.key`.
 
@@ -74,11 +74,10 @@ requirementsOf(source: FeatData | ChoiceOption, ctx): Requirement[]
 
 ### 6. Серверна зміна: підклас у `PUT /choices`
 
-`ChoicesBody` зараз має лише `classChoices`; підклас пишуть тільки level-up (піднімає рівень) і редактор класів. Додаємо необов'язкове `classSubclasses?: Record<classId, subclassId>` (`lib/schemas/choices.ts`, `types/choices.ts`). У `saveCharacterChoices` після `withClassPicks` застосовується до `before.classes`:
+`ChoicesBody` зараз має лише `classChoices`; підклас пишуть тільки level-up (піднімає рівень) і редактор класів. Додаємо необов'язкове `classSubclasses?: Record<classId, subclassId>` (`lib/schemas/choices.ts`, `types/choices.ts`); `choicesBodyOf` надсилає його для записів із підкласом (збіг із збереженим не помилка). У `saveCharacterChoices` після `withClassPicks` застосовується до `before.classes`:
 
 - підклас уже заданий і відрізняється: `SUBCLASS_ALREADY_SET` (422, наявний код);
-- підкласу нема в класі: `SUBCLASS_NOT_FOUND` (наявний у `application.ts`);
-- рівень запису < `subclassLevel`: помилка (нове `SUBCLASS_TOO_EARLY` у `api-errors.ts` і `messages`);
+- підкласу нема в класі, або рівень запису < `subclassLevel`: наявна `validateClassEntries` (`application.ts`) повертає `SUBCLASS_NOT_FOUND` / `SUBCLASS_TOO_EARLY` (коди й тексти вже є);
 - нічого не змінюється, коли поля нема. Міграцій нема. Лог `CHOICES_EDIT` уже пише `before/after`.
 
 План має підтвердити, що `resolveCharacterChoices` перераховує вибори підкласу (відкриваються `bySubclass`-вибори) після зміни `classes`.
@@ -91,9 +90,9 @@ requirementsOf(source: FeatData | ChoiceOption, ctx): Requirement[]
 
 - `requirementsOf`: рівень, найкраща зі здібностей, `scoreAfter`, `requires`, `manual`; `featPrerequisiteMet` дає ті самі відповіді, що й до змін (наявні тести без правок).
 - `wizardSteps`: порядок (раса, передісторія, класи), лише відкриті, підклас-крок лише коли рівень досягнуто, `startAt`.
-- `PUT /choices` з `classSubclasses`: успіх, `SUBCLASS_ALREADY_SET`, `SUBCLASS_NOT_FOUND`, `SUBCLASS_TOO_EARLY`, без поля поведінка не змінилась.
+- `PUT /choices` з `classSubclasses`: успіх, той самий підклас повторно, `SUBCLASS_ALREADY_SET`, `SUBCLASS_NOT_FOUND`, `SUBCLASS_TOO_EARLY`, без поля поведінка не змінилась.
 - `useChoiceWizard` і `ChoicesDialog` (happy-dom): крок N з M, «Назад/Далі», збереження з будь-якого кроку, старт на заданому кроці.
-- Картка: дві групи, причина з числами, ✓ на виконаному, розблокування після підняття здібності в тому ж майстрі, «i» відкриває повний текст.
+- Картка: дві групи, причина з числами, ✓ на виконаному, розблокування feat'а після «Далі» з піднятою здібністю, «i» відкриває повний текст.
 - `subclassPreview` і «Шлях»: «Які бувають», чіп «Залежить від підкласу», `onPick` отримує ключ.
 - Ключі uk/en збігаються; `whatsNew` запис `2026-10-30-character-path-choices` у `lib/onboarding/whats-new.ts` і `messages/{uk,en}/whatsNew.json`.
 
