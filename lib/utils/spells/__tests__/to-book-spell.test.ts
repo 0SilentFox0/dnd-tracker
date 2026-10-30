@@ -9,6 +9,14 @@ describe("toBookSpell", () => {
     expect(toBookSpell({ ...row, dice: 2, fixedDice: true, damageBonus: -3 })).toMatchObject({ dice: 2, fixedDice: true, damageBonus: -3 });
   });
 
+  it("carries ingredients and component flags only when present and valid", () => {
+    const diamond = { name: "Diamond", qty: 1, minGp: 50, consumed: true, focus: false };
+
+    expect(toBookSpell({ ...row, ingredients: [diamond], componentFlags: { v: true, s: false, m: true } })).toMatchObject({ ingredients: [diamond], componentFlags: { v: true, s: false, m: true } });
+    expect(toBookSpell({ ...row, ingredients: [], componentFlags: null })).not.toHaveProperty("ingredients");
+    expect(toBookSpell({ ...row, ingredients: "junk" })).not.toHaveProperty("ingredients");
+  });
+
   it("коректний рядок проходить, нова модель зчитується", () => {
     expect(toBookSpell({ ...row, dice: 3, cost: "bonusAction", targeting: { kind: "area", side: "enemy", maxTargets: 2 }, resolution: { kind: "save", ability: "dexterity", onSuccess: "half" } })).toMatchObject({
       id: "s",

@@ -28,6 +28,9 @@ export const BOOK_SPELL_SELECT = {
   fixedDice: true,
   damageBonus: true,
   fx: true,
+  ingredients: true,
+  componentFlags: true,
+  components: true,
   spellGroup: { select: { id: true, name: true, color: true, icon: true } },
 } satisfies Prisma.SpellSelect;
 

@@ -111,4 +111,7 @@ export type BookSpell = SpellRules & {
   /** плитка живого inline-гранту (grantCast): id = ключ гранту, касту йде hostSpellId + grantKey */
   grantKey?: string;
   hostSpellId?: string;
+  ingredients?: SpellIngredient[];
+  componentFlags?: ComponentFlags | null;
+  components?: string | null;
 };

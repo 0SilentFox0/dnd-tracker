@@ -176,8 +176,8 @@ export function spendCp(p: { gold: number; silver: number; copper: number }, cp:
 - Test: `components/battle/wizards/spellbook/__tests__/IngredientsLine.test.tsx` (happy-dom), `components/spells/__tests__/SpellComponentsLine.test.tsx`
 
 Поведінка: «Потрібно: Diamond ×1 (≥50 gp, витрачається)»; «Бракує: …» (червоний `text-destructive`), підказка «буде сплачено 50 gp з гаманця» при автооплаті; нічого не показувати, коли відстежуваних немає або правило вимкнене; сервер лишається арбітром (помилка 422 показується наявним тостом/форматером помилок). Лист показує лише `SpellComponentsLine` (V S M + інгредієнти), без «бракує».
-- [ ] Тести: рендер потрібно/бракує/автооплата, блокування кнопки, відсутність рядка без інгредієнтів, `componentFlags: null` показує старий рядок.
-- [ ] Реалізація; commit `feat(battle-ui): ingredient requirements in cast dialog and spell cards`.
+- [x] Тести: рендер потрібно/бракує/автооплата, блокування кнопки, відсутність рядка без інгредієнтів, `componentFlags: null` показує старий рядок.
+- [x] Реалізація; commit `feat(battle-ui): ingredient requirements in cast dialog and spell cards`.
 
 ### Task 11: Whats-new, i18n-перевірка, документація
 
