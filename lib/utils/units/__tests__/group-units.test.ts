@@ -44,7 +44,7 @@ describe("groupUnitsByRace", () => {
     expect(raceChips(groupUnitsByRace(units, races))).toEqual([
       { key: "r1", label: "Гобліни", color: null, count: 0 },
       { key: "r2", label: "Орки", color: "#ef4444", count: 3 },
-      { key: NO_RACE, label: "Без раси", color: null, count: 2 },
+      { key: NO_RACE, label: "", color: null, count: 2 },
     ]);
   });
 });
@@ -74,7 +74,7 @@ describe("groupUnitsByRaceName", () => {
       ["r2", "Орки", 0],
       ["type:beast", "beast", 2],
       ["type:undead", "undead", 1],
-      [NO_RACE, "Без раси", 1],
+      [NO_RACE, "", 1],
     ]);
     expect(isTypeGroup("type:beast")).toBe(true);
     expect(raceIdOfGroup("type:beast")).toBeNull();

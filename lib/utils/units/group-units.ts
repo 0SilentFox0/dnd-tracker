@@ -1,4 +1,4 @@
-import { UNGROUPED_KEY, UNGROUPED_LABELS } from "@/lib/constants/ungrouped";
+import { UNGROUPED_KEY } from "@/lib/constants/ungrouped";
 import { groupBy } from "@/lib/utils/common/collections";
 import { byName } from "@/lib/utils/common/text";
 import { matchesQuery } from "@/lib/utils/common/text-search";
@@ -42,7 +42,7 @@ export function groupUnitsByRace<R extends UnitGroupRace>(units: Unit[], races: 
 
   const known = new Set(races.map((r) => r.id));
 
-  const group = (key: string, race: R | null, own: Unit[], label = race?.name ?? UNGROUPED_LABELS.race): UnitRaceGroup<R> => ({ key, label, race, total: own.length, tiers: toTiers(own.filter(matches)) });
+  const group = (key: string, race: R | null, own: Unit[], label = race?.name ?? ""): UnitRaceGroup<R> => ({ key, label, race, total: own.length, tiers: toTiers(own.filter(matches)) });
 
   const unraced = units.filter((u) => !u.raceId || !known.has(u.raceId));
 
