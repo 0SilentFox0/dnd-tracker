@@ -15,8 +15,10 @@ import { revalidateAssistantCaller } from "@/lib/server/assistant/authorize";
 import { assistantCatalog } from "@/lib/server/assistant/catalog";
 import type { AssistantCaller } from "@/lib/server/assistant/types";
 import { ContentError } from "@/lib/server/content/errors";
+import { loadDigestItems } from "@/lib/server/scenario/summary-store";
 import { parseRules } from "@/lib/utils/rules/schema";
 import { pickLiveSection } from "@/lib/utils/scenario/structure";
+import { summariesDigest } from "@/lib/utils/scenario/summary/digest";
 import type { AiFocus, AssistantContextDisclosure, ContextBlockId } from "@/types/ai";
 import type { ScenarioContent } from "@/types/scenario";
 
@@ -89,11 +91,12 @@ export async function buildInstructions({ campaignId, mode, pageId, focus, calle
 
   const effectiveFocus = focus ?? (pageId ? { pageId } : undefined);
 
-  const [party, show, focused, notes] = await Promise.all([
+  const [party, show, focused, notes, digestItems] = await Promise.all([
     partySummary(campaignId, 20),
     mode === "live" ? showSummary(campaignId) : Promise.resolve(null),
     effectiveFocus ? loadFocus(campaignId, effectiveFocus) : Promise.resolve(null),
     sourceNoteSelection ? readCompendiumSummary(actor, "notes", { selectedKeys: validateSourceSelection(sourceNoteSelection) }) : Promise.resolve(null),
+    mode === "scenario" ? loadDigestItems(campaignId) : Promise.resolve([]),
   ]);
 
   const blocks: ContextBlock[] = [
@@ -113,6 +116,10 @@ export async function buildInstructions({ campaignId, mode, pageId, focus, calle
 
     blocks.push({ id: "focusPage", label: `DM focus: page ${page.id}${selected.sectionId ? `, section ${selected.sectionId}` : ""}${selected.rowIds?.length ? `, rows ${selected.rowIds.join(", ")}` : ""} (data)`, text: mode === "live" ? liveScene(page.title, content) : contentToMarkdown(page.title, content) });
   } else if (focused) blocks.push({ id: "focus", label: "DM focus (data)", value: focused.kind === "battle" ? { kind: "battle", battle: { id: focused.battle.id, name: focused.battle.name, status: focused.battle.status, currentRound: focused.battle.currentRound, currentTurnIndex: focused.battle.currentTurnIndex, version: focused.battle.version } } : focused });
+
+  const digest = summariesDigest(digestItems, { maxChars: AI_LIMITS.digestChars });
+
+  if (digest) blocks.push({ id: "digest", label: "Page summaries (DM-only, only pages that have one; (stale) = page edited since; read full text via read_scenario_page)", maxChars: AI_LIMITS.digestChars + 200, text: digest });
 
   let blockIds: ContextBlockId[] = [];
 

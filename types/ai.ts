@@ -106,6 +106,6 @@ export interface CreatedApiToken extends ApiTokenSummary {
 }
 
 export type AssistantSessionContext = { sourceNoteKeys: string[] };
-export type ContextBlockId = "system" | "campaignName" | "policy" | "standing" | "mode" | "capabilities" | "domains" | "campaign" | "party" | "rules" | "show" | "notes" | "focusUnavailable" | "focusPage" | "focus" | "truncation";
+export type ContextBlockId = "system" | "campaignName" | "policy" | "standing" | "mode" | "capabilities" | "domains" | "campaign" | "party" | "rules" | "show" | "notes" | "focusUnavailable" | "focusPage" | "focus" | "digest" | "truncation";
 export type AssistantContextDisclosure = { blocks: ContextBlockId[]; characters: number; truncated: boolean; focusAvailable: boolean; sourceNoteCount: number };
 export type AssistantContextPreview = AssistantContextDisclosure & { provider: AiProvider; model: string; historyLimit: number };

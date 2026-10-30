@@ -10,6 +10,7 @@ vi.mock("@/lib/server/assistant/actions/compendium-reads", () => ({ readCompendi
 vi.mock("@/lib/db", () => ({ prisma: { campaign: { findUnique: vi.fn() }, scenarioPage: { findFirst: vi.fn() } } }));
 vi.mock("@/lib/ai/tools/party", () => ({ partySummary: vi.fn(async () => [{ id: "c1", name: "Годрик", level: 5, class: "Лицар", race: "Людина", armorClass: 16, notes: "боїться вогню" }]) }));
 vi.mock("@/lib/ai/tools/show", () => ({ showSummary: vi.fn(async () => "Слайд: Собор") }));
+vi.mock("@/lib/server/scenario/summary-store", () => ({ loadDigestItems: vi.fn(async () => []) }));
 
 const doc = (text: string) => ({ type: "doc", content: [{ type: "paragraph", content: [{ type: "text", text }] }] });
 
