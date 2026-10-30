@@ -1,7 +1,8 @@
 #!/usr/bin/env tsx
-// pnpm constructor:srd-template [--owner <userId>] [--allow-remote]
+// pnpm constructor:srd-template [--locale uk] [--owner <userId>] [--allow-remote]
 import { readIcons } from "../assets/tokens-5e/icons-file";
 import { assertSeedTarget } from "../seed/seed-library-lib";
+import { listLocales } from "./i18n/store";
 import { SRD_CREDITS } from "./lib/credits";
 import { readSrdData } from "./lib/data-files";
 import { ensureSrdTemplate, formatImportSummary, hasRowErrors, importSrdData, resolveSchoolRefs, SRD_TEMPLATE_NAME, staleSpellColumns, withIcons } from "./lib/load-template";
@@ -14,22 +15,26 @@ import { getTranslator } from "@/lib/i18n/translator";
 import { importContent, OFFLINE_IMPORT_DEPS } from "@/lib/server/content/import/import-content";
 import type { Actor } from "@/lib/utils/api/actor";
 
-const store = makeTemplateStore(SRD_TEMPLATE_NAME);
-
 async function main() {
   const args = process.argv.slice(2);
 
   const owner = args.includes("--owner") ? args[args.indexOf("--owner") + 1] : undefined;
 
+  const locale = args.includes("--locale") ? args[args.indexOf("--locale") + 1] : "en";
+
+  if (!listLocales().includes(locale)) throw new Error(`Немає перекладу "${locale}" (доступні: ${listLocales().join(", ")})`);
+
+  const store = makeTemplateStore(SRD_TEMPLATE_NAME, locale);
+
   assertSeedTarget(process.env.DATABASE_URL, args.includes("--allow-remote"));
 
   const template = await ensureSrdTemplate(store, { owner, rules: SRD_RULES, credits: SRD_CREDITS });
 
-  console.info(`${SRD_TEMPLATE_NAME}: ${template.id}${template.created ? " (створено)" : ""}`);
+  console.info(`${SRD_TEMPLATE_NAME} [${locale}]: ${template.id}${template.created ? " (створено)" : ""}`);
 
   const actor: Actor = { campaignId: template.id, userId: template.dmUserId, isDM: true, via: "session", scopes: null };
 
-  const data = readSrdData();
+  const data = readSrdData(undefined, locale);
 
   const icons = readIcons();
 
