@@ -7,6 +7,7 @@ import type { Ability, Effect } from "@/lib/utils/abilities/schema";
 import type { ArmorStats } from "@/lib/utils/artifacts/armor-stats";
 import type { WeaponStats } from "@/lib/utils/artifacts/weapon-stats";
 import type { ItemStats } from "@/lib/utils/items/item-stats";
+import type { ComponentFlags, SpellIngredient } from "@/lib/utils/spells/ingredients/types";
 import type { SpellCastingTime, SpellCost, SpellResolution, SpellTargeting } from "@/lib/utils/spells/model/schema";
 import type { Choice, FeatPrerequisite, FeatType } from "@/types/choices";
 import type { ClassColumn } from "@/types/classes";
@@ -38,6 +39,8 @@ export interface SpellRow {
   resolution: SpellResolution;
   spellEffects: Effect[];
   lists: string[];
+  ingredients?: SpellIngredient[];
+  componentFlags?: ComponentFlags;
 }
 
 export interface RaceRow { slug: string; name: string; passiveAbility: { name: string; description: string }; abilities: Ability[]; choices?: Choice[] }

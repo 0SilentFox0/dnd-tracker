@@ -489,5 +489,6 @@
   "battleSpellInputRequired": "Enter a value for the spell dice",
   "battleSpellTargetFilter": "The target does not fit the spell restriction (creature type, hazard or flight)",
   "battleSpellNoObjectNear": "None of your summoned objects from this spell are near the target",
-  "battleCasterPacified": "{state}: cannot deal damage or cast hostile spells"
+  "battleCasterPacified": "{state}: cannot deal damage or cast hostile spells",
+  "battleSpellIngredientsMissing": "Missing spell ingredients: {list}"
 }

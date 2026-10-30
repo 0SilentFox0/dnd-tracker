@@ -8,6 +8,7 @@ import { Copy, Move, Pencil, Sparkles, X } from "lucide-react";
 import { SpellPrintCard } from "./SpellPrintCard";
 
 import { HudCard, HudPill } from "@/components/hud/page";
+import { SpellComponentsLine } from "@/components/spells/SpellComponentsLine";
 import { SpellIcon } from "@/components/spells/SpellIcon";
 import { Button } from "@/components/ui/button";
 import {
@@ -103,6 +104,8 @@ export function SpellCard({ spell, campaignId, spellGroups, onRemoveFromGroup, o
       </div>
 
       <p className="line-clamp-2 flex-1 text-xs text-hud-muted">{spell.description}</p>
+
+      <SpellComponentsLine spell={spell} className="line-clamp-2" />
 
       <div className="flex min-w-0 items-center gap-1.5 border-t border-[#2a2218] pt-1.5 text-[11px] text-hud-muted">
         <GroupIcon className="size-3 shrink-0" />

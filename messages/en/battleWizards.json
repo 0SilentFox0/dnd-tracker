@@ -109,6 +109,11 @@
         "template": "Aim on the map",
         "pick": "Pick targets"
       }
+    },
+    "ingredients": {
+      "need": "Required: {list}",
+      "missing": "Missing: {list}",
+      "autoPay": "{gp} gp will be paid from the purse"
     }
   },
   "bonus": {

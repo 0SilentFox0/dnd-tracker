@@ -21,6 +21,6 @@ describe("OpenAPI 4f-4", () => {
   });
 
   it("stays under the size budget", () => {
-    expect(JSON.stringify(doc).length).toBeLessThan(165_000);
+    expect(JSON.stringify(doc).length).toBeLessThan(170_000);
   });
 });

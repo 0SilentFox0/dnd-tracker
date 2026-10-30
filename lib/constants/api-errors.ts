@@ -445,6 +445,7 @@ export const API_ERRORS = {
   BATTLE_SPELL_TARGET_FILTER: "errors.battleSpellTargetFilter",
   BATTLE_SPELL_NO_OBJECT_NEAR: "errors.battleSpellNoObjectNear",
   BATTLE_CASTER_PACIFIED: "errors.battleCasterPacified",
+  BATTLE_SPELL_INGREDIENTS_MISSING: "errors.battleSpellIngredientsMissing",
   COMPENDIUM_PREVIEW_SECRET_REQUIRED: "compendium.errors.previewSecretRequired",
   COMPENDIUM_PREVIEW_STALE: "compendium.errors.previewStale",
   COMPENDIUM_PREVIEW_INVALID: "compendium.errors.previewInvalid",

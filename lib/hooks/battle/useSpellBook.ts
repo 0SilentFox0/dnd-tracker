@@ -4,6 +4,7 @@ import { useMemo, useReducer, useState } from "react";
 
 import { useBattleScene } from "./useBattleScene";
 import { useBattleSpellLibrary } from "./useBattleSpellLibrary";
+import { useIngredientPlan } from "./useIngredientPlan";
 import { useSpellBookTargets } from "./useSpellBookTargets";
 import { useSpellCastSubmit } from "./useSpellCastSubmit";
 
@@ -92,6 +93,8 @@ export function useSpellBook(
 
   const { grantsOf, grantOf, canSlot, slotChoices, selectedGrant, sourceOptions, castLevelOptions, formulaOf } = spellSourceModel(caster, flow, selected, bypassCost);
 
+  const ingredients = useIngredientPlan(caster, selected, bypassCost || !!selectedGrant || !!selected?.grantKey);
+
   useSpellCastSubmit({ caster, selected, flow: { state, dispatch }, cast: { free, legendaryKey: special?.abilityKey, finishLong }, onDone: options.onDone });
 
   const labelOf = (s: BookSpell) => (s.grantKey ? inlineGrantLabel(caster, inlineGrantOf(caster, s)) : grantLabelOf(caster, s.id));
@@ -117,6 +120,7 @@ export function useSpellBook(
     universalSlot,
     free,
     timing: selected?.casting,
+    ingredients,
     pendingCast: caster?.battleData.pendingCast,
     canFastForward: scene.viewer.isDM,
     grantLabel: labelOf,

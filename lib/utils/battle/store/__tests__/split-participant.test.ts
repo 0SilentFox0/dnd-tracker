@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 
 import { createMockParticipant } from "@/lib/utils/battle/__tests__/fixtures/mock-participant";
+import { buildParticipantPatch } from "@/lib/utils/battle/store";
 import { joinParticipant, splitParticipant } from "@/lib/utils/battle/store/split-participant";
 import { hashJson, stableStringify } from "@/lib/utils/battle/store/stable-json";
 import type { BattleParticipant } from "@/types/battle";
@@ -135,5 +136,34 @@ describe("splitParticipant / joinParticipant", () => {
     for (const key of ["currentHp", "tempHp", "maxHp", "morale", "initiative"] as const) {
       expect(Number.isInteger(stored.columns[key])).toBe(true);
     }
+  });
+});
+
+describe("ingredientStock", () => {
+  const stock = { items: [{ id: "d1", key: "diamond", name: "Diamond", worthGp: 50, qty: 2, used: 0 }], purseCp: 1000, usedCp: 0 };
+
+  it("lives in state, not in the snapshot, and survives split/join", () => {
+    const base = createMockParticipant();
+
+    const p = { ...base, battleData: { ...base.battleData, ingredientStock: stock } };
+
+    const stored = splitParticipant(p, { orderIndex: 0, isPending: false });
+
+    expect(stored.state.ingredientStock).toEqual(stock);
+    expect(JSON.stringify(stored.snapshot)).not.toContain("ingredientStock");
+    expect(stored.snapshotHash).toBe(splitParticipant(base, { orderIndex: 0, isPending: false }).snapshotHash);
+    expect(joinParticipant(stored, "b1").battleData.ingredientStock).toEqual(stock);
+  });
+
+  it("a spent item reaches the client as a patch, not a full participant", () => {
+    const base = createMockParticipant();
+
+    const before = { ...base, battleData: { ...base.battleData, ingredientStock: stock } };
+
+    const used = { ...stock, items: [{ ...stock.items[0], used: 1 }] };
+
+    const after = { ...before, battleData: { ...before.battleData, ingredientStock: used } };
+
+    expect(buildParticipantPatch(before, after)).toEqual({ id: base.basicInfo.id, battleData: { ingredientStock: used } });
   });
 });

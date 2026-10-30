@@ -109,6 +109,11 @@
         "template": "Навести на карті",
         "pick": "Обрати цілі"
       }
+    },
+    "ingredients": {
+      "need": "Потрібно: {list}",
+      "missing": "Бракує: {list}",
+      "autoPay": "Буде сплачено {gp} gp з гаманця"
     }
   },
   "bonus": {

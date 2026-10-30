@@ -2,7 +2,7 @@
 
 Одне місце для відповіді на питання «що зараз у роботі». Оновлюється в кінці кожної гілки, в тому ж коміті, що й злиття.
 
-_Оновлено: 2026-10-29._
+_Оновлено: 2026-10-30._
 
 Останнє уточнення checkpoint: T19 завершено окремим commit `410d1820`; окреме завдання невидимості закомічене `b4c77ae1`. T20 whole-stage незалежний review завершено без blocking/high-risk залишків. Він виявив, що `cleanupAssistantData` не мав production caller та не включав `stale` terminal intents/receipts у retention allowlists. Fix закомічено `41fb9760`: захищений щоденний Vercel Cron route, `CRON_SECRET`, 7-day `stale` intent redaction і 90-day `stale` receipt deletion лише з complete effects. Додано workflow guide та coverage owner/action/test зведення в окремому T20 review commit. Combined target run: 56 файлів/414 тестів; після фінального cleanup edit impacted suite 2/6; tsc, ESLint, `pnpm build` і diff checks exit0. Applied migrations не змінювались; DB/provider/Storage/Pusher/Redis і HOMM не запускались. Vercel Production env заданий, але cleanup не діятиме в deployed runtime до наступного production deployment. Етап6 локально завершений; окремий HOMM gateway лишається наступним завданням.
 
@@ -94,4 +94,4 @@ _Оновлено: 2026-10-29._
 
 ## Нещодавно завершено
 
-Онбординг (чеклісти «Перші кроки» ДМ і гравця з прогресом із фактів БД, підказки на екранах, «Що нового» в хедері, довідка `/help`; `docs/architecture/onboarding.md`), AI-асистент ДМ (власні ключі Claude/OpenAI/Gemini, співавтор сценарію з пропозиціями правок, живий чат зі сценою, постійні інструкції кампанії, MCP `/api/mcp`, генерація зображень для «Показу»; `docs/architecture/ai.md`), сценарій і його відтворення, «Показ» (слайди + музика), режими мапи й лабіринт, бойова мапа (погода, музика), 2D-ефекти заклинань і кубики. Їхні специфікації та плани — в `docs/archive/superpowers/`.
+Онбординг (чеклісти «Перші кроки» ДМ і гравця з прогресом із фактів БД, підказки на екранах, «Що нового» в хедері, довідка `/help`; `docs/architecture/onboarding.md`), AI-асистент ДМ (власні ключі Claude/OpenAI/Gemini, співавтор сценарію з пропозиціями правок, живий чат зі сценою, постійні інструкції кампанії, MCP `/api/mcp`, генерація зображень для «Показу»; `docs/architecture/ai.md`), сценарій і його відтворення, «Показ» (слайди + музика), режими мапи й лабіринт, бойова мапа (погода, музика), 2D-ефекти заклинань і кубики. Їхні специфікації та плани — в `docs/archive/superpowers/`. Інгредієнти заклинань (2026-10-30, `feat/spell-ingredients`: інгредієнти в формі/імпорті, предмети й гаманець, перевірка й списання в бою, `persistIngredients`, каст-діалог; [battle.md](architecture/battle.md#інгредієнти-заклинань), [abilities.md](architecture/abilities.md); спек і план в `archive/superpowers/`).

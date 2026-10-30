@@ -1,5 +1,5 @@
 import { spellPoolKey } from "@/lib/utils/items/pools";
-import type { BattleParticipant, BattleParticipantSpellcasting } from "@/types/battle";
+import type { BattleParticipant, BattleParticipantSpellcasting, IngredientStock } from "@/types/battle";
 
 function mergeSlots(live: BattleParticipantSpellcasting["spellSlots"], fresh: BattleParticipantSpellcasting["spellSlots"]) {
   const out: BattleParticipantSpellcasting["spellSlots"] = {};
@@ -21,6 +21,14 @@ function mergeSlots(live: BattleParticipantSpellcasting["spellSlots"], fresh: Ba
   return out;
 }
 
+function mergeIngredientStock(live: IngredientStock | undefined, fresh: IngredientStock | undefined) {
+  if (!fresh) return {};
+
+  const used = new Map(live?.items.map((i) => [i.id, i.used]));
+
+  return { ingredientStock: { ...fresh, usedCp: Math.min(live?.usedCp ?? 0, fresh.purseCp), items: fresh.items.map((i) => ({ ...i, used: Math.min(used.get(i.id) ?? 0, i.qty) })) } };
+}
+
 /** Takes only what the library edits (abilities, attacks, spells, slot maxima, grid size, speed); HP, morale, effects, usage and flags stay live. */
 export function refreshFromSource(live: BattleParticipant, fresh: BattleParticipant): BattleParticipant {
   const pools = fresh.battleData.pools && Object.fromEntries(Object.entries(fresh.battleData.pools).map(([key, pool]) => {
@@ -39,6 +47,7 @@ export function refreshFromSource(live: BattleParticipant, fresh: BattleParticip
       resolvedAbilities: fresh.battleData.resolvedAbilities,
       attacks: fresh.battleData.attacks,
       pools,
+      ...mergeIngredientStock(live.battleData.ingredientStock, fresh.battleData.ingredientStock),
       senses: fresh.battleData.senses,
       movement: fresh.battleData.movement,
       languages: fresh.battleData.languages,

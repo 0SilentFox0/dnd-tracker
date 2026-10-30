@@ -74,3 +74,8 @@ Cunning Strike (Rogue): `Ability.params` (`schema/params.ts`) — `sneakAttack: 
 - **Згортання**: `CollapsibleHeader` + `SectionShell` (`components/abilities/sections`) — заголовок із шевроном, підсумком у згорнутому стані, «+» у шапці; у `AbilityPanel` стан відкритості по секціях (`when`/`then` відкриті, `if`/`limits` — якщо непорожні), секції з помилками відкриваються самі, чіп потоку відкриває й скролить до секції. Секція «Ефекти» форми заклинань згортається так само (підсумок — кількість ефектів, відкрита за замовчуванням, автовідкриття при помилці валідації й після додавання).
 - **`NestedEffectsEditor`** — спільний список вкладених ефектів (`path`, `limits {min,max}`, `renderCard`, `className`, `renderAdd`) для редактора вмінь (`randomOf`, підкасти тощо) і форми заклинань; без `renderAdd` — проста кнопка «додати».
 
+
+## Інгредієнти заклинань
+
+- **Поля Spell**: `ingredients Json @default("[]")` (`SpellIngredient { name, qty, minGp?, consumed, focus }`, `lib/schemas/spell-ingredients.ts`; ключ `ingredientKey(name)` унікальний, непорожній список вимагає `componentFlags.m`) і `componentFlags Json?` (`null` = не вказано, показується старий `components`). Поширюються через content API, sync, 5etools-імпорт (`parseMaterial`) і `toBookSpell`/`toCastableSpell`.
+- **Правило** `rules.spellIngredients { enabled, autoPay }` (default вимкнено; секція `SpellIngredientsSection`, опис у `rules.mechanics.spellIngredients`). Предмет інвентаря — `SpecialItem.worthGp`/`ingredient`; відповідність за `itemIngredientKey`. Бойова перевірка й списання — [battle.md](battle.md#інгредієнти-заклинань); форма — `SpellComponentsFields` + `useSpellComponents`.

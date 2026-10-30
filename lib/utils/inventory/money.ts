@@ -1,6 +1,8 @@
 import { type Coin, COIN_VALUE, COINS } from "@/lib/constants/inventory";
 import type { Purse } from "@/types/inventory";
 
+export const walletToPurse = (w: { gold: number; silver: number; copper: number }): Purse => ({ gp: w.gold, sp: w.silver, cp: w.copper });
+
 export const toCopper = (p: Purse) => COINS.reduce((s, c) => s + p[c] * COIN_VALUE[c], 0);
 
 const payOrder = (coin: Coin): Coin[] => {

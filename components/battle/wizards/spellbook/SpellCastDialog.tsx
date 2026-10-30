@@ -3,6 +3,7 @@ import { Loader2, Sparkles } from "lucide-react";
 
 import { btn, primaryBtn } from "../attack/shared";
 import { TargetButton } from "../TargetButton";
+import { IngredientsLine } from "./IngredientsLine";
 import { SaveRolls } from "./SaveRolls";
 import { SlotSelect } from "./SlotSelect";
 import { SpellSummary } from "./SpellSummary";
@@ -132,8 +133,9 @@ function SummaryStep({ book }: { book: Book }) {
   return (
     <>
       {selected && <SpellSummary spell={selected} state={state} targets={view.targets} formula={view.formulaOf(selected)} targeting={view.definitionOf(selected).targeting} slotCost={view.slotCostLabel(selected)} />}
+      <IngredientsLine line={view.ingredients} />
       <OptionPicker book={book} />
-      <button type="button" disabled={submitting || optionMissing(state)} onClick={actions.submit} className={cn(primary, "mt-3 w-full")}>
+      <button type="button" disabled={submitting || optionMissing(state) || !!view.ingredients?.blocked} onClick={actions.submit} className={cn(primary, "mt-3 w-full")}>
         {submitting ? <Loader2 className="size-5 animate-spin" /> : <><Sparkles className="size-5" />{tw("apply")}</>}
       </button>
       <BackCancel book={book} disabled={submitting} />

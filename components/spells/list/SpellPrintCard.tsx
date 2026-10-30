@@ -2,6 +2,7 @@
 
 import { Sparkles } from "lucide-react";
 
+import { SpellComponentsLine } from "@/components/spells/SpellComponentsLine";
 import { SpellIcon } from "@/components/spells/SpellIcon";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -52,6 +53,7 @@ export function SpellPrintCard({ spell }: { spell: Spell }) {
       </CardHeader>
       <CardContent className="flex-1 flex flex-col">
         <div className="text-xs sm:text-sm text-muted-foreground flex-1">{spell.description && <p>{spell.description}</p>}</div>
+        <SpellComponentsLine spell={spell} className="mt-2" />
       </CardContent>
     </Card>
   );
