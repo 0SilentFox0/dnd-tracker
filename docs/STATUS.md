@@ -2,7 +2,7 @@
 
 Одне місце для відповіді на питання «що зараз у роботі». Оновлюється в кінці кожної гілки, в тому ж коміті, що й злиття.
 
-_Оновлено: 2026-10-30._
+_Оновлено: 2026-10-31._
 
 Останнє уточнення checkpoint: T19 завершено окремим commit `410d1820`; окреме завдання невидимості закомічене `b4c77ae1`. T20 whole-stage незалежний review завершено без blocking/high-risk залишків. Він виявив, що `cleanupAssistantData` не мав production caller та не включав `stale` terminal intents/receipts у retention allowlists. Fix закомічено `41fb9760`: захищений щоденний Vercel Cron route, `CRON_SECRET`, 7-day `stale` intent redaction і 90-day `stale` receipt deletion лише з complete effects. Додано workflow guide та coverage owner/action/test зведення в окремому T20 review commit. Combined target run: 56 файлів/414 тестів; після фінального cleanup edit impacted suite 2/6; tsc, ESLint, `pnpm build` і diff checks exit0. Applied migrations не змінювались; DB/provider/Storage/Pusher/Redis і HOMM не запускались. Vercel Production env заданий, але cleanup не діятиме в deployed runtime до наступного production deployment. Етап6 локально завершений; окремий HOMM gateway лишається наступним завданням.
 
@@ -11,6 +11,8 @@ _Оновлено: 2026-10-30._
 **Передзлиттєве ревю, частина 2 закрита (2026-10-28, `feat/constructor`):** виправлено 86 знахідок реєстру (76 повністю, 8 частково, A22 і B27 у backlog, B04 довгостроково - epic D3), [Disposition і відкриті пункти](archive/superpowers/plans/2026-10-27-constructor-premerge-findings.md); фінальне Opus-ревю без critical, I1-I3 виправлено. tsc, lint (0 errors), `test:run` 8475/8477 (2 таймаути під навантаженням, окремо зелені), integration 138/138, build пройшли. **Не виконано:** battle-sweep на prodcopy (потрібна перебудована prodcopy, рішення користувача), браузерна перевірка a11y діалогів, реальний Chrome `assistant-check --run`. Далі виконано частину 3 (HOMM-шлюз): [звіт](archive/superpowers/plans/2026-10-27-homm-gate-report.md).
 
 ## У роботі
+
+**Іконки рас/класів/підкласів/передісторій/вмінь (`feat/identity-icons`, не змерджено):** 223 AI-іконки SRD завантажено у прод-Storage (URL у `icons.json`), сид і показ у бібліотеках/редакторі класу; 103 іконки мають вшитий текст/підписи, користувач прийняв як є (список `docs/superpowers/specs/2026-10-31-identity-icons-design.md`, QA у робочому каталозі). Прод-БД не чіпали: на проді лише `pnpm constructor:srd-template` у кроці «офіційні шаблони». `whatsNew` не додано (рішення за користувачем відкрите).
 
 **Переклад офіційних шаблонів (`feat/template-i18n`, не змерджено):** накладки мов на SRD 5.2 (`scripts/srd/i18n`, `pnpm srd:i18n`), `campaigns.locale/templateKey` (міграція `20261118000000_template_locale` їде з main), перемикач мови в виборі шаблону; `uk` фази A і B готові (100%, фаза B — 1799 описів units/artifacts/spells; помилки узгодженості виправляють `apply`/`normalize`). Після деплою на проді: `pnpm constructor:srd-template --locale uk --allow-remote`. Деталі — [content-api.md](architecture/content-api.md#мови-шаблону-srd-feattemplate-i18n).
 
