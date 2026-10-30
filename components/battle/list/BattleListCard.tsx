@@ -4,6 +4,7 @@ import { useTranslations } from "next-intl";
 import { HudCard, HudPill } from "@/components/hud/page";
 import { Button } from "@/components/ui/button";
 import { BattleStatus } from "@/lib/constants/battle";
+import { useDeleteBattleCard } from "@/lib/hooks/battles";
 
 interface BattleListCardProps {
   battle: { id: string; name: string; description: string | null; currentRound: number; participants: unknown };
@@ -20,11 +21,19 @@ const KIND = {
 export function BattleListCard({ battle, campaignId, kind }: BattleListCardProps) {
   const t = useTranslations("battleSetup.list");
 
+  const { isDeleting, onDelete } = useDeleteBattleCard(campaignId, battle.id);
+
   const participantCount = Array.isArray(battle.participants) ? battle.participants.length : 0;
 
   const editHref = `/campaigns/${campaignId}/dm/battles/${battle.id}`;
 
   const playHref = `/campaigns/${campaignId}/battles/${battle.id}`;
+
+  const deleteButton = (
+    <Button variant="destructive" size="sm" disabled={isDeleting} onClick={onDelete}>
+      {t("card.delete")}
+    </Button>
+  );
 
   return (
     <HudCard tone={KIND[kind].tone} className="space-y-3 p-4">
@@ -48,9 +57,12 @@ export function BattleListCard({ battle, campaignId, kind }: BattleListCardProps
       </div>
 
       {kind === BattleStatus.ACTIVE && (
-        <Button asChild className="w-full">
-          <Link href={playHref}>{t("card.play")}</Link>
-        </Button>
+        <div className="flex gap-2">
+          <Button asChild size="sm" className="flex-1">
+            <Link href={playHref}>{t("card.play")}</Link>
+          </Button>
+          {deleteButton}
+        </div>
       )}
       {kind === BattleStatus.PREPARED && (
         <div className="flex gap-2">
@@ -60,12 +72,16 @@ export function BattleListCard({ battle, campaignId, kind }: BattleListCardProps
           <Button asChild size="sm" className="flex-1">
             <Link href={playHref}>{t("card.start")}</Link>
           </Button>
+          {deleteButton}
         </div>
       )}
       {kind === BattleStatus.COMPLETED && (
-        <Button asChild variant="outline" size="sm" className="w-full">
-          <Link href={editHref}>{t("card.view")}</Link>
-        </Button>
+        <div className="flex gap-2">
+          <Button asChild variant="outline" size="sm" className="flex-1">
+            <Link href={editHref}>{t("card.view")}</Link>
+          </Button>
+          {deleteButton}
+        </div>
       )}
     </HudCard>
   );

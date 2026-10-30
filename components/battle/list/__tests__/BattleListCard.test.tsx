@@ -1,8 +1,12 @@
 // @vitest-environment happy-dom
-import { cleanup, render, screen } from "@testing-library/react";
-import { afterEach, describe, expect, it } from "vitest";
+import { cleanup, fireEvent, render, screen } from "@testing-library/react";
+import { afterEach, describe, expect, it, vi } from "vitest";
 
 import { BattleListCard } from "@/components/battle/list/BattleListCard";
+
+const onDelete = vi.fn();
+
+vi.mock("@/lib/hooks/battles", () => ({ useDeleteBattleCard: () => ({ isDeleting: false, onDelete }) }));
 
 afterEach(cleanup);
 
@@ -20,7 +24,15 @@ describe("BattleListCard", () => {
     expect(screen.getByText("На тракті")).toBeTruthy();
     expect(hrefOf("battleSetup.list.card.play")).toBe("/campaigns/c1/battles/b1");
     expect(screen.getAllByRole("link")).toHaveLength(1);
-    expect(screen.queryAllByRole("button")).toHaveLength(0);
+    expect(screen.getAllByRole("button")).toHaveLength(1);
+  });
+
+  it("кнопка видалення викликає onDelete", () => {
+    render(<BattleListCard battle={battle} campaignId="c1" kind="completed" />);
+
+    fireEvent.click(screen.getByRole("button", { name: "battleSetup.list.card.delete" }));
+
+    expect(onDelete).toHaveBeenCalledOnce();
   });
 
   it("prepared: учасники, редагування й запуск", () => {

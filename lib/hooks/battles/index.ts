@@ -37,4 +37,5 @@ export {
   useUpdateBattleParticipant,
 } from "./useBattles";
 export { useBattleSummary } from "./useBattleSummary";
+export { useDeleteBattleCard } from "./useDeleteBattleCard";
 export type { BattleConditionsBody, CoreActionBody } from "@/lib/api/battles";

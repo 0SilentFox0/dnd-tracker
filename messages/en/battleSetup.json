@@ -25,7 +25,8 @@
       "play": "Go to battle",
       "edit": "Edit",
       "start": "Start",
-      "view": "View"
+      "view": "View",
+      "delete": "Delete"
     },
     "empty": {
       "title": "No battle scenes yet",
