@@ -52,7 +52,7 @@ function GraphEdgeLineImpl({ edge, from, to, color, sequence = false, dimmed, hi
   const { d, x, y } = curve(from, to, 0.14);
 
   return (
-    <g data-edge-id={edge.id} data-dimmed={dimmed ? "true" : undefined} style={{ opacity: dimmed ? 0.03 : highlighted ? 0.95 : 0.2 }} pointerEvents="none">
+    <g data-edge-id={edge.id} data-dimmed={dimmed ? "true" : undefined} style={{ opacity: dimmed ? 0.03 : highlighted ? 0.95 : 0.28 }} pointerEvents="none">
       <path d={d} fill="none" stroke={color} strokeWidth={highlighted ? width + 1.2 : width} strokeLinecap="round" strokeDasharray={edge.secret ? "6 4" : undefined} />
       {edge.secret ? (
         <g data-secret="true" transform={`translate(${x - 8} ${y - 8})`}>

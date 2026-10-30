@@ -3,6 +3,7 @@
 import { useTranslations } from "next-intl";
 import { ScrollText, TriangleAlert } from "lucide-react";
 
+import { EntityIcon } from "@/components/common/EntityIcon";
 import { Input } from "@/components/ui/input";
 import { GRAPH_TYPE_STYLE } from "@/lib/constants/scenario-graph";
 import type { GraphListGroup } from "@/lib/utils/scenario/graph/list";
@@ -47,6 +48,7 @@ export function GraphListPanel({ groups, selectedId, query, onQuery, onPick }: G
                       className={`flex w-full items-center gap-2 rounded px-1.5 py-1 text-left text-sm hover:bg-accent focus-visible:bg-accent focus-visible:outline-none ${item.id === selectedId ? "bg-accent font-medium" : ""}`}
                       onClick={() => onPick(item.id)}
                     >
+                      {item.image ? <EntityIcon src={item.image} name={item.label} size={40} className="size-5 rounded-full" fallback={<Icon className="size-3" style={{ color: style?.color }} aria-hidden />} /> : null}
                       <span className={`flex-1 truncate ${item.missing ? "line-through opacity-70" : ""}`}>{item.label}</span>
                       {item.missing ? <TriangleAlert className="size-3.5 text-destructive" aria-label={t("missing")} /> : null}
                       <span className="text-xs tabular-nums text-muted-foreground" title={t("counts", { degree: item.degree, mentions: item.mentions })}>

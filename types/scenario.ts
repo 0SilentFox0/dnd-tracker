@@ -161,6 +161,7 @@ export interface IndexEntityNode {
   degree: number;
   sceneIds: string[];
   missing: boolean;
+  image?: string | null;
 }
 
 export interface IndexSceneNode {

@@ -21,7 +21,7 @@ interface Box {
   h: number;
 }
 
-const PAD = 80;
+const PAD = 50;
 
 const MIN_W = 120;
 
@@ -29,7 +29,7 @@ const MAX_W = 20000;
 
 const MAX_FIT_W = 2400;
 
-const MIN_FIT_W = 1200;
+const MIN_FIT_W = 900;
 
 const FALLBACK_ASPECT = 4 / 3;
 

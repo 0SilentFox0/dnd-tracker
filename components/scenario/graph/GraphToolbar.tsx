@@ -26,7 +26,7 @@ export interface GraphToolbarProps {
   onNextMatch: () => void;
 }
 
-const checkClass = "flex items-center gap-1.5 text-sm";
+const checkClass = "flex items-center gap-1.5 text-xs";
 
 export function GraphToolbar({ filters, counts, showSequence, timeline, listOpen, query, matches, onFilters, onShowSequence, onTimeline, onToggleList, onQuery, onNextMatch }: GraphToolbarProps) {
   const t = useTranslations("scenarioGraph.toolbar");
@@ -43,7 +43,7 @@ export function GraphToolbar({ filters, counts, showSequence, timeline, listOpen
   };
 
   return (
-    <div className="flex flex-wrap items-center gap-x-4 gap-y-2" role="group" aria-label={t("filters")}>
+    <div className="flex flex-wrap items-center gap-x-3 gap-y-1.5" role="group" aria-label={t("filters")}>
       <Button size="sm" variant="outline" aria-pressed={listOpen} onClick={onToggleList}><List aria-hidden />{t("list")}</Button>
       <div className="flex items-center gap-2">
         <Input type="search" role="searchbox" aria-label={t("search")} placeholder={t("searchPlaceholder")} value={query} className="h-8 w-48" onChange={(e) => onQuery(e.target.value)} onKeyDown={(e) => e.key === "Enter" && onNextMatch()} />

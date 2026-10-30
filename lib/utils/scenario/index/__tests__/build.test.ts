@@ -78,12 +78,14 @@ describe("buildScenarioIndex", () => {
     const index = buildScenarioIndex({
       pages: [page("a", 1)],
       facts: new Map([["a", facts({ id: "s", refs: [ref("unit", "u1", { label: "Chip" }), ref("spell", "gone", { label: "Old" }), ref("battle", "b1")] })]]),
-      resolved: new Map([[entityKey("unit", "u1"), { label: "Real" }], [entityKey("battle", "b1"), { label: "Fight" }]]),
+      resolved: new Map<string, { label: string; image?: string | null }>([[entityKey("unit", "u1"), { label: "Real", image: "https://x/u.png" }], [entityKey("battle", "b1"), { label: "Fight" }]]),
     });
 
     const byId = Object.fromEntries(index.entities.map((e) => [e.id, e]));
 
-    expect(byId.u1).toMatchObject({ label: "Real", missing: false });
+    expect(byId.u1).toMatchObject({ label: "Real", missing: false, image: "https://x/u.png" });
+    expect(byId.b1?.image).toBeNull();
+    expect(byId.gone?.image).toBeNull();
     expect(byId.gone).toMatchObject({ label: "Old", missing: true });
     expect(index.counts).toEqual({ scenes: 1, entities: 3, edges: 3, byType: { unit: 1, spell: 1, battle: 1 }, missing: 1 });
   });

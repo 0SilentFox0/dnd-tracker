@@ -28,7 +28,7 @@ export function pickLabels(nodes: readonly PositionedNode[], forced: ReadonlySet
   for (const n of order) {
     const w = Math.min(n.label.length, LABEL_MAX) * CHAR_W + 6;
 
-    const top = n.y + 13 + Math.min(n.degree, 8) + 3;
+    const top = n.y + 16 + Math.min(n.degree, 8) + 3;
 
     const box = { x0: n.x - w / 2, x1: n.x + w / 2, y0: top, y1: top + LABEL_H };
 

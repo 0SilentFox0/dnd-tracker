@@ -92,6 +92,7 @@ export function buildGraphModel(index: ScenarioIndex, filters: GraphFilters, cap
     missing: e.missing,
     refId: e.id,
     hidden: 0,
+    image: e.image ?? null,
   }));
 
   const sequence: GraphEdge[] = [];

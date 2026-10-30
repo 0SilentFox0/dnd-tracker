@@ -11,7 +11,7 @@ const index: ScenarioIndex = {
     { kind: "scene", id: "b", title: "Forest", pageKind: "scene", status: "draft", order: 1, sections: [] },
     { kind: "scene", id: "a", title: "Tavern", pageKind: "scene", status: "draft", order: 0, sections: [] },
   ],
-  entities: [entity("unit", "u1", "Wolf", ["a"]), entity("unit", "u2", "Bear", ["a", "b"]), entity("spell", "s1", "Fireball", ["b"], true)],
+  entities: [{ ...entity("unit", "u1", "Wolf", ["a"]), image: "https://x/w.png" }, entity("unit", "u2", "Bear", ["a", "b"]), entity("spell", "s1", "Fireball", ["b"], true)],
   edges: [
     { sceneId: "a", entityType: "unit", entityId: "u1", count: 2, sectionIds: [], secret: false },
     { sceneId: "a", entityType: "unit", entityId: "u2", count: 1, sectionIds: [], secret: false },
@@ -29,6 +29,10 @@ describe("buildGraphList", () => {
     expect(groups[0]!.items.map((i) => i.id)).toEqual(["scene:a", "scene:b"]);
     expect(groups[1]!.items.map((i) => [i.id, i.degree, i.mentions])).toEqual([["unit:u2", 2, 4], ["unit:u1", 1, 2]]);
     expect(groups[0]!.items[0]).toMatchObject({ degree: 2, mentions: 3 });
+  });
+
+  it("carries the image to list items", () => {
+    expect(buildGraphList(index, defaultFilters(), "").flatMap((g) => g.items).find((i) => i.id === "unit:u1")?.image).toBe("https://x/w.png");
   });
 
   it("includes single-link entities regardless of graph collapsing", () => {

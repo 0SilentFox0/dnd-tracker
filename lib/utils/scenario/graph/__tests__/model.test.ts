@@ -123,6 +123,17 @@ describe("sequence edges", () => {
   });
 });
 
+describe("avatars", () => {
+  it("carries entity images into graph nodes", () => {
+    const withImage = { ...index, entities: index.entities.map((e) => (e.id === "u1" ? { ...e, image: "https://x/g.png" } : e)) };
+
+    const m = buildGraphModel(withImage, defaultFilters());
+
+    expect(m.nodes.find((n) => n.id === "unit:u1")?.image).toBe("https://x/g.png");
+    expect(m.nodes.find((n) => n.id === "spell:sp1")?.image).toBeNull();
+  });
+});
+
 describe("egoModel", () => {
   it("keeps the node, its neighbors and the edges among them", () => {
     const m = buildGraphModel(index, defaultFilters());

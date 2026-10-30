@@ -12,6 +12,7 @@ export interface GraphNode {
   order?: number;
   refId: string;
   hidden: number;
+  image?: string | null;
 }
 
 export interface GraphEdge {

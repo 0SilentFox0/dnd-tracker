@@ -13,6 +13,7 @@ export interface GraphListItem {
   degree: number;
   mentions: number;
   missing: boolean;
+  image?: string | null;
 }
 
 export interface GraphListGroup {
@@ -42,7 +43,7 @@ export function buildGraphList(index: ScenarioIndex, filters: GraphFilters, quer
     const items = entities
       .filter((e) => e.type === type)
       .sort((a, b) => b.degree - a.degree || a.label.localeCompare(b.label))
-      .map<GraphListItem>((e) => ({ id: entityNodeId(e.type, e.id), kind: "entity", type: e.type, label: e.label, degree: e.degree, mentions: mentions.get(entityNodeId(e.type, e.id)) ?? 0, missing: e.missing }));
+      .map<GraphListItem>((e) => ({ id: entityNodeId(e.type, e.id), kind: "entity", type: e.type, label: e.label, degree: e.degree, mentions: mentions.get(entityNodeId(e.type, e.id)) ?? 0, missing: e.missing, image: e.image ?? null }));
 
     groups.push({ key: type, items });
   }

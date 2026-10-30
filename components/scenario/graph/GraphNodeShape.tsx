@@ -3,7 +3,10 @@
 import { memo } from "react";
 import { useTranslations } from "next-intl";
 
+import { GraphNodeAvatar } from "./GraphNodeAvatar";
+
 import { GRAPH_SCENE_H, GRAPH_SCENE_W, GRAPH_TYPE_STYLE } from "@/lib/constants/scenario-graph";
+import { graphImageSrc } from "@/lib/utils/scenario/graph/image";
 import type { PositionedNode } from "@/lib/utils/scenario/graph/layout";
 
 export const GRAPH_STATUS_COLOR = { draft: "var(--color-hud-gold-bright)", ready: "var(--color-hud-good)", personal: "var(--color-chart-2)" } as const;
@@ -48,7 +51,11 @@ function GraphNodeShapeImpl({ node, selected, dimmed, matched, hovered, labelled
 
   const h = side ? GRAPH_SCENE_H * 0.78 : GRAPH_SCENE_H;
 
-  const r = 13 + Math.min(node.degree, 8);
+  const r = 16 + Math.min(node.degree, 8);
+
+  const glyph = Icon ? <Icon x={-9} y={-9} width={18} height={18} color={accent} pointerEvents="none" /> : null;
+
+  const avatar = node.kind === "entity" ? graphImageSrc(node.image) : null;
 
   const active = selected || matched || hovered;
 
@@ -80,15 +87,16 @@ function GraphNodeShapeImpl({ node, selected, dimmed, matched, hovered, labelled
         <>
           <rect className="graph-shape" x={-w / 2} y={-h / 2} width={w} height={h} rx={11} fill="var(--card)" stroke={active ? accent : "var(--border)"} strokeWidth={selected || matched ? 2.5 : 1.5} strokeDasharray={side ? "5 3" : undefined} />
           <rect x={-w / 2 + 6} y={-h / 2 + 7} width={4} height={h - 14} rx={2} fill={accent} pointerEvents="none" />
-          <text x={-w / 2 + 18} y={side ? -2 : -5} fontSize={9.5} fill="var(--muted-foreground)" pointerEvents="none">{`#${(node.order ?? 0) + 1}`}</text>
+          <text x={-w / 2 + 18} y={side ? -2 : -5} fontSize={10.5} fill="var(--muted-foreground)" pointerEvents="none">{`#${(node.order ?? 0) + 1}`}</text>
           <text x={-w / 2 + 18} y={side ? 11 : 12} fontSize={12.5} fontWeight={600} fill="currentColor" pointerEvents="none">{clip(node.label, side ? 14 : TITLE_MAX)}</text>
         </>
       ) : (
         <>
           <circle className="graph-shape" r={r} fill={`color-mix(in srgb, ${accent} 22%, var(--card))`} stroke={accent} strokeWidth={selected || matched ? 3 : 2} strokeDasharray={node.missing ? "4 3" : undefined} />
-          {Icon ? <Icon x={-8} y={-8} width={16} height={16} color={accent} pointerEvents="none" /> : null}
+          {avatar ? <GraphNodeAvatar src={avatar} r={r} clipId={`ga-${node.id.replace(/[^a-zA-Z0-9]/g, "_")}`} fallback={glyph} /> : glyph}
         </>
       )}
+      {selected ? <circle r={r + 5} fill="none" stroke={accent} strokeWidth={1.5} strokeDasharray="3 3" opacity={0.8} pointerEvents="none" style={{ display: isScene ? "none" : undefined }} /> : null}
       {node.hidden > 0 ? (
         <g transform={`translate(${w / 2 - 4} ${-h / 2 - 2})`} pointerEvents="none">
           <title>{t("hidden", { count: node.hidden })}</title>

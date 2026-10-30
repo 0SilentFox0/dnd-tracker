@@ -214,6 +214,20 @@ describe("ScenarioGraph", () => {
     expect(node("artifact:o")).not.toBeNull();
   });
 
+  it("shows an avatar image inside the node and falls back to the icon on error", () => {
+    index = { ...FULL, entities: FULL.entities.map((e) => (e.id === "g" ? { ...e, image: "https://example.com/g.png" } : e)) };
+    render(<ScenarioGraph campaignId="c" />);
+
+    const img = node("unit:g").querySelector("image");
+
+    expect(img).not.toBeNull();
+
+    fireEvent.error(img as Element);
+
+    expect(node("unit:g").querySelector("image")).toBeNull();
+    expect(node("unit:g").querySelector("svg")).not.toBeNull();
+  });
+
   it("selects on Space", () => {
     render(<ScenarioGraph campaignId="c" />);
 
