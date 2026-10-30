@@ -13,7 +13,8 @@ import { writeCharacterLog } from "@/lib/server/characters/log";
 import { ContentError } from "@/lib/server/content/errors";
 import { PUBLIC_USER_SELECT } from "@/lib/server/users/db-user";
 import { mergeBackground } from "@/lib/utils/backgrounds/selection";
-import { choicesStateOf, withClassPicks } from "@/lib/utils/characters/choices/picks";
+import { choicesStateOf, withClassPicks, withClassSubclasses } from "@/lib/utils/characters/choices/picks";
+import { validateClassEntries } from "@/lib/utils/characters/classes/application";
 import type { ChoicesBody } from "@/types/choices";
 
 export async function saveCharacterChoices({ access, character }: CharacterGate, body: ChoicesBody) {
@@ -36,12 +37,21 @@ export async function saveCharacterChoices({ access, character }: CharacterGate,
 
     const refs = await loadChoiceRefs(row.campaignId, row.race, { classMode: characterClassMode(rules, before.classes), backgroundIds: [before.backgroundId, body.backgroundId], db: tx });
 
-    const after = {
-      ...mergeBackground(before, body),
-      raceChoices: body.raceChoices ?? before.raceChoices,
-      feats: body.feats ?? before.feats,
-      classes: body.classChoices ? withClassPicks(before.classes, body.classChoices) : before.classes,
-    };
+    let classes = body.classChoices ? withClassPicks(before.classes, body.classChoices) : before.classes;
+
+    if (body.classSubclasses) {
+      const subclassed = withClassSubclasses(classes, body.classSubclasses);
+
+      if (subclassed.conflict) throw new ContentError(API_ERRORS.SUBCLASS_ALREADY_SET, 422);
+
+      const invalid = validateClassEntries(subclassed.entries, refs.classesById, access.campaign.maxLevel);
+
+      if (invalid) throw new ContentError(invalid.error, 422, undefined, invalid.params);
+
+      classes = subclassed.entries;
+    }
+
+    const after = { ...mergeBackground(before, body), raceChoices: body.raceChoices ?? before.raceChoices, feats: body.feats ?? before.feats, classes };
 
     const resolved = await resolveCharacterChoices({ campaignId: row.campaignId, rules, isDM: access.isDM, character: row, before, after, refs });
 

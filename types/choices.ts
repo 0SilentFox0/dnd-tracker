@@ -154,6 +154,7 @@ export interface ChoicesBody {
   raceChoices?: Picks;
   feats?: CharacterFeat[];
   classChoices?: Record<string, Picks>;
+  classSubclasses?: Record<string, string>;
 }
 
 export interface SheetChoices {

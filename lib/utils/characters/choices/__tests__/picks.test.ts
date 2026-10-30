@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 
 import { elf } from "./fixtures";
 
-import { choicesStateOf, keepStoredPicks, lineageName, withClassPicks } from "@/lib/utils/characters/choices/picks";
+import { choicesBodyOf, choicesStateOf, keepStoredPicks, lineageName, withClassPicks, withClassSubclasses } from "@/lib/utils/characters/choices/picks";
 
 describe("picks helpers", () => {
   it("choicesStateOf reads all three columns tolerantly", () => {
@@ -35,5 +35,26 @@ describe("picks helpers", () => {
     expect(lineageName(elf, {})).toBeNull();
     expect(lineageName({ ...elf, choices: elf.choices.filter((c) => !c.lineage) }, {})).toBeUndefined();
     expect(lineageName(null, {})).toBeUndefined();
+  });
+});
+
+describe("subclass picks", () => {
+  const entries = [{ classId: "c", level: 3 }, { classId: "d", level: 3, subclassId: "s1" }];
+
+  it("sets an empty subclass, ignores unknown classes", () => {
+    expect(withClassSubclasses(entries, { c: "s9", zzz: "s2" })).toEqual({ entries: [{ classId: "c", level: 3, subclassId: "s9" }, entries[1]], conflict: null });
+  });
+
+  it("the same subclass again is not a conflict", () => {
+    expect(withClassSubclasses(entries, { d: "s1" })).toEqual({ entries, conflict: null });
+  });
+
+  it("a different subclass is reported and left unchanged", () => {
+    expect(withClassSubclasses(entries, { d: "s2" })).toEqual({ entries, conflict: "d" });
+  });
+
+  it("choicesBodyOf lists subclasses only for entries that have one", () => {
+    expect(choicesBodyOf({ raceChoices: {}, feats: [], classes: entries }).classSubclasses).toEqual({ d: "s1" });
+    expect(choicesBodyOf({ raceChoices: {}, feats: [], classes: [entries[0]] })).not.toHaveProperty("classSubclasses");
   });
 });
