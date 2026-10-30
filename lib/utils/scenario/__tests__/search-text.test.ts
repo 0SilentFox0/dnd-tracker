@@ -35,6 +35,11 @@ describe("search text", () => {
 });
 
 describe("sectionLead", () => {
+  it("matches the title prefix after whitespace and NFC normalisation", () => {
+    expect(sectionLead("Ліс Темний ліс", "Ліс \n", 90)).toBe("Темний ліс");
+    expect(sectionLead("Caf\u00e9 Open", "Cafe\u0301", 90)).toBe("Open");
+  });
+
   it("strips the title prefix", () => {
     expect(sectionLead("Собор Дзвони обриваються", "Собор", 90)).toBe("Дзвони обриваються");
   });

@@ -1,6 +1,5 @@
 import { type DigestLevel, type DigestPage, pageLine } from "./build-lines";
-
-import { fitLines } from "@/lib/utils/scenario/summary/digest";
+import { fitLines } from "./fit-lines";
 
 const LEVELS: DigestLevel[] = [0, 1, 2, 3];
 

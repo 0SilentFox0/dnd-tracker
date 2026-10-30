@@ -19,7 +19,9 @@ export function buildSearchText(title: string, content: ScenarioContent): string
 }
 
 export function sectionLead(line: string, title: string, max: number): string {
-  const body = (line.startsWith(title) ? line.slice(title.length) : line).trim();
+  const t = oneLine(title).normalize("NFC");
+
+  const body = (line.startsWith(t) ? line.slice(t.length) : line).trim();
 
   const chars = Array.from(body);
 

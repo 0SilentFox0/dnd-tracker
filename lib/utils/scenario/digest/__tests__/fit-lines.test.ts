@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { fitLines } from "../digest";
+import { fitLines } from "../fit-lines";
 
 describe("fitLines", () => {
   it("keeps all lines that fit without a marker", () => {
