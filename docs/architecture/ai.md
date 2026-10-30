@@ -171,7 +171,7 @@ DM-сторінка `/campaigns/[id]/dm/graph` — візуалізація `Sce
 - Таблиця `scenario_page_summaries` (`pageId` PK, `campaignId`, `version`, `summary` JSON, `provider`, `model`, `inputTokens`, `outputTokens`), RLS увімкнено; запис через `summary-store` (`upsertSummary`, `loadSummaryRow`).
 - Модель — «розумна» модель ДМ (`pickDmSmartTextModel`, ключ ДМ кампанії, BYOK); ключ не залишає сервер.
 - Ідемпотентність за версією: якщо рядок має `version === page.version` і немає `force`, відповідь віддається з БД без виклику моделі й без rate limit. Гонки: новіша версія не перезаписується старішою.
-- `stale` не зберігається, а обчислюється в `GET`: `row.version !== page.version`.
+- `stale` не зберігається, а обчислюється в `GET`: `row.version < page.version`.
 - Вхід (`buildSummaryInput`, `lib/utils/scenario/summary/`) — текст сторінки з прихованим шаром (`||секрети||`, нотатки ДМ), бюджет `AI_LIMITS.summaryInputChars`, `truncated` у відповіді; секрети потрапляють у вхід, тому конспект лише для ДМ, а модель кладе їх окремо в `secrets`. `filterSummaryEntities` лишає в `entities` тільки ключі чіпів сторінки; у UI сирі ключі не показуються.
 - Схема виходу `pageSummarySchema` (`overview`, `events`, `secrets`, `entities`, `digest`) з лімітами `SUMMARY_LIMITS`.
 - `summariesDigest` (`lib/utils/scenario/summary/digest.ts`) — готовий експорт для етапу 3c: стислий зріз конспектів для контексту асистента; підключення в `fitContext` ще не зроблене.

@@ -184,4 +184,4 @@ Mounting: in the page-client as a collapsed `<details>`-style section (use the e
 ## Self-review
 
 - Spec coverage: table+RLS (T1), format (T1), input/budget/truncated/secrets (T2), pick smart (T3), POST/GET/idempotence/force/races/errors/tokens (T4), client states/egress/i18n (T5), onboarding/docs (T6), digest stub (T2), live run and review (after tasks).
-- Deviations from spec (deliberate): `GET` returns `{ available, summaries }` (needed for the disabled-button state without a second endpoint); entity labels come from chips via `extractPageFacts` instead of `resolveEntities`, so `index-store.ts` is untouched.
+- Deviations from spec (deliberate): `GET` returns `{ available, summaries }` (needed for the disabled-button state without a second endpoint); entity labels come from chips via `extractPageFacts` instead of `resolveEntities`, so `index-store.ts` is untouched; the cached return (same version, no `force`) happens before the rate limit, not after it as in the spec.

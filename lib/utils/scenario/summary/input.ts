@@ -72,7 +72,16 @@ export function buildSummaryInput(page: SummaryInputPage, maxChars: number) {
 
       const room = maxChars - used - freshLines.reduce((n, l) => n + l.length + 1, 0) - 1 - TRUNCATED.length;
 
-      if (room <= 0) continue;
+      if (room <= 0) {
+        const last = blocks.length - 1;
+
+        if (last >= 0 && used + TRUNCATED.length <= maxChars) {
+          blocks[last] += TRUNCATED;
+          used += TRUNCATED.length;
+        }
+
+        continue;
+      }
 
       body = text.slice(0, room) + TRUNCATED;
     }

@@ -18,6 +18,6 @@ export function useGenerateScenarioSummary(campaignId: string) {
   return {
     generate: (pageId: string, force?: boolean) => mutation.mutate({ pageId, force }),
     pendingPageId: mutation.isPending ? mutation.variables.pageId : null,
-    error: mutation.isError ? errorMessage(mutation.error, "") : null,
+    errorFor: (pageId: string) => (mutation.isError && mutation.variables.pageId === pageId ? errorMessage(mutation.error, "") : null),
   };
 }

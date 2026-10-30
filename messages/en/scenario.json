@@ -284,7 +284,7 @@
     "generating": "Generating...",
     "stale": "Outdated: the page changed",
     "events": "Events",
-    "secrets": "Hidden layer (GM only)",
+    "secrets": "Hidden layer (DM only)",
     "unavailable": "An AI key is required: add it in AI settings.",
     "failed": "Could not generate the summary"
   },

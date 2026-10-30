@@ -22,7 +22,7 @@ const entry = (stale: boolean) => ({
 
 const setup = (data: { available: boolean; stale?: boolean; has?: boolean }, gen: { pendingPageId?: string | null; error?: string | null } = {}) => {
   vi.mocked(useScenarioSummaries).mockReturnValue({ isPending: false, data: { available: data.available, summaries: data.has ? { p1: entry(!!data.stale) } : {} } } as never);
-  vi.mocked(useGenerateScenarioSummary).mockReturnValue({ generate, pendingPageId: gen.pendingPageId ?? null, error: gen.error ?? null });
+  vi.mocked(useGenerateScenarioSummary).mockReturnValue({ generate, pendingPageId: gen.pendingPageId ?? null, errorFor: (id: string) => (id === "p1" ? (gen.error ?? null) : null) });
 
   return render(<ScenarioSummaryPanel campaignId="c1" pageId="p1" />);
 };
@@ -63,6 +63,14 @@ describe("ScenarioSummaryPanel", () => {
   it("disables the button while generating", () => {
     setup({ available: true }, { pendingPageId: "p1" });
     expect((screen.getByRole("button", { name: /Генерую/ }) as HTMLButtonElement).disabled).toBe(true);
+  });
+
+  it("shows a retryable error state when the summaries fail to load", () => {
+    vi.mocked(useScenarioSummaries).mockReturnValue({ isPending: false, isError: true, error: new Error("x"), refetch: vi.fn() } as never);
+    vi.mocked(useGenerateScenarioSummary).mockReturnValue({ generate, pendingPageId: null, errorFor: () => null });
+    render(<ScenarioSummaryPanel campaignId="c1" pageId="p1" />);
+    expect(screen.queryByText(/Потрібен ключ AI/)).toBeNull();
+    expect(screen.getByRole("button", { name: /.+/ })).toBeTruthy();
   });
 
   it("shows the error text", () => {

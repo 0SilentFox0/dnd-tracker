@@ -5,17 +5,18 @@ import { aiGuard } from "@/app/api/campaigns/[id]/ai/ai-handlers";
 import { pickDmSmartTextModel } from "@/lib/ai/dm-model";
 import { aiErrorMessage } from "@/lib/ai/errors";
 import { guarded } from "@/lib/ai/guarded";
-import { AI_LIMITS, AI_RATE_LIMITS } from "@/lib/constants/ai";
+import { AI_BODY_LIMITS, AI_LIMITS, AI_RATE_LIMITS } from "@/lib/constants/ai";
 import { API_ERRORS } from "@/lib/constants/api-errors";
 import { prisma } from "@/lib/db";
 import { languageName } from "@/lib/i18n/language-name";
 import { getRequestLocale } from "@/lib/i18n/request-locale";
-import { generateSummaryBodySchema, pageSummarySchema } from "@/lib/schemas/scenario-summary";
+import { clampSummary, generateSummaryBodySchema, lenientSummarySchema, SUMMARY_LIMITS } from "@/lib/schemas/scenario-summary";
 import { readContent } from "@/lib/server/scenario/page-store";
 import { loadSummaryRow, upsertSummary } from "@/lib/server/scenario/summary-store";
 import { errorResponse } from "@/lib/utils/api/api-response";
 import { loadOwned } from "@/lib/utils/api/load-owned";
 import { checkRateLimit, rateLimitResponse } from "@/lib/utils/api/rate-limit";
+import { readLimitedBody } from "@/lib/utils/api/read-limited-body";
 import { buildSummaryInput, filterSummaryEntities } from "@/lib/utils/scenario/summary/input";
 
 const instruction = (language: string) =>
@@ -23,19 +24,22 @@ const instruction = (language: string) =>
     "You summarize one page of a D&D campaign scenario for the dungeon master.",
     `Write in ${language}.`,
     "overview and events are for the DM: what the page is about and the key beats in order.",
-    "secrets are the hidden layer: facts that players must not learn (the ||double bars|| text and DM notes).",
+    "secrets are the hidden layer: facts that players must not learn (the ||double bars|| text and DM notes); overview, events and digest must not reveal them.",
+    `Limits: overview at most ${SUMMARY_LIMITS.overview} characters; at most ${SUMMARY_LIMITS.events} events of at most ${SUMMARY_LIMITS.event} characters each; at most ${SUMMARY_LIMITS.secrets} secrets of at most ${SUMMARY_LIMITS.secret} characters each; digest at most ${SUMMARY_LIMITS.digest} characters.`,
     "entities may only contain keys from the allowed entities list; never invent keys.",
     "digest is one line usable as context for an assistant that knows the whole scenario.",
   ].join("\n");
 
 async function readForce(req: Request): Promise<{ force?: boolean } | NextResponse> {
-  const text = await req.text().catch(() => "");
+  const body = await readLimitedBody(req, AI_BODY_LIMITS.small);
+
+  if (!body.ok) return errorResponse(API_ERRORS.BODY_TOO_LARGE, 413);
 
   let raw: unknown = {};
 
-  if (text.trim()) {
+  if (body.text.trim()) {
     try {
-      raw = JSON.parse(text);
+      raw = JSON.parse(body.text);
     } catch {
       return errorResponse(API_ERRORS.INVALID_JSON, 400);
     }
@@ -83,14 +87,14 @@ export const generateSummaryHandler = (req: Request, campaignId: string, pageId:
     let result;
 
     try {
-      result = await generateObject({ model: choice.model, schema: pageSummarySchema, prompt: `${instruction(languageName(locale))}\n\n${input.prompt}`, abortSignal: req.signal });
+      result = await generateObject({ model: choice.model, schema: lenientSummarySchema, prompt: `${instruction(languageName(locale))}\n\n${input.prompt}`, abortSignal: req.signal });
     } catch (error) {
       console.error("[ai summary]", APICallError.isInstance(error) ? error.statusCode : error instanceof Error ? error.name : "unknown");
 
       return errorResponse(aiErrorMessage(error), 502);
     }
 
-    const summary = filterSummaryEntities(result.object, input.allowedKeys);
+    const summary = filterSummaryEntities(clampSummary(result.object), input.allowedKeys);
 
     await upsertSummary({
       pageId,

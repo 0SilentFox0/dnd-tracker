@@ -17,7 +17,7 @@ export interface SummaryRowInput {
 export async function upsertSummary(row: SummaryRowInput): Promise<void> {
   // older versions must not overwrite newer ones; the page may be deleted mid-generation, so insert only while it exists
   await prisma.$executeRaw`INSERT INTO scenario_page_summaries ("pageId", "campaignId", version, summary, provider, model, "inputTokens", "outputTokens", "createdAt", "updatedAt")
-    SELECT id, ${row.campaignId}::text, ${row.version}::int, ${JSON.stringify(row.summary)}::jsonb, ${row.provider}::text, ${row.model}::text, ${row.inputTokens}::int, ${row.outputTokens}::int, now(), now()
+    SELECT id, "campaignId", ${row.version}::int, ${JSON.stringify(row.summary)}::jsonb, ${row.provider}::text, ${row.model}::text, ${row.inputTokens}::int, ${row.outputTokens}::int, now(), now()
     FROM scenario_pages WHERE id = ${row.pageId}
     ON CONFLICT ("pageId") DO UPDATE SET version = EXCLUDED.version, summary = EXCLUDED.summary, provider = EXCLUDED.provider, model = EXCLUDED.model,
       "inputTokens" = EXCLUDED."inputTokens", "outputTokens" = EXCLUDED."outputTokens", "createdAt" = now(), "updatedAt" = now()

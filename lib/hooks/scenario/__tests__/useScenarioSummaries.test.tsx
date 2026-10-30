@@ -55,7 +55,8 @@ describe("scenario summaries hooks", () => {
     const { result } = renderHook(() => useGenerateScenarioSummary("c1"), { wrapper });
 
     act(() => result.current.generate("p1"));
-    await waitFor(() => expect(result.current.error).toBe("boom"));
+    await waitFor(() => expect(result.current.errorFor("p1")).toBe("boom"));
+    expect(result.current.errorFor("p2")).toBeNull();
     expect(result.current.pendingPageId).toBeNull();
   });
 });

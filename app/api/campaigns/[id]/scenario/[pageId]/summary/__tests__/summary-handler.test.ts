@@ -130,6 +130,26 @@ describe("generateSummaryHandler", () => {
     expect(h.generate).toHaveBeenCalledTimes(2);
   });
 
+  it("trims an overrun to the limits and saves it instead of failing", async () => {
+    h.generate.mockResolvedValue({
+      object: { overview: "o".repeat(900), events: Array.from({ length: 10 }, () => "e".repeat(300)), secrets: Array.from({ length: 7 }, () => "s".repeat(300)), entities: [], digest: "d".repeat(500) },
+      usage: {},
+    });
+
+    const res = await post();
+
+    const { summary } = await res.json();
+
+    expect(res.status).toBe(200);
+    expect(summary.overview).toHaveLength(600);
+    expect(summary.events).toHaveLength(8);
+    expect(summary.events[0]).toHaveLength(160);
+    expect(summary.secrets).toHaveLength(5);
+    expect(summary.secrets[0]).toHaveLength(200);
+    expect(summary.digest).toHaveLength(300);
+    expect(h.upsert).toHaveBeenCalledTimes(1);
+  });
+
   it("rate limit blocks before the model", async () => {
     h.limit.mockResolvedValue({ allowed: false });
 

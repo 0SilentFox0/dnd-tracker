@@ -10,6 +10,26 @@ export const pageSummarySchema = z.object({
   digest: z.string().max(SUMMARY_LIMITS.digest),
 });
 
+export const lenientSummarySchema = z.object({
+  overview: z.string(),
+  events: z.array(z.string()),
+  secrets: z.array(z.string()),
+  entities: z.array(z.string()),
+  digest: z.string(),
+});
+
+const clip = (s: string, max: number) => (s.length > max ? s.slice(0, max) : s);
+
+export function clampSummary(s: z.infer<typeof lenientSummarySchema>): PageSummary {
+  return {
+    overview: clip(s.overview, SUMMARY_LIMITS.overview),
+    events: s.events.slice(0, SUMMARY_LIMITS.events).map((e) => clip(e, SUMMARY_LIMITS.event)),
+    secrets: s.secrets.slice(0, SUMMARY_LIMITS.secrets).map((e) => clip(e, SUMMARY_LIMITS.secret)),
+    entities: s.entities.slice(0, SUMMARY_LIMITS.entities),
+    digest: clip(s.digest, SUMMARY_LIMITS.digest),
+  };
+}
+
 export type PageSummary = z.infer<typeof pageSummarySchema>;
 
 export const generateSummaryBodySchema = z.object({ force: z.boolean().optional() });
