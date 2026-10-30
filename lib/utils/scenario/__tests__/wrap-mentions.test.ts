@@ -69,4 +69,39 @@ describe("wrapMentions", () => {
 
     expect(findMentions(content as never, "Беатріс").every((h) => h.inMention)).toBe(true);
   });
+
+  it("does not wrap a name glued to a bold word, like findMentions", () => {
+    const src = p(text("Super", [{ type: "bold" }]), text("Beatrice"));
+
+    expect(wrapMentions(src, ["Beatrice"], target).count).toBe(0);
+    expect(findMentions({ legend: [], sections: [{ id: "s", title: "S", played: false, rows: [{ id: "r", story: src, notes: p() }] }] } as never, "Beatrice")).toHaveLength(0);
+  });
+
+  it("wraps a name split by markup into one chip with the common marks", () => {
+    const { doc, count } = wrapMentions(p(text("Hi "), text("Bea"), text("trice", [{ type: "bold" }]), text("!")), ["Beatrice"], target);
+
+    expect(count).toBe(1);
+    expect(chips(doc)[0]).toEqual({ type: "mention", attrs: { id: "a1", label: "Beatrice", type: "acquaintance" } });
+    expect(doc.content[0].content?.map((n) => n.text ?? `[${n.attrs?.label}]`).join("")).toBe("Hi [Beatrice]!");
+  });
+
+  it("keeps the secret mark when the name is split inside a secret", () => {
+    const secret: RichNode["marks"] = [{ type: "secret" }];
+
+    const { doc } = wrapMentions(p(text("Бе", secret), text("атріс", [{ type: "secret" }, { type: "bold" }])), ["Беатріс"], target);
+
+    expect(chips(doc)).toHaveLength(1);
+    expect(chips(doc)[0].marks).toEqual([{ type: "secret" }]);
+  });
+
+  it("capitalised forms match only capitalised occurrences", () => {
+    const src = p(text("Віра пішла. віра в богів. БЕАТРІС"));
+
+    const cap = wrapMentions(src, ["Віра"], target);
+
+    expect(cap.count).toBe(1);
+    expect(chips(cap.doc)[0].attrs?.label).toBe("Віра");
+    expect(wrapMentions(src, ["віра"], target).count).toBe(2);
+    expect(wrapMentions(p(text("БЕАТРІС кричить")), ["Беатріс"], target).count).toBe(1);
+  });
 });
