@@ -44,7 +44,9 @@ export function useCharacterChoices({ campaignId, characterId, onSaved }: { camp
     clear();
 
     try {
-      onSaved?.(await mutation.mutateAsync(body));
+      const updated = await mutation.mutateAsync(body);
+
+      onSaved?.(updated);
 
       return true;
     } catch (e) {
