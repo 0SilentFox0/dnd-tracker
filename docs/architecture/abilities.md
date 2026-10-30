@@ -75,6 +75,20 @@ Cunning Strike (Rogue): `Ability.params` (`schema/params.ts`) — `sneakAttack: 
 - **`NestedEffectsEditor`** — спільний список вкладених ефектів (`path`, `limits {min,max}`, `renderCard`, `className`, `renderAdd`) для редактора вмінь (`randomOf`, підкасти тощо) і форми заклинань; без `renderAdd` — проста кнопка «додати».
 
 
+## SRD 5.2: повнота механік
+
+Дані шаблону — `data/templates/srd-5.2/*.json`, збираються `pnpm srd:build`; ручні правки в `scripts/srd/overrides/`. Інгредієнти, ритуали й ефекти заклинань — [content-api.md](content-api.md#повнота-шаблону-srd-52-featsrd-completeness).
+
+- **Чуття:** Darkvision (×6 видів, Drow 120), Feral Senses (blindsight) — прапорець `sense` (див. вище), не нотатка.
+- **Мітка `reckless`:** Reckless Attack ставить `mark { markId: "reckless", duration: { rounds: 1 }, target: "self" }`; умова `hasMark` читає її вміння Frenzy (Path of the Berserker) разом із `RAGING`.
+- **Колонка класу `frenzy`** (`classes.columns`, Barbarian: 2d6/3d6/4d6 на 3/9/16) — `dealDamage.amount: { scale: "frenzy" }`.
+- **`KEEP_SPELL_LISTS`** (`overrides/classes.ts`): конвертер за замовчуванням викидає фічі-«Spell List»; фічі з цього набору лишаються як `note`-вміння (Circle of the Land Spells, рівень 3).
+- **`EXTRA_MAGIC_INITIATE_LISTS`** (`overrides/feats.ts`): додаткові варіанти Magic Initiate поверх Cleric/Wizard з джерела (зараз Druid, рис 19→20).
+- **Step of the Wind** (швидкість +100%; Disengage — нотатка), **Adrenaline Rush** (лише Dash; тимчасові HP — нотатка).
+- **Прогалини рушія (не побудовані, вміння лишаються `note`):** перевага на рятівні проти названого стану (Fey Ancestry, Brave); перекидання d20 (Luck, Savage Attacker, Indomitable, Great Weapon Fighting); гранти тимчасових HP (Adrenaline Rush, Dark One's Blessing, False Life); рятівні-додатки до вмінь (Turn Undead, Sear Undead, Stunning Strike, Quivering Palm); опційний додаток до атаки (Brutal Strike, Flurry of Blows); Disengage як ключ стану; пасивна перевага за умовою цілі (Grappler); половина майстерності на перевірки (Jack of All Trades); мінімум перевірки (Reliable Talent); тригер «при промаху» (Studied Attacks); підкласові завжди-підготовлені заклинання як справжній вибір (тип землі).
+- **Прогалини заклинань (DM-resolved):** тимчасові HP, таймовий max-HP (Aid), виживання на 1 HP (Death Ward), стабілізація, поділений пул лікування (Mass Heal), телепорт у вибрану клітинку, реакція-переривання (Counterspell), апкаст «за смугою слотів»/плоский (Heal +10, Magic Weapon), виклик із вибором статблока (Animate Dead, Conjure *, Summon Dragon), табличні поведінки (Confusion), Polymorph у довільного звіра, шкода за кожні 5 фт руху, другий компонент шкоди з власним рятівним (Ice Knife).
+- **Не перевірено в рантаймі (лише схема валідна):** Antimagic Field (чи включає носія), лінія Wall of Force, `onEnter`-шкода Spike Growth, Frenzy в бою (Rage + Reckless + удар).
+
 ## Інгредієнти заклинань
 
 - **Поля Spell**: `ingredients Json @default("[]")` (`SpellIngredient { name, qty, minGp?, consumed, focus }`, `lib/schemas/spell-ingredients.ts`; ключ `ingredientKey(name)` унікальний, непорожній список вимагає `componentFlags.m`) і `componentFlags Json?` (`null` = не вказано, показується старий `components`). Поширюються через content API, sync, 5etools-імпорт (`parseMaterial`) і `toBookSpell`/`toCastableSpell`.

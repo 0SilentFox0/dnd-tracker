@@ -1,4 +1,8 @@
 {
+  "2026-10-30-srd-completeness": {
+    "title": "More complete SRD 5.2 template",
+    "body": "SRD 5.2 spells now carry material components with gp cost and consumption, and the ingredients rule is on. 29 rituals are flagged (the Ritual flag is also in the spell form; casting without a slot out of combat is not automated yet). Added species senses, Barbarian Frenzy, Circle of the Land Spells and Magic Initiate (Druid). Update your campaign from the template to get the changes."
+  },
   "2026-10-30-spell-ingredients": {
     "title": "Spell ingredients",
     "body": "Spells can require material components: costly ones (with a gp value) or consumed ones. Battles check them on the hero and spend them on cast, and a shortage can be paid from the purse. The DM sets components in the spell form and turns the rule on in Rules; the cast dialog shows what is required and what is missing."
