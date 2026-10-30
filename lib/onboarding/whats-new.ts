@@ -4,6 +4,7 @@ import type { WhatsNewEntry } from "@/lib/onboarding/types";
 export const WHATS_NEW_BUNDLED = 15;
 
 export const WHATS_NEW: WhatsNewEntry[] = [
+  { id: "2026-10-30-character-path-choices", date: "2026-10-30", audience: "all" },
   { id: "2026-10-30-time-zone", date: "2026-10-30", audience: "all", href: "/settings/preferences" },
   { id: "2026-10-30-character-path", date: "2026-10-30", audience: "all" },
   { id: "2026-10-30-scenario-summaries", date: "2026-10-30", audience: "dm", href: "/help/dm-scenario-show" },

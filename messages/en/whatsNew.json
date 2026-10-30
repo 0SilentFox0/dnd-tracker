@@ -1,4 +1,8 @@
 {
+  "2026-10-30-character-path-choices": {
+    "title": "Step-by-step choices and subclasses",
+    "body": "Hero choices now open as a step-by-step wizard: each step shows where the choice comes from and what it gives. Options that are not available yet sit in a separate “Not yet available” group with the reason, for example “needs 13, now 10”, and raising an ability in an earlier step unlocks them right away. The subclass is now picked from cards with a per-level breakdown, both on level-up and in the wizard, and on the Path you can preview which subclasses exist and open the wizard right at the needed step."
+  },
   "2026-10-30-time-zone": {
     "title": "Time zone in your profile",
     "body": "Language and time settings now let you pick a time zone: dates and times are shown in it on any device. By default it follows your browser's zone."
