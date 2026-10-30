@@ -135,6 +135,7 @@ const deps: any = {
   loadRecentEvents: (id: string, l: number) => loadRecentEvents(prisma, id, l),
   publish: () => {},
   rng: () => rng(),
+  logLocale: async () => "uk",
 };
 
 // ---------- журнали ----------

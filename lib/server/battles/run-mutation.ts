@@ -70,7 +70,7 @@ export async function runBattleMutation<TBody>(
     const expectedVersion = raw && typeof raw === "object" && typeof (raw as { expectedVersion?: unknown }).expectedVersion === "number"
       ? (raw as { expectedVersion: number }).expectedVersion : undefined;
 
-    const write = { logLocale: await getRequestLocale() };
+    const write = { logLocale: await (deps.logLocale ?? getRequestLocale)() };
 
     const run = async () => respondWith(options.respond, await runGuardedBattleOperationCore(userId, raw, expectedVersion, options as RunBattleMutationOptions<unknown>, deps, write));
 

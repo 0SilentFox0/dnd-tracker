@@ -7,6 +7,7 @@ import { guardTurnOrder } from "./turn-order-guard";
 
 import { API_ERRORS } from "@/lib/constants/api-errors";
 import { BattleStatus } from "@/lib/constants/battle";
+import type { Locale } from "@/lib/i18n/config";
 import type { Rng } from "@/lib/utils/abilities/engine/core/types";
 import { syncMapAuras } from "@/lib/utils/abilities/engine/effects/map-auras";
 import type { BATTLE_RATE_LIMITS, RateLimitResult } from "@/lib/utils/api/rate-limit";
@@ -79,6 +80,7 @@ export interface PipelineDeps {
   withWrite?<T>(campaignId: string, callback: () => Promise<T>): Promise<T>;
   recheckAccess?(args: { battleId: string; campaignId: string; userId: string }): Promise<{ isMember: boolean; isDM: boolean } | null>;
   rng?: Rng;
+  logLocale?(): Promise<Locale>;
 }
 
 export interface RunBattleMutationOptions<TBody> {
