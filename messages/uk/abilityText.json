@@ -23,7 +23,7 @@
     "gainsEffect": "✨ {target}: отримує «{effect}» ({ability})",
     "applied": "✨ {ability}: {effect} → {target} ({rounds} р.)",
     "chanceMissed": "🎲 {ability}: не спрацювало (шанс {chance} %)",
-    "chanceSuffix": " (шанс {chance} %)",
+    "withChance": "{text} (шанс {chance} %)",
     "raisedDead": "💀 {ability}: {target} повстали ({percent}% HP)",
     "raiseRefused": "⛔ {ability}: {target} — не можна підняти",
     "pushNoMap": "↔️ {ability}: відштовхування — без мапи не застосовано",

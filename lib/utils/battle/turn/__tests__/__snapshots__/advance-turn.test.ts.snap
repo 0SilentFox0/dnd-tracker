@@ -36,7 +36,7 @@ exports[`детермінований контракт turn loop > зберіг�
         "actionIndex": 1,
         "actionType": "ability",
         "actorId": "system",
-        "actorName": "Система",
+        "actorName": "",
         "actorSide": "ally",
         "battleId": "b1",
         "hpChanges": [],
@@ -209,9 +209,10 @@ exports[`детермінований контракт turn loop > зберіг�
             },
           },
           {
-            "message": "$join",
+            "message": "abilityText.log.withChance",
             "params": {
-              "p0": {
+              "chance": 50,
+              "text": {
                 "message": "abilityText.log.heal",
                 "params": {
                   "amount": 1,
@@ -219,13 +220,6 @@ exports[`детермінований контракт turn loop > зберіг�
                   "target": "Тест",
                 },
               },
-              "p1": {
-                "message": "abilityText.log.chanceSuffix",
-                "params": {
-                  "chance": 50,
-                },
-              },
-              "separator": "",
             },
           },
         ],

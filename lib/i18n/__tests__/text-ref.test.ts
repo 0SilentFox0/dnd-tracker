@@ -53,3 +53,16 @@ describe("textOf on the real catalog", () => {
     expect(textOf(textRef("battleCommon.actors.system"), "en")).toBe("System");
   });
 });
+
+describe("empty params are not stored", () => {
+  it("drops empty-string params and renders them as empty", () => {
+    const ref = textRef("battleLog.attack.hit", { attacker: "A", target: "B", damage: 3, crit: "" });
+
+    expect(ref.params).toEqual({ attacker: "A", target: "B", damage: 3 });
+    expect(textOf(ref, "uk")).toBe("A → B: 3 шкоди");
+  });
+
+  it("omits params entirely when all are empty", () => {
+    expect(textRef("battleLog.morale.leadership", { bonus: "" })).toEqual({ message: "battleLog.morale.leadership" });
+  });
+});
