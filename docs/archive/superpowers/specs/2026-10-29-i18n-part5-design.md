@@ -1,6 +1,6 @@
 # i18n: частина 5 — великі домени
 
-Гілка `feat/i18n-part5` (worktree `../dnd-tracker-t5`) від main `eb11461e`. Базові правила — `docs/architecture/i18n.md` (розділи «Межі коду», «CRUD-домени (частина 3)», «Середні домени (частина 4)»), порядок частин — `docs/superpowers/specs/2026-10-28-i18n-core-design.md`, зразок — `docs/archive/superpowers/specs/2026-10-29-i18n-part4-design.md` (рішення 1–10 ч.4 діють і тут).
+Гілка `feat/i18n-part5` (worktree `../dnd-tracker-t5`) від main `eb11461e`. Базові правила — `docs/architecture/i18n.md` (розділи «Межі коду», «CRUD-домени (частина 3)», «Середні домени (частина 4)»), порядок частин — `docs/archive/superpowers/specs/2026-10-28-i18n-core-design.md`, зразок — `docs/archive/superpowers/specs/2026-10-29-i18n-part4-design.md` (рішення 1–10 ч.4 діють і тут).
 
 ## Мета і межі
 

@@ -1,6 +1,6 @@
 # i18n: частина 1 — помилки API, спільні тексти, хвости частини 0
 
-Гілка `feat/i18n-part1` (worktree `../dnd-tracker-i18n1`) від main `ec4717e7`. Базові рішення — `docs/superpowers/specs/2026-10-28-i18n-core-design.md`, поточний стан — `docs/architecture/i18n.md`.
+Гілка `feat/i18n-part1` (worktree `../dnd-tracker-i18n1`) від main `ec4717e7`. Базові рішення — `docs/archive/superpowers/specs/2026-10-28-i18n-core-design.md`, поточний стан — `docs/architecture/i18n.md`.
 
 ## Мета і межі
 

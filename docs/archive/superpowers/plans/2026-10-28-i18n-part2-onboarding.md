@@ -8,7 +8,7 @@
 
 **Стек:** next-intl/use-intl (`lib/i18n/*`), Vitest, TanStack Query.
 
-**Спека:** `docs/superpowers/specs/2026-10-28-i18n-core-design.md` (розділ «Не-React реєстри», «Тести», «ESLint-храповик»). Правила: `docs/architecture/i18n.md`, `docs/architecture/onboarding.md`.
+**Спека:** `docs/archive/superpowers/specs/2026-10-28-i18n-core-design.md` (розділ «Не-React реєстри», «Тести», «ESLint-храповик»). Правила: `docs/architecture/i18n.md`, `docs/architecture/onboarding.md`.
 
 ## Global Constraints
 
