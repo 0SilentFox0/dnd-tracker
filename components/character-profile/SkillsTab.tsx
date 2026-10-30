@@ -6,7 +6,7 @@ import { useTranslations } from "next-intl";
 
 import { ChargesList } from "./rest/ChargesList";
 import { FeatsBlock } from "./FeatsBlock";
-import { CharacterPath } from "./path";
+import { CharacterPath, SpellPicksNudge } from "./path";
 import { useProfile } from "./ProfileContext";
 import { RacePassive } from "./RacePassive";
 
@@ -28,6 +28,7 @@ export function SkillsTab({ manage = false }: { manage?: boolean }) {
 
   return (
     <>
+      <SpellPicksNudge />
       {sheet.classProgression?.map((progression) => (
         <section key={progression.classId} className="mb-3 space-y-2">
           <h3>{progression.className}</h3>

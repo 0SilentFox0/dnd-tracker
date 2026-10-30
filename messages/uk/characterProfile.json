@@ -236,6 +236,8 @@
     "pickOpen": "Потрібно обрати: {label} ({done}/{required})",
     "done": "Обрано: {label}",
     "unlocksAt": "{label}: відкриється на {level}-му рівні",
-    "details": "Докладніше про «{name}»"
+    "details": "Докладніше про «{name}»",
+    "spellNudge": "Оберіть заклинання: {count}",
+    "spellNudgeAction": "Обрати"
   }
 }

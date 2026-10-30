@@ -236,6 +236,8 @@
     "pickOpen": "To choose: {label} ({done}/{required})",
     "done": "Chosen: {label}",
     "unlocksAt": "{label}: unlocks at level {level}",
-    "details": "More about “{name}”"
+    "details": "More about “{name}”",
+    "spellNudge": "Spells to choose: {count}",
+    "spellNudgeAction": "Choose"
   }
 }
