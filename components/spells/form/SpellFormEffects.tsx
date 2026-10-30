@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import { useTranslations } from "next-intl";
 import { X } from "lucide-react";
 
@@ -7,10 +8,13 @@ import type { SpellFormFieldsProps } from "./SpellFormBasicFields";
 
 import { AbilityEditorProvider } from "@/components/abilities/editor-context";
 import { NestedEffectsEditor } from "@/components/abilities/NestedEffectsEditor";
+import { RecipeGallery } from "@/components/abilities/RecipeGallery";
+import { CollapsibleHeader } from "@/components/abilities/sections/CollapsibleHeader";
 import { HudSection } from "@/components/hud/form";
 import { SpellEffectCard } from "@/components/spells/form/effects/SpellEffectCard";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { SelectField } from "@/components/ui/select-field";
@@ -49,24 +53,63 @@ export function SpellFormEffects({ campaignId, formData, setFormData }: SpellFor
     for (const issue of parsed.error.issues) (errorsByPath[["effects", i, ...issue.path].join(".")] ??= []).push({ message: issue.message, params: { ...(issue as { params?: ErrorParams }).params, ...bounds(issue) } });
   });
 
+  const [open, setOpen] = useState(true);
+
+  const [galleryOpen, setGalleryOpen] = useState(false);
+
+  const [seenErrors, setSeenErrors] = useState("");
+
+  const errorKey = Object.keys(errorsByPath).join(",");
+
+  if (errorKey !== seenErrors) {
+    setSeenErrors(errorKey);
+
+    if (errorKey) setOpen(true);
+  }
+
+  const effects = formData.spellEffects as SpellEffect[];
+
+  const addEffects = (added: SpellEffect[], concentration?: boolean) => {
+    setFormData({ ...formData, spellEffects: [...effects, ...added], ...(concentration ? { concentration: true } : {}) });
+    setOpen(true);
+  };
+
   return (
     <>
-      <HudSection title={t("title")}>
-        <p className="mb-2 text-xs text-muted-foreground">
-          {t("hint")}
-        </p>
-        <AbilityEditorProvider value={{ campaignId, errorsByPath }}>
-          <NestedEffectsEditor
-            effects={formData.spellEffects as SpellEffect[]}
-            path="effects"
-            className=""
-            limits={{ min: 0 }}
-            labels={{ add: t("add") }}
-            create={() => newEffect(allowedEffectKinds(SPELL_EFFECT_TRIGGER)[0], SPELL_EFFECT_TRIGGER)}
-            onChange={(spellEffects) => setFormData({ ...formData, spellEffects })}
-            renderCard={({ effect, path, actions }) => <SpellEffectCard effect={effect} path={path} actions={actions} />}
-          />
-        </AbilityEditorProvider>
+      <HudSection title={<CollapsibleHeader title={t("title")} summary={effects.length > 0 ? t("summary", { count: effects.length }) : null} open={open} onToggle={() => setOpen((o) => !o)} controlsId="spell-effects-body" />}>
+        {open && (
+          <div id="spell-effects-body">
+            <p className="mb-2 text-xs text-muted-foreground">
+              {t("hint")}
+            </p>
+            <AbilityEditorProvider value={{ campaignId, errorsByPath }}>
+              <NestedEffectsEditor
+                effects={effects}
+                path="effects"
+                className=""
+                limits={{ min: 0 }}
+                labels={{ add: t("add") }}
+                create={() => newEffect(allowedEffectKinds(SPELL_EFFECT_TRIGGER)[0], SPELL_EFFECT_TRIGGER)}
+                onChange={(spellEffects) => setFormData({ ...formData, spellEffects })}
+                renderCard={({ effect, path, actions }) => <SpellEffectCard effect={effect} path={path} actions={actions} />}
+                renderAdd={() => (
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <Button type="button" size="sm" variant="outline">
+                        {t("add")}
+                      </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="start">
+                      <DropdownMenuItem onSelect={() => setGalleryOpen(true)}>{t("addFromRecipe")}</DropdownMenuItem>
+                      <DropdownMenuItem onSelect={() => addEffects([newEffect(allowedEffectKinds(SPELL_EFFECT_TRIGGER)[0], SPELL_EFFECT_TRIGGER)])}>{t("addEmpty")}</DropdownMenuItem>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+                )}
+              />
+              <RecipeGallery scope="spell" open={galleryOpen} onOpenChange={setGalleryOpen} onPick={({ effects: picked, concentration }) => addEffects(picked, concentration)} />
+            </AbilityEditorProvider>
+          </div>
+        )}
       </HudSection>
 
       <HudSection title={t("concentrationTitle")}>
