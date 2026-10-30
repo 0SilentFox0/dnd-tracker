@@ -2,7 +2,7 @@ import type { CatalogEntry, Translations } from "./catalog";
 
 export type NameMap = Map<string, string>;
 
-const ITALIC = /(?<![*\w])\*([^*\n]+)\*(?![*\w])|(?<![\w_])_([^_\n]+)_(?![\w_])/g;
+const ITALIC = /(?<![*\p{L}\p{N}_])\*([^*\n]+)\*(?![*\p{L}\p{N}_])|(?<![\p{L}\p{N}_])_([^_\n]+)_(?![\p{L}\p{N}_])/gu;
 
 const escapeRe = (s: string) => s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 
@@ -38,18 +38,20 @@ interface Span {
 const spansOf = (text: string): Span[] =>
   [...text.matchAll(ITALIC)].map((m) => ({ index: m.index as number, length: m[0].length, text: m[1] ?? m[2], delim: m[0][0] }));
 
-// Italic names in the translation are replaced by the catalog translation, aligned by order; only when the span counts match
+// Italic names are replaced by the catalog translation, aligned by order; only when span counts match and the span is not already a known translated name (reordering)
 export function fixItalicNames(en: string, tr: string, names: NameMap): string {
   const [enSpans, trSpans] = [spansOf(en), spansOf(tr)];
 
   if (enSpans.length === 0 || enSpans.length !== trSpans.length) return tr;
+
+  const translated = new Set(names.values());
 
   let out = tr;
 
   for (let i = trSpans.length - 1; i >= 0; i -= 1) {
     const wanted = names.get(enSpans[i].text);
 
-    if (wanted !== undefined && wanted !== trSpans[i].text) {
+    if (wanted !== undefined && !translated.has(trSpans[i].text)) {
       const s = trSpans[i];
 
       out = `${out.slice(0, s.index)}${s.delim}${wanted}${s.delim}${out.slice(s.index + s.length)}`;

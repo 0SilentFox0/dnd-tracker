@@ -35,7 +35,7 @@ function extract(locale: string, args: string[]) {
 
   const dir = todoDir(locale);
 
-  for (const f of fs.existsSync(dir) ? fs.readdirSync(dir) : []) if (/^\d+(\.out|\.names)?\.(jsonl|json)$/.test(f)) fs.rmSync(path.join(dir, f));
+  for (const f of fs.existsSync(dir) ? fs.readdirSync(dir) : []) if (/^\d+(\.jsonl|\.out\.jsonl|\.names\.json)$/.test(f)) fs.rmSync(path.join(dir, f));
 
   fs.mkdirSync(dir, { recursive: true });
 
@@ -45,7 +45,10 @@ function extract(locale: string, args: string[]) {
     const id = String(i + 1).padStart(2, "0");
 
     fs.writeFileSync(path.join(dir, `${id}.jsonl`), jsonl(batch.map((e) => ({ h: e.hash, c: e.cls, en: e.en }))));
-    fs.writeFileSync(path.join(dir, `${id}.names.json`), `${JSON.stringify(namesIn(batch.filter((e) => e.cls === "d").map((e) => e.en), names), null, 1)}\n`);
+
+    const found = namesIn(batch.filter((e) => e.cls === "d").map((e) => e.en), names);
+
+    if (Object.keys(found).length > 0) fs.writeFileSync(path.join(dir, `${id}.names.json`), `${JSON.stringify(found, null, 1)}\n`);
   });
 
   console.info(`${locale} фаза ${phase}: ${todo.length} рядків, ${todo.reduce((n, e) => n + e.en.length, 0)} симв., ${batches.length} порцій → ${dir}`);
@@ -83,7 +86,7 @@ function normalize(locale: string) {
 
   const changed = Object.keys(merged).filter((h) => merged[h] !== tr[h]).length;
 
-  writeTranslations(locale, { ...tr, ...merged });
+  writeTranslations(locale, merged);
 
   console.info(`нормалізовано ${changed} рядків`);
 }

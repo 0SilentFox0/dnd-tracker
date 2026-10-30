@@ -22,7 +22,11 @@ export function normalizeSpellHeader(en: string, tr: string, glossary: Glossary)
 
   if (school === undefined) return tr;
 
+  if (trParts.slice(1).some((p) => !p.includes(": "))) return tr;
+
   const values = trParts.slice(1).map(valueOf);
+
+  if (m[6].includes("(") && !values[2].includes("(")) return tr;
 
   const letters = m[6].split(" (")[0].split(", ").map((l) => glossary[l] ?? l).join(", ");
 

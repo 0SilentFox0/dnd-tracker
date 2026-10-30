@@ -8,7 +8,9 @@ const GENDER_SUFFIX: Record<string, string> = { m: "", f: "|f", n: "|n" };
 export function normalizeCreatureHeader(en: string, tr: string, glossary: Glossary): string {
   const m = HEADER.exec(en.split("\n")[0]);
 
-  if (!m) return tr;
+  const trHead = tr.split("\n")[0];
+
+  if (!m || !trHead.includes(", ") || trHead.includes(":")) return tr;
 
   const [, size, type, alignment] = m;
 
