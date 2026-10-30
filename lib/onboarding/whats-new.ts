@@ -4,6 +4,7 @@ import type { WhatsNewEntry } from "@/lib/onboarding/types";
 export const WHATS_NEW_BUNDLED = 15;
 
 export const WHATS_NEW: WhatsNewEntry[] = [
+  { id: "2026-10-30-template-languages", date: "2026-10-30", audience: "dm" },
   { id: "2026-10-30-character-path-background", date: "2026-10-30", audience: "all" },
   { id: "2026-10-30-character-path-multiclass", date: "2026-10-30", audience: "all" },
   { id: "2026-10-30-character-path-choices", date: "2026-10-30", audience: "all" },

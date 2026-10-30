@@ -1,12 +1,14 @@
 "use client";
 
 import { useState } from "react";
-import { useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 
 import { ImportDialog } from "@/components/common/ImportDialog";
 import { HudSection } from "@/components/hud/form";
 import { SelectField, type SelectOptionGroup } from "@/components/ui/select-field";
 import { useBundleFilePicker, useTemplates } from "@/lib/hooks/campaigns";
+import { NATIVE_LANGUAGE_NAMES } from "@/lib/i18n/native-language-names";
+import { groupTemplates, pickVariant } from "@/lib/utils/campaigns/template-variants";
 import type { TemplateCard, TemplateSelection } from "@/types/campaigns";
 
 interface TemplatePickerProps {
@@ -20,6 +22,8 @@ const NONE_VALUE = "__none";
 
 export function TemplatePicker({ value, onChange }: TemplatePickerProps) {
   const t = useTranslations("campaigns.templatePicker");
+
+  const uiLocale = useLocale();
 
   const { data } = useTemplates();
 
@@ -38,11 +42,19 @@ export function TemplatePicker({ value, onChange }: TemplatePickerProps) {
 
   const toOption = (tpl: TemplateCard) => ({ value: tpl.id, label: tpl.name });
 
+  const officialGroups = groupTemplates(data?.official ?? []);
+
+  const selectedGroup = officialGroups.find((g) => Object.values(g.cards).some((c) => c.id === value.templateId));
+
+  const toGroupOption = (g: (typeof officialGroups)[number]) => toOption(g === selectedGroup && selected ? selected : pickVariant(g, uiLocale));
+
+  const languageOptions = (selectedGroup?.locales ?? []).map((code) => ({ value: selectedGroup!.cards[code].id, label: NATIVE_LANGUAGE_NAMES[code as keyof typeof NATIVE_LANGUAGE_NAMES] ?? code }));
+
   const countsLabel = ({ counts }: TemplateCard) =>
     [t("counts.races", { count: counts.races ?? 0 }), t("counts.units", { count: counts.units ?? 0 }), t("counts.spells", { count: counts.spells ?? 0 })].join(" · ");
 
   const groups: SelectOptionGroup[] = [
-    { label: t("official"), options: (data?.official ?? []).map(toOption) },
+    { label: t("official"), options: officialGroups.map(toGroupOption) },
     { label: t("mine"), options: (data?.mine ?? []).map(toOption) },
     {
       label: t("other"),
@@ -68,6 +80,7 @@ export function TemplatePicker({ value, onChange }: TemplatePickerProps) {
             {t("intro")}
           </p>
           <SelectField aria-label={t("ariaLabel")} value={current} onValueChange={handleChange} groups={groups} />
+          {languageOptions.length > 1 && selected && <SelectField aria-label={t("languageLabel")} value={selected.id} onValueChange={handleChange} groups={[{ label: t("language"), options: languageOptions }]} />}
           {selected && <p className="text-xs text-hud-muted">{[selected.description, countsLabel(selected)].filter(Boolean).join(" — ")}</p>}
           {selected?.credits && <p className="line-clamp-2 text-[11px] leading-4 text-hud-muted/80">{selected.credits}</p>}
           {value.file && (
