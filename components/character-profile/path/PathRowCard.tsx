@@ -6,7 +6,7 @@ import { Info } from "lucide-react";
 import { EntityIcon } from "@/components/common/EntityIcon";
 import { HudPill } from "@/components/hud/page";
 import { cn } from "@/lib/utils";
-import { rowItems } from "@/lib/utils/characters/classes/path";
+import { rowItems } from "@/lib/utils/characters/classes";
 import type { ClassProgression, ProgressionItem, ProgressionPick, ProgressionRow } from "@/types/classes";
 
 interface PathRowCardProps {
@@ -19,14 +19,14 @@ interface PathRowCardProps {
 
 const STATE_TONE = { current: "gold", next: "accent", reached: "muted", future: "muted", template: "muted" } as const;
 
-function PickLine({ pick, level, onPick }: { pick: ProgressionPick; level: number; onPick?: () => void }) {
+function PickLine({ pick, level, subclass, onPick }: { pick: ProgressionPick; level: number; subclass?: string; onPick?: () => void }) {
   const t = useTranslations("characterProfile.path");
 
   const tc = useTranslations("classes.progression");
 
   const values = { label: pick.label, done: pick.done ?? 0, required: pick.required };
 
-  if (pick.kind === "subclass") return <span className="text-sm">{tc(pick.status === "open" ? "chooseSubclass" : "subclass")}</span>;
+  if (pick.kind === "subclass") return <span className="text-sm">{subclass ? t("done", { label: subclass }) : tc(pick.status === "open" ? "chooseSubclass" : "subclass")}</span>;
 
   if (pick.status === "locked") return <span className="text-sm text-hud-muted">{t("unlocksAt", { label: pick.label, level })}</span>;
 
@@ -69,7 +69,7 @@ export function PathRowCard({ row, progression, chosen, onPick, onDetail }: Path
         ))}
         {row.picks.map((pick, i) => (
           <li key={`${i}:${pick.key}`}>
-            <PickLine pick={pick} level={row.level} onPick={onPick} />
+            <PickLine pick={pick} level={row.level} subclass={progression.subclasses.find((c) => c.chosen)?.name} onPick={onPick} />
           </li>
         ))}
       </ul>

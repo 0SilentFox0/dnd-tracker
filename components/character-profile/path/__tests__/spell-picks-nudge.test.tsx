@@ -46,6 +46,18 @@ describe("SpellPicksNudge", () => {
     expect(screen.getByTestId("choices-dialog")).toBeTruthy();
   });
 
+  it("with an onPick handler it delegates instead of mounting its own dialog", () => {
+    current.sheet = sheetWith(true);
+
+    const onPick = vi.fn();
+
+    render(<SpellPicksNudge onPick={onPick} />);
+    fireEvent.click(screen.getByRole("button", { name: "characterProfile.path.spellNudgeAction" }));
+
+    expect(onPick).toHaveBeenCalledTimes(1);
+    expect(screen.queryByTestId("choices-dialog")).toBeNull();
+  });
+
   it("without edit rights keeps the text but offers no button", () => {
     current.sheet = sheetWith(false);
     render(<SpellPicksNudge />);

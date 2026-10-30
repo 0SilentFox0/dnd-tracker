@@ -43,7 +43,7 @@ Id `skills` і посилання `?tab=skills` лишаються (там жи�
 - Чіп-причина виводиться з `row.level` і `progression.className`; колонок у БД і змін `buildClassProgression` не треба. Іконки feature поки не додаємо: запасний варіант — літера класу (`EntityIcon`). Справжні іконки генерує користувач на останньому етапі, тоді ж у `ProgressionItem` з'явиться `icon?`.
 
 ### 3. Нудж «немає заклинань»
-Якщо у кастера (`caster != none`) є відкритий `kind: "spell"` вибір (`ProgressionPick.status === "open"`), `CharacterPath` і `MagicTab` показують банер «Оберіть N заклинань» з кнопкою у `ChoicesDialog`. Дані ті ж, нових запитів нема.
+Якщо є відкритий `kind: "spell"` вибір (лише в кастерів, тож окремої перевірки `caster` нема) (`ProgressionPick.status === "open"`), `CharacterPath` і `MagicTab` показують банер «Оберіть N заклинань» з кнопкою у `ChoicesDialog`. Дані ті ж, нових запитів нема.
 
 ### 4. Простіший вибір
 `ChoicePicker` уже показує опції картками (`OptionButton`); стіну тексту дає `choice.description` (повний текст feature, до ~1800 символів). Опис довший за 200 символів показується першим абзацом, решта згорнута в «Детальніше».

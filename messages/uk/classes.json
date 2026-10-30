@@ -95,10 +95,7 @@
     "choice": "Вибір",
     "next": "наступний",
     "subclass": "Підклас",
-    "chooseSubclass": "Оберіть підклас",
-    "statusOpen": "вибір",
-    "statusDone": "готово",
-    "statusLocked": "закрито"
+    "chooseSubclass": "Оберіть підклас"
   },
   "validation": {
     "iconLink": "Іконка класу — лише посилання на зображення",

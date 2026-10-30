@@ -39,6 +39,14 @@ describe("ChoicePicker", () => {
     expect(screen.getByText("choices.picker.moreDetails")).toBeTruthy();
   });
 
+  it("fold holds only the rest of the text, and leading blank lines do not empty the lead", () => {
+    const { container } = render(<Harness choice={{ ...choiceById("metamagic"), description: `\n\nPick two options.\n\n${"Long rules text. ".repeat(40)}` }} context={ctx(2)} />);
+
+    expect(screen.getByText("Pick two options.")).toBeTruthy();
+    expect(container.querySelector("details")?.textContent).not.toContain("Pick two options.");
+    expect(container.querySelector("details")?.textContent).toContain("Long rules text.");
+  });
+
   it("short choice description stays inline without a fold", () => {
     const { container } = render(<Harness choice={{ ...choiceById("metamagic"), description: "Pick two options." }} context={ctx(2)} />);
 

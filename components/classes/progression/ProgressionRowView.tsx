@@ -3,12 +3,10 @@
 import { useTranslations } from "next-intl";
 
 import { cn } from "@/lib/utils";
-import type { ProgressionItem, ProgressionPick, ProgressionRow } from "@/types/classes";
+import type { ProgressionItem, ProgressionRow } from "@/types/classes";
 
 export interface ProgressionActions {
   onOpenLevel?: (level: number, column: "base" | "subclass" | "pick") => void;
-  onPick?: (pick: ProgressionPick, level: number) => void;
-  onChooseSubclass?: () => void;
 }
 
 export const STATE_CLASS: Record<ProgressionRow["state"], string> = {
@@ -39,31 +37,19 @@ export function Items({ items, accent }: { items: ProgressionItem[]; accent?: st
   );
 }
 
-export function Picks({ row, actions }: { row: ProgressionRow; actions?: ProgressionActions }) {
+export function Picks({ row }: { row: ProgressionRow }) {
   const t = useTranslations("classes.progression");
 
   if (row.picks.length === 0) return <span className="text-hud-muted">-</span>;
 
   return (
     <ul className="space-y-1">
-      {row.picks.map((pick, i) => {
-        const isSubclass = pick.kind === "subclass";
-
-        const handler = isSubclass ? actions?.onChooseSubclass : actions?.onPick ? () => actions.onPick?.(pick, row.level) : undefined;
-
-        const open = pick.status === "open";
-
-        const text = isSubclass ? t(open ? "chooseSubclass" : "subclass") : pick.label;
-
-        const badge = (
-          <span className={cn("rounded-full px-2 py-0.5 text-xs", open ? "bg-hud-gold-strong/20 text-hud-gold-strong" : "text-hud-muted")}>
-            {open ? t("statusOpen") : pick.status === "done" ? t("statusDone") : pick.status === "locked" ? t("statusLocked") : ""} {text}
-            {pick.required > 1 ? ` (${pick.done ?? 0}/${pick.required})` : ""}
-          </span>
-        );
-
-        return <li key={`${i}:${pick.key}`}>{open && handler ? <button type="button" onClick={handler}>{badge}</button> : badge}</li>;
-      })}
+      {row.picks.map((pick, i) => (
+        <li key={`${i}:${pick.key}`} className="text-xs text-hud-muted">
+          {pick.kind === "subclass" ? t("subclass") : pick.label}
+          {pick.required > 1 ? ` (${pick.required})` : ""}
+        </li>
+      ))}
     </ul>
   );
 }

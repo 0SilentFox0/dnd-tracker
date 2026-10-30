@@ -88,3 +88,16 @@ describe("CharacterPath summary", () => {
     expect(screen.getByRole("button", { name: /Order/ })).toBeTruthy();
   });
 });
+
+describe("CharacterPath chosen subclass", () => {
+  afterEach(cleanup);
+
+  it("names the subclass once it is chosen", () => {
+    const sub = makeClass({ id: "f", subclassLevel: 3, subclasses: [{ id: "champ", name: "Champion", features: [] }], features: [{ level: 1, abilities: [makeAbility("a1", "Second Wind", "Heal")] }] });
+
+    render(<CharacterPath progression={buildClassProgression(sub, { classId: "f", level: 4, subclassId: "champ" })} />);
+    fireEvent.click(screen.getByText(/characterProfile\.path\.reached/));
+
+    expect(screen.getByText('characterProfile.path.done {"label":"Champion"}')).toBeTruthy();
+  });
+});

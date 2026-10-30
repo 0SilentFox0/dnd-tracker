@@ -7,7 +7,7 @@ import { PathRowCard } from "./PathRowCard";
 
 import { HudPill } from "@/components/hud/page";
 import { ResponsiveDialog } from "@/components/ui/responsive-dialog";
-import { chosenSubclassId, pathSummary, splitPathRows } from "@/lib/utils/characters/classes/path";
+import { chosenSubclassId, pathSummary, splitPathRows } from "@/lib/utils/characters/classes";
 import type { ClassProgression, ProgressionItem, ProgressionRow } from "@/types/classes";
 
 interface CharacterPathProps {

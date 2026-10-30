@@ -95,10 +95,7 @@
     "choice": "Choice",
     "next": "next",
     "subclass": "Subclass",
-    "chooseSubclass": "Choose a subclass",
-    "statusOpen": "choose",
-    "statusDone": "done",
-    "statusLocked": "closed"
+    "chooseSubclass": "Choose a subclass"
   },
   "validation": {
     "iconLink": "The class icon must be an image link only",

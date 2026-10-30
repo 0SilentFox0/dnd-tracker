@@ -28,7 +28,7 @@ export function SkillsTab({ manage = false }: { manage?: boolean }) {
 
   return (
     <>
-      <SpellPicksNudge />
+      <SpellPicksNudge onPick={actions?.onPick} />
       {sheet.classProgression?.map((progression) => (
         <section key={progression.classId} className="mb-3 space-y-2">
           <h3>{progression.className}</h3>

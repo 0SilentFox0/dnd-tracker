@@ -92,16 +92,20 @@ const LEAD_MAX = 200;
 function ChoiceDescription({ text }: { text: string }) {
   const t = useTranslations("choices");
 
-  if (text.length <= LEAD_MAX) return <p className="whitespace-pre-line text-xs text-hud-muted">{text}</p>;
+  const body = text.trim();
 
-  const lead = text.split("\n\n")[0].trim();
+  if (body.length <= LEAD_MAX) return <p className="whitespace-pre-line text-xs text-hud-muted">{body}</p>;
+
+  const [lead, ...tail] = body.split(/\n\s*\n/);
+
+  const cut = lead.length > LEAD_MAX;
 
   return (
     <div className="space-y-1 text-xs text-hud-muted">
-      <p>{lead.length > LEAD_MAX ? `${lead.slice(0, LEAD_MAX).trimEnd()}…` : lead}</p>
+      <p>{cut ? `${lead.slice(0, LEAD_MAX).trimEnd()}…` : lead}</p>
       <details>
         <summary className="cursor-pointer text-hud-gold">{t("picker.moreDetails")}</summary>
-        <p className="mt-1 whitespace-pre-line">{text}</p>
+        <p className="mt-1 whitespace-pre-line">{cut || tail.length === 0 ? body : tail.join("\n\n")}</p>
       </details>
     </div>
   );
