@@ -2,6 +2,7 @@ export { scenarioKeys } from "./keys";
 export { useActiveSection } from "./useActiveSection";
 export { useMentionSearch } from "./useMentionSearch";
 export { type DraftError, type DraftState, useScenarioDraft } from "./useScenarioDraft";
+export { useScenarioGraph } from "./useScenarioGraph";
 export { useScenarioIndex } from "./useScenarioIndex";
 export { useScenarioPage } from "./useScenarioPage";
 export { useScenarioPageActions } from "./useScenarioPageActions";

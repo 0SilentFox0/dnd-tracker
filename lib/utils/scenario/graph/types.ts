@@ -34,3 +34,8 @@ export interface GraphModel {
   edges: GraphEdge[];
   truncated: number;
 }
+
+export interface GraphDetail {
+  node: GraphNode & { x: number; y: number };
+  links: { node: GraphNode; count: number; secret: boolean }[];
+}
