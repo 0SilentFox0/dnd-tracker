@@ -1,4 +1,3 @@
-/* eslint-disable no-restricted-syntax -- derived content written to the DB stays Ukrainian (spec part5, decision 5) */
 import { array, SAVE_HALF } from "../shared";
 import type { SpellRecognizer } from "./index";
 
@@ -54,7 +53,7 @@ export const byDistanceDamage: SpellRecognizer = ({ row, text, higher, cast, abi
   };
 };
 
-export const fallingDamage: SpellRecognizer = ({ text, cast, ability, damageTypes }) => {
+export const fallingDamage: SpellRecognizer = ({ t, text, cast, ability, damageTypes }) => {
   const dice = FALL_DICE.exec(text);
 
   const cap = FALL_MAX.exec(text);
@@ -74,7 +73,7 @@ export const fallingDamage: SpellRecognizer = ({ text, cast, ability, damageType
   const prone = /\bprone\b|\bpulled to the ground\b/i.test(text);
 
   const effects: SpellEffect[] = [
-    { kind: "inputDice", label: "Висота, ×10 фт", max },
+    { kind: "inputDice", label: t("derived.spell.label.height"), max },
     { kind: "dealDamage", amount: { spellRoll: 100 }, damageType: damageTypeOf(damageTypes) },
     ...(prone ? [{ kind: "applyCondition" as const, condition: "prone" as const, duration: { rounds: 1 } }] : []),
   ];
@@ -101,7 +100,7 @@ const FAR_TRAVEL = /\bfarther than (\d+) feet[^.]*?\bat a rate of (\d+) feet per
 
 const UPCAST_NEAR = /\bextra (\d+)d\d+ [^.]*?\bfor each slot level above\b/i;
 
-export const delayedStrike: SpellRecognizer = ({ text, higher, cast, ability, damageTypes }) => {
+export const delayedStrike: SpellRecognizer = ({ t, text, higher, cast, ability, damageTypes }) => {
   const near = NEAR_HIT.exec(text);
 
   const far = FAR_TRAVEL.exec(text);
@@ -125,7 +124,7 @@ export const delayedStrike: SpellRecognizer = ({ text, higher, cast, ability, da
   return {
     native: {
       narrative: false,
-      riders: ["рій у польоті можна атакувати (див. опис)"],
+      riders: [t("derived.spell.rider.swarmAttackable")],
       fields: {
         targeting: { kind: "enemy", range },
         resolution: { kind: "auto" },

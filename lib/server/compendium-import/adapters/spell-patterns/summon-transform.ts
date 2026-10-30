@@ -1,4 +1,3 @@
-/* eslint-disable no-restricted-syntax -- derived content written to the DB stays Ukrainian (spec part5, decision 5) */
 import type { SpellRecognizer } from "./index";
 
 import type { NonRandomEffect } from "@/lib/utils/abilities/schema";
@@ -20,7 +19,7 @@ const EXTRA_PER = /\bone additional [a-z]+ for every (\w+) slot levels? above\b/
 
 const SIZES = { tiny: "tiny", small: "small", medium: "medium", large: "large" } as const;
 
-export const summonObject: SpellRecognizer = ({ text, higher, cast, ability }) => {
+export const summonObject: SpellRecognizer = ({ t, text, higher, cast, ability }) => {
   const made = SUMMON_OBJECT.exec(text);
 
   const aura = AURA.exec(text);
@@ -61,7 +60,7 @@ export const summonObject: SpellRecognizer = ({ text, higher, cast, ability }) =
 
   const grant: SpellEffect = {
     kind: "grantCast",
-    label: "Атака об'єкта",
+    label: t("derived.spell.label.objectAttack"),
     cost: "bonusAction",
     duration: { rounds },
     cast: { targeting: { kind: "enemy" }, resolution: { kind: "attack" }, dice: 0, perObjectFeet: reach, effects: [{ kind: "dealDamage", amount: hit[1], damageType }] },
@@ -84,7 +83,7 @@ const REVERT_AT_ZERO = /\bdrops to 0 hit points\b/i;
 
 const MAX_DURATION_ROUNDS = 99;
 
-export const transformSpell: SpellRecognizer = ({ raw, text, higher, cast, ability }) => {
+export const transformSpell: SpellRecognizer = ({ t, raw, text, higher, cast, ability }) => {
   const target = TRANSFORM.exec(text);
 
   const form = STATS_REPLACED.exec(raw.replace(/\\"/g, '"'));
@@ -95,7 +94,7 @@ export const transformSpell: SpellRecognizer = ({ raw, text, higher, cast, abili
 
   const rounds = durationRounds(cast.facts.duration);
 
-  const riders = [...(/\b(?:hour|day)s?\b/i.test(cast.facts.duration) ? [`тривалість обрізана до ${MAX_DURATION_ROUNDS} раундів`] : []), ...(/\bduration increases\b/i.test(higher) ? ["подовження тривалості на вищих колах"] : []), "зовнішність нової форми: див. опис"];
+  const riders = [...(/\b(?:hour|day)s?\b/i.test(cast.facts.duration) ? [t("derived.spell.rider.durationCapped", { rounds: MAX_DURATION_ROUNDS })] : []), ...(/\bduration increases\b/i.test(higher) ? [t("derived.spell.rider.durationUpcast")] : []), t("derived.spell.rider.newFormLook")];
 
   return {
     native: {

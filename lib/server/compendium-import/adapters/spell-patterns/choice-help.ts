@@ -1,4 +1,3 @@
-/* eslint-disable no-restricted-syntax -- derived content written to the DB stays Ukrainian (spec part5, decision 5) */
 import { renderEntries } from "../../entries";
 import type { SpellRecognizer } from "./index";
 
@@ -52,7 +51,7 @@ function optionOf(text: string, rounds: number): Option {
   return { effect: { kind: "note", text: text.slice(0, 300) }, known: false };
 }
 
-export const chooseOneSpell: SpellRecognizer = ({ row, cast, ability, damageTypes }) => {
+export const chooseOneSpell: SpellRecognizer = ({ t, row, cast, ability, damageTypes }) => {
   const texts = optionTexts(row.entries);
 
   if (!texts || ability || damageTypes.length > 0) return null;
@@ -68,7 +67,7 @@ export const chooseOneSpell: SpellRecognizer = ({ row, cast, ability, damageType
   return {
     native: {
       narrative: false,
-      riders: options.flatMap((o, i) => (o.known ? [] : [`варіант ${i + 1}: див. опис`])),
+      riders: options.flatMap((o, i) => (o.known ? [] : [t("derived.spell.rider.variant", { n: i + 1 })])),
       fields: {
         targeting,
         resolution: { kind: "auto" },

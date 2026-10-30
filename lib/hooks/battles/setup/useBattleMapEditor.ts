@@ -2,7 +2,7 @@
 
 import { useCallback, useState } from "react";
 
-import { DEFAULT_BATTLE_MAP, DEFAULT_HAZARD_DAMAGE_TYPE, DEFAULT_HAZARD_DICE, DEFAULT_HAZARD_LABEL, DEFAULT_MAP_BACKGROUND } from "@/lib/constants/battle";
+import { DEFAULT_BATTLE_MAP, DEFAULT_HAZARD_DAMAGE_TYPE, DEFAULT_HAZARD_DICE, DEFAULT_MAP_BACKGROUND } from "@/lib/constants/battle";
 import { useImageSize } from "@/lib/hooks/common";
 import { textRef } from "@/lib/i18n/text-ref";
 import {
@@ -36,7 +36,7 @@ export interface HazardBrush {
   damageType: string;
 }
 
-const DEFAULT_BRUSH: HazardBrush = { label: DEFAULT_HAZARD_LABEL, dice: DEFAULT_HAZARD_DICE, damageType: DEFAULT_HAZARD_DAMAGE_TYPE };
+const DEFAULT_BRUSH: HazardBrush = { label: "", dice: DEFAULT_HAZARD_DICE, damageType: DEFAULT_HAZARD_DAMAGE_TYPE };
 
 export const NO_PLAYABLE_NOTICE = textRef("battleSetup.map.noPlayable");
 
@@ -132,7 +132,7 @@ export function useBattleMapEditor(initial: BattleMapConfig | null | undefined) 
     (cells: GridPoint[]) => {
       if (!tool || cells.length === 0) return;
 
-      const hazard = tool === "hazard" ? { label: brush.label.trim() || DEFAULT_HAZARD_LABEL, damage: hazardDamage(brush.dice, brush.damageType) } : undefined;
+      const hazard = tool === "hazard" ? { label: brush.label.trim(), damage: hazardDamage(brush.dice, brush.damageType) } : undefined;
 
       const next = paintCells(map, cells, tool, hazard);
 

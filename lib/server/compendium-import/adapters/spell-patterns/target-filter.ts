@@ -1,4 +1,3 @@
-/* eslint-disable no-restricted-syntax -- derived content written to the DB stays Ukrainian (spec part5, decision 5) */
 import type { SpellRecognizer } from "./index";
 
 import { durationRounds, spellRange } from "@/lib/utils/spells/derive/mechanics";
@@ -39,7 +38,7 @@ const INCAPACITATED_SELF = /\byou (?:are|become|remain) \{@condition incapacitat
 
 const CHARM = /\{@condition charmed|\byou take (?:total )?(?:and precise )?control of (?:it|the (?:beast|creature))/i;
 
-export const controlAnimal: SpellRecognizer = ({ raw, text, higher, cast, ability }) => {
+export const controlAnimal: SpellRecognizer = ({ t, raw, text, higher, cast, ability }) => {
   const filter = targetFilterFromText(text, higher);
 
   if (!filter || !ability || !CHARM.test(raw) || !INCAPACITATED_SELF.test(raw)) return null;
@@ -51,7 +50,7 @@ export const controlAnimal: SpellRecognizer = ({ raw, text, higher, cast, abilit
   return {
     native: {
       narrative: false,
-      riders: ["наказ цілі: див. опис"],
+      riders: [t("derived.spell.rider.targetCommand")],
       fields: {
         targeting: { kind: "enemy", ...(range !== "self" && { range }), filter },
         resolution: { kind: "save", ability, onSuccess: "none" },
@@ -67,7 +66,7 @@ export const controlAnimal: SpellRecognizer = ({ raw, text, higher, cast, abilit
 
 const AT_LEAST_SPEED = /\byour (?:walking )?speed (?:becomes|is) at least (\d+) feet|\byou have a (?:walking )?speed of (\d+) feet|\bwalking speed of (\d+) feet, which you can use while (?:riding|operating)\b/i;
 
-export const speedAtLeast: SpellRecognizer = ({ text, cast, ability, damageTypes }) => {
+export const speedAtLeast: SpellRecognizer = ({ t, text, cast, ability, damageTypes }) => {
   const m = AT_LEAST_SPEED.exec(text);
 
   if (!m || ability || damageTypes.length > 0) return null;
@@ -77,7 +76,7 @@ export const speedAtLeast: SpellRecognizer = ({ text, cast, ability, damageTypes
   return {
     native: {
       narrative: false,
-      riders: ["один вершник: див. опис"],
+      riders: [t("derived.spell.rider.singleRider")],
       fields: {
         targeting: { kind: "self" },
         resolution: { kind: "auto" },

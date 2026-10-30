@@ -6,7 +6,7 @@ import { HpChips } from "./HpChips";
 
 import { Portrait } from "@/components/battle/hud";
 import { LogEntryDetails } from "@/components/battle/log/LogEntryDetails";
-import { ParticipantSide } from "@/lib/constants/battle";
+import { DM_ACTOR, ParticipantSide, SYSTEM_ACTOR } from "@/lib/constants/battle";
 import { useText } from "@/lib/i18n/use-text";
 import { cn } from "@/lib/utils";
 import { logEntryView } from "@/lib/utils/battle/view";
@@ -32,11 +32,15 @@ export const LogEntryCard = memo(function LogEntryCard({ entry, actor, open, onT
 }) {
   const t = useTranslations("battle.log");
 
+  const tActors = useTranslations("battleCommon.actors");
+
   const text = useText();
 
   const view = useMemo(() => logEntryView(entry), [entry]);
 
   const Icon = view.kind === "hazard" ? Flame : (ICON[entry.actionType] ?? Sparkles);
+
+  const serviceActorName = entry.actorId === SYSTEM_ACTOR.actorId ? tActors("system") : entry.actorId === DM_ACTOR.actorId ? tActors("dm") : null;
 
   const enemy = entry.actorSide === ParticipantSide.ENEMY;
 
@@ -50,7 +54,7 @@ export const LogEntryCard = memo(function LogEntryCard({ entry, actor, open, onT
       </span>
       <div className="min-w-0 flex-1">
         <div className="mb-0.5 flex items-baseline gap-1.5 text-[11.5px] leading-4">
-          <span className={cn("hud-sc font-bold", enemy ? "text-hud-bad" : "text-hud-good")}>{actor?.basicInfo.name ?? (entry.actorName || t("battle"))}</span>
+          <span className={cn("hud-sc font-bold", enemy ? "text-hud-bad" : "text-hud-good")}>{actor?.basicInfo.name ?? serviceActorName ?? (entry.actorName || t("battle"))}</span>
           <span className="text-[var(--hud-muted)]">· {actor && !view.isTrigger ? text(view.kindLabel) : t("triggers")}</span>
         </div>
         <div className="text-[13.5px] font-medium leading-[18px] text-[var(--ink)]">{text(view.headline)}</div>

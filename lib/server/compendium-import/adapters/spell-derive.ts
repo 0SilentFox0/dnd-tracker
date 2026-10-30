@@ -181,7 +181,7 @@ const narrative = (narrativeReason: NarrativeReason): SpellDerivation => ({ nati
 
 /** Narrative and blocker outcomes decided from the row and text alone, in priority order. */
 function screenSpell(i: SpellInput): SpellDerivation | undefined {
-  const { row, text, higher, cast, raw, misc, damageTypes, ability, signals, rowCombat } = i;
+  const { t, row, text, higher, cast, raw, misc, damageTypes, ability, signals, rowCombat } = i;
 
   if (!rowCombat && isOutOfCombatBuff(cast, text)) return narrative("outOfCombat");
 
@@ -191,7 +191,7 @@ function screenSpell(i: SpellInput): SpellDerivation | undefined {
 
   if (!signals && createsPlainObject(misc, text, raw)) return narrative("createdObject");
 
-  const recognized = recognizeSpell({ row, raw, text, higher, cast, ability: ability as AbilityKey | null, damageTypes });
+  const recognized = recognizeSpell({ t, row, raw, text, higher, cast, ability: ability as AbilityKey | null, damageTypes });
 
   if (recognized) return recognized;
 

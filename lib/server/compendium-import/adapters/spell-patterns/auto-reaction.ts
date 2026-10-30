@@ -1,4 +1,3 @@
-/* eslint-disable no-restricted-syntax -- derived content written to the DB stays Ukrainian (spec part5, decision 5) */
 import { SAVE_HALF } from "../shared";
 import type { SpellRecognizer } from "./index";
 
@@ -15,7 +14,7 @@ const DAMAGE = /(\d+)d(4|6|8|10|12|20)\s+([a-z]+) damage/i;
 
 export const MARK_ID = "reactionAnchor";
 
-export const autoReactionSpell: SpellRecognizer = ({ text, cast, ability }) => {
+export const autoReactionSpell: SpellRecognizer = ({ t, text, cast, ability }) => {
   const attacked = ATTACKED.exec(text);
 
   const trigger = attacked ?? DAMAGED.exec(text);
@@ -46,7 +45,7 @@ export const autoReactionSpell: SpellRecognizer = ({ text, cast, ability }) => {
 
   const spellEffects: SpellEffect[] = [
     { kind: "mark", markId: MARK_ID, duration: { rounds }, target: "eventTarget" },
-    { kind: "grantCast", label: "Реакція", cost: "reaction", duration: { rounds }, cast: inline },
+    { kind: "grantCast", label: t("derived.spell.label.reaction"), cost: "reaction", duration: { rounds }, cast: inline },
   ];
 
   return {

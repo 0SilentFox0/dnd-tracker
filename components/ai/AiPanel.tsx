@@ -13,7 +13,7 @@ import { AssistantContextDisclosure } from "./AssistantContextDisclosure";
 import { EmptyState, LoadingState } from "@/components/common/states";
 import { Button } from "@/components/ui/button";
 import { ResponsiveDialog } from "@/components/ui/responsive-dialog";
-import { type AiProvider, type AiThreadMode, DEFAULT_THREAD_TITLE } from "@/lib/constants/ai";
+import { type AiProvider, type AiThreadMode, LEGACY_THREAD_TITLE } from "@/lib/constants/ai";
 import { AI_PANEL_WIDTH, useAiChat, useAiCredentials, useAiPanelWidth, useAiProposals, useAiThreadMessages, useAiThreads } from "@/lib/hooks/ai";
 import { useAssistantContext } from "@/lib/hooks/ai/useAssistantContext";
 import { useAssistantEffects } from "@/lib/hooks/ai/useAssistantEffects";
@@ -164,7 +164,7 @@ export function AiPanel({ campaignId, campaignName, embedded = false, mode, focu
   const onFinish = () => {
     proposalData?.refresh();
 
-    if (thread?.title === DEFAULT_THREAD_TITLE) void refetch();
+    if (thread && (!thread.title || thread.title === LEGACY_THREAD_TITLE)) void refetch();
   };
 
   let body: ReactNode;

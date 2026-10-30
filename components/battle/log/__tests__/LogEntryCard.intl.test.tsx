@@ -64,4 +64,15 @@ describe("BattleTopBar", () => {
     expect(container.textContent).toContain(round);
     expect(container.textContent).not.toMatch(/battle\./);
   });
+
+  it.each([["system", "System", "Система"], ["dm", "DM", "ДМ"]])("service actor %s is named by actorId, with an empty or legacy stored name", async (actorId, en, legacyName) => {
+    for (const actorName of ["", legacyName]) {
+      const { container } = await renderCard({ ...structured, actorId, actorName } as BattleAction, "en");
+
+      expect(container.textContent).toContain(en);
+      expect(container.textContent).not.toContain(legacyName);
+
+      cleanup();
+    }
+  });
 });

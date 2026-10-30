@@ -81,3 +81,13 @@ describe("reduceDamageRoll", () => {
     expect(JSON.stringify(d)).not.toContain("spellRoll");
   });
 });
+
+describe("spell-pattern text locale", () => {
+  it("en translator writes English rider text", () => {
+    const entries = ["Choose one of the following effects for the target.", { type: "list", items: ["It regains {@dice 2d8} hit points.", "Its speed increases by 10 feet.", "It glows softly."] }];
+
+    const row = { ...base, entries };
+
+    expect(deriveSpell(row, renderEntries(entries).text, "", spellCast(row), derivedTranslator("en"))).toMatchObject({ native: { riders: ["option 3: see description"] } });
+  });
+});

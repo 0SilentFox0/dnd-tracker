@@ -56,7 +56,7 @@ describe("event mapping", () => {
 
     const back = eventToBattleAction({ ...e, seq: 2, actorId: e.actorId ?? null, targets: [], details: e.details ?? {}, hpChanges: [] }, "b1");
 
-    expect(back).toMatchObject({ actorId: "system", actorName: "Система", actionType: "ability", round: 3 });
+    expect(back).toMatchObject({ actorId: "system", actorName: "", actionType: "ability", round: 3 });
   });
 
   it("подія ДМ — від імені ДМ, з цілями", () => {
