@@ -23,7 +23,7 @@ vi.mock("@/lib/db", () => {
   return { prisma };
 });
 
-const row = { id: "ch", campaignId: "camp", controlledBy: "player", status: "active", race: "Elf", level: 4, skills: {}, raceChoices: {}, feats: [], classes: [{ classId: sorcerer.id, level: 4 }], ...scores };
+const row: Record<string, unknown> = { id: "ch", campaignId: "camp", controlledBy: "player", status: "active", race: "Elf", level: 4, skills: {}, raceChoices: {}, feats: [], classes: [{ classId: sorcerer.id, level: 4 }], ...scores };
 
 const gate = ({ isDM = true, allowPlayerEdit = true, character = row } = {}) => {
   vi.mocked(access.requireCharacterAccess).mockResolvedValue({
@@ -94,6 +94,76 @@ describe("PUT choices", () => {
 
     expect((await put({ feats: [{ id: "f-archery", source: "dm" }] })).status).toBe(403);
     expect((await put({})).status).toBe(400);
+  });
+});
+
+describe("PUT choices subclass", () => {
+  const sub = { id: "sub-draconic", name: "Draconic", features: [{ level: 3, abilities: [], choices: [{ id: "ancestry", label: "Ancestry", level: 3, count: 1, kind: "option" as const, options: [{ id: "red", name: "Red", abilities: [] }] }] }] };
+
+  const withSub = { ...refs, classesById: { ...refs.classesById, [sorcerer.id]: { ...sorcerer, subclasses: [sub] } } };
+
+  beforeEach(async () => {
+    vi.clearAllMocks();
+
+    const { loadChoiceRefs } = await import("@/lib/server/characters/choices/load-refs");
+
+    vi.mocked(loadChoiceRefs).mockResolvedValue(withSub as never);
+  });
+
+  const issueOf = async (res: NextResponse) => (await res.json()).error;
+
+  it("saves the subclass and reports it in the classes", async () => {
+    gate();
+
+    const res = await put({ classSubclasses: { [sorcerer.id]: sub.id } });
+
+    expect(res.status).toBe(200);
+    expect(vi.mocked(prisma.character.update).mock.calls[0][0].data).toMatchObject({ classes: [{ classId: sorcerer.id, level: 4, subclassId: sub.id }], subclass: "Draconic" });
+  });
+
+  it("422 when another subclass is already set", async () => {
+    gate({ character: { ...row, classes: [{ classId: sorcerer.id, level: 4, subclassId: "other" }] } });
+
+    const res = await put({ classSubclasses: { [sorcerer.id]: sub.id } });
+
+    expect(res.status).toBe(422);
+    expect(await issueOf(res)).toBe("errors.subclassAlreadySet");
+  });
+
+  it("an existing subclass that is no longer known does not block other saves", async () => {
+    gate({ character: { ...row, classes: [{ classId: sorcerer.id, level: 4, subclassId: "gone" }] } });
+
+    const res = await put({ raceChoices: { "elven-lineage": [{ id: "wood-elf" }] }, classSubclasses: { [sorcerer.id]: "gone" } });
+
+    expect(res.status).toBe(200);
+    expect(vi.mocked(prisma.character.update).mock.calls[0][0].data).not.toHaveProperty("subclass");
+  });
+
+  it("422 for an unknown subclass", async () => {
+    gate();
+
+    const res = await put({ classSubclasses: { [sorcerer.id]: "ghost" } });
+
+    expect(res.status).toBe(422);
+    expect(await issueOf(res)).toBe("errors.subclassNotFound");
+  });
+
+  it("422 when the class level is below subclassLevel", async () => {
+    gate({ character: { ...row, classes: [{ classId: sorcerer.id, level: 2 }] } });
+
+    const res = await put({ classSubclasses: { [sorcerer.id]: sub.id } });
+
+    expect(res.status).toBe(422);
+    expect(await issueOf(res)).toBe('errors.subclassTooEarly {"level":3}');
+  });
+
+  it("picks of the new subclass can be saved together with it", async () => {
+    gate();
+
+    const res = await put({ classSubclasses: { [sorcerer.id]: sub.id }, classChoices: { [sorcerer.id]: { ancestry: [{ id: "red" }] } } });
+
+    expect(res.status).toBe(200);
+    expect(vi.mocked(prisma.character.update).mock.calls[0][0].data).toMatchObject({ classes: [{ subclassId: sub.id, choices: { ancestry: [{ id: "red" }] } }] });
   });
 });
 

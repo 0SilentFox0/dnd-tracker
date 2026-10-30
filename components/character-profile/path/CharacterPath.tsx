@@ -12,7 +12,7 @@ import type { ClassProgression, ProgressionItem, ProgressionRow } from "@/types/
 
 interface CharacterPathProps {
   progression: ClassProgression;
-  actions?: { onPick: () => void };
+  actions?: { onPick: (pickKey?: string) => void };
   names?: Record<string, string>;
 }
 

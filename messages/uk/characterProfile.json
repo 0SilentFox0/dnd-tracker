@@ -243,6 +243,10 @@
     "spellNudgeAction": "Обрати",
     "summary": "Рівень {level} · {cls}",
     "summaryOpen": "Чекає вибору: {count}",
-    "doneWith": "Обрано: {label} — {chosen}"
+    "doneWith": "Обрано: {label} — {chosen}",
+    "pickSubclass": "Обрати підклас",
+    "subclassOptions": "Які бувають",
+    "subclassGain": "Рівень {level}: {names}",
+    "subclassDepends": "Залежить від підкласу"
   }
 }

@@ -4,6 +4,7 @@ import { useTranslations } from "next-intl";
 
 import { LevelUpChoicesStep } from "./LevelUpChoicesStep";
 
+import { SubclassCard } from "@/components/choices/SubclassCard";
 import { FormAlert } from "@/components/common/states";
 import { Button } from "@/components/ui/button";
 import { ResponsiveDialog } from "@/components/ui/responsive-dialog";
@@ -84,16 +85,11 @@ export function ClassLevelUpDialog({ open, onOpenChange, character, onLeveled }:
             triggerClassName="w-full"
           />
         )}
-        {form.needsSubclass && (
-          <SelectField
-            aria-label={t("subclass")}
-            value={selection.subclassId}
-            onValueChange={actions.pickSubclass}
-            placeholder={t("pickSubclass")}
-            options={cls?.subclasses.map((s) => ({ value: s.id, label: s.name }))}
-            required
-            triggerClassName="w-full"
-          />
+        {form.needsSubclass && cls && (
+          <fieldset className="space-y-2" role="radiogroup" aria-label={t("subclass")}>
+            <legend className="text-sm font-semibold">{t("pickSubclass")}</legend>
+            <SubclassCard cls={cls} value={selection.subclassId} onChange={actions.pickSubclass} />
+          </fieldset>
         )}
         {nextRow && (gained.length > 0 || picksCount > 0) && (
           <section aria-label={t("gainsLabel")} className="space-y-1 rounded-md border border-hud-rule p-2 text-sm">

@@ -73,10 +73,10 @@ describe("ClassLevelUpDialog", () => {
     renderDialog(2);
 
     expect(screen.getByText("Воїн 2 → 3")).toBeTruthy();
-    expect(screen.getByRole("combobox", { name: "characterProfile.classLevelUp.subclass" })).toBeTruthy();
+    expect(screen.getByRole("radiogroup", { name: "characterProfile.classLevelUp.subclass" })).toBeTruthy();
     fireEvent.submit(document.getElementById("class-level-up-form") as HTMLFormElement);
     expect(submit).not.toHaveBeenCalled();
-    fireEvent.change(screen.getByRole("combobox", { name: "characterProfile.classLevelUp.subclass" }), { target: { value: "champion" } });
+    fireEvent.click(screen.getByRole("radio", { name: /Чемпіон/ }));
     fireEvent.submit(document.getElementById("class-level-up-form") as HTMLFormElement);
     await waitFor(() => expect(submit).toHaveBeenCalledWith({ classId: "fighter", subclassId: "champion" }));
   });
@@ -84,7 +84,7 @@ describe("ClassLevelUpDialog", () => {
   it("без підкласу до subclassLevel викликає мутацію з classId", async () => {
     renderDialog(1);
 
-    expect(screen.queryByRole("combobox", { name: "characterProfile.classLevelUp.subclass" })).toBeNull();
+    expect(screen.queryByRole("radiogroup", { name: "characterProfile.classLevelUp.subclass" })).toBeNull();
     fireEvent.submit(document.getElementById("class-level-up-form") as HTMLFormElement);
     await waitFor(() => expect(submit).toHaveBeenCalledWith({ classId: "fighter" }));
   });

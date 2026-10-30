@@ -37,6 +37,12 @@ export function keepStoredPicks(next: CharacterClassEntry[], stored: unknown): C
 export const withClassPicks = (entries: CharacterClassEntry[], classChoices: Record<string, Picks>): CharacterClassEntry[] =>
   entries.map((e) => (classChoices[e.classId] ? { ...e, choices: classChoices[e.classId] } : e));
 
+export function withClassSubclasses(entries: CharacterClassEntry[], subclasses: Record<string, string>): CharacterClassEntry[] | null {
+  if (entries.some((e) => e.subclassId && subclasses[e.classId] && subclasses[e.classId] !== e.subclassId)) return null;
+
+  return entries.map((e) => (subclasses[e.classId] && !e.subclassId ? { ...e, subclassId: subclasses[e.classId] } : e));
+}
+
 export function lineageName(race: ChoiceRace | null, picks: Picks): string | null | undefined {
   const lineage = race?.choices.find((c) => c.lineage);
 
@@ -66,6 +72,7 @@ export const choicesBodyOf = (state: ChoicesState): ChoicesBody => ({
   raceChoices: state.raceChoices,
   feats: state.feats,
   classChoices: Object.fromEntries(state.classes.map((e) => [e.classId, e.choices ?? {}])),
+  ...(state.classes.some((e) => e.subclassId) && { classSubclasses: Object.fromEntries(state.classes.flatMap((e) => (e.subclassId ? [[e.classId, e.subclassId]] : []))) }),
 });
 
 /** Збережені вибори чернетки для форми: піки раси лише коли раса та сама, класу — лише коли той самий клас. */

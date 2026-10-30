@@ -10,6 +10,7 @@ export { useCharacter, useCharacters, useCreateCharacter, useLevelUpCharacter, u
 export { useCharacterSheet } from "./useCharacterSheet";
 export { useCharacterTokens } from "./useCharacterTokens";
 export { type ChoiceRefsView, useChoiceRefs } from "./useChoiceRefs";
+export { useChoiceWizard } from "./useChoiceWizard";
 export { deriveClassFields, useClassEntriesField } from "./useClassEntriesField";
 export { useClassLevelUp } from "./useClassLevelUp";
 export { type LevelUpCharacter, NEW_CLASS, useClassLevelUpForm } from "./useClassLevelUpForm";

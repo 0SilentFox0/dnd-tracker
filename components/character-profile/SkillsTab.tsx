@@ -22,22 +22,24 @@ export function SkillsTab({ manage = false }: { manage?: boolean }) {
 
   const personal = sheet.personalSkill;
 
-  const [choicesOpen, setChoicesOpen] = useState(false);
+  const [choices, setChoices] = useState<{ startAt?: string } | null>(null);
 
   const names = Object.fromEntries([...sheet.spells.map((sp) => [sp.id, sp.name]), ...(sheet.choices?.feats ?? []).map((f) => [f.id, f.name])]);
 
-  const actions = sheet.choices?.canEdit ? { onPick: () => setChoicesOpen(true) } : undefined;
+  const openChoices = (pickKey?: string) => setChoices({ startAt: pickKey });
+
+  const actions = sheet.choices?.canEdit ? { onPick: openChoices } : undefined;
 
   return (
     <>
-      <SpellPicksNudge onPick={actions?.onPick} />
+      <SpellPicksNudge onPick={actions && (() => openChoices())} />
       {sheet.classProgression?.map((progression) => (
         <section key={progression.classId} className="mb-3 space-y-2">
           <h3>{progression.className}</h3>
           <CharacterPath progression={progression} actions={actions} names={names} />
         </section>
       ))}
-      {choicesOpen ? <ChoicesDialog open={choicesOpen} onOpenChange={setChoicesOpen} campaignId={campaignId} characterId={characterId} /> : null}
+      {choices ? <ChoicesDialog open onOpenChange={(o) => !o && setChoices(null)} campaignId={campaignId} characterId={characterId} startAt={choices.startAt} /> : null}
       <FeatsBlock />
       <RacePassive />
       <ChargesList />

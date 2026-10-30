@@ -1,4 +1,4 @@
-import type { ClassProgression, ProgressionItem, ProgressionRow } from "@/types/classes";
+import type { ClassProgression, ProgressionItem, ProgressionPick, ProgressionRow } from "@/types/classes";
 
 export interface PathRows {
   reached: ProgressionRow[];
@@ -9,6 +9,25 @@ export interface PathRows {
 export const chosenSubclassId = (progression: ClassProgression): string | null => progression.subclasses.find((s) => s.chosen)?.id ?? null;
 
 export const rowItems = (row: ProgressionRow, chosen: string | null): ProgressionItem[] => [...row.base, ...(chosen ? (row.bySubclass[chosen] ?? []) : [])];
+
+export interface SubclassPreview {
+  id: string;
+  name: string;
+  gains: { level: number; names: string[] }[];
+}
+
+export const hasSubclassOnly = (row: ProgressionRow, chosen: string | null): boolean => !chosen && Object.values(row.bySubclass).some((items) => items.length > 0);
+
+export function subclassPreview(progression: ClassProgression): SubclassPreview[] {
+  return progression.subclasses.map(({ id, name }) => ({
+    id,
+    name,
+    gains: progression.rows
+      .map((row) => ({ level: row.level, names: (row.bySubclass[id] ?? []).map((item) => item.name) }))
+      .filter((g) => g.names.length > 0)
+      .sort((a, b) => a.level - b.level),
+  }));
+}
 
 export function splitPathRows(progression: ClassProgression): PathRows {
   const chosen = chosenSubclassId(progression);
@@ -26,6 +45,21 @@ export function splitPathRows(progression: ClassProgression): PathRows {
   }
 
   return out;
+}
+
+/** same format as `WizardStep.key` */
+export const pickStepKey = (classId: string, pick: Pick<ProgressionPick, "kind" | "key">): string => (pick.kind === "subclass" ? `subclass:${classId}` : `classes.${classId}.${pick.key}`);
+
+export function firstOpenSpellKey(list: readonly ClassProgression[] | undefined): string | undefined {
+  for (const progression of list ?? []) {
+    for (const row of progression.rows) {
+      const pick = row.picks.find((p) => p.kind === "spell" && p.status === "open");
+
+      if (pick) return pickStepKey(progression.classId, pick);
+    }
+  }
+
+  return undefined;
 }
 
 export function openSpellPicks(list: readonly ClassProgression[] | undefined): number {

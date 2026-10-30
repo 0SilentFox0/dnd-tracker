@@ -79,13 +79,11 @@
   "picker": {
     "multiclassSkills": "Multiclass skills",
     "notFound": "Choice not found — it will be removed on save",
-    "fromLevel": "From level {level}",
-    "requires": "Requires: {list}",
-    "featLevel": "level {level}+",
-    "featUnmet": "prerequisites not met",
     "noSpells": "No spells of the required circles in lists {lists}",
-    "moreDetails": "More details",
-    "featTaken": "already taken"
+    "featTaken": "already taken",
+    "available": "Available",
+    "unavailable": "Not available yet",
+    "details": "Details"
   },
   "editor": {
     "loading": "Loading choices…",
@@ -116,5 +114,51 @@
     "tableCountClassOnly": "Count “from class table” is only for a class",
     "featInFeat": "A feat cannot contain a feat choice",
     "nothingToSave": "No choices to save"
+  },
+  "requirement": {
+    "level": "from level {need}, now {have}",
+    "ability": "{abilities}: need {need}, now {have}",
+    "option": "pick first: {list}",
+    "manual": "DM checks: {text}"
+  },
+  "wizard": {
+    "step": "Step {n} of {total}",
+    "back": "Back",
+    "next": "Next",
+    "finish": "Done",
+    "close": "Close",
+    "allChosen": "Everything is chosen",
+    "allChosenHint": "No open choices left for this hero.",
+    "sourceLabel": "From",
+    "givesLabel": "What it gives",
+    "source": {
+      "race": "Race: {name}",
+      "background": "Background: {name}",
+      "backgroundFeat": "Background feat: {name}",
+      "class": "Class: {name}",
+      "classLevel": "Class: {name}, level {level}",
+      "feat": "Feat: {name}"
+    },
+    "gives": {
+      "abilityScore": "Raises ability scores",
+      "feat": "A feat with its own bonuses",
+      "skill": "Skill proficiency",
+      "expertise": "Double proficiency in a skill you know",
+      "spell": "Spells you can cast",
+      "option": "An option with its own benefits",
+      "subclass": "A subclass: new features at later levels"
+    },
+    "featSource": {
+      "background": "Background feat: starting feat",
+      "race": "Race {name}: starting-level feat",
+      "asi": "Ability Score Improvement, {class} {level}: a feat or +2",
+      "fightingStyle": "Fighting Style, {class}: a fighting style feat",
+      "epicBoon": "Epic Boon, {class} {level}: an epic boon feat",
+      "other": "A feat"
+    },
+    "subclass": {
+      "level": "Level {level}",
+      "noDescription": "No description"
+    }
   }
 }

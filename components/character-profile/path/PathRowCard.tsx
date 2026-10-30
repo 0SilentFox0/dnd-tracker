@@ -1,5 +1,6 @@
 "use client";
 
+import { useMemo } from "react";
 import { useTranslations } from "next-intl";
 import { Info } from "lucide-react";
 
@@ -7,21 +8,45 @@ import { EntityIcon } from "@/components/common/EntityIcon";
 import { HudPill } from "@/components/hud/page";
 import { DND_SKILLS, type DndSkill } from "@/lib/constants/skills";
 import { cn } from "@/lib/utils";
-import { rowItems } from "@/lib/utils/characters/classes";
+import { hasSubclassOnly, pickStepKey, rowItems, subclassPreview } from "@/lib/utils/characters/classes";
 import type { ClassProgression, ProgressionItem, ProgressionPick, ProgressionRow } from "@/types/classes";
 
 interface PathRowCardProps {
   row: ProgressionRow;
   progression: ClassProgression;
   chosen: string | null;
-  onPick?: () => void;
+  onPick?: (pickKey: string) => void;
   onDetail: (item: ProgressionItem) => void;
   names?: Record<string, string>;
 }
 
 const STATE_TONE = { current: "gold", next: "accent", reached: "muted", future: "muted", template: "muted", waiting: "accent" } as const;
 
-function PickLine({ pick, level, subclass, names, onPick }: { pick: ProgressionPick; level: number; subclass?: string; names?: Record<string, string>; onPick?: () => void }) {
+function SubclassOptions({ progression }: { progression: ClassProgression }) {
+  const t = useTranslations("characterProfile.path");
+
+  const preview = useMemo(() => subclassPreview(progression), [progression]);
+
+  return (
+    <details className="mt-1 text-xs text-hud-muted">
+      <summary className="cursor-pointer">{t("subclassOptions")}</summary>
+      <ul className="mt-1 space-y-1">
+        {preview.map((sub) => (
+          <li key={sub.id}>
+            <span className="font-semibold text-hud-ink">{sub.name}</span>
+            {sub.gains.map((g) => (
+              <p key={g.level} className="break-words">
+                {t("subclassGain", { level: g.level, names: g.names.join(", ") })}
+              </p>
+            ))}
+          </li>
+        ))}
+      </ul>
+    </details>
+  );
+}
+
+function PickLine({ pick, level, progression, chosen, names, onPick }: { pick: ProgressionPick; level: number; progression: ClassProgression; chosen: string | null; names?: Record<string, string>; onPick?: (pickKey: string) => void }) {
   const t = useTranslations("characterProfile.path");
 
   const tg = useTranslations("gameTerms");
@@ -30,7 +55,24 @@ function PickLine({ pick, level, subclass, names, onPick }: { pick: ProgressionP
 
   const values = { label: pick.label, done: pick.done ?? 0, required: pick.required };
 
-  if (pick.kind === "subclass") return <span className="text-sm">{subclass ? t("done", { label: subclass }) : tc(pick.status === "open" ? "chooseSubclass" : "subclass")}</span>;
+  const subclass = progression.subclasses.find((c) => c.id === chosen)?.name;
+
+  const pickButton = (label: string) => (
+    <button type="button" onClick={() => onPick?.(pickStepKey(progression.classId, pick))} className="min-h-10 w-full rounded-md border border-hud-gold-strong/60 px-3 py-2 text-left text-sm text-hud-gold-strong">
+      {label}
+    </button>
+  );
+
+  if (pick.kind === "subclass") {
+    if (subclass) return <span className="text-sm">{t("done", { label: subclass })}</span>;
+
+    return (
+      <>
+        {pick.status === "open" && onPick ? pickButton(t("pickSubclass")) : <span className="text-sm">{tc(pick.status === "open" ? "chooseSubclass" : "subclass")}</span>}
+        <SubclassOptions progression={progression} />
+      </>
+    );
+  }
 
   if (pick.status === "locked") return <span className="text-sm text-hud-muted">{t("unlocksAt", { label: pick.label, level })}</span>;
 
@@ -42,11 +84,7 @@ function PickLine({ pick, level, subclass, names, onPick }: { pick: ProgressionP
 
   if (!onPick) return <span className="text-sm text-hud-gold-strong">{t("pickOpen", values)}</span>;
 
-  return (
-    <button type="button" onClick={onPick} className="min-h-10 w-full rounded-md border border-hud-gold-strong/60 px-3 py-2 text-left text-sm text-hud-gold-strong">
-      {t("pick", values)}
-    </button>
-  );
+  return pickButton(t("pick", values));
 }
 
 export function PathRowCard({ row, progression, chosen, onPick, onDetail, names }: PathRowCardProps) {
@@ -58,7 +96,10 @@ export function PathRowCard({ row, progression, chosen, onPick, onDetail, names 
     <section data-state={row.state} className={cn("rounded-lg border border-hud-rule p-3", row.state === "current" && "ring-1 ring-hud-gold-strong")}>
       <header className="mb-2 flex items-center justify-between gap-2">
         <h4 className="hud-sc text-sm text-hud-ink">{t("level", { level: row.level })}</h4>
-        <HudPill tone={STATE_TONE[stateKey]}>{t(`state.${stateKey}`)}</HudPill>
+        <span className="flex items-center gap-1">
+          {row.state === "future" && hasSubclassOnly(row, chosen) ? <HudPill tone="muted">{t("subclassDepends")}</HudPill> : null}
+          <HudPill tone={STATE_TONE[stateKey]}>{t(`state.${stateKey}`)}</HudPill>
+        </span>
       </header>
       <ul className="space-y-2">
         {rowItems(row, chosen).map((item) => (
@@ -79,7 +120,7 @@ export function PathRowCard({ row, progression, chosen, onPick, onDetail, names 
         ))}
         {row.picks.map((pick, i) => (
           <li key={`${i}:${pick.key}`}>
-            <PickLine pick={pick} level={row.level} subclass={progression.subclasses.find((c) => c.chosen)?.name} names={names} onPick={onPick} />
+            <PickLine pick={pick} level={row.level} progression={progression} chosen={chosen} names={names} onPick={onPick} />
           </li>
         ))}
       </ul>

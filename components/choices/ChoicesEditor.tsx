@@ -2,53 +2,33 @@
 
 import { useTranslations } from "next-intl";
 
-import { ChoicePicker,type PickerContext } from "./ChoicePicker";
+import { ChoicePicker, type PickerContext } from "./ChoicePicker";
+import { classPickerContext, issueFor, pickerBase } from "./picker-context";
 
 import { HUD_SELECT_CLASS, HudSection } from "@/components/hud/form";
-import { ABILITY_KEYS, type AbilityKey } from "@/lib/constants/abilities";
 import type { ChoiceRefsView } from "@/lib/hooks/characters";
 import { useTranslator } from "@/lib/i18n/use-translator";
 import { mergeBackground } from "@/lib/utils/backgrounds/selection";
-import { abilityPicksOf, abilityScoreDelta } from "@/lib/utils/characters/choices/ability";
 import { classChoiceDefs } from "@/lib/utils/characters/choices/class-choices";
 import { isChoiceOpen } from "@/lib/utils/characters/choices/count";
-import { countFeats, skillFlags, skillPicksOf, visitPicks } from "@/lib/utils/characters/choices/walk";
-import { maxSlotLevelFor } from "@/lib/utils/spells/class-slots";
-import type { Choice, ChoiceIssue, ChoicePick, ChoicesState, Picks } from "@/types/choices";
+import type { Choice, ChoiceHero, ChoiceIssue, ChoicePick, ChoicesState, Picks } from "@/types/choices";
 
 interface ChoicesEditorProps {
   state: { data: ChoicesState; set: (next: ChoicesState) => void };
   refs: ChoiceRefsView;
-  hero: { level: number; scores: Record<AbilityKey, number>; skills: unknown; classMode: boolean };
+  hero: ChoiceHero;
   issues?: ChoiceIssue[];
   /** збережені вибори, чий приріст уже входить у hero.scores */
   saved?: ChoicesState;
   only?: { classId: string; level: number; multiclass?: boolean };
 }
 
-const issueFor = (issues: ChoiceIssue[] | undefined, path: string) => issues?.find((i) => i.path === path || i.path.startsWith(`${path}.`))?.message;
-
 export function ChoicesEditor({ state: { data, set }, refs, hero, issues, saved, only }: ChoicesEditorProps) {
   const t = useTranslations("choices");
 
   const tg = useTranslator("gameTerms");
 
-  const visits = visitPicks(data, refs, { level: hero.level, classMode: hero.classMode });
-
-  const delta = abilityScoreDelta(saved ? abilityPicksOf(visitPicks(saved, refs, { level: hero.level, classMode: hero.classMode })) : [], abilityPicksOf(visits));
-
-  const scoreAfter = Object.fromEntries(ABILITY_KEYS.map((k) => [k, hero.scores[k] + (delta[k] ?? 0)])) as Record<AbilityKey, number>;
-
-  const base: Omit<PickerContext, "level" | "columns" | "maxSlotLevel"> = {
-    totalLevel: hero.level,
-    feats: refs.feats,
-    featsById: refs.featsById,
-    spells: refs.spells,
-    proficient: new Set([...(data.backgroundId ? refs.backgroundsById?.[data.backgroundId]?.skillProficiencies ?? [] : []), ...skillFlags(hero.skills), ...skillPicksOf(visits, "skill")]),
-    scores: hero.scores,
-    scoreAfter,
-    featCounts: countFeats(visits, data, hero.classMode),
-  };
+  const base = pickerBase(data, refs, hero, saved);
 
   const pickers = (defs: readonly Choice[], picks: Picks, ctx: PickerContext, path: string, onPicks: (next: Picks) => void, filter: (c: Choice) => boolean) =>
     defs.filter(filter).map((c) => (
@@ -124,7 +104,7 @@ export function ChoicesEditor({ state: { data, set }, refs, hero, issues, saved,
 
             const defs = classChoiceDefs(cls, subclass, only ? !!only.multiclass : data.classes.indexOf(entry) > 0);
 
-            const ctx: PickerContext = { ...base, level: entry.level, columns: cls.columns ?? [], maxSlotLevel: maxSlotLevelFor({ ...entry, class: cls, subclass }) };
+            const ctx = classPickerContext(base, cls, entry);
 
             const setPicks = (choices: Picks) => set({ ...data, classes: data.classes.map((e) => (e.classId === entry.classId ? { ...e, choices } : e)) });
 

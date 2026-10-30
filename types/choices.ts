@@ -154,6 +154,7 @@ export interface ChoicesBody {
   raceChoices?: Picks;
   feats?: CharacterFeat[];
   classChoices?: Record<string, Picks>;
+  classSubclasses?: Record<string, string>;
 }
 
 export interface SheetChoices {
@@ -166,4 +167,11 @@ export interface SheetChoices {
   options: Array<{ owner: string; label: string; names: string[] }>;
   spellSources: Record<string, TextRef>;
   expertise: DndSkill[];
+}
+
+export interface ChoiceHero {
+  level: number;
+  scores: Record<AbilityKey, number>;
+  skills: unknown;
+  classMode: boolean;
 }

@@ -24,7 +24,7 @@ export interface PickVisit {
   maxSlotLevel?: number;
 }
 
-type WalkRefs = Pick<ChoiceRefs, "race" | "classesById" | "featsById" | "backgroundsById">;
+export type WalkRefs = Pick<ChoiceRefs, "race" | "classesById" | "featsById" | "backgroundsById">;
 
 export type ChoiceOwnerRef =
   | { kind: "race"; race: ChoiceRace }

@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 
 import { makeAbility, makeClass } from "./class-fixtures";
 
-import { chosenSubclassId, openSpellPicks, pathSummary, rowItems, splitPathRows } from "@/lib/utils/characters/classes/path";
+import { chosenSubclassId, hasSubclassOnly, openSpellPicks, pathSummary, rowItems, splitPathRows, subclassPreview } from "@/lib/utils/characters/classes/path";
 import { buildClassProgression } from "@/lib/utils/characters/classes/progression";
 
 const cls = makeClass({
@@ -95,5 +95,34 @@ describe("pathSummary", () => {
   it("gives the current level and how many picks wait", () => {
     expect(pathSummary(buildClassProgression(cls, { classId: "fighter", level: 4 }))).toEqual({ level: 4, open: 2 });
     expect(pathSummary(buildClassProgression(cls, { classId: "fighter", level: 4, subclassId: "champ", choices: { asi4: [{ id: "x" }] } }))).toEqual({ level: 4, open: 0 });
+  });
+});
+
+describe("subclassPreview", () => {
+  it("lists what each subclass gives by level, skipping empty levels", () => {
+    const wide = makeClass({
+      subclassLevel: 3,
+      subclasses: [
+        { id: "champ", name: "Champion", features: [{ level: 7, abilities: [makeAbility("c7", "Remarkable Athlete", "x")] }, { level: 3, abilities: [makeAbility("c3", "Improved Critical", "x"), makeAbility("c3b", "Bonus", "x")] }] },
+        { id: "empty", name: "Empty", features: [] },
+      ],
+    });
+
+    const preview = subclassPreview(buildClassProgression(wide, { classId: "fighter", level: 2 }));
+
+    expect(preview).toEqual([
+      { id: "champ", name: "Champion", gains: [{ level: 3, names: ["Improved Critical", "Bonus"] }, { level: 7, names: ["Remarkable Athlete"] }] },
+      { id: "empty", name: "Empty", gains: [] },
+    ]);
+  });
+});
+
+describe("hasSubclassOnly", () => {
+  const row = buildClassProgression(cls, { classId: "fighter", level: 2 }).rows.find((r) => r.level === 3)!;
+
+  it("is true only when subclass abilities exist and no subclass is chosen", () => {
+    expect(hasSubclassOnly(row, null)).toBe(true);
+    expect(hasSubclassOnly(row, "champ")).toBe(false);
+    expect(hasSubclassOnly(buildClassProgression(cls, { classId: "fighter", level: 2 }).rows.find((r) => r.level === 5)!, null)).toBe(false);
   });
 });
