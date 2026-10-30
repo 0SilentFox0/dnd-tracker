@@ -2,6 +2,8 @@ import "server-only";
 import { prisma } from "@/lib/db";
 import { type PageSummary, pageSummarySchema } from "@/lib/schemas/scenario-summary";
 import type { DigestItem } from "@/lib/utils/scenario/summary/digest";
+import { summaryInputHash } from "@/lib/utils/scenario/summary/hash";
+import type { SummaryInputPage } from "@/lib/utils/scenario/summary/input";
 import type { ScenarioSummaryEntry } from "@/types/scenario";
 
 export interface SummaryRowInput {
@@ -13,16 +15,27 @@ export interface SummaryRowInput {
   model: string;
   inputTokens: number | null;
   outputTokens: number | null;
+  inputHash: string;
 }
 
 export async function upsertSummary(row: SummaryRowInput): Promise<void> {
   // older versions must not overwrite newer ones; the page may be deleted mid-generation, so insert only while it exists
-  await prisma.$executeRaw`INSERT INTO scenario_page_summaries ("pageId", "campaignId", version, summary, provider, model, "inputTokens", "outputTokens", "createdAt", "updatedAt")
-    SELECT id, "campaignId", ${row.version}::int, ${JSON.stringify(row.summary)}::jsonb, ${row.provider}::text, ${row.model}::text, ${row.inputTokens}::int, ${row.outputTokens}::int, now(), now()
+  await prisma.$executeRaw`INSERT INTO scenario_page_summaries ("pageId", "campaignId", version, summary, provider, model, "inputTokens", "outputTokens", "inputHash", "createdAt", "updatedAt")
+    SELECT id, "campaignId", ${row.version}::int, ${JSON.stringify(row.summary)}::jsonb, ${row.provider}::text, ${row.model}::text, ${row.inputTokens}::int, ${row.outputTokens}::int, ${row.inputHash}::text, now(), now()
     FROM scenario_pages WHERE id = ${row.pageId}
     ON CONFLICT ("pageId") DO UPDATE SET version = EXCLUDED.version, summary = EXCLUDED.summary, provider = EXCLUDED.provider, model = EXCLUDED.model,
-      "inputTokens" = EXCLUDED."inputTokens", "outputTokens" = EXCLUDED."outputTokens", "updatedAt" = now()
+      "inputTokens" = EXCLUDED."inputTokens", "outputTokens" = EXCLUDED."outputTokens", "inputHash" = EXCLUDED."inputHash", "updatedAt" = now()
     WHERE scenario_page_summaries.version <= EXCLUDED.version`;
+}
+
+// played/revealed toggles bump the page version without changing the summary input; keep such summaries fresh
+export async function refreshSummaryFreshness(pageId: string, newVersion: number, page: SummaryInputPage): Promise<void> {
+  try {
+    await prisma.$executeRaw`UPDATE scenario_page_summaries SET version = ${newVersion}::int
+      WHERE "pageId" = ${pageId} AND "inputHash" = ${summaryInputHash(page)} AND version < ${newVersion}::int`;
+  } catch (error) {
+    console.error("[summary freshness]", error instanceof Error ? error.name : "unknown");
+  }
 }
 
 export async function loadSummaryRow(pageId: string): Promise<{ version: number; summary: PageSummary; model: string; createdAt: Date } | null> {

@@ -17,6 +17,7 @@ import { errorResponse } from "@/lib/utils/api/api-response";
 import { loadOwned } from "@/lib/utils/api/load-owned";
 import { checkRateLimit, rateLimitResponse } from "@/lib/utils/api/rate-limit";
 import { readLimitedBody } from "@/lib/utils/api/read-limited-body";
+import { summaryInputHash } from "@/lib/utils/scenario/summary/hash";
 import { buildSummaryInput, filterSummaryEntities } from "@/lib/utils/scenario/summary/input";
 
 const instruction = (language: string) =>
@@ -74,7 +75,9 @@ export const generateSummaryHandler = (req: Request, campaignId: string, pageId:
 
     if (!limit.allowed) return rateLimitResponse(limit);
 
-    const input = buildSummaryInput({ title: page.title, kind: page.kind, arc: page.arc, content: readContent(page.content) }, AI_LIMITS.summaryInputChars);
+    const summaryPage = { title: page.title, kind: page.kind, arc: page.arc, content: readContent(page.content) };
+
+    const input = buildSummaryInput(summaryPage, AI_LIMITS.summaryInputChars);
 
     if (input.empty) return errorResponse(API_ERRORS.AI_SUMMARY_EMPTY, 400);
 
@@ -105,6 +108,7 @@ export const generateSummaryHandler = (req: Request, campaignId: string, pageId:
       model: choice.modelId,
       inputTokens: result.usage.inputTokens ?? null,
       outputTokens: result.usage.outputTokens ?? null,
+      inputHash: summaryInputHash(summaryPage),
     });
 
     return NextResponse.json({ summary, version: page.version, stale: false, truncated: input.truncated });

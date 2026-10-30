@@ -7,6 +7,7 @@ import { notifyRevealForContentChange } from "@/lib/server/acquaintances/reveal"
 import { withCampaignContentWrite } from "@/lib/server/content/write";
 import { loadOwnedPage } from "@/lib/server/scenario/loaders";
 import { InvalidScenarioContentError, OWNED_WITH_CONTENT_SELECT, readContentStrict, toJson } from "@/lib/server/scenario/page-store";
+import { refreshSummaryFreshness } from "@/lib/server/scenario/summary-store";
 import { requireDM } from "@/lib/utils/api/api-auth";
 import { errorResponse } from "@/lib/utils/api/api-response";
 import { handleApiError } from "@/lib/utils/api/error-handler";
@@ -42,6 +43,7 @@ export async function patchScenarioSectionHandler(req: Request, campaignId: stri
     if (count === 0) return errorResponse(API_ERRORS.SCENARIO_CONFLICT, 409);
 
     await notifyRevealForContentChange(campaignId, pageId, content, next);
+    await refreshSummaryFreshness(pageId, page.version + 1, { title: page.title, kind: page.kind, arc: page.arc, content: next });
 
     return NextResponse.json({ version: page.version + 1, section: next.sections.find((s) => s.id === sectionId) });
     });
