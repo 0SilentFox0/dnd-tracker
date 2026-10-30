@@ -4,14 +4,22 @@ import "server-only";
 import { AiKeyUnreadableError, loadApiKey } from "@/lib/ai/credentials";
 import { type ImageModelChoice, pickUserImageModel } from "@/lib/ai/image-model";
 import { createModel } from "@/lib/ai/providers";
-import { AI_IMAGE_MODELS, AI_MODELS, AI_PROVIDERS } from "@/lib/constants/ai";
+import { AI_IMAGE_MODELS, AI_MODELS, AI_PROVIDERS, type AiModelOption, type AiProvider } from "@/lib/constants/ai";
 import { CampaignRole } from "@/lib/constants/campaigns";
 import { prisma } from "@/lib/db";
 
 const findDm = (campaignId: string) => prisma.campaignMember.findFirst({ where: { campaignId, role: CampaignRole.DM }, select: { userId: true } });
 
-// keys belong to users; a player's request runs on the campaign DM's key (fast model)
-export async function pickDmTextModel(campaignId: string): Promise<LanguageModel | null> {
+type AiTier = AiModelOption["tier"];
+
+export interface DmTextModelChoice {
+  model: LanguageModel;
+  provider: AiProvider;
+  modelId: string;
+}
+
+// keys belong to users; a player's request runs on the campaign DM's key
+async function pickDmModel(campaignId: string, tier: AiTier): Promise<DmTextModelChoice | null> {
   const dm = await findDm(campaignId);
 
   if (!dm) return null;
@@ -20,15 +28,33 @@ export async function pickDmTextModel(campaignId: string): Promise<LanguageModel
     try {
       const key = await loadApiKey(dm.userId, provider);
 
-      const model = AI_MODELS[provider].find((m) => m.tier === "fast");
+      const option = AI_MODELS[provider].find((m) => m.tier === tier);
 
-      if (key && model) return createModel(provider, key, model.id);
+      if (key && option) return { model: createModel(provider, key, option.id), provider, modelId: option.id };
     } catch (error) {
       if (!(error instanceof AiKeyUnreadableError)) throw error;
     }
   }
 
   return null;
+}
+
+export async function pickDmTextModel(campaignId: string): Promise<LanguageModel | null> {
+  return (await pickDmModel(campaignId, "fast"))?.model ?? null;
+}
+
+export const pickDmSmartTextModel = (campaignId: string) => pickDmModel(campaignId, "smart");
+
+export async function readDmSmartAvailability(campaignId: string): Promise<boolean> {
+  const dm = await findDm(campaignId);
+
+  if (!dm) return false;
+
+  const keys = await prisma.aiCredential.findMany({ where: { userId: dm.userId }, select: { provider: true } });
+
+  const has = new Set(keys.map((k) => k.provider));
+
+  return AI_PROVIDERS.some((p) => has.has(p) && AI_MODELS[p].some((m) => m.tier === "smart"));
 }
 
 export async function pickDmImageModel(campaignId: string): Promise<(ImageModelChoice & { userId: string }) | null> {
