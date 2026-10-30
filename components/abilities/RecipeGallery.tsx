@@ -12,7 +12,7 @@ import { useAbilityText } from "./use-ability-text";
 import { HudChipTabs } from "@/components/hud/page";
 import { Button } from "@/components/ui/button";
 import { ResponsiveDialog } from "@/components/ui/responsive-dialog";
-import { useRecipeValues } from "@/lib/hooks/abilities";
+import { useRecipeValues } from "@/lib/hooks/abilities/useRecipeValues";
 import { useTranslator } from "@/lib/i18n/use-translator";
 import type { Ability } from "@/lib/utils/abilities/schema";
 import { summarizeAbility } from "@/lib/utils/abilities/summary";
