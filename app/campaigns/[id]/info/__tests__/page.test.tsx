@@ -60,7 +60,7 @@ describe("сторінка info", () => {
     access.rules = {};
 
     expect(props?.skills).toEqual([]);
-    expect(props?.classes).toEqual([expect.objectContaining({ name: "Воїн", features: [{ level: 1, name: null, description: "Heal" }] })]);
+    expect(props?.classes).toEqual([expect.objectContaining({ name: "Воїн", features: [{ level: 1, name: null, icon: null, description: "Heal" }] })]);
   });
 
   it("без класів передає classes: null", async () => {

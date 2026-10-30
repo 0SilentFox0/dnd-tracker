@@ -1,4 +1,4 @@
-import type { IconsFile } from "../../assets/tokens-5e/icons-file";
+import type { IconKind, IconsFile } from "../../assets/tokens-5e/icons-file";
 import { toImportRows } from "./data-files";
 import { type SpellRow, SRD_KINDS, type SrdData, type SrdKind } from "./types";
 
@@ -64,7 +64,7 @@ export function withIcons(kind: SrdKind, data: SrdData, rows: Record<string, unk
 
   if (!column) return rows;
 
-  const urls = icons[kind as "spells" | "units" | "artifacts" | "races" | "classes" | "backgrounds"];
+  const urls = icons[kind as IconKind];
 
   const source = data[kind] as ReadonlyArray<{ slug: string }>;
 

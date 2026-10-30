@@ -36,6 +36,18 @@ describe("BonusActionPicker", () => {
     expect(desc.closest("button")?.querySelector("svg, img")).toHaveClass("shrink-0");
   });
 
+  it("shows the own ability icon before the source icon", () => {
+    const own = { ...wind, icon: "https://x/own.webp", source: { ...wind.source, icon: "https://x/source.webp" } } as ResolvedAbility;
+
+    const { wrapper, me } = fakeScene({ abilities: [own] });
+
+    render(<BonusActionPicker participant={me} open onOpenChange={() => {}} onDone={() => {}} />, { wrapper });
+
+    const img = screen.getByRole("button", { name: /Друге дихання/ }).querySelector("img");
+
+    expect(img?.getAttribute("src")).toBe("https://x/own.webp");
+  });
+
   it("уміння без цілі — одразу відправка", async () => {
     const { wrapper, me, bonusAction } = fakeScene({ abilities: [wind] });
 

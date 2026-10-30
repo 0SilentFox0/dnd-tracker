@@ -65,6 +65,7 @@ export interface ArtifactSetForReference {
 export interface ClassFeatureForReference {
   level: number;
   name: string | null;
+  icon?: string | null;
   description: string | null;
 }
 
@@ -80,7 +81,7 @@ export interface ClassForReference {
   color: string | null;
   summary: ClassSummaryLine[];
   features: ClassFeatureForReference[];
-  subclasses: { id: string; name: string; features: ClassFeatureForReference[] }[];
+  subclasses: { id: string; name: string; icon: string | null; features: ClassFeatureForReference[] }[];
 }
 
 export type SectionTab = "all" | "skills" | "spells" | "artifacts" | "classes";

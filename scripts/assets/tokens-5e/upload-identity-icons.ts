@@ -13,7 +13,6 @@ import { expectedTargets, IDENTITY_BUCKET, IDENTITY_SIZE, type IdentityKind, par
 import { planUploads } from "./identity-plan";
 
 import { CampaignKind, SRD_TEMPLATE_NAME } from "@/lib/constants/campaigns";
-import { prisma } from "@/lib/db";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { ensureBucket } from "@/lib/supabase/buckets";
 import { staticAssetUploadOptions } from "@/lib/supabase/storage-cache";
@@ -42,6 +41,8 @@ async function main() {
   const admin = dryRun ? null : createAdminClient();
 
   if (!dryRun) {
+    const { prisma } = await import("@/lib/db");
+
     assertSeedTarget(process.env.DATABASE_URL, args.includes("--allow-remote"));
 
     const campaign = await prisma.campaign.findUnique({ where: { id: templateId }, select: { name: true, kind: true } });
@@ -139,4 +140,6 @@ main()
     console.error(e instanceof Error ? e.message : e);
     process.exitCode = 1;
   })
-  .finally(() => prisma.$disconnect());
+  .finally(async () => {
+    if (!process.argv.includes("--dry-run")) await (await import("@/lib/db")).prisma.$disconnect();
+  });

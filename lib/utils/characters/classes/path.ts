@@ -13,15 +13,17 @@ export const rowItems = (row: ProgressionRow, chosen: string | null): Progressio
 export interface SubclassPreview {
   id: string;
   name: string;
+  icon: string | null;
   gains: { level: number; names: string[] }[];
 }
 
 export const hasSubclassOnly = (row: ProgressionRow, chosen: string | null): boolean => !chosen && Object.values(row.bySubclass).some((items) => items.length > 0);
 
 export function subclassPreview(progression: ClassProgression): SubclassPreview[] {
-  return progression.subclasses.map(({ id, name }) => ({
+  return progression.subclasses.map(({ id, name, icon }) => ({
     id,
     name,
+    icon,
     gains: progression.rows
       .map((row) => ({ level: row.level, names: (row.bySubclass[id] ?? []).map((item) => item.name) }))
       .filter((g) => g.names.length > 0)

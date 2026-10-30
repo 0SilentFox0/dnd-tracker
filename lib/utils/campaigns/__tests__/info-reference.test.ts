@@ -44,6 +44,14 @@ describe("toClassForReference", () => {
     expect(classSearchText(c, t)).toContain("медицина");
   });
 
+  it("carries ability and subclass icons into the reference", () => {
+    const c = toClassForReference({ ...base, features: [{ level: 1, abilities: [{ id: "a", name: "Rage", icon: "https://x/r.webp" }, { id: "b", name: "Plain" }] }], subclasses: [{ id: "s", name: "Berserker", icon: "https://x/s.webp", features: [{ level: 3, abilities: [{ id: "c", name: "Frenzy", icon: "https://x/f.webp" }] }] }] } as unknown as GameClassData);
+
+    expect(c.features.map((f) => f.icon)).toEqual(["https://x/r.webp", null]);
+    expect(c.subclasses[0].icon).toBe("https://x/s.webp");
+    expect(c.subclasses[0].features[0].icon).toBe("https://x/f.webp");
+  });
+
   it("з реальним uk-каталогом зведення читається як раніше", async () => {
     const { getTranslator } = await vi.importActual<typeof import("@/lib/i18n/translator")>("@/lib/i18n/translator");
 

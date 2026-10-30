@@ -13,5 +13,6 @@ it("rejects data: URLs", () => {
 });
 
 it("without icon the parsed ability is unchanged", () => {
-  expect(AbilitySchema.parse(base)).toEqual(AbilitySchema.parse({ ...base, icon: undefined }));
+  expect("icon" in AbilitySchema.parse(base)).toBe(false);
+  expect(AbilitySchema.parse({ ...base, icon: "" }).icon).toBeNull();
 });

@@ -25,7 +25,7 @@ export function ClassCard({ gameClass, campaignId, onDelete }: ClassCardProps) {
         <span className="flex basis-full flex-wrap gap-1">
           {gameClass.subclasses.map((s) => (
             <span key={s.id} title={s.name}>
-              <EntityIcon src={s.icon} name={s.name} size={24} className="size-6 rounded text-xs" />
+              <EntityIcon src={s.icon} name={s.name} size={24} alt={s.name} className="size-6 rounded text-xs" />
             </span>
           ))}
         </span>
