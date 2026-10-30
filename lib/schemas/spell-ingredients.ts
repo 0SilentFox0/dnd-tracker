@@ -17,3 +17,11 @@ export const ComponentFlagsSchema: z.ZodType<ComponentFlags> = z.object({ v: z.b
 export const SpellIngredientsSchema = z.array(SpellIngredientSchema).max(SPELL_INGREDIENTS_MAX).refine((list) => new Set(list.map((i) => ingredientKey(i.name))).size === list.length, { message: "spells.ingredients.duplicate" });
 
 export const ingredientsRequireMaterial = (v: { ingredients?: unknown[]; componentFlags?: ComponentFlags | null }) => !v.ingredients?.length || v.componentFlags?.m === true;
+
+/** Tolerant read of a stored column: keeps every valid entry (duplicates included) so a bad row never silently turns the ingredient check off. */
+export const readStoredIngredients = (raw: unknown): SpellIngredient[] =>
+  Array.isArray(raw) ? raw.flatMap((entry) => {
+    const parsed = SpellIngredientSchema.safeParse(entry);
+
+    return parsed.success ? [parsed.data] : [];
+  }) : [];

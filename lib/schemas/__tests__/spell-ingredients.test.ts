@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { ComponentFlagsSchema, SpellIngredientSchema } from "@/lib/schemas/spell-ingredients";
+import { ComponentFlagsSchema, readStoredIngredients,SpellIngredientSchema } from "@/lib/schemas/spell-ingredients";
 import { createSpellSchema } from "@/lib/schemas/spells";
 import { defaultFocus } from "@/lib/utils/spells/ingredients/types";
 
@@ -60,5 +60,18 @@ describe("createSpellSchema ingredients", () => {
   it("accepts null flags and empty or missing ingredients", () => {
     expect(createSpellSchema.parse({ name: "X", componentFlags: null }).ingredients).toEqual([]);
     expect(createSpellSchema.safeParse({ name: "X", ingredients: [] }).success).toBe(true);
+  });
+});
+
+describe("readStoredIngredients", () => {
+  const ok = { name: "Diamond", qty: 1, consumed: true, focus: false };
+
+  it("keeps valid entries, including duplicate keys, so the check stays on", () => {
+    expect(readStoredIngredients([ok, ok])).toHaveLength(2);
+  });
+
+  it("drops only the invalid entries and tolerates non-arrays", () => {
+    expect(readStoredIngredients([ok, { name: "" }, 5])).toEqual([ok]);
+    expect(readStoredIngredients(null)).toEqual([]);
   });
 });

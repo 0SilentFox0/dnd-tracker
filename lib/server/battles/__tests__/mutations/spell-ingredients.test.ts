@@ -118,6 +118,32 @@ describe("spell ingredients on cast", () => {
     expect(out.events).toHaveLength(1);
   });
 
+  it("a possessed non-consumed ingredient is never spent or paid for across casts", async () => {
+    const kept = row({ ingredients: [{ ...diamond, consumed: false }] });
+
+    let hero = caster(stockOf({ purseCp: 10_000 }), { spellcasting: { spellSlots: { "1": { max: 3, current: 3 } }, knownSpells: ["s1"] } });
+
+    for (let i = 0; i < 3; i++) {
+      hero = heroOf(await cast({ ...hero, actionFlags: { ...hero.actionFlags, hasUsedAction: false } }, { spell: kept }));
+    }
+
+    expect(hero.spellcasting.spellSlots["1"].current).toBe(0);
+    expect(hero.battleData.ingredientStock?.items[0].used).toBe(0);
+    expect(hero.battleData.ingredientStock?.usedCp).toBe(0);
+  });
+
+  it("a non-consumed ingredient without the item is rejected even with gold", async () => {
+    const kept = row({ ingredients: [{ ...diamond, consumed: false }] });
+
+    await expect(cast(caster(stockOf({ items: [], purseCp: 1_000_000 })), { spell: kept })).rejects.toMatchObject({ message: API_ERRORS.BATTLE_SPELL_INGREDIENTS_MISSING });
+  });
+
+  it("invalid stored ingredient entries do not disable the check for the valid ones", async () => {
+    const spell = row({ ingredients: [diamond, { name: "" }] });
+
+    await expect(cast(caster(stockOf({ items: [] })), { spell })).rejects.toMatchObject({ message: API_ERRORS.BATTLE_SPELL_INGREDIENTS_MISSING });
+  });
+
   it("long cast: beginning only checks, completion spends", async () => {
     const spell = row({ cost: "long", casting: { rounds: 2, text: "2 rounds" } });
 

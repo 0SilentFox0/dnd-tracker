@@ -1,4 +1,4 @@
-import { ComponentFlagsSchema, SpellIngredientsSchema } from "@/lib/schemas/spell-ingredients";
+import { ComponentFlagsSchema, readStoredIngredients } from "@/lib/schemas/spell-ingredients";
 import { parseSpellFx } from "@/lib/utils/battle/fx/spell-fx-schema";
 import { readSpellDefinition } from "@/lib/utils/spells/model/read";
 import type { BookSpell, SpellDefinition, SpellGroupRef, SpellRules } from "@/types/spells";
@@ -57,7 +57,7 @@ export function toBookSpell(row: BookSpellRow): BookSpell {
 
   const parsedFx = parseSpellFx(fx);
 
-  const ingredients = SpellIngredientsSchema.safeParse(row.ingredients).data;
+  const ingredients = readStoredIngredients(row.ingredients);
 
   const componentFlags = ComponentFlagsSchema.safeParse(row.componentFlags).data;
 

@@ -14,6 +14,8 @@ export interface IngredientPlan {
 export function planIngredients(ingredients: SpellIngredient[], stock: IngredientStock, opts: { autoPay: boolean }): IngredientPlan {
   const taken: Record<string, number> = {};
 
+  const held: Record<string, number> = {};
+
   const missing: IngredientPlan["missing"] = [];
 
   let spendCp = 0;
@@ -30,15 +32,23 @@ export function planIngredients(ingredients: SpellIngredient[], stock: Ingredien
     for (const item of candidates) {
       if (rest <= 0) break;
 
-      const take = Math.min(rest, item.qty - item.used - (taken[item.id] ?? 0));
+      const take = Math.min(rest, item.qty - item.used - (held[item.id] ?? 0));
 
       if (take <= 0) continue;
 
-      taken[item.id] = (taken[item.id] ?? 0) + take;
+      held[item.id] = (held[item.id] ?? 0) + take;
+
+      if (ing.consumed) taken[item.id] = (taken[item.id] ?? 0) + take;
+
       rest -= take;
     }
 
     if (rest <= 0) continue;
+
+    if (!ing.consumed) {
+      missing.push({ name: ing.name, qty: rest, ...(ing.minGp !== undefined && { minGp: ing.minGp }) });
+      continue;
+    }
 
     const cost = Math.round(minGp * COIN_VALUE.gp) * rest;
 

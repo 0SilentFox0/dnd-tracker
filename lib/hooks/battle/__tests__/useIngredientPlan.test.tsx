@@ -33,6 +33,15 @@ describe("useIngredientPlan", () => {
     expect(run({ stock })).toMatchObject({ blocked: false, payGp: 0 });
   });
 
+  it("a possessed non-consumed ingredient costs nothing and never pays from the purse", () => {
+    const kept = { ingredients: [{ ...spell.ingredients[0], consumed: false }] };
+
+    const stock = stockOf({ items: [{ id: "i1", key: "diamond", name: "Diamond", worthGp: 50, qty: 1, used: 0 }], purseCp: 10000 });
+
+    expect(run({ stock, autoPay: true, spell: kept })).toMatchObject({ blocked: false, payGp: 0 });
+    expect(run({ stock: stockOf({ purseCp: 10000 }), autoPay: true, spell: kept })).toMatchObject({ blocked: true, payGp: 0 });
+  });
+
   it("pays the shortage from the purse when auto-pay is on", () => {
     expect(run({ stock: stockOf({ purseCp: 10000 }), autoPay: true })).toMatchObject({ blocked: false, payGp: 50 });
   });
