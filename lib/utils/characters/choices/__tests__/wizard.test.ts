@@ -3,7 +3,7 @@ import { describe, expect, it } from "vitest";
 import { alert, featsById, refs, rogue, sorcerer } from "./fixtures";
 
 import type { ChoiceRefs } from "@/lib/utils/characters/choices/walk";
-import { picksAtStep, withStepPicks, withStepSubclass, type WizardStep, wizardSteps } from "@/lib/utils/characters/choices/wizard";
+import { picksAtStep, withStepPicks, withStepBackground, withStepSubclass, type WizardStep, wizardSteps } from "@/lib/utils/characters/choices/wizard";
 import type { BackgroundData } from "@/types/backgrounds";
 import type { ChoicesState } from "@/types/choices";
 
@@ -126,5 +126,46 @@ describe("withStepPicks", () => {
     withStepPicks(s, stepOf(s, "raceChoices.keen-senses"), list);
 
     expect(s.raceChoices).toEqual({});
+  });
+});
+
+describe("background step", () => {
+  const bg2: BackgroundData = { ...background, id: "bg2", name: "Soldier", choices: [] };
+
+  const r2: ChoiceRefs = { ...wrefs, backgroundsById: { bg: background, bg2 } };
+
+  const keep = new Set(["background"]);
+
+  it("appears first, only with keep", () => {
+    expect(keys(state(), hero, keep, r2)[0]).toBe("background");
+    expect(keys(state(), hero, undefined, r2)).not.toContain("background");
+  });
+
+  it("needs classMode and backgrounds", () => {
+    expect(keys(state(), { level: 1, classMode: false }, keep, r2)).not.toContain("background");
+    expect(keys(state(), hero, keep, refs)).not.toContain("background");
+  });
+
+  it("uses the current background name", () => {
+    expect(wizardSteps(state({ backgroundId: "bg" }), r2, hero, keep)[0]?.source.name).toBe("Sage");
+  });
+
+  it("withStepBackground resets picks on change, keeps on same id, null clears", () => {
+    const s = state({ backgroundId: "bg", backgroundChoices: { "bg-skill": [{ id: "x" }] }, backgroundFeatPicks: { a: [{ id: "y" }] } });
+
+    const changed = withStepBackground(s, "bg2");
+
+    expect(changed.backgroundId).toBe("bg2");
+    expect(changed.backgroundChoices).toEqual({});
+    expect(changed.backgroundFeatPicks).toEqual({});
+    expect(withStepBackground(s, "bg").backgroundChoices).toEqual(s.backgroundChoices);
+    expect(withStepBackground(s, null).backgroundId).toBeNull();
+    expect(withStepBackground(s, null).backgroundChoices).toEqual({});
+  });
+
+  it("new background choices appear after replacement", () => {
+    const s = withStepBackground(state({ backgroundId: "bg2" }), "bg");
+
+    expect(keys(s, hero, keep, r2)).toContain("backgroundChoices.bg-skill");
   });
 });

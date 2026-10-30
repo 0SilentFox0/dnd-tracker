@@ -33,7 +33,7 @@ export function useChoiceWizard({ campaignId, characterId, initial, hero, refs, 
 
   const [saved, setSaved] = useState(initial);
 
-  const [initialSteps] = useState(() => wizardSteps(initial, refs, hero));
+  const [initialSteps] = useState(() => wizardSteps(initial, refs, hero, new Set(startAt ? [startAt] : [])));
 
   const [seen, setSeen] = useState(() => initialSteps.map((s) => s.key));
 
