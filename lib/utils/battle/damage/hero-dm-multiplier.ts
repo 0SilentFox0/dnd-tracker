@@ -13,7 +13,20 @@ function clampHeroDamageMultiplier(raw: number | undefined | null): number {
   return Math.max(0.1, Math.min(3, x));
 }
 
+const ARCHETYPE_ROW_REFS = {
+  universal: textRef("battleLog.damage.rows.archetypeOf.universal"),
+  warrior: textRef("battleLog.damage.rows.archetypeOf.warrior"),
+  paladin: textRef("battleLog.damage.rows.archetypeOf.paladin"),
+  ranger: textRef("battleLog.damage.rows.archetypeOf.ranger"),
+  rogue: textRef("battleLog.damage.rows.archetypeOf.rogue"),
+  mage: textRef("battleLog.damage.rows.archetypeOf.mage"),
+} as const;
+
 export function archetypeRef(p: BattleParticipant): LogLine {
+  const key = p.abilities.archetypeKey;
+
+  if (key && key in ARCHETYPE_ROW_REFS) return ARCHETYPE_ROW_REFS[key];
+
   return p.abilities.archetypeName ? textRef("battleLog.damage.rows.archetypeNamed", { name: p.abilities.archetypeName }) : textRef("battleLog.damage.rows.archetype");
 }
 

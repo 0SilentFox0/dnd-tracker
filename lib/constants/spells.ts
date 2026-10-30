@@ -46,39 +46,12 @@ export function spellSchoolColor(group: { color?: string | null } | null | undef
   return group?.color || SPELL_GROUP_FALLBACK_COLOR;
 }
 
-/* eslint-disable no-restricted-syntax -- uk facet labels of the cached info reference (lib/utils/spells/model/labels.ts); UI reads spells.* keys */
-export const SPELL_COST_LABELS = {
-  action: "Дія",
-  bonusAction: "Бонусна дія",
-  reaction: "Реакція",
-  long: "Тривале накладання",
-} as const;
+export const SPELL_COST_KEYS = ["action", "bonusAction", "reaction", "long"] as const;
 
-export const SPELL_TARGETING_LABELS = {
-  enemy: "Один ворог",
-  ally: "Один союзник",
-  self: "Заклинатель",
-  allyDead: "Полеглий союзник",
-  allAlliesDead: "Усі полеглі союзники",
-  area: "Область (до N цілей)",
-  template: "Шаблон на карті",
-  allAllies: "Усі союзники",
-  allEnemies: "Усі вороги",
-  everyone: "Усі учасники",
-} as const;
+export const SPELL_TARGETING_KINDS = ["enemy", "ally", "self", "allyDead", "allAlliesDead", "area", "template", "allAllies", "allEnemies", "everyone"] as const;
 
-export const TEMPLATE_SHAPE_LABELS = {
-  circle: "Коло",
-  cube: "Куб",
-  cone: "Конус",
-  line: "Лінія",
-  cross: "Хрест",
-  emanation: "Еманація",
-} as const;
+export const TEMPLATE_SHAPE_KEYS = ["circle", "cube", "cone", "line", "cross", "emanation"] as const;
 
-export const SPELL_SAVE_ON_SUCCESS_LABELS = {
-  half: "Половина шкоди",
-  none: "Без ефекту",
-} as const;
+export const SPELL_SAVE_ON_SUCCESS_KEYS = ["half", "none"] as const;
 
 export const SPELL_NAME_MAX = 100;

@@ -8,7 +8,7 @@
 import { writeFileSync } from "node:fs";
 
 import { ParticipantSide } from "@/lib/constants/battle";
-import { HERO_ARCHETYPE_KEYS, heroArchetype } from "@/lib/constants/hero-archetypes";
+import { HERO_ARCHETYPE_KEYS } from "@/lib/constants/hero-archetypes";
 import { prisma } from "@/lib/db";
 import { averageAttackDamage } from "@/lib/utils/battle/damage/average";
 import { createBattleParticipantFromCharacter } from "@/lib/utils/battle/participant/from-character";
@@ -112,9 +112,7 @@ async function main() {
   const detail: string[] = [];
 
   for (const key of HERO_ARCHETYPE_KEYS) {
-    const a = heroArchetype(key);
-
-    const rows: string[] = [`### ${a.name}`, "", `| Раса | ${LEVELS.map((l) => `Рів. ${l}`).join(" | ")} |`, `|---|${LEVELS.map(() => "---").join("|")}|`];
+    const rows: string[] = [`### ${key}`, "", `| Раса | ${LEVELS.map((l) => `Рів. ${l}`).join(" | ")} |`, `|---|${LEVELS.map(() => "---").join("|")}|`];
 
     const sums = LEVELS.map(() => ({ hp: 0, best: 0 }));
 
@@ -132,7 +130,7 @@ async function main() {
       rows.push(`| ${race} | ${cells.join(" | ")} |`);
     }
 
-    lines.push(`| ${a.name} | ${sums.map((s) => `${f(s.hp / races.length)} / ${f(s.best / races.length)}`).join(" | ")} |`);
+    lines.push(`| ${key} | ${sums.map((s) => `${f(s.hp / races.length)} / ${f(s.best / races.length)}`).join(" | ")} |`);
     detail.push(...rows, "");
   }
 

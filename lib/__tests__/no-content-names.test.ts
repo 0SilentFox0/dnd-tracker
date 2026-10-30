@@ -20,8 +20,6 @@ const ALLOWED: Record<string, string> = {
   "lib/constants/main-skills.ts: Стрільба": "system label of a built-in main skill",
   "lib/constants/main-skills.ts: Захист": "system label of a built-in main skill",
   "lib/constants/main-skills.ts: Лідерство": "system label of a built-in main skill",
-  "lib/constants/hero-archetypes.ts: Лучник": "system label of a built-in hero archetype",
-  "lib/constants/hero-archetypes.ts: Паладин": "system label of a built-in hero archetype",
   "lib/constants/damage.ts: Блискавка": "label of the built-in damage type",
   "lib/constants/damage.ts: Світло": "label of the built-in damage type",
   "lib/constants/skills.ts: Природа": "label of the built-in skill (ability check)",

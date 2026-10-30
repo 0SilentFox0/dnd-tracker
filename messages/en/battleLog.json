@@ -10,6 +10,14 @@
       "crit": "Critical",
       "fairBattle": "Fair battle",
       "archetype": "Archetype",
+      "archetypeOf": {
+        "universal": "Archetype: Universal",
+        "warrior": "Archetype: Warrior",
+        "paladin": "Archetype: Paladin",
+        "ranger": "Archetype: Ranger",
+        "rogue": "Archetype: Rogue",
+        "mage": "Archetype: Mage"
+      },
       "archetypeNamed": "Archetype: {name}",
       "obstacle": "Obstacle",
       "weaponBonus": "Weapon bonus",

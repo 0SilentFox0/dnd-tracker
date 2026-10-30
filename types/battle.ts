@@ -3,6 +3,7 @@ import type { AbilityUsageCounter, ResolvedAbility, StaticEffect } from "./abili
 import { AttackType, type BattleStatus, type CombatStatusType, type MAZE_DIFFICULTIES, type MAZE_MARK_SYMBOLS, ParticipantSide, type ParticipantSourceTypeValue } from "@/lib/constants/battle";
 import type { WEATHER_KINDS } from "@/lib/constants/battle-weather";
 import type { CriticalEffect } from "@/lib/constants/critical-effects";
+import type { HeroArchetypeKey } from "@/lib/constants/hero-archetypes";
 import type { RulesEdition } from "@/lib/constants/rules";
 import type { DndSkill } from "@/lib/constants/skills";
 import type { WeaponTrait } from "@/lib/constants/weapon-traits";
@@ -207,6 +208,8 @@ export interface BattleParticipantAbilities {
   meleeMultiplier?: number;
   rangedMultiplier?: number;
   magicMultiplier?: number;
+  archetypeKey?: HeroArchetypeKey | "universal";
+  /** Legacy snapshots */
   archetypeName?: string;
   /** Характеристики з майстерністю рятівних кидків (лише герої, якщо є) */
   /** Володіння бронею й зброєю класу 5e (вільні рядки SRD); відсутнє — без перевірок */

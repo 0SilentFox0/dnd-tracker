@@ -3,7 +3,7 @@
 exports[`battle participant: item refs > frozen complete participant keeps grant order, stable keys and persisted pools 1`] = `
 {
   "abilities": {
-    "archetypeName": "Універсал",
+    "archetypeKey": "universal",
     "baseInitiative": 0,
     "charisma": 10,
     "constitution": 14,
