@@ -82,34 +82,34 @@ export function ChoiceListEditor({ campaignId, owner, value, onChange, classColu
               <span className="text-xs text-hud-muted">{[t(`kinds.${choice.kind}`), typeof choice.count === "number" ? `×${choice.count}` : null, choice.lineage ? t("list.lineageTag") : null].filter(Boolean).join(" · ")}</span>
             </summary>
             <div className="space-y-3 p-3 pt-1">
-            <ChoiceHeaderRow index={i} choice={choice} owner={owner} kinds={kinds} actions={{ onPatch, onSwitchKind: (kind) => switchKind(i, kind), onRemove: () => remove(i) }} />
+              <ChoiceHeaderRow index={i} choice={choice} owner={owner} kinds={kinds} actions={{ onPatch, onSwitchKind: (kind) => switchKind(i, kind), onRemove: () => remove(i) }} />
 
-            <div className="flex flex-wrap items-end gap-3">
-              {choice.kind !== "abilityScore" && (
-                <div className="w-24 space-y-1">
-                  <Label htmlFor={`choice-${i}-count`}>{t("list.count")}</Label>
-                  <Input id={`choice-${i}-count`} type="number" min={1} max={CHOICE_LIMITS.count} disabled={typeof choice.count !== "number"} value={typeof choice.count === "number" ? choice.count : ""} onChange={(e) => onPatch({ count: Number(e.target.value) || 1 })} />
-                </div>
-              )}
-              {owner === "class" && choice.kind !== "abilityScore" && (
-                <div className="space-y-1">
-                  <Label htmlFor={`choice-${i}-scale`}>{t("list.scale")}</Label>
-                  <select id={`choice-${i}-scale`} className={HUD_SELECT_CLASS} value={typeof choice.count === "number" ? "" : choice.count.scale} onChange={(e) => onPatch({ count: e.target.value ? { scale: e.target.value } : 1 })}>
-                    <option value="">{t("list.scaleNumber")}</option>
-                    {classColumns.map((c) => (
-                      <option key={c.key} value={c.key}>
-                        {c.label}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-              )}
-              {owner === "race" && choice.kind === "option" && (
-                <label className="flex items-center gap-2 text-sm">
-                  <Checkbox checked={!!choice.lineage} onCheckedChange={(on) => onPatch({ lineage: on ? true : undefined })} />
-                  {t("list.lineage")}
-                </label>
-              )}
+              <div className="flex flex-wrap items-end gap-3">
+                {choice.kind !== "abilityScore" && (
+                  <div className="w-24 space-y-1">
+                    <Label htmlFor={`choice-${i}-count`}>{t("list.count")}</Label>
+                    <Input id={`choice-${i}-count`} type="number" min={1} max={CHOICE_LIMITS.count} disabled={typeof choice.count !== "number"} value={typeof choice.count === "number" ? choice.count : ""} onChange={(e) => onPatch({ count: Number(e.target.value) || 1 })} />
+                  </div>
+                )}
+                {owner === "class" && choice.kind !== "abilityScore" && (
+                  <div className="space-y-1">
+                    <Label htmlFor={`choice-${i}-scale`}>{t("list.scale")}</Label>
+                    <select id={`choice-${i}-scale`} className={HUD_SELECT_CLASS} value={typeof choice.count === "number" ? "" : choice.count.scale} onChange={(e) => onPatch({ count: e.target.value ? { scale: e.target.value } : 1 })}>
+                      <option value="">{t("list.scaleNumber")}</option>
+                      {classColumns.map((c) => (
+                        <option key={c.key} value={c.key}>
+                          {c.label}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                )}
+                {owner === "race" && choice.kind === "option" && (
+                  <label className="flex items-center gap-2 text-sm">
+                    <Checkbox checked={!!choice.lineage} onCheckedChange={(on) => onPatch({ lineage: on ? true : undefined })} />
+                    {t("list.lineage")}
+                  </label>
+                )}
             </div>
 
             <div className="space-y-1">

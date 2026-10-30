@@ -53,24 +53,24 @@ export function ChoiceOptionsEditor({ campaignId, owner, value, onChange, classC
           <details key={keys[i]} open={!option.name} className="rounded-md border border-hud-line/40">
             <summary className="cursor-pointer px-3 py-2 text-sm">{option.name || t("options.unnamed")}</summary>
             <div className="space-y-2 p-3 pt-1">
-            <div className="flex items-end gap-2">
-              <div className="flex-1 space-y-1">
-                <Label htmlFor={`${optionKey}-name`}>{t("options.name")}</Label>
-                <Input id={`${optionKey}-name`} value={option.name} onChange={(e) => rename(i, e.target.value)} />
-              </div>
-              <Button
-                type="button"
-                variant="ghost"
-                size="sm"
-                aria-label={t("options.remove", { name: option.name })}
-                onClick={() => {
-                  errors.drop(optionKey);
-                  removeAt(i);
-                  onChange(value.filter((_, k) => k !== i));
-                }}
-              >
-                <Trash2 className="h-4 w-4" />
-              </Button>
+              <div className="flex items-end gap-2">
+                <div className="flex-1 space-y-1">
+                  <Label htmlFor={`${optionKey}-name`}>{t("options.name")}</Label>
+                  <Input id={`${optionKey}-name`} value={option.name} onChange={(e) => rename(i, e.target.value)} />
+                </div>
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="sm"
+                  aria-label={t("options.remove", { name: option.name })}
+                  onClick={() => {
+                    errors.drop(optionKey);
+                    removeAt(i);
+                    onChange(value.filter((_, k) => k !== i));
+                  }}
+                >
+                  <Trash2 className="h-4 w-4" />
+                </Button>
             </div>
             <div className="space-y-1">
               <Label htmlFor={`${optionKey}-description`}>{t("options.description")}</Label>
