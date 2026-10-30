@@ -3,3 +3,4 @@ export { useAbilitySources } from "./useAbilitySources";
 export { type AbilityValidity, useAbilityValidity } from "./useAbilityValidity";
 export { useCopyOwnerAbilities } from "./useCopyOwnerAbilities";
 export { useRecipeValues } from "./useRecipeValues";
+export { useRevealOnError } from "./useRevealOnError";

@@ -20,6 +20,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { useRevealOnError } from "@/lib/hooks/abilities";
 import type { Ability } from "@/lib/utils/abilities/schema";
 import { summarizeAbility } from "@/lib/utils/abilities/summary";
 
@@ -60,13 +61,7 @@ export function AbilityPanel({ ability, path, actions }: { ability: Ability; pat
 
   const errorKey = FLOW_PARTS.filter((p) => errorParts[p]).join();
 
-  const [seenErrors, setSeenErrors] = useState("");
-
-  if (errorKey !== seenErrors) {
-    setSeenErrors(errorKey);
-
-    if (errorKey) setOpen((o) => ({ ...o, ...Object.fromEntries(errorKey.split(",").map((p) => [p, true])) }));
-  }
+  useRevealOnError(errorKey, (key) => setOpen((o) => ({ ...o, ...Object.fromEntries(key.split(",").map((p) => [p, true])) })));
 
   const timer = useRef<ReturnType<typeof setTimeout>>(undefined);
 

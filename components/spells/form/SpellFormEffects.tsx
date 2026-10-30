@@ -19,6 +19,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { SelectField } from "@/components/ui/select-field";
 import type { ErrorParams } from "@/lib/constants/api-errors";
+import { useRevealOnError } from "@/lib/hooks/abilities";
 import { useRaces } from "@/lib/hooks/races";
 import { type AbilityError, allowedEffectKinds, newEffect } from "@/lib/utils/abilities/editor";
 import { SPELL_EFFECT_TRIGGER } from "@/lib/utils/spells/editor/spell-only";
@@ -57,17 +58,11 @@ export function SpellFormEffects({ campaignId, formData, setFormData }: SpellFor
 
   const [galleryOpen, setGalleryOpen] = useState(false);
 
-  const [seenErrors, setSeenErrors] = useState("");
-
-  const errorKey = Object.keys(errorsByPath).join(",");
-
-  if (errorKey !== seenErrors) {
-    setSeenErrors(errorKey);
-
-    if (errorKey) setOpen(true);
-  }
+  useRevealOnError(Object.keys(errorsByPath).join(","), () => setOpen(true));
 
   const effects = formData.spellEffects as SpellEffect[];
+
+  const blankEffect = () => newEffect(allowedEffectKinds(SPELL_EFFECT_TRIGGER)[0], SPELL_EFFECT_TRIGGER);
 
   const addEffects = (added: SpellEffect[], concentration?: boolean) => {
     setFormData({ ...formData, spellEffects: [...effects, ...added], ...(concentration ? { concentration: true } : {}) });
@@ -76,7 +71,7 @@ export function SpellFormEffects({ campaignId, formData, setFormData }: SpellFor
 
   return (
     <>
-      <HudSection title={<CollapsibleHeader title={t("title")} summary={effects.length > 0 ? t("summary", { count: effects.length }) : null} open={open} onToggle={() => setOpen((o) => !o)} controlsId="spell-effects-body" />}>
+      <HudSection header={<CollapsibleHeader title={t("title")} summary={effects.length > 0 ? t("summary", { count: effects.length }) : null} open={open} onToggle={() => setOpen((o) => !o)} controlsId="spell-effects-body" />}>
         {open && (
           <div id="spell-effects-body">
             <p className="mb-2 text-xs text-muted-foreground">
@@ -89,7 +84,7 @@ export function SpellFormEffects({ campaignId, formData, setFormData }: SpellFor
                 className=""
                 limits={{ min: 0 }}
                 labels={{ add: t("add") }}
-                create={() => newEffect(allowedEffectKinds(SPELL_EFFECT_TRIGGER)[0], SPELL_EFFECT_TRIGGER)}
+                create={blankEffect}
                 onChange={(spellEffects) => setFormData({ ...formData, spellEffects })}
                 renderCard={({ effect, path, actions }) => <SpellEffectCard effect={effect} path={path} actions={actions} />}
                 renderAdd={() => (
@@ -101,7 +96,7 @@ export function SpellFormEffects({ campaignId, formData, setFormData }: SpellFor
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="start">
                       <DropdownMenuItem onSelect={() => setGalleryOpen(true)}>{t("addFromRecipe")}</DropdownMenuItem>
-                      <DropdownMenuItem onSelect={() => addEffects([newEffect(allowedEffectKinds(SPELL_EFFECT_TRIGGER)[0], SPELL_EFFECT_TRIGGER)])}>{t("addEmpty")}</DropdownMenuItem>
+                      <DropdownMenuItem onSelect={() => addEffects([blankEffect()])}>{t("addEmpty")}</DropdownMenuItem>
                     </DropdownMenuContent>
                   </DropdownMenu>
                 )}
