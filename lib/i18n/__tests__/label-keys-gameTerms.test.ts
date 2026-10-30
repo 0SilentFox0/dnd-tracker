@@ -23,4 +23,5 @@ describe("game terms have translations", () => {
   expectLabelKeys("gameTerms", "monster.sizes", MONSTER_SIZES);
   expectLabelKeys("gameTerms", "weaponTraits.traits", WEAPON_TRAITS);
   expectLabelKeys("gameTerms", "creatureTypes", CREATURE_TYPES);
+  expectLabelKeys("gameTerms", "creatureType", CREATURE_TYPES);
 });

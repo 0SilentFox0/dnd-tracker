@@ -6,7 +6,7 @@ export function useCreatureTypeLabel(): (type: string) => string {
   const tg = useTranslator("gameTerms");
 
   return (type) => {
-    const key = `creatureTypes.${type.trim().toLowerCase()}`;
+    const key = `creatureType.${type.trim().toLowerCase()}`;
 
     return tg.has(key) ? tg(key) : type;
   };
