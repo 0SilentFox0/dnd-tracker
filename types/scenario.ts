@@ -140,3 +140,51 @@ export interface ScenarioIndexGroups {
   heroes: ScenarioPageSummary[];
   notes: ScenarioPageSummary[];
 }
+
+export interface IndexRef {
+  type: MentionType;
+  id: string;
+  label: string;
+  count: number;
+  secret: boolean;
+}
+
+export interface PageFacts {
+  sections: { id: string; title: string; played: boolean; refs: IndexRef[] }[];
+}
+
+export interface IndexEntityNode {
+  kind: "entity";
+  type: MentionType;
+  id: string;
+  label: string;
+  degree: number;
+  sceneIds: string[];
+  missing: boolean;
+}
+
+export interface IndexSceneNode {
+  kind: "scene";
+  id: string;
+  title: string;
+  pageKind: ScenarioPageKind;
+  status: ScenarioPageStatus;
+  order: number;
+  sections: { id: string; title: string; played: boolean }[];
+}
+
+export interface IndexEdge {
+  sceneId: string;
+  entityType: MentionType;
+  entityId: string;
+  count: number;
+  sectionIds: string[];
+  secret: boolean;
+}
+
+export interface ScenarioIndex {
+  scenes: IndexSceneNode[];
+  entities: IndexEntityNode[];
+  edges: IndexEdge[];
+  counts: { scenes: number; entities: number; edges: number; byType: Partial<Record<MentionType, number>>; missing: number };
+}
