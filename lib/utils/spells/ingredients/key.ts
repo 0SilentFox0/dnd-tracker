@@ -3,6 +3,7 @@ export const ingredientKey = (name: string) =>
     .normalize("NFD")
     .replace(/[̀-ͯ]/g, "")
     .toLowerCase()
+    .replace(/^\s*(?:an?|the)\s+/, "")
     .replace(/[^\p{L}\p{N}]+/gu, "-")
     .replace(/^-+|-+$/g, "");
 

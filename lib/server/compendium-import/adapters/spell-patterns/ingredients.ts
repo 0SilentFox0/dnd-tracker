@@ -13,6 +13,7 @@ const cleanName = (text: string) =>
     .replace(/,?\s*(?:that|and)\s+the spell consumes.*$/i, "")
     .replace(/\s*worth\s+(?:at\s+least\s+)?[\d,]+(?:\.\d+)?\s*\+?\s*(?:gp|gold)\b\.?/gi, "")
     .replace(/[\s,;.]+$/, "")
+    .replace(/^\s*(?:an?|the)\s+/i, "")
     .trim()
     .slice(0, INGREDIENT_NAME_MAX)
     .trim();
