@@ -36,7 +36,7 @@
 ### 1. Чисте ядро (`lib/utils/characters/choices/wizard.ts`)
 
 - `WizardStep.kind`: `"choice" | "subclass" | "background"`. Крок передісторії: `key: "background"`, `source: { owner: "background", name }`, `path: "backgroundId"`.
-- `wizardSteps` додає крок `background`, коли `refs.backgroundsById` непорожній і (`state.backgroundId` порожній **або** `keep` містить `"background"`). Для `classMode: false` кроку немає.
+- `wizardSteps` додає крок `background` лише коли `keep` містить `"background"` (явний вхід із секції «Шляху»), `refs.backgroundsById` непорожній і `hero.classMode`. Автоматично (без `keep`) крок не з'являється, щоб не чіпляти кожного героя без передісторії при будь-якому майстрі. `useChoiceWizard` передає `keep = {startAt}` і для початкових кроків.
 - `withStepBackground(state, step, id)` → `{ ...state, ...mergeBackground(state, { backgroundId: id }) }`.
 - Порядок: крок `background` — перший (до виборів раси), далі як зараз; `useChoiceWizard` вже зберігає порядок `seen`, тож після вибору з'являються кроки виборів нової передісторії й origin feat.
 
