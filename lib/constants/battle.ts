@@ -102,6 +102,9 @@ export const BATTLE_LOG_PAGE_MAX = 100;
 // відкат дозволено й для завершеного бою, тож знімки лишаються, але не всі
 export const BATTLE_SNAPSHOTS_KEPT_AFTER_COMPLETE = 20;
 
+/** Writes the rendered log into `resultText` so a rollback to pre-`log` code still shows text; see STATUS. */
+export const BATTLE_LOG_TEXT_FALLBACK = true;
+
 export const RECHARGE_THRESHOLDS = [4, 5, 6] as const;
 
 export type RechargeThreshold = (typeof RECHARGE_THRESHOLDS)[number];

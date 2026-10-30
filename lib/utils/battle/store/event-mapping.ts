@@ -90,7 +90,7 @@ export function eventToBattleAction(
     actionType: e.type as BattleAction["actionType"],
     targets: e.targets as BattleAction["targets"],
     actionDetails: d.actionDetails ?? {},
-    resultText: e.resultText,
+    resultText: d.log ? "" : e.resultText,
     ...(d.log && { log: d.log }),
     hpChanges: e.hpChanges as BattleAction["hpChanges"],
     isCancelled: Boolean(meta.cancelledAt),

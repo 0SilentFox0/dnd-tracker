@@ -38,7 +38,7 @@ export const defaultPipelineDeps: PipelineDeps = {
   rateLimit: ({ userId, scope, battleId }) =>
     checkRateLimit({ userId, scope, battleId, ...BATTLE_RATE_LIMITS[scope] }),
   loadBattle: (args) => loadBattle(prisma, args),
-  saveBattle: (before, outcome) => saveBattle(prisma, before, outcome),
+  saveBattle: (before, outcome, write) => saveBattle(prisma, before, outcome, write),
   loadRecentEvents: (battleId, limit) => loadRecentEvents(prisma, battleId, limit),
   loadKnowledge: async (battleId) => summarizeKnowledge(await loadKnowledgeEvents(prisma, battleId)),
   onLeftActive(campaignId, battleId) {
@@ -71,7 +71,7 @@ export function scopedPipelineDeps(tx: Prisma.TransactionClient): PipelineDeps {
     ...defaultPipelineDeps,
     loadBattle: args => loadBattle(db, args),
     recheckAccess: recheckAccessWith(db),
-    saveBattle: (before, outcome) => saveBattle(db, before, outcome),
+    saveBattle: (before, outcome, write) => saveBattle(db, before, outcome, write),
     loadRecentEvents: (battleId, limit) => loadRecentEvents(db, battleId, limit),
     loadKnowledge: async battleId => summarizeKnowledge(await loadKnowledgeEvents(db, battleId)),
   };

@@ -67,6 +67,20 @@ describe("event mapping", () => {
   });
 });
 
+describe("fallback-текст у resultText", () => {
+  const log = [textRef("battleCommon.actors.dm"), "Гоблін"];
+
+  const stored = (resultText: string, details: Record<string, unknown>) => ({ seq: 1, type: "ability", round: 1, actorId: null, targets: [], hpChanges: [], resultText, details });
+
+  it("з log клієнту віддається порожній resultText", () => {
+    expect(eventToBattleAction(stored("fallback | text", { log }), "b1").resultText).toBe("");
+  });
+
+  it("без log лишається legacy-рядок", () => {
+    expect(eventToBattleAction(stored("legacy", {}), "b1").resultText).toBe("legacy");
+  });
+});
+
 describe("структурований лог", () => {
   const log = [textRef("battleCommon.actors.dm"), "Гоблін"];
 

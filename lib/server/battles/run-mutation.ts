@@ -4,6 +4,7 @@ import { getBattleOperation } from "./operations";
 import { defaultPipelineDeps } from "./pipeline-deps";
 
 import { API_ERRORS } from "@/lib/constants/api-errors";
+import { getRequestLocale } from "@/lib/i18n/request-locale";
 import { ContentError } from "@/lib/server/content/errors";
 import { rateLimitResponse } from "@/lib/utils/api/rate-limit";
 import { apiErrorJson } from "@/lib/utils/api/translate-error";
@@ -69,7 +70,9 @@ export async function runBattleMutation<TBody>(
     const expectedVersion = raw && typeof raw === "object" && typeof (raw as { expectedVersion?: unknown }).expectedVersion === "number"
       ? (raw as { expectedVersion: number }).expectedVersion : undefined;
 
-    const run = async () => respondWith(options.respond, await runGuardedBattleOperationCore(userId, raw, expectedVersion, options as RunBattleMutationOptions<unknown>, deps));
+    const write = { logLocale: await getRequestLocale() };
+
+    const run = async () => respondWith(options.respond, await runGuardedBattleOperationCore(userId, raw, expectedVersion, options as RunBattleMutationOptions<unknown>, deps, write));
 
     return await (deps.withWrite ? deps.withWrite(options.params.id, run) : run());
   } catch (err) {
