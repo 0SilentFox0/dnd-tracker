@@ -300,3 +300,34 @@ const EMPTY_PAIR: Pair = ["", ""];
 export function exampleOf(locale: Locale, kind: ImportKind, key: string): Pair {
   return LOCALIZED[locale][kind][key] ?? NEUTRAL[kind][key] ?? EMPTY_PAIR;
 }
+
+export const LEGACY_DICE_LETTERS = "кk";
+
+export const LEGACY_NO_ATTACKS = "Відсутні";
+
+export const LEGACY_DAMAGE_KEYWORDS: readonly (readonly [string, readonly string[]])[] = [
+  ["piercing", ["колючий", "piercing"]],
+  ["slashing", ["рублячий", "slashing"]],
+  ["bludgeoning", ["дроблячий", "bludgeoning"]],
+  ["fire", ["полум'я", "fire", "полумя"]],
+  ["cold", ["холод", "cold"]],
+];
+
+// legacy CSV unit columns (uk headers first, then en); the first non-empty value wins
+export const LEGACY_UNIT_COLUMNS = {
+  name: ["Назва", "name", "Name"],
+  tier: ["Tier", "tier"],
+  group: ["Група", "group", "Group"],
+  features: ["Особливості", "features", "Features"],
+  strength: ["СИЛ", "str", "STR"],
+  dexterity: ["ЛОВ", "dex", "DEX"],
+  constitution: ["ТІЛ", "con", "CON"],
+  intelligence: ["ІНТ", "int", "INT"],
+  wisdom: ["МДР", "wis", "WIS"],
+  charisma: ["ХАР", "cha", "CHA"],
+  armorClass: ["КД", "ac", "AC"],
+  speed: ["Швидкість", "speed", "Speed"],
+  maxHp: ["ХП", "hp", "HP"],
+  attacks: ["Атаки", "attacks", "Attacks"],
+  abilities: ["Навички/Здібності", "abilities", "Abilities"],
+} as const;
