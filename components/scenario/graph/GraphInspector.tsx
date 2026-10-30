@@ -1,5 +1,6 @@
 "use client";
 
+import type { ReactNode } from "react";
 import { useTranslations } from "next-intl";
 import { Lock } from "lucide-react";
 
@@ -14,9 +15,10 @@ export interface GraphInspectorProps {
   onClose: () => void;
   focusMode: boolean;
   onToggleFocus: () => void;
+  children?: ReactNode;
 }
 
-export function GraphInspector({ detail, canOpen, onOpen, onSelect, onClose, focusMode, onToggleFocus }: GraphInspectorProps) {
+export function GraphInspector({ detail, canOpen, onOpen, onSelect, onClose, focusMode, onToggleFocus, children }: GraphInspectorProps) {
   const t = useTranslations("scenarioGraph.inspector");
 
   const tPage = useTranslations("scenario.pageKinds");
@@ -54,6 +56,7 @@ export function GraphInspector({ detail, canOpen, onOpen, onSelect, onClose, foc
           ))}
         </ul>
       </div>
+      {children}
     </div>
   );
 }

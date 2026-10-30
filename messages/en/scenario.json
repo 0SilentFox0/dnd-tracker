@@ -275,6 +275,19 @@
     "slideN": "Slide {n}",
     "title": "Slide for the paragraph"
   },
+  "summary": {
+    "title": "Scene summary",
+    "loading": "Loading summary",
+    "empty": "No summary yet.",
+    "generate": "Generate",
+    "refresh": "Refresh",
+    "generating": "Generating...",
+    "stale": "Outdated: the page changed",
+    "events": "Events",
+    "secrets": "Hidden layer (GM only)",
+    "unavailable": "An AI key is required: add it in AI settings.",
+    "failed": "Could not generate the summary"
+  },
   "toc": {
     "played": "played",
     "sections": "Sections"
