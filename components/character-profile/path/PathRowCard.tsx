@@ -104,7 +104,7 @@ export function PathRowCard({ row, progression, chosen, onPick, onDetail, names 
       <ul className="space-y-2">
         {rowItems(row, chosen).map((item) => (
           <li key={item.key} className="flex items-start gap-2">
-            <EntityIcon name={progression.className} size={32} className="size-8 bg-hud-field text-sm text-hud-gold" />
+            <EntityIcon src={item.icon ?? progression.icon} name={progression.className} size={32} className="size-8 bg-hud-field text-sm text-hud-gold" />
             <div className="min-w-0 flex-1">
               <p className="break-words text-sm font-semibold text-hud-ink">
                 {item.name} <HudPill tone="muted">{t("from", { cls: progression.className, level: row.level })}</HudPill>

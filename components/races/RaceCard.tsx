@@ -7,6 +7,7 @@ import { Circle, Edit, Plus, Shield, Trash2 } from "lucide-react";
 import { RacePassiveBlock } from "./RaceInnateSections";
 
 import { ActionsMenu } from "@/components/common/ActionsMenu";
+import { EntityIcon } from "@/components/common/EntityIcon";
 import { HudCard } from "@/components/hud/page";
 import { Badge } from "@/components/ui/badge";
 import { abilityScoreTermKey } from "@/lib/constants/abilities";
@@ -52,7 +53,8 @@ export function RaceCard({ race, campaignId, onDelete }: RaceCardProps) {
     <HudCard accent={race.color ?? undefined} className="flex h-full flex-col gap-3">
       <div>
         <div className="flex items-start justify-between gap-2">
-          <div className="flex-1 min-w-0">
+          <div className="flex min-w-0 flex-1 items-center gap-2">
+            <EntityIcon src={race.icon} name={race.name} size={48} className="size-12 rounded-lg" />
             <h3 className="hud-sc truncate text-lg text-hud-ink">{race.name}</h3>
           </div>
           <ActionsMenu
