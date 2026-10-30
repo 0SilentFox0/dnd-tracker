@@ -13,6 +13,12 @@ const content = {
 };
 
 describe("search text", () => {
+  it("нормалізує до NFC", () => {
+    const text = buildSearchText("Й".normalize("NFD"), { legend: [], sections: [] });
+
+    expect(text).toBe("Й".normalize("NFC"));
+  });
+
   it("рядок на розділ з префіксом id; переноси всередині — пробіли", () => {
     const text = buildSearchText("Монастир Світла", content);
 

@@ -15,7 +15,7 @@ export function buildSearchText(title: string, content: ScenarioContent): string
     return `${SECTION_PREFIX}${s.id}\t${oneLine(`${s.title} ${body}`)}`;
   });
 
-  return [oneLine(title), ...lines].join("\n");
+  return [oneLine(title), ...lines].join("\n").normalize("NFC");
 }
 
 export type SearchWindow = { win: string; at: number; cutBefore: boolean; needleLength: number };
