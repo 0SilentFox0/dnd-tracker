@@ -82,4 +82,19 @@ describe("ChoiceListEditor", () => {
 
     expect(json()).toEqual([]);
   });
+
+  it("shows a visible description label, a table preview and keeps the id under the technical block", () => {
+    render(<Harness owner="race" initial={[{ id: "ancestry", label: "Ancestry", level: 1, count: 1, kind: "option", options: [], description: "Pick.\n\n| A | B |\n|---|---|\n| 1 | 2 |" }]} />);
+
+    expect(screen.getByLabelText("choices.list.description")).toBeTruthy();
+    expect(screen.getByText("choices.list.preview")).toBeTruthy();
+    expect(screen.getAllByRole("columnheader")).toHaveLength(2);
+    expect(screen.getByText("choices.header.technical").closest("details")?.contains(screen.getByLabelText("choices.header.id"))).toBe(true);
+  });
+
+  it("collapses a choice into a summary when there are several", () => {
+    render(<Harness owner="race" initial={[{ id: "a", label: "First", level: 1, count: 1, kind: "skill" }, { id: "b", label: "Second", level: 1, count: 2, kind: "skill" }]} />);
+
+    expect(screen.getByText("First").closest("details")?.open).toBe(false);
+  });
 });

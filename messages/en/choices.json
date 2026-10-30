@@ -14,14 +14,19 @@
     "scale": "Count from class table",
     "scaleNumber": "— number —",
     "lineage": "Lineage (option name → subrace)",
-    "description": "Choice description"
+    "description": "Choice description",
+    "lineageTag": "lineage",
+    "descriptionHint": "Paragraphs and Markdown tables (rows with |) are supported.",
+    "preview": "What the player will see"
   },
   "header": {
     "name": "Choice name",
     "id": "Choice id",
     "kind": "Choice kind",
     "level": "Choice level",
-    "remove": "Delete choice {label}"
+    "remove": "Delete choice {label}",
+    "technical": "Technical: choice id",
+    "idHint": "Internal key: heroes' saved picks are stored under it. Generated automatically; do not change it once the choice is in use — chosen options would be lost."
   },
   "fields": {
     "skillsAny": "Empty — any skill",
@@ -49,7 +54,9 @@
     "minLevel": "Min. level",
     "minLevelAria": "Option minimum level",
     "requires": "requires “{name}”",
-    "add": "Add option"
+    "add": "Add option",
+    "unnamed": "New option",
+    "idHint": "Internal option key: the hero's pick is stored under it. Do not change for options already chosen."
   },
   "optionSpells": {
     "level": "Total level",
@@ -172,5 +179,13 @@
       "pickFirst": "Choose a background to continue.",
       "featDuplicate": "The hero already has the background feat \"{name}\", and it cannot be taken twice."
     }
+  },
+  "kindHints": {
+    "option": "The player picks from your list of options (for example a race lineage).",
+    "feat": "The player picks a feat from the compendium.",
+    "skill": "The player picks a skill.",
+    "expertise": "The player doubles proficiency in a skill they already know.",
+    "abilityScore": "The player spreads +1 points across abilities.",
+    "spell": "The player picks spells by the rules below."
   }
 }

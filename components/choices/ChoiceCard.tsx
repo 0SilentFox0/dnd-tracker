@@ -6,6 +6,7 @@ import { Info } from "lucide-react";
 
 import { RequirementList } from "@/components/choices/RequirementList";
 import { EntityIcon } from "@/components/common/EntityIcon";
+import { MarkdownLite } from "@/components/common/MarkdownLite";
 import { OptionButton } from "@/components/hud/OptionButton";
 import { ResponsiveDialog } from "@/components/ui/responsive-dialog";
 import { cn } from "@/lib/utils";
@@ -29,7 +30,7 @@ export function DetailsButton({ title, text, className }: DetailsButtonProps) {
       </button>
       {open && (
         <ResponsiveDialog hud open onOpenChange={setOpen} title={title}>
-          <p className="whitespace-pre-line text-sm">{typeof text === "function" ? text() : text}</p>
+          <MarkdownLite className="space-y-2 text-sm" text={typeof text === "function" ? text() : text} />
         </ResponsiveDialog>
       )}
     </>
