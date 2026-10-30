@@ -35,11 +35,16 @@ export function CharacterChoicesPanel({ campaignId, characterId, initial, hero, 
 
   if (!refs.ready) return <LoadingState rows={3} label={t("editor.loading")} />;
 
+  const edit = (next: ChoicesState) => {
+    set(next);
+    choices.clear();
+  };
+
   const submit = () => void choices.save(choicesBodyOf(prunePicks(data, refs).state));
 
   return (
     <div className="space-y-4">
-      <ChoicesEditor state={{ data, set }} refs={refs} hero={hero} saved={initial} issues={choices.issues} />
+      <ChoicesEditor state={{ data, set: edit }} refs={refs} hero={hero} saved={initial} issues={choices.issues} />
       {choices.error && (
         <p role="alert" className="text-sm text-hud-danger">
           {choices.error}
