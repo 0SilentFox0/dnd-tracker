@@ -1,4 +1,8 @@
 {
+  "2026-10-30-scenario-summaries": {
+    "title": "Scene summaries",
+    "body": "A summary now appears on the scene page and in the graph panel: an overview, key events and a hidden layer for the GM. The AI writes it with your key, only when you press the button; clicking again without page changes spends no tokens, and after an edit an \"Outdated\" badge appears."
+  },
   "2026-10-30-srd-completeness": {
     "title": "More complete SRD 5.2 template",
     "body": "SRD 5.2 spells now carry material components with gp cost and consumption, and the ingredients rule is on. 29 rituals are flagged (the Ritual flag is also in the spell form; casting without a slot out of combat is not automated yet). Added species senses, Barbarian Frenzy, Circle of the Land Spells and Magic Initiate (Druid). Update your campaign from the template to get the changes."

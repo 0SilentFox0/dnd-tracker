@@ -137,6 +137,15 @@
           "i1": "Type filters hide the clutter.",
           "i2": "Secret links are marked separately."
         }
+      },
+      "s4": {
+        "heading": "Scene summaries",
+        "b0": "A scene summary is an overview, key events and a hidden layer (GM-only secrets). It is on the scene page (a collapsed block) and in the graph node panel.",
+        "b1": {
+          "i0": "\"Generate\" calls the AI with your key; clicking again without page changes spends no tokens.",
+          "i1": "After the page is edited the summary is marked \"Outdated\": press \"Refresh\".",
+          "i2": "Without an AI key the buttons are disabled."
+        }
       }
     }
   },
