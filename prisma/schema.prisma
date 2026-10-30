@@ -817,10 +817,23 @@ model ScenarioPage {
   decks       SlideDeck[]
   aiThreads   AiThread[]
   aiProposals AiProposal[]
+  pageIndex   ScenarioPageIndex?
 
   @@index([campaignId, sortOrder])
   @@index([characterId])
   @@map("scenario_pages")
+}
+
+model ScenarioPageIndex {
+  pageId     String       @id
+  campaignId String
+  version    Int
+  facts      Json
+  updatedAt  DateTime     @default(now())
+  page       ScenarioPage @relation(fields: [pageId], references: [id], onDelete: Cascade)
+
+  @@index([campaignId])
+  @@map("scenario_page_index")
 }
 
 model ScenarioPageVersion {
