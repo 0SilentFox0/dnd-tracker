@@ -6,12 +6,13 @@ import { CampaignKind, CampaignVisibility, DEFAULT_TEMPLATE_LOCALE } from "@/lib
 import { prisma } from "@/lib/db";
 import { createCampaignFromBundle } from "@/lib/server/campaigns/create-campaign";
 import { emptyBundle } from "@/lib/server/templates/bundle";
+import { templateLocaleWhere } from "@/lib/server/templates/locale-filter";
 
 const official = { kind: CampaignKind.TEMPLATE, visibility: CampaignVisibility.OFFICIAL };
 
 export const makeTemplateStore = (name: string, locale: string = DEFAULT_TEMPLATE_LOCALE): TemplateStore => ({
   findTemplate: () =>
-    prisma.campaign.findFirst({ where: { name, ...official, ...(locale === DEFAULT_TEMPLATE_LOCALE ? { OR: [{ locale: null }, { locale }] } : { locale }) }, select: { id: true, dmUserId: true } }),
+    prisma.campaign.findFirst({ where: { name, ...official, ...templateLocaleWhere(locale) }, select: { id: true, dmUserId: true } }),
   findOfficialOwner: async () => (await prisma.campaign.findFirst({ where: official, orderBy: { createdAt: "asc" }, select: { dmUserId: true } }))?.dmUserId ?? null,
   create: async ({ userId, rules, credits, description }) => {
     const { campaign } = await createCampaignFromBundle({ userId, name, description, bundle: { ...emptyBundle(), rules, credits }, ...official });
