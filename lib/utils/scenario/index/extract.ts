@@ -1,5 +1,6 @@
 import { MENTION_TYPES } from "@/lib/constants/scenario";
 import { isSecret } from "@/lib/utils/scenario/doc";
+import { entityKey } from "@/lib/utils/scenario/index/build";
 import type { IndexRef, MentionType, PageFacts, RichDoc, RichNode, ScenarioContent } from "@/types/scenario";
 
 type Acc = Map<string, IndexRef>;
@@ -7,7 +8,7 @@ type Acc = Map<string, IndexRef>;
 const isMentionType = (v: unknown): v is MentionType => (MENTION_TYPES as readonly unknown[]).includes(v);
 
 function add(acc: Acc, type: MentionType, id: string, label: string, secret: boolean) {
-  const key = `${type}:${id}`;
+  const key = entityKey(type, id);
 
   const ref = acc.get(key);
 
