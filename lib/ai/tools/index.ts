@@ -11,13 +11,13 @@ import { getPartyTool, readCharacterTool } from "./party";
 import { proposeScenarioEditTool } from "./propose";
 import { proposeSceneSlideTool } from "./propose-slide";
 import { readReferenceTool, searchReferenceTool } from "./reference";
-import { listScenarioPagesTool, readScenarioPageTool, searchScenarioTool } from "./scenario-read";
+import { findScenarioMentionsTool, listScenarioPagesTool, outlineScenarioPageTool, readScenarioPageTool, searchScenarioTool } from "./scenario-read";
 import { getShowStateTool } from "./show";
 
 import "server-only";
 import { type ApiTokenScope, hasScope } from "@/lib/constants/ai";
 
-export const AI_TOOLS: AiToolDef[] = [getCampaignBriefTool, listScenarioPagesTool, readScenarioPageTool, searchScenarioTool,
+export const AI_TOOLS: AiToolDef[] = [getCampaignBriefTool, listScenarioPagesTool, readScenarioPageTool, outlineScenarioPageTool, findScenarioMentionsTool, searchScenarioTool,
   getPartyTool,
   readCharacterTool,
   getShowStateTool,

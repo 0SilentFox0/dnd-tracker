@@ -6,7 +6,7 @@ const SECTION_PREFIX = "§";
 
 export const SNIPPET_RADIUS = 60;
 
-const oneLine = (s: string) => s.replace(/\s+/g, " ").trim();
+export const oneLine = (s: string) => s.replace(/\s+/g, " ").trim();
 
 export function buildSearchText(title: string, content: ScenarioContent): string {
   const lines = content.sections.map((s) => {

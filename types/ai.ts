@@ -55,13 +55,16 @@ export type ScenarioAiOpInput =
   | { op: "replaceRow"; sectionId: string; rowId: string; story?: string; notes?: string; allowRemoval?: boolean }
   | { op: "insertRow"; sectionId: string; afterRowId?: string; story: string; notes?: string }
   | { op: "addSection"; afterSectionId?: string; title: string; rows: { story: string; notes?: string }[] }
-  | { op: "renameSection"; sectionId: string; title: string };
+  | { op: "renameSection"; sectionId: string; title: string }
+  | { op: "createAcquaintance"; ref: string; name: string; description?: string }
+  | { op: "linkMentions"; acquaintance: { ref: string } | { id: string }; forms: string[]; sectionId?: string; rowIds?: string[]; fields?: ("story" | "notes")[] };
 
 export type ScenarioAiOp =
   | { op: "replaceRow"; sectionId: string; rowId: string; story?: RichDoc; notes?: RichDoc; before: { story: RichDoc; notes: RichDoc } }
   | { op: "insertRow"; sectionId: string; afterRowId: string | null; row: ScenarioRow }
   | { op: "addSection"; afterSectionId: string | null; section: ScenarioSection }
-  | { op: "renameSection"; sectionId: string; title: string; before: { title: string } };
+  | { op: "renameSection"; sectionId: string; title: string; before: { title: string } }
+  | { op: "createAcquaintance"; ref: string; name: string; description: string };
 
 export type AddSlideAiOp = { op: "addSlide"; deckId: string | null; deckTitle?: string; slide: Slide };
 

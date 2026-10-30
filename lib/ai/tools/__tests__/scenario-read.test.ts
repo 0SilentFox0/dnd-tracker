@@ -76,4 +76,40 @@ describe("scenario read tools", () => {
 
     expect(await searchScenarioTool.handler(ctx, { query: "дзвони" })).toEqual([{ pageId: "p1", pageTitle: "Монастир", sectionId: "s1", snippet: "…дзвони…" }]);
   });
+
+  it("read_scenario_page: offset і маркер [next offset]", async () => {
+    const rows = Array.from({ length: 12 }, (_, k) => ({ id: `r${k}`, story: { type: "doc", content: [{ type: "paragraph", content: [{ type: "text", text: "а".repeat(4000) }] }] }, notes: { type: "doc", content: [] } }));
+
+    vi.mocked(prisma.scenarioPage.findFirst).mockResolvedValue({ id: "p1", title: "М", kind: "scene", content: { legend: [], sections: [{ id: "s1", title: "С", played: false, rows }] } } as never);
+
+    const { readScenarioPageTool } = await import("@/lib/ai/tools/scenario-read");
+
+    const first = String(await readScenarioPageTool.handler(ctx, { pageId: "p1" }));
+
+    expect(first.length).toBeLessThanOrEqual(23_000 + 60);
+
+    const m = first.match(/\[next offset (\d+) of (\d+)\]$/);
+
+    expect(m).not.toBeNull();
+
+    if (!m) return;
+
+    const second = String(await readScenarioPageTool.handler(ctx, { pageId: "p1", offset: Number(m[1]) }));
+
+    expect(second.startsWith("### Row")).toBe(true);
+  });
+
+  it("outline_scenario_page і find_scenario_mentions", async () => {
+    const { outlineScenarioPageTool, findScenarioMentionsTool } = await import("@/lib/ai/tools/scenario-read");
+
+    expect(String(await outlineScenarioPageTool.handler(ctx, { pageId: "p1" }))).toContain("[s1]");
+
+    vi.mocked(prisma.scenarioPage.findMany).mockResolvedValue([{ id: "p1", title: "М", kind: "scene", content }] as never);
+
+    const out = (await findScenarioMentionsTool.handler(ctx, { query: "дзвони" })) as { total: number; nextOffset: number | null; hits: { pageId: string; rowId: string }[] };
+
+    expect(out.total).toBe(1);
+    expect(out.nextOffset).toBeNull();
+    expect(out.hits[0]).toMatchObject({ pageId: "p1", rowId: "r1" });
+  });
 });

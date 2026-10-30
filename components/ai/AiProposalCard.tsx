@@ -110,6 +110,15 @@ function OpView({ op, campaignId }: { op: Op; campaignId: string }) {
     );
   }
 
+  if (op.op === "createAcquaintance") {
+    return (
+      <div className="rounded border border-primary/40 p-2" data-slot="ai-proposal-npc">
+        <p className="text-sm font-medium">{t("proposal.newAcquaintance", { name: op.name })}</p>
+        {op.description ? <p className="text-xs text-muted-foreground">{op.description}</p> : null}
+      </div>
+    );
+  }
+
   return (
     <p className="text-sm">{t("proposal.rename", { from: op.before.title, to: op.title })}</p>
   );
@@ -120,14 +129,21 @@ export function AiProposalCard({ proposal, actions, busy, campaignId }: AiPropos
 
   const { status } = proposal;
 
+  const open = status === "pending" || status === "stale";
+
+  const hasNpc = proposal.ops.some((o) => o.op === "createAcquaintance");
+
+  const changedRows = proposal.ops.filter((o) => o.op === "replaceRow").length;
+
   return (
     <div className="space-y-2 rounded-lg border bg-card p-3 text-card-foreground" data-slot="ai-proposal-card">
       <p className="text-sm font-medium">{proposal.summary}</p>
       <p className="break-words text-xs">{t("proposal.target", { pageId: proposal.pageId })}</p>
-      {status === "pending" || status === "stale" ? proposal.ops.map((op, i) => <OpView key={i} op={op} campaignId={campaignId} />) : null}
+      {open && changedRows > 0 && hasNpc ? <p className="text-xs text-muted-foreground">{t("proposal.changedRows", { count: changedRows })}</p> : null}
+      {open ? proposal.ops.map((op, i) => <OpView key={i} op={op} campaignId={campaignId} />) : null}
       {status === "stale" ? <p className="text-sm text-muted-foreground">{t("proposal.stale")}</p> : null}
       {status === "applied" || status === "rejected" ? <p className="text-xs text-muted-foreground">{t(`proposal.status.${status}`)}</p> : null}
-      {status === "pending" || status === "stale" ? (
+      {open ? (
         <div className="flex gap-2">
           {status === "pending" ? (
             <Button type="button" size="sm" disabled={busy} onClick={actions.onApply}>
