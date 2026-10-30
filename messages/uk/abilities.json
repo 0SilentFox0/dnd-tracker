@@ -138,6 +138,7 @@
   "validation": {
     "passiveEffectKinds": "Пасивка допускає лише modifyStat, damageBonus, flag, note",
     "passiveNoDuration": "Пасивка діє постійно — без duration",
+    "iconLink": "Іконка має бути посиланням, а не data: URL",
     "passiveTarget": "Ціль пасивки: self, allAllies, allEnemies, nearbyAllies або nearbyEnemies",
     "bakedStatArea": "{stat} не діє через зону аури",
     "bakedStatCondition": "{stat} застосовується при побудові учасника — умова неможлива",

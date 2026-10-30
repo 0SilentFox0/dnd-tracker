@@ -75,6 +75,7 @@ export interface ProgressionItem {
   name: string;
   summary: string;
   description?: string;
+  icon?: string | null;
 }
 
 export interface ProgressionPick {

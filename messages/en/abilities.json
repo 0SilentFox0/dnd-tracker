@@ -138,6 +138,7 @@
   "validation": {
     "passiveEffectKinds": "A passive allows only modifyStat, damageBonus, flag, note",
     "passiveNoDuration": "A passive is always active — no duration",
+    "iconLink": "Icon must be a link, not a data: URL",
     "passiveTarget": "Passive target: self, allAllies, allEnemies, nearbyAllies or nearbyEnemies",
     "bakedStatArea": "{stat} does not work through an aura area",
     "bakedStatCondition": "{stat} is applied when the participant is built — a condition is impossible",
