@@ -9,6 +9,7 @@ import { RacePassiveBlock } from "./RaceInnateSections";
 import { ActionsMenu } from "@/components/common/ActionsMenu";
 import { HudCard } from "@/components/hud/page";
 import { Badge } from "@/components/ui/badge";
+import { abilityScoreTermKey } from "@/lib/constants/abilities";
 import { useMainSkills, useRacialSkills, useSkills } from "@/lib/hooks/skills";
 import {
   countRaceSkills,
@@ -28,6 +29,8 @@ export function RaceCard({ race, campaignId, onDelete }: RaceCardProps) {
   const t = useTranslations("races");
 
   const tc = useTranslations("common");
+
+  const tg = useTranslations("gameTerms");
 
   const { data: allSkills = [] } = useSkills(campaignId);
 
@@ -121,7 +124,7 @@ export function RaceCard({ race, campaignId, onDelete }: RaceCardProps) {
                       <div
                         key={ability.key}
                         className="flex items-center gap-1.5 rounded-md bg-hud-field px-2 py-1"
-                        title={ability.label}
+                        title={tg(abilityScoreTermKey(ability.key))}
                       >
                         <span className="text-xs font-semibold">
                           {ability.abbreviation}

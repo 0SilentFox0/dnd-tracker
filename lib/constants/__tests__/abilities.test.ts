@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { ABILITY_KEYS, ABILITY_LABELS, ABILITY_SCORES, ABILITY_SHORT_LABELS, CORE_ABILITY_SCORES } from "@/lib/constants/abilities";
+import { ABILITY_KEYS, ABILITY_SCORES, abilityScoreTermKey, CORE_ABILITY_SCORES } from "@/lib/constants/abilities";
 
 describe("ABILITY_SCORES", () => {
   it("скорочення унікальні", () => {
@@ -11,9 +11,9 @@ describe("ABILITY_SCORES", () => {
 });
 
 describe("основні характеристики", () => {
-  it("ключі, мітки й короткі мітки узгоджені", () => {
+  it("ключі збігаються з ABILITY_KEYS, ключ терміна — у gameTerms", () => {
     expect(CORE_ABILITY_SCORES.map((a) => a.key)).toEqual([...ABILITY_KEYS]);
-    expect(ABILITY_LABELS.constitution).toBe("Статура");
-    expect(ABILITY_SHORT_LABELS.wisdom).toBe("МУД");
+    expect(abilityScoreTermKey("constitution")).toBe("abilities.constitution.label");
+    expect(abilityScoreTermKey("moral")).toBe("stats.moral");
   });
 });

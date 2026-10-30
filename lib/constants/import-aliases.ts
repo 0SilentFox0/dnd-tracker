@@ -185,6 +185,19 @@ export const NUMBER_WORDS: Record<ImportKind, PerField<Readonly<Record<string, n
 };
 
 export const ENUM_LABELS: Partial<Record<ImportKind, PerField<Readonly<Record<string, readonly string[]>>>>> = {
+  artifacts: {
+    rarity: { common: ["Звичайний"], uncommon: ["Незвичайний"], rare: ["Рідкісний"], epic: ["Епічний"], legendary: ["Легендарний"] },
+    slot: { weapon: ["Зброя"], range_weapon: ["Дальнобійна зброя"], shield: ["Щит"], cloak: ["Плащ"], ring: ["Кільце"], helmet: ["Шолом"], amulet: ["Амулет"], armor: ["Броня"], boots: ["Черевики"], item: ["Артефакт"] },
+  },
+  classes: {
+    caster: { none: ["Не заклинач"], full: ["Повний заклинач"], half: ["Половинний заклинач"], third: ["Третина заклинача"], pact: ["Пакт"] },
+  },
+  feats: {
+    type: { origin: ["Походження"], general: ["Загальна"], fightingStyle: ["Стиль бою"], epicBoon: ["Епічний дар"] },
+  },
+  "main-skills": {
+    role: { attack: ["Напад"], ranged: ["Стрільба"], defense: ["Захист"], magic: ["Магія"], leadership: ["Лідерство"], race: ["Раса"], ultimate: ["Ультимат"], personal: ["Персональні"] },
+  },
   spells: {
     cost: {
       reaction: ["Реакція", "reaction", "1 reaction"],
@@ -193,6 +206,16 @@ export const ENUM_LABELS: Partial<Record<ImportKind, PerField<Readonly<Record<st
       bonusAction: ["Бонусна дія", "bonus action", "1 bonus action", "бонус", "бонусною дією", "1 бонусна дія"],
     },
   },
+};
+
+// uk ability names and short forms accepted by the CSV import; the English abbreviation always matches too
+export const ABILITY_IMPORT_LABELS: Readonly<Record<string, readonly string[]>> = {
+  strength: ["Сила", "СИЛ"],
+  dexterity: ["Спритність", "СПР"],
+  constitution: ["Статура", "ТІЛ"],
+  intelligence: ["Інтелект", "ІНТ"],
+  wisdom: ["Мудрість", "МУД"],
+  charisma: ["Харизма", "ХАР"],
 };
 
 // short ability labels of the old unit CSV

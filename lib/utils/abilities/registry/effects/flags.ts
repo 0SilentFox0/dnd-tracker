@@ -1,7 +1,7 @@
 import type { FieldMeta } from "../fields";
 import { CONDITION_KEYS_ALL, conditionKeySegment, damageTypeSegment } from "../labels";
 
-import { ABILITY_OPTIONS, DEFAULT_AREA_TARGETS } from "@/lib/constants/abilities";
+import { ABILITY_KEYS, DEFAULT_AREA_TARGETS } from "@/lib/constants/abilities";
 import { PROFICIENCY_KINDS } from "@/lib/constants/artifacts";
 import { AttackType } from "@/lib/constants/battle";
 import { MONSTER_SENSE_KEYS } from "@/lib/constants/monster";
@@ -27,6 +27,8 @@ const ATTACK_KIND_ALL = [
 const MELEE_RANGED = [{ value: AttackType.MELEE }, { value: AttackType.RANGED }];
 
 const plain = (key: FlagKey) => ({ fields: [] as readonly FieldMeta[], defaults: {} as Record<string, unknown>, describe: () => [flagSeg(key)] });
+
+const ABILITY_OPTIONS = ABILITY_KEYS.map((value) => ({ value }));
 
 const SAVE_ABILITY_OPTIONS = [{ value: "all" }, ...ABILITY_OPTIONS];
 

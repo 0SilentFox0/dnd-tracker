@@ -28,7 +28,7 @@ import { HudSection } from "@/components/hud/form";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { SelectField } from "@/components/ui/select-field";
-import { SPELL_ABILITY_OPTIONS, toSpellcastingAbility } from "@/lib/constants/abilities";
+import { SPELLCASTING_ABILITIES, toSpellcastingAbility } from "@/lib/constants/abilities";
 import { useCampaignRules } from "@/lib/hooks/campaigns";
 import { useCharacterRoster, useDmCharacterEditor } from "@/lib/hooks/characters";
 
@@ -38,6 +38,8 @@ export function ProfileEditor({ onDone }: { onDone: () => void }) {
   const router = useRouter();
 
   const t = useTranslations("characterProfile");
+
+  const tg = useTranslations("gameTerms");
 
   const tc = useTranslations("common.tabs");
 
@@ -148,7 +150,7 @@ export function ProfileEditor({ onDone }: { onDone: () => void }) {
                     id="spellcastingAbility"
                     value={spellcasting.data.spellcastingAbility ?? ""}
                     onValueChange={(v) => spellcasting.set("spellcastingAbility", toSpellcastingAbility(v))}
-                    options={SPELL_ABILITY_OPTIONS}
+                    options={SPELLCASTING_ABILITIES.map((key) => ({ value: key, label: tg(`abilities.${key}.label`) }))}
                     allowNone
                     noneLabel={t("editor.none")}
                   />

@@ -3,15 +3,16 @@ import { applyHeroDmDamageMultiplier } from "./hero-dm-multiplier";
 import { calculateDamageWithModifiers } from "./index";
 import { WEAPON_FLAT_LABEL } from "./weapon-flat";
 
+import type { AbilityKey } from "@/lib/constants/abilities";
 import { ParticipantSourceType } from "@/lib/constants/battle";
-import { attackAbilityFor, attackAbilityLabelFor, attackDamageModifier, isFiveE } from "@/lib/utils/battle/attack/ability";
+import { attackAbilityFor, attackDamageModifier, isFiveE } from "@/lib/utils/battle/attack/ability";
 import { attackKindOf } from "@/lib/utils/battle/common/attack-kind";
 import { diceAverage } from "@/lib/utils/common/dice";
 import type { BattleAttack, BattleParticipant, DamageStep } from "@/types/battle";
 
 export interface AverageDamage {
   total: number;
-  statLabel: string;
+  statKey: AbilityKey;
   weaponAvg: number;
   heroDice: string;
   heroPart: number;
@@ -48,5 +49,5 @@ export function averageAttackDamage(p: BattleParticipant, attack: BattleAttack, 
 
   const dm = applyHeroDmDamageMultiplier(p, type, calc.totalDamage + bonus);
 
-  return { total: dm.damage, statLabel: attackAbilityLabelFor(p, attack), weaponAvg, heroDice, heroPart: isHero && !isFiveE(p) ? p.abilities.level + heroDiceAvg : 0, statMod, steps, multiplier: dm.multiplier };
+  return { total: dm.damage, statKey: attackAbilityFor(p, attack), weaponAvg, heroDice, heroPart: isHero && !isFiveE(p) ? p.abilities.level + heroDiceAvg : 0, statMod, steps, multiplier: dm.multiplier };
 }

@@ -1,9 +1,9 @@
-import { ABILITY_LABELS, type AbilityKey } from "@/lib/constants/abilities";
+import type { AbilityKey } from "@/lib/constants/abilities";
 import { AttackType } from "@/lib/constants/battle";
 import type { WeaponTrait } from "@/lib/constants/weapon-traits";
 import { findFlags } from "@/lib/utils/abilities/engine/core/collect-modifiers";
 import { withSelf } from "@/lib/utils/abilities/engine/core/participants";
-import { attackAbilityKey, attackAbilityLabel, getAbilityModifier, getAttackAbilityModifier } from "@/lib/utils/common/calculations";
+import { attackAbilityKey, getAbilityModifier, getAttackAbilityModifier } from "@/lib/utils/common/calculations";
 import type { BattleAttack, BattleParticipant } from "@/types/battle";
 
 export const isFiveE = (p: BattleParticipant): boolean => p.abilities.damageModel === "5e";
@@ -37,8 +37,4 @@ export function attackDamageModifier(p: BattleParticipant, attack: BattleAttack,
   return findFlags(withSelf(participants, p), p.basicInfo.id, "twoWeaponFighting").length > 0 ? mod : 0;
 }
 
-export function attackAbilityLabelFor(p: BattleParticipant, attack: BattleAttack): string {
-  if (!isFiveE(p)) return attackAbilityLabel(p.abilities, attack.type);
 
-  return ABILITY_LABELS[attackAbilityFor(p, attack)];
-}

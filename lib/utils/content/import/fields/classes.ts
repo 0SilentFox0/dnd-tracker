@@ -1,6 +1,6 @@
-import { ABILITY_ENUM, defineSpec, jsonField, nameField, recordLabels, textField } from "./common";
+import { ABILITY_ENUM, defineSpec, jsonField, nameField, textField } from "./common";
 
-import { CLASS_CASTER_LABELS, CLASS_CASTERS } from "@/lib/constants/classes";
+import { CLASS_CASTERS } from "@/lib/constants/classes";
 export const CLASSES_IMPORT = defineSpec({
   kind: "classes",
   fields: [
@@ -11,7 +11,7 @@ export const CLASSES_IMPORT = defineSpec({
     { key: "savingThrows", type: "list", ...ABILITY_ENUM },
     jsonField("proficiencies"),
     jsonField("skillChoices"),
-    { key: "caster", type: "enum", enumValues: CLASS_CASTERS, enumLabels: recordLabels(CLASS_CASTER_LABELS) },
+    { key: "caster", type: "enum", enumValues: CLASS_CASTERS },
     { key: "spellcastingAbility", type: "enum", ...ABILITY_ENUM },
     jsonField("features"),
     { key: "subclassLevel", type: "int" },
