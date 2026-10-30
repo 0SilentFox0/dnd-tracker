@@ -51,7 +51,8 @@
     },
     "defaultAttacks": {
       "melee": "Ближня атака",
-      "ranged": "Дальня атака"
+      "ranged": "Дальня атака",
+      "weapon": "Зброя без назви"
     },
     "saves": {
       "proficiency": "Майстерність у рятівних кидках"
@@ -187,6 +188,7 @@
   },
   "defaultNames": {
     "meleeAttack": "Звичайний удар",
-    "rangedAttack": "Звичайний постріл"
+    "rangedAttack": "Звичайний постріл",
+    "weapon": "Зброя"
   }
 }

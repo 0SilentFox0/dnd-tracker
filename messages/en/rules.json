@@ -51,7 +51,8 @@
     },
     "defaultAttacks": {
       "melee": "Melee attack",
-      "ranged": "Ranged attack"
+      "ranged": "Ranged attack",
+      "weapon": "Unnamed weapon"
     },
     "saves": {
       "proficiency": "Proficiency in saving throws"
@@ -187,6 +188,7 @@
   },
   "defaultNames": {
     "meleeAttack": "Unarmed Strike",
-    "rangedAttack": "Ranged Attack"
+    "rangedAttack": "Ranged Attack",
+    "weapon": "Weapon"
   }
 }

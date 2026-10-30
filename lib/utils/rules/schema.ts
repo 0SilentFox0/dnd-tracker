@@ -52,6 +52,7 @@ const sectionSchemas = {
   defaultAttacks: z.strictObject({
     meleeName: z.string().trim().min(1).max(60),
     rangedName: z.string().trim().min(1).max(60),
+    weaponName: z.string().trim().min(1).max(60),
   }),
   saves: z.strictObject({ proficiency: z.boolean() }),
   deathSaves: z.strictObject({ enabled: z.boolean(), unitsDieAtZero: z.boolean() }),

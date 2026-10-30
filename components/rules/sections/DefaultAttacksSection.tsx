@@ -12,9 +12,10 @@ export function DefaultAttacksSection({ form }: { form: RulesFormState }) {
 
   return (
     <RulesSection mechanic="defaultAttacks">
-      <div className="grid gap-3 sm:grid-cols-2">
+      <div className="grid gap-3 sm:grid-cols-3">
         <LabeledInput label={t("sections.defaultAttacks.melee")} maxLength={60} value={a.meleeName} onChange={(e) => form.set("defaultAttacks", { ...a, meleeName: e.target.value })} />
         <LabeledInput label={t("sections.defaultAttacks.ranged")} maxLength={60} value={a.rangedName} onChange={(e) => form.set("defaultAttacks", { ...a, rangedName: e.target.value })} />
+        <LabeledInput label={t("sections.defaultAttacks.weapon")} maxLength={60} value={a.weaponName} onChange={(e) => form.set("defaultAttacks", { ...a, weaponName: e.target.value })} />
       </div>
     </RulesSection>
   );

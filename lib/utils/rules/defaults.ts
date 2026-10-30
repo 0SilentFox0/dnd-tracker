@@ -6,7 +6,7 @@ export const DEFAULT_RULES: Ruleset = {
   formulas: { saveDcBase: 8, proficiencyBase: 2, proficiencyEvery: 4 },
   heroScaling: { meleeDiceByLevel: null, rangedDiceByLevel: null, hpBaseLevels: 3, hpConCoefficient: 1.5 },
   initiative: { heroMin: 10, heroMax: 16, mode: "static" },
-  defaultAttacks: { meleeName: "Unarmed Strike", rangedName: "Ranged Attack" },
+  defaultAttacks: { meleeName: "Unarmed Strike", rangedName: "Ranged Attack", weaponName: "Weapon" },
   saves: { proficiency: false },
   deathSaves: { enabled: false, unitsDieAtZero: true },
   concentration: { enabled: false, dcCap: null },
@@ -20,5 +20,5 @@ export const DEFAULT_RULES: Ruleset = {
 };
 
 export function localizedDefaultAttacks(t: (key: string) => string): Ruleset["defaultAttacks"] {
-  return { meleeName: t("defaultNames.meleeAttack"), rangedName: t("defaultNames.rangedAttack") };
+  return { meleeName: t("defaultNames.meleeAttack"), rangedName: t("defaultNames.rangedAttack"), weaponName: t("defaultNames.weapon") };
 }

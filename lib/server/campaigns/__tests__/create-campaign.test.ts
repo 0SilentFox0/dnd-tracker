@@ -59,7 +59,7 @@ describe("createCampaignFromBundle", () => {
   it("без бандла у rules зберігається лише defaultAttacks", async () => {
     m.db.campaign.create.mockResolvedValue({ id: "c1" });
 
-    const defaultAttacks = { meleeName: "Удар", rangedName: "Постріл" };
+    const defaultAttacks = { meleeName: "Удар", rangedName: "Постріл", weaponName: "Зброя" };
 
     await createCampaignFromBundle({ userId: "u1", name: "N", bundle: null, defaultAttacks });
 

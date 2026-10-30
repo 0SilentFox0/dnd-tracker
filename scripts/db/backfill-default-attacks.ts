@@ -9,7 +9,7 @@
 import { prisma } from "@/lib/db";
 import { assertSeedTarget } from "@/scripts/seed/seed-library-lib";
 
-const UK_DEFAULT_ATTACKS = { meleeName: "Звичайний удар", rangedName: "Звичайний постріл" };
+const UK_DEFAULT_ATTACKS = { meleeName: "Звичайний удар", rangedName: "Звичайний постріл", weaponName: "Зброя" };
 
 async function main() {
   const args = process.argv.slice(2);
@@ -30,11 +30,13 @@ async function main() {
   for (const c of campaigns) {
     const rules = c.rules && typeof c.rules === "object" && !Array.isArray(c.rules) ? (c.rules as Record<string, unknown>) : {};
 
-    if (rules.defaultAttacks !== undefined) continue;
+    const existing = rules.defaultAttacks as Record<string, unknown> | undefined;
+
+    if (existing !== undefined && "weaponName" in existing) continue;
 
     changed++;
 
-    if (apply) await prisma.campaign.update({ where: { id: c.id }, data: { rules: { ...rules, defaultAttacks: UK_DEFAULT_ATTACKS } } });
+    if (apply) await prisma.campaign.update({ where: { id: c.id }, data: { rules: { ...rules, defaultAttacks: { ...UK_DEFAULT_ATTACKS, ...existing, weaponName: UK_DEFAULT_ATTACKS.weaponName } } } });
   }
 
   console.log(`кампаній (ДМ uk): ${campaigns.length} · ${apply ? "оновлено" : "оновив би"}: ${changed}`);
