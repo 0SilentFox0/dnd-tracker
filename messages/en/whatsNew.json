@@ -188,5 +188,9 @@
   "2026-10-30-scenario-graph": {
     "title": "Scenario graph",
     "body": "The \"Graph\" section shows how scenario pages, units, artifacts, spells and heroes are connected by mentions. Click a node to see its connections and jump to the source; type filters keep a large plot readable."
+  },
+  "2026-10-31-identity-icons": {
+    "title": "Icons in libraries",
+    "body": "Races, classes, subclasses, backgrounds and class features now have icons in the libraries."
   }
 }
