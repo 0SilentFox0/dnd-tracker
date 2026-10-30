@@ -8,7 +8,7 @@
 
 **Tech Stack:** Prisma `$queryRaw`, Vitest, next-intl.
 
-**Spec:** `docs/superpowers/specs/2026-10-30-scenario-digest-design.md`
+**Spec:** `docs/archive/superpowers/specs/2026-10-30-scenario-digest-design.md`
 
 ## Global Constraints
 

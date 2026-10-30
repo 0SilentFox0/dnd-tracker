@@ -1,6 +1,6 @@
 # Конспекти сцен (епік «граф сценарію», етап 3b)
 
-Епік: `docs/superpowers/specs/2026-10-30-scenario-graph-epic.md`. Попередні етапи: індекс 3a (`docs/archive/superpowers/specs/2026-10-30-scenario-index-design.md`), граф 4 (`…-scenario-graph-design.md`). Далі — 3c (digest у промпті) і 5 (Obsidian).
+Епік: `docs/archive/superpowers/specs/2026-10-30-scenario-graph-epic.md`. Попередні етапи: індекс 3a (`docs/archive/superpowers/specs/2026-10-30-scenario-index-design.md`), граф 4 (`…-scenario-graph-design.md`). Далі — 3c (digest у промпті) і 5 (Obsidian).
 
 ## Мета
 

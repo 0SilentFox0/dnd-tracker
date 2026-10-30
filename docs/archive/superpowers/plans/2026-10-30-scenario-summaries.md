@@ -8,7 +8,7 @@
 
 **Tech Stack:** Next.js 16, Prisma 6, Zod, AI SDK 7 `generateObject`, TanStack Query, next-intl.
 
-**Spec:** `docs/superpowers/specs/2026-10-30-scenario-summaries-design.md`
+**Spec:** `docs/archive/superpowers/specs/2026-10-30-scenario-summaries-design.md`
 
 ## Reuse (checked against code)
 
