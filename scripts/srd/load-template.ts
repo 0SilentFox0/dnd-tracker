@@ -5,7 +5,7 @@ import { assertSeedTarget } from "../seed/seed-library-lib";
 import { listLocales } from "./i18n/store";
 import { SRD_CREDITS } from "./lib/credits";
 import { readSrdData } from "./lib/data-files";
-import { ensureSrdTemplate, formatImportSummary, hasRowErrors, importSrdData, resolveSchoolRefs, SRD_TEMPLATE_NAME, staleSpellColumns, withIcons } from "./lib/load-template";
+import { ensureSrdTemplate, formatImportSummary, hasRowErrors, importSrdData, resolveSchoolRefs, SRD_TEMPLATE_NAME, staleSpellColumns, withClassIcons, withIcons } from "./lib/load-template";
 import { SRD_RULES } from "./lib/rules-preset";
 import { makeTemplateStore } from "./lib/template-store";
 
@@ -43,7 +43,13 @@ async function main() {
   const results = await importSrdData(
     data,
     (kind, rows) => importContent(actor, kind, { rows, mode: "update", dryRun: false }, OFFLINE_IMPORT_DEPS),
-    async (kind, rows) => (kind === "spell-groups" ? rows : withIcons(kind, data, resolveSchoolRefs(rows, await schoolIds()), icons)),
+    async (kind, rows) => {
+      if (kind === "spell-groups") return rows;
+
+      const withUrls = withIcons(kind, data, resolveSchoolRefs(rows, await schoolIds()), icons);
+
+      return kind === "classes" ? withClassIcons(withUrls, data, icons) : withUrls;
+    },
   );
 
   for (const { column, names } of staleSpellColumns(data.spells)) await prisma.spell.updateMany({ where: { campaignId: template.id, name: { in: names } }, data: { [column]: null } });

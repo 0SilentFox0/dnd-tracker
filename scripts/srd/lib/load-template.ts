@@ -1,4 +1,3 @@
-import type { TokenKind } from "../../assets/tokens-5e/catalog";
 import type { IconsFile } from "../../assets/tokens-5e/icons-file";
 import { toImportRows } from "./data-files";
 import { type SpellRow, SRD_KINDS, type SrdData, type SrdKind } from "./types";
@@ -58,14 +57,14 @@ export function resolveSchoolRefs<T>(value: T, idByName: ReadonlyMap<string, str
   return Object.fromEntries(Object.entries(value).map(([k, v]) => [k, k === "school" && typeof v === "string" ? (idByName.get(v) ?? v) : resolveSchoolRefs(v, idByName)])) as T;
 }
 
-const ICON_COLUMN: Partial<Record<SrdKind, "icon" | "avatar">> = { spells: "icon", artifacts: "icon", units: "avatar" };
+const ICON_COLUMN: Partial<Record<SrdKind, "icon" | "avatar">> = { spells: "icon", artifacts: "icon", units: "avatar", races: "icon", classes: "icon", backgrounds: "icon" };
 
 export function withIcons(kind: SrdKind, data: SrdData, rows: Record<string, unknown>[], icons: IconsFile): Record<string, unknown>[] {
   const column = ICON_COLUMN[kind];
 
   if (!column) return rows;
 
-  const urls = icons[kind as TokenKind];
+  const urls = icons[kind as "spells" | "units" | "artifacts" | "races" | "classes" | "backgrounds"];
 
   const source = data[kind] as ReadonlyArray<{ slug: string }>;
 
@@ -75,6 +74,33 @@ export function withIcons(kind: SrdKind, data: SrdData, rows: Record<string, unk
     const url = urls[source[i].slug];
 
     return url ? { ...row, [column]: url } : row;
+  });
+}
+
+type FeatureGroupRow = { abilities?: Array<Record<string, unknown> & { id?: string }> };
+
+const iconAbilities = (groups: unknown, scope: string, urls: Record<string, string>) =>
+  Array.isArray(groups)
+    ? groups.map((g: FeatureGroupRow) => ({ ...g, abilities: g.abilities?.map((a) => (a.id && urls[`${scope}/${a.id}`] ? { ...a, icon: urls[`${scope}/${a.id}`] } : a)) }))
+    : groups;
+
+export function withClassIcons(rows: Record<string, unknown>[], data: SrdData, icons: IconsFile): Record<string, unknown>[] {
+  if (data.classes.length !== rows.length) throw new Error(`withClassIcons: ${rows.length} рядків проти ${data.classes.length} записів даних`);
+
+  return rows.map((row, i) => {
+    const slug = data.classes[i].slug;
+
+    const subclasses = Array.isArray(row.subclasses)
+      ? row.subclasses.map((s: Record<string, unknown> & { id?: string }) => {
+          const scope = `${slug}/${s.id}`;
+
+          const icon = icons.subclasses[scope];
+
+          return { ...s, features: iconAbilities(s.features, scope, icons.features), ...(icon ? { icon } : {}) };
+        })
+      : row.subclasses;
+
+    return { ...row, features: iconAbilities(row.features, slug, icons.features), subclasses };
   });
 }
 
