@@ -72,6 +72,21 @@ describe.skipIf(!localDb)("summary-store", () => {
     expect((await loadSummaryRow(page.id))?.summary.overview).toBe("after");
   });
 
+  it("keeps createdAt on a refresh", async () => {
+    const page = await createPage("Created");
+
+    await save(page.id, 2, "before");
+
+    const first = await loadSummaryRow(page.id);
+
+    await save(page.id, 2, "after");
+
+    const second = await loadSummaryRow(page.id);
+
+    expect(second?.summary.overview).toBe("after");
+    expect(second?.createdAt).toEqual(first?.createdAt);
+  });
+
   it("skips the write when the page does not exist", async () => {
     const ghost = randomUUID();
 

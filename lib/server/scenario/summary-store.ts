@@ -20,7 +20,7 @@ export async function upsertSummary(row: SummaryRowInput): Promise<void> {
     SELECT id, "campaignId", ${row.version}::int, ${JSON.stringify(row.summary)}::jsonb, ${row.provider}::text, ${row.model}::text, ${row.inputTokens}::int, ${row.outputTokens}::int, now(), now()
     FROM scenario_pages WHERE id = ${row.pageId}
     ON CONFLICT ("pageId") DO UPDATE SET version = EXCLUDED.version, summary = EXCLUDED.summary, provider = EXCLUDED.provider, model = EXCLUDED.model,
-      "inputTokens" = EXCLUDED."inputTokens", "outputTokens" = EXCLUDED."outputTokens", "createdAt" = now(), "updatedAt" = now()
+      "inputTokens" = EXCLUDED."inputTokens", "outputTokens" = EXCLUDED."outputTokens", "updatedAt" = now()
     WHERE scenario_page_summaries.version <= EXCLUDED.version`;
 }
 

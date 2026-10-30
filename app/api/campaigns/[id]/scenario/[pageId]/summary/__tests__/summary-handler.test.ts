@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { APICallError } from "ai";
+import { APICallError, RetryError } from "ai";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import { generateSummaryHandler } from "../summary-handler";
@@ -168,6 +168,21 @@ describe("generateSummaryHandler", () => {
     expect(JSON.stringify(await res.json())).not.toContain(KEY);
     expect(JSON.stringify(spy.mock.calls)).not.toContain(KEY);
     expect(h.upsert).not.toHaveBeenCalled();
+    spy.mockRestore();
+  });
+
+  it("logs the provider status of a retry error without the message", async () => {
+    const spy = vi.spyOn(console, "error").mockImplementation(() => {});
+
+    const last = new APICallError({ message: `bad ${KEY}`, url: "https://x", requestBodyValues: { key: KEY }, statusCode: 429 });
+
+    h.generate.mockRejectedValue(new RetryError({ message: `retries ${KEY}`, reason: "maxRetriesExceeded", errors: [last] }));
+
+    const res = await post();
+
+    expect(res.status).toBe(502);
+    expect(spy).toHaveBeenCalledWith("[ai summary]", 429);
+    expect(JSON.stringify(spy.mock.calls)).not.toContain(KEY);
     spy.mockRestore();
   });
 

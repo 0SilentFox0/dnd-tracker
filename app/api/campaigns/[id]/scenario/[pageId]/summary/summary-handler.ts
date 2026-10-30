@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { APICallError, generateObject } from "ai";
+import { APICallError, generateObject, RetryError } from "ai";
 
 import { aiGuard } from "@/app/api/campaigns/[id]/ai/ai-handlers";
 import { pickDmSmartTextModel } from "@/lib/ai/dm-model";
@@ -89,7 +89,9 @@ export const generateSummaryHandler = (req: Request, campaignId: string, pageId:
     try {
       result = await generateObject({ model: choice.model, schema: lenientSummarySchema, prompt: `${instruction(languageName(locale))}\n\n${input.prompt}`, abortSignal: req.signal });
     } catch (error) {
-      console.error("[ai summary]", APICallError.isInstance(error) ? error.statusCode : error instanceof Error ? error.name : "unknown");
+      const cause = RetryError.isInstance(error) ? error.lastError : error;
+
+      console.error("[ai summary]", APICallError.isInstance(cause) ? cause.statusCode : error instanceof Error ? error.name : "unknown");
 
       return errorResponse(aiErrorMessage(error), 502);
     }
