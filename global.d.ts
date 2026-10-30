@@ -38,6 +38,7 @@ import type races from "./messages/uk/races.json";
 import type rest from "./messages/uk/rest.json";
 import type rules from "./messages/uk/rules.json";
 import type scenario from "./messages/uk/scenario.json";
+import type scenarioGraph from "./messages/uk/scenarioGraph.json";
 import type show from "./messages/uk/show.json";
 import type skills from "./messages/uk/skills.json";
 import type skillTree from "./messages/uk/skillTree.json";
@@ -83,6 +84,7 @@ declare module "next-intl" {
       rules: typeof rules;
       skillTree: typeof skillTree;
       scenario: typeof scenario;
+      scenarioGraph: typeof scenarioGraph;
       show: typeof show;
       acquaintances: typeof acquaintances;
       world: typeof world;
