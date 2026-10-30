@@ -12,6 +12,8 @@ _Оновлено: 2026-10-30._
 
 ## У роботі
 
+**Переклад офіційних шаблонів (`feat/template-i18n`, не змерджено):** накладки мов на SRD 5.2 (`scripts/srd/i18n`, `pnpm srd:i18n`), `campaigns.locale/templateKey` (міграція `20261118000000_template_locale` їде з main), перемикач мови в виборі шаблону; `uk` фаза A готова, фаза B (описи units/artifacts/spells, ≈640 тис. симв.) відкрита. Після деплою на проді: `pnpm constructor:srd-template --locale uk --allow-remote`. Деталі — [content-api.md](architecture/content-api.md#мови-шаблону-srd-feattemplate-i18n).
+
 **i18n-залишки (`feat/i18n-leftovers`, не змерджено):** збережені крити/стани пишуться як name-id + `label` TextRef, тож відкат прод-коду можливий лише на цей merge або новіший: старіший код покаже сирі id для нових ефектів. `scripts/db/rename-legacy-ai-threads.ts --apply` ще не запущено на проді (потрібен дозвіл користувача); після нього видалити `LEGACY_THREAD_TITLE` у `lib/constants/ai.ts` — це останній `eslint-disable` на кирилицю.
 
 **Конструктор: специфікації й плани етапів 1–6, refactor S1–S10 і pre-merge ревю перенесено в `docs/archive/superpowers/` (2026-10-28, другий merge `main` у `feat/constructor`).** Активним лишається [план виправлень імпорту Obojima](superpowers/plans/2026-10-28-obojima-import-fixes.md); історія стану й промпти — в архівному [handoff](archive/superpowers/constructor-handoff.md).
