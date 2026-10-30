@@ -79,13 +79,11 @@
   "picker": {
     "multiclassSkills": "Multiclass skills",
     "notFound": "Choice not found — it will be removed on save",
-    "fromLevel": "From level {level}",
-    "requires": "Requires: {list}",
-    "featLevel": "level {level}+",
-    "featUnmet": "prerequisites not met",
     "noSpells": "No spells of the required circles in lists {lists}",
-    "moreDetails": "More details",
-    "featTaken": "already taken"
+    "featTaken": "already taken",
+    "available": "Available",
+    "unavailable": "Not available yet",
+    "details": "Details"
   },
   "editor": {
     "loading": "Loading choices…",
@@ -116,5 +114,11 @@
     "tableCountClassOnly": "Count “from class table” is only for a class",
     "featInFeat": "A feat cannot contain a feat choice",
     "nothingToSave": "No choices to save"
+  },
+  "requirement": {
+    "level": "from level {need}, now {have}",
+    "ability": "{abilities}: need {need}, now {have}",
+    "option": "pick first: {list}",
+    "manual": "DM checks: {text}"
   }
 }

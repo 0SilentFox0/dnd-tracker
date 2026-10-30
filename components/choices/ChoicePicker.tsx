@@ -1,14 +1,17 @@
 "use client";
 
+import { Fragment, type ReactNode } from "react";
 import { useTranslations } from "next-intl";
 
+import { ChoiceCard, DetailsButton } from "@/components/choices/ChoiceCard";
 import { OptionButton } from "@/components/hud/OptionButton";
 import { ABILITY_KEYS, ABILITY_SCORE_CAP, type AbilityKey } from "@/lib/constants/abilities";
 import { DND_SKILLS, type DndSkill } from "@/lib/constants/skills";
 import { useTranslator } from "@/lib/i18n/use-translator";
 import { MULTICLASS_SKILLS_ID } from "@/lib/utils/characters/choices/class-choices";
 import { resolveChoiceCount } from "@/lib/utils/characters/choices/count";
-import { featPrerequisiteMet } from "@/lib/utils/characters/choices/validate";
+import { isUnmet, requirementsOf } from "@/lib/utils/characters/choices/requirements";
+import { summarize } from "@/lib/utils/characters/classes";
 import type { Choice, ChoicePick, FeatData, Picks, SpellRef } from "@/types/choices";
 import type { ClassColumn } from "@/types/classes";
 
@@ -40,6 +43,8 @@ function Card({ role, checked, disabled, onClick, title, note }: { role: "checkb
   return <OptionButton variant="form" role={role} checked={checked} disabled={disabled} onClick={onClick} title={title} note={note} />;
 }
 
+const NO_SCORES = Object.fromEntries(ABILITY_KEYS.map((k) => [k, 0])) as Record<AbilityKey, number>;
+
 export function ChoicePicker({ choice, value, onChange, ctx, error }: ChoicePickerProps) {
   const t = useTranslations("choices");
 
@@ -67,7 +72,7 @@ export function ChoicePicker({ choice, value, onChange, ctx, error }: ChoicePick
   return (
     <div className="space-y-2">
       {header}
-      {choice.description && <ChoiceDescription text={choice.description} />}
+      {choice.description && <ChoiceSummary title={choice.label} text={choice.description} />}
       {choice.kind === "option" && <OptionCards choice={choice} ids={ids} level={ctx.level} onToggle={toggle} />}
       {choice.kind === "feat" && <FeatList choice={choice} value={value} ctx={ctx} actions={{ onToggle: toggle, onChange }} />}
       {(choice.kind === "skill" || choice.kind === "expertise") && (
@@ -89,26 +94,46 @@ export function ChoicePicker({ choice, value, onChange, ctx, error }: ChoicePick
   );
 }
 
-const LEAD_MAX = 200;
-
-function ChoiceDescription({ text }: { text: string }) {
-  const t = useTranslations("choices");
-
-  const body = text.trim();
-
-  if (body.length <= LEAD_MAX) return <p className="whitespace-pre-line text-xs text-hud-muted">{body}</p>;
-
-  const [lead, ...tail] = body.split(/\n\s*\n/);
-
-  const cut = lead.length > LEAD_MAX;
+function ChoiceSummary({ title, text }: { title: string; text: string }) {
+  const summary = summarize(text);
 
   return (
-    <div className="space-y-1 text-xs text-hud-muted">
-      <p>{cut ? `${lead.slice(0, LEAD_MAX).trimEnd()}…` : lead}</p>
-      <details>
-        <summary className="cursor-pointer text-hud-gold">{t("picker.moreDetails")}</summary>
-        <p className="mt-1 whitespace-pre-line">{cut || tail.length === 0 ? body : tail.join("\n\n")}</p>
-      </details>
+    <p className="flex items-center gap-1 text-xs text-hud-muted">
+      {summary}
+      {summary !== text.trim() && <DetailsButton title={title} text={text.trim()} />}
+    </p>
+  );
+}
+
+interface CardEntry {
+  key: string;
+  available: boolean;
+  card: ReactNode;
+}
+
+function CardGroups({ entries, layout }: { entries: CardEntry[]; layout: string }) {
+  const t = useTranslations("choices");
+
+  const available = entries.filter((e) => e.available);
+
+  const unavailable = entries.filter((e) => !e.available);
+
+  const group = (list: CardEntry[]) => <div className={layout}>{list.map((e) => <Fragment key={e.key}>{e.card}</Fragment>)}</div>;
+
+  return (
+    <div className="space-y-3">
+      {available.length > 0 && (
+        <div className="space-y-1">
+          {unavailable.length > 0 && <p className="hud-sc text-xs text-hud-muted">{t("picker.available")}</p>}
+          {group(available)}
+        </div>
+      )}
+      {unavailable.length > 0 && (
+        <div className="space-y-1">
+          <p className="hud-sc text-xs text-hud-muted">{t("picker.unavailable")}</p>
+          {group(unavailable)}
+        </div>
+      )}
     </div>
   );
 }
@@ -124,47 +149,49 @@ function isKnown(choice: Choice, p: ChoicePick, ctx: PickerContext) {
 }
 
 function OptionCards({ choice, ids, level, onToggle }: { choice: Choice; ids: string[]; level: number; onToggle: (id: string) => void }) {
-  const t = useTranslations("choices");
+  const names = Object.fromEntries((choice.options ?? []).map((o) => [o.id, o.name]));
 
-  const names = new Map((choice.options ?? []).map((o) => [o.id, o.name]));
+  const picked = new Set(ids);
 
-  return (
-    <div className="grid gap-2 sm:grid-cols-2">
-      {(choice.options ?? []).map((o) => {
-        const missing = (o.requires ?? []).filter((r) => !ids.includes(r));
+  const entries = (choice.options ?? []).map((o): CardEntry => {
+    const requirements = requirementsOf(o, { totalLevel: level, level, scores: NO_SCORES, picked });
 
-        const reason = o.minLevel && o.minLevel > level ? t("picker.fromLevel", { level: o.minLevel }) : missing.length > 0 ? t("picker.requires", { list: missing.map((r) => names.get(r) ?? r).join(", ") }) : undefined;
+    const available = !requirements.some(isUnmet);
 
-        return <Card key={o.id} role="checkbox" checked={ids.includes(o.id)} disabled={!!reason && !ids.includes(o.id)} onClick={() => onToggle(o.id)} title={o.name} note={reason ?? o.description?.slice(0, 160)} />;
-      })}
-    </div>
-  );
+    return { key: o.id, available, card: <ChoiceCard role="checkbox" checked={picked.has(o.id)} disabled={!available && !picked.has(o.id)} onClick={() => onToggle(o.id)} title={o.name} name={o.name} summary={summarize(o.description)} description={o.description} requirements={requirements} requirementNames={names} /> };
+  });
+
+  return <CardGroups entries={entries} layout="grid gap-2 sm:grid-cols-2" />;
 }
 
 function FeatList({ choice, value, ctx, actions }: { choice: Choice; value: ChoicePick[]; ctx: PickerContext; actions: { onToggle: (id: string) => void; onChange: (next: ChoicePick[]) => void } }) {
   const t = useTranslations("choices");
 
-  const tf = useTranslator("feats");
-
   const feats = ctx.feats.filter((f) => (choice.featTypes ?? []).includes(f.type));
 
   const setNested = (id: string, picks: Picks) => actions.onChange(value.map((p) => (p.id === id ? { ...p, picks } : p)));
 
-  return (
-    <div className="space-y-2">
-      {(choice.options ?? []).map((o) => (
-        <Card key={o.id} role="radio" checked={value.some((p) => p.id === o.id)} onClick={() => actions.onToggle(o.id)} title={o.name} note={o.description?.slice(0, 160)} />
-      ))}
-      {feats.map((f) => {
-        const met = featPrerequisiteMet(f, ctx);
+  const entries: CardEntry[] = [
+    ...(choice.options ?? []).map((o) => ({
+      key: o.id,
+      available: true,
+      card: <ChoiceCard role="radio" checked={value.some((p) => p.id === o.id)} onClick={() => actions.onToggle(o.id)} title={o.name} name={o.name} summary={summarize(o.description)} description={o.description} />,
+    })),
+    ...feats.map((f): CardEntry => {
+      const requirements = requirementsOf(f, { totalLevel: ctx.totalLevel, level: ctx.totalLevel, scores: ctx.scores });
 
-        const picked = value.find((p) => p.id === f.id);
+      const picked = value.find((p) => p.id === f.id);
 
-        const taken = !f.repeatable && !picked && (ctx.featCounts?.get(f.id) ?? 0) > 0;
+      const taken = !f.repeatable && !picked && (ctx.featCounts?.get(f.id) ?? 0) > 0;
 
-        return (
-          <div key={f.id} className="space-y-2">
-            <Card role="radio" checked={!!picked} disabled={(!met && !picked) || taken} onClick={() => actions.onToggle(f.id)} title={f.name} note={[tf(`types.${f.type}`), f.prerequisite.level ? t("picker.featLevel", { level: f.prerequisite.level }) : "", met ? "" : t("picker.featUnmet"), taken ? t("picker.featTaken") : ""].filter(Boolean).join(" · ")} />
+      const available = !requirements.some(isUnmet) && !taken;
+
+      return {
+        key: f.id,
+        available,
+        card: (
+          <div className="space-y-2">
+            <ChoiceCard role="radio" checked={!!picked} disabled={!available && !picked} onClick={() => actions.onToggle(f.id)} title={f.name} name={f.name} summary={summarize(f.description ?? undefined)} description={f.description ?? undefined} requirements={requirements} note={taken ? t("picker.featTaken") : undefined} />
             {picked && f.choices.length > 0 && (
               <div className="ml-4 space-y-3 border-l border-hud-line/40 pl-3">
                 {f.choices.map((c) => (
@@ -173,10 +200,12 @@ function FeatList({ choice, value, ctx, actions }: { choice: Choice; value: Choi
               </div>
             )}
           </div>
-        );
-      })}
-    </div>
-  );
+        ),
+      };
+    }),
+  ];
+
+  return <CardGroups entries={entries} layout="space-y-2" />;
 }
 
 function AbilityPoints({ choice, value, onChange, scores, after: scoreAfter }: { choice: Choice; value: ChoicePick[]; onChange: (next: ChoicePick[]) => void; scores: Record<AbilityKey, number>; after?: Record<AbilityKey, number> }) {

@@ -4,7 +4,7 @@ import { cleanup, fireEvent, render, screen } from "@testing-library/react";
 import { afterEach, describe, expect, it } from "vitest";
 
 import { ChoicePicker, type PickerContext } from "@/components/choices/ChoicePicker";
-import { asi, featsById, scores, sorcerer, spells } from "@/lib/utils/characters/choices/__tests__/fixtures";
+import { alert, asi, featsById, scores, sorcerer, spells } from "@/lib/utils/characters/choices/__tests__/fixtures";
 import type { Choice, ChoicePick } from "@/types/choices";
 
 const ctx = (level: number, extra: Partial<PickerContext> = {}): PickerContext => ({ level, totalLevel: level, columns: sorcerer.columns, maxSlotLevel: 1, feats: Object.values(featsById), featsById, spells, proficient: new Set(), scores, ...extra });
@@ -27,38 +27,32 @@ const choiceById = (id: string) => sorcerer.features.flatMap((f) => f.choices ??
 describe("ChoicePicker", () => {
   afterEach(cleanup);
 
-  it("long choice description: first paragraph visible, full text folded away", () => {
+  it("long choice description: only the summary line is inline, the full text opens from the info button", () => {
     const rest = "Long rules text. ".repeat(100);
 
     const { container } = render(<Harness choice={{ ...choiceById("metamagic"), description: `Pick two options.\n\n${rest}` }} context={ctx(2)} />);
 
-    const lead = screen.getByText("Pick two options.");
+    expect(screen.getByText("Pick two options.")).toBeTruthy();
+    expect(container.textContent).not.toContain("Long rules text.");
+    fireEvent.click(screen.getByRole("button", { name: "choices.picker.details" }));
 
-    expect(lead.closest("details")).toBeNull();
-    expect(container.querySelector("details")?.textContent).toContain(rest.trim());
-    expect(screen.getByText("choices.picker.moreDetails")).toBeTruthy();
+    expect(document.body.textContent).toContain("Long rules text.");
   });
 
-  it("fold holds only the rest of the text, and leading blank lines do not empty the lead", () => {
-    const { container } = render(<Harness choice={{ ...choiceById("metamagic"), description: `\n\nPick two options.\n\n${"Long rules text. ".repeat(40)}` }} context={ctx(2)} />);
+  it("short choice description stays inline without an info button", () => {
+    render(<Harness choice={{ ...choiceById("metamagic"), description: "Pick two options." }} context={ctx(2)} />);
 
     expect(screen.getByText("Pick two options.")).toBeTruthy();
-    expect(container.querySelector("details")?.textContent).not.toContain("Pick two options.");
-    expect(container.querySelector("details")?.textContent).toContain("Long rules text.");
-  });
-
-  it("short choice description stays inline without a fold", () => {
-    const { container } = render(<Harness choice={{ ...choiceById("metamagic"), description: "Pick two options." }} context={ctx(2)} />);
-
-    expect(screen.getByText("Pick two options.")).toBeTruthy();
-    expect(container.querySelector("details")).toBeNull();
+    expect(screen.queryByRole("button", { name: "choices.picker.details" })).toBeNull();
   });
 
   it("options: counter, min level reason, requires reason", () => {
     render(<Harness choice={choiceById("metamagic")} context={ctx(2)} />);
 
     expect(screen.getByText("0 / 2")).toBeTruthy();
-    expect(screen.getByText('choices.picker.fromLevel {"level":3}')).toBeTruthy();
+    expect(screen.getByText('choices.requirement.level {"need":3,"have":2}')).toBeTruthy();
+    expect(screen.getByText('choices.requirement.option {"list":"Careful Spell"}')).toBeTruthy();
+    expect(screen.getByText("choices.picker.unavailable")).toBeTruthy();
     fireEvent.click(screen.getByRole("checkbox", { name: /Quickened Spell/ }));
 
     expect(json()).toEqual([{ id: "quickened" }]);
@@ -115,6 +109,45 @@ describe("ChoicePicker", () => {
     render(<Harness choice={choice} context={ctx(1, { featCounts: taken })} initial={[{ id: "f-alert" }]} />);
 
     expect(screen.getByRole("radio", { name: /Alert/ })).not.toBeDisabled();
+  });
+
+  it("feat: unmet ability prerequisite goes to the unavailable group with numbers, met ones get a check", () => {
+    const choice = choiceById("ability-score-improvement-4");
+
+    render(<Harness choice={choice} context={ctx(4, { scores: { ...scores, strength: 10, dexterity: 10 } })} />);
+
+    expect(screen.getByText('choices.requirement.ability {"abilities":"gameTerms.abilities.strength.label / gameTerms.abilities.dexterity.label","need":13,"have":10}')).toBeTruthy();
+    expect(screen.getByRole("radio", { name: /Grappler/ })).toBeDisabled();
+    expect(screen.getByText("choices.picker.unavailable")).toBeTruthy();
+    expect(screen.getAllByText('choices.requirement.level {"need":4,"have":4}').every((el) => el.textContent?.includes("✓"))).toBe(true);
+  });
+
+  it("feat: manualText does not block and shows the DM-check line", () => {
+    const manual = { ...alert, id: "f-manual", name: "Manual", prerequisite: { manualText: ["Be a spellcaster"] } };
+
+    const choice: Choice = { id: "versatile", label: "Versatile", level: 1, count: 1, kind: "feat", featTypes: ["origin"] };
+
+    render(<Harness choice={choice} context={ctx(1, { feats: [manual] })} />);
+
+    expect(screen.getByRole("radio", { name: /Manual/ })).not.toBeDisabled();
+    expect(screen.getByText(/choices.requirement.manual/)).toBeTruthy();
+    expect(screen.queryByText("choices.picker.unavailable")).toBeNull();
+  });
+
+  it("feat: the info button opens the full description and does not change the selection", () => {
+    const long = { ...alert, id: "f-long", name: "Longwinded", description: `Short line.\n\n${"Hidden rules text. ".repeat(30)}` };
+
+    const choice: Choice = { id: "versatile", label: "Versatile", level: 1, count: 1, kind: "feat", featTypes: ["origin"] };
+
+    const { container } = render(<Harness choice={choice} context={ctx(1, { feats: [long] })} />);
+
+    expect(container.textContent).toContain("Short line.");
+    expect(container.textContent).not.toContain("Hidden rules text.");
+    fireEvent.click(screen.getByRole("button", { name: "choices.picker.details" }));
+
+    expect(document.body.textContent).toContain("Hidden rules text.");
+    expect(json()).toEqual([]);
+    expect(screen.getByRole("radio", { name: /Longwinded/, hidden: true }).getAttribute("aria-checked")).toBe("false");
   });
 
   it("feat: types filter, nested choices of the picked feat", () => {

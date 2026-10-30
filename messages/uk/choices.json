@@ -79,13 +79,11 @@
   "picker": {
     "multiclassSkills": "Навички мультикласу",
     "notFound": "Вибір не знайдено — буде прибрано при збереженні",
-    "fromLevel": "З рівня {level}",
-    "requires": "Потребує: {list}",
-    "featLevel": "рівень {level}+",
-    "featUnmet": "передумови не виконано",
     "noSpells": "У списках {lists} немає заклинань потрібних кіл",
-    "moreDetails": "Докладніше",
-    "featTaken": "вже взято"
+    "featTaken": "вже взято",
+    "available": "Можна обрати",
+    "unavailable": "Поки недоступні",
+    "details": "Докладніше"
   },
   "editor": {
     "loading": "Завантаження виборів…",
@@ -116,5 +114,11 @@
     "tableCountClassOnly": "Кількість «з таблиці класу» — лише у класі",
     "featInFeat": "Риса не може містити вибір риси",
     "nothingToSave": "Немає виборів для збереження"
+  },
+  "requirement": {
+    "level": "з {need}-го рівня, зараз {have}",
+    "ability": "{abilities}: потрібно {need}, зараз {have}",
+    "option": "спершу обери: {list}",
+    "manual": "перевіряє ДМ: {text}"
   }
 }
