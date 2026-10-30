@@ -6,7 +6,8 @@ import { HpChips } from "./HpChips";
 
 import { Portrait } from "@/components/battle/hud";
 import { LogEntryDetails } from "@/components/battle/log/LogEntryDetails";
-import { DM_ACTOR, ParticipantSide, SYSTEM_ACTOR } from "@/lib/constants/battle";
+import { ParticipantSide } from "@/lib/constants/battle";
+import { useServiceActorName } from "@/lib/i18n/use-service-actor-name";
 import { useText } from "@/lib/i18n/use-text";
 import { cn } from "@/lib/utils";
 import { logEntryView } from "@/lib/utils/battle/view";
@@ -32,7 +33,7 @@ export const LogEntryCard = memo(function LogEntryCard({ entry, actor, open, onT
 }) {
   const t = useTranslations("battle.log");
 
-  const tActors = useTranslations("battleCommon.actors");
+  const serviceActorNameOf = useServiceActorName();
 
   const text = useText();
 
@@ -40,7 +41,7 @@ export const LogEntryCard = memo(function LogEntryCard({ entry, actor, open, onT
 
   const Icon = view.kind === "hazard" ? Flame : (ICON[entry.actionType] ?? Sparkles);
 
-  const serviceActorName = entry.actorId === SYSTEM_ACTOR.actorId ? tActors("system") : entry.actorId === DM_ACTOR.actorId ? tActors("dm") : null;
+  const serviceActorName = serviceActorNameOf(entry.actorId);
 
   const enemy = entry.actorSide === ParticipantSide.ENEMY;
 
