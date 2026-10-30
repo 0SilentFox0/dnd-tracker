@@ -6,6 +6,7 @@ import { X } from "lucide-react";
 import type { SpellFormFieldsProps } from "./SpellFormBasicFields";
 
 import { AbilityEditorProvider } from "@/components/abilities/editor-context";
+import { NestedEffectsEditor } from "@/components/abilities/NestedEffectsEditor";
 import { HudSection } from "@/components/hud/form";
 import { SpellEffectCard } from "@/components/spells/form/effects/SpellEffectCard";
 import { Button } from "@/components/ui/button";
@@ -55,23 +56,17 @@ export function SpellFormEffects({ campaignId, formData, setFormData }: SpellFor
           {t("hint")}
         </p>
         <AbilityEditorProvider value={{ campaignId, errorsByPath }}>
-          <div className="space-y-2">
-            {formData.spellEffects.map((effect, i) => (
-              <SpellEffectCard
-                key={i}
-                effect={effect as SpellEffect}
-                path={`effects.${i}`}
-                actions={{
-                  onChange: (next) => setFormData({ ...formData, spellEffects: formData.spellEffects.map((x, j) => (j === i ? next : x)) }),
-                  onRemove: () => setFormData({ ...formData, spellEffects: formData.spellEffects.filter((_, j) => j !== i) }),
-                }}
-              />
-            ))}
-          </div>
+          <NestedEffectsEditor
+            effects={formData.spellEffects as SpellEffect[]}
+            path="effects"
+            className=""
+            limits={{ min: 0 }}
+            labels={{ add: t("add") }}
+            create={() => newEffect(allowedEffectKinds(SPELL_EFFECT_TRIGGER)[0], SPELL_EFFECT_TRIGGER)}
+            onChange={(spellEffects) => setFormData({ ...formData, spellEffects })}
+            renderCard={({ effect, path, actions }) => <SpellEffectCard effect={effect} path={path} actions={actions} />}
+          />
         </AbilityEditorProvider>
-        <Button type="button" size="sm" variant="outline" className="mt-2" onClick={() => setFormData({ ...formData, spellEffects: [...formData.spellEffects, newEffect(allowedEffectKinds(SPELL_EFFECT_TRIGGER)[0], SPELL_EFFECT_TRIGGER)] })}>
-          {t("add")}
-        </Button>
       </HudSection>
 
       <HudSection title={t("concentrationTitle")}>
