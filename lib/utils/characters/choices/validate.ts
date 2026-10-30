@@ -2,6 +2,7 @@ import { ABILITY_KEYS, type AbilityKey } from "@/lib/constants/abilities";
 import { API_ERRORS } from "@/lib/constants/api-errors";
 import { DND_SKILLS, type DndSkill } from "@/lib/constants/skills";
 import { isChoiceOpen, resolveChoiceCount } from "@/lib/utils/characters/choices/count";
+import { isUnmet, requirementsOf } from "@/lib/utils/characters/choices/requirements";
 import type { Choice, ChoiceErrorCode, ChoiceIssue, ChoiceOwner, ChoicePick, FeatData, Picks, SpellRef } from "@/types/choices";
 import type { ClassColumn } from "@/types/classes";
 
@@ -21,11 +22,7 @@ export interface PickContext {
 // the ICU texts of these codes end with {detail}, so the separator travels with the value
 export const choiceIssue = (path: string, code: ChoiceErrorCode, detail?: string): ChoiceIssue => ({ path, code, message: API_ERRORS[code], params: { detail: detail ? `: ${detail}` : "" } });
 
-export function featPrerequisiteMet(feat: FeatData, ctx: { totalLevel: number; scores: Readonly<Record<AbilityKey, number>> }): boolean {
-  const { level, scores } = feat.prerequisite;
-
-  return (!level || ctx.totalLevel >= level) && (!scores || scores.abilities.some((a) => ctx.scores[a] >= scores.min));
-}
+export const featPrerequisiteMet = (feat: FeatData, ctx: { totalLevel: number; scores: Readonly<Record<AbilityKey, number>> }): boolean => requirementsOf(feat, { ...ctx, level: ctx.totalLevel }).every((r) => r.met);
 
 const duplicates = (picks: ChoicePick[]) => picks.length !== new Set(picks.map((p) => p.id)).size;
 
@@ -39,9 +36,11 @@ function optionIssues(choice: Choice, picks: ChoicePick[], ctx: PickContext, at:
 
     if (!option) return [choiceIssue(at, "CHOICE_UNKNOWN", p.id)];
 
-    if (option.minLevel && option.minLevel > ctx.level) return [choiceIssue(at, "CHOICE_MIN_LEVEL", option.name)];
+    const unmet = requirementsOf(option, { totalLevel: ctx.totalLevel, level: ctx.level, scores: ctx.scores, picked }).filter(isUnmet);
 
-    return (option.requires ?? []).every((r) => picked.has(r)) ? [] : [choiceIssue(at, "CHOICE_REQUIRES", option.name)];
+    if (unmet.some((r) => r.kind === "level")) return [choiceIssue(at, "CHOICE_MIN_LEVEL", option.name)];
+
+    return unmet.length ? [choiceIssue(at, "CHOICE_REQUIRES", option.name)] : [];
   });
 }
 
