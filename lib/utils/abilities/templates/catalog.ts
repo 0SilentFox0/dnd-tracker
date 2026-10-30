@@ -4,11 +4,10 @@ import { DAMAGE_ELEMENT_OPTIONS } from "@/lib/constants/damage";
 import { newEffect } from "@/lib/utils/abilities/editor";
 import type { Effect, EffectKind, Trigger } from "@/lib/utils/abilities/schema";
 import { CONDITION_5E_KEYS, CONDITION_KEYS, DAMAGE_FILTER_KINDS, STAT_KEYS } from "@/lib/utils/abilities/schema/kinds";
+import { SPELL_EFFECT_TRIGGER } from "@/lib/utils/spells/editor/spell-only";
 import type { SpellEffect } from "@/lib/utils/spells/model/schema";
 
 export const RECIPE_CATEGORIES: readonly RecipeCategory[] = ["defense", "offense", "support", "resource", "control"];
-
-const SPELL_EFFECT_TRIGGER: Trigger = { event: "action" };
 
 const PASSIVE: Trigger = { event: "passive" };
 
