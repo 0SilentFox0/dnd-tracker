@@ -122,7 +122,7 @@ async function main() {
 
     const kept = (kind: TokenKind) => Object.fromEntries(Object.entries(old[kind]).filter(([slug]) => picked.some((p) => p.kind === kind && p.slug === slug)));
 
-    writeIcons({ spells: { ...kept("spells"), ...uploaded.spells }, units: { ...kept("units"), ...uploaded.units }, artifacts: { ...kept("artifacts"), ...uploaded.artifacts } });
+    writeIcons({ ...old, spells: { ...kept("spells"), ...uploaded.spells }, units: { ...kept("units"), ...uploaded.units }, artifacts: { ...kept("artifacts"), ...uploaded.artifacts } });
   }
 
   if (errors.length > 0) process.exitCode = 1;
