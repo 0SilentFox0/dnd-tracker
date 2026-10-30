@@ -19,4 +19,12 @@ describe("loadDigestItems", () => {
 
     expect(await loadDigestItems("camp")).toEqual([{ id: "a", title: "A", sortOrder: 1, digest: "d", stale: true }]);
   });
+
+  it("orders rows deterministically", async () => {
+    queryRaw.mockResolvedValue([]);
+
+    await loadDigestItems("camp");
+
+    expect((queryRaw.mock.calls[0][0] as string[]).join("")).toContain('ORDER BY p."sortOrder", p.title, p.id');
+  });
 });

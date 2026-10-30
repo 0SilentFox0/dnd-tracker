@@ -218,12 +218,22 @@ it("small budget shrinks digest first, keeping standing and focusPage whole", as
 
   vi.mocked(prisma.scenarioPage.findFirst).mockResolvedValue({ id: "f", title, content: { legend: [], sections: [] } } as never);
 
-  const out = await buildInstructions({ ...args, focus: { pageId: "f" } });
+  const disclosure = vi.fn();
+
+  const out = await buildInstructions({ ...args, focus: { pageId: "f" }, onDisclosure: disclosure });
 
   expect(out.length).toBeLessThanOrEqual(40000);
-  expect(out).toContain("Поважай стиль");
+
+  const { blocks, truncated } = disclosure.mock.calls[0][0];
+
+  expect(blocks).toEqual(expect.arrayContaining(["standing", "focusPage"]));
+
+  expect(truncated).toBe(true);
+  expect(blocks).toContain("digest");
+  expect(out).toContain("[truncated]");
   expect(out).toContain(title);
   expect(out).not.toContain("D".repeat(3000));
+  expect(out).toContain("D".repeat(100));
 });
 it("token actor is rejected before the digest query", async () => {
   await expect(buildInstructions({ ...args, caller: { ...caller, channel: "mcp", tokenId: "verified", actor: { ...caller.actor, via: "token", scopes: ["ai"] } } })).rejects.toMatchObject({ status: 403 });

@@ -44,6 +44,8 @@ function liveScene(title: string, content: ScenarioContent): string {
   return [`Scene: ${title}`, played.length && `Already played: ${played.join(", ")}`, current ? `Current section:\n${sectionToMarkdown(current)}` : "All sections have been played."].filter(Boolean).join("\n\n");
 }
 
+const DIGEST_LABEL = "Page summaries (DM-only, only pages that have one; (stale) = page edited since; read full text via read_scenario_page)";
+
 export type SourceNoteSelection = { source: "session-ui"; selectedKeys: string[] };
 
 export async function buildInstructions({ campaignId, mode, pageId, focus, caller, sourceNoteSelection, onDisclosure }: { campaignId: string; mode: AiThreadMode; pageId: string | null; focus?: AiFocus; caller: AssistantCaller; sourceNoteSelection?: SourceNoteSelection; onDisclosure?: (value: AssistantContextDisclosure) => void }): Promise<string> {
@@ -119,7 +121,7 @@ export async function buildInstructions({ campaignId, mode, pageId, focus, calle
 
   const digest = summariesDigest(digestItems, { maxChars: AI_LIMITS.digestChars });
 
-  if (digest) blocks.push({ id: "digest", label: "Page summaries (DM-only, only pages that have one; (stale) = page edited since; read full text via read_scenario_page)", maxChars: AI_LIMITS.digestChars + 200, text: digest });
+  if (digest) blocks.push({ id: "digest", label: DIGEST_LABEL, maxChars: AI_LIMITS.digestChars + DIGEST_LABEL.length + 2, text: digest });
 
   let blockIds: ContextBlockId[] = [];
 

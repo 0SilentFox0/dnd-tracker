@@ -56,7 +56,8 @@ export async function loadDigestItems(campaignId: string): Promise<DigestItem[]>
   const rows = await prisma.$queryRaw<{ id: string; title: string; sortOrder: number; digest: string | null; stale: boolean }[]>`
     SELECT p.id, p.title, p."sortOrder", s.summary->>'digest' AS digest, s.version < p.version AS stale
     FROM scenario_page_summaries s JOIN scenario_pages p ON p.id = s."pageId"
-    WHERE s."campaignId" = ${campaignId}`;
+    WHERE s."campaignId" = ${campaignId}
+    ORDER BY p."sortOrder", p.title, p.id`;
 
   return rows.flatMap((r) => (r.digest?.trim() ? [{ id: r.id, title: r.title, sortOrder: r.sortOrder, digest: r.digest, stale: r.stale }] : []));
 }
