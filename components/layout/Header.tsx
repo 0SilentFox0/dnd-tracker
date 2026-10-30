@@ -61,7 +61,7 @@ export function Header() {
 
   const isBattlePage = BATTLE_PATH.test(pathname ?? "");
 
-  const width = isBattlePage ? "w-full px-6" : "container mx-auto px-4";
+  const width = isBattlePage ? "w-full px-3 sm:px-6" : "container mx-auto px-4";
 
   return (
     <header className="sticky top-0 z-50 w-full border-b border-hud-rule bg-[#0b0908]/[.97]">
@@ -121,7 +121,7 @@ export function Header() {
           )}
         </div>
 
-        <div className="flex items-center gap-2">
+        <div className="flex min-w-0 items-center gap-1 sm:gap-2">
           <JoinBattleButton />
           <WatchShowButton />
           {email && <WhatsNewButton />}
