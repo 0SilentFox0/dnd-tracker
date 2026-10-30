@@ -162,7 +162,7 @@
     },
     "spellIngredients": {
       "label": "Spell ingredients",
-      "description": "Costly or consumed material components are checked when casting in battle and spent from the hero's inventory items; a shortfall can be covered with gold from the wallet. Existing spells without ingredients are unchanged."
+      "description": "Costly or consumed material components are checked when casting in battle and spent from the hero's inventory items; a shortfall can be covered with gold from the wallet. Non-consumed components only have to be in the inventory and are never spent. Spending is kept after the battle only with the \"persist resources\" out-of-combat rule on. Existing spells without ingredients are unchanged."
     }
   },
   "customConditions": {

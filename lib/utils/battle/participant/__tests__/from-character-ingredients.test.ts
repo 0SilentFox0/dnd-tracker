@@ -40,6 +40,14 @@ describe("hero ingredient stock", () => {
     expect((await build(rules, { ...character, inventory: null })).battleData.ingredientStock).toEqual(empty);
   });
 
+  it("skips DM-controlled characters and omits the purse when autoPay is off", async () => {
+    const rules = { spellIngredients: { enabled: true } };
+
+    expect((await build(rules, { ...character, controlledBy: "dm" })).battleData.ingredientStock).toBeUndefined();
+    expect((await build(rules, { ...character, controlledBy: null })).battleData.ingredientStock).toBeUndefined();
+    expect((await build({ spellIngredients: { enabled: true, autoPay: false } })).battleData.ingredientStock?.purseCp).toBe(0);
+  });
+
   it("refreshFromSource keeps used and usedCp, takes fresh quantities", async () => {
     const fresh = await build({ spellIngredients: { enabled: true } });
 

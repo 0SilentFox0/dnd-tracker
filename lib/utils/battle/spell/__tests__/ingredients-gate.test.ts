@@ -15,7 +15,7 @@ const source = { free: false };
 
 describe("ingredientsGate", () => {
   it("rejects a hero with an empty stock", () => {
-    const stock = buildIngredientStock({ items: [], gold: 0, silver: 0, copper: 0 });
+    const stock = buildIngredientStock({ items: [], gold: 0, silver: 0, copper: 0 }, { withPurse: true });
 
     expect(() => ingredientsGate(caster(stock), spell, rules, source)).toThrow();
   });
