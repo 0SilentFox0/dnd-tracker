@@ -5,18 +5,15 @@ import { persistedHeroes } from "./persist-resources";
 import { COIN_VALUE, InventoryLogKind } from "@/lib/constants/inventory";
 import { lockCampaignArtifacts } from "@/lib/server/artifacts/lock";
 import { normalizeItems } from "@/lib/utils/inventory/items";
-import { spendCoins, toCopper } from "@/lib/utils/inventory/money";
+import { spendCoins, toCopper, walletToPurse } from "@/lib/utils/inventory/money";
 import { spendConsumables } from "@/lib/utils/items/consumables";
 import type { Ruleset } from "@/lib/utils/rules";
 import type { BattleParticipant } from "@/types/battle";
-import type { Purse } from "@/types/inventory";
 
 type Wallet = { gold: number; silver: number; copper: number };
 
-const toPurse = (w: Wallet): Purse => ({ gp: w.gold, sp: w.silver, cp: w.copper });
-
 export function spendCp(wallet: Wallet, cp: number): Wallet {
-  const purse = toPurse(wallet);
+  const purse = walletToPurse(wallet);
 
   const wholeGp = Math.floor(cp / COIN_VALUE.gp);
 
@@ -66,11 +63,11 @@ export async function persistIngredients(
 
     const { items, used } = spendConsumables(normalizeItems(inv.items), byItem);
 
-    const before = toCopper(toPurse(inv));
+    const before = toCopper(walletToPurse(inv));
 
     const wallet = usedCp > 0 ? spendCp(inv, usedCp) : inv;
 
-    const paidCp = before - toCopper(toPurse(wallet));
+    const paidCp = before - toCopper(walletToPurse(wallet));
 
     if (used.length === 0 && paidCp <= 0) continue;
 

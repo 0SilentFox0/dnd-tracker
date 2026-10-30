@@ -37,6 +37,15 @@ describe("ItemDialog ingredient fields", () => {
     await waitFor(() => expect(mutateAsync).toHaveBeenCalledWith(expect.objectContaining({ action: "addItem", name: "Gem", worthGp: 50, ingredient: "diamond-dust" })));
   });
 
+  it("accepts a Cyrillic alias", async () => {
+    await render(null);
+    fireEvent.change(screen.getByLabelText("Name"), { target: { value: "Gem" } });
+    fireEvent.change(screen.getByLabelText("Ingredient for… (optional)"), { target: { value: "Рубін пил" } });
+    fireEvent.click(screen.getByRole("button", { name: "Save" }));
+
+    await waitFor(() => expect(mutateAsync).toHaveBeenCalledWith(expect.objectContaining({ ingredient: "рубін-пил" })));
+  });
+
   it("omits both fields for a plain legacy item", async () => {
     await render({ id: "i", name: "Key", quantity: 1, consumable: false });
     fireEvent.click(screen.getByRole("button", { name: "Save" }));

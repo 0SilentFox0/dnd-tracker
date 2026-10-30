@@ -1,12 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { buildIngredientStock, purseToCp } from "@/lib/utils/spells/ingredients/stock";
-
-describe("purseToCp", () => {
-  it("converts coins to copper", () => {
-    expect(purseToCp({ gold: 1, silver: 5, copper: 20 })).toBe(170);
-  });
-});
+import { buildIngredientStock } from "@/lib/utils/spells/ingredients/stock";
 
 describe("buildIngredientStock", () => {
   it("returns an empty stock without items and money, or without an inventory", () => {
