@@ -1,4 +1,3 @@
-import { docText } from "@/lib/utils/scenario/doc";
 import type { ScenarioAiOp } from "@/types/ai";
 import type { RichDoc, RichNode } from "@/types/scenario";
 
@@ -87,8 +86,32 @@ export function sectionOfMention(ops: ScenarioAiOp[], id: string): string | unde
 
 const countMentions = (nodes: RichNode[]): number => nodes.reduce((n, node) => n + (node.type === "mention" ? 1 : 0) + countMentions(node.content ?? []), 0);
 
+const asText = (n: RichNode): RichNode => (n.type === "mention" ? { type: "text", text: String(n.attrs?.label ?? ""), ...(n.marks && { marks: n.marks }) } : n);
+
+const sameMarks = (a: RichNode, b: RichNode) => JSON.stringify(a.marks ?? []) === JSON.stringify(b.marks ?? []);
+
+function flatten(nodes: RichNode[]): RichNode[] {
+  const out: RichNode[] = [];
+
+  for (const raw of nodes) {
+    const n = asText(raw);
+
+    const last = out[out.length - 1];
+
+    if (n.type === "text" && last?.type === "text" && sameMarks(last, n)) {
+      out[out.length - 1] = { ...last, text: `${last.text ?? ""}${n.text ?? ""}` };
+      continue;
+    }
+
+    out.push(n.content ? { ...n, content: flatten(n.content) } : n);
+  }
+
+  return out;
+}
+
+/** Number of chips added when the doc differs only by turning plain text into chips (marks and atoms intact), else null. */
 export function addedMentionCount(before: RichDoc, after: RichDoc): number | null {
-  if (docText(before) !== docText(after)) return null;
+  if (JSON.stringify(flatten(before.content)) !== JSON.stringify(flatten(after.content))) return null;
 
   const added = countMentions(after.content) - countMentions(before.content);
 

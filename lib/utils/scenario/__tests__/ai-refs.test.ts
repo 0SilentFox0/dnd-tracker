@@ -57,4 +57,23 @@ describe("addedMentionCount", () => {
   it("returns null for an identical doc", () => {
     expect(addedMentionCount(d(chip("Бі")), d(chip("Бі")))).toBeNull();
   });
+
+  it("returns null when a secret mark is lost while a chip is added", () => {
+    const secret = [{ type: "secret" }];
+
+    expect(addedMentionCount(d({ ...text("Бі"), marks: secret }), d(chip("Бі"), text("")))).toBeNull();
+    expect(addedMentionCount(d({ ...text("Бі й Ян"), marks: secret }), d(chip("Бі"), text(" й Ян")))).toBeNull();
+  });
+
+  it("returns null when an image is dropped while a chip is added", () => {
+    const image = { type: "image", attrs: { src: "x" } };
+
+    expect(addedMentionCount(d(text("Бі "), image), d(chip("Бі"), text(" ")))).toBeNull();
+  });
+
+  it("keeps marks equal across a chip-only change", () => {
+    const secret = [{ type: "secret" }];
+
+    expect(addedMentionCount(d({ ...text("Бі й Ян"), marks: secret }), d({ ...chip("Бі"), marks: secret }, { ...text(" й Ян"), marks: secret }))).toBe(1);
+  });
 });
