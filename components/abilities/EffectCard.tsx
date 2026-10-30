@@ -75,7 +75,7 @@ export function EffectCard({ effect, trigger, path, actions, kinds, extraKinds =
     <div className="space-y-2 rounded-md border bg-muted/30 p-2">
       <div className="flex items-start gap-2">
         <div className="flex-1">
-          <SelectField value={effect.kind} options={options} onValueChange={(k) => (extraKinds.some((x) => x.value === k) ? actions.onSwitchKind?.(k) : actions.onChange(changeEffectKind(effect, k as EffectKind, trigger)))} />
+          <SelectField value={effect.kind} options={options} onValueChange={(k) => (extraKinds.some((x) => x.value === k) ? actions.onSwitchKind?.(k) : actions.onChange(changeEffectKind(effect, k as EffectKind, trigger, t("defaultNote"))))} />
         </div>
         <Button type="button" size="icon" variant="ghost" onClick={actions.onRemove} disabled={!actions.onRemove} title={actions.onRemove ? undefined : t("minOptions")} aria-label={t("delete")}>
           <X className="h-4 w-4" />

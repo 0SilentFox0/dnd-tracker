@@ -218,5 +218,6 @@
       "formula": "{archetype, select, warrior {Warrior} paladin {Paladin} ranger {Archer} rogue {Rogue} mage {Mage} other {Universal}}: {baseLevels} × {hpPerLevel} + level × ({hpPerLevel} + CON mod {conMod} × {conCoefficient})",
       "total": "= {base} + {level} × {perLevel} = {total}"
     }
-  }
+  },
+  "battleXpNote": "Victory in battle"
 }

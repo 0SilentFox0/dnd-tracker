@@ -10,8 +10,7 @@ export const CIRCLE_SIZE: Record<Circle, number> = { outer: 3, middle: 2, inner:
 
 export const RACIAL_BRANCH_ID = "racial";
 
-// eslint-disable-next-line no-restricted-syntax -- pseudo-branch name stored in the tree JSON
-export const RACIAL_BRANCH_NAME = "Раса";
+export const RACIAL_BRANCH_NAME = "Race";
 
 export const ULTIMATE_BRANCH_ID = "ultimate";
 

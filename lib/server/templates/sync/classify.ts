@@ -5,7 +5,6 @@ import { indexOf, type SyncIndex } from "@/lib/server/templates/sync/index";
 import { getEntry } from "@/lib/server/templates/sync/state";
 import { IGNORED_DELETED, type SyncContext, type SyncItem } from "@/lib/server/templates/sync/types";
 import { hashJson } from "@/lib/utils/battle/store/stable-json";
-import { MECHANIC_REGISTRY } from "@/lib/utils/rules/registry";
 import { parseRules } from "@/lib/utils/rules/schema";
 import type { SourceSyncStatus } from "@/types/campaigns";
 
@@ -32,10 +31,10 @@ function item(ctx: SyncContext, fields: ItemFields): SyncItem {
   return { localId: null, requires: [], visible: true, ...fields, ignored: ignoredHash !== undefined && ignoredHash === (fields.sourceHash ?? IGNORED_DELETED) };
 }
 
-export function classify(ctx: SyncContext): SyncItem[] {
+export function classify(ctx: SyncContext, ruleLabel: (key: string) => string = (key) => key): SyncItem[] {
   const index = indexOf(ctx);
 
-  return [...BUNDLE_TABLES.flatMap((t) => classifyTable(ctx, t, index)), ...classifyRules(ctx), ...classifySettings(ctx)];
+  return [...BUNDLE_TABLES.flatMap((t) => classifyTable(ctx, t, index)), ...classifyRules(ctx, ruleLabel), ...classifySettings(ctx)];
 }
 
 function classifyTable(ctx: SyncContext, t: BundleTableDef, index: SyncIndex): SyncItem[] {
@@ -100,7 +99,7 @@ function classifyTable(ctx: SyncContext, t: BundleTableDef, index: SyncIndex): S
   return out;
 }
 
-function classifyRules(ctx: SyncContext): SyncItem[] {
+function classifyRules(ctx: SyncContext, ruleLabel: (key: string) => string): SyncItem[] {
   const src = parseRules(ctx.sourceBundle.rules) as Record<string, unknown>;
 
   const loc = parseRules(ctx.target.rules) as Record<string, unknown>;
@@ -116,7 +115,7 @@ function classifyRules(ctx: SyncContext): SyncItem[] {
 
     const b = (loc[key] ?? {}) as Record<string, unknown>;
 
-    return [item(ctx, { scope: "rules", key, name: MECHANIC_REGISTRY[key].label, status, changedFields: changed(a, b, [...new Set([...Object.keys(a), ...Object.keys(b)])]), sourceHash: s })];
+    return [item(ctx, { scope: "rules", key, name: ruleLabel(key), status, changedFields: changed(a, b, [...new Set([...Object.keys(a), ...Object.keys(b)])]), sourceHash: s })];
   });
 }
 

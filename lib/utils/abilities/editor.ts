@@ -25,8 +25,7 @@ const EFFECT_DEFAULTS: { [K in EffectKind]: WithoutKind<Extract<Effect, { kind: 
   modifyStat: { stat: "armor", flat: 1 },
   damageBonus: { filter: { kind: "all" }, percent: 10 },
   flag: { flag: "advantage", attackKind: "all" },
-  // eslint-disable-next-line no-restricted-syntax -- default note text is stored in the ability
-  note: { text: "Опис" },
+  note: { text: "" },
   grantAction: { refreshAction: true },
   dealDamage: { amount: "1d6", target: "eventTarget" },
   heal: { amount: "1d8" },
@@ -51,7 +50,7 @@ const EFFECT_DEFAULTS: { [K in EffectKind]: WithoutKind<Extract<Effect, { kind: 
   randomOf: { options: [{ kind: "heal", amount: "1d4" }, { kind: "changeMorale", delta: 1 }] },
 };
 
-const baseEffect = (kind: EffectKind): Effect => ({ kind, ...structuredClone(EFFECT_DEFAULTS[kind]) }) as Effect;
+const baseEffect = (kind: EffectKind, noteText: string): Effect => ({ kind, ...structuredClone(EFFECT_DEFAULTS[kind]), ...(kind === "note" && { text: noteText }) }) as Effect;
 
 function fitToTrigger(effect: Effect, trigger: Trigger): Effect {
   if (trigger.event === "passive") {
@@ -72,12 +71,12 @@ function fitToTrigger(effect: Effect, trigger: Trigger): Effect {
   return effect;
 }
 
-export function newEffect(kind: EffectKind, trigger: Trigger): Effect {
-  return fitToTrigger(baseEffect(kind), trigger);
+export function newEffect(kind: EffectKind, trigger: Trigger, noteText = ""): Effect {
+  return fitToTrigger(baseEffect(kind, noteText), trigger);
 }
 
-export function changeEffectKind(effect: Effect, kind: EffectKind, trigger: Trigger): Effect {
-  const next = baseEffect(kind) as Record<string, unknown>;
+export function changeEffectKind(effect: Effect, kind: EffectKind, trigger: Trigger, noteText = ""): Effect {
+  const next = baseEffect(kind, noteText) as Record<string, unknown>;
 
   const old = effect as Record<string, unknown>;
 

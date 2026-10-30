@@ -184,5 +184,9 @@
     "statusActive": "active",
     "statusPrepared": "prepared",
     "close": "Close"
+  },
+  "defaultNames": {
+    "meleeAttack": "Unarmed Strike",
+    "rangedAttack": "Ranged Attack"
   }
 }

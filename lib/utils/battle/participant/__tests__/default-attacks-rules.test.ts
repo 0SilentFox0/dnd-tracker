@@ -15,9 +15,9 @@ describe("базові атаки героя з правил кампанії", 
     expect(attacks.map((a) => a.name)).toEqual(["Кулак", "Камінь"]);
   });
 
-  it("без правил — Звичайний удар / Звичайний постріл", async () => {
+  it("без правил — англійські назви за замовчуванням", async () => {
     const attacks = await extractAttacksFromCharacter(hero, {});
 
-    expect(attacks.map((a) => a.name)).toEqual(["Звичайний удар", "Звичайний постріл"]);
+    expect(attacks.map((a) => a.name)).toEqual(["Unarmed Strike", "Ranged Attack"]);
   });
 });

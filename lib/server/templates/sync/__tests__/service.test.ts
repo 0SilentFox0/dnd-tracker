@@ -28,7 +28,7 @@ describe("source sync service", () => {
   it("diff читає контекст з перевіркою доступу користувача", async () => {
     expect(await getSourceDiff(actor, "spells")).toEqual({ items: [] });
     expect(loadSyncContext).toHaveBeenCalledWith(prisma, "t", actor);
-    expect(buildDiff).toHaveBeenCalledWith(prisma, {}, "spells");
+    expect(buildDiff).toHaveBeenCalledWith(prisma, {}, "spells", expect.any(Function));
   });
 
   it("помилка доступу з контексту йде нагору без diff", async () => {

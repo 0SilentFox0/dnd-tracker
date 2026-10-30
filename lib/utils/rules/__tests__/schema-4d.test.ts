@@ -24,6 +24,6 @@ describe("rules.outOfCombat", () => {
   });
 
   it("is a registered mechanic", () => {
-    expect(MECHANIC_REGISTRY.outOfCombat.label).toBe("Поза боєм");
+    expect(MECHANIC_REGISTRY.outOfCombat).toBe(true);
   });
 });

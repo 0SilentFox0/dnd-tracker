@@ -7,29 +7,35 @@ export const SPELL_IDS_QUERY_MAX = 200;
 
 export const MAX_SPELL_LEVEL = 9;
 
-/* eslint-disable no-restricted-syntax -- spell group names stored in the DB */
-const SPELL_CIRCLE_ORDINALS = ["", "Перше", "Друге", "Третє", "Четверте", "П'яте", "Шосте", "Сьоме", "Восьме", "Дев'яте"];
+/* eslint-disable no-restricted-syntax -- matching data: group names saved in either locale are parsed back to a level */
+const CIRCLE_ORDINALS = [
+  ["", "Перше", "Друге", "Третє", "Четверте", "П'яте", "Шосте", "Сьоме", "Восьме", "Дев'яте"],
+  ["", "First", "Second", "Third", "Fourth", "Fifth", "Sixth", "Seventh", "Eighth", "Ninth"],
+];
 
-const CANTRIP_NAME = "Замовляння";
+const CANTRIP_NAMES = ["Замовляння", "Cantrip"];
+
+const CIRCLE_SUFFIXES = ["коло", "circle", "level"];
 
 export const ROMAN_NUMERALS = ["0", "I", "II", "III", "IV", "V", "VI", "VII", "VIII", "IX", "X"] as const;
 
-export function spellLevelName(level: number): string {
-  if (level <= 0) return CANTRIP_NAME;
-
-  const ordinal = SPELL_CIRCLE_ORDINALS[level];
-
-  return ordinal ? `${ordinal} коло` : `${level}-те коло`;
+export function spellLevelName(level: number, t: (key: string) => string): string {
+  return level >= 0 && level <= MAX_SPELL_LEVEL ? t(`spellLevels.${level}`) : String(level);
 }
 
 export function spellLevelFromName(name: string): number {
-  if (name === CANTRIP_NAME) return 0;
+  const text = name.trim().toLowerCase();
 
-  const index = SPELL_CIRCLE_ORDINALS.findIndex((ordinal, i) => i > 0 && name === `${ordinal} коло`);
+  if (CANTRIP_NAMES.some((n) => n.toLowerCase() === text)) return 0;
 
-  return index > 0 ? index : parseInt(name, 10) || 0;
+  for (const ordinals of CIRCLE_ORDINALS) {
+    const index = ordinals.findIndex((ordinal, i) => i > 0 && CIRCLE_SUFFIXES.some((suffix) => text === `${ordinal.toLowerCase()} ${suffix}`));
+
+    if (index > 0) return index;
+  }
+
+  return parseInt(text, 10) || 0;
 }
-
 /* eslint-enable no-restricted-syntax */
 
 export function spellLevelRoman(level: number): string {

@@ -1,4 +1,5 @@
-import { type AbilityScores, ARCHETYPE_CLASS, ARCHETYPE_PRIMARY, assignByPriority, assignStandardArray, classPrimaryAbilities } from "./abilities";
+import { type AbilityScores, ARCHETYPE_PRIMARY, assignByPriority, assignStandardArray, classPrimaryAbilities } from "./abilities";
+import { archetypeClasses } from "./archetype-class";
 import { generateBackstory } from "./backstory";
 import { generateName } from "./names";
 import { createRng, pick } from "./rng";
@@ -26,12 +27,9 @@ export interface GeneratedCharacter {
   goals: Array<{ text: string; kind: GoalKind }>;
 }
 
-const ARCHETYPE_CLASS_EN: Record<HeroArchetypeKey, string> = { warrior: "Warrior", paladin: "Paladin", ranger: "Ranger", rogue: "Rogue", mage: "Mage" };
-
 export const GENERATOR_POOLS = {
   alignments: ALIGNMENTS,
   archetypes: HERO_ARCHETYPE_KEYS,
-  classes: HERO_ARCHETYPE_KEYS.map((k) => ARCHETYPE_CLASS[k]),
 } as const;
 
 export function generateCharacter({ races, seed, classes = [], locale = "uk" }: { races: string[]; seed: number; classes?: GeneratorClass[]; locale?: Locale }): GeneratedCharacter {
@@ -55,7 +53,7 @@ export function generateCharacter({ races, seed, classes = [], locale = "uk" }: 
     name,
     race,
     archetype,
-    class: cls?.name ?? (locale === "en" ? ARCHETYPE_CLASS_EN : ARCHETYPE_CLASS)[archetype],
+    class: cls?.name ?? archetypeClasses(locale)[archetype],
     ...(cls && { classId: cls.id }),
     alignment: pick(rng, ALIGNMENTS),
     method: "standard",

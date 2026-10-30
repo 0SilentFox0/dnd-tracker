@@ -81,7 +81,7 @@ exports[`battle participant: item refs > frozen complete participant keeps grant
         "damageDice": "1",
         "damageType": "physical",
         "id": "default-melee",
-        "name": "Звичайний удар",
+        "name": "Unarmed Strike",
         "type": "melee",
       },
       {
@@ -89,7 +89,7 @@ exports[`battle participant: item refs > frozen complete participant keeps grant
         "damageDice": "",
         "damageType": "physical",
         "id": "default-ranged",
-        "name": "Звичайний постріл",
+        "name": "Ranged Attack",
         "type": "ranged",
       },
     ],

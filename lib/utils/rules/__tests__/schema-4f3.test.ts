@@ -24,7 +24,7 @@ describe("rules.items", () => {
   });
 
   it("is a registered mechanic and the SRD preset turns it on", () => {
-    expect(MECHANIC_REGISTRY.items.label).toBe("Предмети");
+    expect(MECHANIC_REGISTRY.items).toBe(true);
     expect(SRD_RULES.items).toEqual({ enabled: true, attunementLimit: 3 });
   });
 });

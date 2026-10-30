@@ -36,10 +36,10 @@ export function PrintSpellsPageClient({
   const tg = useTranslator("gameTerms");
 
   const groupedSpells = useMemo(() => {
-    const map = groupSpellsByGroupAndLevel(initialSpells);
+    const map = groupSpellsByGroupAndLevel(initialSpells, tg);
 
     return convertGroupedSpellsToArray(map);
-  }, [initialSpells]);
+  }, [initialSpells, tg]);
 
   return (
     <div>

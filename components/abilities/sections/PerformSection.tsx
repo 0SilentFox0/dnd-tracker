@@ -7,12 +7,6 @@ import { useAbilityEditor, useErrorsUnder } from "../editor-context";
 import { FieldErrors } from "../FieldErrors";
 import { SectionTitle } from "./SectionTitle";
 
-// eslint-disable-next-line no-restricted-syntax -- default note text is stored in the ability
-const ATTACK_NOTE = "Виконує атаку";
-
-// eslint-disable-next-line no-restricted-syntax -- default note text is stored in the ability
-const SPELL_NOTE = "Застосовує заклинання";
-
 export function PerformSection({ ability, path, onChange }: Omit<AbilitySectionProps, "state">) {
   const t = useTranslations("abilities.perform");
 
@@ -27,7 +21,7 @@ export function PerformSection({ ability, path, onChange }: Omit<AbilitySectionP
   const changeKind = (kind: string) => {
     const { perform: _p, ...rest } = ability;
 
-    onChange(kind === "attack" ? { ...rest, perform: { kind, attack: performChoices?.attacks[0]?.name ?? "" }, effects: [{ kind: "note", text: ability.description || ATTACK_NOTE }] } : kind === "spell" ? { ...rest, perform: { kind, spellId: performChoices?.spells[0]?.id ?? "" }, effects: [{ kind: "note", text: ability.description || SPELL_NOTE }] } : rest);
+    onChange(kind === "attack" ? { ...rest, perform: { kind, attack: performChoices?.attacks[0]?.name ?? "" }, effects: [{ kind: "note", text: ability.description || t("attackNote") }] } : kind === "spell" ? { ...rest, perform: { kind, spellId: performChoices?.spells[0]?.id ?? "" }, effects: [{ kind: "note", text: ability.description || t("spellNote") }] } : rest);
   };
 
   return (

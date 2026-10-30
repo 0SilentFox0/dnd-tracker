@@ -6,8 +6,7 @@ export const DEFAULT_RULES: Ruleset = {
   formulas: { saveDcBase: 8, proficiencyBase: 2, proficiencyEvery: 4 },
   heroScaling: { meleeDiceByLevel: null, rangedDiceByLevel: null, hpBaseLevels: 3, hpConCoefficient: 1.5 },
   initiative: { heroMin: 10, heroMax: 16, mode: "static" },
-  // eslint-disable-next-line no-restricted-syntax -- default attack names stored in campaign rules
-  defaultAttacks: { meleeName: "Звичайний удар", rangedName: "Звичайний постріл" },
+  defaultAttacks: { meleeName: "Unarmed Strike", rangedName: "Ranged Attack" },
   saves: { proficiency: false },
   deathSaves: { enabled: false, unitsDieAtZero: true },
   concentration: { enabled: false, dcCap: null },
@@ -19,3 +18,7 @@ export const DEFAULT_RULES: Ruleset = {
   items: { enabled: false, attunementLimit: 3 },
   spellIngredients: { enabled: false, autoPay: true },
 };
+
+export function localizedDefaultAttacks(t: (key: string) => string): Ruleset["defaultAttacks"] {
+  return { meleeName: t("defaultNames.meleeAttack"), rangedName: t("defaultNames.rangedAttack") };
+}

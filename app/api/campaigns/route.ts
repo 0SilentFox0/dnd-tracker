@@ -5,6 +5,7 @@ import { kvGet, kvSet } from "@/lib/cache/kv";
 import { API_ERRORS } from "@/lib/constants/api-errors";
 import { CampaignKind } from "@/lib/constants/campaigns";
 import { prisma } from "@/lib/db";
+import { getRequestLocale } from "@/lib/i18n/request-locale";
 import { createCampaignSchema } from "@/lib/schemas";
 import { CAMPAIGN_OMIT, createCampaignForUser } from "@/lib/server/campaigns/create-campaign";
 import { ensureDbUser, PUBLIC_USER_SELECT } from "@/lib/server/users/db-user";
@@ -31,7 +32,7 @@ export async function POST(request: Request) {
 
     await ensureDbUser(authUser);
 
-    const created = await createCampaignForUser(userId, data);
+    const created = await createCampaignForUser(userId, data, { locale: await getRequestLocale() });
 
     if (!created.ok) {
       return created.status === 404

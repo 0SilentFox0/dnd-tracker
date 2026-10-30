@@ -1,7 +1,7 @@
 import { shuffle } from "./rng";
 
 import { ABILITY_KEYS, type AbilityKey } from "@/lib/constants/abilities";
-import { HERO_ARCHETYPE_KEYS, heroArchetype,type HeroArchetypeKey } from "@/lib/constants/hero-archetypes";
+import { type HeroArchetypeKey } from "@/lib/constants/hero-archetypes";
 import type { GameClassData } from "@/types/classes";
 
 export const STANDARD_ARRAY = [15, 14, 13, 12, 10, 8] as const;
@@ -21,8 +21,6 @@ export const ARCHETYPE_PRIMARY: Record<HeroArchetypeKey, AbilityKey[]> = {
   rogue: ["dexterity", "intelligence"],
   mage: ["intelligence", "wisdom"],
 };
-
-export const ARCHETYPE_CLASS = Object.fromEntries(HERO_ARCHETYPE_KEYS.map((k) => [k, heroArchetype(k).className])) as Record<HeroArchetypeKey, string>;
 
 export const pointBuySpent = (scores: AbilityScores) => ABILITY_KEYS.reduce((sum, k) => sum + (POINT_BUY_COST[scores[k]] ?? Infinity), 0);
 

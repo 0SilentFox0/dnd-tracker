@@ -102,7 +102,7 @@ export function buildCharacterSheet(input: SheetInput): CharacterSheet {
 
     const expertise = proficient && expert.has(key);
 
-    return { key, label: meta.label, ability: meta.ability, proficient, bonus: checkBonus(scores[meta.ability], proficient, expertise ? prof * 2 : prof), ...(expertise && { expertise: true as const }) };
+    return { key, label: `gameTerms.dndSkills.${key}`, ability: meta.ability, proficient, bonus: checkBonus(scores[meta.ability], proficient, expertise ? prof * 2 : prof), ...(expertise && { expertise: true as const }) };
   });
 
   const passive = (key: string) => 10 + (skills.find((s) => s.key === key)?.bonus ?? 0);

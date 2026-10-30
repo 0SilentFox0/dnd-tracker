@@ -61,7 +61,8 @@
     "minOptions": "At least 2 options are required",
     "delete": "Delete effect",
     "options": "Options (one is picked at random)",
-    "addOption": "+ option"
+    "addOption": "+ option",
+    "defaultNote": "Description"
   },
   "effects": {
     "title": "What it does",
@@ -85,7 +86,9 @@
     "attackAria": "Ability attack",
     "spellAria": "Ability spell",
     "pickAttack": "Pick an attack",
-    "pickSpell": "Pick a spell"
+    "pickSpell": "Pick a spell",
+    "attackNote": "Performs an attack",
+    "spellNote": "Casts a spell"
   },
   "limits": {
     "title": "Limits",
