@@ -1,10 +1,14 @@
 import "server-only";
+import { AI_LIMITS } from "@/lib/constants/ai";
 import { prisma } from "@/lib/db";
+import { pageFactsSchema } from "@/lib/schemas/scenario-index";
 import { type PageSummary, pageSummarySchema } from "@/lib/schemas/scenario-summary";
-import type { DigestItem } from "@/lib/utils/scenario/summary/digest";
+import { type DigestPage, pageLine } from "@/lib/utils/scenario/digest/build-lines";
+import { entityKey } from "@/lib/utils/scenario/index/build";
+import { sectionLead } from "@/lib/utils/scenario/search-text";
 import { summaryInputHash } from "@/lib/utils/scenario/summary/hash";
 import type { SummaryInputPage } from "@/lib/utils/scenario/summary/input";
-import type { ScenarioSummaryEntry } from "@/types/scenario";
+import type { PageFacts, ScenarioSummaryEntry } from "@/types/scenario";
 
 export interface SummaryRowInput {
   pageId: string;
@@ -65,12 +69,103 @@ export async function loadSummaries(campaignId: string): Promise<{ summaries: Re
   return { summaries };
 }
 
-export async function loadDigestItems(campaignId: string): Promise<DigestItem[]> {
-  const rows = await prisma.$queryRaw<{ id: string; title: string; sortOrder: number; digest: string | null; stale: boolean }[]>`
-    SELECT p.id, p.title, p."sortOrder", s.summary->>'digest' AS digest, s.version < p.version AS stale
-    FROM scenario_page_summaries s JOIN scenario_pages p ON p.id = s."pageId"
-    WHERE s."campaignId" = ${campaignId}
+interface DigestRow {
+  id: string;
+  title: string;
+  arc: string | null;
+  sortOrder: number;
+  facts: unknown;
+  digest: string | null;
+  stale: boolean | null;
+  outline: { id: string; title: string; played: boolean }[] | null;
+}
+
+const LEAD_SCAN_CHARS = 150;
+
+function rankedEntities(facts: PageFacts): string[] {
+  const counts = new Map<string, { label: string; count: number }>();
+
+  for (const section of facts.sections) {
+    for (const ref of section.refs) {
+      if (ref.secret) continue;
+
+      const key = entityKey(ref.type, ref.id);
+
+      const prev = counts.get(key);
+
+      counts.set(key, { label: prev?.label || ref.label.trim(), count: (prev?.count ?? 0) + ref.count });
+    }
+  }
+
+  return [...counts.values()]
+    .filter((e) => e.label)
+    .sort((a, b) => b.count - a.count)
+    .slice(0, AI_LIMITS.digestEntities)
+    .map((e) => e.label);
+}
+
+function parseLeads(leads: string[] | null): Map<string, string> {
+  const lines = new Map<string, string>();
+
+  for (const lead of leads ?? []) {
+    const at = lead.indexOf("\t");
+
+    if (at < 0) continue;
+
+    const text = lead.slice(at + 1);
+
+    lines.set(lead.slice(0, at), Array.from(text).length >= LEAD_SCAN_CHARS ? `${text}…` : text);
+  }
+
+  return lines;
+}
+
+function toDigestPage(row: DigestRow, leads: Map<string, string>): DigestPage {
+  const parsed = row.facts ? pageFactsSchema.safeParse(row.facts) : null;
+
+  return {
+    id: row.id,
+    title: row.title,
+    arc: row.arc,
+    sortOrder: row.sortOrder,
+    llm: row.digest?.trim() ? { digest: row.digest, stale: row.stale === true } : null,
+    sections: (row.outline ?? []).map((s) => ({ title: s.title, played: s.played, lead: sectionLead(leads.get(s.id) ?? "", s.title, AI_LIMITS.digestLeadChars) })),
+    entities: parsed?.success ? rankedEntities(parsed.data) : [],
+  };
+}
+
+function leadsFitBudget(pages: DigestPage[]): boolean {
+  const withoutLeads = pages.map((p) => pageLine(p, 1)).join("\n").length;
+
+  const sections = pages.reduce((sum, p) => sum + (p.llm ? 0 : p.sections.length), 0);
+
+  return withoutLeads + sections * (AI_LIMITS.digestLeadChars + 3) <= AI_LIMITS.digestChars;
+}
+
+export async function loadDigestItems(campaignId: string): Promise<DigestPage[]> {
+  const rows = await prisma.$queryRaw<DigestRow[]>`
+    SELECT p.id, p.title, p.arc, p."sortOrder", i.facts,
+      s.summary->>'digest' AS digest, s.version < p.version AS stale,
+      (SELECT jsonb_agg(jsonb_build_object('id', sec->>'id', 'title', sec->>'title', 'played', COALESCE((sec->>'played')::boolean, false)) ORDER BY o)
+        FROM jsonb_array_elements(p.content->'sections') WITH ORDINALITY t(sec, o)) AS outline
+    FROM scenario_pages p
+    LEFT JOIN scenario_page_index i ON i."pageId" = p.id AND i.version = p.version
+    LEFT JOIN scenario_page_summaries s ON s."pageId" = p.id
+    WHERE p."campaignId" = ${campaignId}
     ORDER BY p."sortOrder", p.title, p.id`;
 
-  return rows.flatMap((r) => (r.digest?.trim() ? [{ id: r.id, title: r.title, sortOrder: r.sortOrder, digest: r.digest, stale: r.stale }] : []));
+  const pages = rows.map((row) => toDigestPage(row, new Map()));
+
+  if (!pages.length || !leadsFitBudget(pages)) return pages;
+
+  const ids = rows.filter((r) => !r.digest?.trim()).map((r) => r.id);
+
+  const leadRows = await prisma.$queryRaw<{ id: string; leads: string[] | null }[]>`
+    SELECT p.id, array(SELECT m[1] || E'\t' || m[2] FROM regexp_matches(p."searchText", '§([^\t\n]*)\t([^\n]{0,' || ${LEAD_SCAN_CHARS}::int || '})', 'g') AS m) AS leads
+    FROM scenario_pages p
+    WHERE p."campaignId" = ${campaignId} AND p.id = ANY(${ids}::text[])`;
+
+  const byPage = new Map(leadRows.map((r) => [r.id, parseLeads(r.leads)]));
+
+  return rows.map((row) => toDigestPage(row, byPage.get(row.id) ?? new Map()));
 }
