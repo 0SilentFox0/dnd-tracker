@@ -1,21 +1,8 @@
 import { MAX_CLASS_LEVEL } from "@/lib/constants/classes";
 import { resolveChoiceCount } from "@/lib/utils/characters/choices/count";
 import { resolvedPickCount } from "@/lib/utils/characters/choices/pending";
+import { summarize } from "@/lib/utils/characters/classes/summary";
 import type { CharacterClassEntry, ClassFeature, ClassProgression, GameClassData, ProgressionItem, ProgressionPick, ProgressionRow } from "@/types/classes";
-
-const SUMMARY_MAX = 120;
-
-const summarize = (text?: string): string => {
-  const line = (text ?? "").split("\n").map((l) => l.trim()).find(Boolean) ?? "";
-
-  if (line.length <= SUMMARY_MAX) return line;
-
-  const cut = line.slice(0, SUMMARY_MAX);
-
-  const space = cut.lastIndexOf(" ");
-
-  return `${(space > 0 ? cut.slice(0, space) : cut).trimEnd()}…`;
-};
 
 const itemsOf = (feature: ClassFeature): ProgressionItem[] =>
   feature.abilities.map((a) => ({ key: a.id ?? `${feature.level}:${a.name}`, name: a.name, summary: summarize(a.description), description: a.description }));
