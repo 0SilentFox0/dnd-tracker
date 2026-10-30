@@ -22,6 +22,20 @@ const squall = { key: "squall", name: "Шквал", trigger: { event: "action" }
 const MAP = testMap();
 
 describe("BonusActionPicker", () => {
+  it("довгий опис уміння обрізається, а іконка не стискається", () => {
+    const long = { ...wind, description: "Довгий опис. ".repeat(80) } as ResolvedAbility;
+
+    const { wrapper, me } = fakeScene({ abilities: [long] });
+
+    render(<BonusActionPicker participant={me} open onOpenChange={() => {}} onDone={() => {}} />, { wrapper });
+
+    const desc = screen.getByText(/Довгий опис/);
+
+    expect(desc).toHaveClass("line-clamp-2");
+    expect(desc).not.toHaveClass("block");
+    expect(desc.closest("button")?.querySelector("svg, img")).toHaveClass("shrink-0");
+  });
+
   it("уміння без цілі — одразу відправка", async () => {
     const { wrapper, me, bonusAction } = fakeScene({ abilities: [wind] });
 
