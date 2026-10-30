@@ -109,8 +109,8 @@ export function parseMaterialText(text: string): SpellIngredient[] | null; // "(
 
 **Interfaces — Produces:** `itemIngredientKey(item: SpecialItem): string` у `lib/utils/spells/ingredients/key.ts` = `ingredientKey(item.ingredient ?? item.name)`.
 
-- [ ] Тести: нормалізація зберігає/відкидає поля; діалог відправляє `worthGp`/`ingredient`; старі предмети без полів валідні.
-- [ ] Реалізація; commit `feat(inventory): ingredient fields on special items`.
+- [x] Тести: нормалізація зберігає/відкидає поля; діалог відправляє `worthGp`/`ingredient`; старі предмети без полів валідні.
+- [x] Реалізація; commit `feat(inventory): ingredient fields on special items`.
 
 ### Task 6: Чисті `planIngredients` і запас
 
@@ -135,14 +135,14 @@ export function applyIngredientPlan(stock: IngredientStock, plan: IngredientPlan
 ```
 Алгоритм: для кожного `!focus` інгредієнта: збіг за `key` і `worthGp >= (minGp ?? 0)`, доступно `qty - used`; брати від найдешевшого достатнього; решта покривається `minGp*100*rest` мідних, якщо `autoPay && minGp > 0` і вистачає `purseCp - usedCp`; інакше йде в `missing` (з кількістю решти). План — загальний атомарний: якщо є `missing`, `spendItems`/`spendCp` порожні.
 
-- [ ] Тести: достатньо предметів; частково предмети + gp; `autoPay:false` → missing; без `minGp` і без предмета → missing; `focus` ігнорується; два ключі; дешевший предмет першим; `used` враховується; жодних мутацій вхідного stock.
-- [ ] Реалізація; commit `feat(spells): pure ingredient planning`.
+- [x] Тести: достатньо предметів; частково предмети + gp; `autoPay:false` → missing; без `minGp` і без предмета → missing; `focus` ігнорується; два ключі; дешевший предмет першим; `used` враховується; жодних мутацій вхідного stock.
+- [x] Реалізація; commit `feat(spells): pure ingredient planning`.
 
 ### Task 7: Збирання запасу в учасника + дельти
 
 **Files:** `lib/utils/battle/participant/character-spell-grants.ts` / `extract-artifacts.ts` / `load-character-context.ts` (з тих самих місць, де береться `character.inventory.items` для consumable; перевірити `grep -n "inventory" lib/utils/battle/participant/*.ts`), `types/battle.ts` (`BattleData.ingredientStock`), `lib/utils/battle/refresh*` (зберегти `used`/`usedCp` при `refreshFromSource`), клієнтська дельта (`client-delta`: учасник передається цілком — переконатись, що поле не відкидається).
-- [ ] Тест: герой із предметом-інгредієнтом отримує `ingredientStock` лише коли `rules.spellIngredients.enabled`; юніт — ні; `refreshFromSource` зберігає `used`; поле є в клієнтській дельті.
-- [ ] Реалізація; commit `feat(battle): ingredient stock on hero participants`.
+- [x] Тест: герой із предметом-інгредієнтом отримує `ingredientStock` лише коли `rules.spellIngredients.enabled`; юніт — ні; `refreshFromSource` зберігає `used`; поле є в клієнтській дельті.
+- [x] Реалізація; commit `feat(battle): ingredient stock on hero participants`.
 
 ### Task 8: Перевірка й списання при касті
 
@@ -151,8 +151,8 @@ export function applyIngredientPlan(stock: IngredientStock, plan: IngredientPlan
 
 Поведінка: після `resolveChosenSlot` і перед гілкою `cost: long` викликати `ingredientsGate`; активна лише коли `rules.spellIngredients.enabled && !free && !legendaryAbility && !grant && caster.battleData.ingredientStock && відстежувані.length`. При `!plan.ok` → `throw ruleErrorOf("action_rejected", API_ERRORS.BATTLE_SPELL_INGREDIENTS_MISSING, { list })` (формат `list` — «Diamond ×1 (50 gp)», збирає `formatMissing` у `lib/utils/spells/ingredients/summary.ts`). Списання (`applyIngredientPlan` через `updateParticipant`) — у `finalizeCast`, не при `data.preview`; для `cost: long` — тільки на завершенні касту. Лог-рядок `ingredientsSpent` з переліком.
 
-- [ ] Тести: відмова без змін стану (слот, дія, `used`); успіх списує предмет і `used`; доплата gp збільшує `usedCp`; `free`, `grant`, `legendaryAbility`, юніт без stock, вимкнене правило — каст проходить без змін; `preview` не списує; довгий каст: початок лише перевіряє, завершення списує; повторний каст після відмови працює; рядок логу присутній.
-- [ ] Реалізація; commit `feat(battle): check and spend spell ingredients on cast`.
+- [x] Тести: відмова без змін стану (слот, дія, `used`); успіх списує предмет і `used`; доплата gp збільшує `usedCp`; `free`, `grant`, `legendaryAbility`, юніт без stock, вимкнене правило — каст проходить без змін; `preview` не списує; довгий каст: початок лише перевіряє, завершення списує; повторний каст після відмови працює; рядок логу присутній.
+- [x] Реалізація; commit `feat(battle): check and spend spell ingredients on cast`.
 
 ### Task 9: Фіксація в БД при завершенні бою
 
@@ -165,8 +165,8 @@ export async function persistIngredients(tx: Pick<Prisma.TransactionClient, "cha
 export function spendCp(p: { gold: number; silver: number; copper: number }, cp: number): { gold: number; silver: number; copper: number }; // спершу gp→розмін, без від'ємних; чисте, у тесті
 ```
 Поведінка: для `persistedHeroes` з `used>0`/`usedCp>0`: зменшити `quantity` предметів (0 → видалити), списати гаманець, журнал `item_use` (`{ item, qty: -n }`) і `money_spend` від `campaigns.dmUserId`; один `lockCampaignArtifacts`; поряд із `persistConsumables` в одній транзакції; `persistResources` вимкнено → `persistedHeroes` повертає порожній список (як слоти).
-- [ ] Тести `spendCp`: `0gp 5sp 20cp − 100cp → 0/0/…` без втрати, ніколи < 0, розмін з gp; `persistIngredients`: предмет зменшується/видаляється, журнал, герой без `used` ігнорується, `persistResources:false` нічого не пише, два герої.
-- [ ] Реалізація; commit `feat(battle): persist spent ingredients on battle completion`.
+- [x] Тести `spendCp`: `0gp 5sp 20cp − 100cp → 0/0/…` без втрати, ніколи < 0, розмін з gp; `persistIngredients`: предмет зменшується/видаляється, журнал, герой без `used` ігнорується, `persistResources:false` нічого не пише, два герої.
+- [x] Реалізація; commit `feat(battle): persist spent ingredients on battle completion`.
 
 ## Частина C — UI боя, лист, документація
 
