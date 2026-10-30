@@ -90,6 +90,8 @@ export const AI_LIMITS = {
   keptReadingChars: 60_000,
   contextChars: 40_000,
   digestChars: 4000,
+  digestLeadChars: 90,
+  digestEntities: 12,
   maxSteps: 8,
   battleEvents: 10,
   searchHits: 20,

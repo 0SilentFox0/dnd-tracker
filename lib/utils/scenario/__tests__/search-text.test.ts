@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { buildSearchText, snippetFromWindow } from "@/lib/utils/scenario/search-text";
+import { buildSearchText, sectionLead, snippetFromWindow } from "@/lib/utils/scenario/search-text";
 
 const p = (text: string) => ({ type: "doc" as const, content: [{ type: "paragraph" as const, content: [{ type: "text" as const, text }] }] });
 
@@ -31,5 +31,23 @@ describe("search text", () => {
     expect(snippetFromWindow({ win: `Дзвони ${"а".repeat(80)}`, at: 0, cutBefore: false, needleLength: 6 })).toBe(`Дзвони ${"а".repeat(59)}…`);
     expect(snippetFromWindow({ win: "🎲🎲 Дзвони обриваються", at: 3, cutBefore: false, needleLength: 6 })).toBe("🎲🎲 Дзвони обриваються");
     expect(snippetFromWindow({ win: "x", at: -1, cutBefore: false, needleLength: 1 })).toBeNull();
+  });
+});
+
+describe("sectionLead", () => {
+  it("strips the title prefix", () => {
+    expect(sectionLead("Собор Дзвони обриваються", "Собор", 90)).toBe("Дзвони обриваються");
+  });
+
+  it("returns empty for a title-only line", () => {
+    expect(sectionLead("Собор", "Собор", 90)).toBe("");
+  });
+
+  it("truncates by code point without splitting emoji", () => {
+    expect(sectionLead("T 😀😀😀😀", "T", 2)).toBe("😀😀…");
+  });
+
+  it("does not add an ellipsis when it fits", () => {
+    expect(sectionLead("T abc", "T", 3)).toBe("abc");
   });
 });
