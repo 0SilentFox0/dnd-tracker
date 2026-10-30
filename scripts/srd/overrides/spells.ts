@@ -1,6 +1,6 @@
 import type { SpellRow } from "../lib/types";
 
-import type { Effect, NonRandomEffect } from "@/lib/utils/abilities/schema";
+import type { NonRandomEffect } from "@/lib/utils/abilities/schema";
 import type { SpellEffect, SpellTargeting, SpellZone, ZoneTrigger } from "@/lib/utils/spells/model/schema";
 
 export type SpellOverride = Partial<Omit<SpellRow, "slug" | "name" | "level" | "groupId" | "description">>;
@@ -9,7 +9,7 @@ const rounds = (n: number) => ({ rounds: n });
 
 const NO_DAMAGE: SpellOverride = { dice: 0, dieSides: undefined, upcastDice: undefined, spellEffects: [] };
 
-const resist = (damageType: string, percent = 50, n = 99): NonRandomEffect =>({ kind: "flag", flag: "resistance", damageType, percent, duration: rounds(n) });
+const resist = (damageType: string, percent = 50, n = 99): NonRandomEffect => ({ kind: "flag", flag: "resistance", damageType, percent, duration: rounds(n) });
 
 const damageChoice = (types: string[]): SpellEffect => ({ kind: "chooseOne", options: types.map((damageType): NonRandomEffect => ({ kind: "dealDamage", amount: { spellRoll: 100 }, damageType })) });
 
@@ -192,7 +192,7 @@ export const SPELL_OVERRIDES: Record<string, SpellOverride> = {
   "srd-2024_power-word-heal": { spellEffects: [{ kind: "heal", amount: { percentOf: "maxHp", value: 100 } }, { kind: "cleanse", includeConditions: true }] },
   "srd-2024_regenerate": { spellEffects: [{ kind: "heal", amount: "4d8" }, { kind: "heal", amount: 15 }, { kind: "hot", healPerRound: 1, duration: rounds(99) }] },
   // the retaliation 2d8 is not expressible; only the chosen resistance is mechanized
-  "srd-2024_fire-shield": { ...NO_DAMAGE, targeting: { kind: "self" }, resolution: { kind: "auto" }, spellEffects: [{ kind: "chooseOne", options: [resist("cold", 50, 99), resist("fire", 50, 99)] }] },
+  "srd-2024_fire-shield": { ...NO_DAMAGE, targeting: { kind: "self" }, resolution: { kind: "auto" }, spellEffects: [{ kind: "chooseOne", options: [resist("cold"), resist("fire")] }] },
   "srd-2024_aura-of-life": { spellEffects: [resist("necrotic")] },
 
   // zone effects last at most 10 rounds on the map; spikes hurt on entering the zone, not per 5 feet moved

@@ -3,7 +3,7 @@ import type { ClassCaster } from "@/lib/constants/classes";
 import type { DndSkill } from "@/lib/constants/skills";
 import type { SpellGroupIconKey } from "@/lib/constants/spell-groups";
 import type { WeaponTrait } from "@/lib/constants/weapon-traits";
-import type { Ability, Effect } from "@/lib/utils/abilities/schema";
+import type { Ability } from "@/lib/utils/abilities/schema";
 import type { ArmorStats } from "@/lib/utils/artifacts/armor-stats";
 import type { WeaponStats } from "@/lib/utils/artifacts/weapon-stats";
 import type { ItemStats } from "@/lib/utils/items/item-stats";
