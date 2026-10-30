@@ -3,7 +3,7 @@ import { describe, expect, it } from "vitest";
 import { decodeLog, decodeStoredLog, encodeLog } from "../codec";
 
 import { textOf } from "@/lib/i18n/test/text";
-import { joinLines, textRef } from "@/lib/i18n/text-ref";
+import { dynamicTextRef, joinLines, textRef } from "@/lib/i18n/text-ref";
 import type { LogLine } from "@/types/text";
 
 const sample: LogLine[] = [
@@ -11,7 +11,7 @@ const sample: LogLine[] = [
   textRef("battleLog.attack.hit", { attacker: "A", target: "B", damage: 3, crit: textRef("battleLog.attack.critPlain") }),
   textRef("abilityText.log.withChance", { text: textRef("abilityText.log.applied", { ability: "X", effect: "e", target: "T", rounds: 2 }), chance: 40 }),
   joinLines([textRef("battleLog.attack.critPlain"), textRef("battleLog.attack.critPlain")]),
-  textRef("battleTerms.crits.nat20.title"),
+  dynamicTextRef("battleTerms.crits.nat20.title"),
 ];
 
 describe("battle log codec", () => {
