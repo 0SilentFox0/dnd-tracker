@@ -28,6 +28,10 @@
     "reason": "track-title convention of the HoMM library stored in DB"
   },
   {
+    "glob": "lib/i18n/native-language-names.ts",
+    "reason": "native language names, intentionally not translated"
+  },
+  {
     "glob": "vitest-setup.ts",
     "reason": "test setup mocks with uk strings"
   },
