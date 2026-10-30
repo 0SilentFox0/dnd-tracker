@@ -4,6 +4,7 @@ import { SPELL_GROUP_ICON_KEYS } from "@/lib/constants/spell-groups";
 import { SPELL_NAME_MAX } from "@/lib/constants/spells";
 import { SpellListsSchema } from "@/lib/schemas/choices";
 import { hexColorSchema } from "@/lib/schemas/common";
+import { ComponentFlagsSchema, ingredientsRequireMaterial, SpellIngredientsSchema } from "@/lib/schemas/spell-ingredients";
 import { SpellFxSchema } from "@/lib/utils/battle/fx/spell-fx-schema";
 import { RaceModifierSchema, SpellCastingTimeSchema, SpellCostSchema, SpellDiceSchema, SpellDieSidesSchema, SpellEffectSchema, SpellResolutionSchema, SpellTargetingSchema } from "@/lib/utils/spells/model/schema";
 
@@ -35,7 +36,11 @@ const spellFields = {
   damageBonus: z.number().int().min(-20).max(40).nullable(),
   fx: SpellFxSchema.describe("Visual effect of the spell on the battle map").nullable().optional(),
   lists: SpellListsSchema.describe("Class spell-list tags (Wizard, Cleric…)"),
+  ingredients: SpellIngredientsSchema.describe("Tracked material components"),
+  componentFlags: ComponentFlagsSchema.describe("V/S/M component flags").nullable(),
 };
+
+const ingredientsIssue = { message: "ingredients require the M component", path: ["componentFlags"] };
 
 export const createSpellSchema = z.object({
   ...spellFields,
@@ -59,11 +64,13 @@ export const createSpellSchema = z.object({
   fixedDice: spellFields.fixedDice.optional(),
   damageBonus: spellFields.damageBonus.optional(),
   lists: spellFields.lists.optional(),
-});
+  ingredients: spellFields.ingredients.default([]),
+  componentFlags: spellFields.componentFlags.optional(),
+}).refine(ingredientsRequireMaterial, ingredientsIssue);
 
 export type CreateSpellInput = z.infer<typeof createSpellSchema>;
 
-export const updateSpellSchema = z.object(spellFields).partial();
+export const updateSpellSchema = z.object(spellFields).partial().refine(ingredientsRequireMaterial, ingredientsIssue);
 
 export type UpdateSpellInput = z.infer<typeof updateSpellSchema>;
 

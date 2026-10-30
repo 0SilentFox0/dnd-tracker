@@ -274,6 +274,8 @@ model Spell {
   fixedDice             Boolean?
   damageBonus           Int?
   lists                 Json        @default("[]")
+  ingredients           Json        @default("[]")
+  componentFlags        Json?
   summonUnitId          String?
   summonUnit            Unit?       @relation("SpellSummonUnit", fields: [summonUnitId], references: [id], onDelete: SetNull)
   skills                Skill[]
