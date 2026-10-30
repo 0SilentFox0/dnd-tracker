@@ -69,7 +69,9 @@
     "name": "Name",
     "description": "Description",
     "quantity": "Quantity",
-    "consumable": "Single-use"
+    "consumable": "Single-use",
+    "worthGp": "Worth, gp",
+    "ingredient": "Ingredient for… (optional)"
   },
   "money": {
     "confirm": "Confirm",

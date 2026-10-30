@@ -57,6 +57,8 @@ export interface SpecialItem {
   artifactId?: string;
   parameter?: string;
   spellId?: string;
+  worthGp?: number;
+  ingredient?: string;
 }
 
 export type Purse = Record<Coin, number>;

@@ -69,7 +69,9 @@
     "name": "Назва",
     "description": "Опис",
     "quantity": "Кількість",
-    "consumable": "Одноразова"
+    "consumable": "Одноразова",
+    "worthGp": "Вартість, gp",
+    "ingredient": "Інгредієнт для… (необов'язково)"
   },
   "money": {
     "confirm": "Підтвердити",

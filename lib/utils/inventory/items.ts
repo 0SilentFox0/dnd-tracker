@@ -1,3 +1,4 @@
+import { INGREDIENT_SLUG_RE } from "@/lib/constants/spell-ingredients";
 import type { SpecialItem } from "@/types/inventory";
 
 export function normalizeItems(raw: unknown): SpecialItem[] {
@@ -17,6 +18,8 @@ export function normalizeItems(raw: unknown): SpecialItem[] {
         consumable: o.consumable === true,
         ...(typeof o.artifactId === "string" && o.artifactId ? { artifactId: o.artifactId } : {}),
         ...(typeof o.parameter === "string" && /^[a-z][a-z0-9_-]{0,39}$/.test(o.parameter) ? { parameter: o.parameter } : {}),
+        ...(typeof o.worthGp === "number" && Number.isFinite(o.worthGp) && o.worthGp >= 0 ? { worthGp: o.worthGp } : {}),
+        ...(typeof o.ingredient === "string" && INGREDIENT_SLUG_RE.test(o.ingredient) ? { ingredient: o.ingredient } : {}),
         ...(typeof o.spellId === "string" && o.spellId ? { spellId: o.spellId } : {}),
       },
     ];

@@ -7,3 +7,5 @@ export const ingredientKey = (name: string) =>
     .replace(/^-+|-+$/g, "");
 
 export const trackedIngredients = <T extends { focus: boolean }>(list: T[]) => list.filter((i) => !i.focus);
+
+export const itemIngredientKey = (item: { name: string; ingredient?: string }) => ingredientKey(item.ingredient ?? item.name);

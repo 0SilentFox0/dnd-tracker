@@ -1,3 +1,4 @@
+export const INGREDIENT_SLUG_RE = /^[a-z0-9][a-z0-9-]{0,39}$/;
 export const SPELL_INGREDIENTS_MAX = 8;
 export const INGREDIENT_NAME_MAX = 80;
 export const INGREDIENT_QTY_MAX = 99;
