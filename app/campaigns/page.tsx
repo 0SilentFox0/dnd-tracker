@@ -2,6 +2,7 @@ import Link from "next/link";
 import { Map as MapIcon } from "lucide-react";
 
 import { JoinCampaignDialog } from "@/components/campaigns/join/JoinCampaignDialog";
+import { type TemplateTile,TemplateTiles } from "@/components/campaigns/templates/TemplateTiles";
 import { EmptyState, ErrorState } from "@/components/common/states";
 import { HudCard, HudPage, HudPageHeader, HudPanel } from "@/components/hud/page";
 import { Button } from "@/components/ui/button";
@@ -35,12 +36,12 @@ export default async function CampaignsPage() {
 
   let campaigns: CampaignWithMembers = [];
 
-  let templates: { id: string; name: string; description: string | null }[] = [];
+  let templates: TemplateTile[] = [];
 
   try {
     templates = await prisma.campaign.findMany({
       where: { kind: CampaignKind.TEMPLATE, members: { some: { userId, role: CampaignRole.DM } } },
-      select: { id: true, name: true, description: true },
+      select: { id: true, name: true, description: true, locale: true, templateKey: true },
       orderBy: { updatedAt: "desc" },
     });
 
@@ -143,16 +144,7 @@ export default async function CampaignsPage() {
       {templates.length > 0 && (
         <section className="mt-8 space-y-3">
           <h2 className="hud-sc text-xl text-hud-ink">{t("page.templates")}</h2>
-          <div className="grid gap-3 md:grid-cols-2 lg:grid-cols-3">
-            {templates.map((template) => (
-              <HudCard key={template.id} asChild className="space-y-2">
-                <Link href={`/campaigns/${template.id}`}>
-                  <h3 className="hud-sc text-lg text-hud-ink">{template.name}</h3>
-                  {template.description && <p className="text-sm text-hud-muted">{template.description}</p>}
-                </Link>
-              </HudCard>
-            ))}
-          </div>
+          <TemplateTiles templates={templates} />
         </section>
       )}
 

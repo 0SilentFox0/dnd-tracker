@@ -1,16 +1,21 @@
 import { DEFAULT_TEMPLATE_LOCALE } from "@/lib/constants/campaigns";
 import type { TemplateCard } from "@/types/campaigns";
+export interface TemplateVariant {
+  name: string;
+  locale?: string | null;
+  templateKey?: string | null;
+}
 
-export interface TemplateGroup {
+export interface TemplateGroup<T extends TemplateVariant = TemplateCard> {
   key: string;
-  cards: Record<string, TemplateCard>;
+  cards: Record<string, T>;
   locales: string[];
 }
 
-export const templateLocale = (card: TemplateCard) => card.locale ?? DEFAULT_TEMPLATE_LOCALE;
+export const templateLocale = (card: TemplateVariant) => card.locale ?? DEFAULT_TEMPLATE_LOCALE;
 
-export function groupTemplates(cards: TemplateCard[]): TemplateGroup[] {
-  const groups = new Map<string, TemplateGroup>();
+export function groupTemplates<T extends TemplateVariant>(cards: T[]): TemplateGroup<T>[] {
+  const groups = new Map<string, TemplateGroup<T>>();
 
   for (const card of cards) {
     const key = card.templateKey ?? card.name;
@@ -24,6 +29,6 @@ export function groupTemplates(cards: TemplateCard[]): TemplateGroup[] {
   return [...groups.values()].map((g) => ({ ...g, locales: Object.keys(g.cards) }));
 }
 
-export function pickVariant(group: TemplateGroup, uiLocale: string): TemplateCard {
+export function pickVariant<T extends TemplateVariant>(group: TemplateGroup<T>, uiLocale: string): T {
   return group.cards[uiLocale] ?? group.cards[DEFAULT_TEMPLATE_LOCALE] ?? Object.values(group.cards)[0];
 }
