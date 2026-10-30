@@ -118,7 +118,7 @@ describe("PUT choices subclass", () => {
     const res = await put({ classSubclasses: { [sorcerer.id]: sub.id } });
 
     expect(res.status).toBe(200);
-    expect(vi.mocked(prisma.character.update).mock.calls[0][0].data).toMatchObject({ classes: [{ classId: sorcerer.id, level: 4, subclassId: sub.id }] });
+    expect(vi.mocked(prisma.character.update).mock.calls[0][0].data).toMatchObject({ classes: [{ classId: sorcerer.id, level: 4, subclassId: sub.id }], subclass: "Draconic" });
   });
 
   it("422 when another subclass is already set", async () => {

@@ -15,6 +15,8 @@ import { PUBLIC_USER_SELECT } from "@/lib/server/users/db-user";
 import { mergeBackground } from "@/lib/utils/backgrounds/selection";
 import { choicesStateOf, withClassPicks, withClassSubclasses } from "@/lib/utils/characters/choices/picks";
 import { validateClassEntries } from "@/lib/utils/characters/classes/application";
+import { subclassesLabel } from "@/lib/utils/characters/classes/derive";
+import { resolveClassEntries } from "@/lib/utils/spells/class-slots";
 import type { ChoicesBody } from "@/types/choices";
 
 export async function saveCharacterChoices({ access, character }: CharacterGate, body: ChoicesBody) {
@@ -37,6 +39,8 @@ export async function saveCharacterChoices({ access, character }: CharacterGate,
 
     const refs = await loadChoiceRefs(row.campaignId, row.race, { classMode: characterClassMode(rules, before.classes), backgroundIds: [before.backgroundId, body.backgroundId], db: tx });
 
+    let subclassLabel: string | null | undefined;
+
     let classes = body.classChoices ? withClassPicks(before.classes, body.classChoices) : before.classes;
 
     if (body.classSubclasses) {
@@ -49,6 +53,7 @@ export async function saveCharacterChoices({ access, character }: CharacterGate,
       if (invalid) throw new ContentError(invalid.error, 422, undefined, invalid.params);
 
       classes = subclassed.entries;
+      subclassLabel = subclassesLabel(resolveClassEntries(classes, refs.classesById));
     }
 
     const after = { ...mergeBackground(before, body), raceChoices: body.raceChoices ?? before.raceChoices, feats: body.feats ?? before.feats, classes };
@@ -57,7 +62,7 @@ export async function saveCharacterChoices({ access, character }: CharacterGate,
 
     if (!resolved.ok) throw resolved.error;
 
-    const updated = await tx.character.update({ where: { id: row.id }, data: resolved.fields, include: { user: { select: PUBLIC_USER_SELECT }, inventory: true }, omit: { notes: true } });
+    const updated = await tx.character.update({ where: { id: row.id }, data: { ...resolved.fields, ...(subclassLabel !== undefined && { subclass: subclassLabel }) }, include: { user: { select: PUBLIC_USER_SELECT }, inventory: true }, omit: { notes: true } });
 
     const scores = Object.fromEntries(ABILITY_KEYS.flatMap((k) => (typeof resolved.fields[k] === "number" ? [[k, resolved.fields[k]]] : [])));
 
