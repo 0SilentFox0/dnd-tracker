@@ -426,3 +426,12 @@
     text-size-adjust: 100%;
   }
 }
+
+/* `thin` is the narrowest standard width, so Chromium/WebKit use ::-webkit-scrollbar (4px); the standard properties serve Firefox only */
+:where(*)::-webkit-scrollbar { width: 4px; height: 4px; }
+:where(*)::-webkit-scrollbar-track { background: transparent; }
+:where(*)::-webkit-scrollbar-thumb { background: rgb(230, 194, 90); border-radius: 2px; }
+
+@supports not selector(::-webkit-scrollbar) {
+  * { scrollbar-width: thin; scrollbar-color: rgb(230, 194, 90) transparent; }
+}

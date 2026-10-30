@@ -1,0 +1,66 @@
+{
+  "empty": {
+    "filtered": "Nothing matches the filters",
+    "filteredHint": "Try enabling more types or reset the filters.",
+    "noMentions": "No mentions yet",
+    "noMentionsHint": "Insert @-mentions of units, artifacts, characters and more into scenario pages and the graph will connect them.",
+    "noPages": "The scenario has no pages",
+    "noPagesAction": "Open the scenario",
+    "resetFilters": "Reset filters"
+  },
+  "graph": {
+    "label": "Scenario graph",
+    "secretEdge": "Secret link",
+    "missing": "Broken link: entity deleted",
+    "hidden": "{count} hidden entities"
+  },
+  "inspector": {
+    "close": "Close",
+    "connections": "Connections",
+    "focusOff": "Show all",
+    "focusOn": "Show only neighbors",
+    "missingHint": "This entity was deleted",
+    "noConnections": "No visible connections",
+    "open": "Open",
+    "title": "Node details"
+  },
+  "legend": {
+    "title": "Legend",
+    "draft": "Draft",
+    "ready": "Ready",
+    "personal": "Personal",
+    "sequence": "Story order",
+    "missing": "Deleted",
+    "secret": "Secret link"
+  },
+  "limits": {
+    "overLimit": "The graph is large and may be slow. Narrow it with filters.",
+    "showAll": "Show all",
+    "truncated": "Showing {shown} of {total} entities"
+  },
+  "list": {
+    "title": "Nodes",
+    "search": "Filter the list",
+    "searchPlaceholder": "Find a page or entity",
+    "scenes": "Pages",
+    "empty": "Nothing found",
+    "missing": "Deleted",
+    "counts": "{degree} links, {mentions} mentions"
+  },
+  "toolbar": {
+    "filters": "Filters",
+    "fit": "Fit to view",
+    "list": "List",
+    "matches": "{current} of {total}",
+    "onlyMissing": "Only deleted",
+    "search": "Search the graph",
+    "searchPlaceholder": "Search by name",
+    "showAll": "Show all entities",
+    "showLeaves": "Show single-link entities",
+    "showSequence": "Show story order",
+    "timeline": "Timeline layout",
+    "types": "Entity types",
+    "zoomIn": "Zoom in",
+    "zoomOut": "Zoom out"
+  }
+}
