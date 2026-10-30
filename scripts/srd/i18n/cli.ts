@@ -8,6 +8,7 @@ import * as path from "path";
 import { readSrdData } from "../lib/data-files";
 import { type AppliedLine, inPhase, mergeApplied, missing, type Phase, planBatches } from "./batches";
 import { extractCatalog } from "./catalog";
+import { buildNameMap, namesIn } from "./names";
 import { I18N_DIR, readTranslations, writeTranslations } from "./store";
 
 const arg = (args: string[], name: string) => (args.includes(name) ? args[args.indexOf(name) + 1] : undefined);
@@ -23,17 +24,28 @@ function extract(locale: string, args: string[]) {
 
   const maxChars = Number(arg(args, "--max-chars") ?? 22000);
 
-  const todo = missing(extractCatalog(readSrdData()), readTranslations(locale)).filter((e) => inPhase(e, phase as Phase));
+  const catalog = extractCatalog(readSrdData());
+
+  const translations = readTranslations(locale);
+
+  const names = buildNameMap(catalog, translations);
+
+  const todo = missing(catalog, translations).filter((e) => inPhase(e, phase as Phase));
 
   const dir = todoDir(locale);
 
-  for (const f of fs.existsSync(dir) ? fs.readdirSync(dir) : []) if (/^\d+(\.out)?\.jsonl$/.test(f)) fs.rmSync(path.join(dir, f));
+  for (const f of fs.existsSync(dir) ? fs.readdirSync(dir) : []) if (/^\d+(\.out|\.names)?\.(jsonl|json)$/.test(f)) fs.rmSync(path.join(dir, f));
 
   fs.mkdirSync(dir, { recursive: true });
 
   const batches = planBatches(todo, maxChars);
 
-  batches.forEach((batch, i) => fs.writeFileSync(path.join(dir, `${String(i + 1).padStart(2, "0")}.jsonl`), jsonl(batch.map((e) => ({ h: e.hash, c: e.cls, en: e.en })))));
+  batches.forEach((batch, i) => {
+    const id = String(i + 1).padStart(2, "0");
+
+    fs.writeFileSync(path.join(dir, `${id}.jsonl`), jsonl(batch.map((e) => ({ h: e.hash, c: e.cls, en: e.en }))));
+    fs.writeFileSync(path.join(dir, `${id}.names.json`), `${JSON.stringify(namesIn(batch.filter((e) => e.cls === "d").map((e) => e.en), names), null, 1)}\n`);
+  });
 
   console.info(`${locale} фаза ${phase}: ${todo.length} рядків, ${todo.reduce((n, e) => n + e.en.length, 0)} симв., ${batches.length} порцій → ${dir}`);
 }

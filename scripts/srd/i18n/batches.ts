@@ -1,5 +1,6 @@
 import type { SrdKind } from "../lib/types";
 import { type CatalogEntry, type Translations } from "./catalog";
+import { buildNameMap, fixItalicNames } from "./names";
 import { checkTranslation, type TranslationIssue } from "./validate";
 
 export type Phase = "A" | "B";
@@ -46,6 +47,8 @@ export function mergeApplied(existing: Translations, lines: AppliedLine[], catal
 
   const merged = { ...existing };
 
+  const names = buildNameMap(catalog, existing);
+
   const rejected: Rejected[] = [];
 
   let accepted = 0;
@@ -53,11 +56,13 @@ export function mergeApplied(existing: Translations, lines: AppliedLine[], catal
   for (const line of lines) {
     const entry = byHash.get(line.h);
 
-    const issues = entry ? checkTranslation(entry.en, line.t) : (["unknown"] as Rejected["issues"]);
+    const t = entry ? fixItalicNames(entry.en, line.t, names) : line.t;
+
+    const issues = entry ? checkTranslation(entry.en, t) : (["unknown"] as Rejected["issues"]);
 
     if (issues.length > 0) rejected.push({ ...line, issues });
     else {
-      merged[line.h] = line.t;
+      merged[line.h] = t;
       accepted += 1;
     }
   }

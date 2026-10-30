@@ -39,4 +39,10 @@ describe("mergeApplied", () => {
     expect(first.rejected.map((r) => [r.h, r.issues])).toEqual([["a", ["numbers"]], ["zz", ["unknown"]]]);
     expect(mergeApplied(first.merged, [{ h: "b", t: "Пильність" }], catalog).merged).toEqual(first.merged);
   });
+
+  it("автовиправляє курсивні назви за каталогом перед валідацією", () => {
+    const cat = [e("n1", "Fireball", ["spells"], "n"), e("d1", "Cast *Fireball* now")];
+
+    expect(mergeApplied({ n1: "Вогняна куля" }, [{ h: "d1", t: "Накладіть *Вогняну кулю* зараз" }], cat).merged.d1).toBe("Накладіть *Вогняна куля* зараз");
+  });
 });
