@@ -17,7 +17,7 @@ describe("LimitsSection (en)", () => {
   it("renders English labels without raw keys", async () => {
     const { container } = await renderWithIntl(
       <AbilityEditorProvider value={{ campaignId: "c", errorsByPath: {}, itemCharges: true }}>
-        <LimitsSection ability={ability} path="0" onChange={vi.fn()} />
+        <LimitsSection ability={ability} path="0" state={{ open: true, onToggle: vi.fn(), summary: null }} onChange={vi.fn()} />
       </AbilityEditorProvider>,
       { locale: "en", namespaces: ["common", "validation", "abilities", "abilityRegistry"] },
     );

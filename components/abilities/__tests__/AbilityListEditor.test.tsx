@@ -36,6 +36,7 @@ describe("AbilityListEditor", () => {
 
     fireEvent.click(screen.getByRole("button", { name: "abilities.chips.add" }));
     fireEvent.click(screen.getByText("abilityRegistry.templates.damage.label"));
+    fireEvent.click(screen.getByRole("button", { name: "abilities.templates.create" }));
 
     expect(json()).toHaveLength(1);
     expect(screen.getAllByText(/abilityRegistry\.summary\.effects\.damageBonus/).length).toBeGreaterThan(0);
@@ -88,6 +89,7 @@ describe("AbilityListEditor", () => {
 
     fireEvent.click(screen.getByRole("button", { name: "abilities.chips.add" }));
     fireEvent.click(screen.getByText("abilityRegistry.templates.damage.label"));
+    fireEvent.click(screen.getByRole("button", { name: "abilities.templates.create" }));
 
     const tabs = screen.getAllByRole("tab");
 

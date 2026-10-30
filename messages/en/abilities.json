@@ -12,7 +12,10 @@
   "panel": {
     "name": "Name",
     "delete": "Delete ability {name}",
-    "description": "Description (optional)"
+    "description": "Description (optional)",
+    "expand": "Expand",
+    "collapse": "Collapse",
+    "emptySummary": "—"
   },
   "flow": {
     "when": "When",
@@ -27,8 +30,16 @@
     "add": "+ Ability"
   },
   "templates": {
+    "scratch": "From scratch",
+    "scratchHint": "empty passive ability",
+    "allCategories": "All",
+    "create": "Create",
+    "back": "Back",
+    "previewTitle": "Preview",
+    "nameLabel": "Name",
     "copyTitle": "Copy abilities from…",
     "addTitle": "Add ability",
+    "addSpellTitle": "Add spell effect",
     "copyFrom": "Copy from…"
   },
   "copy": {
@@ -78,6 +89,7 @@
   },
   "limits": {
     "title": "Limits",
+    "add": "Add limits",
     "passive": "A passive is always active — limits do not apply.",
     "perBattle": "Uses per battle",
     "perRound": "Uses per round",
@@ -110,6 +122,8 @@
       "maxHp": "% of max HP",
       "ownerAttack": "% of my attack damage"
     },
+    "diceCount": "Dice count",
+    "diceSides": "Die type",
     "classRefOutside": "A class table reference is allowed only in class abilities",
     "variables": "Variables: {list}",
     "classColumn": "Class table column",
@@ -151,7 +165,8 @@
     "columnMissing": "There is no column “{key}” in the class table",
     "columnNotPool": "Column “{label}” is not a pool",
     "attackNotFound": "The attack was not found among the unit's attacks",
-    "spellNotFound": "The spell was not found in the library"
+    "spellNotFound": "The spell was not found in the library",
+    "diceFormat": "A dice formula like 1d6 or 2d8+1 is required"
   },
   "read": {
     "partialInvalid": "Some of the stored abilities have invalid data — fix or remove them before saving",

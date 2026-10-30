@@ -1,6 +1,7 @@
 import type { WhatsNewEntry } from "@/lib/onboarding/types";
 
 export const WHATS_NEW: WhatsNewEntry[] = [
+  { id: "2026-10-30-ability-recipes", date: "2026-10-30", audience: "dm" },
   { id: "2026-10-30-ai-reading", date: "2026-10-30", audience: "dm", href: "/settings/ai" },
   { id: "2026-10-29-compendium-images", date: "2026-10-29", audience: "dm", href: "/help/compendium-import" },
   { id: "2026-10-29-compendium-import-guide", date: "2026-10-29", audience: "dm", href: "/help/compendium-import" },

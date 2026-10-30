@@ -20,9 +20,9 @@ describe("EffectCard", () => {
   afterEach(cleanup);
 
   it("показує поля з реєстру і підсумок", () => {
-    renderCard({ kind: "dot", damagePerRound: "1d4", damageType: "bleed", duration: { rounds: 2 }, target: "eventTarget" });
+    renderCard({ kind: "dot", damagePerRound: "1d4+1", damageType: "bleed", duration: { rounds: 2 }, target: "eventTarget" });
 
-    expect(screen.getByLabelText("abilityRegistry.effects.dot.fields.damagePerRound")).toHaveValue("1d4");
+    expect(screen.getByLabelText("abilityRegistry.effects.dot.fields.damagePerRound")).toHaveValue("1d4+1");
     expect(screen.getByText(/^abilityRegistry\.summary\.effects\.dot /)).toBeInTheDocument();
   });
 

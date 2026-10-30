@@ -763,48 +763,166 @@
     "stats": {
       "label": "Пасивний бонус статів",
       "hint": "+Сила, +AC, +HP… завжди",
-      "defaultName": "Бонус статів"
+      "defaultName": "Бонус статів",
+      "params": {
+        "stat": "Характеристика",
+        "value": "Бонус"
+      }
     },
     "damage": {
       "label": "Бонус шкоди",
       "hint": "+% / +число до ближньої, дальньої, магії (школа)",
-      "defaultName": "Бонус шкоди"
+      "defaultName": "Бонус шкоди",
+      "params": {
+        "filter": "Вид шкоди",
+        "percent": "Бонус, %"
+      }
     },
     "onHit": {
       "label": "Ефект при влучанні",
       "hint": "DOT, дебаф, стан на ціль",
-      "defaultName": "Кровотеча"
+      "defaultName": "Кровотеча",
+      "params": {
+        "dice": "Шкода за раунд",
+        "damageType": "Тип шкоди",
+        "rounds": "Раунди"
+      }
     },
     "resistance": {
       "label": "Опір / імунітет",
       "hint": "фізичний, магічний, стихія, заклинання",
-      "defaultName": "Опір"
+      "defaultName": "Опір",
+      "params": {
+        "damageType": "Тип шкоди",
+        "percent": "Опір, %"
+      }
     },
     "aura": {
       "label": "Аура",
       "hint": "бонус усім союзникам / штраф ворогам",
-      "defaultName": "Аура"
+      "defaultName": "Аура",
+      "params": {
+        "value": "Бонус до КЗ"
+      }
     },
     "survive": {
       "label": "Раз за бій: вижити з 1 HP",
       "hint": "летальна шкода → 1 HP",
-      "defaultName": "Невмирущий"
+      "defaultName": "Невмирущий",
+      "params": {}
     },
     "bonusAction": {
       "label": "Бонусна дія",
       "hint": "кнопка гравця: лікування, мораль, слот…",
-      "defaultName": "Друге дихання"
+      "defaultName": "Друге дихання",
+      "params": {
+        "dice": "Лікування"
+      }
     },
     "spellSlots": {
       "label": "Слоти заклинань",
       "hint": "+N слотів рівня",
-      "defaultName": "Слоти"
+      "defaultName": "Слоти",
+      "params": {
+        "level": "Рівень слота",
+        "count": "Слотів"
+      }
     },
     "custom": {
-      "label": "Власне",
-      "hint": "порожнє вміння",
       "defaultName": "Нове вміння",
       "note": "Опишіть вміння"
+    },
+    "damageSpell": {
+      "label": "Шкода",
+      "hint": "Завдає шкоди обраного типу",
+      "defaultName": "Удар",
+      "params": {
+        "dice": "Шкода",
+        "damageType": "Тип шкоди"
+      }
+    },
+    "healSpell": {
+      "label": "Лікування",
+      "hint": "Відновлює здоров'я",
+      "defaultName": "Лікування",
+      "params": {
+        "dice": "Лікування"
+      }
+    },
+    "dotSpell": {
+      "label": "Шкода з часом",
+      "hint": "Шкода щораунду",
+      "defaultName": "Отрута",
+      "params": {
+        "dice": "Шкода за раунд",
+        "damageType": "Тип шкоди",
+        "rounds": "Раунди"
+      }
+    },
+    "hotSpell": {
+      "label": "Лікування з часом",
+      "hint": "Лікування щораунду",
+      "defaultName": "Відновлення",
+      "params": {
+        "dice": "Лікування за раунд",
+        "rounds": "Раунди"
+      }
+    },
+    "condition": {
+      "label": "Стан",
+      "hint": "Приголомшення, страх, утримання тощо",
+      "defaultName": "Знерухомлення",
+      "params": {
+        "condition": "Стан",
+        "rounds": "Раунди"
+      }
+    },
+    "pushBack": {
+      "label": "Відштовхування",
+      "hint": "Відкидає ціль від кастера",
+      "defaultName": "Поштовх",
+      "params": {
+        "feet": "Відстань, фт"
+      }
+    },
+    "buffArmor": {
+      "label": "Бафф КЗ",
+      "hint": "Тимчасовий бонус до КЗ",
+      "defaultName": "Щит",
+      "params": {
+        "value": "Бонус до КЗ",
+        "rounds": "Раунди"
+      }
+    },
+    "cleanse": {
+      "label": "Очищення",
+      "hint": "Знімає негативні ефекти",
+      "defaultName": "Очищення",
+      "params": {}
+    },
+    "morale": {
+      "label": "Мораль",
+      "hint": "Підвищує або знижує мораль",
+      "defaultName": "Натхнення",
+      "params": {
+        "delta": "Зміна моралі"
+      }
+    },
+    "concentrationBuff": {
+      "label": "Бафф на концентрації",
+      "hint": "Бонус до КЗ, поки триває концентрація",
+      "defaultName": "Захист",
+      "params": {
+        "value": "Бонус до КЗ",
+        "rounds": "Раунди"
+      }
+    },
+    "categories": {
+      "defense": "Захист",
+      "offense": "Атака",
+      "support": "Підтримка",
+      "resource": "Ресурси",
+      "control": "Контроль"
     }
   },
   "summary": {

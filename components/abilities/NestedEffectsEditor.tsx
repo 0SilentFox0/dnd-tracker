@@ -3,6 +3,7 @@
 import type { ReactNode } from "react";
 
 import { Button } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
 
 interface CardArgs<E> {
   effect: E;
@@ -18,15 +19,17 @@ interface NestedEffectsEditorProps<E> {
   create: () => E;
   onChange: (next: E[]) => void;
   renderCard: (args: CardArgs<E>) => ReactNode;
+  className?: string;
+  renderAdd?: (add: (next: E[]) => void, ctx: { canAdd: boolean }) => ReactNode;
 }
 
-export function NestedEffectsEditor<E>({ effects, path, limits, labels, create, onChange, renderCard }: NestedEffectsEditorProps<E>) {
+export function NestedEffectsEditor<E>({ effects, path, limits, labels, create, onChange, renderCard, className = "col-span-6", renderAdd }: NestedEffectsEditorProps<E>) {
   const canRemove = effects.length > limits.min;
 
   const canAdd = limits.max === undefined || effects.length < limits.max;
 
   return (
-    <div className="col-span-6 space-y-2">
+    <div className={cn("space-y-2", className)}>
       {labels.heading && <p className="text-xs text-muted-foreground">{labels.heading}</p>}
       {effects.map((effect, i) => (
         <div key={i}>
@@ -40,9 +43,13 @@ export function NestedEffectsEditor<E>({ effects, path, limits, labels, create, 
           })}
         </div>
       ))}
-      <Button type="button" size="sm" variant="outline" disabled={!canAdd} onClick={() => onChange([...effects, create()])}>
-        {labels.add}
-      </Button>
+      {renderAdd ? (
+        renderAdd(onChange, { canAdd })
+      ) : (
+        <Button type="button" size="sm" variant="outline" disabled={!canAdd} onClick={() => onChange([...effects, create()])}>
+          {labels.add}
+        </Button>
+      )}
     </div>
   );
 }

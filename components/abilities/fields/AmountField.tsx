@@ -25,6 +25,23 @@ function modeOf(v: Amount | undefined): Mode {
   return "number";
 }
 
+const DICE_SIDES = [4, 6, 8, 10, 12, 20, 100] as const;
+
+const DICE_COUNTS = Array.from({ length: 20 }, (_, i) => String(i + 1));
+
+const DICE_COUNT_OPTIONS = DICE_COUNTS.map((n) => ({ value: n, label: n }));
+
+const DICE_SIDE_OPTIONS = DICE_SIDES.map((n) => ({ value: String(n), label: `d${n}` }));
+
+/** Plain `NdM` the two selects can express; anything else (modifier, odd die, count > 20) keeps the text input. */
+export function parseSimpleDice(v: string): { count: string; sides: string } | null {
+  const m = /^(\d+)d(\d+)$/.exec(v);
+
+  if (!m || !DICE_COUNTS.includes(m[1]) || !DICE_SIDES.some((s) => String(s) === m[2])) return null;
+
+  return { count: m[1], sides: m[2] };
+}
+
 function textOf(v: Amount | undefined): string {
   if (v === undefined) return "";
 
@@ -42,6 +59,8 @@ function textOf(v: Amount | undefined): string {
 /** `null` means "not a number yet" (e.g. a lone "-") — keep the previous value. */
 function build(mode: Mode, text: string, firstColumn: string): Amount | undefined | null {
   if (mode === "scale") return { scale: firstColumn };
+
+  if (mode === "dice" && !DICE_RE.test(text.trim())) return "1d6";
 
   if (text.trim() === "") return undefined;
 
@@ -70,6 +89,8 @@ export function AmountField({ id, value, onChange }: FieldProps<Amount | undefin
 
   const [draft, setDraft] = useState<string | null>(null);
 
+  const dice = mode === "dice" && draft === null && typeof value === "string" ? parseSimpleDice(value) : null;
+
   const first = columns?.[0]?.key ?? "";
 
   const modes = (columns ? [...BASE_MODES.slice(0, 3), "scale" as const, ...BASE_MODES.slice(3)] : [...BASE_MODES]).map((value) => ({ value, label: t(`modes.${value}`) }));
@@ -97,6 +118,15 @@ export function AmountField({ id, value, onChange }: FieldProps<Amount | undefin
         </div>
         {mode === "scale" ? (
           <ScaleColumnSelect id={id} value={textOf(value)} onChange={(key) => onChange({ scale: key })} />
+        ) : dice ? (
+          <>
+            <div className="w-16 shrink-0">
+              <SelectField id={id} aria-label={t("diceCount")} value={dice.count} options={DICE_COUNT_OPTIONS} onValueChange={(n) => onChange(`${n}d${dice.sides}`)} />
+            </div>
+            <div className="w-20 shrink-0">
+              <SelectField aria-label={t("diceSides")} value={dice.sides} options={DICE_SIDE_OPTIONS} onValueChange={(d) => onChange(`${dice.count}d${d}`)} />
+            </div>
+          </>
         ) : (
           <Input
             id={id}

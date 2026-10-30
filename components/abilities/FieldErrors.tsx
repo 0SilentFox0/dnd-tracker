@@ -4,7 +4,7 @@ import { translateIssue } from "@/lib/i18n/translate-issue";
 import { useTranslator } from "@/lib/i18n/use-translator";
 import type { AbilityError } from "@/lib/utils/abilities/editor";
 
-export function FieldErrors({ errors, testId }: { errors: AbilityError[]; testId?: string }) {
+export function FieldErrors({ errors, testId, id }: { errors: AbilityError[]; testId?: string; id?: string }) {
   const t = useTranslator();
 
   if (!errors.length) return null;
@@ -12,7 +12,7 @@ export function FieldErrors({ errors, testId }: { errors: AbilityError[]; testId
   const texts = [...new Set(errors.map((e) => translateIssue(t, typeof e === "string" ? { message: e } : e)))];
 
   return (
-    <div data-testid={testId} className="space-y-0.5">
+    <div id={id} data-testid={testId} className="space-y-0.5">
       {texts.map((text) => (
         <p key={text} className="text-xs text-destructive">
           {text}

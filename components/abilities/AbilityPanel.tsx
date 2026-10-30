@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useRef } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useTranslations } from "next-intl";
 import { X } from "lucide-react";
 
@@ -14,11 +14,13 @@ import { AbilityFlow } from "./AbilityFlow";
 import { useErrorsUnder } from "./editor-context";
 import { FieldErrors } from "./FieldErrors";
 import type { FlowPart } from "./flow-part";
+import { useAbilityText } from "./use-ability-text";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { useRevealOnError } from "@/lib/hooks/abilities";
 import type { Ability } from "@/lib/utils/abilities/schema";
 import { summarizeAbility } from "@/lib/utils/abilities/summary";
 
@@ -26,18 +28,44 @@ export interface AbilitySectionProps {
   ability: Ability;
   path: string;
   onChange: (next: Ability) => void;
+  state: SectionState;
+}
+
+export interface SectionState {
+  open: boolean;
+  onToggle: () => void;
+  summary: string | null;
 }
 
 const HIGHLIGHT = ["bg-hud-gold/15", "transition-colors"];
 
 const HIGHLIGHT_MS = 1200;
 
+const FLOW_PARTS: readonly FlowPart[] = ["when", "if", "then", "limits"];
+
 export function AbilityPanel({ ability, path, actions }: { ability: Ability; path: string; actions: { onChange: (a: Ability) => void; onRemove: () => void } }) {
   const t = useTranslations("abilities.panel");
 
   const summary = useMemo(() => summarizeAbility(ability), [ability]);
 
+  const text = useAbilityText();
+
+  const [open, setOpen] = useState<Record<FlowPart, boolean>>(() => ({ when: true, then: true, if: summary.if.length > 0, limits: summary.limits.length > 0 }));
+
+  const errorParts: Record<FlowPart, boolean> = {
+    when: useErrorsUnder(`${path}.trigger`).length > 0,
+    if: useErrorsUnder(`${path}.condition`).length > 0,
+    limits: useErrorsUnder(`${path}.limits`).length > 0,
+    then: useErrorsUnder(`${path}.effects`).length > 0,
+  };
+
+  const errorKey = FLOW_PARTS.filter((p) => errorParts[p]).join();
+
+  useRevealOnError(errorKey, (key) => setOpen((o) => ({ ...o, ...Object.fromEntries(key.split(",").map((p) => [p, true])) })));
+
   const timer = useRef<ReturnType<typeof setTimeout>>(undefined);
+
+  const frame = useRef<number>(undefined);
 
   const lit = useRef<HTMLElement | null>(null);
 
@@ -47,9 +75,15 @@ export function AbilityPanel({ ability, path, actions }: { ability: Ability; pat
     lit.current = null;
   };
 
-  useEffect(() => unlight, []);
+  useEffect(
+    () => () => {
+      cancelAnimationFrame(frame.current ?? 0);
+      unlight();
+    },
+    [],
+  );
 
-  const focusSection = (part: FlowPart) => {
+  const reveal = (part: FlowPart) => {
     const el = document.getElementById(sectionId(path, part));
 
     if (!el) return;
@@ -61,6 +95,24 @@ export function AbilityPanel({ ability, path, actions }: { ability: Ability; pat
     lit.current = el;
     timer.current = setTimeout(unlight, HIGHLIGHT_MS);
   };
+
+  const focusSection = (part: FlowPart) => {
+    cancelAnimationFrame(frame.current ?? 0);
+
+    if (open[part]) return reveal(part);
+
+    setOpen((o) => ({ ...o, [part]: true }));
+    frame.current = requestAnimationFrame(() => reveal(part));
+  };
+
+  const summaries: Record<FlowPart, string | null> = {
+    when: text.segments(summary.when) || null,
+    if: text.segments(summary.if) || null,
+    limits: text.segments(summary.limits) || null,
+    then: text.lines(summary.then).join(" · ") || null,
+  };
+
+  const stateOf = (part: FlowPart): SectionState => ({ open: open[part], onToggle: () => setOpen((o) => ({ ...o, [part]: !o[part] })), summary: summaries[part] });
 
   const section = { ability, path, onChange: actions.onChange };
 
@@ -96,11 +148,11 @@ export function AbilityPanel({ ability, path, actions }: { ability: Ability; pat
           }}
         />
       </div>
-      <TriggerSection {...section} />
-      <ConditionSection {...section} />
-      <LimitsSection {...section} />
+      <TriggerSection {...section} state={stateOf("when")} />
+      <ConditionSection {...section} state={stateOf("if")} />
+      <LimitsSection {...section} state={stateOf("limits")} />
       <PerformSection {...section} />
-      <EffectsSection {...section} />
+      <EffectsSection {...section} state={stateOf("then")} />
     </div>
   );
 }

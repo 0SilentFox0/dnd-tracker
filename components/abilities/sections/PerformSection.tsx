@@ -13,7 +13,7 @@ const ATTACK_NOTE = "Виконує атаку";
 // eslint-disable-next-line no-restricted-syntax -- default note text is stored in the ability
 const SPELL_NOTE = "Застосовує заклинання";
 
-export function PerformSection({ ability, path, onChange }: AbilitySectionProps) {
+export function PerformSection({ ability, path, onChange }: Omit<AbilitySectionProps, "state">) {
   const t = useTranslations("abilities.perform");
 
   const { performChoices } = useAbilityEditor();

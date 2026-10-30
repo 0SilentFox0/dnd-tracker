@@ -763,48 +763,166 @@
     "stats": {
       "label": "Passive stat bonus",
       "hint": "+Strength, +AC, +HP… always",
-      "defaultName": "Stat bonus"
+      "defaultName": "Stat bonus",
+      "params": {
+        "stat": "Stat",
+        "value": "Bonus"
+      }
     },
     "damage": {
       "label": "Damage bonus",
       "hint": "+% / +number to melee, ranged, magic (school)",
-      "defaultName": "Damage bonus"
+      "defaultName": "Damage bonus",
+      "params": {
+        "filter": "Damage kind",
+        "percent": "Bonus, %"
+      }
     },
     "onHit": {
       "label": "Effect on hit",
       "hint": "DOT, debuff, condition on the target",
-      "defaultName": "Bleeding"
+      "defaultName": "Bleeding",
+      "params": {
+        "dice": "Damage per round",
+        "damageType": "Damage type",
+        "rounds": "Rounds"
+      }
     },
     "resistance": {
       "label": "Resistance / immunity",
       "hint": "physical, magical, elemental, spells",
-      "defaultName": "Resistance"
+      "defaultName": "Resistance",
+      "params": {
+        "damageType": "Damage type",
+        "percent": "Resistance, %"
+      }
     },
     "aura": {
       "label": "Aura",
       "hint": "bonus to all allies / penalty to enemies",
-      "defaultName": "Aura"
+      "defaultName": "Aura",
+      "params": {
+        "value": "Armor bonus"
+      }
     },
     "survive": {
       "label": "Once per battle: survive with 1 HP",
       "hint": "lethal damage → 1 HP",
-      "defaultName": "Undying"
+      "defaultName": "Undying",
+      "params": {}
     },
     "bonusAction": {
       "label": "Bonus action",
       "hint": "player button: healing, morale, slot…",
-      "defaultName": "Second Wind"
+      "defaultName": "Second Wind",
+      "params": {
+        "dice": "Healing"
+      }
     },
     "spellSlots": {
       "label": "Spell slots",
       "hint": "+N slots of a level",
-      "defaultName": "Slots"
+      "defaultName": "Slots",
+      "params": {
+        "level": "Slot level",
+        "count": "Slots"
+      }
     },
     "custom": {
-      "label": "Custom",
-      "hint": "empty ability",
       "defaultName": "New ability",
       "note": "Describe the ability"
+    },
+    "damageSpell": {
+      "label": "Damage",
+      "hint": "Deals damage of a chosen type",
+      "defaultName": "Strike",
+      "params": {
+        "dice": "Damage",
+        "damageType": "Damage type"
+      }
+    },
+    "healSpell": {
+      "label": "Healing",
+      "hint": "Restores hit points",
+      "defaultName": "Healing",
+      "params": {
+        "dice": "Healing"
+      }
+    },
+    "dotSpell": {
+      "label": "Damage over time",
+      "hint": "Damage every round",
+      "defaultName": "Poison",
+      "params": {
+        "dice": "Damage per round",
+        "damageType": "Damage type",
+        "rounds": "Rounds"
+      }
+    },
+    "hotSpell": {
+      "label": "Healing over time",
+      "hint": "Healing every round",
+      "defaultName": "Regeneration",
+      "params": {
+        "dice": "Healing per round",
+        "rounds": "Rounds"
+      }
+    },
+    "condition": {
+      "label": "Condition",
+      "hint": "Stun, fear, restrain and more",
+      "defaultName": "Disabling",
+      "params": {
+        "condition": "Condition",
+        "rounds": "Rounds"
+      }
+    },
+    "pushBack": {
+      "label": "Push back",
+      "hint": "Pushes the target away from the caster",
+      "defaultName": "Shove",
+      "params": {
+        "feet": "Distance, ft"
+      }
+    },
+    "buffArmor": {
+      "label": "Armor buff",
+      "hint": "Temporary armor bonus",
+      "defaultName": "Shield",
+      "params": {
+        "value": "Armor bonus",
+        "rounds": "Rounds"
+      }
+    },
+    "cleanse": {
+      "label": "Cleanse",
+      "hint": "Removes negative effects",
+      "defaultName": "Cleansing",
+      "params": {}
+    },
+    "morale": {
+      "label": "Morale",
+      "hint": "Raises or lowers morale",
+      "defaultName": "Inspiration",
+      "params": {
+        "delta": "Morale change"
+      }
+    },
+    "concentrationBuff": {
+      "label": "Concentration buff",
+      "hint": "Armor bonus while concentrating",
+      "defaultName": "Warding",
+      "params": {
+        "value": "Armor bonus",
+        "rounds": "Rounds"
+      }
+    },
+    "categories": {
+      "defense": "Defense",
+      "offense": "Offense",
+      "support": "Support",
+      "resource": "Resources",
+      "control": "Control"
     }
   },
   "summary": {
