@@ -149,24 +149,34 @@ Progression test: `featureItems` (the function at `progression.ts:8`; read its n
 
 ---
 
-### Task 5: UI display and fallbacks
+### Task 5: UI display and fallbacks (libraries + progression)
+
+Rule: every place that lists or picks a race, class, subclass, background or feat shows its icon through `EntityIcon` (`components/common/EntityIcon.tsx`: `src`, `name`, `size`, `className`; with no `src` or a failed load it shows the initial letter, which is the fallback). Feats have no seeded icons (none generated), so they show the initial until the DM sets one.
 
 **Files:**
-- Modify: `components/classes/progression/ProgressionRowView.tsx` (`Items`)
-- Modify: `components/character-profile/path/PathRowCard.tsx` (same item list; read it first)
-- Check only (add test, change code only if broken): `components/choices/SubclassCard.tsx`, `components/choices/BackgroundPicker.tsx`, race/class pickers in create-character (`grep -rn "icon" components/choices components/characters`), class/race list cards
-- Test: `components/classes/progression/__tests__/Items-icon.test.tsx` (create, `// @vitest-environment happy-dom`)
+- Modify: `components/common/DmEntityCard.tsx` (new optional prop `icon?: string | null`; renders `<EntityIcon src={icon} name={title} size={48} className="size-12 rounded-lg" />` left of the title; hidden when the prop is `undefined`, so other users of the card are unchanged)
+- Modify: `components/classes/ClassCard.tsx`, `components/feats/FeatCard.tsx`, `components/backgrounds/BackgroundCard.tsx` (pass `icon`)
+- Modify: `components/races/RaceCard.tsx` (own layout: add `EntityIcon` next to the name, as `ArtifactCard` does)
+- Modify: `components/classes/ClassCard.tsx` (below the badges: a row of subclass icons, 24 px, `title` = subclass name; omitted when the class has no subclasses)
+- Modify: `components/classes/SubclassesEditor.tsx` (`EntityIcon` in each subclass header, from `subclass.icon`)
+- Modify: `components/classes/progression/ProgressionRowView.tsx` (`Items`), `components/character-profile/path/PathRowCard.tsx`
+- Check and fix only if the icon is missing: `components/choices/{SubclassCard,BackgroundPicker}.tsx` and the race/class/feat pickers in create-character and the character profile (`grep -rn "RacePicker\|ClassPicker\|FeatPicker\|ChoiceCard" components app`), the `info` pages (`app/campaigns/[id]/info`) that list these entities, `components/classes/progression/ClassProgressionMap.tsx` subclass tabs/columns
+- Test: one test per touched component group in its `__tests__/` folder (`// @vitest-environment happy-dom`)
 
 **Interfaces:**
-- Consumes: `ProgressionItem.icon` (Task 1); `OptimizedImage` from the same import `BranchRow.tsx` uses.
+- Consumes: `ProgressionItem.icon` (Task 1); `GameClassData.icon`, `GameClassData.subclasses[].icon`, `Race.icon`, `Background.icon`, `Feat.icon` (already in the types; verify `Race`/`Feat`/`Background` list DTOs actually carry `icon` — if a list endpoint or `select` drops it, add it there and note it in the commit).
 
-- [ ] **Step 1: Failing test:** `Items` with `[{ key: "a", name: "Rage", summary: "", icon: "https://x/r.webp" }, { key: "b", name: "Plain", summary: "" }]` → first `<summary>` contains an `img`, second contains none and still renders its name.
-- [ ] **Step 2:** run → FAIL.
-- [ ] **Step 3:** In `Items` render a 20×20 `OptimizedImage` (`alt=""`, `className="h-5 w-5 shrink-0 rounded object-cover"`, `fallback={null}`) before `it.name` when `it.icon` is set; make the `summary` a flex row (`inline-flex items-center gap-1.5`). Same in `PathRowCard`. For the pickers: grep shows `ChoiceCard` already takes `icon`; write one render test per picker only if none covers the no-icon case.
-- [ ] **Step 4:** `pnpm test:related components/classes/progression/ProgressionRowView.tsx components/character-profile/path/PathRowCard.tsx` → PASS.
-- [ ] **Step 5:** eslint; commit `feat(ui): show feature icons in class progression and hero path`.
+- [ ] **Step 1: Failing tests**
+  - `Items` with `[{ key: "a", name: "Rage", summary: "", icon: "https://x/r.webp" }, { key: "b", name: "Plain", summary: "" }]`: first `<summary>` has an `img`, second has none and still shows its name.
+  - `ClassCard` with `icon` and two subclasses with icons: the class icon and two subclass icons render; with `icon: null` it shows the initial letter and no `img`.
+  - `RaceCard`, `BackgroundCard`, `FeatCard`: with `icon` an `img` renders; with `null` the initial letter renders.
+  - `SubclassesEditor`: subclass with `icon` shows an `img`; without, the initial.
+- [ ] **Step 2:** run them → FAIL.
+- [ ] **Step 3:** Implement as listed. In `Items` render a 20x20 `EntityIcon` (`size={20}`, `className="size-5 rounded"`) only when `it.icon` is set (progression rows with no icon look exactly as before); same in `PathRowCard`. Keep the layering: no `fetch` or `@/lib/api` in components.
+- [ ] **Step 4:** `pnpm test:related components/common/DmEntityCard.tsx components/classes components/races components/feats components/backgrounds components/character-profile/path components/choices` → PASS. Then a browser check of the four library pages and the class page with the local DB seeded (Task 8): live runs go to a Sonnet subagent, text/JS checks over screenshots.
+- [ ] **Step 5:** eslint touched files; commit `feat(ui): icons in race, class, subclass, background and feat libraries`.
 
-Editor note (deviation from spec, flag to the user): no URL field is added to `ClassFeaturesEditor`/`SubclassesEditor`; the editor must only preserve `icon` on save. Add a round-trip test in `components/classes/__tests__/ClassFeaturesEditor.test.tsx`: an ability with `icon` is submitted unchanged. If it fails, fix the editor state mapping.
+Editor note (deviation from spec, flag to the user): no URL field is added to `ClassFeaturesEditor` for ability icons; the editor must only preserve `icon` on save. Add a round-trip test in `components/classes/__tests__/ClassFeaturesEditor.test.tsx`: an ability with `icon` is submitted unchanged. If it fails, fix the editor state mapping.
 
 ---
 
