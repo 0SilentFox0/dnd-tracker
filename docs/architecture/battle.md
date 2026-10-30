@@ -33,7 +33,7 @@ Every battle route is a Zod schema + `runBattleMutation` (`lib/server/battles/ru
 
 `GET /` and `dryRun` still return the full `BattleScene` with the last 30 events; older ones come from `GET /events?before=<seq>` («Показати раніші», `useBattleLogHistory`), and `GET /?versionOnly=1` answers `{ version }`.
 
-**Log:** an event stores `details.log: LogLine[]` (keys, compact `{m,p}` codec in `lib/utils/battle/log/codec.ts`, rendered in the viewer's locale; legacy rows still readable). While `BATTLE_LOG_TEXT_FALLBACK` is on, the DM-locale render is also written to `resultText` so a rollback to pre-`log` code still shows text; the flag is turned off after the rollback window ([i18n.md](i18n.md), part 7).
+**Log:** an event stores `details.log: LogLine[]` (keys, compact `{m,p}` codec in `lib/utils/battle/log/codec.ts`, rendered in the viewer's locale; legacy rows still readable). While `BATTLE_LOG_TEXT_FALLBACK` is on, the render in the acting user's request locale is also written to `resultText` so a rollback to pre-`log` code still shows text; the flag is turned off after the rollback window ([i18n.md](i18n.md), part 7).
 
 ## Turn advance
 
