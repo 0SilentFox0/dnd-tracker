@@ -821,6 +821,7 @@ model ScenarioPage {
   aiThreads   AiThread[]
   aiProposals AiProposal[]
   pageIndex   ScenarioPageIndex?
+  summary     ScenarioPageSummary?
 
   @@index([campaignId, sortOrder])
   @@index([characterId])
@@ -837,6 +838,23 @@ model ScenarioPageIndex {
 
   @@index([campaignId])
   @@map("scenario_page_index")
+}
+
+model ScenarioPageSummary {
+  pageId       String       @id
+  campaignId   String
+  version      Int
+  summary      Json
+  provider     String
+  model        String
+  inputTokens  Int?
+  outputTokens Int?
+  createdAt    DateTime     @default(now())
+  updatedAt    DateTime     @default(now())
+  page         ScenarioPage @relation(fields: [pageId], references: [id], onDelete: Cascade)
+
+  @@index([campaignId])
+  @@map("scenario_page_summaries")
 }
 
 model ScenarioPageVersion {
