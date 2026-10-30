@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useMemo } from "react";
+import { useCallback, useEffect, useMemo } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
@@ -43,6 +43,18 @@ export function ScenarioGraph({ campaignId }: { campaignId: string }) {
     [campaignId, router],
   );
 
+  const hasSelection = !!state.selectedId;
+
+  useEffect(() => {
+    if (!hasSelection) return;
+
+    const onKey = (e: KeyboardEvent) => e.key === "Escape" && select(null);
+
+    document.addEventListener("keydown", onKey);
+
+    return () => document.removeEventListener("keydown", onKey);
+  }, [hasSelection, select]);
+
   if (state.isLoading) return <LoadingState />;
 
   if (state.isError) return <ErrorState error={null} onRetry={set.retry} />;
@@ -59,28 +71,30 @@ export function ScenarioGraph({ campaignId }: { campaignId: string }) {
 
   const { graph, counts } = state;
 
+  const noEntities = !!counts && counts.entities === 0;
+
   const detail = selection.detail;
 
-  const inspector = detail ? <GraphInspector detail={detail} canOpen={!!graphNodeHref(campaignId, detail.node)} onOpen={() => open(detail.node)} onSelect={set.selected} onClose={clear} /> : null;
+  const inspector = detail ? <GraphInspector detail={detail} canOpen={!!graphNodeHref(campaignId, detail.node)} onOpen={() => open(detail.node)} onSelect={set.focus} onClose={clear} /> : null;
 
   const body = () => {
-    if (counts && counts.edges === 0) return <EmptyState icon={Network} title={t("empty.noMentions")} description={t("empty.noMentionsHint")} />;
-
     if (!graph || graph.nodes.length === 0) {
       return <EmptyState icon={Network} title={t("empty.filtered")} description={t("empty.filteredHint")} action={<Button onClick={() => set.filters(defaultFilters())}>{t("empty.resetFilters")}</Button>} />;
     }
 
-    return <ScenarioGraphView graph={graph} selection={selection} selectedId={state.selectedId} matched={matched} onSelect={set.selected} onClear={clear} onOpen={open} />;
+    return <ScenarioGraphView graph={graph} selection={selection} selectedId={state.selectedId} focus={state.focus} showSequence={state.showSequence} matched={matched} onSelect={set.selected} onClear={clear} onOpen={open} />;
   };
 
   return (
-    <div className="flex h-full min-h-[480px] flex-col gap-3">
+    <div className="flex h-[calc(100dvh-13rem)] min-h-[480px] flex-col gap-3">
       <GraphToolbar
         filters={state.filters}
+        showSequence={state.showSequence}
         counts={counts?.byType ?? {}}
         query={state.query}
         matches={{ current: state.matches.length === 0 ? 0 : (state.matchIndex % state.matches.length) + 1, total: state.matches.length }}
         onFilters={set.filters}
+        onShowSequence={set.sequence}
         onQuery={set.query}
         onNextMatch={set.nextMatch}
       />
@@ -91,9 +105,17 @@ export function ScenarioGraph({ campaignId }: { campaignId: string }) {
         </div>
       ) : null}
       {state.overLimit ? <p role="status" className="text-sm text-destructive">{t("limits.overLimit")}</p> : null}
-      <div className="flex min-h-0 flex-1 gap-3">
-        <div className="min-w-0 flex-1">{body()}</div>
-        {inspector && isDesktop ? <aside aria-label={t("inspector.title")} className="w-72 shrink-0 overflow-y-auto rounded-lg border p-3">{inspector}</aside> : null}
+      {noEntities ? (
+        <div role="status" className="flex flex-wrap items-center gap-x-3 gap-y-1 rounded-md border border-dashed bg-card/50 px-3 py-2 text-sm">
+          <Network className="size-4 text-muted-foreground" aria-hidden />
+          <span className="font-medium">{t("empty.noMentions")}</span>
+          <span className="text-muted-foreground">{t("empty.noMentionsHint")}</span>
+          <Button asChild size="sm" variant="outline"><Link href={`/campaigns/${campaignId}/dm/scenario`}>{t("empty.noPagesAction")}</Link></Button>
+        </div>
+      ) : null}
+      <div className="relative min-h-0 flex-1">
+        {body()}
+        {inspector && isDesktop ? <aside aria-label={t("inspector.title")} className="absolute inset-y-2 right-2 w-72 overflow-y-auto rounded-lg border bg-card/95 p-3 shadow-lg backdrop-blur-sm">{inspector}</aside> : null}
       </div>
       {inspector && !isDesktop ? (
         <ResponsiveDialog open onOpenChange={(o) => !o && clear()} title={t("inspector.title")}>

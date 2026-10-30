@@ -13,7 +13,7 @@ export function GraphPageClient({ campaignId, campaignName }: { campaignId: stri
   const t = useTranslations("dashboard.sections.graph");
 
   return (
-    <HudPage>
+    <HudPage className="max-w-[1800px]">
       <HudPageHeader title={t("title")} subtitle={campaignName} />
       <OnboardingHint id="dm.graph" />
       <ScenarioGraph campaignId={campaignId} />

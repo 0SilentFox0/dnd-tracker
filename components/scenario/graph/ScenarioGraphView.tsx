@@ -4,10 +4,12 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useTranslations } from "next-intl";
 import { Maximize, Minus, Plus } from "lucide-react";
 
-import { GraphEdgeLine } from "./GraphEdgeLine";
+import { GraphEdgeLine, SEQUENCE_MARKER_ID } from "./GraphEdgeLine";
+import { GraphLegend } from "./GraphLegend";
 import { GraphNodeShape } from "./GraphNodeShape";
 
 import { Button } from "@/components/ui/button";
+import { GRAPH_TYPE_STYLE } from "@/lib/constants/scenario-graph";
 import { DRAG_THRESHOLD } from "@/lib/hooks/common";
 import type { PositionedGraph, PositionedNode } from "@/lib/utils/scenario/graph/layout";
 
@@ -25,6 +27,8 @@ const MIN_W = 120;
 const MAX_W = 20000;
 
 const FALLBACK_ASPECT = 4 / 3;
+
+const WHEEL_K = 0.0015;
 
 function fitBox(bounds: PositionedGraph["bounds"], aspect: number): Box {
   const w0 = bounds.w + PAD * 2;
@@ -50,13 +54,15 @@ export interface ScenarioGraphViewProps {
   graph: PositionedGraph;
   selection: { nodes: ReadonlySet<string>; edges: ReadonlySet<string> };
   selectedId: string | null;
+  focus: { id: string; n: number } | null;
+  showSequence: boolean;
   matched: ReadonlySet<string>;
   onSelect: (id: string) => void;
   onClear: () => void;
   onOpen: (node: PositionedNode) => void;
 }
 
-export function ScenarioGraphView({ graph, selection, selectedId, matched, onSelect, onClear, onOpen }: ScenarioGraphViewProps) {
+export function ScenarioGraphView({ graph, selection, selectedId, focus, showSequence, matched, onSelect, onClear, onOpen }: ScenarioGraphViewProps) {
   const t = useTranslations("scenarioGraph");
 
   const svgRef = useRef<SVGSVGElement>(null);
@@ -90,17 +96,15 @@ export function ScenarioGraphView({ graph, selection, selectedId, matched, onSel
 
   const byId = useMemo(() => new Map(graph.nodes.map((n) => [n.id, n])), [graph.nodes]);
 
-  useEffect(() => {
-    const node = selectedId ? byId.get(selectedId) : null;
+  const [seenFocus, setSeenFocus] = useState(focus);
 
-    if (!node) return;
+  if (focus !== seenFocus) {
+    setSeenFocus(focus);
 
-    const b = boxRef.current;
+    const node = focus ? byId.get(focus.id) : null;
 
-    const inside = node.x > b.x && node.x < b.x + b.w && node.y > b.y && node.y < b.y + b.h;
-
-    if (!inside) setBox({ ...b, x: node.x - b.w / 2, y: node.y - b.h / 2 });
-  }, [selectedId, byId]);
+    if (node) setBox((b) => ({ ...b, x: node.x - b.w / 2, y: node.y - b.h / 2 }));
+  }
 
   const scale = () => {
     const rect = svgRef.current?.getBoundingClientRect();
@@ -131,7 +135,7 @@ export function ScenarioGraphView({ graph, selection, selectedId, matched, onSel
 
     const onWheel = (e: WheelEvent) => {
       e.preventDefault();
-      zoomAt(e.deltaY > 0 ? 1.15 : 1 / 1.15, e.clientX, e.clientY);
+      zoomAt(Math.exp(Math.max(-120, Math.min(120, e.deltaY * (e.deltaMode === 1 ? 16 : 1))) * WHEEL_K), e.clientX, e.clientY);
     };
 
     el.addEventListener("wheel", onWheel, { passive: false });
@@ -197,7 +201,7 @@ export function ScenarioGraphView({ graph, selection, selectedId, matched, onSel
   };
 
   return (
-    <div className="relative size-full overflow-hidden rounded-lg border bg-card/40">
+    <div className="relative size-full overflow-hidden rounded-lg border bg-gradient-to-b from-card/30 to-card/70">
       <svg
         ref={svgRef}
         role="group"
@@ -216,7 +220,27 @@ export function ScenarioGraphView({ graph, selection, selectedId, matched, onSel
         }}
         onClick={(e) => e.target === e.currentTarget && onClear()}
       >
+        <defs>
+          <pattern id="graph-dots" width={36} height={36} patternUnits="userSpaceOnUse">
+            <circle cx={2} cy={2} r={1.3} fill="var(--color-muted-foreground)" opacity={0.28} />
+          </pattern>
+          <marker id={SEQUENCE_MARKER_ID} viewBox="0 0 10 10" refX={8} refY={5} markerWidth={18} markerHeight={18} markerUnits="userSpaceOnUse" orient="auto">
+            <path d="M2 1.5 L8 5 L2 8.5" fill="none" stroke="var(--color-hud-gold-bright)" strokeWidth={1.8} strokeLinecap="round" strokeLinejoin="round" />
+          </marker>
+        </defs>
+        <rect x={box.x} y={box.y} width={box.w} height={box.h} fill="url(#graph-dots)" pointerEvents="none" />
         <g>
+          {showSequence
+            ? graph.sequence.map((edge) => {
+                const from = byId.get(edge.source);
+
+                const to = byId.get(edge.target);
+
+                if (!from || !to) return null;
+
+                return <GraphEdgeLine key={edge.id} edge={edge} from={from} to={to} color="var(--color-hud-gold-bright)" sequence dimmed={!!selectedId && !selection.nodes.has(edge.source) && !selection.nodes.has(edge.target)} highlighted={false} secretLabel="" />;
+              })
+            : null}
           {graph.edges.map((edge) => {
             const from = byId.get(edge.source);
 
@@ -224,18 +248,19 @@ export function ScenarioGraphView({ graph, selection, selectedId, matched, onSel
 
             if (!from || !to) return null;
 
-            return <GraphEdgeLine key={edge.id} edge={edge} from={from} to={to} dimmed={!!selectedId && !selection.edges.has(edge.id)} highlighted={selection.edges.has(edge.id)} secretLabel={t("graph.secretEdge")} />;
+            return <GraphEdgeLine key={edge.id} edge={edge} from={from} to={to} color={to.type ? GRAPH_TYPE_STYLE[to.type].color : "currentColor"} dimmed={!!selectedId && !selection.edges.has(edge.id)} highlighted={selection.edges.has(edge.id)} secretLabel={t("graph.secretEdge")} />;
           })}
           {graph.nodes.map((node) => (
             <GraphNodeShape key={node.id} node={node} selected={node.id === selectedId} dimmed={!!selectedId && !selection.nodes.has(node.id)} matched={matched.has(node.id)} onSelect={onSelect} onClear={onClear} onOpen={onOpen} />
           ))}
         </g>
       </svg>
-      <div className="absolute right-2 top-2 flex flex-col gap-1">
+      <div className="absolute left-2 top-2 flex flex-col gap-1">
         <Button size="icon" variant="outline" aria-label={t("toolbar.zoomIn")} onClick={() => zoomAt(1 / 1.3)}><Plus /></Button>
         <Button size="icon" variant="outline" aria-label={t("toolbar.zoomOut")} onClick={() => zoomAt(1.3)}><Minus /></Button>
         <Button size="icon" variant="outline" aria-label={t("toolbar.fit")} onClick={fit}><Maximize /></Button>
       </div>
+      <GraphLegend showSequence={showSequence} />
     </div>
   );
 }

@@ -134,14 +134,30 @@ describe("useScenarioGraph", () => {
     act(() => result.current.set.query("вовк"));
     expect(result.current.state.matches).toEqual(["unit:u1", "character:c1"]);
     expect(result.current.state.matchIndex).toBe(0);
-    act(() => result.current.set.nextMatch());
     expect(result.current.state.selectedId).toBe("unit:u1");
+    expect(result.current.state.focus?.id).toBe("unit:u1");
     act(() => result.current.set.nextMatch());
     expect(result.current.state.selectedId).toBe("character:c1");
     expect(result.current.state.matchIndex).toBe(1);
     act(() => result.current.set.nextMatch());
     expect(result.current.state.selectedId).toBe("unit:u1");
     expect(result.current.state.matchIndex).toBe(0);
+  });
+
+  it("toggles the story thread without relayout", async () => {
+    vi.mocked(scenarioApi.getScenarioIndex).mockResolvedValue(index);
+
+    const { result } = setup();
+
+    await waitFor(() => expect(result.current.state.graph).not.toBeNull());
+
+    const before = result.current.state.graph;
+
+    expect(result.current.state.showSequence).toBe(true);
+    expect(before?.sequence).toHaveLength(1);
+    act(() => result.current.set.sequence(false));
+    expect(result.current.state.showSequence).toBe(false);
+    expect(result.current.state.graph).toBe(before);
   });
 
   it("finds a single-page entity by search with default filters", async () => {

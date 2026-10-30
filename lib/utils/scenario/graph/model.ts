@@ -94,7 +94,17 @@ export function buildGraphModel(index: ScenarioIndex, filters: GraphFilters, cap
     hidden: 0,
   }));
 
-  return { nodes: [...sceneNodes, ...entityNodes], edges, truncated, entityTotal: candidates.length };
+  const sequence: GraphEdge[] = [];
+
+  const mainScenes = sceneNodes.filter((n) => n.pageKind === "scene").sort((a, b) => (a.order ?? 0) - (b.order ?? 0));
+
+  mainScenes.forEach((n, i) => {
+    const prev = mainScenes[i - 1];
+
+    if (prev) sequence.push({ id: `seq:${prev.refId}>${n.refId}`, source: prev.id, target: n.id, count: 1, secret: false });
+  });
+
+  return { nodes: [...sceneNodes, ...entityNodes], edges, sequence, truncated, entityTotal: candidates.length };
 }
 
 export function neighbors(model: GraphModel, nodeId: string): { nodes: Set<string>; edges: Set<string> } {

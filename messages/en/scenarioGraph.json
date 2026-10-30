@@ -22,6 +22,15 @@
     "open": "Open",
     "title": "Node details"
   },
+  "legend": {
+    "title": "Legend",
+    "draft": "Draft",
+    "ready": "Ready",
+    "personal": "Personal",
+    "sequence": "Story order",
+    "missing": "Deleted",
+    "secret": "Secret link"
+  },
   "limits": {
     "overLimit": "The graph is large and may be slow. Narrow it with filters.",
     "showAll": "Show all",
@@ -36,6 +45,7 @@
     "searchPlaceholder": "Search by name",
     "showAll": "Show all entities",
     "showLeaves": "Show single-link entities",
+    "showSequence": "Show story order",
     "types": "Entity types",
     "zoomIn": "Zoom in",
     "zoomOut": "Zoom out"

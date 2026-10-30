@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useDeferredValue, useMemo, useState } from "react";
 
 import { useScenarioIndex } from "./useScenarioIndex";
 
@@ -23,14 +23,22 @@ export function useScenarioGraph(campaignId: string) {
 
   const [selectedId, setSelectedId] = useState<string | null>(null);
 
+  const [focus, setFocus] = useState<{ id: string; n: number } | null>(null);
+
+  const [showSequence, setShowSequence] = useState(true);
+
+  const [autoFor, setAutoFor] = useState<string | null>(null);
+
+  const deferredQuery = useDeferredValue(query);
+
   const forcedKey = useMemo(() => {
-    if (!index || !query.trim()) return "";
+    if (!index || !deferredQuery.trim()) return "";
 
     return index.entities
-      .filter((e) => matchesQuery([e.label], query))
+      .filter((e) => matchesQuery([e.label], deferredQuery))
       .map((e) => entityNodeId(e.type, e.id))
       .join("\n");
-  }, [index, query]);
+  }, [index, deferredQuery]);
 
   const forced = useMemo(() => new Set(forcedKey ? forcedKey.split("\n") : []), [forcedKey]);
 
@@ -38,7 +46,7 @@ export function useScenarioGraph(campaignId: string) {
 
   const graph = useMemo(() => (model ? layoutGraph(model) : null), [model]);
 
-  const matches = useMemo(() => (model ? searchMatches(model, query) : []), [model, query]);
+  const matches = useMemo(() => (model ? searchMatches(model, deferredQuery) : []), [model, deferredQuery]);
 
   const selection = useMemo(() => {
     const node = graph?.nodes.find((n) => n.id === selectedId);
@@ -60,6 +68,21 @@ export function useScenarioGraph(campaignId: string) {
 
   const visibleSelectedId = selection.detail ? selectedId : null;
 
+  const focusNode = useCallback((id: string | null) => {
+    setSelectedId(id);
+
+    if (id) setFocus((f) => ({ id, n: (f?.n ?? 0) + 1 }));
+  }, []);
+
+  const firstMatch = matches[0] ?? null;
+
+  if (firstMatch !== autoFor) {
+    setAutoFor(firstMatch);
+    setMatchIndex(0);
+
+    if (firstMatch) focusNode(firstMatch);
+  }
+
   const setQuery = useCallback((q: string) => {
     setQueryState(q);
     setMatchIndex(0);
@@ -73,8 +96,8 @@ export function useScenarioGraph(campaignId: string) {
     const next = matches[current] === selectedId ? (current + 1) % matches.length : current;
 
     setMatchIndex(next);
-    setSelectedId(matches[next] ?? null);
-  }, [matches, matchIndex, selectedId]);
+    focusNode(matches[next] ?? null);
+  }, [matches, matchIndex, selectedId, focusNode]);
 
   const patchFilters = useCallback((patch: Partial<GraphFilters>) => setFilters((f) => ({ ...f, ...patch })), []);
 
@@ -84,6 +107,8 @@ export function useScenarioGraph(campaignId: string) {
       isError,
       isEmpty: !!index && index.scenes.length === 0,
       graph,
+      showSequence,
+      focus,
       filters,
       query,
       selectedId: visibleSelectedId,
@@ -94,7 +119,7 @@ export function useScenarioGraph(campaignId: string) {
       overLimit: (model?.nodes.length ?? 0) > GRAPH_WARN_NODES,
       counts: index?.counts ?? null,
     },
-    set: { filters: patchFilters, query: setQuery, selected: setSelectedId, nextMatch, retry: () => void refetch() },
+    set: { filters: patchFilters, query: setQuery, selected: setSelectedId, focus: focusNode, sequence: setShowSequence, nextMatch, retry: () => void refetch() },
     selection,
   };
 }

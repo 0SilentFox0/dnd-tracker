@@ -11,16 +11,18 @@ import type { MentionType } from "@/types/scenario";
 export interface GraphToolbarProps {
   filters: GraphFilters;
   counts: Partial<Record<MentionType, number>>;
+  showSequence: boolean;
   query: string;
   matches: { current: number; total: number };
   onFilters: (patch: Partial<GraphFilters>) => void;
+  onShowSequence: (show: boolean) => void;
   onQuery: (q: string) => void;
   onNextMatch: () => void;
 }
 
 const checkClass = "flex items-center gap-1.5 text-sm";
 
-export function GraphToolbar({ filters, counts, query, matches, onFilters, onQuery, onNextMatch }: GraphToolbarProps) {
+export function GraphToolbar({ filters, counts, showSequence, query, matches, onFilters, onShowSequence, onQuery, onNextMatch }: GraphToolbarProps) {
   const t = useTranslations("scenarioGraph.toolbar");
 
   const tType = useTranslations("scenario.mentionTypes");
@@ -54,6 +56,10 @@ export function GraphToolbar({ filters, counts, query, matches, onFilters, onQue
           );
         })}
       </fieldset>
+      <label className={checkClass}>
+        <input type="checkbox" checked={showSequence} onChange={(e) => onShowSequence(e.target.checked)} />
+        {t("showSequence")}
+      </label>
       <label className={checkClass}>
         <input type="checkbox" checked={filters.onlyMissing} onChange={(e) => onFilters({ onlyMissing: e.target.checked })} />
         {t("onlyMissing")}

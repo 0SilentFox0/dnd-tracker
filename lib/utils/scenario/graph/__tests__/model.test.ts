@@ -102,6 +102,27 @@ describe("buildGraphModel", () => {
   });
 });
 
+describe("sequence edges", () => {
+  it("chains consecutive scene pages by order, skipping other page kinds and leaving counts alone", () => {
+    const m = buildGraphModel(index, defaultFilters());
+
+    expect(m.sequence).toEqual([{ id: "seq:s1>s2", source: "scene:s1", target: "scene:s2", count: 1, secret: false }]);
+    expect(m.sequence.some((e) => e.source === "scene:h1" || e.target === "scene:h1")).toBe(false);
+    expect(m.nodes.find((n) => n.id === "scene:s1")?.degree).toBe(4);
+    expect(m.edges.some((e) => e.id.startsWith("seq:"))).toBe(false);
+  });
+
+  it("orders by `order`, not by input position", () => {
+    const m = buildGraphModel({ ...index, scenes: [scene("s2", 2), scene("s1", 1)] }, defaultFilters());
+
+    expect(m.sequence.map((e) => e.id)).toEqual(["seq:s1>s2"]);
+  });
+
+  it("skips scenes dropped by onlyMissing", () => {
+    expect(buildGraphModel(index, { ...defaultFilters(), onlyMissing: true }).sequence).toEqual([]);
+  });
+});
+
 describe("node ids", () => {
   it("prefixes ids", () => {
     expect(sceneNodeId("x")).toBe("scene:x");

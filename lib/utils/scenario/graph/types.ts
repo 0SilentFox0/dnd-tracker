@@ -32,6 +32,7 @@ export interface GraphFilters {
 export interface GraphModel {
   nodes: GraphNode[];
   edges: GraphEdge[];
+  sequence: GraphEdge[];
   truncated: number;
   entityTotal: number;
 }

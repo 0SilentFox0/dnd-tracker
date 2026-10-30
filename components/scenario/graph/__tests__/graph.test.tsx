@@ -49,7 +49,7 @@ describe("ScenarioGraph", () => {
     render(<ScenarioGraph campaignId="c" />);
 
     expect(document.querySelectorAll("[data-node-id]")).toHaveLength(4);
-    expect(document.querySelectorAll("[data-edge-id]")).toHaveLength(3);
+    expect(document.querySelectorAll("[data-edge-id]:not([data-sequence])")).toHaveLength(3);
     expect(screen.getByText("+1")).toBeInTheDocument();
   });
 
@@ -126,6 +126,8 @@ describe("ScenarioGraph", () => {
     render(<ScenarioGraph campaignId="c" />);
 
     expect(screen.getByText("scenarioGraph.empty.noMentions")).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: "scenarioGraph.empty.noPagesAction" })).toHaveAttribute("href", "/campaigns/c/dm/scenario");
+    expect(node("scene:a")).not.toBeNull();
   });
 
   it("offers to reset filters when everything is filtered out", () => {
@@ -144,6 +146,53 @@ describe("ScenarioGraph", () => {
 
     fireEvent.click(screen.getByRole("button", { name: "scenarioGraph.empty.resetFilters" }));
     expect(document.querySelectorAll("[data-node-id]").length).toBeGreaterThan(0);
+  });
+
+  it("draws the story thread between scenes and toggles it from the toolbar", () => {
+    render(<ScenarioGraph campaignId="c" />);
+
+    expect(document.querySelectorAll("[data-sequence]")).toHaveLength(1);
+    expect(document.querySelectorAll("[data-edge-id]")).toHaveLength(4);
+
+    fireEvent.click(screen.getByRole("checkbox", { name: /scenarioGraph.toolbar.showSequence/ }));
+
+    expect(document.querySelectorAll("[data-sequence]")).toHaveLength(0);
+  });
+
+  it("selects the first match while typing, without Enter", () => {
+    render(<ScenarioGraph campaignId="c" />);
+
+    fireEvent.change(screen.getByRole("searchbox"), { target: { value: "spark" } });
+
+    expect(node("spell:s")).toHaveClass("graph-node-selected");
+  });
+
+  it("clears the selection on Escape pressed anywhere", () => {
+    render(<ScenarioGraph campaignId="c" />);
+
+    fireEvent.click(node("unit:g"));
+    expect(node("unit:g")).toHaveClass("graph-node-selected");
+
+    fireEvent.keyDown(document.body, { key: "Escape" });
+    expect(node("unit:g")).not.toHaveClass("graph-node-selected");
+  });
+
+  it("selects on Space", () => {
+    render(<ScenarioGraph campaignId="c" />);
+
+    fireEvent.keyDown(node("unit:g"), { key: " " });
+    expect(node("unit:g")).toHaveClass("graph-node-selected");
+  });
+
+  it("keeps the graph in place when the inspector opens", () => {
+    render(<ScenarioGraph campaignId="c" />);
+
+    const before = document.querySelector("svg")?.getAttribute("viewBox");
+
+    fireEvent.click(node("unit:g"));
+    expect(document.querySelector("aside")).not.toBeNull();
+    expect(document.querySelector("aside")?.className).toContain("absolute");
+    expect(document.querySelector("svg")?.getAttribute("viewBox")).toBe(before);
   });
 
   it("search Enter selects the first match", () => {
