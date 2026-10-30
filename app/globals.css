@@ -281,6 +281,8 @@
 @layer base {
   * {
     @apply border-border outline-ring/50;
+    scrollbar-width: thin;
+    scrollbar-color: rgb(230, 194, 90) transparent;
   }
   html {
     min-height: 100vh;
@@ -425,4 +427,10 @@
     -webkit-text-size-adjust: 100%;
     text-size-adjust: 100%;
   }
+}
+
+@supports not (scrollbar-color: auto) {
+  :where(*)::-webkit-scrollbar { width: 8px; height: 8px; }
+  :where(*)::-webkit-scrollbar-track { background: transparent; }
+  :where(*)::-webkit-scrollbar-thumb { background: rgb(230, 194, 90); border-radius: 4px; }
 }
