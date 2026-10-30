@@ -1,8 +1,8 @@
 "use client";
 
 import { useTranslator } from "@/lib/i18n/use-translator";
-import type { ComponentFlags, SpellIngredient } from "@/lib/schemas/spell-ingredients";
 import { summarizeIngredients } from "@/lib/utils/spells/ingredients/summary";
+import type { ComponentFlags, SpellIngredient } from "@/lib/utils/spells/ingredients/types";
 
 interface ComponentsSource {
   ingredients?: SpellIngredient[];

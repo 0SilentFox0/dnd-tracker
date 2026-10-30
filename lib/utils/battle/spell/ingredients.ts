@@ -1,11 +1,11 @@
 import { API_ERRORS } from "@/lib/constants/api-errors";
 import { COIN_VALUE } from "@/lib/constants/inventory";
-import type { SpellIngredient } from "@/lib/schemas/spell-ingredients";
 import { BattleRuleError } from "@/lib/utils/battle/store/errors";
 import type { Ruleset } from "@/lib/utils/rules";
 import { trackedIngredients } from "@/lib/utils/spells/ingredients";
 import { applyIngredientPlan, type IngredientPlan, planIngredients } from "@/lib/utils/spells/ingredients/plan";
 import { formatMissing } from "@/lib/utils/spells/ingredients/summary";
+import type { SpellIngredient } from "@/lib/utils/spells/ingredients/types";
 import type { BattleParticipant, IngredientStock } from "@/types/battle";
 
 interface GateSource {

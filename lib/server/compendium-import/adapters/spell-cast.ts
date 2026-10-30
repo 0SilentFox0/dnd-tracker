@@ -1,8 +1,8 @@
 import { parseMaterial } from "./spell-patterns/ingredients";
 import { array, num, object, str } from "./shared";
 
-import type { ComponentFlags, SpellIngredient } from "@/lib/schemas/spell-ingredients";
 import type { SpellFacts } from "@/lib/utils/spells/derive/mechanics";
+import type { ComponentFlags, SpellIngredient } from "@/lib/utils/spells/ingredients/types";
 
 export interface SpellCast {
   castingKey: string;

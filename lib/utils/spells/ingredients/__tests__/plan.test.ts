@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 
-import type { SpellIngredient } from "@/lib/schemas/spell-ingredients";
 import { applyIngredientPlan, planIngredients } from "@/lib/utils/spells/ingredients/plan";
+import type { SpellIngredient } from "@/lib/utils/spells/ingredients/types";
 import type { IngredientStock } from "@/types/battle";
 
 const diamond = (over: Partial<SpellIngredient> = {}): SpellIngredient => ({ name: "Diamond", qty: 1, minGp: 50, consumed: true, focus: false, ...over });

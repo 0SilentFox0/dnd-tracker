@@ -1,4 +1,4 @@
-import type { ComponentFlags, SpellIngredient } from "@/lib/schemas/spell-ingredients";
+import type { ComponentFlags, SpellIngredient } from "@/lib/utils/spells/ingredients/types";
 
 export interface SummaryLabels {
   minGp: (gp: number) => string;

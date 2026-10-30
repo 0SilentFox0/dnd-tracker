@@ -1,6 +1,6 @@
 import { INGREDIENT_NAME_MAX } from "@/lib/constants/spell-ingredients";
-import type { SpellIngredient } from "@/lib/schemas/spell-ingredients";
-import { defaultFocus } from "@/lib/schemas/spell-ingredients";
+import type { SpellIngredient } from "@/lib/utils/spells/ingredients/types";
+import { defaultFocus } from "@/lib/utils/spells/ingredients/types";
 
 const COST = /worth\s+(?:at\s+least\s+)?([\d,]+(?:\.\d+)?)\s*\+?\s*(?:gp|gold)/gi;
 

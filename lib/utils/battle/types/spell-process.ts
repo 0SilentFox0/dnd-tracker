@@ -1,9 +1,9 @@
-import type { SpellIngredient } from "@/lib/schemas/spell-ingredients";
 import type { SummonRequest } from "@/lib/utils/abilities/engine/core/types";
 import type { CritPicker } from "@/lib/utils/battle/crit-choice/types";
 import type { SpellFx } from "@/lib/utils/battle/fx/spells";
 import type { TransformRequest } from "@/lib/utils/battle/transform/types";
 import type { Ruleset } from "@/lib/utils/rules";
+import type { SpellIngredient } from "@/lib/utils/spells/ingredients/types";
 import type { SpellDice } from "@/lib/utils/spells/model/dice";
 import type { SpellDefinition } from "@/lib/utils/spells/model/schema";
 import type { BattleAction, BattleMapConfig, BattleParticipant, SpellGrant, TerrainDamage } from "@/types/battle";

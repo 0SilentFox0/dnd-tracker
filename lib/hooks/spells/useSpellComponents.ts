@@ -5,10 +5,10 @@ import { useMemo } from "react";
 import type { IngredientPresetId } from "@/lib/constants/spell-ingredients";
 import { SPELL_INGREDIENTS_MAX } from "@/lib/constants/spell-ingredients";
 import { useTranslator } from "@/lib/i18n/use-translator";
-import type { ComponentFlags, SpellIngredient } from "@/lib/schemas/spell-ingredients";
 import { ingredientKey } from "@/lib/utils/spells/ingredients/key";
 import { blankIngredient, ingredientFromPreset, patchIngredient } from "@/lib/utils/spells/ingredients/presets";
 import { deriveComponentFlags, summarizeIngredients } from "@/lib/utils/spells/ingredients/summary";
+import type { ComponentFlags, SpellIngredient } from "@/lib/utils/spells/ingredients/types";
 import type { SpellFormData } from "@/types/spells";
 
 const NO_FLAGS: ComponentFlags = { v: false, s: false, m: false };

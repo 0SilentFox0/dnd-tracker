@@ -6,10 +6,10 @@ import { useBattleScene } from "./useBattleScene";
 
 import { COIN_VALUE } from "@/lib/constants/inventory";
 import { useTranslator } from "@/lib/i18n/use-translator";
-import type { SpellIngredient } from "@/lib/schemas/spell-ingredients";
 import { trackedIngredients } from "@/lib/utils/spells/ingredients";
 import { planIngredients } from "@/lib/utils/spells/ingredients/plan";
 import { formatMissing, summarizeIngredients } from "@/lib/utils/spells/ingredients/summary";
+import type { SpellIngredient } from "@/lib/utils/spells/ingredients/types";
 import type { BattleParticipant } from "@/types/battle";
 
 export interface IngredientLine {

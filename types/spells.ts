@@ -1,5 +1,5 @@
-import type { ComponentFlags, SpellIngredient } from "@/lib/schemas/spell-ingredients";
 import type { SpellFx } from "@/lib/utils/battle/fx/spells";
+import type { ComponentFlags, SpellIngredient } from "@/lib/utils/spells/ingredients/types";
 import type { SpellEffect } from "@/lib/utils/spells/model/schema";
 import type { RaceModifier, SpellCastingTime, SpellCost, SpellDefinition, SpellResolution, SpellTargeting } from "@/lib/utils/spells/model/schema";
 import type { IdName } from "@/types/common";

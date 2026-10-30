@@ -2,11 +2,7 @@ import { z } from "zod";
 
 import { INGREDIENT_MIN_GP_MAX, INGREDIENT_NAME_MAX, INGREDIENT_QTY_MAX, SPELL_INGREDIENTS_MAX } from "@/lib/constants/spell-ingredients";
 import { ingredientKey } from "@/lib/utils/spells/ingredients/key";
-
-export type SpellIngredient = { name: string; qty: number; minGp?: number; consumed: boolean; focus: boolean };
-export type ComponentFlags = { v: boolean; s: boolean; m: boolean };
-
-export const defaultFocus = (i: { minGp?: number; consumed?: boolean }) => !((i.minGp ?? 0) > 0) && !i.consumed;
+import type { ComponentFlags, SpellIngredient } from "@/lib/utils/spells/ingredients/types";
 
 export const SpellIngredientSchema: z.ZodType<SpellIngredient, unknown> = z.object({
   name: z.string().trim().min(1).max(INGREDIENT_NAME_MAX),

@@ -1,5 +1,5 @@
 import { INGREDIENT_PRESETS, type IngredientPresetId } from "@/lib/constants/spell-ingredients";
-import { defaultFocus, type SpellIngredient } from "@/lib/schemas/spell-ingredients";
+import { defaultFocus, type SpellIngredient } from "@/lib/utils/spells/ingredients/types";
 
 export function ingredientFromPreset(id: IngredientPresetId, name: string): SpellIngredient {
   const preset = INGREDIENT_PRESETS.find((p) => p.id === id);

@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { LabeledInput } from "@/components/ui/labeled-input";
 import { INGREDIENT_MIN_GP_MAX, INGREDIENT_NAME_MAX, INGREDIENT_QTY_MAX } from "@/lib/constants/spell-ingredients";
-import type { SpellIngredient } from "@/lib/schemas/spell-ingredients";
+import type { SpellIngredient } from "@/lib/utils/spells/ingredients/types";
 
 export interface IngredientRowProps {
   index: number;

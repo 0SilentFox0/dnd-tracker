@@ -1,7 +1,7 @@
 import { ingredientKey, trackedIngredients } from "./key";
 
 import { COIN_VALUE } from "@/lib/constants/inventory";
-import type { SpellIngredient } from "@/lib/schemas/spell-ingredients";
+import type { SpellIngredient } from "@/lib/utils/spells/ingredients/types";
 import type { IngredientStock } from "@/types/battle";
 
 export interface IngredientPlan {

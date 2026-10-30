@@ -1,7 +1,8 @@
 import { describe, expect, it } from "vitest";
 
-import { ComponentFlagsSchema, defaultFocus, SpellIngredientSchema } from "@/lib/schemas/spell-ingredients";
+import { ComponentFlagsSchema, SpellIngredientSchema } from "@/lib/schemas/spell-ingredients";
 import { createSpellSchema } from "@/lib/schemas/spells";
+import { defaultFocus } from "@/lib/utils/spells/ingredients/types";
 
 const diamond = { name: "Diamond", qty: 1, minGp: 50, consumed: true, focus: false };
 
