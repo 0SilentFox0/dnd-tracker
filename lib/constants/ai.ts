@@ -124,5 +124,5 @@ export const hasScope = (scopes: readonly string[], need: ApiTokenScope) => scop
 
 export const ASSISTANT_PAGE_SIZES = { changes: 20, queue: 20, queueMax: 50 } as const;
 
-// eslint-disable-next-line no-restricted-syntax -- auto-title written by old threads; still recognised for the refetch
+// eslint-disable-next-line no-restricted-syntax -- remove after scripts/db/rename-legacy-ai-threads.ts --apply on prod
 export const LEGACY_THREAD_TITLE = "Новий тред";
