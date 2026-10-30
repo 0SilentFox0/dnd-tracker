@@ -27,7 +27,7 @@ export function SubclassCard({ cls, value, locked, onChange }: SubclassCardProps
       {cls.subclasses.map((s) => {
         const first = s.features.find((f) => f.description)?.description;
 
-        return <ChoiceCard key={s.id} role="radio" checked={value === s.id} disabled={locked && value !== s.id} onClick={() => onChange(s.id)} title={s.name} name={s.name} summary={summarize(first)} description={() => levels(s)} />;
+        return <ChoiceCard key={s.id} role="radio" checked={value === s.id} disabled={locked && value !== s.id} onClick={() => onChange(s.id)} title={s.name} name={s.name} icon={s.icon} summary={summarize(first)} description={() => levels(s)} />;
       })}
     </div>
   );

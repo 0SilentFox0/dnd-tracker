@@ -103,3 +103,17 @@ export const withStepSubclass = (state: ChoicesState, step: WizardStep, subclass
   step.kind === "subclass" ? { ...state, classes: state.classes.map((e) => (e.classId === step.classId ? { ...e, subclassId } : e)) } : state;
 
 export const withStepBackground = (saved: ChoicesState, draft: ChoicesState, id: string | null): ChoicesState => ({ ...draft, ...mergeBackground(saved, { backgroundId: id }) });
+
+export type BackgroundConflict = { kind: "freeOrigin" } | { kind: "duplicate"; name: string };
+
+export function backgroundConflict(data: ChoicesState, refs: Pick<WalkRefs, "backgroundsById" | "featsById">): BackgroundConflict | null {
+  const background = data.backgroundId ? refs.backgroundsById?.[data.backgroundId] : undefined;
+
+  if (!background) return null;
+
+  if (data.feats.some((f) => f.source === "origin")) return { kind: "freeOrigin" };
+
+  const feat = background.originFeatId ? refs.featsById[background.originFeatId] : undefined;
+
+  return feat && !feat.repeatable && data.feats.some((f) => f.id === feat.id) ? { kind: "duplicate", name: feat.name } : null;
+}

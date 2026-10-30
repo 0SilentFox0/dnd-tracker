@@ -191,7 +191,7 @@ function FeatList({ choice, value, ctx, actions }: { choice: Choice; value: Choi
         available,
         card: (
           <div className="space-y-2">
-            <ChoiceCard role="radio" checked={!!picked} disabled={!available && !picked} onClick={() => actions.onToggle(f.id)} title={f.name} name={f.name} summary={summarize(f.description ?? undefined)} description={f.description ?? undefined} requirements={requirements} note={taken ? t("picker.featTaken") : undefined} />
+            <ChoiceCard role="radio" checked={!!picked} disabled={!available && !picked} onClick={() => actions.onToggle(f.id)} title={f.name} name={f.name} icon={f.icon} summary={summarize(f.description ?? undefined)} description={f.description ?? undefined} requirements={requirements} note={taken ? t("picker.featTaken") : undefined} />
             {picked && f.choices.length > 0 && (
               <div className="ml-4 space-y-3 border-l border-hud-line/40 pl-3">
                 {f.choices.map((c) => (

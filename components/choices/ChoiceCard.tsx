@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { type ReactNode, useState } from "react";
 import { useTranslations } from "next-intl";
 import { Info } from "lucide-react";
 
@@ -42,7 +42,8 @@ interface ChoiceCardProps {
   disabled?: boolean;
   title: string;
   name: string;
-  summary: string;
+  icon?: string | null;
+  summary: ReactNode;
   description?: string | (() => string);
   requirements?: Requirement[];
   requirementNames?: Record<string, string>;
@@ -50,7 +51,7 @@ interface ChoiceCardProps {
   onClick: () => void;
 }
 
-export function ChoiceCard({ role, checked, disabled, title, name, summary, description, requirements, requirementNames, note, onClick }: ChoiceCardProps) {
+export function ChoiceCard({ role, checked, disabled, title, name, icon, summary, description, requirements, requirementNames, note, onClick }: ChoiceCardProps) {
   return (
     <div className="relative">
       <OptionButton
@@ -62,7 +63,7 @@ export function ChoiceCard({ role, checked, disabled, title, name, summary, desc
         className={description ? "pr-9" : undefined}
         title={
           <span className="flex items-center gap-2">
-            <EntityIcon name={name} className="size-7 text-xs" />
+            <EntityIcon src={icon} name={name} className="size-7 text-xs" />
             {title}
           </span>
         }

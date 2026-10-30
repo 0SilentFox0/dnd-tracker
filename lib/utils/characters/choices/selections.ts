@@ -191,7 +191,7 @@ export function choiceSelections(input: SelectionInput): ChoiceSelections {
 
       const originFeat = bg.originFeatId ? input.featsById[bg.originFeatId] : undefined;
 
-      out.background = { id: bg.id, name: bg.name, equipmentText: bg.equipmentText, picks: describeFeatPicks(bg, picks), description: bg.description, skills: [...bg.skillProficiencies], tools: [...bg.toolProficiencies], originFeat: originFeat ? { id: originFeat.id, name: originFeat.name } : null };
+      out.background = { id: bg.id, name: bg.name, icon: bg.icon, equipmentText: bg.equipmentText, picks: describeFeatPicks(bg, picks), description: bg.description, skills: [...bg.skillProficiencies], tools: [...bg.toolProficiencies], originFeat: originFeat ? { id: originFeat.id, name: originFeat.name } : null };
       take(defs, picks, { owner: "background", level, name: bg.name, from: () => fromKey("background", { name: bg.name }), sourceFor: (_c, o) => ({ type: "character", id: bg.id, name: `${bg.name}: ${o.name}` }), spellOrigin: spellOrigin("background", bg.name), path: `background:${bg.id}`, sourceKey: `background:${bg.id}` });
     } else if (owner.kind === "backgroundFeat") {
       addFeat(owner.feat, picks, fromKey("background", { name: owner.background.name }), legacyPath, legacyPath);

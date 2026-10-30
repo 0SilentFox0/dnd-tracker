@@ -75,7 +75,8 @@
       "add": "Add class",
       "totalLevel": "Total level: {level}",
       "hitDice": "Hit dice: {dice}",
-      "skillChoice": "Choose {count} skills from: {from}"
+      "skillChoice": "Choose {count} skills from: {from}",
+      "level": "Level"
     },
     "personalAbility": {
       "label": "Ability (Personal)",

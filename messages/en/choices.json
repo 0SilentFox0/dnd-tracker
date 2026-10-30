@@ -164,11 +164,12 @@
     "background": {
       "title": "Background",
       "resetWarning": "Changing the background resets its choices and ability score bonuses.",
-      "noSkills": "none",
       "skills": "Skills",
       "tools": "Tools",
       "originFeat": "Origin feat",
-      "equipment": "Equipment"
+      "equipment": "Equipment",
+      "pickFirst": "Choose a background to continue.",
+      "featDuplicate": "The hero already has the background feat \"{name}\", and it cannot be taken twice."
     }
   }
 }

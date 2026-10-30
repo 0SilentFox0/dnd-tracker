@@ -2,6 +2,8 @@
 
 import { useTranslations } from "next-intl";
 
+import { useBackgroundFacts } from "@/components/choices/useBackgroundFacts";
+import { EntityIcon } from "@/components/common/EntityIcon";
 import { HudPill } from "@/components/hud/page";
 import { Button } from "@/components/ui/button";
 import { translateIssue } from "@/lib/i18n/translate-issue";
@@ -17,7 +19,7 @@ interface BackgroundSectionProps {
 export function BackgroundSection({ background, canEdit, onOpen }: BackgroundSectionProps) {
   const t = useTranslations("characterProfile.path.background");
 
-  const tg = useTranslations("gameTerms");
+  const facts = useBackgroundFacts();
 
   const tr = useTranslator();
 
@@ -34,11 +36,12 @@ export function BackgroundSection({ background, canEdit, onOpen }: BackgroundSec
     );
   }
 
-  const { name, description, skills, tools, originFeat, equipmentText, picks, open, openKey } = background;
+  const { name, icon, description, skills, tools, originFeat, equipmentText, picks, open, openKey } = background;
 
   return (
     <section className="mb-3 space-y-2 text-sm">
       <div className="flex flex-wrap items-baseline gap-2">
+        <EntityIcon src={icon} name={name} className="size-6 text-xs" />
         <h3 className="hud-sc inline">{t("title", { name })}</h3>
         {open > 0 && <HudPill tone="accent">{t("open", { count: open })}</HudPill>}
         {canEdit && (
@@ -58,13 +61,13 @@ export function BackgroundSection({ background, canEdit, onOpen }: BackgroundSec
           <p className="mt-1 whitespace-pre-line">{description}</p>
         </details>
       )}
-      {skills.length > 0 && <p>{`${t("skills")}: ${skills.map((s) => tg(`dndSkills.${s}`)).join(", ")}`}</p>}
-      {tools.length > 0 && <p>{`${t("tools")}: ${tools.join(", ")}`}</p>}
-      {originFeat && <p>{`${t("originFeat")}: ${originFeat.name}`}</p>}
+      {facts({ skills, tools, originFeatName: originFeat?.name }).map((line) => (
+        <p key={line}>{line}</p>
+      ))}
       {picks.length > 0 && <p>{picks.map((p) => translateIssue(tr, p)).join(" · ")}</p>}
       {equipmentText && (
         <p className="whitespace-pre-line text-hud-muted">
-          {`${t("equipment")}: ${equipmentText}`}
+          {facts({ skills: [], tools: [], equipmentText })[0]}
           <br />
           {t("equipmentNote")}
         </p>

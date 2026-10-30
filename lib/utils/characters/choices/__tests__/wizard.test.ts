@@ -3,7 +3,7 @@ import { describe, expect, it } from "vitest";
 import { alert, featsById, refs, rogue, sorcerer } from "./fixtures";
 
 import type { ChoiceRefs } from "@/lib/utils/characters/choices/walk";
-import { picksAtStep, withStepBackground, withStepPicks, withStepSubclass, type WizardStep, wizardSteps } from "@/lib/utils/characters/choices/wizard";
+import { backgroundConflict, picksAtStep, withStepBackground, withStepPicks, withStepSubclass, type WizardStep, wizardSteps } from "@/lib/utils/characters/choices/wizard";
 import type { BackgroundData } from "@/types/backgrounds";
 import type { ChoicesState } from "@/types/choices";
 
@@ -181,5 +181,21 @@ describe("background step", () => {
  return withStepBackground(cur, cur, "bg"); })();
 
     expect(keys(s, hero, keep, r2)).toContain("backgroundChoices.bg-skill");
+  });
+});
+
+describe("backgroundConflict", () => {
+  const withFeat = { ...background, originFeatId: "f-alert" };
+
+  const r = { backgroundsById: { bg: withFeat }, featsById: { "f-alert": { ...alert, repeatable: false } } };
+
+  it("none without a background or clashing feats", () => {
+    expect(backgroundConflict(state(), r)).toBeNull();
+    expect(backgroundConflict(state({ backgroundId: "bg" }), r)).toBeNull();
+  });
+
+  it("free origin feat and a duplicate of the background feat", () => {
+    expect(backgroundConflict(state({ backgroundId: "bg", feats: [{ id: "x", source: "origin" }] }), r)).toEqual({ kind: "freeOrigin" });
+    expect(backgroundConflict(state({ backgroundId: "bg", feats: [{ id: "f-alert", source: "dm" }] }), r)).toEqual({ kind: "duplicate", name: alert.name });
   });
 });

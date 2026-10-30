@@ -30,6 +30,14 @@ export function CharacterClassesField({ value, classes, onChange }: CharacterCla
 
   return (
     <div className="col-span-2 space-y-3">
+      {resolved.length > 0 && (
+        <div aria-hidden="true" className="grid grid-cols-[1fr_1fr_4.5rem_auto] gap-2 text-xs text-muted-foreground">
+          <span>{t("class")}</span>
+          <span>{t("subclass")}</span>
+          <span>{t("level")}</span>
+          <span className="w-9" />
+        </div>
+      )}
       {resolved.map((entry, i) => {
         const cls = entry.class;
 

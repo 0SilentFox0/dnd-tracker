@@ -129,9 +129,9 @@ describe("background step", () => {
 
   beforeEach(() => mocks.save.mockReset().mockResolvedValue(true));
 
-  const sage = { id: "bg-sage", name: "Sage", icon: null, description: "Scholar", choices: [], skillProficiencies: [], toolProficiencies: [], originFeatId: null, equipmentText: null };
+  const sage = { id: "bg-sage", name: "Sage", icon: null, description: "Scholar", choices: [], skillProficiencies: [], toolProficiencies: ["Ink"], originFeatId: null, equipmentText: null };
 
-  const soldier = { ...sage, id: "bg-soldier", name: "Soldier" };
+  const soldier = { ...sage, id: "bg-soldier", name: "Soldier", description: null };
 
   const brefs = { ...wrefs, backgroundsById: { [sage.id]: sage, [soldier.id]: soldier } } as unknown as ChoiceRefsView;
 
@@ -159,10 +159,32 @@ describe("background step", () => {
     expect(screen.getByText("choices.wizard.background.resetWarning")).toBeTruthy();
   });
 
-  it("Next is not blocked without a choice", () => {
+  it("Next is blocked until a background is chosen", () => {
     view();
 
+    expect(screen.getByRole("button", { name: "choices.wizard.next" }).hasAttribute("disabled")).toBe(true);
+
+    fireEvent.click(screen.getByRole("radio", { name: /Sage/ }));
+
     expect(screen.getByRole("button", { name: "choices.wizard.next" }).hasAttribute("disabled")).toBe(false);
+  });
+
+  it("a free origin feat conflicts with a background: hint, replace button, Next unblocked after replacing", () => {
+    render(<ChoiceWizard campaignId="c" characterId="h" initial={{ raceChoices: {}, feats: [{ id: "f-alert", source: "origin" }], classes: [{ classId: fighter.id, level: 1 }], backgroundId: sage.id }} hero={{ level: 1, scores, skills: {}, classMode: true }} refs={brefs} startAt="background" onClose={() => {}} />);
+
+    expect(screen.getByText(/choices.editor.originFirst/)).toBeTruthy();
+    expect(screen.getByRole("button", { name: "choices.wizard.next" }).hasAttribute("disabled")).toBe(true);
+
+    fireEvent.click(screen.getByRole("button", { name: "choices.editor.replaceOrigin" }));
+
+    expect(screen.queryByText(/choices.editor.originFirst/)).toBeNull();
+    expect(screen.getByRole("button", { name: "choices.wizard.next" }).hasAttribute("disabled")).toBe(false);
+  });
+
+  it("a card without description falls back to skills, tools and origin feat", () => {
+    view();
+
+    expect(screen.getAllByText(/Ink/).length).toBeGreaterThan(0);
   });
 });
 

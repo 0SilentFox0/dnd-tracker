@@ -160,6 +160,7 @@ export interface ChoicesBody {
 export interface SheetBackground {
   id: string;
   name: string;
+  icon: string | null;
   equipmentText: string | null;
   picks: TextRef[];
   description: string | null;

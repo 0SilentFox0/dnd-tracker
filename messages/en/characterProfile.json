@@ -260,10 +260,6 @@
       "change": "Change",
       "open": "{count} open choices",
       "description": "Description",
-      "skills": "Skills",
-      "tools": "Tools",
-      "originFeat": "Origin feat",
-      "equipment": "Equipment",
       "equipmentNote": "The DM hands out equipment and money manually."
     }
   }

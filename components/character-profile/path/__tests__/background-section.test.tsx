@@ -5,7 +5,7 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 import { BackgroundSection } from "@/components/character-profile/path";
 import type { SheetBackground } from "@/types/choices";
 
-const bg: SheetBackground = { id: "b", name: "Sage", equipmentText: "Quill", picks: [], description: "Scholar", skills: ["arcana"], tools: ["Ink"], originFeat: { id: "f", name: "Magic Initiate" }, open: 0, openKey: null };
+const bg: SheetBackground = { id: "b", name: "Sage", icon: null, equipmentText: "Quill", picks: [], description: "Scholar", skills: ["arcana"], tools: ["Ink"], originFeat: { id: "f", name: "Magic Initiate" }, open: 0, openKey: null };
 
 describe("BackgroundSection", () => {
   afterEach(cleanup);

@@ -3,6 +3,7 @@
 import { useTranslations } from "next-intl";
 
 import { ChoiceCard } from "@/components/choices/ChoiceCard";
+import { useBackgroundFacts } from "@/components/choices/useBackgroundFacts";
 import { summarize } from "@/lib/utils/characters/classes/summary";
 import type { BackgroundData } from "@/types/backgrounds";
 import type { FeatData } from "@/types/choices";
@@ -17,26 +18,16 @@ interface BackgroundPickerProps {
 export function BackgroundPicker({ backgrounds, feats, value, onChange }: BackgroundPickerProps) {
   const t = useTranslations("choices");
 
-  const tg = useTranslations("gameTerms");
+  const facts = useBackgroundFacts();
 
-  const details = (b: BackgroundData) => {
-    const feat = b.originFeatId ? feats[b.originFeatId] : undefined;
+  const summaryOf = (b: BackgroundData) => facts({ skills: b.skillProficiencies, tools: b.toolProficiencies, originFeatName: b.originFeatId ? feats[b.originFeatId]?.name : null }).join(" · ");
 
-    return [
-      b.description,
-      `${t("wizard.background.skills")}: ${b.skillProficiencies.length > 0 ? b.skillProficiencies.map((s) => tg(`dndSkills.${s}`)).join(", ") : t("wizard.background.noSkills")}`,
-      b.toolProficiencies.length > 0 && `${t("wizard.background.tools")}: ${b.toolProficiencies.join(", ")}`,
-      feat && `${t("wizard.background.originFeat")}: ${feat.name}`,
-      b.equipmentText && `${t("wizard.background.equipment")}: ${b.equipmentText}`,
-    ]
-      .filter(Boolean)
-      .join("\n\n");
-  };
+  const details = (b: BackgroundData) => [b.description, ...facts({ skills: b.skillProficiencies, tools: b.toolProficiencies, originFeatName: b.originFeatId ? feats[b.originFeatId]?.name : null, equipmentText: b.equipmentText })].filter(Boolean).join("\n\n");
 
   return (
-    <div role="radiogroup" aria-label={t("wizard.background.title")} className="grid gap-2 sm:grid-cols-2">
+    <div role="radiogroup" aria-label={t("wizard.background.title")} className="grid gap-2 sm:grid-cols-2 [&>div]:h-full [&>div>[role=radio]]:h-full">
       {backgrounds.map((b) => (
-        <ChoiceCard key={b.id} role="radio" checked={value === b.id} onClick={() => onChange(b.id)} title={b.name} name={b.name} summary={summarize(b.description ?? undefined)} description={() => details(b)} />
+        <ChoiceCard key={b.id} role="radio" checked={value === b.id} onClick={() => onChange(b.id)} title={b.name} name={b.name} icon={b.icon} summary={<span className="line-clamp-2 block min-h-[2lh]">{summarize(b.description ?? undefined) || summaryOf(b)}</span>} description={() => details(b)} />
       ))}
     </div>
   );
