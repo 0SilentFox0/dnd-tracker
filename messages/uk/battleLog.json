@@ -10,6 +10,14 @@
       "crit": "Крит",
       "fairBattle": "Рівний бій",
       "archetype": "Архетип",
+      "archetypeOf": {
+        "universal": "Архетип: Універсал",
+        "warrior": "Архетип: Воїн",
+        "paladin": "Архетип: Паладин",
+        "ranger": "Архетип: Лучник",
+        "rogue": "Архетип: Розбійник",
+        "mage": "Архетип: Маг"
+      },
       "archetypeNamed": "Архетип: {name}",
       "obstacle": "Перешкода",
       "weaponBonus": "Бонус зброї",

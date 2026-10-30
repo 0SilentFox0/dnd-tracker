@@ -1,10 +1,10 @@
 import type { FieldMeta } from "../fields";
 import { CONDITION_KEYS_ALL, conditionKeySegment, damageTypeSegment } from "../labels";
 
-import { ABILITY_OPTIONS, DEFAULT_AREA_TARGETS } from "@/lib/constants/abilities";
+import { ABILITY_KEYS, DEFAULT_AREA_TARGETS } from "@/lib/constants/abilities";
 import { PROFICIENCY_KINDS } from "@/lib/constants/artifacts";
 import { AttackType } from "@/lib/constants/battle";
-import { MONSTER_SENSE_LABELS } from "@/lib/constants/monster";
+import { MONSTER_SENSE_KEYS } from "@/lib/constants/monster";
 import { DND_SKILLS } from "@/lib/constants/skills";
 import type { FlagEffect, FlagKey } from "@/lib/utils/abilities/schema";
 import { seg, type Segment,type SegmentParam } from "@/lib/utils/abilities/segments";
@@ -28,6 +28,8 @@ const MELEE_RANGED = [{ value: AttackType.MELEE }, { value: AttackType.RANGED }]
 
 const plain = (key: FlagKey) => ({ fields: [] as readonly FieldMeta[], defaults: {} as Record<string, unknown>, describe: () => [flagSeg(key)] });
 
+const ABILITY_OPTIONS = ABILITY_KEYS.map((value) => ({ value }));
+
 const SAVE_ABILITY_OPTIONS = [{ value: "all" }, ...ABILITY_OPTIONS];
 
 const SKILL_OPTIONS = DND_SKILLS.map((value) => ({ value }));
@@ -45,7 +47,7 @@ const listParams = (group: string, a: readonly string[] | "all") => ({
 
 export const FLAG_REGISTRY: { [K in FlagKey]: FlagDefinition<K> } = {
   sense: {
-    fields: [{ name: "sense", input: "select", options: Object.keys(MONSTER_SENSE_LABELS).map((value) => ({ value })) }, { name: "range", input: "number" }],
+    fields: [{ name: "sense", input: "select", options: MONSTER_SENSE_KEYS.map((value) => ({ value })) }, { name: "range", input: "number" }],
     defaults: { sense: "blindsight", range: 30 },
     describe: (e) => [flagSeg("sense", { sense: seg(`options.sense.${e.sense}`), range: e.range })],
   },

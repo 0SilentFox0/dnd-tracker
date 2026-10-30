@@ -1,4 +1,3 @@
-/* eslint-disable no-restricted-syntax -- data: uk labels matched when importing content */
 /**
  * Єдині константи, типи та enum для артефактів.
  * Використовувати цей файл у формах, API та сітці слотів.
@@ -21,18 +20,6 @@ export const ARTIFACT_RARITY_VALUES: readonly [ArtifactRarity, ...ArtifactRarity
   ArtifactRarity.EPIC,
   ArtifactRarity.LEGENDARY,
 ];
-
-export const ARTIFACT_RARITY_OPTIONS: ReadonlyArray<{
-  value: ArtifactRarity;
-  label: string;
-}> = [
-  { value: ArtifactRarity.COMMON, label: "Звичайний" },
-  { value: ArtifactRarity.UNCOMMON, label: "Незвичайний" },
-  { value: ArtifactRarity.RARE, label: "Рідкісний" },
-  { value: ArtifactRarity.EPIC, label: "Епічний" },
-  { value: ArtifactRarity.LEGENDARY, label: "Легендарний" },
-];
-
 
 export const ARTIFACT_RARITY_COLOR: Partial<Record<string, string>> = {
   [ArtifactRarity.UNCOMMON]: "border-[#7cbf5a]",
@@ -68,23 +55,6 @@ export const ARTIFACT_SLOT_VALUES: readonly [ArtifactSlot, ...ArtifactSlot[]] = 
   ArtifactSlot.BOOTS,
   ArtifactSlot.ITEM,
 ];
-
-export const ARTIFACT_SLOT_OPTIONS: ReadonlyArray<{
-  value: ArtifactSlot;
-  label: string;
-}> = [
-  { value: ArtifactSlot.WEAPON, label: "Зброя" },
-  { value: ArtifactSlot.RANGE_WEAPON, label: "Дальнобійна зброя" },
-  { value: ArtifactSlot.SHIELD, label: "Щит" },
-  { value: ArtifactSlot.CLOAK, label: "Плащ" },
-  { value: ArtifactSlot.RING, label: "Кільце" },
-  { value: ArtifactSlot.HELMET, label: "Шолом" },
-  { value: ArtifactSlot.AMULET, label: "Амулет" },
-  { value: ArtifactSlot.ARMOR, label: "Броня" },
-  { value: ArtifactSlot.BOOTS, label: "Черевики" },
-  { value: ArtifactSlot.ITEM, label: "Артефакт" },
-];
-
 
 // ─── Сітка 3×3 слотів на персонажі (ключ у equipped + тип артефакта) ───────
 

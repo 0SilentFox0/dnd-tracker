@@ -95,7 +95,7 @@ function SpellFilters({ filter }: { filter: ReferenceFilters["spell"] }) {
         name="spellType"
         value={type.value}
         onChange={type.set}
-        options={asOptions(type.options)}
+        options={type.options}
       />
     </>
   );

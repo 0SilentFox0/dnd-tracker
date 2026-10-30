@@ -1,4 +1,3 @@
-import { ABILITY_KEYS, ABILITY_LABELS } from "@/lib/constants/abilities";
 import { bakedStatSources } from "@/lib/utils/abilities/build/bake";
 import { collectModifiers, statWithModifiers } from "@/lib/utils/abilities/engine/core/collect-modifiers";
 import { calculateAttackBonus } from "@/lib/utils/battle/attack";
@@ -13,15 +12,7 @@ import type { BattleAttack, BattleParticipant } from "@/types/battle";
 import type { AbilityKey, SheetAttack, SheetLine, SheetLineSource, SheetTotal } from "@/types/characters";
 import type { LogLine } from "@/types/text";
 
-export const abilityLabel = (key: AbilityKey) => ABILITY_LABELS[key];
-
-const abilityKeyOf = (label: string) => ABILITY_KEYS.find((k) => ABILITY_LABELS[k] === label);
-
-const statLabelKey = (label: string) => {
-  const key = abilityKeyOf(label);
-
-  return key ? `gameTerms.abilities.${key}.label` : label;
-};
+export const abilityLabel = (key: AbilityKey) => `gameTerms.abilities.${key}.label`;
 
 const labelParts = (label: LogLine): Pick<SheetLine, "label" | "params"> => (typeof label === "string" ? { label } : { label: label.message, params: label.params });
 
@@ -66,7 +57,7 @@ export function attackSheet(p: BattleParticipant, attack: BattleAttack): SheetAt
   const hitMods = collectModifiers([p], p.basicInfo.id, { stat: "attackBonus", attackKind: type });
 
   const toHitLines: SheetLine[] = [
-    { label: statLabelKey(avg.statLabel), suffix: star, value: signed(hitMod), source: "ability" },
+    { label: abilityLabel(avg.statKey), suffix: star, value: signed(hitMod), source: "ability" },
     { label: sheetLineKey("proficiency"), value: signed(p.abilities.proficiencyBonus), source: "proficiency" },
     ...(attack.attackBonus ? [{ label: sheetLineKey("weapon"), value: signed(attack.attackBonus), source: "weapon" as const }] : []),
     ...hitMods.entries.filter((e) => e.flat).map((e) => ({ ...labelParts(e.label), value: signed(e.flat), source: asSource(e.sourceType) })),
@@ -77,9 +68,9 @@ export function attackSheet(p: BattleParticipant, attack: BattleAttack): SheetAt
   const damageLines: SheetLine[] = [
     ...(attack.damageDice ? [{ label: sheetLineKey("weaponDice"), params: { dice: attack.damageDice }, value: avg.weaponAvg.toFixed(1), source: "dice" as const }] : []),
     ...(avg.heroPart ? [{ label: sheetLineKey("levelDice"), params: { dice: avg.heroDice }, value: avg.heroPart.toFixed(1), source: "level" as const }] : []),
-    { label: statLabelKey(avg.statLabel), value: signed(statMod), source: "ability" },
+    { label: abilityLabel(avg.statKey), value: signed(statMod), source: "ability" },
     ...avg.steps
-      .filter((s) => s.kind === "percent" || (s.kind === "flat" && plainLabel(s.label) !== statLabelKey(avg.statLabel) && plainLabel(s.label) !== HERO_LEVEL_STEP))
+      .filter((s) => s.kind === "percent" || (s.kind === "flat" && plainLabel(s.label) !== abilityLabel(avg.statKey) && plainLabel(s.label) !== HERO_LEVEL_STEP))
       .map((s) => ({ ...labelParts(s.label), value: s.kind === "percent" ? `${signed(s.value)}%` : signed(s.value), source: damageSources.get(plainLabel(s.label)) ?? ("skill" as const) })),
     ...(avg.multiplier !== 1 ? [{ label: sheetLineKey("dmMultiplier"), value: `×${avg.multiplier}`, source: "multiplier" as const }] : []),
   ];

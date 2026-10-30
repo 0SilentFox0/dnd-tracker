@@ -3,7 +3,7 @@ import { resolveTargetIds } from "./targets";
 import type { AbilityRunContext, AbilityRunResult, Downed, SummonRequest } from "./types";
 import { recordUse, resetUsage, withinLimits } from "./usage";
 
-import { joinLines, textRef } from "@/lib/i18n/text-ref";
+import { textRef } from "@/lib/i18n/text-ref";
 import { restoreCharm } from "@/lib/utils/abilities/engine/effects/charm";
 import { conditionEventForTarget, evaluateCondition, hasCreatureTypeCondition } from "@/lib/utils/abilities/registry/conditions";
 import { applyEffect } from "@/lib/utils/abilities/registry/effects";
@@ -76,7 +76,7 @@ export function runAbilities(participants: BattleParticipant[], event: AbilityEv
         const r = applyEffect({ participants: ps, ability, effectIndex, ownerId, effect, targetIds, event, ctx });
 
         ps = r.participants;
-        messages.push(...r.messages.map((m) => (ability.limits?.chance !== undefined ? joinLines([m, textRef("abilityText.log.chanceSuffix", { chance: ability.limits.chance })]) : m)));
+        messages.push(...r.messages.map((m) => (ability.limits?.chance !== undefined ? textRef("abilityText.log.withChance", { text: m, chance: ability.limits.chance }) : m)));
 
         for (const m of r.actionModifiers ?? []) (actionModifiers[m.participantId] ??= []).push(m.effect);
 

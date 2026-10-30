@@ -263,7 +263,7 @@ export async function createBattleParticipantFromCharacter(
       meleeMultiplier: archetype.melee,
       rangedMultiplier: archetype.ranged,
       magicMultiplier: archetype.magic,
-      archetypeName: archetype.name,
+      archetypeKey: archetype.key ?? "universal",
       ...(classProficiency && { proficiencies: classProficiency }),
       ...(saveProficiencies.length && { saveProficiencies }),
       ...(dndSkillProficiencies.length && { skillProficiencies: dndSkillProficiencies }),

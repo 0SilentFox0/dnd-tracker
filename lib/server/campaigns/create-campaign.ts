@@ -3,6 +3,8 @@ import type { Campaign, Prisma } from "@prisma/client";
 import { invalidateCampaignLists } from "@/lib/cache/campaign-list";
 import { CampaignKind, CampaignRole, CampaignVisibility } from "@/lib/constants/campaigns";
 import { prisma } from "@/lib/db";
+import { DEFAULT_LOCALE, type Locale } from "@/lib/i18n/config";
+import { getTranslator } from "@/lib/i18n/translator";
 import { type Bundle, TemplateLeakError } from "@/lib/server/templates/bundle";
 import { exportCampaign } from "@/lib/server/templates/export-campaign";
 import { importBundle } from "@/lib/server/templates/import-bundle";
@@ -10,7 +12,8 @@ import { baselineFromBundle } from "@/lib/server/templates/sync/hash";
 import { PUBLIC_USER_SELECT } from "@/lib/server/users/db-user";
 import { canReadSource } from "@/lib/utils/api/is-dm";
 import { generateInviteCode, INVITE_CODE_ATTEMPTS, isInviteCodeClash } from "@/lib/utils/campaigns/invite-code";
-import { parseRules } from "@/lib/utils/rules/schema";
+import { localizedDefaultAttacks } from "@/lib/utils/rules/defaults";
+import { parseRules, type Ruleset } from "@/lib/utils/rules/schema";
 
 export { TemplateLeakError };
 
@@ -27,6 +30,7 @@ interface CreateFromBundleInput {
   createdFromId?: string | null;
   settings?: Partial<Bundle["settings"]>;
   critChoiceByDm?: boolean;
+  defaultAttacks?: Ruleset["defaultAttacks"];
 }
 
 const defined = <T extends object>(obj: T) => Object.fromEntries(Object.entries(obj).filter(([, v]) => v !== undefined));
@@ -47,7 +51,9 @@ function campaignData(input: CreateFromBundleInput): Prisma.CampaignCreateInput 
     ...(s.allowPlayerEdit !== undefined && { allowPlayerEdit: s.allowPlayerEdit }),
     ...(s.friendlyFire !== undefined && { friendlyFire: s.friendlyFire }),
     ...(input.critChoiceByDm !== undefined && { critChoiceByDm: input.critChoiceByDm }),
-    ...(input.bundle && { rules: parseRules(input.bundle.rules) as Prisma.InputJsonObject }),
+    ...(input.bundle
+      ? { rules: parseRules({ ...(input.defaultAttacks && { defaultAttacks: input.defaultAttacks }), ...(input.bundle.rules as object | undefined) }) as Prisma.InputJsonObject }
+      : input.defaultAttacks && { rules: { defaultAttacks: input.defaultAttacks } }),
     ...(input.bundle?.credits !== undefined && { credits: input.bundle.credits }),
     members: { create: { userId: input.userId, role: CampaignRole.DM } },
   } as Prisma.CampaignUncheckedCreateInput;
@@ -108,7 +114,7 @@ type CreateCampaignData = { name: string; description?: string | null; templateI
 
 type CampaignSource = { bundle: Bundle; id: string };
 
-export async function createCampaignForUser(userId: string, data: CreateCampaignData, options: { source?: CampaignSource; defer?: (effect: () => Promise<void>) => void } = {}) {
+export async function createCampaignForUser(userId: string, data: CreateCampaignData, options: { source?: CampaignSource; defer?: (effect: () => Promise<void>) => void; locale?: Locale } = {}) {
   let source = options.source ?? null;
 
   if (!source && data.templateId) {
@@ -127,6 +133,7 @@ export async function createCampaignForUser(userId: string, data: CreateCampaign
     createdFromId: source?.id ?? null,
     settings: { maxLevel: data.maxLevel, allowPlayerEdit: data.allowPlayerEdit },
     critChoiceByDm: data.critChoiceByDm,
+    defaultAttacks: localizedDefaultAttacks(await getTranslator(options.locale ?? DEFAULT_LOCALE, "rules")),
   });
 
   const invalidate = () => invalidateCampaignLists([userId]);

@@ -23,12 +23,25 @@
     "gainsEffect": "✨ {target}: отримує «{effect}» ({ability})",
     "applied": "✨ {ability}: {effect} → {target} ({rounds} р.)",
     "chanceMissed": "🎲 {ability}: не спрацювало (шанс {chance} %)",
-    "chanceSuffix": " (шанс {chance} %)",
+    "withChance": "{text} (шанс {chance} %)",
     "raisedDead": "💀 {ability}: {target} повстали ({percent}% HP)",
     "raiseRefused": "⛔ {ability}: {target} — не можна підняти",
     "pushNoMap": "↔️ {ability}: відштовхування — без мапи не застосовано",
     "pushNowhere": "↔️ {target}: відштовхнути нікуди",
     "pushed": "↔️ {ability}: {target} відштовхнуто на {feet} фт",
     "help": "🤝 {ability}: {target} має перевагу на наступну атаку"
+  },
+  "derived": {
+    "multiattack": "Мультиатака ×{count}",
+    "exhaustion": "Виснаження",
+    "armor": {
+      "stealth": "Перешкода на Скритність",
+      "slowed": "Сила нижче {strength}: швидкість −{penalty}"
+    },
+    "choices": {
+      "source": "Вибори",
+      "skills": "Майстерність з виборів",
+      "expertise": "Експертиза з виборів"
+    }
   }
 }

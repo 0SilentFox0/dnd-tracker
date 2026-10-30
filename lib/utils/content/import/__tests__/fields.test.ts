@@ -86,4 +86,13 @@ describe("IMPORT_SPECS", () => {
 
     expect(transformRow(cls, autoMap(Object.keys(cls), IMPORT_SPECS.classes.fields), IMPORT_SPECS.classes.fields).value).toEqual({ name: "Жрець", caster: "full", savingThrows: ["wisdom", "charisma"] });
   });
+
+  it("enum-підписи: рідкість, тип риси, роль основної навички, повні й короткі назви характеристик", () => {
+    const run = (kind: "artifacts" | "feats" | "main-skills" | "classes", row: Record<string, string>) => transformRow(row, autoMap(Object.keys(row), IMPORT_SPECS[kind].fields), IMPORT_SPECS[kind].fields).value;
+
+    expect(run("artifacts", { Назва: "Меч", Слот: "Дальнобійна зброя", Рідкість: "Легендарний" })).toEqual({ name: "Меч", slot: "range_weapon", rarity: "legendary" });
+    expect(run("feats", { Назва: "Т", Тип: "Епічний дар" })).toMatchObject({ type: "epicBoon" });
+    expect(run("main-skills", { Назва: "Н", Колір: "#fff", Роль: "Персональні" })).toMatchObject({ role: "personal" });
+    expect(run("classes", { Назва: "К", "Рятівні кидки": "Сила, СПР, ТІЛ, Інтелект, МДР, cha" })).toMatchObject({ savingThrows: ["strength", "dexterity", "constitution", "intelligence", "wisdom", "charisma"] });
+  });
 });

@@ -176,7 +176,10 @@ exports[`choice owner walk characterization > backgroundFeat > selections 1`] = 
               },
             ],
             "id": "choice-skills",
-            "name": "Майстерність з виборів",
+            "label": {
+              "message": "abilityText.derived.choices.skills",
+            },
+            "name": "choice-skills",
             "trigger": {
               "event": "passive",
             },
@@ -184,7 +187,10 @@ exports[`choice owner walk characterization > backgroundFeat > selections 1`] = 
         ],
         "source": {
           "id": "choices",
-          "name": "Вибори",
+          "label": {
+            "message": "abilityText.derived.choices.source",
+          },
+          "name": "choices",
           "type": "character",
         },
       },
@@ -201,7 +207,12 @@ exports[`choice owner walk characterization > backgroundFeat > selections 1`] = 
     "spellGrants": [],
     "spells": [
       {
-        "label": "Риса: Magic Initiate",
+        "label": {
+          "message": "characterProfile.sheet.spellOrigin.feat",
+          "params": {
+            "name": "Magic Initiate",
+          },
+        },
         "source": {
           "message": "characterProfile.sheet.spellOrigin.feat",
           "params": {
@@ -211,7 +222,12 @@ exports[`choice owner walk characterization > backgroundFeat > selections 1`] = 
         "spellId": "sp-guidance",
       },
       {
-        "label": "Риса: Magic Initiate",
+        "label": {
+          "message": "characterProfile.sheet.spellOrigin.feat",
+          "params": {
+            "name": "Magic Initiate",
+          },
+        },
         "source": {
           "message": "characterProfile.sheet.spellOrigin.feat",
           "params": {
@@ -670,7 +686,12 @@ exports[`choice owner walk characterization > featChain > selections 1`] = `
     "spellGrants": [],
     "spells": [
       {
-        "label": "Риса: Magic Initiate",
+        "label": {
+          "message": "characterProfile.sheet.spellOrigin.feat",
+          "params": {
+            "name": "Magic Initiate",
+          },
+        },
         "source": {
           "message": "characterProfile.sheet.spellOrigin.feat",
           "params": {
@@ -1207,7 +1228,10 @@ exports[`choice owner walk characterization > multiclass > selections 1`] = `
               },
             ],
             "id": "choice-expertise",
-            "name": "Експертиза з виборів",
+            "label": {
+              "message": "abilityText.derived.choices.expertise",
+            },
+            "name": "choice-expertise",
             "trigger": {
               "event": "passive",
             },
@@ -1215,7 +1239,10 @@ exports[`choice owner walk characterization > multiclass > selections 1`] = `
         ],
         "source": {
           "id": "choices",
-          "name": "Вибори",
+          "label": {
+            "message": "abilityText.derived.choices.source",
+          },
+          "name": "choices",
           "type": "character",
         },
       },
@@ -1237,7 +1264,12 @@ exports[`choice owner walk characterization > multiclass > selections 1`] = `
     "spellGrants": [],
     "spells": [
       {
-        "label": "Клас: Sorcerer",
+        "label": {
+          "message": "characterProfile.sheet.spellOrigin.class",
+          "params": {
+            "name": "Sorcerer",
+          },
+        },
         "source": {
           "message": "characterProfile.sheet.spellOrigin.class",
           "params": {
@@ -1656,7 +1688,10 @@ exports[`choice owner walk characterization > raceSubrace > selections 1`] = `
               },
             ],
             "id": "choice-skills",
-            "name": "Майстерність з виборів",
+            "label": {
+              "message": "abilityText.derived.choices.skills",
+            },
+            "name": "choice-skills",
             "trigger": {
               "event": "passive",
             },
@@ -1664,7 +1699,10 @@ exports[`choice owner walk characterization > raceSubrace > selections 1`] = `
         ],
         "source": {
           "id": "choices",
-          "name": "Вибори",
+          "label": {
+            "message": "abilityText.derived.choices.source",
+          },
+          "name": "choices",
           "type": "character",
         },
       },
@@ -1689,7 +1727,12 @@ exports[`choice owner walk characterization > raceSubrace > selections 1`] = `
     "spellGrants": [],
     "spells": [
       {
-        "label": "Лінія: Wood Elf",
+        "label": {
+          "message": "characterProfile.sheet.spellOrigin.lineage",
+          "params": {
+            "name": "Wood Elf",
+          },
+        },
         "source": {
           "message": "characterProfile.sheet.spellOrigin.lineage",
           "params": {
@@ -1699,7 +1742,12 @@ exports[`choice owner walk characterization > raceSubrace > selections 1`] = `
         "spellId": "sp-druidcraft",
       },
       {
-        "label": "Лінія: Wood Elf",
+        "label": {
+          "message": "characterProfile.sheet.spellOrigin.lineage",
+          "params": {
+            "name": "Wood Elf",
+          },
+        },
         "source": {
           "message": "characterProfile.sheet.spellOrigin.lineage",
           "params": {

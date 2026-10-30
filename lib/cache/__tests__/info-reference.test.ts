@@ -44,7 +44,13 @@ describe("довідник кампанії", () => {
     const { skills, spells } = await getCachedInfoReference("c");
 
     expect(skills[0]).toMatchObject({ id: "k", mainSkillName: "Напад", mainSkillColor: "red", grantedSpellName: "Іскра", abilitySummary: [] });
-    expect(spells[0]).toMatchObject({ id: "s", groupName: "Вогонь", type: "ворог", dice: 1, effects: [expect.any(Array)] });
+    expect(spells[0]).toMatchObject({ id: "s", groupName: "Вогонь", targeting: { kind: "enemy" }, facetKey: "enemy", cost: "action", resolution: { kind: "auto" }, dice: 1, effects: [expect.any(Array)] });
+  });
+
+  it("кешує структуру фасетів без кирилиці", async () => {
+    const { spells } = await getCachedInfoReference("c");
+
+    expect(JSON.stringify({ ...spells[0], name: "", description: "", groupName: "" })).not.toMatch(/[А-Яа-яІіЇїЄє]/);
   });
 
   it("кеш позначено тегами скілів, основних навиків і заклинань", async () => {

@@ -8,16 +8,24 @@ const hero = { campaignId: "c", inventory: null } as unknown as CharacterFromPri
 
 describe("базові атаки героя з правил кампанії", () => {
   it("назви беруться з rules.defaultAttacks", async () => {
-    const { defaultAttacks } = parseRules({ defaultAttacks: { meleeName: "Кулак", rangedName: "Камінь" } });
+    const { defaultAttacks } = parseRules({ defaultAttacks: { meleeName: "Кулак", rangedName: "Камінь", weaponName: "Зброя" } });
 
     const attacks = await extractAttacksFromCharacter(hero, {}, defaultAttacks);
 
     expect(attacks.map((a) => a.name)).toEqual(["Кулак", "Камінь"]);
   });
 
-  it("без правил — Звичайний удар / Звичайний постріл", async () => {
+  it("без правил — англійські назви за замовчуванням", async () => {
     const attacks = await extractAttacksFromCharacter(hero, {});
 
-    expect(attacks.map((a) => a.name)).toEqual(["Звичайний удар", "Звичайний постріл"]);
+    expect(attacks.map((a) => a.name)).toEqual(["Unarmed Strike", "Ranged Attack"]);
+  });
+
+  it("інлайн-зброя без назви не бере назву базового удару", () => {
+    const withInline = { campaignId: "c", inventory: { equipped: { weapon: { damageDice: "1d8" } } } } as unknown as CharacterFromPrisma;
+
+    const attacks = extractAttacksFromCharacter(withInline, {}, { meleeName: "Кулак", rangedName: "Камінь", weaponName: "Зброя" });
+
+    expect(attacks[0].name).toBe("Зброя");
   });
 });

@@ -25,6 +25,28 @@ function plainParams(t: Translator, params: Record<string, TextArg> | undefined)
   return Object.fromEntries(Object.entries(params).map(([key, value]) => [key, typeof value === "object" ? translateIssue(t, value) : value]));
 }
 
+const placeholderCache = new Map<string, string[]>();
+
+function placeholders(raw: string): string[] {
+  const cached = placeholderCache.get(raw);
+
+  if (cached) return cached;
+
+  const names = [...new Set([...raw.matchAll(/\{\s*(\w+)\s*[,}]/g)].map((match) => match[1] as string))];
+
+  placeholderCache.set(raw, names);
+
+  return names;
+}
+
+function withEmptyDefaults(t: Translator, key: string, params: ErrorParams): ErrorParams {
+  const raw = t.raw(key);
+
+  if (typeof raw !== "string") return params;
+
+  return { ...Object.fromEntries(placeholders(raw).map((name) => [name, ""])), ...params };
+}
+
 export function issueParams(issue: Omit<TranslatableIssue, "params"> & { params?: ErrorParams }): ErrorParams {
   const values: ErrorParams = { ...API_ERROR_PARAMS[issue.message as ApiErrorKey], ...issue.params };
 
@@ -54,5 +76,5 @@ export function translateIssue(t: Translator, issue: TranslatableIssue): string 
     return text.charAt(0).toLocaleUpperCase() + text.slice(1);
   }
 
-  return t.has(issue.message) ? t(issue.message, issueParams({ ...issue, params })) : issue.message;
+  return t.has(issue.message) ? t(issue.message, withEmptyDefaults(t, issue.message, issueParams({ ...issue, params }))) : issue.message;
 }

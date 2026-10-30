@@ -1,4 +1,3 @@
-/* eslint-disable no-restricted-syntax -- derived content written to the DB stays Ukrainian (spec part5, decision 5) */
 import type { SpellRecognizer } from "./index";
 
 import { ABILITY_KEYS } from "@/lib/constants/abilities";
@@ -17,7 +16,7 @@ const CHOSEN_IGNORE = /\bcreatures of your choice\b[^.]*\bignore\b/i;
 
 const MAX_ZONE_ROUNDS = 10;
 
-export const terrainZoneSpell: SpellRecognizer = ({ text, cast }) => {
+export const terrainZoneSpell: SpellRecognizer = ({ t, text, cast }) => {
   const radius = RADIUS_SPHERE.exec(text);
 
   const obscured = OBSCURED.test(text);
@@ -42,7 +41,7 @@ export const terrainZoneSpell: SpellRecognizer = ({ text, cast }) => {
   return {
     native: {
       narrative: false,
-      riders: [...(CHOSEN_IGNORE.test(text) ? ["істоти за вибором кастера ігнорують ефекти: див. опис"] : []), ...(durationRounds(cast.facts.duration) > MAX_ZONE_ROUNDS ? ["зона діє не довше 10 раундів"] : [])],
+      riders: [...(CHOSEN_IGNORE.test(text) ? [t("derived.spell.rider.chosenIgnore")] : []), ...(durationRounds(cast.facts.duration) > MAX_ZONE_ROUNDS ? [t("derived.spell.rider.zoneCapped", { rounds: MAX_ZONE_ROUNDS })] : [])],
       fields: {
         targeting: { kind: "template", shape: "circle", size: Math.min(120, Number(radius[1])), side: "enemy", maxTargets: 20, exact: true, ...(range !== "self" && { range }), zone },
         resolution: { kind: "auto" },
@@ -57,7 +56,7 @@ const WALL_CELL = /\b(?:wall|structure)\b[^.]{0,80}?\b(?:5 feet tall,? (?:and )?
 
 const SAVE_OR_DAMAGE = /\bsaving throw\b|\bdamage\b|\battack roll\b/i;
 
-export const wallSpell: SpellRecognizer = ({ text, cast, ability, damageTypes }) => {
+export const wallSpell: SpellRecognizer = ({ t, text, cast, ability, damageTypes }) => {
   if (!WALL_CELL.test(text) || ability || damageTypes.length > 0 || SAVE_OR_DAMAGE.test(text.replace(/\bhit points\b/gi, ""))) return null;
 
   const range = spellRange(cast.facts);
@@ -67,7 +66,7 @@ export const wallSpell: SpellRecognizer = ({ text, cast, ability, damageTypes })
   return {
     native: {
       narrative: false,
-      riders: ["міцність (КЗ, HP) і знищення стіни: див. опис"],
+      riders: [t("derived.spell.rider.wall")],
       fields: {
         targeting: { kind: "template", shape: "cube", size: 5, side: "enemy", maxTargets: 1, ...(range !== "self" && { range }) },
         resolution: { kind: "auto" },

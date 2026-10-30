@@ -68,7 +68,7 @@ const DB_IMPORT_PATH = {
 
 const DB_IN_UTILS_EXEMPT = ["lib/utils/api/api-auth.ts"];
 
-const I18N_EXEMPT = JSON.parse(readFileSync(new URL("./i18n-exempt.json", import.meta.url), "utf8"));
+const I18N_EXEMPT = JSON.parse(readFileSync(new URL("./i18n-exempt.json", import.meta.url), "utf8")).map((e) => e.glob);
 
 const CYRILLIC_MESSAGE = "Текст — у messages/*.json через t()";
 

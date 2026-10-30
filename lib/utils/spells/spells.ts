@@ -25,11 +25,12 @@ export function groupSpellsByGroup(spells: Spell[]): Map<string, Spell[]> {
  */
 export function groupSpellsByGroupAndLevel(
   spells: Spell[],
+  t: (key: string) => string,
 ): Map<string, Map<string, Spell[]>> {
   const groupedSpellsMap = new Map<string, Map<string, Spell[]>>();
 
   for (const [groupName, groupSpells] of groupBy(spells, (spell) => spell.spellGroup?.name || UNGROUPED_KEY)) {
-    groupedSpellsMap.set(groupName, groupBy(groupSpells, (spell) => spellLevelName(spell.level)));
+    groupedSpellsMap.set(groupName, groupBy(groupSpells, (spell) => spellLevelName(spell.level, t)));
   }
 
   groupedSpellsMap.forEach((levelMap) => {

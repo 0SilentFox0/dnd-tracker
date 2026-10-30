@@ -20,7 +20,7 @@ describe("SRD rules preset", () => {
     expect(SRD_RULES.classes.enabled).toBe(true);
     expect(SRD_RULES.outOfCombat).toEqual({ persistResources: true, longRestHitDice: "all", xp: true, inspiration: true });
     expect(SRD_RULES.encounters).toEqual({ balance: "xp", edition: "2024", autoXp: true });
-    expect(SRD_RULES.defaultAttacks).toEqual({ meleeName: "Unarmed Strike", rangedName: "Ranged Attack" });
+    expect(SRD_RULES.defaultAttacks).toEqual({ meleeName: "Unarmed Strike", rangedName: "Ranged Attack", weaponName: "Weapon" });
     expect(SRD_RULES.initiative).toEqual({ heroMin: 0, heroMax: 20, mode: "roll" });
   });
 });

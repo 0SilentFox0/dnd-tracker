@@ -1,5 +1,5 @@
-import { ABILITY_KEYS, ABILITY_LABELS, ABILITY_SHORT_LABELS, CORE_ABILITY_SCORES } from "@/lib/constants/abilities";
-import { ENUM_LABELS, FIELD_ALIASES, LEGACY_ABILITY_SHORT, NUMBER_WORDS } from "@/lib/constants/import-aliases";
+import { ABILITY_KEYS, CORE_ABILITY_SCORES } from "@/lib/constants/abilities";
+import { ABILITY_IMPORT_LABELS, ENUM_LABELS, FIELD_ALIASES, LEGACY_ABILITY_SHORT, NUMBER_WORDS } from "@/lib/constants/import-aliases";
 import type { ImportField, ImportSpec } from "@/types/content-import";
 
 export type FieldDef = Omit<ImportField, "aliases" | "labelKey">;
@@ -8,12 +8,8 @@ export type SpecDef = Omit<ImportSpec, "fields"> & { fields: readonly FieldDef[]
 
 export const ABILITY_ENUM = {
   enumValues: ABILITY_KEYS,
-  enumLabels: Object.fromEntries(CORE_ABILITY_SCORES.map((a) => [a.key, [ABILITY_LABELS[a.key], ABILITY_SHORT_LABELS[a.key], a.abbreviation, ...(LEGACY_ABILITY_SHORT[a.key] ?? [])]])) as Record<string, string[]>,
+  enumLabels: Object.fromEntries(CORE_ABILITY_SCORES.map((a) => [a.key, [...(ABILITY_IMPORT_LABELS[a.key] ?? []), a.abbreviation, ...(LEGACY_ABILITY_SHORT[a.key] ?? [])]])) as Record<string, string[]>,
 };
-
-export const optionLabels = (options: ReadonlyArray<{ value: string; label: string }>): Record<string, string[]> => Object.fromEntries(options.map((o) => [o.value, [o.label]]));
-
-export const recordLabels = (labels: Readonly<Record<string, string>>): Record<string, string[]> => Object.fromEntries(Object.entries(labels).map(([value, label]) => [value, [label]]));
 
 export const nameField = (): FieldDef => ({ key: "name", type: "string", required: true });
 

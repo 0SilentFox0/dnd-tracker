@@ -56,6 +56,16 @@ describe("createCampaignFromBundle", () => {
     expect(m.importBundle).not.toHaveBeenCalled();
   });
 
+  it("без бандла у rules зберігається лише defaultAttacks", async () => {
+    m.db.campaign.create.mockResolvedValue({ id: "c1" });
+
+    const defaultAttacks = { meleeName: "Удар", rangedName: "Постріл", weaponName: "Зброя" };
+
+    await createCampaignFromBundle({ userId: "u1", name: "N", bundle: null, defaultAttacks });
+
+    expect(m.db.campaign.create.mock.calls[0][0].data.rules).toEqual({ defaultAttacks });
+  });
+
   it("з бандлом: кампанія, імпорт і перевірка витоку в одній транзакції", async () => {
     m.tx.campaign.create.mockResolvedValue({ id: "c1" });
 

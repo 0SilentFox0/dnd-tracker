@@ -144,6 +144,22 @@
     "plant": "Рослини",
     "undead": "Нежить"
   },
+  "creatureType": {
+    "aberration": "Аберація",
+    "beast": "Звір",
+    "celestial": "Небожитель",
+    "construct": "Конструкт",
+    "dragon": "Дракон",
+    "elemental": "Елементаль",
+    "fey": "Фея",
+    "fiend": "Пекельне створіння",
+    "giant": "Велетень",
+    "humanoid": "Гуманоїд",
+    "monstrosity": "Монстр",
+    "ooze": "Слиз",
+    "plant": "Рослина",
+    "undead": "Нежить"
+  },
   "abbreviations": {
     "title": "Довідка про абревіатури",
     "srOnly": "Інформація про абревіатури",

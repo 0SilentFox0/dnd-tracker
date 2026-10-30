@@ -20,8 +20,13 @@ import type {
   StoredParticipant,
 } from "./types";
 
-import { BATTLE_SNAPSHOTS_KEPT_AFTER_COMPLETE, BattleStatus } from "@/lib/constants/battle";
+import { BATTLE_LOG_TEXT_FALLBACK, BATTLE_SNAPSHOTS_KEPT_AFTER_COMPLETE, BattleStatus } from "@/lib/constants/battle";
+import { DEFAULT_LOCALE, type Locale } from "@/lib/i18n/config";
+import { getTranslator } from "@/lib/i18n/translator";
+import { encodeLog } from "@/lib/utils/battle/log/codec";
+import { formatBattleLog } from "@/lib/utils/battle/log/lines";
 import type { BattleParticipant } from "@/types/battle";
+import type { LogLine } from "@/types/text";
 
 type UpdatableColumn = Exclude<keyof ParticipantColumns, "id">;
 
@@ -101,7 +106,9 @@ export interface PreparedSave {
   delta: BattleDelta;
 }
 
-export function prepareSave(before: LoadedBattle, outcome: BattleMutationOutcome): PreparedSave {
+export type BattleWrite = { logLocale: Locale };
+
+export function prepareSave(before: LoadedBattle, outcome: BattleMutationOutcome, logText?: (log: LogLine[]) => string): PreparedSave {
   const { scene } = before;
 
   const beforeStored = toStored(before.participants, before.pending);
@@ -123,6 +130,16 @@ export function prepareSave(before: LoadedBattle, outcome: BattleMutationOutcome
     resultText: e.resultText,
   }));
 
+  const stored = events.map((e) => {
+    const log = (e.details as { log?: LogLine[] }).log;
+
+    if (!log) return e;
+
+    const resultText = logText && BATTLE_LOG_TEXT_FALLBACK ? logText(log) : e.resultText;
+
+    return { ...e, resultText, details: { ...e.details, log: encodeLog(log) } };
+  });
+
   const { map: _map, ...scenePatch } = outcome.scene ?? {};
 
   const nextScene: BattleSceneState = { ...scene, ...scenePatch };
@@ -143,19 +160,26 @@ export function prepareSave(before: LoadedBattle, outcome: BattleMutationOutcome
     events,
   };
 
-  return { beforeStored, diff, events, clearHistory, delta };
+  return { beforeStored, diff, events: stored, clearHistory, delta };
 }
 
 export async function saveBattle(
   db: BattleDb,
   before: LoadedBattle,
   outcome: BattleMutationOutcome,
+  write: BattleWrite = { logLocale: DEFAULT_LOCALE },
 ): Promise<BattleDelta> {
   const { scene } = before;
 
   const patch = outcome.scene ?? {};
 
-  const { beforeStored, diff, events, clearHistory, delta } = prepareSave(before, outcome);
+  const t = BATTLE_LOG_TEXT_FALLBACK ? await getTranslator(write.logLocale) : undefined;
+
+  const { beforeStored, diff, events, clearHistory, delta } = prepareSave(
+    before,
+    outcome,
+    t && ((log) => formatBattleLog(t, { log, resultText: "" })),
+  );
 
   const completing = patch.status === BattleStatus.COMPLETED && scene.status !== BattleStatus.COMPLETED;
 
@@ -237,7 +261,7 @@ export async function saveBattle(
 
     if (completing) {
       await persistCharacterResources(tx, { campaignId: scene.campaignId, battleId: scene.id, rules: before.meta.rules }, outcome.participants);
-      await persistBattleXp(tx, { campaignId: scene.campaignId, battleId: scene.id, rules: before.meta.rules }, outcome.participants, outcome.events);
+      await persistBattleXp(tx, { campaignId: scene.campaignId, battleId: scene.id, rules: before.meta.rules, locale: write.logLocale }, outcome.participants, outcome.events);
       await persistConsumables(tx, { campaignId: scene.campaignId }, outcome.participants);
       await persistIngredients(tx, { campaignId: scene.campaignId, rules: before.meta.rules }, outcome.participants);
       await tx.$executeRaw(pruneSnapshotsSql(scene.id));

@@ -298,5 +298,8 @@
     "low": "Low",
     "moderate": "Moderate",
     "high": "High"
+  },
+  "grant": {
+    "unnamed": "Unnamed spell"
   }
 }

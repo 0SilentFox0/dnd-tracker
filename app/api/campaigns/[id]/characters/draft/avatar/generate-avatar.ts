@@ -34,7 +34,7 @@ export async function generateDraftAvatar(request: Request, campaignId: string):
 
   if (!picked) return errorResponse(API_ERRORS.AI_NOT_CONFIGURED_FOR_PLAYERS, 400);
 
-  const prompt = `Fantasy character portrait in the style of Heroes of Might and Magic V: ${data.name}, a ${data.race} ${data.class} (${heroArchetype(data.archetype).name}). Head-and-shoulders bust, dramatic painterly lighting, no text, no letters, no watermark.`;
+  const prompt = `Fantasy character portrait in the style of Heroes of Might and Magic V: ${data.name}, a ${data.race} ${data.class} (${heroArchetype(data.archetype).key ?? "universal"}). Head-and-shoulders bust, dramatic painterly lighting, no text, no letters, no watermark.`;
 
   try {
     return NextResponse.json(await generateAvatarImage({ campaignId, userId: picked.userId, prompt, provider: picked.provider, model: picked.model, abortSignal: request.signal }));

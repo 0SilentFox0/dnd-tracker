@@ -21,7 +21,7 @@ function stripTiming(effect: StaticEffect): StaticEffect {
   return rest as StaticEffect;
 }
 
-export function applyStatic(input: EffectApplyInput<StaticEffect>, describe: (e: Effect) => string): EffectApplyResult {
+export function applyStatic(input: EffectApplyInput<StaticEffect>, describe: (e: Effect) => LogLine): EffectApplyResult {
   const { effect, ability, targetIds, ctx } = input;
 
   const stripped = stripTiming(effect);

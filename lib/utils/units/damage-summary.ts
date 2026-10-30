@@ -1,12 +1,13 @@
-import { ABILITY_SHORT_LABELS, type AbilityKey } from "@/lib/constants/abilities";
+import type { AbilityKey } from "@/lib/constants/abilities";
 import { AttackType } from "@/lib/constants/battle";
 import { attackAbilityKey, getAttackAbilityModifier } from "@/lib/utils/common/calculations";
 import { diceAverage } from "@/lib/utils/common/dice";
-import { signedDelta } from "@/lib/utils/common/format";
 
 export interface UnitDamageSummary {
   average: number;
-  formula: string;
+  dice: string;
+  mod: number;
+  ability: AbilityKey;
 }
 
 type Scores = { strength: number; dexterity: number; primaryAbility?: AbilityKey | null };
@@ -29,9 +30,5 @@ export function unitDamageSummary(scores: Scores, attacks: ReadonlyArray<{ damag
 
   if (!best) return null;
 
-  const label = ABILITY_SHORT_LABELS[attackAbilityKey(scores, best.type)];
-
-  const modText = best.mod === 0 ? "" : ` ${signedDelta(best.mod)} ${label}`;
-
-  return { average: Math.round(best.avg), formula: `${best.dice}${modText}` };
+  return { average: Math.round(best.avg), dice: best.dice, mod: best.mod, ability: attackAbilityKey(scores, best.type) };
 }

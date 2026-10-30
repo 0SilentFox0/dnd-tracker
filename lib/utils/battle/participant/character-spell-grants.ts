@@ -7,6 +7,10 @@ import { type ConsumableEntry, consumablePools } from "@/lib/utils/items/consuma
 import { itemStatsFromRow } from "@/lib/utils/items/item-row";
 import { consumablePoolKey, grantPoolKey, itemPoolKey, itemPools, spellGrantFields } from "@/lib/utils/items/pools";
 import type { AbilityPool, SpellGrant } from "@/types/battle";
+import type { LogLine } from "@/types/text";
+
+// Pools are keyed and compared by label, so an origin ref collapses to its content name.
+const poolLabelOf = (label: LogLine): string => (typeof label === "string" ? label : String(label.params?.name ?? label.message));
 
 export function buildCharacterSpellGrants({ selections, artifactRows, consumables, proficiencyBonus }: {
   selections: ChoiceSelections | null;
@@ -19,7 +23,7 @@ export function buildCharacterSpellGrants({ selections, artifactRows, consumable
   const grantPools = Object.fromEntries((selections?.spellGrants ?? []).flatMap(({ label, sourceKey, grantPolicy }) => {
     const max = grantPolicy.uses === "proficiency" ? proficiencyBonus : grantPolicy.uses;
 
-    return max > 0 ? [[grantPoolKey(sourceKey, grantPolicy.sharedPool), { label, max, rest: grantPolicy.rest }]] : [];
+    return max > 0 ? [[grantPoolKey(sourceKey, grantPolicy.sharedPool), { label: poolLabelOf(label), max, rest: grantPolicy.rest }]] : [];
   }));
 
   const spellGrants: SpellGrant[] = (selections?.spellGrants ?? []).map(({ spellId, label, sourceKey, grantPolicy }) => {

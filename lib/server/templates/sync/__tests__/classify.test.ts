@@ -125,7 +125,7 @@ describe("classify", () => {
 
     const items = visible(c);
 
-    expect(items).toEqual([expect.objectContaining({ scope: "rules", key: "morale", status: "updated", name: "Мораль" })]);
+    expect(items).toEqual([expect.objectContaining({ scope: "rules", key: "morale", status: "updated", name: "morale" })]);
   });
 
   it("settings: one item with changed field names", () => {

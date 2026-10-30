@@ -1,6 +1,6 @@
 # i18n: частина 6 — бій і залишки (закриття епіку)
 
-Гілка `feat/i18n-part6` (worktree `../dnd-tracker-t6`) від main `b675bc56`. Базові правила — `docs/architecture/i18n.md` («Межі коду», «Середні домени (частина 4)», «Великі домени (частина 5)»), порядок частин — `docs/superpowers/specs/2026-10-28-i18n-core-design.md`, зразок — `docs/archive/superpowers/specs/2026-10-29-i18n-part5-design.md` (рішення 1–15 ч.5 діють і тут). Рушій бою — `docs/architecture/{battle,abilities}.md`.
+Гілка `feat/i18n-part6` (worktree `../dnd-tracker-t6`) від main `b675bc56`. Базові правила — `docs/architecture/i18n.md` («Межі коду», «Середні домени (частина 4)», «Великі домени (частина 5)»), порядок частин — `docs/archive/superpowers/specs/2026-10-28-i18n-core-design.md`, зразок — `docs/archive/superpowers/specs/2026-10-29-i18n-part5-design.md` (рішення 1–15 ч.5 діють і тут). Рушій бою — `docs/architecture/{battle,abilities}.md`.
 
 ## Мета і межі
 

@@ -189,7 +189,7 @@
     "scores": {
       "method": "Спосіб розподілу",
       "standard": "Стандартний масив",
-      "pointBuy": "Point-buy ({budget})",
+      "pointBuy": "Купівля очок ({budget})",
       "spent": "Витрачено {spent} / {budget}",
       "uniqueArray": "Кожне значення масиву — рівно один раз",
       "lessAria": "{ability}: менше",

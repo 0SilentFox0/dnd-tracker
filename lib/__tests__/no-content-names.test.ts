@@ -13,14 +13,13 @@ const ALLOWED_FILES: Record<string, string> = {
 };
 
 const ALLOWED: Record<string, string> = {
+  "lib/utils/characters/generate/archetype-class.uk.ts: Паладин": "uk class name of the Paladin hero archetype in the generator table",
   "lib/utils/battle/modes/maze/texts.ts: Світло": "maze UI toggle label, not the library name",
   "lib/utils/battle/modes/maze/texts.ts: Темрява": "maze UI toggle label, not the library name",
   "lib/constants/main-skills.ts: Напад": "system label of a built-in main skill",
   "lib/constants/main-skills.ts: Стрільба": "system label of a built-in main skill",
   "lib/constants/main-skills.ts: Захист": "system label of a built-in main skill",
   "lib/constants/main-skills.ts: Лідерство": "system label of a built-in main skill",
-  "lib/constants/hero-archetypes.ts: Лучник": "system label of a built-in hero archetype",
-  "lib/constants/hero-archetypes.ts: Паладин": "system label of a built-in hero archetype",
   "lib/constants/damage.ts: Блискавка": "label of the built-in damage type",
   "lib/constants/damage.ts: Світло": "label of the built-in damage type",
   "lib/constants/skills.ts: Природа": "label of the built-in skill (ability check)",

@@ -1,14 +1,15 @@
 import type { RollStep } from "./useRollReveal";
 
 import { ABILITY_KEYS, type AbilityKey } from "@/lib/constants/abilities";
-import { type AbilityScores, ARCHETYPE_CLASS, pick, STANDARD_ARRAY } from "@/lib/utils/characters/generate";
+import type { Locale } from "@/lib/i18n/config";
+import { type AbilityScores, archetypeClasses, pick, STANDARD_ARRAY } from "@/lib/utils/characters/generate";
 import type { DraftInput } from "@/types/characters";
 
 export type RollKey = "race" | "avatar" | "archetype" | "class" | "alignment" | "name" | "background" | AbilityKey;
 
 export const standardScores = (): AbilityScores => Object.fromEntries(ABILITY_KEYS.map((k, i) => [k, STANDARD_ARRAY[i]])) as AbilityScores;
 
-export const EMPTY_DRAFT: DraftInput = { name: "", race: "", class: ARCHETYPE_CLASS.warrior, archetype: "warrior", method: "standard", ...standardScores(), goals: [] };
+export const emptyDraft = (locale: Locale): DraftInput => ({ name: "", race: "", class: archetypeClasses(locale).warrior, archetype: "warrior", method: "standard", ...standardScores(), goals: [] });
 
 export const scoresOf = (v: DraftInput): AbilityScores => Object.fromEntries(ABILITY_KEYS.map((k) => [k, v[k]])) as AbilityScores;
 

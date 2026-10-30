@@ -102,7 +102,7 @@ export function buildCharacterSheet(input: SheetInput): CharacterSheet {
 
     const expertise = proficient && expert.has(key);
 
-    return { key, label: meta.label, ability: meta.ability, proficient, bonus: checkBonus(scores[meta.ability], proficient, expertise ? prof * 2 : prof), ...(expertise && { expertise: true as const }) };
+    return { key, label: `gameTerms.dndSkills.${key}`, ability: meta.ability, proficient, bonus: checkBonus(scores[meta.ability], proficient, expertise ? prof * 2 : prof), ...(expertise && { expertise: true as const }) };
   });
 
   const passive = (key: string) => 10 + (skills.find((s) => s.key === key)?.bonus ?? 0);
@@ -125,7 +125,7 @@ export function buildCharacterSheet(input: SheetInput): CharacterSheet {
     viewer: input.viewer,
     review: { pending: c.status === CharacterStatus.PENDING, note: c.status === CharacterStatus.PENDING ? (c.reviewNote ?? null) : null },
     maxLevel: input.maxLevel,
-    identity: { id: c.id, name: c.name, avatar: c.avatar, level: c.level, className: c.class, archetype: heroArchetype(c.archetype).name, subclass: c.subclass, race: c.race, ...(showSubrace && c.subrace && { subrace: c.subrace }), raceIcon: input.raceIcon, alignment: c.alignment },
+    identity: { id: c.id, name: c.name, avatar: c.avatar, level: c.level, className: c.class, archetype: heroArchetype(c.archetype).key ?? "universal", subclass: c.subclass, race: c.race, ...(showSubrace && c.subrace && { subrace: c.subrace }), raceIcon: input.raceIcon, alignment: c.alignment },
     abilities: ABILITY_KEYS.map((key) => ({ key, score: scores[key], mod: getAbilityModifier(scores[key]), isPrimary: primary === key, lines: abilityLines(p, key, c[key]) })),
     primaryAbility: primary,
     proficiency: prof,

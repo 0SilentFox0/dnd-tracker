@@ -9,20 +9,27 @@ type Flatten<T, P extends string> = { [K in keyof T & string]: T[K] extends stri
 
 export type AppMessageKey = { [N in keyof Messages & string]: Flatten<Messages[N], `${N}.`> }[keyof Messages & string];
 
+/** Empty-string params are dropped to keep the stored log small; `translateIssue` fills the missing placeholders with "". */
+function compactRef(message: string, params?: Record<string, TextArg>): TextRef {
+  const kept = params && Object.entries(params).filter(([, value]) => value !== "");
+
+  return kept?.length ? { message, params: Object.fromEntries(kept) } : { message };
+}
+
 export function textRef(message: AppMessageKey, params?: Record<string, TextArg>): TextRef {
-  return params ? { message, params } : { message };
+  return compactRef(message, params);
 }
 
 /** For keys built at runtime (`battleTerms.crits.${source}…`); each dynamic family needs a `label-keys-<ns>` test. */
 export function dynamicTextRef(message: string, params?: Record<string, TextArg>): TextRef {
-  return params ? { message, params } : { message };
+  return compactRef(message, params);
 }
 
 /** Concatenates lines; plain strings collapse into one string, otherwise a catalog-free `$join` ref that `formatText` resolves. */
 export function joinLines(parts: readonly LogLine[], separator = ""): LogLine {
   if (parts.every((part) => typeof part === "string")) return parts.join(separator);
 
-  return { message: JOIN_KEY, params: { separator, ...Object.fromEntries(parts.map((part, index) => [`p${index}`, part])) } };
+  return { message: JOIN_KEY, params: { ...(separator && { separator }), ...Object.fromEntries(parts.map((part, index) => [`p${index}`, part])) } };
 }
 
 /** Capitalizes at render time, after the locale text is known. */

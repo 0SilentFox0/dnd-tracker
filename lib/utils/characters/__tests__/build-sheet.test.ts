@@ -87,7 +87,7 @@ describe("buildCharacterSheet", () => {
     const s = buildCharacterSheet(lira());
 
     expect(s.saves.find((x) => x.key === "dexterity")).toMatchObject({ bonus: 13, proficient: true });
-    expect(s.skills.find((x) => x.key === "stealth")).toMatchObject({ label: "Скритність", bonus: 13 });
+    expect(s.skills.find((x) => x.key === "stealth")).toMatchObject({ label: "gameTerms.dndSkills.stealth", bonus: 13 });
     expect(s.passives.perception).toBe(10 + 0 + 9);
   });
 

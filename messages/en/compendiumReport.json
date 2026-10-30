@@ -169,6 +169,27 @@
       "reaction": "movement as a reaction",
       "hold": "holding the targets: conditions and movement (see the description)",
       "conditions": "conditions: {list}"
+    },
+    "spell": {
+      "label": {
+        "reaction": "Reaction",
+        "height": "Height, ×10 ft",
+        "spellAttack": "Spell attack",
+        "objectStrike": "Object strike",
+        "objectAttack": "Object attack"
+      },
+      "rider": {
+        "swarmAttackable": "a swarm in flight can be attacked (see description)",
+        "variant": "option {n}: see description",
+        "durationCapped": "duration capped at {rounds} rounds",
+        "durationUpcast": "duration extends at higher levels",
+        "newFormLook": "appearance of the new form: see description",
+        "targetCommand": "command to the target: see description",
+        "singleRider": "a single rider: see description",
+        "chosenIgnore": "creatures chosen by the caster ignore the effects: see description",
+        "zoneCapped": "the zone lasts at most {rounds} rounds",
+        "wall": "wall toughness (AC, HP) and destruction: see description"
+      }
     }
   }
 }

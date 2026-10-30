@@ -13,8 +13,10 @@ import { controlAnimal, speedAtLeast } from "./target-filter";
 import { terrainZoneSpell, wallSpell } from "./zone-terrain";
 
 import type { AbilityKey } from "@/lib/constants/abilities";
+import type { Translator } from "@/lib/i18n/translator";
 
 export interface SpellPatternInput {
+  t: Translator;
   row: Record<string, unknown>;
   raw: string;
   text: string;

@@ -26,6 +26,14 @@ describe("useBattleMapEditor", () => {
     expect(result.current.state.map.blocked).toEqual(["1:1", "2:1"]);
   });
 
+  it("небезпека без підпису не пише label", () => {
+    const { result } = renderHook(() => useBattleMapEditor(null));
+
+    act(() => result.current.actions.setTool("hazard"));
+    act(() => result.current.actions.onStroke([{ x: 4, y: 3 }]));
+    expect(result.current.state.map.terrain?.["4:3"]).toEqual({ kind: "hazard", damage: { dice: "1d6", type: "fire" } });
+  });
+
   it("палітра: непрохідне, небезпека з підписом, стерти", () => {
     const { result } = renderHook(() => useBattleMapEditor(null));
 

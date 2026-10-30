@@ -79,7 +79,7 @@ export default async function CampaignDetailPage({
         </div>
 
         <div className="space-y-4">
-          <CampaignSummaryPanel campaignId={id} campaign={campaign} isDM={isDM} meta={{ createdFromId: campaign.createdFromId ?? null, isTemplate, credits: campaign.credits ?? null }} />
+          <CampaignSummaryPanel campaignId={id} campaign={{ name: campaign.name, description: campaign.description, maxLevel: campaign.maxLevel, allowPlayerEdit: campaign.allowPlayerEdit, critChoiceByDm: campaign.critChoiceByDm, acquaintancesEnabled: campaign.acquaintancesEnabled, status: campaign.status, inviteCode: campaign.inviteCode }} isDM={isDM} meta={{ createdFromId: campaign.createdFromId ?? null, isTemplate, credits: campaign.credits ?? null }} />
 
           {!isTemplate && (
             <HudPanel>

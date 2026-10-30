@@ -42,10 +42,10 @@ export const BattleStatus = {
 
 export type BattleStatus = (typeof BattleStatus)[keyof typeof BattleStatus];
 
-export const DM_ACTOR = { actorId: "dm", actorName: "DM", actorSide: ParticipantSide.ALLY } as const;
+export const DM_ACTOR = { actorId: "dm", actorName: "", actorSide: ParticipantSide.ALLY } as const;
 
-// eslint-disable-next-line no-restricted-syntax -- actor name is persisted in battle_events.details, not UI text
-export const SYSTEM_ACTOR = { actorId: "system", actorName: "Система", actorSide: ParticipantSide.ALLY } as const;
+// service actors persist an empty name; the UI translates by actorId
+export const SYSTEM_ACTOR = { actorId: "system", actorName: "", actorSide: ParticipantSide.ALLY } as const;
 
 export const BattleActionType = {
   ATTACK: "attack",
@@ -102,6 +102,9 @@ export const BATTLE_LOG_PAGE_MAX = 100;
 // відкат дозволено й для завершеного бою, тож знімки лишаються, але не всі
 export const BATTLE_SNAPSHOTS_KEPT_AFTER_COMPLETE = 20;
 
+/** Writes the rendered log into `resultText` so a rollback to pre-`log` code still shows text; see STATUS. */
+export const BATTLE_LOG_TEXT_FALLBACK = true;
+
 export const RECHARGE_THRESHOLDS = [4, 5, 6] as const;
 
 export type RechargeThreshold = (typeof RECHARGE_THRESHOLDS)[number];
@@ -120,9 +123,6 @@ export const AURA_RADIUS_CELLS = 2;
 export const SKILL_AREA_RADIUS_FEET = 10;
 
 export const DEFAULT_MAP_BACKGROUND = "/battle-maps/nicolas-tomb.webp";
-
-// eslint-disable-next-line no-restricted-syntax -- default hazard label is written into battle map data in the author's locale
-export const DEFAULT_HAZARD_LABEL = "Небезпечна зона";
 
 export const DEFAULT_HAZARD_DICE = "1d6";
 

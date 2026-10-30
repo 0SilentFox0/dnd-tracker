@@ -17,13 +17,13 @@ export function useSetLocale(): { locale: Locale; set: (locale: Locale, hardNavi
     async (next: Locale, hardNavigateTo?: string) => {
       if (hardNavigateTo) {
         // a failed PUT must not leave the switcher dead: fall back to the cookie and still load the target URL
-        await localeApi.set(next).catch(() => writeLocaleCookie(next));
+        await localeApi.set({ locale: next }).catch(() => writeLocaleCookie(next));
         window.location.assign(hardNavigateTo);
 
         return;
       }
 
-      await localeApi.set(next).catch(() => writeLocaleCookie(next));
+      await localeApi.set({ locale: next }).catch(() => writeLocaleCookie(next));
       window.dispatchEvent(new Event(LOCALE_CHANGE_EVENT));
       router.refresh();
     },

@@ -6,8 +6,8 @@ import type { SourceDiff, SourceDiffItem, SourceSyncScope } from "@/types/campai
 
 type Usage = NonNullable<SourceDiffItem["usage"]>;
 
-export async function buildDiff(db: SyncDb, ctx: SyncContext, scope?: SourceSyncScope): Promise<SourceDiff> {
-  const items = classify(ctx).filter((i) => i.visible && !i.ignored && (!scope || i.scope === scope));
+export async function buildDiff(db: SyncDb, ctx: SyncContext, scope?: SourceSyncScope, ruleLabel?: (key: string) => string): Promise<SourceDiff> {
+  const items = classify(ctx, ruleLabel).filter((i) => i.visible && !i.ignored && (!scope || i.scope === scope));
 
   const usage = await countUsage(db, ctx, new Set(items.filter((i) => i.status === "deletedInSource" && i.localId).map((i) => i.localId!)));
 

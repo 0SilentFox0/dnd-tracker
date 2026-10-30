@@ -33,7 +33,7 @@ describe("useSetLocale", () => {
 
     await act(() => result.current.set("en"));
 
-    expect(localeApi.set).toHaveBeenCalledWith("en");
+    expect(localeApi.set).toHaveBeenCalledWith({ locale: "en" });
     expect(onChange).toHaveBeenCalledTimes(1);
     expect(refresh).toHaveBeenCalled();
     window.removeEventListener(LOCALE_CHANGE_EVENT, onChange);

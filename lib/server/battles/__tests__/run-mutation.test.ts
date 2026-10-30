@@ -2,6 +2,7 @@ import { describe, expect, it, vi } from "vitest";
 import { z } from "zod";
 
 import { ParticipantSide } from "@/lib/constants/battle";
+import { getRequestLocale } from "@/lib/i18n/request-locale";
 import { textRef } from "@/lib/i18n/text-ref";
 import { runBattleMutation } from "@/lib/server/battles/run-mutation";
 import { resolved } from "@/lib/utils/abilities/__tests__/fixtures";
@@ -12,6 +13,8 @@ import type { BattleDelta, LoadedBattle } from "@/lib/utils/battle/store";
 import { BattleConflictError, BattleRuleError } from "@/lib/utils/battle/store";
 import { DEFAULT_RULES } from "@/lib/utils/rules";
 import type { BattleParticipant } from "@/types/battle";
+
+vi.mock("@/lib/i18n/request-locale", () => ({ getRequestLocale: vi.fn(async () => "uk") }));
 
 const hero = createMockParticipant({ basicInfo: { ...createMockParticipant().basicInfo, id: "hero", controlledBy: "u-player" } });
 
@@ -78,6 +81,18 @@ const req = (body: unknown = {}) =>
   new Request("http://x/api", { method: "POST", body: JSON.stringify(body) });
 
 const noop = vi.fn((ctx) => ({ participants: ctx.participants, pending: ctx.pending, events: [] }));
+
+describe("runBattleMutation: мова запису логу", () => {
+  it("мова запиту йде в saveBattle як logLocale", async () => {
+    vi.mocked(getRequestLocale).mockResolvedValueOnce("en");
+
+    const d = deps();
+
+    await runBattleMutation(req(), { params, access: "member", mutate: (ctx) => ({ participants: ctx.participants, pending: ctx.pending, events: [] }) }, d);
+
+    expect(vi.mocked(d.saveBattle).mock.calls[0][2]).toEqual({ logLocale: "en" });
+  });
+});
 
 describe("runBattleMutation: завершення бою", () => {
   const complete = vi.fn((ctx) => ({ participants: ctx.participants, pending: ctx.pending, scene: { status: "completed" as const, completedAt: new Date() }, events: [] }));

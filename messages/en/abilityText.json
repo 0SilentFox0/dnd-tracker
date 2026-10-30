@@ -23,12 +23,25 @@
     "gainsEffect": "✨ {target}: gains «{effect}» ({ability})",
     "applied": "✨ {ability}: {effect} → {target} ({rounds} rd.)",
     "chanceMissed": "🎲 {ability}: did not trigger ({chance}% chance)",
-    "chanceSuffix": " ({chance}% chance)",
+    "withChance": "{text} ({chance}% chance)",
     "raisedDead": "💀 {ability}: {target} rise again ({percent}% HP)",
     "raiseRefused": "⛔ {ability}: {target} — cannot be raised",
     "pushNoMap": "↔️ {ability}: push not applied — there is no map",
     "pushNowhere": "↔️ {target}: nowhere to be pushed",
     "pushed": "↔️ {ability}: {target} pushed {feet} ft",
     "help": "🤝 {ability}: {target} has advantage on the next attack"
+  },
+  "derived": {
+    "multiattack": "Multiattack ×{count}",
+    "exhaustion": "Exhaustion",
+    "armor": {
+      "stealth": "Stealth disadvantage",
+      "slowed": "Strength below {strength}: speed −{penalty}"
+    },
+    "choices": {
+      "source": "Choices",
+      "skills": "Skill proficiency from choices",
+      "expertise": "Expertise from choices"
+    }
   }
 }

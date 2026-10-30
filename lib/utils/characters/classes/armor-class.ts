@@ -1,4 +1,5 @@
 import { ParticipantSourceType } from "@/lib/constants/battle";
+import { joinLines, textRef } from "@/lib/i18n/text-ref";
 import type { Effect } from "@/lib/utils/abilities/schema";
 import { armorDexCap } from "@/lib/utils/artifacts/armor-row";
 import { wornArmor } from "@/lib/utils/artifacts/worn-armor";
@@ -53,10 +54,9 @@ export function armorPenalties(p: BattleParticipant): ResolvedAbility | null {
 
   const { artifactId, name } = worn.artifact;
 
-  // eslint-disable-next-line no-restricted-syntax -- ability description is battle data
-  const description = [stealthDisadvantage ? "Перешкода на Скритність" : null, slowed ? `Сила нижче ${strength}: швидкість −${ARMOR_STRENGTH_SPEED_PENALTY}` : null].filter(Boolean).join("; ");
+  const details = joinLines([stealthDisadvantage ? textRef("abilityText.derived.armor.stealth") : null, slowed ? textRef("abilityText.derived.armor.slowed", { strength, penalty: ARMOR_STRENGTH_SPEED_PENALTY }) : null].filter((x) => x !== null), "; ");
 
-  return { id: PENALTY_ID, name, description, trigger: { event: "passive" }, effects, source: { type: "artifact", id: artifactId, name }, key: `artifact:${artifactId}:${PENALTY_ID}` };
+  return { id: PENALTY_ID, name, details, trigger: { event: "passive" }, effects, source: { type: "artifact", id: artifactId, name }, key: `artifact:${artifactId}:${PENALTY_ID}` };
 }
 
 // запікання вже минуло, тож −10 швидкості пишемо одразу, а вміння лише показує джерело

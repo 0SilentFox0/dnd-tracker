@@ -7,6 +7,7 @@ import { Shield } from "lucide-react";
 import { HitFrame, PortraitFx } from "@/components/battle/fx/PortraitFx";
 import { EffectLine, HealthBar, HealthLabel, hitFlashClass, HitFloat, Portrait } from "@/components/battle/hud";
 import { useHitFx } from "@/lib/hooks/battle";
+import { useCreatureTypeLabel } from "@/lib/i18n/use-creature-type";
 import { useText } from "@/lib/i18n/use-text";
 import { cn } from "@/lib/utils";
 import { legendaryBadge } from "@/lib/utils/battle/actions/legendary-options";
@@ -49,6 +50,8 @@ export const ParticipantRow = memo(function ParticipantRow({ participant: live, 
 }) {
   const text = useText();
 
+  const creatureTypeLabel = useCreatureTypeLabel();
+
   const { change, shown: participant, shakeRef } = useHitFx<HTMLDivElement>(live, impact);
 
   const { currentHp, maxHp } = participant.combatStats;
@@ -66,7 +69,7 @@ export const ParticipantRow = memo(function ParticipantRow({ participant: live, 
         <Portrait key={`portrait:${change?.id ?? ""}`} participant={participant} fx="main" size={48} current={current} className={cn("pointer-events-none", !change?.impact && hitFlashClass(change))} />
       </PortraitFx>
       <div className="min-w-0 flex-1">
-        {exact && participant.abilities.creatureType && <div className="text-[10px] text-[var(--hud-muted)]">{participant.abilities.creatureType}</div>}
+        {exact && participant.abilities.creatureType && <div className="text-[10px] text-[var(--hud-muted)]">{creatureTypeLabel(participant.abilities.creatureType)}</div>}
         <div className={cn("hud-sc flex h-5 items-center whitespace-nowrap text-base font-bold text-[var(--ink)]", down && "line-through")}>
           <span className="truncate">{participant.basicInfo.name}</span>
           {exact ? <span className={cn("ml-auto pl-2 font-sans text-sm font-medium tracking-normal", hpRatio(participant) <= 0.25 ? "text-[#e04a35]" : "text-[#d6cbb7]")}>{currentHp} / {maxHp}</span> : <HealthLabel participant={participant} />}

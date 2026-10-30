@@ -16,6 +16,7 @@ import { Button } from "@/components/ui/button";
 import { AttackType } from "@/lib/constants/battle";
 import { challengeLabel } from "@/lib/constants/challenge";
 import { useConfirm } from "@/lib/hooks/common";
+import { signedDelta } from "@/lib/utils/common/format";
 import { getUnitImmunities } from "@/lib/utils/races/race-effects";
 import { unitDamageSummary } from "@/lib/utils/units/damage-summary";
 import { UNIT_DRAG_TYPE, unitDragPayload } from "@/lib/utils/units/drag";
@@ -41,6 +42,8 @@ export const UnitCard = memo(function UnitCard({ unit, campaignId, onDelete }: U
   const t = useTranslations("units.card");
 
   const tActions = useTranslations("common.actions");
+
+  const tg = useTranslations("gameTerms");
 
   const confirm = useConfirm();
 
@@ -92,7 +95,7 @@ export const UnitCard = memo(function UnitCard({ unit, campaignId, onDelete }: U
                 {damage && (
                   <>
                     {t("damage", { average: damage.average })}
-                    <span className="whitespace-nowrap text-xs">({damage.formula})</span>
+                    <span className="whitespace-nowrap text-xs">({damage.dice}{damage.mod !== 0 && ` ${signedDelta(damage.mod)} ${tg(`abilities.${damage.ability}.short`)}`})</span>
                   </>
                 )}
               </div>

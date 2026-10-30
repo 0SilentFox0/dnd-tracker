@@ -4,7 +4,7 @@ import { Fragment, useRef } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useTranslations } from "next-intl";
-import { CircleHelp, Home, KeyRound, LogOut, Menu, Sparkles, User, UserRoundCog } from "lucide-react";
+import { CircleHelp, Globe, Home, KeyRound, LogOut, Menu, Sparkles, User, UserRoundCog } from "lucide-react";
 
 import { JoinBattleButton } from "@/components/campaigns/JoinBattleButton";
 import { WatchShowButton } from "@/components/campaigns/WatchShowButton";
@@ -61,7 +61,7 @@ export function Header() {
 
   const isBattlePage = BATTLE_PATH.test(pathname ?? "");
 
-  const width = isBattlePage ? "w-full px-6" : "container mx-auto px-4";
+  const width = isBattlePage ? "w-full px-3 sm:px-6" : "container mx-auto px-4";
 
   return (
     <header className="sticky top-0 z-50 w-full border-b border-hud-rule bg-[#0b0908]/[.97]">
@@ -121,7 +121,7 @@ export function Header() {
           )}
         </div>
 
-        <div className="flex items-center gap-2">
+        <div className="flex min-w-0 items-center gap-0.5 sm:gap-2">
           <JoinBattleButton />
           <WatchShowButton />
           {email && <WhatsNewButton />}
@@ -158,6 +158,12 @@ export function Header() {
                 <Link href="/settings/password">
                   <KeyRound className="h-4 w-4 mr-2" />
                   {t("password")}
+                </Link>
+              </DropdownMenuItem>
+              <DropdownMenuItem asChild>
+                <Link href="/settings/preferences">
+                  <Globe className="h-4 w-4 mr-2" />
+                  {t("preferences")}
                 </Link>
               </DropdownMenuItem>
               <DropdownMenuItem asChild>

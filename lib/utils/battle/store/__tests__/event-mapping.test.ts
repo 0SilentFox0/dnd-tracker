@@ -56,7 +56,7 @@ describe("event mapping", () => {
 
     const back = eventToBattleAction({ ...e, seq: 2, actorId: e.actorId ?? null, targets: [], details: e.details ?? {}, hpChanges: [] }, "b1");
 
-    expect(back).toMatchObject({ actorId: "system", actorName: "Система", actionType: "ability", round: 3 });
+    expect(back).toMatchObject({ actorId: "system", actorName: "", actionType: "ability", round: 3 });
   });
 
   it("подія ДМ — від імені ДМ, з цілями", () => {
@@ -64,6 +64,20 @@ describe("event mapping", () => {
 
     expect(e).toMatchObject({ type: "ability", round: 2, targets: [{ participantId: "p", participantName: "П" }], resultText: "ДМ щось зробив" });
     expect(dmEvent(2, "x")).not.toHaveProperty("targets");
+  });
+});
+
+describe("fallback-текст у resultText", () => {
+  const log = [textRef("battleCommon.actors.dm"), "Гоблін"];
+
+  const stored = (resultText: string, details: Record<string, unknown>) => ({ seq: 1, type: "ability", round: 1, actorId: null, targets: [], hpChanges: [], resultText, details });
+
+  it("з log клієнту віддається порожній resultText", () => {
+    expect(eventToBattleAction(stored("fallback | text", { log }), "b1").resultText).toBe("");
+  });
+
+  it("без log лишається legacy-рядок", () => {
+    expect(eventToBattleAction(stored("legacy", {}), "b1").resultText).toBe("legacy");
   });
 });
 

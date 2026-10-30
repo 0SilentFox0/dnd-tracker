@@ -4,7 +4,7 @@ import { useTranslations } from "next-intl";
 
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
-import { ABILITY_SCORES } from "@/lib/constants/abilities";
+import { ABILITY_SCORES, abilityScoreTermKey } from "@/lib/constants/abilities";
 import type { RaceFormData } from "@/types/races";
 
 interface RaceEditFormStatModifiersProps {
@@ -18,6 +18,8 @@ export function RaceEditFormStatModifiers({
 }: RaceEditFormStatModifiersProps) {
   const t = useTranslations("races");
 
+  const tg = useTranslations("gameTerms");
+
   return (
     <div className="border rounded-md p-3 space-y-4 max-h-96 overflow-y-auto">
       {ABILITY_SCORES.map((ability) => {
@@ -30,7 +32,7 @@ export function RaceEditFormStatModifiers({
             className="space-y-2 pb-3 border-b last:border-0"
           >
             <Label className="text-sm font-semibold mt-2">
-              {ability.label} ({ability.abbreviation})
+              {tg(abilityScoreTermKey(ability.key))} ({ability.abbreviation})
             </Label>
             <div className="space-y-2 pl-4">
               <div className="flex items-center space-x-2">

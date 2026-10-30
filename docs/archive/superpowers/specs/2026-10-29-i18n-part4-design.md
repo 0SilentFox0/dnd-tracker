@@ -1,6 +1,6 @@
 # i18n: частина 4 — середні домени
 
-Гілка `feat/i18n-part4` (worktree `../dnd-tracker-i18n4`) від main `0c4c11a7`. Базові правила — `docs/architecture/i18n.md`, порядок частин — `docs/superpowers/specs/2026-10-28-i18n-core-design.md`, зразок — `docs/archive/superpowers/specs/2026-10-28-i18n-part3-design.md` (рішення 1–9 частини 3 діють і тут).
+Гілка `feat/i18n-part4` (worktree `../dnd-tracker-i18n4`) від main `0c4c11a7`. Базові правила — `docs/architecture/i18n.md`, порядок частин — `docs/archive/superpowers/specs/2026-10-28-i18n-core-design.md`, зразок — `docs/archive/superpowers/specs/2026-10-28-i18n-part3-design.md` (рішення 1–9 частини 3 діють і тут).
 
 ## Мета і межі
 

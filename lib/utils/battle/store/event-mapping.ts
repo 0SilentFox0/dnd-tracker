@@ -1,6 +1,7 @@
 import type { NewBattleEvent, StoredBattleEvent } from "./types";
 
 import { DM_ACTOR, SYSTEM_ACTOR } from "@/lib/constants/battle";
+import { decodeLog } from "@/lib/utils/battle/log/codec";
 import { logFields } from "@/lib/utils/battle/log/lines";
 import type { BattleAction, BattleParticipant } from "@/types/battle";
 import type { LogLine } from "@/types/text";
@@ -78,6 +79,8 @@ export function eventToBattleAction(
 ): BattleAction {
   const d = (e.details ?? {}) as EventDetails;
 
+  const log = d.log && decodeLog(d.log);
+
   return {
     id: `${battleId}-${e.seq}`,
     battleId,
@@ -90,8 +93,8 @@ export function eventToBattleAction(
     actionType: e.type as BattleAction["actionType"],
     targets: e.targets as BattleAction["targets"],
     actionDetails: d.actionDetails ?? {},
-    resultText: e.resultText,
-    ...(d.log && { log: d.log }),
+    resultText: log ? "" : e.resultText,
+    ...(log && { log }),
     hpChanges: e.hpChanges as BattleAction["hpChanges"],
     isCancelled: Boolean(meta.cancelledAt),
   };

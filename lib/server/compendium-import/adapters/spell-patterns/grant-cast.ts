@@ -1,4 +1,3 @@
-/* eslint-disable no-restricted-syntax -- derived content written to the DB stays Ukrainian (spec part5, decision 5) */
 import type { SpellRecognizer } from "./index";
 
 import { durationRounds, spellRange } from "@/lib/utils/spells/derive/mechanics";
@@ -16,7 +15,7 @@ const WITHIN = /\bwithin (\d+) feet\b/i;
 
 const COSTS = { "bonus action": "bonusAction", action: "action", reaction: "reaction" } as const;
 
-export const grantSpellAttack: SpellRecognizer = ({ text, cast, ability, damageTypes }) => {
+export const grantSpellAttack: SpellRecognizer = ({ t, text, cast, ability, damageTypes }) => {
   const use = USE.exec(text);
 
   if (!use || ability) return null;
@@ -64,7 +63,7 @@ export const grantSpellAttack: SpellRecognizer = ({ text, cast, ability, damageT
         targeting: owner || hostRange === "self" ? { kind: "self" } : { kind: "ally", range: hostRange },
         resolution: { kind: "auto" },
         dice: 0,
-        spellEffects: [{ kind: "grantCast", label: "Атака заклинанням", cost: COSTS[use[2].toLowerCase() as keyof typeof COSTS], duration: { rounds: durationRounds(cast.facts.duration) }, ...(!owner && { target: "eventTarget" }), cast: inline }],
+        spellEffects: [{ kind: "grantCast", label: t("derived.spell.label.spellAttack"), cost: COSTS[use[2].toLowerCase() as keyof typeof COSTS], duration: { rounds: durationRounds(cast.facts.duration) }, ...(!owner && { target: "eventTarget" }), cast: inline }],
       },
     },
   };
@@ -76,7 +75,7 @@ const WEAPON_DAMAGE = /\bdeals? (\d+)d(4|6|8|10|12|20) ([a-z]+) damage on a hit\
 
 const BITE_HEAL = /\b(?:heals?|healing)\b[^.]{0,60}\bhit points\b/i;
 
-export const grantWeaponObject: SpellRecognizer = ({ text, cast, ability }) => {
+export const grantWeaponObject: SpellRecognizer = ({ t, text, cast, ability }) => {
   const weapon = WEAPON_OBJECT.exec(text);
 
   const dmg = weapon && WEAPON_DAMAGE.exec(text.slice(weapon.index));
@@ -104,7 +103,7 @@ export const grantWeaponObject: SpellRecognizer = ({ text, cast, ability }) => {
         targeting: { kind: "ally", range },
         resolution: { kind: "auto" },
         dice: 0,
-        spellEffects: [{ kind: "grantCast", label: "Удар предметом", cost: "action", duration: { rounds: durationRounds(cast.facts.duration) }, target: "eventTarget", cast: inline }],
+        spellEffects: [{ kind: "grantCast", label: t("derived.spell.label.objectStrike"), cost: "action", duration: { rounds: durationRounds(cast.facts.duration) }, target: "eventTarget", cast: inline }],
       },
     },
   };

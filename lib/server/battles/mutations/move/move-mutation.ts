@@ -4,13 +4,12 @@ import { mazeMove } from "./maze-move";
 import { resolveMover } from "./resolve-mover";
 
 import { API_ERRORS } from "@/lib/constants/api-errors";
-import { DEFAULT_HAZARD_LABEL } from "@/lib/constants/battle";
 import { moveSchema } from "@/lib/schemas/battles";
 import { findParticipant, isActive, replaceParticipant } from "@/lib/utils/abilities/engine/core/participants";
 import { resolveDowned } from "@/lib/utils/abilities/engine/core/run-abilities";
 import { releaseInvalidGrapples } from "@/lib/utils/battle/actions/grapple";
 import { resolveMovement5e } from "@/lib/utils/battle/actions/movement";
-import { canStand, cellKey, checkReturnToStart, frightenedBlocksMove, hazardHit, hazardOnMove, moveBudget, pathFrom, placeParticipants, searchPaths } from "@/lib/utils/battle/grid";
+import { canStand, cellKey, checkReturnToStart, frightenedBlocksMove, hazardHit, hazardLabel, hazardOnMove, moveBudget, pathFrom, placeParticipants, searchPaths } from "@/lib/utils/battle/grid";
 import { lineText, logFields } from "@/lib/utils/battle/log/lines";
 import { activeMapMode, type MapModeKey } from "@/lib/utils/battle/modes";
 import type { BattleMutationContext, MutationResult } from "@/lib/utils/battle/pipeline/run-battle-mutation";
@@ -171,7 +170,7 @@ function resolveHazardHit(
       actorSide: before.basicInfo.side,
       ...(moveText.log && { log: moveText.log }),
       actionDetails: {
-        hazard: { label: cell.label ?? DEFAULT_HAZARD_LABEL, damageType: cell.damage?.type ?? "", damage: hit.damage },
+        hazard: { label: hazardLabel(cell.label), damageType: cell.damage?.type ?? "", damage: hit.damage },
         damageRolls: [{ dice: cell.damage?.dice ?? String(cell.damage?.amount ?? 0), results: [], total: hit.damage, damageType: cell.damage?.type ?? "" }],
       },
     },

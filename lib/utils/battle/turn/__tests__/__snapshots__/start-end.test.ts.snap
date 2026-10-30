@@ -13,9 +13,10 @@ exports[`детермінований контракт початку ходу >
         },
       },
       {
-        "message": "$join",
+        "message": "abilityText.log.withChance",
         "params": {
-          "p0": {
+          "chance": 50,
+          "text": {
             "message": "abilityText.log.heal",
             "params": {
               "amount": 2,
@@ -23,13 +24,6 @@ exports[`детермінований контракт початку ходу >
               "target": "Тест",
             },
           },
-          "p1": {
-            "message": "abilityText.log.chanceSuffix",
-            "params": {
-              "chance": 50,
-            },
-          },
-          "separator": "",
         },
       },
     ],

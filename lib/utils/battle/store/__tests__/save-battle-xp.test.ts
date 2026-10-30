@@ -1,5 +1,7 @@
 import { describe, expect, it, vi } from "vitest";
 
+vi.unmock("@/lib/i18n/translator");
+
 import { BattleStatus, CombatStatus, ParticipantSide } from "@/lib/constants/battle";
 import { createMockParticipant } from "@/lib/utils/battle/__tests__/fixtures/mock-participant";
 import type { BattleDb } from "@/lib/utils/battle/store/load-battle";
@@ -65,6 +67,14 @@ describe("saveBattle: авто-досвід", () => {
     expect(tx.character.updateMany).toHaveBeenCalledWith({ where: { id: { in: ["ch-1", "ch-2"] } }, data: { experience: { increment: 225 } } });
     expect(tx.character.update).not.toHaveBeenCalled();
     expect(tx.characterLog.createMany).toHaveBeenCalledWith({ data: [expect.objectContaining({ characterId: "ch-1", kind: "xp", actorUserId: null, data: { amount: 225, total: 325, note: "Перемога в бою", battleId: "b1" } }), expect.objectContaining({ characterId: "ch-2", data: expect.objectContaining({ total: 225 }) })] });
+  });
+
+  it("нотатка журналу — мовою запиту", async () => {
+    const { db, tx } = fakeDb();
+
+    await saveBattle(db, loaded(ON, ps()), { participants: ps(), pending: [], events: [resultEvent("victory")], scene: COMPLETE }, { logLocale: "en" });
+
+    expect(tx.characterLog.createMany).toHaveBeenCalledWith({ data: [expect.objectContaining({ data: expect.objectContaining({ note: "Victory in battle" }) }), expect.anything()] });
   });
 
   it("поразка, вимкнене правило або бій не завершується — нічого", async () => {

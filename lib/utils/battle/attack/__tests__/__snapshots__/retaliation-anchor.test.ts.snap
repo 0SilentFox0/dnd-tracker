@@ -28,7 +28,6 @@ exports[`resolveRetaliation якір (байт-у-байт) > rng 0.05 1`] = `
         "message": "battleLog.offTurn.miss",
         "params": {
           "attacker": "d",
-          "crit": "",
           "d20": 2,
           "target": "a",
           "title": {
@@ -158,10 +157,8 @@ exports[`resolveRetaliation якір (байт-у-байт) > rng 0.85 1`] = `
         "message": "battleLog.offTurn.hit",
         "params": {
           "attacker": "d",
-          "crit": "",
           "d20": 18,
           "damage": 7,
-          "plainCrit": "",
           "target": "a",
           "title": {
             "message": "battleLog.offTurn.titles.retaliation",
@@ -323,7 +320,6 @@ exports[`resolveRetaliation якір (байт-у-байт) > rng 0.99 1`] = `
           },
           "d20": 20,
           "damage": 4,
-          "plainCrit": "",
           "target": "a",
           "title": {
             "message": "battleLog.offTurn.titles.retaliation",

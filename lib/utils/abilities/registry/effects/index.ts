@@ -32,10 +32,9 @@ import type { EffectApplyInput, EffectApplyResult } from "./types";
 
 import type { Translator } from "@/lib/i18n/translator";
 import { resolveTargetIds } from "@/lib/utils/abilities/engine/core/targets";
-import { logText } from "@/lib/utils/abilities/log-text";
 import type { Ability, Effect, EffectKind } from "@/lib/utils/abilities/schema";
 import { CONDITION_5E_KEYS, MANEUVERS } from "@/lib/utils/abilities/schema/kinds";
-import { joinSegments, seg, type Segment } from "@/lib/utils/abilities/segments";
+import { joinSegments, seg, type Segment, segmentsLine } from "@/lib/utils/abilities/segments";
 import { pickOne } from "@/lib/utils/common/dice";
 import { signed } from "@/lib/utils/common/format";
 import type { SpellEffect } from "@/lib/utils/spells/model/schema";
@@ -182,7 +181,7 @@ export function describeEffect(effect: Effect | SpellEffect): Segment[] {
   return def ? def.describe(effect as never) : [seg("summary.unknownEffect", { kind: String(effect.kind) })];
 }
 
-const describeEffectText = (effect: Effect | SpellEffect) => logText(describeEffect(effect));
+const describeEffectText = (effect: Effect | SpellEffect) => segmentsLine(describeEffect(effect));
 
 export { FLAG_FIELDS, FLAG_KEYS };
 

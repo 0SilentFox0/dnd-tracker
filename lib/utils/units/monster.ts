@@ -1,10 +1,11 @@
 import { type AbilityKey, isAbilityKey, SPELLCASTING_ABILITIES, type SpellcastingAbility } from "@/lib/constants/abilities";
 import { proficiencyForChallenge, xpForChallenge } from "@/lib/constants/challenge";
-import { MONSTER_SENSE_LABELS } from "@/lib/constants/monster";
+import { MONSTER_SENSE_KEYS } from "@/lib/constants/monster";
+import { dynamicTextRef, textRef } from "@/lib/i18n/text-ref";
 import { resolveAbilities } from "@/lib/utils/abilities/build/resolve";
 import { getAbilityModifier, getProficiencyBonus } from "@/lib/utils/common/calculations";
 import type { ResolvedAbility } from "@/types/abilities";
-import type { UnitSenseKind,UnitStatblock } from "@/types/units";
+import type { UnitStatblock } from "@/types/units";
 
 export function isMonster5e<T extends { cr?: number | null }>(u: T): u is T & { cr: number } {
   return u.cr !== null && u.cr !== undefined;
@@ -34,18 +35,17 @@ export function multiattackAbilities(unit: { id: string; name: string; multiatta
   if (extra < 1) return [];
 
   return resolveAbilities({ type: "unit", id: unit.id, name: unit.name }, [
-    // eslint-disable-next-line no-restricted-syntax -- default ability name stored as data (read by the battle log)
-    { id: "multiattack", name: `Мультиатака ×${extra + 1}`, trigger: { event: "passive" }, effects: [{ kind: "modifyStat", stat: "attacksPerAction", flat: extra }] },
+    { id: "multiattack", name: "multiattack", label: textRef("abilityText.derived.multiattack", { count: extra + 1 }), trigger: { event: "passive" }, effects: [{ kind: "modifyStat", stat: "attacksPerAction", flat: extra }] },
   ]);
 }
 
 export function monsterSenseAbilities(unit: { id: string; name: string; cr?: number | null }, senses: UnitStatblock["senses"]): ResolvedAbility[] {
   if (!isMonster5e(unit) || !senses) return [];
 
-  return resolveAbilities({ type: "unit", id: unit.id, name: unit.name }, (Object.keys(MONSTER_SENSE_LABELS) as UnitSenseKind[]).flatMap((sense) => {
+  return resolveAbilities({ type: "unit", id: unit.id, name: unit.name }, MONSTER_SENSE_KEYS.flatMap((sense) => {
     const range = senses[sense];
 
-    return typeof range === "number" && range > 0 ? [{ id: `sense-${sense}`, name: MONSTER_SENSE_LABELS[sense], trigger: { event: "passive" as const }, effects: [{ kind: "flag" as const, flag: "sense" as const, sense, range }] }] : [];
+    return typeof range === "number" && range > 0 ? [{ id: `sense-${sense}`, name: `sense-${sense}`, label: dynamicTextRef(`gameTerms.monster.senses.${sense}`), trigger: { event: "passive" as const }, effects: [{ kind: "flag" as const, flag: "sense" as const, sense, range }] }] : [];
   }));
 }
 

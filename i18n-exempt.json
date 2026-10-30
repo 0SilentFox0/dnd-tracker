@@ -1,11 +1,38 @@
 [
-  "scripts/**",
-  "tests/**",
-  "data/**",
-  "prisma/**",
-  "lib/utils/characters/generate/**",
-  "lib/constants/import-aliases.ts",
-  "vitest-setup.ts",
-  "eslint/**",
-  "*.config.*"
+  {
+    "glob": "scripts/**",
+    "reason": "ops scripts print developer/operator output, not product UI"
+  },
+  {
+    "glob": "tests/**",
+    "reason": "test fixtures use uk sample data"
+  },
+  {
+    "glob": "data/**",
+    "reason": "seed/library content authored in Ukrainian"
+  },
+  {
+    "glob": "prisma/**",
+    "reason": "seed and migration data"
+  },
+  {
+    "glob": "lib/utils/characters/generate/*.uk.ts",
+    "reason": "uk tables of the hero generator (names, backstory, archetype classes), selected by locale"
+  },
+  {
+    "glob": "lib/constants/import-aliases.ts",
+    "reason": "uk aliases matched when importing content"
+  },
+  {
+    "glob": "vitest-setup.ts",
+    "reason": "test setup mocks with uk strings"
+  },
+  {
+    "glob": "eslint/**",
+    "reason": "lint rule sources and their tests"
+  },
+  {
+    "glob": "*.config.*",
+    "reason": "tool configs"
+  }
 ]

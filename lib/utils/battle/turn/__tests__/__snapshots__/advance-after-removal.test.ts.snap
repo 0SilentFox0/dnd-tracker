@@ -9,7 +9,7 @@ exports[`removal зберігає death-save event, participants, turn/round і 
         "actionIndex": 0,
         "actionType": "ability",
         "actorId": "system",
-        "actorName": "Система",
+        "actorName": "",
         "actorSide": "ally",
         "battleId": "b1",
         "hpChanges": [],

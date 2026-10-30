@@ -3,7 +3,7 @@ import { useRouter } from "next/navigation";
 import { useLocale, useTranslations } from "next-intl";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 
-import { avatarStep, backgroundStep, EMPTY_DRAFT, type RollKey, scoresOf, scoreSteps, standardScores } from "./draft-form-helpers";
+import { avatarStep, backgroundStep, emptyDraft, type RollKey, scoresOf, scoreSteps, standardScores } from "./draft-form-helpers";
 import { characterKeys } from "./keys";
 import { useDraftAi } from "./useDraftAi";
 import { draftPortraitsQuery, useDraftPortraits } from "./useDraftPortraits";
@@ -22,8 +22,8 @@ import type { ChoiceRefs } from "@/lib/utils/characters/choices/walk";
 import { classModeOf } from "@/lib/utils/characters/classes";
 import {
   type AbilityMethod,
-  ARCHETYPE_CLASS,
   ARCHETYPE_PRIMARY,
+  archetypeClasses,
   assignByPriority,
   assignStandardArray,
   classPrimaryAbilities,
@@ -67,7 +67,7 @@ export function usePlayerDraftForm({ campaignId, characterId, initial }: PlayerD
 
   const raceNames = useMemo(() => (raceList ?? []).map((r) => r.name), [raceList]);
 
-  const [values, setValues] = useState<DraftInput>(typeof initial === "object" ? initial : EMPTY_DRAFT);
+  const [values, setValues] = useState<DraftInput>(typeof initial === "object" ? initial : emptyDraft(locale));
 
   const reveal = useRollReveal<RollKey>();
 
@@ -140,7 +140,7 @@ export function usePlayerDraftForm({ campaignId, characterId, initial }: PlayerD
       raceStep(g.race),
       ...(portrait ? [avatarStep(portrait, pool)] : []),
       ...(classBased ? [] : [{ key: "archetype" as const, pool: () => tArchetype(`${pick(Math.random, HERO_ARCHETYPE_KEYS)}.name`), final: tArchetype(`${g.archetype}.name`) }]),
-      { key: "class", pool: () => (classBased ? pick(Math.random, classMode.classes).name : ARCHETYPE_CLASS[pick(Math.random, HERO_ARCHETYPE_KEYS)]), final: g.class },
+      { key: "class", pool: () => (classBased ? pick(Math.random, classMode.classes).name : archetypeClasses(locale)[pick(Math.random, HERO_ARCHETYPE_KEYS)]), final: g.class },
       { key: "alignment", pool: () => pick(Math.random, ALIGNMENTS), final: g.alignment },
       nameStep(g.name, g.race),
       ...scoreSteps(g.scores),

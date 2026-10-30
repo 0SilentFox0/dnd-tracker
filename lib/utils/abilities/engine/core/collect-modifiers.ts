@@ -3,6 +3,7 @@ import { staticEffectStrength } from "./effect-strength";
 import { findParticipant, isActive, isDormant, isEscaped, resolvedAbilitiesOf } from "./participants";
 
 import { textRef } from "@/lib/i18n/text-ref";
+import { abilityLabel } from "@/lib/utils/abilities/build/resolve";
 import { legacyActiveEffectModifiers } from "@/lib/utils/abilities/engine/effects/legacy-active-effects";
 import { countMarks } from "@/lib/utils/abilities/engine/effects/marks";
 import { liveActiveEffects } from "@/lib/utils/abilities/engine/effects/zone-effects";
@@ -28,7 +29,7 @@ export interface ModifierEntry {
   flag?: FlagEffect;
   icon?: string | null;
   /** назва вміння, раси, артефакту чи ефекту, що дав модифікатор */
-  source?: string;
+  source?: LogLine;
   condition?: string;
 }
 
@@ -167,7 +168,7 @@ export function collectModifiers(
         for (const effect of ability.effects) {
           if (!isStaticEffect(effect) || !appliesTo(effect.target, source, subject)) continue;
 
-          const entry = entryOf(effect, source, { label: ability.name, sourceType: ability.source.type, icon: ability.source.icon, source: ability.source.name });
+          const entry = entryOf(effect, source, { label: abilityLabel(ability), sourceType: ability.source.type, icon: ability.source.icon, source: ability.source.label ?? ability.source.name });
 
           if (!entry) continue;
 

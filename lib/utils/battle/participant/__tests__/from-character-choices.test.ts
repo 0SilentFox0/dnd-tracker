@@ -73,8 +73,8 @@ describe("participant from choices", () => {
     const p = await build({ raceChoices: { "elven-lineage": [{ id: "drow" }] } }, DEFAULT_RULES, race);
 
     expect(p.spellcasting.knownSpells).toContain("sp-dancing");
-    expect(p.spellcasting.grants).toEqual([{ spellId: "sp-dancing", key: "race:race-elf:elven-lineage:drow:sp-dancing", label: "Лінія: Drow", via: "slotOrGrant", pool: "pool:grant:race:race-elf:elven-lineage:drow:sp-dancing", cost: 1, castLevel: 1 }]);
-    expect(p.battleData.pools?.["pool:grant:race:race-elf:elven-lineage:drow:sp-dancing"]).toEqual({ label: "Лінія: Drow", max: 1, rest: "long" });
+    expect(p.spellcasting.grants).toEqual([{ spellId: "sp-dancing", key: "race:race-elf:elven-lineage:drow:sp-dancing", label: { message: "characterProfile.sheet.spellOrigin.lineage", params: { name: "Drow" } }, via: "slotOrGrant", pool: "pool:grant:race:race-elf:elven-lineage:drow:sp-dancing", cost: 1, castLevel: 1 }]);
+    expect(p.battleData.pools?.["pool:grant:race:race-elf:elven-lineage:drow:sp-dancing"]).toEqual({ label: "Drow", max: 1, rest: "long" });
   });
 
   it("two breath shapes share one proficiency pool and use Constitution", async () => {

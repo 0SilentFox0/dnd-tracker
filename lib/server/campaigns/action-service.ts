@@ -257,7 +257,7 @@ const createdResult = (
 });
 
 async function createFromSource(run: CampaignRun, operation: "create" | "clone"): Promise<ActionResult> {
-  const { actor, input, loaded } = run;
+  const { actor, input, loaded, locale } = run;
 
   const creation = operation === "create" ? parseInput(createCampaignSchema, input) : undefined;
 
@@ -266,7 +266,7 @@ async function createFromSource(run: CampaignRun, operation: "create" | "clone")
   const created = await createCampaignForUser(
     actor.userId,
     { ...data, ...(creation && { maxLevel: creation.maxLevel, allowPlayerEdit: creation.allowPlayerEdit, critChoiceByDm: creation.critChoiceByDm }) },
-    { source: loaded.source ?? undefined, defer: afterContentCommit },
+    { source: loaded.source ?? undefined, defer: afterContentCommit, locale },
   );
 
   if (!created.ok) throw new ContentError(API_ERRORS.ASSISTANT_TEMPLATE_UNAVAILABLE, created.status);

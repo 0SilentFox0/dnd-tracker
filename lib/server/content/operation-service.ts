@@ -99,7 +99,7 @@ export async function runContentOperation(operationId: ContentOperationId, actor
       case "rules.update": return updateCampaignRules(actor, bodyOf("rules.update", body));
       case "rules.condition-usage": return readCustomConditionUsage(actor, param("slug"));
       case "campaign.export": return exportCampaign(prisma, actor.campaignId);
-      case "source.diff": return getSourceDiff(actor, CONTENT_OPERATIONS["source.diff"].query.parse(input.query ?? {}).scope);
+      case "source.diff": return getSourceDiff(actor, CONTENT_OPERATIONS["source.diff"].query.parse(input.query ?? {}).scope, locale);
       case "source.apply": return applySource(actor, bodyOf("source.apply", body));
       case "skill-trees.list": return listSkillTrees(actor);
       case "skill-trees.save": return saveSkillTree(actor, { ...bodyOf("skill-trees.save", body), ...(input.treeId ? { treeId: String(input.treeId) } : {}) });

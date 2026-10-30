@@ -26,7 +26,7 @@
   },
   "roles": {
     "dm": "DM",
-    "player": "Player"
+    "player": "Гравець"
   },
   "join": {
     "trigger": "Приєднатися до кампанії",

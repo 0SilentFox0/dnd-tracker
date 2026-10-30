@@ -1,6 +1,5 @@
 // Утиліти для розрахунків D&D
 
-import { ABILITY_LABELS } from "@/lib/constants/abilities";
 import { AttackType } from "@/lib/constants/battle";
 import { DEFAULT_RULES, proficiencyForLevel, type Ruleset } from "@/lib/utils/rules";
 import type { AbilityKey } from "@/types/characters";
@@ -55,12 +54,6 @@ type AttackAbilities = { strength: number; dexterity: number; primaryAbility?: A
 
 export function attackAbilityKey(abilities: { primaryAbility?: AbilityKey | null }, attackType: AttackType | string): AbilityKey {
   return abilities.primaryAbility ?? (attackType === AttackType.MELEE ? "strength" : "dexterity");
-}
-
-export function attackAbilityLabel(abilities: { primaryAbility?: AbilityKey | null }, attackType: AttackType | string): string {
-  const key = attackAbilityKey(abilities, attackType);
-
-  return ABILITY_LABELS[key];
 }
 
 export function getAttackAbilityModifier(abilities: AttackAbilities, attackType: AttackType | string): number {

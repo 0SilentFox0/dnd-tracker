@@ -5,13 +5,13 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import { createWrapper } from "@/components/onboarding/__tests__/onboarding-test-utils";
 import * as api from "@/lib/api/onboarding";
 import { useCampaignOnboarding, useMarkPlayerSheetSeen, useOnboardingFlags, useOnboardingHint, useWhatsNew } from "@/lib/hooks/onboarding";
-import { WHATS_NEW } from "@/lib/onboarding/whats-new";
+import { WHATS_NEW_SHOWN } from "@/lib/onboarding/whats-new";
 
 vi.mock("@/lib/api/onboarding", async () => (await import("@/components/onboarding/__tests__/onboarding-test-utils")).onboardingApiMock());
 
 beforeEach(() => {
   vi.clearAllMocks();
-  vi.mocked(api.getOnboardingFlags).mockResolvedValue({ flags: { "whats-new": WHATS_NEW[WHATS_NEW.length - 1].id }, audiences: ["dm", "player"] });
+  vi.mocked(api.getOnboardingFlags).mockResolvedValue({ flags: { "whats-new": WHATS_NEW_SHOWN[WHATS_NEW_SHOWN.length - 1].id }, audiences: ["dm", "player"] });
 });
 
 describe("useOnboardingHint", () => {
@@ -40,11 +40,11 @@ describe("useWhatsNew", () => {
   it("непобачені → markSeen ставить найновіший id", async () => {
     const { result } = renderHook(() => useWhatsNew(), { wrapper: createWrapper() });
 
-    await waitFor(() => expect(result.current.unseen.length).toBe(WHATS_NEW.length - 1));
+    await waitFor(() => expect(result.current.unseen.length).toBe(WHATS_NEW_SHOWN.length - 1));
     act(() => result.current.markSeen());
 
     await waitFor(() => expect(result.current.unseen).toEqual([]));
-    expect(vi.mocked(api.setOnboardingFlag).mock.calls[0][0]).toEqual({ key: "whats-new", value: WHATS_NEW[0].id });
+    expect(vi.mocked(api.setOnboardingFlag).mock.calls[0][0]).toEqual({ key: "whats-new", value: WHATS_NEW_SHOWN[0].id });
   });
 });
 

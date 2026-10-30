@@ -49,6 +49,11 @@ describe("cyrillic ratchet", () => {
     expect(await cyrillicErrors("lib/constants/import-aliases.ts", literal)).toHaveLength(0);
   });
 
+  it("exempts only the uk tables of the hero generator", async () => {
+    expect(await cyrillicErrors("lib/utils/characters/generate/names.uk.ts", literal)).toHaveLength(0);
+    expect(await cyrillicErrors("lib/utils/characters/generate/generate-character.ts", literal)).toHaveLength(1);
+  });
+
   it("ignores __tests__ in migrated directories", async () => {
     expect(await cyrillicErrors("components/auth/__tests__/x.tsx", jsx)).toHaveLength(0);
   });

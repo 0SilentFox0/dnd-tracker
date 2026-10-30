@@ -1,7 +1,7 @@
 import type { Prisma } from "@prisma/client";
 
 import "server-only";
-import { AI_LIMITS, type AiProvider, type AiThreadMode, DEFAULT_THREAD_TITLE, defaultModelFor, isKnownModel } from "@/lib/constants/ai";
+import { AI_LIMITS, type AiProvider, type AiThreadMode, defaultModelFor, isKnownModel } from "@/lib/constants/ai";
 import { prisma } from "@/lib/db";
 import type { AiChatMessage, AiMessageMetadata, AiThread, AiUsage } from "@/types/ai";
 
@@ -32,7 +32,7 @@ export async function resolveDefaultModel(userId: string, provider: AiProvider, 
 export async function createThread(campaignId: string, userId: string, input: { mode: AiThreadMode; scenarioPageId?: string | null; provider: AiProvider; model?: string }): Promise<AiThread> {
   const model = input.model ?? (await resolveDefaultModel(userId, input.provider, input.mode));
 
-  const row = await prisma.aiThread.create({ data: { campaignId, userId, mode: input.mode, scenarioPageId: input.scenarioPageId ?? null, provider: input.provider, model, title: DEFAULT_THREAD_TITLE }, select: SELECT });
+  const row = await prisma.aiThread.create({ data: { campaignId, userId, mode: input.mode, scenarioPageId: input.scenarioPageId ?? null, provider: input.provider, model, title: "" }, select: SELECT });
 
   return toThread(row);
 }

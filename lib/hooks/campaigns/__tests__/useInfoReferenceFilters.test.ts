@@ -3,7 +3,7 @@ import { act, renderHook } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
 
 import { useInfoReferenceFilters } from "@/lib/hooks/campaigns/useInfoReferenceFilters";
-import type { ArtifactForReference, ClassForReference } from "@/types/info-reference";
+import type { ArtifactForReference, ClassForReference, SpellForReference } from "@/types/info-reference";
 
 const art = (over: Partial<ArtifactForReference>): ArtifactForReference => ({
   id: "x",
@@ -75,5 +75,36 @@ describe("useInfoReferenceFilters: класи", () => {
 
     expect(result.current.filters.classMode).toBe(false);
     expect(result.current.filters.visible).toMatchObject({ skills: true, classes: false });
+  });
+});
+
+describe("useInfoReferenceFilters: заклинання", () => {
+  const spell = (id: string, over: Partial<SpellForReference>): SpellForReference => ({
+    id,
+    name: id,
+    level: 1,
+    targeting: { kind: "enemy" },
+    facetKey: "enemy",
+    cost: "action",
+    resolution: { kind: "auto" },
+    dice: 0,
+    description: null,
+    effects: [],
+    appearanceDescription: null,
+    groupName: null,
+    icon: null,
+    ...over,
+  });
+
+  const spells = [spell("a", {}), spell("b", {}), spell("c", { targeting: { kind: "allAllies" }, facetKey: "allAllies" })];
+
+  it("групує цілі за facetKey і фільтрує за ним", () => {
+    const { result } = renderHook(() => useInfoReferenceFilters([], spells));
+
+    expect(result.current.filters.spell.type.options.map((o) => o.value).sort()).toEqual(["allAllies", "enemy"]);
+
+    act(() => result.current.filters.spell.type.set("enemy"));
+
+    expect(result.current.results.filteredSpells.map((s) => s.id)).toEqual(["a", "b"]);
   });
 });

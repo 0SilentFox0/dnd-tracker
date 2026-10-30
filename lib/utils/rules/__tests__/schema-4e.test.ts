@@ -24,6 +24,6 @@ describe("rules.encounters", () => {
   });
 
   it("is a registered mechanic", () => {
-    expect(MECHANIC_REGISTRY.encounters.label).toBe("Зустрічі");
+    expect(MECHANIC_REGISTRY.encounters).toBe(true);
   });
 });

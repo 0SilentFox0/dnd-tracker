@@ -1,5 +1,7 @@
 import type { Namespace } from "./config";
 
+export const ROOT_NAMESPACES = ["common", "validation", "whatsNew", "gameTerms"] as const satisfies readonly Namespace[];
+
 export const CAMPAIGN_NAMESPACES = [
   "common",
   "validation",

@@ -27,7 +27,7 @@ describe("editor helpers", () => {
       for (const kind of allowedEffectKinds(trigger)) {
         if (kind === "summon") continue;
 
-        const a = { id: "a", name: "Т", trigger, effects: [newEffect(kind, trigger)] };
+        const a = { id: "a", name: "Т", trigger, effects: [newEffect(kind, trigger, "note")] };
 
         expect(AbilitySchema.safeParse(a).success, `${event}/${kind}`).toBe(true);
       }

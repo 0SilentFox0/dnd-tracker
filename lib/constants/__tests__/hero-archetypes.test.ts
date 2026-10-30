@@ -4,8 +4,8 @@ import { heroArchetype } from "@/lib/constants/hero-archetypes";
 
 describe("heroArchetype", () => {
   it("null і невідоме — Універсал 10/1/1/1", () => {
-    expect(heroArchetype(null)).toMatchObject({ name: "Універсал", hpPerLevel: 10, melee: 1, ranged: 1, magic: 1 });
-    expect(heroArchetype("x").name).toBe("Універсал");
+    expect(heroArchetype(null)).toMatchObject({ key: null, hpPerLevel: 10, melee: 1, ranged: 1, magic: 1 });
+    expect(heroArchetype("x").key).toBeNull();
   });
 
   it("значення зі спеки", () => {

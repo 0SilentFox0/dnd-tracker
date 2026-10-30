@@ -7,6 +7,7 @@ import { guardTurnOrder } from "./turn-order-guard";
 
 import { API_ERRORS } from "@/lib/constants/api-errors";
 import { BattleStatus } from "@/lib/constants/battle";
+import type { Locale } from "@/lib/i18n/config";
 import type { Rng } from "@/lib/utils/abilities/engine/core/types";
 import { syncMapAuras } from "@/lib/utils/abilities/engine/effects/map-auras";
 import type { BATTLE_RATE_LIMITS, RateLimitResult } from "@/lib/utils/api/rate-limit";
@@ -26,6 +27,7 @@ import type {
   BattleMeta,
   BattleMutationOutcome,
   BattleSceneState,
+  BattleWrite,
   LoadedBattle,
 } from "@/lib/utils/battle/store";
 import {
@@ -70,7 +72,7 @@ export interface PipelineDeps {
   getUserId(): Promise<string | null>;
   rateLimit(input: { userId: string; scope: keyof typeof BATTLE_RATE_LIMITS; battleId: string }): Promise<RateLimitResult>;
   loadBattle(args: { battleId: string; campaignId: string; userId: string }): Promise<(LoadedBattle & { isMember: boolean }) | null>;
-  saveBattle(before: LoadedBattle, outcome: BattleMutationOutcome): Promise<BattleDelta>;
+  saveBattle(before: LoadedBattle, outcome: BattleMutationOutcome, write?: BattleWrite): Promise<BattleDelta>;
   publish(messages: PusherMessage[]): void;
   onLeftActive?(campaignId: string, battleId: string): void;
   loadRecentEvents(battleId: string, limit: number): Promise<BattleAction[]>;
@@ -78,6 +80,7 @@ export interface PipelineDeps {
   withWrite?<T>(campaignId: string, callback: () => Promise<T>): Promise<T>;
   recheckAccess?(args: { battleId: string; campaignId: string; userId: string }): Promise<{ isMember: boolean; isDM: boolean } | null>;
   rng?: Rng;
+  logLocale?(): Promise<Locale>;
 }
 
 export interface RunBattleMutationOptions<TBody> {
@@ -221,6 +224,7 @@ export async function runGuardedBattleOperationCore<TBody>(
   expectedVersion: number | undefined,
   options: RunBattleMutationOptions<TBody>,
   deps: PipelineDeps,
+  write?: BattleWrite,
 ): Promise<BattleOperationOutcome> {
   const { id: campaignId, battleId } = options.params;
 
@@ -267,7 +271,7 @@ export async function runGuardedBattleOperationCore<TBody>(
 
   if (!access?.isMember || access.isDM !== loaded.isDM) throw new BattleAccessError(403, API_ERRORS.FORBIDDEN);
 
-  const delta = await deps.saveBattle(loaded, result);
+  const delta = await deps.saveBattle(loaded, result, write);
 
   const { map: _map, ...scenePatch } = result.scene ?? {};
 

@@ -1,4 +1,3 @@
-/* eslint-disable no-restricted-syntax -- DND_SKILL_META.label feeds the character sheet payload; UI elsewhere reads gameTerms.dndSkills keys */
 import { CORE_ABILITY_SCORES } from "./abilities";
 
 export const DND_SKILLS = [
@@ -37,25 +36,25 @@ export const DND_SAVING_THROWS = [
 
 export type DndSkill = (typeof DND_SKILLS)[number];
 
-export const DND_SKILL_META: Record<DndSkill, { label: string; ability: "strength" | "dexterity" | "intelligence" | "wisdom" | "charisma" }> = {
-  acrobatics: { label: "Акробатика", ability: "dexterity" },
-  animalHandling: { label: "Поводження з тваринами", ability: "wisdom" },
-  arcana: { label: "Магія", ability: "intelligence" },
-  athletics: { label: "Атлетика", ability: "strength" },
-  deception: { label: "Обман", ability: "charisma" },
-  history: { label: "Історія", ability: "intelligence" },
-  insight: { label: "Проникливість", ability: "wisdom" },
-  intimidation: { label: "Залякування", ability: "charisma" },
-  investigation: { label: "Розслідування", ability: "intelligence" },
-  medicine: { label: "Медицина", ability: "wisdom" },
-  nature: { label: "Природа", ability: "intelligence" },
-  perception: { label: "Сприйняття", ability: "wisdom" },
-  performance: { label: "Виступ", ability: "charisma" },
-  persuasion: { label: "Переконання", ability: "charisma" },
-  religion: { label: "Релігія", ability: "intelligence" },
-  sleightOfHand: { label: "Спритність рук", ability: "dexterity" },
-  stealth: { label: "Скритність", ability: "dexterity" },
-  survival: { label: "Виживання", ability: "wisdom" },
+export const DND_SKILL_META: Record<DndSkill, { ability: "strength" | "dexterity" | "intelligence" | "wisdom" | "charisma" }> = {
+  acrobatics: { ability: "dexterity" },
+  animalHandling: { ability: "wisdom" },
+  arcana: { ability: "intelligence" },
+  athletics: { ability: "strength" },
+  deception: { ability: "charisma" },
+  history: { ability: "intelligence" },
+  insight: { ability: "wisdom" },
+  intimidation: { ability: "charisma" },
+  investigation: { ability: "intelligence" },
+  medicine: { ability: "wisdom" },
+  nature: { ability: "intelligence" },
+  perception: { ability: "wisdom" },
+  performance: { ability: "charisma" },
+  persuasion: { ability: "charisma" },
+  religion: { ability: "intelligence" },
+  sleightOfHand: { ability: "dexterity" },
+  stealth: { ability: "dexterity" },
+  survival: { ability: "wisdom" },
 };
 
 export const SKILL_NAME_MAX = 100;

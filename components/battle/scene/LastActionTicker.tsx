@@ -5,6 +5,7 @@ import { useTranslations } from "next-intl";
 
 import { Portrait } from "@/components/battle/hud";
 import { useBattleSceneData } from "@/lib/hooks/battle";
+import { useServiceActorName } from "@/lib/i18n/use-service-actor-name";
 import { useTranslator } from "@/lib/i18n/use-translator";
 import { formatBattleLog } from "@/lib/utils/battle/log/lines";
 import { lastAction } from "@/lib/utils/battle/view";
@@ -14,6 +15,8 @@ export const LastActionTicker = memo(function LastActionTicker({ onOpenLog }: { 
   const t = useTranslator();
 
   const ts = useTranslations("battle.scene");
+
+  const serviceActorName = useServiceActorName();
 
   const { battle } = useBattleSceneData();
 
@@ -32,7 +35,7 @@ export const LastActionTicker = memo(function LastActionTicker({ onOpenLog }: { 
   return (
     <button type="button" onClick={onOpenLog} className="mx-4 flex h-10 w-[calc(100%-2rem)] items-center gap-2 border-y border-white/10 text-left text-sm text-[#d9cfbd]">
       {actor && <Portrait participant={actor} size={24} />}
-      <span className="max-w-[45%] shrink-0 truncate">{last.actorName}</span>
+      <span className="max-w-[45%] shrink-0 truncate">{actor?.basicInfo.name ?? serviceActorName(last.actorId) ?? last.actorName}</span>
       {target && <><span className="text-[var(--hud-muted)]">→</span><Portrait participant={target} size={24} /><span className="truncate">{target.basicInfo.name}</span></>}
       {change !== 0 && <b className={change > 0 ? "text-[#e9a08f]" : "text-[#8fd07a]"}>{signedDelta(-change)}</b>}
       {!target && change === 0 && <span className="min-w-0 truncate text-[var(--hud-muted)]">{formatBattleLog(t, last)}</span>}

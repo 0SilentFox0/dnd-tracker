@@ -1,12 +1,13 @@
 // @vitest-environment happy-dom
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { cleanup, screen } from "@testing-library/react";
+import { cleanup, render as rtlRender, screen } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
 import { TravelLog } from "../TravelLog";
 
 import { render } from "@/components/ui/__tests__/uk-intl";
 import * as api from "@/lib/api/world";
+import { IntlWrapper } from "@/lib/i18n/test/intl-wrapper";
 import type { TravelKind, WorldTravelEntry } from "@/types/world";
 
 vi.unmock("next-intl");
@@ -48,5 +49,32 @@ describe("TravelLog", () => {
     expect(screen.getByText("Aria")).toBeTruthy();
     expect(screen.queryByText("Town")).toBeNull();
     expect(screen.queryByText("Map")).toBeNull();
+  });
+
+  it("formats the same instant in the provider time zone", async () => {
+    vi.mocked(api.getTravelLog).mockResolvedValue([{ ...entry("z", "travel"), createdAt: "2026-07-01T12:00:00.000Z" }]);
+
+    const hourIn = async (timeZone: string) => {
+      rtlRender(
+        <IntlWrapper timeZone={timeZone}>
+          <QueryClientProvider client={new QueryClient({ defaultOptions: { queries: { retry: false } } })}>
+            <TravelLog campaignId="c1" />
+          </QueryClientProvider>
+        </IntlWrapper>,
+      );
+
+      const text = (await screen.findByText(/\d{2}:\d{2}/)).textContent;
+
+      cleanup();
+
+      return text;
+    };
+
+    const kyiv = await hourIn("Europe/Kyiv");
+
+    const newYork = await hourIn("America/New_York");
+
+    expect(kyiv).toContain("15:00");
+    expect(newYork).toContain("08:00");
   });
 });

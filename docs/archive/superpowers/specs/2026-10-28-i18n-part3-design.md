@@ -1,6 +1,6 @@
 # i18n: частина 3 — малі CRUD-домени
 
-Гілка `feat/i18n-part3` (worktree `../dnd-tracker-i18n3`) від main `4b78f3c7`. Базові правила — `docs/architecture/i18n.md` («Межі коду», «Як перенести домен»), порядок частин — `docs/superpowers/specs/2026-10-28-i18n-core-design.md`.
+Гілка `feat/i18n-part3` (worktree `../dnd-tracker-i18n3`) від main `4b78f3c7`. Базові правила — `docs/architecture/i18n.md` («Межі коду», «Як перенести домен»), порядок частин — `docs/archive/superpowers/specs/2026-10-28-i18n-core-design.md`.
 
 ## Мета і межі
 

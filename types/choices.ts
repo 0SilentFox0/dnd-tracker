@@ -3,7 +3,7 @@ import type { CHOICE_KINDS, FEAT_TYPES } from "@/lib/constants/choices";
 import type { DndSkill } from "@/lib/constants/skills";
 import type { Ability } from "@/types/abilities";
 import type { CharacterClassEntry } from "@/types/classes";
-import type { TextRef } from "@/types/text";
+import type { LogLine, TextRef } from "@/types/text";
 
 export type { TextRef };
 
@@ -26,7 +26,7 @@ export interface SpellGrantPolicy {
 
 export interface SelectedSpellGrant {
   spellId: string;
-  label: string;
+  label: LogLine;
   sourceKey: string;
   grantPolicy: SpellGrantPolicy;
 }

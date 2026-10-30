@@ -20,7 +20,7 @@ export function withInlineDefinition(spell: CastableSpell, grant: SpellGrant): C
 
   return {
     ...spell,
-    name: grant.label ?? spell.name,
+    name: typeof grant.label === "string" ? grant.label : spell.name,
     level: 0,
     definition: { executionMode: "native", dice, cost: grant.castCost ?? "action", targeting, resolution, effects, raceModifiers: [], fixedDice: true, ...(dieSides && { dieSides }), ...(addAbilityMod && { addAbilityMod }), ...(damageBonus !== undefined && { damageBonus }), ...(perObjectFeet && { perObjectFeet }) },
   };
