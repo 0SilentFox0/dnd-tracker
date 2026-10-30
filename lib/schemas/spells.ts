@@ -4,7 +4,7 @@ import { SPELL_GROUP_ICON_KEYS } from "@/lib/constants/spell-groups";
 import { SPELL_NAME_MAX } from "@/lib/constants/spells";
 import { SpellListsSchema } from "@/lib/schemas/choices";
 import { hexColorSchema } from "@/lib/schemas/common";
-import { ComponentFlagsSchema, ingredientsRequireMaterial, SpellIngredientsSchema } from "@/lib/schemas/spell-ingredients";
+import { ComponentFlagsSchema, ingredientsConflictWithFlags, ingredientsRequireMaterial, SpellIngredientsSchema } from "@/lib/schemas/spell-ingredients";
 import { SpellFxSchema } from "@/lib/utils/battle/fx/spell-fx-schema";
 import { RaceModifierSchema, SpellCastingTimeSchema, SpellCostSchema, SpellDiceSchema, SpellDieSidesSchema, SpellEffectSchema, SpellResolutionSchema, SpellTargetingSchema } from "@/lib/utils/spells/model/schema";
 
@@ -70,7 +70,7 @@ export const createSpellSchema = z.object({
 
 export type CreateSpellInput = z.infer<typeof createSpellSchema>;
 
-export const updateSpellSchema = z.object(spellFields).partial().refine(ingredientsRequireMaterial, ingredientsIssue);
+export const updateSpellSchema = z.object(spellFields).partial().refine(ingredientsConflictWithFlags, ingredientsIssue);
 
 export type UpdateSpellInput = z.infer<typeof updateSpellSchema>;
 
