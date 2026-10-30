@@ -18,6 +18,7 @@
 
 ## Поза обсягом
 
+- Дані SRD (`scripts/srd/`, заповнення `ingredients`/`componentFlags`, пресет правил) і ритуали (`ritual`): сесія `feat/srd-completeness` після мерджу цієї схеми. Розбір тексту `parseMaterialText` лишається в нашому коді як чиста функція.
 - Каст поза боєм, ритуали, світова карта.
 - Масштабування інгредієнтів з upcast (кількість і вартість фіксовані; рідкісні винятки правляться вручну).
 - Окремі предмети-фокуси й сумки в інвентарі, вага, магазин/купівля з UI.
@@ -59,7 +60,7 @@ ComponentFlags = { v: boolean, s: boolean, m: boolean }
 - Zod-refine: непорожні `ingredients` вимагають `componentFlags.m === true`; ключ інгредієнта `ingredientKey(name)` (slug, нижній регістр) унікальний у межах заклинання.
 - Міграція expand-only: `ALTER TABLE spells ADD COLUMN` ×2 (Json з default/nullable), нових таблиць немає, тож RLS не потрібен. Старі рядки отримують `[]` / `null`, нічого не мігрується.
 - Поширення: поля потрапляють у `spellFields` (`lib/schemas/spells.ts`); бандл, sync-хеші, OpenAPI/MCP і CRUD беруть їх автоматично. Спостереження: після оновлення SRD-шаблону DM побачить diff по заклинаннях з інгредієнтами (очікувано).
-- Імпорт: 5etools-адаптер мапить `components.m` (`text`, `cost` у мідних, `consume`) у `ingredients` + `componentFlags`; `components` лишається текстом. SRD-шаблон: скрипт збірки розбирає `M (… worth 50+ GP, which the spell consumes)` з `description` (188 із 498 мають M; 57 — із вартістю) у структуру; випадки з кількома предметами в одній дужці (Astral Projection) йдуть у `ingredients` за списком або, якщо розбір неоднозначний, лишаються текстом без відстеження (перелік у `coverage` як manual). Кожне правило розбору — з позитивним і негативним тестом, як у `spell-patterns/`.
+- Імпорт: 5etools-адаптер мапить `components.m` (`text`, `cost` у мідних, `consume`) у `ingredients` + `componentFlags`; `components` лишається текстом. SRD-шаблон (заповнює feat/srd-completeness; нижче — орієнтир): скрипт збірки розбирає `M (… worth 50+ GP, which the spell consumes)` з `description` (188 із 498 мають M; 57 — із вартістю) у структуру; випадки з кількома предметами в одній дужці (Astral Projection) йдуть у `ingredients` за списком або, якщо розбір неоднозначний, лишаються текстом без відстеження (перелік у `coverage` як manual). Кожне правило розбору — з позитивним і негативним тестом, як у `spell-patterns/`.
 
 ### 2. Звідки беруться предмети й гроші
 
