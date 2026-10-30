@@ -6,7 +6,7 @@ import { createWrapper } from "@/components/onboarding/__tests__/onboarding-test
 import { WhatsNewButton } from "@/components/onboarding/WhatsNewButton";
 import * as api from "@/lib/api/onboarding";
 import { renderWithIntl } from "@/lib/i18n/test/render-with-intl";
-import { WHATS_NEW } from "@/lib/onboarding/whats-new";
+import { WHATS_NEW_SHOWN } from "@/lib/onboarding/whats-new";
 
 vi.unmock("next-intl");
 vi.mock("@/lib/api/onboarding", async () => (await import("@/components/onboarding/__tests__/onboarding-test-utils")).onboardingApiMock());
@@ -34,6 +34,6 @@ describe("WhatsNewButton in English", () => {
 
     expect(dialog.textContent).toContain("What's new");
     expect(dialog.textContent).not.toMatch(/[А-Яа-яІіЇїЄє]/);
-    expect(dialog.textContent).not.toContain(WHATS_NEW[0].id + ".");
+    expect(dialog.textContent).not.toContain(WHATS_NEW_SHOWN[0].id + ".");
   });
 });

@@ -96,7 +96,7 @@
   "summary": {
     "choices": "Вибори: {count}",
     "skillsTools": "Навички: {skills}; інструменти: {tools}",
-    "originFeat": "Origin feat: {names}",
+    "originFeat": "Риса походження: {names}",
     "manualGear": "Спорядження й гроші — вручну"
   },
   "info": {
@@ -172,7 +172,7 @@
     "chapterDefault": "Розділ {n}",
     "sources": "Джерела та явні зіставлення source",
     "edition": "Редакція: {edition}",
-    "sourceBinding": "{name} → source JSON id",
+    "sourceBinding": "{name} → id у вихідному JSON",
     "sourcePlaceholder": "Джерело для запису без source",
     "mixedEdition": "Дозволяю явне змішування classic / one (без конвертації правил)",
     "enableClasses": "Увімкнути класи 5e в правилах кампанії",
@@ -303,9 +303,9 @@
     "runNotFound": "Запуск імпорту не знайдено.",
     "importFailed": "Не вдалося виконати імпорт. Жоден частковий запис не підтверджено; спробуйте повторити з тим самим ключем.",
     "fileSize": "FILE_SIZE: максимум 3 MiB; виберіть менший файл",
-    "parsingTimeout": "PARSING_TIMEOUT: виберіть менший файл",
-    "invalidJson": "INVALID_JSON",
-    "recordSize": "RECORD_SIZE: {kind}",
+    "parsingTimeout": "Розбір тривав надто довго. Виберіть менший файл.",
+    "invalidJson": "Файл не є коректним JSON.",
+    "recordSize": "Запис у категорії {kind} завеликий.",
     "httpError": "HTTP_ERROR: перевірте вибір і повторіть preview",
     "unknownCode": "{code}: перевірте вибір і повторіть preview",
     "readFailed": "Не вдалося прочитати JSON",

@@ -29,7 +29,7 @@ describe("compendium labels", () => {
     expect(describeRulesPatch(t, { classes: { enabled: true } })).toBe("увімкнути режим класів 5e");
     expect(describeRulesPatch(t, undefined)).toBe("немає");
     expect(describeRulesPatch(t, { classes: { enabled: true }, conditions: { custom: [{}, {}] } })).toBe("увімкнути режим класів 5e; власні стани з книги: 2");
-    expect(summaryLines(t, { choices: [1], skills: [1, 2], tools: [], originFeat: [{ name: "Gift" }] }).join("|")).toContain("Origin feat: «Gift»");
+    expect(summaryLines(t, { choices: [1], skills: [1, 2], tools: [], originFeat: [{ name: "Gift" }] }).join("|")).toContain("Риса походження: «Gift»");
   });
 
   it("separates informational skip notices from manual actions", () => {

@@ -1,5 +1,8 @@
 import type { WhatsNewEntry } from "@/lib/onboarding/types";
 
+/** Newest entries shown in the UI and bundled into the root chunk; older ones stay in the catalog as history. */
+export const WHATS_NEW_BUNDLED = 15;
+
 export const WHATS_NEW: WhatsNewEntry[] = [
   { id: "2026-10-30-time-zone", date: "2026-10-30", audience: "all", href: "/settings/preferences" },
   { id: "2026-10-30-srd-completeness", date: "2026-10-30", audience: "dm" },
@@ -41,3 +44,5 @@ export const WHATS_NEW: WhatsNewEntry[] = [
   { id: "2026-10-21-manuscript", date: "2026-10-21", audience: "dm" },
   { id: "2026-10-20-ai", date: "2026-10-20", audience: "dm", href: "/settings/ai" },
 ];
+
+export const WHATS_NEW_SHOWN: WhatsNewEntry[] = WHATS_NEW.slice(0, WHATS_NEW_BUNDLED);

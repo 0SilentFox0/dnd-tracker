@@ -2,10 +2,12 @@ import { gzipSync } from "node:zlib";
 import { describe, expect, it } from "vitest";
 
 import { LOCALES } from "../config";
-import { loadMessages } from "../messages";
+import { loadMessages, loadStaticMessages } from "../messages";
 import { BATTLE_NAMESPACES, CAMPAIGN_NAMESPACES } from "../scopes";
 
 const LIMIT_KB = 100;
+
+const ROOT_LIMIT_KB = 20;
 
 const SCOPES = [
   { name: "campaign", namespaces: CAMPAIGN_NAMESPACES },
@@ -21,5 +23,15 @@ describe("message scope size", () => {
     console.info(`${name} scope ${locale}: ${(json.length / 1024).toFixed(1)} KB raw, ${gzipKb.toFixed(1)} KB gzip`);
 
     expect(gzipKb).toBeLessThan(LIMIT_KB);
+  });
+
+  it("root chunk (common + validation + whatsNew, both locales) stays under the budget", async () => {
+    const json = JSON.stringify(await loadStaticMessages(["common", "validation", "whatsNew"]));
+
+    const gzipKb = gzipSync(json, { level: 9 }).length / 1024;
+
+    console.info(`root scope: ${(json.length / 1024).toFixed(1)} KB raw, ${gzipKb.toFixed(1)} KB gzip`);
+
+    expect(gzipKb).toBeLessThan(ROOT_LIMIT_KB);
   });
 });

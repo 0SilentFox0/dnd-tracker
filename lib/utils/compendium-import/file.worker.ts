@@ -6,6 +6,6 @@ self.onmessage = async (event: MessageEvent<File>) => {
 
     self.postMessage({ root: parseCompendium(text, { checkRecordSize: false }) });
   } catch (error) {
-    self.postMessage({ error: error instanceof Error && "code" in error ? String(error.code) : "INVALID_JSON_UTF8" });
+    self.postMessage({ error: error instanceof Error && "code" in error ? String(error.code) : "INVALID_UTF8" });
   }
 };
