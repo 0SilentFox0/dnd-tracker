@@ -26,7 +26,7 @@ export interface GraphToolbarProps {
   onNextMatch: () => void;
 }
 
-const checkClass = "flex items-center gap-1.5 text-xs";
+const checkClass = "flex items-center gap-1.5 text-sm";
 
 export function GraphToolbar({ filters, counts, showSequence, timeline, listOpen, query, matches, onFilters, onShowSequence, onTimeline, onToggleList, onQuery, onNextMatch }: GraphToolbarProps) {
   const t = useTranslations("scenarioGraph.toolbar");
@@ -47,7 +47,7 @@ export function GraphToolbar({ filters, counts, showSequence, timeline, listOpen
       <Button size="sm" variant="outline" aria-pressed={listOpen} onClick={onToggleList}><List aria-hidden />{t("list")}</Button>
       <div className="flex items-center gap-2">
         <Input type="search" role="searchbox" aria-label={t("search")} placeholder={t("searchPlaceholder")} value={query} className="h-8 w-48" onChange={(e) => onQuery(e.target.value)} onKeyDown={(e) => e.key === "Enter" && onNextMatch()} />
-        {query.trim() ? <span className="text-xs text-muted-foreground">{t("matches", matches)}</span> : null}
+        {query.trim() ? <span className="text-sm text-muted-foreground">{t("matches", matches)}</span> : null}
       </div>
       <fieldset className="flex flex-wrap items-center gap-x-3 gap-y-1">
         <legend className="sr-only">{t("types")}</legend>
@@ -57,7 +57,7 @@ export function GraphToolbar({ filters, counts, showSequence, timeline, listOpen
           return (
             <label key={type} className={checkClass}>
               <input type="checkbox" checked={filters.types.has(type)} onChange={() => toggleType(type)} />
-              <Icon className="size-4" style={{ color: GRAPH_TYPE_STYLE[type].color }} aria-hidden />
+              <Icon className="size-[18px]" style={{ color: GRAPH_TYPE_STYLE[type].color }} aria-hidden />
               {tType(type)} ({counts[type] ?? 0})
             </label>
           );
