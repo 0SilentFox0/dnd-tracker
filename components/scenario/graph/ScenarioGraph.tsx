@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo } from "react";
+import { useCallback, useMemo } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
@@ -30,6 +30,19 @@ export function ScenarioGraph({ campaignId }: { campaignId: string }) {
 
   const matched = useMemo(() => new Set(state.matches), [state.matches]);
 
+  const select = set.selected;
+
+  const clear = useCallback(() => select(null), [select]);
+
+  const open = useCallback(
+    (node: GraphNode) => {
+      const href = graphNodeHref(campaignId, node);
+
+      if (href) router.push(href);
+    },
+    [campaignId, router],
+  );
+
   if (state.isLoading) return <LoadingState />;
 
   if (state.isError) return <ErrorState error={null} />;
@@ -46,17 +59,11 @@ export function ScenarioGraph({ campaignId }: { campaignId: string }) {
 
   const { graph, counts } = state;
 
-  const open = (node: GraphNode) => {
-    const href = graphNodeHref(campaignId, node);
-
-    if (href) router.push(href);
-  };
-
   const detail = selection.detail;
 
   const entityShown = graph?.nodes.filter((n) => n.kind === "entity").length ?? 0;
 
-  const inspector = detail ? <GraphInspector detail={detail} canOpen={!!graphNodeHref(campaignId, detail.node)} onOpen={() => open(detail.node)} onSelect={set.selected} onClose={() => set.selected(null)} /> : null;
+  const inspector = detail ? <GraphInspector detail={detail} canOpen={!!graphNodeHref(campaignId, detail.node)} onOpen={() => open(detail.node)} onSelect={set.selected} onClose={clear} /> : null;
 
   const body = () => {
     if (counts && counts.edges === 0) return <EmptyState icon={Network} title={t("empty.noMentions")} description={t("empty.noMentionsHint")} />;
@@ -65,7 +72,7 @@ export function ScenarioGraph({ campaignId }: { campaignId: string }) {
       return <EmptyState icon={Network} title={t("empty.filtered")} description={t("empty.filteredHint")} action={<Button onClick={() => set.filters(defaultFilters())}>{t("empty.resetFilters")}</Button>} />;
     }
 
-    return <ScenarioGraphView graph={graph} selection={selection} selectedId={state.selectedId} matched={matched} onSelect={set.selected} onClear={() => set.selected(null)} onOpen={open} />;
+    return <ScenarioGraphView graph={graph} selection={selection} selectedId={state.selectedId} matched={matched} onSelect={set.selected} onClear={clear} onOpen={open} />;
   };
 
   return (
@@ -91,7 +98,7 @@ export function ScenarioGraph({ campaignId }: { campaignId: string }) {
         {inspector && isDesktop ? <aside aria-label={t("inspector.title")} className="w-72 shrink-0 overflow-y-auto rounded-lg border p-3">{inspector}</aside> : null}
       </div>
       {inspector && !isDesktop ? (
-        <ResponsiveDialog open onOpenChange={(o) => !o && set.selected(null)} title={t("inspector.title")}>
+        <ResponsiveDialog open onOpenChange={(o) => !o && clear()} title={t("inspector.title")}>
           {inspector}
         </ResponsiveDialog>
       ) : null}

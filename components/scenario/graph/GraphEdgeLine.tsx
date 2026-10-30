@@ -1,8 +1,9 @@
+import { memo } from "react";
 import { Lock } from "lucide-react";
 
 import type { GraphEdge } from "@/lib/utils/scenario/graph/types";
 
-export function GraphEdgeLine({ edge, from, to, dimmed, highlighted, secretLabel }: { edge: GraphEdge; from: { x: number; y: number }; to: { x: number; y: number }; dimmed: boolean; highlighted: boolean; secretLabel: string }) {
+function GraphEdgeLineImpl({ edge, from, to, dimmed, highlighted, secretLabel }: { edge: GraphEdge; from: { x: number; y: number }; to: { x: number; y: number }; dimmed: boolean; highlighted: boolean; secretLabel: string }) {
   const width = Math.min(1 + edge.count * 0.6, 5);
 
   const mx = (from.x + to.x) / 2;
@@ -22,3 +23,5 @@ export function GraphEdgeLine({ edge, from, to, dimmed, highlighted, secretLabel
     </g>
   );
 }
+
+export const GraphEdgeLine = memo(GraphEdgeLineImpl);

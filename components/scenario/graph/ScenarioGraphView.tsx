@@ -8,6 +8,7 @@ import { GraphEdgeLine } from "./GraphEdgeLine";
 import { GraphNodeShape } from "./GraphNodeShape";
 
 import { Button } from "@/components/ui/button";
+import { DRAG_THRESHOLD } from "@/lib/hooks/common";
 import type { PositionedGraph, PositionedNode } from "@/lib/utils/scenario/graph/layout";
 
 interface Box {
@@ -22,8 +23,6 @@ const PAD = 80;
 const MIN_W = 120;
 
 const MAX_W = 20000;
-
-const DRAG_THRESHOLD = 4;
 
 const FALLBACK_ASPECT = 4 / 3;
 

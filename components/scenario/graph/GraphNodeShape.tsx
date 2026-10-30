@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { memo, useState } from "react";
 
 import { GRAPH_LABEL_MIN_DEGREE, GRAPH_TYPE_STYLE } from "@/lib/constants/scenario-graph";
 import type { PositionedNode } from "@/lib/utils/scenario/graph/layout";
@@ -19,7 +19,7 @@ export interface GraphNodeShapeProps {
   onOpen: (node: PositionedNode) => void;
 }
 
-export function GraphNodeShape({ node, selected, dimmed, matched, onSelect, onClear, onOpen }: GraphNodeShapeProps) {
+function GraphNodeShapeImpl({ node, selected, dimmed, matched, onSelect, onClear, onOpen }: GraphNodeShapeProps) {
   const [hover, setHover] = useState(false);
 
   const isScene = node.kind === "scene";
@@ -82,3 +82,5 @@ export function GraphNodeShape({ node, selected, dimmed, matched, onSelect, onCl
     </g>
   );
 }
+
+export const GraphNodeShape = memo(GraphNodeShapeImpl);

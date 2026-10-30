@@ -1,5 +1,6 @@
 import { MENTION_TYPES } from "@/lib/constants/scenario";
 import { GRAPH_ENTITY_CAP } from "@/lib/constants/scenario-graph";
+import { matchesQuery } from "@/lib/utils/common/text-search";
 import type { GraphEdge, GraphFilters, GraphModel, GraphNode } from "@/lib/utils/scenario/graph/types";
 import type { MentionType, ScenarioIndex } from "@/types/scenario";
 
@@ -103,9 +104,7 @@ export function neighbors(model: GraphModel, nodeId: string): { nodes: Set<strin
 }
 
 export function searchMatches(model: GraphModel, query: string): string[] {
-  const q = query.trim().toLocaleLowerCase("uk");
+  if (!query.trim()) return [];
 
-  if (!q) return [];
-
-  return model.nodes.filter((n) => n.label.toLocaleLowerCase("uk").includes(q)).map((n) => n.id);
+  return model.nodes.filter((n) => matchesQuery([n.label], query)).map((n) => n.id);
 }
