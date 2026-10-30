@@ -27,7 +27,7 @@ const cls = makeClass({
 describe("SkillsTab class map", () => {
   afterEach(cleanup);
 
-  it("renders the map instead of the old feature list and opens choices on pick", () => {
+  it("renders the path timeline instead of the old table and opens choices on pick", () => {
     current.sheet = {
       ...sheetFixture,
       classProgression: [buildClassProgression(cls, { classId: "f", level: 4 })],
@@ -36,6 +36,7 @@ describe("SkillsTab class map", () => {
     render(<SkillsTab />);
 
     expect(screen.getByText("Fighter")).toBeTruthy();
+    expect(screen.getByText('characterProfile.path.level {"level":4}')).toBeTruthy();
     expect(screen.queryByText("Вміння класу та підкласу")).toBeNull();
     fireEvent.click(screen.getAllByRole("button", { name: /ASI/ })[0]);
 

@@ -46,6 +46,18 @@ describe("CharacterProfile — перегляд", () => {
 
   afterEach(cleanup);
 
+  it("вкладка вмінь зветься «Шлях» лише для героя з класами", () => {
+    renderWithConfirm(<CharacterProfile campaignId="c" characterId="ch" canEdit={false} />);
+    expect(screen.queryByRole("tab", { name: "characterProfile.tabs.path" })).toBeNull();
+    expect(screen.getByRole("tab", { name: "characterProfile.tabs.skills" })).toBeTruthy();
+
+    cleanup();
+    h.sheetQuery.data = { ...sheetFixture, classProgression: [{ classId: "f", className: "Fighter", color: null, subclasses: [], subclassLevel: null, rows: [] }] };
+    renderWithConfirm(<CharacterProfile campaignId="c" characterId="ch" canEdit={false} />);
+
+    expect(screen.getByRole("tab", { name: "characterProfile.tabs.path" })).toBeTruthy();
+  });
+
   it("hero: імʼя, HP, AC, Влуч, Майст", () => {
     renderWithConfirm(<CharacterProfile campaignId="c" characterId="ch" canEdit={false} />);
 

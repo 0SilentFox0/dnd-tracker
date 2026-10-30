@@ -8,7 +8,8 @@
     "items": "Інвентар",
     "story": "Історія",
     "log": "Журнал",
-    "things": "Речі"
+    "things": "Речі",
+    "path": "Шлях"
   },
   "hero": {
     "level": "{level} рів.",
@@ -218,5 +219,23 @@
       "formula": "{archetype, select, warrior {Воїн} paladin {Паладин} ranger {Лучник} rogue {Розбійник} mage {Маг} other {Універсал}}: {baseLevels} × {hpPerLevel} + рівень × ({hpPerLevel} + мод. ВИТ {conMod} × {conCoefficient})",
       "total": "= {base} + {level} × {perLevel} = {total}"
     }
+  },
+  "path": {
+    "level": "Рівень {level}",
+    "state": {
+      "current": "Зараз",
+      "next": "Наступний",
+      "reached": "Отримано",
+      "future": "Далі",
+      "template": ""
+    },
+    "reached": "Отримано ({count})",
+    "upcoming": "Далі ({count})",
+    "from": "← {cls} {level}",
+    "pick": "Обрати: {label} ({done}/{required})",
+    "pickOpen": "Потрібно обрати: {label} ({done}/{required})",
+    "done": "Обрано: {label}",
+    "unlocksAt": "{label}: відкриється на {level}-му рівні",
+    "details": "Докладніше про «{name}»"
   }
 }

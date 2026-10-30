@@ -6,10 +6,10 @@ import { useTranslations } from "next-intl";
 
 import { ChargesList } from "./rest/ChargesList";
 import { FeatsBlock } from "./FeatsBlock";
+import { CharacterPath } from "./path";
 import { useProfile } from "./ProfileContext";
 import { RacePassive } from "./RacePassive";
 
-import { ClassProgressionMap } from "@/components/classes/progression";
 import { EntityIcon } from "@/components/common/EntityIcon";
 import { ProgressionPanel } from "@/components/skill-tree/progression";
 
@@ -31,7 +31,7 @@ export function SkillsTab({ manage = false }: { manage?: boolean }) {
       {sheet.classProgression?.map((progression) => (
         <section key={progression.classId} className="mb-3 space-y-2">
           <h3>{progression.className}</h3>
-          <ClassProgressionMap progression={progression} mode="sheet" actions={actions} />
+          <CharacterPath progression={progression} actions={actions} />
         </section>
       ))}
       {choicesOpen ? <ChoicesDialog open={choicesOpen} onOpenChange={setChoicesOpen} campaignId={campaignId} characterId={characterId} /> : null}

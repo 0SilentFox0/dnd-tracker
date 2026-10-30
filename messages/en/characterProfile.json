@@ -8,7 +8,8 @@
     "items": "Inventory",
     "story": "Story",
     "log": "Log",
-    "things": "Gear"
+    "things": "Gear",
+    "path": "Path"
   },
   "hero": {
     "level": "Lv {level}",
@@ -218,5 +219,23 @@
       "formula": "{archetype, select, warrior {Warrior} paladin {Paladin} ranger {Archer} rogue {Rogue} mage {Mage} other {Universal}}: {baseLevels} × {hpPerLevel} + level × ({hpPerLevel} + CON mod {conMod} × {conCoefficient})",
       "total": "= {base} + {level} × {perLevel} = {total}"
     }
+  },
+  "path": {
+    "level": "Level {level}",
+    "state": {
+      "current": "Now",
+      "next": "Next",
+      "reached": "Gained",
+      "future": "Later",
+      "template": ""
+    },
+    "reached": "Gained ({count})",
+    "upcoming": "Later ({count})",
+    "from": "← {cls} {level}",
+    "pick": "Choose: {label} ({done}/{required})",
+    "pickOpen": "To choose: {label} ({done}/{required})",
+    "done": "Chosen: {label}",
+    "unlocksAt": "{label}: unlocks at level {level}",
+    "details": "More about “{name}”"
   }
 }
