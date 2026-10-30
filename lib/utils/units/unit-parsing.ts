@@ -1,5 +1,5 @@
-/* eslint-disable no-restricted-syntax -- Ukrainian CSV import keywords (data format, not UI text) */
 import { AttackType } from "@/lib/constants/battle";
+import { LEGACY_DAMAGE_KEYWORDS, LEGACY_DICE_LETTERS, LEGACY_NO_ATTACKS, LEGACY_UNIT_COLUMNS } from "@/lib/constants/import-aliases";
 import { getProficiencyBonus } from "@/lib/utils/common/calculations";
 import { normalizeDiceText } from "@/lib/utils/common/dice";
 import type { CSVUnitRow, ImportUnit, UnitSpecialAbility } from "@/types/import";
@@ -46,7 +46,7 @@ export function parseLevel(value: string): number {
 
 // "Укус +5, 1к6 колючий. Кігті +6, 2к6 рублячий" — атаки через крапку
 function parseLegacyAttacks(value: string): UnitAttack[] {
-  if (!value || value.trim() === "Відсутні" || value.trim() === "") {
+  if (!value || value.trim() === LEGACY_NO_ATTACKS || value.trim() === "") {
     return [];
   }
 
@@ -61,7 +61,7 @@ function parseLegacyAttacks(value: string): UnitAttack[] {
   for (const attackStr of attackStrings) {
     const bonusMatch = attackStr.match(/\+(\d+)/);
 
-    const damageMatch = attackStr.match(/(\d+[кk]?\d+[\+\-]?\d*)/i);
+    const damageMatch = attackStr.match(LEGACY_DAMAGE_DICE);
     
     let name = "";
 
@@ -85,19 +85,9 @@ function parseLegacyAttacks(value: string): UnitAttack[] {
 
     const lowerStr = attackStr.toLowerCase();
 
-    if (lowerStr.includes("колючий") || lowerStr.includes("piercing")) {
-      damageType = "piercing";
-    } else if (lowerStr.includes("рублячий") || lowerStr.includes("slashing")) {
-      damageType = "slashing";
-    } else if (lowerStr.includes("дроблячий") || lowerStr.includes("bludgeoning")) {
-      damageType = "bludgeoning";
-    } else if (lowerStr.includes("полум'я") || lowerStr.includes("fire") || lowerStr.includes("полумя")) {
-      damageType = "fire";
-    } else if (lowerStr.includes("холод") || lowerStr.includes("cold")) {
-      damageType = "cold";
-    }
+    damageType = LEGACY_DAMAGE_KEYWORDS.find(([, words]) => words.some((word) => lowerStr.includes(word)))?.[0] ?? damageType;
 
-    const damageDice = damageMatch ? damageMatch[1].replace(/к/g, "d").replace(/k/g, "d") : "1d4";
+    const damageDice = damageMatch ? damageMatch[1].replace(DICE_LETTER_G, "d") : "1d4";
 
     attacks.push({
       name,
@@ -110,11 +100,15 @@ function parseLegacyAttacks(value: string): UnitAttack[] {
   return attacks;
 }
 
-const NAMED_DICE = /^(.+?)[_\s]+(\d+[dкk]\d+(?:\s*[+-]\s*\d+)?)$/i;
+const DICE_LETTER_G = new RegExp(`[${LEGACY_DICE_LETTERS}]`, "g");
+
+const LEGACY_DAMAGE_DICE = new RegExp(`(\\d+[${LEGACY_DICE_LETTERS}]?\\d+[+-]?\\d*)`, "i");
+
+const NAMED_DICE = new RegExp(`^(.+?)[_\\s]+(\\d+[d${LEGACY_DICE_LETTERS}]\\d+(?:\\s*[+-]\\s*\\d+)?)$`, "i");
 
 const RANGED_NAME = /ranged|range|shot|bow/i;
 
-const LEGACY_DAMAGE = /\d+[кk]?\d+/i;
+const LEGACY_DAMAGE = new RegExp(`\\d+[${LEGACY_DICE_LETTERS}]?\\d+`, "i");
 
 // "Name_1d12+2|Name2 1d4" (| ; newline) or the legacy Ukrainian text; parts that fit neither land in `unparsed`
 export function parseAttacksDetailed(value: string): { attacks: UnitAttack[]; unparsed: string[] } {
@@ -189,10 +183,14 @@ export function convertCSVRowsToUnits(rows: CSVUnitRow[]): ImportUnit[] {
   return rows.map(convertCSVRowToUnit).filter((unit) => unit.name !== "");
 }
 
-export function convertCSVRowToUnit(row: CSVUnitRow): ImportUnit {
-  const name = (row.Назва || row.name || row.Name || "").trim();
+const column = (row: CSVUnitRow, keys: readonly string[]): string | undefined => keys.map((key) => row[key]).find(Boolean);
 
-  const tier = parseLevel(row.Tier || row.tier || "1");
+export function convertCSVRowToUnit(row: CSVUnitRow): ImportUnit {
+  const col = LEGACY_UNIT_COLUMNS;
+
+  const name = (column(row, col.name) ?? "").trim();
+
+  const tier = parseLevel(column(row, col.tier) ?? "1");
 
   const initiativeRaw = (row.Initiative ?? row.initiative ?? "").trim();
 
@@ -200,26 +198,26 @@ export function convertCSVRowToUnit(row: CSVUnitRow): ImportUnit {
 
   const avatar = (row.Image ?? row.image ?? row.URL ?? "").trim() || undefined;
 
-  const raceName = (row.Група || row.group || row.Group || "").trim() || undefined;
+  const raceName = (column(row, col.group) ?? "").trim() || undefined;
 
-  const features = row.Особливості || row.features || row.Features;
+  const features = column(row, col.features);
 
   return {
     name,
     level: tier,
-    strength: parseAbilityScore(row.СИЛ || row.str || row.STR || "10"),
-    dexterity: parseAbilityScore(row.ЛОВ || row.dex || row.DEX || "10"),
-    constitution: parseAbilityScore(row.ТІЛ || row.con || row.CON || "10"),
-    intelligence: parseAbilityScore(row.ІНТ || row.int || row.INT || "10"),
-    wisdom: parseAbilityScore(row.МДР || row.wis || row.WIS || "10"),
-    charisma: parseAbilityScore(row.ХАР || row.cha || row.CHA || "10"),
-    armorClass: parseArmorClass(row.КД || row.ac || row.AC || "10"),
+    strength: parseAbilityScore(column(row, col.strength) ?? "10"),
+    dexterity: parseAbilityScore(column(row, col.dexterity) ?? "10"),
+    constitution: parseAbilityScore(column(row, col.constitution) ?? "10"),
+    intelligence: parseAbilityScore(column(row, col.intelligence) ?? "10"),
+    wisdom: parseAbilityScore(column(row, col.wisdom) ?? "10"),
+    charisma: parseAbilityScore(column(row, col.charisma) ?? "10"),
+    armorClass: parseArmorClass(column(row, col.armorClass) ?? "10"),
     initiative: Number.isNaN(initiative) ? 10 : initiative,
-    speed: parseSpeed(row.Швидкість || row.speed || row.Speed || "30"),
-    maxHp: parseMaxHp(row.ХП || row.hp || row.HP || "10"),
+    speed: parseSpeed(column(row, col.speed) ?? "30"),
+    maxHp: parseMaxHp(column(row, col.maxHp) ?? "10"),
     proficiencyBonus: getProficiencyBonus(tier),
-    attacks: parseAttacks(row.Атаки || row.attacks || row.Attacks || ""),
-    specialAbilities: parseSpecialAbilities((row["Навички/Здібності"] || row.abilities || row.Abilities || "") + (features ? ". " + features : "")),
+    attacks: parseAttacks(column(row, col.attacks) ?? ""),
+    specialAbilities: parseSpecialAbilities((column(row, col.abilities) ?? "") + (features ? ". " + features : "")),
     knownSpells: [],
     ...(avatar && { avatar }),
     ...(raceName && { raceName }),

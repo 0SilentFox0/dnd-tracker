@@ -14,8 +14,8 @@ import { ABILITY_KEYS, type AbilityKey } from "@/lib/constants/abilities";
 import { CONDITION_LIMITS } from "@/lib/constants/battle";
 import type { BattleConditionsBody } from "@/lib/hooks/battles";
 import { useText } from "@/lib/i18n/use-text";
+import { effectName } from "@/lib/utils/battle/common/terms";
 import { CONDITION_5E_KEYS, conditionEffects, type ConditionKey, MAX_EXHAUSTION } from "@/lib/utils/battle/conditions";
-import { effectTitle } from "@/lib/utils/battle/view";
 import type { Ruleset } from "@/lib/utils/rules";
 import type { BattleParticipant } from "@/types/battle";
 
@@ -116,7 +116,7 @@ function ConditionsDialogBody({ participant, onClose, onSubmit, isPending, custo
           <div className="text-xs text-[var(--hud-muted)]">{t("current")}</div>
           {current.map(({ key, effect }) => (
             <div key={effect.id} className="flex items-center justify-between gap-2 text-sm">
-              <span>{text(effectTitle(effect))}{effect.permanent ? "" : t("roundsLeft", { duration: effect.duration })}</span>
+              <span>{text(effectName(effect))}{effect.permanent ? "" : t("roundsLeft", { duration: effect.duration })}</span>
               <Button type="button" size="sm" variant="outline" disabled={isPending} onClick={() => onSubmit({ action: "remove", participantId, condition: key })}>
                 {t("remove")}
               </Button>

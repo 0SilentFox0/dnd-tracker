@@ -7,7 +7,8 @@ import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip
 import { useText } from "@/lib/i18n/use-text";
 import { useTranslator } from "@/lib/i18n/use-translator";
 import { cn } from "@/lib/utils";
-import { effectSummary, effectTitle } from "@/lib/utils/battle/view";
+import { effectName } from "@/lib/utils/battle/common/terms";
+import { effectSummary } from "@/lib/utils/battle/view";
 import type { ActiveEffect } from "@/types/battle";
 
 const tone = (e: ActiveEffect) => (e.type === "buff" ? "text-[#cdb87e]" : "text-hud-danger");
@@ -19,7 +20,7 @@ function EffectChip({ effect }: { effect: ActiveEffect }) {
 
   const summary = effectSummary(effect, t).map(text);
 
-  const name = text(effectTitle(effect));
+  const name = text(effectName(effect));
 
   return (
     <Tooltip>

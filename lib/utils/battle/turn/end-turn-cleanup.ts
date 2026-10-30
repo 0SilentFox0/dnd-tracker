@@ -16,7 +16,7 @@ export interface SaveEndsContext {
   rng: () => number;
 }
 
-export function finishTurnEffects(source: BattleParticipant, saves?: SaveEndsContext): { participant: BattleParticipant; expired: string[]; messages: LogLine[] } {
+export function finishTurnEffects(source: BattleParticipant, saves?: SaveEndsContext): { participant: BattleParticipant; expired: LogLine[]; messages: LogLine[] } {
   const rolled = saves ? rollSaveEnds(source, saves.participants, saves.rules, saves.rng) : { participant: source, messages: [] };
 
   let p = rolled.participant;

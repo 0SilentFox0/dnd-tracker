@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 
 import { AttackType, ParticipantSide } from "@/lib/constants/battle";
+import { textOf } from "@/lib/i18n/test/text";
 import { seq } from "@/lib/utils/abilities/__tests__/fixtures";
 import { CLAWS, placed, testMap } from "@/lib/utils/battle/__tests__/fixtures/placed";
 import { forcedRollMode, rollModeReasons } from "@/lib/utils/battle/attack/bonus";
@@ -27,8 +28,11 @@ const ally = (at?: { x: number; y: number }) => placed("a", { side: ParticipantS
 
 const foe = (at?: { x: number; y: number }) => placed("e", { at });
 
-const reasons = (ps: BattleParticipant[], attack: BattleAttack, withTarget = true) =>
-  rollModeReasons(ps.find((p) => p.basicInfo.id === "a") as BattleParticipant, attack, ps, withTarget ? { targetId: "e" } : {});
+const reasons = (ps: BattleParticipant[], attack: BattleAttack, withTarget = true) => {
+  const r = rollModeReasons(ps.find((p) => p.basicInfo.id === "a") as BattleParticipant, attack, ps, withTarget ? { targetId: "e" } : {});
+
+  return { advantage: r.advantage.map((l) => textOf(l)), disadvantage: r.disadvantage.map((l) => textOf(l)) };
+};
 
 describe("5e стани в кидку атаки", () => {
   it("повалена ціль: суміжна ближня — перевага, дальня здалеку — недолік", () => {

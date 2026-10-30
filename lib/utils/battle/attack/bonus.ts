@@ -8,6 +8,7 @@ import { attackAbilityFor, attackRollModifier } from "@/lib/utils/battle/attack/
 import { INSPIRATION_LABEL } from "@/lib/utils/battle/attack/inspiration";
 import { attackSourceOf } from "@/lib/utils/battle/attack/source";
 import { attackKindOf } from "@/lib/utils/battle/common/attack-kind";
+import { effectName } from "@/lib/utils/battle/common/terms";
 import { rangeDisadvantageReasons } from "@/lib/utils/battle/grid/attack-reach";
 import { footprintDistance } from "@/lib/utils/battle/grid/geometry";
 import { cellsOf, isAdjacent, isOnMap } from "@/lib/utils/battle/grid/occupancy";
@@ -80,7 +81,7 @@ export function rollModeReasons(attacker: BattleParticipant, attack: BattleAttac
 
   const frightenedLabels = attacker.battleData.activeEffects
     .filter((e) => e.source && e.effects.some((m) => m.type === "frightened") && ps.some((p) => p.basicInfo.id === e.source?.participantId && isActive(p)))
-    .map((e) => e.name);
+    .map(effectName);
 
   const attackerBlind = isObscured(opts.map, attacker) && !attackerSees;
 

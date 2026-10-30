@@ -1,4 +1,3 @@
-import { spellLevelFromName, spellLevelName } from "@/lib/constants/spells";
 import { UNGROUPED_KEY } from "@/lib/constants/ungrouped";
 import { groupBy } from "@/lib/utils/common/collections";
 import type { Spell } from "@/types/spells";
@@ -23,14 +22,11 @@ export function groupSpellsByGroup(spells: Spell[]): Map<string, Spell[]> {
 /**
  * Групує заклинання спочатку по групах, потім по рівнях
  */
-export function groupSpellsByGroupAndLevel(
-  spells: Spell[],
-  t: (key: string) => string,
-): Map<string, Map<string, Spell[]>> {
-  const groupedSpellsMap = new Map<string, Map<string, Spell[]>>();
+export function groupSpellsByGroupAndLevel(spells: Spell[]): Map<string, Map<number, Spell[]>> {
+  const groupedSpellsMap = new Map<string, Map<number, Spell[]>>();
 
   for (const [groupName, groupSpells] of groupBy(spells, (spell) => spell.spellGroup?.name || UNGROUPED_KEY)) {
-    groupedSpellsMap.set(groupName, groupBy(groupSpells, (spell) => spellLevelName(spell.level, t)));
+    groupedSpellsMap.set(groupName, groupBy(groupSpells, (spell) => spell.level));
   }
 
   groupedSpellsMap.forEach((levelMap) => {
@@ -45,22 +41,20 @@ export function groupSpellsByGroupAndLevel(
 /**
  * Сортує рівні заклинань для відображення
  */
-export function sortSpellLevels(
-  levels: [string, Spell[]][],
-): [string, Spell[]][] {
-  return [...levels].sort(([levelA], [levelB]) => spellLevelFromName(levelA) - spellLevelFromName(levelB));
+export function sortSpellLevels(levels: [number, Spell[]][]): [number, Spell[]][] {
+  return [...levels].sort(([levelA], [levelB]) => levelA - levelB);
 }
 
 /**
  * Конвертує Map з групами та рівнями в масив для рендеру
  */
 export function convertGroupedSpellsToArray(
-  groupedSpellsMap: Map<string, Map<string, Spell[]>>,
-): [string, [string, Spell[]][]][] {
+  groupedSpellsMap: Map<string, Map<number, Spell[]>>,
+): [string, [number, Spell[]][]][] {
   return Array.from(groupedSpellsMap.entries()).map(([groupName, levelMap]) => {
     const sortedLevels = sortSpellLevels(Array.from(levelMap.entries()));
 
-    return [groupName, sortedLevels] as [string, [string, Spell[]][]];
+    return [groupName, sortedLevels] as [string, [number, Spell[]][]];
   });
 }
 
@@ -77,8 +71,6 @@ export function filterSelectedSpells(
 /**
  * Обчислює загальну кількість заклинань у групі
  */
-export function calculateTotalSpellsInGroup(
-  levels: [string, Spell[]][],
-): number {
+export function calculateTotalSpellsInGroup(levels: [number, Spell[]][]): number {
   return levels.reduce((sum, [, spells]) => sum + spells.length, 0);
 }

@@ -5,6 +5,7 @@ import { textOf } from "@/lib/i18n/test/text";
 import { makeParticipant, resolved, seq } from "@/lib/utils/abilities/__tests__/fixtures";
 import { applyEffect } from "@/lib/utils/abilities/registry/effects";
 import type { Effect } from "@/lib/utils/abilities/schema";
+import { effectName } from "@/lib/utils/battle/common/terms";
 import { exhaustionLevel, restoreExhaustionHp, syncExhaustion } from "@/lib/utils/battle/conditions";
 import { movementBudget } from "@/lib/utils/battle/grid/path";
 import { spellSaveDc } from "@/lib/utils/battle/spell/power";
@@ -47,7 +48,8 @@ describe("applyCondition 5e", () => {
     const e = t.battleData.activeEffects[0];
 
     expect(e.type).toBe("condition");
-    expect(e.name).toBe("Приголомшений");
+    expect(e.name).toBe("stunned");
+    expect(textOf(effectName(e))).toBe("Приголомшений");
     expect(e.effects.map((m) => m.type)).toEqual(expect.arrayContaining(["stunned", "incapacitated", "no_reaction", "immobilized"]));
     expect(e.abilityEffects).toEqual(expect.arrayContaining([expect.objectContaining({ flag: "autoFailSave" })]));
     expect(t.actionFlags.hasUsedReaction).toBe(true);

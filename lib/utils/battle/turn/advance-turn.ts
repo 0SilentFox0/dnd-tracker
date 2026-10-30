@@ -5,7 +5,7 @@ import { runAdvanceTurnLoop } from "./run-advance-turn-loop";
 import { applyVictoryCompletion } from "./turn-helpers";
 import { resetTurnState } from "./turn-state";
 
-import { textRef } from "@/lib/i18n/text-ref";
+import { joinLines, textRef } from "@/lib/i18n/text-ref";
 import { findParticipant, replaceParticipant, takesTurn } from "@/lib/utils/abilities/engine/core/participants";
 import { runAbilities } from "@/lib/utils/abilities/engine/core/run-abilities";
 import { pruneExpiredTerrain } from "@/lib/utils/battle/grid/terrain";
@@ -78,7 +78,7 @@ function advanceFrom({ participants, pending, scene, rng, map, rules }: AdvanceT
 
     if (finished.messages.length > 0) actions.push(turnEndAction(ending, scene, finished.messages));
 
-    if (finished.expired.length > 0) actions.push(turnEndAction(ending, scene, [textRef("battleLog.turn.effectsEnded", { names: finished.expired.join(", ") })]));
+    if (finished.expired.length > 0) actions.push(turnEndAction(ending, scene, [textRef("battleLog.turn.effectsEnded", { names: joinLines(finished.expired, ", ") })]));
   }
 
   const current = order[scene.turnIndex];

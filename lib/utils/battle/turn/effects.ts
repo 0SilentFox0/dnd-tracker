@@ -76,14 +76,14 @@ export function countDownRoundEffects(p: BattleParticipant): BattleParticipant {
 }
 
 /** Початок ходу власника: відлік для countdownAtTurnStart. */
-export function countDownAtTurnStart(effects: ActiveEffect[]): { kept: ActiveEffect[]; expired: string[] } {
+export function countDownAtTurnStart(effects: ActiveEffect[]): { kept: ActiveEffect[]; expired: LogLine[] } {
   const kept: ActiveEffect[] = [];
 
-  const expired: string[] = [];
+  const expired: LogLine[] = [];
 
   for (const e of effects) {
     if (!e.countdownAtTurnStart) kept.push(e);
-    else if (e.duration <= 1) expired.push(e.name);
+    else if (e.duration <= 1) expired.push(effectName(e));
     else kept.push({ ...e, duration: e.duration - 1 });
   }
 
@@ -98,11 +98,11 @@ export function decreaseEffectDurations(
   participant: BattleParticipant
 ): {
   updatedEffects: ActiveEffect[];
-  expiredEffects: string[];
+  expiredEffects: LogLine[];
 } {
   const updatedEffects: ActiveEffect[] = [];
 
-  const expiredEffects: string[] = [];
+  const expiredEffects: LogLine[] = [];
 
   for (const effect of participant.battleData.activeEffects) {
     if (!effect.armed) {
@@ -113,7 +113,7 @@ export function decreaseEffectDurations(
     const newDuration = effect.duration - 1;
 
     if (newDuration <= 0 || effect.expireAtTurnEnd) {
-      expiredEffects.push(effect.name);
+      expiredEffects.push(effectName(effect));
     } else {
       const { armed: _armed, ...rest } = effect;
 

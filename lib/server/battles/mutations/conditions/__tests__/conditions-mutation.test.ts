@@ -20,7 +20,7 @@ describe("battleConditionsMutation", () => {
     const effects = byId(out.participants, "gob").battleData.activeEffects;
 
     expect(effects).toHaveLength(1);
-    expect(effects[0]).toMatchObject({ name: "Повалений", type: "condition" });
+    expect(effects[0]).toMatchObject({ name: "prone", type: "condition" });
     expect(effects[0].source).toBeUndefined();
     expect(eventTextOf(out.events[0])).toContain("ДМ: Гоблін — повалений");
   });
@@ -48,7 +48,7 @@ describe("battleConditionsMutation", () => {
 
     const g = byId(out.participants, "gob");
 
-    expect(g.battleData.activeEffects.map((e) => e.name)).toEqual(["Паралізований"]);
+    expect(g.battleData.activeEffects.map((e) => e.name)).toEqual(["paralyzed"]);
   });
 
   it("remove incapacitated не знімає paralyzed", () => {

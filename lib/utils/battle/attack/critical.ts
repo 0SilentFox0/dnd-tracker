@@ -77,7 +77,13 @@ function specFor(effect: CriticalEffect): EffectSpec | null {
   return typeof spec === "function" ? spec(effect) : spec;
 }
 
-export const critNameRef = (effect: Pick<CriticalEffect, "id" | "type">, source: "attack" | "save" = "attack"): TextRef => dynamicTextRef(`battleTerms.crits.${source}.${effect.type}.${effect.id}.name`);
+type CritTable = "attack" | "save";
+
+const critKey = (effect: Pick<CriticalEffect, "id" | "type">, table: CritTable) => `battleTerms.crits.${table}.${effect.type}.${effect.id}`;
+
+export const critNameRef = (effect: Pick<CriticalEffect, "id" | "type">, table: CritTable = "attack"): TextRef => dynamicTextRef(`${critKey(effect, table)}.name`);
+
+export const critEffectId = (effect: Pick<CriticalEffect, "id" | "type">, table: CritTable = "attack") => `crit.${table}.${effect.type}.${effect.id}`;
 
 export interface CritFlavor {
   index: number;
@@ -107,7 +113,7 @@ export function applyCriticalEffect(
   participant: BattleParticipant,
   effect: CriticalEffect,
   currentRound: number,
-  opts: { offTurn?: boolean; source?: string } = {},
+  opts: { offTurn?: boolean; source?: string; table?: CritTable } = {},
 ): BattleParticipant {
   const updated = { ...participant };
 
@@ -128,6 +134,8 @@ export function applyCriticalEffect(
 
   const duration = spec.duration ?? effect.effect.duration ?? 1;
 
+  const table = opts.table ?? "attack";
+
   return {
     ...base,
     battleData: {
@@ -136,9 +144,10 @@ export function applyCriticalEffect(
         base,
         {
           id: freeEffectId(base, `critical-${spec.idPart}-${currentRound}${opts.source ? `-${opts.source}` : ""}`),
-          name: effect.name,
+          name: critEffectId(effect, table),
+          label: critNameRef(effect, table),
           type: spec.type,
-          description: effect.description,
+          description: dynamicTextRef(`${critKey(effect, table)}.description`),
           duration,
           effects: spec.legacy ? [{ type: spec.legacy, value: spec.legacyValue ?? 1 }] : [],
           ...(spec.modifiers && { abilityEffects: spec.modifiers }),

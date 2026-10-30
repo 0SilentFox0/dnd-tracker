@@ -1,4 +1,3 @@
-/* eslint-disable no-restricted-syntax -- label/description are stored into the active effect (data); the battle UI reads battleCommon.conditions.* keys */
 import { EffectMarker } from "@/lib/constants/battle";
 import { type RulesEdition } from "@/lib/constants/rules";
 import { dynamicTextRef } from "@/lib/i18n/text-ref";
@@ -13,8 +12,6 @@ export { CONDITION_5E_KEYS, type Condition5eKey } from "@/lib/utils/abilities/sc
 export type ExhaustionVariant = RulesEdition;
 
 interface Condition5eDef {
-  label: string;
-  description: string;
   markers: string[];
   flags: (variant: ExhaustionVariant) => StaticEffect[];
   implies?: Condition5eKey[];
@@ -28,47 +25,33 @@ const INCAPACITATED_MARKERS = [EffectMarker.SKIP_ACTION, EffectMarker.NO_BONUS_A
 
 export const CONDITION_5E_REGISTRY = {
   blinded: {
-    label: "Засліплений",
-    description: "Не бачить: атаки з недоліком, атаки по ньому з перевагою.",
     markers: [],
     flags: () => [flag({ flag: "disadvantage" }), flag({ flag: "advantageForAttackers" })],
   },
   charmed: {
-    label: "Зачарований",
-    description: "Не може атакувати зачаровувача; зачаровувач має перевагу в соціальних перевірках (рушій перевіряє джерело стану).",
     markers: [],
     flags: () => [],
   },
-  deafened: { label: "Оглухлий", description: "Нічого не чує; без механічного впливу в бою.", markers: [], flags: () => [] },
+  deafened: { markers: [], flags: () => [] },
   frightened: {
-    label: "Наляканий",
-    description: "Недолік на атаки, поки джерело страху в полі зору (рушій перевіряє джерело стану).",
     markers: [],
     flags: () => [],
   },
   grappled: {
-    label: "Схоплений",
-    description: "Швидкість 0. За правилами 2024 — недолік на атаки по всіх, крім того, хто схопив (виняток для схоплювача не моделюється).",
     markers: [EffectMarker.IMMOBILIZED],
     flags: (v) => (v === "2024" ? [flag({ flag: "disadvantage" })] : []),
   },
-  incapacitated: { label: "Недієздатний", description: "Не може діяти й реагувати; концентрація переривається.", markers: INCAPACITATED_MARKERS, flags: () => [] },
+  incapacitated: { markers: INCAPACITATED_MARKERS, flags: () => [] },
   invisible: {
-    label: "Невидимий",
-    description: "Атаки з перевагою, атаки по ньому з недоліком.",
     markers: [],
     flags: () => [flag({ flag: "advantage", attackKind: "all" }), flag({ flag: "disadvantageForAttackers" })],
   },
   paralyzed: {
-    label: "Паралізований",
-    description: "Недієздатний і не рухається; автопровал СИЛ/СПР; атаки по ньому з перевагою, ближні з 5 фт — критичні.",
     markers: [EffectMarker.IMMOBILIZED],
     implies: ["incapacitated"],
     flags: () => [flag({ flag: "autoFailSave", abilities: STR_DEX }), flag({ flag: "advantageForAttackers" }), flag({ flag: "autoCritAdjacent" })],
   },
   petrified: {
-    label: "Скам'янілий",
-    description: "Недієздатний, не рухається; автопровал СИЛ/СПР; опір усій шкоді; імунітет до отруєння.",
     markers: [EffectMarker.IMMOBILIZED],
     implies: ["incapacitated"],
     flags: () => [
@@ -78,36 +61,26 @@ export const CONDITION_5E_REGISTRY = {
       flag({ flag: "conditionImmunity", conditions: ["poisoned"] }),
     ],
   },
-  poisoned: { label: "Отруєний", description: "Недолік на атаки.", markers: [], flags: () => [flag({ flag: "disadvantage" })] },
+  poisoned: { markers: [], flags: () => [flag({ flag: "disadvantage" })] },
   prone: {
-    label: "Повалений",
-    description: "Недолік на власні атаки; ближні атаки по ньому з перевагою, дальні — з недоліком.",
     markers: [],
     flags: () => [flag({ flag: "disadvantage" }), flag({ flag: "proneDefense" })],
   },
   restrained: {
-    label: "Скутий",
-    description: "Швидкість 0; недолік на атаки і рятівні кидки СПР; атаки по ньому з перевагою.",
     markers: [EffectMarker.IMMOBILIZED],
     flags: () => [flag({ flag: "disadvantage" }), flag({ flag: "advantageForAttackers" }), flag({ flag: "saveDisadvantage", abilities: ["dexterity"] })],
   },
   stunned: {
-    label: "Приголомшений",
-    description: "Недієздатний, не рухається; автопровал СИЛ/СПР; атаки по ньому з перевагою.",
     markers: [EffectMarker.IMMOBILIZED],
     implies: ["incapacitated"],
     flags: () => [flag({ flag: "autoFailSave", abilities: STR_DEX }), flag({ flag: "advantageForAttackers" })],
   },
   unconscious: {
-    label: "Непритомний",
-    description: "Недієздатний, не рухається, повалений; автопровал СИЛ/СПР; атаки по ньому з перевагою, ближні з 5 фт — критичні.",
     markers: [EffectMarker.IMMOBILIZED],
     implies: ["incapacitated", "prone"],
     flags: () => [flag({ flag: "autoFailSave", abilities: STR_DEX }), flag({ flag: "advantageForAttackers" }), flag({ flag: "autoCritAdjacent" })],
   },
   exhaustion: {
-    label: "Виснаження",
-    description: "Накопичується рівнями 1–6; ефекти залежать від варіанта правил (2014 / 2024); 6 рівень — смерть.",
     markers: [],
     flags: () => [],
   },
@@ -192,7 +165,7 @@ export function conditionEffectInput(key: Condition5eKey, opts: ConditionEffectO
   return {
     timedKey: opts.timedKey,
     source: opts.source,
-    name: CONDITION_5E_REGISTRY[key].label,
+    name: key,
     label: dynamicTextRef(`battleCommon.conditions.${key}.label`),
     type: "condition",
     rounds: opts.rounds,

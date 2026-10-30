@@ -5,7 +5,6 @@ import { useMemo, useState } from "react";
 import { useDeleteAllSpells, useMoveSpellToGroup, useRemoveSpellFromGroup, useSpellGroups, useSpells } from "./useSpells";
 
 import { useSearch } from "@/lib/hooks/common";
-import { useTranslator } from "@/lib/i18n/use-translator";
 import { convertGroupedSpellsToArray, groupSpellsByGroupAndLevel } from "@/lib/utils/spells/spells";
 import type { Spell } from "@/types/spells";
 
@@ -22,8 +21,6 @@ export function useSpellsList(campaignId: string) {
 
   const deleteAll = useDeleteAllSpells(campaignId);
 
-  const tg = useTranslator("gameTerms");
-
   const [listTag, setListTag] = useState<string | null>(null);
 
   const tags = useMemo(() => [...new Set(spells.flatMap((s) => s.lists ?? []))].sort((a, b) => a.localeCompare(b)), [spells]);
@@ -32,7 +29,7 @@ export function useSpellsList(campaignId: string) {
 
   const search = useSearch(tagged, spellFields);
 
-  const groups = useMemo(() => convertGroupedSpellsToArray(groupSpellsByGroupAndLevel(search.items, tg)), [search.items, tg]);
+  const groups = useMemo(() => convertGroupedSpellsToArray(groupSpellsByGroupAndLevel(search.items)), [search.items]);
 
   return {
     spells,

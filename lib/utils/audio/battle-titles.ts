@@ -1,4 +1,6 @@
-import { BATTLE_TRACK_GROUP, TRACK_GROUP_SEPARATOR } from "./playlist-groups";
+import { TRACK_GROUP_SEPARATOR } from "./playlist-groups";
+
+import { BATTLE_TITLE_KEYWORD } from "@/lib/constants/track-title-conventions";
 
 export interface BattleTrackRef {
   id: string;
@@ -11,7 +13,7 @@ export interface BattleTitleChange {
   to: string;
 }
 
-const BATTLE_TITLE = new RegExp(`^(.+?)${TRACK_GROUP_SEPARATOR}${BATTLE_TRACK_GROUP}(?:\\s+\\d+)?(?:\\s+(\\(.+\\)))?$`, "u");
+const BATTLE_TITLE = new RegExp(`^(.+?)${TRACK_GROUP_SEPARATOR}${BATTLE_TITLE_KEYWORD}(?:\\s+\\d+)?(?:\\s+(\\(.+\\)))?$`, "u");
 
 /** «<Раса> - Битва», «… Битва 2», «… Битва (альфа-версія)» → раса і примітка в дужках */
 export function parseBattleTitle(title: string): { faction: string; note: string | null } | null {
@@ -21,7 +23,7 @@ export function parseBattleTitle(title: string): { faction: string; note: string
 }
 
 export function battleTrackTitle(faction: string, n: number | null, note: string | null): string {
-  return [`${faction}${TRACK_GROUP_SEPARATOR}${BATTLE_TRACK_GROUP}`, n, note].filter(Boolean).join(" ");
+  return [`${faction}${TRACK_GROUP_SEPARATOR}${BATTLE_TITLE_KEYWORD}`, n, note].filter(Boolean).join(" ");
 }
 
 /** Нумерація за порядком бібліотеки лише серед треків з однаковою назвою (раса + примітка); ідемпотентно */

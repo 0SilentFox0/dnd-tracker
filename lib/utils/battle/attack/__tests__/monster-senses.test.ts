@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 
+import { textOf } from "@/lib/i18n/test/text";
 import { resolved } from "@/lib/utils/abilities/__tests__/fixtures";
 import { EffectSchema } from "@/lib/utils/abilities/schema";
 import { CLAWS, placed } from "@/lib/utils/battle/__tests__/fixtures/placed";
@@ -11,7 +12,11 @@ const sensed = (sense: string, range = 30) => placed("monster", { at: { x: 0, y:
 
 const condition = (ps: BattleParticipant[], id: string, key: Condition5eKey) => applyCondition5e(ps, id, { key, rounds: 5, source: { participantId: "src", name: "X" }, sourceName: "X", timedKey: key, round: 1 }).participants;
 
-const reasons = (ps: BattleParticipant[]) => rollModeReasons(ps[0], CLAWS, ps, { targetId: ps[1].basicInfo.id });
+const reasons = (ps: BattleParticipant[]) => {
+  const r = rollModeReasons(ps[0], CLAWS, ps, { targetId: ps[1].basicInfo.id });
+
+  return { advantage: r.advantage.map((l) => textOf(l)), disadvantage: r.disadvantage.map((l) => textOf(l)) };
+};
 
 describe("monster senses", () => {
   it("validates the passive sense flag", () => {

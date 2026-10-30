@@ -10,6 +10,7 @@ import { liveActiveEffects } from "@/lib/utils/abilities/engine/effects/zone-eff
 import { evaluateCondition, hasCreatureTypeCondition } from "@/lib/utils/abilities/registry/conditions";
 import type { AttackKind, DamageKind, FlagEffect, FlagKey, StaticEffect, StatKey } from "@/lib/utils/abilities/schema";
 import { isBakedStat, isStaticEffect } from "@/lib/utils/abilities/schema/kinds";
+import { effectName } from "@/lib/utils/battle/common/terms";
 import type { AbilitySource, ResolvedAbility } from "@/types/abilities";
 import type { BattleParticipant } from "@/types/battle";
 import type { LogLine } from "@/types/text";
@@ -198,7 +199,7 @@ export function collectModifiers(
 
     const condition = ae.effects.find((m) => m.type === "blinded" || m.type === "invisible")?.type;
 
-    for (const effect of ae.abilityEffects ?? legacyActiveEffectModifiers(ae)) add(effect, owner, { label: ae.name, sourceType: "effect", icon: ae.icon ?? ae.source?.icon, source: ae.name, ...(condition && { condition }) });
+    for (const effect of ae.abilityEffects ?? legacyActiveEffectModifiers(ae)) add(effect, owner, { label: effectName(ae), sourceType: "effect", icon: ae.icon ?? ae.source?.icon, source: effectName(ae), ...(condition && { condition }) });
   }
 
   for (const effect of extra) add(effect, subject, { label: textRef("abilityText.thisAction"), sourceType: "action" });

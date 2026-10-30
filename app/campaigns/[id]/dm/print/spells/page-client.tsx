@@ -35,11 +35,7 @@ export function PrintSpellsPageClient({
 
   const tg = useTranslator("gameTerms");
 
-  const groupedSpells = useMemo(() => {
-    const map = groupSpellsByGroupAndLevel(initialSpells, tg);
-
-    return convertGroupedSpellsToArray(map);
-  }, [initialSpells, tg]);
+  const groupedSpells = useMemo(() => convertGroupedSpellsToArray(groupSpellsByGroupAndLevel(initialSpells)), [initialSpells]);
 
   return (
     <div>
@@ -88,10 +84,10 @@ export function PrintSpellsPageClient({
                 </span>
               </div>
 
-              {levels.map(([levelLabel, levelSpells]) => (
-                <div key={levelLabel} className="mb-6">
+              {levels.map(([level, levelSpells]) => (
+                <div key={level} className="mb-6">
                   <h3 className="text-base font-semibold mb-2 uppercase tracking-wide text-muted-foreground">
-                    {tg(`spellLevels.${levelSpells[0]?.level ?? 0}`)}
+                    {tg(`spellLevels.${level}`)}
                     <span className="ml-2 text-xs font-normal">
                       ({levelSpells.length})
                     </span>

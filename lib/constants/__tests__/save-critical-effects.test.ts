@@ -67,9 +67,9 @@ describe("catalog", () => {
 
     for (const e of [...SAVE_SUCCESS_EFFECTS, ...SAVE_FAIL_EFFECTS]) {
       if (HANDLED_IN_SPELL.includes(e.effect.type)) {
-        expect(applyCriticalEffect(target, e, 1)).toEqual(target);
+        expect(applyCriticalEffect(target, e, 1, { table: "save" })).toEqual(target);
       } else {
-        expect(applyCriticalEffect(target, e, 1), e.name).not.toEqual(target);
+        expect(applyCriticalEffect(target, e, 1, { table: "save" }), String(e.id)).not.toEqual(target);
       }
     }
   });

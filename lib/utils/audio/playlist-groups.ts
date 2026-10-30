@@ -1,10 +1,10 @@
+import { BATTLE_TITLE_KEYWORD, OTHER_TITLE_KEYWORD } from "@/lib/constants/track-title-conventions";
 import { normalizeSearchText } from "@/lib/utils/common/text-search";
 import type { TrackKind } from "@/types/audio";
 
 export const TRACK_GROUP_SEPARATOR = " - ";
 
-// eslint-disable-next-line no-restricted-syntax -- track-title convention stored in DB
-export const OTHER_TRACK_GROUP = "Інше";
+export const OTHER_TRACK_GROUP = "__other";
 
 export interface PlaylistFilter {
   query: string;
@@ -18,17 +18,16 @@ export interface TrackGroup<T> {
   tracks: T[];
 }
 
-// eslint-disable-next-line no-restricted-syntax -- track-title convention stored in DB
-export const BATTLE_TRACK_GROUP = "Битва";
+export const BATTLE_TRACK_GROUP = "__battle";
 
-const BATTLE_TITLE = /^Битва(\s|$)/u;
+const BATTLE_TITLE = new RegExp(`^${BATTLE_TITLE_KEYWORD}(\\s|$)`, "u");
 
 const separatorAt = (title: string) => title.indexOf(TRACK_GROUP_SEPARATOR);
 
 const isBattleTitle = (title: string) => {
   const at = separatorAt(title);
 
-  return at > 0 && BATTLE_TITLE.test(title.slice(at + TRACK_GROUP_SEPARATOR.length).trim());
+  return at > 0 && (BATTLE_TITLE.test(title.slice(at + TRACK_GROUP_SEPARATOR.length).trim()) || title.slice(0, at).trim() === BATTLE_TITLE_KEYWORD);
 };
 
 /** Група — частина назви до « - » («Люди - Місто» → «Люди»); усі «<раса> - Битва N» — в одній групі «Битва» */
@@ -39,7 +38,7 @@ export function trackGroupName(title: string): string {
 
   const group = at > 0 ? title.slice(0, at).trim() : "";
 
-  return group || OTHER_TRACK_GROUP;
+  return !group || group === OTHER_TITLE_KEYWORD ? OTHER_TRACK_GROUP : group;
 }
 
 export function trackGroupLabelKey(name: string): "music.groups.other" | "music.groups.battle" | null {
@@ -110,7 +109,7 @@ export function joinTrackTitle(group: string, name: string): string {
 
   const n = name.trim();
 
-  return g && g !== OTHER_TRACK_GROUP && n ? `${g}${TRACK_GROUP_SEPARATOR}${n}` : n;
+  return g && g !== OTHER_TITLE_KEYWORD && g !== OTHER_TRACK_GROUP && n ? `${g}${TRACK_GROUP_SEPARATOR}${n}` : n;
 }
 
 /** Підказки для поля «Група»: усі префікси назв, включно з расами битв */

@@ -17,6 +17,7 @@ describe("trackGroupName", () => {
   it("усі «<раса> - Битва N» — група «Битва»; «Битвище» і інші треки раси — ні", () => {
     expect(trackGroupName("Люди - Битва")).toBe(BATTLE_TRACK_GROUP);
     expect(trackGroupName("Ельфи - Битва 2")).toBe(BATTLE_TRACK_GROUP);
+    expect(trackGroupName("Битва - Фінал")).toBe(BATTLE_TRACK_GROUP);
     expect(trackGroupName("Нейтральні - Битва 3 (HoMM III)")).toBe(BATTLE_TRACK_GROUP);
     expect(trackGroupName("Люди - Битвище")).toBe("Люди");
     expect(trackGroupName("Люди - Облога після Битва")).toBe("Люди");
@@ -82,8 +83,8 @@ describe("splitTrackTitle / joinTrackTitle", () => {
 
 describe("trackGroupLabelKey", () => {
   it("маркери «Інше» і «Битва» мають ключі, решта груп — ні", () => {
-    expect(trackGroupLabelKey("Інше")).toBe("music.groups.other");
-    expect(trackGroupLabelKey("Битва")).toBe("music.groups.battle");
+    expect(trackGroupLabelKey(OTHER_TRACK_GROUP)).toBe("music.groups.other");
+    expect(trackGroupLabelKey(BATTLE_TRACK_GROUP)).toBe("music.groups.battle");
     expect(trackGroupLabelKey("Люди")).toBeNull();
   });
 });

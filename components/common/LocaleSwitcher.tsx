@@ -3,12 +3,7 @@
 import { Button } from "@/components/ui/button";
 import { useSetLocale } from "@/lib/hooks/common";
 import type { Locale } from "@/lib/i18n/config";
-
-const LABELS: Record<Locale, string> = {
-  // eslint-disable-next-line no-restricted-syntax -- native language name
-  uk: "Українська",
-  en: "English",
-};
+import { NATIVE_LANGUAGE_NAMES } from "@/lib/i18n/native-language-names";
 
 // with hrefs (landing) the options are real links, so crawlers and no-JS visitors reach the other language
 export function LocaleSwitcher({ hrefs }: { hrefs?: Record<Locale, string> }) {
@@ -16,13 +11,13 @@ export function LocaleSwitcher({ hrefs }: { hrefs?: Record<Locale, string> }) {
 
   return (
     <div className="flex items-center gap-1" role="group">
-      {(Object.keys(LABELS) as Locale[]).map((code) => {
+      {(Object.keys(NATIVE_LANGUAGE_NAMES) as Locale[]).map((code) => {
         const active = code === locale;
 
         const label = (
           <>
             {code.toUpperCase()}
-            <span className="sr-only">{LABELS[code]}</span>
+            <span className="sr-only">{NATIVE_LANGUAGE_NAMES[code]}</span>
           </>
         );
 

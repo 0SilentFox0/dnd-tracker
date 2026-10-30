@@ -26,7 +26,6 @@ export interface SpellGroupItemActions {
 }
 
 interface SpellLevelAccordionProps {
-  levelName: string;
   level: number;
   spells: Spell[];
   campaignId: string;
@@ -35,7 +34,6 @@ interface SpellLevelAccordionProps {
 }
 
 export function SpellLevelAccordion({
-  levelName,
   level,
   spells,
   campaignId,
@@ -65,7 +63,7 @@ export function SpellLevelAccordion({
 
   return (
     <>
-      <AccordionItem value={levelName} key={levelName}>
+      <AccordionItem value={String(level)}>
         <div className="relative">
           <AccordionTrigger className="px-3 sm:px-5 pr-12 sm:pr-14">
             <div className="flex items-center justify-between w-full min-w-0 gap-2 sm:gap-3">

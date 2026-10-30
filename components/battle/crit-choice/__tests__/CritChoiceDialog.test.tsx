@@ -9,6 +9,8 @@ import type { useCritChoiceDialog } from "@/lib/hooks/battle";
 import { BattleSceneContext } from "@/lib/hooks/battle";
 import type { BattleSceneValue } from "@/lib/hooks/battle/types";
 import { renderWithConfirm } from "@/lib/i18n/test/render-uk";
+import { textOf } from "@/lib/i18n/test/text";
+import { critNameRef } from "@/lib/utils/battle/attack/critical";
 import { critEffectsFor } from "@/lib/utils/battle/crit-choice/catalog";
 
 
@@ -52,7 +54,7 @@ describe("CritChoiceDialog", () => {
 
     const [first] = critEffectsFor("attack", "success");
 
-    fireEvent.click(screen.getAllByRole("radio", { name: new RegExp(first.name) })[0]);
+    fireEvent.click(screen.getAllByRole("radio", { name: new RegExp(textOf(critNameRef(first))) })[0]);
     expect(confirm.disabled).toBe(true);
 
     fireEvent.click(screen.getAllByRole("button", { name: "Випадково" })[1]);

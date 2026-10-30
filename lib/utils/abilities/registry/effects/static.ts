@@ -13,6 +13,7 @@ import { effectSource } from "@/lib/utils/abilities/engine/effects/timed-effects
 import type { Effect, Flat, StaticEffect } from "@/lib/utils/abilities/schema";
 import { DAMAGE_FILTER_KINDS,STAT_KEYS } from "@/lib/utils/abilities/schema/kinds";
 import { seg, type Segment } from "@/lib/utils/abilities/segments";
+import { effectName } from "@/lib/utils/battle/common/terms";
 import type { LogLine } from "@/types/text";
 
 function stripTiming(effect: StaticEffect): StaticEffect {
@@ -74,7 +75,7 @@ export function applyStatic(input: EffectApplyInput<StaticEffect>, describe: (e:
         ctx.round,
       );
 
-      for (const e of removed) cancelled.push(textRef("abilityText.log.cancelsEffect", { ability: ability.name, effect: e.name, target: target.basicInfo.name }));
+      for (const e of removed) cancelled.push(textRef("abilityText.log.cancelsEffect", { ability: ability.name, effect: effectName(e), target: target.basicInfo.name }));
 
       return participant;
     });

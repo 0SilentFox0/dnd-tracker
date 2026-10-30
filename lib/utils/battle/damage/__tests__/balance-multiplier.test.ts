@@ -104,7 +104,7 @@ describe("множник застосовується рівно раз на к�
       attack: club,
       damageRolls: [3, 3],
       allParticipants: [a, t],
-      attackRoll: { isCritical: true, criticalEffect: { id: 1, name: "Крит", description: "", type: "success", flavorCount: 0, effect: { type: effectType } } },
+      attackRoll: { isCritical: true, criticalEffect: { id: 1, type: "success", flavorCount: 0, effect: { type: effectType } } },
       currentRound: 1,
       ...extra,
     });

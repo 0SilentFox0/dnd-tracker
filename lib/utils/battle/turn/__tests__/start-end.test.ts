@@ -74,7 +74,7 @@ describe("рух на початку ходу", () => {
 });
 
 describe("critical effects at the start of turn", () => {
-  const crit = (type: CriticalEffectType): CriticalEffect => ({ id: 1, name: "Е", description: "о", type: "success", flavorCount: 0, effect: { type, duration: type === "lose_action" ? 1 : 2 } });
+  const crit = (type: CriticalEffectType): CriticalEffect => ({ id: 1, type: "success", flavorCount: 0, effect: { type, duration: type === "lose_action" ? 1 : 2 } });
 
   const hit = (type: CriticalEffectType) => applyCriticalEffect(createMockParticipant(), crit(type), 1);
 
