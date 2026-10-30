@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { assignStandardArray, createRng, pointBuySpent, validateAbilityScores } from "@/lib/utils/characters/generate";
+import { assignStandardArray, createRng, isUntouchedScores, pointBuySpent, recommendedPriority, recommendedScores, validateAbilityScores } from "@/lib/utils/characters/generate";
 
 const s = (str: number, dex: number, con: number, int: number, wis: number, cha: number) => ({ strength: str, dexterity: dex, constitution: con, intelligence: int, wisdom: wis, charisma: cha });
 
@@ -25,5 +25,36 @@ describe("assignStandardArray", () => {
 
     expect(mage.intelligence).toBe(15);
     expect(validateAbilityScores(mage, "standard")).toBe(true);
+  });
+});
+
+describe("recommendedScores", () => {
+  it("puts the standard array on the priority abilities first, rest in fixed order", () => {
+    const wizard = recommendedScores(["intelligence", "wisdom"]);
+
+    expect(wizard).toEqual(s(8, 12, 13, 15, 14, 10));
+    expect(validateAbilityScores(wizard, "standard")).toBe(true);
+  });
+
+  it("is deterministic and tolerates an empty priority", () => {
+    expect(recommendedScores([])).toEqual(recommendedScores([]));
+    expect(validateAbilityScores(recommendedScores([]), "standard")).toBe(true);
+  });
+});
+
+describe("recommendedPriority", () => {
+  it("uses class saves and casting ability, falling back to the archetype", () => {
+    expect(recommendedPriority({ cls: { spellcastingAbility: "intelligence", savingThrows: ["intelligence", "wisdom"] } })).toEqual(["intelligence", "wisdom"]);
+    expect(recommendedPriority({ archetype: "rogue" })).toEqual(["dexterity", "intelligence"]);
+    expect(recommendedPriority({ archetype: "" })).toBeNull();
+  });
+});
+
+describe("isUntouchedScores", () => {
+  it("is true for defaults and for the previous recommendation only", () => {
+    expect(isUntouchedScores(s(10, 10, 10, 10, 10, 10), null)).toBe(true);
+    expect(isUntouchedScores(recommendedScores(["strength"]), ["strength"])).toBe(true);
+    expect(isUntouchedScores(recommendedScores(["strength"]), ["dexterity"])).toBe(false);
+    expect(isUntouchedScores(s(10, 10, 10, 10, 10, 11), null)).toBe(false);
   });
 });
