@@ -82,4 +82,22 @@ describe("AiProposalBadge", () => {
     fireEvent.click(screen.getByText("2"));
     expect(onClick).toHaveBeenCalled();
   });
+
+  it("createAcquaintance: картка мікро NPC зі списком змінених рядків", () => {
+    const ops = [{ op: "createAcquaintance", ref: "b", name: "Беатріс", description: "Шинкарка" }, base.ops[0], { ...base.ops[0], rowId: "r2" }];
+
+    render(<AiProposalCard proposal={{ ...base, ops, status: "pending" } as never} actions={actions()} busy={false} campaignId="c1" />);
+    expect(screen.getByText('ai.proposal.newAcquaintance {"name":"Беатріс"}')).toBeTruthy();
+    expect(screen.getByText("Шинкарка")).toBeTruthy();
+    expect(screen.getByText('ai.proposal.changedRows {"count":2}')).toBeTruthy();
+    expect(screen.getAllByText("Дзвони мовчать")).toHaveLength(2);
+  });
+
+  it("createAcquaintance без опису і без змінених рядків", () => {
+    const ops = [{ op: "createAcquaintance", ref: "b", name: "Беатріс", description: "" }];
+
+    render(<AiProposalCard proposal={{ ...base, ops, status: "pending" } as never} actions={actions()} busy={false} campaignId="c1" />);
+    expect(screen.getByText('ai.proposal.newAcquaintance {"name":"Беатріс"}')).toBeTruthy();
+    expect(screen.queryByText(/changedRows/)).toBeNull();
+  });
 });

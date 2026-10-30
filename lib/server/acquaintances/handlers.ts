@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 
+import { createAcquaintance, findAcquaintanceByCharacter } from "./service";
 import { ACQUAINTANCE_INCLUDE, assertSectionInCampaign, ownedAcquaintance, readAcquaintances, viewAcquaintanceRows } from "./store";
 
 import { API_ERRORS } from "@/lib/constants/api-errors";
@@ -48,24 +49,12 @@ export function createAcquaintanceHandler(req: Request, campaignId: string) {
         if (character instanceof NextResponse) return character;
 
         // the same hero is one acquaintance: re-picking returns it so the caller inserts its chip
-        const existing = await prisma.acquaintance.findFirst({ where: { campaignId, characterId: body.characterId }, include: ACQUAINTANCE_INCLUDE });
+        const existing = await findAcquaintanceByCharacter(prisma, campaignId, body.characterId);
 
         if (existing) return NextResponse.json(await dmView(campaignId, access.userId, existing));
       }
 
-      const created = await prisma.acquaintance.create({
-        data: {
-          campaignId,
-          kind: body.kind,
-          characterId: body.kind === "character" ? (body.characterId ?? null) : null,
-          name: body.name,
-          description: body.description,
-          avatarUrl: body.avatarUrl ?? null,
-          sourcePageId: body.sourcePageId,
-          sourceSectionId: body.sourceSectionId,
-        },
-        include: ACQUAINTANCE_INCLUDE,
-      });
+      const created = await createAcquaintance(prisma, campaignId, body);
 
       return NextResponse.json(await dmView(campaignId, access.userId, created), { status: 201 });
     },

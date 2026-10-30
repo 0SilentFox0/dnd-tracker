@@ -10,7 +10,7 @@ import { createModel } from "@/lib/ai/providers";
 import { recoveredState } from "@/lib/ai/recovered-state";
 import { appendMessage, loadMessages, loadThread } from "@/lib/ai/threads";
 import { toAiSdkTools } from "@/lib/ai/tools";
-import { AI_LIMITS, API_TOKEN_SCOPES } from "@/lib/constants/ai";
+import { AI_LIMITS, AI_SCENARIO_READ_TOOLS, API_TOKEN_SCOPES } from "@/lib/constants/ai";
 import { API_ERRORS } from "@/lib/constants/api-errors";
 import { getRequestLocale } from "@/lib/i18n/request-locale";
 import { getTranslator } from "@/lib/i18n/translator";
@@ -123,7 +123,7 @@ async function streamChat(scope: StreamScope, model: LanguageModel): Promise<Res
   ]);
 
   // Historical tool outputs predate the current transport redaction boundary.
-  const history = publicToolData(compactToolOutputs(stored)) as UIMessage[];
+  const history = publicToolData(compactToolOutputs(stored, { keep: { tools: AI_SCENARIO_READ_TOOLS, maxChars: AI_LIMITS.keptReadingChars } })) as UIMessage[];
 
   const result = streamText({
     model,

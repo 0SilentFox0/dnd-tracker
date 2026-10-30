@@ -151,6 +151,10 @@
       "s3": {
         "heading": "MCP and API tokens",
         "b0": "The same tools are available to external AI clients (Claude Desktop, Cursor) through MCP. A token is created on the campaign's \"AI and API\" page and shown only once."
+      },
+      "s4": {
+        "heading": "Large scenarios and micro NPCs",
+        "b0": "On a large page the assistant reads the scenario in chunks and finds every form of a name. It can propose a micro NPC plus mention chips in one proposal; the acquaintance is created when you apply it (acquaintances must be enabled for the campaign)."
       }
     }
   },

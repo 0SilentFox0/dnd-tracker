@@ -3,6 +3,7 @@ import type { AssistantWriteAction } from "../types";
 import { API_ERRORS } from "@/lib/constants/api-errors";
 import { getTranslator } from "@/lib/i18n/translator";
 import { proposeScenarioEditSchema } from "@/lib/schemas/ai";
+import { readAcquaintancesEnabled } from "@/lib/server/acquaintances/store";
 import { applyProposal,createProposal } from "@/lib/server/assistant/proposals";
 import { ContentError } from "@/lib/server/content/errors";
 import { withCampaignContentWrite } from "@/lib/server/content/write";
@@ -23,6 +24,8 @@ export const SCENARIO_EDIT_ACTION: AssistantWriteAction = {
     const page = state.page;
 
     if (!page) throw new ContentError(API_ERRORS.SCENARIO_PAGE_NOT_FOUND, 404);
+
+    if (input.ops.some((o) => o.op === "createAcquaintance") && !(await readAcquaintancesEnabled(caller.actor.campaignId))) throw new ContentError(API_ERRORS.ACQUAINTANCES_DISABLED, 403);
 
     const resolved = resolveAiOps(readContentStrict(page.content), input.ops, await getTranslator(caller.locale, "assistant"));
 

@@ -2,6 +2,8 @@ import { describe, expect, it } from "vitest";
 
 import { makeT } from "@/lib/i18n/test/mock-t";
 import { applyAiOps, resolveAiOps as resolve } from "@/lib/utils/scenario/ai-ops";
+import { blockInventory, lostBlocks } from "@/lib/utils/scenario/block-inventory";
+import type { ScenarioAiOpInput } from "@/types/ai";
 import type { RichDoc, ScenarioContent } from "@/types/scenario";
 
 const doc = (text: string): RichDoc => ({ type: "doc", content: [{ type: "paragraph", content: [{ type: "text", text }] }] });
@@ -102,6 +104,20 @@ describe("resolveAiOps", () => {
   });
 });
 
+describe("resolveAiOps createAcquaintance", () => {
+  it("зберігає ref, ім'я та порожній опис за замовчуванням", () => {
+    const { ops } = ok(resolveAiOps(content(), [{ op: "createAcquaintance", ref: "b", name: "Беатріс" }]));
+
+    expect(ops).toEqual([{ op: "createAcquaintance", ref: "b", name: "Беатріс", description: "" }]);
+  });
+
+  it("applyAiOps не змінює сценарій для createAcquaintance", () => {
+    const c = content();
+
+    expect(applyAiOps(c, [{ op: "createAcquaintance", ref: "b", name: "Беатріс", description: "" }])).toEqual({ ok: true, content: c });
+  });
+});
+
 describe("applyAiOps", () => {
   it("застосовує всі чотири операції в правильні місця", () => {
     const { ops } = ok(resolveAiOps(content(), [
@@ -162,5 +178,90 @@ describe("applyAiOps", () => {
     const reordered = JSON.parse(JSON.stringify(content(), (_k, v) => (v && typeof v === "object" && !Array.isArray(v) ? Object.fromEntries(Object.entries(v).reverse()) : v)));
 
     expect(applyAiOps(reordered, ops).ok).toBe(true);
+  });
+});
+
+describe("resolveAiOps linkMentions", () => {
+  const withName = (): ScenarioContent => ({
+    legend: [],
+    sections: [
+      { id: "s1", title: "Бал", played: false, rows: [{ id: "r1", story: doc("Беатріс танцює"), notes: doc("Дай Беатрісі ключ") }, { id: "r2", story: doc("Тиша"), notes: doc("") }] },
+      { id: "s2", title: "Сад", played: false, rows: [{ id: "r3", story: doc("Лист для Беатріс"), notes: doc("") }] },
+    ],
+  });
+
+  const create = { op: "createAcquaintance", ref: "b", name: "Беатріс" } as const;
+
+  const link = (extra: object = {}): ScenarioAiOpInput => ({ op: "linkMentions", acquaintance: { ref: "b" }, forms: ["Беатріс", "Беатрісі"], ...extra });
+
+  it("ref: replaceRow per changed row with @ref placeholder id and before", () => {
+    const c = withName();
+
+    const { ops } = ok(resolveAiOps(c, [create, link()]));
+
+    const rows = ops.filter((o) => o.op === "replaceRow");
+
+    expect(rows.map((o) => o.op === "replaceRow" && o.rowId)).toEqual(["r1", "r3"]);
+
+    const first = rows[0];
+
+    if (first.op !== "replaceRow") throw new Error("x");
+
+    expect(first.story?.content[0].content?.[0].attrs).toEqual({ id: "@ref:b", label: "Беатріс", type: "acquaintance" });
+    expect(first.notes?.content[0].content?.[1].attrs?.label).toBe("Беатрісі");
+    expect(first.before.story).toEqual(c.sections[0].rows[0].story);
+    expect(ok(applyAiOps(c, ops)).content.sections[0].rows[0].story.content[0].content?.[0].type).toBe("mention");
+  });
+
+  it("id target is written as is; sectionId, rowIds and fields narrow the scope", () => {
+    const { ops } = ok(resolveAiOps(withName(), [link({ acquaintance: { id: "real" }, sectionId: "s1", rowIds: ["r1"], fields: ["notes"] })]));
+
+    expect(ops).toHaveLength(1);
+
+    const op = ops[0];
+
+    if (op.op !== "replaceRow") throw new Error("x");
+
+    expect(op.story).toBeUndefined();
+    expect(op.notes?.content[0].content?.[1].attrs?.id).toBe("real");
+  });
+
+  it("zero occurrences -> noMentions, no ops", () => {
+    const r = resolveAiOps(withName(), [create, link({ forms: ["Гаррі"] })]);
+
+    expect(r).toMatchObject({ ok: false, error: { message: "assistant.scenarioOps.noMentions" } });
+  });
+
+  it("already linked occurrences are skipped, so a second pass is noMentions", () => {
+    const c = withName();
+
+    const first = ok(resolveAiOps(c, [create, link()]));
+
+    const applied = ok(applyAiOps(c, first.ops));
+
+    expect(resolveAiOps(applied.content, [link({ acquaintance: { id: "@ref:b" } })])).toMatchObject({ ok: false, error: { message: "assistant.scenarioOps.noMentions" } });
+  });
+
+  it("unknown ref and unknown section fail", () => {
+    expect(resolveAiOps(withName(), [link()])).toMatchObject({ ok: false, error: { message: "assistant.scenarioOps.refMissing" } });
+    expect(resolveAiOps(withName(), [create, link({ sectionId: "zz" })])).toMatchObject({ ok: false, error: { message: "assistant.scenarioOps.sectionMissing" } });
+  });
+
+  it("two linkMentions over the same row chain their before states", () => {
+    const c = withName();
+
+    const { ops } = ok(resolveAiOps(c, [create, link({ forms: ["Беатріс"], fields: ["story"] }), link({ forms: ["Беатрісі"], fields: ["notes"] })]));
+
+    expect(ok(applyAiOps(c, ops)).content.sections[0].rows[0].notes.content[0].content?.[1].type).toBe("mention");
+  });
+
+  it("block inventory: mention count grows and nothing is reported lost", () => {
+    const { ops } = ok(resolveAiOps(withName(), [create, link()]));
+
+    for (const o of ops) if (o.op === "replaceRow") expect(lostBlocks(o.before.story, o.story ?? o.before.story)).toEqual({});
+
+    const row = ops.find((o) => o.op === "replaceRow");
+
+    expect(row?.op === "replaceRow" && blockInventory(row.story as RichDoc).mention).toBe(1);
   });
 });
