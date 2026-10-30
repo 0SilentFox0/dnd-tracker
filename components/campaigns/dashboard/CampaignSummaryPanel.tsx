@@ -1,3 +1,5 @@
+"use client";
+
 import { useTranslations } from "next-intl";
 
 import { CampaignSettingsButton } from "@/components/campaigns/settings/CampaignSettingsButton";

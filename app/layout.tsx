@@ -10,6 +10,7 @@ import { ConfirmProvider } from "@/components/ui/confirm-dialog";
 import { SITE_INDEXING, SITE_URL } from "@/lib/constants/site";
 import { ClientLocaleProvider } from "@/lib/i18n/client-locale-provider";
 import { loadStaticMessages } from "@/lib/i18n/messages";
+import { ROOT_NAMESPACES } from "@/lib/i18n/scopes";
 import { QueryProvider } from "@/lib/providers/query-provider";
 
 export const metadata: Metadata = {
@@ -24,7 +25,7 @@ export default async function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  const messages = await loadStaticMessages(["common", "validation", "whatsNew"]);
+  const messages = await loadStaticMessages(ROOT_NAMESPACES);
 
   return (
     <html lang="uk" className="dark">

@@ -3,7 +3,7 @@ import { describe, expect, it } from "vitest";
 
 import { LOCALES } from "../config";
 import { loadMessages, loadStaticMessages } from "../messages";
-import { BATTLE_NAMESPACES, CAMPAIGN_NAMESPACES } from "../scopes";
+import { BATTLE_NAMESPACES, CAMPAIGN_NAMESPACES, ROOT_NAMESPACES } from "../scopes";
 
 const LIMIT_KB = 100;
 
@@ -25,8 +25,8 @@ describe("message scope size", () => {
     expect(gzipKb).toBeLessThan(LIMIT_KB);
   });
 
-  it("root chunk (common + validation + whatsNew, both locales) stays under the budget", async () => {
-    const json = JSON.stringify(await loadStaticMessages(["common", "validation", "whatsNew"]));
+  it("root chunk (root namespaces, both locales) stays under the budget", async () => {
+    const json = JSON.stringify(await loadStaticMessages(ROOT_NAMESPACES));
 
     const gzipKb = gzipSync(json, { level: 9 }).length / 1024;
 
