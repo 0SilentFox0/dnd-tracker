@@ -138,3 +138,14 @@ Guard-стан превʼю й виконання не читає повні р�
 `execute.ts` є facade: transaction authority — `execution-transaction.ts`, recovery/effects — `execution-effects.ts`, persisted external JSON boundary — `execution-state.ts`; runtime limits — `lib/constants/assistant.ts` і доменні власники. `actions/handoff-navigation.ts` будує safe app hrefs, `compendium-reads.ts` володіє bounded read projections; `handoffs.ts` зберігає compatibility exports. Recovery run/receipt selects bounded, pending/status mapping і одна оплачувана operation/run збережені.
 
 UI cache identity — `lib/hooks/ai/keys.ts`, polling — `assistant-polling.ts` (intents10s, executing receipt2s). Receipt dedup scoped QueryClient/campaign із retry після invalidation failure; broad campaign invalidation збережено для cascades/unknown domains. Disclosure approval не переживає зміну campaign/thread/focus/notes/configuration; save-before-apply fail closed. Synthetic browser та SQL evidence розділено в [S8 checkpoint](../archive/superpowers/plans/2026-10-26-constructor-refactor-s8-progress.md).
+
+## Індекс сценарію (етап 3a)
+
+Похідний індекс «сцена → сутності» лише для ДМ: `GET /api/campaigns/[id]/scenario/index` → `ScenarioIndex` (сцени за `sortOrder`, сутності зі ступенем, ребра сцена–сутність, лічильники, `missing` для видалених сутностей), хук `useScenarioIndex`.
+
+- Таблиця `scenario_page_index` (`pageId`, `campaignId`, `version`, `facts`) — лінивий кеш: `loadScenarioIndex` читає `content` лише для сторінок, чий кеш відсутній, застарів за `version` або не проходить `pageFactsSchema`, пачками по 20. Шляхи запису сценарію таблицю не чіпають.
+- Запис через сирий upsert із `WHERE version <= EXCLUDED.version`: старіша збірка не перезаписує новіші факти.
+- Чисті функції: `extractPageFacts` (контент → посилання по розділах) і `buildScenarioIndex` (факти → граф) у `lib/utils/scenario/index/`.
+- Індексуються чіпи згадок (`unit`, `artifact`, `character`, `spell`, `battle`, `marker`, `acquaintance`), `battleId` і `marker` рядків та розділів; звичайний текст — ні. Чіп під марком `secret` (власним чи предка) дає `secret: true`, лише якщо всі входження в розділі секретні.
+- Назви сутностей резолвляться одним запитом на тип у межах кампанії; відсутня в БД сутність → `missing: true`, назва з чіпа.
+- Споживачі: етапи 3b/3c/4 епіку графа ([епік](../superpowers/specs/2026-10-30-scenario-graph-epic.md)).

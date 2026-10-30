@@ -92,7 +92,7 @@ describe.skipIf(!localDb)("loadScenarioIndex", () => {
     await loadScenarioIndex(campaignId);
     expect((await cachedRow(page.id))?.version).toBe(1);
 
-    await prisma.scenarioPageIndex.update({ where: { pageId: page.id }, data: { facts: sentinel("sentinel-1") } });
+    await prisma.scenarioPageIndex.update({ where: { pageId: page.id }, data: { facts: sentinel("sentinel-1") as object } });
     expect((await loadScenarioIndex(campaignId)).entities.map((e) => e.id)).toContain("sentinel-1");
 
     await prisma.scenarioPage.update({ where: { id: page.id }, data: { version: 2 } });
