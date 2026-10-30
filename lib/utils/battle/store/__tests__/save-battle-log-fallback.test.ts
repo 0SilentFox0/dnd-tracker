@@ -5,6 +5,7 @@ import { prepareSave } from "../save-battle";
 import * as battleConstants from "@/lib/constants/battle";
 import { textRef } from "@/lib/i18n/text-ref";
 import { context } from "@/lib/server/battles/__tests__/mutations/fixtures";
+import { decodeStoredLog, encodeLog } from "@/lib/utils/battle/log/codec";
 import { legacyLines } from "@/lib/utils/battle/log/legacy";
 import { systemEvent } from "@/lib/utils/battle/store/event-mapping";
 
@@ -17,11 +18,12 @@ function save(events: ReturnType<typeof systemEvent>[], logText?: (l: typeof log
 }
 
 describe("prepareSave: fallback resultText", () => {
-  it("подія з log отримує рендер через ' | ', details.log без змін", () => {
+  it("подія з log отримує рендер через ' | ', details.log зберігається у стислому вигляді", () => {
     const { events, delta } = save([systemEvent(1, log)], (l) => l.map(String).join(" | "));
 
     expect(events[0].resultText).toContain(" | ");
-    expect(events[0].details).toMatchObject({ log });
+    expect(events[0].details).toMatchObject({ log: encodeLog(log) });
+    expect(decodeStoredLog(events[0].details)).toEqual(log);
     expect(delta.events[0].resultText).toBe("");
   });
 

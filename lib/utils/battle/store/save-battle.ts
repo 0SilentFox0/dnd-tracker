@@ -23,6 +23,7 @@ import type {
 import { BATTLE_LOG_TEXT_FALLBACK, BATTLE_SNAPSHOTS_KEPT_AFTER_COMPLETE, BattleStatus } from "@/lib/constants/battle";
 import { DEFAULT_LOCALE, type Locale } from "@/lib/i18n/config";
 import { getTranslator } from "@/lib/i18n/translator";
+import { encodeLog } from "@/lib/utils/battle/log/codec";
 import { formatBattleLog } from "@/lib/utils/battle/log/lines";
 import type { BattleParticipant } from "@/types/battle";
 import type { LogLine } from "@/types/text";
@@ -129,13 +130,15 @@ export function prepareSave(before: LoadedBattle, outcome: BattleMutationOutcome
     resultText: e.resultText,
   }));
 
-  const stored = logText && BATTLE_LOG_TEXT_FALLBACK
-    ? events.map((e) => {
-      const log = (e.details as { log?: LogLine[] }).log;
+  const stored = events.map((e) => {
+    const log = (e.details as { log?: LogLine[] }).log;
 
-      return log ? { ...e, resultText: logText(log) } : e;
-    })
-    : events;
+    if (!log) return e;
+
+    const resultText = logText && BATTLE_LOG_TEXT_FALLBACK ? logText(log) : e.resultText;
+
+    return { ...e, resultText, details: { ...e.details, log: encodeLog(log) } };
+  });
 
   const { map: _map, ...scenePatch } = outcome.scene ?? {};
 

@@ -5,9 +5,9 @@ import { BattleStatus } from "@/lib/constants/battle";
 import { prisma } from "@/lib/db";
 import { getTranslator } from "@/lib/i18n/translator";
 import { ContentError } from "@/lib/server/content/errors";
+import { decodeStoredLog } from "@/lib/utils/battle/log/codec";
 import { formatBattleLog } from "@/lib/utils/battle/log/lines";
 import { loadBattle } from "@/lib/utils/battle/store";
-import type { LogLine } from "@/types/text";
 
 /** Legacy read remains available on ai; no new write transport is activated here. */
 export async function readLegacyBattleState(ctx: { campaignId: string; userId: string }, battleId?: string) {
@@ -44,6 +44,6 @@ export async function readLegacyBattleState(ctx: { campaignId: string; userId: s
         ac: p.combatStats.armorClass,
         status: p.combatStats.status,
       })),
-      lastEvents: events.reverse().map((e) => `R${e.round}: ${formatBattleLog(t, { resultText: e.resultText, log: (e.details as { log?: LogLine[] } | null)?.log })}`),
+      lastEvents: events.reverse().map((e) => `R${e.round}: ${formatBattleLog(t, { resultText: e.resultText, log: decodeStoredLog(e.details) })}`),
     };
 }

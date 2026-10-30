@@ -4,6 +4,7 @@
  * Читає бої `ТЕСТ …`, створені після --since (battle-sweep --keep-battles); --cleanup видаляє їх.
  */
 import { prisma } from "@/lib/db";
+import { decodeStoredLog } from "@/lib/utils/battle/log/codec";
 import { resultTextOf } from "@/scripts/sim/log-text";
 import type { LogLine } from "@/types/text";
 
@@ -53,11 +54,13 @@ async function main() {
   const perKey = new Map<string, number>();
 
   for (const e of events) {
-    const log = (e.details as { log?: LogLine[] }).log;
+    const stored = (e.details as { log?: LogLine[] }).log;
 
-    if (!log?.length) continue;
+    if (!stored?.length) continue;
 
-    const logBytes = bytes(JSON.stringify(log));
+    const log = decodeStoredLog(e.details) ?? [];
+
+    const logBytes = bytes(JSON.stringify(stored));
 
     logSum += logBytes;
     ukSum += bytes(resultTextOf({ log }));
