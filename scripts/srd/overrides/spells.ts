@@ -135,6 +135,7 @@ export const SPELL_OVERRIDES: Record<string, SpellOverride> = {
       { kind: "modifyStat", stat: "armor", flat: 1, duration: rounds(99) },
       { kind: "modifyStat", stat: "savingThrow", flat: 1, duration: rounds(99) },
     ],
+    ingredients: [{ name: "Platinum rings", qty: 2, minGp: 50, consumed: false, focus: false }],
   },
   "srd-2024_mind-blank": { spellEffects: [{ kind: "flag", flag: "conditionImmunity", conditions: ["charmed"], duration: rounds(99) }] },
   "srd-2024_foresight": {
@@ -198,9 +199,11 @@ export const SPELL_OVERRIDES: Record<string, SpellOverride> = {
   // zone effects last at most 10 rounds on the map; spikes hurt on entering the zone, not per 5 feet moved
   "srd-2024_fog-cloud": { ...NO_DAMAGE, targeting: sphere(20, 120, { rounds: 10, terrain: ["obscured"], side: "all" }) },
   "srd-2024_darkness": { ...NO_DAMAGE, targeting: sphere(15, 60, { rounds: 10, terrain: ["obscured"], side: "all" }) },
+  "srd-2024_true-strike": { ingredients: [] },
+  "srd-2024_gentle-repose": { ingredients: [{ name: "Copper pieces", qty: 2, minGp: 0.02, consumed: true, focus: false }] },
   "srd-2024_spike-growth": {
     ...NO_DAMAGE,
-    targeting: sphere(20, 150, { rounds: 10, terrain: ["difficult"], side: "enemies", onEnter: { effects: [{ kind: "dealDamage", amount: "2d4", damageType: "piercing" }] } }),
+    targeting: sphere(20, 150, { rounds: 10, terrain: ["difficult"], side: "all", onEnter: { effects: [{ kind: "dealDamage", amount: "2d4", damageType: "piercing" }] } }),
   },
   "srd-2024_gust-of-wind": {
     ...NO_DAMAGE,

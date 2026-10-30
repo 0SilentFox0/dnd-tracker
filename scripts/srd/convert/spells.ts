@@ -16,7 +16,7 @@ const CASTING_TIME: Record<string, string> = { action: "Action", "bonus-action":
 function materials(f: O5Spell): Pick<SpellRow, "componentFlags" | "ingredients"> {
   const componentFlags = { v: f.verbal, s: f.somatic, m: f.material };
 
-  const parsed = f.material && f.material_specified ? parseMaterial({ text: f.material_specified, consume: f.material_consumed || undefined }) : null;
+  const parsed = f.material && f.material_specified ? parseMaterial({ text: f.material_specified }) : null;
 
   return { componentFlags, ingredients: parsed ?? [] };
 }

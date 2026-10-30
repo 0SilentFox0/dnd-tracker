@@ -2216,7 +2216,7 @@
       {
         "name": "miniature sword",
         "qty": 1,
-        "consumed": true,
+        "consumed": false,
         "minGp": 250,
         "focus": false
       }
@@ -2337,7 +2337,7 @@
       {
         "name": "specially marked sticks, bones, cards, or other divinatory tokens",
         "qty": 1,
-        "consumed": true,
+        "consumed": false,
         "minGp": 25,
         "focus": false
       }
@@ -3001,7 +3001,7 @@
       {
         "name": "Holy Symbol",
         "qty": 1,
-        "consumed": true,
+        "consumed": false,
         "minGp": 5,
         "focus": false
       }
@@ -3902,7 +3902,7 @@
       {
         "name": "diamond",
         "qty": 1,
-        "consumed": true,
+        "consumed": false,
         "minGp": 50,
         "focus": false
       }
@@ -4026,7 +4026,7 @@
       {
         "name": "powder of a crushed black pearl",
         "qty": 1,
-        "consumed": true,
+        "consumed": false,
         "minGp": 500,
         "focus": false
       }
@@ -4084,7 +4084,7 @@
       {
         "name": "focus, either a jeweled horn for hearing or a glass eye for seeing",
         "qty": 1,
-        "consumed": true,
+        "consumed": false,
         "minGp": 100,
         "focus": false
       }
@@ -4975,7 +4975,7 @@
       {
         "name": "gem-encrusted statuette of yourself",
         "qty": 1,
-        "consumed": true,
+        "consumed": false,
         "minGp": 1500,
         "focus": false
       }
@@ -7998,7 +7998,7 @@
       {
         "name": "set of divination tools—such as cards or runes—",
         "qty": 1,
-        "consumed": true,
+        "consumed": false,
         "minGp": 100,
         "focus": false
       }
@@ -8664,7 +8664,7 @@
       {
         "name": "ruby dust",
         "qty": 1,
-        "consumed": true,
+        "consumed": false,
         "minGp": 1000,
         "focus": false
       }
@@ -8961,7 +8961,7 @@
       {
         "name": "diamond",
         "qty": 1,
-        "consumed": true,
+        "consumed": false,
         "minGp": 5000,
         "focus": false
       }
@@ -9088,8 +9088,9 @@
     },
     "ingredients": [
       {
-        "name": "2 Copper Pieces",
-        "qty": 1,
+        "name": "Copper pieces",
+        "qty": 2,
+        "minGp": 0.02,
         "consumed": true,
         "focus": false
       }
@@ -9921,7 +9922,7 @@
       {
         "name": "silver rod",
         "qty": 1,
-        "consumed": true,
+        "consumed": false,
         "minGp": 10,
         "focus": false
       }
@@ -10854,7 +10855,7 @@
       {
         "name": "reliquary",
         "qty": 1,
-        "consumed": true,
+        "consumed": false,
         "minGp": 1000,
         "focus": false
       }
@@ -11178,7 +11179,7 @@
       {
         "name": "pearl",
         "qty": 1,
-        "consumed": true,
+        "consumed": false,
         "minGp": 100,
         "focus": false
       }
@@ -11261,7 +11262,7 @@
       {
         "name": "statuette of the target",
         "qty": 1,
-        "consumed": true,
+        "consumed": false,
         "minGp": 5000,
         "focus": false
       }
@@ -11491,7 +11492,7 @@
       {
         "name": "sapphire",
         "qty": 1,
-        "consumed": true,
+        "consumed": false,
         "minGp": 1000,
         "focus": false
       }
@@ -12537,7 +12538,7 @@
       {
         "name": "gem, crystal, or reliquary",
         "qty": 1,
-        "consumed": true,
+        "consumed": false,
         "minGp": 500,
         "focus": false
       }
@@ -12738,7 +12739,7 @@
       {
         "name": "miniature door",
         "qty": 1,
-        "consumed": true,
+        "consumed": false,
         "minGp": 15,
         "focus": false
       }
@@ -14227,7 +14228,7 @@
       {
         "name": "forked, metal rod and attuned to a plane of existence",
         "qty": 1,
-        "consumed": true,
+        "consumed": false,
         "minGp": 250,
         "focus": false
       }
@@ -14812,7 +14813,7 @@
       {
         "name": "jade dust",
         "qty": 1,
-        "consumed": true,
+        "consumed": false,
         "minGp": 25,
         "focus": false
       }
@@ -14856,7 +14857,7 @@
       {
         "name": "statuette of yourself",
         "qty": 1,
-        "consumed": true,
+        "consumed": false,
         "minGp": 5,
         "focus": false
       }
@@ -16042,7 +16043,7 @@
       {
         "name": "focus, such as a crystal ball, mirror, or water-filled font",
         "qty": 1,
-        "consumed": true,
+        "consumed": false,
         "minGp": 1000,
         "focus": false
       }
@@ -16339,7 +16340,7 @@
       {
         "name": "jade circlet",
         "qty": 1,
-        "consumed": true,
+        "consumed": false,
         "minGp": 1500,
         "focus": false
       }
@@ -17429,7 +17430,7 @@
         "terrain": [
           "difficult"
         ],
-        "side": "enemies",
+        "side": "all",
         "onEnter": {
           "effects": [
             {
@@ -17967,7 +17968,7 @@
       {
         "name": "object with the image of a dragon engraved on it",
         "qty": 1,
-        "consumed": true,
+        "consumed": false,
         "minGp": 500,
         "focus": false
       }
@@ -18822,14 +18823,7 @@
       "s": true,
       "m": true
     },
-    "ingredients": [
-      {
-        "name": "weapon with",
-        "qty": 1,
-        "consumed": true,
-        "focus": false
-      }
-    ],
+    "ingredients": [],
     "targeting": {
       "kind": "self"
     },
@@ -19471,10 +19465,10 @@
     },
     "ingredients": [
       {
-        "name": "pair of platinum rings each",
-        "qty": 1,
-        "consumed": true,
+        "name": "Platinum rings",
+        "qty": 2,
         "minGp": 50,
+        "consumed": false,
         "focus": false
       }
     ],

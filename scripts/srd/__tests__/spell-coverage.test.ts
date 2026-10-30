@@ -38,9 +38,24 @@ describe("SRD spell effect coverage", () => {
     const unparsed = spells.filter((s) => s.componentFlags?.m && (s.ingredients ?? []).length === 0).map((s) => s.slug.replace("srd-2024_", ""));
 
     expect(spells.filter((s) => s.lists.length > 0).every((s) => s.componentFlags)).toBe(true);
-    expect(withIngredients).toHaveLength(184);
-    expect(unparsed.sort()).toEqual(["astral-projection", "clone", "jump", "legend-lore", "secret-chest"]);
+    expect(withIngredients).toHaveLength(183);
+    expect(unparsed.sort()).toEqual(["astral-projection", "clone", "jump", "legend-lore", "secret-chest", "true-strike"]);
     expect(spell("revivify").ingredients).toEqual([{ name: "diamond", qty: 1, consumed: true, minGp: 300, focus: false }]);
+  });
+
+  it("ingredients are consumed only when the material text says so", () => {
+    const wrong = spells.flatMap((s) => {
+      const text = /Components: [^·]*?M \((.*?)\) · Duration/.exec(s.description)?.[1] ?? "";
+
+      return (s.ingredients ?? []).length > 0 && (s.ingredients ?? []).some((i) => i.consumed) !== /consum/i.test(text) ? [s.slug] : [];
+    });
+
+    expect(wrong).toEqual([]);
+    expect(spell("bless").ingredients?.[0].consumed).toBe(false);
+    expect(spell("chromatic-orb").ingredients?.[0].consumed).toBe(false);
+    expect(spell("revivify").ingredients?.[0].consumed).toBe(true);
+    expect(spell("true-strike").ingredients).toEqual([]);
+    expect(spell("warding-bond").ingredients).toEqual([{ name: "Platinum rings", qty: 2, minGp: 50, consumed: false, focus: false }]);
   });
 
   it("every override effect passes the spell schema", () => {
