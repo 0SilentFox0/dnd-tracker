@@ -7,7 +7,7 @@ import { AssistantPolicyControl } from "./AssistantPolicyControl";
 
 import { Button } from "@/components/ui/button";
 import { SelectField } from "@/components/ui/select-field";
-import { AI_MODELS, AI_PROVIDER_LABELS, type AiProvider } from "@/lib/constants/ai";
+import { AI_MODELS, AI_PROVIDER_LABELS, type AiProvider, LEGACY_THREAD_TITLE } from "@/lib/constants/ai";
 import type { AiThread } from "@/types/ai";
 
 interface AiThreadHeaderProps {
@@ -36,7 +36,7 @@ export function AiThreadHeader({ campaignId, threads, thread, providers, actions
       </div>
       {thread ? (
         <>
-          <SelectField aria-label={t("thread.thread")} value={thread.id} onValueChange={actions.onSelect} options={threads.map((item) => ({ value: item.id, label: item.title || t("thread.untitled") }))} />
+          <SelectField aria-label={t("thread.thread")} value={thread.id} onValueChange={actions.onSelect} options={threads.map((item) => ({ value: item.id, label: item.title && item.title !== LEGACY_THREAD_TITLE ? item.title : t("thread.untitled") }))} />
           <div className="flex gap-2">
             <SelectField
               aria-label={t("thread.provider")}
