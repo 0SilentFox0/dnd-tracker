@@ -1,5 +1,7 @@
+import { parseMaterial } from "./spell-patterns/ingredients";
 import { array, num, object, str } from "./shared";
 
+import type { ComponentFlags, SpellIngredient } from "@/lib/schemas/spell-ingredients";
 import type { SpellFacts } from "@/lib/utils/spells/derive/mechanics";
 
 export interface SpellCast {
@@ -8,6 +10,8 @@ export interface SpellCast {
   trigger: string | null;
   rangeText: string;
   components: string;
+  componentFlags: ComponentFlags;
+  ingredients: SpellIngredient[];
   durationText: string;
   concentration: boolean;
   ritual: boolean;
@@ -72,6 +76,16 @@ function components(raw: unknown): string {
   return [c.v && "V", c.s && "S", c.m && `M${material ? ` (${material})` : ""}`].filter(Boolean).join(", ");
 }
 
+function ingredients(raw: unknown): { componentFlags: ComponentFlags; ingredients: SpellIngredient[] } {
+  const c = object(raw);
+
+  const componentFlags = { v: Boolean(c.v), s: Boolean(c.s), m: Boolean(c.m) };
+
+  const m = typeof c.m === "string" ? c.m : c.m && typeof c.m === "object" ? { text: str(object(c.m).text) || undefined, cost: num(object(c.m).cost), consume: object(c.m).consume as boolean | "optional" | undefined } : null;
+
+  return { componentFlags, ingredients: (m && parseMaterial(m)) || [] };
+}
+
 function duration(row: Record<string, unknown>): Pick<SpellCast, "durationText" | "concentration"> & { facts: string } {
   const list = array(row.duration).map(object);
 
@@ -105,6 +119,7 @@ export function spellCast(row: Record<string, unknown>): SpellCast {
     ...casting(row),
     rangeText: r.rangeText,
     components: components(row.components),
+    ...ingredients(row.components),
     durationText: d.durationText,
     concentration: d.concentration,
     ritual: meta.ritual === true,

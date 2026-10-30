@@ -41,7 +41,7 @@ export const spell: Adapter = (row, ctx) => {
   else if (derived.native.narrative) ctx.issues.push(issue("SPELL_NARRATIVE_ONLY", ctx.path, "warning"));
   else if (derived.native.riders.length > 0) ctx.issues.push(issue("SPELL_RIDER_MANUAL", ctx.path, "warning", { riders: derived.native.riders.join(", ") }));
 
-  return { kind: "spells", refs: "native" in derived ? (derived.native.refs ?? []).map((r) => ({ ...r, edition: ctx.edition })) : [], body: { name: row.name, level: row.level, description: [head, description(row, ctx)].filter(Boolean).join("\n\n"), ...mechanics, ...castingFields(cast.castingKey, cast.trigger), concentration: cast.concentration, lists }, notes: unsupported(row, SPELL_CONSUMED, ctx) };
+  return { kind: "spells", refs: "native" in derived ? (derived.native.refs ?? []).map((r) => ({ ...r, edition: ctx.edition })) : [], body: { name: row.name, level: row.level, description: [head, description(row, ctx)].filter(Boolean).join("\n\n"), ...mechanics, ...castingFields(cast.castingKey, cast.trigger), concentration: cast.concentration, componentFlags: cast.componentFlags, ingredients: cast.ingredients, lists }, notes: unsupported(row, SPELL_CONSUMED, ctx) };
 };
 
 const MONSTER_FIELDS = ["trait", "action", "bonus", "reaction", "legendary", "spellcasting"] as const;
