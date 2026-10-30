@@ -34,12 +34,12 @@ const type = (value: string) => {
 const tileLinks = () => screen.getAllByRole("link");
 
 describe("DashboardGroups", () => {
-  it("DM without query shows group headings and 13 links", async () => {
+  it("DM without query shows group headings and 14 links", async () => {
     await render(<DashboardGroups campaignId="c1" isDM pendingDrafts={0} />);
 
     for (const t of ["Гра", "Герої", "Бібліотеки"]) expect(screen.getByRole("heading", { name: t })).toBeTruthy();
 
-    expect(tileLinks()).toHaveLength(13);
+    expect(tileLinks()).toHaveLength(14);
   });
 
   it("shows pending drafts in the characters subtitle", async () => {
@@ -92,7 +92,7 @@ describe("DashboardGroups", () => {
 
     fireEvent.click(screen.getAllByRole("button", { name: "Очистити пошук" }).at(-1)!);
 
-    expect(await screen.findAllByRole("link")).toHaveLength(13);
+    expect(await screen.findAllByRole("link")).toHaveLength(14);
   });
 
   it("Enter with a padded uppercase query navigates to the match", async () => {

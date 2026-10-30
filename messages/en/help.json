@@ -128,6 +128,15 @@
           "i1": "B for the curtain: players see the chosen curtain slide, and position and music are not reset.",
           "i2": "N (in the scenario) for the next row."
         }
+      },
+      "s3": {
+        "heading": "Scenario graph",
+        "b0": "The graph draws scenario pages and everything mentioned in them with @: units, artifacts, spells, heroes. A line between nodes means a mention.",
+        "b1": {
+          "i0": "Click a node to open the connections panel.",
+          "i1": "Type filters hide the clutter.",
+          "i2": "Secret links are marked separately."
+        }
       }
     }
   },

@@ -126,7 +126,8 @@
       "print": "Друк",
       "world": "Карта світу",
       "show": "Показ",
-      "scenario": "Сценарій"
+      "scenario": "Сценарій",
+      "graph": "Граф"
     },
     "ids": {
       "campaigns": "Кампанія",
@@ -168,6 +169,7 @@
   },
   "dmSections": {
     "scenario": "Сценарій",
+    "graph": "Граф",
     "characters": "Персонажі",
     "units": "Юніти",
     "spells": "Заклинання",
@@ -189,6 +191,7 @@
   },
   "dmMenu": {
     "scenario": "Сценарій",
+    "graph": "Граф",
     "characters": "Персонажі",
     "units": "NPC Юніти",
     "spells": "Заклинання",
