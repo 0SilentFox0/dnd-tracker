@@ -6,8 +6,8 @@
 import { readFileSync } from "node:fs";
 import { gzipSync } from "node:zlib";
 
-import { resultTextOf } from "@/scripts/sim/log-text";
 import { encodeLog } from "@/lib/utils/battle/log/codec";
+import { resultTextOf } from "@/scripts/sim/log-text";
 
 type Entry = { log?: unknown[]; resultText?: string; [k: string]: unknown };
 
@@ -18,10 +18,16 @@ const rows = readFileSync(process.argv[2], "utf8").trim().split("\n").map((l) =>
 const forms: Record<string, (d: Delta) => Delta> = {
   now: (d) => d,
   codec: (d) => ({ ...d, log: d.log.map((e) => (e.log ? { ...e, log: encodeLog(e.log as never) } : e)) }),
-  old: (d) => ({ ...d, log: d.log.map((e) => { if (!e.log) return e; const { log: _log, ...rest } = e; return { ...rest, resultText: resultTextOf(e as never) }; }) }),
+  old: (d) => ({ ...d, log: d.log.map((e) => { if (!e.log) return e;
+
+ const { log: _log, ...rest } = e;
+
+ return { ...rest, resultText: resultTextOf(e as never) }; }) }),
 };
 
-const size = (v: unknown) => { const s = JSON.stringify(v); return [Buffer.byteLength(s), gzipSync(s).length] as const; };
+const size = (v: unknown) => { const s = JSON.stringify(v);
+
+ return [Buffer.byteLength(s), gzipSync(s).length] as const; };
 
 const groups = new Map<string, Delta[]>();
 
