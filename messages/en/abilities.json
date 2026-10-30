@@ -154,7 +154,8 @@
     "columnMissing": "There is no column “{key}” in the class table",
     "columnNotPool": "Column “{label}” is not a pool",
     "attackNotFound": "The attack was not found among the unit's attacks",
-    "spellNotFound": "The spell was not found in the library"
+    "spellNotFound": "The spell was not found in the library",
+    "diceFormat": "A dice formula like 1d6 or 2d8+1 is required"
   },
   "read": {
     "partialInvalid": "Some of the stored abilities have invalid data — fix or remove them before saving",
