@@ -5,12 +5,15 @@ import { CharacterType, type CharacterTypeValue } from "@/lib/constants/characte
 import { characterToFormData } from "@/lib/utils/characters/character-form";
 import { buildCharacterFormBindings } from "@/lib/utils/characters/form/bindings";
 import { defaultCharacterFormData } from "@/lib/utils/characters/form/defaults";
+import { withRecommendedScores } from "@/lib/utils/characters/form/recommended-scores";
 import type { Character } from "@/types/characters";
 import { CharacterFormData } from "@/types/characters";
+import type { GameClassData } from "@/types/classes";
 
 interface UseCharacterFormOptions {
   initialData?: Partial<Character> | Partial<CharacterFormData>;
   type?: CharacterTypeValue;
+  recommendScores?: Record<string, GameClassData>;
   onSubmit: (data: CharacterFormData) => Promise<CharacterFormData | void>;
   onCancel?: () => void;
 }
@@ -72,6 +75,18 @@ export function useCharacterForm(options: UseCharacterFormOptions) {
     }));
   }, []);
 
+  const recommendScores = options.recommendScores;
+
+  const setWithRecommendation = useCallback<typeof setFormData>(
+    (update) =>
+      setFormData((prev) => {
+        const next = typeof update === "function" ? update(prev) : update;
+
+        return recommendScores ? withRecommendedScores(prev, next, recommendScores) : next;
+      }),
+    [recommendScores],
+  );
+
   const handleSubmit = useCallback(
     async (e: React.FormEvent) => {
       e.preventDefault();
@@ -127,8 +142,8 @@ export function useCharacterForm(options: UseCharacterFormOptions) {
     abilities,
   } = useMemo(
     () =>
-      buildCharacterFormBindings(formData, setFormData, { toggleSavingThrow, toggleSkill }),
-    [formData, toggleSavingThrow, toggleSkill],
+      buildCharacterFormBindings(formData, recommendScores ? setWithRecommendation : setFormData, { toggleSavingThrow, toggleSkill }),
+    [formData, recommendScores, setWithRecommendation, toggleSavingThrow, toggleSkill],
   );
 
   return {

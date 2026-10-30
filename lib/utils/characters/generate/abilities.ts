@@ -45,3 +45,27 @@ export const assignStandardArray = (archetype: HeroArchetypeKey, rng: () => numb
 export const classPrimaryAbilities = (cls: Pick<GameClassData, "spellcastingAbility" | "savingThrows">): AbilityKey[] => [
   ...new Set([...(cls.spellcastingAbility ? [cls.spellcastingAbility] : []), ...cls.savingThrows]),
 ];
+
+const REST_ORDER: readonly AbilityKey[] = ["constitution", "dexterity", "wisdom", "intelligence", "charisma", "strength"];
+
+export function recommendedScores(primary: readonly AbilityKey[]): AbilityScores {
+  const order = [...new Set([...primary, ...REST_ORDER])];
+
+  return Object.fromEntries(order.map((k, i) => [k, STANDARD_ARRAY[i]])) as AbilityScores;
+}
+
+export function recommendedPriority({ cls, archetype }: { cls?: Pick<GameClassData, "spellcastingAbility" | "savingThrows"> | null; archetype?: string | null }): AbilityKey[] | null {
+  if (cls) return classPrimaryAbilities(cls);
+
+  return archetype && archetype in ARCHETYPE_PRIMARY ? ARCHETYPE_PRIMARY[archetype as HeroArchetypeKey] : null;
+}
+
+export function isUntouchedScores(scores: AbilityScores, prevPriority: readonly AbilityKey[] | null): boolean {
+  const same = (a: AbilityScores, b: AbilityScores) => ABILITY_KEYS.every((k) => a[k] === b[k]);
+
+  return ABILITY_KEYS.every((k) => scores[k] === 10) || (prevPriority !== null && same(scores, recommendedScores(prevPriority)));
+}
+
+export function rerecommendScores(scores: AbilityScores, prevPriority: readonly AbilityKey[] | null, nextPriority: readonly AbilityKey[] | null): AbilityScores | null {
+  return nextPriority && isUntouchedScores(scores, prevPriority) ? recommendedScores(nextPriority) : null;
+}
