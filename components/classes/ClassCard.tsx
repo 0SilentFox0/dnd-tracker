@@ -21,7 +21,7 @@ export function ClassCard({ gameClass, campaignId, onDelete }: ClassCardProps) {
       <Badge variant="outline">d{gameClass.hitDie}</Badge>
       <Badge variant="outline">{t(`classes.casters.${gameClass.caster}`)}</Badge>
       <Badge variant="outline">{t("classes.card.subclasses", { count: gameClass.subclasses.length })}</Badge>
-    {gameClass.subclasses.length > 0 && (
+      {gameClass.subclasses.length > 0 && (
         <span className="flex basis-full flex-wrap gap-1">
           {gameClass.subclasses.map((s) => (
             <span key={s.id} title={s.name}>

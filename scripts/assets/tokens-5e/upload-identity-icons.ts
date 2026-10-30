@@ -8,7 +8,7 @@ import * as path from "path";
 import { assertSeedTarget } from "../../seed/seed-library-lib";
 import { readSrdData } from "../../srd/lib/data-files";
 import { toWebp } from "./convert";
-import { type IconKind, readIcons, writeIcons } from "./icons-file";
+import { readIcons, writeIcons } from "./icons-file";
 import { expectedTargets, IDENTITY_BUCKET, IDENTITY_SIZE, type IdentityKind, parseIdentityCsv } from "./identity-catalog";
 import { planUploads } from "./identity-plan";
 
@@ -125,7 +125,7 @@ async function main() {
     for (const kind of KINDS) {
       const valid = new Set(targets.filter((t) => t.kind === kind).map((t) => t.key));
 
-      next[kind as IconKind] = Object.fromEntries(Object.entries({ ...old[kind], ...uploaded[kind] }).filter(([key]) => valid.has(key)));
+      next[kind] = Object.fromEntries(Object.entries({ ...old[kind], ...uploaded[kind] }).filter(([key]) => valid.has(key)));
     }
 
     writeIcons(next);
