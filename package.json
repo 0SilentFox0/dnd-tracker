@@ -34,6 +34,7 @@
     "constructor:copy-heroes": "tsx --env-file=.env.local --tsconfig tsconfig.scripts.json scripts/constructor/copy-test-heroes.ts",
     "constructor:backfill": "tsx --env-file=.env.local --tsconfig tsconfig.scripts.json scripts/constructor/backfill-content-fields.ts",
     "constructor:srd-template": "tsx --env-file=.env.local --tsconfig tsconfig.scripts.json scripts/srd/load-template.ts",
+    "constructor:empty-5e-template": "tsx --env-file=.env.local --tsconfig tsconfig.scripts.json scripts/srd/empty-template.ts",
     "i18n:extract": "tsx scripts/i18n/extract-cyrillic.ts",
     "srd:build": "tsx --tsconfig tsconfig.scripts.json scripts/srd/build.ts",
     "seed-library": "tsx --env-file=.env.local --tsconfig tsconfig.scripts.json scripts/seed/seed-library.ts",

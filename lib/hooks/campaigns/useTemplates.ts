@@ -6,6 +6,7 @@ import { useQuery } from "@tanstack/react-query";
 import { campaignKeys } from "./keys";
 
 import { getTemplates } from "@/lib/api/templates";
+import { EMPTY_5E_TEMPLATE_NAME } from "@/lib/constants/campaigns";
 import { REFERENCE_STALE_MS } from "@/lib/providers/query-provider";
 import type { TemplateSelection } from "@/types/campaigns";
 
@@ -18,9 +19,9 @@ export function useTemplateSelection() {
 
   const [chosen, setChosen] = useState<TemplateSelection | null>(null);
 
-  const selection = chosen ?? { templateId: null };
-
   const all = [...(templates.data?.official ?? []), ...(templates.data?.mine ?? [])];
+
+  const selection = chosen ?? { templateId: templates.data?.official.find((t) => t.name === EMPTY_5E_TEMPLATE_NAME)?.id ?? null };
 
   const name = selection.file?.name.replace(/\.json$/i, "") ?? all.find((t) => t.id === selection.templateId)?.name;
 
