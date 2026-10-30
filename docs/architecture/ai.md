@@ -37,7 +37,7 @@
 
 ## Читання великих сценаріїв і мікро NPC (`feat/ai-scenario-reading`)
 
-Спека: `docs/superpowers/specs/2026-10-30-ai-scenario-reading-and-micro-npc-design.md`.
+Спека: `docs/archive/superpowers/specs/2026-10-30-ai-scenario-reading-and-micro-npc-design.md`.
 
 - **Читання частинами** (`lib/utils/scenario/read-chunks.ts`): `read_scenario_page` приймає `offset`; ліміт частини рахується за JSON-формою рядка (`JSON.stringify(text).length <= AI_LIMITS.toolResultJsonChars`, 20000; `boundedOutput` проєктує усе від ~22000 і губить трейлер), нарізка по рядках, останній рядок `[next offset N of TOTAL]`, надто великий рядок ріжеться з маркером `[row split]`. `outline_scenario_page` — карта сторінки (секції, id рядків, розміри, початок тексту, offset для `read_scenario_page`), бюджет ~3800 символів.
 - **`find_scenario_mentions`** (`lib/utils/scenario/mentions.ts`): пошук імені в `story`/`notes` у будь-якій відмінковій формі (основа слова, до 3 літер закінчення, Unicode-межі слів, збіг через кілька текстових вузлів); пагінація `offset`/`nextOffset`, до 100 збігів за виклик (менше, якщо JSON більший за `toolResultJsonChars`), `inMention` = уже чіп; без `pageId` — уся кампанія. Відомі межі: зміна основи (Ольга → Ользі) не ловиться.

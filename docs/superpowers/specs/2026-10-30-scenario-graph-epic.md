@@ -1,6 +1,6 @@
 # Епік «граф сценарію» (етапи 3–5) — заготовка
 
-Після етапів 1–2 ([спека](2026-10-30-ai-scenario-reading-and-micro-npc-design.md)). Це не готова спека: перед планом пройти `brainstorming` у новій сесії.
+Після етапів 1–2 ([спека](../../archive/superpowers/specs/2026-10-30-ai-scenario-reading-and-micro-npc-design.md)). Це не готова спека: перед планом пройти `brainstorming` у новій сесії.
 
 ## Мета
 
