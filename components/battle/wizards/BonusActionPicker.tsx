@@ -51,7 +51,7 @@ export function BonusActionPicker({ participant, open, onOpenChange, onDone, tri
               {a.source.icon ? <OptimizedImage src={a.source.icon} alt="" width={40} height={40} className="size-10 shrink-0 rounded object-cover" /> : <Zap className="size-10 shrink-0 p-2 text-[var(--gold)]" />}
               <span className="min-w-0">
                 <span className="hud-sc block font-bold">{text(abilityLabel(a))}{cooldownLeft > 0 && <span className="ml-2 text-xs font-normal text-[#a89c88]">{t("bonus.cooldown", { rounds: cooldownLeft })}</span>}{pool && <span className="ml-2 text-xs font-normal text-[#a89c88]">{pool.label} {pool.left}/{pool.max} · −{pool.cost}</span>}</span>
-                <span className="line-clamp-2 block text-xs text-[#a89c88]">{a.details ? text(a.details) : (a.description ?? a.effects.map(abilityText.effect).join(", "))}</span>
+                <span className="line-clamp-2 text-xs text-[#a89c88]">{a.details ? text(a.details) : (a.description ?? a.effects.map(abilityText.effect).join(", "))}</span>
               </span>
             </button>
           ))}
