@@ -12,7 +12,7 @@
  * Звіт: <out>/battle-sweep.md (+ data.json, log.txt). Код виходу 1, якщо є помилки.
  * Створені бої видаляються після прогону; --keep-battles лишає їх для огляду в браузері.
  */
-import { mkdirSync, writeFileSync } from "node:fs";
+import { appendFileSync, mkdirSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 
@@ -221,6 +221,8 @@ async function call(label: string, options: any, body: any = {}, as?: string): P
 
     state = applied === "refetch" ? await readState() : applied;
     newLog = json.delta.log ?? [];
+
+    if (process.env.DELTA_DUMP) appendFileSync(process.env.DELTA_DUMP, `${JSON.stringify({ label, delta: json.delta })}\n`);
 
     if (CONSISTENCY) {
       const full: any = await readState();
