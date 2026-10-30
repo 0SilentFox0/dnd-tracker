@@ -1,6 +1,7 @@
 import "server-only";
 import { prisma } from "@/lib/db";
 import { type PageSummary, pageSummarySchema } from "@/lib/schemas/scenario-summary";
+import type { DigestItem } from "@/lib/utils/scenario/summary/digest";
 import type { ScenarioSummaryEntry } from "@/types/scenario";
 
 export interface SummaryRowInput {
@@ -49,4 +50,13 @@ export async function loadSummaries(campaignId: string): Promise<{ summaries: Re
   }
 
   return { summaries };
+}
+
+export async function loadDigestItems(campaignId: string): Promise<DigestItem[]> {
+  const rows = await prisma.$queryRaw<{ id: string; title: string; sortOrder: number; digest: string | null; stale: boolean }[]>`
+    SELECT p.id, p.title, p."sortOrder", s.summary->>'digest' AS digest, s.version < p.version AS stale
+    FROM scenario_page_summaries s JOIN scenario_pages p ON p.id = s."pageId"
+    WHERE s."campaignId" = ${campaignId}`;
+
+  return rows.flatMap((r) => (r.digest?.trim() ? [{ id: r.id, title: r.title, sortOrder: r.sortOrder, digest: r.digest, stale: r.stale }] : []));
 }

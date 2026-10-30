@@ -1,4 +1,5 @@
 export interface DigestItem {
+  id: string;
   title: string;
   sortOrder: number;
   digest: string;
@@ -11,7 +12,7 @@ export function summariesDigest(items: DigestItem[], opts: { maxChars: number })
   let used = 0;
 
   for (const item of [...items].sort((a, b) => a.sortOrder - b.sortOrder)) {
-    const line = `- ${item.title}: ${item.digest}${item.stale ? " (stale)" : ""}`;
+    const line = `- ${item.title} [${item.id}]: ${item.digest}${item.stale ? " (stale)" : ""}`;
 
     const cost = line.length + (out.length ? 1 : 0);
 

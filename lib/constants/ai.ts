@@ -89,6 +89,7 @@ export const AI_LIMITS = {
   toolResultJsonChars: 20_000,
   keptReadingChars: 60_000,
   contextChars: 40_000,
+  digestChars: 4000,
   maxSteps: 8,
   battleEvents: 10,
   searchHits: 20,
