@@ -1,4 +1,8 @@
 {
+  "2026-10-31-user-palettes": {
+    "title": "Color palettes",
+    "body": "Choose your theme from the menu at the top of the page: Tavern, Midnight, Forest, Parchment, Amethyst, or Frost. Your selection is saved to your profile and themes your spellbook on character sheets and in battle."
+  },
   "2026-10-30-template-languages": {
     "title": "Template languages",
     "body": "When creating a campaign, an official template can now be picked in another language: a language switch appears under the template list. Existing campaigns are not changed."

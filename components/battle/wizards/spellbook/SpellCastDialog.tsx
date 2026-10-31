@@ -20,7 +20,7 @@ type Book = ReturnType<typeof useSpellBook>;
 
 const ghost = cn(btn, "border-white/25");
 
-const primary = cn(btn, primaryBtn, "disabled:opacity-50");
+const primary = cn(btn, primaryBtn, "spell-book-action disabled:opacity-50");
 
 function BackCancel({ book, disabled }: { book: Book; disabled?: boolean }) {
   const tc = useTranslations("common.actions");
@@ -153,7 +153,7 @@ export function SpellCastDialog({ book }: { book: Book }) {
   const open = (step === "targets" && !view.mapTargeting) || step === "rolls" || step === "summary" || step === "submitting";
 
   return (
-    <ResponsiveDialog open={open} onOpenChange={(o) => !o && actions.close()} title={view.selected?.name ?? tw("fallbackName")} className={cn(HUD_SURFACE, "border-white/25 bg-[#15110e]")}>
+    <ResponsiveDialog open={open} onOpenChange={(o) => !o && actions.close()} title={view.selected?.name ?? tw("fallbackName")} className={cn(HUD_SURFACE, "spellbook-dialog border-white/25")}>
       {step !== "submitting" && <SlotSelect book={book} />}
       {step === "targets" && <TargetsStep book={book} />}
       {step === "rolls" && <RollsStep book={book} />}

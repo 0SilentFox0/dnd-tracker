@@ -12,6 +12,8 @@ import { ClientLocaleProvider } from "@/lib/i18n/client-locale-provider";
 import { loadStaticMessages } from "@/lib/i18n/messages";
 import { ROOT_NAMESPACES } from "@/lib/i18n/scopes";
 import { QueryProvider } from "@/lib/providers/query-provider";
+import { ThemeProvider } from "@/lib/providers/theme-provider";
+import { PALETTE_BOOTSTRAP } from "@/lib/theme/client";
 
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
@@ -28,8 +30,9 @@ export default async function RootLayout({
   const messages = await loadStaticMessages(ROOT_NAMESPACES);
 
   return (
-    <html lang="uk" className="dark">
+    <html lang="uk" className="dark" suppressHydrationWarning>
       <head>
+        <script dangerouslySetInnerHTML={{ __html: PALETTE_BOOTSTRAP }} />
         {HUD_PRELOAD_FONTS.map((href) => (
           <link key={href} rel="preload" href={href} as="font" type="font/woff2" crossOrigin="" />
         ))}
@@ -38,10 +41,12 @@ export default async function RootLayout({
         <ScreenBackground />
         <ClientLocaleProvider messages={messages}>
           <QueryProvider>
-            <ConfirmProvider>
-              <HeaderGate />
-              <PageTransition>{children}</PageTransition>
-            </ConfirmProvider>
+            <ThemeProvider>
+              <ConfirmProvider>
+                <HeaderGate />
+                <PageTransition>{children}</PageTransition>
+              </ConfirmProvider>
+            </ThemeProvider>
           </QueryProvider>
         </ClientLocaleProvider>
       </body>

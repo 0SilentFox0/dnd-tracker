@@ -108,6 +108,11 @@
     "switchAccount": "Змінити акаунт",
     "signOut": "Вийти",
     "watchShow": "Показ",
+    "palette": {
+      "label": "Кольорова тема",
+      "names": { "tavern": "Таверна", "midnight": "Опівніч", "forest": "Ліс", "parchment": "Пергамент", "amethyst": "Аметист", "frost": "Крига" },
+      "errors": { "load": "Не вдалося завантажити тему", "save": "Не вдалося зберегти тему" }
+    },
     "watchShowAria": "Дивитися показ",
     "joinBattle": "До бою",
     "joinBattleAria": "Приєднатися до бою"

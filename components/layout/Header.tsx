@@ -10,6 +10,7 @@ import { JoinBattleButton } from "@/components/campaigns/JoinBattleButton";
 import { WatchShowButton } from "@/components/campaigns/WatchShowButton";
 import { AbbreviationsInfoDialog } from "@/components/common/AbbreviationsInfoDialog";
 import { LocaleSwitcher } from "@/components/common/LocaleSwitcher";
+import { PaletteSwitcher } from "@/components/common/PaletteSwitcher";
 import { HUD_SURFACE } from "@/components/hud";
 import { Breadcrumbs } from "@/components/layout/Breadcrumbs";
 import { WhatsNewButton } from "@/components/onboarding/WhatsNewButton";
@@ -127,6 +128,7 @@ export function Header() {
           {email && <WhatsNewButton />}
           <AbbreviationsInfoDialog />
           <LocaleSwitcher />
+          {email && <PaletteSwitcher />}
           {email && (
             <span className="hidden sm:inline text-sm text-hud-muted">
               {email}

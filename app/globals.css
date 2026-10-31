@@ -1,23 +1,24 @@
 @import "tailwindcss";
 @import "tw-animate-css";
+@import "./palettes.css";
 
 @custom-variant dark (&:is(.dark *));
 
 @theme static {
-  --color-hud-muted: #8f8473;
-  --color-hud-gold: #c9b37a;
-  --color-hud-ink: #efe5d2;
-  --color-hud-bone: #e6dccb;
-  --color-hud-line: #4a3c2c;
-  --color-hud-field: #1a140f;
-  --color-hud-rule: #3a2e22;
-  --color-hud-danger: #d0705c;
-  --color-hud-bad: #ff8a7a;
-  --color-hud-good: #a8d48f;
-  --color-hud-good-dim: #7fa86a;
-  --color-hud-gold-bright: #ffe08a;
-  --color-hud-gold-strong: #e6c25a;
-  --color-hud-panel: rgba(17, 14, 11, 0.82);
+  --color-hud-muted: var(--hud-muted, #8f8473);
+  --color-hud-gold: var(--hud-gold, #c9b37a);
+  --color-hud-ink: var(--hud-ink, #efe5d2);
+  --color-hud-bone: var(--hud-bone, #e6dccb);
+  --color-hud-line: var(--hud-line, #4a3c2c);
+  --color-hud-field: var(--hud-field, #1a140f);
+  --color-hud-rule: var(--hud-rule, #3a2e22);
+  --color-hud-danger: var(--hud-danger, #d0705c);
+  --color-hud-bad: var(--hud-bad, #ff8a7a);
+  --color-hud-good: var(--hud-good, #a8d48f);
+  --color-hud-good-dim: var(--hud-good-dim, #7fa86a);
+  --color-hud-gold-bright: var(--hud-gold-bright, #ffe08a);
+  --color-hud-gold-strong: var(--hud-gold-strong, #e6c25a);
+  --color-hud-panel: var(--palette-panel, rgba(17, 14, 11, 0.82));
   --flow-when: #6aa4e0;
   --flow-if: #e0b04a;
   --flow-then: #e07a6a;
@@ -353,7 +354,7 @@
   }
   body {
     @apply text-foreground;
-    background-color: #0b0908;
+    background-color: var(--palette-page, #0b0908);
     min-height: 100vh;
     position: relative;
   }

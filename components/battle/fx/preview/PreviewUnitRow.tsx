@@ -20,11 +20,11 @@ const ROW_LOOK = {
     bar: { ally: "bg-[#c0392b]", enemy: "bg-[#c0392b]" },
   },
   book: {
-    row: "rounded-[3px] border border-[#3b2716]/70 bg-[#e6d9bf] text-[#2a2018] shadow-[0_1px_3px_rgba(0,0,0,.45),inset_0_0_0_2px_rgba(226,214,191,.6)]",
-    portrait: "bg-[#3b2a1c] text-[#e6d9bf]",
-    ring: "#2a1d14",
-    fallenName: "text-[#7a6650]",
-    track: "h-[3px] bg-[#2a1d14]/20",
+    row: "spell-book-preview-row rounded-[3px] border",
+    portrait: "spell-book-preview-portrait",
+    ring: "var(--book-ink,#2a1d14)",
+    fallenName: "spell-book-muted",
+    track: "spell-book-preview-track h-[3px]",
     bar: { ally: "bg-[#4a6b3a]", enemy: "bg-[#8a2e22]" },
   },
 };

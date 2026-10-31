@@ -25,7 +25,7 @@ export function ProfileSpellBook({ spells, slots, open, onOpenChange }: { spells
       onOpenChange={onOpenChange}
       title={showDetail && !wide ? t("toList") : t("title")}
       size="lg"
-      className={cn(HUD_SURFACE, "max-w-[980px] border-none bg-[#3a2016] p-2.5 text-[#2a2018] shadow-[0_30px_80px_rgba(0,0,0,.9),inset_0_0_0_2px_#2a160f]")}
+      className={cn(HUD_SURFACE, "spellbook-dialog max-w-[980px] border-none p-2.5 shadow-2xl")}
     >
       <SpellBookPages
         byLevel={book.byLevel}
@@ -35,7 +35,7 @@ export function ProfileSpellBook({ spells, slots, open, onOpenChange }: { spells
         detail={book.selected && <div className="relative flex h-full flex-1 flex-col px-5 pb-5 pt-6"><SpellDetail spell={book.selected} /></div>}
       />
       {showDetail && !wide && (
-        <button type="button" onClick={book.back} className="hud-sc mt-2 h-10 w-full text-sm text-hud-bone">
+        <button type="button" onClick={book.back} className="spell-book spell-book-accent hud-sc mt-2 h-10 w-full text-sm">
           {t("back")}
         </button>
       )}
