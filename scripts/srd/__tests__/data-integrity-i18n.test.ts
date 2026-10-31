@@ -9,6 +9,7 @@ import * as os from "os";
 import * as path from "path";
 
 import { extractCatalog, hashText } from "../i18n/catalog";
+import { applyOverlay } from "../i18n/overlay";
 import { listLocales } from "../i18n/store";
 import { readSrdData, toImportRows } from "../lib/data-files";
 import { SRD_DATA_DIR } from "../lib/source";
@@ -95,5 +96,39 @@ describe("SRD i18n overlay", () => {
 
   it.each(listLocales().filter((l) => l !== "en"))("%s: усе проходить імпорт без помилок і попереджень", async (locale) => {
     await dryRunAll(readSrdData(undefined, locale));
+  });
+});
+
+describe("shared overlay compatibility", () => {
+  it("keeps every shipped translation hash discoverable after adding contextual prose", () => {
+    const entries = new Map(extractCatalog(readSrdData()).map((entry) => [entry.hash, entry]));
+
+    const translations = JSON.parse(fs.readFileSync(path.join(SRD_DATA_DIR, "i18n", "uk.json"), "utf8")) as Record<string, string>;
+
+    expect(Object.keys(translations)).toHaveLength(4522);
+    expect(Object.keys(translations).filter((hash) => !entries.has(hash))).toEqual([]);
+    expect([...entries.values()].some((entry) => entry.en === "Choose 3 Musical Instruments" && entry.cls === "d")).toBe(true);
+  });
+
+  it("localized real unit attack references resolve within their owning unit", () => {
+    const en = readSrdData();
+
+    const names = [...new Set(en.units.flatMap((unit) => unit.attacks.map((attack) => attack.name)))];
+
+    const translations = Object.fromEntries(names.map((name) => [hashText("n", name), `UK ${name}`]));
+
+    const out = applyOverlay(en, translations);
+
+    for (const unit of out.units) {
+      for (const ability of unit.abilities) {
+        if (ability.perform?.kind === "attack") {
+          const target = ability.perform.attack.toLowerCase();
+
+          expect(unit.attacks.some((attack) => attack.name.toLowerCase() === target), unit.name).toBe(true);
+        }
+      }
+    }
+
+    expect(applyOverlay(en, {})).toEqual(en);
   });
 });

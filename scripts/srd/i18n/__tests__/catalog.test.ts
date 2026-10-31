@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 
 import type { SrdData } from "../../lib/types";
-import { extractCatalog, hashText } from "../catalog";
+import { classOf, extractCatalog, hashText } from "../catalog";
 
 const data = (over: Record<string, unknown[]>) => ({ "spell-groups": [], spells: [], races: [], classes: [], feats: [], backgrounds: [], units: [], artifacts: [], ...over }) as unknown as SrdData;
 
@@ -25,5 +25,15 @@ describe("extractCatalog", () => {
 
   it("розрізняє клас name і description з однаковим текстом", () => {
     expect(hashText("n", "Light")).not.toBe(hashText("d", "Light"));
+  });
+});
+
+describe("contextual prose", () => {
+  it("classifies omitted prose without translating mechanical lookalikes", () => {
+    const entries = extractCatalog(data({ classes: [{ name: "Bard", proficiencies: { armor: ["Light armor"], weapons: ["Simple weapons"], tools: ["Musical Instruments"], multiclass: { armor: ["Shields"], skills: { from: ["acrobatics"] } } }, tools: ["smith"], properties: "heavy" }], backgrounds: [{ toolProficiencies: ["Artisan tools"] }], spells: [{ casting: { text: "reaction", trigger: "When a creature moves" }, trigger: "reaction" }], units: [{ statblock: { alignment: "lawful good", languages: "Common, Draconic" }, attacks: [{ properties: "plus acid damage" }] }], artifacts: [{ weapon: { properties: "Mastery: Vex" } }] }));
+
+    expect(entries.map((e) => e.en).sort()).toEqual(["Bard", "Light armor", "Simple weapons", "Musical Instruments", "Shields", "Artisan tools", "When a creature moves", "lawful good", "Common, Draconic", "plus acid damage", "Mastery: Vex"].sort());
+    expect(classOf("trigger", "casting")).toBe("d");
+    expect(classOf("trigger", "abilities")).toBeNull();
   });
 });
