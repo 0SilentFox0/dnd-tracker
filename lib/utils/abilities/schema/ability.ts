@@ -85,6 +85,7 @@ export const AbilitySchema = z
   .object({
     id: z.string().min(1),
     name: z.string().min(1),
+    icon: z.preprocess((v) => (v === "" ? null : v), z.string().max(2000).refine((v) => !v.startsWith("data:"), "abilities.validation.iconLink").nullable().optional()),
     description: z.string().optional(),
     trigger: TriggerSchema,
     condition: ConditionSchema.optional(),

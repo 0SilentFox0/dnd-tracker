@@ -20,7 +20,12 @@ function FeatureList({ features }: { features: ClassFeatureForReference[] }) {
       {features.map((f, i) => (
         <li key={i}>
           <span className="hud-sc text-hud-gold">{t("levelShort", { level: f.level })}</span>
-          {f.name && <span className="ml-2 font-medium text-hud-ink">{f.name}</span>}
+          {f.name && (
+            <span className="ml-2 inline-flex items-center gap-1.5 align-middle font-medium text-hud-ink">
+              {f.icon && <EntityIcon src={f.icon} name={f.name} size={20} className="size-5 rounded text-xs" />}
+              {f.name}
+            </span>
+          )}
           {f.description && <p className="mt-0.5 whitespace-pre-line text-hud-bone">{f.description}</p>}
         </li>
       ))}
@@ -66,7 +71,10 @@ export function ClassReferenceCard({ gameClass }: { gameClass: ClassForReference
           )}
           {subclasses.map((s) => (
             <div key={s.id}>
-              <Label className="hud-sc text-xs text-hud-gold">{t("subclass", { name: s.name })}</Label>
+              <Label className="hud-sc flex items-center gap-1.5 text-xs text-hud-gold">
+                {s.icon && <EntityIcon src={s.icon} name={s.name} size={20} className="size-5 rounded text-xs" />}
+                {t("subclass", { name: s.name })}
+              </Label>
               <FeatureList features={s.features} />
             </div>
           ))}

@@ -155,3 +155,13 @@ describe("buildClassProgression", () => {
     });
   });
 });
+
+describe("buildClassProgression icons", () => {
+  it("maps ability icon to the progression item, null when absent", () => {
+    const cls = make({ features: [{ level: 1, abilities: [{ ...ability("a1", "Rage"), icon: "https://x/a.webp" }, ability("a2", "Fury")] }] });
+
+    const items = buildClassProgression(cls).rows[0].base;
+
+    expect(items.map((i) => i.icon)).toEqual(["https://x/a.webp", null]);
+  });
+});

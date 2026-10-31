@@ -17,6 +17,7 @@ import type { FlowPart } from "./flow-part";
 import { useAbilityText } from "./use-ability-text";
 
 import { Button } from "@/components/ui/button";
+import { ImageUpload } from "@/components/ui/image-upload";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
@@ -43,7 +44,7 @@ const HIGHLIGHT_MS = 1200;
 
 const FLOW_PARTS: readonly FlowPart[] = ["when", "if", "then", "limits"];
 
-export function AbilityPanel({ ability, path, actions }: { ability: Ability; path: string; actions: { onChange: (a: Ability) => void; onRemove: () => void } }) {
+export function AbilityPanel({ ability, path, actions, withIcon = false }: { ability: Ability; path: string; actions: { onChange: (a: Ability) => void; onRemove: () => void }; withIcon?: boolean }) {
   const t = useTranslations("abilities.panel");
 
   const summary = useMemo(() => summarizeAbility(ability), [ability]);
@@ -118,6 +119,8 @@ export function AbilityPanel({ ability, path, actions }: { ability: Ability; pat
 
   const nameErrors = useErrorsUnder(`${path}.name`);
 
+  const iconErrors = useErrorsUnder(`${path}.icon`);
+
   return (
     <div className="space-y-3 pt-2">
       <div className="flex items-start gap-2">
@@ -132,6 +135,22 @@ export function AbilityPanel({ ability, path, actions }: { ability: Ability; pat
           <X className="h-4 w-4" />
         </Button>
       </div>
+      {withIcon && (
+        <div className="space-y-1">
+          <ImageUpload
+            value={ability.icon ?? ""}
+            onChange={(icon) => {
+              const { icon: _i, ...rest } = ability;
+
+              actions.onChange(icon ? { ...rest, icon } : rest);
+            }}
+            label={t("icon")}
+            fallbackText={ability.name}
+            allowFile={false}
+          />
+          <FieldErrors errors={iconErrors} testId={`field-errors-${path}.icon`} />
+        </div>
+      )}
       <AbilityFlow summary={summary} variant="editor" onChipClick={focusSection} sectionId={(part) => sectionId(path, part)} />
       <div className="space-y-1">
         <Label htmlFor={`${path}.description`} className="text-xs text-muted-foreground">

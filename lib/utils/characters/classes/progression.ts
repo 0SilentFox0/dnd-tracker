@@ -5,7 +5,7 @@ import { summarize } from "@/lib/utils/characters/classes/summary";
 import type { CharacterClassEntry, ClassFeature, ClassProgression, GameClassData, ProgressionItem, ProgressionPick, ProgressionRow } from "@/types/classes";
 
 const itemsOf = (feature: ClassFeature): ProgressionItem[] =>
-  feature.abilities.map((a) => ({ key: a.id ?? `${feature.level}:${a.name}`, name: a.name, summary: summarize(a.description), description: a.description }));
+  feature.abilities.map((a) => ({ key: a.id ?? `${feature.level}:${a.name}`, name: a.name, summary: summarize(a.description), description: a.description, icon: a.icon ?? null }));
 
 export function buildClassProgression(cls: GameClassData, entry?: CharacterClassEntry): ClassProgression {
   const columns = cls.columns ?? [];

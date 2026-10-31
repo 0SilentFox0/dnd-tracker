@@ -111,9 +111,15 @@ describe("subclassPreview", () => {
     const preview = subclassPreview(buildClassProgression(wide, { classId: "fighter", level: 2 }));
 
     expect(preview).toEqual([
-      { id: "champ", name: "Champion", gains: [{ level: 3, names: ["Improved Critical", "Bonus"] }, { level: 7, names: ["Remarkable Athlete"] }] },
-      { id: "empty", name: "Empty", gains: [] },
+      { id: "champ", name: "Champion", icon: null, gains: [{ level: 3, names: ["Improved Critical", "Bonus"] }, { level: 7, names: ["Remarkable Athlete"] }] },
+      { id: "empty", name: "Empty", icon: null, gains: [] },
     ]);
+  });
+
+  it("carries the subclass icon", () => {
+    const withIcon = makeClass({ subclassLevel: 3, subclasses: [{ id: "champ", name: "Champion", icon: "https://x/c.webp", features: [{ level: 3, abilities: [makeAbility("c3", "Improved Critical", "x")] }] }] });
+
+    expect(subclassPreview(buildClassProgression(withIcon, { classId: "fighter", level: 2 }))[0].icon).toBe("https://x/c.webp");
   });
 });
 

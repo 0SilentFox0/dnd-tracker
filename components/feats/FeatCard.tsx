@@ -12,7 +12,7 @@ export function FeatCard({ feat, campaignId, onDelete }: { feat: FeatData; campa
   const choices = feat.choices.length;
 
   return (
-    <DmEntityCard href={`/campaigns/${campaignId}/dm/feats/${feat.id}`} title={feat.name} onDelete={() => onDelete(feat.id)}>
+    <DmEntityCard href={`/campaigns/${campaignId}/dm/feats/${feat.id}`} title={feat.name} icon={feat.icon} onDelete={() => onDelete(feat.id)}>
       <Badge variant="outline">{t(`types.${feat.type}`)}</Badge>
       {feat.prerequisite.level && <Badge variant="outline">{t("card.level", { level: feat.prerequisite.level })}</Badge>}
       {feat.repeatable && <Badge variant="outline">{t("card.repeatable")}</Badge>}

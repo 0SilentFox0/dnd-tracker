@@ -2,18 +2,18 @@ import * as fs from "fs";
 import * as path from "path";
 
 import { SRD_DATA_DIR } from "../../srd/lib/source";
-import type { TokenKind } from "./catalog";
+export type IconKind = "spells" | "units" | "artifacts" | "features" | "races" | "classes" | "subclasses" | "backgrounds";
 
-export type IconsFile = Record<TokenKind, Record<string, string>>;
+export type IconsFile = Record<IconKind, Record<string, string>>;
 
 export const ICONS_FILE = path.join(SRD_DATA_DIR, "icons.json");
 
-const KINDS: TokenKind[] = ["spells", "units", "artifacts"];
+const KINDS: IconKind[] = ["spells", "units", "artifacts", "features", "races", "classes", "subclasses", "backgrounds"];
 
 export function readIcons(file = ICONS_FILE): IconsFile {
   const stored: Partial<IconsFile> = fs.existsSync(file) ? JSON.parse(fs.readFileSync(file, "utf8")) : {};
 
-  return { spells: stored.spells ?? {}, units: stored.units ?? {}, artifacts: stored.artifacts ?? {} };
+  return Object.fromEntries(KINDS.map((k) => [k, stored[k] ?? {}])) as IconsFile;
 }
 
 export function writeIcons(icons: IconsFile, file = ICONS_FILE): void {

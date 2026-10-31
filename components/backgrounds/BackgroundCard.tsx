@@ -12,7 +12,7 @@ export function BackgroundCard({ background, campaignId, onDelete }: { backgroun
   const choices = background.choices.length;
 
   return (
-    <DmEntityCard href={`/campaigns/${campaignId}/dm/backgrounds/${background.id}`} title={background.name} onDelete={() => onDelete(background.id)}>
+    <DmEntityCard href={`/campaigns/${campaignId}/dm/backgrounds/${background.id}`} title={background.name} icon={background.icon} onDelete={() => onDelete(background.id)}>
       {choices > 0 && <Badge variant="outline">{t("card.choices", { count: choices })}</Badge>}
     </DmEntityCard>
   );

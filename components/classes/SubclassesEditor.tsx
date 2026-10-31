@@ -5,8 +5,10 @@ import { Plus, Trash2 } from "lucide-react";
 
 import { ClassFeaturesEditor } from "./ClassFeaturesEditor";
 
+import { EntityIcon } from "@/components/common/EntityIcon";
 import { HudSection } from "@/components/hud/form";
 import { Button } from "@/components/ui/button";
+import { ImageUpload } from "@/components/ui/image-upload";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { DEFAULT_SUBCLASS_LEVEL, MAX_CLASS_LEVEL } from "@/lib/constants/classes";
@@ -59,7 +61,12 @@ export function SubclassesEditor({ campaignId, form: { data, set }, onValidityCh
       {data.subclasses.map((subclass) => (
         <HudSection
           key={subclass.id}
-          title={subclass.name || t("subclasses.newSubclass")}
+          title={
+            <span className="flex items-center gap-2">
+              <EntityIcon src={subclass.icon} name={subclass.name} size={24} className="size-6 rounded text-xs" />
+              {subclass.name || t("subclasses.newSubclass")}
+            </span>
+          }
           action={
             <Button type="button" variant="ghost" size="sm" aria-label={t("subclasses.remove", { name: subclass.name })} onClick={() => remove(subclass.id)}>
               <Trash2 className="h-4 w-4" />
@@ -67,6 +74,7 @@ export function SubclassesEditor({ campaignId, form: { data, set }, onValidityCh
           }
         >
           <div className="space-y-3">
+            <ImageUpload value={subclass.icon ?? ""} onChange={(icon) => patchSubclass(subclass.id, { icon: icon || null })} label={t("basics.icon")} fallbackText={subclass.name} allowFile={false} />
             <Input aria-label={t("subclasses.nameLabel")} value={subclass.name} required onChange={(e) => patchSubclass(subclass.id, { name: e.target.value })} placeholder={t("subclasses.nameLabel")} />
             <ClassFeaturesEditor
               campaignId={campaignId}

@@ -2,6 +2,7 @@
 
 import { useTranslations } from "next-intl";
 
+import { EntityIcon } from "@/components/common/EntityIcon";
 import { cn } from "@/lib/utils";
 import type { ProgressionItem, ProgressionRow } from "@/types/classes";
 
@@ -26,6 +27,7 @@ export function Items({ items, accent }: { items: ProgressionItem[]; accent?: st
         <li key={it.key}>
           <details>
             <summary className={cn("cursor-pointer text-sm", it.description ? "" : "list-none")} style={accent ? { color: accent } : undefined}>
+              {it.icon ? <EntityIcon src={it.icon} name={it.name} size={20} className="mr-1 inline-flex size-5 align-middle rounded" /> : null}
               {it.name}
               {it.summary ? <span className="ml-1 text-xs text-hud-muted">{it.summary}</span> : null}
             </summary>

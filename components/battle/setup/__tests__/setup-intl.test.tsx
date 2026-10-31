@@ -1,10 +1,12 @@
 // @vitest-environment happy-dom
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { cleanup } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
 import { BattleListCard } from "@/components/battle/list/BattleListCard";
 import { BalanceSummary } from "@/components/battle/setup/BalanceSummary";
 import { XpBalanceSummary } from "@/components/battle/setup/XpBalanceSummary";
+import { ConfirmProvider } from "@/components/ui/confirm-dialog";
 import { renderWithIntl } from "@/lib/i18n/test/render-with-intl";
 import { textOf } from "@/lib/i18n/test/text";
 import { textRef } from "@/lib/i18n/text-ref";
@@ -12,6 +14,8 @@ import type { FairScaling, PartyPower } from "@/lib/utils/battle/balance";
 import { computeXpBudget } from "@/lib/utils/battle/balance/xp-budget";
 
 vi.unmock("next-intl");
+
+vi.mock("next/navigation", () => ({ useRouter: () => ({ push: vi.fn(), refresh: vi.fn() }) }));
 
 afterEach(cleanup);
 
@@ -29,10 +33,12 @@ describe("battle setup and list on real catalogs", () => {
     ["uk", "Баланс бою", "Слабко: додайте Orc ×2", "Раунд:", "Активний"],
   ] as const)("%s: balance summary and list card without raw keys", async (locale, title, hint, round, status) => {
     const { container } = await renderWithIntl(
-      <>
-        <BalanceSummary fair={{ party, scaling }} />
-        <BattleListCard battle={battle} campaignId="c1" kind="active" />
-      </>,
+      <QueryClientProvider client={new QueryClient()}>
+        <ConfirmProvider>
+          <BalanceSummary fair={{ party, scaling }} />
+          <BattleListCard battle={battle} campaignId="c1" kind="active" />
+        </ConfirmProvider>
+      </QueryClientProvider>,
       { locale, namespaces: NAMESPACES },
     );
 

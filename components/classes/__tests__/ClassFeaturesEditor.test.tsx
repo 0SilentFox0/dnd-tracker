@@ -7,7 +7,11 @@ import { ClassFeaturesEditor } from "@/components/classes/ClassFeaturesEditor";
 import type { ClassFeature } from "@/types/classes";
 
 vi.mock("@/components/abilities", () => ({
-  AbilityListEditor: ({ value }: { value: unknown[] }) => <div data-testid="ability-editor">{value.length}</div>,
+  AbilityListEditor: ({ value, withIcon }: { value: unknown[]; withIcon?: boolean }) => (
+    <div data-testid="ability-editor" data-with-icon={String(!!withIcon)}>
+      {value.length}
+    </div>
+  ),
 }));
 
 function Harness({ initial = [] }: { initial?: ClassFeature[] }) {
@@ -20,6 +24,12 @@ const headings = () => screen.queryAllByRole("heading", { name: /^classes\.featu
 
 describe("ClassFeaturesEditor", () => {
   afterEach(cleanup);
+
+  it("вмикає поле іконки у редакторі здібностей", () => {
+    render(<Harness initial={[{ level: 1, abilities: [] }]} />);
+
+    expect(screen.getByTestId("ability-editor").getAttribute("data-with-icon")).toBe("true");
+  });
 
   it("додає рівень із секцією редактора здібностей", () => {
     render(<Harness />);

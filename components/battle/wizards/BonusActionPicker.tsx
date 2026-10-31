@@ -46,15 +46,19 @@ export function BonusActionPicker({ participant, open, onOpenChange, onDone, tri
               <span className="hud-sc block font-bold">{t("bonus.offHand")}</span>
             </button>
           )}
-          {!ability && abilities.map(({ ability: a, cooldownLeft, pool }) => (
+          {!ability && abilities.map(({ ability: a, cooldownLeft, pool }) => {
+            const icon = a.icon ?? a.source.icon;
+
+            return (
             <button key={a.key} type="button" disabled={cooldownLeft > 0 || isPending} onClick={() => pick(a)} className="flex min-h-14 w-full items-center gap-3 border border-white/15 px-3 py-2.5 text-left disabled:opacity-50">
-              {a.source.icon ? <OptimizedImage src={a.source.icon} alt="" width={40} height={40} className="size-10 shrink-0 rounded object-cover" /> : <Zap className="size-10 shrink-0 p-2 text-[var(--gold)]" />}
+              {icon ? <OptimizedImage src={icon} alt="" width={40} height={40} className="size-10 shrink-0 rounded object-cover" /> : <Zap className="size-10 shrink-0 p-2 text-[var(--gold)]" />}
               <span className="min-w-0">
                 <span className="hud-sc block font-bold">{text(abilityLabel(a))}{cooldownLeft > 0 && <span className="ml-2 text-xs font-normal text-[#a89c88]">{t("bonus.cooldown", { rounds: cooldownLeft })}</span>}{pool && <span className="ml-2 text-xs font-normal text-[#a89c88]">{pool.label} {pool.left}/{pool.max} · −{pool.cost}</span>}</span>
                 <span className="line-clamp-2 text-xs text-[#a89c88]">{a.details ? text(a.details) : (a.description ?? a.effects.map(abilityText.effect).join(", "))}</span>
               </span>
             </button>
-          ))}
+            );
+          })}
           {ability && candidates.map((t) => (
             <TargetButton
               key={t.basicInfo.id}

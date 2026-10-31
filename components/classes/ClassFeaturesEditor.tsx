@@ -106,6 +106,7 @@ export function ClassFeaturesEditor({ campaignId, value, onChange, onValidityCha
             onChange={(abilities) => setAbilities(feature.level, abilities)}
             onValidityChange={(_, n) => reportLevel(String(feature.level), n)}
             classColumns={classColumns}
+            withIcon
           />
           <div className="mt-3 space-y-2">
             <p className="hud-sc text-xs text-hud-muted">{t("features.choices")}</p>

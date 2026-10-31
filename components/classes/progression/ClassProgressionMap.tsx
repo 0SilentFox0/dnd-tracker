@@ -5,6 +5,7 @@ import { useTranslations } from "next-intl";
 
 import { Items, Picks, type ProgressionActions, STATE_CLASS } from "./ProgressionRowView";
 
+import { EntityIcon } from "@/components/common/EntityIcon";
 import { HudChipTabs, HudPanel } from "@/components/hud/page";
 import { cn } from "@/lib/utils";
 import type { ClassProgression } from "@/types/classes";
@@ -40,6 +41,7 @@ export function ClassProgressionMap({ progression, actions }: Props) {
             <th className="px-2 py-1">{t("base")}</th>
             {subclasses.map((s) => (
               <th key={s.id} className="px-2 py-1">
+                {s.icon ? <EntityIcon src={s.icon} name={s.name} size={20} className="mr-1 inline-flex size-5 align-middle rounded" /> : null}
                 {s.name}
               </th>
             ))}

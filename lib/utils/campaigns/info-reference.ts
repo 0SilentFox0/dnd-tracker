@@ -7,9 +7,9 @@ import type { ArtifactForReference, ClassFeatureForReference, ClassForReference,
 function featuresForReference(features: ClassFeature[]): ClassFeatureForReference[] {
   return features
     .flatMap((f): ClassFeatureForReference[] => {
-      const own = f.description?.trim() ? [{ level: f.level, name: null, description: f.description.trim() }] : [];
+      const own = f.description?.trim() ? [{ level: f.level, name: null, icon: null, description: f.description.trim() }] : [];
 
-      return [...own, ...f.abilities.map((a) => ({ level: f.level, name: a.name, description: a.description?.trim() || null }))];
+      return [...own, ...f.abilities.map((a) => ({ level: f.level, name: a.name, icon: a.icon ?? null, description: a.description?.trim() || null }))];
     })
     .sort((a, b) => a.level - b.level);
 }
@@ -38,7 +38,7 @@ export function toClassForReference(c: GameClassData): ClassForReference {
     color: c.color,
     summary,
     features: featuresForReference(c.features),
-    subclasses: c.subclasses.map((s) => ({ id: s.id, name: s.name, features: featuresForReference(s.features) })),
+    subclasses: c.subclasses.map((s) => ({ id: s.id, name: s.name, icon: s.icon ?? null, features: featuresForReference(s.features) })),
   };
 }
 
