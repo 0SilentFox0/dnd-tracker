@@ -19,7 +19,7 @@ function subclassesOf(v: unknown): Subclass[] {
   return v.flatMap((s) => {
     const o = asObject(s);
 
-    return typeof o.id === "string" && typeof o.name === "string" ? [{ id: o.id, name: o.name, features: classFeatureAbilities(o.features) }] : [];
+    return typeof o.id === "string" && typeof o.name === "string" ? [{ id: o.id, name: o.name, icon: typeof o.icon === "string" ? o.icon : null, features: classFeatureAbilities(o.features) }] : [];
   });
 }
 
