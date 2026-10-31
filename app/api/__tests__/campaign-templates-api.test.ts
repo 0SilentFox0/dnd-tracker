@@ -2,6 +2,9 @@ import { NextResponse } from "next/server";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import { API_ERRORS } from "@/lib/constants/api-errors";
+import { hashText } from "@/lib/srd/i18n/catalog";
+
+vi.mock("@/lib/server/templates/srd-translations", () => ({ translationsFor: (locale: string) => locale === "uk" ? { [hashText("n", "Bless")]: "Благословення" } : {} }));
 
 const m = vi.hoisted(() => ({
   db: {
@@ -58,6 +61,7 @@ const bundle = {
   artifactSets: [],
   artifacts: [],
   tracks: [],
+  classes: [], feats: [], backgrounds: [],
 };
 
 const json = (body: unknown, url = "http://x") => new Request(url, { method: "POST", body: JSON.stringify(body) });
@@ -102,6 +106,33 @@ describe("campaign templates API", () => {
       expect(m.db.campaign.create).not.toHaveBeenCalled();
     });
 
+    it.each(["en", "uk"])("official alias creation stores %s independently of the request UI locale", async (contentLocale) => {
+      const identity = { kind: "template", visibility: "official", templateKey: "5e SRD 5.2", members: [] };
+
+      m.db.campaign.findUnique.mockImplementation(async ({ where }) => ({ ...identity, id: where.id, locale: where.id === "legacy" ? "uk" : "en" }));
+      m.db.campaign.findMany.mockResolvedValue([{ id: "canonical" }]);
+      m.exportCampaign.mockResolvedValue({ ...bundle, spells: [{ id: "c" + "s".repeat(24), name: "Bless", description: "Fallback text" }] });
+
+      const res = await createPost(json({ name: "N", templateId: "legacy", contentLocale }));
+
+      expect(res.status).toBe(200);
+      expect(m.db.campaign.create.mock.calls[0][0].data).toMatchObject({ createdFromId: "canonical", locale: contentLocale });
+      expect(m.db.campaignSourceSync.create.mock.calls[0][0].data.sourceCampaignId).toBe("canonical");
+      expect(m.exportCampaign).toHaveBeenCalledExactlyOnceWith(m.db, "canonical");
+
+      const imported = m.importBundle.mock.calls[0][1];
+
+      expect(imported.spells[0]).toMatchObject({ name: contentLocale === "uk" ? "Благословення" : "Bless", description: "Fallback text" });
+    });
+
+    it("rejects language overrides without an overlay before writes", async () => {
+      m.db.campaign.findUnique.mockResolvedValue({ id: "t1", kind: "template", visibility: "official", members: [] });
+      for (const body of [{ name: "N", contentLocale: "uk" }, { name: "N", templateId: "t1", contentLocale: "uk" }, { name: "N", templateId: "t1", contentLocale: "fr" }]) {
+        expect((await createPost(json(body))).status).toBe(400);
+      }
+      expect(m.db.campaign.create).not.toHaveBeenCalled();
+    });
+
     it("BundleInvalidError з імпорту шаблону — 400 з текстом, не 500", async () => {
       m.db.campaign.findUnique.mockResolvedValue({ id: "t1", kind: "template", visibility: "official", members: [] });
       m.importBundle.mockRejectedValue(new BundleInvalidError("Бандл посилається на контент інших кампаній: cx"));
@@ -142,11 +173,13 @@ describe("campaign templates API", () => {
   describe("save-as-template", () => {
     it("ДМ — новий приватний шаблон з createdFromId", async () => {
       asDM();
+      m.db.campaign.findUnique.mockResolvedValue({ id: "c1", kind: "campaign", visibility: "private", members: [{ role: "dm" }], locale: "uk" });
 
       const res = await saveAsTemplate(json({ name: "T" }), params());
 
       expect(res.status).toBe(200);
-      expect(m.db.campaign.create.mock.calls[0][0].data).toMatchObject({ kind: "template", visibility: "private", createdFromId: "c1" });
+      expect(m.db.campaign.create.mock.calls[0][0].data).toMatchObject({ kind: "template", visibility: "private", createdFromId: "c1", locale: "uk" });
+      expect(m.db.campaign.create.mock.calls[0][0].data).not.toHaveProperty("templateKey");
     });
 
     it("гравець — 403", async () => {

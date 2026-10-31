@@ -11,6 +11,7 @@ export type LocalRow = { table: BundleTable; row: Record<string, unknown> & { id
 
 export interface SyncContext {
   campaignId: string;
+  srdOverlay?: boolean;
   source: { id: string; name: string; kind: string };
   sourceBundle: Bundle;
   target: { settings: Bundle["settings"]; rules: unknown; credits?: string | null; rows: LocalRow[] };

@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-import { CAMPAIGN_INCLUDE, CAMPAIGN_OMIT, createCampaignForUser, createCampaignFromBundle, loadTemplateForUser } from "./create-campaign";
+import { CAMPAIGN_INCLUDE, CAMPAIGN_OMIT, createCampaignForUser, createCampaignFromBundle } from "./create-campaign";
 
 import "server-only";
 import { saveAiSettings } from "@/lib/ai/settings";
@@ -15,7 +15,7 @@ import { checklistProgress, checklistState } from "@/lib/onboarding/progress";
 import { stepText } from "@/lib/onboarding/step-text";
 import { aiSettingsSchema } from "@/lib/schemas/ai";
 import { createCampaignSchema, updateCampaignSchema } from "@/lib/schemas/campaigns";
-import { saveAsTemplateSchema } from "@/lib/schemas/templates";
+import { cloneCampaignSchema, saveAsTemplateSchema } from "@/lib/schemas/templates";
 import { actionResult } from "@/lib/server/assistant/json";
 import { resultLabel } from "@/lib/server/assistant/result-labels";
 import type { ActionResult } from "@/lib/server/assistant/types";
@@ -24,13 +24,14 @@ import { ContentError, parseInput } from "@/lib/server/content/errors";
 import { withCampaignContentWrite } from "@/lib/server/content/write";
 import { afterContentCommit } from "@/lib/server/content/write-context";
 import { readOnboardingSnapshot } from "@/lib/server/onboarding/facts";
-import { type Bundle,BUNDLE_FORMAT_VERSION } from "@/lib/server/templates/bundle";
-import { exportCampaign } from "@/lib/server/templates/export-campaign";
+import { BUNDLE_FORMAT_VERSION } from "@/lib/server/templates/bundle";
 import { listTemplates } from "@/lib/server/templates/list-templates";
+import { prepareCampaignSource, type PreparedCampaignSource } from "@/lib/server/templates/prepare-source";
 import type { Actor } from "@/lib/utils/api/actor";
 import { windowOf } from "@/lib/utils/api/page-of";
 import { isPlatformAdmin } from "@/lib/utils/api/platform-admin";
 import { requestDigest } from "@/lib/utils/battle/store/stable-json";
+import type { SrdContentLocale } from "@/lib/utils/campaigns/template-locales";
 import { ownHandler } from "@/lib/utils/common/own-handler";
 
 export const campaignWindowSchema = z.object({ offset: z.number().int().min(0).default(0), limit: z.number().int().min(1).max(50).default(20) });
@@ -103,7 +104,7 @@ const DELETE_DEPENDENCIES = {
   characterLog: { select: { id: true }, orderBy: { id: "asc" } },
 } as const;
 
-type PreparedSource = { bundle: Bundle; id: string };
+type PreparedSource = PreparedCampaignSource;
 
 async function loadCampaignState(actor: Actor, operation: string, input: Record<string, unknown>) {
   const row = await prisma.campaign.findUnique({
@@ -119,22 +120,23 @@ async function loadCampaignState(actor: Actor, operation: string, input: Record<
 
   let source: PreparedSource | null = null;
 
-  if (["clone", "template.save"].includes(operation)) source = { bundle: await exportCampaign(prisma, actor.campaignId), id: actor.campaignId };
+  const sourceId = operation === "create" && input.templateId ? String(input.templateId) : ["clone", "template.save"].includes(operation) ? actor.campaignId : null;
 
-  if (operation === "create" && input.templateId) {
-    if (String(input.templateId) !== actor.campaignId) {
-      try { await prisma.$queryRaw`SELECT id FROM campaigns WHERE id = ${String(input.templateId)} FOR SHARE NOWAIT`; }
-      catch { throw new ContentError(API_ERRORS.ASSISTANT_TEMPLATE_CHANGING, 409); }
-    }
+  if (sourceId) {
+    source = await prepareCampaignSource(prisma, sourceId, {
+      userId: actor.userId,
+      mode: operation === "template.save" ? "save" : operation === "clone" ? "clone" : "create",
+      contentLocale: input.contentLocale as SrdContentLocale | undefined,
+      beforeExport: async (resolvedId) => {
+        if (resolvedId === actor.campaignId) return;
 
-    const template = await loadTemplateForUser(actor.userId, String(input.templateId));
-
-    if (!template.ok) throw new ContentError(API_ERRORS.ASSISTANT_TEMPLATE_UNAVAILABLE, template.status);
-
-    source = { bundle: await exportCampaign(prisma, template.template.id), id: template.template.id };
+        try { await prisma.$queryRaw`SELECT id FROM campaigns WHERE id = ${resolvedId} FOR SHARE NOWAIT`; }
+        catch { throw new ContentError(API_ERRORS.ASSISTANT_TEMPLATE_CHANGING, 409); }
+      },
+    });
   }
 
-  if (source) sourceHash = requestDigest(source.bundle);
+  if (source) sourceHash = requestDigest({ id: source.id, contentLocale: source.contentLocale, bundle: source.bundle });
 
   const state = {
     settings: safeSettings(row),
@@ -215,22 +217,23 @@ export async function deleteCampaign(actor: Actor) {
     return { success: true };
   });
 }
-export async function saveCampaignAsTemplate(actor: Actor, raw: unknown, prepared?: Bundle) {
+export async function saveCampaignAsTemplate(actor: Actor, raw: unknown, prepared?: PreparedCampaignSource) {
   assertCan(actor, need(true, true));
 
   const data = parseInput(saveAsTemplateSchema, raw);
 
   return withCampaignContentWrite(actor.campaignId, async () => {
-    const bundle = prepared ?? await exportCampaign(prisma, actor.campaignId);
+    const source = prepared ?? await prepareCampaignSource(prisma, actor.campaignId, { userId: actor.userId, mode: "save" });
 
     const created = await createCampaignFromBundle({
       userId: actor.userId,
       name: data.name,
       description: data.description,
-      bundle,
+      bundle: source.bundle,
+      contentLocale: source.contentLocale,
       kind: CampaignKind.TEMPLATE,
       visibility: CampaignVisibility.PRIVATE,
-      createdFromId: actor.campaignId,
+      createdFromId: source.id,
     });
 
     afterContentCommit(() => invalidateCampaignLists([actor.userId]));
@@ -261,7 +264,7 @@ async function createFromSource(run: CampaignRun, operation: "create" | "clone")
 
   const creation = operation === "create" ? parseInput(createCampaignSchema, input) : undefined;
 
-  const data = creation ?? parseInput(saveAsTemplateSchema, input);
+  const data = creation ?? parseInput(cloneCampaignSchema, input);
 
   const created = await createCampaignForUser(
     actor.userId,
@@ -307,7 +310,7 @@ const CAMPAIGN_HANDLERS: Record<string, CampaignHandler> = {
   },
   "members.remove": async ({ result, actor, input }) => result(await removeCampaignMember(actor, String(input.memberId)), actor.campaignId),
   delete: async ({ result, actor }) => result(await deleteCampaign(actor), actor.campaignId),
-  "template.save": async (run) => createdResult(run, await saveCampaignAsTemplate(run.actor, run.input, run.loaded.source?.bundle)),
+  "template.save": async (run) => createdResult(run, await saveCampaignAsTemplate(run.actor, run.input, run.loaded.source ?? undefined)),
   create: run => createFromSource(run, "create"),
   clone: run => createFromSource(run, "clone"),
 };

@@ -14,6 +14,7 @@ import { collectKeysAndStrings, remapIds } from "@/lib/server/templates/remap-id
 import { classify } from "@/lib/server/templates/sync/classify";
 import { loadSyncContext, type SyncDb } from "@/lib/server/templates/sync/context";
 import { indexOf } from "@/lib/server/templates/sync/index";
+import { assertSrdNameReferences } from "@/lib/server/templates/sync/name-references";
 import { cloneState, setEntry } from "@/lib/server/templates/sync/state";
 import { IGNORED_DELETED, type SyncContext, type SyncItem } from "@/lib/server/templates/sync/types";
 import { localeOrRequest } from "@/lib/utils/api/translate-error";
@@ -160,6 +161,8 @@ async function assertResultingGraph(db: SyncDb, ctx: SyncContext, index: ReturnT
   }
 
   const resulting = [...effective.values()];
+
+  if (ctx.srdOverlay) assertSrdNameReferences(ctx.target.rows, resulting, new Set([...selected.values()].map((item) => item.localId ?? map.get(item.key)).filter((id): id is string => !!id)));
 
   const feats = resulting.filter((r) => r.table === "feats").map(({ row }) => ({ id: row.id, type: row.type }));
 

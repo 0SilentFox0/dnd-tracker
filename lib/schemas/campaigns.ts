@@ -1,6 +1,7 @@
 import { z } from "zod";
 
 import { CampaignStatus, CampaignVisibility } from "@/lib/constants/campaigns";
+import { SRD_CONTENT_LOCALES } from "@/lib/utils/campaigns/template-locales";
 
 export const createCampaignSchema = z.object({
   name: z.string().min(1).max(100),
@@ -9,6 +10,7 @@ export const createCampaignSchema = z.object({
   allowPlayerEdit: z.boolean().optional(),
   critChoiceByDm: z.boolean().default(false),
   templateId: z.string().min(1).optional(),
+  contentLocale: z.enum(SRD_CONTENT_LOCALES).optional(),
 });
 
 export const updateCampaignSchema = z.object({

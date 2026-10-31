@@ -4,10 +4,13 @@ import { API_ERRORS } from "@/lib/constants/api-errors";
 import { ContentError } from "@/lib/server/content/errors";
 import { BUNDLE_TABLES, delegateOf, SETTINGS_SELECT, settingsOf, type TemplateDb } from "@/lib/server/templates/bundle";
 import { exportCampaign } from "@/lib/server/templates/export-campaign";
+import { localizeSrdBundle } from "@/lib/server/templates/localize-srd-bundle";
+import { translationsFor } from "@/lib/server/templates/srd-translations";
 import { baselineFromBundle } from "@/lib/server/templates/sync/hash";
 import { emptyState } from "@/lib/server/templates/sync/state";
 import type { LocalRow, SyncContext, SyncState, TableHashes } from "@/lib/server/templates/sync/types";
 import { canReadSource } from "@/lib/utils/api/is-dm";
+import { isCanonicalSrdTemplate, SRD_CONTENT_LOCALES, type SrdContentLocale } from "@/lib/utils/campaigns/template-locales";
 
 export type SyncDb = TemplateDb & Pick<Prisma.TransactionClient, "campaignSourceSync" | "character">;
 
@@ -22,7 +25,7 @@ const asState = (v: unknown): SyncState => {
 export async function loadSyncContext(db: SyncDb, campaignId: string, access?: { userId: string }): Promise<SyncContext> {
   const campaign = await db.campaign.findUnique({
     where: { id: campaignId },
-    select: { createdFromId: true, rules: true, credits: true, ...SETTINGS_SELECT },
+    select: { locale: true, createdFromId: true, rules: true, credits: true, ...SETTINGS_SELECT },
   });
 
   if (!campaign) throw new ContentError(API_ERRORS.CAMPAIGN_NOT_FOUND, 404);
@@ -31,7 +34,7 @@ export async function loadSyncContext(db: SyncDb, campaignId: string, access?: {
 
   const found = await db.campaign.findUnique({
     where: { id: campaign.createdFromId },
-    select: { id: true, name: true, kind: true, visibility: true, members: { where: { userId: access?.userId ?? "" }, select: { role: true } } },
+    select: { id: true, name: true, kind: true, visibility: true, templateKey: true, locale: true, members: { where: { userId: access?.userId ?? "" }, select: { role: true } } },
   });
 
   if (!found) throw new ContentError(API_ERRORS.SOURCE_NOT_FOUND, 404);
@@ -40,11 +43,19 @@ export async function loadSyncContext(db: SyncDb, campaignId: string, access?: {
 
   const source = { id: found.id, name: found.name, kind: found.kind };
 
-  const [sourceBundle, rows, state] = await Promise.all([
+  const [rawSourceBundle, rows, state] = await Promise.all([
     exportCampaign(db, source.id),
     loadTargetRows(db, campaignId),
     db.campaignSourceSync.findUnique({ where: { campaignId } }),
   ]);
+
+  const srdOverlay = isCanonicalSrdTemplate(found);
+
+  const contentLocale = campaign.locale ?? "en";
+
+  if (srdOverlay && !SRD_CONTENT_LOCALES.includes(contentLocale as SrdContentLocale)) throw new ContentError(API_ERRORS.TEMPLATE_CONTENT_LOCALE, 400);
+
+  const sourceBundle = srdOverlay ? localizeSrdBundle(rawSourceBundle, translationsFor(contentLocale as SrdContentLocale)) : rawSourceBundle;
 
   const synced = state?.sourceCampaignId === source.id ? state : null;
 
@@ -54,6 +65,7 @@ export async function loadSyncContext(db: SyncDb, campaignId: string, access?: {
 
   return {
     campaignId,
+    srdOverlay,
     source,
     sourceBundle,
     target: { settings: settingsOf(campaign), rules: campaign.rules, credits: campaign.credits ?? null, rows },

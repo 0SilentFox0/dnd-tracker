@@ -25,6 +25,7 @@ export function createFakeSyncDb() {
 
   const db: Record<string, unknown> = {
     campaign: {
+      findMany: async () => campaigns.filter((r) => r.kind === "template" && r.visibility === "official" && r.templateKey === "5e SRD 5.2" && (r.locale == null || r.locale === "en")).map(copy),
       findUnique: async ({ where }: { where: { id: string } }) => readCopy(campaigns.find((r) => r.id === where.id)),
       update: async ({ where, data }: { where: { id: string }; data: Row }) => {
         const c = campaigns.find((r) => r.id === where.id)!;

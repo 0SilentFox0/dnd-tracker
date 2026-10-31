@@ -10,7 +10,7 @@ import type { Actor } from "@/lib/utils/api/actor";
 const tx = vi.hoisted(() => ({ $queryRaw: vi.fn() }));
 
 vi.mock("@/lib/db", () => ({ prisma: { $transaction: vi.fn() } }));
-vi.mock("@/lib/cache/tags", () => ({ ReferenceKind: { SPELLS: "spells" }, invalidateReference: vi.fn() }));
+vi.mock("@/lib/cache/tags", () => ({ ReferenceKind: { SPELLS: "spells" }, invalidateReference: vi.fn(), invalidateAllReference: vi.fn() }));
 vi.mock("@/lib/server/templates/sync/context", () => ({ loadSyncContext: vi.fn() }));
 vi.mock("@/lib/server/templates/sync/diff", () => ({ buildDiff: vi.fn() }));
 vi.mock("@/lib/server/templates/sync/apply", () => ({ applySourceChanges: vi.fn() }));
