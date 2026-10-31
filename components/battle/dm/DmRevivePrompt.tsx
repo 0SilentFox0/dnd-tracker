@@ -15,7 +15,7 @@ export function DmRevivePrompt() {
   return (
     <div className="fixed inset-x-4 bottom-4 z-50 mx-auto flex max-w-md flex-col gap-2 animate-[hud-fade_.2s]">
       {heroes.map((p) => (
-        <div key={p.basicInfo.id} role="alert" className="flex min-h-12 items-center gap-2.5 border border-hud-danger/50 bg-[#15110e]/95 px-3 text-sm text-[#d9cfbd]">
+        <div key={p.basicInfo.id} role="alert" className="flex min-h-12 items-center gap-2.5 border border-hud-danger/50 bg-hud-surface/95 px-3 text-sm text-hud-text">
           <Skull className="size-4 shrink-0 text-hud-danger" />
           <span className="min-w-0 flex-1">
             {t.rich("message", { name: p.basicInfo.name, b: (chunks) => <b className="hud-sc text-[var(--ink)]">{chunks}</b> })}

@@ -1,31 +1,36 @@
 import type { ReactNode } from "react";
+import Link from "next/link";
 import { Slot } from "@radix-ui/react-slot";
 
 import { cn } from "@/lib/utils";
 
 const TONE = {
-  default: "shadow-[inset_0_0_0_1px_rgba(230,194,90,.25)] hover:shadow-[inset_0_0_0_1px_var(--color-hud-gold-strong)]",
-  active: "shadow-[inset_0_0_0_1px_var(--color-hud-gold-strong),0_0_12px_rgba(230,194,90,.18)]",
-  muted: "opacity-70 shadow-[inset_0_0_0_1px_rgba(230,194,90,.15)]",
+  default: "shadow-[inset_0_0_0_1px_var(--color-hud-edge)] hover:shadow-[inset_0_0_0_1px_var(--color-hud-gold-strong)]",
+  active: "shadow-[inset_0_0_0_1px_var(--color-hud-gold-strong),0_0_12px_var(--color-hud-glow)]",
+  muted: "opacity-70 shadow-[inset_0_0_0_1px_var(--color-hud-edge-faint)]",
 } as const;
 
 interface HudCardProps {
   tone?: keyof typeof TONE;
   accent?: string;
   asChild?: boolean;
+  href?: string;
+  linkLabel?: string;
   className?: string;
   children: ReactNode;
 }
 
-export function HudCard({ tone = "default", accent, asChild = false, className, children }: HudCardProps) {
+export function HudCard({ tone = "default", accent, asChild = false, href, linkLabel, className, children }: HudCardProps) {
   const Comp = asChild ? Slot : "div";
 
   return (
     <Comp
       data-tone={tone}
+      data-clickable={href ? "" : undefined}
       style={accent ? { borderLeftColor: accent } : undefined}
-      className={cn("block rounded-lg bg-[rgba(20,16,12,.85)] p-3 text-hud-bone transition-shadow", accent && "border-l-[3px]", TONE[tone], className)}
+      className={cn(href && "relative cursor-pointer", "block rounded-lg bg-hud-panel p-3 text-hud-bone transition-shadow", accent && "border-l-[3px]", TONE[tone], className)}
     >
+      {href && <Link href={href} data-card-overlay aria-label={linkLabel} className="absolute inset-0 rounded-lg" />}
       {children}
     </Comp>
   );

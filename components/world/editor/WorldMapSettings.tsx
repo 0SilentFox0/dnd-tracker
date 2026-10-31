@@ -34,7 +34,7 @@ function MapForm({ detail }: { detail: WorldMapDetail }) {
 
   return (
     <div>
-      <WorldPanelHeader badge={<MapIcon className="size-5 text-[#2a1d05]" aria-hidden />} title={map.name} subtitle={map.parentMapId ? t("mapKind.nested") : t("mapKind.root")} />
+      <WorldPanelHeader badge={<MapIcon className="size-5 text-[var(--palette-primary-foreground,#2a1d05)]" aria-hidden />} title={map.name} subtitle={map.parentMapId ? t("mapKind.nested") : t("mapKind.root")} />
       <HudSection title={t("editor.basic")}>
         <LabeledInput label={t("name")} maxLength={WORLD_NAME_MAX} value={name} onChange={(e) => setName(e.target.value)} onBlur={commitName} />
       </HudSection>

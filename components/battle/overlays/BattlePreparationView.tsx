@@ -37,7 +37,7 @@ export function BattlePreparationView({
           <h2 className="hud-sc text-4xl font-extrabold tracking-[.12em] text-[var(--ink)] drop-shadow-2xl sm:text-7xl">
             {t("title")}
           </h2>
-          <p className="hud-book mx-auto max-w-lg text-lg italic leading-relaxed text-[#b8ab95] sm:text-2xl">
+          <p className="hud-book mx-auto max-w-lg text-lg italic leading-relaxed text-hud-soft sm:text-2xl">
             {t("tagline")}
           </p>
         </div>
@@ -85,7 +85,7 @@ export function BattlePreparationView({
               {isStarting ? t("starting") : t("start")}
             </button>
           ) : (
-            <div className="mx-auto inline-block animate-[hud-pulse_2.4s_infinite] border-y border-hud-line bg-black/55 px-6 py-4 text-lg italic text-[#d6cbb7] sm:px-8 sm:text-xl">
+            <div className="mx-auto inline-block animate-[hud-pulse_2.4s_infinite] border-y border-hud-line bg-black/55 px-6 py-4 text-lg italic text-hud-text sm:px-8 sm:text-xl">
               {t("waiting")}
             </div>
           )}

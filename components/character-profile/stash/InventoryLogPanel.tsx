@@ -28,7 +28,7 @@ export function InventoryLogPanel() {
         {entries.length === 0 && <p className="text-sm text-hud-muted">{log.isPending ? t("log.loading") : t("log.empty")}</p>}
         <ul>
           {entries.map((e) => (
-            <li key={e.id} className="break-words border-b border-[#2a2218] py-1.5 text-xs text-hud-muted">
+            <li key={e.id} className="break-words border-b border-hud-raised py-1.5 text-xs text-hud-muted">
               {format.dateTime(new Date(e.createdAt), { day: "2-digit", month: "2-digit", year: "numeric" })} · {e.actor.displayName ?? "—"} · <span className="text-hud-ink">{describeLog(e, t)}</span>
             </li>
           ))}

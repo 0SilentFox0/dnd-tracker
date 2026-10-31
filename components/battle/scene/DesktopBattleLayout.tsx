@@ -28,7 +28,7 @@ import { myTurnKey } from "@/lib/utils/battle/view";
 const DmPanel = dynamic(() => import("@/components/battle/dm/DmPanel").then((m) => m.DmPanel), { ssr: false });
 
 const H3 = ({ side, children }: { side: ParticipantSide; children: React.ReactNode }) => (
-  <h3 className="hud-sc flex h-8 items-center gap-2 border-b border-white/[.14] text-[15px] font-bold tracking-[.1em] text-[#a89c88]">
+  <h3 className="hud-sc flex h-8 items-center gap-2 border-b border-white/[.14] text-[15px] font-bold tracking-[.1em] text-hud-soft">
     <SideDot side={side} />
     {children}
   </h3>
@@ -103,7 +103,7 @@ export function DesktopBattleLayout({ onComplete }: { onComplete: () => void }) 
           <main className="grid min-h-0 grid-cols-2 gap-6 overflow-y-auto px-6 py-4"><BattleColumns /></main>
         )}
         <aside className="flex min-h-0 flex-col overflow-y-auto border-l border-white/10 px-5 py-4">
-          <h3 className="hud-sc flex h-8 items-center justify-between border-b border-white/[.14] text-[15px] font-bold tracking-[.1em] text-[#a89c88]">
+          <h3 className="hud-sc flex h-8 items-center justify-between border-b border-white/[.14] text-[15px] font-bold tracking-[.1em] text-hud-soft">
             {selected ? t("participant") : t("log")}
             {selected && <button type="button" onClick={() => select(null)} className="font-sans text-[13px] font-normal tracking-normal text-[var(--hud-muted)]">{t("backToLog")}</button>}
           </h3>

@@ -147,7 +147,7 @@ export function ReferenceSearchBar({ filters }: ReferenceSearchBarProps) {
   const { search, section, panel, hasActive, clearAll, visible, classMode } = filters;
 
   return (
-    <HudPanel as="div" className="sticky top-0 z-10 bg-[rgba(17,14,11,.97)]">
+    <HudPanel as="div" className="sticky top-0 z-10 bg-hud-page/97">
       <div className="space-y-3">
         <div className="relative">
           <Search className="pointer-events-none absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-hud-muted" />

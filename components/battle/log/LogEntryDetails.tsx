@@ -41,7 +41,7 @@ export function LogEntryDetails({ action }: { action: BattleAction }) {
   if (items.length === 0) return null;
 
   return (
-    <div className="mt-1.5 space-y-0.5 border-l-2 border-hud-line pl-4 text-xs text-[#a89c88]">
+    <div className="mt-1.5 space-y-0.5 border-l-2 border-hud-line pl-4 text-xs text-hud-soft">
       {items.map((item, i) =>
         item.kind === "damage" ? (
           <DamageTable key={i} rows={item.rows} />

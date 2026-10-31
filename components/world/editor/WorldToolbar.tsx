@@ -47,7 +47,7 @@ export function WorldToolbar({ drawing, readOnly = false, onSettings, inspector,
 
   return (
     <TooltipProvider delayDuration={300}>
-      <div className="rounded-md border border-hud-rule bg-[rgba(17,14,11,.97)]">
+      <div className="rounded-md border border-hud-rule bg-hud-page/97">
       <div className="flex flex-col lg:flex-row lg:items-center">
       <div role="group" aria-label={t("group")} className="hud-scroll-x flex w-full items-center gap-1 overflow-x-auto p-1 lg:min-w-0 lg:flex-1">
         {TOOLS.map(({ key, hotkey, Icon }) => (

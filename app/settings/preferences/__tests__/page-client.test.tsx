@@ -16,6 +16,6 @@ describe("PreferencesClient", () => {
 
     expect(screen.getByText("auth.settings.preferences.title")).toBeTruthy();
     expect(screen.getByText("auth.settings.preferences.timeZone")).toBeTruthy();
-    expect(screen.getByRole("combobox").textContent).toContain("Asia/Tokyo");
+    expect(screen.getAllByRole("combobox").some((c) => c.textContent?.includes("Asia/Tokyo"))).toBe(true);
   });
 });

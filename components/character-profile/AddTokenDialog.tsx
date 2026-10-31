@@ -58,7 +58,7 @@ export function AddTokenDialog({ open, onOpenChange, onSubmit, isPending }: AddT
               type="button"
               aria-pressed={color === c}
               onClick={() => setColor(c)}
-              className={cn("flex h-11 flex-1 items-center justify-center gap-2 rounded border border-[#2a2218] text-sm", color === c && "border-hud-gold text-hud-gold")}
+              className={cn("flex h-11 flex-1 items-center justify-center gap-2 rounded border border-hud-raised text-sm", color === c && "border-hud-gold text-hud-gold")}
             >
               <span className={cn("size-3 rounded-full", TOKEN_DOT[c])} />
               {t(`colors.${c}`)}

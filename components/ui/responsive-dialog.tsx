@@ -88,7 +88,7 @@ export function ResponsiveDialog({ open, onOpenChange, title, description, foote
               <InsideSheet.Provider value={true}>{body}</InsideSheet.Provider>
             </div>
             {footer ? (
-              <div data-slot="sheet-footer" className={cn("flex gap-2 border-t bg-background px-4 pt-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] [&>*]:flex-1", hud && "border-hud-rule bg-[#110e0b]/95")}>
+              <div data-slot="sheet-footer" className={cn("flex gap-2 border-t bg-background px-4 pt-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] [&>*]:flex-1", hud && "border-hud-rule bg-hud-page/95")}>
                 {footer}
               </div>
             ) : null}

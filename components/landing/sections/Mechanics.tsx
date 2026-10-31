@@ -26,13 +26,13 @@ export function Mechanics({ t }: { t: Translator }) {
               <Icon aria-hidden className="mt-1 size-5 shrink-0 text-hud-gold transition group-hover:text-hud-gold-bright" />
               <div>
                 <h3 className="hud-sc text-lg text-hud-ink">{t(`mechanics.capabilities.${id}.title`)}</h3>
-                <p className="text-sm text-[#b3a893]">{t(`mechanics.capabilities.${id}.text`)}</p>
+                <p className="text-sm text-hud-soft">{t(`mechanics.capabilities.${id}.text`)}</p>
               </div>
             </li>
           );
         })}
       </ul>
-      <p className="mx-auto mt-10 max-w-3xl text-center text-sm text-[#8f8473]">{t("mechanics.footnote")}</p>
+      <p className="mx-auto mt-10 max-w-3xl text-center text-sm text-hud-muted">{t("mechanics.footnote")}</p>
     </section>
   );
 }

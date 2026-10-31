@@ -70,7 +70,7 @@ export function GoalList() {
       {goals.length === 0 && <p className="text-sm text-hud-muted">{t("empty")}</p>}
       <ul>
         {goals.map((g) => (
-          <li key={g.id} className="flex items-start gap-2 border-b border-[#2a2218] py-2.5 text-sm last:border-b-0">
+          <li key={g.id} className="flex items-start gap-2 border-b border-hud-raised py-2.5 text-sm last:border-b-0">
             <button
               type="button"
               disabled={!isDM || isPending}

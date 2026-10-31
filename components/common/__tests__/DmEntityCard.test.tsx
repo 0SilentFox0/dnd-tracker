@@ -14,7 +14,7 @@ describe("DmEntityCard", () => {
       </DmEntityCard>,
     );
 
-    expect(screen.getByRole("heading", { name: "Wizard" }).closest("a")?.getAttribute("href")).toBe("/x/1");
-    expect(screen.getByText("d6").closest("a")?.getAttribute("href")).toBe("/x/1");
+    expect(screen.getByRole("link", { name: "Wizard" }).getAttribute("href")).toBe("/x/1");
+    expect(screen.getByText("d6")).toBeTruthy();
   });
 });

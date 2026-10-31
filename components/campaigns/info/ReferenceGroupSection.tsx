@@ -79,7 +79,7 @@ export function ReferenceGroupSection({ group, children, className }: ReferenceG
 
   return (
     <section
-      className={cn(frameClass, "border-hud-line bg-[rgba(20,16,12,.85)]")}
+      className={cn(frameClass, "border-hud-line bg-hud-panel")}
       style={accentStyle}
     >
       <header>

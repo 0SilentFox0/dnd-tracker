@@ -7,7 +7,7 @@ import { Pencil } from "lucide-react";
 
 import { AbilityFlowList } from "@/components/abilities/AbilityFlow";
 import { ArtifactDeleteButton } from "@/components/artifacts/ArtifactDeleteButton";
-import { EntityIcon } from "@/components/common/EntityIcon";
+import { ZoomableEntityIcon } from "@/components/common/ZoomableEntityIcon";
 import { HudCard } from "@/components/hud/page";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -92,7 +92,7 @@ export function ArtifactCard({
     return (
       <div className="h-full rounded-md bg-hud-field p-2 shadow-[inset_0_0_0_1px_var(--color-hud-line)]">
         <div className="flex items-start gap-3">
-          <EntityIcon src={artifact.icon} name={artifact.name} size={64} className="size-16 rounded-lg text-xl" />
+          <ZoomableEntityIcon src={artifact.icon} name={artifact.name} size={96} className="size-20 rounded-lg text-xl" />
           <div className="min-w-0 flex-1">
             <div className="flex items-start gap-1">
               <p className="min-w-0 flex-1 text-sm font-semibold leading-snug text-hud-ink [overflow-wrap:anywhere]">{artifact.name}</p>
@@ -135,9 +135,9 @@ export function ArtifactCard({
   }
 
   return (
-    <HudCard className="space-y-2 p-4">
+    <HudCard href={`/campaigns/${campaignId}/dm/artifacts/${artifact.id}`} linkLabel={artifact.name} className="space-y-2 p-4">
       <div className="flex items-start gap-3">
-        <EntityIcon src={artifact.icon} name={artifact.name} size={64} className="size-12 rounded-lg text-xl sm:size-16" />
+        <ZoomableEntityIcon src={artifact.icon} name={artifact.name} size={96} className="size-16 rounded-lg text-xl sm:size-20" />
         <div className="flex min-w-0 flex-1 items-start justify-between gap-2">
           <h3 className="hud-sc min-w-0 flex-1 truncate text-base text-hud-ink">{artifact.name}</h3>
           {artifact.rarity && (

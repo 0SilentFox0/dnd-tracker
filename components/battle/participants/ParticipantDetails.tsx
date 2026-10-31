@@ -43,13 +43,13 @@ function EffectRow({ effect: e }: { effect: ActiveEffect }) {
 
   return (
     <div className="flex gap-3 border-b border-white/[.08] py-2.5">
-      <span className={e.type === "buff" ? "text-[#cdb87e]" : "text-hud-danger"}>
+      <span className={e.type === "buff" ? "text-hud-gold" : "text-hud-danger"}>
         <EffectIcon effect={e} size={36} />
       </span>
       <div className="min-w-0 flex-1">
         <div className="flex justify-between text-[15px] font-medium text-[var(--ink)]"><span>{text(effectName(e))}</span><span className="text-[13px] font-normal text-[var(--hud-muted)]">{e.zone ? t("zone") : e.permanent ? t("permanent") : t("rounds", { count: e.duration })}</span></div>
-        {effectLines(e, abilityT).map(text).map((line) => <p key={line} className="mt-0.5 text-[13px] leading-[18px] text-[#a89c88]">{line}</p>)}
-        {e.source && <p className="text-[13px] leading-[18px] text-[#a89c88]">{t("from", { source: e.source.abilityName ? `${e.source.abilityName} (${e.source.name})` : e.source.name })}</p>}
+        {effectLines(e, abilityT).map(text).map((line) => <p key={line} className="mt-0.5 text-[13px] leading-[18px] text-hud-soft">{line}</p>)}
+        {e.source && <p className="text-[13px] leading-[18px] text-hud-soft">{t("from", { source: e.source.abilityName ? `${e.source.abilityName} (${e.source.name})` : e.source.name })}</p>}
       </div>
     </div>
   );
@@ -86,7 +86,7 @@ function ParticipantDetailsBody({ participant: live }: ParticipantDetailsProps) 
         <ZoomablePortrait flashKey={`portrait:${change?.id ?? ""}`} participant={participant} fx="detail" size={64} className={cn(!change?.impact && hitFlashClass(change))} />
         <div>
           <div className="hud-sc text-[22px] font-bold leading-7">{participant.basicInfo.name}</div>
-          {exact ? <div className="text-sm text-[#d6cbb7]">{participant.combatStats.currentHp} / {participant.combatStats.maxHp}</div> : <HealthLabel participant={participant} />}
+          {exact ? <div className="text-sm text-hud-text">{participant.combatStats.currentHp} / {participant.combatStats.maxHp}</div> : <HealthLabel participant={participant} />}
         </div>
       </div>
       <HealthBar participant={participant} exact={exact} className="mt-3" />

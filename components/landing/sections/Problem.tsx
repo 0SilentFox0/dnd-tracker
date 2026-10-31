@@ -37,11 +37,11 @@ export function Problem({ t }: { t: Translator }) {
                 <div
                   key={key}
                   style={{ marginLeft: `${(i % 3) * 14}px` }}
-                  className="relative flex items-center gap-3 rounded-lg border border-hud-rule bg-[#15110d] px-3 py-2 text-hud-bone/70"
+                  className="relative flex items-center gap-3 rounded-lg border border-hud-rule bg-hud-surface px-3 py-2 text-hud-bone/70"
                 >
-                  <Icon className="size-4 shrink-0 text-[#8f8473]" />
+                  <Icon className="size-4 shrink-0 text-hud-muted" />
                   <span className="text-sm">{t(`problem.replaces.${key}.title`)}</span>
-                  <span className="ml-auto text-xs text-[#8f8473]">{t(`problem.replaces.${key}.text`)}</span>
+                  <span className="ml-auto text-xs text-hud-muted">{t(`problem.replaces.${key}.text`)}</span>
                   <span className="absolute inset-x-2 top-1/2 h-px bg-hud-danger/80" />
                 </div>
               );

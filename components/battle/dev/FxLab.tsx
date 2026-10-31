@@ -25,15 +25,15 @@ function CanvasFrameTile({ label, frame }: { label: string; frame: FrameAnimatio
 
   return (
     <div className="flex flex-col items-center gap-2">
-      <div className="relative flex min-h-[76px] w-full items-center gap-3 border-b border-white/[.08] px-2 py-2 text-[#d6cbb7]">
+      <div className="relative flex min-h-[76px] w-full items-center gap-3 border-b border-white/[.08] px-2 py-2 text-hud-text">
         {token > 0 && <CanvasFrame key={token} frame={frame} delayMs={0} />}
-        <span className="flex size-12 items-center justify-center rounded-full bg-[#241d16] text-xs font-bold shadow-[0_0_0_2px_var(--enemy),0_0_0_3px_#000]">Og</span>
+        <span className="flex size-12 items-center justify-center rounded-full bg-hud-raised text-xs font-bold shadow-[0_0_0_2px_var(--enemy),0_0_0_3px_#000]">Og</span>
         <span className="min-w-0 flex-1">
           <span className="hud-sc block font-bold text-[var(--ink)]">Ogre · {label}</span>
           <span className="mt-1 block h-1.5 rounded-full bg-[#c0392b]" />
         </span>
       </div>
-      <button type="button" onClick={() => setToken((t) => t + 1)} aria-label={`Play frame: ${label}`} className="flex h-8 items-center gap-1.5 rounded-full px-3 text-xs text-[#2a1d05] [background:linear-gradient(135deg,#8a6414,#e6c25a_55%,#8a6414)]">
+      <button type="button" onClick={() => setToken((t) => t + 1)} aria-label={`Play frame: ${label}`} className="flex h-8 items-center gap-1.5 rounded-full px-3 text-xs text-[var(--palette-primary-foreground,#2a1d05)] [background:linear-gradient(135deg,#8a6414,#e6c25a_55%,#8a6414)]">
         <Play className="size-3" />
         Play
       </button>
@@ -65,7 +65,7 @@ export function FxLab() {
               <Link href="/dev/fx-spells" className="flex h-9 items-center rounded-full px-4 text-sm text-hud-bone shadow-[inset_0_0_0_1px_var(--color-hud-gold)]">
                 Spells and effects
               </Link>
-              <button type="button" onClick={() => setToken((t) => t + 1)} aria-label="Play" className="flex h-9 items-center gap-2 rounded-full px-4 text-sm text-[#2a1d05] [background:linear-gradient(135deg,#8a6414,#e6c25a_55%,#8a6414)]">
+              <button type="button" onClick={() => setToken((t) => t + 1)} aria-label="Play" className="flex h-9 items-center gap-2 rounded-full px-4 text-sm text-[var(--palette-primary-foreground,#2a1d05)] [background:linear-gradient(135deg,#8a6414,#e6c25a_55%,#8a6414)]">
               <Play className="size-4" />
               Play
             </button>
@@ -94,7 +94,7 @@ export function FxLab() {
                 <span className="relative size-12 shrink-0 rounded-full bg-[#3a3326] ring-1 ring-white/20">
                   <AuraCanvas kinds={[kind]} size={48} />
                 </span>
-                <span className="text-xs text-[#d6cbb7]">{AURA_LABEL[kind]}</span>
+                <span className="text-xs text-hud-text">{AURA_LABEL[kind]}</span>
               </div>
             ))}
           </div>

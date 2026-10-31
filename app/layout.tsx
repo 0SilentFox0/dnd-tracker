@@ -3,6 +3,7 @@ import type { Metadata } from "next";
 import "./globals.css";
 import "./fonts.css";
 import { HUD_PRELOAD_FONTS, hudFontClassName } from "@/components/hud";
+import { FooterGate } from "@/components/layout/FooterGate";
 import { HeaderGate } from "@/components/layout/HeaderGate";
 import { PageTransition } from "@/components/layout/PageTransition";
 import { ScreenBackground } from "@/components/layout/screen-background";
@@ -45,6 +46,7 @@ export default async function RootLayout({
               <ConfirmProvider>
                 <HeaderGate />
                 <PageTransition>{children}</PageTransition>
+                <FooterGate />
               </ConfirmProvider>
             </ThemeProvider>
           </QueryProvider>

@@ -64,7 +64,7 @@ export function StripLead({ icon: Icon, label, labelClassName = "" }: { icon: Lu
   return (
     <span className="flex shrink-0 items-center gap-2">
       <span className={MEDALLION}>
-        <Icon className="size-4 text-[#2a1d05]" aria-hidden />
+        <Icon className="size-4 text-[var(--palette-primary-foreground,#2a1d05)]" aria-hidden />
       </span>
       <span className={`hud-sc text-xs text-hud-muted ${labelClassName}`}>{label}</span>
     </span>

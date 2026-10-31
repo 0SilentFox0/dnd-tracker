@@ -9,8 +9,6 @@ import { CircleHelp, Globe, Home, KeyRound, LogOut, Menu, Sparkles, User, UserRo
 import { JoinBattleButton } from "@/components/campaigns/JoinBattleButton";
 import { WatchShowButton } from "@/components/campaigns/WatchShowButton";
 import { AbbreviationsInfoDialog } from "@/components/common/AbbreviationsInfoDialog";
-import { LocaleSwitcher } from "@/components/common/LocaleSwitcher";
-import { PaletteSwitcher } from "@/components/common/PaletteSwitcher";
 import { HUD_SURFACE } from "@/components/hud";
 import { Breadcrumbs } from "@/components/layout/Breadcrumbs";
 import { WhatsNewButton } from "@/components/onboarding/WhatsNewButton";
@@ -65,7 +63,7 @@ export function Header() {
   const width = isBattlePage ? "w-full px-3 sm:px-6" : "container mx-auto px-4";
 
   return (
-    <header className="sticky top-0 z-50 w-full border-b border-hud-rule bg-[#0b0908]/[.97]">
+    <header className="sticky top-0 z-50 w-full border-b border-hud-rule bg-hud-page/[.97]">
       <HudPortalClassProvider value={HUD_SURFACE}>
       <div className={cn(width, "flex h-14 items-center justify-between")}>
         <div className="flex items-center gap-2">
@@ -127,8 +125,6 @@ export function Header() {
           <WatchShowButton />
           {email && <WhatsNewButton />}
           <AbbreviationsInfoDialog />
-          <LocaleSwitcher />
-          {email && <PaletteSwitcher />}
           {email && (
             <span className="hidden sm:inline text-sm text-hud-muted">
               {email}

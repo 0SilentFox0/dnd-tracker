@@ -14,7 +14,7 @@ export function Breakdown({ lines }: { lines: SheetLine[] }) {
   const text = useSheetLine();
 
   return (
-    <ul className="mt-2 space-y-0.5 border-t border-hud-rule pt-2 text-xs text-[#b8ab95]">
+    <ul className="mt-2 space-y-0.5 border-t border-hud-rule pt-2 text-xs text-hud-soft">
       {lines.map((l, i) => (
         <li key={i} className="flex justify-between gap-3">
           <span className="min-w-0 break-words">{text(l)}</span>

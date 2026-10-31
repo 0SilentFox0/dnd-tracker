@@ -75,7 +75,7 @@ function RowCard({ row, committed, onNotes, campaignId }: { row: Row; committed:
 
   const { kind, name, owner, source } = entryParts(t, row.canonicalKey);
 
-  return <li className="min-w-0"><details className="rounded-lg bg-[rgba(20,16,12,.85)] p-3 shadow-[inset_0_0_0_1px_rgba(230,194,90,.25)]">
+  return <li className="min-w-0"><details className="rounded-lg bg-hud-panel p-3 shadow-[inset_0_0_0_1px_var(--color-hud-edge)]">
     <summary className="cursor-pointer space-y-1">
       {kind && <span className="block text-[11px] uppercase text-hud-muted">{kind}</span>}
       <span className="hud-sc block break-words text-[15px] text-hud-ink">{kind ? `«${name}»${owner}` : name}</span>

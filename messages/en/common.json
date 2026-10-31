@@ -167,6 +167,7 @@
     "cancel": "Cancel",
     "add": "Add",
     "remove": "Remove",
+    "zoomIcon": "Open icon: {name}",
     "back": "Back"
   },
   "form": {

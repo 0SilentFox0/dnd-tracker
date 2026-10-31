@@ -56,7 +56,7 @@ export function TransferArtifactDialog({ artifact, source, open, onOpenChange }:
         <ul>
           {recipients.map((h) => (
               <li key={h.id}>
-                <button type="button" disabled={transfer.isPending} onClick={() => give(h.id, h.name)} className="flex min-h-11 w-full items-center gap-3 border-b border-[#2a2218] py-2 text-left disabled:opacity-50">
+                <button type="button" disabled={transfer.isPending} onClick={() => give(h.id, h.name)} className="flex min-h-11 w-full items-center gap-3 border-b border-hud-raised py-2 text-left disabled:opacity-50">
                   <EntityIcon src={h.avatar} name={h.name} size={36} className="size-9 rounded-full" />
                   <span className="min-w-0">
                     <span className="block text-sm text-hud-ink">{h.name}</span>

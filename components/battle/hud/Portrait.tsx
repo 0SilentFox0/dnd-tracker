@@ -25,7 +25,7 @@ export function Portrait({ participant, size = 40, current, me, extra, className
     <span
       data-fx-participant={fx ? participant.basicInfo.id : undefined}
       data-fx-anchor={fx && fx !== "main" ? fx : undefined}
-      className={cn("relative inline-flex shrink-0 items-center justify-center overflow-hidden rounded-full bg-[#241d16] text-xs font-bold", isDown(participant) && "grayscale brightness-50", className)}
+      className={cn("relative inline-flex shrink-0 items-center justify-center overflow-hidden rounded-full bg-hud-raised text-xs font-bold", isDown(participant) && "grayscale brightness-50", className)}
       style={{
         width: size,
         height: size,

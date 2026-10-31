@@ -42,7 +42,7 @@ export function CampaignMembersList({
       {members.map((member) => (
         <div
           key={member.id}
-          className="flex items-center justify-between border-b border-[#2a2218] p-2 last:border-b-0"
+          className="flex items-center justify-between border-b border-hud-raised p-2 last:border-b-0"
         >
           <div className="flex items-center gap-2">
             <span className="text-hud-bone">{member.user.displayName}</span>

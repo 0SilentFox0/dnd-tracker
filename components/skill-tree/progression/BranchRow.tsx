@@ -23,7 +23,7 @@ export function BranchRow({ row, dto, onSelect }: { row: Row; dto: CharacterProg
   const renderSlot = (s: NodeState, i: number) => <SlotButton key={i} state={s} label={label(s)} icon={icon(s)} onSelect={() => onSelect(s)} />;
 
   return (
-    <div role="group" aria-label={`${branch?.name ?? row.branchId} · ${levelText}`} className="flex items-center gap-2 border-b border-[rgba(230,220,203,.07)] px-3 py-2 sm:px-4">
+    <div role="group" aria-label={`${branch?.name ?? row.branchId} · ${levelText}`} className="flex items-center gap-2 border-b border-hud-bone/10 px-3 py-2 sm:px-4">
       <Button
         type="button"
         variant="ghost"
@@ -37,7 +37,7 @@ export function BranchRow({ row, dto, onSelect }: { row: Row; dto: CharacterProg
         </span>
         <span className="hud-sc text-[11px] text-[var(--m2)]">{levelText}</span>
       </Button>
-      <span aria-hidden className="hidden text-[#6b5f50] sm:inline">▸</span>
+      <span aria-hidden className="hidden text-hud-muted sm:inline">▸</span>
       <div className="flex items-center gap-2 lg:gap-4">
         <div className="flex">{row.outer.map(renderSlot)}</div>
         <div className="flex">{row.middle.map(renderSlot)}</div>

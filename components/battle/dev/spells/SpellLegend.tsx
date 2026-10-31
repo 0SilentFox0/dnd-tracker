@@ -7,7 +7,7 @@ const ROWS: [string, string][] = [
 
 export function SpellLegend() {
   return (
-    <section aria-label="Legend" className="rounded-xl border border-hud-rule bg-[rgba(17,14,11,.82)] p-3 text-xs text-hud-muted">
+    <section aria-label="Legend" className="rounded-xl border border-hud-rule bg-hud-panel p-3 text-xs text-hud-muted">
       <p className="mb-2 text-hud-bone">
         Every spell is cast through the battle engine on a test arena (all saving throws fail, dice roll fours), so the display matches what players will see. ▶ plays the animation, frames and auras on the arena.
       </p>

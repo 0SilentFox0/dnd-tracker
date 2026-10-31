@@ -31,7 +31,7 @@ export function SpellCard({ spell, onPlay }: { spell: SpellCardData; onPlay: (sp
   return (
     <HudCard accent={spec ? PALETTE[spec.element].core : undefined}>
       <article aria-label={spell.name} className="flex gap-3">
-        <EntityIcon src={spell.icon} name={spell.name} size={48} className="size-12 rounded-lg bg-[#241d16] text-hud-bone" />
+        <EntityIcon src={spell.icon} name={spell.name} size={48} className="size-12 rounded-lg bg-hud-raised text-hud-bone" />
         <div className="min-w-0 flex-1 space-y-2">
           <div className="flex items-start justify-between gap-2">
             <div className="min-w-0">
@@ -44,7 +44,7 @@ export function SpellCard({ spell, onPlay }: { spell: SpellCardData; onPlay: (sp
               type="button"
               onClick={() => onPlay(spell)}
               aria-label={`Play: ${spell.name}`}
-              className="flex size-8 shrink-0 items-center justify-center rounded-full text-[#2a1d05] [background:linear-gradient(135deg,#8a6414,#e6c25a_55%,#8a6414)]"
+              className="flex size-8 shrink-0 items-center justify-center rounded-full text-[var(--palette-primary-foreground,#2a1d05)] [background:linear-gradient(135deg,#8a6414,#e6c25a_55%,#8a6414)]"
             >
               <Play className="size-3.5" />
             </button>

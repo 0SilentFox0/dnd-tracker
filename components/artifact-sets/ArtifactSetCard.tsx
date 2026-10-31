@@ -27,7 +27,7 @@ export function ArtifactSetCard(props: ArtifactSetCardProps) {
   const count = props.artifacts.length;
 
   return (
-    <HudCard className="space-y-4 p-4">
+    <HudCard href={editHref} linkLabel={set.name} className="space-y-4 p-4">
       <div className="flex items-start justify-between gap-2">
         <div className="flex min-w-0 flex-1 gap-3">
           <ArtifactSetCardIcon url={set.icon} name={set.name} size="lg" />

@@ -49,7 +49,7 @@ export function ReserveGroup() {
 
   return (
     <section aria-label={t("aria")}>
-      <h3 className="hud-sc flex h-8 items-center border-b border-white/[.14] text-[15px] font-bold tracking-[.1em] text-[#a89c88]">{t("title", { count: reserve.length })}</h3>
+      <h3 className="hud-sc flex h-8 items-center border-b border-white/[.14] text-[15px] font-bold tracking-[.1em] text-hud-soft">{t("title", { count: reserve.length })}</h3>
       <ReserveList />
     </section>
   );
@@ -69,7 +69,7 @@ export function ReserveSheetButton() {
       <button type="button" onClick={() => setOpen(true)} className="hud-sc flex shrink-0 items-center px-2 text-[14px] tracking-[.06em] text-[var(--gold)]">
         {t("title", { count: reserve.length })}
       </button>
-      <ResponsiveDialog open={open} onOpenChange={setOpen} title={t("title", { count: reserve.length })} className={cn(HUD_SURFACE, "border-white/25 bg-[#15110e]")}>
+      <ResponsiveDialog open={open} onOpenChange={setOpen} title={t("title", { count: reserve.length })} className={cn(HUD_SURFACE, "border-white/25 bg-hud-surface")}>
         <ReserveList />
       </ResponsiveDialog>
     </>

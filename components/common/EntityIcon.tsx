@@ -13,7 +13,7 @@ export interface EntityIconProps {
   alt?: string;
 }
 
-const isImageSrc = (src: string) => /^(https?:\/\/|\/|data:image\/|blob:)/.test(src.trim());
+export const isImageSrc = (src: string) => /^(https?:\/\/|\/|data:image\/|blob:)/.test(src.trim());
 
 export function EntityIcon({ src, name, size = 64, className, fallback, emoji = false, alt = "" }: EntityIconProps) {
   const initial = fallback ?? <span className="flex size-full items-center justify-center">{name.trim().charAt(0).toUpperCase() || "?"}</span>;

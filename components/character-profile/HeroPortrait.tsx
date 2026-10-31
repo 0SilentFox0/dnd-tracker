@@ -19,7 +19,7 @@ export function HeroPortrait({ src, name, className, canEdit }: HeroPortraitProp
 
   const [open, setOpen] = useState(false);
 
-  const frame = cn("relative aspect-[3/4] w-full overflow-hidden rounded-xl border-2 border-hud-gold bg-[#2a2016]", className);
+  const frame = cn("relative aspect-[3/4] w-full overflow-hidden rounded-xl border-2 border-hud-gold bg-hud-raised", className);
 
   if (!src) {
     return (
