@@ -1,6 +1,6 @@
 # One SRD template with a language overlay
 
-Status: revised after a second code review on 2026-10-31; awaiting design approval. Documentation only; no product code changes.
+Status: revised after a second code review and approved by the user on 2026-10-31. Implementation authorized.
 
 ## Intent and agreed constraints
 
