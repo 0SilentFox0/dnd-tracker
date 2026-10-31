@@ -30,8 +30,14 @@ export function HudCard({ tone = "default", accent, asChild = false, href, linkL
       style={accent ? { borderLeftColor: accent } : undefined}
       className={cn(href && "relative cursor-pointer", "block rounded-lg bg-hud-panel p-3 text-hud-bone transition-shadow", accent && "border-l-[3px]", TONE[tone], className)}
     >
-      {href && <Link href={href} data-card-overlay aria-label={linkLabel} className="absolute inset-0 rounded-lg" />}
-      {children}
+      {href && !asChild ? (
+        <>
+          <Link href={href} data-card-overlay aria-label={linkLabel} className="absolute inset-0 rounded-lg" />
+          {children}
+        </>
+      ) : (
+        children
+      )}
     </Comp>
   );
 }
