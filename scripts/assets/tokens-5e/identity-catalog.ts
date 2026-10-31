@@ -3,7 +3,7 @@ import type { IconKind } from "./icons-file";
 
 import { parseTable } from "@/lib/utils/content/import/table";
 
-export type IdentityKind = Extract<IconKind, "features" | "races" | "classes" | "subclasses" | "backgrounds">;
+export type IdentityKind = Extract<IconKind, "features" | "races" | "classes" | "subclasses" | "backgrounds" | "feats">;
 
 export interface IdentityTarget { kind: IdentityKind; key: string; recordId: string }
 
@@ -23,6 +23,7 @@ export const IDENTITY_BUCKET: Record<IdentityKind, string> = {
   subclasses: "class-icons",
   backgrounds: "background-icons",
   features: "feature-icons",
+  feats: "feat-icons",
 };
 
 const PLACEHOLDER_RE = /-subclass(?:es)?-\d+$/;
@@ -45,6 +46,8 @@ export function expectedTargets(data: SrdData): IdentityTarget[] {
   }
 
   for (const b of data.backgrounds) targets.push({ kind: "backgrounds", key: b.slug, recordId: `background:${bare(b.slug)}` });
+
+  for (const f of data.feats) targets.push({ kind: "feats", key: f.slug, recordId: `feat:${bare(f.slug)}` });
 
   const features = (groups: ClassFeatureGroup[], scope: string) =>
     groups.flatMap((g) => g.abilities.filter((a) => !PLACEHOLDER_RE.test(a.id)).map((a) => ({ kind: "features" as const, key: `${scope}/${a.id}`, recordId: `feature:${scope.replace(SRD_PREFIX, "")}/${a.id}` })));

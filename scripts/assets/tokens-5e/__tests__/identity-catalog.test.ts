@@ -9,6 +9,7 @@ const ab = (id: string) => ({ id, name: id, trigger: { event: "passive" }, effec
 const fixture = {
   races: [{ slug: "srd-2024_elf" }],
   backgrounds: [{ slug: "srd-2024_sage" }],
+  feats: [{ slug: "srd-2024_alert" }],
   classes: [
     {
       slug: "srd-2024_wizard",
@@ -25,6 +26,7 @@ describe("expectedTargets", () => {
       { kind: "classes", key: "srd-2024_wizard", recordId: "class:wizard" },
       { kind: "subclasses", key: "srd-2024_wizard/evoker", recordId: "subclass:wizard-school-of-evocation" },
       { kind: "backgrounds", key: "srd-2024_sage", recordId: "background:sage" },
+      { kind: "feats", key: "srd-2024_alert", recordId: "feat:alert" },
       { kind: "features", key: "srd-2024_wizard/spell-mastery-18", recordId: "feature:wizard/spell-mastery-18" },
       { kind: "features", key: "srd-2024_wizard/evoker/x-3", recordId: "feature:wizard/evoker/x-3" },
     ]);
@@ -33,7 +35,7 @@ describe("expectedTargets", () => {
   it("counts on the real SRD data", () => {
     const count = (kind: string) => expectedTargets(readSrdData()).filter((t) => t.kind === kind).length;
 
-    expect(["features", "races", "classes", "subclasses", "backgrounds"].map(count)).toEqual([186, 9, 12, 12, 4]);
+    expect(["features", "races", "classes", "subclasses", "backgrounds", "feats"].map(count)).toEqual([186, 9, 12, 12, 4, 20]);
   });
 });
 

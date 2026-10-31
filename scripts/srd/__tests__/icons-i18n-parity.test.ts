@@ -6,7 +6,7 @@ import { readSrdData, toImportRows } from "../lib/data-files";
 import { withClassIcons, withIcons } from "../lib/load-template";
 
 const fakeIcons = (): IconsFile => {
-  const icons: IconsFile = { features: {}, races: {}, classes: {}, subclasses: {}, backgrounds: {}, spells: {}, units: {}, artifacts: {} };
+  const icons: IconsFile = { features: {}, races: {}, classes: {}, subclasses: {}, backgrounds: {}, feats: {}, spells: {}, units: {}, artifacts: {} };
 
   for (const t of expectedTargets(readSrdData())) icons[t.kind][t.key] = `https://x/${IDENTITY_BUCKET[t.kind]}/${t.key.replace(/\//g, "_")}.webp`;
 
@@ -26,7 +26,7 @@ const iconPaths = (locale: string) => {
 
   const icons = fakeIcons();
 
-  return (["races", "classes", "backgrounds"] as const).flatMap((kind) => {
+  return (["races", "classes", "backgrounds", "feats"] as const).flatMap((kind) => {
     const merged = withIcons(kind, data, toImportRows(data[kind]), icons);
 
     return flatten(kind === "classes" ? withClassIcons(merged, data, icons) : merged, kind);

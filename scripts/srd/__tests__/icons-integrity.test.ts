@@ -20,7 +20,7 @@ it.each(["spells", "units", "artifacts"] as const)("%s: every icon slug exists i
   }
 });
 
-const IDENTITY_KINDS = ["features", "races", "classes", "subclasses", "backgrounds"] as const;
+const IDENTITY_KINDS = ["features", "races", "classes", "subclasses", "backgrounds", "feats"] as const;
 
 const targets = expectedTargets(data);
 

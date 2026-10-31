@@ -57,7 +57,7 @@ export function resolveSchoolRefs<T>(value: T, idByName: ReadonlyMap<string, str
   return Object.fromEntries(Object.entries(value).map(([k, v]) => [k, k === "school" && typeof v === "string" ? (idByName.get(v) ?? v) : resolveSchoolRefs(v, idByName)])) as T;
 }
 
-const ICON_COLUMN: Partial<Record<SrdKind, "icon" | "avatar">> = { spells: "icon", artifacts: "icon", units: "avatar", races: "icon", classes: "icon", backgrounds: "icon" };
+const ICON_COLUMN: Partial<Record<SrdKind, "icon" | "avatar">> = { spells: "icon", artifacts: "icon", units: "avatar", races: "icon", classes: "icon", backgrounds: "icon", feats: "icon" };
 
 export function withIcons(kind: SrdKind, data: SrdData, rows: Record<string, unknown>[], icons: IconsFile): Record<string, unknown>[] {
   const column = ICON_COLUMN[kind];

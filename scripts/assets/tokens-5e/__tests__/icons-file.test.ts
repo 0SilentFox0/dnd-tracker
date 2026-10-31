@@ -5,7 +5,7 @@ import { expect, it } from "vitest";
 
 import { type IconsFile, readIcons, writeIcons } from "../icons-file";
 
-const EMPTY: IconsFile = { spells: {}, units: {}, artifacts: {}, features: {}, races: {}, classes: {}, subclasses: {}, backgrounds: {} };
+const EMPTY: IconsFile = { spells: {}, units: {}, artifacts: {}, features: {}, races: {}, classes: {}, subclasses: {}, backgrounds: {}, feats: {} };
 
 it("round-trips with sorted keys and is stable", () => {
   const p = path.join(fs.mkdtempSync(path.join(os.tmpdir(), "icons-")), "icons.json");

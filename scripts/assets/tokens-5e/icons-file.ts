@@ -2,13 +2,13 @@ import * as fs from "fs";
 import * as path from "path";
 
 import { SRD_DATA_DIR } from "../../srd/lib/source";
-export type IconKind = "spells" | "units" | "artifacts" | "features" | "races" | "classes" | "subclasses" | "backgrounds";
+export type IconKind = "spells" | "units" | "artifacts" | "features" | "races" | "classes" | "subclasses" | "backgrounds" | "feats";
 
 export type IconsFile = Record<IconKind, Record<string, string>>;
 
 export const ICONS_FILE = path.join(SRD_DATA_DIR, "icons.json");
 
-const KINDS: IconKind[] = ["spells", "units", "artifacts", "features", "races", "classes", "subclasses", "backgrounds"];
+const KINDS: IconKind[] = ["spells", "units", "artifacts", "features", "races", "classes", "subclasses", "backgrounds", "feats"];
 
 export function readIcons(file = ICONS_FILE): IconsFile {
   const stored: Partial<IconsFile> = fs.existsSync(file) ? JSON.parse(fs.readFileSync(file, "utf8")) : {};

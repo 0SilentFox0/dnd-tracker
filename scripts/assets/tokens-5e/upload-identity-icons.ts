@@ -21,7 +21,7 @@ const USAGE = "Використання: pnpm assets:identity-icons <templateId>
 
 const KB = 1024;
 
-const KINDS: IdentityKind[] = ["features", "races", "classes", "subclasses", "backgrounds"];
+const KINDS: IdentityKind[] = ["features", "races", "classes", "subclasses", "backgrounds", "feats"];
 
 async function main() {
   const args = process.argv.slice(2);
@@ -56,7 +56,7 @@ async function main() {
 
   const plan = planUploads(targets, readCsv("features.csv"), readCsv("identity.csv"), { features: path.join(dir, "output-features", "icons"), identity: path.join(dir, "output-identity", "icons") });
 
-  const uploaded: Record<IdentityKind, Record<string, string>> = { features: {}, races: {}, classes: {}, subclasses: {}, backgrounds: {} };
+  const uploaded: Record<IdentityKind, Record<string, string>> = { features: {}, races: {}, classes: {}, subclasses: {}, backgrounds: {}, feats: {} };
 
   const ensured = new Set<string>();
 

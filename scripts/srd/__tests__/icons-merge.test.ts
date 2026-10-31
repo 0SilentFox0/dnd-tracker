@@ -11,6 +11,7 @@ const data = {
   races: [{ slug: "r1" }],
   classes: [{ slug: "c1" }],
   backgrounds: [{ slug: "b1" }],
+  feats: [{ slug: "f1" }],
 } as unknown as SrdData;
 
 const icons: IconsFile = {
@@ -19,6 +20,7 @@ const icons: IconsFile = {
   classes: { c1: "https://x/c1.webp" },
   subclasses: { "c1/sc": "https://x/sc.webp" },
   backgrounds: { b1: "https://x/b1.webp" },
+  feats: { f1: "https://x/ft1.webp" },
   spells: { s1: "https://x/s1.webp" },
   units: { u1: "https://x/u1.webp" },
   artifacts: { a1: "https://x/a1.webp" },
@@ -30,13 +32,13 @@ it("units get avatar, spells and artifacts get icon, missing entries stay untouc
   expect(withIcons("units", data, rows("units"), icons)).toEqual([{ name: "U1", avatar: "https://x/u1.webp" }, { name: "U2" }]);
   expect(withIcons("spells", data, rows("spells"), icons)).toEqual([{ name: "S1", icon: "https://x/s1.webp" }]);
   expect(withIcons("artifacts", data, rows("artifacts"), icons)).toEqual([{ name: "A1", icon: "https://x/a1.webp" }]);
-  expect(withIcons("feats", data, [{ name: "F" }], icons)).toEqual([{ name: "F" }]);
 });
 
-it("races, classes and backgrounds get icon", () => {
+it("races, classes, backgrounds and feats get icon", () => {
   expect(withIcons("races", data, [{ name: "R" }], icons)).toEqual([{ name: "R", icon: "https://x/r1.webp" }]);
   expect(withIcons("classes", data, [{ name: "C" }], icons)).toEqual([{ name: "C", icon: "https://x/c1.webp" }]);
   expect(withIcons("backgrounds", data, [{ name: "B" }], icons)).toEqual([{ name: "B", icon: "https://x/b1.webp" }]);
+  expect(withIcons("feats", data, [{ name: "F" }], icons)).toEqual([{ name: "F", icon: "https://x/ft1.webp" }]);
 });
 
 describe("withClassIcons", () => {
