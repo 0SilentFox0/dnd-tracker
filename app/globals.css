@@ -365,6 +365,11 @@
     background-color: var(--palette-page, #0b0908);
     min-height: 100vh;
     position: relative;
+    display: flex;
+    flex-direction: column;
+  }
+  body > .page-transition {
+    flex: 1 0 auto;
   }
   body::before,
   body::after {
