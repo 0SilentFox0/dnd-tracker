@@ -20,8 +20,8 @@ const [CASTER] = PREVIEW_UNITS;
 
 function Chip({ label, book, children }: { label: string; book: boolean; children: ReactNode }) {
   return (
-    <span className={cn("inline-flex items-center gap-1 rounded-full border px-2 py-0.5 text-[11px] leading-4", book ? "spell-book-preview-pill" : "border-white/15 bg-white/[.04]")}>
-      <span className={book ? "spell-book-muted" : "text-[#a8987c]"}>{label}</span>
+    <span className={cn("inline-flex items-center gap-1 rounded-full border px-2 py-0.5 text-[11px] leading-4", book ? "spell-book-preview-pill" : "border-hud-line bg-hud-raised")}>
+      <span className={book ? "spell-book-muted" : "text-hud-muted"}>{label}</span>
       {children}
     </span>
   );
@@ -66,7 +66,7 @@ export default function SpellBattlePreviewPanel({ spell, className, variant = "h
       aria-label={t("fx.aria")}
       className={cn(
         "fx-preview text-[13px] not-italic",
-        book ? "spell-book-preview" : "rounded-xl border border-black/50 bg-[rgba(17,14,11,.94)] p-2.5 text-[#e6dccb] shadow-[inset_0_0_0_1px_rgba(230,194,90,.14)]",
+        book ? "spell-book-preview" : "rounded-xl border border-hud-line bg-hud-page/95 p-2.5 text-hud-bone shadow-[inset_0_0_0_1px_var(--color-hud-edge-faint)]",
         className,
       )}
     >
@@ -101,7 +101,7 @@ export default function SpellBattlePreviewPanel({ spell, className, variant = "h
             onClick={replay}
             className={cn(
               "ml-auto inline-flex min-h-7 items-center gap-1 rounded-full px-2.5 text-[11px]",
-              book ? "spell-book-preview-title shadow-[inset_0_0_0_1px_color-mix(in_srgb,var(--book-accent)_60%,transparent)] hover:bg-[color-mix(in_srgb,var(--book-accent)_10%,transparent)]" : "text-[#e6c25a] shadow-[inset_0_0_0_1px_rgba(230,194,90,.45)] hover:bg-white/5",
+              book ? "spell-book-preview-title shadow-[inset_0_0_0_1px_color-mix(in_srgb,var(--book-accent)_60%,transparent)] hover:bg-[color-mix(in_srgb,var(--book-accent)_10%,transparent)]" : "text-hud-gold-bright shadow-[inset_0_0_0_1px_var(--color-hud-edge)] hover:bg-hud-raised",
             )}
           >
             <Play className="size-3" aria-hidden />

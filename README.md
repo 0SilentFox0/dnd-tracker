@@ -38,11 +38,10 @@
 git clone <repository-url> && cd dnd-tracker
 pnpm install
 cp .env.example .env.local   # заповніть значення
-pnpm db:local                # Docker Postgres на :54322 + міграції
-pnpm dev                     # http://localhost:3000
+pnpm dev                     # запускає Docker Postgres, застосовує міграції й відкриває http://localhost:3000
 ```
 
-Локальна БД — Docker (`postgres:17`, порт 54322), щоб `pnpm dev` не витрачав ліміт Supabase. Для неї в `.env.local`:
+Локальна БД — Docker (`postgres:17`, порт 54322), щоб `pnpm dev` не витрачав ліміт Supabase. `pnpm dev` автоматично запускає її та застосовує міграції. Для неї в `.env.local`:
 `DATABASE_URL=DIRECT_URL=postgresql://postgres:postgres@localhost:54322/postgres`. Supabase Auth/Storage і Pusher лишаються хмарними.
 
 ### Змінні середовища

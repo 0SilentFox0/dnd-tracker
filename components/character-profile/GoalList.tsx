@@ -80,19 +80,19 @@ export function GoalList() {
             >
               {g.status === "done" ? <Check className="size-4" /> : g.status === "failed" ? <X className="size-4" /> : "◆"}
             </button>
-            <div className={cn("min-w-0 flex-1 pt-1.5", g.status !== GoalStatus.ACTIVE && "opacity-60")}>
+            <div className="min-w-0 flex-1 pt-1.5">
               {(g.title || g.kind || g.author === GoalAuthor.PLAYER) && (
                 <div className="mb-1 flex flex-wrap items-baseline gap-x-2 gap-y-1">
-                  {g.title && <span className={cn("hud-sc text-[15px] text-hud-bone", g.status !== GoalStatus.ACTIVE && "line-through")}>{g.title}</span>}
+                  {g.title && <span className={cn("hud-sc text-[15px]", g.status === GoalStatus.ACTIVE ? "text-hud-bone" : "text-hud-muted line-through")}>{g.title}</span>}
                   {g.kind && (
-                    <span className={cn("rounded border px-1.5 text-[10px] uppercase tracking-[.06em]", g.kind === GoalKind.SECRET ? "border-[#a05a5a] text-[#d08a8a]" : "border-[#5a4a32] text-hud-gold")}>
+                    <span className={cn("rounded border px-1.5 text-[10px] uppercase tracking-[.06em]", g.kind === GoalKind.SECRET ? "border-hud-danger text-hud-danger" : "border-hud-gold text-hud-gold")}>
                       {t(g.kind)}
                     </span>
                   )}
-                  {g.author === GoalAuthor.PLAYER && <span className="inline-block rounded border border-[#6f8fb0] px-1 text-[10px] text-[#6f8fb0]">{t("fromPlayer")}</span>}
+                  {g.author === GoalAuthor.PLAYER && <span className="inline-block rounded border border-hud-info px-1 text-[10px] text-hud-info">{t("fromPlayer")}</span>}
                 </div>
               )}
-              <p className={cn("leading-relaxed", g.title ? "text-hud-muted" : "text-hud-bone", !g.title && g.status !== GoalStatus.ACTIVE && "line-through")}>{g.text}</p>
+              <p className={cn("leading-relaxed", g.status !== GoalStatus.ACTIVE || g.title ? "text-hud-muted" : "text-hud-bone", g.status !== GoalStatus.ACTIVE && "line-through")}>{g.text}</p>
             </div>
             {canEdit(g) && (
               <>

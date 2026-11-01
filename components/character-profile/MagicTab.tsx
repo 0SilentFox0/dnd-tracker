@@ -80,7 +80,7 @@ export function MagicTab() {
       )}
       {sheet.spells.length > 0 ? (
         <>
-          <Button type="button" className="hud-sc mt-4 h-12 w-full gap-2 bg-[#7a2a1f] text-[#fff3d1] hover:bg-[#8a3427]" onClick={() => setOpen(true)}>
+          <Button type="button" className="hud-sc mt-4 h-12 w-full gap-2 bg-hud-gold text-[var(--palette-primary-foreground,#2a1d05)] hover:brightness-110" onClick={() => setOpen(true)}>
             <BookOpen className="size-5" />
             {t("book")}
           </Button>

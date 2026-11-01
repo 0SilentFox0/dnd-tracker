@@ -5,7 +5,7 @@ import { parseBiography, parseBold, parseHighlights } from "@/lib/utils/characte
 function Inline({ text }: { text: string }) {
   return parseHighlights(text).map((s, i) =>
     s.marked ? (
-      <mark key={i} className="bg-transparent text-hud-bone underline decoration-[#c9b37a]/60 decoration-1 underline-offset-4">
+      <mark key={i} className="bg-transparent text-hud-bone underline decoration-hud-gold/60 decoration-1 underline-offset-4">
         {s.text}
       </mark>
     ) : (
@@ -20,7 +20,7 @@ export function BiographyText({ text }: { text: string }) {
       {parseBiography(text).map((b, i) => {
         if (b.kind === "heading") {
           return (
-            <h3 key={i} className="hud-sc flex items-center gap-3 pt-3 text-[12px] uppercase tracking-[.14em] text-hud-gold after:h-px after:flex-1 after:bg-[#3a2f20] first:pt-0">
+            <h3 key={i} className="hud-sc flex items-center gap-3 pt-3 text-[12px] uppercase tracking-[.14em] text-hud-gold after:h-px after:flex-1 after:bg-hud-rule first:pt-0">
               {b.text}
             </h3>
           );
@@ -28,7 +28,7 @@ export function BiographyText({ text }: { text: string }) {
 
         if (b.kind === "quote") {
           return (
-            <blockquote key={i} className="whitespace-pre-line border-l-2 border-[#c9b37a]/60 py-0.5 pl-4 text-[17px] italic text-[#e8dcc2]">
+            <blockquote key={i} className="whitespace-pre-line border-l-2 border-hud-gold/60 py-0.5 pl-4 text-[17px] italic text-hud-bone">
               <Inline text={b.text} />
             </blockquote>
           );

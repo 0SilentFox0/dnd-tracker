@@ -19,10 +19,12 @@ export function LevelBookmarks({ level, slotOf, onLevel }: { level: number; slot
             aria-pressed={level === l}
             aria-label={t("bookmark", { level: spellLevelRoman(l), slots: l === 0 ? "∞" : slotOf(l) })}
             onClick={() => onLevel(l)}
-            className={cn("hud-sc flex h-14 flex-col items-center justify-center gap-1 pb-1.5 text-[13px] [clip-path:polygon(0_0,100%_0,100%_100%,50%_86%,0_100%)]", spellLevelMetal(l), "metal-fill", level === l ? "-ml-2 w-10" : "w-8", l > 0 && slotOf(l) === 0 && "opacity-55 grayscale")}
+            className={cn("hud-sc flex h-14 flex-col items-center justify-center gap-1 pb-1.5 text-[13px] [clip-path:polygon(0_0,100%_0,100%_100%,50%_86%,0_100%)]", spellLevelMetal(l), "metal-fill", level === l ? "-ml-2 w-10" : "w-8")}
           >
-            {spellLevelRoman(l)}
-            <span className="font-sans text-[11px] opacity-85">{l === 0 ? "∞" : slotOf(l)}</span>
+            <span className="flex flex-col items-center rounded-sm bg-[var(--palette-card,#1a140f)] px-1 text-[var(--palette-foreground,#e6dccb)]">
+              {spellLevelRoman(l)}
+              <span className="font-sans text-[11px]">{l === 0 ? "∞" : slotOf(l)}</span>
+            </span>
           </button>
         ))}
       </div>

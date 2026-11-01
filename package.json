@@ -6,7 +6,7 @@
     "*.css"
   ],
   "scripts": {
-    "dev": "next dev",
+    "dev": "pnpm db:local && next dev",
     "build": "prisma generate && next build",
     "build:local": "prisma generate && next build",
     "start": "next start",

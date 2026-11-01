@@ -2,6 +2,7 @@ import { useTranslations } from "next-intl";
 
 import { spellSchoolColor } from "@/lib/constants/spells";
 import { ALL_SCHOOLS } from "@/lib/hooks/spells";
+import { contrastTextColor, normalizeHexColor } from "@/lib/theme/contrast-text-color";
 import { cn } from "@/lib/utils";
 import { NO_SCHOOL } from "@/lib/utils/spells/group-by-school";
 
@@ -15,20 +16,21 @@ export function SchoolTabs({ schools, active, countOf, onPick }: { schools: { na
       {tabs.map((t) => {
         const count = t.name === ALL_SCHOOLS ? undefined : countOf(t.name);
 
+        const backgroundColor = normalizeHexColor(t.color);
+
         return (
           <button
             key={t.name}
             type="button"
             aria-pressed={active === t.name}
             onClick={() => onPick(t.name)}
-            style={{ backgroundColor: t.color }}
+            style={{ backgroundColor, color: contrastTextColor(backgroundColor) }}
             className={cn(
-              "hud-sc flex items-start justify-center px-3 pt-1 text-[13px] font-bold text-white [clip-path:polygon(0_0,100%_0,100%_100%,50%_82%,0_100%)] [text-shadow:0_1px_2px_rgba(0,0,0,.6)]",
+              "hud-sc flex items-start justify-center px-3 pt-1 text-[13px] font-bold [clip-path:polygon(0_0,100%_0,100%_100%,50%_82%,0_100%)]",
               active === t.name ? "h-11" : "h-8 hover:h-9",
-              count === 0 && "opacity-40",
             )}
           >
-            {t.label}{count !== undefined && <span className="ml-1 font-sans text-[11px] opacity-85">{count}</span>}
+            {t.label}{count !== undefined && <span className="ml-1 font-sans text-[11px]">{count}</span>}
           </button>
         );
       })}
