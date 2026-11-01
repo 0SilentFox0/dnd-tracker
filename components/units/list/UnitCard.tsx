@@ -26,7 +26,7 @@ function primaryAttackIndex(attacks: UnitAttack[]): number {
   if (!attacks.length) return -1;
 
   const meleeIdx = attacks.findIndex(
-    (a) => (a as { type?: string }).type === AttackType.MELEE || !a.type,
+    (a) => (a as { type?: string }).type === AttackType.MELEE || !a.type
   );
 
   return meleeIdx >= 0 ? meleeIdx : 0;
@@ -38,7 +38,11 @@ interface UnitCardProps {
   onDelete: (unitId: string) => void;
 }
 
-export const UnitCard = memo(function UnitCard({ unit, campaignId, onDelete }: UnitCardProps) {
+export const UnitCard = memo(function UnitCard({
+  unit,
+  campaignId,
+  onDelete,
+}: UnitCardProps) {
   const t = useTranslations("units.card");
 
   const tActions = useTranslations("common.actions");
@@ -53,9 +57,7 @@ export const UnitCard = memo(function UnitCard({ unit, campaignId, onDelete }: U
     e.dataTransfer.setData("text/plain", unit.name);
   };
 
-  const attacks: UnitAttack[] = Array.isArray(unit.attacks)
-    ? unit.attacks
-    : [];
+  const attacks: UnitAttack[] = Array.isArray(unit.attacks) ? unit.attacks : [];
 
   const abilitySummary = unit.abilitySummary ?? [];
 
@@ -68,7 +70,11 @@ export const UnitCard = memo(function UnitCard({ unit, campaignId, onDelete }: U
   const primaryAttack = primaryIdx >= 0 ? attacks[primaryIdx] : null;
 
   return (
-    <HudCard href={`/campaigns/${campaignId}/dm/units/${unit.id}`} linkLabel={unit.name} className="group/card relative flex flex-col justify-between space-y-3">
+    <HudCard
+      href={`/campaigns/${campaignId}/dm/units/${unit.id}`}
+      linkLabel={unit.name}
+      className="group/card relative flex flex-col justify-between space-y-3"
+    >
       <div
         draggable
         onDragStart={handleDragStart}
@@ -79,7 +85,12 @@ export const UnitCard = memo(function UnitCard({ unit, campaignId, onDelete }: U
       </div>
       <div className="pl-5">
         <div className="flex items-start gap-3">
-          <ZoomableEntityIcon src={unit.avatar} name={unit.name} size={128} className="size-20 rounded-lg text-2xl sm:size-24" />
+          <ZoomableEntityIcon
+            src={unit.avatar}
+            name={unit.name}
+            size={128}
+            className="size-20 text-2xl sm:size-24 rounded-full"
+          />
           <div className="flex-1 min-w-0">
             <h3 className="text-base font-semibold text-hud-ink">
               {unit.name}
@@ -95,7 +106,14 @@ export const UnitCard = memo(function UnitCard({ unit, campaignId, onDelete }: U
                 {damage && (
                   <>
                     {t("damage", { average: damage.average })}
-                    <span className="whitespace-nowrap text-xs">({damage.dice}{damage.mod !== 0 && ` ${signedDelta(damage.mod)} ${tg(`abilities.${damage.ability}.short`)}`})</span>
+                    <span className="whitespace-nowrap text-xs">
+                      ({damage.dice}
+                      {damage.mod !== 0 &&
+                        ` ${signedDelta(damage.mod)} ${tg(
+                          `abilities.${damage.ability}.short`
+                        )}`}
+                      )
+                    </span>
                   </>
                 )}
               </div>
@@ -104,10 +122,17 @@ export const UnitCard = memo(function UnitCard({ unit, campaignId, onDelete }: U
         </div>
 
         <div className="mt-3 mb-3">
-          <UnitQuickStatsEditor unit={unit} campaignId={campaignId} primaryAttackIndex={primaryIdx} primaryAttackName={primaryAttack?.name} />
+          <UnitQuickStatsEditor
+            unit={unit}
+            campaignId={campaignId}
+            primaryAttackIndex={primaryIdx}
+            primaryAttackName={primaryAttack?.name}
+          />
         </div>
 
-        {unit.cr != null && unit.statblock && <MonsterStatblock block={unit.statblock} />}
+        {unit.cr != null && unit.statblock && (
+          <MonsterStatblock block={unit.statblock} />
+        )}
 
         {abilitySummary.length > 0 && (
           <div className="space-y-1 mt-4">
@@ -160,7 +185,14 @@ export const UnitCard = memo(function UnitCard({ unit, campaignId, onDelete }: U
           size="sm"
           aria-label={t("deleteLabel", { name: unit.name })}
           onClick={async () => {
-            if ((await confirm({ title: t("deleteTitle", { name: unit.name }), confirmLabel: tActions("delete"), destructive: true }))) onDelete(unit.id);
+            if (
+              await confirm({
+                title: t("deleteTitle", { name: unit.name }),
+                confirmLabel: tActions("delete"),
+                destructive: true,
+              })
+            )
+              onDelete(unit.id);
           }}
         >
           <X className="h-4 w-4" />
