@@ -5,7 +5,7 @@ import { HUD_SURFACE } from "@/components/hud";
 import { HudPortalClassProvider } from "@/components/ui/portal-class";
 import { cn } from "@/lib/utils";
 
-const WIDTH = { md: "max-w-4xl", lg: "max-w-6xl" } as const;
+const WIDTH = { md: "max-w-4xl", lg: "max-w-page" } as const;
 
 export function HudPage({ width = "lg", className, children }: { width?: keyof typeof WIDTH; className?: string; children: ReactNode }) {
   return (

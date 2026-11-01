@@ -60,7 +60,7 @@ export function Header() {
 
   const isBattlePage = BATTLE_PATH.test(pathname ?? "");
 
-  const width = isBattlePage ? "w-full px-3 sm:px-6" : "container mx-auto px-4";
+  const width = isBattlePage ? "w-full px-3 sm:px-6" : "container mx-auto px-4 min-[96rem]:max-w-page";
 
   return (
     <header className="sticky top-0 z-50 w-full border-b border-hud-rule bg-hud-page/[.97]">
