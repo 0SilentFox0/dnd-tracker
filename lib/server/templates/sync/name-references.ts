@@ -56,8 +56,8 @@ function providers(entries: Entry[]) {
 }
 
 /** Reject only newly invalid or newly introduced name links; unrelated legacy gaps remain tolerated. */
-export function assertSrdNameReferences(before: Entry[], after: Entry[], selectedLocalIds: ReadonlySet<string>): void {
-  const oldProviders = providers(before), nextProviders = providers(after);
+export function assertSrdNameReferences(before: Entry[], after: Entry[], selectedLocalIds: ReadonlySet<string>, source: { rows: Entry[]; sourceToLocal: ReadonlyMap<string, string> }): void {
+  const oldProviders = providers(before), nextProviders = providers(after), sourceProviders = providers(source.rows);
 
   const previous = new Map(before.map((entry) => [entry.row.id, entry]));
 
@@ -68,6 +68,8 @@ export function assertSrdNameReferences(before: Entry[], after: Entry[], selecte
   for (const entry of after) {
     const old = previous.get(entry.row.id);
 
+    const isSelected = selectedLocalIds.has(String(entry.row.id));
+
     const oldRefs = old ? references(old) : [];
 
     const oldKeys = new Set(oldRefs.map(keyOf));
@@ -75,16 +77,33 @@ export function assertSrdNameReferences(before: Entry[], after: Entry[], selecte
     for (const ref of references(entry)) {
       const key = keyOf(ref);
 
-      if (nextProviders.get(key)?.length === 1) continue;
+      const matches = nextProviders.get(key) ?? [];
 
       const previouslyValid = oldKeys.has(key) && oldProviders.get(key)?.length === 1;
 
-      const introduced = selectedLocalIds.has(String(entry.row.id)) && !oldKeys.has(key);
+      const introduced = isSelected && !oldKeys.has(key);
 
-      if (!previouslyValid && !introduced) continue;
+      // A selected reference comes from the current source graph. Its provider may
+      // deliberately change, but a same-name custom row cannot stand in for it.
+      const sourceMatches = sourceProviders.get(key);
+
+      const intended = isSelected && sourceMatches?.length === 1 ? sourceMatches[0] : undefined;
+
+      const intendedLocalId = intended && source.sourceToLocal.get(String(intended.row.id));
+
+      const wrongProvider = !!intended && matches.length === 1 && matches[0].row.id !== intendedLocalId;
+
+      if ((matches.length === 1 && !wrongProvider) || (!previouslyValid && !introduced)) continue;
 
       related.add(rowName(entry.row));
       related.add(ref.name);
+
+      if (intendedLocalId) {
+        const provider = nextById.get(intendedLocalId) ?? previous.get(intendedLocalId);
+
+        if (provider) related.add(rowName(provider.row));
+      }
+
       for (const oldRef of oldRefs) {
         for (const provider of oldProviders.get(keyOf(oldRef)) ?? []) {
           related.add(rowName(provider.row));

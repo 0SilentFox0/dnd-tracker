@@ -162,7 +162,11 @@ async function assertResultingGraph(db: SyncDb, ctx: SyncContext, index: ReturnT
 
   const resulting = [...effective.values()];
 
-  if (ctx.srdOverlay) assertSrdNameReferences(ctx.target.rows, resulting, new Set([...selected.values()].map((item) => item.localId ?? map.get(item.key)).filter((id): id is string => !!id)));
+  if (ctx.srdOverlay) {
+    const selectedLocalIds = new Set([...selected.values()].map((item) => item.localId ?? map.get(item.key)).filter((id): id is string => !!id));
+
+    assertSrdNameReferences(ctx.target.rows, resulting, selectedLocalIds, { rows: [...index.sourceIndex.values()], sourceToLocal: map });
+  }
 
   const feats = resulting.filter((r) => r.table === "feats").map(({ row }) => ({ id: row.id, type: row.type }));
 

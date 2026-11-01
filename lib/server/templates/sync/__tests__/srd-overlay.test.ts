@@ -121,6 +121,59 @@ describe("SRD effective name reference graph", () => {
     await expect(applySourceChanges(f.db, target, { apply: (await diff()).filter((i) => i.key === key).map(ref), ignore: [] })).rejects.toMatchObject({ status: 409 });
     expect(f.updates).toEqual([]);
   });
+  it("rejects a reference-only class rename that would bind to an unrelated local class", async () => {
+    await makeClone();
+
+    const wizardId = local("gameClass")[0].id;
+
+    f.addRow("gameClass", { id: id("m"), campaignId: target, name: "Mage", sourceId: null });
+    dictionary.values[hashText("n", "Wizard")] = "Mage";
+
+    const before = structuredClone([...f.store.entries()]);
+
+    const selection = (await diff()).filter((i) => i.key === spell).map(ref);
+
+    await expect(applySourceChanges(f.db, target, { apply: selection, ignore: [] })).rejects.toMatchObject({ status: 409, params: { rows: expect.stringContaining("Wizard") } });
+    expect([...f.store.entries()]).toEqual(before);
+    expect(f.updates).toEqual([]);
+    expect(local("gameClass").find((r) => r.id === wizardId)?.name).toBe("Wizard");
+  });
+  it("rejects a serialized base reference rename that would bind to an unrelated local artifact", async () => {
+    await makeClone();
+    f.addRow("artifact", { id: id("m"), campaignId: target, name: "Blade", sourceId: null, modifiers: [] });
+    dictionary.values[hashText("n", "Sword")] = "Blade";
+
+    const before = structuredClone([...f.store.entries()]);
+
+    const selection = (await diff()).filter((i) => i.key === property).map(ref);
+
+    await expect(applySourceChanges(f.db, target, { apply: selection, ignore: [] })).rejects.toMatchObject({ status: 409, params: { rows: expect.stringContaining("Sword") } });
+    expect([...f.store.entries()]).toEqual(before);
+    expect(f.updates).toEqual([]);
+  });
+  it("allows a deliberate source reference retarget to another existing class provider", async () => {
+    const cleric = id("c");
+
+    f.addRow("gameClass", { id: cleric, campaignId: source, name: "Cleric", spellList: "Cleric" });
+    await makeClone();
+    f.patchRow("spell", spell, { lists: ["Cleric"] });
+    await applySourceChanges(f.db, target, { apply: (await diff()).filter((i) => i.key === spell).map(ref), ignore: [] });
+    expect(local("spell")[0].lists).toEqual(["Cleric"]);
+    expect(await diff()).toEqual([]);
+  });
+  it("allows a deliberate serialized source reference retarget to another existing base provider", async () => {
+    const axe = id("a");
+
+    f.addRow("artifact", { id: axe, campaignId: source, name: "Axe", modifiers: [] });
+    await makeClone();
+    f.patchRow("artifact", property, { modifiers: [{ type: "itemStats", value: JSON.stringify({ property: { appliesTo: { bases: ["Axe"] } }, extra: true }) }] });
+    await applySourceChanges(f.db, target, { apply: (await diff()).filter((i) => i.key === property).map(ref), ignore: [] });
+
+    const row = local("artifact").find((r) => r.sourceId === property);
+
+    expect(JSON.parse((row?.modifiers as Array<{ value: string }>)[0].value).property.appliesTo.bases).toEqual(["Axe"]);
+    expect(await diff()).toEqual([]);
+  });
   it("accepts complete linked updates and tolerates unchanged unrelated unmatched references", async () => {
     f.addRow("spell", { id: id("u"), campaignId: source, name: "Unrelated", lists: ["Custom unmatched"] });
     await makeClone();
