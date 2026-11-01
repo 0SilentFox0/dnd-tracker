@@ -1,6 +1,6 @@
 # One SRD template with a language overlay
 
-Status: revised after a second code review and approved by the user on 2026-10-31. Implementation authorized.
+Status: approved by the user on 2026-10-31; implementation completed and verified on 2026-11-01. See the implementation plan for test, build and final-review evidence. Not deployed.
 
 ## Intent and agreed constraints
 
