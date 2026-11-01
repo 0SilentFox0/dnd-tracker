@@ -54,12 +54,6 @@ export function PuzzleStage({ campaignId, isDM, userId, spec, imageUrl, puzzle }
 
   return (
     <div className="absolute inset-0 z-10 flex flex-col-reverse bg-black md:flex-row">
-      <aside className="flex max-h-36 shrink-0 flex-col border-t border-white/15 md:max-h-none md:w-52 md:border-r md:border-t-0">
-        <div aria-hidden className="hidden h-40 shrink-0 md:block" />
-        <div className="min-h-0 flex-1 overflow-y-auto">
-          <PuzzleTray scene={scene} />
-        </div>
-      </aside>
       <div ref={areaRef} className="relative flex min-h-0 min-w-0 flex-1 items-center justify-center p-2">
         {isDM && (
           <div className="absolute right-2 top-2 z-20 flex gap-2">
@@ -75,6 +69,12 @@ export function PuzzleStage({ campaignId, isDM, userId, spec, imageUrl, puzzle }
           <PuzzleBoard scene={scene} boardRef={boardRef} />
         </div>
       </div>
+      <aside className="flex max-h-36 shrink-0 flex-col border-t border-white/15 md:max-h-none md:w-52 md:border-l md:border-t-0">
+        <div aria-hidden className="hidden h-40 shrink-0 md:block" />
+        <div className="min-h-0 flex-1 overflow-y-auto">
+          <PuzzleTray scene={scene} />
+        </div>
+      </aside>
       {drag && held && <PuzzleHand drag={drag} piece={held} spec={spec} imageUrl={imageUrl} onRotate={rotate} />}
     </div>
   );
