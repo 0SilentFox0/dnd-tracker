@@ -15,6 +15,7 @@ import { ROOT_NAMESPACES } from "@/lib/i18n/scopes";
 import { QueryProvider } from "@/lib/providers/query-provider";
 import { ThemeProvider } from "@/lib/providers/theme-provider";
 import { PALETTE_BOOTSTRAP } from "@/lib/theme/client";
+import { PALETTES_ENABLED } from "@/lib/theme/palettes";
 
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
@@ -33,7 +34,7 @@ export default async function RootLayout({
   return (
     <html lang="uk" className="dark" suppressHydrationWarning>
       <head>
-        <script dangerouslySetInnerHTML={{ __html: PALETTE_BOOTSTRAP }} />
+        {PALETTES_ENABLED && <script dangerouslySetInnerHTML={{ __html: PALETTE_BOOTSTRAP }} />}
         {HUD_PRELOAD_FONTS.map((href) => (
           <link key={href} rel="preload" href={href} as="font" type="font/woff2" crossOrigin="" />
         ))}

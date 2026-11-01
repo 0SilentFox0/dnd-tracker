@@ -1,6 +1,8 @@
 import type { PaletteId } from "@/types/theme";
 
 export const PALETTE_IDS = ["tavern", "midnight", "forest", "parchment", "amethyst", "frost"] as const;
+// palettes are parked: no switcher, no applying; the classic look is the only one until they are redesigned
+export const PALETTES_ENABLED = false;
 export const DEFAULT_PALETTE: PaletteId = "tavern";
 export const LIGHT_PALETTES: readonly PaletteId[] = ["parchment", "frost"];
 
