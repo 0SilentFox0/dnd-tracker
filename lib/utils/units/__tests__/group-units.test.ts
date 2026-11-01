@@ -17,14 +17,13 @@ describe("groupUnitsByRace", () => {
   it("раси за назвою, «Без раси» в кінці; тири за зростанням, юніти за назвою", () => {
     const g = groupUnitsByRace(units, races);
 
-    expect(g.map((x) => x.key)).toEqual(["r1", "r2", NO_RACE]);
-    expect(g[0]).toMatchObject({ total: 0, tiers: [] });
-    expect(g[1].tiers.map((t) => [t.level, t.units.map((x) => x.name)])).toEqual([
+    expect(g.map((x) => x.key)).toEqual(["r2", NO_RACE]);
+    expect(g[0].tiers.map((t) => [t.level, t.units.map((x) => x.name)])).toEqual([
       [1, ["Воїн"]],
       [2, ["Берсерк", "Шаман"]],
     ]);
-    expect(g[2].race).toBeNull();
-    expect(g[2].tiers.flatMap((t) => t.units.map((x) => x.id))).toEqual(["4", "5"]);
+    expect(g[1].race).toBeNull();
+    expect(g[1].tiers.flatMap((t) => t.units.map((x) => x.id))).toEqual(["4", "5"]);
   });
 
   it("пошук без урахування регістру лишає лише групи зі збігами, total — без фільтра", () => {
@@ -42,7 +41,6 @@ describe("groupUnitsByRace", () => {
 
   it("raceChips: назва, колір і кількість", () => {
     expect(raceChips(groupUnitsByRace(units, races))).toEqual([
-      { key: "r1", label: "Гобліни", color: null, count: 0 },
       { key: "r2", label: "Орки", color: "#ef4444", count: 3 },
       { key: NO_RACE, label: "", color: null, count: 2 },
     ]);
@@ -71,7 +69,6 @@ describe("groupUnitsByRaceName", () => {
 
     expect(g.map((x) => [x.key, x.label, x.total])).toEqual([
       ["r1", "Гобліни", 1],
-      ["r2", "Орки", 0],
       ["type:beast", "beast", 2],
       ["type:undead", "undead", 1],
       [NO_RACE, "", 1],
@@ -80,5 +77,31 @@ describe("groupUnitsByRaceName", () => {
     expect(raceIdOfGroup("type:beast")).toBeNull();
     expect(creatureTypeOfGroup("type:beast")).toBe("beast");
     expect(creatureTypeOfGroup("r1")).toBeNull();
+  });
+});
+
+
+describe("unit group images and empty groups", () => {
+  it("omits empty race and unassigned groups", () => {
+    expect(groupUnitsByRace([], races)).toEqual([]);
+    expect(groupUnitsByRace([u("a", "A", 1, "r2")], races).map((g) => g.key)).toEqual(["r2"]);
+  });
+
+  it("uses the first available avatar in display order, stable during search", () => {
+    const list = [
+      { ...u("b", "B", 2, null), avatar: "https://x/b.png" },
+      { ...u("a", "A", 1, null), avatar: null },
+      { ...u("c", "C", 1, null), avatar: "https://x/c.png" },
+    ];
+
+    expect(groupUnitsByRace(list, [])[0].icon).toBe("https://x/c.png");
+    expect(groupUnitsByRace(list, [], "B")[0].icon).toBe("https://x/c.png");
+  });
+
+  it("preserves a race icon and falls back when it is missing", () => {
+    const list = [{ ...u("a", "A", 1, "r1"), avatar: "https://x/a.png" }];
+
+    expect(groupUnitsByRace(list, races)[0].icon).toBe("https://x/g.png");
+    expect(groupUnitsByRace(list, [{ ...races[0], id: "r1" }])[0].icon).toBe("https://x/a.png");
   });
 });

@@ -59,7 +59,6 @@ export function DMUnitsPageClient({ campaignId, initialUnits }: DMUnitsPageClien
             chips={list.view.chips}
             selected={list.filter.raceFilter}
             onToggle={list.filter.toggleRace}
-            hideEmpty={{ value: list.filter.hideEmpty, onToggle: list.filter.toggleHideEmpty }}
           />
         )}
       </HudPageHeader>

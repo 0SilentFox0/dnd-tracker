@@ -2,9 +2,13 @@
 
 import { memo, useState } from "react";
 import { useTranslations } from "next-intl";
+import { Pencil } from "lucide-react";
+
+import { UnitGroupDialog } from "./UnitGroupDialog";
 
 import { EntityIcon } from "@/components/common/EntityIcon";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
+import { Button } from "@/components/ui/button";
 import { UnitCard } from "@/components/units/list/UnitCard";
 import { useGroupLabel } from "@/lib/hooks/units";
 import { parseUnitDragPayload, planUnitDrop, UNIT_DRAG_TYPE, type UnitDropTarget } from "@/lib/utils/units/drag";
@@ -23,6 +27,8 @@ const carriesUnit = (e: React.DragEvent) => e.dataTransfer.types.includes(UNIT_D
 
 export const UnitGroupAccordion = memo(function UnitGroupAccordion({ group, campaignId, onDeleteUnit, onDrop }: UnitGroupAccordionProps) {
   const t = useTranslations("units.group");
+
+  const [editing, setEditing] = useState(false);
 
   const [over, setOver] = useState<string | null>(null);
 
@@ -54,21 +60,27 @@ export const UnitGroupAccordion = memo(function UnitGroupAccordion({ group, camp
 
   return (
     <AccordionItem value={group.key} className="border-l-4" style={group.race?.color ? { borderLeftColor: group.race.color } : undefined}>
-      <AccordionTrigger className="px-4 sm:px-6">
-        <div
-          className={`flex w-full items-center gap-3 rounded-md text-left transition-colors sm:gap-4 ${highlight("race")}`}
-          onDragOver={raceDrop ? allowDrop : undefined}
-          onDragEnter={(e) => raceDrop && carriesUnit(e) && setOver("race")}
-          onDragLeave={() => setOver(null)}
-          onDrop={raceDrop ? dropOn({ raceId: raceIdOfGroup(group.key) }) : undefined}
-        >
-          <EntityIcon src={group.race?.icon ?? null} name={title} className="h-9 w-9 shrink-0" />
-          <div className="min-w-0 flex-1">
-            <h3 className="hud-sc truncate text-lg text-hud-ink">{title}</h3>
-            <p className="mt-1 text-sm text-hud-muted">{t("total", { count: group.total })}</p>
+      <div className="relative">
+        <AccordionTrigger className="pl-4 pr-16 sm:pl-6 sm:pr-20">
+          <div
+            className={`flex w-full items-center gap-3 rounded-md text-left transition-colors sm:gap-4 ${highlight("race")}`}
+            onDragOver={raceDrop ? allowDrop : undefined}
+            onDragEnter={(e) => raceDrop && carriesUnit(e) && setOver("race")}
+            onDragLeave={() => setOver(null)}
+            onDrop={raceDrop ? dropOn({ raceId: raceIdOfGroup(group.key) }) : undefined}
+          >
+            <EntityIcon src={group.icon} name={title} className="h-9 w-9 shrink-0" />
+            <div className="min-w-0 flex-1">
+              <h3 className="hud-sc truncate text-lg text-hud-ink">{title}</h3>
+              <p className="mt-1 text-sm text-hud-muted">{t("total", { count: group.total })}</p>
+            </div>
           </div>
-        </div>
-      </AccordionTrigger>
+        </AccordionTrigger>
+        <Button type="button" variant="ghost" size="icon" className="absolute right-3 top-1/2 -translate-y-1/2" aria-label={t("edit", { name: title })} onClick={() => setEditing(true)}>
+          <Pencil className="h-4 w-4" />
+        </Button>
+      </div>
+      {editing && <UnitGroupDialog campaignId={campaignId} group={group} onClose={() => setEditing(false)} />}
       <AccordionContent>
         <div className="px-1 pb-4 sm:px-2">
           {group.tiers.length === 0 ? (

@@ -146,3 +146,27 @@ describe("mergeRules removeCustomConditions", () => {
     expect(RulesetPatchSchema.safeParse({ removeCustomConditions: [] }).success).toBe(false);
   });
 });
+
+
+describe("unit group presentation", () => {
+  it("persists edits by group key without overwriting other groups or encounter rules", () => {
+    const current = parseRules({ encounters: { balance: "xp", unitGroups: { "type:beast": { name: "Beasts", icon: "https://x/beast.png" } } } });
+
+    const patch = RulesetPatchSchema.parse({ encounters: { unitGroups: { "type:undead": { name: "Undead", icon: null } } } });
+
+    const result = mergeRules(current, patch);
+
+    expect(result).toMatchObject({ ok: true, rules: { encounters: { balance: "xp", unitGroups: {
+      "type:beast": { name: "Beasts", icon: "https://x/beast.png" },
+      "type:undead": { name: "Undead", icon: null },
+    } } } });
+
+    if (result.ok) expect(parseRules(result.rules).encounters.unitGroups).toEqual(result.rules.encounters.unitGroups);
+  });
+
+  it("rejects blank names and unsafe image URLs", () => {
+    for (const appearance of [{ name: " " }, { icon: "javascript:alert(1)" }]) {
+      expect(RulesetPatchSchema.safeParse({ encounters: { unitGroups: { "type:beast": appearance } } }).success).toBe(false);
+    }
+  });
+});

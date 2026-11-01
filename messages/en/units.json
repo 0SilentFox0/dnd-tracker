@@ -16,14 +16,13 @@
   },
   "toolbar": {
     "search": "Search units",
-    "hideEmpty": "Hide empty groups",
-    "showEmpty": "Show empty groups",
-    "raceFilter": "Filter by race"
+    "raceFilter": "Filter by group"
   },
   "group": {
     "total": "{count, plural, one {# unit} other {# units}}",
     "dropHint": "Drag a unit here to assign the race",
-    "tier": "Level {level} ({count, plural, one {# unit} other {# units}})"
+    "tier": "Level {level} ({count, plural, one {# unit} other {# units}})",
+    "edit": "Edit group “{name}”"
   },
   "card": {
     "dragTitle": "Drag onto a race or level",
@@ -180,5 +179,13 @@
     "challengeRating": "CR: 0, 1/8, 1/4, 1/2 or an integer 1–30",
     "rechargeNeedsPerBattle": "Recharge requires perBattle: 1",
     "duplicateSpell": "A spell is repeated among the grants"
+  },
+  "groupDialog": {
+    "title": "Edit group",
+    "description": "Customize the unit group name and image.",
+    "name": "Group name",
+    "icon": "Group image",
+    "iconHint": "Leave the URL empty to use the race icon or the first unit with an image.",
+    "saveFailed": "Could not save the group. Try again."
   }
 }

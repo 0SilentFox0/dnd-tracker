@@ -5,6 +5,7 @@ import { useCallback, useMemo, useState } from "react";
 import { useGroupLabel } from "./useGroupLabel";
 import { useDeleteAllUnits, useDeleteUnit, useUnits, useUpdateUnit } from "./useUnits";
 
+import { useCampaignRules } from "@/lib/hooks/campaigns";
 import { useRaces } from "@/lib/hooks/races";
 import { groupUnitsByRace, raceChips } from "@/lib/utils/units/group-units";
 import type { Unit } from "@/types/units";
@@ -13,6 +14,10 @@ export function useUnitsList(campaignId: string, initialUnits: Unit[]) {
   const { data: units = initialUnits, isLoading } = useUnits(campaignId, initialUnits);
 
   const { data: races = [] } = useRaces(campaignId);
+
+  const { data: rules } = useCampaignRules(campaignId);
+
+  const appearances = rules?.encounters?.unitGroups;
 
   const deleteAll = useDeleteAllUnits(campaignId);
 
@@ -28,13 +33,13 @@ export function useUnitsList(campaignId: string, initialUnits: Unit[]) {
 
   const labelOf = useGroupLabel();
 
-  const [hideEmpty, setHideEmpty] = useState(false);
+  const allGroups = useMemo(() => groupUnitsByRace(units, races, "", appearances), [units, races, appearances]);
 
-  const allGroups = useMemo(() => groupUnitsByRace(units, races).filter((g) => !hideEmpty || g.total > 0), [units, races, hideEmpty]);
+  const found = useMemo(() => groupUnitsByRace(units, races, query, appearances), [units, races, query, appearances]);
 
-  const found = useMemo(() => groupUnitsByRace(units, races, query).filter((g) => !hideEmpty || g.total > 0), [units, races, query, hideEmpty]);
+  const activeRaceFilter = raceFilter.filter((key) => allGroups.some((group) => group.key === key));
 
-  const groups = raceFilter.length > 0 ? found.filter((g) => raceFilter.includes(g.key)) : found;
+  const groups = activeRaceFilter.length > 0 ? found.filter((g) => activeRaceFilter.includes(g.key)) : found;
 
   const search = (next: string) => {
     setQuery(next);
@@ -56,7 +61,7 @@ export function useUnitsList(campaignId: string, initialUnits: Unit[]) {
     units,
     isLoading,
     view: { groups, chips: raceChips(allGroups, labelOf), open, setOpen },
-    filter: { query, search, raceFilter, toggleRace, hideEmpty, toggleHideEmpty: () => setHideEmpty((v) => !v) },
+    filter: { query, search, raceFilter: activeRaceFilter, toggleRace },
     actions: {
       deleteUnit,
       removeAll,

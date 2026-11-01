@@ -7,7 +7,9 @@ export function useGroupLabel() {
 
   const tg = useTranslator("gameTerms");
 
-  return (group: Pick<UnitRaceGroup, "key" | "label">): string => {
+  return (group: Pick<UnitRaceGroup, "key" | "label" | "customName">): string => {
+    if (group.customName) return group.customName;
+
     if (group.key === NO_RACE) return tg("ungrouped.race");
 
     const type = creatureTypeOfGroup(group.key);

@@ -3,6 +3,7 @@ import { z } from "zod";
 import { DEFAULT_RULES } from "./defaults";
 
 import { RULES_EDITIONS } from "@/lib/constants/rules";
+import { UnitGroupAppearancesSchema } from "@/lib/schemas/unit-groups";
 import { StaticEffectSchema } from "@/lib/utils/abilities/schema/effects";
 import { CONDITION_KEYS, CUSTOM_CONDITION_KEY_RE } from "@/lib/utils/abilities/schema/kinds";
 import { isRecord } from "@/lib/utils/common/is-record";
@@ -68,6 +69,7 @@ const sectionSchemas = {
   }),
   encounters: z.strictObject({
     balance: z.enum(["fair", "xp"]),
+    unitGroups: UnitGroupAppearancesSchema.optional(),
     edition: z.enum(RULES_EDITIONS),
     autoXp: z.boolean(),
   }),
@@ -226,6 +228,18 @@ export function mergeRules(current: Ruleset, patch: MergePatch): MergeRulesResul
   if (conflict) return { ok: false, issues: [{ code: "custom", message: "validation.rulesCustomConflict", path: ["removeCustomConditions"], input: patch.removeCustomConditions }] };
 
   const next = Object.fromEntries((Object.keys(current) as (keyof Ruleset)[]).map((k) => [k, { ...current[k], ...(sections[k] ?? {}) }]));
+
+  const groupPatch = sections.encounters?.unitGroups;
+
+  if (isRecord(groupPatch)) {
+    const unitGroups = { ...current.encounters.unitGroups };
+
+    for (const [key, appearance] of Object.entries(groupPatch)) {
+      if (isRecord(appearance)) unitGroups[key] = { ...unitGroups[key], ...appearance };
+    }
+
+    next.encounters = { ...next.encounters, unitGroups };
+  }
 
   const patchedCustom = sections.conditions?.custom;
 

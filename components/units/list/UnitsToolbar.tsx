@@ -4,7 +4,6 @@ import { useTranslations } from "next-intl";
 
 import { SearchInput } from "@/components/common/SearchInput";
 import { HudChipTabs } from "@/components/hud/page";
-import { Button } from "@/components/ui/button";
 import type { UnitRaceChip } from "@/lib/utils/units/group-units";
 
 interface UnitsToolbarProps {
@@ -13,10 +12,9 @@ interface UnitsToolbarProps {
   chips: UnitRaceChip[];
   selected: string[];
   onToggle: (key: string) => void;
-  hideEmpty: { value: boolean; onToggle: () => void };
 }
 
-export function UnitsToolbar({ query, onSearch, chips, selected, onToggle, hideEmpty }: UnitsToolbarProps) {
+export function UnitsToolbar({ query, onSearch, chips, selected, onToggle }: UnitsToolbarProps) {
   const t = useTranslations("units.toolbar");
 
   return (
@@ -25,9 +23,6 @@ export function UnitsToolbar({ query, onSearch, chips, selected, onToggle, hideE
         <div className="min-w-0 flex-1">
           <SearchInput value={query} onChange={onSearch} label={t("search")} />
         </div>
-        <Button type="button" variant={hideEmpty.value ? "default" : "outline"} className="whitespace-nowrap text-xs sm:text-sm" aria-pressed={hideEmpty.value} onClick={hideEmpty.onToggle}>
-          {hideEmpty.value ? t("showEmpty") : t("hideEmpty")}
-        </Button>
       </div>
       <HudChipTabs
         ariaLabel={t("raceFilter")}

@@ -1,4 +1,5 @@
 import { UNGROUPED_KEY } from "@/lib/constants/ungrouped";
+import type { UnitGroupAppearance } from "@/lib/schemas/unit-groups";
 import { groupBy } from "@/lib/utils/common/collections";
 import { byName } from "@/lib/utils/common/text";
 import { matchesQuery } from "@/lib/utils/common/text-search";
@@ -20,6 +21,10 @@ export interface UnitRaceGroup<R extends UnitGroupRace = UnitGroupRace> {
   key: string;
   label: string;
   race: R | null;
+  icon: string | null;
+  defaultIcon: string | null;
+  customName?: string;
+  customIcon?: string | null;
   total: number;
   tiers: UnitTier[];
 }
@@ -35,14 +40,29 @@ function toTiers(units: Unit[]): UnitTier[] {
   return [...groupBy(units, (unit) => unit.level).entries()].sort(([a], [b]) => a - b).map(([level, list]) => ({ level, units: list.sort(byName) }));
 }
 
-export function groupUnitsByRace<R extends UnitGroupRace>(units: Unit[], races: R[], query = ""): UnitRaceGroup<R>[] {
+export function groupUnitsByRace<R extends UnitGroupRace>(units: Unit[], races: R[], query = "", appearances: Record<string, UnitGroupAppearance> = {}): UnitRaceGroup<R>[] {
   const q = query.trim();
 
   const matches = (unit: Unit) => matchesQuery([unit.name], q);
 
   const known = new Set(races.map((r) => r.id));
 
-  const group = (key: string, race: R | null, own: Unit[], label = race?.name ?? ""): UnitRaceGroup<R> => ({ key, label, race, total: own.length, tiers: toTiers(own.filter(matches)) });
+  const group = (key: string, race: R | null, own: Unit[], label = race?.name ?? ""): UnitRaceGroup<R> => {
+    const tiers = toTiers(own);
+
+    const appearance = appearances[key];
+
+    const defaultIcon = race?.icon || tiers.flatMap((tier) => tier.units).find((unit) => unit.avatar)?.avatar || null;
+
+    return {
+      key, label, race, total: own.length,
+      customName: appearance?.name,
+      customIcon: appearance?.icon,
+      defaultIcon,
+      icon: appearance?.icon || defaultIcon,
+      tiers: q ? tiers.map((tier) => ({ ...tier, units: tier.units.filter(matches) })).filter((tier) => tier.units.length > 0) : tiers,
+    };
+  };
 
   const unraced = units.filter((u) => !u.raceId || !known.has(u.raceId));
 
@@ -59,7 +79,7 @@ export function groupUnitsByRace<R extends UnitGroupRace>(units: Unit[], races: 
     group(NO_RACE, null, byType.get("") ?? []),
   ];
 
-  return q ? groups.filter((g) => g.tiers.length > 0) : groups;
+  return groups.filter((g) => g.tiers.length > 0);
 }
 
 export function raceIdOfGroup(key: string): string | null {
