@@ -10,6 +10,27 @@ import type { ImportReport } from "@/types/content-import";
 
 export { SRD_TEMPLATE_NAME };
 
+export interface SrdSeedArgs {
+  locale: "en";
+  owner?: string;
+  allowRemote: boolean;
+}
+
+/** Validate before loading any database-backed seeding code. */
+export function parseSrdSeedArgs(args: string[]): SrdSeedArgs {
+  for (const [index, arg] of args.entries()) {
+    if (arg === "--locale" && args[index + 1] !== "en") throw new Error("SRD seeding supports English only (--locale en); select the content language when cloning a campaign.");
+  }
+
+  const ownerIndex = args.indexOf("--owner");
+
+  const owner = ownerIndex < 0 ? undefined : args[ownerIndex + 1];
+
+  if (ownerIndex >= 0 && (!owner || owner.startsWith("--"))) throw new Error("Вкажіть --owner <userId>");
+
+  return { locale: "en", owner, allowRemote: args.includes("--allow-remote") };
+}
+
 export const SRD_TEMPLATE_DESCRIPTION = "System Reference Document 5.2 (CC-BY-4.0): заклинання, монстри, зброя, раси й класи; правила 5e";
 
 export interface TemplateStore {

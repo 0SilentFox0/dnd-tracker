@@ -1,69 +1,16 @@
 #!/usr/bin/env tsx
-// pnpm constructor:srd-template [--locale uk] [--owner <userId>] [--allow-remote]
-import { readIcons } from "../assets/tokens-5e/icons-file";
-import { assertSeedTarget } from "../seed/seed-library-lib";
-import { listLocales } from "./i18n/store";
-import { SRD_CREDITS } from "./lib/credits";
-import { readSrdData } from "./lib/data-files";
-import { ensureSrdTemplate, formatImportSummary, hasRowErrors, importSrdData, resolveSchoolRefs, SRD_TEMPLATE_NAME, staleSpellColumns, withClassIcons, withIcons } from "./lib/load-template";
-import { SRD_RULES } from "./lib/rules-preset";
-import { makeTemplateStore } from "./lib/template-store";
-
-import { REFERENCE_REVALIDATE_SECONDS } from "@/lib/cache/reference-data";
-import { prisma } from "@/lib/db";
-import { getTranslator } from "@/lib/i18n/translator";
-import { importContent, OFFLINE_IMPORT_DEPS } from "@/lib/server/content/import/import-content";
-import type { Actor } from "@/lib/utils/api/actor";
+// pnpm constructor:srd-template [--locale en] [--owner <userId>] [--allow-remote]
+import { parseSrdSeedArgs } from "./lib/load-template";
 
 async function main() {
-  const args = process.argv.slice(2);
+  const options = parseSrdSeedArgs(process.argv.slice(2));
 
-  const owner = args.includes("--owner") ? args[args.indexOf("--owner") + 1] : undefined;
+  const { loadSrdTemplate } = await import("./lib/run-load-template");
 
-  const locale = args.includes("--locale") ? args[args.indexOf("--locale") + 1] : "en";
-
-  if (!listLocales().includes(locale)) throw new Error(`Немає перекладу "${locale}" (доступні: ${listLocales().join(", ")})`);
-
-  const store = makeTemplateStore(SRD_TEMPLATE_NAME, locale);
-
-  assertSeedTarget(process.env.DATABASE_URL, args.includes("--allow-remote"));
-
-  const template = await ensureSrdTemplate(store, { owner, rules: SRD_RULES, credits: SRD_CREDITS });
-
-  console.info(`${SRD_TEMPLATE_NAME} [${locale}]: ${template.id}${template.created ? " (створено)" : ""}`);
-
-  const actor: Actor = { campaignId: template.id, userId: template.dmUserId, isDM: true, via: "session", scopes: null };
-
-  const data = readSrdData(undefined, locale);
-
-  const icons = readIcons();
-
-  const schoolIds = async () => new Map((await prisma.spellGroup.findMany({ where: { campaignId: template.id }, select: { id: true, name: true } })).map((g) => [g.name, g.id]));
-
-  const results = await importSrdData(
-    data,
-    (kind, rows) => importContent(actor, kind, { rows, mode: "update", dryRun: false }, OFFLINE_IMPORT_DEPS),
-    async (kind, rows) => {
-      if (kind === "spell-groups") return rows;
-
-      const withUrls = withIcons(kind, data, resolveSchoolRefs(rows, await schoolIds()), icons);
-
-      return kind === "classes" ? withClassIcons(withUrls, data, icons) : withUrls;
-    },
-  );
-
-  for (const { column, names } of staleSpellColumns(data.spells)) await prisma.spell.updateMany({ where: { campaignId: template.id, name: { in: names } }, data: { [column]: null } });
-
-  for (const line of formatImportSummary(results, await getTranslator("uk"))) console.info(line);
-
-  console.info(`Кеш довідника на сервері оновиться протягом ${REFERENCE_REVALIDATE_SECONDS} с`);
-
-  if (hasRowErrors(results)) process.exitCode = 1;
+  await loadSrdTemplate(options);
 }
 
-main()
-  .catch((e) => {
-    console.error(e);
-    process.exitCode = 1;
-  })
-  .finally(() => prisma.$disconnect());
+void main().catch((error) => {
+  console.error(error);
+  process.exitCode = 1;
+});

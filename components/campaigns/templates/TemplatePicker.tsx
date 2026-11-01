@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useLocale, useTranslations } from "next-intl";
 
 import { ImportDialog } from "@/components/common/ImportDialog";
@@ -8,6 +8,7 @@ import { HudSection } from "@/components/hud/form";
 import { SelectField, type SelectOptionGroup } from "@/components/ui/select-field";
 import { useBundleFilePicker, useTemplates } from "@/lib/hooks/campaigns";
 import { NATIVE_LANGUAGE_NAMES } from "@/lib/i18n/native-language-names";
+import { isCanonicalSrdTemplate, type SrdContentLocale } from "@/lib/utils/campaigns/template-locales";
 import { groupTemplates, pickVariant } from "@/lib/utils/campaigns/template-variants";
 import type { TemplateCard, TemplateSelection } from "@/types/campaigns";
 
@@ -46,9 +47,20 @@ export function TemplatePicker({ value, onChange }: TemplatePickerProps) {
 
   const selectedGroup = officialGroups.find((g) => Object.values(g.cards).some((c) => c.id === value.templateId));
 
+  const contentLocales = selected && isCanonicalSrdTemplate(selected) ? selected.availableLocales ?? [] : [];
+
+  const contentLocale = value.contentLocale ?? (contentLocales.includes(uiLocale) ? uiLocale : "en");
+
+  // Resolve an externally supplied selection too, so the visible default is also submitted.
+  useEffect(() => {
+    if (selected && contentLocales.length > 0 && value.contentLocale === undefined) onChange({ templateId: selected.id, contentLocale: contentLocale as SrdContentLocale });
+  }, [selected, contentLocales.length, value.contentLocale, contentLocale, onChange]);
+
   const toGroupOption = (g: (typeof officialGroups)[number]) => toOption(g === selectedGroup && selected ? selected : pickVariant(g, uiLocale));
 
-  const languageOptions = (selectedGroup?.locales ?? []).map((code) => ({ value: selectedGroup!.cards[code].id, label: NATIVE_LANGUAGE_NAMES[code as keyof typeof NATIVE_LANGUAGE_NAMES] ?? code }));
+  const languageOptions = contentLocales.length > 0
+    ? contentLocales.map((code) => ({ value: code, label: NATIVE_LANGUAGE_NAMES[code as keyof typeof NATIVE_LANGUAGE_NAMES] ?? code }))
+    : (selectedGroup?.locales ?? []).map((code) => ({ value: selectedGroup?.cards[code].id ?? "", label: NATIVE_LANGUAGE_NAMES[code as keyof typeof NATIVE_LANGUAGE_NAMES] ?? code }));
 
   const countsLabel = ({ counts }: TemplateCard) =>
     [t("counts.races", { count: counts.races ?? 0 }), t("counts.units", { count: counts.units ?? 0 }), t("counts.spells", { count: counts.spells ?? 0 })].join(" · ");
@@ -69,7 +81,11 @@ export function TemplatePicker({ value, onChange }: TemplatePickerProps) {
     if (!next) return;
 
     if (next === FILE_VALUE) setImportOpen(true);
-    else onChange({ templateId: next === NONE_VALUE ? null : next });
+    else {
+      const source = templates.find((tpl) => tpl.id === next);
+
+      onChange({ templateId: next === NONE_VALUE ? null : next, ...(source && isCanonicalSrdTemplate(source) ? { contentLocale: uiLocale === "uk" ? "uk" : "en" } : {}) });
+    }
   };
 
   return (
@@ -80,7 +96,7 @@ export function TemplatePicker({ value, onChange }: TemplatePickerProps) {
             {t("intro")}
           </p>
           <SelectField aria-label={t("ariaLabel")} value={current} onValueChange={handleChange} groups={groups} />
-          {languageOptions.length > 1 && selected && <SelectField aria-label={t("languageLabel")} value={selected.id} onValueChange={handleChange} groups={[{ label: t("language"), options: languageOptions }]} />}
+          {languageOptions.length > 1 && selected && <SelectField aria-label={t("languageLabel")} value={contentLocales.length > 0 ? contentLocale : selected.id} onValueChange={contentLocales.length > 0 ? (locale) => onChange({ templateId: selected.id, contentLocale: locale as SrdContentLocale }) : handleChange} groups={[{ label: t("language"), options: languageOptions }]} />}
           {selected && <p className="text-xs text-hud-muted">{[selected.description, countsLabel(selected)].filter(Boolean).join(" — ")}</p>}
           {selected?.credits && <p className="line-clamp-2 text-[11px] leading-4 text-hud-muted/80">{selected.credits}</p>}
           {value.file && (

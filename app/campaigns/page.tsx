@@ -11,6 +11,7 @@ import { CampaignKind, CampaignRole, CampaignStatus } from "@/lib/constants/camp
 import { prisma } from "@/lib/db";
 import { getRequestLocale } from "@/lib/i18n/request-locale";
 import { getTranslator } from "@/lib/i18n/translator";
+import { visibleTemplates } from "@/lib/server/templates/list-templates";
 
 export default async function CampaignsPage() {
   const user = await getAuthUser();
@@ -39,11 +40,11 @@ export default async function CampaignsPage() {
   let templates: TemplateTile[] = [];
 
   try {
-    templates = await prisma.campaign.findMany({
+    templates = visibleTemplates(await prisma.campaign.findMany({
       where: { kind: CampaignKind.TEMPLATE, members: { some: { userId, role: CampaignRole.DM } } },
-      select: { id: true, name: true, description: true, locale: true, templateKey: true },
+      select: { id: true, name: true, description: true, kind: true, visibility: true, locale: true, templateKey: true },
       orderBy: { updatedAt: "desc" },
-    });
+    }));
 
     campaigns = await prisma.campaign.findMany({
       where: {

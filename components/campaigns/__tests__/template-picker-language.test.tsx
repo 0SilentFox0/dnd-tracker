@@ -3,6 +3,7 @@ import { cleanup, fireEvent, render, screen } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
 import { TemplatePicker } from "@/components/campaigns/templates/TemplatePicker";
+import { SRD_TEMPLATE_NAME } from "@/lib/constants/campaigns";
 import type { TemplateCard } from "@/types/campaigns";
 
 const card = (id: string, locale: string | null): TemplateCard => ({ id, name: "SRD", description: null, visibility: "official", counts: {}, locale, templateKey: "srd" });
@@ -19,13 +20,63 @@ vi.mock("@/components/ui/select-field", () => ({
 
 let official: TemplateCard[] = [];
 
+let uiLocale = "uk";
+
+vi.mock("next-intl", async () => {
+  const { makeT } = await import("@/lib/i18n/test/mock-t");
+
+  return { useLocale: () => uiLocale, useTranslations: (ns: string) => makeT(ns) };
+});
+
 vi.mock("@/lib/hooks/campaigns", () => ({
   useTemplates: () => ({ data: { official, mine: [] } }),
   useBundleFilePicker: () => ({ file: null, status: { error: null, success: null, isLoading: false }, actions: { handleFileChange: vi.fn(), handleImport: vi.fn(), reset: vi.fn() } }),
 }));
 
 describe("TemplatePicker: мова шаблону", () => {
-  afterEach(cleanup);
+  afterEach(() => { cleanup(); uiLocale = "uk"; });
+
+  const canonical = () => ({ ...card("canonical", "en"), kind: "template", templateKey: SRD_TEMPLATE_NAME, availableLocales: ["en", "uk"] });
+
+  it("uses one SRD id and emits the displayed default language, then preserves explicit selection across UI changes", () => {
+    official = [canonical()];
+
+    const onChange = vi.fn();
+
+    const { rerender } = render(<TemplatePicker value={{ templateId: "canonical" }} onChange={onChange} />);
+
+    expect(onChange).toHaveBeenLastCalledWith({ templateId: "canonical", contentLocale: "uk" });
+    expect((screen.getByLabelText("campaigns.templatePicker.languageLabel") as HTMLSelectElement).value).toBe("uk");
+
+    fireEvent.change(screen.getByLabelText("campaigns.templatePicker.languageLabel"), { target: { value: "en" } });
+    expect(onChange).toHaveBeenLastCalledWith({ templateId: "canonical", contentLocale: "en" });
+    rerender(<TemplatePicker value={{ templateId: "canonical", contentLocale: "en" }} onChange={onChange} />);
+    onChange.mockClear();
+    uiLocale = "en";
+    rerender(<TemplatePicker value={{ templateId: "canonical", contentLocale: "en" }} onChange={onChange} />);
+    expect((screen.getByLabelText("campaigns.templatePicker.languageLabel") as HTMLSelectElement).value).toBe("en");
+    expect(onChange).not.toHaveBeenCalled();
+
+    fireEvent.change(screen.getByLabelText("campaigns.templatePicker.languageLabel"), { target: { value: "uk" } });
+    expect(onChange).toHaveBeenLastCalledWith({ templateId: "canonical", contentLocale: "uk" });
+  });
+
+  it("defaults unsupported interface languages to English and clears locale when changing source", () => {
+    uiLocale = "pl";
+    official = [canonical(), card("other", "uk")];
+
+    const onChange = vi.fn();
+
+    const { rerender } = render(<TemplatePicker value={{ templateId: null }} onChange={onChange} />);
+
+    fireEvent.change(screen.getByLabelText("campaigns.templatePicker.ariaLabel"), { target: { value: "canonical" } });
+    expect(onChange).toHaveBeenLastCalledWith({ templateId: "canonical", contentLocale: "en" });
+    rerender(<TemplatePicker value={{ templateId: "canonical", contentLocale: "uk" }} onChange={onChange} />);
+    fireEvent.change(screen.getByLabelText("campaigns.templatePicker.ariaLabel"), { target: { value: "other" } });
+    expect(onChange).toHaveBeenLastCalledWith({ templateId: "other" });
+    fireEvent.change(screen.getByLabelText("campaigns.templatePicker.ariaLabel"), { target: { value: "__none" } });
+    expect(onChange).toHaveBeenLastCalledWith({ templateId: null });
+  });
 
   it("одна картка на групу, перемикач мови віддає id варіанта", () => {
     official = [card("en1", null), card("uk1", "uk")];

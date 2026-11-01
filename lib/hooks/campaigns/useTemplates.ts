@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useLocale } from "next-intl";
 import { useQuery } from "@tanstack/react-query";
 
 import { campaignKeys } from "./keys";
@@ -8,6 +9,7 @@ import { campaignKeys } from "./keys";
 import { getTemplates } from "@/lib/api/templates";
 import { EMPTY_5E_TEMPLATE_NAME } from "@/lib/constants/campaigns";
 import { REFERENCE_STALE_MS } from "@/lib/providers/query-provider";
+import { isCanonicalSrdTemplate } from "@/lib/utils/campaigns/template-locales";
 import type { TemplateSelection } from "@/types/campaigns";
 
 export function useTemplates() {
@@ -17,6 +19,8 @@ export function useTemplates() {
 export function useTemplateSelection() {
   const templates = useTemplates();
 
+  const uiLocale = useLocale();
+
   const [chosen, setChosen] = useState<TemplateSelection | null>(null);
 
   const all = [...(templates.data?.official ?? []), ...(templates.data?.mine ?? [])];
@@ -25,5 +29,13 @@ export function useTemplateSelection() {
 
   const name = selection.file?.name.replace(/\.json$/i, "") ?? all.find((t) => t.id === selection.templateId)?.name;
 
-  return { selection, setSelection: setChosen, name, isLoading: templates.isLoading };
+  const setSelection = (next: TemplateSelection) => {
+    if (next.file) return setChosen({ file: next.file });
+
+    const source = all.find((t) => t.id === next.templateId);
+
+    setChosen({ templateId: next.templateId, ...(source && isCanonicalSrdTemplate(source) ? { contentLocale: next.contentLocale ?? (uiLocale === "uk" ? "uk" : "en") } : {}) });
+  };
+
+  return { selection, setSelection, name, isLoading: templates.isLoading };
 }

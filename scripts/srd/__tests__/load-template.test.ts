@@ -1,6 +1,6 @@
 import { describe, expect, it, vi } from "vitest";
 
-import { ensureSrdTemplate, formatImportSummary, hasRowErrors, importSrdData, type RunImport, SRD_TEMPLATE_DESCRIPTION, staleSpellColumns, type TemplateStore } from "../lib/load-template";
+import { ensureSrdTemplate, formatImportSummary, hasRowErrors, importSrdData, parseSrdSeedArgs, type RunImport, SRD_TEMPLATE_DESCRIPTION, staleSpellColumns, type TemplateStore } from "../lib/load-template";
 import { SRD_RULES } from "../lib/rules-preset";
 import { SRD_KINDS, type SrdData } from "../lib/types";
 
@@ -17,6 +17,20 @@ const store = (over: Partial<TemplateStore> = {}): TemplateStore => ({
 const opts = { rules: SRD_RULES, credits: "CREDITS" };
 
 const report = (error = 0): ImportReport => ({ dryRun: false, results: error ? [{ row: 2, name: "Fireball", status: "error", issues: [{ level: "error", message: "bad" }] }] : [], counts: { created: 0, updated: 3, skipped: 0, error } });
+
+describe("canonical SRD seed arguments", () => {
+  it.each([[], ["--locale", "en"]])("seeds English for %j", (...args) => {
+    expect(parseSrdSeedArgs(args)).toEqual({ locale: "en", owner: undefined, allowRemote: false });
+  });
+
+  it("retains owner and explicit remote opt-in", () => {
+    expect(parseSrdSeedArgs(["--owner", "owner", "--allow-remote"])).toEqual({ locale: "en", owner: "owner", allowRemote: true });
+  });
+
+  it.each([["uk"], ["pl"], [], ["--owner", "owner"]])("rejects --locale %j before a store can be used", (...args) => {
+    expect(() => parseSrdSeedArgs(["--locale", ...args])).toThrow(/English|англійськ/i);
+  });
+});
 
 describe("ensureSrdTemplate", () => {
   it("existing template: rules, credits and description are rewritten, nothing created", async () => {

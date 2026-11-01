@@ -4,6 +4,7 @@ import {
   campaignPatch,
   request,
 } from "@/lib/api/client";
+import type { SrdContentLocale } from "@/lib/utils/campaigns/template-locales";
 import type { ActiveSessions, Campaign, CampaignMember, CampaignSettings, CampaignWithWarnings } from "@/types/campaigns";
 
 /**
@@ -37,6 +38,7 @@ export async function createCampaign(data: {
   maxLevel?: number;
   allowPlayerEdit?: boolean;
   templateId?: string;
+  contentLocale?: SrdContentLocale;
   critChoiceByDm?: boolean;
 }): Promise<CampaignWithWarnings> {
   return request<CampaignWithWarnings>("/api/campaigns", {

@@ -1,5 +1,6 @@
 import type { BattleStatus } from "@/lib/constants/battle";
 import type { SYNC_SCOPES, SYNC_STATUSES } from "@/lib/constants/source-sync";
+import type { SrdContentLocale } from "@/lib/utils/campaigns/template-locales";
 
 export interface Campaign {
   id: string;
@@ -29,6 +30,8 @@ export interface TemplateCard {
   credits?: string | null;
   locale?: string | null;
   templateKey?: string | null;
+  kind?: string;
+  availableLocales?: readonly string[];
 }
 
 export interface TemplateList {
@@ -42,7 +45,7 @@ export interface BundleFile {
   entities: number;
 }
 
-export type TemplateSelection = { templateId?: string | null; file?: BundleFile };
+export type TemplateSelection = { templateId?: string | null; file?: BundleFile; contentLocale?: SrdContentLocale };
 
 /** Рядок campaign_members з user-relation (сторінка кампанії). */
 export interface CampaignMembership {

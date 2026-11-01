@@ -7,6 +7,7 @@ import { useLocale, useTranslations } from "next-intl";
 import { HudCard } from "@/components/hud/page";
 import { SelectField } from "@/components/ui/select-field";
 import { NATIVE_LANGUAGE_NAMES } from "@/lib/i18n/native-language-names";
+import { isCanonicalSrdTemplate, isLegacySrdTemplate } from "@/lib/utils/campaigns/template-locales";
 import { groupTemplates, pickVariant, type TemplateGroup } from "@/lib/utils/campaigns/template-variants";
 
 export interface TemplateTile {
@@ -15,6 +16,8 @@ export interface TemplateTile {
   description: string | null;
   locale: string | null;
   templateKey: string | null;
+  kind?: string;
+  visibility?: string;
 }
 
 const languageName = (code: string) => NATIVE_LANGUAGE_NAMES[code as keyof typeof NATIVE_LANGUAGE_NAMES] ?? code;
@@ -39,16 +42,22 @@ function TemplateGroupTile({ group }: { group: TemplateGroup<TemplateTile> }) {
       {options.length > 1 ? (
         <SelectField aria-label={t("languageLabel")} value={variant.id} onValueChange={setPickedId} groups={[{ label: t("language"), options }]} />
       ) : (
-        variant.locale && <p className="text-xs text-hud-muted">{languageName(variant.locale)}</p>
+        (variant.locale || isCanonicalSrdTemplate(variant)) && <p className="text-xs text-hud-muted">{languageName(variant.locale ?? "en")}</p>
       )}
     </HudCard>
   );
 }
 
 export function TemplateTiles({ templates }: { templates: TemplateTile[] }) {
+  // Canonical SRD browsing always opens its stored English content. Private copies
+  // remain independent even if older data retained the official template key.
+  const canonical = templates.filter(isCanonicalSrdTemplate).map((template) => ({ key: template.id, cards: { en: template }, locales: ["en"] }));
+
+  const other = groupTemplates(templates.filter((template) => !isCanonicalSrdTemplate(template) && !isLegacySrdTemplate(template)));
+
   return (
     <div className="grid gap-3 md:grid-cols-2 lg:grid-cols-3">
-      {groupTemplates(templates).map((group) => (
+      {[...canonical, ...other].map((group) => (
         <TemplateGroupTile key={group.key} group={group} />
       ))}
     </div>
