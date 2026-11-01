@@ -86,6 +86,8 @@
   "composer": {
     "quickPrompts": {
       "npcName": "A name for an NPC",
+      "microNpc": "Micro NPC",
+      "microNpcPrompt": "Invent one random micro NPC I can introduce into the current scene right now. Give them a name, a brief appearance and manner, a connection to the scene's place or events, and a 2–3 sentence personal history. Make the character vivid and easy to improvise; answer concisely in English.",
       "nextInScenario": "What's next in the scenario?",
       "dc": "What's the DC?"
     },

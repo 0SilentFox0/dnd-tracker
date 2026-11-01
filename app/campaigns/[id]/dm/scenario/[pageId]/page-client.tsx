@@ -4,7 +4,7 @@ import { useCallback, useMemo, useRef, useState } from "react";
 import dynamic from "next/dynamic";
 import Link from "next/link";
 import { useTranslations } from "next-intl";
-import { BookOpen, ChevronsUpDown, History, Moon, Sun } from "lucide-react";
+import { BookOpen, ChevronDown, ChevronsUpDown, History, Loader2, MessageSquare, Moon, RefreshCw, Sun } from "lucide-react";
 
 import { AiPanel, AiProposalBadge, AiProposalCard } from "@/components/ai";
 import { AssistantReview } from "@/components/ai/AssistantReview";
@@ -15,10 +15,12 @@ import { ScenarioBar, ScenarioBook, ScenarioLayout, ScenarioPageView, ScenarioSu
 import { VersionsDialog } from "@/components/scenario/editor/VersionsDialog";
 import { ScenarioShowDock } from "@/components/scenario/play/ScenarioShowDock";
 import { WorldMapLink } from "@/components/world/WorldMapLink";
+import { Button } from "@/components/ui/button";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import type { AiThreadMode } from "@/lib/constants/ai";
 import { useAiProposals } from "@/lib/hooks/ai";
 import { useMediaQuery } from "@/lib/hooks/common";
-import { useScenarioPage, useScenarioPlay, useSectionCollapse, useSectionProgress } from "@/lib/hooks/scenario";
+import { useGenerateScenarioSummary, useScenarioPage, useScenarioPlay, useSectionCollapse, useSectionProgress } from "@/lib/hooks/scenario";
 import { playedLookup } from "@/lib/utils/scenario/reveal";
 import { pickLiveSection } from "@/lib/utils/scenario/structure";
 import type { AiFocus } from "@/types/ai";
@@ -54,6 +56,8 @@ function ScenarioPageBody({ campaignId, page, playedPages, aiEnabled }: { campai
   const t = useTranslations("scenario.pageBody");
 
   const progress = useSectionProgress(campaignId, page.id);
+
+  const summary = useGenerateScenarioSummary(campaignId);
 
   const collapse = useSectionCollapse();
 
@@ -130,9 +134,24 @@ function ScenarioPageBody({ campaignId, page, playedPages, aiEnabled }: { campai
       )}
       {aiEnabled && (
         <>
-          <button type="button" className="toggle" onClick={() => openAi(false)}>
-            AI
-          </button>
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button type="button" variant="ghost" className="toggle" aria-label="AI">
+                AI <ChevronDown className="ml-1 size-3.5" aria-hidden />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+              <DropdownMenuItem onSelect={() => openAi(false)}>
+                <MessageSquare aria-hidden /> {t("openAi")}
+              </DropdownMenuItem>
+              {page.kind === "scene" && (
+                <DropdownMenuItem disabled={summary.pendingPageId === page.id} onSelect={() => summary.generate(page.id, true)}>
+                  {summary.pendingPageId === page.id ? <Loader2 className="animate-spin" aria-hidden /> : <RefreshCw aria-hidden />}
+                  {t("refreshSummary")}
+                </DropdownMenuItem>
+              )}
+            </DropdownMenuContent>
+          </DropdownMenu>
           <AiProposalBadge count={proposals.pendingCount} onClick={() => openAi(true)} />
         </>
       )}

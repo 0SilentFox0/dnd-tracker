@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { AI_LIMITS, type AiThreadMode } from "@/lib/constants/ai";
 
-const QUICK_PROMPTS = ["npcName", "nextInScenario", "dc"] as const;
+const QUICK_PROMPTS = ["npcName", "microNpc", "nextInScenario", "dc"] as const;
 
 const COUNTER_FROM = 7000;
 
@@ -55,8 +55,8 @@ export function AiComposer({ mode, busy, focusLabel, actions }: AiComposerProps)
       {mode === "live" && !busy ? (
         <div className="flex flex-wrap gap-1.5">
           {QUICK_PROMPTS.map((q) => (
-            <Button key={q} type="button" size="sm" variant="outline" className="h-7 rounded-full text-xs" onClick={() => actions.onSend(t(`composer.quickPrompts.${q}`))}>
-              {t(`composer.quickPrompts.${q}`)}
+            <Button key={q} type="button" size="sm" variant="outline" className="h-7 rounded-full text-xs" onClick={() => actions.onSend(q === "microNpc" ? t("composer.quickPrompts.microNpcPrompt") : t(`composer.quickPrompts.${q}`))}>
+              {q === "microNpc" ? t("composer.quickPrompts.microNpc") : t(`composer.quickPrompts.${q}`)}
             </Button>
           ))}
         </div>
